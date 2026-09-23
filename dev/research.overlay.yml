@@ -1,0 +1,25 @@
+# research.overlay.yml — headless 实验组合的 overlay（R1 备用，用法随 R2 实证核对）
+# 用途：纯 headless 组合没有 web-app 的 agent-presets 出厂行可替换（替换语法会 not found
+# 丢弃），本 overlay 用 insert 行补齐研究 pack 的全部行——全 workspace 源码域解析，
+# 无 profile 安装混线（company dev/company.overlay.yml 同款机制）。
+# ⚠ 行 id/config 与 cordis.patch.yml 同源；web 三行的确切写法随队列「web-tool-rows 实证」核对。
+- insert:
+    - id: agent-presets
+      name: '@deepseek-ai/dsh-agent-presets'
+      config:
+        default: lead
+        roots:
+          - path: packages/deep-research-pack/presets/
+            trust: system
+    - id: tool-web
+      name: '@deepseek-ai/dsh-tool-web'
+    - id: web-search
+      name: '@deepseek-ai/dsh-web-search-deepseek'
+    - id: web-fetch
+      name: '@deepseek-ai/dsh-web-fetch-http'
+    - id: tool-present
+      name: '@deepseek-ai/dsh-tool-present'
+    - id: agent-team
+      name: '@deepseek-ai/dsh-experimental-agent-team'
+    - id: tool-agent-team
+      name: '@deepseek-ai/dsh-experimental-tool-agent-team'

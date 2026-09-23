@@ -1,0 +1,15 @@
+{
+  "name": "ai-dsh-deep-research",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "DSH Deep Research 插件项目：多角色研究团队 preset pack（Lead/Scout/Analyst/Critic）+ Agent Team 协作。方法论内核源自 codex Deep Research harness 考古（notes/research/）。",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "verify": "node scripts/verify.mjs",
+    "test": "node --test tests/*.test.mjs"
+  }
+}
