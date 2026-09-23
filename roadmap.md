@@ -11,9 +11,10 @@
 1. ▶ **首个完整研究 run**（feature，M2）——真实问题端到端：HITL1 → 侦察 → 挖掘 → 综合 →
    critic → HITL2 → final.md + present；L4 全量四判据（来源链抽查/两点纪律/静默自主/
    中断恢复）；Q2（team 成员 preset 组合）Q4（synthesizer 拆分）Q5（topic 争用）
-   Q6（floor 机械化）随实测闭。**开工前置：计划先落 notes/proposed/ RFC（可切多件）→
-   用户审阅打磨 → 呈批后才实施**。（2026-09-24 用户定案：实质优先，提前至
-   vendor-submodule 之前；元工作顺延待实战证据反哺。）
+   Q6（floor 机械化）随实测闭。**开工前置 RFC 已落 notes/proposed/（2026-09-24-m2-run-mechanics /
+   2026-09-24-m2-plan-shape / 2026-09-24-m2-data-caliber，状态 proposed）→ 用户打磨 →
+   呈批后才实施**。（2026-09-24 用户定案：实质优先，提前至 vendor-submodule 之前；
+   元工作顺延待实战证据反哺。）
 2. **vendor-submodule-and-pnpm-dsh**（feature）——加 pinned submodule（tag
    `dsh-v0.1.5-rc.2` @ `fb2c4b9e`）+ workspace 五件套 + `pnpm dsh` 从钉住源码起会话；
    verify 加 vendor-pin/clean 门禁；机制权威从"借用 company checkout"切回本仓 vendor
