@@ -43,6 +43,9 @@
 | D8 | **迭代单位 = 垂直轮 + 八成把握先行**：最薄全路径先行 → 逐轮加宽；不追求一次想透 | 用户指令（迭代纠错优先于完美规划）；company D11 |
 | D9 | **web 工具行（已实证）**：模型面 `tool-web` 行随 preset（config 照抄 base：`fetch: true` + 60s 超时）；providers（web seam / web-search-deepseek / web-fetch-http）是 base host 面出厂行，不进本包 bundle 也不随 preset；DeepSeek 搜索 `apiKeyEnv: DEEPSEEK_API_KEY` 与 chat 同钥匙 | [10 §4](./design/10-architecture.md)；[web-tool-rows 毕业 Note](../notes/implemented/2026-09-24-web-tool-rows.md) |
 | D10 | **vendor submodule 延后**：首版无构建需求（纯配置包）；机制权威暂借 `/Users/bowhead/ai_dsh_company/vendor/dsh`（同一钉住 tag，只读）；verify 的 vendor-pin 门禁随队列条目启用 | [偏离登记](../notes/implemented/2026-09-24-r1-scaffold.md)；队列「vendor-submodule-and-pnpm-dsh」 |
+| D11 | **队列制 roadmap**：纯队列——条目按主题命名（feature/卫生/研究三型）、完成即离队（历史归 notes/ + git）；▶ = 全仓唯一"当前"指针 | 用户指令；inround-task-surface 精神；[根 roadmap 头注](../roadmap.md) |
+| D12 | **队列与 RFC 分家**：队列行只做有序索引（每行 ≤3 行）；条目全文（问题/方案/输掉的方案/验收）住 notes/proposed/ 一文件一条目；毕业 = 迁 implemented/ + 删行 | 用户指令；[proposed/README.md](../notes/proposed/README.md) |
+| D13 | **status rots 拆除**：时变状态（当前条目/跑到哪了）不住 docs——docs 只写 now，全仓唯一"当前"指针 = roadmap ▶ | 用户指令（[intents 第 6 条](../notes/intents.md)）；[evaluation.md §3 尾注](./evaluation.md) |
 | D14 | **preset-smoke 双通道**：源码域（web 出厂 profile + overlay 指向本仓 presets 源码，迭代快）+ 安装域（`--profile <p> --no-patch` 走 plugin add 正式路径）；断言同构（roster/逐角色 create/skills 隔离），L1 用前者、L2 用后者；boot 必须起自 company 钉 tag 源码（tsx 解析树），overlay/roots 用绝对路径 | [L1/L2 绿灯 Note](../notes/implemented/2026-09-24-l1-l2-green.md) |
 | D15 | **release-smoke 形状**：照 company release.md 五步（pack → 干净 profile 先删后建 → `plugin --profile add file:` → manifest 断言 → 安装域冒烟）；工具态（npm cache/pnpm store）全重定向进 repo gitignored 区；peers 是声明语义（安装锚兜底解析，非安装要求） | 同上 |
 
