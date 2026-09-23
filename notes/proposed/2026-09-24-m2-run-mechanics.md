@@ -11,6 +11,60 @@
 - **Q5**：多 analyst 并行时的 topic 争用（单 owner 纪律够不够）；
 - **Q4**：lead 综合负载是否高到需要专职 synthesizer。
 
+## 运行流程总览（一眼版）
+
+```
+你（用户）           lead 会话（主编，唯一入口/出口）        队员会话（scout/analyst/critic）
+   │ 提出研究问题        │                                    │
+   ├──────────────────▶ │ 加载 research-brief skill           │
+   │ ◀── HITL1 三问 ──── │ （ask_user_question，每问带推荐：    │
+   │  （类型/深度/口径）   │   研究类型/深度篇幅/时间口径语言）     │
+   ├─ 拍板 ───────────▶ │                                    │
+   │                    │ 建 runs/<slug>/（从模板起步）：        │
+   │                    │   question.md（定稿+Purpose+RQ+       │
+   │                    │     Scope In/Out+Constraints+        │
+   │                    │     HITL1 快照+Decisions 第 1 条）    │
+   │                    │   topics.md（T1..Tn：must_answer 列表  │
+   │                    │     + scope_role + depends_on）       │
+   │                    │ 组队（team-assembly skill）：          │
+   │                    │   spawn_teammate scout、analyst        │
+   │                    │   （critic 后置进场）——Q2 在此验证     │
+   │                    │ ═══════ 静默自主区（不问你、不汇报）═════
+   │                    │ 任务板派活                           │
+   │                    │ ───────────────────────────────────▶ │ wave0 侦察（scout）
+   │                    │                                    │   lead-mapping：query 三轮
+   │                    │                                    │   多样化+30 秒去留+A–D 分级
+   │                    │                                    │   → leads.md（含显式排除）
+   │                    │ ───────────────────────────────────▶ │ wave1 挖掘（analyst）
+   │                    │                                    │   evidence-extraction：
+   │                    │                                    │   evidence/*.md 一条一档
+   │                    │                                    │   （身份链+口径+交叉 ≥2+
+   │                    │                                    │    反例必搜+单源标"待破"）
+   │                    │ 收活 → findings.md                   │
+   │                    │   （F1..Fn：结论+支撑+gap 四态；         │
+   │                    │    纯综合先行禁新搜；needs_search       │
+   │                    │    → 定向补搜只一轮）                   │
+   │                    │ 成稿交 critic ────────────────────▶ │ 三线对抗审查
+   │                    │                                    │   （无来源狩猎 CRITICAL/
+   │                    │                                    │    质量审计 MAJOR 含口径/
+   │                    │                                    │    反例覆盖 MAJOR）
+   │                    │ ◀── review.md ───────────────────── │ （CRITICAL 未修复→回修再审）
+   │                    │ readiness: PASS                     │
+   │ ◀── HITL2 审阅 ──── │ （ask_user：证据充分性判断+           │
+   │  （审阅建议）        │   交付/补研究推荐+composition 确认：    │
+   ├─ 拍板 ───────────▶ │   读者是谁/用来做什么/前景化重点）       │
+   │                    │ final.md（关键结论带                  │
+   │                    │   [来源: evidence/xx.md]）            │
+   │ ◀═══ 报告 + present ════════════════════════════════════
+   │                    │ （可选）方向修订 → Decisions 追加一条   │
+   │                    │  （delta+受影响 topics+你的原话）      │
+   │                    │  → 原地补搜 或 runs/<slug>-v2/        │
+```
+
+**你只在两处出手**：HITL1（定问题形状）和 HITL2（审阅拍板）；两点之间全部静默自主
+（不问"要不要继续"、不汇报中间进度）。**每个里程碑的实物**：question/topics → leads →
+evidence/ → findings → review → final——全部落在 `runs/<slug>/`，中断恢复只认这些文件。
+
 ## 方案（run 的编队与运转）
 
 1. **运行主体 = 一个 lead 会话**：挂 `Deep Research Lead` preset，cwd = `research-workspace/`。
