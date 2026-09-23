@@ -2,7 +2,7 @@
 // verify.mjs — L0 结构门禁（keyless，零依赖）。
 // 门禁清单与判据定义：docs/evaluation.md §L0；每条门禁的反证记录：notes/implemented/。
 // 移植自 ai_dsh_company/scripts/verify.mjs（按当前规模裁剪；vendor-pin/client-half/proposal
-// 全量版随对应能力落地启用，见 docs/plans/roadmap.md）。
+// 全量版随对应能力落地启用，见 docs/roadmap.md）。
 
 import { readFileSync, readdirSync, existsSync, lstatSync, readlinkSync, statSync } from 'node:fs';
 import { join, dirname, resolve, relative } from 'node:path';
@@ -164,7 +164,7 @@ const mdFiles = allFiles.filter((f) => f.endsWith('.md'));
   const gate = 'proposal-scheduled';
   const dir = join(ROOT, 'notes', 'proposed');
   if (existsSync(dir)) {
-    const roadmapPath = join(ROOT, 'docs', 'plans', 'roadmap.md');
+    const roadmapPath = join(ROOT, 'docs', 'roadmap.md');
     const roadmap = existsSync(roadmapPath) ? readFileSync(roadmapPath, 'utf8') : '';
     for (const ent of readdirSync(dir)) {
       if (ent === 'README.md' || !ent.endsWith('.md')) continue;

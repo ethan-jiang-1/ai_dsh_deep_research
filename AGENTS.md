@@ -10,14 +10,14 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 CLAUDE.md -> AGENTS.md    symlink（编辑真文件 AGENTS.md，verify 门禁校验）
 packages/deep-research-pack/   唯一自写包（纯配置）：presets/<role>/（persona+skills）、cordis.patch.yml（bundle 行）
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、runs/<slug>/、templates/run/
-docs/                    00-index（地图+决策台账+术语映射）→ design/10-30 → plans/roadmap（纯队列）→ guides/60 + evaluation.md（验收合同）
+docs/                    00-index（地图+决策台账+术语映射）→ roadmap（纯队列）→ design/10-30 → guides/60 + evaluation.md（验收合同）
 notes/                   决策记录：intents.md → proposed/（RFC，一文件一条目）→ implemented/；research/（考古报告）；postmortem/
 scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）
 tests/                   keyless 回归（node:test，零依赖；layering 守卫禁真模型/网络/子进程）
 dev/                     env.sh（双 home + dsh 机制基线）、research.overlay.yml、harness-home/（gitignore 运行残留）
 ```
 
-接下来开发什么 = [roadmap §队列](docs/plans/roadmap.md) 的 ▶ 条目（全仓唯一"当前"指针）；
+接下来开发什么 = [roadmap §队列](docs/roadmap.md) 的 ▶ 条目（全仓唯一"当前"指针）；
 开工/收尾程序 = [guides/60](docs/guides/60-dev-loop.md) §0/§4。
 
 ## 命令表

@@ -17,7 +17,7 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 |-----------|------------|
 | `packages/deep-research-pack/` | 唯一自写包：四角色 presets + bundle 行（cordis.patch.yml） |
 | `research-workspace/` | 运行时研究工作区（角色会话 cwd）：runs/ + templates/ + 研究手册 |
-| `docs/` | 按性质分层：00-index（导航+台账）→ design/ → plans/ → guides/ + 顶层合同 |
+| `docs/` | 按性质分层：00-index（导航+台账）→ roadmap.md（队列）→ design/ → guides/ + 顶层合同 |
 | `notes/` | 按时间分层：intents → implemented + research/（考古报告）+ postmortem/ |
 | `scripts/` | verify.mjs（结构门禁）、preset-smoke.mjs（真挂载冒烟，认证档） |
 | `tests/` | keyless 回归（node:test，零依赖） |
@@ -37,4 +37,4 @@ node scripts/preset-smoke.mjs    # L1 真挂载冒烟（需 DSH_HOME + 已装 pa
 - 纯配置 pack（零自写 JS，见 00-index D7）；Node >= 20；测试用 `node:test` + `node:assert`，零 npm 依赖。
 - 评估五面（L0 结构 / L1 挂载 / L2 安装 / L3 领域 / L4 交付）不互抵，定义见 `docs/evaluation.md`。
 - 不发明：优先用 DSH 现成载体（preset/skill/agent-team/todo/present/goal），自建机制须有"DSH 轆体不可用"的证据。
-- 迭代单位 = 垂直轮（最薄全路径 → 逐轮加宽），当前进度看 `docs/plans/roadmap.md` §队列。
+- 迭代单位 = 垂直轮（最薄全路径 → 逐轮加宽），当前进度看 `docs/roadmap.md` §队列。

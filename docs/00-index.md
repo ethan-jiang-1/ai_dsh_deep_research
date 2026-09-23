@@ -13,7 +13,7 @@
 | 导航 | 本文件 | 地图 + 台账 | 活（每决策/每新文档更新） |
 | 合同 | [evaluation.md](./evaluation.md) | **验收怎么判**（五面） | 活（变更须 D 号） |
 | 设计 | `design/` | **为什么**：机制依据、方案取舍 | 稳定；被推翻时归档并记 D 号 |
-| 计划 | `plans/` | **接下来**：队列 | 被实现逐条吞掉（完成即离队） |
+| 计划 | `roadmap.md` | **接下来**：队列 | 被实现逐条吞掉（完成即离队） |
 | 指南 | `guides/` | **怎么操作**：开发环 | 活（随操作方式演进） |
 
 ## 文档地图
@@ -24,7 +24,7 @@
 | [design/10-architecture.md](./design/10-architecture.md) | 设计 | repo 形态与组合层（单包四角色）；通道选型（agent-team 主通道）；工具面；偏离登记 |
 | [design/20-roles.md](./design/20-roles.md) | 设计 | 四角色内容：职责 owner 表、persona 要素、skills 清单、信噪比策略落点 |
 | [design/30-methodology-mapping.md](./design/30-methodology-mapping.md) | 设计 | **方法论映射**：codex Deep Research harness 内核 → DSH 载体（L3 领域面的核心载体） |
-| [plans/roadmap.md](./plans/roadmap.md) | 计划 | 队列（条目按主题命名、完成即离队）+ 搁置池 |
+| [roadmap.md](./roadmap.md) | 计划 | 队列（条目按主题命名、完成即离队）+ 搁置池 |
 | [guides/60-dev-loop.md](./guides/60-dev-loop.md) | 指南 | 开发环：六步闭环、面选择表、双 home、密钥 |
 
 ## 决策台账
