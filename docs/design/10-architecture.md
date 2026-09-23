@@ -24,7 +24,7 @@ vendor/dsh/                    （队列「vendor-submodule-and-pnpm-dsh」落�
 
 | 层 | 载体 | 放什么 | 教义 |
 |---|---|---|---|
-| bundle 层 | `cordis.patch.yml` | host 共享行：preset roster（default: lead）、present、团队三行（web 行不进 bundle——D9：base 出厂行，回归守卫在 tests/presets.test.mjs） | `- id:` 只替换已有行；**新增必须 `- insert:`**；baseUrl = profile 目录（路径写 profile 相对 `node_modules/…`，写错 = ENOENT 静默空，UI 无角色） |
+| bundle 层 | `cordis.patch.yml` | host 共享行：preset roster（default: lead）、present、ui-agent-team 观察行（团队机制行归 vendor agent-team-profile 层——A 定案，RFC m2-p1-run-channel；web 行不进 bundle——D9：base 出厂行，回归守卫在 tests/presets.test.mjs） | `- id:` 只替换已有行；**新增必须 `- insert:`**；baseUrl = profile 目录（路径写 profile 相对 `node_modules/…`，写错 = ENOENT 静默空，UI 无角色） |
 | preset 层 | `presets/<role>/agent.cordis.yml` | 角色组合：persona + 硬隔离 skills + 工具面 + agent-instructions | **preset 自包含**（DSH 无 patch 继承）：角色要用的行必须自己声明，否则会话只拿到 bundle 少数行（company R1 血泪：工具行不声明 = CEO 读不了文件） |
 
 web 工具行双层声明（D9）：bundle 层给非 preset 会话共享；preset 层保证角色自包含。
@@ -35,8 +35,8 @@ web 工具行双层声明（D9）：bundle 层给非 preset 会话共享；prese
 
 | 通道 | 载体 | 用途 | 边界依据 |
 |---|---|---|---|
-| **Agent Teams（主通道）** | `agent-team` + `tool-agent-team`（bundle insert 行） | 持续对话、任务板、多轮往返：scout 汇报 → analyst 接力 → critic 审查 → analyst 补证 | 续驶语义归 team：team-scoped 会话里 continuable child 不可达（company D18 实证），不重蹈 |
-| subagent（工人） | `tool-subagent`（preset 行，continuable） | 单点快捷查证、并行铺方向/深挖 | 前台拿结果；连续对话不归它 |
+| **Agent Teams（主通道）** | `agent-team` + `tool-agent-team`（vendor **agent-team-profile 层**行：profile 装 `@…-agent-team-profile@0.1.5-rc.2`，带实战 config + D18 机械禁令——control / list-agents 禁用、subagent 强制 one-shot；A 定案） | 持续对话、任务板、多轮往返：scout 汇报 → analyst 接力 → critic 审查 → analyst 补证 | 续驶语义归 team：team-scoped 会话里 continuable child 不可达（company D18 实证）——层把边界从纪律文本升级为组合层禁令 |
+| subagent（工人） | `tool-subagent`（preset 行，**one-shot**——D18 对齐：层强制 one-shot 但实测 preset 行覆盖 profile 行，preset 须同声明；RFC m2-p1-run-channel） | 单点快捷查证、并行铺方向/深挖 | 前台拿结果；连续对话不归它 |
 | present（交付） | `tool-present`（bundle + lead preset） | 成品声明：final.md 是唯一成品 | 非 lead 的 present = 过程稿展示（研究手册三态） |
 
 ## 4. 工具面（四角色共同基座 + 差异）

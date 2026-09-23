@@ -26,6 +26,7 @@
 | [design/30-methodology-mapping.md](./design/30-methodology-mapping.md) | 设计 | **方法论映射**：codex Deep Research harness 内核 → DSH 载体（L3 领域面的核心载体） |
 | [根 roadmap.md](../roadmap.md) | 计划 | 队列（条目按主题命名、完成即离队）+ 搁置池 |
 | [guides/60-dev-loop.md](./guides/60-dev-loop.md) | 指南 | 开发环：六步闭环、面选择表、双 home、密钥 |
+| [guides/61-run-playbook.md](./guides/61-run-playbook.md) | 指南 | **run 操作指南**（研究发起人入口）：boot-run、lead 会话、HITL 两点、观察面——run 通道（research profile：本包 + vendor agent-team-profile 层，P1 定案）的使用面 |
 
 ## 决策台账
 
@@ -48,6 +49,7 @@
 | D13 | **status rots 拆除**：时变状态（当前条目/跑到哪了）不住 docs——docs 只写 now，全仓唯一"当前"指针 = roadmap ▶ | 用户指令（[intents 第 6 条](../notes/intents.md)）；[evaluation.md §3 尾注](./evaluation.md) |
 | D14 | **preset-smoke 双通道**：源码域（web 出厂 profile + overlay 指向本仓 presets 源码，迭代快）+ 安装域（`--profile <p> --no-patch` 走 plugin add 正式路径）；断言同构（roster/逐角色 create/skills 隔离），L1 用前者、L2 用后者；boot 必须起自 company 钉 tag 源码（tsx 解析树），overlay/roots 用绝对路径 | [L1/L2 绿灯 Note](../notes/implemented/2026-09-24-l1-l2-green.md) |
 | D15 | **release-smoke 形状**：照 company release.md 五步（pack → 干净 profile 先删后建 → `plugin --profile add file:` → manifest 断言 → 安装域冒烟）；工具态（npm cache/pnpm store）全重定向进 repo gitignored 区；peers 是声明语义（安装锚兜底解析，非安装要求） | 同上 |
+| D16 | **团队组合归 vendor agent-team-profile 层**（P1 A 定案）：run 通道 profile 装 `@…-agent-team-profile@<pin>`（版本从 pack 兼容矩阵同源派生，`dev/boot-run.sh` 执行）；本包 bundle 撤 agent-team / tool-agent-team 两行（同行 id 双 insert = 重复行，实证）；ui-agent-team 观察行留本包；三 preset 的 tool-subagent 声明 **one-shot** 对齐 D18（差分实验实证 preset 行覆盖 profile 行——不对齐则层禁令被自家声明抵消；D3 原文"one-shot subagent"的漂移顺带修复） | [P1 毕业 Note](../notes/implemented/2026-09-24-m2-p1-run-channel.md)；[10 §2/§3](./design/10-architecture.md)；[61 指南](./guides/61-run-playbook.md) |
 
 ### 待定（阻塞项标 ⛔）
 
@@ -66,7 +68,7 @@
 | 本项目 | DSH 官方 | vendor/dsh 落点 |
 |---|---|---|
 | 研究角色（Lead/Scout/Analyst/Critic） | agent preset（`presets/<id>/`：preset.yml + agent.cordis.yml[persona 行/skills/工具行] + skills/） | `packages/preset/agent-presets` + `packages/preset/persona` |
-| 研究团队 / 组队 | Agent Teams（`spawn_teammate` / 任务板，experimental） | `packages/experimental/agent-team` + `tool-agent-team` + `docs/subsystems/agent-team.md` |
+| 研究团队 / 组队 | Agent Teams（`spawn_teammate` / 任务板，experimental；**组合层 = vendor agent-team-profile**，D16） | `packages/experimental/agent-team` + `tool-agent-team` + `agent-team-profile` + `docs/subsystems/agent-team.md` |
 | 研究工人（一次性查证） | one-shot/continuable subagent（`dsh-tool-subagent`, spawn provider） | `packages/subagent/tool-subagent/README.md` |
 | 研究方法论的载体 | skill（`presets/<role>/skills/<n>/SKILL.md`，硬隔离） | `packages/skill/skill-filesystem` |
 | web 搜索/抓取 | `dsh-tool-web` + search/fetch provider | `packages/web/tool-web` + `web-search-deepseek` + `web-fetch-http` |

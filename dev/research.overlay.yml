@@ -5,8 +5,10 @@
 # ⚠ 本文件里的路径一律**绝对路径**：boot cwd = company checkout（tsx 解析所需），
 #   相对路径会指进 company 树——company overlay 用相对路径是因为它 boot 自家根。
 # 语法：web-app bundle 已 insert agent-presets 行（default: standard）→ 本 overlay 用**替换**
-# 语法换成本包 roster；tool-present 与团队三行 web profile 缺席 → insert。
-# （已装 pack 的正式形态见 cordis.patch.yml——两者行等价；web 行不在此，实证归 base。）
+# 语法换成本包 roster；tool-present / ui-agent-team web profile 缺席 → insert。
+# （镜像 cordis.patch.yml 的行集合。团队机制行 agent-team / tool-agent-team 归 vendor
+#  agent-team-profile 层——安装域随 profile 装载（RFC m2-p1-run-channel A 定案）；源码域
+#  boot 无团队面，preset 迭代不需要。web 行不在此，实证归 base。）
 - id: agent-presets
   name: '@deepseek-ai/dsh-agent-presets'
   config:
@@ -17,9 +19,5 @@
 - insert:
     - id: tool-present
       name: '@deepseek-ai/dsh-tool-present'
-    - id: agent-team
-      name: '@deepseek-ai/dsh-experimental-agent-team'
-    - id: tool-agent-team
-      name: '@deepseek-ai/dsh-experimental-tool-agent-team'
     - id: ui-agent-team
       name: '@deepseek-ai/dsh-experimental-client-ui-agent-team'

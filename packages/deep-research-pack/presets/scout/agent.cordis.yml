@@ -42,13 +42,15 @@
     fetch: true
     searchTimeoutMs: 60000
 
-# 并行铺开多个方向时生搜索工人（前台拿结果，快进快出语义）
+# 并行铺开多个方向时生搜索工人（前台拿结果，快进快出 = one-shot 语义）。
+# one-shot 对齐（RFC m2-p1-run-channel）：vendor 层在 profile 面强制 one-shot（D18 机械
+# 禁令），但实测 preset 行覆盖 profile 行——preset 必须同声明，否则层禁令被自家声明抵消。
 - id: tool-subagent
   name: '@deepseek-ai/dsh-tool-subagent'
   config:
     provider: spawn
     toolName: subagent
-    backgroundMode: continuable
+    backgroundMode: one-shot
 
 - id: agent-instructions
   name: '@deepseek-ai/dsh-agent-instructions'

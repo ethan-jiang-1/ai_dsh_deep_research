@@ -30,12 +30,13 @@ dsh() {
   if [ -f "$_dsh_src" ]; then
     (cd /Users/bowhead/ai_dsh_company && node --import tsx/esm "$_dsh_src" "$@")
   else
-    echo "dev/env.sh: 机制基线源码不可达（$_dsh_src）——检查 company checkout 是否在位；" >&2
+    echo "dev/env.sh: 机制基线源码不可达（${_dsh_src}）——检查 company checkout 是否在位；" >&2
     echo "  机制核对前不要静默退回全局 dsh（版本漂移，不作依据）。确要日用：command dsh" >&2
     return 1
   fi
 }
 
-# 提示（source 时可见一次）
-echo "dev/env.sh: DSH_HOME=$DSH_HOME（数据面隔离）"
+# 提示（source 时可见一次）——变量一律花括号：全角括号紧跟 $VAR 会被 bash 当成变量名
+# 的一部分（$DSH_HOME（… → 变量 "DSH_HOME（"），set -u 的 source 方必炸（boot-run 实证）。
+echo "dev/env.sh: DSH_HOME=${DSH_HOME}（数据面隔离）"
 echo "dev/env.sh: dsh → 钉 tag 源码基线（company checkout 借用，D10 偏离；日用全局版用 command dsh）"

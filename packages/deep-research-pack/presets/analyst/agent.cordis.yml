@@ -42,13 +42,14 @@
     fetch: true
     searchTimeoutMs: 60000
 
-# 并行深挖多个 topic 时生挖掘工人
+# 并行深挖多个 topic 时生挖掘工人（one-shot 对齐：RFC m2-p1-run-channel——层禁令
+# 被 preset 声明覆盖的实测结论，preset 必须同声明 one-shot；D18 边界的唯一安全语义）
 - id: tool-subagent
   name: '@deepseek-ai/dsh-tool-subagent'
   config:
     provider: spawn
     toolName: subagent
-    backgroundMode: continuable
+    backgroundMode: one-shot
 
 - id: agent-instructions
   name: '@deepseek-ai/dsh-agent-instructions'

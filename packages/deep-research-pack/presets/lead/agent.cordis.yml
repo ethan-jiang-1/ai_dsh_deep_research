@@ -54,15 +54,16 @@
     fetch: true
     searchTimeoutMs: 60000
 
-# ④ 研究工人：通用 subagent（continuable），用于单点快捷查证；
-#    团队协作（spawn_teammate / 任务板）来自 bundle 行 tool-agent-team，
-#    这是主通道（用户定案：多角色 + agent team）。
+# ④ 研究工人：通用 subagent（one-shot 快进快出），用于单点快捷查证；团队协作
+#    （spawn_teammate / 任务板）来自 vendor agent-team-profile 层行（profile 安装；
+#    RFC m2-p1-run-channel A 定案）。one-shot 同层声明：实测 preset 行覆盖 profile 行，
+#    不对齐则层禁令（D18 机械强制 one-shot）被自家 continuable 声明抵消。
 - id: tool-subagent
   name: '@deepseek-ai/dsh-tool-subagent'
   config:
     provider: spawn
     toolName: subagent
-    backgroundMode: continuable
+    backgroundMode: one-shot
 
 # ⑤ 研究手册：把 research-workspace 根的 AGENTS.md 注入本会话。
 #    projectRootMarkers: [] ⇒ projectRoot = 会话 cwd（= research-workspace/），

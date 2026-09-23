@@ -6,7 +6,7 @@ Deep Research 插件包：四角色 preset + host bundle 行。当前为**纯配
 
 | 位置 | 内容 |
 |---|---|
-| `cordis.patch.yml` | bundle 行：preset roster（default: lead）+ present + 团队三行（web 行 = base 出厂行、不进 bundle，D9） |
+| `cordis.patch.yml` | bundle 行：preset roster（default: lead）+ present + ui-agent-team 观察行（团队机制行归 vendor agent-team-profile 层——A 定案；web 行 = base 出厂行、不进 bundle，D9） |
 | `presets/lead/` | 研究主编：立项对齐（HITL1）、拆解分派、组队、综合交付（HITL2/Final） |
 | `presets/scout/` | 侦察员：广度搜索、来源发现与质量分级、候选方向图 |
 | `presets/analyst/` | 分析员：深度挖掘、证据抽取、交叉验证、反例搜索 |

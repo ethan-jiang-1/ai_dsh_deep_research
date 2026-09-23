@@ -49,7 +49,9 @@ source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名�
   不动——崩溃半径隔离；
 - **裸 dsh 拦截**：`PATH` 里的全局 dsh 随升级漂移，不作机制依据；机制核对一律走 env.sh
   定义的 dsh（当前指向 company checkout 的钉 tag 源码，D10 偏离；本仓 vendor 落地后切换）；
-- web 观察窗：`dsh web -- --port 3081 --no-open`（3080 是本 GUI 占用）。
+- web 观察窗：`dsh web -- --port 3081 --no-open`（3080 是本 GUI 占用）；
+- run 通道（研究 run 的正式启动面，安装域）：`bash dev/boot-run.sh`（幂等：组合校验/补装
+  → boot web 3081 → 入口步骤打印）——用法全文见 [61-run-playbook](./61-run-playbook.md)。
 
 ## 4. 收尾程序（同 diff，五件）
 

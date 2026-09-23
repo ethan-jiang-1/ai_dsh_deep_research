@@ -45,20 +45,25 @@ test('行依赖全部声明进 peerDependencies', () => {
   }
 });
 
-test('bundle patch：roster 替换行 + 团队/present insert 行在位；web 行归 base 不进本包', () => {
+test('bundle patch：roster 替换行 + present/ui-agent-team insert 行在位；团队与 web 行不进本包', () => {
   const yml = readFileSync(join(PACK, 'cordis.patch.yml'), 'utf8');
   // 替换行：agent-presets（default: lead，roots 指向本包 presets）
   assert.match(yml, /^- id: agent-presets$/m);
   assert.match(yml, /default: lead/);
   assert.match(yml, /node_modules\/dsh-deep-research-pack\/presets\//);
-  // insert 行：present + 团队三件（web 行实证结论 = base 出厂行，不进本包——RFC web-tool-rows）
+  // insert 行：present + ui-agent-team（web 行实证结论 = base 出厂行，不进本包——RFC web-tool-rows）
   const insertBlock = yml.split(/^- insert:$/m).slice(1).join('\n');
-  for (const row of ['tool-present', 'agent-team', 'tool-agent-team', 'ui-agent-team']) {
+  for (const row of ['tool-present', 'ui-agent-team']) {
     assert.match(insertBlock, new RegExp(`^\\s*- id: ${row}$`, 'm'), `insert 行缺失: ${row}`);
   }
   // 回归守卫：web 四行不得出现在本包 bundle（insert 会与 web-app surface 的 preset-scoping 打架）
   for (const row of ['tool-web', 'web-search', 'web-fetch', 'web']) {
     assert.doesNotMatch(insertBlock, new RegExp(`^\\s*- id: ${row}$`, 'm'), `web 行 ${row} 不应进 bundle（base 出厂行）`);
+  }
+  // 回归守卫：团队机制行不得出现在本包 bundle（与 vendor agent-team-profile 层同行 id
+  // 双 insert = 重复行，实证见 RFC m2-p1-run-channel Phase 0；团队组合的家 = vendor 层）
+  for (const row of ['agent-team', 'tool-agent-team']) {
+    assert.doesNotMatch(insertBlock, new RegExp(`^\\s*- id: ${row}$`, 'm'), `团队行 ${row} 不应进 bundle（归 vendor agent-team-profile 层）`);
   }
 });
 

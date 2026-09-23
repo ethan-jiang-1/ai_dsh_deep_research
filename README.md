@@ -22,7 +22,7 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 | `notes/` | 按时间分层：intents → proposed/（RFC）→ implemented/ + research/（考古报告） |
 | `scripts/` | 门禁与分层冒烟脚本（verify / preset-smoke / release-smoke / l4-lite-smoke；档位说明见 AGENTS.md §命令表） |
 | `tests/` | keyless 回归（node:test，零依赖） |
-| `dev/` | env.sh（双 home + dsh 机制基线）、research.overlay.yml、gitignored 运行区（harness-home/、smoke-workspace/） |
+| `dev/` | boot-run.sh（run 通道开跑命令）、env.sh（双 home + dsh 机制基线）、research.overlay.yml（源码域 overlay）、gitignored 运行区（harness-home/、smoke-workspace/） |
 
 ## Commands
 
