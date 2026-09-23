@@ -8,9 +8,9 @@
 
 ## 队列
 
-1. ▶ **L4-lite 真模型冒烟**（feature，M1 收口件）——每角色一条消息（presence 档
-   ~$1 量级）；验收 = 模型响应 + 工具调用真实发生。**阻塞在凭据**：dev home 需配
-   `DEEPSEEK_API_KEY`（dev/harness-home/.credentials.yaml），待用户提供或授权复制。
+1. ▶ **l4-lite-smoke 复跑**（卫生，速件）——重写版脚本（日志轮询断言）尚未整跑过；
+   `source dev/env.sh && node scripts/l4-lite-smoke.mjs`，验收 = 自己全绿（证据级判据已由
+   首跑日志核验闭环，见 implemented Note 2026-09-24-l4-lite-m1-done）。
 2. **vendor-submodule-and-pnpm-dsh**（feature）——加 pinned submodule（tag
    `dsh-v0.1.5-rc.2` @ `fb2c4b9e`）+ workspace 五件套 + `pnpm dsh` 从钉住源码起会话；
    verify 加 vendor-pin/clean 门禁；机制权威从"借用 company checkout"切回本仓 vendor

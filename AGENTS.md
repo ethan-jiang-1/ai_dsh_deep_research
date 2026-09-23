@@ -12,7 +12,7 @@ packages/deep-research-pack/   唯一自写包（纯配置）：presets/<role>/�
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、runs/<slug>/、templates/run/
 docs/                    00-index（地图+决策台账+术语映射）→ design/10-30 → plans/roadmap（纯队列）→ guides/60 + evaluation.md（验收合同）
 notes/                   决策记录：intents.md → proposed/（RFC，一文件一条目）→ implemented/；research/（考古报告）；postmortem/
-scripts/                 verify.mjs（L0 结构门禁）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、release-smoke.mjs（L2 安装面）
+scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）
 tests/                   keyless 回归（node:test，零依赖；layering 守卫禁真模型/网络/子进程）
 dev/                     env.sh（双 home + dsh 机制基线）、research.overlay.yml、harness-home/（gitignore 运行残留）
 ```
@@ -28,11 +28,12 @@ node --test tests/*.test.mjs        # L0 keyless 回归（也可 pnpm test）
 source dev/env.sh                     # 双 home + 裸 dsh 拦截（DSH_HOME=dev/harness-home）
 node scripts/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真挂载档（keyless：roster+逐角色建会话+skills 隔离；--profile <p> --no-patch 切安装域通道）
 node scripts/release-smoke.mjs        # L2 真实安装形状（认证档：pack→干净 profile→plugin add→安装域冒烟）
+node scripts/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（认证档，需凭据：四角色响应 + scout web_search 调用）
 ```
 
 ## 密钥
 
-L4-lite 真模型冒烟（队列条目）需要 `DEEPSEEK_API_KEY`：开发 home
+L4-lite 真模型冒烟（`scripts/l4-lite-smoke.mjs`）需要 `DEEPSEEK_API_KEY`：开发 home
 （`dev/harness-home/.credentials.yaml`）配一次即可；永不提交密钥。L1/L2 的冒烟
 （preset-smoke 真挂载档、release-smoke）**keyless**——组合与冷读，无模型调用。
 web 搜索无需独立 key——base 的 `web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，
