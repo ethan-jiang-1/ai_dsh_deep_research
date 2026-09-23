@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// release-smoke.mjs — L2 安装面冒烟（认证档）：真实安装形状的完成定义。
+// release-smoke.mjs — L2 安装面冒烟（keyless，起真 DSH 环境、无模型调用）：真实安装形状的完成定义。
 // 定义：docs/evaluation.md §L2。程序照搬 ai_dsh_company docs/release.md §发布冒烟（按本仓裁剪）：
 //   ① npm pack（npm cache 重定向进仓库 gitignored 区——纪律：工具态不越界）
 //   ② 干净 profile（先删后建，从 web 模板）+ .npmrc（pnpm store/cache 钉 repo 内）

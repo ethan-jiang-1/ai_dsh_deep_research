@@ -13,3 +13,10 @@ Deep Research 插件包：四角色 preset + host bundle 行。当前为**纯配
 | `presets/critic/` | 核查员：对抗审查、无来源结论狩猎、交付前质量门 |
 
 角色职责表与方法论映射：`docs/design/20-roles.md`、`docs/design/30-methodology-mapping.md`。
+
+## 新增一个研究角色
+
+1. `presets/<role>/` 三件套：`preset.yml`（name/description/order）+ `agent.cordis.yml`（自包含组合：persona 行 + skills roots + 工具行 + agent-instructions 行）+ `skills/<n>/SKILL.md`（frontmatter `name` = 目录名）；
+2. 结构门禁：verify 门禁 3（preset-structure）+ 门禁 6（行引用的 `@deepseek-ai/*` 全进 peerDependencies）；
+3. roster 自动发现：bundle 的 agent-presets 行 `roots` 指向 `presets/`，新角色无需逐个登记 bundle 行；
+4. 完成定义 = preset-smoke 真挂载绿（L1 面，keyless）。

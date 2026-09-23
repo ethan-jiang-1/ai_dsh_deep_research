@@ -33,7 +33,7 @@
 |---|---|---|
 | L0 结构 | 每次收尾必跑；实施期随手 | `node scripts/verify.mjs` + `node --test tests/*.test.mjs`（或 `pnpm verify` / `pnpm test`） |
 | L1 挂载 | preset 内容/结构改动（其完成定义） | `DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs`（源码域，keyless）；安装域加 `--profile <p> --no-patch` |
-| L2 安装 | 包结构/release 相关改动 | `node scripts/release-smoke.mjs`（认证档：pack→干净 profile→plugin add→安装域冒烟） |
+| L2 安装 | 包结构/release 相关改动 | `node scripts/release-smoke.mjs`（keyless：pack→干净 profile→plugin add→安装域冒烟；无模型调用） |
 | L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `node --test tests/evaluation-contract.test.mjs` |
 | L4 交付 | 里程碑级 | L4-lite 冒烟（需 `DEEPSEEK_API_KEY`）/ 完整 run（队列条目） |
 
@@ -62,9 +62,10 @@ source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名�
 
 ## 5. 密钥
 
-`DSH_SMOKE_REAL` 与真模型冒烟需要 `DEEPSEEK_API_KEY`（开发 home
-`dev/harness-home/.credentials.yaml` 配一次）；永不提交密钥；web 搜索 provider 若需
-独立 key（Q1 实证项）随用随配。
+- 仅真模型档需要 `DEEPSEEK_API_KEY`（当前 = l4-lite-smoke；开发 home
+  `dev/harness-home/.credentials.yaml` 配一次）；永不提交密钥；
+- 其余全档 keyless（`DSH_SMOKE_REAL` 真挂载档、release-smoke：起真 DSH 环境，但无模型调用）；
+- web 搜索无需独立 key（D9 实证）：与 chat 同一把 `DEEPSEEK_API_KEY`。
 
 ## 6. 新门禁的规矩
 

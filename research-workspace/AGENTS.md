@@ -20,6 +20,10 @@ runs/<slug>/           一次研究 engagement = 一个 run（slug 由主编在�
 templates/run/         新 run 的起点模板（只读，不直接写）
 ```
 
+模板六件 ↔ question/topics/leads/evidence-entry（= evidence/ 单条模板）/findings/final；
+review.md、drafts/、journal.md 无模板——review 格式住 critic 的 adversarial-review skill，
+drafts/journal 运行时自建。
+
 ## 事实的 owner（一处事实一个家）
 
 | 文件 | 唯一 owner | 其他人 |

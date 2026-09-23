@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// l4-lite-smoke.mjs — L4-lite 真模型冒烟（认证档，需 DEEPSEEK_API_KEY）。
+// l4-lite-smoke.mjs — L4-lite 真模型冒烟（真模型档，需 DEEPSEEK_API_KEY）。
 // 定义：docs/evaluation.md §L4-lite——每角色一条消息，验证模型响应 + 工具调用真实发生。
 // 断言用标记法 + 会话日志即真相：prompt 要求模型回复指定标记，轮询**落盘的会话日志**
 // （zstd 解压），断言 `assistant/message` 事件携带标记（不是用户消息回显）与

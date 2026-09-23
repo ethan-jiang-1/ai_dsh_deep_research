@@ -1,0 +1,73 @@
+# 入口链 fresh-agent 审计与卫生修正（用户 steer，非队列条目）
+
+> 来源：用户 steer ×2——① roadmap.md 移至 docs/ 顶层（常设队列信息，与入口链其余
+> 三件同级）；② 以 fresh-agent 视角审计信息架构（高信噪比 / 渐进式披露 / 从
+> AGENTS.md 按图索骥全覆盖——信息不过窄也不过载），不符则调整。本 Note = 收尾
+> 记录（决定 / 输掉的方案 / 实际跑过的验证 / 环境状态）。
+
+## 决定（7 项）
+
+1. **roadmap.md → docs/ 顶层**（git mv 保历史）：入口链四件（AGENTS / 00-index /
+   roadmap / evaluation）同级；引用同步 6 文件 10 处（AGENTS ×2、evaluation ×2、
+   00-index ×2、README ×2、verify 头注 + 门禁 8 的 roadmap 路径）。独立提交 f9af63c。
+2. **档位词汇统一**：废除全仓无定义且自相矛盾的"认证档"（AGENTS 命令表曾给
+   release-smoke 标"认证档"，同文件密钥节又说它 keyless）→ 两分法：**keyless**
+   （无凭据可跑；preset-smoke 真挂载档与 release-smoke 会起真 DSH 环境但无模型
+   调用）/ **真模型档**（需 DEEPSEEK_API_KEY 与真模型调用）。定义入 AGENTS.md
+   §密钥；替换点：命令表 ×2、60 §2 表、release-smoke/l4-lite-smoke 头注、
+   roadmap 条目 4。
+3. **60 §5 重写**：修正两处销账前残留——"DSH_SMOKE_REAL 需要 DEEPSEEK_API_KEY"
+   （错：真挂载档 keyless，D14）与"web 搜索 provider 若需独立 key 随用随配"
+   （Q1 已销账；D9：与 chat 同一把钥匙）。
+4. **README 处置 = 修 + 并**（未删）：Commands 区并为指针（唯一正本 =
+   AGENTS.md §命令表，此处不复制）；Directory Map 降稳定粒度（脚本只列名不标
+   档位——档位标注正是本轮实证的漂移源）；Start Here 补 roadmap ▶ 入口；修
+   preset-smoke "需 API key"错误标注与"辘体"错字。
+5. **AGENTS.md §布局补真**：补 README.md、根 workspace 两行（盘上存在而图上
+   无的地标）；删 notes/postmortem/（图上有而盘上无）；dev/ 补 smoke-workspace/；
+   preset 行写全三件套（persona 是 agent.cordis.yml 内的行而非文件——消除三种
+   粒度歧义，同步 00-index 术语映射行）。
+6. **导航补针**：研究手册加"模板六件 ↔ run 文件"对应行（review/drafts/journal
+   无模板的原因显式化）；pack README 加"新增一个研究角色"四步指针（探针 Q10
+   原需拼 verify + cordis.patch.yml + package.json 三个源文件才能答）。
+7. **design/10 §6 偏离表去重**：簿记正本 = AGENTS.md §偏离登记簿，本节改纯指针
+   （原表已与正本漂移：3 行 vs 2 行、粒度不一——双家必腐的再证实）。
+
+## 输掉的方案
+
+- **README 压成纯指针页**（探针首选建议）：保留人类门面的稳定粒度信息（原则级
+  Rules / 粗粒度 Directory Map 漂移面低）；Commands 已并指针。若 README 再漂移
+  → 降级纯指针页（复活条件登记于此）。
+- **AGENTS.md 纪律表外移**（探针"过载"项）：纪律锚须常驻入口文件，可辩护；已有
+  ⚠ 首版子集自省，队列条目「dsh-discipline 全量枚举」落地时整表替换。
+- **队列生命周期双家收敛**（roadmap 头注 vs 60 §0）：一详一略、内容一致、零漂移
+  史，保留。
+- **把本轮登记为队列条目**：用户 steer 即时指令，直接执行；探针的制度化已由队列
+  条目 4（entry-chain-probe 脚本化）承接——本轮即该条目的一次语义版人工执行。
+
+## 证据（fresh-agent 探针 = 零上下文 subagent，只读，禁脚本/git/改文件）
+
+- **首轮探针**（读 14 文件 + 3 次 ls）：10/10 定向问答找到、除 README（图上无此
+  地标）外**零盲找**；开工就绪最小集 = 5 文件（AGENTS → 00-index → roadmap →
+  60 → evaluation）；总评 **4.5/5**——渐进披露真实成立（design 深水区/notes/tests
+  全部按需可达不强制），扣分全在"一处事实一个家"执行瑕疵（README 双家腐烂、
+  60 §5 残留、"认证档"无定义——自家教义未贯彻到自家门口）。探针独立复现走读
+  发现的全部漂移，并额外发现 60 §5 两处错误与档位词自相矛盾。
+- **复验探针**（定点回归 6 摩擦点）：执行中（零上下文 subagent，定点回归：档位词汇/
+  README 一致性/60 §5/模板对应/新增角色指针/布局树实物对照）；结果落地后以追加小节
+  补录于本 Note。
+
+## 实际跑过的验证
+
+- `node scripts/verify.mjs`：8 门禁全绿（roadmap 搬家后、全部调整后各跑一次）；
+- `node --test tests/*.test.mjs`：10 pass / 0 fail（同上两个时点）；
+- `grep 认证档` 全仓：活文档清零（AGENTS.md §密钥的定义说明句除外——那是定义
+  本身）；notes/ 历史记录保留原样（时间点记录，不追改）。
+
+## 环境状态
+
+- 本轮纯 docs/脚本头注卫生，未动 preset 与包内容 → 按面选择表（60 §2）不触发
+  L1/L2/L3 加跑条件；
+- ▶ 条目「l4-lite-smoke 复跑」未动（steer 插队），仍居队列首位；本轮已知遗留
+  一个待修项：l4-lite-smoke.mjs 第 34 行 zstd 守卫的运算符优先级 bug（恒 false，
+  守卫从不触发），随该条目一并处理。
