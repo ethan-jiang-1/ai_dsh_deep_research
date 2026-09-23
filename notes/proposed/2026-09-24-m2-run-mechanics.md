@@ -4,6 +4,11 @@
 > 依据：codex harness 考古（notes/research/2026-09-24-deep-research-harness-analysis.md）
 > + 本轮源头亲读（RUN.md / BUNDLE_ENTRY / rb_plan 实物）+ evaluation.md L4 全量判据。
 
+## 依赖与落地次序
+
+第 ③ 件（落地序见 roadmap 队列行）：前置 = m2-plan-shape + m2-data-caliber 已落地——
+run 的输入（模板形状、纪律文本）由它们定义，本 RFC 的流程图与验收直接引用两件产物。
+
 ## 问题
 
 四角色 preset 从未以团队形态协作过（M1 只证了单会话挂载与单条消息响应）。三个未知：
@@ -104,8 +109,16 @@ evidence/ → findings → review → final——全部落在 `runs/<slug>/`，�
 - L4 全量四判据（evaluation.md）：① final.md 存在且含来源清单；② 抽查 N 条结论可回溯
   （建议 N=5，用户可调）；③ 两点纪律：HITL 之间静默自主（会话日志核对无中途提问）；
   ④ 中断恢复实测通过；
-- Q2 闭：成员会话日志核对 preset 组合（zstd 解压逐事件，方法同 l4-lite）；
-- Q5/Q4 观察：journal.md 记录争用/负载现象 → 00-index 待定表销账或留证据。
+- Q2 闭：成员会话日志核对 preset 组合（zstd 解压逐事件，方法同 l4-lite）；**含 D18
+  边界复核：team 语境下成员的 tool-subagent（backgroundMode: continuable）是否可用——
+  company 实证"team-scoped 会话里 continuable child 不可达"（D3 明文"不重蹈"），若
+  复现则降级 = 前台 one-shot worker（scout persona 已是此语义）或 lead 代派，如实记
+  journal，不现场发明机制**；
+- Q5/Q4 观察：journal.md 记录争用/负载现象 → 00-index 待定表销账或留证据；
+- 汇总验收：本 run 同时核销另两件的落地验收——plan-shape（question.md 四节非空 +
+  Decisions ≥1 条）、data-caliber（final.md 至少一处"单源——待破 / 已搜未得"如实记录）；
+- 映射表 §1 hitl2 行同步：审阅建议吸收 composition_handoff（读者/用途/前景化——
+  源头 rb_profile 的 composition 契约，原映射只写了"证据充分性+交付/补研究推荐"）。
 
 ## 开放问题（请用户定）
 

@@ -4,6 +4,10 @@
 > 依据：源头仓亲读实证——`dpt_rb_glm-5-3-deepseek-v4-domestic-chips/rb_plan.md`（真实
 > run 的计划书实物）对照本仓 `research-workspace/templates/run/`。
 
+## 依赖与落地次序
+
+第 ① 件（落地序见 roadmap 队列行）：无前置；run-mechanics 的流程图与验收引用本件产物。
+
 ## 问题
 
 源头计划书里三块真功夫，我们的模板没有载体：
@@ -42,9 +46,13 @@
 ## 验收判据
 
 - 三个模板更新后：`verify` 门禁 7 全绿（模板六件在位不变）；映射表 §1 的
-  instantiation/seed-topics 行"本插件载体"列同步；evaluation-contract 测试绿；
+  instantiation / seed-topics / **rerun** 三行"本插件载体"列同步（Decisions 记录并入
+  rerun 行——原映射只写了"新 run 目录 + 引用前版"）；evaluation-contract 测试绿；
+- 同步面（docs 只写 now）：手册目录约定的 question.md 行补"四节 + Decisions"描述；
+- 落地面：L0 + L3（映射表审查 + evaluation-contract）——模板是方法论载体、非 preset
+  内容，不触发 L1；
 - M2 run 实际用上（question.md 四节非空、Decisions 至少一条——HITL1 本身就是第一条
-  决策记录）。
+  决策记录；此项由 run-mechanics 的 run 汇总核销）。
 
 ## 开放问题（请用户定）
 
