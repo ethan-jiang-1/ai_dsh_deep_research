@@ -2,6 +2,9 @@
 node_modules/
 .pnpm-store/
 *.log
+# pack 构建产物（release-smoke 产出到 dev/smoke-workspace/release-pack/，已在其段覆盖；
+# 此条兜住手动在包目录 npm pack 的残留）
+packages/*/*.tgz
 
 # ── 机密（防御纵深：宁可重复，不可漏——任何位置的凭据/环境文件都不进库）──
 # dev/harness-home/.credentials.yaml 已被下段覆盖；这里兜住"万一落到别处"的情况
