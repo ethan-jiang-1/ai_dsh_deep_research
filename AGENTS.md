@@ -9,8 +9,8 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 ```
 CLAUDE.md -> AGENTS.md    symlink（编辑真文件 AGENTS.md，verify 门禁校验）
 README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令/纪律/布局正本 = AGENTS.md，不复制）
-package.json / pnpm-workspace.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 随队列条目——见 pnpm-workspace.yaml 头注）
-packages/deep-research-pack/   唯一自写包（纯配置）：presets/<role>/（preset.yml + agent.cordis.yml[persona 行/skills/工具行] + skills/<n>/SKILL.md）、cordis.patch.yml（bundle 行）
+package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 随队列条目——见 pnpm-workspace.yaml 头注）
+packages/deep-research-pack/   唯一自写包（纯配置）：presets/<role>/（preset.yml + agent.cordis.yml[persona 行/skills/工具行] + skills/<n>/SKILL.md）、cordis.patch.yml（bundle 行）；新增角色步骤见包 README
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、runs/<slug>/、templates/run/
 docs/                    00-index（地图+决策台账+术语映射）→ roadmap（纯队列）→ design/10-30 → guides/60 + evaluation.md（验收合同）
 notes/                   决策记录：intents.md → proposed/（RFC，一文件一条目）→ implemented/；research/（考古报告）

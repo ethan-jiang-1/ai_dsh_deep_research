@@ -1,38 +1,44 @@
-# ── 依赖与工具产物 ──
-node_modules/
-.pnpm-store/
-*.log
-# pack 构建产物（release-smoke 产出到 dev/smoke-workspace/release-pack/，已在其段覆盖；
-# 此条兜住手动在包目录 npm pack 的残留）
-packages/*/*.tgz
+# .gitignore — 两段式设计：
+#   ① 位置性运行区（中部）：内容默认不进库，但允许 ! 再包含个别夹具/资产；
+#   ② 绝不进库（置底段）：机密与依赖/构建残留。gitignore 对同一路径"后匹配者胜"，
+#      本段必须保持在文件末尾——①段未来任何 ! 再包含都位于本段之前、赢不了本段。
+#      （红绿实证见 notes/implemented/2026-09-24-entry-chain-fresh-agent-audit.md：
+#      旧版把机密段放中部时，dev 段两行 !profiles 再包含就能让 git add -A 干跑列出
+#      .credentials.yaml 与 node_modules。）
+#   第三道防线：verify 门禁 secrets-untracked 对 tracked 清单做机械断言——gitignore
+#   不作用于已跟踪文件，只有门禁抓得到（历史实证：tarball 曾误提交，efcf56d 清除）。
 
-# ── 机密（防御纵深：宁可重复，不可漏——任何位置的凭据/环境文件都不进库）──
-# dev/harness-home/.credentials.yaml 已被下段覆盖；这里兜住"万一落到别处"的情况
+# ── ① 位置性运行区（可按需 ! 再包含夹具）──
+# 开发 DSH_HOME 的运行残留（目录本体进库，内容不进）
+dev/harness-home/*
+!dev/harness-home/.gitkeep
+# 研究运行时状态：runs/ 内容是 runtime truth，不进版本控制；
+# templates/ 与研究手册（AGENTS.md）是资产，进库
+research-workspace/runs/*
+!research-workspace/runs/.gitkeep
+# 排练/冒烟残留
+dev/smoke-workspace/*
+!dev/smoke-workspace/.gitkeep
+# 运行时临时区（codex harness 教训：临时区随 run 走，不是版本控制对象）
+_tmp/
+_cache/
+# 编辑器杂物
+.vscode/
+.idea/
+
+# ── ② 绝不进库（置底段，勿移动勿后补）──
+# 机密：宁可重复，不可漏——任何位置的凭据/环境文件都不进库
 .env
 .env.*
+.envrc
 !.env.example
 **/.credentials.yaml
 *.pem
 *.key
-
-# ── OS / 编辑器杂物 ──
+# 依赖与构建/工具残留（tarball 含手动 npm pack 的产物）
+node_modules/
+.pnpm-store/
+*.tgz
+*.log
+# OS 杂物
 .DS_Store
-.vscode/
-.idea/
-
-# ── 开发 DSH_HOME 的运行残留（目录本体进库，内容不进）──
-dev/harness-home/*
-!dev/harness-home/.gitkeep
-
-# ── 研究运行时状态：runs/ 内容是 runtime truth，不进版本控制；
-#    templates/ 与研究手册（AGENTS.md）是资产，进库。──
-research-workspace/runs/*
-!research-workspace/runs/.gitkeep
-
-# ── 排练/冒烟残留 ──
-dev/smoke-workspace/*
-!dev/smoke-workspace/.gitkeep
-
-# ── 运行时临时区（codex harness 教训：临时区随 run 走，不是版本控制对象）──
-_tmp/
-_cache/

@@ -71,3 +71,41 @@
 - ▶ 条目「l4-lite-smoke 复跑」未动（steer 插队），仍居队列首位；本轮已知遗留
   一个待修项：l4-lite-smoke.mjs 第 34 行 zstd 守卫的运算符优先级 bug（恒 false，
   守卫从不触发），随该条目一并处理。
+
+## 补录（同日）：复验探针结果 + .gitignore 审计与修正（steer ③）
+
+### 复验探针（定点回归）：6/6 PASS
+
+零上下文 subagent 对六个摩擦点逐项从零验证（只读 + ls，全部结论带实读行号）：档位
+词汇（keyless/真模型档在 AGENTS.md §密钥就地定义、活文档零"认证档"未定义使用）、
+README 与 AGENTS 零矛盾、60 §5 与 AGENTS §密钥零矛盾、模板对应显式（手册一行 +
+门禁 7 机械背书）、新增角色四步指针自包含（pack README 单文件）、布局树与实物
+零虚构。**五项旧摩擦对 fresh agent 均不再咬人。** 两条轻微残余同轮修掉：AGENTS.md
+布局行补 pnpm-lock.yaml、packages 行补"新增角色步骤见包 README"半句。
+
+### .gitignore 审计与修正
+
+**审计（实证，非自述）**：
+- check-ignore 全套：真实敏感/残留路径 13/13 被接住（凭据/会话日志/profiles/
+  node_modules/tgz 双位置/runs 内容/.env*/.pem/.key/.log/.envrc）；
+- tracked 清单 60 文件零敏感物；dev/ 与 runs/ 下只有资产 + .gitkeep；
+- 历史：唯一一次事故 = tarball 误提交（166d94e 进、efcf56d 出），凭据从未进过库；
+- 盘上零"未跟踪且未忽略"残留。
+
+**发现的洞与修正**：
+1. **机密段原在中部，gitignore"后匹配者胜"使防御纵深名存实亡**——红证：在 dev 段
+   模拟两行 `!profiles` 再包含（提交 profile 夹具的自然写法），`git add -A` 干跑
+   直接列出 `.credentials.yaml` 与 `node_modules/`（泄漏面实锤）。修正 = **两段式
+   重写**：① 位置性运行区（中部，允许 ! 再包含夹具）；② 绝不进库置底段（机密 +
+   依赖/构建/OS 残留，勿移动勿后补）。绿证：同样再包含模拟下 add -A 干跑零敏感物；
+   13/13 路径回归全过。测量教训两条入册：`git status` 折叠显示全未跟踪目录（grep
+   子路径测不到）；`check-ignore -v` 对否定模式的退出码有歧义——泄漏判据必须用
+   `git add -n -A` 干跑。
+2. **`.envrc`（direnv）未盖**——补进置底段；`packages/*/*.tgz` 收敛为 `*.tgz`
+   （纯配置仓无合法 tarball，任何深度皆残留）。
+3. **gitignore 对已跟踪文件无效**（tarball 事故正是此类）——verify 新增门禁 9
+   `secrets-untracked`：git ls-files 清单断言零 credentials/.env*/.envrc/.pem/
+   .key/node_modules/.pnpm-store/*.tgz/*.log/.DS_Store。红绿反证：注入 tracked 哑
+   .pem → 门禁红（精确点名文件与处置法）→ 还原 → 9 门禁全绿。
+
+**验证**：verify 9 门禁 + node --test 10 pass（红绿前后各跑，全部实际执行）。

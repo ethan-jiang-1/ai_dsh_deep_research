@@ -4,6 +4,7 @@
 // 移植自 ai_dsh_company/scripts/verify.mjs（按当前规模裁剪；vendor-pin/client-half/proposal
 // 全量版随对应能力落地启用，见 docs/roadmap.md）。
 
+import { spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync, existsSync, lstatSync, readlinkSync, statSync } from 'node:fs';
 import { join, dirname, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -174,8 +175,30 @@ const mdFiles = allFiles.filter((f) => f.endsWith('.md'));
   }
 }
 
+// ── 门禁 9：secrets-untracked（tracked 清单零敏感/残留物；gitignore 不作用于已跟踪文件）──
+{
+  const gate = 'secrets-untracked';
+  const r = spawnSync('git', ['ls-files'], { cwd: ROOT, encoding: 'utf8' });
+  if (r.status !== 0) {
+    fail(gate, `git ls-files 不可用（${String(r.stderr).slice(0, 120)}）——本门禁依赖仓库态，fail-loud`);
+  } else {
+    const bad = r.stdout.split('\n').filter(Boolean).filter((f) =>
+      /\.credentials\.ya?ml$/i.test(f)
+      || (/(^|\/)\.env(\..+)?$/.test(f) && !/(^|\/)\.env\.example$/.test(f))
+      || /(^|\/)\.envrc$/.test(f)
+      || /\.pem$/i.test(f)
+      || /\.key$/i.test(f)
+      || /(^|\/)node_modules\//.test(f)
+      || /(^|\/)\.pnpm-store\//.test(f)
+      || /\.tgz$/.test(f)
+      || /\.log$/i.test(f)
+      || /\.DS_Store$/.test(f));
+    for (const f of bad) fail(gate, `敏感/残留物已被 tracked：${f}（gitignore 管不住已跟踪文件，须 git rm --cached）`);
+  }
+}
+
 // ── 汇报 ──
-const gates = ['md-utf8-newline', 'md-links', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'proposal-scheduled'];
+const gates = ['md-utf8-newline', 'md-links', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'proposal-scheduled', 'secrets-untracked'];
 const failed = new Set(failures.map((f) => f.match(/^\[(.+)\]/)[1]));
 for (const g of gates) console.log(`${failed.has(g) ? 'FAIL' : 'PASS'}  ${g}`);
 for (const n of notes) console.log(`note  ${n}`);
