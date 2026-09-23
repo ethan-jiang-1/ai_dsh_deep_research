@@ -45,21 +45,28 @@ test('行依赖全部声明进 peerDependencies', () => {
   }
 });
 
-test('bundle patch：roster 替换行 + 团队/web/present insert 行在位', () => {
+test('bundle patch：roster 替换行 + 团队/present insert 行在位；web 行归 base 不进本包', () => {
   const yml = readFileSync(join(PACK, 'cordis.patch.yml'), 'utf8');
   // 替换行：agent-presets（default: lead，roots 指向本包 presets）
   assert.match(yml, /^- id: agent-presets$/m);
   assert.match(yml, /default: lead/);
   assert.match(yml, /node_modules\/dsh-deep-research-pack\/presets\//);
-  // insert 行：web 三件 + present + 团队三件。用行锚定分割：真 insert 标记在列 0 整行
-  // （`^- insert:$`），注释里的字面量提及（行中、反引号内）不会误命中——首版测试在这里
-  // 被 cordis.patch.yml 第 3 行注释打红过，教训：结构性断言锚定结构特征，不锚定子串。
-  const insertBlock = yml.split(/^- insert:$/m)[1] ?? '';
-  for (const row of [
-    'tool-web', 'web-search', 'web-fetch', 'tool-present',
-    'agent-team', 'tool-agent-team', 'ui-agent-team',
-  ]) {
+  // insert 行：present + 团队三件（web 行实证结论 = base 出厂行，不进本包——RFC web-tool-rows）
+  const insertBlock = yml.split(/^- insert:$/m).slice(1).join('\n');
+  for (const row of ['tool-present', 'agent-team', 'tool-agent-team', 'ui-agent-team']) {
     assert.match(insertBlock, new RegExp(`^\\s*- id: ${row}$`, 'm'), `insert 行缺失: ${row}`);
+  }
+  // 回归守卫：web 四行不得出现在本包 bundle（insert 会与 web-app surface 的 preset-scoping 打架）
+  for (const row of ['tool-web', 'web-search', 'web-fetch', 'web']) {
+    assert.doesNotMatch(insertBlock, new RegExp(`^\\s*- id: ${row}$`, 'm'), `web 行 ${row} 不应进 bundle（base 出厂行）`);
+  }
+});
+
+test('每角色 preset 的 tool-web 行带 base config（fetch + 60s 超时）', () => {
+  for (const r of ROLES) {
+    const yml = readFileSync(join(PRESETS, r, 'agent.cordis.yml'), 'utf8');
+    const m = yml.match(/- id: tool-web\n\s*name: '@deepseek-ai\/dsh-tool-web'\n\s*config:\n\s*fetch: true\n\s*searchTimeoutMs: 60000/);
+    assert.ok(m, `${r}: tool-web 行缺 base config（fetch: true / searchTimeoutMs: 60000）`);
   }
 });
 

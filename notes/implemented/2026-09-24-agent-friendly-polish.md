@@ -51,4 +51,8 @@ MODULE_NOT_FOUND，实测）→ 统一为 `node --test tests/*.test.mjs`。
 2. **写"计划要做 X"的文档在 X 做完后必须回扫**：evaluation.md 的"待建"是最典型的
    承诺腐化——凡是描述"将要"的句子都是未来的 rot，合同文档只写"是什么/怎么跑"；
 3. **路径要写消费视角**：给角色会话看的路径必须从其 cwd 可解析（仓库读者视角 ≠ 会话
-   agent 视角），注入式载体（agent-instructions）里的引用尤其如此。
+   agent 视角），注入式载体（agent-instructions）里的引用尤其如此；
+4. **提交链必须挂在测试退出码上**（web-tool-rows 收尾的流程失误：`node --test … | tail`
+   之后 `&& git commit` 挂在了 tail 的成功上，红灯状态被提交进 509a04b）——正确形状 =
+   `node --test … > out 2>&1 && git …`（重定向不吞退出码）；红灯 commit 的事实保留在
+   git 历史里作证，修复向前。
