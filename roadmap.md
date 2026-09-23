@@ -8,13 +8,10 @@
 
 ## 队列
 
-1. ▶ **M2 铺垫 P1：run 启动通道与操作指南**（卫生）——真入口路径纪律：run 走安装域
-   （pack → dev home 专用 profile → plugin add），不走源码域 overlay；候选基础 =
-   vendor experimental 的 agent-team-profile 现成 team profile 层（对照评估见
-   market 粗扫报告 notes/research/2026-09-24-dsh-market-scout.md §2/§4）；产出 = 开跑
-   就绪命令/小脚本（boot web + research profile + 入口步骤打印）+ 一页"怎么开 run"
-   操作说明（开哪个会话/说什么/HITL 两点各会看到什么/观察面指南——看哪里：各角色
-   会话流 / ui-agent-team 任务板 / deliverables，详见 m2-run-dashboard RFC 的 L0）。
+1. ▶ **M2 铺垫 P1：run 启动通道与操作指南**（卫生）——run 走安装域真入口（转正
+   research profile，不走源码域 overlay）；产出 = 幂等开跑就绪脚本 + 一页"怎么开
+   run"操作说明；核心决策 = agent-team-profile 复用 vs 自组。全文 =
+   2026-09-24-m2-p1-run-channel RFC（notes/proposed/）。
 2. **M2 铺垫 P2：team 机制迷你预检**（卫生，真模型档小成本 ~3 次模型调用）——仿
    l4-lite 形状：boot 后 prompt lead 会话组队 → 会话日志断言 spawn_teammate 真调用 +
    成员会话建立 + 成员 preset 组合；提前拆 D18 雷区（team 语境 continuable 可用性），
