@@ -12,7 +12,7 @@ packages/deep-research-pack/   唯一自写包（纯配置）：presets/<role>/�
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、runs/<slug>/、templates/run/
 docs/                    00-index（地图+决策台账+术语映射）→ design/10-30 → plans/roadmap（纯队列）→ guides/60 + evaluation.md（验收合同）
 notes/                   决策记录：intents.md → proposed/（RFC，一文件一条目）→ implemented/；research/（考古报告）；postmortem/
-scripts/                 verify.mjs（L0 结构门禁）、preset-smoke.mjs（L1 冒烟骨架）
+scripts/                 verify.mjs（L0 结构门禁）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、release-smoke.mjs（L2 安装面）
 tests/                   keyless 回归（node:test，零依赖；layering 守卫禁真模型/网络/子进程）
 dev/                     env.sh（双 home + dsh 机制基线）、research.overlay.yml、harness-home/（gitignore 运行残留）
 ```
@@ -26,15 +26,17 @@ dev/                     env.sh（双 home + dsh 机制基线）、research.over
 node scripts/verify.mjs               # L0 结构门禁（keyless，收尾必跑）
 node --test tests/*.test.mjs        # L0 keyless 回归（也可 pnpm test）
 source dev/env.sh                     # 双 home + 裸 dsh 拦截（DSH_HOME=dev/harness-home）
-node scripts/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真会话档（需 key；真会话流程随队列「preset-smoke 真跑」落地）
+node scripts/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真挂载档（keyless：roster+逐角色建会话+skills 隔离；--profile <p> --no-patch 切安装域通道）
+node scripts/release-smoke.mjs        # L2 真实安装形状（认证档：pack→干净 profile→plugin add→安装域冒烟）
 ```
 
 ## 密钥
 
-真模型冒烟（`DSH_SMOKE_REAL=1`）需要 `DEEPSEEK_API_KEY`：开发 home
-（`dev/harness-home/.credentials.yaml`）配一次即可；永不提交密钥。web 搜索无需独立 key——
-base 的 `web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，与 chat 同一把钥匙
-（实证：vendor base bundle cordis.patch.yml）。
+L4-lite 真模型冒烟（队列条目）需要 `DEEPSEEK_API_KEY`：开发 home
+（`dev/harness-home/.credentials.yaml`）配一次即可；永不提交密钥。L1/L2 的冒烟
+（preset-smoke 真挂载档、release-smoke）**keyless**——组合与冷读，无模型调用。
+web 搜索无需独立 key——base 的 `web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，
+与 chat 同一把钥匙（实证：vendor base bundle cordis.patch.yml）。
 
 ## DSH 源码：机制权威在哪
 
@@ -59,7 +61,7 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 | 完成定义 = 该面最小"真检查"通过；发现权在代理一侧 | vendor docs/testing.md；company D15 | evaluation.md（五面合同） |
 | no-key 证管道，with-key 证 agent；真模型/真浏览器不进 keyless 回归 | vendor docs/testing.md | tests/layering.test.mjs 守卫 |
 | verify the world, not the self-report（断言重读文件，不信自述） | vendor docs/testing.md | evaluation.md L4 判据 + 手册完成判据 |
-| 真入口路径 = 发布产物（pack → 干净 profile → plugin add → 会话） | vendor docs/testing.md + company release.md | 队列「release-smoke」（L2 面） |
+| 真入口路径 = 发布产物（pack → 干净 profile → plugin add → 会话） | vendor docs/testing.md + company release.md | `scripts/release-smoke.mjs`（L2 面） |
 | 每条新门禁带反证（红→还原→绿） | vendor docs/testing.md "A guard only guards…" | guides/60 §6 |
 | docs = 当前合同（一处事实一个家，只写 now；status rots——队列不积累历史，入口文件只收常设指令） | vendor docs/AGENTS.md tier 表；company inround 研究 §二/§十一 | 00-index 组织原则；roadmap 纯队列 |
 | 非平凡变更同 diff 带 Note（决定/输掉的方案/跑过的验证） | vendor .agents/notes/README.md | notes/ intents → implemented |

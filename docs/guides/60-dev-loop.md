@@ -32,10 +32,10 @@
 | 面 | 什么时候跑 | 命令 |
 |---|---|---|
 | L0 结构 | 每次收尾必跑；实施期随手 | `node scripts/verify.mjs` + `node --test tests/*.test.mjs`（或 `pnpm verify` / `pnpm test`） |
-| L1 挂载 | preset 内容/结构改动（其完成定义） | `node scripts/preset-smoke.mjs`（keyless 预检）/ `DSH_SMOKE_REAL=1`（真会话档） |
-| L2 安装 | 包结构/release 相关改动 | release-smoke（队列条目落地后） |
-| L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `tests/evaluation-contract.test.mjs` |
-| L4 交付 | 里程碑级 | L4-lite 冒烟 / 完整 run（队列条目） |
+| L1 挂载 | preset 内容/结构改动（其完成定义） | `DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs`（源码域，keyless）；安装域加 `--profile <p> --no-patch` |
+| L2 安装 | 包结构/release 相关改动 | `node scripts/release-smoke.mjs`（认证档：pack→干净 profile→plugin add→安装域冒烟） |
+| L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `node --test tests/evaluation-contract.test.mjs` |
+| L4 交付 | 里程碑级 | L4-lite 冒烟（需 `DEEPSEEK_API_KEY`）/ 完整 run（队列条目） |
 
 判据与负面判据（什么算"框架不合理"）见 [evaluation.md](../evaluation.md)——面与面不互抵。
 

@@ -41,14 +41,16 @@
 | D6 | **评估先行**：docs/evaluation.md 五面合同先于框架定案；完成定义 = 该面最小真检查；goal complete 的唯一条件 = 里程碑矩阵全绿 | 用户指令；company D15 |
 | D7 | **首版 = 纯配置包**：零自写 JS、零构建、无 client 面；UI 用现成 `ui-agent-team` | company D5 同教义（第 0 天零自定义 JS） |
 | D8 | **迭代单位 = 垂直轮 + 八成把握先行**：最薄全路径先行 → 逐轮加宽；不追求一次想透 | 用户指令（迭代纠错优先于完美规划）；company D11 |
-| D9 | **web 工具行（已实证）**：模型面 `tool-web` 行随 preset（config 照抄 base：`fetch: true` + 60s 超时）；providers（web seam / web-search-deepseek / web-fetch-http）是 base host 面出厂行，不进本包 bundle 也不随 preset；DeepSeek 搜索 `apiKeyEnv: DEEPSEEK_API_KEY` 与 chat 同钥匙 | [10 §4](./design/10-architecture.md)；[RFC web-tool-rows](../notes/proposed/2026-09-24-web-tool-rows.md) |
+| D9 | **web 工具行（已实证）**：模型面 `tool-web` 行随 preset（config 照抄 base：`fetch: true` + 60s 超时）；providers（web seam / web-search-deepseek / web-fetch-http）是 base host 面出厂行，不进本包 bundle 也不随 preset；DeepSeek 搜索 `apiKeyEnv: DEEPSEEK_API_KEY` 与 chat 同钥匙 | [10 §4](./design/10-architecture.md)；[web-tool-rows 毕业 Note](../notes/implemented/2026-09-24-web-tool-rows.md) |
 | D10 | **vendor submodule 延后**：首版无构建需求（纯配置包）；机制权威暂借 `/Users/bowhead/ai_dsh_company/vendor/dsh`（同一钉住 tag，只读）；verify 的 vendor-pin 门禁随队列条目启用 | [偏离登记](../notes/implemented/2026-09-24-r1-scaffold.md)；队列「vendor-submodule-and-pnpm-dsh」 |
+| D14 | **preset-smoke 双通道**：源码域（web 出厂 profile + overlay 指向本仓 presets 源码，迭代快）+ 安装域（`--profile <p> --no-patch` 走 plugin add 正式路径）；断言同构（roster/逐角色 create/skills 隔离），L1 用前者、L2 用后者；boot 必须起自 company 钉 tag 源码（tsx 解析树），overlay/roots 用绝对路径 | [L1/L2 绿灯 Note](../notes/implemented/2026-09-24-l1-l2-green.md) |
+| D15 | **release-smoke 形状**：照 company release.md 五步（pack → 干净 profile 先删后建 → `plugin --profile add file:` → manifest 断言 → 安装域冒烟）；工具态（npm cache/pnpm store）全重定向进 repo gitignored 区；peers 是声明语义（安装锚兜底解析，非安装要求） | 同上 |
 
 ### 待定（阻塞项标 ⛔）
 
 | # | 问题 | 归宿 |
 |---|---|---|
-| Q2 | agent-team spawn_teammate 成员会话的 preset 挂载行为（成员拿到谁的组合） | 队列「preset-smoke 真跑」 |
+| Q2 | agent-team spawn_teammate 成员会话的 preset 挂载行为（成员拿到谁的组合）——team 组建需真实交互，普通 session 挂载已由 preset-smoke 覆盖 | 队列「首个完整研究 run」实测 |
 | Q3 | `dsh plugin add` 的目标 profile 形状与 release-smoke 完整流程 | 队列「release-smoke」 |
 | Q4 | 专职 synthesizer 是否独立成角色（背景：[20-roles §4](./design/20-roles.md)） | 队列「首个完整研究 run」实测 |
 | Q5 | 多 analyst 并行时的 topic 争用（背景：[20-roles §4](./design/20-roles.md)） | 队列「首个完整研究 run」实测 |

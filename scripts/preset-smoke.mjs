@@ -1,25 +1,36 @@
 #!/usr/bin/env node
-// preset-smoke.mjs — L1 真挂载冒烟（认证档：需 DSH_HOME + 已装 pack；真模型档另需 DEEPSEEK_API_KEY）。
-// 定义：docs/evaluation.md §L1。为什么必须是真会话：ai_dsh_company postmortem 0001 实证
-// preset 挂载失败只发生在 session/create（Loader 逐行校验 config schema），roster 扫描与
-// --dump-config 都看不见，UI 吞错。dump/roster 可见 ≠ 挂载成功。
+// preset-smoke.mjs — L1 真挂载冒烟。
+// keyless 预检档（默认）：环境/安装形状断言，不发任何请求。
+// 真会话档（DSH_SMOKE_REAL=1）：boot 真 web（钉 tag 源码基线 + 源码域 overlay），
+//   roster 断言 → 逐角色 session/create 真挂载 → skills 硬隔离断言。全程 keyless
+//   （组合与冷读，无模型调用）——session/create 才会触发行 config 校验，roster/dump
+//   看不见（company postmortem 0001：挂载失败只有真会话抓得到，UI 还吞错）。
 //
-// 用法：
-//   node scripts/preset-smoke.mjs                 # keyless 预检（环境/安装形状），不发模型请求
-//   DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs # 真会话档：逐角色起会话发一条消息（需 key）
-//
-// 骨架说明：keyless 预检已实现；真会话档依赖 web/headless 启动细节（队列「preset-smoke
-// 真跑」条目落地——对照 company preset-smoke.mjs 的 boot 流程：boot web → roster → 逐角色
-// session/create → 断言模块表）。本脚本 keyless 预检失败时给出精确修复指令。
+// 前置：DSH_HOME 已设（source dev/env.sh）；DSH_SRC（默认 /Users/bowhead/ai_dsh_company，
+//   钉 tag 源码基线 + tsx 解析树——D10 偏离下的机制权威）。
+// 用法：source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs [--port 3099]
 
+import { spawn } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawnSync } from 'node:child_process';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
+const PRESETS = join(PACK, 'presets');
 const ROLES = ['lead', 'scout', 'analyst', 'critic'];
+const OVERLAY = join(ROOT, 'dev', 'research.overlay.yml');
+
+const arg = (name, fallback) => {
+  const i = process.argv.indexOf(`--${name}`);
+  return i === -1 ? fallback : process.argv[i + 1];
+};
+const PORT = Number(arg('port', '3099'));
+// 双通道：默认 = 源码域（web 出厂 profile + overlay 指向本仓 presets 源码）；
+// --profile <name> --no-patch = 安装域（plugin add 过的 profile，走已装 pack 的正式路径）。
+const PROFILE = arg('profile', 'web');
+const NO_PATCH = process.argv.includes('--no-patch');
+const BOOT_TIMEOUT_MS = 120_000;
 
 let failed = false;
 const step = (ok, label, hint) => {
@@ -27,48 +38,136 @@ const step = (ok, label, hint) => {
   if (!ok) { failed = true; if (hint) console.log(`      → ${hint}`); }
 };
 
-// ── 预检 1：pack 文件面完整（这层 keyless 可判）──
+// ── keyless 预检（两档共用）──
 step(existsSync(join(PACK, 'cordis.patch.yml')), 'pack: cordis.patch.yml 存在');
 for (const r of ROLES) {
   step(
     existsSync(join(PACK, 'presets', r, 'preset.yml')) && existsSync(join(PACK, 'presets', r, 'agent.cordis.yml')),
-    `pack: presets/${r} 三件套（yml 两件）`,
+    `pack: presets/${r} yml 两件`,
   );
   const skills = join(PACK, 'presets', r, 'skills');
   step(existsSync(skills) && readdirSync(skills).length > 0, `pack: presets/${r} skills 非空`);
 }
 
-// ── 预检 2：DSH_HOME 环境（真挂载的前提）──
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
-step(!!home, 'env: DSH_HOME 已设置（先 source dev/env.sh）', '未设置则冒烟只能停在 keyless 预检');
+step(!!home, 'env: DSH_HOME 已设置（先 source dev/env.sh）', '未设置则只能停在 keyless 预检');
 
-if (home) {
-  // ── 预检 3：pack 已安装进 home（真实安装形状）──
-  const installed = join(home, 'node_modules', 'dsh-deep-research-pack');
-  step(existsSync(installed), `home: pack 已安装（${installed}）`,
-    '安装：npm pack（在 packages/deep-research-pack）→ dsh plugin add <tarball>，见 guides/60');
+const dshSrc = process.env.DSH_SRC ?? '/Users/bowhead/ai_dsh_company';
+const bin = join(dshSrc, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
 
-  if (existsSync(installed)) {
-    for (const r of ROLES) {
-      step(
-        existsSync(join(installed, 'presets', r, 'agent.cordis.yml')),
-        `home: 安装形状含 presets/${r}`,
-        'files 声明缺失预设目录 → 检查 package.json files 字段',
-      );
-    }
-  }
+if (process.env.DSH_SMOKE_REAL !== '1') {
+  console.log(failed ? '\npreset-smoke: 预检未全绿（见上）' : '\npreset-smoke: 预检绿（真挂载档：DSH_SMOKE_REAL=1）');
+  process.exit(failed ? 1 : 0);
 }
 
-// ── 真会话档（显式开启，需 key）──
-if (process.env.DSH_SMOKE_REAL === '1') {
-  const key = process.env.DEEPSEEK_API_KEY;
-  step(!!key, 'env: DEEPSEEK_API_KEY（真模型档必需）');
-  if (key && home) {
-    // 逐角色一条消息的最小真挂载。dsh CLI 的会话子命令随队列「preset-smoke 真跑」按实际
-    // CLI 面落地；这里保留占位流程：dsh --profile <profile> 起会话 → 断言响应非错误。
-    console.log('note  真会话流程在队列「preset-smoke 真跑」条目落地（boot 流程对照 company preset-smoke.mjs）');
+// ══ 真会话档 ══
+if (failed) {
+  console.error('preset-smoke: 预检未过，真会话档不启动');
+  process.exit(1);
+}
+step(existsSync(bin), `env: 机制基线源码在位（${bin}）`, '检查 DSH_SRC / company checkout');
+
+const roleSkills = (role) => readdirSync(join(PRESETS, role, 'skills'), { withFileTypes: true })
+  .filter((e) => e.isDirectory()).map((e) => e.name).sort();
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+let rpcId = 0;
+const rpc = async (base, cookie, endpoint, args) => {
+  const response = await fetch(`${base}/api/${endpoint}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', cookie },
+    body: JSON.stringify({ type: 'client-request', rpcId: `smoke-${++rpcId}`, method: endpoint, payload: { args } }),
+  });
+  const body = await response.json();
+  if (body?.result?.ok !== true) {
+    throw new Error(`${endpoint} 失败: ${body?.result?.error?.message ?? JSON.stringify(body).slice(0, 200)}`);
   }
+  return body.result.value;
+};
+
+const boot = async () => {
+  const argv = ['--import', 'tsx/esm', bin, '--profile', PROFILE];
+  if (!NO_PATCH) argv.push('--patch', OVERLAY);
+  argv.push('--', '--port', String(PORT), '--no-open');
+  const child = spawn(process.execPath, argv, { cwd: dshSrc, env: { ...process.env, DSH_HOME: home }, stdio: ['ignore', 'pipe', 'pipe'] });
+  let output = '';
+  const banner = new Promise((resolveBanner, rejectBanner) => {
+    const onData = (chunk) => {
+      output += String(chunk);
+      const m = new RegExp(`http://127\\.0\\.0\\.1:${PORT}/\\?token=(\\S+)`).exec(output);
+      if (m !== null) resolveBanner({ token: m[1] });
+    };
+    child.stdout.on('data', onData);
+    child.stderr.on('data', onData);
+    child.on('exit', (code) => rejectBanner(new Error(`web 进程提前退出（code ${String(code)}）\n${output.slice(-800)}`)));
+    setTimeout(() => rejectBanner(new Error(`等待启动横幅超时\n${output.slice(-800)}`)), BOOT_TIMEOUT_MS);
+  });
+  const { token } = await banner;
+  return { child, token };
+};
+
+const authenticate = async (port, token) => {
+  const response = await fetch(`http://127.0.0.1:${String(port)}/?token=${token}`, { redirect: 'manual' });
+  const cookies = response.headers.getSetCookie?.() ?? [];
+  if (cookies.length === 0) throw new Error('token 交换没有拿到 cookie');
+  return cookies.map((c) => c.split(';')[0]).join('; ');
+};
+
+const failures = [];
+const check = (label, fn) => fn().then(
+  () => console.log(`  PASS ${label}`),
+  (error) => { failures.push(`${label}: ${error.message}`); console.log(`  FAIL ${label}: ${error.message}`); },
+);
+
+const SMOKE_CWD = join(ROOT, 'dev', 'smoke-workspace');
+const { child, token } = await boot();
+try {
+  const base = `http://127.0.0.1:${String(PORT)}`;
+  const cookie = await authenticate(PORT, token);
+
+  // ① roster：四角色都在且零 broken
+  const roster = await rpc(base, cookie, 'agentPresets/list', {});
+  const presets = roster.presets ?? [];
+  for (const role of ROLES) {
+    await check(`roster 含 ${role}`, async () => {
+      const row = presets.find((p) => p.id === role);
+      if (row === undefined) throw new Error(`roster 里没有 ${role}（共 ${presets.length} 条）`);
+      if (row.broken !== undefined) throw new Error(`preset 被标 broken：${String(row.broken).slice(0, 160)}`);
+    });
+  }
+
+  // ② 真入口：逐角色建会话——这一步才触发行 config 校验
+  const sessionIds = new Map();
+  for (const role of ROLES) {
+    await check(`session/create 挂上 ${role}`, async () => {
+      const created = await rpc(base, cookie, 'session/create', { request: { cwd: SMOKE_CWD, agentPreset: role } });
+      if (created?.agentPreset !== role) throw new Error(`返回的 preset 不是 ${role}：${JSON.stringify(created).slice(0, 200)}`);
+      const id = created?.id ?? created?.sessionId;
+      if (typeof id !== 'string') throw new Error(`session/create 没返回会话 id：${JSON.stringify(created).slice(0, 200)}`);
+      sessionIds.set(role, id);
+    });
+  }
+
+  // ③ skills 硬隔离：每角色只看见自己的 skills（includeDefaultRoots: false 的真入口断言）
+  for (const role of ROLES) {
+    await check(`${role} 只看见自己的 skills`, async () => {
+      const sessionId = sessionIds.get(role);
+      if (sessionId === undefined) throw new Error('没有会话 id（上一步未通过）');
+      const value = await rpc(base, cookie, 'skills/list', { request: { sessionId } });
+      const actual = (value.skills ?? []).map((s) => s.name).sort();
+      const expected = roleSkills(role);
+      const extra = actual.filter((n) => !expected.includes(n));
+      const missing = expected.filter((n) => !actual.includes(n));
+      if (extra.length > 0) throw new Error(`看见了非本角色的 skill：${extra.join(', ')}`);
+      if (missing.length > 0) throw new Error(`本角色 skill 缺席：${missing.join(', ')}`);
+    });
+  }
+} finally {
+  child.kill('SIGTERM');
+  await sleep(300);
 }
 
-console.log(failed ? '\npreset-smoke: 预检未全绿（见上）' : '\npreset-smoke: 预检绿（真挂载档见 DSH_SMOKE_REAL=1）');
-process.exit(failed ? 1 : 0);
+console.log(failures.length === 0
+  ? `\npreset-smoke: ALL PASS（${ROLES.length} 个 preset 全部真挂载绿）`
+  : `\npreset-smoke: ${failures.length} FAILURE(S)\n${failures.join('\n')}`);
+process.exit(failures.length === 0 ? 0 : 1);
