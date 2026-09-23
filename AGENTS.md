@@ -15,7 +15,7 @@ packages/deep-research-pack/   唯一自写包（纯配置）：presets/<role>/�
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、runs/<slug>/、templates/run/
 docs/                    00-index（地图+决策台账+术语映射）→ design/10-30 → guides/60（开发环）+ guides/61（run 操作指南）+ evaluation.md（验收合同）
 notes/                   决策记录：intents.md → proposed/（RFC，一文件一条目）→ implemented/；research/（考古报告）
-scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）
+scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）、team-preflight-smoke.mjs（team 机制预检，真模型档）
 tests/                   keyless 回归（node:test，零依赖；layering 守卫禁真模型/网络/子进程）
 dev/                     boot-run.sh（run 通道开跑命令：幂等装+boot web）、env.sh（双 home + dsh 机制基线）、research.overlay.yml（源码域 overlay，镜像 bundle 行）、harness-home/ 与 smoke-workspace/（gitignore 运行区）
 ```
@@ -32,13 +32,15 @@ source dev/env.sh                     # 双 home + 裸 dsh 拦截（DSH_HOME=dev
 node scripts/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真挂载档（keyless：roster+逐角色建会话+skills 隔离；--profile <p> --no-patch 切安装域通道）
 node scripts/release-smoke.mjs        # L2 真实安装形状（keyless：pack→干净 profile→plugin add→安装域冒烟；起真 DSH 环境，无模型调用）
 node scripts/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：四角色响应 + scout web_search 调用）
+node scripts/team-preflight-smoke.mjs # M2 team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + D18 one-shot worker 探针）
 ```
 
 ## 密钥
 
 档位词汇（全仓统一；替代曾用而未定义的"认证档"）：**keyless** = 无凭据可跑——preset-smoke
 真挂载档与 release-smoke 会起真 DSH 环境，但无模型调用、不需要 key；**真模型档** = 需要
-`DEEPSEEK_API_KEY` 与真模型调用（当前 = l4-lite-smoke；队列里的 L4 全量与探针脚本化同档）。
+`DEEPSEEK_API_KEY` 与真模型调用（当前 = l4-lite-smoke 与 team-preflight-smoke；队列里的
+L4 全量与探针脚本化同档）。
 
 L4-lite 真模型冒烟（`scripts/l4-lite-smoke.mjs`）需要 `DEEPSEEK_API_KEY`：开发 home
 （`dev/harness-home/.credentials.yaml`）配一次即可；永不提交密钥。L1/L2 的冒烟

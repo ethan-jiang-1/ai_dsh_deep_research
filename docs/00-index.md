@@ -55,7 +55,7 @@
 
 | # | 问题 | 归宿 |
 |---|---|---|
-| Q2 | agent-team spawn_teammate 成员会话的 preset 挂载行为（成员拿到谁的组合）——team 组建需真实交互，普通 session 挂载已由 preset-smoke 覆盖 | 队列「首个完整研究 run」实测 |
+| Q2 | agent-team spawn_teammate 成员会话的 preset 组合：**机制半边已答（P2 预检实证）**——spawn_teammate 无 preset 参数，成员挂 roster 默认 preset（= lead，session 事件 `agentPreset:"lead"` 原样在案）+ team 工具面；角色人格须经 lead 的 spawn prompt 传达（persona-by-prompt；行为效果归 run 实测） | [P2 毕业 Note](../notes/implemented/2026-09-24-m2-p2-team-preflight.md)；队列「首个完整研究 run」实测 |
 | Q3 | `dsh plugin add` 的目标 profile 形状与 release-smoke 完整流程 | 队列「release-smoke」 |
 | Q4 | 专职 synthesizer 是否独立成角色（背景：[20-roles §4](./design/20-roles.md)） | 队列「首个完整研究 run」实测 |
 | Q5 | 多 analyst 并行时的 topic 争用（背景：[20-roles §4](./design/20-roles.md)） | 队列「首个完整研究 run」实测 |

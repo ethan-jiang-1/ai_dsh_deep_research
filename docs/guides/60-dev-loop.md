@@ -64,7 +64,7 @@ source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名�
 
 ## 5. 密钥
 
-- 仅真模型档需要 `DEEPSEEK_API_KEY`（当前 = l4-lite-smoke；开发 home
+- 仅真模型档需要 `DEEPSEEK_API_KEY`（当前 = l4-lite-smoke 与 team-preflight-smoke；开发 home
   `dev/harness-home/.credentials.yaml` 配一次）；永不提交密钥；
 - 其余全档 keyless（`DSH_SMOKE_REAL` 真挂载档、release-smoke：起真 DSH 环境，但无模型调用）；
 - web 搜索无需独立 key（D9 实证）：与 chat 同一把 `DEEPSEEK_API_KEY`。
