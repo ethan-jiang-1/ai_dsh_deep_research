@@ -31,8 +31,8 @@ if (!existsSync(join(home, '.credentials.yaml'))) {
   console.error('l4-lite: dev home 无凭据文件（.credentials.yaml）——先配置 DEEPSEEK_API_KEY');
   process.exit(2);
 }
-if (!spawnSync('zstd', ['--version']).status === 0 && !existsSync('/opt/homebrew/bin/zstd')) {
-  console.error('l4-lite: 需要 zstd（会话日志为 zstd 压缩）');
+if (spawnSync('zstd', ['--version']).status !== 0) {
+  console.error('l4-lite: 需要 zstd 且须在 PATH 上（会话日志为 zstd 压缩，readSessionLog 直接调 zstd）');
   process.exit(2);
 }
 const dshSrc = process.env.DSH_SRC ?? '/Users/bowhead/ai_dsh_company';

@@ -8,9 +8,12 @@
 
 ## 队列
 
-1. ▶ **l4-lite-smoke 复跑**（卫生，速件）——重写版脚本（日志轮询断言）尚未整跑过；
-   `source dev/env.sh && node scripts/l4-lite-smoke.mjs`，验收 = 自己全绿（证据级判据已由
-   首跑日志核验闭环，见 implemented Note 2026-09-24-l4-lite-m1-done）。
+1. ▶ **首个完整研究 run**（feature，M2）——真实问题端到端：HITL1 → 侦察 → 挖掘 → 综合 →
+   critic → HITL2 → final.md + present；L4 全量四判据（来源链抽查/两点纪律/静默自主/
+   中断恢复）；Q2（team 成员 preset 组合）Q4（synthesizer 拆分）Q5（topic 争用）
+   Q6（floor 机械化）随实测闭。**开工前置：计划先落 notes/proposed/ RFC（可切多件）→
+   用户审阅打磨 → 呈批后才实施**。（2026-09-24 用户定案：实质优先，提前至
+   vendor-submodule 之前；元工作顺延待实战证据反哺。）
 2. **vendor-submodule-and-pnpm-dsh**（feature）——加 pinned submodule（tag
    `dsh-v0.1.5-rc.2` @ `fb2c4b9e`）+ workspace 五件套 + `pnpm dsh` 从钉住源码起会话；
    verify 加 vendor-pin/clean 门禁；机制权威从"借用 company checkout"切回本仓 vendor
@@ -22,12 +25,8 @@
 4. **entry-chain-probe**（卫生）——真模型档脚本：全新上下文只读入口链（AGENTS → 00-index →
    队列 → evaluation.md，四文件）答 N 个**时不变问法**的"现在"问题，零过期零自相矛盾；
    每 feature 条目收尾跑（company 探针的已知盲区：问句期望也会过期——问法必须时间不变）。
-   语义版已人工执行过一次（2026-09-24，见 implemented Note），本条目 = 脚本化 + 制度化节奏。
-5. **首个完整研究 run**（feature，M2）——真实问题端到端：HITL1 → 侦察 → 挖掘 → 综合 →
-   critic → HITL2 → final.md + present；L4 全量四判据（来源链抽查/两点纪律/静默自主/
-   中断恢复）；Q2（team 成员 preset 组合）Q4（synthesizer 拆分）Q5（topic 争用）
-   Q6（floor 机械化）随实测闭。
-6. **升 pin 重校**（⟳ 触发型）——`sync-dsh` 升 pin 时流程合同对 vendor 重校一遍
+   语义版已人工执行过两次（2026-09-24 定向 + 定点回归，见 implemented Note），本条目 = 脚本化 + 制度化节奏。
+5. **升 pin 重校**（⟳ 触发型）——`sync-dsh` 升 pin 时流程合同对 vendor 重校一遍
    （继承跟 pin 走；触发时进队，平时不占位）。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；被否决的方案不进池；复活条件写进行内）
