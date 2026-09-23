@@ -7,7 +7,7 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 ## Start Here
 
 1. 本仓入口链：[`AGENTS.md`](AGENTS.md)（布局 + 命令表 + 纪律）
-2. **接下来做什么**：[`docs/roadmap.md`](docs/roadmap.md) §队列 ▶（全仓唯一"当前"指针）
+2. **接下来做什么**：[`roadmap.md`](roadmap.md) §队列 ▶（全仓唯一"当前"指针）
 3. **验收怎么判**：[`docs/evaluation.md`](docs/evaluation.md)（五个评估面——先于框架定案的验收合同）
 4. 地图与决策台账：[`docs/00-index.md`](docs/00-index.md)
 5. 方法论映射（codex 内核 → DSH 载体）：[`docs/design/30-methodology-mapping.md`](docs/design/30-methodology-mapping.md)
@@ -39,4 +39,4 @@ node --test tests/*.test.mjs     # L0 keyless 回归（也可 pnpm test）
 - 纯配置 pack（零自写 JS，见 00-index D7）；Node >= 20；测试用 `node:test` + `node:assert`，零 npm 依赖。
 - 评估五面（L0 结构 / L1 挂载 / L2 安装 / L3 领域 / L4 交付）不互抵，定义见 `docs/evaluation.md`。
 - 不发明：优先用 DSH 现成载体（preset/skill/agent-team/todo/present/goal），自建机制须有“DSH 载体不可用”的证据。
-- 迭代单位 = 垂直轮（最薄全路径 → 逐轮加宽），当前进度看 `docs/roadmap.md` §队列。
+- 迭代单位 = 垂直轮（最薄全路径 → 逐轮加宽），当前进度看 `roadmap.md` §队列。

@@ -24,7 +24,7 @@ vendor/dsh/                    （队列「vendor-submodule-and-pnpm-dsh」落�
 
 | 层 | 载体 | 放什么 | 教义 |
 |---|---|---|---|
-| bundle 层 | `cordis.patch.yml` | host 共享行：preset roster（default: lead）、web 工具三行、present、团队三行 | `- id:` 只替换已有行；**新增必须 `- insert:`**；baseUrl = profile 目录（路径写 profile 相对 `node_modules/…`，写错 = ENOENT 静默空，UI 无角色） |
+| bundle 层 | `cordis.patch.yml` | host 共享行：preset roster（default: lead）、present、团队三行（web 行不进 bundle——D9：base 出厂行，回归守卫在 tests/presets.test.mjs） | `- id:` 只替换已有行；**新增必须 `- insert:`**；baseUrl = profile 目录（路径写 profile 相对 `node_modules/…`，写错 = ENOENT 静默空，UI 无角色） |
 | preset 层 | `presets/<role>/agent.cordis.yml` | 角色组合：persona + 硬隔离 skills + 工具面 + agent-instructions | **preset 自包含**（DSH 无 patch 继承）：角色要用的行必须自己声明，否则会话只拿到 bundle 少数行（company R1 血泪：工具行不声明 = CEO 读不了文件） |
 
 web 工具行双层声明（D9）：bundle 层给非 preset 会话共享；preset 层保证角色自包含。

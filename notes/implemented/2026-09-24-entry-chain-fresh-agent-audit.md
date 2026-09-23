@@ -109,3 +109,21 @@ README 与 AGENTS 零矛盾、60 §5 与 AGENTS §密钥零矛盾、模板对应
    .pem → 门禁红（精确点名文件与处置法）→ 还原 → 9 门禁全绿。
 
 **验证**：verify 9 门禁 + node --test 10 pass（红绿前后各跑，全部实际执行）。
+
+### 追补（steer ⑤）：roadmap.md 再迁仓库根 + 终扫收口
+
+用户定案：队列文件升**仓库根**（与 AGENTS/README 同级——全仓最高频查阅的"当前"指针
+要最高可见度；此前的 docs/ 顶层为过渡位）。引用同步 11 处：AGENTS 布局树（roadmap
+入根、docs/ 行收敛）+ 指针链接、00-index 层表/文档地图（链接改 ../）、evaluation ×2、
+README ×2、verify 头注 + 门禁 8 路径；md-links 门禁范围纳入根 roadmap.md。
+
+**终扫（系统结构面）发现与处置**：design/10 §2 与 pack README 的 bundle 内容描述仍写
+"web 工具"——D9 实证前的旧措辞（机器真相早已由 tests/presets.test.mjs 守卫：web 行
+不得进 bundle），散文未跟上机器。两处改为 roster + present + 团队三行。
+
+**终扫结论**（四 preset 实读 + overlay + 测试断言逐项核对）：工具面与 design/10 §4
+逐角色精确对齐（lead 独有 ask-user + present；scout/analyst 有 subagent；critic 刻意
+无两者——"工具面即职责边界的机器表达"成立）；overlay 与 cordis.patch.yml 行等价；
+presets.test.mjs 六测覆盖结构/行依赖/bundle 形状/web 行禁入/compat 钉 tag。结构两维
+（导航 + 系统）实证无已知问题；遗留项全部为已登记队列条目（D10 vendor submodule /
+纪律全量枚举 / 探针脚本化 / l4-lite zstd 守卫 + 复跑），非结构缺陷。
