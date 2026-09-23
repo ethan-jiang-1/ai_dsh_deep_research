@@ -8,8 +8,8 @@
 //   node scripts/preset-smoke.mjs                 # keyless 预检（环境/安装形状），不发模型请求
 //   DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs # 真会话档：逐角色起会话发一条消息（需 key）
 //
-// R1 骨架说明：keyless 预检已实现；真会话档依赖 web/headless 启动细节（R2「preset-smoke 真跑」
-// 队列条目落地——对照 company preset-smoke.mjs 的 boot 流程：boot web → roster → 逐角色
+// 骨架说明：keyless 预检已实现；真会话档依赖 web/headless 启动细节（队列「preset-smoke
+// 真跑」条目落地——对照 company preset-smoke.mjs 的 boot 流程：boot web → roster → 逐角色
 // session/create → 断言模块表）。本脚本 keyless 预检失败时给出精确修复指令。
 
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
@@ -64,9 +64,9 @@ if (process.env.DSH_SMOKE_REAL === '1') {
   const key = process.env.DEEPSEEK_API_KEY;
   step(!!key, 'env: DEEPSEEK_API_KEY（真模型档必需）');
   if (key && home) {
-    // 逐角色一条消息的最小真挂载。dsh CLI 的会话子命令在 R2 按实际 CLI 面落地；
-    // 这里保留占位流程：dsh --profile <profile> 起会话 → 断言响应非错误。
-    console.log('note  真会话流程在 R2「preset-smoke 真跑」队列条目落地（boot 流程对照 company preset-smoke.mjs）');
+    // 逐角色一条消息的最小真挂载。dsh CLI 的会话子命令随队列「preset-smoke 真跑」按实际
+    // CLI 面落地；这里保留占位流程：dsh --profile <profile> 起会话 → 断言响应非错误。
+    console.log('note  真会话流程在队列「preset-smoke 真跑」条目落地（boot 流程对照 company preset-smoke.mjs）');
   }
 }
 

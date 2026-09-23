@@ -21,7 +21,7 @@
 | 文档 | 层 | 回答什么 |
 |---|---|---|
 | [evaluation.md](./evaluation.md) | 合同 | 评估五面（L0 结构/L1 挂载/L2 安装/L3 领域/L4 交付）与里程碑矩阵——**先于框架定案** |
-| [design/10-architecture.md](./design/10-architecture.md) | 设计 | repo 形态与组合层（单包四角色）；通道选型（agent-team 主通道）；工具面；R1 偏离登记 |
+| [design/10-architecture.md](./design/10-architecture.md) | 设计 | repo 形态与组合层（单包四角色）；通道选型（agent-team 主通道）；工具面；偏离登记 |
 | [design/20-roles.md](./design/20-roles.md) | 设计 | 四角色内容：职责 owner 表、persona 要素、skills 清单、信噪比策略落点 |
 | [design/30-methodology-mapping.md](./design/30-methodology-mapping.md) | 设计 | **方法论映射**：codex Deep Research harness 内核 → DSH 载体（L3 领域面的核心载体） |
 | [plans/roadmap.md](./plans/roadmap.md) | 计划 | 队列（条目按主题命名、完成即离队）+ 搁置池 |
@@ -39,18 +39,21 @@
 | D4 | **方法论内核 = codex harness 考古十条**（两 HITL 锚点 + 三波 + 证据身份链 + 声明式质量门 + 反伪造审计）；markdown 控制面/CLI 状态机/手工队列**弃用**，DSH 原生载体承接 | [方法论映射](./design/30-methodology-mapping.md)；[harness 考古报告](../notes/research/2026-09-24-deep-research-harness-analysis.md) |
 | D5 | **证据身份链 = 唯一自建残留**：evidence frontmatter 文件契约 + critic 狩猎，不做 CLI 引擎（完成判定锚定文件事实而非账本外观——codex 教训 1 的轻量等价物） | [30 §证据身份链](./design/30-methodology-mapping.md)；evaluation.md L3 判据 3 |
 | D6 | **评估先行**：docs/evaluation.md 五面合同先于框架定案；完成定义 = 该面最小真检查；goal complete 的唯一条件 = 里程碑矩阵全绿 | 用户指令；company D15 |
-| D7 | **R1 = 纯配置包**：零自写 JS、零构建、无 client 面；UI 用现成 `ui-agent-team` | company D5 同教义（第 0 天零自定义 JS） |
-| D8 | **迭代单位 = 垂直轮 + 八成把握先行**：R1 最薄全路径 → 逐轮加宽；不追求一次想透 | 用户指令（迭代纠错优先于完美规划）；company D11 |
-| D9 | **web 工具行 = bundle + preset 双声明**：bundle 层 host 共享（含非 preset 会话），preset 层自包含教义（company R1 实证：不声明则会话无工具）；行 config 确切写法未实证 → 队列 R2 | [10 §4](./design/10-architecture.md)；roadmap 队列 |
-| D10 | **vendor submodule 延后到 R2**：R1 无构建需求（纯配置包）；机制权威暂借 `/Users/bowhead/ai_dsh_company/vendor/dsh`（同一钉住 tag，只读）；verify 的 vendor-pin 门禁随 R2 启用 | [偏离登记](../notes/implemented/2026-09-24-r1-scaffold.md)；roadmap 队列 |
+| D7 | **首版 = 纯配置包**：零自写 JS、零构建、无 client 面；UI 用现成 `ui-agent-team` | company D5 同教义（第 0 天零自定义 JS） |
+| D8 | **迭代单位 = 垂直轮 + 八成把握先行**：最薄全路径先行 → 逐轮加宽；不追求一次想透 | 用户指令（迭代纠错优先于完美规划）；company D11 |
+| D9 | **web 工具行 = bundle + preset 双声明**：bundle 层 host 共享（含非 preset 会话），preset 层自包含教义（company R1 实证：不声明则会话无工具）；行 config 确切写法未实证 → 队列「web-tool-rows 实证」 | [10 §4](./design/10-architecture.md)；roadmap 队列 |
+| D10 | **vendor submodule 延后**：首版无构建需求（纯配置包）；机制权威暂借 `/Users/bowhead/ai_dsh_company/vendor/dsh`（同一钉住 tag，只读）；verify 的 vendor-pin 门禁随队列条目启用 | [偏离登记](../notes/implemented/2026-09-24-r1-scaffold.md)；队列「vendor-submodule-and-pnpm-dsh」 |
 
 ### 待定（阻塞项标 ⛔）
 
 | # | 问题 | 归宿 |
 |---|---|---|
-| Q1 | web 工具行的确切 id/config（provider 行写法、搜索 provider 是否要 API key） | R2「web-tool-rows 实证」（对照 vendor shipped web-app bundle） |
-| Q2 | agent-team spawn_teammate 成员会话的 preset 挂载行为（成员拿到谁的组合） | R2「preset-smoke 真跑」 |
-| Q3 | `dsh plugin add` 的目标 profile 形状与 release-smoke 完整流程 | R2「release-smoke」 |
+| Q1 | web 工具行的确切 id/config（provider 行写法、搜索 provider 是否要 API key） | 队列「web-tool-rows 实证」（对照 vendor shipped web-app bundle） |
+| Q2 | agent-team spawn_teammate 成员会话的 preset 挂载行为（成员拿到谁的组合） | 队列「preset-smoke 真跑」 |
+| Q3 | `dsh plugin add` 的目标 profile 形状与 release-smoke 完整流程 | 队列「release-smoke」 |
+| Q4 | 专职 synthesizer 是否独立成角色（背景：[20-roles §4](./design/20-roles.md)） | 队列「首个完整研究 run」实测 |
+| Q5 | 多 analyst 并行时的 topic 争用（背景：[20-roles §4](./design/20-roles.md)） | 队列「首个完整研究 run」实测 |
+| Q6 | floor 数值门禁是否需要机械化（背景：[30 §4](./design/30-methodology-mapping.md)） | 队列「首个完整研究 run」实测 |
 
 ## 术语映射（本项目 ↔ DSH 官方 ↔ vendor/dsh 源码）
 

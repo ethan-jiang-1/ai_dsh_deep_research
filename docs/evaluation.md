@@ -1,8 +1,8 @@
 # 评估框架 — 本 repo 的验收合同
 
-> 性质：**合同**（评估怎么判，只写 now）。本文件是仓库第一份文件，先于框架本身存在：
-> 用户指令"评估先行，让 final/ongoing goal 可被判定"。改评估标准本身 = 一个 D 号决策，进
-> `notes/`，不悄悄改。
+> 性质：**合同**（评估怎么判，只写 now）。改评估标准本身 = 一个 D 号决策，进
+> `notes/`，不悄悄改；时变状态（哪个面跑到哪了）不住本文件，唯一"当前"指针 =
+> `docs/plans/roadmap.md` §队列 ▶ 条目。
 
 ## 0. 血缘与权威
 
@@ -23,28 +23,28 @@
 ### L0 结构面（机械门禁，keyless）
 
 - **定义**：仓库结构、文件卫生、preset 三件套完整性、vendor 铁律（如采用 submodule）等机械可查的不变量。
-- **最小真检查**：`pnpm verify`（结构门禁，脚本待建）+ `pnpm test`（keyless 回归，脚本待建）。
+- **最小真检查**：`node scripts/verify.mjs`（或 `pnpm verify`）+ `node --test tests/*.test.mjs`（或 `pnpm test`）——均 keyless、秒级。
 - **通过判据**：全绿；`verify` 的门禁清单与 `tests/` 守卫一一登记在案，每条带反证记录。
 - **何时跑**：每轮 goal 续驶必跑。
 
 ### L1 挂载面（真挂载 = preset 类改动的完成定义）
 
 - **定义**：每个研究角色 preset 在**真 DSH 会话**里挂载成功——persona 生效、skills 可见、工具面齐全。dump/roster 可见不算（company postmortem 0001 实证：挂载失败只有真会话抓得到）。
-- **最小真检查**：`node scripts/preset-smoke.mjs`（脚本待建：boot 真 web/headless，逐角色建会话，机器断言工具/skill 面在场）。
+- **最小真检查**：`node scripts/preset-smoke.mjs`——keyless 预检（环境/安装形状断言）+ 真会话档（`DSH_SMOKE_REAL=1`：boot 真 web/headless 逐角色建会话，机器断言工具/skill 面在场；各档落地状态见 roadmap §队列）。
 - **通过判据**：全部角色真挂载绿；失败角色即里程碑未完成，无例外。
 - **何时跑**：preset 内容/结构改动时；框架里程碑必跑。
 
 ### L2 安装面（真实安装形状）
 
 - **定义**：插件以用户实际获得的方式可用——`npm pack` 产物完整，装进**干净 profile** 成功，起会话可用。
-- **最小真检查**：`release-smoke`（脚本待建：`npm pack` → 全新 `DSH_HOME` profile → `dsh plugin add` → 起会话断言）。
+- **最小真检查**：`release-smoke`：`npm pack` → 全新 `DSH_HOME` profile → `dsh plugin add` → 起会话断言（落地状态见 roadmap §队列）。
 - **通过判据**：pack 清单与 `files` 声明一致、安装零缺失警告、干净 profile 会话能列出研究角色。
 - **何时跑**：包结构/release 相关改动时；框架里程碑必跑。
 
 ### L3 领域面（Deep Research 方法论完整性 — 本项目独有）
 
 - **定义**：从 codex Deep Research harness（`/Users/bowhead/ai_tool_deepresearch`）提炼的方法论在本插件上有完整落点，且**用 DSH 原生载体**实现。
-- **最小真检查**：`docs/design/methodology-mapping.md`（映射表，待建）审查 + 对应 keyless 断言（表中的机械可查项）。
+- **最小真检查**：`docs/design/30-methodology-mapping.md`（映射表）审查 + `tests/evaluation-contract.test.mjs` 的 keyless 断言。
 - **通过判据**（四条全要）：
   1. **生命周期映射完整**：研究生命周期每一环节（立项对齐 / 广度侦察 / 深度挖掘 / 综合写作 / 质量把关 / 审阅交付）在映射表有 DSH 落点（preset persona / skill / agent-team / todo / present…），或带证据的显式弃用理由；
   2. **角色分工单一职责**：每角色一个 owner 列（职责、产出物、验收判据）；任何两类事实不得双 owner 或无 owner；
@@ -67,7 +67,7 @@
 
 | # | 判据 | 面 |
 |---|---|---|
-| 1 | `pnpm verify` + `pnpm test` 全绿，门禁清单登记且每条带反证 | L0 |
+| 1 | L0 全绿（`node scripts/verify.mjs` + `node --test tests/*.test.mjs`），门禁清单登记且每条带反证 | L0 |
 | 2 | `preset-smoke`：全部研究角色真挂载绿 | L1 |
 | 3 | `release-smoke`：npm pack → 干净 profile 安装 → 会话可用 | L2 |
 | 4 | 方法论映射表完成且四条判据全过（含角色单一职责表、证据载体、信噪比策略） | L3 |
@@ -104,7 +104,7 @@
 
 | 参考机制 | 出处 | 本 repo 对应物 |
 |---|---|---|
-| `pnpm verify` 结构门禁 + 反证纪律 | company `scripts/verify.mjs` | L0 门禁（裁剪移植） |
+| `pnpm verify` 结构门禁 + 反证纪律 | company `scripts/verify.mjs` | L0 门禁（裁剪移植：`scripts/verify.mjs`） |
 | `preset-smoke.mjs` 真挂载 | company（postmortem 0001 产物） | L1 检查 |
 | `release-smoke`（pack → 干净 profile → plugin add） | company `docs/release.md` | L2 检查 |
 | `tests/layering.spec.ts` 测试分层守卫 | company | L0 守卫 |
@@ -114,6 +114,5 @@
 
 ## 6. 已知边界（诚实记账）
 
-- L1/L2/L4 需要真 DSH 环境与（L4）`DEEPSEEK_API_KEY`；环境未就绪时该面标"未跑"，**不等同通过**；
-- `verify`/`preset-smoke`/`release-smoke` 等脚本本身是框架搭建的一部分，"脚本存在且带反证"计入 M1 判据 1；
-- 本文件先于 `docs/00-index.md` 存在；00-index 出生时把本文件登记进文档地图。
+- L1/L2/L4 需要真 DSH 环境与（L4）`DEEPSEEK_API_KEY`；环境未就绪时该面标"未跑"，**不等同通过**（各面的当前落地状态见 roadmap §队列，"未跑"≠"通过"）；
+- 脚本本身是框架搭建的一部分：门禁/预检脚本存在且可跑计入 M1 判据 1，真会话/发布档的脚本化随对应队列条目落地。

@@ -2,7 +2,7 @@
 
 DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四个研究角色 preset
 （`Deep Research Lead / Scout / Analyst / Critic`）；协作主通道 = DSH 现成 Agent Teams。
-方法论内核移植自 codex Deep Research harness（映射表 design/30）。
+方法论内核移植自 codex Deep Research harness（映射表 docs/design/30-methodology-mapping.md）。
 
 ## 布局
 
@@ -24,9 +24,9 @@ dev/                     env.sh（双 home + dsh 机制基线）、research.over
 
 ```sh
 node scripts/verify.mjs               # L0 结构门禁（keyless，收尾必跑）
-node --test tests/                    # L0 keyless 回归
+node --test tests/*.test.mjs        # L0 keyless 回归（也可 pnpm test）
 source dev/env.sh                     # 双 home + 裸 dsh 拦截（DSH_HOME=dev/harness-home）
-node scripts/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真会话档（需 key）
+node scripts/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真会话档（需 key；真会话流程随队列「preset-smoke 真跑」落地）
 ```
 
 ## 密钥
@@ -38,7 +38,7 @@ node scripts/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=
 
 | 实体 | 位置 | 角色 |
 |---|---|---|
-| ① 开发基线（唯一权威） | `/Users/bowhead/ai_dsh_company/vendor/dsh/`（钉住 tag `dsh-v0.1.5-rc.2`，**只读借用**——D10 偏离：本仓 submodule 延后 R2） | 机制核对与验证会话一律走它（dev/env.sh 的 dsh 指向此处源码） |
+| ① 开发基线（唯一权威） | `/Users/bowhead/ai_dsh_company/vendor/dsh/`（钉住 tag `dsh-v0.1.5-rc.2`，**只读借用**——D10 偏离：本仓 submodule 延后至队列「vendor-submodule-and-pnpm-dsh」） | 机制核对与验证会话一律走它（dev/env.sh 的 dsh 指向此处源码） |
 | ② 日用全局安装 | npm 全局（`which dsh`） | 与本 repo 开发无关；版本随全局漂移，行为不作机制依据 |
 | ③ 参考仓 | `/Users/bowhead/ai_dsh_company/`（插件工程范式）、`/Users/bowhead/ai_tool_deepresearch/`（方法论源头） | 只读参考；吸收落点登记在 00-index §外部研究材料 |
 
@@ -47,7 +47,7 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 
 ## 纪律（默认严格照做，偏离必须登记 D 号 + 约束证据）
 
-> ⚠ 本表是 **R1 枚举子集**（来源：本会话亲读的 vendor `docs/testing.md`、company AGENTS.md
+> ⚠ 本表是**首版枚举子集**（来源：亲读的 vendor `docs/testing.md`、company AGENTS.md
 > 纪律表、company inround-task-surface 研究）。全量逐源枚举 = 队列条目「dsh-discipline
 > 全量枚举」（vendor submodule 落地后执行，替换本表）。**你无法继承你从没清点过的东西。**
 
@@ -69,8 +69,8 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 
 | D 号 | 偏离 | 约束证据 | 归宿 |
 |---|---|---|---|
-| D10 | 无 vendor submodule（company 范式是钉 SHA submodule + workspace 五件套） | R1 纯配置包零构建，无源码级机制需求；同 tag checkout 已存在（company 仓，只读借用） | 队列「vendor-submodule-and-pnpm-dsh」；verify 的 vendor-pin 门禁随其启用 |
-| （伴随） | node:test 而非 vitest；verify 用 regex 断言而非 YAML 解析 | R1 零 npm 依赖原则；断言对象是自控文件 | 随 R2 vendor 工作区重估 |
+| D10 | 无 vendor submodule（company 范式是钉 SHA submodule + workspace 五件套） | 首版纯配置包零构建，无源码级机制需求；同 tag checkout 已存在（company 仓，只读借用） | 队列「vendor-submodule-and-pnpm-dsh」；verify 的 vendor-pin 门禁随其启用 |
+| （伴随） | node:test 而非 vitest；verify 用 regex 断言而非 YAML 解析 | 首版零 npm 依赖原则；断言对象是自控文件 | 随队列「vendor-submodule-and-pnpm-dsh」重估 |
 
 ## 术语速查
 

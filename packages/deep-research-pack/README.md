@@ -1,6 +1,6 @@
 # deep-research-pack
 
-Deep Research 插件包：四角色 preset + host bundle 行。R1 为**纯配置包**（零自写 JS、零构建、无 client 面）——UI 用现成团队界面（`ui-agent-team`），皮肤层留待后续轮次。
+Deep Research 插件包：四角色 preset + host bundle 行。当前为**纯配置包**（零自写 JS、零构建、无 client 面，见 docs/00-index.md D7）——UI 用现成团队界面（`ui-agent-team`），皮肤层留待后续轮次。
 
 ## 内容
 

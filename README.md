@@ -27,14 +27,14 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 
 ```sh
 node scripts/verify.mjs          # L0 结构门禁（keyless）
-node --test tests/               # L0 keyless 回归
+node --test tests/*.test.mjs        # L0 keyless 回归（也可 pnpm test）
 source dev/env.sh                # DSH_HOME=dev/harness-home + dsh 机制基线指向
 node scripts/preset-smoke.mjs    # L1 真挂载冒烟（需 DSH_HOME + 已装 pack + API key）
 ```
 
 ## Rules In One Screen
 
-- 纯配置 pack（R1 零自写 JS）；Node >= 20；测试用 `node:test` + `node:assert`，零 npm 依赖。
+- 纯配置 pack（零自写 JS，见 00-index D7）；Node >= 20；测试用 `node:test` + `node:assert`，零 npm 依赖。
 - 评估五面（L0 结构 / L1 挂载 / L2 安装 / L3 领域 / L4 交付）不互抵，定义见 `docs/evaluation.md`。
 - 不发明：优先用 DSH 现成载体（preset/skill/agent-team/todo/present/goal），自建机制须有"DSH 轆体不可用"的证据。
 - 迭代单位 = 垂直轮（最薄全路径 → 逐轮加宽），当前进度看 `docs/plans/roadmap.md` §队列。

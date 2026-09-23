@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // verify.mjs — L0 结构门禁（keyless，零依赖）。
 // 门禁清单与判据定义：docs/evaluation.md §L0；每条门禁的反证记录：notes/implemented/。
-// 移植自 ai_dsh_company/scripts/verify.mjs（按 R1 规模裁剪；vendor-pin/client-half/proposal
+// 移植自 ai_dsh_company/scripts/verify.mjs（按当前规模裁剪；vendor-pin/client-half/proposal
 // 全量版随对应能力落地启用，见 docs/plans/roadmap.md）。
 
 import { readFileSync, readdirSync, existsSync, lstatSync, readlinkSync, statSync } from 'node:fs';

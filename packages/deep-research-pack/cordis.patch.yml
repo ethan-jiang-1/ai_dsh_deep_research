@@ -21,7 +21,7 @@
 
 - insert:
     # ── 研究工具面（本 pack 的立身之本）：web 搜索/抓取，host 共享给所有会话（含非 preset 会话）。
-    #    ⚠ 行 config 的确切写法未实证（R2 队列「web 工具行实证」：对照 vendor/dsh shipped
+    #    ⚠ 行 config 的确切写法未实证（队列「web-tool-rows 实证」：对照 vendor/dsh shipped
     #    web-app bundle 核对 provider 行的 id/config，preset-smoke 抓挂载失败）。──
     - id: tool-web
       name: '@deepseek-ai/dsh-tool-web'

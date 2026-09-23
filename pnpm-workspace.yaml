@@ -1,8 +1,8 @@
 packages:
   - packages/*
 
-# R1 偏离登记（notes/implemented/2026-09-24-r1-scaffold.md §偏离）：
-# vendor/dsh pinned submodule 延后到 R2（机制核实轮）。R1 为纯配置 pack（零自写 JS、
-# 零构建），不需要 vendor 工作区；vendor 树的 workspace 五件套（packages/*/* 等）
-# 随 R2 submodule 落地时一并加入，镜像 ai_dsh_company/pnpm-workspace.yaml。
+# 偏离登记（notes/implemented/2026-09-24-r1-scaffold.md §偏离）：
+# vendor/dsh pinned submodule 延后至队列「vendor-submodule-and-pnpm-dsh」。当前为纯配置
+# pack（零自写 JS、零构建），不需要 vendor 工作区；vendor 树的 workspace 五件套
+# （packages/*/* 等）随该队列条目落地时一并加入，镜像 ai_dsh_company/pnpm-workspace.yaml。
 linkWorkspacePackages: true

@@ -8,8 +8,8 @@
 #   ② 代码面：拦截裸 `dsh` —— PATH 里的全局安装随升级漂移，不作机制依据；机制核对
 #      一律走钉住 tag 的源码基线。
 #
-# ⚠ D10 偏离（R1）：本仓尚无 vendor submodule。机制基线暂指向 company 仓的钉 tag
-#   checkout（同一 tag `dsh-v0.1.5-rc.2`，只读借用）；R2 队列「vendor-submodule-and-pnpm-dsh」
+# ⚠ D10 偏离（当前）：本仓尚无 vendor submodule。机制基线暂指向 company 仓的钉 tag
+#   checkout（同一 tag `dsh-v0.1.5-rc.2`，只读借用）；队列「vendor-submodule-and-pnpm-dsh」
 #   落地后改为本仓 `node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts`。
 
 # ① 数据面

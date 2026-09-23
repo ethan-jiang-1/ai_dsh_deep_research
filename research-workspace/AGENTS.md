@@ -36,8 +36,9 @@ templates/run/         新 run 的起点模板（只读，不直接写）
 ## 证据文件契约（evidence/ 下的硬格式）
 
 frontmatter 必须有：`source_url`（真实抓取过的 URL）/ `retrieved_at` / `quality`（A–D）/
-`found_by` / `supports`。正文"原文摘录"与"解读"两节分开。完整格式见 analyst 的
-`evidence-extraction` skill。**没有 frontmatter 的文件不算证据**（critic 按此判）。
+`found_by` / `supports`。正文"原文摘录"与"解读"两节分开。以上即最小契约，**所有角色按此判**；
+analyst 会话内另有全文模板（`evidence-extraction` skill——skills 按角色硬隔离，其他角色
+加载不到，判据以本手册为准）。**没有 frontmatter 的文件不算证据**（critic 按此判）。
 
 ## 交付物三态
 

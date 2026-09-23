@@ -17,7 +17,7 @@ description: 立项对齐（HITL1）方法论：研究类型判定、澄清问�
    - 研究类型（上面三选一，附你判断的理由）；
    - 深度与篇幅（快答 / 标准报告 / 深度报告）；
    - 口径（时间范围、语言、地域、排除项）。
-3. **定稿 question.md**：模板 `research-workspace/templates/run/question.md`。
+3. **定稿 question.md**：模板 `templates/run/question.md`。
 4. **拆 topics.md**：模板 `templates/run/topics.md`。每个 topic 必须有：
    - `must_answer`：一句话，验收时能判"答了/没答"；
    - `scope_role`：`primary`（报告主体）/ `synthesis`（跨 topic 综合）/ `comparison`（对比）/ `supporting`（背景）。

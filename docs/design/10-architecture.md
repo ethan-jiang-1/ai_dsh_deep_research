@@ -2,8 +2,8 @@
 
 > 层：设计（为什么）。工程范式照搬 `ai_dsh_company`（解剖报告见
 > [notes/research/2026-09-24-dsh-plugin-repo-anatomy.md](../../notes/research/2026-09-24-dsh-plugin-repo-anatomy.md)）；
-> DSH 机制的权威在 vendor 树（钉住 tag `dsh-v0.1.5-rc.2`；本仓 R1 无 submodule，机制核对
-> 暂用 `/Users/bowhead/ai_dsh_company/vendor/dsh` 同 tag 只读树，偏离登记见 D10）。
+> DSH 机制的权威在 vendor 树（钉住 tag `dsh-v0.1.5-rc.2`；本仓暂无 submodule——D10 偏离，
+> 机制核对暂用 `/Users/bowhead/ai_dsh_company/vendor/dsh` 同 tag 只读树，偏离登记见 AGENTS.md）。
 
 ## 1. repo 形态
 
@@ -13,7 +13,7 @@
 packages/deep-research-pack/   唯一自写包：presets/<role>/ + cordis.patch.yml（纯配置，零 JS）
 research-workspace/            运行场：角色会话 cwd（研究手册 + runs/ + templates/）
 docs/ notes/ scripts/ tests/ dev/   文档/决策/门禁/回归/环境（分层原则见 00-index）
-vendor/dsh/                    （R2 落地）pinned submodule，只读铁律
+vendor/dsh/                    （队列「vendor-submodule-and-pnpm-dsh」落地）pinned submodule，只读铁律
 ```
 
 **为什么单包多角色**（company D1 同构）：DSH 的 preset 是自包含组合，角色差异天然住在
@@ -52,10 +52,10 @@ web 工具行双层声明（D9）：bundle 层给非 preset 会话共享；prese
   隔离——全局安装随升级漂移，不作机制依据）；
 - 验证五面见 [evaluation.md](../evaluation.md)；preset 类改动的完成定义 = preset-smoke 真挂载。
 
-## 6. R1 偏离登记（默认严格 DSH/company 纪律，偏离须 D 号 + 约束证据）
+## 6. 偏离登记（默认严格 DSH/company 纪律，偏离须 D 号 + 约束证据；簿记正本 = AGENTS.md §偏离登记簿）
 
 | 偏离 | 约束证据 | 归宿 |
 |---|---|---|
-| 无 vendor submodule（company 是钉 SHA submodule + workspace 五件套） | R1 纯配置包零构建，无源码级机制需求；同一钉住 tag 的 checkout 已存在于 company 仓（只读借用） | R2 队列「vendor-submodule-and-pnpm-dsh」 |
-| verify 用 regex 结构断言而非 YAML 解析 | R1 零 npm 依赖原则（node:test 同因）；断言对象是本仓自控文件，格式收敛 | 随 R2 vendor 工作区引入依赖后升级 |
-| node:test 而非 vitest | 无 vendor 即无 vitest 供应链；codex harness 同款零依赖模式 | R2 重估（vitest 是 vendor 生态同族） |
+| 无 vendor submodule（company 是钉 SHA submodule + workspace 五件套） | 纯配置包零构建，无源码级机制需求；同一钉住 tag 的 checkout 已存在于 company 仓（只读借用） | 队列「vendor-submodule-and-pnpm-dsh」 |
+| verify 用 regex 结构断言而非 YAML 解析 | 零 npm 依赖原则（node:test 同因）；断言对象是本仓自控文件，格式收敛 | 随队列「vendor-submodule-and-pnpm-dsh」引入依赖后升级 |
+| node:test 而非 vitest | 无 vendor 即无 vitest 供应链；codex harness 同款零依赖模式 | 随队列「vendor-submodule-and-pnpm-dsh」重估（vitest 是 vendor 生态同族） |

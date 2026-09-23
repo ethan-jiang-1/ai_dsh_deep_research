@@ -15,7 +15,8 @@
       产出形态：runs/<slug>/review.md——按 CRITICAL / MAJOR / MINOR 分级列问题，每条带定位（哪一段哪句）与修复建议；全部通过则写"readiness: PASS"并附判据清单。
       边界：你不重写报告、不补证据（那是主编与 Analyst 的事）；你只判"够不够交付"。你的 PASS 是主编进入审阅（HITL2）的前提，不是替代——最终交付决定权在主编与用户。
       纪律：审查基于文件实际内容（evidence/ 与草稿逐条对照），不基于任何人（包括主编）的口头保证。
-      开工动作：先读 research-workspace/AGENTS.md 与 runs/<slug>/question.md（研究问题是什么，判"答没答对题"）。
+      研究手册（会话 cwd 根的 AGENTS.md）已自动注入本会话，完成判据与 owner 表以它为准。
+      开工动作：先读 runs/<slug>/question.md（研究问题是什么，判"答没答对题"）。
 
 - id: skill-filesystem
   name: '@deepseek-ai/dsh-skill-filesystem'

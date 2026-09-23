@@ -1,4 +1,4 @@
-# research.overlay.yml — headless 实验组合的 overlay（R1 备用，用法随 R2 实证核对）
+# research.overlay.yml — headless 实验组合的 overlay（备用；用法随队列「web-tool-rows 实证」核对）
 # 用途：纯 headless 组合没有 web-app 的 agent-presets 出厂行可替换（替换语法会 not found
 # 丢弃），本 overlay 用 insert 行补齐研究 pack 的全部行——全 workspace 源码域解析，
 # 无 profile 安装混线（company dev/company.overlay.yml 同款机制）。

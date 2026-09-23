@@ -51,7 +51,6 @@ Deep Research 的本质困难 = 搜索结果信噪比极差 + 答案位置未知
 4. **缺口显性化**（lead/synthesis）：insufficient/contradicted 如实呈现——搜不到也
    是结论，禁止假装全知。
 
-## 4. 留待实测的开放点（不预建，记 Q 号）
+## 4. 留待实测的开放点
 
-- Q4：专职 synthesizer 是否独立成角色（当前综合归 lead；首个真实 run 实测 lead 负载后定）；
-- Q5：多 analyst 并行时的 topic 争用（当前靠 topics.md 单 owner 纪律；实测若断则补机制）。
+登记与归宿统一在 [00-index §待定表](../00-index.md)（Q4 专职 synthesizer 拆分 / Q5 多 analyst topic 争用）；本节只留背景：当前综合归 lead、topic 靠单 owner 纪律，两者均待「首个完整研究 run」实测再定。

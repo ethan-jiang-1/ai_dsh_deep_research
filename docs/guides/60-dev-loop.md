@@ -31,7 +31,7 @@
 
 | 面 | 什么时候跑 | 命令 |
 |---|---|---|
-| L0 结构 | 每次收尾必跑；实施期随手 | `node scripts/verify.mjs` + `node --test tests/` |
+| L0 结构 | 每次收尾必跑；实施期随手 | `node scripts/verify.mjs` + `node --test tests/*.test.mjs`（或 `pnpm verify` / `pnpm test`） |
 | L1 挂载 | preset 内容/结构改动（其完成定义） | `node scripts/preset-smoke.mjs`（keyless 预检）/ `DSH_SMOKE_REAL=1`（真会话档） |
 | L2 安装 | 包结构/release 相关改动 | release-smoke（队列条目落地后） |
 | L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `tests/evaluation-contract.test.mjs` |
@@ -48,7 +48,7 @@ source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名�
 - **双 home**：开发数据（会话/凭据/插件安装）全部进 `dev/harness-home/`，日用 `~/.dsh`
   不动——崩溃半径隔离；
 - **裸 dsh 拦截**：`PATH` 里的全局 dsh 随升级漂移，不作机制依据；机制核对一律走 env.sh
-  定义的 dsh（R1 指向 company checkout 的钉 tag 源码，D10 偏离；R2 起指向本仓 vendor）；
+  定义的 dsh（当前指向 company checkout 的钉 tag 源码，D10 偏离；本仓 vendor 落地后切换）；
 - web 观察窗：`dsh web -- --port 3081 --no-open`（3080 是本 GUI 占用）。
 
 ## 4. 收尾程序（同 diff，五件）
@@ -56,7 +56,7 @@ source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名�
 1. docs 只写 now：改过的语义面同步对应文档（合同随代码同 diff）；
 2. 队列行删除 + RFC 毕业到 `notes/implemented/`（日期+主题命名，含：决定/输掉的方案/
    实际跑过的验证/环境状态）；
-3. `node scripts/verify.mjs` + `node --test tests/` 全绿（涉及面按 §2 加跑）；
+3. `node scripts/verify.mjs` + `node --test tests/*.test.mjs` 全绿（涉及面按 §2 加跑）；
 4. 入口链探针（条目改动面含 docs/AGENTS 时必跑，否则按节奏）；
 5. commit（窄证据切片：只提交本条目相关改动）。
 
