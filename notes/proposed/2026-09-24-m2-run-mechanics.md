@@ -6,8 +6,17 @@
 
 ## 依赖与落地次序
 
-第 ③ 件（落地序见 roadmap 队列行）：前置 = m2-plan-shape + m2-data-caliber 已落地——
-run 的输入（模板形状、纪律文本）由它们定义，本 RFC 的流程图与验收直接引用两件产物。
+第 ④ 件（落地序见 roadmap 队列行）：前置 = ① m2-plan-shape + ② m2-data-caliber
+（模板形状、纪律文本——流程图与验收直接引用两件产物）+ ③ m2-run-dashboard
+（run 期间的用户观察面）。
+
+## 可视化原则（run 期间用户怎么看）
+
+静默自律 ⟹ 进度可见性必须住**文件投影**，不住角色汇报（汇报即破坏两点交互纪律）。
+观察两层：L0 现成面（web GUI 各角色会话实时流 + ui-agent-team 任务板 + deliverables
+面板——P1 操作指南写明"看哪里"）；L1 仪表盘（m2-run-dashboard RFC：keyless 只读
+投影脚本——topic×evidence 矩阵 / A–D 分布 / gap 四态 / journal feed）。观察是
+**被动的**：可视化不构成第三个交互点，不从观察面向角色发指令。
 
 ## 问题
 

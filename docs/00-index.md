@@ -76,3 +76,4 @@
 |---|---|---|
 | `/Users/bowhead/ai_tool_deepresearch/`（codex Deep Research harness 全仓） | 11-phase 生命周期 / wave 语义 / gate 体系 / 证据四层 / 反伪造教训 | 考古报告 `notes/research/2026-09-24-deep-research-harness-analysis.md` → 映射表 design/30 |
 | `/Users/bowhead/ai_dsh_company/`（DSH 插件工程范式仓） | 包结构 / patch 语法 / preset 教义 / verify 门禁 / 双 home / 垂直轮 | 解剖报告 `notes/research/2026-09-24-dsh-plugin-repo-anatomy.md` → design/10 + scripts/verify.mjs + dev/env.sh |
+| DSH 插件生态（vendor 能力目录差集 + 第三方市场/清单，2026-09-24 快照） | workflow / mcp / session-query / compaction 等未采用能力；第三方 280+ 插件（14 类，未亲装） | 粗扫报告 `notes/research/2026-09-24-dsh-market-scout.md` → 认真琢磨 = 后续 research 条目（用户定节奏） |

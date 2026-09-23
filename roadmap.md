@@ -8,27 +8,45 @@
 
 ## 队列
 
-1. ▶ **首个完整研究 run**（feature，M2）——真实问题端到端：HITL1 → 侦察 → 挖掘 → 综合 →
+1. ▶ **M2 铺垫 P1：run 启动通道与操作指南**（卫生）——真入口路径纪律：run 走安装域
+   （pack → dev home 专用 profile → plugin add），不走源码域 overlay；候选基础 =
+   vendor experimental 的 agent-team-profile 现成 team profile 层（对照评估见
+   market 粗扫报告 notes/research/2026-09-24-dsh-market-scout.md §2/§4）；产出 = 开跑
+   就绪命令/小脚本（boot web + research profile + 入口步骤打印）+ 一页"怎么开 run"
+   操作说明（开哪个会话/说什么/HITL 两点各会看到什么/观察面指南——看哪里：各角色
+   会话流 / ui-agent-team 任务板 / deliverables，详见 m2-run-dashboard RFC 的 L0）。
+2. **M2 铺垫 P2：team 机制迷你预检**（卫生，真模型档小成本 ~3 次模型调用）——仿
+   l4-lite 形状：boot 后 prompt lead 会话组队 → 会话日志断言 spawn_teammate 真调用 +
+   成员会话建立 + 成员 preset 组合；提前拆 D18 雷区（team 语境 continuable 可用性），
+   灾难性风险最小成本暴露，避免整场 run 栽在第一步；顺带预答 Q2 的机制半边。
+3. **首个完整研究 run**（feature，M2）——真实问题端到端：HITL1 → 侦察 → 挖掘 → 综合 →
    critic → HITL2 → final.md + present；L4 全量四判据（来源链抽查/两点纪律/静默自主/
    中断恢复）；Q2（team 成员 preset 组合）Q4（synthesizer 拆分）Q5（topic 争用）
-   Q6（floor 机械化）随实测闭。**开工前置 RFC（proposed，待用户打磨），落地序 =
-   ① 2026-09-24-m2-plan-shape（计划/模板形状）→ ② 2026-09-24-m2-data-caliber
-   （口径纪律）——两件开跑前内容落地 → ③ 2026-09-24-m2-run-mechanics（run 本体）；
-   呈批后才实施；次序规则见 notes/proposed/README.md**。（2026-09-24 用户定案：
-   实质优先，提前至 vendor-submodule 之前；元工作顺延待实战证据反哺。）
-2. **vendor-submodule-and-pnpm-dsh**（feature）——加 pinned submodule（tag
+   Q6（floor 机械化）随实测闭。**落地序 = ① 2026-09-24-m2-plan-shape（计划/模板形状）→
+   ② 2026-09-24-m2-data-caliber（口径纪律）→ ③ 2026-09-24-m2-run-dashboard（可视化
+   观察面，用户定案事前设计）——三件开跑前内容落地 → ④ 2026-09-24-m2-run-mechanics
+   （run 本体）；RFC proposed 待用户打磨，呈批后才实施；
+   次序规则见 notes/proposed/README.md**。（2026-09-24 用户定案：实质优先，提前至
+   vendor-submodule 之前；元工作顺延待实战证据反哺。）
+4. **M2 收口与复盘**（卫生，run 完成后同 diff 收尾）——L4 四判据证据落 Note；Q2/Q4/
+   Q5/Q6 销账（答案+证据进 00-index 待定表）；D18 复核结论；搁置池三条复活条件到期
+   复审（专职 synthesizer=Q4 / floor 机械化=Q6 / UI 皮肤=run 通过+demo 需求）；实测新
+   发现 → 队列新条目（skill/persona/模板修订类）；打扫（dev home 磁盘残留、runs 证据
+   留存策略执行——runtime truth 不进 git、Note 记路径与抽查结果）；M3 重排（顺延元
+   工作的复活顺序按实测证据定）；docs 面改动 → 入口链探针必跑。
+5. **vendor-submodule-and-pnpm-dsh**（feature）——加 pinned submodule（tag
    `dsh-v0.1.5-rc.2` @ `fb2c4b9e`）+ workspace 五件套 + `pnpm dsh` 从钉住源码起会话；
    verify 加 vendor-pin/clean 门禁；机制权威从"借用 company checkout"切回本仓 vendor
    （preset-smoke/release-smoke 的 DSH_SRC 随之切换）。D10 偏离随本条目销账。
-3. **dsh-discipline 全量枚举**（卫生，「vendor-submodule-and-pnpm-dsh」落地后）——从 vendor
+6. **dsh-discipline 全量枚举**（卫生，「vendor-submodule-and-pnpm-dsh」落地后）——从 vendor
    逐源枚举纪律清单（根 AGENTS.md / docs/AGENTS.md / docs/testing.md / .agents/notes/ /
    postmortem），每行 = DSH 做法 → 本仓落点 → 状态（照搬/带证据适配/不适用+理由），替换
    AGENTS.md 的首版枚举子集表；源头清单照 company 五件套研究 §六之 1。
-4. **entry-chain-probe**（卫生）——真模型档脚本：全新上下文只读入口链（AGENTS → 00-index →
+7. **entry-chain-probe**（卫生）——真模型档脚本：全新上下文只读入口链（AGENTS → 00-index →
    队列 → evaluation.md，四文件）答 N 个**时不变问法**的"现在"问题，零过期零自相矛盾；
    每 feature 条目收尾跑（company 探针的已知盲区：问句期望也会过期——问法必须时间不变）。
    语义版已人工执行过两次（2026-09-24 定向 + 定点回归，见 implemented Note），本条目 = 脚本化 + 制度化节奏。
-5. **升 pin 重校**（⟳ 触发型）——`sync-dsh` 升 pin 时流程合同对 vendor 重校一遍
+8. **升 pin 重校**（⟳ 触发型）——`sync-dsh` 升 pin 时流程合同对 vendor 重校一遍
    （继承跟 pin 走；触发时进队，平时不占位）。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；被否决的方案不进池；复活条件写进行内）
