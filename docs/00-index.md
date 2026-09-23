@@ -41,19 +41,20 @@
 | D6 | **评估先行**：docs/evaluation.md 五面合同先于框架定案；完成定义 = 该面最小真检查；goal complete 的唯一条件 = 里程碑矩阵全绿 | 用户指令；company D15 |
 | D7 | **首版 = 纯配置包**：零自写 JS、零构建、无 client 面；UI 用现成 `ui-agent-team` | company D5 同教义（第 0 天零自定义 JS） |
 | D8 | **迭代单位 = 垂直轮 + 八成把握先行**：最薄全路径先行 → 逐轮加宽；不追求一次想透 | 用户指令（迭代纠错优先于完美规划）；company D11 |
-| D9 | **web 工具行 = bundle + preset 双声明**：bundle 层 host 共享（含非 preset 会话），preset 层自包含教义（company R1 实证：不声明则会话无工具）；行 config 确切写法未实证 → 队列「web-tool-rows 实证」 | [10 §4](./design/10-architecture.md)；roadmap 队列 |
+| D9 | **web 工具行（已实证）**：模型面 `tool-web` 行随 preset（config 照抄 base：`fetch: true` + 60s 超时）；providers（web seam / web-search-deepseek / web-fetch-http）是 base host 面出厂行，不进本包 bundle 也不随 preset；DeepSeek 搜索 `apiKeyEnv: DEEPSEEK_API_KEY` 与 chat 同钥匙 | [10 §4](./design/10-architecture.md)；[RFC web-tool-rows](../notes/proposed/2026-09-24-web-tool-rows.md) |
 | D10 | **vendor submodule 延后**：首版无构建需求（纯配置包）；机制权威暂借 `/Users/bowhead/ai_dsh_company/vendor/dsh`（同一钉住 tag，只读）；verify 的 vendor-pin 门禁随队列条目启用 | [偏离登记](../notes/implemented/2026-09-24-r1-scaffold.md)；队列「vendor-submodule-and-pnpm-dsh」 |
 
 ### 待定（阻塞项标 ⛔）
 
 | # | 问题 | 归宿 |
 |---|---|---|
-| Q1 | web 工具行的确切 id/config（provider 行写法、搜索 provider 是否要 API key） | 队列「web-tool-rows 实证」（对照 vendor shipped web-app bundle） |
 | Q2 | agent-team spawn_teammate 成员会话的 preset 挂载行为（成员拿到谁的组合） | 队列「preset-smoke 真跑」 |
 | Q3 | `dsh plugin add` 的目标 profile 形状与 release-smoke 完整流程 | 队列「release-smoke」 |
 | Q4 | 专职 synthesizer 是否独立成角色（背景：[20-roles §4](./design/20-roles.md)） | 队列「首个完整研究 run」实测 |
 | Q5 | 多 analyst 并行时的 topic 争用（背景：[20-roles §4](./design/20-roles.md)） | 队列「首个完整研究 run」实测 |
 | Q6 | floor 数值门禁是否需要机械化（背景：[30 §4](./design/30-methodology-mapping.md)） | 队列「首个完整研究 run」实测 |
+
+（Q1 web 工具行已实证闭环 → D9；销账 2026-09-24，答案与证据见 RFC web-tool-rows。）
 
 ## 术语映射（本项目 ↔ DSH 官方 ↔ vendor/dsh 源码）
 

@@ -45,13 +45,14 @@
   name: '@deepseek-ai/dsh-tool-ask-user'
 - id: tool-present
   name: '@deepseek-ai/dsh-tool-present'
-# 研究工具面：web 搜索/抓取（bundle 层亦有 host 共享行；preset 声明保证自包含）
+# 研究工具面：web 搜索/抓取。实证结论（RFC web-tool-rows）：providers（web seam /
+# web-search-deepseek / web-fetch-http）是 base 的 host 面行、不随 preset；preset 只声明
+# 模型面 tool-web 行，config 照抄 base（fetch: true + 60s 搜索超时）。
 - id: tool-web
   name: '@deepseek-ai/dsh-tool-web'
-- id: web-search
-  name: '@deepseek-ai/dsh-web-search-deepseek'
-- id: web-fetch
-  name: '@deepseek-ai/dsh-web-fetch-http'
+  config:
+    fetch: true
+    searchTimeoutMs: 60000
 
 # ④ 研究工人：通用 subagent（continuable），用于单点快捷查证；
 #    团队协作（spawn_teammate / 任务板）来自 bundle 行 tool-agent-team，

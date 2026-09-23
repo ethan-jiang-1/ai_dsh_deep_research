@@ -32,7 +32,9 @@ node scripts/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=
 ## 密钥
 
 真模型冒烟（`DSH_SMOKE_REAL=1`）需要 `DEEPSEEK_API_KEY`：开发 home
-（`dev/harness-home/.credentials.yaml`）配一次即可；永不提交密钥。
+（`dev/harness-home/.credentials.yaml`）配一次即可；永不提交密钥。web 搜索无需独立 key——
+base 的 `web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，与 chat 同一把钥匙
+（实证：vendor base bundle cordis.patch.yml）。
 
 ## DSH 源码：机制权威在哪
 

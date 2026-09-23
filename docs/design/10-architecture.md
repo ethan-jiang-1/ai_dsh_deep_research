@@ -41,7 +41,12 @@ web 工具行双层声明（D9）：bundle 层给非 preset 会话共享；prese
 
 ## 4. 工具面（四角色共同基座 + 差异）
 
-- **共同基座**：tool-fs / tool-fs-search / tool-skill / tool-todo / tool-web + web-search + web-fetch；
+- **共同基座**：tool-fs / tool-fs-search / tool-skill / tool-todo / **tool-web**（模型面行随
+  preset，行 config 照抄 base：`fetch: true` + `searchTimeoutMs: 60000`）；web 的 providers
+  （`web` seam / `web-search-deepseek` / `web-fetch-http`）是 dsh-base 的 **host 面出厂行**、
+  不随 preset 也不进本包 bundle——实证依据 vendor base bundle `packages/bundle/base/cordis.patch.yml`
+  436–454 行 + web-app surface 对 `tool-web` 的 preset-scoping 注释；DeepSeek 搜索 provider
+  的 `apiKeyEnv: DEEPSEEK_API_KEY` 与 chat 同一把钥匙（无需独立搜索 key）；
 - **lead 独有**：tool-ask-user（HITL 两点交互的唯一持有人）+ tool-present（成品声明权）；
 - **lead/scout/analyst**：tool-subagent（工人）；
 - **critic 刻意无**：ask-user（静默审查）、subagent（聚焦独行）——工具面即职责边界的机器表达。

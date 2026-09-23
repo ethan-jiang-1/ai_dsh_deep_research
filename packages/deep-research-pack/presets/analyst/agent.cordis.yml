@@ -35,12 +35,12 @@
   name: '@deepseek-ai/dsh-tool-todo'
   config:
     allowParallelInProgress: true
+# web 工具（模型面行随 preset；providers 走 base host 行——实证见 RFC web-tool-rows）
 - id: tool-web
   name: '@deepseek-ai/dsh-tool-web'
-- id: web-search
-  name: '@deepseek-ai/dsh-web-search-deepseek'
-- id: web-fetch
-  name: '@deepseek-ai/dsh-web-fetch-http'
+  config:
+    fetch: true
+    searchTimeoutMs: 60000
 
 # 并行深挖多个 topic 时生挖掘工人
 - id: tool-subagent
