@@ -146,3 +146,29 @@ evidence/ → findings → review → final——全部落在 `runs/<slug>/`，�
    Gemini DR / Perplexity / Kimi 探索版等）如何处理证据链：引用粒度、来源呈现、
    单源与缺口披露、证据暴露度**。Purpose：为本仓 M3 的证据呈现与交付设计提供竞品
    事实基础（探索型、有界、可交叉；新功能细节常单源 = 天然"待破"素材）。
+
+## 暂停点记录（2026-09-24，用户指令"先停下来打扫卫生"）
+
+**停在哪儿**：④ 已起跑至 HITL1 挂起 → 用户暂停。已完成的起跑面：岔口 C 执行毕
+（ad-hoc 队三 teammates 收队、旧 canonical 会话挂起 HITL1 取消、芯片题 kickoff 进正规
+通道 session-0fc52a87，cwd=research-workspace）；lead 开场动作完整（加载 research-brief、
+glob runs/、**主动读了 ad-hoc 侦察材料**）、芯片题 HITL1 三问挂起（探索性全景/深度报告/
+2024-01 起口径，全带推荐）→ 未答。暂停时挂起回合已 session/cancel（现场无半开回合），
+web 3081 + 仪表盘 watcher 已停、无残留进程。
+
+**重启配方（三条命令）**：
+
+```sh
+bash dev/boot-run.sh                                  # web 3081 + 仪表盘（--latest 只读投影）
+node dev/run-kickoff.mjs --port 3081 --token <横幅token> --prompt-file dev/smoke-workspace/kickoff-chip.md
+# GUI 打开 token 链接 → 「国产AI芯片实际应用调研」会话（或新会话）→ 答 HITL1
+```
+
+（`dev/smoke-workspace/kickoff-chip.md` = 芯片题题面全文，含 Purpose 与 ad-hoc 线索指针，
+gitignored 运行区但已随本暂停点核实存在；若被清理，题面原文见本 RFC 暂停点上文与
+ad-hoc run 的 question.md。）
+
+**暂停时的已知偏差记录**：① 旧 run 会话 01f37f82（DR 题）与 chip 会话 0fc52a87 都停在
+"取消的回合"上，重启后可继续用或新开（kickoff 脚本建新会话即可）；② boot-run 的 trap
+在 job_kill 下未杀净 watcher（本次手动清）——记为 boot-run 小瑕疵，随 debug-dashboard-plus
+条目顺手修；③ L4 四判据/Q2 行为半边/Q4/Q5/①② run 内判据全部未核销，等重启后随 run 闭。
