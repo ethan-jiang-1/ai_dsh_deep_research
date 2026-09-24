@@ -6,33 +6,16 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 
 ## Start Here
 
-1. 本仓入口链：[`AGENTS.md`](AGENTS.md)（布局 + 命令表 + 纪律）
-2. **接下来做什么**：[`roadmap.md`](roadmap.md) §队列 ▶（全仓唯一"当前"指针）
-3. **验收怎么判**：[`docs/evaluation.md`](docs/evaluation.md)（五个评估面——先于框架定案的验收合同）
-4. 地图与决策台账：[`docs/00-index.md`](docs/00-index.md)
-5. 方法论映射（codex 内核 → DSH 载体）：[`docs/design/30-methodology-mapping.md`](docs/design/30-methodology-mapping.md)
+- 开工入口链（唯一正本，5 步）= [`AGENTS.md`](AGENTS.md) §入口链——依次读什么、接下来做什么、怎么验收、怎么开工收尾，全在那节。
+- 人类速览"现在干什么"：[`roadmap.md`](roadmap.md) §队列 ▶（全仓唯一"当前"指针）。
 
 ## Directory Map
 
-| Directory | What it is |
-|-----------|------------|
-| `packages/deep-research-pack/` | 唯一自写包：四角色 presets + bundle 行（cordis.patch.yml） |
-| `research-workspace/` | 运行时研究工作区（角色会话 cwd）：runs/ + templates/ + 研究手册 |
-| `docs/` | 按性质分层：00-index（导航+台账）→ roadmap.md（队列）→ design/ → guides/ + 顶层合同 |
-| `notes/` | 按时间分层：intents → proposed/（RFC）→ implemented/ + research/（考古报告） |
-| `scripts/` | 门禁与分层冒烟脚本（verify / preset-smoke / release-smoke / l4-lite-smoke；档位说明见 AGENTS.md §命令表） |
-| `tests/` | keyless 回归（node:test，零依赖） |
-| `dev/` | boot-run.sh（run 通道开跑命令）、env.sh（双 home + dsh 机制基线）、research.overlay.yml（源码域 overlay）、gitignored 运行区（harness-home/、smoke-workspace/） |
+布局正本 = [`AGENTS.md`](AGENTS.md) §布局（notes/ 各层语义、scripts/ 与 dev/ 全部工具、运行区）——本文件不复制第二份清单（清单漂移先例：基础整治 C7）。
 
 ## Commands
 
-```sh
-node scripts/verify.mjs          # L0 结构门禁（keyless，收尾必跑）
-node --test tests/*.test.mjs     # L0 keyless 回归（也可 pnpm test）
-```
-
-全档命令表（env.sh 双 home、L1 preset-smoke keyless 双通道、L2 release-smoke、L4-lite 真模型档）
-= [AGENTS.md](AGENTS.md) §命令表（唯一正本，此处不复制）。
+命令表正本 = [`AGENTS.md`](AGENTS.md) §命令表（L0/L1/L2/真模型档/run 通道全档，含 `source dev/env.sh` 前置说明）——本文件不复制。
 
 ## Rules In One Screen
 
