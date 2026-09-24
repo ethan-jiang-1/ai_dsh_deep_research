@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'entry-budget'];
+const gates = ['md-utf8-newline', 'md-links', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'entry-budget'];
 
 const failures = [];
 const notes = [];
@@ -32,7 +32,6 @@ function walk(dir, out = []) {
   return out;
 }
 const allFiles = walk(ROOT);
-const mdFiles = allFiles.filter((f) => f.endsWith('.md'));
 
 // roadmap §队列 节切片（proposal-scheduled 与 entry-chain 共用：归宿/当前指针只认队列节，
 // 搁置池与头注不算）。文件缺席或节缺席 → null（fail 由调用侧出，报因按语境）。
@@ -50,18 +49,26 @@ function roadmapQueue() {
   return out.join('\n');
 }
 
-// ── 门禁 1：md-utf8 / newline（全仓 .md 严格 UTF-8、恰一个结尾换行）──
+// ── 门禁 1：md-utf8 / newline（所有 tracked .md 严格 UTF-8、恰一个结尾换行；git
+//    ls-files 驱动——运行区（gitignored bundle/profile 镜像）不扫，研究手册合同既有；
+//    旧版全树 walk 曾被 live run 的 leads.md 双尾换行咬红，2026-09-24 修正范围）──
 {
   const gate = 'md-utf8-newline';
-  for (const f of mdFiles) {
-    const raw = readFileSync(f);
-    const text = raw.toString('utf8');
-    if (raw.includes(Buffer.from([0xef, 0xbf, 0xbd]))) {
-      // 逐字节比对：decode 后再 encode 不一致 = 有非法字节
-      if (Buffer.from(text, 'utf8').equals(raw) === false) fail(gate, `${relative(ROOT, f)} 含非 UTF-8 字节`);
+  const r = spawnSync('git', ['ls-files', '*.md'], { cwd: ROOT, encoding: 'utf8' });
+  if (r.status !== 0) fail(gate, `git ls-files 不可用（${String(r.stderr).slice(0, 120)}）——fail-loud`);
+  else {
+    for (const rel of r.stdout.split('\n').filter(Boolean)) {
+      const f = join(ROOT, rel);
+      if (!existsSync(f)) continue; // 稀疏态防御（同 md-links）
+      const raw = readFileSync(f);
+      const text = raw.toString('utf8');
+      if (raw.includes(Buffer.from([0xef, 0xbf, 0xbd]))) {
+        // 逐字节比对：decode 后再 encode 不一致 = 有非法字节
+        if (Buffer.from(text, 'utf8').equals(raw) === false) fail(gate, `${rel} 含非 UTF-8 字节`);
+      }
+      if (!text.endsWith('\n')) fail(gate, `${rel} 缺结尾换行`);
+      else if (text.endsWith('\n\n')) fail(gate, `${rel} 结尾多于一个换行`);
     }
-    if (!text.endsWith('\n')) fail(gate, `${relative(ROOT, f)} 缺结尾换行`);
-    else if (text.endsWith('\n\n')) fail(gate, `${relative(ROOT, f)} 结尾多于一个换行`);
   }
 }
 
@@ -202,6 +209,41 @@ function roadmapQueue() {
     const m = text.match(/runs\//g);
     if (m) fail(gate, `${f}: 携带已废目录契约 runs/（×${m.length}）——D17 后 run bundle = drt_<slug>/`);
   }
+}
+
+// ── 门禁 9：note-format（notes/ 决定记录骨架与状态行——DSH SDLC reference 01
+//    点状吸纳："没记击败了什么的决定会重开讼"；遗留形态走 grandfather 条款不追改）──
+{
+  const gate = 'note-format';
+  const GRANDFATHER = /<!-- grandfather:/;
+  const each = (sub, fn) => {
+    const dir = join(ROOT, 'notes', sub);
+    if (!existsSync(dir)) return; // 空层不检（如 postmortem 尚无事故）
+    for (const ent of readdirSync(dir)) {
+      if (ent === 'README.md' || !ent.endsWith('.md')) continue;
+      fn(ent, readFileSync(join(dir, ent), 'utf8'));
+    }
+  };
+  // proposed/：RFC 状态行（与目录互验）+ 输掉的方案在场
+  each('proposed', (ent, text) => {
+    if (!/^> 状态：\*{0,2}(proposed|approved|superseded)/m.test(text))
+      fail(gate, `notes/proposed/${ent}: 状态行缺席或值域外（proposed/approved/superseded）`);
+    if (!/输掉的方案/.test(text))
+      fail(gate, `notes/proposed/${ent}: 缺"输掉的方案"——没记击败了什么的决定会重开讼`);
+  });
+  // implemented/：骨架在场（决定 + 输掉的方案）；grandfather 条款豁免门禁生效前的遗留形态
+  each('implemented', (ent, text) => {
+    const g = GRANDFATHER.test(text);
+    if (!/^## 决定/m.test(text) && !g)
+      fail(gate, `notes/implemented/${ent}: 缺"## 决定"节（遗留形态须标 grandfather 注释，见 notes/README.md）`);
+    if (!/^## 输掉的方案/m.test(text) && !g)
+      fail(gate, `notes/implemented/${ent}: 缺"## 输掉的方案"节（遗留形态须标 grandfather 注释，见 notes/README.md）`);
+  });
+  // rejected/：否决状态行（提案体保留，结论在状态行）
+  each('rejected', (ent, text) => {
+    if (!/^> 状态：\*{0,2}rejected/m.test(text))
+      fail(gate, `notes/rejected/${ent}: 缺 rejected 状态行`);
+  });
 }
 
 // ── 门禁 8：proposal-scheduled（proposed/ 每提案必须在 roadmap §队列 有归宿；搁置池/头注不算）──

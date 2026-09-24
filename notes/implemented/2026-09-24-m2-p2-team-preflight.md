@@ -104,3 +104,5 @@ D18（team 语境 worker 可用性）都是未知数。雷区若在 run 中途�
 
 **环境状态**：预检会话留在 dev home（gitignored；队列「M2 收口与复盘」的打扫项处理）；
 research profile 组合未动；web 已停。
+
+<!-- grandfather: note-format 门禁生效（2026-09-24）前的遗留形态——内容有效不追改，新篇一律按 guides/60 §4 骨架 -->

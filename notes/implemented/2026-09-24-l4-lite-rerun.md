@@ -46,3 +46,5 @@
 - dev home 凭据在位（内容未读）；boot 起自 company checkout 钉 tag 源码（D10 借用，
   队列条目 2 落地后切回本仓 vendor）；
 - 本条目销账；▶ 移交「首个完整研究 run」（M2）——开工前先出 RFC。
+
+<!-- grandfather: note-format 门禁生效（2026-09-24）前的遗留形态——内容有效不追改，新篇一律按 guides/60 §4 骨架 -->

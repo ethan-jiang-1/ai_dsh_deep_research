@@ -28,7 +28,7 @@
 
 | 门禁 | 断言什么 | 反证记录 |
 |---|---|---|
-| `md-utf8-newline` | 全仓 .md 严格 UTF-8、恰一个结尾换行 | [noise-sweep Note](../notes/implemented/2026-09-24-noise-sweep.md)（清欠账：双尾换行注入红→还原绿） |
+| `md-utf8-newline` | 所有 **tracked** .md 严格 UTF-8、恰一个结尾换行（git ls-files 驱动——运行区不扫，手册合同既有） | [noise-sweep Note](../notes/implemented/2026-09-24-noise-sweep.md)（清欠账：双尾换行注入红→还原绿）；范围修正反证 = live run 的 `dev/harness-home/runs/…/leads.md` 双尾换行被旧版全树 walk 咬红（运行区不该扫）→ 修 tracked-only → 绿 |
 | `md-links` | 所有 **tracked** .md 的 Markdown 相对链接（方括号+圆括号语法）可解析（git ls-files 驱动——具名目录白名单版会让根目录其余 tracked .md 逃检，基础整治 C10 改；反引号裸路径不检 = 设计） | 基础整治 Note（根目录 tracked .md 注入死链红→还原绿） |
 | `preset-structure` | presets/ 每角色目录：id 规范 + preset.yml 三字段 + agent.cordis.yml + ≥1 skill 且 frontmatter name=目录名 | 同 noise-sweep（清欠账：缺件角色目录注入红→还原绿） |
 | `claude-symlink` | CLAUDE.md 是指向 AGENTS.md 的 symlink | [r1-scaffold](../notes/implemented/2026-09-24-r1-scaffold.md)（symlink 创建前红→后绿） |
@@ -36,6 +36,7 @@
 | `row-deps` | preset 与 bundle 行引用的 `@deepseek-ai/*` 全在 peerDependencies | [m2-p1-run-channel](../notes/implemented/2026-09-24-m2-p1-run-channel.md)（违规 insert 行被守卫+row-deps 咬红→还原绿） |
 | `workspace-contract` | 研究手册 + 六件 run bundle 模板在位（bundle 目录 drt_<slug>/ 运行时由 lead 创建，无静态目录可查——D17）+ $DSH_HOME/AGENTS.md 化石镜像不在场（手册唯一定居点 = 会话 cwd projectRoot 注入） | 同 noise-sweep（清欠账：run 模板暂移注入红→还原绿）；化石镜像反证 = 真实事故红（旧契约镜像在场，lead 按 runs/<slug> 行动被用户实测抓到）→删除→绿 |
 | `pack-contract-sync` | pack 的 tracked yml/md 文本零 `runs/` 旧契约路径——persona/skill 文本经会话系统提示与 skill 加载注入，携带已废目录契约即污染 run（D17 事故 2 实证：pack 不在首轮 sweep 清单，13 处残留漏网） | D17 事故 2：真实红（verify 逐文件点名 13 处 runs/ 残留）→同 commit 修复→绿 |
+| `note-format` | notes/ 决定记录骨架与状态行：proposed/ RFC 状态行（proposed/approved/superseded）+ 输掉的方案在场；implemented/ 骨架（## 决定 + ## 输掉的方案）在场或 grandfather 条款；rejected/ 状态行——"没记击败了什么的决定会重开讼"（DSH SDLC reference 01 点状吸纳） | [note-lifecycle-absorption Note](../notes/implemented/2026-09-24-note-lifecycle-absorption.md)（双形态注入红：无骨架 implemented Note / 无状态行 proposed RFC → 红 → 删复绿） |
 | `proposal-scheduled` | notes/proposed/ 每提案文件在 roadmap **§队列**有归宿（proposed 不是停车场；搁置池/头注不算归宿） | review-driven-hardening Note（收紧+清欠账：无归宿/仅搁置池双形态注入红→还原绿） |
 | `secrets-untracked` | tracked 清单零敏感/残留物（credentials/.env/.pem/.tgz/.log/…） | [入口链审计](../notes/implemented/2026-09-24-entry-chain-fresh-agent-audit.md)（.pem 注入红→还原绿） |
 | `role-list-sync` | 角色清单单一事实源 = 盘上 presets/；代码（scripts/tests/dev 的 .mjs/.sh）里角色清单字面量（单行 ≥3 角色名 / `[...]` 块 ≥3 角色名字符串）即红——检测名从盘上现取 | 基础整治 Note（JS 单行数组/多行数组块/bash for-in 三形态注入红→还原绿） |

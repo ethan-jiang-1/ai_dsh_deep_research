@@ -56,3 +56,5 @@ MODULE_NOT_FOUND，实测）→ 统一为 `node --test tests/*.test.mjs`。
    之后 `&& git commit` 挂在了 tail 的成功上，红灯状态被提交进 509a04b）——正确形状 =
    `node --test … > out 2>&1 && git …`（重定向不吞退出码）；红灯 commit 的事实保留在
    git 历史里作证，修复向前。
+
+<!-- grandfather: note-format 门禁生效（2026-09-24）前的遗留形态——内容有效不追改，新篇一律按 guides/60 §4 骨架 -->

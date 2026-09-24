@@ -29,3 +29,5 @@
   preset-scoping 设计打架；
 - preset 声明 provider 行（初稿的"自包含"推论）：providers 属 host 面（同 tool-fs vs
   fs-local 模式）。
+
+<!-- grandfather: note-format 门禁生效（2026-09-24）前的遗留形态——内容有效不追改，新篇一律按 guides/60 §4 骨架 -->

@@ -54,6 +54,9 @@ dev/                     boot-run.sh（run 通道开跑：幂等装+boot web+仪
   门禁 `proposal-scheduled` 机械强制）；条目收尾时毕业到 `implemented/`，队列行删除；
 - **`implemented/` 是活的决策记忆，不是冻结档案**：路径/名称/默认值随实现同 diff 维护；
   想逆转某决定 → 写新 Note 并互链，**不改写旧 Note 成相反结论**；
+- **取代检查（每新增一篇 Note 触发；DSH SDLC reference 01 吸纳）**：搜活动树同决定/同
+  机制——已有 owner → 更新它不建重复；部分取代 → 双方互链；完整取代 → 新 Note 吸收旧
+  Note 全部独有内容后才可删旧；已交付决定直接进 implemented/，不必从 proposed/ 起步；
 - **`rejected/` = 否决理由**：保留的唯一条件是"它仍能阻止一个诱人的重犯"（含用户已拍板否决
   的方向）；`postmortem/` = 事故复盘（事故叙事的唯一合法层）；
 - **RFC 状态行住在 RFC 自己的头部**（proposed / approved / superseded），不进 roadmap；

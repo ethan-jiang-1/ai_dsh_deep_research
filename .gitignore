@@ -12,9 +12,10 @@
 # 开发 DSH_HOME 的运行残留（目录本体进库，内容不进）
 dev/harness-home/*
 !dev/harness-home/.gitkeep
-# 研究运行时状态：run bundle（drt_<slug>/）内容是 runtime truth，不进版本控制；
+# 研究运行时状态：run bundle（drt_<slug>/，含桥接 symlink——无尾斜杠使 pattern 同时覆盖
+# 目录与符号链接，防 symlink 误入 git）内容是 runtime truth，不进版本控制；
 # templates/ 与研究手册（AGENTS.md）是资产，进库
-research-workspace/drt_*/
+research-workspace/drt_*
 # 排练/冒烟残留
 dev/smoke-workspace/*
 !dev/smoke-workspace/.gitkeep

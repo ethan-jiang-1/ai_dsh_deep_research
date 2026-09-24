@@ -166,3 +166,5 @@ P2）/ L2 分工 / 发起研究入口；链健康度：D16 台账、patch、三 
 **环境状态**：registry 本会话可达（层经 registry 钉版本安装；不可达环境的回退线 = 锚挂载
 manual bundles 登记，未启用）；scratch profile p1-scratch 已清理；research profile = 正式
 run 通道组合；boot web 验收后已停。
+
+<!-- grandfather: note-format 门禁生效（2026-09-24）前的遗留形态——内容有效不追改，新篇一律按 guides/60 §4 骨架 -->
