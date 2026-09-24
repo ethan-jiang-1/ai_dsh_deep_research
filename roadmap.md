@@ -28,12 +28,7 @@
    postmortem），每行 = DSH 做法 → 本仓落点 → 状态（照搬/带证据适配/不适用+理由），替换
    AGENTS.md 的首版枚举子集表；源头清单照 company 五件套研究 §六之 1。
    RFC = [2026-09-24-dsh-discipline](notes/proposed/2026-09-24-dsh-discipline.md)（approved）。
-5. **entry-chain-probe**（卫生）——真模型档脚本：全新上下文只读入口链（唯一正本 = 根
-   AGENTS.md §入口链，5 步）答 N 个**时不变问法**的"现在"问题，零过期零自相矛盾；
-   每 feature 条目收尾跑（company 探针的已知盲区：问句期望也会过期——问法必须时间不变）。
-   语义版已人工执行过两次（2026-09-24 定向 + 定点回归，见 implemented Note），本条目 = 脚本化 + 制度化节奏。
-   RFC = [2026-09-24-entry-chain-probe](notes/proposed/2026-09-24-entry-chain-probe.md)（approved）。
-6. **升 pin 重校**（⟳ 触发型）——`sync-dsh` 升 pin 时流程合同对 vendor 重校一遍
+5. **升 pin 重校**（⟳ 触发型）——`sync-dsh` 升 pin 时流程合同对 vendor 重校一遍
    （继承跟 pin 走；触发时进队，平时不占位）。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；被否决的方案不进池；复活条件写进行内）

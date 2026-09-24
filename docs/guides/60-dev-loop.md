@@ -64,7 +64,9 @@ source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名�
    方案/实际跑过的验证/环境状态——note-format 门禁断言）；**毕业 = 正文改写**：计划体→
    已交付事实体，未来时态/迁移计划删除——只改路径不改正文 = 未来计划伪装成当前事实；
 3. `node scripts/verify.mjs` + `node --test tests/*.test.mjs` 全绿（涉及面按 §2 加跑）；
-4. 入口链探针（条目改动面含 docs/AGENTS 时必跑，否则按节奏）；
+4. 入口链探针（条目改动面含 docs/AGENTS 时必跑，否则按节奏）——机械版：
+   `source dev/env.sh && node scripts/entry-chain-probe.mjs`（真模型档；时不变问法 × 4，
+   真值机械抽取 + 软断言，留档 dev/smoke-workspace/ 供人工复核；无凭据时退化为语义版人工）；
 5. commit（窄证据切片：只提交本条目相关改动；pre-commit 钩子自动复跑 verify+tests 拦红灯——§3）。
 
 ## 5. 密钥

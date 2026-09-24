@@ -32,7 +32,7 @@ docs/                    00-index（地图+决策台账+术语映射）→ desig
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）：
                          intents.md → proposed/（RFC，一文件一条目）→ implemented/；
                          rejected/（否决理由，防复犯）；postmortem/（事故复盘）；research/（考古报告）
-scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）、team-preflight-smoke.mjs（team 机制预检）、run-dashboard.mjs（run 只读投影，boot-run 起）、lib/roles.mjs（角色清单访问器，事实源=盘上 presets/）
+scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）、team-preflight-smoke.mjs（team 机制预检）、entry-chain-probe.mjs（入口链探针，真模型档）、run-dashboard.mjs（run 只读投影，boot-run 起）、lib/roles.mjs（角色清单访问器，事实源=盘上 presets/）
 tests/                   keyless 回归（node:test，零依赖；layering 守卫禁真模型/网络/子进程；fixtures/ 测试夹具）
 dev/                     boot-run.sh（run 通道开跑：幂等装+boot web+仪表盘）、run-kickoff.mjs（run 会话驱动：建会话+发 kickoff prompt）、env.sh（双 home + dsh 机制基线 + pre-commit 钩子激活）、research.overlay.yml（源码域 overlay，镜像 bundle 行）、hooks/（pre-commit：verify+tests 红灯拦 commit）、harness-home/ 与 smoke-workspace/（gitignore 运行区）
 ```
@@ -78,9 +78,11 @@ node scripts/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=
 node scripts/release-smoke.mjs        # L2 真实安装形状（keyless：pack→干净 profile→plugin add→安装域冒烟；起真 DSH 环境，无模型调用）
 node scripts/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：四角色响应 + scout web_search 调用）
 node scripts/team-preflight-smoke.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + company D18 one-shot worker 探针）
-bash dev/boot-run.sh                  # run 通道开跑（幂等：组合校验/补装 → boot web 3081 → 仪表盘）；用法 = guides/61
+bash dev/boot-run.sh                  # run 通道开跑（幂等：组合校验/漂移检测/补装 → boot web 3081 → 仪表盘）；用法 = guides/61
 node scripts/run-dashboard.mjs --latest --out <html>   # run 只读投影（多场扫描 + 步骤条 + HITL 等待横幅；--watch 持续再生成）
 node dev/run-kickoff.mjs --port 3081 --token <横幅 token> --prompt-file <file>        # run 会话驱动（建会话+发 kickoff）
+pnpm dsh <args…>                      # 机制基线 CLI（vendor/dsh 钉 tag 源码；等价 dev/env.sh 的 dsh 函数）
+node scripts/entry-chain-probe.mjs    # 入口链探针（真模型档：时不变四问，答案对 ▶ 真值软断言，留档人工复核）
 ```
 
 档位词汇（keyless / 真模型档）与密钥定义 = §密钥。脚本头注各带设计依据与 RFC 出处。
@@ -89,8 +91,8 @@ node dev/run-kickoff.mjs --port 3081 --token <横幅 token> --prompt-file <file>
 
 档位词汇（全仓统一；替代曾用而未定义的"认证档"）：**keyless** = 无凭据可跑——preset-smoke
 真挂载档与 release-smoke 会起真 DSH 环境，但无模型调用、不需要 key；**真模型档** = 需要
-`DEEPSEEK_API_KEY` 与真模型调用（当前 = l4-lite-smoke 与 team-preflight-smoke；队列里的
-L4 全量与探针脚本化同档）。
+`DEEPSEEK_API_KEY` 与真模型调用（当前 = l4-lite-smoke、team-preflight-smoke 与
+entry-chain-probe；队列里的 L4 全量同档）。
 
 L4-lite 真模型冒烟（`scripts/l4-lite-smoke.mjs`）需要 `DEEPSEEK_API_KEY`：开发 home
 （`dev/harness-home/.credentials.yaml`）配一次即可；永不提交密钥。L1/L2 的冒烟
