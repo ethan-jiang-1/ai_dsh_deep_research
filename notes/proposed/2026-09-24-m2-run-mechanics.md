@@ -167,3 +167,30 @@ node dev/run-kickoff.mjs --port 3081 --token <横幅token> --prompt-file <题面
 手动清过）+ 不检测 pack 内容漂移（pack 文本修正后 profile 镜像需手动同步或 rm 重建——
 D17 事故 2 的手术同步即此产物）——记为 boot-run 小瑕疵，随 debug-dashboard-plus 条目
 顺手修；② L4 四判据/Q2 行为半边/Q4/Q5/①② run 内判据全部未核销，等重启后随 run 闭。
+
+## 收口方案（2026-09-24 追加：通道错位 run 的迁移与判据闭合——已批准，同日放行静默自主执行）
+
+**事故背景**：run 实际起跑于旧实验会话（a2a6850a，cwd=dev/harness-home，创建于全部
+修复之前、上下文冻结在化石契约）——bundle 落在 `dev/harness-home/runs/cn-us-cpu-gap/`，
+drt_ 契约与观察面未走到；这是三段注入面事故链（化石镜像 → pack 文本 → 旧会话复用）的
+第三段。立项质量本身合格（question.md 五维拆解 + HITL1 快照 + 验收判据齐）。
+
+**迁移方案**（run 交付后执行；期间以 research-workspace/drt_cn-us-cpu-gap → 现目录的
+symlink 桥接仪表盘可见性）：
+
+1. A 系会话先收队（teammates 终局 + lead 会话自然结束，不搬活会话脚下的目录）；
+2. 真搬家：`mv dev/harness-home/runs/cn-us-cpu-gap → research-workspace/drt_cn-us-cpu-gap`
+   （撤桥接 symlink）；
+3. 契约补齐：question.md 补 `## Decisions（append-only，最新在上）` 节（首条 = HITL1
+   定稿回填）；化石命名修正（`review-critic.md` → `review.md`）；`final.md` →
+   `final/v1.md`；journal.md 补纪要（含通道错位事故如实记录）；
+4. **判据④ 实测 = 迁移本身构成场景**：新开正规 lead 会话说"继续 drt_cn-us-cpu-gap"，
+   只凭 bundle 文件重建上下文续跑（顺带一次受控 kill）——"文件即真相"的最便宜实证。
+
+**判据闭合清单**：① final/v1.md 存在且含来源清单；② 抽查 N=5 结论可回溯；③ 两点
+纪律 = A 系会话日志 zstd 逐事件核对（HITL1→HITL2 间静默自主）；④ 如上；Q2 = teammate
+会话日志核对 preset 组合（含 D18 one-shot 边界）；Q4/Q5 = journal + 日志观察记账。
+
+**诚实账**：M2 收口 Note 如实写"run 主体走旧通道"，不粉饰为"正规通道验证通过"；
+drt_ 契约的 in situ 验证缺口由"迁移 + 判据④ 续跑"部分覆盖，残余缺口在 M3 重排时
+评估是否需要第二个正规通道 run。
