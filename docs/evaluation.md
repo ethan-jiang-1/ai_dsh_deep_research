@@ -79,19 +79,7 @@
 - **通过判据**：按档位全绿；L4 全量**不进常规回归**（成本），只在里程碑跑。
 - **何时跑**：里程碑级。
 
-## 2. "框架搭建完成"的完成定义（当前里程碑）
-
-**全部满足才算框架搭好，goal 才可标 complete：**
-
-| # | 判据 | 面 |
-|---|---|---|
-| 1 | L0 全绿（`node scripts/verify.mjs` + `node --test tests/*.test.mjs`），门禁清单登记且每条带反证 | L0 |
-| 2 | `preset-smoke`：全部研究角色真挂载绿 | L1 |
-| 3 | `release-smoke`：npm pack → 干净 profile 安装 → 会话可用 | L2 |
-| 4 | 方法论映射表完成且四条判据全过（含角色单一职责表、证据载体、信噪比策略） | L3 |
-| 5 | L4-lite：真模型逐角色冒烟绿（需 `DEEPSEEK_API_KEY` + 双 home 环境） | L4 |
-
-**负面判据（任一出现 = 框架不合理，触发重构而非继续堆功能）：**
+## 2. 负面判据（任一出现 = 框架不合理，触发重构而非继续堆功能）
 
 1. 自建机制与 DSH 现成载体重复（如自建 markdown 任务队列 vs agent-team 任务板），且拿不出"DSH 载体不可用"的证据——**不发明纪律**（company D13/D15 否决依据同源）；
 2. 角色职责重叠或漂移，某类事实出现双 owner / 无 owner；
@@ -118,19 +106,6 @@
 3. 同一面连续 3 轮无法转绿且阻塞条件明确 → goal 标 `blocked`，报告具体条件（区分"缺上游能力"与"设计缺陷"：前者找 DSH seam 或提议上游，后者触发负面判据重构）；
 4. 评估标准本身的变更 = D 号决策登记，禁止静默放宽。
 
-## 5. 与参考项目评估机制的血缘
+## 5. 已知边界（诚实记账）
 
-| 参考机制 | 出处 | 本 repo 对应物 |
-|---|---|---|
-| `pnpm verify` 结构门禁 + 反证纪律 | company `scripts/verify.mjs` | L0 门禁（裁剪移植：`scripts/verify.mjs`） |
-| `preset-smoke.mjs` 真挂载 | company（postmortem 0001 产物） | L1 检查 |
-| `release-smoke`（pack → 干净 profile → plugin add） | company `docs/release.md` | L2 检查 |
-| `tests/layering.spec.ts` 测试分层守卫 | company | L0 守卫 |
-| presence-e2e（真模型 ~$1 档） | company | L4-lite |
-| validate-bundle / inspect-bundle / audit-phase-status | codex harness（领域质检灵感） | L3 机械断言 + L4 run 审计（**实现须换 DSH 载体，不移植 CLI 引擎**） |
-| "verify the world, not the self-report" | vendor/dsh `docs/testing.md` | 贯穿 L1–L4 的断言风格 |
-
-## 6. 已知边界（诚实记账）
-
-- L1/L2/L4 需要真 DSH 环境与（L4）`DEEPSEEK_API_KEY`；环境未就绪时该面标"未跑"，**不等同通过**（已 green 面的证据见对应毕业 Note——00-index 待定表 Q 行指向；未闭面的当前状态 = roadmap ▶，"未跑"≠"通过"）；
-- 脚本本身是框架搭建的一部分：门禁/预检脚本存在且可跑计入 M1 判据 1，真会话/发布档的脚本化随对应队列条目落地。
+- L1/L2/L4 需要真 DSH 环境与（L4）`DEEPSEEK_API_KEY`；环境未就绪时该面标"未跑"，**不等同通过**（已 green 面的证据 = 各面定义里的毕业 Note 引用；未闭面的当前状态 = roadmap ▶，"未跑"≠"通过"）。
