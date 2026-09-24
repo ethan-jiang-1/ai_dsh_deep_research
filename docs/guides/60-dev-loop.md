@@ -52,6 +52,10 @@ source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名�
 - web 观察窗：`dsh web -- --port 3081 --no-open`（3080 是本 GUI 占用）；
 - run 通道（研究 run 的正式启动面，安装域）：`bash dev/boot-run.sh`（幂等：组合校验/补装
   → boot web 3081 → 入口步骤打印）——用法全文见 [61-run-playbook](./61-run-playbook.md)。
+- 提交门禁：`source dev/env.sh` 幂等启用 pre-commit 钩子（`dev/hooks/pre-commit`：verify +
+  tests 红灯即拦 commit——"收尾必跑"的机器化，红 commit 溜进历史的教训见
+  [agent-friendly-polish Note 教训 4](../../notes/implemented/2026-09-24-agent-friendly-polish.md)）；
+  应急 `--no-verify` 须在 commit message 说明跳过的面与理由。
 
 ## 4. 收尾程序（同 diff，五件）
 
@@ -60,7 +64,7 @@ source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名�
    实际跑过的验证/环境状态）；
 3. `node scripts/verify.mjs` + `node --test tests/*.test.mjs` 全绿（涉及面按 §2 加跑）；
 4. 入口链探针（条目改动面含 docs/AGENTS 时必跑，否则按节奏）；
-5. commit（窄证据切片：只提交本条目相关改动）。
+5. commit（窄证据切片：只提交本条目相关改动；pre-commit 钩子自动复跑 verify+tests 拦红灯——§3）。
 
 ## 5. 密钥
 

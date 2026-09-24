@@ -40,3 +40,12 @@ dsh() {
 # 的一部分（$DSH_HOME（… → 变量 "DSH_HOME（"），set -u 的 source 方必炸（boot-run 实证）。
 echo "dev/env.sh: DSH_HOME=${DSH_HOME}（数据面隔离）"
 echo "dev/env.sh: dsh → 钉 tag 源码基线（company checkout 借用，D10 偏离；日用全局版用 command dsh）"
+
+# ③ 提交面：pre-commit 钩子（dev/hooks/pre-commit：verify+tests 红灯拦 commit——收尾纪律
+#    "必跑"的机器化，教训实证见 notes/implemented/2026-09-24-agent-friendly-polish.md）。
+#    git config 幂等；hooksPath 相对路径按仓库顶层解析。
+if git -C "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)" config core.hooksPath dev/hooks 2>/dev/null; then
+  echo "dev/env.sh: core.hooksPath=dev/hooks（pre-commit 门禁生效：红灯 commit 被拦）"
+else
+  echo "dev/env.sh: ⚠ 无法设置 core.hooksPath——pre-commit 门禁未生效，收尾须按 guides/60 §4 手跑 verify+tests" >&2
+fi

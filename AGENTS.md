@@ -33,7 +33,7 @@ notes/                   **开发记忆与证据链**（核心流程数据，不
                          rejected/（否决理由，防复犯）；postmortem/（事故复盘）；research/（考古报告）
 scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）、team-preflight-smoke.mjs（team 机制预检）、run-dashboard.mjs（run 只读投影，boot-run 起）、lib/roles.mjs（角色清单访问器，事实源=盘上 presets/）
 tests/                   keyless 回归（node:test，零依赖；layering 守卫禁真模型/网络/子进程；fixtures/ 测试夹具）
-dev/                     boot-run.sh（run 通道开跑：幂等装+boot web+仪表盘）、run-kickoff.mjs（run 会话驱动：建会话+发 kickoff prompt）、env.sh（双 home + dsh 机制基线）、research.overlay.yml（源码域 overlay，镜像 bundle 行）、harness-home/ 与 smoke-workspace/（gitignore 运行区）
+dev/                     boot-run.sh（run 通道开跑：幂等装+boot web+仪表盘）、run-kickoff.mjs（run 会话驱动：建会话+发 kickoff prompt）、env.sh（双 home + dsh 机制基线 + pre-commit 钩子激活）、research.overlay.yml（源码域 overlay，镜像 bundle 行）、hooks/（pre-commit：verify+tests 红灯拦 commit）、harness-home/ 与 smoke-workspace/（gitignore 运行区）
 ```
 
 接下来开发什么 = §入口链 第 3 步的 ▶ 条目；开工/收尾程序 = 第 5 步。
