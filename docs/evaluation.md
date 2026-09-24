@@ -46,14 +46,14 @@
 ### L1 挂载面（真挂载 = preset 类改动的完成定义）
 
 - **定义**：每个研究角色 preset 在**真 DSH 会话**里挂载成功——persona 生效、skills 可见、工具面齐全。dump/roster 可见不算（company postmortem 0001 实证：挂载失败只有真会话抓得到）。
-- **最小真检查**：`node scripts/preset-smoke.mjs`——keyless 预检（环境/安装形状断言）+ 真会话档（`DSH_SMOKE_REAL=1`：boot 真 web/headless 逐角色建会话，机器断言工具/skill 面在场；已 green——证据：L1/L2 绿灯 Note）。
+- **最小真检查**：`node scripts/preset-smoke.mjs`——keyless 预检（环境/安装形状断言）+ 真会话档（`DSH_SMOKE_REAL=1`：boot 真 web/headless 逐角色建会话，机器断言工具/skill 面在场；落地证据 = [L1/L2 绿灯 Note](../notes/implemented/2026-09-24-l1-l2-green.md)）。
 - **通过判据**：全部角色真挂载绿；失败角色即里程碑未完成，无例外。
 - **何时跑**：preset 内容/结构改动时；框架里程碑必跑。
 
 ### L2 安装面（真实安装形状）
 
 - **定义**：插件以用户实际获得的方式可用——`npm pack` 产物完整，装进**干净 profile** 成功，起会话可用。
-- **最小真检查**：`release-smoke`：`npm pack` → 全新 `DSH_HOME` profile → `dsh plugin add` → 起会话断言（已 green——证据：L1/L2 绿灯 Note）。
+- **最小真检查**：`release-smoke`：`npm pack` → 全新 `DSH_HOME` profile → `dsh plugin add` → 起会话断言（落地证据 = [L1/L2 绿灯 Note](../notes/implemented/2026-09-24-l1-l2-green.md)）。
 - **通过判据**：pack 清单与 `files` 声明一致、安装零缺失警告、干净 profile 会话能列出研究角色。
 - **何时跑**：包结构/release 相关改动时；框架里程碑必跑。
 

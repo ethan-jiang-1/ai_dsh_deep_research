@@ -40,7 +40,7 @@
 | D4 | **方法论内核 = codex harness 考古十条**（两 HITL 锚点 + 三波 + 证据身份链 + 声明式质量门 + 反伪造审计）；markdown 控制面/CLI 状态机/手工队列**弃用**，DSH 原生载体承接 | [方法论映射](./design/30-methodology-mapping.md)；[harness 考古报告](../notes/research/2026-09-24-deep-research-harness-analysis.md) |
 | D5 | **证据身份链 = 唯一自建残留**：evidence frontmatter 文件契约 + critic 狩猎，不做 CLI 引擎（完成判定锚定文件事实而非账本外观——codex 教训 1 的轻量等价物） | [30 §证据身份链](./design/30-methodology-mapping.md)；evaluation.md L3 判据 3 |
 | D6 | **评估先行**：docs/evaluation.md 五面合同先于框架定案；完成定义 = 该面最小真检查；goal complete 的唯一条件 = 里程碑矩阵全绿 | 用户指令；company D15 |
-| D7 | **首版 = 纯配置包**：零自写 JS、零构建、无 client 面；UI 用现成 `ui-agent-team` | company D5 同教义（第 0 天零自定义 JS） |
+| D7 | **首版 = 纯配置包**：pack 内零自写 JS、零构建、无 client 面；UI 用现成 `ui-agent-team`。**边界澄清（基础整治 §3.7 补）**：约束对象是 `packages/deep-research-pack/`（发布产物）；仓级 `scripts/`、`tests/` 的工具 JS（verify/roles/run-dashboard 等）不受此限，构建链另见队列「观察面 GUI 化」 | company D5 同教义（第 0 天零自定义 JS） |
 | D8 | **迭代单位 = 垂直轮 + 八成把握先行**：最薄全路径先行 → 逐轮加宽；不追求一次想透 | 用户指令（迭代纠错优先于完美规划）；company D11 |
 | D9 | **web 工具行（已实证）**：模型面 `tool-web` 行随 preset（config 照抄 base：`fetch: true` + 60s 超时）；providers（web seam / web-search-deepseek / web-fetch-http）是 base host 面出厂行，不进本包 bundle 也不随 preset；DeepSeek 搜索 `apiKeyEnv: DEEPSEEK_API_KEY` 与 chat 同钥匙 | [10 §4](./design/10-architecture.md)；[web-tool-rows 毕业 Note](../notes/implemented/2026-09-24-web-tool-rows.md) |
 | D10 | **vendor submodule 延后**：首版无构建需求（纯配置包）；机制权威暂借 `/Users/bowhead/ai_dsh_company/vendor/dsh`（同一钉住 tag，只读）；verify 的 vendor-pin 门禁随队列条目启用 | [偏离登记](../notes/implemented/2026-09-24-r1-scaffold.md)；队列「vendor-submodule-and-pnpm-dsh」 |

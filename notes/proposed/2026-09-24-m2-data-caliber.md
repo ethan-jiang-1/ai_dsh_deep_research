@@ -38,8 +38,9 @@ skill ×2 + evidence 模板 + 手册证据契约节），排在其后只为评�
 
 ## 输掉的方案
 
-- **frontmatter 加 caliber 字段并机械断言**：否——Q6 已登记"floor 机械化缺实测证据"，
-  同理：口径机械化先跑实测，第一轮只做纪律文本（教训：margin ≠ threshold，先别上 gate）。
+- **frontmatter 加 caliber 字段并机械断言**：否——独立成篇迁
+  [rejected/2026-09-24-frontmatter-caliber-gate](../rejected/2026-09-24-frontmatter-caliber-gate.md)
+  （仍能阻止重犯：margin ≠ threshold，实测前别上 gate；Q6 同病根）。
 - **critic 新开第四审查线（口径线）**：否——并入质量审计线，避免线膨胀稀释注意力。
 - **要求全部摘录带口径**：否——只约束"数字/规格类"（关键事实），叙述性背景不背这包袱。
 

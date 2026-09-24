@@ -37,6 +37,8 @@ notes/rejected/yyyy-mm-dd-<主题>.md
 
 ## 当前条目
 
-无——本仓尚未有独立成篇的否决方案；各决定内部的"输掉的方案"小节仍在原 Note 里
-（例：[m2-data-caliber](../proposed/2026-09-24-m2-data-caliber.md) 否决"frontmatter 加字段
-并机械断言"）。将来迁移进来的条件 = 该理由被反复重提、需要独立检索命中。
+- [2026-09-24-frontmatter-caliber-gate](./2026-09-24-frontmatter-caliber-gate.md)——
+  evidence frontmatter 加 `caliber` 字段并机械断言（margin ≠ threshold，实测前别上
+  gate；2026-09-24 基础整治 §3.4 用户拍板迁出独立成篇：该理由会被反复重提——基础整治
+  §3.3 做字段对账设计时就是最近的近亲重犯现场；其余各决定内联的"输掉的方案"不迁，
+  它们是决定的内在组成部分）。
