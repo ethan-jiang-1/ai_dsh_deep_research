@@ -16,6 +16,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { presetRoles } from './lib/roles.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
@@ -79,7 +80,7 @@ step(Array.isArray(pkg?.dsh?.profile?.bundles) && pkg.dsh.profile.bundles.includ
   'bundles reconcile 进 dsh-deep-research-pack', JSON.stringify(pkg?.dsh?.profile?.bundles));
 step(existsSync(join(installed, 'presets')) && existsSync(join(installed, 'cordis.patch.yml')),
   '安装副本带 presets/ + cordis.patch.yml');
-for (const role of ['lead', 'scout', 'analyst', 'critic']) {
+for (const role of presetRoles(ROOT)) {
   step(existsSync(join(installed, 'presets', role, 'agent.cordis.yml')), `安装形状含 presets/${role}`);
 }
 const packPkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));

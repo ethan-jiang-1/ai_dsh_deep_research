@@ -197,8 +197,35 @@ const mdFiles = allFiles.filter((f) => f.endsWith('.md'));
   }
 }
 
+// ── 门禁 10：role-list-sync（角色清单单一事实源 = 盘上 presets/；代码里出现角色清单字面量 → 红）──
+// 检测名从盘上目录现取（门禁自身零硬编码，新角色入列即自动纳入检测）。典型咬合形态：
+//   ① 单行 ≥3 个角色名 token（JS 数组 / bash for-in 列表）；② [...] 数组块内 ≥3 个角色名字符串。
+// 合法的 ≤2 共现（探针成员名、prompt 覆盖对象逐行键）不触发。消费点应 import scripts/lib/roles.mjs。
+{
+  const gate = 'role-list-sync';
+  const roleNames = readdirSync(PRESETS, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
+  if (roleNames.length === 0) fail(gate, 'presets/ 下没有任何角色目录（单一事实源为空）');
+  else {
+    const tokenOf = (n) => new RegExp(`(^|[^a-z0-9-])${n}([^a-z0-9-]|$)`);
+    const codeFiles = allFiles.filter((f) => /\.(mjs|sh)$/.test(f)
+      && (f.startsWith(join(ROOT, 'scripts') + '/') || f.startsWith(join(ROOT, 'tests') + '/') || f.startsWith(join(ROOT, 'dev') + '/'))
+      && !f.includes('smoke-workspace') && !f.includes('node_modules'));
+    for (const f of codeFiles) {
+      const text = readFileSync(f, 'utf8');
+      for (const line of text.split('\n')) {
+        const hits = roleNames.filter((n) => tokenOf(n).test(line));
+        if (hits.length >= 3) fail(gate, `${relative(ROOT, f)}: 角色清单硬编码（单行 ${hits.length} 个角色名：${hits.join(', ')}）——清单事实源 = 盘上 presets/，JS 用 scripts/lib/roles.mjs、bash 用目录枚举`);
+      }
+      for (const m of text.matchAll(/\[[^\[\]]*\]/gs)) {
+        const hits = roleNames.filter((n) => new RegExp(`['"\`]${n}['"\`]`).test(m[0]));
+        if (hits.length >= 3) fail(gate, `${relative(ROOT, f)}: 角色清单硬编码（[...] 数组块含 ${hits.length} 个角色名：${hits.join(', ')}）——清单事实源 = 盘上 presets/，JS 用 scripts/lib/roles.mjs`);
+      }
+    }
+  }
+}
+
 // ── 汇报 ──
-const gates = ['md-utf8-newline', 'md-links', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'proposal-scheduled', 'secrets-untracked'];
+const gates = ['md-utf8-newline', 'md-links', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync'];
 const failed = new Set(failures.map((f) => f.match(/^\[(.+)\]/)[1]));
 for (const g of gates) console.log(`${failed.has(g) ? 'FAIL' : 'PASS'}  ${g}`);
 for (const n of notes) console.log(`note  ${n}`);

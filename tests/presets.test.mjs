@@ -4,16 +4,21 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { presetRoles } from '../scripts/lib/roles.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
-const ROLES = ['lead', 'scout', 'analyst', 'critic'];
+// 角色清单事实源 = 盘上 presets/（基础整治 §3.2）；本测试文件不再持有副本清单
+const ROLES = presetRoles(ROOT);
 
-test('四角色 preset 齐备且 id 规范', () => {
+test('角色清单 = 盘上 presets/ 目录（单一事实源），数量哨兵咬 D2', () => {
+  // 访问器输出与直接 readdir 对账（防访问器自身漂移：改读别处/过滤丢失）
   const dirs = readdirSync(PRESETS, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
-  assert.deepEqual([...dirs].sort(), [...ROLES].sort());
+  assert.deepEqual(ROLES, [...dirs].sort(), 'presetRoles() 枚举 ≠ 盘上目录——访问器漂移');
   for (const id of dirs) assert.match(id, /^[a-z0-9][a-z0-9-]*$/);
+  // 数量哨兵：增删角色 = 推翻 D2（角色 = 4 个），先在 docs/00-index.md 台账登记新 D 号再动代码
+  assert.equal(ROLES.length, 4, `角色数量 ${ROLES.length} ≠ 4（D2）——增删角色即推翻 D2，先登记新 D 号（AGENTS.md §偏离登记簿）`);
 });
 
 test('每个角色三件套完整', () => {

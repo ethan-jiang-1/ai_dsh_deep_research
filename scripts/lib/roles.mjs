@@ -1,0 +1,13 @@
+// roles.mjs — 角色清单的单一事实源访问器（基础整治 §3.2）。
+// 事实源 = 盘上 packages/deep-research-pack/presets/ 目录本身；任何消费点不得
+// 再硬编码角色清单（verify 门禁 role-list-sync 咬单行 ≥3 角色名与 [...] 数组块）。
+// 零依赖（本仓纪律：不引入 npm 依赖——偏离登记簿伴随行）。
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
+
+/** 枚举 pack 盘上角色目录（id 规范的目录即角色；preset.yml 缺席由 verify preset-structure 咬），字典序。 */
+export const presetRoles = (root) => readdirSync(join(root, 'packages', 'deep-research-pack', 'presets'), { withFileTypes: true })
+  .filter((d) => d.isDirectory())
+  .map((d) => d.name)
+  .filter((n) => /^[a-z0-9][a-z0-9-]*$/.test(n))
+  .sort();

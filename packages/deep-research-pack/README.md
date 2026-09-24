@@ -16,7 +16,10 @@ Deep Research 插件包：四角色 preset + host bundle 行。当前为**纯配
 
 ## 新增一个研究角色
 
+**第 0 步（先于一切代码）**：增删角色 = 推翻 D2（角色 = 4 个，见 docs/00-index.md 台账）——先在台账登记新 D 号，再动手。tests 的数量哨兵（tests/presets.test.mjs）会机械拦住没登记的增删。
+
 1. `presets/<role>/` 三件套：`preset.yml`（name/description/order）+ `agent.cordis.yml`（自包含组合：persona 行 + skills roots + 工具行 + agent-instructions 行）+ `skills/<n>/SKILL.md`（frontmatter `name` = 目录名）；
-2. 结构门禁：verify 门禁 3（preset-structure）+ 门禁 6（行引用的 `@deepseek-ai/*` 全进 peerDependencies）；
+2. 结构门禁：verify 门禁 preset-structure + 门禁 row-deps（行引用的 `@deepseek-ai/*` 全进 peerDependencies）；
 3. roster 自动发现：bundle 的 agent-presets 行 `roots` 指向 `presets/`，新角色无需逐个登记 bundle 行；
-4. 完成定义 = preset-smoke 真挂载绿（L1 面，keyless）。
+4. 消费点**无需逐个改**：角色清单事实源 = 盘上 `presets/` 目录（基础整治 §3.2）——`preset-smoke` / `release-smoke` / `team-preflight-smoke` / `boot-run.sh` / `tests` 全部目录枚举。唯二要补的：`l4-lite-smoke` 的 `PROMPTS` 加该角色的标记 prompt（缺了 fail-loud 退出）；`scripts/l4-lite-smoke.mjs` 之外若新写脚本，用 `scripts/lib/roles.mjs` 枚举，别手抄清单（verify 门禁 `role-list-sync` 咬硬编码）；
+5. 完成定义 = preset-smoke 真挂载绿（L1 面，keyless）。

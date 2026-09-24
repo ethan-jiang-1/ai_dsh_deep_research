@@ -35,7 +35,7 @@
 | # | 决定 | 依据/出处 |
 |---|---|---|
 | D1 | **自写包 = 1 个**（`deep-research-pack`）；行多包少，角色是 preset 目录不是包 | company D1 同构；[10-architecture](./design/10-architecture.md) |
-| D2 | **角色 = 4 个**：Lead（主编）/ Scout（侦察）/ Analyst（分析）/ Critic（核查）；wave2 综合归 Lead（最薄队形；专职 synthesizer 视 run 实测再拆） | 用户指令（多角色分工）；[20-roles](./design/20-roles.md) |
+| D2 | **角色 = 4 个**：Lead（主编）/ Scout（侦察）/ Analyst（分析）/ Critic（核查）；wave2 综合归 Lead（最薄队形；专职 synthesizer 视 run 实测再拆）。**角色清单的事实源 = 盘上 `packages/deep-research-pack/presets/` 目录**（基础整治 §3.2）：JS 消费点经 `scripts/lib/roles.mjs` 枚举、bash 用目录枚举，硬编码清单被 verify 门禁 `role-list-sync` 咬；增删角色 = 推翻本条，先登记新 D 号（tests 数量哨兵会拦） | 用户指令（多角色分工）；[20-roles](./design/20-roles.md) |
 | D3 | **协作主通道 = Agent Teams**（spawn_teammate 组队 + 任务板）；单点快捷查证走 one-shot subagent——续驶语义归 team（company D18 实证边界：team-scoped 会话里 continuable child 不可达，不重蹈） | 用户指令；company D18；[10-architecture §3](./design/10-architecture.md) |
 | D4 | **方法论内核 = codex harness 考古十条**（两 HITL 锚点 + 三波 + 证据身份链 + 声明式质量门 + 反伪造审计）；markdown 控制面/CLI 状态机/手工队列**弃用**，DSH 原生载体承接 | [方法论映射](./design/30-methodology-mapping.md)；[harness 考古报告](../notes/research/2026-09-24-deep-research-harness-analysis.md) |
 | D5 | **证据身份链 = 唯一自建残留**：evidence frontmatter 文件契约 + critic 狩猎，不做 CLI 引擎（完成判定锚定文件事实而非账本外观——codex 教训 1 的轻量等价物） | [30 §证据身份链](./design/30-methodology-mapping.md)；evaluation.md L3 判据 3 |

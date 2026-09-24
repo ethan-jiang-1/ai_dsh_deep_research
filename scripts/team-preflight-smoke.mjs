@@ -17,6 +17,7 @@ import { randomUUID } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { presetRoles } from './lib/roles.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (name, fallback) => {
@@ -54,11 +55,11 @@ const profDir = join(home, 'profiles', PROFILE);
     const b = new Set(m?.dsh?.profile?.bundles ?? []);
     ok = b.has('dsh-deep-research-pack') && b.has('@deepseek-ai/dsh-experimental-agent-team-profile');
   }
-  for (const r of ['lead', 'scout', 'analyst', 'critic']) {
+  for (const r of presetRoles(ROOT)) {
     ok = ok && existsSync(join(profDir, 'node_modules', 'dsh-deep-research-pack', 'presets', r, 'preset.yml'));
   }
   if (!ok) {
-    console.error('team-preflight: research profile 组合不完整（本包 + vendor 层 + 四角色）——先跑 dev/boot-run.sh 再来');
+    console.error('team-preflight: research profile 组合不完整（本包 + vendor 层 + 盘上全部角色 preset）——先跑 dev/boot-run.sh 再来');
     process.exit(2);
   }
 }

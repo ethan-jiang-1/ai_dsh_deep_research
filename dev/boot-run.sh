@@ -21,14 +21,19 @@ RUNTMP="$ROOT/dev/smoke-workspace/run-pack"
 LAYER_VER="$(node -e "console.log(require('$PACKDIR/package.json').dsh.compatibility.dshReleases[0].replace(/^dsh-v/,''))")"
 LAYER="@deepseek-ai/dsh-experimental-agent-team-profile@$LAYER_VER"
 
-# 组合在位 = bundles 含本包与 vendor 层 + 安装副本四角色 preset 在位
+# 组合在位 = bundles 含本包与 vendor 层 + 安装副本每个盘上角色 preset 在位。
+# 角色清单从本仓 pack 盘上目录枚举（单一事实源——基础整治 §3.2；硬编码清单会让
+# profile_ok 在新增角色后永远返回假，幂等静默失效、每次调用都走重建分支）。
 profile_ok() {
   [ -f "$PROFDIR/package.json" ] || return 1
   node -e "
     const b = new Set(require('$PROFDIR/package.json').dsh?.profile?.bundles ?? []);
     process.exit(b.has('dsh-deep-research-pack') && b.has('@deepseek-ai/dsh-experimental-agent-team-profile') ? 0 : 1);
   " || return 1
-  for r in lead scout analyst critic; do
+  local r
+  for r in "$PACKDIR"/presets/*/; do
+    r="${r%/}"; r="${r##*/}"
+    [ -f "$PACKDIR/presets/$r/preset.yml" ] || continue
     [ -f "$PROFDIR/node_modules/dsh-deep-research-pack/presets/$r/preset.yml" ] || return 1
   done
 }

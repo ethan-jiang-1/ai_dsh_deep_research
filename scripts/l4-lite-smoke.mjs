@@ -13,6 +13,7 @@ import { randomUUID } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { presetRoles } from './lib/roles.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OVERLAY = join(ROOT, 'dev', 'research.overlay.yml');
@@ -123,20 +124,35 @@ const check = (label, fn) => fn().then(
   (error) => { failures.push(`${label}: ${error.message}`); console.log(`  FAIL ${label}: ${error.message}`); },
 );
 
-// 每角色：一条消息断言 assistant 响应；scout 额外强制 web_search 工具调用
+// 每角色：一条消息断言 assistant 响应；scout 额外强制 web_search 工具调用。
+// 角色清单事实源 = 盘上 presets/（§3.2）；PROMPTS 只是已知角色的 prompt 覆盖映射——
+// 盘上冒出新角色而无覆盖、或覆盖键漂移出盘上集合，都 fail-loud（不再静默忽略）。
+const ROLES = presetRoles(ROOT);
 const PROMPTS = {
   lead: { text: '这是一次连通性冒烟测试。请不要使用任何工具，只回复这几个字：就绪-LEAD', marker: '就绪-LEAD' },
   scout: { text: '这是一次连通性冒烟测试。请用 web_search 工具搜索 DeepSeek API，然后只回复：搜索完成-SCOUT', marker: '搜索完成-SCOUT' },
   analyst: { text: '这是一次连通性冒烟测试。请不要使用任何工具，只回复这几个字：就绪-ANALYST', marker: '就绪-ANALYST' },
   critic: { text: '这是一次连通性冒烟测试。请不要使用任何工具，只回复这几个字：就绪-CRITIC', marker: '就绪-CRITIC' },
 };
+for (const role of ROLES) {
+  if (PROMPTS[role] === undefined) {
+    console.error(`l4-lite: 盘上角色 ${role} 无 prompt 覆盖——l4-lite 是全角色冒烟，请在 PROMPTS 增加该角色的标记 prompt`);
+    process.exit(2);
+  }
+}
+for (const key of Object.keys(PROMPTS)) {
+  if (!ROLES.includes(key)) {
+    console.error(`l4-lite: PROMPTS 覆盖键 ${key} 不在盘上角色集合（${ROLES.join(', ')}）——覆盖映射漂移，删掉或改名`);
+    process.exit(2);
+  }
+}
 
 const { child, token } = await boot();
 try {
   const base = `http://127.0.0.1:${String(PORT)}`;
   const cookie = await authenticate(token);
   const sessionIds = new Map();
-  for (const role of Object.keys(PROMPTS)) {
+  for (const role of ROLES) {
     await check(`${role} 会话挂载`, async () => {
       const created = await rpc(base, cookie, 'session/create', { request: { cwd: SMOKE_CWD, agentPreset: role } });
       const id = created?.id ?? created?.sessionId;

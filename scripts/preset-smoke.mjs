@@ -14,11 +14,13 @@ import { spawn } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { presetRoles } from './lib/roles.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
-const ROLES = ['lead', 'scout', 'analyst', 'critic'];
+// 角色清单事实源 = 盘上 presets/ 目录（§3.2；硬编码清单被 verify role-list-sync 咬）
+const ROLES = presetRoles(ROOT);
 const OVERLAY = join(ROOT, 'dev', 'research.overlay.yml');
 
 const arg = (name, fallback) => {
