@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'entry-budget'];
+const gates = ['md-utf8-newline', 'md-links', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'entry-budget'];
 
 const failures = [];
 const notes = [];
@@ -244,6 +244,38 @@ function roadmapQueue() {
     if (!/^> 状态：\*{0,2}rejected/m.test(text))
       fail(gate, `notes/rejected/${ent}: 缺 rejected 状态行`);
   });
+}
+
+// ── 门禁 10：vendor-pin（vendor/dsh submodule 在位且钉住 dsh-v0.1.5-rc.2 = fb2c4b9e；
+//    D10 销账的机械面——机制权威自持，队列「vendor-submodule-and-pnpm-dsh」）──
+{
+  const gate = 'vendor-pin';
+  const PIN = 'fb2c4b9e698e30edb738bca4cf0618587db7d203';
+  if (!existsSync(join(ROOT, '.gitmodules'))) fail(gate, '.gitmodules 缺席');
+  else {
+    const gm = readFileSync(join(ROOT, '.gitmodules'), 'utf8');
+    if (!/path = vendor\/dsh/.test(gm)) fail(gate, '.gitmodules 缺 vendor/dsh 条目');
+    if (!/url = https:\/\/github\.com\/deepseek-ai\/deepseek-harness\.git/.test(gm))
+      fail(gate, '.gitmodules URL 非 deepseek-harness 正源');
+  }
+  const r = spawnSync('git', ['submodule', 'status', 'vendor/dsh'], { cwd: ROOT, encoding: 'utf8' });
+  const m = r.stdout ? /^[-+ ]?([0-9a-f]{40})/.exec(r.stdout.trim()) : null;
+  if (!m) fail(gate, 'submodule status 不可读——检查 git submodule init/update');
+  else if (m[1] !== PIN) fail(gate, `vendor/dsh 钉在 ${m[1].slice(0, 8)}——应为 ${PIN.slice(0, 8)}（dsh-v0.1.5-rc.2）`);
+}
+
+// ── 门禁 11：vendor-clean（vendor/dsh 只读铁律：零未提交改动——机制权威不许就地改）──
+// ⚠ 子模块 git 调用必须剥掉继承的 GIT_* 环境变量：pre-commit 语境里 git 注入 GIT_DIR=
+//    父仓 .git，会覆盖 -C vendor/dsh 的仓库发现 → status 不可用（红）——两次 pre-commit
+//    拦截实证，非瞬态。
+{
+  const gate = 'vendor-clean';
+  const cleanEnv = Object.fromEntries(
+    Object.entries(process.env).filter(([k]) => !/^GIT_(DIR|INDEX_FILE|WORK_TREE|NAMESPACE)/.test(k)),
+  );
+  const r = spawnSync('git', ['-C', 'vendor/dsh', 'status', '--porcelain'], { cwd: ROOT, encoding: 'utf8', env: cleanEnv });
+  if (r.status !== 0) fail(gate, 'vendor/dsh git status 不可用——submodule 未初始化？（或 git 环境变量污染，见上方注释）');
+  else if (r.stdout.trim()) fail(gate, `vendor/dsh 有未提交改动（只读铁律）：${r.stdout.trim().split('\n')[0]}…`);
 }
 
 // ── 门禁 8：proposal-scheduled（proposed/ 每提案必须在 roadmap §队列 有归宿；搁置池/头注不算）──

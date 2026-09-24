@@ -9,7 +9,7 @@
 // peers 装不进 profile 无碍（声明语义；行解析安装锚先于 profile 目录——company release.md
 // §依赖姿态，本仓源码基线 = company 工作区即安装锚）。
 //
-// 前置：DSH_HOME 已设（source dev/env.sh）；DSH_SRC（默认 /Users/bowhead/ai_dsh_company）。
+// 前置：DSH_HOME 已设（source dev/env.sh）；DSH_SRC 默认本仓根（vendor/dsh submodule）。
 // 用法：source dev/env.sh && node scripts/release-smoke.mjs
 
 import { spawnSync } from 'node:child_process';
@@ -28,7 +28,7 @@ if (!home) {
   console.error('release-smoke: 需要 DSH_HOME（先 source dev/env.sh）');
   process.exit(2);
 }
-const dshSrc = process.env.DSH_SRC ?? '/Users/bowhead/ai_dsh_company';
+const dshSrc = process.env.DSH_SRC ?? ROOT; // 本仓根 = 安装锚（vendor/dsh submodule 在 workspace；原默认 company 借用已随 D10 销账）
 const bin = join(dshSrc, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
 if (!existsSync(bin)) {
   console.error(`release-smoke: 机制基线源码不在位（${bin}）——检查 DSH_SRC`);

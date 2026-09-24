@@ -1,8 +1,49 @@
 packages:
   - packages/*
+  # DSH 的包在 packages/<group>/<pkg> 两层深（vendor 自己的 workspace 也是 */* 写法）；
+  # 只写一层 → "No matching version found for @deepseek-ai/dsh-acp@*"（company 2026-09-21 实证）。
+  - vendor/dsh/packages/*/*
+  - vendor/dsh/apps/*
+  # vendored cordis 全家（cordis/cosmokit/schemastery/loader/...）：DSH 依赖它们为
+  # workspace 包（其 vendor/* glob 的镜像），缺了 → apps/cli 报 cordis PKG_NOT_FOUND。
+  - vendor/dsh/vendor/*
+  # node-addon-system 源树（webworker-runtime 依赖 @deepseek-ai/node-addon-system，
+  # 缺了 → PKG_NOT_FOUND，company 2026-09-21 实证）。benchmarks/website/python 暂无需求，不加。
+  - vendor/dsh/native/system
+  - vendor/dsh/native/system/packages/*
 
-# 偏离登记（notes/implemented/2026-09-24-r1-scaffold.md §偏离）：
-# vendor/dsh pinned submodule 延后至队列「vendor-submodule-and-pnpm-dsh」。当前为纯配置
-# pack（零自写 JS、零构建），不需要 vendor 工作区；vendor 树的 workspace 五件套
-# （packages/*/* 等）随该队列条目落地时一并加入，镜像 ai_dsh_company/pnpm-workspace.yaml。
+# 组合/构建策略镜像 vendor/dsh/pnpm-workspace.yaml（路径改指 vendor 内，照抄
+# ai_dsh_company/pnpm-workspace.yaml——队列「vendor-submodule-and-pnpm-dsh」落地，D10 销账）；
+#   vendor 换 tag 时随升级环（roadmap 触发型条目「升 pin 重校」）同步 diff 这一段。
 linkWorkspacePackages: true
+
+# cordis 强制链接为本仓实证新增（company 未写但它的历史 lock 已链接；本仓 2026-09-24
+# 全新解析时 registry 4.0.2 混进闭包 → profile-boot 的 FiberState 命名导出炸——
+# registry 版与 vendored fork 导出面不同。cosmokit/schemastery 照抄 company）。
+overrides:
+  '@deepseek-ai/cordis': 'link:vendor/dsh/vendor/cordis'
+  '@deepseek-ai/cosmokit': 'link:vendor/dsh/vendor/cosmokit'
+  '@deepseek-ai/schemastery': 'link:vendor/dsh/vendor/schemastery'
+
+peerDependencyRules:
+  allowedVersions:
+    typescript: '>=5 <7'
+
+# pnpm 10+ strictDepBuilds：未列名的带构建脚本依赖会被硬拒——镜像 vendor 清单
+# （其中 file: 条目在本 repo 不命中任何包，无害保留）。
+allowBuilds:
+  esbuild: true
+  lefthook: true
+  node-pty: true
+  '@google/genai': false
+  protobufjs: false
+  node-addon-require-builtin: false
+  koffi: true
+  '@deepseek-ai/dsh-subprocess-local@file:packages/subprocess/subprocess-local': true
+  electron-winstaller: false
+  msgpackr-extract: false
+
+patchedDependencies:
+  # 只镜像闭包内实际命中的补丁；@yao-pkg/pkg（vendor 打单文件 exe 用）不在本 repo
+  # 闭包，声明了会被 ERR_PNPM_UNUSED_PATCH 硬拒（company 2026-09-21 实证）。
+  node-pty@1.2.0-beta.15: vendor/dsh/patches/node-pty@1.2.0-beta.15.patch

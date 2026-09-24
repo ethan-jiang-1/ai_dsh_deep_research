@@ -26,6 +26,7 @@ README.md                 人类门面（Start Here 链接 + 稳定原则摘要�
 roadmap.md                队列 + 搁置池（纯队列：条目完成即离队；▶ = 全仓唯一"当前"指针）
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 随队列条目——见 pnpm-workspace.yaml 头注）
 packages/deep-research-pack/   唯一自写包（纯配置）：presets/<role>/（preset.yml + agent.cordis.yml[persona 行/skills/工具行] + skills/<n>/SKILL.md）、cordis.patch.yml（bundle 行）；新增角色步骤见包 README
+vendor/dsh/               pinned submodule（tag `dsh-v0.1.5-rc.2` @ `fb2c4b9e`，只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，D10 已销账）
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、drt_<slug>/（run bundle）、templates/run/
 docs/                    00-index（地图+决策台账+术语映射）→ design/10-30 → guides/60（开发环）+ guides/61（run 操作指南）+ evaluation.md（验收合同）
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）：
@@ -101,7 +102,7 @@ web 搜索无需独立 key——base 的 `web-search-deepseek` 行 `apiKeyEnv: D
 
 | 实体 | 位置 | 角色 |
 |---|---|---|
-| ① 开发基线（唯一权威） | `/Users/bowhead/ai_dsh_company/vendor/dsh/`（钉住 tag `dsh-v0.1.5-rc.2`，**只读借用**——D10 偏离：本仓 submodule 延后至队列「vendor-submodule-and-pnpm-dsh」） | 机制核对与验证会话一律走它（dev/env.sh 的 dsh 指向此处源码） |
+| ① 开发基线（唯一权威） | `vendor/dsh/`（本仓 pinned submodule，tag `dsh-v0.1.5-rc.2` @ `fb2c4b9e`，只读铁律——verify vendor-pin/vendor-clean 把守；D10 已销账） | 机制核对与验证会话一律走它（dev/env.sh 的 dsh 函数与 `pnpm dsh` 从此处源码起） |
 | ② 日用全局安装 | npm 全局（`which dsh`） | 与本 repo 开发无关；版本随全局漂移，行为不作机制依据 |
 | ③ 参考仓 | `/Users/bowhead/ai_dsh_company/`（插件工程范式）、`/Users/bowhead/ai_tool_deepresearch/`（方法论源头） | 只读参考；吸收落点登记在 00-index §外部研究材料 |
 
@@ -132,8 +133,7 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 
 | D 号 | 偏离 | 约束证据 | 归宿 |
 |---|---|---|---|
-| D10 | 无 vendor submodule（company 范式是钉 SHA submodule + workspace 五件套） | 首版纯配置包零构建，无源码级机制需求；同 tag checkout 已存在（company 仓，只读借用） | 队列「vendor-submodule-and-pnpm-dsh」；verify 的 vendor-pin 门禁随其启用 |
-| （伴随） | node:test 而非 vitest；verify 用 regex 断言而非 YAML 解析 | 首版零 npm 依赖原则；断言对象是自控文件 | 随队列「vendor-submodule-and-pnpm-dsh」重估 |
+| （伴随） | node:test 而非 vitest；verify 用 regex 断言而非 YAML 解析 | ~~首版零 npm 依赖原则~~（vendor 落地后已引入 tsx/构建链）——**已重估维持**：测试栈零迁移收益（23 tests 绿即证据），断言对象是自控文件 | 重估记录 = [vendor-submodule 毕业 Note](notes/implemented/2026-09-24-vendor-submodule.md)（2026-09-24）；D10 已随同条目销账 |
 
 ## 术语速查
 

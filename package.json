@@ -10,6 +10,10 @@
   },
   "scripts": {
     "verify": "node scripts/verify.mjs",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "dsh": "node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4"
   }
 }

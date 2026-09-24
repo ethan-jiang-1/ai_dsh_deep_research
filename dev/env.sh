@@ -8,9 +8,9 @@
 #   ② 代码面：拦截裸 `dsh` —— PATH 里的全局安装随升级漂移，不作机制依据；机制核对
 #      一律走钉住 tag 的源码基线。
 #
-# ⚠ D10 偏离（当前）：本仓尚无 vendor submodule。机制基线暂指向 company 仓的钉 tag
-#   checkout（同一 tag `dsh-v0.1.5-rc.2`，只读借用）；队列「vendor-submodule-and-pnpm-dsh」
-#   落地后改为本仓 `node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts`。
+# ⚠ 已销账（原 D10 偏离）：vendor submodule 已落地（队列「vendor-submodule-and-pnpm-dsh」，
+#   2026-09-24 毕业）。机制基线 = 本仓 vendor/dsh（pinned tag dsh-v0.1.5-rc.2，verify 门禁
+#   vendor-pin/vendor-clean 机械把守）；不再借用 company checkout。
 
 # ① 数据面（⚠ 无条件覆盖，不用 ${DSH_HOME:-…} 预设优先）
 #   实证（2026-09-24 l4-lite 复跑首跑栽坑）：DSH 会话内（agent shell / GUI 环境）自带
@@ -24,13 +24,15 @@ fi
 export DSH_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/dev/harness-home"
 mkdir -p "$DSH_HOME"
 
-# ② 代码面：dsh = 钉 tag 源码基线（company checkout，只读）；确要日用全局版：command dsh
-_dsh_src="/Users/bowhead/ai_dsh_company/vendor/dsh/apps/cli/src/bin.ts"
+# ② 代码面：dsh = 本仓 vendor 钉 tag 源码基线（vendor/dsh submodule，只读）；确要日用全局版：command dsh
+#    前置：根 pnpm install 已跑（tsx + vendor workspace 依赖在 node_modules）。
+_repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+_dsh_src="${_repo_root}/vendor/dsh/apps/cli/src/bin.ts"
 dsh() {
   if [ -f "$_dsh_src" ]; then
-    (cd /Users/bowhead/ai_dsh_company && node --import tsx/esm "$_dsh_src" "$@")
+    (cd "${_repo_root}" && node --import tsx/esm "$_dsh_src" "$@")
   else
-    echo "dev/env.sh: 机制基线源码不可达（${_dsh_src}）——检查 company checkout 是否在位；" >&2
+    echo "dev/env.sh: 机制基线源码不可达（${_dsh_src}）——检查 vendor/dsh submodule（git submodule update --init）；" >&2
     echo "  机制核对前不要静默退回全局 dsh（版本漂移，不作依据）。确要日用：command dsh" >&2
     return 1
   fi
@@ -39,7 +41,7 @@ dsh() {
 # 提示（source 时可见一次）——变量一律花括号：全角括号紧跟 $VAR 会被 bash 当成变量名
 # 的一部分（$DSH_HOME（… → 变量 "DSH_HOME（"），set -u 的 source 方必炸（boot-run 实证）。
 echo "dev/env.sh: DSH_HOME=${DSH_HOME}（数据面隔离）"
-echo "dev/env.sh: dsh → 钉 tag 源码基线（company checkout 借用，D10 偏离；日用全局版用 command dsh）"
+echo "dev/env.sh: dsh → 本仓 vendor/dsh 钉 tag 源码基线（D10 已销账；日用全局版用 command dsh）"
 
 # ③ 提交面：pre-commit 钩子（dev/hooks/pre-commit：verify+tests 红灯拦 commit——收尾纪律
 #    "必跑"的机器化，教训实证见 notes/implemented/2026-09-24-agent-friendly-polish.md）。

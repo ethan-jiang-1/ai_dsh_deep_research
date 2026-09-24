@@ -2,8 +2,8 @@
 
 > 层：设计（为什么）。工程范式照搬 `ai_dsh_company`（解剖报告见
 > [notes/research/2026-09-24-dsh-plugin-repo-anatomy.md](../../notes/research/2026-09-24-dsh-plugin-repo-anatomy.md)）；
-> DSH 机制的权威在 vendor 树（钉住 tag `dsh-v0.1.5-rc.2`；本仓暂无 submodule——D10 偏离，
-> 机制核对暂用 `/Users/bowhead/ai_dsh_company/vendor/dsh` 同 tag 只读树，偏离登记见 AGENTS.md）。
+> DSH 机制的权威在本仓 `vendor/dsh/` pinned submodule（tag `dsh-v0.1.5-rc.2` @ `fb2c4b9e`，
+> 只读铁律；D10 已销账——队列「vendor-submodule-and-pnpm-dsh」2026-09-24 毕业）。
 
 ## 1. repo 形态
 
@@ -11,9 +11,10 @@
 
 ```
 packages/deep-research-pack/   唯一自写包：presets/<role>/ + cordis.patch.yml（纯配置，零 JS）
-research-workspace/            运行场：角色会话 cwd（研究手册 + runs/ + templates/）
+research-workspace/            运行场：角色会话 cwd（研究手册 + drt_<slug>/（run bundle）+ templates/）
 docs/ notes/ scripts/ tests/ dev/   文档/决策/门禁/回归/环境（分层原则见 00-index）
-vendor/dsh/                    （队列「vendor-submodule-and-pnpm-dsh」落地）pinned submodule，只读铁律
+vendor/dsh/                    pinned submodule（dsh-v0.1.5-rc.2 @ fb2c4b9e，只读铁律——verify
+                               vendor-pin/vendor-clean 把守；workspace 五件套吸收其包，pnpm dsh 从此起）
 ```
 
 ### 第一性分层：harness / run bundle（D17）
@@ -75,11 +76,13 @@ vendor/dsh/                    （队列「vendor-submodule-and-pnpm-dsh」落�
 ## 5. 环境与验证
 
 - `dev/env.sh`：DSH_HOME 重定向到 `dev/harness-home`（数据面隔离）+ 裸 dsh 拦截（代码面
-  隔离——全局安装随升级漂移，不作机制依据）；
+  隔离——全局安装随升级漂移，不作机制依据）；机制基线 = 本仓 `vendor/dsh/`（env.sh 的
+  dsh 函数与根 `pnpm dsh` 均从钉 tag 源码起，前置 = 根 pnpm install + vendor 一次
+  `pnpm run build` 产 lib/——company release.md 同款流程）；
 - 验证五面见 [evaluation.md](../evaluation.md)；preset 类改动的完成定义 = preset-smoke 真挂载。
 
 ## 6. 偏离登记（默认严格 DSH/company 纪律，偏离须 D 号 + 约束证据）
 
 簿记正本 = [AGENTS.md §偏离登记簿](../../AGENTS.md)——一处事实一个家，本节不复制表（防双家漂移）。
-当前登记两条：D10（vendor submodule 延后，机制核对暂借 company 同 tag 树只读）与伴随的
-node:test/regex 断言选择；均随队列「vendor-submodule-and-pnpm-dsh」销账或重估。
+当前登记一条：伴随的 node:test/regex 断言选择（已重估维持——零迁移收益，23 tests 绿即证据）；
+D10（vendor submodule 延后）已随队列条目毕业销账（2026-09-24）。

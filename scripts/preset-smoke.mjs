@@ -6,7 +6,7 @@
 //   （组合与冷读，无模型调用）——session/create 才会触发行 config 校验，roster/dump
 //   看不见（company postmortem 0001：挂载失败只有真会话抓得到，UI 还吞错）。
 //
-// 前置：DSH_HOME 已设（source dev/env.sh）；DSH_SRC（默认 /Users/bowhead/ai_dsh_company，
+// 前置：DSH_HOME 已设（source dev/env.sh）；DSH_SRC 默认本仓根（vendor/dsh submodule）。
 //   钉 tag 源码基线 + tsx 解析树——D10 偏离下的机制权威）。
 // 用法：source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs [--port 3099]
 
@@ -54,7 +54,7 @@ for (const r of ROLES) {
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
 step(!!home, 'env: DSH_HOME 已设置（先 source dev/env.sh）', '未设置则只能停在 keyless 预检');
 
-const dshSrc = process.env.DSH_SRC ?? '/Users/bowhead/ai_dsh_company';
+const dshSrc = process.env.DSH_SRC ?? ROOT; // 本仓根 = 安装锚（vendor/dsh submodule 在 workspace；原默认 company 借用已随 D10 销账）
 const bin = join(dshSrc, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
 
 if (process.env.DSH_SMOKE_REAL !== '1') {
