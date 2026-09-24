@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // verify.mjs — L0 结构门禁（keyless，零依赖）。
-// 门禁清单与判据定义：docs/evaluation.md §L0；每条门禁的反证记录：notes/implemented/。
+// 门禁登记表（正本）：docs/evaluation.md §L0——与本脚本 gates 数组经门禁 gate-ledger-sync
+// 机械对账（登记与实现漂移即红）；每条门禁的反证记录 = 表末列所指 notes/。
 // 移植自 ai_dsh_company/scripts/verify.mjs（按当前规模裁剪；vendor-pin/client-half/proposal
 // 全量版随对应能力落地启用，见根 roadmap.md）。
 
@@ -12,6 +13,9 @@ import { fileURLToPath } from 'node:url';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
+
+// 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
+const gates = ['md-utf8-newline', 'md-links', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync'];
 
 const failures = [];
 const notes = [];
@@ -45,25 +49,30 @@ const mdFiles = allFiles.filter((f) => f.endsWith('.md'));
   }
 }
 
-// ── 门禁 2：md-links（docs/notes/研究工作区/包文档/根 README/AGENTS 的相对链接必须可解析）──
+// ── 门禁 2：md-links（所有 tracked .md 的相对链接必须可解析；git ls-files 驱动——基础整治 C10）──
+// 原版只扫具名目录（docs/notes/…），根目录其余 tracked .md 逃检——本单子文件初稿 31 条死链
+// 同刻全绿即实证。覆盖面 = tracked 集合（新文件 git add 后纳入）；反引号裸路径不检（设计）。
 {
   const gate = 'md-links';
-  const scopes = ['docs', 'notes', 'research-workspace', 'packages', 'roadmap.md', 'README.md', 'AGENTS.md']
-    .map((s) => join(ROOT, s))
-    .filter((p) => existsSync(p));
-  const inScope = (f) => scopes.some((s) => f === s || f.startsWith(s + '/'));
-  for (const f of mdFiles.filter(inScope)) {
-    const text = readFileSync(f, 'utf8');
-    const lines = text.split('\n');
-    let inFence = false;
-    for (const line of lines) {
-      if (line.trimStart().startsWith('```')) inFence = !inFence;
-      if (inFence) continue;
-      for (const m of line.matchAll(/\[[^\]]*\]\(([^)\s]+)\)/g)) {
-        const target = m[1].split('#')[0];
-        if (!target || /^[a-z]+:\/\//i.test(target) || target.startsWith('mailto:')) continue;
-        const abs = resolve(dirname(f), target);
-        if (!existsSync(abs)) fail(gate, `${relative(ROOT, f)}: 链接不可解析 → ${target}`);
+  const r = spawnSync('git', ['ls-files', '*.md'], { cwd: ROOT, encoding: 'utf8' });
+  if (r.status !== 0) {
+    fail(gate, `git ls-files 不可用（${String(r.stderr).slice(0, 120)}）——本门禁覆盖面依赖仓库态，fail-loud`);
+  } else {
+    for (const rel of r.stdout.split('\n').filter(Boolean)) {
+      const f = join(ROOT, rel);
+      if (!existsSync(f)) continue; // 稀疏态防御
+      const text = readFileSync(f, 'utf8');
+      const lines = text.split('\n');
+      let inFence = false;
+      for (const line of lines) {
+        if (line.trimStart().startsWith('```')) inFence = !inFence;
+        if (inFence) continue;
+        for (const m of line.matchAll(/\[[^\]]*\]\(([^)\s]+)\)/g)) {
+          const target = m[1].split('#')[0];
+          if (!target || /^[a-z]+:\/\//i.test(target) || target.startsWith('mailto:')) continue;
+          const abs = resolve(dirname(f), target);
+          if (!existsSync(abs)) fail(gate, `${rel}: 链接不可解析 → ${target}`);
+        }
       }
     }
   }
@@ -224,8 +233,28 @@ const mdFiles = allFiles.filter((f) => f.endsWith('.md'));
   }
 }
 
+// ── 门禁 11：gate-ledger-sync（docs/evaluation.md §L0 门禁登记表 = 本脚本 gates 数组，不漂移）──
+// 抓取形状：表格行首列为 code span（`| `gate-name` |`）——evaluation.md 其他表首列非此形状，不误抓。
+{
+  const gate = 'gate-ledger-sync';
+  const evalPath = join(ROOT, 'docs', 'evaluation.md');
+  if (!existsSync(evalPath)) fail(gate, 'docs/evaluation.md 不存在');
+  else {
+    const ledger = new Set();
+    for (const line of readFileSync(evalPath, 'utf8').split('\n')) {
+      const m = /^\| `([a-z0-9-]+)` \|/.exec(line);
+      if (m) ledger.add(m[1]);
+    }
+    for (const g of gates) {
+      if (!ledger.has(g)) fail(gate, `evaluation.md §L0 登记表缺门禁：${g}——登记表与脚本必须同步`);
+    }
+    for (const l of ledger) {
+      if (!gates.includes(l)) fail(gate, `evaluation.md §L0 登记表多出门禁（脚本 gates 数组无此名）：${l}`);
+    }
+  }
+}
+
 // ── 汇报 ──
-const gates = ['md-utf8-newline', 'md-links', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync'];
 const failed = new Set(failures.map((f) => f.match(/^\[(.+)\]/)[1]));
 for (const g of gates) console.log(`${failed.has(g) ? 'FAIL' : 'PASS'}  ${g}`);
 for (const n of notes) console.log(`note  ${n}`);
