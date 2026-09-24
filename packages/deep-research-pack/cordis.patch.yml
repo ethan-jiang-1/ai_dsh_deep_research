@@ -29,7 +29,7 @@
       name: '@deepseek-ai/dsh-tool-present'
     # ── 团队机制行（agent-team / tool-agent-team）不在此声明（RFC m2-p1-run-channel A 定案）：
     #    组合归 vendor agent-team-profile 层（profile 装 @…-agent-team-profile@0.1.5-rc.2）——
-    #    行带实战 config + D18 机械禁令（control / list-agents 禁用、subagent 强制 one-shot）。
+    #    行带实战 config + company D18 机械禁令（control / list-agents 禁用、subagent 强制 one-shot）。
     #    实证（p1 scratch 实验）：本包 insert 同 id 行 = 双 insert 重复行（无 fail-loud 无合并）。──
     # ── 团队 Web 可视面（观察与调试任务起止的最简途径；vendor 层无此行，仍归本包）──
     - id: ui-agent-team

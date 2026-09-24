@@ -31,8 +31,8 @@ docs/                    00-index（地图+决策台账+术语映射）→ desig
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）：
                          intents.md → proposed/（RFC，一文件一条目）→ implemented/；
                          rejected/（否决理由，防复犯）；postmortem/（事故复盘）；research/（考古报告）
-scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）、team-preflight-smoke.mjs（team 机制预检）、run-dashboard.mjs（run 只读投影，boot-run 起）
-tests/                   keyless 回归（node:test，零依赖；layering 守卫禁真模型/网络/子进程）
+scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）、team-preflight-smoke.mjs（team 机制预检）、run-dashboard.mjs（run 只读投影，boot-run 起）、lib/roles.mjs（角色清单访问器，事实源=盘上 presets/）
+tests/                   keyless 回归（node:test，零依赖；layering 守卫禁真模型/网络/子进程；fixtures/ 测试夹具）
 dev/                     boot-run.sh（run 通道开跑：幂等装+boot web+仪表盘）、run-kickoff.mjs（run 会话驱动：建会话+发 kickoff prompt）、env.sh（双 home + dsh 机制基线）、research.overlay.yml（源码域 overlay，镜像 bundle 行）、harness-home/ 与 smoke-workspace/（gitignore 运行区）
 ```
 
@@ -46,8 +46,8 @@ dev/                     boot-run.sh（run 通道开跑：幂等装+boot web+仪
 记录过的坑——这些事实不在代码里，也不在 docs 里。
 
 - **读取触发（开工即做）**：按条目名或机制名检索 `notes/proposed/`、`notes/implemented/`、
-  `notes/postmortem/`，**只读命中的**，不通读全树。拿到决定、输掉的方案、边界与未核销清单
-  再动手；
+  `notes/postmortem/`、`notes/rejected/`（否决防复犯）、`notes/research/`（机制考古报告），
+  **只读命中的**，不通读全树。拿到决定、输掉的方案、边界与未核销清单再动手；
 - **写入触发（同 diff，非事后补）**：非平凡变更必须在**同一变更**里新增或更新 Note——纯机械
   编辑与局部错字除外。收尾格式（决定/输掉的方案/实际跑过的验证/环境状态）= guides/60 §4；
 - **`proposed/` = 队列条目的 RFC 全文**（一文件一条目），进门须在 roadmap 有条目（verify
@@ -73,7 +73,7 @@ source dev/env.sh                     # ⚠ 双 home + 裸 dsh 拦截（DSH_HOME
 node scripts/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真挂载档（keyless：roster+逐角色建会话+skills 隔离；--profile <p> --no-patch 切安装域通道）
 node scripts/release-smoke.mjs        # L2 真实安装形状（keyless：pack→干净 profile→plugin add→安装域冒烟；起真 DSH 环境，无模型调用）
 node scripts/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：四角色响应 + scout web_search 调用）
-node scripts/team-preflight-smoke.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + D18 one-shot worker 探针）
+node scripts/team-preflight-smoke.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + company D18 one-shot worker 探针）
 bash dev/boot-run.sh                  # run 通道开跑（幂等：组合校验/补装 → boot web 3081 → 仪表盘）；用法 = guides/61
 node scripts/run-dashboard.mjs --latest --root research-workspace/runs --out <html>   # run 只读投影（--watch 持续再生成）
 node dev/run-kickoff.mjs --port 3081 --token <横幅 token> --prompt-file <file>        # run 会话驱动（建会话+发 kickoff）

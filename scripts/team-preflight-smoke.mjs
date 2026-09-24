@@ -3,7 +3,7 @@
 // 定义：notes/proposed/2026-09-24-m2-p2-team-preflight RFC。仿 l4-lite 形状（标记法 +
 // 会话日志即真相），通道 = run 通道（--profile research 安装域，boot 形状同 dev/boot-run.sh）。
 // 断言：spawn_teammate 真调用 ×2 / list_agents / 成员会话建立 + 响应标记 / lead 的
-//   one-shot subagent 调用（D18 现状探针）/ 成员组合画像（发现型：agentPreset 字段 +
+//   one-shot subagent 调用（company D18 现状探针）/ 成员组合画像（发现型：agentPreset 字段 +
 //   工具面线索 → 打印事实，不硬断言——机制预读预期成员 = 裸代理，无角色 preset）。
 // 时序教训（首跑实证）：模型会在确认语里**早现标记词**，且回合含多步工具调用——等标记
 //   不等于等回合完成；这里用静默检测（日志行数连续 4 次轮询不变）等回合真正落定。
@@ -216,7 +216,7 @@ try {
     return `共 ${n} 次`;
   });
 
-  await check('lead 的 one-shot subagent 调用真实发生（D18 现状探针）', async () => {
+  await check('lead 的 one-shot subagent 调用真实发生（company D18 现状探针）', async () => {
     const n = countEvents(leadId, (line) => line.includes('"tool/call"') && line.includes('"name":"subagent"'));
     if (n < 1) throw new Error('subagent 调用未见（lead 可能跳过第 3 步或用了别的工具）');
     return `共 ${n} 次`;

@@ -57,7 +57,7 @@
 # ④ 研究工人：通用 subagent（one-shot 快进快出），用于单点快捷查证；团队协作
 #    （spawn_teammate / 任务板）来自 vendor agent-team-profile 层行（profile 安装；
 #    RFC m2-p1-run-channel A 定案）。one-shot 同层声明：实测 preset 行覆盖 profile 行，
-#    不对齐则层禁令（D18 机械强制 one-shot）被自家 continuable 声明抵消。
+#    不对齐则层禁令（company D18 机械强制 one-shot）被自家 continuable 声明抵消。
 - id: tool-subagent
   name: '@deepseek-ai/dsh-tool-subagent'
   config:
