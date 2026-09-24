@@ -78,7 +78,7 @@ node scripts/release-smoke.mjs        # L2 真实安装形状（keyless：pack�
 node scripts/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：四角色响应 + scout web_search 调用）
 node scripts/team-preflight-smoke.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + company D18 one-shot worker 探针）
 bash dev/boot-run.sh                  # run 通道开跑（幂等：组合校验/补装 → boot web 3081 → 仪表盘）；用法 = guides/61
-node scripts/run-dashboard.mjs --latest --root research-workspace --out <html>   # run 只读投影（--watch 持续再生成）
+node scripts/run-dashboard.mjs --latest --out <html>   # run 只读投影（多场扫描 + 步骤条 + HITL 等待横幅；--watch 持续再生成）
 node dev/run-kickoff.mjs --port 3081 --token <横幅 token> --prompt-file <file>        # run 会话驱动（建会话+发 kickoff）
 ```
 

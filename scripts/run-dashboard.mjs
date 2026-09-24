@@ -1,19 +1,31 @@
 #!/usr/bin/env node
-// run-dashboard — M2 run 只读观察面（RFC：notes/proposed/2026-09-24-m2-run-dashboard.md）
+// run-dashboard — M2 run 只读观察面（RFC：notes/proposed/2026-09-24-m2-run-dashboard.md
+// + debug-dashboard-plus：notes/proposed/2026-09-24-debug-dashboard-plus.md）
 //
 // 用法：
 //   node scripts/run-dashboard.mjs <runDir> [--out <html>]          一次性生成
-//   node scripts/run-dashboard.mjs --latest [--root <runsDir>] ...   永远画最新 run
+//   node scripts/run-dashboard.mjs --latest [--out <html>]          多场扫描取最新（SCENE_ROOTS）
 //   加 --watch --interval <秒> 持续再生成（配合页面 meta refresh；默认 5s）
 //
 // 原则（RFC 定死，勿破）：
 //   1. 投影不是真相——只读解析 run 文件，不写 run 目录，不缓存派生状态；
 //   2. 被动观察——不构成第三个交互点，不从观察面向角色发指令；
-//   3. keyless——纯 fs，无模型/网络/子进程；
+//   3. keyless——纯 fs + node:zlib（zstd 会话日志解压，HITL 等待检测用），无模型/网络/子进程；
 //   4. fail-soft——缺失/畸形文件显示"未开始 / 无法解析"并继续渲染其余部分。
 import { readFileSync, writeFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import * as zlib from 'node:zlib';
+
+/** 多 run 场根（debug-dashboard-plus）：drt 正规场 + ad-hoc 场（无契约，标注呈现不隐藏） */
+const SCENE_ROOTS = [
+  { dir: 'research-workspace', kind: 'drt', label: 'drt' },
+  { dir: 'dev/harness-home/runs', kind: 'ad-hoc', label: 'ad-hoc·无契约' },
+];
+/** lead 会话日志根（HITL 等待检测；$DSH_HOME/sessions/<cwd 组>/<会话>/session.v3.jsonl.zstd） */
+const SESSIONS_ROOT = 'dev/harness-home/sessions';
+/** web 日志（boot-run tee 的横幅，含 token URL——deep-link 用；缺席即不链） */
+const WEB_LOG = 'dev/smoke-workspace/web.log';
 
 // ── 纯解析函数（测试面；全部对畸形输入 fail-soft，永不 throw）──────────────────
 
@@ -43,10 +55,12 @@ function sectionBody(text, title) {
   return rest.join('\n');
 }
 
-/** question.md → { question, purpose, profile, depth, decisions }（缺节为 null） */
+/** question.md → { question, purpose, profile, depth, decisions }（缺节为 null）。
+ *  双形态容纳（debug-dashboard-plus）：模板契约节名 + ad-hoc 场的变体节名/表格行。 */
 export function parseQuestion(text) {
   const out = { question: null, purpose: null, profile: null, depth: null, decisions: 0 };
-  const qSec = sectionBody(text, '研究问题（定稿）');
+  let qSec = sectionBody(text, '研究问题（定稿）');
+  if (!qSec) qSec = sectionBody(text, '一句话问题'); // ad-hoc 变体
   if (qSec) {
     const line = qSec.split(/\r?\n/).find((l) => l.trim() && !l.trim().startsWith('<!--') && !l.trim().startsWith('<'));
     if (line) out.question = line.trim().replace(/^ <|> $/g, '').trim();
@@ -58,8 +72,10 @@ export function parseQuestion(text) {
   }
   const hSec = sectionBody(text, 'HITL1 Alignment Snapshot');
   if (hSec) {
-    const p = /^-\s+研究类型:\s*(.+)$/m.exec(hSec);
-    const d = /^-\s+深度与篇幅:\s*(.+)$/m.exec(hSec);
+    let p = /^-\s+研究类型:\s*(.+)$/m.exec(hSec);
+    let d = /^-\s+深度与篇幅:\s*(.+)$/m.exec(hSec);
+    if (!p) p = /^\|\s*研究类型\s*\|\s*([^|]+)\|/m.exec(hSec); // ad-hoc 表格行
+    if (!d) d = /^\|\s*深度与篇幅\s*\|\s*([^|]+)\|/m.exec(hSec);
     if (p) out.profile = p[1].trim();
     if (d) out.depth = d[1].trim();
   }
@@ -225,7 +241,171 @@ export function gapStats(findings) {
   return s;
 }
 
-/** 汇总模型：run 目录 → 一个可渲染对象（fail-soft，永不 throw） */
+// ── debug-dashboard-plus 新增纯函数（测试面）──────────────────────────────────
+
+/** 多 run 场扫描：全部场按 mtime 降序。drt 场只认 drt_*（桥接 symlink 经 statSync 跟随亦算）；
+ *  ad-hoc 场全收（标注"无契约"呈现，不隐藏）。根缺席 → 该场为空（fail-soft）。 */
+export function listScenes(roots = SCENE_ROOTS) {
+  const scenes = [];
+  for (const root of roots) {
+    try {
+      for (const d of readdirSync(root.dir)) {
+        try {
+          if (root.kind === 'drt' && !/^drt_/.test(d)) continue;
+          const p = join(root.dir, d);
+          if (!statSync(p).isDirectory()) continue;
+          scenes.push({ dir: p, slug: d, kind: root.kind, label: root.label, mtimeMs: statSync(p).mtimeMs });
+        } catch {
+          /* 单条目 stat 失败跳过 */
+        }
+      }
+    } catch {
+      /* 根不存在/不可读 → 该场空 */
+    }
+  }
+  return scenes.sort((a, b) => b.mtimeMs - a.mtimeMs);
+}
+
+/** 场内进度速览（stat-only，不解析内容）：走到哪一步 / 完成几件。
+ *  final 双命名容纳：final/v*.md（契约）或 final.md（ad-hoc 化石命名）；review 同理。 */
+export function sceneState(dir) {
+  const has = (f) => {
+    try {
+      statSync(join(dir, f));
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  let ev = false;
+  try {
+    ev = readdirSync(join(dir, 'evidence')).some((f) => f.endsWith('.md'));
+  } catch {
+    /* evidence/ 缺席 */
+  }
+  let fin = has('final.md');
+  if (!fin) {
+    try {
+      fin = readdirSync(join(dir, 'final')).some((f) => /^v\d+\.md$/.test(f));
+    } catch {
+      /* final/ 缺席 */
+    }
+  }
+  const steps = [
+    ['question', has('question.md')],
+    ['topics', has('topics.md')],
+    ['leads', has('leads.md')],
+    ['evidence', ev],
+    ['findings', has('findings.md')],
+    ['review', has('review.md') || has('review-critic.md')],
+    ['final', fin],
+  ];
+  let last = -1;
+  steps.forEach(([, v], i) => {
+    if (v) last = i;
+  });
+  return { lastStep: last >= 0 ? steps[last][0] : null, done: steps.filter(([, v]) => v).length };
+}
+
+/** 流程步骤条（纯文件事实，零发明）：done ✓ / 当前 ● / 待办 ○。当前步 = 最后一个有内容的步。 */
+export function deriveStep(model) {
+  const has = {
+    question: !!model.question,
+    topics: model.topics.length > 0,
+    leads: model.leads.length > 0,
+    evidence: model.stats.evidence > 0,
+    findings: model.findings.length > 0,
+    review: !!model.review,
+    final: !!model.final,
+  };
+  const order = ['question', 'topics', 'leads', 'evidence', 'findings', 'review', 'final'];
+  const labels = { question: '立项', topics: '拆解', leads: '侦察', evidence: '取证', findings: '综合', review: '审查', final: '交付' };
+  let lastDone = -1;
+  for (const [i, k] of order.entries()) if (has[k]) lastDone = i;
+  return order.map((k, i) => ({
+    key: k,
+    label: labels[k],
+    state: i < lastDone ? 'done' : i === lastDone ? 'current' : 'pending',
+  }));
+}
+
+/** DSH 会话日志 = 逐次 append 的 zstd 帧拼接（一次写入一帧；实测 357 帧 / 639 行）。
+ *  node:zlib 只有单帧 zstdDecompressSync——按帧魔数（28 B5 2F FD）切段、逐帧解压、拼接。
+ *  坏段跳过（魔数误匹配/半截帧，fail-soft）；非帧拼接格式（首字节非魔数）返回 null。 */
+export function decompressSessionLog(buf, decompress = typeof zlib.zstdDecompressSync === 'function' ? zlib.zstdDecompressSync : null) {
+  if (!decompress || !buf || buf.length < 4) return null;
+  const idxs = [];
+  for (let i = 0; i <= buf.length - 4; i++) {
+    if (buf[i] === 0x28 && buf[i + 1] === 0xb5 && buf[i + 2] === 0x2f && buf[i + 3] === 0xfd) idxs.push(i);
+  }
+  if (!idxs.length || idxs[0] !== 0) return null;
+  const parts = [];
+  for (let k = 0; k < idxs.length; k++) {
+    try {
+      parts.push(decompress(buf.subarray(idxs[k], idxs[k + 1] ?? buf.length)));
+    } catch {
+      /* 坏段跳过 */
+    }
+  }
+  return Buffer.concat(parts);
+}
+
+/** HITL 等待检测（真事件流，非启发式）：扫近期会话日志（zstd 多帧逐段解压），一个会话在
+ *  "等待" = 它的最后一个事件恰是 ask_user_question 的 tool/call（其后无 tool/result、
+ *  无任何后续事件——取消回合会有后续事件，天然排除陈旧挂起）。zstd 缺席/解压失败/
+ *  日志畸形 → 跳过该会话（fail-soft）。返回 [{ session, group, since }] 按挂起时间降序。 */
+export function detectHitlWait(sessionsRoot = SESSIONS_ROOT, { maxAgeMs = 12 * 3600 * 1000 } = {}) {
+  const waiting = [];
+  if (typeof zlib.zstdDecompressSync !== 'function') return waiting; // node 无 zstd → 无检测（fail-soft）
+  const cutoff = Date.now() - maxAgeMs;
+  let groups = [];
+  try {
+    groups = readdirSync(sessionsRoot);
+  } catch {
+    return waiting;
+  }
+  for (const g of groups) {
+    const gdir = join(sessionsRoot, g);
+    let sessions = [];
+    try {
+      sessions = readdirSync(gdir);
+    } catch {
+      continue;
+    }
+    for (const s of sessions) {
+      try {
+        const logFile = join(gdir, s, 'session.v3.jsonl.zstd');
+        if (statSync(logFile).mtimeMs < cutoff) continue;
+        const lines = decompressSessionLog(readFileSync(logFile))?.toString('utf8').trim().split('\n');
+        if (!lines || !lines.length) continue;
+        const last = JSON.parse(lines[lines.length - 1]);
+        const d = last.data ?? {};
+        if (last.type === 'tool/call' && d.name === 'ask_user_question') {
+          waiting.push({ session: s.replace(/^session-/, '').slice(0, 8), group: g, since: new Date(last.time).toISOString() });
+        }
+      } catch {
+        /* 无日志/解压失败/畸形 → 跳过 */
+      }
+    }
+  }
+  return waiting.sort((a, b) => (a.since < b.since ? 1 : -1));
+}
+
+/** web GUI 基址（deep-link）：从 boot-run tee 的 web 日志抓横幅 URL；缺席返回 null */
+export function readGuiBase(webLog = WEB_LOG) {
+  try {
+    const m = /dsh web: (https?:\/\/\S+)/.exec(readFileSync(webLog, 'utf8'));
+    return m ? m[1] : null;
+  } catch {
+    return null;
+  }
+}
+
+// ── 汇总模型 ─────────────────────────────────────────────────────────────────
+
+/** 汇总模型：run 目录 → 一个可渲染对象（fail-soft，永不 throw）。
+ *  final：final/v*.md（契约，取最大版号）或 final.md（ad-hoc 化石命名）→ { file, versioned }；
+ *  review：review.md 或 review-critic.md（ad-hoc 化石命名）双命名容纳。 */
 export function buildModel(runDir) {
   const model = {
     runDir,
@@ -238,6 +418,7 @@ export function buildModel(runDir) {
     leads: [],
     findings: [],
     review: null,
+    final: null,
     journal: [],
     stats: { evidence: 0, drafts: 0, lastModified: null },
   };
@@ -260,8 +441,31 @@ export function buildModel(runDir) {
   model.leads = l ? parseLeads(l) : [];
   const f = read('findings.md');
   model.findings = f ? parseFindings(f) : [];
-  const r = read('review.md');
-  model.review = r ? parseReview(r) : null;
+  let rText = null;
+  for (const rf of ['review.md', 'review-critic.md']) {
+    try {
+      rText = readFileSync(join(runDir, rf), 'utf8');
+      break;
+    } catch {
+      /* 下一个命名 */
+    }
+  }
+  if (rText === null) model.missing.push('review.md');
+  model.review = rText ? parseReview(rText) : null;
+  try {
+    const fins = readdirSync(join(runDir, 'final')).filter((x) => /^v\d+\.md$/.test(x)).sort();
+    if (fins.length) model.final = { file: `final/${fins[fins.length - 1]}`, versioned: true };
+  } catch {
+    /* final/ 缺席 → 试 final.md */
+  }
+  if (!model.final) {
+    try {
+      statSync(join(runDir, 'final.md'));
+      model.final = { file: 'final.md', versioned: false };
+    } catch {
+      /* 未交付 */
+    }
+  }
   const j = read('journal.md');
   model.journal = j ? tailJournal(j) : [];
   model.stats.evidence = model.evidence.filter((e) => e.ok).length;
@@ -293,6 +497,8 @@ const esc = (s) =>
   String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 const distLine = (d) => `A:${d.A} B:${d.B} C:${d.C} D:${d.D}`;
+
+const STEP_LABELS = { question: '立项', topics: '拆解', leads: '侦察', evidence: '取证', findings: '综合', review: '审查', final: '交付' };
 
 function renderMatrix(model) {
   const rows = topicEvidenceMatrix(model.topics, model.evidence);
@@ -337,12 +543,45 @@ function renderReview(model) {
   return `<p>readiness: <span class="tag ${cls}">${r.readiness}</span> · CRITICAL ${r.critical} / MAJOR ${r.major} / MINOR ${r.minor}</p>`;
 }
 
+function renderStepBar(model) {
+  const steps = model.steps ?? [];
+  if (!steps.length) return '';
+  const chips = steps
+    .map((s) => `<span class="chip ${s.state}">${s.state === 'done' ? '✓' : s.state === 'current' ? '●' : '○'} ${esc(s.label)}</span>`)
+    .join(' ');
+  return `<p class="steps">${chips}</p>`;
+}
+
+function renderBanners(model) {
+  const out = [];
+  const link = model.guiBase ? ` · <a href="${esc(model.guiBase)}" target="_blank">打开 web GUI</a>` : '';
+  for (const w of model.hitlWait ?? []) {
+    out.push(`<p class="banner wait">⏳ 等你拍板（HITL）——会话 ${esc(w.session)}（自 ${esc(String(w.since).slice(11, 19))} 挂起）${link}</p>`);
+  }
+  if (model.silentZone) out.push('<p class="banner silent">静默自主区——角色在干活，无需等待</p>');
+  return out.join('');
+}
+
+function renderScenes(model) {
+  const scenes = model.scenes ?? [];
+  if (!scenes.length) return '';
+  const rows = scenes
+    .map((s, i) => {
+      const cur = s.dir === model.runDir ? ' class="cur"' : '';
+      const lead = i === 0 && s.dir === model.runDir ? '● ' : i === 0 ? '○ ' : '';
+      const badge = s.state?.lastStep ? STEP_LABELS[s.state.lastStep] ?? s.state.lastStep : '未开始';
+      return `<tr${cur}><td>${lead}${esc(s.slug)}</td><td><span class="tag ${s.kind === 'drt' ? 'dig' : 'exc'}">${esc(s.label)}</span></td><td>${badge}（${s.state?.done ?? 0}/7）</td><td>${esc(new Date(s.mtimeMs).toISOString().slice(11, 19))}</td></tr>`;
+    })
+    .join('');
+  return `<h2>run 场清单（多场扫描）</h2><table><tr><th>场</th><th>类型</th><th>进度</th><th>最后修改</th></tr>${rows}</table>`;
+}
+
 export function renderHtml(model) {
   const q = model.question;
   const head = q
     ? `<p><b>问题</b>：${esc(q.question ?? '无法解析')}</p>
        <p><b>Purpose</b>：${esc(q.purpose ?? '—')}</p>
-       <p><b>类型/深度</b>：${esc(q.profile ?? '—')} / ${esc(q.depth ?? '—')} · <b>Decisions</b> ${q.decisions} 条</p>`
+       <p><b>类型/深度</b>：${esc(q.profile ?? '—')} / ${esc(q.depth ?? '—')} · <b>Decisions</b> ${q.decisions} 条${model.final ? ` · <b>交付</b> ${esc(model.final.file)}` : ''}</p>`
     : '<p class="soft">question.md 未开始/无法解析</p>';
   const journal = model.journal.length
     ? `<ul>${model.journal.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>`
@@ -360,15 +599,25 @@ export function renderHtml(model) {
  body{font-family:system-ui,sans-serif;margin:2rem;max-width:60rem;color:#222}
  h1{font-size:1.3rem} h2{font-size:1.05rem;border-bottom:1px solid #ddd;padding-bottom:.3rem;margin-top:1.6rem}
  table{border-collapse:collapse} td,th{border:1px solid #ddd;padding:.3rem .6rem;font-size:.9rem}
+ tr.cur td{background:#f5f8ff}
  .tag{display:inline-block;padding:0 .4rem;border-radius:.3rem;font-size:.8rem}
  .dig{background:#e6f4ea}.exc{background:#fdecea}.pass{background:#e6f4ea}.fail{background:#fdecea}
  .gap-supported{background:#e6f4ea}.gap-needs_search{background:#fef7e0}.gap-contradicted{background:#fdecea}.gap-insufficient{background:#eee}
  .soft{color:#999}
+ .banner{padding:.5rem .8rem;border-radius:.4rem;margin:.4rem 0}
+ .banner.wait{background:#fef7e0;border:1px solid #e8d48a}
+ .banner.silent{background:#e6f4ea;border:1px solid #b7dfc2}
+ .steps .chip{display:inline-block;padding:.15rem .5rem;border-radius:.9rem;font-size:.8rem;margin-right:.3rem;border:1px solid #ddd}
+ .chip.done{background:#e6f4ea;border-color:#b7dfc2}
+ .chip.current{background:#d0e2ff;border-color:#9cc0ff;font-weight:600}
+ .chip.pending{color:#999}
 </style>
 </head>
 <body>
 <h1>run dashboard — ${esc(model.slug)}</h1>
+${renderBanners(model)}${renderStepBar(model)}
 ${head}${missing}
+${renderScenes(model)}
 <h2>topic × evidence 矩阵</h2>
 ${renderMatrix(model)}
 <h2>leads 概览</h2>
@@ -389,30 +638,6 @@ ${journal}
 
 // ── CLI ─────────────────────────────────────────────────────────────────────
 
-function latestRunDir(root) {
-  try {
-    let best = null;
-    let bestMtime = 0;
-    for (const d of readdirSync(root)) {
-      try {
-        if (!/^drt_/.test(d)) continue; // 只认 run bundle（drt_<slug>/）——AGENTS.md/templates 等非 bundle 条目排除
-        const p = join(root, d);
-        if (!statSync(p).isDirectory()) continue; // 只认目录
-        const m = statSync(p).mtimeMs;
-        if (m > bestMtime) {
-          bestMtime = m;
-          best = p;
-        }
-      } catch {
-        /* 跳过不可 stat 的条目 */
-      }
-    }
-    return best;
-  } catch {
-    return null;
-  }
-}
-
 function main() {
   const args = process.argv.slice(2);
   const flag = (name) => {
@@ -421,7 +646,6 @@ function main() {
   };
   const out = flag('--out');
   const interval = Number(flag('--interval') ?? 5);
-  const root = flag('--root');
   const take = (name) => {
     const i = args.indexOf(name);
     if (i >= 0) args.splice(i, 1);
@@ -432,24 +656,38 @@ function main() {
   take('--latest');
   const runDir = args.find((a) => !a.startsWith('--'));
   if (!runDir && !latest) {
-    console.error('用法: run-dashboard.mjs <runDir> [--out <html>] [--watch] [--interval <s>] | --latest [--root <runsDir>]');
+    console.error('用法: run-dashboard.mjs <runDir> [--out <html>] [--watch] [--interval <s>] | --latest [--out <html>]（多场扫描）');
     process.exit(1);
   }
   const generate = () => {
-    const dir = latest ? latestRunDir(root ?? 'research-workspace') : runDir;
+    const scenes = listScenes();
+    const dir = latest ? (scenes[0]?.dir ?? null) : runDir;
     const model = dir
       ? buildModel(dir)
-      : { runDir: '(无 run)', slug: '未开始', generatedAt: new Date().toISOString(), missing: ['drt_<slug>/'], question: null, topics: [], evidence: [], leads: [], findings: [], review: null, journal: [], stats: { evidence: 0, drafts: 0, lastModified: null } };
+      : { runDir: '(无 run)', slug: '未开始', generatedAt: new Date().toISOString(), missing: ['drt_<slug>/'], question: null, topics: [], evidence: [], leads: [], findings: [], review: null, final: null, journal: [], stats: { evidence: 0, drafts: 0, lastModified: null } };
+    model.scenes = scenes.map((s) => ({ ...s, state: sceneState(s.dir) }));
+    model.steps = deriveStep(model);
+    model.hitlWait = detectHitlWait();
+    model.silentZone = !model.hitlWait.length && scenes.some((s) => Date.now() - s.mtimeMs < 10 * 60 * 1000);
+    model.guiBase = readGuiBase();
     const html = renderHtml(model);
     if (out) {
       writeFileSync(out, html);
-      console.error(`run-dashboard: 写 ${out}（run: ${model.slug}${dir ? '' : '，等待 lead 建 drt_<slug>/'}）`);
+      console.error(`run-dashboard: 写 ${out}（run: ${model.slug}${dir ? '' : '，等待 lead 建 drt_<slug>/'}${model.hitlWait.length ? '，HITL 等待 ×' + model.hitlWait.length : ''}）`);
     } else {
       process.stdout.write(html);
     }
   };
   generate();
-  if (watch) setInterval(generate, Math.max(1, interval) * 1000);
+  if (watch) {
+    // 孤儿自退出（boot-run trap 的第二道保险：job_kill SIGKILL 掉父 shell 时，trap 不会跑，
+    // 但父死后 ppid 变化 → 本进程 2s 内自行退出——2026-09-24 事故 ① 的机制化收尾）。
+    const ppid = process.ppid;
+    setInterval(() => {
+      if (process.ppid !== ppid) process.exit(0);
+    }, 2000);
+    setInterval(generate, Math.max(1, interval) * 1000);
+  }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();

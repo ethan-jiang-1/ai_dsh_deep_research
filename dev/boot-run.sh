@@ -56,14 +56,48 @@ else
   profile_ok || { echo "boot-run: 重建后组合校验仍不过——fail-loud，检查上方安装输出" >&2; exit 1; }
 fi
 
-# ③ 仪表盘（RFC m2-run-dashboard）：--latest 只读投影（run 建立即有画面，未建显示"未开始"）；
-# 输出进本仓 gitignored 运行区；watch 模式持续再生成，页面 5s meta refresh 拉取。
+# ② pack 漂移检测（RFC debug-dashboard-plus）：pack 源 ↔ profile 安装镜像逐文件比对。
+# 2026-09-24 三次注入面事故里两次是镜像类（$DSH_HOME/AGENTS.md 化石、pack persona/skill
+# 旧文本进了镜像）——机制化补丁：不符即 fail-loud，不带着旧 harness 开 run。
+# 单跑模式：bash dev/boot-run.sh --drift-check（测试/CI 用，不起 web）。
+drift_check() {
+  local bad=0 f rel mirror
+  while IFS= read -r f; do
+    rel="${f#"$PACKDIR"/}"
+    mirror="$PROFDIR/node_modules/dsh-deep-research-pack/$rel"
+    if [ ! -f "$mirror" ] || ! diff -q "$f" "$mirror" >/dev/null 2>&1; then
+      echo "boot-run: 漂移——$rel 与 profile 镜像不一致（或镜像缺席）" >&2
+      bad=1
+    fi
+  done < <(find "$PACKDIR" -type f \( -name '*.yml' -o -name '*.md' -o -name 'package.json' \) ! -path '*/node_modules/*')
+  if [ "$bad" -ne 0 ]; then
+    echo "boot-run: pack 漂移检测红——修复：rm -rf '$PROFDIR' 后重跑本脚本重建（或逐文件 cp 同步）" >&2
+    exit 1
+  fi
+  echo "boot-run: pack 漂移检测绿（pack 源 ↔ profile 镜像一致）"
+}
+if [ "${1:-}" = "--drift-check" ]; then
+  [ -d "$PROFDIR" ] || { echo "boot-run: profile 不存在（先跑一次完整 boot 生成）" >&2; exit 1; }
+  drift_check
+  exit 0
+fi
+drift_check
+
+# ③ 仪表盘（RFC m2-run-dashboard + debug-dashboard-plus）：--latest 多场扫描
+# （research-workspace/drt_* + dev/harness-home/runs ad-hoc 场）、流程步骤条、
+# HITL 等待横幅（⏳ 等你拍板）、web GUI deep-link（token 读自下方 tee 的 web.log）。
 DASH_OUT="$ROOT/dev/smoke-workspace/dashboard.html"
 mkdir -p "$(dirname "$DASH_OUT")"
-node "$ROOT/scripts/run-dashboard.mjs" --latest --root "$ROOT/research-workspace" \
+node "$ROOT/scripts/run-dashboard.mjs" --latest \
   --out "$DASH_OUT" --watch --interval 5 &
 DASH_PID=$!
-trap 'kill "$DASH_PID" 2>/dev/null' EXIT INT TERM
+# trap 修复（RFC debug-dashboard-plus，2026-09-24 事故 ① 收尾）：EXIT/INT/TERM 全杀子进程；
+# SIGKILL 直杀本 shell 时 trap 不会跑 → 仪表盘自带孤儿自退出（ppid 变化即退）作第二道保险。
+cleanup() {
+  kill "$DASH_PID" 2>/dev/null || true
+  pkill -P $$ 2>/dev/null || true
+}
+trap cleanup EXIT INT TERM
 
 echo "boot-run: run 仪表盘已起（只读投影，5s 再生成）：$DASH_OUT"
 cat <<'STEPS'
@@ -72,13 +106,15 @@ cat <<'STEPS'
 2. 新建会话：preset 选 "Deep Research Lead"（默认项），cwd 选 research-workspace/
 3. 说出研究问题 → lead 走 HITL1 三问（研究类型 / 深度篇幅 / 时间口径，每问带推荐）→ 你拍板
 4. 静默自主区（角色不问不报）：进度看四处——① run 仪表盘（dev/smoke-workspace/dashboard.html：
-   矩阵/leads/findings/review/journal 一页看全，5s 刷新）② 各角色会话实时流
-   ③ ui-agent-team 任务板（谁领了什么活） ④ deliverables 面板（成品出现处）
-5. HITL2 审阅（证据充分性 + 交付/补研究推荐 + composition 确认）→ 拍板 → final.md + present 交付
+   多 run 场清单/流程步骤条/HITL 等待横幅/矩阵/leads/findings/review/journal，5s 刷新）
+   ② 各角色会话实时流 ③ ui-agent-team 任务板（谁领了什么活） ④ deliverables 面板（成品出现处）
+5. 仪表盘出现"⏳ 等你拍板（HITL）"横幅 = lead 在等你（HITL1/HITL2）——去 web GUI 答题
+6. HITL2 审阅（证据充分性 + 交付/补研究推荐）→ 拍板 → final/ 版本化交付 + present 声明
    中断恢复：新开 lead 会话只认 research-workspace/drt_<slug>/ 的文件事实。
 全文指南：docs/guides/61-run-playbook.md
 ───────────────────────────────────────────────────────────────────
 STEPS
 
 echo "boot-run: boot web（research profile，端口 ${PORT}；Ctrl-C 停止）…"
-dsh --profile "$PROFILE" -- --port "$PORT" --no-open
+# web 输出 tee 进运行区日志：仪表盘 deep-link 从这里抓 token URL（缺席 → 页面不链，fail-soft）
+dsh --profile "$PROFILE" -- --port "$PORT" --no-open 2>&1 | tee "$ROOT/dev/smoke-workspace/web.log"

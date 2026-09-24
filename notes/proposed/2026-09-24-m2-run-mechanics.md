@@ -163,10 +163,11 @@ node dev/run-kickoff.mjs --port 3081 --token <横幅token> --prompt-file <题面
 # 题目 = bundle 变量，不进框架文档）
 ```
 
-**暂停时的已知偏差记录**：① boot-run 的 trap 在 job_kill 下未杀净 watcher（实例残留，
-手动清过）+ 不检测 pack 内容漂移（pack 文本修正后 profile 镜像需手动同步或 rm 重建——
-D17 事故 2 的手术同步即此产物）——记为 boot-run 小瑕疵，随 debug-dashboard-plus 条目
-顺手修；② L4 四判据/Q2 行为半边/Q4/Q5/①② run 内判据全部未核销，等重启后随 run 闭。
+**暂停时的已知偏差记录**：① ~~boot-run 的 trap 在 job_kill 下未杀净 watcher + 不检测
+pack 内容漂移~~——**已销账（2026-09-24）**：随 debug-dashboard-plus 条目毕业修复（trap
+cleanup + 仪表盘孤儿自退出实证 + drift_check 漂移检测首跑即抓到真漂移，见该毕业 Note
+实施记录）；② L4 四判据/Q2 行为半边/Q4/Q5/①② run 内判据全部未核销——run 已在旧通道
+交付（通道错位叙事见 §收口方案），判据随收口方案的迁移与闭合步骤走。
 
 ## 收口方案（2026-09-24 追加：通道错位 run 的迁移与判据闭合——已批准，同日放行静默自主执行）
 

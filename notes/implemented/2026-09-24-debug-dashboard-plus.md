@@ -1,9 +1,14 @@
 # RFC：debug-dashboard-plus——仪表盘多场可见 + 流程感知 + HITL 等待横幅 + boot-run 瑕疵收尾
 
-> 状态：**approved（2026-09-24 八小时路线图批准框架；同日用户放行静默自主执行）** ·
-> 归宿：roadmap §队列「debug-dashboard-plus」· 设计依据：
+> 状态：**implemented（2026-09-24 同日立项同日毕业；实施记录见文末）** ·
+> 归宿：roadmap §队列「debug-dashboard-plus」（已离队）· 设计依据：
 > [ui-observability-surfaces §3.1/§7](../research/2026-09-24-ui-observability-surfaces.md)
 > + 2026-09-24 run 错位事故（run 在旧通道跑了 40 分钟，观察面零感知——需求即时性实证）
+
+## 决定
+
+本条目同日立项、同日实施毕业——决定正文 = 下方方案五点（全部已交付），
+验证与现场证据 = 文末实施记录。
 
 ## 问题
 
@@ -45,3 +50,35 @@
 - HITL 横幅用 d29822ed 的挂起 ask 实测出现；run 活跃期反向提示出现；
 - 漂移检测红绿反证：篡改镜像一文件 → boot 报红 → 同步恢复 → 绿；
 - trap 修复实证：job_kill 后无 watcher 残留进程。
+
+## 实施记录（2026-09-24，同日实施毕业）
+
+**实现**：run-dashboard.mjs 重写——新增纯函数 listScenes（多场扫描）/ sceneState（stat-only
+进度）/ deriveStep（流程步骤条）/ decompressSessionLog（zstd 多帧切段解压）/ detectHitlWait
+（真事件流等待检测）/ readGuiBase（web.log token 基址）+ 渲染层（横幅/步骤条/场清单）+
+watch 孤儿自退出（ppid 变化即退）；boot-run.sh——drift_check 函数（`--drift-check` 单跑
+模式 + 每次 boot 内联执行）+ trap cleanup（EXIT/INT/TERM 全杀 + pkill 子进程）+ web 输出
+tee 进 web.log（deep-link 数据源）；AGENTS 命令表同步。
+
+**验收实证（全部通过）**：
+
+1. 23 tests 绿（+3：多场扫描过滤排序 / final+review 双命名与步骤推导 / HITL 多帧检测）；
+2. ad-hoc 场实测出现在场清单（cn-ai-chip-adoption + cn-us-cpu-gap + drt 桥接场，带标注）；
+3. HITL 横幅实测**三会话**（a2a6850a = run 的 HITL2 挂起 + d29822ed/cc7e241f = 孤儿
+   HITL1）——真事件流检测（末事件 = 未答 ask），非启发式；静默区反向提示逻辑在场
+   （有等待时不显示，互斥正确）；
+4. 漂移检测红绿反证 + **首跑抓到真漂移**：cordis.patch.yml / README.md 镜像 = D16 前旧版
+   （此前手术同步只覆盖 7 个当日改过的文件）——检测上线即值回票价；
+5. 孤儿自退实证：job_kill 杀父 → watcher 2s 内自退（输出文件 mtime 冻结 + pgrep 无残留）；
+   trap 修复代码在场，live kill 复核随下次通道全重启（web 运行中不重启）。
+
+**实现中发现（对后续条目是前置知识）**：DSH 会话日志 = 逐次 append 的 **zstd 多帧拼接**
+（实测 357 帧 / 639 行）——node:zlib 的 zstdDecompressSync 是单帧 API，直接喂整文件只得
+首帧（228 字节）；须按帧魔数（28 B5 2F FD）切段逐帧解压再拼接。判据③④ 的日志核对、
+entry-chain-probe 读会话日志时同此。
+
+**deep-link 现状**：web.log token 基址链已实装（下次 boot 生效——当前 web 是旧 boot 起的
+无 tee）；会话级路由待 vendor web 调研，本轮 base URL 即用。
+
+**毕业动作**：本文件迁 notes/implemented/；roadmap 队列行删除；m2-run-mechanics §暂停点
+偏差①（boot-run 两瑕疵）随本条目销账。
