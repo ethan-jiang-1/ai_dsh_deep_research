@@ -9,7 +9,7 @@
 ## 队列
 
 1. ▶ **首个完整研究 run**（feature，M2）——端到端最薄直跑（HITL1→侦察→挖掘→综合→critic→HITL2→final+present；L4 全量四判据随 run 闭）。
-   四份 RFC 全 approved（已落地，记录见各 RFC 文末）：[2026-09-24-m2-plan-shape](notes/proposed/2026-09-24-m2-plan-shape.md) / [2026-09-24-m2-data-caliber](notes/proposed/2026-09-24-m2-data-caliber.md) / [2026-09-24-m2-run-dashboard](notes/proposed/2026-09-24-m2-run-dashboard.md)；
+   四份 RFC 全 approved：[2026-09-24-m2-plan-shape](notes/proposed/2026-09-24-m2-plan-shape.md) / [2026-09-24-m2-data-caliber](notes/proposed/2026-09-24-m2-data-caliber.md) / [2026-09-24-m2-run-dashboard](notes/proposed/2026-09-24-m2-run-dashboard.md) 三件已落地（记录见各 RFC 文末）；
    活跃 RFC = [2026-09-24-m2-run-mechanics](notes/proposed/2026-09-24-m2-run-mechanics.md)——起跑至 HITL1 挂起（快照与重启配方 = 该 RFC §暂停点记录）。
 2. **M2 收口与复盘**（卫生，run 完成后同 diff 收尾）——L4 四判据证据落 Note；Q2/Q4/
    Q5/Q6 销账（答案+证据进 00-index 待定表）；company D18 复核结论；搁置池三条复活条件到期

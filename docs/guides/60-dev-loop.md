@@ -1,7 +1,7 @@
 # 60 · 开发环：条目生命周期、面选择与操作手册
 
 > 层：指南（怎么操作）。流程纪律的权威在 DSH（vendor 树）与 company 仓
-> （`notes/research/2026-09-23-dsh-inround-task-surface.md`——"轮内任务面"研究，
+> （`notes/implemented/2026-09-23-dsh-inround-task-surface.md`——"轮内任务面"研究，
 > 本指南的条目生命周期直接移植其结论）；本文是本仓落点。
 
 ## 0. 条目生命周期（反馈双门）
