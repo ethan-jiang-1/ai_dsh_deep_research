@@ -60,7 +60,7 @@ fi
 # 输出进本仓 gitignored 运行区；watch 模式持续再生成，页面 5s meta refresh 拉取。
 DASH_OUT="$ROOT/dev/smoke-workspace/dashboard.html"
 mkdir -p "$(dirname "$DASH_OUT")"
-node "$ROOT/scripts/run-dashboard.mjs" --latest --root "$ROOT/research-workspace/runs" \
+node "$ROOT/scripts/run-dashboard.mjs" --latest --root "$ROOT/research-workspace" \
   --out "$DASH_OUT" --watch --interval 5 &
 DASH_PID=$!
 trap 'kill "$DASH_PID" 2>/dev/null' EXIT INT TERM
@@ -75,7 +75,7 @@ cat <<'STEPS'
    矩阵/leads/findings/review/journal 一页看全，5s 刷新）② 各角色会话实时流
    ③ ui-agent-team 任务板（谁领了什么活） ④ deliverables 面板（成品出现处）
 5. HITL2 审阅（证据充分性 + 交付/补研究推荐 + composition 确认）→ 拍板 → final.md + present 交付
-   中断恢复：新开 lead 会话只认 research-workspace/runs/<slug>/ 的文件事实。
+   中断恢复：新开 lead 会话只认 research-workspace/drt_<slug>/ 的文件事实。
 全文指南：docs/guides/61-run-playbook.md
 ───────────────────────────────────────────────────────────────────
 STEPS

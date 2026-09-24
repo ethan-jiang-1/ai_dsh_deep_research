@@ -16,6 +16,28 @@ docs/ notes/ scripts/ tests/ dev/   文档/决策/门禁/回归/环境（分层�
 vendor/dsh/                    （队列「vendor-submodule-and-pnpm-dsh」落地）pinned submodule，只读铁律
 ```
 
+### 第一性分层：harness / run bundle（D17）
+
+**`研究报告 = harness(bundle)`**——全仓最高分层不变量：
+
+- **harness（框架）= 只读函数**：`packages/deep-research-pack/**`（preset+skills+bundle 行）、
+  `research-workspace/AGENTS.md`（手册）+ `templates/run/**`、docs/notes（设计与决策记忆）。
+  对任何一次研究是同一份；不持任何 per-run 状态；run 期间零写入；演进只走开发环，且只由
+  run 复盘的证据驱动。harness 内的可变值都是 per-version 常量（工具行 config/超时/纪律
+  文本），随版本走、不随 run 走。
+- **run bundle = 一次调研的全部变量**：`research-workspace/drt_<slug>/`（drt = Deep
+  Research Topic，目录名即方向）——question.md（方向契约：定稿/HITL1 快照/Decisions
+  append-only，跨 rerun 持久）+ topics/leads/evidence/findings/review/drafts + final/
+  （版本化交付）+ journal.md。一次新调研 = 实例化一个新 bundle；**判定式：恢复这次研究
+  所需 = bundle 变量**（会话/任务板/聊天记忆 = 执行基底，不是变量）；交付后 bundle 冻结
+  为只读证据。
+- **rerun 三分语义（源头 DEEP_RESEARCH_HARNESS post-final-recovery 对齐）**：表述性修订
+  → 当前版原位改（版本号不变）；证据扩张 → 同 bundle final/ 下一版；结构性另起 → 新
+  bundle（sibling 预检 + 用户同意）。不搬：Engine/rb_status/rb_queue（D4 弃 CLI 引擎）、
+  per-bundle BUNDLE_MAP（固定契约 + agent-instructions 注入使其冗余）。
+- **消歧**：DSH 语境"bundle 行"（cordis.patch.yml 配置行）≠ run bundle（研究实例容器）
+  ——后者两词连用，禁缩写成裸 "bundle"。
+
 **为什么单包多角色**（company D1 同构）：DSH 的 preset 是自包含组合，角色差异天然住在
 `presets/<id>/`；包是发布与安装的单位，角色不是。"行多包少"——bundle 行 + preset 目录
 都长在一个包里，`plugin add` 一次全装。

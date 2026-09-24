@@ -92,4 +92,4 @@ the regression）。反证记录进对应 implemented Note。
 [m2-plan-shape RFC §输掉的方案](../../notes/proposed/2026-09-24-m2-plan-shape.md)：
 会话日志 / git / RFC 即持久真相，第二份"状态的家"必然漂移。恢复程序 = **读上述三样**，
 不是"先更新状态文件再干活"。（研究 run 通道的恢复另有程序：[guides/61 §5](./61-run-playbook.md)，
-只认 `runs/<slug>/` 的文件事实。）
+只认 run bundle（`drt_<slug>/`）的文件事实。）

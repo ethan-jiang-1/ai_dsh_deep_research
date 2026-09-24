@@ -381,7 +381,7 @@ ${renderReview(model)}
 ${journal}
 <h2>文件统计</h2>
 <p>证据（有效 frontmatter）${model.stats.evidence} 条 · drafts ${model.stats.drafts} 个 · 最后修改 ${esc(model.stats.lastModified ?? '—')}</p>
-<p class="soft">生成于 ${esc(model.generatedAt)} · 只读投影（runs/ 目录是唯一真相）· 5s 自动刷新</p>
+<p class="soft">生成于 ${esc(model.generatedAt)} · 只读投影（run bundle 是唯一真相）· 5s 自动刷新</p>
 </body>
 </html>
 `;
@@ -395,8 +395,9 @@ function latestRunDir(root) {
     let bestMtime = 0;
     for (const d of readdirSync(root)) {
       try {
+        if (!/^drt_/.test(d)) continue; // 只认 run bundle（drt_<slug>/）——AGENTS.md/templates 等非 bundle 条目排除
         const p = join(root, d);
-        if (!statSync(p).isDirectory()) continue; // 只认目录（.gitkeep 等文件不是 run）
+        if (!statSync(p).isDirectory()) continue; // 只认目录
         const m = statSync(p).mtimeMs;
         if (m > bestMtime) {
           bestMtime = m;
@@ -435,14 +436,14 @@ function main() {
     process.exit(1);
   }
   const generate = () => {
-    const dir = latest ? latestRunDir(root ?? 'research-workspace/runs') : runDir;
+    const dir = latest ? latestRunDir(root ?? 'research-workspace') : runDir;
     const model = dir
       ? buildModel(dir)
-      : { runDir: '(无 run)', slug: '未开始', generatedAt: new Date().toISOString(), missing: ['runs/'], question: null, topics: [], evidence: [], leads: [], findings: [], review: null, journal: [], stats: { evidence: 0, drafts: 0, lastModified: null } };
+      : { runDir: '(无 run)', slug: '未开始', generatedAt: new Date().toISOString(), missing: ['drt_<slug>/'], question: null, topics: [], evidence: [], leads: [], findings: [], review: null, journal: [], stats: { evidence: 0, drafts: 0, lastModified: null } };
     const html = renderHtml(model);
     if (out) {
       writeFileSync(out, html);
-      console.error(`run-dashboard: 写 ${out}（run: ${model.slug}${dir ? '' : '，等待 lead 建 runs/<slug>/'}）`);
+      console.error(`run-dashboard: 写 ${out}（run: ${model.slug}${dir ? '' : '，等待 lead 建 drt_<slug>/'}）`);
     } else {
       process.stdout.write(html);
     }

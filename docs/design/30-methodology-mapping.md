@@ -11,7 +11,7 @@
 
 | codex 环节 | codex 载体 | 本插件 DSH 载体 | 状态 |
 |---|---|---|---|
-| instantiation（建 run bundle） | `instantiate-run-bundle.mjs` CLI + rb_* 控制文件脚手架 | lead 收到请求 → 建 `runs/<slug>/`（从 templates/run/ 起步）+ question.md（定稿 + Purpose/RQ 分解/Scope/Constraints 四节 + Decisions append-only） | 照搬语义，载体 = 目录约定 + 研究手册 |
+| instantiation（建 run bundle） | `instantiate-run-bundle.mjs` CLI + rb_* 控制文件脚手架 | lead 收到请求 → 建 `drt_<slug>/`（从 templates/run/ 起步）+ question.md（定稿 + Purpose/RQ 分解/Scope/Constraints 四节 + Decisions append-only） | 照搬语义，载体 = 目录约定 + 研究手册 |
 | **HITL1（立项对齐）** | hitl1 phase（stop:yes）+ rb_profile 写入 | lead preset 的 `tool-ask-user` + `research-brief` skill（研究类型三分 + 澄清三问带推荐） | **原生**（ask_user_question 即 DSH 的 stop 面） |
 | setup / seed-topics | enter-phase + operate-topic-state（UID/ordinal 物化） | lead 写 topics.md（must_answer 问题列表 2–5 问 + scope_role + depends_on） | 简化：topic 身份 = markdown 锚点，不建 registry 机制 |
 | **wave0（广度地基）** | dpt-source-intake 工作单元 + source.yaml + floor 门禁 | **scout 角色**（lead-mapping skill：query 多样化 + A–D 分级 + leads.md） | **角色化**（floor 数值门禁弃用，分级与排除显式化承担质量下限） |
@@ -20,7 +20,7 @@
 | **hitl2（审阅）** | hitl2 phase（stop:yes）+ composition_handoff | lead 的 `tool-ask-user`（审阅建议 = 证据充分性判断 + 交付/补研究推荐） | **原生** |
 | readiness（确定性预检） | readiness phase + 10 gate definition JSON | **critic 角色**（adversarial-review skill：readiness 判据清单 + review.md 的 PASS/FAIL） | **角色化**（确定性 schema 检查降格为 skill 清单——诚实取舍，见 §4 之 3） |
 | final（交付） | final/final.md + presentation 反馈 | final.md + `tool-present`（lead preset 独有声明权） | **原生** |
-| rerun（重跑） | ReopenResearchPass + rerun_count 血统 | 新 run 目录（`runs/<slug>-v2/`，question.md 引用前版）+ question.md `## Decisions` append-only 修订记录（delta 类型/受影响 topics/agent interpretation/用户原话 verbatim，最新在上） | 简化：不做血统机制，git + 目录命名 + Decisions 记录承担 |
+| rerun（重跑） | ReopenResearchPass + rerun_count 血统 | 同 bundle 版本演进（D17）：证据扩张 → `final/` 下一版（表述修订 polish 原位改、版本号不变；结构性另起才开新 bundle，sibling 预检）+ question.md `## Decisions` append-only 修订记录（delta 类型/受影响 topics/agent interpretation/用户原话 verbatim，最新在上） | 简化：不做血统机制，final/ 版本化 + Decisions/journal 记录承担 |
 
 **两点交互纪律**（codex "静默自律" spec 的移植）：HITL1 与 HITL2 之间所有角色静默自主
 推进，不问"要不要继续"、不汇报中间进度；用户主动发消息直接回答但不改变既定方向——
@@ -32,7 +32,7 @@
 |---|---|---|
 | markdown 控制面（phase node + manifest + transitions.chain） | codex 无会话内状态载体 | preset persona + skill（组合即控制面）；goal 系统（跨轮目标） |
 | CLI 文件状态机（enter-phase/advance-status/queue/work-unit 操作） | 宿主无调度原语 | agent-team 任务板（spawn_teammate/派活/收活）+ todo_write（轮内任务面） |
-| rb_status/rb_trace 审计流 | 需要 append-only 证据链对抗伪造 | 会话日志即真相（DSH event-sourced；DSH 研发流程研究 §一之 4 同哲学）；关键交接落 runs/<slug>/ 文件 |
+| rb_status/rb_trace 审计流 | 需要 append-only 证据链对抗伪造 | 会话日志即真相（DSH event-sourced；DSH 研发流程研究 §一之 4 同哲学）；关键交接落 run bundle（drt_<slug>/）文件 |
 | work-unit ledger / dry-submit→submit 两阶段 / receipt_nonce | 委派完整性（防提交漂移） | DSH subagent 生命周期 + 团队任务板状态；提交前验证降格为 critic 狩猎（§4 之 2） |
 | queue.json P0–P6 手工调度 | 无队列原语 | agent-team 任务板 + topics.md 单 owner 纪律 |
 | 五反馈面（attempt_disposition/recovery_action）| 工作单元恢复需要结构化反馈 | DSH 会话原生错误反馈 + steer；不重建恢复词汇表 |

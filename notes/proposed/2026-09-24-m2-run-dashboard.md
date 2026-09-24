@@ -14,13 +14,13 @@
 
 两点交互 + 静默自律 ⟹ run 期间（可能很长）用户没有任何进度可见性——不允许角色
 汇报（汇报即破坏纪律），也不该让用户干等 final。**可见性必须住文件投影**：run 的
-状态本来就在 `runs/<slug>/` 的文件契约里（topics / evidence frontmatter / leads
+状态本来就在 `drt_<slug>/` 的文件契约里（topics / evidence frontmatter / leads
 分级 / findings gap / review / journal），缺的只是"看"的渲染。
 
 ## 原则（先于实现定死）
 
 1. **投影不是真相**：仪表盘只读解析 run 文件，不写 run 目录、不缓存派生状态——
-   `runs/<slug>/` 仍是唯一 runtime truth（一处事实一个家）；
+   `drt_<slug>/` 仍是唯一 runtime truth（一处事实一个家）；
 2. **被动观察**：可视化不构成第三个交互点——不从观察面向角色发指令、不因观察
    打断静默自主；
 3. **keyless**：纯 fs 解析，无模型/网络/子进程（tests/layering 同款纪律）；
@@ -36,7 +36,7 @@
 - deliverables 面板（final.md 经 present 声明后出现）。
 
 **L1 仪表盘（本件交付）：`scripts/run-dashboard.mjs`**
-- 用法：`node scripts/run-dashboard.mjs research-workspace/runs/<slug> [--out <html>]`
+- 用法：`node scripts/run-dashboard.mjs research-workspace/drt_<slug> [--out <html>]`
   → 单页自包含 HTML（内联样式 + `<meta refresh>` 5s 自动刷新），浏览器打开即看；
 - 渲染区块（全部从文件契约解析，零发明）：
   1. run 头部：slug、问题定稿一句话、研究类型/深度（HITL1 快照）、Decisions 条数；

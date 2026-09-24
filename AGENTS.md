@@ -26,7 +26,7 @@ README.md                 人类门面（Start Here 链接 + 稳定原则摘要�
 roadmap.md                队列 + 搁置池（纯队列：条目完成即离队；▶ = 全仓唯一"当前"指针）
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 随队列条目——见 pnpm-workspace.yaml 头注）
 packages/deep-research-pack/   唯一自写包（纯配置）：presets/<role>/（preset.yml + agent.cordis.yml[persona 行/skills/工具行] + skills/<n>/SKILL.md）、cordis.patch.yml（bundle 行）；新增角色步骤见包 README
-research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、runs/<slug>/、templates/run/
+research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、drt_<slug>/（run bundle）、templates/run/
 docs/                    00-index（地图+决策台账+术语映射）→ design/10-30 → guides/60（开发环）+ guides/61（run 操作指南）+ evaluation.md（验收合同）
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）：
                          intents.md → proposed/（RFC，一文件一条目）→ implemented/；
@@ -75,7 +75,7 @@ node scripts/release-smoke.mjs        # L2 真实安装形状（keyless：pack�
 node scripts/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：四角色响应 + scout web_search 调用）
 node scripts/team-preflight-smoke.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + company D18 one-shot worker 探针）
 bash dev/boot-run.sh                  # run 通道开跑（幂等：组合校验/补装 → boot web 3081 → 仪表盘）；用法 = guides/61
-node scripts/run-dashboard.mjs --latest --root research-workspace/runs --out <html>   # run 只读投影（--watch 持续再生成）
+node scripts/run-dashboard.mjs --latest --root research-workspace --out <html>   # run 只读投影（--watch 持续再生成）
 node dev/run-kickoff.mjs --port 3081 --token <横幅 token> --prompt-file <file>        # run 会话驱动（建会话+发 kickoff）
 ```
 

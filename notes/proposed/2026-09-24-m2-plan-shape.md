@@ -34,7 +34,8 @@
    ——对齐源头 topic_registry 的 must_answer 数组。
 3. **question.md 增 `## Decisions（append-only，最新在上）`**：方向修订/重跑记录，字段对齐
    源头：delta 类型 / 受影响 topics / agent interpretation / 用户原话 verbatim。重跑语义
-   维持简化版（`runs/<slug>-v2/` 新目录 + question.md 引用前版），但**记录形状对齐源头**。
+   （原定 `runs/<slug>-v2/` 新目录，D17 修订 = 同 bundle final/ 版本演进——见 run-bundle
+   Note），**记录形状对齐源头**。
 
 ## 输掉的方案
 

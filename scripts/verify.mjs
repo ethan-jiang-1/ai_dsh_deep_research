@@ -173,7 +173,8 @@ function roadmapQueue() {
   }
 }
 
-// ── 门禁 7：workspace-contract（研究手册 + 六件 run 模板 + runs/ 目录在位）──
+// ── 门禁 7：workspace-contract（研究手册 + 六件 run bundle 模板在位；bundle 目录
+//    drt_<slug>/ 运行时由 lead 创建，无静态目录可查——D17 目录契约）──
 {
   const gate = 'workspace-contract';
   if (!existsSync(join(ROOT, 'research-workspace', 'AGENTS.md'))) fail(gate, 'research-workspace/AGENTS.md 不存在');
@@ -181,8 +182,6 @@ function roadmapQueue() {
     if (!existsSync(join(ROOT, 'research-workspace', 'templates', 'run', t)))
       fail(gate, `templates/run/ 缺模板 ${t}`);
   }
-  if (!statSync(join(ROOT, 'research-workspace', 'runs')).isDirectory())
-    fail(gate, 'research-workspace/runs/ 目录不存在');
 }
 
 // ── 门禁 8：proposal-scheduled（proposed/ 每提案必须在 roadmap §队列 有归宿；搁置池/头注不算）──

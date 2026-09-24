@@ -48,6 +48,6 @@
 - 受影响 topics: <T# 列表或 无>
 - agent interpretation: <lead 对修订的理解>
 - 用户原话: <verbatim>
-重跑语义：新目录 runs/<slug>-v2/ + 本文件引用前版。 -->
+重跑语义（D17）：证据扩张 = 同 bundle final/ 下一版 + 本文件 Decisions 追加；表述修订 = 当前版原位改、版本号不变。 -->
 
 - 2026-… HITL1 定稿（delta: 新增；agent interpretation: …；用户原话: "…"）

@@ -23,7 +23,8 @@
 - 直接说出研究问题（一句话到一段话皆可）。lead 加载 research-brief skill 走 **HITL1**
   三问：研究类型（quick_factual / exploratory_map / claim_verification）/ 深度篇幅 /
   时间口径语言——每问带推荐，你拍板即定稿；
-- 拍板后 lead 建 `research-workspace/runs/<slug>/`（question.md 定稿 + topics.md 拆解）
+- 拍板后 lead 实例化 run bundle `research-workspace/drt_<slug>/`（question.md 定稿 +
+  topics.md 拆解；立项时 sibling 预检——同名/前缀相关 bundle 已在则先问你）
   并组队（scout 先行，critic 后置进场），进入静默自主区。
 
 ## 3. 静默自主区（两点之间你会看到什么）
@@ -38,17 +39,18 @@
 ## 4. HITL2（交付审阅）
 
 - lead 带审阅建议来找你：证据充分性判断 + 交付/补研究推荐 + composition 确认
-  （读者是谁 / 用来做什么 / 前景化重点）——拍板后 final.md 落盘 + present 声明交付；
+  （读者是谁 / 用来做什么 / 前景化重点）——拍板后 final/ 当前版落盘 + present 声明交付；
 - 每条关键结论带 `[来源: evidence/xx.md]`，critic 的 review.md readiness: PASS
   是交付前置（无 CRITICAL 未修复才许交付）。
 
 ## 5. 中断与恢复
 
 - 任何时候可关页面/停机。恢复 = 重跑 `boot-run.sh` → 新开 lead 会话说
-  "继续 <slug> 这个 run"——lead 只凭 `runs/<slug>/` 的文件事实重建上下文，
+  "继续 <slug> 这个 run"——lead 只凭 `drt_<slug>/` 的文件事实重建上下文，
   不依赖聊天记忆；
-- 方向修订：直接告诉 lead——Decisions 追加一条记录后原地补搜，或开
-  `runs/<slug>-v2/`（重跑语义）。
+- 方向修订：直接告诉 lead——Decisions 追加一条记录后原地补搜（不算 rerun）；
+  证据扩张 rerun = 同 bundle final/ 下一版；结构性另起 = 新 drt_<slug>/（sibling
+  预检后建）。
 
 ## 6. 判定"研究完成"
 

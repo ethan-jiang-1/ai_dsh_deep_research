@@ -1,6 +1,6 @@
 # RFC：M2 运行机制——四角色团队在 DSH 上怎么真跑起来
 
-> 状态：**approved（2026-09-24 用户批准形状/队形/题目；开跑待用户就位 HITL1）** ·
+> 状态：**approved（2026-09-24 用户批准形状/队形；开跑待用户就位 HITL1）** ·
 > 2026-09-24 · 归宿：roadmap ▶「首个完整研究 run」
 > 依据：codex harness 考古（notes/research/2026-09-24-deep-research-harness-analysis.md）
 > + 本轮源头亲读（RUN.md / BUNDLE_ENTRY / rb_plan 实物）+ evaluation.md L4 全量判据。
@@ -35,7 +35,7 @@
    │ ◀── HITL1 三问 ──── │ （ask_user_question，每问带推荐：    │
    │  （类型/深度/口径）   │   研究类型/深度篇幅/时间口径语言）     │
    ├─ 拍板 ───────────▶ │                                    │
-   │                    │ 建 runs/<slug>/（从模板起步）：        │
+   │                    │ 建 drt_<slug>/（从模板起步）：         │
    │                    │   question.md（定稿+Purpose+RQ+       │
    │                    │     Scope In/Out+Constraints+        │
    │                    │     HITL1 快照+Decisions 第 1 条）    │
@@ -73,18 +73,18 @@
    │ ◀═══ 报告 + present ════════════════════════════════════
    │                    │ （可选）方向修订 → Decisions 追加一条   │
    │                    │  （delta+受影响 topics+你的原话）      │
-   │                    │  → 原地补搜 或 runs/<slug>-v2/        │
+   │                    │  → 原地补搜 或 final/ 下一版          │
 ```
 
 **你只在两处出手**：HITL1（定问题形状）和 HITL2（审阅拍板）；两点之间全部静默自主
 （不问"要不要继续"、不汇报中间进度）。**每个里程碑的实物**：question/topics → leads →
-evidence/ → findings → review → final——全部落在 `runs/<slug>/`，中断恢复只认这些文件。
+evidence/ → findings → review → final——全部落在 `drt_<slug>/`，中断恢复只认这些文件。
 
 ## 方案（run 的编队与运转）
 
 1. **运行主体 = 一个 lead 会话**：挂 `Deep Research Lead` preset，cwd = `research-workspace/`。
    用户在 lead 会话提出研究问题 → lead 加载 research-brief skill 走 **HITL1**
-   （ask_user_question：研究类型 / 深度篇幅 / 口径，每问带推荐）→ 落 `runs/<slug>/`。
+   （ask_user_question：研究类型 / 深度篇幅 / 口径，每问带推荐）→ 落 `drt_<slug>/`。
 2. **组队**：lead 按 team-assembly skill 定名单（探索性全景默认：scout ×1 + analyst ×1 +
    critic 后置进场；负载高再加 analyst），`spawn_teammate` 组队——**成员挂 roster 默认
    preset（=lead，P2 实证），角色人格与技能经 lead 的 spawn prompt 携带角色章程
@@ -95,9 +95,9 @@ evidence/ → findings → review → final——全部落在 `runs/<slug>/`，�
 4. **HITL2**：lead ask_user 给审阅建议——证据充分性判断 + 交付/补研究推荐 +
    **composition 确认**（吸收源头 composition_handoff：读者是谁 / 用来做什么 /
    前景化重点——写进审阅建议而非新机制）。
-5. **交付**：`final.md`（每条关键结论带 `[来源: evidence/xx.md]`）+ `present` 声明。
+5. **交付**：`final/` 当前版（每条关键结论带 `[来源: evidence/xx.md]`）+ `present` 声明。
 6. **中断恢复实测**（L4 判据 ④）：run 进行中受控 kill lead 会话 → 新开 lead 会话 →
-   只凭 `runs/<slug>/` 文件重建上下文继续（不依赖 chat memory）——记进 journal。
+   只凭 `drt_<slug>/` 文件重建上下文继续（不依赖 chat memory）——记进 journal。
 
 ### 源头对照（哪些照搬、哪些已有载体）
 
@@ -107,7 +107,7 @@ evidence/ → findings → review → final——全部落在 `runs/<slug>/`，�
 | queue demand → work-unit 派活 | team 任务板 + 手册 owner 表（D3 定案，不重建 CLI） |
 | HITL1/HITL2 stop:yes | lead 的 ask-user（唯一持有人，工具面已表达） |
 | readiness 确定性预检 | critic skill 清单（诚实降格，设计已记录） |
-| ReopenResearchPass 重跑 | 简化：`runs/<slug>-v2/` 新目录 + 修订记录（见 m2-plan-shape RFC） |
+| ReopenResearchPass 重跑 | 同 bundle 版本演进：证据扩张 → final/ 下一版（表述修订 polish 版本不变；结构性另起才开新 bundle + sibling 预检——D17，见 run-bundle Note） |
 
 ## 输掉的方案
 
@@ -118,7 +118,7 @@ evidence/ → findings → review → final——全部落在 `runs/<slug>/`，�
 
 ## 验收判据
 
-- L4 全量四判据（evaluation.md）：① final.md 存在且含来源清单；② 抽查 N 条结论可回溯
+- L4 全量四判据（evaluation.md）：① final/ 当前版存在且含来源清单；② 抽查 N 条结论可回溯
   （建议 N=5，用户可调）；③ 两点纪律：HITL 之间静默自主（会话日志核对无中途提问）；
   ④ 中断恢复实测通过；
 - Q2 闭：成员会话日志核对 preset 组合（zstd 解压逐事件，方法同 l4-lite）；**含 D18
@@ -142,33 +142,27 @@ evidence/ → findings → review → final——全部落在 `runs/<slug>/`，�
 2. analyst 初始数量：**1**（随最薄配置定案；Q4 观察后议增）；
 3. 中断恢复：**做一次受控真 kill**（最便宜地证明"文件即真相"，L4 判据④）；
    抽查条数 **N=5**（已确认，可调）；
-4. 研究题（已定，2026-09-24 用户选 A）：**主流 Deep Research 产品（ChatGPT DR /
-   Gemini DR / Perplexity / Kimi 探索版等）如何处理证据链：引用粒度、来源呈现、
-   单源与缺口披露、证据暴露度**。Purpose：为本仓 M3 的证据呈现与交付设计提供竞品
-   事实基础（探索型、有界、可交叉；新功能细节常单源 = 天然"待破"素材）。
+4. **研究题不是本 RFC 的事项（D17 分层，2026-09-24 拍板）**：题目是 run bundle 的第一个
+   变量（kickoff/HITL1 给定，落 question.md），框架文档不记录、不拍板任何具体题目——
+   原先写在本条的具体题目段已按分层删除。
 
-## 暂停点记录（2026-09-24，用户指令"先停下来打扫卫生"）
+## 暂停点记录（2026-09-24，用户指令"先停下来打扫卫生"；同日按 D17 去实例化重写）
 
-**停在哪儿**：④ 已起跑至 HITL1 挂起 → 用户暂停。已完成的起跑面：岔口 C 执行毕
-（ad-hoc 队三 teammates 收队、旧 canonical 会话挂起 HITL1 取消、芯片题 kickoff 进正规
-通道 session-0fc52a87，cwd=research-workspace）；lead 开场动作完整（加载 research-brief、
-glob runs/、**主动读了 ad-hoc 侦察材料**）、芯片题 HITL1 三问挂起（探索性全景/深度报告/
-2024-01 起口径，全带推荐）→ 未答。暂停时挂起回合已 session/cancel（现场无半开回合），
-web 3081 + 仪表盘 watcher 已停、无残留进程。
+**停在哪儿**：④ 已起跑至 HITL1 挂起 → 用户暂停。机制事实：组队前清理执行毕（ad-hoc
+会话收队、旧会话挂起回合 cancel，现场无半开回合）、lead 会话已 kickoff 进正规通道
+（cwd=research-workspace）、HITL1 三问挂起未答；web 3081 + 仪表盘 watcher 已停、无残留
+进程。实例状态（题面、会话号、侦察线索）属运行区与 bundle（D17），本 RFC 不记账——
+题面文件在 `dev/smoke-workspace/`（gitignored 运行区）。
 
-**重启配方（三条命令）**：
+**重启配方（机制三条）**：
 
 ```sh
 bash dev/boot-run.sh                                  # web 3081 + 仪表盘（--latest 只读投影）
-node dev/run-kickoff.mjs --port 3081 --token <横幅token> --prompt-file dev/smoke-workspace/kickoff-chip.md
-# GUI 打开 token 链接 → 「国产AI芯片实际应用调研」会话（或新会话）→ 答 HITL1
+node dev/run-kickoff.mjs --port 3081 --token <横幅token> --prompt-file <题面文件>
+# GUI 打开 token 链接 → 新会话（kickoff 脚本自建）→ 答 HITL1；题面由用户届时给定（D17：
+# 题目 = bundle 变量，不进框架文档）
 ```
 
-（`dev/smoke-workspace/kickoff-chip.md` = 芯片题题面全文，含 Purpose 与 ad-hoc 线索指针，
-gitignored 运行区但已随本暂停点核实存在；若被清理，题面原文见本 RFC 暂停点上文与
-ad-hoc run 的 question.md。）
-
-**暂停时的已知偏差记录**：① 旧 run 会话 01f37f82（DR 题）与 chip 会话 0fc52a87 都停在
-"取消的回合"上，重启后可继续用或新开（kickoff 脚本建新会话即可）；② boot-run 的 trap
-在 job_kill 下未杀净 watcher（本次手动清）——记为 boot-run 小瑕疵，随 debug-dashboard-plus
-条目顺手修；③ L4 四判据/Q2 行为半边/Q4/Q5/①② run 内判据全部未核销，等重启后随 run 闭。
+**暂停时的已知偏差记录**：① boot-run 的 trap 在 job_kill 下未杀净 watcher（实例残留，
+手动清过）——记为 boot-run 小瑕疵，随 debug-dashboard-plus 条目顺手修；② L4 四判据/
+Q2 行为半边/Q4/Q5/①② run 内判据全部未核销，等重启后随 run 闭。

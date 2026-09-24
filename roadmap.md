@@ -18,7 +18,7 @@
    留存策略执行——runtime truth 不进 git、Note 记路径与抽查结果）；M3 重排（顺延元
    工作的复活顺序按实测证据定）；docs 面改动 → 入口链探针必跑。
 3. **debug-dashboard-plus**（feature 小件，零 client 代码）——仪表盘多 run 场扫描
-   （research-workspace/runs + dev/harness-home/runs，ad-hoc 场不再裸奔）+ 流程步骤条
+   （research-workspace/drt_* + dev/harness-home/runs，ad-hoc 场不再裸奔）+ 流程步骤条
    （文件推导+当前步高亮）+ **HITL 等待横幅**（读 lead 会话日志检测 open ask_user_question
    →"⏳ 等你拍板" + 静默期反向提示）+ deep-link。设计依据 = notes/research/
    2026-09-24-ui-observability-surfaces.md §3.1/§7（2026-09-24 用户定：入队不做，run 收口后实施）。

@@ -4,24 +4,35 @@
 `agent-instructions` 注入每个角色会话。角色人格见各自 preset；这里只放**跨角色共享的
 工作纪律与文件契约**。
 
+## 分层铁律（D17：harness / run bundle）
+
+harness 只读：presets、skills、本手册、templates/ 对任何一次研究都是同一份，run 期间零
+写入，不持任何 per-run 状态。**一切变量只写进本 run 的 bundle（本目录下 `drt_<slug>/`）**
+——不写回手册/模板，不把 run 状态记到任何框架文档。`研究报告 = harness(bundle)`。
+
 ## 目录约定
 
 ```
-runs/<slug>/           一次研究 engagement = 一个 run（slug 由主编在立项时定，kebab-case）
-  question.md          研究问题定稿 + Purpose/RQ 分解/Scope/Constraints + HITL1 对齐
-                       快照 + Decisions（append-only 方向修订记录，最新在上）（owner: lead）
+drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research Topic，目录名即方向；
+                       slug 由主编立项时定，kebab-case；立项 sibling 预检：同名/前缀相关
+                       bundle 已在 → 问用户，不擅自另起）
+  question.md          方向契约：研究问题定稿 + Purpose/RQ 分解/Scope/Constraints + HITL1
+                       对齐快照 + Decisions（append-only 方向修订记录，最新在上）——跨
+                       rerun 持久，bundle 身份核心（owner: lead）
   topics.md            topic 图：must_answer（问题列表 2–5 问）+ scope_role（owner: lead）
   leads.md             候选方向清单（owner: scout）
   evidence/            证据文件，一条一档（owner: analyst）
   findings.md          发现账本：结论 + 支撑 + gap 状态（owner: lead）
   review.md            对抗核查报告（owner: critic）
   drafts/              过程稿（owner: 各角色，按需）
-  final.md             最终报告（owner: lead，成品）
-  journal.md           运行纪要（追加式，所有角色可写）
-templates/run/         新 run 的起点模板（只读，不直接写）
+  final/               版本化交付：v1.md → 证据扩张 rerun 后 v2.md…当前版 = 最大号
+                       （owner: lead，成品 = 当前版）
+  journal.md           运行纪要（追加式，所有角色可写；跨 rerun 累积血统）
+templates/run/         新 run bundle 的起点模板（只读，不直接写）
 ```
 
-模板六件 ↔ question/topics/leads/evidence-entry（= evidence/ 单条模板）/findings/final；
+模板六件 ↔ question/topics/leads/evidence-entry（= evidence/ 单条模板）/findings/final
+（= final/ 首版模板）；
 review.md、drafts/、journal.md 无模板——review 格式住 critic 的 adversarial-review skill，
 drafts/journal 运行时自建。
 
@@ -34,7 +45,7 @@ drafts/journal 运行时自建。
 | evidence/*.md | analyst（创建者） | 只读 |
 | findings.md | lead | 只读 |
 | review.md | critic | 只读 |
-| final.md | lead | 只读 |
+| final/（当前版） | lead | 只读 |
 
 要改别人 owner 的文件：通过团队通道向 owner 提请求，不直接动手。
 
@@ -53,12 +64,12 @@ analyst 会话内另有全文模板（`evidence-extraction` skill——skills �
 
 **机械强度诚实记账**：本契约的机械检查 = L0 契约测试（五字段在场 + 各执行者副本对账）
 + 仪表盘渲染谓词（上述）；run 内执法 = critic 狩猎（散文判断）。verify 门禁不扫
-`runs/`（gitignored 运行区）——run 数据的完整性由 critic + 仪表盘呈现，不在 L0。
+bundle（gitignored 运行区）——run 数据的完整性由 critic + 仪表盘呈现，不在 L0。
 
 ## 交付物三态
 
 - **过程稿**：drafts/ 与各 owner 文件——团队内部工作面，不是成品；
-- **成品**：lead 会话中 `present` 声明的 `runs/<slug>/final.md`——唯一对外交付物；
+- **成品**：lead 会话中 `present` 声明的 `final/` 当前版——唯一对外交付物；
 - **非成品声明**：非 lead 角色的 present 声明一律视为过程稿展示。
 
 ## 交互纪律（两点交互）
@@ -69,6 +80,6 @@ analyst 会话内另有全文模板（`evidence-extraction` skill——skills �
 
 ## 完成判据（verify the world）
 
-- final.md 每条关键结论附 `[来源: evidence/xx.md]` 且文件真实存在、内容真实支撑；
-- 没有 CRITICAL 未修复的 review.md 就没有 final.md（readiness: PASS 前置）；
-- "研究完成"的唯一依据是文件事实（final.md + present 声明），不是任何人的口头宣告。
+- final/ 当前版每条关键结论附 `[来源: evidence/xx.md]` 且文件真实存在、内容真实支撑；
+- 没有 CRITICAL 未修复的 review.md 就没有 final 交付（readiness: PASS 前置）；
+- "研究完成"的唯一依据是文件事实（final/ 当前版 + present 声明），不是任何人的口头宣告。
