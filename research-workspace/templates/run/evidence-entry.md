@@ -2,7 +2,7 @@
 source_url: <真实抓取过的 URL>
 retrieved_at: YYYY-MM-DD
 quality: A
-found_by: analyst
+found_by: <发现者角色>
 supports: T1
 ---
 
@@ -15,7 +15,7 @@ supports: T1
 
 ## 解读
 
-<推理与初步判断；结论性的写"初步判断（待主编综合）"。
+<推理与初步判断；结论性的写"初步判断（待主编综合）">。
 
 ## Question List（本 topic）
 

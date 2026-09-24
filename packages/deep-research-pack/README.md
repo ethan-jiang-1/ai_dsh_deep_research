@@ -23,3 +23,11 @@ Deep Research 插件包：四角色 preset + host bundle 行。当前为**纯配
 3. roster 自动发现：bundle 的 agent-presets 行 `roots` 指向 `presets/`，新角色无需逐个登记 bundle 行；
 4. 消费点**无需逐个改**：角色清单事实源 = 盘上 `presets/` 目录（基础整治 §3.2）——`preset-smoke` / `release-smoke` / `team-preflight-smoke` / `boot-run.sh` / `tests` 全部目录枚举。唯二要补的：`l4-lite-smoke` 的 `PROMPTS` 加该角色的标记 prompt（缺了 fail-loud 退出）；`scripts/l4-lite-smoke.mjs` 之外若新写脚本，用 `scripts/lib/roles.mjs` 枚举，别手抄清单（verify 门禁 `role-list-sync` 咬硬编码）；
 5. 完成定义 = preset-smoke 真挂载绿（L1 面，keyless）。
+
+## 新增一个 skill
+
+1. 建 `presets/<role>/skills/<n>/SKILL.md`——frontmatter `name:` 必须**逐字等于目录名**（verify 门禁 preset-structure 强制）；
+2. `agent.cordis.yml` **不用改**：`customSkillDirs` 指向整个 `skills/` 目录且 `includeDefaultRoots: false`，自动发现；
+3. `cordis.patch.yml` **不用改**（bundle 行只管 roster/工具，不管 skill）；
+4. 文档**不用改**：skills 清单的单一事实源 = 盘上目录（20-roles §2 已路由，基础整治 C8）；仅当 skill 承载**新方法论条目**时，`docs/design/30-methodology-mapping.md` 同 diff（L3 合同）；
+5. 完成定义 = `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs` 绿——它断言每角色 `skills/list` **恰好等于**盘上目录，多一个少一个都会红。

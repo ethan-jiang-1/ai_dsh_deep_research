@@ -27,29 +27,27 @@ L3 判据 2 的载体；任何两类事实不得双 owner 或无 owner。
 5. 通道用法（team 汇报 vs subagent 工人的适用场景）；
 6. veto 权（只有 lead 能说"证据不足以交付"——要说出口）。
 
-## 2. skills 清单（方法论的家）
+## 2. skills（方法论的家）
 
-| 角色 | skill | 承载的方法论 |
-|---|---|---|
-| lead | `research-brief` | HITL1：研究类型三分（quick_factual / exploratory_map / claim_verification）、澄清三问带推荐、question/topics 定稿格式 |
-| lead | `team-assembly` | 组队矩阵（按研究类型定名单）、通道选择、单 owner 分派纪律、critic 后置进场 |
-| lead | `synthesis` | wave2 语义：纯综合先行禁新搜索 → finding gap 定向补搜一轮 → final.md 来源链格式 |
-| scout | `lead-mapping` | query 多样化三轮、30 秒去留判、A–D 质量分级、排除显式、URL 必须真实抓取 |
-| analyst | `evidence-extraction` | question-list 驱动、证据文件 frontmatter 身份链、摘录/解读分离、交叉验证 ≥2 独立来源、反例搜索必记、口径与单源显式化（"单源——待破"/"已搜未得"） |
-| critic | `adversarial-review` | 三审查线（无来源狩猎 CRITICAL / 质量审计 MAJOR / 反例覆盖 MAJOR）、review.md 分级格式、readiness 判据清单 |
+每角色一个技能目录：`presets/<role>/skills/<n>/SKILL.md`，一技能一目录。**当前有哪些
+skill = 盘上目录本身**（单一事实源：`ls packages/deep-research-pack/presets/<role>/skills/`）——
+此处不复制清单：复制即缓存，加删 skill 会静默漏项（基础整治 C8）。本节只说明技能面
+承载什么：**方法论条目 ↔ skill 的映射正本 = [30-methodology-mapping.md](./30-methodology-mapping.md)**
+（L3 载体，合同随代码同 diff）；每条方法论纪律写在承载它的 SKILL.md 正文里；
+跨角色硬契约（证据 frontmatter 等）住研究手册（research-workspace/AGENTS.md）。
 
 ## 3. 信噪比策略落点（L3 判据 4：显式机制，不靠模型自觉）
 
 Deep Research 的本质困难 = 搜索结果信噪比极差 + 答案位置未知。四道显式防线：
 
-1. **分层过滤**（scout/lead-mapping）：30 秒去留判 + A–D 分级——噪声在广度层就被分级
+1. **分层过滤**（scout，广度层）：30 秒去留判 + A–D 分级——噪声在广度层就被分级
    隔离，D 级默认弃用；
-2. **问题驱动**（analyst/evidence-extraction）：question-list 把"探索"变成"逐问题找
+2. **问题驱动**（analyst，深度层）：question-list 把"探索"变成"逐问题找
    证据"——搜索有靶子，噪声进不了正题；
 3. **对抗验证**（analyst 交叉验证 + critic 狩猎）：关键 claim ≥2 独立来源 + 反例专搜 +
    **单源显式标记（"单源——待破"）与数字口径（测量条件 ≥2 项）** + 无来源结论
    CRITICAL——幸存的信号才许进报告；
-4. **缺口显性化**（lead/synthesis）：insufficient/contradicted 如实呈现——搜不到也
+4. **缺口显性化**（lead，综合层）：insufficient/contradicted 如实呈现——搜不到也
    是结论，禁止假装全知。
 
 ## 4. 留待实测的开放点

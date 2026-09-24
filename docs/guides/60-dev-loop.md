@@ -73,3 +73,19 @@ source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名�
 
 每条新机械门禁**带反证**：先注入违规看红 → 还原 → 绿（guard only guards if it fails
 the regression）。反证记录进对应 implemented Note。
+
+## 7. 中断恢复（开发通道：上个 Agent 干到一半死了，下一个怎么接）
+
+只认三样东西，**不维护任何"控制/状态文件"**：
+
+1. **`roadmap.md` §队列 ▶**——全仓唯一"当前"指针（干到哪个条目）；
+2. **该条目 RFC 的状态行 + 文末实施记录**（`notes/proposed/` 一文件一条目；状态行住
+   RFC 自己头部：proposed / approved / …；实施记录随进度追加——干到条目内部哪一步）；
+3. **`git log`**——最近提交的窄证据切片（哪些已闭、实际跑过什么验证）。
+
+为什么不是状态文件：本仓**主动否决**过控制文件那套（rb_status / rb_queue / rb_trace
+状态文件）——输掉的方案与理由见
+[m2-plan-shape RFC §输掉的方案](../../notes/proposed/2026-09-24-m2-plan-shape.md)：
+会话日志 / git / RFC 即持久真相，第二份"状态的家"必然漂移。恢复程序 = **读上述三样**，
+不是"先更新状态文件再干活"。（研究 run 通道的恢复另有程序：[guides/61 §5](./61-run-playbook.md)，
+只认 `runs/<slug>/` 的文件事实。）
