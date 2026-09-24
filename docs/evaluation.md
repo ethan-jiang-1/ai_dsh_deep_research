@@ -46,14 +46,14 @@
 ### L1 挂载面（真挂载 = preset 类改动的完成定义）
 
 - **定义**：每个研究角色 preset 在**真 DSH 会话**里挂载成功——persona 生效、skills 可见、工具面齐全。dump/roster 可见不算（company postmortem 0001 实证：挂载失败只有真会话抓得到）。
-- **最小真检查**：`node scripts/preset-smoke.mjs`——keyless 预检（环境/安装形状断言）+ 真会话档（`DSH_SMOKE_REAL=1`：boot 真 web/headless 逐角色建会话，机器断言工具/skill 面在场；各档落地状态见 roadmap §队列）。
+- **最小真检查**：`node scripts/preset-smoke.mjs`——keyless 预检（环境/安装形状断言）+ 真会话档（`DSH_SMOKE_REAL=1`：boot 真 web/headless 逐角色建会话，机器断言工具/skill 面在场；已 green——证据：L1/L2 绿灯 Note）。
 - **通过判据**：全部角色真挂载绿；失败角色即里程碑未完成，无例外。
 - **何时跑**：preset 内容/结构改动时；框架里程碑必跑。
 
 ### L2 安装面（真实安装形状）
 
 - **定义**：插件以用户实际获得的方式可用——`npm pack` 产物完整，装进**干净 profile** 成功，起会话可用。
-- **最小真检查**：`release-smoke`：`npm pack` → 全新 `DSH_HOME` profile → `dsh plugin add` → 起会话断言（落地状态见 roadmap §队列）。
+- **最小真检查**：`release-smoke`：`npm pack` → 全新 `DSH_HOME` profile → `dsh plugin add` → 起会话断言（已 green——证据：L1/L2 绿灯 Note）。
 - **通过判据**：pack 清单与 `files` 声明一致、安装零缺失警告、干净 profile 会话能列出研究角色。
 - **何时跑**：包结构/release 相关改动时；框架里程碑必跑。
 
@@ -130,5 +130,5 @@
 
 ## 6. 已知边界（诚实记账）
 
-- L1/L2/L4 需要真 DSH 环境与（L4）`DEEPSEEK_API_KEY`；环境未就绪时该面标"未跑"，**不等同通过**（各面的当前落地状态见 roadmap §队列，"未跑"≠"通过"）；
+- L1/L2/L4 需要真 DSH 环境与（L4）`DEEPSEEK_API_KEY`；环境未就绪时该面标"未跑"，**不等同通过**（已 green 面的证据见对应毕业 Note——00-index 待定表 Q 行指向；未闭面的当前状态 = roadmap ▶，"未跑"≠"通过"）；
 - 脚本本身是框架搭建的一部分：门禁/预检脚本存在且可跑计入 M1 判据 1，真会话/发布档的脚本化随对应队列条目落地。

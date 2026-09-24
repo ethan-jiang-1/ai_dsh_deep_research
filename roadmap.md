@@ -8,19 +8,9 @@
 
 ## 队列
 
-1. ▶ **首个完整研究 run**（feature，M2）——真实问题端到端：HITL1 → 侦察 → 挖掘 → 综合 →
-   critic → HITL2 → final.md + present；L4 全量四判据（来源链抽查/两点纪律/静默自主/
-   中断恢复）；Q2（team 成员 preset 组合——**机制半边已由 P2 预检答**：成员挂 roster
-   默认 preset=lead，角色人格须经 spawn prompt 传达，打磨材料见 P2 毕业 Note）Q4
-   （synthesizer 拆分）Q5（topic 争用）Q6（floor 机械化）随实测闭。**落地序 =
-   ① 2026-09-24-m2-plan-shape（计划/模板形状）→ ② 2026-09-24-m2-data-caliber（口径
-   纪律）→ ③ 2026-09-24-m2-run-dashboard（可视化观察面，用户定案事前设计）——三件
-   开跑前内容落地 → ④ 2026-09-24-m2-run-mechanics（run 本体）；RFC 已全部定案并批准
-   （2026-09-24 用户拍板全部开放问题，含 run 形状 = 端到端最薄直跑、岔口 C 收编芯片题），
-   ①②③ 已实施落地（L0/L1/L3 绿，实施记录见各 RFC 文末），④ 起跑至 HITL1 挂起后用户暂停
-   ——现场已收净（回合取消/进程无残留），重启配方 = run-mechanics RFC 暂停点记录；
-   次序规则见 notes/proposed/README.md**。（2026-09-24 用户定案：
-   实质优先，提前至 vendor-submodule 之前；元工作顺延待实战证据反哺。）
+1. ▶ **首个完整研究 run**（feature，M2）——端到端最薄直跑（HITL1→侦察→挖掘→综合→critic→HITL2→final+present；L4 全量四判据随 run 闭）。
+   四份 RFC 全 approved：2026-09-24-m2-plan-shape / 2026-09-24-m2-data-caliber / 2026-09-24-m2-run-dashboard 已落地
+   （记录见各 RFC 文末）；2026-09-24-m2-run-mechanics 起跑至 HITL1 挂起（快照与重启配方 = 该 RFC §暂停点记录）。
 2. **M2 收口与复盘**（卫生，run 完成后同 diff 收尾）——L4 四判据证据落 Note；Q2/Q4/
    Q5/Q6 销账（答案+证据进 00-index 待定表）；D18 复核结论；搁置池三条复活条件到期
    复审（专职 synthesizer=Q4 / floor 机械化=Q6 / UI 皮肤=run 通过+demo 需求）；实测新
