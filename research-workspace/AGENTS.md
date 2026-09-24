@@ -25,8 +25,10 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
   findings.md          发现账本：结论 + 支撑 + gap 状态（owner: lead）
   review.md            对抗核查报告（owner: critic）
   drafts/              过程稿（owner: 各角色，按需）
-  final/               版本化交付：v1.md → 证据扩张 rerun 后 v2.md…当前版 = 最大号
-                       （owner: lead，成品 = 当前版）
+  final/               版本记账：v1.md = 版本索引与关键事实回溯；当前版权威副本 =
+                       本目录 final.md（[来源: evidence/] 相对 run 根解析，防双份全文
+                       分叉——2026-09-25 run 实测采纳的 lead 设计）；证据扩张 rerun 才落
+                       v2.md 全文并在此登记（owner: lead，成品 = final.md 当前版）
   journal.md           运行纪要（追加式，所有角色可写；跨 rerun 累积血统）
 templates/run/         新 run bundle 的起点模板（只读，不直接写）
 ```

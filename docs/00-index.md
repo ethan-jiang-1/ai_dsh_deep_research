@@ -60,12 +60,12 @@
 
 | # | 问题 | 归宿 |
 |---|---|---|
-| Q2 | agent-team spawn_teammate 成员会话的 preset 组合：**机制半边已答（P2 预检实证）**——spawn_teammate 无 preset 参数，成员挂 roster 默认 preset（= lead，session 事件 `agentPreset:"lead"` 原样在案）+ team 工具面；角色人格须经 lead 的 spawn prompt 传达（persona-by-prompt；行为效果归 run 实测） | [P2 毕业 Note](../notes/implemented/2026-09-24-m2-p2-team-preflight.md)；队列「首个完整研究 run」实测 |
-| Q4 | 专职 synthesizer 是否独立成角色（背景：[20-roles §4](./design/20-roles.md)） | 队列「首个完整研究 run」实测 |
-| Q5 | 多 analyst 并行时的 topic 争用（背景：[20-roles §4](./design/20-roles.md)） | 队列「首个完整研究 run」实测 |
-| Q6 | floor 数值门禁是否需要机械化（背景：[30 §4](./design/30-methodology-mapping.md)） | 队列「首个完整研究 run」实测 |
+| ~~Q2~~ | ~~agent-team spawn_teammate 成员会话的 preset 组合~~ **已销账（2026-09-25 run 实测）**：成员挂 roster 默认 preset（`agentPreset:"lead"` 原样在案）+ 角色人格经 lead spawn prompt 传达且行为生效（scout/analyst 按章程行事）；D18 复核 = team 语境 one-shot subagent 可用（本仓 vendor 探针 ×2 PASS），continuable 边界维持 company 结论 | [m2-run-mechanics §实施记录](../notes/implemented/2026-09-24-m2-run-mechanics.md)；[P2 Note](../notes/implemented/2026-09-24-m2-p2-team-preflight.md) |
+| ~~Q4~~ | ~~专职 synthesizer 是否独立成角色~~ **已销账（2026-09-25 run 实测）**：lead 独任综合无过载（journal 两次调度决策干净落地；标准报告 4 topic 规模）——不拆角色，搁置池条目维持搁置 | [m2-run-mechanics §实施记录](../notes/implemented/2026-09-24-m2-run-mechanics.md) |
+| ~~Q5~~ | ~~多 analyst 并行时的 topic 争用~~ **已销账（2026-09-25 run 实测）**：无争用——T1 中途改派经 lead 调度干净落地，单 owner + 任务板纪律足够 | [m2-run-mechanics §实施记录](../notes/implemented/2026-09-24-m2-run-mechanics.md) |
+| ~~Q6~~ | ~~floor 数值门禁是否需要机械化~~ **已销账（2026-09-25 run 实测）**：不需要——critic 散文审查实际抓出三根钉子（"2–4 年"无来源/"1.56×"平台不对称/"国产高 16%"口径）即质量证据；数值 floor 维持搁置 | [m2-run-mechanics §实施记录](../notes/implemented/2026-09-24-m2-run-mechanics.md) |
 
-（已销账：Q1 web 工具行 → D9（[web-tool-rows 毕业 Note](../notes/implemented/2026-09-24-web-tool-rows.md)）；Q3 plugin add 形状 → D15（[L1/L2 绿灯 Note](../notes/implemented/2026-09-24-l1-l2-green.md)）。均 2026-09-24。）
+（已销账：Q1 → D9（[web-tool-rows Note](../notes/implemented/2026-09-24-web-tool-rows.md)）；Q3 → D15（[L1/L2 绿灯 Note](../notes/implemented/2026-09-24-l1-l2-green.md)）。2026-09-24。Q2/Q4/Q5/Q6 → run 实测，2026-09-25。）
 
 ## 术语映射（本项目 ↔ DSH 官方 ↔ vendor/dsh 源码）
 

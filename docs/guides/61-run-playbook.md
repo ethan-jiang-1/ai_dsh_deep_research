@@ -2,7 +2,7 @@
 
 > 层：指南（怎么操作）。通道 = run 通道（安装域 research profile：本包 + vendor
 > agent-team-profile 层，P1 定案——[毕业 Note](../../notes/implemented/2026-09-24-m2-p1-run-channel.md)）；
-> 四角色流程全图 = [m2-run-mechanics RFC](../../notes/proposed/2026-09-24-m2-run-mechanics.md)；
+> 四角色流程全图 = [m2-run-mechanics RFC](../../notes/implemented/2026-09-24-m2-run-mechanics.md)；
 > 跨角色纪律与文件契约 = [研究手册](../../research-workspace/AGENTS.md)。本页只答"你现在做什么"。
 
 ## 0. 开跑（一次性准备 + 每次启动）

@@ -1,6 +1,6 @@
 # RFC：M2 运行机制——四角色团队在 DSH 上怎么真跑起来
 
-> 状态：**approved（2026-09-24 用户批准形状/队形；开跑待用户就位 HITL1）** ·
+> 状态：**implemented（2026-09-25 M2 run 收口毕业；实施记录见文末——L4 四判据全闭）** ·
 > 2026-09-24 · 归宿：roadmap ▶「首个完整研究 run」
 > 依据：codex harness 考古（notes/research/2026-09-24-deep-research-harness-analysis.md）
 > + 本轮源头亲读（RUN.md / BUNDLE_ENTRY / rb_plan 实物）+ evaluation.md L4 全量判据。
@@ -195,3 +195,60 @@ symlink 桥接仪表盘可见性）：
 **诚实账**：M2 收口 Note 如实写"run 主体走旧通道"，不粉饰为"正规通道验证通过"；
 drt_ 契约的 in situ 验证缺口由"迁移 + 判据④ 续跑"部分覆盖，残余缺口在 M3 重排时
 评估是否需要第二个正规通道 run。
+
+## 实施记录（2026-09-25 01:15，M2 run 收口毕业——L4 四判据全闭）
+
+**Run 概况**：研究题 = 国产 CPU vs 美国 CPU 五维差距（题面 = 用户一句话输入，D17：题目 =
+bundle 第一个变量）；旧通道执行（化石契约上下文，四段注入面事故链见下）→ 22:09 交付 →
+2026-09-25 00:45 用户授权代理全程模拟人机交互 → HITL2 代理代答"按现稿定稿"（01:08 lead
+完成 present #2 + final/v1.md 版本索引）→ Phase C 迁移至 research-workspace/drt_cn-us-cpu-gap/
++ 契约补齐（Decisions 3 条回填 / review-critic.md→review.md / journal 补录）。
+
+**L4 四判据闭合**：
+
+- **① final 存在且含来源清单 ✓**：final.md（350 行，61 条 `[来源: evidence/xx.md]` 内链）
+  + final/v1.md 版本索引（lead 自发创建，其"防相对引用分叉"设计经续跑会话复核后被采纳为
+  手册契约细化）。
+- **② 抽查 N=5 回溯 ✓**：TL;DR 五条主结论逐一回溯证据文件内容（Zen1/4.92 ins/cycle、
+  284vs409 官方算术、Linux 5.19 主线、Windows on Arm 用户态限制、168.2 全库第一）——5/5
+  内容支撑通过。**诚实记账**：证据 frontmatter 五字段 0/31（旧通道注入化石手册，无
+  frontmatter 契约）——现行有效证据谓词判 0/31；实质证据链（来源/口径/交叉/反例）完整，
+  差距如实记录不追改（事后补造分级 = 判据注水）。
+- **③ 两点纪律 ✓**：lead 会话 639 事件全程仅 2 次 ask（HITL1 19:12 用户亲答 + HITL2 代答）；
+  三 teammate 真实 ask = 0（字符串命中已排除）。静默自主区 19:12→22:09 三小时零打扰。
+- **④ 中断恢复 ✓**（双证）：(a) 非受控硬中断——web 通道死亡 2 小时（22:09→00:23），bundle
+  文件零损失、恢复只认文件；(b) 受控续跑——新 lead 会话 A/B 仅凭 bundle 重建（B 实际执行
+  31/31 引用核验 + journal 交接条目 + 发现 final/ 契约解释问题）。A 段受控 kill 落在回合
+  完成后（25s 已跑完），硬中断证据由 (a) 承担。
+
+**Q2/Q4/Q5 闭合**（销账进 00-index 待定表）：
+
+- **Q2 ✓**：teammates 挂 roster 默认 preset（agentPreset=lead 原样在案）+ 角色人格经 spawn
+  prompt（persona-by-prompt 行为生效：scout/analyst 行为按章程）；D18 复核：team 语境
+  one-shot subagent 可用（本仓 vendor team-preflight 探针 ×2 PASS；本 run 成员零 subagent
+  调用，边界未触发）。
+- **Q4**：lead 独任综合无过载（journal 两次调度决策干净：T1 中途改派 + 纯综合先行一轮补搜）；
+  标准报告 4 topic 规模下不拆 synthesizer。
+- **Q5**：无 topic 争用（单 owner + 任务板纪律足够；T1 改派经 lead 调度无冲突）。
+
+**四段注入面事故链（全记档，机制化归宿各自落地）**：
+
+1. `$DSH_HOME/AGENTS.md` 化石镜像（全局注入第二通道）→ 删除 + workspace-contract 反门禁；
+2. pack persona/skill 旧契约文本（13 处）→ 清除 + pack-contract-sync 门禁；
+3. web boot 时缓存 preset（teammates 21:51 spawn 仍拿修复前文本）→ 漂移检测 + 重启实践
+   （boot-run 已收编）；**契约执行跟着注入的 manual 版本走**——本 run 证据 frontmatter
+   0/31 即此教训的产物；
+4. web 重启终局化挂起回合（补写 turn/end + end-seed，ask 无法作答）→ 恢复 prompt 手法
+   （cancel + queue 重发）+ dashboard sealed-turn 盲区记档。
+
+**E1 连带**：通道死亡重启暴露 E1 机制切换回归（research profile × 本仓 vendor 模型调用
+REQUEST_EXTENSION）→ 当晚修复毕业（根 devDeps 镜像 15 包 workspace 链接；l4-lite +
+team-preflight with-key 面补跑全绿）。
+
+**联合核销**：plan-shape（question 四节非空 ✓ + Decisions 3 条 ✓）、data-caliber
+（final 如实记录"单源——待破/已搜未得"类口径 ✓——§六 不可核实清单十项全录）。
+
+**验收遗留（如实）**：run 主体走旧通道（drt_ 契约 in situ 未走到——由迁移 + 判据④ 续跑部分
+覆盖）；M3 评估是否需要第二个正规通道 run（观察面 GUI 化立项时一并定）。
+
+<!-- grandfather: note-format 门禁生效（2026-09-24）前的 RFC 形态——含完整实施记录，内容有效不追改，新篇一律按 guides/60 §4 骨架 -->

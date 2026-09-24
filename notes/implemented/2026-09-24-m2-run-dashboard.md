@@ -97,3 +97,5 @@
   （token 打印）、dashboard.html 每 5s 再生成、退出无残留进程；顺手抓到并修掉
   `--latest` 的一个瑕疵（把 runs/ 的 `.gitkeep` 文件当选 run 目录——改 statSync
   isDirectory() 过滤，修后空 runs/ 正确显示"未开始"）；修后全量门禁复跑绿。
+
+<!-- grandfather: note-format 门禁生效（2026-09-24）前的 RFC 形态——含完整实施记录，内容有效不追改，新篇一律按 guides/60 §4 骨架 -->

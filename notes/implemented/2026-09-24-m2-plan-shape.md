@@ -74,3 +74,5 @@
 - 跑过的检查：`node scripts/verify.mjs` 9 门全绿 + `node --test tests/*.test.mjs` 10/10
   （含 evaluation-contract）——落地面 L0+L3 按 RFC 判据齐；
 - run 内判据（四节非空 + Decisions ≥1 条）由 ④ run-mechanics 的 run 汇总核销，未核销。
+
+<!-- grandfather: note-format 门禁生效（2026-09-24）前的 RFC 形态——含完整实施记录，内容有效不追改，新篇一律按 guides/60 §4 骨架 -->

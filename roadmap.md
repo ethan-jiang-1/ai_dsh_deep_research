@@ -8,23 +8,16 @@
 
 ## 队列
 
-1. ▶ **首个完整研究 run**（feature，M2）——端到端最薄直跑（HITL1→侦察→挖掘→综合→critic→HITL2→final+present；L4 全量四判据随 run 闭）。
-   四份 RFC 全 approved：[2026-09-24-m2-plan-shape](notes/proposed/2026-09-24-m2-plan-shape.md) / [2026-09-24-m2-data-caliber](notes/proposed/2026-09-24-m2-data-caliber.md) / [2026-09-24-m2-run-dashboard](notes/proposed/2026-09-24-m2-run-dashboard.md) 三件已落地（记录见各 RFC 文末）；
-   活跃 RFC = [2026-09-24-m2-run-mechanics](notes/proposed/2026-09-24-m2-run-mechanics.md)——起跑至 HITL1 挂起（快照与重启配方 = 该 RFC §暂停点记录）。
-2. **M2 收口与复盘**（卫生，run 完成后同 diff 收尾）——L4 四判据证据落 Note；Q2/Q4/
-   Q5/Q6 销账（答案+证据进 00-index 待定表）；company D18 复核结论；搁置池三条复活条件到期
-   复审（专职 synthesizer=Q4 / floor 机械化=Q6 / UI 皮肤=run 通过+demo 需求）；实测新
-   发现 → 队列新条目（skill/persona/模板修订类）；打扫（dev home 磁盘残留、runs 证据
-   留存策略执行——runtime truth 不进 git、Note 记路径与抽查结果）；M3 重排（顺延元
-   工作的复活顺序按实测证据定）；docs 面改动 → 入口链探针必跑。
-   RFC = [2026-09-24-m2-closing](notes/proposed/2026-09-24-m2-closing.md)（收尾清单显性化，approved）。
-3. **观察面 GUI 化**（feature，run 实测后立项）——右栏「研究状态」页签（流程步骤条 +
-   活标题"⏳ 等你拍板" + journal→矩阵→review 渐进）+ 研究语义工具卡（C）+ D7 修订
-   （限定观察面用途）+ 双半构建链（tsdown 契约照抄 company）+ client-load-smoke 完成
-   定义。时机 = 2026-09-24 用户定：run 后（D 接住 run 期间观察需求，构建链成本让 run
-   实测说话）；材料同上 note。
-4. **升 pin 重校**（⟳ 触发型）——`sync-dsh` 升 pin 时流程合同对 vendor 重校一遍
+1. ▶ **观察面 GUI 化**（feature，M3 初排升位——前置"run 实测后立项"已满足；用户验收可调）——
+   右栏「研究状态」页签（流程步骤条 + 活标题"⏳ 等你拍板" + journal→矩阵→review 渐进）+
+   研究语义工具卡（C）+ D7 修订（限定观察面用途）+ 双半构建链（tsdown 契约照抄 company）+
+   client-load-smoke 完成定义。材料 = notes/research/2026-09-24-ui-observability-surfaces.md。
+2. **升 pin 重校**（⟳ 触发型）——`sync-dsh` 升 pin 时流程合同对 vendor 重校一遍
    （继承跟 pin 走——含 discipline-map 三态表重校；触发时进队，平时不占位）。
+
+（已毕业离队 2026-09-25：首个完整研究 run（L4 四判据全闭 + Q2/Q4/Q5/Q6 销账，run =
+drt_cn-us-cpu-gap）与 M2 收口与复盘（八件清单毕）——六份 RFC 迁 implemented/，证据 =
+各 RFC §实施记录；E1 通道回归排查同日毕业。M3 其余顺延项：观察面 GUI 化已升位。）
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；被否决的方案不进池；复活条件写进行内）
 

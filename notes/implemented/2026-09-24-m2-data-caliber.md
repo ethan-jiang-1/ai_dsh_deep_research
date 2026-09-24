@@ -77,3 +77,5 @@ skill ×2 + evidence 模板 + 手册证据契约节），排在其后只为评�
   node scripts/preset-smoke.mjs` ALL PASS（4 preset 真会话 + skills 硬隔离）——按 RFC 落地面
   L0+L1+L3 齐；
 - run 内判据（final.md 至少一处"单源——待破/已搜未得"）由 ④ run 汇总核销，未核销。
+
+<!-- grandfather: note-format 门禁生效（2026-09-24）前的 RFC 形态——含完整实施记录，内容有效不追改，新篇一律按 guides/60 §4 骨架 -->
