@@ -35,10 +35,12 @@
 | `pack-bundle-compat` | pack 的 dsh.bundle.patch 指向真实文件；dsh.compatibility.dshReleases 非空 | 欠账（同 r1-scaffold） |
 | `row-deps` | preset 与 bundle 行引用的 `@deepseek-ai/*` 全在 peerDependencies | [m2-p1-run-channel](../notes/implemented/2026-09-24-m2-p1-run-channel.md)（违规 insert 行被守卫+row-deps 咬红→还原绿） |
 | `workspace-contract` | 研究手册 + 六件 run 模板 + runs/ 目录在位 | 欠账（同 r1-scaffold） |
-| `proposal-scheduled` | notes/proposed/ 每提案文件在 roadmap 有归宿（proposed 不是停车场） | 欠账（同 r1-scaffold） |
+| `proposal-scheduled` | notes/proposed/ 每提案文件在 roadmap **§队列**有归宿（proposed 不是停车场；搁置池/头注不算归宿） | review-driven-hardening Note（收紧+清欠账：无归宿/仅搁置池双形态注入红→还原绿） |
 | `secrets-untracked` | tracked 清单零敏感/残留物（credentials/.env/.pem/.tgz/.log/…） | [入口链审计](../notes/implemented/2026-09-24-entry-chain-fresh-agent-audit.md)（.pem 注入红→还原绿） |
 | `role-list-sync` | 角色清单单一事实源 = 盘上 presets/；代码（scripts/tests/dev 的 .mjs/.sh）里角色清单字面量（单行 ≥3 角色名 / `[...]` 块 ≥3 角色名字符串）即红——检测名从盘上现取 | 基础整治 Note（JS 单行数组/多行数组块/bash for-in 三形态注入红→还原绿） |
 | `gate-ledger-sync` | 本表门禁名集合 = verify 脚本 gates 数组（登记与实现不漂移） | 基础整治 Note（表删行/数组加假名红→还原绿） |
+| `entry-chain` | 入口链存在性投影：成员文件在场（AGENTS/00-index/roadmap/proposed//guides60/evaluation/design10-30/guides61）+ roadmap §队列 恰一个 ▶（D11 唯一"当前"指针；链接解析归 md-links，此处补反引号指针与 ▶ 唯一性两个盲区） | review-driven-hardening Note（成员缺席/▶ 删除/▶ 复制三形态注入红→还原绿） |
+| `entry-budget` | 常设入口防膨胀：AGENTS.md ≤145 行、README.md ≤30 行（vendor verify-doc-budgets 裁剪版；台账/指南为生长面不设顶）；超顶处置序 = 下放 > 压缩 > 升顶（须 D 号） | review-driven-hardening Note（两文件各注入超顶红→还原绿） |
 
 - **通过判据**：全绿；`verify` 的门禁清单与 `tests/` 守卫一一登记在案，每条带反证记录（上表；"欠账"= 门禁建立时未做注入反证，如实登记，下次改该门禁时补）。
 - **何时跑**：每轮 goal 续驶必跑。

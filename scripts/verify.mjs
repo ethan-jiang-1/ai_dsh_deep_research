@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync'];
+const gates = ['md-utf8-newline', 'md-links', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'entry-budget'];
 
 const failures = [];
 const notes = [];
@@ -33,6 +33,22 @@ function walk(dir, out = []) {
 }
 const allFiles = walk(ROOT);
 const mdFiles = allFiles.filter((f) => f.endsWith('.md'));
+
+// roadmap §队列 节切片（proposal-scheduled 与 entry-chain 共用：归宿/当前指针只认队列节，
+// 搁置池与头注不算）。文件缺席或节缺席 → null（fail 由调用侧出，报因按语境）。
+function roadmapQueue() {
+  const p = join(ROOT, 'roadmap.md');
+  if (!existsSync(p)) return null;
+  const lines = readFileSync(p, 'utf8').split('\n');
+  const s = lines.findIndex((l) => /^## 队列/.test(l));
+  if (s === -1) return null;
+  const out = [];
+  for (let i = s + 1; i < lines.length; i++) {
+    if (/^## /.test(lines[i])) break;
+    out.push(lines[i]);
+  }
+  return out.join('\n');
+}
 
 // ── 门禁 1：md-utf8 / newline（全仓 .md 严格 UTF-8、恰一个结尾换行）──
 {
@@ -169,17 +185,20 @@ const mdFiles = allFiles.filter((f) => f.endsWith('.md'));
     fail(gate, 'research-workspace/runs/ 目录不存在');
 }
 
-// ── 门禁 8：proposal-scheduled（proposed/ 每提案必须在 roadmap 有归宿）──
+// ── 门禁 8：proposal-scheduled（proposed/ 每提案必须在 roadmap §队列 有归宿；搁置池/头注不算）──
+// 收紧记录：review-driven-hardening Note（原版全文件子串匹配——stem 出现在任何位置都算归宿）。
 {
   const gate = 'proposal-scheduled';
   const dir = join(ROOT, 'notes', 'proposed');
   if (existsSync(dir)) {
-    const roadmapPath = join(ROOT, 'roadmap.md');
-    const roadmap = existsSync(roadmapPath) ? readFileSync(roadmapPath, 'utf8') : '';
-    for (const ent of readdirSync(dir)) {
-      if (ent === 'README.md' || !ent.endsWith('.md')) continue;
-      const stem = ent.replace(/\.md$/, '');
-      if (!roadmap.includes(stem)) fail(gate, `proposed/${ent} 在 roadmap 无归宿（proposed 不是停车场）`);
+    const queue = roadmapQueue();
+    if (queue === null) fail(gate, 'roadmap §队列 不可读——proposed 的归宿只能登记在队列节');
+    else {
+      for (const ent of readdirSync(dir)) {
+        if (ent === 'README.md' || !ent.endsWith('.md')) continue;
+        const stem = ent.replace(/\.md$/, '');
+        if (!queue.includes(stem)) fail(gate, `proposed/${ent} 在 roadmap §队列 无归宿（proposed 不是停车场；搁置池/头注不算归宿）`);
+      }
     }
   }
 }
@@ -251,6 +270,44 @@ const mdFiles = allFiles.filter((f) => f.endsWith('.md'));
     for (const l of ledger) {
       if (!gates.includes(l)) fail(gate, `evaluation.md §L0 登记表多出门禁（脚本 gates 数组无此名）：${l}`);
     }
+  }
+}
+
+// ── 门禁 12：entry-chain（入口链存在性投影——正本 = 根 AGENTS.md §入口链）──
+// md-links 已机械覆盖全部 tracked .md 的链接解析；本门禁补它的盲区：① 入口链中以反引号/
+// 散文指针提到的成员文件（`docs/design/10-30` 等——md-links 不检非链接形态）必须在场；
+// ② roadmap §队列 恰一个 ▶（全仓唯一"当前"指针的存在性与唯一性，D11）。
+// 改入口链结构 = 同 diff 更新本清单（成员清单是入口链的存在性投影，非第二正本）。
+{
+  const gate = 'entry-chain';
+  const members = ['AGENTS.md', 'docs/00-index.md', 'roadmap.md', 'notes/proposed',
+    'docs/guides/60-dev-loop.md', 'docs/evaluation.md', 'docs/design/10-architecture.md',
+    'docs/design/20-roles.md', 'docs/design/30-methodology-mapping.md', 'docs/guides/61-run-playbook.md'];
+  for (const rel of members) {
+    if (!existsSync(join(ROOT, rel))) fail(gate, `入口链成员缺席：${rel}（正本 = AGENTS.md §入口链；改链须同 diff 更新本门禁清单）`);
+  }
+  if (existsSync(join(ROOT, 'AGENTS.md')) && !/^## 入口链/m.test(readFileSync(join(ROOT, 'AGENTS.md'), 'utf8')))
+    fail(gate, 'AGENTS.md 缺 §入口链 标题——入口链定义的家');
+  const queue = roadmapQueue();
+  if (queue === null) fail(gate, 'roadmap §队列 不可读——入口链第 3 步（唯一"当前"指针）断链');
+  else {
+    const marks = (queue.match(/▶/g) ?? []).length;
+    if (marks === 0) fail(gate, 'roadmap §队列 无 ▶——全仓唯一"当前"指针缺席（D11）');
+    else if (marks > 1) fail(gate, `roadmap §队列 有 ${marks} 个 ▶——"当前"指针必须唯一（D11）`);
+  }
+}
+
+// ── 门禁 13：entry-budget（常设入口防膨胀——vendor verify-doc-budgets 的裁剪版）──
+// 预算只防"常驻入口"膨胀：AGENTS.md（纪律表全量枚举替换在即，膨胀风险最高点）与
+// README.md（门面）。台账（00-index）与指南（guides/）是生长面，不设顶（vendor
+// "review governs unbudgeted tiers" 同款）。超顶处置序 = 下放（指针化）> 压缩 >
+// 升顶（升顶须 D 号 + Note 依据——a too-low ceiling is a budget bug）。
+// 行数 = split('\n') - 1（结尾恰一换行由 md-utf8-newline 门禁保证）。
+{
+  const gate = 'entry-budget';
+  for (const [rel, cap] of [['AGENTS.md', 145], ['README.md', 30]]) {
+    const lines = readFileSync(join(ROOT, rel), 'utf8').split('\n').length - 1;
+    if (lines > cap) fail(gate, `${rel} ${lines} 行 > 预算 ${cap} 行——处置序：下放/压缩；升顶须 D 号登记（evaluation.md §L0 登记表同 diff 更新上限值）`);
   }
 }
 
