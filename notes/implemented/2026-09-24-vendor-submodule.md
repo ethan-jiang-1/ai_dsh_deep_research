@@ -80,3 +80,18 @@ gitignored，vendor-clean 绿）；根 node_modules = workspace 全解析（1072
 pnpm store 已重定向 `dev/smoke-workspace/pnpm-store`；双 tsx 并存（根 4.23.15 =
 `pnpm dsh` 通道；vendor 自装 4.22.4 = vendor 自有脚本通道）；vendor 换 tag 重校义务 →
 roadmap 触发型条目「升 pin 重校」。
+
+## 毕业后发现（2026-09-25 00:30，通道实测抓到）：E1 机制切换的隐性回归
+
+**现象**：run 通道（research profile）在本仓 vendor 起的 web 上，一切模型调用报
+`DeepSeek request extension preparation failed (REQUEST_EXTENSION)`——全新会话同样炸
+（排除会话状态因素）；同一 research profile 在 company 基线源码上正常；web 纯净 profile
++ 真模型（entry-chain-probe）在本仓 vendor 上也正常（排除凭据与 vendor 整体因素）。
+**回归面 = research profile（本包 + agent-team-profile 层）× 本仓 vendor 的组合**。
+
+**测试缺口根因**：E1 验收只重跑了 keyless 面（preset-smoke/release-smoke——无模型调用）
++ web profile 真模型（探针）——research profile 的 with-key 面没在切换后重验。
+"no-key 证管道，with-key 证 agent" 的反面教训：**机制基线切换必须把 with-key 面也重验**。
+
+**处置**：run 通道已回退 company 基线恢复服务（web 3081 + HITL2 问询重发成功，横幅在案）；
+E1 的 keyless 面与 web-profile 真模型面维持切换；回归排查 = 队列新条目「E1 通道回归排查」。
