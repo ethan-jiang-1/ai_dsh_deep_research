@@ -230,21 +230,23 @@ try {
   });
   const memberIds = [...new Set([...readSessionLog(leadId).matchAll(/Background subagent ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/g)].map((m) => m[1]))];
 
+  // 归属按内容不按位置（2026-09-25 实证修正）：spawn 顺序与日志出现顺序不保证一致，
+  // 位置配对在顺序交叉时误报（probe-scout 位回 ANALYST 标记 = 冒烟自身缺陷非机制缺陷）——
+  // 每个成员会话的日志含自己的 spawn prompt 标记，按标记内容归属天然免疫顺序。
   const memberSpecs = [[SCOUT_MARKER, 'probe-scout'], [ANALYST_MARKER, 'probe-analyst']];
-  for (let i = 0; i < memberSpecs.length; i += 1) {
-    const [marker, name] = memberSpecs[i];
+  const idOfMarker = (marker) => memberIds.find((mid) => readSessionLog(mid).includes(marker));
+  for (const [marker, name] of memberSpecs) {
     await check(`成员 ${name} 响应（assistant 携带 ${marker}）`, async () => {
-      const id = memberIds[i];
-      if (id === undefined) throw new Error('成员 id 缺席（上一步未全过）');
+      const id = idOfMarker(marker);
+      if (id === undefined) throw new Error('成员 id 缺席（按标记内容未找到对应会话）');
       return await waitForLine(id, `成员标记 ${marker}`, (line) =>
         line.includes('"assistant/message"') && line.includes(marker), MEMBER_WAIT_MS);
     });
   }
 
   // 发现型画像（不硬断言——机制预读预期：成员 = 裸代理 + team 工具面，无角色 preset）
-  for (let i = 0; i < memberSpecs.length; i += 1) {
-    const [, name] = memberSpecs[i];
-    const id = memberIds[i];
+  for (const [marker, name] of memberSpecs) {
+    const id = idOfMarker(marker);
     if (id === undefined) continue;
     const log = readSessionLog(id);
     const presetHit = /"agentPreset":"([^"]*)"/.exec(log);

@@ -18,18 +18,12 @@
    留存策略执行——runtime truth 不进 git、Note 记路径与抽查结果）；M3 重排（顺延元
    工作的复活顺序按实测证据定）；docs 面改动 → 入口链探针必跑。
    RFC = [2026-09-24-m2-closing](notes/proposed/2026-09-24-m2-closing.md)（收尾清单显性化，approved）。
-3. **E1 通道回归排查**（bug，事故驱动 2026-09-25 登记）——research profile（本包 +
-   agent-team-profile 层）在本仓 vendor 上的模型调用报 REQUEST_EXTENSION（对照矩阵四格
-   已锁定回归面；web 纯净 profile 与 keyless 面在本仓 vendor 全正常）；run 通道已回退
-   company 基线运行（服务不中断）；修复后 l4-lite + team-preflight 复跑（E1 欠的 with-key
-   面）+ run 通道切回本仓 vendor。
-   RFC = [2026-09-25-e1-channel-regression](notes/proposed/2026-09-25-e1-channel-regression.md)。
-4. **观察面 GUI 化**（feature，run 实测后立项）——右栏「研究状态」页签（流程步骤条 +
+3. **观察面 GUI 化**（feature，run 实测后立项）——右栏「研究状态」页签（流程步骤条 +
    活标题"⏳ 等你拍板" + journal→矩阵→review 渐进）+ 研究语义工具卡（C）+ D7 修订
    （限定观察面用途）+ 双半构建链（tsdown 契约照抄 company）+ client-load-smoke 完成
    定义。时机 = 2026-09-24 用户定：run 后（D 接住 run 期间观察需求，构建链成本让 run
    实测说话）；材料同上 note。
-5. **升 pin 重校**（⟳ 触发型）——`sync-dsh` 升 pin 时流程合同对 vendor 重校一遍
+4. **升 pin 重校**（⟳ 触发型）——`sync-dsh` 升 pin 时流程合同对 vendor 重校一遍
    （继承跟 pin 走——含 discipline-map 三态表重校；触发时进队，平时不占位）。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；被否决的方案不进池；复活条件写进行内）
