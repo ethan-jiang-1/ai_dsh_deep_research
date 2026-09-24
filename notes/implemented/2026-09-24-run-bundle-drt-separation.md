@@ -55,11 +55,18 @@ git，暂无归档需求）。
   同日事故推翻，见文末事故节**）。
 - 化石镜像反门禁红→绿实证：化石复活 → `FAIL workspace-contract`（精确点名）；删除 →
   全绿。20 tests 全绿。
+- pack-contract-sync 门禁（D17 事故 2 新增）：真实红（7 文件 13 处 runs/ 逐文件点名）→
+  同 commit 修复 → 绿；终态 14 门禁 + 20 tests 全绿。
 
 ## 环境状态
 
-- run 通道待重启：`bash dev/boot-run.sh`（仪表盘 --root research-workspace，扫描 drt_*/）；
-  题面由用户届时给定 → kickoff 建 lead 会话 → HITL1 落 drt_<slug>/question.md。
+- run 通道已重启：web 3081 + 仪表盘（--root research-workspace 扫描 drt_*/）；CPU 题面已
+  kickoff（session-d29822ed），HITL1 三问挂起待用户答——lead 会话创建于 persona 修复前，
+  但其推理已显式"AGENTS.md supersedes"按 drt_ 行动（会话日志实证：glob drt_*/**）；
+- research profile 安装镜像已手术同步 D17 文本（7 文件；web 运行中不能重建，sanctioned
+  刷新 = rm profile + boot-run 重建）；release-check 镜像为 L2 throwaway（release-smoke
+  每次先删后建，自愈，不动）；boot-run 不检测 pack 内容漂移 = 已知债（随 debug-dashboard-plus
+  条目处理）。
 - 手册 final/ 版本化契约生效：首个 run 的交付 = final/v1.md + present 声明。
 
 ## 事故与补丁（同日，用户实测抓到——"实实验了一下，好像不对"）
@@ -82,3 +89,26 @@ research-workspace/AGENTS.md；projectRootMarkers: [] 防灌开发仓根 AGENTS.
 **教训（防复犯）**：gitignored ≠ 非合同——**注入源必须在落库牵连面清单里**；凡被 DSH
 注入/消费的运行区文件都是合同的活镜像，改合同必须同步清点它们，否则落库只落在纸面。
 落库清单的新检查问句：这个文件被谁读？（不只"谁写它"）。
+
+### 事故 2（同日续，会话日志核查抓到）：pack persona/skill 文本携带旧契约（13 处/7 文件）
+
+**现象**：化石清除后 kickoff 的 CPU 题会话（session-d29822ed）行为正确——lead 推理
+"manual says drt_<slug>/，AGENTS.md supersedes"，glob drt_*/**、HITL1 三问挂起待答；但
+会话系统提示里的 persona 与 skill 文本仍写 runs/<slug>/——HITL1 拍板后 spawn 的
+teammates 会带旧路径开工（scout persona："先读 runs/<slug>/question.md" → 路径不存在）。
+
+**根因（双盲）**：① 首轮残留扫描的路径清单漏了 packages/（pack = harness 主体：persona
+经系统提示注入、skill 经加载注入）；② 扫 dev/ 时 `grep -v node_modules` 把 profile 安装
+镜像（会话实际读取的副本）一并滤掉。本轮 lead 靠"手册优先"自行化解了矛盾，teammates
+无此保障。
+
+**修复**：① 7 文件 13 处改 drt_ 契约（lead/scout/analyst/critic 四 persona +
+evidence-extraction/synthesis/adversarial-review 三 skill；final.md → final/ 版本化交付
+语义同步）；② 新门禁 pack-contract-sync（pack tracked yml/md 零 runs/）——真实红 7 文件
+逐一点名在案 → 修复 → 绿；③ research profile 镜像手术同步 7 文件（HITL1 挂起中 web 不能
+重启重建，sanctioned 刷新 = rm profile + boot-run）；④ release-check 镜像 = L2 throwaway
+（release-smoke 每次先删后建，自愈，不动）。
+
+**教训追加**：sweep 清单必须覆盖**全部注入通道**——persona（系统提示）/ skill（加载）/
+手册（agent-instructions）/ $DSH_HOME 全局，四通道一个不漏；`-v node_modules` 要区分
+"别人的依赖"与"自家 pack 的安装镜像"。

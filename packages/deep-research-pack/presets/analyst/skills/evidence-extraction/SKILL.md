@@ -11,7 +11,7 @@ Analyst 的核心方法论。目标：把方向变成**可核查的证据文件*
 
 每个 topic 开工时列问题清单（Question List）：把 must_answer 拆成具体可搜的问题。逐问题找证据；新发现催生的新问题**追加进清单**，答完的划掉。清单落在 evidence 文件的问题区，演进过程保留（划掉的留痕）。
 
-## 证据文件格式（每条证据一个文件，`runs/<slug>/evidence/<topic>-<slug>.md`）
+## 证据文件格式（每条证据一个文件，`drt_<slug>/evidence/<topic>-<slug>.md`）
 
 ```
 ---

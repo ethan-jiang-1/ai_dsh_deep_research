@@ -34,7 +34,7 @@ Critic 的核心方法论。你的产出只有两种价值：找到裂缝（修�
 ## review.md 格式
 
 ```
-# Review — runs/<slug>（审查对象：<draft 文件>）
+# Review — drt_<slug>（审查对象：<draft 文件>）
 
 ## CRITICAL
 - C1: <定位：段落/句子> <问题> → <修复建议>

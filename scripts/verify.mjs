@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'entry-budget'];
+const gates = ['md-utf8-newline', 'md-links', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'entry-budget'];
 
 const failures = [];
 const notes = [];
@@ -187,6 +187,21 @@ function roadmapQueue() {
   // 旧契约化石镜像让 lead 按 runs/<slug> 行动）——存在即红。
   if (existsSync(join(ROOT, 'dev', 'harness-home', 'AGENTS.md')))
     fail(gate, 'dev/harness-home/AGENTS.md 化石镜像在场（手册唯一注入通道 = cwd projectRoot）——删除它');
+}
+
+// ── 门禁 8：pack-contract-sync（pack 的 tracked yml/md 零 runs/ 旧契约路径——persona
+//    经系统提示注入、skill 经加载注入，携带已废目录契约即污染 run；D17 事故 2：pack
+//    不在首轮 sweep 清单，13 处残留漏网被用户实测抓到）──
+{
+  const gate = 'pack-contract-sync';
+  const r = spawnSync('git', ['ls-files', '--', 'packages/deep-research-pack'], { cwd: ROOT, encoding: 'utf8' });
+  const files = (r.stdout || '').split('\n').filter((f) => /\.(yml|md)$/.test(f));
+  if (files.length === 0) fail(gate, 'packages/deep-research-pack 下无 tracked yml/md（ls-files 空）');
+  for (const f of files) {
+    const text = readFileSync(join(ROOT, f), 'utf8');
+    const m = text.match(/runs\//g);
+    if (m) fail(gate, `${f}: 携带已废目录契约 runs/（×${m.length}）——D17 后 run bundle = drt_<slug>/`);
+  }
 }
 
 // ── 门禁 8：proposal-scheduled（proposed/ 每提案必须在 roadmap §队列 有归宿；搁置池/头注不算）──

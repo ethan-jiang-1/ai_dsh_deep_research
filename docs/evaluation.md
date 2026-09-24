@@ -35,6 +35,7 @@
 | `pack-bundle-compat` | pack 的 dsh.bundle.patch 指向真实文件；dsh.compatibility.dshReleases 非空 | 同 noise-sweep（清欠账：patch 指向不存在文件注入红→还原绿） |
 | `row-deps` | preset 与 bundle 行引用的 `@deepseek-ai/*` 全在 peerDependencies | [m2-p1-run-channel](../notes/implemented/2026-09-24-m2-p1-run-channel.md)（违规 insert 行被守卫+row-deps 咬红→还原绿） |
 | `workspace-contract` | 研究手册 + 六件 run bundle 模板在位（bundle 目录 drt_<slug>/ 运行时由 lead 创建，无静态目录可查——D17）+ $DSH_HOME/AGENTS.md 化石镜像不在场（手册唯一定居点 = 会话 cwd projectRoot 注入） | 同 noise-sweep（清欠账：run 模板暂移注入红→还原绿）；化石镜像反证 = 真实事故红（旧契约镜像在场，lead 按 runs/<slug> 行动被用户实测抓到）→删除→绿 |
+| `pack-contract-sync` | pack 的 tracked yml/md 文本零 `runs/` 旧契约路径——persona/skill 文本经会话系统提示与 skill 加载注入，携带已废目录契约即污染 run（D17 事故 2 实证：pack 不在首轮 sweep 清单，13 处残留漏网） | D17 事故 2：真实红（verify 逐文件点名 13 处 runs/ 残留）→同 commit 修复→绿 |
 | `proposal-scheduled` | notes/proposed/ 每提案文件在 roadmap **§队列**有归宿（proposed 不是停车场；搁置池/头注不算归宿） | review-driven-hardening Note（收紧+清欠账：无归宿/仅搁置池双形态注入红→还原绿） |
 | `secrets-untracked` | tracked 清单零敏感/残留物（credentials/.env/.pem/.tgz/.log/…） | [入口链审计](../notes/implemented/2026-09-24-entry-chain-fresh-agent-audit.md)（.pem 注入红→还原绿） |
 | `role-list-sync` | 角色清单单一事实源 = 盘上 presets/；代码（scripts/tests/dev 的 .mjs/.sh）里角色清单字面量（单行 ≥3 角色名 / `[...]` 块 ≥3 角色名字符串）即红——检测名从盘上现取 | 基础整治 Note（JS 单行数组/多行数组块/bash for-in 三形态注入红→还原绿） |
