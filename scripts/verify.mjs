@@ -182,6 +182,11 @@ function roadmapQueue() {
     if (!existsSync(join(ROOT, 'research-workspace', 'templates', 'run', t)))
       fail(gate, `templates/run/ 缺模板 ${t}`);
   }
+  // 手册唯一定居点 = research-workspace/AGENTS.md（agent-instructions 经会话 cwd projectRoot
+  // 注入）；$DSH_HOME/AGENTS.md 是 DSH 全局注入第二通道，一旦存在必与手册漂移（事故实证：
+  // 旧契约化石镜像让 lead 按 runs/<slug> 行动）——存在即红。
+  if (existsSync(join(ROOT, 'dev', 'harness-home', 'AGENTS.md')))
+    fail(gate, 'dev/harness-home/AGENTS.md 化石镜像在场（手册唯一注入通道 = cwd projectRoot）——删除它');
 }
 
 // ── 门禁 8：proposal-scheduled（proposed/ 每提案必须在 roadmap §队列 有归宿；搁置池/头注不算）──

@@ -51,10 +51,34 @@ git，暂无归档需求）。
   不经 latestRunDir，扫描根改动无测试面影响）。evaluation-contract 的 owner 表锚随契约
   更新（final.md → final/（当前版））：锚先行撞新契约红一次（反证在案）→ 改锚 → 绿。
 - 全仓残留扫描：`grep runs/<slug>` tracked 区零命中（plan-shape 的 D17 修订注记有意保留
-  旧名作历史；dev/harness-home/AGENTS.md 为 gitignored 运行区副本不属合同）。
+  旧名作历史；dev/harness-home/AGENTS.md 为 gitignored 运行区副本不属合同——**此判断被
+  同日事故推翻，见文末事故节**）。
+- 化石镜像反门禁红→绿实证：化石复活 → `FAIL workspace-contract`（精确点名）；删除 →
+  全绿。20 tests 全绿。
 
 ## 环境状态
 
 - run 通道待重启：`bash dev/boot-run.sh`（仪表盘 --root research-workspace，扫描 drt_*/）；
   题面由用户届时给定 → kickoff 建 lead 会话 → HITL1 落 drt_<slug>/question.md。
 - 手册 final/ 版本化契约生效：首个 run 的交付 = final/v1.md + present 声明。
+
+## 事故与补丁（同日，用户实测抓到——"实实验了一下，好像不对"）
+
+**现象**：重启后的 lead 会话收到 CPU 中美差距题面，行为仍走旧契约——glob `runs/**/final.md`、
+读 ad-hoc 旧 run 材料、按 runs/<slug> 形状准备立项。
+
+**根因**：本 Note 落库时把 `dev/harness-home/AGENTS.md` 误判为"gitignored 运行区副本不属
+合同"，实际它是 DSH 全局注入第二通道（$DSH_HOME/AGENTS.md）——一份史前旧契约化石
+（runs/<slug>/、review-critic.md、五件套），随每个会话注入，压过了 cwd projectRoot 通道
+注入的新手册。preset 的 agent-instructions 行设计上只走 cwd projectRoot（注入
+research-workspace/AGENTS.md；projectRootMarkers: [] 防灌开发仓根 AGENTS.md），全局通道
+是多余的第二家，必然漂移。
+
+**修复**：① 删除化石镜像（手册唯一定居点 = research-workspace/AGENTS.md；旧文件内容复核
+无独有信息——"交付红线"三条被手册证据契约/口径契约/analyst skill 交叉 ≥2 纪律覆盖）；
+② workspace-contract 门禁加存在性反禁（$DSH_HOME/AGENTS.md 在场即红，防复发；红→绿实证
+在案）；③ research-workspace/runs/.gitkeep 移除（runs/ 契约退场残留）。
+
+**教训（防复犯）**：gitignored ≠ 非合同——**注入源必须在落库牵连面清单里**；凡被 DSH
+注入/消费的运行区文件都是合同的活镜像，改合同必须同步清点它们，否则落库只落在纸面。
+落库清单的新检查问句：这个文件被谁读？（不只"谁写它"）。
