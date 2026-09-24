@@ -47,6 +47,14 @@ analyst 会话内另有全文模板（`evidence-extraction` skill——skills �
 **口径最小契约**（与 frontmatter 同级）：数字/规格类摘录须带测量条件口径（版本/配置/
 时间/原文限定语至少两项；口径不明写"口径不明"）——所有角色按此判。
 
+**有效证据谓词（观察面对账）**：run 仪表盘（scripts/run-dashboard.mjs）按同一契约渲染——
+**五字段全齐才算有效证据，缺任一字段标无效**（不计入 topic × evidence 矩阵）；谓词正本
+= 本节，tests/evaluation-contract.test.mjs 对账。
+
+**机械强度诚实记账**：本契约的机械检查 = L0 契约测试（五字段在场 + 各执行者副本对账）
++ 仪表盘渲染谓词（上述）；run 内执法 = critic 狩猎（散文判断）。verify 门禁不扫
+`runs/`（gitignored 运行区）——run 数据的完整性由 critic + 仪表盘呈现，不在 L0。
+
 ## 交付物三态
 
 - **过程稿**：drafts/ 与各 owner 文件——团队内部工作面，不是成品；

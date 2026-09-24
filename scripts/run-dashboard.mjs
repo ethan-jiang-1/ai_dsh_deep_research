@@ -112,13 +112,15 @@ export function parseEvidenceDir(dir) {
       const rec = { file: f, ok: false, quality: null, supports: null, sourceUrl: null, retrievedAt: null };
       try {
         const { fm } = splitFrontmatter(readFileSync(join(dir, f), 'utf8'));
-        if (fm && fm.source_url && fm.quality && fm.supports) {
+        // 有效证据谓词：五字段全齐（正本 = 研究手册 research-workspace/AGENTS.md §证据文件契约；
+        // 本处是渲染层实现，tests/evaluation-contract.test.mjs 机械对账）
+        if (fm && fm.source_url && fm.retrieved_at && fm.quality && fm.found_by && fm.supports) {
           Object.assign(rec, {
             ok: true,
             quality: fm.quality,
             supports: fm.supports,
             sourceUrl: fm.source_url,
-            retrievedAt: fm.retrieved_at ?? null,
+            retrievedAt: fm.retrieved_at,
           });
         }
       } catch {
