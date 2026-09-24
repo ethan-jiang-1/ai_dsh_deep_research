@@ -23,13 +23,8 @@
    （限定观察面用途）+ 双半构建链（tsdown 契约照抄 company）+ client-load-smoke 完成
    定义。时机 = 2026-09-24 用户定：run 后（D 接住 run 期间观察需求，构建链成本让 run
    实测说话）；材料同上 note。
-4. **dsh-discipline 全量枚举**（卫生，前置已满足——vendor submodule 已落地）——从 vendor
-   逐源枚举纪律清单（根 AGENTS.md / docs/AGENTS.md / docs/testing.md / .agents/notes/ /
-   postmortem），每行 = DSH 做法 → 本仓落点 → 状态（照搬/带证据适配/不适用+理由），替换
-   AGENTS.md 的首版枚举子集表；源头清单照 company 五件套研究 §六之 1。
-   RFC = [2026-09-24-dsh-discipline](notes/proposed/2026-09-24-dsh-discipline.md)（approved）。
-5. **升 pin 重校**（⟳ 触发型）——`sync-dsh` 升 pin 时流程合同对 vendor 重校一遍
-   （继承跟 pin 走；触发时进队，平时不占位）。
+4. **升 pin 重校**（⟳ 触发型）——`sync-dsh` 升 pin 时流程合同对 vendor 重校一遍
+   （继承跟 pin 走——含 discipline-map 三态表重校；触发时进队，平时不占位）。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；被否决的方案不进池；复活条件写进行内）
 
