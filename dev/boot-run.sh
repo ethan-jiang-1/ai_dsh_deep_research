@@ -51,13 +51,24 @@ else
   profile_ok || { echo "boot-run: 重建后组合校验仍不过——fail-loud，检查上方安装输出" >&2; exit 1; }
 fi
 
+# ③ 仪表盘（RFC m2-run-dashboard）：--latest 只读投影（run 建立即有画面，未建显示"未开始"）；
+# 输出进本仓 gitignored 运行区；watch 模式持续再生成，页面 5s meta refresh 拉取。
+DASH_OUT="$ROOT/dev/smoke-workspace/dashboard.html"
+mkdir -p "$(dirname "$DASH_OUT")"
+node "$ROOT/scripts/run-dashboard.mjs" --latest --root "$ROOT/research-workspace/runs" \
+  --out "$DASH_OUT" --watch --interval 5 &
+DASH_PID=$!
+trap 'kill "$DASH_PID" 2>/dev/null' EXIT INT TERM
+
+echo "boot-run: run 仪表盘已起（只读投影，5s 再生成）：$DASH_OUT"
 cat <<'STEPS'
 ──────────────────────────── 怎么开 run ────────────────────────────
 1. 等 web 横幅出现 http://127.0.0.1:3081/?token=… 用浏览器打开（token 在横幅里）
 2. 新建会话：preset 选 "Deep Research Lead"（默认项），cwd 选 research-workspace/
 3. 说出研究问题 → lead 走 HITL1 三问（研究类型 / 深度篇幅 / 时间口径，每问带推荐）→ 你拍板
-4. 静默自主区（角色不问不报）：进度看三处——① 各角色会话实时流
-   ② ui-agent-team 任务板（谁领了什么活） ③ deliverables 面板（成品出现处）
+4. 静默自主区（角色不问不报）：进度看四处——① run 仪表盘（dev/smoke-workspace/dashboard.html：
+   矩阵/leads/findings/review/journal 一页看全，5s 刷新）② 各角色会话实时流
+   ③ ui-agent-team 任务板（谁领了什么活） ④ deliverables 面板（成品出现处）
 5. HITL2 审阅（证据充分性 + 交付/补研究推荐 + composition 确认）→ 拍板 → final.md + present 交付
    中断恢复：新开 lead 会话只认 research-workspace/runs/<slug>/ 的文件事实。
 全文指南：docs/guides/61-run-playbook.md

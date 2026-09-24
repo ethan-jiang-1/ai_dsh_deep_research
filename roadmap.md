@@ -15,8 +15,10 @@
    （synthesizer 拆分）Q5（topic 争用）Q6（floor 机械化）随实测闭。**落地序 =
    ① 2026-09-24-m2-plan-shape（计划/模板形状）→ ② 2026-09-24-m2-data-caliber（口径
    纪律）→ ③ 2026-09-24-m2-run-dashboard（可视化观察面，用户定案事前设计）——三件
-   开跑前内容落地 → ④ 2026-09-24-m2-run-mechanics（run 本体）；RFC proposed 待用户
-   打磨，呈批后才实施；次序规则见 notes/proposed/README.md**。（2026-09-24 用户定案：
+   开跑前内容落地 → ④ 2026-09-24-m2-run-mechanics（run 本体）；RFC 已全部定案并批准
+   （2026-09-24 用户拍板全部开放问题，含 run 形状 = 端到端最薄直跑、研究题 = DR 产品
+   证据链设计），①②③ 已实施落地（L0/L1/L3 绿，实施记录见各 RFC 文末），④ 待用户
+   就位 HITL1 开跑；次序规则见 notes/proposed/README.md**。（2026-09-24 用户定案：
    实质优先，提前至 vendor-submodule 之前；元工作顺延待实战证据反哺。）
 2. **M2 收口与复盘**（卫生，run 完成后同 diff 收尾）——L4 四判据证据落 Note；Q2/Q4/
    Q5/Q6 销账（答案+证据进 00-index 待定表）；D18 复核结论；搁置池三条复活条件到期

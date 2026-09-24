@@ -11,16 +11,16 @@
 
 | codex 环节 | codex 载体 | 本插件 DSH 载体 | 状态 |
 |---|---|---|---|
-| instantiation（建 run bundle） | `instantiate-run-bundle.mjs` CLI + rb_* 控制文件脚手架 | lead 收到请求 → 建 `runs/<slug>/`（从 templates/run/ 起步）+ question.md | 照搬语义，载体 = 目录约定 + 研究手册 |
+| instantiation（建 run bundle） | `instantiate-run-bundle.mjs` CLI + rb_* 控制文件脚手架 | lead 收到请求 → 建 `runs/<slug>/`（从 templates/run/ 起步）+ question.md（定稿 + Purpose/RQ 分解/Scope/Constraints 四节 + Decisions append-only） | 照搬语义，载体 = 目录约定 + 研究手册 |
 | **HITL1（立项对齐）** | hitl1 phase（stop:yes）+ rb_profile 写入 | lead preset 的 `tool-ask-user` + `research-brief` skill（研究类型三分 + 澄清三问带推荐） | **原生**（ask_user_question 即 DSH 的 stop 面） |
-| setup / seed-topics | enter-phase + operate-topic-state（UID/ordinal 物化） | lead 写 topics.md（must_answer + scope_role + depends_on） | 简化：topic 身份 = markdown 锚点，不建 registry 机制 |
+| setup / seed-topics | enter-phase + operate-topic-state（UID/ordinal 物化） | lead 写 topics.md（must_answer 问题列表 2–5 问 + scope_role + depends_on） | 简化：topic 身份 = markdown 锚点，不建 registry 机制 |
 | **wave0（广度地基）** | dpt-source-intake 工作单元 + source.yaml + floor 门禁 | **scout 角色**（lead-mapping skill：query 多样化 + A–D 分级 + leads.md） | **角色化**（floor 数值门禁弃用，分级与排除显式化承担质量下限） |
 | **wave1（深度挖掘）** | question-list 契约 + depth-review + 反例/交叉验证参数 | **analyst 角色**（evidence-extraction skill：question-list + 交叉验证 ≥2 + 反例必记） | **角色化**（深度参数不进 profile，进 skill 纪律） |
 | **wave2（综合）** | 纯综合禁新搜 → finding gap 定向补搜 + finding-index | **lead 的 synthesis skill**（findings.md 的 gap 四态：supported/needs_search/contradicted/insufficient） | **skill 化**（只补一轮 = 参数纪律进 skill 文本） |
 | **hitl2（审阅）** | hitl2 phase（stop:yes）+ composition_handoff | lead 的 `tool-ask-user`（审阅建议 = 证据充分性判断 + 交付/补研究推荐） | **原生** |
 | readiness（确定性预检） | readiness phase + 10 gate definition JSON | **critic 角色**（adversarial-review skill：readiness 判据清单 + review.md 的 PASS/FAIL） | **角色化**（确定性 schema 检查降格为 skill 清单——诚实取舍，见 §4 之 3） |
 | final（交付） | final/final.md + presentation 反馈 | final.md + `tool-present`（lead preset 独有声明权） | **原生** |
-| rerun（重跑） | ReopenResearchPass + rerun_count 血统 | 新 run 目录（`runs/<slug>-v2/`，question.md 引用前版） | 简化：不做血统机制，git + 目录命名承担 |
+| rerun（重跑） | ReopenResearchPass + rerun_count 血统 | 新 run 目录（`runs/<slug>-v2/`，question.md 引用前版）+ question.md `## Decisions` append-only 修订记录（delta 类型/受影响 topics/agent interpretation/用户原话 verbatim，最新在上） | 简化：不做血统机制，git + 目录命名 + Decisions 记录承担 |
 
 **两点交互纪律**（codex "静默自律" spec 的移植）：HITL1 与 HITL2 之间所有角色静默自主
 推进，不问"要不要继续"、不汇报中间进度；用户主动发消息直接回答但不改变既定方向——
@@ -41,7 +41,8 @@
 
 **为什么唯一**：DSH 没有任何载体承载"研究报告的结论 → 来源文件"的可核查链——web_search
 的返回不落盘、会话日志可读但不是角色间契约面。研究手册的证据 frontmatter 契约
-（`source_url / retrieved_at / quality / found_by / supports`）+ final.md 的
+（`source_url / retrieved_at / quality / found_by / supports`）+ **口径最小契约**（数字/
+规格类摘录带测量条件 ≥2 项；单源关键数字显式标"待破"）+ final.md 的
 `[来源: evidence/xx.md]` 引用格式 + critic 的逐条狩猎 = 轻量等价物：
 
 - codex 教训 1（"LLM 会伪造看起来完成的产物"）→ 我们的等价防线：完成判定锚定**文件事实**
@@ -75,7 +76,7 @@
 | margin ≠ threshold | 质量下限（A/B 支撑关键结论）与搜索策略（补搜一轮）分层在 skill |
 | 同目标写冲突显式拒绝 | topics/文件单 owner 表（手册 §事实的 owner） |
 | 结构检查与语义审查分权 | critic 三线审查 vs HITL2 人类语义审阅 |
-| gate 结果只信 JSON 不信 prose | review.md 固定格式（readiness: PASS + 判据勾选清单） |
+| gate 结果只信 JSON 不信 prose | review.md 固定格式（readiness: PASS + 判据勾选清单）+ **口径纪律**（数字带测量条件、单源标"待破"——"只信机器可判事实"的数据版） |
 | retry 上限防疲劳循环 | 补搜只一轮、澄清只三问、gap 定向补搜纪律 |
 
 ## 6. 与 L3 四判据的对账

@@ -8,8 +8,9 @@
 
 ```
 runs/<slug>/           一次研究 engagement = 一个 run（slug 由主编在立项时定，kebab-case）
-  question.md          研究问题定稿 + HITL1 对齐快照（owner: lead）
-  topics.md            topic 图：must_answer + scope_role（owner: lead）
+  question.md          研究问题定稿 + Purpose/RQ 分解/Scope/Constraints + HITL1 对齐
+                       快照 + Decisions（append-only 方向修订记录，最新在上）（owner: lead）
+  topics.md            topic 图：must_answer（问题列表 2–5 问）+ scope_role（owner: lead）
   leads.md             候选方向清单（owner: scout）
   evidence/            证据文件，一条一档（owner: analyst）
   findings.md          发现账本：结论 + 支撑 + gap 状态（owner: lead）
@@ -43,6 +44,8 @@ frontmatter 必须有：`source_url`（真实抓取过的 URL）/ `retrieved_at`
 `found_by` / `supports`。正文"原文摘录"与"解读"两节分开。以上即最小契约，**所有角色按此判**；
 analyst 会话内另有全文模板（`evidence-extraction` skill——skills 按角色硬隔离，其他角色
 加载不到，判据以本手册为准）。**没有 frontmatter 的文件不算证据**（critic 按此判）。
+**口径最小契约**（与 frontmatter 同级）：数字/规格类摘录须带测量条件口径（版本/配置/
+时间/原文限定语至少两项；口径不明写"口径不明"）——所有角色按此判。
 
 ## 交付物三态
 

@@ -1,6 +1,7 @@
 # RFC：M2 运行机制——四角色团队在 DSH 上怎么真跑起来
 
-> 状态：**proposed（待用户打磨）** · 2026-09-24 · 归宿：roadmap ▶「首个完整研究 run」
+> 状态：**approved（2026-09-24 用户批准形状/队形/题目；开跑待用户就位 HITL1）** ·
+> 2026-09-24 · 归宿：roadmap ▶「首个完整研究 run」
 > 依据：codex harness 考古（notes/research/2026-09-24-deep-research-harness-analysis.md）
 > + 本轮源头亲读（RUN.md / BUNDLE_ENTRY / rb_plan 实物）+ evaluation.md L4 全量判据。
 
@@ -85,7 +86,9 @@ evidence/ → findings → review → final——全部落在 `runs/<slug>/`，�
    用户在 lead 会话提出研究问题 → lead 加载 research-brief skill 走 **HITL1**
    （ask_user_question：研究类型 / 深度篇幅 / 口径，每问带推荐）→ 落 `runs/<slug>/`。
 2. **组队**：lead 按 team-assembly skill 定名单（探索性全景默认：scout ×1 + analyst ×1 +
-   critic 后置进场；负载高再加 analyst），`spawn_teammate` 组队——成员 preset 按角色挂。
+   critic 后置进场；负载高再加 analyst），`spawn_teammate` 组队——**成员挂 roster 默认
+   preset（=lead，P2 实证），角色人格与技能经 lead 的 spawn prompt 携带角色章程
+   （persona-by-prompt——P2 毕业 Note 的设计后果）**。
 3. **派活与回收**：任务板（team 主通道，D3）；topic 单 owner（手册 owner 表）；scout 的
    leads.md 定向给 analyst；analyst 证据回来 lead 写 findings.md；critic 对成稿出
    review.md；lead 综合纪律 = 纯综合先行禁新搜、gap 定向补搜只一轮。
@@ -129,8 +132,17 @@ evidence/ → findings → review → final——全部落在 `runs/<slug>/`，�
 - 映射表 §1 hitl2 行同步：审阅建议吸收 composition_handoff（读者/用途/前景化——
   源头 rb_profile 的 composition 契约，原映射只写了"证据充分性+交付/补研究推荐"）。
 
-## 开放问题（请用户定）
+## 开放问题（部分已定，2026-09-24 用户拍板）
 
-1. analyst 初始数量（默认 1；Q4 观察后议增）；
-2. 抽查条数 N 与中断恢复是否要"真 kill"（建议做一次受控的，最有说服力）；
-3. 研究问题（你出题——run 的输入）。
+1. **run 形状已定：端到端最薄直跑**——环节 = run 内部检查点（文件契约：leads →
+   evidence → findings → review），不做独立分段排练。依据：company D11 横切否决先例
+   （"活体时刻"不得推迟）+ 源头 harness 的 gate-in-run 设计 + 环节机制已全部预飞
+   （M1/L4-lite/P2）+ 剩余未知（Q2 行为半边/Q4/Q5/L4③④）均为组合性质，分段产生
+   不了证据；环节内容劣化 → run 后蛇形折回（「M2 收口与复盘」条目收证据修订）；
+2. analyst 初始数量：**1**（随最薄配置定案；Q4 观察后议增）；
+3. 中断恢复：**做一次受控真 kill**（最便宜地证明"文件即真相"，L4 判据④）；
+   抽查条数 **N=5**（已确认，可调）；
+4. 研究题（已定，2026-09-24 用户选 A）：**主流 Deep Research 产品（ChatGPT DR /
+   Gemini DR / Perplexity / Kimi 探索版等）如何处理证据链：引用粒度、来源呈现、
+   单源与缺口披露、证据暴露度**。Purpose：为本仓 M3 的证据呈现与交付设计提供竞品
+   事实基础（探索型、有界、可交叉；新功能细节常单源 = 天然"待破"素材）。

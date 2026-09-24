@@ -35,7 +35,7 @@ L3 判据 2 的载体；任何两类事实不得双 owner 或无 owner。
 | lead | `team-assembly` | 组队矩阵（按研究类型定名单）、通道选择、单 owner 分派纪律、critic 后置进场 |
 | lead | `synthesis` | wave2 语义：纯综合先行禁新搜索 → finding gap 定向补搜一轮 → final.md 来源链格式 |
 | scout | `lead-mapping` | query 多样化三轮、30 秒去留判、A–D 质量分级、排除显式、URL 必须真实抓取 |
-| analyst | `evidence-extraction` | question-list 驱动、证据文件 frontmatter 身份链、摘录/解读分离、交叉验证 ≥2 独立来源、反例搜索必记 |
+| analyst | `evidence-extraction` | question-list 驱动、证据文件 frontmatter 身份链、摘录/解读分离、交叉验证 ≥2 独立来源、反例搜索必记、口径与单源显式化（"单源——待破"/"已搜未得"） |
 | critic | `adversarial-review` | 三审查线（无来源狩猎 CRITICAL / 质量审计 MAJOR / 反例覆盖 MAJOR）、review.md 分级格式、readiness 判据清单 |
 
 ## 3. 信噪比策略落点（L3 判据 4：显式机制，不靠模型自觉）
@@ -47,7 +47,8 @@ Deep Research 的本质困难 = 搜索结果信噪比极差 + 答案位置未知
 2. **问题驱动**（analyst/evidence-extraction）：question-list 把"探索"变成"逐问题找
    证据"——搜索有靶子，噪声进不了正题；
 3. **对抗验证**（analyst 交叉验证 + critic 狩猎）：关键 claim ≥2 独立来源 + 反例专搜 +
-   无来源结论 CRITICAL——幸存的信号才许进报告；
+   **单源显式标记（"单源——待破"）与数字口径（测量条件 ≥2 项）** + 无来源结论
+   CRITICAL——幸存的信号才许进报告；
 4. **缺口显性化**（lead/synthesis）：insufficient/contradicted 如实呈现——搜不到也
    是结论，禁止假装全知。
 

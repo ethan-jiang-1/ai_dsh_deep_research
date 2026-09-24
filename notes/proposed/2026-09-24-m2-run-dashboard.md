@@ -1,6 +1,7 @@
 # RFC：M2 run 可视化——观察面与只读仪表盘（"做整个搜索"看得见）
 
-> 状态：**proposed（待用户打磨）** · 2026-09-24 · 归宿：roadmap ▶「首个完整研究 run」
+> 状态：**approved（2026-09-24 用户批准；同日实施落地——实施记录见文末）** · 2026-09-24 ·
+> 归宿：roadmap ▶「首个完整研究 run」
 > 起因：用户定案——"肯定要视觉化做整个搜索"，且必须在 run 前想清楚（事前设计，
 > 不在 run 中途发明）。
 
@@ -66,9 +67,33 @@
 - M2 run 期间实际使用：用户开仪表盘能回答"现在到哪了"（矩阵 + journal），无需
   询问任何角色——静默自律与可见性同时成立。
 
-## 开放问题（请用户定）
+## 开放问题（已定，2026-09-24 用户拍板）
 
-1. 自动刷新间隔（建议 5s 起步）；
-2. 要不要"开跑就绪"一键脚本把 boot web + 仪表盘一起起（可并入 P1 的就绪命令）；
-3. 仪表盘要不要放各角色会话的 deep-link（跳 web GUI 对应会话）——需确认 GUI 会话
-   URL 形状，M2 观察期看价值再定。
+1. 自动刷新间隔：**5s**；
+2. "开跑就绪"一键脚本：**并入 boot-run**（boot web + 仪表盘一起起，不另立命令）；
+3. 角色会话 deep-link：**先不做**——M2 观察期看价值再定（需确认 GUI 会话 URL 形状）。
+
+## 实施记录（2026-09-24）
+
+- `scripts/run-dashboard.mjs`：可 import 纯解析函数（splitFrontmatter / parseQuestion /
+  parseTopics / parseEvidenceDir / parseLeads / parseFindings / parseReview / tailJournal /
+  topicEvidenceMatrix / gapStats / buildModel——全部对畸形输入 fail-soft 永不 throw）+
+  renderHtml 渲染薄壳 + CLI（`<runDir>` 或 `--latest [--root]`，`--out` / `--watch` /
+  `--interval`；meta refresh 5s）；
+- 实施中抓到并修一个 CLI bug：flag 不在场时 `splice(indexOf(...), 1)` 变 `splice(-1, 1)`
+  倒删末参（两个症状同根：一次性模式丢 runDir、--latest 模式误报用法错误）——改 take()
+  守卫后两模式冒烟通过；
+- `tests/run-dashboard.test.mjs`（8 断言）+ fixture run 目录 = 契约形状实例（A/D 级证据各一、
+  findings 两条含 contradicted、leads 含已排除行、review readiness: PASS）；
+- **红绿反证**：sed 注入 fixture 的 evidence quality A→B → 矩阵分布 + 渲染壳两断言红 →
+  还原 → 8/8 绿（2026-09-24，方法 = 改 fixture 数字，非改断言）；
+- boot-run.sh 并入一键就绪：`--latest --watch --interval 5` 后台再生成 →
+  `dev/smoke-workspace/dashboard.html`（gitignored 运行区）+ EXIT/INT/TERM trap 清理；
+  STEPS 更新为"进度看四处"（仪表盘列 ①）；
+- 跑过的检查：L0 verify 9 门 + 18 tests 绿；CLI 冒烟（fixture 一次性渲染含矩阵/readiness；
+  空 runs/ 显示"未开始"×6 处 = fail-soft 实证）；
+- run 内判据（用户开仪表盘能答"现在到哪了"，无需询问角色）由 ④ run 使用核销，未核销。
+- **boot-run 端到端实证**（补记）：真跑 `bash dev/boot-run.sh` 20 秒——web 起 3081
+  （token 打印）、dashboard.html 每 5s 再生成、退出无残留进程；顺手抓到并修掉
+  `--latest` 的一个瑕疵（把 runs/ 的 `.gitkeep` 文件当选 run 目录——改 statSync
+  isDirectory() 过滤，修后空 runs/ 正确显示"未开始"）；修后全量门禁复跑绿。

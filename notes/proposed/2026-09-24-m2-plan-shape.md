@@ -1,6 +1,7 @@
 # RFC：M2 计划形状升级——把 rb_plan 的范围纪律与修订记录吸收进模板
 
-> 状态：**proposed（待用户打磨）** · 2026-09-24 · 归宿：roadmap ▶「首个完整研究 run」
+> 状态：**approved（2026-09-24 用户批准；同日实施落地——实施记录见文末）** · 2026-09-24 ·
+> 归宿：roadmap ▶「首个完整研究 run」
 > 依据：源头仓亲读实证——`dpt_rb_glm-5-3-deepseek-v4-domestic-chips/rb_plan.md`（真实
 > run 的计划书实物）对照本仓 `research-workspace/templates/run/`。
 
@@ -24,9 +25,10 @@
 ## 方案（模板三改，全部最小改）
 
 1. **question.md 增四节**（HITL1 快照之前）：
-   - `## 研究问题（定稿）`（现有）之后：`## Purpose——为谁决策什么`（一句话）；
+   - `## 研究问题（定稿）`（现有）之后：`## Purpose——为谁决策什么`（一句话，**必填**）；
    - `## 研究问题分解`（3–6 条 Research Questions）；
-   - `## Scope`：In / **Out（每条带排除理由）** / 待定；
+   - `## Scope`：In / **Out（方向级，每条带排除理由；单来源弃用不入此——住 scout
+     leads.md"已排除"行）** / 待定；
    - `## Constraints`：语言 / 时间预算 / 地域 / 来源偏好；`User Research Controls` 默认"未提供"。
 2. **topics.md**：`must_answer` 从一句话升为**问题列表（2–5 问，每问可判"答了/没答"）**
    ——对齐源头 topic_registry 的 must_answer 数组。
@@ -54,8 +56,20 @@
 - M2 run 实际用上（question.md 四节非空、Decisions 至少一条——HITL1 本身就是第一条
   决策记录；此项由 run-mechanics 的 run 汇总核销）。
 
-## 开放问题（请用户定）
+## 开放问题（已定，2026-09-24 用户拍板）
 
-1. Out-of-scope 的粒度：只记"整个方向被排除"，还是也记"单来源被弃用"（源头两者都有；
-   建议前者进 Scope.Out、后者留在 scout 的 leads.md"已排除"行——已有载体）；
-2. Purpose 是否必填（源头是；建议必填——"为谁决策什么"是对齐质量的最强约束）。
+1. Out-of-scope 粒度：**方向级进 Scope.Out**（每条带排除理由）；单来源弃用留在 scout 的
+   leads.md"已排除"行——已有载体，不重复安家；
+2. Purpose **必填**——"为谁决策什么"是对齐质量的最强约束（与源头一致）。
+
+## 实施记录（2026-09-24）
+
+- question.md 模板：四节落地（Purpose 必填 / RQ 分解 3–6 条 / Scope In·Out 方向级带理由·待定 /
+  Constraints 含 User Research Controls 默认未提供）+ `## Decisions` append-only（最新在上，
+  字段注释对齐源头；HITL1 定稿即第 1 条示例行）；
+- topics.md 模板：must_answer 升为缩进问题列表（2–5 问，每问可判"答了/没答"）；
+- 同步面：手册目录约定 question/topics 两行；映射表 §1 instantiation / setup-seed-topics /
+  rerun 三行（rerun 行并入 Decisions 记录——原映射只写"新 run 目录 + 引用前版"）；
+- 跑过的检查：`node scripts/verify.mjs` 9 门全绿 + `node --test tests/*.test.mjs` 10/10
+  （含 evaluation-contract）——落地面 L0+L3 按 RFC 判据齐；
+- run 内判据（四节非空 + Decisions ≥1 条）由 ④ run-mechanics 的 run 汇总核销，未核销。
