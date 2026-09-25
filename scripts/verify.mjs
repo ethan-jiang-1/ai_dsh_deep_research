@@ -252,11 +252,11 @@ function roadmapQueue() {
   });
 }
 
-// ── 门禁 10：vendor-pin（vendor/dsh submodule 在位且钉住 dsh-v0.1.5-rc.2 = fb2c4b9e；
+// ── 门禁 10：vendor-pin（vendor/dsh submodule 在位且钉住 dsh-v0.1.7-rc.2 = 477b4f4205；
 //    D10 销账的机械面——机制权威自持，队列「vendor-submodule-and-pnpm-dsh」）──
 {
   const gate = 'vendor-pin';
-  const PIN = 'fb2c4b9e698e30edb738bca4cf0618587db7d203';
+  const PIN = '477b4f420553e8a52c2fbccc464d7561b239c443';
   if (!existsSync(join(ROOT, '.gitmodules'))) fail(gate, '.gitmodules 缺席');
   else {
     const gm = readFileSync(join(ROOT, '.gitmodules'), 'utf8');
@@ -267,7 +267,7 @@ function roadmapQueue() {
   const r = spawnSync('git', ['submodule', 'status', 'vendor/dsh'], { cwd: ROOT, encoding: 'utf8' });
   const m = r.stdout ? /^[-+ ]?([0-9a-f]{40})/.exec(r.stdout.trim()) : null;
   if (!m) fail(gate, 'submodule status 不可读——检查 git submodule init/update');
-  else if (m[1] !== PIN) fail(gate, `vendor/dsh 钉在 ${m[1].slice(0, 8)}——应为 ${PIN.slice(0, 8)}（dsh-v0.1.5-rc.2）`);
+  else if (m[1] !== PIN) fail(gate, `vendor/dsh 钉在 ${m[1].slice(0, 8)}——应为 ${PIN.slice(0, 8)}（dsh-v0.1.7-rc.2）`);
 }
 
 // ── 门禁 11：vendor-clean（vendor/dsh 只读铁律：零未提交改动——机制权威不许就地改）──

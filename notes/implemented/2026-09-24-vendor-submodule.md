@@ -16,7 +16,7 @@ tag 升级时无从机械校验。
 
 ## 方案
 
-1. `git submodule add` 钉住 tag `dsh-v0.1.5-rc.2`（commit `fb2c4b9e`）→ `vendor/dsh/`；
+1. `git submodule add` 钉住 tag `dsh-v0.1.7-rc.2`（commit `477b4f4205`）→ `vendor/dsh/`；
 2. workspace 五件套：pnpm-workspace.yaml 收 vendor/dsh + 根 package.json scripts
    `dsh` 从钉住源码起会话（替代 env.sh 的 company 借用路径）；
 3. verify 新门禁两条：**vendor-pin**（submodule 在位 + 指向钉住 commit）与
@@ -47,7 +47,7 @@ release-smoke 安装域 ALL PASS（内嵌四 preset 真挂载）；D10 从偏离
 
 **实现全录**：
 
-1. vendor/dsh pinned submodule（tag `dsh-v0.1.5-rc.2` @ `fb2c4b9e`；.gitmodules 正源 URL；
+1. vendor/dsh pinned submodule（tag `dsh-v0.1.7-rc.2` @ `477b4f4205`；.gitmodules 正源 URL；
    本地 clone 落地免网络，URL 事后修正）。
 2. workspace 全镜像 company：五件套 globs + overrides（**cordis/cosmokit/schemastery
    强制 link**——cordis 为本仓实证新增：company 靠历史 lock 自然链接，本仓全新解析时

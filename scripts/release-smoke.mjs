@@ -86,7 +86,7 @@ for (const role of presetRoles(ROOT)) {
 }
 const packPkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
 step(Object.keys(packPkg.peerDependencies ?? {}).length > 0, 'peers 在 manifest（声明语义）');
-step(Array.isArray(packPkg?.dsh?.compatibility?.dshReleases) && packPkg.dsh.compatibility.dshReleases.includes('dsh-v0.1.5-rc.2'),
+step(Array.isArray(packPkg?.dsh?.compatibility?.dshReleases) && packPkg.dsh.compatibility.dshReleases.includes('dsh-v0.1.7-rc.2'),
   '兼容矩阵钉住当前 tag');
 
 // ⑤ boot + preset-smoke 断言（安装域通道：无 overlay，走已装 pack 的正式路径）

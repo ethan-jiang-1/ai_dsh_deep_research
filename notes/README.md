@@ -77,4 +77,4 @@
 
 **原生权威**（机制核对一律走它）：`vendor/dsh/.agents/notes/README.md`、
 `vendor/dsh/.agents/notes/implemented/AGENTS.md`、`vendor/dsh/.agents/notes/archived/AGENTS.md`
-（钉 tag `dsh-v0.1.5-rc.2`，只读铁律）。
+（钉 tag `dsh-v0.1.7-rc.2`，只读铁律）。

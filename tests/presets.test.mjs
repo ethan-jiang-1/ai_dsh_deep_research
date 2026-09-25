@@ -82,5 +82,5 @@ test('每角色 preset 的 tool-web 行带 base config（fetch + 60s 超时）',
 
 test('compatibility 矩阵钉住当前 tag', () => {
   const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
-  assert.deepEqual(pkg.dsh.compatibility.dshReleases, ['dsh-v0.1.5-rc.2']);
+  assert.deepEqual(pkg.dsh.compatibility.dshReleases, ['dsh-v0.1.7-rc.2']);
 });

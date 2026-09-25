@@ -2,7 +2,7 @@
 
 > 层：设计（为什么）。工程范式照搬 `ai_dsh_company`（解剖报告见
 > [notes/research/2026-09-24-dsh-plugin-repo-anatomy.md](../../notes/research/2026-09-24-dsh-plugin-repo-anatomy.md)）；
-> DSH 机制的权威在本仓 `vendor/dsh/` pinned submodule（tag `dsh-v0.1.5-rc.2` @ `fb2c4b9e`，
+> DSH 机制的权威在本仓 `vendor/dsh/` pinned submodule（tag `dsh-v0.1.7-rc.2` @ `477b4f4205`，
 > 只读铁律；D10 已销账——队列「vendor-submodule-and-pnpm-dsh」2026-09-24 毕业）。
 
 ## 1. repo 形态
@@ -13,7 +13,7 @@
 packages/deep-research-pack/   唯一自写包：presets/<role>/ + cordis.patch.yml（纯配置，零 JS）
 research-workspace/            运行场：角色会话 cwd（研究手册 + drt_<slug>/（run bundle）+ templates/）
 docs/ notes/ scripts/ tests/ dev/   文档/决策/门禁/回归/环境（分层原则见 00-index）
-vendor/dsh/                    pinned submodule（dsh-v0.1.5-rc.2 @ fb2c4b9e，只读铁律——verify
+vendor/dsh/                    pinned submodule（dsh-v0.1.7-rc.2 @ 477b4f4205，只读铁律——verify
                                vendor-pin/vendor-clean 把守；workspace 五件套吸收其包，pnpm dsh 从此起）
 ```
 

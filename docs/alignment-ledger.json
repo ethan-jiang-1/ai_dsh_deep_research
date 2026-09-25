@@ -1,5 +1,5 @@
 {
-  "_note": "对齐台账（机读正本）：vendor/dsh（钉 @ fb2c4b9e）的 development-harness 源面逐项结论。门禁 align-ledger 强制三件事：① 每条 source 在 vendor/dsh 里真实存在（换 pin 后文件移位/删除即红——这就是重审触发器）；② verdict=adopted/adapted 的每处 landing 在仓内真实存在；③ verdict=na 必须给 reason。人读视图 = docs/discipline-map.md 源 1–9。 覆盖规则：结构面逐条登记——vendor 每个 AGENTS.md（不含 snapshots/session 夹具）、每个开发技能 SKILL.md、顶层 docs/*.md 与 docs/cookbook/*.md（非 .zh.md 副本）、以及根文件（package.json/.editorconfig/.gitattributes/lefthook.yml/vendor/README.md/snapshots/AGENTS.md/.github/AGENTS.md/packages/README.md/scripts/run-gates.ts/scripts/doc-budgets.manifest.json）；双语 .zh.md 副本按类登记（不携带独立约定，配对机制见 docs/i18n/README.md 一条）。门禁 align-ledger 强制该覆盖（缺登记即红）。 landing 粒度 = 该约定的本仓载体（可为类级：例如各 cookbook 篇 → guides/62 + docs/AGENTS.md；技能形式约定 → .agents/skills/ + dev-skill-format 门禁）。",
+  "_note": "对齐台账（机读正本）：vendor/dsh（钉 @ 477b4f420505）的 development-harness 源面逐项结论。门禁 align-ledger 强制三件事：① 每条 source 在 vendor/dsh 里真实存在（换 pin 后文件移位/删除即红——这就是重审触发器）；② verdict=adopted/adapted 的每处 landing 在仓内真实存在；③ verdict=na 必须给 reason。人读视图 = docs/discipline-map.md 源 1–9。 覆盖规则：结构面逐条登记——vendor 每个 AGENTS.md（不含 snapshots/session 夹具）、每个开发技能 SKILL.md、顶层 docs/*.md 与 docs/cookbook/*.md（非 .zh.md 副本）、以及根文件（package.json/.editorconfig/.gitattributes/lefthook.yml/vendor/README.md/snapshots/AGENTS.md/.github/AGENTS.md/packages/README.md/scripts/run-gates.ts/scripts/doc-budgets.manifest.json）；双语 .zh.md 副本按类登记（不携带独立约定，配对机制见 docs/i18n/README.md 一条）。门禁 align-ledger 强制该覆盖（缺登记即红）。 landing 粒度 = 该约定的本仓载体（可为类级：例如各 cookbook 篇 → guides/62 + docs/AGENTS.md；技能形式约定 → .agents/skills/ + dev-skill-format 门禁）。",
   "_evidence": "逐条原始行（810 条）在 dev/smoke-workspace/inventory/{root-packaging,subtree-agents,dev-skills,docs-standards,packages-evidence}.json（gitignored 运行区，可重跑 workflow vendor-inventory-to-files 复现）",
   "sources": [
     {
@@ -37,6 +37,16 @@
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
     {
+      "source": ".agents/skills/agent-experience/SKILL.md",
+      "owns": "技能：agent 体验设计判断",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "docs/AGENTS.md"
+      ],
+      "note": "0.1.7 新增技能；形式约定同类（frontmatter + guidance 声明）"
+    },
+    {
       "source": ".agents/skills/dsh-archive-agent-notes/SKILL.md",
       "owns": "新增 Note 触发限定范围的取代审计：按未来决策价值把 implemented Note 分保留/归档、rejected 只留仍能阻止诱人重犯的、proposed 永不归档，归档只走冻结 triplet 机制（原样搬 foo.md/foo.zh.md/foo.i18n.yaml",
       "verdict": "adapted",
@@ -65,6 +75,12 @@
         "scripts/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-client-ui-ux/SKILL.md",
+      "owns": "技能：客户端 UI/UX 判断",
+      "verdict": "na",
+      "reason": "本仓无客户端 UI 面（观察面为开发期只读投影）；同类约定已在 .agents/skills/ 四技能落地"
     },
     {
       "source": ".agents/skills/dsh-code-review/SKILL.md",
@@ -509,6 +525,12 @@
       ]
     },
     {
+      "source": "docs/cookbook/reviewing-persistence-type-changes.md",
+      "owns": "持久化类型变更评审配方",
+      "verdict": "na",
+      "reason": "本仓无持久化类型面（session log 由 base 拥有）"
+    },
+    {
       "source": "docs/cordis-primer.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
@@ -618,6 +640,12 @@
       "reason": "本仓无工具执行管线实现面"
     },
     {
+      "source": "docs/ui-radius.md",
+      "owns": "客户端 UI 圆角规范",
+      "verdict": "na",
+      "reason": "本仓无客户端 UI 样式面"
+    },
+    {
       "source": "docs/web-styling.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
@@ -684,13 +712,14 @@
       "reason": "本仓无该包组（唯一包是纯配置 deep-research-pack）"
     },
     {
-      "source": "packages/preset/agent-presets/README.md",
-      "owns": "包 README 以 frontmatter 声明 description，写明面向的用户与维护者场景，并声明 kind: package-reference",
+      "source": "packages/preset/agent-preset/README.md",
+      "owns": "新 preset 系统：一个 preset = 一条 @deepseek-ai/dsh-agent-preset 行，子插件行内声明",
       "verdict": "adapted",
       "landing": [
         "packages/deep-research-pack/README.md",
-        "packages/deep-research-pack/AGENTS.md"
-      ]
+        "docs/guides/62-plugin-authoring.md"
+      ],
+      "note": "0.1.7 重设计：旧 packages/preset/agent-presets 整包删除（迁移见 notes/proposed/2026-09-25-vendor-pin-bump-017rc2.md）"
     },
     {
       "source": "packages/README.md",

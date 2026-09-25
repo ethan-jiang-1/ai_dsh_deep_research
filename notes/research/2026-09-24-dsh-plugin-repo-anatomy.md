@@ -19,13 +19,13 @@
 | `tests/` | 6 个 keyless spec：presets/layering/client-face/delegation-card/deliverables/presence-board |
 | `dev/` | env.sh 双 home、company.overlay.yml、harness-home/（dev DSH_HOME）、rehearsal-workspace/（排练场≠运行场） |
 | `snapshots/` | 回放录制（r2-motion 等，replay-smoke 判据） |
-| `vendor/dsh` | pinned submodule：dsh-v0.1.5-rc.2 @ fb2c4b9e698e30edb738bca4cf0618587db7d203，只读铁律 |
+| `vendor/dsh` | pinned submodule（当时 pin）：dsh-v0.1.7-rc.2 @ 477b4f420553e8a52c2fbccc464d7561b239c443，只读铁律 |
 
 ## 2. 插件包构成要件
 
 **package.json 的 `dsh` 段**：
 - `dsh.bundle.patch: "./cordis.patch.yml"`——plugin add 时并入 host 的默认行（host 共享面；角色差异在 presets/）
-- `dsh.compatibility.dshReleases: ["dsh-v0.1.5-rc.2"]`——兼容矩阵，必须含当前 pin 的 tag
+- `dsh.compatibility.dshReleases: ["dsh-v0.1.7-rc.2"]`——兼容矩阵，必须含当前 pin 的 tag
 - `dsh.client: { inject: [官方 client/api 模块名…], platform: "web" }`——浏览器半依赖（informational only，不排序不 gate）
 - exports 必须双半：`.`（host）+ `./client`（浏览器）；`files` 含 `lib/**`、`presets/**`、`cordis.patch.yml`；runtime 行依赖进 peerDependencies（pre-stable 不钉死）
 

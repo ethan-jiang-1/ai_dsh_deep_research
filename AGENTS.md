@@ -28,7 +28,7 @@ README.md                 人类门面（Start Here 链接 + 稳定原则摘要�
 roadmap.md                队列 + 搁置池（纯队列：条目完成即离队；▶ = 全仓唯一"当前"指针）
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 随队列条目——见 pnpm-workspace.yaml 头注）
 packages/deep-research-pack/   唯一自写包（纯配置）：presets/<role>/（preset.yml + agent.cordis.yml[persona 行/skills/工具行] + skills/<n>/SKILL.md）、cordis.patch.yml（bundle 行）；新增角色步骤见包 README
-vendor/dsh/               pinned submodule（tag `dsh-v0.1.5-rc.2` @ `fb2c4b9e`，只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，D10 已销账）
+vendor/dsh/               pinned submodule（tag `dsh-v0.1.7-rc.2` @ `477b4f4205`，只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，D10 已销账）
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、drt_<slug>/（run bundle）、templates/run/
 docs/                    00-index（地图+决策台账+术语映射）→ design/10-30 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ evaluation.md（验收合同）
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）；目录名自带时态，
@@ -97,7 +97,7 @@ web 搜索无需独立 key——base 的 `web-search-deepseek` 行 `apiKeyEnv: D
 
 | 实体 | 位置 | 角色 |
 |---|---|---|
-| ① 开发基线（唯一权威） | `vendor/dsh/`（本仓 pinned submodule，tag `dsh-v0.1.5-rc.2` @ `fb2c4b9e`，只读铁律——verify vendor-pin/vendor-clean 把守；D10 已销账） | 机制核对与验证会话一律走它（dev/env.sh 的 dsh 函数与 `pnpm dsh` 从此处源码起） |
+| ① 开发基线（唯一权威） | `vendor/dsh/`（本仓 pinned submodule，tag `dsh-v0.1.7-rc.2` @ `477b4f4205`，只读铁律——verify vendor-pin/vendor-clean 把守；D10 已销账） | 机制核对与验证会话一律走它（dev/env.sh 的 dsh 函数与 `pnpm dsh` 从此处源码起） |
 | ② 日用全局安装 | npm 全局（`which dsh`） | 与本 repo 开发无关；版本随全局漂移，行为不作机制依据 |
 | ③ 参考仓 | `/Users/bowhead/ai_dsh_company/`（插件工程范式）、`/Users/bowhead/ai_tool_deepresearch/`（方法论源头） | 只读参考；吸收落点登记在 00-index §外部研究材料 |
 

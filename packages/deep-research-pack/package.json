@@ -29,7 +29,7 @@
     },
     "compatibility": {
       "dshReleases": [
-        "dsh-v0.1.5-rc.2"
+        "dsh-v0.1.7-rc.2"
       ]
     }
   }
