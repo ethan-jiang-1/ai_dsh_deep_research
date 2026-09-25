@@ -58,22 +58,33 @@ fi
 # ② pack 漂移检测（RFC debug-dashboard-plus）：pack 源 ↔ profile 安装镜像逐文件比对。
 # 2026-09-24 三次注入面事故里两次是镜像类（$DSH_HOME/AGENTS.md 化石、pack persona/skill
 # 旧文本进了镜像）——机制化补丁：不符即 fail-loud，不带着旧 harness 开 run。
+# 比对集合 = **实际随包发布的文件**（`npm pack --dry-run --json` 为准），不是源目录全量：
+# pack 的 `files` 字段决定镜像里有什么（例如 AGENTS.md 是子树开发指令、不随包发布），
+# 按源目录全量比对会把"没发布"误报成"镜像缺席"（0.1.7 升 pin 时实测）。
 # 单跑模式：bash dev/boot-run.sh --drift-check（测试/CI 用，不起 web）。
 drift_check() {
-  local bad=0 f rel mirror
-  while IFS= read -r f; do
-    rel="${f#"$PACKDIR"/}"
+  local bad=0 rel mirror
+  local shipped
+  # 工具态重定向（本仓纪律）：npm 缓存钉在仓库内，避全局 cache 权限/污染（release-smoke 同款）。
+  shipped="$(cd "$PACKDIR" && npm pack --dry-run --json --cache "$ROOT/dev/smoke-workspace/npm-cache" 2>/dev/null | node -e '
+    let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => {
+      const j = JSON.parse(s);
+      for (const f of j[0]?.files ?? []) console.log(f.path);
+    });
+  ')"
+  [ -n "$shipped" ] || { echo "boot-run: 漂移检测拿不到 pack 发布清单（npm pack --dry-run 失败）" >&2; exit 1; }
+  while IFS= read -r rel; do
     mirror="$PROFDIR/node_modules/dsh-deep-research-pack/$rel"
-    if [ ! -f "$mirror" ] || ! diff -q "$f" "$mirror" >/dev/null 2>&1; then
+    if [ ! -f "$PACKDIR/$rel" ] || [ ! -f "$mirror" ] || ! diff -q "$PACKDIR/$rel" "$mirror" >/dev/null 2>&1; then
       echo "boot-run: 漂移——$rel 与 profile 镜像不一致（或镜像缺席）" >&2
       bad=1
     fi
-  done < <(find "$PACKDIR" -type f \( -name '*.yml' -o -name '*.md' -o -name 'package.json' \) ! -path '*/node_modules/*')
+  done <<< "$shipped"
   if [ "$bad" -ne 0 ]; then
     echo "boot-run: pack 漂移检测红——修复：rm -rf '$PROFDIR' 后重跑本脚本重建（或逐文件 cp 同步）" >&2
     exit 1
   fi
-  echo "boot-run: pack 漂移检测绿（pack 源 ↔ profile 镜像一致）"
+  echo "boot-run: pack 漂移检测绿（pack 发布集 ↔ profile 镜像一致）"
 }
 if [ "${1:-}" = "--drift-check" ]; then
   [ -d "$PROFDIR" ] || { echo "boot-run: profile 不存在（先跑一次完整 boot 生成）" >&2; exit 1; }
