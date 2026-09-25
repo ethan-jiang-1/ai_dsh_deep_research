@@ -13,19 +13,16 @@
 > ③ GUI 是主菜，真人 HITL run 验收**延期给④**；④需用户带题（真人拍板，静默期做不了），
 > 兼③的真 run 验收载体；⑤用户节奏触发。
 
-1. ▶ **vendor 构建产物自检**（卫生，小）——boot 前 fail-loud + 一行 remedy；红证 =
-   删代表产物 → 红 → 还原 → 绿，产物在位不误报。
-   RFC = [2026-09-25-vendor-build-guard](notes/proposed/2026-09-25-vendor-build-guard.md)。
-2. **team-preflight 末标记加固**（卫生，小，已知脆点三跑两红一绿）——判据改锚
+1. ▶ **team-preflight 末标记加固**（卫生，小，已知脆点三跑两红一绿）——判据改锚
    （回合落定**或**标记，二其一）为主、prompt 加固为辅；验收 = 真模型档连续 ≥3 次全绿。
    RFC = [2026-09-25-team-preflight-marker](notes/proposed/2026-09-25-team-preflight-marker.md)。
-3. **观察面 GUI 化**（feature，大；两段三步全文见 RFC）——D7 修订 + 构建链 + client-load-smoke
-   → B-min 验链 → B-full（步骤条/活标题/矩阵/review）；真人 HITL run 验收延期给条目 4。
+2. **观察面 GUI 化**（feature，大；两段三步全文见 RFC）——D7 修订 + 构建链 + client-load-smoke
+   → B-min 验链 → B-full（步骤条/活标题/矩阵/review）；真人 HITL run 验收延期给条目 3。
    RFC = [2026-09-24-observability-gui](notes/proposed/2026-09-24-observability-gui.md)。
-4. **研究类型覆盖**（研究，**用户带题驱动**：真人 HITL、类型 ≠ 首场）——兼条目 3 的
+3. **研究类型覆盖**（研究，**用户带题驱动**：真人 HITL、类型 ≠ 首场）——兼条目 2 的
    真 run 验收；顺手取证 synthesizer/floor 重估证据。
    RFC = [2026-09-25-research-type-coverage](notes/proposed/2026-09-25-research-type-coverage.md)。
-5. **DSH 插件生态认真研究**（研究，用户节奏触发）——粗扫后续：生态缺什么、定位独占性。
+4. **DSH 插件生态认真研究**（研究，用户节奏触发）——粗扫后续：生态缺什么、定位独占性。
    RFC = [2026-09-24-dsh-plugin-ecosystem-research](notes/proposed/2026-09-24-dsh-plugin-ecosystem-research.md)。
 
 （已毕业离队 2026-09-25：升 pin 重校（`dsh-v0.1.5-rc.2` → **`dsh-v0.1.7-rc.2`** @ `477b4f4205`，
