@@ -22,7 +22,8 @@
 
 - 直接说出研究问题（一句话到一段话皆可）。lead 加载 research-brief skill 走 **HITL1**
   三问：研究类型（quick_factual / exploratory_map / claim_verification）/ 深度篇幅 /
-  时间口径语言——每问带推荐，你拍板即定稿；
+  时间口径语言——**一张结构化选项卡**（一次 ask_user_question 携带三问，每问 options
+  化、推荐项置首带（Recommended）），你点选项即拍板（需要改的选项可自由输入）；
 - 拍板后 lead 实例化 run bundle `research-workspace/drt_<slug>/`（question.md 定稿 +
   topics.md 拆解；立项时 sibling 预检——同名/前缀相关 bundle 已在则先问你）
   并组队（scout 先行，critic 后置进场），进入静默自主区。

@@ -11,3 +11,6 @@ export const RESEARCH_PANE_SLOT = 'sidebar.right.pane.tab'
 
 /** 「研究状态」页签的**活标题**槽名（挂起时变"研究状态 · ⏳ 等你拍板"）。 */
 export const RESEARCH_TITLE_SLOT = 'sidebar.right.pane.tab.title'
+
+/** 研究语义工具卡的 keyed 槽名（tool.call.toolview；key = wire 工具名，见 ResearchToolCard）。 */
+export const RESEARCH_TOOLVIEW_SLOT = 'tool.call.toolview'
