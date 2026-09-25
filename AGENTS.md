@@ -50,7 +50,7 @@ dev/                     boot-run.sh（run 通道开跑：幂等装+boot web+仪
 记录过的坑——这些事实不在代码里，也不在 docs 里。
 
 - **读取触发（开工即做）**：按条目名或机制名检索 `notes/proposed/`、`notes/implemented/`、
-  `notes/postmortem/`、`notes/rejected/`（否决防复犯）、`notes/research/`（机制考古报告），
+  `notes/postmortem/`、`notes/rejected/`（否决防复犯）、`notes/research/`（调研报告与考古），
   **只读命中的**，不通读全树。拿到决定、输掉的方案、边界与未核销清单再动手；
 - **写入触发（同 diff，非事后补）**：非平凡变更必须在**同一变更**里新增或更新 Note——纯机械
   编辑与局部错字除外。收尾格式（决定/输掉的方案/实际跑过的验证/环境状态）= guides/60 §4；
