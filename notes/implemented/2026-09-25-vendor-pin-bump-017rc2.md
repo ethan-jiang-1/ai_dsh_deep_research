@@ -1,10 +1,18 @@
 # RFC：vendor 升 pin 重校（`dsh-v0.1.5-rc.2` → `dsh-v0.1.7-rc.2`）
 
-> 状态：proposed
+> 状态：implemented
 
-归宿：roadmap §队列「升 pin 重校」（触发型 → 本次触发，升为 ▶）；依据 =
+归宿：roadmap §队列「升 pin 重校」（触发型 → 2026-09-25 触发并毕业，已离队）；依据 =
 [discipline-map §重审触发路径](../../docs/discipline-map.md) + 用户指令（DSH 上游有最新 RC，
 同步并确认既有工作无重大问题）。
+
+## 决定
+
+**升 pin 到上游最新 RC 并按其重审机制逐条重校**——不是"只换 commit"：pin 换到
+`dsh-v0.1.7-rc.2` @ `477b4f4205`，同时迁移 0.1.7 的 preset 重设计（`@deepseek-ai/dsh-agent-presets`
+整包删除 → 一条 `@deepseek-ai/dsh-agent-preset` 行 + 行内 `config.plugins`）、补齐 0.1.7 启动
+所依赖的构建产物、把主线（research profile + run 通道）整体切到新 RC，并按
+[discipline-map §重审触发路径](../../docs/discipline-map.md) 逐条重读 vendor 源、改写受影响结论。
 
 ## 目标 pin
 
@@ -224,3 +232,43 @@ vendor 树仍干净。**升 pin 固定动作补两条：删 `lib/` + 删 `*.tsbu
 正解抄自上游 `packages/bundle/web-app/presets/cordis.patch.yml` 的范本：
 `createRequire(baseUrl).resolve('dsh-deep-research-pack/package.json')` 定位随包目录再 join
 `presets/<role>/skills`；同时把本包加进根 devDependencies（`workspace:*`）使**源码域**也能解析。
+
+## 升 pin 复核结论（2026-09-25 毕业）
+
+**新 pin**：`dsh-v0.1.7-rc.2` @ `477b4f420553e8a52c2fbccc464d7561b239c443`（GitHub `ls-remote`
+确认是上游最新 RC；跨 0.1.6-α1/2、0.1.7-α1/2、0.1.7-rc.1、rc.2 共六个 RC）。旧 pin
+`dsh-v0.1.5-rc.2` @ `fb2c4b9e` 只留在 git 历史，**任何运行路径都不再指向它**（主线 = 本仓
+vendor + 0.1.7-rc.2 装的 research profile）。
+
+**逐条重审结论**：全量清单与四处实质命中见
+[discipline-map §0.1.7 重审命中](../../docs/discipline-map.md)（命中 = Agent Note 判据收窄、
+`verify-vendored-links` 门禁被上游删除、`experimental/` 语义反转 + 包分组重构、
+`snapshots` 新增 `retired-tools` 钉法；其余源 diff 无涉本仓结论）。三处载体（根 AGENTS /
+`notes/AGENTS.md` / 本表源 1 行）已同 diff 对齐新判据；搁置池「keyless 录制快照通道」的复活
+条件据 `retired-tools` 更新。
+
+**实际跑过的验证（全部在新 pin 上实跑）**：
+
+| 面 | 结果 |
+|---|---|
+| L0 门禁 | **24 门禁全绿**（新增 `overlay-fresh`；`vendor-pin` 钉新 commit） |
+| L0 tests | **23 pass**（`presets.test.mjs` 迁移到 0.1.7 形态；`evaluation-contract` 副本路径改指） |
+| L1 源码域真挂载 | `preset-smoke: ALL PASS`（roster + 四角色 session/create + skills 硬隔离） |
+| L2 安装域 | `release-smoke: ALL PASS`（pack → 干净 profile → plugin add → 挂载） |
+| L4-lite 真模型 | `l4-lite-smoke: ALL PASS`（四角色 assistant 响应 + scout 真调 web_search） |
+| 入口链探针 | `entry-chain-probe: ALL PASS`（四问对 ▶ 真值；留档人工复核） |
+| team 机制预检 | 第 2 次跑：机制面全 PASS（spawn_teammate ×2 / list_agents / one-shot 探针 / 成员响应），唯一红 = lead 末标记超时（模型服从度抖动）；**第 3 次跑：ALL PASS**——判为抖动、非机制失败，脆点存档 |
+| run 通道（主线） | `bash dev/boot-run.sh`：组合校验 + 漂移检测绿 → web `127.0.0.1:3081` 起于**本仓 vendor 0.1.7-rc.2**（旧 company 基线服务器已停） |
+
+**环境状态与残留风险**：
+
+- **0.1.7 起启动依赖构建产物**（`lib/typert.<face>.js`、client 面 `lib/client.js`、
+  逐包 `lib/types`）——`bash dev/vendor-build.sh`（本仓驱动）是换 pin 后的固定动作；
+  vendor 自带 `pnpm run build` 在干净树上红在 tsdown **根单元**（root 包无
+  `lib/types/{index,invariant,startup}.js`；语料维护页记过同类阻断），故由本仓驱动。
+- **残留风险 1**：vendor 树的构建产物是 gitignored 状态，**换 pin 后必须 `--clean`**
+  （旧 `lib/` + `*.tsbuildinfo` 会让 `tsc -b` 跳过 emit 并引用已删导出；实测踩过两次）。
+- **残留风险 2**：`team-preflight` 的 lead 末标记对模型服从度敏感（历史脆点，非本仓机制）。
+- **残留风险 3**：`!!js` 表达式对 `baseUrl` 的依赖是**静默失效**面（指错路径不报错，只是
+  skills 缺席）——已在 L1/L2 的"只看见自己的 skills"断言里兜住；新增 preset 行时照
+  `createRequire(baseUrl).resolve('<pkg>/package.json')` 范本写。

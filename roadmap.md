@@ -8,20 +8,16 @@
 
 ## 队列
 
-1. ▶ **升 pin 重校**（⟳ 触发型 → **2026-09-25 已触发，执行中**）——`dsh-v0.1.5-rc.2` →
-   **`dsh-v0.1.7-rc.2`**（`477b4f4205`，跨六个 RC）；含 0.1.7 preset 重设计的形态迁移
-   （`@deepseek-ai/dsh-agent-presets` 整包删除 → `dsh-agent-preset` 行内 `config.plugins`）。
-   三阶段：① 机械 + 台账（门禁绿，L1/L2/真模型档预期红）② preset 形态迁移（L1/L2 绿）
-   ③ 逐条重审 + 真模型档三脚本绿 + 复核结论。
-   RFC = [2026-09-25-vendor-pin-bump-017rc2](notes/proposed/2026-09-25-vendor-pin-bump-017rc2.md)。
-2. **观察面 GUI 化**（feature，M3 初排升位——前置"run 实测后立项"已满足；用户验收可调）——
+1. ▶ **观察面 GUI 化**（feature，M3 初排升位——前置"run 实测后立项"已满足；用户验收可调）——
    右栏「研究状态」页签（流程步骤条 + 活标题"⏳ 等你拍板" + journal→矩阵→review 渐进）+
    研究语义工具卡（C）+ D7 修订（限定观察面用途）+ 双半构建链（tsdown 契约照抄 company）+
    client-load-smoke 完成定义。材料 = notes/research/2026-09-24-ui-observability-surfaces.md。
 
-（已毕业离队 2026-09-25：首个完整研究 run（L4 四判据全闭 + Q2/Q4/Q5/Q6 销账，run =
-drt_cn-us-cpu-gap）与 M2 收口与复盘（八件清单毕）——六份 RFC 迁 implemented/，证据 =
-各 RFC §实施记录；E1 通道回归排查同日毕业。M3 其余顺延项：观察面 GUI 化已升位。）
+（已毕业离队 2026-09-25：升 pin 重校（`dsh-v0.1.5-rc.2` → **`dsh-v0.1.7-rc.2`** @ `477b4f4205`，
+跨六个 RC；preset 重设计迁移 + 0.1.7 构建产物 + 逐条重审——RFC 迁 implemented/，证据 =
+[复核结论](notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md#升-pin-复核结论2026-09-25-毕业)）；
+首个完整研究 run（L4 四判据全闭 + Q2/Q4/Q5/Q6 销账，run = drt_cn-us-cpu-gap）与 M2 收口与复盘
+（八件清单毕）——六份 RFC 迁 implemented/，证据 = 各 RFC §实施记录；E1 通道回归排查同日毕业。）
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；被否决的方案不进池；复活条件写进行内）
 

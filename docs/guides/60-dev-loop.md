@@ -58,7 +58,12 @@ source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名�
 - **双 home**：开发数据（会话/凭据/插件安装）全部进 `dev/harness-home/`，日用 `~/.dsh`
   不动——崩溃半径隔离；
 - **裸 dsh 拦截**：`PATH` 里的全局 dsh 随升级漂移，不作机制依据；机制核对一律走 env.sh
-  定义的 dsh（当前指向 company checkout 的钉 tag 源码，D10 偏离；本仓 vendor 落地后切换）；
+  定义的 dsh（当前指向**本仓 `vendor/dsh` 钉 tag 源码**——升 pin 见根 AGENTS §DSH 源码表）；
+- **换 pin 后先构建**（0.1.7 起启动依赖构建产物）：`bash dev/vendor-build.sh --clean`——
+  产出逐包 `lib/types`、`lib/typert.<face>.js`（`typert-loader` 启动要求）与 client 面
+  `lib/client.js`（client-modules 组合要求）；vendor 自带 `pnpm run build` 在干净树上红在
+  tsdown 根单元，故由本仓驱动（坑与三条产物细节见
+  [升 pin 复核结论](../../notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md#升-pin-复核结论2026-09-25-毕业)）；
 - web 观察窗：`dsh web -- --port 3081 --no-open`（3080 是本 GUI 占用）；
 - run 通道（研究 run 的正式启动面，安装域）：`bash dev/boot-run.sh`（幂等：组合校验/补装
   → boot web 3081 → 入口步骤打印）——用法全文见 [61-run-playbook](./61-run-playbook.md)。

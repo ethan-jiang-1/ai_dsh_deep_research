@@ -27,7 +27,7 @@ CLAUDE.md -> AGENTS.md    symlink（编辑真文件 AGENTS.md，verify 门禁校
 README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令/纪律/布局正本 = AGENTS.md，不复制）
 roadmap.md                队列 + 搁置池（纯队列：条目完成即离队；▶ = 全仓唯一"当前"指针）
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 随队列条目——见 pnpm-workspace.yaml 头注）
-packages/deep-research-pack/   唯一自写包（纯配置）：presets/<role>/（preset.yml + agent.cordis.yml[persona 行/skills/工具行] + skills/<n>/SKILL.md）、cordis.patch.yml（bundle 行）；新增角色步骤见包 README
+packages/deep-research-pack/   唯一自写包（纯配置）：presets/<role>.patch.yml（0.1.7 形态=一条 @deepseek-ai/dsh-agent-preset 行，config.plugins 内声明 persona/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、cordis.patch.yml（bundle 行）；新增角色步骤见包 README
 vendor/dsh/               pinned submodule（tag `dsh-v0.1.7-rc.2` @ `477b4f4205`，只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，D10 已销账）
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、drt_<slug>/（run bundle）、templates/run/
 docs/                    00-index（地图+决策台账+术语映射）→ design/10-30 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ evaluation.md（验收合同）
@@ -39,15 +39,16 @@ notes/                   **开发记忆与证据链**（核心流程数据，不
                          （毕业条目 / 加角色 / 写门禁 / 跑 run）；与产品内 runtime skills（presets/*/skills/）分家
 scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）、team-preflight-smoke.mjs（team 机制预检）、entry-chain-probe.mjs（入口链探针，真模型档）、run-dashboard.mjs（run 只读投影，boot-run 起）、lib/roles.mjs（角色清单访问器，事实源=盘上 presets/）
 tests/                   keyless 回归（node:test，零依赖；layering 守卫禁真模型/网络/子进程；fixtures/ 测试夹具）
-dev/                     boot-run.sh（run 通道开跑：幂等装+boot web+仪表盘）、run-kickoff.mjs（run 会话驱动：建会话+发 kickoff prompt）、env.sh（双 home + dsh 机制基线 + pre-commit 钩子激活）、research.overlay.yml（源码域 overlay，镜像 bundle 行）、hooks/（pre-commit：verify+tests 红灯拦 commit）、harness-home/ 与 smoke-workspace/（gitignore 运行区）
+dev/                     vendor-build.sh（vendor 树构建：tsc host/client + typert 产物 + client bundle）、vendor-typert-emit.mjs（typert 产物生成器）、vendor-host-typert.config.ts（逐包 tsdown 配置）、render-overlay.mjs（从 pack 渲染 research.overlay.yml）、boot-run.sh（run 通道开跑：幂等装+boot web+仪表盘）、run-kickoff.mjs（run 会话驱动）、env.sh（双 home + dsh 机制基线 + pre-commit 钩子激活）、research.overlay.yml（源码域 overlay，**生成物**）、hooks/（pre-commit：verify+tests 红灯拦 commit）、harness-home/ 与 smoke-workspace/（gitignore 运行区）
 ```
 
 接下来开发什么 = §入口链 第 3 步的 ▶ 条目；开工/收尾程序 = 第 5 步。
 
 ## `notes/`：开发记忆（常设指令）
 
-**开工先查 notes，再改代码**：按条目名/机制名检索（只读命中的，不通读全树）；非平凡变更
-**同一变更**里新增或更新 Note。细则是子树指令，不在这里复述：
+**开工先查 notes，再改代码**：按条目名/机制名检索（只读命中的，不通读全树）；**只有承载持久决定
+理由的变更**（代码/测试/现有文档说不清的"为什么选它、放弃了什么"）才需**同一变更**新增或更新
+Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。细则是子树指令，不在这里复述：
 
 - **时态总图 = [notes/README.md](notes/README.md)**（将来 `proposed/` · 过去
   `implemented/` `rejected/` `postmortem/` `research/`；空 `proposed/` 是常态——下一步看
@@ -64,6 +65,7 @@ dev/                     boot-run.sh（run 通道开跑：幂等装+boot web+仪
 ## 命令表
 
 ```sh
+bash dev/vendor-build.sh              # vendor 树构建（换 pin 后必做：--clean 清陈旧产物；tsc host/client + typert 产物 + client bundle——0.1.7 起启动依赖构建产物）
 node scripts/verify.mjs               # L0 结构门禁（keyless，收尾必跑）
 node --test tests/*.test.mjs          # L0 keyless 回归（也可 pnpm test）
 source dev/env.sh                     # ⚠ 双 home + 裸 dsh 拦截（DSH_HOME=dev/harness-home）；下列 L1/L2 必须先 source，否则脚本自拒 exit 2

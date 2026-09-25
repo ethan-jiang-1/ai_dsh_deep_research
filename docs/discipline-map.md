@@ -13,7 +13,7 @@
 | Model-visible ⟺ logged（进模型请求的输入必须可从会话日志重建） | 会话日志即真相：L4-lite/探针断言全走 zstd 日志逐事件；手册完成判据 = 文件事实 | 照搬 |
 | Misconfiguration fails loud（配置错在最早可判定点炸，不静默跳过） | verify 门禁全 fail-loud（清单正本 = evaluation §L0）；boot-run 漂移检测；design/10 记 ENOENT 静默空教训 | 照搬 |
 | Files end with exactly one trailing newline | verify 门禁 md-utf8-newline（tracked 全量） | 照搬 |
-| Non-trivial changes MUST include an Agent Note in the same PR（机械/局部编辑豁免） | AGENTS §notes 写入触发（同 diff）+ note-format 门禁（骨架/状态行） | 照搬 |
+| Add/update an Agent Note **only for lasting decision rationale**（机械与局部编辑——含本地 UI 呈现/交互——豁免；0.1.7 判据自 0.1.5 的 non-trivial 全量收窄） | AGENTS §notes 写入触发（同 diff）+ notes/AGENTS.md §什么时候必须写 Note + note-format 门禁 | 照搬（判据按 0.1.7 收窄） |
 | Plugins, not loop changes（新行为走扩展点，不改 agent-loop） | 本包只经组合面贡献（preset/skill/bundle 行），循环属 DSH 侧 | 带证据适配（纯配置包天然满足；vendor 循环不在本仓改动面） |
 | Prefer maintained dependencies over hand-rolling（真能删掉自 owned 代码与测试时） | 测试栈 node:test、zstd 解压 node:zlib、regex 断言——全部维护中的标准件；tsx/pnpm 构建链引入（vendor 落地）而非自造 | 照搬 |
 | Tests describe behavior, not correctness（过时行为随测试一起改） | tests/ 契约测试（evaluation-contract 对手册谓词、dashboard 对文件形状）；行为变更同 diff 改锚 | 照搬 |
@@ -199,3 +199,22 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
   本表，不在 AGENTS.md 复制（一处事实一个家）；
 - 首版枚举子集表（三个来源、11 行）已被本表**完整覆盖并扩展**——历史原文见 git（本条目
   毕业时的 AGENTS.md 版本）。
+
+## 0.1.7 重审命中（2026-09-25 升 pin：fb2c4b9e → 477b4f4205）
+
+按 §重审触发路径 逐条重读上列 vendor 源，**实质命中四处**（其余源 diff 无涉本仓结论）：
+
+| 源 | 0.1.5 → 0.1.7 变化 | 本仓处置 |
+|---|---|---|
+| 根 `AGENTS.md` · `docs/AGENTS.md` · `.agents/notes/README.md` | Agent Note 判据收窄：`non-trivial change MUST add a Note` → **只有"代码/测试/现有文档解释不了的持久决定理由"才写**；豁免扩到"含本地 UI 呈现/交互" | 三处载体同改（根 AGENTS §notes / `notes/AGENTS.md` / 本表源 1 行）——本仓写入触发本就以"持久决定理由"为准，此次只补豁免面 |
+| `vendor/README.md` + `scripts/run-gates.ts` | vendored 引用改 `workspace:~`（DSH 侧 `workspace:*`）；原 `verify-vendored-links` 门禁**已删除**（现存仅 markdown/public-repository links） | 本仓 `vendor-links` 门禁**独立立论**（E1 事故教训：devDep 必须解析为 `link:vendor/dsh/...` 且无 registry 副本）——上游去掉该门禁不影响本仓保留；devDeps 继续用 `workspace:*`（link，永不 registry），pack 的 peerDeps 用 semver 区间（随包分发到 profile，那里没有 workspace） |
+| `packages/README.md` | `experimental/` 语义**反转**：`private by default with explicit public exceptions` → `pre-stable prototypes with explicit private exceptions`；包分组重构（`e2b/`→`ssh/`、`code-runtime/`→`ptc-runtime/`，新增 `computer-use/` `browser-use/` `deliverables/` `jobs/` `schedule/` `goal/` `storage/` `workspace/` `feedback/` `mcp/` `host/` `client/` `session-query/` `attachment/` `spill/` `runtime-diagnostics/` `test-support/`；`self-modification/`→`extensions/`、`support/`→`test-support/`） | 本仓不引用 vendor 包分组路径；团队机制层 `@deepseek-ai/dsh-experimental-agent-team-profile` 的**包名未变**、语义仍为 pre-stable（`experimental/` 的 public/private 默认与本仓依赖无关）。结论：无命中，登记备查 |
+| `snapshots/AGENTS.md` | 新增 `retired-tools` 钉法：**退役工具录制可与迁移覆盖无关地独立钉住**（含当前 format 版本）；replay 接受保留的 V3 基线或当前代 | 搁置池「keyless 录制快照通道」的复活条件更新：0.1.7 起可只钉"退役工具"这一窄面，不必整代快照 |
+
+**逐条结论（清单全量，含无命中）**：根 AGENTS.md（命中①）· `docs/AGENTS.md`（命中①，另有 persistence-history 新文档层——本仓无持久化面） ·
+`docs/testing.md`（"real entry path" 例证改指 `lib/process.js`/`ptc-runtime`——本仓 L2 断言面未变）· `docs/architecture.md`（应用启动节不变） ·
+`scripts/AGENTS.md`（无命中）· `scripts/doc-budgets.manifest.json`（仅 `docs/architecture.md` 2400→2410 升顶——本仓预算自持） ·
+`scripts/run-gates.ts`（命中②：门禁增删；本仓门禁集自持，见 evaluation §L0）· `packages/AGENTS.md`（无命中；invariant 规则不变） ·
+`packages/README.md`（命中③）· `.agents/notes/{README,AGENTS,implemented/AGENTS,archived/AGENTS}.md`（命中①；archived 删除规则细化——本仓未设 archived/，条件在案） ·
+`.agents/skills/**`（清单与 frontmatter 约定不变：新增 `agent-experience`、`dsh-client-ui-ux` 两个技能已登记进台账） ·
+`snapshots/AGENTS.md`（命中④）· `vendor/README.md`（命中②）· `.github/AGENTS.md`（无命中，CI 细节）。
