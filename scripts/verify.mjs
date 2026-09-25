@@ -138,12 +138,16 @@ function roadmapQueue() {
 // ── 门禁 4：claude-symlink（CLAUDE.md 必须是指向 AGENTS.md 的 symlink）──
 {
   const gate = 'claude-symlink';
-  const p = join(ROOT, 'CLAUDE.md');
-  const a = join(ROOT, 'AGENTS.md');
-  if (!existsSync(a)) fail(gate, 'AGENTS.md 不存在');
-  if (!existsSync(p)) fail(gate, 'CLAUDE.md 不存在（应为 → AGENTS.md 的 symlink）');
-  else if (!lstatSync(p).isSymbolicLink()) fail(gate, 'CLAUDE.md 不是 symlink（应为 → AGENTS.md）');
-  else if (readlinkSync(p) !== 'AGENTS.md') fail(gate, `CLAUDE.md 指向 ${readlinkSync(p)}（应为 AGENTS.md）`);
+  // 两条 symlink（vendor 同构）：根 CLAUDE.md → AGENTS.md；.claude/skills → ../.agents/skills
+  // （后者让 Claude 系 harness 发现与 DSH 同一批开发技能——上游 .claude/ 只此一件）。
+  const pairs = [['CLAUDE.md', 'AGENTS.md'], [join('.claude', 'skills'), join('..', '.agents', 'skills')]];
+  if (!existsSync(join(ROOT, 'AGENTS.md'))) fail(gate, 'AGENTS.md 不存在');
+  for (const [rel, want] of pairs) {
+    const p = join(ROOT, rel);
+    if (!existsSync(p)) { fail(gate, `${rel} 不存在（应为 → ${want} 的 symlink）`); continue; }
+    if (!lstatSync(p).isSymbolicLink()) { fail(gate, `${rel} 不是 symlink（应为 → ${want}）`); continue; }
+    if (readlinkSync(p) !== want) fail(gate, `${rel} 指向 ${readlinkSync(p)}（应为 ${want}）`);
+  }
 }
 
 // ── 门禁 5：pack-bundle / compat（dsh.bundle.patch 指向真实文件；dshReleases 非空）──

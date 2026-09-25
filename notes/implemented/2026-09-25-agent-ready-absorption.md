@@ -172,3 +172,13 @@ notes/README 差异表、notes/AGENTS.md、guides/60 §4、evaluation 台账同�
 的等价物：keyless 回归只放契约测试与夹具，运行产物/真会话日志不进仓）；子树 `CLAUDE.md`
 symlink **不追平**（vendor 自身只在根 · `packages/` · `vendor/` · `.agents/notes/implemented/`
 四处有，非一致约定）。
+
+**二轮再补（结构面逐项登记）**：`vendor/dsh` 根部结构面逐项过了一遍，避免"没抄 = 遗漏"的
+误读——**采纳 1 项**：`.claude/skills -> ../.agents/skills`（上游 `.claude/` 只此一件；让
+Claude 系 harness 发现与 DSH 同一批开发技能），门禁 `claude-symlink` 扩为覆盖两条 symlink；
+**已具备（改名映射）**：glossary → 00-index §术语映射，development/testing/architecture/
+cookbook/subsystems → guides/60 · evaluation · design/ · guides/61-62 · design/；
+**未决 1 项**：`LICENSE`（本仓 `private: true` 未分发，vendor 是 MIT——进 roadmap 搁置池，
+复活条件 = 对外分发前）；**不适用**：i18n/user/website、snapshots、benchmarks/native/python/
+patches/apps、CONTRIBUTING/SAFETY/THIRD_PARTY/BRAND、lint/jscpd/vitest/lefthook 配置（无 TS
+源码面；Markdown 纪律由门禁承担）。逐项理由见 [discipline-map 源 9](../../docs/discipline-map.md)。

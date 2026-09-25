@@ -162,6 +162,19 @@ docs 合同 + notes 记忆 + 17+ 门禁；
 | `.agents/skills/` 命名带产品前缀（`dsh-`），少数通用技能无前缀 | 四个开发技能无前缀（与 vendor 的 `agent-experience`、`record-browser-gif` 同风格） | 已具备 |
 | **一段一行**（`verify-md-wrap` 门禁） | 硬折行 ~90 列 | **不适用**：中文优先仓折行是既有惯例，整仓重排会淹没审阅（成本 > 收益）；引入条件 = 转英文或双语文档 |
 | `docs/defensive-patterns.md`（高风险缺陷模式：生命周期/并发/子进程/teardown——供 review 逐条扫） | 主体 = TypeScript 代码模式，本仓无 TS 面；**可迁移的部分已分居**：门禁与子进程陷阱 → [scripts/AGENTS.md](../scripts/AGENTS.md)，事故与教训 → notes/postmortem/ 与各毕业 Note | 不适用（不另建第二份清单，避免与上述 home 漂移） |
+vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗漏"的误读）：
+
+| vendor 文件/目录 | 本仓处置 |
+|---|---|
+| `.claude/skills` symlink | **采纳**：`.claude/skills -> ../.agents/skills`（Claude 系 harness 发现同一批开发技能）；门禁 `claude-symlink` 覆盖两条 symlink |
+| `docs/glossary.md` | 已具备：`docs/00-index.md §术语映射`（一个概念一个 canonical term，含 DSH↔本仓对照） |
+| `docs/development.md` · `docs/testing.md` · `docs/architecture.md` · `docs/cookbook/` · `docs/subsystems/` | 已具备（改名映射）：guides/60 · evaluation + guides/60 §2 · design/10 · guides/61/62 · design/ |
+| `docs/i18n/` · `docs/user/` · `website/` | 不适用：单语、无对外产品文档站与站点投影 |
+| `snapshots/`（session 回放 fixture） | 不适用：无 session 快照测试面；keyless 回归 = 契约测试与夹具（放置规则归 [tests/AGENTS.md](../tests/AGENTS.md)） |
+| `benchmarks/` · `native/` · `python/` · `patches/` · `apps/` | 不适用：本仓无这些发布 lane 与运行时面 |
+| `CONTRIBUTING.md` · `SAFETY.md` · `SECURITY` · `THIRD_PARTY_NOTICES.md` · `BRAND_GUIDELINES.md` | 不适用：无外部贡献流、无运行时安全授权面、无捆绑第三方代码、无品牌资产 |
+| `.editorconfig` · `.gitattributes` · lint（oxlint）· 重复代码检测（jscpd）· vitest 系列配置 · `lefthook.yml` | 不适用：无 TS 源码面；Markdown 纪律由门禁（md-utf8-newline / md-links / md-anchors / doc-budgets）承担，git 钩子 = `dev/hooks/pre-commit` |
+| `LICENSE` | **未决（非遗漏）**：本仓 `private: true` 未分发；已进 [roadmap 搁置池](../roadmap.md)，复活条件 = 对外分发前定许可证 |
 
 ## 重审触发路径
 

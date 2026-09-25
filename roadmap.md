@@ -26,3 +26,4 @@ drt_cn-us-cpu-gap）与 M2 收口与复盘（八件清单毕）——六份 RFC 
 | UI 皮肤（client 面 + slots 品牌） | 核心研究流未稳，皮肤是表现层（company 到 R5 才做皮肤） | 首个完整 run 通过 + 有 demo 需求 |
 | 专职 synthesizer 角色 | 缺实测证据（Q4） | 首个 run 实测 lead 综合负载过高 |
 | floor 数值门禁机械化 | 缺实测证据（Q6）；keyless 断言有假绿风险 | 首个 run 出现质量滑坡实证 |
+| 许可证（LICENSE） | 本仓 `private: true` 未对外分发（vendor 是 MIT，我们尚无 license 字段——**未决非遗漏**） | 对外分发/发布 pack 前定许可证并加 `LICENSE` + package.json `license` 字段 |

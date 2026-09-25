@@ -32,7 +32,7 @@
 | `md-links` | 所有 **tracked** .md 的 Markdown 相对链接（方括号+圆括号语法）可解析（git ls-files 驱动——具名目录白名单版会让根目录其余 tracked .md 逃检，基础整治 C10 改；反引号裸路径不检 = 设计） | 基础整治 Note（根目录 tracked .md 注入死链红→还原绿） |
 | `md-anchors` | 相对链接的 `#fragment` 在目标文件真实存在（标题按 GitHub slug 规则 + 手写 `<a id>`；《_agent_ready_development》语料 verify.mjs 吸纳——md-links 只管文件存在，标题改名后的锚点漂移是它的盲区） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（注入 `#不存在的锚点` 红→还原绿） |
 | `preset-structure` | presets/ 每角色目录：id 规范 + preset.yml 三字段 + agent.cordis.yml + ≥1 skill 且 frontmatter name=目录名 | 同 noise-sweep（清欠账：缺件角色目录注入红→还原绿） |
-| `claude-symlink` | CLAUDE.md 是指向 AGENTS.md 的 symlink | [r1-scaffold](../notes/implemented/2026-09-24-r1-scaffold.md)（symlink 创建前红→后绿） |
+| `claude-symlink` | 两条 symlink（vendor 同构）：根 `CLAUDE.md` → `AGENTS.md`；`.claude/skills` → `../.agents/skills`（让 Claude 系 harness 发现与 DSH 同一批开发技能——上游 `.claude/` 只此一件） | [r1-scaffold](../notes/implemented/2026-09-24-r1-scaffold.md) + [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（断链 / 指错两形态注入红→还原绿） |
 | `pack-bundle-compat` | pack 的 dsh.bundle.patch 指向真实文件；dsh.compatibility.dshReleases 非空 | 同 noise-sweep（清欠账：patch 指向不存在文件注入红→还原绿） |
 | `row-deps` | preset 与 bundle 行引用的 `@deepseek-ai/*` 全在 peerDependencies | [m2-p1-run-channel](../notes/implemented/2026-09-24-m2-p1-run-channel.md)（违规 insert 行被守卫+row-deps 咬红→还原绿） |
 | `workspace-contract` | 研究手册 + 六件 run bundle 模板在位（bundle 目录 drt_<slug>/ 运行时由 lead 创建，无静态目录可查——D17）+ $DSH_HOME/AGENTS.md 化石镜像不在场（手册唯一定居点 = 会话 cwd projectRoot 注入） | 同 noise-sweep（清欠账：run 模板暂移注入红→还原绿）；化石镜像反证 = 真实事故红（旧契约镜像在场，lead 按 runs/<slug> 行动被用户实测抓到）→删除→绿 |
