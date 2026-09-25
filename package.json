@@ -30,6 +30,7 @@
     "@deepseek-ai/dsh-tool-todo": "workspace:*",
     "@deepseek-ai/dsh-tool-web": "workspace:*",
     "@deepseek-ai/dsh-experimental-agent-team": "workspace:*",
-    "@deepseek-ai/dsh-experimental-tool-agent-team": "workspace:*"
+    "@deepseek-ai/dsh-experimental-tool-agent-team": "workspace:*",
+    "dsh-deep-research-pack": "workspace:*"
   }
 }

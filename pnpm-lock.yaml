@@ -64,6 +64,9 @@ importers:
       '@deepseek-ai/dsh-tool-web':
         specifier: workspace:*
         version: link:vendor/dsh/packages/web/tool-web
+      dsh-deep-research-pack:
+        specifier: workspace:*
+        version: link:packages/deep-research-pack
       tsx:
         specifier: ^4
         version: 4.23.15

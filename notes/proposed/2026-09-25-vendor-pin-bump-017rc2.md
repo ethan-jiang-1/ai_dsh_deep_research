@@ -189,3 +189,38 @@ vendor 树仍干净。**升 pin 固定动作补两条：删 `lib/` + 删 `*.tsbu
 
 **旁证/记账**：`tsc -b tsconfig.host.json` 与 `tsc -b tsconfig.client.json` 都跑得通；
 本轮也已把「清陈旧 `lib/` + 清 `*.tsbuildinfo`」写进升 pin 固定动作。
+
+## 构建打通 + 双通道全绿（本轮，2026-09-25）
+
+**三条产物缺一不可**（0.1.7 起，全部实测）：
+
+1. 逐包 `lib/types/**`——`tsc -b tsconfig.host.json` / `tsconfig.client.json` 两遍都通；
+2. `lib/typert.<face>.js`——`typert-loader` 启动时 import 各贡献包的 `./typert`；
+3. client 面 `lib/client.js`——缺则启动报 `client-modules: 51 client packages failed to compose:
+   client bundle not found; run \`pnpm run build\` before launch`。
+
+**本仓驱动的解法**（vendor tracked 内容一字未改，产物落 gitignored `lib/`）：
+
+- `dev/vendor-typert-emit.mjs`：**复刻 vendor 插件的 workspace 生成路径**——
+  `discover(faces)` → 按 manifest 的 `./typert` / `./client/typert` / `./remote` 导出**过滤**
+  → `generate(packages, faces)` → 写各包 `lib/`。关键差别：vendor 插件的 **package 模式漏了这层
+  过滤**（`tsdown-plugin.ts` 的 `emitWorkspace` 有、package 分支没有），于是撞
+  `@deepseek-ai/dsh-agent must export ./typert` 校验错（该包源码注册 typert 但 manifest 无导出，
+  上游对它的既定处置就是"跳过"）。实测：91 个贡献包 → 过滤后 **24 个** 生成，67 个按上游规则跳过。
+- `dev/vendor-build.sh`：把序固化成可复跑脚本（`--clean` 清陈旧 `lib/`+`*.tsbuildinfo`；
+  tsc host → typert host → tsc client → tsdown client → typert client）。
+- `dev/vendor-host-typert.config.ts`：逐包 tsdown 配置（备选路径留档；本仓不 import `tsdown`，
+  入口/输出用绝对路径且不设 `root`，否则得到 `lib/lib/types/*` 嵌套错误形状）。
+
+**结果（新 pin 上实测绿灯）**：
+
+- **L1 源码域**（`--profile web --patch` 生成 overlay）：`preset-smoke: ALL PASS`（roster + 四角色
+  session/create 挂载 + skills 硬隔离）；
+- **L2 安装域**（打包 → 干净 profile → plugin add → 挂载）：`release-smoke: ALL PASS`；
+- **L4-lite 真模型**：`l4-lite-smoke: ALL PASS`（四角色 assistant 响应 + scout 真调 web_search）。
+
+**另一个对齐收获（skills 路径）**：0.1.7 里 preset 行内 `!!js` 的 `baseUrl` **不再是 patch 文件**，
+`new URL('<role>/skills/', baseUrl)` 因此指错（角色 skills 全缺席，但**不报错**——静默失效）。
+正解抄自上游 `packages/bundle/web-app/presets/cordis.patch.yml` 的范本：
+`createRequire(baseUrl).resolve('dsh-deep-research-pack/package.json')` 定位随包目录再 join
+`presets/<role>/skills`；同时把本包加进根 devDependencies（`workspace:*`）使**源码域**也能解析。

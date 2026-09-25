@@ -32,7 +32,7 @@
             config:
               includeDefaultRoots: false
               customSkillDirs:
-                - !!js "process.getBuiltinModule('node:url').fileURLToPath(new URL('scout/skills/', baseUrl))"
+                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('dsh-deep-research-pack/package.json')), 'presets/scout/skills')
 
           - id: tool-fs
             name: '@deepseek-ai/dsh-tool-fs'
