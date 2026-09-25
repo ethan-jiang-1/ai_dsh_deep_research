@@ -66,7 +66,7 @@ Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。
 ```sh
 bash dev/vendor-build.sh              # vendor 树构建（换 pin 后必做：--clean 清陈旧产物；tsc host/client + typert 产物 + client bundle——0.1.7 起启动依赖构建产物）
 node scripts/verify.mjs               # L0 结构门禁（keyless，收尾必跑）
-node --test tests/*.test.mjs          # L0 keyless 回归（也可 pnpm test）
+node --import tsx/esm --test tests/*.test.mjs   # L0 keyless 回归（也可 pnpm test；--import tsx/esm 使测试可吃 src/lib 的 TS 折算——D18 观察面分层）
 source dev/env.sh                     # ⚠ 双 home + 裸 dsh 拦截（DSH_HOME=dev/harness-home）；下列 L1/L2 必须先 source，否则脚本自拒 exit 2
 node scripts/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真挂载档（keyless：roster+逐角色建会话+skills 隔离；--profile <p> --no-patch 切安装域通道）
 cd packages/deep-research-pack && pnpm build   # pack 双半构建（tsc -b . + tsdown → lib/index.js + lib/client.js——观察面 client 面，D18）
@@ -78,6 +78,7 @@ bash dev/boot-run.sh                  # run 通道开跑（幂等：组合校验
 node scripts/run-dashboard.mjs --latest --out <html>   # run 只读投影（多场扫描 + 步骤条 + HITL 等待横幅；--watch 持续再生成）
 node dev/run-kickoff.mjs --port 3081 --token <横幅 token> --prompt-file <file>        # run 会话驱动（建会话+发 kickoff）
 pnpm dsh <args…>                      # 机制基线 CLI（vendor/dsh 钉 tag 源码；等价 dev/env.sh 的 dsh 函数）
+node --import tsx/esm scripts/client-hitl-smoke.mjs   # 观察面活标题触发验证（真模型档：RPC followup 造挂起态 + 盘侧谓词 + 浏览器观察点）
 node scripts/entry-chain-probe.mjs    # 入口链探针（真模型档：时不变四问，答案对 ▶ 真值软断言，留档人工复核）
 ```
 
@@ -87,8 +88,8 @@ node scripts/entry-chain-probe.mjs    # 入口链探针（真模型档：时不�
 
 档位词汇（全仓统一；替代曾用而未定义的"认证档"）：**keyless** = 无凭据可跑——preset-smoke
 真挂载档与 release-smoke 会起真 DSH 环境，但无模型调用、不需要 key；**真模型档** = 需要
-`DEEPSEEK_API_KEY` 与真模型调用（当前 = l4-lite-smoke、team-preflight-smoke 与
-entry-chain-probe；队列里的 L4 全量同档）。
+`DEEPSEEK_API_KEY` 与真模型调用（当前 = l4-lite-smoke、team-preflight-smoke、
+entry-chain-probe 与 client-hitl-smoke；队列里的 L4 全量同档）。
 
 L4-lite 真模型冒烟（`scripts/l4-lite-smoke.mjs`）需要 `DEEPSEEK_API_KEY`：开发 home
 （`dev/harness-home/.credentials.yaml`）配一次即可；永不提交密钥。L1/L2 的冒烟

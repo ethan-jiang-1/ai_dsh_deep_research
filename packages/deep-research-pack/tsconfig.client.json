@@ -1,4 +1,4 @@
-// Client 编译面：只编 src/client/**（Stage 3 起加 src/lib 共享折算）。
+// Client 编译面：编 src/client/** + src/lib/**（共享折算；composite 工程要求 import 的文件显式列进 include——TS6307 实测）
 // 与 host 面分叶的原因见 tsconfig.host.json 头注（Context 类型增强冲突）。
 {
   "extends": "../../vendor/dsh/tsconfig.base.client.json",
@@ -8,5 +8,5 @@
     "tsBuildInfoFile": "lib/tsconfig.client.tsbuildinfo",
     "paths": {}
   },
-  "include": ["src/client"]
+  "include": ["src/client", "src/lib"]
 }

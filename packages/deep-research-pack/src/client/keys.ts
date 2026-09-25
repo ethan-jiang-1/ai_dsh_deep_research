@@ -8,3 +8,6 @@ export const RESEARCH_TAB_KEY = 'dsh-deep-research-pack/research-status'
 
 /** 「研究状态」页签的 keyed 槽名（sidebar.right.pane.tab）。 */
 export const RESEARCH_PANE_SLOT = 'sidebar.right.pane.tab'
+
+/** 「研究状态」页签的**活标题**槽名（挂起时变"研究状态 · ⏳ 等你拍板"）。 */
+export const RESEARCH_TITLE_SLOT = 'sidebar.right.pane.tab.title'

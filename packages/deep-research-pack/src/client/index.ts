@@ -12,8 +12,8 @@ import type {} from '@deepseek-ai/dsh-api-remotes/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
-import { RESEARCH_TAB_KEY, RESEARCH_PANE_SLOT } from './keys.ts'
-import { ResearchStatusTab, type JournalFrame } from './ResearchStatusTab.tsx'
+import { RESEARCH_TAB_KEY, RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT } from './keys.ts'
+import { ResearchStatusTab, ResearchStatusTitle, type JournalFrame } from './ResearchStatusTab.tsx'
 
 /** Required services：槽注册表（renderer）+ 右栏页签注册器 + remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
  *  父级则取 .session 炸 "without injecting it"，只声明子级则取父属性炸 "without inject"）。 */
@@ -53,5 +53,15 @@ export function apply(ctx: ClientContext): void {
         ResearchStatusTab,
       ),
     ]), 'deep-research-pack: research-status pane')
+
+    // 活标题（HITL 挂起时"研究状态 · ⏳ 等你拍板"——用户点名的观察需求）：同一 fold 谓词
+    //（末位事件 = 未答的 ask_user_question），标题组件自己开一条 follow 流（两条流都吃
+    // 同一 WebSocket 数据面，v1 接受；合流进共享 store 是后续优化）。
+    scoped.effect(() => scoped.slots.inject(RESEARCH_TITLE_SLOT, () => [
+      scoped.slots.register(
+        { name: RESEARCH_TITLE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow }) },
+        ResearchStatusTitle,
+      ),
+    ]), 'deep-research-pack: research-status live title')
   })
 }
