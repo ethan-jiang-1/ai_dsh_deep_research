@@ -68,6 +68,73 @@
 vendor 与本仓的 postmortem/ 均为空目录（事故复盘的唯一合法层，两侧同构；本仓首个事故按
 notes/postmortem/README 落档）。无枚举行。
 
+## 源 6：vendor .agents/skills/（开发 Skill——2026-09-25 吸纳，`.agents/skills/` 落地）
+
+| DSH 做法 | 本仓落点 | 状态 |
+|---|---|---|
+| 两类同名 Skill 严格区分：repository development Skills（`.agents/skills/`，服务改仓库的 coding agent）vs runtime Skill capability（`packages/skill/`，服务产品内 agent） | 本仓两侧都有且分家：`.agents/skills/`（四个开发技能）+ `packages/deep-research-pack/presets/*/skills/`（研究角色运行时技能） | 照搬 |
+| Skill 的定位 = 可复用工作流 + 专门判断标准（不是产品 API，也不是自动门禁） | 四个开发技能各带触发条件/步骤/完成判据；机制细节仍链接 owner 文档而非复制 | 照搬 |
+| 五步调用：Match（description 命中）→ Load（读全文，不从摘要猜）→ Resolve sources（读 owner）→ Apply judgment → Verify and report | 技能正文按此组织；`dev-skill-format` 门禁断言 frontmatter 在场且 `name` = 目录名 | 带证据适配（门禁为 regex 版，非 vendor 的 schema 校验） |
+| Skill ≠ gate：机械可判的下沉到类型/脚本/invariant，语义留给 review | 本仓分工表见末节「载体分工」 | 照搬 |
+| 按需加载控制上下文成本（progressive disclosure） | AGENTS 只放指针（命令表 + 布局树一行），完整流程按 description 触发加载 | 照搬 |
+
+## 源 7：仓库分类学与维护形态（vendor `repo-harness/08`，2026-09-25 吸纳）
+
+**内容的五种维护形态**（DSH 用"哪只手能改它"分类，而不是"静态/动态"二分）：
+
+| 形态 | DSH 例子 | 本仓实例 | 机器边界 |
+|---|---|---|---|
+| 手写维护 | AGENTS、docs、README、活动 Note、Skills | 全部 `docs/`、`notes/`、`AGENTS.md`、presets、skills | 结构受门禁（预算/格式/链接），内容人写 |
+| 生成 + freshness 门禁 | tool/config/persistence catalog、module-graph | **无 tracked 生成物** | 引入条件：出现"从源码可穷举、手写会漂移"的清单 |
+| 混合（生成区嵌手写页） | subsystem 页的 cordis-surface 区、type-equiv 块 | `agent.cordis.yml`（手写）↔ `dev/research.overlay.yml` + profile 镜像（同事实的第二落点）——由 `boot-run.sh` 漂移检测承担 freshness | 漂移即 fail-loud |
+| 录制（机器写、人审、封存不改） | snapshots/、archived Note、persistence releases | run bundle（`research-workspace/drt_*`）——gitignored 运行区，事实由 bundle 文件承载 | 不进 L0（运行区不扫）；完整性归 run 内 critic + 观察面谓词 |
+| 投影（canonical 源的抛弃型派生物） | `website/.generated/` | `dev/smoke-workspace/dashboard.html`（canonical = 会话日志 + bundle 文件） | 随时可重建；永不手改、永不入库 |
+
+**一个事实一个 owner / 目录树即清单 / 不建第二份索引**：`notes/` 不设集中 INDEX（路径 =
+生命周期 + 日期 + 主题）；`research/` 例外地有一份 README 目录表（人类视角的状态面），
+其新鲜度由 `note-status` 门禁对账——这是本仓对"不建索引"的**登记偏离**：人读场景优先。
+
+**vendor = 所有权边界**：DSH 把框架层 vendor 进仓（可审计、可打补丁、钉版本）并要求
+"离上游的每一处分叉都留痕"；本仓用 **pinned submodule**（钉 commit，只读铁律，`vendor-pin`
++ `vendor-clean` 把守）——更强的不变量（零分叉），代价是本地修改只能走上游或升 pin。
+
+## 源 8：反馈分层与评估框架（vendor `repo-harness/05`/`07`，2026-09-25 吸纳）
+
+**六层反馈 ↔ 本仓五面**（每层只拥有自己观察得到的性质）：
+
+| DSH 层 | 能证明 | 本仓对应 | 命令 |
+|---|---|---|---|
+| 编译期 | 类型与穷举分支 | （无 TS 源码面） | — |
+| Load / parser | 输入在最早可解析点合法 | L0 门禁 + cordis 行校验 | `node scripts/verify.mjs` |
+| 局部行为 | 模块正例/错误/生命周期 | L0 契约测试 | `node --test tests/*.test.mjs` |
+| 组装行为 | 真实入口产生预期外部结果 | L1 真挂载 + L2 安装形状 | `preset-smoke`（`DSH_SMOKE_REAL=1`）/ `release-smoke` |
+| 运行时关系 | 活系统中的 owner relationship | 本仓等价物 = 真模型档与 run 内 critic（无 invariant companion 面） | `l4-lite-smoke` / `team-preflight-smoke` / `entry-chain-probe` |
+| 语义判断 | 意图、架构、风险与证据对齐 | 人工验收 + run 内 critic | 用户验收 / `review.md` |
+
+**三问自检**（评估任何 development harness，vendor `repo-harness/07` 归纳）：
+① 规则住在哪里（人脑 vs 可搜索文档/类型/生成索引/可执行检查）→ 本仓：AGENTS 入口链 +
+docs 合同 + notes 记忆 + 17+ 门禁；
+② 正确入口是否明确（能否从目标找到 owner、范本与升级条件）→ 本仓：布局树 + 参与阶梯
+（[guides/62 §参与阶梯](guides/62-plugin-authoring.md)）+ `.agents/skills/` 范本；
+③ 错误何时被发现（编译/加载/局部/运行时/push 前/评审/生产）→ 本仓：pre-commit 门禁 +
+契约测试 + 三级冒烟 + 真模型档 + 人工验收。
+
+## 载体分工
+
+谁回答什么（vendor `repo-harness/03` §Skill 不等于 gate，2026-09-25 吸纳）：
+
+| 载体 | 擅长回答 | 不能替代 | 本仓实例 |
+|---|---|---|---|
+| `AGENTS.md` | 每轮必须遵守什么 | 情境化长流程 | 入口链、命令表、纪律指针 |
+| `docs/` 合同面 | 系统**现在**是什么、怎么用 | 决策历史 | evaluation、discipline-map、guides 60–62 |
+| Skill（`.agents/skills/`） | 面对某类任务怎样调查、判断、验证 | 确定性 pass/fail | 毕业条目 / 加角色 / 写门禁 / 跑 run |
+| 门禁与契约测试 | 一个可机械条件是否满足 | 意图与设计质量 | `scripts/verify.mjs` + `tests/` |
+| Agent Note（`notes/`） | 为什么这样决定、放弃了什么 | 当前 API 的唯一说明 | proposed（将来）/ implemented（过去）|
+| 运行区记录 | 这次实际发生了什么 | 可复现的回归证据 | `drt_*` bundle、会话日志、仪表盘投影 |
+
+组合使用的判据：规则改变 → 只改规则 owner；Skill 只**链接** owner 不复制；门禁只判条件，
+语义判断留给 review 与用户验收。
+
 ## 维护规则
 
 - 本表随 vendor 换 tag 重校（roadmap 触发型条目「升 pin 重校」）；新增三态行同 diff 落

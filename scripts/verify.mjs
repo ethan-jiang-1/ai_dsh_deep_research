@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'entry-budget'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'entry-budget'];
 
 const failures = [];
 const notes = [];
@@ -401,6 +401,128 @@ function roadmapQueue() {
   for (const [rel, cap] of [['AGENTS.md', 145], ['README.md', 30]]) {
     const lines = readFileSync(join(ROOT, rel), 'utf8').split('\n').length - 1;
     if (lines > cap) fail(gate, `${rel} ${lines} 行 > 预算 ${cap} 行——处置序：下放/压缩；升顶须 D 号登记（evaluation.md §L0 登记表同 diff 更新上限值）`);
+  }
+}
+
+// ── 门禁 14：md-anchors（相对链接的 #fragment 必须在目标文件里真的存在——
+//    《_agent_ready_development》语料 verify.mjs 吸纳：它校验"内部链接与锚点"，
+//    本仓 md-links 只管文件存在，锚点漂移（标题改名后片段失效）是它的盲区。
+//    slug 规则照抄 GitHub：小写、去非 [字母/数字/_/空格/-]、空格→'-'、重复加 -N；
+//    另认手写 <a id="...">。外链与 mailto 不检（同 md-links）。）──
+{
+  const gate = 'md-anchors';
+  const slug = (h) => h
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')   // 链接 → 其文字
+    .replace(/[*`]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}_ -]/gu, '')
+    .replaceAll(' ', '-');
+  const anchorsOf = (f) => {
+    const out = new Set();
+    const seen = new Map();
+    const text = readFileSync(f, 'utf8');
+    let inFence = false;
+    for (const line of text.split('\n')) {
+      if (line.trimStart().startsWith('```')) { inFence = !inFence; continue; }
+      if (inFence) continue;
+      const m = /^ {0,3}#{1,6}\s+(.+?)\s*$/.exec(line);
+      if (m) {
+        const base = slug(m[1]);
+        let a = base;
+        let n = seen.get(base) ?? 0;
+        while (out.has(a)) { n += 1; a = `${base}-${n}`; }
+        seen.set(base, n);
+        out.add(a);
+      }
+      for (const id of line.matchAll(/<a\s+[^>]*\bid="([^"]+)"[^>]*>/g)) out.add(id[1]);
+    }
+    return out;
+  };
+  const cache = new Map();
+  const anchorsFor = (f) => {
+    if (!cache.has(f)) cache.set(f, existsSync(f) ? anchorsOf(f) : new Set());
+    return cache.get(f);
+  };
+  const r = spawnSync('git', ['ls-files', '*.md'], { cwd: ROOT, encoding: 'utf8' });
+  if (r.status !== 0) fail(gate, 'git ls-files 不可用——覆盖面依赖仓库态，fail-loud');
+  else {
+    for (const rel of r.stdout.split('\n').filter(Boolean)) {
+      const f = join(ROOT, rel);
+      if (!existsSync(f)) continue;
+      const text = readFileSync(f, 'utf8');
+      let inFence = false;
+      for (const line of text.split('\n')) {
+        if (line.trimStart().startsWith('```')) inFence = !inFence;
+        if (inFence) continue;
+        for (const m of line.matchAll(/\[[^\]]*\]\(([^)\s]+)\)/g)) {
+          const [target, frag] = m[1].split('#');
+          if (!frag || /^[a-z]+:\/\//i.test(m[1]) || m[1].startsWith('mailto:')) continue;
+          const abs = target === '' ? f : resolve(dirname(f), target);
+          if (!existsSync(abs)) continue; // 文件缺席归 md-links（单一失败源）
+          if (!anchorsFor(abs).has(decodeURIComponent(frag))) {
+            fail(gate, `${rel}: 锚点不可解析 → ${m[1]}（目标文件无此标题或 a-id）`);
+          }
+        }
+      }
+    }
+  }
+}
+
+// ── 门禁 15：dev-skill-format（.agents/skills/ 开发技能的形状——vendor .agents/skills/
+//    吸纳：repository development Skills 的 frontmatter 用 name/description，
+//    description 以 "Use " 开头携带触发条件（匹配即加载；摘要不携带指令）；
+//    形状坏了 = 技能静默不触发，比写错正文更难发现。）──
+{
+  const gate = 'dev-skill-format';
+  const dir = join(ROOT, '.agents', 'skills');
+  if (!existsSync(dir)) fail(gate, '.agents/skills/ 缺席——开发技能层是入口链的一部分');
+  else {
+    const skills = readdirSync(dir, { withFileTypes: true }).filter((d) => d.isDirectory());
+    if (skills.length === 0) fail(gate, '.agents/skills/ 下没有任何技能');
+    for (const s of skills) {
+      const file = join(dir, s.name, 'SKILL.md');
+      if (!existsSync(file)) { fail(gate, `.agents/skills/${s.name}: 缺 SKILL.md`); continue; }
+      const text = readFileSync(file, 'utf8');
+      const fm = /^---\n([\s\S]*?)\n---\n/.exec(text);
+      if (fm === null) { fail(gate, `.agents/skills/${s.name}: 缺 frontmatter`); continue; }
+      const name = /^name:\s*(\S+)\s*$/m.exec(fm[1])?.[1];
+      const desc = /^description:\s*(.+)$/m.exec(fm[1])?.[1];
+      if (name !== s.name) fail(gate, `.agents/skills/${s.name}: frontmatter name=${String(name)} ≠ 目录名`);
+      if (desc === undefined || !desc.startsWith('Use ')) {
+        fail(gate, `.agents/skills/${s.name}: description 须以 "Use " 开头（携带触发分支；摘要不携带指令）`);
+      }
+    }
+  }
+}
+
+// ── 门禁 16：note-status（notes/ 的时态与状态面——2026-09-25 用户诉求落地：
+//    人一眼看懂、Agent 一眼分辨当前/将来/过去。三条断言：
+//    ① notes/ 每个子目录有 README.md（目录自述时态与状态标记方式）；
+//    ② research/ 的非 README 文件带状态行 `> 状态：已完成|进行中`（报告层不是生命周期
+//       目录，状态必须写在文件里）；
+//    ③ research/README.md 登记 research/ 的每个文件（人工索引的新鲜度对账——登记漏项
+//       即红；这是本仓对 vendor"不建索引"的登记偏离，人读场景优先）。）──
+{
+  const gate = 'note-status';
+  const notesDir = join(ROOT, 'notes');
+  for (const ent of readdirSync(notesDir, { withFileTypes: true })) {
+    if (!ent.isDirectory()) continue;
+    if (!existsSync(join(notesDir, ent.name, 'README.md'))) {
+      fail(gate, `notes/${ent.name}/: 缺 README.md（子目录须自述时态与状态标记方式）`);
+    }
+  }
+  const research = join(notesDir, 'research');
+  if (existsSync(research)) {
+    const files = readdirSync(research).filter((f) => f.endsWith('.md') && f !== 'README.md');
+    const index = existsSync(join(research, 'README.md')) ? readFileSync(join(research, 'README.md'), 'utf8') : '';
+    for (const f of files) {
+      const text = readFileSync(join(research, f), 'utf8');
+      if (!/^> 状态：\*{0,2}(已完成|进行中)/m.test(text)) {
+        fail(gate, `notes/research/${f}: 缺状态行（> 状态：已完成 | 进行中 · 日期）`);
+      }
+      if (!index.includes(f)) fail(gate, `notes/research/README.md: 未登记 ${f}（索引新鲜度）`);
+    }
   }
 }
 

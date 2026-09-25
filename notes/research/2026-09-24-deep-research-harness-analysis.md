@@ -1,5 +1,7 @@
 # DEEP_RESEARCH_HARNESS 方法论考古报告
 
+> 状态：**已完成** · 2026-09-24 · 方法论源头的考古报告；落点 = design/30。
+
 > 归档注（2026-09-24）：本文为 R1 搭建前的消化产物（委派子代理对
 > `/Users/bowhead/ai_tool_deepresearch/DEEP_RESEARCH_HARNESS/` 的考古）。吸收落点 =
 > `docs/design/30-methodology-mapping.md`（生命周期映射表 §1 / 弃用清单 §2 / 教训落点 §5）。

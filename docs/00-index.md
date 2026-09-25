@@ -28,6 +28,7 @@
 | [根 roadmap.md](../roadmap.md) | 计划 | 队列（条目按主题命名、完成即离队）+ 搁置池 |
 | [guides/60-dev-loop.md](./guides/60-dev-loop.md) | 指南 | 开发环：六步闭环、面选择表、双 home、密钥 |
 | [guides/61-run-playbook.md](./guides/61-run-playbook.md) | 指南 | **run 操作指南**（研究发起人入口）：boot-run、lead 会话、HITL 两点、观察面——run 通道（research profile：本包 + vendor agent-team-profile 层，P1 定案）的使用面 |
+| [guides/62-plugin-authoring.md](./guides/62-plugin-authoring.md) | 指南 | **插件作者入口**（改插件内容的人/agent 入口）：DSH 词汇对齐（plugin/bundle/profile/preset）、参与阶梯 L0–L3、新行为归属、范本与证据义务——上游 `docs/user/develop/**` 的本仓投影 |
 
 ## 决策台账
 
@@ -78,6 +79,10 @@
 | web 搜索/抓取 | `dsh-tool-web` + search/fetch provider | `packages/web/tool-web` + `web-search-deepseek` + `web-fetch-http` |
 | 成品交付 | `present` 工具 explicit deliveries | `packages/fs/tool-present` + `client/ui-deliverables` |
 | 研究工作区 | 会话 cwd + `agent-instructions` 注入手册 | `packages/context/agent-instructions` |
+| 开发 harness / 运行 harness | development harness / runtime harness（同一仓库的两面：前者让 agent 看懂、修改、验证自己；后者是产品运行框架） | 本仓两面并存：`packages/deep-research-pack/` 是 runtime 面，`AGENTS.md` + `docs/` + `notes/` + `.agents/skills/` + 门禁是 development 面 |
+| 参与阶梯 | participation ladder（L0 组合 → L1 扩展点 → L2 capability seam → L3 core loop） | [guides/62 §参与阶梯](./guides/62-plugin-authoring.md)（本仓版本：L0 配置行 / L1 preset+skill / L2 尚无 / L3 归上游） |
+| 程序化工作记忆 | procedural memory（可复用工作流 + 专门判断标准） | `.agents/skills/`（开发技能：毕业条目 / 加角色 / 写门禁 / 跑 run）——与产品内 runtime skills（`presets/*/skills/`）严格分家 |
+| plugin / bundle / profile | plugin = 导出 `apply(ctx)` 的模块；bundle = 你编写与分发的单位（`dsh.bundle`）；profile = 用户 `dsh --profile` 启动的环境（`dsh.profile`）——**Nothing is both** | bundle = `packages/deep-research-pack/cordis.patch.yml`；profile = `dev/harness-home/profiles/research/`（镜像；源 = `dev/research.overlay.yml`） |
 | run bundle（一次调研的变量容器） | —（本仓原生概念，源头 = DEEP_RESEARCH_HARNESS run bundle） | 载体 = `research-workspace/drt_<slug>/`（契约 = 研究手册目录约定）；**消歧**：DSH "bundle 行"（cordis.patch.yml 配置行）≠ run bundle（一次调研的变量容器），后者禁缩写成裸 "bundle" |
 
 ## 外部研究材料登记（repo 外，只读引用）
@@ -89,3 +94,4 @@
 | DSH 插件生态（vendor 能力目录差集 + 第三方市场/清单，2026-09-24 快照） | workflow / mcp / session-query / compaction 等未采用能力；第三方 280+ 插件（14 类，未亲装） | 粗扫报告 `notes/research/2026-09-24-dsh-market-scout.md` → 认真琢磨 = 后续 research 条目（用户定节奏） |
 | DSH client/UI 扩展面（vendor slots/client-modules/hmr/remotes 正文档 + company client-face 五页签实例，2026-09-24 亲读+双代理考古） | 右栏平台页签契约（sidebarRightTabs + sidebar.right.pane.tab 双半注册）/ 数据通道（agentTeams.view·session.follow·workspaceFiles·@Remote）/ 双半 tsdown 构建契约 / 12 坑 | 琢磨稿 `notes/research/2026-09-24-ui-observability-surfaces.md`（选项 A–D + 渐进路径 + D7/搁置池张力 + 队列条目草案——用户推敲中，未入 roadmap） |
 | DSH SDLC reference（`/Users/bowhead/deepseek-harness/_agent_ready_development/sdlc-reference/`，2026-09-24 亲读 01-agent-note-lifecycle） | Agent Note 生命周期：决定覆盖（非提案优先）/ 取代检查硬触发 / 毕业正文改写 / alternatives 必载 / grandfather 条款 / 目录树代替索引 | [notes/README.md §决定覆盖与取代检查](../notes/README.md) + verify 门禁 note-format + [吸纳 Note](../notes/implemented/2026-09-24-note-lifecycle-absorption.md) |
+| **`_agent_ready_development/` 全语料**（三视角：sdlc-tutorial 5 篇 / sdlc-reference 11 篇 / repo-harness 9 篇 + `_coverage` 维护页 + 语料 verify.mjs，2026-09-25 全文通读） | 开发 harness 原理（知识归属/载体分工/参与阶梯/分层反馈/运行时查询/仓库分类学/插件作者入口）+ 语料级门禁（锚点、目录 README、钉版外链）+ 维护页（re-pin 轮次与重审触发） | [吸纳 Note](../notes/implemented/2026-09-25-agent-ready-absorption.md)（三态清单）→ `.agents/skills/`（四个开发技能）、[guides/62](./guides/62-plugin-authoring.md)、[discipline-map](./discipline-map.md) 源 6–8、[notes/README](../notes/README.md)，新门禁 `md-anchors` / `note-status` / `dev-skill-format` |

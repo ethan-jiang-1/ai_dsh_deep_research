@@ -39,6 +39,16 @@
 
 判据与负面判据（什么算"框架不合理"）见 [evaluation.md](../evaluation.md)——面与面不互抵。
 
+三条与面选择同级的纪律（`_agent_ready_development` 吸纳，2026-09-25）：
+
+- **先加载匹配的开发技能**：任务命中 `.agents/skills/` 某条 description（毕业条目 / 加角色 /
+  写门禁 / 跑 run）→ 先读该 `SKILL.md` 全文再动手，不从摘要猜流程；
+- **查询实际配置树，别从源码猜部署**：`pnpm dsh --profile research --dump-config` 是
+  profile/bundle/patch 叠加后的官方查询（"会加载什么"）；`boot-run.sh` 的漂移检测管另一问
+  ——"镜像是否等于 pack 源"；
+- **未运行项如实分开**：交付报告里"未跑"与"通过"分列（例：无凭据自动跳过的 e2e 不算验过
+  真实 provider，mock 测试不能替代真实入口证据）。
+
 ## 3. 开发环境
 
 ```sh

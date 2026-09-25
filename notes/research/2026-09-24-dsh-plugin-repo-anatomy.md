@@ -1,5 +1,7 @@
 # DSH 插件开发仓库（ai_dsh_company）工程机制解剖
 
+> 状态：**已完成** · 2026-09-24 · 参考插件仓的机制解剖；落点 = design/10 与 verify/env.sh。
+
 > 归档注（2026-09-24）：本文为 R1 搭建前的消化产物（委派子代理对 `/Users/bowhead/ai_dsh_company/`
 > 的考古）。吸收落点 = `docs/design/10-architecture.md`（组合层/通道/工具面）、
 > `scripts/verify.mjs`（门禁移植）、`dev/env.sh`（双 home）、`docs/plans/roadmap.md`（队列制）。
