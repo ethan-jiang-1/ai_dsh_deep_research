@@ -60,7 +60,7 @@ logged）——本仓只在 pack 行引入**现成**能力，因此这项义务�
 
 | 改动面 | 最小可信证据 |
 |---|---|
-| 角色目录形状（preset.yml / agent.cordis.yml / skills） | `node scripts/verify.mjs`（`preset-structure` / `row-deps` / `role-list-sync`） |
+| 角色 preset 行形状（`presets/<role>.patch.yml`：dsh-agent-preset 行 + config.plugins + skills/） | `node scripts/verify.mjs`（`preset-structure` / `row-deps` / `role-list-sync`） |
 | 接线（roster、bundle 行、skills 隔离） | `DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs`（L1 真挂载） |
 | 安装形状（pack → 干净 profile → plugin add） | `node scripts/release-smoke.mjs`（L2） |
 | persona / skill 文本（模型可见） | 追加 `node scripts/l4-lite-smoke.mjs`（真模型档） |

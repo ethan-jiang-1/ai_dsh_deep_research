@@ -31,7 +31,7 @@
 | `md-utf8-newline` | 所有 **tracked** .md 严格 UTF-8、恰一个结尾换行（git ls-files 驱动——运行区不扫，手册合同既有） | [noise-sweep Note](../notes/implemented/2026-09-24-noise-sweep.md)（清欠账：双尾换行注入红→还原绿）；范围修正反证 = live run 的 `dev/harness-home/runs/…/leads.md` 双尾换行被旧版全树 walk 咬红（运行区不该扫）→ 修 tracked-only → 绿 |
 | `md-links` | 所有 **tracked** .md 的 Markdown 相对链接（方括号+圆括号语法）可解析（git ls-files 驱动——具名目录白名单版会让根目录其余 tracked .md 逃检，基础整治 C10 改；反引号裸路径不检 = 设计） | 基础整治 Note（根目录 tracked .md 注入死链红→还原绿） |
 | `md-anchors` | 相对链接的 `#fragment` 在目标文件真实存在（标题按 GitHub slug 规则 + 手写 `<a id>`；《_agent_ready_development》语料 verify.mjs 吸纳——md-links 只管文件存在，标题改名后的锚点漂移是它的盲区） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（注入 `#不存在的锚点` 红→还原绿） |
-| `preset-structure` | presets/ 每角色目录：id 规范 + preset.yml 三字段 + agent.cordis.yml + ≥1 skill 且 frontmatter name=目录名 | 同 noise-sweep（清欠账：缺件角色目录注入红→还原绿） |
+| `preset-structure` | presets/ 每角色 `<role>.patch.yml`（0.1.7 形态）：id 规范 + `preset-<role>` 声明行 + name/description/order/plugins 字段 + `presets/<role>/skills/` ≥1 skill 且 frontmatter name=目录名 | 同 noise-sweep（清欠账：缺件角色目录注入红→还原绿） |
 | `claude-symlink` | 两条 symlink（vendor 同构）：根 `CLAUDE.md` → `AGENTS.md`；`.claude/skills` → `../.agents/skills`（让 Claude 系 harness 发现与 DSH 同一批开发技能——上游 `.claude/` 只此一件） | [r1-scaffold](../notes/implemented/2026-09-24-r1-scaffold.md) + [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（断链 / 指错两形态注入红→还原绿） |
 | `pack-bundle-compat` | pack 的 dsh.bundle.patch 指向真实文件；dsh.compatibility.dshReleases 非空 | 同 noise-sweep（清欠账：patch 指向不存在文件注入红→还原绿） |
 | `row-deps` | preset 与 bundle 行引用的 `@deepseek-ai/*` 全在 peerDependencies | [m2-p1-run-channel](../notes/implemented/2026-09-24-m2-p1-run-channel.md)（违规 insert 行被守卫+row-deps 咬红→还原绿） |
@@ -51,6 +51,7 @@
 | `align-ledger` | 对齐台账机读对账（docs/alignment-ledger.json ↔ vendor/dsh ↔ 本仓落点）：source 必须在 vendor/dsh 存在（换 pin 后源移位即红 = 重审触发器）· verdict=adopted/adapted 的 landing 必须存在 · na 必须给理由 | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（注入不存在 source / 不存在落点 / na 无理由三形态红→还原绿） |
 | `repo-conventions` | 与 vendor 本体的机械约定对齐：`.editorconfig`（root/LF/尾换行）· `.gitattributes`（`* text=auto eol=lf`）· `package.json engines.node` **直接等于** vendor/dsh/package.json 的值（换 pin 即红）· pre-commit 含 `git diff --cached --check` | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（改 engines / 删 gitattributes / 删 whitespace 检查三形态注入红→还原绿） |
 | `vendor-links` | vendored 解析的机械面（E1 事故教训）：根 package.json 每个 `@deepseek-ai/*` devDependency 在 lockfile importer 里解析为 `link:vendor/dsh/...`；overrides 三件套（cordis/cosmokit/schemastery）无 registry 包条目；`link:vendor/dsh/` 出现 0 次即红（防空语料） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（改 devDep 为 registry 版 / 注入 registry 条目 / 清空 link 三形态红→还原绿） |
+| `overlay-fresh` | 源码域 overlay 是生成物：`dev/research.overlay.yml` 必须等于 `node dev/render-overlay.mjs` 从 pack 的渲染结果（0.1.7 preset 重设计后 overlay 携带 preset 行，两处手写必漂移；本仓首个 tracked 生成物） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) + 本轮升 pin（改 pack 不重渲染 → 红；还原绿） |
 
 - **通过判据**：全绿；`verify` 的门禁清单与 `tests/` 守卫一一登记在案，每条带反证记录（上表）。
 - **何时跑**：每轮 goal 续驶必跑。

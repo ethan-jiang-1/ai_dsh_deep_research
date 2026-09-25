@@ -1,4 +1,6 @@
 // presets 结构回归 — 与 scripts/verify.mjs 门禁 3/5/6 同源判据（keyless，进程内文件断言）。
+// 0.1.7 preset 重设计：preset = `presets/<role>.patch.yml` 里的一条 `@deepseek-ai/dsh-agent-preset`
+// 行（config 带 id/name/description/order/plugins）；角色技能仍在 `presets/<role>/skills/`。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
@@ -9,23 +11,27 @@ import { presetRoles } from '../scripts/lib/roles.mjs';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
-// 角色清单事实源 = 盘上 presets/（基础整治 §3.2）；本测试文件不再持有副本清单
+// 角色清单事实源 = 盘上 presets/*.patch.yml（基础整治 §3.2）；本测试文件不再持有副本清单
 const ROLES = presetRoles(ROOT);
 
-test('角色清单 = 盘上 presets/ 目录（单一事实源），数量哨兵咬 D2', () => {
+test('角色清单 = 盘上 presets/*.patch.yml（单一事实源），数量哨兵咬 D2', () => {
   // 访问器输出与直接 readdir 对账（防访问器自身漂移：改读别处/过滤丢失）
-  const dirs = readdirSync(PRESETS, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
-  assert.deepEqual(ROLES, [...dirs].sort(), 'presetRoles() 枚举 ≠ 盘上目录——访问器漂移');
-  for (const id of dirs) assert.match(id, /^[a-z0-9][a-z0-9-]*$/);
+  const files = readdirSync(PRESETS).filter((f) => f.endsWith('.patch.yml')).map((f) => f.replace(/\.patch\.yml$/, ''));
+  assert.deepEqual(ROLES, [...files].sort(), 'presetRoles() 枚举 ≠ 盘上 patch 文件——访问器漂移');
+  for (const id of files) assert.match(id, /^[a-z0-9][a-z0-9-]*$/);
   // 数量哨兵：增删角色 = 推翻 D2（角色 = 4 个），先在 docs/00-index.md 台账登记新 D 号再动代码
   assert.equal(ROLES.length, 4, `角色数量 ${ROLES.length} ≠ 4（D2）——增删角色即推翻 D2，先登记新 D 号（AGENTS.md §偏离登记簿）`);
 });
 
-test('每个角色三件套完整', () => {
+test('每个角色 preset 行完整（0.1.7 形态：一条 dsh-agent-preset 行 + config.plugins）', () => {
   for (const r of ROLES) {
+    const yml = readFileSync(join(PRESETS, `${r}.patch.yml`), 'utf8');
+    assert.match(yml, new RegExp(`^\\s*- id: preset-${r}\\s*$`, 'm'), `${r}: 缺 preset-${r} 声明行`);
+    assert.match(yml, /^\s+name:\s*'@deepseek-ai\/dsh-agent-preset'\s*$/m, `${r}: 声明行 name 不是 dsh-agent-preset`);
+    for (const field of ['id:', 'name:', 'description:', 'order:', 'plugins:']) {
+      assert.match(yml, new RegExp(`^\\s+${field}`, 'm'), `${r}: config 缺字段 ${field}`);
+    }
     const dir = join(PRESETS, r);
-    assert.ok(existsSync(join(dir, 'preset.yml')), `${r}: preset.yml`);
-    assert.ok(existsSync(join(dir, 'agent.cordis.yml')), `${r}: agent.cordis.yml`);
     const skills = readdirSync(join(dir, 'skills'), { withFileTypes: true }).filter((d) => d.isDirectory());
     assert.ok(skills.length >= 1, `${r}: 至少一个 skill`);
     for (const s of skills) {
@@ -40,7 +46,7 @@ test('行依赖全部声明进 peerDependencies', () => {
   const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
   const peers = new Set(Object.keys(pkg.peerDependencies ?? {}));
   const files = [
-    ...ROLES.map((r) => join(PRESETS, r, 'agent.cordis.yml')),
+    ...ROLES.map((r) => join(PRESETS, `${r}.patch.yml`)),
     join(PACK, 'cordis.patch.yml'),
   ];
   for (const f of files) {
@@ -50,12 +56,12 @@ test('行依赖全部声明进 peerDependencies', () => {
   }
 });
 
-test('bundle patch：roster 替换行 + present/ui-agent-team insert 行在位；团队与 web 行不进本包', () => {
+test('bundle patch：registry 替换行 + present/ui-agent-team insert 行在位；团队与 web 行不进本包', () => {
   const yml = readFileSync(join(PACK, 'cordis.patch.yml'), 'utf8');
-  // 替换行：agent-presets（default: lead，roots 指向本包 presets）
-  assert.match(yml, /^- id: agent-presets$/m);
+  // 替换行（0.1.7）：registry 的默认 preset 指研究主编（旧 agent-presets roots 形态已随重设计删除）
+  assert.match(yml, /^- id: agent-preset-registry$/m);
+  assert.match(yml, /name: '@deepseek-ai\/dsh-agent-preset-registry'/);
   assert.match(yml, /default: lead/);
-  assert.match(yml, /node_modules\/dsh-deep-research-pack\/presets\//);
   // insert 行：present + ui-agent-team（web 行实证结论 = base 出厂行，不进本包——RFC web-tool-rows）
   const insertBlock = yml.split(/^- insert:$/m).slice(1).join('\n');
   for (const row of ['tool-present', 'ui-agent-team']) {
@@ -74,7 +80,7 @@ test('bundle patch：roster 替换行 + present/ui-agent-team insert 行在位�
 
 test('每角色 preset 的 tool-web 行带 base config（fetch + 60s 超时）', () => {
   for (const r of ROLES) {
-    const yml = readFileSync(join(PRESETS, r, 'agent.cordis.yml'), 'utf8');
+    const yml = readFileSync(join(PRESETS, `${r}.patch.yml`), 'utf8');
     const m = yml.match(/- id: tool-web\n\s*name: '@deepseek-ai\/dsh-tool-web'\n\s*config:\n\s*fetch: true\n\s*searchTimeoutMs: 60000/);
     assert.ok(m, `${r}: tool-web 行缺 base config（fetch: true / searchTimeoutMs: 60000）`);
   }

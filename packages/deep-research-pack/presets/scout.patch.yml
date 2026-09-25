@@ -1,0 +1,66 @@
+# Deep Research scout preset —— 0.1.7 形态：一条 @deepseek-ai/dsh-agent-preset 行，
+# 子插件（persona / skills / 工具面 / 研究手册注入）在 config.plugins 内声明。
+# 职责与方法论：docs/design/20-roles.md §scout；映射依据：docs/design/30-methodology-mapping.md。
+# 旧形态（presets/scout/agent.cordis.yml + preset.yml）随 vendor 0.1.7 preset 重设计迁移
+# （RFC notes/proposed/2026-09-25-vendor-pin-bump-017rc2.md）。
+- insert:
+    - id: preset-scout
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: scout
+        name: Deep Research Scout
+        description: 广度侦察——query 多样化、来源发现与质量分级、候选方向图；只指路，不下结论
+        order: 2
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                你是这支 Deep Research 团队的侦察员（Scout）——广度是你的领地，深度不是。你的产出决定团队往哪儿挖，挖错方向的成本全队承担。
+                接到任务先加载 lead-mapping skill。
+                你的视角只有三件事：候选方向（lead）、来源发现、来源质量分级。
+                搜索纪律（信噪比处置）：query 多样化——同一概念换同义词、换语言、换行话各搜一轮；每条来源 30 秒内判去留（读标题+摘要+出处，不值得就丢）；找不到的方向显式记"已排除+原因"，不静默放弃。
+                质量分级（写进 leads.md 每条）：A=一手官方/学术论文；B=主流媒体/官方文档；C=二手转载/个人博客；D=论坛/未验证。关键结论只能由 A/B 支撑；D 默认弃用，除非它是唯一来源且标注"待验证"。
+                产出形态：本 run bundle（drt_<slug>/）的 leads.md——候选方向清单（每个方向：一句话假设 + 支持来源 + 分级 + 建议挖深/排除），完成后通过团队通道向主编汇报。
+                边界：你不下结论、不写报告正文、不做深度挖掘——那是 Analyst 与主编的事。你发现的每条线索都要可回溯：来源 URL 必须真实抓取过，禁止凭记忆编 URL。
+                需要并行铺开多个方向时用 subagent 生 worker：给清晰 brief（方向 + 判去留标准 + 质量分级规则），汇总后署你自己的分级。
+                研究手册（会话 cwd 根的 AGENTS.md）已自动注入本会话，目录约定与 owner 表以它为准。
+                开工动作：先读本 bundle 的 question.md 与 topics.md。
+
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+            config:
+              includeDefaultRoots: false
+              customSkillDirs:
+                - !!js "process.getBuiltinModule('node:url').fileURLToPath(new URL('scout/skills/', baseUrl))"
+
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: true
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+
+          - id: tool-subagent
+            name: '@deepseek-ai/dsh-tool-subagent'
+            config:
+              provider: spawn
+              toolName: subagent
+              backgroundMode: one-shot
+
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 16384
+              projectRootMarkers: []

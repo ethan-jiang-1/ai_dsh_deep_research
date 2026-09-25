@@ -16,8 +16,8 @@ roster（角色清单）。**三处不同步 = 角色在场但行为不对**，�
 
 | 文件 | 拥有 | 门禁 |
 |---|---|---|
-| `preset.yml` | `name` / `description` / `order` | `preset-structure` |
-| `agent.cordis.yml` | persona 行、skills 行、工具行 | `preset-structure` / `row-deps` |
+| `presets/<role>.patch.yml` | 一条 `@deepseek-ai/dsh-agent-preset` 行：config 带 `id`/`name`/`description`/`order`/`plugins`（0.1.7 形态） | `preset-structure` |
+| `presets/<role>/skills/` | 该角色专属技能（`customSkillDirs` 指向它，硬隔离） | `preset-structure` |
 | `skills/<n>/SKILL.md` | 该角色专属方法论（≥1 个） | `preset-structure`（frontmatter `name` = 目录名） |
 | `README.md` | 该角色为什么这样切（可选但推荐） | — |
 

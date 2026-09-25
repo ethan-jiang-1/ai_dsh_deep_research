@@ -31,10 +31,9 @@ profile_ok() {
     process.exit(b.has('dsh-deep-research-pack') && b.has('@deepseek-ai/dsh-experimental-agent-team-profile') ? 0 : 1);
   " || return 1
   local r
-  for r in "$PACKDIR"/presets/*/; do
-    r="${r%/}"; r="${r##*/}"
-    [ -f "$PACKDIR/presets/$r/preset.yml" ] || continue
-    [ -f "$PROFDIR/node_modules/dsh-deep-research-pack/presets/$r/preset.yml" ] || return 1
+  for r in "$PACKDIR"/presets/*.patch.yml; do
+    r="${r##*/}"; r="${r%.patch.yml}"
+    [ -f "$PROFDIR/node_modules/dsh-deep-research-pack/presets/$r.patch.yml" ] || return 1
   done
 }
 

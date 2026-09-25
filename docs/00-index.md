@@ -74,7 +74,7 @@
 
 | 本项目 | DSH 官方 | vendor/dsh 落点 |
 |---|---|---|
-| 研究角色（Lead/Scout/Analyst/Critic） | agent preset（`presets/<id>/`：preset.yml + agent.cordis.yml[persona 行/skills/工具行] + skills/） | `packages/preset/agent-presets` + `packages/preset/persona` |
+| 研究角色（Lead/Scout/Analyst/Critic） | agent preset（0.1.7：`@deepseek-ai/dsh-agent-preset` 一条行，config.plugins 内声明 persona/skills/工具行；行文件 = `presets/<id>.patch.yml`） | `packages/preset/agent-presets` + `packages/preset/persona` |
 | 研究团队 / 组队 | Agent Teams（`spawn_teammate` / 任务板，experimental；**组合层 = vendor agent-team-profile**，D16） | `packages/experimental/agent-team` + `tool-agent-team` + `agent-team-profile` + `docs/subsystems/agent-team.md` |
 | 研究工人（一次性查证） | one-shot/continuable subagent（`dsh-tool-subagent`, spawn provider） | `packages/subagent/tool-subagent/README.md` |
 | 研究方法论的载体 | skill（`presets/<role>/skills/<n>/SKILL.md`，硬隔离） | `packages/skill/skill-filesystem` |

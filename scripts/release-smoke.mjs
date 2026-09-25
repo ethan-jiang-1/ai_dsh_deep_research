@@ -82,7 +82,7 @@ step(Array.isArray(pkg?.dsh?.profile?.bundles) && pkg.dsh.profile.bundles.includ
 step(existsSync(join(installed, 'presets')) && existsSync(join(installed, 'cordis.patch.yml')),
   '安装副本带 presets/ + cordis.patch.yml');
 for (const role of presetRoles(ROOT)) {
-  step(existsSync(join(installed, 'presets', role, 'agent.cordis.yml')), `安装形状含 presets/${role}`);
+  step(existsSync(join(installed, 'presets', `${role}.patch.yml`)), `安装形状含 presets/${role}.patch.yml`);
 }
 const packPkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
 step(Object.keys(packPkg.peerDependencies ?? {}).length > 0, 'peers 在 manifest（声明语义）');

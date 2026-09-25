@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh'];
 
 const failures = [];
 const notes = [];
@@ -101,26 +101,28 @@ function roadmapQueue() {
   }
 }
 
-// ── 门禁 3：preset 结构（id 规范 / preset.yml 三字段 / agent.cordis.yml / ≥1 SKILL.md 且 frontmatter name=目录名）──
+// ── 门禁 3：preset 结构（0.1.7 形态：presets/<role>.patch.yml 一条 @deepseek-ai/dsh-agent-preset
+//    行，行内 config 带 id/name/description/order/plugins；角色技能仍在 presets/<role>/skills/，
+//    ≥1 个且 frontmatter name = 目录名）──
 {
   const gate = 'preset-structure';
   if (!existsSync(PRESETS)) fail(gate, `presets 目录不存在: ${relative(ROOT, PRESETS)}`);
   else {
-    const roles = readdirSync(PRESETS, { withFileTypes: true }).filter((d) => d.isDirectory());
-    if (roles.length === 0) fail(gate, 'presets/ 下没有任何角色目录');
-    for (const r of roles) {
-      const id = r.name;
+    const patches = readdirSync(PRESETS).filter((f) => f.endsWith('.patch.yml'));
+    if (patches.length === 0) fail(gate, 'presets/ 下没有任何 <role>.patch.yml（0.1.7 preset = 一条行）');
+    for (const f of patches) {
+      const id = f.replace(/\.patch\.yml$/, '');
       if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) fail(gate, `角色 id 不合规: ${id}（须 ^[a-z0-9][a-z0-9-]*$）`);
-      const dir = join(PRESETS, id);
-      const presetYml = join(dir, 'preset.yml');
-      if (!existsSync(presetYml)) { fail(gate, `${id}: 缺 preset.yml`); continue; }
-      const yml = readFileSync(presetYml, 'utf8');
-      for (const field of ['name:', 'description:', 'order:']) {
-        if (!new RegExp(`^${field}`, 'm').test(yml)) fail(gate, `${id}/preset.yml: 缺字段 ${field}`);
+      const yml = readFileSync(join(PRESETS, f), 'utf8');
+      if (!new RegExp(`^\\s*- id: preset-${id}\\s*$`, 'm').test(yml))
+        fail(gate, `${f}: 缺 \`- id: preset-${id}\` 声明行`);
+      if (!/^\s+name:\s*'@deepseek-ai\/dsh-agent-preset'\s*$/m.test(yml))
+        fail(gate, `${f}: 声明行 name 须为 '@deepseek-ai/dsh-agent-preset'`);
+      for (const field of ['id:', 'name:', 'description:', 'order:', 'plugins:']) {
+        if (!new RegExp(`^\\s+${field}`, 'm').test(yml)) fail(gate, `${f}: config 缺字段 ${field}`);
       }
-      if (!existsSync(join(dir, 'agent.cordis.yml'))) fail(gate, `${id}: 缺 agent.cordis.yml`);
-      const skillsDir = join(dir, 'skills');
-      if (!existsSync(skillsDir)) { fail(gate, `${id}: 缺 skills/`); continue; }
+      const skillsDir = join(PRESETS, id, 'skills');
+      if (!existsSync(skillsDir)) { fail(gate, `${id}: 缺 presets/${id}/skills/`); continue; }
       const skills = readdirSync(skillsDir, { withFileTypes: true }).filter((d) => d.isDirectory());
       if (skills.length === 0) fail(gate, `${id}: skills/ 下没有任何技能目录`);
       for (const s of skills) {
@@ -159,7 +161,16 @@ function roadmapQueue() {
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
     const patch = pkg?.dsh?.bundle?.patch;
     if (!patch) fail(gate, 'dsh.bundle.patch 未声明');
-    else if (!existsSync(join(PACK, patch))) fail(gate, `dsh.bundle.patch 指向的文件不存在: ${patch}`);
+    else {
+      const list = Array.isArray(patch) ? patch : [patch];
+      if (list.length === 0) fail(gate, 'dsh.bundle.patch 为空');
+      for (const rel0 of list) {
+        if (typeof rel0 !== 'string' || !existsSync(join(PACK, rel0))) fail(gate, `dsh.bundle.patch 指向的文件不存在: ${String(rel0)}`);
+      }
+      // 0.1.7：preset 即行，bundle 必须随包携带自己的 preset patch（否则角色根本没被声明）
+      const presetPatches = list.filter((x) => typeof x === 'string' && /presets\/[a-z0-9-]+\.patch\.yml$/.test(x));
+      if (presetPatches.length === 0) fail(gate, 'dsh.bundle.patch 未携带任何 presets/<role>.patch.yml（0.1.7 preset 行随 bundle 装载）');
+    }
     const rel = pkg?.dsh?.compatibility?.dshReleases;
     if (!Array.isArray(rel) || rel.length === 0) fail(gate, 'dsh.compatibility.dshReleases 为空');
   }
@@ -171,9 +182,7 @@ function roadmapQueue() {
   const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
   const peers = new Set(Object.keys(pkg.peerDependencies ?? {}));
   const declFiles = [
-    ...readdirSync(PRESETS, { withFileTypes: true })
-      .filter((d) => d.isDirectory())
-      .map((d) => join(PRESETS, d.name, 'agent.cordis.yml')),
+    ...readdirSync(PRESETS).filter((f) => f.endsWith('.patch.yml')).map((f) => join(PRESETS, f)),
     join(PACK, 'cordis.patch.yml'),
   ];
   for (const f of declFiles.filter(existsSync)) {
@@ -330,8 +339,8 @@ function roadmapQueue() {
 // 合法的 ≤2 共现（探针成员名、prompt 覆盖对象逐行键）不触发。消费点应 import scripts/lib/roles.mjs。
 {
   const gate = 'role-list-sync';
-  const roleNames = readdirSync(PRESETS, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
-  if (roleNames.length === 0) fail(gate, 'presets/ 下没有任何角色目录（单一事实源为空）');
+  const roleNames = readdirSync(PRESETS).filter((f) => f.endsWith('.patch.yml')).map((f) => f.replace(/\.patch\.yml$/, ''));
+  if (roleNames.length === 0) fail(gate, 'presets/ 下没有任何 <role>.patch.yml（单一事实源为空）');
   else {
     const tokenOf = (n) => new RegExp(`(^|[^a-z0-9-])${n}([^a-z0-9-]|$)`);
     const codeFiles = allFiles.filter((f) => /\.(mjs|sh)$/.test(f)
@@ -700,6 +709,19 @@ function roadmapQueue() {
         fail(gate, `lockfile 里有 @deepseek-ai/${name} 的 registry 版本条目——overrides 的 link: 钉法失效`);
       }
     }
+  }
+}
+
+// ── 门禁 24：overlay-fresh（源码域 overlay 是**生成物**——由 dev/render-overlay.mjs 从 pack
+//    渲染；改 pack 后不重渲染即红。0.1.7 preset 重设计后 overlay 必须携带 preset 行，两处手写
+//    必然漂移，故改成生成 + 新鲜度门禁（vendor 的"生成 + freshness"形态；本仓首个 tracked
+//    生成物，登记在 discipline-map 源 7）。）──
+{
+  const gate = 'overlay-fresh';
+  const r = spawnSync(process.execPath, ['dev/render-overlay.mjs', '--check'], { cwd: ROOT, encoding: 'utf8' });
+  if (r.status !== 0) {
+    const first = `${r.stderr ?? ''}${r.stdout ?? ''}`.trim().split('\n').filter(Boolean)[0];
+    fail(gate, first ?? 'dev/research.overlay.yml 与 pack 渲染结果不一致——跑 `node dev/render-overlay.mjs` 重生成');
   }
 }
 

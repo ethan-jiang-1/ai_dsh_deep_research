@@ -92,3 +92,71 @@
 - **预期红（如实记档，不粉饰）**：`DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs` →
   `ERR_MODULE_NOT_FOUND`——overlay 仍引用 0.1.7 已删除的 `@deepseek-ai/dsh-agent-presets`；
   dump 档（pack 自检）仍绿。L2 与真模型档未跑（同因）。按 RFC §阶段划分，这属于阶段二的入口条件。
+
+## 用户加码（2026-09-25）：主线必须用最新 RC
+
+同步后**主线整体切到 `dsh-v0.1.7-rc.2`**，不允许"pin 换了但主线还跑旧 RC"的双轨：
+
+- run 通道（`dev/boot-run.sh` → web 3081）与其 **profile 镜像**（`dev/harness-home/profiles/research/`）
+  必须装到新 RC（含 agent-team-profile 层随新树的可用版本）；
+- 兼容矩阵（`dsh.compatibility.dshReleases`）与 peerDependencies 已指新 RC（阶段一完成）；
+- 判据收紧：阶段二的完成条件 = **L1（preset-smoke 真挂载，源码域）与 L2（release-smoke，
+  安装域）在新 RC 上绿**；阶段三 = **真模型档三脚本在新 RC 上绿**（含 run 通道一次真实交互）。
+  旧 RC 只作为"回退记录"存在于 git 历史，不留在任何运行路径里。
+
+## 阶段二进行中（2026-09-25）：preset 形态迁移
+
+**已完成**：
+
+- pack 改为 0.1.7 形态：四个角色 = `presets/<role>.patch.yml`（一条
+  `@deepseek-ai/dsh-agent-preset` 行，`config.plugins` 内声明 persona/skills/工具行/手册注入），
+  旧的 `presets/<role>/{preset.yml,agent.cordis.yml}` 删除；技能仍在 `presets/<role>/skills/`，
+  `customSkillDirs` 的 `!!js` 路径改为 `new URL('<role>/skills/', baseUrl)`；
+- `cordis.patch.yml`：替换行由旧 `agent-presets`（roots）改为 `agent-preset-registry`
+  （`default: lead`）；`package.json` 的 `dsh.bundle.patch` 改为**文件数组**
+  （`cordis.patch.yml` + 四个 preset patch）、peerDependencies 按 pack 实际引用重算（14 个，`^0.1.7-rc.2`）；
+- **overlay 改为生成物**：新增 `dev/render-overlay.mjs`（从 pack 渲染 `dev/research.overlay.yml`）
+  + 门禁 `overlay-fresh`（改 pack 不重渲染即红，带红证）——0.1.7 下 overlay 必须携带 preset 行，
+  两处手写必然漂移；这是本仓首个 tracked 生成物（登记进 discipline-map 源 7）；
+- 门禁迁移：`preset-structure`（新形态断言）、`pack-bundle-compat`（数组 + 必须携带 preset patch）、
+  `row-deps`、`role-list-sync`（角色 = `presets/*.patch.yml`）——全绿；
+- 脚本/测试/文档：`lib/roles.mjs`、`preset-smoke`、`release-smoke`、`team-preflight`、
+  `boot-run.sh`（镜像检测按 patch 文件）、`tests/presets.test.mjs`、`tests/evaluation-contract.test.mjs`、
+  pack README/AGENTS、guides/62、design/20、00-index 术语映射、`adding-a-research-role` 技能、
+  evaluation 台账行。
+
+**遇到的坑（记录在案）**：换 pin 后 vendor 树的 **gitignored 构建产物是 0.1.5 的陈旧物**——
+`pnpm run build` 报 `[MISSING_EXPORT] "SettingsProvider" is not exported by ../settings/src/index.ts`
+（旧 `lib/types/index.js` 引用已删除的导出）；vendor 自带的 `pnpm run clean` 也被旧残留绊倒
+（`expected TypeScript outDir to end in /types: lib/desktop-keyboard-test-types`）。处置 =
+手工删 `packages|apps|vendor` 下（非 node_modules）**327 个陈旧 `lib/` 目录** + 删除已删包的
+残留 `packages/preset/agent-presets/`，`vendor-clean` 仍绿——**升 pin 的固定动作应加上
+"清陈旧构建产物"这一步**（重审清单已补）。
+
+**坑 2（同批）**：清掉 `lib/` 后 `pnpm run build` 仍红——`[@deepseek-ai/dsh-root] Cannot find entry:
+["lib/types/{index,invariant,startup}.js"]`。根因是 **280 个陈旧 `*.tsbuildinfo`**：`tsc -b` 认为
+"已最新"而跳过 emit，tsdown 便找不到入口。处置 = 一并删除（gitignored 构建状态），
+vendor 树仍干净。**升 pin 固定动作补两条：删 `lib/` + 删 `*.tsbuildinfo`**（或跑 vendor 的
+`pnpm run clean`——但它在旧残留上会自己失败，所以手工清扫是可靠路径）。
+
+## 阶段二状态（本轮结束点，2026-09-25）
+
+**已通**：模块解析（新包在宿主根已 link）；pack 新形态 + overlay 生成 + 门禁/tests/文档全绿。
+
+**当前卡点（两条，均已定位）**：
+
+1. **vendor `pnpm run build` 仍红**：清 `lib/` 与 `*.tsbuildinfo` 后，卡在
+   `[@deepseek-ai/dsh-root] Cannot find entry: ["lib/types/{index,invariant,startup}.js"]`
+   ——`tsc -b tsconfig.host.json` 没有产出根包的 `lib/types`。**这不是我们引入的**：语料自身的
+   维护页记过同类环境阻断（`doc-typecheck` 缺同一组构建入口）。待查：根包 tsc 目标与 tsdown
+   入口的先后关系（`build:lib:host` 的 `&&` 链），以及是否需要先跑 `gen:*`。
+   **运行面不完全依赖它**：本仓启动走 tsx 源码（`node --import tsx/esm apps/cli/src/bin.ts`）。
+2. **dev home 的 `web` profile 是 0.1.5 时代装的**：L1 真挂载现在报插件装载诊断
+   （`Plugin client-hmr — Missing services: clientModules`），说明 profile 的组成/依赖仍指向旧
+   RC。处置候选：① 用 `release-smoke`（L2 从零建干净 profile）作为新 RC 的首个绿点；
+   ② 重建 dev home 的 `web` profile（0.1.7 模板）后再跑 L1；③ `boot-run.sh` 重建 `research`
+   profile 同理。
+
+**下一轮入口**：先跑 L2（`node scripts/release-smoke.mjs`，它自带干净 profile 构建）拿到新 RC
+的第一个端到端绿点 → 再按需重建 dev home profile 使 L1 真挂载绿 → 之后 L4 真模型三脚本 →
+阶段三逐条重审 + 复核结论。

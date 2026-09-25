@@ -18,16 +18,16 @@ Deep Research 插件包：四角色 preset + host bundle 行。当前为**纯配
 
 **第 0 步（先于一切代码）**：增删角色 = 推翻 D2（角色 = 4 个，见 docs/00-index.md 台账）——先在台账登记新 D 号，再动手。tests 的数量哨兵（tests/presets.test.mjs）会机械拦住没登记的增删。
 
-1. `presets/<role>/` 三件套：`preset.yml`（name/description/order）+ `agent.cordis.yml`（自包含组合：persona 行 + skills roots + 工具行 + agent-instructions 行）+ `skills/<n>/SKILL.md`（frontmatter `name` = 目录名）；
+1. `presets/<role>.patch.yml`：一条 `@deepseek-ai/dsh-agent-preset` 行（0.1.7 形态），`config` 带 id/name/description/order + plugins（自包含组合：persona 行 + skills roots + 工具行 + agent-instructions 行）+ `skills/<n>/SKILL.md`（frontmatter `name` = 目录名）；
 2. 结构门禁：verify 门禁 preset-structure + 门禁 row-deps（行引用的 `@deepseek-ai/*` 全进 peerDependencies）；
-3. roster 自动发现：bundle 的 agent-presets 行 `roots` 指向 `presets/`，新角色无需逐个登记 bundle 行；
+3. roster 装载：`package.json` 的 `dsh.bundle.patch` 数组列出 `cordis.patch.yml` 与每个 `presets/*.patch.yml`；新增角色 = 新 patch 文件 + 把它加进该数组；
 4. 消费点**无需逐个改**：角色清单事实源 = 盘上 `presets/` 目录（基础整治 §3.2）——`preset-smoke` / `release-smoke` / `team-preflight-smoke` / `boot-run.sh` / `tests` 全部目录枚举。唯二要补的：`l4-lite-smoke` 的 `PROMPTS` 加该角色的标记 prompt（缺了 fail-loud 退出）；`scripts/l4-lite-smoke.mjs` 之外若新写脚本，用 `scripts/lib/roles.mjs` 枚举，别手抄清单（verify 门禁 `role-list-sync` 咬硬编码）；
 5. 完成定义 = preset-smoke 真挂载绿（L1 面，keyless）。
 
 ## 新增一个 skill
 
 1. 建 `presets/<role>/skills/<n>/SKILL.md`——frontmatter `name:` 必须**逐字等于目录名**（verify 门禁 preset-structure 强制）；
-2. `agent.cordis.yml` **不用改**：`customSkillDirs` 指向整个 `skills/` 目录且 `includeDefaultRoots: false`，自动发现；
+2. preset 行的 plugins **不用改**：`customSkillDirs` 指向 `presets/<role>/skills/` 且 `includeDefaultRoots: false`，自动发现；
 3. `cordis.patch.yml` **不用改**（bundle 行只管 roster/工具，不管 skill）；
 4. 文档**不用改**：skills 清单的单一事实源 = 盘上目录（20-roles §2 已路由，基础整治 C8）；仅当 skill 承载**新方法论条目**时，`docs/design/30-methodology-mapping.md` 同 diff（L3 合同）；
 5. 完成定义 = `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs` 绿——它断言每角色 `skills/list` **恰好等于**盘上目录，多一个少一个都会红。
@@ -39,7 +39,7 @@ Deep Research 插件包：四角色 preset + host bundle 行。当前为**纯配
 
 | 贡献 | 模型看到什么 | 代价/影响 |
 |---|---|---|
-| `presets/<role>/agent.cordis.yml` 的 persona 行 | 该角色会话的系统提示前缀（角色职责与边界） | 每个会话常驻；改动 = 模型可见面变更，需真模型档证据 |
+| `presets/<role>.patch.yml` 里 preset 行的 persona 子行 | 该角色会话的系统提示前缀（角色职责与边界） | 每个会话常驻；改动 = 模型可见面变更，需真模型档证据 |
 | `presets/<role>/skills/<n>/SKILL.md` | **按需加载**：先只给 name + description，命中任务才读全文 | description 是常驻成本（短、带触发条件）；正文只在选中时付费 |
 | preset 的工具行（`tools:` 段） | 该角色的工具 schema 清单 | 行列错/漏 = 角色缺工具或多工具（`row-deps` + L1 真挂载门禁把守） |
 | 研究手册注入（`research-workspace/AGENTS.md`，经 agent-instructions） | 每次角色会话的 workspace 指令段 | 常驻；改文本需重启 run 通道（web 进程缓存 boot 时文本） |

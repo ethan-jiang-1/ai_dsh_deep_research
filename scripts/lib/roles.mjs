@@ -5,9 +5,9 @@
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-/** 枚举 pack 盘上角色目录（id 规范的目录即角色；preset.yml 缺席由 verify preset-structure 咬），字典序。 */
-export const presetRoles = (root) => readdirSync(join(root, 'packages', 'deep-research-pack', 'presets'), { withFileTypes: true })
-  .filter((d) => d.isDirectory())
-  .map((d) => d.name)
+/** 枚举 pack 盘上角色（0.1.7：presets/<role>.patch.yml 即一个角色；结构由 verify preset-structure 咬），字典序。 */
+export const presetRoles = (root) => readdirSync(join(root, 'packages', 'deep-research-pack', 'presets'))
+  .filter((f) => f.endsWith('.patch.yml'))
+  .map((f) => f.replace(/\.patch\.yml$/, ''))
   .filter((n) => /^[a-z0-9][a-z0-9-]*$/.test(n))
   .sort();

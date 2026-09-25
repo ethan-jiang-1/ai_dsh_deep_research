@@ -1,6 +1,6 @@
 # 20 · 角色内容：职责 owner 表、persona 要素与 skills
 
-> 层：设计（为什么）。角色组合行见 `packages/deep-research-pack/presets/<role>/agent.cordis.yml`；
+> 层：设计（为什么）。角色组合行见 `packages/deep-research-pack/presets/<role>.patch.yml`（0.1.7 preset 行）；
 > 方法论来源（wave 语义、gate 精神）见 [30-methodology-mapping.md](./30-methodology-mapping.md)。
 
 ## 0. 队形总览（D2）

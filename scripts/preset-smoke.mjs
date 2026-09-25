@@ -45,8 +45,8 @@ const step = (ok, label, hint) => {
 step(existsSync(join(PACK, 'cordis.patch.yml')), 'pack: cordis.patch.yml 存在');
 for (const r of ROLES) {
   step(
-    existsSync(join(PACK, 'presets', r, 'preset.yml')) && existsSync(join(PACK, 'presets', r, 'agent.cordis.yml')),
-    `pack: presets/${r} yml 两件`,
+    existsSync(join(PACK, 'presets', `${r}.patch.yml`)),
+    `pack: presets/${r}.patch.yml（0.1.7 preset 行）`,
   );
   const skills = join(PACK, 'presets', r, 'skills');
   step(existsSync(skills) && readdirSync(skills).length > 0, `pack: presets/${r} skills 非空`);

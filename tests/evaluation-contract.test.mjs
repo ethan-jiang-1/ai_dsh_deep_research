@@ -42,7 +42,7 @@ const CONTRACT_COPIES = [
   ['研究手册（语义正本）', 'research-workspace/AGENTS.md'],
   ['run 模板副本', 'research-workspace/templates/run/evidence-entry.md'],
   ['analyst skill 副本（执行者实际看的）', 'packages/deep-research-pack/presets/analyst/skills/evidence-extraction/SKILL.md'],
-  ['analyst persona 内联副本', 'packages/deep-research-pack/presets/analyst/agent.cordis.yml'],
+  ['analyst persona 内联副本（0.1.7 preset 行）', 'packages/deep-research-pack/presets/analyst.patch.yml'],
   ['方法论映射（L3 载体）', 'docs/design/30-methodology-mapping.md'],
 ];
 

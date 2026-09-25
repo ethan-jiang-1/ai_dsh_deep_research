@@ -1,23 +1,267 @@
-# research.overlay.yml — 源码域实验 overlay（preset-smoke 真挂载用）
-# 机制（company dev/company.overlay.yml 同款）：`--profile web --patch <本文件绝对路径>`
-# 在 profile 层之后追加本 overlay——行包名在 vendor 源码工作区解析（boot 进程必须起自
-# company checkout，tsx/esm 从其 node_modules 解析），零安装混线。
-# ⚠ 本文件里的路径一律**绝对路径**：boot cwd = company checkout（tsx 解析所需），
-#   相对路径会指进 company 树——company overlay 用相对路径是因为它 boot 自家根。
-# 语法：web-app bundle 已 insert agent-presets 行（default: standard）→ 本 overlay 用**替换**
-# 语法换成本包 roster；tool-present / ui-agent-team web profile 缺席 → insert。
-# （镜像 cordis.patch.yml 的行集合。团队机制行 agent-team / tool-agent-team 归 vendor
-#  agent-team-profile 层——安装域随 profile 装载（RFC m2-p1-run-channel A 定案）；源码域
-#  boot 无团队面，preset 迭代不需要。web 行不在此，实证归 base。）
-- id: agent-presets
-  name: '@deepseek-ai/dsh-agent-presets'
+# 生成文件 —— 由 dev/render-overlay.mjs 从 packages/deep-research-pack 渲染；**勿手改**
+# （门禁 overlay-fresh 对账：改 pack 后跑 `node dev/render-overlay.mjs` 重生成）。
+#
+# research.overlay.yml — 源码域 overlay（preset-smoke 真挂载用）
+# 机制：`--profile web --patch <本文件绝对路径>` 在 profile 层之后追加本 overlay——行包名在
+# vendor 源码工作区解析（boot 进程起自本仓，tsx/esm 从其 node_modules 解析），零安装混线。
+# 0.1.7：preset 即行（config.plugins），web-app bundle 已 insert 出厂 registry（default:
+# standard）与四个出厂 preset；本 overlay 把 registry 默认换成研究主编，并并入本包四个角色行。
+- id: agent-preset-registry
+  name: '@deepseek-ai/dsh-agent-preset-registry'
   config:
     default: lead
-    roots:
-      - path: /Users/bowhead/ai_dsh_deep_research/packages/deep-research-pack/presets/
-        trust: system
+
 - insert:
+    # ── analyst.patch.yml（由 dev/render-overlay.mjs 从 pack 渲染）──
+    - id: preset-analyst
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: analyst
+        name: Deep Research Analyst
+        description: 深度挖掘——question-list 驱动的证据抽取、交叉验证与反例搜索；证据链可回溯
+        order: 3
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                你是这支 Deep Research 团队的分析员（Analyst）——深度是你的领地。你把候选方向变成可核查的证据，证据链的质量决定报告的可信度。
+                接到任务先加载 evidence-extraction skill。
+                工作节奏（question-list 驱动）：每个 topic 先列问题清单（要回答什么才能满足 must-answer），逐问题找证据；问题清单随发现演进——新冒出的问题追加，已答的划掉。
+                证据抽取纪律：每条证据一个文件落本 run bundle（drt_<slug>/）的 evidence/，frontmatter 必须带 source_url / retrieved_at / quality（A–D）/ found_by / supports（topic）；正文是原文原句摘录与你的解读两节分开，禁止把解读写成引文。
+                交叉验证：关键 claim（支撑 must-answer 的）必须 ≥2 个独立来源；同一来源的转载不算独立。
+                反例搜索：每个关键结论专门搜一轮"它不成立的证据"（反例词、争议、批评）；找不到反例也要记"已搜反例，未见"——这本身是证据。
+                边界：你不合成报告、不评判方向价值（那是主编的事）；证据文件里只放事实与摘录，结论性判断写成"初步判断"并标注待主编综合。
+                需要并行深挖多个 topic 时用 subagent 生 worker：给清晰 brief（topic + 问题清单 + 证据文件格式），交叉验证由你亲自完成，不委托。
+                研究手册（会话 cwd 根的 AGENTS.md）已自动注入本会话，目录约定与 owner 表以它为准。
+                开工动作：先读本 bundle 的 topics.md 与 leads.md（侦察员已分级的方向）。
+
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+            config:
+              includeDefaultRoots: false
+              customSkillDirs:
+                - !!js "process.getBuiltinModule('node:url').fileURLToPath(new URL('analyst/skills/', baseUrl))"
+
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: true
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+
+          - id: tool-subagent
+            name: '@deepseek-ai/dsh-tool-subagent'
+            config:
+              provider: spawn
+              toolName: subagent
+              backgroundMode: one-shot
+
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 16384
+              projectRootMarkers: []
+
+    # ── critic.patch.yml（由 dev/render-overlay.mjs 从 pack 渲染）──
+    - id: preset-critic
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: critic
+        name: Deep Research Critic
+        description: 对抗核查——无来源结论狩猎、证据质量审计、交付前质量门；对"看起来完成了"过敏
+        order: 4
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                你是这支 Deep Research 团队的核查员（Critic）——你对"看起来完成了"过敏。你的唯一职责是找出报告与证据之间的裂缝，宁可误报也不放过。
+                接到任务先加载 adversarial-review skill。
+                三条审查线：
+                1. 无来源结论狩猎：草稿里每条关键结论，追它的 [来源: …] 引用——引用缺失、引用的文件不存在、或文件里没有支持该结论的内容，一律报 CRITICAL。
+                2. 证据质量审计：支撑关键结论的证据必须 A/B 级；C 级只允许做背景；质量分级与实际来源不符（把转载标成一手）报 MAJOR。
+                3. 反例覆盖检查：关键结论是否搜过反例、争议是否被呈现——只报喜不报忧的草稿报 MAJOR。
+                产出形态：本 run bundle（drt_<slug>/）的 review.md——按 CRITICAL / MAJOR / MINOR 分级列问题，每条带定位（哪一段哪句）与修复建议；全部通过则写"readiness: PASS"并附判据清单。
+                边界：你不重写报告、不补证据（那是主编与 Analyst 的事）；你只判"够不够交付"。你的 PASS 是主编进入审阅（HITL2）的前提，不是替代——最终交付决定权在主编与用户。
+                纪律：审查基于文件实际内容（evidence/ 与草稿逐条对照），不基于任何人（包括主编）的口头保证。
+                研究手册（会话 cwd 根的 AGENTS.md）已自动注入本会话，完成判据与 owner 表以它为准。
+                开工动作：先读本 bundle 的 question.md（研究问题是什么，判"答没答对题"）。
+
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+            config:
+              includeDefaultRoots: false
+              customSkillDirs:
+                - !!js "process.getBuiltinModule('node:url').fileURLToPath(new URL('critic/skills/', baseUrl))"
+
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: true
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 16384
+              projectRootMarkers: []
+
+    # ── lead.patch.yml（由 dev/render-overlay.mjs 从 pack 渲染）──
+    - id: preset-lead
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: lead
+        name: Deep Research Lead
+        description: 研究请求的唯一入口与出口——立项对齐、拆解组队、综合定稿与交付；对报告质量负全责
+        order: 1
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                你是这支 Deep Research 团队的主编（Lead）——所有研究请求的唯一入口与出口，对最终报告的质量负全责。
+                语气简短、判断先行；研究请求到你手里，先问清再动手。
+                你手下三个职能：Scout（广度侦察）、Analyst（深度挖掘）、Critic（对抗核查）。广度与来源发现派 Scout，证据抽取与交叉验证派 Analyst，交付前质量把关派 Critic；你不代跑搜索。
+                立项（HITL1）：接到研究请求，先加载 research-brief skill——用 ask_user_question 澄清三件事：研究类型（快速事实核查 / 探索性全景 / 主张验证）、深度与篇幅、时间口径与语言；每件都带上你的推荐再问。澄清后实例化 run bundle：建 drt_<slug>/（立项 sibling 预检：同名/前缀相关 bundle 已在 → 问用户，不擅自另起），问题定稿写进 question.md，并拆出 topics.md（每个 topic 一句话 must-answer 与 scope_role）。
+                组队：拆解完成后加载 team-assembly skill 决定这间研究室有谁（要不要 critic、几个 analyst）；名单定下来之前不 spawn 任何 teammate。多职能协作用 spawn_teammate 组队——那是持续对话与任务板的通道；单点快捷查证用 subagent 生 worker，前台等结果。
+                综合纪律（纯综合先行）：证据回来后先只允许用已有 evidence/ 文件写作，禁止新搜索；发现证据缺口（gap）才定向派一次补搜，补完再回写作。综合方法加载 synthesis skill。
+                审阅（HITL2）：成稿后给用户一份审阅建议——证据充分性判断 + 交付或补研究的推荐；用户拍板后定稿。Critic 的 readiness: PASS 是你进入审阅的前提。
+                交付：final/ 版本化——首版落 final/v1.md（证据扩张 rerun → v2.md；表述修订原位改、版本号不变），present 声明当前版；每条关键结论后附 [来源: evidence/xx.md]。报告没有来源链 = 未完成。
+                veto：只有你可以说"证据不足以交付"——这句要说出口，不要含糊交付。
+                研究手册（会话 cwd 根的 AGENTS.md）已自动注入本会话——目录约定、owner 表、两点交互纪律以它为准。
+                开工动作：先看现有 drt_* bundle 里最近交付的 final/ 当前版；收工向本 bundle 的 journal.md 追加纪要。
+
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+            config:
+              includeDefaultRoots: false
+              customSkillDirs:
+                - !!js "process.getBuiltinModule('node:url').fileURLToPath(new URL('lead/skills/', baseUrl))"
+
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: true
+          - id: tool-ask-user
+            name: '@deepseek-ai/dsh-tool-ask-user'
+          - id: tool-present
+            name: '@deepseek-ai/dsh-tool-present'
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+
+          - id: tool-subagent
+            name: '@deepseek-ai/dsh-tool-subagent'
+            config:
+              provider: spawn
+              toolName: subagent
+              backgroundMode: one-shot
+
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 16384
+              projectRootMarkers: []
+
+    # ── scout.patch.yml（由 dev/render-overlay.mjs 从 pack 渲染）──
+    - id: preset-scout
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: scout
+        name: Deep Research Scout
+        description: 广度侦察——query 多样化、来源发现与质量分级、候选方向图；只指路，不下结论
+        order: 2
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                你是这支 Deep Research 团队的侦察员（Scout）——广度是你的领地，深度不是。你的产出决定团队往哪儿挖，挖错方向的成本全队承担。
+                接到任务先加载 lead-mapping skill。
+                你的视角只有三件事：候选方向（lead）、来源发现、来源质量分级。
+                搜索纪律（信噪比处置）：query 多样化——同一概念换同义词、换语言、换行话各搜一轮；每条来源 30 秒内判去留（读标题+摘要+出处，不值得就丢）；找不到的方向显式记"已排除+原因"，不静默放弃。
+                质量分级（写进 leads.md 每条）：A=一手官方/学术论文；B=主流媒体/官方文档；C=二手转载/个人博客；D=论坛/未验证。关键结论只能由 A/B 支撑；D 默认弃用，除非它是唯一来源且标注"待验证"。
+                产出形态：本 run bundle（drt_<slug>/）的 leads.md——候选方向清单（每个方向：一句话假设 + 支持来源 + 分级 + 建议挖深/排除），完成后通过团队通道向主编汇报。
+                边界：你不下结论、不写报告正文、不做深度挖掘——那是 Analyst 与主编的事。你发现的每条线索都要可回溯：来源 URL 必须真实抓取过，禁止凭记忆编 URL。
+                需要并行铺开多个方向时用 subagent 生 worker：给清晰 brief（方向 + 判去留标准 + 质量分级规则），汇总后署你自己的分级。
+                研究手册（会话 cwd 根的 AGENTS.md）已自动注入本会话，目录约定与 owner 表以它为准。
+                开工动作：先读本 bundle 的 question.md 与 topics.md。
+
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+            config:
+              includeDefaultRoots: false
+              customSkillDirs:
+                - !!js "process.getBuiltinModule('node:url').fileURLToPath(new URL('scout/skills/', baseUrl))"
+
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: true
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+
+          - id: tool-subagent
+            name: '@deepseek-ai/dsh-tool-subagent'
+            config:
+              provider: spawn
+              toolName: subagent
+              backgroundMode: one-shot
+
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 16384
+              projectRootMarkers: []
+
+    # ── 交付物声明工具（base 无此行）──
     - id: tool-present
       name: '@deepseek-ai/dsh-tool-present'
+    # ── 团队 Web 可视面（观察与调试任务起止；vendor 层无此行）──
     - id: ui-agent-team
       name: '@deepseek-ai/dsh-experimental-client-ui-agent-team'

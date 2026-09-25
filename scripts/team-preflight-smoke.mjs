@@ -57,7 +57,7 @@ const profDir = join(home, 'profiles', PROFILE);
     ok = b.has('dsh-deep-research-pack') && b.has('@deepseek-ai/dsh-experimental-agent-team-profile');
   }
   for (const r of presetRoles(ROOT)) {
-    ok = ok && existsSync(join(profDir, 'node_modules', 'dsh-deep-research-pack', 'presets', r, 'preset.yml'));
+    ok = ok && existsSync(join(profDir, 'node_modules', 'dsh-deep-research-pack', 'presets', `${r}.patch.yml`));
   }
   if (!ok) {
     console.error('team-preflight: research profile 组合不完整（本包 + vendor 层 + 盘上全部角色 preset）——先跑 dev/boot-run.sh 再来');
