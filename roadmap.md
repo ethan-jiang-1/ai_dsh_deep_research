@@ -8,23 +8,24 @@
 
 ## 队列
 
-1. ▶ **观察面 GUI 化**（feature，M3 初排升位——前置"run 实测后立项"已满足；用户验收可调）——
-   两段：client-face-bootstrapping（D7 修订限定观察面用途 + 双半 tsdown 构建链 +
-   client-load-smoke + keyless key 守卫）→ run-status-tab（右栏「研究状态」页签：流程步骤条 +
-   活标题"⏳ 等你拍板" + journal→矩阵→review 渐进 + 工具卡 C 随 B 议）。
-   RFC = [2026-09-24-observability-gui](notes/proposed/2026-09-24-observability-gui.md)。
-2. **vendor 构建产物自检**（卫生，小——升 pin 教训）——0.1.7 起启动依赖构建产物，缺失时
-   报错隐晦（client-hmr / typert-loader）；boot 前 fail-loud + 一行 remedy。
+> 次序依据（2026-09-25 马拉松规划）：①②两个卫生小项**先行**——产物自检保护后续所有 boot
+> 调试时间（升 pin 当天隐晦报错吃过亏）、末标记加固让真模型档信号在 GUI 反复取证期可信；
+> ③ GUI 是主菜，真人 HITL run 验收**延期给④**；④需用户带题（真人拍板，静默期做不了），
+> 兼③的真 run 验收载体；⑤用户节奏触发。
+
+1. ▶ **vendor 构建产物自检**（卫生，小）——boot 前 fail-loud + 一行 remedy；红证 =
+   删代表产物 → 红 → 还原 → 绿，产物在位不误报。
    RFC = [2026-09-25-vendor-build-guard](notes/proposed/2026-09-25-vendor-build-guard.md)。
-3. **team-preflight 末标记加固**（卫生，小——已知脆点：三跑两红一绿，机制面全 PASS）——
-   判据改锚（回合落定或标记）为主、prompt 加固为辅。
+2. **team-preflight 末标记加固**（卫生，小，已知脆点三跑两红一绿）——判据改锚
+   （回合落定**或**标记，二其一）为主、prompt 加固为辅；验收 = 真模型档连续 ≥3 次全绿。
    RFC = [2026-09-25-team-preflight-marker](notes/proposed/2026-09-25-team-preflight-marker.md)。
-4. **研究类型覆盖**（研究/活动，**用户带题驱动**）——下一场真人 HITL 全流程 run（类型 ≠
-   首场的探索性全景，建议"主张验证"）；兼观察面 GUI 化的 L4 验收载体；顺手取证
-   synthesizer/floor 两条搁置项的重估证据。
+3. **观察面 GUI 化**（feature，大；两段三步全文见 RFC）——D7 修订 + 构建链 + client-load-smoke
+   → B-min 验链 → B-full（步骤条/活标题/矩阵/review）；真人 HITL run 验收延期给条目 4。
+   RFC = [2026-09-24-observability-gui](notes/proposed/2026-09-24-observability-gui.md)。
+4. **研究类型覆盖**（研究，**用户带题驱动**：真人 HITL、类型 ≠ 首场）——兼条目 3 的
+   真 run 验收；顺手取证 synthesizer/floor 重估证据。
    RFC = [2026-09-25-research-type-coverage](notes/proposed/2026-09-25-research-type-coverage.md)。
-5. **DSH 插件生态认真研究**（研究，**用户节奏触发**）——粗扫后续：生态缺什么、
-   deep-research 定位独占性；产出 = 调研报告（钉版引用）。
+5. **DSH 插件生态认真研究**（研究，用户节奏触发）——粗扫后续：生态缺什么、定位独占性。
    RFC = [2026-09-24-dsh-plugin-ecosystem-research](notes/proposed/2026-09-24-dsh-plugin-ecosystem-research.md)。
 
 （已毕业离队 2026-09-25：升 pin 重校（`dsh-v0.1.5-rc.2` → **`dsh-v0.1.7-rc.2`** @ `477b4f4205`，
