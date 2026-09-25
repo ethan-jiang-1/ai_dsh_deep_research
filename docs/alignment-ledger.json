@@ -567,7 +567,7 @@
       "source": "docs/module-graph.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
-      "reason": "本仓无生成模块图面"
+      "reason": "本仓无入库生成物（模块关系图属 from-source 生成目录面）；生成态缺席与引入条件登记在 discipline-map 源 7"
     },
     {
       "source": "docs/persistence-catalog.md",
