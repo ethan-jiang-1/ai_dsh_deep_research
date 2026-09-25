@@ -37,7 +37,7 @@
 | `row-deps` | preset 与 bundle 行引用的 `@deepseek-ai/*` 全在 peerDependencies | [m2-p1-run-channel](../notes/implemented/2026-09-24-m2-p1-run-channel.md)（违规 insert 行被守卫+row-deps 咬红→还原绿） |
 | `workspace-contract` | 研究手册 + 六件 run bundle 模板在位（bundle 目录 drt_<slug>/ 运行时由 lead 创建，无静态目录可查——D17）+ $DSH_HOME/AGENTS.md 化石镜像不在场（手册唯一定居点 = 会话 cwd projectRoot 注入） | 同 noise-sweep（清欠账：run 模板暂移注入红→还原绿）；化石镜像反证 = 真实事故红（旧契约镜像在场，lead 按 runs/<slug> 行动被用户实测抓到）→删除→绿 |
 | `pack-contract-sync` | pack 的 tracked yml/md 文本零 `runs/` 旧契约路径——persona/skill 文本经会话系统提示与 skill 加载注入，携带已废目录契约即污染 run（D17 事故 2 实证：pack 不在首轮 sweep 清单，13 处残留漏网） | D17 事故 2：真实红（verify 逐文件点名 13 处 runs/ 残留）→同 commit 修复→绿 |
-| `note-format` | notes/ 决定记录骨架与状态行：proposed/ RFC 状态行（proposed/approved/superseded）+ 输掉的方案在场；implemented/ 骨架（## 决定 + ## 输掉的方案）在场或 grandfather 条款；rejected/ 状态行——"没记击败了什么的决定会重开讼"（DSH SDLC reference 01 点状吸纳） | [note-lifecycle-absorption Note](../notes/implemented/2026-09-24-note-lifecycle-absorption.md)（双形态注入红：无骨架 implemented Note / 无状态行 proposed RFC → 红 → 删复绿） |
+| `note-format` | notes/ 决定记录的状态行与骨架：**活动 Note 一律有裸状态行**（`> 状态：<值>`，值域与所在目录互验：proposed/approved/superseded · implemented · rejected（理由可用 `—` 一行附后）；不带日期括号——上游 Status 行同构）；proposed/ 另需输掉的方案在场；implemented/ 需 `## 决定` + `## 输掉的方案` 或 grandfather；rejected/ 保留提案体 | [note-lifecycle-absorption](../notes/implemented/2026-09-24-note-lifecycle-absorption.md) + [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（双形态注入红：无骨架 implemented / 无状态行 / 状态带日期括号 → 红 → 还原绿） |
 | `note-status` | notes/ 的时态与状态面：① 每子目录有 README.md；② research/ 文件带状态行 `> 状态：已完成\|进行中`；③ research/README.md 登记该目录每个文件（索引新鲜度——人读场景优先的登记偏离） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（删状态行 / 删索引行 / 移 README 三形态注入红→还原绿） |
 | `dev-skill-format` | `.agents/skills/*/SKILL.md` 在场 + frontmatter `name` = 目录名 + `description` 以 "Use " 开头（vendor 开发 Skill 约定；形状坏了 = 技能静默不触发，比写错正文更难发现） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（写错 name / 去掉 Use 前缀红→还原绿） |
 | `vendor-pin` | vendor/dsh submodule 在位：.gitmodules 正源 URL + 钉 commit `fb2c4b9e`（tag dsh-v0.1.5-rc.2）——D10 销账的机械面，机制权威自持 | vendor-submodule 毕业 Note（submodule 钉错 commit 注入红 → 还原绿） |
@@ -47,7 +47,7 @@
 | `role-list-sync` | 角色清单单一事实源 = 盘上 presets/；代码（scripts/tests/dev 的 .mjs/.sh）里角色清单字面量（单行 ≥3 角色名 / `[...]` 块 ≥3 角色名字符串）即红——检测名从盘上现取 | 基础整治 Note（JS 单行数组/多行数组块/bash for-in 三形态注入红→还原绿） |
 | `gate-ledger-sync` | 本表门禁名集合 = verify 脚本 gates 数组（登记与实现不漂移） | 基础整治 Note（表删行/数组加假名红→还原绿） |
 | `entry-chain` | 入口链存在性投影：成员文件在场（AGENTS/00-index/roadmap/proposed//guides60/evaluation/design10-30/guides61）+ roadmap §队列 恰一个 ▶（D11 唯一"当前"指针；链接解析归 md-links，此处补反引号指针与 ▶ 唯一性两个盲区） | review-driven-hardening Note（成员缺席/▶ 删除/▶ 复制三形态注入红→还原绿） |
-| `entry-budget` | 常设入口防膨胀：AGENTS.md ≤145 行、README.md ≤30 行（vendor verify-doc-budgets 裁剪版；台账/指南为生长面不设顶）；超顶处置序 = 下放 > 压缩 > 升顶（须 D 号） | review-driven-hardening Note（两文件各注入超顶红→还原绿） |
+| `doc-budgets` | 常驻文档预算：`scripts/doc-budgets.json` 拥有上限（登记项必须存在且不超限；仓内新增 AGENTS.md 必须登记——缺登记即红）。行数度量（CJK 词数不可靠，等价上游 verify-doc-budgets 的词数预算）；超限处置序 = 下放 > 压缩 > 升顶（升顶须同变更登记理由） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（超限/缺登记两形态注入红→还原绿） |
 
 - **通过判据**：全绿；`verify` 的门禁清单与 `tests/` 守卫一一登记在案，每条带反证记录（上表）。
 - **何时跑**：每轮 goal 续驶必跑。

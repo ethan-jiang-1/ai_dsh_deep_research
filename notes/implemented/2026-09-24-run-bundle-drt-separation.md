@@ -1,5 +1,7 @@
 # Note：harness / run bundle 分离（D17）——"题目出 RFC"的分层纠偏与 drt_ 目录契约
 
+> 状态：implemented
+
 > 2026-09-24 · 用户 steer（非队列条目，先例 d5a9113）· 互链：加固探针 Note 遗留 1（本 Note
 > 销账）· 正本落点：design/10 §1 第一性分层 + 00-index D17 / 术语映射 + 研究手册 §分层铁律
 > + 手册 §目录约定（drt_ 契约）

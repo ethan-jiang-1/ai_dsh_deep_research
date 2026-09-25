@@ -1,9 +1,8 @@
 # RFC：M2 计划形状升级——把 rb_plan 的范围纪律与修订记录吸收进模板
 
-> 状态：**approved（2026-09-24 用户批准；同日实施落地——实施记录见文末）** · 2026-09-24 ·
-> 归宿：roadmap ▶「首个完整研究 run」
-> 依据：源头仓亲读实证——`dpt_rb_glm-5-3-deepseek-v4-domestic-chips/rb_plan.md`（真实
-> run 的计划书实物）对照本仓 `research-workspace/templates/run/`。
+> 状态：implemented
+
+2026-09-24 · 归宿：roadmap ▶「首个完整研究 run」 依据：源头仓亲读实证——`dpt_rb_glm-5-3-deepseek-v4-domestic-chips/rb_plan.md`（真实 run 的计划书实物）对照本仓 `research-workspace/templates/run/`。
 
 ## 依赖与落地次序
 

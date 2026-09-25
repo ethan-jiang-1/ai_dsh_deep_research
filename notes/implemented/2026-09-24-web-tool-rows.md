@@ -1,5 +1,7 @@
 # web-tool-rows 实证（毕业自 proposed/，2026-09-24）
 
+> 状态：implemented
+
 > 原 RFC：`notes/proposed/2026-09-24-web-tool-rows.md`（已离场）。条目"web-tool-rows 实证" +
 > "preset-smoke 真跑"已闭环，毕业归档；历史全貌见 git。
 

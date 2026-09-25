@@ -1,9 +1,8 @@
 # RFC：M2 运行机制——四角色团队在 DSH 上怎么真跑起来
 
-> 状态：**implemented（2026-09-25 M2 run 收口毕业；实施记录见文末——L4 四判据全闭）** ·
-> 2026-09-24 · 归宿：roadmap ▶「首个完整研究 run」
-> 依据：codex harness 考古（notes/research/2026-09-24-deep-research-harness-analysis.md）
-> + 本轮源头亲读（RUN.md / BUNDLE_ENTRY / rb_plan 实物）+ evaluation.md L4 全量判据。
+> 状态：implemented
+
+2026-09-24 · 归宿：roadmap ▶「首个完整研究 run」 依据：codex harness 考古（notes/research/2026-09-24-deep-research-harness-analysis.md） + 本轮源头亲读（RUN.md / BUNDLE_ENTRY / rb_plan 实物）+ evaluation.md L4 全量判据。
 
 ## 依赖与落地次序
 

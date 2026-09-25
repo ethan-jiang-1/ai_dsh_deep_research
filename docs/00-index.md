@@ -24,6 +24,7 @@
 | [design/10-architecture.md](./design/10-architecture.md) | 设计 | repo 形态与组合层（单包四角色）；通道选型（agent-team 主通道）；工具面；偏离登记 |
 | [design/20-roles.md](./design/20-roles.md) | 设计 | 四角色内容：职责 owner 表、persona 要素、skills 清单、信噪比策略落点 |
 | [design/30-methodology-mapping.md](./design/30-methodology-mapping.md) | 设计 | **方法论映射**：codex Deep Research harness 内核 → DSH 载体（L3 领域面的核心载体） |
+| [AGENTS.md](./AGENTS.md) | 指令 | **文档标准**（`docs/` 子树）：层级归属（一个事实一个家）/ 写作规则 / slop 清单 / 预算处置序——上游 `docs/AGENTS.md` 同构 |
 | [discipline-map.md](./discipline-map.md) | 合同 | **纪律全量枚举**：vendor 逐源三态表（照搬/带证据适配/不适用+理由）——AGENTS §纪律的正本（随 vendor 换 tag 重校） |
 | [根 roadmap.md](../roadmap.md) | 计划 | 队列（条目按主题命名、完成即离队）+ 搁置池 |
 | [guides/60-dev-loop.md](./guides/60-dev-loop.md) | 指南 | 开发环：六步闭环、面选择表、双 home、密钥 |
@@ -85,13 +86,17 @@
 | plugin / bundle / profile | plugin = 导出 `apply(ctx)` 的模块；bundle = 你编写与分发的单位（`dsh.bundle`）；profile = 用户 `dsh --profile` 启动的环境（`dsh.profile`）——**Nothing is both** | bundle = `packages/deep-research-pack/cordis.patch.yml`；profile = `dev/harness-home/profiles/research/`（镜像；源 = `dev/research.overlay.yml`） |
 | run bundle（一次调研的变量容器） | —（本仓原生概念，源头 = DEEP_RESEARCH_HARNESS run bundle） | 载体 = `research-workspace/drt_<slug>/`（契约 = 研究手册目录约定）；**消歧**：DSH "bundle 行"（cordis.patch.yml 配置行）≠ run bundle（一次调研的变量容器），后者禁缩写成裸 "bundle" |
 
-## 外部研究材料登记（repo 外，只读引用）
+## 外部研究材料登记（repo 外，只读引用；**钉版** = 路径 + 引用时的 HEAD commit）
 
-| 材料 | 内容 | 吸收落点 |
+钉版纪律（_agent_ready_development 语料吸纳）：repo 外引用必须能以固定身份复核。本机参考仓
+以 `路径 @ <short sha>` 记录；复核 = `git -C <路径> log -1 --format=%H` 与下表比对，不一致
+即"上游已前进、结论待复核"（重审触发路径见 [discipline-map](discipline-map.md#重审触发路径)）。
+
+| 材料（钉版身份） | 内容 | 吸收落点 |
 |---|---|---|
-| `/Users/bowhead/ai_tool_deepresearch/`（codex Deep Research harness 全仓） | 11-phase 生命周期 / wave 语义 / gate 体系 / 证据四层 / 反伪造教训 | 考古报告 `notes/research/2026-09-24-deep-research-harness-analysis.md` → 映射表 design/30 |
-| `/Users/bowhead/ai_dsh_company/`（DSH 插件工程范式仓） | 包结构 / patch 语法 / preset 教义 / verify 门禁 / 双 home / 垂直轮 | 解剖报告 `notes/research/2026-09-24-dsh-plugin-repo-anatomy.md` → design/10 + scripts/verify.mjs + dev/env.sh |
+| `/Users/bowhead/ai_tool_deepresearch/` @ `24ba84636` | | 11-phase 生命周期 / wave 语义 / gate 体系 / 证据四层 / 反伪造教训 | 考古报告 `notes/research/2026-09-24-deep-research-harness-analysis.md` → 映射表 design/30 |
+| `/Users/bowhead/ai_dsh_company/` @ `555215d` | | 包结构 / patch 语法 / preset 教义 / verify 门禁 / 双 home / 垂直轮 | 解剖报告 `notes/research/2026-09-24-dsh-plugin-repo-anatomy.md` → design/10 + scripts/verify.mjs + dev/env.sh |
 | DSH 插件生态（vendor 能力目录差集 + 第三方市场/清单，2026-09-24 快照） | workflow / mcp / session-query / compaction 等未采用能力；第三方 280+ 插件（14 类，未亲装） | 粗扫报告 `notes/research/2026-09-24-dsh-market-scout.md` → 认真琢磨 = 后续 research 条目（用户定节奏） |
 | DSH client/UI 扩展面（vendor slots/client-modules/hmr/remotes 正文档 + company client-face 五页签实例，2026-09-24 亲读+双代理考古） | 右栏平台页签契约（sidebarRightTabs + sidebar.right.pane.tab 双半注册）/ 数据通道（agentTeams.view·session.follow·workspaceFiles·@Remote）/ 双半 tsdown 构建契约 / 12 坑 | 琢磨稿 `notes/research/2026-09-24-ui-observability-surfaces.md`（选项 A–D + 渐进路径 + D7/搁置池张力 + 队列条目草案——用户推敲中，未入 roadmap） |
-| DSH SDLC reference（`/Users/bowhead/deepseek-harness/_agent_ready_development/sdlc-reference/`，2026-09-24 亲读 01-agent-note-lifecycle） | Agent Note 生命周期：决定覆盖（非提案优先）/ 取代检查硬触发 / 毕业正文改写 / alternatives 必载 / grandfather 条款 / 目录树代替索引 | [notes/README.md §决定覆盖与取代检查](../notes/README.md) + verify 门禁 note-format + [吸纳 Note](../notes/implemented/2026-09-24-note-lifecycle-absorption.md) |
-| **`_agent_ready_development/` 全语料**（三视角：sdlc-tutorial 5 篇 / sdlc-reference 11 篇 / repo-harness 9 篇 + `_coverage` 维护页 + 语料 verify.mjs，2026-09-25 全文通读） | 开发 harness 原理（知识归属/载体分工/参与阶梯/分层反馈/运行时查询/仓库分类学/插件作者入口）+ 语料级门禁（锚点、目录 README、钉版外链）+ 维护页（re-pin 轮次与重审触发） | [吸纳 Note](../notes/implemented/2026-09-25-agent-ready-absorption.md)（三态清单）→ `.agents/skills/`（四个开发技能）、[guides/62](./guides/62-plugin-authoring.md)、[discipline-map](./discipline-map.md) 源 6–8、[notes/README](../notes/README.md)，新门禁 `md-anchors` / `note-status` / `dev-skill-format` |
+| DSH SDLC reference（`/Users/bowhead/deepseek-harness/_agent_ready_development/sdlc-reference/` @ `efdba905b2`，2026-09-24 亲读 01-agent-note-lifecycle） | Agent Note 生命周期：决定覆盖（非提案优先）/ 取代检查硬触发 / 毕业正文改写 / alternatives 必载 / grandfather 条款 / 目录树代替索引 | [notes/README.md §决定覆盖与取代检查](../notes/README.md) + verify 门禁 note-format + [吸纳 Note](../notes/implemented/2026-09-24-note-lifecycle-absorption.md) |
+| **`_agent_ready_development/` 全语料** @ `efdba905b2`（三视角 37 篇 + `_coverage` 维护页 + 语料 verify.mjs，2026-09-25 全文通读；语料自身钉 DSH `dsh-v0.1.7-rc.1`） | 开发 harness 原理（知识归属/载体分工/参与阶梯/分层反馈/运行时查询/仓库分类学/插件作者入口）+ 语料级门禁（锚点、目录 README、钉版外链）+ 维护页（re-pin 轮次与重审触发） | [吸纳 Note](../notes/implemented/2026-09-25-agent-ready-absorption.md)（三态清单）→ `.agents/skills/`（四个开发技能）、[guides/62](./guides/62-plugin-authoring.md)、[discipline-map](./discipline-map.md) 源 6–8、[notes/README](../notes/README.md)，新门禁 `md-anchors` / `note-status` / `dev-skill-format` |

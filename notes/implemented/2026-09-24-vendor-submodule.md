@@ -1,7 +1,8 @@
 # RFC：vendor-submodule-and-pnpm-dsh——机制权威自持
 
-> 状态：**implemented（2026-09-24 同日立项同日毕业；实施记录见文末，本文件即毕业 Note）** ·
-> 归宿：roadmap §队列「vendor-submodule-and-pnpm-dsh」（已离队）· 偏离销账：D10 ✓
+> 状态：implemented
+
+归宿：roadmap §队列「vendor-submodule-and-pnpm-dsh」（已离队）· 偏离销账：D10 ✓
 
 ## 决定
 

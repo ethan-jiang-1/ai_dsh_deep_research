@@ -1,5 +1,7 @@
 # 入口链 fresh-agent 审计与卫生修正（用户 steer，非队列条目）
 
+> 状态：implemented
+
 > 来源：用户 steer ×2——① roadmap.md 移至 docs/ 顶层（常设队列信息，与入口链其余
 > 三件同级）；② 以 fresh-agent 视角审计信息架构（高信噪比 / 渐进式披露 / 从
 > AGENTS.md 按图索骥全覆盖——信息不过窄也不过载），不符则调整。本 Note = 收尾

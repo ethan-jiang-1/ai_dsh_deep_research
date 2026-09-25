@@ -1,5 +1,7 @@
 # Note：DSH Agent Note 生命周期点状吸纳（note-format 门禁 + 取代检查 + 毕业改写）
 
+> 状态：implemented
+
 > 2026-09-24 · 用户指令（"点和吸纳就行了，不要推翻我们现在"）· 来源：
 > `/Users/bowhead/deepseek-harness/_agent_ready_development/sdlc-reference/01-agent-note-lifecycle.md`
 > （DSH 官方 SDLC 参考，亲读全文）· 合同落点：[notes/README.md §决定覆盖与取代检查](../README.md)

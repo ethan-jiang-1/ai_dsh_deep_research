@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'entry-budget'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets'];
 
 const failures = [];
 const notes = [];
@@ -226,14 +226,16 @@ function roadmapQueue() {
   };
   // proposed/：RFC 状态行（与目录互验）+ 输掉的方案在场
   each('proposed', (ent, text) => {
-    if (!/^> 状态：\*{0,2}(proposed|approved|superseded)/m.test(text))
-      fail(gate, `notes/proposed/${ent}: 状态行缺席或值域外（proposed/approved/superseded）`);
+    if (!/^> 状态：\*{0,2}(proposed|approved|superseded)\*{0,2}\s*$/m.test(text))
+      fail(gate, `notes/proposed/${ent}: 状态行须为裸值（> 状态：proposed|approved|superseded；不带日期/括号——上游 Status 行同构）`);
     if (!/输掉的方案/.test(text))
       fail(gate, `notes/proposed/${ent}: 缺"输掉的方案"——没记击败了什么的决定会重开讼`);
   });
   // implemented/：骨架在场（决定 + 输掉的方案）；grandfather 条款豁免门禁生效前的遗留形态
   each('implemented', (ent, text) => {
     const g = GRANDFATHER.test(text);
+    if (!/^> 状态：\*{0,2}implemented\*{0,2}\s*$/m.test(text))
+      fail(gate, `notes/implemented/${ent}: 缺裸状态行（> 状态：implemented——目录↔状态互验）`);
     if (!/^## 决定/m.test(text) && !g)
       fail(gate, `notes/implemented/${ent}: 缺"## 决定"节（遗留形态须标 grandfather 注释，见 notes/README.md）`);
     if (!/^## 输掉的方案/m.test(text) && !g)
@@ -241,8 +243,8 @@ function roadmapQueue() {
   });
   // rejected/：否决状态行（提案体保留，结论在状态行）
   each('rejected', (ent, text) => {
-    if (!/^> 状态：\*{0,2}rejected/m.test(text))
-      fail(gate, `notes/rejected/${ent}: 缺 rejected 状态行`);
+    if (!/^> 状态：\*{0,2}rejected\*{0,2}(\s*—\s*.+)?$/m.test(text))
+      fail(gate, `notes/rejected/${ent}: 缺 rejected 状态行（裸值；一行理由用 —— 附在状态行后）`);
   });
 }
 
@@ -375,7 +377,9 @@ function roadmapQueue() {
   const gate = 'entry-chain';
   const members = ['AGENTS.md', 'docs/00-index.md', 'roadmap.md', 'notes/proposed',
     'docs/guides/60-dev-loop.md', 'docs/evaluation.md', 'docs/design/10-architecture.md',
-    'docs/design/20-roles.md', 'docs/design/30-methodology-mapping.md', 'docs/guides/61-run-playbook.md'];
+    'docs/design/20-roles.md', 'docs/design/30-methodology-mapping.md', 'docs/guides/61-run-playbook.md',
+    'docs/guides/62-plugin-authoring.md', 'docs/AGENTS.md', 'scripts/AGENTS.md', 'notes/AGENTS.md',
+    'packages/deep-research-pack/AGENTS.md'];
   for (const rel of members) {
     if (!existsSync(join(ROOT, rel))) fail(gate, `入口链成员缺席：${rel}（正本 = AGENTS.md §入口链；改链须同 diff 更新本门禁清单）`);
   }
@@ -390,17 +394,34 @@ function roadmapQueue() {
   }
 }
 
-// ── 门禁 13：entry-budget（常设入口防膨胀——vendor verify-doc-budgets 的裁剪版）──
-// 预算只防"常驻入口"膨胀：AGENTS.md（纪律表全量枚举替换在即，膨胀风险最高点）与
-// README.md（门面）。台账（00-index）与指南（guides/）是生长面，不设顶（vendor
-// "review governs unbudgeted tiers" 同款）。超顶处置序 = 下放（指针化）> 压缩 >
-// 升顶（升顶须 D 号 + Note 依据——a too-low ceiling is a budget bug）。
-// 行数 = split('\n') - 1（结尾恰一换行由 md-utf8-newline 门禁保证）。
+// ── 门禁 13：doc-budgets（常驻文档预算——上游 verify-doc-budgets 的等价物：预算由
+//    scripts/doc-budgets.json 拥有（不硬编码），登记项必须存在且不超限，仓内新增
+//    AGENTS.md 必须登记（缺登记即红）。台账（00-index）与 guides 是生长面，不设顶
+//    （vendor "review governs unbudgeted tiers" 同款）。行数 = split('\n') - 1
+//    （结尾恰一换行由 md-utf8-newline 保证）；运行区（dev/）与 vendor 不扫。──
 {
-  const gate = 'entry-budget';
-  for (const [rel, cap] of [['AGENTS.md', 145], ['README.md', 30]]) {
-    const lines = readFileSync(join(ROOT, rel), 'utf8').split('\n').length - 1;
-    if (lines > cap) fail(gate, `${rel} ${lines} 行 > 预算 ${cap} 行——处置序：下放/压缩；升顶须 D 号登记（evaluation.md §L0 登记表同 diff 更新上限值）`);
+  const gate = 'doc-budgets';
+  const manifestPath = join(ROOT, 'scripts', 'doc-budgets.json');
+  if (!existsSync(manifestPath)) fail(gate, 'scripts/doc-budgets.json 缺席——常驻文档预算的 owner');
+  else {
+    let manifest = {};
+    try { manifest = JSON.parse(readFileSync(manifestPath, 'utf8')); }
+    catch (error) { fail(gate, `doc-budgets.json 不是合法 JSON：${String(error).slice(0, 80)}`); }
+    const budgeted = Object.keys(manifest).filter((k) => !k.startsWith('_'));
+    for (const rel of budgeted) {
+      const f = join(ROOT, rel);
+      if (!existsSync(f)) { fail(gate, `${rel}: 已登记预算但文件缺席`); continue; }
+      const lines = readFileSync(f, 'utf8').split('\n').length - 1;
+      if (lines > manifest[rel]) {
+        fail(gate, `${rel} ${lines} 行 > 预算 ${manifest[rel]} 行——处置序：下放/压缩；升顶须改 manifest 并在同一变更登记理由`);
+      }
+    }
+    for (const p of allFiles) {
+      const rel = relative(ROOT, p);
+      if (!rel.endsWith('AGENTS.md')) continue;
+      if (rel.startsWith('dev/') || rel.startsWith('vendor/')) continue;
+      if (!Object.hasOwn(manifest, rel)) fail(gate, `${rel}: 常驻指令文件未登记预算（scripts/doc-budgets.json）`);
+    }
   }
 }
 

@@ -1,5 +1,7 @@
 # Agent 友好性整治轮记录（2026-09-24，入口链探针驱动）
 
+> 状态：implemented
+
 > 触发：用户指令"第一次提交之后不断打磨迭代，确保框架没有任何问题；要满足对 Agent 友好"。
 > 方法：全新上下文入口链探针（fresh subagent 只读 AGENTS → 00-index → roadmap → evaluation
 > 四文件答"现在"问题 + 审计矛盾）→ 逐条修复 → 门禁复绿。

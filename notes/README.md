@@ -73,7 +73,7 @@
 | 格式骨架 | `## Problem` / `Decision` / `Alternatives considered` / `Verification` 强制，`verify-agent-note-format` 门禁 | 中文骨架：决定 / 输掉的方案 / 实际跑过的验证 / 环境状态（guides/60 §4）+ **轻量门禁 `note-format`** |
 | 取代检查 | 子树 AGENTS.md 硬触发：每新增 Note 搜同决定/同机制，完整取代同 PR 归档旧 triplet | 同（2026-09-24 吸纳：更新 owner / 部分互链 / 完整吸收后才删旧——见上节） |
 | 集中索引 | 明文禁止建 `INDEX.md`（目录树即清单） | **部分偏离**：`research/` 有一份 README 目录表（人读的状态面），新鲜度由 `note-status` 门禁对账；其余目录仍不建索引 |
-| 状态标记 | `Status:` 行 + 目录互验（格式门禁） | 目录即状态；`proposed/` 与 `rejected/` 有状态行门禁；`research/` 有 `> 状态：已完成\|进行中` 门禁 |
+| 状态标记 | `Status: <status>` 头三行之第三行，裸值、无日期括号，目录互验（格式门禁） | 同构：`> 状态：<值>` 裸值 + 目录互验（`note-format` 门禁）；`research/` 另有 `> 状态：已完成\|进行中 · 日期`（报告层约定，非生命周期状态） |
 
 **原生权威**（机制核对一律走它）：`vendor/dsh/.agents/notes/README.md`、
 `vendor/dsh/.agents/notes/implemented/AGENTS.md`、`vendor/dsh/.agents/notes/archived/AGENTS.md`

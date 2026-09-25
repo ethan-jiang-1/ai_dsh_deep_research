@@ -1,8 +1,8 @@
 # RFC：entry-chain-probe——入口链探针脚本化
 
-> 状态：**implemented（2026-09-24 同日立项同日毕业；实施记录见文末）** ·
-> 归宿：roadmap §队列「entry-chain-probe」（已离队）· 语义版已人工两跑（2026-09-24
-> 定向 + 定点回归，见 implemented Note）——本条目 = 脚本化 + 制度化 ✓
+> 状态：implemented
+
+归宿：roadmap §队列「entry-chain-probe」（已离队）· 语义版已人工两跑（2026-09-24 定向 + 定点回归，见 implemented Note）——本条目 = 脚本化 + 制度化 ✓
 
 ## 决定
 

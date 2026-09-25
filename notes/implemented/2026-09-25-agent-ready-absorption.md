@@ -1,5 +1,7 @@
 # Agent-ready Development 吸纳（上游研发语料 → 本仓开发 harness）
 
+> 状态：implemented
+
 > 来源：`/Users/bowhead/deepseek-harness/_agent_ready_development/`（用户 2026-09-25 指令：
 > 我们是开发 DSH 插件的仓库，细节要与 DH 官方研发思路 align）。通读范围 = 语料 **37 篇 .md
 > 全部**（root/三个主题与图示 README、sdlc-tutorial 5 篇、sdlc-reference 11 篇、repo-harness
@@ -118,3 +120,55 @@
   `notes/research/*`（四个状态行）、`scripts/verify.mjs`（三条门禁）。
 - 未落地（登记为后续触发）：`.agents/notes/` 路径对齐、`implemented/` class 分层、`archived/`
   冻结树——各自引入条件写在 notes/README 差异表。
+
+## 复核轮（2026-09-25 二轮：改以 vendor 本体为主源）
+
+**动因**：用户质疑"确定完全对齐了吗"。一轮的读法是"读语料"——而语料是对 DSH `dsh-v0.1.7-rc.1`
+的**描述**，我们钉的 vendor 是 `dsh-v0.1.5-rc.2`，且语料**未覆盖**若干仓库本体约定。二轮改为
+逐条对照 `vendor/dsh/` 本体，差距如下（全部已落地）。
+
+| 二轮发现的差距 | vendor 证据 | 本仓落点 |
+|---|---|---|
+| **子树 `AGENTS.md` 层**：根只放每轮常驻指令，子树专属指令放子树 `AGENTS.md`（22 份） | `docs/AGENTS.md` tier 表 + 22 个子树文件 | 新建 `docs/AGENTS.md` · `scripts/AGENTS.md` · `notes/AGENTS.md` · `packages/deep-research-pack/AGENTS.md`；根瘦身 138 → 132 行（notes 段下放）；`entry-chain` 成员补四项 |
+| **文档标准文件**（层级归属 / 写作规则 / slop 清单 / 预算处置序 / 机检链接） | `docs/AGENTS.md` 全文 | [docs/AGENTS.md](../../docs/AGENTS.md)（中文适配；含 `## 已知限制与延后工作` 节约定） |
+| **门禁写作规则文件** | `scripts/AGENTS.md` | [scripts/AGENTS.md](../../scripts/AGENTS.md)（范围 tracked-only / 剥 `GIT_*` / 端口独占 / stdlib-only） |
+| **包级约定文件** | `packages/AGENTS.md` | [packages/deep-research-pack/AGENTS.md](../../packages/deep-research-pack/AGENTS.md)（三处同步 / 模型可见面 / roster 单一事实源） |
+| **Note 子树常设指令**（取代检查硬触发） | `.agents/notes/AGENTS.md` | [notes/AGENTS.md](../../notes/AGENTS.md)；根只留指针 |
+| **Note 头三行格式**：`Status:` 裸值、无日期括号、与目录互验；rejected 理由用 `—` 附行 | `.agents/notes/README.md` §The file format | `note-format` 门禁收紧为裸值正则；**25 篇 implemented 全部规整**（13 篇补状态行、12 篇去日期括号并把 provenance 落正文）；顺带修掉 3 篇"写 approved 却已在 implemented/"的目录↔状态不一致 |
+| **预算由 manifest 拥有**，门禁拒超限**与缺登记** | `scripts/doc-budgets.manifest.json` + `verify-doc-budgets` | 新建 [scripts/doc-budgets.json](../../scripts/doc-budgets.json)；门禁 `entry-budget` → `doc-budgets`（自动发现仓内 AGENTS.md 未登记即红） |
+| 根 AGENTS 的 **“Editing these instructions” 节** | 根 `AGENTS.md` §Editing these instructions | 根新增 §编辑这些指令 |
+| **外部证据钉版**（上游 URL 钉 commit） | 语料 `verify.mjs` 的钉版外链检查 | [00-index §外部研究材料](../../docs/00-index.md) 记 `路径 @ <short sha>`（`ai_dsh_company @ 555215d` · `ai_tool_deepresearch @ 24ba84636` · `deepseek-harness @ efdba905b2`）+ [discipline-map §重审触发路径](../../docs/discipline-map.md#重审触发路径) |
+
+**二轮更正的事实错误**：一轮源 5 曾写"vendor 与本仓 postmortem 均为空目录"——错在只查了
+`.agents/notes/postmortem/`（不存在）。vendor 的事故复盘住在 **`docs/postmortem/`**（10 篇
+编号条目 + README 判据）。已更正为带**层差异**的三态行（vendor 放 docs 层 / 本仓放 notes
+时间层），并按 vendor 判据收紧 [notes/postmortem/README.md](../../notes/postmortem/README.md)
+的进门条件（"bug 到达了不该到达的地方"）。
+
+**二轮明确不采纳（带理由）**：
+
+- **一段一行**（`verify-md-wrap`）：中文优先仓硬折行是既有惯例，整仓重排会淹没审阅（成本 >
+  收益）；引入条件 = 转英文或双语文档。登记在 docs/AGENTS.md 差异表。
+- **词数预算**：CJK 词数不可靠；改为行数（manifest 机制照搬，度量等价）。
+- **`.agents/notes/` 路径**：维持顶层 `notes/`（人类可发现性），差异登记在 notes/README。
+
+**二轮证据**：
+
+- **三条门禁反证（实测）**：`doc-budgets` 超限（AGENTS.md 145 > 140 → 红）、未登记子树
+  AGENTS（`tests/AGENTS.md` → 红）、`note-format` 缺裸状态行（删一行 → 红）；三者各自还原后绿；
+- **锚点门禁在真实改动中抓到新写坏的锚点**：00-index 指向 `discipline-map.md#重审触发路径`，
+  而该标题当时带括号尾注 → slug 不匹配 → 红；简化标题后绿。**这不是构造的负例**——是新门禁
+  在本轮改动里直接拦下的真实缺陷；
+- **子树 `AGENTS.md` 被运行中的 harness 作为局部指令注入**：四份文件写入后，本会话即出现
+  "Additional instructions from: docs/AGENTS.md / scripts/AGENTS.md / notes/AGENTS.md /
+  packages/deep-research-pack/AGENTS.md"——机制在场的行为实证（与 `.agents/skills/` 的目录
+  发现并列）。
+
+**环境状态（二轮后）**：门禁 20 条（`doc-budgets` 改名并 manifest 化）；常驻指令文件 7 份
+（根 + 四子树 + 研究手册）全部登记预算；`notes/implemented/` 25 篇全部带裸状态行；
+notes/README 差异表、notes/AGENTS.md、guides/60 §4、evaluation 台账同步。
+
+**二轮补充（同批）**：`tests/AGENTS.md`（证据放置 owner——vendor `snapshots/AGENTS.md` 规则
+的等价物：keyless 回归只放契约测试与夹具，运行产物/真会话日志不进仓）；子树 `CLAUDE.md`
+symlink **不追平**（vendor 自身只在根 · `packages/` · `vendor/` · `.agents/notes/implemented/`
+四处有，非一致约定）。

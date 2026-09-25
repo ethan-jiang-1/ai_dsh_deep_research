@@ -1,5 +1,7 @@
 # 基础整治(foundation-remediation)——交接单全条目闭档
 
+> 状态：implemented
+
 > 状态:implemented(2026-09-24)· 依据:《基础整治交接单.md》(临时工单,任务完成即删,
 > 本文即其全部内容的归宿)· 提交链:7c32541 → df2569a → 4104b44 → f0402dc →
 > c9ccf6f → c3cdeb7 → 8c526d7 → d9cf1ee(+本文终 commit)

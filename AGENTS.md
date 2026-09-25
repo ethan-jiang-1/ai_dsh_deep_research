@@ -22,6 +22,8 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 
 ```
 CLAUDE.md -> AGENTS.md    symlink（编辑真文件 AGENTS.md，verify 门禁校验）
+子树 AGENTS.md            docs/ · scripts/ · notes/ · packages/deep-research-pack/ · tests/ 各一份——只放该
+                         子树的指令（根只放每轮常驻指令；上游 22 个子树 AGENTS.md 同构）
 README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令/纪律/布局正本 = AGENTS.md，不复制）
 roadmap.md                队列 + 搁置池（纯队列：条目完成即离队；▶ = 全仓唯一"当前"指针）
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 随队列条目——见 pnpm-workspace.yaml 头注）
@@ -42,37 +44,21 @@ dev/                     boot-run.sh（run 通道开跑：幂等装+boot web+仪
 
 接下来开发什么 = §入口链 第 3 步的 ▶ 条目；开工/收尾程序 = 第 5 步。
 
-## `notes/`：DSH 开发流程的核心数据，不是历史附件
+## `notes/`：开发记忆（常设指令）
 
-**开工先查 notes，再改代码。** 这不是礼貌建议——`notes/` 是 DSH 开发记忆的主体（vendor
-`.agents/notes/` 同构）：代码承载实现、`docs/` 承载当前合同、**`notes/` 承载"为什么这样做 /
-放弃了什么 / 实现后要维持哪些事实 / 跑了什么验证"**。跳过它的代价是重复已否决的方案、踩已
-记录过的坑——这些事实不在代码里，也不在 docs 里。
+**开工先查 notes，再改代码**：按条目名/机制名检索（只读命中的，不通读全树）；非平凡变更
+**同一变更**里新增或更新 Note。细则是子树指令，不在这里复述：
 
-- **读取触发（开工即做）**：按条目名或机制名检索 `notes/proposed/`、`notes/implemented/`、
-  `notes/postmortem/`、`notes/rejected/`（否决防复犯）、`notes/research/`（调研报告与考古），
-  **只读命中的**，不通读全树。拿到决定、输掉的方案、边界与未核销清单再动手；
-- **写入触发（同 diff，非事后补）**：非平凡变更必须在**同一变更**里新增或更新 Note——纯机械
-  编辑与局部错字除外。收尾格式（决定/输掉的方案/实际跑过的验证/环境状态）= guides/60 §4；
-- **`proposed/` = 队列条目的 RFC 全文**（一文件一条目），进门须在 roadmap 有条目（verify
-  门禁 `proposal-scheduled` 机械强制）；条目收尾时毕业到 `implemented/`，队列行删除；
-- **`implemented/` 是活的决策记忆，不是冻结档案**：路径/名称/默认值随实现同 diff 维护；
-  想逆转某决定 → 写新 Note 并互链，**不改写旧 Note 成相反结论**；
-- **取代检查（每新增一篇 Note 触发；DSH SDLC reference 01 吸纳）**：搜活动树同决定/同
-  机制——已有 owner → 更新它不建重复；部分取代 → 双方互链；完整取代 → 新 Note 吸收旧
-  Note 全部独有内容后才可删旧；已交付决定直接进 implemented/，不必从 proposed/ 起步；
-- **`rejected/` = 否决理由**：保留的唯一条件是"它仍能阻止一个诱人的重犯"（含用户已拍板否决
-  的方向）；`postmortem/` = 事故复盘（事故叙事的唯一合法层）；
-- **RFC 状态行住在 RFC 自己的头部**（proposed / approved / superseded），不进 roadmap；
-  落地次序进队列行——细则见 [notes/proposed/README.md](notes/proposed/README.md)；
-- **时态总图 = [notes/README.md](notes/README.md)**（将来 `proposed/`、过去 `implemented/`
-  `rejected/` `postmortem/` `research/`；空 `proposed/` 是常态——下一步看 roadmap ▶）；
-  **任务流程**（毕业条目 / 加角色 / 写门禁 / 跑 run）= `.agents/skills/` 的开发技能，按
+- **时态总图 = [notes/README.md](notes/README.md)**（将来 `proposed/` · 过去
+  `implemented/` `rejected/` `postmortem/` `research/`；空 `proposed/` 是常态——下一步看
+  roadmap ▶）；
+- **写入触发 / 取代检查 / 格式与毕业 = [notes/AGENTS.md](notes/AGENTS.md)**；
+- **任务流程**（毕业条目 / 加角色 / 写门禁 / 跑 run）= `.agents/skills/` 开发技能，按
   description 触发加载，不占常驻上下文。
 
 原生定义（vendor 树内，本仓不复制）：`vendor/dsh/.agents/notes/README.md`（生命周期/分类/
-格式骨架）、`vendor/dsh/.agents/notes/implemented/AGENTS.md`（维护规则）、
-`vendor/dsh/.agents/notes/archived/AGENTS.md`（冻结语义）。本仓落地与差异见
+格式骨架）、`vendor/dsh/.agents/notes/AGENTS.md`（取代检查常设指令）、
+`vendor/dsh/.agents/notes/implemented/AGENTS.md`（维护规则）。本仓落地与差异见
 [notes/README.md](notes/README.md)。
 
 ## 命令表
@@ -131,6 +117,14 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 | D 号 | 偏离 | 约束证据 | 归宿 |
 |---|---|---|---|
 | （伴随） | node:test 而非 vitest；verify 用 regex 断言而非 YAML 解析 | ~~首版零 npm 依赖原则~~（vendor 落地后已引入 tsx/构建链）——**已重估维持**：测试栈零迁移收益（23 tests 绿即证据），断言对象是自控文件 | 重估记录 = [vendor-submodule 毕业 Note](notes/implemented/2026-09-24-vendor-submodule.md)（2026-09-24）；D10 已随同条目销账 |
+
+## 编辑这些指令
+
+`CLAUDE.md` symlink `AGENTS.md`（编辑真文件）。根 AGENTS.md 只放**每轮都要在场的常驻指令**
+（每条 1–3 行 + 链到 home）；子树专属指令放该子树的 `AGENTS.md`（`docs/` · `scripts/` ·
+`notes/` · `packages/deep-research-pack/` · `tests/`）。入口链成员与行数上限分别由 `entry-chain` 与
+`doc-budgets` 门禁把守；上限在 [scripts/doc-budgets.json](scripts/doc-budgets.json)，
+超限处置序 = 下放 > 压缩 > 升顶（升顶须同变更登记理由——上限过低是预算 bug）。
 
 ## 术语速查
 

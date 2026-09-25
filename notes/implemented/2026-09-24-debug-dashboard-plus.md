@@ -1,9 +1,8 @@
 # RFC：debug-dashboard-plus——仪表盘多场可见 + 流程感知 + HITL 等待横幅 + boot-run 瑕疵收尾
 
-> 状态：**implemented（2026-09-24 同日立项同日毕业；实施记录见文末）** ·
-> 归宿：roadmap §队列「debug-dashboard-plus」（已离队）· 设计依据：
-> [ui-observability-surfaces §3.1/§7](../research/2026-09-24-ui-observability-surfaces.md)
-> + 2026-09-24 run 错位事故（run 在旧通道跑了 40 分钟，观察面零感知——需求即时性实证）
+> 状态：implemented
+
+归宿：roadmap §队列「debug-dashboard-plus」（已离队）· 设计依据： [ui-observability-surfaces §3.1/§7](../research/2026-09-24-ui-observability-surfaces.md) + 2026-09-24 run 错位事故（run 在旧通道跑了 40 分钟，观察面零感知——需求即时性实证）
 
 ## 决定
 

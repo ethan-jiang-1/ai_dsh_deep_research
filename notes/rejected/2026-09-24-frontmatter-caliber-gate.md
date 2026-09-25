@@ -1,8 +1,7 @@
 # 否决：给 evidence frontmatter 加 caliber 字段并机械断言
 
-> 状态：rejected（2026-09-24，口径纪律定案时用户批准的范围 = 纪律文本先行；2026-09-24
-> 基础整治 §3.4 用户拍板从 data-caliber RFC 迁出独立成篇）——margin ≠ threshold，
-> 实测前别上 gate。
+> 状态：rejected — margin ≠ threshold：实测前别上 gate（口径纪律定案时用户批准的范围 =
+> 纪律文本先行；基础整治 §3.4 用户拍板从 data-caliber RFC 迁出独立成篇）。
 
 ## 原方案
 

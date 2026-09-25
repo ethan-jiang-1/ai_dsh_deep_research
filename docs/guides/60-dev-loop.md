@@ -70,9 +70,11 @@ source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名�
 ## 4. 收尾程序（同 diff，五件）
 
 1. docs 只写 now：改过的语义面同步对应文档（合同随代码同 diff）；
-2. 队列行删除 + RFC 毕业到 `notes/implemented/`（日期 = 主题首提日期，含：决定/输掉的
-   方案/实际跑过的验证/环境状态——note-format 门禁断言）；**毕业 = 正文改写**：计划体→
-   已交付事实体，未来时态/迁移计划删除——只改路径不改正文 = 未来计划伪装成当前事实；
+2. 队列行删除 + RFC 毕业到 `notes/implemented/`（日期 = 主题首提日期，含：状态行/决定/
+   输掉的方案/实际跑过的验证/环境状态——note-format 门禁断言；**状态行是裸值**
+   `> 状态：implemented`，不带日期括号，目录↔状态互验，其余 provenance 落正文）；**毕业 =
+   正文改写**：计划体→已交付事实体，未来时态/迁移计划删除——只改路径不改正文 = 未来计划
+   伪装成当前事实；
 3. `node scripts/verify.mjs` + `node --test tests/*.test.mjs` 全绿（涉及面按 §2 加跑）；
 4. 入口链探针（条目改动面含 docs/AGENTS 时必跑，否则按节奏）——机械版：
    `source dev/env.sh && node scripts/entry-chain-probe.mjs`（真模型档；时不变问法 × 4，
