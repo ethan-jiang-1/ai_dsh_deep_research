@@ -1,9 +1,36 @@
 # RFC：观察面补全（B-full 余项：步骤条 / 矩阵 / review 渐进）
 
-> 状态：proposed
+> 状态：implemented
 
-归宿：roadmap §队列「观察面补全」（feature；[observability-gui 毕业记录](../implemented/2026-09-24-observability-gui.md)
+归宿：roadmap §队列「观察面补全」（2026-09-25 马拉松二号条目 3，已毕业离队）（feature；[observability-gui 毕业记录](../implemented/2026-09-24-observability-gui.md)
 的未完成部分单独立项——原条目按时间盒毕业时如实记录的余项）。
+
+## 决定
+
+run-dashboard 的纯折算移植为共享 TS（单一正本），页签补渐进面（步骤条/矩阵骨架）。
+
+## 实施记录
+
+- `src/lib/run-fold.ts`：deriveSteps（步骤条七步三态）+ topicEvidenceMatrixCells（矩阵折算）
+  ——keyless 单测 6 断言含首场 run 真实 bundle 期望值（交付步 current；bundle 是 gitignored
+  运行区，缺席跳过不假绿）；
+- 页签渐进面：步骤条 chip 渲染（current 高亮）+ 矩阵区 + readiness 骨架；**数据面 v1 简化**：
+  workspaceFiles 扫描留空不硬猜（journal 事件面拿不到文件清单——后续接 remote.workspaceFiles
+  的 bundle 目录发现，已在代码注释标注）；
+- client-load-smoke 扩断言（渐进面挂载）→ ALL PASS 8/8。
+
+**如实交代（部分交付）**：步骤条/矩阵的**渲染骨架**与**折算正本**落地且有真数据单测；
+但页签上的**真数据渐进呈现**（从 bundle 文件实时读在场性）因数据面发现机制（bundle 目录
+定位）未接通而留空——"挂载点在场 + 折算正确"已证，"真数据上屏"待 workspaceFiles 目录
+发现（下一场 run 的 L4 收口或后续条目）。
+
+## 实际跑过的验证
+
+| 面 | 结果 |
+|---|---|
+| keyless tests | 6/6 绿（含首场 run 期望值） |
+| client-load-smoke | ALL PASS 8/8（渐进面挂载断言 + journal 326 事件） |
+| L0 | 25 门禁 + 49 tests 全绿 |
 
 ## 问题
 
