@@ -23,7 +23,10 @@ bundle 落 `drt_<slug>/`。可选组合：观察面 GUI 化交付后同场验收
 - **自造题目刷覆盖**：否决——真实问题才有真压力（评估面教义：真模型、真实问题）；
 - **等 GUI 全好才跑**：可议——GUI 前 run 也有效（D 路仪表盘已可用），不必串行死等。
 
-## 验收（含延期收口的观察面真人档）
+## 验收（含延期收口的观察面真人档 + 证据可靠性面）
+
+- 证据可靠性（自 [evidence-reliability RFC](2026-09-25-evidence-reliability.md)）：bundle 含 audit.md 且关键结论佐证结构达标；
+
 
 - 观察面真人档（自 [observability-gui 毕业记录](../implemented/2026-09-24-observability-gui.md) 延期）：活标题/横幅目验 + 矩阵/review 状态与 run bundle 对账；
 

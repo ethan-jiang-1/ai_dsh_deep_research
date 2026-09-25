@@ -13,8 +13,15 @@
 > ③ GUI 是主菜，真人 HITL run 验收**延期给④**；④需用户带题（真人拍板，静默期做不了），
 > 兼③的真 run 验收载体；⑤用户节奏触发。
 
-1. ▶ **研究类型覆盖**（研究，**用户带题驱动**：真人 HITL、类型 ≠ 首场）——兼观察面 GUI 化的
-   真人档验收（活标题/页签目验 + 矩阵/review 对账）；顺手取证 synthesizer/floor 重估证据。
+1. ▶ **证据可靠性面**（feature/卫生；用户 2026-09-25 点名）——信源分级（source_tier 四级 +
+   域名）+ 交叉验证纪律（关键结论 ≥2 独立信源，单源显性标注；独立性判定归 critic）+
+   **机械对账工具**（evidence-audit：source_url 须在会话日志 web 工具结果里真实出现、引句
+   转写可回溯、final 溯源链完整 → run bundle audit.md——"是不是幻觉"变机检）。
+   **先于下一场 run 落地**，该 run 即其验收载体。
+   RFC = [2026-09-25-evidence-reliability](notes/proposed/2026-09-25-evidence-reliability.md)。
+2. **研究类型覆盖**（研究，**用户带题驱动**：真人 HITL、类型 ≠ 首场）——兼观察面 GUI 化的
+   真人档验收 + 证据可靠性面的 run 级验收（bundle 含 audit.md 且佐证结构达标）；顺手取证
+   synthesizer/floor 重估证据。
    RFC = [2026-09-25-research-type-coverage](notes/proposed/2026-09-25-research-type-coverage.md)。
 2. **DSH 插件生态认真研究**（研究，用户节奏触发）——粗扫后续：生态缺什么、定位独占性。
    RFC = [2026-09-24-dsh-plugin-ecosystem-research](notes/proposed/2026-09-24-dsh-plugin-ecosystem-research.md)。
