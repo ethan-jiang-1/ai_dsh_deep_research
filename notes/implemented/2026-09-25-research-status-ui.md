@@ -1,9 +1,27 @@
 # RFC：研究状态界面（UI 优先——把界面弄对）
 
-> 状态：proposed
+> 状态：implemented
 
 归宿：roadmap §队列 ▶「研究状态界面」（feature；用户 2026-09-25 指令："先别搞逻辑了，
 先把界面弄对"——对观察面 tab 的直接评价：**分析不太出来**=人看不懂）。
+
+## 决定
+
+页签从工程验证面改为人能读的研究界面：人性化活动流（原始事件类型名全替换）+ 五区布局
+（HITL 横幅/问题行/步骤条/证据交付/活动流）。
+
+## 实施记录
+
+- `src/lib/activity-fold.ts`：journal 事件 → 人性化行（🔍 检索/👥 派出/💬 成员/📦 交付），
+  噪音全过滤（step/turn/session/system/permission/user/其他工具/空 query）——keyless 4 断言；
+- 页签五区重构 + workspaceFiles 闭包注入（listDir/readFile，company 同款降级 null）；
+- client-load-smoke 8 断言 ALL PASS：**人性化活动流 15 行** + **噪音零残留**（6 种原始类型名
+  全无）+ 渐进面如实记观察点。
+
+**如实记档（部分交付）**：活动流与噪音过滤是本条目的核心交付（人看懂了——✅）；bundle
+渐进面（步骤条/证据/交付的**真数据上屏**）因 workspaceFiles list 路径问题未接通——RPC
+探测 5 种路径全 ok=false（'', '.', '/', 'drt_*', 'research-workspace'），组件代码已就位
+（数据来了就渲染），**待查 API 调用形态**。截图留档 research-status-ui.png。
 
 ## 问题
 
