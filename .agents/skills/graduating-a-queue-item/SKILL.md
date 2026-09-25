@@ -5,6 +5,8 @@ description: Use when a roadmap queue item is delivered or abandoned and must le
 
 # 毕业一个队列条目
 
+本技能是 **guidance，不是 checklist**：按实际 diff 与风险选择动作，完成判据在各步末；相关技能：[`.agents/skills/writing-a-gate`](../writing-a-gate/SKILL.md) · [`.agents/skills/running-a-research-run`](../running-a-research-run/SKILL.md)。
+
 条目收尾是一次**原子移动**：队列行、RFC 位置、正文时态、门禁、台账同一步完成。
 判据由 `docs/evaluation.md` 与该条目的 RFC §验收 拥有；本技能只给执行顺序与判断点。
 

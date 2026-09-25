@@ -27,8 +27,6 @@
     "@deepseek-ai/dsh-tool-present": "workspace:*",
     "@deepseek-ai/dsh-experimental-agent-team": "workspace:*",
     "@deepseek-ai/dsh-experimental-tool-agent-team": "workspace:*",
-    "@deepseek-ai/dsh-experimental-client-ui-agent-team": "workspace:*",
-    "@deepseek-ai/dsh-llm-replay": "workspace:*",
-    "@deepseek-ai/dsh-session-snapshot": "workspace:*"
+    "@deepseek-ai/dsh-experimental-client-ui-agent-team": "workspace:*"
   }
 }

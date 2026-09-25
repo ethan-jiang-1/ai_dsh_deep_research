@@ -5,6 +5,8 @@ description: Use when adding, widening, or retiring a mechanical check in script
 
 # 新增一条机械门禁
 
+本技能是 **guidance，不是 checklist**：按实际 diff 与风险选择动作，完成判据在各步末；相关技能：[`.agents/skills/graduating-a-queue-item`](../graduating-a-queue-item/SKILL.md)。
+
 门禁的价值只在"它会红"。一条永远为绿的脚本不是保护，是假安全感（DSH testing policy：
 *A guard only guards if the regression fails it*）。所以顺序是：**先想红，再写绿**。
 
@@ -19,6 +21,9 @@ description: Use when adding, widening, or retiring a mechanical check in script
 失败驱动，而不是从"检查失败"猜原因。
 
 ## 2. 定范围（最常错的一步）
+
+**防空语料**：扫描型门禁必须对"扫到 0 个文件/范围被收窄"判红——静默变成空集的门禁等于不存在；
+**边界形态要测**：每个被纳入与被排除的形态各留一条断言（含空格路径、symlink、忽略目录）。
 
 - 覆盖面用 `git ls-files` 驱动 = **tracked-only**：运行区（`dev/harness-home/`、
   `research-workspace/drt_*`）不进 L0，否则 pre-commit 会被 run 产物拦红（实测教训）；

@@ -31,3 +31,26 @@ Deep Research 插件包：四角色 preset + host bundle 行。当前为**纯配
 3. `cordis.patch.yml` **不用改**（bundle 行只管 roster/工具，不管 skill）；
 4. 文档**不用改**：skills 清单的单一事实源 = 盘上目录（20-roles §2 已路由，基础整治 C8）；仅当 skill 承载**新方法论条目**时，`docs/design/30-methodology-mapping.md` 同 diff（L3 合同）；
 5. 完成定义 = `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs` 绿——它断言每角色 `skills/list` **恰好等于**盘上目录，多一个少一个都会红。
+
+## 模型体验（Model Experience）
+
+本包不写代码，但**它贡献的每一行都进模型请求**——本节是这些可见面的合同（vendor 包 README
+的 Model Experience 节吸纳，KV-cache 面在本包不适用：无自有请求构造）。
+
+| 贡献 | 模型看到什么 | 代价/影响 |
+|---|---|---|
+| `presets/<role>/agent.cordis.yml` 的 persona 行 | 该角色会话的系统提示前缀（角色职责与边界） | 每个会话常驻；改动 = 模型可见面变更，需真模型档证据 |
+| `presets/<role>/skills/<n>/SKILL.md` | **按需加载**：先只给 name + description，命中任务才读全文 | description 是常驻成本（短、带触发条件）；正文只在选中时付费 |
+| preset 的工具行（`tools:` 段） | 该角色的工具 schema 清单 | 行列错/漏 = 角色缺工具或多工具（`row-deps` + L1 真挂载门禁把守） |
+| 研究手册注入（`research-workspace/AGENTS.md`，经 agent-instructions） | 每次角色会话的 workspace 指令段 | 常驻；改文本需重启 run 通道（web 进程缓存 boot 时文本） |
+
+## 已知限制与延后工作
+
+- **无 TypeScript 插件代码**：本包是纯配置 bundle；要贡献代码级能力（新工具/新 provider）必须
+  新增 TS 包并走 `vendor/dsh/docs/user/develop/basic/` 的插件路径——当前无此需求。
+- **persona/skill 文本的运行时缓存**：web 进程在 boot 时读取文本；改完 pack 文本必须重启 run
+  通道才生效（实测：spawn 出的成员拿到修复前的 persona）。
+- **成员不继承角色 persona**：`spawn_teammate` 成员挂 roster 默认 preset（= lead），角色人格经
+  lead 的 spawn prompt 传达（Q2 实测结论）；本包无法在配置层改变这一点。
+- **`dsh-experimental-*` 层是 experimental**：agent-team 系列无稳定性承诺，随 vendor 升 pin
+  可能破坏（升 pin 条目负责重校）。

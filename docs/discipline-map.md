@@ -11,7 +11,7 @@
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
 | Model-visible ⟺ logged（进模型请求的输入必须可从会话日志重建） | 会话日志即真相：L4-lite/探针断言全走 zstd 日志逐事件；手册完成判据 = 文件事实 | 照搬 |
-| Misconfiguration fails loud（配置错在最早可判定点炸，不静默跳过） | verify 17 门禁全 fail-loud；boot-run 漂移检测；design/10 记 ENOENT 静默空教训 | 照搬 |
+| Misconfiguration fails loud（配置错在最早可判定点炸，不静默跳过） | verify 门禁全 fail-loud（清单正本 = evaluation §L0）；boot-run 漂移检测；design/10 记 ENOENT 静默空教训 | 照搬 |
 | Files end with exactly one trailing newline | verify 门禁 md-utf8-newline（tracked 全量） | 照搬 |
 | Non-trivial changes MUST include an Agent Note in the same PR（机械/局部编辑豁免） | AGENTS §notes 写入触发（同 diff）+ note-format 门禁（骨架/状态行） | 照搬 |
 | Plugins, not loop changes（新行为走扩展点，不改 agent-loop） | 本包只经组合面贡献（preset/skill/bundle 行），循环属 DSH 侧 | 带证据适配（纯配置包天然满足；vendor 循环不在本仓改动面） |

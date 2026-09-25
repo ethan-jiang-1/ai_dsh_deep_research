@@ -5,6 +5,8 @@ description: Use when adding a research role preset, renaming one, or changing a
 
 # 新增或修改研究角色
 
+本技能是 **guidance，不是 checklist**：按实际 diff 与风险选择动作，完成判据在各步末；相关技能：[`.agents/skills/writing-a-gate`](../writing-a-gate/SKILL.md) · [`.agents/skills/running-a-research-run`](../running-a-research-run/SKILL.md)。
+
 角色 = 一个 preset 目录；它同时被三处消费：源码域（overlay）、镜像（`$DSH_HOME` profile）、
 roster（角色清单）。**三处不同步 = 角色在场但行为不对**，所以顺序固定。
 

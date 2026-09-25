@@ -225,3 +225,16 @@ gitignored 运行区，可重跑复现），聚合成 **80 个唯一源面**。
 6. **技能形式**：vendor 技能多在首段声明"这是 guidance 不是 checklist"、用 `references/` 分层、
    技能间互链（24 处）——本仓四技能全无；
 7. **复盘开头**：vendor 复盘有"三十秒摘要"起手节——本仓五节骨架缺此节。
+
+**三轮（同批续）：缺口收敛结果**
+
+| 缺口 | 结果 | 证据 |
+|---|---|---|
+| vendored 链接无门禁 | **已落地**：门禁 `vendor-links`（devDep 必须在 lockfile importer 解析为 `link:vendor/dsh/...`；overrides 三件套无 registry 条目；`link:vendor/dsh/` 为 0 即红） | 三形态红证（改 registry 版 / 注入 registry 条目 / 清空 link） |
+| 声明未用的依赖 | **已核销**：`dsh-session-snapshot`、`dsh-llm-replay` 移除（E1 修复的最小集是 14 而非 16） | 移除后双通道复跑：research profile 真模型调用 ✅ + `l4-lite-smoke` ALL PASS ✅ |
+| docs 写作顺序 / 分类 | **已落地**：docs/AGENTS.md 新增「分类与写作顺序」（tutorial/reference、前置与难度、作者六步）+ 配方页新鲜度契约（预算同步升顶 70→85，理由同变更） | verify 绿（doc-budgets 覆盖升顶） |
+| 门禁防空/收窄语料 | **已落地**：scripts/AGENTS.md 新增「语料面纪律」+ writing-a-gate 同步（防空集、测边界形态） | — |
+| 包 README 义务节 | **已落地**：pack README 新增「模型体验」（persona/skill/工具行/手册注入的可见面与代价）与「已知限制与延后工作」四节 | — |
+| 技能形式（guidance 声明/互链） | **已落地**：四个技能首段加「guidance 不是 checklist」+ 相关技能互链 | — |
+| 复盘三十秒摘要 | **已落地**：notes/postmortem/README 起手节（一至三句：什么坏了/影响谁/根因） | — |
+| keyless 录制快照面 | **未落地（进搁置池）**：模型/用户可见输出的 keyless 回归证据仍靠真挂载冒烟与真模型档；引入条件 = 需要"输出快照"级回归时 | 见 roadmap 搁置池 |

@@ -28,15 +28,9 @@ importers:
       '@deepseek-ai/dsh-experimental-tool-agent-team':
         specifier: workspace:*
         version: link:vendor/dsh/packages/experimental/tool-agent-team
-      '@deepseek-ai/dsh-llm-replay':
-        specifier: workspace:*
-        version: link:vendor/dsh/packages/test-support/llm-replay
       '@deepseek-ai/dsh-persona':
         specifier: workspace:*
         version: link:vendor/dsh/packages/preset/persona
-      '@deepseek-ai/dsh-session-snapshot':
-        specifier: workspace:*
-        version: link:vendor/dsh/packages/test-support/session-snapshot
       '@deepseek-ai/dsh-skill-filesystem':
         specifier: workspace:*
         version: link:vendor/dsh/packages/skill/skill-filesystem

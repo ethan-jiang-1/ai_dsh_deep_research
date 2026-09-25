@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links'];
 
 const failures = [];
 const notes = [];
@@ -629,6 +629,42 @@ function roadmapQueue() {
   const hook = read('dev/hooks/pre-commit');
   if (hook === null) fail(gate, 'dev/hooks/pre-commit 缺席');
   else if (!hook.includes('git diff --cached --check')) fail(gate, 'pre-commit 缺 git diff --cached --check（暂存面空白/冲突标记检查，vendor lefthook whitespace 作业）');
+}
+
+// ── 门禁 23：vendor-links（vendored 解析的机械面——vendor/README.md 的 verify-vendored-links
+//    等价物；E1 事故的教训：registry 副本一旦混进闭包，机制基线的行为就与本仓 vendor 树脱钩。
+//    ① 根 package.json 的每个 @deepseek-ai/* devDependency 在 lockfile importer 里解析为
+//       link:vendor/dsh/...；② overrides 三件套（cordis/cosmokit/schemastery）不得有 registry
+//       包条目；③ 防空语料：link:vendor/dsh/ 出现 0 次即红。）──
+{
+  const gate = 'vendor-links';
+  const lockPath = join(ROOT, 'pnpm-lock.yaml');
+  const pkgPath = join(ROOT, 'package.json');
+  if (!existsSync(lockPath)) fail(gate, 'pnpm-lock.yaml 缺席');
+  else if (!existsSync(pkgPath)) fail(gate, 'package.json 缺席');
+  else {
+    const lock = readFileSync(lockPath, 'utf8');
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+    const links = lock.match(/link:vendor\/dsh\//g) ?? [];
+    if (links.length === 0) fail(gate, 'lockfile 里 link:vendor/dsh/ 出现 0 次——vendored 解析面为空（防空语料）');
+    const lockLines = lock.split('\n');
+    const deps = Object.keys(pkg.devDependencies ?? {}).filter((d) => d.startsWith('@deepseek-ai/'));
+    for (const dep of deps) {
+      const i = lockLines.findIndex((l) => l.trim() === `'${dep}':`);
+      if (i === -1) {
+        fail(gate, `${dep}: lockfile importer 无该 devDependency 条目（lock 与 package.json 不同步？跑 pnpm install）`);
+        continue;
+      }
+      if (!/version: link:vendor\/dsh\//.test(lockLines.slice(i, i + 4).join('\n'))) {
+        fail(gate, `${dep}: 未解析为 link:vendor/dsh/...（registry 副本混入闭包？E1 事故再现——见 vendor/README.md 的 vendored 链接规则）`);
+      }
+    }
+    for (const name of ['cordis', 'cosmokit', 'schemastery']) {
+      if (new RegExp(`^  /?@deepseek-ai/${name}@\\d`, 'm').test(lock)) {
+        fail(gate, `lockfile 里有 @deepseek-ai/${name} 的 registry 版本条目——overrides 的 link: 钉法失效`);
+      }
+    }
+  }
 }
 
 // ── 汇报 ──
