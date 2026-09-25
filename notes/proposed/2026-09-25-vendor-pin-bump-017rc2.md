@@ -160,3 +160,32 @@ vendor 树仍干净。**升 pin 固定动作补两条：删 `lib/` + 删 `*.tsbu
 **下一轮入口**：先跑 L2（`node scripts/release-smoke.mjs`，它自带干净 profile 构建）拿到新 RC
 的第一个端到端绿点 → 再按需重建 dev home profile 使 L1 真挂载绿 → 之后 L4 真模型三脚本 →
 阶段三逐条重审 + 复核结论。
+
+## 构建卡点精确定位（本轮结论，2026-09-25）
+
+**为什么必须构建**：0.1.7 新增 `typert-loader` 贡献者机制——启动时它 import 每个贡献包的
+`./typert` 子路径（`lib/typert.host.js`）。实测诊断（`dev/harness-home/logs/startup-*.log`）：
+`typert-loader: 21 typert contributor(s) failed to register … Cannot find module …/lib/typert.host.js`
+→ **主线在 0.1.7 必须有 host 面构建产物**（源码启动不再自足）；`lib/typert.host.js` 由
+`tsdown` + `typertPlugin` 在 host 遍生成。
+
+**卡在哪**：vendor 自己的 `pnpm run build:lib:host` = `tsc -b tsconfig.host.json`（✅ 逐包产出
+`lib/types/**`）+ `tsdown --env.DSH_BUILD_FACE host`（❌）。tsdown 报
+`[@deepseek-ai/dsh-root] Cannot find entry: ["lib/types/{index,invariant,startup}.js"]`：
+根 `tsdown.config.ts` 的 entry glob 是**逐单元**应用的（各包用自己 tsc 产出的 `lib/types/*` 当入口），
+而 **root 包没有 src、也就没有 `lib/types/*`** → 根单元必红。这不是我们引入的：语料维护页记过
+同类（`doc-typecheck` 缺同一组入口）；vendor 自带 `pnpm run clean` 在旧残留上也会自我失败。
+
+**已试**：`tsdown -F '/^(?!@deepseek-ai\/dsh-root$)/'` → `No valid configuration found`
+（`-F` 是正向 name/cwd 过滤，不支持负向排除）。
+
+**下一轮可选路径（按代价排序）**：
+
+1. 摸清 `-F` 语义（正向逐名过滤出需要的包）→ 用我们自己的封装脚本跑 host 构建
+   （不改 vendor：命令与配置都在本仓，产物落 vendor 的 gitignored `lib/`）；
+2. 本仓写一份 host 构建配置（`entry` 不设/按包 exports 派生 + `typertPlugin` 用绝对路径 import），
+   以 `tsdown -c <本仓配置>` 覆盖 root 单元行为；
+3. 只对 21 个 typert 贡献包逐个跑 typert 生成（最窄，但要自己驱动插件）。
+
+**旁证/记账**：`tsc -b tsconfig.host.json` 与 `tsc -b tsconfig.client.json` 都跑得通；
+本轮也已把「清陈旧 `lib/` + 清 `*.tsbuildinfo`」写进升 pin 固定动作。
