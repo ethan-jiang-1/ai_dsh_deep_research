@@ -153,6 +153,9 @@ try {
       const paneText = await page.evaluate(() => document.body?.innerText ?? '')
       const paneOk = paneText.includes('journal 流')
       step(paneOk, '页签体渲染（keyed 槽体挂对 key + follow 通道接通）')
+      // B-full 余项断言：渐进面（步骤条/矩阵）——渲染挂载点在场（数据面 v1 简化为空态不硬猜）
+      const stepsOk = paneText.includes('立项') && paneText.includes('交付')
+      step(stepsOk, '页签渐进面挂载（步骤条七步渲染骨架）')
       if (paneOk) {
         const m = /journal 流（(\d+) 事件）/.exec(paneText)
         step(m !== null && Number(m[1]) >= 1, 'journal 流有真数据（snapshot 历史 ≥1 事件）', m ? '' + m[1] + ' 事件' : '未见计数（等待会话态？）')

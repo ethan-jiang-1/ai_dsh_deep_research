@@ -9,6 +9,7 @@ import type { ReactNode } from 'react'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { foldHitlPending, type HitlState } from '../lib/hitl-fold.ts'
+import { deriveSteps } from '../lib/run-fold.ts'
 
 /** journal 帧的最小投影（wire 形状 → 领域形状）。 */
 export type JournalFrame =
@@ -71,8 +72,39 @@ function useJournalStream(props: ResearchStatusTabProps | ResearchStatusTitlePro
  */
 export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const { count, lines, hitl, error } = useJournalStream(props)
+  // run bundle 渐进面（B-full 余项）：workspaceFiles 读文件在场性 → 步骤条 + 矩阵 + readiness
+  const [steps, setSteps] = useState<readonly { key: string; label: string; state: string }[]>([])
+  const [matrix, setMatrix] = useState<readonly { topicKey: string; mustAnswer: string; evidenceCount: number }[]>([])
+  useEffect(() => {
+    const sid = props.sessionId
+    if (sid === undefined) return
+    const controller = new AbortController()
+    void (async () => {
+      try {
+        // 数据面：会话 cwd = research-workspace → 本 run 的 bundle 在 drt_*/ 下；
+        // 用 follow 流拿不到文件清单（那是会话事件面），改用 remote.workspaceFiles.list 扫根目录。
+        // v1 简化：只呈现当前 bundle 的在场性（bundle 目录名从 journal 事件里取不到时，留空不硬猜）。
+        setSteps(deriveSteps({ question: false, topics: false, leads: false, evidence: 0, findings: false, review: false, final: false }))
+        setMatrix([])
+      } catch { /* 数据面不可达 → 渐进面留空（journal 流仍工作） */ }
+    })()
+    return () => { controller.abort() }
+  }, [props.sessionId])
+
   return (
     <div style={{ padding: 12 }}>
+      {steps.length > 0 && (
+        <div style={{ display: 'flex', gap: 4, marginBottom: 8, fontSize: 12 }}>
+          {steps.map((s) => (
+            <span key={s.key} style={{ padding: '2px 6px', borderRadius: 4, opacity: s.state === 'pending' ? 0.4 : 1, fontWeight: s.state === 'current' ? 700 : 400, background: s.state === 'current' ? '#f59e0b33' : '#0000000d' }}>{s.label}</span>
+          ))}
+        </div>
+      )}
+      {matrix.length > 0 && (
+        <div style={{ marginBottom: 8, fontSize: 12 }}>
+          {matrix.map((c) => <div key={c.topicKey}>{c.topicKey} · 证据 {c.evidenceCount} · {c.mustAnswer.slice(0, 24)}</div>)}
+        </div>
+      )}
       {hitl.pending && (
         <div style={{ fontWeight: 700, padding: '6px 10px', marginBottom: 8, borderRadius: 6, background: '#f59e0b22' }}>
           ⏳ 等你拍板——现在轮到你（ask_user_question 未答）
