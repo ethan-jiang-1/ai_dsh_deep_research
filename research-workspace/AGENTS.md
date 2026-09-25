@@ -53,20 +53,40 @@ drafts/journal 运行时自建。
 
 ## 证据文件契约（evidence/ 下的硬格式）
 
-frontmatter 必须有：`source_url`（真实抓取过的 URL）/ `retrieved_at` / `quality`（A–D）/
-`found_by` / `supports`。正文"原文摘录"与"解读"两节分开。以上即最小契约，**所有角色按此判**；
-analyst 会话内另有全文模板（`evidence-extraction` skill——skills 按角色硬隔离，其他角色
-加载不到，判据以本手册为准）。**没有 frontmatter 的文件不算证据**（critic 按此判）。
+frontmatter 必须有（七字段）：`source_url`（真实抓取过的 URL）/ `retrieved_at` / `quality`
+（A–D）/ `found_by` / `supports` / `source_tier`（信源分级，见下表）/ `publisher`（注册域）。
+正文"原文摘录"与"解读"两节分开。以上即最小契约，**所有角色按此判**；analyst 会话内另有
+全文模板（`evidence-extraction` skill——skills 按角色硬隔离，其他角色加载不到，判据以
+本手册为准）。**没有 frontmatter 的文件不算证据**（critic 按此判）。
 **口径最小契约**（与 frontmatter 同级）：数字/规格类摘录须带测量条件口径（版本/配置/
 时间/原文限定语至少两项；口径不明写"口径不明"）——所有角色按此判。
 
-**有效证据谓词（观察面对账）**：run 仪表盘（scripts/run-dashboard.mjs）按同一契约渲染——
-**五字段全齐才算有效证据，缺任一字段标无效**（不计入 topic × evidence 矩阵）；谓词正本
-= 本节，tests/evaluation-contract.test.mjs 对账。
+**信源分级表（source_tier 唯一正本；scout 的质量分级与 quality 字段共用 A–D，tier 描述
+信源身份、quality 描述内容质量，两者独立）**：
 
-**机械强度诚实记账**：本契约的机械检查 = L0 契约测试（五字段在场 + 各执行者副本对账）
-+ 仪表盘渲染谓词（上述）；run 内执法 = critic 狩猎（散文判断）。verify 门禁不扫
-bundle（gitignored 运行区）——run 数据的完整性由 critic + 仪表盘呈现，不在 L0。
+| tier | 判据 | 例 |
+|---|---|---|
+| `primary` | 一手：官方文档/论文/财报/标准文档/原始数据 | 官网 spec、arXiv 论文 |
+| `secondary` | 权威二手：主流媒体/权威机构/知名智库 | 路透、IEEE Spectrum |
+| `tertiary` | 行业博客/技术社区/厂商技术文章 | 个人技术博客、Stack Overflow |
+| `weak` | 论坛/自媒体/内容农场/聚合转载站 | Reddit、营销号 |
+
+**交叉验证纪律**：进 `final/` 的关键结论（支撑 must-answer 的）须 **≥2 个独立信源**——
+独立性 = **不同注册域，且非同一通稿/转载链**（判定归 critic：同源两票不算两票）。单源
+结论不硬禁（快速事实核查型 run 可能天然单源），但必须显式标注`单源——待破`并在 review.md
+说明风险——**显性化而不是静默**。
+
+**有效证据谓词（观察面对账，分层）**：run 仪表盘（scripts/run-dashboard.mjs）按同一契约
+渲染——**硬五字段**（source_url / retrieved_at / quality / found_by / supports）全齐才算
+有效证据，缺任一标无效（不计入 topic × evidence 矩阵）；**软二字段**（source_tier /
+publisher）缺失不否决有效性，标"未分级"（旧 run 的存量证据按此显示，不回填——run bundle
+是交付记录，不改历史）；谓词正本 = 本节，tests/evaluation-contract.test.mjs 对账。
+
+**机械强度诚实记账**：本契约的机械检查 = L0 契约测试（七字段在场 + 各执行者副本对账）
++ 仪表盘渲染谓词（上述）+ **evidence-audit 溯源审计**（`scripts/evidence-audit.mjs`：source_url
+须在会话日志的 web 工具结果里真实出现过、摘录可回溯、final 溯源链完整——防伪造链接与
+转写幻觉，报告落 bundle 的 audit.md）；run 内执法 = critic 狩猎（散文判断）。verify 门禁
+不扫 bundle（gitignored 运行区）——run 数据的完整性由 critic + 仪表盘 + audit 呈现，不在 L0。
 
 ## 交付物三态
 

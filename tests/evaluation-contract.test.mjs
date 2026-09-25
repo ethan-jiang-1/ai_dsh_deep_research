@@ -30,14 +30,14 @@ test('角色职责 owner 表存在（L3 判据 2 的载体）', () => {
 
 test('证据身份链契约存在（L3 判据 3 的载体）', () => {
   const ws = readFileSync(join(ROOT, 'research-workspace', 'AGENTS.md'), 'utf8');
-  for (const field of ['source_url', 'retrieved_at', 'quality', 'found_by', 'supports']) {
+  for (const field of ['source_url', 'retrieved_at', 'quality', 'found_by', 'supports', 'source_tier', 'publisher']) {
     assert.ok(ws.includes(field), `证据 frontmatter 契约缺 ${field}`);
   }
 });
 
 // ── 基础整治 §3.3：契约字段在执行者副本间机械对账（字段必须物理到达执行者，
 //    副本允许存在，但副本与正本漂移必须变红——不是只在手册里出现过就算数）──
-const FIELDS = ['source_url', 'retrieved_at', 'quality', 'found_by', 'supports'];
+const FIELDS = ['source_url', 'retrieved_at', 'quality', 'found_by', 'supports', 'source_tier', 'publisher'];
 const CONTRACT_COPIES = [
   ['研究手册（语义正本）', 'research-workspace/AGENTS.md'],
   ['run 模板副本', 'research-workspace/templates/run/evidence-entry.md'],
@@ -46,7 +46,7 @@ const CONTRACT_COPIES = [
   ['方法论映射（L3 载体）', 'docs/design/30-methodology-mapping.md'],
 ];
 
-test('证据契约五字段在各执行者副本全部在场（对账，防静默漂移）', () => {
+test('证据契约七字段在各执行者副本全部在场（对账，防静默漂移；谓词分层：硬五字段定有效性、软二字段标未分级）', () => {
   for (const [label, rel] of CONTRACT_COPIES) {
     const text = readFileSync(join(ROOT, rel), 'utf8');
     const missing = FIELDS.filter((f) => !text.includes(f));
@@ -54,14 +54,14 @@ test('证据契约五字段在各执行者副本全部在场（对账，防静�
   }
 });
 
-test('有效证据谓词 = 五字段全齐（仪表盘渲染层与手册对账；反证：降回三字段即本测试红）', async () => {
+test('有效证据谓词分层：硬五字段定有效性、软二字段标未分级（仪表盘渲染层与手册对账）', async () => {
   const { parseEvidenceDir } = await import('../scripts/run-dashboard.mjs');
   const { mkdirSync, rmSync, writeFileSync } = await import('node:fs');
   const tmp = join(ROOT, 'tests', '.tmp-evidence-predicate');
   rmSync(tmp, { recursive: true, force: true });
   mkdirSync(tmp, { recursive: true });
   try {
-    const full = '---\nsource_url: https://e.example/x\nretrieved_at: 2026-09-24\nquality: A\nfound_by: analyst\nsupports: T1\n---\n';
+    const full = '---\nsource_url: https://e.example/x\nretrieved_at: 2026-09-24\nquality: A\nfound_by: analyst\nsupports: T1\nsource_tier: primary\npublisher: e.example\n---\n';
     writeFileSync(join(tmp, 'full.md'), full);
     for (const drop of FIELDS) {
       const fm = full.split('\n').filter((l) => !l.startsWith(`${drop}:`)).join('\n');
@@ -69,9 +69,14 @@ test('有效证据谓词 = 五字段全齐（仪表盘渲染层与手册对账�
     }
     const { files } = parseEvidenceDir(tmp);
     const byName = Object.fromEntries(files.map((r) => [r.file, r]));
-    assert.equal(byName['full.md']?.ok, true, '五字段齐 → 有效证据');
-    for (const drop of FIELDS) {
-      assert.equal(byName[`drop-${drop}.md`]?.ok, false, `缺 ${drop} → 必须标无效（谓词弱于手册 = 影子契约）`);
+    assert.equal(byName['full.md']?.ok, true, '七字段齐 → 有效且已分级');
+    assert.equal(byName['full.md']?.ungraded, false, '七字段齐 → 不标未分级');
+    for (const drop of ['source_url', 'retrieved_at', 'quality', 'found_by', 'supports']) {
+      assert.equal(byName[`drop-${drop}.md`]?.ok, false, `缺硬字段 ${drop} → 必须标无效（谓词弱于手册 = 影子契约）`);
+    }
+    for (const drop of ['source_tier', 'publisher']) {
+      assert.equal(byName[`drop-${drop}.md`]?.ok, true, `缺软字段 ${drop} → 仍有效（分层：不否决）`);
+      assert.equal(byName[`drop-${drop}.md`]?.ungraded, true, `缺软字段 ${drop} → 标未分级（旧 run 存量按此显示，不回填）`);
     }
   } finally {
     rmSync(tmp, { recursive: true, force: true });

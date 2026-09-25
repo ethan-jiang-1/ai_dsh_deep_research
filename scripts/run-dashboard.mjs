@@ -113,7 +113,8 @@ export function parseTopics(text) {
   return topics;
 }
 
-/** evidence/ 目录 → [{ file, ok, quality, supports, sourceUrl, retrievedAt }]（无 frontmatter 不算证据） */
+/** evidence/ 目录 → [{ file, ok, ungraded, quality, supports, sourceUrl, retrievedAt, sourceTier, publisher }]
+ * （无 frontmatter 不算证据）*/
 export function parseEvidenceDir(dir) {
   if (!existsSync(dir)) return { missing: true, files: [] };
   let names = [];
@@ -125,11 +126,12 @@ export function parseEvidenceDir(dir) {
   return {
     missing: false,
     files: names.map((f) => {
-      const rec = { file: f, ok: false, quality: null, supports: null, sourceUrl: null, retrievedAt: null };
+      const rec = { file: f, ok: false, ungraded: false, quality: null, supports: null, sourceUrl: null, retrievedAt: null, sourceTier: null, publisher: null };
       try {
         const { fm } = splitFrontmatter(readFileSync(join(dir, f), 'utf8'));
-        // 有效证据谓词：五字段全齐（正本 = 研究手册 research-workspace/AGENTS.md §证据文件契约；
-        // 本处是渲染层实现，tests/evaluation-contract.test.mjs 机械对账）
+        // 有效证据谓词（分层，正本 = 研究手册 §证据文件契约；渲染层实现，tests 机械对账）：
+        // 硬五字段全齐才有效；软二字段（source_tier/publisher）缺失不否决——标 ungraded（旧
+        // run 存量证据按此显示，不回填：run bundle 是交付记录）。
         if (fm && fm.source_url && fm.retrieved_at && fm.quality && fm.found_by && fm.supports) {
           Object.assign(rec, {
             ok: true,
@@ -137,7 +139,10 @@ export function parseEvidenceDir(dir) {
             supports: fm.supports,
             sourceUrl: fm.source_url,
             retrievedAt: fm.retrieved_at,
+            sourceTier: fm.source_tier ?? null,
+            publisher: fm.publisher ?? null,
           });
+          rec.ungraded = fm.source_tier === undefined || fm.publisher === undefined;
         }
       } catch {
         /* 畸形文件 → ok: false，继续 */

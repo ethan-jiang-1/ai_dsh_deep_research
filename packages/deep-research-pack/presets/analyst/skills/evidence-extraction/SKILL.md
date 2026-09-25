@@ -16,6 +16,8 @@ Analyst 的核心方法论。目标：把方向变成**可核查的证据文件*
 ```
 ---
 source_url: <真实抓取过的 URL>
+source_tier: <primary/secondary/tertiary/weak——信源分级，判据表在研究手册>
+publisher: <注册域>
 retrieved_at: <YYYY-MM-DD>
 quality: A|B|C|D
 found_by: analyst

@@ -41,7 +41,7 @@
 
 **为什么唯一**：DSH 没有任何载体承载"研究报告的结论 → 来源文件"的可核查链——web_search
 的返回不落盘、会话日志可读但不是角色间契约面。研究手册的证据 frontmatter 契约
-（`source_url / retrieved_at / quality / found_by / supports`）+ **口径最小契约**（数字/
+（`source_url / retrieved_at / quality / found_by / supports / source_tier / publisher`——七字段）+ **口径最小契约**（数字/
 规格类摘录带测量条件 ≥2 项；单源关键数字显式标"待破"）+ final.md 的
 `[来源: evidence/xx.md]` 引用格式 + critic 的逐条狩猎 = 轻量等价物：
 

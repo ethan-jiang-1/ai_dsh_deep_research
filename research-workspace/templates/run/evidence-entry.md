@@ -4,6 +4,8 @@ retrieved_at: YYYY-MM-DD
 quality: A
 found_by: <发现者角色>
 supports: T1
+source_tier: primary   # primary/secondary/tertiary/weak（信源分级，正本 = 研究手册分级表）
+publisher: example.com # 注册域
 ---
 
 # <证据标题>
