@@ -1,10 +1,12 @@
 # Agent-ready Development 吸纳（上游研发语料 → 本仓开发 harness）
 
 > 来源：`/Users/bowhead/deepseek-harness/_agent_ready_development/`（用户 2026-09-25 指令：
-> 我们是开发 DSH 插件的仓库，细节要与 DH 官方研发思路 align）。通读范围 = 全语料 56 个文件
-> 中的全部正文（sdlc-tutorial 5 篇 / sdlc-reference 11 篇 / repo-harness 9 篇 / `_coverage`
-> 维护页 / 三个 README 与图示归属页 / 语料 `verify.mjs`），钉版基线 = DS H `dsh-v0.1.7-rc.1`。
-> 通则：**点状吸纳，不推翻本仓现行规则**；每项给三态（采纳 / 已具备 / 不适用+理由）。
+> 我们是开发 DSH 插件的仓库，细节要与 DH 官方研发思路 align）。通读范围 = 语料 **37 篇 .md
+> 全部**（root/三个主题与图示 README、sdlc-tutorial 5 篇、sdlc-reference 11 篇、repo-harness
+> 9 篇、`_coverage` 维护页与 `_coverage/README`）+ 语料 `verify.mjs` 的规则面（锚点/链接/
+> 目录 README/SVG 检查，非全文）；**18 张 SVG 未逐张读**（图服务正文，正文与图示归属页已读）。
+> 钉版基线 = DSH `dsh-v0.1.7-rc.1`。通则：**点状吸纳，不推翻本仓现行规则**；每项给三态
+> （采纳 / 已具备 / 不适用+理由）。
 
 ## 决定
 
