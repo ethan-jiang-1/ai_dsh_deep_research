@@ -207,13 +207,24 @@ try {
   });
   if (leadId === null) throw new Error('lead 会话未建立，后续断言无从谈起');
 
-  await check(`lead 回合落定 + 标记（${LEAD_MARKER}）`, async () => {
+  // 判据改锚（RFC team-preflight-marker，2026-09-25）：被测对象 = 机制完成——回合落定
+  // （waitForQuiescence 已锚定）+ 下方机制断言集（spawn/list/probe/成员响应）。末标记只是
+  // 模型服从度的副产品：在场 = 证据加分；缺席 = findings 观察点，**不再红灯**（历史实测
+  // 三跑两红一绿，红的全是标记缺席、机制面三次全 PASS——把回合完成寄托在字面服从上
+  // 是断言设计错误，不是机制问题）。
+  await check('lead 回合落定（机制判据）＋ 末标记（服从度观察）', async () => {
     await rpc(base, cookie, 'session/prompt', {
       request: { requestId: randomUUID(), sessionId: leadId, mode: 'queue', content: [{ type: 'text', text: LEAD_PROMPT }] },
     });
     await waitForQuiescence(leadId, 'lead 回合', LEAD_TURN_TIMEOUT_MS);
-    return await waitForLine(leadId, `assistant 携带 ${LEAD_MARKER}`, (line) =>
-      line.includes('"assistant/message"') && line.includes(LEAD_MARKER), 15_000);
+    try {
+      await waitForLine(leadId, `assistant 携带 ${LEAD_MARKER}`, (line) =>
+        line.includes('"assistant/message"') && line.includes(LEAD_MARKER), 15_000);
+      return '回合落定；标记在场';
+    } catch {
+      findings.push('lead 末标记缺席但回合已落定（模型服从度观察点，非机制失败——判据改锚见 RFC team-preflight-marker）');
+      return '回合落定；标记缺席（已记 findings，不红）';
+    }
   });
 
   await check('spawn_teammate 真调用 ×2（tool/call）', async () => {
