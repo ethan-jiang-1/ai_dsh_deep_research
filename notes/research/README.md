@@ -15,7 +15,8 @@
 |---|---|---|---|---|
 | [deep-research-harness-analysis.md](2026-09-24-deep-research-harness-analysis.md) | 已完成 | 2026-09-24 | 方法论源头（`ai_tool_deepresearch/DEEP_RESEARCH_HARNESS/`）的考古报告 | [design/30-methodology-mapping.md](../../docs/design/30-methodology-mapping.md)（生命周期映射/弃用清单/教训落点） |
 | [dsh-plugin-repo-anatomy.md](2026-09-24-dsh-plugin-repo-anatomy.md) | 已完成 | 2026-09-24 | 参考插件仓（`ai_dsh_company`）的工程机制解剖 | [design/10-architecture.md](../../docs/design/10-architecture.md)、`scripts/verify.mjs`（门禁移植）、`dev/env.sh`（双 home） |
-| [dsh-market-scout.md](2026-09-24-dsh-market-scout.md) | 已完成（粗扫） | 2026-09-24 | DSH 插件生态与存量能力的粗扫种子（用户 steer：先行粗找） | 未定落点；认真研究 = 后续条目（按用户节奏触发） |
+| [dsh-market-scout.md](2026-09-24-dsh-market-scout.md) | 已完成（粗扫） | 2026-09-24 |
+| [dsh-plugin-ecosystem.md](2026-09-25-dsh-plugin-ecosystem.md) | 已完成 | 2026-09-25 | DSH 插件生态与存量能力的粗扫种子（用户 steer：先行粗找） | 未定落点；认真研究 = 后续条目（按用户节奏触发） |
 | [ui-observability-surfaces.md](2026-09-24-ui-observability-surfaces.md) | 已完成（琢磨稿） | 2026-09-24 | 观察面（右栏状态页签等）的手段与取舍琢磨 | [roadmap.md](../../roadmap.md) ▶「观察面 GUI 化」的材料 |
 
 本目录只放**报告**；对上游研发语料（`deepseek-harness/_agent_ready_development`）的通读与
