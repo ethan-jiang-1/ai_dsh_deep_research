@@ -1,0 +1,10 @@
+/** 观察面 client 的 keyed 常量（唯一正本）。
+ * 页签类型 id 与 keyed 槽体的 key **必须同值**（拼错任一处不报错、永不渲染——company 坑 1：
+ * "a typo simply never renders"）。verify 门禁 client-keys 逐处对账：源里出现的每个 key
+ * 字面量都必须等于这里的导出值，杜绝第二份会漂移的清单。 */
+
+/** 「研究状态」页签：sidebarRightTabs.register 的 id 与 sidebar.right.pane.tab 槽的 key。 */
+export const RESEARCH_TAB_KEY = 'dsh-deep-research-pack/research-status'
+
+/** 「研究状态」页签的 keyed 槽名（sidebar.right.pane.tab）。 */
+export const RESEARCH_PANE_SLOT = 'sidebar.right.pane.tab'

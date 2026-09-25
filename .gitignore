@@ -42,3 +42,6 @@ node_modules/
 *.log
 # OS 杂物
 .DS_Store
+
+# 自写包的构建产物（源码面/产物面不混，同 DSH/company 的 lib/ 约定；npm pack 的 files 白名单优先于 gitignore，发布不受影响）
+packages/deep-research-pack/lib/

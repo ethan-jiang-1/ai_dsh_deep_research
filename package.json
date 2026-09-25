@@ -31,6 +31,13 @@
     "@deepseek-ai/dsh-tool-web": "workspace:*",
     "@deepseek-ai/dsh-experimental-agent-team": "workspace:*",
     "@deepseek-ai/dsh-experimental-tool-agent-team": "workspace:*",
-    "dsh-deep-research-pack": "workspace:*"
+    "dsh-deep-research-pack": "workspace:*",
+    "typescript": "^6.0.3",
+    "tsdown": "^0.22.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0"
   }
 }

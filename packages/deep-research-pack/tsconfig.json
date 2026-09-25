@@ -1,0 +1,10 @@
+// Solution root：只引用两面（host + client），自身不编文件（company-pack 同形范本）。
+// 构建 = `tsc -b .`（两叶都出 lib/types/**）。此后 host / client 任一面改动都要重建，
+// 再跑 tsdown 出 lib/index.js / lib/client.js（package.json `build` 脚本串起两步）。
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.host.json" },
+    { "path": "./tsconfig.client.json" }
+  ]
+}
