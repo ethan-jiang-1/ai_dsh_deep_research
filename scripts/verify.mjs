@@ -588,6 +588,42 @@ function roadmapQueue() {
         }
       }
       note(gate, `${sources.length} 条源面已对账（vendor 存在性 + 落点存在性 + na 理由）`);
+      // 覆盖断言（防空集/防漏登记）：结构面必须逐条登记——vendor 的每个 AGENTS.md（不含
+      // snapshots/session 夹具）与每个开发技能 SKILL.md、顶层 docs/*.md（非 .zh.md 副本）、
+      // docs/cookbook/*.md（非副本）、以及若干根文件。双语副本按类登记（见台账 _note）。
+      {
+        const V = join(ROOT, 'vendor', 'dsh');
+        const must = [];
+        const walkV = (dir) => {
+          for (const ent of readdirSync(dir, { withFileTypes: true })) {
+            if (ent.name === 'node_modules' || ent.name === '.git') continue;
+            const p = join(dir, ent.name);
+            if (ent.isDirectory()) { if (p.includes(join('snapshots', 'session'))) continue; walkV(p); }
+            else if (ent.name === 'AGENTS.md') must.push(relative(V, p));
+          }
+        };
+        if (existsSync(V)) walkV(V);
+        const skillsDir = join(V, '.agents', 'skills');
+        if (existsSync(skillsDir)) {
+          for (const d of readdirSync(skillsDir, { withFileTypes: true })) {
+            if (d.isDirectory() && existsSync(join(skillsDir, d.name, 'SKILL.md'))) must.push(`.agents/skills/${d.name}/SKILL.md`);
+          }
+        }
+        for (const sub of ['docs', join('docs', 'cookbook')]) {
+          const dir = join(V, sub);
+          if (!existsSync(dir)) continue;
+          for (const f of readdirSync(dir)) {
+            if (f.endsWith('.md') && !f.endsWith('.zh.md')) must.push(`${sub}/${f}`);
+          }
+        }
+        for (const rel of ['package.json', '.editorconfig', '.gitattributes', 'lefthook.yml', 'vendor/README.md', 'snapshots/AGENTS.md', '.github/AGENTS.md', 'packages/README.md', 'scripts/run-gates.ts', 'scripts/doc-budgets.manifest.json']) {
+          if (existsSync(join(V, rel))) must.push(rel);
+        }
+        const missing = [...new Set(must)].filter((m) => !seen.has(m));
+        if (must.length < 20) fail(gate, `覆盖断言自检：待覆盖源只有 ${must.length} 条（防空集——vendor 树或扫描范围被改坏？）`);
+        for (const m of missing.slice(0, 8)) fail(gate, `未登记：${m}（结构面须逐条进台账；新增上游子树/技能时同 diff 登记）`);
+        if (missing.length > 8) fail(gate, `另有 ${missing.length - 8} 条未登记（见上）`);
+      }
     }
   }
 }

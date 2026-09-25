@@ -1,5 +1,5 @@
 {
-  "_note": "对齐台账（机读正本）：vendor/dsh（钉 @ fb2c4b9e）的 development-harness 源面逐项结论。门禁 align-ledger 强制三件事：① 每条 source 在 vendor/dsh 里真实存在（换 pin 后文件移位/删除即红——这就是重审触发器）；② verdict=adopted/adapted 的每处 landing 在仓内真实存在；③ verdict=na 必须给 reason。人读视图 = docs/discipline-map.md 源 1–9。",
+  "_note": "对齐台账（机读正本）：vendor/dsh（钉 @ fb2c4b9e）的 development-harness 源面逐项结论。门禁 align-ledger 强制三件事：① 每条 source 在 vendor/dsh 里真实存在（换 pin 后文件移位/删除即红——这就是重审触发器）；② verdict=adopted/adapted 的每处 landing 在仓内真实存在；③ verdict=na 必须给 reason。人读视图 = docs/discipline-map.md 源 1–9。 覆盖规则：结构面逐条登记——vendor 每个 AGENTS.md（不含 snapshots/session 夹具）、每个开发技能 SKILL.md、顶层 docs/*.md 与 docs/cookbook/*.md（非 .zh.md 副本）、以及根文件（package.json/.editorconfig/.gitattributes/lefthook.yml/vendor/README.md/snapshots/AGENTS.md/.github/AGENTS.md/packages/README.md/scripts/run-gates.ts/scripts/doc-budgets.manifest.json）；双语 .zh.md 副本按类登记（不携带独立约定，配对机制见 docs/i18n/README.md 一条）。门禁 align-ledger 强制该覆盖（缺登记即红）。 landing 粒度 = 该约定的本仓载体（可为类级：例如各 cookbook 篇 → guides/62 + docs/AGENTS.md；技能形式约定 → .agents/skills/ + dev-skill-format 门禁）。",
   "_evidence": "逐条原始行（810 条）在 dev/smoke-workspace/inventory/{root-packaging,subtree-agents,dev-skills,docs-standards,packages-evidence}.json（gitignored 运行区，可重跑 workflow vendor-inventory-to-files 复现）",
   "sources": [
     {
@@ -47,16 +47,6 @@
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
     {
-      "source": ".agents/skills/dsh-ci-test-reliability/SKILL.md",
-      "owns": "资源必须原子分配（listen(0) 后读实际地址、mkdtemp 建私有临时根），进程全局状态按「记下原值是否缺席 → 精确还原 → 立即注册清理 → try/finally 最小作用域」处理，同步靠可观察状态而非 sleep，teardown 必须 dispose 到 qui",
-      "verdict": "adapted",
-      "landing": [
-        ".agents/skills/",
-        "scripts/verify.mjs"
-      ],
-      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
-    },
-    {
       "source": ".agents/skills/dsh-ci-test-reliability/references/ci-flake-diagnosis.md",
       "owns": "诊断请求保持只读（不给修复、重跑或改 CI 的授权）；先冻结证据（repo/workflow/job/commit SHA/runner 标签/时间戳/精确失败命令/首个稳定失败签名，基础设施消息与测试输出分开）；按八类分类（host-resource collision、inc",
       "verdict": "adapted",
@@ -67,8 +57,8 @@
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
     {
-      "source": ".agents/skills/dsh-code-review/SKILL.md",
-      "owns": "审阅前先取 PR 的 live base/head 并跑 change-scope 定范围（retarget 或 merge 后必须重取重跑）；把新增散文的语义审阅、文档与代码同 diff 一致、注册项清理等列为阻断要求；报告按 defect/location/impact/ev",
+      "source": ".agents/skills/dsh-ci-test-reliability/SKILL.md",
+      "owns": "资源必须原子分配（listen(0) 后读实际地址、mkdtemp 建私有临时根），进程全局状态按「记下原值是否缺席 → 精确还原 → 立即注册清理 → try/finally 最小作用域」处理，同步靠可观察状态而非 sleep，teardown 必须 dispose 到 qui",
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -77,8 +67,8 @@
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
     {
-      "source": ".agents/skills/dsh-doc/SKILL.md",
-      "owns": "文档 kind 一对一映射唯一模板；页序固定为 YAML → H1 → 语言切换器 → Summary → Table of Contents → 用户面到开发者面 → 可选 Further Exploration → 末节 Dev Note；每个操作/命令/默认值声明必须实跑复",
+      "source": ".agents/skills/dsh-code-review/SKILL.md",
+      "owns": "审阅前先取 PR 的 live base/head 并跑 change-scope 定范围（retarget 或 merge 后必须重取重跑）；把新增散文的语义审阅、文档与代码同 diff 一致、注册项清理等列为阻断要求；报告按 defect/location/impact/ev",
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -129,6 +119,16 @@
     {
       "source": ".agents/skills/dsh-doc/references/website-sync.md",
       "owns": "站点 manifest（website/docs.ts）是显式公开白名单：改已发布页只动 canonical 源，新页加一条 manifest，移动/删除要原子更新源+manifest+入站链接；DocsPage 每个字段（source/route/label/sidebar/s",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-doc/SKILL.md",
+      "owns": "文档 kind 一对一映射唯一模板；页序固定为 YAML → H1 → 语言切换器 → Summary → Table of Contents → 用户面到开发者面 → 可选 Further Exploration → 末节 Dev Note；每个操作/命令/默认值声明必须实跑复",
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -207,8 +207,8 @@
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
     {
-      "source": ".agents/skills/dsh-prose-standard/SKILL.md",
-      "owns": "修剪只删装饰不删命题：actor 与动作、条件时机与顺序、must/may/never 情态、负保证与例外、所有权/副作用/失败模式/后果逐条保留；按散文位置定必需覆盖（公共 JSDoc 写调用方可见的返回差异与抛错、内部注释只写非显然不变量、README 写消费者合同、技能要声",
+      "source": ".agents/skills/dsh-prose-standard/references/examples.md",
+      "owns": "用 Over-trimmed / Balanced / Over-detailed 三态对照把「完整命题」落成可判定样例：必须保留 actor 与作用域、处置顺序与失败可见性、所有权变更点与完成保证、throw 与状态前置、映射中丢弃或改写的字段、measured 这类 prov",
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -217,8 +217,8 @@
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
     {
-      "source": ".agents/skills/dsh-prose-standard/references/examples.md",
-      "owns": "用 Over-trimmed / Balanced / Over-detailed 三态对照把「完整命题」落成可判定样例：必须保留 actor 与作用域、处置顺序与失败可见性、所有权变更点与完成保证、throw 与状态前置、映射中丢弃或改写的字段、measured 这类 prov",
+      "source": ".agents/skills/dsh-prose-standard/SKILL.md",
+      "owns": "修剪只删装饰不删命题：actor 与动作、条件时机与顺序、must/may/never 情态、负保证与例外、所有权/副作用/失败模式/后果逐条保留；按散文位置定必需覆盖（公共 JSDoc 写调用方可见的返回差异与抛错、内部注释只写非显然不变量、README 写消费者合同、技能要声",
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -247,16 +247,6 @@
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
     {
-      "source": ".agents/skills/dsh-trim-cot-leakage/SKILL.md",
-      "owns": "唯一判据 = HEAD 读者在无会话记录/PR 线程/未提交草稿的情况下能否解析每个引用并验证每条断言；按八类泄漏逐条处理（死设计引用、PR/栈视角、变更叙事与版本戳、评审编排、对评审者辩解、过程复述、hedge 残留、作者语言残留）；改写义务性句子前先枚举该段全部命题，保留 i",
-      "verdict": "adapted",
-      "landing": [
-        ".agents/skills/",
-        "scripts/verify.mjs"
-      ],
-      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
-    },
-    {
       "source": ".agents/skills/dsh-trim-cot-leakage/references/examples.md",
       "owns": "按泄漏类别给 leaked → fixed 对照，并单列 Overcorrection traps：把义务（pending migration）改成背书（sanctioned）、把假设/未来标记删成已交付特性、连同过程转述一起删掉同句里的真事实、以及删掉 measured 之类 ",
       "verdict": "adapted",
@@ -277,8 +267,8 @@
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
     {
-      "source": ".agents/skills/record-browser-gif/SKILL.md",
-      "owns": "改产品可见 GUI 行为的 PR 必须附 GIF：从该 PR 树的真实 server + 真 key + 真实模型轮次录制，一个故事板 = 一次证据运行（不得拼接不同 run 的帧），正文旁声明被演示的 commit SHA、树的来源、模式例外与是否真跑了模型轮次；录制与发布分离",
+      "source": ".agents/skills/dsh-trim-cot-leakage/SKILL.md",
+      "owns": "唯一判据 = HEAD 读者在无会话记录/PR 线程/未提交草稿的情况下能否解析每个引用并验证每条断言；按八类泄漏逐条处理（死设计引用、PR/栈视角、变更叙事与版本戳、评审编排、对评审者辩解、过程复述、hedge 残留、作者语言残留）；改写义务性句子前先枚举该段全部命题，保留 i",
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -299,6 +289,16 @@
     {
       "source": ".agents/skills/record-browser-gif/scripts/test_encode_gif.py",
       "owns": "用 unittest 驱动真实 ffmpeg/ffprobe 子进程：setUp 里造三段纯色 WebM 夹具与 tempfile 私有根并注册 cleanup，断言 trim/speed/final-hold/palette 顺序与默认保留全片时长；对每类非法参数（负 star",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/record-browser-gif/SKILL.md",
+      "owns": "改产品可见 GUI 行为的 PR 必须附 GIF：从该 PR 树的真实 server + 真 key + 真实模型轮次录制，一个故事板 = 一次证据运行（不得拼接不同 run 的帧），正文旁声明被演示的 commit SHA、树的来源、模式例外与是否真跑了模型轮次；录制与发布分离",
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -364,6 +364,12 @@
       "reason": "本仓无性能基准面（无 benchmark 目录与车道）"
     },
     {
+      "source": "docs/agent-lifecycle.md",
+      "owns": "vendor 运行时/子系统/生成目录参考",
+      "verdict": "na",
+      "reason": "本仓无 agent 生命周期实现面（消费 base 能力）；生命周期术语在 00-index §术语映射"
+    },
+    {
       "source": "docs/AGENTS.md",
       "owns": "Form/ownership row: docs/AGENTS.md owns the repository documentation standard — 75 lines / ~10.6 KB, pure orders in five sections (Document ",
       "verdict": "adapted",
@@ -372,12 +378,36 @@
       ]
     },
     {
+      "source": "docs/api-gateway.md",
+      "owns": "vendor 运行时/子系统/生成目录参考",
+      "verdict": "na",
+      "reason": "本仓无 API gateway 子系统"
+    },
+    {
       "source": "docs/architecture.md",
       "owns": "改 packages/ 下任何东西之前先读架构页；它假定你懂 Cordis，不懂就先读 primer 或教程。",
       "verdict": "adapted",
       "landing": [
         "docs/design/10-architecture.md"
       ]
+    },
+    {
+      "source": "docs/architecture.zh.md",
+      "owns": "双语配对副本（docs/**/*.zh.md 的代表；同类共 28 份）",
+      "verdict": "na",
+      "reason": "双语配对副本不携带独立 harness 约定——配对机制本身的结论在 docs/i18n/README.md 一条（单语仓，不适用）；同类不逐条登记"
+    },
+    {
+      "source": "docs/capability-seams.md",
+      "owns": "vendor 运行时/子系统/生成目录参考",
+      "verdict": "na",
+      "reason": "本仓不自建 capability seam（术语已收 plugin/bundle/profile；seam 三角属 vendor 面）"
+    },
+    {
+      "source": "docs/config-catalog.md",
+      "owns": "vendor 运行时/子系统/生成目录参考",
+      "verdict": "na",
+      "reason": "本仓无入库生成目录（生成的 config/tool/persistence catalog 面）；生成态缺席与引入条件登记在 discipline-map 源 7"
     },
     {
       "source": "docs/cookbook/",
@@ -479,6 +509,18 @@
       ]
     },
     {
+      "source": "docs/cordis-primer.md",
+      "owns": "vendor 运行时/子系统/生成目录参考",
+      "verdict": "na",
+      "reason": "Cordis 运行时概念参考属 vendor 面；本仓以 cordis 行消费，不写插件代码"
+    },
+    {
+      "source": "docs/deepseek-llm-api-wire-extensions.md",
+      "owns": "vendor 运行时/子系统/生成目录参考",
+      "verdict": "na",
+      "reason": "本仓无自写 LLM 请求扩展面"
+    },
+    {
       "source": "docs/defensive-patterns.md",
       "owns": "写生命周期、并发、子进程或 teardown 代码前先读这份缺陷模式清单。",
       "verdict": "adapted",
@@ -496,6 +538,12 @@
       ]
     },
     {
+      "source": "docs/event-producer-consumer.md",
+      "owns": "vendor 运行时/子系统/生成目录参考",
+      "verdict": "na",
+      "reason": "本仓不定义事件类型（消费 base 事件）"
+    },
+    {
       "source": "docs/glossary.md",
       "owns": "领域词汇一个概念只用一个 canonical term；术语用标准 Markdown 锚点链到自己的条目。",
       "verdict": "adapted",
@@ -504,10 +552,28 @@
       ]
     },
     {
+      "source": "docs/graph-atlas.md",
+      "owns": "vendor 运行时/子系统/生成目录参考",
+      "verdict": "na",
+      "reason": "本仓无生成的关系索引面"
+    },
+    {
       "source": "docs/i18n/README.md",
       "owns": "范围内的每份文档同时以英文与简体中文维护，因为读者含公司内外的人与 agent",
       "verdict": "na",
       "reason": "单语仓：无双语配对三件套与 site 投影"
+    },
+    {
+      "source": "docs/module-graph.md",
+      "owns": "vendor 运行时/子系统/生成目录参考",
+      "verdict": "na",
+      "reason": "本仓无生成模块图面"
+    },
+    {
+      "source": "docs/persistence-catalog.md",
+      "owns": "vendor 运行时/子系统/生成目录参考",
+      "verdict": "na",
+      "reason": "本仓无持久化事件声明面"
     },
     {
       "source": "docs/postmortem/README.md",
@@ -516,6 +582,12 @@
       "landing": [
         "notes/postmortem/README.md"
       ]
+    },
+    {
+      "source": "docs/rescope.md",
+      "owns": "vendor 运行时/子系统/生成目录参考",
+      "verdict": "na",
+      "reason": "vendor 的 rescope 机制不适用：本仓用 pinned submodule（零分叉，vendor-clean 门禁）"
     },
     {
       "source": "docs/session-format-status.md",
@@ -532,6 +604,24 @@
         "docs/guides/60-dev-loop.md",
         "scripts/AGENTS.md"
       ]
+    },
+    {
+      "source": "docs/tool-catalog.md",
+      "owns": "vendor 运行时/子系统/生成目录参考",
+      "verdict": "na",
+      "reason": "本仓无生成工具目录面（工具行由 row-deps + L1 真挂载验证）"
+    },
+    {
+      "source": "docs/tool-execution-pipeline.md",
+      "owns": "vendor 运行时/子系统/生成目录参考",
+      "verdict": "na",
+      "reason": "本仓无工具执行管线实现面"
+    },
+    {
+      "source": "docs/web-styling.md",
+      "owns": "vendor 运行时/子系统/生成目录参考",
+      "verdict": "na",
+      "reason": "本仓无客户端 UI/样式面"
     },
     {
       "source": "lefthook.yml",
@@ -573,15 +663,6 @@
       ]
     },
     {
-      "source": "packages/README.md",
-      "owns": "本页是 packages/ 的顶层地图：先定位拥有该能力的能力组，再进该组 README 拿包清单；每个组 README 是其家族的权威包清单",
-      "verdict": "adapted",
-      "landing": [
-        "packages/deep-research-pack/README.md",
-        "AGENTS.md"
-      ]
-    },
-    {
       "source": "packages/bundle/base/README.md",
       "owns": "Summary 说清谁会自动带上它、何时才需要直接碰它，并点明 the package is not a library you import",
       "verdict": "adapted",
@@ -612,6 +693,15 @@
       ]
     },
     {
+      "source": "packages/README.md",
+      "owns": "本页是 packages/ 的顶层地图：先定位拥有该能力的能力组，再进该组 README 拿包清单；每个组 README 是其家族的权威包清单",
+      "verdict": "adapted",
+      "landing": [
+        "packages/deep-research-pack/README.md",
+        "AGENTS.md"
+      ]
+    },
+    {
       "source": "packages/schedule/AGENTS.md",
       "owns": "Form/ownership row: packages/schedule/AGENTS.md owns the rules for packages/schedule/* and announces itself as a supplement to the repositor",
       "verdict": "na",
@@ -638,6 +728,24 @@
       "verdict": "adapted",
       "landing": [
         "scripts/AGENTS.md"
+      ]
+    },
+    {
+      "source": "scripts/doc-budgets.manifest.json",
+      "owns": "门禁聚合入口 / 文档预算 manifest",
+      "verdict": "adapted",
+      "landing": [
+        "scripts/doc-budgets.json",
+        "scripts/verify.mjs"
+      ]
+    },
+    {
+      "source": "scripts/run-gates.ts",
+      "owns": "门禁聚合入口 / 文档预算 manifest",
+      "verdict": "adapted",
+      "landing": [
+        "scripts/verify.mjs",
+        "docs/evaluation.md"
       ]
     },
     {
