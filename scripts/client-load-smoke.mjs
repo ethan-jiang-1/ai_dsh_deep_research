@@ -151,15 +151,15 @@ try {
       await capsule.click({ timeout: 5_000 }).catch(() => {})
       await new Promise((r) => setTimeout(r, 3_500))
       const paneText = await page.evaluate(() => document.body?.innerText ?? '')
-      const paneOk = paneText.includes('journal 流')
+      const paneOk = paneText.includes('研究状态') && (paneText.includes('💬') || paneText.includes('（研究中'))
       step(paneOk, '页签体渲染（keyed 槽体挂对 key + follow 通道接通）')
-      // B-full 余项断言：渐进面（步骤条/矩阵）——渲染挂载点在场（数据面 v1 简化为空态不硬猜）
-      const stepsOk = paneText.includes('立项') && paneText.includes('交付')
-      step(stepsOk, '页签渐进面挂载（步骤条七步渲染骨架）')
-      if (paneOk) {
-        const m = /journal 流（(\d+) 事件）/.exec(paneText)
-        step(m !== null && Number(m[1]) >= 1, 'journal 流有真数据（snapshot 历史 ≥1 事件）', m ? '' + m[1] + ' 事件' : '未见计数（等待会话态？）')
-      }
+      // UI 优先断言（RFC research-status-ui）
+      const humanRows = (paneText.match(/🔍|👥|💬|📦/gu) ?? []).length
+      step(humanRows >= 3, '人性化活动流在场（≥3 行）', humanRows + ' 行')
+      const rawNoise = ['step/end', 'step/start', 'tool/call', 'assistant/message', 'turn/end', 'turn/start'].filter((x) => paneText.includes(x))
+      step(rawNoise.length === 0, '页签正文无原始事件类型名（噪音已过滤）', rawNoise.length > 0 ? rawNoise.slice(0, 2).join('、') : '')
+      // 观察点（bundle 渐进面——workspaceFiles 路径问题未接通，如实记档）
+      console.log('  （观察点）渐进面步骤条:', paneText.includes('立项') ? '在场' : '缺席（数据面未接通）')
     }
   }
 

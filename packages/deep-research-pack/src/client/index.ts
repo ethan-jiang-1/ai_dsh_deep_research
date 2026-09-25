@@ -18,7 +18,7 @@ import { ResearchStatusTab, ResearchStatusTitle, type JournalFrame } from './Res
 
 /** Required services：槽注册表（renderer）+ 右栏页签注册器 + remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
  *  父级则取 .session 炸 "without injecting it"，只声明子级则取父属性炸 "without inject"）。 */
-export const inject = ['slots', 'sidebarRightTabs', 'remote', 'remote.session']
+export const inject = ['slots', 'sidebarRightTabs', 'remote', 'remote.session', 'remote.workspaceFiles']
 
 /**
  * Client plugin body：登记「研究状态」页签（类型 + keyed 槽体共享同一 key——拼错任一处
@@ -26,7 +26,7 @@ export const inject = ['slots', 'sidebarRightTabs', 'remote', 'remote.session']
  * @param ctx - client root context。
  */
 export function apply(ctx: ClientContext): void {
-  ctx.inject(['slots', 'sidebarRightTabs', 'remote', 'remote.session'], (scoped) => {
+  ctx.inject(['slots', 'sidebarRightTabs', 'remote', 'remote.session', 'remote.workspaceFiles'], (scoped) => {
     // journal 流式源（company 同款最小投影）：snapshot 给历史、event 给实时；
     // wire 形状 → 领域形状的折算住这里（纯装配），展示住组件。
     const follow = async function* (sessionId: SessionId, signal: AbortSignal): AsyncGenerator<JournalFrame> {
@@ -48,9 +48,26 @@ export function apply(ctx: ClientContext): void {
       guide: [{ id: RESEARCH_TAB_KEY, order: 1, title: () => '研究状态', description: () => '研究 run 的步骤、等待与证据状态' }],
     }), 'deep-research-pack: research-status tab type')
 
+    // workspaceFiles 闭包（bundle 渐进面数据通道；company cultivation 同款，失败降级 null）
+    const listDir = async (sessionId: SessionId, path: string, signal: AbortSignal) => {
+      try {
+        const result = await scoped.remote.workspaceFiles.list(sessionId, path, signal)
+        if (!result.ok) return null
+        return result.value.entries as readonly { type: string; name: string }[]
+      } catch { return null }
+    }
+    const readFile = async (sessionId: SessionId, path: string, signal: AbortSignal) => {
+      try {
+        const result = await scoped.remote.workspaceFiles.read(sessionId, path, { limit: 40 }, signal)
+        if (!result.ok) return null
+        const text = (result.value as { text?: unknown }).text
+        return typeof text === 'string' ? text : null
+      } catch { return null }
+    }
+
     scoped.effect(() => scoped.slots.inject(RESEARCH_PANE_SLOT, () => [
       scoped.slots.register(
-        { name: RESEARCH_PANE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow }) },
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow, listDir, readFile }) },
         ResearchStatusTab,
       ),
     ]), 'deep-research-pack: research-status pane')
@@ -67,7 +84,7 @@ export function apply(ctx: ClientContext): void {
 
     scoped.effect(() => scoped.slots.inject(RESEARCH_TITLE_SLOT, () => [
       scoped.slots.register(
-        { name: RESEARCH_TITLE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow }) },
+        { name: RESEARCH_TITLE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow, listDir, readFile }) },
         ResearchStatusTitle,
       ),
     ]), 'deep-research-pack: research-status live title')
