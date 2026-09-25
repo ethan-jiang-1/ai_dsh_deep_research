@@ -765,8 +765,12 @@ function roadmapParked() {
       for (const f of files) {
         if (f === 'keys.ts') continue;
         const text = readFileSync(join(clientDir, f), 'utf8');
-        // ① 槽名/包键字面量只许住 keys.ts
-        for (const m of text.matchAll(/['"](sidebar\.right\.[a-z.]+|dsh-deep-research-pack\/[a-z-]+)['"]/g))
+        // ① 槽名/包键字面量只许住 keys.ts。**类型位豁免**：PropsRuntime<'…'> 的泛型参数是
+        //    编译期对 SlotMap 键检查的（拼错 = TS 红），不是本门禁要防的值位静默失效面——
+        //    先抹掉类型位再扫（边界形态实证：Stage 2 的 PropsRuntime 用法被本门禁误咬，
+        //    2026-09-25 收窄）。
+        const valuePositionText = text.replace(/PropsRuntime<[^>]*>/g, '')
+        for (const m of valuePositionText.matchAll(/['"](sidebar\.right\.[a-z.]+|dsh-deep-research-pack\/[a-z-]+)['"]/g))
           fail(gate, `src/client/${f}: keyed 字面量 ${m[1]} 出现在 keys.ts 之外（单一正本 = keys.ts，用导出的常量）`);
         // ② inject 首参与描述符 name/key/id 只许标识符，且出自 keys.ts
         for (const m of text.matchAll(/slots\.inject\(\s*(['"][^'"]+['"])/g))

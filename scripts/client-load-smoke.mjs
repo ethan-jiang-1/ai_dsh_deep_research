@@ -15,7 +15,9 @@
 // 同款——boot 起自本仓，行包名经根 node_modules 解析到 pack 源码树，浏览器经
 // exports["./client"] 取已构建的 lib/client.js）。
 // 前置：source dev/env.sh；pack 已构建（lib/client.js 在位——boot 前自检会拦）。
-// 用法：source dev/env.sh && node scripts/client-load-smoke.mjs [--port 3109]
+// 用法：source dev/env.sh && node scripts/client-load-smoke.mjs [--port 3109] [--session <既有会话标题>]
+// 前置（B-min 起）：dev home 里有至少一个带历史的会话（journal 流要有真数据；默认取首场
+// 研究 run 的会话标题——缺席时用 --session 指定别的）。
 import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -30,6 +32,7 @@ const arg = (name, fallback) => {
   return i === -1 ? fallback : process.argv[i + 1]
 }
 const PORT = Number(arg('port', '3109'))
+const SESSION_TITLE = arg('session', '国产CPU与美国CPU的差距')
 const BOOT_TIMEOUT_MS = 120_000
 const RENDER_TIMEOUT_MS = 60_000
 
@@ -117,6 +120,45 @@ try {
   //    sidebar.right.pane.tab 的 GUIDE_ID 槽体——见 RFC 实施记录。）
   const batchHit = urls.find((u) => u.includes('/plugins/??') && u.includes('dsh-deep-research-pack/client.js'))
   step(batchHit !== undefined, '/plugins/ 批次包含 dsh-deep-research-pack/client.js（模块表收录 + 浏览器取到）')
+
+  // ④ B-min 真渲染流（company runCockpitFlow 配方 + 0.1.7 两处适配，实测打通）：
+  //    a) 关测试须知模态（Continue——它的全屏 _mask_ 盖住一切控件，不关则后续点击全超时）；
+  //    b) 打开既有会话（journal 有真数据；行文本被隐藏的同名 actions 菜单抢匹配——迭代取
+  //       可见者，actionability 被拦则 force 落点）；
+  //    c) 展开右栏（收起时叫 Open right sidebar；company 同款）；
+  //    d) 点「研究状态」guide 胶囊（展开后直接在场，无需 New tab——company 配方核心；
+  //       0.1.7 的 New tab 控件在折叠列内永远 visibility:hidden，不走它）；
+  //    e) 页签体渲染 journal 流且 snapshot 历史 ≥1 事件。
+  const cont = page.getByRole('button', { name: /continue/i }).first()
+  if (await cont.isVisible().catch(() => false)) await cont.click({ timeout: 6_000 }).catch(() => {})
+  await new Promise((r) => setTimeout(r, 1_500))
+
+  // 会话行点击（实测可行形态）：点**整行 span**（含时间戳的 _root_ 行容器，正规 locator 点击
+  // 可触发行处理器——force 点标题文本不触发；隐藏的同名 actions 菜单会抢 getByText 匹配）。
+  const sessionRow = page.locator('span[class*="_root_"]').filter({ hasText: SESSION_TITLE }).first()
+  const sessionOk = await sessionRow.isVisible({ timeout: RENDER_TIMEOUT_MS }).catch(() => false)
+  step(sessionOk, '既有会话在场（journal 数据源）', sessionOk ? SESSION_TITLE : 'dev home 缺该会话——用 --session 指定')
+  if (sessionOk) {
+    await sessionRow.click({ timeout: 10_000 }).catch(() => {})
+    await new Promise((r) => setTimeout(r, 4_000))
+    const expand = page.getByRole('button', { name: 'Open right sidebar' })
+    if (await expand.count() > 0) await expand.first().click({ timeout: 8_000 }).catch(() => {})
+    await new Promise((r) => setTimeout(r, 1_500))
+    const capsule = page.getByRole('button', { name: /研究状态/ }).first()
+    const capOk = await capsule.isVisible({ timeout: 12_000 }).catch(() => false)
+    step(capOk, '「研究状态」guide 胶囊在场（tab 类型注册成功 + 右栏展开）')
+    if (capOk) {
+      await capsule.click({ timeout: 5_000 }).catch(() => {})
+      await new Promise((r) => setTimeout(r, 3_500))
+      const paneText = await page.evaluate(() => document.body?.innerText ?? '')
+      const paneOk = paneText.includes('journal 流')
+      step(paneOk, '页签体渲染（keyed 槽体挂对 key + follow 通道接通）')
+      if (paneOk) {
+        const m = /journal 流（(\d+) 事件）/.exec(paneText)
+        step(m !== null && Number(m[1]) >= 1, 'journal 流有真数据（snapshot 历史 ≥1 事件）', m ? '' + m[1] + ' 事件' : '未见计数（等待会话态？）')
+      }
+    }
+  }
 
   await browser.close()
 } catch (error) {

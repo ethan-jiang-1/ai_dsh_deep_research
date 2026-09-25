@@ -140,12 +140,24 @@ importers:
       '@deepseek-ai/cordis':
         specifier: link:../../vendor/dsh/vendor/cordis
         version: link:../../vendor/dsh/vendor/cordis
+      '@deepseek-ai/dsh-api-remotes':
+        specifier: workspace:*
+        version: link:../../vendor/dsh/packages/api/remotes
       '@deepseek-ai/dsh-client-ui-renderer':
         specifier: workspace:*
         version: link:../../vendor/dsh/packages/client/ui-renderer
+      '@deepseek-ai/dsh-client-ui-session':
+        specifier: workspace:*
+        version: link:../../vendor/dsh/packages/client/ui-session
       '@deepseek-ai/dsh-client-ui-sidebar-right':
         specifier: workspace:*
         version: link:../../vendor/dsh/packages/client/ui-sidebar-right
+      '@deepseek-ai/dsh-client-ui-slots':
+        specifier: workspace:*
+        version: link:../../vendor/dsh/packages/client/ui-slots
+      '@deepseek-ai/dsh-session':
+        specifier: workspace:*
+        version: link:../../vendor/dsh/packages/core/session
 
   vendor/dsh/apps/cli:
     dependencies:
