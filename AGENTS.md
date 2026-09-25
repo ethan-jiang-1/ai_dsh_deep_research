@@ -50,9 +50,8 @@ dev/                     vendor-build.sh（vendor 树构建：tsc host/client + 
 理由的变更**（代码/测试/现有文档说不清的"为什么选它、放弃了什么"）才需**同一变更**新增或更新
 Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。细则是子树指令，不在这里复述：
 
-- **时态总图 = [notes/README.md](notes/README.md)**（将来 `proposed/` · 过去
-  `implemented/` `rejected/` `postmortem/` `research/`；空 `proposed/` 是常态——下一步看
-  roadmap ▶）；
+- **时态总图 = [notes/README.md](notes/README.md)**（将来 `proposed/` = 队列+搁置条目的 RFC 全文、搁置带复活条件 · 过去
+  `implemented/` `rejected/` `postmortem/` `research/`；下一步仍只看 roadmap ▶）；
 - **写入触发 / 取代检查 / 格式与毕业 = [notes/AGENTS.md](notes/AGENTS.md)**；
 - **任务流程**（毕业条目 / 加角色 / 写门禁 / 跑 run）= `.agents/skills/` 开发技能，按
   description 触发加载，不占常驻上下文。

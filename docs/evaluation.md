@@ -42,7 +42,7 @@
 | `dev-skill-format` | `.agents/skills/*/SKILL.md` 在场 + frontmatter `name` = 目录名 + `description` 以 "Use " 开头（vendor 开发 Skill 约定；形状坏了 = 技能静默不触发，比写错正文更难发现） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（写错 name / 去掉 Use 前缀红→还原绿） |
 | `vendor-pin` | vendor/dsh submodule 在位：.gitmodules 正源 URL + 钉 commit `477b4f4205`（tag dsh-v0.1.7-rc.2）——D10 销账的机械面，机制权威自持 | vendor-submodule 毕业 Note（submodule 钉错 commit 注入红 → 还原绿） |
 | `vendor-clean` | vendor/dsh 只读铁律：`git status --porcelain` 零未提交改动——机制权威不许就地改 | vendor-submodule 毕业 Note（touch 注入红 → checkout 还原绿） |
-| `proposal-scheduled` | notes/proposed/ 每提案文件在 roadmap **§队列**有归宿（proposed 不是停车场；搁置池/头注不算归宿） | review-driven-hardening Note（收紧+清欠账：无归宿/仅搁置池双形态注入红→还原绿） |
+| `proposal-scheduled` | notes/proposed/ 每提案文件在 roadmap **§队列或 §搁置池**有归宿（队列/池行与 RFC 双向挂链；孤儿提案红——搁置 RFC 须在池行有链接且写复活条件，仍不是停车场） | review-driven-hardening Note（收紧注入红→绿）+ 2026-09-25 放宽搁置池第二归宿面（孤儿注入红→还原绿；用户"显性化所有内容到 proposed"指令） |
 | `secrets-untracked` | tracked 清单零敏感/残留物（credentials/.env/.pem/.tgz/.log/…） | [入口链审计](../notes/implemented/2026-09-24-entry-chain-fresh-agent-audit.md)（.pem 注入红→还原绿） |
 | `role-list-sync` | 角色清单单一事实源 = 盘上 presets/；代码（scripts/tests/dev 的 .mjs/.sh）里角色清单字面量（单行 ≥3 角色名 / `[...]` 块 ≥3 角色名字符串）即红——检测名从盘上现取 | 基础整治 Note（JS 单行数组/多行数组块/bash for-in 三形态注入红→还原绿） |
 | `gate-ledger-sync` | 本表门禁名集合 = verify 脚本 gates 数组（登记与实现不漂移） | 基础整治 Note（表删行/数组加假名红→还原绿） |

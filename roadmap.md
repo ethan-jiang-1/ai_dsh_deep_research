@@ -9,9 +9,23 @@
 ## 队列
 
 1. ▶ **观察面 GUI 化**（feature，M3 初排升位——前置"run 实测后立项"已满足；用户验收可调）——
-   右栏「研究状态」页签（流程步骤条 + 活标题"⏳ 等你拍板" + journal→矩阵→review 渐进）+
-   研究语义工具卡（C）+ D7 修订（限定观察面用途）+ 双半构建链（tsdown 契约照抄 company）+
-   client-load-smoke 完成定义。材料 = notes/research/2026-09-24-ui-observability-surfaces.md。
+   两段：client-face-bootstrapping（D7 修订限定观察面用途 + 双半 tsdown 构建链 +
+   client-load-smoke + keyless key 守卫）→ run-status-tab（右栏「研究状态」页签：流程步骤条 +
+   活标题"⏳ 等你拍板" + journal→矩阵→review 渐进 + 工具卡 C 随 B 议）。
+   RFC = [2026-09-24-observability-gui](notes/proposed/2026-09-24-observability-gui.md)。
+2. **vendor 构建产物自检**（卫生，小——升 pin 教训）——0.1.7 起启动依赖构建产物，缺失时
+   报错隐晦（client-hmr / typert-loader）；boot 前 fail-loud + 一行 remedy。
+   RFC = [2026-09-25-vendor-build-guard](notes/proposed/2026-09-25-vendor-build-guard.md)。
+3. **team-preflight 末标记加固**（卫生，小——已知脆点：三跑两红一绿，机制面全 PASS）——
+   判据改锚（回合落定或标记）为主、prompt 加固为辅。
+   RFC = [2026-09-25-team-preflight-marker](notes/proposed/2026-09-25-team-preflight-marker.md)。
+4. **研究类型覆盖**（研究/活动，**用户带题驱动**）——下一场真人 HITL 全流程 run（类型 ≠
+   首场的探索性全景，建议"主张验证"）；兼观察面 GUI 化的 L4 验收载体；顺手取证
+   synthesizer/floor 两条搁置项的重估证据。
+   RFC = [2026-09-25-research-type-coverage](notes/proposed/2026-09-25-research-type-coverage.md)。
+5. **DSH 插件生态认真研究**（研究，**用户节奏触发**）——粗扫后续：生态缺什么、
+   deep-research 定位独占性；产出 = 调研报告（钉版引用）。
+   RFC = [2026-09-24-dsh-plugin-ecosystem-research](notes/proposed/2026-09-24-dsh-plugin-ecosystem-research.md)。
 
 （已毕业离队 2026-09-25：升 pin 重校（`dsh-v0.1.5-rc.2` → **`dsh-v0.1.7-rc.2`** @ `477b4f4205`，
 跨六个 RC；preset 重设计迁移 + 0.1.7 构建产物 + 逐条重审——RFC 迁 implemented/，证据 =
@@ -21,10 +35,10 @@
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；被否决的方案不进池；复活条件写进行内）
 
-| 条目 | 进池原因 | 复活条件 |
+| 条目 | 进池原因 | 复活条件（现状） |
 |---|---|---|
-| UI 皮肤（client 面 + slots 品牌） | 核心研究流未稳，皮肤是表现层（company 到 R5 才做皮肤） | 首个完整 run 通过 + 有 demo 需求 |
-| 专职 synthesizer 角色 | 缺实测证据（Q4） | 首个 run 实测 lead 综合负载过高 |
-| floor 数值门禁机械化 | 缺实测证据（Q6）；keyless 断言有假绿风险 | 首个 run 出现质量滑坡实证 |
-| keyless 录制快照面（session 回放 fixture） | 模型/用户可见输出目前靠真挂载冒烟 + 真模型档取证，成本较高且无快照级回归 | 需要「输出快照」级 keyless 回归时（vendor 的 dsh-session-snapshot / llm-replay 路线；E1 时曾误引入为解析依赖，已核销） |
-| 许可证（LICENSE） | 本仓 `private: true` 未对外分发（vendor 是 MIT，我们尚无 license 字段——**未决非遗漏**） | 对外分发/发布 pack 前定许可证并加 `LICENSE` + package.json `license` 字段 |
+| UI 皮肤（client 面 + slots 品牌）——[RFC](notes/proposed/2026-09-24-ui-skin.md) | 核心研究流未稳，皮肤是表现层（company 到 R5 才做皮肤）；与观察面边界已辨析 | 首个完整 run 通过（✓）+ 有 demo 需求（✗ 等用户点名） |
+| 专职 synthesizer 角色——[RFC](notes/proposed/2026-09-24-synthesizer-role.md) | Q4 已销账：单场 run 实测 lead 独任综合无过载 | run 实测综合负载过高（✗；多 run 后重估） |
+| floor 数值门禁机械化——[RFC](notes/proposed/2026-09-24-floor-gates.md) | Q6 已销账：critic 散文审查实证有效，数值 floor 有假绿风险 | run 出现质量滑坡实证（✗；多 run 后重估） |
+| keyless 录制快照面——[RFC](notes/proposed/2026-09-24-keyless-snapshot-lane.md) | 模型/用户可见输出靠真挂载+真模型档取证，成本较高；E1 教训 = 该二包只可作 devDep | 需要「输出快照」级 keyless 回归时（✗；**0.1.7 `retired-tools` 钉法已降复活成本**；观察面落地后渲染改动频繁则重估） |
+| 许可证（LICENSE）——[RFC](notes/proposed/2026-09-24-license.md) | 本仓 `private: true` 未对外分发（**未决非遗漏**） | 对外分发/发布 pack 前（✗ 等用户分发计划） |

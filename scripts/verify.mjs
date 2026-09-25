@@ -49,6 +49,23 @@ function roadmapQueue() {
   return out.join('\n');
 }
 
+// roadmap §搁置池 节切片（proposal-scheduled 的**第二归宿面**：搁置条目的 RFC 也住
+// proposed/——用户 2026-09-25 指令"显性化所有内容到 proposed，统统思考进去"。
+// ▶ 当前指针仍只认队列节：搁置 RFC 不参与 entry-chain 的"当前"语义）。
+function roadmapParked() {
+  const p = join(ROOT, 'roadmap.md');
+  if (!existsSync(p)) return null;
+  const lines = readFileSync(p, 'utf8').split('\n');
+  const s = lines.findIndex((l) => /^## 搁置池/.test(l));
+  if (s === -1) return null;
+  const out = [];
+  for (let i = s + 1; i < lines.length; i++) {
+    if (/^## /.test(lines[i])) break;
+    out.push(lines[i]);
+  }
+  return out.join('\n');
+}
+
 // ── 门禁 1：md-utf8 / newline（所有 tracked .md 严格 UTF-8、恰一个结尾换行；git
 //    ls-files 驱动——运行区（gitignored bundle/profile 镜像）不扫，研究手册合同既有；
 //    旧版全树 walk 曾被 live run 的 leads.md 双尾换行咬红，2026-09-24 修正范围）──
@@ -293,19 +310,22 @@ function roadmapQueue() {
   else if (r.stdout.trim()) fail(gate, `vendor/dsh 有未提交改动（只读铁律）：${r.stdout.trim().split('\n')[0]}…`);
 }
 
-// ── 门禁 8：proposal-scheduled（proposed/ 每提案必须在 roadmap §队列 有归宿；搁置池/头注不算）──
-// 收紧记录：review-driven-hardening Note（原版全文件子串匹配——stem 出现在任何位置都算归宿）。
+// ── 门禁 8：proposal-scheduled（proposed/ 每提案必须在 roadmap §队列 **或 §搁置池** 有
+//    归宿——两处都不是的 RFC = 孤儿提案，红灯。搁置池归宿 = 复活条件 + 现状写进 RFC，
+//    不是停车场（搁置 RFC 与池行双向挂链）。收紧记录：review-driven-hardening Note。）──
 {
   const gate = 'proposal-scheduled';
   const dir = join(ROOT, 'notes', 'proposed');
   if (existsSync(dir)) {
     const queue = roadmapQueue();
-    if (queue === null) fail(gate, 'roadmap §队列 不可读——proposed 的归宿只能登记在队列节');
+    const parked = roadmapParked() ?? '';
+    if (queue === null) fail(gate, 'roadmap §队列 不可读——proposed 的归宿只能登记在队列/搁置池节');
     else {
       for (const ent of readdirSync(dir)) {
         if (ent === 'README.md' || !ent.endsWith('.md')) continue;
         const stem = ent.replace(/\.md$/, '');
-        if (!queue.includes(stem)) fail(gate, `proposed/${ent} 在 roadmap §队列 无归宿（proposed 不是停车场；搁置池/头注不算归宿）`);
+        if (!queue.includes(stem) && !parked.includes(stem))
+          fail(gate, `proposed/${ent} 在 roadmap §队列/§搁置池 均无归宿（孤儿提案——队列或池行须挂本 RFC 的链接）`);
       }
     }
   }
