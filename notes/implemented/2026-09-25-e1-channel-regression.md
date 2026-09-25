@@ -75,3 +75,17 @@ memberSpecs[i]）——spawn 顺序与日志出现顺序交叉时误报"成员�
 
 **遗留**：run 通道（3081）在 run 收尾前维持 company 基线（E1 已修复验证，但切换 = 重启 =
 挂起回合终局化风险——等 HITL2 定稿与 Phase C 完成后，下一次 boot-run 自然用本仓 vendor）。
+
+## 勘误（2026-09-25 三轮：本仓 vendor 逐源对齐时发现）
+
+上文"验证（with-key 面补齐）"里写的 **l4-lite / team-preflight「本仓 vendor 基线首跑」不准确**：
+当时这两个脚本的 `dshSrc` 默认值仍指 `/Users/bowhead/ai_dsh_company`（E1 只把 preset-smoke /
+release-smoke 改成 `?? ROOT`），所以那两次 ALL PASS 实际跑在 **company 基线**上——它们没有验证
+本仓 vendor。现已修默认值（`?? ROOT`，与另两个脚本一致）并**在本仓 vendor 上重跑**：
+
+- `DSH_SRC=<本仓> node scripts/l4-lite-smoke.mjs` → **ALL PASS**（四角色响应 + scout web_search）；
+  同时该次跑在**洗过的子进程 env** 下（新一轮的凭据卫生改动），证明洗 env 不影响真模型档；
+- `node scripts/team-preflight-smoke.mjs`（默认已指本仓）→ 机制面 **全 PASS**（spawn_teammate ×2、
+  list_agents、one-shot subagent ×3、两成员标记齐全），唯一 FAIL = **lead 末标记
+  `预检完成-LEAD` 超时**；两次连跑行为不同（一次 lead 不 spawn、一次 spawn 后不落末标记），
+  属**模型对四步脚本的服从度抖动**，不是机制缺失——已知脆点，记此备忘。

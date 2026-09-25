@@ -13,6 +13,7 @@
 // 用法：source dev/env.sh && node scripts/team-preflight-smoke.mjs [--port 3102]
 
 import { spawn, spawnSync } from 'node:child_process';
+import { withModelKey } from './lib/env.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
@@ -43,7 +44,7 @@ if (spawnSync('zstd', ['--version']).status !== 0) {
   console.error('team-preflight: 需要 zstd 且须在 PATH 上（会话日志为 zstd 压缩）');
   process.exit(2);
 }
-const dshSrc = process.env.DSH_SRC ?? '/Users/bowhead/ai_dsh_company';
+const dshSrc = process.env.DSH_SRC ?? ROOT; // 机制基线 = 本仓 vendor/dsh 钉 tag（AGENTS §DSH 源码；E1 切换后统一默认）
 const bin = join(dshSrc, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
 if (!existsSync(bin)) { console.error(`team-preflight: 机制基线不在位（${bin}）`); process.exit(2); }
 // run 通道组合校验（镜像 boot-run.sh 的 profile_ok；缺则提示先跑 boot-run）
@@ -82,7 +83,7 @@ const rpc = async (base, cookie, endpoint, args) => {
 const boot = async () => {
   const child = spawn(process.execPath,
     ['--import', 'tsx/esm', bin, '--profile', PROFILE, '--', '--port', String(PORT), '--no-open'],
-    { cwd: dshSrc, env: { ...process.env, DSH_HOME: home }, stdio: ['ignore', 'pipe', 'pipe'] });
+    { cwd: dshSrc, env: withModelKey({ DSH_HOME: home }), stdio: ['ignore', 'pipe', 'pipe'] });
   let output = '';
   const banner = new Promise((resolveBanner, rejectBanner) => {
     const onData = (chunk) => {

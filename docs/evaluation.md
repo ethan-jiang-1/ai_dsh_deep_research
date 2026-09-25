@@ -48,6 +48,8 @@
 | `gate-ledger-sync` | 本表门禁名集合 = verify 脚本 gates 数组（登记与实现不漂移） | 基础整治 Note（表删行/数组加假名红→还原绿） |
 | `entry-chain` | 入口链存在性投影：成员文件在场（AGENTS/00-index/roadmap/proposed//guides60/evaluation/design10-30/guides61）+ roadmap §队列 恰一个 ▶（D11 唯一"当前"指针；链接解析归 md-links，此处补反引号指针与 ▶ 唯一性两个盲区） | review-driven-hardening Note（成员缺席/▶ 删除/▶ 复制三形态注入红→还原绿） |
 | `doc-budgets` | 常驻文档预算：`scripts/doc-budgets.json` 拥有上限（登记项必须存在且不超限；仓内新增 AGENTS.md 必须登记——缺登记即红）。行数度量（CJK 词数不可靠，等价上游 verify-doc-budgets 的词数预算）；超限处置序 = 下放 > 压缩 > 升顶（升顶须同变更登记理由） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（超限/缺登记两形态注入红→还原绿） |
+| `align-ledger` | 对齐台账机读对账（docs/alignment-ledger.json ↔ vendor/dsh ↔ 本仓落点）：source 必须在 vendor/dsh 存在（换 pin 后源移位即红 = 重审触发器）· verdict=adopted/adapted 的 landing 必须存在 · na 必须给理由 | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（注入不存在 source / 不存在落点 / na 无理由三形态红→还原绿） |
+| `repo-conventions` | 与 vendor 本体的机械约定对齐：`.editorconfig`（root/LF/尾换行）· `.gitattributes`（`* text=auto eol=lf`）· `package.json engines.node` **直接等于** vendor/dsh/package.json 的值（换 pin 即红）· pre-commit 含 `git diff --cached --check` | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（改 engines / 删 gitattributes / 删 whitespace 检查三形态注入红→还原绿） |
 
 - **通过判据**：全绿；`verify` 的门禁清单与 `tests/` 守卫一一登记在案，每条带反证记录（上表）。
 - **何时跑**：每轮 goal 续驶必跑。

@@ -14,6 +14,7 @@
 // 前置：source dev/env.sh（DSH_HOME + 凭据）；DSH_SRC 默认本仓根（vendor/dsh）。
 // 用法：source dev/env.sh && node scripts/entry-chain-probe.mjs [--port 3102]
 import { spawn, spawnSync } from 'node:child_process';
+import { withModelKey } from './lib/env.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, writeFileSync } from 'node:fs';
 import { readdirSync, readFileSync } from 'node:fs';
@@ -93,7 +94,7 @@ const rpc = async (base, cookie, endpoint, args) => {
 const boot = async () => {
   const child = spawn(process.execPath,
     ['--import', 'tsx/esm', bin, '--profile', 'web', '--', '--port', String(PORT), '--no-open'],
-    { cwd: dshSrc, env: { ...process.env, DSH_HOME: home }, stdio: ['ignore', 'pipe', 'pipe'] });
+    { cwd: dshSrc, env: withModelKey({ DSH_HOME: home }), stdio: ['ignore', 'pipe', 'pipe'] });
   let output = '';
   const banner = new Promise((resolveBanner, rejectBanner) => {
     const onData = (chunk) => {

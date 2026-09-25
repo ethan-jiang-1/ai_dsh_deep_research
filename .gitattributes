@@ -1,0 +1,8 @@
+# 仓库正本文本形态 = LF，checkout 也强制：工作树与仓库之间没有 smudge 边界，字节级门禁
+# （md-utf8-newline 的逐字节校验、pack-contract-sync 的文本扫描、blob 哈希）在每个宿主上
+# 看到同一种形态（vendor/dsh/.gitattributes 吸纳）。
+#
+# 未采纳的上游条目及理由：`*.cmd text eol=crlf`（本仓无 Windows 命令脚本）、`*.pdf binary`
+# （无 PDF 资产）、`*.i18n.yaml merge=dsh-translation-pairing`（单语仓，无配对 sidecar 与
+# merge driver）。
+* text=auto eol=lf

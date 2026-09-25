@@ -7,6 +7,8 @@
 # 测试输出重定向进 dev/smoke-workspace/（gitignored 工具态区——纪律：工具状态不落 /tmp）。
 set -u
 cd "$(git rev-parse --show-toplevel)" || { echo "pre-commit: 不在 git 仓库内？" >&2; exit 1; }
+# whitespace 门禁（vendor lefthook 的 whitespace 作业吸纳）：尾随空白/冲突标记/CRLF 在暂存面即拦。
+git diff --cached --check || { echo "pre-commit: 暂存面有空白/冲突标记问题（git diff --cached --check）——修完再提" >&2; exit 1; }
 node scripts/verify.mjs || { echo; echo "pre-commit: verify 红灯——commit 已拦（修完再提；应急 --no-verify 须在 message 说明）" >&2; exit 1; }
 out="dev/smoke-workspace/pre-commit-test.out"
 node --test tests/*.test.mjs >"$out" 2>&1 || { tail -25 "$out" >&2; echo "pre-commit: tests 红灯——commit 已拦（详情如上；应急 --no-verify 须在 message 说明）" >&2; exit 1; }

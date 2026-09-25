@@ -13,6 +13,7 @@
 // 用法：source dev/env.sh && node scripts/release-smoke.mjs
 
 import { spawnSync } from 'node:child_process';
+import { scrubbedEnv, withModelKey } from './lib/env.mjs';
 import { existsSync, readFileSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -61,7 +62,7 @@ step(pack.status === 0 && typeof tarball === 'string' && tarball.endsWith('.tgz'
 rmSync(profileDir, { recursive: true, force: true });
 console.log('② 建 profile（web 模板）…');
 const init = run(process.execPath, ['--import', 'tsx/esm', bin, '--profile', PROFILE, '--from-default-profile', 'web', '--dump-config'],
-  { cwd: dshSrc, env: { ...process.env, DSH_HOME: home } });
+  { cwd: dshSrc, env: scrubbedEnv({ DSH_HOME: home }) });
 step(init.status === 0 && existsSync(join(profileDir, 'cordis.yml')), 'profile 初始化（web 模板）', init.stderr.slice(-400));
 // .npmrc：pnpm store/cache 钉 repo 内（工具态纪律）
 writeFileSync(join(profileDir, '.npmrc'),
@@ -70,7 +71,7 @@ writeFileSync(join(profileDir, '.npmrc'),
 // ③ plugin add
 console.log('③ plugin add file:tarball …');
 const add = run(process.execPath, ['--import', 'tsx/esm', bin, 'plugin', '--profile', PROFILE, 'add', `file:${join(tmp, tarball)}`],
-  { cwd: dshSrc, env: { ...process.env, DSH_HOME: home } });
+  { cwd: dshSrc, env: scrubbedEnv({ DSH_HOME: home }) });
 step(add.status === 0, 'dsh plugin add 安装', (add.stderr || add.stdout).slice(-400));
 
 // ④ manifest 断言
@@ -91,7 +92,7 @@ step(Array.isArray(packPkg?.dsh?.compatibility?.dshReleases) && packPkg.dsh.comp
 // ⑤ boot + preset-smoke 断言（安装域通道：无 overlay，走已装 pack 的正式路径）
 console.log('⑤ preset-smoke（安装域：--profile release-check --no-patch）…');
 const smoke = run(process.execPath, [join(ROOT, 'scripts', 'preset-smoke.mjs'), '--profile', PROFILE, '--no-patch', '--port', PORT],
-  { env: { ...process.env, DSH_HOME: home, DSH_SMOKE_REAL: '1' } });
+  { env: withModelKey({ DSH_HOME: home, DSH_SMOKE_REAL: '1' }) });
 console.log(smoke.stdout.split('\n').map((l) => `    ${l}`).join('\n'));
 step(smoke.status === 0, 'preset-smoke 安装域全绿', smoke.stdout.split('\n').filter((l) => l.includes('FAIL')).join(' | '));
 

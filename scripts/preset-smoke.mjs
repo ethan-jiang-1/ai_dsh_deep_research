@@ -11,6 +11,7 @@
 // 用法：source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs [--port 3099]
 
 import { spawn } from 'node:child_process';
+import { withModelKey } from './lib/env.mjs';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -91,7 +92,7 @@ const boot = async () => {
   const argv = ['--import', 'tsx/esm', bin, '--profile', PROFILE];
   if (!NO_PATCH) argv.push('--patch', OVERLAY);
   argv.push('--', '--port', String(PORT), '--no-open');
-  const child = spawn(process.execPath, argv, { cwd: dshSrc, env: { ...process.env, DSH_HOME: home }, stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn(process.execPath, argv, { cwd: dshSrc, env: withModelKey({ DSH_HOME: home }), stdio: ['ignore', 'pipe', 'pipe'] });
   let output = '';
   const banner = new Promise((resolveBanner, rejectBanner) => {
     const onData = (chunk) => {

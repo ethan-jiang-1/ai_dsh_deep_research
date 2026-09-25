@@ -1,0 +1,700 @@
+{
+  "_note": "对齐台账（机读正本）：vendor/dsh（钉 @ fb2c4b9e）的 development-harness 源面逐项结论。门禁 align-ledger 强制三件事：① 每条 source 在 vendor/dsh 里真实存在（换 pin 后文件移位/删除即红——这就是重审触发器）；② verdict=adopted/adapted 的每处 landing 在仓内真实存在；③ verdict=na 必须给 reason。人读视图 = docs/discipline-map.md 源 1–9。",
+  "_evidence": "逐条原始行（810 条）在 dev/smoke-workspace/inventory/{root-packaging,subtree-agents,dev-skills,docs-standards,packages-evidence}.json（gitignored 运行区，可重跑 workflow vendor-inventory-to-files 复现）",
+  "sources": [
+    {
+      "source": ".agents/notes/AGENTS.md",
+      "owns": "Form/ownership row: the Agent Notes tree AGENTS.md owns the note lifecycle standing orders — 7 lines / ~0.8 KB, essentially pure orders (thr",
+      "verdict": "adopted",
+      "landing": [
+        "notes/AGENTS.md",
+        "notes/README.md"
+      ]
+    },
+    {
+      "source": ".agents/notes/archived/AGENTS.md",
+      "owns": "Form/ownership row: the archived-notes AGENTS.md owns the sealed-artifact rules — 7 lines / ~0.9 KB, pure orders in three paragraphs, linkin",
+      "verdict": "na",
+      "reason": "本仓未引入 archived 冻结层（缺归档需求）；引入条件写在 notes/README 差异表（未来指导价值低的 implemented 存量出现时）"
+    },
+    {
+      "source": ".agents/notes/implemented/AGENTS.md",
+      "owns": "Form/ownership row: the implemented-notes AGENTS.md owns shipped-note currency rules — 13 lines / ~1.0 KB, pure orders with one `##` heading",
+      "verdict": "adopted",
+      "landing": [
+        "notes/implemented/README.md",
+        "notes/AGENTS.md"
+      ]
+    },
+    {
+      "source": ".agents/skills/.gitignore",
+      "owns": "整个技能树只忽略 */agents/openai.yaml —— 每个技能目录下由运行时生成的 agent 描述文件不入库，技能目录其余内容（SKILL.md、references/、templates/、scripts/）都是受版本控制的源。",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-archive-agent-notes/SKILL.md",
+      "owns": "新增 Note 触发限定范围的取代审计：按未来决策价值把 implemented Note 分保留/归档、rejected 只留仍能阻止诱人重犯的、proposed 永不归档，归档只走冻结 triplet 机制（原样搬 foo.md/foo.zh.md/foo.i18n.yaml",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-ci-test-reliability/SKILL.md",
+      "owns": "资源必须原子分配（listen(0) 后读实际地址、mkdtemp 建私有临时根），进程全局状态按「记下原值是否缺席 → 精确还原 → 立即注册清理 → try/finally 最小作用域」处理，同步靠可观察状态而非 sleep，teardown 必须 dispose 到 qui",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-ci-test-reliability/references/ci-flake-diagnosis.md",
+      "owns": "诊断请求保持只读（不给修复、重跑或改 CI 的授权）；先冻结证据（repo/workflow/job/commit SHA/runner 标签/时间戳/精确失败命令/首个稳定失败签名，基础设施消息与测试输出分开）；按八类分类（host-resource collision、inc",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-code-review/SKILL.md",
+      "owns": "审阅前先取 PR 的 live base/head 并跑 change-scope 定范围（retarget 或 merge 后必须重取重跑）；把新增散文的语义审阅、文档与代码同 diff 一致、注册项清理等列为阻断要求；报告按 defect/location/impact/ev",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-doc/SKILL.md",
+      "owns": "文档 kind 一对一映射唯一模板；页序固定为 YAML → H1 → 语言切换器 → Summary → Table of Contents → 用户面到开发者面 → 可选 Further Exploration → 末节 Dev Note；每个操作/命令/默认值声明必须实跑复",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-doc/references/metadata-links-i18n.md",
+      "owns": "package README 的 frontmatter 只允许 description + kind（明确拒收 name、audience、tags 与 README 级 i18n，键小写连字符）；kind 按机械顺序推导（packages 组地图 → dsh.bundle.p",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-doc/references/review.md",
+      "owns": "新人测试：无仓库上下文的专业工程师在 3–5 个互链页内应能答出产品做什么、怎么安全用、状态存哪、谁拥有、怎么失败、在哪改；每条 material 断言对最强 owner 校验（包元数据/公开类型与 JSDoc/运行时代码/测试/生成目录/活动 Note），操作类断言以实跑为唯一",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-doc/references/structure-hierarchy.md",
+      "owns": "页序自 YAML 起、到末节 Dev Note 止；Summary 三到五句，Table of Contents 只导航不描述性展开；内容按读者深度排序（基本使用 → 高级配置 → 开发者细节）；每个实质 H2 先给一段定向段落再放表格/代码/H3；重开发者细节与 Dev Not",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-doc/references/style.md",
+      "owns": "Summary 三到五句一段（英文包 README 另有 100 wc -w 词上限门禁）；受控技术英语：点名 actor 与动作、一概念一个稳定术语、优先直接动词、一句一指令、拆分号与长从句，20/25 词只是复核提示而非门禁，绝不为了长度删改 must/may/never/时",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-doc/references/website-sync.md",
+      "owns": "站点 manifest（website/docs.ts）是显式公开白名单：改已发布页只动 canonical 源，新页加一条 manifest，移动/删除要原子更新源+manifest+入站链接；DocsPage 每个字段（source/route/label/sidebar/s",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-doc/templates/package-bundle.md",
+      "owns": "bundle 模板只在 manifest 声明 dsh.bundle.patch 时使用：先给实测过的 dsh plugin --profile <name> add/remove 安装路径与层语义（说明 in-box bundle 从哪解析、reconcile 激活什么、缺声明",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-doc/templates/package-group.md",
+      "owns": "组地图模板：用于 packages/README.md 与 packages/<group>/README.md，只做地图——一段定向句 + 每直接包一行（链接 + 一行职责，职责只讲贡献不讲内部）+ Related documentation（链邻接 owner 并各配短语）+",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-doc/templates/package-library.md",
+      "owns": "库模板：入口是普通模块 API、不向 composition 注册任何东西；与 package-reference 的三点差别 = 不写 profile 安装路径、不写挂载配置、Model Experience 只写门禁指派的形式（多数 none 或 indirect，绝不发明不",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-doc/templates/package-reference.md",
+      "owns": "插件包 README 骨架：frontmatter 为 description + kind: package-reference；正文依次是 # <包名>、语言切换器、Summary（≤100 词）、Table of Contents、-----、Use this packag",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-find-simplifications/SKILL.md",
+      "owns": "简化候选必须有消费者分类证据（production / non-production / ambiguous，rg 搜精确符号后再读调用点）才算强候选：无生产消费者、同一事实两种表示、声明 seam 但无消费者、手写可换维护依赖、只保护未用 API 的测试都算；小到不值得立 No",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-merging-stacked-prs/SKILL.md",
+      "owns": "同仓依赖链一律走 GitHub 官方 stacked-PR 对象：先 gh stack --version 硬停检查、用 PullRequest.stack 与 stackEntry.position 的 GraphQL 查询认证成员与顺序（不以 base 分支推断代替），gh ",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-pre-push-checks/SKILL.md",
+      "owns": "push 前按 diff 实际触及的面选最小证据、拒绝反射式跑全量套件：文档/Note/目录类跑 doc-sync、模型或编辑器可见输出跑所属 keyless snapshot、清单/构建/worker 入口跑 build+hygiene、跨包行为才放 profile 或 CI ",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-prose-standard/SKILL.md",
+      "owns": "修剪只删装饰不删命题：actor 与动作、条件时机与顺序、must/may/never 情态、负保证与例外、所有权/副作用/失败模式/后果逐条保留；按散文位置定必需覆盖（公共 JSDoc 写调用方可见的返回差异与抛错、内部注释只写非显然不变量、README 写消费者合同、技能要声",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-prose-standard/references/examples.md",
+      "owns": "用 Over-trimmed / Balanced / Over-detailed 三态对照把「完整命题」落成可判定样例：必须保留 actor 与作用域、处置顺序与失败可见性、所有权变更点与完成保证、throw 与状态前置、映射中丢弃或改写的字段、measured 这类 prov",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-speed-up-perf/SKILL.md",
+      "owns": "先测未优化工作负载再改生产代码，并记录 measurement card（用户操作与可观察完成条件 / 固定工作负载维度与种子 / 生产入口路径 / 时钟起止与排除项 / 内存可达与瞬态口径 / 原始样本与判定阈值 / 行为测试）；端到端与组件相位分开测；每个改动要求负控（收紧后",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-translate-docs/SKILL.md",
+      "owns": "只在用户显式点名时运行（frontmatter disable-model-invocation: true + user-invocable: true，禁从其他技能或推断触发）；按变更类型分路——更新走 briefing 驱动的最小对照修改（不整篇重译）、新配对才委派子代理整",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-trim-cot-leakage/SKILL.md",
+      "owns": "唯一判据 = HEAD 读者在无会话记录/PR 线程/未提交草稿的情况下能否解析每个引用并验证每条断言；按八类泄漏逐条处理（死设计引用、PR/栈视角、变更叙事与版本戳、评审编排、对评审者辩解、过程复述、hedge 残留、作者语言残留）；改写义务性句子前先枚举该段全部命题，保留 i",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-trim-cot-leakage/references/examples.md",
+      "owns": "按泄漏类别给 leaked → fixed 对照，并单列 Overcorrection traps：把义务（pending migration）改成背书（sanctioned）、把假设/未来标记删成已交付特性、连同过程转述一起删掉同句里的真事实、以及删掉 measured 之类 ",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/dsh-trim-cot-leakage/references/recall-batteries.md",
+      "owns": "探针集纪律：ripgrep 必须加 --hidden --glob '!.git/**'（否则漏掉 .agents/），排除项放最后以免被后续 include 重新纳入，自然语言行加 -i 而代码模式行不加，短语要加词界，零命中必须先打中已知正例、噪声模式必须先拒绝近似负例，中英",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/record-browser-gif/SKILL.md",
+      "owns": "改产品可见 GUI 行为的 PR 必须附 GIF：从该 PR 树的真实 server + 真 key + 真实模型轮次录制，一个故事板 = 一次证据运行（不得拼接不同 run 的帧），正文旁声明被演示的 commit SHA、树的来源、模式例外与是否真跑了模型轮次；录制与发布分离",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/record-browser-gif/scripts/encode_gif.py",
+      "owns": "编码器 CLI 的脚本契约：一切错误走 fail() 的单行 error: 退出（可自行修正的措辞）；数值参数在 argparse 层按 positive / nonnegative / finite 校验，拒绝 nan 与 inf；缺 ffmpeg/ffprobe 时只报告依赖",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".agents/skills/record-browser-gif/scripts/test_encode_gif.py",
+      "owns": "用 unittest 驱动真实 ffmpeg/ffprobe 子进程：setUp 里造三段纯色 WebM 夹具与 tempfile 私有根并注册 cleanup，断言 trim/speed/final-hold/palette 顺序与默认保留全片时长；对每类非法参数（负 star",
+      "verdict": "adapted",
+      "landing": [
+        ".agents/skills/",
+        "scripts/verify.mjs"
+      ],
+      "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
+    },
+    {
+      "source": ".claude/",
+      "owns": ".claude/skills 是指向 ../.agents/skills 的 symlink：在 Claude 系 harness 的发现路径暴露同一批开发技能，不复制正文。",
+      "verdict": "adopted",
+      "landing": [
+        ".claude/skills",
+        "scripts/verify.mjs"
+      ]
+    },
+    {
+      "source": ".editorconfig",
+      "owns": "root = true（本文件是仓库文本约定的根声明）。",
+      "verdict": "adopted",
+      "landing": [
+        ".editorconfig",
+        "scripts/verify.mjs"
+      ]
+    },
+    {
+      "source": ".gitattributes",
+      "owns": "* text=auto eol=lf —— 仓库正本文本形态为 LF 且 checkout 即强制，使字节级门禁在每宿主看到同一形态。",
+      "verdict": "adopted",
+      "landing": [
+        ".gitattributes",
+        "scripts/verify.mjs"
+      ]
+    },
+    {
+      "source": ".github/AGENTS.md",
+      "owns": "Windows 任务跑在 Windows runner（`windows-*` 标签）下并使用原生 `pwsh`",
+      "verdict": "na",
+      "reason": "本仓无远端 CI/PR 面（.github 不存在）；等价面 = dev/hooks/pre-commit + scripts/verify.mjs 的本地门禁"
+    },
+    {
+      "source": "AGENTS.md",
+      "owns": "改 packages/ 前先读 docs/architecture.md；文档改动遵循 docs/AGENTS.md。",
+      "verdict": "adapted",
+      "landing": [
+        "AGENTS.md",
+        "docs/discipline-map.md"
+      ]
+    },
+    {
+      "source": "apps/cli/tests/profiles/AGENTS.md",
+      "owns": "Form/ownership row: the CLI profile-integration-test AGENTS.md owns shipped-profile cross-package test rules — 7 lines / ~0.8 KB, pure order",
+      "verdict": "adapted",
+      "landing": [
+        "scripts/release-smoke.mjs",
+        "scripts/preset-smoke.mjs"
+      ]
+    },
+    {
+      "source": "benchmarks/AGENTS.md",
+      "owns": "Form/ownership row: the performance-benchmark AGENTS.md owns required repo-level performance gates whose measured user path crosses package ",
+      "verdict": "na",
+      "reason": "本仓无性能基准面（无 benchmark 目录与车道）"
+    },
+    {
+      "source": "docs/AGENTS.md",
+      "owns": "Form/ownership row: docs/AGENTS.md owns the repository documentation standard — 75 lines / ~10.6 KB, pure orders in five sections (Document ",
+      "verdict": "adapted",
+      "landing": [
+        "docs/AGENTS.md"
+      ]
+    },
+    {
+      "source": "docs/architecture.md",
+      "owns": "改 packages/ 下任何东西之前先读架构页；它假定你懂 Cordis，不懂就先读 primer 或教程。",
+      "verdict": "adapted",
+      "landing": [
+        "docs/design/10-architecture.md"
+      ]
+    },
+    {
+      "source": "docs/cookbook/",
+      "owns": "每篇 cookbook 都以双语对发布：英文 <name>.md + <name>.zh.md，并有 <name>.i18n.yaml sidecar 记录配对身份。",
+      "verdict": "adapted",
+      "landing": [
+        "docs/guides/62-plugin-authoring.md",
+        "docs/AGENTS.md"
+      ]
+    },
+    {
+      "source": "docs/cookbook/adding-a-package.md",
+      "owns": "新增 @deepseek-ai/dsh-<name> 包用逐文件清单；该清单以 bash 与 adapter 包为模板验证过，若与实际模板漂移就在此修清单。",
+      "verdict": "adapted",
+      "landing": [
+        "docs/guides/62-plugin-authoring.md",
+        "docs/AGENTS.md"
+      ]
+    },
+    {
+      "source": "docs/cookbook/adding-a-remote-api.md",
+      "owns": "增改一个 ctx.remote 端点走五步：声明方法、声明它的失败、在包上注册、在 Client 消费、测试它。",
+      "verdict": "adapted",
+      "landing": [
+        "docs/guides/62-plugin-authoring.md",
+        "docs/AGENTS.md"
+      ]
+    },
+    {
+      "source": "docs/cookbook/adding-a-session-format-version.md",
+      "owns": "只在头、事件信封、核心事件语义或表面重建发生结构变更时升格式；普通的事件新增不需要升版，并要把 Session 格式整数与包发布版本、SQLite schema 版本、投影单元版本、协议包装版本区分开。",
+      "verdict": "adapted",
+      "landing": [
+        "docs/guides/62-plugin-authoring.md",
+        "docs/AGENTS.md"
+      ]
+    },
+    {
+      "source": "docs/cookbook/adding-a-settings-card.md",
+      "owns": "插件把自己的配置放上 settings 页不需要改本仓内任何东西：Host 服务每个已注册的 settings namespace，Plugins 区按 namespace 归类卡片，两半都注册即自动配对。",
+      "verdict": "adapted",
+      "landing": [
+        "docs/guides/62-plugin-authoring.md",
+        "docs/AGENTS.md"
+      ]
+    },
+    {
+      "source": "docs/cookbook/adding-a-tool.md",
+      "owns": "模型可见工具必须满足的最小形状：defineTool 声明 name/description（模型所见）/parameters/output schema 与 render，execute 收到由 schema 推出的类型化 args 与携带不可变身份与 token 的 exec",
+      "verdict": "adapted",
+      "landing": [
+        "docs/guides/62-plugin-authoring.md",
+        "docs/AGENTS.md"
+      ]
+    },
+    {
+      "source": "docs/cookbook/adding-a-vendored-package.md",
+      "owns": "需要另一个上游 Cordis 包时把它作为钉住的源码 vendor 进 vendor/，而不是加一条 npm 依赖。",
+      "verdict": "adapted",
+      "landing": [
+        "docs/guides/62-plugin-authoring.md",
+        "docs/AGENTS.md"
+      ]
+    },
+    {
+      "source": "docs/cookbook/adding-an-llm-adapter.md",
+      "owns": "接入新模型 provider 时注册是 effect 式（HMR 安全）；每个 provider 路由一个 adapter——重复注册会抛错，多路由注册是全有或全无。",
+      "verdict": "adapted",
+      "landing": [
+        "docs/guides/62-plugin-authoring.md",
+        "docs/AGENTS.md"
+      ]
+    },
+    {
+      "source": "docs/cookbook/extension-cookbook.md",
+      "owns": "这是 harness 扩展的参考模式集；片段省略 import 与 helper 实现，不是可直接复制的完整代码。",
+      "verdict": "adapted",
+      "landing": [
+        "docs/guides/62-plugin-authoring.md",
+        "docs/AGENTS.md"
+      ]
+    },
+    {
+      "source": "docs/cookbook/maintaining-dsh-code-review.md",
+      "owns": "该技能由单一指定操作者用私有周期性维护工具保持最新；工作流本身由对应的 skill-maintenance Agent Note 规范，本页是操作者与接手者的入口。",
+      "verdict": "adapted",
+      "landing": [
+        "docs/guides/62-plugin-authoring.md",
+        "docs/AGENTS.md"
+      ]
+    },
+    {
+      "source": "docs/cookbook/responding-to-pr-review-on-a-stack.md",
+      "owns": "每个 PR 分支一个 worktree：每个 PR 的修复在它自己的 worktree 里做，并行修复绝不共享 checkout。",
+      "verdict": "adapted",
+      "landing": [
+        "docs/guides/62-plugin-authoring.md",
+        "docs/AGENTS.md"
+      ]
+    },
+    {
+      "source": "docs/defensive-patterns.md",
+      "owns": "写生命周期、并发、子进程或 teardown 代码前先读这份缺陷模式清单。",
+      "verdict": "adapted",
+      "landing": [
+        "scripts/AGENTS.md",
+        "notes/postmortem/README.md"
+      ]
+    },
+    {
+      "source": "docs/development.md",
+      "owns": "Node.js 支持 22.19+ 与 24+；CI 覆盖 22.19、24、26。",
+      "verdict": "adapted",
+      "landing": [
+        "docs/guides/60-dev-loop.md"
+      ]
+    },
+    {
+      "source": "docs/glossary.md",
+      "owns": "领域词汇一个概念只用一个 canonical term；术语用标准 Markdown 锚点链到自己的条目。",
+      "verdict": "adapted",
+      "landing": [
+        "docs/00-index.md"
+      ]
+    },
+    {
+      "source": "docs/i18n/README.md",
+      "owns": "范围内的每份文档同时以英文与简体中文维护，因为读者含公司内外的人与 agent",
+      "verdict": "na",
+      "reason": "单语仓：无双语配对三件套与 site 投影"
+    },
+    {
+      "source": "docs/postmortem/README.md",
+      "owns": "事故复盘的对象是「bug 到达了它不该到达的地方」（真实用户、已合并的 PR、一次发布），有趣的不是那一行修复，而是为什么我们的流程放它过去。",
+      "verdict": "adapted",
+      "landing": [
+        "notes/postmortem/README.md"
+      ]
+    },
+    {
+      "source": "docs/session-format-status.md",
+      "owns": "用一页专文区分 checkout 的 Session writer 版本与最新已发布格式；其他文档链接到这里，而不是各自重述哪个版本是当前/下一个/未发布。",
+      "verdict": "na",
+      "reason": "本仓不定义 session 格式与版本状态（消费 base 能力）"
+    },
+    {
+      "source": "docs/testing.md",
+      "owns": "Unit 层 = vitest 跑各包与 example 的 tests/** 以及 scripts/**/*.spec.ts；测试住在它所检验的代码区旁边。",
+      "verdict": "adopted",
+      "landing": [
+        "docs/evaluation.md",
+        "docs/guides/60-dev-loop.md",
+        "scripts/AGENTS.md"
+      ]
+    },
+    {
+      "source": "lefthook.yml",
+      "owns": "本地检查点保持快，全仓门禁矩阵归 CI。",
+      "verdict": "adapted",
+      "landing": [
+        "dev/hooks/pre-commit",
+        "dev/env.sh"
+      ]
+    },
+    {
+      "source": "native/system/AGENTS.md",
+      "owns": "Form/ownership row: native/system/AGENTS.md owns the @deepseek-ai/node-addon-system workspace (Linux landlock-run confinement executable plu",
+      "verdict": "na",
+      "reason": "本仓无 native addon 发布 lane"
+    },
+    {
+      "source": "node_modules/.pnpm/cytoscape@3.34.0/node_modules/cytoscape/AGENTS.md",
+      "owns": "Form/ownership row: this is a third-party dependency's own AGENTS.md shipped inside node_modules (Cytoscape.js) — 69 lines / ~6.4 KB in four",
+      "verdict": "na",
+      "reason": "inventory 判定为不适用（无对应实现面）；逐条理由见 dev/smoke-workspace/inventory/ 的原始行"
+    },
+    {
+      "source": "package.json",
+      "owns": "包名 @deepseek-ai/dsh-root。",
+      "verdict": "adapted",
+      "landing": [
+        "package.json",
+        "scripts/verify.mjs",
+        "pnpm-workspace.yaml"
+      ]
+    },
+    {
+      "source": "packages/AGENTS.md",
+      "owns": "本文件只补充仓级 conventions（../AGENTS.md#conventions），不重复仓级规则",
+      "verdict": "adapted",
+      "landing": [
+        "packages/deep-research-pack/AGENTS.md"
+      ]
+    },
+    {
+      "source": "packages/README.md",
+      "owns": "本页是 packages/ 的顶层地图：先定位拥有该能力的能力组，再进该组 README 拿包清单；每个组 README 是其家族的权威包清单",
+      "verdict": "adapted",
+      "landing": [
+        "packages/deep-research-pack/README.md",
+        "AGENTS.md"
+      ]
+    },
+    {
+      "source": "packages/bundle/base/README.md",
+      "owns": "Summary 说清谁会自动带上它、何时才需要直接碰它，并点明 the package is not a library you import",
+      "verdict": "adapted",
+      "landing": [
+        "packages/deep-research-pack/README.md",
+        "packages/deep-research-pack/AGENTS.md"
+      ]
+    },
+    {
+      "source": "packages/client/AGENTS.md",
+      "owns": "Form/ownership row: packages/client/AGENTS.md owns the rules for packages/client/* and the apps/web build entry — 154 lines / ~25.5 KB (by f",
+      "verdict": "na",
+      "reason": "本仓无该包组（唯一包是纯配置 deep-research-pack）"
+    },
+    {
+      "source": "packages/experimental/AGENTS.md",
+      "owns": "Form/ownership row: packages/experimental/AGENTS.md owns the rules for experimental packages and explicitly declares itself a supplement to ",
+      "verdict": "na",
+      "reason": "本仓无该包组（唯一包是纯配置 deep-research-pack）"
+    },
+    {
+      "source": "packages/preset/agent-presets/README.md",
+      "owns": "包 README 以 frontmatter 声明 description，写明面向的用户与维护者场景，并声明 kind: package-reference",
+      "verdict": "adapted",
+      "landing": [
+        "packages/deep-research-pack/README.md",
+        "packages/deep-research-pack/AGENTS.md"
+      ]
+    },
+    {
+      "source": "packages/schedule/AGENTS.md",
+      "owns": "Form/ownership row: packages/schedule/AGENTS.md owns the rules for packages/schedule/* and announces itself as a supplement to the repositor",
+      "verdict": "na",
+      "reason": "本仓无该包组（唯一包是纯配置 deep-research-pack）"
+    },
+    {
+      "source": "packages/skill/skill-filesystem/README.md",
+      "owns": "Summary 一段说清能力、技能可来自哪些处，以及何时选本 provider / 何时改用别的 provider",
+      "verdict": "adapted",
+      "landing": [
+        "packages/deep-research-pack/README.md",
+        "packages/deep-research-pack/AGENTS.md"
+      ]
+    },
+    {
+      "source": "packages/web/AGENTS.md",
+      "owns": "Form/ownership row: packages/web/AGENTS.md owns one security rule for the web package group and declares itself a supplement to the package ",
+      "verdict": "na",
+      "reason": "本仓无该包组（唯一包是纯配置 deep-research-pack）"
+    },
+    {
+      "source": "scripts/AGENTS.md",
+      "owns": "Form/ownership row: scripts/AGENTS.md owns the repository gate-script rules — 5 lines / ~0.8 KB, two dense unordered paragraphs with no bull",
+      "verdict": "adapted",
+      "landing": [
+        "scripts/AGENTS.md"
+      ]
+    },
+    {
+      "source": "snapshots/AGENTS.md",
+      "owns": "该树只放以已提交 session JSONL 为回放输入与期望持久化输出的测试；非 session 的期望输出（ARIA、几何、生成器、CLI、单测）留在其属主 app/script/package，并用各自的 test:expected/test:web/test 档",
+      "verdict": "adapted",
+      "landing": [
+        "tests/AGENTS.md"
+      ]
+    },
+    {
+      "source": "snapshots/session/agent-instructions/workspace/AGENTS.md",
+      "owns": "This one-line file is not an instruction set but a workspace-seed fixture whose entire content is the sentence 'Root snapshot instruction.',",
+      "verdict": "na",
+      "reason": "本仓无对应发布 lane / 应用面 / 会话录制夹具面"
+    },
+    {
+      "source": "snapshots/session/agent-instructions/workspace/nested/AGENTS.md",
+      "owns": "This one-line file is a workspace-seed fixture whose entire content is the sentence 'Nested snapshot instruction.', verifying that a nested ",
+      "verdict": "na",
+      "reason": "本仓无对应发布 lane / 应用面 / 会话录制夹具面"
+    },
+    {
+      "source": "snapshots/session/ptc-workspace-context/workspace/AGENTS.md",
+      "owns": "This one-line file is a workspace-seed fixture whose entire content is the sentence 'Workspace snapshot root instruction.', providing the ro",
+      "verdict": "na",
+      "reason": "本仓无对应发布 lane / 应用面 / 会话录制夹具面"
+    },
+    {
+      "source": "snapshots/session/ptc-workspace-context/workspace/nested/AGENTS.md",
+      "owns": "This one-line file is a behavioural fixture whose entire content is the order 'When asked for the Code Mode workspace handshake, answer exac",
+      "verdict": "na",
+      "reason": "本仓无对应发布 lane / 应用面 / 会话录制夹具面"
+    },
+    {
+      "source": "vendor/AGENTS.md",
+      "owns": "vendor/README.md 拥有 manifest、本地修改日志与上游同步程序。",
+      "verdict": "adapted",
+      "landing": [
+        "AGENTS.md",
+        "scripts/verify.mjs"
+      ]
+    },
+    {
+      "source": "vendor/README.md",
+      "owns": "vendored 包为源码副本而非 npm 依赖，使 harness 完全拥有框架层（可审计、可打补丁、钉版本）。",
+      "verdict": "adapted",
+      "landing": [
+        "AGENTS.md",
+        "scripts/verify.mjs"
+      ]
+    },
+    {
+      "source": "website/AGENTS.md",
+      "owns": "Form/ownership row: website/AGENTS.md owns the VitePress documentation-website adapter — 17 lines / ~1.7 KB, eight prose paragraphs with no ",
+      "verdict": "na",
+      "reason": "本仓无文档站/站点投影面"
+    }
+  ]
+}

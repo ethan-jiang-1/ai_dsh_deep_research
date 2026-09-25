@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions'];
 
 const failures = [];
 const notes = [];
@@ -549,6 +549,86 @@ function roadmapQueue() {
       if (!index.includes(f)) fail(gate, `notes/research/README.md: 未登记 ${f}（索引新鲜度）`);
     }
   }
+}
+
+// ── 门禁 21：align-ledger（对齐台账机读对账——docs/alignment-ledger.json 与 vendor 本体、
+//    与本仓落点三方核对：① 每条 source 在 vendor/dsh 真实存在（换 pin 后文件移位/删除即红
+//    = 重审触发器）；② verdict=adopted/adapted 的每处 landing 在仓内存在；③ na 必须给理由。
+//    人读视图 = docs/discipline-map.md 源 1–9；本门禁只判存在性，不判语义对错。）──
+{
+  const gate = 'align-ledger';
+  const manifestPath = join(ROOT, 'docs', 'alignment-ledger.json');
+  if (!existsSync(manifestPath)) fail(gate, 'docs/alignment-ledger.json 缺席——对齐台账的机读正本');
+  else {
+    let ledger = null;
+    try { ledger = JSON.parse(readFileSync(manifestPath, 'utf8')); }
+    catch (error) { fail(gate, `alignment-ledger.json 不是合法 JSON：${String(error).slice(0, 80)}`); }
+    const sources = ledger?.sources;
+    if (!Array.isArray(sources) || sources.length === 0) fail(gate, 'alignment-ledger.json 缺 sources 数组或为空');
+    else {
+      const seen = new Set();
+      for (const entry of sources) {
+        const src = entry?.source;
+        if (typeof src !== 'string' || src.length === 0) { fail(gate, '条目缺 source 字符串'); continue; }
+        if (seen.has(src)) fail(gate, `source 重复登记：${src}`);
+        seen.add(src);
+        if (!existsSync(join(ROOT, 'vendor', 'dsh', src))) {
+          fail(gate, `${src}: vendor/dsh 里不存在（换 pin 后源文件移位/删除？重审触发——见 discipline-map §重审触发路径）`);
+        }
+        const verdict = entry.verdict;
+        if (!['adopted', 'adapted', 'na'].includes(verdict)) { fail(gate, `${src}: verdict 值域外（adopted/adapted/na）`); continue; }
+        if (verdict === 'na') {
+          if (typeof entry.reason !== 'string' || entry.reason.trim() === '') fail(gate, `${src}: verdict=na 必须给 reason`);
+          continue;
+        }
+        const landing = entry.landing;
+        if (!Array.isArray(landing) || landing.length === 0) { fail(gate, `${src}: verdict=${verdict} 必须给 landing（落点路径）`); continue; }
+        for (const rel of landing) {
+          if (typeof rel !== 'string' || !existsSync(join(ROOT, rel))) fail(gate, `${src}: 落点不存在 → ${String(rel)}`);
+        }
+      }
+      note(gate, `${sources.length} 条源面已对账（vendor 存在性 + 落点存在性 + na 理由）`);
+    }
+  }
+}
+
+// ── 门禁 22：repo-conventions（与 vendor 本体的机械约定逐条对齐——vendor 树是唯一证据源，
+//    故 engines 直接与 vendor/dsh/package.json 比较：换 pin 后不一致即红。文本形态两条
+//    （.editorconfig / .gitattributes）与暂存面 whitespace 检查同属"仓库正本形态"约定。）──
+{
+  const gate = 'repo-conventions';
+  const read = (rel) => (existsSync(join(ROOT, rel)) ? readFileSync(join(ROOT, rel), 'utf8') : null);
+  const editorconfig = read('.editorconfig');
+  if (editorconfig === null) fail(gate, '.editorconfig 缺席（编辑器侧文本约定；vendor/dsh/.editorconfig 吸纳）');
+  else {
+    for (const needle of ['root = true', 'end_of_line = lf', 'insert_final_newline = true']) {
+      if (!editorconfig.includes(needle)) fail(gate, `.editorconfig 缺 "${needle}"`);
+    }
+  }
+  const gitattributes = read('.gitattributes');
+  if (gitattributes === null) fail(gate, '.gitattributes 缺席（仓库正本形态 = LF；byte 级门禁的前提）');
+  else if (!/^\* text=auto eol=lf$/m.test(gitattributes)) fail(gate, '.gitattributes 缺 "* text=auto eol=lf"');
+  const vendorPkg = join(ROOT, 'vendor', 'dsh', 'package.json');
+  if (!existsSync(vendorPkg)) fail(gate, 'vendor/dsh/package.json 缺席——engines 对齐无证据源');
+  else {
+    const want = JSON.parse(readFileSync(vendorPkg, 'utf8'))?.engines?.node;
+    const got = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'))?.engines?.node;
+    if (typeof want !== 'string') fail(gate, 'vendor/dsh/package.json 无 engines.node——对齐基准缺失');
+    else if (got !== want) fail(gate, `package.json engines.node = ${JSON.stringify(got)} ≠ vendor ${JSON.stringify(want)}（机制基线源码启动的 engines 区间必须与 vendor 一致）`);
+  }
+  // 子进程凭据卫生（vendor docs/defensive-patterns.md §27-29）：spawn 的 env 必须洗过，
+  // 禁止整体透传 process.env；白名单条目只能在调用点显式写（scripts/lib/env.mjs）。
+  if (!existsSync(join(ROOT, 'scripts', 'lib', 'env.mjs'))) fail(gate, 'scripts/lib/env.mjs 缺席（子进程 env 清洗助手）');
+  for (const ent of readdirSync(join(ROOT, 'scripts'), { withFileTypes: true })) {
+    if (!ent.isFile() || !ent.name.endsWith('.mjs')) continue;
+    const text = readFileSync(join(ROOT, 'scripts', ent.name), 'utf8');
+    if (/env:\s*\{\s*\.\.\.process\.env/.test(text)) {
+      fail(gate, `scripts/${ent.name}: spawn env 整体透传 process.env——改用 scripts/lib/env.mjs 的 scrubbedEnv/withModelKey（凭据卫生）`);
+    }
+  }
+  const hook = read('dev/hooks/pre-commit');
+  if (hook === null) fail(gate, 'dev/hooks/pre-commit 缺席');
+  else if (!hook.includes('git diff --cached --check')) fail(gate, 'pre-commit 缺 git diff --cached --check（暂存面空白/冲突标记检查，vendor lefthook whitespace 作业）');
 }
 
 // ── 汇报 ──

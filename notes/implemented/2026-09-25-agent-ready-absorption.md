@@ -182,3 +182,46 @@ cookbook/subsystems → guides/60 · evaluation · design/ · guides/61-62 · de
 复活条件 = 对外分发前）；**不适用**：i18n/user/website、snapshots、benchmarks/native/python/
 patches/apps、CONTRIBUTING/SAFETY/THIRD_PARTY/BRAND、lint/jscpd/vitest/lefthook 配置（无 TS
 源码面；Markdown 纪律由门禁承担）。逐项理由见 [discipline-map 源 9](../../docs/discipline-map.md)。
+
+## 三轮（2026-09-25：vendor 逐源枚举 → 机读台账）
+
+**方法**：把 vendor 侧 harness 源面按五组（根与打包 / 子树 AGENTS / 开发技能 / docs 标准 /
+包与证据）委派并行枚举，**810 条规范写成文件**（`dev/smoke-workspace/inventory/*.json`，
+gitignored 运行区，可重跑复现），聚合成 **80 个唯一源面**。
+
+**机读台账 + 门禁**：
+
+- `docs/alignment-ledger.json`：80 条源面，每条 = source（vendor 路径）· owns · verdict
+  （adopted 6 / adapted 58 / na 16）· landing（本仓路径）· reason；
+- 门禁 **`align-ledger`**：① 每条 source 在 `vendor/dsh` 真实存在——**换 pin 后源文件移位即红
+  （重审触发器）**；② adopted/adapted 的每处 landing 存在；③ na 必须给理由；
+- 门禁 **`repo-conventions`**：与 vendor 本体的机械约定对比——`.editorconfig`（root/LF/尾换行）、
+  `.gitattributes`（`* text=auto eol=lf`）、`package.json engines.node` **直接等于** vendor 值、
+  pre-commit 含 whitespace 检查、**scripts 不得整体透传 `process.env`**（凭据卫生）。
+
+**本轮落地（都不是"指向文件"，是真改）**：
+
+| 落地 | vendor 依据 | 证据 |
+|---|---|---|
+| `.editorconfig` + `.gitattributes`（LF 正本形态；分工注释照搬） | `.editorconfig` / `.gitattributes` | `repo-conventions` 三门红证 |
+| `engines.node`: `>=20` → **`^22.19.0 \|\| >=24.0.0`**（与 vendor 同区间，门禁直接对 vendor 比较） | 根 `package.json` | 红证：改回 `>=20` 即红 |
+| pre-commit 加 `git diff --cached --check`（暂存面空白/冲突标记） | `lefthook.yml` whitespace 作业 | 红证：删该行即红 |
+| **子进程凭据卫生**：新增 `scripts/lib/env.mjs`（`scrubbedEnv` / `withModelKey`，丢掉 `*KEY*/*SECRET*/*TOKEN*/*PASSWORD*`），五个脚本 6 处 spawn 全部改造；门禁禁止再出现 `env: { ...process.env }` | `docs/defensive-patterns.md` §27-29 | 红证 + **真模型档实证**：洗 env 下 l4-lite ALL PASS |
+| `dshSrc` 默认值统一为**本仓 ROOT**（l4-lite / team-preflight 原默认 company） | 根 `AGENTS.md`（机制基线 = vendor 钉 tag） | 重跑 team-preflight 机制面全 PASS；E1 Note 勘误在案 |
+
+**枚举点出、尚未落地的缺口（下一轮或新条目的输入，已在案不丢）**：
+
+1. **vendored 链接无门禁**：verify 不读 `pnpm-lock.yaml`，无法断言 `@deepseek-ai/*` 解析为
+   `link:vendor/dsh/...`（vendor 有 `verify-vendored-links`）——E1 事故（registry 混入闭包）
+   的机械面缺位；
+2. **声明未用的依赖**：`dsh-session-snapshot`、`dsh-llm-replay` 由 E1 修复引入但零引用
+   （是否最小集未验；keyless 录制快照面缺）；
+3. **docs 写作顺序**：vendor 要求先分类 tutorial/reference、按前置知识与难度排序、作者顺序
+   「定位→定详略→分类→排序→下放下级细节」——本仓 docs/AGENTS.md 只有层级表与 slop 清单；
+4. **门禁防空/收窄语料**：vendor `scripts/AGENTS.md` 要求门禁防"扫到 0 文件"并测检测边界的
+   纳入/排除形态——本仓 writing-a-gate 只要求反证；
+5. **包 README 义务节**：`## 已知限制与延后工作`（约定已立，pack README 尚未加节）与
+   **Model Experience**（persona/skills 注入模型请求的可见面与代价）；
+6. **技能形式**：vendor 技能多在首段声明"这是 guidance 不是 checklist"、用 `references/` 分层、
+   技能间互链（24 处）——本仓四技能全无；
+7. **复盘开头**：vendor 复盘有"三十秒摘要"起手节——本仓五节骨架缺此节。
