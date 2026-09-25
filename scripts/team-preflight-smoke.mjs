@@ -19,6 +19,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { presetRoles } from './lib/roles.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from './lib/vendor-artifacts.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (name, fallback) => {
@@ -181,6 +182,16 @@ const check = (label, fn) => fn().then(
   (error) => { failures.push(`${label}: ${error.message}`); console.log(`  FAIL ${label}: ${error.message}`); },
 );
 
+// boot 前自检（RFC vendor-build-guard）：0.1.7 起启动依赖构建产物，缺失时报错隐晦——
+// 提前拦成一行 remedy。exit 2 = 环境前置缺失（与"未 source env"同档）。
+{
+  const va = assertVendorArtifacts(dshSrc);
+  if (!va.ok) {
+    console.error(`boot 前自检红：vendor 构建产物缺失（${va.missing.join('、')}）`);
+    console.error(ARTIFACT_REMEDY);
+    process.exit(2);
+  }
+}
 const { child, token } = await boot();
 try {
   const base = `http://127.0.0.1:${String(PORT)}`;

@@ -10,13 +10,18 @@ ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 source "$ROOT/dev/env.sh"   # 双 home（DSH_HOME=dev/harness-home）+ dsh 机制基线函数
 set -euo pipefail
 
+# ⓪ vendor 构建产物自检（RFC vendor-build-guard，2026-09-25）：0.1.7 起启动依赖构建
+#    产物，缺失时启动深处报错隐晦（typert-loader / client-modules）——提前拦成一行 remedy。
+#    这是 boot 面护栏；L0 门禁刻意不依赖构建产物（新 clone 未构建时 verify 仍应秒级绿）。
+node "$ROOT/scripts/lib/vendor-artifacts.mjs"
+
 PROFILE=research
 PORT=3081                    # 60 §3 约定：3080 被 DSH web GUI 占用
 PACKDIR="$ROOT/packages/deep-research-pack"
 PROFDIR="$DSH_HOME/profiles/$PROFILE"
 RUNTMP="$ROOT/dev/smoke-workspace/run-pack"
 
-# 层版本钉住：与 pack 兼容矩阵同源（dsh-v0.1.5-rc.2 → 0.1.5-rc.2）——升 pin 只改 pack
+# 层版本钉住：与 pack 兼容矩阵同源（dsh-v0.1.7-rc.2 → 0.1.7-rc.2）——升 pin 只改 pack
 # package.json 的 dsh.compatibility.dshReleases，本脚本随之走（vendor 各包版本锁步发布）。
 LAYER_VER="$(node -e "console.log(require('$PACKDIR/package.json').dsh.compatibility.dshReleases[0].replace(/^dsh-v/,''))")"
 LAYER="@deepseek-ai/dsh-experimental-agent-team-profile@$LAYER_VER"

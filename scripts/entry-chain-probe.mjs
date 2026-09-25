@@ -21,6 +21,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as zlib from 'node:zlib';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from './lib/vendor-artifacts.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (name, fallback) => {
@@ -188,6 +189,16 @@ Q4: 入口链规定开工与收尾的程序在哪个文件？`;
 
 const gt = groundTruth();
 console.log(`probe: 真值（机械抽取）——▶ 当前 = ${gt.cur}${gt.next ? `；下一条目 = ${gt.next}` : '（无）'}`);
+// boot 前自检（RFC vendor-build-guard）：0.1.7 起启动依赖构建产物，缺失时报错隐晦——
+// 提前拦成一行 remedy。exit 2 = 环境前置缺失（与"未 source env"同档）。
+{
+  const va = assertVendorArtifacts(dshSrc);
+  if (!va.ok) {
+    console.error(`boot 前自检红：vendor 构建产物缺失（${va.missing.join('、')}）`);
+    console.error(ARTIFACT_REMEDY);
+    process.exit(2);
+  }
+}
 const { child, token } = await boot();
 let verdict = [];
 let transcript = '';
