@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys'];
 
 const failures = [];
 const notes = [];
@@ -742,6 +742,47 @@ function roadmapParked() {
   if (r.status !== 0) {
     const first = `${r.stderr ?? ''}${r.stdout ?? ''}`.trim().split('\n').filter(Boolean)[0];
     fail(gate, first ?? 'dev/research.overlay.yml 与 pack 渲染结果不一致——跑 `node dev/render-overlay.mjs` 重生成');
+  }
+}
+
+// ── 门禁 25：client-keys（观察面 client 的 keyed 字面量单一正本——company 坑 1：
+//    "a typo simply never renders"，key 拼错不报错永不渲染。规则：① key/槽名字面量只许住
+//    src/client/keys.ts（别处出现即红——杜绝第二份会漂移的清单）；② slots.inject 的第一参、
+//    register 描述符的 name/key/id 只许用标识符（引号字面量即红），且必须出自 keys.ts 的导出；
+//    ③ keys.ts 至少一个导出、src/client 至少一个文件（防空集——D18 边界内 client 面常在）。）──
+{
+  const gate = 'client-keys';
+  const clientDir = join(PACK, 'src', 'client');
+  if (!existsSync(clientDir)) { fail(gate, 'packages/deep-research-pack/src/client/ 缺席（D18：观察面 client 面常在）'); }
+  else {
+    const files = readdirSync(clientDir).filter((f) => /\.(ts|tsx)$/.test(f));
+    if (files.length === 0) fail(gate, 'src/client/ 无 .ts/.tsx（防空集：D18 边界内 client 面常在）');
+    const keysFile = files.includes('keys.ts') ? readFileSync(join(clientDir, 'keys.ts'), 'utf8') : '';
+    if (!files.includes('keys.ts')) fail(gate, 'src/client/ 缺 keys.ts（keyed 字面量的唯一正本）');
+    else {
+      const keyExports = new Set([...keysFile.matchAll(/export const (\w+) = '/g)].map((m) => m[1]));
+      if (keyExports.size === 0) fail(gate, 'keys.ts 无 `export const X = \x27…\x27` 导出（防空集）');
+      for (const f of files) {
+        if (f === 'keys.ts') continue;
+        const text = readFileSync(join(clientDir, f), 'utf8');
+        // ① 槽名/包键字面量只许住 keys.ts
+        for (const m of text.matchAll(/['"](sidebar\.right\.[a-z.]+|dsh-deep-research-pack\/[a-z-]+)['"]/g))
+          fail(gate, `src/client/${f}: keyed 字面量 ${m[1]} 出现在 keys.ts 之外（单一正本 = keys.ts，用导出的常量）`);
+        // ② inject 首参与描述符 name/key/id 只许标识符，且出自 keys.ts
+        for (const m of text.matchAll(/slots\.inject\(\s*(['"][^'"]+['"])/g))
+          fail(gate, `src/client/${f}: slots.inject 首参是字面量 ${m[1]}——须用 keys.ts 导出的常量（拼错即永不渲染）`);
+        for (const m of text.matchAll(/\b(name|key|id):\s*(['"][^'"]+['"])/g)) {
+          if (/^(name|key|id)$/.test(m[1]) && /sidebar\.right\.|dsh-deep-research-pack\//.test(m[2]))
+            fail(gate, `src/client/${f}: 描述符 ${m[1]}: 是 keyed 字面量 ${m[2]}——须用 keys.ts 导出的常量`);
+        }
+        for (const m of text.matchAll(/slots\.inject\(\s*(\w+)\s*[,)]/g))
+          if (!keyExports.has(m[1])) fail(gate, `src/client/${f}: slots.inject(${m[1]}) 的标识符不在 keys.ts 导出里`);
+        for (const m of text.matchAll(/\b(?:name|key|id):\s*(\w+)\s*[,}]/g)) {
+          if (/^(RESEARCH|TAB|PANE|KEY|SLOT)/.test(m[1]) && !keyExports.has(m[1]))
+            fail(gate, `src/client/${f}: 描述符用的 ${m[1]} 不在 keys.ts 导出里`);
+        }
+      }
+    }
   }
 }
 

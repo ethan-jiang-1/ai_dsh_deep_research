@@ -26,6 +26,16 @@ function presetBodies() {
   return parts.join('\n\n');
 }
 
+/** 取 cordis.patch.yml 的 insert 块正文（bundle 级行：tool-present / ui-agent-team /
+ *  research-client——与 pack 镜像同一来源，不再硬编码第二份清单，杜绝漂移）。 */
+function bundleInserts() {
+  const lines = readFileSync(join(PACK, 'cordis.patch.yml'), 'utf8').split('\n');
+  const i = lines.findIndex((l) => l.trim() === '- insert:');
+  if (i === -1) throw new Error('cordis.patch.yml: 缺 "- insert:" 行');
+  const body = lines.slice(i + 1).join('\n').replace(/\s+$/, '');
+  return `    # ── cordis.patch.yml 的 bundle 级 insert 行（由 dev/render-overlay.mjs 直读，镜像同源）──\n${body}`;
+}
+
 const rendered = `# 生成文件 —— 由 dev/render-overlay.mjs 从 packages/deep-research-pack 渲染；**勿手改**
 # （门禁 overlay-fresh 对账：改 pack 后跑 \`node dev/render-overlay.mjs\` 重生成）。
 #
@@ -42,12 +52,7 @@ const rendered = `# 生成文件 —— 由 dev/render-overlay.mjs 从 packages/
 - insert:
 ${presetBodies()}
 
-    # ── 交付物声明工具（base 无此行）──
-    - id: tool-present
-      name: '@deepseek-ai/dsh-tool-present'
-    # ── 团队 Web 可视面（观察与调试任务起止；vendor 层无此行）──
-    - id: ui-agent-team
-      name: '@deepseek-ai/dsh-experimental-client-ui-agent-team'
+${bundleInserts()}
 `;
 
 if (process.argv.includes('--check')) {
