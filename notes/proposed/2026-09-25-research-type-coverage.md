@@ -25,7 +25,8 @@ bundle 落 `drt_<slug>/`。可选组合：观察面 GUI 化交付后同场验收
 
 ## 验收（含延期收口的观察面真人档 + 证据可靠性面）
 
-- 证据可靠性（自 [evidence-reliability 毕业记录](../implemented/2026-09-25-evidence-reliability.md)）：bundle 含 audit.md 且关键结论佐证结构达标；
+- 证据可靠性（自 [evidence-reliability 毕业记录](../implemented/2026-09-25-evidence-reliability.md)
+- 交互卡片真人体验（自 research-interaction 毕业记录延期）：HITL1 三问选项卡在真人流程中的可用性 + HITL2 选项拍板 + 工具卡可读性）：bundle 含 audit.md 且关键结论佐证结构达标；
 
 
 - 观察面真人档（自 [observability-gui 毕业记录](../implemented/2026-09-24-observability-gui.md) 延期）：活标题/横幅目验 + 矩阵/review 状态与 run bundle 对账；

@@ -1,6 +1,6 @@
 # RFC：研究交互设计（DSH 界面交互 × 研究生命周期）
 
-> 状态：proposed
+> 状态：implemented
 
 归宿：roadmap §队列「研究交互设计」（feature；用户 2026-09-25 点名："我们之所以用 DSH，还有
 一个优点是它有很好的界面交互，适合我们这个项目的界面交互……我们需要啊"）。
@@ -23,7 +23,39 @@ DSH 的界面交互能力是选它的核心理由之一，但本项目只用了�
 | 观察流 | 「研究状态」页签（已交付：journal 流 + 活标题） | ✓ |
 | 研究语义工具卡 | `tool.call.toolview` 槽（company TeamToolCard 先例） | 无 → S2 |
 
-## 方案（四 Stage）
+## 决定
+
+研究生命周期的交互时刻全部落到 DSH **现成交互面**（零自建面板）：HITL1/2 用
+ask_user_question 的结构化选项卡（一次多问 + options + 推荐位），工具卡用 toolview 槽的
+研究语义卡，交付用 present 官方卡。
+
+## 实施记录（S0–S3）
+
+- **S0 契约研究**：ask_user_question 全参数契约（questions 数组：id/question/header/
+  options{label,description}/multi_select；推荐项 = 首选项 + label 尾 "(Recommended)"）；
+  company toolview 范本三要点（一键一 inject——rc.2 旧写法不生效；priority -1 压通用行——
+  同键同优先级 throw；展示模型 = call/result 切片的纯函数）。
+- **S1 HITL 卡片塑形**：lead persona 的 HITL1 改**一次调用携带三问**（全局硬格式规则行
+  置前：推荐选项放首位且 label 逐字以（Recommended）结尾，三问无一例外）；HITL2 改结构化
+  选项卡（审阅摘要前置 + 定稿(Recommended)/补研究/修订表述）。真模型实测**三轮迭代**：
+  一次多问 + 全 options 化首轮即中；推荐位两轮加强后 PASS。**坑**：persona 指令用全角
+  （Recommended），验证正则须宽匹配 [（(]Recommended[)）]——半角正则假阴性。
+- **S2 工具卡**：`src/lib/tool-card.ts` 纯函数（company 同款移植）+
+  `ResearchToolCard.tsx` 薄渲染（spawn_teammate = 组队成员职责卡 / web_search = 检索词卡）
+  + 一键一 inject priority -1。rc.2 argsRaw 契约实证（PreparingToolCall 无 argsRaw 须
+  收窄后读）。
+- **S3 文档同步**：手册交互纪律节 + guides/61 HITL1 卡片形态。
+
+## 实际跑过的验证
+
+| 面 | 结果 |
+|---|---|
+| L4-lite（新 persona） | ALL PASS（四角色 + scout web_search） |
+| HITL1 卡片真模型实测 | **PASS**：一次调用 3 问、每问 options 化、推荐位齐（盘侧断言 questions 结构） |
+| client-load-smoke | ALL PASS（含工具卡注册后页签渲染 326 事件） |
+| L0 | 25 门禁 + 43 tests 全绿 |
+
+## 方案（四 Stage，原计划存档）
 
 - **S0 交互面研究留档**：各契约 vendor 出处 + company 先例记进本 RFC 实施记录（研究稿
   `ui-observability-surfaces` 补交互节或独立段落——产出是记录不是新文档层）；

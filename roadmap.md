@@ -13,21 +13,18 @@
 > ③ GUI 是主菜，真人 HITL run 验收**延期给④**；④需用户带题（真人拍板，静默期做不了），
 > 兼③的真 run 验收载体；⑤用户节奏触发。
 
-1. ▶ **研究交互设计**（feature；用户 2026-09-25 点名"DSH 界面交互是我们选它的理由之一"）——
-   HITL1/2 问题卡塑形（一次多问+选项+推荐位；HITL2 从纯文本改结构化选项）+ 研究语义工具卡
-   （toolview：spawn/web_search/task）+ 交付卡验证。persona 改动随 L4-lite 取证。
-   RFC = [2026-09-25-research-interaction](notes/proposed/2026-09-25-research-interaction.md)。
-2. **观察面补全**（feature；B-full 如实记档的余项单独立项）——run-dashboard 折算移植 src/lib
+1. ▶ **观察面补全**（feature；B-full 如实记档的余项单独立项）——run-dashboard 折算移植 src/lib
    共享 + 页签步骤条/矩阵/review 渐进（workspaceFiles 数据面）+ smoke 扩断言。
    RFC = [2026-09-25-observability-completion](notes/proposed/2026-09-25-observability-completion.md)。
-3. **研究类型覆盖**（研究，**用户带题驱动**：真人 HITL、类型 ≠ 首场）——兼观察面 GUI 化的
+2. **研究类型覆盖**（研究，**用户带题驱动**：真人 HITL、类型 ≠ 首场）——兼观察面 GUI 化的
    真人档验收 + 证据可靠性面的 run 级验收（bundle 含 audit.md 且佐证结构达标）+ 交互卡片的
    真人体验收口；顺手取证 synthesizer/floor 重估证据。
    RFC = [2026-09-25-research-type-coverage](notes/proposed/2026-09-25-research-type-coverage.md)。
-4. **DSH 插件生态认真研究**（研究，用户节奏触发）——粗扫后续：生态缺什么、定位独占性。
+3. **DSH 插件生态认真研究**（研究，用户节奏触发）——粗扫后续：生态缺什么、定位独占性。
    RFC = [2026-09-24-dsh-plugin-ecosystem-research](notes/proposed/2026-09-24-dsh-plugin-ecosystem-research.md)。
 
-（已毕业离队 2026-09-25：证据可靠性面（七字段契约+交叉验证纪律+evidence-audit 机械对账——基线审计：首场 run 102/102 URL 全溯源无伪造、31 份全无 frontmatter 如实揭出；RFC 迁 implemented/）；
+（已毕业离队 2026-09-25：研究交互设计（HITL1/2 结构化选项卡[一次三问+推荐位，真模型实测 PASS]+研究语义工具卡[spawn/web_search，toolview priority -1]——RFC 迁 implemented/）；
+证据可靠性面（七字段契约+交叉验证纪律+evidence-audit 机械对账——基线审计：首场 run 102/102 URL 全溯源无伪造、31 份全无 frontmatter 如实揭出；RFC 迁 implemented/）；
 观察面 GUI 化（D18 单点例外 + 双半构建链 + journal 流页签 + 活标题/HITL 折算 + client-load-smoke 7/7——RFC 迁 implemented/，真人档延期给当前条目互指）；
 升 pin 重校（`dsh-v0.1.5-rc.2` → **`dsh-v0.1.7-rc.2`** @ `477b4f4205`，
 跨六个 RC；preset 重设计迁移 + 0.1.7 构建产物 + 逐条重审——RFC 迁 implemented/，证据 =
