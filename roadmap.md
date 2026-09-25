@@ -19,11 +19,18 @@
    转写可回溯、final 溯源链完整 → run bundle audit.md——"是不是幻觉"变机检）。
    **先于下一场 run 落地**，该 run 即其验收载体。
    RFC = [2026-09-25-evidence-reliability](notes/proposed/2026-09-25-evidence-reliability.md)。
-2. **研究类型覆盖**（研究，**用户带题驱动**：真人 HITL、类型 ≠ 首场）——兼观察面 GUI 化的
-   真人档验收 + 证据可靠性面的 run 级验收（bundle 含 audit.md 且佐证结构达标）；顺手取证
-   synthesizer/floor 重估证据。
+2. **研究交互设计**（feature；用户 2026-09-25 点名"DSH 界面交互是我们选它的理由之一"）——
+   HITL1/2 问题卡塑形（一次多问+选项+推荐位；HITL2 从纯文本改结构化选项）+ 研究语义工具卡
+   （toolview：spawn/web_search/task）+ 交付卡验证。persona 改动随 L4-lite 取证。
+   RFC = [2026-09-25-research-interaction](notes/proposed/2026-09-25-research-interaction.md)。
+3. **观察面补全**（feature；B-full 如实记档的余项单独立项）——run-dashboard 折算移植 src/lib
+   共享 + 页签步骤条/矩阵/review 渐进（workspaceFiles 数据面）+ smoke 扩断言。
+   RFC = [2026-09-25-observability-completion](notes/proposed/2026-09-25-observability-completion.md)。
+4. **研究类型覆盖**（研究，**用户带题驱动**：真人 HITL、类型 ≠ 首场）——兼观察面 GUI 化的
+   真人档验收 + 证据可靠性面的 run 级验收（bundle 含 audit.md 且佐证结构达标）+ 交互卡片的
+   真人体验收口；顺手取证 synthesizer/floor 重估证据。
    RFC = [2026-09-25-research-type-coverage](notes/proposed/2026-09-25-research-type-coverage.md)。
-2. **DSH 插件生态认真研究**（研究，用户节奏触发）——粗扫后续：生态缺什么、定位独占性。
+5. **DSH 插件生态认真研究**（研究，用户节奏触发）——粗扫后续：生态缺什么、定位独占性。
    RFC = [2026-09-24-dsh-plugin-ecosystem-research](notes/proposed/2026-09-24-dsh-plugin-ecosystem-research.md)。
 
 （已毕业离队 2026-09-25：观察面 GUI 化（D18 单点例外 + 双半构建链 + journal 流页签 + 活标题/HITL 折算 + client-load-smoke 7/7——RFC 迁 implemented/，真人档延期给当前条目互指）；
