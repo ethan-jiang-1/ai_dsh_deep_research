@@ -13,16 +13,14 @@
 > ③ GUI 是主菜，真人 HITL run 验收**延期给④**；④需用户带题（真人拍板，静默期做不了），
 > 兼③的真 run 验收载体；⑤用户节奏触发。
 
-1. ▶ **观察面 GUI 化**（feature，大；两段三步全文见 RFC）——D7 修订 + 构建链 + client-load-smoke
-   → B-min 验链 → B-full（步骤条/活标题/矩阵/review）；真人 HITL run 验收延期给条目 2。
-   RFC = [2026-09-24-observability-gui](notes/proposed/2026-09-24-observability-gui.md)。
-2. **研究类型覆盖**（研究，**用户带题驱动**：真人 HITL、类型 ≠ 首场）——兼条目 1 的
-   真 run 验收；顺手取证 synthesizer/floor 重估证据。
+1. ▶ **研究类型覆盖**（研究，**用户带题驱动**：真人 HITL、类型 ≠ 首场）——兼观察面 GUI 化的
+   真人档验收（活标题/页签目验 + 矩阵/review 对账）；顺手取证 synthesizer/floor 重估证据。
    RFC = [2026-09-25-research-type-coverage](notes/proposed/2026-09-25-research-type-coverage.md)。
-3. **DSH 插件生态认真研究**（研究，用户节奏触发）——粗扫后续：生态缺什么、定位独占性。
+2. **DSH 插件生态认真研究**（研究，用户节奏触发）——粗扫后续：生态缺什么、定位独占性。
    RFC = [2026-09-24-dsh-plugin-ecosystem-research](notes/proposed/2026-09-24-dsh-plugin-ecosystem-research.md)。
 
-（已毕业离队 2026-09-25：升 pin 重校（`dsh-v0.1.5-rc.2` → **`dsh-v0.1.7-rc.2`** @ `477b4f4205`，
+（已毕业离队 2026-09-25：观察面 GUI 化（D18 单点例外 + 双半构建链 + journal 流页签 + 活标题/HITL 折算 + client-load-smoke 7/7——RFC 迁 implemented/，真人档延期给当前条目互指）；
+升 pin 重校（`dsh-v0.1.5-rc.2` → **`dsh-v0.1.7-rc.2`** @ `477b4f4205`，
 跨六个 RC；preset 重设计迁移 + 0.1.7 构建产物 + 逐条重审——RFC 迁 implemented/，证据 =
 [复核结论](notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md#升-pin-复核结论2026-09-25-毕业)）；
 首个完整研究 run（L4 四判据全闭 + Q2/Q4/Q5/Q6 销账，run = drt_cn-us-cpu-gap）与 M2 收口与复盘
