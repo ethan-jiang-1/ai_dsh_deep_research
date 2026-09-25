@@ -53,6 +53,7 @@ ask_user_question 的结构化选项卡（一次多问 + options + 推荐位）�
 | L4-lite（新 persona） | ALL PASS（四角色 + scout web_search） |
 | HITL1 卡片真模型实测 | **PASS**：一次调用 3 问、每问 options 化、推荐位齐（盘侧断言 questions 结构） |
 | client-load-smoke | ALL PASS（含工具卡注册后页签渲染 326 事件） |
+| **HITL2 选项卡实测**（2026-09-25 马拉松三号补验） | **PASS**：审阅摘要前置 + 三选项齐（按现稿定稿（Recommended）/补研究/修订表述）——真模型实测，答题环节代理模拟标注 |
 | L0 | 25 门禁 + 43 tests 全绿 |
 
 ## 方案（四 Stage，原计划存档）

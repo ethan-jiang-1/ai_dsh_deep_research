@@ -13,17 +13,16 @@
 > （便宜单回合）；③生态研究可自主执行，纳入本马拉松；④需用户带题（真人拍板），
 > 兼①②③全部真人档验收。
 
-1. ▶ **HITL2 选项卡实测**（卫生/小；「研究交互设计」的延期验证项）——便宜单回合真模型实测
-   （代理答题标注）：盘侧断言选项结构（定稿(Recommended)/补研究/修订表述）。
-2. **DSH 插件生态认真研究**（研究；可自主执行，纳入本马拉松）——粗扫后续：生态缺什么、
+1. ▶ **DSH 插件生态认真研究**（研究；可自主执行，纳入本马拉松）——粗扫后续：生态缺什么、
    deep-research 定位独占性；产出 = 调研报告（钉版引用）。
    RFC = [2026-09-24-dsh-plugin-ecosystem-research](notes/proposed/2026-09-24-dsh-plugin-ecosystem-research.md)。
-3. **研究类型覆盖**（研究，**用户带题驱动**：真人 HITL、类型 ≠ 首场）——兼观察面 GUI 化的
+2. **研究类型覆盖**（研究，**用户带题驱动**：真人 HITL、类型 ≠ 首场）——兼观察面 GUI 化的
    真人档验收 + 证据可靠性面的 run 级验收（bundle 含 audit.md 且佐证结构达标）+ 交互卡片
    真人体验 + 研究状态界面真人目验；顺手取证 synthesizer/floor 重估证据。
    RFC = [2026-09-25-research-type-coverage](notes/proposed/2026-09-25-research-type-coverage.md)。
 
-（已毕业离队 2026-09-25：研究状态界面（人性化活动流+噪音过滤=UI 核心交付[15 行活动/零残留]；bundle 渐进面部分交付如实记档[workspaceFiles 路径未接通]——RFC 迁 implemented/）；
+（已毕业离队 2026-09-25：HITL2 选项卡实测（审阅摘要前置+三选项齐+推荐位——真模型 PASS，验证结果补进 research-interaction 毕业 Note）；
+研究状态界面（人性化活动流+噪音过滤=UI 核心交付[15 行活动/零残留]；bundle 渐进面部分交付如实记档[workspaceFiles 路径未接通]——RFC 迁 implemented/）；
 观察面补全（共享折算 run-fold.ts + 渐进面挂载——部分交付如实记档：渲染骨架与折算正本落地，真数据上屏待 workspaceFiles 目录发现——RFC 迁 implemented/）；
 研究交互设计（HITL1/2 结构化选项卡[一次三问+推荐位，真模型实测 PASS]+研究语义工具卡[spawn/web_search，toolview priority -1]——RFC 迁 implemented/）；
 证据可靠性面（七字段契约+交叉验证纪律+evidence-audit 机械对账——基线审计：首场 run 102/102 URL 全溯源无伪造、31 份全无 frontmatter 如实揭出；RFC 迁 implemented/）；
