@@ -1,56 +1,98 @@
 # deep-research-pack
 
-Deep Research 插件包：四角色 preset + host bundle 行。当前为**纯配置包**（零自写 JS、零构建、无 client 面，见 docs/00-index.md D7）——UI 用现成团队界面（`ui-agent-team`），皮肤层留待后续轮次。
+Deep Research 插件包：**四角色 preset + 研究方法论技能 + 观察面 client 面 + 工作区种子**。
+
+一次调研 = 一支四人研究团队（Lead 主编 / Scout 侦察 / Analyst 分析 / Critic 核查）在 DSH 的
+Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bundle 落 `drt_<slug>/`）。
 
 ## 内容
 
-| 位置 | 内容 |
-|---|---|
-| `cordis.patch.yml` | bundle 行：preset roster（default: lead）+ present + ui-agent-team 观察行（团队机制行归 vendor agent-team-profile 层——A 定案；web 行 = base 出厂行、不进 bundle，D9） |
-| `presets/lead/` | 研究主编：立项对齐（HITL1）、拆解分派、组队、综合交付（HITL2/Final） |
-| `presets/scout/` | 侦察员：广度搜索、来源发现与质量分级、候选方向图 |
-| `presets/analyst/` | 分析员：深度挖掘、证据抽取、交叉验证、反例搜索 |
-| `presets/critic/` | 核查员：对抗审查、无来源结论狩猎、交付前质量门 |
+| 位置 | 内容 | 随包发布 |
+|---|---|---|
+| `presets/<role>.patch.yml` | 四角色 preset（0.1.7 形态：一条 `@deepseek-ai/dsh-agent-preset` 行，config.plugins 内声明 persona/skills/工具行） | ✓ |
+| `presets/<role>/skills/<n>/SKILL.md` | 六个研究方法论技能（research-brief / team-assembly / lead-mapping / evidence-extraction / synthesis / adversarial-review） | ✓ |
+| `cordis.patch.yml` | bundle 行：preset roster（default: lead）+ `tool-present` + 团队可视面 `ui-agent-team` + 本包 client 面 | ✓ |
+| `workspace/` | **研究工作区种子**：研究手册（`AGENTS.md`：证据契约/目录约定/完成判据）+ `templates/run/` 六件模板 | ✓ |
+| `src/client/` → `lib/client.js` | 观察面 client 面（D18 单点例外）：右栏「研究状态」页签（人性化活动流/活标题/HITL 横幅）+ 研究语义工具卡 | ✓ 构建产物 |
+| `src/lib/` → `lib/types/lib/` | 纯函数折算（activity-fold / hitl-fold / run-fold / tool-card）——keyless 单测直接断言 | ✓ 构建产物 |
+| `scripts/preflight.mjs` · `scripts/scaffold.mjs` | 部署前置检查 + 一键准备（见下） | ✓ |
 
 角色职责表与方法论映射：`docs/design/20-roles.md`、`docs/design/30-methodology-mapping.md`。
 
+## 部署（三步）
+
+**前置**：DSH 版本必须是 `dsh-v0.1.7-rc.2`（`dsh.compatibility.dshReleases` 钉死）。
+
+```sh
+# ① 装包进 profile（tarball 或 npm 名；dsh plugin add 自动 reconcile dsh.profile.bundles）
+dsh plugin --profile research add dsh-deep-research-pack
+
+# ② 一键准备：铺工作区种子 + 确保团队机制层在场 + 跑前置检查
+dsh-deep-research-scaffold --workspace ~/research-workspace --profile research
+#   等价手工：cp -r <pack>/workspace/. ~/research-workspace/
+#             dsh plugin --profile research add @deepseek-ai/dsh-experimental-agent-team-profile
+
+# ③ 起研究会话（cwd = 工作区，手册从这里注入）
+cd ~/research-workspace && dsh --profile research
+```
+
+**为什么需要 ②**：研究纪律靠**会话 cwd 的 `AGENTS.md`**（DSH 的 agent-instructions 从 cwd
+向上发现并注入每个角色）；团队机制（`spawn_teammate` / `team_task_*`）**不在本包声明**
+（组合与实战 config 归 vendor 的 `agent-team-profile` 层——RFC m2-p1-run-channel A 定案）。
+缺任一 → 角色没有纪律、或没有团队通道。
+
+**前置检查**（随时可跑，fail-loud + 给补救命令）：
+
+```sh
+dsh-deep-research-preflight --workspace ~/research-workspace
+# 检查：DSH 版本 / 14 个平台 peer 包 / 团队机制层 / 工作区手册+模板 / 构建产物 / 模型密钥
+```
+
+## 研究怎么跑
+
+1. **HITL1 立项**：对 Lead 说出研究问题 → 一张结构化选项卡三问（研究类型/深度篇幅/时间口径
+   与语言，推荐项置首带 (Recommended)）→ 你点选即定稿；
+2. **静默自主区**：Lead 拆 topic、派 Scout/Analyst/Critic（Agent Teams 通道），证据落
+   `drt_<slug>/evidence/`（七字段 frontmatter：source_url / retrieved_at / quality / found_by /
+   supports / source_tier / publisher）；Critic 对抗核查出 `review.md`（readiness PASS 是交付前置）；
+3. **HITL2 审阅**：结构化选项卡（按现稿定稿(Recommended) / 补研究 / 修订表述）→ 拍板后交付
+   `final.md`（每条关键结论附 `[来源: evidence/xx.md]`）；
+4. **观察面**：DSH Web GUI 右栏「研究状态」页签看实时动态（人性化活动流 + HITL 挂起横幅 +
+   活标题「研究状态 · ⏳ 等你拍板」）；
+5. **审计**（本仓开发面）：`node scripts/evidence-audit.mjs <bundle>` 对会话日志机械对账——
+   URL 是否真被抓取过、摘录是否可回溯、final 溯源链是否完整 → `audit.md`。
+
 ## 新增一个研究角色
 
-**第 0 步（先于一切代码）**：增删角色 = 推翻 D2（角色 = 4 个，见 docs/00-index.md 台账）——先在台账登记新 D 号，再动手。tests 的数量哨兵（tests/presets.test.mjs）会机械拦住没登记的增删。
+**第 0 步（先于一切代码）**：增删角色 = 推翻 D2（角色 = 4 个，见 docs/00-index.md 台账）——
+先在台账登记新 D 号，再动手。tests 的数量哨兵（tests/presets.test.mjs）会机械拦住没登记的增删。
 
-1. `presets/<role>.patch.yml`：一条 `@deepseek-ai/dsh-agent-preset` 行（0.1.7 形态），`config` 带 id/name/description/order + plugins（自包含组合：persona 行 + skills roots + 工具行 + agent-instructions 行）+ `skills/<n>/SKILL.md`（frontmatter `name` = 目录名）；
-2. 结构门禁：verify 门禁 preset-structure + 门禁 row-deps（行引用的 `@deepseek-ai/*` 全进 peerDependencies）；
-3. roster 装载：`package.json` 的 `dsh.bundle.patch` 数组列出 `cordis.patch.yml` 与每个 `presets/*.patch.yml`；新增角色 = 新 patch 文件 + 把它加进该数组；
-4. 消费点**无需逐个改**：角色清单事实源 = 盘上 `presets/` 目录（基础整治 §3.2）——`preset-smoke` / `release-smoke` / `team-preflight-smoke` / `boot-run.sh` / `tests` 全部目录枚举。唯二要补的：`l4-lite-smoke` 的 `PROMPTS` 加该角色的标记 prompt（缺了 fail-loud 退出）；`scripts/l4-lite-smoke.mjs` 之外若新写脚本，用 `scripts/lib/roles.mjs` 枚举，别手抄清单（verify 门禁 `role-list-sync` 咬硬编码）；
+1. `presets/<role>.patch.yml`：一条 `@deepseek-ai/dsh-agent-preset` 行，`config` 带
+   id/name/description/order + plugins（自包含组合：persona 行 + skills roots + 工具行 +
+   agent-instructions 行）+ `skills/<n>/SKILL.md`（frontmatter `name` = 目录名）；
+2. 结构门禁：verify 门禁 preset-structure + row-deps（行引用的 `@deepseek-ai/*` 全进 peerDependencies）；
+3. roster 装载：`package.json` 的 `dsh.bundle.patch` 数组列出 `cordis.patch.yml` 与每个
+   `presets/*.patch.yml`；
+4. 消费点**无需逐个改**：角色清单事实源 = 盘上 `presets/` 目录——`preset-smoke` /
+   `release-smoke` / `team-preflight-smoke` / `boot-run.sh` / `tests` 全部目录枚举。唯二要补的：
+   `l4-lite-smoke` 的 `PROMPTS` 加该角色的标记 prompt；新脚本用 `scripts/lib/roles.mjs` 枚举；
 5. 完成定义 = preset-smoke 真挂载绿（L1 面，keyless）。
 
 ## 新增一个 skill
 
-1. 建 `presets/<role>/skills/<n>/SKILL.md`——frontmatter `name:` 必须**逐字等于目录名**（verify 门禁 preset-structure 强制）；
-2. preset 行的 plugins **不用改**：`customSkillDirs` 指向 `presets/<role>/skills/` 且 `includeDefaultRoots: false`，自动发现；
-3. `cordis.patch.yml` **不用改**（bundle 行只管 roster/工具，不管 skill）；
-4. 文档**不用改**：skills 清单的单一事实源 = 盘上目录（20-roles §2 已路由，基础整治 C8）；仅当 skill 承载**新方法论条目**时，`docs/design/30-methodology-mapping.md` 同 diff（L3 合同）；
-5. 完成定义 = `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs` 绿——它断言每角色 `skills/list` **恰好等于**盘上目录，多一个少一个都会红。
-
-## 模型体验（Model Experience）
-
-本包不写代码，但**它贡献的每一行都进模型请求**——本节是这些可见面的合同（vendor 包 README
-的 Model Experience 节吸纳，KV-cache 面在本包不适用：无自有请求构造）。
-
-| 贡献 | 模型看到什么 | 代价/影响 |
-|---|---|---|
-| `presets/<role>.patch.yml` 里 preset 行的 persona 子行 | 该角色会话的系统提示前缀（角色职责与边界） | 每个会话常驻；改动 = 模型可见面变更，需真模型档证据 |
-| `presets/<role>/skills/<n>/SKILL.md` | **按需加载**：先只给 name + description，命中任务才读全文 | description 是常驻成本（短、带触发条件）；正文只在选中时付费 |
-| preset 的工具行（`tools:` 段） | 该角色的工具 schema 清单 | 行列错/漏 = 角色缺工具或多工具（`row-deps` + L1 真挂载门禁把守） |
-| 研究手册注入（`research-workspace/AGENTS.md`，经 agent-instructions） | 每次角色会话的 workspace 指令段 | 常驻；改文本需重启 run 通道（web 进程缓存 boot 时文本） |
+1. 建 `presets/<role>/skills/<n>/SKILL.md`——frontmatter `name:` 必须**逐字等于目录名**
+   （门禁 preset-structure 强制）；
+2. preset 行的 plugins **不用改**：`customSkillDirs` 指向 `presets/<role>/skills/` 且
+   `includeDefaultRoots: false`，自动发现。
 
 ## 已知限制与延后工作
 
-- **无 TypeScript 插件代码**：本包是纯配置 bundle；要贡献代码级能力（新工具/新 provider）必须
-  新增 TS 包并走 `vendor/dsh/docs/user/develop/basic/` 的插件路径——当前无此需求。
-- **persona/skill 文本的运行时缓存**：web 进程在 boot 时读取文本；改完 pack 文本必须重启 run
-  通道才生效（实测：spawn 出的成员拿到修复前的 persona）。
-- **成员不继承角色 persona**：`spawn_teammate` 成员挂 roster 默认 preset（= lead），角色人格经
-  lead 的 spawn prompt 传达（Q2 实测结论）；本包无法在配置层改变这一点。
-- **`dsh-experimental-*` 层是 experimental**：agent-team 系列无稳定性承诺，随 vendor 升 pin
-  可能破坏（升 pin 条目负责重校）。
+- **研究状态页签的 bundle 渐进面（步骤条/证据计数/交付状态）尚未接通**：组件与纯函数折算
+  已就位（`run-fold.ts`），但 `remote.workspaceFiles` 的 list 路径形态未解（实测 5 种路径
+  全失败）——数据面接通前，页签只显示活动流与 HITL 横幅；
+- **`workspace/` 种子是快照**：由 `dev/sync-pack-workspace.mjs` 从仓库正本同步（门禁
+  `pack-workspace-fresh` 防漂移）；种子只铺新工作区，**不覆盖**已存在文件（`--force` 除外）；
+- **皮肤/品牌层**（ui-skin）与**专职 synthesizer 角色**（Q4 已销账：单场实测 Lead 独任综合
+  无过载）仍在搁置池，复活条件见 roadmap；
+- **工具卡只做了 2 张**（spawn_teammate / web_search）；`team_task_*` 卡留后续；
+- **版本兼容面窄**：只声明 `dsh-v0.1.7-rc.2`（pre-stable API，peer 版本号不精确钉死）。

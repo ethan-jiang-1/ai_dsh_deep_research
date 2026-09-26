@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'pack-workspace-fresh'];
 
 const failures = [];
 const notes = [];
@@ -742,6 +742,17 @@ function roadmapParked() {
   if (r.status !== 0) {
     const first = `${r.stderr ?? ''}${r.stdout ?? ''}`.trim().split('\n').filter(Boolean)[0];
     fail(gate, first ?? 'dev/research.overlay.yml 与 pack 渲染结果不一致——跑 `node dev/render-overlay.mjs` 重生成');
+  }
+}
+// pack 工作区种子新鲜度（sync-pack-workspace --check）：手册/模板是会话 cwd 的内容，
+// pack 必须自带（否则部署方装了包也没有研究纪律）。正本 = research-workspace/，
+// 种子 = pack workspace/（生成物，勿手改；漂移即红——与 overlay-fresh 同形态）。
+{
+  const gate = 'pack-workspace-fresh';
+  const r = spawnSync(process.execPath, ['dev/sync-pack-workspace.mjs', '--check'], { cwd: ROOT, encoding: 'utf8' });
+  if (r.status !== 0) {
+    const first = `${r.stderr ?? ''}${r.stdout ?? ''}`.trim().split('\n').filter(Boolean)[0];
+    fail(gate, first ?? 'pack workspace/ 种子与 research-workspace/ 正本漂移——跑 `node dev/sync-pack-workspace.mjs` 重同步');
   }
 }
 

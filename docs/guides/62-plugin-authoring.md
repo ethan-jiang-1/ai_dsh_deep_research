@@ -67,6 +67,47 @@ logged）——本仓只在 pack 行引入**现成**能力，因此这项义务�
 | docs / AGENTS / roadmap | 追加 `node scripts/entry-chain-probe.mjs`（真模型档） |
 | 门禁本身 | 注入回归看红 → 还原 → 绿（反证记录进 `docs/evaluation.md`） |
 
+## 交付与部署形态（本包怎么送到用户手里）
+
+DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`）：**bundle 是你编写与
+分发的单位，profile 是用户启动的环境，二者互斥**。本仓据此的交付拓扑：
+
+| 参与方 | 形态 | 谁提供 |
+|---|---|---|
+| DSH 本体 | 平台（`@deepseek-ai/dsh-base` + `dsh-web-app` 两个 bundle） | 用户装 DSH |
+| 本包 | 一个 bundle（`dsh-deep-research-pack`） | 本仓 |
+| 团队机制层 | 另一个 bundle（`@deepseek-ai/dsh-experimental-agent-team-profile`） | vendor（本包**故意不声明**团队行——组合与实战 config 归该层，RFC m2-p1-run-channel A 定案） |
+| 研究工作区 | 会话 cwd 的目录（手册 `AGENTS.md` + `templates/run/`） | 本包 `workspace/` 种子（`dev/sync-pack-workspace.mjs` 同步） |
+
+工作区是**纪律的载体**：DSH 的 agent-instructions 从会话 cwd 向上发现 `AGENTS.md` 并注入每个
+角色——手册不在工作区，四个角色就没有证据契约与完成判据。安装步骤（用户视角三步）与前置
+检查 = [pack README](../../packages/deep-research-pack/README.md)；部署工具 = 包内两条 bin
+（`dsh-deep-research-preflight` 检查、`dsh-deep-research-scaffold` 铺种子 + 补团队层）。
+
+本仓开发面的三个生成物各有生成器与新鲜度门禁（漂移即红）：`dev/research.overlay.yml`
+（`dev/render-overlay.mjs` → `overlay-fresh`）、pack 的 `workspace/` 种子
+（`dev/sync-pack-workspace.mjs` → `pack-workspace-fresh`）、run 通道 profile 镜像
+（`dev/boot-run.sh` 幂等重建，逐文件漂移检测）。
+
+## 改动影响面（添 / 换 / 删要一起动什么）
+
+一次改动往往牵动多处；漏一处的表现是"本地对、部署错"或"静默不生效"。按下表一次改齐：
+
+| 你要做的事 | 必须一起动 | 最小证据 |
+|---|---|---|
+| 加/换一条 bundle 行（host 共享面） | `cordis.patch.yml` → `node dev/render-overlay.mjs` 重渲染；行引用的 `@deepseek-ai/*` 进 `peerDependencies` | `overlay-fresh` / `row-deps` 门禁 + L1 真挂载 + L2 安装形状 |
+| 加一个研究角色 | `presets/<role>.patch.yml` + `package.json` 的 `dsh.bundle.patch` 数组 + `l4-lite-smoke` 的 `PROMPTS` + 台账 D 号（D2 是角色数） | `preset-smoke` 真挂载（L1）+ `preset-structure` / `role-list-sync` |
+| 加一个方法论 skill | `presets/<role>/skills/<n>/SKILL.md`（frontmatter `name` 逐字等于目录名） | `preset-structure` + L1 的 skills 隔离断言 |
+| 改研究手册 / run 模板 | 改 `research-workspace/` 正本 → `node dev/sync-pack-workspace.mjs` 同步进 pack | `pack-workspace-fresh` 门禁 |
+| 加部署脚本 / bin | `package.json` 的 `files` + `bin` | `release-smoke`（L2：真装一次，装完能跑） |
+| 加观察面 client 面能力 | `src/client/` + `tsconfig.client.json` 的 include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `client-load-smoke`（真浏览器）+ `client-keys` 门禁 |
+| 改 persona / skill / 手册文本（模型可见） | 同 diff 跑真模型档；运行中的 web 缓存 boot 文本，须重启通道 | `l4-lite-smoke`（真模型档） |
+| 换 vendor pin | `dev/vendor-build.sh` 全链重建 + 逐条重审 | 升 pin 毕业记录（[2026-09-25](../../notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md)） |
+| 改 profile 镜像 | 不手改——`dev/boot-run.sh` 幂等重建 | boot-run 漂移检测（fail-loud） |
+
+**一句话规则**：源改一处（pack），生成物跑生成器，证据按面选档（keyless 证管道 / 真模型档
+证 agent 行为），部署形状变更追加 L2。
+
 ## 继承边界（DSH 不要求插件仓库复制什么）
 
 `AGENTS.md`、Agent Notes、gates、发布序列是 **DSH 自身作为 development harness** 的参与

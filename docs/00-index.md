@@ -30,7 +30,7 @@
 | [根 roadmap.md](../roadmap.md) | 计划 | 队列（条目按主题命名、完成即离队）+ 搁置池 |
 | [guides/60-dev-loop.md](./guides/60-dev-loop.md) | 指南 | 开发环：六步闭环、面选择表、双 home、密钥 |
 | [guides/61-run-playbook.md](./guides/61-run-playbook.md) | 指南 | **run 操作指南**（研究发起人入口）：boot-run、lead 会话、HITL 两点、观察面——run 通道（research profile：本包 + vendor agent-team-profile 层，P1 定案）的使用面 |
-| [guides/62-plugin-authoring.md](./guides/62-plugin-authoring.md) | 指南 | **插件作者入口**（改插件内容的人/agent 入口）：DSH 词汇对齐（plugin/bundle/profile/preset）、参与阶梯 L0–L3、新行为归属、范本与证据义务——上游 `docs/user/develop/**` 的本仓投影 |
+| [guides/62-plugin-authoring.md](./guides/62-plugin-authoring.md) | 指南 | **插件作者入口**（改插件内容的人/agent 入口）：DSH 词汇对齐（plugin/bundle/profile/preset）、参与阶梯 L0–L3、新行为归属、范本与证据义务、**交付与部署形态**（bundle/profile 拓扑 + 工作区种子 + 部署 bin）、**改动影响面**（添/换/删要一起动什么）——上游 `docs/user/develop/**` 的本仓投影 |
 
 ## 决策台账
 

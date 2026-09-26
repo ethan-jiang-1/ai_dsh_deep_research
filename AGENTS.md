@@ -27,7 +27,7 @@ CLAUDE.md -> AGENTS.md    symlink（编辑真文件 AGENTS.md，verify 门禁校
 README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令/纪律/布局正本 = AGENTS.md，不复制）
 roadmap.md                队列 + 搁置池（纯队列：条目完成即离队；▶ = 全仓唯一"当前"指针）
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 随队列条目——见 pnpm-workspace.yaml 头注）
-packages/deep-research-pack/   唯一自写包（纯配置）：presets/<role>.patch.yml（0.1.7 形态=一条 @deepseek-ai/dsh-agent-preset 行，config.plugins 内声明 persona/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、cordis.patch.yml（bundle 行）；新增角色步骤见包 README
+packages/deep-research-pack/   唯一自写包（配置为主 + 一个观察面 client 面，D18）：presets/<role>.patch.yml（0.1.7 形态=一条 @deepseek-ai/dsh-agent-preset 行，config.plugins 内声明 persona/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、cordis.patch.yml（bundle 行）、workspace/（工作区种子：手册+模板，生成物）、scripts/{preflight,scaffold}.mjs（部署 bin）；交付与部署形态 = guides/62，合同 = 包 README
 vendor/dsh/               pinned submodule（tag `dsh-v0.1.7-rc.2` @ `477b4f4205`，只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，D10 已销账）
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、drt_<slug>/（run bundle）、templates/run/
 docs/                    00-index（地图+决策台账+术语映射）→ design/10-30 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ evaluation.md（验收合同）
@@ -81,6 +81,8 @@ pnpm dsh <args…>                      # 机制基线 CLI（vendor/dsh 钉 tag 
 node --import tsx/esm scripts/client-hitl-smoke.mjs   # 观察面活标题触发验证（真模型档：RPC followup 造挂起态 + 盘侧谓词 + 浏览器观察点）
 node scripts/evidence-audit.mjs --latest  # run bundle 证据溯源审计（keyless：URL/摘录/final 链对会话日志机械对账 → audit.md；CRITICAL 即 exit 1）
 node scripts/entry-chain-probe.mjs    # 入口链探针（真模型档：时不变四问，答案对 ▶ 真值软断言，留档人工复核）
+node packages/deep-research-pack/scripts/preflight.mjs --workspace <dir>   # 部署前置检查（pack 自带 bin：DSH 版本/peer 包/团队层/工作区手册/构建产物/密钥；fail-loud 带补救命令）
+node packages/deep-research-pack/scripts/scaffold.mjs --workspace <dir>    # 部署准备（pack 自带 bin：铺工作区种子 + 补团队层 + 复跑 preflight；幂等）
 ```
 
 档位词汇（keyless / 真模型档）与密钥定义 = §密钥。脚本头注各带设计依据与 RFC 出处。
