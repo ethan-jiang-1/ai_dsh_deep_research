@@ -209,7 +209,7 @@ export function parseFindings(text) {
 /** review.md → { readiness, critical, major, minor }；无 readiness 行返回 null。
  *  readiness 取**最后一处** = 终局判定：review.md 允许两相（首审 + lead 改稿后的复核终审，
  *  复核在文末再写一次 `## readiness:`），首审判定留在文中作为留痕。取首个匹配会把已交付的
- *  run 报成 FAIL（真实形态实证；见 RFC 2026-09-26-signal-to-noise-remediation §问题③）。 */
+ *  run 报成 FAIL（真实形态实证；见 Note 2026-09-26-signal-to-noise-remediation §问题③）。 */
 export function parseReview(text) {
   const all = [...text.matchAll(/readiness:\s*(PASS|FAIL)/g)];
   if (all.length === 0) return null;

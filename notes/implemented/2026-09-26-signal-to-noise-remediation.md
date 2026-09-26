@@ -1,16 +1,16 @@
-# RFC：信噪比整治（fresh-agent 双链清晰化 + 活文档腐烂清扫）
+# 信噪比整治（fresh-agent 双链清晰化 + 活文档腐烂清扫）
 
-> 状态：proposed
+> 状态：implemented
 
-归宿：roadmap §队列「信噪比整治」（卫生/长期，用户 2026-09-26 指令"是到了还技术债务的
-时候了……我们需要高的信噪比"）。§问题 的腐烂清单 = 三支探针 2026-09-26 实跑取证（零上下文
-fresh-agent 双链走读 ×2 + 机械扫描 ×1），非推测。
+来源：用户 2026-09-26 指令"是到了还技术债务的时候了……我们需要高的信噪比"。取证 = 五支探针
+2026-09-26 实跑（零上下文 fresh-agent 双链走读 ×2、独立腐烂深扫 ×1、复验 ×1、定点回归 ×1），
+非推测。**当前事实在本页**；提案时的基线快照留在 §问题（见其注记）。
 
-## 问题
+## 问题（提案时基线快照）
 
-> **本节 = 提案时（2026-09-26）的基线快照，不是当前状态。** 已修项与当前进度一律看
-> [§实施记录](#实施记录)——本节按 RFC 惯例在正文毕业时才改写为已交付事实体；在飞期间读它请
-> 自带"这是当时"的时态。
+> **本节 = 提案时（2026-09-26）的基线快照，保留为"为什么做"的问题陈述**——它记的是动手前的
+> 状态，**不是当前状态**。已交付事实在 §决定；逐条怎么验的在 §验收怎么闭的；过程证据在
+> §实施记录。读本节请自带"这是当时"的时态（毕业时未改写它：问题陈述的时态本来就属于过去）。
 
 三个独立病灶，共同点是**让 fresh agent 读到"现在不为真"的东西**。①③ 机械可查，② 是结构。
 
@@ -34,10 +34,10 @@ fresh-agent 双链走读 ×2 + 机械扫描 ×1），非推测。
 | 10 | [AGENTS.md](../../AGENTS.md) 偏离登记簿 + [design/10](../../docs/design/10-architecture.md) §6 | "23 tests 绿即证据" | 现为 **53 tests** |
 | 11 | [notes/README](../README.md) §时态表后 | "`implemented/` 有 26 篇而队列只有 2 条" | 现为 **40 篇 / 1 条**——手抄计数住在一张"时态地图"里 |
 | 12 | [roadmap.md](../../roadmap.md) 队列节尾 | "（已毕业离队 2026-09-26：…）"12 行历史块 | 与同文件头注"完成即离队（历史归 notes/ + git，**队列里看不见它**）"及 D13 自相矛盾；且随毕业无限增长，把唯一"当前"指针埋掉 |
-| 13 | [ui-skin RFC](2026-09-24-ui-skin.md) · [research-type-coverage RFC](2026-09-25-research-type-coverage.md) | 把"▶ 观察面 GUI 化"当作当前指针引用 | 该条目已毕业，▶ 已移交 |
+| 13 | [ui-skin RFC](../proposed/2026-09-24-ui-skin.md) · [research-type-coverage RFC](../proposed/2026-09-25-research-type-coverage.md) | 把"▶ 观察面 GUI 化"当作当前指针引用 | 该条目已毕业，▶ 已移交 |
 | 14 | [discipline-map](../../docs/discipline-map.md) 图例 · [alignment-ledger](../../docs/alignment-ledger.json) ×4 | "纯配置仓/纯配置 deep-research-pack" | 同 #4 |
 | 15 | 非 `.md` tracked 文件里的 RFC 指针（**13 处**，机械复算）：`presets/{lead,analyst,critic,scout}.patch.yml:5`、`dev/boot-run.sh:3`、`dev/vendor-build.sh:7`、`dev/vendor-typert-emit.mjs:3`、`scripts/entry-chain-probe.mjs:3`、`scripts/run-dashboard.mjs:2-3`、`tests/run-dashboard.test.mjs:1,92`、`docs/alignment-ledger.json:722` | 指 `notes/proposed/<某 RFC>.md` | 该 RFC 已毕业迁 `implemented/`——指针 404。**门禁盲区**：`md-links`/`md-anchors` 只扫 tracked `.md` 的链接语法，yml/sh/mjs/json 注释逃检。preset 头注尤其要紧——它是**模型可见**文本 |
-| 16 | [research-type-coverage RFC](2026-09-25-research-type-coverage.md) §验收 | 13 行里有孤儿子项（无父项）、游离右括号、`（原验收如下）` 把一节劈成两份互相竞争的清单；且无 `实施记录` 节 | 该 RFC 是 ▶ 条目的**唯一验收正本**，而 guides/60 §7 的中断恢复又要求读"文末实施记录"——fresh agent 必须满足的那一节恰好不可用 |
+| 16 | [research-type-coverage RFC](../proposed/2026-09-25-research-type-coverage.md) §验收 | 13 行里有孤儿子项（无父项）、游离右括号、`（原验收如下）` 把一节劈成两份互相竞争的清单；且无 `实施记录` 节 | 该 RFC 是 ▶ 条目的**唯一验收正本**，而 guides/60 §7 的中断恢复又要求读"文末实施记录"——fresh agent 必须满足的那一节恰好不可用 |
 | 17 | `dev/harness-home/runs/cn-ai-chip-adoption/`（旧 `runs/` 契约残留）与 `research-workspace/drt_*` | 两个 run 根并存，`run-dashboard` 两处都扫 | D17 已把 run bundle 定为 `research-workspace/drt_<slug>/`；旧根是 A→B 变迁残留，让"哪个才是这次的 run"需要猜 |
 | 18 | [README.md](../../README.md) Rules | "测试用 `node:test` + `node:assert`，**零 npm 依赖**" | `package.json` 有 25 个 devDependencies；[AGENTS.md](../../AGENTS.md) 偏离登记簿自己记着"首版零 npm 依赖原则……已重估维持"——README 在复述一条已被放弃的原则 |
 | 19 | [00-index](../../docs/00-index.md) D9 行 · [design/10](../../docs/design/10-architecture.md) §4 | web 工具行"`fetch: true` + **60s 超时**" | 盘上只有 `fetch: true`（布尔启用）+ `searchTimeoutMs: 60000`（**搜索**预算）；**`fetchTimeoutMs` 全仓未设**，实际取 vendor 默认 30s。文档把搜索预算说成抓取超时——照文档改会**改错字段且全部门禁仍绿**（探针实测：任务"把抓取超时 60s 改 90s"在字面读法下改的是搜索预算） |
@@ -100,76 +100,27 @@ fresh-agent 双链走读 ×2 + 机械扫描 ×1），非推测。
 - **preset 行 key 无 schema 校验**：schemastery 对象解析非严格（未知键静默合并后忽略），
   拼错的键（如 `fetchTimeoutsMs`）**不报错、L1 仍绿**——没有门禁把 preset 行键对回 vendor schema。
 
-## 判据（什么算"干净"）
+## 决定（五阶段，已交付）
 
-1. **腐烂清单清零**：§问题① 每行都在同一变更里改掉；`entry-chain-probe` 的答案不再命中旧事实。
-2. **一个事实一个家**：枚举的自指事实各有唯一 owner（pin/版本 · 计数 · 决策生死 · 生成物形态 ·
-   路径与命令契约），其余位置只留链接。**审计方式**（原先没写，等于不可判）：以 §实施记录
-   「S2 前置 · 自指事实归属表」为清单逐行核对；其中 pin 与计数两类已由 `pin-agreement` /
-   `count-free` 门禁机械把守，不再靠人工。
-3. **入口链能回答"现在能不能开工"**：▶ 的可执行性在链上可见（等人 / 可自主推进），不需要
-   读到 RFC 才发现；研究型条目在链上就能拿到 guides/61 + 对应技能 + 硬前置。
-4. **执行链有单一路由表**：给定一个任务型（代码 / preset / 研究 run / 门禁 / **用户直派非队列
-   任务**），能**在一处**查到"必改什么 + 生成物与检查的次序 + 必跑哪些面 + 必写什么 + done
-   判据"，其余页作为细节被链接而非复述；值级改动有可证伪断言或显式"不可证"声明。
-5. **根 AGENTS.md 留出余量**：落到预算内并留 headroom（目标 ≤ 上限 −10 行）。
-6. **投影与真实一致**：run-dashboard 对多相 `review.md` 取**终局**判定，且该行为有回归断言——
-   载体是 `tests/run-dashboard.test.mjs` 的 **inline 两相文本**（fixture 保持单相，两形态各有断言）；
-   两个 run 根只剩一个正本（legacy 根由 guides/61 说明为契约前历史）。
-7. **防复发**：每条新门禁带反证记录（注入回归 → 红 → 还原 → 绿）并登记 evaluation.md §L0 台账，
-   **反证原文记进本 RFC §实施记录**（只写 commit message 不算——本仓有过"声称的防线从未落地"的
-   事故）；`proposed-pointer-live` 上线后，第 15 行那类指针不可能再静默 404（宽版 `ref-paths`
-   已证否，理由见 §实施记录 S4）。
-8. **零上下文复验**：fresh-agent 走读零盲找、零猜测；**定位负载（链步 1–3）不增长**，且读到第 3
-   步就能决定"开工还是取题"。判据**不看 RFC 体量**（条目越大 RFC 越长是正常的，原"链上载入
-   ≤436 行"的写法已被证否：复验实测 725 行，其中 RFC 281 行——见 §实施记录 S4 复验）。
-   同口径不低于 2026-09-24 那次审计的探针法（口径 = [该次审计](../implemented/2026-09-24-entry-chain-fresh-agent-audit.md)）。
-9. **恢复契约可满足**：RFC §实施记录随每阶段**同 diff** 追加（guides/60 §7 的三源恢复里，第二源
-   就是它——复验实测它曾停在 S2 而 S3/S4 已提交，导致"我在条目内哪一步"只能靠猜）。
+按 S0→S5 顺序做完，每阶段同 diff 提交窄证据切片；逐阶段的实跑记录与反证原文在 §实施记录。
 
-## 方案（五阶段，按序）
-
-**S0 · 基线与判据固化**——三支探针在现状上各跑一次并留档（`entry-chain-probe` 真模型档 +
-零上下文 fresh-agent 双链走读 + 机械腐烂扫描）；基线表（fresh agent 现在会答错什么）入本
-RFC 附录或独立 Note。**为什么先**：没有基线，"更清楚"不可验证；探针即验收工具。
-
-**S1 · 活文档腐烂清扫**——逐行修 §问题① 全部 20 行：pin/版本（1–3、7–9）、计数（10–11）、
-决策生死（4–6）、生成物形态（5–6）、路径与命令契约（13–15）、计划层历史（12）、工具面字段
-误标（19）、镜像重建语义（20）、**▶ 条目 RFC 的 §验收 修复 + 补 `实施记录` 节**（16）、旧 run
-根残留判定（17）、README 原则复述（18）；命令双写法收敛；顺带修 ③（readiness 终局判定 +
-两相夹具）。**注意**：第 15 行含 `presets/*.patch.yml` 头注——那是模型可见文本且属 preset
-内容，**触发 L1 preset-smoke 面**，按 [guides/60](../../docs/guides/60-dev-loop.md) §2 单独跑、
-单独提交窄切片。**为什么第二**：最便宜、立刻提 SNR，且 S2/S3 的编辑要以"哪些是错的"为前提。
-机械、低风险、可分批提交。
-
-**S2 · 单一归属与预算余量**——每个自指事实指定唯一 owner（pin 的正本 = `.gitmodules` +
-pack 兼容矩阵；门禁/测试计数**不写进文档**，只留查询入口；决策生死归 00-index 台账的 now 态；
-生成物形态归 discipline-map 一处）；根 AGENTS.md 下放/压缩到预算内并留余量。**为什么在 S3
-之前**：双链重构的本质就是"把内容放到它的 owner 层"，先定归属再改链。
-
-**S3 · 双链显性化**（用户核心诉求）——probe chain：显式契约表（每步：读什么 → 现在应知道
-什么 → 卡住怎么办），**并按条目类型分支**（代码型 → guides/60；研究型 → guides/61 +
-running-a-research-run 技能），点名 `.agents/skills/` 与"哪类条目归哪个技能"的对应；
-▶ 可执行性上浮（等人 / 可自主推进，含研究型的硬前置：工作区注册）。task execution chain：
-单一路由表（任务型 → 同 diff 必改 → **生成物与检查的次序** → 必跑面 → 必写 → done），owner
-唯一，62 与 evaluation 降为被链接的细节；路由表须对"值级改动"给出可证伪断言（或显式声明
-该改动不可证、只能证到"仍挂载 + 文档同步"——**不许留白**）。另补**用户直派任务入口**（不在
-队列里的任务走哪条路：何时直接 `implemented/`、何时先立 RFC——把子文档里的逃生口提到链上）。
-**为什么第三**：依赖 S2 定好的归属，否则重构会再造双家。
-
-**S4 · 机械防复发**——把 S1–S3 的结论钉成门禁（每条带反证、窄范围、防空语料）：
-(a) `pin-agreement`：live 文档/脚本里的 pin（tag/commit/层版本）与 `.gitmodules` + submodule
-HEAD + pack 兼容矩阵一致（现状已有 3 处不一致，红证现成）；
-(b) 计数自由：live 文档禁硬编码门禁数/tests 数/note 数（或与真值机械对账）；
-(c) `doc-now-only`（窄版）：live 文档禁"已销账 / 修订→ / 曾 / 不再"等变更史措辞（机制表白名单）；
-(d) 投影终局判定：run-dashboard 多相折算的回归断言；
-(e) `ref-paths`：tracked **非 `.md`** 文件（yml/sh/mjs/json）里的仓内路径引用必须可解析——
-补 `md-links`/`md-anchors` 的盲区（第 16 行那 17 处正是从这里逃掉的）。
-**为什么最后**：门禁要编码**已定型**的形状，否则会把过渡态钉死。
-
-**S5 · 记忆层复查**（收尾，可延后）——notes/ 40 篇按机制名可检索性抽查；复核
-[notes/README](../README.md) 自定的 `implemented/` 分类/归档触发条件（阈值 ≈50 篇，现 40）；
-对已无指导价值的存量执行删除或完整取代。**为什么最后**：收益最低、风险最高（删证据链）。
+- **S0 · 基线固化**：五支探针实跑留档（双链走读 ×2 / 腐烂深扫 / 复验 / 定点回归），基线表入
+  §实施记录。基线本身即判据——"更清楚"由同一批探针前后对比来判，不靠自述。
+- **S1 · 活文档腐烂清扫**：主清单 20 行 + 深扫补充 40 行全部处置，手法三类（改成现在时的事实 /
+  去数字化 / 历史下沉到 notes 与 git）。附带两条实质修复：**run-dashboard 的 `readiness` 改取
+  终局判定**（原先取首个匹配，已交付的 run 被报成 FAIL）；**补齐 `dev/vendor-build.sh` 的 ⑦ host
+  半补建与 ⑧ 前端壳重建**——这两步曾被 commit message 声称落地，实际从未写进脚本（详见
+  §实施记录 S1 追加发现）。
+- **S2 · 单一归属与预算余量**：自指事实归属表逐行落地，pin 的散文正本收敛到一处；根
+  `AGENTS.md` 由 138 行降到 120 行，上限同步由 140 收紧到 130（余量 10 行）。
+- **S3 · 双链显性化**：probe chain 产出契约表（含"卡住怎么办"与按条目类型分支）；task execution
+  chain 收敛为**一张九类任务的路由表**（含生成物与检查的次序、值级改动可证伪声明、用户直派
+  非队列任务入口）；roadmap 固化可执行性标注。
+- **S4 · 机械防复发**：新增四条门禁 `proposed-pointer-live` / `pin-agreement` / `count-free` /
+  `doc-now-only`（各带反证原文），投影终局由 inline 单元断言把守，并加固 `pack-bundle-compat`
+  的覆盖完整性（原判据只要"≥1 条"，新增角色漏登记会绿而坏）。
+- **S5 · 记忆层复查**：结论是**不动结构**——分类/归档触发条件均未命中，机制名按内容可检索；
+  弱点如实记档（见 §实施记录 S5）。
 
 ## 输掉的方案
 
@@ -186,17 +137,22 @@ HEAD + pack 兼容矩阵一致（现状已有 3 处不一致，红证现成）�
 - **引入"整治进度状态文件"**：guides/60 §7 已否决控制文件那套（第二份"状态的家"必然漂移）；
   进度 = 本 RFC 的实施记录 + git。
 
-## 验收
+## 验收怎么闭的（逐条：命令 + 结果，2026-09-26）
 
-- S1 后：§问题① 清单清零；`node scripts/verify.mjs` + `node --test tests/*.test.mjs` 全绿；
-  run-dashboard 对两相 `review.md` 报 PASS（真 run bundle 上复验，非仅夹具）。
-- S2 后：枚举的自指事实"同一事实两个家"审计返回零；根 AGENTS.md ≤ 上限 −10 行。
-- S3 后：`entry-chain-probe` 四问全中且答案不含猜测；零上下文 fresh-agent 走读**零盲找**，
-  并能在链上一眼看出"当前条目等人 / 可自主推进"。
-- S4 后：每条新门禁有反证记录并登记 [evaluation.md](../../docs/evaluation.md) §L0 台账；
-  注入回归 → 红 → 还原 → 绿逐条实跑。
-- 全程：涉及面按 [guides/60](../../docs/guides/60-dev-loop.md) §2 加跑（本 RFC 以文档/脚本为主，
-  触发 L1/L2 时按表加跑）；每阶段同 diff 更新文档并提交窄证据切片。
+| # | 判据 | 实际怎么验的 | 结果 |
+|---|---|---|---|
+| 1 | 腐烂清单清零 | 机械复算非 `.md` 死指针；`git grep` 裸 `node --test`（notes 外）；`doc-now-only` / `count-free` 上线并把守同类 | 死指针 0；裸写法 0 |
+| 2 | 一个事实一个家 | §实施记录「S2 前置 · 自指事实归属表」逐行核对；pin 与计数两类改由 `pin-agreement` / `count-free` 机械把守 | 达标 |
+| 3 | 入口链能回答"现在能不能开工" | `node scripts/entry-chain-probe.mjs`（真模型档） | **ALL PASS**——模型作答原文含"该行标注'静默期可自主推进'，故可开工而非取题" |
+| 4 | 执行链有单一路由表 | [guides/60 §2](../../docs/guides/60-dev-loop.md) 九类任务路由表；guides/62 明确降为文件级细节并指回 | 达标 |
+| 5 | 根 AGENTS.md 留余量 | `wc -l AGENTS.md` vs `scripts/doc-budgets.json` | 120 / 上限 130（达标线 ≤120） |
+| 6 | 投影与真实一致 | `node scripts/run-dashboard.mjs --latest` 对真 bundle（两相 `review.md`） | `readiness: PASS`（修前报 FAIL）；两相行为有 inline 断言；legacy run 根在 guides/61 说明 |
+| 7 | 防复发（新门禁带反证） | 四条门禁各自"注入 → 红 → 还原 → 绿"，**反证原文记在 §实施记录 S4 表**；`evaluation.md` §L0 登记；`gate-ledger-sync` 对账 | 全绿 |
+| 8 | 零上下文复验 | 复验探针（判 mostly：两条目标摩擦确认消失，四条自造问题已修）已闭；**定点回归探针（6 摩擦点）毕业时仍在跑——未跑 ≠ 通过**，结论落档后补记于 §实施记录 S4 复验 | 复验已闭；定点回归**待落档** |
+| 9 | 恢复契约可满足 | §实施记录随每阶段同 diff 追加（本页即证据）；guides/60 §7 恢复源由三样补为四样（加工作树） | 达标 |
+
+L0 全绿：`node scripts/verify.mjs`（门禁清单正本 = [evaluation.md](../../docs/evaluation.md) §L0，
+计数不写进散文）+ `pnpm test`。
 
 ## 实施记录
 
@@ -317,7 +273,20 @@ research/README 行 3 格对 4 列表头）；**门禁盲区同类**（fixture �
 ④ §问题② 仍以现在时断言已被 S3 修掉的缺口 → 加"提案时快照"注记。另修：判据 2/6/7/8 不可判
 （无 owner / 载体名写错 / `ref-paths` 已改名 / "≤436 行"目标已被实测 725 行证否）→ 逐条改写为可判。
 
-**S4 待做**：S5（notes/ 记忆层可检索性复查）+ 全量复验 + 毕业。
+**S4 待做**：S5（已完成，见下）+ 全量复验 + 毕业。**定点回归探针（6 摩擦点）在毕业时仍在跑——结论落档后补记本节。**
+
+### S5 · 完成（2026-09-26）——结论：**不动结构**
+
+- **分类/归档触发条件均未命中**：`notes/README.md` 自定的引入条件是 `implemented/` 超约 50 篇
+  （现 40 篇）与"出现未来指导价值低的存量"。逐项抽查候选（三篇 marathon 复盘、l1-l2-green、
+  foundation-remediation、m2-closing）——各自带独立的决定与输掉的方案，**没有该删的**。
+  故不引入 class 子层、不设 `archived/`，触发条件留在原处待命中。
+- **机制名可检索性抽查（按内容 grep）**：readiness / workspaceFiles / overlay-fresh / doc-budgets /
+  queue-pointer-live / role-list-sync 六项均在 `implemented/` 命中（1–6 篇，首篇即相关 Note）。
+- **一处如实记档的弱点**：本轮清扫的众多子决定住在**一篇以整治命名的 Note** 里（文件名 =
+  `signal-to-noise-remediation`），按**文件名**检索不到 `readiness` / `proposed-pointer-live` 这类
+  机制名——只能靠内容 grep。这是"一文件一条目"与"一次整治含多条子决定"的固有张力；不为此拆
+  文件（拆了会让"这次整治"失去单一入口），但**毕业正文必须逐个点名这些机制**，让内容 grep 有货。
 **L1 真挂载 `DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs` ALL PASS**（preset 头注改动触发该面——
 四角色 roster + 逐个 session/create + skills 硬隔离全绿）；`bash -n dev/vendor-build.sh` 通过；
 根 AGENTS.md **138/140**（净 −1，余量 +2）。
