@@ -33,12 +33,15 @@ const SESSION = flag('--session', null) // 标题子串；缺省 = 侧栏里第�
 const PICK = flag('--pick', 'recommended') // recommended | first | <1-based index>
 const CUSTOM = flag('--custom', null)
 const MAX_STEPS = Number(flag('--max-steps', '8'))
-const DRY = has('dry-run')
+const DRY = has('--dry-run')
 
 if (!TOKEN) {
   console.error('缺 --token（web 横幅里的 token）')
   process.exit(2)
 }
+// 模式自报（2026-09-26 教训：`flag/has` 的 `--` 加了两遍 → `--dry-run` 判假，**"dry-run" 实际
+// 执行了代答**。此后开局即打印模式，操作者一眼能看出它到底会不会点。）
+console.log(`hitl-answer: 模式 = ${DRY ? 'dry-run（只看不点）' : '实答（会提交）'} · pick=${PICK} · session=${SESSION ?? '（侧栏第一个待答）'}`)
 
 const answered = []
 const log = (m) => console.log(m)
@@ -78,7 +81,12 @@ try {
     opened = text.slice(0, 60)
     break
   }
-  if (opened === null) throw new Error(`侧栏没找到待答会话（--session=${SESSION ?? '（缺省：Waiting for answer）'}）——它可能已被 web 重启终局化，需向会话发恢复 prompt 让 lead 重发问询`)
+  if (opened === null) {
+    // 预期态，不是异常：没有待答会话时给一句人话 + 非零退出（原来抛栈，操作者要自己读 trace）
+    console.error(`hitl-answer: 侧栏没有待答会话（--session=${SESSION ?? '（缺省：Waiting for answer）'}）——`
+      + '可能：① 该 HITL 已被答过；② 挂起回合被 web 重启终局化（需向会话发恢复 prompt 让 lead 原样重发问询）。')
+    process.exit(3)
+  }
   log(`hitl-answer: 已打开会话「${opened}」`)
 
   // ①b 等卡片渲染（实测：点开会话后卡片不是立刻就有——问询可能正在写、或视图还在挂载。
