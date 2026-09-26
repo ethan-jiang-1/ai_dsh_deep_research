@@ -1,6 +1,6 @@
 # AGENTS.md — keyless 回归与夹具（证据放置）
 
-`tests/` 拥有 **keyless 回归**：`node --test tests/*.test.mjs`（零依赖、无凭据可跑）。
+`tests/` 拥有 **keyless 回归**：`pnpm test`（= `node --import tsx/esm --test tests/*.test.mjs`；零依赖、无凭据可跑）。
 它证明的是**契约与形状**，不是产品行为——行为证据归分级冒烟与真模型档（见
 [docs/evaluation.md](../docs/evaluation.md)）。上游对应物 = DSH `snapshots/AGENTS.md`
 的"证据住在被它证明的对象旁边"规则。

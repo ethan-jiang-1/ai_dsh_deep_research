@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # dev/boot-run.sh — 开跑就绪命令（幂等，keyless）：research profile 组合校验/补装 → boot web
-# → 打印入口步骤。RFC：notes/proposed/2026-09-24-m2-p1-run-channel.md（A 定案：团队机制归
+# → 打印入口步骤。RFC：notes/implemented/2026-09-24-m2-p1-run-channel.md（A 定案：团队机制归
 # vendor agent-team-profile 层）。操作指南全文 = docs/guides/61-run-playbook.md。
 # 用法：bash dev/boot-run.sh（Ctrl-C 停 web）。重复执行不重复安装（组合在位即跳过）。
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

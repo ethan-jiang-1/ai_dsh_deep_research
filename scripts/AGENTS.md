@@ -36,7 +36,7 @@
 
 - 脚本只用 Node 标准库（`node:test`、`node:zlib`、`node:child_process`）；不引入测试框架。
 - 真模型调用只出现在 keyless/tier 已登记的真模型档脚本里（`l4-lite-smoke`、
-  `team-preflight-smoke`、`entry-chain-probe`）；`tests/` 的 layering 守卫禁止 keyless
-  回归里出现真模型、网络与子进程。
+  `team-preflight-smoke`、`entry-chain-probe`、`client-hitl-smoke`）；`tests/` 的 layering
+  守卫禁止 keyless 回归里出现真模型、网络与子进程。
 - 投影类脚本（`run-dashboard.mjs`）**只读**：canonical 源是会话日志与 bundle 文件，产物
   （HTML）是抛弃型投影，永不入库、永不手改。

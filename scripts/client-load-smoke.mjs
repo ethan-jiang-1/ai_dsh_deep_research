@@ -5,11 +5,12 @@
 // 为什么必须有它（company postmortem 0003 同款教训）：preset-smoke 只打 RPC 面（roster /
 // session/create），**client 入口的 apply 抛错**（如重复 $mount、槽名拼错）只有浏览器能抓——
 // 这类失败不静默，会把整个 Web UI 砖在 BootPage 错误屏。keyed 槽的 key 拼错则相反：静默
-// 永不渲染——所以本冒烟除"零失败"外还断言**功能可见性**（页签可点、占位体渲染）。
+// 永不渲染——所以本冒烟除"零失败"外还断言**功能可见性**（页签可点、渐进面与活动流真渲染）。
 //
-// 断言三件事：① 页面无 "Failed to load plugins"；② console 无 `failed to apply loader
-// entry`；③ 「研究状态」页签可见、可点，点开后占位体（Stage 1 文案）渲染——它证明 app
-// 渲染完成且本包 client 入口成功 apply + keyed 槽体挂对 key。
+// 断言 13+ 条（前置条件 + 渐进面硬断言 + 活动流）：① 页面无 "Failed to load plugins"；② console
+// 无 `failed to apply loader entry`；③ 「研究状态」页签可见、可点，点开后步骤条七步 / 证据计数 /
+// ✅ 已交付 / 问题行渲染（首场 run 真数据）——它证明 app 渲染完成且本包 client 入口成功 apply +
+// keyed 槽体挂对 key；另有活动流断言（人性化行在场、原始事件类型名零残留）。
 //
 // 通道：源码域（--profile web --patch dev/research.overlay.yml，与 preset-smoke 真挂载档
 // 同款——boot 起自本仓，行包名经根 node_modules 解析到 pack 源码树，浏览器经

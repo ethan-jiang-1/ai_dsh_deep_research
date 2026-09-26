@@ -42,8 +42,8 @@ description: Use when a roadmap queue item is delivered or abandoned and must le
 按改动面选证据（见 `writing-a-gate` 与 guides/60 §2），至少：
 
 ```sh
-node scripts/verify.mjs
-node --test tests/*.test.mjs
+pnpm verify
+pnpm test
 ```
 
 改了 docs/AGENTS/roadmap → 追加 `node scripts/entry-chain-probe.mjs`（真模型档）。

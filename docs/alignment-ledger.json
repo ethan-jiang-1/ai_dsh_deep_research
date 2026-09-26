@@ -1,5 +1,5 @@
 {
-  "_note": "对齐台账（机读正本）：vendor/dsh（钉 @ 477b4f420505）的 development-harness 源面逐项结论。门禁 align-ledger 强制三件事：① 每条 source 在 vendor/dsh 里真实存在（换 pin 后文件移位/删除即红——这就是重审触发器）；② verdict=adopted/adapted 的每处 landing 在仓内真实存在；③ verdict=na 必须给 reason。人读视图 = docs/discipline-map.md 源 1–9。 覆盖规则：结构面逐条登记——vendor 每个 AGENTS.md（不含 snapshots/session 夹具）、每个开发技能 SKILL.md、顶层 docs/*.md 与 docs/cookbook/*.md（非 .zh.md 副本）、以及根文件（package.json/.editorconfig/.gitattributes/lefthook.yml/vendor/README.md/snapshots/AGENTS.md/.github/AGENTS.md/packages/README.md/scripts/run-gates.ts/scripts/doc-budgets.manifest.json）；双语 .zh.md 副本按类登记（不携带独立约定，配对机制见 docs/i18n/README.md 一条）。门禁 align-ledger 强制该覆盖（缺登记即红）。 landing 粒度 = 该约定的本仓载体（可为类级：例如各 cookbook 篇 → guides/62 + docs/AGENTS.md；技能形式约定 → .agents/skills/ + dev-skill-format 门禁）。",
+  "_note": "对齐台账（机读正本）：vendor/dsh（钉 @ 477b4f420553e8a52c2fbccc464d7561b239c443）的 development-harness 源面逐项结论。门禁 align-ledger 强制三件事：① 每条 source 在 vendor/dsh 里真实存在（换 pin 后文件移位/删除即红——这就是重审触发器）；② verdict=adopted/adapted 的每处 landing 在仓内真实存在；③ verdict=na 必须给 reason。人读视图 = docs/discipline-map.md 源 1–9。 覆盖规则：结构面逐条登记——vendor 每个 AGENTS.md（不含 snapshots/session 夹具）、每个开发技能 SKILL.md、顶层 docs/*.md 与 docs/cookbook/*.md（非 .zh.md 副本）、以及根文件（package.json/.editorconfig/.gitattributes/lefthook.yml/vendor/README.md/snapshots/AGENTS.md/.github/AGENTS.md/packages/README.md/scripts/run-gates.ts/scripts/doc-budgets.manifest.json）；双语 .zh.md 副本按类登记（不携带独立约定，配对机制见 docs/i18n/README.md 一条）。门禁 align-ledger 强制该覆盖（缺登记即红）。 landing 粒度 = 该约定的本仓载体（可为类级：例如各 cookbook 篇 → guides/62 + docs/AGENTS.md；技能形式约定 → .agents/skills/ + dev-skill-format 门禁）。",
   "_evidence": "逐条原始行（810 条）在 dev/smoke-workspace/inventory/{root-packaging,subtree-agents,dev-skills,docs-standards,packages-evidence}.json（gitignored 运行区，可重跑 workflow vendor-inventory-to-files 复现）",
   "sources": [
     {
@@ -703,13 +703,13 @@
       "source": "packages/client/AGENTS.md",
       "owns": "Form/ownership row: packages/client/AGENTS.md owns the rules for packages/client/* and the apps/web build entry — 154 lines / ~25.5 KB (by f",
       "verdict": "na",
-      "reason": "本仓无该包组（唯一包是纯配置 deep-research-pack）"
+      "reason": "本仓无该包组（唯一包 deep-research-pack 已非纯配置：TS 源 + 单点 client 插件，D18）"
     },
     {
       "source": "packages/experimental/AGENTS.md",
       "owns": "Form/ownership row: packages/experimental/AGENTS.md owns the rules for experimental packages and explicitly declares itself a supplement to ",
       "verdict": "na",
-      "reason": "本仓无该包组（唯一包是纯配置 deep-research-pack）"
+      "reason": "本仓无该包组（唯一包 deep-research-pack 已非纯配置：TS 源 + 单点 client 插件，D18）"
     },
     {
       "source": "packages/preset/agent-preset/README.md",
@@ -719,7 +719,7 @@
         "packages/deep-research-pack/README.md",
         "docs/guides/62-plugin-authoring.md"
       ],
-      "note": "0.1.7 重设计：旧 packages/preset/agent-presets 整包删除（迁移见 notes/proposed/2026-09-25-vendor-pin-bump-017rc2.md）"
+      "note": "0.1.7 重设计：旧 packages/preset/agent-presets 整包删除（迁移见 notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md）"
     },
     {
       "source": "packages/README.md",
@@ -734,7 +734,7 @@
       "source": "packages/schedule/AGENTS.md",
       "owns": "Form/ownership row: packages/schedule/AGENTS.md owns the rules for packages/schedule/* and announces itself as a supplement to the repositor",
       "verdict": "na",
-      "reason": "本仓无该包组（唯一包是纯配置 deep-research-pack）"
+      "reason": "本仓无该包组（唯一包 deep-research-pack 已非纯配置：TS 源 + 单点 client 插件，D18）"
     },
     {
       "source": "packages/skill/skill-filesystem/README.md",
@@ -749,7 +749,7 @@
       "source": "packages/web/AGENTS.md",
       "owns": "Form/ownership row: packages/web/AGENTS.md owns one security rule for the web package group and declares itself a supplement to the package ",
       "verdict": "na",
-      "reason": "本仓无该包组（唯一包是纯配置 deep-research-pack）"
+      "reason": "本仓无该包组（唯一包 deep-research-pack 已非纯配置：TS 源 + 单点 client 插件，D18）"
     },
     {
       "source": "scripts/AGENTS.md",

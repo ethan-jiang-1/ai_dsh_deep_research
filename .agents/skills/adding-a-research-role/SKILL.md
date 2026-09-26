@@ -7,30 +7,35 @@ description: Use when adding a research role preset, renaming one, or changing a
 
 本技能是 **guidance，不是 checklist**：按实际 diff 与风险选择动作，完成判据在各步末；相关技能：[`.agents/skills/writing-a-gate`](../writing-a-gate/SKILL.md) · [`.agents/skills/running-a-research-run`](../running-a-research-run/SKILL.md)。
 
-角色 = 一个 preset 目录；它同时被三处消费：源码域（overlay）、镜像（`$DSH_HOME` profile）、
-roster（角色清单）。**三处不同步 = 角色在场但行为不对**，所以顺序固定。
+角色 = `presets/<role>.patch.yml`（preset 行）+ `presets/<role>/`（技能根）；它同时被源码域
+（overlay）、镜像（`$DSH_HOME` profile）、roster（角色清单）与 bundle 装载面消费。**漏一处 =
+角色在场但行为不对（或根本没装载）**，所以顺序固定。
 
-## 1. 角色目录的形状
-
-在 `packages/deep-research-pack/presets/<role-id>/` 下：
+## 1. 角色的文件形状（包内）
 
 | 文件 | 拥有 | 门禁 |
 |---|---|---|
 | `presets/<role>.patch.yml` | 一条 `@deepseek-ai/dsh-agent-preset` 行：config 带 `id`/`name`/`description`/`order`/`plugins`（0.1.7 形态） | `preset-structure` |
-| `presets/<role>/skills/` | 该角色专属技能（`customSkillDirs` 指向它，硬隔离） | `preset-structure` |
-| `skills/<n>/SKILL.md` | 该角色专属方法论（≥1 个） | `preset-structure`（frontmatter `name` = 目录名） |
-| `README.md` | 该角色为什么这样切（可选但推荐） | — |
+| `presets/<role>/skills/<n>/SKILL.md` | 该角色专属方法论（≥1 个；`customSkillDirs` 指向 `presets/<role>/skills/`，硬隔离） | `preset-structure`（frontmatter `name` = 目录名） |
+| `presets/<role>/README.md` | 该角色为什么这样切（可选但推荐） | — |
+| `package.json` 的 `dsh.bundle.patch` | 列出 `cordis.patch.yml` + 每个 `presets/*.patch.yml`（漏则 preset 行不随 bundle 装载） | `pack-bundle-compat` |
 
 角色 id 用 `^[a-z0-9][a-z0-9-]*$`。persona 文本写"职责 + 边界 + 何时交给谁"，
 不写工具用法（工具用法归 skill 或 vendor 文档）。
 
-## 2. 三处同步（漏一处就漂移）
+## 2. 装载点同步（漏一处就漂移）
 
+- **bundle 装载**：`package.json` 的 `dsh.bundle.patch` 数组补上 `presets/<role>.patch.yml`
+  ——0.1.7 的 preset 行随 bundle 装载，漏了它角色不进 roster（`pack-bundle-compat` 红）；
 - **源码域**：`dev/research.overlay.yml` 的 bundle 行——源码域通道（冒烟、探针）走它；
 - **镜像**：`dev/harness-home/profiles/research/` 的 profile 镜像——run 通道走它；
   `bash dev/boot-run.sh` 的漂移检测会逐文件比 pack 源 vs 镜像，不符即 fail-loud；
 - **roster**：`scripts/lib/roles.mjs` 是访问器，事实源 = 盘上 `presets/`；改完跑
-  `role-list-sync` 门禁（角色清单与 pack 对账）。
+  `role-list-sync` 门禁（角色清单与 pack 对账）；
+- **真模型档覆盖**：`scripts/l4-lite-smoke.mjs` 的 `PROMPTS` 加该角色的标记 prompt——它是
+  全角色冒烟，盘上有角色而无覆盖即 exit 2；
+- **台账**：增删角色 = 推翻 D2（角色 = 4 个），先在 `docs/00-index.md` 台账登记新 D 号，
+  再动代码——`tests/presets.test.mjs` 的数量哨兵会拦住没登记的增删。
 
 ## 3. 验证（完成判据，keyless 优先）
 

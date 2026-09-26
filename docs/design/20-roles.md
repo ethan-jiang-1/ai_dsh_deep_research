@@ -50,6 +50,9 @@ Deep Research 的本质困难 = 搜索结果信噪比极差 + 答案位置未知
 4. **缺口显性化**（lead，综合层）：insufficient/contradicted 如实呈现——搜不到也
    是结论，禁止假装全知。
 
-## 4. 留待实测的开放点
+## 4. 队形实测结论（首场完整 run）
 
-登记与归宿统一在 [00-index §待定表](../00-index.md)（Q4 专职 synthesizer 拆分 / Q5 多 analyst topic 争用）；本节只留背景：当前综合归 lead、topic 靠单 owner 纪律，两者均待「首个完整研究 run」实测再定。
+- **综合归 lead 足够**：lead 独任综合无过载（两次调度决策干净落地，标准报告 4 topic 规模）——专职 synthesizer 不拆，维持搁置；
+- **topic 无争用**：单 owner + 任务板纪律足够（T1 中途改派经 lead 调度干净落地）。
+
+证据 = [m2-run-mechanics §实施记录](../../notes/implemented/2026-09-24-m2-run-mechanics.md)。

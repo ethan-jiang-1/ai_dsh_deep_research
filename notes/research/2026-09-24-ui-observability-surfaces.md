@@ -1,6 +1,6 @@
 # UI 观察面（调试可视化）研究——右栏状态页签与相关手段的琢磨稿
 
-> 状态：**已完成（琢磨稿）** · 2026-09-24 · 观察面材料；被 roadmap ▶「观察面 GUI 化」引用。
+> 状态：**已完成（琢磨稿）** · 2026-09-24 · 观察面材料；落点 = D18 观察面 client 面（RFC = [observability-gui](../implemented/2026-09-24-observability-gui.md)）。
 
 > 性质：**研究/琢磨稿**（2026-09-24，起因 = 用户指令：多 agent 跑起来后"调试的时候让我知道
 > 底下在干什么"，要 right side pane / tasks 类的直观界面；提早准备；内容先落 notes/research

@@ -8,9 +8,9 @@
 #   ② 代码面：拦截裸 `dsh` —— PATH 里的全局安装随升级漂移，不作机制依据；机制核对
 #      一律走钉住 tag 的源码基线。
 #
-# ⚠ 已销账（原 D10 偏离）：vendor submodule 已落地（队列「vendor-submodule-and-pnpm-dsh」，
-#   2026-09-24 毕业）。机制基线 = 本仓 vendor/dsh（pinned tag dsh-v0.1.5-rc.2，verify 门禁
-#   vendor-pin/vendor-clean 机械把守）；不再借用 company checkout。
+# ⚠ 机制基线 = 本仓 vendor/dsh（pinned submodule；verify 门禁 vendor-pin/vendor-clean 机械
+#   把守）；不借用任何外部 checkout。原「vendor submodule 延后」的偏离（D10）已随
+#   队列「vendor-submodule-and-pnpm-dsh」落地而终结。
 
 # ① 数据面（⚠ 无条件覆盖，不用 ${DSH_HOME:-…} 预设优先）
 #   实证（2026-09-24 l4-lite 复跑首跑栽坑）：DSH 会话内（agent shell / GUI 环境）自带
@@ -41,7 +41,7 @@ dsh() {
 # 提示（source 时可见一次）——变量一律花括号：全角括号紧跟 $VAR 会被 bash 当成变量名
 # 的一部分（$DSH_HOME（… → 变量 "DSH_HOME（"），set -u 的 source 方必炸（boot-run 实证）。
 echo "dev/env.sh: DSH_HOME=${DSH_HOME}（数据面隔离）"
-echo "dev/env.sh: dsh → 本仓 vendor/dsh 钉 tag 源码基线（D10 已销账；日用全局版用 command dsh）"
+echo "dev/env.sh: dsh → 本仓 vendor/dsh 钉 tag 源码基线（机制权威；日用全局版用 command dsh）"
 
 # ③ 提交面：pre-commit 钩子（dev/hooks/pre-commit：verify+tests 红灯拦 commit——收尾纪律
 #    "必跑"的机器化，教训实证见 notes/implemented/2026-09-24-agent-friendly-polish.md）。

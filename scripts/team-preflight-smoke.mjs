@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // team-preflight-smoke.mjs — M2 铺垫 P2：team 机制迷你预检（真模型档，需 DEEPSEEK_API_KEY）。
-// 定义：notes/proposed/2026-09-24-m2-p2-team-preflight RFC。仿 l4-lite 形状（标记法 +
+// 定义：notes/implemented/2026-09-24-m2-p2-team-preflight RFC。仿 l4-lite 形状（标记法 +
 // 会话日志即真相），通道 = run 通道（--profile research 安装域，boot 形状同 dev/boot-run.sh）。
 // 断言：spawn_teammate 真调用 ×2 / list_agents / 成员会话建立 + 响应标记 / lead 的
 //   one-shot subagent 调用（company D18 现状探针）/ 成员组合画像（发现型：agentPreset 字段 +

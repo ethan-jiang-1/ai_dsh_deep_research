@@ -1,9 +1,9 @@
 // dev/render-overlay.mjs — 从 pack 渲染源码域 overlay（生成物，勿手改；`--check` 给门禁用）。
 //
-// 为什么需要生成：0.1.7 preset 重设计后，preset 的内容就是 patch 行本身（旧形态里角色内容
-// 住在 presets/<role>/ 目录、overlay 只指路径）。源码域通道（preset-smoke 真挂载）用
-// `--profile web --patch <本文件>` 迭代 preset，因此必须携带同样的 preset 行——为避免
-// 「pack 一份、overlay 一份」两处漂移，overlay 由本脚本生成，门禁 `overlay-fresh` 对账。
+// 作用：从 pack 的 presets/*.patch.yml 与 cordis.patch.yml 渲染源码域 overlay（生成物）。
+// 源码域通道（preset-smoke 真挂载）用 `--profile web --patch <本文件>` 迭代 preset，因此必须
+// 携带同样的 preset 行——为避免「pack 一份、overlay 一份」两处漂移，overlay 由本脚本生成，
+// 门禁 `overlay-fresh` 对账。
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';

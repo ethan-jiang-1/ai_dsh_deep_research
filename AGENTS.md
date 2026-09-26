@@ -28,7 +28,7 @@ README.md                 人类门面（Start Here 链接 + 稳定原则摘要�
 roadmap.md                队列 + 搁置池（纯队列：条目完成即离队；▶ = 全仓唯一"当前"指针）
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 随队列条目——见 pnpm-workspace.yaml 头注）
 packages/deep-research-pack/   唯一自写包（配置为主 + 一个观察面 client 面，D18）：presets/<role>.patch.yml（0.1.7 形态=一条 @deepseek-ai/dsh-agent-preset 行，config.plugins 内声明 persona/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、cordis.patch.yml（bundle 行）、workspace/（工作区种子：手册+模板，生成物）、scripts/{preflight,scaffold}.mjs（部署 bin）；交付与部署形态 = guides/62，合同 = 包 README
-vendor/dsh/               pinned submodule（tag `dsh-v0.1.7-rc.2` @ `477b4f4205`，只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，D10 已销账）
+vendor/dsh/               pinned submodule（tag `dsh-v0.1.7-rc.2` @ `477b4f4205`，只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本）
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、drt_<slug>/（run bundle）、templates/run/
 docs/                    00-index（地图+决策台账+术语映射）→ design/10-30 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ evaluation.md（验收合同）
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）；目录名自带时态，
@@ -37,9 +37,9 @@ notes/                   **开发记忆与证据链**（核心流程数据，不
                          rejected/（否决理由，防复犯）；postmortem/（事故复盘）；research/（调研报告，带状态表）
 .agents/skills/          开发技能（DSH 约定路径：project-agents 发现根）：任务匹配即加载的程序化工作记忆
                          （毕业条目 / 加角色 / 写门禁 / 跑 run）；与产品内 runtime skills（presets/*/skills/）分家
-scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）、team-preflight-smoke.mjs（team 机制预检）、entry-chain-probe.mjs（入口链探针，真模型档）、run-dashboard.mjs（run 只读投影，boot-run 起）、lib/roles.mjs（角色清单访问器，事实源=盘上 presets/）
-tests/                   keyless 回归（node:test，零依赖；layering 守卫禁真模型/网络/子进程；fixtures/ 测试夹具）
-dev/                     vendor-build.sh（vendor 树构建：tsc host/client + typert 产物 + client bundle）、vendor-typert-emit.mjs（typert 产物生成器）、vendor-host-typert.config.ts（逐包 tsdown 配置）、render-overlay.mjs（从 pack 渲染 research.overlay.yml）、boot-run.sh（run 通道开跑：幂等装+boot web+仪表盘）、run-kickoff.mjs（run 会话驱动）、env.sh（双 home + dsh 机制基线 + pre-commit 钩子激活）、research.overlay.yml（源码域 overlay，**生成物**）、hooks/（pre-commit：verify+tests 红灯拦 commit）、harness-home/ 与 smoke-workspace/（gitignore 运行区）
+scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）、team-preflight-smoke.mjs（team 机制预检）、entry-chain-probe.mjs（入口链探针，真模型档）、run-dashboard.mjs（run 只读投影，boot-run 起）、lib/（roles 角色清单访问器[事实源=盘上 presets/] + env/playwright/vendor-artifacts 三个冒烟支撑模块）
+tests/                   keyless 回归（node:test，无测试框架；layering 守卫禁真模型/网络/子进程；fixtures/ 测试夹具）
+dev/                     vendor-build.sh（vendor 树构建：tsc host/client + typert 产物 + client bundle）、vendor-typert-emit.mjs（typert 产物生成器）、vendor-host-bundle.config.ts（逐包 host 半补建配置：tsdown -c 给缺 lib/index.js 的包补产物）、vendor-host-typert.config.ts（逐包 tsdown 备选配置，留档）、render-overlay.mjs（从 pack 渲染 research.overlay.yml）、sync-pack-workspace.mjs（把 research-workspace 正本同步进 pack 的 workspace/ 种子）、boot-run.sh（run 通道开跑：幂等装+boot web+仪表盘）、run-kickoff.mjs（run 会话驱动）、env.sh（双 home + dsh 机制基线 + pre-commit 钩子激活）、research.overlay.yml（源码域 overlay，**生成物**）、hooks/（pre-commit：verify+tests 红灯拦 commit）、harness-home/ 与 smoke-workspace/（gitignore 运行区）
 ```
 
 接下来开发什么 = §入口链 第 3 步的 ▶ 条目；开工/收尾程序 = 第 5 步。
@@ -70,7 +70,7 @@ node --import tsx/esm --test tests/*.test.mjs   # L0 keyless 回归（也可 pnp
 source dev/env.sh                     # ⚠ 双 home + 裸 dsh 拦截（DSH_HOME=dev/harness-home）；下列 L1/L2 必须先 source，否则脚本自拒 exit 2
 node scripts/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真挂载档（keyless：roster+逐角色建会话+skills 隔离；--profile <p> --no-patch 切安装域通道）
 cd packages/deep-research-pack && pnpm build   # pack 双半构建（tsc -b . + tsdown → lib/index.js + lib/client.js——观察面 client 面，D18）
-node scripts/client-load-smoke.mjs    # 观察面 client 面真浏览器加载（keyless：boot web + headless chromium 三断言）
+node scripts/client-load-smoke.mjs    # 观察面 client 面真浏览器加载（keyless：boot web + headless chromium——插件零失败 + 页签与渐进面硬断言）
 node scripts/release-smoke.mjs        # L2 真实安装形状（keyless：pack→干净 profile→plugin add→安装域冒烟；起真 DSH 环境，无模型调用）
 node scripts/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：四角色响应 + scout web_search 调用）
 node scripts/team-preflight-smoke.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + company D18 one-shot worker 探针）
@@ -89,7 +89,7 @@ node packages/deep-research-pack/scripts/scaffold.mjs --workspace <dir>    # 部
 
 ## 密钥
 
-档位词汇（全仓统一；替代曾用而未定义的"认证档"）：**keyless** = 无凭据可跑——preset-smoke
+档位词汇（全仓统一）：**keyless** = 无凭据可跑——preset-smoke
 真挂载档与 release-smoke 会起真 DSH 环境，但无模型调用、不需要 key；**真模型档** = 需要
 `DEEPSEEK_API_KEY` 与真模型调用（当前 = l4-lite-smoke、team-preflight-smoke、
 entry-chain-probe 与 client-hitl-smoke；队列里的 L4 全量同档）。
@@ -104,7 +104,7 @@ web 搜索无需独立 key——base 的 `web-search-deepseek` 行 `apiKeyEnv: D
 
 | 实体 | 位置 | 角色 |
 |---|---|---|
-| ① 开发基线（唯一权威） | `vendor/dsh/`（本仓 pinned submodule，tag `dsh-v0.1.7-rc.2` @ `477b4f4205`，只读铁律——verify vendor-pin/vendor-clean 把守；D10 已销账） | 机制核对与验证会话一律走它（dev/env.sh 的 dsh 函数与 `pnpm dsh` 从此处源码起） |
+| ① 开发基线（唯一权威） | `vendor/dsh/`（本仓 pinned submodule，tag `dsh-v0.1.7-rc.2` @ `477b4f4205`，只读铁律——verify vendor-pin/vendor-clean 把守） | 机制核对与验证会话一律走它（dev/env.sh 的 dsh 函数与 `pnpm dsh` 从此处源码起） |
 | ② 日用全局安装 | npm 全局（`which dsh`） | 与本 repo 开发无关；版本随全局漂移，行为不作机制依据 |
 | ③ 参考仓 | `/Users/bowhead/ai_dsh_company/`（插件工程范式）、`/Users/bowhead/ai_tool_deepresearch/`（方法论源头） | 只读参考；吸收落点登记在 00-index §外部研究材料 |
 
@@ -113,9 +113,8 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 
 ## 纪律（全量正本 = [discipline-map.md](docs/discipline-map.md)——vendor 逐源三态枚举）
 
-> 首版枚举子集表已由「dsh-discipline 全量枚举」条目（2026-09-24 毕业）替换：全表见
-> [discipline-map](docs/discipline-map.md)（每行 = DSH 做法 → 本仓落点 → 照搬/带证据适配/
-> 不适用+理由；随 vendor 换 tag 重校）。速查关键词：fail-loud · model-visible ⟺ logged ·
+> 全表 = [discipline-map](docs/discipline-map.md)（每行 = DSH 做法 → 本仓落点 → 照搬/带证据适配/
+> 不适用+理由；随 vendor 换 tag 重校）——纪律的权威正本。速查关键词：fail-loud · model-visible ⟺ logged ·
 > 完成定义 = 真检查 · no-key 证管道 / with-key 证 agent · verify the world · 真入口路径 ·
 > 新门禁带反证 · docs = 当前合同 · 同 diff 带 Note · 窄证据切片 · 卫生铁律 · 工具态重定向。
 
@@ -123,7 +122,7 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 
 | D 号 | 偏离 | 约束证据 | 归宿 |
 |---|---|---|---|
-| （伴随） | node:test 而非 vitest；verify 用 regex 断言而非 YAML 解析 | ~~首版零 npm 依赖原则~~（vendor 落地后已引入 tsx/构建链）——**已重估维持**：测试栈零迁移收益（23 tests 绿即证据），断言对象是自控文件 | 重估记录 = [vendor-submodule 毕业 Note](notes/implemented/2026-09-24-vendor-submodule.md)（2026-09-24）；D10 已随同条目销账 |
+| （伴随） | node:test 而非 vitest；verify 用 regex 断言而非 YAML 解析 | **已重估维持**：测试栈零迁移收益（keyless tests 绿即证据——计数不写进文档，查 `pnpm test`），断言对象是自控文件 | 重估记录 = [vendor-submodule 毕业 Note](notes/implemented/2026-09-24-vendor-submodule.md)（2026-09-24） |
 
 ## 编辑这些指令
 

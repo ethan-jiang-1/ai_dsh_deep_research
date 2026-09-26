@@ -1,9 +1,10 @@
 /**
  * 浏览器半：右栏「研究状态」页签（观察面，D18 单点例外）。
- * Stage 2（B-min）：journal 流页签——数据通道 = `remote.session.follow`（WebSocket 流，
- * snapshot 给历史、event 给实时；company 同款最小投影）；Stage 3 起接步骤条/活标题/矩阵/
- * review（见 RFC observability-gui 的两段三步）。数据/展示分层纪律：折算进 `src/lib/`
- * 纯函数（keyless 单测），组件薄渲染——本文件只做登记与装配。
+ * 数据通道 = `remote.session.follow`（WebSocket 流，snapshot 给历史、event 给实时）+
+ * `remote.workspaceFiles`（会话工作区根 → run bundle 文件）。注册三件：页签体（步骤条 /
+ * 问题行 / 证据概览 / 交付状态 / 团队动态）、活标题（HITL 挂起时改标题）、研究语义工具卡。
+ * 数据/展示分层纪律：折算进 `src/lib/` 纯函数（keyless 单测），组件薄渲染——本文件只做
+ * 登记与装配。
  */
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'

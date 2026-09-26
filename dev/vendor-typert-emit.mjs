@@ -1,6 +1,6 @@
 // dev/vendor-typert-emit.mjs —— 本仓驱动的 typert host/client 产物生成（不改 vendor 内容）。
 //
-// 背景（详见 notes/proposed/2026-09-25-vendor-pin-bump-017rc2.md）：0.1.7 起启动需要各贡献包
+// 背景（详见 notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md）：0.1.7 起启动需要各贡献包
 // 的 `lib/typert.<face>.js`（`typert-loader` 会 import 包的 `./typert` 子路径）。vendor 自己的
 // 全量构建在干净树上会先红在 tsdown 的**根单元**（root 包无 `lib/types/{index,invariant,startup}.js`
 // 入口）——那是上游构建链在干净树上的自不自洽处，与本仓无关。

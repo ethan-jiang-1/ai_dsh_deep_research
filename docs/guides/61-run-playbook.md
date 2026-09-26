@@ -21,8 +21,9 @@
   -- --port 3081 --no-open`；web 在 stdin 关闭时会自行退出）；
 - **刷新白屏的判别序**：① `lsof -nP -iTCP:3081 -sTCP:LISTEN` 有没有监听 → 无 = 进程已停
   （重跑上面任一形态）；② 有监听但仍白屏/401 = token 过期（**每次启动都是新 token**，
-  用当次横幅里的 URL；旧 URL 作废）；③ 有监听且 token 新但页面空 = 前端产物陈旧
-  （`pnpm run build:web`，见 [AGENTS.md §命令表](../../AGENTS.md) 的 `dev/vendor-build.sh`）。
+  用当次横幅里的 URL；旧 URL 作废）；③ 有监听且 token 新但页面空 = 前端壳产物陈旧
+  （`pnpm --filter @deepseek-ai/dsh-web-frontend run build` 重建；vendor 构建产物整体重建 =
+  `bash dev/vendor-build.sh`，见 [AGENTS.md §命令表](../../AGENTS.md)）。
 
 ## 1. 开哪个会话
 
@@ -73,6 +74,9 @@ frontmatter）。`dev/run-kickoff.mjs` 已默认用 workspaceId 形态把会话�
 - 任何时候可关页面/停机。恢复 = 重跑 `boot-run.sh` → 新开 lead 会话说
   "继续 <slug> 这个 run"——lead 只凭 `drt_<slug>/` 的文件事实重建上下文，
   不依赖聊天记忆；
+- **run 根只有一个正本**：`research-workspace/drt_<slug>/`（D17 契约位）。`dev/harness-home/runs/`
+  下的 bundle 是契约前的 ad-hoc 历史（仪表盘标 "ad-hoc·无契约"）——不是这次要恢复的 run，
+  也不要删（gitignored 运行数据，是那次研究留下的证据）；
 - 方向修订：直接告诉 lead——Decisions 追加一条记录后原地补搜（不算 rerun）；
   证据扩张 rerun = 同 bundle final/ 下一版；结构性另起 = 新 drt_<slug>/（sibling
   预检后建）。

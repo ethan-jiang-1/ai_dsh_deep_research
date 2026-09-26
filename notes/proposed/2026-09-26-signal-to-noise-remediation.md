@@ -32,13 +32,14 @@ fresh-agent 双链走读 ×2 + 机械扫描 ×1），非推测。
 | 12 | [roadmap.md](../../roadmap.md) 队列节尾 | "（已毕业离队 2026-09-26：…）"12 行历史块 | 与同文件头注"完成即离队（历史归 notes/ + git，**队列里看不见它**）"及 D13 自相矛盾；且随毕业无限增长，把唯一"当前"指针埋掉 |
 | 13 | [ui-skin RFC](2026-09-24-ui-skin.md) · [research-type-coverage RFC](2026-09-25-research-type-coverage.md) | 把"▶ 观察面 GUI 化"当作当前指针引用 | 该条目已毕业，▶ 已移交 |
 | 14 | [discipline-map](../../docs/discipline-map.md) 图例 · [alignment-ledger](../../docs/alignment-ledger.json) ×4 | "纯配置仓/纯配置 deep-research-pack" | 同 #4 |
-| 15 | [agent-friendly-polish Note](../implemented/2026-09-24-agent-friendly-polish.md) | 引 `docs/design/methodology-mapping.md` | 实际 = `docs/design/30-methodology-mapping.md`——implemented Note 的路径按 [implemented/README](../implemented/README.md) 是**活的**，随实现同 diff 维护 |
-| 16 | 非 `.md` tracked 文件里的 RFC 指针（**13 处**，机械复算）：`presets/{lead,analyst,critic,scout}.patch.yml:5`、`dev/boot-run.sh:3`、`dev/vendor-build.sh:7`、`dev/vendor-typert-emit.mjs:3`、`scripts/entry-chain-probe.mjs:3`、`scripts/run-dashboard.mjs:2-3`、`tests/run-dashboard.test.mjs:1,92`、`docs/alignment-ledger.json:722` | 指 `notes/proposed/<某 RFC>.md` | 该 RFC 已毕业迁 `implemented/`——指针 404。**门禁盲区**：`md-links`/`md-anchors` 只扫 tracked `.md` 的链接语法，yml/sh/mjs/json 注释逃检。preset 头注尤其要紧——它是**模型可见**文本 |
-| 17 | [research-type-coverage RFC](2026-09-25-research-type-coverage.md) §验收 | 13 行里有孤儿子项（无父项）、游离右括号、`（原验收如下）` 把一节劈成两份互相竞争的清单；且无 `实施记录` 节 | 该 RFC 是 ▶ 条目的**唯一验收正本**，而 guides/60 §7 的中断恢复又要求读"文末实施记录"——fresh agent 必须满足的那一节恰好不可用 |
-| 18 | `dev/harness-home/runs/cn-ai-chip-adoption/`（旧 `runs/` 契约残留）与 `research-workspace/drt_*` | 两个 run 根并存，`run-dashboard` 两处都扫 | D17 已把 run bundle 定为 `research-workspace/drt_<slug>/`；旧根是 A→B 变迁残留，让"哪个才是这次的 run"需要猜 |
-| 19 | [README.md](../../README.md) Rules | "测试用 `node:test` + `node:assert`，**零 npm 依赖**" | `package.json` 有 25 个 devDependencies；[AGENTS.md](../../AGENTS.md) 偏离登记簿自己记着"首版零 npm 依赖原则……已重估维持"——README 在复述一条已被放弃的原则 |
-| 20 | [00-index](../../docs/00-index.md) D9 行 · [design/10](../../docs/design/10-architecture.md) §4 | web 工具行"`fetch: true` + **60s 超时**" | 盘上只有 `fetch: true`（布尔启用）+ `searchTimeoutMs: 60000`（**搜索**预算）；**`fetchTimeoutMs` 全仓未设**，实际取 vendor 默认 30s。文档把搜索预算说成抓取超时——照文档改会**改错字段且全部门禁仍绿**（探针实测：任务"把抓取超时 60s 改 90s"在字面读法下改的是搜索预算） |
-| 21 | [guides/62](../../docs/guides/62-plugin-authoring.md) 影响面矩阵 | "改 profile 镜像｜不手改——`dev/boot-run.sh` **幂等重建**" | boot-run 只在组合不全时重建；**漂移时 exit 1** 并要求手动 `rm -rf` 重跑（见 §③） |
+| 15 | 非 `.md` tracked 文件里的 RFC 指针（**13 处**，机械复算）：`presets/{lead,analyst,critic,scout}.patch.yml:5`、`dev/boot-run.sh:3`、`dev/vendor-build.sh:7`、`dev/vendor-typert-emit.mjs:3`、`scripts/entry-chain-probe.mjs:3`、`scripts/run-dashboard.mjs:2-3`、`tests/run-dashboard.test.mjs:1,92`、`docs/alignment-ledger.json:722` | 指 `notes/proposed/<某 RFC>.md` | 该 RFC 已毕业迁 `implemented/`——指针 404。**门禁盲区**：`md-links`/`md-anchors` 只扫 tracked `.md` 的链接语法，yml/sh/mjs/json 注释逃检。preset 头注尤其要紧——它是**模型可见**文本 |
+| 16 | [research-type-coverage RFC](2026-09-25-research-type-coverage.md) §验收 | 13 行里有孤儿子项（无父项）、游离右括号、`（原验收如下）` 把一节劈成两份互相竞争的清单；且无 `实施记录` 节 | 该 RFC 是 ▶ 条目的**唯一验收正本**，而 guides/60 §7 的中断恢复又要求读"文末实施记录"——fresh agent 必须满足的那一节恰好不可用 |
+| 17 | `dev/harness-home/runs/cn-ai-chip-adoption/`（旧 `runs/` 契约残留）与 `research-workspace/drt_*` | 两个 run 根并存，`run-dashboard` 两处都扫 | D17 已把 run bundle 定为 `research-workspace/drt_<slug>/`；旧根是 A→B 变迁残留，让"哪个才是这次的 run"需要猜 |
+| 18 | [README.md](../../README.md) Rules | "测试用 `node:test` + `node:assert`，**零 npm 依赖**" | `package.json` 有 25 个 devDependencies；[AGENTS.md](../../AGENTS.md) 偏离登记簿自己记着"首版零 npm 依赖原则……已重估维持"——README 在复述一条已被放弃的原则 |
+| 19 | [00-index](../../docs/00-index.md) D9 行 · [design/10](../../docs/design/10-architecture.md) §4 | web 工具行"`fetch: true` + **60s 超时**" | 盘上只有 `fetch: true`（布尔启用）+ `searchTimeoutMs: 60000`（**搜索**预算）；**`fetchTimeoutMs` 全仓未设**，实际取 vendor 默认 30s。文档把搜索预算说成抓取超时——照文档改会**改错字段且全部门禁仍绿**（探针实测：任务"把抓取超时 60s 改 90s"在字面读法下改的是搜索预算） |
+| 20 | [guides/62](../../docs/guides/62-plugin-authoring.md) 影响面矩阵 | "改 profile 镜像｜不手改——`dev/boot-run.sh` **幂等重建**" | boot-run 只在组合不全时重建；**漂移时 exit 1** 并要求手动 `rm -rf` 重跑（见 §③） |
+
+> **撤回一行**：初版把 [agent-friendly-polish Note](../implemented/2026-09-24-agent-friendly-polish.md) 里的旧路径列为腐烂——复核确认那是**过去时记录**（该 Note 记的正是那次漂移的修复），按层规则合法，已撤下。第二遍只读深扫另找出 32 行，见 §实施记录 S0 深扫补充。
 
 **同一命令两种写法**（7 处）：`node --import tsx/esm --test tests/*.test.mjs`（[AGENTS.md](../../AGENTS.md) §命令表、`package.json`、pre-commit）vs 裸 `node --test tests/*.test.mjs`（[guides/60](../../docs/guides/60-dev-loop.md) §2/§4、[evaluation.md](../../docs/evaluation.md) §L0、[tests/AGENTS.md](../../tests/AGENTS.md)、[discipline-map](../../docs/discipline-map.md)、graduating skill）。两者在 engines 地板上都能跑，但**同一事实两个家**就是漂移面。
 
@@ -109,7 +110,7 @@ fresh-agent 双链走读 ×2 + 机械扫描 ×1），非推测。
 6. **投影与真实一致**：run-dashboard 对多相 `review.md` 取**终局**判定；夹具含两相形态；
    两个 run 根只剩一个正本。
 7. **防复发**：每条新门禁带反证记录（注入回归 → 红 → 还原 → 绿）并登记 evaluation.md §L0 台账；
-   `ref-paths` 上线后，第 16 行那类指针不可能再静默 404。
+   `ref-paths` 上线后，第 15 行那类指针不可能再静默 404。
 8. **零上下文复验**：fresh-agent 走读零盲找、零猜测、无"读多了/读少了"抱怨；链上载入显著
    低于当前 ≈436 行，且**答全四问不再需要离开链**；同口径不低于 2026-09-24 那次审计的 4.5/5。
 
@@ -119,11 +120,11 @@ fresh-agent 双链走读 ×2 + 机械扫描 ×1），非推测。
 零上下文 fresh-agent 双链走读 + 机械腐烂扫描）；基线表（fresh agent 现在会答错什么）入本
 RFC 附录或独立 Note。**为什么先**：没有基线，"更清楚"不可验证；探针即验收工具。
 
-**S1 · 活文档腐烂清扫**——逐行修 §问题① 全部 21 行：pin/版本（1–3、7–9）、计数（10–11）、
-决策生死（4–6）、生成物形态（5–6）、路径与命令契约（13–16）、计划层历史（12）、工具面字段
-误标（20）、镜像重建语义（21）、**▶ 条目 RFC 的 §验收 修复 + 补 `实施记录` 节**（17）、旧 run
-根残留判定（18）、README 原则复述（19）；命令双写法收敛；顺带修 ③（readiness 终局判定 +
-两相夹具）。**注意**：第 16 行含 `presets/*.patch.yml` 头注——那是模型可见文本且属 preset
+**S1 · 活文档腐烂清扫**——逐行修 §问题① 全部 20 行：pin/版本（1–3、7–9）、计数（10–11）、
+决策生死（4–6）、生成物形态（5–6）、路径与命令契约（13–15）、计划层历史（12）、工具面字段
+误标（19）、镜像重建语义（20）、**▶ 条目 RFC 的 §验收 修复 + 补 `实施记录` 节**（16）、旧 run
+根残留判定（17）、README 原则复述（18）；命令双写法收敛；顺带修 ③（readiness 终局判定 +
+两相夹具）。**注意**：第 15 行含 `presets/*.patch.yml` 头注——那是模型可见文本且属 preset
 内容，**触发 L1 preset-smoke 面**，按 [guides/60](../../docs/guides/60-dev-loop.md) §2 单独跑、
 单独提交窄切片。**为什么第二**：最便宜、立刻提 SNR，且 S2/S3 的编辑要以"哪些是错的"为前提。
 机械、低风险、可分批提交。
@@ -192,8 +193,75 @@ HEAD + pack 兼容矩阵一致（现状已有 3 处不一致，红证现成）�
 |---|---|---|
 | probe chain 走读 | 零上下文 subagent，只读，任务 = "继续这个项目" | 五步指针全活、四问全部答出；但**走到第 4 步才发现条目卡在等人**（白走一趟）；链是代码形状的，研究型条目的真程序在链外；链上 ≈436 行 / 答全四问实际 ≈815 行 + grep |
 | task execution chain 走读 | 零上下文 subagent，只读，任务 = 改 scout web 行的抓取超时 | 判 **NO**：文档把 `searchTimeoutMs` 说成 fetch 超时，照文档改会**改错字段且全门禁仍绿**；无值级验收判据；用户直派任务无成文路径 |
-| 机械腐烂扫描 | 本仓脚本 + git grep + 路径解析 | §问题① 共 21 行；另机械复算出**13 处**非 `.md` 死指针（探针初报 17，本仓复算修正为 13——**取证数字必须复算**，这条本身即是本轮纪律的样本） |
+| 机械腐烂扫描 | 本仓脚本 + git grep + 路径解析 | §问题① 共 20 行；另机械复算出**13 处**非 `.md` 死指针（探针初报 17，本仓复算修正为 13——**取证数字必须复算**，这条本身即是本轮纪律的样本） |
 
 **基线状态**：`verify` 27 门禁全绿、`pnpm test` 53/53 绿——**腐烂全部活在门禁的盲区里**（散文
 里的自指断言、非 `.md` 注释、投影工具）。这正是"高信噪比"要补的那一类：门禁保护产物与结构，
 保护不到"文档说的系统状态"。
+
+### S0 · 深扫补充（第二遍独立只读扫描，2026-09-26）
+
+第一遍是"沿链走读 + 定向 grep"；第二遍换方法（全仓逐文件对照真值源 + 表列数校验 + 门禁集合
+比对），去重后另找出 **40 行**。两行 HIGH 是主表漏掉的：
+
+- [guides/61](../../docs/guides/61-run-playbook.md) 白屏判别序 ③ 让操作员跑 `pnpm run build:web`
+  ——**仓根 `package.json` 没有这个 script**（只有 verify/test/dsh），它只存在于 `vendor/dsh`；
+  同句引的 `AGENTS.md §命令表` 条目其实是 `bash dev/vendor-build.sh`。**事故中跑不存在的命令。**
+- [discipline-map](../../docs/discipline-map.md) 形态表 :27 仍写"无 TypeScript 源码"（TS 面自 D18 起
+  存在）——该行自己的重估触发条件已命中。
+
+其余按类：**计数/枚举残值**（`80 条`→101、`17+ 门禁`→27、`四份子树 AGENTS.md`→五份、`132 行`→139、
+`三断言`→13+、真模型档列 2 或 3 个→4、roadmap `7/7`→13）；**已废命名**（门禁 `entry-budget` 已更名
+`doc-budgets` 且上限 145→140；preset 载体 `presets/<role>/agent.cordis.yml` 不存在；postmortem 形状
+`NNNN-` 实为日期 slug；`review-critic.md` 化石名；钉 hash `477b4f420505`）；**已闭问题的"待定"表述**
+（design/20 的 Q4/Q5、design/30 的 Q6 都写着"待首个 run 实测"，而 run 已于 2026-09-25 关闭它们）；
+**已交付功能的"未接通"表述**（roadmap 历史块与 observability-completion Note 都说 workspaceFiles
+未接通，实际 2026-09-26 已接通并有硬断言）；**形态表失真的"不适用"理由**（无 client UI 代码 /
+无构建产物测试面 / 无 TS 面 / "纯配置仓"图例）；**表结构畸形**（00-index 外部材料表 4 格对 3 列表头、
+research/README 行 3 格对 4 列表头）；**门禁盲区同类**（fixture 里的 `runs/` 旧约定、`verify.mjs`
+注释编号与 gates 数组错位、`.agents/skills` 的"三处同步"漏 package.json 与 l4-lite 步骤）。
+
+**方法教训两条（进 S4 门禁设计）**：① 探针初报 17 处死指针，机械复算 = 13——**外部报数一律复算**；
+② 主表把一条**过去时记录**误判为腐烂（[agent-friendly-polish Note](../implemented/2026-09-24-agent-friendly-polish.md)
+记的正是那次漂移的修复）——**判腐烂必须先判层**，层规则优先于"看起来旧"。
+
+### S1 · 清扫完成（2026-09-26）
+
+主清单 20 行 + 深扫补充 40 行**全部处置**（四支只读→修复代理按文件严格分区并行，主线只做判断类
+与跨文件收口）。处置手法三类：**改成现在时的事实**（D7/D9/D10 行、形态表两行、guides/62 三处）、
+**去数字化**（门禁数/tests 数/断言数/note 数/行数一律不再写进散文，改指正本）、**下沉历史**
+（roadmap 的"已毕业离队"块删除；discipline-map 的 0.1.7 重审表整体迁进
+[升 pin 毕业 Note](../implemented/2026-09-25-vendor-pin-bump-017rc2.md)，原地只留维护规则与指针）。
+
+**S1 追加发现（本轮最重的一条，性质 = 假称的防复发）**：commit `e152961` 的 message 声称
+"vendor-build.sh 固化 ⑦ host 半补建 ⑧ 前端壳重建 两步（防下次升 pin 重蹈）"，但
+`git show --stat e152961` 显示该 commit **根本没碰 `dev/vendor-build.sh`**，HEAD 版脚本只有 ①–⑥——
+即**声称的防线从未落地**（与 [毕业漂移复盘](../postmortem/2026-09-26-roadmap-graduation-drift.md)
+同一失效类：message 凭意图写、不凭 diff 写）。后果是真实的：升 pin 后 `apps/web/dist` 会留上一代
+平台壳，Web UI 静默报 `settingsNumberField is not a function`（该 message 自己记了这次事故）。
+**已补齐并实测**：⑦ 判据 = "有 `lib/types/index.js` 而无 `lib/index.js`"（实测**当场命中
+`apps/desktop-host` 一个真缺件**，补建后 313/313 齐全）；⑧ = `pnpm --filter
+@deepseek-ai/dsh-web-frontend run build`（vite build 2s；`apps/web/dist` 在 vendor `.gitignore`
+内，重建不污染只读面——实测 `vendor-clean` 仍绿）。
+
+**S1 验证（全部实跑）**：`node scripts/verify.mjs` **27 门禁全绿**；`pnpm test` **54/54**；
+**L1 真挂载 `DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs` ALL PASS**（preset 头注改动触发该面——
+四角色 roster + 逐个 session/create + skills 硬隔离全绿）；`bash -n dev/vendor-build.sh` 通过；
+根 AGENTS.md **138/140**（净 −1，余量 +2）。
+
+### S2 前置 · 自指事实归属表（深扫产出，S2 据此收敛）
+
+一个事实一个家；下表"唯一 owner"列即 S2 的执行目标，其余位置一律改链接或删除（**不复制**）。
+
+| 自指事实 | 现有多家 | 唯一 owner（S2 目标） |
+|---|---|---|
+| vendor pin（tag + commit） | 14 处（AGENTS ×2 · design/10 ×2 · discipline-map ×2 · evaluation · pack README ×2 · pack package.json · presets.test · release-smoke · verify · notes/README；其中 env.sh、design/10:60、alignment-ledger、roadmap 曾错） | `.gitmodules` + submodule HEAD + pack 兼容矩阵（`vendor-pin` 门禁已把守其一）；散文只链接 |
+| 门禁数 / tests 数 | AGENTS:126 · design/10:87 · discipline-map:124 · 00-index:28 · notes/README:20 · roadmap:32 | `verify.mjs` gates 数组 ↔ [evaluation.md](../../docs/evaluation.md) §L0 表（`gate-ledger-sync` 对账）；**散文不写计数** |
+| 真模型档成员 | AGENTS §密钥（对，4 个）· guides/60:91（2 个）· discipline-map ×3 + scripts/AGENTS（3 个） | AGENTS.md §密钥；其余链接 |
+| L0 测试命令写法 | `--import tsx/esm` 形（AGENTS 命令表 · package.json · pre-commit）vs 裸形（guides/60 ×2 · evaluation · tests/AGENTS · discipline-map · 四个 skills 之一） | `package.json` 的 `test` script；全仓一律写 `pnpm test` |
+| workspaceFiles 接通状态 | 代码 + client-load-smoke + bundle-face-wiring Note（= 已接通）vs roadmap 历史块 + observability-completion Note（= 未接通） | [bundle-face-wiring Note](../implemented/2026-09-26-bundle-face-wiring.md) |
+| client-load-smoke 断言数 | AGENTS:73 · evaluation:26 · 脚本头注（"三断言"）vs 脚本实体（13+） | 脚本自身；**散文不写断言数** |
+| pack 形态（D7 vs D18） | 00-index D18 + pack AGENTS/README（= 配置为主 + 单点 client 面）vs guides/62:19 + discipline-map 图例/形态表 + alignment-ledger na 理由 | 00-index D18 + pack AGENTS/README |
+| preset 载体文件名 | design/10:51 · discipline-map:97（`agent.cordis.yml`）vs 盘上 + pack README（`presets/<role>.patch.yml`） | 盘上 + pack README |
+| client 面注册证据 | discipline-map:25（"四处 effect / 工具卡全部经 effect"）vs `src/client/index.ts`（3 effect + 1 裸 inject） | 源文件自身 |
+| 外部研究材料表形状 | 00-index 表头 3 列 vs 数据行 4 格 | 00-index 表头 |

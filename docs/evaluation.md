@@ -23,7 +23,7 @@
 ### L0 结构面（机械门禁，keyless）
 
 - **定义**：仓库结构、文件卫生、preset 三件套完整性、vendor 铁律（如采用 submodule）等机械可查的不变量。
-- **最小真检查**（client 面（D18 观察面）另加：`node scripts/client-load-smoke.mjs`——headless 浏览器三断言：零插件失败横幅 / 无 loader entry 失败 / 本包 client bundle 进 /plugins/ 批次）；`node scripts/verify.mjs`（或 `pnpm verify`）+ `node --test tests/*.test.mjs`（或 `pnpm test`）——均 keyless、秒级。
+- **最小真检查**（client 面（D18 观察面）另加：`node scripts/client-load-smoke.mjs`——headless 浏览器真挂载断言（插件零失败横幅 / 无 loader entry 失败 / 本包 client bundle 进 /plugins/ 批次 / 页签渐进面与活动流），断言清单以脚本为准）；`node scripts/verify.mjs`（或 `pnpm verify`）+ `pnpm test`（= `node --import tsx/esm --test tests/*.test.mjs`，本仓唯一登记的测试命令）——均 keyless、秒级。
 - **门禁登记表**（正本在此；与 `scripts/verify.mjs` 的 gates 数组经门禁 `gate-ledger-sync` 机械对账——加门禁须两处同步，漏一处即红）：
 
 | 门禁 | 断言什么 | 反证记录 |

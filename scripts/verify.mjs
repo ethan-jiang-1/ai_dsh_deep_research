@@ -118,7 +118,7 @@ function roadmapParked() {
   }
 }
 
-// ── 门禁 3：preset 结构（0.1.7 形态：presets/<role>.patch.yml 一条 @deepseek-ai/dsh-agent-preset
+// ── 门禁 4：preset 结构（0.1.7 形态：presets/<role>.patch.yml 一条 @deepseek-ai/dsh-agent-preset
 //    行，行内 config 带 id/name/description/order/plugins；角色技能仍在 presets/<role>/skills/，
 //    ≥1 个且 frontmatter name = 目录名）──
 {
@@ -154,7 +154,7 @@ function roadmapParked() {
   }
 }
 
-// ── 门禁 4：claude-symlink（CLAUDE.md 必须是指向 AGENTS.md 的 symlink）──
+// ── 门禁 5：claude-symlink（CLAUDE.md 必须是指向 AGENTS.md 的 symlink）──
 {
   const gate = 'claude-symlink';
   // 两条 symlink（vendor 同构）：根 CLAUDE.md → AGENTS.md；.claude/skills → ../.agents/skills
@@ -169,7 +169,7 @@ function roadmapParked() {
   }
 }
 
-// ── 门禁 5：pack-bundle / compat（dsh.bundle.patch 指向真实文件；dshReleases 非空）──
+// ── 门禁 6：pack-bundle / compat（dsh.bundle.patch 指向真实文件；dshReleases 非空）──
 {
   const gate = 'pack-bundle-compat';
   const pkgPath = join(PACK, 'package.json');
@@ -193,7 +193,7 @@ function roadmapParked() {
   }
 }
 
-// ── 门禁 6：row-deps（preset 与 bundle 行引用的 @deepseek-ai/* 包必须在 peerDependencies）──
+// ── 门禁 7：row-deps（preset 与 bundle 行引用的 @deepseek-ai/* 包必须在 peerDependencies）──
 {
   const gate = 'row-deps';
   const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
@@ -210,7 +210,7 @@ function roadmapParked() {
   }
 }
 
-// ── 门禁 7：workspace-contract（研究手册 + 六件 run bundle 模板在位；bundle 目录
+// ── 门禁 8：workspace-contract（研究手册 + 六件 run bundle 模板在位；bundle 目录
 //    drt_<slug>/ 运行时由 lead 创建，无静态目录可查——D17 目录契约）──
 {
   const gate = 'workspace-contract';
@@ -226,7 +226,7 @@ function roadmapParked() {
     fail(gate, 'dev/harness-home/AGENTS.md 化石镜像在场（手册唯一注入通道 = cwd projectRoot）——删除它');
 }
 
-// ── 门禁 8：pack-contract-sync（pack 的 tracked yml/md 零 runs/ 旧契约路径——persona
+// ── 门禁 9：pack-contract-sync（pack 的 tracked yml/md 零 runs/ 旧契约路径——persona
 //    经系统提示注入、skill 经加载注入，携带已废目录契约即污染 run；D17 事故 2：pack
 //    不在首轮 sweep 清单，13 处残留漏网被用户实测抓到）──
 {
@@ -241,7 +241,7 @@ function roadmapParked() {
   }
 }
 
-// ── 门禁 9：note-format（notes/ 决定记录骨架与状态行——DSH SDLC reference 01
+// ── 门禁 10：note-format（notes/ 决定记录骨架与状态行——DSH SDLC reference 01
 //    点状吸纳："没记击败了什么的决定会重开讼"；遗留形态走 grandfather 条款不追改）──
 {
   const gate = 'note-format';
@@ -278,7 +278,7 @@ function roadmapParked() {
   });
 }
 
-// ── 门禁 10：vendor-pin（vendor/dsh submodule 在位且钉住 dsh-v0.1.7-rc.2 = 477b4f4205；
+// ── 门禁 13：vendor-pin（vendor/dsh submodule 在位且钉住 dsh-v0.1.7-rc.2 = 477b4f4205；
 //    D10 销账的机械面——机制权威自持，队列「vendor-submodule-and-pnpm-dsh」）──
 {
   const gate = 'vendor-pin';
@@ -296,7 +296,7 @@ function roadmapParked() {
   else if (m[1] !== PIN) fail(gate, `vendor/dsh 钉在 ${m[1].slice(0, 8)}——应为 ${PIN.slice(0, 8)}（dsh-v0.1.7-rc.2）`);
 }
 
-// ── 门禁 11：vendor-clean（vendor/dsh 只读铁律：零未提交改动——机制权威不许就地改）──
+// ── 门禁 14：vendor-clean（vendor/dsh 只读铁律：零未提交改动——机制权威不许就地改）──
 // ⚠ 子模块 git 调用必须剥掉继承的 GIT_* 环境变量：pre-commit 语境里 git 注入 GIT_DIR=
 //    父仓 .git，会覆盖 -C vendor/dsh 的仓库发现 → status 不可用（红）——两次 pre-commit
 //    拦截实证，非瞬态。
@@ -310,7 +310,7 @@ function roadmapParked() {
   else if (r.stdout.trim()) fail(gate, `vendor/dsh 有未提交改动（只读铁律）：${r.stdout.trim().split('\n')[0]}…`);
 }
 
-// ── 门禁 8：proposal-scheduled（proposed/ 每提案必须在 roadmap §队列 **或 §搁置池** 有
+// ── 门禁 15：proposal-scheduled（proposed/ 每提案必须在 roadmap §队列 **或 §搁置池** 有
 //    归宿——两处都不是的 RFC = 孤儿提案，红灯。搁置池归宿 = 复活条件 + 现状写进 RFC，
 //    不是停车场（搁置 RFC 与池行双向挂链）。收紧记录：review-driven-hardening Note。）──
 {
@@ -331,7 +331,7 @@ function roadmapParked() {
   }
 }
 
-// ── 门禁：queue-pointer-live（队列 ▶ 行引用的 RFC 必须仍在 notes/proposed/）──
+// ── 门禁 27：queue-pointer-live（队列 ▶ 行引用的 RFC 必须仍在 notes/proposed/）──
 // 反证形态（2026-09-26 事故：毕业手续漏做 → ▶ 指向已完成条目，commit message 却声称已更新）：
 // 把 ▶ 行的 RFC 链接改指 implemented/ 的文件 → 本门禁红 → 还原绿。
 {
@@ -363,7 +363,7 @@ function roadmapParked() {
     }
   }
 }
-// ── 门禁 9：secrets-untracked（tracked 清单零敏感/残留物；gitignore 不作用于已跟踪文件）──
+// ── 门禁 16：secrets-untracked（tracked 清单零敏感/残留物；gitignore 不作用于已跟踪文件）──
 {
   const gate = 'secrets-untracked';
   const r = spawnSync('git', ['ls-files'], { cwd: ROOT, encoding: 'utf8' });
@@ -385,7 +385,7 @@ function roadmapParked() {
   }
 }
 
-// ── 门禁 10：role-list-sync（角色清单单一事实源 = 盘上 presets/；代码里出现角色清单字面量 → 红）──
+// ── 门禁 17：role-list-sync（角色清单单一事实源 = 盘上 presets/；代码里出现角色清单字面量 → 红）──
 // 检测名从盘上目录现取（门禁自身零硬编码，新角色入列即自动纳入检测）。典型咬合形态：
 //   ① 单行 ≥3 个角色名 token（JS 数组 / bash for-in 列表）；② [...] 数组块内 ≥3 个角色名字符串。
 // 合法的 ≤2 共现（探针成员名、prompt 覆盖对象逐行键）不触发。消费点应 import scripts/lib/roles.mjs。
@@ -412,7 +412,7 @@ function roadmapParked() {
   }
 }
 
-// ── 门禁 11：gate-ledger-sync（docs/evaluation.md §L0 门禁登记表 = 本脚本 gates 数组，不漂移）──
+// ── 门禁 18：gate-ledger-sync（docs/evaluation.md §L0 门禁登记表 = 本脚本 gates 数组，不漂移）──
 // 抓取形状：表格行首列为 code span（`| `gate-name` |`）——evaluation.md 其他表首列非此形状，不误抓。
 {
   const gate = 'gate-ledger-sync';
@@ -433,7 +433,7 @@ function roadmapParked() {
   }
 }
 
-// ── 门禁 12：entry-chain（入口链存在性投影——正本 = 根 AGENTS.md §入口链）──
+// ── 门禁 19：entry-chain（入口链存在性投影——正本 = 根 AGENTS.md §入口链）──
 // md-links 已机械覆盖全部 tracked .md 的链接解析；本门禁补它的盲区：① 入口链中以反引号/
 // 散文指针提到的成员文件（`docs/design/10-30` 等——md-links 不检非链接形态）必须在场；
 // ② roadmap §队列 恰一个 ▶（全仓唯一"当前"指针的存在性与唯一性，D11）。
@@ -459,7 +459,7 @@ function roadmapParked() {
   }
 }
 
-// ── 门禁 13：doc-budgets（常驻文档预算——上游 verify-doc-budgets 的等价物：预算由
+// ── 门禁 20：doc-budgets（常驻文档预算——上游 verify-doc-budgets 的等价物：预算由
 //    scripts/doc-budgets.json 拥有（不硬编码），登记项必须存在且不超限，仓内新增
 //    AGENTS.md 必须登记（缺登记即红）。台账（00-index）与 guides 是生长面，不设顶
 //    （vendor "review governs unbudgeted tiers" 同款）。行数 = split('\n') - 1
@@ -490,7 +490,7 @@ function roadmapParked() {
   }
 }
 
-// ── 门禁 14：md-anchors（相对链接的 #fragment 必须在目标文件里真的存在——
+// ── 门禁 3：md-anchors（相对链接的 #fragment 必须在目标文件里真的存在——
 //    《_agent_ready_development》语料 verify.mjs 吸纳：它校验"内部链接与锚点"，
 //    本仓 md-links 只管文件存在，锚点漂移（标题改名后片段失效）是它的盲区。
 //    slug 规则照抄 GitHub：小写、去非 [字母/数字/_/空格/-]、空格→'-'、重复加 -N；
@@ -555,7 +555,7 @@ function roadmapParked() {
   }
 }
 
-// ── 门禁 15：dev-skill-format（.agents/skills/ 开发技能的形状——vendor .agents/skills/
+// ── 门禁 12：dev-skill-format（.agents/skills/ 开发技能的形状——vendor .agents/skills/
 //    吸纳：repository development Skills 的 frontmatter 用 name/description，
 //    description 以 "Use " 开头携带触发条件（匹配即加载；摘要不携带指令）；
 //    形状坏了 = 技能静默不触发，比写错正文更难发现。）──
@@ -582,7 +582,7 @@ function roadmapParked() {
   }
 }
 
-// ── 门禁 16：note-status（notes/ 的时态与状态面——2026-09-25 用户诉求落地：
+// ── 门禁 11：note-status（notes/ 的时态与状态面——2026-09-25 用户诉求落地：
 //    人一眼看懂、Agent 一眼分辨当前/将来/过去。三条断言：
 //    ① notes/ 每个子目录有 README.md（目录自述时态与状态标记方式）；
 //    ② research/ 的非 README 文件带状态行 `> 状态：已完成|进行中`（报告层不是生命周期
@@ -776,7 +776,7 @@ function roadmapParked() {
     fail(gate, first ?? 'dev/research.overlay.yml 与 pack 渲染结果不一致——跑 `node dev/render-overlay.mjs` 重生成');
   }
 }
-// pack 工作区种子新鲜度（sync-pack-workspace --check）：手册/模板是会话 cwd 的内容，
+// ── 门禁 26：pack 工作区种子新鲜度（sync-pack-workspace --check）：手册/模板是会话 cwd 的内容，
 // pack 必须自带（否则部署方装了包也没有研究纪律）。正本 = research-workspace/，
 // 种子 = pack workspace/（生成物，勿手改；漂移即红——与 overlay-fresh 同形态）。
 {

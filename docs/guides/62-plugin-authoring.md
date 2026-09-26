@@ -16,10 +16,10 @@
 
 | 术语 | DSH 定义 | 本仓落点 |
 |---|---|---|
-| plugin | 导出 `apply(ctx)` 的 TS 模块；注册即 `apply(ctx)`，配置经 cordis schema 校验 | 本仓是**纯配置包**，暂无自写 TS 插件；要写从 `vendor/dsh/docs/user/develop/basic/` 起步 |
+| plugin | 导出 `apply(ctx)` 的 TS 模块；注册即 `apply(ctx)`，配置经 cordis schema 校验 | 本仓自写两个插件（D18 单点例外）：`src/index.ts`（host 半空壳 = 观察面宿主位）与 `src/client/index.ts`（client 半：注册右栏「研究状态」页签 / 活标题 / 研究语义工具卡）；新插件从 `vendor/dsh/docs/user/develop/basic/` 起步 |
 | bundle | 你编写与分发的单位（`dsh.bundle`）——回答"这个包贡献什么"，是插入/覆盖 plugin rows 的 patch 层 | `packages/deep-research-pack/cordis.patch.yml` + 包内 `presets/`、`skills/` |
 | profile | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）——回答"哪些 bundle 按什么顺序组成" | `dev/harness-home/profiles/research/`（镜像；源 = overlay） |
-| preset | 一个 agent 形态：persona 行 + skills + 工具行 | `presets/<role>/`（lead / scout / analyst / critic） |
+| preset | 一个 agent 形态：persona 行 + skills + 工具行 | `presets/<role>.patch.yml`（preset 行）+ `presets/<role>/skills/`（lead / scout / analyst / critic） |
 | patch / overlay | 层叠覆盖条目（id 定向的 config 覆盖、禁用、插入） | `dev/research.overlay.yml`（源码域通道的镜像源） |
 
 **Nothing is both**：bundle 与 profile 是两个 manifest 的两种东西，别把本包写成 profile。
@@ -29,13 +29,14 @@
 | 层级 | 本仓首选入口 | 典型变化 | 何时升级 |
 |---|---|---|---|
 | **L0 组合** | cordis 行 config、bundle 行、preset 行、profile 层 | 换 provider、调超时、开关并行、改工具行参数 | 配置表达不了新行为 |
-| **L1 扩展点** | preset（persona / skills / 工具行）、`SKILL.md` | 新增研究角色、新增方法论 skill、调整工具面 | 需要一项**可替换的完整能力** |
+| **L1 扩展点** | preset（persona / skills / 工具行）、`SKILL.md`、client 插件（`src/client/` 的槽与页签注册） | 新增研究角色、新增方法论 skill、调整工具面、新增观察面槽位 | 需要一项**可替换的完整能力** |
 | **L2 capability seam** | Service Definition + Provider + Consumer | 新的研究能力接缝（本仓尚无） | 现有扩展点表达不了循环驱动 |
 | **L3 core loop** | `agent-loop`（vendor 所有） | 改默认循环 | 本仓**不直接改**（vendor 只读铁律）；走上游 + 升 pin |
 
 阶梯不是价值排序：L0 的部署替换是完整系统能力，L3 只是影响面最大。**横切义务**：任何层级
 新增"模型可见"的事实时，必须同时扩展 `SessionEventMap` 并从日志可投影（model-visible ⟺
-logged）——本仓只在 pack 行引入**现成**能力，因此这项义务落在 vendor 面。
+logged）——pack 行只引入**现成**能力，这项义务落在 vendor 面；本仓自写的 client 面（D18）
+只注册槽位、渲染观察数据，不新增模型可见事实。
 
 ## 新行为落在哪：按顺序问归属
 
@@ -103,7 +104,7 @@ DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`�
 | 加观察面 client 面能力 | `src/client/` + `tsconfig.client.json` 的 include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `client-load-smoke`（真浏览器）+ `client-keys` 门禁 |
 | 改 persona / skill / 手册文本（模型可见） | 同 diff 跑真模型档；运行中的 web 缓存 boot 文本，须重启通道 | `l4-lite-smoke`（真模型档） |
 | 换 vendor pin | `dev/vendor-build.sh` 全链重建 + 逐条重审 | 升 pin 毕业记录（[2026-09-25](../../notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md)） |
-| 改 profile 镜像 | 不手改——`dev/boot-run.sh` 幂等重建 | boot-run 漂移检测（fail-loud） |
+| 改 profile 镜像 | 不手改——改 pack 源后跑 `bash dev/boot-run.sh`：组合不完整/缺席时它重建，漂移时它 **exit 1** 并打印 `rm -rf <profile>` 补救（直接 `dsh --profile research` 会静默用旧镜像） | boot-run 漂移检测（fail-loud） |
 
 **一句话规则**：源改一处（pack），生成物跑生成器，证据按面选档（keyless 证管道 / 真模型档
 证 agent 行为），部署形状变更追加 L2。

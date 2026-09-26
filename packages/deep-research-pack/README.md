@@ -17,7 +17,7 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 | `src/lib/` → `lib/types/lib/` | 纯函数折算（activity-fold / hitl-fold / run-fold / tool-card）——keyless 单测直接断言 | ✓ 构建产物 |
 | `scripts/preflight.mjs` · `scripts/scaffold.mjs` | 部署前置检查 + 一键准备（见下） | ✓ |
 
-角色职责表与方法论映射：`docs/design/20-roles.md`、`docs/design/30-methodology-mapping.md`。
+角色职责与方法论：见各 `presets/<role>.patch.yml`（persona）与 `presets/<role>/skills/<n>/SKILL.md`（方法论正文）——都随本包发布。
 
 ## 部署（三步）
 
@@ -92,7 +92,7 @@ dsh-deep-research-preflight --workspace ~/research-workspace
   `workspaceId` 形态建会话（`dev/run-kickoff.mjs` 已默认此形态）；建在别处的会话只显示活动流；
 - **`workspace/` 种子是快照**：由 `dev/sync-pack-workspace.mjs` 从仓库正本同步（门禁
   `pack-workspace-fresh` 防漂移）；种子只铺新工作区，**不覆盖**已存在文件（`--force` 除外）；
-- **皮肤/品牌层**（ui-skin）与**专职 synthesizer 角色**（Q4 已销账：单场实测 Lead 独任综合
-  无过载）仍在搁置池，复活条件见 roadmap；
+- **皮肤/品牌层**（ui-skin）与**专职 synthesizer 角色**（单场实测 Lead 独任综合无过载）
+  仍在搁置池，复活条件见 roadmap；
 - **工具卡只做了 2 张**（spawn_teammate / web_search）；`team_task_*` 卡留后续；
 - **版本兼容面窄**：只声明 `dsh-v0.1.7-rc.2`（pre-stable API，peer 版本号不精确钉死）。

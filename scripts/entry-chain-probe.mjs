@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // entry-chain-probe.mjs — 入口链探针（真模型档，需 DEEPSEEK_API_KEY）。
-// RFC：notes/proposed/2026-09-24-entry-chain-probe.md · 语义版已人工两跑（2026-09-24，
+// RFC：notes/implemented/2026-09-24-entry-chain-probe.md · 语义版已人工两跑（2026-09-24，
 // 见 implemented Note），本脚本 = 脚本化 + 制度化（每 feature 条目收尾跑）。
 //
 // 设计（时不变原则——company 探针已知盲区：问句期望也会过期，问法必须换任何 ▶ 条目都不变）：

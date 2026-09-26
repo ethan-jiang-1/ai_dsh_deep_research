@@ -31,7 +31,7 @@
 
 | 面 | 什么时候跑 | 命令 |
 |---|---|---|
-| L0 结构 | 每次收尾必跑；实施期随手 | `node scripts/verify.mjs` + `node --test tests/*.test.mjs`（或 `pnpm verify` / `pnpm test`） |
+| L0 结构 | 每次收尾必跑；实施期随手 | `pnpm verify` + `pnpm test`（正本 = `package.json` 的 `verify`/`test` 脚本） |
 | L1 挂载 | preset 内容/结构改动（其完成定义） | `DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs`（源码域，keyless）；安装域加 `--profile <p> --no-patch` |
 | L2 安装 | 包结构/release 相关改动 | `node scripts/release-smoke.mjs`（keyless：pack→干净 profile→plugin add→安装域冒烟；无模型调用） |
 | L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `node --test tests/evaluation-contract.test.mjs` |
@@ -80,7 +80,7 @@ source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名�
    `> 状态：implemented`，不带日期括号，目录↔状态互验，其余 provenance 落正文）；**毕业 =
    正文改写**：计划体→已交付事实体，未来时态/迁移计划删除——只改路径不改正文 = 未来计划
    伪装成当前事实；
-3. `node scripts/verify.mjs` + `node --test tests/*.test.mjs` 全绿（涉及面按 §2 加跑）；
+3. `pnpm verify` + `pnpm test` 全绿（涉及面按 §2 加跑）；
 4. 入口链探针（条目改动面含 docs/AGENTS 时必跑，否则按节奏）——机械版：
    `source dev/env.sh && node scripts/entry-chain-probe.mjs`（真模型档；时不变问法 × 4，
    真值机械抽取 + 软断言，留档 dev/smoke-workspace/ 供人工复核；无凭据时退化为语义版人工）；
@@ -88,7 +88,8 @@ source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名�
 
 ## 5. 密钥
 
-- 仅真模型档需要 `DEEPSEEK_API_KEY`（当前 = l4-lite-smoke 与 team-preflight-smoke；开发 home
+- 仅真模型档需要 `DEEPSEEK_API_KEY`（当前 = l4-lite-smoke、team-preflight-smoke、
+  entry-chain-probe 与 client-hitl-smoke；开发 home
   `dev/harness-home/.credentials.yaml` 配一次）；永不提交密钥；
 - 其余全档 keyless（`DSH_SMOKE_REAL` 真挂载档、release-smoke：起真 DSH 环境，但无模型调用）；
 - web 搜索无需独立 key（D9 实证）：与 chat 同一把 `DEEPSEEK_API_KEY`。

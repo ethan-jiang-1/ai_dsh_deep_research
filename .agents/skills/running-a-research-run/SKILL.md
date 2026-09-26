@@ -16,8 +16,9 @@ run 的操作面是**文件 + 会话通道**，不是代码。启动器、观察
   bundle 已在 → 先问用户，不擅自另起（bundle 身份 = 方向契约）；
 - 起通道：`bash dev/boot-run.sh`（幂等：组合校验 → 漂移检测 → boot web 3081 → 仪表盘）。
   改了 pack 文本（persona/skill/手册）必须重启通道——**web 进程缓存 boot 时的文本**；
-- 观察面：`node scripts/run-dashboard.mjs --latest --out <html>`（或 `--watch`），
-  它同时是"这次 run 是否在等我"的唯一可信投影。
+- 观察面两处、同一折算：`node scripts/run-dashboard.mjs --latest --out <html>`（或 `--watch`，
+  多场扫描的 HTML 投影）与 GUI 右栏「研究状态」页签（会话内实时：步骤条 + HITL 挂起横幅 +
+  活标题「研究状态 · ⏳ 等你拍板」）——"这次 run 是否在等我"两处答案一致。
 
 ## 2. 只有两个人机交互点
 
@@ -44,7 +45,7 @@ run 交付后，bundle 必须落到正式契约位并在原位补齐：
 
 1. 搬到 `research-workspace/drt_<slug>/`（撤掉任何桥接 symlink）；
 2. 补齐契约：`question.md` 追加 §Decisions（人工/代理交互各一条，含时间与选择）、
-   `review-critic.md` → `review.md`、当前版正文与 `final/` 版本记账对齐（
+   critic 的对抗核查报告落 `review.md`、当前版正文与 `final/` 版本记账对齐（
    [研究手册](../../../research-workspace/AGENTS.md) 的目录约定）；
 3. 判据④ 实测：**新开一个 lead 会话，只凭 bundle 文件续跑**（不给聊天记忆），
    验证它能说出研究状态与下一步——这是"文件即真相"的正面证据；
