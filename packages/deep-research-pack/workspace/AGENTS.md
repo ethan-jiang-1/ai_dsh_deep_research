@@ -60,6 +60,12 @@ frontmatter 必须有（七字段）：`source_url`（真实抓取过的 URL）/
 本手册为准）。**没有 frontmatter 的文件不算证据**（critic 按此判）。
 **口径最小契约**（与 frontmatter 同级）：数字/规格类摘录须带测量条件口径（版本/配置/
 时间/原文限定语至少两项；口径不明写"口径不明"）——所有角色按此判。
+**摘录最小契约**（与 frontmatter 同级）：引文行**只放原文**——卡片自己的标注（标签、URL、
+`（同上…）`、`旁证｜…`、`说明：…`）不进 `>` 行，写在引文块外或解读节；**多段摘录逐段逐字**，
+段间省略用统一标记 `[…]`，不把来源中不连续的句子拼成一段；**表格按单元格摘录**，每格独立
+一行引文，不整行/跨行合并；**`source_url` 必须成功抓取过**——`web_fetch` 真实取回该 URL，
+搜索结果列表里出现过不算。四条均为 evidence-audit 机检项（未抓取的 source_url 与非逐字摘录
+单列分级）——所有角色按此判。
 
 **信源分级表（source_tier 唯一正本；scout 的质量分级与 quality 字段共用 A–D，tier 描述
 信源身份、quality 描述内容质量，两者独立）**：
@@ -83,9 +89,11 @@ publisher）缺失不否决有效性，标"未分级"（旧 run 的存量证据�
 是交付记录，不改历史）；谓词正本 = 本节，tests/evaluation-contract.test.mjs 对账。
 
 **机械强度诚实记账**：本契约的机械检查 = L0 契约测试（七字段在场 + 各执行者副本对账）
-+ 仪表盘渲染谓词（上述）+ **evidence-audit 溯源审计**（`scripts/evidence-audit.mjs`：source_url
-须在会话日志的 web 工具结果里真实出现过、摘录可回溯、final 溯源链完整——防伪造链接与
-转写幻觉，报告落 bundle 的 audit.md）；run 内执法 = critic 狩猎（散文判断）。verify 门禁
++ 仪表盘渲染谓词（上述）+ **evidence-audit 溯源审计**（`scripts/evidence-audit.mjs`：
+`source_url` 必须被 `web_fetch` **成功取回**——仅出现在搜索结果里不算，MAJOR 单列；
+摘录对 **web-only 语料**回溯（agent 自撰文本已剔除，防自证），覆盖率分档 ≥0.95 逐字 /
+0.6–0.95 复合或截断 / <0.6 非逐字；final 溯源链完整——防伪造链接与转写幻觉，报告落
+bundle 的 audit.md）；run 内执法 = critic 狩猎（散文判断）。verify 门禁
 不扫 bundle（gitignored 运行区）——run 数据的完整性由 critic + 仪表盘 + audit 呈现，不在 L0。
 
 ## 交付物三态
