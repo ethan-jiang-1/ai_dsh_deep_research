@@ -55,6 +55,7 @@
 | `pack-workspace-fresh` | pack 的工作区种子（`workspace/AGENTS.md` + `templates/run/`）必须等于 `node dev/sync-pack-workspace.mjs --check` 的正本同步结果——手册/模板是会话 cwd 内容，pack 必须自带（否则部署方装了包也没有研究纪律）；正本 = `research-workspace/` | 部署工程化（改正本不重同步 → 红；还原绿） |
 | `queue-pointer-live` | 队列 ▶ 行（整块条目）引用的 RFC 必须仍在 `notes/proposed/`——毕业须同 diff 完成三件（RFC 迁 `implemented/` + 队列行删除 + ▶ 移交），否则 ▶ 指向已完成条目 | [毕业漂移复盘](../notes/postmortem/2026-09-26-roadmap-graduation-drift.md)（把 ▶ 的 RFC 改指 implemented/ → 红；还原绿） |
 | `client-keys` | 观察面 client 的 keyed 字面量单一正本（company 坑 1：拼错不报错永不渲染）：字面量只住 `src/client/keys.ts`；`slots.inject` 首参与描述符 name/key/id 只许 keys.ts 导出的标识符 | [observability-gui 毕业记录](../notes/implemented/2026-09-24-observability-gui.md) Stage 1（四种形态红证：keys.ts 外值位字面量/inject 字面量/描述符 key 字面量/keys.ts 缺席 → 红；还原绿。类型位（PropsRuntime<泛型参数>）豁免——编译期可查非静默失效面，Stage 2 实证误咬后收窄） |
+| `proposed-pointer-live` | live 文件（tracked，**排除 `notes/` 历史层**与 vendor/）里指向 `notes/proposed/<x>.md` 的**具体指针**必须存在——`md-links`/`md-anchors` 只扫 `.md` 的链接语法，非 `.md` 注释里的指针是它们的盲区（preset 头注还随包分发）。防空语料：0 个 live 文件、或 0 个指针被检查即红 | [信噪比整治 RFC](../notes/proposed/2026-09-26-signal-to-noise-remediation.md) §实施记录（注入死指针 → 红 → 还原绿；范围实测 live 120 文件零误报；宽版 `ref-paths` 因 13 处 vendor 相对/自相对/外部引用误报被否，理由同记该处） |
 
 - **通过判据**：全绿；`verify` 的门禁清单与 `tests/` 守卫一一登记在案，每条带反证记录（上表）。
 - **何时跑**：每轮 goal 续驶必跑。

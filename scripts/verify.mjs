@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'pack-workspace-fresh', 'queue-pointer-live'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'pack-workspace-fresh', 'queue-pointer-live', 'proposed-pointer-live'];
 
 const failures = [];
 const notes = [];
@@ -363,6 +363,44 @@ function roadmapParked() {
     }
   }
 }
+// ── 门禁 28：proposed-pointer-live（live 文件里指向 notes/proposed/<x>.md 的具体指针必须存在）──
+// 为什么：md-links/md-anchors 只扫 tracked .md 的 Markdown 链接语法，**非 .md 文件里的指针逃检**
+// ——2026-09-26 清扫实测 13 处已 404 的 notes/proposed/ 指针（presets 头注 ×4、dev ×3、scripts ×3、
+// tests ×1、alignment-ledger ×1）全部从这条缝漏过；preset 头注还随包分发。
+// 范围：tracked 且**排除 notes/ 历史层**（历史层保留过去时指针是合法的，如"原 RFC：…（已离场）"）
+// 与 vendor/。防空语料：扫到 0 个 live 文件、或 0 个指针被检查 → 红（静默空集 = 门禁不存在）。
+// 反证形态：把任一头注里的 notes/implemented/ 改回 notes/proposed/ → 本门禁红 → 还原绿。
+{
+  const gate = 'proposed-pointer-live';
+  const r = spawnSync('git', ['ls-files'], { cwd: ROOT, encoding: 'utf8' });
+  if (r.status !== 0) {
+    fail(gate, `git ls-files 不可用（${String(r.stderr).slice(0, 120)}）——本门禁覆盖面依赖仓库态，fail-loud`);
+  } else {
+    const files = r.stdout.split('\n').filter(Boolean)
+      .filter((f) => !f.startsWith('vendor/') && !f.startsWith('notes/') && f !== 'pnpm-lock.yaml');
+    if (files.length === 0) {
+      fail(gate, '防空语料：未扫到任何 live 文件——范围被收窄或 git ls-files 失效');
+    } else {
+      let checked = 0;
+      for (const rel of files) {
+        const f = join(ROOT, rel);
+        if (!existsSync(f)) continue; // 稀疏态防御（同 md-links）
+        let text;
+        try { text = readFileSync(f, 'utf8'); } catch { continue; }
+        for (const m of text.matchAll(/notes\/proposed\/[A-Za-z0-9._-]+\.md/g)) {
+          checked++;
+          if (!existsSync(join(ROOT, m[0]))) {
+            const line = text.slice(0, m.index).split('\n').length;
+            fail(gate, `${rel}:${line} 指向 ${m[0]}——该文件不在 notes/proposed/（已毕业？毕业须同 diff 改指 notes/implemented/）`);
+          }
+        }
+      }
+      if (checked === 0) fail(gate, '防空语料：零个 notes/proposed/ 指针被检查——指针全没了或正则失效');
+      else note(gate, `${checked} 个 live 指针全部可解析`);
+    }
+  }
+}
+
 // ── 门禁 16：secrets-untracked（tracked 清单零敏感/残留物；gitignore 不作用于已跟踪文件）──
 {
   const gate = 'secrets-untracked';
