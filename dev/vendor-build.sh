@@ -4,7 +4,7 @@
 # 为什么需要自建：vendor 自己的 `pnpm run build` 在干净树上红在 tsdown 的**根单元**
 # （root 包无 `lib/types/{index,invariant,startup}.js` 入口——上游构建链在干净树上的自不自洽处；
 # `-F` 过滤在本版对 workspace 合成配置无效）。实测过的失败链见
-# notes/proposed/2026-09-25-vendor-pin-bump-017rc2.md。
+# notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md。
 #
 # 真正被启动需要的三类产物（0.1.7 起）：
 #   ① 逐包 `lib/types/**`（tsc host/client 两遍）——tsdown 与 typert 生成器的输入；
@@ -41,4 +41,29 @@ npx tsdown --env.DSH_BUILD_FACE client
 echo "⑥ typert client 产物…"
 node "$ROOT/dev/vendor-typert-emit.mjs" client
 
-echo "vendor-build: 完成（vendor tracked 内容未改；构建产物在 gitignored 的 lib/）"
+# ⑦ host 半补建（tsc host 遍早夭的残留）：root 单元红会让 205 个包的 host 半 lib/index.js
+#   从未产出，而 client 遍的 clientBundle 助手对"纯折"依赖**能解析才内联**——目标包缺
+#   lib/index.js 时静默外置成 require，浏览器模块表答不出（实测两连：cosmokit /
+#   dsh-typert-protocol "missed the module table"）。判据 = 有 lib/types/index.js 而无
+#   lib/index.js；处置 = 用本仓无插件配置逐包补建。
+echo "⑦ host 半补建检查…"
+missing="$(find packages apps -maxdepth 3 -type d -name lib -not -path '*/node_modules/*' \
+  -exec sh -c 'for l; do [ -f "$l/types/index.js" ] && [ ! -f "$l/index.js" ] && printf "%s\n" "${l%/lib}"; done' _ {} +)"
+if [[ -n "$missing" ]]; then
+  n="$(printf '%s\n' "$missing" | wc -l | tr -d ' ')"
+  echo "  发现 $n 个包缺 host 半产物，逐包补建（tsdown -c dev/vendor-host-bundle.config.ts）…"
+  while IFS= read -r pkgdir; do
+    ( cd "$pkgdir" && "$VENDOR/node_modules/.bin/tsdown" -c "$ROOT/dev/vendor-host-bundle.config.ts" >/dev/null )
+  done <<< "$missing"
+  echo "  补建完成：$n 个包"
+else
+  echo "  无缺件（host 半产物齐全）"
+fi
+
+# ⑧ 前端壳重建：apps/web/dist 是 gitignored 的**冻结产物**——升 pin 后不重建会留着上一代
+#   平台壳，实测症状是 Web UI 静默报 "settingsNumberField is not a function"（旧壳 + 新
+#   lib 的组合错误）。dist 在 .gitignore 内，重建不污染 vendor 只读面。
+echo "⑧ 前端壳重建（apps/web/dist）…"
+pnpm --filter @deepseek-ai/dsh-web-frontend run build
+
+echo "vendor-build: 完成（vendor tracked 内容未改；构建产物在 gitignored 的 lib/ 与 apps/web/dist）"
