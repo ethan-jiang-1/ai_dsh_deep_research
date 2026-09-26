@@ -703,13 +703,13 @@
       "source": "packages/client/AGENTS.md",
       "owns": "Form/ownership row: packages/client/AGENTS.md owns the rules for packages/client/* and the apps/web build entry — 154 lines / ~25.5 KB (by f",
       "verdict": "na",
-      "reason": "本仓无该包组（唯一包 deep-research-pack 已非纯配置：TS 源 + 单点 client 插件，D18）"
+      "reason": "本仓无该包组（唯一包 deep-research-pack：TS 源 + 单点 client 插件，D18）"
     },
     {
       "source": "packages/experimental/AGENTS.md",
       "owns": "Form/ownership row: packages/experimental/AGENTS.md owns the rules for experimental packages and explicitly declares itself a supplement to ",
       "verdict": "na",
-      "reason": "本仓无该包组（唯一包 deep-research-pack 已非纯配置：TS 源 + 单点 client 插件，D18）"
+      "reason": "本仓无该包组（唯一包 deep-research-pack：TS 源 + 单点 client 插件，D18）"
     },
     {
       "source": "packages/preset/agent-preset/README.md",
@@ -734,7 +734,7 @@
       "source": "packages/schedule/AGENTS.md",
       "owns": "Form/ownership row: packages/schedule/AGENTS.md owns the rules for packages/schedule/* and announces itself as a supplement to the repositor",
       "verdict": "na",
-      "reason": "本仓无该包组（唯一包 deep-research-pack 已非纯配置：TS 源 + 单点 client 插件，D18）"
+      "reason": "本仓无该包组（唯一包 deep-research-pack：TS 源 + 单点 client 插件，D18）"
     },
     {
       "source": "packages/skill/skill-filesystem/README.md",
@@ -749,7 +749,7 @@
       "source": "packages/web/AGENTS.md",
       "owns": "Form/ownership row: packages/web/AGENTS.md owns one security rule for the web package group and declares itself a supplement to the package ",
       "verdict": "na",
-      "reason": "本仓无该包组（唯一包 deep-research-pack 已非纯配置：TS 源 + 单点 client 插件，D18）"
+      "reason": "本仓无该包组（唯一包 deep-research-pack：TS 源 + 单点 client 插件，D18）"
     },
     {
       "source": "scripts/AGENTS.md",

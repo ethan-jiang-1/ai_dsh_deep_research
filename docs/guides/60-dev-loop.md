@@ -34,7 +34,7 @@
 | L0 结构 | 每次收尾必跑；实施期随手 | `pnpm verify` + `pnpm test`（正本 = `package.json` 的 `verify`/`test` 脚本） |
 | L1 挂载 | preset 内容/结构改动（其完成定义） | `DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs`（源码域，keyless）；安装域加 `--profile <p> --no-patch` |
 | L2 安装 | 包结构/release 相关改动 | `node scripts/release-smoke.mjs`（keyless：pack→干净 profile→plugin add→安装域冒烟；无模型调用） |
-| L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `node --test tests/evaluation-contract.test.mjs` |
+| L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `node --import tsx/esm --test tests/evaluation-contract.test.mjs` |
 | L4 交付 | 里程碑级 | L4-lite 冒烟（需 `DEEPSEEK_API_KEY`）/ 完整 run（队列条目） |
 
 判据与负面判据（什么算"框架不合理"）见 [evaluation.md](../evaluation.md)——面与面不互抵。
