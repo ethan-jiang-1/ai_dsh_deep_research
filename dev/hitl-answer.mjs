@@ -51,7 +51,7 @@ const browser = await launchChromium(chromium)
 const page = await browser.newPage({ viewport: { width: 1600, height: 1100 } })
 try {
   await page.goto(`http://127.0.0.1:${PORT}/?token=${TOKEN}`, { waitUntil: 'domcontentloaded' })
-  await page.waitForTimeout(3500)
+  await page.waitForTimeout(6000)
 
   // ⓪ 关测试须知弹窗——**限定在 dialog/mask 容器内点**：实测教训（2026-09-26 跑第二场 run 时踩到）
   //   问询卡片的提交按钮同样可能叫 "Continue"，盲点 `button:has-text("Continue")` 会在卡片已
@@ -68,21 +68,39 @@ try {
   }
   await page.waitForTimeout(800)
 
-  // ① 点开侧栏里挂起问询的会话（左栏 x < 256，防中央区同名 class 抢匹配）
+  // ① 点开侧栏里挂起问询的会话（左栏 x < 256，防中央区同名 class 抢匹配）。
+  //    实测坑（2026-09-26 第三场 HITL2）：`click().catch(()=>{})` 会把超时**静默吞掉**——
+  //    页面未加载完时元素在重渲染，click 落空但脚本以为点开了，随后 40s 等卡片当然等不到。
+  //    现在：①初始等待加长到 6s；②click 失败要**报出来**；③点完校验主视图真的切到了该会话
+  //    （正文里出现会话标题或问询卡片），没切就换目标再点一次。
   const rows = page.locator('span[class*="_root_"]')
-  const n = await rows.count()
-  let opened = null
-  for (let i = 0; i < Math.min(n, 80); i++) {
-    const el = rows.nth(i)
-    if (!(await el.isVisible().catch(() => false))) continue
-    const box = await el.boundingBox().catch(() => null)
-    if (box === null || box.x >= 256) continue
-    const text = ((await el.textContent()) ?? '').trim()
-    const match = SESSION !== null ? text.includes(SESSION) : text.includes('Waiting for answer')
-    if (!match) continue
-    await el.click({ timeout: 10_000 }).catch(() => {})
-    opened = text.slice(0, 60)
-    break
+  const openSession = async () => {
+    const n = await rows.count()
+    for (let i = 0; i < Math.min(n, 80); i++) {
+      const el = rows.nth(i)
+      if (!(await el.isVisible().catch(() => false))) continue
+      const box = await el.boundingBox().catch(() => null)
+      if (box === null || box.x >= 256) continue
+      const text = ((await el.textContent()) ?? '').trim()
+      const match = SESSION !== null ? text.includes(SESSION) : text.includes('Waiting for answer')
+      if (!match) continue
+      try { await el.click({ timeout: 10_000 }) } catch (e) { log(`hitl-answer: ⚠ 行点击失败（${String(e).slice(0, 90)}）——换下一个目标`) ; continue }
+      return text.slice(0, 60)
+    }
+    return null
+  }
+  const activated = async (title) => {
+    const body = await page.evaluate(() => document.body.innerText).catch(() => '')
+    if (/Waiting for your action|Recommended|Submit/.test(body)) return true // 问询卡片在场
+    return title !== null && body.includes(title.slice(0, 20)) // 或主视图标题 = 会话标题
+  }
+  let opened = await openSession()
+  if (opened !== null && !(await activated(opened))) {
+    log('hitl-answer: 点击后主视图没切过去——重试一次（点标题文本）')
+    const t2 = page.locator(`text=${(opened.match(/[^A-Za-z]+/) ?? ['x'])[0].slice(0, 8)}`).first()
+    await t2.click({ timeout: 8_000 }).catch(() => {})
+    await page.waitForTimeout(2500)
+    if (!(await activated(opened))) log('hitl-answer: ⚠ 重试后仍未激活——继续等卡片，若超时则如实报告')
   }
   if (opened === null) {
     // 预期态，不是异常：没有待答会话时给一句人话 + 非零退出（原来抛栈，操作者要自己读 trace）
@@ -115,12 +133,23 @@ try {
     const prompt = page.locator('text=/Waiting for your action/').first()
     const promptText = (await visible(prompt)) ? ((await prompt.textContent()) ?? '').replace(/\s+/g, ' ').trim() : '(未取到题干)'
 
-    // 选项目标：recommended → 带 Recommended 的那一项；first → 第 1 项；数字 → 第 n 项
+    // 选项目标：recommended → 带 Recommended 的那一项；first → 第 1 项；数字 → 第 n 项。
+    // ⚠ 实测坑（第三场 HITL2）：对话历史里 assistant 的推理文本也会含 "Recommended" 这个词
+    //   （不可见），`text=/Recommended/` + `.first()` 先命中它 → 误判"没有可点选项"。
+    //   修法：先试**精确文本**匹配（徽标文本就是 "Recommended" 本身），再退到逐个可见过滤。
     const optionRows = page.locator('[class*="_option_"], label[class*="_option_"]')
     let target = null
     let targetLabel = null
     if (PICK === 'recommended') {
-      const rec = page.locator('text=/Recommended/').first()
+      let rec = page.locator('text="Recommended"').first() // 精确匹配（trim + 大小写不敏感）
+      if (!(await visible(rec))) {
+        const recs = page.locator('text=/Recommended/')
+        const rc = await recs.count()
+        for (let i = 0; i < rc; i++) {
+          const el = recs.nth(i)
+          if (await visible(el)) { rec = el; break }
+        }
+      }
       if (await visible(rec)) {
         target = rec.locator('xpath=ancestor::*[self::label or self::button or contains(@class,"option")][1]')
         if (!(await visible(target))) target = rec
