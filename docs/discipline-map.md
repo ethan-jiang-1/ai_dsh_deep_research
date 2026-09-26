@@ -14,7 +14,7 @@
 | Misconfiguration fails loud（配置错在最早可判定点炸，不静默跳过） | verify 门禁全 fail-loud（清单正本 = evaluation §L0）；boot-run 漂移检测；design/10 记 ENOENT 静默空教训 | 照搬 |
 | Files end with exactly one trailing newline | verify 门禁 md-utf8-newline（tracked 全量） | 照搬 |
 | Add/update an Agent Note **only for lasting decision rationale**（机械与局部编辑——含本地 UI 呈现/交互——豁免；0.1.7 判据自 0.1.5 的 non-trivial 全量收窄） | AGENTS §notes 写入触发（同 diff）+ notes/AGENTS.md §什么时候必须写 Note + note-format 门禁 | 照搬（判据按 0.1.7 收窄） |
-| Plugins, not loop changes（新行为走扩展点，不改 agent-loop） | 本包只经组合面贡献（preset/skill/bundle 行），循环属 DSH 侧 | 带证据适配（纯配置包天然满足；vendor 循环不在本仓改动面） |
+| Plugins, not loop changes（新行为走扩展点，不改 agent-loop） | 组合面（preset/skill/bundle 行）+ 观察面 client 面（`src/client/` 只注册页签/工具卡槽，D18） | 带证据适配（两处贡献都走 DSH 扩展点；agent-loop 属 vendor，本仓零改动——client 面只用 `slots`/`sidebarRightTabs` 注册面） |
 | Prefer maintained dependencies over hand-rolling（真能删掉自 owned 代码与测试时） | 测试栈 node:test、zstd 解压 node:zlib、regex 断言——全部维护中的标准件；tsx/pnpm 构建链引入（vendor 落地）而非自造 | 照搬 |
 | Tests describe behavior, not correctness（过时行为随测试一起改） | tests/ 契约测试（evaluation-contract 对手册谓词、dashboard 对文件形状）；行为变更同 diff 改锚 | 照搬 |
 | No hardcoded tunables（部署可变量必须是 config 字段） | preset 工具行 config（tool-todo allowParallelInProgress、tool-web 超时）皆声明为 config；层版本钉在 pack 兼容矩阵 | 带证据适配（载体 = cordis 行 config 而非代码 Config 类型） |
@@ -22,7 +22,7 @@
 | Source plane vs artifact plane, never mixed（静态测试走 src，吃构建产物的测试声明依赖） | L1 双通道：preset-smoke 源码域（overlay 指 src）+ 安装域（plugin add 正式路径）；根 tsconfig 门面 = 源码面解析 | 带证据适配（两平面在本仓 = 源码域/安装域两通道，D14） |
 | Design each tool's UI presentation up front（呈现先于实现设计） | preset persona/skill 文本 = 工具的行为呈现面，R1 起逐角色先定稿再挂载；观察面 = 先 RFC 后实现（run-dashboard/debug-dashboard-plus 皆然） | 带证据适配 |
 | Plan unit/e2e/snapshot coverage for seams | evaluation.md 五面合同（L0–L4）先于框架定案（D6） | 带证据适配 |
-| Registrations are effects（一切贡献走 ctx.effect，register 返回 disposer） | 无自写 cordis 插件代码 | 不适用（纯配置包，无 ctx 调用面；DSH 侧机制由 vendor 享有） |
+| Registrations are effects（一切贡献走 ctx.effect，register 返回 disposer） | client 面 `src/client/index.ts`：页签/槽/工具卡全部经 `scoped.effect(() => scoped.slots.inject(...))` + `slots.register(...)` 注册（副作用随作用域销毁） | 照搬（D18 后本仓有自写 cordis 插件代码；证据 = 该文件四处 effect 包裹 + `client-load-smoke` 真浏览器挂载断言） |
 | Runtime invariants assert owned relationships（invariant 包规则） | 同上 | 不适用 |
 | Typed events / declaration merging / assertNever / waterfall next() / branded ids / Trust TypeScript / explicit request-spec split / compiler faces | 无 TypeScript 源码 | 不适用（R3+ 若引入 TS 面则重估——vendor-submodule Note 已记 tsconfig 门面就位） |
 | ESM everywhere / 包命名与 rescope / cordis peer 约定 | 不发布 npm 包（private pack 经 plugin add 分发） | 不适用 |
@@ -154,7 +154,7 @@ docs 合同 + notes 记忆 + 17+ 门禁；
 | `docs/AGENTS.md` = 文档标准：层级归属（一个事实一个家）/ 写作规则 / slop 清单 / 预算处置序 / 机检链接 | [docs/AGENTS.md](AGENTS.md)：tier 表、写作规则、slop 清单（中文适配）、`## 已知限制与延后工作` 节约定 | 带证据适配 |
 | 预算由 **manifest 拥有**（`scripts/doc-budgets.manifest.json`），门禁拒超限**与缺登记** | [scripts/doc-budgets.json](../scripts/doc-budgets.json) + 门禁 `doc-budgets`（登记项须存在且不超限；仓内新增 AGENTS.md 未登记即红） | 带证据适配（度量词数 → 行数：CJK 词数不可靠） |
 | `scripts/AGENTS.md` = 门禁写作规则（无 shell / 端口与临时路径自持有 / 只在单独运行通过的 spec 是缺陷） | [scripts/AGENTS.md](../scripts/AGENTS.md)：范围（git ls-files tracked-only）、剥 `GIT_*`、端口独占、stdlib-only 分层 | 带证据适配（换成我们的实测教训） |
-| `packages/AGENTS.md` = 包级约定（插件导出形态 / 当前 owner 与需求 / 限制节） | [packages/deep-research-pack/AGENTS.md](../packages/deep-research-pack/AGENTS.md)：三处同步、模型可见面 + 重启、roster 单一事实源 | 带证据适配（纯配置包版） |
+| `packages/AGENTS.md` = 包级约定（插件导出形态 / 当前 owner 与需求 / 限制节） | [packages/deep-research-pack/AGENTS.md](../packages/deep-research-pack/AGENTS.md)：三处同步、模型可见面 + 重启、roster 单一事实源、**部署义务**（发布集/种子/部署脚本变更跑 L2） | 带证据适配（配置为主 + 一个 client 面版） |
 | `.agents/notes/AGENTS.md` = Note 子树常设指令（**取代检查硬触发**） | [notes/AGENTS.md](../notes/AGENTS.md)：写入触发 + 取代检查 + 格式与毕业；根只留指针 | 照搬 |
 | Note 头三行恰为 `# Agent Note: <title>` / 空 / `Status: <status>`（**裸值，无日期括号**），与生命周期目录互验；rejected 的理由用 `—` 附在状态行 | `> 状态：<裸值>` + 目录互验（`note-format` 门禁）；rejected 允许 `— 一行理由`；章节名映射（问题↔Problem · 决定↔Decision · 输掉的方案↔Alternatives considered · 验证↔Verification · 环境状态↔Consequences）登记在 notes/AGENTS.md | 带证据适配（头三行结构与裸值照搬；`## Problem` 不强制于遗留篇——grandfather） |
 | 包 README 的 `## Known Limitations and Deferred Work` 固定节 | `## 已知限制与延后工作` 写进 docs/AGENTS.md 与包 AGENTS | 照搬 |
