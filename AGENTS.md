@@ -8,7 +8,7 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 
 按序读，不跳：
 
-1. **本文件**——布局 + 命令表 + 纪律 + `notes/` 地位 + 本链的定义；
+1. **本文件**——布局 + 命令速查 + 纪律 + `notes/` 地位 + 本链的定义；
 2. **[docs/00-index.md](docs/00-index.md)**——文档地图 + 决策台账（D 号）+ 术语映射；
 3. **[roadmap.md](roadmap.md) §队列 ▶**——全仓唯一"当前"条目；
 4. 该条目在 **[notes/proposed/](notes/proposed/)** 的 RFC——条目全文（问题/方案/输掉的方案/验收）；
@@ -24,11 +24,11 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 CLAUDE.md -> AGENTS.md    symlink（编辑真文件 AGENTS.md，verify 门禁校验）
 子树 AGENTS.md            docs/ · scripts/ · notes/ · packages/deep-research-pack/ · tests/ 各一份——只放该
                          子树的指令（根只放每轮常驻指令；上游 22 个子树 AGENTS.md 同构）
-README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令/纪律/布局正本 = AGENTS.md，不复制）
+README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令正本 = guides/60 §2，不复制）
 roadmap.md                队列 + 搁置池（纯队列：条目完成即离队；▶ = 全仓唯一"当前"指针）
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 随队列条目——见 pnpm-workspace.yaml 头注）
 packages/deep-research-pack/   唯一自写包（配置为主 + 一个观察面 client 面，D18）：presets/<role>.patch.yml（0.1.7 形态=一条 @deepseek-ai/dsh-agent-preset 行，config.plugins 内声明 persona/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、cordis.patch.yml（bundle 行）、workspace/（工作区种子：手册+模板，生成物）、scripts/{preflight,scaffold}.mjs（部署 bin）；交付与部署形态 = guides/62，合同 = 包 README
-vendor/dsh/               pinned submodule（tag `dsh-v0.1.7-rc.2` @ `477b4f4205`，只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本）
+vendor/dsh/               pinned submodule（只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，tag/commit 见 §DSH 源码表）
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、drt_<slug>/（run bundle）、templates/run/
 docs/                    00-index（地图+决策台账+术语映射）→ design/10-30 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ evaluation.md（验收合同）
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）；目录名自带时态，
@@ -61,31 +61,15 @@ Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。
 `vendor/dsh/.agents/notes/implemented/AGENTS.md`（维护规则）。本仓落地与差异见
 [notes/README.md](notes/README.md)。
 
-## 命令表
+## 命令速查（全档正本 = [guides/60 §2](docs/guides/60-dev-loop.md)）
 
 ```sh
-bash dev/vendor-build.sh              # vendor 树构建（换 pin 后必做：--clean 清陈旧产物；tsc host/client + typert 产物 + client bundle——0.1.7 起启动依赖构建产物）
-node scripts/verify.mjs               # L0 结构门禁（keyless，收尾必跑）
-node --import tsx/esm --test tests/*.test.mjs   # L0 keyless 回归（也可 pnpm test；--import tsx/esm 使测试可吃 src/lib 的 TS 折算——D18 观察面分层）
-source dev/env.sh                     # ⚠ 双 home + 裸 dsh 拦截（DSH_HOME=dev/harness-home）；下列 L1/L2 必须先 source，否则脚本自拒 exit 2
-node scripts/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真挂载档（keyless：roster+逐角色建会话+skills 隔离；--profile <p> --no-patch 切安装域通道）
-cd packages/deep-research-pack && pnpm build   # pack 双半构建（tsc -b . + tsdown → lib/index.js + lib/client.js——观察面 client 面，D18）
-node scripts/client-load-smoke.mjs    # 观察面 client 面真浏览器加载（keyless：boot web + headless chromium——插件零失败 + 页签与渐进面硬断言）
-node scripts/release-smoke.mjs        # L2 真实安装形状（keyless：pack→干净 profile→plugin add→安装域冒烟；起真 DSH 环境，无模型调用）
-node scripts/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：四角色响应 + scout web_search 调用）
-node scripts/team-preflight-smoke.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + company D18 one-shot worker 探针）
-bash dev/boot-run.sh                  # run 通道开跑（幂等：组合校验/漂移检测/补装 → boot web 3081 → 仪表盘）；用法 = guides/61
-node scripts/run-dashboard.mjs --latest --out <html>   # run 只读投影（多场扫描 + 步骤条 + HITL 等待横幅；--watch 持续再生成）
-node dev/run-kickoff.mjs --port 3081 --token <横幅 token> --prompt-file <file>        # run 会话驱动（建会话+发 kickoff）
-pnpm dsh <args…>                      # 机制基线 CLI（vendor/dsh 钉 tag 源码；等价 dev/env.sh 的 dsh 函数）
-node --import tsx/esm scripts/client-hitl-smoke.mjs   # 观察面活标题触发验证（真模型档：RPC followup 造挂起态 + 盘侧谓词 + 浏览器观察点）
-node scripts/evidence-audit.mjs --latest  # run bundle 证据溯源审计（keyless：URL/摘录/final 链对会话日志机械对账 → audit.md；CRITICAL 即 exit 1）
-node scripts/entry-chain-probe.mjs    # 入口链探针（真模型档：时不变四问，答案对 ▶ 真值软断言，留档人工复核）
-node packages/deep-research-pack/scripts/preflight.mjs --workspace <dir>   # 部署前置检查（pack 自带 bin：DSH 版本/peer 包/团队层/工作区手册/构建产物/密钥；fail-loud 带补救命令）
-node packages/deep-research-pack/scripts/scaffold.mjs --workspace <dir>    # 部署准备（pack 自带 bin：铺工作区种子 + 补团队层 + 复跑 preflight；幂等）
+source dev/env.sh    # ⚠ 前置：双 home + 裸 dsh 拦截（DSH_HOME=dev/harness-home）；L1/L2 必须先 source，否则脚本自拒 exit 2
+pnpm verify          # L0 结构门禁（keyless，收尾必跑）
+pnpm test            # L0 keyless 回归（唯一登记的测试命令）
 ```
 
-档位词汇（keyless / 真模型档）与密钥定义 = §密钥。脚本头注各带设计依据与 RFC 出处。
+其余全档（L1 挂载 / L2 安装 / L4-lite / run 通道 / 观察面 / 部署 bin）与逐命令说明 = [guides/60 §2](docs/guides/60-dev-loop.md)；档位与密钥 = 下节。
 
 ## 密钥
 
@@ -95,10 +79,9 @@ node packages/deep-research-pack/scripts/scaffold.mjs --workspace <dir>    # 部
 entry-chain-probe 与 client-hitl-smoke；队列里的 L4 全量同档）。
 
 L4-lite 真模型冒烟（`scripts/l4-lite-smoke.mjs`）需要 `DEEPSEEK_API_KEY`：开发 home
-（`dev/harness-home/.credentials.yaml`）配一次即可；永不提交密钥。L1/L2 的冒烟
-（preset-smoke 真挂载档、release-smoke）**keyless**——组合与冷读，无模型调用。
-web 搜索无需独立 key——base 的 `web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，
-与 chat 同一把钥匙（实证：vendor base bundle cordis.patch.yml）。
+（`dev/harness-home/.credentials.yaml`）配一次即可；永不提交密钥。web 搜索无需独立 key——base 的
+`web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，与 chat 同一把钥匙（实证：vendor base
+bundle cordis.patch.yml）。
 
 ## DSH 源码：机制权威在哪
 
@@ -134,5 +117,4 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 
 ## 术语速查
 
-概念 → 官方载体 → 源码路径：[00-index §术语映射](docs/00-index.md)。探索路由（vendor 树）：
-`docs/architecture.md` → `docs/capability-seams.md` → 具体 package README。
+概念 → 官方载体 → 源码路径 = [00-index §术语映射](docs/00-index.md)；探索路由（vendor 树）= `docs/architecture.md` → `docs/capability-seams.md` → 具体 package README。

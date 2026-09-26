@@ -15,7 +15,7 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 
 ## Commands
 
-命令表正本 = [`AGENTS.md`](AGENTS.md) §命令表（L0/L1/L2/真模型档/run 通道全档，含 `source dev/env.sh` 前置说明）——本文件不复制。
+命令表正本 = [`docs/guides/60-dev-loop.md`](docs/guides/60-dev-loop.md) §2（L0/L1/L2/真模型档/run 通道全档，含 `source dev/env.sh` 前置说明）；[`AGENTS.md`](AGENTS.md) 只留速查与指针——本文件不复制。
 
 ## Rules In One Screen
 

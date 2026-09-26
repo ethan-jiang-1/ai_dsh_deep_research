@@ -244,6 +244,20 @@ research/README 行 3 格对 4 列表头）；**门禁盲区同类**（fixture �
 @deepseek-ai/dsh-web-frontend run build`（vite build 2s；`apps/web/dist` 在 vendor `.gitignore`
 内，重建不污染只读面——实测 `vendor-clean` 仍绿）。
 
+### S2 · 完成（2026-09-26）
+
+- **根 AGENTS.md 让出余量**：命令表（26 行）下放到它本来该在的家——[guides/60 §2](../../docs/guides/60-dev-loop.md)
+  新增「全档命令正本」；根文件只留三行**命令速查**（`source dev/env.sh` / `pnpm verify` /
+  `pnpm test`）与指针。**138 → 120 行**，上限同步收紧 **140 → 130**（`scripts/doc-budgets.json`），
+  余量 10 行——达标线是"≤ 上限 −10"。
+- **单一归属（自指事实归属表逐行落地）**：pin 的**散文正本收敛到一处**（AGENTS §DSH 源码表）——
+  布局树、design/10 ×2、00-index D10 行的 tag+commit 复述改为指针（hash 曾是唯一写错过的那一项，
+  现在散文里只此一家；机器侧仍由 `.gitmodules`/兼容矩阵/`vendor-pin` 门禁持有）。计数类已清零
+  （实测 grep：live 散文零硬编码门禁/tests 数）。测试命令全仓只剩一种写法（裸 `node --test` 归零）。
+  命令表正本的三处旧指针（README、guides/61、dev/env.sh 注释）与 discipline-map 的两处"AGENTS 持有什么"
+  描述同步改指。
+- 验证：`verify` 27 门禁全绿；`pnpm test` 54/54。
+
 **S1 验证（全部实跑）**：`node scripts/verify.mjs` **27 门禁全绿**；`pnpm test` **54/54**；
 **L1 真挂载 `DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs` ALL PASS**（preset 头注改动触发该面——
 四角色 roster + 逐个 session/create + skills 硬隔离全绿）；`bash -n dev/vendor-build.sh` 通过；

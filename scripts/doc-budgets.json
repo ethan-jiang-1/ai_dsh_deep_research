@@ -1,6 +1,6 @@
 {
   "_note": "常驻文档行数上限正本（上游 DSH 用词数 + scripts/doc-budgets.manifest.json；CJK 词数不可靠，本仓用行数等价）。门禁 doc-budgets 强制：登记项必须存在且不超限，仓内新增 AGENTS.md 必须登记。超限处置序 = 下放 > 压缩 > 升顶（升顶须同变更登记理由——上限过低是预算 bug）。",
-  "AGENTS.md": 140,
+  "AGENTS.md": 130,
   "README.md": 30,
   "docs/AGENTS.md": 85,
   "scripts/AGENTS.md": 45,

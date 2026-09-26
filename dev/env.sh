@@ -16,7 +16,7 @@
 #   实证（2026-09-24 l4-lite 复跑首跑栽坑）：DSH 会话内（agent shell / GUI 环境）自带
 #   平台级 DSH_HOME=~/.dsh——预设优先会让 source 后静默指向日用 home，boot 在日用
 #   home 找不到 profile 时回退写 ~/.dsh/profiles/web/cordis.yml（被会话沙箱 EPERM 拒，
-#   fail-loud 正确行为）。数据面隔离合同（AGENTS.md 命令表：source 本文件 ⇒
+#   fail-loud 正确行为）。数据面隔离合同（guides/60 §2 命令正本：source 本文件 ⇒
 #   DSH_HOME=dev/harness-home）要求无条件生效。
 if [ -n "${DSH_HOME:-}" ] && [ "$DSH_HOME" != "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/dev/harness-home" ]; then
   echo "dev/env.sh: 覆盖预设 DSH_HOME（$DSH_HOME → 本仓 dev/harness-home）" >&2

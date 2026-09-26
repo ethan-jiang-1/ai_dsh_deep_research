@@ -23,7 +23,7 @@
   （重跑上面任一形态）；② 有监听但仍白屏/401 = token 过期（**每次启动都是新 token**，
   用当次横幅里的 URL；旧 URL 作废）；③ 有监听且 token 新但页面空 = 前端壳产物陈旧
   （`pnpm --filter @deepseek-ai/dsh-web-frontend run build` 重建；vendor 构建产物整体重建 =
-  `bash dev/vendor-build.sh`，见 [AGENTS.md §命令表](../../AGENTS.md)）。
+  `bash dev/vendor-build.sh`，见 [guides/60 §2](./60-dev-loop.md)）。
 
 ## 1. 开哪个会话
 

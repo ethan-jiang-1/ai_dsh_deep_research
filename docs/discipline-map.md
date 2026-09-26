@@ -85,7 +85,7 @@ vendor 的事故复盘住在 **`docs/postmortem/`**（10 篇编号条目 + `READ
 | Skill 的定位 = 可复用工作流 + 专门判断标准（不是产品 API，也不是自动门禁） | 四个开发技能各带触发条件/步骤/完成判据；机制细节仍链接 owner 文档而非复制 | 照搬 |
 | 五步调用：Match（description 命中）→ Load（读全文，不从摘要猜）→ Resolve sources（读 owner）→ Apply judgment → Verify and report | 技能正文按此组织；`dev-skill-format` 门禁断言 frontmatter 在场且 `name` = 目录名 | 带证据适配（门禁为 regex 版，非 vendor 的 schema 校验） |
 | Skill ≠ gate：机械可判的下沉到类型/脚本/invariant，语义留给 review | 本仓分工表见末节「载体分工」 | 照搬 |
-| 按需加载控制上下文成本（progressive disclosure） | AGENTS 只放指针（命令表 + 布局树一行），完整流程按 description 触发加载 | 照搬 |
+| 按需加载控制上下文成本（progressive disclosure） | AGENTS 只放常驻（入口链 + 布局树 + 三行命令速查 + 指针），完整命令与流程按需加载（全档命令正本 = guides/60 §2） | 照搬 |
 
 ## 源 7：仓库分类学与维护形态（vendor `repo-harness/08`，2026-09-25 吸纳）
 
@@ -134,7 +134,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 
 | 载体 | 擅长回答 | 不能替代 | 本仓实例 |
 |---|---|---|---|
-| `AGENTS.md` | 每轮必须遵守什么 | 情境化长流程 | 入口链、命令表、纪律指针 |
+| `AGENTS.md` | 每轮必须遵守什么 | 情境化长流程、全档命令表 | 入口链、布局树、命令速查、纪律指针 |
 | `docs/` 合同面 | 系统**现在**是什么、怎么用 | 决策历史 | evaluation、discipline-map、guides 60–62 |
 | Skill（`.agents/skills/`） | 面对某类任务怎样调查、判断、验证 | 确定性 pass/fail | 毕业条目 / 加角色 / 写门禁 / 跑 run |
 | 门禁与契约测试 | 一个可机械条件是否满足 | 意图与设计质量 | `scripts/verify.mjs` + `tests/` |
@@ -144,7 +144,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 组合使用的判据：规则改变 → 只改规则 owner；Skill 只**链接** owner 不复制；门禁只判条件，
 语义判断留给 review 与用户验收。
 
-## 源 9：vendor 本体仓库结构（`vendor/dsh/` @ `477b4f4205`，2026-09-25 二轮核对补）
+## 源 9：vendor 本体仓库结构（`vendor/dsh/` 钉住 submodule）
 
 > 语料（源 1–8 的部分行）是对 0.1.7 的**描述**；下面这些是从我们钉住的 **vendor 本体**
 > 直接读出的结构约定——语料未覆盖，是"对齐"的硬面。
