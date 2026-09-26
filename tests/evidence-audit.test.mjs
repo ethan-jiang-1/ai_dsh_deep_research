@@ -20,12 +20,15 @@ function fixture({ forged = false, brokenRef = false, derived = false } = {}) {
   mkdirSync(sessions, { recursive: true });
   // 会话日志：一个 web_search 工具事件（call + result 都带真 URL；result 带可回溯文本）
   const realUrl = 'https://example.com/spec/xeon-4314';
+  // 真实形态（2026-09-26 按真日志对齐）：call = {callId,name,arguments(JSON 字符串)}；
+  // result = {message:{toolCallId,content:[{type:'text',text}]}}——**result 不带工具名**，靠 callId 反查；
+  // web_fetch 成功时文本以 `Fetched <url> (HTTP 200)` 开头（失败则 `Error: …`）。
   const log = [
     JSON.stringify({ type: 'assistant/message', data: { text: `顺嘴提一句 https://example.com/mentioned-only（非工具事件——不应算数）` } }),
-    JSON.stringify({ type: 'tool/call', data: { name: 'web_search', arguments: { query: 'xeon 4314 spec' } } }),
-    JSON.stringify({ type: 'tool/result', data: { name: 'web_search', content: `SPECrate2017_int_base = 228 见 ${realUrl}` } }),
-    JSON.stringify({ type: 'tool/call', data: { name: 'web_fetch', arguments: { url: 'https://blog.example.org/post-x' } } }),
-    JSON.stringify({ type: 'tool/result', data: { name: 'web_fetch', content: '博客全文 https://blog.example.org/post-x' } }),
+    JSON.stringify({ type: 'tool/call', data: { callId: 'c1', name: 'web_fetch', arguments: JSON.stringify({ url: realUrl }) } }),
+    JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'c1', role: 'tool', content: [{ type: 'text', text: `Fetched ${realUrl} (HTTP 200)\n\nSPECrate2017_int_base = 228 见 ${realUrl}` }] } } }),
+    JSON.stringify({ type: 'tool/call', data: { callId: 'c2', name: 'web_fetch', arguments: JSON.stringify({ url: 'https://blog.example.org/post-x' }) } }),
+    JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'c2', role: 'tool', content: [{ type: 'text', text: 'Fetched https://blog.example.org/post-x (HTTP 200)\n\n博客全文 https://blog.example.org/post-x' }] } } }),
   ].join('\n');
   writeFileSync(join(sessions, 'session.v4.jsonl'), log);
   // 证据文件 A：契约完整 + URL 可溯源 + 摘录可回溯
@@ -46,7 +49,9 @@ test('干净 bundle：URL 全溯源、摘录回溯、final 链完整、无 CRITI
   const r = auditBundle(bundle, sessions);
   assert.equal(r.criticalCount, 0, `不应有 CRITICAL：${JSON.stringify(r.findings)}`);
   assert.equal(r.stats.urlTotal, 2, '两份证据各一个声称 URL');
-  assert.equal(r.stats.urlOk, 2, '两个 URL 都可溯源（A 的 spec + B 的 blog 都在工具事件里？——B 的 blog URL 不在语料，见下）');
+  assert.equal(r.stats.urlOk, 2, '两个 URL 都在 web 工具事件里（A 的 spec + B 的 blog）');
+  assert.equal(r.stats.srcFetched, 1, 'A 的 source_url 真抓过（web_fetch 成功）');
+  assert.equal(r.stats.srcNeverFetched, 0, '干净夹具里没有"声明却没抓"的 source_url');
 });
 
 test('B 的正文 URL 不在语料 → 伪造链接 CRITICAL（URL 溯源只认工具事件）', () => {
@@ -66,6 +71,20 @@ test('同域但路径未抓过 → MAJOR「仅域名可溯源」，不是伪造�
   const derived = r.findings.filter((f) => f.kind === '仅域名可溯源');
   assert.equal(derived.length, 1, '域名在语料里、该路径不在 → MAJOR 而非 CRITICAL');
   assert.equal(r.criticalCount, 0, '域名抓过就不该判伪造');
+});
+
+test('source_url 只出现在搜索结果、没真抓过 → MAJOR（契约要"真实抓取过"，原审计只查"出现过"）', () => {
+  const { bundle, sessions } = fixture();
+  // 把 A 的 source_url 换成一个只在 web_search 结果里出现过的 URL（抓过的是另一个）
+  const evA = join(bundle, 'evidence', 'ev-a.md');
+  const raw = readFileSync(evA, 'utf8').replace(/^source_url: .*$/m, 'source_url: https://search-only.example.net/hit');
+  writeFileSync(evA, raw);
+  const logPath = join(sessions, 'session.v4.jsonl');
+  writeFileSync(logPath, readFileSync(logPath, 'utf8') + '\n' + JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'c1', role: 'tool', content: [{ type: 'text', text: '搜索结果含 https://search-only.example.net/hit' }] } } }));
+  const r = auditBundle(bundle, sessions);
+  const hit = r.findings.filter((f) => f.kind === 'source_url 未抓取' && f.file === 'ev-a.md');
+  assert.equal(hit.length, 1, '未真抓过的 source_url → MAJOR 单列');
+  assert.equal(r.criticalCount, 0, '它出现在 web 事件里，所以不是伪造（只是没抓）');
 });
 
 test('红证①：伪造 source_url → CRITICAL；还原后消失', () => {

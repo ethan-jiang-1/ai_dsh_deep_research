@@ -44,19 +44,40 @@ export function splitFrontmatter(text) {
 // 尾部清理集（2026-09-26 实测修复）：原版只剥 ASCII `.,;:)]`，于是证据卡里形如
 // `` `https://x/y`（HTTP 200） `` 的写法被抽成 `https://x/y`（HTTP`——**不匹配语料 → 假 CRITICAL**。
 // 现把反引号与全角括号一并排除/剥除（URL 内本就不会出现这两类字符）。
-const URL_RE = /https?:\/\/[^\s>)）』」"'\]，。；`（]+/g
-const urlsOf = (text) => [...text.matchAll(URL_RE)].map((m) => m[0].replace(/[.,;:)\]`）】」'"]+$/, ''))
+// ⚠ 反斜杠也必须排除（2026-09-26 实测）：tool/call 的 `arguments` 是内嵌 JSON 字符串，`JSON.stringify`
+// 会把内层引号转义成 `\"`，于是 URL 尾巴上粘一个 `\`——抽成 `https://x/y\` 与卡片的干净 URL 对不上，
+// 直接导致"真抓过的 source_url 被判没抓过"。URL 内本就不会出现反斜杠。
+const URL_RE = /https?:\/\/[^\s>)）』」"'\]，。；`（\\]+/g
+const urlsOf = (text) => [...text.matchAll(URL_RE)].map((m) => m[0].replace(/[.,;:)\]`）】」'"\\]+$/, ''))
 /** 规范化（CJK 安全）：去全部空白 + markdown 强调符 + 小写。 */
-// 去空白 + markdown 语法符（强调/引用/标题/列表/表格分隔 `|`）——表格行摘录要能与来源原文对齐。
-export const normalize = (s) => s.replace(/[\s>*_`#·•|]+/gu, '').toLowerCase()
+// 去空白 + markdown 语法符（强调/引用/标题/列表/表格分隔 `|`）+ **引号/书名号类装饰符**。
+// 引号是 2026-09-26 实测补的：59 条摘录其实是**逐字**的，只因卡片用 `"…"`/`「…」` 包住原文、
+// 而来源里没有这层引号，就被判"转写不符"——判据是"文字是否来自来源"，不是"装饰是否一致"。
+export const normalize = (s) => s.replace(/[\s>*_`#·•|"'“”‘’「」『』]+/gu, '').toLowerCase()
 const stripTrailing = (u) => u.replace(/\/+$/, '')
 
-/** 会话日志语料（全部会话；只认工具事件——模型口述的 URL 不算数）。.jsonl 直读、.zstd 走 CLI。 */
+/**
+ * 会话日志语料——**只认 web 工具事件**（`web_fetch` / `web_search` 的 call 与 result）。
+ *
+ * ⚠ 为什么必须剔除 agent 自撰文本（2026-09-26 实测的重大缺陷）：原版吞掉**全部** tool/call 与
+ * tool/result，其中 `write` 的 arguments **就是被审的那张证据卡本身**、`read`/`grep` 的 result 又把
+ * 它读回来——于是"摘录可回溯"在很大程度上是**自证**。实测：判"已溯源"的摘录里，deep-research 有
+ * 102/279、infra 有 266/333 仅由自撰事件命中；把语料限到 web 结果后，真实可回溯降到 196/446 与
+ * 51/368。更糟的是：任何 normalize 放宽都会把它推成 446/446 满堂红（实测未溯源的 167/167、35/35
+ * 全部被"修好"）——**一个能自证的审计等于不存在**。
+ *
+ * 返回：webUrls（web 事件里出现过的 URL，含搜索结果列表）/ fetchedOk / fetchFailed（web_fetch 的
+ * 成败，按 call 的 url 与 result 的 `Fetched …` vs `Error:` 判定）/ webChunks（web 结果正文分片）。
+ */
 export function buildCorpus(root) {
-  const urls = new Set()
-  const chunks = [] // 逐事件规范化分片（**不要** join 成一个大字符串）
+  const webUrls = new Set()
+  const fetchedOk = new Set()
+  const fetchFailed = new Set()
+  const webChunks = []
   let sessionFiles = 0
-  if (!existsSync(root)) return { urls, chunks, sessionFiles }
+  let webEvents = 0
+  if (!existsSync(root)) return { webUrls, fetchedOk, fetchFailed, webChunks, sessionFiles, webEvents }
+  const isWeb = (name) => name === 'web_fetch' || name === 'web_search'
   const walk = (dir) => {
     for (const ent of readdirSync(dir, { withFileTypes: true })) {
       const p = join(dir, ent.name)
@@ -69,26 +90,48 @@ export function buildCorpus(root) {
           if (r.status !== 0) return
           text = r.stdout
         } else text = readFileSync(p, 'utf8')
+        const callName = new Map()
+        const callUrl = new Map()
         for (const line of text.split('\n')) {
           if (!line.includes('"type":"tool/')) continue
           let e
           try { e = JSON.parse(line) } catch { continue }
           if (e?.type !== 'tool/call' && e?.type !== 'tool/result' && e?.type !== 'tool-call' && e?.type !== 'tool-result') continue
-          // ⚠ 反转义斜杠（2026-09-26 实测的关键修复）：tool/call 的 `arguments` 是**内嵌 JSON 字符串**，
-          // 其中的 URL 在日志里是 `https:\/\/host\/path` 形态；不反转义则 URL_RE 一条也匹配不到
-          // ——后果是**把真实抓取过的来源判成"伪造链接"**（实测 5 个 host 各命中 11–19 次仍被误判）。
+          // 反转义斜杠：tool/call 的 `arguments` 是内嵌 JSON 字符串，URL 在日志里是 `https:\/\/…`
           const payload = JSON.stringify(e.data ?? {}).replace(/\\\//g, '/')
-          // 分片存储（2026-09-26 实测修复）：原先 `texts.join('\n')` 在会话日志长到十几 MB
-          // 压缩量时超出 V8 单字符串上限 → `RangeError: Invalid string length`，**审计整条崩掉**。
-          // 摘录回溯本来只需"在某一个工具事件里出现过"，逐片判定等价且内存安全。
-          chunks.push(normalize(payload.slice(0, 4 * 1024 * 1024)))
-          for (const u of urlsOf(payload)) urls.add(u)
+          if (e.type === 'tool/call' || e.type === 'tool-call') {
+            const name = e.data?.name
+            callName.set(e.data?.callId, name)
+            if (isWeb(name)) {
+              webEvents += 1
+              const us = urlsOf(payload)
+              for (const u of us) webUrls.add(u)
+              if (name === 'web_fetch' && us.length > 0) callUrl.set(e.data.callId, us[0])
+            }
+            continue
+          }
+          // tool/result：按 callId 反查工具名（result 自身不带名字）
+          const id = e.data?.message?.toolCallId ?? e.data?.toolCallId
+          const name = callName.get(id)
+          if (!isWeb(name)) continue
+          webEvents += 1
+          for (const u of urlsOf(payload)) webUrls.add(u)
+          const body = JSON.stringify(e.data?.message?.content ?? '')
+          if (name === 'web_fetch') {
+            const target = callUrl.get(id)
+            if (target !== undefined) {
+              if (/^\[\{"type":"text","text":"Error:/.test(body)) fetchFailed.add(target)
+              else if (body.includes('Fetched ')) fetchedOk.add(target)
+            }
+          }
+          // 分片存储（不要 join 成一个大字符串——历史上 RangeError: Invalid string length 就是这么来的）
+          webChunks.push(normalize(body.slice(0, 4 * 1024 * 1024)))
         }
       }
     }
   }
   walk(root)
-  return { urls, chunks, sessionFiles }
+  return { webUrls, fetchedOk, fetchFailed, webChunks, sessionFiles, webEvents }
 }
 
 /**
@@ -114,7 +157,15 @@ export function auditBundle(bundleDir, sessionsRoot) {
       if (fm?.source_url) rec.claimedUrls.push(fm.source_url)
       rec.claimedUrls.push(...urlsOf(body))
       rec.claimedUrls = [...new Set(rec.claimedUrls)]
+      // 只认 `## 原文摘录` 节内的 `>` 行（2026-09-26 实测：原版扫全文，5 条未溯源行根本不在摘录节里；
+      // 且 `>` 被复用为卡片自己的注——指针/标签，那些不是摘录主张）。
+      const secLines = []
+      let inQuoteSec = false
       for (const line of body.split('\n')) {
+        if (/^##\s/.test(line)) { inQuoteSec = /^##\s*原文摘录/.test(line); continue }
+        if (inQuoteSec) secLines.push(line)
+      }
+      for (const line of secLines) {
         const m = /^>\s*(.+)$/.exec(line)
         if (m && m[1].trim().length >= 16) rec.quotes.push(m[1].trim())
       }
@@ -129,7 +180,7 @@ export function auditBundle(bundleDir, sessionsRoot) {
     }
   }
   const corpus = buildCorpus(sessionsRoot)
-  const corpusUrlSet = new Set([...corpus.urls].map(stripTrailing))
+  const corpusUrlSet = new Set([...corpus.webUrls].map(stripTrailing))
 
   // ① URL 溯源（三档——2026-09-26 实测细化：原版只有"逐字命中/CRITICAL"两档，把
   //    「域名抓过、路径是派生态（ar5iv/PDF 变体、站点根）」也打成 CRITICAL，假阳性淹没真问题）
@@ -142,51 +193,74 @@ export function auditBundle(bundleDir, sessionsRoot) {
   for (const u of corpusUrlSet) {
     try { hosts.add(new URL(u).host) } catch { /* 非法 URL 跳过 */ }
   }
+  const fetchedOkSet = new Set([...corpus.fetchedOk].map(stripTrailing))
+  const fetchFailedSet = new Set([...corpus.fetchFailed].map(stripTrailing))
   let urlOk = 0
   let urlTotal = 0
+  let srcFetched = 0
+  let srcNeverFetched = 0
   for (const rec of evidence) {
+    // ④ source_url 的**抓取强度**（2026-09-26 实测补的最大缺口）：契约（研究手册 :56）要求
+    //    source_url 是"**真实抓取过**的 URL"，而原审计只要求它出现在**任何**工具事件里——
+    //    搜索结果列表里出现过就算过。实测两场 run 共 13 张卡的 source_url **从未被抓取**。
+    const src = rec.fm?.source_url
+    if (typeof src === 'string' && src.length > 0) {
+      const su = stripTrailing(src)
+      if (fetchedOkSet.has(su)) srcFetched += 1
+      else {
+        srcNeverFetched += 1
+        const kind = fetchFailedSet.has(su) ? '声明抓取但抓取失败' : (corpusUrlSet.has(su) ? '仅出现在搜索结果、未真正抓取' : 'source_url 从未出现在任何 web 工具事件里')
+        findings.push({ level: 'MAJOR', file: rec.file, kind: 'source_url 未抓取', detail: `${kind}：${src.slice(0, 100)}` })
+      }
+    }
     for (const u of rec.claimedUrls) {
       urlTotal += 1
       if (corpusUrlSet.has(stripTrailing(u))) { urlOk += 1; continue }
       let host = null
       try { host = new URL(u).host } catch { /* 非法 URL */ }
       if (host !== null && hosts.has(host)) {
-        findings.push({ level: 'MAJOR', file: rec.file, kind: '仅域名可溯源', detail: `具体路径未在工具事件中出现（域名已抓过）：${u.slice(0, 100)}` })
+        findings.push({ level: 'MAJOR', file: rec.file, kind: '仅域名可溯源', detail: `具体路径未在 web 工具事件中出现（域名出现过）：${u.slice(0, 100)}` })
         continue
       }
-      findings.push({ level: 'CRITICAL', file: rec.file, kind: '伪造链接/未溯源', detail: `域名与 URL 都未出现在任何工具事件里：${u.slice(0, 100)}` })
+      findings.push({ level: 'CRITICAL', file: rec.file, kind: '伪造链接/未溯源', detail: `域名与 URL 都未出现在任何 web 工具事件里：${u.slice(0, 100)}` })
     }
   }
-  // ② 摘录转写回溯
+  // ② 摘录转写回溯（web-only 语料 + **限定在 `## 原文摘录` 节内** + 覆盖率分档）
+  //    为什么限节：原版扫正文全部 `^>` 行，实测 5 条未溯源行根本不在摘录节里（在 §解读 或节外），
+  //    而且 `>` 被复用为"卡片自己的注"（指针/标签），那些不是摘录主张。
+  //    为什么用覆盖率而不是二值：语料修正后，**复合摘录**（多段拼接）与**被截断的抓取**是合法形态，
+  //    二值判定会把它们一律打成伪造——实测 A2/B 桶（113 条）是逐字、E/D 桶（60 条）是复合。
+  const webText = corpus.webChunks.join('\u0000')
+  const inWeb = (x) => x.length >= 8 && webText.includes(x)
+  const coverage = (n) => {
+    if (inWeb(n)) return 1
+    const N = 16
+    const STRIDE = 8
+    const sh = []
+    for (let i = 0; i + N <= n.length; i += STRIDE) sh.push(n.slice(i, i + N))
+    if (sh.length === 0) return 0
+    const cap = 40
+    const step = Math.max(1, Math.ceil(sh.length / cap))
+    const use = sh.filter((_, i) => i % step === 0)
+    return use.filter(inWeb).length / use.length
+  }
   let quoteOk = 0
   let quoteTotal = 0
+  let quoteComposite = 0
+  let quoteBad = 0
   for (const rec of evidence) {
     for (const q of rec.quotes) {
       quoteTotal += 1
       const n = normalize(q)
-      if (n.length >= 8 && corpus.chunks.some((c) => c.includes(n))) { quoteOk += 1; continue }
-      // 逐字命中失败时的分级（2026-09-26 实测细化）：长摘录里含表格行/改写时，整串必然对不上，
-      // 但**开头**通常仍逐字来自来源——把"头部可溯源"降为 INFO，只在**头部都对不上**时才判
-      // MAJOR 转写不符（那才是"凭空写摘录"的信号）。原版一律 MAJOR，实测 505 条假阳性。
-      // 表格行摘录（原串含 `|`）：语义单位是**单元格**，不是整行——逐格回溯，
-      // 全部格可溯源即通过，部分可溯源降 INFO，一格都对不上才 MAJOR。
-      if (q.includes('|')) {
-        const cells = q.split('|').map((x) => normalize(x)).filter((x) => x.length >= 8)
-        if (cells.length > 0) {
-          const okCells = cells.filter((x) => corpus.chunks.some((c) => c.includes(x))).length
-          if (okCells === cells.length) { quoteOk += 1; continue }
-          if (okCells > 0) {
-            findings.push({ level: 'INFO', file: rec.file, kind: '摘录部分可溯源', detail: `表格行 ${okCells}/${cells.length} 格可回溯：${q.slice(0, 60)}` })
-            continue
-          }
-        }
-      }
-      const head = n.slice(0, 60)
-      if (head.length >= 8 && corpus.chunks.some((c) => c.includes(head))) {
-        findings.push({ level: 'INFO', file: rec.file, kind: '摘录非逐字', detail: `头部可溯源、整段非逐字（表格/改写）：${q.slice(0, 60)}` })
+      const cov = coverage(n)
+      if (cov >= 0.95) { quoteOk += 1; continue }
+      if (cov >= 0.6) {
+        quoteComposite += 1
+        findings.push({ level: 'INFO', file: rec.file, kind: '摘录非逐字（复合/标注/截断）', detail: `web 语料覆盖率 ${cov.toFixed(2)}：${q.slice(0, 60)}` })
         continue
       }
-      findings.push({ level: 'MAJOR', file: rec.file, kind: '转写不符', detail: `摘录头部即不可回溯（前 60 字）：${q.slice(0, 60)}` })
+      quoteBad += 1
+      findings.push({ level: 'MAJOR', file: rec.file, kind: '转写不符', detail: `web 语料覆盖率仅 ${cov.toFixed(2)}（摘录文字在抓取到的来源里基本找不到）：${q.slice(0, 60)}` })
     }
   }
   // ③ final 溯源链（反引号内的格式说明占位不算引用——先剥 code span）
@@ -230,7 +304,7 @@ export function auditBundle(bundleDir, sessionsRoot) {
   const report = `# Evidence Audit — ${bundleDir.split('/').pop()}（${new Date().toISOString()}）
 
 > 由 scripts/evidence-audit.mjs 生成（keyless 机械对账；正本判据 = 研究手册 §证据文件契约）。
-> 会话语料：${corpus.sessionFiles} 个日志文件、${corpus.urls.size} 个工具事件 URL。
+> 会话语料：${corpus.sessionFiles} 个日志文件、${corpus.webEvents} 个 **web 工具事件**（${corpus.webUrls.size} 个 URL；已剔除 agent 自撰文本——否则摘录审计自证）。
 
 ## 概要
 
@@ -254,7 +328,7 @@ ${major.length === 0 ? '（无）' : major.map((f) => `- **${f.file}** [${f.kind
 
 ${info.length === 0 ? '（无）' : info.map((f) => `- **${f.file}** [${f.kind}] ${f.detail}`).join('\n')}
 `
-  return { findings, criticalCount: critical.length, stats: { evidence: evidence.length, withFm: evidence.filter((r) => r.fm).length, urlOk, urlTotal, quoteOk, quoteTotal, finalRefs, finalBroken, critical: critical.length, major: major.length, info: info.length }, report }
+  return { findings, criticalCount: critical.length, stats: { evidence: evidence.length, withFm: evidence.filter((r) => r.fm).length, urlOk, urlTotal, srcFetched, srcNeverFetched, quoteOk, quoteTotal, quoteComposite, quoteBad, finalRefs, finalBroken, critical: critical.length, major: major.length, info: info.length }, report }
 }
 
 // ── CLI ──
@@ -288,7 +362,10 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
   }
   const { stats, report, criticalCount } = auditBundle(bundleDir, sessionsRoot)
   writeFileSync(join(bundleDir, 'audit.md'), report)
-  console.log(`evidence-audit: ${stats.evidence} 份证据 · URL 溯源 ${stats.urlOk}/${stats.urlTotal} · 摘录回溯 ${stats.quoteOk}/${stats.quoteTotal} · final 链 ${stats.finalRefs - stats.finalBroken}/${stats.finalRefs}`)
+  console.log(`evidence-audit: ${stats.evidence} 份证据 · URL 溯源 ${stats.urlOk}/${stats.urlTotal} · `
+    + `source_url 真抓过 ${stats.srcFetched}（未抓 ${stats.srcNeverFetched}）· `
+    + `摘录回溯 ${stats.quoteOk}/${stats.quoteTotal}（复合 ${stats.quoteComposite} / 不符 ${stats.quoteBad}）· `
+    + `final 链 ${stats.finalRefs - stats.finalBroken}/${stats.finalRefs}`)
   console.log(`  发现：CRITICAL ${stats.critical} · MAJOR ${stats.major} · INFO ${stats.info} —— 报告已写 ${join(bundleDir, 'audit.md')}`)
   process.exit(criticalCount === 0 ? 0 : 1)
 }
