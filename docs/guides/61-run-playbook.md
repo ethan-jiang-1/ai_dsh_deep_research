@@ -26,7 +26,19 @@
 
 ## 1. 开哪个会话
 
-- web GUI 新建会话：preset 选 **Deep Research Lead**（默认项），cwd 选 **research-workspace/**；
+**前置（一次）：把研究工作区注册进 DSH**——侧栏只列已注册的工作区，未注册的目录在
+"新建会话"里选不到、其会话也不进侧栏（[实测根因](../../notes/implemented/2026-09-26-bundle-face-wiring.md)）。
+
+```sh
+# 经 GUI：Workspaces 面板的 + 添加 research-workspace/ 目录；或经 RPC：
+#   workspace/create { request: { path: "<repo>/research-workspace" } }（幂等）
+```
+
+**为什么关键**：研究手册是**会话 cwd 的 `AGENTS.md`**，DSH 从 cwd 向上发现并注入每个角色
+——cwd 不是研究工作区，手册就不进上下文（首场 run 因此丢了跨角色证据契约，31 份证据无
+frontmatter）。`dev/run-kickoff.mjs` 已默认用 workspaceId 形态把会话建在 research-workspace。
+
+- web GUI 新建会话：preset 选 **Deep Research Lead**（默认项），工作区选 **research-workspace**；
 - 只跟 lead 对话——它是唯一入口与出口：立项、组队、派活、综合、交付全归它；
   scout / analyst / critic 是它的队员，不直接听你指挥。
 
