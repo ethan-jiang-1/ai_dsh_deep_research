@@ -8,20 +8,16 @@
 
 ## 队列
 
-> 次序依据（2026-09-25 马拉松三号：UI 优先）：①界面是用户点名"先把界面弄对"——当前
-> tab 是工程验证面（原始事件类型名流），人看不懂；②HITL2 实测是交互 RFC 的延期验证项
-> （便宜单回合）；③生态研究可自主执行，纳入本马拉松；④需用户带题（真人拍板），
-> 兼①②③全部真人档验收。
+> 次序依据（2026-09-26）：①队列只剩用户带题项——需真人拍板（静默期做不了），且兼此前
+> 全部真人档验收（观察面/证据契约/交互卡片/研究状态界面）；②搁置池五条复活条件均未满足。
 
-1. ▶ **DSH 插件生态认真研究**（研究；可自主执行，纳入本马拉松）——粗扫后续：生态缺什么、
-   deep-research 定位独占性；产出 = 调研报告（钉版引用）。
-   RFC = [2026-09-24-dsh-plugin-ecosystem-research](notes/proposed/2026-09-24-dsh-plugin-ecosystem-research.md)。
-2. **研究类型覆盖**（研究，**用户带题驱动**：真人 HITL、类型 ≠ 首场）——兼观察面 GUI 化的
+1. ▶ **研究类型覆盖**（研究，**用户带题驱动**：真人 HITL、类型 ≠ 首场）——兼观察面 GUI 化的
    真人档验收 + 证据可靠性面的 run 级验收（bundle 含 audit.md 且佐证结构达标）+ 交互卡片
    真人体验 + 研究状态界面真人目验；顺手取证 synthesizer/floor 重估证据。
    RFC = [2026-09-25-research-type-coverage](notes/proposed/2026-09-25-research-type-coverage.md)。
 
-（已毕业离队 2026-09-25：HITL2 选项卡实测（审阅摘要前置+三选项齐+推荐位——真模型 PASS，验证结果补进 research-interaction 毕业 Note）；
+（已毕业离队 2026-09-26：DSH 插件生态认真研究（调研报告 456+ 插件/8 竞品/**空白位=多角色+证据审计+Teams**；毕业手续补完——[复盘](notes/postmortem/2026-09-26-roadmap-graduation-drift.md)）；
+2026-09-25：HITL2 选项卡实测（审阅摘要前置+三选项齐+推荐位——真模型 PASS，验证结果补进 research-interaction 毕业 Note）；
 研究状态界面（人性化活动流+噪音过滤=UI 核心交付[15 行活动/零残留]；bundle 渐进面部分交付如实记档[workspaceFiles 路径未接通]——RFC 迁 implemented/）；
 观察面补全（共享折算 run-fold.ts + 渐进面挂载——部分交付如实记档：渲染骨架与折算正本落地，真数据上屏待 workspaceFiles 目录发现——RFC 迁 implemented/）；
 研究交互设计（HITL1/2 结构化选项卡[一次三问+推荐位，真模型实测 PASS]+研究语义工具卡[spawn/web_search，toolview priority -1]——RFC 迁 implemented/）；

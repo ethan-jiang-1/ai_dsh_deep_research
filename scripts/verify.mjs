@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'pack-workspace-fresh'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'pack-workspace-fresh', 'queue-pointer-live'];
 
 const failures = [];
 const notes = [];
@@ -331,6 +331,38 @@ function roadmapParked() {
   }
 }
 
+// ── 门禁：queue-pointer-live（队列 ▶ 行引用的 RFC 必须仍在 notes/proposed/）──
+// 反证形态（2026-09-26 事故：毕业手续漏做 → ▶ 指向已完成条目，commit message 却声称已更新）：
+// 把 ▶ 行的 RFC 链接改指 implemented/ 的文件 → 本门禁红 → 还原绿。
+{
+  const gate = 'queue-pointer-live';
+  const queue = roadmapQueue();
+  if (queue === null) {
+    fail(gate, 'roadmap §队列 不可读——▶ 指针无处可查');
+  } else {
+    const qLines = queue.split('\n');
+    const pointerIdx = qLines.map((l, i) => (l.includes('▶') ? i : -1)).filter((i) => i !== -1);
+    if (pointerIdx.length !== 1) {
+      fail(gate, `队列 ▶ 指针必须唯一（实测 ${pointerIdx.length} 处）`);
+    } else {
+      // 条目块 = ▶ 行起，到下一个编号条目 / 节标题 / 毕业注记为止（RFC 链接常在续行）
+      let end = qLines.length;
+      for (let i = pointerIdx[0] + 1; i < qLines.length; i++) {
+        if (/^\d+\.\s/.test(qLines[i]) || /^##\s/.test(qLines[i]) || qLines[i].startsWith('（')) { end = i; break; }
+      }
+      const block = qLines.slice(pointerIdx[0], end).join('\n');
+      const refs = [...block.matchAll(/\]\(notes\/proposed\/([^)]+?)\.md\)/g)].map((m) => m[1]);
+      if (refs.length === 0) {
+        fail(gate, '队列 ▶ 行未挂 RFC 链接——当前条目必须有 notes/proposed/ 的 RFC 全文');
+      }
+      for (const stem of refs) {
+        if (!existsSync(join(ROOT, 'notes', 'proposed', `${stem}.md`))) {
+          fail(gate, `▶ 行引用的 RFC 不在 notes/proposed/：${stem}——条目已完成？（毕业须同 diff：RFC 迁 implemented/ + 队列行删除 + ▶ 移交）`);
+        }
+      }
+    }
+  }
+}
 // ── 门禁 9：secrets-untracked（tracked 清单零敏感/残留物；gitignore 不作用于已跟踪文件）──
 {
   const gate = 'secrets-untracked';

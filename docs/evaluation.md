@@ -53,6 +53,7 @@
 | `vendor-links` | vendored 解析的机械面（E1 事故教训）：根 package.json 每个 `@deepseek-ai/*` devDependency 在 lockfile importer 里解析为 `link:vendor/dsh/...`；overrides 三件套（cordis/cosmokit/schemastery）无 registry 包条目；`link:vendor/dsh/` 出现 0 次即红（防空语料） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（改 devDep 为 registry 版 / 注入 registry 条目 / 清空 link 三形态红→还原绿） |
 | `overlay-fresh` | 源码域 overlay 是生成物：`dev/research.overlay.yml` 必须等于 `node dev/render-overlay.mjs` 从 pack 的渲染结果（0.1.7 preset 重设计后 overlay 携带 preset 行，两处手写必漂移；本仓首个 tracked 生成物） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) + 本轮升 pin（改 pack 不重渲染 → 红；还原绿） |
 | `pack-workspace-fresh` | pack 的工作区种子（`workspace/AGENTS.md` + `templates/run/`）必须等于 `node dev/sync-pack-workspace.mjs --check` 的正本同步结果——手册/模板是会话 cwd 内容，pack 必须自带（否则部署方装了包也没有研究纪律）；正本 = `research-workspace/` | 部署工程化（改正本不重同步 → 红；还原绿） |
+| `queue-pointer-live` | 队列 ▶ 行（整块条目）引用的 RFC 必须仍在 `notes/proposed/`——毕业须同 diff 完成三件（RFC 迁 `implemented/` + 队列行删除 + ▶ 移交），否则 ▶ 指向已完成条目 | [毕业漂移复盘](../notes/postmortem/2026-09-26-roadmap-graduation-drift.md)（把 ▶ 的 RFC 改指 implemented/ → 红；还原绿） |
 | `client-keys` | 观察面 client 的 keyed 字面量单一正本（company 坑 1：拼错不报错永不渲染）：字面量只住 `src/client/keys.ts`；`slots.inject` 首参与描述符 name/key/id 只许 keys.ts 导出的标识符 | [observability-gui 毕业记录](../notes/implemented/2026-09-24-observability-gui.md) Stage 1（四种形态红证：keys.ts 外值位字面量/inject 字面量/描述符 key 字面量/keys.ts 缺席 → 红；还原绿。类型位（PropsRuntime<泛型参数>）豁免——编译期可查非静默失效面，Stage 2 实证误咬后收窄） |
 
 - **通过判据**：全绿；`verify` 的门禁清单与 `tests/` 守卫一一登记在案，每条带反证记录（上表）。
