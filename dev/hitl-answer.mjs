@@ -48,7 +48,10 @@ const log = (m) => console.log(m)
 
 const chromium = await loadChromium(ROOT)
 const browser = await launchChromium(chromium)
-const page = await browser.newPage({ viewport: { width: 1600, height: 1100 } })
+// ⚠ 视口要够高（2026-09-27 第七场实测）：题干超长的问询卡会把选项行挤到 y≈2300+，
+// 1100 高的视口里选项在折叠线下方、Playwright 在该容器里自动滚动不生效 → click 超时被
+// catch 吞掉 → Submit 一直 disabled、答了 8 次全没提交。2600 覆盖至今见过的最长卡。
+const page = await browser.newPage({ viewport: { width: 1600, height: 2600 } })
 try {
   await page.goto(`http://127.0.0.1:${PORT}/?token=${TOKEN}`, { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(6000)
@@ -151,7 +154,9 @@ try {
         }
       }
       if (await visible(rec)) {
-        target = rec.locator('xpath=ancestor::*[self::label or self::button or contains(@class,"option")][1]')
+        // 祖先只认 BUTTON/LABEL（2026-09-27 第七场实测）：选项的中间层 span 类名就含 "option"
+        // （optionCopy/optionLine），旧 XPath 的 contains(@class,"option") 会截胡到文本 span。
+        target = rec.locator('xpath=ancestor::*[self::button or self::label][1]')
         if (!(await visible(target))) target = rec
       }
     }
@@ -169,7 +174,25 @@ try {
     }
     targetLabel = ((await target.textContent()) ?? '').replace(/\s+/g, ' ').trim().slice(0, 120)
     if (DRY) { log(`[dry-run] 第 ${step} 题将选：${targetLabel}`); break }
-    await target.click({ timeout: 8_000 }).catch(() => {})
+    // 点击（2026-09-27 第七场实测教训）：超长题干把选项行挤到视口外（y≈2300+），且问询卡在
+    // 嵌套滚动容器里——Playwright 的自动滚动失效 → click 超时被 catch 吞掉 → 没选中 →
+    // Submit 永远 disabled，答 8 次全空转。修法：Playwright 点不动就**DOM 原生 click 兜底**
+    // （el.scrollIntoView + el.click()，绕过视口与可点击性检查；React 按钮响应正常，实测一击即中）。
+    const domClickByText = async (needle, sel = 'button,label') => {
+      try {
+        return await page.evaluate((n, s) => {
+          const el = [...document.querySelectorAll(s)].find(e => ((e.textContent ?? '').replace(/\s+/g, ' ')).includes(n))
+          if (el === undefined) return false
+          el.scrollIntoView({ block: 'center' })
+          el.click()
+          return true
+        }, needle, sel)
+      } catch { return false }
+    }
+    try { await target.click({ timeout: 5_000 }) } catch {
+      const ok = await domClickByText(targetLabel.slice(0, 24))
+      log(ok ? 'hitl-answer: ⚠ 选项在视口外点不动——已用 DOM 原生点击兜底' : 'hitl-answer: ⚠ 选项点击失败且 DOM 兜底未命中')
+    }
     await page.waitForTimeout(400)
     if (CUSTOM !== null) {
       const box = page.locator('textarea, input[type="text"]').first()
@@ -178,11 +201,18 @@ try {
     answered.push({ step, prompt: promptText.slice(0, 140), selected: targetLabel })
     log(`hitl-answer: 第 ${step} 题 ← ${targetLabel}`)
 
-    // 前进：优先 Submit/提交/完成，其次 Next，最后 Done
+    // 前进：优先 Submit/提交/完成，其次 Next，最后 Done。
+    // 禁用态的 Submit 用 Playwright 点**不抛错但无效果**（选中没生效时的表象）——先查禁用态，
+    // 禁用则 DOM 兜底重选选项再点；点击抛错（视口外）也走 DOM 兜底。
     let advanced = false
     for (const label of ['Submit', '提交', 'Done', '完成', 'Next', '下一步']) {
       const b = page.locator(`button:has-text("${label}")`).first()
-      if (await visible(b)) { await b.click({ timeout: 8_000 }).catch(() => {}); advanced = true; break }
+      if (!(await visible(b))) continue
+      const isDisabled = await b.evaluate((el) => el.disabled).catch(() => false)
+      if (isDisabled) { await domClickByText(targetLabel.slice(0, 24)); await page.waitForTimeout(600) }
+      try { await b.click({ timeout: 5_000 }) } catch { await domClickByText(label, 'button') }
+      advanced = true
+      break
     }
     if (!advanced) { log(`hitl-answer: 第 ${step} 题后没找到前进按钮——可能已是末题且已提交`); break }
     await page.waitForTimeout(1500)
