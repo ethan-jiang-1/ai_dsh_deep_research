@@ -14,7 +14,7 @@
 
 import { spawnSync } from 'node:child_process';
 import { scrubbedEnv, withModelKey } from './lib/env.mjs';
-import { existsSync, readFileSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { presetRoles } from './lib/roles.mjs';
@@ -88,6 +88,26 @@ const packPkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
 step(Object.keys(packPkg.peerDependencies ?? {}).length > 0, 'peers 在 manifest（声明语义）');
 step(Array.isArray(packPkg?.dsh?.compatibility?.dshReleases) && packPkg.dsh.compatibility.dshReleases.includes('dsh-v0.1.7-rc.2'),
   '兼容矩阵钉住当前 tag');
+
+// ④b 部署链证据（pack 自带 bin：真铺一个工作区 → preflight 验它）——"装完能跑"的机械面
+console.log('④b 部署链（安装副本：scaffold 铺种子 + preflight 复检）…');
+const probeWs = join(home, 'smoke-scaffold-probe');
+rmSync(probeWs, { recursive: true, force: true });
+const scaffoldDry = run(process.execPath, [join(installed, 'scripts', 'scaffold.mjs'), '--workspace', probeWs, '--profile', PROFILE, '--dry-run'],
+  { env: withModelKey({ DSH_HOME: home }) });
+step(scaffoldDry.status === 0 && scaffoldDry.stdout.includes('dry-run') && !existsSync(probeWs),
+  'scaffold --dry-run 可预演且未落盘', scaffoldDry.stdout.split('\n').filter((l) => l.includes('✗')).join(' | '));
+const scaffoldReal = run(process.execPath, [join(installed, 'scripts', 'scaffold.mjs'), '--workspace', probeWs, '--profile', PROFILE],
+  { env: withModelKey({ DSH_HOME: home }) });
+console.log(scaffoldReal.stdout.split('\n').map((l) => `    ${l}`).join('\n'));
+const seedTemplates = existsSync(join(probeWs, 'templates', 'run')) ? readdirSync(join(probeWs, 'templates', 'run')).filter((f) => f.endsWith('.md')).length : 0;
+step(scaffoldReal.status === 0 && existsSync(join(probeWs, 'AGENTS.md')) && seedTemplates >= 6,
+  'scaffold 真铺种子（手册 + ≥6 模板）', `AGENTS.md=${existsSync(join(probeWs, 'AGENTS.md'))} 模板=${seedTemplates}`);
+const preflight = run(process.execPath, [join(installed, 'scripts', 'preflight.mjs'), '--workspace', probeWs, '--host', profileDir],
+  { env: withModelKey({ DSH_HOME: home }) });
+step(preflight.status === 0, 'preflight 对铺好的工作区全绿（六项机检）',
+  preflight.stdout.split('\n').filter((l) => l.includes('✗')).join(' | '));
+rmSync(probeWs, { recursive: true, force: true });
 
 // ⑤ boot + preset-smoke 断言（安装域通道：无 overlay，走已装 pack 的正式路径）
 console.log('⑤ preset-smoke（安装域：--profile release-check --no-patch）…');

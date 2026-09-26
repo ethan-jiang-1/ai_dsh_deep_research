@@ -76,10 +76,15 @@ if (workspace === null) {
   }
 }
 
-// ③ 收尾 preflight
+// ③ 收尾 preflight（dry-run 跳过：未落盘，工作区检查必然报缺——预演退出码只看前两步）
+const failed = steps.filter((s) => !s.ok).length
+if (dryRun) {
+  console.log('\nscaffold: [dry-run] 跳过收尾 preflight（未落盘，工作区检查预期报缺）')
+  console.log(`scaffold: ${failed === 0 ? '预演通过' : `${failed} 步失败`}（工作区 = ${workspace}，profile = ${profile}）`)
+  process.exit(failed === 0 ? 0 : 1)
+}
 console.log('\nscaffold: 跑 preflight 复核…\n')
 const pf = spawnSync(process.execPath, [join(PACK, 'scripts', 'preflight.mjs'), '--workspace', workspace, ...(argOf('host') === null ? [] : ['--host', argOf('host')])], { stdio: 'inherit' })
-const failed = steps.filter((s) => !s.ok).length
 console.log(`\nscaffold: ${failed === 0 ? '准备完成' : `${failed} 步失败`}（工作区 = ${workspace}，profile = ${profile}）`)
 if (failed === 0) {
   console.log(`下一步：cd ${workspace} && dsh --profile ${profile}   # 起研究会话；角色 = Deep Research Lead`)
