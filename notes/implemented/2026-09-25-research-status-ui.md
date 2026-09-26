@@ -18,10 +18,10 @@
 - client-load-smoke 8 断言 ALL PASS：**人性化活动流 15 行** + **噪音零残留**（6 种原始类型名
   全无）+ 渐进面如实记观察点。
 
-**如实记档（部分交付）**：活动流与噪音过滤是本条目的核心交付（人看懂了——✅）；bundle
-渐进面（步骤条/证据/交付的**真数据上屏**）因 workspaceFiles list 路径问题未接通——RPC
-探测 5 种路径全 ok=false（'', '.', '/', 'drt_*', 'research-workspace'），组件代码已就位
-（数据来了就渲染），**待查 API 调用形态**。截图留档 research-status-ui.png。
+**补记（2026-09-26）**：bundle 渐进面**已接通**——根因链四条（空路径 / 会话工作区根 /
+工作区未注册 / profile 镜像）与修复见 [bundle-face-wiring](2026-09-26-bundle-face-wiring.md)；
+`client-load-smoke` 的渐进面断言已从观察点升级为硬断言（步骤条七步 / 证据 31 份 / ✅ 已交付 /
+问题行），13 断言 ALL PASS。
 
 ## 问题
 

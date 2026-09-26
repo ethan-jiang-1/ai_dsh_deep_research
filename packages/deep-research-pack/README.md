@@ -87,9 +87,9 @@ dsh-deep-research-preflight --workspace ~/research-workspace
 
 ## 已知限制与延后工作
 
-- **研究状态页签的 bundle 渐进面（步骤条/证据计数/交付状态）尚未接通**：组件与纯函数折算
-  已就位（`run-fold.ts`），但 `remote.workspaceFiles` 的 list 路径形态未解（实测 5 种路径
-  全失败）——数据面接通前，页签只显示活动流与 HITL 横幅；
+- **会话必须建在**研究工作区里**才能看到渐进面**：页签读的是会话工作区根（`workspaceFiles`），
+  run bundle 在工作区内才可见——故需先把研究工作区注册进 DSH（`workspace/create`），再用
+  `workspaceId` 形态建会话（`dev/run-kickoff.mjs` 已默认此形态）；建在别处的会话只显示活动流；
 - **`workspace/` 种子是快照**：由 `dev/sync-pack-workspace.mjs` 从仓库正本同步（门禁
   `pack-workspace-fresh` 防漂移）；种子只铺新工作区，**不覆盖**已存在文件（`--force` 除外）；
 - **皮肤/品牌层**（ui-skin）与**专职 synthesizer 角色**（Q4 已销账：单场实测 Lead 独任综合

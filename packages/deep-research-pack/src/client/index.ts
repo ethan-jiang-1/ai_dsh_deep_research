@@ -52,17 +52,31 @@ export function apply(ctx: ClientContext): void {
     const listDir = async (sessionId: SessionId, path: string, signal: AbortSignal) => {
       try {
         const result = await scoped.remote.workspaceFiles.list(sessionId, path, signal)
-        if (!result.ok) return null
+        if (!result.ok) {
+          // 诊断面（RFC research-status-ui 的 bundle 渐进面）：把真实失败原因打到 console，
+          // 便于 client-load-smoke 抓取——静默吞错会让"数据面不可达"与"目录为空"无法区分。
+          console.error('[research-status] workspaceFiles.list 失败', JSON.stringify({ path, error: result.error }))
+          return null
+        }
         return result.value.entries as readonly { type: string; name: string }[]
-      } catch { return null }
+      } catch (cause) {
+        console.error('[research-status] workspaceFiles.list 抛错', String(cause))
+        return null
+      }
     }
     const readFile = async (sessionId: SessionId, path: string, signal: AbortSignal) => {
       try {
         const result = await scoped.remote.workspaceFiles.read(sessionId, path, { limit: 40 }, signal)
-        if (!result.ok) return null
+        if (!result.ok) {
+          console.error('[research-status] workspaceFiles.read 失败', JSON.stringify({ path, error: result.error }))
+          return null
+        }
         const text = (result.value as { text?: unknown }).text
         return typeof text === 'string' ? text : null
-      } catch { return null }
+      } catch (cause) {
+        console.error('[research-status] workspaceFiles.read 抛错', String(cause))
+        return null
+      }
     }
 
     scoped.effect(() => scoped.slots.inject(RESEARCH_PANE_SLOT, () => [

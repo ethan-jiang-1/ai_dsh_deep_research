@@ -100,6 +100,12 @@ CRITICAL → exit 1；AGENTS 命令表登记。
 | keyless tests | 8/8 绿（干净面 / 删工具事件→未溯源 CRITICAL / 红证①伪造 source_url / 红证② final 断链 / 占位豁免回归钉 / 契约分层 / 摘录回溯） |
 | 基线审计（首场 run drt_cn-us-cpu-gap） | **102/102 URL 全部可溯源到真实工具事件（无伪造链接）**；final 链 94/94；31 份证据**全部无 frontmatter**（契约从未被执行——散文式证据卡，32 MAJOR 如实揭出）；exit 0 |
 
+**补记（2026-09-26 实测）**：首场 run 的会话 cwd = `dev/harness-home`，而研究手册在
+`research-workspace/AGENTS.md`（`agent-instructions` 从 cwd 向上发现）——**该 run 一份手册都没
+注入**（system 消息无手册特征串，实证）。"31 份证据全无 frontmatter"的直接原因由此确定：
+跨角色契约没进上下文，run 靠 persona + 角色 skill 跑完。根因与修复见
+[bundle-face-wiring](2026-09-26-bundle-face-wiring.md)（工作区未注册 → 会话建错 cwd）。
+
 **基线审计的诚实结论**：首场 run 的**链接真实性**通过机械对账（102/102——好消息）；
 但**格式契约**完全没被执行（31 份全无 frontmatter——run 期间的 analyst 没按手册写）。
 这正是用户担心的"谁知道是不是幻觉"的两面：链接没造假，但契约纪律缺位；下一场 run

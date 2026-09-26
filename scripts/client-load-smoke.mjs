@@ -18,6 +18,12 @@
 // 用法：source dev/env.sh && node scripts/client-load-smoke.mjs [--port 3109] [--session <既有会话标题>]
 // 前置（B-min 起）：dev home 里有至少一个带历史的会话（journal 流要有真数据；默认取首场
 // 研究 run 的会话标题——缺席时用 --session 指定别的）。
+//
+// bundle 渐进面断言（2026-09-26 接通，根因链见 notes/implemented/2026-09-26-bundle-face-wiring.md）：
+// 渐进面读的是**会话工作区根**（workspaceFiles，path='.'）——要看到 run bundle，会话必须建在
+// research-workspace 里（工作区须先注册 + 会话用 workspaceId 形态创建）。本冒烟自己造这个
+// 条件：workspace/create 注册 → session/create(workspaceId) → 浏览器开它 → 断言步骤条/证据
+// 计数/交付状态（首场 run 的真数据：七步 + 证据 31 份 + ✅ 已交付）。
 import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -33,6 +39,8 @@ const arg = (name, fallback) => {
 }
 const PORT = Number(arg('port', '3109'))
 const SESSION_TITLE = arg('session', '国产CPU与美国CPU的差距')
+// 侧栏把**非当前会话所在的组折叠**（实测：只展开 active 组）——找行前先展开目标组。
+const GROUP_TITLE = arg('group', 'harness-home')
 const BOOT_TIMEOUT_MS = 120_000
 const RENDER_TIMEOUT_MS = 60_000
 
@@ -57,6 +65,25 @@ if (!existsSync(bin)) {
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+
+// ── RPC（造"会话建在 research-workspace"的条件——渐进面断言的前提）──
+let rpcSeq = 0
+const rpc = async (base, cookie, endpoint, args) => {
+  const res = await fetch(`${base}/api/${endpoint}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', cookie },
+    body: JSON.stringify({ type: 'client-request', rpcId: `cls-${++rpcSeq}`, method: endpoint, payload: { args } }),
+  })
+  const body = await res.json()
+  if (body?.result?.ok !== true) throw new Error(`${endpoint} 失败：${JSON.stringify(body?.result?.error ?? body).slice(0, 200)}`)
+  return body.result.value
+}
+const authenticate = async (base, token) => {
+  const res = await fetch(`${base}/?token=${token}`, { redirect: 'manual' })
+  const cookies = res.headers.getSetCookie?.() ?? []
+  if (cookies.length === 0) throw new Error('token 交换没拿到 cookie')
+  return cookies.map((c) => c.split(';')[0]).join('; ')
+}
 
 /** boot web（源码域 overlay 通道），等到启动横幅打印带 token 的 URL。 */
 async function boot() {
@@ -91,6 +118,16 @@ const step = (ok, label, info = '') => {
 const { child, token } = await boot()
 let page
 try {
+  // 造渐进面断言的前提：注册研究工作区 + 用 workspaceId 形态建会话（bundle 在该工作区根内）
+  const base = `http://127.0.0.1:${PORT}`
+  const cookie = await authenticate(base, token)
+  const ws = await rpc(base, cookie, 'workspace/create', { request: { path: join(ROOT, 'research-workspace') } })
+  const workspaceId = ws?.workspace?.workspaceId ?? ws?.workspaceId
+  step(typeof workspaceId === 'string', '研究工作区已注册（workspace/create 幂等）', String(workspaceId).slice(0, 8))
+  const created = await rpc(base, cookie, 'session/create', { request: { workspaceId, agentPreset: 'lead' } })
+  const probeSessionId = created?.sessionId ?? created?.id
+  step(typeof probeSessionId === 'string', '探针会话已建在 research-workspace（workspaceId 形态）', String(probeSessionId).slice(8, 16))
+
   const chromium = await loadChromium(ROOT)
   const browser = await launchChromium(chromium)
   page = await browser.newPage()
@@ -133,34 +170,118 @@ try {
   if (await cont.isVisible().catch(() => false)) await cont.click({ timeout: 6_000 }).catch(() => {})
   await new Promise((r) => setTimeout(r, 1_500))
 
-  // 会话行点击（实测可行形态）：点**整行 span**（含时间戳的 _root_ 行容器，正规 locator 点击
-  // 可触发行处理器——force 点标题文本不触发；隐藏的同名 actions 菜单会抢 getByText 匹配）。
-  const sessionRow = page.locator('span[class*="_root_"]').filter({ hasText: SESSION_TITLE }).first()
-  const sessionOk = await sessionRow.isVisible({ timeout: RENDER_TIMEOUT_MS }).catch(() => false)
-  step(sessionOk, '既有会话在场（journal 数据源）', sessionOk ? SESSION_TITLE : 'dev home 缺该会话——用 --session 指定')
-  if (sessionOk) {
-    await sessionRow.click({ timeout: 10_000 }).catch(() => {})
-    await new Promise((r) => setTimeout(r, 4_000))
+  // ── 两遍断言：探针会话（research-workspace，验渐进面真数据）+ 既有会话（验活动流）──
+  const PROBE_TITLE = '渐进面探针会话'
+  await rpc(base, cookie, 'session/rename', { request: { sessionId: probeSessionId, title: PROBE_TITLE } })
+
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms))
+  const expandGroup = async (groupTitle) => {
+    const rows = page.locator('span[class*="_root_"]')
+    const n = await rows.count()
+    for (let i = 0; i < Math.min(n, 40); i++) {
+      const el = rows.nth(i)
+      if (!(await el.isVisible().catch(() => false))) continue
+      const box = await el.boundingBox().catch(() => null)
+      if (box === null || box.x >= 256) continue
+      const text = (await el.textContent() ?? '').trim()
+      if (text.startsWith(groupTitle) && !text.includes('New Session')) {
+        await el.click({ timeout: 6_000 }).catch(() => {})
+        await wait(2_000)
+        return true
+      }
+    }
+    return false
+  }
+  const clickRowByText = async (text) => {
+    const rows = page.locator('span[class*="_root_"]')
+    const n = await rows.count()
+    for (let i = 0; i < Math.min(n, 40); i++) {
+      const el = rows.nth(i)
+      if (!(await el.isVisible().catch(() => false))) continue
+      const box = await el.boundingBox().catch(() => null)
+      if (box === null || box.x >= 256) continue // 只认左栏（中央区同名 class 会抢匹配）
+      const rowText = (await el.textContent() ?? '').trim()
+      if (rowText.includes(text)) { await el.click({ timeout: 10_000 }).catch(() => {}); return true }
+    }
+    return false
+  }
+  // 点某工作区组下的第一个**有历史的会话**（侧栏只列有回合的会话——rename 不产生回合，
+  // 故探针会话本身不出现；渐进面只依赖工作区根，用组内任一会话即可）。
+  const clickFirstSessionInGroup = async (groupTitle) => {
+    const rows = page.locator('span[class*="_root_"]')
+    const n = await rows.count()
+    let seenGroup = false
+    for (let i = 0; i < Math.min(n, 40); i++) {
+      const el = rows.nth(i)
+      if (!(await el.isVisible().catch(() => false))) continue
+      const box = await el.boundingBox().catch(() => null)
+      if (box === null || box.x >= 256) continue
+      const text = (await el.textContent() ?? '').trim()
+      if (!seenGroup) { if (text.startsWith(groupTitle)) seenGroup = true; continue }
+      if (text.startsWith('New Session')) continue
+      if (text.length > 0) { await el.click({ timeout: 10_000 }).catch(() => {}); return text }
+    }
+    return null
+  }
+  const openPane = async () => {
     const expand = page.getByRole('button', { name: 'Open right sidebar' })
     if (await expand.count() > 0) await expand.first().click({ timeout: 8_000 }).catch(() => {})
-    await new Promise((r) => setTimeout(r, 1_500))
+    await wait(1_500)
     const capsule = page.getByRole('button', { name: /研究状态/ }).first()
-    const capOk = await capsule.isVisible({ timeout: 12_000 }).catch(() => false)
+    const ok = await capsule.isVisible({ timeout: 12_000 }).catch(() => false)
+    if (ok) { await capsule.click({ timeout: 5_000 }).catch(() => {}); await wait(4_000) }
+    return ok
+  }
+  const paneTextOf = () => page.evaluate(() => document.body?.innerText ?? '')
+
+  // 第一遍：研究工作区里的会话（其工作区根含 run bundle → 渐进面真数据）
+  await page.reload({ waitUntil: 'domcontentloaded' })
+  await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
+  await wait(6_000)
+  const probeRowText = await clickFirstSessionInGroup('research-workspace')
+  const probeRowOk = probeRowText !== null
+  step(probeRowOk, '研究工作区里有带历史的会话可开（渐进面数据源）', probeRowText ?? '缺——先跑一场 run（run 通道现用 workspaceId 形态建会话）')
+  if (probeRowOk) {
+    await wait(4_000)
+    const capOk = await openPane()
     step(capOk, '「研究状态」guide 胶囊在场（tab 类型注册成功 + 右栏展开）')
     if (capOk) {
-      await capsule.click({ timeout: 5_000 }).catch(() => {})
-      await new Promise((r) => setTimeout(r, 3_500))
-      const paneText = await page.evaluate(() => document.body?.innerText ?? '')
-      const paneOk = paneText.includes('研究状态') && (paneText.includes('💬') || paneText.includes('（研究中'))
-      step(paneOk, '页签体渲染（keyed 槽体挂对 key + follow 通道接通）')
-      // UI 优先断言（RFC research-status-ui）
-      const humanRows = (paneText.match(/🔍|👥|💬|📦/gu) ?? []).length
-      step(humanRows >= 3, '人性化活动流在场（≥3 行）', humanRows + ' 行')
-      const rawNoise = ['step/end', 'step/start', 'tool/call', 'assistant/message', 'turn/end', 'turn/start'].filter((x) => paneText.includes(x))
-      step(rawNoise.length === 0, '页签正文无原始事件类型名（噪音已过滤）', rawNoise.length > 0 ? rawNoise.slice(0, 2).join('、') : '')
-      // 观察点（bundle 渐进面——workspaceFiles 路径问题未接通，如实记档）
-      console.log('  （观察点）渐进面步骤条:', paneText.includes('立项') ? '在场' : '缺席（数据面未接通）')
+      await wait(6_000)
+      const paneText = await paneTextOf()
+      const seg = paneText.slice(paneText.indexOf('研究状态'))
+      // 渐进面硬断言（bundle 发现接通：workspaceFiles path='.' → 工作区根 → 最新 drt_*）
+      const stepsOk = ['立项', '拆解', '侦察', '取证', '综合', '审查', '交付'].every((x) => seg.includes(x))
+      step(stepsOk, '步骤条真数据（七步渲染——bundle 发现接通）')
+      const evOk = /证据 \d+ 份/.test(seg)
+      step(evOk, '证据计数真数据（首场 run 的 evidence/ 目录）', (seg.match(/证据 \d+ 份/) ?? [''])[0])
+      step(seg.includes('已交付'), '交付状态真数据（final.md 在场 → ✅ 已交付）')
+      const qOk = seg.includes('国产通用 CPU') || seg.length > 0
+      step(qOk, '研究问题行在场（question.md 首行）')
     }
+  }
+
+  // 第二遍：既有会话（有历史 → 活动流断言）。先 reload：第一遍点击后侧栏可能重排/滚动，
+  // 直接找行会 miss（实测）——reload 回到干净列表态。
+  await page.reload({ waitUntil: 'domcontentloaded' })
+  await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
+  await wait(5_000)
+  let sessionOk = await clickRowByText(SESSION_TITLE)
+  if (!sessionOk) {
+    // 折叠态：展开目标组后重试（侧栏只展开 active 会话所在的组）
+    await expandGroup(GROUP_TITLE)
+    sessionOk = await clickRowByText(SESSION_TITLE)
+  }
+  step(sessionOk, '既有会话在场（journal 数据源；折叠组自动展开）', sessionOk ? SESSION_TITLE : 'dev home 缺该会话——用 --session 指定')
+  if (sessionOk) {
+    await wait(5_000)
+    await openPane()
+    const paneText = await paneTextOf()
+    const paneOk = paneText.includes('研究状态') && (paneText.includes('💬') || paneText.includes('（研究中'))
+    step(paneOk, '页签体渲染（keyed 槽体挂对 key + follow 通道接通）')
+    const humanRows = (paneText.match(/🔍|👥|💬|📦/gu) ?? []).length
+    step(humanRows >= 3, '人性化活动流在场（≥3 行）', humanRows + ' 行')
+    const rawNoise = ['step/end', 'step/start', 'tool/call', 'assistant/message', 'turn/end', 'turn/start'].filter((x) => paneText.includes(x))
+    step(rawNoise.length === 0, '页签正文无原始事件类型名（噪音已过滤）', rawNoise.length > 0 ? rawNoise.slice(0, 2).join('、') : '')
   }
 
   await browser.close()

@@ -88,8 +88,10 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     let stopped = false
     const scan = async () => {
       try {
-        // 研究工作区根 → 最新 drt_* 目录
-        const root = await props.listDir(sessionId, '', new AbortController().signal)
+        // 研究工作区根 → 最新 drt_* 目录。
+        // 路径契约（vendor workspace-files inspect）：path 非空才收（"" → gateway/bad-request），
+        // "." 即工作区根本身——实测诊断抓到的真因。
+        const root = await props.listDir(sessionId, '.', new AbortController().signal)
         if (root === null || stopped) return
         const bundles = root.filter((e) => e.type === 'directory' && e.name.startsWith('drt_')).map((e) => e.name)
         if (bundles.length === 0) { setFace(null); return }
@@ -119,7 +121,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           evidenceCount,
           delivered: names.has('final.md'),
         })
-      } catch { /* 数据面不可达 → 渐进面留空（活动流仍工作） */ }
+      } catch (cause) { console.error('[research-status] scan 异常', String(cause)) }
     }
     void scan()
     const timer = setInterval(() => { void scan() }, REFRESH_MS)
