@@ -1,4 +1,4 @@
-// run-dashboard 回归 — RFC notes/proposed/2026-09-24-m2-run-dashboard.md 的 keyless 验收：
+// run-dashboard 回归 — RFC notes/implemented/2026-09-24-m2-run-dashboard.md 的 keyless 验收：
 // fixture run 目录 → 断言矩阵计数与分级统计精确；fail-soft（缺失/畸形不 throw）。
 // 反证方法：改 fixture 数字（如 evidence quality A→B）本文件必须红——见 RFC 验收判据。
 import { test } from 'node:test';
@@ -10,6 +10,7 @@ import {
   renderHtml,
   topicEvidenceMatrix,
   gapStats,
+  parseReview,
 } from '../scripts/run-dashboard.mjs';
 
 const RUN = join(dirname(fileURLToPath(import.meta.url)), 'fixtures', 'run-dashboard', 'run');
@@ -61,6 +62,23 @@ test('review：readiness 与分级计数', () => {
   assert.equal(m.review.minor, 1);
 });
 
+test('review：两相 review.md 取终局判定（首审 FAIL → 复核 PASS）', () => {
+  // 边界形态 = 真实形态（drt_cn-us-cpu-gap/review.md）：结论摘要里一处散文提及 + 首审
+  // `# readiness: FAIL` + lead 改稿后文末复核 `## readiness: PASS`。取首个匹配会把已交付的
+  // run 报成 FAIL（本轮修的真实缺陷）。
+  const twoPhase = [
+    '# Review — drt_demo（审查对象：final.md）',
+    '- **结论摘要**：**readiness: FAIL**——三处口径没随结论走。',
+    '## objection 1 — 下限无来源',
+    '# readiness: FAIL',
+    '# 复核（lead 改稿后）：终审',
+    '## readiness: PASS',
+  ].join('\n');
+  assert.equal(parseReview(twoPhase).readiness, 'PASS');
+  assert.equal(parseReview('## readiness: FAIL').readiness, 'FAIL'); // 单相仍取唯一判定
+  assert.equal(parseReview('本文件没有判定行'), null); // fail-soft 不变
+});
+
 test('journal 尾部与文件统计', () => {
   const m = buildModel(RUN);
   assert.ok(m.journal.length >= 1 && m.journal.length <= 15);
@@ -89,7 +107,7 @@ test('渲染壳：关键区块与 meta refresh 在场', () => {
   assert.match(html, /只读投影/);
 });
 
-// ── debug-dashboard-plus（RFC notes/proposed/2026-09-24-debug-dashboard-plus.md）──────
+// ── debug-dashboard-plus（RFC notes/implemented/2026-09-24-debug-dashboard-plus.md）──────
 // 多场扫描 / 场内进度 / 步骤推导 / final 与 review 双命名容纳 / HITL 等待检测（zstd 夹具
 // 测试内生成——node:zlib 原生，无子进程，layering 纪律不破）。
 import { mkdirSync, rmSync, writeFileSync, utimesSync } from 'node:fs';
