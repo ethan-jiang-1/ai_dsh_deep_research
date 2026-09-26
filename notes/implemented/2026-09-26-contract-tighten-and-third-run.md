@@ -91,7 +91,24 @@ deepseek-v4-pro / 模型版本 …"每格一行）——第 3 条被遵守；引
   click 超时被静默吞掉；`text=/Recommended/` 误命中 assistant 推理文本）——三处都是真跑才暴露，
   各带复现与修法，见对应 commit。
 
-## scout 方法论建议（第③件，提交用户拍板）
+## scout 方法论与轻量 critic（第③件——用户已拍板：A + 配轻量 critic，2026-09-26 实施）
+
+用户选了 **A（检索器对账节）+ 给 quick_factual 配轻量 critic**。实施落点（全部 preset 内容，
+模型可见）：
+
+- **scout `lead-mapping`**：新增"检索器对账"节——每条 lead 标注经由哪个检索器/来源域可达、
+  单一可达标 `单检索器——待破`、跨检索器方向优先推荐；`leads.md` 模板加 `- 检索器:` 字段；
+- **lead `team-assembly`**：quick_factual 行从"不组队"改为"subagent 单点查证 + **轻量 critic ×1**
+  （草稿成型后进场，单条 review.md，只查数字转写与出处链）"——并写明理由：主编自检与
+  "审计自证"同构，查不出自己没看见的错；
+- **critic `adversarial-review`**：新增"轻量模式（quick_factual 薄路径）"节——两条线（数字逐字对、
+  出处链），不做完整反例狩猎（研究手册已豁免天然单源），但两条底线不降：单源数字未标
+  `单源——待破` 仍报、source_url 未真实抓取仍报；readiness 判据不降。
+
+验证：overlay 重渲染（280 行）+ L0 全绿（56 tests）+ **L1 真挂载连跑三次全绿** + **L4-lite
+真模型 ALL PASS**（四角色 + scout web_search）。三处均为本轮第三场 run 实测暴露的证据驱动。
+
+## scout 方法论建议（原提案，留档）
 
 三场数据齐了。关键事实：run 1 最硬的发现是"**仅换检索器动 14–21 个百分点**"——检索器（而非
 模型国别）是深度研究能力的主导变量；而本轮审计又显示摘录保真与 source_url 抓取纪律对 agent

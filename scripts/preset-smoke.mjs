@@ -10,7 +10,7 @@
 //   钉 tag 源码基线 + tsx 解析树——D10 偏离下的机制权威）。
 // 用法：source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs [--port 3099]
 
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { withModelKey } from './lib/env.mjs';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
@@ -99,11 +99,33 @@ const rpc = async (base, cookie, endpoint, args) => {
   return body.result.value;
 };
 
+// 端口自持有纪律（scripts/AGENTS.md「用完释放」）的执行器：实测 web 服务进程**不在** spawn
+// 子进程的进程组里（SIGTERM / 整组 SIGKILL 都够不着——2026-09-26 连跑三次实测，每次跑完端口
+// 仍被占、下一次冒烟直接 EADDRINUSE）。按**端口**收割才可靠：谁还听着这个口就杀谁，杀完验证
+// 释放；不干净就 fail-loud（一个只在单独运行时通过的脚本是脚本的缺陷）。
+const listenersOn = (port) => {
+  const r = spawnSync('lsof', ['-t', '-nP', `-iTCP:${port}`, '-sTCP', 'LISTEN'], { encoding: 'utf8' })
+  if (r.error !== undefined) return null // lsof 缺席：降级为不校验（本仓目标平台在位）
+  return r.stdout.split('\n').map((x) => x.trim()).filter(Boolean)
+}
+const reclaimPort = async (port) => {
+  const pids = listenersOn(port)
+  if (pids === null) return `lsof 缺席，跳过端口校验（pid=${String(process.env.PID ?? '?')}）`
+  for (const pid of pids) { try { process.kill(Number(pid), 'SIGKILL') } catch { /* 已死 */ } }
+  await sleep(500)
+  const left = listenersOn(port)
+  if (left !== null && left.length > 0) return `端口 ${port} 用后未释放（残留 pid ${left.join(',')}）`
+  return null
+}
+
 const boot = async () => {
   const argv = ['--import', 'tsx/esm', bin, '--profile', PROFILE];
   if (!NO_PATCH) argv.push('--patch', OVERLAY);
   argv.push('--', '--port', String(PORT), '--no-open');
-  const child = spawn(process.execPath, argv, { cwd: dshSrc, env: withModelKey({ DSH_HOME: home }), stdio: ['ignore', 'pipe', 'pipe'] });
+  // detached = 组长（2026-09-26 实测修复）：web 会再派生子进程（真正的服务进程），SIGTERM 直杀
+  // 只达直接子进程、孙进程成孤儿占住端口——一次全绿的 L1 跑完后泄漏的孤儿让下一次冒烟直接
+  // EADDRINUSE。组长模式让我们能整组收割（process.kill(-pid)）。
+  const child = spawn(process.execPath, argv, { cwd: dshSrc, env: withModelKey({ DSH_HOME: home }), stdio: ['ignore', 'pipe', 'pipe'], detached: true });
   let output = '';
   const banner = new Promise((resolveBanner, rejectBanner) => {
     const onData = (chunk) => {
@@ -116,8 +138,16 @@ const boot = async () => {
     child.on('exit', (code) => rejectBanner(new Error(`web 进程提前退出（code ${String(code)}）\n${output.slice(-800)}`)));
     setTimeout(() => rejectBanner(new Error(`等待启动横幅超时\n${output.slice(-800)}`)), BOOT_TIMEOUT_MS);
   });
-  const { token } = await banner;
-  return { child, token };
+  try {
+    const { token } = await banner;
+    return { child, token };
+  } catch (e) {
+    // 启动失败（横幅超时 / web 早退）也不能留活口——原版直接 throw，child 成孤儿
+    try { process.kill(-child.pid, 'SIGKILL') } catch { child.kill('SIGKILL') }
+    await sleep(500);
+    try { process.kill(-child.pid, 'SIGKILL') } catch { /* 已死 */ }
+    throw e;
+  }
 };
 
 const authenticate = async (port, token) => {
@@ -177,8 +207,12 @@ try {
     });
   }
 } finally {
-  child.kill('SIGTERM');
+  // 双保险：先按进程拓扑杀（组杀），再按**端口**收割并验证——后者才是本修复的判据
+  try { process.kill(-child.pid, 'SIGTERM') } catch { child.kill('SIGTERM') }
   await sleep(300);
+  try { process.kill(-child.pid, 'SIGKILL') } catch { child.kill('SIGKILL') }
+  const leak = await reclaimPort(PORT);
+  if (leak !== null) { failures.push(leak); console.log(`  FAIL ${leak}`); }
 }
 
 console.log(failures.length === 0

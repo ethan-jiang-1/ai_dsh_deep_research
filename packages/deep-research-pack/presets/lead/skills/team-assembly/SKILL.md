@@ -11,7 +11,7 @@ topic 图定稿后、任何 spawn 之前加载。**名单定下来之前不 spaw
 
 | 研究类型 | 组队 |
 |---|---|
-| `quick_factual` | 不组队。subagent 单点查证，主编亲自核证据后直接交付 |
+| `quick_factual` | subagent 单点查证 + **轻量 critic ×1**（草稿成型后进场，单条 review.md，只查数字转写与出处链）——主编亲自核证据**不能替代对抗审查**：自检与"审计自证"同构，你查不出你自己没看见的错 |
 | `exploratory_map` | scout ×1（铺方向）+ analyst ×1–2（按 primary topic 数）+ critic ×1 |
 | `claim_verification` | scout ×1 + analyst ×1（反例权重最高）+ critic ×1（必须有，验证类报告最容易自嗨） |
 
