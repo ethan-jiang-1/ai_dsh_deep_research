@@ -50,10 +50,11 @@ export function splitFrontmatter(text) {
 const URL_RE = /https?:\/\/[^\s>)）』」"'\]，。；`（\\]+/g
 const urlsOf = (text) => [...text.matchAll(URL_RE)].map((m) => m[0].replace(/[.,;:)\]`）】」'"\\]+$/, ''))
 /** 规范化（CJK 安全）：去全部空白 + markdown 强调符 + 小写。 */
-// 去空白 + markdown 语法符（强调/引用/标题/列表/表格分隔 `|`）+ **引号/书名号类装饰符**。
-// 引号是 2026-09-26 实测补的：59 条摘录其实是**逐字**的，只因卡片用 `"…"`/`「…」` 包住原文、
-// 而来源里没有这层引号，就被判"转写不符"——判据是"文字是否来自来源"，不是"装饰是否一致"。
-export const normalize = (s) => s.replace(/[\s>*_`#·•|"'“”‘’「」『』]+/gu, '').toLowerCase()
+// 去空白 + markdown 语法符（强调/引用/标题/列表/表格分隔 `|`）+ **引号/书名号类装饰符** +
+// **反斜杠转义**。引号与转义都是实测补的：59 条逐字摘录只因卡片用 `"…"` 包住原文被判失败；
+// 第四场 run 又有 33+ 条只因 `128K\<Token≤256K`（卡片把 `<` 转义成 `\<` 防止被当 HTML 标签、
+// 来源页无转义）整条失配——判据是"文字是否来自来源"，不是"装饰与转义是否一致"。
+export const normalize = (s) => s.replace(/[\\\s>*_`#·•|"'“”‘’「」『』]+/gu, '').toLowerCase()
 const stripTrailing = (u) => u.replace(/\/+$/, '')
 
 /**
