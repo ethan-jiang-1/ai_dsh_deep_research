@@ -62,6 +62,16 @@ frontmatter）。`dev/run-kickoff.mjs` 已默认用 workspaceId 形态把会话�
   2. `ui-agent-team` 任务板（谁领了什么活、起止状态）；
   3. deliverables 面板（final.md 交付后出现）。
 
+**用户不在场时代答（代理模拟）**：HITL 的 answerer 只有连着 web 的浏览器客户端（vendor 实测：
+CLI/host 侧没有 answerer，也没有提交答案的 RPC）——所以代答要用真浏览器：
+
+```sh
+node dev/hitl-answer.mjs --port 3081 --token <横幅 token>   # 默认逐题选带（Recommended）的那一项
+```
+
+它逐题打印选择结果；**必须**把这次代答如实记进 bundle 的 `question.md` §Decisions 与
+`journal.md`，标注"代理模拟"（它替的是人，不是人）。HITL1 与 HITL2 都走同一条命令。
+
 ## 4. HITL2（交付审阅）
 
 - lead 带审阅建议来找你：证据充分性判断 + 交付/补研究推荐 + composition 确认
