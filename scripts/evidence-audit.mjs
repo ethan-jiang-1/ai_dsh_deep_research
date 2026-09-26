@@ -74,7 +74,10 @@ export function buildCorpus(root) {
           let e
           try { e = JSON.parse(line) } catch { continue }
           if (e?.type !== 'tool/call' && e?.type !== 'tool/result' && e?.type !== 'tool-call' && e?.type !== 'tool-result') continue
-          const payload = JSON.stringify(e.data ?? {})
+          // ⚠ 反转义斜杠（2026-09-26 实测的关键修复）：tool/call 的 `arguments` 是**内嵌 JSON 字符串**，
+          // 其中的 URL 在日志里是 `https:\/\/host\/path` 形态；不反转义则 URL_RE 一条也匹配不到
+          // ——后果是**把真实抓取过的来源判成"伪造链接"**（实测 5 个 host 各命中 11–19 次仍被误判）。
+          const payload = JSON.stringify(e.data ?? {}).replace(/\\\//g, '/')
           // 分片存储（2026-09-26 实测修复）：原先 `texts.join('\n')` 在会话日志长到十几 MB
           // 压缩量时超出 V8 单字符串上限 → `RangeError: Invalid string length`，**审计整条崩掉**。
           // 摘录回溯本来只需"在某一个工具事件里出现过"，逐片判定等价且内存安全。
@@ -133,9 +136,11 @@ export function auditBundle(bundleDir, sessionsRoot) {
   //    · 逐字命中 → OK
   //    · 域名（scheme+host）命中但路径没命中 → MAJOR「仅域名可溯源」
   //    · 域名也没命中 → CRITICAL「域名与 URL 都未出现」
-  const origins = new Set()
+  // 比 host（含端口）而不是 origin：实测 run 的卡片常写 `http://…` 而日志里是 `https://…`
+  // （或反之），用 origin 比会把**同一站点**判成"域名也没抓过"→ 假 CRITICAL（实测 61 次命中被误判）。
+  const hosts = new Set()
   for (const u of corpusUrlSet) {
-    try { origins.add(new URL(u).origin) } catch { /* 非法 URL 跳过 */ }
+    try { hosts.add(new URL(u).host) } catch { /* 非法 URL 跳过 */ }
   }
   let urlOk = 0
   let urlTotal = 0
@@ -143,9 +148,9 @@ export function auditBundle(bundleDir, sessionsRoot) {
     for (const u of rec.claimedUrls) {
       urlTotal += 1
       if (corpusUrlSet.has(stripTrailing(u))) { urlOk += 1; continue }
-      let origin = null
-      try { origin = new URL(u).origin } catch { /* 非法 URL */ }
-      if (origin !== null && origins.has(origin)) {
+      let host = null
+      try { host = new URL(u).host } catch { /* 非法 URL */ }
+      if (host !== null && hosts.has(host)) {
         findings.push({ level: 'MAJOR', file: rec.file, kind: '仅域名可溯源', detail: `具体路径未在工具事件中出现（域名已抓过）：${u.slice(0, 100)}` })
         continue
       }
@@ -257,7 +262,18 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
   const argv = process.argv.slice(2)
   const latest = argv.includes('--latest')
   const sessionsIdx = argv.indexOf('--sessions')
-  const sessionsRoot = sessionsIdx !== -1 ? resolve(argv[sessionsIdx + 1]) : (process.env.DSH_HOME ? join(resolve(process.env.DSH_HOME), 'sessions') : join(ROOT, 'dev', 'harness-home', 'sessions'))
+  // 会话根解析（2026-09-26 实测修复）：**不能盲信继承来的 DSH_HOME**。实测：在日用 GUI 的 shell 里
+  // DSH_HOME 常已被设成 `~/.dsh`（日用 home），于是本脚本会去审计**另一个 home 的会话**——
+  // 同一 bundle 两次跑出 7/88 与 85/88（1807 vs 330 个日志文件），足以把好报告判成"伪造链接"。
+  // 处置：默认锚定本仓 dev home；DSH_HOME 指向别处时**先自拒**（同 L1/L2 的 exit 2 纪律），
+  // 要审别的 home 就显式 `--sessions <dir>`。
+  const repoHome = join(ROOT, 'dev', 'harness-home')
+  const envHome = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null
+  if (sessionsIdx === -1 && envHome !== null && envHome !== repoHome) {
+    console.error(`evidence-audit: DSH_HOME=${envHome} 不是本仓 dev home（${repoHome}）——先 \`source dev/env.sh\`，或显式 --sessions <dir>；本脚本不自作主张换 home（实测会审到别的 home 的会话，结论不可比）`)
+    process.exit(2)
+  }
+  const sessionsRoot = sessionsIdx !== -1 ? resolve(argv[sessionsIdx + 1]) : join(repoHome, 'sessions')
   const bundleArg = argv.find((a) => !a.startsWith('--') && a !== sessionsRoot)
   const statMs = (p) => { try { return statSync(p).mtimeMs } catch { return 0 } }
   let bundleDir = null

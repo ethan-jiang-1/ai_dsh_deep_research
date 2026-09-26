@@ -107,7 +107,7 @@ node scripts/run-dashboard.mjs --latest --out <html>   # run 只读投影（多�
 node dev/run-kickoff.mjs --port 3081 --token <横幅 token> --prompt-file <file>        # run 会话驱动（建会话+发 kickoff）
 pnpm dsh <args…>                      # 机制基线 CLI（vendor/dsh 钉 tag 源码；等价 dev/env.sh 的 dsh 函数）
 node --import tsx/esm scripts/client-hitl-smoke.mjs   # 观察面活标题触发验证（真模型档：RPC followup 造挂起态 + 盘侧谓词 + 浏览器观察点）
-node scripts/evidence-audit.mjs --latest  # run bundle 证据溯源审计（keyless：URL/摘录/final 链对会话日志机械对账 → audit.md；CRITICAL 即 exit 1）
+node scripts/evidence-audit.mjs <bundle>|--latest  # 证据溯源审计（**须先 source dev/env.sh**：它锚定本仓 dev home，DSH_HOME 指向别处即自拒）（keyless：URL/摘录/final 链对会话日志机械对账 → audit.md；CRITICAL 即 exit 1）
 node scripts/entry-chain-probe.mjs    # 入口链探针（真模型档：时不变四问，答案对 ▶ 真值软断言，留档人工复核）
 node packages/deep-research-pack/scripts/preflight.mjs --workspace <dir>   # 部署前置检查（pack 自带 bin：DSH 版本/peer 包/团队层/工作区手册/构建产物/密钥；fail-loud 带补救命令）
 node packages/deep-research-pack/scripts/scaffold.mjs --workspace <dir>    # 部署准备（pack 自带 bin：铺工作区种子 + 补团队层 + 复跑 preflight；幂等）
