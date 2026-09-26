@@ -12,7 +12,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const TMP = join(ROOT, 'tests', '.tmp-evidence-audit');
 
 /** 造夹具：bundle（evidence + final）+ sessions（纯 .jsonl 工具事件）。 */
-function fixture({ forged = false, brokenRef = false } = {}) {
+function fixture({ forged = false, brokenRef = false, derived = false } = {}) {
   rmSync(TMP, { recursive: true, force: true });
   const bundle = join(TMP, 'drt_fixture');
   const sessions = join(TMP, 'sessions', 'g1', 's1');
@@ -24,15 +24,17 @@ function fixture({ forged = false, brokenRef = false } = {}) {
     JSON.stringify({ type: 'assistant/message', data: { text: `顺嘴提一句 https://example.com/mentioned-only（非工具事件——不应算数）` } }),
     JSON.stringify({ type: 'tool/call', data: { name: 'web_search', arguments: { query: 'xeon 4314 spec' } } }),
     JSON.stringify({ type: 'tool/result', data: { name: 'web_search', content: `SPECrate2017_int_base = 228 见 ${realUrl}` } }),
-    JSON.stringify({ type: 'tool/call', data: { name: 'web_fetch', arguments: { url: 'https://example.com/blog/post-x' } } }),
-    JSON.stringify({ type: 'tool/result', data: { name: 'web_fetch', content: '博客全文 https://example.com/blog/post-x' } }),
+    JSON.stringify({ type: 'tool/call', data: { name: 'web_fetch', arguments: { url: 'https://blog.example.org/post-x' } } }),
+    JSON.stringify({ type: 'tool/result', data: { name: 'web_fetch', content: '博客全文 https://blog.example.org/post-x' } }),
   ].join('\n');
   writeFileSync(join(sessions, 'session.v4.jsonl'), log);
   // 证据文件 A：契约完整 + URL 可溯源 + 摘录可回溯
   const urlA = forged ? 'https://forged.example.com/never-fetched' : realUrl;
   writeFileSync(join(bundle, 'evidence', 'ev-a.md'), `---\nsource_url: ${urlA}\nretrieved_at: 2026-09-25\nquality: A\nfound_by: analyst\nsupports: T1\nsource_tier: primary\npublisher: example.com\n---\n\n# A\n\n## 原文摘录\n\n> SPECrate2017_int_base = 228 见 ${realUrl}\n\n## 解读\n\n初步判断。\n`);
   // 证据文件 B：无 frontmatter（存量散文式）——契约不符 MAJOR；正文 URL 可溯源
-  writeFileSync(join(bundle, 'evidence', 'ev-b.md'), `# B（散文式存量）\n\n来源：https://example.com/blog/post-x\n`);
+  // derived=true → 同域但路径是派生态（域名抓过、该路径没抓过）——应判 MAJOR「仅域名可溯源」，不是伪造
+  const urlB = derived ? 'https://blog.example.org/post-y-never-fetched' : 'https://blog.example.org/post-x';
+  writeFileSync(join(bundle, 'evidence', 'ev-b.md'), `# B（散文式存量）\n\n来源：${urlB}\n`);
   // final：A 引用正常；按需断链；头部占位说明（反引号内——豁免）
   const broken = brokenRef ? '\n结论X [来源: evidence/not-exist.md]' : '';
   writeFileSync(join(bundle, 'final.md'), `# Final\n\n格式说明：每条附 \`[来源: evidence/xx.md]\`。\n\n结论 [来源: evidence/ev-a.md]${broken}\n`);
@@ -51,11 +53,19 @@ test('B 的正文 URL 不在语料 → 伪造链接 CRITICAL（URL 溯源只认�
   const { bundle, sessions } = fixture();
   // 显式拿掉 blog 的工具事件（模拟"模型口述过但从未真取"）
   const logPath = join(sessions, 'session.v4.jsonl');
-  writeFileSync(logPath, readFileSync(logPath, 'utf8').split('\n').filter((l) => !l.includes('blog/post-x')).join('\n'));
+  writeFileSync(logPath, readFileSync(logPath, 'utf8').split('\n').filter((l) => !l.includes('blog.example.org/post-x')).join('\n'));
   const r = auditBundle(bundle, sessions);
   const forged = r.findings.filter((f) => f.kind === '伪造链接/未溯源');
-  assert.equal(forged.length, 1, 'ev-b.md 的 blog URL 不在任何工具事件 → CRITICAL');
+  assert.equal(forged.length, 1, 'ev-b.md 的域名与 URL 都不在任何工具事件 → CRITICAL');
   assert.equal(forged[0].file, 'ev-b.md');
+});
+
+test('同域但路径未抓过 → MAJOR「仅域名可溯源」，不是伪造（三档判据的第二档）', () => {
+  const { bundle, sessions } = fixture({ derived: true });
+  const r = auditBundle(bundle, sessions);
+  const derived = r.findings.filter((f) => f.kind === '仅域名可溯源');
+  assert.equal(derived.length, 1, '域名在语料里、该路径不在 → MAJOR 而非 CRITICAL');
+  assert.equal(r.criticalCount, 0, '域名抓过就不该判伪造');
 });
 
 test('红证①：伪造 source_url → CRITICAL；还原后消失', () => {

@@ -41,18 +41,22 @@ export function splitFrontmatter(text) {
   return { fm, body: m[2] }
 }
 
-const URL_RE = /https?:\/\/[^\s>)）』」"'\]，。；]+/g
-const urlsOf = (text) => [...text.matchAll(URL_RE)].map((m) => m[0].replace(/[.,;:)\]]+$/, ''))
+// 尾部清理集（2026-09-26 实测修复）：原版只剥 ASCII `.,;:)]`，于是证据卡里形如
+// `` `https://x/y`（HTTP 200） `` 的写法被抽成 `https://x/y`（HTTP`——**不匹配语料 → 假 CRITICAL**。
+// 现把反引号与全角括号一并排除/剥除（URL 内本就不会出现这两类字符）。
+const URL_RE = /https?:\/\/[^\s>)）』」"'\]，。；`（]+/g
+const urlsOf = (text) => [...text.matchAll(URL_RE)].map((m) => m[0].replace(/[.,;:)\]`）】」'"]+$/, ''))
 /** 规范化（CJK 安全）：去全部空白 + markdown 强调符 + 小写。 */
-export const normalize = (s) => s.replace(/[\s>*_`#·•]+/gu, '').toLowerCase()
+// 去空白 + markdown 语法符（强调/引用/标题/列表/表格分隔 `|`）——表格行摘录要能与来源原文对齐。
+export const normalize = (s) => s.replace(/[\s>*_`#·•|]+/gu, '').toLowerCase()
 const stripTrailing = (u) => u.replace(/\/+$/, '')
 
 /** 会话日志语料（全部会话；只认工具事件——模型口述的 URL 不算数）。.jsonl 直读、.zstd 走 CLI。 */
 export function buildCorpus(root) {
   const urls = new Set()
-  const texts = []
+  const chunks = [] // 逐事件规范化分片（**不要** join 成一个大字符串）
   let sessionFiles = 0
-  if (!existsSync(root)) return { urls, text: '', sessionFiles }
+  if (!existsSync(root)) return { urls, chunks, sessionFiles }
   const walk = (dir) => {
     for (const ent of readdirSync(dir, { withFileTypes: true })) {
       const p = join(dir, ent.name)
@@ -71,14 +75,17 @@ export function buildCorpus(root) {
           try { e = JSON.parse(line) } catch { continue }
           if (e?.type !== 'tool/call' && e?.type !== 'tool/result' && e?.type !== 'tool-call' && e?.type !== 'tool-result') continue
           const payload = JSON.stringify(e.data ?? {})
-          texts.push(payload)
+          // 分片存储（2026-09-26 实测修复）：原先 `texts.join('\n')` 在会话日志长到十几 MB
+          // 压缩量时超出 V8 单字符串上限 → `RangeError: Invalid string length`，**审计整条崩掉**。
+          // 摘录回溯本来只需"在某一个工具事件里出现过"，逐片判定等价且内存安全。
+          chunks.push(normalize(payload.slice(0, 4 * 1024 * 1024)))
           for (const u of urlsOf(payload)) urls.add(u)
         }
       }
     }
   }
   walk(root)
-  return { urls, text: texts.join('\n'), sessionFiles }
+  return { urls, chunks, sessionFiles }
 }
 
 /**
@@ -87,6 +94,11 @@ export function buildCorpus(root) {
  * @param sessionsRoot - 会话日志根。
  * @returns { findings, criticalCount, stats, report }——findings: { level: CRITICAL|MAJOR|INFO, file, kind, detail }。
  */
+// 已知限制（2026-09-26 跑 run 实测，如实记档）：
+//   · ① URL 溯源 = 逐字 / 仅域名 / 都没有 三档——"域名抓过但路径是派生态"不再误判为伪造。
+//   · ② 摘录回溯对**表格行**逐格判定；但**翻译或改写过的摘录永远对不上**（本仓 run 的卡片是
+//     中文交付、来源多为英文，卡内译文属正常实践）。故 ② 的未命中数**不等于**伪造数，
+//     读报告时看 kind 分档，别只看总数。
 export function auditBundle(bundleDir, sessionsRoot) {
   const evDir = join(bundleDir, 'evidence')
   const findings = []
@@ -114,17 +126,30 @@ export function auditBundle(bundleDir, sessionsRoot) {
     }
   }
   const corpus = buildCorpus(sessionsRoot)
-  const corpusNorm = normalize(corpus.text)
   const corpusUrlSet = new Set([...corpus.urls].map(stripTrailing))
 
-  // ① URL 溯源
+  // ① URL 溯源（三档——2026-09-26 实测细化：原版只有"逐字命中/CRITICAL"两档，把
+  //    「域名抓过、路径是派生态（ar5iv/PDF 变体、站点根）」也打成 CRITICAL，假阳性淹没真问题）
+  //    · 逐字命中 → OK
+  //    · 域名（scheme+host）命中但路径没命中 → MAJOR「仅域名可溯源」
+  //    · 域名也没命中 → CRITICAL「域名与 URL 都未出现」
+  const origins = new Set()
+  for (const u of corpusUrlSet) {
+    try { origins.add(new URL(u).origin) } catch { /* 非法 URL 跳过 */ }
+  }
   let urlOk = 0
   let urlTotal = 0
   for (const rec of evidence) {
     for (const u of rec.claimedUrls) {
       urlTotal += 1
       if (corpusUrlSet.has(stripTrailing(u))) { urlOk += 1; continue }
-      findings.push({ level: 'CRITICAL', file: rec.file, kind: '伪造链接/未溯源', detail: `URL 不在任何会话日志的工具事件里：${u.slice(0, 100)}` })
+      let origin = null
+      try { origin = new URL(u).origin } catch { /* 非法 URL */ }
+      if (origin !== null && origins.has(origin)) {
+        findings.push({ level: 'MAJOR', file: rec.file, kind: '仅域名可溯源', detail: `具体路径未在工具事件中出现（域名已抓过）：${u.slice(0, 100)}` })
+        continue
+      }
+      findings.push({ level: 'CRITICAL', file: rec.file, kind: '伪造链接/未溯源', detail: `域名与 URL 都未出现在任何工具事件里：${u.slice(0, 100)}` })
     }
   }
   // ② 摘录转写回溯
@@ -134,8 +159,29 @@ export function auditBundle(bundleDir, sessionsRoot) {
     for (const q of rec.quotes) {
       quoteTotal += 1
       const n = normalize(q)
-      if (n.length >= 8 && corpusNorm.includes(n)) { quoteOk += 1; continue }
-      findings.push({ level: 'MAJOR', file: rec.file, kind: '转写不符', detail: `摘录在工具结果语料中不可回溯（前 60 字）：${q.slice(0, 60)}` })
+      if (n.length >= 8 && corpus.chunks.some((c) => c.includes(n))) { quoteOk += 1; continue }
+      // 逐字命中失败时的分级（2026-09-26 实测细化）：长摘录里含表格行/改写时，整串必然对不上，
+      // 但**开头**通常仍逐字来自来源——把"头部可溯源"降为 INFO，只在**头部都对不上**时才判
+      // MAJOR 转写不符（那才是"凭空写摘录"的信号）。原版一律 MAJOR，实测 505 条假阳性。
+      // 表格行摘录（原串含 `|`）：语义单位是**单元格**，不是整行——逐格回溯，
+      // 全部格可溯源即通过，部分可溯源降 INFO，一格都对不上才 MAJOR。
+      if (q.includes('|')) {
+        const cells = q.split('|').map((x) => normalize(x)).filter((x) => x.length >= 8)
+        if (cells.length > 0) {
+          const okCells = cells.filter((x) => corpus.chunks.some((c) => c.includes(x))).length
+          if (okCells === cells.length) { quoteOk += 1; continue }
+          if (okCells > 0) {
+            findings.push({ level: 'INFO', file: rec.file, kind: '摘录部分可溯源', detail: `表格行 ${okCells}/${cells.length} 格可回溯：${q.slice(0, 60)}` })
+            continue
+          }
+        }
+      }
+      const head = n.slice(0, 60)
+      if (head.length >= 8 && corpus.chunks.some((c) => c.includes(head))) {
+        findings.push({ level: 'INFO', file: rec.file, kind: '摘录非逐字', detail: `头部可溯源、整段非逐字（表格/改写）：${q.slice(0, 60)}` })
+        continue
+      }
+      findings.push({ level: 'MAJOR', file: rec.file, kind: '转写不符', detail: `摘录头部即不可回溯（前 60 字）：${q.slice(0, 60)}` })
     }
   }
   // ③ final 溯源链（反引号内的格式说明占位不算引用——先剥 code span）
@@ -146,9 +192,14 @@ export function auditBundle(bundleDir, sessionsRoot) {
     const finalText = readFileSync(finalPath, 'utf8').replace(/`[^`]*`/g, '')
     for (const m of finalText.matchAll(/\[来源:\s*evidence\/([^\]]+?)\]/g)) {
       finalRefs += 1
-      if (!existsSync(join(evDir, m[1].trim()))) {
+      const whole = m[1].trim()
+      const path = whole.split(/[\s§]/)[0] // 路径只取到空白/§ 为止（`xx.md §四` 是节指引，不是文件名）
+      if (!existsSync(join(evDir, path))) {
         finalBroken += 1
-        findings.push({ level: 'CRITICAL', file: 'final.md', kind: '溯源断链', detail: `[来源: evidence/${m[1]}] 指向的文件不存在` })
+        findings.push({ level: 'CRITICAL', file: 'final.md', kind: '溯源断链', detail: `[来源: evidence/${whole}] 指向的文件不存在` })
+      } else if (path !== whole) {
+        // 文件在，但引用括号里塞了节指引——契约格式是 `[来源: evidence/<file>.md]`
+        findings.push({ level: 'MAJOR', file: 'final.md', kind: '引用格式偏差', detail: `[来源: evidence/${whole}] 括号内含节指引；契约格式只写文件路径（文件本身存在）` })
       }
     }
   }
