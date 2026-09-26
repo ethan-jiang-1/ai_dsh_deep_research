@@ -20,14 +20,40 @@
 
 ## 1. 六步闭环（实施期）
 
+### 1.1 入口链契约（每步：读什么 → 应知道什么 → 卡住怎么办）
+
+入口链的**步骤清单**正本 = 根 [AGENTS.md](../../AGENTS.md) §入口链（5 步）；下表是它的**产出契约**
+（每一步给多少、拿到什么才算走完、卡住时的正确动作）：
+
+| 步 | 读什么 | 读完应知道 | 卡住怎么办 |
+|---|---|---|---|
+| 1 | 根 `AGENTS.md` | 仓库形态、布局、纪律、`notes/` 地位、入口链本身 | 只想问"这仓库是什么" → 到此为止，别再往下读 |
+| 2 | `docs/00-index.md` | 有哪些文档、决策 D 号在哪查、术语映射 | **别通读台账**；按需查 D 号 |
+| 3 | `roadmap.md` §队列 ▶ | 当前条目是谁 + **它可不可执行**（行内标注"等人 / 可自主"） | ▶ 标"等人" → 正确动作是**向用户取题**，不是开工 |
+| 4 | 该条目的 RFC | 问题 / 方案 / 输掉的方案 / **验收** | 验收不可用或与现状矛盾 → 先修 RFC 再动手 |
+| 5 | 本页（guides/60） | 开工（§1/§2）与收尾（§4）程序 | 见下"按条目类型分支" |
+
+**按条目类型分支**（第 5 步的实际程序不同，别拿代码程序跑研究条目）：
+
+- **代码 / 卫生型** → 本页 §1.2 六步闭环 + §2 面选择表与任务型路由表 + §4 收尾；
+- **研究 run 型** → [guides/61](61-run-playbook.md)（含**硬前置**：`research-workspace` 必须已注册进
+  DSH，否则研究手册不进上下文）+ 开发技能 `running-a-research-run`；
+- **队列条目毕业** → `graduating-a-queue-item`；**加/改角色** → `adding-a-research-role`；
+  **加/改门禁** → `writing-a-gate`。
+
+任务命中 `.agents/skills/` 某条 description（上列四个）时**先读该 `SKILL.md` 全文再动手**，不从
+摘要猜流程。
+
+### 1.2 六步闭环
+
 1. 读入口链定位条目（入口链唯一正本 = 根 [AGENTS.md](../../AGENTS.md) §入口链，5 步）+ 该条目 RFC；
 2. 列 todo（一 concrete step 一条，开列全量）；
 3. 改动（源码/文档/配置同 diff 维护"现在为真"）；
-4. 按改动面选跑验证（§2 面选择表）；
+4. 按改动面选跑验证（§2 面选择表 + 任务型路由表）；
 5. 修复 → 复跑，只报告**实际跑过的检查**；
 6. 收尾（§4）。
 
-## 2. 面选择表（评估五面的运行时入口）
+## 2. 面选择、任务型路由与全档命令（运行时入口）
 
 | 面 | 什么时候跑 | 命令 |
 |---|---|---|
@@ -38,6 +64,27 @@
 | L4 交付 | 里程碑级 | L4-lite 冒烟（需 `DEEPSEEK_API_KEY`）/ 完整 run（队列条目） |
 
 判据与负面判据（什么算"框架不合理"）见 [evaluation.md](../evaluation.md)——面与面不互抵。
+
+### 任务型路由表（必改 → 次序 → 必跑面 → 必写 → done）
+
+本表是**执行程序**的唯一 owner（面判据 = [evaluation.md](../evaluation.md)；改 pack 的文件级影响面 =
+[guides/62 §改动影响面](62-plugin-authoring.md)——那两处是细节，不在这里复述）：
+
+| 任务型 | 同 diff 必改 | 生成物与检查次序 | 必跑面 | 必写 | done |
+|---|---|---|---|---|---|
+| 改 preset（角色/skills/工具行） | pack 源 `presets/` | **`render-overlay` 先于 L1**（L1 挂的是 overlay，不是 pack 源） | L0 + L1 | 行为/发布集变才写 Note | 四角色真挂载绿 + 文档同步 |
+| 改 persona / skill / 手册文本（模型可见） | pack 源 | `render-overlay` → L1 → **重启 run 通道**（web 缓存 boot 时文本） | L0 + L1 + L4-lite | 同上 | 真模型档证据 + L1 绿 |
+| 改观察面 client 面 | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `pnpm build` → `client-load-smoke` | L0 + client-load-smoke | 同上 | 真浏览器断言全绿 |
+| 加 / 改机械门禁 | `verify.mjs` gates 数组 + `evaluation.md` §L0 台账 | **注入回归红 → 还原 → 绿** | L0 | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 |
+| 改工作区手册 / 模板 | `research-workspace/` 正本 → `sync-pack-workspace` | sync → verify | L0 | — | `pack-workspace-fresh` 绿 |
+| 改部署面（preflight / scaffold / 发布集） | pack `scripts/` + `package.json` 的 files/bin | — | L0 + L2 | 部署 Note | `release-smoke` ALL PASS |
+| 换 vendor pin | `.gitmodules` + pack 兼容矩阵 | `vendor-build.sh`（含 host 半补建 + 前端壳重建）→ 逐条重审 | L0 + L1 + L2 + L4-lite | 升 pin 毕业 Note（重审结论正本） | 全档绿 + 重审入 Note |
+| 纯文档 / 卫生 | 文档自身 | — | L0 | 仅持久决定理由才写 | 门禁绿 |
+| **用户直派（不在队列）** | 先判路径：决定已作出 → 直接 `notes/implemented/`；重大且未构建 → 先立 RFC + 队列行 | 同对应任务型 | 同对应任务型 | 同对应任务型 | 同对应任务型 |
+
+**值级改动**（只改一个配置**值**，如超时/阈值/开关）：本仓**没有值级断言**——门禁只证结构，L1 只证
+"还能挂载"。所以 done 只能证到"仍挂载 + 文档同步"；要可证伪就**同 diff 补一条断言**（进 `tests/` 或
+对应冒烟），否则在交付报告里显式写"**值级不可证**"，不许留白。
 
 ### 全档命令正本（含前置与档位）
 

@@ -10,9 +10,9 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 
 1. **本文件**——布局 + 命令速查 + 纪律 + `notes/` 地位 + 本链的定义；
 2. **[docs/00-index.md](docs/00-index.md)**——文档地图 + 决策台账（D 号）+ 术语映射；
-3. **[roadmap.md](roadmap.md) §队列 ▶**——全仓唯一"当前"条目；
+3. **[roadmap.md](roadmap.md) §队列 ▶**——全仓唯一"当前"条目；行内标注**可执行性**（"等人 / 可自主"）——标"等人"时正确动作是向用户取题，不是开工；
 4. 该条目在 **[notes/proposed/](notes/proposed/)** 的 RFC——条目全文（问题/方案/输掉的方案/验收）；
-5. **[docs/guides/60-dev-loop.md](docs/guides/60-dev-loop.md)**——开工（§0/§1）与收尾（§4）程序。
+5. **[docs/guides/60-dev-loop.md](docs/guides/60-dev-loop.md)**——开工（§1/§2）与收尾（§4）程序；每步"读什么 → 应知道什么 → 卡住怎么办"的**契约表**与按条目类型的分支 = 该页 §1.1。
 
 开工就绪最小集 = 上列 1–5。**其余一切按需，不强制通读**：验收怎么判 →
 [docs/evaluation.md](docs/evaluation.md)；机制为什么这样 → `docs/design/10-30`；run 怎么操作 →
