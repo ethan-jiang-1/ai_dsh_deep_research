@@ -50,12 +50,17 @@ try {
   await page.goto(`http://127.0.0.1:${PORT}/?token=${TOKEN}`, { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(3500)
 
-  // ⓪ 关测试须知模态（全屏 mask 不关则一切点击超时——client-load-smoke 同款）
-  for (const sel of ['button:has-text("Continue")', 'button:has-text("我知道了")', 'button:has-text("Got it")']) {
-    const b = page.locator(sel).first()
-    if (await b.isVisible().catch(() => false)) { await b.click().catch(() => {}); break }
+  // ⓪ 关测试须知模态——**必须限定在 mask 内点**：实测教训（2026-09-26 跑第二场 run 时踩到）
+  //   问询卡片的提交按钮同样可能叫 "Continue"，盲点 `button:has-text("Continue")` 会在卡片已
+  //   渲染时**替人提交默认选项**（选项默认选中 Recommended），代答就变成了"未经复核的提交"。
+  const mask = page.locator('[class*="_mask_"]').first()
+  if (await mask.isVisible().catch(() => false)) {
+    for (const sel of ['button:has-text("Continue")', 'button:has-text("我知道了")', 'button:has-text("Got it")']) {
+      const b = mask.locator(sel).first()
+      if (await b.isVisible().catch(() => false)) { await b.click().catch(() => {}); break }
+    }
+    await page.waitForTimeout(800)
   }
-  await page.waitForTimeout(800)
 
   // ① 点开侧栏里挂起问询的会话（左栏 x < 256，防中央区同名 class 抢匹配）
   const rows = page.locator('span[class*="_root_"]')
@@ -75,7 +80,22 @@ try {
   }
   if (opened === null) throw new Error(`侧栏没找到待答会话（--session=${SESSION ?? '（缺省：Waiting for answer）'}）——它可能已被 web 重启终局化，需向会话发恢复 prompt 让 lead 重发问询`)
   log(`hitl-answer: 已打开会话「${opened}」`)
-  await page.waitForTimeout(2500)
+
+  // ①b 等卡片渲染（实测：点开会话后卡片不是立刻就有——问询可能正在写、或视图还在挂载。
+  //     固定 sleep 会漏，故轮询到出现为止；超时才放弃。）
+  const cardReady = async () => {
+    for (const sel of ['text=/Waiting for your action/', '[class*="_option_"]', 'text=/Recommended/']) {
+      if (await page.locator(sel).first().isVisible().catch(() => false)) return true
+    }
+    return false
+  }
+  let ready = false
+  for (let i = 0; i < 40; i++) {
+    if (await cardReady()) { ready = true; break }
+    await page.waitForTimeout(1000)
+  }
+  if (!ready) log('hitl-answer: 等了 40s 仍未见问询卡片——会话可能已不在待答态（问询被终局化或已答）')
+  await page.waitForTimeout(600)
 
   // ② 逐题作答：每题选一项（默认 Recommended），再按 pager 前进
   const visible = async (loc) => loc.isVisible().catch(() => false)
