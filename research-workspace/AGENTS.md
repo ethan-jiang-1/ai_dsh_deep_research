@@ -25,10 +25,11 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
   findings.md          发现账本：结论 + 支撑 + gap 状态（owner: lead）
   review.md            对抗核查报告（owner: critic）
   drafts/              过程稿（owner: 各角色，按需）
-  final/               版本记账：v1.md = 版本索引与关键事实回溯；当前版权威副本 =
-                       本目录 final.md（[来源: evidence/] 相对 run 根解析，防双份全文
-                       分叉——2026-09-25 run 实测采纳的 lead 设计）；证据扩张 rerun 才落
-                       v2.md 全文并在此登记（owner: lead，成品 = final.md 当前版）
+  final/               版本记账：v1.md = 版本索引与关键事实回溯；证据扩张 rerun 才落 v2.md
+                       全文并在此登记（owner: lead）——**final/ 只放版本记账，不放当前版全文**
+  final.md             当前版权威副本 = **run 根（bundle 顶层）的 final.md**——[来源: evidence/]
+                       相对 run 根解析。**不放 final/ 里**（2026-09-26 实测：第五场 lead 放进了
+                       final/，位置漂移、审计还静默跳过——正本钉死在 run 根）
   journal.md           运行纪要（追加式，所有角色可写；跨 rerun 累积血统）
 templates/run/         新 run bundle 的起点模板（只读，不直接写）
 ```
@@ -47,7 +48,7 @@ drafts/journal 运行时自建。
 | evidence/*.md | analyst（创建者） | 只读 |
 | findings.md | lead | 只读 |
 | review.md | critic | 只读 |
-| final/（当前版） | lead | 只读 |
+| final.md（当前版）+ final/（版本记账） | lead | 只读 |
 
 要改别人 owner 的文件：通过团队通道向 owner 提请求，不直接动手。
 
@@ -60,6 +61,10 @@ frontmatter 必须有（七字段）：`source_url`（真实抓取过的 URL）/
 本手册为准）。**没有 frontmatter 的文件不算证据**（critic 按此判）。
 **口径最小契约**（与 frontmatter 同级）：数字/规格类摘录须带测量条件口径（版本/配置/
 时间/原文限定语至少两项；口径不明写"口径不明"）——所有角色按此判。
+**日期最小契约**（与 frontmatter 同级）：任何"当前 / 截至 / 查询时间"类日期（含 frontmatter
+`retrieved_at`、review 的审查时间、question 的口径截至）落笔前**先跑 bash `date` 核对**——模型
+的时间感不可信（2026-09-26 实测：五场 run 交付物里的日期全部写错，从 +6 天到 -8 个月不等）；
+抓取时间以 fetch 当刻的系统日期为准。所有角色按此判。
 **摘录最小契约**（与 frontmatter 同级）：引文行**只放原文**——卡片自己的标注（标签、URL、
 `（同上…）`、`旁证｜…`、`说明：…`）不进 `>` 行，写在引文块外或解读节；**多段摘录逐段逐字**，
 段间省略用统一标记 `[…]`，不把来源中不连续的句子拼成一段；**表格按单元格摘录**，每格独立
@@ -99,7 +104,7 @@ bundle 的 audit.md）；run 内执法 = critic 狩猎（散文判断）。verif
 ## 交付物三态
 
 - **过程稿**：drafts/ 与各 owner 文件——团队内部工作面，不是成品；
-- **成品**：lead 会话中 `present` 声明的 `final/` 当前版——唯一对外交付物；
+- **成品**：lead 会话中 `present` 声明的 `final.md` 当前版（run 根）——唯一对外交付物；
 - **非成品声明**：非 lead 角色的 present 声明一律视为过程稿展示。
 
 ## 交互纪律（两点交互）
@@ -110,6 +115,6 @@ bundle 的 audit.md）；run 内执法 = critic 狩猎（散文判断）。verif
 
 ## 完成判据（verify the world）
 
-- final/ 当前版每条关键结论附 `[来源: evidence/xx.md]` 且文件真实存在、内容真实支撑；
+- final.md 当前版（run 根）每条关键结论附 `[来源: evidence/xx.md]` 且文件真实存在、内容真实支撑；
 - 没有 CRITICAL 未修复的 review.md 就没有 final 交付（readiness: PASS 前置）；
 - "研究完成"的唯一依据是文件事实（final/ 当前版 + present 声明），不是任何人的口头宣告。

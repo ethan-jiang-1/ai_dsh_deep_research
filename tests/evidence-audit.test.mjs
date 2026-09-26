@@ -3,7 +3,7 @@
 // 红证形态：伪造 source_url / final 断链 / 反引号占位豁免 / 契约不符分级。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync, readFileSync, renameSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { auditBundle } from '../scripts/evidence-audit.mjs';
@@ -103,6 +103,28 @@ test('红证②：final 断链 → CRITICAL 溯源断链', () => {
   const hit = r.findings.filter((f) => f.kind === '溯源断链');
   assert.equal(hit.length, 1);
   assert.ok(hit[0].detail.includes('not-exist.md'));
+});
+
+test('final.md 挪进 final/ → MAJOR 位置违约，但链检查仍执行（第五场 run 实测漂移的回归钉）', () => {
+  const { bundle, sessions } = fixture();
+  // 把根 final.md 挪进 final/ —— 第五场 lead 的真实形态
+  mkdirSync(join(bundle, 'final'), { recursive: true });
+  renameSync(join(bundle, 'final.md'), join(bundle, 'final', 'final.md'));
+  const r = auditBundle(bundle, sessions);
+  const hit = r.findings.filter((f) => f.kind === '当前版位置违约');
+  assert.equal(hit.length, 1, '当前版不在 run 根 → MAJOR 单列（契约钉死在 run 根）');
+  assert.equal(r.criticalCount, 0, '位置违约不是伪造');
+  assert.ok(r.stats.finalRefs >= 1, '链检查不能因位置漂移而丢——仍要对实际位置执行');
+});
+
+test('final.md 两处都没有 → CRITICAL 防空语料（原版静默跳过 = 检查不存在）', () => {
+  const { bundle, sessions } = fixture();
+  rmSync(join(bundle, 'final.md'));
+  const r = auditBundle(bundle, sessions);
+  const hit = r.findings.filter((f) => f.kind === '防空语料');
+  assert.equal(hit.length, 1, '没有 final.md 必须报，不许静默跳过');
+  assert.equal(r.criticalCount, 1, 'final 缺席 = CRITICAL（不是"0/0 通过"）');
+  assert.equal(r.stats.finalRefs, 0, '确实无对象可查');
 });
 
 test('反引号内的格式占位（evidence/xx.md）不算引用（首场 run 假阳性修正的回归钉）', () => {

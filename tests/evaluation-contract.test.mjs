@@ -23,7 +23,7 @@ test('评估合同存在且五面齐全', () => {
 test('角色职责 owner 表存在（L3 判据 2 的载体）', () => {
   const ws = readFileSync(join(ROOT, 'research-workspace', 'AGENTS.md'), 'utf8');
   assert.ok(ws.includes('事实的 owner'), '研究手册缺 owner 表');
-  for (const doc of ['question.md', 'leads.md', 'evidence/', 'findings.md', 'review.md', 'final/（当前版）']) {
+  for (const doc of ['question.md', 'leads.md', 'evidence/', 'findings.md', 'review.md', 'final.md（当前版）+ final/（版本记账）']) {
     assert.ok(ws.includes(doc), `owner 表缺 ${doc} 行`);
   }
 });

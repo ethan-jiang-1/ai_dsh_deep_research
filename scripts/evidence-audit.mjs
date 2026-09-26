@@ -265,11 +265,21 @@ export function auditBundle(bundleDir, sessionsRoot) {
     }
   }
   // ③ final 溯源链（反引号内的格式说明占位不算引用——先剥 code span）
+  // ⚠ 防空语料（2026-09-26 第五场 run 实测）：原版在 final.md 缺席时**静默跳过**本检查——final 链
+  //   报 0/0 看着像"无引用"，实为"没查"（第五场 lead 把当前版放进了 final/final.md，审计静默放行）。
+  //   现在：缺席即 findings（契约钉死在 run 根），但**仍对实际位置执行链检查**，不丢检查。
   let finalRefs = 0
   let finalBroken = 0
   const finalPath = join(bundleDir, 'final.md')
-  if (existsSync(finalPath)) {
-    const finalText = readFileSync(finalPath, 'utf8').replace(/`[^`]*`/g, '')
+  const finalAltPath = join(bundleDir, 'final', 'final.md')
+  if (!existsSync(finalPath) && !existsSync(finalAltPath)) {
+    findings.push({ level: 'CRITICAL', file: 'final.md', kind: '防空语料', detail: 'run 根与 final/ 下都没有 final.md——final 溯源链无处可查；这不是"通过"，是没有对象' })
+  } else if (!existsSync(finalPath)) {
+    findings.push({ level: 'MAJOR', file: 'final.md', kind: '当前版位置违约', detail: '当前版在 final/final.md——契约钉死在 run 根（[来源: evidence/] 相对 run 根解析）；链检查按实际位置执行' })
+  }
+  const finalActual = existsSync(finalPath) ? finalPath : finalAltPath
+  if (existsSync(finalActual)) {
+    const finalText = readFileSync(finalActual, 'utf8').replace(/`[^`]*`/g, '')
     for (const m of finalText.matchAll(/\[来源:\s*evidence\/([^\]]+?)\]/g)) {
       finalRefs += 1
       const whole = m[1].trim()
