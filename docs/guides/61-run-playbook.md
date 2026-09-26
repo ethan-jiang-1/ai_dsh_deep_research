@@ -12,6 +12,18 @@
 - 启动：`bash dev/boot-run.sh`（幂等：组合在位即直接 boot）→ 等横幅
   `http://127.0.0.1:3081/?token=…` 用浏览器打开（3080 被开发 GUI 占用，固定 3081）。
 
+**web 进程生命周期（实测约束）**：`boot-run.sh` 把 web 跑在**前台**并用 trap 管子进程——
+**脚本退出即 web 停**（这是特性：不留孤儿）。因此：
+
+- 交互式使用 = 让 `boot-run.sh` 待在终端里（Ctrl-C 才停）；
+- 需要它在你离开后继续服务 = 用**托管后台任务**跑 web，并**保持 stdin 打开**
+  （`sleep <秒> | node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts --profile research
+  -- --port 3081 --no-open`；web 在 stdin 关闭时会自行退出）；
+- **刷新白屏的判别序**：① `lsof -nP -iTCP:3081 -sTCP:LISTEN` 有没有监听 → 无 = 进程已停
+  （重跑上面任一形态）；② 有监听但仍白屏/401 = token 过期（**每次启动都是新 token**，
+  用当次横幅里的 URL；旧 URL 作废）；③ 有监听且 token 新但页面空 = 前端产物陈旧
+  （`pnpm run build:web`，见 [AGENTS.md §命令表](../../AGENTS.md) 的 `dev/vendor-build.sh`）。
+
 ## 1. 开哪个会话
 
 - web GUI 新建会话：preset 选 **Deep Research Lead**（默认项），cwd 选 **research-workspace/**；

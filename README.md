@@ -19,7 +19,7 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 
 ## Rules In One Screen
 
-- 纯配置 pack（零自写 JS，见 00-index D7）；Node >= 20；测试用 `node:test` + `node:assert`，零 npm 依赖。
+- 配置为主的 pack（预设/技能/bundle 行）+ 一个观察面 client 面（D18 单点例外）；Node >= 20；测试用 `node:test` + `node:assert`，零 npm 依赖。
 - 评估五面（L0 结构 / L1 挂载 / L2 安装 / L3 领域 / L4 交付）不互抵，定义见 `docs/evaluation.md`。
 - 不发明：优先用 DSH 现成载体（preset/skill/agent-team/todo/present/goal），自建机制须有“DSH 载体不可用”的证据。
 - 迭代单位 = 垂直轮（最薄全路径 → 逐轮加宽），当前进度看 `roadmap.md` §队列。
