@@ -14,6 +14,12 @@ description: 综合写作（wave2 语义）方法论：纯综合先行、finding
 3. **写 final/ 当前版**（首版 v1.md）：结构 = 结论先行（TL;DR）→ 按 topic 的主体论述 → 反例与争议（不抹平）→ 证据缺口（insufficient 的如实列出）→ 来源清单。
 4. **来源链格式**：每条关键结论后附 `[来源: evidence/<file>.md]`；来源清单节列出全部 evidence 文件（路径 + 一句话说明）。
 5. **交 critic**：review.md 拿到 readiness: PASS 后，才向用户提交审阅建议（HITL2）。
+6. **交付前机械自审（2026-09-27 新增）**：HITL2 前派一个 subagent 跑溯源审计——
+   `cd <仓库根> && node scripts/evidence-audit.mjs research-workspace/<本 slug>`。**CRITICAL 与
+   `source_url 未抓取` MAJOR 必须处置后才能交付**（回抓该 URL、或换真实抓取过的来源、或在卡片
+   frontmatter 降级说明）；其余分档（复合/转写不符/仅域名可溯源）属审计已知限制，**如实带入
+   review.md，不硬凑零**。实测依据：critic 的散文审查在 40–57 卡规模下会漏 2–3 张未抓取的
+   source_url（第五/七场），机械审计补上这道门。
 
 ## 判据
 
