@@ -92,6 +92,8 @@
 bash dev/vendor-build.sh              # vendor 树构建（换 pin 后必做：--clean 清陈旧产物；tsc host/client + typert 产物 + client bundle + host 半补建 + 前端壳重建——0.1.7 起启动依赖构建产物）
 pnpm verify                           # L0 结构门禁（keyless，收尾必跑）
 pnpm test                             # L0 keyless 回归（= node --import tsx/esm --test tests/*.test.mjs；唯一登记的测试命令）
+node dev/render-overlay.mjs            # 生成物：从 pack 渲染 dev/research.overlay.yml（改 pack 后必跑，且**必须先于 L1**）
+node dev/sync-pack-workspace.mjs       # 生成物：把 research-workspace 正本同步进 pack 的 workspace/ 种子（改手册/模板后必跑）
 source dev/env.sh                     # ⚠ 双 home + 裸 dsh 拦截（DSH_HOME=dev/harness-home）；下列 L1/L2 必须先 source，否则脚本自拒 exit 2
 node scripts/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真挂载档（keyless：roster+逐角色建会话+skills 隔离；--profile <p> --no-patch 切安装域通道）
 cd packages/deep-research-pack && pnpm build   # pack 双半构建（tsc -b . + tsdown → lib/index.js + lib/client.js——观察面 client 面，D18）
@@ -175,12 +177,14 @@ the regression）。反证记录进对应 implemented Note。
 
 ## 7. 中断恢复（开发通道：上个 Agent 干到一半死了，下一个怎么接）
 
-只认三样东西，**不维护任何"控制/状态文件"**：
+只认四样东西，**不维护任何"控制/状态文件"**：
 
 1. **`roadmap.md` §队列 ▶**——全仓唯一"当前"指针（干到哪个条目）；
 2. **该条目 RFC 的状态行 + 文末实施记录**（`notes/proposed/` 一文件一条目；状态行住
    RFC 自己头部：proposed / approved / …；实施记录随进度追加——干到条目内部哪一步）；
-3. **`git log`**——最近提交的窄证据切片（哪些已闭、实际跑过什么验证）。
+3. **`git log`**——最近提交的窄证据切片（哪些已闭、实际跑过什么验证）；
+4. **`git status` + 工作树**——**在飞**（未提交）的那一步只能从这里看：前两源都落后于工作树时
+   （复验实测：RFC 实施记录停在 S2 而 S3/S4 已提交），先补记实施记录再继续，别靠猜。
 
 为什么不是状态文件：本仓**主动否决**过控制文件那套（rb_status / rb_queue / rb_trace
 状态文件）——输掉的方案与理由见

@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'pack-workspace-fresh', 'queue-pointer-live', 'proposed-pointer-live'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'pack-workspace-fresh', 'queue-pointer-live', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only'];
 
 const failures = [];
 const notes = [];
@@ -187,6 +187,15 @@ function roadmapParked() {
       // 0.1.7：preset 即行，bundle 必须随包携带自己的 preset patch（否则角色根本没被声明）
       const presetPatches = list.filter((x) => typeof x === 'string' && /presets\/[a-z0-9-]+\.patch\.yml$/.test(x));
       if (presetPatches.length === 0) fail(gate, 'dsh.bundle.patch 未携带任何 presets/<role>.patch.yml（0.1.7 preset 行随 bundle 装载）');
+      // 覆盖完整性（2026-09-26 复验发现：原判据只要"≥1 条"，新增角色忘登记第 5 条会**绿而坏**）：
+      // 盘上每个 presets/<role>.patch.yml 都必须在数组里——事实源 = 盘上目录（同 role-list-sync）。
+      if (existsSync(PRESETS)) {
+        const onDisk = readdirSync(PRESETS).filter((f) => /\.patch\.yml$/.test(f)).map((f) => `./presets/${f}`);
+        if (onDisk.length === 0) fail(gate, '防空语料：presets/ 下零个 .patch.yml');
+        for (const rel1 of onDisk) {
+          if (!list.includes(rel1)) fail(gate, `presets/${rel1.replace('./presets/', '')} 在盘上但未登记进 dsh.bundle.patch——新增角色漏登记 = 绿而坏`);
+        }
+      }
     }
     const rel = pkg?.dsh?.compatibility?.dshReleases;
     if (!Array.isArray(rel) || rel.length === 0) fail(gate, 'dsh.compatibility.dshReleases 为空');
@@ -397,6 +406,107 @@ function roadmapParked() {
       }
       if (checked === 0) fail(gate, '防空语料：零个 notes/proposed/ 指针被检查——指针全没了或正则失效');
       else note(gate, `${checked} 个 live 指针全部可解析`);
+    }
+  }
+}
+
+// ── 门禁 29：pin-agreement（live 文件里的钉身份必须与 submodule 实际状态一致）──
+// 为什么：pin 在仓里有 14 个家，2026-09-26 清扫实测三处写错（dev/env.sh 的 tag 停在 0.1.5、
+// design/10 的层版本停在 0.1.5、alignment-ledger 的 commit 写成 477b4f420505）——而 vendor-pin
+// 只管 .gitmodules 一处，散文/机读面的复述无人对账。
+// 规则：① live 文件里每个 40 位 hex 串必须等于 submodule HEAD；② 每个 `dsh-v*` tag 串必须等于
+// submodule 的 tag——**唯一例外**：同一行带外部归属标记（语料/参考仓/company/外部材料）的，
+// 那是别的仓的 pin，不是本仓的（现仅 00-index 的"语料自身钉 dsh-v0.1.7-rc.1"一处）。
+// 防空语料：0 个 hex、或 0 个 tag 被检查 → 红。
+{
+  const gate = 'pin-agreement';
+  const sub = spawnSync('git', ['submodule', 'status', 'vendor/dsh'], { cwd: ROOT, encoding: 'utf8' });
+  const m = /^[\s+U-]*([0-9a-f]{40})/.exec(sub.stdout ?? '');
+  const tagR = spawnSync('git', ['-C', join(ROOT, 'vendor', 'dsh'), 'describe', '--tags', '--exact-match'], { cwd: ROOT, encoding: 'utf8' });
+  const TAG = (tagR.stdout ?? '').trim();
+  if (!m || !TAG) {
+    fail(gate, `读不到 submodule 钉身份（commit=${m ? m[1].slice(0, 8) : '?'} tag=${TAG || '?'}）——fail-loud`);
+  } else {
+    const PIN = m[1];
+    const r = spawnSync('git', ['ls-files'], { cwd: ROOT, encoding: 'utf8' });
+    const files = (r.stdout ?? '').split('\n').filter(Boolean)
+      .filter((f) => !f.startsWith('vendor/') && !f.startsWith('notes/') && f !== 'pnpm-lock.yaml');
+    let hexes = 0, tags = 0, skipped = 0;
+    for (const rel of files) {
+      const f = join(ROOT, rel);
+      if (!existsSync(f)) continue;
+      let text;
+      try { text = readFileSync(f, 'utf8'); } catch { continue; }
+      const lines = text.split('\n');
+      for (const h of text.matchAll(/[0-9a-f]{40}/g)) {
+        hexes++;
+        if (h[0] !== PIN) {
+          const line = text.slice(0, h.index).split('\n').length;
+          fail(gate, `${rel}:${line} 的 commit ${h[0].slice(0, 12)}… ≠ submodule HEAD ${PIN.slice(0, 12)}…（散文/机读面的钉身份必须与 .gitmodules 一致）`);
+        }
+      }
+      for (const t of text.matchAll(/dsh-v[0-9][0-9A-Za-z.-]*/g)) {
+        const line = text.slice(0, t.index).split('\n').length;
+        if (/(语料|参考仓|company|外部材料)/.test(lines[line - 1] ?? '')) { skipped++; continue; }
+        tags++;
+        if (t[0] !== TAG) fail(gate, `${rel}:${line} 的 tag ${t[0]} ≠ submodule tag ${TAG}（换 pin 后复述面未同步）`);
+      }
+    }
+    if (hexes === 0 || tags === 0) fail(gate, `防空语料：检查到 ${hexes} 个 commit / ${tags} 个 tag——钉身份复述面消失或正则失效`);
+    else note(gate, `${hexes} 个 commit + ${tags} 个 tag 与 submodule 一致（外部归属豁免 ${skipped} 处）`);
+  }
+}
+
+// ── 门禁 30：count-free（live 文档不写硬编码计数）──
+// 为什么：门禁数 / tests 数 / 断言数是最易腐的一类自指事实（2026-09-26 清扫实测 5 处写错：
+// tests 数 ×2、note 篇数、源面条数、门禁数——本注释原先照抄这些数字，被本门禁自己咬红，
+// 即为它有效的第一份证据）。计数有正本（gates 数组 / evaluation 台账 / ls），散文里的副本
+// 只会腐烂——一律改成"查正本"。
+// 范围：live 文件（排除 notes/ 历史层与 vendor/）。防空语料：0 个文件被检查 → 红。
+{
+  const gate = 'count-free';
+  const r = spawnSync('git', ['ls-files'], { cwd: ROOT, encoding: 'utf8' });
+  const files = (r.stdout ?? '').split('\n').filter(Boolean)
+    .filter((f) => !f.startsWith('vendor/') && !f.startsWith('notes/') && f !== 'pnpm-lock.yaml');
+  if (files.length === 0) fail(gate, '防空语料：未扫到任何 live 文件');
+  else {
+    for (const rel of files) {
+      const f = join(ROOT, rel);
+      if (!existsSync(f)) continue;
+      let text;
+      try { text = readFileSync(f, 'utf8'); } catch { continue; }
+      for (const mm of text.matchAll(/(?<![A-Za-z0-9])[0-9]+ ?(门禁|tests|断言|条源面)/g)) {
+        const line = text.slice(0, mm.index).split('\n').length;
+        fail(gate, `${rel}:${line} 写死计数"${mm[0]}"——计数有正本（gates 数组 / evaluation §L0 / ls），散文改指正本`);
+      }
+    }
+  }
+}
+
+// ── 门禁 31：doc-now-only（live 文档只写 now，不写变更史）──
+// 为什么：docs/AGENTS.md §写作规则明令"写当前状态，不写变更史"，但 2026-09-26 清扫实测 live 文档
+// 里成片出现"已销账 / 修订 → / 曾用 / 首版…已由…替换"——读者会据此以为旧结论仍有效。
+// 范围：live 文档（排除 notes/ 历史层与 vendor/）。豁免两处——① `docs/AGENTS.md`（它是这条规则
+// 的家，slop 清单必须能举例禁用词）；② **含本门禁名 `doc-now-only` 的行**（本门禁在
+// evaluation.md §L0 的登记行与本节注释都要点名禁用词，否则规则无从表述）。
+// 防空语料：0 个文件被检查 → 红。
+{
+  const gate = 'doc-now-only';
+  const r = spawnSync('git', ['ls-files', '*.md'], { cwd: ROOT, encoding: 'utf8' });
+  const files = (r.stdout ?? '').split('\n').filter(Boolean)
+    .filter((f) => !f.startsWith('vendor/') && !f.startsWith('notes/') && f !== 'docs/AGENTS.md');
+  if (files.length === 0) fail(gate, '防空语料：未扫到任何 live 文档');
+  else {
+    for (const rel of files) {
+      const f = join(ROOT, rel);
+      if (!existsSync(f)) continue;
+      const text = readFileSync(f, 'utf8');
+      const lines = text.split('\n');
+      for (const mm of text.matchAll(/已销账|修订 →|曾用|首版[^\n]{0,15}已由/g)) {
+        const line = text.slice(0, mm.index).split('\n').length;
+        if ((lines[line - 1] ?? '').includes('doc-now-only')) continue; // 规则自身的表述行
+        fail(gate, `${rel}:${line} 含变更史措辞"${mm[0]}"——live 文档只写 now；历史归 notes/ 与 git`);
+      }
     }
   }
 }

@@ -15,12 +15,12 @@
 > **用户带题即优先插队**，且兼此前全部真人档验收（观察面/证据契约/交互卡片/研究状态界面）；
 > ③搁置池五条复活条件均未满足。
 
-1. ▶ **信噪比整治**（卫生/长期，**静默期可自主推进**）——fresh-agent 双链清晰化（probe chain
+1. ▶ **信噪比整治**（卫生/长期，**可自主**——静默期可独立推进，无需真人输入）——fresh-agent 双链清晰化（probe chain
    可执行性 + 按条目类型分支；task execution chain 单一路由表）+ 活文档腐烂清扫（19 行清单）+
    投影说谎修复（run-dashboard 终局判定）+ 防复发门禁。
    RFC = [2026-09-26-signal-to-noise-remediation](notes/proposed/2026-09-26-signal-to-noise-remediation.md)。
 
-2. **研究类型覆盖**（研究，**用户带题驱动**：真人 HITL、类型 ≠ 首场）——兼观察面 GUI 化的
+2. **研究类型覆盖**（研究，**等人**——用户带题驱动：真人 HITL、类型 ≠ 首场）——兼观察面 GUI 化的
    真人档验收 + 证据可靠性面的 run 级验收（bundle 含 audit.md 且佐证结构达标）+ 交互卡片
    真人体验 + 研究状态界面真人目验；顺手取证 synthesizer/floor 重估证据。
    RFC = [2026-09-25-research-type-coverage](notes/proposed/2026-09-25-research-type-coverage.md)。
