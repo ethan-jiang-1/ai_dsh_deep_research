@@ -15,6 +15,12 @@ lead 独任综合**无过载**：journal 两次调度决策干净落地，标准
 瓶颈。结论 = 不拆角色，本条维持搁置（出处：
 [m2-run-mechanics §实施记录](../implemented/2026-09-24-m2-run-mechanics.md)）。
 
+### 重估追加（2026-09-26，两场 run）
+
+第二轮证据来自 `drt_cn-llm-deep-research`（26 张证据卡 / 6 topic）与 `drt_cn-llm-infra`
+（46 张证据卡 / 6 topic）。两场均为单 lead 独任综合，journal 未见调度或综合阶段的过载迹象，
+critic 也未就"综合被压垮"提出任何 objection。**结论不变：不拆角色，维持搁置。**
+
 ## 方案（草图，仅复活后适用）
 
 加第五角色 = 推翻 D2（角色数 4），须先登记新 D 号；person = "只综合不派工"，承接

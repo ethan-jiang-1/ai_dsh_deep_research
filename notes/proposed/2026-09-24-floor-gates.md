@@ -15,6 +15,12 @@
 "国产高 16%"口径）——这就是质量证据；数值 floor 反而有假绿风险（凑数达标 ≠ 真溯源）。
 出处同 [m2-run-mechanics §实施记录](../implemented/2026-09-24-m2-run-mechanics.md)。
 
+### 重估追加（2026-09-26，两场 run）
+
+第二轮证据：`drt_cn-llm-deep-research` 的 critic 首轮抓 1 条 CRITICAL、`drt_cn-llm-infra` 抓 5 条，
+**两场全部闭合且终判 readiness = PASS**——即散文审查既抓得到问题、也没有出现"抓不完"的滑坡。
+**结论不变：不引入数值 floor，维持搁置。**
+
 ## 方案（草图，仅复活后适用）
 
 若多 run 出现滑坡实证：floor 只做**窄面机械哨兵**（如 final.md 的 [来源: …] 链接密度、
