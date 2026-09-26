@@ -53,17 +53,20 @@ try {
   await page.goto(`http://127.0.0.1:${PORT}/?token=${TOKEN}`, { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(3500)
 
-  // ⓪ 关测试须知模态——**必须限定在 mask 内点**：实测教训（2026-09-26 跑第二场 run 时踩到）
+  // ⓪ 关测试须知弹窗——**限定在 dialog/mask 容器内点**：实测教训（2026-09-26 跑第二场 run 时踩到）
   //   问询卡片的提交按钮同样可能叫 "Continue"，盲点 `button:has-text("Continue")` 会在卡片已
-  //   渲染时**替人提交默认选项**（选项默认选中 Recommended），代答就变成了"未经复核的提交"。
-  const mask = page.locator('[class*="_mask_"]').first()
-  if (await mask.isVisible().catch(() => false)) {
-    for (const sel of ['button:has-text("Continue")', 'button:has-text("我知道了")', 'button:has-text("Got it")']) {
-      const b = mask.locator(sel).first()
+  //   渲染时**替人提交默认选项**。容器实测有**两种**：`_dialog_`（CSS modules 哈希——测试须知
+  //   "Internal Testing Notice" 用这个，重建 profile 后它会重新出现）与 `_mask_`；按序试。
+  for (const sel of ['[class*="_dialog_"]', '[role="dialog"]', '[class*="_mask_"]']) {
+    const dlg = page.locator(sel).first()
+    if (!(await dlg.isVisible().catch(() => false))) continue
+    for (const lbl of ['button:has-text("Continue")', 'button:has-text("我知道了")', 'button:has-text("Got it")']) {
+      const b = dlg.locator(lbl).first()
       if (await b.isVisible().catch(() => false)) { await b.click().catch(() => {}); break }
     }
-    await page.waitForTimeout(800)
+    break
   }
+  await page.waitForTimeout(800)
 
   // ① 点开侧栏里挂起问询的会话（左栏 x < 256，防中央区同名 class 抢匹配）
   const rows = page.locator('span[class*="_root_"]')
