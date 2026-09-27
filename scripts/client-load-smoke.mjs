@@ -20,13 +20,14 @@
 // 前置（B-min 起）：dev home 里有至少一个带历史的会话（journal 流要有真数据；默认取首场
 // 研究 run 的会话标题——缺席时用 --session 指定别的）。
 //
-// bundle 渐进面断言（2026-09-26 接通，根因链见 notes/implemented/2026-09-26-bundle-face-wiring.md）：
+// bundle 渐进面断言（2026-09-26 接通，根因链见 notes/implemented/2026-09-26-bundle-face-wiring.md；
+// 2026-09-27 起自造活动 bundle 作数据源——位置=状态：交付 run 全在 archive/，根上无 bundle）：
 // 渐进面读的是**会话工作区根**（workspaceFiles，path='.'）——要看到 run bundle，会话必须建在
 // research-workspace 里（工作区须先注册 + 会话用 workspaceId 形态创建）。本冒烟自己造这个
 // 条件：workspace/create 注册 → session/create(workspaceId) → 浏览器开它 → 断言步骤条/证据
-// 计数/交付状态（首场 run 的真数据：七步 + 证据 31 份 + ✅ 已交付）。
+// 计数/交付状态（探针 bundle 的真数据：七步 + 证据 2 份 + ✅ 已交付）。
 import { spawn } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { scrubbedEnv } from './lib/env.mjs'
@@ -115,6 +116,16 @@ const step = (ok, label, info = '') => {
   console.log(`  ${ok ? 'PASS' : 'FAIL'} ${label}${info ? `（${info}）` : ''}`)
   if (!ok) failures.push(label)
 }
+
+// 自造最小**活动** bundle（位置=状态：交付 run 全在 archive/，渐进面只读工作区根的活动
+// drt_*——依赖运行区历史状态会随归档搬迁漂移，2026-09-27 实测三断言红）。验完即删，
+// 冒烟自足：渐进面断言的数据源 = 本探针 bundle 的真文件（question/evidence/final）。
+const SMOKE_BUNDLE = join(ROOT, 'research-workspace', 'drt_client-load-smoke-probe')
+mkdirSync(join(SMOKE_BUNDLE, 'evidence'), { recursive: true })
+writeFileSync(join(SMOKE_BUNDLE, 'question.md'), '# 冒烟探针\n\n冒烟渐进面探针问题：观察面 client 冒烟自造的活动 bundle。\n')
+writeFileSync(join(SMOKE_BUNDLE, 'evidence', 'e1.md'), '# 证据 1\n\n冒烟证据卡 1。\n')
+writeFileSync(join(SMOKE_BUNDLE, 'evidence', 'e2.md'), '# 证据 2\n\n冒烟证据卡 2。\n')
+writeFileSync(join(SMOKE_BUNDLE, 'final.md'), '# 冒烟交付\n\n冒烟 final 当前版。\n')
 
 const { child, token } = await boot()
 let page
@@ -290,6 +301,7 @@ try {
   failures.push(`浏览器断言异常: ${error.message}`)
   console.error(`  FAIL 浏览器断言异常: ${error.message}`)
 } finally {
+  rmSync(SMOKE_BUNDLE, { recursive: true, force: true })
   child.kill('SIGTERM')
   await sleep(300)
 }

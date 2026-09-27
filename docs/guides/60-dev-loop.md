@@ -73,7 +73,7 @@
 | 任务型 | 同 diff 必改 | 生成物与检查次序 | 必跑面 | 必写 | done |
 |---|---|---|---|---|---|
 | 改 preset（角色/skills/工具行） | pack 源 `presets/` | **`render-overlay` 先于 L1**（L1 挂的是 overlay，不是 pack 源） | L0 + L1 | 行为/发布集变才写 Note | 四角色真挂载绿 + 文档同步 |
-| 改 persona / skill / 手册文本（模型可见） | pack 源 | `render-overlay` → L1 → **重启 run 通道**（web 缓存 boot 时文本） | L0 + L1 + L4-lite | 同上 | 真模型档证据 + L1 绿 |
+| 改 persona / skill / 手册文本（模型可见） | pack 源 | `render-overlay` → L1 → **snapshot-replay B 层**（模型可见文本变化的 keyless 秒级信号：有意变更 → 红 = 已捕获，走新一代 fixture + `--update-expected` 重写金标准 + 人审）→ **重启 run 通道**（web 缓存 boot 时文本） | L0 + L1 + L4-lite | 同上 | 真模型档证据 + L1 绿 |
 | 改观察面 client 面 | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `pnpm build` → `client-load-smoke` | L0 + client-load-smoke | 同上 | 真浏览器断言全绿 |
 | 加 / 改机械门禁 | `verify.mjs` gates 数组 + `evaluation.md` §L0 台账 | **注入回归红 → 还原 → 绿** | L0 | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 |
 | 改工作区手册 / 模板 | `research-workspace/` 正本 → `sync-pack-workspace` | sync → verify | L0 | — | `pack-workspace-fresh` 绿 |
@@ -107,7 +107,7 @@ node scripts/run-dashboard.mjs --latest --out <html>   # run 只读投影（多�
 node dev/run-kickoff.mjs --port 3081 --token <横幅 token> --prompt-file <file>        # run 会话驱动（建会话+发 kickoff）
 pnpm dsh <args…>                      # 机制基线 CLI（vendor/dsh 钉 tag 源码；等价 dev/env.sh 的 dsh 函数）
 node --import tsx/esm scripts/client-hitl-smoke.mjs   # 观察面活标题触发验证（真模型档：RPC followup 造挂起态 + 盘侧谓词 + 浏览器观察点）
-node scripts/snapshot-replay-smoke.mjs    # keyless 回放冒烟（须先 source dev/env.sh：spawn dsh 研究档回放录制 fixture——零真模型调用、收尾文本逐字命中；端口 3103）
+node scripts/snapshot-replay-smoke.mjs    # keyless 回放冒烟（须先 source dev/env.sh，端口 3103：三层判据——A 零真模型回放收尾逐字命中 / B 组装请求 diff（persona+工具 schema）/ C 渲染金标准比对；`--update-expected` 从真实回放重写金标准）
 node scripts/evidence-audit.mjs <bundle>|--latest  # 证据溯源审计（**须先 source dev/env.sh**：它锚定本仓 dev home，DSH_HOME 指向别处即自拒）（keyless：URL/摘录/final 链对会话日志机械对账 → audit.md；CRITICAL 即 exit 1）
 node scripts/entry-chain-probe.mjs    # 入口链探针（真模型档：时不变四问，答案对 ▶ 真值软断言，留档人工复核）
 node packages/deep-research-pack/scripts/preflight.mjs --workspace <dir>   # 部署前置检查（pack 自带 bin：DSH 版本/peer 包/团队层/工作区手册/构建产物/密钥；fail-loud 带补救命令）

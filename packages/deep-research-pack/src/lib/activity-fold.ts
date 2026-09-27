@@ -27,14 +27,19 @@ interface EventLike {
   readonly time?: unknown
 }
 
-/** 从 call 的 arguments（JSON 字符串或对象）取一个字符串字段；截断 JSON → null。 */
-function argOf(args: unknown, key: string): string | undefined {
+/** 从 call 的 arguments（JSON 字符串或对象）取字段原值；截断 JSON → null。 */
+function argValueOf(args: unknown, key: string): unknown {
   let obj: unknown = args
   if (typeof args === 'string') {
-    try { obj = JSON.parse(args) } catch { return undefined }
+    try { obj = JSON.parse(args) } catch { return null }
   }
-  if (typeof obj !== 'object' || obj === null) return undefined
-  const v = (obj as Record<string, unknown>)[key]
+  if (typeof obj !== 'object' || obj === null) return null
+  return (obj as Record<string, unknown>)[key] ?? null
+}
+
+/** 从 call 的 arguments（JSON 字符串或对象）取一个字符串字段；截断 JSON → null。 */
+function argOf(args: unknown, key: string): string | undefined {
+  const v = argValueOf(args, key)
   return typeof v === 'string' ? v : undefined
 }
 
@@ -70,8 +75,11 @@ export function foldActivityRows(events: readonly unknown[]): readonly ActivityR
     if (e.type === 'tool/call') {
       const name = e.data?.name
       if (name === 'web_search') {
-        const q = argOf(e.data?.arguments, 'query')
-        if (q !== undefined && q.trim() !== '') rows.push({ icon: '🔍', text: `检索：${q.slice(0, 40)}`, time })
+        // wire 权威形状 = queries 数组（vendor tool-web search schema；录制流实证——2026-09-27
+        // 快照 lane 首个战果：旧代码读 query 单串，真实 web_search 行从未出过 🔍 行）。
+        const args = argValueOf(e.data?.arguments, 'queries')
+        const list = Array.isArray(args) ? args.filter((q) => typeof q === 'string' && q.trim() !== '') : []
+        if (list.length > 0) rows.push({ icon: '🔍', text: `检索：${list.join(' · ').slice(0, 40)}`, time })
       } else if (name === 'spawn_teammate') {
         const n = argOf(e.data?.arguments, 'name') ?? '(未具名)'
         const d = argOf(e.data?.arguments, 'description') ?? ''

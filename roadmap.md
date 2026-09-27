@@ -10,24 +10,15 @@
 
 ## 队列
 
-> 次序依据（2026-09-27 二次更新）：①用户授权代理对搁置池做**长远正确决断**，结论——
-> **keyless-snapshot 复活**（频率条件实质到达：单日 6+ 次模型可见文本变更各耗真模型档验证；
-> 且九场 run 的录制流就是现成回放料），升为当前条目；**真人档验收延后到最后**（用户指令，
-> 期间代理模拟代行）；其余三条维持搁置（floor 的可实现核心已被 evidence-audit 吸收，synthesizer
-> 大概率永不触发，license/ui-skin 等用户触发）；②搁置池余四条条件均未满足；③同日借鉴评估
-> （07_borrowing-dsh-harness-idea 十维对照审计）定调打扫卫生与门禁候选——**毕业正文改写门禁**
-> 立项入队（可自主，排当前条目之后），archived/ 冻结层同日激活（23 篇迁入，活跃 implemented 降至
-> 约 30 篇）；真人档仍居末。
+> 次序依据（2026-09-27 三次更新）：①当前条目 = 毕业正文改写门禁（卫生，可自主）——毕业纪律的
+> 机器面收尾；②真人档验收居末（等人——用户指令延后到最后，期间代理模拟代行"看"）；
+> ③搁置池四条维持 rejected/（floor 的可实现核心已被 evidence-audit 吸收，synthesizer 大概率
+> 永不触发，license/ui-skin 等用户触发），复活条件见行内。
 
-1. ▶ **keyless 录制快照面**（feature，**可自主**——复活条件到达：2026-09-27 单日 6+ 次模型可见
-   文本变更各耗真模型档验证）——窄带钉法（`retired-tools` 钉研究工具面：spawn_teammate/web_search/
-   team_task_*/ask_user_question/present）+ 录制流（九场 run 的会话 JSONL 是现成回放料）+ 渲染
-   金标准（ui.expected.md）+ 回放冒烟（L1 形态：spawn dsh + 研究档 → 渲染 → 比对，红证 = 注入输出
-   差异）。RFC = [2026-09-24-keyless-snapshot-lane](notes/proposed/2026-09-24-keyless-snapshot-lane.md)。
-2. **毕业正文改写门禁**（卫生，**可自主**）——implemented/ 活跃 Note 零计划体残留的 L0 机械
+1. ▶ **毕业正文改写门禁**（卫生，**可自主**）——implemented/ 活跃 Note 零计划体残留的 L0 机械
    门禁（"毕业 = 正文改写"的机器面；writing-a-gate 全程序；负例 = 注入 `## 验收` 节/待办
    标记 → 红 → 还原）。RFC = [2026-09-27-graduation-rewrite-gate](notes/proposed/2026-09-27-graduation-rewrite-gate.md)。
-3. **真人档验收**（研究/活动，**等人**——用户指令延后到最后；期间代理模拟代行"看"）——一次在场
+2. **真人档验收**（研究/活动，**等人**——用户指令延后到最后；期间代理模拟代行"看"）——一次在场
    会话闭四项：真人 HITL1/HITL2（不代答）、卡片可用性结论、观察面目验、run 本体 L4 四判据 +
    `audit.md` CRITICAL 0。RFC = [2026-09-26-human-gate-acceptance](notes/proposed/2026-09-26-human-gate-acceptance.md)。
 

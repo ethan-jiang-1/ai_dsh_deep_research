@@ -11,7 +11,8 @@ export interface ToolCardArgs {
   readonly name?: unknown
   readonly description?: unknown
   readonly prompt?: unknown
-  readonly query?: unknown
+  /** web_search 的入参是 queries 数组（vendor tool-web search schema 权威形状——非 query 单串）。 */
+  readonly queries?: unknown
 }  // 协调类工具（team_task_*/wait_agent/list_agents/send_message）不进对话流——无卡片需求（2026-09-27 实测）
 
 /** 从 call/result 切片推导卡片状态（settled 前 running；interrupted → stopped）。 */
@@ -44,7 +45,8 @@ export function cardTitleOf(toolName: string, args: ToolCardArgs | null, argsRaw
       return `组队：${name}${desc === '' ? '' : ` — ${desc.slice(0, 50)}`}`
     }
     if (toolName === 'web_search') {
-      const q = typeof args.query === 'string' ? args.query : ''
+      const list = Array.isArray(args.queries) ? args.queries.filter((q): q is string => typeof q === 'string' && q.trim() !== '') : []
+      const q = list.join(' · ')
       return q === '' ? '检索' : `检索：${q.slice(0, 60)}`
     }
 
