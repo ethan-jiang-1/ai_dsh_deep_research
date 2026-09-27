@@ -32,8 +32,13 @@ E1 教训仍有效：快照二包**只作 devDependency 解析物**，绝不进 
 **lib 产物缺失**（vendor-build 未覆盖 test-support 层）——**实施第 0 步 = 扩 vendor-build**
 （vendor-host 补建配置加这两包）。回放驱动 = `llm-replay`（cordis.snapshot.yml 声明录制响应）；
 规范化助手齐全（normalizeSessionLog / tokenizeSessionFixtureCwd / scrubModelRequestBulk 等，
-vendor `snapshots/sdk/sdk.snapshot.ts` 是完整用例）。录制料 = 第九场会话 JSONL（37 卡、研究
-工具面全调用）。
+vendor `snapshots/sdk/sdk.snapshot.ts` 是完整用例）。录制料 = **已就位**：`tests/fixtures/snapshot-research-face/session.v1.jsonl`（最小探针会话：
+web_search ×3——含上游故障形态，正是渲染回归要钉的样本——+ web_fetch ×1 成功，30KB）+
+`snapshot.yml` 骨架。接线模板 = vendor `snapshots/session/web-search-endpoint-guidance/`
+（同构场景：禁用真 LLM → 插入 llm-replay（replay-only provider 目录）→ 搜索故障保持真实——
+"the failed search remains real; only the conversation model adapter is replaced by replay"）。
+**剩余**：第 0 步扩 vendor-build（二包 lib）→ 回放冒烟脚本（L1 形态）→ ui.expected.md 金标准
+→ 红绿。
 
 ## 输掉的方案
 

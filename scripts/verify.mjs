@@ -430,7 +430,11 @@ function roadmapParked() {
     const PIN = m[1];
     const r = spawnSync('git', ['ls-files'], { cwd: ROOT, encoding: 'utf8' });
     const files = (r.stdout ?? '').split('\n').filter(Boolean)
-      .filter((f) => !f.startsWith('vendor/') && !f.startsWith('notes/') && f !== 'pnpm-lock.yaml');
+      .filter((f) => !f.startsWith('vendor/') && !f.startsWith('notes/') && f !== 'pnpm-lock.yaml')
+      // 快照 fixture 豁免（2026-09-27）：录制的会话流里含 harness 自身的版本戳（system-reminder
+      // 注入的构建身份）——那是 vendor 规范化契约说的"挥发性身份"（fixture 定形时 tokenize），
+      // 不是本仓的钉声明；钉死在 fixtures 录制流上会与每次重录打架。
+      .filter((f) => !f.startsWith('tests/fixtures/snapshot-'));
     let hexes = 0, tags = 0, skipped = 0;
     for (const rel of files) {
       const f = join(ROOT, rel);

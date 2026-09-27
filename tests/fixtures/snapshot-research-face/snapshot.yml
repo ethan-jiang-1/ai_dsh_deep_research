@@ -1,0 +1,11 @@
+version: 1
+scenario: research-face-recording
+profile: research
+composition: research-face-recording
+recording: live
+header:
+  class: research-face-recording
+  pin: true
+  systemPromptSource: chat-turn
+  toolSchemasSource: chat-turn
+  # retired-tools 窄带钉法（复活后细化）：钉研究工具面的当前 format 版本
