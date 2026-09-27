@@ -15,7 +15,9 @@ harness 只读：presets、skills、本手册、templates/ 对任何一次研究
 ```
 drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research Topic，目录名即方向；
                        slug 由主编立项时定，kebab-case；立项 sibling 预检：同名/前缀相关
-                       bundle 已在 → 问用户，不擅自另起）
+                       bundle 已在（**含 archive/ 归档**）→ 问用户，不擅自另起）
+archive/<slug>/        已交付 run 归档位（2026-09-27 用户指令）：交付后操作侧移入，工作区根
+                       只留活跃 run——防题名目录被误读为"待开展课题"；仍可被审计/仪表盘按路径投影
   question.md          方向契约：研究问题定稿 + Purpose/RQ 分解/Scope/Constraints + HITL1
                        对齐快照 + Decisions（append-only 方向修订记录，最新在上）——跨
                        rerun 持久，bundle 身份核心（owner: lead）
@@ -61,16 +63,13 @@ frontmatter 必须有（七字段）：`source_url`（真实抓取过的 URL）/
 本手册为准）。**没有 frontmatter 的文件不算证据**（critic 按此判）。
 **口径最小契约**（与 frontmatter 同级）：数字/规格类摘录须带测量条件口径（版本/配置/
 时间/原文限定语至少两项；口径不明写"口径不明"）——所有角色按此判。
-**日期最小契约**（与 frontmatter 同级）：任何"当前 / 截至 / 查询时间"类日期（含 frontmatter
-`retrieved_at`、review 的审查时间、question 的口径截至）落笔前**先跑 bash `date` 核对**——模型
-的时间感不可信（2026-09-26 实测：五场 run 交付物里的日期全部写错，从 +6 天到 -8 个月不等）；
-抓取时间以 fetch 当刻的系统日期为准。所有角色按此判。
-**摘录最小契约**（与 frontmatter 同级）：引文行**只放原文**——卡片自己的标注（标签、URL、
-`（同上…）`、`旁证｜…`、`说明：…`）不进 `>` 行，写在引文块外或解读节；**多段摘录逐段逐字**，
-段间省略用统一标记 `[…]`，不把来源中不连续的句子拼成一段；**表格按单元格摘录**，每格独立
-一行引文，不整行/跨行合并；**`source_url` 必须成功抓取过**——`web_fetch` 真实取回该 URL，
-搜索结果列表里出现过不算。四条均为 evidence-audit 机检项（未抓取的 source_url 与非逐字摘录
-单列分级）——所有角色按此判。
+**日期最小契约**（与 frontmatter 同级）：任何"当前 / 截至 / 查询时间"类日期（含 `retrieved_at`、
+review 审查时间、口径截至）落笔前**先跑 bash `date` 核对**——模型时间感不可信（2026-09-26
+实测五场交付物日期全错）；抓取时间以 fetch 当刻系统日期为准。所有角色按此判。
+**摘录最小契约**（与 frontmatter 同级）：引文行**只放原文**——卡片自己的标注（标签/URL/
+`（同上…）`/`旁证｜…`）不进 `>` 行，写在引文块外或解读节；**多段摘录逐段逐字**，段间省略标
+`[…]`，不拼接不连续句；**表格按单元格摘录**，不整行/跨行合并；**`source_url` 必须成功抓取过**
+（`web_fetch` 真实取回，搜索结果里出现过不算）。四条均为 evidence-audit 机检项——所有角色按此判。
 
 **信源分级表（source_tier 唯一正本；scout 的质量分级与 quality 字段共用 A–D，tier 描述
 信源身份、quality 描述内容质量，两者独立）**：
@@ -95,11 +94,10 @@ publisher）缺失不否决有效性，标"未分级"（旧 run 的存量证据�
 
 **机械强度诚实记账**：本契约的机械检查 = L0 契约测试（七字段在场 + 各执行者副本对账）
 + 仪表盘渲染谓词（上述）+ **evidence-audit 溯源审计**（`scripts/evidence-audit.mjs`：
-`source_url` 必须被 `web_fetch` **成功取回**——仅出现在搜索结果里不算，MAJOR 单列；
-摘录对 **web-only 语料**回溯（agent 自撰文本已剔除，防自证），覆盖率分档 ≥0.95 逐字 /
-0.6–0.95 复合或截断 / <0.6 非逐字；final 溯源链完整——防伪造链接与转写幻觉，报告落
-bundle 的 audit.md）；run 内执法 = critic 狩猎（散文判断）。verify 门禁
-不扫 bundle（gitignored 运行区）——run 数据的完整性由 critic + 仪表盘 + audit 呈现，不在 L0。
+`source_url` 须被 `web_fetch` **成功取回**（仅出现在搜索结果里不算，MAJOR 单列）；摘录对
+**web-only 语料**回溯（agent 自撰文本已剔除，防自证），覆盖率分档；final 溯源链完整——
+防伪造与转写幻觉，报告落 bundle 的 audit.md）；run 内执法 = critic 狩猎。verify 门禁不扫
+bundle（gitignored 运行区）——run 数据的完整性由 critic + 仪表盘 + audit 呈现，不在 L0。
 
 ## 交付物三态
 

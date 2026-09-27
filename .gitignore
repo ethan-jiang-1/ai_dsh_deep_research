@@ -16,6 +16,7 @@ dev/harness-home/*
 # 目录与符号链接，防 symlink 误入 git）内容是 runtime truth，不进版本控制；
 # templates/ 与研究手册（AGENTS.md）是资产，进库
 research-workspace/drt_*
+research-workspace/archive/
 # 排练/冒烟残留
 dev/smoke-workspace/*
 !dev/smoke-workspace/.gitkeep

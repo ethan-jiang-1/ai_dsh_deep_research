@@ -20,6 +20,9 @@ import * as zlib from 'node:zlib';
 /** 多 run 场根（debug-dashboard-plus）：drt 正规场 + ad-hoc 场（无契约，标注呈现不隐藏） */
 const SCENE_ROOTS = [
   { dir: 'research-workspace', kind: 'drt', label: 'drt' },
+  // 归档场（2026-09-27）：已交付 run 移入 archive/ 后仍进多 run 总表（历史不丢）；
+  // label 区分归档，避免与活跃场混淆。
+  { dir: 'research-workspace/archive', kind: 'drt', label: 'drt·归档' },
   { dir: 'dev/harness-home/runs', kind: 'ad-hoc', label: 'ad-hoc·无契约' },
 ];
 /** lead 会话日志根（HITL 等待检测；$DSH_HOME/sessions/<cwd 组>/<会话>/session.v3.jsonl.zstd） */
