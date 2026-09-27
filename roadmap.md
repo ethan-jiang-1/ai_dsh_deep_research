@@ -14,14 +14,20 @@
 > **keyless-snapshot 复活**（频率条件实质到达：单日 6+ 次模型可见文本变更各耗真模型档验证；
 > 且九场 run 的录制流就是现成回放料），升为当前条目；**真人档验收延后到最后**（用户指令，
 > 期间代理模拟代行）；其余三条维持搁置（floor 的可实现核心已被 evidence-audit 吸收，synthesizer
-> 大概率永不触发，license/ui-skin 等用户触发）；②搁置池余四条条件均未满足。
+> 大概率永不触发，license/ui-skin 等用户触发）；②搁置池余四条条件均未满足；③同日借鉴评估
+> （07_borrowing-dsh-harness-idea 十维对照审计）定调打扫卫生与门禁候选——**毕业正文改写门禁**
+> 立项入队（可自主，排当前条目之后），archived/ 冻结层同日激活（23 篇迁入，活跃 implemented 降至
+> 约 30 篇）；真人档仍居末。
 
 1. ▶ **keyless 录制快照面**（feature，**可自主**——复活条件到达：2026-09-27 单日 6+ 次模型可见
    文本变更各耗真模型档验证）——窄带钉法（`retired-tools` 钉研究工具面：spawn_teammate/web_search/
    team_task_*/ask_user_question/present）+ 录制流（九场 run 的会话 JSONL 是现成回放料）+ 渲染
    金标准（ui.expected.md）+ 回放冒烟（L1 形态：spawn dsh + 研究档 → 渲染 → 比对，红证 = 注入输出
    差异）。RFC = [2026-09-24-keyless-snapshot-lane](notes/proposed/2026-09-24-keyless-snapshot-lane.md)。
-2. **真人档验收**（研究/活动，**等人**——用户指令延后到最后；期间代理模拟代行"看"）——一次在场
+2. **毕业正文改写门禁**（卫生，**可自主**）——implemented/ 活跃 Note 零计划体残留的 L0 机械
+   门禁（"毕业 = 正文改写"的机器面；writing-a-gate 全程序；负例 = 注入 `## 验收` 节/待办
+   标记 → 红 → 还原）。RFC = [2026-09-27-graduation-rewrite-gate](notes/proposed/2026-09-27-graduation-rewrite-gate.md)。
+3. **真人档验收**（研究/活动，**等人**——用户指令延后到最后；期间代理模拟代行"看"）——一次在场
    会话闭四项：真人 HITL1/HITL2（不代答）、卡片可用性结论、观察面目验、run 本体 L4 四判据 +
    `audit.md` CRITICAL 0。RFC = [2026-09-26-human-gate-acceptance](notes/proposed/2026-09-26-human-gate-acceptance.md)。
 
@@ -33,3 +39,4 @@
 | 专职 synthesizer 角色——[RFC](notes/rejected/2026-09-24-synthesizer-role.md) | lead 独任综合无过载：首场 run（[m2-run-mechanics](notes/implemented/2026-09-24-m2-run-mechanics.md)）+ **2026-09-26 两场 run 重估**（26 / 46 张证据卡、6 topic，无过载迹象） | run 实测综合负载过高（✗；**2026-09-26 已多 run 重估一轮，条件仍未满足**） |
 | floor 数值门禁机械化——[RFC](notes/rejected/2026-09-24-floor-gates.md) | critic 散文审查实证有效（九场无一滑坡）；**可实现核心已被 evidence-audit 吸收**（抓取强度/摘录覆盖率/final 链/日期——数值门禁的灵魂已活在机械审计里） | run 出现质量滑坡实证（✗；重估至第九场，条件仍未满足） |
 | 许可证（LICENSE）——[RFC](notes/rejected/2026-09-24-license.md) | 本仓 `private: true` 未对外分发（**未决非遗漏**） | 对外分发/发布 pack 前（✗ 等用户分发计划） |
+| evidence caliber 数值断言——[RFC](notes/rejected/2026-09-24-frontmatter-caliber-gate.md) | margin ≠ threshold：实测前数值门禁是假牙齿（口径是散文判断，"字段在场"断言查不出"口径真实"；基础整治 §3.4 用户拍板独立成篇） | 首个 run 实测出现口径缺失高频导致 critic 狩猎漏检、或口径标记被滥用逃避纪律，且实测数据能定出判据形状（随 floor 机械化一并重提）（✗） |
