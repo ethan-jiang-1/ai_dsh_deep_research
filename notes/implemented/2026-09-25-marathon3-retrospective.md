@@ -4,7 +4,7 @@
 
 归宿：goal「静默自主长程马拉松三号」复盘；条目各自毕业 Note / 报告在案
 （[research-status-ui](2026-09-25-research-status-ui.md) · [research-interaction §验证表含 HITL2 补验](2026-09-25-research-interaction.md) ·
-[dsh-plugin-ecosystem 调研报告](../research/2026-09-25-dsh-plugin-ecosystem.md)）。
+[dsh-plugin-ecosystem 调研报告](../implemented/2026-09-25-dsh-plugin-ecosystem.md)）。
 
 ## 决定
 

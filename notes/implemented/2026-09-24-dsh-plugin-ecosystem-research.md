@@ -9,7 +9,7 @@
 ## 决定
 
 按 research 技能跑一轮认真调研，产出**调研报告**（不是代码）；结论直接决定后续投入方向
-（守差异化 vs 补生态空白）。报告 = [dsh-plugin-ecosystem](../research/2026-09-25-dsh-plugin-ecosystem.md)。
+（守差异化 vs 补生态空白）。报告 = [dsh-plugin-ecosystem](../implemented/2026-09-25-dsh-plugin-ecosystem.md)。
 
 ## 实施记录
 

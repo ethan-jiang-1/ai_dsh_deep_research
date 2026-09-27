@@ -12,7 +12,6 @@
 | **将来（已开工的设计）** | 这个条目打算怎么做 | [`proposed/`](proposed/README.md) 的 RFC 全文 | RFC 头部状态行 `proposed / approved / superseded` |
 | **过去（已交付）** | 当初为什么这么决定、放弃了什么 | [`implemented/`](implemented/README.md) | 目录即状态（文件名 = 首提日期 + 主题） |
 | **过去（否决与事故）** | 哪些路别再走、哪些坑踩过 | [`rejected/`](rejected/README.md) · [`postmortem/`](postmortem/README.md) | 目录即状态（rejected 另有结论状态行） |
-| **过去（调研报告）** | 外部/上游摸过什么底 | [`research/`](research/README.md)（有状态表） | 文件头状态行 `已完成 / 进行中` |
 | **始终** | 这个项目为什么起、用户下过哪些方向 | [`intents.md`](intents.md) | 追加式，不删 |
 
 **`proposed/` = 完整规划面**（2026-09-25 用户指令"显性化所有内容"）：队列条目与搁置条目的
@@ -37,7 +36,7 @@ RFC 都住这里（搁置 RFC 带复活条件；▶ 语义仍归 roadmap 队列�
 | `implemented/` | 已落地的决定记录（决定/输掉的方案/实际跑过的验证/环境状态） | RFC 毕业，或用户直派任务的交付（**不必从 proposed/ 起步**） | **活的**：事实随实现维护；逆转另写新 Note 互链 |
 | `rejected/` | 被否决的方案——**只保留仍能阻止一次诱人重犯的** | 方案被否决且理由有未来价值 | 不再有防复犯价值 → 直接删（不留空壳） |
 | `postmortem/` | 事故复盘（事故叙事的唯一合法层） | 出现值得记的事故 | 事实澄清后仍留（历史记录） |
-| `research/` | 外部研究/考古报告（仍在被引用的） | 研究产出并被 docs 或决定引用 | 不再被引用 → 删或并入 |
+| ~~`research/`~~ | （2026-09-27 清并：五篇调研报告全部完成且落点已落地，**并入 [`implemented/`](implemented/)** 带 grandfather 标注——位置=状态，防误读为待开展课题） | — | — |
 
 细则见各子目录 README（每个子目录都有 README，`note-status` 门禁强制在场）。
 

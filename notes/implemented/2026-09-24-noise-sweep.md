@@ -13,7 +13,7 @@
 
 1. **evaluation.md §5 机制血缘表**（7 行）——与 §0 原则表、L1–L4 各面内联引用、台账
    D4/D5 三重重复（同一规则多处陈述 = slop）；codex 工具名（validate-bundle 等）的
-   正本 = [harness 考古报告](../research/2026-09-24-deep-research-harness-analysis.md)。
+   正本 = [harness 考古报告](../implemented/2026-09-24-deep-research-harness-analysis.md)。
 2. **evaluation.md §2 的 M1 完成定义表与"（当前里程碑）"头注**——M1 已收（证据 =
    [m1-done Note](./2026-09-24-l4-lite-m1-done.md)），完成定义归 §1 各面 + §3 矩阵 +
    §4 goal 程序；"当前里程碑"已失真（当前 = M2）= status rot 活体。负面判据保留

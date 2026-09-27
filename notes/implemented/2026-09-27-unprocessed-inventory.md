@@ -27,7 +27,7 @@
 3. **A2 claim-evidence ledger 对比 → 维持现状**：dsh-scholar 的 claim 一等实体 + 两段式 intake +
    gate 治理与我们证据链**同构但不同架构**（Research Kernel 类型化状态 vs 文件契约）；逐项对照
    后无一值得吸收，且我们独有机械溯源审计、反例纪律、口径纪律（scholar README 均无）。吸收记录
-   已入 [生态调研笔记](../research/2026-09-25-dsh-plugin-ecosystem.md)。
+   已入 [生态调研笔记](../implemented/2026-09-25-dsh-plugin-ecosystem.md)。
 4. **C run 7 情报回灌 → 零新增 roadmap 条目**（逐条判定防自嗨）：报告 §9 三类缺口里——A1①
    "引用是否真支持所引句子"我们的 critic **每场都在做**（"文件存在但不支撑结论 → CRITICAL"）；
    A1② 链接腐烂我们的**摘录式设计天然免疫**（引文住在卡片里）；B 类取证阻断是研究内容的 rerun

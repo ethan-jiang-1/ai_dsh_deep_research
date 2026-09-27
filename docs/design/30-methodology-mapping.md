@@ -2,7 +2,7 @@
 
 > 层：设计（为什么）。这是 [evaluation.md](../evaluation.md) L3 领域面的核心载体：
 > 生命周期每一环节在本插件的落点，或带证据的弃用理由。考古来源 =
-> [notes/research/2026-09-24-deep-research-harness-analysis.md](../../notes/research/2026-09-24-deep-research-harness-analysis.md)
+> [notes/research/2026-09-24-deep-research-harness-analysis.md](../../notes/implemented/2026-09-24-deep-research-harness-analysis.md)
 > （codex harness 11-phase 生命周期 / wave 语义 / gate 体系 / 证据四层 / 8 条实证教训）。
 > 原则（用户定案 + company D13）：**不发明**——codex 因宿主缺原语自建的机制，在 DSH 上
 > 一律换原生载体；每个自建残留须有"DSH 载体不可用"的证据。
