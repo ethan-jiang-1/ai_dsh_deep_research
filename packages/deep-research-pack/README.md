@@ -94,5 +94,8 @@ dsh-deep-research-preflight --workspace ~/research-workspace
   `pack-workspace-fresh` 防漂移）；种子只铺新工作区，**不覆盖**已存在文件（`--force` 除外）；
 - **皮肤/品牌层**（ui-skin）与**专职 synthesizer 角色**（单场实测 Lead 独任综合无过载）
   仍在搁置池，复活条件见 roadmap；
-- **工具卡只做了 2 张**（spawn_teammate / web_search）；`team_task_*` 卡留后续；
+- **工具卡 = 2 张**（spawn_teammate / web_search）；`team_task_*` 与其他协调类工具
+  （wait_agent / list_agents / send_message）**不进对话流**（2026-09-27 实测：流里 0 出现，
+  harness 把协调类工具排除在对话渲染外）——团队任务的观察由 ui-agent-team 任务板与 To-dos
+  折叠承担，无需卡片（曾实现过 4 张，重放验证 toolview 永不触发，已回退）；
 - **版本兼容面窄**：只声明 `dsh-v0.1.7-rc.2`（pre-stable API，peer 版本号不精确钉死）。

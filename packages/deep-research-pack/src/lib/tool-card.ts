@@ -12,7 +12,7 @@ export interface ToolCardArgs {
   readonly description?: unknown
   readonly prompt?: unknown
   readonly query?: unknown
-}
+}  // 协调类工具（team_task_*/wait_agent/list_agents/send_message）不进对话流——无卡片需求（2026-09-27 实测）
 
 /** 从 call/result 切片推导卡片状态（settled 前 running；interrupted → stopped）。 */
 export function cardStateOf(block: object): CardState {
@@ -47,6 +47,7 @@ export function cardTitleOf(toolName: string, args: ToolCardArgs | null, argsRaw
       const q = typeof args.query === 'string' ? args.query : ''
       return q === '' ? '检索' : `检索：${q.slice(0, 60)}`
     }
+
   }
   return `${toolName} ${argsRaw.slice(0, 40)}`
 }
