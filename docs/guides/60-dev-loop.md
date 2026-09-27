@@ -74,7 +74,7 @@
 |---|---|---|---|---|---|
 | 改 preset（角色/skills/工具行） | pack 源 `presets/` | **`render-overlay` 先于 L1**（L1 挂的是 overlay，不是 pack 源） | L0 + L1 | 行为/发布集变才写 Note | 四角色真挂载绿 + 文档同步 |
 | 改 persona / skill / 手册文本（模型可见） | pack 源 | `render-overlay` → L1 → **snapshot-replay B 层**（模型可见文本变化的 keyless 秒级信号：有意变更 → 红 = 已捕获，走新一代 fixture + `--update-expected` 重写金标准 + 人审）→ **重启 run 通道**（web 缓存 boot 时文本） | L0 + L1 + L4-lite | 同上 | 真模型档证据 + L1 绿 |
-| 改观察面 client 面 | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `pnpm build` → `client-load-smoke` | L0 + client-load-smoke | 同上 | 真浏览器断言全绿 |
+| **改驾驶舱**（观察面 client 面——`src/client/` 套件，[命名正本](../../notes/implemented/2026-09-28-cockpit-naming.md)） | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `pnpm build` → `client-load-smoke`（改挂起显性化再跑 `client-hitl-smoke`） | L0 + client-load-smoke | 同上 | 真浏览器断言全绿 |
 | 加 / 改机械门禁 | `verify.mjs` gates 数组 + `evaluation.md` §L0 台账 | **注入回归红 → 还原 → 绿** | L0 | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 |
 | 改工作区手册 / 模板 | `research-workspace/` 正本 → `sync-pack-workspace` | sync → verify | L0 | — | `pack-workspace-fresh` 绿 |
 | 改部署面（preflight / scaffold / 发布集） | pack `scripts/` + `package.json` 的 files/bin | — | L0 + L2 | 部署 Note | `release-smoke` ALL PASS |

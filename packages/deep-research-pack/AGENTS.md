@@ -1,10 +1,11 @@
 # AGENTS.md — deep-research-pack（插件内容子树）
 
-本包是**配置为主 + 一个 client 面**：贡献 = `cordis.patch.yml` 的 bundle 行 +
-`presets/<role>.patch.yml`（一条 `@deepseek-ai/dsh-agent-preset` 行，config.plugins 内声明
-persona/skills/工具行）+ `presets/<role>/skills/` + **观察面 client 面**（`src/client/`，
-D18 单点例外；构建产物 `lib/client.js`）+ 工作区种子 `workspace/`（手册与模板的快照，
-由 `dev/sync-pack-workspace.mjs` 同步，门禁 `pack-workspace-fresh` 防漂移）+ 部署脚本
+本包是**配置为主 + 研究驾驶舱（Research Cockpit——观察面 client 套件，D18 单点例外；
+[命名正本](../../notes/implemented/2026-09-28-cockpit-naming.md)）**：贡献 = `cordis.patch.yml`
+的 bundle 行 + `presets/<role>.patch.yml`（一条 `@deepseek-ai/dsh-agent-preset` 行，
+config.plugins 内声明 persona/skills/工具行）+ `presets/<role>/skills/` + 驾驶舱
+（`src/client/`，构建产物 `lib/client.js`）+ 工作区种子 `workspace/`（手册与模板快照，
+`dev/sync-pack-workspace.mjs` 同步，门禁 `pack-workspace-fresh` 防漂移）+ 部署脚本
 `scripts/{preflight,scaffold}.mjs`（bin 两条命令）。包级当前合同在 [README.md](README.md)；
 本文件只放该子树的**指令**。上游对应物 = DSH `packages/AGENTS.md`。
 

@@ -10,7 +10,7 @@
 独立 repo + 单自写包 + 运行时工作区：
 
 ```
-packages/deep-research-pack/   唯一自写包：presets/<role>/ + cordis.patch.yml + 观察面 client 面（src/client/ + lib/client.js——D18 单点例外，用途限定观察/调试）
+packages/deep-research-pack/   唯一自写包：presets/<role>/ + cordis.patch.yml + 研究驾驶舱（Research Cockpit——观察面 client 套件，src/client/ + lib/client.js；D18 单点例外，用途限定观察/调试；[命名正本](../../notes/implemented/2026-09-28-cockpit-naming.md)）
 research-workspace/            运行场：角色会话 cwd（研究手册 + drt_<slug>/（run bundle）+ templates/）
 docs/ notes/ scripts/ tests/ dev/   文档/决策/门禁/回归/环境（分层原则见 00-index）
 vendor/dsh/                    pinned submodule（只读铁律——verify vendor-pin/vendor-clean 把守；
