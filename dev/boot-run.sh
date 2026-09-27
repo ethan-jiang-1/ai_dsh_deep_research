@@ -16,7 +16,10 @@ set -euo pipefail
 node "$ROOT/scripts/lib/vendor-artifacts.mjs"
 
 PROFILE=research
-PORT=3081                    # 60 §3 约定：3080 被 DSH web GUI 占用
+# 端口可覆盖（2026-09-28 用户指令：3081 让给别的项目，本仓 run 通道用 3083）：
+#   DSH_RUN_PORT=3083 bash dev/boot-run.sh
+# 缺省仍 3081（60 §3 既有约定）；3080 = DSH web GUI 占用，不可用。
+PORT="${DSH_RUN_PORT:-3081}"
 PACKDIR="$ROOT/packages/deep-research-pack"
 PROFDIR="$DSH_HOME/profiles/$PROFILE"
 RUNTMP="$ROOT/dev/smoke-workspace/run-pack"

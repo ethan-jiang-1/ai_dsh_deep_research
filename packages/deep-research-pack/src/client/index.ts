@@ -14,6 +14,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
 import { RESEARCH_TAB_KEY, RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT } from './keys.ts'
+import { IconGaugeOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import { ResearchToolCard, RESEARCH_TOOL_KEYS } from './ResearchToolCard.tsx'
 import { ResearchStatusTab, ResearchStatusTitle, type JournalFrame } from './ResearchStatusTab.tsx'
 
@@ -46,7 +47,9 @@ export function apply(ctx: ClientContext): void {
       kind: 'research-status',
       priority: 'extension',
       title: () => '研究状态',
-      guide: [{ id: RESEARCH_TAB_KEY, order: 1, title: () => '研究状态', description: () => '研究 run 的步骤、等待与证据状态' }],
+      // guide 胶囊的 glyph（vendor SidebarRightGuideEntry.icon：标题前图标——缺席则画方块
+      // 占位符；2026-09-28 用户点名要 icon）：仪表盘 = 状态监测语义，与检索/工具图标不撞
+      guide: [{ id: RESEARCH_TAB_KEY, order: 1, title: () => '研究状态', description: () => '研究 run 的步骤、等待与证据状态', icon: IconGaugeOutlineRegular }],
     }), 'deep-research-pack: research-status tab type')
 
     // workspaceFiles 闭包（bundle 渐进面数据通道；company cultivation 同款，失败降级 null）
