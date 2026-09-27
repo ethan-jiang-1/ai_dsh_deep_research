@@ -10,15 +10,12 @@
 
 ## 队列
 
-> 次序依据（2026-09-27 三次更新）：①当前条目 = 毕业正文改写门禁（卫生，可自主）——毕业纪律的
-> 机器面收尾；②真人档验收居末（等人——用户指令延后到最后，期间代理模拟代行"看"）；
-> ③搁置池四条维持 rejected/（floor 的可实现核心已被 evidence-audit 吸收，synthesizer 大概率
-> 永不触发，license/ui-skin 等用户触发），复活条件见行内。
+> 次序依据（2026-09-27）：唯一剩余条目 = 真人档验收（等人——用户在场时一次闭四项，期间代理
+> 模拟代行"看"）；机械可自主的两条（keyless 快照面、毕业正文改写门禁）均已交付离队。搁置池
+> 四条维持 rejected/（floor 的可实现核心已被 evidence-audit 吸收，synthesizer 大概率永不
+> 触发，license/ui-skin 等用户触发），复活条件见行内。
 
-1. ▶ **毕业正文改写门禁**（卫生，**可自主**）——implemented/ 活跃 Note 零计划体残留的 L0 机械
-   门禁（"毕业 = 正文改写"的机器面；writing-a-gate 全程序；负例 = 注入 `## 验收` 节/待办
-   标记 → 红 → 还原）。RFC = [2026-09-27-graduation-rewrite-gate](notes/proposed/2026-09-27-graduation-rewrite-gate.md)。
-2. **真人档验收**（研究/活动，**等人**——用户指令延后到最后；期间代理模拟代行"看"）——一次在场
+1. ▶ **真人档验收**（研究/活动，**等人**——用户指令延后到最后；期间代理模拟代行"看"）——一次在场
    会话闭四项：真人 HITL1/HITL2（不代答）、卡片可用性结论、观察面目验、run 本体 L4 四判据 +
    `audit.md` CRITICAL 0。RFC = [2026-09-26-human-gate-acceptance](notes/proposed/2026-09-26-human-gate-acceptance.md)。
 

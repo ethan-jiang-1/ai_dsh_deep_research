@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'pack-workspace-fresh', 'queue-pointer-live', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'pack-workspace-fresh', 'queue-pointer-live', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only'];
 
 const failures = [];
 const notes = [];
@@ -760,6 +760,60 @@ function roadmapParked() {
         fail(gate, `notes/research/${f}: 缺状态行（> 状态：已完成 | 进行中 · 日期）`);
       }
       if (!index.includes(f)) fail(gate, `notes/research/README.md: 未登记 ${f}（索引新鲜度）`);
+    }
+  }
+}
+
+// ── 门禁 11b：note-graduation-rewrite（implemented 活跃 Note 零计划体残留——"毕业 = 正文改写"
+//    的机器面，2026-09-27 立项。此前只有 skill 散文约束无机械守卫；roadmap-graduation-drift
+//    事故（postmortem 在案）是毕业时序纪律失守的近亲——队列指针半边已有 queue-pointer-live
+//    把守，正文改写这半边由此补上。判据窄带（2026-09-27 探针：候选词表对活跃区 31 篇全量
+//    零命中零误报——宁窄勿宽，漏报由 graduating-a-queue-item skill 语义兜底）：
+//    ① RFC 专有**裸**节名 `## 验收`（implemented 骨架 = 决定/输掉的方案/实际跑过的验证/环境
+//       状态；带后缀的历史变体 `## 验收判据`/`## 验收怎么闭的` 是既有事实体形态，不追改）；
+//    ② 行内计划体标记：TODO/TBD/待办/待实施/下一步将/接下来将/将迁移/将新增。
+//    **引文边界**（实测自指教训：记录本门禁红证的 Note 必然内嵌标记原文——不豁免则门禁咬
+//    自己的毕业 Note）：fenced 代码块与反引号内联代码 = 引文非正文语态，剥离后再匹配；
+//    裸文本中的标记才红。grandfather 注释件豁免（遗留形态允许骨架不齐）；archived/ 冻结层
+//    不扫（快照不追改）；README.md 非毕业件不扫；扫描范围空集即红（防空语料）。──
+{
+  const gate = 'note-graduation-rewrite';
+  const dir = join(ROOT, 'notes', 'implemented');
+  if (!existsSync(dir)) {
+    fail(gate, 'notes/implemented/ 目录缺席——扫描范围失效（防空语料）');
+  } else {
+    const files = readdirSync(dir).filter((f) => f.endsWith('.md') && f !== 'README.md');
+    if (files.length === 0) {
+      fail(gate, 'notes/implemented/ 扫描范围为空——门禁失去保护面（防空语料），检查目录是否被误清');
+    }
+    const markers = [
+      ['RFC 裸节名 ## 验收', /^##\s*验收\s*$/],
+      ['计划体标记 TODO', /TODO/],
+      ['计划体标记 TBD', /TBD/],
+      ['计划体标记 待办', /待办/],
+      ['计划体标记 待实施', /待实施/],
+      ['计划体标记 下一步将', /下一步将/],
+      ['计划体标记 接下来将', /接下来将/],
+      ['计划体标记 将迁移', /将迁移/],
+      ['计划体标记 将新增', /将新增/],
+    ];
+    for (const f of files) {
+      const text = readFileSync(join(dir, f), 'utf8');
+      if (/<!--\s*grandfather:/.test(text)) continue;
+      const lines = text.split('\n');
+      let inFence = false;
+      for (let i = 0; i < lines.length; i++) {
+        const raw = lines[i];
+        if (raw.trimStart().startsWith('```')) { inFence = !inFence; continue }
+        if (inFence) continue;
+        // 剥离反引号内联代码（引文非正文）后再匹配；行号 = 原文真实行号。
+        const bare = raw.replace(/`[^`]*`/g, '');
+        for (const [label, re] of markers) {
+          if (re.test(bare)) {
+            fail(gate, `notes/implemented/${f}:${i + 1} 命中${label}——计划体残留。毕业 = 正文改写（计划体 → 已交付事实体，删未来时态/待办清单；见 .agents/skills/graduating-a-queue-item），只改路径不改正文 = 未来计划伪装成当前事实`);
+          }
+        }
+      }
     }
   }
 }
