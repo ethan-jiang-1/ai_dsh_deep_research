@@ -19,10 +19,6 @@
    第 12 场代理模拟 run 闭环（现行 profile；kickoff/HITL 代答/盯场/审计全自服务）；真人 HITL/
    卡片可用性/观察面目验**如实记"未采集（用户明示豁免）"**，转任意时刻自愿复查口（~2 分钟）。
    RFC = [2026-09-26-human-gate-acceptance](notes/proposed/2026-09-26-human-gate-acceptance.md)。
-2. **run 操作面自诊断**（卫生，**可自主**）——状态判定谓词化（复用 pack hitl-fold 正本：末位
-   回合事件形状，非字符串 grep——2026-09-27 实录：grep 命中工具 schema 误报"卡已挂起"）+
-   watcher 盯场件转正 + hitl-answer 前置自拒与 `--session` 空串防御 + 三态夹具回归。
-   RFC = [2026-09-27-run-ops-self-diagnosis](notes/proposed/2026-09-27-run-ops-self-diagnosis.md)。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 
