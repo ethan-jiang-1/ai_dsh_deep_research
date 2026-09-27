@@ -20,6 +20,9 @@
 第二轮证据：`drt_cn-llm-deep-research` 的 critic 首轮抓 1 条 CRITICAL、`drt_cn-llm-infra` 抓 5 条，
 **两场全部闭合且终判 readiness = PASS**——即散文审查既抓得到问题、也没有出现"抓不完"的滑坡。
 **结论不变：不引入数值 floor，维持搁置。**
+第五至八场再重估（含 40 / 57 卡最大规模）：critic 在第五场抓 4 个 CRITICAL（含"报告方法学结论被
+自身证据证伪"级）、第七场 FAIL→PASS 走满四轮、第八场 0 CRITICAL——散文审查持续有效，且无任何
+滑坡迹象。
 
 ## 方案（草图，仅复活后适用）
 
