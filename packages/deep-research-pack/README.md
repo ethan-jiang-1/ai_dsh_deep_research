@@ -38,7 +38,8 @@ cd ~/research-workspace && dsh --profile research
 
 **为什么需要 ②**：研究纪律靠**会话 cwd 的 `AGENTS.md`**（DSH 的 agent-instructions 从 cwd
 向上发现并注入每个角色）；团队机制（`spawn_teammate` / `team_task_*`）**不在本包声明**
-（组合与实战 config 归 vendor 的 `agent-team-profile` 层——RFC m2-p1-run-channel A 定案）。
+（组合与实战 config 归 vendor 的 `agent-team-profile` 层——D16；作者面规则正本 =
+[guides/62 参与方表](../../docs/guides/62-plugin-authoring.md)）。
 缺任一 → 角色没有纪律、或没有团队通道。
 
 **前置检查**（随时可跑，fail-loud + 给补救命令）：
@@ -92,10 +93,10 @@ dsh-deep-research-preflight --workspace ~/research-workspace
   `workspaceId` 形态建会话（`dev/run-kickoff.mjs` 已默认此形态）；建在别处的会话只显示活动流；
 - **`workspace/` 种子是快照**：由 `dev/sync-pack-workspace.mjs` 从仓库正本同步（门禁
   `pack-workspace-fresh` 防漂移）；种子只铺新工作区，**不覆盖**已存在文件（`--force` 除外）；
-- **皮肤/品牌层**（ui-skin）与**专职 synthesizer 角色**（单场实测 Lead 独任综合无过载）
-  仍在搁置池，复活条件见 roadmap；
+- **皮肤/品牌层**（ui-skin）与**专职 synthesizer 角色**（多场 run 重估：lead 独任综合
+  无过载）仍在搁置池，复活条件见 roadmap；
 - **工具卡 = 2 张**（spawn_teammate / web_search）；`team_task_*` 与其他协调类工具
   （wait_agent / list_agents / send_message）**不进对话流**（2026-09-27 实测：流里 0 出现，
   harness 把协调类工具排除在对话渲染外）——团队任务的观察由 ui-agent-team 任务板与 To-dos
-  折叠承担，无需卡片（曾实现过 4 张，重放验证 toolview 永不触发，已回退）；
+  折叠承担，无需卡片（4 卡方案的回退理由 = [marathon2 复盘](../../notes/archived/2026-09-25-marathon2-retrospective.md)，冻结层）；
 - **版本兼容面窄**：只声明 `dsh-v0.1.7-rc.2`（pre-stable API，peer 版本号不精确钉死）。

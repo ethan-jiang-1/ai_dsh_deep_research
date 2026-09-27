@@ -49,9 +49,9 @@ function roadmapQueue() {
   return out.join('\n');
 }
 
-// roadmap §搁置池 节切片（proposal-scheduled 的**第二归宿面**：搁置条目的 RFC 也住
-// proposed/——用户 2026-09-25 指令"显性化所有内容到 proposed，统统思考进去"。
-// ▶ 当前指针仍只认队列节：搁置 RFC 不参与 entry-chain 的"当前"语义）。
+// roadmap §搁置池 节切片（proposal-scheduled 的第二归宿面——防御性兼容：2026-09-27 起搁置
+// 条目全文住 notes/rejected/（搁置即"决定不做"，池行直链 rejected 文件），proposed/ 只收
+// 在飞队列条目；本分支保留，防语义误挂时静默。▶ 当前指针只认队列节）。
 function roadmapParked() {
   const p = join(ROOT, 'roadmap.md');
   if (!existsSync(p)) return null;
@@ -320,8 +320,9 @@ function roadmapParked() {
 }
 
 // ── 门禁 15：proposal-scheduled（proposed/ 每提案必须在 roadmap §队列 **或 §搁置池** 有
-//    归宿——两处都不是的 RFC = 孤儿提案，红灯。搁置池归宿 = 复活条件 + 现状写进 RFC，
-//    不是停车场（搁置 RFC 与池行双向挂链）。收紧记录：review-driven-hardening Note。）──
+//    归宿——两处都不是的 RFC = 孤儿提案，红灯。2026-09-27 起搁置池条目全文住 notes/rejected/
+//    （带重启条件，池行直链），proposed/ 正常只收队列条目；§搁置池分支保留为防御性兼容。
+//    收紧记录：review-driven-hardening Note。）──
 {
   const gate = 'proposal-scheduled';
   const dir = join(ROOT, 'notes', 'proposed');
@@ -737,10 +738,9 @@ function roadmapParked() {
 // ── 门禁 11：note-status（notes/ 的时态与状态面——2026-09-25 用户诉求落地：
 //    人一眼看懂、Agent 一眼分辨当前/将来/过去。三条断言：
 //    ① notes/ 每个子目录有 README.md（目录自述时态与状态标记方式）；
-//    ② research/ 的非 README 文件带状态行 `> 状态：已完成|进行中`（报告层不是生命周期
-//       目录，状态必须写在文件里）；
-//    ③ research/README.md 登记 research/ 的每个文件（人工索引的新鲜度对账——登记漏项
-//       即红；这是本仓对 vendor"不建索引"的登记偏离，人读场景优先）。）──
+//    ②③ research/ 断言（状态行 + README 索引对账）条件化保留——research/ 已清并
+//       （2026-09-27：目录名=状态，现读作"待研究课题"会误读；五篇报告并入 implemented/），
+//       目录重现则断言复活。）──
 {
   const gate = 'note-status';
   const notesDir = join(ROOT, 'notes');

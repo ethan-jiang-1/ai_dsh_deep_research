@@ -29,15 +29,18 @@ roadmap.md                队列 + 搁置池（纯队列：条目完成即离队
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 随队列条目——见 pnpm-workspace.yaml 头注）
 packages/deep-research-pack/   唯一自写包（配置为主 + 一个观察面 client 面，D18）：presets/<role>.patch.yml（0.1.7 形态=一条 @deepseek-ai/dsh-agent-preset 行，config.plugins 内声明 persona/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、cordis.patch.yml（bundle 行）、workspace/（工作区种子：手册+模板，生成物）、scripts/{preflight,scaffold}.mjs（部署 bin）；交付与部署形态 = guides/62，合同 = 包 README
 vendor/dsh/               pinned submodule（只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，tag/commit 见 §DSH 源码表）
-research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、drt_<slug>/（run bundle）、templates/run/
+research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、drt_<slug>/（run bundle）、
+                         archive/（已交付 run 归档位）、templates/run/
 docs/                    00-index（地图+决策台账+术语映射）→ design/10-30 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ evaluation.md（验收合同）
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）；目录名自带时态，
-                         总图 = notes/README.md（将来 proposed/ · 过去 implemented/rejected/postmortem/research/）：
-                         intents.md → proposed/（RFC，一文件一条目）→ implemented/；
-                         rejected/（否决理由，防复犯）；postmortem/（事故复盘）；research/（调研报告，带状态表）
+                         总图 = notes/README.md（将来 proposed/ · 过去 implemented/archived/rejected/
+                         postmortem/）：
+                         intents.md → proposed/（在飞队列条目的 RFC）→ implemented/（不再指导未来工作者
+                         冻结入 archived/）；
+                         rejected/（否决与搁置——"决定不做"，带重启条件）；postmortem/（事故复盘）
 .agents/skills/          开发技能（DSH 约定路径：project-agents 发现根）：任务匹配即加载的程序化工作记忆
                          （毕业条目 / 加角色 / 写门禁 / 跑 run）；与产品内 runtime skills（presets/*/skills/）分家
-scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）、team-preflight-smoke.mjs（team 机制预检）、entry-chain-probe.mjs（入口链探针，真模型档）、run-dashboard.mjs（run 只读投影，boot-run 起）、lib/（roles 角色清单访问器[事实源=盘上 presets/] + env/playwright/vendor-artifacts 三个冒烟支撑模块）
+scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、client-load-smoke.mjs（观察面真浏览器）、client-hitl-smoke.mjs（活标题触发，真模型档）、evidence-audit.mjs（证据面机械审计）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）、team-preflight-smoke.mjs（team 机制预检）、entry-chain-probe.mjs（入口链探针，真模型档）、run-dashboard.mjs（run 只读投影，boot-run 起）、lib/（roles 角色清单访问器[事实源=盘上 presets/] + env/playwright/vendor-artifacts 三个冒烟支撑模块）
 tests/                   keyless 回归（node:test，无测试框架；layering 守卫禁真模型/网络/子进程；fixtures/ 测试夹具）
 dev/                     vendor-build.sh（vendor 树构建：tsc host/client + typert 产物 + client bundle）、vendor-typert-emit.mjs（typert 产物生成器）、vendor-host-bundle.config.ts（逐包 host 半补建配置：tsdown -c 给缺 lib/index.js 的包补产物）、vendor-host-typert.config.ts（逐包 tsdown 备选配置，留档）、render-overlay.mjs（从 pack 渲染 research.overlay.yml）、sync-pack-workspace.mjs（把 research-workspace 正本同步进 pack 的 workspace/ 种子）、boot-run.sh（run 通道开跑：幂等装+boot web+仪表盘）、run-kickoff.mjs（run 会话驱动）、env.sh（双 home + dsh 机制基线 + pre-commit 钩子激活）、research.overlay.yml（源码域 overlay，**生成物**）、hooks/（pre-commit：verify+tests 红灯拦 commit）、harness-home/ 与 smoke-workspace/（gitignore 运行区）
 ```
@@ -50,8 +53,8 @@ dev/                     vendor-build.sh（vendor 树构建：tsc host/client + 
 理由的变更**（代码/测试/现有文档说不清的"为什么选它、放弃了什么"）才需**同一变更**新增或更新
 Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。细则是子树指令，不在这里复述：
 
-- **时态总图 = [notes/README.md](notes/README.md)**（将来 `proposed/` = 队列+搁置条目的 RFC 全文、搁置带复活条件 · 过去
-  `implemented/` `rejected/` `postmortem/` `research/`；下一步仍只看 roadmap ▶）；
+- **时态总图 = [notes/README.md](notes/README.md)**（将来 `proposed/` = 在飞队列条目的 RFC 全文 · 过去
+  `implemented/` `archived/`（冻结） `rejected/`（否决与搁置，带重启条件） `postmortem/`；下一步仍只看 roadmap ▶）；
 - **写入触发 / 取代检查 / 格式与毕业 = [notes/AGENTS.md](notes/AGENTS.md)**；
 - **任务流程**（毕业条目 / 加角色 / 写门禁 / 跑 run）= `.agents/skills/` 开发技能，按
   description 触发加载，不占常驻上下文。

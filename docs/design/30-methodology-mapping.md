@@ -2,7 +2,7 @@
 
 > 层：设计（为什么）。这是 [evaluation.md](../evaluation.md) L3 领域面的核心载体：
 > 生命周期每一环节在本插件的落点，或带证据的弃用理由。考古来源 =
-> [notes/research/2026-09-24-deep-research-harness-analysis.md](../../notes/implemented/2026-09-24-deep-research-harness-analysis.md)
+> [deep-research-harness-analysis（考古报告）](../../notes/implemented/2026-09-24-deep-research-harness-analysis.md)
 > （codex harness 11-phase 生命周期 / wave 语义 / gate 体系 / 证据四层 / 8 条实证教训）。
 > 原则（用户定案 + company D13）：**不发明**——codex 因宿主缺原语自建的机制，在 DSH 上
 > 一律换原生载体；每个自建残留须有"DSH 载体不可用"的证据。
@@ -56,10 +56,9 @@
 
 1. **floor 数值门禁弃用**（wave0 每题源数下限等）：参数化质量下限换成 skill 纪律文本，
    失去机械强制性。补偿：critic 的 readiness 判据清单含"关键结论证据 ≥ A/B 级"硬项；
-   首场完整 run 实测：critic 散文审查抓出三根钉子（无来源/平台不对称/口径）
-   即质量证据，数值 floor 有假绿风险——**维持搁置**，复活条件 = run 出现质量滑坡实证
-   （[roadmap §搁置池](../../roadmap.md)）；复活后的升级路径 = keyless 脚本断言 evidence/
-   计数与 frontmatter 完整性（进 verify，带反证）。
+   多场 run 实证 critic 散文审查无滑坡（数值 floor 有假绿风险）——**维持搁置**；
+   其可实现核心（抓取强度/摘录覆盖率/final 链/日期）已由 evidence-audit 机械审计吸收，
+   复活条件 = run 出现质量滑坡实证（[roadmap §搁置池](../../roadmap.md)）。
 2. **提交前验证降格**：codex 的 dry-submit schema 校验换成 critic 狩猎。代价：critic 也
    是 LLM，可能漏。补偿：readiness 判据清单逐条勾选格式 + lead 的 veto 纪律。
 3. **确定性 readiness 降格为语义审查**：失去"纯结构、零语义"的预检层。补偿：模板文件

@@ -52,7 +52,7 @@ Deep Research 的本质困难 = 搜索结果信噪比极差 + 答案位置未知
 
 ## 4. 队形实测结论（首场完整 run）
 
-- **综合归 lead 足够**：lead 独任综合无过载（两次调度决策干净落地，标准报告 4 topic 规模）——专职 synthesizer 不拆，维持搁置；
+- **综合归 lead 足够**：lead 独任综合无过载（首场实测干净落地；多场 run 重估维持，现状 = [roadmap 搁置池](../../roadmap.md) synthesizer 行）——专职 synthesizer 不拆，维持搁置；
 - **topic 无争用**：单 owner + 任务板纪律足够（T1 中途改派经 lead 调度干净落地）。
 
 证据 = [m2-run-mechanics §实施记录](../../notes/implemented/2026-09-24-m2-run-mechanics.md)。

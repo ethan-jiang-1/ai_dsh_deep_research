@@ -1,7 +1,7 @@
 # 10 · 架构：repo 形态、组合层与通道选型
 
 > 层：设计（为什么）。工程范式照搬 `ai_dsh_company`（解剖报告见
-> [notes/research/2026-09-24-dsh-plugin-repo-anatomy.md](../../notes/implemented/2026-09-24-dsh-plugin-repo-anatomy.md)）；
+> [dsh-plugin-repo-anatomy](../../notes/implemented/2026-09-24-dsh-plugin-repo-anatomy.md)）；
 > DSH 机制的权威在本仓 `vendor/dsh/` pinned submodule（tag 与钉 commit 的正本 = [AGENTS.md §DSH 源码表](../../AGENTS.md) +
 > `.gitmodules`；只读铁律——verify 门禁 `vendor-pin`/`vendor-clean` 把守，D10）。
 
@@ -79,8 +79,9 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 
 - `dev/env.sh`：DSH_HOME 重定向到 `dev/harness-home`（数据面隔离）+ 裸 dsh 拦截（代码面
   隔离——全局安装随升级漂移，不作机制依据）；机制基线 = 本仓 `vendor/dsh/`（env.sh 的
-  dsh 函数与根 `pnpm dsh` 均从钉 tag 源码起，前置 = 根 pnpm install + vendor 一次
-  `pnpm run build` 产 lib/——company release.md 同款流程）；
+  dsh 函数与根 `pnpm dsh` 均从钉 tag 源码起，前置 = 根 pnpm install + `dev/vendor-build.sh`
+  （vendor 树构建：tsc host/client + typert 产物 + client bundle；构建入口正本 = guides/60 §2）——
+  company release.md 同款流程）；
 - 验证五面见 [evaluation.md](../evaluation.md)；preset 类改动的完成定义 = preset-smoke 真挂载。
 
 ## 6. 偏离登记（默认严格 DSH/company 纪律，偏离须 D 号 + 约束证据）
