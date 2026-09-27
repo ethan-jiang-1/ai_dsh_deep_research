@@ -109,13 +109,17 @@ const listenersOn = (port) => {
   return r.stdout.split('\n').map((x) => x.trim()).filter(Boolean)
 }
 const reclaimPort = async (port) => {
-  const pids = listenersOn(port)
-  if (pids === null) return `lsof 缺席，跳过端口校验（pid=${String(process.env.PID ?? '?')}）`
-  for (const pid of pids) { try { process.kill(Number(pid), 'SIGKILL') } catch { /* 已死 */ } }
-  await sleep(500)
+  // 重试收割（2026-09-27 实测）：web 有 supervisor 式的监听重建行为——单次杀+验存在竞态窗口，
+  // 杀完立刻验会漏。三轮"杀→等→验"，仍不干净才 fail-loud。
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const pids = listenersOn(port)
+    if (pids === null) return `lsof 缺席，跳过端口收割校验（本机无 lsof）`
+    if (pids.length === 0) return null
+    for (const pid of pids) { try { process.kill(Number(pid), 'SIGKILL') } catch { /* 已死 */ } }
+    await sleep(800)
+  }
   const left = listenersOn(port)
-  if (left !== null && left.length > 0) return `端口 ${port} 用后未释放（残留 pid ${left.join(',')}）`
-  return null
+  return left !== null && left.length > 0 ? `端口 ${port} 用后未释放（残留 pid ${left.join(',')}）` : null
 }
 
 const boot = async () => {
@@ -144,8 +148,8 @@ const boot = async () => {
   } catch (e) {
     // 启动失败（横幅超时 / web 早退）也不能留活口——原版直接 throw，child 成孤儿
     try { process.kill(-child.pid, 'SIGKILL') } catch { child.kill('SIGKILL') }
-    await sleep(500);
-    try { process.kill(-child.pid, 'SIGKILL') } catch { /* 已死 */ }
+    const leak = await reclaimPort(PORT);
+    if (leak !== null) console.error(`[preset-smoke] ${leak}`);
     throw e;
   }
 };

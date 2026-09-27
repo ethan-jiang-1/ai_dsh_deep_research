@@ -189,7 +189,14 @@ try {
       line.includes('"tool/call"') && line.includes('"name":"web_search"'));
   });
 } finally {
+  // 端口自持有（scripts/AGENTS.md「用完释放」）：SIGTERM 直杀只达直接子进程，孙进程会占着
+  // 端口成为孤儿——与 preset-smoke 同款按端口收割（2026-09-27 实测 3099 孤儿反复出现的同因）。
   child.kill('SIGTERM');
+  await sleep(400);
+  const taker = spawnSync('lsof', ['-t', '-nP', `-iTCP:${PORT}`, '-sTCP', 'LISTEN'], { encoding: 'utf8' });
+  for (const pid of (taker.stdout ?? '').split('\n').map((x) => x.trim()).filter(Boolean)) {
+    try { process.kill(Number(pid), 'SIGKILL') } catch { /* 已死 */ }
+  }
   await sleep(300);
 }
 
