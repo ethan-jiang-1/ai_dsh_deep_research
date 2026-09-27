@@ -81,3 +81,21 @@ DSH 原生 Teams 通道**，而非搜索或学术工具面——那些已被重�
   [dsh-evoresearch](https://github.com/Karbo123/DSH-EvoResearch)、[dsh-search-boost](https://github.com/Mr-remon219/dsh-search-boost)、
   [dsh-industry-research](https://github.com/PerryLink/dsh-industry-research)、[dsh-science](https://github.com/biociao/dsh-science)
 - [极客公园：黑鲸鱼 DeepSeek Harness，从「赛博乐高」变成 Agent Store](http://www.geekpark.net/news/369003)
+
+---
+
+## 吸收记录（2026-09-27 补：战略含义里"可对比取长"两钩子的处置）
+
+1. **dsh-scholar 的 claim-to-evidence 体系（对比后维持现状）**：读其 README——它的模型是
+   claim 为一等实体（claim-to-evidence links 记为持久研究状态）+ 两段式 intake（上传物先进隔离
+   Intake、永不自动成为 Evidence）+ gate 治理（agent 不能伪造已采纳 Evidence / 绕过 Gate）。
+   与本仓 evidence 身份链**同构但不同架构**：它有 Research Kernel（类型化数据库状态），我们是
+   文件契约（frontmatter 七字段 + 摘录/解读分节 + 口径 + 单源待破 + evidence-audit 机械审计）。
+   逐项对照：typed claim ledger ≈ 我们的 findings 行 + [来源:] 链（架构错配，文件式 harness
+   不值得引入类型化账本）；两段式 intake ≈ 我们的 drafts/ 与 evidence/ 之分 + critic + audit
+   （无失败证据，加流程纯增摩擦）；confidence ≈ 我们的 quality A–D。**反向强项**：机械溯源审计
+   （抓取强度/摘录覆盖率/final 链）、反例搜索纪律、口径纪律——scholar 的 README 均无对应物。
+   结论：**不吸收**；两者的差异是架构路线差，不是能力缺。
+2. **dsh-web-search-pro 多引擎路由（seam 阻塞）**：见 [search-fallback-seam](../implemented/2026-09-27-search-fallback-seam.md)
+   ——vendor web seam 是单 provider 语义、明文拒绝隐藏优先级链；替代路径 = 换 provider（用户动作）
+   或 agent 韧性（已实证）。
