@@ -96,7 +96,7 @@ vendor 的事故复盘住在 **`docs/postmortem/`**（10 篇编号条目 + `READ
 | 手写维护 | AGENTS、docs、README、活动 Note、Skills | 全部 `docs/`、`notes/`、`AGENTS.md`、presets、skills | 结构受门禁（预算/格式/链接），内容人写 |
 | 生成 + freshness 门禁 | tool/config/persistence catalog、module-graph | `dev/research.overlay.yml`（门禁 `overlay-fresh`；[evaluation.md](evaluation.md) §L0 登记为"本仓首个 tracked 生成物"）+ `packages/deep-research-pack/workspace/` 种子（门禁 `pack-workspace-fresh`，正本 = `research-workspace/`） | 改源不重生成即红（两条门禁机械对账） |
 | 混合（生成区嵌手写页） | subsystem 页的 cordis-surface 区、type-equiv 块 | `packages/deep-research-pack/presets/<role>.patch.yml`（手写）↔ `dev/research.overlay.yml`（渲染生成）+ profile 镜像（同事实的第二落点）——由 `boot-run.sh` 漂移检测承担 freshness | 漂移即 fail-loud |
-| 录制（机器写、人审、封存不改） | snapshots/、archived Note、persistence releases | run bundle（`research-workspace/drt_*`）——gitignored 运行区，事实由 bundle 文件承载 | 不进 L0（运行区不扫）；完整性归 run 内 critic + 观察面谓词 |
+| 录制（机器写、人审、封存不改） | snapshots/、archived Note、persistence releases | run bundle（`research-workspace/drt_*` 在飞 + `archive/` 已交付）——gitignored 运行区，事实由 bundle 文件承载 | 不进 L0（运行区不扫）；完整性归 run 内 critic + 观察面谓词 |
 | 投影（canonical 源的抛弃型派生物） | `website/.generated/` | `dev/smoke-workspace/dashboard.html`（canonical = 会话日志 + bundle 文件） | 随时可重建；永不手改、永不入库 |
 
 **一个事实一个 owner / 目录树即清单 / 不建第二份索引**：`notes/` 不设集中 INDEX（路径 =

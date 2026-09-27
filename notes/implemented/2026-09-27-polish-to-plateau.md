@@ -85,9 +85,9 @@ final 位置正确、链 201/201、CRITICAL 0，仅 source_url 残留 2 张（**
 
 ## 只剩你能做的（借助你的唯一事项）
 
-1. **真人档 HITL**（队列 ▶ 条目，至今 8 场全部代理模拟）：在场答一次 HITL1/HITL2——我代答永远
+1. **真人档 HITL**（队列条目【等人】，至今 8 场全部代理模拟）：在场答一次 HITL1/HITL2——我代答永远
    选推荐项，真人会犹豫/自定义/嫌措辞含糊，这是代理覆盖不了的盲区；
-2. **读报告**（你说回来看的）：四份深度 + 四份价格表，都在 `research-workspace/drt_*/final.md`，
+2. **读报告**（你说回来看的）：四份深度 + 四份价格表，都在 `research-workspace/archive/drt_*/final.md`，
    每条关键结论可点回 evidence；
 3. 想看过程：八个仪表盘在 `dev/smoke-workspace/dashboard-drt_*.html`。
 
@@ -95,5 +95,5 @@ final 位置正确、链 201/201、CRITICAL 0，仅 source_url 残留 2 张（**
 
 - run 通道 3081（token 在 `dev/smoke-workspace/web.log`，8h 保险丝）；八场 bundle 全在盘上；
 - 工作树干净，L0 全绿（31 门禁），tests 58/58，L1/L4-lite ALL PASS（最后一轮 pack 改动后）；
-- 「真人档验收」仍是队列 ▶（等人）——它的四项判据里，机械可断言部分已由八场间接覆盖，剩下的
+- 「真人档验收」仍是队列条目（等人，居末位）——它的四项判据里，机械可断言部分已由八场间接覆盖，剩下的
   是你的眼睛与手感。

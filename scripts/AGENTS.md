@@ -16,7 +16,7 @@
 ## 范围纪律（实测教训，不是风格偏好）
 
 - **覆盖面用 `git ls-files` 驱动**（tracked-only）：运行区（`dev/harness-home/`、
-  `research-workspace/drt_*`）不进 L0——否则 pre-commit 会被 run 产物拦红。
+  `research-workspace/` 的 `drt_*` 与 `archive/`）不进 L0——否则 pre-commit 会被 run 产物拦红。
 - 稀疏态（文件可能缺席）用 `existsSync` 防御；目录扫描跳过 `.git` 与 `node_modules`。
 - **子进程环境要剥 `GIT_*`**：`git -C <dir>` 在 pre-commit 钩子里会被注入的 `GIT_DIR`
   覆盖仓库发现（实测两次假红）——需要时传去掉 `GIT_DIR/GIT_INDEX_FILE/GIT_WORK_TREE/

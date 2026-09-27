@@ -21,7 +21,7 @@
 //       存在 CRITICAL（伪造链接 / final 断链）→ exit 1（供 CI/收尾判据用）。
 //       （auditBundle() 可导入——tests/ 层禁子进程，keyless 测试走纯 .jsonl 夹具直调。）
 // 用法：node scripts/evidence-audit.mjs <run-bundle-dir> [--sessions <会话根>]（缺省 $DSH_HOME/sessions）
-//       node scripts/evidence-audit.mjs --latest（取 research-workspace 最新 drt_*）
+//       node scripts/evidence-audit.mjs --latest（取 research-workspace 最新 drt_*——根[在飞]与 archive/[已交付]并扫）
 import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -360,12 +360,26 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
   }
   const sessionsRoot = sessionsIdx !== -1 ? resolve(argv[sessionsIdx + 1]) : join(repoHome, 'sessions')
   const bundleArg = argv.find((a) => !a.startsWith('--') && a !== sessionsRoot)
-  const statMs = (p) => { try { return statSync(p).mtimeMs } catch { return 0 } }
   let bundleDir = null
   if (latest) {
-    const dir = join(ROOT, 'research-workspace')
-    const cands = readdirSync(dir).filter((d) => /^drt_/.test(d)).map((d) => ({ d, m: statMs(join(dir, d)) })).sort((a, b) => b.m - a.m)
-    bundleDir = cands.length > 0 ? join(dir, cands[0].d) : null
+    // 位置=状态（D17）：在飞 bundle 住工作区根，已交付的由操作侧移入 archive/——两处并扫取
+    // mtime 最新；同名时根优先（在飞态是正本，archive 场是历史）。两处全空 → 走用法红（防空语料）。
+    const ws = join(ROOT, 'research-workspace')
+    const cands = []
+    const seen = new Set()
+    for (const dir of [ws, join(ws, 'archive')]) {
+      if (!existsSync(dir)) continue
+      for (const d of readdirSync(dir)) {
+        if (!/^drt_/.test(d) || seen.has(d)) continue
+        let st = null
+        try { st = statSync(join(dir, d)) } catch { continue }
+        if (!st.isDirectory()) continue
+        seen.add(d)
+        cands.push({ p: join(dir, d), m: st.mtimeMs })
+      }
+    }
+    cands.sort((a, b) => b.m - a.m)
+    bundleDir = cands.length > 0 ? cands[0].p : null
   } else if (bundleArg) bundleDir = resolve(bundleArg)
   if (bundleDir === null || !existsSync(bundleDir)) {
     console.error('evidence-audit: 用法 node scripts/evidence-audit.mjs <run-bundle-dir> | --latest（bundle 不存在）')

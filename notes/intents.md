@@ -22,7 +22,7 @@
 5. **怎么迭代**（2026-09-24 追加）：八成把握就先落地，不断 review/iteration 知错改错，
    不要想透澈了一口气输出。→ 落地：垂直轮节奏 + 队列制。
 6. **流程精神**（2026-09-24 追加）：借鉴 company 仓
-   `notes/research/2026-09-23-dsh-inround-task-surface.md` 的精神——先枚举再继承、
+   `notes/implemented/2026-09-23-dsh-inround-task-surface.md` 的精神——先枚举再继承、
    轮内反馈双门（plan 呈批 + todo 活清单）、队列不积累历史、status rots、默认严格
    偏离登记。→ 落地：AGENTS.md 纪律表（R1 枚举子集 + 全量枚举队列条目）、guides/60
    §0 条目生命周期、roadmap 纯队列。

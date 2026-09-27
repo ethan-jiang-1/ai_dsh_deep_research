@@ -19,8 +19,8 @@
 
 | run | 类型 | 题面 | 交付 | 证据审计 |
 |---|---|---|---|---|
-| `research-workspace/drt_cn-llm-deep-research` | **claim_verification** | 国产大模型"深度研究"能力是否追平国际一线 | `final.md` 402 行 · 26 张证据卡 · critic 三轮 FAIL→**PASS** | URL 溯源 93/93 · final 链 118/118 · **CRITICAL 0** |
-| `research-workspace/drt_cn-llm-infra` | exploratory_map | 国内 LLM infra 现状与瓶颈 | `final.md` 628 行 · 46 张证据卡 · critic **PASS** | URL 溯源 85/88 · final 链 128/128 · **CRITICAL 0** |
+| `research-workspace/archive/drt_cn-llm-deep-research` | **claim_verification** | 国产大模型"深度研究"能力是否追平国际一线 | `final.md` 402 行 · 26 张证据卡 · critic 三轮 FAIL→**PASS** | URL 溯源 93/93 · final 链 118/118 · **CRITICAL 0** |
+| `research-workspace/archive/drt_cn-llm-infra` | exploratory_map | 国内 LLM infra 现状与瓶颈 | `final.md` 628 行 · 46 张证据卡 · critic **PASS** | URL 溯源 85/88 · final 链 128/128 · **CRITICAL 0** |
 
 （bundle 在 gitignored 运行区，故此处以反引号记路径、不做链接——链到运行区会让新 clone 的
 `md-links` 红。）

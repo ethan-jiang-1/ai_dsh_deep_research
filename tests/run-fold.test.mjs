@@ -8,7 +8,11 @@ import { deriveSteps, topicEvidenceMatrixCells } from '../packages/deep-research
 import { parseTopics, parseEvidenceDir } from '../scripts/run-dashboard.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const RUN = join(ROOT, 'research-workspace', 'drt_cn-us-cpu-gap');
+// 位置=状态：bundle 在飞住工作区根，交付后移入 archive/——两处按序找（缺席 = 干净检出，下方守卫跳过）
+const RUN = [
+  join(ROOT, 'research-workspace', 'drt_cn-us-cpu-gap'),
+  join(ROOT, 'research-workspace', 'archive', 'drt_cn-us-cpu-gap'),
+].find((p) => existsSync(p));
 
 test('步骤条：全空 → 首步 pending 全 pending', () => {
   const steps = deriveSteps({ question: false, topics: false, leads: false, evidence: 0, findings: false, review: false, final: false });
@@ -42,7 +46,7 @@ test('矩阵：topic × evidence 计数折算', () => {
 });
 
 test('首场 run 真实 bundle 期望值（步骤条 = 交付 current；矩阵行数 = topics 数）', () => {
-  if (!existsSync(RUN)) return; // bundle 是运行区（gitignored）——缺席时跳过不假绿
+  if (!RUN || !existsSync(RUN)) return; // bundle 是运行区（gitignored）——缺席时跳过不假绿
   const topics = parseTopics(readFileSync(join(RUN, 'topics.md'), 'utf8'));
   const ev = parseEvidenceDir(join(RUN, 'evidence'));
   const has = (f) => existsSync(join(RUN, f));

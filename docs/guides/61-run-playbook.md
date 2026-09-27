@@ -84,7 +84,9 @@ node dev/hitl-answer.mjs --port 3081 --token <横幅 token>   # 默认逐题选�
 - 任何时候可关页面/停机。恢复 = 重跑 `boot-run.sh` → 新开 lead 会话说
   "继续 <slug> 这个 run"——lead 只凭 `drt_<slug>/` 的文件事实重建上下文，
   不依赖聊天记忆；
-- **run 根只有一个正本**：`research-workspace/drt_<slug>/`（D17 契约位）。`dev/harness-home/runs/`
+- **run 根只有一个正本**：`research-workspace/drt_<slug>/`（D17 契约位）。**位置=状态**：在飞
+  run 住工作区根，交付后由操作侧移入 `research-workspace/archive/<slug>/`（归档不消失——
+  仪表盘多 run 总表与 evidence-audit `--latest` 均并扫 archive/）。`dev/harness-home/runs/`
   下的 bundle 是契约前的 ad-hoc 历史（仪表盘标 "ad-hoc·无契约"）——不是这次要恢复的 run，
   也不要删（gitignored 运行数据，是那次研究留下的证据）；
 - 方向修订：直接告诉 lead——Decisions 追加一条记录后原地补搜（不算 rerun）；
