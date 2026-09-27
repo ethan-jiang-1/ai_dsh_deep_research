@@ -1,9 +1,14 @@
 # deep-research-pack
 
-Deep Research 插件包：**四角色 preset + 研究方法论技能 + 观察面 client 面 + 工作区种子**。
+Deep Research 插件包：**四角色 preset + 研究方法论技能 + 研究驾驶舱（Research Cockpit，
+观察面 client 套件）+ 工作区种子**。
 
 一次调研 = 一支四人研究团队（Lead 主编 / Scout 侦察 / Analyst 分析 / Critic 核查）在 DSH 的
 Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bundle 落 `drt_<slug>/`）。
+
+> **研究驾驶舱** = 观察面 client 套件的套件名（2026-09-28 定名）：右栏「研究状态」页签 +
+> 研究语义工具卡 + 活标题 + 挂起显性化（pending 自动展开右栏）——静默自主期看仪表、HITL
+> 挂起时接手的地方；折算谓词住 `src/lib/`（keyless 单测，与 run-dashboard 投影共用）。
 
 ## 内容
 
@@ -13,7 +18,7 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 | `presets/<role>/skills/<n>/SKILL.md` | 六个研究方法论技能（research-brief / team-assembly / lead-mapping / evidence-extraction / synthesis / adversarial-review） | ✓ |
 | `cordis.patch.yml` | bundle 行：preset roster（default: lead）+ `tool-present` + 团队可视面 `ui-agent-team` + 本包 client 面 | ✓ |
 | `workspace/` | **研究工作区种子**：研究手册（`AGENTS.md`：证据契约/目录约定/完成判据）+ `templates/run/` 六件模板 | ✓ |
-| `src/client/` → `lib/client.js` | 观察面 client 面（D18 单点例外）：右栏「研究状态」页签（人性化活动流/活标题/HITL 横幅）+ 研究语义工具卡 | ✓ 构建产物 |
+| `src/client/` → `lib/client.js` | **研究驾驶舱**（Research Cockpit——观察面 client 面，D18 单点例外）：右栏「研究状态」页签（人性化活动流/活标题/HITL 横幅）+ 研究语义工具卡 + 挂起显性化 | ✓ 构建产物 |
 | `src/lib/` → `lib/types/lib/` | 纯函数折算（activity-fold / hitl-fold / run-fold / tool-card）——keyless 单测直接断言 | ✓ 构建产物 |
 | `scripts/preflight.mjs` · `scripts/scaffold.mjs` | 部署前置检查 + 一键准备（见下） | ✓ |
 

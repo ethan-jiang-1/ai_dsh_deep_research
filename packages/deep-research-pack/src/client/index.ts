@@ -1,9 +1,16 @@
 /**
- * 浏览器半：右栏「研究状态」页签（观察面，D18 单点例外）。
+ * 浏览器半 = **研究驾驶舱（Research Cockpit）** —— 观察面 client 套件的唯一入口（2026-09-28
+ * 定名，命名分层与决定正本 = notes/implemented 的 cockpit-naming Note；目录名守 DSH 双半
+ * 约定 host/client，套件名钉在本头注）。
+ *
+ * 组成（件名保留，均是驾驶舱里的件）：
+ *   - 「研究状态」页签（右栏：步骤条 / 证据计数 / 人性化活动流 / 会话绑定 bundle 面）；
+ *   - 活标题（HITL 挂起时"研究状态 · ⏳ 等你拍板"）；
+ *   - 研究语义工具卡（对话流：组队 / 检索）；
+ *   - 挂起显性化（pending 迁移 → revealStatusTab → openTab 右栏同步骤展开）。
  * 数据通道 = `remote.session.follow`（WebSocket 流，snapshot 给历史、event 给实时）+
- * `remote.workspaceFiles`（会话工作区根 → run bundle 文件）。注册三件：页签体（步骤条 /
- * 问题行 / 证据概览 / 交付状态 / 团队动态）、活标题（HITL 挂起时改标题）、研究语义工具卡。
- * 数据/展示分层纪律：折算进 `src/lib/` 纯函数（keyless 单测），组件薄渲染——本文件只做
+ * `remote.workspaceFiles`（会话工作区 → bundle 文件）。折算谓词住 `src/lib/`（keyless 单测，
+ * 与 run-dashboard 投影共用）；数据/展示分层纪律：折算进 lib，组件薄渲染——本文件只做
  * 登记与装配。
  */
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
