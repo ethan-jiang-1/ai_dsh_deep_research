@@ -1,5 +1,6 @@
 # UI 观察面（调试可视化）研究——右栏状态页签与相关手段的琢磨稿
 > 状态：implemented
+> 归档：2026-09-28
 
 <!-- grandfather: 调研报告形态（状态表），非 Note 骨架——内容有效不追改。原状态行：**已完成（琢磨稿）** · 2026-09-24 · 观察面材料；落点 = D18 观察面 client 面（RFC = [observability-gui](../implemented/2026-09-24-observability-gui.md)）。 -->
 

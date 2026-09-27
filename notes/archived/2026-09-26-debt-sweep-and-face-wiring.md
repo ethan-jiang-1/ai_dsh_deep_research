@@ -24,7 +24,7 @@
 ## 往前跑：(g) 渐进面接通
 
 根因链四条（空路径 / 会话工作区根 / **工作区从未注册** / profile 镜像）与修复 =
-[bundle-face-wiring](../implemented/2026-09-26-bundle-face-wiring.md)。**附带重大发现**：首场 run 因 cwd 错，
+[bundle-face-wiring](./2026-09-26-bundle-face-wiring.md)。**附带重大发现**：首场 run 因 cwd 错，
 **一份手册都没注入**——这是 31 份证据无 frontmatter 的直接原因（已补记进证据可靠性毕业记录）。
 
 ## 收尾证据链（全绿）

@@ -602,14 +602,15 @@ function roadmapParked() {
 
 // ── 门禁 19：entry-chain（入口链存在性投影——正本 = 根 AGENTS.md §入口链）──
 // md-links 已机械覆盖全部 tracked .md 的链接解析；本门禁补它的盲区：① 入口链中以反引号/
-// 散文指针提到的成员文件（`docs/design/10-30` 等——md-links 不检非链接形态）必须在场；
+// 散文指针提到的成员文件（`docs/design/10-40` 等——md-links 不检非链接形态）必须在场；
 // ② roadmap §队列 恰一个 ▶（全仓唯一"当前"指针的存在性与唯一性，D11）。
 // 改入口链结构 = 同 diff 更新本清单（成员清单是入口链的存在性投影，非第二正本）。
 {
   const gate = 'entry-chain';
   const members = ['AGENTS.md', 'docs/00-index.md', 'roadmap.md', 'notes/proposed',
     'docs/guides/60-dev-loop.md', 'docs/evaluation.md', 'docs/design/10-architecture.md',
-    'docs/design/20-roles.md', 'docs/design/30-methodology-mapping.md', 'docs/guides/61-run-playbook.md',
+    'docs/design/20-roles.md', 'docs/design/30-methodology-mapping.md', 'docs/design/40-research-cockpit.md',
+    'docs/guides/61-run-playbook.md',
     'docs/guides/62-plugin-authoring.md', 'docs/AGENTS.md', 'scripts/AGENTS.md', 'notes/AGENTS.md',
     'packages/deep-research-pack/AGENTS.md'];
   for (const rel of members) {

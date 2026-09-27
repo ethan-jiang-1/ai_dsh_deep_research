@@ -27,7 +27,7 @@ run-dashboard 的纯折算移植为共享 TS（单一正本），页签补渐进
 
 **补记（2026-09-26）**：真数据上屏**已接通**——`ResearchStatusTab.tsx` 的 bundle 发现改用
 `listDir(sessionId, '.')`（工作区根 → 最新 `drt_*`），根因链四条与修复见
-[bundle-face-wiring](../implemented/2026-09-26-bundle-face-wiring.md)；`client-load-smoke` 的渐进面断言已从
+[bundle-face-wiring](./2026-09-26-bundle-face-wiring.md)；`client-load-smoke` 的渐进面断言已从
 观察点升级为硬断言（步骤条七步 / 证据 31 份 / ✅ 已交付 / 问题行），13 断言 ALL PASS。
 
 ## 实际跑过的验证

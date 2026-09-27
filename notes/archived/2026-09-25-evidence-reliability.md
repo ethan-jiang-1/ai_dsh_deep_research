@@ -105,7 +105,7 @@ CRITICAL → exit 1；AGENTS 命令表登记。
 `research-workspace/AGENTS.md`（`agent-instructions` 从 cwd 向上发现）——**该 run 一份手册都没
 注入**（system 消息无手册特征串，实证）。"31 份证据全无 frontmatter"的直接原因由此确定：
 跨角色契约没进上下文，run 靠 persona + 角色 skill 跑完。根因与修复见
-[bundle-face-wiring](../implemented/2026-09-26-bundle-face-wiring.md)（工作区未注册 → 会话建错 cwd）。
+[bundle-face-wiring](./2026-09-26-bundle-face-wiring.md)（工作区未注册 → 会话建错 cwd）。
 
 **基线审计的诚实结论**：首场 run 的**链接真实性**通过机械对账（102/102——好消息）；
 但**格式契约**完全没被执行（31 份全无 frontmatter——run 期间的 analyst 没按手册写）。

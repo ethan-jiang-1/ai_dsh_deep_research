@@ -1,7 +1,7 @@
 /**
  * 浏览器半 = **研究驾驶舱（Research Cockpit）** —— 观察面 client 套件的唯一入口（2026-09-28
- * 定名，命名分层与决定正本 = notes/implemented 的 cockpit-naming Note；目录名守 DSH 双半
- * 约定 host/client，套件名钉在本头注）。
+ * 定名；当前事实正本 = docs/design/40-research-cockpit.md——定位/构成/通道/纪律/验证/边界；
+ * 目录名守 DSH 双半约定 host/client，套件名钉在本头注）。
  *
  * 组成（件名保留，均是驾驶舱里的件）：
  *   - 「研究状态」页签（右栏：步骤条 / 证据计数 / 人性化活动流 / 会话绑定 bundle 面）；

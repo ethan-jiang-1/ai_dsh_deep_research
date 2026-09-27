@@ -305,7 +305,7 @@ research/README 行 3 格对 4 列表头）；**门禁盲区同类**（fixture �
 | 门禁数 / tests 数 | AGENTS:126 · design/10:87 · discipline-map:124 · 00-index:28 · notes/README:20 · roadmap:32 | `verify.mjs` gates 数组 ↔ [evaluation.md](../../docs/evaluation.md) §L0 表（`gate-ledger-sync` 对账）；**散文不写计数** |
 | 真模型档成员 | AGENTS §密钥（对，4 个）· guides/60:91（2 个）· discipline-map ×3 + scripts/AGENTS（3 个） | AGENTS.md §密钥；其余链接 |
 | L0 测试命令写法 | `--import tsx/esm` 形（AGENTS 命令表 · package.json · pre-commit）vs 裸形（guides/60 ×2 · evaluation · tests/AGENTS · discipline-map · 四个 skills 之一） | `package.json` 的 `test` script；全仓一律写 `pnpm test` |
-| workspaceFiles 接通状态 | 代码 + client-load-smoke + bundle-face-wiring Note（= 已接通）vs roadmap 历史块 + observability-completion Note（= 未接通） | [bundle-face-wiring Note](../implemented/2026-09-26-bundle-face-wiring.md) |
+| workspaceFiles 接通状态 | 代码 + client-load-smoke + bundle-face-wiring Note（= 已接通）vs roadmap 历史块 + observability-completion Note（= 未接通） | [bundle-face-wiring Note](../archived/2026-09-26-bundle-face-wiring.md) |
 | client-load-smoke 断言数 | AGENTS:73 · evaluation:26 · 脚本头注（"三断言"）vs 脚本实体（13+） | 脚本自身；**散文不写断言数** |
 | pack 形态（D7 vs D18） | 00-index D18 + pack AGENTS/README（= 配置为主 + 单点 client 面）vs guides/62:19 + discipline-map 图例/形态表 + alignment-ledger na 理由 | 00-index D18 + pack AGENTS/README |
 | preset 载体文件名 | design/10:51 · discipline-map:97（`agent.cordis.yml`）vs 盘上 + pack README（`presets/<role>.patch.yml`） | 盘上 + pack README |

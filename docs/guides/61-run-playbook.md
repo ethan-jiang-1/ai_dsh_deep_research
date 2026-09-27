@@ -28,7 +28,7 @@
 ## 1. 开哪个会话
 
 **前置（一次）：把研究工作区注册进 DSH**——侧栏只列已注册的工作区，未注册的目录在
-"新建会话"里选不到、其会话也不进侧栏（[实测根因](../../notes/implemented/2026-09-26-bundle-face-wiring.md)）。
+"新建会话"里选不到、其会话也不进侧栏（[实测根因](../../notes/archived/2026-09-26-bundle-face-wiring.md)）。
 
 ```sh
 # 经 GUI：Workspaces 面板的 + 添加 research-workspace/ 目录；或经 RPC：
