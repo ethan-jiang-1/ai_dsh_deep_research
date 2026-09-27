@@ -1,24 +1,28 @@
 #!/usr/bin/env node
-// client-hitl-smoke —— 活标题触发验证（真模型档；RFC observability-gui Stage 3 的
-// "一次代理模拟并标注的 mini-run"）。
+// client-hitl-smoke —— 活标题触发 + 挂起显性化验证（真模型档；RFC observability-gui Stage 3
+// 与 RFC right-pane-ux-debt ⑤ 段）。
 //
-// 验证什么：「研究状态」页签的**活标题**真的会翻转——真模型会话里让 lead 调一次
+// 验证什么：①「研究状态」页签的**活标题**真的会翻转——真模型会话里让 lead 调一次
 // ask_user_question 并停在那里（HITL 挂起），页签 chip 应变"研究状态 · ⏳ 等你拍板"、
 // 页签体应出横幅行。谓词 = src/lib/hitl-fold.ts（末位回合事件 = 未答的 ask_user_question，
 // 从尾扫跳过 session/* 元数据；keyless 单测已绿）——本脚本与页签共用同一 fold（单一正本）。
+// ② **挂起显性化**（right-pane-ux-debt fix①）：挂起迁移（false→true）时页签体经
+// revealStatusTab → openTab——右栏**同步骤自动展开**（vendor sidebar-right 契约），
+// 页签 dock 在折叠态保持挂载（观察者常在）。
 //
-// 代理模拟标注：本脚本的 HITL 时刻**不代答**——挂起态即被验证对象；真实用户拍板路径
-// 属队列条目「研究类型覆盖」（真人档验收）。真模型花销 ≈ 一条消息（L4-lite 档同量级）。
+// 代理模拟标注：⑤ 段答卡走 hitl-answer 子进程（代理模拟的唯一实现，如实标注）；挂起态
+// 本身即验证对象。真模型花销 ≈ 两条消息（L4-lite 档同量级）。
 //
-// 流程（0.1.7 实测打通的形态）：
+// 流程（2026-09-28 实测打通）：
 //   ⓪ boot web（源码域 overlay）+ 浏览器就位 + 关测试须知模态（全屏 _mask_ 盖住一切控件）；
-//   ① RPC 建会话 + prompt（盘侧已实证 ask 真调且挂起；composer 自动化被编辑器实现挡住——
-//      textarea/contenteditable/坐标输入全不落，非产品缺陷，纯自动化面；真人路径 = 条目 4）；
+//   ① RPC 建**新鲜**会话（旧会话复用会撞跨进程写锁——"active write handle" 连拒三跑实录）
+//      + rename + followup prompt（盘侧已实证 ask 真调且挂起）；
 //   ② 盘侧轮询（zstd CLI 全帧解——node:zlib 只解第一帧，实测骗了整轮调试）到挂起态，
 //      顺带从 session/title 事件提取自动标题；
-//   ③ **reload**（侧栏会话列表懒刷新——RPC 建的会话 reload 后才进列表）→ 关须知 →
-//      按标题点行（左侧栏 x<256；_root_ class 多组件同名，坐标约束防抓中央区）；
-//   ④ 展右栏 → 点「研究状态」guide 胶囊 → 等活标题翻转 + 横幅行。
+//   ③ **reload**（侧栏会话列表懒刷新——RPC 建的会话 reload 后才进列表）→ 按标题点行；
+//   ④ 展右栏 → 点「研究状态」guide 胶囊 → 等活标题翻转 + 横幅行；
+//   ⑤ fix① 闭环：收起右栏（dock 不卸载）→ hitl-answer 答卡 → 回合闭合 → 二次触发挂起
+//      → 断言右栏**自动展开** + 横幅在场。
 //
 // 前置：source dev/env.sh；DEEPSEEK_API_KEY 已配；pack 已构建；zstd CLI 在 PATH。
 // 用法：source dev/env.sh && node --import tsx/esm scripts/client-hitl-smoke.mjs [--port 3113]
@@ -122,7 +126,7 @@ const logOfSession = (sid) => {
   return null
 }
 const logEvents = (f) => {
-  const r = spawnSync('zstd', ['-dc', f], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 })
+  const r = spawnSync('zstd', ['-dc', f], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
   return r.status === 0
     ? r.stdout.trim().split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l) } catch { return null } }).filter(Boolean)
     : []
@@ -133,27 +137,26 @@ try {
   const base = `http://127.0.0.1:${PORT}`
   const cookie = await authenticate(base, token)
 
-  // ① 定位一个**已在侧栏列表里的既有会话**（RPC 新建的会话不进当前工作区列表——reload 也不进，
-  // 实测两轮；既有交付会话天然在列表且点行即可激活视图）并对它发 followup prompt，让它的
-  // 末位回合事件变成挂起的 ask_user_question（D17 rerun 语义：表述层追问不改 run bundle）。
-  const KNOWN = '国产CPU与美国CPU的差距'
-  let sessionId = null
-  for (const g of readdirSync(sessionsRoot)) for (const s of readdirSync(join(sessionsRoot, g))) {
-    const f = readdirSync(join(sessionsRoot, g, s)).find((x) => x.endsWith('.jsonl.zstd'))
-    if (f === undefined) continue
-    const r = spawnSync('zstd', ['-dc', join(sessionsRoot, g, s, f)], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 })
-    if (r.status === 0 && r.stdout.includes(KNOWN)) { sessionId = s; break }
-  }
-  if (sessionId === null) throw new Error('找不到既有会话（dev home 需有首场 run 的会话）')
-  await rpc(base, cookie, 'session/prompt', {
-    request: { requestId: randomUUID(), sessionId, mode: 'queue',
-      content: [{ type: 'text', text: '这是观察面活标题的功能验证，不是研究任务。请立刻调用 ask_user_question 工具问我一个二选一的小问题（比如：验证记录要不要存档？选项：要/不要），然后停在那里等我回答。不要做任何其他事。' }] },
+  // ① 新鲜会话（旧会话复用会撞写锁：活动句柄跨进程持有——2026-09-28 实测同一旧会话连拒
+  //    三跑 "active write handle"；新鲜会话 + followup 回合 = 侧栏可见（snapshot-replay 冒烟
+  //    的会话即此形态），且零残留态）。
+  const ws = await rpc(base, cookie, 'workspace/create', { request: { path: join(ROOT, 'research-workspace') } })
+  const workspaceId = ws?.workspace?.workspaceId ?? ws?.workspaceId
+  if (typeof workspaceId !== 'string') throw new Error('workspace/create 失败')
+  const created = await rpc(base, cookie, 'session/create', { request: { workspaceId, agentPreset: 'lead' } })
+  const sessionId = created?.id ?? created?.sessionId
+  if (typeof sessionId !== 'string') throw new Error('session/create 失败')
+  await rpc(base, cookie, 'session/rename', { request: { sessionId, title: 'hitl-smoke 活标题探针' } })
+  const ASK_INSTRUCTION = '这是观察面活标题的功能验证，不是研究任务。请立刻调用 ask_user_question 工具问我一个二选一的小问题（比如：验证记录要不要存档？选项：要/不要），然后停在那里等我回答。不要做任何其他事。'
+  const sendPrompt = () => rpc(base, cookie, 'session/prompt', {
+    request: { requestId: randomUUID(), sessionId, mode: 'queue', content: [{ type: 'text', text: ASK_INSTRUCTION }] },
   })
-  step(true, '既有会话 followup 已发（真模型；HITL 由脚本代理触发、不代答——标注：代理模拟）', `${KNOWN} / session ${String(sessionId).slice(8, 16)}…`)
+  await sendPrompt()
+  step(true, '新鲜会话 followup 已发（真模型；挂起即验证对象）', `session ${String(sessionId).slice(8, 16)}…`)
 
   // ② 盘侧轮询到挂起态（共用 fold 谓词），顺带提取自动标题。
   let askFired = false
-  let autoTitle = KNOWN
+  let autoTitle = 'hitl-smoke 活标题探针'
   for (let i = 0; i < 60; i++) {
     await sleep(4_000)
     const f = logOfSession(sessionId)
@@ -229,13 +232,72 @@ try {
         if (i >= 0) { console.log('  （页签诊断）', JSON.stringify(text.slice(i, i + 320))); diagPrinted = true }
       }
     }
-    // 观察点（非致命，如实记录）：活标题翻转。盘侧挂起态 + fold 单测 + 页签渲染是硬判据；
-    // 浏览器端到端翻转受会话列表语义（RPC/成员会话行的身份区分）阻隔——真人 run（队列条目
-    // 「研究类型覆盖」）时由用户直接目验，此处留截图供复核。
+    // 观察点（非致命，如实记录）：活标题翻转。盘侧挂起态 + fold 单测 + 页签渲染是硬判据。
     console.log('  （观察点）活标题翻转:', titleFlipped, '| 横幅行:', bannerShown)
     if (titleFlipped && bannerShown) console.log('  PASS 活标题翻转 + 横幅（超出基线的加分证据）')
     await page.screenshot({ path: join(ROOT, 'dev', 'smoke-workspace', 'client-hitl-smoke.png') }).catch(() => {})
     console.log('  （截图留档 dev/smoke-workspace/client-hitl-smoke.png 供人工复核）')
+
+    // ⑤ fix① 完整验证（RFC right-pane-ux-debt：挂起迁移 → 页签体 revealStatusTab →
+    //    openTab 落定时右栏同步骤展开）：收起右栏（页签 dock 不卸载）→ hitl-answer 答掉
+    //    挂起卡（子进程，复用唯一实现）→ 等回合闭合 → 二次触发挂起 → 断言右栏**自动展开**。
+    const collapseBtn = page.locator('button[aria-label="收起右侧边栏"], button[aria-label="Collapse right sidebar"]').first()
+    const collapsed = await collapseBtn.isVisible({ timeout: 6_000 }).catch(() => false)
+    if (collapsed) {
+      await collapseBtn.click({ timeout: 5_000 }).catch(() => {})
+      await sleep(2_000)
+      const expandBack = page.getByRole('button', { name: 'Open right sidebar' })
+      const expandBackVisible = await expandBack.isVisible({ timeout: 6_000 }).catch(() => false)
+      step(expandBackVisible, '⑤a 右栏已收起（页签 dock 保持挂载——观察者仍在）')
+      // 答掉挂起卡（hitl-answer 子进程 = 代理模拟的唯一实现；本冒烟即验证场，标注如实）
+      const answeredRun = spawnSync(process.execPath, ['--import', 'tsx/esm', join(ROOT, 'dev', 'hitl-answer.mjs'), '--port', String(PORT), '--token', token], { encoding: 'utf8', cwd: ROOT })
+      const answeredOk = answeredRun.status === 0 && /共作答 \d+ 题/.test(answeredRun.stdout ?? '')
+      step(answeredOk, '⑤b 挂起卡已答（hitl-answer 子进程——代理模拟，如实标注）', (answeredRun.stdout ?? answeredRun.stderr ?? '').split('\n').filter((l) => l.includes('共作答') || l.includes('第 1 题'))[0]?.trim() ?? String(answeredRun.status))
+      // 等回合闭合（lead 处理完答案落 turn/end；若再追问则再答一轮——最多两轮）
+      let turnClosed = false
+      for (let round = 0; round < 2 && !turnClosed; round++) {
+        for (let i = 0; i < 30; i++) {
+          await sleep(4_000)
+          const f = logOfSession(sessionId)
+          if (f === null) continue
+          const events = logEvents(f)
+          if (!foldHitlPending(events).pending && events.some((j) => j?.type === 'turn/end')) { turnClosed = true; break }
+          if (foldHitlPending(events).pending && i === 20) {
+            // lead 又追问了——再答一轮
+            spawnSync(process.execPath, ['--import', 'tsx/esm', join(ROOT, 'dev', 'hitl-answer.mjs'), '--port', String(PORT), '--token', token], { encoding: 'utf8', cwd: ROOT })
+          }
+        }
+      }
+      step(turnClosed, '⑤c 答后回合闭合（写锁释放——可二次触发）')
+      // 二次触发挂起（false→true 迁移——fix① 的激发条件）
+      if (turnClosed) {
+        await sendPrompt()
+        let rePended = false
+        for (let i = 0; i < 60; i++) {
+          await sleep(4_000)
+          const f = logOfSession(sessionId)
+          if (f === null) continue
+          if (foldHitlPending(logEvents(f)).pending) { rePended = true; break }
+        }
+        step(rePended, '⑤d 二次挂起到位（false→true 迁移已发生）')
+        if (rePended) {
+          // 断言：右栏自动展开（expand 按钮消失 = 面板在场）+ 横幅可见
+          let autoExpanded = false
+          let banner2 = false
+          const deadline2 = Date.now() + 30_000
+          while (Date.now() < deadline2 && !(autoExpanded && banner2)) {
+            await sleep(2_500)
+            const expandStill = await page.getByRole('button', { name: 'Open right sidebar' }).isVisible().catch(() => false)
+            autoExpanded = !expandStill
+            banner2 = (await page.evaluate(() => document.body?.innerText ?? '')).includes('现在轮到你')
+          }
+          step(autoExpanded, '⑤e 右栏**自动展开**（挂起迁移 → revealStatusTab → openTab 同步骤展开——fix① 闭环）')
+          step(banner2, '⑤f 横幅「⏳ 等你拍板」在场（自动展开后信号可见）')
+        }
+      }
+    } else {
+      step(false, '⑤a 收起控件不在场（无法验证 fix① 的折叠→自动展开链）')
+    }
   }
   await browser.close()
 } catch (error) {

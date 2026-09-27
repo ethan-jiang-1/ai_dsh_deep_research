@@ -1,0 +1,65 @@
+// bundle-bind 回归 — 会话 → run bundle 绑定折算（keyless；RFC right-pane-ux-debt：
+// 状态页签只跟本会话自己的 run）。信号 = tool/call 参数里的 drt_<slug>/ 路径形态。
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { sessionBundleOf } from '../packages/deep-research-pack/src/lib/bundle-bind.ts';
+
+const call = (name, args) => ({ type: 'tool/call', data: { name, arguments: typeof args === 'string' ? args : JSON.stringify(args) } });
+const ev = (type, data = {}) => ({ type, data });
+
+test('write/edit 调用携带 bundle 内路径 → 绑定该 slug', () => {
+  const events = [
+    ev('session'), ev('turn/start'),
+    call('write', { path: 'drt_dsh-release-watch/question.md', content: '# q' }),
+    call('edit', { path: 'drt_dsh-release-watch/journal.md', old: 'a', new: 'b' }),
+  ];
+  assert.equal(sessionBundleOf(events), 'dsh-release-watch');
+});
+
+test('read/glob/grep 调用同样可绑（恢复会话场景）', () => {
+  const events = [
+    call('read', { path: 'drt_cn-llm-infra/final.md' }),
+    call('glob', { pattern: 'drt_cn-llm-infra/evidence/*.md' }),
+  ];
+  assert.equal(sessionBundleOf(events), 'cn-llm-infra');
+});
+
+test('无 bundle 动作（纯检索/抓取会话）→ undefined（不显示别家数据）', () => {
+  const events = [
+    call('web_search', { queries: ['DSH harness'] }),
+    call('web_fetch', { url: 'https://api-docs.deepseek.com/' }),
+    ev('assistant/message', { message: { content: [{ type: 'text', text: '探针完成' }] } }),
+  ];
+  assert.equal(sessionBundleOf(events), undefined);
+});
+
+test('多个 bundle 动作 → 最后一个为准（另起/转续场景）', () => {
+  const events = [
+    call('write', { path: 'drt_first-run/question.md' }),
+    call('read', { path: 'drt_second-run/final.md' }),
+  ];
+  assert.equal(sessionBundleOf(events), 'second-run');
+});
+
+test('用户消息文本提到 drt_ 不构成绑定（只认工具调用——问句顺带提及 ≠ 真的在动手）', () => {
+  const events = [
+    ev('user/message', { content: [{ type: 'text', text: '继续 drt_some-run 这个 run' }] }),
+    call('web_search', { queries: ['x'] }),
+  ];
+  assert.equal(sessionBundleOf(events), undefined);
+});
+
+test('截断 JSON 参数 → 跳过不崩（流式前缀形态）', () => {
+  const events = [call('write', '{"path":"drt_probe/que')];
+  assert.equal(sessionBundleOf(events), undefined);
+});
+
+test('畸形输入 fail-soft 不崩', () => {
+  assert.equal(sessionBundleOf([]), undefined);
+  assert.equal(sessionBundleOf([null, undefined, 'x', 42, {}, ev('tool/call')]), undefined);
+});
+
+test('slug 形态边界：连字符合法、数字合法、斜杠后必须真有路径段', () => {
+  assert.equal(sessionBundleOf([call('write', { path: 'drt_a-1-b/v2/x.md' })]), 'a-1-b');
+  assert.equal(sessionBundleOf([call('write', { text: 'mention drt_foo/ in prose only' })]), 'foo'); // JSON.stringify 后命中路径形态——宽松面：宁可多绑（随后 listDir 找不到文件如实无面）
+});

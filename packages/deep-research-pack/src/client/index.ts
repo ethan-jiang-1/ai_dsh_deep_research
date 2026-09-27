@@ -17,9 +17,9 @@ import { RESEARCH_TAB_KEY, RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOO
 import { ResearchToolCard, RESEARCH_TOOL_KEYS } from './ResearchToolCard.tsx'
 import { ResearchStatusTab, ResearchStatusTitle, type JournalFrame } from './ResearchStatusTab.tsx'
 
-/** Required services：槽注册表（renderer）+ 右栏页签注册器 + remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
+/** Required services：槽注册表（renderer）+ 右栏页签注册器 + 右栏导航面（openTab——挂起显性化）+ remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
  *  父级则取 .session 炸 "without injecting it"，只声明子级则取父属性炸 "without inject"）。 */
-export const inject = ['slots', 'sidebarRightTabs', 'remote', 'remote.session', 'remote.workspaceFiles']
+export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles']
 
 /**
  * Client plugin body：登记「研究状态」页签（类型 + keyed 槽体共享同一 key——拼错任一处
@@ -27,7 +27,7 @@ export const inject = ['slots', 'sidebarRightTabs', 'remote', 'remote.session', 
  * @param ctx - client root context。
  */
 export function apply(ctx: ClientContext): void {
-  ctx.inject(['slots', 'sidebarRightTabs', 'remote', 'remote.session', 'remote.workspaceFiles'], (scoped) => {
+  ctx.inject(['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles'], (scoped) => {
     // journal 流式源（company 同款最小投影）：snapshot 给历史、event 给实时；
     // wire 形状 → 领域形状的折算住这里（纯装配），展示住组件。
     const follow = async function* (sessionId: SessionId, signal: AbortSignal): AsyncGenerator<JournalFrame> {
@@ -80,9 +80,13 @@ export function apply(ctx: ClientContext): void {
       }
     }
 
+    // 挂起显性化入口（RFC right-pane-ux-debt）：pending 迁移时页签体调用——openTab 落定时
+    // 右栏同步骤展开（vendor sidebar-right 契约）；页签体在折叠态保持挂载（dock 不卸载）。
+    const revealStatusTab = () => { scoped.sidebarRight.openTab('research-status') }
+
     scoped.effect(() => scoped.slots.inject(RESEARCH_PANE_SLOT, () => [
       scoped.slots.register(
-        { name: RESEARCH_PANE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow, listDir, readFile }) },
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow, listDir, readFile, revealStatusTab }) },
         ResearchStatusTab,
       ),
     ]), 'deep-research-pack: research-status pane')
@@ -99,7 +103,7 @@ export function apply(ctx: ClientContext): void {
 
     scoped.effect(() => scoped.slots.inject(RESEARCH_TITLE_SLOT, () => [
       scoped.slots.register(
-        { name: RESEARCH_TITLE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow, listDir, readFile }) },
+        { name: RESEARCH_TITLE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow, listDir, readFile, revealStatusTab }) },
         ResearchStatusTitle,
       ),
     ]), 'deep-research-pack: research-status live title')

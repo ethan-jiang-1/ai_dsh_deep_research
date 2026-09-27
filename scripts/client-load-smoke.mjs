@@ -16,23 +16,24 @@
 // 同款——boot 起自本仓，行包名经根 node_modules 解析到 pack 源码树，浏览器经
 // exports["./client"] 取已构建的 lib/client.js）。
 // 前置：source dev/env.sh；pack 已构建（lib/client.js 在位——boot 前自检会拦）。
-// 用法：source dev/env.sh && node scripts/client-load-smoke.mjs [--port 3109] [--session <既有会话标题>]
-// 前置（B-min 起）：dev home 里有至少一个带历史的会话（journal 流要有真数据；默认取首场
-// 研究 run 的会话标题——缺席时用 --session 指定别的）。
+// 用法：node --import tsx/esm scripts/client-load-smoke.mjs [--port 3109] [--session <既有会话标题>]
+// 前置（B-min 起）：dev home 里有至少一个**绑定 run bundle 的带历史会话**（跑过一场 run 即有——
+// 渐进面断言的磁盘认证源；未绑定会话负样本可选，snapshot-replay 冒烟产生）。
 //
 // bundle 渐进面断言（2026-09-26 接通，根因链见 notes/implemented/2026-09-26-bundle-face-wiring.md；
-// 2026-09-27 起自造活动 bundle 作数据源——位置=状态：交付 run 全在 archive/，根上无 bundle）：
-// 渐进面读的是**会话工作区根**（workspaceFiles，path='.'）——要看到 run bundle，会话必须建在
-// research-workspace 里（工作区须先注册 + 会话用 workspaceId 形态创建）。本冒烟自己造这个
-// 条件：workspace/create 注册 → session/create(workspaceId) → 浏览器开它 → 断言步骤条/证据
-// 计数/交付状态（探针 bundle 的真数据：七步 + 证据 2 份 + ✅ 已交付）。
+// 2026-09-28 起会话绑定——RFC right-pane-ux-debt：渐进面只跟本会话自己的 run）：
+// 渐进面读**会话 journal 工具调用路径绑定的 bundle**（bundle-bind 谓词），位置=状态两个位置
+// 都认（根=在飞 / archive/=已交付）。断言的磁盘认证源 = 磁盘侧扫出的最新绑定会话（跑过 run
+// 即有），其 bundle 的 evidence 计数/交付态/问题行以盘上真值对账——不再自造探针 bundle。
 import { spawn } from 'node:child_process'
-import { existsSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { scrubbedEnv } from './lib/env.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from './lib/vendor-artifacts.mjs'
 import { launchChromium, loadChromium } from './lib/playwright.mjs'
+import { readSessionEvents } from './lib/run-state.mjs'
+import { sessionBundleOf } from '../packages/deep-research-pack/src/lib/bundle-bind.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const arg = (name, fallback) => {
@@ -117,15 +118,56 @@ const step = (ok, label, info = '') => {
   if (!ok) failures.push(label)
 }
 
-// 自造最小**活动** bundle（位置=状态：交付 run 全在 archive/，渐进面只读工作区根的活动
-// drt_*——依赖运行区历史状态会随归档搬迁漂移，2026-09-27 实测三断言红）。验完即删，
-// 冒烟自足：渐进面断言的数据源 = 本探针 bundle 的真文件（question/evidence/final）。
-const SMOKE_BUNDLE = join(ROOT, 'research-workspace', 'drt_client-load-smoke-probe')
-mkdirSync(join(SMOKE_BUNDLE, 'evidence'), { recursive: true })
-writeFileSync(join(SMOKE_BUNDLE, 'question.md'), '# 冒烟探针\n\n冒烟渐进面探针问题：观察面 client 冒烟自造的活动 bundle。\n')
-writeFileSync(join(SMOKE_BUNDLE, 'evidence', 'e1.md'), '# 证据 1\n\n冒烟证据卡 1。\n')
-writeFileSync(join(SMOKE_BUNDLE, 'evidence', 'e2.md'), '# 证据 2\n\n冒烟证据卡 2。\n')
-writeFileSync(join(SMOKE_BUNDLE, 'final.md'), '# 冒烟交付\n\n冒烟 final 当前版。\n')
+// ── 磁盘侧：扫绑定会话（渐进面真数据源）与未绑定会话（不显示别家数据的负样本）──
+// 绑定谓词 = pack bundle-bind（journal 工具调用路径里的 drt_<slug>/）；带历史 = 有回合。
+const sessionsRoot = join(home, 'sessions')
+const sessionGroup = existsSync(sessionsRoot) ? readdirSync(sessionsRoot).find((d) => d.includes('research-workspace')) : undefined
+const hasTurns = (events) => events.some((j) => j?.type === 'turn/end')
+// 顶层会话才进侧栏（子代理子会话 delegationDepth > 0——run 12 实测其不显示，点了也白点）
+const isTopLevel = (events) => {
+  const s = events.find((j) => j?.type === 'session')
+  return s?.delegationDepth === 0
+}
+const lastTitleOf = (events) => {
+  const titles = events.filter((j) => j?.type === 'session/title')
+  return titles[titles.length - 1]?.data?.title ?? null
+}
+let boundSession = null
+let unboundSession = null
+const unboundCandidates = []
+if (sessionGroup === undefined) {
+  console.error('client-load-smoke: dev home sessions 里没有 research-workspace 会话组——先 source dev/env.sh 并跑一场 run')
+  process.exit(2)
+}
+for (const { d, m } of readdirSync(join(sessionsRoot, sessionGroup))
+  .map((d) => ({ d, m: (() => { try { return statSync(join(sessionsRoot, sessionGroup, d, 'session.v4.jsonl.zstd')).mtimeMs } catch { return 0 } })() }))
+  .sort((a, b) => b.m - a.m)) {
+  if (m === 0) continue
+  const { readable, events } = readSessionEvents(join(sessionsRoot, sessionGroup, d, 'session.v4.jsonl.zstd'))
+  if (!readable || !hasTurns(events) || !isTopLevel(events)) continue
+  const title = lastTitleOf(events)
+  if (title === null || title.trim() === '') continue
+  const slug = sessionBundleOf(events)
+  if (slug !== undefined && boundSession === null) boundSession = { title, slug }
+  if (slug === undefined && unboundCandidates.length < 5) unboundCandidates.push({ title })
+  if (boundSession !== null && unboundCandidates.length >= 1) break
+}
+// 绑定 bundle 的磁盘真值（evidence 计数 / 交付态 / 问题行首行——与页签折算同口径；
+// slug 无 drt_ 前缀、目录名有——拼回；位置=状态两位置）
+const bundleBaseOf = (slug) => {
+  for (const base of [join(ROOT, 'research-workspace', `drt_${slug}`), join(ROOT, 'research-workspace', 'archive', `drt_${slug}`)]) {
+    if (existsSync(base)) return base
+  }
+  return null
+}
+const expectedFace = boundSession !== null && bundleBaseOf(boundSession.slug) !== null ? (() => {
+  const base = bundleBaseOf(boundSession.slug)
+  const names = new Set(readdirSync(base))
+  const evidenceCount = existsSync(join(base, 'evidence')) ? readdirSync(join(base, 'evidence')).filter((f) => f.endsWith('.md')).length : 0
+  const questionText = names.has('question.md') ? readFileSync(join(base, 'question.md'), 'utf8') : null
+  const firstLine = questionText?.split('\n').find((l) => l.trim() !== '' && !l.startsWith('#'))?.slice(0, 60) ?? null
+  return { base, evidenceCount, delivered: names.has('final.md'), firstLine }
+})() : null
 
 const { child, token } = await boot()
 let page
@@ -217,24 +259,6 @@ try {
     }
     return false
   }
-  // 点某工作区组下的第一个**有历史的会话**（侧栏只列有回合的会话——rename 不产生回合，
-  // 故探针会话本身不出现；渐进面只依赖工作区根，用组内任一会话即可）。
-  const clickFirstSessionInGroup = async (groupTitle) => {
-    const rows = page.locator('span[class*="_root_"]')
-    const n = await rows.count()
-    let seenGroup = false
-    for (let i = 0; i < Math.min(n, 40); i++) {
-      const el = rows.nth(i)
-      if (!(await el.isVisible().catch(() => false))) continue
-      const box = await el.boundingBox().catch(() => null)
-      if (box === null || box.x >= 256) continue
-      const text = (await el.textContent() ?? '').trim()
-      if (!seenGroup) { if (text.startsWith(groupTitle)) seenGroup = true; continue }
-      if (text.startsWith('New Session')) continue
-      if (text.length > 0) { await el.click({ timeout: 10_000 }).catch(() => {}); return text }
-    }
-    return null
-  }
   const openPane = async () => {
     const expand = page.getByRole('button', { name: 'Open right sidebar' })
     if (await expand.count() > 0) await expand.first().click({ timeout: 8_000 }).catch(() => {})
@@ -246,30 +270,61 @@ try {
   }
   const paneTextOf = () => page.evaluate(() => document.body?.innerText ?? '')
 
-  // 第一遍：研究工作区里的会话（其工作区根含 run bundle → 渐进面真数据）
+  // 第一遍：绑定会话（磁盘侧定位——渐进面真数据 = 本会话自己的 bundle，磁盘认证对账）
   await page.reload({ waitUntil: 'domcontentloaded' })
   await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
   await wait(6_000)
-  const probeRowText = await clickFirstSessionInGroup('research-workspace')
-  const probeRowOk = probeRowText !== null
-  step(probeRowOk, '研究工作区里有带历史的会话可开（渐进面数据源）', probeRowText ?? '缺——先跑一场 run（run 通道现用 workspaceId 形态建会话）')
-  if (probeRowOk) {
-    await wait(4_000)
-    const capOk = await openPane()
-    step(capOk, '「研究状态」guide 胶囊在场（tab 类型注册成功 + 右栏展开）')
-    if (capOk) {
-      await wait(6_000)
-      const paneText = await paneTextOf()
-      const seg = paneText.slice(paneText.indexOf('研究状态'))
-      // 渐进面硬断言（bundle 发现接通：workspaceFiles path='.' → 工作区根 → 最新 drt_*）
-      const stepsOk = ['立项', '拆解', '侦察', '取证', '综合', '审查', '交付'].every((x) => seg.includes(x))
-      step(stepsOk, '步骤条真数据（七步渲染——bundle 发现接通）')
-      const evOk = /证据 \d+ 份/.test(seg)
-      step(evOk, '证据计数真数据（首场 run 的 evidence/ 目录）', (seg.match(/证据 \d+ 份/) ?? [''])[0])
-      step(seg.includes('已交付'), '交付状态真数据（final.md 在场 → ✅ 已交付）')
-      const qOk = seg.includes('国产通用 CPU') || seg.length > 0
-      step(qOk, '研究问题行在场（question.md 首行）')
+  const boundOk = boundSession !== null && expectedFace !== null
+  step(boundOk, '磁盘侧找到绑定 run 的带历史会话（渐进面真数据源）', boundOk ? `「${boundSession.title}」→ drt_${boundSession.slug}` : '缺——先跑一场 run（run 通道现用 workspaceId 形态建会话）')
+  if (boundOk) {
+    const opened = await clickRowByText(boundSession.title)
+    step(opened, '绑定会话在侧栏可开（按磁盘侧标题定位）')
+    if (opened) {
+      await wait(4_000)
+      const capOk = await openPane()
+      step(capOk, '「研究状态」guide 胶囊在场（tab 类型注册成功 + 右栏展开）')
+      if (capOk) {
+        await wait(6_000)
+        const paneText = await paneTextOf()
+        const seg = paneText.slice(paneText.indexOf('研究状态'))
+        // 渐进面硬断言（会话绑定 + 位置=状态两位置：证据计数/交付态/问题行与磁盘真值对账）
+        const stepsOk = ['立项', '拆解', '侦察', '取证', '综合', '审查', '交付'].every((x) => seg.includes(x))
+        step(stepsOk, '步骤条真数据（七步渲染——本会话绑定的 bundle）')
+        const evMatch = seg.match(/证据 (\d+) 份/)
+        step(evMatch !== null && Number(evMatch[1]) === expectedFace.evidenceCount,
+          '证据计数 = 磁盘真值（会话绑定 + 根/archive 两位置）', evMatch ? `${evMatch[0]}（磁盘 ${expectedFace.evidenceCount}）` : '未渲染')
+        const delivOk = expectedFace.delivered ? seg.includes('已交付') : !seg.includes('已交付')
+        step(delivOk, '交付状态 = 磁盘真值', expectedFace.delivered ? 'final.md 在场 → ✅ 已交付' : '无 final.md → 如实不显')
+        const qOk = expectedFace.firstLine !== null && seg.includes(expectedFace.firstLine.slice(0, 12))
+        step(qOk, '研究问题行 = question.md 首行', expectedFace.firstLine?.slice(0, 24) ?? '')
+      }
     }
+  }
+
+  // 第一遍 b（负样本，有样本才跑）：未绑定会话 → 提示行在场 + 零别家渐进面泄漏
+  //（候选逐个试到能点开为止——子代理子会话可能不进侧栏，标题垃圾的跳过）
+  if (unboundCandidates.length > 0) {
+    for (const cand of unboundCandidates) {
+      await page.reload({ waitUntil: 'domcontentloaded' })
+      await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
+      await wait(5_000)
+      const opened2 = await clickRowByText(cand.title)
+      if (!opened2) continue
+      await wait(4_000)
+      const capOk2 = await openPane()
+      if (!capOk2) continue
+      await wait(5_000)
+      const t2 = await paneTextOf()
+      const seg2 = t2.slice(t2.indexOf('研究状态'))
+      unboundSession = cand
+      step(seg2.includes('本会话未绑定 run bundle'), '未绑定会话：提示行在场（如实说明，不冒充）', cand.title)
+      const leaked = ['立项', '拆解', '侦察', '取证', '综合', '审查', '已交付'].filter((x) => seg2.includes(x))
+      step(leaked.length === 0, '未绑定会话：零别家渐进面泄漏', leaked.length > 0 ? leaked.join('、') : '')
+      break
+    }
+    if (unboundSession === null) console.log('  note  未绑定会话负样本：候选都不可点开（子会话不进侧栏？跳过）')
+  } else {
+    console.log('  note  未绑定会话负样本：无样本（跳过——先跑 snapshot-replay 冒烟产生纯检索会话）')
   }
 
   // 第二遍：既有会话（有历史 → 活动流断言）。先 reload：第一遍点击后侧栏可能重排/滚动，
@@ -301,7 +356,6 @@ try {
   failures.push(`浏览器断言异常: ${error.message}`)
   console.error(`  FAIL 浏览器断言异常: ${error.message}`)
 } finally {
-  rmSync(SMOKE_BUNDLE, { recursive: true, force: true })
   child.kill('SIGTERM')
   await sleep(300)
 }
