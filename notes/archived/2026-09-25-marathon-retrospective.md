@@ -1,10 +1,11 @@
 # 马拉松复盘：静默自主长程（队列条目 1→3，2026-09-25）
 
 > 状态：implemented
+> 归档：2026-09-27
 
 归宿：goal「静默自主长程马拉松（8 小时预算）」复盘记录；三个队列条目各自毕业 Note 在案
-（[vendor-build-guard](2026-09-25-vendor-build-guard.md) · [team-preflight-marker](2026-09-25-team-preflight-marker.md) ·
-[observability-gui](2026-09-24-observability-gui.md)）——本 Note 只做马拉松级汇总，不复述细节。
+（[vendor-build-guard](../implemented/2026-09-25-vendor-build-guard.md) · [team-preflight-marker](2026-09-25-team-preflight-marker.md) ·
+[observability-gui](../implemented/2026-09-24-observability-gui.md)）——本 Note 只做马拉松级汇总，不复述细节。
 
 ## 决定
 

@@ -1,6 +1,7 @@
 # RFC：dsh-discipline 全量枚举——纪律表从子集到全量
 
 > 状态：implemented
+> 归档：2026-09-27
 
 归宿：roadmap §队列「dsh-discipline 全量枚举」（已离队）· 前置：「vendor-submodule-and-pnpm-dsh」✓（同日毕业）
 

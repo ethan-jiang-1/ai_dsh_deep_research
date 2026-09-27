@@ -1,6 +1,7 @@
 # RFC：team-preflight 末标记加固（已知脆点收口）
 
 > 状态：implemented
+> 归档：2026-09-27
 
 归宿：roadmap §队列「team-preflight 末标记加固」（2026-09-25 马拉松条目 2，已毕业离队）。
 

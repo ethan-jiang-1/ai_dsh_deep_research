@@ -1,6 +1,7 @@
 # RFC：DSH 插件生态认真研究（粗扫的后续）
 
 > 状态：implemented
+> 归档：2026-09-27
 
 归宿：roadmap §队列「DSH 插件生态认真研究」（2026-09-26 补完毕业手续——**毕业事故见
 [postmortem](../postmortem/2026-09-26-roadmap-graduation-drift.md)**：本 RFC 的报告早已交付，

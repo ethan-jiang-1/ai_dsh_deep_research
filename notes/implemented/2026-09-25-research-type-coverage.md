@@ -55,7 +55,7 @@
 ## 实施记录
 
 - 两场 run 的过程证据在各自 bundle 的 `journal.md` / `review.md` / `audit.md`；环路侧暴露并修掉的
-  六处缺陷见 [run-loop-hardening](2026-09-26-run-loop-hardening.md)（其中"没有 headless HITL 代答
+  六处缺陷见 [run-loop-hardening](../archived/2026-09-26-run-loop-hardening.md)（其中"没有 headless HITL 代答
   路径"是本条目能跑完的前提——`dev/hitl-answer.mjs` 即为此新建）。
 - HITL 的代理模拟性质已在两个 bundle 的 `question.md` §Decisions 与 `journal.md` 显式声明，不隐去。
 - 遗留（不属本条）：两场 lead 把日期写成 `2026-10-02`（系统日期 2026-09-26，模型日期漂移，未改写）；

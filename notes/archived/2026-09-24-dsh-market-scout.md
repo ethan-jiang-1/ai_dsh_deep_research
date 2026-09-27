@@ -1,7 +1,8 @@
 # DSH 插件市场粗扫（market scout）
 > 状态：implemented
+> 归档：2026-09-27
 
-<!-- grandfather: 调研报告形态（状态表），非 Note 骨架——内容有效不追改。原状态行：**已完成（粗扫）** · 2026-09-24 · 种子登记；落点 = 认真版 [dsh-plugin-ecosystem](2026-09-25-dsh-plugin-ecosystem.md)（已毕业，登记在 [00-index](../../docs/00-index.md) §外部研究材料）。 -->
+<!-- grandfather: 调研报告形态（状态表），非 Note 骨架——内容有效不追改。原状态行：**已完成（粗扫）** · 2026-09-24 · 种子登记；落点 = 认真版 [dsh-plugin-ecosystem](../implemented/2026-09-25-dsh-plugin-ecosystem.md)（已毕业，登记在 [00-index](../../docs/00-index.md) §外部研究材料）。 -->
 
 
 

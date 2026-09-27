@@ -15,7 +15,7 @@
    D4/D5 三重重复（同一规则多处陈述 = slop）；codex 工具名（validate-bundle 等）的
    正本 = [harness 考古报告](../implemented/2026-09-24-deep-research-harness-analysis.md)。
 2. **evaluation.md §2 的 M1 完成定义表与"（当前里程碑）"头注**——M1 已收（证据 =
-   [m1-done Note](./2026-09-24-l4-lite-m1-done.md)），完成定义归 §1 各面 + §3 矩阵 +
+   [m1-done Note](../archived/2026-09-24-l4-lite-m1-done.md)），完成定义归 §1 各面 + §3 矩阵 +
    §4 goal 程序；"当前里程碑"已失真（当前 = M2）= status rot 活体。负面判据保留
    （时效无关合同，evaluation-contract 测试锚点原样在场）。
 3. **evaluation.md 旧 §6 第二条 bullet**——"门禁/预检脚本存在且可跑计入 M1 判据 1"
@@ -33,7 +33,7 @@
 
 **并（backfill 活内容的归宿）**：跳号考古结论已自愈无需追溯；"墓碑注记 vs 行式登记"
 裁决 = 行式登记胜（台账实践已证）；认证档误用改写裁决链的正本 =
-[foundation-remediation](./2026-09-24-foundation-remediation.md)（backfill 内为指针非家）。
+[foundation-remediation](../archived/2026-09-24-foundation-remediation.md)（backfill 内为指针非家）。
 
 **修（4）**：evaluation §5（原 §6）"已 green 面证据"路由从"00-index 待定表 Q 行指向"
 改为"各面定义里的毕业 Note 引用"（Q3 销账后原路由死亡）；L0 通过判据删"欠账"定义

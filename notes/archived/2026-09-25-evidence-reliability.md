@@ -1,6 +1,7 @@
 # RFC：证据可靠性面（信源分级 + 交叉验证 + 机械对账）
 
 > 状态：implemented
+> 归档：2026-09-27
 
 归宿：roadmap §队列 ▶「证据可靠性面」（feature/卫生混合；**先于下一场研究 run 落地**——
 该 run 即其验收载体，与「研究类型覆盖」天然配套）。触发 = 用户指令（2026-09-25）：
@@ -104,7 +105,7 @@ CRITICAL → exit 1；AGENTS 命令表登记。
 `research-workspace/AGENTS.md`（`agent-instructions` 从 cwd 向上发现）——**该 run 一份手册都没
 注入**（system 消息无手册特征串，实证）。"31 份证据全无 frontmatter"的直接原因由此确定：
 跨角色契约没进上下文，run 靠 persona + 角色 skill 跑完。根因与修复见
-[bundle-face-wiring](2026-09-26-bundle-face-wiring.md)（工作区未注册 → 会话建错 cwd）。
+[bundle-face-wiring](../implemented/2026-09-26-bundle-face-wiring.md)（工作区未注册 → 会话建错 cwd）。
 
 **基线审计的诚实结论**：首场 run 的**链接真实性**通过机械对账（102/102——好消息）；
 但**格式契约**完全没被执行（31 份全无 frontmatter——run 期间的 analyst 没按手册写）。

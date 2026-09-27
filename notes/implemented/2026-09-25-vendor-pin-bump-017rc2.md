@@ -255,12 +255,12 @@ vendor + 0.1.7-rc.2 装的 research profile）。
 `docs/testing.md`（"real entry path" 例证改指 `lib/process.js`/`ptc-runtime`——本仓 L2 断言面未变）· `docs/architecture.md`（应用启动节不变） ·
 `scripts/AGENTS.md`（无命中）· `scripts/doc-budgets.manifest.json`（仅 `docs/architecture.md` 2400→2410 升顶——本仓预算自持） ·
 `scripts/run-gates.ts`（命中②：门禁增删；本仓门禁集自持，见 evaluation §L0）· `packages/AGENTS.md`（无命中；invariant 规则不变） ·
-`packages/README.md`（命中③）· `.agents/notes/{README,AGENTS,implemented/AGENTS,archived/AGENTS}.md`（命中①；archived 删除规则细化——本仓未设 archived/，条件在案） ·
+`packages/README.md`（命中③）· `.agents/notes/{README,AGENTS,implemented/AGENTS,archived/AGENTS}.md`（命中①；archived 删除规则细化——本仓 archived/ 已激活（2026-09-27，冻结快照层）） ·
 `.agents/skills/**`（清单与 frontmatter 约定不变：新增 `agent-experience`、`dsh-client-ui-ux` 两个技能已登记进台账） ·
 `snapshots/AGENTS.md`（命中④）· `vendor/README.md`（命中②）· `.github/AGENTS.md`（无命中，CI 细节）。
 
 **前身（首版枚举子集表的来历）**：本表首版是三个来源、11 行的子集，已被全量枚举**完整覆盖并扩展**；
-原文只在 git（[dsh-discipline 毕业 Note](2026-09-24-dsh-discipline.md) 记了那次下放的决定）。
+原文只在 git（[dsh-discipline 毕业 Note](../archived/2026-09-24-dsh-discipline.md) 记了那次下放的决定）。
 
 **实际跑过的验证（全部在新 pin 上实跑）**：
 

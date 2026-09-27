@@ -1,6 +1,7 @@
 # RFC：研究状态界面（UI 优先——把界面弄对）
 
 > 状态：implemented
+> 归档：2026-09-27
 
 归宿：roadmap §队列 ▶「研究状态界面」（feature；用户 2026-09-25 指令："先别搞逻辑了，
 先把界面弄对"——对观察面 tab 的直接评价：**分析不太出来**=人看不懂）。
@@ -19,7 +20,7 @@
   全无）+ 渐进面如实记观察点。
 
 **补记（2026-09-26）**：bundle 渐进面**已接通**——根因链四条（空路径 / 会话工作区根 /
-工作区未注册 / profile 镜像）与修复见 [bundle-face-wiring](2026-09-26-bundle-face-wiring.md)；
+工作区未注册 / profile 镜像）与修复见 [bundle-face-wiring](../implemented/2026-09-26-bundle-face-wiring.md)；
 `client-load-smoke` 的渐进面断言已从观察点升级为硬断言（步骤条七步 / 证据 31 份 / ✅ 已交付 /
 问题行），13 断言 ALL PASS。
 

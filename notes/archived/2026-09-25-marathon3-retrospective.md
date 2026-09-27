@@ -1,6 +1,7 @@
 # 马拉松三号复盘：研究状态界面 + HITL2 实测 + 生态研究（2026-09-25）
 
 > 状态：implemented
+> 归档：2026-09-27
 
 归宿：goal「静默自主长程马拉松三号」复盘；条目各自毕业 Note / 报告在案
 （[research-status-ui](2026-09-25-research-status-ui.md) · [research-interaction §验证表含 HITL2 补验](2026-09-25-research-interaction.md) ·

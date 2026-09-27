@@ -1,6 +1,7 @@
 # 马拉松二号复盘：证据可靠性 + 研究交互 + 观察面补全（2026-09-25）
 
 > 状态：implemented
+> 归档：2026-09-27
 
 归宿：goal「静默自主长程马拉松二号」复盘；三个队列条目各自毕业 Note 在案
 （[evidence-reliability](2026-09-25-evidence-reliability.md) · [research-interaction](2026-09-25-research-interaction.md) ·

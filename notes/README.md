@@ -12,19 +12,20 @@
 | **将来（已开工的设计）** | 这个条目打算怎么做 | [`proposed/`](proposed/README.md) 的 RFC 全文 | RFC 头部状态行 `proposed / approved / superseded` |
 | **过去（已交付）** | 当初为什么这么决定、放弃了什么 | [`implemented/`](implemented/README.md) | 目录即状态（文件名 = 首提日期 + 主题） |
 | **过去（否决与事故）** | 哪些路别再走、哪些坑踩过 | [`rejected/`](rejected/README.md) · [`postmortem/`](postmortem/README.md) | 目录即状态（rejected 另有结论状态行） |
+| **过去（冻结）** | 不再指导当前工作的已交付决定去哪了 | [`archived/`](archived/README.md) | 目录即状态 + 文件内 `> 归档：<日期>` 行（冻结快照，正文永不改） |
 | **始终** | 这个项目为什么起、用户下过哪些方向 | [`intents.md`](intents.md) | 追加式，不删 |
 
-**`proposed/` = 完整规划面**（2026-09-25 用户指令"显性化所有内容"）：队列条目与搁置条目的
-RFC 都住这里（搁置 RFC 带复活条件；▶ 语义仍归 roadmap 队列节）——
-**不等于没有活干**。下一步看 roadmap ▶，不是看这个目录。同理，`implemented/` 远厚于队列，
-也不表示积压：过去的决定层本来就比队列厚。
+**`proposed/` = 在飞队列条目的规划面**：只有 roadmap §队列条目的 RFC 住这里（一文件一条目）。
+2026-09-27 用户定调：**搁置即"决定不做"**——搁置条目全文住 [rejected/](rejected/README.md)
+并带重启条件，搁置池行直接链它，`proposed/` 不再收搁置条目。下一步看 roadmap ▶，不是看这个
+目录。同理，`implemented/` 远厚于队列，也不表示积压：过去的决定层本来就比队列厚。
 
 ## 为什么内部按生命周期分，不按时间分
 
 `notes/` 整体是时间维度，内部按**生命周期**分（vendor `.agents/notes/` 同构，且目录名
 自带时态）——按时间分目录必然长出"烂尾层"（company D10 教义，见
 [00-index §组织原则](../docs/00-index.md)）。**目录名 = 状态**：不熟悉本仓的人扫一眼
-`proposed / implemented / rejected / postmortem` 就知道每条记忆处在哪个时态，不必读规则全文
+`proposed / implemented / archived / rejected / postmortem` 就知道每条记忆处在哪个时态，不必读规则全文
 （vendor 教学页原话："目录本身就是流程"）。
 
 ## 布局与进出规则
@@ -32,10 +33,11 @@ RFC 都住这里（搁置 RFC 带复活条件；▶ 语义仍归 roadmap 队列�
 | 路径 | 放什么 | 进门条件 | 出门 |
 |---|---|---|---|
 | `intents.md` | 初始意图与用户指令存档（为什么起这个项目、原话要点） | 立项/用户给新方向时追加 | 追加式，不删 |
-| `proposed/` | **队列与搁置条目的 RFC 全文**（一文件一条目：问题/方案/输掉的方案/验收判据；搁置条目另写复活条件+现状） | roadmap §队列或 §搁置池须有对应条目（verify 门禁 `proposal-scheduled` 强制） | 队列条目收尾 → 迁 `implemented/`；搁置条目 → 复活进队列或否决迁 `rejected/` |
+| `proposed/` | **在飞队列条目的 RFC 全文**（一文件一条目：问题/方案/输掉的方案/验收判据） | roadmap §队列须有对应条目（verify 门禁 `proposal-scheduled` 强制） | 队列条目收尾 → 迁 `implemented/`；不再做的条目 → 否决迁 `rejected/`（搁置池行链 rejected/ 文件） |
 | `implemented/` | 已落地的决定记录（决定/输掉的方案/实际跑过的验证/环境状态） | RFC 毕业，或用户直派任务的交付（**不必从 proposed/ 起步**） | **活的**：事实随实现维护；逆转另写新 Note 互链 |
 | `rejected/` | 被否决的方案——**只保留仍能阻止一次诱人重犯的** | 方案被否决且理由有未来价值 | 不再有防复犯价值 → 直接删（不留空壳） |
 | `postmortem/` | 事故复盘（事故叙事的唯一合法层） | 出现值得记的事故 | 事实澄清后仍留（历史记录） |
+| `archived/` | 冻结快照：不再指导当前工作的已交付 Note（进门条件与冻结纪律见 [archived/README.md](archived/README.md)） | implemented/ Note 按"未来决策价值"判定搬入（vendor `dsh-archive-agent-notes` 校准：不按年龄字数） | 无出门——冻结；复活 = 写新 Note 引用快照 |
 | ~~`research/`~~ | （2026-09-27 清并：五篇调研报告全部完成且落点已落地，**并入 [`implemented/`](implemented/)** 带 grandfather 标注——位置=状态，防误读为待开展课题） | — | — |
 
 细则见各子目录 README（每个子目录都有 README，`note-status` 门禁强制在场）。
@@ -69,11 +71,11 @@ RFC 都住这里（搁置 RFC 带复活条件；▶ 语义仍归 roadmap 队列�
 |---|---|---|
 | 路径 | `.agents/notes/`（隐藏、agent 面） | `notes/`（顶层、人机共面）——人验收时直接看得到；`.agents/skills/` 已按 vendor 约定落地，notes 留在顶层是**登记的偏离**（代价：与 vendor 路径不同构；收益：人类可发现性） |
 | 第二轴 | 生命周期 + **class 子目录**（feature/bug-fix/simplification/architecture/process/testing），closed set 由门禁脚本校验 | **无 class 层**——当前规模用文件名主题即可分辨；引入条件 = `implemented/` 超过约 50 篇，或检索开始靠猜 |
-| 冻结层 | `archived/`（implemented 可归档，归档树永久冻结） | **暂不设**——无归档需求；引入条件 = `implemented/` 出现"未来指导价值低"的存量 |
+| 冻结层 | `archived/`（implemented 可归档，归档树永久冻结） | **已设**（2026-09-27 用户指令激活）：单语单文件 + `> 归档：<日期>` 行，等价上游 triplet+hash seal 的本仓落地；判定 = vendor `dsh-archive-agent-notes` 的"未来决策价值"校准 |
 | 格式骨架 | `## Problem` / `Decision` / `Alternatives considered` / `Verification` 强制，`verify-agent-note-format` 门禁 | 中文骨架：决定 / 输掉的方案 / 实际跑过的验证 / 环境状态（guides/60 §4）+ **轻量门禁 `note-format`** |
 | 取代检查 | 子树 AGENTS.md 硬触发：每新增 Note 搜同决定/同机制，完整取代同 PR 归档旧 triplet | 同（2026-09-24 吸纳：更新 owner / 部分互链 / 完整吸收后才删旧——见上节） |
-| 集中索引 | 明文禁止建 `INDEX.md`（目录树即清单） | **部分偏离**：`research/` 有一份 README 目录表（人读的状态面），新鲜度由 `note-status` 门禁对账；其余目录仍不建索引 |
-| 状态标记 | `Status: <status>` 头三行之第三行，裸值、无日期括号，目录互验（格式门禁） | 同构：`> 状态：<值>` 裸值 + 目录互验（`note-format` 门禁）；`research/` 另有 `> 状态：已完成\|进行中 · 日期`（报告层约定，非生命周期状态） |
+| 集中索引 | 明文禁止建 `INDEX.md`（目录树即清单） | **同构**：各目录不建手抄索引（`note-status` 门禁只强制各子目录 README 在场） |
+| 状态标记 | `Status: <status>` 头三行之第三行，裸值、无日期括号，目录互验（格式门禁） | 同构：`> 状态：<值>` 裸值 + 目录互验（`note-format` 门禁）；`archived/` 另有 `> 归档：<日期>` 行（冻结标记，vendor `Archived:` 行等价） |
 
 **原生权威**（机制核对一律走它）：`vendor/dsh/.agents/notes/README.md`、
 `vendor/dsh/.agents/notes/implemented/AGENTS.md`、`vendor/dsh/.agents/notes/archived/AGENTS.md`

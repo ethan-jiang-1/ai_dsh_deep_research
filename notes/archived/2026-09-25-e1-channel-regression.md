@@ -1,6 +1,7 @@
 # RFC：E1 通道回归排查——research profile 在本仓 vendor 上的模型调用失败
 
 > 状态：implemented
+> 归档：2026-09-27
 
 归宿：roadmap §队列「E1 通道回归排查」（已离队）· 来源：[vendor-submodule 毕业 Note §毕业后发现](../implemented/2026-09-24-vendor-submodule.md)
 
