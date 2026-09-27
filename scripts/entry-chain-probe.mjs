@@ -57,7 +57,15 @@ function groundTruth() {
     if (m) queue.push({ n: Number(m[1]), theme: m[2] });
   }
   const cur = queue.find((q) => roadmap.split('\n').some((l) => l.includes(`\u25b6 **${q.theme}**`)));
-  if (cur === undefined) throw new Error('找不到 ▶ 当前条目');
+  if (cur === undefined) {
+    // parked 态（2026-09-28 首次清空起）：队列空 = 全部条目毕业——"当前"= 待用户取题。
+    // 合法形态 = 空态标记在场 + 零编号条目；否则真红。
+    const section = lines.slice(s).join('\n');
+    if (section.includes('（队列空——待用户取题）') && !/^\d+\.\s/m.test(section)) {
+      return { cur: '队列空——待用户取题', next: null };
+    }
+    throw new Error('找不到 ▶ 当前条目（且非 parked 态——队列既无 ▶ 也无空态标记）');
+  }
   const next = queue.find((q) => q.n > cur.n);
   return { cur: cur.theme, next: next?.theme ?? null };
 }

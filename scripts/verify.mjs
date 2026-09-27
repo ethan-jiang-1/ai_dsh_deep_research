@@ -52,6 +52,11 @@ function roadmapQueue() {
 // roadmap §搁置池 节切片（proposal-scheduled 的第二归宿面——防御性兼容：2026-09-27 起搁置
 // 条目全文住 notes/rejected/（搁置即"决定不做"，池行直链 rejected 文件），proposed/ 只收
 // 在飞队列条目；本分支保留，防语义误挂时静默。▶ 当前指针只认队列节）。
+
+/** 队列 parked 标记（2026-09-28 首次清空起的一等状态）：队列空 = 全部条目毕业，待用户取题。
+ *  parked 合法形态 = 标记行在场 + 零 ▶ + 零编号条目；标记与 ▶/编号条目并存 = 矛盾态，红。 */
+const QUEUE_PARKED = '（队列空——待用户取题）';
+const queueParkedState = (queue) => queue.includes(QUEUE_PARKED) && !/^\d+\.\s/m.test(queue);
 function roadmapParked() {
   const p = join(ROOT, 'roadmap.md');
   if (!existsSync(p)) return null;
@@ -352,9 +357,13 @@ function roadmapParked() {
   } else {
     const qLines = queue.split('\n');
     const pointerIdx = qLines.map((l, i) => (l.includes('▶') ? i : -1)).filter((i) => i !== -1);
-    if (pointerIdx.length !== 1) {
-      fail(gate, `队列 ▶ 指针必须唯一（实测 ${pointerIdx.length} 处）`);
-    } else {
+    // parked 态（2026-09-28）：零 ▶ 合法——"当前"停在待用户取题，无 RFC 可指；
+    // 标记与 ▶/编号条目并存 = 矛盾态，红。
+    if (pointerIdx.length === 0 && !queueParkedState(queue)) {
+      fail(gate, `队列 ▶ 指针必须唯一（实测 0 处）——且非 parked 态（队列空须标 ${QUEUE_PARKED}，不得残留编号条目）`);
+    } else if ((pointerIdx.length !== 1 && pointerIdx.length > 0) || (pointerIdx.length === 1 && queue.includes(QUEUE_PARKED))) {
+      fail(gate, `队列 ▶ 指针必须唯一（实测 ${pointerIdx.length} 处${queue.includes(QUEUE_PARKED) ? '；且与 parked 标记并存=矛盾态' : ''}）`);
+    } else if (pointerIdx.length === 1) {
       // 条目块 = ▶ 行起，到下一个编号条目 / 节标题 / 毕业注记为止（RFC 链接常在续行）
       let end = qLines.length;
       for (let i = pointerIdx[0] + 1; i < qLines.length; i++) {
@@ -405,7 +414,9 @@ function roadmapParked() {
           }
         }
       }
-      if (checked === 0) fail(gate, '防空语料：零个 notes/proposed/ 指针被检查——指针全没了或正则失效');
+      if (checked === 0 && !queueParkedState(roadmapQueue() ?? '')) {
+        fail(gate, '防空语料：零个 notes/proposed/ 指针被检查——指针全没了或正则失效（例外：队列空 parked 态——在飞条目为零，零指针合法）');
+      } else if (checked === 0) note(gate, '零指针（队列空 parked 态——合法）');
       else note(gate, `${checked} 个 live 指针全部可解析`);
     }
   }
@@ -610,8 +621,11 @@ function roadmapParked() {
   if (queue === null) fail(gate, 'roadmap §队列 不可读——入口链第 3 步（唯一"当前"指针）断链');
   else {
     const marks = (queue.match(/▶/g) ?? []).length;
-    if (marks === 0) fail(gate, 'roadmap §队列 无 ▶——全仓唯一"当前"指针缺席（D11）');
-    else if (marks > 1) fail(gate, `roadmap §队列 有 ${marks} 个 ▶——"当前"指针必须唯一（D11）`);
+    // parked 态（2026-09-28 首次清空）：零 ▶ + 标记在场 + 无编号条目 = 合法——"当前"指针
+    // 停在"待用户取题"；标记与 ▶ 条目并存 = 矛盾态，红。
+    if (marks > 1) fail(gate, `roadmap §队列 有 ${marks} 个 ▶——"当前"指针必须唯一（D11）`);
+    else if (marks >= 1 && queue.includes(QUEUE_PARKED)) fail(gate, `roadmap §队列 parked 标记与 ▶ 条目并存——矛盾态（队列要么空要么有当前条目）`);
+    else if (marks === 0 && !queueParkedState(queue)) fail(gate, `roadmap §队列 无 ▶ 且非 parked 态——全仓唯一"当前"指针缺席（D11；队列空须以 ${QUEUE_PARKED} 行标注且不得残留编号条目）`);
   }
 }
 
