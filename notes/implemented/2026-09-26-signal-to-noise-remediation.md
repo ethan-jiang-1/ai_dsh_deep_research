@@ -34,7 +34,7 @@
 | 10 | [AGENTS.md](../../AGENTS.md) 偏离登记簿 + [design/10](../../docs/design/10-architecture.md) §6 | "23 tests 绿即证据" | 现为 **53 tests** |
 | 11 | [notes/README](../README.md) §时态表后 | "`implemented/` 有 26 篇而队列只有 2 条" | 现为 **40 篇 / 1 条**——手抄计数住在一张"时态地图"里 |
 | 12 | [roadmap.md](../../roadmap.md) 队列节尾 | "（已毕业离队 2026-09-26：…）"12 行历史块 | 与同文件头注"完成即离队（历史归 notes/ + git，**队列里看不见它**）"及 D13 自相矛盾；且随毕业无限增长，把唯一"当前"指针埋掉 |
-| 13 | [ui-skin RFC](../proposed/2026-09-24-ui-skin.md) · [research-type-coverage RFC](2026-09-25-research-type-coverage.md) | 把"▶ 观察面 GUI 化"当作当前指针引用 | 该条目已毕业，▶ 已移交 |
+| 13 | [ui-skin RFC](../rejected/2026-09-24-ui-skin.md) · [research-type-coverage RFC](2026-09-25-research-type-coverage.md) | 把"▶ 观察面 GUI 化"当作当前指针引用 | 该条目已毕业，▶ 已移交 |
 | 14 | [discipline-map](../../docs/discipline-map.md) 图例 · [alignment-ledger](../../docs/alignment-ledger.json) ×4 | "纯配置仓/纯配置 deep-research-pack" | 同 #4 |
 | 15 | 非 `.md` tracked 文件里的 RFC 指针（**13 处**，机械复算）：`presets/{lead,analyst,critic,scout}.patch.yml:5`、`dev/boot-run.sh:3`、`dev/vendor-build.sh:7`、`dev/vendor-typert-emit.mjs:3`、`scripts/entry-chain-probe.mjs:3`、`scripts/run-dashboard.mjs:2-3`、`tests/run-dashboard.test.mjs:1,92`、`docs/alignment-ledger.json:722` | 指 `notes/proposed/<某 RFC>.md` | 该 RFC 已毕业迁 `implemented/`——指针 404。**门禁盲区**：`md-links`/`md-anchors` 只扫 tracked `.md` 的链接语法，yml/sh/mjs/json 注释逃检。preset 头注尤其要紧——它是**模型可见**文本 |
 | 16 | [research-type-coverage RFC](2026-09-25-research-type-coverage.md) §验收 | 13 行里有孤儿子项（无父项）、游离右括号、`（原验收如下）` 把一节劈成两份互相竞争的清单；且无 `实施记录` 节 | 该 RFC 是 ▶ 条目的**唯一验收正本**，而 guides/60 §7 的中断恢复又要求读"文末实施记录"——fresh agent 必须满足的那一节恰好不可用 |

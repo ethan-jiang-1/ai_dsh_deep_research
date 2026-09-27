@@ -27,6 +27,14 @@ present）的会话流 + 观察面渲染，不整代快照。四件套（形状�
 
 E1 教训仍有效：快照二包**只作 devDependency 解析物**，绝不进 runtime 依赖。
 
+**可行性探针（2026-09-27，开工即有地图）**：二包定位 = `vendor/dsh/packages/test-support/
+{session-snapshot,llm-replay}`（test-support 层，与 E1 教训同构）；`main: lib/index.js` 的
+**lib 产物缺失**（vendor-build 未覆盖 test-support 层）——**实施第 0 步 = 扩 vendor-build**
+（vendor-host 补建配置加这两包）。回放驱动 = `llm-replay`（cordis.snapshot.yml 声明录制响应）；
+规范化助手齐全（normalizeSessionLog / tokenizeSessionFixtureCwd / scrubModelRequestBulk 等，
+vendor `snapshots/sdk/sdk.snapshot.ts` 是完整用例）。录制料 = 第九场会话 JSONL（37 卡、研究
+工具面全调用）。
+
 ## 输掉的方案
 
 - **E1 时随解析依赖引入**：已否决——正是 E1 事故本身（`cannot resolve active package`）；
