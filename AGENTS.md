@@ -100,6 +100,10 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 > 不适用+理由；随 vendor 换 tag 重校）——纪律的权威正本。速查关键词：fail-loud · model-visible ⟺ logged ·
 > 完成定义 = 真检查 · no-key 证管道 / with-key 证 agent · verify the world · 真入口路径 ·
 > 新门禁带反证 · docs = 当前合同 · 同 diff 带 Note · 窄证据切片 · 卫生铁律 · 工具态重定向。
+>
+> **研发宪章**（2026-09-27 用户定调）= [README §研发宪章](README.md)：循 DSH 而不发明 · 自主优先
+> 并借鉴成熟 DSH 插件（采纳度为信号）· **审阅分层**——机械门禁/审计/判据探针/对抗自审自主做，
+> 只在阶段边界请人（REVIEW 是最后手段，不是例行步骤）。
 
 ## 偏离登记簿
 

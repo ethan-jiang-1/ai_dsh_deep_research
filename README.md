@@ -17,9 +17,14 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 
 命令表正本 = [`docs/guides/60-dev-loop.md`](docs/guides/60-dev-loop.md) §2（L0/L1/L2/真模型档/run 通道全档，含 `source dev/env.sh` 前置说明）；[`AGENTS.md`](AGENTS.md) 只留速查与指针——本文件不复制。
 
+## 研发宪章（2026-09-27 用户定调）
+
+1. **循 DSH 而不发明**：机制权威 = `vendor/dsh`（钉 tag），纪律全表 = `docs/discipline-map.md`（逐源三态）；优先用 DSH 现成载体，自建机制须有"载体不可用"证据。
+2. **自主优先，借鉴成熟**：问题先探成熟 DSH 插件的解法（采纳度 = 下载量 / 影响力为信号；参考仓 `ai_dsh_company`），能自主解决的静默解决、不外抛。
+3. **审阅分层**：机械门禁 / 溯源审计 / 判据探针 / 对抗自审（critic 式）全部自主做；只有不可代理的判断（真人体验、方向取舍）才在阶段边界请人——不设额外打断点。
+
 ## Rules In One Screen
 
 - 配置为主的 pack（预设/技能/bundle 行）+ 一个观察面 client 面（D18 单点例外）；Node `^22.19.0 || >=24.0.0`（`engines`，与 vendor 对齐）；测试用 `node:test` + `node:assert`（无测试框架）。
 - 评估五面（L0 结构 / L1 挂载 / L2 安装 / L3 领域 / L4 交付）不互抵，定义见 `docs/evaluation.md`。
-- 不发明：优先用 DSH 现成载体（preset/skill/agent-team/todo/present/goal），自建机制须有“DSH 载体不可用”的证据。
 - 迭代单位 = 垂直轮（最薄全路径 → 逐轮加宽），当前进度看 `roadmap.md` §队列。
