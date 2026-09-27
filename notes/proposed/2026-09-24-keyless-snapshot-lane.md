@@ -2,8 +2,8 @@
 
 > 状态：proposed
 
-归宿：roadmap §搁置池「keyless 录制快照面」（升级注记：0.1.7 的 `retired-tools` 钉法
-**降低了复活成本**——见升 pin 重审命中 ④）。
+归宿：roadmap §队列 ▶（**2026-09-27 复活**——频率条件实质到达：单日 6+ 次模型可见文本变更
+各耗真模型档验证；九场 run 的会话 JSONL 是现成回放料）。原搁置理由与 E1 教训保留于下。
 
 ## 问题
 
@@ -11,13 +11,21 @@
 + 真模型档（L4-lite）取证——**成本高且无快照级 keyless 回归**：改了 persona 或渲染层，
 无法秒级知道"输出形态变了"。
 
-## 方案（草图，复活后细化）
+## 方案（定形——先例 = vendor `snapshots/web/web-search-round/`）
 
-vendor 路线 = `dsh-session-snapshot`（session 回放 fixture）+ llm-replay；0.1.7 起
-`snapshots/AGENTS.md` 支持 **`retired-tools` 独立钉法**（退役工具录制可与迁移覆盖无关
-地钉住，含当前 format 版本）——意味着可以只钉"研究工具面"这一窄带做 keyless 回放，
-不必整代快照。E1 教训仍有效：这两个包**只能作为 devDependency 解析物存在**，
-绝不能进 runtime 依赖（E1 事故根源，已核销）。
+**窄带**：只钉研究工具面（spawn_teammate / web_search / team_task_* / ask_user_question /
+present）的会话流 + 观察面渲染，不整代快照。四件套（形状照 vendor 先例）：
+
+1. `session.v1.jsonl`——录制料：从第九场（37 卡、含全部研究工具面调用）的会话 JSONL
+   **规范化**而来（挥发性身份 → 类型化 token；system prompt / tool schema → token）；
+2. `snapshot.yml`——`profile: research` + **`retired-tools` 钉法**（研究工具面独立钉住，
+   含当前 format 版本——vendor `snapshots/AGENTS.md` 明载该机制）；
+3. `ui.expected.md`——渲染金标准：研究语义卡 + 状态页签在该录制流下的期望输出；
+4. **回放冒烟**（scripts/snapshot-replay-smoke.mjs，L1 形态）：spawn `dsh`（研究档 +
+   场景 patch）→ 回放录制流 → Playwright 渲染 → 与 `ui.expected.md` 比对。
+   **红证**：注入一处输出差异（如卡片标题措辞）→ 回放红；还原 → 绿。
+
+E1 教训仍有效：快照二包**只作 devDependency 解析物**，绝不进 runtime 依赖。
 
 ## 输掉的方案
 
@@ -26,8 +34,8 @@ vendor 路线 = `dsh-session-snapshot`（session 回放 fixture）+ llm-replay�
 
 ## 验收（= 复活条件现状）
 
-- 复活条件：需要「输出快照」级 keyless 回归时（**✗ 未到——但已接近重估点**：2026-09-27
-  单日内对模型可见文本（persona/skill）改动 6+ 次，每次均以 L4-lite 真模型档验证（实测成本
-  ~2-3 分钟/次 + token）。若该节奏常态化，快照面回本——下次同类改动日即触发重估）；
+- ~~复活条件：需要「输出快照」级 keyless 回归时~~ → **已满足并复活**（2026-09-27：单日 6+
+  次模型可见文本变更、每次 L4-lite 真模型档验证 ~2-3 分钟 + token——频率条件实质到达；
+  第九场后维护期该节奏预计延续）；
 - 复活后验收：一条录制 → 回放 keyless 绿 + 注入输出差异 → 红（红证）+ 依赖面零污染
   （vendor-links 绿）。
