@@ -37,8 +37,13 @@ web_search ×3——含上游故障形态，正是渲染回归要钉的样本—
 `snapshot.yml` 骨架。接线模板 = vendor `snapshots/session/web-search-endpoint-guidance/`
 （同构场景：禁用真 LLM → 插入 llm-replay（replay-only provider 目录）→ 搜索故障保持真实——
 "the failed search remains real; only the conversation model adapter is replaced by replay"）。
-**剩余**：第 0 步扩 vendor-build（二包 lib）→ 回放冒烟脚本（L1 形态）→ ui.expected.md 金标准
-→ 红绿。
+**进度（2026-09-27）**：录制 fixture ✓ · snapshot.yml ✓ · **回放冒烟 ✓（首次实跑 ALL PASS：
+零真模型调用完整回放、收尾文本逐字命中）· 红绿 ✓**（破坏 profile patch → 红 exit 1；还原 → 绿）。
+二包 lib **早已构建**（前次探针查错路径误报"缺"，实际 `packages/test-support/*/lib` 齐全——
+vendor 补建循环的 maxdepth 没问题）。
+**剩余增量**：ui.expected.md 渲染金标准（Playwright 文本捕获层——日志级回放已钉，渲染层是其
+上层加固）；组装请求 diff（persona 文本变化的捕获——需 llm-replay 请求捕获面，机制边界
+已记：canned 响应不随 persona 变化）。
 
 ## 输掉的方案
 
