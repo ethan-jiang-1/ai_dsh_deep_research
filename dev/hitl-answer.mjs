@@ -135,6 +135,7 @@ try {
     // 题干 = 卡片里 "Waiting for your action · <题干>" 的那一行
     const prompt = page.locator('text=/Waiting for your action/').first()
     const promptText = (await visible(prompt)) ? ((await prompt.textContent()) ?? '').replace(/\s+/g, ' ').trim() : '(未取到题干)'
+    if (promptText.length > 400) log(`hitl-answer: ⚠ 题干 ${promptText.length} 字（>400）——选项可能折叠线下，真人需滚动才能答题（HITL2 摘要纪律的执行方差信号）`)
 
     // 选项目标：recommended → 带 Recommended 的那一项；first → 第 1 项；数字 → 第 n 项。
     // ⚠ 实测坑（第三场 HITL2）：对话历史里 assistant 的推理文本也会含 "Recommended" 这个词
