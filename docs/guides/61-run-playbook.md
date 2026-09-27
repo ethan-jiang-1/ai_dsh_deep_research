@@ -66,7 +66,7 @@ frontmatter）。`dev/run-kickoff.mjs` 已默认用 workspaceId 形态把会话�
 CLI/host 侧没有 answerer，也没有提交答案的 RPC）——所以代答要用真浏览器：
 
 ```sh
-node dev/hitl-answer.mjs --port 3081 --token <横幅 token>   # 默认逐题选带（Recommended）的那一项
+node --import tsx/esm dev/hitl-answer.mjs --port 3081 --token <横幅 token>   # 默认逐题选带（Recommended）的那一项
 ```
 
 它逐题打印选择结果；**必须**把这次代答如实记进 bundle 的 `question.md` §Decisions 与

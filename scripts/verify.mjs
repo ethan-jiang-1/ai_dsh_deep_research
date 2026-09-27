@@ -435,7 +435,10 @@ function roadmapParked() {
       // 快照 fixture 豁免（2026-09-27）：录制的会话流里含 harness 自身的版本戳（system-reminder
       // 注入的构建身份）——那是 vendor 规范化契约说的"挥发性身份"（fixture 定形时 tokenize），
       // 不是本仓的钉声明；钉死在 fixtures 录制流上会与每次重录打架。
-      .filter((f) => !f.startsWith('tests/fixtures/snapshot-'));
+      .filter((f) => !f.startsWith('tests/fixtures/snapshot-'))
+      // run-state 夹具同款豁免（2026-09-27）：同为录制会话日志的投影——lead 的 grep 研究动作
+      // 参数里出现 DSH 版本 tag 字样是实录数据（本次 pre-commit 咬住的实录即红证），不是钉声明。
+      .filter((f) => !f.startsWith('tests/fixtures/run-state/'));
     let hexes = 0, tags = 0, skipped = 0;
     for (const rel of files) {
       const f = join(ROOT, rel);

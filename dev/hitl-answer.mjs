@@ -8,16 +8,19 @@
 // 本脚本补上这条缝：用真浏览器把挂起的问询答完，并把每次选择打印出来，供 bundle 的
 // question.md §Decisions 如实记"代理模拟"。
 //
-// 用法：
-//   node dev/hitl-answer.mjs --port 3081 --token <横幅 token> [--session <标题子串>]
+// 用法（须带 tsx——前置谓词 import pack .ts 源）：
+//   node --import tsx/esm dev/hitl-answer.mjs --port 3081 --token <横幅 token> [--session <标题子串>]
 //                            [--pick recommended|first|<1-based index>] [--custom <文本>]
 //                            [--max-steps 8] [--dry-run]
-// 行为：打开 web → 关测试须知模态 → 点开侧栏里"Waiting for answer"的会话 → 逐题作答
-//       （默认选带 Recommended 的那一项）→ 走到最后一题提交 → 打印每题的选择。
+// 行为：**先盘侧谓词自拒**（无真挂起会话即退出，不开浏览器——2026-09-27 实录：grep 误报
+//       "卡已挂起"后代答空转找卡）→ 打开 web → 关测试须知模态 → 点开侧栏里"Waiting for
+//       answer"的会话 → 逐题作答（默认选带 Recommended 的那一项）→ 提交 → 打印每题的选择。
 // 注意：**必须**在 question.md §Decisions 与 journal.md 标注"代理模拟"——它替的是人，不是人。
-import { resolve, dirname } from 'node:path'
+import { resolve, dirname, join } from 'node:path'
+import { existsSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { loadChromium, launchChromium } from '../scripts/lib/playwright.mjs'
+import { runStateOf } from '../scripts/lib/run-state.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 // 与 dev/run-kickoff.mjs 同形：name 自带 `--`（本仓约定，别在 helper 里再加一次）
@@ -29,7 +32,10 @@ const has = (name) => process.argv.includes(name) // 同约定：name 自带 `--
 
 const PORT = flag('--port', '3081')
 const TOKEN = flag('--token', null)
-const SESSION = flag('--session', null) // 标题子串；缺省 = 侧栏里第一个 "Waiting for answer"
+// 空串/纯空白 = 未指定（2026-09-27 实录：`--session ""` 使 text.includes('') 恒真 →
+// 点开侧栏第一个无关会话——flag 解析不得把空串当"已指定"）
+const rawSession = flag('--session', null)
+const SESSION = rawSession !== null && rawSession.trim() !== '' ? rawSession : null // 标题子串；缺省 = 侧栏里第一个 "Waiting for answer"
 const PICK = flag('--pick', 'recommended') // recommended | first | <1-based index>
 const CUSTOM = flag('--custom', null)
 const MAX_STEPS = Number(flag('--max-steps', '8'))
@@ -38,6 +44,37 @@ const DRY = has('--dry-run')
 if (!TOKEN) {
   console.error('缺 --token（web 横幅里的 token）')
   process.exit(2)
+}
+
+// ⓪⁻ 盘侧前置谓词（RFC run-ops-self-diagnosis）：开浏览器前，先按**事件形状**判定
+//    research-workspace 组最新会话里有没有真挂起（末位回合事件 = 未答 ask_user_question）。
+//    request/header 里的工具 schema 字样不构成挂起——那正是 grep 假阳性的形态。无真挂起即
+//    自拒，不开浏览器空转。
+{
+  const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'dev', 'harness-home')
+  const sessionsRoot = join(home, 'sessions')
+  const group = existsSync(sessionsRoot) ? readdirSync(sessionsRoot).find((d) => d.includes('research-workspace')) : undefined
+  if (group === undefined) {
+    console.error('hitl-answer: 找不到 research-workspace 会话组——先 source dev/env.sh')
+    process.exit(2)
+  }
+  const gdir = join(sessionsRoot, group)
+  const sids = readdirSync(gdir)
+    .map((d) => ({ d, m: (() => { try { return statSync(join(gdir, d, 'session.v4.jsonl.zstd')).mtimeMs } catch { return 0 } })() }))
+    .sort((a, b) => b.m - a.m)
+  let pending = null
+  for (const { d, m } of sids.slice(0, 15)) {
+    if (m === 0) continue
+    const s = runStateOf({ logPath: join(gdir, d, 'session.v4.jsonl.zstd'), wsRoot: join(ROOT, 'research-workspace') })
+    if (s.hitlPending === true) { pending = d; break } // 新者先扫，命中即停
+  }
+  if (pending === null) {
+    console.error('hitl-answer: 盘侧谓词自拒——最新 15 个会话无真挂起（末位回合事件 ≠ 未答 ask_user_question）。'
+      + '可能：① 卡还没发（request/header 工具 schema 字样不算挂起——grep 会误报，谓词不会）；'
+      + '② 挂起回合已被 web 重启终局化（需向会话发恢复 prompt 让 lead 原样重发）。不开浏览器。')
+    process.exit(3)
+  }
+  console.log(`hitl-answer: 盘侧谓词——真挂起会话在场：${pending}`)
 }
 // 模式自报（2026-09-26 教训：`flag/has` 的 `--` 加了两遍 → `--dry-run` 判假，**"dry-run" 实际
 // 执行了代答**。此后开局即打印模式，操作者一眼能看出它到底会不会点。）
