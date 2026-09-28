@@ -25,6 +25,9 @@ importers:
       '@deepseek-ai/dsh-agent-preset-registry':
         specifier: workspace:*
         version: link:vendor/dsh/packages/preset/agent-preset-registry
+      '@deepseek-ai/dsh-client-ui-primitives':
+        specifier: workspace:*
+        version: link:vendor/dsh/packages/client/ui-primitives
       '@deepseek-ai/dsh-experimental-agent-team':
         specifier: workspace:*
         version: link:vendor/dsh/packages/experimental/agent-team
