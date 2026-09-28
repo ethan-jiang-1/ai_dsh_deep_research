@@ -106,7 +106,7 @@ dsh-deep-research-preflight --workspace ~/research-workspace
 - **`workspace/` 种子是快照**：由 `dev/sync-pack-workspace.mjs` 从仓库正本同步（门禁
   `pack-workspace-fresh` 防漂移）；种子只铺新工作区，**不覆盖**已存在文件（`--force` 除外）；
 - **皮肤/品牌层**（ui-skin）与**专职 synthesizer 角色**（多场 run 重估：lead 独任综合
-  无过载）仍在搁置池，复活条件见 roadmap；
+  无过载）仍在搁置池，复活条件见 `_backlog/queue.md` 搁置池；
 - **工具卡 = 2 张**（spawn_teammate / web_search）；`team_task_*` 与其他协调类工具
   （wait_agent / list_agents / send_message）**不进对话流**（2026-09-27 实测：流里 0 出现，
   harness 把协调类工具排除在对话渲染外）——团队任务的观察由 ui-agent-team 任务板与 To-dos
