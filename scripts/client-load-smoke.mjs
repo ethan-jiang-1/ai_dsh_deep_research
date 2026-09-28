@@ -296,8 +296,8 @@ try {
         const paneText = await paneTextOf()
         const seg = paneText.slice(paneText.indexOf('研究状态'))
         // 渐进面硬断言（会话绑定 + 位置=状态两位置：证据计数/交付态/问题行与磁盘真值对账）
-        const stepsOk = ['立项', '拆解', '侦察', '取证', '综合', '审查', '交付'].every((x) => seg.includes(x))
-        step(stepsOk, '步骤条真数据（七步渲染——本会话绑定的 bundle）')
+        const stepsOk = ['立项', '组队', '侦察', '挖掘', '综合', '审查', '交付'].every((x) => seg.includes(x))
+        step(stepsOk, '步骤条真数据（流程轨道七步 = 定义流程——本会话绑定的 bundle）')
         const evMatch = seg.match(/证据 (\d+) 份/)
         step(evMatch !== null && Number(evMatch[1]) === expectedFace.evidenceCount,
           '证据计数 = 磁盘真值（会话绑定 + 根/archive 两位置）', evMatch ? `${evMatch[0]}（磁盘 ${expectedFace.evidenceCount}）` : '未渲染')

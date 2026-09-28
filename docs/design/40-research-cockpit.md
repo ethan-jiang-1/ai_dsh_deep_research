@@ -27,7 +27,7 @@
 
 | 件 | 文件 | 职责 |
 |---|---|---|
-| 研究状态页签 | [ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) | 右栏页签，自上而下六区：① HITL 挂起横幅（点名锚点 + 参与指引）② 流程轨道 = ◆立项确认 + 七步（立项→拆解→侦察→取证→综合→审查→交付）+ ◆交付审阅 ③ 研究问题行 ④ 人性化活动流 ⑤ 证据计数 + 交付状态 + rerun 三分静线 ⑥ 决策诚实线（指路 question.md §Decisions） |
+| 研究状态页签 | [ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) | 右栏页签，自上而下六区：① HITL 挂起横幅（点名锚点 + 参与指引）② 流程轨道 = ◆立项确认 + 立项→组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付（步序正本 = [m2-run-mechanics 运行流程总览](../../notes/implemented/2026-09-24-m2-run-mechanics.md)；↻ rerun 回路自交付审阅可见：补研究回挖掘 / 修订表述原位改 / 另起新 bundle；交付节点带 final/ 版本）③ 研究问题行 ④ 人性化活动流 ⑤ 证据计数 + 交付状态 ⑥ 决策诚实线（指路 question.md §Decisions） |
 | 活标题 | 同上（`ResearchStatusTitle`） | 挂起时页签名变「研究状态 · ⏳ 等你拍板」 |
 | 研究语义工具卡 | [ResearchToolCard.tsx](../../packages/deep-research-pack/src/client/ResearchToolCard.tsx) + [tool-card.ts](../../packages/deep-research-pack/src/lib/tool-card.ts) | 对话流卡片：`spawn_teammate` → 组队卡、`web_search` → 检索卡（2 张） |
 | 挂起显性化 | [index.ts](../../packages/deep-research-pack/src/client/index.ts)（`revealStatusTab`） | pending false→true 迁移时 `openTab` 右栏自动展开；页签 dock 折叠态保持挂载（观察者常在） |
@@ -86,6 +86,9 @@
 - **队员动作不进页签活动流**：活动流只 follow lead 会话（scout/analyst 的检索与取证在各自
   会话）——`wait_agent` 的"队员作业中"行缓解全静；团队任务细节 = `ui-agent-team` 任务板
   （队员流接入需新数据通道，后续候选）；
+- **组队步无独立文件**：轨道的组队步在场性随立项（cursor 在"立项完成 → 侦察交付"窗口停靠
+  组队——该窗口即组队+侦察进行段，活动流区分两者）；run-dashboard 的步序副本与 run-fold
+  手工同步（G5 已登记合并方向）。
 - **工具卡只 2 张**：`team_task_*` 等协调类工具不进对话渲染流（harness 排除），团队观察
   由 `ui-agent-team` 任务板承担；
 - 活标题与页签体各开一条 follow 流共用 WebSocket 数据面（v1 接受，合流是后续优化）；

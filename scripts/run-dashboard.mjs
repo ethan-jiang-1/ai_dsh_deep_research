@@ -305,7 +305,7 @@ export function sceneState(dir) {
   }
   const steps = [
     ['question', has('question.md')],
-    ['topics', has('topics.md')],
+    ['team', has('question.md')],
     ['leads', has('leads.md')],
     ['evidence', ev],
     ['findings', has('findings.md')],
@@ -319,19 +319,21 @@ export function sceneState(dir) {
   return { lastStep: last >= 0 ? steps[last][0] : null, done: steps.filter(([, v]) => v).length };
 }
 
-/** 流程步骤条（纯文件事实，零发明）：done ✓ / 当前 ● / 待办 ○。当前步 = 最后一个有内容的步。 */
+/** 流程步骤条（纯文件事实，零发明）：done ✓ / 当前 ● / 待办 ○。当前步 = 最后一个有内容的步。
+ *  步序正本 = m2-run-mechanics「运行流程总览」：立项（question+topics 一体）→ 组队 → 侦察 →
+ *  挖掘 → 综合 → 审查 → 交付；组队无独立文件，在场性随立项（cursor 停靠语义，与 run-fold 同）。 */
 export function deriveStep(model) {
   const has = {
     question: !!model.question,
-    topics: model.topics.length > 0,
+    team: !!model.question,
     leads: model.leads.length > 0,
     evidence: model.stats.evidence > 0,
     findings: model.findings.length > 0,
     review: !!model.review,
     final: !!model.final,
   };
-  const order = ['question', 'topics', 'leads', 'evidence', 'findings', 'review', 'final'];
-  const labels = { question: '立项', topics: '拆解', leads: '侦察', evidence: '取证', findings: '综合', review: '审查', final: '交付' };
+  const order = ['question', 'team', 'leads', 'evidence', 'findings', 'review', 'final'];
+  const labels = { question: '立项', team: '组队', leads: '侦察', evidence: '挖掘', findings: '综合', review: '审查', final: '交付' };
   let lastDone = -1;
   for (const [i, k] of order.entries()) if (has[k]) lastDone = i;
   return order.map((k, i) => ({
@@ -510,7 +512,7 @@ const esc = (s) =>
 
 const distLine = (d) => `A:${d.A} B:${d.B} C:${d.C} D:${d.D}`;
 
-const STEP_LABELS = { question: '立项', topics: '拆解', leads: '侦察', evidence: '取证', findings: '综合', review: '审查', final: '交付' };
+const STEP_LABELS = { question: '立项', team: '组队', leads: '侦察', evidence: '挖掘', findings: '综合', review: '审查', final: '交付' };
 
 function renderMatrix(model) {
   const rows = topicEvidenceMatrix(model.topics, model.evidence);

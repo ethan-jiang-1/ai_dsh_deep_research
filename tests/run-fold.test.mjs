@@ -15,23 +15,33 @@ const RUN = [
 ].find((p) => existsSync(p));
 
 test('步骤条：全空 → 首步 pending 全 pending', () => {
-  const steps = deriveSteps({ question: false, topics: false, leads: false, evidence: 0, findings: false, review: false, final: false });
+  const steps = deriveSteps({ question: false, team: false, leads: false, evidence: 0, findings: false, review: false, final: false });
   assert.equal(steps.length, 7);
   assert.ok(steps.every((s) => s.state === 'pending'));
 });
 
 test('步骤条：question 在场 → 立项 current 其余 pending', () => {
-  const steps = deriveSteps({ question: true, topics: false, leads: false, evidence: 0, findings: false, review: false, final: false });
+  const steps = deriveSteps({ question: true, team: false, leads: false, evidence: 0, findings: false, review: false, final: false });
   assert.deepEqual(steps.map((s) => s.state), ['current', 'pending', 'pending', 'pending', 'pending', 'pending', 'pending']);
 });
 
+test('步骤条：步序 = 定义流程（立项→组队→侦察→挖掘→综合→审查→交付，m2-run-mechanics 正本）', () => {
+  const steps = deriveSteps({ question: true, team: true, leads: true, evidence: 5, findings: true, review: true, final: true });
+  assert.deepEqual(steps.map((s) => s.label), ['立项', '组队', '侦察', '挖掘', '综合', '审查', '交付']);
+});
+
+test('步骤条：组队随立项在场 → cursor 停靠组队（组队+侦察进行段）', () => {
+  const steps = deriveSteps({ question: true, team: true, leads: false, evidence: 0, findings: false, review: false, final: false });
+  assert.deepEqual(steps.map((s) => s.state), ['done', 'current', 'pending', 'pending', 'pending', 'pending', 'pending']);
+});
+
 test('步骤条：全在场 → 前六 done 交付 current（最后在场的步是 current）', () => {
-  const steps = deriveSteps({ question: true, topics: true, leads: true, evidence: 5, findings: true, review: true, final: true });
+  const steps = deriveSteps({ question: true, team: true, leads: true, evidence: 5, findings: true, review: true, final: true });
   assert.deepEqual(steps.map((s) => s.state), ['done', 'done', 'done', 'done', 'done', 'done', 'current']);
 });
 
-test('步骤条：中间断档（evidence 有 findings 无）→ 取证 current', () => {
-  const steps = deriveSteps({ question: true, topics: true, leads: true, evidence: 3, findings: false, review: false, final: false });
+test('步骤条：中间断档（evidence 有 findings 无）→ 挖掘 current', () => {
+  const steps = deriveSteps({ question: true, team: true, leads: true, evidence: 3, findings: false, review: false, final: false });
   assert.equal(steps[3].state, 'current');
   assert.equal(steps[2].state, 'done');
   assert.equal(steps[4].state, 'pending');
@@ -51,7 +61,7 @@ test('首场 run 真实 bundle 期望值（步骤条 = 交付 current；矩阵�
   const ev = parseEvidenceDir(join(RUN, 'evidence'));
   const has = (f) => existsSync(join(RUN, f));
   const steps = deriveSteps({
-    question: has('question.md'), topics: topics.length > 0, leads: has('leads.md'),
+    question: has('question.md'), team: has('question.md'), leads: has('leads.md'),
     evidence: ev.files.filter((e) => e.ok).length, findings: has('findings.md'),
     review: has('review.md'), final: has('final.md'),
   });

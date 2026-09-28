@@ -60,6 +60,8 @@ interface BundleFace {
   readonly steps: readonly RunStep[]
   readonly evidenceCount: number
   readonly delivered: boolean
+  /** final/ 版本记账数（v*.md）——≥2 即发生过证据扩张 rerun。 */
+  readonly versions: number
 }
 
 /** 30s 重扫间隔（bundle 文件变化不高频；团队面板同款节奏）。 */
@@ -143,6 +145,10 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           const evidenceDir = await props.listDir(sessionId, `${base}/evidence`, new AbortController().signal)
           if (stopped) return
           const evidenceCount = evidenceDir?.filter((e) => e.type === 'file' && e.name.endsWith('.md')).length ?? 0
+          // final/ 版本记账（D17：证据扩张 rerun 落 v2.md+）——回路表达的数据源
+          const finalDir = names.has('final') ? await props.listDir(sessionId, `${base}/final`, new AbortController().signal) : null
+          if (stopped) return
+          const versions = finalDir?.filter((e) => e.type === 'file' && /^v\d+\.md$/.test(e.name)).length ?? 0
           const questionText = names.has('question.md') ? await props.readFile(sessionId, `${base}/question.md`, new AbortController().signal) : null
           if (stopped) return
           // G3（RFC cockpit-flow-face）：剥 markdown 强调符再截断——`**` 与反引号是源文件
@@ -155,7 +161,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
             hasQuestion: names.has('question.md'),
             steps: deriveSteps({
               question: names.has('question.md'),
-              topics: names.has('topics.md'),
+              team: names.has('question.md'),
               leads: names.has('leads.md'),
               evidence: evidenceCount,
               findings: names.has('findings.md'),
@@ -164,6 +170,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
             }),
             evidenceCount,
             delivered: names.has('final.md'),
+            versions,
           })
           return
         }
@@ -187,7 +194,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const railVisible = face !== null || hitl.pending || anchors.some((a) => a.state !== 'upcoming')
   const passedCount = anchors.filter((a) => a.state === 'passed').length
   const pendingAnchor = anchors.find((a) => a.state === 'pending')
-  const steps = face !== null ? face.steps : deriveSteps({ question: false, topics: false, leads: false, evidence: 0, findings: false, review: false, final: false })
+  const steps = face !== null ? face.steps : deriveSteps({ question: false, team: false, leads: false, evidence: 0, findings: false, review: false, final: false })
   const anchorChip = (a: RunAnchor) => (
     <span key={a.key} style={{ padding: '2px 8px', borderRadius: 4, fontWeight: a.state === 'pending' ? 700 : 400, background: a.state === 'pending' ? '#f59e0b33' : a.state === 'passed' ? '#22c55e22' : '#0000000d', color: a.state === 'pending' ? '#b45309' : a.state === 'passed' ? '#16a34a' : '#888' }}>
       ◆{a.label}{a.state === 'pending' && a.questions > 0 ? `（${a.questions} 问）` : ''} {a.state === 'pending' ? '⏳' : a.state === 'passed' ? '✓' : '·'}
@@ -225,16 +232,18 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       {face?.questionLine !== null && face?.questionLine !== undefined && (
         <div style={{ fontWeight: 600, marginBottom: 6, lineHeight: 1.4 }}>{face.questionLine}</div>
       )}
-      {/* ⑤ 证据概览 + 交付状态 + rerun 三分静线（不交互，只告知下一步合法动作） */}
+      {/* ⑤ 证据概览 + 交付状态 + 版本（final/ 记账 ≥v2 = 发生过证据扩张 rerun） */}
       {face !== null && (
         <div style={{ display: 'flex', gap: 12, marginBottom: 10, fontSize: 13, opacity: 0.85 }}>
           <span>证据 {face.evidenceCount} 份</span>
           {face.delivered && <span style={{ color: '#16a34a', fontWeight: 600 }}>✅ 已交付</span>}
+          {face.versions >= 2 && <span style={{ fontWeight: 600 }}>v{face.versions}</span>}
         </div>
       )}
-      {face !== null && face.delivered && (
+      {/* ↻ rerun 回路（HITL2 到达即可见——拍板的分支后果画进流程，交付后仍指路） */}
+      {anchors[1] !== undefined && anchors[1].state !== 'upcoming' && (
         <div style={{ marginBottom: 10, fontSize: 12, opacity: 0.55 }}>
-          rerun 三分：表述修订（原位改）/ 证据扩张（final/ 下一版）/ 另起新 bundle——向 lead 提出
+          ↻ rerun 回路：补研究 → 回挖掘（final/ 下一版）｜修订表述 → 原位改｜另起 → 新 bundle
         </div>
       )}
       {/* 未绑定 / 绑定待确认提示（RFC right-pane-ux-debt + cockpit-flow-face G4） */}

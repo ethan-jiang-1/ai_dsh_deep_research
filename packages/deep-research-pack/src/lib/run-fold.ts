@@ -10,10 +10,13 @@
  * 自行取文件内容后喂这里的折算）。
  */
 
-/** 一个 run 的文件在场性（步骤条输入——由调用方从文件内容/在场性构造）。 */
+/** 一个 run 的文件在场性（步骤条输入——由调用方从文件内容/在场性构造）。
+ *  步序正本 = m2-run-mechanics「运行流程总览」：立项（question+topics 一体）→ 组队 →
+ *  侦察 → 挖掘 → 综合 → 审查 → 交付；组队无独立文件，在场性随立项（cursor 停靠语义，
+ *  见 deriveSteps）。 */
 export interface RunStepInputs {
   readonly question: boolean
-  readonly topics: boolean
+  readonly team: boolean
   readonly leads: boolean
   readonly evidence: number
   readonly findings: boolean
@@ -28,18 +31,20 @@ export interface RunStep {
   readonly state: 'done' | 'current' | 'pending'
 }
 
-const STEP_ORDER = ['question', 'topics', 'leads', 'evidence', 'findings', 'review', 'final'] as const
-const STEP_LABELS = { question: '立项', topics: '拆解', leads: '侦察', evidence: '取证', findings: '综合', review: '审查', final: '交付' }
+const STEP_ORDER = ['question', 'team', 'leads', 'evidence', 'findings', 'review', 'final'] as const
+const STEP_LABELS = { question: '立项', team: '组队', leads: '侦察', evidence: '挖掘', findings: '综合', review: '审查', final: '交付' }
 
 /**
  * 步骤条推导：在场性 → 七步三态（最后在场的步 = current，之前 done，之后 pending）。
+ * 组队的输入随立项（question 在场即 team 在场）——组队无独立文件，cursor 在"立项完成 →
+ * 侦察交付"的窗口内停靠在组队（该窗口即组队+侦察进行段，正本图同序）。
  * @param inputs - 文件在场性（evidence 为计数 >0 判定）。
  * @returns 步骤条。
  */
 export function deriveSteps(inputs: RunStepInputs): readonly RunStep[] {
   const has: Record<string, boolean> = {
     question: inputs.question,
-    topics: inputs.topics,
+    team: inputs.team,
     leads: inputs.leads,
     evidence: inputs.evidence > 0,
     findings: inputs.findings,

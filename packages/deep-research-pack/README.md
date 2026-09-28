@@ -66,9 +66,9 @@ dsh-deep-research-preflight --workspace ~/research-workspace
    supports / source_tier / publisher）；Critic 对抗核查出 `review.md`（readiness PASS 是交付前置）；
 3. **HITL2 审阅**：结构化选项卡（按现稿定稿(Recommended) / 补研究 / 修订表述）→ 拍板后交付
    `final.md`（每条关键结论附 `[来源: evidence/xx.md]`）；
-4. **观察面**：DSH Web GUI 右栏「研究状态」页签看实时动态（流程轨道 = ◆立项确认 + 七步 +
-   ◆交付审阅、人性化活动流、HITL 挂起横幅点名锚点与参与方式、活标题「研究状态 · ⏳ 等你拍板」、
-   交付后 rerun 三分提示）；
+4. **观察面**：DSH Web GUI 右栏「研究状态」页签看实时动态（流程轨道 = ◆立项确认 + 立项→
+   组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付，↻ rerun 回路自交付审阅可见，人性化活动流，
+   HITL 挂起横幅点名锚点与参与方式，活标题「研究状态 · ⏳ 等你拍板」，交付节点带 final/ 版本）；
 5. **审计**（本仓开发面）：`node scripts/evidence-audit.mjs <bundle>` 对会话日志机械对账——
    URL 是否真被抓取过、摘录是否可回溯、final 溯源链是否完整 → `audit.md`。
 
