@@ -65,7 +65,7 @@ logged）——pack 行只引入**现成**能力，这项义务落在 vendor 面
 | 接线（roster、bundle 行、skills 隔离） | `DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs`（L1 真挂载） |
 | 安装形状（pack → 干净 profile → plugin add） | `node scripts/release-smoke.mjs`（L2） |
 | persona / skill 文本（模型可见） | 追加 `node scripts/l4-lite-smoke.mjs`（真模型档） |
-| docs / AGENTS / roadmap | 追加 `node scripts/entry-chain-probe.mjs`（真模型档） |
+| docs / AGENTS / queue | 追加 `node scripts/entry-chain-probe.mjs`（真模型档） |
 | 门禁本身 | 注入回归看红 → 还原 → 绿（反证记录进 `docs/evaluation.md`） |
 
 ## 交付与部署形态（本包怎么送到用户手里）

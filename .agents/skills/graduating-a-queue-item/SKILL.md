@@ -1,6 +1,6 @@
 ---
 name: graduating-a-queue-item
-description: Use when a roadmap queue item is delivered or abandoned and must leave the queue — moving its RFC from notes/proposed/ to notes/implemented/, rewriting the plan voice into shipped facts, deleting the roadmap line, and closing the gates.
+description: Use when a queue item is delivered or abandoned and must leave the queue — moving its RFC from notes/proposed/ to notes/implemented/, rewriting the plan voice into shipped facts, deleting the queue line, and closing the gates.
 ---
 
 # 毕业一个队列条目
@@ -32,7 +32,7 @@ description: Use when a roadmap queue item is delivered or abandoned and must le
 ## 3. 移动、删行、对账
 
 1. `git mv notes/proposed/<file>.md notes/implemented/<file>.md`；
-2. 删 roadmap §队列 的条目行；后续条目重编号；**▶ 指针必须恰好一个**（`entry-chain` 门禁）；
+2. 删 `_backlog/queue.md` §队列 的条目行；后续条目重编号；**▶ 指针必须恰好一个**（`entry-chain` 门禁）；
 3. 若条目引入或修改了机制：docs 合同面同 diff 更新（`docs/` 只写 now）；
 4. 全仓清扫指回旧路径的链接（`md-links` + `md-anchors` 门禁）；
 5. 条目产生的新事实（新坑、新机制）→ 新条目或事实进 Note，不入队列历史。
@@ -46,7 +46,7 @@ pnpm verify
 pnpm test
 ```
 
-改了 docs/AGENTS/roadmap → 追加 `node scripts/entry-chain-probe.mjs`（真模型档）。
+改了 docs/AGENTS/queue → 追加 `node scripts/entry-chain-probe.mjs`（真模型档）。
 
 全绿 + RFC 正文已改写 + 队列行已删 → 本条目毕业；commit 用窄证据切片，正文写清
 "条目离队 + 判据如何闭"。

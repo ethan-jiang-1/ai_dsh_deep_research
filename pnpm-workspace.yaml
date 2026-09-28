@@ -14,7 +14,7 @@ packages:
 
 # 组合/构建策略镜像 vendor/dsh/pnpm-workspace.yaml（路径改指 vendor 内，照抄
 # ai_dsh_company/pnpm-workspace.yaml——队列「vendor-submodule-and-pnpm-dsh」落地，D10 销账）；
-#   vendor 换 tag 时随升级环（roadmap 触发型条目「升 pin 重校」）同步 diff 这一段。
+#   vendor 换 tag 时随升级环（queue 触发型条目「升 pin 重校」）同步 diff 这一段。
 linkWorkspacePackages: true
 
 # cordis 强制链接为本仓实证新增（company 未写但它的历史 lock 已链接；本仓 2026-09-24

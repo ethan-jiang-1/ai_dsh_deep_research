@@ -16,7 +16,7 @@
 | 导航 | 本文件 | 地图 + 台账 | 活（每决策/每新文档更新） |
 | 合同 | [evaluation.md](./evaluation.md) | **验收怎么判**（五面） | 活（变更须 D 号） |
 | 设计 | `design/` | **为什么**：机制依据、方案取舍 | 稳定；被推翻时归档并记 D 号 |
-| 计划 | 根 `roadmap.md` | **接下来**：队列 | 被实现逐条吞掉（完成即离队） |
+| 计划 | 根 `_backlog/`（[queue.md](../_backlog/queue.md) + plans/） | **接下来**：队列 + 推敲 | 被实现逐条吞掉（完成即离队） |
 | 指南 | `guides/` | **怎么操作**：开发环 | 活（随操作方式演进） |
 
 ## 文档地图
@@ -31,7 +31,7 @@
 | [AGENTS.md](./AGENTS.md) | 指令 | **文档标准**（`docs/` 子树）：层级归属（一个事实一个家）/ 写作规则 / slop 清单 / 预算处置序——上游 `docs/AGENTS.md` 同构 |
 | [alignment-ledger.json](./alignment-ledger.json) | 合同 | **对齐台账（机读）**：vendor/dsh harness 源面逐项结论（adopted/adapted/na + 落点 + 理由；条数以台账 `sources` 数组为准）；门禁 `align-ledger` 对账（source 在 vendor 存在 / 落点存在 / na 有理由）——人读视图 = discipline-map 源 1–9 |
 | [discipline-map.md](./discipline-map.md) | 合同 | **纪律全量枚举**：vendor 逐源三态表（照搬/带证据适配/不适用+理由）——AGENTS §纪律的正本（随 vendor 换 tag 重校） |
-| [根 roadmap.md](../roadmap.md) | 计划 | 队列（条目按主题命名、完成即离队）+ 搁置池 |
+| [_backlog/](../_backlog/README.md)（[queue.md](../_backlog/queue.md)） | 计划 | 队列（条目按主题命名、完成即离队）+ 搁置池 + 推敲卡 |
 | [guides/60-dev-loop.md](./guides/60-dev-loop.md) | 指南 | 开发环：六步闭环、面选择表、双 home、密钥 |
 | [guides/61-run-playbook.md](./guides/61-run-playbook.md) | 指南 | **run 操作指南**（研究发起人入口）：boot-run、lead 会话、HITL 两点、观察面——run 通道（research profile：本包 + vendor agent-team-profile 层，P1 定案）的使用面 |
 | [guides/62-plugin-authoring.md](./guides/62-plugin-authoring.md) | 指南 | **插件作者入口**（改插件内容的人/agent 入口）：DSH 词汇对齐（plugin/bundle/profile/preset）、参与阶梯 L0–L3、新行为归属、范本与证据义务、**交付与部署形态**（bundle/profile 拓扑 + 工作区种子 + 部署 bin）、**改动影响面**（添/换/删要一起动什么）——上游 `docs/user/develop/**` 的本仓投影 |
@@ -55,14 +55,16 @@
 | D8 | **迭代单位 = 垂直轮 + 八成把握先行**：最薄全路径先行 → 逐轮加宽；不追求一次想透 | 用户指令（迭代纠错优先于完美规划）；company D11 |
 | D9 | **web 工具行（已实证）**：模型面 `tool-web` 行随 preset（config 照抄 base：`fetch: true` = 注册 `web_fetch` 的布尔开关，`searchTimeoutMs: 60000` = 搜索预算；`fetchTimeoutMs` 本仓不设、走 vendor schema 默认 30000 ms——字段语义正本 = vendor `packages/web/tool-web/README.md`）；providers（web seam / web-search-deepseek / web-fetch-http）是 base host 面出厂行，不进本包 bundle 也不随 preset；DeepSeek 搜索 `apiKeyEnv: DEEPSEEK_API_KEY` 与 chat 同钥匙 | [10 §4](./design/10-architecture.md)；[web-tool-rows 毕业 Note](../notes/implemented/2026-09-24-web-tool-rows.md) |
 | D10 | **vendor submodule = 机制权威**：本仓 `vendor/dsh/` pinned submodule（只读铁律；tag 与钉 commit 正本 = [AGENTS.md §DSH 源码表](../AGENTS.md)）；机制核对与验证会话一律走它，全局安装不作机制依据；verify 门禁 `vendor-pin`/`vendor-clean` 把守 | [evaluation.md §L0](./evaluation.md#l0-结构面机械门禁keyless)；[10 §1](./design/10-architecture.md) |
-| D11 | **队列制 roadmap**：纯队列——条目按主题命名（feature/卫生/研究三型）、完成即离队（历史归 notes/ + git）；▶ = 全仓唯一"当前"指针 | 用户指令；inround-task-surface 精神；[根 roadmap 头注](../roadmap.md) |
+| D11 | **队列制**：纯队列——条目按主题命名（feature/卫生/研究三型）、完成即离队（历史归 notes/ + git）；▶ = 全仓唯一"当前"指针（指针的家 2026-09-28 迁 [_backlog/queue.md](../_backlog/queue.md)，D20） | 用户指令；inround-task-surface 精神；[queue.md 头注](../_backlog/queue.md) |
 | D12 | **队列与 RFC 分家**：队列行只做有序索引（每行 ≤3 行）；条目全文（问题/方案/输掉的方案/验收）住 notes/proposed/ 一文件一条目；毕业 = 迁 implemented/ + 删行 | 用户指令；[proposed/README.md](../notes/proposed/README.md) |
-| D13 | **status rots 拆除**：时变状态（当前条目/跑到哪了）不住 docs——docs 只写 now，全仓唯一"当前"指针 = roadmap ▶ | 用户指令（[intents 第 6 条](../notes/intents.md)）；[evaluation.md §3 尾注](./evaluation.md) |
+| D13 | **status rots 拆除**：时变状态（当前条目/跑到哪了）不住 docs——docs 只写 now，全仓唯一"当前"指针 = 队列 ▶（家 = [_backlog/queue.md](../_backlog/queue.md)，D20） | 用户指令（[intents 第 6 条](../notes/intents.md)）；[evaluation.md §3 尾注](./evaluation.md) |
 | D14 | **preset-smoke 双通道**：源码域（web 出厂 profile + overlay 指向本仓 presets 源码，迭代快）+ 安装域（`--profile <p> --no-patch` 走 plugin add 正式路径）；断言同构（roster/逐角色 create/skills 隔离），L1 用前者、L2 用后者；boot 必须起自 company 钉 tag 源码（tsx 解析树），overlay/roots 用绝对路径 | [L1/L2 绿灯 Note](../notes/implemented/2026-09-24-l1-l2-green.md) |
 | D15 | **release-smoke 形状**：照 company release.md 五步（pack → 干净 profile 先删后建 → `plugin --profile add file:` → manifest 断言 → 安装域冒烟）；工具态（npm cache/pnpm store）全重定向进 repo gitignored 区；peers 是声明语义（安装锚兜底解析，非安装要求） | 同上 |
 | D16 | **团队组合归 vendor agent-team-profile 层**（P1 A 定案）：run 通道 profile 装 `@…-agent-team-profile@<pin>`（版本从 pack 兼容矩阵同源派生，`dev/boot-run.sh` 执行）；本包 bundle 撤 agent-team / tool-agent-team 两行（同行 id 双 insert = 重复行，实证）；ui-agent-team 观察行留本包；三 preset 的 tool-subagent 声明 **one-shot** 对齐 company D18（差分实验实证 preset 行覆盖 profile 行——不对齐则层禁令被自家声明抵消；D3 原文"one-shot subagent"的漂移顺带修复） | [P1 毕业 Note](../notes/implemented/2026-09-24-m2-p1-run-channel.md)；[10 §2/§3](./design/10-architecture.md)；[61 指南](./guides/61-run-playbook.md) |
 | D17 | **harness / run bundle 分离**（`研究报告 = harness(bundle)`）：harness（pack+手册+templates+docs/notes）只读、零 per-run 状态、run 期间零写入；run bundle = `research-workspace/drt_<slug>/`（一调研一 bundle，drt = Deep Research Topic，目录名即方向），持全部变量（判定式：恢复这次研究所需）；**位置=状态**——在飞住工作区根，交付后由操作侧移入 `research-workspace/archive/`（2026-09-27）；rerun 三分（表述修订 polish 版本不变 / 证据扩张 final/ 下一版 / 结构性另起新 bundle+sibling 预检）；框架文档不出现具体题目 | 用户拍板（2026-09-24，源头 DEEP_RESEARCH_HARNESS 概念比对后定）；[10 §1 第一性分层](./design/10-architecture.md)；[Note](../notes/implemented/2026-09-24-run-bundle-drt-separation.md)；[研究手册](../research-workspace/AGENTS.md)（归档约定正本） |
 | D18 | **观察面 client 面 = D7 的单点例外，套件名 = 研究驾驶舱（Research Cockpit，2026-09-28 用户拍板）**：例外范围 = 两个插件（`src/client/` client 半 + `src/index.ts` host 半空壳宿主位）+ `src/lib/` 折算纯函数；双半 tsdown 产物 `lib/client.js` + `lib/index.js`，用途限定 = 研究观察/调试；品牌/皮肤面不因此解禁（仍搁置池）。构成的当前事实正本 = [design/40](./design/40-research-cockpit.md) | 用户明确需求（run 期观察分散四处 + HITL 等待不可见实证）+ [琢磨稿](../notes/archived/2026-09-24-ui-observability-surfaces.md)（机制考古，已归档）+ company 同款生长序 + [observability-gui RFC](../notes/implemented/2026-09-24-observability-gui.md)（2026-09-25 马拉松 Stage 0） |
+| D19 | **推敲空间 = 根目录 `_backlog/`**（plans/bugs/_done 全三件；借鉴链 = deerflow → company D31 → 本仓）：决策前四问（该不该做/何时/次序/是否放弃）的家——只载判断材料，**不载次序与授权**（次序唯一 = [_backlog/queue.md](../_backlog/queue.md) §队列，同日 D20 修订——规划面单一化；授权唯一 = guides/60；推敲卡不是任务）；plans 卡 `YYMMDD-<slug>`（本仓裁定——归档日期流可读，company 原样纯 slug）；毕业四门产出**判断**不开工；门禁 = `plans-liveness` | 用户直派（2026-09-28，裁定：根目录 / 全三件 / 走正门 + 命名裁定）；[Note](../notes/implemented/2026-09-28-backlog-deliberation-space.md)；规矩手册 = [_backlog/README.md](../_backlog/README.md) |
+| D20 | **规划面单一化：roadmap.md 退役**（2026-09-28 用户裁决——先问「有了 _backlog 是否还需要 roadmap」，代理反证倾向保留，用户裁断退役；反证论据随推敲卡永久归档）：队列 + 搁置池迁 [_backlog/queue.md](../_backlog/queue.md)（纯索引，零判断材料），推敲（plans/）与次序（queue.md）一个家分半区；入口链第 3 步、`proposal-scheduled` / `queue-pointer-live` / `entry-chain` 三门禁、`entry-chain-probe` 真值锚同 diff 改锚 | 用户裁决；推敲证据 = [_done/_closed_plans/260928-retire-roadmap](../_backlog/_done/_closed_plans/260928-retire-roadmap.md)（首张立卡当日毕业的推敲卡）；[Note](../notes/implemented/2026-09-28-backlog-deliberation-space.md) |
 
 ### 待定（阻塞项标 ⛔）
 
@@ -96,7 +98,7 @@ notes/ 文件）。
 | 材料（钉版身份） | 内容 | 吸收落点 |
 |---|---|---|
 | `/Users/bowhead/ai_tool_deepresearch/` @ `24ba84636` | 11-phase 生命周期 / wave 语义 / gate 体系 / 证据四层 / 反伪造教训 | [考古报告](../notes/implemented/2026-09-24-deep-research-harness-analysis.md) → 映射表 design/30 |
-| `/Users/bowhead/ai_dsh_company/` @ `555215d` | 包结构 / patch 语法 / preset 教义 / verify 门禁 / 双 home / 垂直轮 | [解剖报告](../notes/implemented/2026-09-24-dsh-plugin-repo-anatomy.md) → design/10 + scripts/verify.mjs + dev/env.sh |
+| `/Users/bowhead/ai_dsh_company/` @ `3cfa8f1` | 包结构 / patch 语法 / preset 教义 / verify 门禁 / 双 home / 垂直轮 / `_backlog` 推敲空间（D31） | [解剖报告](../notes/implemented/2026-09-24-dsh-plugin-repo-anatomy.md) → design/10 + scripts/verify.mjs + dev/env.sh；推敲空间借入 → 根 `_backlog/` + 门禁 `plans-liveness`（D19，同日 D20 规划面单一化） |
 | DSH 插件生态（vendor 能力目录差集 + 第三方市场/清单；2026-09-25 认真版） | 直接竞品 8 个；**我们差异化 = 多角色 + 证据审计 + Teams = 空白位**（搜索/学术/知识库已饱和不扩） | 认真报告 [dsh-plugin-ecosystem](../notes/implemented/2026-09-25-dsh-plugin-ecosystem.md)（已毕业）；粗扫种子见 [dsh-market-scout](../notes/archived/2026-09-24-dsh-market-scout.md)（冻结）→ 落点即该认真报告 |
 | DSH client/UI 扩展面（vendor slots/client-modules/hmr/remotes 正文档 + company client-face 五页签实例，2026-09-24 亲读+双代理考古） | 右栏平台页签契约（sidebarRightTabs + sidebar.right.pane.tab 双半注册）/ 数据通道（agentTeams.view·session.follow·workspaceFiles·@Remote）/ 双半 tsdown 构建契约 / 12 坑 | [琢磨稿](../notes/archived/2026-09-24-ui-observability-surfaces.md)（选项 A–D + 渐进路径 + D7/搁置池张力，已归档）——已落地为观察面 client 面（D18，构成正本 = [design/40](./design/40-research-cockpit.md)）：RFC = [observability-gui](../notes/implemented/2026-09-24-observability-gui.md) |
 | DSH SDLC reference（`/Users/bowhead/deepseek-harness/_agent_ready_development/sdlc-reference/` @ `efdba905b2`，2026-09-24 亲读 01-agent-note-lifecycle） | Agent Note 生命周期：决定覆盖（非提案优先）/ 取代检查硬触发 / 毕业正文改写 / alternatives 必载 / grandfather 条款 / 目录树代替索引 | [notes/README.md §决定覆盖与取代检查](../notes/README.md) + verify 门禁 note-format + [吸纳 Note](../notes/implemented/2026-09-24-note-lifecycle-absorption.md) |

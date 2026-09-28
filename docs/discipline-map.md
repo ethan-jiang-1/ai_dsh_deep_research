@@ -41,14 +41,14 @@
 | Prefer the real implementation over a mock | L1 真挂载档（真会话断言工具/skill 面——dump/roster 可见不算） | 照搬 |
 | The with-key policy: inference is cheap（语义面用真模型证） | 真模型档脚本（清单正本 = AGENTS §密钥）；入口链探针 = 语义漂移的真模型检测 | 照搬 |
 | Test resolution: source plane only | keyless 回归断言 tracked 源文件（md-utf8-newline 改 git ls-files 驱动即为此则——运行区不扫，live run 实证） | 带证据适配 |
-| Snapshot tests（关键用户可见变更更新录制快照） | 无录制快照树；等价物 = tests/fixtures（keyless 形状回归）+ 真模型档会话日志断言（zstd 逐事件）+ `client-load-smoke` 真浏览器断言（client 面可见性）；录制通道在搁置池（复活条件见 roadmap 行） | 带证据适配 |
+| Snapshot tests（关键用户可见变更更新录制快照） | 无录制快照树；等价物 = tests/fixtures（keyless 形状回归）+ 真模型档会话日志断言（zstd 逐事件）+ `client-load-smoke` 真浏览器断言（client 面可见性）；录制通道在搁置池（复活条件见 [_backlog/queue.md](../_backlog/queue.md) 行） | 带证据适配 |
 | Test subprocess launch modes（构建产物/源码启动模式分立） | 本仓不设双启动模式：冒烟子进程一律走 tsx 源码通道（`node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts`）；构建产物另有在场断言（`lib/client.js` 经 exports["./client"] 由 `client-load-smoke` 加载，缺件由 `vendor-artifacts` 自检拦） | 不适用 |
 
 ## 源 3：vendor docs/AGENTS.md（文档标准）
 
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
-| Tier 分类法：一处事实一个家（docs 只写 now） | 00-index 组织原则；docs/notes/roadmap 三层分工 | 照搬 |
+| Tier 分类法：一处事实一个家（docs 只写 now） | 00-index 组织原则；docs/notes/_backlog 三层分工 | 照搬 |
 | Wordcount budgets（入口文件行数顶） | verify 门禁 `doc-budgets`（AGENTS ≤140 / README ≤30——vendor verify-doc-budgets 裁剪版；上限正本 = [scripts/doc-budgets.json](../scripts/doc-budgets.json)；超顶处置序 = 下放>压缩>升顶须同变更登记理由） | 带证据适配 |
 | Cross-reference with machine-checkable links, never free prose | md-links 门禁（方括号+圆括号语法全 tracked md）+ entry-chain 门禁（反引号指针盲区补齐） | 带证据适配（反引号裸路径不检 = 已知盲区，entry-chain 探针语义面兜底） |
 | Slop checklist（文档废话清单） | 行文规范沿袭（定性吸收，未机械化） | 带证据适配 |
@@ -175,7 +175,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | `benchmarks/` · `native/` · `python/` · `patches/` · `apps/` | 不适用：本仓无这些发布 lane 与运行时面 |
 | `CONTRIBUTING.md` · `SAFETY.md` · `SECURITY` · `THIRD_PARTY_NOTICES.md` · `BRAND_GUIDELINES.md` | 不适用：无外部贡献流、无运行时安全授权面、无捆绑第三方代码、无品牌资产 |
 | `.editorconfig` · `.gitattributes` · lint（oxlint）· 重复代码检测（jscpd）· vitest 系列配置 · `lefthook.yml` | 前两件已具备（`repo-conventions` 门禁强制与 vendor 对齐）；后四件未引入（TS 面 = 一个包的 `src/`，测试栈 = node:test）；Markdown 纪律由门禁（md-utf8-newline / md-links / md-anchors / doc-budgets）承担，git 钩子 = `dev/hooks/pre-commit` |
-| `LICENSE` | **未决（非遗漏）**：本仓 `private: true` 未分发；已进 [roadmap 搁置池](../roadmap.md)，复活条件 = 对外分发前定许可证 |
+| `LICENSE` | **未决（非遗漏）**：本仓 `private: true` 未分发；已进 [_backlog/queue.md 搁置池](../_backlog/queue.md)，复活条件 = 对外分发前定许可证 |
 
 ## 重审触发路径
 
@@ -196,7 +196,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 
 ## 维护规则
 
-- 本表随 vendor 换 tag 重校（roadmap 触发型条目「升 pin 重校」）；新增三态行同 diff 落
+- 本表随 vendor 换 tag 重校（queue 触发型条目「升 pin 重校」）；新增三态行同 diff 落
   本表，不在 AGENTS.md 复制（一处事实一个家）；
 - 每轮重校的**重审命中与逐条结论**写进该轮「升 pin 重校」条目的毕业 Note（本表不建维护页、
   不带版本变更史）——历次结论见 [升 pin 重校毕业 Note](../notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md#升-pin-复核结论2026-09-25-毕业)。

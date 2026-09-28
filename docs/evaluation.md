@@ -2,7 +2,7 @@
 
 > 性质：**合同**（评估怎么判，只写 now）。改评估标准本身 = 一个 D 号决策，进
 > `notes/`，不悄悄改；时变状态（哪个面跑到哪了）不住本文件，唯一"当前"指针 =
-> `roadmap.md`（根）§队列 ▶ 条目。
+> [_backlog/queue.md](../_backlog/queue.md) §队列 ▶ 条目。
 
 ## 0. 血缘与权威
 
@@ -43,11 +43,11 @@
 | `dev-skill-format` | `.agents/skills/*/SKILL.md` 在场 + frontmatter `name` = 目录名 + `description` 以 "Use " 开头（vendor 开发 Skill 约定；形状坏了 = 技能静默不触发，比写错正文更难发现） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（写错 name / 去掉 Use 前缀红→还原绿） |
 | `vendor-pin` | vendor/dsh submodule 在位：.gitmodules 正源 URL + 钉 commit `477b4f4205`（tag dsh-v0.1.7-rc.2）——D10 销账的机械面，机制权威自持 | vendor-submodule 毕业 Note（submodule 钉错 commit 注入红 → 还原绿） |
 | `vendor-clean` | vendor/dsh 只读铁律：`git status --porcelain` 零未提交改动——机制权威不许就地改 | vendor-submodule 毕业 Note（touch 注入红 → checkout 还原绿） |
-| `proposal-scheduled` | notes/proposed/ 每提案文件在 roadmap **§队列或 §搁置池**有归宿（孤儿提案红）。2026-09-27 起搁置池条目全文住 notes/rejected/（带重启条件，池行直链），proposed/ 正常只收队列条目；§搁置池分支保留为防御性兼容 | review-driven-hardening Note（收紧注入红→绿）+ 2026-09-25 放宽第二归宿面（孤儿注入红→还原绿） |
+| `proposal-scheduled` | notes/proposed/ 每提案文件在 [_backlog/queue.md](../_backlog/queue.md) **§队列或 §搁置池**有归宿（孤儿提案红）。2026-09-27 起搁置池条目全文住 notes/rejected/（带重启条件，池行直链），proposed/ 正常只收队列条目；§搁置池分支保留为防御性兼容 | review-driven-hardening Note（收紧注入红→绿）+ 2026-09-25 放宽第二归宿面（孤儿注入红→还原绿） |
 | `secrets-untracked` | tracked 清单零敏感/残留物（credentials/.env/.pem/.tgz/.log/…） | [入口链审计](../notes/implemented/2026-09-24-entry-chain-fresh-agent-audit.md)（.pem 注入红→还原绿） |
 | `role-list-sync` | 角色清单单一事实源 = 盘上 presets/；代码（scripts/tests/dev 的 .mjs/.sh）里角色清单字面量（单行 ≥3 角色名 / `[...]` 块 ≥3 角色名字符串）即红——检测名从盘上现取 | 基础整治 Note（JS 单行数组/多行数组块/bash for-in 三形态注入红→还原绿） |
 | `gate-ledger-sync` | 本表门禁名集合 = verify 脚本 gates 数组（登记与实现不漂移） | 基础整治 Note（表删行/数组加假名红→还原绿） |
-| `entry-chain` | 入口链存在性投影：成员文件在场（AGENTS/00-index/roadmap/proposed//guides60/evaluation/design10-30/guides61）+ roadmap §队列 恰一个 ▶（D11 唯一"当前"指针；链接解析归 md-links，此处补反引号指针与 ▶ 唯一性两个盲区）；**parked 态**（2026-09-28 首次清空）：零 ▶ + `（队列空——待用户取题）` 标记 + 零编号条目 = 合法，标记与 ▶/编号条目并存 = 矛盾红 | review-driven-hardening Note（成员缺席/▶ 删除/▶ 复制三形态注入红→还原绿）；parked 红→绿 = 2026-09-28 队列清空实录（三门禁天然红 → parked 语义落地绿，见 [human-gate-acceptance](../notes/implemented/2026-09-26-human-gate-acceptance.md)） |
+| `entry-chain` | 入口链存在性投影：成员文件在场（AGENTS/00-index/_backlog/queue.md/proposed//guides60/evaluation/design10-30/guides61）+ queue.md §队列 恰一个 ▶（D11 唯一"当前"指针；链接解析归 md-links，此处补反引号指针与 ▶ 唯一性两个盲区）；**parked 态**（2026-09-28 首次清空）：零 ▶ + `（队列空——待用户取题）` 标记 + 零编号条目 = 合法，标记与 ▶/编号条目并存 = 矛盾红 | review-driven-hardening Note（成员缺席/▶ 删除/▶ 复制三形态注入红→还原绿）；parked 红→绿 = 2026-09-28 队列清空实录（三门禁天然红 → parked 语义落地绿，见 [human-gate-acceptance](../notes/implemented/2026-09-26-human-gate-acceptance.md)） |
 | `doc-budgets` | 常驻文档预算：`scripts/doc-budgets.json` 拥有上限（登记项必须存在且不超限；仓内新增 AGENTS.md 必须登记——缺登记即红）。行数度量（CJK 词数不可靠，等价上游 verify-doc-budgets 的词数预算）；超限处置序 = 下放 > 压缩 > 升顶（升顶须同变更登记理由） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（超限/缺登记两形态注入红→还原绿） |
 | `align-ledger` | 对齐台账机读对账（docs/alignment-ledger.json ↔ vendor/dsh ↔ 本仓落点）：source 必须在 vendor/dsh 存在（换 pin 后源移位即红 = 重审触发器）· verdict=adopted/adapted 的 landing 必须存在 · na 必须给理由 | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（注入不存在 source / 不存在落点 / na 无理由三形态红→还原绿） |
 | `repo-conventions` | 与 vendor 本体的机械约定对齐：`.editorconfig`（root/LF/尾换行）· `.gitattributes`（`* text=auto eol=lf`）· `package.json engines.node` **直接等于** vendor/dsh/package.json 的值（换 pin 即红）· pre-commit 含 `git diff --cached --check` | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（改 engines / 删 gitattributes / 删 whitespace 检查三形态注入红→还原绿） |
@@ -60,6 +60,7 @@
 | `pin-agreement` | live 文件里的**钉身份复述**必须与 submodule 实际状态一致：每个 40 位 hex 串 = submodule HEAD；每个 `dsh-v*` tag = submodule tag（唯一例外：同行带外部归属标记「语料/参考仓/company/外部材料」的，是别的仓的 pin）。防空语料：0 个 hex 或 0 个 tag 被检查即红 | [信噪比整治 RFC](../notes/implemented/2026-09-26-signal-to-noise-remediation.md) §实施记录（实测三处曾写错：env.sh 的 tag、design/10 的层版本、alignment-ledger 的 commit；反证 = 改一处 hex → 红 → 还原绿） |
 | `count-free` | live 文件不写硬编码计数（`<数> 门禁` / `<数> tests` / `<数> 断言` / `<数> 条源面`）——计数有正本（gates 数组 / 本表 §L0 / `ls`），散文副本必腐。防空语料：0 个 live 文件即红 | [信噪比整治 RFC](../notes/implemented/2026-09-26-signal-to-noise-remediation.md) §实施记录（首跑即咬红**本门禁自己的注释**——它照抄了那几个历史数字，即它有效的第一份证据；反证 = 写回计数 → 红 → 还原绿） |
 | `doc-now-only` | live 文档只写 now，不写变更史：禁「已销账 / 修订 → / 曾用 / 首版…已由…替换」（`docs/AGENTS.md` 自身豁免——它是这条规则的家，必须能举例禁用词）。防空语料：0 个 live 文档即红 | [信噪比整治 RFC](../notes/implemented/2026-09-26-signal-to-noise-remediation.md) §实施记录（清扫实测 live 文档成片出现这四类措辞；反证 = 注入「已销账」→ 红 → 还原绿） |
+| `plans-liveness` | `_backlog/plans/` 每张活跃推敲卡（tracked .md，非 README）：① 文件名 = `YYMMDD-<slug>.md`（立卡日期编码——归档 `git mv` 文件名不变，日期流在归档侧可读）；② 首部 12 行内有「状态：…毕业门判断 = <值>」户口行。层契约：`plans/README.md` 缺席 = 红；0 卡 = 合法空态（note 声明——company 同款空转） | [backlog-deliberation-space](../notes/implemented/2026-09-28-backlog-deliberation-space.md)（无户口行卡注入 → 红 → 补行绿；错名卡 `260928_Bad Name.md` → 红 → 还原绿；untracked 注入不可见 = `git ls-files` 索引面，staged 后兜住——同 md-links 边界） |
 
 - **通过判据**：全绿；`verify` 的门禁清单与 `tests/` 守卫一一登记在案，每条带反证记录（上表）。
 - **何时跑**：每轮 goal 续驶必跑。
@@ -115,7 +116,8 @@
 | M2 首次完整研究 run | ✓ | 改动则跑 | 改动则跑 | ✓ | **全量** |
 | M3+ 打磨/回归固化 | ✓ | 改动则跑 | 改动则跑 | 改动则跑 | 按需 |
 
-当前处于哪个里程碑 = `roadmap.md`（根）§队列的 ▶ 条目（唯一"当前"指针；本表只定义
+当前处于哪个里程碑 = [_backlog/queue.md](../_backlog/queue.md) §队列的 ▶ 条目（唯一"当前"指
+针；本表只定义
 里程碑的验收形状，不携带时变状态——status rots）。
 
 ## 4. 每轮 goal 续驶的判定程序
@@ -127,4 +129,4 @@
 
 ## 5. 已知边界（诚实记账）
 
-- L1/L2/L4 需要真 DSH 环境与（L4）`DEEPSEEK_API_KEY`；环境未就绪时该面标"未跑"，**不等同通过**（已 green 面的证据 = 各面定义里的毕业 Note 引用；未闭面的当前状态 = roadmap ▶，"未跑"≠"通过"）。
+- L1/L2/L4 需要真 DSH 环境与（L4）`DEEPSEEK_API_KEY`；环境未就绪时该面标"未跑"，**不等同通过**（已 green 面的证据 = 各面定义里的毕业 Note 引用；未闭面的当前状态 = queue ▶，"未跑"≠"通过"）。

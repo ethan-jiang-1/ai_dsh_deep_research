@@ -8,16 +8,17 @@
 
 | 时态 | 问什么 | 唯一入口 | 状态怎么标 |
 |---|---|---|---|
-| **将来** | 接下来做什么 | [roadmap.md §队列 ▶](../roadmap.md)（全仓唯一"当前"指针 + 排队条目 + 搁置池） | 队列行序号；▶ = 当前条目 |
+| **将来** | 接下来做什么 | [_backlog/queue.md §队列 ▶](../_backlog/queue.md)（全仓唯一"当前"指针 + 排队条目 + 搁置池） | 队列行序号；▶ = 当前条目 |
 | **将来（已开工的设计）** | 这个条目打算怎么做 | [`proposed/`](proposed/README.md) 的 RFC 全文 | RFC 头部状态行 `proposed / approved / superseded` |
 | **过去（已交付）** | 当初为什么这么决定、放弃了什么 | [`implemented/`](implemented/README.md) | 目录即状态（文件名 = 首提日期 + 主题） |
 | **过去（否决与事故）** | 哪些路别再走、哪些坑踩过 | [`rejected/`](rejected/README.md) · [`postmortem/`](postmortem/README.md) | 目录即状态（rejected 另有结论状态行） |
 | **过去（冻结）** | 不再指导当前工作的已交付决定去哪了 | [`archived/`](archived/README.md) | 目录即状态 + 文件内 `> 归档：<日期>` 行（冻结快照，正文永不改） |
 | **始终** | 这个项目为什么起、用户下过哪些方向 | [`intents.md`](intents.md) | 追加式，不删 |
 
-**`proposed/` = 在飞队列条目的规划面**：只有 roadmap §队列条目的 RFC 住这里（一文件一条目）。
+**`proposed/` = 在飞队列条目的规划面**：只有 [_backlog/queue.md](../_backlog/queue.md) §队列
+条目的 RFC 住这里（一文件一条目）。
 2026-09-27 用户定调：**搁置即"决定不做"**——搁置条目全文住 [rejected/](rejected/README.md)
-并带重启条件，搁置池行直接链它，`proposed/` 不再收搁置条目。下一步看 roadmap ▶，不是看这个
+并带重启条件，搁置池行直接链它，`proposed/` 不再收搁置条目。下一步看 queue ▶，不是看这个
 目录。同理，`implemented/` 远厚于队列，也不表示积压：过去的决定层本来就比队列厚。
 
 ## 为什么内部按生命周期分，不按时间分
@@ -33,7 +34,7 @@
 | 路径 | 放什么 | 进门条件 | 出门 |
 |---|---|---|---|
 | `intents.md` | 初始意图与用户指令存档（为什么起这个项目、原话要点） | 立项/用户给新方向时追加 | 追加式，不删 |
-| `proposed/` | **在飞队列条目的 RFC 全文**（一文件一条目：问题/方案/输掉的方案/验收判据） | roadmap §队列须有对应条目（verify 门禁 `proposal-scheduled` 强制） | 队列条目收尾 → 迁 `implemented/`；不再做的条目 → 否决迁 `rejected/`（搁置池行链 rejected/ 文件） |
+| `proposed/` | **在飞队列条目的 RFC 全文**（一文件一条目：问题/方案/输掉的方案/验收判据） | [_backlog/queue.md](../_backlog/queue.md) §队列须有对应条目（verify 门禁 `proposal-scheduled` 强制） | 队列条目收尾 → 迁 `implemented/`；不再做的条目 → 否决迁 `rejected/`（搁置池行链 rejected/ 文件） |
 | `implemented/` | 已落地的决定记录（决定/输掉的方案/实际跑过的验证/环境状态） | RFC 毕业，或用户直派任务的交付（**不必从 proposed/ 起步**） | **活的**：事实随实现维护；逆转另写新 Note 互链 |
 | `rejected/` | 被否决的方案——**只保留仍能阻止一次诱人重犯的** | 方案被否决且理由有未来价值 | 不再有防复犯价值 → 直接删（不留空壳） |
 | `postmortem/` | 事故复盘（事故叙事的唯一合法层） | 出现值得记的事故 | 事实澄清后仍留（历史记录） |
@@ -41,6 +42,11 @@
 | ~~`research/`~~ | （2026-09-27 清并：五篇调研报告全部完成且落点已落地，**并入 [`implemented/`](implemented/)** 带 grandfather 标注——位置=状态，防误读为待开展课题） | — | — |
 
 细则见各子目录 README（每个子目录都有 README，`note-status` 门禁强制在场）。
+
+**规划面在树外**：根目录 [_backlog/](../_backlog/README.md) = 唯一规划面（2026-09-28 用户
+裁决 roadmap.md 退役，D20）——推敲半区 [plans/](../_backlog/plans/README.md) 卡毕业**不重写
+正文**，与 Note 毕业 = 正文改写方向相反，故不入本时态地图；次序半区 =
+[queue.md](../_backlog/queue.md)（纯索引）。推敲卡不是任务，fresh agent 开工照旧只看 queue ▶。
 
 ## 决定覆盖与取代检查（DSH SDLC reference 01 吸纳，2026-09-24）
 

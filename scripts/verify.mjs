@@ -3,7 +3,7 @@
 // 门禁登记表（正本）：docs/evaluation.md §L0——与本脚本 gates 数组经门禁 gate-ledger-sync
 // 机械对账（登记与实现漂移即红）；每条门禁的反证记录 = 表末列所指 notes/。
 // 移植自 ai_dsh_company/scripts/verify.mjs（按当前规模裁剪；vendor-pin/client-half/proposal
-// 全量版随对应能力落地启用，见根 roadmap.md）。
+// 全量版随对应能力落地启用，见根 _backlog/queue.md）。
 
 import { spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync, existsSync, lstatSync, readlinkSync, statSync } from 'node:fs';
@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'pack-workspace-fresh', 'queue-pointer-live', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'pack-workspace-fresh', 'queue-pointer-live', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'plans-liveness'];
 
 const failures = [];
 const notes = [];
@@ -33,10 +33,11 @@ function walk(dir, out = []) {
 }
 const allFiles = walk(ROOT);
 
-// roadmap §队列 节切片（proposal-scheduled 与 entry-chain 共用：归宿/当前指针只认队列节，
-// 搁置池与头注不算）。文件缺席或节缺席 → null（fail 由调用侧出，报因按语境）。
-function roadmapQueue() {
-  const p = join(ROOT, 'roadmap.md');
+// _backlog/queue.md §队列 节切片（proposal-scheduled 与 entry-chain 共用：归宿/当前指针只认
+// 队列节，搁置池与头注不算）。文件缺席或节缺席 → null（fail 由调用侧出，报因按语境）。
+// 2026-09-28 规划面单一化（D20）：队列自 roadmap.md 迁 _backlog/queue.md，函数名保留。
+function queueSection() {
+  const p = join(ROOT, '_backlog', 'queue.md');
   if (!existsSync(p)) return null;
   const lines = readFileSync(p, 'utf8').split('\n');
   const s = lines.findIndex((l) => /^## 队列/.test(l));
@@ -49,7 +50,7 @@ function roadmapQueue() {
   return out.join('\n');
 }
 
-// roadmap §搁置池 节切片（proposal-scheduled 的第二归宿面——防御性兼容：2026-09-27 起搁置
+// queue.md §搁置池 节切片（proposal-scheduled 的第二归宿面——防御性兼容：2026-09-27 起搁置
 // 条目全文住 notes/rejected/（搁置即"决定不做"，池行直链 rejected 文件），proposed/ 只收
 // 在飞队列条目；本分支保留，防语义误挂时静默。▶ 当前指针只认队列节）。
 
@@ -57,8 +58,8 @@ function roadmapQueue() {
  *  parked 合法形态 = 标记行在场 + 零 ▶ + 零编号条目；标记与 ▶/编号条目并存 = 矛盾态，红。 */
 const QUEUE_PARKED = '（队列空——待用户取题）';
 const queueParkedState = (queue) => queue.includes(QUEUE_PARKED) && !/^\d+\.\s/m.test(queue);
-function roadmapParked() {
-  const p = join(ROOT, 'roadmap.md');
+function parkedSection() {
+  const p = join(ROOT, '_backlog', 'queue.md');
   if (!existsSync(p)) return null;
   const lines = readFileSync(p, 'utf8').split('\n');
   const s = lines.findIndex((l) => /^## 搁置池/.test(l));
@@ -324,23 +325,24 @@ function roadmapParked() {
   else if (r.stdout.trim()) fail(gate, `vendor/dsh 有未提交改动（只读铁律）：${r.stdout.trim().split('\n')[0]}…`);
 }
 
-// ── 门禁 15：proposal-scheduled（proposed/ 每提案必须在 roadmap §队列 **或 §搁置池** 有
+// ── 门禁 15：proposal-scheduled（proposed/ 每提案必须在 _backlog/queue.md §队列 **或 §搁置池** 有
 //    归宿——两处都不是的 RFC = 孤儿提案，红灯。2026-09-27 起搁置池条目全文住 notes/rejected/
 //    （带重启条件，池行直链），proposed/ 正常只收队列条目；§搁置池分支保留为防御性兼容。
+//    2026-09-28 规划面单一化（D20）：队列的家 = _backlog/queue.md。
 //    收紧记录：review-driven-hardening Note。）──
 {
   const gate = 'proposal-scheduled';
   const dir = join(ROOT, 'notes', 'proposed');
   if (existsSync(dir)) {
-    const queue = roadmapQueue();
-    const parked = roadmapParked() ?? '';
-    if (queue === null) fail(gate, 'roadmap §队列 不可读——proposed 的归宿只能登记在队列/搁置池节');
+    const queue = queueSection();
+    const parked = parkedSection() ?? '';
+    if (queue === null) fail(gate, 'queue.md §队列 不可读——proposed 的归宿只能登记在队列/搁置池节');
     else {
       for (const ent of readdirSync(dir)) {
         if (ent === 'README.md' || !ent.endsWith('.md')) continue;
         const stem = ent.replace(/\.md$/, '');
         if (!queue.includes(stem) && !parked.includes(stem))
-          fail(gate, `proposed/${ent} 在 roadmap §队列/§搁置池 均无归宿（孤儿提案——队列或池行须挂本 RFC 的链接）`);
+          fail(gate, `proposed/${ent} 在 queue.md §队列/§搁置池 均无归宿（孤儿提案——队列或池行须挂本 RFC 的链接）`);
       }
     }
   }
@@ -351,9 +353,9 @@ function roadmapParked() {
 // 把 ▶ 行的 RFC 链接改指 implemented/ 的文件 → 本门禁红 → 还原绿。
 {
   const gate = 'queue-pointer-live';
-  const queue = roadmapQueue();
+  const queue = queueSection();
   if (queue === null) {
-    fail(gate, 'roadmap §队列 不可读——▶ 指针无处可查');
+    fail(gate, 'queue.md §队列 不可读——▶ 指针无处可查');
   } else {
     const qLines = queue.split('\n');
     const pointerIdx = qLines.map((l, i) => (l.includes('▶') ? i : -1)).filter((i) => i !== -1);
@@ -370,7 +372,7 @@ function roadmapParked() {
         if (/^\d+\.\s/.test(qLines[i]) || /^##\s/.test(qLines[i]) || qLines[i].startsWith('（')) { end = i; break; }
       }
       const block = qLines.slice(pointerIdx[0], end).join('\n');
-      const refs = [...block.matchAll(/\]\(notes\/proposed\/([^)]+?)\.md\)/g)].map((m) => m[1]);
+      const refs = [...block.matchAll(/\]\((?:\.\.\/)?notes\/proposed\/([^)]+?)\.md\)/g)].map((m) => m[1]);
       if (refs.length === 0) {
         fail(gate, '队列 ▶ 行未挂 RFC 链接——当前条目必须有 notes/proposed/ 的 RFC 全文');
       }
@@ -414,7 +416,7 @@ function roadmapParked() {
           }
         }
       }
-      if (checked === 0 && !queueParkedState(roadmapQueue() ?? '')) {
+      if (checked === 0 && !queueParkedState(queueSection() ?? '')) {
         fail(gate, '防空语料：零个 notes/proposed/ 指针被检查——指针全没了或正则失效（例外：队列空 parked 态——在飞条目为零，零指针合法）');
       } else if (checked === 0) note(gate, '零指针（队列空 parked 态——合法）');
       else note(gate, `${checked} 个 live 指针全部可解析`);
@@ -603,11 +605,12 @@ function roadmapParked() {
 // ── 门禁 19：entry-chain（入口链存在性投影——正本 = 根 AGENTS.md §入口链）──
 // md-links 已机械覆盖全部 tracked .md 的链接解析；本门禁补它的盲区：① 入口链中以反引号/
 // 散文指针提到的成员文件（`docs/design/10-40` 等——md-links 不检非链接形态）必须在场；
-// ② roadmap §队列 恰一个 ▶（全仓唯一"当前"指针的存在性与唯一性，D11）。
+// ② queue.md §队列 恰一个 ▶（全仓唯一"当前"指针的存在性与唯一性，D11；2026-09-28 D20
+// 迁 _backlog/queue.md）。
 // 改入口链结构 = 同 diff 更新本清单（成员清单是入口链的存在性投影，非第二正本）。
 {
   const gate = 'entry-chain';
-  const members = ['AGENTS.md', 'docs/00-index.md', 'roadmap.md', 'notes/proposed',
+  const members = ['AGENTS.md', 'docs/00-index.md', '_backlog/queue.md', 'notes/proposed',
     'docs/guides/60-dev-loop.md', 'docs/evaluation.md', 'docs/design/10-architecture.md',
     'docs/design/20-roles.md', 'docs/design/30-methodology-mapping.md', 'docs/design/40-research-cockpit.md',
     'docs/guides/61-run-playbook.md',
@@ -618,15 +621,15 @@ function roadmapParked() {
   }
   if (existsSync(join(ROOT, 'AGENTS.md')) && !/^## 入口链/m.test(readFileSync(join(ROOT, 'AGENTS.md'), 'utf8')))
     fail(gate, 'AGENTS.md 缺 §入口链 标题——入口链定义的家');
-  const queue = roadmapQueue();
-  if (queue === null) fail(gate, 'roadmap §队列 不可读——入口链第 3 步（唯一"当前"指针）断链');
+  const queue = queueSection();
+  if (queue === null) fail(gate, 'queue.md §队列 不可读——入口链第 3 步（唯一"当前"指针）断链');
   else {
     const marks = (queue.match(/▶/g) ?? []).length;
     // parked 态（2026-09-28 首次清空）：零 ▶ + 标记在场 + 无编号条目 = 合法——"当前"指针
     // 停在"待用户取题"；标记与 ▶ 条目并存 = 矛盾态，红。
-    if (marks > 1) fail(gate, `roadmap §队列 有 ${marks} 个 ▶——"当前"指针必须唯一（D11）`);
-    else if (marks >= 1 && queue.includes(QUEUE_PARKED)) fail(gate, `roadmap §队列 parked 标记与 ▶ 条目并存——矛盾态（队列要么空要么有当前条目）`);
-    else if (marks === 0 && !queueParkedState(queue)) fail(gate, `roadmap §队列 无 ▶ 且非 parked 态——全仓唯一"当前"指针缺席（D11；队列空须以 ${QUEUE_PARKED} 行标注且不得残留编号条目）`);
+    if (marks > 1) fail(gate, `queue.md §队列 有 ${marks} 个 ▶——"当前"指针必须唯一（D11）`);
+    else if (marks >= 1 && queue.includes(QUEUE_PARKED)) fail(gate, `queue.md §队列 parked 标记与 ▶ 条目并存——矛盾态（队列要么空要么有当前条目）`);
+    else if (marks === 0 && !queueParkedState(queue)) fail(gate, `queue.md §队列 无 ▶ 且非 parked 态——全仓唯一"当前"指针缺席（D11；队列空须以 ${QUEUE_PARKED} 行标注且不得残留编号条目）`);
   }
 }
 
@@ -1053,6 +1056,44 @@ function roadmapParked() {
             fail(gate, `src/client/${f}: 描述符用的 ${m[1]} 不在 keys.ts 导出里`);
         }
       }
+    }
+  }
+}
+
+// ── 门禁 32：plans-liveness（_backlog/plans/ 推敲卡自带户口）──
+// 为什么：未完结思考稿缺状态行挂着不动 = 死稿（company D30 起因即此病；company D31 立
+// `_backlog/` 推敲空间时同款门禁随层落地，本仓借入——RFC = notes/proposed/2026-09-28-
+// backlog-deliberation-space.md，plans 卡文件名日期编码为本仓裁定）。断言：每张活跃卡
+// ① 文件名 = `YYMMDD-<slug>.md`（YYMMDD = 立卡日期——归档 git mv 文件名不变，日期流在
+// 归档侧可读）；② 首部 12 行内有「状态：…毕业门判断 = <值>」行（待定/该做/待触发/
+// 倾向放弃皆可，结构必须在——防挂死稿）。范围：git ls-files 驱动（tracked-only）。
+// 层契约：plans/README.md 缺席 = 红；0 张卡 = 合法空态（note 声明，company 同款空转）。
+// 反证：注入无状态行卡 → 红；错名卡 → 红；还原 → 绿（记录进毕业 Note）。
+{
+  const gate = 'plans-liveness';
+  const plansRel = '_backlog/plans';
+  const readme = join(ROOT, plansRel, 'README.md');
+  if (!existsSync(readme)) {
+    fail(gate, `${plansRel}/README.md 缺席——推敲空间的规矩手册必须在场（层契约）`);
+  } else {
+    const r = spawnSync('git', ['ls-files', `${plansRel}/`], { cwd: ROOT, encoding: 'utf8' });
+    if (r.status !== 0) {
+      fail(gate, `git ls-files 不可用（${String(r.stderr).slice(0, 120)}）——本门禁覆盖面依赖仓库态，fail-loud`);
+    } else {
+      const cards = r.stdout.split('\n').filter(Boolean)
+        .filter((f) => f.startsWith(`${plansRel}/`) && f.endsWith('.md') && !f.endsWith('README.md'));
+      for (const rel of cards) {
+        const base = rel.split('/').pop();
+        if (!/^\d{6}-[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(base))
+          fail(gate, `${rel}: 文件名违反 YYMMDD-<slug> 编码（YYMMDD = 立卡日期，slug 为 kebab-case）`);
+        const f = join(ROOT, rel);
+        if (!existsSync(f)) continue; // 稀疏态防御（同 md-links）
+        const head = readFileSync(f, 'utf8').split('\n').slice(0, 12);
+        const statusLine = head.find((l) => l.includes('状态：'));
+        if (!statusLine || !/毕业门判断\s*=\s*\S/.test(statusLine))
+          fail(gate, `${rel}: 首部 12 行内无「状态：…毕业门判断 = <值>」户口行——推敲卡必须自带毕业门判断（待定/该做/待触发/倾向放弃/…），防挂死稿`);
+      }
+      if (cards.length === 0) note(gate, 'plans-liveness：0 张活跃推敲卡（合法空态——首卡立时入检）');
     }
   }
 }

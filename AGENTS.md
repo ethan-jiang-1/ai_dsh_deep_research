@@ -10,7 +10,7 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 
 1. **本文件**——布局 + 命令速查 + 纪律 + `notes/` 地位 + 本链的定义；
 2. **[docs/00-index.md](docs/00-index.md)**——文档地图 + 决策台账（D 号）+ 术语映射；
-3. **[roadmap.md](roadmap.md) §队列 ▶**——全仓唯一"当前"条目；行内标注**可执行性**（"等人 / 可自主"）——标"等人"时正确动作是向用户取题，不是开工；队列空（`（队列空——待用户取题）` parked 标记）同此——取题，不是找活凑数；
+3. **[_backlog/queue.md](_backlog/queue.md) §队列 ▶**——全仓唯一"当前"条目；行内标注**可执行性**（"等人 / 可自主"）——标"等人"时正确动作是向用户取题，不是开工；队列空（`（队列空——待用户取题）` parked 标记）同此——取题，不是找活凑数；
 4. 该条目在 **[notes/proposed/](notes/proposed/)** 的 RFC——条目全文（问题/方案/输掉的方案/验收）；
 5. **[docs/guides/60-dev-loop.md](docs/guides/60-dev-loop.md)**——开工（§1/§2）与收尾（§4）程序；每步"读什么 → 应知道什么 → 卡住怎么办"的**契约表**与按条目类型的分支 = 该页 §1.1。
 
@@ -25,7 +25,9 @@ CLAUDE.md -> AGENTS.md    symlink（编辑真文件 AGENTS.md，verify 门禁校
 子树 AGENTS.md            docs/ · scripts/ · notes/ · packages/deep-research-pack/ · tests/ 各一份——只放该
                          子树的指令（根只放每轮常驻指令；上游 22 个子树 AGENTS.md 同构）
 README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令正本 = guides/60 §2，不复制）
-roadmap.md                队列 + 搁置池（纯队列：条目完成即离队；▶ = 全仓唯一"当前"指针）
+_backlog/                 规划面单入口（D20，roadmap.md 已退役）：queue.md = 纯队列索引（▶ 唯一"当前"
+                          指针 + 搁置池，零判断材料）；plans/ 推敲卡（YYMMDD-slug，只载判断材料）、
+                          bugs/ 缺陷卡、_done/ 归档（位置即状态）；推敲卡不是任务；手册 = _backlog/README.md
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 随队列条目——见 pnpm-workspace.yaml 头注）
 packages/deep-research-pack/   唯一自写包（配置为主 + 研究驾驶舱[Research Cockpit，观察面 client 套件，D18，构成正本 = docs/design/40-research-cockpit.md]）：presets/<role>.patch.yml（0.1.7 形态=一条 @deepseek-ai/dsh-agent-preset 行，config.plugins 内声明 persona/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、cordis.patch.yml（bundle 行）、workspace/（工作区种子：手册+模板，生成物）、scripts/{preflight,scaffold}.mjs（部署 bin）；交付与部署形态 = guides/62，合同 = 包 README
 vendor/dsh/               pinned submodule（只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，tag/commit 见 §DSH 源码表）
@@ -54,7 +56,7 @@ dev/                     vendor-build.sh（vendor 树构建：tsc host/client + 
 Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。细则是子树指令，不在这里复述：
 
 - **时态总图 = [notes/README.md](notes/README.md)**（将来 `proposed/` = 在飞队列条目的 RFC 全文 · 过去
-  `implemented/` `archived/`（冻结） `rejected/`（否决与搁置，带重启条件） `postmortem/`；下一步仍只看 roadmap ▶）；
+  `implemented/` `archived/`（冻结） `rejected/`（否决与搁置，带重启条件） `postmortem/`；下一步仍只看 [_backlog/queue.md](_backlog/queue.md) ▶）；
 - **写入触发 / 取代检查 / 格式与毕业 = [notes/AGENTS.md](notes/AGENTS.md)**；
 - **任务流程**（毕业条目 / 加角色 / 写门禁 / 跑 run）= `.agents/skills/` 开发技能，按
   description 触发加载，不占常驻上下文。

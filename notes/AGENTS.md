@@ -32,7 +32,7 @@
 ## 毕业与命名
 
 - 毕业 = **正文改写**（计划体 → 已交付事实体，删未来时态与迁移计划）+ 迁
-  `implemented/` + 删 roadmap 队列行；只改路径不改正文 = 未来计划伪装成当前事实；
+  `implemented/` + 删 _backlog/queue.md 队列行；只改路径不改正文 = 未来计划伪装成当前事实；
 - 毕业 Note 不再指导未来工作时 → 搬 `archived/` 冻结（进门条件与纪律 =
   [notes/archived/README.md](archived/README.md)；vendor `dsh-archive-agent-notes` 校准：
   按未来决策价值判定，不按年龄字数；红证/台账引用/负知识/复活条件在身者留活跃）；

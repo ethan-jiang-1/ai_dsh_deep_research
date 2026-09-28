@@ -6,7 +6,7 @@
 // 设计（时不变原则——company 探针已知盲区：问句期望也会过期，问法必须换任何 ▶ 条目都不变）：
 //   1. 全新默认 preset 会话（无研究 pack 上下文污染），cwd = 仓根；
 //   2. prompt 指令只按根 AGENTS.md §入口链 读五步指定文件，答四个时不变问题；
-//   3. 脚本自己从 roadmap.md 抽真值（▶ 条目主题 / 下一条目主题），软断言答案命中
+//   3. 脚本自己从 _backlog/queue.md 抽真值（▶ 条目主题 / 下一条目主题），软断言答案命中
 //      （token 重叠），全文留档 dev/smoke-workspace/ 供人工复核——机械断言只证结构
 //      不证语义（SDLC reference 01 同款诚实记账）；
 //   4. 会话日志即真相：assistant/message 事件里找答案文本（不是用户消息回显）。
@@ -44,19 +44,19 @@ const dshSrc = process.env.DSH_SRC ?? ROOT; // 本仓根 = 安装锚（vendor/ds
 const bin = join(dshSrc, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
 if (!existsSync(bin)) { console.error(`probe: 机制基线不在位（${bin}）——git submodule update --init`); process.exit(2); }
 
-// ── 真值抽取（从 roadmap.md 机械读出，不问模型）──────────────────────────────
+// ── 真值抽取（从 _backlog/queue.md 机械读出，不问模型；2026-09-28 D20 迁锚）──────
 function groundTruth() {
-  const roadmap = readFileSync(join(ROOT, 'roadmap.md'), 'utf8');
-  const lines = roadmap.split('\n');
+  const queueText = readFileSync(join(ROOT, '_backlog', 'queue.md'), 'utf8');
+  const lines = queueText.split('\n');
   const s = lines.findIndex((l) => /^## 队列/.test(l));
-  if (s === -1) throw new Error('roadmap §队列 缺席');
+  if (s === -1) throw new Error('queue.md §队列 缺席');
   const queue = [];
   for (let i = s + 1; i < lines.length; i++) {
     if (/^## /.test(lines[i])) break;
     const m = /^(\d+)\.\s+(?:▶\s+)?\*\*(.+?)\*\*/.exec(lines[i]);
     if (m) queue.push({ n: Number(m[1]), theme: m[2] });
   }
-  const cur = queue.find((q) => roadmap.split('\n').some((l) => l.includes(`\u25b6 **${q.theme}**`)));
+  const cur = queue.find((q) => queueText.split('\n').some((l) => l.includes(`\u25b6 **${q.theme}**`)));
   if (cur === undefined) {
     // parked 态（2026-09-28 首次清空起）：队列空 = 全部条目毕业——"当前"= 待用户取题。
     // 合法形态 = 空态标记在场 + 零编号条目；否则真红。
@@ -192,7 +192,7 @@ const PROMPT = `你是入口链探针（一次只读审计）。请严格按本�
 
 Q1: 按入口链的指引，现在这个仓库应该做什么工作？引用条目的主题名。
 Q2: Q1 的结论来自入口链的第几步、哪个文件？
-Q3: roadmap 队列里，排在当前条目之后的下一个条目主题是什么？
+Q3: _backlog/queue.md 队列里，排在当前条目之后的下一个条目主题是什么？
 Q4: 入口链规定开工与收尾的程序在哪个文件？`;
 
 const gt = groundTruth();
@@ -232,7 +232,7 @@ try {
   const hits1 = hitCount(q1, gt.cur);
   const grams1 = bigrams(gt.cur).length;
   verdict.push([`Q1 命中当前条目「${gt.cur}」（bigram ${hits1}/${grams1}）`, hits1 >= Math.min(2, grams1)]);
-  verdict.push([`Q2 指认入口链步骤/文件（含 roadmap 或队列字样或 AGENTS）`, /roadmap|队列|AGENTS|入口链/i.test(answer)]);
+  verdict.push([`Q2 指认入口链步骤/文件（含队列或 AGENTS 字样）`, /队列|AGENTS|入口链/i.test(answer)]);
   if (gt.next) {
     const hits3 = hitCount(q3, gt.next);
     const grams3 = bigrams(gt.next).length;

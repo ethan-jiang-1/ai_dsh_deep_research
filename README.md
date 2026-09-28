@@ -7,7 +7,7 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 ## Start Here
 
 - 开工入口链（唯一正本，5 步）= [`AGENTS.md`](AGENTS.md) §入口链——依次读什么、接下来做什么、怎么验收、怎么开工收尾，全在那节。
-- 人类速览"现在干什么"：[`roadmap.md`](roadmap.md) §队列 ▶（全仓唯一"当前"指针）。
+- 人类速览"现在干什么"：[`_backlog/queue.md`](_backlog/queue.md) §队列 ▶（全仓唯一"当前"指针）。
 
 ## Directory Map
 
@@ -27,4 +27,4 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 
 - 配置为主的 pack（预设/技能/bundle 行）+ 一个观察面 client 面（D18 单点例外）；Node `^22.19.0 || >=24.0.0`（`engines`，与 vendor 对齐）；测试用 `node:test` + `node:assert`（无测试框架）。
 - 评估五面（L0 结构 / L1 挂载 / L2 安装 / L3 领域 / L4 交付）不互抵，定义见 `docs/evaluation.md`。
-- 迭代单位 = 垂直轮（最薄全路径 → 逐轮加宽），当前进度看 `roadmap.md` §队列。
+- 迭代单位 = 垂直轮（最薄全路径 → 逐轮加宽），当前进度看 `_backlog/queue.md` §队列。
