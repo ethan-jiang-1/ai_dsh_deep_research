@@ -200,9 +200,18 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       ◆{a.label}{a.state === 'pending' && a.questions > 0 ? `（${a.questions} 问）` : ''} {a.state === 'pending' ? '⏳' : a.state === 'passed' ? '✓' : '·'}
     </span>
   )
-  const stepChip = (s: RunStep) => (
-    <span key={s.key} style={{ padding: '2px 8px', borderRadius: 4, opacity: face === null ? 0.35 : s.state === 'pending' ? 0.4 : 1, fontWeight: face !== null && s.state === 'current' ? 700 : 400, background: face !== null && s.state === 'current' ? '#f59e0b33' : face !== null && s.state === 'done' ? '#22c55e22' : '#0000000d' }}>{s.label}</span>
-  )
+  // 步态符号语法 = 仪表盘同款（✓ 已过 / ● 进行中 / ○ 未到）：done 绿字（与锚点 passed 同
+  // 色相）、current 琥珀唯一——2026-09-28 trial 实测反馈：done 与 pending 都读成"没走过"，
+  // 轨道丢掉 v1 已走完的历史；回边 ▲ 紧贴芯片左下角还造成"挖掘被点亮"的误读。
+  // 重入点描边（虚线琥珀）= 回边落点显性化，与 current 实底可分——rerun 期间 current 按设计
+  // 钉在交付，重入点在挖掘，两颗"亮"芯片语义不同，视觉必须可分。
+  const loopOn = anchors[1] !== undefined && anchors[1].state !== 'upcoming'
+  const stepChip = (s: RunStep) => {
+    const reentry = face !== null && loopOn && s.key === 'evidence'
+    return (
+      <span key={s.key} style={{ padding: '2px 8px', borderRadius: 4, opacity: face === null ? 0.35 : s.state === 'pending' ? 0.4 : 1, fontWeight: face !== null && s.state === 'current' ? 700 : 400, background: face !== null && s.state === 'current' ? '#f59e0b33' : face !== null && s.state === 'done' ? '#22c55e22' : '#0000000d', color: face !== null && s.state === 'done' ? '#16a34a' : undefined, outline: reentry ? '1.5px dashed #c08a2e' : undefined, outlineOffset: reentry ? 1 : undefined }}>{s.state === 'done' ? '✓ ' : s.state === 'current' ? '● ' : '○ '}{s.label}</span>
+    )
+  }
 
   // 流程轨道 = grid 两行：第一行主轨 chips，第二行 ↻ 回路边（HITL2 到达后出现）——
   // 回路从 ◆交付审阅 下探、横行、上翘回【挖掘】（U 形连线跨列绘制，箭头指重入点）。
@@ -214,7 +223,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     ...steps.slice(6).map((s) => ({ key: s.key, chip: stepChip(s) })),
     ...anchors.slice(2).map((a) => ({ key: a.key, chip: anchorChip(a) })),
   ]
-  const loopVisible = anchors[1] !== undefined && anchors[1].state !== 'upcoming'
+  const loopVisible = loopOn
   const EV_COL = 5
   const A2_COL = 8
 
@@ -228,17 +237,22 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       )}
       {/* ② 流程轨道：◆立项确认 + 主轨 + ◆交付审阅 + 交付；↻ 回边 = 拍板的分支后果画进流程 */}
       {railVisible && (
+        <>
         <div style={{ display: 'grid', gridTemplateColumns: `repeat(${railNodes.length}, auto)`, alignItems: 'start', marginBottom: 8, fontSize: 12 }}>
           {railNodes.map((n, i) => (
             <div key={n.key} style={{ gridRow: 1, gridColumn: i + 1 }}>{n.chip}</div>
           ))}
           {loopVisible && (
             <div style={{ gridRow: 2, gridColumn: `${EV_COL} / ${A2_COL + 1}`, position: 'relative', margin: '4px 6px 0', border: '1px dashed #c08a2e', borderTop: 'none', borderRadius: '0 0 8px 8px', padding: '2px 6px 3px', color: '#b45309', textAlign: 'center', whiteSpace: 'nowrap' }}>
-              <span style={{ position: 'absolute', top: -8, left: -5, fontSize: 10, color: '#b45309' }}>▲</span>
+              <span style={{ position: 'absolute', top: -9, left: 3, fontSize: 10, color: '#b45309' }}>▲</span>
               ↻ 补研究（final/ 下一版）· 修订表述原位改{face !== null && face.versions >= 2 ? ` · 已落 v${face.versions}` : ''}
             </div>
           )}
         </div>
+        {face !== null && (
+          <div style={{ fontSize: 11, opacity: 0.55, marginBottom: 8 }}>✓ 已过 · ● 进行中 · ○ 未到 · 虚线描边 = ↻ 回边落点（重入点）</div>
+        )}
+        </>
       )}
       {/* ⑥ 决策诚实线（指路不复制——谁答的家在 question.md §Decisions） */}
       {passedCount > 0 && (

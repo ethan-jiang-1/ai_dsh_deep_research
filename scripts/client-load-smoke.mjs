@@ -298,6 +298,18 @@ try {
         // 渐进面硬断言（会话绑定 + 位置=状态两位置：证据计数/交付态/问题行与磁盘真值对账）
         const stepsOk = ['立项', '组队', '侦察', '挖掘', '综合', '审查', '交付'].every((x) => seg.includes(x))
         step(stepsOk, '步骤条真数据（流程轨道七步 = 定义流程——本会话绑定的 bundle）')
+        // 步态语法回归（2026-09-28 trial 实测反馈：done 与 pending 都读成"没走过" + ▲ 粘连
+        // 造成双琥珀歧义误读）——✓/●/○ 与仪表盘同语法；current 唯一；done 绿字；重入点描边。
+        const rail = await page.evaluate((lbls) => {
+          const spans = [...document.querySelectorAll('span')]
+          const cur = spans.filter((n) => (n.textContent ?? '').trim().startsWith('● '))
+          const greenDone = (lbl) => spans.some((n) => (n.textContent ?? '').trim() === `✓ ${lbl}` && getComputedStyle(n).color === 'rgb(22, 163, 74)')
+          const ev = spans.find((n) => (n.textContent ?? '').trim() === '✓ 挖掘')
+          return { cur: cur.length, greens: lbls.filter(greenDone), reentry: ev === undefined ? null : getComputedStyle(ev).outlineStyle }
+        }, ['立项', '组队', '侦察', '挖掘', '综合', '审查'])
+        step(rail.cur === 1, '轨道 current 唯一（● 恰一枚——双高亮歧义回归红）', `● ×${rail.cur}`)
+        step(rail.greens.length === 6, '轨道 done 可读（六步全 ✓ 绿字 = 已过，与锚点 passed 同语法）', `绿字 done：${rail.greens.join('、') || '无'}`)
+        step(rail.reentry === 'dashed', '重入点描边在场（回边落点 = 挖掘，与 current 实底可分）', `outline=${rail.reentry ?? '无'}`)
         const evMatch = seg.match(/证据 (\d+) 份/)
         step(evMatch !== null && Number(evMatch[1]) === expectedFace.evidenceCount,
           '证据计数 = 磁盘真值（会话绑定 + 根/archive 两位置）', evMatch ? `${evMatch[0]}（磁盘 ${expectedFace.evidenceCount}）` : '未渲染')

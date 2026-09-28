@@ -623,7 +623,7 @@ export function renderHtml(model) {
  .banner.silent{background:#e6f4ea;border:1px solid #b7dfc2}
  .steps .chip{display:inline-block;padding:.15rem .5rem;border-radius:.9rem;font-size:.8rem;margin-right:.3rem;border:1px solid #ddd}
  .chip.done{background:#e6f4ea;border-color:#b7dfc2}
- .chip.current{background:#d0e2ff;border-color:#9cc0ff;font-weight:600}
+ .chip.current{background:#f59e0b33;border-color:#e8c48a;font-weight:600}
  .chip.pending{color:#999}
 </style>
 </head>

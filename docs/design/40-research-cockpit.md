@@ -27,7 +27,7 @@
 
 | 件 | 文件 | 职责 |
 |---|---|---|
-| 研究状态页签 | [ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) | 右栏页签，自上而下六区：① HITL 挂起横幅（点名锚点 + 参与指引）② 流程轨道 = ◆立项确认 + 立项→组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付（步序正本 = [m2-run-mechanics 运行流程总览](../../notes/implemented/2026-09-24-m2-run-mechanics.md)；↻ rerun 回路自交付审阅可见：补研究回挖掘 / 修订表述原位改 / 另起新 bundle；交付节点带 final/ 版本）③ 研究问题行 ④ 人性化活动流 ⑤ 证据计数 + 交付状态 ⑥ 决策诚实线（指路 question.md §Decisions） |
+| 研究状态页签 | [ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) | 右栏页签，自上而下六区：① HITL 挂起横幅（点名锚点 + 参与指引）② 流程轨道 = ◆立项确认 + 立项→组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付（步序正本 = [m2-run-mechanics 运行流程总览](../../notes/implemented/2026-09-24-m2-run-mechanics.md)；↻ rerun 回路自交付审阅可见：补研究回挖掘 / 修订表述原位改 / 另起新 bundle；交付节点带 final/ 版本；步态符号 ✓已过/●进行中/○未到——done 绿字、current 琥珀唯一、回边落点重入描边（与仪表盘同语法，图例行随轨））③ 研究问题行 ④ 人性化活动流 ⑤ 证据计数 + 交付状态 ⑥ 决策诚实线（指路 question.md §Decisions） |
 | 活标题 | 同上（`ResearchStatusTitle`） | 挂起时页签名变「研究状态 · ⏳ 等你拍板」 |
 | 研究语义工具卡 | [ResearchToolCard.tsx](../../packages/deep-research-pack/src/client/ResearchToolCard.tsx) + [tool-card.ts](../../packages/deep-research-pack/src/lib/tool-card.ts) | 对话流卡片：`spawn_teammate` → 组队卡、`web_search` → 检索卡（2 张） |
 | 挂起显性化 | [index.ts](../../packages/deep-research-pack/src/client/index.ts)（`revealStatusTab`） | pending false→true 迁移时 `openTab` 右栏自动展开；页签 dock 折叠态保持挂载（观察者常在） |
