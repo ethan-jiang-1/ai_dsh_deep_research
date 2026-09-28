@@ -165,9 +165,17 @@ const expectedFace = boundSession !== null && bundleBaseOf(boundSession.slug) !=
   const names = new Set(readdirSync(base))
   const evidenceCount = existsSync(join(base, 'evidence')) ? readdirSync(join(base, 'evidence')).filter((f) => f.endsWith('.md')).length : 0
   const questionText = names.has('question.md') ? readFileSync(join(base, 'question.md'), 'utf8') : null
-  const firstLine = questionText?.split('\n').find((l) => l.trim() !== '' && !l.startsWith('#'))?.slice(0, 60) ?? null
-  return { base, evidenceCount, delivered: names.has('final.md'), firstLine }
+  // G3（RFC cockpit-flow-face）：与页签同口径——剥 markdown 强调符再截断（72 字 + 省略号）。
+  const firstLine = questionText?.split('\n').find((l) => l.trim() !== '' && !l.startsWith('#'))?.replace(/\*\*/g, '').replace(/`/g, '').trim().slice(0, 72) ?? null
+  return { base, evidenceCount, delivered: names.has('final.md'), hasQuestion: names.has('question.md'), firstLine }
 })() : null
+
+// 锚点三态盘侧真值（RFC cockpit-flow-face，混合折算口径）：passed = 文件事实（question.md /
+// final.md 在场 = 对应拍板落盘）——与 hitl-fold.deriveAnchors 同一谓词，盘侧独立取文件不 import 折算。
+// （pending 态的真值断言归 client-hitl-smoke：它用真模型造挂起并端到端观察。）
+const expectedAnchor = boundSession !== null && expectedFace !== null
+  ? { passed: (expectedFace.hasQuestion ? 1 : 0) + (expectedFace.delivered ? 1 : 0) }
+  : null
 
 const { child, token } = await boot()
 let page
@@ -295,6 +303,12 @@ try {
           '证据计数 = 磁盘真值（会话绑定 + 根/archive 两位置）', evMatch ? `${evMatch[0]}（磁盘 ${expectedFace.evidenceCount}）` : '未渲染')
         const delivOk = expectedFace.delivered ? seg.includes('已交付') : !seg.includes('已交付')
         step(delivOk, '交付状态 = 磁盘真值', expectedFace.delivered ? 'final.md 在场 → ✅ 已交付' : '无 final.md → 如实不显')
+        // 锚点入轨断言（RFC cockpit-flow-face）：轨道渲染 + 诚实线计数与盘侧文件事实对账
+        const railOk = seg.includes('◆立项确认') && seg.includes('◆交付审阅')
+        step(railOk, '流程轨道渲染（◆立项确认 + ◆交付审阅在场）')
+        if (expectedAnchor !== null && expectedAnchor.passed > 0) {
+          step(seg.includes(`停靠点已过 ${expectedAnchor.passed} 个`), '停靠点诚实线 = 盘侧真值（文件事实独立重算）', `盘侧 passed=${expectedAnchor.passed}`)
+        }
         const qOk = expectedFace.firstLine !== null && seg.includes(expectedFace.firstLine.slice(0, 12))
         step(qOk, '研究问题行 = question.md 首行', expectedFace.firstLine?.slice(0, 24) ?? '')
       }
@@ -318,7 +332,9 @@ try {
       const seg2 = t2.slice(t2.indexOf('研究状态'))
       unboundSession = cand
       step(seg2.includes('本会话未绑定 run bundle'), '未绑定会话：提示行在场（如实说明，不冒充）', cand.title)
-      const leaked = ['立项', '拆解', '侦察', '取证', '综合', '审查', '已交付'].filter((x) => seg2.includes(x))
+      // 泄漏检查盯**别家面数据**（渐进面/诚实线），不盯占位步骤名——未绑定但本会话有挂起 ask
+      // 时，锚点轨道带占位步骤在场是有意行为（cockpit-flow-face：锚点段从 journal 画）。
+      const leaked = ['已交付', '证据 ', '停靠点已过'].filter((x) => seg2.includes(x))
       step(leaked.length === 0, '未绑定会话：零别家渐进面泄漏', leaked.length > 0 ? leaked.join('、') : '')
       break
     }

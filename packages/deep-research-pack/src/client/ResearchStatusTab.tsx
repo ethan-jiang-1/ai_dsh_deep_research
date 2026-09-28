@@ -1,12 +1,14 @@
 /**
  * 「研究状态」页签体（UI 优先版：把界面弄对——RFC research-status-ui）。
  *
- * 自上而下五区（一眼回答"研究到哪了、谁在干什么、等没等我"）：
- *   ① 研究问题行（question.md 首行）；
- *   ② 步骤条（七步真数据——bundle 文件在场性喂 run-fold.deriveSteps）；
- *   ③ HITL 挂起横幅（hitl-fold 谓词）；
+ * 自上而下六区（一眼回答"研究到哪了、谁在干什么、等没等我、我在哪出手"）：
+ *   ① HITL 挂起横幅（点名锚点 + 参与指引——hitl-fold.deriveAnchors）；
+ *   ② 流程轨道 = ◆立项确认 + 七步 + ◆交付审阅（锚点段从 journal 折算、步骤段从 bundle 文件
+ *      在场性折算——两段数据源分开，HITL1 等待时 bundle 未建而锚点仍在场）；
+ *   ③ 研究问题行（question.md 首行，剥 markdown 强调符）；
  *   ④ 团队动态 = 人性化活动流（activity-fold：🔍/👥/💬/📦，噪音过滤——**原始事件类型名不出正文**）；
- *   ⑤ 证据概览 + 交付状态（evidence/ 计数 + final 在场 → ✅ 已交付）。
+ *   ⑤ 证据概览 + 交付状态（evidence/ 计数 + final 在场 → ✅ 已交付 + rerun 三分静线）；
+ *   ⑥ 决策诚实线（停靠点已过 → 指路 question.md §Decisions——谁答的不复制进 UI，家在文件）。
  *
  * 会话绑定（RFC right-pane-ux-debt，2026-09-28）：渐进面只显示**本会话自己的** run bundle
  * （bundle-bind：journal 工具调用路径识别 `drt_<slug>/`），位置=状态两个位置都认——根（在飞）
@@ -22,14 +24,14 @@
  * cultivation 页签同款闭包模式（失败降级 null，面板如实显示）。
  * 分层纪律：折算全住 src/lib 纯函数（keyless 单测）；组件薄渲染。
  */
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { foldHitlPending, type HitlState } from '../lib/hitl-fold.ts'
+import { deriveAnchors, foldHitlPending, type HitlState, type RunAnchor } from '../lib/hitl-fold.ts'
 import { deriveSteps, type RunStep } from '../lib/run-fold.ts'
 import { foldActivityRows, type ActivityRow } from '../lib/activity-fold.ts'
-import { sessionBundleOf } from '../lib/bundle-bind.ts'
+import { sessionBindingOf, type SessionBinding } from '../lib/bundle-bind.ts'
 
 /** journal 帧的最小投影（wire 形状 → 领域形状）。 */
 export type JournalFrame =
@@ -53,6 +55,8 @@ export type ResearchStatusTabProps = PropsRuntime<'sidebar.right.pane.tab'> & Re
 /** bundle 渐进面模型（问题行 + 步骤 + 证据 + 交付）。 */
 interface BundleFace {
   readonly questionLine: string | null
+  /** question.md 在场（锚点 passed 态的文件事实——与 questionLine 区分：首行可能缺席）。 */
+  readonly hasQuestion: boolean
   readonly steps: readonly RunStep[]
   readonly evidenceCount: number
   readonly delivered: boolean
@@ -69,13 +73,13 @@ const REFRESH_MS = 30_000
 export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const [rows, setRows] = useState<readonly ActivityRow[]>([])
   const [hitl, setHitl] = useState<HitlState>({ pending: false, since: undefined })
+  const [journalEvents, setJournalEvents] = useState<readonly unknown[]>([])
   const [face, setFace] = useState<BundleFace | null>(null)
   const [unbound, setUnbound] = useState(false)
-  const [boundSlug, setBoundSlug] = useState<string | undefined>(undefined)
+  const [binding, setBinding] = useState<SessionBinding>({ slug: undefined, boundBy: undefined })
   const [journalSeen, setJournalSeen] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const eventsRef = useRef<readonly unknown[]>([])
-  const slugRef = useRef<string | undefined>(undefined)
+  const boundRef = useRef<string | undefined>(undefined)
   const prevPending = useRef(false)
 
   // ① journal 流 → 活动行 + HITL 谓词 + 会话绑定输入
@@ -83,8 +87,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     const sessionId = props.sessionId
     if (sessionId === undefined) return
     const controller = new AbortController()
-    eventsRef.current = []
-    slugRef.current = undefined
+    boundRef.current = undefined
     prevPending.current = false
     void (async () => {
       try {
@@ -92,7 +95,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
         for await (const frame of props.follow(sessionId, controller.signal)) {
           if (frame.kind === 'history') events = [...frame.events]
           else events = [...events, frame.event]
-          eventsRef.current = events
+          setJournalEvents(events)
           setJournalSeen(true)
           setRows(foldActivityRows(events))
           const next = foldHitlPending(events)
@@ -101,10 +104,10 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           // openTab 落定时右栏同步骤展开；页签体折叠态保持挂载，观察者常在。
           if (next.pending && !prevPending.current) props.revealStatusTab()
           prevPending.current = next.pending
-          const slug = sessionBundleOf(events)
-          if (slug !== slugRef.current) {
-            slugRef.current = slug
-            setBoundSlug(slug)
+          const bound = sessionBindingOf(events)
+          if (bound.slug !== boundRef.current) {
+            boundRef.current = bound.slug
+            setBinding(bound)
           }
         }
       } catch (cause) {
@@ -115,14 +118,19 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   }, [props.sessionId])
 
   // ② bundle 渐进面（绑定本会话的 run；slug 变化即扫 + 30s 定时——文件在场性不高频）
+  // G4（RFC cockpit-flow-face）：read 弱绑定在挂起期不作渐进面依据——立项预检读取旧 bundle
+  // 会错绑（2026-09-28 首跑实证）；挂起 + 仅读绑定 → 抑制面（此刻本 run 的 bundle 多半未
+  // 实例化），写命中后 boundBy 变 write 自然恢复。恢复会话只读查询（无挂起）不受影响。
   useEffect(() => {
     const sessionId = props.sessionId
-    if (sessionId === undefined || boundSlug === undefined) {
+    const suppressed = binding.boundBy === 'read' && hitl.pending
+    if (sessionId === undefined || binding.slug === undefined || suppressed) {
       setFace(null)
-      setUnbound(journalSeen)
+      setUnbound(journalSeen && binding.slug === undefined)
       return
     }
     setUnbound(false)
+    const boundSlug = binding.slug
     let stopped = false
     const scan = async () => {
       try {
@@ -137,9 +145,14 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           const evidenceCount = evidenceDir?.filter((e) => e.type === 'file' && e.name.endsWith('.md')).length ?? 0
           const questionText = names.has('question.md') ? await props.readFile(sessionId, `${base}/question.md`, new AbortController().signal) : null
           if (stopped) return
-          const firstLine = questionText?.split('\n').find((l) => l.trim() !== '' && !l.startsWith('#'))?.slice(0, 60) ?? null
+          // G3（RFC cockpit-flow-face）：剥 markdown 强调符再截断——`**` 与反引号是源文件
+          // 标记不是内容；截断补省略号，不在字中间装作完整句。
+          const raw = questionText?.split('\n').find((l) => l.trim() !== '' && !l.startsWith('#')) ?? null
+          const flat = raw !== null ? raw.replace(/\*\*/g, '').replace(/`/g, '').trim() : null
+          const firstLine = flat === null || flat === '' ? null : flat.length > 72 ? `${flat.slice(0, 72)}…` : flat
           setFace({
             questionLine: firstLine,
+            hasQuestion: names.has('question.md'),
             steps: deriveSteps({
               question: names.has('question.md'),
               topics: names.has('topics.md'),
@@ -160,39 +173,79 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     void scan()
     const timer = setInterval(() => { void scan() }, REFRESH_MS)
     return () => { stopped = true; clearInterval(timer) }
-  }, [props.sessionId, boundSlug, journalSeen])
+  }, [props.sessionId, binding, hitl.pending, journalSeen])
+
+  // 锚点 = 混合折算（尾窗约束的实测产物，RFC cockpit-flow-face）：passed 态由文件事实承载
+  // （question.md/final.md 在场），pending 态由 journal 尾窗承载——face 缺席时退化为纯尾窗判定。
+  const anchors = useMemo(
+    () => deriveAnchors(journalEvents, face !== null ? { question: face.hasQuestion, delivered: face.delivered } : undefined),
+    [journalEvents, face],
+  )
+
+  // 流程轨道件（锚点入轨，RFC cockpit-flow-face）：锚点段从 journal+文件折算（挂起期也在场），
+  // 步骤段从文件在场性折算——face 缺席时以占位态渲染（不冒充进度）。
+  const railVisible = face !== null || hitl.pending || anchors.some((a) => a.state !== 'upcoming')
+  const passedCount = anchors.filter((a) => a.state === 'passed').length
+  const pendingAnchor = anchors.find((a) => a.state === 'pending')
+  const steps = face !== null ? face.steps : deriveSteps({ question: false, topics: false, leads: false, evidence: 0, findings: false, review: false, final: false })
+  const anchorChip = (a: RunAnchor) => (
+    <span key={a.key} style={{ padding: '2px 8px', borderRadius: 4, fontWeight: a.state === 'pending' ? 700 : 400, background: a.state === 'pending' ? '#f59e0b33' : a.state === 'passed' ? '#22c55e22' : '#0000000d', color: a.state === 'pending' ? '#b45309' : a.state === 'passed' ? '#16a34a' : '#888' }}>
+      ◆{a.label}{a.state === 'pending' && a.questions > 0 ? `（${a.questions} 问）` : ''} {a.state === 'pending' ? '⏳' : a.state === 'passed' ? '✓' : '·'}
+    </span>
+  )
+  const stepChip = (s: RunStep) => (
+    <span key={s.key} style={{ padding: '2px 8px', borderRadius: 4, opacity: face === null ? 0.35 : s.state === 'pending' ? 0.4 : 1, fontWeight: face !== null && s.state === 'current' ? 700 : 400, background: face !== null && s.state === 'current' ? '#f59e0b33' : face !== null && s.state === 'done' ? '#22c55e22' : '#0000000d' }}>{s.label}</span>
+  )
 
   return (
     <div style={{ padding: 12 }}>
-      {/* ③ HITL 挂起横幅（最醒目位置） */}
+      {/* ① HITL 挂起横幅（最醒目位置；点名锚点 + 参与指引——"怎么参与"在需要那一刻说清） */}
       {hitl.pending && (
         <div style={{ fontWeight: 700, padding: '8px 12px', marginBottom: 10, borderRadius: 6, background: '#f59e0b33', border: '1px solid #f59e0b66' }}>
-          ⏳ 等你拍板——现在轮到你
+          ⏳ 等你拍板——{pendingAnchor?.label ?? '决定'}{pendingAnchor !== undefined && pendingAnchor.questions > 0 ? `（${pendingAnchor.questions} 问）` : ''}：在会话里的问题卡上点选项即可（推荐项已置首）
         </div>
       )}
-      {/* ① 研究问题行 */}
+      {/* ② 流程轨道：◆立项确认 + 七步 + ◆交付审阅（超额 ask 如实缀为"中途确认"） */}
+      {railVisible && (
+        <div style={{ display: 'flex', gap: 4, marginBottom: 8, fontSize: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+          {anchorChip(anchors[0] ?? { key: 'anchor-1', label: '立项确认', state: 'upcoming', questions: 0 })}
+          {steps.slice(0, 6).map(stepChip)}
+          {anchorChip(anchors[1] ?? { key: 'anchor-2', label: '交付审阅', state: 'upcoming', questions: 0 })}
+          {steps.slice(6).map(stepChip)}
+          {anchors.slice(2).map((a) => anchorChip(a))}
+        </div>
+      )}
+      {/* ⑥ 决策诚实线（指路不复制——谁答的家在 question.md §Decisions） */}
+      {passedCount > 0 && (
+        <div style={{ marginBottom: 8, fontSize: 12, opacity: 0.55 }}>
+          停靠点已过 {passedCount} 个 · 每次拍板的记录见 question.md §Decisions
+        </div>
+      )}
+      {/* ③ 研究问题行 */}
       {face?.questionLine !== null && face?.questionLine !== undefined && (
         <div style={{ fontWeight: 600, marginBottom: 6, lineHeight: 1.4 }}>{face.questionLine}</div>
       )}
-      {/* ② 步骤条（真数据） */}
-      {face !== null && (
-        <div style={{ display: 'flex', gap: 4, marginBottom: 10, fontSize: 12, flexWrap: 'wrap' }}>
-          {face.steps.map((s) => (
-            <span key={s.key} style={{ padding: '2px 8px', borderRadius: 4, opacity: s.state === 'pending' ? 0.4 : 1, fontWeight: s.state === 'current' ? 700 : 400, background: s.state === 'current' ? '#f59e0b33' : s.state === 'done' ? '#22c55e22' : '#0000000d' }}>{s.label}</span>
-          ))}
-        </div>
-      )}
-      {/* ⑤ 证据概览 + 交付状态 */}
+      {/* ⑤ 证据概览 + 交付状态 + rerun 三分静线（不交互，只告知下一步合法动作） */}
       {face !== null && (
         <div style={{ display: 'flex', gap: 12, marginBottom: 10, fontSize: 13, opacity: 0.85 }}>
           <span>证据 {face.evidenceCount} 份</span>
           {face.delivered && <span style={{ color: '#16a34a', fontWeight: 600 }}>✅ 已交付</span>}
         </div>
       )}
-      {/* 未绑定提示（RFC right-pane-ux-debt：只跟本会话的 run——journal 已到但无 bundle 动作） */}
+      {face !== null && face.delivered && (
+        <div style={{ marginBottom: 10, fontSize: 12, opacity: 0.55 }}>
+          rerun 三分：表述修订（原位改）/ 证据扩张（final/ 下一版）/ 另起新 bundle——向 lead 提出
+        </div>
+      )}
+      {/* 未绑定 / 绑定待确认提示（RFC right-pane-ux-debt + cockpit-flow-face G4） */}
       {unbound && (
         <div style={{ marginBottom: 10, fontSize: 12, opacity: 0.55 }}>
           （本会话未绑定 run bundle——研究状态只跟本会话自己的 run）
+        </div>
+      )}
+      {!unbound && face === null && binding.boundBy === 'read' && hitl.pending && (
+        <div style={{ marginBottom: 10, fontSize: 12, opacity: 0.55 }}>
+          （挂起期间不显示 bundle 渐进面——当前绑定仅由读取推断，落笔后确认）
         </div>
       )}
       {error !== null && <div style={{ color: '#b00', marginBottom: 6, fontSize: 12 }}>{error}</div>}

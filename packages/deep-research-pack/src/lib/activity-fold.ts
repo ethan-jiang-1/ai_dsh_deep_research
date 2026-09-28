@@ -54,7 +54,8 @@ function messageTextOf(data: EventLike['data']): string | undefined {
       if (typeof t === 'string') parts.push(t)
     }
   }
-  const joined = parts.join(' ').trim()
+  // G3 同款（RFC cockpit-flow-face）：活动行是"人能读的行"——markdown 源标记（**/`）不出正文。
+  const joined = parts.join(' ').replace(/\*\*/g, '').replace(/`/g, '').trim()
   return joined === '' ? undefined : joined.slice(0, 50)
 }
 
@@ -86,6 +87,13 @@ export function foldActivityRows(events: readonly unknown[]): readonly ActivityR
         rows.push({ icon: '👥', text: `派出 ${n}${d === '' ? '' : `：${d.slice(0, 30)}`}`, time })
       } else if (name === 'present') {
         rows.push({ icon: '📦', text: '交付声明', time })
+      } else if (name === 'wait_agent') {
+        // 静默区观察盲区缓解（RFC cockpit-flow-face G2）：lead 等队员期间页签不再全静——
+        // 连续重复折叠（wait_agent 可多次调用，同文行不重复出）。
+        const lastRow = rows[rows.length - 1]
+        if (lastRow?.text !== '队员作业中——等待返回') {
+          rows.push({ icon: '👥', text: '队员作业中——等待返回', time })
+        }
       }
       // 其他工具调用：v1 不出行（可按需加 key→icon 映射）
     } else if (e.type === 'assistant/message') {

@@ -226,7 +226,7 @@ try {
       await sleep(4_000)
       const text = await page.evaluate(() => document.body?.innerText ?? '')
       titleFlipped = text.includes('研究状态 · ⏳ 等你拍板')
-      bannerShown = text.includes('现在轮到你')
+      bannerShown = text.includes('在会话里的问题卡上点选项')
       if (!diagPrinted) {
         const i = text.indexOf('journal 流')
         if (i >= 0) { console.log('  （页签诊断）', JSON.stringify(text.slice(i, i + 320))); diagPrinted = true }
@@ -289,10 +289,10 @@ try {
             await sleep(2_500)
             const expandStill = await page.getByRole('button', { name: 'Open right sidebar' }).isVisible().catch(() => false)
             autoExpanded = !expandStill
-            banner2 = (await page.evaluate(() => document.body?.innerText ?? '')).includes('现在轮到你')
+            banner2 = (await page.evaluate(() => document.body?.innerText ?? '')).includes('在会话里的问题卡上点选项')
           }
           step(autoExpanded, '⑤e 右栏**自动展开**（挂起迁移 → revealStatusTab → openTab 同步骤展开——fix① 闭环）')
-          step(banner2, '⑤f 横幅「⏳ 等你拍板」在场（自动展开后信号可见）')
+          step(banner2, '⑤f 横幅（点名锚点 + 参与指引）在场（自动展开后信号可见）')
         }
       }
     } else {

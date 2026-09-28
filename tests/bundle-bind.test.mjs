@@ -2,7 +2,7 @@
 // 状态页签只跟本会话自己的 run）。信号 = tool/call 参数里的 drt_<slug>/ 路径形态。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { sessionBundleOf } from '../packages/deep-research-pack/src/lib/bundle-bind.ts';
+import { sessionBindingOf, sessionBundleOf } from '../packages/deep-research-pack/src/lib/bundle-bind.ts';
 
 const call = (name, args) => ({ type: 'tool/call', data: { name, arguments: typeof args === 'string' ? args : JSON.stringify(args) } });
 const ev = (type, data = {}) => ({ type, data });
@@ -33,12 +33,30 @@ test('无 bundle 动作（纯检索/抓取会话）→ undefined（不显示别�
   assert.equal(sessionBundleOf(events), undefined);
 });
 
-test('多个 bundle 动作 → 最后一个为准（另起/转续场景）', () => {
+test('写强读弱：先写 A 后读 B（立项预检读旧 bundle 的实测形态）→ 仍绑 A（G4）', () => {
   const events = [
     call('write', { path: 'drt_first-run/question.md' }),
     call('read', { path: 'drt_second-run/final.md' }),
   ];
+  assert.equal(sessionBundleOf(events), 'first-run');
+});
+
+test('多个写命中 → 最新写为准（另起/转续场景）', () => {
+  const events = [
+    call('write', { path: 'drt_first-run/question.md' }),
+    call('edit', { path: 'drt_second-run/journal.md' }),
+  ];
   assert.equal(sessionBundleOf(events), 'second-run');
+});
+
+test('sessionBindingOf 暴露绑定强度：仅读命中 → boundBy read（挂起期消费方据此抑制渐进面）', () => {
+  const events = [call('read', { path: 'drt_cn-us-open-source/question.md' })];
+  assert.deepEqual(sessionBindingOf(events), { slug: 'cn-us-open-source', boundBy: 'read' });
+});
+
+test('sessionBindingOf：写命中 → boundBy write；无命中 → 全 undefined', () => {
+  assert.deepEqual(sessionBindingOf([call('write', { path: 'drt_a/x.md' })]), { slug: 'a', boundBy: 'write' });
+  assert.deepEqual(sessionBindingOf([]), { slug: undefined, boundBy: undefined });
 });
 
 test('用户消息文本提到 drt_ 不构成绑定（只认工具调用——问句顺带提及 ≠ 真的在动手）', () => {

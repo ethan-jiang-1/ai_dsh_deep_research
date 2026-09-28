@@ -13,6 +13,16 @@ interface BindEventLike {
   readonly data?: { readonly name?: unknown; readonly arguments?: unknown } | undefined
 }
 
+/** 变更类工具（强绑定信号）：写/编辑进 bundle 的调用直接定绑。 */
+const WRITE_TOOLS = new Set(['write', 'edit', 'multiedit'])
+
+/** 会话 → run bundle 绑定（含绑定强度——RFC cockpit-flow-face G4：read 弱绑定防错绑）。 */
+export interface SessionBinding {
+  readonly slug: string | undefined
+  /** write = 有写命中（可信）；read = 仅有读命中（立项预检等读取也会命中，挂起期不可作渐进面依据）。 */
+  readonly boundBy: 'write' | 'read' | undefined
+}
+
 /** 从调用参数（JSON 字符串或对象）里找 `drt_<slug>/` 路径形态；找不到 → undefined。 */
 function slugInArgs(args: unknown): string | undefined {
   let obj: unknown = args
@@ -25,18 +35,34 @@ function slugInArgs(args: unknown): string | undefined {
 }
 
 /**
- * 折算：journal 事件序列 → 本会话绑定的 run bundle slug。
- * 取**最后**一个命中（运行中另起 bundle / 恢复会话转续别的 run 时，以最新动作为准）。
- * @param events 按 wire 顺序的事件。@returns slug（如 `dsh-release-watch`）；无绑定 → undefined。
+ * 折算：journal 事件序列 → 本会话绑定的 run bundle（含绑定强度）。
+ * **写强读弱**：任一 write/edit 命中 → 取最新写命中（boundBy: write）；否则取最新读命中
+ * （boundBy: read）。实测根因（2026-09-28 首跑）：立项预检 read 旧 bundle 也会命中路径——
+ * 读绑定在挂起期不可作渐进面依据（消费方据此抑制），写命中后自然纠正。
+ * @param events 按 wire 顺序的事件。@returns 绑定（slug 如 `selfhosted-ai-gateway`；无绑定 → undefined）。
  */
-export function sessionBundleOf(events: readonly unknown[]): string | undefined {
-  let bound: string | undefined
+export function sessionBindingOf(events: readonly unknown[]): SessionBinding {
+  let writeSlug: string | undefined
+  let readSlug: string | undefined
   for (const event of events) {
     if (typeof event !== 'object' || event === null) continue
     const e = event as BindEventLike
     if (e.type !== 'tool/call') continue
     const slug = slugInArgs(e.data?.arguments)
-    if (slug !== undefined) bound = slug
+    if (slug === undefined) continue
+    const name = typeof e.data?.name === 'string' ? e.data.name : ''
+    if (WRITE_TOOLS.has(name)) writeSlug = slug
+    else readSlug = slug
   }
-  return bound
+  if (writeSlug !== undefined) return { slug: writeSlug, boundBy: 'write' }
+  if (readSlug !== undefined) return { slug: readSlug, boundBy: 'read' }
+  return { slug: undefined, boundBy: undefined }
+}
+
+/**
+ * 折算：journal 事件序列 → 本会话绑定的 run bundle slug（兼容壳 = sessionBindingOf().slug）。
+ * @param events 按 wire 顺序的事件。@returns slug（如 `dsh-release-watch`）；无绑定 → undefined。
+ */
+export function sessionBundleOf(events: readonly unknown[]): string | undefined {
+  return sessionBindingOf(events).slug
 }

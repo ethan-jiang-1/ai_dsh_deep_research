@@ -26,6 +26,21 @@ test('web_search 多词入参（queries 数组——wire 权威形状，录制�
   assert.match(rows[0].text, /DSH harness · DeepSeek plugin/);
 });
 
+test('wait_agent → 队员作业中行（G2：静默区页签不全静）；连续重复折叠为一行', () => {
+  const rows = foldActivityRows([
+    call('spawn_teammate', { name: 'scout', description: '广度侦察' }, 't1'),
+    call('wait_agent', {}, 't2'),
+    call('wait_agent', {}, 't3'),
+    call('wait_agent', {}, 't4'),
+  ]);
+  assert.deepEqual(rows.map((r) => r.text), ['派出 scout：广度侦察', '队员作业中——等待返回']);
+});
+
+test('活动行剥 markdown 强调符（G3 同款：源标记不出正文）', () => {
+  const rows = foldActivityRows([ev('assistant/message', { message: { content: [{ type: 'text', text: '组队决策：**两线并行**，`核查` 后置进场' }] } })]);
+  assert.equal(rows[0].text, '组队决策：两线并行，核查 后置进场');
+});
+
 test('噪音事件不出行（step/turn/session/system/permission/user/其他工具）', () => {
   const rows = foldActivityRows([
     ev('step/start'), ev('step/end'), ev('turn/start'), ev('turn/end'),

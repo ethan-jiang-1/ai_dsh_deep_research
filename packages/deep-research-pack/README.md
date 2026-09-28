@@ -8,7 +8,9 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 
 > **研究驾驶舱** = 观察面 client 套件的套件名（2026-09-28 定名）：右栏「研究状态」页签 +
 > 研究语义工具卡 + 活标题 + 挂起显性化（pending 自动展开右栏）——静默自主期看仪表、HITL
-> 挂起时接手的地方；折算谓词住 `src/lib/`（keyless 单测，与 run-dashboard 投影共用）。
+> 挂起时接手的地方；页签含**流程轨道**（◆立项确认 + 七步 + ◆交付审阅——两个 HITL 停靠点
+> 常驻可见）+ 参与指引 + 决策诚实线 + rerun 三分提示；折算谓词住 `src/lib/`（keyless 单测，
+> 与 run-dashboard 投影共用）。
 > 构成的当前事实正本 = [docs/design/40-research-cockpit.md](../../docs/design/40-research-cockpit.md)。
 
 ## 内容
@@ -19,7 +21,7 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 | `presets/<role>/skills/<n>/SKILL.md` | 六个研究方法论技能（research-brief / team-assembly / lead-mapping / evidence-extraction / synthesis / adversarial-review） | ✓ |
 | `cordis.patch.yml` | bundle 行：preset roster（default: lead）+ `tool-present` + 团队可视面 `ui-agent-team` + 本包 client 面 | ✓ |
 | `workspace/` | **研究工作区种子**：研究手册（`AGENTS.md`：证据契约/目录约定/完成判据）+ `templates/run/` 六件模板 | ✓ |
-| `src/client/` → `lib/client.js` | **研究驾驶舱**（Research Cockpit——观察面 client 面，D18 单点例外；构成正本 = [design/40](../../docs/design/40-research-cockpit.md)）：右栏「研究状态」页签（人性化活动流/活标题/HITL 横幅）+ 研究语义工具卡 + 挂起显性化 | ✓ 构建产物 |
+| `src/client/` → `lib/client.js` | **研究驾驶舱**（Research Cockpit——观察面 client 面，D18 单点例外；构成正本 = [design/40](../../docs/design/40-research-cockpit.md)）：右栏「研究状态」页签（流程轨道锚点/人性化活动流/活标题/HITL 横幅/参与指引/决策诚实线）+ 研究语义工具卡 + 挂起显性化 | ✓ 构建产物 |
 | `src/lib/` → `lib/types/lib/` | 纯函数折算（activity-fold / hitl-fold / run-fold / tool-card）——keyless 单测直接断言 | ✓ 构建产物 |
 | `scripts/preflight.mjs` · `scripts/scaffold.mjs` | 部署前置检查 + 一键准备（见下） | ✓ |
 
@@ -64,8 +66,9 @@ dsh-deep-research-preflight --workspace ~/research-workspace
    supports / source_tier / publisher）；Critic 对抗核查出 `review.md`（readiness PASS 是交付前置）；
 3. **HITL2 审阅**：结构化选项卡（按现稿定稿(Recommended) / 补研究 / 修订表述）→ 拍板后交付
    `final.md`（每条关键结论附 `[来源: evidence/xx.md]`）；
-4. **观察面**：DSH Web GUI 右栏「研究状态」页签看实时动态（人性化活动流 + HITL 挂起横幅 +
-   活标题「研究状态 · ⏳ 等你拍板」）；
+4. **观察面**：DSH Web GUI 右栏「研究状态」页签看实时动态（流程轨道 = ◆立项确认 + 七步 +
+   ◆交付审阅、人性化活动流、HITL 挂起横幅点名锚点与参与方式、活标题「研究状态 · ⏳ 等你拍板」、
+   交付后 rerun 三分提示）；
 5. **审计**（本仓开发面）：`node scripts/evidence-audit.mjs <bundle>` 对会话日志机械对账——
    URL 是否真被抓取过、摘录是否可回溯、final 溯源链是否完整 → `audit.md`。
 
@@ -97,6 +100,9 @@ dsh-deep-research-preflight --workspace ~/research-workspace
 - **会话必须建在**研究工作区里**才能看到渐进面**：页签读的是会话工作区根（`workspaceFiles`），
   run bundle 在工作区内才可见——故需先把研究工作区注册进 DSH（`workspace/create`），再用
   `workspaceId` 形态建会话（`dev/run-kickoff.mjs` 已默认此形态）；建在别处的会话只显示活动流；
+- **页签活动流只 follow lead 会话**：队员（scout/analyst/critic）的检索与取证动作在各自会话，
+  不进 lead journal——`wait_agent` 的"队员作业中"行缓解全静，团队任务细节看 `ui-agent-team`
+  任务板（队员流接入需新数据通道，是后续候选）；
 - **`workspace/` 种子是快照**：由 `dev/sync-pack-workspace.mjs` 从仓库正本同步（门禁
   `pack-workspace-fresh` 防漂移）；种子只铺新工作区，**不覆盖**已存在文件（`--force` 除外）；
 - **皮肤/品牌层**（ui-skin）与**专职 synthesizer 角色**（多场 run 重估：lead 独任综合

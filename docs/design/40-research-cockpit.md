@@ -27,7 +27,7 @@
 
 | 件 | 文件 | 职责 |
 |---|---|---|
-| 研究状态页签 | [ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) | 右栏页签，自上而下五区：① 研究问题行 ② 七步步骤条（立项→拆解→侦察→取证→综合→审查→交付）③ HITL 挂起横幅 ④ 人性化活动流 ⑤ 证据计数 + 交付状态 |
+| 研究状态页签 | [ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) | 右栏页签，自上而下六区：① HITL 挂起横幅（点名锚点 + 参与指引）② 流程轨道 = ◆立项确认 + 七步（立项→拆解→侦察→取证→综合→审查→交付）+ ◆交付审阅 ③ 研究问题行 ④ 人性化活动流 ⑤ 证据计数 + 交付状态 + rerun 三分静线 ⑥ 决策诚实线（指路 question.md §Decisions） |
 | 活标题 | 同上（`ResearchStatusTitle`） | 挂起时页签名变「研究状态 · ⏳ 等你拍板」 |
 | 研究语义工具卡 | [ResearchToolCard.tsx](../../packages/deep-research-pack/src/client/ResearchToolCard.tsx) + [tool-card.ts](../../packages/deep-research-pack/src/lib/tool-card.ts) | 对话流卡片：`spawn_teammate` → 组队卡、`web_search` → 检索卡（2 张） |
 | 挂起显性化 | [index.ts](../../packages/deep-research-pack/src/client/index.ts)（`revealStatusTab`） | pending false→true 迁移时 `openTab` 右栏自动展开；页签 dock 折叠态保持挂载（观察者常在） |
@@ -38,10 +38,10 @@
 
 | 折算 | 输入 → 输出 | 要点 |
 |---|---|---|
-| [hitl-fold](../../packages/deep-research-pack/src/lib/hitl-fold.ts) | journal 事件 → 挂起态 | 尾扫跳过 `session/*` 元数据，末位回合事件 = 未答的 `ask_user_question` 即挂起 |
+| [hitl-fold](../../packages/deep-research-pack/src/lib/hitl-fold.ts) | journal 事件 → 挂起态 + 流程锚点三态 | 尾扫跳过 `session/*` 元数据，末位回合事件 = 未答的 `ask_user_question` 即挂起；`deriveAnchors` 按 ask 序数定锚（第 1 次=立项确认、第 2 次=交付审阅，超额=中途确认如实显示），已答 = ask 后存在回合事件 |
 | [run-fold](../../packages/deep-research-pack/src/lib/run-fold.ts) | bundle 文件在场性 → 步骤条 / 矩阵 | 与 run-dashboard 投影**共用单一正本**（防两处漂移） |
-| [activity-fold](../../packages/deep-research-pack/src/lib/activity-fold.ts) | journal 事件 → 活动行 | 🔍 检索 / 👥 派出 / 💬 成员 / 📦 交付；原始事件类型名不出正文（噪音过滤，尾部 30 行） |
-| [bundle-bind](../../packages/deep-research-pack/src/lib/bundle-bind.ts) | journal 事件 → 本会话绑定的 run slug | 只认 `tool/call` 参数路径里的 `drt_<slug>/`（真动手才算绑定）；多命中取最新 |
+| [activity-fold](../../packages/deep-research-pack/src/lib/activity-fold.ts) | journal 事件 → 活动行 | 🔍 检索 / 👥 派出与队员作业中（wait_agent，连续折叠）/ 💬 成员 / 📦 交付；markdown 源标记与原始事件类型名不出正文（噪音过滤，尾部 30 行） |
+| [bundle-bind](../../packages/deep-research-pack/src/lib/bundle-bind.ts) | journal 事件 → 本会话绑定的 run slug + 绑定强度 | 只认 `tool/call` 参数路径里的 `drt_<slug>/`；**写强读弱**——write/edit 命中直接定绑，仅读命中兜底（立项预检读旧 bundle 的错绑防线，2026-09-28 首跑实证） |
 | [tool-card](../../packages/deep-research-pack/src/lib/tool-card.ts) | call/result 切片 → 卡片状态 | running / ok / error / stopped |
 
 ## 3. 数据通道与接线
@@ -64,13 +64,14 @@
   断言，组件只画）；
 - **keyed 字面量单一正本** `keys.ts`（`client-keys` 门禁逐处对账）；
 - **会话绑定**：渐进面只显示**本会话自己的** run bundle（不显示别家数据）；位置=状态
-  两个位置都认（工作区根 = 在飞、`archive/` = 已交付）；未绑定如实提示。
+  两个位置都认（工作区根 = 在飞、`archive/` = 已交付）；未绑定如实提示；写强读弱 +
+  挂起期抑制仅读绑定的渐进面（预检读取不算"本会话的 run"）。
 
 ## 5. 验证面与改动路由
 
 | 面 | 命令 | 断言什么 |
 |---|---|---|
-| keyless 真浏览器 | `client-load-smoke` | 插件零失败 + 页签渲染 + 渐进面与**磁盘真值对账**（证据计数/交付态/问题行）+ 未绑定负样本 |
+| keyless 真浏览器 | `client-load-smoke` | 插件零失败 + 页签渲染 + 渐进面与**磁盘真值对账**（证据计数/交付态/问题行）+ 锚点轨道与诚实线对账（盘侧独立重算）+ 未绑定负样本 |
 | 真模型档 | `client-hitl-smoke` | 活标题翻转 + 横幅 + 挂起迁移 → 右栏自动展开（端到端） |
 | keyless 单测 | `pnpm test` | 折算五件纯函数（hitl/run/activity/bundle-bind/tool-card 各有测试文件） |
 
@@ -82,6 +83,9 @@
 
 - **会话必须建在研究工作区里**才有渐进面（workspaceFiles 读的是会话工作区根）；建在
   别处的会话只显示活动流（详见 [pack README 已知限制](../../packages/deep-research-pack/README.md)）；
+- **队员动作不进页签活动流**：活动流只 follow lead 会话（scout/analyst 的检索与取证在各自
+  会话）——`wait_agent` 的"队员作业中"行缓解全静；团队任务细节 = `ui-agent-team` 任务板
+  （队员流接入需新数据通道，后续候选）；
 - **工具卡只 2 张**：`team_task_*` 等协调类工具不进对话渲染流（harness 排除），团队观察
   由 `ui-agent-team` 任务板承担；
 - 活标题与页签体各开一条 follow 流共用 WebSocket 数据面（v1 接受，合流是后续优化）；
