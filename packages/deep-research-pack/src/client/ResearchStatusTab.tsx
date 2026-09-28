@@ -204,6 +204,20 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     <span key={s.key} style={{ padding: '2px 8px', borderRadius: 4, opacity: face === null ? 0.35 : s.state === 'pending' ? 0.4 : 1, fontWeight: face !== null && s.state === 'current' ? 700 : 400, background: face !== null && s.state === 'current' ? '#f59e0b33' : face !== null && s.state === 'done' ? '#22c55e22' : '#0000000d' }}>{s.label}</span>
   )
 
+  // 流程轨道 = grid 两行：第一行主轨 chips，第二行 ↻ 回路边（HITL2 到达后出现）——
+  // 回路从 ◆交付审阅 下探、横行、上翘回【挖掘】（U 形连线跨列绘制，箭头指重入点）。
+  // 列位（1 起）：a1=1，steps[0..5]=2..7，a2=8，final=9；回边跨"挖掘列 → a2 列"。
+  const railNodes: { key: string; chip: ReactNode }[] = [
+    { key: 'anchor-1', chip: anchorChip(anchors[0] ?? { key: 'anchor-1', label: '立项确认', state: 'upcoming', questions: 0 }) },
+    ...steps.slice(0, 6).map((s) => ({ key: s.key, chip: stepChip(s) })),
+    { key: 'anchor-2', chip: anchorChip(anchors[1] ?? { key: 'anchor-2', label: '交付审阅', state: 'upcoming', questions: 0 }) },
+    ...steps.slice(6).map((s) => ({ key: s.key, chip: stepChip(s) })),
+    ...anchors.slice(2).map((a) => ({ key: a.key, chip: anchorChip(a) })),
+  ]
+  const loopVisible = anchors[1] !== undefined && anchors[1].state !== 'upcoming'
+  const EV_COL = 5
+  const A2_COL = 8
+
   return (
     <div style={{ padding: 12 }}>
       {/* ① HITL 挂起横幅（最醒目位置；点名锚点 + 参与指引——"怎么参与"在需要那一刻说清） */}
@@ -212,14 +226,18 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           ⏳ 等你拍板——{pendingAnchor?.label ?? '决定'}{pendingAnchor !== undefined && pendingAnchor.questions > 0 ? `（${pendingAnchor.questions} 问）` : ''}：在会话里的问题卡上点选项即可（推荐项已置首）
         </div>
       )}
-      {/* ② 流程轨道：◆立项确认 + 七步 + ◆交付审阅（超额 ask 如实缀为"中途确认"） */}
+      {/* ② 流程轨道：◆立项确认 + 主轨 + ◆交付审阅 + 交付；↻ 回边 = 拍板的分支后果画进流程 */}
       {railVisible && (
-        <div style={{ display: 'flex', gap: 4, marginBottom: 8, fontSize: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-          {anchorChip(anchors[0] ?? { key: 'anchor-1', label: '立项确认', state: 'upcoming', questions: 0 })}
-          {steps.slice(0, 6).map(stepChip)}
-          {anchorChip(anchors[1] ?? { key: 'anchor-2', label: '交付审阅', state: 'upcoming', questions: 0 })}
-          {steps.slice(6).map(stepChip)}
-          {anchors.slice(2).map((a) => anchorChip(a))}
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${railNodes.length}, auto)`, alignItems: 'start', marginBottom: 8, fontSize: 12 }}>
+          {railNodes.map((n, i) => (
+            <div key={n.key} style={{ gridRow: 1, gridColumn: i + 1 }}>{n.chip}</div>
+          ))}
+          {loopVisible && (
+            <div style={{ gridRow: 2, gridColumn: `${EV_COL} / ${A2_COL + 1}`, position: 'relative', margin: '4px 6px 0', border: '1px dashed #c08a2e', borderTop: 'none', borderRadius: '0 0 8px 8px', padding: '2px 6px 3px', color: '#b45309', textAlign: 'center', whiteSpace: 'nowrap' }}>
+              <span style={{ position: 'absolute', top: -8, left: -5, fontSize: 10, color: '#b45309' }}>▲</span>
+              ↻ 补研究（final/ 下一版）· 修订表述原位改{face !== null && face.versions >= 2 ? ` · 已落 v${face.versions}` : ''}
+            </div>
+          )}
         </div>
       )}
       {/* ⑥ 决策诚实线（指路不复制——谁答的家在 question.md §Decisions） */}
@@ -238,12 +256,6 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           <span>证据 {face.evidenceCount} 份</span>
           {face.delivered && <span style={{ color: '#16a34a', fontWeight: 600 }}>✅ 已交付</span>}
           {face.versions >= 2 && <span style={{ fontWeight: 600 }}>v{face.versions}</span>}
-        </div>
-      )}
-      {/* ↻ rerun 回路（HITL2 到达即可见——拍板的分支后果画进流程，交付后仍指路） */}
-      {anchors[1] !== undefined && anchors[1].state !== 'upcoming' && (
-        <div style={{ marginBottom: 10, fontSize: 12, opacity: 0.55 }}>
-          ↻ rerun 回路：补研究 → 回挖掘（final/ 下一版）｜修订表述 → 原位改｜另起 → 新 bundle
         </div>
       )}
       {/* 未绑定 / 绑定待确认提示（RFC right-pane-ux-debt + cockpit-flow-face G4） */}

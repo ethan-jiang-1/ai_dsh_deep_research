@@ -306,6 +306,7 @@ try {
         // 锚点入轨断言（RFC cockpit-flow-face）：轨道渲染 + 诚实线计数与盘侧文件事实对账
         const railOk = seg.includes('◆立项确认') && seg.includes('◆交付审阅')
         step(railOk, '流程轨道渲染（◆立项确认 + ◆交付审阅在场）')
+        step(seg.includes('↻ 补研究'), '↻ rerun 回边在场（交付审阅到达后 U 形回路可见）')
         if (expectedAnchor !== null && expectedAnchor.passed > 0) {
           step(seg.includes(`停靠点已过 ${expectedAnchor.passed} 个`), '停靠点诚实线 = 盘侧真值（文件事实独立重算）', `盘侧 passed=${expectedAnchor.passed}`)
         }
