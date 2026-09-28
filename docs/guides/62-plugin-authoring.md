@@ -85,10 +85,12 @@ DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`�
 检查 = [pack README](../../packages/deep-research-pack/README.md)；部署工具 = 包内两条 bin
 （`dsh-deep-research-preflight` 检查、`dsh-deep-research-scaffold` 铺种子 + 补团队层）。
 
-本仓开发面的三个生成物各有生成器与新鲜度门禁（漂移即红）：`dev/research.overlay.yml`
+本仓开发面的四个生成物各有生成器与新鲜度门禁（漂移即红）：`dev/research.overlay.yml`
 （`dev/render-overlay.mjs` → `overlay-fresh`）、pack 的 `workspace/` 种子
 （`dev/sync-pack-workspace.mjs` → `pack-workspace-fresh`）、run 通道 profile 镜像
-（`dev/boot-run.sh` 幂等重建，逐文件漂移检测）。
+（`dev/boot-run.sh` 幂等重建，逐文件漂移检测）、dist 导出手册（`scripts/export-dist.mjs`
+→ `dist-manual-version`——一条命令出 tarball + 安装手册到 `_dist/`，tarball 不进库，
+手册 tracked；版本动必须重导出，导出不是发布）。
 
 ## 改动影响面（添 / 换 / 删要一起动什么）
 

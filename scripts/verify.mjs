@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'pack-workspace-fresh', 'queue-pointer-live', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'plans-liveness'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'pack-workspace-fresh', 'queue-pointer-live', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'plans-liveness', 'dist-manual-version'];
 
 const failures = [];
 const notes = [];
@@ -1094,6 +1094,32 @@ function parkedSection() {
           fail(gate, `${rel}: 首部 12 行内无「状态：…毕业门判断 = <值>」户口行——推敲卡必须自带毕业门判断（待定/该做/待触发/倾向放弃/…），防挂死稿`);
       }
       if (cards.length === 0) note(gate, 'plans-liveness：0 张活跃推敲卡（合法空态——首卡立时入检）');
+    }
+  }
+}
+
+// ── 门禁 33：dist-manual-version（dist 导出合同——精神移植 ai_dsh_architect docs/distribution.md：
+//    _dist/安装手册.md 是 tracked 生成物（生成器 = scripts/export-dist.mjs），表头版本必须等于
+//    pack 的 package.json 版本，且指名同目录 tarball 的文件名——版本动而手册不重导出即红，
+//    迫使版本 bump 与重导出同 diff。导出目的地 = _dist/（tarball gitignored）。）──
+{
+  const gate = 'dist-manual-version';
+  const manualPath = join(ROOT, '_dist', '安装手册.md');
+  if (!existsSync(manualPath)) {
+    fail(gate, '_dist/安装手册.md 缺席——tracked 生成物必须在库（跑 `node scripts/export-dist.mjs` 导出）');
+  } else {
+    const manual = readFileSync(manualPath, 'utf8');
+    const packVersion = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8')).version;
+    const head = manual.split('\n').slice(0, 10).join('\n');
+    const m = head.match(/\|\s*版本\s*\|\s*(\S+)\s*\|/);
+    if (!m) {
+      fail(gate, '_dist/安装手册.md: 表头 10 行内无「| 版本 | … |」行——手册是 export-dist.mjs 的生成物，勿手写；跑 `node scripts/export-dist.mjs` 重生成');
+    } else if (m[1] !== packVersion) {
+      fail(gate, `_dist/安装手册.md: 表头版本 ${m[1]} ≠ pack package.json 的 ${packVersion}——版本 bump 必须同 diff 重导出（跑 \`node scripts/export-dist.mjs\` 后提交）`);
+    }
+    const t = head.match(/\|\s*安装包\s*\|\s*`([^`]+)`/);
+    if (!t || t[1] !== `dsh-deep-research-pack-${packVersion}.tgz`) {
+      fail(gate, `_dist/安装手册.md: 表头未指名当前 tarball dsh-deep-research-pack-${packVersion}.tgz——手册与旁边的产物漂移，重导出`);
     }
   }
 }

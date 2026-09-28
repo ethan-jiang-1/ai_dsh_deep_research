@@ -61,6 +61,7 @@
 | `count-free` | live 文件不写硬编码计数（`<数> 门禁` / `<数> tests` / `<数> 断言` / `<数> 条源面`）——计数有正本（gates 数组 / 本表 §L0 / `ls`），散文副本必腐。防空语料：0 个 live 文件即红 | [信噪比整治 RFC](../notes/implemented/2026-09-26-signal-to-noise-remediation.md) §实施记录（首跑即咬红**本门禁自己的注释**——它照抄了那几个历史数字，即它有效的第一份证据；反证 = 写回计数 → 红 → 还原绿） |
 | `doc-now-only` | live 文档只写 now，不写变更史：禁「已销账 / 修订 → / 曾用 / 首版…已由…替换」（`docs/AGENTS.md` 自身豁免——它是这条规则的家，必须能举例禁用词）。防空语料：0 个 live 文档即红 | [信噪比整治 RFC](../notes/implemented/2026-09-26-signal-to-noise-remediation.md) §实施记录（清扫实测 live 文档成片出现这四类措辞；反证 = 注入「已销账」→ 红 → 还原绿） |
 | `plans-liveness` | `_backlog/plans/` 每张活跃推敲卡（tracked .md，非 README）：① 文件名 = `YYMMDD-<slug>.md`（立卡日期编码——归档 `git mv` 文件名不变，日期流在归档侧可读）；② 首部 12 行内有「状态：…毕业门判断 = <值>」户口行。层契约：`plans/README.md` 缺席 = 红；0 卡 = 合法空态（note 声明——company 同款空转） | [backlog-deliberation-space](../notes/implemented/2026-09-28-backlog-deliberation-space.md)（无户口行卡注入 → 红 → 补行绿；错名卡 `260928_Bad Name.md` → 红 → 还原绿；untracked 注入不可见 = `git ls-files` 索引面，staged 后兜住——同 md-links 边界） |
+| `dist-manual-version` | dist 导出合同（精神移植参考仓 ai_dsh_architect 的 `docs/distribution.md`）：`_dist/安装手册.md` 是 tracked 生成物（生成器 = `scripts/export-dist.mjs`），必须在库；表头版本 = pack `package.json` 版本，且表头指名 `dsh-deep-research-pack-<version>.tgz`——版本 bump 不重导出即红（手册与旁边的 tarball 不能漂移） | [dist-export Note](../notes/implemented/2026-09-28-dist-export.md)（表头版本注入 `9.9.9` → 红 → 还原绿） |
 
 - **通过判据**：全绿；`verify` 的门禁清单与 `tests/` 守卫一一登记在案，每条带反证记录（上表）。
 - **何时跑**：每轮 goal 续驶必跑。
