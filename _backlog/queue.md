@@ -13,7 +13,9 @@
 
 ## 队列
 
-▶ **节点 I/O 契约显式化（NODES.md + node-gate ②③ 小切口）**——RFC：[2026-09-28-node-io-schema](../notes/proposed/2026-09-28-node-io-schema.md)；范围 = NODES.md 落点（A2 新文件 + 手册一行指针）+ §Decisions 拍板行门 + present 声明门；**用户点名提前**〔第二阶段风味，裁量在用户〕｜**可自主**（keyless 实施面；手册指针行为模型可见改动——收尾需 L4-lite + 通道重启）
+（队列空——待用户取题）
+
+> 队列空 = 全部条目已毕业（历史归 notes/implemented/ + git）；待用户取题或新立项。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 
