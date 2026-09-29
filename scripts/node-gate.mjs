@@ -167,8 +167,11 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
     process.exit(2)
   }
   const { gates, red, report } = gateBundle(bundleDir, sessionsRoot)
+  console.log(`node-gate: ${basename(bundleDir)} ｜ 门③ §Decisions 拍板行 = ${gates.hitl2Row.status} ｜ 门② present 声明 = ${gates.present.status}`)
+  console.log(`  ③ ${gates.hitl2Row.detail}`)
+  console.log(`  ② ${gates.present.detail}`)
   // 报告写入防护：tests/ 夹具区是 tracked 区——写报告=污染 git（2026-09-29 实测 6 个未跟踪文件，
-  // 红证记录见 notes/implemented/2026-09-29-quality-evidence-loop.md）。夹具判定走 stdout 即可。
+  // 红证记录见 notes/implemented/2026-09-29-quality-evidence-loop.md）。夹具判定走上面的 stdout。
   if (resolve(bundleDir).startsWith(join(ROOT, 'tests') + '/')) {
     console.log('  报告写入跳过（tests/ 夹具区——防 tracked 区污染；判定如上）')
   } else {

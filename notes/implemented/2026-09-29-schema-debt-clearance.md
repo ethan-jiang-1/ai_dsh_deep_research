@@ -34,3 +34,4 @@
 - 判断类文件（leads/review/audit 结论）**永不事后代写**——操作侧补齐只做事实性/机械性修复（本仓从此有成文先例：归位与 backfill 合法、代写判断不合法）。
 - 「契约期零违约」仍无对象——第一份可验证对象 = 下一场契约期交付 run（与 pipeline-polish 计数同窗）。
 - journal 未来日期旗继续 INFO（7 本在册，最远 2026-10-20）；契约期后 run 仍出现则升格为机械门候选（先证据后门）。
+- 契约前期 bundle 以**现行**契约 + 现行会话语料重跑 evidence-audit 会打出历史性发现（cpu-gap 现跑 = CRITICAL 16，run 当时的 audit.md = CRITICAL 0）——成因 = 旧通道化石契约 + 会话语料时效，其 journal 早已记账"不追改"；**差分实证**（剥掉本轮 findings backfill 与 journal 追加后复跑，数字逐项一致）证明非本轮修复引入。归档原件的 audit.md = run 当时记录，不以今日重跑覆盖。
