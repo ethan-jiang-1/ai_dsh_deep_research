@@ -6,6 +6,9 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 
 ## 入口链（唯一正本——其他文件一律指回本节，不再各自复述）
 
+> **先分流**：先按 [00-index §先分流](docs/00-index.md) 选行，再读该行指向的文档；下面这条
+> 1–5 步链**只在"改本仓"时适用**（用户说启动 / 跑研究 / 装插件 = "用它"，先看那节）。
+
 按序读，不跳：
 
 1. **本文件**——布局 + 命令速查 + 纪律 + `notes/` 地位 + 本链的定义；
@@ -69,7 +72,7 @@ Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。
 ## 命令速查（全档正本 = [guides/60 §2](docs/guides/60-dev-loop.md)）
 
 ```sh
-source dev/env.sh    # ⚠ 前置：双 home + 裸 dsh 拦截（DSH_HOME=dev/harness-home）；L1/L2 必须先 source，否则脚本自拒 exit 2
+source dev/env.sh    # ⚠ 前置：双 home + 裸 dsh 拦截（DSH_HOME=dev/harness-home）；L1/L2 必须先 source，否则脚本自拒 exit 2（run 通道 dev/boot-run.sh 自 source，勿重复）
 pnpm verify          # L0 结构门禁（keyless，收尾必跑）
 pnpm test            # L0 keyless 回归（唯一登记的测试命令）
 ```

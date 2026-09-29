@@ -9,7 +9,7 @@
 // question.md §Decisions 如实记"代理模拟"。
 //
 // 用法（须带 tsx——前置谓词 import pack .ts 源）：
-//   node --import tsx/esm dev/hitl-answer.mjs --port 3081 --token <横幅 token> [--session <标题子串>]
+//   node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <横幅 token> [--session <标题子串>]
 //                            [--pick recommended|first|<1-based index>] [--custom <文本>]
 //                            [--max-steps 8] [--dry-run]
 // 行为：**先盘侧谓词自拒**（无真挂起会话即退出，不开浏览器——2026-09-27 实录：grep 误报
@@ -30,7 +30,7 @@ const flag = (name, fallback) => {
 }
 const has = (name) => process.argv.includes(name) // 同约定：name 自带 `--`
 
-const PORT = flag('--port', '3081')
+const PORT = flag('--port', process.env.DSH_RUN_PORT || '3083')
 const TOKEN = flag('--token', null)
 // 空串/纯空白 = 未指定（2026-09-27 实录：`--session ""` 使 text.includes('') 恒真 →
 // 点开侧栏第一个无关会话——flag 解析不得把空串当"已指定"）

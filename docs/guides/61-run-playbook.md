@@ -10,7 +10,18 @@
 - 凭据：真 run 需要模型——`dev/harness-home/.credentials.yaml` 配一次
   `DEEPSEEK_API_KEY`（见 [AGENTS.md §密钥](../../AGENTS.md)；boot 本身 keyless）；
 - 启动：`bash dev/boot-run.sh`（幂等：组合在位即直接 boot）→ 等横幅
-  `http://127.0.0.1:3081/?token=…` 用浏览器打开（3080 被开发 GUI 占用，固定 3081）。
+  `http://127.0.0.1:<port>/?token=…` 用浏览器打开。**端口 = `DSH_RUN_PORT`，缺省 3083**
+  （2026-09-28 起 3081 让给别的项目；3080 是本仓开发 GUI，勿占；换端口：
+  `DSH_RUN_PORT=<空闲端口> bash dev/boot-run.sh`）。端口已被占时 boot-run 会 fail-loud 并给
+  补救，**先看占用者是谁**：若是本仓在飞的 run 通道 → **别另起**，用它（URL/token 见启动横幅或
+  `dev/smoke-workspace/web.log`）；不是 → 换端口，或确认后停掉它（**别盲杀**：那会终局化挂起的
+  HITL 回合）；
+- **启动前先判"接续还是新开"**：`ls -dt research-workspace/drt_*/`（`archive/` 除外）——**根目录下
+  每个未归档 bundle 都要报出来**，分两类：(a) 无 `final/` 或 `review.md` 不是 `readiness: PASS`
+  = **在飞** → 问"接续它还是新开"（接续做法 = §5）；(b) 有 `final/` 且 PASS = **交付线已在盘、未归档**
+  （按 D17"位置=状态"该进 `archive/` 了）→ 问"先归档再新开，还是补研究（rerun）"。两类都带上
+  slug + mtime，**都不自己挑**；注意 `final/` + PASS 只是**盘上可验**的交付线——手册的完成判据还要
+  lead 的 `present` 声明（盘上不可验），所以 (b) 类归档前请用户确认。
 
 **web 进程生命周期（实测约束）**：`boot-run.sh` 把 web 跑在**前台**并用 trap 管子进程——
 **脚本退出即 web 停**（这是特性：不留孤儿）。因此：
@@ -18,8 +29,10 @@
 - 交互式使用 = 让 `boot-run.sh` 待在终端里（Ctrl-C 才停）；
 - 需要它在你离开后继续服务 = 用**托管后台任务**跑 web，并**保持 stdin 打开**
   （`sleep <秒> | node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts --profile research
-  -- --port 3081 --no-open`；web 在 stdin 关闭时会自行退出）；
-- **刷新白屏的判别序**：① `lsof -nP -iTCP:3081 -sTCP:LISTEN` 有没有监听 → 无 = 进程已停
+  -- --port <端口，缺省 3083> --no-open`；web 在 stdin 关闭时会自行退出）。**这条绕过 boot-run 的
+  漂移门**（§0 上面"别直接跑 `dsh --profile research`"正为此）：先 `bash dev/boot-run.sh --drift-check`
+  过门再用它；报漂移就按 [guides/62 §改动影响面](./62-plugin-authoring.md) 重建镜像；
+- **刷新白屏的判别序**：① `lsof -nP -iTCP:<端口> -sTCP:LISTEN` 有没有监听 → 无 = 进程已停
   （重跑上面任一形态）；② 有监听但仍白屏/401 = token 过期（**每次启动都是新 token**，
   用当次横幅里的 URL；旧 URL 作废）；③ 有监听且 token 新但页面空 = 前端壳产物陈旧
   （`pnpm --filter @deepseek-ai/dsh-web-frontend run build` 重建；vendor 构建产物整体重建 =
@@ -34,6 +47,9 @@
 # 经 GUI：Workspaces 面板的 + 添加 research-workspace/ 目录；或经 RPC：
 #   workspace/create { request: { path: "<repo>/research-workspace" } }（幂等）
 ```
+
+**自检 / 补登记**：`dev/run-kickoff.mjs` 建会话前就调 `workspace/create`（幂等，RPC 同上）——
+"这台机器登记过没有"不用记；`dev/harness-home` 被重建后本步重新需要。
 
 **为什么关键**：研究手册是**会话 cwd 的 `AGENTS.md`**，DSH 从 cwd 向上发现并注入每个角色
 ——cwd 不是研究工作区，手册就不进上下文（首场 run 因此丢了跨角色证据契约，31 份证据无
@@ -66,7 +82,7 @@ frontmatter）。`dev/run-kickoff.mjs` 已默认用 workspaceId 形态把会话�
 CLI/host 侧没有 answerer，也没有提交答案的 RPC）——所以代答要用真浏览器：
 
 ```sh
-node --import tsx/esm dev/hitl-answer.mjs --port 3081 --token <横幅 token>   # 默认逐题选带（Recommended）的那一项
+node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <横幅 token>   # 默认逐题选带（Recommended）的那一项
 ```
 
 它逐题打印选择结果；**必须**把这次代答如实记进 bundle 的 `question.md` §Decisions 与

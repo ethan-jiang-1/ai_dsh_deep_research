@@ -157,7 +157,7 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
   const con = rows.filter((r) => r.core.length > 0 && r.era !== 'pre-contract').length
   const ex = rows.reduce((n, r) => n + r.exempt.length, 0)
   const wn = rows.reduce((n, r) => n + r.warn.length, 0)
-  const objNote = conObj === 0 ? '（契约期尚无交付对象——「零违约」无对象，不得宣称）' : '——RED'
+  const objNote = conObj === 0 ? '（契约期尚无交付对象——「零违约」无对象，不得宣称）' : con === 0 ? '' : '——RED'
   console.log(`\n== 违约地图：契约前 ${pre}/${rows.length}（如实报告不计红）｜契约期 ${con}/${conObj}${objNote}｜编制豁免 ${ex} 件｜WARN ${wn} ==`)
   process.exit(red ? 1 : 0)
 }

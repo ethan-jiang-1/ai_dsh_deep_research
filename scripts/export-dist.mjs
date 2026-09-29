@@ -97,17 +97,17 @@ ${entries.length} 个条目 —— 不需要 npm registry，不需要克隆仓�
 ## 一、安装
 
 \`\`\`sh
-dsh plugin --profile research add /path/to/${tarballName}
+# ① 建 profile——自定义名默认只带 dsh-base（起不了 web，也就没有图形界面）；须先取 web 模板。
+#    这一步只需第一次；profile 已存在就跳过。\`web\` = DSH 出厂模板，不读你本地同名 profile。
+dsh --profile research --from-default-profile web --dump-config
+
+# ② 装本包（本包 private，未发布 registry——必须给 tarball 的 file: 形态，且必须**绝对路径**：
+#    \`file:\` 的相对路径按 profile 目录解析，不是你的 cwd）
+dsh plugin --profile research add file:/path/to/${tarballName}
 \`\`\`
 
-想先隔离试用、不动日常环境？换一个名字，多一步一次性初始化：
-
-\`\`\`sh
-dsh --profile try-research --from-default-profile web --dump-config   # 只需第一次
-dsh plugin --profile try-research add /path/to/${tarballName}
-\`\`\`
-
-（后文一律以 \`research\` 为例；用了别的名字，把命令里的 \`research\` 换成它即可。）
+（本文一律以 \`research\` 为例；换名字——例如隔离试用 \`try-research\`、不动日常环境——把命令里
+的 \`research\` 换成它即可。）
 
 ## 二、验证安装
 
@@ -130,7 +130,8 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffo
 \`\`\`
 
 它会铺工作区种子（研究手册 AGENTS.md + run 模板）、确保团队机制层在场，并跑前置检查。
-随时可单独复检：
+脚本用 PATH 上的 \`dsh\`，写哪个 home 由 \`DSH_HOME\` 决定——装日用 DSH 时**别先** source 开发
+环境的 env.sh。随时可单独复检：
 
 \`\`\`sh
 node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/preflight.mjs \\
@@ -143,8 +144,10 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 cd ~/research-workspace && dsh --profile research
 \`\`\`
 
-对 Lead 说出研究问题即进 HITL1 立项；研究过程中 DSH Web GUI 右栏出现「研究状态」页签
-（重启 \`dsh web\` 后首次可用；浏览器刷新本身不加载新模块，需硬刷新 ⌘⇧R）。
+对 Lead 说出研究问题即进 HITL1 立项；这一步拉起该 profile 的 web 应用并打印
+\`http://127.0.0.1:<port>/?token=…\`（每次启动 token 都不同，旧 URL 作废）——用浏览器打开它，
+研究过程中右栏出现「研究状态」页签（改插件内容后要重启这个 profile 才生效：浏览器刷新本身
+不加载新模块，还需硬刷新 ⌘⇧R）。
 
 ## 五、卸载（干净，无残留）
 

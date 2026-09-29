@@ -14,7 +14,12 @@ run 的操作面是**文件 + 会话通道**，不是代码。启动器、观察
 
 - 题面：一次调研 = 一个 run bundle（`research-workspace/drt_<slug>/`）。同名/前缀相关
   bundle 已在 → 先问用户，不擅自另起（bundle 身份 = 方向契约）；
-- 起通道：`bash dev/boot-run.sh`（幂等：组合校验 → 漂移检测 → boot web 3081 → 仪表盘）。
+- **开跑前先扫未归档 run**：`research-workspace/drt_*/`（`archive/` 除外）——根目录下**每个** bundle
+  都要报出来，分两类：(a) 无 `final/` 或 `review.md` 不是 `readiness: PASS` = 在飞 → 问**接续它还是
+  新开**（接续做法 = §3）；(b) 有 `final/` 且 PASS = 交付线已在盘但未归档 → 问**先归档再新开，还是
+  补研究**。两类都带 slug + mtime，**都不自己挑**；
+- 起通道：`bash dev/boot-run.sh`（幂等：组合校验 → 漂移检测 → boot web（`DSH_RUN_PORT`，缺省 3083）
+  → 仪表盘）。
   改了 pack 文本（persona/skill/手册）必须重启通道——**web 进程缓存 boot 时的文本**；
 - 观察面两处、同一折算：`node scripts/run-dashboard.mjs --latest --out <html>`（或 `--watch`，
   多场扫描的 HTML 投影）与 GUI 右栏「研究状态」页签（会话内实时：步骤条 + HITL 挂起横幅 +

@@ -6,6 +6,39 @@
 > **读法（省上下文）**：入口链第 2 步只需要本页 §文档地图（下面那张表）——**别通读决策台账**；
 > D 号按需查（改到哪个机制就查哪条），术语映射与外部材料登记同理。
 
+## 先分流：用户要"用它"还是"改它"
+
+**先记住这条模型**：本包是 bundle + preset 的集合，**自身没有进程**——"启动它"始终等于"装进
+某个 profile + 起该 profile"（本仓 = `research` profile）。带着这个模型读下表：每行只给**一个
+首个动作**（会占住前台的已标出；本表覆盖用户对"启动 / 跑 / 装 / 改"的全部常见说法）：
+
+| 用户的说法 | 走哪（该事的唯一 owner） | 首个动作 |
+|---|---|---|
+| "启动这个 DSH 插件""跑起来看看""开跑"——**未指定别的 home 时就是本行，直接做、不要停下来问** | [guides/61](./guides/61-run-playbook.md) | `bash dev/boot-run.sh`（**占前台**，Ctrl-C 才停；**别**直接 `dsh --profile research`——那会绕过漂移检测、静默用旧镜像） |
+| "接着上次跑""继续那个研究" | [guides/61 §5](./guides/61-run-playbook.md) | 同一条 `bash dev/boot-run.sh`；起来后新开 lead 会话说"继续 `<slug>` 这个 run" |
+| "装到我的 DSH""部署给别人 / 别的机器" | [pack README §部署](../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../_dist/安装手册.md)（出包 = `node scripts/export-dist.mjs`） | `dsh --profile <p> --from-default-profile web --dump-config`（一次性；写的是 `DSH_HOME` 那个 home） |
+| "只验证插件还能挂载"（开发证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs` |
+| "改插件内容"（角色 / skill / 驾驶舱 / 部署面） | [guides/62](./guides/62-plugin-authoring.md) | 该页 §参与阶梯 + §改动影响面 |
+| "改本仓开发流程"（门禁 / docs / notes / 入口链） | 根 [AGENTS.md](../AGENTS.md) §入口链 | 第 3 步队列 ▶ |
+
+**开跑前置**（只对第 1/2 行）：仓根 `pnpm install` 已跑 + `vendor/dsh` submodule 已 init +
+`dev/harness-home/.credentials.yaml` 有 `DEEPSEEK_API_KEY`（boot 本身 keyless）。
+`bash dev/boot-run.sh` **自己 source `dev/env.sh`**——先 source 不是前置（`AGENTS.md §命令速查`
+那条 ⚠ 只约束 L1/L2 脚本）。要它在你离开后继续服务 = [61 §0](./guides/61-run-playbook.md)
+的"托管后台 + 保持 stdin 打开"形态。
+
+**歧义裁定**（两条规则谁管谁）：用户**未指定别的 DSH home** → 直接走第 1 行，不停下来发问
+（第 1 行的"不要问"只指"别问装哪个 home"；**在飞 run 的接续/新开照下面那条办，该问就问**）；
+只有他明说"装到我日用 / 别人的 DSH"、或目标 home 不是 `dev/harness-home` 时才问一句
+"装到哪个 DSH home？"（本仓开发通道 = `dev/harness-home`，先 `source dev/env.sh`；日用 =
+`~/.dsh`，**不要** source——两者装的东西不同）。
+
+**每次"启动"前先扫一眼在飞 run**（动作 = `ls -dt research-workspace/drt_*/`，`archive/` 除外；
+细判据 = [61 §0](./guides/61-run-playbook.md)）：**根目录下每个未归档 bundle 都要报出来**——
+(a) 无 `final/` 或 `review.md` 非 `readiness: PASS` = 在飞 → 问"接续它还是新开"；(b) 有 `final/`
+且 PASS = 交付线已在盘、未归档 → 问"先归档再新开，还是补研究"（`present` 声明盘上不可验，
+归档前请用户确认）。两类都带上 slug + mtime，**都不自己挑**。
+
 ## 文档组织原则
 
 **docs/ 按"性质"分层，不按"时间"分层**（沿 ai_dsh_company D10）：时间维度的东西（初始意图、
@@ -65,6 +98,7 @@
 | D18 | **观察面 client 面 = D7 的单点例外，套件名 = 研究驾驶舱（Research Cockpit，2026-09-28 用户拍板）**：例外范围 = 两个插件（`src/client/` client 半 + `src/index.ts` host 半空壳宿主位）+ `src/lib/` 折算纯函数；双半 tsdown 产物 `lib/client.js` + `lib/index.js`，用途限定 = 研究观察/调试；品牌/皮肤面不因此解禁（仍搁置池）。构成的当前事实正本 = [design/40](./design/40-research-cockpit.md) | 用户明确需求（run 期观察分散四处 + HITL 等待不可见实证）+ [琢磨稿](../notes/archived/2026-09-24-ui-observability-surfaces.md)（机制考古，已归档）+ company 同款生长序 + [observability-gui RFC](../notes/implemented/2026-09-24-observability-gui.md)（2026-09-25 马拉松 Stage 0） |
 | D19 | **推敲空间 = 根目录 `_backlog/`**（plans/bugs/_done 全三件；借鉴链 = deerflow → company D31 → 本仓）：决策前四问（该不该做/何时/次序/是否放弃）的家——只载判断材料，**不载次序与授权**（次序唯一 = [_backlog/queue.md](../_backlog/queue.md) §队列，同日 D20 修订——规划面单一化；授权唯一 = guides/60；推敲卡不是任务）；plans 卡 `YYMMDD-<slug>`（本仓裁定——归档日期流可读，company 原样纯 slug）；毕业四门产出**判断**不开工；门禁 = `plans-liveness` | 用户直派（2026-09-28，裁定：根目录 / 全三件 / 走正门 + 命名裁定）；[Note](../notes/implemented/2026-09-28-backlog-deliberation-space.md)；规矩手册 = [_backlog/README.md](../_backlog/README.md) |
 | D20 | **规划面单一化：roadmap.md 退役**（2026-09-28 用户裁决——先问「有了 _backlog 是否还需要 roadmap」，代理反证倾向保留，用户裁断退役；反证论据随推敲卡永久归档）：队列 + 搁置池迁 [_backlog/queue.md](../_backlog/queue.md)（纯索引，零判断材料），推敲（plans/）与次序（queue.md）一个家分半区；入口链第 3 步、`proposal-scheduled` / `queue-pointer-live` / `entry-chain` 三门禁、`entry-chain-probe` 真值锚同 diff 改锚 | 用户裁决；推敲证据 = [_done/_closed_plans/260928-retire-roadmap](../_backlog/_done/_closed_plans/260928-retire-roadmap.md)（首张立卡当日毕业的推敲卡）；[Note](../notes/implemented/2026-09-28-backlog-deliberation-space.md) |
+| D21 | **入口按意图分流（"用它" vs "改它"）**：路由正本 = 本页 §先分流（用户说法 → 文档 → 第一条命令），根 AGENTS.md §入口链与 README Start Here 各一行指针；"启动这个插件"默认理解 = 本仓 run 通道；含糊时判据 = 目标 DSH home（本仓 `dev/harness-home` vs 日用 `~/.dsh`）。禁止再让操作类请求落进队列分支 | 用户定调（2026-09-29「fresh agent 一进来就要立刻明白」，泛化性优先于本人用法）+ 4 个零上下文探针实证 4/4 必须反问、且各自选了不同答案；[Note](../notes/implemented/2026-09-29-cold-start-intent-router.md) |
 
 ### 待定（阻塞项标 ⛔）
 

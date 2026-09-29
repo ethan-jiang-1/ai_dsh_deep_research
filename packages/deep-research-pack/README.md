@@ -27,24 +27,38 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 
 角色职责与方法论：见各 `presets/<role>.patch.yml`（persona）与 `presets/<role>/skills/<n>/SKILL.md`（方法论正文）——都随本包发布。
 
-## 部署（三步）
+## 部署（四步）
 
 **前置**：DSH 版本必须是 `dsh-v0.1.7-rc.2`（`dsh.compatibility.dshReleases` 钉死）。
 
 ```sh
-# ① 装包进 profile（tarball 或 npm 名；dsh plugin add 自动 reconcile dsh.profile.bundles）
-dsh plugin --profile research add dsh-deep-research-pack
+# ① 建 profile——自定义名默认只带 dsh-base（起不了 web，也就没有 GUI）；须先取 web 模板。
+#    `web` = DSH 出厂模板（不读你本地同名 profile）。profile 已存在则**跳过本步**，改用不带该
+#    flag 的 `dsh --profile research --dump-config`（带 `--from-default-profile` 会因"已存在"硬失败）。
+dsh --profile research --from-default-profile web --dump-config
 
-# ② 一键准备：铺工作区种子 + 确保团队机制层在场 + 跑前置检查
-dsh-deep-research-scaffold --workspace ~/research-workspace --profile research
-#   等价手工：cp -r <pack>/workspace/. ~/research-workspace/
-#             dsh plugin --profile research add @deepseek-ai/dsh-experimental-agent-team-profile
+# ② 装包：本包 private（未发布 registry）——裸包名解析不到，必须给 tarball 的 file: 形态；
+#    且**必须绝对路径**（`file:` 相对路径按 profile 目录解析，不是你的 cwd）。
+#    出包 = `node scripts/export-dist.mjs`（仓根执行）→ `_dist/` 的 tarball + 安装手册.md（用户视角正本）。
+dsh plugin --profile research add file:/abs/path/to/dsh-deep-research-pack-0.1.0.tgz
 
-# ③ 起研究会话（cwd = 工作区，手册从这里注入）
+# ②b 验证形状（"装好了"的最小判据；下四项缺任一 = 没装上）
+dsh --profile research --dump-config   # 应见 preset-lead/scout/analyst/critic + tool-present + ui-agent-team + research-client
+
+# ③ 一键准备：铺工作区种子 + 确保团队机制层在场 + 跑前置检查
+#    ⚠ tarball 装法**不生成 PATH bin**——用安装副本里的脚本全路径（不是 `dsh-deep-research-scaffold`）：
+node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffold.mjs \
+  --workspace ~/research-workspace --profile research
+#    它用 PATH 上的 `dsh`；写哪个 home 由 `DSH_HOME` 决定（未设时默认 ~/.dsh）——日用安装别先 source dev/env.sh；
+#    手工等价 = 三件全做（scaffold 内部就是这三件）：cp -r <pack>/workspace/. ~/research-workspace/
+#             + dsh plugin --profile research add @deepseek-ai/dsh-experimental-agent-team-profile
+#             + 全路径 preflight.mjs --workspace ~/research-workspace
+
+# ④ 起研究会话（cwd = 工作区，手册从这里注入；本步拉起该 profile 的 web 并打印带 token 的 URL）
 cd ~/research-workspace && dsh --profile research
 ```
 
-**为什么需要 ②**：研究纪律靠**会话 cwd 的 `AGENTS.md`**（DSH 的 agent-instructions 从 cwd
+**为什么需要 ③**：研究纪律靠**会话 cwd 的 `AGENTS.md`**（DSH 的 agent-instructions 从 cwd
 向上发现并注入每个角色）；团队机制（`spawn_teammate` / `team_task_*`）**不在本包声明**
 （组合与实战 config 归 vendor 的 `agent-team-profile` 层——D16；作者面规则正本 =
 [guides/62 参与方表](../../docs/guides/62-plugin-authoring.md)）。
@@ -53,7 +67,8 @@ cd ~/research-workspace && dsh --profile research
 **前置检查**（随时可跑，fail-loud + 给补救命令）：
 
 ```sh
-dsh-deep-research-preflight --workspace ~/research-workspace
+node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/preflight.mjs \
+  --workspace ~/research-workspace
 # 检查：DSH 版本 / 14 个平台 peer 包 / 团队机制层 / 工作区手册+模板 / 构建产物 / 模型密钥
 ```
 

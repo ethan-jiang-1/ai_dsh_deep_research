@@ -27,6 +27,8 @@
 
 **2026-09-29 两场 run 体感喂进**（model-ecosystem / cn-us-open-source，均 HITL2 定稿归档）：① 质量机器再验证——critic 真拦截 ×2（前者 Round1 FAIL 1 CRITICAL 漏读 excerpts → 修复 → PASS；后者 Round1 FAIL C1/C2+M1–M7 → Round2 PASS 逐项实测复核）、evidence-audit CRITICAL=0 ×2——**反向门未触发**；② **第 5 面（停靠点）新证据**：cn-us-open-source 通道死在门前 → lead 的 present 从未声明 + HITL2 从未被问（**G8 双缺席第二实例**，会话日志全库取证），model-ecosystem 的 HITL2 问询也被通道死孤置（用户经操作侧结构化卡代驱作答）——HITL2 码头对通道死亡脆弱，rerun-loop-live 候选后续①②③加权；③ **第一阶段判据的新取样点**："连续 N 场无操作侧救场"——本次两场均需操作侧收尾（代驱拍板 + present 补齐 + 归档），算不算"救场"？判据定义时必须先给"救场"划界。
 
+**2026-09-29 第三场样本（drt_mcp-server-ecosystem，契约生效后首场）＝样本 1/3，判不过**，卡三条全中：① 通道死救场 ×1（DeepSeek transport 故障把 analyst-1 turn 与 lead turn 2 双双打死，重试 5 次耗尽；操作侧 session/prompt 恢复——lead 据文件事实重建并 spawn analyst-3 无缝接续，恢复路径本身顺畅）；② 两点外卡壳（通道死停摆 ~1.5h）；③ 交付记账返工一处——**门③活体抓红**（G8 第三实例·契约期首例：lead 拍板 HITL2 后落 final/ 并 present，但未回写 §Decisions 拍板行）→ 操作侧显式记账补齐转绿。正面记录：critic 首轮真 FAIL（CRITICAL 2，含抓出 scout 的 leads.md 计数错）→ 修复 → 复评 PASS；evidence-audit 首过 CRITICAL=0；归档即位零搬砖。**新划界题**：用户预先授权的 HITL 代驱（"完全自主弄完"）算不算①的救场？建议判定 = 授权代驱不算、故障代驱算——待用户拍板。
+
 1. **专业 DR 方法论对标**：策略层深化——移植只解决了"内核在场"，与专业 DR（OpenAI DR 等）的策略取舍（搜索预算分配、迭代深度、终止条件）尚未逐项对过。
 2. **wave0 机制（侦察，scout）**：leads 映射波次——搜索面怎么铺、主题怎么拆、leads 的覆盖判据（侦察产出质量直接决定 wave1 的天花板）。
 3. **wave1 机制（挖掘，analyst）**：证据采集波次——spawn 规模、任务板粒度、每 lead 挖多深、补搜轮次（synthesis 现行"只补一轮"是否最优）。

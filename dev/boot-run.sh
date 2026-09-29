@@ -16,10 +16,18 @@ set -euo pipefail
 node "$ROOT/scripts/lib/vendor-artifacts.mjs"
 
 PROFILE=research
-# 端口可覆盖（2026-09-28 用户指令：3081 让给别的项目，本仓 run 通道用 3083）：
-#   DSH_RUN_PORT=3083 bash dev/boot-run.sh
-# 缺省仍 3081（60 §3 既有约定）；3080 = DSH web GUI 占用，不可用。
-PORT="${DSH_RUN_PORT:-3081}"
+# 端口：缺省 3083（2026-09-28 用户指令——3081 让给别的项目；3080 = 本仓开发 GUI）；覆写：
+#   DSH_RUN_PORT=<空闲端口> bash dev/boot-run.sh
+PORT="${DSH_RUN_PORT:-3083}"
+
+# 端口自检（fail-loud + 补救）：端口已 LISTEN = 另起通道必失败，且可能打断在飞 run 的通道
+# （bundle 文件不受损，但挂起的 HITL 回合会被终局化）——先说清再让人决定。
+if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
+  echo "boot-run: 端口 $PORT 已被占用：pid = $(lsof -nP -iTCP:"$PORT" -sTCP:LISTEN -t 2>/dev/null | tr '\n' ' ')" >&2
+  echo "          若是本仓在飞的 run 通道 → 别另起：用它（URL/token 见启动横幅或 dev/smoke-workspace/web.log）" >&2
+  echo "          确要重启或换端口：先停占用者，或 DSH_RUN_PORT=<空闲端口> bash dev/boot-run.sh" >&2
+  exit 1
+fi
 PACKDIR="$ROOT/packages/deep-research-pack"
 PROFDIR="$DSH_HOME/profiles/$PROFILE"
 RUNTMP="$ROOT/dev/smoke-workspace/run-pack"
@@ -124,7 +132,7 @@ trap cleanup EXIT INT TERM
 echo "boot-run: run 仪表盘已起（只读投影，5s 再生成）：$DASH_OUT"
 cat <<'STEPS'
 ──────────────────────────── 怎么开 run ────────────────────────────
-1. 等 web 横幅出现 http://127.0.0.1:3081/?token=… 用浏览器打开（token 在横幅里）
+1. 等 web 横幅出现（含本次端口与 token）→ 用浏览器打开该 URL
 2. 新建会话：preset 选 "Deep Research Lead"（默认项），cwd 选 research-workspace/
 3. 说出研究问题 → lead 走 HITL1 三问（研究类型 / 深度篇幅 / 时间口径，每问带推荐）→ 你拍板
 4. 静默自主区（角色不问不报）：进度看四处——① run 仪表盘（dev/smoke-workspace/dashboard.html：

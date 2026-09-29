@@ -4,7 +4,7 @@
 // 本脚本不做研究断言。中断恢复复用：--cwd/--preset 同，--prompt-file 换恢复指令。
 //
 // 用法：
-//   node dev/run-kickoff.mjs --port 3081 --token <t> [--cwd <dir>] [--preset lead] [--prompt <text> | --prompt-file <f>]
+//   node dev/run-kickoff.mjs --port 3083 --token <t> [--cwd <dir>] [--preset lead] [--prompt <text> | --prompt-file <f>]
 // 输出：session id（stdout，一行）——后续日志核对/仪表盘观察用它定位。
 import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
@@ -17,7 +17,7 @@ const flag = (name, dflt) => {
   const i = args.indexOf(name);
   return i >= 0 ? args[i + 1] : dflt;
 };
-const port = flag('--port', '3081');
+const port = flag('--port', process.env.DSH_RUN_PORT || '3083');
 const token = flag('--token', null);
 const cwd = flag('--cwd', resolve(ROOT, 'research-workspace'));
 const preset = flag('--preset', 'lead');

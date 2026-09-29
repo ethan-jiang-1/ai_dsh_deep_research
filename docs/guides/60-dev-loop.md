@@ -97,7 +97,7 @@ pnpm verify                           # L0 结构门禁（keyless，收尾必跑
 pnpm test                             # L0 keyless 回归（= node --import tsx/esm --test tests/*.test.mjs；唯一登记的测试命令）
 node dev/render-overlay.mjs            # 生成物：从 pack 渲染 dev/research.overlay.yml（改 pack 后必跑，且**必须先于 L1**）
 node dev/sync-pack-workspace.mjs       # 生成物：把 research-workspace 正本同步进 pack 的 workspace/ 种子（改手册/模板后必跑）
-node dev/hitl-answer.mjs --port 3081 --token <t>   # HITL 代答（代理模拟；默认逐题选推荐项）——answerer 只在浏览器客户端，故用真浏览器
+node dev/hitl-answer.mjs --port 3083 --token <t>   # HITL 代答（代理模拟；默认逐题选推荐项）——answerer 只在浏览器客户端，故用真浏览器
 source dev/env.sh                     # ⚠ 双 home + 裸 dsh 拦截（DSH_HOME=dev/harness-home）；下列 L1/L2 必须先 source，否则脚本自拒 exit 2
 node scripts/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真挂载档（keyless：roster+逐角色建会话+skills 隔离；--profile <p> --no-patch 切安装域通道）
 cd packages/deep-research-pack && pnpm build   # pack 双半构建（tsc -b . + tsdown → lib/index.js + lib/client.js——观察面 client 面，D18）
@@ -105,11 +105,11 @@ node --import tsx/esm scripts/client-load-smoke.mjs    # 观察面 client 面真
 node scripts/release-smoke.mjs        # L2 真实安装形状（keyless：pack→干净 profile→plugin add→安装域冒烟；起真 DSH 环境，无模型调用）
 node scripts/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：四角色响应 + scout web_search 调用）
 node scripts/team-preflight-smoke.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + company D18 one-shot worker 探针）
-bash dev/boot-run.sh                  # run 通道开跑（幂等：组合校验/漂移检测/补装 → boot web 3081 → 仪表盘）；用法 = 61
+bash dev/boot-run.sh                  # run 通道开跑（幂等：组合校验/漂移检测/补装 → boot web 3083 → 仪表盘）；用法 = 61
 node scripts/run-dashboard.mjs --latest --out <html>   # run 只读投影（多场扫描 + 步骤条 + HITL 等待横幅；--watch 持续再生成）
-node dev/run-kickoff.mjs --port 3081 --token <横幅 token> --prompt-file <file>        # run 会话驱动（建会话+发 kickoff）
+node dev/run-kickoff.mjs --port 3083 --token <横幅 token> --prompt-file <file>        # run 会话驱动（建会话+发 kickoff）
 node --import tsx/esm scripts/watch-run.mjs <session-id>   # run 盯场（谓词化状态判定：事件形状，非字符串 grep——HITL-PENDING/RUN-SETTLED 时退出自报；grep 会误报 request/header 工具 schema）
-node --import tsx/esm dev/hitl-answer.mjs --port 3081 --token <t>   # HITL 代答（代理模拟；默认逐题选推荐项——先盘侧谓词自拒：无真挂起不开浏览器；answerer 只在浏览器客户端）
+node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <t>   # HITL 代答（代理模拟；默认逐题选推荐项——先盘侧谓词自拒：无真挂起不开浏览器；answerer 只在浏览器客户端）
 pnpm dsh <args…>                      # 机制基线 CLI（vendor/dsh 钉 tag 源码；等价 dev/env.sh 的 dsh 函数）
 node --import tsx/esm scripts/client-hitl-smoke.mjs   # 观察面活标题触发验证（真模型档：RPC followup 造挂起态 + 盘侧谓词 + 浏览器观察点）
 node scripts/snapshot-replay-smoke.mjs    # keyless 回放冒烟（须先 source dev/env.sh，端口 3103：三层判据——A 零真模型回放收尾逐字命中 / B 组装请求 diff（persona+工具 schema）/ C 渲染金标准比对；`--update-expected` 从真实回放重写金标准）
@@ -151,7 +151,7 @@ source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名�
   [升 pin 复核结论](../../notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md#升-pin-复核结论2026-09-25-毕业)）；
 - web 观察窗：`dsh web -- --port 3081 --no-open`（3080 是本 GUI 占用）；
 - run 通道（研究 run 的正式启动面，安装域）：`bash dev/boot-run.sh`（幂等：组合校验/补装
-  → boot web 3081 → 入口步骤打印）——用法全文见 [61-run-playbook](./61-run-playbook.md)。
+  → boot web 3083 → 入口步骤打印）——用法全文见 [61-run-playbook](./61-run-playbook.md)。
 - 提交门禁：`source dev/env.sh` 幂等启用 pre-commit 钩子（`dev/hooks/pre-commit`：verify +
   tests 红灯即拦 commit——"收尾必跑"的机器化，红 commit 溜进历史的教训见
   [agent-friendly-polish Note 教训 4](../../notes/implemented/2026-09-24-agent-friendly-polish.md)）；
