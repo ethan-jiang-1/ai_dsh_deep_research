@@ -1,0 +1,1 @@
+{"type":"tool/call","seq":1,"time":1790600000000,"data":{"turn":1,"step":1,"callId":"c1","name":"present","arguments":"{\"file_path\": \"research-workspace/drt_fixture-complete/final.md\"}"}}
