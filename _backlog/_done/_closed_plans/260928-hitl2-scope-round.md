@@ -1,6 +1,6 @@
 # 推敲：HITL2 条件范围轮——补研究的细节对齐集中在一个锚点
 
-> 状态：推敲中｜毕业门判断 = 待定（复盘已做 2026-09-29：两场首交付 HITL2 试点 = A 形态零摩擦正向证据〔范围轮试点题两场均被认真作答：3 方向 / 1 方向，零"过烦"信号〕；但严格门实证〔"补的方向非我所要"〕未发生——两场都拍定稿、零 rerun → 按卡内分支 A 减配 / D 义务化评估，且受两阶段纪律约束〔HITL2 合同 = 环节合同，第一阶段不动〕）｜下一步 = 首场真 rerun 的 HITL2 体感定形，或用户点名提前立 RFC + 队列行（动手窗口 = 通道重启时机）
+> 状态：已毕业·该做但不现在（2026-09-29 用户裁决搁置：严格门未触发〔零 rerun〕+ 实施归第二阶段〔环节合同〕；试点正证留卡——范围轮试点题两场被认真作答 3+1 方向、零过烦）｜去向 = queue.md §搁置池行「HITL2 条件范围轮」+ 本卡迁 _done/_closed_plans/；复活条件 = 首场补研究型 HITL2 发生〔体感定形 → 立 RFC〕或用户点名提前
 
 ## 背景 / 触发
 
@@ -14,9 +14,9 @@ trial run（drt_cn-us-open-source，2026-09-28）中用户提出：rerun 启动�
 
 已核实：
 
-- HITL2 本身是**循环的**——每个版本交付重过一次（[m2-run-mechanics](../../notes/implemented/2026-09-24-m2-run-mechanics.md) §109：ReopenResearchPass = 同 bundle 版本演进）；候选后续①（rerun 交付同样过 HITL2 锚进 skill）待做，与本卡相邻。
+- HITL2 本身是**循环的**——每个版本交付重过一次（[m2-run-mechanics](../../../notes/implemented/2026-09-24-m2-run-mechanics.md) §109：ReopenResearchPass = 同 bundle 版本演进）；候选后续①（rerun 交付同样过 HITL2 锚进 skill）待做，与本卡相邻。
 - 一次多问 + 推荐置首的卡片机制现成（HITL1 三问同卡）——范围轮可直接复用形态。
-- HITL2 卡 ≤200 字纪律刚立（[synthesis §5](../../packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md)，实测 6 张超长卡最长 1280 字把选项挤出视口）——范围细节塞进决策卡会重新破戒。
+- HITL2 卡 ≤200 字纪律刚立（[synthesis §5](../../../packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md)，实测 6 张超长卡最长 1280 字把选项挤出视口）——范围细节塞进决策卡会重新破戒。
 - 重入点合同：补研究回挖掘（最深重入点）、修订表述原位改（不回节点）、结构性另起新 bundle（D17）；HITL1 永不重开（rerun-loop-live 记账实证）。
 - 用户初步裁决（2026-09-28 会话）：倾向**所有交互集中在 HITL2**——认知依据：HITL2 是用户信息最全的时刻（刚看完交付稿），HITL1 是最不全的时刻；问范围细节问在实料上。
 - **2026-09-29 两场 HITL2 试点复盘**（model-ecosystem 与 cn-us-open-source 均定稿；run 通道 web 3081 已死，操作侧按"文件即真相"代驱——结构化卡转呈、用户本人作答）：① **A 形态交互成本实测 ≈ 0**——范围轮试点题（多选 over final §9 缺口清单）两场均被认真作答（3 方向 / 1 方向），零摩擦零"过烦"；② **D 形态 de facto 在场**——用户勾选全部落在 final §9 缺口清单内（两场 final 的 §9 即数据源），只是未合同化；③ **严格门实证未发生**：两场都拍定稿、零 rerun → "lead 补的方向非我所要"无从出现——门要求的恰是 A 会预防的痛（**门悖论如实登记**：等实证 = 等一次本可避免的跑偏）；④ **相邻发现**：cn-us-open-source lead 的 present 从未声明 + HITL2 从未被问（通道死在门前，**G8 双缺席第二实例**，会话日志全库取证）——HITL2 码头对通道死亡脆弱，候选后续①②〔rerun-loop-live〕的相关性因此超出 rerun 场景。

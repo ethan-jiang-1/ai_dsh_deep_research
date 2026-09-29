@@ -1,17 +1,17 @@
 # 推敲：节点 I/O schema——上下游的交接约定
 
-> 状态：推敲中｜毕业门判断 = 定稿门已过（2026-09-29 用户逐节点过目后**定稿**：三要领 + 八节点 I/O 表成为拓扑演进与质量门的参考正本；两场 run 同日活体验证第 7/8 行判据）｜下一步 = 落地门留第二阶段：A/B 落点与交接判据机械化范围同质量门卡一起判（第一阶段维持 C——住卡不加仪式）
+> 状态：已毕业·该做（近期）（2026-09-29 用户点名提前并定案：落点 A2〔NODES.md 新文件住契约全表 + 手册一行指针〕+ node-gate 小切口②③〔§Decisions 拍板行门 + present 声明门〕；C 形态同日翻案——分量够，不等第二阶段）｜去向 = queue.md §队列行（▶）+ [RFC](../../../notes/proposed/2026-09-28-node-io-schema.md) + 本卡迁 _done/_closed_plans/
 
 ## 背景 / 触发
 
-用户 2026-09-28 点出："每一个 node 都有输入有输出，前面那个输出就是后面那个输入，他们至少得有个约定——这个约定可能叫 schema。定一下，不要搞得太复杂，抓住要领最重要。"动机 = 节点可换可加的前提是接口有约（关联 [260928-pipeline-polish](260928-pipeline-polish.md) 第 7 面：拓扑演进）。
+用户 2026-09-28 点出："每一个 node 都有输入有输出，前面那个输出就是后面那个输入，他们至少得有个约定——这个约定可能叫 schema。定一下，不要搞得太复杂，抓住要领最重要。"动机 = 节点可换可加的前提是接口有约（关联 [260928-pipeline-polish](../../plans/260928-pipeline-polish.md) 第 7 面：拓扑演进）。
 
 ## 已知与未决
 
 **schema 的坯子已经存在三处**（定约 = 显式化，不是发明新格式）：
 
 - **模板 = 字段级契约实例**：`research-workspace/templates/run/` 六个模板（question/topics/leads/evidence-entry/findings/final），每个输出文件的必备件写在模板里。
-- **手册 = 文件级正本**：[研究手册](../../research-workspace/AGENTS.md) §目录约定（哪个节点写哪些文件）+ §证据文件契约（硬五字段/口径最小契约）。
+- **手册 = 文件级正本**：[研究手册](../../../research-workspace/AGENTS.md) §目录约定（哪个节点写哪些文件）+ §证据文件契约（硬五字段/口径最小契约）。
 - **audit = 交接的机械把守**：evidence-audit 已机械对账 evidence→final 链；run-fold 的**在场性折算**（STEP_ORDER 由文件在场驱动）= "节点完成"判据的机器可读形态——观察面轨道就是消费它。
 
 **2026-09-29 活体验证（定稿同日）**：两场 run（model-ecosystem / cn-us-open-source，均 HITL2 定稿）把表第 7/8 行判据逐条演示——① **第 7 行判据（§Decisions 行在场）在两场上都红**：HITL2 拍板行缺席（cn-us-open-source 更是 present + HITL2 双缺席，G8 第二实例，会话日志全库取证）——交付节点因上游未给齐而无法开工，判据咬人实证；其自然机械化路径 = rerun-loop-live 候选后续③（审计层查版本交付前 ask 在场）。② **第 8 行三件**（final/v1.md + present 声明 + audit CRITICAL=0）在 model-ecosystem 当天全数落位、cn-us-open-source 由操作侧补齐——判据可执行性实测通过。
