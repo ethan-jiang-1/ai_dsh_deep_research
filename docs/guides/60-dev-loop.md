@@ -114,6 +114,8 @@ pnpm dsh <args…>                      # 机制基线 CLI（vendor/dsh 钉 tag 
 node --import tsx/esm scripts/client-hitl-smoke.mjs   # 观察面活标题触发验证（真模型档：RPC followup 造挂起态 + 盘侧谓词 + 浏览器观察点）
 node scripts/snapshot-replay-smoke.mjs    # keyless 回放冒烟（须先 source dev/env.sh，端口 3103：三层判据——A 零真模型回放收尾逐字命中 / B 组装请求 diff（persona+工具 schema）/ C 渲染金标准比对；`--update-expected` 从真实回放重写金标准）
 node scripts/evidence-audit.mjs <bundle>|--latest  # 证据溯源审计（**须先 source dev/env.sh**：它锚定本仓 dev home，DSH_HOME 指向别处即自拒）（keyless：URL/摘录/final 链对会话日志机械对账 → audit.md；CRITICAL 即 exit 1）
+node scripts/node-gate.mjs <bundle>|--latest [--sessions <dir>]  # 节点交接契约门（keyless：交付两门 = §Decisions 拍板行 + present 声明；RED = exit 1，报告落 bundle node-gate.md；tests/ 夹具区只出 stdout 不写文件）
+node scripts/schema-scan.mjs [<bundle-dir>…]     # schema 保真度扫描（keyless：八节点输出件在场断言；断代定红——契约日 2026-09-29 后交付且违约 = exit 1，契约前期如实报告不计红；默认扫 archive 全量）
 node scripts/entry-chain-probe.mjs    # 入口链探针（真模型档：时不变四问，答案对 ▶ 真值软断言，留档人工复核）
 node packages/deep-research-pack/scripts/preflight.mjs --workspace <dir>   # 部署前置检查（pack 自带 bin：DSH 版本/peer 包/团队层/工作区手册/构建产物/密钥；fail-loud 带补救命令）
 node packages/deep-research-pack/scripts/scaffold.mjs --workspace <dir>    # 部署准备（pack 自带 bin：铺工作区种子 + 补团队层 + 复跑 preflight；幂等）
