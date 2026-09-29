@@ -21,7 +21,7 @@
 
 （2026-09-29 实跑）
 
-- **schema 全量扫描**：`node scripts/schema-scan.mjs` → 违约地图 = 契约前 6/14（agentic-parity final.md 位置漂移〔2026-09-26 缺陷实例〕；cpu-gap 缺 findings.md；4 场 pricing run 缺 leads.md，deepseek 另缺 review.md），契约期对象 0（「零违约」无对象不得宣称——CLI 尾行原样输出）；另抓 7 本 journal 含未来日期（最远 2026-10-20 > 当日 2026-09-29）。leads.md 模板与手册条目自 R1（ea0d3b7，2026-09-23）即在——schema 在场而无机械把守，角色照漂。
+- **schema 全量扫描**：`node scripts/schema-scan.mjs` → 违约地图 = 契约前 6/14（agentic-parity final.md 位置漂移〔2026-09-26 缺陷实例〕；cpu-gap 缺 findings.md；4 场 pricing run 缺 leads.md，deepseek 另缺 review.md），契约期对象 0（「零违约」无对象不得宣称——CLI 尾行原样输出）；另抓 7 本 journal 含未来日期（最远 2026-10-20 > 当日 2026-09-29）。leads.md 模板与手册条目自 R1（ea0d3b7，2026-09-23）即在——一轮初判「schema 在场而无机械把守，角色照漂」；**同日二轮勘误（材料复核推翻该归因，见 [schema 债务清偿](2026-09-29-schema-debt-clearance.md)）**：4 场 pricing 实为 quick_factual 编制合法跳过（类型/记账俱在），属 schema 歧义而非角色越轨；真缺陷 = 位置漂移 ×1（已机械归位）+ findings 契约演进债务 ×1（已显性 backfill）；6/14 地图已收敛至 0 违约 + 5 豁免。
 - **断代逻辑反证**：`node --test tests/schema-scan.test.mjs` 6 断言全过（契约前违约不红 / 契约期违约红 / 无日期从严红 / 位置漂移形态 / 断代翻转 / journal 未来日期旗）——夹具在 `tests/fixtures/schema-scan/`（5 mini bundle），断代日期经 `dates` 注入（夹具 mtime 随检出时间漂，不可作断代依据）。
 - **门决策表逐格**：node-gate 夹具 6 形态 **CLI exit 矩阵**（hitl2-missing / no-question / present-missing → 1；complete / early / relay → 0）+ 真数据突变 4 形态（改名 slug + 删拍板行 → 双 RED exit 1；真 basename 删拍板行 → 门③ 隔离红 exit 1；readiness→FAIL → 门② N/A exit 0；删 final/ → 门③ N/A exit 0）+ 真实 bundle 2 例（model-ecosystem 双 PASS、open-source 门③ PASS + 门② PASS-RELAY）——与 NODES.md 第 7/8 行判据逐格一致。
 - **副作用红绿证**：防护前 6 个未跟踪文件（实证）→ 防护后夹具矩阵 + git status 零新文件。

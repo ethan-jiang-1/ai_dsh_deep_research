@@ -58,3 +58,27 @@ test('journal 未来日期异常旗（模型时间感不可信——显性化不
   assert.equal(rows[0].future, '2026-10-20')
   assert.equal(rows[0].core.length, 0) // 异常旗不计违约（INFO 级）
 })
+
+// ── 编制条件性（RFC 2026-09-29-schema-debt-clearance）──
+
+test('quick_factual 编制豁免：条件件缺席不计违约，journal 记账在场则无 WARN', () => {
+  const { rows, red } = scanAll([join(F, 'drt-quickfactual')], { dates: { 'drt-quickfactual': '2026-09-29' } })
+  assert.equal(rows[0].core.length, 0)
+  assert.equal(rows[0].exempt.length, 2) // leads.md + review.md 双豁免
+  assert.equal(rows[0].warn.length, 0)
+  assert.equal(red, false)
+})
+
+test('quick_factual 但 journal 无补偿把关记账 → WARN（不静默不红，人工核对入口）', () => {
+  const { rows, red } = scanAll([join(F, 'drt-quickfactual-silent')], { dates: { 'drt-quickfactual-silent': '2026-09-29' } })
+  assert.equal(rows[0].core.length, 0)
+  assert.ok(rows[0].warn.length >= 1)
+  assert.equal(red, false)
+})
+
+test('无类型标记而条件件缺席 → 维持违约（豁免依据必须是 bundle 自带事实，不是名单）', () => {
+  const { rows, red } = scanAll([join(F, 'drt-notyped-missing-leads')], { dates: { 'drt-notyped-missing-leads': '2026-09-29' } })
+  assert.ok(rows[0].core.some((c) => c.includes('leads.md')))
+  assert.equal(rows[0].exempt.length, 0)
+  assert.equal(red, true)
+})

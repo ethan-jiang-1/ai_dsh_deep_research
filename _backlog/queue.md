@@ -13,10 +13,9 @@
 
 ## 队列
 
-▶ **schema 债务清偿**（feature，可自主）——[RFC](../notes/proposed/2026-09-29-schema-debt-clearance.md)：
-编制条件性入 NODES.md 契约（quick_factual 条件件）+ schema-scan v2 编制感知 + 真缺陷两件修
-（agentic-parity 位置归位 / cpu-gap findings 显性 backfill）+ 判断类文件显性拒修 + 一轮归因勘误。
-用户裁决（2026-09-29）：「那就修好……想好，然后修」——修的是歧义与真缺陷，不伪造编制记录。
+（队列空——待用户取题）
+
+> 队列空 = 全部条目已毕业（历史归 notes/implemented/ + git）；待用户取题或新立项。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 
