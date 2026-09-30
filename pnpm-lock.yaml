@@ -55,6 +55,9 @@ importers:
       '@deepseek-ai/dsh-tool-fs-search':
         specifier: workspace:*
         version: link:vendor/dsh/packages/fs/tool-fs-search
+      '@deepseek-ai/dsh-tool-goal':
+        specifier: workspace:*
+        version: link:vendor/dsh/packages/goal/tool-goal
       '@deepseek-ai/dsh-tool-present':
         specifier: workspace:*
         version: link:vendor/dsh/packages/deliverables/tool-present
@@ -136,6 +139,9 @@ importers:
       '@deepseek-ai/dsh-tool-fs-search':
         specifier: ^0.2.0-rc.2
         version: link:../../vendor/dsh/packages/fs/tool-fs-search
+      '@deepseek-ai/dsh-tool-goal':
+        specifier: ^0.2.0-rc.2
+        version: link:../../vendor/dsh/packages/goal/tool-goal
       '@deepseek-ai/dsh-tool-present':
         specifier: ^0.2.0-rc.2
         version: link:../../vendor/dsh/packages/deliverables/tool-present

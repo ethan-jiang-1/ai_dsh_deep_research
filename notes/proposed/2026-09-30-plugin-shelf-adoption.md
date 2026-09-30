@@ -97,6 +97,17 @@ ask-user / present / agent-instructions + agent-team-profile 层），升 pin �
 
 **R2（2026-09-30，基线债优先 = 用户裁决）**：
 
+- **R2-3a tool-goal 落地（lead 行 + 方法论接线）**：goal-round-driver 随 base 在位（create_goal
+  后自动续轮 = 中断韧性）；用法钉进 persona「run 目标态」行——HITL1 拍板后 create_goal
+  （objective = 定稿问题 + 交付判据）、**任何 ask 挂起前 update_goal action=pause / 答后
+  resume**（结构性护栏：driver 只认 goal 状态不认挂起 ask〔goal-round-driver/src:165/:269
+  只在 phase=active 且 armed 时续轮〕，等拍板期间不 pause 会空转烧模型调用）、真交付后
+  complete；goal 与 drt_ bundle 互为镜像、冲突以 bundle 文件事实为准。只挂 lead（单 run 单
+  owner）；GoalBar 观察面免费。fixture 换代 v4（30 工具含 goal 三件 + persona 行）。验证：
+  verify 全绿 + tests 116/0 + L1/L2/L4-lite + snapshot-replay ALL PASS（金标准人审：仅措辞差异）。
+
+**R2（2026-09-30，基线债优先 = 用户裁决）**：
+
 - **R2-2 timed ask-user 落地（600s，修正语义下的用户呈批）**：lead preset 的 tool-ask-user
   行配 `mode: timed + timeout: 600`——超时返回 pending（问题保持可答、后答经
   answer_to_pending_question 唤醒、pending 通知明示"这不是许可"）。**配套观察谓词升级

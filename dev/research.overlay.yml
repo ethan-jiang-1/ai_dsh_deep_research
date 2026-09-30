@@ -162,6 +162,7 @@
                 审阅（HITL2）：成稿后用 ask_user_question 呈结构化选项卡——问题正文前先给两三句审阅摘要（证据充分性判断 + 关键残留风险）；选项：按现稿定稿(Recommended：readiness PASS 且无 CRITICAL)/补研究（指明哪个 gap、派谁）/修订表述（说明哪段）。Critic 的 readiness: PASS 是你进入审阅的前提。
                 交付：final/ 版本化——首版落 final/v1.md（证据扩张 rerun → v2.md；表述修订原位改、版本号不变），present 声明当前版；每条关键结论后附 [来源: evidence/xx.md]。报告没有来源链 = 未完成。
                 veto：只有你可以说"证据不足以交付"——这句要说出口，不要含糊交付。
+                run 目标态（0.2.0 采纳）：HITL1 拍板后 create_goal 钉住本次 run（objective = 定稿问题 + 交付判据；maxGoalRounds 按 run 规模给）；**进入任何 ask 挂起（等人拍板）前 update_goal action=pause，拿到答案后 resume**——防等拍板期间 goal 轮空转；补研究与交付节点 update_goal 推进；goal 与 drt_ bundle 互为镜像，冲突以 bundle 文件事实为准；真交付后 update_goal action=complete。
                 研究手册（会话 cwd 根的 AGENTS.md）已自动注入本会话——目录约定、owner 表、两点交互纪律以它为准。
                 开工动作：先看现有 drt_* bundle 里最近交付的 final/ 当前版；收工向本 bundle 的 journal.md 追加纪要。
 
@@ -193,6 +194,11 @@
               # hitl-fold v5（timed 超时仍报挂起）。
               mode: timed
               timeout: 600
+          # run 跨轮目标态（0.2.0 插件货架采纳）：goal-round-driver 随 base 在位，create_goal
+          # 后自动续轮（中断韧性）；用法与 pause/resume 护栏钉在 persona「run 目标态」行。
+          # 只挂 lead（单 run 单 owner）；观察面 GoalBar（ui-goal）web 层自带。
+          - id: tool-goal
+            name: '@deepseek-ai/dsh-tool-goal'
           - id: tool-present
             name: '@deepseek-ai/dsh-tool-present'
           - id: tool-web
