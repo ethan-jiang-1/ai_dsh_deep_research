@@ -13,9 +13,13 @@
 
 ## 队列
 
-（队列空——待用户取题）
-
-> 队列空 = 全部条目已毕业（历史归 notes/implemented/ + git）；待用户取题或新立项。
+▶ **0.2.0 插件货架适配**（feature，可自主；timed ask-user 语义变更与 auto-review 取舍在阶段边界请人）——
+[RFC](../notes/proposed/2026-09-30-plugin-shelf-adoption.md)：DSH 0.2.0 出厂插件对 deep-research
+场景的分层采纳与逐项收口——session-query 检索 / timed ask-user / compaction 调优（一梯队）、
+tool-goal / tool-jobs / auto-review（二梯队）、workflow-vs-Teams / browser-use / 换源引既有定案
+（辨析梯队）；每项采纳（落地 + 全档绿）或否决（理由 + 归宿记档）。
+用户指令（2026-09-30）：「充分利用 DSH 的新插件……合适我们场景的」（语料 =
+`/Users/bowhead/deepseek-harness/_digested/plugin-inventory/`，基线与本仓 pin 一致）。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 
