@@ -51,12 +51,44 @@ test('多个写命中 → 最新写为准（另起/转续场景）', () => {
 
 test('sessionBindingOf 暴露绑定强度：仅读命中 → boundBy read（挂起期消费方据此抑制渐进面）', () => {
   const events = [call('read', { path: 'drt_cn-us-open-source/question.md' })];
-  assert.deepEqual(sessionBindingOf(events), { slug: 'cn-us-open-source', boundBy: 'read' });
+  assert.deepEqual(sessionBindingOf(events), { slug: 'cn-us-open-source', boundBy: 'read', kickoffSeen: false });
 });
 
 test('sessionBindingOf：写命中 → boundBy write；无命中 → 全 undefined', () => {
-  assert.deepEqual(sessionBindingOf([call('write', { path: 'drt_a/x.md' })]), { slug: 'a', boundBy: 'write' });
-  assert.deepEqual(sessionBindingOf([]), { slug: undefined, boundBy: undefined });
+  assert.deepEqual(sessionBindingOf([call('write', { path: 'drt_a/x.md' })]), { slug: 'a', boundBy: 'write', kickoffSeen: false });
+  assert.deepEqual(sessionBindingOf([]), { slug: undefined, boundBy: undefined, kickoffSeen: false });
+});
+
+// ── kickoffSeen（BUG-001：立项轨道信号——ask_user_question 调用或 research-brief skill 加载）──
+
+test('kickoff：research-brief skill 加载（开工第一步）→ kickoffSeen true', () => {
+  const events = [call('skill', { name: 'research-brief' })];
+  assert.equal(sessionBindingOf(events).kickoffSeen, true);
+});
+
+test('kickoff：ask_user_question 调用（HITL1 三问）→ kickoffSeen true（含仅读绑定的立项窗口）', () => {
+  const events = [
+    call('read', { path: 'drt_old-run/final.md' }), // 预检读取旧 bundle（错绑源）
+    call('ask_user_question', { questions: [{ id: 'q1' }] }),
+  ];
+  const b = sessionBindingOf(events);
+  assert.equal(b.slug, 'old-run');
+  assert.equal(b.boundBy, 'read');
+  assert.equal(b.kickoffSeen, true); // 消费方据此抑制："这场还没开始"
+});
+
+test('kickoff：恢复会话形态（只读目标 bundle、无立项动作）→ kickoffSeen false（渐进面不受影响）', () => {
+  const events = [
+    call('read', { path: 'drt_cn-llm-infra/question.md' }),
+    call('read', { path: 'drt_cn-llm-infra/topics.md' }),
+  ];
+  assert.equal(sessionBindingOf(events).kickoffSeen, false);
+});
+
+test('kickoff 边界：别的 skill 不算；畸形 skill 参数 fail-soft', () => {
+  assert.equal(sessionBindingOf([call('skill', { name: 'synthesis' })]).kickoffSeen, false);
+  assert.equal(sessionBindingOf([call('skill', '{"name":"research')]).kickoffSeen, false);
+  assert.equal(sessionBindingOf([call('skill', 'not-json')]).kickoffSeen, false);
 });
 
 test('用户消息文本提到 drt_ 不构成绑定（只认工具调用——问句顺带提及 ≠ 真的在动手）', () => {

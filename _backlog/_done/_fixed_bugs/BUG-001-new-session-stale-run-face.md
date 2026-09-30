@@ -1,6 +1,6 @@
 # BUG-001：新会话立项窗口期，「研究状态」页签错呈上一次 run 的渐进面
 
-> 严重级别：P1（观察面诚实性——驾驶舱核心承诺是"如实"，错绑直接违反）｜发现：2026-09-30｜状态：活跃
+> 严重级别：P1（观察面诚实性——驾驶舱核心承诺是"如实"，错绑直接违反）｜发现：2026-09-30｜状态：已修（2026-09-30 同日，修复见 _done/_fixed_bugs 登记行）
 
 ## 症状
 
@@ -36,7 +36,22 @@
 
 ## 修复关联
 
-待修（用户 2026-09-30 报告并定预期："不应该呈现的是上一次，而是这一次还没开始"）。
-涉及面：`packages/deep-research-pack/src/client/ResearchStatusTab.tsx`（抑制条件）+
-可能的 `bundle-bind.ts`（ask 信号面）+ keyless 单测（`tests/` 补立项窗口形态矩阵）+
-`client-load-smoke` 渐进面断言（未开始态的盘侧真值对账）。
+**已修（2026-09-30 同日，用户点名当场修）**：
+
+- `bundle-bind.ts`：`SessionBinding` 增 `kickoffSeen`（立项轨道信号 = `ask_user_question`
+  调用 ∨ `skill` 调用加载 `research-brief`——persona 规定的开工第一步，覆盖预检读取→ask
+  发出前的窗口；ask 在场覆盖拍板后→落笔前的窗口）；
+- `ResearchStatusTab.tsx`：抑制条件扩为 `read && (pending || kickoffSeen)` + 专属
+  「🌱 这场研究还没开始」状态行；附带修复 boundRef 守卫只比 slug 的潜伏 bug（同 slug 的
+  boundBy 翻转与 kickoffSeen 翻转此前不触发重渲染）；
+- 测试：bundle-bind +4 kickoff 矩阵（skill 加载/ask 调用/恢复会话负样本/边界），两处
+  deepEqual 随新字段翻新；
+- 连带（本卡修复期间暴露）：client-load-smoke 三条轨道断言从"已交付 run 假设"改为
+  **盘侧相对**（done 步数与 deriveSteps 对账；重入点/↻ 回边按 delivered ∨ 尾窗挂起
+  [loopOn 同谓词] 分支）——此前绑到在飞 bundle 会假红。
+
+**验证**：tests 120/0（fold 矩阵）+ client-load-smoke ALL PASS（真浏览器：绑定会话渐进面
+= 盘侧真值、未绑定零泄漏）+ 活体探针：kickoff+读绑定旧 bundle 的挂起会话页签 =
+⏳ 横幅 + 抑制线 + **零旧 run 渐进面泄漏**。**如实记档**：🌱 状态行的活体观察未捕获
+（瞬态窗口 + 探针会话被通道重启冻结在挂起态）——触发条件有单测矩阵、渲染分支与已验证
+的兄弟态同构，待首场真 run 顺带确认。

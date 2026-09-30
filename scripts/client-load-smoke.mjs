@@ -34,6 +34,8 @@ import { assertVendorArtifacts, ARTIFACT_REMEDY } from './lib/vendor-artifacts.m
 import { launchChromium, loadChromium } from './lib/playwright.mjs'
 import { readSessionEvents } from './lib/run-state.mjs'
 import { sessionBundleOf } from '../packages/deep-research-pack/src/lib/bundle-bind.ts'
+import { deriveSteps } from '../packages/deep-research-pack/src/lib/run-fold.ts'
+import { foldHitlPending } from '../packages/deep-research-pack/src/lib/hitl-fold.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const arg = (name, fallback) => {
@@ -148,7 +150,9 @@ for (const { d, m } of readdirSync(join(sessionsRoot, sessionGroup))
   const title = lastTitleOf(events)
   if (title === null || title.trim() === '') continue
   const slug = sessionBundleOf(events)
-  if (slug !== undefined && boundSession === null) boundSession = { title, slug }
+  // 尾窗挂起谓词（↻ 回边盘侧真值的一半：deriveAnchors 的 loopOn = final 在场 或
+  // question 在场 + 尾部 ask 未答——HITL2 挂起也亮回边，不只是已交付）
+  if (slug !== undefined && boundSession === null) boundSession = { title, slug, tailAskPending: foldHitlPending(events).pending }
   if (slug === undefined && unboundCandidates.length < 5) unboundCandidates.push({ title })
   if (boundSession !== null && unboundCandidates.length >= 1) break
 }
@@ -167,7 +171,19 @@ const expectedFace = boundSession !== null && bundleBaseOf(boundSession.slug) !=
   const questionText = names.has('question.md') ? readFileSync(join(base, 'question.md'), 'utf8') : null
   // G3（RFC cockpit-flow-face）：与页签同口径——剥 markdown 强调符再截断（72 字 + 省略号）。
   const firstLine = questionText?.split('\n').find((l) => l.trim() !== '' && !l.startsWith('#'))?.replace(/\*\*/g, '').replace(/`/g, '').trim().slice(0, 72) ?? null
-  return { base, evidenceCount, delivered: names.has('final.md'), hasQuestion: names.has('question.md'), firstLine }
+  // 步态盘侧真值（BUG-001 轮修正）：done/current 期望随磁盘文件走——绑到的会话不一定是
+  // 已交付 run（在飞 bundle 只做了一部分步骤）；deriveSteps 与页签同一谓词，期望值不再
+  // 隐含"六步全绿 + 回边"的已交付假设。
+  const steps = deriveSteps({
+    question: names.has('question.md'),
+    team: names.has('question.md'),
+    leads: names.has('leads.md'),
+    evidence: evidenceCount,
+    findings: names.has('findings.md'),
+    review: names.has('review.md'),
+    final: names.has('final.md'),
+  })
+  return { base, evidenceCount, delivered: names.has('final.md'), hasQuestion: names.has('question.md'), firstLine, steps }
 })() : null
 
 // 锚点三态盘侧真值（RFC cockpit-flow-face，混合折算口径）：passed = 文件事实（question.md /
@@ -308,8 +324,14 @@ try {
           return { cur: cur.length, greens: lbls.filter(greenDone), reentry: ev === undefined ? null : getComputedStyle(ev).outlineStyle }
         }, ['立项', '组队', '侦察', '挖掘', '综合', '审查'])
         step(rail.cur === 1, '轨道 current 唯一（● 恰一枚——双高亮歧义回归红）', `● ×${rail.cur}`)
-        step(rail.greens.length === 6, '轨道 done 可读（六步全 ✓ 绿字 = 已过，与锚点 passed 同语法）', `绿字 done：${rail.greens.join('、') || '无'}`)
-        step(rail.reentry === 'dashed', '重入点描边在场（回边落点 = 挖掘，与 current 实底可分）', `outline=${rail.reentry ?? '无'}`)
+        // done 期望 = 盘侧 deriveSteps 真值（BUG-001 轮修正：绑到的会话不一定是已交付 run，
+        // 在飞 bundle 只做了一部分步骤——期望随磁盘走，不再隐含"六步全绿"）
+        const expectedDone = expectedFace.steps.filter((s) => s.state === 'done').length
+        step(rail.greens.length === expectedDone, '轨道 done = 盘侧步态真值（✓ 绿字步数与 deriveSteps 对账）', `绿字 ${rail.greens.length} / 盘侧期望 ${expectedDone}：${rail.greens.join('、') || '无'}`)
+        // 重入点描边与 ↻ 回边 = 已交付 run 的轨道面（loopOn 锚点 = question+final 都在场）；
+        // 在飞 bundle 无回边属如实渲染，断言随 delivered 分支。
+        step(expectedFace.delivered ? rail.reentry === 'dashed' : rail.reentry === null,
+          '重入点描边（回边落点 = 挖掘；已交付 run 才有回边）', `outline=${rail.reentry ?? '无'}（delivered=${expectedFace.delivered}）`)
         const evMatch = seg.match(/证据 (\d+) 份/)
         step(evMatch !== null && Number(evMatch[1]) === expectedFace.evidenceCount,
           '证据计数 = 磁盘真值（会话绑定 + 根/archive 两位置）', evMatch ? `${evMatch[0]}（磁盘 ${expectedFace.evidenceCount}）` : '未渲染')
@@ -318,7 +340,10 @@ try {
         // 锚点入轨断言（RFC cockpit-flow-face）：轨道渲染 + 诚实线计数与盘侧文件事实对账
         const railOk = seg.includes('◆立项确认') && seg.includes('◆交付审阅')
         step(railOk, '流程轨道渲染（◆立项确认 + ◆交付审阅在场）')
-        step(seg.includes('↻ 补研究'), '↻ rerun 回边在场（交付审阅到达后 U 形回路可见）')
+        // ↻ 回边的完整真值（deriveAnchors.loopOn）：final 在场（已交付）或 question 在场 +
+        // 尾部 ask 未答（HITL2 挂起）——两者都亮回边；只排除"既没交付也没挂起"的在建态。
+        const loopExpected = expectedFace.delivered || (expectedFace.hasQuestion && boundSession.tailAskPending === true)
+        step(loopExpected === seg.includes('↻ 补研究'), '↻ rerun 回边 = 盘侧完整真值（交付 ∨ 挂起；loopOn 同谓词）', `delivered=${expectedFace.delivered} tailAskPending=${boundSession.tailAskPending}`)
         if (expectedAnchor !== null && expectedAnchor.passed > 0) {
           step(seg.includes(`停靠点已过 ${expectedAnchor.passed} 个`), '停靠点诚实线 = 盘侧真值（文件事实独立重算）', `盘侧 passed=${expectedAnchor.passed}`)
         }

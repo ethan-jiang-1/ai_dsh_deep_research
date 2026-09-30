@@ -78,10 +78,11 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const [journalEvents, setJournalEvents] = useState<readonly unknown[]>([])
   const [face, setFace] = useState<BundleFace | null>(null)
   const [unbound, setUnbound] = useState(false)
-  const [binding, setBinding] = useState<SessionBinding>({ slug: undefined, boundBy: undefined })
+  const [binding, setBinding] = useState<SessionBinding>({ slug: undefined, boundBy: undefined, kickoffSeen: false })
   const [journalSeen, setJournalSeen] = useState(false)
+  const [kickoffHold, setKickoffHold] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const boundRef = useRef<string | undefined>(undefined)
+  const boundRef = useRef<SessionBinding>({ slug: undefined, boundBy: undefined, kickoffSeen: false })
   const prevPending = useRef(false)
 
   // ① journal 流 → 活动行 + HITL 谓词 + 会话绑定输入
@@ -89,7 +90,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     const sessionId = props.sessionId
     if (sessionId === undefined) return
     const controller = new AbortController()
-    boundRef.current = undefined
+    boundRef.current = { slug: undefined, boundBy: undefined, kickoffSeen: false }
     prevPending.current = false
     void (async () => {
       try {
@@ -107,8 +108,11 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           if (next.pending && !prevPending.current) props.revealStatusTab()
           prevPending.current = next.pending
           const bound = sessionBindingOf(events)
-          if (bound.slug !== boundRef.current) {
-            boundRef.current = bound.slug
+          // 全值比对（BUG-001 附带修复）：只比 slug 会漏 boundBy 翻转（同 slug 的 read→write，
+          // rerun 场景）与 kickoffSeen 翻转（立项动作出现）——两者都改变渐进面判定。
+          if (bound.slug !== boundRef.current.slug || bound.boundBy !== boundRef.current.boundBy
+            || bound.kickoffSeen !== boundRef.current.kickoffSeen) {
+            boundRef.current = bound
             setBinding(bound)
           }
         }
@@ -123,15 +127,21 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   // G4（RFC cockpit-flow-face）：read 弱绑定在挂起期不作渐进面依据——立项预检读取旧 bundle
   // 会错绑（2026-09-28 首跑实证）；挂起 + 仅读绑定 → 抑制面（此刻本 run 的 bundle 多半未
   // 实例化），写命中后 boundBy 变 write 自然恢复。恢复会话只读查询（无挂起）不受影响。
+  // BUG-001（2026-09-30 用户报告）补第二窗口：非挂起期的立项轨道（预检读取 → ask 发出前、
+  // ask 拍板后 → 落笔前）同样错呈旧 run——kickoffSeen（ask_user_question 调用或
+  // research-brief skill 加载 = 本会话在开新 run）把整个立项轨道的仅读绑定都抑制。
   useEffect(() => {
     const sessionId = props.sessionId
-    const suppressed = binding.boundBy === 'read' && hitl.pending
+    const kickoff = binding.boundBy === 'read' && binding.kickoffSeen
+    const suppressed = binding.boundBy === 'read' && (hitl.pending || binding.kickoffSeen)
     if (sessionId === undefined || binding.slug === undefined || suppressed) {
       setFace(null)
       setUnbound(journalSeen && binding.slug === undefined)
+      setKickoffHold(kickoff && !hitl.pending)
       return
     }
     setUnbound(false)
+    setKickoffHold(false)
     const boundSlug = binding.slug
     let stopped = false
     const scan = async () => {
@@ -278,7 +288,12 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           （本会话未绑定 run bundle——研究状态只跟本会话自己的 run）
         </div>
       )}
-      {!unbound && face === null && binding.boundBy === 'read' && hitl.pending && (
+      {kickoffHold && (
+        <div style={{ marginBottom: 10, fontSize: 12, padding: '6px 10px', borderRadius: 6, background: '#0000000d' }}>
+          🌱 这场研究还没开始——立项对齐中，读到的是上一场 run 的上下文；落笔开跑后这里显示本场状态。
+        </div>
+      )}
+      {!unbound && !kickoffHold && face === null && binding.boundBy === 'read' && hitl.pending && (
         <div style={{ marginBottom: 10, fontSize: 12, opacity: 0.55 }}>
           （挂起期间不显示 bundle 渐进面——当前绑定仅由读取推断，落笔后确认）
         </div>

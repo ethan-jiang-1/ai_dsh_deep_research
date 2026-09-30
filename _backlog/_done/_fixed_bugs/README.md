@@ -6,4 +6,4 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
-| （空） | | | |
+| [BUG-001](BUG-001-new-session-stale-run-face.md) | 新会话立项窗口期，「研究状态」页签错呈上一次 run 的渐进面 | （本 commit：kickoffSeen 立项轨道信号 + 抑制条件扩展 + 🌱 状态行） | 2026-09-30 |
