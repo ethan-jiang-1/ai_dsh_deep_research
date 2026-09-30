@@ -2,6 +2,10 @@
 
 > 状态：implemented
 
+> 本轮（0.1.5→0.1.7）建立的升 pin 固定动作与复核结论由后续轮次增量修订：0.2.0 轮见
+> [020rc2 升 pin Note](2026-09-30-vendor-pin-bump-020rc2.md)（新增 vendor 内部 node_modules
+> 刷新、typert emit 按面过滤、聚合 typecheck 金丝雀守门、host 半补建扫 vendor）。
+
 归宿：roadmap §队列「升 pin 重校」（触发型 → 2026-09-25 触发并毕业，已离队）；依据 =
 [discipline-map §重审触发路径](../../docs/discipline-map.md) + 用户指令（DSH 上游有最新 RC，
 同步并确认既有工作无重大问题）。

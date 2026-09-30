@@ -147,8 +147,11 @@ source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名�
 - **换 pin 后先构建**（0.1.7 起启动依赖构建产物）：`bash dev/vendor-build.sh --clean`——
   产出逐包 `lib/types`、`lib/typert.<face>.js`（`typert-loader` 启动要求）与 client 面
   `lib/client.js`（client-modules 组合要求）；vendor 自带 `pnpm run build` 在干净树上红在
-  tsdown 根单元，故由本仓驱动（坑与三条产物细节见
-  [升 pin 复核结论](../../notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md#升-pin-复核结论2026-09-25-毕业)）；
+  tsdown 根单元，故由本仓驱动（0.1.7 轮三条产物细节见
+  [升 pin 复核结论](../../notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md#升-pin-复核结论2026-09-25-毕业)；
+  0.2.0 轮新增固定动作 = vendor 内部 node_modules 刷新 + typert emit 按面过滤 +
+  聚合 typecheck 红的金丝雀守门 + host 半补建扫 `vendor`，见
+  [020rc2 升 pin Note](../../notes/implemented/2026-09-30-vendor-pin-bump-020rc2.md)）；
 - web 观察窗：`dsh web -- --port 3081 --no-open`（3080 是本 GUI 占用）；
 - run 通道（研究 run 的正式启动面，安装域）：`bash dev/boot-run.sh`（幂等：组合校验/补装
   → boot web 3083 → 入口步骤打印）——用法全文见 [61-run-playbook](./61-run-playbook.md)。

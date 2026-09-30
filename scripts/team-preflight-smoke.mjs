@@ -15,7 +15,7 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { withModelKey } from './lib/env.mjs';
 import { randomUUID } from 'node:crypto';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { presetRoles } from './lib/roles.mjs';
@@ -245,19 +245,45 @@ try {
     return `共 ${n} 次`;
   });
 
-  // 成员发现：lead 日志的 "Background subagent <uuid>" 行 = roster childId（机制原生）
-  await check('成员 id 从 lead 日志提取（Background subagent 行）', async () => {
-    const ids = [...readSessionLog(leadId).matchAll(/Background subagent ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/g)].map((m) => m[1]);
-    if (ids.length < 2) throw new Error(`只提取到 ${ids.length} 个成员 id`);
-    return ids.map((i) => i.slice(0, 8)).join(' / ');
-  });
-  const memberIds = [...new Set([...readSessionLog(leadId).matchAll(/Background subagent ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/g)].map((m) => m[1]))];
-
   // 归属按内容不按位置（2026-09-25 实证修正）：spawn 顺序与日志出现顺序不保证一致，
   // 位置配对在顺序交叉时误报（probe-scout 位回 ANALYST 标记 = 冒烟自身缺陷非机制缺陷）——
   // 每个成员会话的日志含自己的 spawn prompt 标记，按标记内容归属天然免疫顺序。
   const memberSpecs = [[SCOUT_MARKER, 'probe-scout'], [ANALYST_MARKER, 'probe-analyst']];
+
+  // 成员发现（0.2.0 实测修正）：lead 日志的 "Background subagent <uuid>" 行是**完成通知**
+  // （0.2.0 实测只有先完成者落此行，后完成者被收场截断），当成员全集会在单成员场景假红；
+  // 成员全集改为**按 spawn prompt 标记内容**扫描近窗会话——与归属免疫是同一哲学。
+  const scanRecentSessions = (needle, windowMs) => {
+    if (!existsSync(sessionsRoot)) return null;
+    for (const ws of readdirSync(sessionsRoot)) {
+      const wsDir = join(sessionsRoot, ws);
+      for (const d of readdirSync(wsDir)) {
+        const dir = join(wsDir, d);
+        if (!existsSync(dir)) continue;
+        const file = readdirSync(dir).find((f) => f.endsWith('.jsonl.zstd') || f.endsWith('.jsonl'));
+        if (file === undefined) continue;
+        const p = join(dir, file);
+        if (Date.now() - statSync(p).mtimeMs > windowMs) continue;
+        const r = spawnSync('zstd', ['-dc', p], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
+        const text = file.endsWith('.zstd') ? (r.status === 0 ? r.stdout : '') : readFileSync(p, 'utf8');
+        if (text.includes(needle)) return d.startsWith('session-') ? d.slice('session-'.length) : d;
+      }
+    }
+    return null;
+  };
+  const memberIds = [];
+  await check('成员发现（两个成员标记各命中一个近窗会话）', async () => {
+    const windowMs = 60 * 60 * 1000;
+    for (const [marker] of memberSpecs) {
+      const hit = scanRecentSessions(marker, windowMs);
+      if (hit === null) throw new Error(`${marker}: 近窗会话无一携带标记`);
+      memberIds.push(hit);
+    }
+    return [...new Set(memberIds)].map((i) => i.slice(0, 8)).join(' / ');
+  });
+
   const idOfMarker = (marker) => memberIds.find((mid) => readSessionLog(mid).includes(marker));
+
   for (const [marker, name] of memberSpecs) {
     await check(`成员 ${name} 响应（assistant 携带 ${marker}）`, async () => {
       const id = idOfMarker(marker);

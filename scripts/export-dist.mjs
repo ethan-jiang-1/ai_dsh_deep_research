@@ -87,7 +87,7 @@ try {
 | 版本 | ${version} |
 | 安装包 | \`${tarballName}\`（与本手册同目录） |
 | 打包日期 | ${date} |
-| 验证基线 | DSH \`dsh-v0.1.7-rc.2\`（Node ≥ 22.19） |
+| 验证基线 | DSH \`dsh-v0.2.0-rc.2\`（Node ≥ 22.19） |
 
 这个安装包是自包含的：bundle 行（cordis.patch.yml）、四角色 preset 与六个方法论技能（presets/）、
 研究驾驶舱浏览器端（lib/）、工作区种子（workspace/）、部署 bin（scripts/）、README，共

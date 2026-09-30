@@ -4,7 +4,7 @@
 > 「dsh-discipline 全量枚举」2026-09-24 毕业；AGENTS.md 只留指针）。枚举方法 = vendor 逐源
 > 清点（"你无法继承你从没清点过的东西"），每行三态：**照搬**（原样继承，带本仓落点）/
 > **带证据适配**（语义保留、载体改造，带证据）/ **不适用**（带理由——本仓无该设施对应面）。
-> 源头 = vendor/dsh submodule（tag dsh-v0.1.7-rc.2，只读铁律）。
+> 源头 = vendor/dsh submodule（tag dsh-v0.2.0-rc.2，只读铁律）。
 
 ## 源 1：vendor 根 AGENTS.md · Conventions
 
@@ -19,6 +19,7 @@
 | Tests describe behavior, not correctness（过时行为随测试一起改） | tests/ 契约测试（evaluation-contract 对手册谓词、dashboard 对文件形状）；行为变更同 diff 改锚 | 照搬 |
 | No hardcoded tunables（部署可变量必须是 config 字段） | preset 工具行 config（tool-todo allowParallelInProgress、tool-web 超时）皆声明为 config；层版本钉在 pack 兼容矩阵 | 带证据适配（载体 = cordis 行 config 而非代码 Config 类型） |
 | TODO 标记分级（FIXME/TODO/XXX 按紧急度） | 沿用（仓内出现时按此分级） | 照搬 |
+| Record externally perceptible breaking changes in an upgrade guide（对外可感知破坏面在其引入的变更内即写 `docs/upgrade-guide/`；0.2.0 新增） | 本仓 pack private、无下游消费者；换 pin 的迁移与重审结论由升 pin Note 承载 | 不适用（对外分发/发布 pack 时重估） |
 | Source plane vs artifact plane, never mixed（静态测试走 src，吃构建产物的测试声明依赖） | L1 双通道：preset-smoke 源码域（overlay 指 src）+ 安装域（plugin add 正式路径）；根 tsconfig 门面 = 源码面解析 | 带证据适配（两平面在本仓 = 源码域/安装域两通道，D14） |
 | Design each tool's UI presentation up front（呈现先于实现设计） | preset persona/skill 文本 = 工具的行为呈现面，R1 起逐角色先定稿再挂载；观察面 = 先 RFC 后实现（run-dashboard/debug-dashboard-plus 皆然） | 带证据适配 |
 | Plan unit/e2e/snapshot coverage for seams | evaluation.md 五面合同（L0–L4）先于框架定案（D6） | 带证据适配 |

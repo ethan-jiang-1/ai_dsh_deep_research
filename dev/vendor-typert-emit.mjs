@@ -22,11 +22,16 @@ const TSC_VERIFIED_INPUT = { checkDiagnostics: false }
 const FACES = process.argv.slice(2).length > 0 ? process.argv.slice(2) : ['host', 'client']
 
 const readManifest = (packageDir) => JSON.parse(readFileSync(join(packageDir, 'package.json'), 'utf8'))
-const hasTypertExport = (exportsField) => {
+// 按面严格过滤：host 产物对应 manifest 的 `./typert`（`./remote` 伴生 remote-client 发射），
+// client 产物对应 `./client/typert`——与 typert-loader 运行时的实际 import 面一致。
+// 0.2.0 实测：面无关过滤会把 client 源注册了 typert 但 manifest 未声明 `./client/typert`
+// 的包（@deepseek-ai/dsh-api-session-controller）送进 generate，撞 `must export
+// ./client/typert` 校验错（上游 files 清单也只认 host 面）——缺声明 = 上游对该包的既定
+// 处置就是"该面无 typert 产物"，跳过即对齐。
+const faceQualifies = (face, exportsField) => {
   if (exportsField === null || typeof exportsField !== 'object' || Array.isArray(exportsField)) return false
-  return Object.hasOwn(exportsField, './typert')
-    || Object.hasOwn(exportsField, './client/typert')
-    || Object.hasOwn(exportsField, './remote')
+  if (face === 'host') return Object.hasOwn(exportsField, './typert') || Object.hasOwn(exportsField, './remote')
+  return Object.hasOwn(exportsField, './client/typert')
 }
 
 const generator = new WorkspaceTypertGenerator(VENDOR, TSC_VERIFIED_INPUT)
@@ -34,7 +39,7 @@ let total = 0
 for (const face of FACES) {
   const discovered = generator.discover([face])
   const packages = discovered
-    .filter((candidate) => hasTypertExport(readManifest(join(VENDOR, candidate.root)).exports))
+    .filter((candidate) => faceQualifies(face, readManifest(join(VENDOR, candidate.root)).exports))
     .map((candidate) => candidate.package)
   const skipped = discovered.filter((candidate) => !packages.includes(candidate.package))
   console.log(`[${face}] 贡献包 ${discovered.length} 个；按 manifest 过滤后生成 ${packages.length} 个` +

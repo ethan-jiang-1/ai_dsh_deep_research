@@ -32,8 +32,18 @@ node --max-old-space-size=4096 ./node_modules/typescript/bin/tsc -b tsconfig.hos
 echo "③ typert host 产物（本仓驱动：按 manifest 过滤后逐包生成）…"
 node "$ROOT/dev/vendor-typert-emit.mjs" host
 
-echo "④ tsc client 遍…"
-node --max-old-space-size=4096 ./node_modules/typescript/bin/tsc -b tsconfig.client.json
+echo "④ tsc client 遍（叶项目 lib/types 发射；聚合自身 = noEmit 纯 typecheck）…"
+if ! node --max-old-space-size=4096 ./node_modules/typescript/bin/tsc -b tsconfig.client.json; then
+  # 0.2.0 实测（升 pin Note 记档）：聚合程序的 tests 夹具红 TS2883（@vitest/spy Procedure
+  # 不可命名——tests 靠上游单层安装的 hoist 解析 vitest，本仓双层安装下不可命名），而本步
+  # 真正需要的叶项目 lib/types 发射先于聚合程序完成。fail-loud：金丝雀叶产物缺失 = 真失败。
+  canary='packages/client/ui-sidebar-right/lib/types/index.d.ts'
+  if [ ! -f "$canary" ]; then
+    echo "tsc client 红：叶产物缺失（$canary）——真构建失败，中止" >&2
+    exit 1
+  fi
+  echo "  聚合 typecheck 红（TS2883，tests 夹具，上游面偏差）——叶 lib/types 发射齐全，继续"
+fi
 
 echo "⑤ client 面 bundle（client-modules 组合要求 lib/client.js）…"
 npx tsdown --env.DSH_BUILD_FACE client
@@ -45,9 +55,10 @@ node "$ROOT/dev/vendor-typert-emit.mjs" client
 #   从未产出，而 client 遍的 clientBundle 助手对"纯折"依赖**能解析才内联**——目标包缺
 #   lib/index.js 时静默外置成 require，浏览器模块表答不出（实测两连：cosmokit /
 #   dsh-typert-protocol "missed the module table"）。判据 = 有 lib/types/index.js 而无
-#   lib/index.js；处置 = 用本仓无插件配置逐包补建。
+#   lib/index.js；处置 = 用本仓无插件配置逐包补建。0.2.0 轮补 `vendor` 前缀：--clean 会清掉
+#   vendored cordis 全家（vendor/cordis、cosmokit、schemastery）的 lib/，它们同样命中该判据。
 echo "⑦ host 半补建检查…"
-missing="$(find packages apps -maxdepth 3 -type d -name lib -not -path '*/node_modules/*' \
+missing="$(find packages apps vendor -maxdepth 3 -type d -name lib -not -path '*/node_modules/*' \
   -exec sh -c 'for l; do [ -f "$l/types/index.js" ] && [ ! -f "$l/index.js" ] && printf "%s\n" "${l%/lib}"; done' _ {} +)"
 if [[ -n "$missing" ]]; then
   n="$(printf '%s\n' "$missing" | wc -l | tr -d ' ')"

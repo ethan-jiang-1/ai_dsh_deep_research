@@ -32,7 +32,7 @@ PACKDIR="$ROOT/packages/deep-research-pack"
 PROFDIR="$DSH_HOME/profiles/$PROFILE"
 RUNTMP="$ROOT/dev/smoke-workspace/run-pack"
 
-# 层版本钉住：与 pack 兼容矩阵同源（dsh-v0.1.7-rc.2 → 0.1.7-rc.2）——升 pin 只改 pack
+# 层版本钉住：与 pack 兼容矩阵同源（dsh-v0.2.0-rc.2 → 0.2.0-rc.2）——升 pin 只改 pack
 # package.json 的 dsh.compatibility.dshReleases，本脚本随之走（vendor 各包版本锁步发布）。
 LAYER_VER="$(node -e "console.log(require('$PACKDIR/package.json').dsh.compatibility.dshReleases[0].replace(/^dsh-v/,''))")"
 LAYER="@deepseek-ai/dsh-experimental-agent-team-profile@$LAYER_VER"

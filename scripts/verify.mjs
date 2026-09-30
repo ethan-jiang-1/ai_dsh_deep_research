@@ -293,11 +293,11 @@ function parkedSection() {
   });
 }
 
-// ── 门禁 13：vendor-pin（vendor/dsh submodule 在位且钉住 dsh-v0.1.7-rc.2 = 477b4f4205；
+// ── 门禁 13：vendor-pin（vendor/dsh submodule 在位且钉住 dsh-v0.2.0-rc.2 = 639ed01539；
 //    D10 销账的机械面——机制权威自持，队列「vendor-submodule-and-pnpm-dsh」）──
 {
   const gate = 'vendor-pin';
-  const PIN = '477b4f420553e8a52c2fbccc464d7561b239c443';
+  const PIN = '639ed015397290b3745d163aafe02ffee4aa3f84';
   if (!existsSync(join(ROOT, '.gitmodules'))) fail(gate, '.gitmodules 缺席');
   else {
     const gm = readFileSync(join(ROOT, '.gitmodules'), 'utf8');
@@ -308,7 +308,7 @@ function parkedSection() {
   const r = spawnSync('git', ['submodule', 'status', 'vendor/dsh'], { cwd: ROOT, encoding: 'utf8' });
   const m = r.stdout ? /^[-+ ]?([0-9a-f]{40})/.exec(r.stdout.trim()) : null;
   if (!m) fail(gate, 'submodule status 不可读——检查 git submodule init/update');
-  else if (m[1] !== PIN) fail(gate, `vendor/dsh 钉在 ${m[1].slice(0, 8)}——应为 ${PIN.slice(0, 8)}（dsh-v0.1.7-rc.2）`);
+  else if (m[1] !== PIN) fail(gate, `vendor/dsh 钉在 ${m[1].slice(0, 8)}——应为 ${PIN.slice(0, 8)}（dsh-v0.2.0-rc.2）`);
 }
 
 // ── 门禁 14：vendor-clean（vendor/dsh 只读铁律：零未提交改动——机制权威不许就地改）──
@@ -426,7 +426,7 @@ function parkedSection() {
 
 // ── 门禁 29：pin-agreement（live 文件里的钉身份必须与 submodule 实际状态一致）──
 // 为什么：pin 在仓里有 14 个家，2026-09-26 清扫实测三处写错（dev/env.sh 的 tag 停在 0.1.5、
-// design/10 的层版本停在 0.1.5、alignment-ledger 的 commit 写成 477b4f420505）——而 vendor-pin
+// design/10 的层版本停在 0.1.5、alignment-ledger 的 commit 写成 639ed0153905）——而 vendor-pin
 // 只管 .gitmodules 一处，散文/机读面的复述无人对账。
 // 规则：① live 文件里每个 40 位 hex 串必须等于 submodule HEAD；② 每个 `dsh-v*` tag 串必须等于
 // submodule 的 tag——**唯一例外**：同一行带外部归属标记（语料/参考仓/company/外部材料）的，

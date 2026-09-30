@@ -12,21 +12,21 @@
     "scripts/**"
   ],
   "peerDependencies": {
-    "@deepseek-ai/dsh-agent-instructions": "^0.1.7-rc.2",
-    "@deepseek-ai/dsh-agent-preset": "^0.1.7-rc.2",
-    "@deepseek-ai/dsh-agent-preset-registry": "^0.1.7-rc.2",
-    "@deepseek-ai/dsh-client-ui-primitives": "^0.1.7-rc.2",
-    "@deepseek-ai/dsh-experimental-client-ui-agent-team": "^0.1.7-rc.2",
-    "@deepseek-ai/dsh-persona": "^0.1.7-rc.2",
-    "@deepseek-ai/dsh-skill-filesystem": "^0.1.7-rc.2",
-    "@deepseek-ai/dsh-tool-ask-user": "^0.1.7-rc.2",
-    "@deepseek-ai/dsh-tool-fs": "^0.1.7-rc.2",
-    "@deepseek-ai/dsh-tool-fs-search": "^0.1.7-rc.2",
-    "@deepseek-ai/dsh-tool-present": "^0.1.7-rc.2",
-    "@deepseek-ai/dsh-tool-skill": "^0.1.7-rc.2",
-    "@deepseek-ai/dsh-tool-subagent": "^0.1.7-rc.2",
-    "@deepseek-ai/dsh-tool-todo": "^0.1.7-rc.2",
-    "@deepseek-ai/dsh-tool-web": "^0.1.7-rc.2"
+    "@deepseek-ai/dsh-agent-instructions": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-agent-preset": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-agent-preset-registry": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-client-ui-primitives": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-experimental-client-ui-agent-team": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-persona": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-skill-filesystem": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-tool-ask-user": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-tool-fs": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-tool-fs-search": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-tool-present": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-tool-skill": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-tool-subagent": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-tool-todo": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-tool-web": "^0.2.0-rc.2"
   },
   "dsh": {
     "bundle": {
@@ -40,7 +40,7 @@
     },
     "compatibility": {
       "dshReleases": [
-        "dsh-v0.1.7-rc.2"
+        "dsh-v0.2.0-rc.2"
       ]
     },
     "client": {
