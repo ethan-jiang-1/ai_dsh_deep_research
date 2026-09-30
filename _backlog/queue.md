@@ -13,18 +13,16 @@
 
 ## 队列
 
-▶ **0.2.0 插件货架适配**（feature，可自主；timed ask-user 语义变更与 auto-review 取舍在阶段边界请人）——
-[RFC](../notes/proposed/2026-09-30-plugin-shelf-adoption.md)：DSH 0.2.0 出厂插件对 deep-research
-场景的分层采纳与逐项收口——session-query 检索 / timed ask-user / compaction 调优（一梯队）、
-tool-goal / tool-jobs / auto-review（二梯队）、workflow-vs-Teams / browser-use / 换源引既有定案
-（辨析梯队）；每项采纳（落地 + 全档绿）或否决（理由 + 归宿记档）。
-用户指令（2026-09-30）：「充分利用 DSH 的新插件……合适我们场景的」（语料 =
-`/Users/bowhead/deepseek-harness/_digested/plugin-inventory/`，基线与本仓 pin 一致）。
+（队列空——待用户取题）
+
+> 队列空 = 全部条目已毕业（历史归 notes/implemented/ + git）；待用户取题或新立项。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 
 | 条目 | 进池原因 | 复活条件（现状） |
 |---|---|---|
+| workflow 工具采纳——[RFC](../notes/rejected/2026-09-30-workflow-adoption.md) | 内核错位（方法论弃管道面）+ 载体倒转（one-shot 裸代理跑主通道倒转 D3/D16）+ HITL 停点结构性无落点；run 实证每个高价值行为皆不可预脚本 | workflow 引擎出现 continuable/teammate 或 HITL 感知语义，或研究管道出现"无判断可扇出"且 keyless 门禁不适载的步骤（✗） |
+| browser-use 插件族——[RFC](../notes/rejected/2026-09-30-browser-use-adoption.md) | 缺口真实（15 场 run 中 13 场命中 SPA 证据失败）但 experimental 零出厂采纳信号 + 团队形态错配（每 agent 起 MCP 子进程）；绕行策略已对冲大半 | C1 provider 晋级 stable（pin bump 后 experimental 目录 grep 空）或进可选 bundle；C2 leads 阶段 ≥2 条 A/B 级线索四绕行全败 → 单场 scoped pilot；C3 `js-render-blocked-no-workaround` 标签累计 ≥4 例（历史已 3）（✗） |
 | UI 皮肤（client 面 + slots 品牌）——[RFC](../notes/rejected/2026-09-24-ui-skin.md) | 核心研究流未稳，皮肤是表现层（company 到 R5 才做皮肤）；与观察面边界已辨析 | 首个完整 run 通过（✓）+ 有 demo 需求（✗ 等用户点名） |
 | 专职 synthesizer 角色——[RFC](../notes/rejected/2026-09-24-synthesizer-role.md) | lead 独任综合无过载：首场 run（[m2-run-mechanics](../notes/implemented/2026-09-24-m2-run-mechanics.md)）+ **2026-09-26 两场 run 重估**（26 / 46 张证据卡、6 topic，无过载迹象） | run 实测综合负载过高（✗；**2026-09-26 已多 run 重估一轮，条件仍未满足**） |
 | floor 数值门禁机械化——[RFC](../notes/rejected/2026-09-24-floor-gates.md) | critic 散文审查实证有效（九场无一滑坡）；**可实现核心已被 evidence-audit 吸收**（抓取强度/摘录覆盖率/final 链/日期——数值门禁的灵魂已活在机械审计里） | run 出现质量滑坡实证（✗；重估至第九场，条件仍未满足） |

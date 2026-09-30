@@ -99,13 +99,21 @@ node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <横幅 token>   #
 - lead 带审阅建议来找你：证据充分性判断 + 交付/补研究推荐 + composition 确认
   （读者是谁 / 用来做什么 / 前景化重点）——拍板后 final/ 当前版落盘 + present 声明交付；
 - 每条关键结论带 `[来源: evidence/xx.md]`，critic 的 review.md readiness: PASS
-  是交付前置（无 CRITICAL 未修复才许交付）。
+  是交付前置（无 CRITICAL 未修复才许交付）；
+- **HITL 超时语义（0.2.0 timed ask-user，600s）**：两点挂起 600s 未答 → 工具返回
+  pending，**问题保持可答**（挂起横幅仍在——hitl-fold v5 把 timed 超时仍判挂起），lead
+  可继续有用工作但 pending 通知明示"这不是许可"；你之后随时可答，答复作为新消息唤醒
+  会话。**不是**按推荐项自动落定。
 
 ## 5. 中断与恢复
 
 - 任何时候可关页面/停机。恢复 = 重跑 `boot-run.sh` → 新开 lead 会话说
   "继续 <slug> 这个 run"——lead 只凭 `drt_<slug>/` 的文件事实重建上下文，
   不依赖聊天记忆；
+- **run 目标态（0.2.0 tool-goal）**：HITL1 拍板后 lead 用 create_goal 钉住本次 run
+  （objective = 定稿问题 + 交付判据）——goal-round-driver 随 base 在位，中断的回合会
+  自动续轮（韧性增益）；lead 在任何 ask 挂起前 pause goal、答后 resume（防空转），
+  goal 与 drt_ bundle 互为镜像、冲突以 bundle 文件事实为准；
 - **run 根只有一个正本**：`research-workspace/drt_<slug>/`（D17 契约位）。**位置=状态**：在飞
   run 住工作区根，交付后由操作侧移入 `research-workspace/archive/<slug>/`（归档不消失——
   仪表盘多 run 总表与 evidence-audit `--latest` 均并扫 archive/）。`dev/harness-home/runs/`
