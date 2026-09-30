@@ -1,10 +1,16 @@
 /**
  * HITL 挂起折算（纯函数，keyless 单测面）。
  *
- * 谓词（run-dashboard detectHitlWait 的移植 + v4 修正）：从事件序列**尾部**向前，跳过
- * `session/*` 元数据事件（0.1.7 的 v4 日志里自动命名 session/title 会落在 ask 之后——实测
- * 首版"恰为末位"谓词被它绊住），第一个**回合事件**是 `ask_user_question` 的 tool/call
- * 即挂起——其后无任何回合事件（取消/答完会有，天然排除陈旧挂起）。
+ * 谓词（v5：末位 ask 状态机——0.2.0 timed ask-user 适配）：定位**最后一个**
+ * `ask_user_question` 的 tool/call，看它之后的事件——
+ * - 对应 callId 的 tool/result 带 `"pending":true` 标记（timed 超时落定）= 问题仍可答
+ *   （后答经 answer_to_pending_question 唤醒）→ **仍挂起**；其后的 agent 自身事件
+ *   （assistant / 其他工具 / step / turn 边界）不关闭它；
+ * - 对应 callId 的其他 tool/result（answers 形态或错误/取消）= 已答/已终 → 不挂起；
+ * - 其后出现 user/message（真人说话：答案批次或新指令）= 已应 → 不挂起；
+ * - 其后无任何事件（legacy 在飞等待）→ 挂起。
+ * v4 及之前的纯尾窗谓词（"末位回合事件恰为未答 ask"）在 timed 超时后会漏报可答挂起，
+ * 被 v5 取代（行为对 legacy 形态完全兼容：在飞 = 其后无事件）。
  *
  * 数据/展示分层纪律（RFC observability-gui）：折算住 src/lib 纯函数 + keyless 单测；
  * 组件薄渲染。client bundle 经 tsdown 打包此文件（tsc client 面含 src/lib）。
@@ -17,7 +23,7 @@ export interface JournalEventLike {
   readonly time?: unknown
 }
 
-/** HITL 挂起态：pending = 末位回合事件是未答的 ask_user_question；since = 该事件时间。 */
+/** HITL 挂起态：pending = 末位 ask 仍开放（在飞等待或 timed 超时可补答）；since = 该 ask 的时间。 */
 export interface HitlState {
   readonly pending: boolean
   readonly since: string | undefined
@@ -32,29 +38,77 @@ export interface RunAnchor {
   readonly questions: number
 }
 
-/** 回合事件（参与"轮到谁"判定）；session/* 是元数据（标题/创建等），不改变轮次。 */
-function isTurnEvent(type: unknown): boolean {
-  return typeof type === 'string' && !type.startsWith('session/')
+/** 从 tool/call 事件取 callId（无则 undefined——畸形 fail-soft）。 */
+function callIdOf(event: unknown): string | undefined {
+  const data = (event as { readonly data?: { readonly callId?: unknown } } | null)?.data
+  const id = data?.callId
+  return typeof id === 'string' ? id : undefined
+}
+
+/** tool/result 事件正文文本（content 块的 text 拼接；畸形 → ''）。 */
+function resultTextOf(event: unknown): string {
+  const content = (event as { readonly data?: { readonly message?: { readonly content?: unknown } } } | null)
+    ?.data?.message?.content
+  if (!Array.isArray(content)) return ''
+  return content
+    .map((block) => (typeof block === 'object' && block !== null ? String((block as { readonly text?: unknown }).text ?? '') : ''))
+    .join('')
+}
+
+/** timed 落定标记（tool-result 正文带 `"pending":true` = 问题仍可答）。 */
+const TIMED_PENDING = /"pending"\s*:\s*true/
+
+/** 同一 callId 的 tool/result（含嵌套 message.toolCallId 两种携带位——fail-soft 兼容）。 */
+function isResultFor(event: unknown, callId: string | undefined): boolean {
+  if (callId === undefined) return false
+  const data = (event as { readonly data?: { readonly message?: { readonly toolCallId?: unknown }, readonly callId?: unknown } } | null)?.data
+  return data?.message?.toolCallId === callId || data?.callId === callId
+}
+
+/** 末位 ask 的定位（index / callId / time / 问数）。 */
+interface LastAsk {
+  readonly index: number
+  readonly callId: string | undefined
+  readonly time: unknown
+  readonly questions: number
+}
+
+function findLastAsk(events: readonly unknown[]): LastAsk | undefined {
+  let last: LastAsk | undefined
+  for (let i = 0; i < events.length; i++) {
+    const event = events[i]
+    if (typeof event !== 'object' || event === null) continue
+    const e = event as JournalEventLike
+    if (e.type !== 'tool/call' || typeof e.data !== 'object' || e.data === null || e.data.name !== 'ask_user_question') continue
+    last = {
+      index: i,
+      callId: callIdOf(event),
+      time: e.time,
+      questions: askQuestionCount((e.data as { readonly arguments?: unknown }).arguments),
+    }
+  }
+  return last
 }
 
 /**
- * 折算：journal 事件序列 → HITL 挂起态。
+ * 折算：journal 事件序列 → HITL 挂起态（末位 ask 状态机，见文件头注的 v5 谓词）。
  * @param events - 按 wire 顺序的事件（follow 的 snapshot 历史或实时流；畸形输入 fail-soft）。
  * @returns 挂起态（永不 throw）。
  */
 export function foldHitlPending(events: readonly unknown[]): HitlState {
-  for (let i = events.length - 1; i >= 0; i--) {
-    const event = events[i]
+  const ask = findLastAsk(events)
+  if (ask === undefined) return { pending: false, since: undefined }
+  for (let j = ask.index + 1; j < events.length; j++) {
+    const event = events[j]
     if (typeof event !== 'object' || event === null) continue
     const e = event as JournalEventLike
-    if (!isTurnEvent(e.type)) continue
-    if (e.type === 'tool/call' && typeof e.data === 'object' && e.data !== null && e.data.name === 'ask_user_question') {
-      const time = e.time
-      return { pending: true, since: typeof time === 'string' ? time : undefined }
+    if (e.type === 'tool/result' && isResultFor(event, ask.callId)) {
+      if (TIMED_PENDING.test(resultTextOf(event))) continue // timed 超时落定：仍可答，继续找关闭事件
+      return { pending: false, since: undefined } // answers 形态或错误/取消：已终
     }
-    return { pending: false, since: undefined }
+    if (e.type === 'user/message') return { pending: false, since: undefined } // 真人已应（答案批次/新指令）
   }
-  return { pending: false, since: undefined }
+  return { pending: true, since: typeof ask.time === 'string' ? ask.time : undefined }
 }
 
 /** ask 调用携带的问数（args.questions 数组长度；截断 JSON / 畸形 fail-soft → 0）。 */
@@ -79,17 +133,10 @@ export interface AnchorFileFacts {
   readonly delivered: boolean
 }
 
-/** 尾窗内末位未答 ask 携带的问数（无挂起 → 0）。 */
+/** 尾窗内末位开放 ask 携带的问数（无挂起 → 0；挂起期间 agent 自身事件不改变问数）。 */
 function tailPendingQuestions(events: readonly unknown[]): number {
-  for (let i = events.length - 1; i >= 0; i--) {
-    const e = events[i] as (JournalEventLike & { readonly data?: { readonly arguments?: unknown } }) | null
-    if (typeof e !== 'object' || e === null || !isTurnEvent(e.type)) continue
-    if (e.type === 'tool/call' && typeof e.data === 'object' && e.data !== null && e.data.name === 'ask_user_question') {
-      return askQuestionCount(e.data.arguments)
-    }
-    return 0
-  }
-  return 0
+  if (!foldHitlPending(events).pending) return 0
+  return findLastAsk(events)?.questions ?? 0
 }
 
 /**

@@ -10,5 +10,6 @@
 
 ## 研究状态页签 · 人性化活动行（icon + 文本）
 
+💬 I'll run the two calls, then summarize.
 🔍 检索：DSH harness
-💬 探针完成：搜了 1 次（「DSH harness」，返回 8 条来源），抓了 1 个页面（[极客公园
+💬 探针完成，搜了「DSH harness」拿到 8 条结果（首个官方域名页面为 [DoNews 报道]

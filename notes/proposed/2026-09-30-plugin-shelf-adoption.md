@@ -97,6 +97,19 @@ ask-user / present / agent-instructions + agent-team-profile 层），升 pin �
 
 **R2（2026-09-30，基线债优先 = 用户裁决）**：
 
+- **R2-2 timed ask-user 落地（600s，修正语义下的用户呈批）**：lead preset 的 tool-ask-user
+  行配 `mode: timed + timeout: 600`——超时返回 pending（问题保持可答、后答经
+  answer_to_pending_question 唤醒、pending 通知明示"这不是许可"）。**配套观察谓词升级
+  hitl-fold v5**：旧尾窗谓词（"末位回合事件恰为未答 ask"）在 timed 超时后会漏报可答挂起；
+  新谓词 = 末位 ask 状态机（timed pending result → 仍挂起；answers 形态 result / 其后的
+  user/message → 关闭；agent 自身事件不关闭；多 ask 取末位）——watch-run / 研究驾驶舱
+  横幅 / 锚点问数三消费面共用。测试 +4（timed 形态矩阵），两处旧断言按"行为变了同 diff 改
+  断言"纪律翻新。fixture 换代 v3（ask 工具 schema 增 timeout 参数——B 层捕获即重录）；
+  run 技能超时语义节同步。验证：verify 全绿 + tests 116/0 + L1/L2/L4-lite ALL PASS +
+  snapshot-replay ALL PASS（金标准重写人审：仅模型措辞差异）。
+
+**R2（2026-09-30，基线债优先 = 用户裁决）**：
+
 - **snapshot v2 重录完成**：借在飞 run 通道（3083）以 v1 同款探针提示词录真模型 lead 会话
   （web_search×1 成功 + web_fetch×1 + "探针完成"收尾，36 事件）；fixture 换代
   `session.v2.jsonl`（v1 移除，git 历史即归档），冒烟 FIXTURE 指针与 snapshot.yml 工具数

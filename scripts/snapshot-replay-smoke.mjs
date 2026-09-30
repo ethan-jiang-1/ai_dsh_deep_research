@@ -2,7 +2,7 @@
 // scripts/snapshot-replay-smoke.mjs — keyless 回放冒烟（keyless-snapshot 四件套之四）。
 //
 // 三层判据（本脚本钉的，逐层独立报告）：
-//   A 回放通路：录制的会话流（tests/fixtures/snapshot-research-face/session.v2.jsonl）在
+//   A 回放通路：录制的会话流（tests/fixtures/snapshot-research-face/session.v3.jsonl）在
 //     **零真模型调用**下完整回放——回合结束后最终 assistant 文本 = 录制流的收尾文本
 //     （canned 响应逐条回放的直接证据：活模型不可能逐字复现）。只认**本次 boot 之后新写**
 //     的会话日志（mtime 过滤 + 新者先——否则第二跑起会命中上一跑的旧日志假绿）。
@@ -38,7 +38,7 @@ const UPDATE_EXPECTED = process.argv.includes('--update-expected');
 const BOOT_TIMEOUT_MS = 120_000;
 const TURN_TIMEOUT_MS = 240_000;
 const RENDER_TIMEOUT_MS = 60_000;
-const FIXTURE = join(ROOT, 'tests', 'fixtures', 'snapshot-research-face', 'session.v2.jsonl');
+const FIXTURE = join(ROOT, 'tests', 'fixtures', 'snapshot-research-face', 'session.v3.jsonl');
 const EXPECTED = join(ROOT, 'tests', 'fixtures', 'snapshot-research-face', 'ui.expected.md');
 const UNIQUE_TITLE = '快照回放冒烟·渲染面探针';
 const DSH_HOME = process.env.DSH_HOME ?? join(ROOT, 'dev', 'harness-home');

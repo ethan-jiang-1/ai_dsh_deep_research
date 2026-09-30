@@ -49,6 +49,13 @@
               allowParallelInProgress: true
           - id: tool-ask-user
             name: '@deepseek-ai/dsh-tool-ask-user'
+            config:
+              # 0.2.0 timed 模式（用户呈批 2026-09-30，600s）：超时不落定答案，返回 pending——
+              # 问题保持可答（后答经 answer_to_pending_question 唤醒新轮），可继续有用工作；
+              # pending 通知明示"这不是许可"，不把沉默当拍板。挂起横幅的观察谓词 =
+              # hitl-fold v5（timed 超时仍报挂起）。
+              mode: timed
+              timeout: 600
           - id: tool-present
             name: '@deepseek-ai/dsh-tool-present'
           - id: tool-web
