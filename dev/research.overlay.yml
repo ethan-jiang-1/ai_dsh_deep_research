@@ -5,11 +5,17 @@
 # 机制：`--profile web --patch <本文件绝对路径>` 在 profile 层之后追加本 overlay——行包名在
 # vendor 源码工作区解析（boot 进程起自本仓，tsx/esm 从其 node_modules 解析），零安装混线。
 # 0.1.7：preset 即行（config.plugins），web-app bundle 已 insert 出厂 registry（default:
-# standard）与四个出厂 preset；本 overlay 把 registry 默认换成研究主编，并并入本包四个角色行。
+# standard）与四个出厂 preset；replace 行（registry 默认 + 索引开关）与 insert 行均从
+# pack 的 cordis.patch.yml 直读，本 overlay 不持有第二份。
 - id: agent-preset-registry
   name: '@deepseek-ai/dsh-agent-preset-registry'
   config:
     default: lead
+- id: session-query-sqlite
+  name: '@deepseek-ai/dsh-session-query-sqlite'
+  config:
+    path: ':memory:'
+    openAt: first-search
 
 - insert:
     # ── analyst.patch.yml（由 dev/render-overlay.mjs 从 pack 渲染）──
@@ -123,6 +129,10 @@
             config:
               fetch: true
               searchTimeoutMs: 60000
+          # 会话检索（0.2.0 插件货架采纳）：交叉核查时检索历史 run 会话的取证原文——
+          # 工具面与索引开关说明同 lead 行。
+          - id: tool-session-query
+            name: '@deepseek-ai/dsh-tool-session-query'
 
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
@@ -183,6 +193,11 @@
             config:
               fetch: true
               searchTimeoutMs: 60000
+          # 会话检索（0.2.0 插件货架采纳）：跨 run 找历史证据、回溯组员会话取证原文——
+          # 五工具 session_search / session_event_search / session_trace / session_event_trace
+          # / session_event_read；FTS 索引由 bundle 层 openAt: first-search 惰性开。
+          - id: tool-session-query
+            name: '@deepseek-ai/dsh-tool-session-query'
 
           - id: tool-subagent
             name: '@deepseek-ai/dsh-tool-subagent'

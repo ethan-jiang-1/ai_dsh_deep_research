@@ -40,6 +40,9 @@ importers:
       '@deepseek-ai/dsh-persona':
         specifier: workspace:*
         version: link:vendor/dsh/packages/preset/persona
+      '@deepseek-ai/dsh-session-query-sqlite':
+        specifier: workspace:*
+        version: link:vendor/dsh/packages/session-query/session-query-sqlite
       '@deepseek-ai/dsh-skill-filesystem':
         specifier: workspace:*
         version: link:vendor/dsh/packages/skill/skill-filesystem
@@ -55,6 +58,9 @@ importers:
       '@deepseek-ai/dsh-tool-present':
         specifier: workspace:*
         version: link:vendor/dsh/packages/deliverables/tool-present
+      '@deepseek-ai/dsh-tool-session-query':
+        specifier: workspace:*
+        version: link:vendor/dsh/packages/session-query/tool-session-query
       '@deepseek-ai/dsh-tool-skill':
         specifier: workspace:*
         version: link:vendor/dsh/packages/skill/tool-skill
@@ -115,6 +121,9 @@ importers:
       '@deepseek-ai/dsh-persona':
         specifier: ^0.2.0-rc.2
         version: link:../../vendor/dsh/packages/preset/persona
+      '@deepseek-ai/dsh-session-query-sqlite':
+        specifier: ^0.2.0-rc.2
+        version: link:../../vendor/dsh/packages/session-query/session-query-sqlite
       '@deepseek-ai/dsh-skill-filesystem':
         specifier: ^0.2.0-rc.2
         version: link:../../vendor/dsh/packages/skill/skill-filesystem
@@ -130,6 +139,9 @@ importers:
       '@deepseek-ai/dsh-tool-present':
         specifier: ^0.2.0-rc.2
         version: link:../../vendor/dsh/packages/deliverables/tool-present
+      '@deepseek-ai/dsh-tool-session-query':
+        specifier: ^0.2.0-rc.2
+        version: link:../../vendor/dsh/packages/session-query/tool-session-query
       '@deepseek-ai/dsh-tool-skill':
         specifier: ^0.2.0-rc.2
         version: link:../../vendor/dsh/packages/skill/tool-skill
@@ -16221,9 +16233,6 @@ packages:
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
 
-  '@types/ws@8.18.2':
-    resolution: {integrity: sha512-67MQl+fpWKVTT1NYdnmo3U4sc/xPo/zQBncVnI74qmQa0z/b+1g6iYqNmGCPbxO+zz2aklb08a0oHfegiVd0/w==}
-
   '@types/yauzl@2.10.3':
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
 
@@ -19477,18 +19486,6 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.22.0:
-    resolution: {integrity: sha512-Ydggc987+RO0AnWtZ/7Wq9FtNvcrL1b/RO0ud9mWjUPgDrsAAwQSF51sm2hm1XofbU/4jkpGEsLFsZZxU+1DOg==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: '>=5.0.2'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-
   wsl-utils@1.0.0:
     resolution: {integrity: sha512-Hl0ZOAs672vg+06kfujwRhoS6/jehvULrlFkuF2dRu6pHgA8U06h3xqNIqNNU1LTXPcedxByAR4GS6pwQK0mgA==}
     engines: {node: '>=20'}
@@ -21477,10 +21474,6 @@ snapshots:
     dependencies:
       '@types/node': 22.20.4
 
-  '@types/ws@8.18.2':
-    dependencies:
-      '@types/node': 26.6.2
-
   '@types/yauzl@2.10.3':
     dependencies:
       '@types/node': 22.20.4
@@ -21985,7 +21978,7 @@ snapshots:
 
   buffer-image-size@0.6.4:
     dependencies:
-      '@types/node': 26.6.2
+      '@types/node': 22.20.4
 
   buffer-indexof-polyfill@1.0.2: {}
 
@@ -22982,13 +22975,13 @@ snapshots:
 
   happy-dom@20.14.5:
     dependencies:
-      '@types/node': 26.6.2
+      '@types/node': 22.20.4
       '@types/whatwg-mimetype': 3.0.2
-      '@types/ws': 8.18.2
+      '@types/ws': 8.18.1
       buffer-image-size: 0.6.4
       entities: 7.0.1
       whatwg-mimetype: 3.0.0
-      ws: 8.22.0
+      ws: 8.21.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -25079,8 +25072,6 @@ snapshots:
   ws@8.21.0: {}
 
   ws@8.21.3: {}
-
-  ws@8.22.0: {}
 
   wsl-utils@1.0.0:
     dependencies:

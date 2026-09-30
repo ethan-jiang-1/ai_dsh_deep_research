@@ -19,7 +19,7 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 |---|---|---|
 | `presets/<role>.patch.yml` | 四角色 preset（0.1.7 形态：一条 `@deepseek-ai/dsh-agent-preset` 行，config.plugins 内声明 persona/skills/工具行） | ✓ |
 | `presets/<role>/skills/<n>/SKILL.md` | 六个研究方法论技能（research-brief / team-assembly / lead-mapping / evidence-extraction / synthesis / adversarial-review） | ✓ |
-| `cordis.patch.yml` | bundle 行：preset roster（default: lead）+ `tool-present` + 团队可视面 `ui-agent-team` + 本包 client 面 | ✓ |
+| `cordis.patch.yml` | bundle 行：preset roster（default: lead）+ 会话全文检索开关（`session-query-sqlite` `openAt: first-search`——FTS 惰性开，`:memory:` 每进程重建；检索工具行在 lead/critic preset）+ `tool-present` + 团队可视面 `ui-agent-team` + 本包 client 面 | ✓ |
 | `workspace/` | **研究工作区种子**：研究手册（`AGENTS.md`：证据契约/目录约定/完成判据）+ `templates/run/` 六件模板 | ✓ |
 | `src/client/` → `lib/client.js` | **研究驾驶舱**（Research Cockpit——观察面 client 面，D18 单点例外；构成正本 = [design/40](../../docs/design/40-research-cockpit.md)）：右栏「研究状态」页签（流程轨道锚点/人性化活动流/活标题/HITL 横幅/参与指引/决策诚实线）+ 研究语义工具卡 + 挂起显性化 | ✓ 构建产物 |
 | `src/lib/` → `lib/types/lib/` | 纯函数折算（activity-fold / hitl-fold / run-fold / tool-card）——keyless 单测直接断言 | ✓ 构建产物 |
@@ -43,7 +43,7 @@ dsh --profile research --from-default-profile web --dump-config
 dsh plugin --profile research add file:/abs/path/to/dsh-deep-research-pack-0.1.0.tgz
 
 # ②b 验证形状（"装好了"的最小判据；下四项缺任一 = 没装上）
-dsh --profile research --dump-config   # 应见 preset-lead/scout/analyst/critic + tool-present + ui-agent-team + research-client
+dsh --profile research --dump-config   # 应见 preset-lead/scout/analyst/critic + tool-present + ui-agent-team + research-client + session-query-sqlite（openAt: first-search）
 
 # ③ 一键准备：铺工作区种子 + 确保团队机制层在场 + 跑前置检查
 #    ⚠ tarball 装法**不生成 PATH bin**——用安装副本里的脚本全路径（不是 `dsh-deep-research-scaffold`）：

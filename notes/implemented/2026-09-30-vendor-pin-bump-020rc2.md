@@ -104,6 +104,16 @@ package.json + README、alignment-ledger `_note`、lockfile specifiers ×15、bo
 | run 通道（主线） | `dev/boot-run.sh` 漂移检测红（预期）→ 按 its 处方删旧 profile 重建，组合校验绿、层 = `@deepseek-ai/dsh-experimental-agent-team-profile@0.2.0-rc.2` |
 | 入口链探针 | `entry-chain-probe: ALL PASS`（首跑 180s 超时 = 模型五文件阅读未完，重试即过——无机制红） |
 
+**勘误（同日，plugin-shelf-adoption 轮发现）**：上表的 run 通道/boot 只证了宿主侧；**浏览器观察面
+当时实坏未被发现**——Web boot 17 个 client 包 failed / 60 entries did not activate，根因 =
+`vendor-build.sh` 固化顺序把 tsdown client（bundle 生成）放在 host 半补建**之前**，client bundle
+构建时 `dsh-typert-protocol` / `dsh-util-workspace-path` 等"纯折"依赖缺 `lib/index.js` 被静默
+外置成 require，浏览器模块表答不出（报错自述 "build-time externals drift"）。漏网原因 =
+换 pin 必跑面（L0+L1+L2+L4-lite）不含 client-load-smoke。处置：⑤ host 半补建移到 ⑥ tsdown
+client 之前（顺序铁律入脚本注释）、guides/60 路由表补 client-load-smoke 进换 pin 必跑面、
+重跑 tsdown client 后浏览器探针 0 failed / 0 console 错误、client-load-smoke 横幅断言转绿。
+（0.1.7 轮未踩此坑是调试时序凑巧，非顺序正确。）
+
 **冒烟侧修正（team-preflight 成员发现，0.2.0 日志格式实证）**：lead 日志的
 `Background subagent <uuid>` 行在 0.2.0 是**完成通知**（只落先完成者，后完成者被收场截断），
 当成员全集会在单成员场景假红（scout 机制实绿但 id 提取缺席——直接读成员会话日志证实其标记在）。

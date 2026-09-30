@@ -45,19 +45,17 @@ if ! node --max-old-space-size=4096 ./node_modules/typescript/bin/tsc -b tsconfi
   echo "  聚合 typecheck 红（TS2883，tests 夹具，上游面偏差）——叶 lib/types 发射齐全，继续"
 fi
 
-echo "⑤ client 面 bundle（client-modules 组合要求 lib/client.js）…"
-npx tsdown --env.DSH_BUILD_FACE client
-
-echo "⑥ typert client 产物…"
-node "$ROOT/dev/vendor-typert-emit.mjs" client
-
-# ⑦ host 半补建（tsc host 遍早夭的残留）：root 单元红会让 205 个包的 host 半 lib/index.js
+# ⑤ host 半补建（tsc host 遍早夭的残留）：root 单元红会让 200+ 个包的 host 半 lib/index.js
 #   从未产出，而 client 遍的 clientBundle 助手对"纯折"依赖**能解析才内联**——目标包缺
-#   lib/index.js 时静默外置成 require，浏览器模块表答不出（实测两连：cosmokit /
-#   dsh-typert-protocol "missed the module table"）。判据 = 有 lib/types/index.js 而无
-#   lib/index.js；处置 = 用本仓无插件配置逐包补建。0.2.0 轮补 `vendor` 前缀：--clean 会清掉
-#   vendored cordis 全家（vendor/cordis、cosmokit、schemastery）的 lib/，它们同样命中该判据。
-echo "⑦ host 半补建检查…"
+#   lib/index.js 时静默外置成 require，浏览器模块表答不出（实测三连：cosmokit /
+#   dsh-typert-protocol / dsh-util-workspace-path "missed the module table"）。判据 = 有
+#   lib/types/index.js 而无 lib/index.js；处置 = 用本仓无插件配置逐包补建。0.2.0 轮补
+#   `vendor` 前缀：--clean 会清掉 vendored cordis 全家（vendor/cordis、cosmokit、schemastery）
+#   的 lib/，它们同样命中该判据。
+#   **顺序铁律（0.2.0 轮实证）**：本步必须在 ⑥ tsdown client **之前**——client bundle 构建时
+#   依赖缺 lib/index.js 会被静默外置成 require，事后补建救不了已生成的 bundle（症状 = Web
+#   boot 17 包 failed / "missed the module table"；换 pin 必跑面含 client-load-smoke 把关）。
+echo "⑤ host 半补建检查…"
 missing="$(find packages apps vendor -maxdepth 3 -type d -name lib -not -path '*/node_modules/*' \
   -exec sh -c 'for l; do [ -f "$l/types/index.js" ] && [ ! -f "$l/index.js" ] && printf "%s\n" "${l%/lib}"; done' _ {} +)"
 if [[ -n "$missing" ]]; then
@@ -70,6 +68,12 @@ if [[ -n "$missing" ]]; then
 else
   echo "  无缺件（host 半产物齐全）"
 fi
+
+echo "⑥ client 面 bundle（client-modules 组合要求 lib/client.js；依赖内联前提 = ⑤ 已补齐）…"
+npx tsdown --env.DSH_BUILD_FACE client
+
+echo "⑦ typert client 产物…"
+node "$ROOT/dev/vendor-typert-emit.mjs" client
 
 # ⑧ 前端壳重建：apps/web/dist 是 gitignored 的**冻结产物**——升 pin 后不重建会留着上一代
 #   平台壳，实测症状是 Web UI 静默报 "settingsNumberField is not a function"（旧壳 + 新

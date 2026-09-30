@@ -17,6 +17,10 @@ ask-user / present / agent-instructions + agent-team-profile 层），升 pin �
 
 ## 方案：三层收口（每项 = 采纳落地或否决记档，不悬置）
 
+> **用户裁决（2026-09-30 呈批）**：①timed ask-user 采纳、超时 600s；②分层按序推进，
+> 但 **auto-review 调研、workflow 辨析、browser-use 评估三项提前**——一梯队落地的同时，
+> 这三项的调研/辨析尽早展开（它们可能开新的采纳面，不能压到最后）。
+
 ### 第一梯队（配置 / preset 行级，直接增益，低风险）
 
 1. **session-query 全文检索**——base 出厂 `session-query-sqlite` `openAt: never` 关着
@@ -26,11 +30,12 @@ ask-user / present / agent-instructions + agent-team-profile 层），升 pin �
    五工具，显式 opt-in 的现成包）。收益：critic 交叉核查、lead 跨 run 找历史证据、
    会话级证据检索进模型面——研究场景天然刚需。peerDeps + `@deepseek-ai/dsh-tool-session-query`。
 2. **timed ask-user（0.2.0 新增）**——`tool-ask-user` 新 `mode: timed` + `timeout`（缺省
-   120s，legacy 缺省保持）。给 lead 的 ask-user 行配 `mode: timed` + 研究节奏的超时（提案
-   300s）：超时未答走结构化落定（两结算模式，vendor
+   120s，legacy 缺省保持）。给 lead 的 ask-user 行配 `mode: timed` + 研究节奏的超时：
+   超时未答走结构化落定（两结算模式，vendor
    `2026-09-19-timed-user-question-two-settlements` Note）。方法论对齐：超时落定到推荐项与
    lead persona 的「推荐项置首 + (Recommended)」设计天然咬合——人没拍板时按明示推荐走，
-   且落定事件进会话日志可追溯。**这是行为语义变更，列呈批点**（默认方案 = 采纳）。
+   且落定事件进会话日志可追溯。**用户已呈批（2026-09-30）：采纳，超时 600s**（给足思考
+   窗口；非 120s 缺省）。
 3. **compaction / spill 调优**——长研究会话（实测 26/46 张证据卡）的工具结果裁剪：
    `compaction-tool-result-pruner` 的 thresholdChars / headChars / tailChars 与
    `spill-policy.maxInlineTokens` 都是 base 已挂载行的 config 字段，pack patch replace 调值。
@@ -87,6 +92,38 @@ ask-user / present / agent-instructions + agent-team-profile 层），升 pin �
   非研究语义的页签（ui-jobs / ui-workflow-run 等）随对应工具采纳与否走，不单独接。
 - **等 0.2.0 正式版再动**：语料基线与我们 pin 完全一致，现在就是采纳窗口；
   rc.2 → 正式版若再有破坏面，升 pin 重审程序兜底。
+
+## 实施记录
+
+**R1（2026-09-30）**：
+
+- 三项提前调研收口（用户裁决的三项提前）——**auto-review 否决**（零 config 面 + 固定安全
+  策略 + 激活即 danger-full-access 沙箱倒退 + 每工具调用一次 LLM 请求；本仓
+  evidence-audit.mjs 已是候选用途的确定性正解——调研报告带源码行号，全文见子代理留档）；
+  **workflow 否决**（`agent()` 走 one-shot 裸 subagent = D3 划给单点查证的载体倒转主通道；
+  前台运行原子占死父回合 = HITL 停点结构性无落点；方法论 §2 本就弃用管道编排面。重启
+  条件 = workflow 引擎出现 continuable/teammate 语义或研究管道出现"无判断可扇出"步骤）；
+  **browser-use 搁置进池**（缺口真实：15 场归档 run 中 13 场命中 JS 渲染证据失败，残余硬缺口
+  = 消费端 SPA 定价页与 JS 榜单；但 experimental 零出厂采纳信号 + 团队形态错配
+  〔mountSessionMcp 每 agent 起 MCP 子进程〕。重启判据：C1 provider 晋级 stable /
+  C2 单场 scoped pilot〔leads 阶段 ≥2 条 A/B 级线索四绕行全败〕/ C3 累计 ≥4 例）。
+- **一梯队 session-query 落地**：pack `cordis.patch.yml` replace `session-query-sqlite`
+  （`openAt: first-search`，`:memory:` 每进程重建——持久化索引属 launcher 面）；lead/critic
+  preset 挂 `tool-session-query` 五工具行（`session_search / session_event_search /
+  session_trace / session_event_trace / session_event_read`）；peerDeps +2（tool-session-query
+  / session-query-sqlite）+ root devDeps 镜像。验证：verify 全绿 + tests 112/0 + L1 真挂载
+  ALL PASS + L2 release-smoke ALL PASS + L4-lite ALL PASS。
+- **连带修掉一个升 pin 遗留回归**（020rc2 Note 已补勘误）：vendor-build.sh 顺序缺陷
+  （tsdown client 先于 host 半补建 → client bundle 把 typert-protocol/util-workspace-path
+  静默外置成 require → Web boot 17 包 failed）；顺序修正 + 重跑 tsdown client 后
+  client-load-smoke ALL PASS；guides/60 换 pin 必跑面补 client-load-smoke；
+  render-overlay 治掉 registry replace 的硬编码第二份（replace 块统一从 pack 直读）。
+- **待办**：①timed ask-user 需按**修正后的语义**重新呈批（0.2.0 实测：超时不落定到推荐项，
+  而是返回 pending 通知——问题保持可答、agent 可继续有用工作、用户后答经
+  answer_to_pending_question 唤醒；先前呈批基于"自动落定"的错误描述）；②snapshot-replay
+  B 层重录 session.v2.jsonl（B1 = e6e51bc persona 变更欠的基线债、B2 = 本次工具面变更，
+  治法 = 新一代录制 + 人审；C5 金标准已重写）；③二梯队（tool-goal / tool-jobs / compaction
+  调优）未动。
 
 ## 验收
 

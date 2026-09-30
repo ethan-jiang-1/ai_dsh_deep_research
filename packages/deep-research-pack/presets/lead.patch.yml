@@ -56,6 +56,11 @@
             config:
               fetch: true
               searchTimeoutMs: 60000
+          # 会话检索（0.2.0 插件货架采纳）：跨 run 找历史证据、回溯组员会话取证原文——
+          # 五工具 session_search / session_event_search / session_trace / session_event_trace
+          # / session_event_read；FTS 索引由 bundle 层 openAt: first-search 惰性开。
+          - id: tool-session-query
+            name: '@deepseek-ai/dsh-tool-session-query'
 
           - id: tool-subagent
             name: '@deepseek-ai/dsh-tool-subagent'

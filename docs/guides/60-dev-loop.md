@@ -81,7 +81,7 @@
 | 加 / 改机械门禁 | `verify.mjs` gates 数组 + `evaluation.md` §L0 台账 | **注入回归红 → 还原 → 绿** | L0 | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 |
 | 改工作区手册 / 模板 | `research-workspace/` 正本 → `sync-pack-workspace` | sync → verify | L0 | — | `pack-workspace-fresh` 绿 |
 | 改部署面（preflight / scaffold / 发布集） | pack `scripts/` + `package.json` 的 files/bin | — | L0 + L2 | 部署 Note | `release-smoke` ALL PASS |
-| 换 vendor pin | `.gitmodules` + pack 兼容矩阵 | `vendor-build.sh`（含 host 半补建 + 前端壳重建）→ 逐条重审 | L0 + L1 + L2 + L4-lite | 升 pin 毕业 Note（重审结论正本） | 全档绿 + 重审入 Note |
+| 换 vendor pin | `.gitmodules` + pack 兼容矩阵 | `vendor-build.sh`（含 host 半补建 + 前端壳重建）→ 逐条重审 | L0 + L1 + L2 + client-load-smoke + L4-lite（0.2.0 轮实证：漏跑观察面 = client bundle 的 build-time externals 漂移漏网） | 升 pin 毕业 Note（重审结论正本） | 全档绿 + 重审入 Note |
 | 纯文档 / 卫生 | 文档自身 | — | L0 | 仅持久决定理由才写 | 门禁绿 |
 | **用户直派（不在队列）** | 先判路径：决定已作出 → 直接 `notes/implemented/`；重大且未构建 → 先立 RFC + 队列行 | 同对应任务型 | 同对应任务型 | 同对应任务型 | 同对应任务型 |
 

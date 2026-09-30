@@ -26,6 +26,16 @@ function presetBodies() {
   return parts.join('\n\n');
 }
 
+/** 取 cordis.patch.yml 的 replace 块（`- insert:` 之前的顶层行，去注释与空行）——bundle 级
+ *  replace 行（registry 默认 preset、session-query-sqlite 索引开关等）与 insert 行同源直读，
+ *  不在渲染器里硬编码第二份（漂移教训同 bundleInserts 头注）。 */
+function bundleReplaces() {
+  const lines = readFileSync(join(PACK, 'cordis.patch.yml'), 'utf8').split('\n');
+  const i = lines.findIndex((l) => l.trim() === '- insert:');
+  if (i === -1) throw new Error('cordis.patch.yml: 缺 "- insert:" 行');
+  return lines.slice(0, i).filter((l) => l.trim() !== '' && !l.trim().startsWith('#')).join('\n').replace(/\s+$/, '');
+}
+
 /** 取 cordis.patch.yml 的 insert 块正文（bundle 级行：tool-present / ui-agent-team /
  *  research-client——与 pack 镜像同一来源，不再硬编码第二份清单，杜绝漂移）。 */
 function bundleInserts() {
@@ -43,11 +53,9 @@ const rendered = `# 生成文件 —— 由 dev/render-overlay.mjs 从 packages/
 # 机制：\`--profile web --patch <本文件绝对路径>\` 在 profile 层之后追加本 overlay——行包名在
 # vendor 源码工作区解析（boot 进程起自本仓，tsx/esm 从其 node_modules 解析），零安装混线。
 # 0.1.7：preset 即行（config.plugins），web-app bundle 已 insert 出厂 registry（default:
-# standard）与四个出厂 preset；本 overlay 把 registry 默认换成研究主编，并并入本包四个角色行。
-- id: agent-preset-registry
-  name: '@deepseek-ai/dsh-agent-preset-registry'
-  config:
-    default: lead
+# standard）与四个出厂 preset；replace 行（registry 默认 + 索引开关）与 insert 行均从
+# pack 的 cordis.patch.yml 直读，本 overlay 不持有第二份。
+${bundleReplaces()}
 
 - insert:
 ${presetBodies()}

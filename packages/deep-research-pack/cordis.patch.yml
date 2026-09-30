@@ -14,6 +14,16 @@
   config:
     default: lead
 
+# ── 会话全文检索（0.2.0 插件货架采纳）：base 出厂 openAt: never（seam 已挂、FTS 关着）。
+#    首次搜索惰性开 SQLite FTS；:memory: = 每进程重建、零状态文件（持久化索引属 launcher
+#    面——boot-context slot 语义，见 vendor session-query-sqlite 源码头注）。模型面工具行
+#    在 presets/lead 与 presets/critic（tool-session-query 五工具），其余角色不挂（scoping）。──
+- id: session-query-sqlite
+  name: '@deepseek-ai/dsh-session-query-sqlite'
+  config:
+    path: ':memory:'
+    openAt: first-search
+
 - insert:
     # ── web 工具：不在此声明。实证结论（RFC web-tool-rows）：web seam / web-search-deepseek /
     #    web-fetch-http / tool-web 四行全部是 dsh-base 出厂行——providers 与 seam 留在 host 面，
