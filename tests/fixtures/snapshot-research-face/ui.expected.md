@@ -7,13 +7,8 @@
 ## 对话流 · 研究语义卡（web_search 卡标题，状态符不钉）
 
 检索：DSH harness
-检索：DSH harness DeepSeek
-检索：DeepSeek Harness DSH github
 
 ## 研究状态页签 · 人性化活动行（icon + 文本）
 
-💬 I'll run the probe: one search, then fetch the fir
 🔍 检索：DSH harness
-🔍 检索：DSH harness DeepSeek
-🔍 检索：DeepSeek Harness DSH github
-💬 探针完成，web_search 三次调用全部失败（搜索后端返回不可解析的响应体，https://ap
+💬 探针完成：搜了 1 次（「DSH harness」，返回 8 条来源），抓了 1 个页面（[极客公园

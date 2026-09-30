@@ -95,6 +95,17 @@ ask-user / present / agent-instructions + agent-team-profile 层），升 pin �
 
 ## 实施记录
 
+**R2（2026-09-30，基线债优先 = 用户裁决）**：
+
+- **snapshot v2 重录完成**：借在飞 run 通道（3083）以 v1 同款探针提示词录真模型 lead 会话
+  （web_search×1 成功 + web_fetch×1 + "探针完成"收尾，36 事件）；fixture 换代
+  `session.v2.jsonl`（v1 移除，git 历史即归档），冒烟 FIXTURE 指针与 snapshot.yml 工具数
+  注释（22→27——request/header 实测 27 工具含 session-query 五件）同步。验证：
+  snapshot-replay-smoke ALL PASS（A 回放 + B1 persona + B2 工具 schema + C5 金标准重写
+  人审通过——diff = 三连败搜索卡 → 一次成功搜索卡 + 新收尾文本，正是 R1 变更的镜像）。
+  **e6e51bc 欠的 persona 基线债与 R1 工具面债一并清偿**；后续模型可见面变更重新获得
+  keyless 秒级回归信号。
+
 **R1（2026-09-30）**：
 
 - 三项提前调研收口（用户裁决的三项提前）——**auto-review 否决**（零 config 面 + 固定安全
