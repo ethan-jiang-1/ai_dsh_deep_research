@@ -16,6 +16,12 @@
   补救，**先看占用者是谁**：若是本仓在飞的 run 通道 → **别另起**，用它（URL/token 见启动横幅或
   `dev/smoke-workspace/web.log`）；不是 → 换端口，或确认后停掉它（**别盲杀**：那会终局化挂起的
   HITL 回合）；
+- **启动请求的呈交纪律（2026-09-30 用户定调）**：用户让"启动/起 web"= 代理**先自己跑通**——
+  boot-run 全序（自检 → 漂移检测 → 补装）红了就当场修（漂移 = 按脚本处方重建 profile；
+  vendor 产物缺失 = `bash dev/vendor-build.sh`），boot 出横幅后**再验浏览器面**（探针断言
+  无 "Failed to load plugins" / 零 console 错误——0.2.0 轮教训：boot 横幅只证宿主侧，
+  观察面可能坏着），**全绿才把 URL 交出去**。不呈交"可能能用的东西"；红了不自修就上报 =
+  失职。
 - **启动前先判"接续还是新开"**：`ls -dt research-workspace/drt_*/`（`archive/` 除外）——**根目录下
   每个未归档 bundle 都要报出来**，分两类：(a) 无 `final/` 或 `review.md` 不是 `readiness: PASS`
   = **在飞** → 问"接续它还是新开"（接续做法 = §5）；(b) 有 `final/` 且 PASS = **交付线已在盘、未归档**

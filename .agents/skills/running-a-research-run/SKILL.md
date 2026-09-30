@@ -19,7 +19,8 @@ run 的操作面是**文件 + 会话通道**，不是代码。启动器、观察
   新开**（接续做法 = §3）；(b) 有 `final/` 且 PASS = 交付线已在盘但未归档 → 问**先归档再新开，还是
   补研究**。两类都带 slug + mtime，**都不自己挑**；
 - 起通道：`bash dev/boot-run.sh`（幂等：组合校验 → 漂移检测 → boot web（`DSH_RUN_PORT`，缺省 3083）
-  → 仪表盘）。
+  → 仪表盘）。**呈交纪律 = 先自跑自修（红了当场修）+ 验浏览器面全绿，才把 URL 交给用户**
+  （正本 = guides/61 §0 启动请求的呈交纪律）。
   改了 pack 文本（persona/skill/手册）必须重启通道——**web 进程缓存 boot 时的文本**；
 - 观察面两处、同一折算：`node scripts/run-dashboard.mjs --latest --out <html>`（或 `--watch`，
   多场扫描的 HTML 投影）与 GUI 右栏「研究状态」页签（会话内实时：步骤条 + HITL 挂起横幅 +
