@@ -9,3 +9,4 @@
 | [260928-retire-roadmap](260928-retire-roadmap.md) | 用户裁决（退役——规划面单一化；推翻卡内初版倾向，反证论据随卡保留） | [毕业 Note](../../../notes/implemented/2026-09-28-backlog-deliberation-space.md)（D19/D20） | 2026-09-28 |
 | [260928-node-io-schema](260928-node-io-schema.md) | 用户点名提前（定稿门过；落点 A2 + node-gate ②③ 小切口——C 形态同日翻案） | [毕业 Note](../../../notes/implemented/2026-09-28-node-io-schema.md) | 2026-09-29 |
 | [260928-hitl2-scope-round](260928-hitl2-scope-round.md) | 用户裁决搁置（严格门未触发零 rerun，试点正证留卡；复活 = 首场补研究型 HITL2 或点名提前） | [queue.md §搁置池行](../../queue.md) | 2026-09-29 |
+| [260929-dispatch-distillation](260929-dispatch-distillation.md) | 用户裁定先上（两项未决当日拍板：具体弱档对照 + 最浅白文本；样题代理拟、用户过目）——当日实施完成（模式库 v1 + 增长机制，方向经三轮重塑：直接沉淀 > A/B 前置） | [毕业 Note](../../../notes/implemented/2026-09-29-dispatch-distillation.md) | 2026-09-29 |

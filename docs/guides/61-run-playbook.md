@@ -113,3 +113,17 @@ node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <横幅 token>   #
 
 唯一依据 = **文件事实**：final.md 存在 + lead 会话的 present 声明（手册 §完成判据），
 不是任何人的口头宣告。
+
+## 7. 归档时收割判型模式（增长协议的收割步）
+
+归档一个 run 前，扫它的 journal 的判型标记（命中/未命中两类，协议正本 =
+[question-patterns.md 库尾](../../research-workspace/question-patterns.md)）：
+
+```sh
+grep -rn "判型" research-workspace/ --include=journal.md
+```
+
+输出分两类：`判型未命中` 行 → 新条目候选；`判型命中=P#` 行 → 各条目效用账。
+候选过晋升门槛（跨 run 复现 ≥2 次，或单次造成真实成本〔HITL1 返工 / §Decisions 方向
+修正 / 前提级发现〕）才按六段骨架写新条目、标（留察）；连续 3 次收割零命中的条目移
+休眠节。库的任何变更同 diff 跑 l4-lite + `node dev/sync-pack-workspace.mjs`。

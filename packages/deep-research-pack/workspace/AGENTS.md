@@ -35,6 +35,7 @@ archive/<slug>/        已交付 run 归档位（2026-09-27 用户指令）：�
   journal.md           运行纪要（追加式，所有角色可写；跨 rerun 累积血统）
 templates/run/         新 run bundle 的起点模板（只读，不直接写）
 NODES.md               节点 I/O 契约全表（八节点输入/输出/下游可开工判据 + 回边版本语义）——节点开工前对照；机械把守 = schema-scan.mjs（在场级全行）+ node-gate.mjs（交付判据两门）
+question-patterns.md   判型模式库（HITL1 第一对照面：命中走条目、未命中兜底 + journal 标记行；增长协议正本 = 库尾节）
 ```
 
 模板六件 ↔ question/topics/leads/evidence-entry（= evidence/ 单条模板）/findings/final

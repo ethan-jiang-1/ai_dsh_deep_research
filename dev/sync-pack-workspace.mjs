@@ -20,10 +20,11 @@ const SRC = join(ROOT, 'research-workspace')
 const DST = join(ROOT, 'packages', 'deep-research-pack', 'workspace')
 const check = process.argv.includes('--check')
 
-/** 种子文件清单（手册 + 节点契约 + run 模板；drt_ 开头的 run bundle 运行区不进种子）。 */
+/** 种子文件清单（手册 + 节点契约 + 判型模式库 + run 模板；drt_ 开头的 run bundle 运行区不进种子）。 */
 const FILES = [
   ['AGENTS.md', 'AGENTS.md'],
   ['NODES.md', 'NODES.md'],
+  ['question-patterns.md', 'question-patterns.md'],
   ...readdirSync(join(SRC, 'templates', 'run')).filter((f) => f.endsWith('.md')).sort()
     .map((f) => [`templates/run/${f}`, `templates/run/${f}`]),
 ]
