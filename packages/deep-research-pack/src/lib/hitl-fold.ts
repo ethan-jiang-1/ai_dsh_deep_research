@@ -71,6 +71,7 @@ interface LastAsk {
   readonly callId: string | undefined
   readonly time: unknown
   readonly questions: number
+  readonly kind: AskKind
 }
 
 function findLastAsk(events: readonly unknown[]): LastAsk | undefined {
@@ -80,11 +81,13 @@ function findLastAsk(events: readonly unknown[]): LastAsk | undefined {
     if (typeof event !== 'object' || event === null) continue
     const e = event as JournalEventLike
     if (e.type !== 'tool/call' || typeof e.data !== 'object' || e.data === null || e.data.name !== 'ask_user_question') continue
+    const args = (e.data as { readonly arguments?: unknown }).arguments
     last = {
       index: i,
       callId: callIdOf(event),
       time: e.time,
-      questions: askQuestionCount((e.data as { readonly arguments?: unknown }).arguments),
+      questions: askQuestionCount(args),
+      kind: askKindOf(args),
     }
   }
   return last
@@ -133,10 +136,36 @@ export interface AnchorFileFacts {
   readonly delivered: boolean
 }
 
+/**
+ * 开放 ask 的归属判型（BUG-002：timed 模式让挂起持续存在，"question.md 在场 + 尾部未答
+ * 一律记交付审阅"的旧启发式把 HITL1 重发/立项追问误标成交付审阅）。签名 = persona 钦定的
+ * 卡片形状：HITL1 首问 header 恒为「研究类型」；HITL2 选项恒含「按现稿定稿」。其余 =
+ * 契约外（中途确认）。
+ */
+type AskKind = 'hitl1' | 'hitl2' | 'unknown'
+
+function askKindOf(args: unknown): AskKind {
+  let obj: unknown = args
+  if (typeof args === 'string') {
+    try { obj = JSON.parse(args) } catch { return 'unknown' }
+  }
+  if (typeof obj !== 'object' || obj === null) return 'unknown'
+  const text = JSON.stringify(obj)
+  if (text.includes('按现稿定稿')) return 'hitl2'
+  if (text.includes('研究类型')) return 'hitl1'
+  return 'unknown'
+}
+
 /** 尾窗内末位开放 ask 携带的问数（无挂起 → 0；挂起期间 agent 自身事件不改变问数）。 */
 function tailPendingQuestions(events: readonly unknown[]): number {
   if (!foldHitlPending(events).pending) return 0
   return findLastAsk(events)?.questions ?? 0
+}
+
+/** 末位开放 ask 的归属（无挂起 → undefined）。 */
+function tailAskKind(events: readonly unknown[]): AskKind | undefined {
+  if (!foldHitlPending(events).pending) return undefined
+  return findLastAsk(events)?.kind ?? 'unknown'
 }
 
 /**
@@ -152,27 +181,50 @@ function tailPendingQuestions(events: readonly unknown[]): number {
  * @param fileFacts - bundle 文件在场性（face 缺席时省略）。
  * @returns 锚点列表（固定两位 + 契约外挂起追加；永不 throw）。
  */
+/**
+ * 折算：journal 事件序列（+ 可选文件事实）→ 流程锚点态（立项确认 / 交付审阅）。
+ *
+ * **混合折算（尾窗约束的实测产物，2026-09-28 首跑）**：journal 流的 snapshot 是尾窗
+ * （vendor history.ts `DEFAULT_MAX_MESSAGES = 50`），长会话里 ask 的序数与更早的停靠点
+ * 不可见——passed 态**由文件事实承载**（question.md 在场 = 立项拍板落盘；final.md 在场 =
+ * 交付拍板落盘），journal 尾窗只承载 **pending 态**。文件事实缺席（bundle 未建/未绑定）
+ * 时退化为纯尾窗判定：只显示 pending，不虚构 passed。
+ *
+ * **pending 归属按 ask 内容判型（BUG-002，2026-09-30 UX 清扫实测）**：尾部开放 ask 带
+ * HITL1 签名（首问 header「研究类型」）→ 立项确认 pending（question.md 已在场 = timed
+ * 超时后 lead 按默认草案落盘、真人拍板仍开放的形态——re-open 是诚实态）；带 HITL2 签名
+ * （「按现稿定稿」选项）→ 交付审阅 pending；两 signature 皆无 → 契约外「中途确认」缀第三
+ * 锚（原第三锚只盖双锚已过形态，现扩到任意窗口）。开放 ask 优先于文件 passed 态——决策点
+ * 重新开放时 pending 是诚实显示。
+ * @param events - 按 wire 顺序的事件（follow 的 snapshot + 实时流；畸形输入 fail-soft）。
+ * @param fileFacts - bundle 文件在场性（face 缺席时省略）。
+ * @returns 锚点列表（固定两位 + 契约外挂起追加；永不 throw）。
+ */
 export function deriveAnchors(events: readonly unknown[], fileFacts?: AnchorFileFacts): readonly RunAnchor[] {
   const tailUnanswered = foldHitlPending(events).pending
   const pendingQs = tailPendingQuestions(events)
+  const kind = tailAskKind(events)
   const q = fileFacts?.question ?? false
   const f = fileFacts?.delivered ?? false
   const slots: RunAnchor[] = []
+  const a1Pending = tailUnanswered && (kind === 'hitl1' || (kind === 'unknown' && !q))
+  const a2Pending = tailUnanswered && kind === 'hitl2'
+  const extraPending = tailUnanswered && kind === 'unknown' && q
   slots.push(
-    q
-      ? { key: 'anchor-1', label: ANCHOR_LABELS[0] ?? '立项确认', state: 'passed', questions: 0 }
-      : tailUnanswered
-        ? { key: 'anchor-1', label: ANCHOR_LABELS[0] ?? '立项确认', state: 'pending', questions: pendingQs }
+    a1Pending
+      ? { key: 'anchor-1', label: ANCHOR_LABELS[0] ?? '立项确认', state: 'pending', questions: pendingQs }
+      : q
+        ? { key: 'anchor-1', label: ANCHOR_LABELS[0] ?? '立项确认', state: 'passed', questions: 0 }
         : { key: 'anchor-1', label: ANCHOR_LABELS[0] ?? '立项确认', state: 'upcoming', questions: 0 },
   )
   slots.push(
-    f
-      ? { key: 'anchor-2', label: ANCHOR_LABELS[1] ?? '交付审阅', state: 'passed', questions: 0 }
-      : q && tailUnanswered
-        ? { key: 'anchor-2', label: ANCHOR_LABELS[1] ?? '交付审阅', state: 'pending', questions: pendingQs }
+    a2Pending
+      ? { key: 'anchor-2', label: ANCHOR_LABELS[1] ?? '交付审阅', state: 'pending', questions: pendingQs }
+      : f
+        ? { key: 'anchor-2', label: ANCHOR_LABELS[1] ?? '交付审阅', state: 'passed', questions: 0 }
         : { key: 'anchor-2', label: ANCHOR_LABELS[1] ?? '交付审阅', state: 'upcoming', questions: 0 },
   )
-  if (tailUnanswered && q && f) {
+  if (extraPending) {
     slots.push({ key: 'anchor-extra', label: '中途确认', state: 'pending', questions: pendingQs })
   }
   return slots

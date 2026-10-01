@@ -102,10 +102,23 @@ test('passed 由文件事实承载（尾窗里没有 ask 也能正确显示—�
   assert.deepEqual(deriveAnchors([other('web_search')], { question: true, delivered: false }).map((a) => a.state), ['passed', 'upcoming']);
 });
 
-test('立项已落盘 + 尾位未答 ask → 交付审阅 pending（带问数）', () => {
+test('立项已落盘 + 尾位无签名 ask → 契约外「中途确认」第三锚（BUG-002：不再误标成交付审阅）', () => {
   const anchors = deriveAnchors([askWithQs(1, 't')], { question: true, delivered: false });
-  assert.deepEqual(anchors.map((a) => a.state), ['passed', 'pending']);
-  assert.equal(anchors[1].questions, 1);
+  assert.deepEqual(anchors.map((a) => [a.label, a.state]), [['立项确认', 'passed'], ['交付审阅', 'upcoming'], ['中途确认', 'pending']]);
+  assert.equal(anchors[2].questions, 1);
+});
+
+test('BUG-002 主场景：timed 超时后 lead 重发 HITL1 三问（研究类型签名）→ 立项确认 re-open pending，不误标交付审阅', () => {
+  const hitl1ReAsk = { type: 'tool/call', data: { name: 'ask_user_question', arguments: JSON.stringify({ questions: [{ id: 'research_type', header: '研究类型' }] }) } };
+  const anchors = deriveAnchors([hitl1ReAsk], { question: true, delivered: false });
+  assert.deepEqual(anchors.map((a) => [a.label, a.state]), [['立项确认', 'pending'], ['交付审阅', 'upcoming']]);
+  assert.equal(anchors[0].questions, 1);
+});
+
+test('HITL2 定稿卡签名（按现稿定稿）→ 交付审阅 pending', () => {
+  const hitl2Ask = { type: 'tool/call', data: { name: 'ask_user_question', arguments: JSON.stringify({ questions: [{ id: 'finalize', options: [{ label: '按现稿定稿（Recommended）' }] }] }) } };
+  const anchors = deriveAnchors([hitl2Ask], { question: true, delivered: false });
+  assert.deepEqual(anchors.map((a) => [a.label, a.state]), [['立项确认', 'passed'], ['交付审阅', 'pending']]);
 });
 
 test('交付后再来的挂起 ask（契约外）→ 如实缀第三锚 中途确认', () => {

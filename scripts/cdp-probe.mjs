@@ -102,18 +102,8 @@ try {
       return true
     })()`) === true;
     if (dispatch) return true;
-    // 行不可见的最常见原因 = 工作区分组折叠（组头 = _root_ span、startsWith 组名）→
-    // 点组头展开后重试（smoke expandGroup 同款）
-    await evaluate(`(() => {
-      const rows = Array.from(document.querySelectorAll('span[class*="_root_"]'));
-      for (const el of rows) {
-        const r = el.getBoundingClientRect();
-        if (r.x >= 256 || r.width === 0) continue;
-        const t = (el.textContent ?? '').trim();
-        if (t.startsWith('research-workspace') && !t.includes('New Session')) { el.click(); return 'group-expanded' }
-      }
-      return 'no-group'
-    })()`);
+    // 行不可见的最常见原因 = 「Show N more sessions」折叠（组内 65+ 会话）→ 点开重试
+    await evaluate(`(() => { const m = Array.from(document.querySelectorAll('button,span')).find(x => /Show \\d+ more sessions/.test(x.textContent ?? '')); if (m) { m.click(); return true } return false })()`);
     await new Promise((resolve) => { setTimeout(resolve, 2500) });
     return evaluate(`(() => {
       const t = ${JSON.stringify(text)};
