@@ -9,5 +9,5 @@
 - [_closed_plans/](_closed_plans/README.md) — 已毕业推敲卡（无编号，按 `YYMMDD-slug` 查）
 - [_fixed_bugs/](_fixed_bugs/README.md) — 已修复缺陷卡（逐行索引）
 
-**Next BUG ID: BUG-001**（新号 = 已分配最大号 + 1，活跃 [_fixed_bugs/](_fixed_bugs/README.md)
+**Next BUG ID: BUG-003**（新号 = 已分配最大号 + 1，活跃 [_fixed_bugs/](_fixed_bugs/README.md)
 ∪ [bugs/](../bugs/README.md) 一起算）
