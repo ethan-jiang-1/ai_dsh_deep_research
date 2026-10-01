@@ -43,7 +43,9 @@ const arg = (name, fallback) => {
   return i === -1 ? fallback : process.argv[i + 1]
 }
 const PORT = Number(arg('port', '3109'))
-const SESSION_TITLE = arg('session', '国产CPU与美国CPU的差距')
+// 既有会话默认 = 盘侧最新绑定会话（惰性解析——boundSession 在下方扫描；硬编码标题会
+// 随会话积累腐烂，BUG-002 清扫轮实测假红）。--session 仍可显式指定。
+const SESSION_TITLE_ARG = arg('session', null)
 // 侧栏把**非当前会话所在的组折叠**（实测：只展开 active 组）——找行前先展开目标组。
 const GROUP_TITLE = arg('group', 'harness-home')
 const BOOT_TIMEOUT_MS = 120_000
@@ -256,7 +258,7 @@ try {
   const expandGroup = async (groupTitle) => {
     const rows = page.locator('span[class*="_root_"]')
     const n = await rows.count()
-    for (let i = 0; i < Math.min(n, 40); i++) {
+    for (let i = 0; i < Math.min(n, 300); i++) {
       const el = rows.nth(i)
       if (!(await el.isVisible().catch(() => false))) continue
       const box = await el.boundingBox().catch(() => null)
@@ -271,15 +273,42 @@ try {
     return false
   }
   const clickRowByText = async (text) => {
-    const rows = page.locator('span[class*="_root_"]')
-    const n = await rows.count()
-    for (let i = 0; i < Math.min(n, 40); i++) {
-      const el = rows.nth(i)
-      if (!(await el.isVisible().catch(() => false))) continue
-      const box = await el.boundingBox().catch(() => null)
-      if (box === null || box.x >= 256) continue // 只认左栏（中央区同名 class 会抢匹配）
-      const rowText = (await el.textContent() ?? '').trim()
-      if (rowText.includes(text)) { await el.click({ timeout: 10_000 }).catch(() => {}); return true }
+    const scan = async () => {
+      const rows = page.locator('span[class*="_root_"]')
+      const n = await rows.count()
+      for (let i = 0; i < Math.min(n, 300); i++) {
+        const el = rows.nth(i)
+        if (!(await el.isVisible().catch(() => false))) continue
+        const box = await el.boundingBox().catch(() => null)
+        if (box === null || box.x >= 256) continue // 只认左栏（中央区同名 class 会抢匹配）
+        const rowText = (await el.textContent() ?? '').trim()
+        if (rowText.includes(text)) { await el.click({ timeout: 10_000 }).catch(() => {}); return true }
+      }
+      return false
+    }
+    if (await scan()) return true
+    // 目标沉到「Show N more sessions」折叠区 → 展开后重试一次（BUG-002 轮：验证会话
+    // 被后续探针会话挤出近列表——按标题定位必须能穿透折叠）
+    const more = page.getByText(/Show \d+ more sessions/).first()
+    if (await more.isVisible({ timeout: 4000 }).catch(() => false)) {
+      await more.click().catch(() => {})
+      await wait(3000)
+      if (await scan()) return true
+    }
+    // 仍不可见 → 走「Search sessions」按名字定位（深列表的权威路径；React 受控输入
+    // 用 native setter + input 事件——execCommand 不触发受控更新）
+    const searchOpened = await page.evaluate(() => { const b = document.querySelector('[aria-label="Search sessions"]'); if (b === null) return false; b.click(); return true })
+    if (searchOpened) {
+      await wait(1500)
+      await page.evaluate((t) => {
+        const i = Array.from(document.querySelectorAll('input')).find(x => x.getBoundingClientRect().width > 0)
+        if (i === undefined) return
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
+        setter.call(i, t)
+        i.dispatchEvent(new Event('input', { bubbles: true }))
+      }, text)
+      await wait(2500)
+      if (await scan()) return true
     }
     return false
   }
@@ -386,11 +415,16 @@ try {
   await page.reload({ waitUntil: 'domcontentloaded' })
   await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
   await wait(5_000)
-  let sessionOk = await clickRowByText(SESSION_TITLE)
-  if (!sessionOk) {
-    // 折叠态：展开目标组后重试（侧栏只展开 active 会话所在的组）
-    await expandGroup(GROUP_TITLE)
-    sessionOk = await clickRowByText(SESSION_TITLE)
+  const SESSION_TITLE = SESSION_TITLE_ARG ?? boundSession?.title ?? null
+  let sessionOk = SESSION_TITLE !== null && await clickRowByText(SESSION_TITLE)
+  if (!sessionOk && SESSION_TITLE !== null) {
+    // 折叠态：逐组展开后重试（侧栏只展开 active 会话所在的组；目标会话的组随其 cwd
+    // 走——BUG-002 清扫轮实证：老 ad-hoc 会话在 harness-home 组，不在 research-workspace）
+    for (const g of ['research-workspace', 'harness-home', 'Ungrouped', 'rehearsal-workspace']) {
+      await expandGroup(g)
+      sessionOk = await clickRowByText(SESSION_TITLE)
+      if (sessionOk) break
+    }
   }
   step(sessionOk, '既有会话在场（journal 数据源；折叠组自动展开）', sessionOk ? SESSION_TITLE : 'dev home 缺该会话——用 --session 指定')
   if (sessionOk) {

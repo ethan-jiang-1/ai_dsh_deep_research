@@ -84,6 +84,10 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const [error, setError] = useState<string | null>(null)
   const boundRef = useRef<SessionBinding>({ slug: undefined, boundBy: undefined, kickoffSeen: false })
   const prevPending = useRef(false)
+  // 观察连续性（UX 清扫 F1，2026-09-30）：vendor 在切换会话时收起右栏——观察面板每次
+  // 切换丢失。旧会话正被观察（绑定/挂起）时，切换后重开状态页签（revealStatusTab）。
+  const prevSidRef = useRef<string | undefined>(undefined)
+  const wasObservingRef = useRef(false)
 
   // ① journal 流 → 活动行 + HITL 谓词 + 会话绑定输入
   useEffect(() => {
@@ -115,12 +119,24 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
             boundRef.current = bound
             setBinding(bound)
           }
+          // 观察连续性的采样点：旧会话的末态（绑定/挂起）在切换那一刻经此 ref 供切换效应读。
+          wasObservingRef.current = boundRef.current.slug !== undefined || prevPending.current
         }
       } catch (cause) {
         if (!controller.signal.aborted) setError(String(cause))
       }
     })()
     return () => { controller.abort() }
+  }, [props.sessionId])
+
+  // 切换会话时重开状态页签（F1）：仅在"上一个会话正被观察"时触发；初始挂载与
+  // 未观察会话之间的切换不动作（不覆盖用户刻意收起的常态——只在观察被切断时续上）。
+  useEffect(() => {
+    const prev = prevSidRef.current
+    if (prev !== undefined && prev !== props.sessionId && wasObservingRef.current) {
+      props.revealStatusTab()
+    }
+    prevSidRef.current = props.sessionId
   }, [props.sessionId])
 
   // ② bundle 渐进面（绑定本会话的 run；slug 变化即扫 + 30s 定时——文件在场性不高频）
@@ -290,7 +306,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       )}
       {kickoffHold && (
         <div style={{ marginBottom: 10, fontSize: 12, padding: '6px 10px', borderRadius: 6, background: '#0000000d' }}>
-          🌱 这场研究还没开始——立项对齐中，读到的是上一场 run 的上下文；落笔开跑后这里显示本场状态。
+          🌱 这场研究还没开始——立项对齐中，读到的是上一场 run（drt_{binding.slug}）的上下文；落笔开跑后这里显示本场状态。
         </div>
       )}
       {!unbound && !kickoffHold && face === null && binding.boundBy === 'read' && hitl.pending && (
