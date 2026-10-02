@@ -16,9 +16,9 @@
   补救，**先看占用者是谁**：若是本仓在飞的 run 通道 → **别另起**，用它（URL/token 见启动横幅或
   `dev/smoke-workspace/web.log`）；不是 → 换端口，或确认后停掉它（**别盲杀**：那会终局化挂起的
   HITL 回合）；
-- **可选 SPA 抓取通道（scoped pilot）**：`MCP_PLAYWRIGHT=1 bash dev/boot-run.sh` = 挂本地
-  Playwright MCP（npx 拉起，零账号零凭据；SPA 定价页/JS 榜单的渲染抓取兜底）；缺省不挂，
-  拆 = 不带 env 重跑。按 pilot 实测定常驻与否——决定正本 =
+- **SPA 抓取通道（mcp-playwright，默认挂载）**：`bash dev/boot-run.sh` 自带本地 Playwright MCP
+  （npx 拉起 `@0.0.83`、headless、`direct://` 直连绕过系统代理——SPA 定价页/JS 榜单的渲染抓取）；
+  `MCP_PLAYWRIGHT=0` = 显式拆。决定与环境踩坑正本 =
   [mcp-playwright 采纳 Note](../../notes/implemented/2026-10-02-mcp-playwright-adoption.md)；
 - **通道必须由用户终端起**（2026-10-02 pilot 实证）：代理在会话内后台起通道会继承会话执行
   沙箱——`web_fetch` 全域名撞"resolves to a non-public IP"解析墙、workspace 外 EPERM

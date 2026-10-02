@@ -71,14 +71,14 @@ else
   profile_ok || { echo "boot-run: 重建后组合校验仍不过——fail-loud，检查上方安装输出" >&2; exit 1; }
 fi
 
-# ①½ 可选 MCP 抓取通道（scoped pilot，2026-10-02 拍板采纳本地 Playwright MCP；D22 交付约束：
-#     零账号零凭据零订阅——npx 自动拉起，机器有 Node 即可用）。MCP_PLAYWRIGHT=1 = 挂（标记块
-#     幂等追加进 profile patch）；缺省/0 = 拆（删除标记块）——env 即开关，profile 重建分支
-#     不携带它（常驻与否按 pilot 实测定）。决定/淘汰方案正本 =
-#     notes/implemented/2026-10-02-mcp-playwright-adoption.md。
+# ①½ SPA 抓取通道（mcp-playwright，**默认挂载**——2026-10-03 用户拍板常驻，pilot 终版结论 =
+#     采纳 Note；D22 交付约束：零账号零凭据零订阅，npx 自动拉起）。MCP_PLAYWRIGHT=0 = 显式拆；
+#     缺省挂。决定/淘汰方案/环境踩坑全记录正本 =
+#     notes/implemented/2026-10-02-mcp-playwright-adoption.md。版本钉 0.0.83（与缓存一致，
+#     升 pin 时随重验流程走）。
 MCP_MARK_BEGIN='# BEGIN mcp-playwright-block'
 MCP_MARK_END='# END mcp-playwright-block'
-if [ "${MCP_PLAYWRIGHT:-0}" = "1" ]; then
+if [ "${MCP_PLAYWRIGHT:-1}" = "1" ]; then
   if ! grep -qF "$MCP_MARK_BEGIN" "$PROFDIR/cordis.patch.yml" 2>/dev/null; then
     # 新建 profile 的 patch 以 `[]` 闭数组占位——其后再追加条目即非法 YAML（pilot 首跑红证），
     # 先摘掉占位行再追加块。
@@ -93,13 +93,13 @@ $MCP_MARK_BEGIN
         serverName: playwright
         transport: stdio
         command: npx
-        args: ['-y', '@playwright/mcp@latest', '--headless', '--proxy-server', 'direct://', '--proxy-bypass', '*']
+        args: ['-y', '@playwright/mcp@0.0.83', '--headless', '--proxy-server', 'direct://', '--proxy-bypass', '*']
         env:
           npm_config_cache: '$ROOT/dev/smoke-workspace/npm-cache'
         failOnStartupError: true
 $MCP_MARK_END
 MCPROW
-    echo "boot-run: MCP Playwright 通道已写入 profile patch（MCP_PLAYWRIGHT=1；拆 = 不带该 env 重跑本脚本）"
+    echo "boot-run: MCP Playwright 通道已写入 profile patch（默认挂载；拆 = MCP_PLAYWRIGHT=0 重跑本脚本）"
   fi
 elif grep -qF "$MCP_MARK_BEGIN" "$PROFDIR/cordis.patch.yml" 2>/dev/null; then
   sed -i '' "/^${MCP_MARK_BEGIN}/,/^${MCP_MARK_END}/d" "$PROFDIR/cordis.patch.yml"
@@ -107,7 +107,7 @@ elif grep -qF "$MCP_MARK_BEGIN" "$PROFDIR/cordis.patch.yml" 2>/dev/null; then
   if ! grep -qvE '^[[:space:]]*(#.*)?$' "$PROFDIR/cordis.patch.yml"; then
     printf '[]\n' >> "$PROFDIR/cordis.patch.yml"
   fi
-  echo "boot-run: MCP Playwright 通道已移除（MCP_PLAYWRIGHT 未设——拆）"
+  echo "boot-run: MCP Playwright 通道已移除（MCP_PLAYWRIGHT=0——显式拆）"
 fi
 
 # ② pack 漂移检测（RFC debug-dashboard-plus）：pack 源 ↔ profile 安装镜像逐文件比对。

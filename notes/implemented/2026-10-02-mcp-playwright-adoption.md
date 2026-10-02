@@ -79,7 +79,9 @@ A 级）——该页在 drt_cn-dr-products 判"不可判定"、本次 run 故障
 **Token 面**：+25 工具 schema 进全角色请求（58 vs 30 基线）；实测影响可承受——run 中段 24% 上下文、
 9M tokens/98% cache hit（工具 schema 属可缓存前缀，边际成本被 KV 命中摊薄）。
 
-**Recommendation：常驻**（默认挂载，等用户拍板切换）——覆盖力决定性、token 成本可承受、零账号
+**Recommendation → 已拍板：常驻（2026-10-03 用户定调「默认开」）**——boot-run 默认挂载
+（`MCP_PLAYWRIGHT=0` 显式拆）、版本钉 `@playwright/mcp@0.0.83`。依据：覆盖力决定性、token
+成本可承受、零账号
 （D22 合规）、浏览器渲染不可替代（web_fetch 只回壳页）。已知 trade-off 随行：`--proxy-server
 direct://` 修复 Chromium 渲染但**打断 playwright 服务器进程的 `page.request.get` 子通道**（Node 侧
 把 "direct" 当代理主机名解析，`ENOTFOUND direct`——critic 独立复测钉死因果）；该子通道的原职能由
