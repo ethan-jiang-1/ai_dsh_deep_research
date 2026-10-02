@@ -35,12 +35,23 @@
 - **开发者侧留用（全仓审计类任务）**：不在本 Note 范围（那是 harness 会话的工具面，不是
   pack 采纳面）；workflow 在 base 已对开发者会话可用，无须任何本仓动作。
 
-## 重启条件（任一命中重开辨析）
+## 重启条件（2026-10-02 按 vendor 源码重估改写——事实基础先记录）
 
-1. **机制条件**：DSH workflow 引擎出现 continuable/teammate 子代理、人格挂载或 HITL 感知
-   语义（即 workflow 与 teams 融合）；
-2. **需求条件**：研究管道出现真正"无判断、可并行扇出、现载体疼痛且不适合 keyless 脚本
-   门禁"的步骤——目前未出现。
+重估事实（vendor `dsh-v0.2.0-rc.2` 源码核实，与 [m2-run-mechanics Q2](../implemented/2026-09-24-m2-run-mechanics.md) run 实证交叉一致）：
+
+- agent-team-profile 只禁四个 subagent 工具行（tool-subagent-control / -list-agents / -subagent / -subagent-fork），**workflow spawn 通道机制层保留**（`agent-team-profile/cordis.patch.yml:4-14`；README:49）——"teams 与 workflow 互斥"不是事实；
+- 但 web-app 把 host 平面 workflow-ptc / tool-workflow 都禁了、移入 preset 平面（`web-app/cordis.patch.yml:539-541` + `standard.patch.yml:119-123`）——**模型可见性由 preset 行决定**，本仓四角色 preset 均未声明；
+- teammate 一律继承 lead preset（`child-agent.ts:200-219` composeFrom + registry bindScopeParent `273-289`）——给 teammate 扇出能力 = 在 lead preset 声明 `workflow-ptc（provider: spawn）+ tool-workflow` **两行**（tool-workflow inject workflowEngine，只加一行挂载即 fail-loud）；
+- teammate 手里的 subagent 工具被默认 maxDepth=1 封死（`tool-subagent/src/index.ts:514-522`），而 workflow 的 agent() 直调 subagents.start **不带 cap**（`workflow-ptc/src/host.ts:197-211`）——workflow 是 teammate 唯一不受深度预算约束的扇出通道；
+- HITL 侧否定性事实不变：子代理/teammate 调 ask_user_question 必败 `DELEGATED_CALLER`（`user-questions/src/index.ts:131-144,287-295`）、approval 钉 'never'（`child-agent.ts:249-256`）、引擎零停点/恢复语义（`runtime-types.ts:37-47`）。
+
+据此，否决理由的现况：**内核错位与 HITL 无落点仍然成立**（否决主通道采纳的依据不变）；**载体倒转被实质削弱**——workflow 可作为角色 preset 内的受控扇出内线存在而不倒转 D3/D16。重启辨析分双轨：
+
+- **主通道轨**（维持原条件）：workflow 引擎出现 continuable/teammate 子代理、人格挂载或 HITL 感知语义（workflow 与 teams 融合）；
+- **受控内线轨**（2026-10-02 新写，三条同时满足才开）：
+  1. **受控内线**：仅在某角色 preset 显式声明 `workflow-ptc + tool-workflow` 两行（后台另加 tool-jobs 行），只作该角色的扇出内线，不进主流程、不替代任务板主通道（机制依据：可见性由 preset 行控制）；
+  2. **封闭子任务域**：仅用于无需人裁决的封闭扇出（批量检索/审计/反例扫描），一切 HITL 停点留根会话（机制依据：DELEGATED_CALLER + approval never + 零停点）；
+  3. **实证疼痛**：run 实证扇出段载体疼痛（如 scout 多源检索串行成瓶颈、teammate 深度预算挡住合法扇出）——无疼痛不采纳（维持原"无疼痛即无窄用理由"判据）；采纳时显式设 maxTotalAgents 收紧预算（引擎默认 1000 agents/并发 16，深度预算对 workflow 通道无效）。
 
 附带事实：`workflow` 三包不在本仓 pack 的 bundle/preset 任何行中，本否决不产生行变更；
 语义上更近"固定新代理循环"的 `tool-ralph` 出厂默认禁用，同样不在采纳面。

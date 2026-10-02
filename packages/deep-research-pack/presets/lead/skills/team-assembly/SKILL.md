@@ -23,7 +23,8 @@ topic 图定稿后、任何 spawn 之前加载。**名单定下来之前不 spaw
 ## 分派纪律
 
 - 每个 topic 单一 owner（一个 analyst 负责的 topic 不重叠）；
-- 每个 teammate 的第一份任务写清：读哪些文件（question.md/topics.md/leads.md）、产出什么文件、验收判据是什么；
+- 每份派发（spawn prompt 与任务板 description 同标准）写全四件——任务板没有 reviewed/evidence 字段，验收约定不会被 service 自动解释，只认描述文本：①读哪些文件（question.md/topics.md/leads.md）；②产出什么文件；③验收判据；④怎么验证（可执行检查：evidence frontmatter 齐全、final 引用链真实、口径字段在场）；
+- 任务完不成时派发里带修订动作（缺口的处理路径：定向补搜 / 降级标 gap / 上报重派），收"完成"只认文件事实与验证结果，不认 teammate 自报；
 - critic 在草稿成型后才进场（提前进场没有可审对象，浪费一轮）。
 
 ## 反模式

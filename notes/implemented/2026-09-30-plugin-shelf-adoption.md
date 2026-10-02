@@ -27,6 +27,14 @@ browser-use 三项调研提前。
 | 10 | schedule-bundle | **搁置** | run 节奏由 HITL 与人驱动，定时看护无需求。重启条件：run 实证需要定时检查点 |
 | 11 | web-search-exa / perplexity 换源 | **引既有定案不重开** | [search-fallback-seam Note](2026-09-27-search-fallback-seam.md)：换源留给用户拍板，本仓不擅动 |
 
+**2026-10-02 补盲（DSH 新语料反省）**：上表漏了 **mcp-client**（外部 MCP server 通道）——
+它归在语料"扩展机制与运营"组，不在研究相关显眼八类；当时语料消化不全是盲区根因。四个机制
+未知数（profile 层作用域 / 工具可见性 / teammate 可见性 / 部署安全面）已由 vendor 源码深挖
+落定（关键事实：连接数 = 行数与 agent 数解耦；spawn_teammate 子一律继承 lead preset——与
+本仓 m2 首场 run 实证一致），现状进推敲卡
+[_backlog/plans/261002-mcp-client-adoption.md](../../_backlog/plans/261002-mcp-client-adoption.md)：
+选型与凭据属用户拍板面（同 #11 性质），采纳则联动修订 #8 的 C2 判据。
+
 **连带修复（升 pin 遗留回归，020rc2 Note 已补勘误）**：`vendor-build.sh` 顺序缺陷——tsdown
 client 先于 host 半补建，client bundle 把 `typert-protocol` / `util-workspace-path` 静默外置成
 require → Web boot 17 包 failed（"missed the module table"）。顺序铁律修正（半补建前移）+

@@ -190,7 +190,10 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 - `packages/AGENTS.md`、`packages/README.md`；
 - `.agents/notes/{README,AGENTS,implemented/AGENTS,archived/AGENTS}.md`；
 - `.agents/skills/**`（清单与 frontmatter 约定）；
-- `snapshots/AGENTS.md`、`vendor/README.md`、`.github/AGENTS.md`。
+- `snapshots/AGENTS.md`、`vendor/README.md`、`.github/AGENTS.md`；
+- `packages/experimental/` 的 agent-team 四包（agent-team · tool-agent-team · agent-team-profile ·
+  client-ui-agent-team）src 与 README——协作主通道押在 experimental 合同上（D3/D16 赖以立论，
+  官方无稳定性承诺），逐 tag diff，变化对照 D3/D16 与研究手册 team 用法。
 
 复核结论（"无命中/改写哪几行"）连同新 tag 与日期，写进该轮「升 pin 重校」条目的毕业 Note
 ——**逐条结论本身即是重审记录**，不另建维护页（避免第二份会漂移的清单）。
