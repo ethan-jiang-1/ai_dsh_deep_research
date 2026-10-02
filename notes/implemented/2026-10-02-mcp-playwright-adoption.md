@@ -67,6 +67,32 @@ PLAYWRIGHT_BROWSERS_PATH 指向本仓 ms-playwright 缓存）或拆。
 - **run 现状**：goal paused、turn 干净收尾、bundle 未建——挂起待用户终端起干净通道
   （`MCP_PLAYWRIGHT=1 bash dev/boot-run.sh`），恢复 = 向该会话发恢复消息让 lead resume goal。
 
+## Pilot 终版结论（2026-10-03 交付，run = drt_cn-llm-pricing-2026-10）
+
+**覆盖力（决定性）**：历史头号缺口被渲染通道关闭——智谱 GLM Coding Plan 三档价目（Lite ¥118/月起 ×
+包月/包季/包年，`bigmodel.cn/glm-coding`）经 DOM 渲染完整取证（ev-glm-coding-plan-prices-rendered.md，
+A 级）——该页在 drt_cn-dr-products 判"不可判定"、本次 run 故障期判"JS 壳页不可取证"，**渲染一通价目
+即得**。千问平台 API 价目页渲染取证（A 级）。DeepSeek 消费端渲染后判"仅登录墙"——缺口边界钉清：
+**在登录层不在渲染层**。team 手法实证：共享 tab 被占时 `page.context().newPage()` 独立页取完即关；
+渲染等待 6000–8000ms 记进口径（价目为前端异步注入）。
+
+**Token 面**：+25 工具 schema 进全角色请求（58 vs 30 基线）；实测影响可承受——run 中段 24% 上下文、
+9M tokens/98% cache hit（工具 schema 属可缓存前缀，边际成本被 KV 命中摊薄）。
+
+**Recommendation：常驻**（默认挂载，等用户拍板切换）——覆盖力决定性、token 成本可承受、零账号
+（D22 合规）、浏览器渲染不可替代（web_fetch 只回壳页）。已知 trade-off 随行：`--proxy-server
+direct://` 修复 Chromium 渲染但**打断 playwright 服务器进程的 `page.request.get` 子通道**（Node 侧
+把 "direct" 当代理主机名解析，`ENOTFOUND direct`——critic 独立复测钉死因果）；该子通道的原职能由
+`web_fetch` 覆盖，净损失≈0。更优参数组合（两通道兼得）留作已知限制，重估条件 = 出现需要服务器进程
+请求通道的 run 实证。
+
+**browser-use C3 tally**：本场 run **零新增** `js-render-blocked-no-workaround` 案例（渲染通道把
+智谱案例从"不可得"变"可得"）——browser-use 常设评估的必要性进一步下降，C1/C2/C3 判据维持。
+
+**goal 护栏终判（残留观察点 1 关闭）**：第二次 HITL2 全程合规——挂起前 `update_goal pause`、答后
+`resume`、present 后 `complete`（persona 护栏逐条命中；首轮 blocker ask 未先 pause 但自选
+`timeout: -1` 无空转风险——已记上文）。
+
 ## 已知限制与延后工作
 
 - `@playwright/mcp@latest` 未钉版本（pilot 可接受；常驻时钉版本进标记块）；

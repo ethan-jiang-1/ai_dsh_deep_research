@@ -93,7 +93,7 @@ $MCP_MARK_BEGIN
         serverName: playwright
         transport: stdio
         command: npx
-        args: ['-y', '@playwright/mcp@latest']
+        args: ['-y', '@playwright/mcp@latest', '--headless', '--proxy-server', 'direct://', '--proxy-bypass', '*']
         env:
           npm_config_cache: '$ROOT/dev/smoke-workspace/npm-cache'
         failOnStartupError: true
