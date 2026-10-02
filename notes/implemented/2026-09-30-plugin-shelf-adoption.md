@@ -32,8 +32,9 @@ browser-use 三项调研提前。
 未知数（profile 层作用域 / 工具可见性 / teammate 可见性 / 部署安全面）已由 vendor 源码深挖
 落定（关键事实：连接数 = 行数与 agent 数解耦；spawn_teammate 子一律继承 lead preset——与
 本仓 m2 首场 run 实证一致），现状进推敲卡
-[_backlog/plans/261002-mcp-client-adoption.md](../../_backlog/plans/261002-mcp-client-adoption.md)：
-选型与凭据属用户拍板面（同 #11 性质），采纳则联动修订 #8 的 C2 判据。
+[_backlog/_done/_closed_plans/261002-mcp-client-adoption.md](../../_backlog/_done/_closed_plans/261002-mcp-client-adoption.md)
+（已毕业：2026-10-02 拍板采纳本地 Playwright MCP——D22 交付约束，实施 =
+[mcp-playwright 采纳 Note](2026-10-02-mcp-playwright-adoption.md)）；采纳则联动修订 #8 的 C2 判据。
 
 **连带修复（升 pin 遗留回归，020rc2 Note 已补勘误）**：`vendor-build.sh` 顺序缺陷——tsdown
 client 先于 host 半补建，client bundle 把 `typert-protocol` / `util-workspace-path` 静默外置成

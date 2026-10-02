@@ -71,6 +71,38 @@ else
   profile_ok || { echo "boot-run: 重建后组合校验仍不过——fail-loud，检查上方安装输出" >&2; exit 1; }
 fi
 
+# ①½ 可选 MCP 抓取通道（scoped pilot，2026-10-02 拍板采纳本地 Playwright MCP；D22 交付约束：
+#     零账号零凭据零订阅——npx 自动拉起，机器有 Node 即可用）。MCP_PLAYWRIGHT=1 = 挂（标记块
+#     幂等追加进 profile patch）；缺省/0 = 拆（删除标记块）——env 即开关，profile 重建分支
+#     不携带它（常驻与否按 pilot 实测定）。决定/淘汰方案正本 =
+#     notes/implemented/2026-10-02-mcp-playwright-adoption.md。
+MCP_MARK_BEGIN='# BEGIN mcp-playwright-block'
+MCP_MARK_END='# END mcp-playwright-block'
+if [ "${MCP_PLAYWRIGHT:-0}" = "1" ]; then
+  if ! grep -qF "$MCP_MARK_BEGIN" "$PROFDIR/cordis.patch.yml" 2>/dev/null; then
+    cat >> "$PROFDIR/cordis.patch.yml" <<MCPROW
+
+$MCP_MARK_BEGIN
+- insert:
+    - id: mcp-playwright
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: playwright
+        transport: stdio
+        command: npx
+        args: ['-y', '@playwright/mcp@latest']
+        env:
+          npm_config_cache: '$ROOT/dev/smoke-workspace/npm-cache'
+        failOnStartupError: true
+$MCP_MARK_END
+MCPROW
+    echo "boot-run: MCP Playwright 通道已写入 profile patch（MCP_PLAYWRIGHT=1；拆 = 不带该 env 重跑本脚本）"
+  fi
+elif grep -qF "$MCP_MARK_BEGIN" "$PROFDIR/cordis.patch.yml" 2>/dev/null; then
+  sed -i '' "/^${MCP_MARK_BEGIN}/,/^${MCP_MARK_END}/d" "$PROFDIR/cordis.patch.yml"
+  echo "boot-run: MCP Playwright 通道已移除（MCP_PLAYWRIGHT 未设——拆）"
+fi
+
 # ② pack 漂移检测（RFC debug-dashboard-plus）：pack 源 ↔ profile 安装镜像逐文件比对。
 # 2026-09-24 三次注入面事故里两次是镜像类（$DSH_HOME/AGENTS.md 化石、pack persona/skill
 # 旧文本进了镜像）——机制化补丁：不符即 fail-loud，不带着旧 harness 开 run。

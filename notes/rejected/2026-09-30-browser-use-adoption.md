@@ -38,15 +38,19 @@
 - **preset 行挂载**：否决——三个 provider README 均要求 profile composition；preset
   子插件逐 agent 挂载属未测用法（违反"循 DSH 而不发明"）。
 
-## 重启判据（任一命中重新评估，优先 playwright-mcp）
+## 重启判据（2026-10-02 修订：C2 四绕行 → 五绕行——mcp-playwright 通道已采纳进研究通道）
 
 - **C1（stable Provider 出现，机械可测）**：vendor pin bump 后
   `ls vendor/dsh/packages/experimental | grep browser-use` 为空（晋级去 experimental 前缀）
   或 dsh 安装镜像可选 bundle 清单出现 browser-use；
 - **C2（选题驱动 pilot）**：新 run 的 leads 阶段 ≥2 条 A/B 级线索官方页实测 SPA 壳且
-  `.md`/API/raw/存档四绕行全失败 → 允许单场 scoped pilot（按 recipe 挂、跑完即拆）；
-  建议在 leads-gaps.md 立标签 `js-render-blocked-no-workaround` 使判据可 tally；
+  `.md`/API/raw/存档/**mcp-playwright 通道**五绕行全失败 → 允许单场 scoped pilot（按 recipe
+  挂、跑完即拆）；建议在 leads-gaps.md 立标签 `js-render-blocked-no-workaround` 使判据可 tally；
 - **C3（累计阈值）**：该标签累计 ≥4 例（历史已 3 例）→ 升级为常设评估。
+
+通道分工（与 [mcp-playwright 采纳 Note](../implemented/2026-10-02-mcp-playwright-adoption.md)）：
+mcp-playwright 覆盖**单发渲染抓取**（先挂、零账号）；browser-use 留给**多步交互浏览**——C1/C2/C3
+继续在池，pilot 触发时先试 mcp 通道再升 browser-use。
 
 ## 采纳 recipe（触发时照抄）
 
