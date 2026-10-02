@@ -193,7 +193,11 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 - `snapshots/AGENTS.md`、`vendor/README.md`、`.github/AGENTS.md`；
 - `packages/experimental/` 的 agent-team 四包（agent-team · tool-agent-team · agent-team-profile ·
   client-ui-agent-team）src 与 README——协作主通道押在 experimental 合同上（D3/D16 赖以立论，
-  官方无稳定性承诺），逐 tag diff，变化对照 D3/D16 与研究手册 team 用法。
+  官方无稳定性承诺），逐 tag diff，变化对照 D3/D16 与研究手册 team 用法；
+- 上游 `packages/` 组清单（`packages/README.md` + 组目录）逐 tag diff——**新增包/组对照研究
+  场景做增量货架收口**，结论进该轮升 pin Note（2026-10-02 教训：mcp-client 漏出 2026-09-30
+  全量盘点——它在语料中不归研究显眼类；语料 `_digested/plugin-inventory/` 随新基线更新后
+  一并对账，防同类盲区）。
 
 复核结论（"无命中/改写哪几行"）连同新 tag 与日期，写进该轮「升 pin 重校」条目的毕业 Note
 ——**逐条结论本身即是重审记录**，不另建维护页（避免第二份会漂移的清单）。
