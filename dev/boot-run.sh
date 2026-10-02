@@ -80,6 +80,9 @@ MCP_MARK_BEGIN='# BEGIN mcp-playwright-block'
 MCP_MARK_END='# END mcp-playwright-block'
 if [ "${MCP_PLAYWRIGHT:-0}" = "1" ]; then
   if ! grep -qF "$MCP_MARK_BEGIN" "$PROFDIR/cordis.patch.yml" 2>/dev/null; then
+    # 新建 profile 的 patch 以 `[]` 闭数组占位——其后再追加条目即非法 YAML（pilot 首跑红证），
+    # 先摘掉占位行再追加块。
+    sed -i '' '/^\[\]$/d' "$PROFDIR/cordis.patch.yml"
     cat >> "$PROFDIR/cordis.patch.yml" <<MCPROW
 
 $MCP_MARK_BEGIN
@@ -100,6 +103,10 @@ MCPROW
   fi
 elif grep -qF "$MCP_MARK_BEGIN" "$PROFDIR/cordis.patch.yml" 2>/dev/null; then
   sed -i '' "/^${MCP_MARK_BEGIN}/,/^${MCP_MARK_END}/d" "$PROFDIR/cordis.patch.yml"
+  # 摘除后若无任何非注释内容，补回 `[]` 占位（注释-only 的 patch 文件解析非数组即抛）。
+  if ! grep -qvE '^[[:space:]]*(#.*)?$' "$PROFDIR/cordis.patch.yml"; then
+    printf '[]\n' >> "$PROFDIR/cordis.patch.yml"
+  fi
   echo "boot-run: MCP Playwright 通道已移除（MCP_PLAYWRIGHT 未设——拆）"
 fi
 

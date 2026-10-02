@@ -45,6 +45,28 @@ PLAYWRIGHT_BROWSERS_PATH 指向本仓 ms-playwright 缓存）或拆。
 | 真挂载 | 见本 Note 尾部 pilot 记录（首场 pilot 后回填） |
 | L0 | verify 全绿 + tests 全过（本变更不动 pack 发布集——mcp 行在 profile 层，pack/overlay 零变化） |
 
+## Pilot 阶段记录（2026-10-02 首场进行中——环境踩坑与真发现）
+
+- **boot 路径两 bug 被 fail-loud 抓到并当轮修复**：①全新 profile 的 patch 以 `[]` 闭数组占位，
+  向其后追加 mcp 块 = 非法 YAML（parsePatchList 当场红）——修法 = 追加前摘占位行、拆后无内容
+  补回占位；②崩溃循环把仓内 npx 缓存跑坏（`ENOTEMPTY` 半安装残留）——`failOnStartupError: true`
+  让条目拒绝激活并大声警告（app-boot 政策允许 optional 条目失败不拦 boot——**起通道后必须查
+  日志"did not activate"缺席才算挂载成功**），清缓存重 boot 即愈。
+- **真挂载 + 真使用证据**：25 个 `mcp__playwright__*` 工具全进 lead request/header（58 工具 vs
+  基线 30——token 面 +25 工具 schema）；lead 真实调用 `browser_navigate` ×3（行为证据，非纸面）。
+- **阻断项（操作层，非产品缺陷）**：通道被会话内代理后台起 → 继承会话执行沙箱——`web_fetch`
+  全域名撞"resolves to a non-public IP"墙、playwright 浏览器 `EPERM` 建不了
+  `~/Library/Caches/ms-playwright-mcp`。教训入 guides/61 §0：**boot 这个动作归用户终端**；代理
+  驱动已起通道没问题（kickoff / hitl-answer 走 localhost API 全通）。
+- **timed 600s 语义实测通过**：sibling 预检 ask 超时 → pending → lead 自主判断继续 → 问题保持
+  可补答（历史卡片的 Answer 按钮在）——与 0.2.0 文档语义逐条吻合。
+- **goal 护栏观察（残留观察点 1，部分合规）**：lead 在阻断中途确认前**没有**先 update_goal
+  pause（persona 偏差），但该 ask 自带 `timeout: -1`（回合不关闭 = goal 轮驱动器不会空转烧
+  调用——风险被这个选择绕开）；答案落地后正确 pause 挂起（update_goal action=pause 实锤）。
+  完整合规判定待干净通道的首场完整 run。
+- **run 现状**：goal paused、turn 干净收尾、bundle 未建——挂起待用户终端起干净通道
+  （`MCP_PLAYWRIGHT=1 bash dev/boot-run.sh`），恢复 = 向该会话发恢复消息让 lead resume goal。
+
 ## 已知限制与延后工作
 
 - `@playwright/mcp@latest` 未钉版本（pilot 可接受；常驻时钉版本进标记块）；

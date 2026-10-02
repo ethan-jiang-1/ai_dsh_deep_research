@@ -40,7 +40,7 @@ docs/                    00-index（地图+决策台账+术语映射）→ desig
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）；目录名自带时态，
                          总图 = notes/README.md（将来 proposed/ · 过去 implemented/archived/rejected/
                          postmortem/）：
-                         intents.md → proposed/（在飞队列条目的 RFC）→ implemented/（不再指导未来工作者
+                         intents.md（立项宪章，已冻结——新定调进 D 号依据）→ proposed/（在飞队列条目的 RFC）→ implemented/（不再指导未来工作者
                          冻结入 archived/）；
                          rejected/（否决与搁置——"决定不做"，带重启条件）；postmortem/（事故复盘）
 .agents/skills/          开发技能（DSH 约定路径：project-agents 发现根）：任务匹配即加载的程序化工作记忆

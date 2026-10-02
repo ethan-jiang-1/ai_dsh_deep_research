@@ -20,6 +20,10 @@
   Playwright MCP（npx 拉起，零账号零凭据；SPA 定价页/JS 榜单的渲染抓取兜底）；缺省不挂，
   拆 = 不带 env 重跑。按 pilot 实测定常驻与否——决定正本 =
   [mcp-playwright 采纳 Note](../../notes/implemented/2026-10-02-mcp-playwright-adoption.md)；
+- **通道必须由用户终端起**（2026-10-02 pilot 实证）：代理在会话内后台起通道会继承会话执行
+  沙箱——`web_fetch` 全域名撞"resolves to a non-public IP"解析墙、workspace 外 EPERM
+  （playwright 浏览器缓存建不了），run 取数全断；代理**驱动**已起的通道没问题（run-kickoff /
+  hitl-answer 走 localhost API 全通）。boot 这个动作归用户终端；
 - **启动请求的呈交纪律（2026-09-30 用户定调）**：用户让"启动/起 web"= 代理**先自己跑通**——
   boot-run 全序（自检 → 漂移检测 → 补装）红了就当场修（漂移 = 按脚本处方重建 profile；
   vendor 产物缺失 = `bash dev/vendor-build.sh`），boot 出横幅后**再验浏览器面**（探针断言
