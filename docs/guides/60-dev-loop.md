@@ -42,9 +42,9 @@
 - **研究 run 型** → [guides/61](61-run-playbook.md)（含**硬前置**：`research-workspace` 必须已注册进
   DSH，否则研究手册不进上下文）+ 开发技能 `running-a-research-run`；
 - **队列条目毕业** → `graduating-a-queue-item`；**加/改角色** → `adding-a-research-role`；
-  **加/改门禁** → `writing-a-gate`。
+  **加/改门禁** → `writing-a-gate`；**加/调节点轨道** → `changing-node-topology`。
 
-任务命中 `.agents/skills/` 某条 description（上列四个）时**先读该 `SKILL.md` 全文再动手**，不从
+任务命中 `.agents/skills/` 某条 description（上列五个）时**先读该 `SKILL.md` 全文再动手**，不从
 摘要猜流程。
 
 ### 1.2 六步闭环
