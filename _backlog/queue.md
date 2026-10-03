@@ -13,11 +13,11 @@
 
 ## 队列
 
-（队列空——待用户取题）
-
-> 队列空 = 全部条目已毕业（历史归 notes/implemented/ + git）；待用户取题或新立项。
-> 剩余面 = [pipeline-polish 卡](plans/2026-09-28-pipeline-polish.md) 面①（策略对标——
-> 并行研究型，调研产出判断材料）；面⑥ 随 run 滚动不单独立卡。
+▶ **专业 DR 策略层对标——预算分配/迭代深度/终止条件**（研究，可自主；产出判断材料非机制）——
+[RFC](../notes/proposed/2026-09-28-strategy-benchmark.md)：三轴无对标（本仓现行策略各有
+机把守但从未与专业 DR 逐项对过）；双源 = 本地源头仓 ai_tool_deepresearch 策略层残留 +
+外部一手自述（OpenAI/Anthropic）；产出 = reference/ 材料 + 对账表回填卡片，采纳候选带
+触发条件不直接改机制。pipeline-polish 面①（最后待立卡面）。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 
