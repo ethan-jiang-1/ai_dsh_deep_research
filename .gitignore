@@ -51,3 +51,6 @@ node_modules/
 
 # 自写包的构建产物（源码面/产物面不混，同 DSH/company 的 lib/ 约定；npm pack 的 files 白名单优先于 gitignore，发布不受影响）
 packages/deep-research-pack/lib/
+
+# playwright MCP 的运行时产物（快照/截图，随浏览器工具调用重现）
+.playwright-mcp/
