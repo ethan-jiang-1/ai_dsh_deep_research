@@ -13,12 +13,10 @@
 
 ## 队列
 
-（队列空——待用户取题）
-
-> 队列空 = 全部条目已毕业（历史归 notes/implemented/ + git）；待用户取题或新立项。
-> 剩余面预排 = [pipeline-polish 卡](plans/2026-09-28-pipeline-polish.md) 面⑦（拓扑演进
-> 程序——收尾文档活，趁同步面六处新鲜）→ 面①（策略对标，并行研究型）；面⑥ 随 run 滚动
-> 不单独立卡。
+▶ **节点拓扑演进程序——改轨道六处同步技能**（feature，可自主；开发技能 + 三处指针，零机制新增）——
+[RFC](../notes/proposed/2026-09-28-node-topology-procedure.md)：改轨道无程序（本 session
+两轮轨道变更靠现场回忆同步面，漏 sync 当场被 boot 漂移抓红）；方案 = changing-node-topology
+开发技能（六处+两附属清单 + 先想红程序，清单从实战反写）。pipeline-polish 面⑦（收尾棒）。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 
