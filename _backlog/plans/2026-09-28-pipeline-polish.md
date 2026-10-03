@@ -29,7 +29,9 @@
 
 **2026-09-29 第三场样本（drt_mcp-server-ecosystem，契约生效后首场）＝样本 1/3，判不过**，卡三条全中：① 通道死救场 ×1（DeepSeek transport 故障把 analyst-1 turn 与 lead turn 2 双双打死，重试 5 次耗尽；操作侧 session/prompt 恢复——lead 据文件事实重建并 spawn analyst-3 无缝接续，恢复路径本身顺畅）；② 两点外卡壳（通道死停摆 ~1.5h）；③ 交付记账返工一处——**门③活体抓红**（G8 第三实例·契约期首例：lead 拍板 HITL2 后落 final/ 并 present，但未回写 §Decisions 拍板行）→ 操作侧显式记账补齐转绿。正面记录：critic 首轮真 FAIL（CRITICAL 2，含抓出 scout 的 leads.md 计数错）→ 修复 → 复评 PASS；evidence-audit 首过 CRITICAL=0；归档即位零搬砖。**新划界题**：用户预先授权的 HITL 代驱（"完全自主弄完"）算不算①的救场？建议判定 = 授权代驱不算、故障代驱算——待用户拍板。
 
-**2026-10-03 第四场样本（drt_cn-llm-pricing-2026-10，mcp-playwright 常驻前 pilot）＝判不过**，记账补录（含欠账声明：token-factory〔2026-10-01 交付〕一场未及记档，无法无损追溯重建——自本条起恢复记档纪律）：① 通道死救场 ×1（会话内代理后台起的通道继承会话沙箱——web_fetch 全域名解析墙 + playwright 浏览器 EPERM，操作侧修复重启；教训已入 guides/61 §0）② HITL 代驱 ×3（HITL1 + 两轮 HITL2，用户预先授权 pilot——**划界题已拍板 2026-10-03：授权代驱不算救场**）③ 交付即落位 ✅（audit CRITICAL=0、两轮 critic PASS、present/记账齐）。**正资产**：mcp-playwright 渲染通道把智谱 Coding Plan 价目（历史"不可判定"缺口）取证关闭——七项推敲面之外的新鲜实证，已回填采纳 Note。**计数**：连续无救场计数维持 0（本场判不过）。
+**2026-10-03 第四场样本（drt_cn-llm-pricing-2026-10，mcp-playwright 常驻前 pilot）＝判不过**，记账补录（含欠账声明：token-factory〔2026-10-01 交付〕一场未及记档，无法无损追溯重建——自本条起恢复记档纪律）：① 通道死救场 ×1（会话内代理后台起的通道继承会话沙箱——web_fetch 全域名解析墙 + playwright 浏览器 EPERM，操作侧修复重启；教训已入 guides/61 §0）② HITL 代驱 ×3（HITL1 + 两轮 HITL2，用户预先授权 pilot——**划界题已拍板 2026-10-03：授权代驱不算救场**）③ 交付即落位 ✅（audit CRITICAL=0、两轮 critic PASS、present/记账齐）。**正资产**：mcp-playwright 渲染通道把智谱 Coding Plan 价目（历史"不可判定"缺口）取证关闭——七项推敲面之外的新鲜实证，已回填采纳 Note。**2026-10-04 第五场样本（drt_2026-ai-coding-agent-landscape，验收 run＝判过）**：三判据全过——① 零救场（HITL 全程授权代驱〔划界已钉不算〕、present/记账 lead 本手全落、通道 3083 一 pid 到底未死）② 两点外零卡壳（答案投递机械故障发生在停靠点内，lead 按 timed 语义在等待期持续产出源地图；代答器 bug 属操作侧工具债）③ audit CRITICAL=0 首过（40 卡、final 链 112/112）+ present/拍板记账齐。附注：门L 格式红（leads.md 模板形态违约）= 判据未覆盖的新维度，如实另记不抹。**正面活证据**：交付四步序列〔拍板行→final/→present→goal complete〕按面⑤新 persona 全数执行（G8#3 形态零复发）；goal 护栏 pause/resume/complete 全程合规（插件货架"值级不可证"项的活体补证）；未取得≠有科纪律在证据卡内活体执行；门L 首场活体违约抓捕（面②设计价值实证）；判据④ 新会话只凭文件判明交付态。**系统性新发现**：spawn_teammate 子 composeFrom lead → scout/analyst 的方法论技能从未到达队友（两队友会话零 lead-mapping/evidence-extraction 字样实测）——证据卡守约靠注入手册的契约而非角色技能 → 立卡「角色方法论传递机制」进 queue。**计数：连续无救场 1/3**（划界钉死后首场起算）。**候选 A 标定数据**：primary topic 卡数 T1=18/T2=20（超源仓地板 12/10）、comparison T4=13——本场无地板压力形态，标定继续攒。
+
+**计数**：连续无救场计数 **1/3**（2026-10-04 验收 run 起算）（本场判不过）。
 
 **2026-10-03 基座适配复查**（用户拍板开始推进第二阶段，触发本轮逐面对照）——卡片成文（09-28）后基座动了一轮：vendor pin 仍钉 `dsh-v0.2.0-rc.2`（fetch 全 tag 确认无新 tag），调整 = 0.2.0 适配与其上的采纳面：插件货架三件（timed ask-user 600s + hitl-fold v5／tool-goal 护栏〔pilot 一场真 run 已验〕／session-query 五工具进 lead+critic）、mcp-playwright 常驻（默认挂载）、NODES.md 八节点契约 + schema-scan（在场级全行）+ node-gate v1（交付两门 + PASS-RELAY 操作侧补齐通道）、BUG-001/002 观察面诚实性修复、guides/61 §0 通道纪律（通道必须用户终端起）。逐面判定：
 
@@ -41,7 +43,7 @@
 - ⑥ 节点间质量门——**适应且更具体**：机械两层已上岗（在场级 schema-scan／判据级 node-gate 交付两门），余 = 八节点判据逐行升格（随 run 证据，防假牙齿）＋对抗/机械/数值配比；
 - ⑦ 拓扑演进——**改口**：同步面已从「三处」涨到六处（NODES.md／模板六件／手册／cockpit STEP_ORDER（`run-fold.ts`）／schema-scan／node-gate），改轨道程序仍缺、原文「三处同步」过时。
 
-**计数**：连续无救场计数维持 0（划界题已拍板 2026-10-03，见毕业门①：授权代驱不算、故障代驱算——追溯适用，样本 3/4 的判定不变）；样本 4（pilot bundle）已交付**已归档**（2026-10-03 用户确认，D17 位置=状态）。
+**计数**：连续无救场计数 **1/3**（2026-10-04 验收 run 起算）（划界题已拍板 2026-10-03，见毕业门①：授权代驱不算、故障代驱算——追溯适用，样本 3/4 的判定不变）；样本 4（pilot bundle）已交付**已归档**（2026-10-03 用户确认，D17 位置=状态）。
 
 1. **专业 DR 方法论对标**：策略层深化——移植只解决了"内核在场"，与专业 DR（OpenAI DR 等）的策略取舍（搜索预算分配、迭代深度、终止条件）尚未逐项对过（**已收口 2026-10-03**：迭代深度收敛〔源仓 emergent_rounds=1 = 本仓 4 场实证只补一轮〕、地板缺失与数量型终止部分缺失 = 候选 A/B 入搁置池；OpenAI = end-to-end RL 非同构不采纳——[Note](../../notes/implemented/2026-09-28-strategy-benchmark.md)）。
 2. **wave0 机制（侦察，scout）**：leads 映射波次——搜索面怎么铺、主题怎么拆、leads 的覆盖判据（侦察产出质量直接决定 wave1 的天花板）。
