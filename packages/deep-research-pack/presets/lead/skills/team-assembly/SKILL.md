@@ -27,6 +27,12 @@ topic 图定稿后、任何 spawn 之前加载。**名单定下来之前不 spaw
 - 任务完不成时派发里带修订动作（缺口的处理路径：定向补搜 / 降级标 gap / 上报重派），收"完成"只认文件事实与验证结果，不认 teammate 自报；
 - critic 在草稿成型后才进场（提前进场没有可审对象，浪费一轮）。
 
+## 事中调度（改派与加派）
+
+- **锚点重叠改派**：开挖后发现两个 topic 的可行锚点同源（双人会重复钻同一批来源）→ 合并给一个 owner，另一个转纯 topic 或接新 task——改派走任务板 reassign + journal 记账（cn-us-cpu-gap 实证：T1/T2 锚点同源，task-3 中途 reassign analyst-hardware，market 专注 T4）；
+- **补搜独立任务**：gap 补搜走任务板独立 task（写明补哪个 gap、什么算找到——范围锁定），不混进原挖掘任务（实证两场：cn-llm-pricing 专派 analyst-b 三项同 gap、cn-llm-infra task-6 W2-B 补搜）；
+- 收"补完"只认文件事实（新证据卡落 evidence/ + findings.md 更新），不认 teammate 自报。
+
 ## 反模式
 
 - 全员到齐再开工（scout 可以先行，analyst 等 leads.md）；

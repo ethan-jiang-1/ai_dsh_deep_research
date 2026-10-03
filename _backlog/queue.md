@@ -13,11 +13,11 @@
 
 ## 队列
 
-▶ **wave1 挖掘打磨——未取得纪律与事中调度编典**（feature，可自主；lead skill 文本 ×2，真模型档证据随收尾交）——
-[RFC](../notes/proposed/2026-09-28-wave1-dig-polish.md)：cn-dr-products 当场发明"未取得
-≠ 没有"硬纪律零编典 + 事中改派零编典（cpu-gap 锚点重叠实证）+ 补搜独立任务形态两场实证；
-方案 = synthesis 判据 + team-assembly 事中调度，零门禁新增（判据内容级，防假牙齿）。
-pipeline-polish 面③（主序第三棒）。
+（队列空——待用户取题）
+
+> 队列空 = 全部条目已毕业（历史归 notes/implemented/ + git）；待用户取题或新立项。
+> 下一棒预排 = [pipeline-polish 卡](plans/2026-09-28-pipeline-polish.md) 面④ wave2 综合
+> （主序 ⑤→②→③→④ 第四棒；立卡动作照入口链）。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 

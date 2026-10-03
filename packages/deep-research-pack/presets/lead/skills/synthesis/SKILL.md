@@ -10,7 +10,7 @@ description: 综合写作（wave2 语义）方法论：纯综合先行、finding
 ## 流程
 
 1. **纯综合（禁止新搜索）**：通读本 run bundle（drt_<slug>/）的 evidence/ 全部文件与 topics.md，写 findings.md——每个 finding 一行：结论 + 支撑证据文件 + gap 状态（`supported` / `needs_search` / `contradicted`）。
-2. **gap 定向补搜**：只对 `needs_search` 的 finding 派一次定向任务（给 analyst 或 subagent，说清找什么、什么算找到）。补完更新 findings.md，**只补一轮**——补了还缺就把该 finding 标 `insufficient` 并在报告里如实呈现。
+2. **gap 定向补搜**：只对 `needs_search` 的 finding 派一次定向任务（给 analyst 或 subagent，说清找什么、什么算找到）。补完更新 findings.md，**只补一轮**——补了还缺就把该 finding 标 `insufficient` 并在报告里如实呈现。**未取得 ≠ 没有**：拿不到的项，报告里只能落「未取得/无法判定」（写明试过的渠道），**禁止转写成「没有/不提供」**——取证可达性不对称是常态（cn-dr-products 实证：洋厂商一手定价页全域 403，"查不到"进无法判定类），查不到 ≠ 官方没有。
 3. **写 final/ 当前版**（首版 v1.md）：结构 = 结论先行（TL;DR）→ 按 topic 的主体论述 → 反例与争议（不抹平）→ 证据缺口（insufficient 的如实列出）→ 来源清单。
 4. **来源链格式**：每条关键结论后附 `[来源: evidence/<file>.md]`；来源清单节列出全部 evidence 文件（路径 + 一句话说明）。
 5. **交 critic**：review.md 拿到 readiness: PASS 后，才向用户提交审阅建议（HITL2）。
