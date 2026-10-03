@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// node-gate —— 节点交接契约机检 v1（交付两门；RFC 2026-09-28-node-io-schema）。
+// node-gate —— 节点交接契约机检 v2（交付两门 + leads 交接门；RFC 2026-09-28-node-io-schema
+// + 2026-09-28-wave0-leads-polish）。
 //
 // 为什么存在：八节点 I/O 契约（research-workspace/NODES.md）的判据此前只对人有约束力。
 // 2026-09-29 两场 run 实证裸奔代价：HITL2 拍板行缺席两场 + present 从未声明（G8「双缺席」
@@ -13,8 +14,24 @@
 //      须含指向本 bundle 的 present 工具调用；§Decisions 拍板行显式标注「操作侧」补齐
 //      （通道死亡恢复路径，如实记账）→ PASS-RELAY 放行带注——静默缺席才是红。
 //
-// 红绿语义：任一门 RED → exit 1；N/A = 无对象（未到交付段，不是通过也不是失败——防空语料
-// 反面：无对象必须显式标注，不静默跳过）。
+// v2 新增门 L（leads 交接门；RFC 2026-09-28-wave0-leads-polish，实证 = 样本 3
+// CRITICAL-2：leads.md 计数错且内部不一致未回改——计数对账归 skill 自检 + critic 狩猎，
+// 机械门只守字段与覆盖两个可机械判定的面，不发明数值打分）：
+//   触发 = leads.md 在场（缺席 = N/A——在场级归 schema-scan，不越界双判）；
+//   quick_factual 编制豁免 = N/A（条件件，与 schema-scan 同语义，依据 = question.md 类型）；
+//   L1 字段齐：每个「## 方向:」节状态行在场且值合法（建议挖深｜已排除）；建议挖深 →
+//     支持来源（含 A–D 分级）+ 关键线索 + 建议 owner 三行齐；已排除 → 原因非空；
+//     0 个方向节 = RED（防空语料——空集显式，不静默）；
+//   L2 topic 覆盖：topics.md 的 scope_role ∈ {primary, comparison} 的 T# 须被 ≥1 条建议
+//     挖深 lead 指向（标题或 owner 行引用都算——mcp-server 生态场实证两处出现）；
+//     synthesis/supporting 免检（窄带防假牙齿，按 run 证据再收紧）；topics.md 缺席 =
+//     覆盖未判显式注记（在场级归 schema-scan）；
+//   断代（同 schema-scan 成例）：交付日 < LEADS_CONTRACT_DATE（2026-10-03）→ 违约计
+//     PRE-CONTRACT 不计红（run bundle 是交付记录，不改历史）；无日期可断 = 从严
+//     （可定日期而不定 = 逃逸口）。
+//
+// 红绿语义：任一门 RED → exit 1；N/A = 无对象（未到该节点段，不是通过也不是失败——防空
+// 语料反面：无对象必须显式标注，不静默跳过）；PRE-CONTRACT = 契约前违约如实报告不计红。
 // keyless：纯 fs + zstd CLI（同 evidence-audit 通道）；gateBundle() 可导入——tests/ 层禁
 // 子进程，keyless 测试走纯 .jsonl 夹具直调（fixtures/node-gate/，先红后绿的永久反证记录）。
 // 用法：node scripts/node-gate.mjs <run-bundle-dir> [--sessions <会话根>]
@@ -23,8 +40,12 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { deliveryDate } from './schema-scan.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+
+/** 门 L 契约日（2026-10-03 = RFC wave0-leads-polish 落地日；此前交付的 bundle 不追溯）。 */
+export const LEADS_CONTRACT_DATE = '2026-10-03'
 
 /** 读一个会话日志文件（.jsonl 直读 / .jsonl.zstd 走 zstd CLI——多帧拼接 CLI 可解全帧）。 */
 function readLog(p) {
@@ -72,11 +93,132 @@ export function decisionsLines(questionText) {
 }
 
 /**
- * 门一个 bundle（核心逻辑，可导入；keyless）。
- * @returns { gates: { hitl2Row, present }, red, report }
- *   每门：{ status: 'PASS'|'PASS-RELAY'|'RED'|'N/A', detail }
+ * 门 L（leads 交接门，可导入；keyless）。断代日期可注入（tests——夹具 mtime 不可靠）。
+ * @returns { status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT', detail }
  */
-export function gateBundle(bundleDir, sessionsRoot) {
+export function leadsGate(bundleDir, leadsDate) {
+  const leadsPath = join(bundleDir, 'leads.md')
+  if (!existsSync(leadsPath)) {
+    return { status: 'N/A', detail: 'leads.md 不在场——门 L 无对象（在场级违约归 schema-scan，不越界双判）' }
+  }
+  const qText = existsSync(join(bundleDir, 'question.md'))
+    ? readFileSync(join(bundleDir, 'question.md'), 'utf8')
+    : ''
+  if (/quick_factual|快速事实核查/.test(qText)) {
+    return { status: 'N/A', detail: 'quick_factual 编制豁免——不设侦察编制，门 L 无对象（条件件，与 schema-scan 同语义）' }
+  }
+  const text = readFileSync(leadsPath, 'utf8')
+  // 解析「## 方向:」节（heading + body 到下一个 ## 或文件尾）
+  const sections = []
+  let cur = null
+  for (const line of text.split('\n')) {
+    if (/^##\s+/.test(line)) {
+      if (cur) sections.push(cur)
+      cur = { heading: line.replace(/^##\s+/, ''), body: [] }
+    } else if (cur) cur.body.push(line)
+  }
+  if (cur) sections.push(cur)
+  const dirs = sections.filter((s) => /^方向[:：]/.test(s.heading))
+  if (dirs.length === 0) {
+    return { status: 'RED', detail: 'leads.md 在场但 0 个「## 方向:」节——防空语料（空集显式红；修正 = 按 templates/run/leads.md 形态重写：每方向一节，字段行齐）' }
+  }
+  const problems = []
+  const covered = new Set()
+  let dig = 0
+  let excluded = 0
+  for (const s of dirs) {
+    const title = s.heading.slice(0, 40)
+    const body = s.body.join('\n')
+    const ownerM = body.match(/^\s*-\s*建议\s*owner[:：].*$/mi)
+    const statusM = body.match(/^\s*-\s*状态[:：]\s*(.+)$/m)
+    // topic 引用：标题 + owner 行都算（mcp-server 生态场实证两处出现）
+    if (ownerM && /^\s*-\s*建议\s*owner/i.test(ownerM[0])) {
+      const digProbe = statusM && /^建议挖深/.test(statusM[1].trim())
+      if (digProbe) for (const m of (s.heading + ' ' + ownerM[0]).matchAll(/T\d+/g)) covered.add(m[0])
+    }
+    if (!statusM) {
+      problems.push(`「${title}」缺「- 状态:」行（修正 = 按 templates/run/leads.md 补状态行）`)
+      continue
+    }
+    const sv = statusM[1].trim()
+    if (/^建议挖深/.test(sv)) {
+      dig++
+      const srcM = body.match(/^\s*-\s*支持来源[:：].*$/m)
+      if (!srcM || !/[(（]\s*[ABCD]\b/.test(srcM[0])) {
+        problems.push(`「${title}」建议挖深但支持来源缺席或无 A–D 分级（收集而不分级反模式；修正 = 补支持来源行并带分级）`)
+      }
+      if (!/^\s*-\s*关键线索/m.test(body)) {
+        problems.push(`「${title}」建议挖深但缺「- 关键线索:」行（修正 = 补来自哪个来源的哪句话）`)
+      }
+      if (!ownerM) {
+        problems.push(`「${title}」建议挖深但缺「- 建议 owner:」行（修正 = 补 owner 与对应 topic）`)
+      }
+    } else if (/^已排除/.test(sv)) {
+      excluded++
+      const reason = sv.replace(/^已排除/, '').replace(/^\s*[：:（(]\s*/, '').trim()
+      if (reason.length === 0) {
+        problems.push(`「${title}」已排除但无原因（静默放弃反模式；修正 = 已排除（<一句话原因>））`)
+      }
+    } else {
+      problems.push(`「${title}」状态值非法："${sv.slice(0, 20)}"（合法 = 建议挖深｜已排除；修正 = 改状态行）`)
+    }
+  }
+  // L2 覆盖（窄带：primary/comparison 免检 synthesis/supporting——防假牙齿，按 run 证据再收紧）
+  const topicsPath = join(bundleDir, 'topics.md')
+  let coverageNote = ''
+  const gaps = []
+  let requiredCount = 0
+  if (!existsSync(topicsPath)) {
+    coverageNote = '（覆盖未判：topics.md 不在场——在场级归 schema-scan）'
+  } else {
+    const tText = readFileSync(topicsPath, 'utf8')
+    const tSections = []
+    let tcur = null
+    for (const line of tText.split('\n')) {
+      if (/^##\s+/.test(line)) {
+        if (tcur) tSections.push(tcur)
+        tcur = { heading: line.replace(/^##\s+/, ''), body: [] }
+      } else if (tcur) tcur.body.push(line)
+    }
+    if (tcur) tSections.push(tcur)
+    for (const s of tSections) {
+      const idM = s.heading.match(/^(T\d+)\b/)
+      if (!idM) continue
+      const roleM = s.body.join('\n').match(/^\s*-\s*scope_role[:：]\s*(\S+)/m)
+      const role = roleM ? roleM[1].toLowerCase() : ''
+      if (role === 'primary' || role === 'comparison') {
+        requiredCount++
+        if (!covered.has(idM[1])) gaps.push(idM[1])
+      }
+    }
+    if (gaps.length > 0) {
+      problems.push(`覆盖缺口：${gaps.join('、')}（primary/comparison topic 无任何建议挖深 lead 指向——侦察缺口；修正 = 补 lead 或在 lead 的标题/owner 行补对应 topic）`)
+    }
+  }
+  // 断代（同 schema-scan 成例）：无日期可断 = 从严；pre-contract = 如实报告不计红
+  const date = leadsDate ?? deliveryDate(bundleDir)
+  const preContract = date !== null && date < LEADS_CONTRACT_DATE
+  let status
+  let detail
+  if (problems.length === 0) {
+    status = 'PASS'
+    const cov = existsSync(topicsPath)
+      ? `覆盖 ${requiredCount - gaps.length}/${requiredCount}（primary/comparison 全指向）`
+      : '覆盖未判'
+    detail = `方向节 ${dirs.length}（挖深 ${dig}/排除 ${excluded}）字段齐；${cov}${coverageNote}`
+  } else {
+    status = preContract ? 'PRE-CONTRACT' : 'RED'
+    detail = problems.join('；') + coverageNote + (preContract ? '（契约前交付——如实报告不计红，run bundle 是交付记录不改历史）' : '')
+  }
+  return { status, detail }
+}
+
+/**
+ * 门一个 bundle（核心逻辑，可导入；keyless）。
+ * @returns { gates: { hitl2Row, present, leads }, red, report }
+ *   每门：{ status: 'PASS'|'PASS-RELAY'|'RED'|'N/A'|'PRE-CONTRACT', detail }
+ */
+export function gateBundle(bundleDir, sessionsRoot, opts = {}) {
   const slug = basename(bundleDir)
   // 门③：final/ 版本记账在场 → §Decisions 须含 HITL2 拍板行
   const finalDir = join(bundleDir, 'final')
@@ -115,16 +257,17 @@ export function gateBundle(bundleDir, sessionsRoot) {
     else present = { status: 'RED', detail: 'final.md + readiness PASS 在场，但日志无 present 调用、拍板行也无操作侧补齐标注——静默缺席（G8 形态）' }
   }
 
-  const gates = { hitl2Row, present }
-  const red = [hitl2Row, present].some((g) => g.status === 'RED')
+  const gates = { hitl2Row, present, leads: leadsGate(bundleDir, opts.leadsDate) }
+  const red = [hitl2Row, present, gates.leads].some((g) => g.status === 'RED')
   const report = `# Node Gate — ${slug}（${new Date().toISOString()}）
 
-> scripts/node-gate.mjs（keyless；契约正本 = research-workspace/NODES.md 第 7/8 行）。
+> scripts/node-gate.mjs（keyless；契约正本 = research-workspace/NODES.md 第 3/7/8 行）。
 
 | 门 | 状态 | 说明 |
 |---|---|---|
 | ③ §Decisions 拍板行 | ${hitl2Row.status} | ${hitl2Row.detail} |
 | ② present 声明 | ${present.status} | ${present.detail} |
+| L leads 交接 | ${gates.leads.status} | ${gates.leads.detail} |
 `
   return { gates, red, report }
 }
@@ -167,9 +310,10 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
     process.exit(2)
   }
   const { gates, red, report } = gateBundle(bundleDir, sessionsRoot)
-  console.log(`node-gate: ${basename(bundleDir)} ｜ 门③ §Decisions 拍板行 = ${gates.hitl2Row.status} ｜ 门② present 声明 = ${gates.present.status}`)
+  console.log(`node-gate: ${basename(bundleDir)} ｜ 门③ §Decisions 拍板行 = ${gates.hitl2Row.status} ｜ 门② present 声明 = ${gates.present.status} ｜ 门L leads 交接 = ${gates.leads.status}`)
   console.log(`  ③ ${gates.hitl2Row.detail}`)
   console.log(`  ② ${gates.present.detail}`)
+  console.log(`  L ${gates.leads.detail}`)
   // 报告写入防护：tests/ 夹具区是 tracked 区——写报告=污染 git（2026-09-29 实测 6 个未跟踪文件，
   // 红证记录见 notes/implemented/2026-09-29-quality-evidence-loop.md）。夹具判定走上面的 stdout。
   if (resolve(bundleDir).startsWith(join(ROOT, 'tests') + '/')) {

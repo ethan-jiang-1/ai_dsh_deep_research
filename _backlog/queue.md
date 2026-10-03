@@ -13,11 +13,11 @@
 
 ## 队列
 
-▶ **wave0 侦察打磨——leads 计数对账与交接门升格**（feature，可自主；scout skill 模型可见文本 + node-gate 升格，真模型档证据随收尾交）——
-[RFC](../notes/proposed/2026-09-28-wave0-leads-polish.md)：样本 3 CRITICAL-2 实证（写数
-未点数 + 内部不一致未回改，analyst 抽数入口错数传染）+ 覆盖判据纯散文；方案 = skill 三
-判据 + node-gate v2 门 L（字段齐 + topic 覆盖，quick_factual 豁免）。pipeline-polish 面②
-（主序第二棒）。
+（队列空——待用户取题）
+
+> 队列空 = 全部条目已毕业（历史归 notes/implemented/ + git）；待用户取题或新立项。
+> 下一棒预排 = [pipeline-polish 卡](plans/2026-09-28-pipeline-polish.md) 面③ wave1 挖掘
+> （主序 ⑤→②→③→④ 第三棒；立卡动作照入口链）。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 

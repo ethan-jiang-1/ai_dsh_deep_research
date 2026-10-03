@@ -60,3 +60,73 @@ test('decisionsLines：只取 §Decisions 节，遇下一个 ## 停', () => {
   assert.equal(lines.length, 2)
   assert.ok(lines.every((l) => l.includes('HITL')))
 })
+
+// ── 门 L（leads 交接门，v2；RFC 2026-09-28-wave0-leads-polish）────────────────
+// 断代判据随测试注入日期（夹具 mtime 随检出时间漂，不可作断代依据——同 schema-scan 成例）。
+const L = (name, date) => gateBundle(bundle(name), undefined, { leadsDate: date }).gates.leads
+
+test('门L 健康：字段齐 + 覆盖齐（2 挖深盖 T1/T2，1 排除带原因，T3 synthesis 免检）→ PASS', () => {
+  const g = L('fixture-leads-healthy', '2026-10-04')
+  assert.equal(g.status, 'PASS', JSON.stringify(g.detail))
+})
+
+test('门L 反证：方向节缺 状态: 行 → RED', () => {
+  const g = L('fixture-leads-missing-status', '2026-10-04')
+  assert.equal(g.status, 'RED')
+  assert.match(g.detail, /状态/)
+})
+
+test('门L 反证：状态值不在合法集（待定）→ RED', () => {
+  const g = L('fixture-leads-bad-status', '2026-10-04')
+  assert.equal(g.status, 'RED')
+  assert.match(g.detail, /非法|合法/)
+})
+
+test('门L 反证：建议挖深缺支持来源（收集而不分级反模式）→ RED', () => {
+  const g = L('fixture-leads-dig-missing-source', '2026-10-04')
+  assert.equal(g.status, 'RED')
+  assert.match(g.detail, /支持来源/)
+})
+
+test('门L 反证：已排除无原因（静默放弃反模式）→ RED', () => {
+  const g = L('fixture-leads-excluded-no-reason', '2026-10-04')
+  assert.equal(g.status, 'RED')
+  assert.match(g.detail, /原因/)
+})
+
+test('门L 反证：primary topic 无任何建议挖深 lead 指向（覆盖缺口）→ RED', () => {
+  const g = L('fixture-leads-coverage-gap', '2026-10-04')
+  assert.equal(g.status, 'RED')
+  assert.match(g.detail, /T1/)
+})
+
+test('门L 防空语料：leads.md 在场但 0 个方向节 → RED', () => {
+  const g = L('fixture-leads-empty', '2026-10-04')
+  assert.equal(g.status, 'RED')
+  assert.match(g.detail, /0|零|空/)
+})
+
+test('门L 豁免：quick_factual（question.md 类型在场）→ N/A（条件件，不静默）', () => {
+  const g = L('fixture-leads-quickfactual', '2026-10-04')
+  assert.equal(g.status, 'N/A')
+  assert.match(g.detail, /quick_factual|豁免/)
+})
+
+test('门L 在场级不越界：leads.md 缺席（非豁免型）→ N/A（schema-scan 领地）', () => {
+  const g = L('fixture-leads-absent', '2026-10-04')
+  assert.equal(g.status, 'N/A')
+})
+
+test('门L 断代：契约前交付日 → 违约如实报告计 PRE-CONTRACT 不计红', () => {
+  const g = L('fixture-leads-bad-status', '2026-10-02')
+  assert.equal(g.status, 'PRE-CONTRACT')
+  const r = gateBundle(bundle('fixture-leads-bad-status'), undefined, { leadsDate: '2026-10-02' })
+  assert.equal(r.red, false, '契约前不计红（run bundle 是交付记录，不改历史）')
+})
+
+test('门L 隔离性：leads RED 不连坐交付两门（各自 N/A 如实呈现）', () => {
+  const r = gateBundle(bundle('fixture-leads-bad-status'), undefined, { leadsDate: '2026-10-04' })
+  assert.equal(r.gates.leads.status, 'RED')
+  assert.equal(r.gates.hitl2Row.status, 'N/A', 'final/ 不在场——门③无对象')
+  assert.equal(r.gates.present.status, 'N/A', 'final.md 不在场——门②无对象')
+})
