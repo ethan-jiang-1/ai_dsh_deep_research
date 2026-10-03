@@ -1,6 +1,6 @@
 # 推敲：全环节打磨与节点质量门（第二阶段收纳面）
 
-> 状态：推敲中｜毕业门判断 = 待触发（第一阶段判据已钉 2026-09-29：连续 3 场〔救场边界含通道死代驱〕，见毕业门；反向门 = 质量塌方实证可提前插队）——**2026-10-03 用户拍板开始推进第二阶段，门建议转健康遥测（计数照记不拦拆卡），待拍板**｜下一步 = **面⑤首棒已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-hitl-docking-polish.md)：拍板记账 + 交付四步序列 + 摘要自检落地，L0/L1/L4-lite/快照三层全绿；B2 mcp 在途债随 fixture 换代清偿）；**面②已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-wave0-leads-polish.md)：skill 三对账 + node-gate v2 门 L〔字段齐 + topic 覆盖〕先红后绿，四档全绿）；**面③已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-wave1-dig-polish.md)：synthesis「未取得≠没有」+ team-assembly 事中调度〔锚点重叠改派/补搜独立任务〕；补搜轮次 4 场确认不改、spawn 规模无过载不改——证据入卡）；**面④已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-wave2-synthesis-polish.md)：门④版本记账 + 断代，活体回验修复两处门缺陷，tests 140/0）；**面⑦已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-node-topology-procedure.md)：changing-node-topology 开发技能 + 三处指针）；**面①已立卡进队列**（[RFC](../../notes/proposed/2026-09-28-strategy-benchmark.md) ▶，2026-10-03）——策略层三轴对标——**主序 ⑤②③④ + ⑦ 毕业完毕**，面① 收口后仅剩 ⑥随 run，HITL1 侧待 run 采样证据、scope-round 待触发；缺陷线索照旧喂「已知与未决」
+> 状态：推敲中｜毕业门判断 = 待触发（第一阶段判据已钉 2026-09-29：连续 3 场〔救场边界含通道死代驱〕，见毕业门；反向门 = 质量塌方实证可提前插队）——**2026-10-03 用户拍板开始推进第二阶段，门建议转健康遥测（计数照记不拦拆卡），待拍板**｜下一步 = **面⑤首棒已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-hitl-docking-polish.md)：拍板记账 + 交付四步序列 + 摘要自检落地，L0/L1/L4-lite/快照三层全绿；B2 mcp 在途债随 fixture 换代清偿）；**面②已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-wave0-leads-polish.md)：skill 三对账 + node-gate v2 门 L〔字段齐 + topic 覆盖〕先红后绿，四档全绿）；**面③已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-wave1-dig-polish.md)：synthesis「未取得≠没有」+ team-assembly 事中调度〔锚点重叠改派/补搜独立任务〕；补搜轮次 4 场确认不改、spawn 规模无过载不改——证据入卡）；**面④已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-wave2-synthesis-polish.md)：门④版本记账 + 断代，活体回验修复两处门缺陷，tests 140/0）；**面⑦已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-node-topology-procedure.md)：changing-node-topology 开发技能 + 三处指针）；**面①已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-strategy-benchmark.md)：三轴对标——迭代深度收敛维持、地板候选 A/B 入搁置池、OpenAI 非同构不采纳）——**七面全部收口（⑤②③④⑦① 毕业 + ⑥ 随 run）**，HITL1 侧待 run 采样证据、scope-round 待触发；缺陷线索照旧喂「已知与未决」
 
 ## 背景 / 触发
 
@@ -43,7 +43,7 @@
 
 **计数**：连续无救场计数维持 0（划界题已拍板 2026-10-03，见毕业门①：授权代驱不算、故障代驱算——追溯适用，样本 3/4 的判定不变）；样本 4（pilot bundle）已交付**已归档**（2026-10-03 用户确认，D17 位置=状态）。
 
-1. **专业 DR 方法论对标**：策略层深化——移植只解决了"内核在场"，与专业 DR（OpenAI DR 等）的策略取舍（搜索预算分配、迭代深度、终止条件）尚未逐项对过。
+1. **专业 DR 方法论对标**：策略层深化——移植只解决了"内核在场"，与专业 DR（OpenAI DR 等）的策略取舍（搜索预算分配、迭代深度、终止条件）尚未逐项对过（**已收口 2026-10-03**：迭代深度收敛〔源仓 emergent_rounds=1 = 本仓 4 场实证只补一轮〕、地板缺失与数量型终止部分缺失 = 候选 A/B 入搁置池；OpenAI = end-to-end RL 非同构不采纳——[Note](../../notes/implemented/2026-09-28-strategy-benchmark.md)）。
 2. **wave0 机制（侦察，scout）**：leads 映射波次——搜索面怎么铺、主题怎么拆、leads 的覆盖判据（侦察产出质量直接决定 wave1 的天花板）。
 3. **wave1 机制（挖掘，analyst）**：证据采集波次——spawn 规模、任务板粒度、每 lead 挖多深、补搜轮次（synthesis 现行"只补一轮"是否最优）。
 4. **wave2 机制（综合，synthesis）**：纯综合先行与定向补搜的写作纪律、final/ 版本演进语义（扩张 +1、polish 原位）。

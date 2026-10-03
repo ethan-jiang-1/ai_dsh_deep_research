@@ -13,11 +13,11 @@
 
 ## 队列
 
-▶ **专业 DR 策略层对标——预算分配/迭代深度/终止条件**（研究，可自主；产出判断材料非机制）——
-[RFC](../notes/proposed/2026-09-28-strategy-benchmark.md)：三轴无对标（本仓现行策略各有
-机把守但从未与专业 DR 逐项对过）；双源 = 本地源头仓 ai_tool_deepresearch 策略层残留 +
-外部一手自述（OpenAI/Anthropic）；产出 = reference/ 材料 + 对账表回填卡片，采纳候选带
-触发条件不直接改机制。pipeline-polish 面①（最后待立卡面）。
+（队列空——待用户取题）
+
+> 队列空 = 全部条目已毕业（历史归 notes/implemented/ + git）；待用户取题或新立项。
+> pipeline-polish 卡七面收口完毕（⑤②③④⑦① 毕业 + ⑥ 随 run 滚动）；下一步 =
+> 下一场真 run（第二阶段验收场）+ 搁置池候选 A 触发链（存量标定先行）。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 
@@ -30,4 +30,5 @@
 | floor 数值门禁机械化——[RFC](../notes/rejected/2026-09-24-floor-gates.md) | critic 散文审查实证有效（九场无一滑坡）；**可实现核心已被 evidence-audit 吸收**（抓取强度/摘录覆盖率/final 链/日期——数值门禁的灵魂已活在机械审计里） | run 出现质量滑坡实证（✗；重估至第九场，条件仍未满足） |
 | 许可证（LICENSE）——[RFC](../notes/rejected/2026-09-24-license.md) | 本仓 `private: true` 未对外分发（**未决非遗漏**） | 对外分发/发布 pack 前（✗ 等用户分发计划） |
 | evidence caliber 数值断言——[RFC](../notes/rejected/2026-09-24-frontmatter-caliber-gate.md) | margin ≠ threshold：实测前数值门禁是假牙齿（口径是散文判断，"字段在场"断言查不出"口径真实"；基础整治 §3.4 用户拍板独立成篇） | 首个 run 实测出现口径缺失高频导致 critic 狩猎漏检、或口径标记被滥用逃避纪律，且实测数据能定出判据形状（随 floor 机械化一并重提）（✗） |
+| per-topic evidence 数量地板参数化（策略对标候选 A/B）——[对标材料](reference/2026-10-03-strategy-benchmark-sources.md) | 三轴对标判定"地板缺失/数量型终止部分缺失"（源仓 wave0 12/wave1 10 + CLI 单点计算权威可借鉴；Anthropic 用 prompt 区间）；floor 教训 = 数值未标定前是假牙齿，**先标定后立门** | ①存量 19 场标定"每 primary topic 卡数"分布（journal 逐场数，零成本）→ ②下一场 run 起 journal 增记该字段 → ③分布实证"primary 卡数 < 下限且 wave2 返工"场次 → 立门（数值由分布定；候选 B 参数单点计算权威同 diff）（✗） |
 | HITL2 条件范围轮（A+D 合流）——[卡](_done/_closed_plans/2026-09-28-hitl2-scope-round.md) | 严格门实证未发生（零 rerun）+ 实施归第二阶段（环节合同）；试点正证留卡〔范围轮试点题两场被认真作答、零过烦〕 | 首场补研究型 HITL2 发生（体感定形 → 立 RFC）或用户点名提前（✗） |
