@@ -50,10 +50,15 @@ if (!TOKEN) {
 //    research-workspace 组最新会话里有没有真挂起（末位回合事件 = 未答 ask_user_question）。
 //    request/header 里的工具 schema 字样不构成挂起——那正是 grep 假阳性的形态。无真挂起即
 //    自拒，不开浏览器空转。
+// 以下三个模块级变量 = 谓词块的发现结果，尾部盘侧复核复用（2026-10-03：块作用域提升）。
+let pendingSid = null // 形如 session-<uuid>；null = 无挂起
+let wsGroup = null
+let wsSessionsRoot = null
 {
   const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'dev', 'harness-home')
   const sessionsRoot = join(home, 'sessions')
   const group = existsSync(sessionsRoot) ? readdirSync(sessionsRoot).find((d) => d.includes('research-workspace')) : undefined
+  wsSessionsRoot = sessionsRoot; wsGroup = group
   if (group === undefined) {
     console.error('hitl-answer: 找不到 research-workspace 会话组——先 source dev/env.sh')
     process.exit(2)
@@ -66,7 +71,7 @@ if (!TOKEN) {
   for (const { d, m } of sids.slice(0, 15)) {
     if (m === 0) continue
     const s = runStateOf({ logPath: join(gdir, d, 'session.v4.jsonl.zstd'), wsRoot: join(ROOT, 'research-workspace') })
-    if (s.hitlPending === true) { pending = d; break } // 新者先扫，命中即停
+    if (s.hitlPending === true) { pending = d; pendingSid = d; break } // 新者先扫，命中即停
   }
   if (pending === null) {
     console.error('hitl-answer: 盘侧谓词自拒——最新 15 个会话无真挂起（末位回合事件 ≠ 未答 ask_user_question）。'
@@ -166,99 +171,133 @@ try {
   if (!ready) log('hitl-answer: 等了 40s 仍未见问询卡片——会话可能已不在待答态（问询被终局化或已答）')
   await page.waitForTimeout(600)
 
-  // ② 逐题作答：每题选一项（默认 Recommended），再按 pager 前进
+  // ② 逐题作答（0.2.0 分页问询卡：一次渲染一题 = radiogroup + pager "n / N" + Next/Submit）。
+  //   2026-10-03 验收 run 现场实测三坑（本块重写的依据）：
+  //   a. 选项容器类名漂移（`_option_` → `<hash>_option*`，CSS modules 前缀随构建变）——发现与
+  //      定位改走 role（radiogroup / button[role=radio]），与类名彻底解耦；
+  //   b. timed 超时后卡头从 "Waiting for your action" 变 "Work continued — you can still
+  //      answer"——旧版以旧卡头消失判"提交完成"，在超时态每题都假绿退出（实测答 6 次全空转）；
+  //   c. 前进按钮按 has-text 子串匹配会截胡页面里别的同名按钮——改在卡容器（radiogroup 的
+  //      祖先）内按精确文本找。
   const visible = async (loc) => loc.isVisible().catch(() => false)
-  for (let step = 1; step <= MAX_STEPS; step++) {
-    // 题干 = 卡片里 "Waiting for your action · <题干>" 的那一行
-    const prompt = page.locator('text=/Waiting for your action/').first()
-    const promptText = (await visible(prompt)) ? ((await prompt.textContent()) ?? '').replace(/\s+/g, ' ').trim() : '(未取到题干)'
-    if (promptText.length > 400) log(`hitl-answer: ⚠ 题干 ${promptText.length} 字（>400）——选项可能折叠线下，真人需滚动才能答题（HITL2 摘要纪律的执行方差信号）`)
-
-    // 选项目标：recommended → 带 Recommended 的那一项；first → 第 1 项；数字 → 第 n 项。
-    // ⚠ 实测坑（第三场 HITL2）：对话历史里 assistant 的推理文本也会含 "Recommended" 这个词
-    //   （不可见），`text=/Recommended/` + `.first()` 先命中它 → 误判"没有可点选项"。
-    //   修法：先试**精确文本**匹配（徽标文本就是 "Recommended" 本身），再退到逐个可见过滤。
-    const optionRows = page.locator('[class*="_option_"], label[class*="_option_"]')
-    let target = null
-    let targetLabel = null
-    if (PICK === 'recommended') {
-      let rec = page.locator('text="Recommended"').first() // 精确匹配（trim + 大小写不敏感）
-      if (!(await visible(rec))) {
-        const recs = page.locator('text=/Recommended/')
-        const rc = await recs.count()
-        for (let i = 0; i < rc; i++) {
-          const el = recs.nth(i)
-          if (await visible(el)) { rec = el; break }
+  const cardRoot = () => page.locator('[role="radiogroup"]').last()
+  const optionButtons = () => cardRoot().locator('button[role="radio"]')
+  /** 卡容器 = radiogroup 向上两层的 div（选项与 pager 按钮同住；类名不钉，走结构）。 */
+  const cardContainer = () => cardRoot().locator('xpath=ancestor::div[1]|ancestor::div[2]').first()
+  const pagerOf = async () => {
+    return await page.evaluate(() => {
+      const rg = [...document.querySelectorAll('[role="radiogroup"]')].pop()
+      if (!rg) return null
+      let scope = rg
+      for (let up = 0; up < 3 && scope; up++) {
+        scope = scope.parentElement
+        if (!scope) break
+        for (const el of scope.querySelectorAll('*')) {
+          if (el.childNodes.length > 3) continue
+          const m = ((el.textContent ?? '')).trim().match(/^(\d+)\s*\/\s*(\d+)$/)
+          if (m) return { cur: Number(m[1]), total: Number(m[2]) }
         }
       }
-      if (await visible(rec)) {
-        // 祖先只认 BUTTON/LABEL（2026-09-27 第七场实测）：选项的中间层 span 类名就含 "option"
-        // （optionCopy/optionLine），旧 XPath 的 contains(@class,"option") 会截胡到文本 span。
-        target = rec.locator('xpath=ancestor::*[self::button or self::label][1]')
-        if (!(await visible(target))) target = rec
-      }
+      return null
+    })
+  }
+  const headerAlive = async () => {
+    const body = await page.evaluate(() => document.body.innerText).catch(() => '')
+    return /Waiting for your action|Work continued|you can still answer/i.test(body)
+  }
+  for (let step = 1; step <= MAX_STEPS; step++) {
+    // 等当前题的选项渲染（radiogroup 里 ≥1 个 radio）
+    let opts = 0
+    for (let i = 0; i < 20; i++) {
+      opts = await optionButtons().count()
+      if (opts > 0) break
+      await page.waitForTimeout(600)
+    }
+    if (opts === 0) {
+      if (!(await headerAlive())) { log(`hitl-answer: 第 ${step} 题无选项且卡头已消——按已提交处理（尾部有盘侧复核）`); break }
+      log(`hitl-answer: 等了 12s 仍无选项（第 ${step} 题）——卡可能被终局化或处于已答态；如实停止`)
+      break
+    }
+    await page.waitForTimeout(500)
+    const promptText = await page.evaluate(() => {
+      const rg = [...document.querySelectorAll('[role="radiogroup"]')].pop()
+      let p = rg
+      for (let i = 0; i < 4 && p; i++) p = p.parentElement
+      return p ? (p.textContent ?? '').replace(/\s+/g, ' ').slice(0, 140) : '(未取到题干)'
+    })
+    // 选目标：recommended → radiogroup 内带 Recommended 徽标的 radio；first/数字 → 第 n 个
+    let target = null
+    if (PICK === 'recommended') {
+      const rec = cardRoot().locator('button[role="radio"]', { hasText: /Recommended/i }).first()
+      if (await visible(rec)) target = rec
     }
     if (target === null) {
       const idx = PICK === 'first' ? 0 : Math.max(0, Number(PICK) - 1)
-      if (await optionRows.count() > idx) target = optionRows.nth(idx)
-      else {
-        const anyOpt = page.locator('text=/^(主张验证|探索性全景|快速事实核查|标准报告|简报|深度报告)$/').first()
-        if (await visible(anyOpt)) target = anyOpt
-      }
+      const all = optionButtons()
+      if (await all.count() > idx) target = all.nth(idx)
     }
-    if (target === null || !(await visible(target))) {
-      log(`hitl-answer: 第 ${step} 题没找到可点选项——停在此处（已答 ${answered.length} 题）`)
-      break
-    }
-    targetLabel = ((await target.textContent()) ?? '').replace(/\s+/g, ' ').trim().slice(0, 120)
+    if (target === null || !(await visible(target))) { log(`hitl-answer: 第 ${step} 题没找到可点选项——停在此处（已答 ${answered.length} 题）`); break }
+    const targetLabel = ((await target.textContent()) ?? '').replace(/\s+/g, ' ').trim().slice(0, 120)
     if (DRY) { log(`[dry-run] 第 ${step} 题将选：${targetLabel}`); break }
-    // 点击（2026-09-27 第七场实测教训）：超长题干把选项行挤到视口外（y≈2300+），且问询卡在
-    // 嵌套滚动容器里——Playwright 的自动滚动失效 → click 超时被 catch 吞掉 → 没选中 →
-    // Submit 永远 disabled，答 8 次全空转。修法：Playwright 点不动就**DOM 原生 click 兜底**
-    // （el.scrollIntoView + el.click()，绕过视口与可点击性检查；React 按钮响应正常，实测一击即中）。
-    const domClickByText = async (needle, sel = 'button,label') => {
-      try {
-        return await page.evaluate((n, s) => {
-          const el = [...document.querySelectorAll(s)].find(e => ((e.textContent ?? '').replace(/\s+/g, ' ')).includes(n))
-          if (el === undefined) return false
-          el.scrollIntoView({ block: 'center' })
-          el.click()
-          return true
-        }, needle, sel)
-      } catch { return false }
-    }
-    try { await target.click({ timeout: 5_000 }) } catch {
-      const ok = await domClickByText(targetLabel.slice(0, 24))
+    try { await target.click({ timeout: 5000 }) } catch {
+      const ok = await page.evaluate((n) => {
+        const els = [...document.querySelectorAll('[role="radiogroup"] button[role="radio"]')]
+        const el = els.find(e => (e.textContent ?? '').replace(/\s+/g, ' ').includes(n))
+        if (!el) return false
+        el.scrollIntoView({ block: 'center' }); el.click(); return true
+      }, targetLabel.slice(0, 20))
       log(ok ? 'hitl-answer: ⚠ 选项在视口外点不动——已用 DOM 原生点击兜底' : 'hitl-answer: ⚠ 选项点击失败且 DOM 兜底未命中')
     }
-    await page.waitForTimeout(400)
+    await page.waitForTimeout(700)
     if (CUSTOM !== null) {
       const box = page.locator('textarea, input[type="text"]').first()
       if (await visible(box)) { await box.fill(CUSTOM).catch(() => {}); await page.waitForTimeout(200) }
     }
-    answered.push({ step, prompt: promptText.slice(0, 140), selected: targetLabel })
+    answered.push({ step, prompt: promptText, selected: targetLabel })
     log(`hitl-answer: 第 ${step} 题 ← ${targetLabel}`)
-
-    // 前进：优先 Submit/提交/完成，其次 Next，最后 Done。
-    // 禁用态的 Submit 用 Playwright 点**不抛错但无效果**（选中没生效时的表象）——先查禁用态，
-    // 禁用则 DOM 兜底重选选项再点；点击抛错（视口外）也走 DOM 兜底。
+    // 前进：有 pager 且 cur < total → Next（精确文本）；末题或无 pager → Submit。
+    //   ⚠ Skip 不是前进（跳题留空），绝不点。
+    const pg = await pagerOf()
+    const fwdTexts = pg !== null && pg.cur < pg.total ? ['Next', '下一步'] : ['Submit', '提交']
     let advanced = false
-    for (const label of ['Submit', '提交', 'Done', '完成', 'Next', '下一步']) {
-      const b = page.locator(`button:has-text("${label}")`).first()
+    for (const lb of fwdTexts) {
+      const b = cardContainer().locator('button').filter({ hasText: new RegExp(`^${lb}$`) }).first()
       if (!(await visible(b))) continue
       const isDisabled = await b.evaluate((el) => el.disabled).catch(() => false)
-      if (isDisabled) { await domClickByText(targetLabel.slice(0, 24)); await page.waitForTimeout(600) }
-      try { await b.click({ timeout: 5_000 }) } catch { await domClickByText(label, 'button') }
+      if (isDisabled) { await page.waitForTimeout(600) }
+      try { await b.click({ timeout: 5000 }) } catch { await b.evaluate((el) => { el.scrollIntoView({ block: 'center' }); el.click() }).catch(() => {}) }
       advanced = true
+      log(`hitl-answer: 前进 ← ${lb}（pager=${pg ? `${pg.cur}/${pg.total}` : '无'}）`)
       break
     }
-    if (!advanced) { log(`hitl-answer: 第 ${step} 题后没找到前进按钮——可能已是末题且已提交`); break }
-    await page.waitForTimeout(1500)
-    // 卡片消失 = 提交完成
-    if (!(await visible(page.locator('text=/Waiting for your action/').first()))) { log('hitl-answer: 问询卡片已消失（提交完成）'); break }
+    if (!advanced) { log(`hitl-answer: 第 ${step} 题后没找到前进按钮（${fwdTexts.join('/')}）——如实停止（已答 ${answered.length} 题）`); break }
+    await page.waitForTimeout(1600)
+    // 下一题判定：pager 前进（cur 变大）或新选项出现；二者都没有 → 检查是否已提交（卡头消）
+    const pg2 = await pagerOf()
+    const opts2 = await optionButtons().count()
+    if (pg !== null && pg2 !== null && pg2.cur > pg.cur) continue // 翻页成功，进下一题
+    if (pg === null && opts2 > 0) continue // 无 pager 卡的新选项（罕见形态）
+    if (opts2 === 0 && !(await headerAlive())) { log('hitl-answer: 选项与卡头俱消——提交完成'); break }
+    if (opts2 > 0 && (pg === null || (pg2 !== null && pg2.cur === pg.cur))) {
+      // pager 没动但选项还在——前进可能没生效，再等一轮再验一次
+      await page.waitForTimeout(2000)
+      const pg3 = await pagerOf()
+      if (pg3 !== null && pg !== null && pg3.cur > pg.cur) continue
+      log('hitl-answer: ⚠ 前进后 pager 未动——如实报告（可能需要人工看卡）')
+      break
+    }
   }
 
   log(`hitl-answer: 共作答 ${answered.length} 题`)
+  // 盘侧复核（2026-10-03 假绿教训：UI 判"完成"不算数——答完重读盘侧谓词，仍挂起即大声说）
+  if (!DRY && answered.length > 0) {
+    await page.waitForTimeout(2500)
+    if (pendingSid !== null && wsGroup !== null && wsSessionsRoot !== null) {
+      const s2 = runStateOf({ logPath: join(wsSessionsRoot, wsGroup, pendingSid, 'session.v4.jsonl.zstd'), wsRoot: join(ROOT, 'research-workspace') })
+      if (s2.hitlPending === true) console.error('hitl-answer: ⚠ 盘侧复核：会话仍挂起——本次代答未真正提交，别信上面的"提交完成"！（重跑本脚本或人工入 GUI 答）')
+      else log('hitl-answer: 盘侧复核通过——挂起已清')
+    }
+  }
   log('hitl-answer: 代理模拟记录（写进 bundle 的 question.md §Decisions 与 journal.md）——')
   for (const a of answered) log(`  Q${a.step}: ${a.prompt}\n     → ${a.selected}`)
 } finally {
