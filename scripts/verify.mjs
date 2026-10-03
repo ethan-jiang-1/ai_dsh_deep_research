@@ -1064,7 +1064,7 @@ function parkedSection() {
 // 为什么：未完结思考稿缺状态行挂着不动 = 死稿（company D30 起因即此病；company D31 立
 // `_backlog/` 推敲空间时同款门禁随层落地，本仓借入——RFC = notes/proposed/2026-09-28-
 // backlog-deliberation-space.md，plans 卡文件名日期编码为本仓裁定）。断言：每张活跃卡
-// ① 文件名 = `YYMMDD-<slug>.md`（YYMMDD = 立卡日期——归档 git mv 文件名不变，日期流在
+// ① 文件名 = `YYYY-MM-DD-<slug>.md`（与 notes 树同格式——归档 git mv 文件名不变，日期流在
 // 归档侧可读）；② 首部 12 行内有「状态：…毕业门判断 = <值>」行（待定/该做/待触发/
 // 倾向放弃皆可，结构必须在——防挂死稿）。范围：git ls-files 驱动（tracked-only）。
 // 层契约：plans/README.md 缺席 = 红；0 张卡 = 合法空态（note 声明，company 同款空转）。
@@ -1084,8 +1084,8 @@ function parkedSection() {
         .filter((f) => f.startsWith(`${plansRel}/`) && f.endsWith('.md') && !f.endsWith('README.md'));
       for (const rel of cards) {
         const base = rel.split('/').pop();
-        if (!/^\d{6}-[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(base))
-          fail(gate, `${rel}: 文件名违反 YYMMDD-<slug> 编码（YYMMDD = 立卡日期，slug 为 kebab-case）`);
+        if (!/^\d{4}-\d{2}-\d{2}-[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(base))
+          fail(gate, `${rel}: 文件名违反 YYYY-MM-DD-<slug> 编码（与 notes 树同一种日期格式——2026-10-03 用户定调对齐）`);
         const f = join(ROOT, rel);
         if (!existsSync(f)) continue; // 稀疏态防御（同 md-links）
         const head = readFileSync(f, 'utf8').split('\n').slice(0, 12);

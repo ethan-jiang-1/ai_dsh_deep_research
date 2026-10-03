@@ -52,7 +52,7 @@
 
 - **保留 roadmap 双层（本仓初版倾向，用户同日裁断否决）**：论据（推敲与次序互补、门禁网
   挂载其上、借鉴源同日保留 ROADMAP）全部成立并随首张推敲卡永久归档
-  （[_done/_closed_plans/260928-retire-roadmap](../../_backlog/_done/_closed_plans/260928-retire-roadmap.md)），
+  （[_done/_closed_plans/2026-09-28-retire-roadmap](../../_backlog/_done/_closed_plans/2026-09-28-retire-roadmap.md)），
   但两个规划入口的真实成本（双指针纪律、入口链分叉、fresh agent 二跳）被裁断大于复用价值；
   反证论据按位置即状态原样保留，重新提出合并前先读该卡。
 - **notes/ 下子目录**：卡毕业纪律（内容不重写）与 Note 毕业纪律（正文必须改写）方向相反，
@@ -66,7 +66,7 @@
 
 ## 实际跑过的验证
 
-- **plans-liveness 反证（红→还原→绿）**：① 无状态行卡（`260928-probe-card.md` staged 注入）
+- **plans-liveness 反证（红→还原→绿）**：① 无状态行卡（`2026-09-28-probe-card.md` staged 注入）
   → 红「无『状态：…毕业门判断 = <值>』户口行」；② 补状态行 → PASS；③ 错名卡
   `260928_Bad Name.md` → 红「文件名违反 YYMMDD-<slug> 编码」；④ 还原 → PASS + 零卡合法空态
   note。untracked 注入门禁不可见 = `git ls-files` 索引面（staged 后兜住，同 md-links 边界）。
@@ -86,7 +86,7 @@
   plans/（推敲半区，空态）+ bugs/ + _done/；roadmap.md 已 `git rm`（历史在 git）。
 - 新门禁 `plans-liveness`（gates 数组 + [evaluation §L0 台账](../../docs/evaluation.md) 同步）；
   doc-budgets 新登记 `_backlog/queue.md`。
-- 首张推敲卡 260928-retire-roadmap 当日立卡、当日经用户裁决毕业归档——卡生命周期首例全程
+- 首张推敲卡 2026-09-28-retire-roadmap 当日立卡、当日经用户裁决毕业归档——卡生命周期首例全程
   走完（立卡 → 检索 → 毕业门 → 归档补去向指针），plans/ 回到合法空态。
 - 并行会话交接：rerun-loop-live 的毕业件（notes/implemented/2026-09-28-rerun-loop-live.md）
   系并行会话在飞成果，保持 untracked 归其整轮提交；本变更 queue.md 直接以 parked 态落地

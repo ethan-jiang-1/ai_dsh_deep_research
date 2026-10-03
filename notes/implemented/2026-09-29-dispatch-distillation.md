@@ -1,7 +1,7 @@
 # 判型模式库 v1 与增长机制（dispatch-distillation）
 
 > 状态：implemented
-> 源卡：[260929-dispatch-distillation](../../_backlog/_done/_closed_plans/260929-dispatch-distillation.md)（2026-09-29 立卡→当日毕业，用户三轮定调：强模型思考直接沉淀、典型场景起步、增长机制是命门、漏的靠模型能力兜底）；外部调研过程稿 = `research-workspace/drafts/self-growing-pattern-library-research.md` 与 `research-workspace/drafts/2026-09-29-hitl1-intake-routing-survey.md`（已随本变更入库如同目录先例，一手来源核实、URL 内联可复核）
+> 源卡：[2026-09-29-dispatch-distillation](../../_backlog/_done/_closed_plans/2026-09-29-dispatch-distillation.md)（2026-09-29 立卡→当日毕业，用户三轮定调：强模型思考直接沉淀、典型场景起步、增长机制是命门、漏的靠模型能力兜底）；外部调研过程稿 = `research-workspace/drafts/self-growing-pattern-library-research.md` 与 `research-workspace/drafts/2026-09-29-hitl1-intake-routing-survey.md`（已随本变更入库如同目录先例，一手来源核实、URL 内联可复核）
 
 ## 决定
 

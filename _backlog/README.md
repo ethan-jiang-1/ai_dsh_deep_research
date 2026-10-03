@@ -53,7 +53,7 @@
 _backlog/
 ├── README.md            # 本文件（规矩手册——宪章；活卡/计数/现值一律进各账本）
 ├── queue.md             # 次序半区：队列（▶ = 当前指针，parked 态合法）+ 搁置池——零判断材料
-├── plans/               # 推敲卡：设计 / 分析 / 调研（文件名 YYMMDD-slug，日期 = 立卡日）
+├── plans/               # 推敲卡：设计 / 分析 / 调研（文件名 YYYY-MM-DD-slug，与 notes 树同一种日期格式——2026-10-03 定调对齐）
 ├── bugs/                # 缺陷卡：已发现、不当场修的缺陷（当场修掉的不建档）
 ├── reference/           # 推敲资料区：喂活跃卡的调研材料（随卡毕业迁 _done/_reference/）
 └── _done/               # 归档（位置即状态）：_closed_plans/ + _suspended_plans/ +
@@ -108,7 +108,7 @@ rejected Note），两者不混。暂停是队列级决定（跟随用户明示�
 - **README 永不删除**，只更新索引行。
 - **编号权威住归档侧**：`_done/_fixed_bugs/` 持有 Next BUG ID（新号 = 已分配最大号 + 1，
   活跃 ∪ 归档一起算，权威值 = [_done/README.md](_done/README.md)）；plans 卡无编号，
-  文件名 `YYMMDD-<slug>` 自带立卡日期——归档后日期流可读（本仓裁定，company 原样为纯 slug）。
+  文件名 `YYYY-MM-DD-<slug>` 自带立卡日期（与 notes 树同格式——2026-10-03 定调对齐，替代首借 YYMMDD 裁定）。
 - **半区互斥**：queue.md 只载次序与归宿、零判断内容；plans/ 卡只载判断材料、零调度——
   互越界即回归 D23 病（第二个队列）。
 - **宪章与账本分离**（2026-10-03 借鉴）：本手册是**宪章**——只记制度（布局、门、规矩、

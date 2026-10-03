@@ -27,11 +27,15 @@ plans/bugs README 对齐（措辞见宪章各节）+ plans-liveness 门禁扩展
 5. **plans-liveness 扩展：索引交叉对账**——plans/bugs/reference 三活跃面 + _done 五池，
    每个文件必须被其 README 索引点名（孤儿即红）；反方向（索引行点名缺文件）归 md-links。
    loop_advisor 的教训 = 该检查在其仓三度复发后才加，本仓前置采纳。
+6. **推敲卡命名对齐 full-date**（用户指出 `260928-pipeline-polish` 未对齐要求后采纳）：
+   `YYMMDD-<slug>` → `YYYY-MM-DD-<slug>`（与 notes 树同一种日期格式——loop_advisor 的原
+   论据成立）。迁移 = 全仓 6 卡改名（git mv）+ 15 文件引用更新 + plans-liveness 正则更新
+   + D19 行措辞修订（替代首借时的 YYMMDD 裁定，D19 行保留决策轨迹）。
 
-**不借三件**（理由记本 Note 存档，不入宪章——不借鉴的不提）：①loop_advisor 的"无队列"模型（其调度归
+**不借两件**（理由记本 Note 存档，不入宪章——不借鉴的不提）：①loop_advisor 的"无队列"模型（其调度归
 notes/proposed + goal 机制）——与本仓 D20/入口链第 3 步冲突，queue.md 是 ▶ 唯一指针的家；
-②推敲卡全日期命名（YYYY-MM-DD）——D19 登记裁定 YYMMDD，迁移 = 重命名归档卡 + 断引用链；
-③OpenSpec 加工机制——本仓生产线 = notes/，主干框架已按本仓结构改写。
+②OpenSpec 加工机制——本仓生产线 = notes/，主干框架已按本仓结构改写。
+（原"不借"第三件「推敲卡全日期命名」在用户指出命名未对齐后翻案为采纳，见决定 6。）
 
 连带翻案：宪章负知识表 `_suspended_*` / `_reference_` 两行由"不借"翻"采纳"——原判据
 （"第二个搁置池" / "notes/archived 已覆盖"）均未区分本轮 loop_advisor 细化的语义边界
@@ -52,7 +56,7 @@ notes/proposed + goal 机制）——与本仓 D20/入口链第 3 步冲突，qu
 | 面 | 结果 |
 |---|---|
 | 反证（先想红） | 注入无索引孤儿卡 `_backlog/plans/261003-orphan-test.md`（状态行合规，仅索引缺失）→ plans-liveness **红** → 移除 → 绿 |
-| 上岗即战果 | 红证当场抓到**真孤儿**：`_done/_closed_plans/261002-mcp-client-adoption.md` 毕业时漏建索引行（本轮补行）——门禁价值当轮兑现 |
+| 上岗即战果 | 红证当场抓到**真孤儿**：`_done/_closed_plans/2026-10-02-mcp-client-adoption.md` 毕业时漏建索引行（本轮补行）——门禁价值当轮兑现 |
 | L0 | verify 全绿（plans-liveness 扩展后）+ tests 122/0 |
 | 开关两向 | 暂停池/资料区为空池合法态（0 文件无断言）；md-links 覆盖反方向 |
 

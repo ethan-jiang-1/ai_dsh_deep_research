@@ -7,7 +7,7 @@
 
 ## 目录
 
-- [_closed_plans/](_closed_plans/README.md) — 已毕业推敲卡（无编号，按 `YYMMDD-slug` 查）
+- [_closed_plans/](_closed_plans/README.md) — 已毕业推敲卡（无编号，按 `YYYY-MM-DD-slug` 查）
 - [_suspended_plans/](_suspended_plans/README.md) — 暂停的推敲卡（未裁决、非完成，重启条件随卡）
 - [_fixed_bugs/](_fixed_bugs/README.md) — 已修复缺陷卡（逐行索引）
 - [_suspended_bugs/](_suspended_bugs/README.md) — 暂停缺陷卡（已查明、修复未确认，编号保留）

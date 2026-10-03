@@ -10,7 +10,7 @@
 - **第二阶段 = 逐环节打磨**：每个环节都要过一遍专业化推敲——"专业的 Deep Research 怎么做、策略怎么弄、wave0 怎么搞、wave1 怎么搞、wave2 怎么搞；保障质量的话，每个节点之间怎么做质量门"。本卡就是这个阶段的**思考收纳面**（不是任务、不调度）。
 - **节点拓扑保持可调**：今后可能加节点、调整节点——轨道（两◆ + 七步 + 回边）是当前态不是终态。
 
-触发本卡的体感来源：首场 trial（drt_cn-us-open-source）暴露的环节级问题——轨道可读性、HITL2 范围细节无户口（见 [260928-hitl2-scope-round](../_done/_closed_plans/260928-hitl2-scope-round.md)）、L2 安装域缺口——说明环节间缝隙要在跑顺后系统过一遍。
+触发本卡的体感来源：首场 trial（drt_cn-us-open-source）暴露的环节级问题——轨道可读性、HITL2 范围细节无户口（见 [2026-09-28-hitl2-scope-round](../_done/_closed_plans/2026-09-28-hitl2-scope-round.md)）、L2 安装域缺口——说明环节间缝隙要在跑顺后系统过一遍。
 
 ## 已知与未决
 
@@ -29,11 +29,13 @@
 
 **2026-09-29 第三场样本（drt_mcp-server-ecosystem，契约生效后首场）＝样本 1/3，判不过**，卡三条全中：① 通道死救场 ×1（DeepSeek transport 故障把 analyst-1 turn 与 lead turn 2 双双打死，重试 5 次耗尽；操作侧 session/prompt 恢复——lead 据文件事实重建并 spawn analyst-3 无缝接续，恢复路径本身顺畅）；② 两点外卡壳（通道死停摆 ~1.5h）；③ 交付记账返工一处——**门③活体抓红**（G8 第三实例·契约期首例：lead 拍板 HITL2 后落 final/ 并 present，但未回写 §Decisions 拍板行）→ 操作侧显式记账补齐转绿。正面记录：critic 首轮真 FAIL（CRITICAL 2，含抓出 scout 的 leads.md 计数错）→ 修复 → 复评 PASS；evidence-audit 首过 CRITICAL=0；归档即位零搬砖。**新划界题**：用户预先授权的 HITL 代驱（"完全自主弄完"）算不算①的救场？建议判定 = 授权代驱不算、故障代驱算——待用户拍板。
 
+**2026-10-03 第四场样本（drt_cn-llm-pricing-2026-10，mcp-playwright 常驻前 pilot）＝判不过**，记账补录（含欠账声明：token-factory〔2026-10-01 交付〕一场未及记档，无法无损追溯重建——自本条起恢复记档纪律）：① 通道死救场 ×1（会话内代理后台起的通道继承会话沙箱——web_fetch 全域名解析墙 + playwright 浏览器 EPERM，操作侧修复重启；教训已入 guides/61 §0）② HITL 代驱 ×3（HITL1 + 两轮 HITL2，用户预先授权 pilot——划界题同上仍待拍板）③ 交付即落位 ✅（audit CRITICAL=0、两轮 critic PASS、present/记账齐）。**正资产**：mcp-playwright 渲染通道把智谱 Coding Plan 价目（历史"不可判定"缺口）取证关闭——七项推敲面之外的新鲜实证，已回填采纳 Note。**计数**：连续无救场计数维持 0（本场判不过）。
+
 1. **专业 DR 方法论对标**：策略层深化——移植只解决了"内核在场"，与专业 DR（OpenAI DR 等）的策略取舍（搜索预算分配、迭代深度、终止条件）尚未逐项对过。
 2. **wave0 机制（侦察，scout）**：leads 映射波次——搜索面怎么铺、主题怎么拆、leads 的覆盖判据（侦察产出质量直接决定 wave1 的天花板）。
 3. **wave1 机制（挖掘，analyst）**：证据采集波次——spawn 规模、任务板粒度、每 lead 挖多深、补搜轮次（synthesis 现行"只补一轮"是否最优）。
 4. **wave2 机制（综合，synthesis）**：纯综合先行与定向补搜的写作纪律、final/ 版本演进语义（扩张 +1、polish 原位）。
-5. **HITL1/HITL2 停靠点打磨**：用户唯二伸手的地方，优先级天然靠前——HITL1 三问的问项质量与时机（发生在用户最没 context 处：怎么问得省力、推荐项怎么拟才准）；HITL2 卡的人机工学（≤200 字纪律的遵守、选项与推荐、范围轮形态 = 关联卡 [260928-hitl2-scope-round](../_done/_closed_plans/260928-hitl2-scope-round.md)）、拍板记录（question.md §Decisions）、挂起显性化与诚实线的体验。
+5. **HITL1/HITL2 停靠点打磨**：用户唯二伸手的地方，优先级天然靠前——HITL1 三问的问项质量与时机（发生在用户最没 context 处：怎么问得省力、推荐项怎么拟才准）；HITL2 卡的人机工学（≤200 字纪律的遵守、选项与推荐、范围轮形态 = 关联卡 [2026-09-28-hitl2-scope-round](../_done/_closed_plans/2026-09-28-hitl2-scope-round.md)）、拍板记录（question.md §Decisions）、挂起显性化与诚实线的体验。
 6. **节点间质量门**：每个节点之间怎么做质量门——进出门条件、谁把守（critic 对抗 / 机械审计 / 数值断言）、防假牙齿（floor 教训：先实测定口径再机械化）。
 7. **节点拓扑演进**：加节点/调节点的程序——改轨道涉及 cockpit 渲染 + 步序正本（m2-run-mechanics）+ 研究手册三处同步，目前无专门程序。
 
