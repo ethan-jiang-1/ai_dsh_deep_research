@@ -28,7 +28,7 @@ plans/bugs README 对齐（措辞见宪章各节）+ plans-liveness 门禁扩展
    每个文件必须被其 README 索引点名（孤儿即红）；反方向（索引行点名缺文件）归 md-links。
    loop_advisor 的教训 = 该检查在其仓三度复发后才加，本仓前置采纳。
 
-**不借三件**（连同理由入宪章负知识表）：①loop_advisor 的"无队列"模型（其调度归
+**不借三件**（理由记本 Note 存档，不入宪章——不借鉴的不提）：①loop_advisor 的"无队列"模型（其调度归
 notes/proposed + goal 机制）——与本仓 D20/入口链第 3 步冲突，queue.md 是 ▶ 唯一指针的家；
 ②推敲卡全日期命名（YYYY-MM-DD）——D19 登记裁定 YYMMDD，迁移 = 重命名归档卡 + 断引用链；
 ③OpenSpec 加工机制——本仓生产线 = notes/，主干框架已按本仓结构改写。

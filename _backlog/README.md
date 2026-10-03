@@ -90,9 +90,8 @@ rejected Note），两者不混。暂停是队列级决定（跟随用户明示�
 ## 推敲资料区（reference/）：喂卡片的证据面
 
 打磨卡片会攒下调研——证据走读、综述、机制笔记——它们的家既不是卡（卡只载判断材料）
-也不是 notes/（那边是决定记录）。`reference/` 就是这个家（2026-10-03 二轮借鉴采纳——
-原先的"不借"判据针对的是**留存型**参考语义（notes/archived 已覆盖），没覆盖**服务活跃
-卡**的调研资料；本轮实测空位真实存在，如 mcp-client 推敲卡的调研材料曾只能塞进卡体）。
+也不是 notes/（那边是决定记录）。`reference/` 就是这个家（2026-10-03 二轮借鉴采纳，
+登记 = [borrow Note](../notes/implemented/2026-10-03-backlog-governance-borrow.md)）。
 要点（完整契约 = [reference/README.md](reference/README.md)）：
 
 - **喂活跃卡**：推敲时攒的、被卡引用的、喂毕业判断的证据材料；半成品合法。
@@ -134,11 +133,6 @@ rejected Note），两者不混。暂停是队列级决定（跟随用户明示�
 |---|---|
 | `todos/` 桶 | [queue.md](queue.md) §队列已是 todo/次序的家；另立 = 重蹈 company D23 废除的 plans 层 |
 | 独立 roadmap 文件 | 规划面单入口（D20 用户裁决）：两个规划入口 = 双份指针纪律 + 入口链分叉；次序半区已住 queue.md |
-| ~~`_suspended_*` 桶~~ → **2026-10-03 翻案采纳** | 原判据（"第二个搁置池"）没区分两种语义：queue 搁置池 = **已裁决**的 do-not-now（复活条件在池行 + rejected Note）；`_suspended_{plans,bugs}/` = **未裁决**的暂停（用户明示先放一放、无毕业判断，重启条件随卡）——空位真实，语义不重叠，采纳（borrow Note 有全程） |
-| ~~`_reference/` 桶~~ → **2026-10-03 翻案采纳** | 原判据（"notes/archived 已覆盖"）只覆盖**留存型**参考（越过所有卡的资料），没覆盖**服务活跃卡**的调研资料——空位实测存在（mcp-client 卡调研材料塞卡体）；采纳 + 随卡毕业语义（borrow Note 有全程） |
-| ~~loop_advisor 的"无队列"模型~~ | 其调度归 notes/proposed + goal 机制；本仓 queue.md = 入口链第 3 步（D20 用户裁决的 ▶ 唯一指针）——结构不同不硬搬，主干框架按本仓结构改写（queue 留在 _backlog 作次序半区） |
-| 推敲卡全日期命名（YYYY-MM-DD） | loop_advisor 论据 = "与 notes 树一种日期格式"；本仓 YYMMDD 为 D19 登记裁定（归档日期流同样可读），迁移 = 重命名归档卡 + 断全仓引用链，churn > 收益——维持不借，复发压力再议 |
-| OpenSpec 加工机制 | loop_advisor 生产线走 OpenSpec changes；本仓生产线 = notes/proposed→implemented——机制不同，主干框架已按本仓结构改写 |
 | 复盘卡 | [notes/postmortem/](../notes/postmortem/README.md) 已有（事故复盘 ≠ 设计推敲，别混） |
 | deerflow 的三处索引一致性 / `_` 目录声明 / 编号撞号门禁 | 「有压力再借」判据：错误在本仓复发过才升格；当前登记在案，复发即加（索引交叉对账已本轮前置采纳，见机械门禁） |
 
