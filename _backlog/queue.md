@@ -13,11 +13,11 @@
 
 ## 队列
 
-▶ **HITL 停靠点打磨首棒——拍板记账与交付序列**（feature，可自主；模型可见文本改动，真模型档证据随收尾交）——
-[RFC](../notes/proposed/2026-09-28-hitl-docking-polish.md)：G8 #③ 实证缺口——拍板行回写
-在 lead 模型可见面缺席 + 交付无序列化完成定义 + HITL2 摘要 ≤200 字缺自检；方案 = persona
-两行 + synthesis §5 三处文本判据，HITL1 侧无实证不动。pipeline-polish 面⑤首棒（主序
-⑤→②→③→④，2026-10-03 用户拍板）。
+（队列空——待用户取题）
+
+> 队列空 = 全部条目已毕业（历史归 notes/implemented/ + git）；待用户取题或新立项。
+> 下一棒预排 = [pipeline-polish 卡](plans/2026-09-28-pipeline-polish.md) 面② wave0（主序
+> ⑤→②→③→④ 第二棒，2026-10-03 用户拍板；立卡动作照入口链）。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 
