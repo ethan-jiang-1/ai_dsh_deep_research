@@ -4,7 +4,10 @@
 > `git mv` 文件名不变，日期流因此在归档侧可读；company 原样为纯 slug，登记为带理由
 > 偏离）。毕业（批准 / 搁置 / 否决 / 消化）时 `git mv` 到
 > [`../_done/_closed_plans/`](../_done/_closed_plans/README.md)，文件名不变、内容不重写，
-> 状态行补去向指针。规矩手册 = [`../README.md`](../README.md)。
+> 状态行补去向指针。**用户明示的未裁决暂停**（无毕业判断）走
+> [`../_done/_suspended_plans/`](../_done/_suspended_plans/README.md)——暂停非完成，重启
+> 需用户新的优先级决定。推敲时攒的调研材料进 [`../reference/`](../reference/README.md)，
+> 随卡毕业。规矩手册 = [`../README.md`](../README.md)。
 
 ## 活跃列表
 

@@ -10,3 +10,4 @@
 | [260928-node-io-schema](260928-node-io-schema.md) | 用户点名提前（定稿门过；落点 A2 + node-gate ②③ 小切口——C 形态同日翻案） | [毕业 Note](../../../notes/implemented/2026-09-28-node-io-schema.md) | 2026-09-29 |
 | [260928-hitl2-scope-round](260928-hitl2-scope-round.md) | 用户裁决搁置（严格门未触发零 rerun，试点正证留卡；复活 = 首场补研究型 HITL2 或点名提前） | [queue.md §搁置池行](../../queue.md) | 2026-09-29 |
 | [260929-dispatch-distillation](260929-dispatch-distillation.md) | 用户裁定先上（两项未决当日拍板：具体弱档对照 + 最浅白文本；样题代理拟、用户过目）——当日实施完成（模式库 v1 + 增长机制，方向经三轮重塑：直接沉淀 > A/B 前置） | [毕业 Note](../../../notes/implemented/2026-09-29-dispatch-distillation.md) | 2026-09-29 |
+| [261002-mcp-client-adoption](261002-mcp-client-adoption.md) | 批准（两轮呈批：本地 Playwright MCP——D22 交付约束；实施与 pilot 记录住采纳 Note） | [mcp-playwright 采纳 Note](../../../notes/implemented/2026-10-02-mcp-playwright-adoption.md) | 2026-10-02 |

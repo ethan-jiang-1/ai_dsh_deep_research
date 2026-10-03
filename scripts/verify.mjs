@@ -1096,6 +1096,40 @@ function parkedSection() {
       if (cards.length === 0) note(gate, 'plans-liveness：0 张活跃推敲卡（合法空态——首卡立时入检）');
     }
   }
+  // 索引交叉对账（2026-10-03 借鉴 loop_advisor backlog-liveness 的索引成员检查；其三度复发
+  // 的教训前置采纳）：每个池里的文件必须被其 README 索引点名——孤儿卡即红（入池必须建行、
+  // 移出必须撤行）；反方向（索引行点名不存在的文件）= md-links 门禁职责，此处不重复。
+  // 覆盖：plans/bugs/reference 三个活跃面 + _done 五个归档池。空池合法（0 文件 = 无断言）。
+  const backlogPools = [
+    { dir: '_backlog/plans', readme: '_backlog/plans/README.md' },
+    { dir: '_backlog/bugs', readme: '_backlog/bugs/README.md' },
+    { dir: '_backlog/reference', readme: '_backlog/reference/README.md' },
+    { dir: '_backlog/_done/_closed_plans', readme: '_backlog/_done/_closed_plans/README.md' },
+    { dir: '_backlog/_done/_suspended_plans', readme: '_backlog/_done/_suspended_plans/README.md' },
+    { dir: '_backlog/_done/_fixed_bugs', readme: '_backlog/_done/_fixed_bugs/README.md' },
+    { dir: '_backlog/_done/_suspended_bugs', readme: '_backlog/_done/_suspended_bugs/README.md' },
+    { dir: '_backlog/_done/_reference', readme: '_backlog/_done/_reference/README.md' },
+  ];
+  for (const { dir: poolDir, readme: poolReadme } of backlogPools) {
+    const rmPath = join(ROOT, poolReadme);
+    if (!existsSync(rmPath)) {
+      fail(gate, `${poolReadme} 缺席——索引必须在场（索引交叉对账层契约：每池 README 载其成员行）`);
+      continue;
+    }
+    const idx = readFileSync(rmPath, 'utf8');
+    const lsPool = spawnSync('git', ['ls-files', `${poolDir}/`], { cwd: ROOT, encoding: 'utf8' });
+    if (lsPool.status !== 0) {
+      fail(gate, `git ls-files 不可用（${String(lsPool.stderr).slice(0, 120)}）——索引交叉对账依赖仓库态，fail-loud`);
+      continue;
+    }
+    const poolFiles = lsPool.stdout.split('\n').filter(Boolean)
+      .filter((f) => f.endsWith('.md') && !f.endsWith('README.md'));
+    for (const rel of poolFiles) {
+      const base = rel.split('/').pop();
+      if (!idx.includes(base))
+        fail(gate, `${rel}: 未被 ${poolReadme} 索引点名——孤儿卡（索引交叉对账：文件入池必须同时在索引建行，迁出必须撤行）`);
+    }
+  }
 }
 
 // ── 门禁 33：dist-manual-version（dist 导出合同——精神移植 ai_dsh_architect docs/distribution.md：
