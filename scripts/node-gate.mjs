@@ -47,6 +47,9 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 /** 门 L 契约日（2026-10-03 = RFC wave0-leads-polish 落地日；此前交付的 bundle 不追溯）。 */
 export const LEADS_CONTRACT_DATE = '2026-10-03'
 
+/** 门④ 契约日（2026-10-03 = RFC wave2-synthesis-polish 落地日；kimi 09-26 契约前形态 = 断代必要性活证）。 */
+export const VERSION_CONTRACT_DATE = '2026-10-03'
+
 /** 读一个会话日志文件（.jsonl 直读 / .jsonl.zstd 走 zstd CLI——多帧拼接 CLI 可解全帧）。 */
 function readLog(p) {
   if (p.endsWith('.zstd')) {
@@ -120,7 +123,16 @@ export function leadsGate(bundleDir, leadsDate) {
   if (cur) sections.push(cur)
   const dirs = sections.filter((s) => /^方向[:：]/.test(s.heading))
   if (dirs.length === 0) {
-    return { status: 'RED', detail: 'leads.md 在场但 0 个「## 方向:」节——防空语料（空集显式红；修正 = 按 templates/run/leads.md 形态重写：每方向一节，字段行齐）' }
+    // 防空语料（空集显式）——断代在先：契约前 0 节 = PRE-CONTRACT 如实报告不计红
+    // （selfhosted/siliconflow 自由体 leads.md 实测抓出早退跳断代的缺陷）。
+    const dateEmpty = leadsDate ?? deliveryDate(bundleDir)
+    const preEmpty = dateEmpty !== null && dateEmpty < LEADS_CONTRACT_DATE
+    return {
+      status: preEmpty ? 'PRE-CONTRACT' : 'RED',
+      detail:
+        'leads.md 在场但 0 个「## 方向:」节——防空语料（空集显式；修正 = 按 templates/run/leads.md 形态重写：每方向一节，字段行齐）' +
+        (preEmpty ? '（契约前交付——如实报告不计红，run bundle 是交付记录不改历史）' : ''),
+    }
   }
   const problems = []
   const covered = new Set()
@@ -214,8 +226,78 @@ export function leadsGate(bundleDir, leadsDate) {
 }
 
 /**
+ * 门④（版本记账门，可导入；keyless；RFC 2026-09-28-wave2-synthesis-polish）。
+ * final/ 存在 vN（n≥2）→ ①§Decisions 须含提及 vN 的行（版本落盘须有对应拍板/立项/追认
+ * 记账——selfhosted-ai-gateway/siliconflow-financials 实证形态）；②final/v1.md 须登记该
+ * 版本（跨版本索引——手册 final/ 节契约；三场 v2 run 实证形态：kimi「已被 v2 取代」/
+ * selfhosted 索引表/siliconflow「当前交付版 v2」）；v1.md 缺席 = RED（fail-loud）。
+ * 断代：交付日 < VERSION_CONTRACT_DATE → PRE-CONTRACT 不计红（kimi 09-26 §Decisions 零
+ * v2 记账 = 真实契约前形态，不追溯红）。
+ * @returns { status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT', detail }
+ */
+export function versionGate(bundleDir, versionDate) {
+  const finalDir = join(bundleDir, 'final')
+  if (!existsSync(finalDir)) {
+    return { status: 'N/A', detail: 'final/ 不在场——门④ 无对象（bundle 未到版本记账段）' }
+  }
+  const versions = readdirSync(finalDir)
+    .map((f) => {
+      const m = f.match(/^v(\d+)\.md$/)
+      return m ? Number(m[1]) : 0
+    })
+    .filter((n) => n >= 2)
+    .sort((a, b) => a - b)
+  if (versions.length === 0) {
+    return { status: 'N/A', detail: 'final/ 仅 v1 记账（无扩张 rerun）——门④ 无对象（显式标注，不静默跳过）' }
+  }
+  const qPath = join(bundleDir, 'question.md')
+  const qText = existsSync(qPath) ? readFileSync(qPath, 'utf8') : null
+  const dec = qText ? decisionsLines(qText) : []
+  const idxPath = join(finalDir, 'v1.md')
+  const idxText = existsSync(idxPath) ? readFileSync(idxPath, 'utf8') : null
+  const problems = []
+  if (!qText) {
+    problems.push('question.md 缺席——版本记账无法核对（方向契约文件失踪，fail-loud）')
+  }
+  if (idxText === null) {
+    problems.push('final/v1.md 版本索引缺席而扩张版本在场（修正 = 按 templates/run/final 补版本索引，手册 final/ 节契约）')
+  }
+  for (const n of versions) {
+    const tag = `v${n}`
+    if (qText && !dec.some((l) => l.includes(tag))) {
+      problems.push(`final/${tag}.md 在场但 §Decisions 无提及 ${tag} 的行（版本落盘先于记账——selfhosted 流程偏差同形态；修正 = §Decisions 追加 ${tag} 拍板/立项/追认行）`)
+    }
+    if (idxText !== null) {
+      // 登记判定跳过 `>` 引用行——模板脚注（rerun 语义规则文本）本身含 "vN"，朴素 includes
+      // 永远误绿（红绿纪律实测抓出）；真实登记形态 = 内容行（列表/表格/粗体，三场 v2 run 实证）。
+      const idxHit = idxText
+        .split('\n')
+        .filter((l) => !/^\s*>/.test(l))
+        .some((l) => l.includes(tag))
+      if (!idxHit) {
+        problems.push(`final/${tag}.md 在场但 final/v1.md 索引未登记 ${tag}（跨版本索引契约——手册 final/ 节；修正 = 在 v1.md 登记该版本）`)
+      }
+    }
+  }
+  const date = versionDate ?? deliveryDate(bundleDir)
+  const preContract = date !== null && date < VERSION_CONTRACT_DATE
+  if (problems.length === 0) {
+    return {
+      status: 'PASS',
+      detail: `扩张版本 ${versions.map((n) => `v${n}`).join('、')}记账齐（§Decisions 行 + v1.md 索引登记）`,
+    }
+  }
+  return {
+    status: preContract ? 'PRE-CONTRACT' : 'RED',
+    detail:
+      problems.join('；') +
+      (preContract ? '（契约前交付——如实报告不计红，run bundle 是交付记录不改历史）' : ''),
+  }
+}
+
+/**
  * 门一个 bundle（核心逻辑，可导入；keyless）。
- * @returns { gates: { hitl2Row, present, leads }, red, report }
+ * @returns { gates: { hitl2Row, present, leads, version }, red, report }
  *   每门：{ status: 'PASS'|'PASS-RELAY'|'RED'|'N/A'|'PRE-CONTRACT', detail }
  */
 export function gateBundle(bundleDir, sessionsRoot, opts = {}) {
@@ -257,17 +339,18 @@ export function gateBundle(bundleDir, sessionsRoot, opts = {}) {
     else present = { status: 'RED', detail: 'final.md + readiness PASS 在场，但日志无 present 调用、拍板行也无操作侧补齐标注——静默缺席（G8 形态）' }
   }
 
-  const gates = { hitl2Row, present, leads: leadsGate(bundleDir, opts.leadsDate) }
-  const red = [hitl2Row, present, gates.leads].some((g) => g.status === 'RED')
+  const gates = { hitl2Row, present, leads: leadsGate(bundleDir, opts.leadsDate), version: versionGate(bundleDir, opts.versionDate) }
+  const red = [hitl2Row, present, gates.leads, gates.version].some((g) => g.status === 'RED')
   const report = `# Node Gate — ${slug}（${new Date().toISOString()}）
 
-> scripts/node-gate.mjs（keyless；契约正本 = research-workspace/NODES.md 第 3/7/8 行）。
+> scripts/node-gate.mjs（keyless；契约正本 = research-workspace/NODES.md 第 3/7/8 行 + 回边版本语义节）。
 
 | 门 | 状态 | 说明 |
 |---|---|---|
 | ③ §Decisions 拍板行 | ${hitl2Row.status} | ${hitl2Row.detail} |
 | ② present 声明 | ${present.status} | ${present.detail} |
 | L leads 交接 | ${gates.leads.status} | ${gates.leads.detail} |
+| ④ 版本记账 | ${gates.version.status} | ${gates.version.detail} |
 `
   return { gates, red, report }
 }
@@ -310,10 +393,11 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
     process.exit(2)
   }
   const { gates, red, report } = gateBundle(bundleDir, sessionsRoot)
-  console.log(`node-gate: ${basename(bundleDir)} ｜ 门③ §Decisions 拍板行 = ${gates.hitl2Row.status} ｜ 门② present 声明 = ${gates.present.status} ｜ 门L leads 交接 = ${gates.leads.status}`)
+  console.log(`node-gate: ${basename(bundleDir)} ｜ 门③ §Decisions 拍板行 = ${gates.hitl2Row.status} ｜ 门② present 声明 = ${gates.present.status} ｜ 门L leads 交接 = ${gates.leads.status} ｜ 门④ 版本记账 = ${gates.version.status}`)
   console.log(`  ③ ${gates.hitl2Row.detail}`)
   console.log(`  ② ${gates.present.detail}`)
   console.log(`  L ${gates.leads.detail}`)
+  console.log(`  ④ ${gates.version.detail}`)
   // 报告写入防护：tests/ 夹具区是 tracked 区——写报告=污染 git（2026-09-29 实测 6 个未跟踪文件，
   // 红证记录见 notes/implemented/2026-09-29-quality-evidence-loop.md）。夹具判定走上面的 stdout。
   if (resolve(bundleDir).startsWith(join(ROOT, 'tests') + '/')) {

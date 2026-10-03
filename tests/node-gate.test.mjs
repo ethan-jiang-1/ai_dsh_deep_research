@@ -130,3 +130,49 @@ test('门L 隔离性：leads RED 不连坐交付两门（各自 N/A 如实呈现
   assert.equal(r.gates.hitl2Row.status, 'N/A', 'final/ 不在场——门③无对象')
   assert.equal(r.gates.present.status, 'N/A', 'final.md 不在场——门②无对象')
 })
+
+// ── 门④（版本记账门，v2；RFC 2026-09-28-wave2-synthesis-polish）──────────────
+const V = (name, date) => gateBundle(bundle(name), undefined, { versionDate: date }).gates.version
+
+test('门④ 健康：v2 在场 + §Decisions v2 行 + v1.md 索引登记 → PASS', () => {
+  const g = V('fixture-version-healthy', '2026-10-04')
+  assert.equal(g.status, 'PASS', JSON.stringify(g.detail))
+})
+
+test('门④ 反证：final/v2.md 在场而 §Decisions 无 v2 行（kimi 契约前形态）→ RED', () => {
+  const g = V('fixture-version-missing-decision', '2026-10-04')
+  assert.equal(g.status, 'RED')
+  assert.match(g.detail, /§Decisions/)
+})
+
+test('门④ 反证：final/v2.md 在场而 v1.md 索引未登记 → RED', () => {
+  const g = V('fixture-version-missing-index', '2026-10-04')
+  assert.equal(g.status, 'RED')
+  assert.match(g.detail, /登记|索引/)
+})
+
+test('门④ 无对象：final/ 仅 v1 记账（无扩张 rerun）→ N/A 显式', () => {
+  const g = V('fixture-version-v1only', '2026-10-04')
+  assert.equal(g.status, 'N/A')
+  assert.match(g.detail, /v1|无扩张/)
+})
+
+test('门④ 断代：契约前交付日 → PRE-CONTRACT 不计红（kimi 09-26 形态）', () => {
+  const g = V('fixture-version-missing-decision', '2026-10-02')
+  assert.equal(g.status, 'PRE-CONTRACT')
+  const r = gateBundle(bundle('fixture-version-missing-decision'), undefined, { versionDate: '2026-10-02' })
+  assert.equal(r.red, false, '契约前不计红（run bundle 是交付记录，不改历史）')
+})
+
+test('门④ 隔离性：门④ RED 不连坐门③（HITL2 行在场 → 门③ PASS）', () => {
+  const r = gateBundle(bundle('fixture-version-missing-decision'), undefined, { versionDate: '2026-10-04' })
+  assert.equal(r.gates.version.status, 'RED')
+  assert.equal(r.gates.hitl2Row.status, 'PASS', '门③不因门④红而连坐')
+})
+
+test('门L 断代：0 节防空语料路径也走断代（契约前自由体 leads.md → PRE-CONTRACT 不计红）', () => {
+  const g = L('fixture-leads-empty', '2026-10-02')
+  assert.equal(g.status, 'PRE-CONTRACT', '0 节早退分支不得跳过断代（selfhosted/siliconflow 实测抓出）')
+  const r = gateBundle(bundle('fixture-leads-empty'), undefined, { leadsDate: '2026-10-02' })
+  assert.equal(r.red, false)
+})

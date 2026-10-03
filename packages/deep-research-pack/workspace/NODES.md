@@ -35,7 +35,9 @@ schema-scan 按此感知（条件件缺席 → 豁免注记不静默，journal �
 
 补研究 = 重入挖掘（最深重入点），输入追加"范围锁定"（§Decisions 行），输出 final/ v(n+1)
 ——**扩张 +1**；修订表述 = 原位改 final.md 当前版，**不回节点、版本号不变**；结构性重构 =
-另起新 bundle。HITL1 永不重开。
+另起新 bundle。HITL1 永不重开。机械把守 = node-gate 门④（版本记账门，2026-10-03 起）：
+final/vN（n≥2）在场 → §Decisions 须含 vN 行 + final/v1.md 索引须登记该版本（断代同门 L，
+契约前 PRE-CONTRACT 不计红）。
 
 ## 两点交互边界
 

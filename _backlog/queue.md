@@ -13,11 +13,12 @@
 
 ## 队列
 
-▶ **wave2 综合打磨——版本记账门④**（feature，可自主；scripts + NODES 契约面，零模型可见面改动）——
-[RFC](../notes/proposed/2026-09-28-wave2-synthesis-polish.md)：3 场 v2 run 形态一致 +
-kimi 场 §Decisions 零 v2 记账（09-26 契约前真实违约形态在案）+ selfhosted 流程偏差记账 =
-G8 在版本停靠点再现；方案 = 门④（§Decisions vN 行 + v1.md 索引登记 + 断代）。
-pipeline-polish 面④（主序第四棒）。
+（队列空——待用户取题）
+
+> 队列空 = 全部条目已毕业（历史归 notes/implemented/ + git）；待用户取题或新立项。
+> 剩余面预排 = [pipeline-polish 卡](plans/2026-09-28-pipeline-polish.md) 面⑦（拓扑演进
+> 程序——收尾文档活，趁同步面六处新鲜）→ 面①（策略对标，并行研究型）；面⑥ 随 run 滚动
+> 不单独立卡。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 
