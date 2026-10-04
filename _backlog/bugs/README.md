@@ -12,7 +12,7 @@
 
 | Bug | 标题 | 严重级 | 发现 |
 |---|---|---|---|
-| （空——首卡立时建行） | | | |
+| [BUG-004-hitl-answer-submit-not-landing](BUG-004-hitl-answer-submit-not-landing.md) | hitl-answer 点击提交不落地——"卡头消"与盘侧 answer 事件脱钩 | P1 | 2026-10-04 |
 
 ## 卡片模板
 
