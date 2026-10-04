@@ -159,12 +159,16 @@ for (const { d, m } of readdirSync(join(sessionsRoot, sessionGroup))
   else if (unboundCandidates.length < 5) unboundCandidates.push({ title })
   if (candidates.length >= 5 && unboundCandidates.length >= 1) break
 }
-// 绑定 = 近窗（新→旧前 5 个 slug 会话）中**事件最多**的一个：观察面断言的意图对象是真实
-// run 的渐进面，而最新会话可能是收尾判终态/探针等短会话（BUG-001 同族：期望随绑定态漂移
-// 的第三例——选最富样本，断言的"活动流 ≥3 行"等富度阈值才有稳定语义）。
-boundSession = candidates.length > 0
-  ? candidates.reduce((a, b) => (b.eventCount > a.eventCount ? b : a))
-  : null
+// 绑定 = 近窗内（新→旧前 5 个 slug 会话）**富度地板之上取最新**：观察面断言的意图对象是
+// 真实 run 的渐进面，而一次性短会话（录制/红证探针/收尾判终态）事件数只有真实 run 的零头
+// （BUG-001 同族：期望随绑定态漂移——第三例即短会话被绑定）。地板按事件数划线，取最新
+// 保证 GUI 侧栏可见性（旧富会话可能被侧栏窗口挤出——实红教训）。
+const RICH_FLOOR = 60
+boundSession = (() => {
+  const rich = candidates.filter((c) => c.eventCount >= RICH_FLOOR)
+  const pool = rich.length > 0 ? rich : candidates
+  return pool.length > 0 ? pool[0] : null
+})()
 // 绑定 bundle 的磁盘真值（evidence 计数 / 交付态 / 问题行首行——与页签折算同口径；
 // slug 无 drt_ 前缀、目录名有——拼回；位置=状态两位置）
 const bundleBaseOf = (slug) => {
@@ -195,13 +199,10 @@ const expectedFace = boundSession !== null && bundleBaseOf(boundSession.slug) !=
   return { base, evidenceCount, delivered: names.has('final.md'), hasQuestion: names.has('question.md'), firstLine, steps }
 })() : null
 
-// 锚点三态盘侧真值（RFC cockpit-flow-face，混合折算口径）：passed = 文件事实（question.md /
-// final.md 在场 = 对应拍板落盘，盘侧独立取文件）；pending 判型走 hitl-fold.deriveAnchors 合流
-// （BUG-003——旧手抄镜像停留在 BUG-002 前启发式，mid-flow 挂起误判回边）。
-// （pending 态的真值断言归 client-hitl-smoke：它用真模型造挂起并端到端观察。）
-const expectedAnchor = boundSession !== null && expectedFace !== null
-  ? { passed: (expectedFace.hasQuestion ? 1 : 0) + (expectedFace.delivered ? 1 : 0) }
-  : null
+// 锚点断言的取态源标注（BUG-003 卡"牵出的失败类"收口）：步骤/done = deriveSteps（lib 同源）·
+// 锚点 passed/pending = deriveAnchors（lib 同源）· 证据计数/交付态/问题行 = 盘侧文件事实 ·
+// 渲染观察 = 页面 DOM——四类源各归各，不再有任何手抄镜像。
+const anchorBound = boundSession !== null && expectedFace !== null
 
 const { child, token } = await boot()
 let page
@@ -383,8 +384,12 @@ try {
         // 交付审阅锚态——旧手抄公式（delivered ∨ tailAskPending）停留在 BUG-002 前的
         // 「一律记交付审阅」旧启发式，mid-flow 挂起被误判为回边应亮，废。
         step(loopExpected === seg.includes('↻ 补研究'), '↻ rerun 回边 = 盘侧真值（deriveAnchors 合流，交付审阅锚非 upcoming）', `loopOn=${loopExpected}（anchor-2=${String(diskAnchors[1]?.state)} tailAskPending=${boundSession.tailAskPending}）`)
-        if (expectedAnchor !== null && expectedAnchor.passed > 0) {
-          step(seg.includes(`停靠点已过 ${expectedAnchor.passed} 个`), '停靠点诚实线 = 盘侧真值（文件事实独立重算）', `盘侧 passed=${expectedAnchor.passed}`)
+        if (anchorBound && diskAnchors.some((a) => a.state === 'passed')) {
+          // 停靠点诚实线（BUG-003 同族收口）：passed 计数 = diskAnchors（lib 同一函数）——
+          // pending 覆盖 passed 的 re-open 语义（BUG-002）在此与 UI 天然一致；旧
+          // hasQuestion+delivered 镜像不知道 re-open，是本族最后一块手抄镜像。
+          const expectedPassed = diskAnchors.filter((a) => a.state === 'passed').length
+          step(seg.includes(`停靠点已过 ${expectedPassed} 个`), '停靠点诚实线 = 盘侧真值（deriveAnchors 合流——passed 文件事实 + pending 覆盖语义同源）', `盘侧 passed=${expectedPassed}`)
         }
         const qOk = expectedFace.firstLine !== null && seg.includes(expectedFace.firstLine.slice(0, 12))
         step(qOk, '研究问题行 = question.md 首行', expectedFace.firstLine?.slice(0, 24) ?? '')

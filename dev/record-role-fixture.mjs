@@ -4,6 +4,9 @@
 // 需 DEEPSEEK_API_KEY）→ 以 <role> preset 建会话 → 发角色探针 prompt（含哨兵指令）→ 等回合
 // 落定（哨兵出现 + 日志静默）→ 解压会话日志写 fixture + snapshot.yml（人审后入库）。
 // 录一次，之后 keyless 永久回放（B 层组装请求 diff 钉 persona 全文 + 工具 schema）。
+// ⚠ 副作用自知：每次录制在 dev home 会话组留一段一次性探针会话（事件数只有真实 run 的
+// 零头）——量大后会污染 client-load-smoke 的绑定窗（实红教训），按标题前缀
+// 「用一两句话说明你作为」定期清理即可。
 // 用法：source dev/env.sh && node --import tsx/esm dev/record-role-fixture.mjs --role scout [--port 3105]
 import { spawn, execSync } from 'node:child_process'
 import { writeFileSync, existsSync, mkdirSync, readdirSync, mkdtempSync, statSync } from 'node:fs'
