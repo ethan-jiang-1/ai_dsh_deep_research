@@ -444,7 +444,12 @@ function parkedSection() {
     const PIN = m[1];
     const r = spawnSync('git', ['ls-files'], { cwd: ROOT, encoding: 'utf8' });
     const files = (r.stdout ?? '').split('\n').filter(Boolean)
-      .filter((f) => !f.startsWith('vendor/') && !f.startsWith('notes/') && f !== 'pnpm-lock.yaml')
+      // notes/ 整层豁免只对历史层（Note = 冻结快照，pin 复述是过去时，合法）；README.md 与
+      // AGENTS.md 是活动指令层（目录地图 + 常设指令），捞回受检（2026-10-04 fresh-agent-doc-audit
+      // 扩围：notes/README.md 曾携带 0.1.7 时代的过期 tag 而本门禁不咬——活动层复述面必须与
+      // submodule 一致；扩围反证实录 = evaluation.md 本行）。
+      .filter((f) => !f.startsWith('vendor/') && f !== 'pnpm-lock.yaml'
+        && !(f.startsWith('notes/') && f !== 'notes/README.md' && f !== 'notes/AGENTS.md'))
       // 快照 fixture 豁免（2026-09-27）：录制的会话流里含 harness 自身的版本戳（system-reminder
       // 注入的构建身份）——那是 vendor 规范化契约说的"挥发性身份"（fixture 定形时 tokenize），
       // 不是本仓的钉声明；钉死在 fixtures 录制流上会与每次重录打架。

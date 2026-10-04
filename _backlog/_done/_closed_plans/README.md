@@ -1,6 +1,6 @@
 # _closed_plans/ · 已毕业推敲卡
 
-> 从 [`../../plans/`](../../plans/README.md) `git mv` 迁入；文件名不变（`YYMMDD-slug`，
+> 从 [`../../plans/`](../../plans/README.md) `git mv` 迁入；文件名不变（`YYYY-MM-DD-slug`，
 > 日期 = 立卡日）、内容不重写。毕业去向（RFC+队列 / 搁置池 / 输掉的方案 / 消化落点）
 > 记在卡自己的状态行。索引与规矩 = [`../README.md`](../README.md)。
 
@@ -13,3 +13,4 @@
 | [2026-10-02-mcp-client-adoption](2026-10-02-mcp-client-adoption.md) | 批准（两轮呈批：本地 Playwright MCP——D22 交付约束；实施与 pilot 记录住采纳 Note） | [mcp-playwright 采纳 Note](../../../notes/implemented/2026-10-02-mcp-playwright-adoption.md) | 2026-10-02 |
 | [2026-09-28-pipeline-polish](2026-09-28-pipeline-polish.md) | 触发达成（连续无救场计数 3/3——2026-10-04 三场验收 run；七面收口 = 六面各自毕业 Note + ⑥ 随 run；余项拆出：门L 分形卡 + HITL1 侧待采样 + 效果终验挂起） | 拆分落点 = [2026-10-04-leads-topic-shape 卡](2026-10-04-leads-topic-shape.md) + 六面毕业 Note（见卡状态行与正文） | 2026-10-04 |
 | [2026-10-04-leads-topic-shape](2026-10-04-leads-topic-shape.md) | 判断产出（三例反转：browser 假阳性/coding-agent·video 真违约；判型规则 = 门守字段齐不变量、组织轴自由） | [实施卡 RFC](../../../notes/implemented/2026-10-04-gate-l-invariant.md)（门L 判据升格 + 模板/skill 措辞） | 2026-10-04 |
+| [2026-10-04-fresh-agent-doc-audit](2026-10-04-fresh-agent-doc-audit.md) | 用户裁定全修（三方交叉审计 + 卡质量审查改判两红：61 衔接语坐实、D18 前缀合规；候选 A + 暂缓项单列） | [毕业 Note](../../../notes/implemented/2026-10-04-fresh-agent-doc-audit.md)（七红 + 布局中道 + 门禁扩围 + intents.md 退役） | 2026-10-04 |

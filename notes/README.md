@@ -13,7 +13,16 @@
 | **过去（已交付）** | 当初为什么这么决定、放弃了什么 | [`implemented/`](implemented/README.md) | 目录即状态（文件名 = 首提日期 + 主题） |
 | **过去（否决与事故）** | 哪些路别再走、哪些坑踩过 | [`rejected/`](rejected/README.md) · [`postmortem/`](postmortem/README.md) | 目录即状态（rejected 另有结论状态行） |
 | **过去（冻结）** | 不再指导当前工作的已交付决定去哪了 | [`archived/`](archived/README.md) | 目录即状态 + 文件内 `> 归档：<日期>` 行（冻结快照，正文永不改） |
-| **始终** | 这个项目为什么起、用户下过哪些方向 | [`intents.md`](intents.md) | 追加式，不删 |
+
+## 立项来历
+
+2026-09-24 立项：DSH Deep Research 插件——对 harness 要求高（接触大量搜索、结果信噪比
+差，仍要探索出最终答案在哪）；工程范式参考 `ai_dsh_company`，方法论参考
+`ai_tool_deepresearch`（codex 成熟 harness）；多角色（preset）+ Agent Teams 主通道、
+评估先行、八成把握垂直轮为立项当日定调。定调语义已全数落进
+[00-index 决策台账](../docs/00-index.md)（D 号依据列引原话——**新定调只进 D 号**，不再有
+追加式存档文件）；立项原话全文 = git 历史（`notes/intents.md` 2026-10-04 退役——冻结存档
+与 D 号台账双载体，噪声大于信息，用户裁定剔除）。
 
 **`proposed/` = 在飞队列条目的规划面**：只有 [_backlog/queue.md](../_backlog/queue.md) §队列
 条目的 RFC 住这里（一文件一条目）。
@@ -33,7 +42,6 @@
 
 | 路径 | 放什么 | 进门条件 | 出门 |
 |---|---|---|---|
-| `intents.md` | 初始意图与用户指令存档（为什么起这个项目、原话要点） | 立项/用户给新方向时追加 | 追加式，不删 |
 | `proposed/` | **在飞队列条目的 RFC 全文**（一文件一条目：问题/方案/输掉的方案/验收判据） | [_backlog/queue.md](../_backlog/queue.md) §队列须有对应条目（verify 门禁 `proposal-scheduled` 强制） | 队列条目收尾 → 迁 `implemented/`；不再做的条目 → 否决迁 `rejected/`（搁置池行链 rejected/ 文件） |
 | `implemented/` | 已落地的决定记录（决定/输掉的方案/实际跑过的验证/环境状态） | RFC 毕业，或用户直派任务的交付（**不必从 proposed/ 起步**） | **活的**：事实随实现维护；逆转另写新 Note 互链 |
 | `rejected/` | 被否决的方案——**只保留仍能阻止一次诱人重犯的** | 方案被否决且理由有未来价值 | 不再有防复犯价值 → 直接删（不留空壳） |
@@ -85,4 +93,4 @@
 
 **原生权威**（机制核对一律走它）：`vendor/dsh/.agents/notes/README.md`、
 `vendor/dsh/.agents/notes/implemented/AGENTS.md`、`vendor/dsh/.agents/notes/archived/AGENTS.md`
-（钉 tag `dsh-v0.1.7-rc.2`，只读铁律）。
+（钉 tag 与只读铁律的正本 = [根 AGENTS.md §DSH 源码](../AGENTS.md)——此处不复述，防漂移）。

@@ -16,8 +16,6 @@ harness 只读：presets、skills、本手册、templates/ 对任何一次研究
 drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research Topic，目录名即方向；
                        slug 由主编立项时定，kebab-case；立项 sibling 预检：同名/前缀相关
                        bundle 已在（**含 archive/ 归档**）→ 问用户，不擅自另起）
-archive/<slug>/        已交付 run 归档位（2026-09-27 用户指令）：交付后操作侧移入，工作区根
-                       只留活跃 run——防题名目录被误读为"待开展课题"；仍可被审计/仪表盘按路径投影
   question.md          方向契约：研究问题定稿 + Purpose/RQ 分解/Scope/Constraints + HITL1
                        对齐快照 + Decisions（append-only 方向修订记录，最新在上）——跨
                        rerun 持久，bundle 身份核心（owner: lead）
@@ -33,8 +31,10 @@ archive/<slug>/        已交付 run 归档位（2026-09-27 用户指令）：�
                        相对 run 根解析。**不放 final/ 里**（2026-09-26 实测：第五场 lead 放进了
                        final/，位置漂移、审计还静默跳过——正本钉死在 run 根）
   journal.md           运行纪要（追加式，所有角色可写；跨 rerun 累积血统）
+archive/<slug>/        已交付 run 归档位（2026-09-27 用户指令）：交付后操作侧移入，工作区根
+                       只留活跃 run——防题名目录被误读为"待开展课题"；仍可被审计/仪表盘按路径投影
 templates/run/         新 run bundle 的起点模板（只读，不直接写）
-NODES.md               节点 I/O 契约全表（八节点输入/输出/下游可开工判据 + 回边版本语义）——节点开工前对照；机械把守 = schema-scan.mjs（在场级全行）+ node-gate.mjs（交付判据两门）
+NODES.md               节点 I/O 契约全表（八节点输入/输出/下游可开工判据 + 回边版本语义）——节点开工前对照；机械把守 = schema-scan.mjs（在场级全行）+ node-gate.mjs（判据级：交付两门②③ + 门L leads 交接 + 门④ 版本记账——门编号图例与判据正本 = NODES.md 头部）
 question-patterns.md   判型模式库（HITL1 第一对照面：命中走条目、未命中兜底 + journal 标记行；增长协议正本 = 库尾节）
 ```
 
@@ -117,4 +117,4 @@ bundle（gitignored 运行区）——run 数据的完整性由 critic + 仪表�
 
 - final.md 当前版（run 根）每条关键结论附 `[来源: evidence/xx.md]` 且文件真实存在、内容真实支撑；
 - 没有 CRITICAL 未修复的 review.md 就没有 final 交付（readiness: PASS 前置）；
-- "研究完成"的唯一依据是文件事实（final/ 当前版 + present 声明），不是任何人的口头宣告。
+- "研究完成"的唯一依据是文件事实（run 根 `final.md` 当前版 + present 声明），不是任何人的口头宣告。

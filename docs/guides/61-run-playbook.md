@@ -36,10 +36,11 @@
   失职。
 - **启动前先判"接续还是新开"**：`ls -dt research-workspace/drt_*/`（`archive/` 除外）——**根目录下
   每个未归档 bundle 都要报出来**，分两类：(a) 无 `final/` 或 `review.md` 不是 `readiness: PASS`
-  = **在飞** → 问"接续它还是新开"（接续做法 = §5）；(b) 有 `final/` 且 PASS = **交付线已在盘、未归档**
-  （按 D17"位置=状态"该进 `archive/` 了）→ 问"先归档再新开，还是补研究（rerun）"。两类都带上
-  slug + mtime，**都不自己挑**；注意 `final/` + PASS 只是**盘上可验**的交付线——手册的完成判据还要
-  lead 的 `present` 声明（盘上不可验），所以 (b) 类归档前请用户确认。
+  = **在飞** → 问"接续它还是新开"（接续做法 = §5）；(b) 有 `final/` 且 PASS = **已过审查线、未归档**
+  ——按 [NODES](../../research-workspace/NODES.md)，`final/`（版本记账）自综合阶段就在场，此态
+  **不等于已交付**（停在 HITL2 等拍板也长这样）；交付判别 = §6（run 根 `final.md` + `present`
+  声明）→ 问"先归档再新开，还是补研究（rerun）"。两类都带上 slug + mtime，**都不自己挑**；
+  present 声明不在 bundle 文件里（node-gate 门② 查 lead 会话日志），(b) 类归档前请用户确认。
 
 **web 进程生命周期（实测约束）**：`boot-run.sh` 把 web 跑在**前台**并用 trap 管子进程——
 **脚本退出即 web 停**（这是特性：不留孤儿）。因此：
@@ -91,10 +92,12 @@ frontmatter）。`dev/run-kickoff.mjs` 已默认用 workspaceId 形态把会话�
 
 - 角色不问你、不汇报进度、不等确认（两点交互纪律）；你主动发消息会被直接回答，
   但不改变既定方向与分派；
-- 进度看三处（**被动观察**——不构成第三个交互点，不从观察面向角色发指令）：
-  1. 各角色会话的实时消息流（scout 的搜索调用、analyst 的抓取逐条可见）；
-  2. `ui-agent-team` 任务板（谁领了什么活、起止状态）；
-  3. deliverables 面板（final.md 交付后出现）。
+- 进度看四处（**被动观察**——不构成第三个交互点，不从观察面向角色发指令）：
+  1. 研究驾驶舱「研究状态」页签（**主观察面**——流程轨道 / 活动流 / 活标题 / HITL 挂起横幅，
+     构成正本 = [design/40](../design/40-research-cockpit.md)）；
+  2. 各角色会话的实时消息流（scout 的搜索调用、analyst 的抓取逐条可见）；
+  3. `ui-agent-team` 任务板（谁领了什么活、起止状态）；
+  4. deliverables 面板（final.md 交付后出现）。
 
 **用户不在场时代答（代理模拟）**：HITL 的 answerer 只有连着 web 的浏览器客户端（vendor 实测：
 CLI/host 侧没有 answerer，也没有提交答案的 RPC）——所以代答要用真浏览器：
@@ -109,7 +112,7 @@ node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <横幅 token>   #
 ## 4. HITL2（交付审阅）
 
 - lead 带审阅建议来找你：证据充分性判断 + 交付/补研究推荐 + composition 确认
-  （读者是谁 / 用来做什么 / 前景化重点）——拍板后 final/ 当前版落盘 + present 声明交付；
+  （读者是谁 / 用来做什么 / 前景化重点）——拍板后 run 根 `final.md` 当前版落盘 + present 声明交付；
 - 每条关键结论带 `[来源: evidence/xx.md]`，critic 的 review.md readiness: PASS
   是交付前置（无 CRITICAL 未修复才许交付）；
 - **HITL 超时语义（0.2.0 timed ask-user，600s）**：两点挂起 600s 未答 → 工具返回

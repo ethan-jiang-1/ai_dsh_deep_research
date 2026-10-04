@@ -24,30 +24,36 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 ## 布局
 
 ```
-CLAUDE.md -> AGENTS.md    symlink（编辑真文件 AGENTS.md，verify 门禁校验）
+CLAUDE.md→AGENTS.md、.claude/skills→.agents/skills    两条 symlink（编辑真文件；后者让 Claude 系
+                         harness 发现同一批开发技能——verify 门禁 claude-symlink 校验）
 子树 AGENTS.md            docs/ · scripts/ · notes/ · packages/deep-research-pack/ · tests/ 各一份——只放该
                          子树的指令（根只放每轮常驻指令；上游 22 个子树 AGENTS.md 同构）
 README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令正本 = guides/60 §2，不复制）
 _backlog/                 规划面单入口（D20，roadmap.md 已退役）：queue.md = 纯队列索引（▶ 唯一"当前"
-                          指针 + 搁置池，零判断材料）；plans/ 推敲卡（YYMMDD-slug，只载判断材料）、
+                          指针 + 搁置池，零判断材料）；plans/ 推敲卡（YYYY-MM-DD-slug，只载判断材料）、
                           bugs/ 缺陷卡、_done/ 归档（位置即状态）；推敲卡不是任务；手册 = _backlog/README.md
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 随队列条目——见 pnpm-workspace.yaml 头注）
-packages/deep-research-pack/   唯一自写包（配置为主 + 研究驾驶舱[Research Cockpit，观察面 client 套件，D18，构成正本 = docs/design/40-research-cockpit.md]）：presets/<role>.patch.yml（0.1.7 形态=一条 @deepseek-ai/dsh-agent-preset 行，config.plugins 内声明 persona/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、cordis.patch.yml（bundle 行）、workspace/（工作区种子：手册+模板，生成物）、scripts/{preflight,scaffold}.mjs（部署 bin）；交付与部署形态 = guides/62，合同 = 包 README
+packages/deep-research-pack/   唯一自写包（配置为主 + 研究驾驶舱[Research Cockpit，观察面 client 套件，D18，构成正本 = docs/design/40-research-cockpit.md]）：presets/<role>.patch.yml（0.1.7 形态=一条 @deepseek-ai/dsh-agent-preset 行，config.plugins 内声明 persona/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、cordis.patch.yml（bundle 行）、workspace/（工作区种子：手册+模板，生成物）、scripts/{preflight,scaffold}.mjs（部署 bin）、src/client/ 与 src/lib/（驾驶舱 client 半与折算纯函数，构建产物 lib/）；交付与部署形态 = guides/62，合同 = 包 README
 vendor/dsh/               pinned submodule（只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，tag/commit 见 §DSH 源码表）
-research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、drt_<slug>/（run bundle）、
+research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、NODES.md（节点 I/O 契约
+                         全表）、question-patterns.md（判型模式库）、drt_<slug>/（run bundle）、
                          archive/（已交付 run 归档位）、drafts/、templates/run/
 docs/                    00-index（地图+决策台账+术语映射）→ design/10-40 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ evaluation.md（验收合同）
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）；目录名自带时态，
                          总图 = notes/README.md（将来 proposed/ · 过去 implemented/archived/rejected/
-                         postmortem/）：
-                         intents.md（立项宪章，已冻结——新定调进 D 号依据）→ proposed/（在飞队列条目的 RFC）→ implemented/（不再指导未来工作者
+                         postmortem/；立项来历 = 该页 §立项来历——用户定调只进 00-index D 号依据列）：
+                         proposed/（在飞队列条目的 RFC）→ implemented/（不再指导未来工作者
                          冻结入 archived/）；
                          rejected/（否决与搁置——"决定不做"，带重启条件）；postmortem/（事故复盘）
 .agents/skills/          开发技能（DSH 约定路径：project-agents 发现根）：任务匹配即加载的程序化工作记忆
                          （毕业条目 / 加角色 / 写门禁 / 跑 run / 改轨道）；与产品内 runtime skills（presets/*/skills/）分家
-scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、client-load-smoke.mjs（观察面真浏览器）、client-hitl-smoke.mjs（活标题触发，真模型档）、evidence-audit.mjs（证据面机械审计）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）、team-preflight-smoke.mjs（team 机制预检）、entry-chain-probe.mjs（入口链探针，真模型档）、run-dashboard.mjs（run 只读投影，boot-run 起）、snapshot-replay-smoke.mjs（keyless 回放冒烟）、lib/（roles 角色清单访问器[事实源=盘上 presets/] + env/playwright/vendor-artifacts 三个冒烟支撑模块）
+scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、client-load-smoke.mjs（观察面真浏览器）、client-hitl-smoke.mjs（活标题触发，真模型档）、evidence-audit.mjs（证据面机械审计）、node-gate.mjs / schema-scan.mjs（run bundle 机械门：判据级/在场级）、watch-run.mjs（run 盯场）、cdp-probe.mjs（交互探针）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）、team-preflight-smoke.mjs（team 机制预检）、entry-chain-probe.mjs（入口链探针，真模型档）、run-dashboard.mjs（run 只读投影，boot-run 起）、snapshot-replay-smoke.mjs（keyless 回放冒烟）、export-dist.mjs（出包→_dist/）、lib/（roles 角色清单访问器[事实源=盘上 presets/] + env/playwright/vendor-artifacts/cdp-driver/run-state 冒烟支撑模块）
 tests/                   keyless 回归（node:test，无测试框架；layering 守卫禁真模型/网络/子进程；fixtures/ 测试夹具）
 dev/                     vendor-build.sh（vendor 树构建：tsc host/client + typert 产物 + client bundle）、vendor-typert-emit.mjs（typert 产物生成器）、vendor-host-bundle.config.ts（逐包 host 半补建配置：tsdown -c 给缺 lib/index.js 的包补产物）、vendor-host-typert.config.ts（逐包 tsdown 备选配置，留档）、render-overlay.mjs（从 pack 渲染 research.overlay.yml）、sync-pack-workspace.mjs（把 research-workspace 正本同步进 pack 的 workspace/ 种子）、boot-run.sh（run 通道开跑：幂等装+boot web+仪表盘）、run-kickoff.mjs（run 会话驱动）、env.sh（双 home + dsh 机制基线 + pre-commit 钩子激活）、research.overlay.yml（源码域 overlay，**生成物**）、hooks/（pre-commit：verify+tests 红灯拦 commit）、harness-home/ 与 smoke-workspace/（gitignore 运行区）
+_dist/                   对外交付件：安装手册.md（tracked 生成物，生成器 = scripts/export-dist.mjs）
+                         + 打包 tgz（gitignore）
+（布局 = 骨架图，非全量清单——scripts/dev 全档工具与逐命令说明 = guides/60 §2；
+  _backlog 细构[reference/ 资料区、_done 五池] = _backlog/README.md）
 ```
 
 接下来开发什么 = §入口链 第 3 步的 ▶ 条目；开工/收尾程序 = 第 5 步。

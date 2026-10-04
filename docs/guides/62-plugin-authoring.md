@@ -9,7 +9,8 @@
 
 开发本插件时，coding agent 同时读**两个仓库**：本仓（插件内容）与 `vendor/dsh/`（机制本体）。
 两边沿用同一套概念时，同样的检索模式与判断标准都成立；哪边自造词汇，agent 就要在哪边重建
-一套局部模型（`_agent_ready_development/repo-harness/09-plugin-author-entry.md` §4）。
+一套局部模型（仓外语料 `_agent_ready_development/repo-harness/09-plugin-author-entry.md` §4——
+钉版与路径登记 = [00-index §外部研究材料](../00-index.md)，仓内不可解析）。
 本页把本仓的落点钉在那些概念上。
 
 ## 词汇（与 DSH 对齐，不允许自造同义词）
@@ -18,13 +19,13 @@
 |---|---|---|
 | plugin | 导出 `apply(ctx)` 的 TS 模块；注册即 `apply(ctx)`，配置经 cordis schema 校验 | 本仓自写两个插件（D18 单点例外，构成正本 = [design/40](../design/40-research-cockpit.md)）：`src/index.ts`（host 半空壳 = 观察面宿主位）与 `src/client/index.ts`（client 半：注册右栏「研究状态」页签 / 活标题 / 研究语义工具卡）；新插件从 `vendor/dsh/docs/user/develop/basic/` 起步 |
 | bundle | 你编写与分发的单位（`dsh.bundle`）——回答"这个包贡献什么"，是插入/覆盖 plugin rows 的 patch 层 | `packages/deep-research-pack/cordis.patch.yml` + 包内 `presets/`、`skills/` |
-| profile | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）——回答"哪些 bundle 按什么顺序组成" | `dev/harness-home/profiles/research/`（镜像；源 = overlay） |
+| profile | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）——回答"哪些 bundle 按什么顺序组成" | `dev/harness-home/profiles/research/`（镜像；源 = pack——`boot-run.sh` 从 pack 重建；overlay 只是源码域冒烟通道的生成物） |
 | preset | 一个 agent 形态：persona 行 + skills + 工具行 | `presets/<role>.patch.yml`（preset 行）+ `presets/<role>/skills/`（lead / scout / analyst / critic） |
 | patch / overlay | 层叠覆盖条目（id 定向的 config 覆盖、禁用、插入） | `dev/research.overlay.yml`（源码域通道的镜像源） |
 
 **Nothing is both**：bundle 与 profile 是两个 manifest 的两种东西，别把本包写成 profile。
 
-## 参与阶梯（本仓版本；DSH 原表见 `repo-harness/04`）
+## 参与阶梯（本仓版本；DSH 原表见仓外语料 `repo-harness/04`——登记处同上）
 
 | 层级 | 本仓首选入口 | 典型变化 | 何时升级 |
 |---|---|---|---|
@@ -58,6 +59,9 @@ logged）——pack 行只引入**现成**能力，这项义务落在 vendor 面
 | 跑一次研究 | `research-workspace/templates/run/` | [`.agents/skills/running-a-research-run`](../../.agents/skills/running-a-research-run/SKILL.md) |
 
 ## 证据义务（改哪面跑什么）
+
+下表命令（L1/L2/真模型档）均须先 `source dev/env.sh`——否则脚本自拒 exit 2（正本 = 根
+AGENTS.md §命令速查）：
 
 | 改动面 | 最小可信证据 |
 |---|---|
