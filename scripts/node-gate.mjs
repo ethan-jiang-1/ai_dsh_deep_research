@@ -111,26 +111,31 @@ export function leadsGate(bundleDir, leadsDate) {
     return { status: 'N/A', detail: 'quick_factual 编制豁免——不设侦察编制，门 L 无对象（条件件，与 schema-scan 同语义）' }
   }
   const text = readFileSync(leadsPath, 'utf8')
-  // 解析「## 方向:」节（heading + body 到下一个 ## 或文件尾）
+  // 解析方向单元（不变量口径，2026-10-04 门L 升格；判据来源 = leads-topic-shape 推敲卡毕业
+  // 判断）：任意层级 #{2,4} 的节都是单元——组织轴自由（方向轴/实体轴/前提校验段皆合法，
+  // 门不判轴，按题型分形是 scout 的专业判断）；门守不变量 = 可派发的字段齐单元。
+  // 「lead 尝试」= 含状态行或 owner 行的单元；字段齐检查只施加于 lead 尝试。
   const sections = []
   let cur = null
   for (const line of text.split('\n')) {
-    if (/^##\s+/.test(line)) {
+    if (/^#{2,4}\s+/.test(line)) {
       if (cur) sections.push(cur)
-      cur = { heading: line.replace(/^##\s+/, ''), body: [] }
+      cur = { heading: line.replace(/^#{2,4}\s+/, ''), body: [] }
     } else if (cur) cur.body.push(line)
   }
   if (cur) sections.push(cur)
-  const dirs = sections.filter((s) => /^方向[:：]/.test(s.heading))
+  const isLeadAttempt = (u) =>
+    /^\s*-\s*建议\s*owner[:：]/mi.test(u.body.join('\n')) || /^\s*-\s*状态[:：]/mi.test(u.body.join('\n'))
+  const dirs = sections.filter(isLeadAttempt)
   if (dirs.length === 0) {
-    // 防空语料（空集显式）——断代在先：契约前 0 节 = PRE-CONTRACT 如实报告不计红
+    // 防空语料（空集显式）——断代在先：契约前 0 单元 = PRE-CONTRACT 如实报告不计红
     // （selfhosted/siliconflow 自由体 leads.md 实测抓出早退跳断代的缺陷）。
     const dateEmpty = leadsDate ?? deliveryDate(bundleDir)
     const preEmpty = dateEmpty !== null && dateEmpty < LEADS_CONTRACT_DATE
     return {
       status: preEmpty ? 'PRE-CONTRACT' : 'RED',
       detail:
-        'leads.md 在场但 0 个「## 方向:」节——防空语料（空集显式；修正 = 按 templates/run/leads.md 形态重写：每方向一节，字段行齐）' +
+        'leads.md 在场但 0 个字段齐的方向单元（任意层级/任意组织轴的节，含「- 状态:」或「- 建议 owner:」行即算）——防空语料（空集显式；修正 = 按 templates/run/leads.md：每个可派发方向/实体一节，四字段行齐）' +
         (preEmpty ? '（契约前交付——如实报告不计红，run bundle 是交付记录不改历史）' : ''),
     }
   }
@@ -143,16 +148,19 @@ export function leadsGate(bundleDir, leadsDate) {
     const body = s.body.join('\n')
     const ownerM = body.match(/^\s*-\s*建议\s*owner[:：].*$/mi)
     const statusM = body.match(/^\s*-\s*状态[:：]\s*(.+)$/m)
+    // 状态值语义识别：markdown 强调符（**…**）是合法排版噪音——browser 第六场实物实证
+    // （`- 状态: **建议挖深**（T2 主…）`），字面匹配会把语义正确的状态判非法并连带
+    // 覆盖计数清零。剥强调后再匹配，不要求重写交付记录。
+    const sv = statusM === null ? null : statusM[1].trim().replace(/\*\*/g, '')
     // topic 引用：标题 + owner 行都算（mcp-server 生态场实证两处出现）
     if (ownerM && /^\s*-\s*建议\s*owner/i.test(ownerM[0])) {
-      const digProbe = statusM && /^建议挖深/.test(statusM[1].trim())
+      const digProbe = sv !== null && /^建议挖深/.test(sv)
       if (digProbe) for (const m of (s.heading + ' ' + ownerM[0]).matchAll(/T\d+/g)) covered.add(m[0])
     }
     if (!statusM) {
       problems.push(`「${title}」缺「- 状态:」行（修正 = 按 templates/run/leads.md 补状态行）`)
       continue
     }
-    const sv = statusM[1].trim()
     if (/^建议挖深/.test(sv)) {
       dig++
       const srcM = body.match(/^\s*-\s*支持来源[:：].*$/m)
@@ -217,7 +225,7 @@ export function leadsGate(bundleDir, leadsDate) {
     const cov = existsSync(topicsPath)
       ? `覆盖 ${requiredCount - gaps.length}/${requiredCount}（primary/comparison 全指向）`
       : '覆盖未判'
-    detail = `方向节 ${dirs.length}（挖深 ${dig}/排除 ${excluded}）字段齐；${cov}${coverageNote}`
+    detail = `字段齐方向单元 ${dirs.length}（挖深 ${dig}/排除 ${excluded}）；${cov}${coverageNote}`
   } else {
     status = preContract ? 'PRE-CONTRACT' : 'RED'
     detail = problems.join('；') + coverageNote + (preContract ? '（契约前交付——如实报告不计红，run bundle 是交付记录不改历史）' : '')

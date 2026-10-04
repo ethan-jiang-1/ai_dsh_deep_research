@@ -176,3 +176,32 @@ test('门L 断代：0 节防空语料路径也走断代（契约前自由体 lea
   const r = gateBundle(bundle('fixture-leads-empty'), undefined, { leadsDate: '2026-10-02' })
   assert.equal(r.red, false)
 })
+
+// ── 门L v3（不变量口径；RFC 2026-10-04-gate-l-invariant；leads-topic-shape 毕业判断落地）
+// 三形态契约夹具 = 三场验收 run 实测形态的微缩：h3 方向轴（假阳性回归钉——旧判据把字段齐
+// 的 h3 单元数成 0）/ 实体轴字段齐（轴自由钉）/ 实体轴·底稿零字段（真违约钉——字段缺失
+// 必须被抓，轴自由 ≠ 免检）。判据：门守"字段齐方向单元 ≥1"不变量，组织轴不判。──
+const L3 = (name, date) => gateBundle(bundle(name), undefined, { leadsDate: date }).gates.leads
+
+test('门L v3 假阳性回归：h3 层级的方向节（字段齐）→ PASS——旧判据数不出即假红', () => {
+  const g = L3('fixture-leads-h3-directions', '2026-10-04')
+  assert.equal(g.status, 'PASS', JSON.stringify(g.detail))
+  assert.match(g.detail, /字段齐方向单元/)
+})
+
+test('门L v3 轴自由：实体轴组织（字段齐）→ PASS——门不判组织轴', () => {
+  const g = L3('fixture-leads-entity-axis', '2026-10-04')
+  assert.equal(g.status, 'PASS', JSON.stringify(g.detail))
+})
+
+test('门L v3 真违约钉：实体轴但零字段行 → RED（字段缺失必须被抓——轴自由 ≠ 免检）', () => {
+  const g = L3('fixture-leads-entity-no-fields', '2026-10-04')
+  assert.equal(g.status, 'RED')
+  assert.match(g.detail, /字段齐的方向单元/)
+})
+
+test('门L v3 真违约钉：过程底稿组织（无任何字段行）→ RED——coding-agent 第五场形态', () => {
+  const g = L3('fixture-leads-checklist', '2026-10-04')
+  assert.equal(g.status, 'RED')
+  assert.match(g.detail, /字段齐的方向单元/)
+})
