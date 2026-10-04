@@ -14,7 +14,8 @@
 //   C 渲染金标准：Playwright 读对话流研究语义卡（web_search 卡标题）与「研究状态」页签
 //     人性化活动行（🔍/💬），与 tests/fixtures/snapshot-research-face/ui.expected.md 逐字
 //     比对。窄带：只钉录制流驱动的确定性面；不钉工具结果体/时间戳/bundle 渐进面（依赖
-//     工作区态，非录制流）。`--update-expected` 从真实回放渲染重写金标准。
+//     工作区态，非录制流）。`--update-expected` 从真实回放渲染重写金标准——只许重写金标准，
+//     不许放宽比对或归一化凑绿（fix fixtures, not normalizers）。
 //
 // 用法：source dev/env.sh && node scripts/snapshot-replay-smoke.mjs [--port 3103] [--update-expected]
 // 红证（实录）：改 fixture 内一条 assistant 文本 → A 红；改 fixture persona（system/message）一词

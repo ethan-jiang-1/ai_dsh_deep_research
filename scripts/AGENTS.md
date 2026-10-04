@@ -15,9 +15,9 @@
 
 ## 范围纪律（实测教训，不是风格偏好）
 
-- **覆盖面用 `git ls-files` 驱动**（tracked-only）：运行区（`dev/harness-home/`、
-  `research-workspace/` 的 `drt_*` 与 `archive/`）不进 L0——否则 pre-commit 会被 run 产物拦红。
-- 稀疏态（文件可能缺席）用 `existsSync` 防御；目录扫描跳过 `.git` 与 `node_modules`。
+- **覆盖面用 `git ls-files` 驱动**（tracked-only）：运行区（`dev/harness-home/`、`research-workspace/`
+  的 `drt_*` 与 `archive/`）不进 L0——否则 pre-commit 会被 run 产物拦红；稀疏态（文件可能缺席）用
+  `existsSync` 防御，目录扫描跳过 `.git` 与 `node_modules`。
 - **子进程环境要剥 `GIT_*`**：`git -C <dir>` 在 pre-commit 钩子里会被注入的 `GIT_DIR`
   覆盖仓库发现（实测两次假红）——需要时传去掉 `GIT_DIR/GIT_INDEX_FILE/GIT_WORK_TREE/
   GIT_NAMESPACE` 的 env。
@@ -30,7 +30,13 @@
   门禁等于不存在。范围收窄要显式（例如 tracked-only），并在门禁注释里写清为什么。
 - **测边界形态**：以语法/发现规则驱动检测的门禁，对**每个被纳入与被排除的形态**都要有断言
   （例如"路径含空格/是 symlink/在忽略目录下"各一条），否则检测边界只是猜的。
-- **失败信息**：失败对象 + 违反的规则 + 修正入口三件齐；不确定就 fail-loud。
+
+## 冒烟脚本可靠性纪律（test-strategy 语料采纳，2026-10-04）
+
+- **verdict 契约**：exit 0=全绿 / 1=断言红 / 2=未跑（前置缺席）；未跑 ≠ 通过，交付报告分列。
+- **retry 白名单**：重试只许在真模型/浏览器等外部边界且带理由注释；确定性检查加重试 = 掩盖竞态。
+- **等待显式状态**：等就绪信号/状态迁移/谓词（范本 = watch-run 事件形状判定）；固定 sleep 不是证据。
+- **释放到静默**：kill 后 await 退出码——孤儿进程 = 脚本缺陷（"单独运行才通过"条款的孪生）。
 
 ## 依赖与分层
 

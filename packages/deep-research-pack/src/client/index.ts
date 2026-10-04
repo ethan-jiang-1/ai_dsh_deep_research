@@ -106,9 +106,11 @@ export function apply(ctx: ClientContext): void {
     // 同一 WebSocket 数据面，v1 接受；合流进共享 store 是后续优化）。
     // 研究语义工具卡（S2）：spawn_teammate / web_search → 研究语义卡。一键一 inject +
     // priority -1 压过 vendor 通用明细行（rc.2 同键同优先级 throw——company UX 实验实证）。
+    // 每个 key 独立 effect 包裹（registrations are effects：dispose 即撤销该卡贡献——
+    // 零裸注册，门禁 client-effect-wrap 把守；test-strategy 语料台阶③收口）。
     for (const key of RESEARCH_TOOL_KEYS) {
-      scoped.slots.inject(RESEARCH_TOOLVIEW_SLOT, () =>
-        scoped.slots.register({ name: RESEARCH_TOOLVIEW_SLOT, key, priority: -1 }, ResearchToolCard))
+      scoped.effect(() => scoped.slots.inject(RESEARCH_TOOLVIEW_SLOT, () =>
+        scoped.slots.register({ name: RESEARCH_TOOLVIEW_SLOT, key, priority: -1 }, ResearchToolCard)), `deep-research-pack: toolview ${key}`)
     }
 
     scoped.effect(() => scoped.slots.inject(RESEARCH_TITLE_SLOT, () => [

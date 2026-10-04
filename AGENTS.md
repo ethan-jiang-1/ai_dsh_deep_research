@@ -86,10 +86,8 @@ pnpm test            # L0 keyless 回归（唯一登记的测试命令）
 `DEEPSEEK_API_KEY` 与真模型调用（当前 = l4-lite-smoke、team-preflight-smoke、
 entry-chain-probe 与 client-hitl-smoke；队列里的 L4 全量同档）。
 
-L4-lite 真模型冒烟（`scripts/l4-lite-smoke.mjs`）需要 `DEEPSEEK_API_KEY`：开发 home
-（`dev/harness-home/.credentials.yaml`）配一次即可；永不提交密钥。web 搜索无需独立 key——base 的
-`web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，与 chat 同一把钥匙（实证：vendor base
-bundle cordis.patch.yml）。
+L4-lite 真模型冒烟需要 `DEEPSEEK_API_KEY`：开发 home（`dev/harness-home/.credentials.yaml`）配一次
+即可，永不提交密钥；web 搜索无需独立 key——base 的 `web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，与 chat 同一把钥匙（实证：vendor base bundle cordis.patch.yml）。
 
 ## DSH 源码：机制权威在哪
 
@@ -108,6 +106,8 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 > 不适用+理由；随 vendor 换 tag 重校）——纪律的权威正本。速查关键词：fail-loud · model-visible ⟺ logged ·
 > 完成定义 = 真检查 · no-key 证管道 / with-key 证 agent · verify the world · 真入口路径 ·
 > 新门禁带反证 · docs = 当前合同 · 同 diff 带 Note · 窄证据切片 · 卫生铁律 · 工具态重定向。
+>
+> **证据匹配面**：改动的面 → 证据类型，执行正本 = [guides/60 §2 任务型路由表](docs/guides/60-dev-loop.md)；新契约测试与门禁同 diff 带反证（先看红再交付绿）。
 >
 > **研发宪章**（2026-09-27 用户定调）= [README §研发宪章](README.md)：循 DSH 而不发明 · 自主优先
 > 并借鉴成熟 DSH 插件（采纳度为信号）· **审阅分层**——机械门禁/审计/判据探针/对抗自审自主做，

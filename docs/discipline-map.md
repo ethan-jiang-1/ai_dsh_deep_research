@@ -23,7 +23,7 @@
 | Source plane vs artifact plane, never mixed（静态测试走 src，吃构建产物的测试声明依赖） | L1 双通道：preset-smoke 源码域（overlay 指 src）+ 安装域（plugin add 正式路径）；根 tsconfig 门面 = 源码面解析 | 带证据适配（两平面在本仓 = 源码域/安装域两通道，D14） |
 | Design each tool's UI presentation up front（呈现先于实现设计） | preset persona/skill 文本 = 工具的行为呈现面，R1 起逐角色先定稿再挂载；观察面 = 先 RFC 后实现（run-dashboard/debug-dashboard-plus 皆然） | 带证据适配 |
 | Plan unit/e2e/snapshot coverage for seams | evaluation.md 五面合同（L0–L4）先于框架定案（D6） | 带证据适配 |
-| Registrations are effects（一切贡献走 ctx.effect，register 返回 disposer） | client 面 `src/client/index.ts`：三处 `scoped.effect(...)` 包裹（页签类型 `sidebarRightTabs.register` / 页签槽体 / 活标题槽体，后两处为 `scoped.slots.inject(...)` 内嵌 `slots.register(...)`）；工具卡循环（`for (const key of RESEARCH_TOOL_KEYS)`）是 `ctx.inject([...], (scoped) => …)` 回调内的一处裸 `scoped.slots.inject(...)`，未再包一层 effect | 照搬（D18 后本仓有自写 cordis 插件代码；证据 = 该文件三处 effect 包裹 + `client-load-smoke` 真浏览器挂载断言） |
+| Registrations are effects（一切贡献走 ctx.effect，register 返回 disposer） | client 面 `src/client/index.ts`：四处注册全量 `scoped.effect(...)` 包裹（页签类型 `sidebarRightTabs.register` / 页签槽体 / 活标题槽体 / 工具卡循环逐 key `slots.inject`） | 照搬（D18 后本仓有自写 cordis 插件代码；证据 = 门禁 `client-effect-wrap` 全量断言 + `client-load-smoke` 真浏览器挂载断言） |
 | Runtime invariants assert owned relationships（invariant 包规则） | 同上 | 不适用 |
 | Typed events / declaration merging / assertNever / waterfall next() / branded ids / Trust TypeScript / explicit request-spec split | TS 面（`src/client/` 观察面 + `src/lib/` 折算）只**消费** vendor 的声明合并类型（`import type {} from '@deepseek-ai/dsh-*/client'`），不 author 会话事件、不注册服务或 waterfall 监听器、无跨边界自持 id、无 request/spec 默认化面 | 不适用（无对应机制面；本仓开始 author 事件或服务时重估） |
 | Keep compiler faces explicit（host/client 各出叶配置，根仅 solution） | `packages/deep-research-pack/tsconfig.host.json` · `tsconfig.client.json` 两叶（各自拉不同的 Context 类型增强）+ solution-only 根 `tsconfig.json`（`files: []` + references）；构建 = `tsc -b .` | 照搬 |
@@ -42,7 +42,7 @@
 | Prefer the real implementation over a mock | L1 真挂载档（真会话断言工具/skill 面——dump/roster 可见不算） | 照搬 |
 | The with-key policy: inference is cheap（语义面用真模型证） | 真模型档脚本（清单正本 = AGENTS §密钥）；入口链探针 = 语义漂移的真模型检测 | 照搬 |
 | Test resolution: source plane only | keyless 回归断言 tracked 源文件（md-utf8-newline 改 git ls-files 驱动即为此则——运行区不扫，live run 实证） | 带证据适配 |
-| Snapshot tests（关键用户可见变更更新录制快照） | 无录制快照树；等价物 = tests/fixtures（keyless 形状回归）+ 真模型档会话日志断言（zstd 逐事件）+ `client-load-smoke` 真浏览器断言（client 面可见性）；录制通道在搁置池（复活条件见 [_backlog/queue.md](../_backlog/queue.md) 行） | 带证据适配 |
+| Snapshot tests（关键用户可见变更更新录制快照） | 等价物 = snapshot-replay-smoke 三层判据（A 回放收尾逐字命中 / B 组装请求 diff = persona + 工具 schema / C 渲染金标准）+ 真模型档会话日志断言（zstd 逐事件）+ `client-load-smoke` 真浏览器断言；真录制通道不做——B 层 diff 已是模型可见变更的独立 keyless 信号（输掉的方案 = test-strategy 采纳 Note） | 带证据适配 |
 | Test subprocess launch modes（构建产物/源码启动模式分立） | 本仓不设双启动模式：冒烟子进程一律走 tsx 源码通道（`node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts`）；构建产物另有在场断言（`lib/client.js` 经 exports["./client"] 由 `client-load-smoke` 加载，缺件由 `vendor-artifacts` 自检拦） | 不适用 |
 
 ## 源 3：vendor docs/AGENTS.md（文档标准）
@@ -178,6 +178,26 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | `.editorconfig` · `.gitattributes` · lint（oxlint）· 重复代码检测（jscpd）· vitest 系列配置 · `lefthook.yml` | 前两件已具备（`repo-conventions` 门禁强制与 vendor 对齐）；后四件未引入（TS 面 = 一个包的 `src/`，测试栈 = node:test）；Markdown 纪律由门禁（md-utf8-newline / md-links / md-anchors / doc-budgets）承担，git 钩子 = `dev/hooks/pre-commit` |
 | `LICENSE` | **未决（非遗漏）**：本仓 `private: true` 未分发；已进 [_backlog/queue.md 搁置池](../_backlog/queue.md)，复活条件 = 对外分发前定许可证 |
 
+<a id="source-10"></a>
+## 源 10：_digested/test-strategy 语料（测试策略消化 11 篇，基线 = 本仓 pin）
+
+> 语料身份与吸收落点 = [00-index §外部研究材料](00-index.md)；对照总账正本 = test-strategy 采纳
+> Note（[notes/implemented/2026-10-04-test-strategy-adoption.md](../notes/implemented/2026-10-04-test-strategy-adoption.md)）。
+> 本表只收语料带来的**增量**结论；与源 1–9 重复的教义不重复登记。
+
+| 语料教义 | 本仓落点 | 状态 |
+|---|---|---|
+| 证据匹配面（改动的面 ↔ 证据类型） | [guides/60 §2 任务型路由表](guides/60-dev-loop.md) + [guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md) + 根 AGENTS §纪律常驻指针 | 已具备（增量 = 常驻化） |
+| 可靠性三纪律：retry 白名单 / 等待显式状态 / 释放到静默 | [scripts/AGENTS §冒烟脚本可靠性纪律](../scripts/AGENTS.md) | 照搬（载体 = 冒烟脚本层） |
+| 防假绿 verdict 契约（0 绿 / 1 红 / 2 未跑；未跑 ≠ 通过） | 真模型档脚本既有行为 → scripts/AGENTS.md 契约化 + `tests/smoke-contract.test.mjs` 机械钉住 | 带证据适配（行为先在，语料后成文） |
+| 插件五台阶证据阶梯（导出守卫 → 行为 → 注册生命周期 → 真挂载 → 组装面） | [guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md) + `tests/export-shape.test.mjs`（台阶①）+ verify 门禁 `client-effect-wrap`（台阶③） | 带证据适配（自写代码面 = 驾驶舱） |
+| registrations are effects 的 HMR 投影（dispose 即撤销贡献） | 驾驶舱 slot 注册全量 `scoped.effect` 包裹 + 门禁 `client-effect-wrap` 机械把守；HMR 行为断言不做（迭代循环走重启不走热重载，重启条件 = 采纳 Note 输掉的方案 2） | 照搬（静态收口形态） |
+| fix fixtures, not normalizers（证据不许磨到跟 bug 吻合） | [tests/AGENTS「改夹具先想红」](../tests/AGENTS.md) + guides/60 金标准红线（只许 `--update-expected` 重写，不许放宽比对） | 照搬 |
+| prove-it-red 前向化到契约测试（不只门禁） | tests/AGENTS 反证规则 + 承重四文件抽检（实录 = 采纳 Note） | 照搬 |
+| fixture 守卫先于比较（形状 corpus 层） | 不另建——夹具语义已被消费测试逐个钉死（node-gate / schema-scan 用例即永久反证记录），形状层 = 重复保护 | 不适用（防重复机制） |
+| 快照世代模型 / record-refresh 分叉 / 平台变体 | 单 fixture 单代；`--update-expected` = refresh 语义已具；record = 真录制维持搁置 | 不适用（无格式演进压力） |
+| 七层宪法层 / coverage 门 / run-gates DAG / 性能基准层 / flake 八分类 | 维持五面合同与偏离登记（L0–L4 已是证据形态分层） | 不适用（理由 = 采纳 Note 输掉的方案） |
+
 ## 重审触发路径
 
 升 pin 时按此清单逐条复核（语料 `_coverage` 模式吸纳）：
@@ -198,6 +218,9 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
   场景做增量货架收口**，结论进该轮升 pin Note（2026-10-02 教训：mcp-client 漏出 2026-09-30
   全量盘点——它在语料中不归研究显眼类；语料 `_digested/plugin-inventory/` 随新基线更新后
   一并对账，防同类盲区）。
+- `_digested/` 语料专题随新基线更新后一并对账（test-strategy 的钉法见
+  [00-index §外部研究材料](00-index.md)）：语料自报基线 ≠ 新 pin 即该专题待更新，增量结论
+  按 [源 10](#source-10) 重校。
 
 复核结论（"无命中/改写哪几行"）连同新 tag 与日期，写进该轮「升 pin 重校」条目的毕业 Note
 ——**逐条结论本身即是重审记录**，不另建维护页（避免第二份会漂移的清单）。

@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'pack-workspace-fresh', 'queue-pointer-live', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'plans-liveness', 'dist-manual-version'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'pack-workspace-fresh', 'queue-pointer-live', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'plans-liveness', 'dist-manual-version'];
 
 const failures = [];
 const notes = [];
@@ -1155,6 +1155,28 @@ function parkedSection() {
     if (!t || t[1] !== `dsh-deep-research-pack-${packVersion}.tgz`) {
       fail(gate, `_dist/安装手册.md: 表头未指名当前 tarball dsh-deep-research-pack-${packVersion}.tgz——手册与旁边的产物漂移，重导出`);
     }
+  }
+}
+
+// ── 门禁 34：client-effect-wrap（驾驶舱 slot/页签/活标题注册全量包 scoped.effect——
+//    registrations are effects 的 dispose 即撤销贡献（test-strategy 语料台阶③；裸注册在
+//    重应用/卸载语义下无撤销边界）。防空语料：src/client/index.ts 零注册调用即红——驾驶舱
+//    必须注册。层边界：只查 index.ts（唯一登记装配位），组件文件不管。）──
+//    反证：把工具卡循环的 effect 包裹还原成裸 scoped.slots.inject 语句 → 红；复包 → 绿。
+{
+  const gate = 'client-effect-wrap';
+  const entry = join(PACK, 'src', 'client', 'index.ts');
+  if (!existsSync(entry)) {
+    fail(gate, 'packages/deep-research-pack/src/client/index.ts 缺席（驾驶舱唯一登记装配位）');
+  } else {
+    const lines = readFileSync(entry, 'utf8').split('\n');
+    const registration = /\b(?:slots\.inject|sidebarRightTabs\.register)\(/;
+    if (!lines.some((l) => registration.test(l)))
+      fail(gate, 'src/client/index.ts 无任何 slots.inject / sidebarRightTabs.register（防空语料：驾驶舱必须注册）');
+    lines.forEach((l, i) => {
+      if (registration.test(l) && !/\bscoped\.effect\(/.test(l))
+        fail(gate, `src/client/index.ts:${i + 1}: 注册调用不在 scoped.effect 包裹内——registrations are effects（dispose 即撤销贡献），包 effect 或并入既有 effect`);
+    });
   }
 }
 

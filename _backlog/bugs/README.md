@@ -12,7 +12,7 @@
 
 | Bug | 标题 | 严重级 | 发现 |
 |---|---|---|---|
-| （空——首卡立时建行） | | | |
+| [BUG-003-client-load-smoke-loop-edge-mismatch](BUG-003-client-load-smoke-loop-edge-mismatch.md) | 盘侧 tailAskPending=true 的绑定会话，观察面不渲染 ↻ rerun 回边 | P2 | 2026-10-04 |
 
 ## 卡片模板
 

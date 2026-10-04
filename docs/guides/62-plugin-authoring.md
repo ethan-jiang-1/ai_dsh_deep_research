@@ -68,6 +68,19 @@ logged）——pack 行只引入**现成**能力，这项义务落在 vendor 面
 | docs / AGENTS / queue | 追加 `node scripts/entry-chain-probe.mjs`（真模型档） |
 | 门禁本身 | 注入回归看红 → 还原 → 绿（反证记录进 `docs/evaluation.md`） |
 
+### 自写代码的证据阶梯（驾驶舱与未来 `src/` 套件；test-strategy 语料五台阶移植）
+
+本仓自写的插件代码（当前 = 驾驶舱，D18 单点例外；未来任何 `src/` 套件同表对号）按五个台阶
+逐级抬高入口真实性——跳过任何一级都有对应的静默失效形态：
+
+| 台阶 | 本仓证据 | 载体 |
+|---|---|---|
+| ① 导出形态守卫 | `src/index.ts` / `src/client/index.ts`：named exports（`inject` / `apply`）在场、无 `export default`、`inject` 为字符串数组 | `tests/export-shape.test.mjs`（keyless 秒级） |
+| ② 行为 / 谓词 | `src/lib/` 每个折算谓词有正例 + 错误路径用例，同 diff 交付 | `tests/*.test.mjs` |
+| ③ 注册生命周期 | slot / 页签 / 活标题注册全量包 `scoped.effect(...)`——dispose 即撤销贡献，零裸注册 | verify 门禁 `client-effect-wrap` |
+| ④ 真挂载 | pack 构建产物经真 DSH web 装载（真入口路径；挂载失败只有真会话抓得到） | `client-load-smoke`（真浏览器断言清单） |
+| ⑤ 组装面 | persona / 工具 schema 走 snapshot-replay B 层（组装请求 diff）；用户可见面走 C 层渲染金标准 | `snapshot-replay-smoke` |
+
 ## 交付与部署形态（本包怎么送到用户手里）
 
 DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`）：**bundle 是你编写与
