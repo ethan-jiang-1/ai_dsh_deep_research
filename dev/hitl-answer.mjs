@@ -21,7 +21,7 @@ import { existsSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { loadChromium, launchChromium } from '../scripts/lib/playwright.mjs'
 import { runStateOf, readSessionEvents } from '../scripts/lib/run-state.mjs'
-import { parseAskArgs, nextDriveAction, driveVerdict } from '../scripts/lib/ask-drive.mjs'
+import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf } from '../scripts/lib/ask-drive.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 // 与 dev/run-kickoff.mjs 同形：name 自带 `--`（本仓约定，别在 helper 里再加一次）
@@ -84,11 +84,11 @@ let wsSessionsRoot = null
 }
 // 驱动计划（点击前读盘侧形态，BUG-005）：卡共几题 + ask 形态。活等待（wait:-1）下
 // timed 600s 放行与文本消息兜底**都不可用**——脚本必须真浏览器答满，操作者必须知道这点。
-let plan = { questionCount: null, indefinite: null }
+let plan = { questionCount: null, indefinite: null, callId: null }
 {
   const s1 = readSessionEvents(join(wsSessionsRoot, wsGroup, pendingSid, 'session.v4.jsonl.zstd'))
   const ask = s1.readable ? [...s1.events].reverse().find((j) => j?.type === 'tool/call' && j?.data?.name === 'ask_user_question') : undefined
-  if (ask !== undefined) plan = parseAskArgs(ask.data?.arguments)
+  if (ask !== undefined) plan = { ...parseAskArgs(ask.data?.arguments), callId: ask.data?.callId ?? null }
 }
 console.log(`hitl-answer: 驱动计划——卡共 ${plan.questionCount ?? '?'} 题 · 形态 = ${plan.indefinite === true ? 'wait:-1 无限期（⚠ timed 放行与文本兜底均不可用，必须真浏览器答满）' : plan.indefinite === false ? 'timed/默认（600s 放行 + 保持可答）' : '未知（日志读不到 ask 参数）'}`)
 // 模式自报（2026-09-26 教训：`flag/has` 的 `--` 加了两遍 → `--dry-run` 判假，**"dry-run" 实际
@@ -268,13 +268,18 @@ try {
   }
 
   log(`hitl-answer: 共作答 ${answered.length} 题${plan.questionCount !== null ? ` / 卡共 ${plan.questionCount} 题` : ''}${submitted ? ' · Submit 已点击' : ' · 未走到 Submit'}`)
-  // 盘侧裁决（BUG-004 升格：从"警告"改 verdict——不落地 = exit 1，遵循冒烟 verdict 契约：
-  // 0 绿 / 1 红。UI 自报永不作数，挂起清除与否只看盘侧谓词重读。）
+  // 盘侧裁决（BUG-004 升格 + 活体验证补切片）：成功判据 = 盘侧 answer 批内容（UI 会预选/
+  // 自动推进选中态，点击计数不可作判据——实测点击 0 次而批全 Recommended 的假红形态）。
   {
-    const s2 = (!DRY && pendingSid !== null && wsGroup !== null && wsSessionsRoot !== null)
-      ? runStateOf({ logPath: join(wsSessionsRoot, wsGroup, pendingSid, 'session.v4.jsonl.zstd'), wsRoot: join(ROOT, 'research-workspace') })
-      : { hitlPending: null }
-    const verdict = driveVerdict({ hitlPendingAfter: s2.hitlPending === true, answeredCount: answered.length, dryRun: DRY })
+    let settled = false
+    let batch = []
+    if (!DRY && pendingSid !== null && wsGroup !== null && wsSessionsRoot !== null) {
+      const logPath = join(wsSessionsRoot, wsGroup, pendingSid, 'session.v4.jsonl.zstd')
+      const s2 = runStateOf({ logPath, wsRoot: join(ROOT, 'research-workspace') })
+      batch = plan.callId !== null ? answerBatchOf(readSessionEvents(logPath).events, plan.callId) : []
+      settled = s2.hitlPending === false && batch.length > 0
+    }
+    const verdict = driveVerdict({ dryRun: DRY, settled, batch, clickCount: answered.length })
     log(`hitl-answer: 盘侧裁决——${verdict.reason}`)
     process.exitCode = verdict.exitCode
   }

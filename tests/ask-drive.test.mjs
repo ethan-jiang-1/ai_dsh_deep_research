@@ -12,7 +12,7 @@
 // ④ ask 形态（wait:-1 无限期）可从盘侧日志判别（BUG-005：活等待的兜底语义不同）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseAskArgs, nextDriveAction, driveVerdict } from '../scripts/lib/ask-drive.mjs';
+import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf } from '../scripts/lib/ask-drive.mjs';
 
 test('parseAskArgs：三问卡带 wait:-1 → 3 题 + 无限期（BUG-005 第 5 例现场的盘侧形态）', () => {
   const args = JSON.stringify({
@@ -60,24 +60,76 @@ test('nextDriveAction：无卡可读 → abort 交盘侧裁决，不自行宣布
   assert.equal(nextDriveAction(obs).action, 'abort');
 });
 
-test('driveVerdict：盘侧仍挂起 = 红（exit 1）——UI 自报永不作为成功判据（BUG-004 裁决升格）', () => {
-  const v = driveVerdict({ hitlPendingAfter: true, answeredCount: 3, dryRun: false });
+test('driveVerdict：未 settled（盘侧仍挂起 / result 缺席）= 红——UI 自报永不作为成功判据（BUG-004 裁决升格）', () => {
+  const v = driveVerdict({ dryRun: false, settled: false, batch: [], clickCount: 3 });
   assert.equal(v.pass, false);
   assert.equal(v.exitCode, 1);
 });
 
-test('driveVerdict：一题未答（非 dry-run）= 红——旧脚本"共作答 1/3 题"静默 exit 0 的形态不复存在', () => {
-  const v = driveVerdict({ hitlPendingAfter: true, answeredCount: 0, dryRun: false });
-  assert.equal(v.pass, false);
-  assert.equal(v.exitCode, 1);
+test('driveVerdict：settled + 混合批 = 绿，但跳过数必须显性（偏差不静默）', () => {
+  const v = driveVerdict({
+    dryRun: false, settled: true,
+    batch: [
+      { id: 'a', selected: ['x（Recommended）'] },
+      { id: 'b', selected: [] },
+    ],
+    clickCount: 2,
+  });
+  assert.deepEqual({ pass: v.pass, exitCode: v.exitCode }, { pass: true, exitCode: 0 });
+  assert.match(v.reason, /跳过 1 题/, '理由行未点名跳过数');
 });
 
-test('driveVerdict：挂起已清 = 绿（exit 0）', () => {
-  const v = driveVerdict({ hitlPendingAfter: false, answeredCount: 3, dryRun: false });
+test('driveVerdict：settled + 批有实质作答 = 绿（exit 0）', () => {
+  const v = driveVerdict({
+    dryRun: false, settled: true,
+    batch: [{ id: 'a', selected: ['x（Recommended）'] }, { id: 'b', selected: ['y（Recommended）'] }, { id: 'c', selected: ['z（Recommended）'] }],
+    clickCount: 3,
+  });
   assert.deepEqual({ pass: v.pass, exitCode: v.exitCode }, { pass: true, exitCode: 0 });
 });
 
 test('driveVerdict：dry-run 不判提交（信息性绿）——它本来就不该点', () => {
-  const v = driveVerdict({ hitlPendingAfter: true, answeredCount: 0, dryRun: true });
+  const v = driveVerdict({ dryRun: true, settled: false, batch: [], clickCount: 0 });
   assert.deepEqual({ pass: v.pass, exitCode: v.exitCode }, { pass: true, exitCode: 0 });
+});
+
+test('driveVerdict：裁决吃盘侧 answer 批内容，不吃点击计数（活体验证发现的形态）', () => {
+  // 活体验证实录：UI 在卡上预选/自动推进选中态，点击计数 = 0 而盘侧批非空——
+  // 旧判据（answeredCount===0 → 红）在此形态假红。盘侧批有实质选择 = 唯一成功事实。
+  const v = driveVerdict({
+    dryRun: false, settled: true,
+    batch: [{ id: 'hitl2_final', selected: ['按现稿定稿（Recommended）'] }],
+    clickCount: 0,
+  });
+  assert.deepEqual({ pass: v.pass, exitCode: v.exitCode }, { pass: true, exitCode: 0 });
+});
+
+test('driveVerdict：settled 但批全空 = 红——空批提交即"把沉默当拍板"（不可放行）', () => {
+  const v = driveVerdict({
+    dryRun: false, settled: true,
+    batch: [{ id: 'hitl2_final', selected: [] }],
+    clickCount: 1,
+  });
+  assert.equal(v.pass, false);
+  assert.equal(v.exitCode, 1);
+});
+
+test('driveVerdict：未 settled（盘侧仍挂起 / result 缺席）= 红', () => {
+  for (const settled of [false]) {
+    const v = driveVerdict({ dryRun: false, settled, batch: [], clickCount: 3 });
+    assert.equal(v.exitCode, 1, `settled=${settled}`);
+  }
+});
+
+test('answerBatchOf：从盘侧事件抠 ask 的 answer 批（result 缺席 → 空数组）', () => {
+  const callId = 'call_x1';
+  const events = [
+    { type: 'tool/call', data: { callId, name: 'ask_user_question', arguments: '{"questions":[{"id":"q1"}]}' } },
+    { type: 'tool/result', data: { message: { role: 'tool', source: { kind: 'tool', callId }, content: [
+      { type: 'text', text: JSON.stringify({ answers: [{ id: 'q1', selected: ['a（Recommended）'] }] }) },
+    ] } } },
+  ];
+  assert.deepEqual(answerBatchOf(events, callId), [{ id: 'q1', selected: ['a（Recommended）'] }]);
+  assert.deepEqual(answerBatchOf(events.slice(0, 1), callId), [], 'result 未落地 → 空数组');
+  assert.deepEqual(answerBatchOf([{ type: 'turn/start' }], callId), []);
 });

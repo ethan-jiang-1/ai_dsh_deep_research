@@ -40,20 +40,44 @@ export function nextDriveAction(obs) {
 }
 
 /**
- * 盘侧裁决（BUG-004：盘侧复核从"警告"升格为 verdict）——代答是否成功的唯一判据是
- * 盘侧挂起是否清除，UI 侧一切自报（卡头消/提交完成）不构成证据。
- * @param s hitlPendingAfter 驱动后重读盘侧谓词；answeredCount 实际答完的题数；
- *   dryRun 只看不点（不构成提交，信息性通过）。
+ * 从盘侧事件抠一次 ask 的 answer 批（tool/result 的 text 载荷）。
+ * @param events 已解析会话事件。@param callId ask 的 tool/call id。
+ * @returns answers 数组；result 未落地 → 空数组（调用方以 settled=false 表达）。
+ */
+export function answerBatchOf(events, callId) {
+  const res = [...events].reverse().find((j) => j?.type === 'tool/result'
+    && (j?.data?.message?.source?.callId === callId || j?.data?.callId === callId))
+  if (res === undefined) return []
+  const text = (res?.data?.message?.content ?? []).find((c) => c.type === 'text')?.text
+  try {
+    const answers = JSON.parse(text ?? '{}')?.answers
+    return Array.isArray(answers) ? answers : []
+  } catch { return [] }
+}
+
+/**
+ * 盘侧裁决（BUG-004：盘侧复核从"警告"升格为 verdict）。成功判据 = 盘侧 answer 批的
+ * **内容**，不是点击计数——UI 会预选/自动推进选中态，活体验证实测点击数 0 而批全
+ * Recommended（假红形态）；反过来，全空批 = 把沉默当拍板，必须红。
+ * @param s dryRun 只看不点（信息性通过）；settled 盘侧 ask 已落地（result 在场且挂起
+ *   清除）；batch answerBatchOf 的批（逐题 selected）；clickCount 点击数（仅入理由行）。
  * @returns exitCode 遵循冒烟 verdict 契约：0 = 绿，1 = 红（调用方以此退出）。
  */
 export function driveVerdict(s) {
-  const { hitlPendingAfter, answeredCount, dryRun } = s ?? {}
+  const { dryRun, settled, batch, clickCount } = s ?? {}
   if (dryRun === true) return { pass: true, exitCode: 0, reason: 'dry-run——未提交，盘侧不判' }
-  if (!((answeredCount ?? 0) > 0)) {
-    return { pass: false, exitCode: 1, reason: '一题未答——没有可提交的东西（如实红）' }
+  const items = Array.isArray(batch) ? batch : []
+  const skipped = items.filter((a) => (a?.selected ?? []).length === 0).length
+  const nonEmpty = items.length - skipped
+  const clicks = `（点击 ${clickCount ?? 0} 次）`
+  if (settled !== true) {
+    return { pass: false, exitCode: 1, reason: `盘侧复核：ask 未落地（仍挂起或 result 缺席）——UI 自报无效${clicks}；重跑本脚本或人工入 GUI 答` }
   }
-  if (hitlPendingAfter === true) {
-    return { pass: false, exitCode: 1, reason: '盘侧复核：会话仍挂起——answer 未落地，UI 自报无效（重跑本脚本或人工入 GUI 答）' }
+  if (items.length === 0) {
+    return { pass: false, exitCode: 1, reason: `盘侧复核：ask 已落地但读不到 answer 批——无法证明实质作答${clicks}` }
   }
-  return { pass: true, exitCode: 0, reason: '盘侧复核通过——挂起已清' }
+  if (nonEmpty === 0) {
+    return { pass: false, exitCode: 1, reason: `盘侧复核：answer 批全空——空批提交等于把沉默当拍板，不放行${clicks}` }
+  }
+  return { pass: true, exitCode: 0, reason: `盘侧复核通过——answer 批 ${nonEmpty}/${items.length} 题实质作答${skipped > 0 ? `（跳过 ${skipped} 题，显性记账）` : ''}${clicks}` }
 }
