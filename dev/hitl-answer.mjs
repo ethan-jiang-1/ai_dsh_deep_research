@@ -185,20 +185,24 @@ try {
   /** 卡容器 = radiogroup 向上两层的 div（选项与 pager 按钮同住；类名不钉，走结构）。 */
   const cardContainer = () => cardRoot().locator('xpath=ancestor::div[1]|ancestor::div[2]').first()
   const pagerOf = async () => {
+    // 2026-10-04 验收 run 残 bug 修复：旧版向上盲扫 3 层内所有 \d+/\d$ 文本，会命中**别的卡**
+    // （历史 ask 卡同屏渲染时串读，实测 2/4 被读成 4/4 致跳题）。改走 drive 实证版：先向上找到
+    // "含 pager 或 Next/Submit"的卡作用域，再**只在该作用域内**读 pager。
     return await page.evaluate(() => {
       const rg = [...document.querySelectorAll('[role="radiogroup"]')].pop()
       if (!rg) return null
       let scope = rg
-      for (let up = 0; up < 3 && scope; up++) {
-        scope = scope.parentElement
-        if (!scope) break
-        for (const el of scope.querySelectorAll('*')) {
-          if (el.childNodes.length > 3) continue
-          const m = ((el.textContent ?? '')).trim().match(/^(\d+)\s*\/\s*(\d+)$/)
-          if (m) return { cur: Number(m[1]), total: Number(m[2]) }
-        }
+      for (let up = 0; up < 4 && scope; up++) {
+        const cand = scope.parentElement
+        if (!cand) break
+        const hasPager = [...cand.querySelectorAll('*')].some(e => e.childNodes.length <= 3 && /^(\d+)\s*\/\s*(\d+)$/.test((e.textContent ?? '').trim()))
+        const hasFwd = [...cand.querySelectorAll('button')].some(b => /^(Next|Submit)$/i.test((b.textContent ?? '').trim()))
+        scope = cand
+        if (hasPager || hasFwd) break
       }
-      return null
+      const pagerEl = [...scope.querySelectorAll('*')].filter(e => e.childNodes.length <= 3 && /^(\d+)\s*\/\s*(\d+)$/.test((e.textContent ?? '').trim())).pop()
+      const m = pagerEl ? (pagerEl.textContent ?? '').trim().match(/^(\d+)\s*\/\s*(\d+)$/) : null
+      return m ? { cur: Number(m[1]), total: Number(m[2]) } : null
     })
   }
   const headerAlive = async () => {
