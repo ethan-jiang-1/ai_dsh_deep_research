@@ -1,6 +1,6 @@
 # BUG-004：hitl-answer 点击提交不落地——"卡头消"与盘侧 answer 事件脱钩
 
-> 严重级别：P1（重要——授权代驱通道在当前 UI 上失效，只能降级文本消息应答）｜发现：2026-10-04｜状态：活跃
+> 严重级别：P1（重要——授权代驱通道在当前 UI 上失效，只能降级文本消息应答）｜发现：2026-10-04｜状态：活跃 — 已修复 2026-10-05（TDD：策略抽纯函数 + 盘侧裁决升格；待下一场真 run 实测确认后归档）
 
 ## 症状
 
@@ -44,10 +44,18 @@ hitl-answer 的成功判据应同样以盘侧 answer 事件落地为准（工具
 
 ## 修复关联
 
-当场未修（run 途中，降级文本消息应答完成两点交互——§4"答复作为新消息"语义兜底，授权
-代驱划界内）。修复方向：drive 以盘侧 answer 事件落地为成功判据 + 点击前校验卡片
-still-answerable 锚；盘侧复核从警告升格为 verdict（不落地 = FAIL exit 1）。
-**2026-10-05 增补**：修复方向收窄为——①逐题循环直到 Submit 可用且末题已选中才点
-Submit（弃"卡头消"判据，第 5 例反证其必假）；②`browser.close()` 后补进程树收割
-（`chrome.kill()` 或 CDP `Browser.close`），防僵尸 client 联动 BUG-005；
-③文案"卡头消——提交完成"改为逐题计数（共 N 题 / 已答 M 题）。
+已落地（2026-10-05，TDD 红→绿，反证 = 注入旧启发式看红再还原）：
+
+- **`scripts/lib/ask-drive.mjs`（新）**：驱动策略与裁决抽成纯函数——`nextDriveAction`
+  （观察→动作；UI 形状永不判完成，Submit 可用 = 唯一提交动作）、`driveVerdict`
+  （盘侧复核从警告升格 verdict：仍挂起/一题未答 = exit 1，遵循冒烟 verdict 契约）、
+  `parseAskArgs`（盘侧 ask 形态判别，兼 BUG-005）；`tests/ask-drive.test.mjs` 11 例
+  契约钉（含第 5 例现场形态回归钉：多题卡换题头 + Submit 禁用 → 必须继续点选项）。
+- **`dev/hitl-answer.mjs` 重接**：逐题循环改策略驱动（弃"卡头消"判据，重渲染二次确认防
+  瞬态误 abort）；驱动前打印盘侧计划（卡共 N 题 + timed/无限期形态）；DOM 原生点击
+  （Playwright actionability 在问询卡上被挡死的既有实测）；盘侧裁决给退出码。
+- **`scripts/lib/cdp-driver.mjs` 收割**：`detached` spawn + 进程组负 pid kill + await 退出
+  （裸 `chrome.kill()` 只杀主进程，Helper 存活持 websocket 即僵尸——第 5 例放大器）；
+  playwright 侧 `browser.close()` 后补 SIGKILL 兜底。
+- 待办：下一场真 run 的 HITL 实测确认（多题卡全答满 + 盘侧 answer 落地）→ 归档
+  `_fixed_bugs/`。

@@ -20,7 +20,8 @@ import { resolve, dirname, join } from 'node:path'
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { loadChromium, launchChromium } from '../scripts/lib/playwright.mjs'
-import { runStateOf } from '../scripts/lib/run-state.mjs'
+import { runStateOf, readSessionEvents } from '../scripts/lib/run-state.mjs'
+import { parseAskArgs, nextDriveAction, driveVerdict } from '../scripts/lib/ask-drive.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 // 与 dev/run-kickoff.mjs 同形：name 自带 `--`（本仓约定，别在 helper 里再加一次）
@@ -81,6 +82,15 @@ let wsSessionsRoot = null
   }
   console.log(`hitl-answer: 盘侧谓词——真挂起会话在场：${pending}`)
 }
+// 驱动计划（点击前读盘侧形态，BUG-005）：卡共几题 + ask 形态。活等待（wait:-1）下
+// timed 600s 放行与文本消息兜底**都不可用**——脚本必须真浏览器答满，操作者必须知道这点。
+let plan = { questionCount: null, indefinite: null }
+{
+  const s1 = readSessionEvents(join(wsSessionsRoot, wsGroup, pendingSid, 'session.v4.jsonl.zstd'))
+  const ask = s1.readable ? [...s1.events].reverse().find((j) => j?.type === 'tool/call' && j?.data?.name === 'ask_user_question') : undefined
+  if (ask !== undefined) plan = parseAskArgs(ask.data?.arguments)
+}
+console.log(`hitl-answer: 驱动计划——卡共 ${plan.questionCount ?? '?'} 题 · 形态 = ${plan.indefinite === true ? 'wait:-1 无限期（⚠ timed 放行与文本兜底均不可用，必须真浏览器答满）' : plan.indefinite === false ? 'timed/默认（600s 放行 + 保持可答）' : '未知（日志读不到 ask 参数）'}`)
 // 模式自报（2026-09-26 教训：`flag/has` 的 `--` 加了两遍 → `--dry-run` 判假，**"dry-run" 实际
 // 执行了代答**。此后开局即打印模式，操作者一眼能看出它到底会不会点。）
 console.log(`hitl-answer: 模式 = ${DRY ? 'dry-run（只看不点）' : '实答（会提交）'} · pick=${PICK} · session=${SESSION ?? '（侧栏第一个待答）'}`)
@@ -171,141 +181,111 @@ try {
   if (!ready) log('hitl-answer: 等了 40s 仍未见问询卡片——会话可能已不在待答态（问询被终局化或已答）')
   await page.waitForTimeout(600)
 
-  // ② 逐题作答（0.2.0 分页问询卡：一次渲染一题 = radiogroup + pager "n / N" + Next/Submit）。
-  //   2026-10-03 验收 run 现场实测三坑（本块重写的依据）：
-  //   a. 选项容器类名漂移（`_option_` → `<hash>_option*`，CSS modules 前缀随构建变）——发现与
-  //      定位改走 role（radiogroup / button[role=radio]），与类名彻底解耦；
-  //   b. timed 超时后卡头从 "Waiting for your action" 变 "Work continued — you can still
-  //      answer"——旧版以旧卡头消失判"提交完成"，在超时态每题都假绿退出（实测答 6 次全空转）；
-  //   c. 前进按钮按 has-text 子串匹配会截胡页面里别的同名按钮——改在卡容器（radiogroup 的
-  //      祖先）内按精确文本找。
-  const visible = async (loc) => loc.isVisible().catch(() => false)
-  const cardRoot = () => page.locator('[role="radiogroup"]').last()
-  const optionButtons = () => cardRoot().locator('button[role="radio"]')
-  /** 卡容器 = radiogroup 向上两层的 div（选项与 pager 按钮同住；类名不钉，走结构）。 */
-  const cardContainer = () => cardRoot().locator('xpath=ancestor::div[1]|ancestor::div[2]').first()
-  const pagerOf = async () => {
-    // 2026-10-04 验收 run 残 bug 修复：旧版向上盲扫 3 层内所有 \d+/\d$ 文本，会命中**别的卡**
-    // （历史 ask 卡同屏渲染时串读，实测 2/4 被读成 4/4 致跳题）。改走 drive 实证版：先向上找到
-    // "含 pager 或 Next/Submit"的卡作用域，再**只在该作用域内**读 pager。
-    return await page.evaluate(() => {
-      const rg = [...document.querySelectorAll('[role="radiogroup"]')].pop()
-      if (!rg) return null
-      let scope = rg
-      for (let up = 0; up < 4 && scope; up++) {
-        const cand = scope.parentElement
-        if (!cand) break
-        const hasPager = [...cand.querySelectorAll('*')].some(e => e.childNodes.length <= 3 && /^(\d+)\s*\/\s*(\d+)$/.test((e.textContent ?? '').trim()))
-        const hasFwd = [...cand.querySelectorAll('button')].some(b => /^(Next|Submit)$/i.test((b.textContent ?? '').trim()))
-        scope = cand
-        if (hasPager || hasFwd) break
-      }
-      const pagerEl = [...scope.querySelectorAll('*')].filter(e => e.childNodes.length <= 3 && /^(\d+)\s*\/\s*(\d+)$/.test((e.textContent ?? '').trim())).pop()
-      const m = pagerEl ? (pagerEl.textContent ?? '').trim().match(/^(\d+)\s*\/\s*(\d+)$/) : null
-      return m ? { cur: Number(m[1]), total: Number(m[2]) } : null
-    })
-  }
-  const headerAlive = async () => {
-    const body = await page.evaluate(() => document.body.innerText).catch(() => '')
-    return /Waiting for your action|Work continued|you can still answer/i.test(body)
-  }
+  // ② 策略驱动作答（BUG-004 重写）：观察 → nextDriveAction → 动作，UI 形状**永不**判完成；
+  //    提交成功与否由尾部盘侧裁决（driveVerdict）唯一判定。点击走 DOM 原生派发（Playwright
+  //    在 DSH UI 上的 actionability 检查会被问询卡挡死——cdp-probe 头注同款实测）。
+  const observeCard = async () => page.evaluate(() => {
+    const rg = [...document.querySelectorAll('[role="radiogroup"]')].pop()
+    if (!rg) return { radioCount: 0, checkedCount: 0, submitFound: false, submitDisabled: false }
+    const radios = [...rg.querySelectorAll('button[role="radio"]')]
+    let scope = rg
+    let submit = null
+    for (let up = 0; up < 4 && scope && submit === null; up++) {
+      const cand = scope.parentElement
+      if (!cand) break
+      scope = cand
+      submit = [...scope.querySelectorAll('button')].find((b) => /^(Submit|提交)$/i.test((b.textContent ?? '').trim())) ?? null
+    }
+    return {
+      radioCount: radios.length,
+      checkedCount: radios.filter((b) => b.getAttribute('aria-checked') === 'true').length,
+      submitFound: submit !== null,
+      submitDisabled: submit !== null && !!submit.disabled,
+    }
+  })
+  const clickOption = async () => page.evaluate((pick) => {
+    const rg = [...document.querySelectorAll('[role="radiogroup"]')].pop()
+    if (!rg) return null
+    const radios = [...rg.querySelectorAll('button[role="radio"]')]
+    if (radios.length === 0) return null
+    const checked = radios.find((b) => b.getAttribute('aria-checked') === 'true')
+    let want = null
+    if (checked === undefined) {
+      if (pick === 'recommended') want = radios.find((b) => /Recommended/i.test(b.textContent ?? '')) ?? null
+      else if (pick !== 'first' && Number.isFinite(Number(pick))) want = radios[Number(pick) - 1] ?? null
+      if (want === null) want = radios[0]
+    }
+    const el = checked ?? want
+    el.scrollIntoView({ block: 'center' })
+    el.click()
+    let p = rg
+    for (let i = 0; i < 4 && p; i++) p = p.parentElement
+    return {
+      label: (el.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 120),
+      prompt: p ? (p.textContent ?? '').replace(/\s+/g, ' ').slice(0, 140) : '(未取到题干)',
+    }
+  }, PICK)
+  const clickSubmit = async () => page.evaluate(() => {
+    const rg = [...document.querySelectorAll('[role="radiogroup"]')].pop()
+    if (!rg) return false
+    let scope = rg
+    for (let up = 0; up < 4 && scope; up++) {
+      const cand = scope.parentElement
+      if (!cand) break
+      scope = cand
+      const submit = [...scope.querySelectorAll('button')].find((b) => /^(Submit|提交)$/i.test((b.textContent ?? '').trim()))
+      if (submit && !submit.disabled) { submit.scrollIntoView({ block: 'center' }); submit.click(); return true }
+    }
+    return false
+  })
+  let submitted = false
   for (let step = 1; step <= MAX_STEPS; step++) {
-    // 等当前题的选项渲染（radiogroup 里 ≥1 个 radio）
-    let opts = 0
-    for (let i = 0; i < 20; i++) {
-      opts = await optionButtons().count()
-      if (opts > 0) break
-      await page.waitForTimeout(600)
+    let obs = await observeCard()
+    let act = nextDriveAction(obs)
+    if (act.action === 'abort') {
+      // 重渲染二次确认：题间切换的瞬态（radioCount=0）不该误判"无卡"——1.2s 后重看一次
+      await page.waitForTimeout(1200)
+      obs = await observeCard()
+      act = nextDriveAction(obs)
     }
-    if (opts === 0) {
-      if (!(await headerAlive())) { log(`hitl-answer: 第 ${step} 题无选项且卡头已消——按已提交处理（尾部有盘侧复核）`); break }
-      log(`hitl-answer: 等了 12s 仍无选项（第 ${step} 题）——卡可能被终局化或处于已答态；如实停止`)
-      break
-    }
-    await page.waitForTimeout(500)
-    const promptText = await page.evaluate(() => {
-      const rg = [...document.querySelectorAll('[role="radiogroup"]')].pop()
-      let p = rg
-      for (let i = 0; i < 4 && p; i++) p = p.parentElement
-      return p ? (p.textContent ?? '').replace(/\s+/g, ' ').slice(0, 140) : '(未取到题干)'
-    })
-    // 选目标：recommended → radiogroup 内带 Recommended 徽标的 radio；first/数字 → 第 n 个
-    let target = null
-    if (PICK === 'recommended') {
-      const rec = cardRoot().locator('button[role="radio"]', { hasText: /Recommended/i }).first()
-      if (await visible(rec)) target = rec
-    }
-    if (target === null) {
-      const idx = PICK === 'first' ? 0 : Math.max(0, Number(PICK) - 1)
-      const all = optionButtons()
-      if (await all.count() > idx) target = all.nth(idx)
-    }
-    if (target === null || !(await visible(target))) { log(`hitl-answer: 第 ${step} 题没找到可点选项——停在此处（已答 ${answered.length} 题）`); break }
-    const targetLabel = ((await target.textContent()) ?? '').replace(/\s+/g, ' ').trim().slice(0, 120)
-    if (DRY) { log(`[dry-run] 第 ${step} 题将选：${targetLabel}`); break }
-    try { await target.click({ timeout: 5000 }) } catch {
-      const ok = await page.evaluate((n) => {
-        const els = [...document.querySelectorAll('[role="radiogroup"] button[role="radio"]')]
-        const el = els.find(e => (e.textContent ?? '').replace(/\s+/g, ' ').includes(n))
-        if (!el) return false
-        el.scrollIntoView({ block: 'center' }); el.click(); return true
-      }, targetLabel.slice(0, 20))
-      log(ok ? 'hitl-answer: ⚠ 选项在视口外点不动——已用 DOM 原生点击兜底' : 'hitl-answer: ⚠ 选项点击失败且 DOM 兜底未命中')
-    }
-    await page.waitForTimeout(700)
-    if (CUSTOM !== null) {
-      const box = page.locator('textarea, input[type="text"]').first()
-      if (await visible(box)) { await box.fill(CUSTOM).catch(() => {}); await page.waitForTimeout(200) }
-    }
-    answered.push({ step, prompt: promptText, selected: targetLabel })
-    log(`hitl-answer: 第 ${step} 题 ← ${targetLabel}`)
-    // 前进（2026-10-04 第三场实测定模型）：**选项点击自带 auto-advance**（点击已选中项也会
-    // 推进——实测复点即翻页）——**Next 绝不点**（会多跳一题：点选项翻到 n+1 后再点 Next 直达
-    // n+2，实测跳题后 Submit 禁用空转）。只在 pager 已到末题（cur ≥ total）时点 Submit；
-    // 无 pager 的单题卡（HITL2 形态 1/1）同此。Skip 不是前进，绝不点。
-    await page.waitForTimeout(600)
-    const pgAfter = await pagerOf()
-    let submitted = false
-    if (pgAfter !== null && pgAfter.cur >= pgAfter.total) {
-      const sb = cardContainer().locator('button').filter({ hasText: /^(Submit|提交)$/ }).first()
-      if (await visible(sb)) {
-        const dis = await sb.evaluate((el) => el.disabled).catch(() => true)
-        if (!dis) {
-          try { await sb.click({ timeout: 5000 }) } catch { await sb.evaluate((el) => { el.scrollIntoView({ block: 'center' }); el.click() }).catch(() => {}) }
-          submitted = true
-          log(`hitl-answer: 末题已答（${pgAfter.cur}/${pgAfter.total}）——点击 Submit`)
-        } else {
-          log('hitl-answer: ⚠ 末题 Submit 仍禁用（有题未答？）——如实停止')
-          break
-        }
-      } else {
-        log('hitl-answer: 末题无 Submit 按钮——如实停止待人工核查')
-        break
+    if (DRY) { log(`[dry-run] 观察 radio=${obs.radioCount} checked=${obs.checkedCount} submit=${obs.submitFound}/${obs.submitDisabled} → ${act.action}（${act.reason}）`); break }
+    if (act.action === 'abort') { log(`hitl-answer: ${act.reason}`); break }
+    if (act.action === 'click-option') {
+      const hit = await clickOption()
+      if (hit === null) { log('hitl-answer: 选项点击未命中——如实停止（盘侧裁决收口）'); break }
+      if (CUSTOM !== null) {
+        const box = page.locator('textarea, input[type="text"]').first()
+        if (await box.isVisible().catch(() => false)) { await box.fill(CUSTOM).catch(() => {}); await page.waitForTimeout(200) }
       }
+      answered.push({ step, prompt: hit.prompt, selected: hit.label })
+      log(`hitl-answer: 第 ${step} 题 ← ${hit.label}`)
+      await page.waitForTimeout(900) // 等选中态/翻页渲染
+      continue
     }
-    // 非末题：等 auto-advance 渲染下一题（pager 前进或选项更换），不带任何按钮点击
-    for (let w = 0; w < 12; w++) {
-      await page.waitForTimeout(700)
-      const pg2 = await pagerOf()
-      const opts2 = await optionButtons().count()
-      if (pgAfter !== null && pg2 !== null && pg2.cur > pgAfter.cur) break
-      if (opts2 > 0 && !(await headerAlive())) { log('hitl-answer: 卡头消——提交完成'); submitted = true; break }
-    }
-    if (submitted) break
+    // click-submit
+    if (await clickSubmit()) { submitted = true; log(`hitl-answer: 已答 ${answered.length} 题——Submit 已点击`); break }
+    await page.waitForTimeout(700) // 提交钮被重渲染 → 回环重观察
   }
 
-  log(`hitl-answer: 共作答 ${answered.length} 题`)
-  // 盘侧复核（2026-10-03 假绿教训：UI 判"完成"不算数——答完重读盘侧谓词，仍挂起即大声说）
-  if (!DRY && answered.length > 0) {
-    await page.waitForTimeout(2500)
-    if (pendingSid !== null && wsGroup !== null && wsSessionsRoot !== null) {
-      const s2 = runStateOf({ logPath: join(wsSessionsRoot, wsGroup, pendingSid, 'session.v4.jsonl.zstd'), wsRoot: join(ROOT, 'research-workspace') })
-      if (s2.hitlPending === true) console.error('hitl-answer: ⚠ 盘侧复核：会话仍挂起——本次代答未真正提交，别信上面的"提交完成"！（重跑本脚本或人工入 GUI 答）')
-      else log('hitl-answer: 盘侧复核通过——挂起已清')
-    }
+  log(`hitl-answer: 共作答 ${answered.length} 题${plan.questionCount !== null ? ` / 卡共 ${plan.questionCount} 题` : ''}${submitted ? ' · Submit 已点击' : ' · 未走到 Submit'}`)
+  // 盘侧裁决（BUG-004 升格：从"警告"改 verdict——不落地 = exit 1，遵循冒烟 verdict 契约：
+  // 0 绿 / 1 红。UI 自报永不作数，挂起清除与否只看盘侧谓词重读。）
+  {
+    const s2 = (!DRY && pendingSid !== null && wsGroup !== null && wsSessionsRoot !== null)
+      ? runStateOf({ logPath: join(wsSessionsRoot, wsGroup, pendingSid, 'session.v4.jsonl.zstd'), wsRoot: join(ROOT, 'research-workspace') })
+      : { hitlPending: null }
+    const verdict = driveVerdict({ hitlPendingAfter: s2.hitlPending === true, answeredCount: answered.length, dryRun: DRY })
+    log(`hitl-answer: 盘侧裁决——${verdict.reason}`)
+    process.exitCode = verdict.exitCode
   }
   log('hitl-answer: 代理模拟记录（写进 bundle 的 question.md §Decisions 与 journal.md）——')
   for (const a of answered) log(`  Q${a.step}: ${a.prompt}\n     → ${a.selected}`)
 } finally {
-  await browser.close()
+  try { await browser.close() } catch {}
+  // 进程收割（BUG-004 放大器加固）：close 后主进程若仍活着（exitCode null）→ SIGKILL 兜底。
+  // 僵尸 client 持有与通道的 websocket，会把宿主侧 ask 等待孤儿化（BUG-005 联动前提）。
+  const proc = typeof browser.process === 'function' ? browser.process() : null
+  if (proc !== null && proc !== undefined && proc.pid !== undefined && proc.exitCode === null) {
+    try { process.kill(proc.pid, 'SIGKILL') } catch {}
+  }
 }

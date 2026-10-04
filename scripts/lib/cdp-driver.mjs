@@ -70,7 +70,7 @@ export async function launchCdpBrowser({ url, chromeBin, windowSize = '1600,1000
     '--remote-debugging-port=0',
     `--window-size=${windowSize}`,
     url,
-  ], { stdio: 'ignore' });
+  ], { stdio: 'ignore', detached: true });
 
   const sleep = (ms) => new Promise((resolve) => { setTimeout(resolve, ms) });
   const problems = [];
@@ -166,7 +166,21 @@ export async function launchCdpBrowser({ url, chromeBin, windowSize = '1600,1000
     consoleProblems: problems,
     exceptions,
     profileDir,
-    close: () => { chrome.kill() },
+    // 进程收割（BUG-004 第 5 例放大器加固）：裸 spawn 的 chrome.kill() 只 SIGTERM 主进程，
+    // Helper 可能存活并持有与通道的 websocket——僵尸 client 会把宿主侧 ask 等待孤儿化。
+    // detached + 进程组负 pid 收割全树；kill 后 await 退出（释放到静默，孤儿 = 脚本缺陷）。
+    close: () => {
+      try { if (chrome.pid !== undefined) process.kill(-chrome.pid, 'SIGTERM') } catch {}
+      try { chrome.kill() } catch {}
+      return new Promise((resolve) => {
+        if (chrome.exitCode !== null || chrome.signalCode !== null) return resolve()
+        const t0 = Date.now();
+        const tick = () => (chrome.exitCode !== null || chrome.signalCode !== null || Date.now() - t0 > 3000)
+          ? resolve()
+          : setTimeout(tick, 100);
+        tick();
+      })
+    },
   };
   handle.settle = async () => {
     chrome.kill();
