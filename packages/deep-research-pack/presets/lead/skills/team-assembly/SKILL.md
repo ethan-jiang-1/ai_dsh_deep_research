@@ -23,9 +23,19 @@ topic 图定稿后、任何 spawn 之前加载。**名单定下来之前不 spaw
 ## 分派纪律
 
 - 每个 topic 单一 owner（一个 analyst 负责的 topic 不重叠）；
-- 每份派发（spawn prompt 与任务板 description 同标准）写全四件——任务板没有 reviewed/evidence 字段，验收约定不会被 service 自动解释，只认描述文本：①读哪些文件（question.md/topics.md/leads.md）；②产出什么文件；③验收判据；④怎么验证（可执行检查：evidence frontmatter 齐全、final 引用链真实、口径字段在场）；
+- 每份派发（spawn prompt 与任务板 description 同标准）写全**五件**——任务板没有 reviewed/evidence 字段，验收约定不会被 service 自动解释，只认描述文本：①读哪些文件（question.md/topics.md/leads.md）；②产出什么文件；③验收判据；④怎么验证（可执行检查：evidence frontmatter 齐全、final 引用链真实、口径字段在场）；⑤**方法论装载**（见下节——spawn_teammate 子按角色硬隔离拿不到队友的技能，必须显式指路）；
 - 任务完不成时派发里带修订动作（缺口的处理路径：定向补搜 / 降级标 gap / 上报重派），收"完成"只认文件事实与验证结果，不认 teammate 自报；
 - critic 在草稿成型后才进场（提前进场没有可审对象，浪费一轮）。
+
+## 方法论装载（派发第五件，2026-10-04 验收双 run 实证）
+
+spawn_teammate 子**一律 composeFrom lead**（vendor 机制）——队友的技能目录里只有你的 lead 技能，**scout/analyst/critic 的方法论技能按角色硬隔离根本不在其目录**（2026-10-04 两场实测：队友日志 grep 零命中；scout 自报"skill 不存在"后按模板形态 improvising）。因此每份 spawn prompt 首段必须令队友**开工先 `read` 自己的方法论技能文件**（文件就在与你同安装位的 pack 里，fs 工具可读）：
+
+- scout → `presets/scout/skills/lead-mapping/SKILL.md`（搜索纪律 / 质量分级 / leads.md 格式 / 定稿三对账）
+- analyst → `presets/analyst/skills/evidence-extraction/SKILL.md`（question-list 工作流 / 证据文件格式 / 交叉验证与反例）
+- critic → `presets/critic/skills/adversarial-review/SKILL.md`（对抗核查判据与 readiness 格式）
+
+路径前缀 = 你自己技能的安装位同层（你的 skill 目录在 `presets/lead/skills/`，角色目录是它的兄弟）。路径找不到就用 glob 找 `presets/*/skills/*/SKILL.md` 枚举。队友读完按技能执行；读不到（路径漂移）→ 如实回报并按任务验收判据 + `templates/run/` 模板形态执行，**不得静默跳过**（2026-10-04 scout 的显式报偏即正确形态）。
 
 ## 事中调度（改派与加派）
 

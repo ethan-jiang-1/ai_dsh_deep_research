@@ -13,11 +13,11 @@
 
 ## 队列
 
-▶ **角色方法论传递机制——spawn 队友的技能到达缺口**（feature，可自主）——
-[RFC](../notes/proposed/2026-10-04-teammate-methodology-delivery.md)：验收 run 实证——
-spawn 子 composeFrom lead，scout/analyst/critic 方法论技能零到达（队友日志 grep 零命中），
-门L 首场活体违约抓捕即其下游后果；现行靠注入手册兜底（契约与技能判据分工倒挂）；候选
-A prompt 级装载（零 vendor 依赖）为主方向。
+（队列空——待用户取题）
+
+> 队列空 = 全部条目已毕业（历史归 notes/implemented/ + git）；待用户取题或新立项。
+> 效果终验挂起 = 下一场 run 的队友日志 grep 角色技能内容 + 门L 转绿判定
+> （[Note](../notes/implemented/2026-10-04-teammate-methodology-delivery.md) 环境状态节）。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 
