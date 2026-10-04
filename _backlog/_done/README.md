@@ -13,5 +13,5 @@
 - [_suspended_bugs/](_suspended_bugs/README.md) — 暂停缺陷卡（已查明、修复未确认，编号保留）
 - [_reference/](_reference/README.md) — 随毕业卡归档的推敲资料（无编号，按 slug 查）
 
-**Next BUG ID: BUG-003**（新号 = 已分配最大号 + 1，活跃 [_fixed_bugs/](_fixed_bugs/README.md)
-∪ [bugs/](../bugs/README.md) 一起算）
+**Next BUG ID: BUG-006**（新号 = 已分配最大号 + 1，活跃 [_fixed_bugs/](_fixed_bugs/README.md)
+∪ [bugs/](../bugs/README.md) 一起算；2026-10-05 随 BUG-005 建卡同步校正——上一版停在 BUG-003 已过期）

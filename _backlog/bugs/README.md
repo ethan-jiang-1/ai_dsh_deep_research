@@ -13,6 +13,7 @@
 | Bug | 标题 | 严重级 | 发现 |
 |---|---|---|---|
 | [BUG-004-hitl-answer-submit-not-landing](BUG-004-hitl-answer-submit-not-landing.md) | hitl-answer 点击提交不落地——"卡头消"与盘侧 answer 事件脱钩 | P1 | 2026-10-04 |
+| [BUG-005-hitl1-indefinite-wait-no-floor](BUG-005-hitl1-indefinite-wait-no-floor.md) | HITL1 ask 带 wait:-1 无限期等待——timed 护栏被绕过 + 活等待无断连地板 | P1 | 2026-10-05 |
 
 ## 卡片模板
 
