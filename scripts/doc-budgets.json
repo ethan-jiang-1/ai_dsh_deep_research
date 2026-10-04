@@ -3,13 +3,13 @@
   "_raises": {
     "AGENTS.md": "130→132（2026-09-29）：§入口链 增「用 vs 改」意图分流句——冷启动探针实证 4/4 fresh agent 在「启动这个插件」上必须反问，分流句是每轮在场的判据，下放不了。",
     "README.md": "30→31（2026-09-29）：Start Here 增「想用它」意图入口（同上分流句的人类门面对应行）。",
-    "scripts/AGENTS.md": "45→48（2026-10-04）：test-strategy 语料采纳——冒烟脚本可靠性纪律四条（verdict 契约/retry 白名单/等显式状态/释放到静默）常驻该子树指令层；下放无更深的家（冒烟写作规则的家就是本文件），压缩已清重复条款，余 3 行升顶。"
+    "scripts/AGENTS.md": "45→54（2026-10-04）：test-strategy 语料采纳——冒烟脚本可靠性纪律四条（verdict 契约/retry 白名单/等显式状态/释放到静默）+ 命名即层规则（后缀申报证据类型与档位/真模型档登记制 closed set）常驻该子树指令层；下放无更深的家（冒烟写作规则的家就是本文件），压缩已清重复条款（verbatim 重复的失败信息条款、范围纪律合并），余 9 行升顶。"
   },
   "AGENTS.md": 132,
   "README.md": 31,
   "_backlog/queue.md": 45,
   "docs/AGENTS.md": 85,
-  "scripts/AGENTS.md": 48,
+  "scripts/AGENTS.md": 54,
   "notes/AGENTS.md": 50,
   "packages/deep-research-pack/AGENTS.md": 35,
   "research-workspace/AGENTS.md": 120,

@@ -46,3 +46,9 @@
   守卫禁止 keyless 回归里出现真模型、网络与子进程。
 - 投影类脚本（`run-dashboard.mjs`）**只读**：canonical 源是会话日志与 bundle 文件，产物
   （HTML）是抛弃型投影，永不入库、永不手改。
+- **命名即层**（DSH 后缀选层的本仓形态；新增检查先命名）：后缀申报证据类型与档位——
+  `tests/*.test.mjs` = 唯一 regression 成员（glob 即选中，layering 钉 keyless）；`*-smoke` =
+  分级冒烟、`*-probe` = 探针、`*-gate`/`*-audit`/`*-scan` = run bundle 机械门；`scripts/lib/`、
+  `tests/fixtures/` 刻意在一切车道之外。真模型档 = 登记制 closed set：要求凭据（引用
+  `.credentials.yaml`）的顶层脚本必须恰为名单（机械对账 = `tests/smoke-contract`——
+  `withModelKey` 是条件透传不作判据），新档位脚本同 diff 进名单与根 AGENTS §密钥。

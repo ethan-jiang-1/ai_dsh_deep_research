@@ -16,6 +16,9 @@
 
 ## 写测试时
 
+- **命名即申报**：`*.test.mjs` 命名即进 regression（`pnpm test` 的 glob 选中机制，layering
+  守卫钉 keyless）——新检查先想清它是不是 keyless 契约证据再命名；支援件住 `lib/`、
+  `fixtures/`（glob 之外，import 不注册测试）。档位语法正本 = [scripts/AGENTS §依赖与分层](../scripts/AGENTS.md)；
 - **verify the world**：断言重读文件或观察持久状态，不信"代码里已经设好了"；
 - **新契约测试带反证**：同 diff 注入回归看红（改夹具 / 松判据 / 删断言皆是回归手法）再还原——
   只交付绿 = 不知道测试会不会咬人；

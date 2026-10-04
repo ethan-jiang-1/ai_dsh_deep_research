@@ -193,6 +193,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | 插件五台阶证据阶梯（导出守卫 → 行为 → 注册生命周期 → 真挂载 → 组装面） | [guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md) + `tests/export-shape.test.mjs`（台阶①）+ verify 门禁 `client-effect-wrap`（台阶③） | 带证据适配（自写代码面 = 驾驶舱） |
 | registrations are effects 的 HMR 投影（dispose 即撤销贡献） | 驾驶舱 slot 注册全量 `scoped.effect` 包裹 + 门禁 `client-effect-wrap` 机械把守；HMR 行为断言不做（迭代循环走重启不走热重载，重启条件 = 采纳 Note 输掉的方案 2） | 照搬（静态收口形态） |
 | fix fixtures, not normalizers（证据不许磨到跟 bug 吻合） | [tests/AGENTS「改夹具先想红」](../tests/AGENTS.md) + guides/60 金标准红线（只许 `--update-expected` 重写，不许放宽比对） | 照搬 |
+| 后缀即层 / 命名即所有权（expected-filenames 门禁强制改名） | [scripts/AGENTS §依赖与分层「命名即层」](../scripts/AGENTS.md)（后缀申报证据类型与档位）+ 真模型档登记制 closed set（tests/smoke-contract 对账"要求凭据的脚本恰为名单"） | 带证据适配（本仓车道 = glob + 目录形态，非多 vitest 配置） |
 | prove-it-red 前向化到契约测试（不只门禁） | tests/AGENTS 反证规则 + 承重四文件抽检（实录 = 采纳 Note） | 照搬 |
 | fixture 守卫先于比较（形状 corpus 层） | 不另建——夹具语义已被消费测试逐个钉死（node-gate / schema-scan 用例即永久反证记录），形状层 = 重复保护 | 不适用（防重复机制） |
 | 快照世代模型 / record-refresh 分叉 / 平台变体 | 单 fixture 单代；`--update-expected` = refresh 语义已具；record = 真录制维持搁置 | 不适用（无格式演进压力） |
