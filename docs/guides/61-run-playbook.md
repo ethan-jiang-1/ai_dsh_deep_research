@@ -125,7 +125,7 @@ source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --tok
   可继续有用工作但 pending 通知明示"这不是许可"；你之后随时可答，答复作为新消息唤醒
   会话。**不是**按推荐项自动落定。timed 放行是无人值守 run 的生命线：lead persona 的
   ask 硬约束（禁 `wait: -1`，模型单参即可拆掉它）由回归测试钉住——形态判别与救活路径
-  的机制正本 = [BUG-005 卡](../../_backlog/bugs/BUG-005-hitl1-indefinite-wait-no-floor.md)。
+  的机制正本 = [BUG-005 卡](../../_backlog/_done/_fixed_bugs/BUG-005-hitl1-indefinite-wait-no-floor.md)。
 
 ## 5. 中断与恢复
 
