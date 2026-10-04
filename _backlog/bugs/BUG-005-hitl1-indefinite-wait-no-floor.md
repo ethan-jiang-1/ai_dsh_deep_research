@@ -1,6 +1,6 @@
 # BUG-005：HITL1 ask 带 wait:-1 无限期等待——timed 护栏被模型参数绕过 + 活等待无断连地板，无人值守 run 悬挂 28 分钟
 
-> 严重级别：P1（重要——"用户不在场"这一被文档明确支持的场景整体失效：timed 兜底、文本消息兜底双双落空）｜发现：2026-10-05｜状态：活跃
+> 严重级别：P1（重要——"用户不在场"这一被文档明确支持的场景整体失效：timed 兜底、文本消息兜底双双落空）｜发现：2026-10-05｜状态：活跃 — 已修复 2026-10-05（本仓层 TDD 落地；vendor 层为上游 seam，见修复关联；待下一场真 run 实测确认后归档）
 
 ## 症状
 
@@ -53,3 +53,20 @@ run 通道内（dr_open-weights-swebench-parity）lead 抛出 HITL1 ask 后：
   悬挂；或 timed 模式下服务端 clamp 模型显式 -1 的能力（配置侧 `allowIndefinite: false`）。
 - **代驱工具（ hitl-answer）**：BUG-004 修复同 diff 顺带——重试前先判活等待/continued
   两种形态，活等待直接走真浏览器路径，别再降级文本。
+
+## 修复关联
+
+已落地（2026-10-05，TDD 红→绿；反证 = persona 契约测试断言面注入 `wait: -999` 看红还原）：
+
+- **persona 契约（本仓最小修）**：`lead.patch.yml` persona 增「ask 调用硬约束（HITL1/HITL2
+  通用）」行——禁 `wait: -1` + 说明违反后果（超时/文本兜底失效 → 悬挂）+ pending 语义的
+  正路；`tests/presets.test.mjs` 契约测试钉住（约束句 + 禁令 + 后果三断言）。
+- **盘侧形态判别**：`scripts/lib/run-state.mjs` 增 `askIndefiniteOf`（最后一条 ask 的
+  wait 参数形状：true 无限期 / false timed / null 未知不猜测）+ `runStateOf` 暴露
+  `askIndefinite` 字段；`tests/run-state.test.mjs` 4 例（inline 事件形状，零子进程）。
+- **代驱工具**：hitl-answer 驱动前打印盘侧计划（卡共 N 题 + timed/无限期），活等待当场
+  喊话"超时兜底与文本兜底均不可用"（随 BUG-004 修复同 diff 落地）。
+- **runbook**：guides/61 §3 增"应答通道按 ask 形态二分"（活等待只有真浏览器一条路）+
+  代答命令补 `source dev/env.sh`（实测文档摩擦）；§4 超时语义补 persona 硬约束指针。
+- **vendor 层（不动 vendor，上游 seam 登记）**：活等待断连地板 / 服务端 clamp -1 能力——
+  随 vendor 换 tag 重估（discipline-map 重审触发路径）；命中形态再议是否入搁置池。

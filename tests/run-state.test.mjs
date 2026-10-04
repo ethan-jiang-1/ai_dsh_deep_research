@@ -11,7 +11,7 @@ import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readSessionEvents, toolCallCount, hitlPendingOf, turnOpenOf, bundleStateOf, runStateOf } from '../scripts/lib/run-state.mjs';
+import { readSessionEvents, toolCallCount, hitlPendingOf, turnOpenOf, bundleStateOf, runStateOf, askIndefiniteOf } from '../scripts/lib/run-state.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FIX = (name) => join(ROOT, 'tests', 'fixtures', 'run-state', `${name}.jsonl`);
@@ -99,4 +99,27 @@ test('runStateOf：不可读日志 → readable=false 且挂起/计数为 null�
   assert.equal(s.hitlPending, null);
   assert.equal(s.askCalls, null);
   assert.equal(s.runSettled, false, '不可读不许判落定');
+});
+
+test('askIndefiniteOf：最后一条 ask 带 wait:-1 → true（BUG-005：活等待的兜底语义不同）', () => {
+  const events = [
+    { type: 'turn/start' },
+    { type: 'tool/call', data: { name: 'ask_user_question', arguments: JSON.stringify({ questions: [{ id: 'a' }], wait: -1 }) } },
+  ];
+  assert.equal(askIndefiniteOf(events), true);
+});
+
+test('askIndefiniteOf：无 wait 参数 → false（preset 默认 600s timed 形态）', () => {
+  const events = [{ type: 'tool/call', data: { name: 'ask_user_question', arguments: '{"questions":[{"id":"a"}]}' } }];
+  assert.equal(askIndefiniteOf(events), false);
+});
+
+test('askIndefiniteOf：无 ask / 参数坏串 → null（形态未知，不猜测）', () => {
+  assert.equal(askIndefiniteOf([{ type: 'turn/start' }]), null);
+  assert.equal(askIndefiniteOf([{ type: 'tool/call', data: { name: 'ask_user_question', arguments: '{not json' } }]), null);
+});
+
+test('runStateOf 暴露 askIndefinite 字段（watcher 与代答工具的判定输入）', () => {
+  const st = runStateOf({ logPath: FIX('answered'), wsRoot: join(ROOT, 'research-workspace') });
+  assert.equal(st.askIndefinite, false, 'answered 夹具的 ask 无 wait 参数 → false');
 });

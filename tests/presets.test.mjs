@@ -91,3 +91,12 @@ test('compatibility 矩阵钉住当前 tag', () => {
   const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
   assert.deepEqual(pkg.dsh.compatibility.dshReleases, ['dsh-v0.2.0-rc.2']);
 });
+
+test('lead persona 钉 ask 硬约束：禁 wait:-1（BUG-005——模型单参绕过 timed 护栏即无人值守悬挂）', () => {
+  const yml = readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8');
+  // 契约文本两个必备面：约束句在场（HITL1/HITL2 通用）+ 明确点名 wait: -1 的禁令
+  assert.match(yml, /ask 调用硬约束（HITL1\/HITL2 通用）/, 'persona 缺 ask 硬约束句——timed 护栏可被模型单参绕过');
+  assert.match(yml, /wait: -1/, 'persona 未点名禁 wait: -1');
+  // 双保险：约束句必须同时说明"为什么"（兜底失效后果）——没有后果的禁令对模型是空约束
+  assert.match(yml, /兜底/, 'ask 硬约束句未说明违反后果（超时/文本兜底失效）');
+});

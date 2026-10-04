@@ -103,11 +103,16 @@ frontmatter）。`dev/run-kickoff.mjs` 已默认用 workspaceId 形态把会话�
 CLI/host 侧没有 answerer，也没有提交答案的 RPC）——所以代答要用真浏览器：
 
 ```sh
-node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <横幅 token>   # 默认逐题选带（Recommended）的那一项
+source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <横幅 token>   # 默认逐题选带（Recommended）的那一项
 ```
 
 它逐题打印选择结果；**必须**把这次代答如实记进 bundle 的 `question.md` §Decisions 与
 `journal.md`，标注"代理模拟"（它替的是人，不是人）。HITL1 与 HITL2 都走同一条命令。
+代答是否成功以工具尾部的**盘侧裁决**退出码为准（0 = answer 落地 / 1 = 未落地），UI 自报不算数。
+
+**应答通道按 ask 形态二分**（形态 = 盘侧 ask 参数，hitl-answer 的驱动计划会打印）：timed 形态
+（缺省 600s）超时转 pending 后，真浏览器与文本消息两条路都通；活等待（`wait: -1`）只有真浏览器
+一条路——对活等待发文本消息只会 splice 进 next-turn，而挂起的回合永不收尾，消息永不被消费。
 
 ## 4. HITL2（交付审阅）
 
@@ -118,7 +123,9 @@ node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <横幅 token>   #
 - **HITL 超时语义（0.2.0 timed ask-user，600s）**：两点挂起 600s 未答 → 工具返回
   pending，**问题保持可答**（挂起横幅仍在——hitl-fold v5 把 timed 超时仍判挂起），lead
   可继续有用工作但 pending 通知明示"这不是许可"；你之后随时可答，答复作为新消息唤醒
-  会话。**不是**按推荐项自动落定。
+  会话。**不是**按推荐项自动落定。timed 放行是无人值守 run 的生命线：lead persona 的
+  ask 硬约束（禁 `wait: -1`，模型单参即可拆掉它）由回归测试钉住——形态判别与救活路径
+  的机制正本 = [BUG-005 卡](../../_backlog/bugs/BUG-005-hitl1-indefinite-wait-no-floor.md)。
 
 ## 5. 中断与恢复
 

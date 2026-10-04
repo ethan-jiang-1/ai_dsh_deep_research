@@ -59,6 +59,20 @@ export function turnOpenOf(events) {
 }
 
 /**
+ * 最后一条 ask_user_question 的等待形态（BUG-005：活等待的兜底语义不同——
+ * wait:-1 无限期下 timed 600s 放行与文本消息兜底均不可用，只有真浏览器作答一条路）。
+ * @returns true = 无限期；false = timed/默认；null = 无 ask 或参数读不出（形态未知不猜测）。
+ */
+export function askIndefiniteOf(events) {
+  const last = [...events].reverse().find((j) => j?.type === 'tool/call' && j?.data?.name === 'ask_user_question')
+  if (last === undefined) return null
+  let args = {}
+  try { args = JSON.parse(last?.data?.arguments ?? '{}') } catch { return null }
+  if (!Array.isArray(args.questions)) return null
+  return args.wait === -1
+}
+
+/**
  * 工作区 run bundle 状态（位置=状态：工作区根 drt_* = 在飞；已交付归 archive/ 不在此列）。
  * @param wsRoot 研究工作区根。
  */
@@ -85,6 +99,7 @@ export function runStateOf({ logPath, wsRoot }) {
     events: events.length,
     hitlPending: readable ? hitlPendingOf(events).pending : null,
     askCalls: readable ? toolCallCount(events, 'ask_user_question') : null,
+    askIndefinite: readable ? askIndefiniteOf(events) : null,
     presentCalls: readable ? toolCallCount(events, 'present') : null,
     turnOpen,
     ...bundle,
