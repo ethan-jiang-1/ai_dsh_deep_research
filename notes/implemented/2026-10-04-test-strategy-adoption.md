@@ -84,7 +84,7 @@ client-load-smoke 磁盘真值对账 / watch-run 谓词化）、真入口路径�
 - 改动面（`src/client/`）真挂载：pack 构建 + `client-load-smoke`——22 条断言 PASS、2 条 FAIL
   （重入点描边 / ↻ rerun 回边）。**隔离反证**：还原裸版重建重跑，失败集完全一致——2 红与本
   改动无关，系绑定会话（`drt_2026-ai-video-generation-landscape`）盘侧真值与 UI 渲染的既有
-  错位，立 [BUG-003](../../_backlog/bugs/BUG-003-client-load-smoke-loop-edge-mismatch.md)
+  错位，立 [BUG-003](../../_backlog/_done/_fixed_bugs/BUG-003-client-load-smoke-loop-edge-mismatch.md)
   （P2）跟进，不阻断本条目。
 
 ## 环境状态

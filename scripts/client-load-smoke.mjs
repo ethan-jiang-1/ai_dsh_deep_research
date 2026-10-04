@@ -35,7 +35,7 @@ import { launchChromium, loadChromium } from './lib/playwright.mjs'
 import { readSessionEvents } from './lib/run-state.mjs'
 import { sessionBundleOf } from '../packages/deep-research-pack/src/lib/bundle-bind.ts'
 import { deriveSteps } from '../packages/deep-research-pack/src/lib/run-fold.ts'
-import { foldHitlPending } from '../packages/deep-research-pack/src/lib/hitl-fold.ts'
+import { deriveAnchors, foldHitlPending } from '../packages/deep-research-pack/src/lib/hitl-fold.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const arg = (name, fallback) => {
@@ -143,6 +143,7 @@ if (sessionGroup === undefined) {
   console.error('client-load-smoke: dev home sessions 里没有 research-workspace 会话组——先 source dev/env.sh 并跑一场 run')
   process.exit(2)
 }
+const candidates = []
 for (const { d, m } of readdirSync(join(sessionsRoot, sessionGroup))
   .map((d) => ({ d, m: (() => { try { return statSync(join(sessionsRoot, sessionGroup, d, 'session.v4.jsonl.zstd')).mtimeMs } catch { return 0 } })() }))
   .sort((a, b) => b.m - a.m)) {
@@ -152,12 +153,18 @@ for (const { d, m } of readdirSync(join(sessionsRoot, sessionGroup))
   const title = lastTitleOf(events)
   if (title === null || title.trim() === '') continue
   const slug = sessionBundleOf(events)
-  // 尾窗挂起谓词（↻ 回边盘侧真值的一半：deriveAnchors 的 loopOn = final 在场 或
-  // question 在场 + 尾部 ask 未答——HITL2 挂起也亮回边，不只是已交付）
-  if (slug !== undefined && boundSession === null) boundSession = { title, slug, tailAskPending: foldHitlPending(events).pending }
-  if (slug === undefined && unboundCandidates.length < 5) unboundCandidates.push({ title })
-  if (boundSession !== null && unboundCandidates.length >= 1) break
+  // 尾窗挂起谓词（BUG-003 合流：回边盘侧真值 = deriveAnchors 直调——锚点判型走 lib 同一
+  // 函数，不再手抄镜像；events 留存供 fileFacts 合成）
+  if (slug !== undefined) candidates.push({ title, slug, events, eventCount: events.length, tailAskPending: foldHitlPending(events).pending })
+  else if (unboundCandidates.length < 5) unboundCandidates.push({ title })
+  if (candidates.length >= 5 && unboundCandidates.length >= 1) break
 }
+// 绑定 = 近窗（新→旧前 5 个 slug 会话）中**事件最多**的一个：观察面断言的意图对象是真实
+// run 的渐进面，而最新会话可能是收尾判终态/探针等短会话（BUG-001 同族：期望随绑定态漂移
+// 的第三例——选最富样本，断言的"活动流 ≥3 行"等富度阈值才有稳定语义）。
+boundSession = candidates.length > 0
+  ? candidates.reduce((a, b) => (b.eventCount > a.eventCount ? b : a))
+  : null
 // 绑定 bundle 的磁盘真值（evidence 计数 / 交付态 / 问题行首行——与页签折算同口径；
 // slug 无 drt_ 前缀、目录名有——拼回；位置=状态两位置）
 const bundleBaseOf = (slug) => {
@@ -189,7 +196,8 @@ const expectedFace = boundSession !== null && bundleBaseOf(boundSession.slug) !=
 })() : null
 
 // 锚点三态盘侧真值（RFC cockpit-flow-face，混合折算口径）：passed = 文件事实（question.md /
-// final.md 在场 = 对应拍板落盘）——与 hitl-fold.deriveAnchors 同一谓词，盘侧独立取文件不 import 折算。
+// final.md 在场 = 对应拍板落盘，盘侧独立取文件）；pending 判型走 hitl-fold.deriveAnchors 合流
+// （BUG-003——旧手抄镜像停留在 BUG-002 前启发式，mid-flow 挂起误判回边）。
 // （pending 态的真值断言归 client-hitl-smoke：它用真模型造挂起并端到端观察。）
 const expectedAnchor = boundSession !== null && expectedFace !== null
   ? { passed: (expectedFace.hasQuestion ? 1 : 0) + (expectedFace.delivered ? 1 : 0) }
@@ -357,10 +365,12 @@ try {
         // 在飞 bundle 只做了一部分步骤——期望随磁盘走，不再隐含"六步全绿"）
         const expectedDone = expectedFace.steps.filter((s) => s.state === 'done').length
         step(rail.greens.length === expectedDone, '轨道 done = 盘侧步态真值（✓ 绿字步数与 deriveSteps 对账）', `绿字 ${rail.greens.length} / 盘侧期望 ${expectedDone}：${rail.greens.join('、') || '无'}`)
-        // 重入点描边与 ↻ 回边 = 已交付 run 的轨道面（loopOn 锚点 = question+final 都在场）；
-        // 在飞 bundle 无回边属如实渲染，断言随 delivered 分支。
-        step(expectedFace.delivered ? rail.reentry === 'dashed' : rail.reentry === null,
-          '重入点描边（回边落点 = 挖掘；已交付 run 才有回边）', `outline=${rail.reentry ?? '无'}（delivered=${expectedFace.delivered}）`)
+        // 重入点描边与 ↻ 回边 = 交付审阅锚非 upcoming 的轨道面（BUG-003 合流：盘侧直调
+        // deriveAnchors 与 UI 同一函数——mid-flow HITL1/契约外挂起不亮回边，HITL2 挂起亮）。
+        const diskAnchors = deriveAnchors(boundSession.events, { question: expectedFace.hasQuestion, delivered: expectedFace.delivered })
+        const loopExpected = diskAnchors[1] !== undefined && diskAnchors[1].state !== 'upcoming'
+        step(loopExpected ? rail.reentry === 'dashed' : (rail.reentry === null || rail.reentry === 'none'),
+          '重入点描边（回边落点 = 挖掘；交付审阅非 upcoming 才描边）', `outline=${rail.reentry ?? '无'}（loopOn=${loopExpected}）`)
         const evMatch = seg.match(/证据 (\d+) 份/)
         step(evMatch !== null && Number(evMatch[1]) === expectedFace.evidenceCount,
           '证据计数 = 磁盘真值（会话绑定 + 根/archive 两位置）', evMatch ? `${evMatch[0]}（磁盘 ${expectedFace.evidenceCount}）` : '未渲染')
@@ -369,10 +379,10 @@ try {
         // 锚点入轨断言（RFC cockpit-flow-face）：轨道渲染 + 诚实线计数与盘侧文件事实对账
         const railOk = seg.includes('◆立项确认') && seg.includes('◆交付审阅')
         step(railOk, '流程轨道渲染（◆立项确认 + ◆交付审阅在场）')
-        // ↻ 回边的完整真值（deriveAnchors.loopOn）：final 在场（已交付）或 question 在场 +
-        // 尾部 ask 未答（HITL2 挂起）——两者都亮回边；只排除"既没交付也没挂起"的在建态。
-        const loopExpected = expectedFace.delivered || (expectedFace.hasQuestion && boundSession.tailAskPending === true)
-        step(loopExpected === seg.includes('↻ 补研究'), '↻ rerun 回边 = 盘侧完整真值（交付 ∨ 挂起；loopOn 同谓词）', `delivered=${expectedFace.delivered} tailAskPending=${boundSession.tailAskPending}`)
+        // ↻ 回边盘侧真值（BUG-003 合流）：直调 hitl-fold.deriveAnchors（UI 同一函数）取
+        // 交付审阅锚态——旧手抄公式（delivered ∨ tailAskPending）停留在 BUG-002 前的
+        // 「一律记交付审阅」旧启发式，mid-flow 挂起被误判为回边应亮，废。
+        step(loopExpected === seg.includes('↻ 补研究'), '↻ rerun 回边 = 盘侧真值（deriveAnchors 合流，交付审阅锚非 upcoming）', `loopOn=${loopExpected}（anchor-2=${String(diskAnchors[1]?.state)} tailAskPending=${boundSession.tailAskPending}）`)
         if (expectedAnchor !== null && expectedAnchor.passed > 0) {
           step(seg.includes(`停靠点已过 ${expectedAnchor.passed} 个`), '停靠点诚实线 = 盘侧真值（文件事实独立重算）', `盘侧 passed=${expectedAnchor.passed}`)
         }

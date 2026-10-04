@@ -1,6 +1,6 @@
 # BUG-003：盘侧 tailAskPending=true 的绑定会话，观察面不渲染 ↻ rerun 回边
 
-> 严重级别：P2（次要——观察面诚实线断言红，不影响研究流程）｜发现：2026-10-04｜状态：活跃
+> 严重级别：P2（次要——观察面诚实线断言红，不影响研究流程）｜发现：2026-10-04｜状态：活跃 — 已修复 2026-10-04：smoke 删旧手抄镜像、直调 hitl-fold.deriveAnchors（root cause = 镜像停留在 BUG-002 前「一律记交付审阅」启发式；详见修复关联 + test-asset-completion Note）
 
 ## 症状
 
@@ -44,3 +44,10 @@ dev/harness-home 即此态，绑定 drt_2026-ai-video-generation-landscape）。
 未修（发现于 test-strategy 采纳条目的真挂载证据环节，隔离反证排除本次改动后建档）。
 修复落点候选：ResearchStatusTab 的 `loopOn`/回边谓词与 `deriveSteps`/盘侧谓词合流到
 `src/lib/` 同一折算函数（keyless 单测可钉）——与活动流/状态页签的既有折算层纪律同向。
+
+**已修复（2026-10-04，test-asset-completion 条目）**：诊断升级——UI 侧本就是对的
+（`deriveAnchors` 早已按 ask 判型，BUG-002 修复），错的是 smoke 的盘侧镜像公式停留在
+BUG-002 前的旧启发式（`delivered ∨ tailAskPending`），mid-flow 挂起被误判为回边应亮。
+修复 = smoke 删手抄公式、直调 `hitl-fold.deriveAnchors`（与 UI 同一函数，零镜像可漂移），
+描边/回边两断言随合流谓词；附带修复绑定富度（最新会话可能是收尾判终态短会话——BUG-001
+同族第三例，改近窗内取事件最多者）。live 证据：client-load-smoke 原两条红转绿、断言面全绿（断言清单见跑批输出——计数正本 = 跑批，不进散文）。
