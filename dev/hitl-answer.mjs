@@ -259,37 +259,39 @@ try {
     }
     answered.push({ step, prompt: promptText, selected: targetLabel })
     log(`hitl-answer: 第 ${step} 题 ← ${targetLabel}`)
-    // 前进：有 pager 且 cur < total → Next（精确文本）；末题或无 pager → Submit。
-    //   ⚠ Skip 不是前进（跳题留空），绝不点。
-    const pg = await pagerOf()
-    const fwdTexts = pg !== null && pg.cur < pg.total ? ['Next', '下一步'] : ['Submit', '提交']
-    let advanced = false
-    for (const lb of fwdTexts) {
-      const b = cardContainer().locator('button').filter({ hasText: new RegExp(`^${lb}$`) }).first()
-      if (!(await visible(b))) continue
-      const isDisabled = await b.evaluate((el) => el.disabled).catch(() => false)
-      if (isDisabled) { await page.waitForTimeout(600) }
-      try { await b.click({ timeout: 5000 }) } catch { await b.evaluate((el) => { el.scrollIntoView({ block: 'center' }); el.click() }).catch(() => {}) }
-      advanced = true
-      log(`hitl-answer: 前进 ← ${lb}（pager=${pg ? `${pg.cur}/${pg.total}` : '无'}）`)
-      break
+    // 前进（2026-10-04 第三场实测定模型）：**选项点击自带 auto-advance**（点击已选中项也会
+    // 推进——实测复点即翻页）——**Next 绝不点**（会多跳一题：点选项翻到 n+1 后再点 Next 直达
+    // n+2，实测跳题后 Submit 禁用空转）。只在 pager 已到末题（cur ≥ total）时点 Submit；
+    // 无 pager 的单题卡（HITL2 形态 1/1）同此。Skip 不是前进，绝不点。
+    await page.waitForTimeout(600)
+    const pgAfter = await pagerOf()
+    let submitted = false
+    if (pgAfter !== null && pgAfter.cur >= pgAfter.total) {
+      const sb = cardContainer().locator('button').filter({ hasText: /^(Submit|提交)$/ }).first()
+      if (await visible(sb)) {
+        const dis = await sb.evaluate((el) => el.disabled).catch(() => true)
+        if (!dis) {
+          try { await sb.click({ timeout: 5000 }) } catch { await sb.evaluate((el) => { el.scrollIntoView({ block: 'center' }); el.click() }).catch(() => {}) }
+          submitted = true
+          log(`hitl-answer: 末题已答（${pgAfter.cur}/${pgAfter.total}）——点击 Submit`)
+        } else {
+          log('hitl-answer: ⚠ 末题 Submit 仍禁用（有题未答？）——如实停止')
+          break
+        }
+      } else {
+        log('hitl-answer: 末题无 Submit 按钮——如实停止待人工核查')
+        break
+      }
     }
-    if (!advanced) { log(`hitl-answer: 第 ${step} 题后没找到前进按钮（${fwdTexts.join('/')}）——如实停止（已答 ${answered.length} 题）`); break }
-    await page.waitForTimeout(1600)
-    // 下一题判定：pager 前进（cur 变大）或新选项出现；二者都没有 → 检查是否已提交（卡头消）
-    const pg2 = await pagerOf()
-    const opts2 = await optionButtons().count()
-    if (pg !== null && pg2 !== null && pg2.cur > pg.cur) continue // 翻页成功，进下一题
-    if (pg === null && opts2 > 0) continue // 无 pager 卡的新选项（罕见形态）
-    if (opts2 === 0 && !(await headerAlive())) { log('hitl-answer: 选项与卡头俱消——提交完成'); break }
-    if (opts2 > 0 && (pg === null || (pg2 !== null && pg2.cur === pg.cur))) {
-      // pager 没动但选项还在——前进可能没生效，再等一轮再验一次
-      await page.waitForTimeout(2000)
-      const pg3 = await pagerOf()
-      if (pg3 !== null && pg !== null && pg3.cur > pg.cur) continue
-      log('hitl-answer: ⚠ 前进后 pager 未动——如实报告（可能需要人工看卡）')
-      break
+    // 非末题：等 auto-advance 渲染下一题（pager 前进或选项更换），不带任何按钮点击
+    for (let w = 0; w < 12; w++) {
+      await page.waitForTimeout(700)
+      const pg2 = await pagerOf()
+      const opts2 = await optionButtons().count()
+      if (pgAfter !== null && pg2 !== null && pg2.cur > pgAfter.cur) break
+      if (opts2 > 0 && !(await headerAlive())) { log('hitl-answer: 卡头消——提交完成'); submitted = true; break }
     }
+    if (submitted) break
   }
 
   log(`hitl-answer: 共作答 ${answered.length} 题`)
