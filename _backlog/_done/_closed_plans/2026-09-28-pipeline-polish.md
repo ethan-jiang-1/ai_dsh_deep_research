@@ -1,6 +1,6 @@
 # 推敲：全环节打磨与节点质量门（第二阶段收纳面）
 
-> 状态：推敲中｜毕业门判断 = 待触发（第一阶段判据已钉 2026-09-29：连续 3 场〔救场边界含通道死代驱〕，见毕业门；反向门 = 质量塌方实证可提前插队）——**2026-10-03 用户拍板开始推进第二阶段，门建议转健康遥测（计数照记不拦拆卡），待拍板**｜下一步 = **面⑤首棒已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-hitl-docking-polish.md)：拍板记账 + 交付四步序列 + 摘要自检落地，L0/L1/L4-lite/快照三层全绿；B2 mcp 在途债随 fixture 换代清偿）；**面②已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-wave0-leads-polish.md)：skill 三对账 + node-gate v2 门 L〔字段齐 + topic 覆盖〕先红后绿，四档全绿）；**面③已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-wave1-dig-polish.md)：synthesis「未取得≠没有」+ team-assembly 事中调度〔锚点重叠改派/补搜独立任务〕；补搜轮次 4 场确认不改、spawn 规模无过载不改——证据入卡）；**面④已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-wave2-synthesis-polish.md)：门④版本记账 + 断代，活体回验修复两处门缺陷，tests 140/0）；**面⑦已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-node-topology-procedure.md)：changing-node-topology 开发技能 + 三处指针）；**面①已毕业**（2026-10-03，[Note](../../notes/implemented/2026-09-28-strategy-benchmark.md)：三轴对标——迭代深度收敛维持、地板候选 A/B 入搁置池、OpenAI 非同构不采纳）——**七面全部收口（⑤②③④⑦① 毕业 + ⑥ 随 run）**，HITL1 侧待 run 采样证据、scope-round 待触发；缺陷线索照旧喂「已知与未决」
+> 状态：已毕业·触发达成（计数 3/3——2026-10-04 三场验收 run 连续，见正文第七场样本；2026-10-03"门转健康遥测"建议随触发达成消解：计数完成使命）｜去向 = 本卡迁 `_done/_closed_plans/`；余项 = 门L 分形推敲卡（[2026-10-04-leads-topic-shape](../../plans/2026-10-04-leads-topic-shape.md)）+ 面⑤ HITL1 侧待 run 采样（不立卡）+ 面⑥ 判据升格随 run（不立卡）+ 效果终验挂起（queue 头注）｜七面收口记录（下方原状态行内容）＝**面⑤首棒已毕业**（2026-10-03，[Note](../../../notes/implemented/2026-09-28-hitl-docking-polish.md)：拍板记账 + 交付四步序列 + 摘要自检落地，L0/L1/L4-lite/快照三层全绿；B2 mcp 在途债随 fixture 换代清偿）；**面②已毕业**（2026-10-03，[Note](../../../notes/implemented/2026-09-28-wave0-leads-polish.md)：skill 三对账 + node-gate v2 门 L〔字段齐 + topic 覆盖〕先红后绿，四档全绿）；**面③已毕业**（2026-10-03，[Note](../../../notes/implemented/2026-09-28-wave1-dig-polish.md)：synthesis「未取得≠没有」+ team-assembly 事中调度〔锚点重叠改派/补搜独立任务〕；补搜轮次 4 场确认不改、spawn 规模无过载不改——证据入卡）；**面④已毕业**（2026-10-03，[Note](../../../notes/implemented/2026-09-28-wave2-synthesis-polish.md)：门④版本记账 + 断代，活体回验修复两处门缺陷，tests 140/0）；**面⑦已毕业**（2026-10-03，[Note](../../../notes/implemented/2026-09-28-node-topology-procedure.md)：changing-node-topology 开发技能 + 三处指针）；**面①已毕业**（2026-10-03，[Note](../../../notes/implemented/2026-09-28-strategy-benchmark.md)：三轴对标——迭代深度收敛维持、地板候选 A/B 入搁置池、OpenAI 非同构不采纳）——**七面全部收口（⑤②③④⑦① 毕业 + ⑥ 随 run）**，HITL1 侧待 run 采样证据、scope-round 待触发；缺陷线索照旧喂「已知与未决」
 
 ## 背景 / 触发
 
@@ -10,7 +10,7 @@
 - **第二阶段 = 逐环节打磨**：每个环节都要过一遍专业化推敲——"专业的 Deep Research 怎么做、策略怎么弄、wave0 怎么搞、wave1 怎么搞、wave2 怎么搞；保障质量的话，每个节点之间怎么做质量门"。本卡就是这个阶段的**思考收纳面**（不是任务、不调度）。
 - **节点拓扑保持可调**：今后可能加节点、调整节点——轨道（两◆ + 七步 + 回边）是当前态不是终态。
 
-触发本卡的体感来源：首场 trial（drt_cn-us-open-source）暴露的环节级问题——轨道可读性、HITL2 范围细节无户口（见 [2026-09-28-hitl2-scope-round](../_done/_closed_plans/2026-09-28-hitl2-scope-round.md)）、L2 安装域缺口——说明环节间缝隙要在跑顺后系统过一遍。
+触发本卡的体感来源：首场 trial（drt_cn-us-open-source）暴露的环节级问题——轨道可读性、HITL2 范围细节无户口（见 [2026-09-28-hitl2-scope-round](2026-09-28-hitl2-scope-round.md)）、L2 安装域缺口——说明环节间缝隙要在跑顺后系统过一遍。
 
 ## 已知与未决
 
@@ -39,21 +39,21 @@
 
 **2026-10-03 基座适配复查**（用户拍板开始推进第二阶段，触发本轮逐面对照）——卡片成文（09-28）后基座动了一轮：vendor pin 仍钉 `dsh-v0.2.0-rc.2`（fetch 全 tag 确认无新 tag），调整 = 0.2.0 适配与其上的采纳面：插件货架三件（timed ask-user 600s + hitl-fold v5／tool-goal 护栏〔pilot 一场真 run 已验〕／session-query 五工具进 lead+critic）、mcp-playwright 常驻（默认挂载）、NODES.md 八节点契约 + schema-scan（在场级全行）+ node-gate v1（交付两门 + PASS-RELAY 操作侧补齐通道）、BUG-001/002 观察面诚实性修复、guides/61 §0 通道纪律（通道必须用户终端起）。逐面判定：
 
-- ① 策略对标——**适应**；喂料更新：模型能力轴已由 [dispatch-distillation 毕业](../../notes/implemented/2026-09-29-dispatch-distillation.md)占用（任务派发合同四件入 team-assembly），搜索预算变量新增渲染通道成本；
+- ① 策略对标——**适应**；喂料更新：模型能力轴已由 [dispatch-distillation 毕业](../../../notes/implemented/2026-09-29-dispatch-distillation.md)占用（任务派发合同四件入 team-assembly），搜索预算变量新增渲染通道成本；
 - ② wave0——**适应**；新变量 = 渲染通道改侦察可达面（SPA 线索不再天然排除，样本 4 正证）；
 - ③ wave1——**适应**；派发合同已写，spawn 规模／每 lead 挖深／补搜轮次仍开放；
 - ④ wave2——**适应**（基座本轮无触点）；
-- ⑤ HITL 停靠点——**改口**：原列「挂起显性化与诚实线」已被基座大部分承接（timed pending 语义＋hitl-fold v5＋goal pause/resume 护栏＋BUG-002 锚点判型修复），余下 = HITL1 问项质量与时机、HITL2 人机工学（≤200 字、选项与推荐）、拍板记录纪律、hitl2-scope-round 试点；G8 三实例全落在本面 = 推进证据最密处（**首棒已毕业 2026-10-03**：拍板记账 + 交付四步序列 + 摘要自检——[Note](../../notes/implemented/2026-09-28-hitl-docking-polish.md)；余 HITL1 侧与 scope-round 待证据/触发）；
+- ⑤ HITL 停靠点——**改口**：原列「挂起显性化与诚实线」已被基座大部分承接（timed pending 语义＋hitl-fold v5＋goal pause/resume 护栏＋BUG-002 锚点判型修复），余下 = HITL1 问项质量与时机、HITL2 人机工学（≤200 字、选项与推荐）、拍板记录纪律、hitl2-scope-round 试点；G8 三实例全落在本面 = 推进证据最密处（**首棒已毕业 2026-10-03**：拍板记账 + 交付四步序列 + 摘要自检——[Note](../../../notes/implemented/2026-09-28-hitl-docking-polish.md)；余 HITL1 侧与 scope-round 待证据/触发）；
 - ⑥ 节点间质量门——**适应且更具体**：机械两层已上岗（在场级 schema-scan／判据级 node-gate 交付两门），余 = 八节点判据逐行升格（随 run 证据，防假牙齿）＋对抗/机械/数值配比；
 - ⑦ 拓扑演进——**改口**：同步面已从「三处」涨到六处（NODES.md／模板六件／手册／cockpit STEP_ORDER（`run-fold.ts`）／schema-scan／node-gate），改轨道程序仍缺、原文「三处同步」过时。
 
 **计数**：连续无救场计数 **3/3——第一阶段判据达成**（2026-10-04 三场验收 run 连续）（划界题已拍板 2026-10-03，见毕业门①：授权代驱不算、故障代驱算——追溯适用，样本 3/4 的判定不变）；样本 4（pilot bundle）已交付**已归档**（2026-10-03 用户确认，D17 位置=状态）。
 
-1. **专业 DR 方法论对标**：策略层深化——移植只解决了"内核在场"，与专业 DR（OpenAI DR 等）的策略取舍（搜索预算分配、迭代深度、终止条件）尚未逐项对过（**已收口 2026-10-03**：迭代深度收敛〔源仓 emergent_rounds=1 = 本仓 4 场实证只补一轮〕、地板缺失与数量型终止部分缺失 = 候选 A/B 入搁置池；OpenAI = end-to-end RL 非同构不采纳——[Note](../../notes/implemented/2026-09-28-strategy-benchmark.md)）。
+1. **专业 DR 方法论对标**：策略层深化——移植只解决了"内核在场"，与专业 DR（OpenAI DR 等）的策略取舍（搜索预算分配、迭代深度、终止条件）尚未逐项对过（**已收口 2026-10-03**：迭代深度收敛〔源仓 emergent_rounds=1 = 本仓 4 场实证只补一轮〕、地板缺失与数量型终止部分缺失 = 候选 A/B 入搁置池；OpenAI = end-to-end RL 非同构不采纳——[Note](../../../notes/implemented/2026-09-28-strategy-benchmark.md)）。
 2. **wave0 机制（侦察，scout）**：leads 映射波次——搜索面怎么铺、主题怎么拆、leads 的覆盖判据（侦察产出质量直接决定 wave1 的天花板）。
 3. **wave1 机制（挖掘，analyst）**：证据采集波次——spawn 规模、任务板粒度、每 lead 挖多深、补搜轮次（synthesis 现行"只补一轮"是否最优）。
 4. **wave2 机制（综合，synthesis）**：纯综合先行与定向补搜的写作纪律、final/ 版本演进语义（扩张 +1、polish 原位）。
-5. **HITL1/HITL2 停靠点打磨**：用户唯二伸手的地方，优先级天然靠前——HITL1 三问的问项质量与时机（发生在用户最没 context 处：怎么问得省力、推荐项怎么拟才准）；HITL2 卡的人机工学（≤200 字纪律的遵守、选项与推荐、范围轮形态 = 关联卡 [2026-09-28-hitl2-scope-round](../_done/_closed_plans/2026-09-28-hitl2-scope-round.md)）、拍板记录（question.md §Decisions）、挂起显性化与诚实线的体验（**2026-10-03 复查改口：此小项基座已大部分承接**——timed pending＋hitl-fold v5＋goal 护栏＋BUG-002，余项见上方复查块⑤）。
+5. **HITL1/HITL2 停靠点打磨**：用户唯二伸手的地方，优先级天然靠前——HITL1 三问的问项质量与时机（发生在用户最没 context 处：怎么问得省力、推荐项怎么拟才准）；HITL2 卡的人机工学（≤200 字纪律的遵守、选项与推荐、范围轮形态 = 关联卡 [2026-09-28-hitl2-scope-round](2026-09-28-hitl2-scope-round.md)）、拍板记录（question.md §Decisions）、挂起显性化与诚实线的体验（**2026-10-03 复查改口：此小项基座已大部分承接**——timed pending＋hitl-fold v5＋goal 护栏＋BUG-002，余项见上方复查块⑤）。
 6. **节点间质量门**：每个节点之间怎么做质量门——进出门条件、谁把守（critic 对抗 / 机械审计 / 数值断言）、防假牙齿（floor 教训：先实测定口径再机械化）。
 7. **节点拓扑演进**：加节点/调节点的程序——改轨道的同步面已扩到六处（2026-10-03 复查改口，原文「三处同步」过时：NODES.md／模板六件／手册／cockpit STEP_ORDER／schema-scan／node-gate），目前无专门程序。
 

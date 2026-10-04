@@ -3,7 +3,7 @@
 > 状态：implemented
 
 出处：验收 run drt_2026-ai-coding-agent-landscape（2026-10-04）操作侧收尾的系统性发现；
-第二场 run（drt_2026-ai-browser-landscape）追加实证；喂 [pipeline-polish 卡](../../_backlog/plans/2026-09-28-pipeline-polish.md) 面②与技能传递面。
+第二场 run（drt_2026-ai-browser-landscape）追加实证；喂 [pipeline-polish 卡](../../_backlog/_done/_closed_plans/2026-09-28-pipeline-polish.md) 面②与技能传递面。
 
 ## 决定
 

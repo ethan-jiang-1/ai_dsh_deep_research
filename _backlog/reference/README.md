@@ -21,4 +21,4 @@
 
 | 文件 | 服务 | 一句话 |
 |---|---|---|
-| [2026-10-03-strategy-benchmark-sources.md](2026-10-03-strategy-benchmark-sources.md) | [pipeline-polish 面①](../plans/2026-09-28-pipeline-polish.md) | 专业 DR 三轴对标材料：源仓 research_style_params 全参数化 + Anthropic 工程自述一手 + OpenAI 系统卡物种边界；采纳候选 A/B 带触发条件 |
+| [2026-10-03-strategy-benchmark-sources.md](2026-10-03-strategy-benchmark-sources.md) | [pipeline-polish 面①](../_done/_closed_plans/2026-09-28-pipeline-polish.md) | 专业 DR 三轴对标材料：源仓 research_style_params 全参数化 + Anthropic 工程自述一手 + OpenAI 系统卡物种边界；采纳候选 A/B 带触发条件 |

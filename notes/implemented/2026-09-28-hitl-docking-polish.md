@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-出处：[pipeline-polish 卡](../../_backlog/plans/2026-09-28-pipeline-polish.md) 2026-10-03 基座
+出处：[pipeline-polish 卡](../../_backlog/_done/_closed_plans/2026-09-28-pipeline-polish.md) 2026-10-03 基座
 适配复查后面⑤首棒（主序 ⑤→②→③→④ 第一棒，2026-10-03 用户拍板开工）。
 
 ## 决定
