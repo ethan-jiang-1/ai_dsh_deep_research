@@ -22,3 +22,4 @@
 | 文件 | 服务 | 一句话 |
 |---|---|---|
 | [2026-10-03-strategy-benchmark-sources.md](2026-10-03-strategy-benchmark-sources.md) | [pipeline-polish 面①](../_done/_closed_plans/2026-09-28-pipeline-polish.md) | 专业 DR 三轴对标材料：源仓 research_style_params 全参数化 + Anthropic 工程自述一手 + OpenAI 系统卡物种边界；采纳候选 A/B 带触发条件 |
+| [2026-10-06-per-topic-card-distribution.md](2026-10-06-per-topic-card-distribution.md) | [queue §搁置池「per-topic 地板参数化」](../queue.md) | 候选 A ①步存量标定：25 场可数 / 68 primary topic，中位 13、p25=6、max=53，低于源仓地板 28/68（双条件未满足不立门）；quick_factual 型 6 场口径不可数（无 primary 标记） |

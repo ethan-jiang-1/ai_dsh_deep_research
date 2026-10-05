@@ -29,7 +29,11 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 export const CONTRACT_DATE = '2026-09-29'
 
 const read = (p) => (existsSync(p) ? readFileSync(p, 'utf8') : null)
-const mtimeDate = (p) => (existsSync(p) ? statSync(p).mtime.toISOString().slice(0, 10) : null)
+
+/** 本地日期 YYYY-MM-DD（journal/交付日期按本地时区落——UTC 计算在跨午夜窗口会把本地
+ * "今天"误判为未来日期，mcp-hosts run 2026-10-06 实录假阳性；UTC 滞后窗口最长 8 小时）。 */
+export const toDateStr = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+const mtimeDate = (p) => (existsSync(p) ? toDateStr(statSync(p).mtime) : null)
 
 /** 交付日：final.md mtime，回退 final/v1.md → question.md；全缺 = null（从严处理）。 */
 export function deliveryDate(bundleDir) {
@@ -105,7 +109,7 @@ export function scanBundle(bundleDir) {
 
 /** 全量扫描 + 断代定红。dates 可按 slug 注入交付日（tests 用——夹具 mtime 不可靠）。 */
 export function scanAll(bundleDirs, { contractDate = CONTRACT_DATE, today, dates = {} } = {}) {
-  const now = today ?? new Date().toISOString().slice(0, 10)
+  const now = today ?? toDateStr(new Date())
   const rows = bundleDirs.map((d) => {
     const b = scanBundle(d)
     const date = dates[b.slug] ?? deliveryDate(d)
