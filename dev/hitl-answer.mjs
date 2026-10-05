@@ -273,9 +273,11 @@ try {
   // 自动推进选中态，点击计数不可作判据——实测点击 0 次而批全 Recommended 的假红形态）。
   // 读窗有界重试（BUG-007 关联：日志帧批量落盘，answer 事件可能晚于短读窗数秒——等谓词，
   // 不固定睡；最多 4 读 × 3s，仍不落地才如实红）。
+  // landedBatch 声明在裁决块外（作用域教训：块内声明 + 块外 provenance 引用 = 裁决通过后必崩，
+  // 答案落地但 provenance 永丢——license run HITL2 实录，第三缺口）。
+  let landedBatch = []
   {
     let verdict = null
-    let landedBatch = [] // 裁决通过时实际落地的 answer 批（provenance 的权威数据源——BUG-014 第二缺口：UI 预选零点击时点击日志为空，批不为空）
     if (DRY) {
       verdict = driveVerdict({ dryRun: true, settled: false, batch: [], clickCount: answered.length })
     } else {
@@ -296,10 +298,12 @@ try {
     log(`hitl-answer: 盘侧裁决——${verdict.reason}`)
     process.exitCode = verdict.exitCode
   }
-  // 代理模拟 provenance（BUG-014 正修 ×2）：盘侧裁决通过（answer 真落地）才写盘——数据源 =
+  // 代理模拟 provenance（BUG-014 正修 ×3）：盘侧裁决通过（answer 真落地）才写盘——数据源 =
   // **实际提交的 answer 批**（batchToAnswered，id 作标签），不以点击日志为准（DSH UI 预选推荐项、
   // 零点击 Submit 时点击日志为空——第二缺口实录：mcp-hosts run HITL2 预选形态零写盘）。
   // dry-run 不写；裁决红不写；批与点击日志双空 = answer 未落地不写。HITL1 窗口（无 bundle）响亮延迟。
+  // ⚠ 作用域教训（第三缺口实录）：landedBatch 必须声明在裁决块之外——块内声明 + 块外引用
+  // = ReferenceError，裁决通过后必崩（答案已落地但 provenance 永远丢失，且 node --check 查不出）。
   const provAnswered = batchToAnswered(landedBatch).length > 0 ? batchToAnswered(landedBatch) : answered
   if (!DRY && provAnswered.length > 0 && process.exitCode === 0) {
     const wsRoot = join(ROOT, 'research-workspace')
