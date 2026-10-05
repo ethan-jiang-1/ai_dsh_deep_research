@@ -13,13 +13,29 @@
 |---|---|---|
 | 产品包 | bundle、preset、产品 runtime skills、驾驶舱 client、部署 bin、发布种子 | [pack README](../packages/deep-research-pack/README.md)、[插件作者指南](guides/62-plugin-authoring.md) |
 | 启动与开发驱动 | vendor 构建、环境隔离、生成物同步、安装组合、web 启动、会话驱动 | [开发环](guides/60-dev-loop.md)、[boot-run](../dev/boot-run.sh) |
-| 研究运行数据 | 角色会话 cwd、共享手册、节点契约、模板、每次研究 bundle | [研究手册](../research-workspace/AGENTS.md)、[NODES](../research-workspace/NODES.md) |
+| 研究运行数据 | 角色会话 cwd、共享手册、节点契约、模板、每次研究 bundle | [研究手册](../research-workspace/AGENTS.md)、[NODES](../research-workspace/NODES.md)、[状态与循环](design/50-agent-loop-and-state.md) |
 | 验证与调试 | 静态门禁、确定性回归、挂载/安装/浏览器 smoke、回放、run 审计和观察 | [验收合同](evaluation.md)、[脚本指令](../scripts/AGENTS.md)、[测试指令](../tests/AGENTS.md) |
 | 人机交互 | Web 中的问卡、会话流、任务板、驾驶舱与交付面板；独立 HTML 仪表盘提供观察投影 | [驾驶舱设计](design/40-research-cockpit.md)、[Run 指南](guides/61-run-playbook.md) |
 
 根与子树的开发 `AGENTS.md`、开发技能 `.agents/skills/` 指导 Coding Agent 改仓库；
 研究工作区的 [AGENTS.md](../research-workspace/AGENTS.md) 与包内角色技能指导研究团队执行研究。
 两套技能服务不同任务。团队职责分别是 Lead 立项/综合/交付、Scout 找方向、Analyst 取证、Critic 审查。
+
+## 任务入口矩阵
+
+每个任务只有一个首选入口；Agent Loop 与四类运行状态的合同正本 = [design/50](design/50-agent-loop-and-state.md)，节点 I/O = [NODES](../research-workspace/NODES.md)，命令与前置正本 = [开发环 §2](guides/60-dev-loop.md)。
+
+| 任务 | 首选入口 | 写盘 | 档位 | 事实来源 | 失败后的下一站 |
+|---|---|---|---|---|---|
+| 启动一次研究 | `bash dev/boot-run.sh`（占前台） | 是（会话与 bundle） | boot keyless；run 需凭据 | [Run 指南](guides/61-run-playbook.md) | boot 终端报错 → 下文「调试先看哪份事实」 |
+| 继续在飞 run | 同上；起来后 lead 会话说「继续 \<slug\>」 | 是 | 同上 | bundle 文件 + [Run 指南](guides/61-run-playbook.md) | bundle 缺件 → NODES 判据定位 |
+| 观察在飞 run | boot 自带后台仪表盘 + Web 驾驶舱 | 只读投影 | 浏览器 | [驾驶舱设计](design/40-research-cockpit.md) | 页签坏 → client-load-smoke |
+| 回答 HITL | Web GUI 选项卡（产品面）；代理代答 = `dev/hitl-answer.mjs`（开发面） | 是 | 浏览器；代答需真挂起在场 | [Run 指南](guides/61-run-playbook.md) | 卡未弹 → watch-run 看挂起谓词 |
+| 查看 run 状态与交付 | `research-workspace/drt_<slug>/` 文件事实（仪表盘只是投影） | 只读 | keyless | [NODES](../research-workspace/NODES.md) | 交付不明 → node-gate 门②③ |
+| 验证挂载（插件真挂载） | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs` | 否 | keyless 真挂载 | [开发环 §2](guides/60-dev-loop.md) | 红 → preset 源 + render-overlay 后复跑 |
+| 验证安装 | `source dev/env.sh && node scripts/release-smoke.mjs` | 是（测试 profile） | keyless（`--install-only` 跳凭据） | [开发环 §2](guides/60-dev-loop.md) | 红 → pack 发布集对账 |
+| 查漂移（镜像一致性） | boot-run 漂移门（启动即查，不静默用旧镜像） | 否 | keyless | boot-run 输出 | 红 → 按失败消息重装镜像 |
+| 定位故障 | 下文「调试先看哪份事实」表 | 只读 | keyless | 现象 → 事实源映射 | 事实源看完仍不明 → watch-run / node-gate |
 
 ## 一次运行怎么串起来
 
@@ -98,7 +114,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 
 | 职责 | 查哪些入口 | 结果/支撑资产 |
 |---|---|---|
-| 门禁、挂载、安装、浏览器、回放与模型检查 | 上表具名入口 | `tests/` 与 `tests/fixtures/` 提供确定性消费路径 |
+| 门禁、挂载、安装、浏览器、回放与模型检查 | 上表具名入口 | `tests/` 与 [tests/fixtures taxonomy](../tests/fixtures/README.md) 提供确定性消费路径 |
 | 研究观察与运维 | [watch-run](../scripts/watch-run.mjs)、[run-dashboard](../scripts/run-dashboard.mjs)、[run-kickoff](../dev/run-kickoff.mjs)、[hitl-answer](../dev/hitl-answer.mjs) | `dev/smoke-workspace/` 放日志与 HTML；会话日志在开发 home；bundle 在研究工作区 |
 | 分发生成 | [export-dist](../scripts/export-dist.mjs) | `_dist/` 生成包与安装手册；安装可用性由 L2 证明 |
 | 环境与生成物 | [env](../dev/env.sh)、[vendor-build](../dev/vendor-build.sh)、上方同步生成器 | vendor 构建产物、overlay、发布种子 |
@@ -127,7 +143,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 
 ## 已知限制与延后工作
 
-- `scripts/` 同时包含检查、运维、投影和导出，物理布局依靠职责索引解释；职责分组与目录取舍见
+- `scripts/` 同时包含检查、运维、投影和导出，物理布局依靠[职责索引](../scripts/README.md)解释；`dev/` 同理见 [dev 入口说明](../dev/README.md)；职责分组与目录取舍见
   [目录与入口治理 Note](../notes/implemented/2026-10-05-project-navigability.md)。
 - `layering` 主要扫描顶层测试文本；默认 run-state 回归的日志读取路径使用原生 Node 解码，覆盖直读、连续帧及损坏日志，零外部解压子进程。
   真实部署与浏览器脚本仍属于分级 smoke，不进入默认回归。

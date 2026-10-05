@@ -133,6 +133,8 @@ source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --tok
 
 ## 5. 中断与恢复
 
+四类运行状态（run bundle / session log / goal·任务板 / 观察面）的 canonical 合同与恢复优先级正本 = [design/50](../design/50-agent-loop-and-state.md)——本节只载人的操作步骤。
+
 - 任何时候可关页面/停机。恢复 = 重跑 `boot-run.sh` → 新开 lead 会话说
   "继续 <slug> 这个 run"——lead 只凭 `drt_<slug>/` 的文件事实重建上下文，
   不依赖聊天记忆；

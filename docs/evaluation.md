@@ -64,6 +64,7 @@
 | `plans-liveness` | `_backlog/plans/` 每张活跃推敲卡（tracked .md，非 README）：① 文件名 = `YYYY-MM-DD-<slug>.md`（与 notes 树同格式——2026-10-03 定调；归档 `git mv` 文件名不变，日期流在归档侧可读）；② 首部 12 行内有「状态：…毕业门判断 = <值>」户口行；③ **索引交叉对账**（2026-10-03 借鉴 loop_advisor）：plans/bugs/reference 三活跃面 + _done 五池，每个文件必须被其 README 索引点名（孤儿即红；反方向归 md-links）。层契约：`plans/README.md` 缺席 = 红；0 卡 = 合法空态（note 声明——company 同款空转） | [backlog-deliberation-space](../notes/implemented/2026-09-28-backlog-deliberation-space.md)（无户口行卡注入 → 红 → 补行绿；错名卡 `260928_Bad Name.md` → 红 → 还原绿；untracked 注入不可见 = `git ls-files` 索引面，staged 后兜住——同 md-links 边界）；③ 的反证与上岗战果 = [backlog-governance-borrow](../notes/implemented/2026-10-03-backlog-governance-borrow.md)（孤儿注入 → 红 → 移除绿；上岗首轮即抓真孤儿 261002 毕业漏索引——补行绿） |
 | `dist-manual-version` | dist 导出合同（精神移植参考仓 ai_dsh_architect 的 `docs/distribution.md`）：`_dist/安装手册.md` 是 tracked 生成物（生成器 = `scripts/export-dist.mjs`），必须在库；表头版本 = pack `package.json` 版本，且表头指名 `dsh-deep-research-pack-<version>.tgz`——版本 bump 不重导出即红（手册与旁边的 tarball 不能漂移） | [dist-export Note](../notes/implemented/2026-09-28-dist-export.md)（表头版本注入 `9.9.9` → 红 → 还原绿） |
 
+- **契约回归**（`pnpm test` 守卫族的面对应登记）：可驾驭性契约 = [tests/navigability-contract.test.mjs](../tests/navigability-contract.test.mjs)（design/50 与状态合同唯一正本、任务入口矩阵九任务与链接目标、scripts/dev/fixtures 资产索引全覆盖、fixture 每组真实 consumer 零孤儿——D23 立红与反证记录 = 条目 RFC 实施记录）；fixture 分类 = [tests/fixtures/README.md](../tests/fixtures/README.md)；其余守卫的归属见各自文件头注。
 - **通过判据**：全绿；`verify` 的门禁清单与 `tests/` 守卫一一登记在案，每条带反证记录（上表）。
 - **何时跑**：每轮 goal 续驶必跑。
 

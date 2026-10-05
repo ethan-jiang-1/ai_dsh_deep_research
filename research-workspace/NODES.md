@@ -1,6 +1,8 @@
 # NODES — 节点 I/O 契约全表（角色开工对照正本）
 
 > 正本地位：本表由推敲卡 2026-09-28-node-io-schema 定稿（2026-09-29 用户逐节点过目）。
+> 状态合同（run bundle / session log / goal·任务板 / 观察面的 canonical 与恢复优先级）正本 =
+> 仓库 docs/design/50-agent-loop-and-state.md——本表只持节点 I/O；随包部署的种子不带仓内链接，故此处纯文本指路。
 > 三要领 = **文件即接口**（节点之间只传 bundle 文件）/ **在场即完成**（输出在场且必备件齐
 > = 节点完成）/ **模板即 schema 实例**（字段级契约住 templates/run/，不另造格式清单）。
 > 加节点/调节点 = 改本表 + 同步 cockpit 渲染与步序正本（改轨道程序住 pipeline-polish 卡

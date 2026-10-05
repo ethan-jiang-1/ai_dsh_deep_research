@@ -81,3 +81,17 @@
 ## 实施记录
 
 - **R1（2026-10-05）**：RFC 落档（approved；未决点四项落定）；queue.md ▶ 行登记（卫生，可自主）；推敲卡 `git mv` 归档 `_done/_closed_plans/`，状态行补去向指针，plans/ 与 _closed_plans/ 两处索引同步。用户 steer（同日）= 条目级验收 TDD 化（D23）：验收节按四型绑定检查方式，流程正本 = guides/60 §0 验收门。后续轮次：R2 = Phase 0 基线 + 判据可检验化落地（四门展开为逐条检查：契约测试 `tests/navigability-contract.test.mjs` 与对账命令先立红并记录），R3–R4 = Phase 1 七项实现到绿（动 preset 则 render-overlay 先于 L1；动工作区正本则 sync-pack-workspace），R5 = Phase 2 反证 + 逐门对账，R6 = 同 diff 收尾（四门逐条对账全绿 + RFC 迁 implemented/ 正文改写 + 队列行删除 + entry-chain-probe）。
+- **R2（2026-10-05，Phase 0 基线 + 判据可检验化）**：
+  - **基线**：`pnpm verify` 全绿 + `pnpm test` 194/0（R1 收官实测、树同态复跑；BUG-013 为 snapshot-replay 冒烟面既有红，不在默认回归内，与本条目分离登记）。
+  - **盘点（Phase 0）**：`scripts/` 26 个 tracked 入口（根级脚本 + lib/ 七模块 + AGENTS.md/doc-budgets.json 配置件）；`dev/` 12 文件 + 3 目录（hooks/ 配置、harness-home/ 与 smoke-workspace/ 两个运行区）；`dev/smoke-workspace/` 盘上 77 项分类 = 运行日志（*.log）+ 探针留档（entry-chain-probe-*.md）+ 生成运行区（release-pack / run-pack / npm-cache / web.log / dashboard.html——由 boot-run、release-smoke、export-dist 写入，tracked 引用在案）+ regression-process-guard.mjs（被走查 Note 引用的原型）+ 各类一次性测试输出。引用证明齐备，**无删除候选**——未决点②按"只清点标状态"结案。
+  - **判据可检验化落地**：新增 `tests/navigability-contract.test.mjs`（keyless 契约回归 = 四门的机械面：design/50 在场且承载状态合同 + project-map/61/NODES 三导航面链接、入口矩阵九任务全覆盖 + 矩阵链接目标在场、scripts/README + dev/README + tests/fixtures/README 覆盖全量盘上入口、fixtures 每顶层组 ≥1 真实 consumer、状态合同词在非 owner 文档零重述）。
+  - **立红实测**：6 红 1 绿（design/50、三链接、矩阵、三个索引 README 均缺席即红；spot-grep 因合同词尚不存在而空转绿）。**反证实测（三针）**：注入孤儿 fixture 组（stub README 预置命名）→ 孤儿断言红（"零真实 consumer"）；向 README.md 注入状态合同词 → spot-grep 红；还原后回到 6 红 1 绿基线。consumer 形态归一化实证：`fixtures/<组>` 与 `join(..., 'fixtures', '<组>')` 两种写法皆有真实消费，六组全有 consumer（taxonomy 的输入事实）。
+  - **提交策略（D23 与绿提交不变量的调和）**：立红状态不落 git（沿"门禁带反证"先例——红证记录在案、红状态不提交）；本测试在工作树内保持红，R3–R4 实现到绿后**同 diff** 提交，并按 tests/AGENTS 在 docs/evaluation.md 对应面登记本契约测试。另：分片 commit 时 pre-commit 以临时索引对账，与工作树不一致的切片会被拦（R1 实拦一次）——R3/R4 提交用整片或次序化切片。工作树恢复四源（guides/60 §7）照常有效。
+- **R3（2026-10-05，Phase 1 实现到绿——契约测试 6 红 → 0）**：
+  - `docs/design/50-agent-loop-and-state.md` 新档落地（Agent Loop 四部件总览 + 四类状态 canonical 合同 + 恢复优先级 + 交付判定；体裁沿 design/40），[00-index 文档地图](../../docs/00-index.md) 登记；
+  - [project-map](../../docs/project-map.md) 增「任务入口矩阵」（九任务 × 唯一入口 × 写盘/档位/事实来源/失败下一站），面 表与已知限制节挂 design/50 与三个新索引；
+  - [61 §5](../../docs/guides/61-run-playbook.md) 挂 design/50 指针（操作步骤不冒充状态正本）；[NODES.md](../../research-workspace/NODES.md) 头部纯文本指路——种子部署侧不带仓内链接，契约测试断言相应细化为 repo 文档链接形态 / 种子纯文本两档；种子经 sync-pack-workspace 同步（9 文件）；
+  - 三个资产索引落地：[scripts/README](../../scripts/README.md)（职责分类 × 档位 × 事实来源，26 入口全点名）、[dev/README](../../dev/README.md)（环境/构建/同步 · run 通道 · 驱动 · 运行区，15 入口全点名，运行区标非 canonical）、[tests/fixtures/README](../../tests/fixtures/README.md)（六组 taxonomy：consumer / 证明内容 / 冻结规则 / 回归面）；
+  - [evaluation.md §L0](../../docs/evaluation.md) 增「契约回归」登记行（tests/AGENTS 同 diff 登记义务）；
+  - **红转绿实录**：契约测试 6 红 1 绿 → 修三处 → 7/7 绿、verify 全绿、tests 201/201。三处 = ①61 链接 `../` 前缀断言细化（合同细化非放宽）；②矩阵行名「验证插件挂载」→「验证挂载（插件真挂载）」——**测试抓到 RFC 词表与文档措辞的真实漂移，改文档不改判据**；③dev README 自指豁免。
+  - 余项（R4）：角色 skills 单向指针化（四分之六的 SKILL.md 含状态措辞；动 preset → render-overlay 先于 L1）、README + 根 AGENTS 首屏重排（doc-budgets 处置序）、根 AGENTS 布局「design/10-40」→「10-50」+ entry-chain 门禁成员清单同 diff 同步、61/研究手册深层重述修剪。
