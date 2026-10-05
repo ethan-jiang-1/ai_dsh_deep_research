@@ -13,11 +13,7 @@
 
 ## 队列
 
-▶ **项目可驾驭性 Phase 1——导航、Agent Loop 与状态模型**（卫生，可自主）——
-[RFC](../notes/proposed/2026-10-05-project-navigability-phase1.md)：先导航后迁移——Agent Loop
-与四类状态正本（design/50 新 reference）、入口矩阵、五文档单向指针、scripts 职责索引、
-fixtures taxonomy、README/AGENTS 首屏重排、dev 入口说明；零行为变更，验收判据可检验化
-（D23 红绿循环），四毕业门全绿收口（用户 2026-10-05 授权 ongoing goal 全程自主推进）。
+（队列空——待用户取题）
 
 > 另有既定效果终验挂起 = 下一场 run 的队友日志 grep 角色技能内容 + 门L 转绿判定
 > （[Note](../notes/implemented/2026-10-04-teammate-methodology-delivery.md) 环境状态节）。

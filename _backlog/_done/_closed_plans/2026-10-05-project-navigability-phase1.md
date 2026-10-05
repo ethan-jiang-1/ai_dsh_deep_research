@@ -1,6 +1,6 @@
 # 推敲：项目可驾驭性 Phase 1——导航、Agent Loop 与状态模型
 
-> 状态：已毕业｜毕业门判断 = 该做｜去向 = [RFC](../../../notes/proposed/2026-10-05-project-navigability-phase1.md)（2026-10-05 用户授权全程自主推进，转队列开工）
+> 状态：已毕业｜毕业门判断 = 该做｜去向 = [毕业 Note](../../../notes/implemented/2026-10-05-project-navigability-phase1.md)（2026-10-05 用户授权全程自主推进，同日交付）
 
 ## 背景 / 触发
 

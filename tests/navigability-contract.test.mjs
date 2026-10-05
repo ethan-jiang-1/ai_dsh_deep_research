@@ -1,4 +1,4 @@
-// 可驾驭性契约回归（D23 判据可检验化的机械面；RFC = notes/proposed/2026-10-05-project-navigability-phase1.md）。
+// 可驾驭性契约回归（D23 判据可检验化的机械面；条目 Note = notes/implemented/2026-10-05-project-navigability-phase1.md）。
 // 断言对象 = 仓库自控文件（keyless、纯 fs、零子进程、零网络——layering 守卫范围）。
 // 覆盖：正本门（design/50 在场 + 三导航面链接 + 状态定语零重述）、导航门（任务入口矩阵九任务
 // 全覆盖 + 矩阵链接目标在场）、资产门（scripts 职责索引 + dev 入口说明 + fixtures taxonomy
