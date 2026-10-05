@@ -102,3 +102,10 @@
   - **entry-chain 门禁成员扩列 design/50**（writing-a-gate 纪律执行：先加载技能全文 → 改 verify.mjs members + evaluation.md 行同步 → **注入反证**：加 bogus 成员 `docs/design/99-bogus.md` → entry-chain FAIL → 还原 → PASS；反证记录入 evaluation.md 该行）。
   - **README 首屏重排**：Start Here 增第四指针（想看懂运转 → project-map 任务入口矩阵 + design/50 状态合同），Directory Map 节折叠并入该指针（31 → 28 行，预算内净减）。
   - Phase 1 七项至此全数落地（第 3 项含"验证过、无需改"的如实记录——不发明工作）。验证：契约测试 7/7 + verify 全绿 + tests 201/201。
+- **R5（2026-10-05，Phase 2 反证对账——四门逐门对账全过）**：
+  1. **导航门**：冷启动走查（人工判据型）两起点全通——README 起点：第 4 指针（想看懂 → project-map + design/50）1 跳即达运行入口矩阵、调试表、状态正本；测试入口在 AGENTS 命令速查（入口链第 1 步）。AGENTS 起点：布局图 `design/10-50`、入口链后段 → project-map、入口链第 2 步 00-index 文档地图 → design/50——五目的地（运行入口 / Agent Loop 正本 / run 状态正本 / 测试入口 / 故障定位）均 ≤2 跳，全部链路 grep 实证在场。入口矩阵命令对账 ✓：boot-run / hitl-answer 文件在场、preset-smoke 与 release-smoke 命令与 guides/60 §2 正本逐字一致、漂移门在 boot-run.sh 实装、失败下一站引用（watch-run）与职责索引一致。
+  2. **正本门**：design/50 在场 + project-map/61/NODES 三面指针（契约断言）✓；**状态模型反证**：向 61 注入「仪表盘才是研究事实正本，恢复从它开始」→ spot-grep 精确红（报出文件 + 合同词 + 修正入口）→ 还原 → 7/7 绿 ✓；常态合同词零重述 ✓。
+  3. **资产门**：三索引全覆盖 + 每组 ≥1 真实 consumer（契约断言）✓；**逐条声称审计实抓两处虚账**：taxonomy 的 schema-scan←scripts/schema-scan.mjs 与 vendor-artifacts←scripts/lib/vendor-artifacts.mjs 声称不实（前者的夹具路径引用只在测试；后者的路径由测试经参数喂给 lib）→ 已修为确切声称（间接消费如实标注），审计 9/9 全实——契约测试只保证"每组 ≥1 consumer"，逐条声称的准确性由本次对账补上，反证价值当场兑现。
+  4. **行为门**：verify 全绿 + tests 201/201（R5 收官复跑）；本条目四个 commit 零运行件路径移动（唯一 git mv = 推敲卡归档，非运行件）；BUG-013 未触碰。
+  - **对账方法论教训（记档）**：一次性对账命令两次手抄判据形态出错（丢 `/`、引号形态漏）才暴露虚账疑云，第三次直接复用契约测试正则（单一判据源）才对齐——**对账命令要么复用契约判据源，要么其本身进契约测试**，不手抄第二份。
+  - **窄迁三条件评估（结论：不窄迁，维持索引）**：① 稳定 owner——部分成立（各职责类有 owner 面，但共享 scripts/ 目录为家，交叉在位）；② 独立生命周期——不成立（verify 每轮、smoke 按改动面、run 门每 run，同一发布常同时动）；③ 独立发现范围——不成立（tests glob、scripts readdir、smoke-contract 顶层扫描、真模型档 closed set 登记、`import.meta.url` 相对路径全部依赖顶层结构，递归发现与 manifest 未建）。三者不同时成立 → 不另立窄迁 RFC；触发条件维持推敲卡原文（三者同时成立时再立）。dev/ 同判（15 入口小盘面，运行区已 gitignored 隔离）。
