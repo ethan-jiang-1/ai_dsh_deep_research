@@ -138,9 +138,15 @@ source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --tok
 - 任何时候可关页面/停机。恢复 = 重跑 `boot-run.sh` → 新开 lead 会话说
   "继续 <slug> 这个 run"——lead 只凭 `drt_<slug>/` 的文件事实重建上下文，
   不依赖聊天记忆；
+- **会话日志尾部在通道死亡时不保证**（SIGTERM 后未落盘缓冲蒸发实测）——"文件即真相"只对
+  bundle 文件断言；盘侧谓词消费日志前先过回退检测（watch-run 内建，回退即 fail-loud），
+  跨会话取证的结论要意识到日志可能被截断（[BUG-007 卡](../../_backlog/_done/_fixed_bugs/BUG-007-channel-death-loses-log-tail.md)）；
 - **run 目标态（0.2.0 tool-goal）**：HITL1 拍板后 lead 用 create_goal 钉住本次 run
-  （objective = 定稿问题 + 交付判据）——goal-round-driver 随 base 在位，中断的回合会
-  自动续轮（韧性增益）；lead 在任何 ask 挂起前 pause goal、答后 resume（防空转），
+  （objective = 定稿问题 + 交付判据）——goal-round-driver 随 base 在位，会话存活期中断的
+  回合由 goal 驱动续轮（韧性增益；goal 语义随 run 生效有实测）；**通道死亡场景以文件恢复
+  为准，不假设自动续轮**（通道死亡下续轮未单独实测——机制描述须有盘面支撑，
+  [BUG-009 卡](../../_backlog/_done/_fixed_bugs/BUG-009-no-finalization-on-restart.md) 同款教训）；
+  lead 在任何 ask 挂起前 pause goal、答后 resume（防空转），
   goal 与 drt_ bundle 互为镜像、冲突以 bundle 文件事实为准；
 - **在飞与归档的位置**：在飞 run 住工作区根，交付后由操作侧移入
   `research-workspace/archive/<slug>/`（归档不消失——

@@ -16,3 +16,5 @@
 | [BUG-011](BUG-011-release-smoke-keyless-mismatch.md) | L2 keyless 与部署凭据检查冲突 | （显式安装模式；真实 L2 全绿；默认缺凭据拒绝） | 2026-10-05 |
 | [BUG-012](BUG-012-dashboard-state-divergence.md) | 仪表盘日志/HITL/步骤折算分叉 | （canonical 日志与共享折算；真实浏览器通过） | 2026-10-05 |
 | [BUG-014](BUG-014-hitl-answer-provenance-not-written.md) | hitl-answer 的"代理模拟记录"只打印不写盘——代答 provenance 静默丢失，拍板行误归因用户 | （scripts/lib/hitl-provenance 纯函数+写盘器 + 驱动裁决通过后接线 + 契约测试红先立；活体确认挂账 = 下一次代答写盘日志 + bundle grep 双证） | 2026-10-05 |
+| [BUG-007](BUG-007-channel-death-loses-log-tail.md) | 通道死亡丢会话日志尾部——settled run 回变"挂起未答"假态，盘侧谓词地基晃动 | （watch-run 回退检测 fail-loud + hitl-answer 读窗重试 + 61 §5 限定句 + 仪表盘显式非目标判定；vendor seam = 逐帧 flush + SIGTERM finalizer，随换 tag 重估） | 2026-10-05 |
+| [BUG-009](BUG-009-no-finalization-on-restart.md) | 挂起回合通道重启后没有被"终局化"——文档承诺的机制实测不存在 | （文档改写实测行为 + 读窗重试 + 横切盘点"自动X"句式三处逐条验证 + 自动续轮句加通道死亡限定；vendor seam = boot 中断回合对账，随换 tag 重估） | 2026-10-05 |
