@@ -205,3 +205,4 @@ drt_zhipu-api-pricing（**跨 run 复现 4 次**——本库最早的自证模�
 - 2026-09-29 | 外部校准 | HITL1 接收/澄清调研折入：P4 思考路径绑 ACH 区分性证据、
   P8 绑指标/信号；澄清纪律与深度推荐依据（检索往返锚）进 research-brief skill；
   预测型（What-If）不抢跑，留给增长协议。
+- 2026-10-05 | 收割 | mistral-api-model-list 命中 P2（清单档变体：多实体 × 字段矩阵，quick_factual 型，critic 在场）——复现 +1；编制条件性豁免全程正确（schema-scan 豁免注记 + 门L N/A）与 critic 在场各一，实证归合同漂移条。
