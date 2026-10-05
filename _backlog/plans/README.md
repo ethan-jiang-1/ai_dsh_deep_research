@@ -13,6 +13,7 @@
 
 | 卡 | 一句话 | 毕业门判断 |
 |---|---|---|
+| [2026-10-05-project-navigability-phase1.md](2026-10-05-project-navigability-phase1.md) | 先补齐 Agent Loop、状态模型、入口矩阵和测试资产索引，再决定是否窄迁目录 | 该做；先转 RFC/队列，再实施 |
 
 ## 卡片模板
 
