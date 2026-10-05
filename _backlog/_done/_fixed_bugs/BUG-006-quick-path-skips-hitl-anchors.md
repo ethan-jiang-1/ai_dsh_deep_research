@@ -1,6 +1,6 @@
 # BUG-006：quick_factual 题型下 lead 自我豁免 HITL1、HITL2 未拍板即 present——快路径无合同且无门禁可检
 
-> 严重级别：P1（重要——方法论两 HITL 锚点（D4 内核）在快题型上整体失效，且现有机械门禁对该失效不可见）｜发现：2026-10-05（系统探针 A：drt_swebench-verified-top）｜状态：活跃
+> 严重级别：P1（重要——方法论两 HITL 锚点（D4 内核）在快题型上整体失效，且现有机械门禁对该失效不可见）｜发现：2026-10-05（系统探针 A：drt_swebench-verified-top）｜状态：活跃 — 已修复并活体确认 2026-10-05（用户拍板"不豁免"路线）：persona HITL1 零例外句落地，同族快答题复测 HITL1 照发（四问卡、无 wait 参数）；node-gate 门①（HITL 锚点门）落地，确认 run（drt_openai-context-window）门①③②全 PASS。
 
 ## 症状
 
@@ -45,6 +45,20 @@ SPA 榜单快答题（P1 单点事实）全程 **askCalls = 0**：
   （askCalls 从会话日志事件形状可判，run-state 已有 `toolCallCount`）。
 - **顺带**：`quick_factual` 的"快"需要标定（本场 30+ 分钟 vs 快答预期 1–2 屏）——深度
   纪律对 P1 的适用边界（要不要限制 subagent 数/轮次）随合同决定一并写清。
+
+## 修复关联
+
+已落地（2026-10-05，用户拍板"不豁免"路线；TDD 红→绿，门①判据经三轮真数据打磨）：
+
+- **persona**：HITL1 行增「HITL1 零例外」——任何研究请求先发卡，题面自含答案时全取
+  推荐档照常发卡；presets.test 两断言钉（零例外句 + 推荐档操作）。
+- **node-gate 门①（HITL 锚点门）**：写过 `drt_<slug>/question.md` 的会话里 HITL1 签名
+  （研究类型问）ask ≥1，零 ask 红；断代 HITL_CONTRACT_DATE=2026-10-05 不追溯。
+  判据三轮真数据打磨（路径提及绑定 → 邻场 ask 串场；时间锚 → 历史场次穿透；终态 =
+  写事件会话绑定 + JSON 转义斜杠 normalize——presentInLogs 同款先例，每轮反证进
+  tests/node-gate.test.mjs）。
+- 活体确认：探针 D（drt_openai-context-window）同族快答题 HITL1 照发 → 交付 →
+  门①③②全 PASS；探针 A 现场（drt_swebench-verified-top）门① RED + 门③ G8 双红留档。
 
 ## 牵出的失败类
 
