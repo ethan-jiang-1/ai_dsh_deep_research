@@ -1,6 +1,6 @@
 # BUG-008：leads.md 状态词漂移（建议深挖 ≠ 建议挖深）穿透交付——critic 未狩猎、门L 只能事后
 
-> 严重级别：P2（次要——机械门拦住了、交付物本体未坏；但暴露"交付前无人在环跑机械门 + critic 不查 leads 术语"两个流程洞）｜发现：2026-10-05（系统探针 E：drt_open-tts-2026-landscape）｜状态：活跃
+> 严重级别：P2（次要——机械门拦住了、交付物本体未坏；但暴露"交付前无人在环跑机械门 + critic 不查 leads 术语"两个流程洞）｜发现：2026-10-05（系统探针 E：drt_open-tts-2026-landscape）｜状态：活跃 — 已修复 2026-10-05（TDD：critic 狩猎清单第 4 线 + 61 §4 拍板前机械门步骤；模型可见文本全梯绿；待下一场含 leads 的 run 实测确认后归档）
 
 ## 症状
 
@@ -36,6 +36,18 @@ source dev/env.sh && node scripts/node-gate.mjs research-workspace/drt_open-tts-
   只覆盖 boot 面，交付面缺对称条款）。
 - **生成侧**（观察）：若漂移跨 run 复现，考虑 spawn prompt 第⑤件装载里加"状态词逐字"
   硬约束（装载扩六件）——先攒场次再动。
+
+## 修复关联
+
+已落地（2026-10-05，TDD 红→绿）：
+
+- **critic 狩猎清单第 4 线**：adversarial-review skill 增「leads 交接纪律狩猎」（状态值
+  逐字白名单 + 近形漂移「建议深挖」点名 + 字段齐自查 + 不重写只定位）；presets.test
+  三断言钉（狩猎节/白名单词/近形形态）。critic 在草稿段在场 → HITL2 前可拦。
+- **61 §4 拍板前机械门**：呈交纪律补"拍板前操作侧先跑 node-gate，门①/③/L 红先修再拍板"。
+- 生成侧（装载扩六件加"状态词逐字"）：按卡内修复方向攒场次再动。
+- 验证：verify 全绿 + tests 185/0；L1 preset-smoke ALL PASS；L4-lite 真模型 ALL PASS；
+  overlay 渲染同步；通道重启漂移绿。
 
 ## 牵出的失败类
 

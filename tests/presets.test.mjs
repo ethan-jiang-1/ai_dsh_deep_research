@@ -92,6 +92,14 @@ test('compatibility 矩阵钉住当前 tag', () => {
   assert.deepEqual(pkg.dsh.compatibility.dshReleases, ['dsh-v0.2.0-rc.2']);
 });
 
+test('critic adversarial-review 钉 leads 交接狩猎（BUG-008 契约：状态词漂移不可穿透交付）', () => {
+  const yml = readFileSync(join(PRESETS, 'critic', 'skills', 'adversarial-review', 'SKILL.md'), 'utf8');
+  // 契约文本三个必备面：狩猎节在场 + 白名单词逐字 + 近形漂移点名（建议深挖 = 必抓形态）
+  assert.match(yml, /leads 交接纪律狩猎/, '缺 leads 狩猎节——状态词漂移无审查面');
+  assert.match(yml, /建议挖深/, '白名单合同词缺席');
+  assert.match(yml, /建议深挖/, '近形漂移形态未点名（critic 不知道要抓什么）');
+});
+
 test('lead persona 钉 HITL1 零例外（BUG-006 契约：快路径自我豁免不可见即违法）', () => {
   const yml = readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8');
   // 契约文本两个必备面：零例外句在场 + 指明"题面自含答案"也必须问（取推荐档即时拍板）

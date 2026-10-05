@@ -116,6 +116,9 @@ source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --tok
 
 ## 4. HITL2（交付审阅）
 
+- **拍板前操作侧先跑机械门**：`source dev/env.sh && node scripts/node-gate.mjs
+  research-workspace/drt_<slug>`——门①/③/L 红在场 = 先让 lead 原位修再拍板（红门会
+  穿过 HITL2 落地，lead 自己跑不了门：无 bash）；
 - lead 带审阅建议来找你：证据充分性判断 + 交付/补研究推荐 + composition 确认
   （读者是谁 / 用来做什么 / 前景化重点）——拍板后 run 根 `final.md` 当前版落盘 + present 声明交付；
 - 每条关键结论带 `[来源: evidence/xx.md]`，critic 的 review.md readiness: PASS
