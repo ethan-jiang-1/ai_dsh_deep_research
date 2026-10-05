@@ -19,3 +19,4 @@
 | [BUG-007](BUG-007-channel-death-loses-log-tail.md) | 通道死亡丢会话日志尾部——settled run 回变"挂起未答"假态，盘侧谓词地基晃动 | （watch-run 回退检测 fail-loud + hitl-answer 读窗重试 + 61 §5 限定句 + 仪表盘显式非目标判定；vendor seam = 逐帧 flush + SIGTERM finalizer，随换 tag 重估） | 2026-10-05 |
 | [BUG-009](BUG-009-no-finalization-on-restart.md) | 挂起回合通道重启后没有被"终局化"——文档承诺的机制实测不存在 | （文档改写实测行为 + 读窗重试 + 横切盘点"自动X"句式三处逐条验证 + 自动续轮句加通道死亡限定；vendor seam = boot 中断回合对账，随换 tag 重估） | 2026-10-05 |
 | [BUG-013](BUG-013-lead-replay-persona-stale.md) | Lead 回放 persona 金标准未包含既有 HITL1 零例外规则——语料一代过期 | （录制器补 lead 支持[探针原文复用] + 真模型重录 + C 金标准 --update-expected 人审[窄带保持、比较器未动] + snapshot-replay 4 场景 ALL PASS——B1 站立红转绿） | 2026-10-05 |
+| [BUG-008](BUG-008-leads-term-drift-past-delivery.md) | leads.md 状态词漂移（建议深挖≠建议挖深）穿透交付——critic 未狩猎、门L 只能事后 | （critic 狩猎第 4 线 + 61 §4 拍板前机械门；实测确认 = drt_mcp-hosts-governance：门L PASS 22/22 零漂移 + critic 狩猎线在场工作） | 2026-10-06 |

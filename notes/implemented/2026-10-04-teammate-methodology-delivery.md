@@ -43,4 +43,5 @@
   （方法论到达），但 leads.md 模板形态与实体边界型任务天然不合**——"leads 形态契约按 topic
   类型分形"升级为独立推敲议题（方向清单型 vs 实体边界型 vs 通道地图型，三场 run 各出一种）；
   门L 的 `## 方向:` 计数判据需要按此重推敲（不排除判据本身演进）；
+- **效果终验终局（2026-10-06，drt_mcp-hosts-governance）**：队友日志 grep 角色技能内容 = **非零命中**（4/4 team 队友——scout→lead-mapping、analyst×2→evidence-extraction、critic→adversarial-review——各自技能路径与内容标记均在日志在场；第五会话 = subagent 一次性 worker，设计上不装角色技能）；**门L PASS**（22/22 单元字段齐、挖深 22/排除 0、覆盖 6/6，零漂移形态——第三场形态不合的问题本场未复发，实体边界型任务外的常规分型照常产出 leads）。挂账终验两半全绿，销账（queue 注记同步移除）。
 - run 通道重启（镜像重建）后新文本生效——本决定同 diff 已重启通道（代理配方自起）。

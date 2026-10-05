@@ -7,11 +7,23 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { provenanceLines, appendProvenance } from '../scripts/lib/hitl-provenance.mjs';
+import { provenanceLines, appendProvenance, batchToAnswered } from '../scripts/lib/hitl-provenance.mjs';
 
 const ANSWERED = [
   { step: 1, prompt: '定稿还是补研究？', selected: '按现稿定稿交付（Recommended）' },
 ];
+
+test('batchToAnswered：盘侧 answer 批 → answered 形态（id 作标签——UI 预选零点击形态的 provenance 数据源，BUG-014 第二缺口）', () => {
+  const batch = [
+    { id: 'delivery_review', selected: ['按现稿定稿（Recommended）'] },
+    { id: 'research_type', selected: ['探索性全景（Recommended）'] },
+  ];
+  assert.deepEqual(batchToAnswered(batch), [
+    { step: 1, prompt: 'delivery_review', selected: '按现稿定稿（Recommended）' },
+    { step: 2, prompt: 'research_type', selected: '探索性全景（Recommended）' },
+  ]);
+  assert.deepEqual(batchToAnswered(null), [], '批缺席 → 空数组（不猜）');
+});
 
 test('provenanceLines：两行都带代理模拟标注、作答内容与日期', () => {
   const lines = provenanceLines({ date: '2026-10-05', pick: 'recommended', answered: ANSWERED });

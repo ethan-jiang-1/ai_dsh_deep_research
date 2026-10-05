@@ -12,7 +12,7 @@
 
 | Bug | 标题 | 严重级 | 发现 |
 |---|---|---|---|
-| [BUG-008-leads-term-drift-past-delivery](BUG-008-leads-term-drift-past-delivery.md) | leads.md 状态词漂移（建议深挖≠建议挖深）穿透交付——critic 未狩猎、门L 只能事后 | P2 | 2026-10-05 |
+| （无活跃卡——bugs 池清零，2026-10-06；最近归档 = BUG-008 实测确认闭卡） | | | |
 
 ## 卡片模板
 

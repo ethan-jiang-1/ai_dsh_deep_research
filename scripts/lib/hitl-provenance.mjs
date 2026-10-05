@@ -8,6 +8,22 @@ import { appendFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 /**
+ * 盘侧 answer 批 → provenance 的 answered 形态（BUG-014 第二缺口正修：DSH UI 会预选推荐项，
+ * 驱动零点击直接 Submit 时点击日志为空——provenance 数据源必须是**实际提交的批**而非点击日志；
+ * 批形态 = [{id, selected: [...]}]，以 id 作题目标签）。
+ * @param {Array<{id?: string, prompt?: string, selected?: string[]}>} batch
+ * @returns {Array<{step: number, prompt: string, selected: string}>} 批缺席 → 空数组（不猜）。
+ */
+export function batchToAnswered(batch) {
+  if (!Array.isArray(batch)) return [];
+  return batch.map((b, i) => ({
+    step: i + 1,
+    prompt: String(b?.id ?? b?.prompt ?? ''),
+    selected: String(Array.isArray(b?.selected) ? (b.selected[0] ?? '') : (b?.selected ?? '')),
+  }));
+}
+
+/**
  * 生成两行 provenance 记账文本（纯函数）。
  * @param {{date: string, pick: string, answered: Array<{step: number, prompt: string, selected: string}>}} params
  *   date = YYYY-MM-DD；pick = 驱动选取模式；answered = 实际作答序列（驱动侧已逐题记录）。

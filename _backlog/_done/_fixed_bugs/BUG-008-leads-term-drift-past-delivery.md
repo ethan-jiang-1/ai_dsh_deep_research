@@ -1,6 +1,6 @@
 # BUG-008：leads.md 状态词漂移（建议深挖 ≠ 建议挖深）穿透交付——critic 未狩猎、门L 只能事后
 
-> 严重级别：P2（次要——机械门拦住了、交付物本体未坏；但暴露"交付前无人在环跑机械门 + critic 不查 leads 术语"两个流程洞）｜发现：2026-10-05（系统探针 E：drt_open-tts-2026-landscape）｜状态：活跃 — 已修复 2026-10-05（TDD：critic 狩猎清单第 4 线 + 61 §4 拍板前机械门步骤；模型可见文本全梯绿；待下一场含 leads 的 run 实测确认后归档）
+> 严重级别：P2（次要——机械门拦住了、交付物本体未坏；但暴露"交付前无人在环跑机械门 + critic 不查 leads 术语"两个流程洞）｜发现：2026-10-05（系统探针 E：drt_open-tts-2026-landscape）｜状态：已修复并实测确认（2026-10-06，drt_mcp-hosts-governance：门L PASS + critic 狩猎第 4 线在场——归档）
 
 ## 症状
 
@@ -54,3 +54,10 @@ source dev/env.sh && node scripts/node-gate.mjs research-workspace/drt_open-tts-
 **"词形漂移穿透语义审查"**—— critic 抓内容矛盾、机械门抓白名单外词形，但机械门在
 交付后才有机会跑。与 BUG-006 同向（交付前缺机械判）、与门L 升格（2026-10-04）的
 "语义识别 vs 字面白名单"边界互补：强调符可剥、词序漂移不可放。
+
+## 实测确认（2026-10-06，drt_mcp-hosts-governance——含 leads 的 team 型 run）
+
+- **门L PASS（修复实效的机械判定）**：22/22 方向单元字段齐、状态值 挖深 22 / 排除 0、primary/comparison 覆盖 6/6——**零漂移形态**（本场早期信号亦然：leads.md 状态词 25 处全合同形态）；
+- **critic 狩猎第 4 线在场且工作**：review.md 显式核查 leads 交接纪律（知道查「- 状态:」白名单与字段齐备），并诚实圈定核查范围（leads 未进最终交付链 → 建议门L 处机械核一遍）——修复设计的"critic 草稿段狩猎 + 门L 机械确认"分工如实呈现；
+- 交付链按修复后的操作序走完：HITL2 拍板前机械条件齐（readiness PASS 在前），门①②③L 全 PASS 交付。
+- 归档闭卡；生成侧（spawn prompt 状态词逐字硬约束）按卡内既定"攒场次再动"维持观察。

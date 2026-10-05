@@ -22,7 +22,7 @@ import { fileURLToPath } from 'node:url'
 import { loadChromium, launchChromium } from '../scripts/lib/playwright.mjs'
 import { runStateOf, readSessionEvents, bundleStateOf } from '../scripts/lib/run-state.mjs'
 import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf } from '../scripts/lib/ask-drive.mjs'
-import { appendProvenance } from '../scripts/lib/hitl-provenance.mjs'
+import { appendProvenance, batchToAnswered } from '../scripts/lib/hitl-provenance.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 // 与 dev/run-kickoff.mjs 同形：name 自带 `--`（本仓约定，别在 helper 里再加一次）
@@ -275,6 +275,7 @@ try {
   // 不固定睡；最多 4 读 × 3s，仍不落地才如实红）。
   {
     let verdict = null
+    let landedBatch = [] // 裁决通过时实际落地的 answer 批（provenance 的权威数据源——BUG-014 第二缺口：UI 预选零点击时点击日志为空，批不为空）
     if (DRY) {
       verdict = driveVerdict({ dryRun: true, settled: false, batch: [], clickCount: answered.length })
     } else {
@@ -288,18 +289,19 @@ try {
           : []
         const settled = s2.hitlPending === false && batch.length > 0
         const candidate = driveVerdict({ dryRun: false, settled, batch, clickCount: answered.length })
-        if (candidate.pass) { verdict = candidate; break }
+        if (candidate.pass) { verdict = candidate; landedBatch = batch; break }
         verdict = candidate // 保留最后一次（红），继续重试窗
       }
     }
     log(`hitl-answer: 盘侧裁决——${verdict.reason}`)
     process.exitCode = verdict.exitCode
   }
-  // 代理模拟 provenance（BUG-014 正修）：盘侧裁决通过（answer 真落地）才写盘——真把
-  // 「操作侧代理模拟」行追加进 bundle 的 question.md §Decisions 与 journal.md，不再只
-  // 打印承诺（此前症状：输出声称写盘、文件零命中，拍板行误归因用户）。dry-run 不写；
-  // 未提交成功或零作答不写（answer 没发生就不记）。缺件 fail-loud（lib 抛错即终止）。
-  if (!DRY && answered.length > 0 && process.exitCode === 0) {
+  // 代理模拟 provenance（BUG-014 正修 ×2）：盘侧裁决通过（answer 真落地）才写盘——数据源 =
+  // **实际提交的 answer 批**（batchToAnswered，id 作标签），不以点击日志为准（DSH UI 预选推荐项、
+  // 零点击 Submit 时点击日志为空——第二缺口实录：mcp-hosts run HITL2 预选形态零写盘）。
+  // dry-run 不写；裁决红不写；批与点击日志双空 = answer 未落地不写。HITL1 窗口（无 bundle）响亮延迟。
+  const provAnswered = batchToAnswered(landedBatch).length > 0 ? batchToAnswered(landedBatch) : answered
+  if (!DRY && provAnswered.length > 0 && process.exitCode === 0) {
     const wsRoot = join(ROOT, 'research-workspace')
     const { activeBundle } = bundleStateOf(wsRoot)
     if (activeBundle === null) {
@@ -308,12 +310,12 @@ try {
       // bundle 出现后补记（答案内容已逐题打印在下方）。
       log('hitl-answer: answer 已落地但工作区根无 drt_* bundle（HITL1 窗口常态）——provenance 延迟：bundle 实例化后由操作侧补记，勿隐去')
     } else {
-      const written = appendProvenance({ bundle: join(wsRoot, activeBundle), date: new Date().toISOString().slice(0, 10), pick: PICK, answered })
+      const written = appendProvenance({ bundle: join(wsRoot, activeBundle), date: new Date().toISOString().slice(0, 10), pick: PICK, answered: provAnswered })
       log(`hitl-answer: 代理模拟记录已写盘——${written.question} + ${written.journal}`)
     }
   } else if (DRY) {
     log('hitl-answer: dry-run——代理模拟记录不写盘')
-  } else if (answered.length > 0) {
+  } else if (answered.length > 0 || provAnswered.length > 0) {
     log('hitl-answer: 未提交成功（盘侧裁决红）——不写 provenance（answer 未落地，如实）')
   }
   for (const a of answered) log(`  Q${a.step}: ${a.prompt}\n     → ${a.selected}`)
