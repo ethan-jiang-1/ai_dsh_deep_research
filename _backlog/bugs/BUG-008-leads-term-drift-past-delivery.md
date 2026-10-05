@@ -1,0 +1,44 @@
+# BUG-008：leads.md 状态词漂移（建议深挖 ≠ 建议挖深）穿透交付——critic 未狩猎、门L 只能事后
+
+> 严重级别：P2（次要——机械门拦住了、交付物本体未坏；但暴露"交付前无人在环跑机械门 + critic 不查 leads 术语"两个流程洞）｜发现：2026-10-05（系统探针 E：drt_open-tts-2026-landscape）｜状态：活跃
+
+## 症状
+
+dr_open-tts-2026-landscape（exploratory_map + run 内方向修订）交付后 node-gate 门L RED：
+leads.md 里 **7 个方向单元的状态行写成「建议深挖」**（合同词 = 「建议挖深」，挖/深字序
+颠倒），同文件 A1–A4 又是正确的——**同一代内漂移**。语义对人不损（读者全懂），但
+机械白名单 correctly 判非法；且 critic 对抗审查 readiness PASS——**没有狩猎 leads.md
+的术语纪律**；交付（HITL2 拍板 + present）在门L 红的情况下照常完成。
+
+## 根因（假设，三层）
+
+- **生成侧**：scout 的 lead-mapping skill / templates 钉了合同词，但 spawn 队友的转写
+  仍是概率行为——本场 4 次 spawn（含方向修订触发的补搜轮），漂移集中在后段单元
+  （B 段全部 + A5/A7），与"修订后加 spawned 的轮次"相关（未确证）。
+- **审查侧**：critic 的对抗审查面 = final.md 本体；leads.md 的术语白名单不在其狩猎
+  清单（门L 设计注释说"计数对账归 skill 自检 + critic 狩猎"——狩猎清单里没有这条）。
+- **流程侧**：lead 无 bash、跑不了 node-gate——机械门只能操作侧事后跑，交付前无人在
+  环；门L 红**不阻塞** HITL2/present（门③②才阻塞），红门交付无拦截点。
+
+## 复现
+
+```sh
+source dev/env.sh && node scripts/node-gate.mjs research-workspace/drt_open-tts-2026-landscape
+# 门L RED：7 个单元状态值非法「建议深挖…」（其余四门 PASS；critic readiness PASS 在先）
+```
+
+## 修复方向
+
+- **critic 狩猎清单**（本仓，最小修）：adversarial-review skill 增一行 leads.md 术语
+  狩猎（状态值 ∈ {建议挖深, 已排除} 逐字；顺带字段齐自查）——critic 在草稿段就在场，
+  能在 HITL2 前拦住。
+- **操作序**（61）：呈交纪律补一步——HITL2 拍板前操作侧先跑 node-gate（当前"呈交纪律"
+  只覆盖 boot 面，交付面缺对称条款）。
+- **生成侧**（观察）：若漂移跨 run 复现，考虑 spawn prompt 第⑤件装载里加"状态词逐字"
+  硬约束（装载扩六件）——先攒场次再动。
+
+## 牵出的失败类
+
+**"词形漂移穿透语义审查"**—— critic 抓内容矛盾、机械门抓白名单外词形，但机械门在
+交付后才有机会跑。与 BUG-006 同向（交付前缺机械判）、与门L 升格（2026-10-04）的
+"语义识别 vs 字面白名单"边界互补：强调符可剥、词序漂移不可放。
