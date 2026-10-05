@@ -92,6 +92,13 @@ test('compatibility 矩阵钉住当前 tag', () => {
   assert.deepEqual(pkg.dsh.compatibility.dshReleases, ['dsh-v0.2.0-rc.2']);
 });
 
+test('lead persona 钉 HITL1 零例外（BUG-006 契约：快路径自我豁免不可见即违法）', () => {
+  const yml = readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8');
+  // 契约文本两个必备面：零例外句在场 + 指明"题面自含答案"也必须问（取推荐档即时拍板）
+  assert.match(yml, /HITL1 零例外/, 'persona 缺 HITL1 零例外句——快路径仍可自我豁免');
+  assert.match(yml, /推荐档/, '零例外句未写明题面自含答案时的操作（取推荐档）');
+});
+
 test('lead persona 钉 ask 硬约束：禁 wait:-1（BUG-005——模型单参绕过 timed 护栏即无人值守悬挂）', () => {
   const yml = readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8');
   // 契约文本两个必备面：约束句在场（HITL1/HITL2 通用）+ 明确点名 wait: -1 的禁令

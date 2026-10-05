@@ -13,6 +13,7 @@
 | Bug | 标题 | 严重级 | 发现 |
 |---|---|---|---|
 | [BUG-006-quick-path-skips-hitl-anchors](BUG-006-quick-path-skips-hitl-anchors.md) | quick_factual 题型下 lead 自我豁免 HITL1、HITL2 未拍板即 present——快路径无合同且无门禁可检 | P1 | 2026-10-05 |
+| [BUG-007-channel-death-loses-log-tail](BUG-007-channel-death-loses-log-tail.md) | 通道死亡丢会话日志尾部——settled run 回变"挂起未答"假态，盘侧谓词地基晃动 | P1 | 2026-10-05 |
 
 ## 卡片模板
 

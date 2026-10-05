@@ -50,6 +50,9 @@ export const LEADS_CONTRACT_DATE = '2026-10-03'
 /** 门④ 契约日（2026-10-03 = RFC wave2-synthesis-polish 落地日；kimi 09-26 契约前形态 = 断代必要性活证）。 */
 export const VERSION_CONTRACT_DATE = '2026-10-03'
 
+/** 门① 契约日（2026-10-05 = BUG-006 落地日：快路径自我豁免 HITL1 实证后机械化；此前交付不追溯）。 */
+export const HITL_CONTRACT_DATE = '2026-10-05'
+
 /** 读一个会话日志文件（.jsonl 直读 / .jsonl.zstd 走 zstd CLI——多帧拼接 CLI 可解全帧）。 */
 function readLog(p) {
   if (p.endsWith('.zstd')) {
@@ -304,8 +307,72 @@ export function versionGate(bundleDir, versionDate) {
 }
 
 /**
+ * 门①（HITL 锚点门，可导入；keyless；BUG-006 实证反证）。
+ * 判据 = **写过本 bundle 方向契约文件**（会话日志含指向 `drt_<slug>/question.md` 的
+ * write 调用）的会话里，带 **HITL1 签名**（问卡含「研究类型」——persona 三问之首，问卡
+ * id 可变故认 header/题面词）的 ask_user_question 调用 ≥ 1。绑定语义 = HITL1 与立项
+ * 同场的合同本身；两轮真 bundle 实拍否定更宽的绑定（sibling 预检的提及/读取都会把
+ * 邻场与历史场次的 ask 串进来——时间锚也漏历史场次）。
+ * 零例外合同（persona「ask 调用硬约束」同日落地）——无豁免形态。
+ * 断代：交付日 < HITL_CONTRACT_DATE → PRE-CONTRACT 不计红（run bundle 是交付记录）。
+ * @returns { status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT', detail }
+ */
+export function hitlAskGate(bundleDir, sessionsRoot, hitlDate) {
+  const qPath = join(bundleDir, 'question.md')
+  if (!existsSync(qPath)) {
+    return { status: 'N/A', detail: 'question.md 不在场——门①无对象（方向契约未立，不越界判交互面）' }
+  }
+  const bindMark = `${basename(bundleDir)}/question.md`
+  let asks = 0
+  let hitl1Signed = 0
+  let writerSessions = 0
+  if (sessionsRoot && existsSync(sessionsRoot)) {
+    const scan = (dir) => {
+      for (const ent of readdirSync(dir, { withFileTypes: true })) {
+        const p = join(dir, ent.name)
+        if (ent.isDirectory()) { scan(p); continue }
+        if (!/\.jsonl(\.zstd)?$/.test(ent.name)) continue
+        const text = readLog(p)
+        if (!text.includes('ask_user_question') && !text.includes(bindMark.split('/')[0])) continue
+        let sessionWrites = false
+        let sessionAsks = 0
+        let sessionSigned = 0
+        for (const line of text.split('\n')) {
+          if (!line.includes('"tool/call"')) continue
+          let e
+          try { e = JSON.parse(line) } catch { continue }
+          const d = e?.data ?? e
+          if (d?.name !== 'write' && d?.name !== 'ask_user_question') continue
+          const args = String(d?.arguments ?? '').replace(/\\\//g, '/')
+          if (d?.name === 'write' && args.includes(bindMark)) sessionWrites = true
+          if (d?.name === 'ask_user_question') {
+            sessionAsks++
+            if (/研究类型/.test(args)) sessionSigned++
+          }
+        }
+        if (!sessionWrites) continue
+        writerSessions++
+        asks += sessionAsks
+        hitl1Signed += sessionSigned
+      }
+    }
+    scan(sessionsRoot)
+  }
+  const date = hitlDate ?? deliveryDate(bundleDir)
+  const pre = date !== null && date < HITL_CONTRACT_DATE
+  if (hitl1Signed === 0) {
+    return {
+      status: pre ? 'PRE-CONTRACT' : 'RED',
+      detail: `写过 question.md 的会话 ${writerSessions} 个、ask ${asks} 次，但 HITL1 签名（研究类型问）0 次——两 HITL 锚点之首缺失（BUG-006 形态：快路径自我豁免；persona 契约 = 任何研究请求先 HITL1，零例外）` +
+        (pre ? '（契约前交付——如实报告不计红，run bundle 是交付记录不改历史）' : ''),
+    }
+  }
+  return { status: 'PASS', detail: `写过 question.md 的会话 ${writerSessions} 个：HITL1 签名 ask ${hitl1Signed} 次（总 ask ${asks} 次）——锚点在场` }
+}
+
+/**
  * 门一个 bundle（核心逻辑，可导入；keyless）。
- * @returns { gates: { hitl2Row, present, leads, version }, red, report }
+ * @returns { gates: { hitlAsk, hitl2Row, present, leads, version }, red, report }
  *   每门：{ status: 'PASS'|'PASS-RELAY'|'RED'|'N/A'|'PRE-CONTRACT', detail }
  */
 export function gateBundle(bundleDir, sessionsRoot, opts = {}) {
@@ -347,14 +414,15 @@ export function gateBundle(bundleDir, sessionsRoot, opts = {}) {
     else present = { status: 'RED', detail: 'final.md + readiness PASS 在场，但日志无 present 调用、拍板行也无操作侧补齐标注——静默缺席（G8 形态）' }
   }
 
-  const gates = { hitl2Row, present, leads: leadsGate(bundleDir, opts.leadsDate), version: versionGate(bundleDir, opts.versionDate) }
-  const red = [hitl2Row, present, gates.leads, gates.version].some((g) => g.status === 'RED')
+  const gates = { hitlAsk: hitlAskGate(bundleDir, sessionsRoot, opts.hitlDate), hitl2Row, present, leads: leadsGate(bundleDir, opts.leadsDate), version: versionGate(bundleDir, opts.versionDate) }
+  const red = [gates.hitlAsk, hitl2Row, present, gates.leads, gates.version].some((g) => g.status === 'RED')
   const report = `# Node Gate — ${slug}（${new Date().toISOString()}）
 
-> scripts/node-gate.mjs（keyless；契约正本 = research-workspace/NODES.md 第 3/7/8 行 + 回边版本语义节）。
+> scripts/node-gate.mjs（keyless；契约正本 = research-workspace/NODES.md 第 3/7/8 行 + 回边版本语义节 + BUG-006 门①）。
 
 | 门 | 状态 | 说明 |
 |---|---|---|
+| ① HITL 锚点 | ${gates.hitlAsk.status} | ${gates.hitlAsk.detail} |
 | ③ §Decisions 拍板行 | ${hitl2Row.status} | ${hitl2Row.detail} |
 | ② present 声明 | ${present.status} | ${present.detail} |
 | L leads 交接 | ${gates.leads.status} | ${gates.leads.detail} |
@@ -401,7 +469,8 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
     process.exit(2)
   }
   const { gates, red, report } = gateBundle(bundleDir, sessionsRoot)
-  console.log(`node-gate: ${basename(bundleDir)} ｜ 门③ §Decisions 拍板行 = ${gates.hitl2Row.status} ｜ 门② present 声明 = ${gates.present.status} ｜ 门L leads 交接 = ${gates.leads.status} ｜ 门④ 版本记账 = ${gates.version.status}`)
+  console.log(`node-gate: ${basename(bundleDir)} ｜ 门① HITL 锚点 = ${gates.hitlAsk.status} ｜ 门③ §Decisions 拍板行 = ${gates.hitl2Row.status} ｜ 门② present 声明 = ${gates.present.status} ｜ 门L leads 交接 = ${gates.leads.status} ｜ 门④ 版本记账 = ${gates.version.status}`)
+  console.log(`  ① ${gates.hitlAsk.detail}`)
   console.log(`  ③ ${gates.hitl2Row.detail}`)
   console.log(`  ② ${gates.present.detail}`)
   console.log(`  L ${gates.leads.detail}`)

@@ -205,3 +205,47 @@ test('门L v3 真违约钉：过程底稿组织（无任何字段行）→ RED�
   assert.equal(g.status, 'RED')
   assert.match(g.detail, /字段齐的方向单元/)
 })
+
+// ── 门①（HITL 锚点门，2026-10-05；BUG-006 实证反证）──
+
+test('门①反证：question.md 在场而关联会话零 ask → RED（BUG-006 形态：HITL1 自我豁免不可见即违法）', () => {
+  const r = gateBundle(bundle('fixture-complete'), sessions('s-no-ask'), { hitlDate: '2026-10-06' })
+  assert.equal(r.gates.hitlAsk.status, 'RED', '零 ask 的 run 必须红——快路径豁免无合同授权')
+  assert.equal(r.red, true)
+})
+
+test('门①合规：关联会话含 HITL1 签名 ask（研究类型问）→ PASS', () => {
+  const r = gateBundle(bundle('fixture-complete'), sessions('s-complete'), { hitlDate: '2026-10-06' })
+  assert.equal(r.gates.hitlAsk.status, 'PASS', 'HITL1 锚点在场')
+  assert.match(r.gates.hitlAsk.detail, /HITL1 签名 ask 1 次/)
+})
+
+test('门①N/A：question.md 缺席 → 无对象（方向契约未立，不越界）', () => {
+  const r = gateBundle(bundle('fixture-no-question'), sessions('s-complete'))
+  assert.equal(r.gates.hitlAsk.status, 'N/A')
+})
+
+test('门①断代：零 ask 而交付日早于契约日 → PRE-CONTRACT 不计红（历史交付不追溯）', () => {
+  const r = gateBundle(bundle('fixture-early'), sessions('s-no-ask'), { hitlDate: '2026-10-01' })
+  assert.equal(r.gates.hitlAsk.status, 'PRE-CONTRACT')
+  assert.equal(r.red, false, 'PRE-CONTRACT 不计入红灯')
+})
+
+test('门①签名区分：只有 HITL2 签名 ask（无研究类型问）→ 仍 RED（HITL1 锚点缺失）', () => {
+  // HITL2 问卡被答过但 HITL1 从未发起 = 锚点缺失的残余形态；门①认 HITL1 签名，不认 ask 总数
+  const r = gateBundle(bundle('fixture-complete'), sessions('s-no-ask'), { hitlDate: '2026-10-06' })
+  assert.equal(r.gates.hitlAsk.status, 'RED')
+})
+
+test('门①绑定反证：邻场会话（无 write、只有 ask）的 HITL1 ask 不串场 → 仍 RED（真 bundle 两轮实拍串场形态）', () => {
+  // 实拍两轮：宽松绑定（路径提及/时间窗）把邻场与历史场次的 ask 串进本门①——
+  // 绑定语义 = HITL1 与立项同场（写过 question.md 的会话）。
+  const r = gateBundle(bundle('fixture-complete'), sessions('s-time-anchor'), { hitlDate: '2026-10-06' })
+  assert.equal(r.gates.hitlAsk.status, 'RED', '邻场 ask 串场 = 门①假绿（写会话绑定反证）')
+})
+
+test('门①合规：写过 question.md 的会话里 HITL1 签名 ask 在场（先问后立）→ PASS', () => {
+  const r = gateBundle(bundle('fixture-complete'), sessions('s-complete'), { hitlDate: '2026-10-06' })
+  assert.equal(r.gates.hitlAsk.status, 'PASS', 'HITL1 锚点在场')
+  assert.match(r.gates.hitlAsk.detail, /写过 question.md 的会话 1 个：HITL1 签名 ask 1 次/)
+})

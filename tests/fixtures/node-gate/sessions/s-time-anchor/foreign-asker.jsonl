@@ -1,0 +1,1 @@
+{"type":"tool/call","seq":1,"time":1790610000000,"data":{"turn":1,"step":1,"callId":"c8","name":"ask_user_question","arguments":"{\"questions\": [{\"id\": \"research_type\", \"header\": \"研究类型\", \"question\": \"邻场 run 的 HITL1——时间在 question.md 落盘之后\", \"options\": [{\"label\": \"x（Recommended）\"}]}] }"}}

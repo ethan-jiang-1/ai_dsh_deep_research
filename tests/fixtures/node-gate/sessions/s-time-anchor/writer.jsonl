@@ -1,0 +1,1 @@
+{"type":"tool/call","seq":3,"time":1790600000000,"data":{"turn":1,"step":3,"callId":"c5","name":"write","arguments":"{\"file_path\": \"research-workspace/drt_fixture-complete/question.md\", \"content\": \"# Question\"}"}}
