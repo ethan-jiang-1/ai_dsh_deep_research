@@ -141,7 +141,11 @@ source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --tok
   仪表盘多 run 总表与 evidence-audit `--latest` 均并扫 archive/）。`dev/harness-home/runs/`
   下的 bundle 是契约前的 ad-hoc 历史（仪表盘标 "ad-hoc·无契约"）——不是这次要恢复的 run，
   也不要删（gitignored 运行数据，是那次研究留下的证据）；
-- 方向修订：直接告诉 lead——Decisions 追加一条记录后原地补搜（不算 rerun）；
+- 方向修订：直接告诉 lead——**载体 = steer**（GUI 里打字即 steer；RPC 用 `session/prompt`
+  的 `mode: 'steer'`，running 中的 agent 在下一步边界消费）；lead 记账（§Decisions 追加）
+  后原地补搜（不算 rerun）。**queue 模式的消息（代驱脚本缺省形态）在 run 的单超长 turn
+  下滞留到收尾才被消费——中途修订不可走 queue**；同一条修订也别 queue + steer 双发
+  （重复投递）。
   证据扩张 rerun = 同 bundle final/ 下一版；结构性另起 = 新 drt_<slug>/（sibling
   预检后建）。
 
