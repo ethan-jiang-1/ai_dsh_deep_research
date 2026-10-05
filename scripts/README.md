@@ -60,6 +60,7 @@
 | lib/playwright.mjs | 浏览器冒烟 | Playwright 启停支撑 |
 | lib/cdp-driver.mjs | cdp-probe | 裸 CDP 驱动 |
 | lib/ask-drive.mjs | hitl-answer | 代答读窗与谓词 |
+| lib/hitl-provenance.mjs | hitl-answer | 代答 provenance 写盘（BUG-014 正修——代理模拟显式记账） |
 | lib/vendor-artifacts.mjs | boot 面护栏（五个入口共用） | vendor 构建产物自检 |
 
 ## 指令件

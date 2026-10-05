@@ -20,8 +20,9 @@ import { resolve, dirname, join } from 'node:path'
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { loadChromium, launchChromium } from '../scripts/lib/playwright.mjs'
-import { runStateOf, readSessionEvents } from '../scripts/lib/run-state.mjs'
+import { runStateOf, readSessionEvents, bundleStateOf } from '../scripts/lib/run-state.mjs'
 import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf } from '../scripts/lib/ask-drive.mjs'
+import { appendProvenance } from '../scripts/lib/hitl-provenance.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 // 与 dev/run-kickoff.mjs 同形：name 自带 `--`（本仓约定，别在 helper 里再加一次）
@@ -294,7 +295,23 @@ try {
     log(`hitl-answer: 盘侧裁决——${verdict.reason}`)
     process.exitCode = verdict.exitCode
   }
-  log('hitl-answer: 代理模拟记录（写进 bundle 的 question.md §Decisions 与 journal.md）——')
+  // 代理模拟 provenance（BUG-014 正修）：盘侧裁决通过（answer 真落地）才写盘——真把
+  // 「操作侧代理模拟」行追加进 bundle 的 question.md §Decisions 与 journal.md，不再只
+  // 打印承诺（此前症状：输出声称写盘、文件零命中，拍板行误归因用户）。dry-run 不写；
+  // 未提交成功或零作答不写（answer 没发生就不记）。缺件 fail-loud（lib 抛错即终止）。
+  if (!DRY && answered.length > 0 && process.exitCode === 0) {
+    const wsRoot = join(ROOT, 'research-workspace')
+    const { activeBundle } = bundleStateOf(wsRoot)
+    if (activeBundle === null) {
+      throw new Error('hitl-answer: answer 落地但工作区根无 drt_* bundle——provenance 无处落账，fail-loud（修正入口：核对工作区）')
+    }
+    const written = appendProvenance({ bundle: join(wsRoot, activeBundle), date: new Date().toISOString().slice(0, 10), pick: PICK, answered })
+    log(`hitl-answer: 代理模拟记录已写盘——${written.question} + ${written.journal}`)
+  } else if (DRY) {
+    log('hitl-answer: dry-run——代理模拟记录不写盘')
+  } else if (answered.length > 0) {
+    log('hitl-answer: 未提交成功（盘侧裁决红）——不写 provenance（answer 未落地，如实）')
+  }
   for (const a of answered) log(`  Q${a.step}: ${a.prompt}\n     → ${a.selected}`)
 } finally {
   try { await browser.close() } catch {}

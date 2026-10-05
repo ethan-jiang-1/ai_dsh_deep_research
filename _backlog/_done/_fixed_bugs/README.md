@@ -15,3 +15,4 @@
 | [BUG-010](BUG-010-regression-indirect-subprocess.md) | 回归经导入模块启动子进程 | （原生日志解码；执行路径探针 0 次子进程） | 2026-10-05 |
 | [BUG-011](BUG-011-release-smoke-keyless-mismatch.md) | L2 keyless 与部署凭据检查冲突 | （显式安装模式；真实 L2 全绿；默认缺凭据拒绝） | 2026-10-05 |
 | [BUG-012](BUG-012-dashboard-state-divergence.md) | 仪表盘日志/HITL/步骤折算分叉 | （canonical 日志与共享折算；真实浏览器通过） | 2026-10-05 |
+| [BUG-014](BUG-014-hitl-answer-provenance-not-written.md) | hitl-answer 的"代理模拟记录"只打印不写盘——代答 provenance 静默丢失，拍板行误归因用户 | （scripts/lib/hitl-provenance 纯函数+写盘器 + 驱动裁决通过后接线 + 契约测试红先立；活体确认挂账 = 下一次代答写盘日志 + bundle grep 双证） | 2026-10-05 |
