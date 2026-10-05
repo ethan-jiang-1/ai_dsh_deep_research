@@ -30,10 +30,12 @@
 输入只有两个动作——上报 lead 或等，**没有"瞎猜补全"这个选项**。清单检查由脚本做，不加记账仪式。
 
 **编制条件性（quick_factual）**：研究类型 = quick_factual（快速事实核查；HITL1 定、记
-question.md）按 team-assembly 矩阵**不设 scout/analyst 常设编制，critic 可轻量或不配**——
+question.md）按 team-assembly 矩阵**不设 scout/analyst 常设编制、critic 轻量 ×1**（编制正本 =
+team-assembly 矩阵；原「critic 可轻量或不配」分支已撤销——三场 quick_factual 实证全配 critic
+且两场共 4 处有效捕获，主编自检不能替代对抗审查；裁决 = 合同漂移卡 2026-10-06）——
 节点 2/3 的输出与节点 6 的 `review.md` 为**条件件**：缺席合法当且仅当 ①question.md 研究类型
-字段在场 ②journal 显式记账补偿把关（谁承担了核查）。节点 1/4/5/8 输出件全类型必备；
-schema-scan 按此感知（条件件缺席 → 豁免注记不静默，journal 无记账 → WARN）。
+字段在场 ②journal 显式记账补偿把关（谁承担了核查；异常场兜底回退，常态不触发）。节点 1/4/5/8
+输出件全类型必备；schema-scan 按此感知（条件件缺席 → 豁免注记不静默，journal 无记账 → WARN）。
 
 ## 回边版本语义（D17）
 

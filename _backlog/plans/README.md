@@ -13,7 +13,7 @@
 
 | 卡 | 一句话 | 毕业门判断 |
 |---|---|---|
-| [2026-10-06-contract-drift.md](2026-10-06-contract-drift.md) | quick_factual 的 Critic 必要性指引 + final.md/final/ 版本语义五处文档对账——走查欠账的两处合同漂移 | 待定（两问各有实证：mistral 场 critic 有效捕获 / 两场实践无漂移漂移在表述面） |
+| （无活跃卡——plans 池清零，2026-10-06；最近毕业 = contract-drift 两问收口） | | |
 
 ## 卡片模板
 
