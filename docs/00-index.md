@@ -101,6 +101,7 @@
 | D20 | **规划面单一化：roadmap.md 退役**（2026-09-28 用户裁决——先问「有了 _backlog 是否还需要 roadmap」，代理反证倾向保留，用户裁断退役；反证论据随推敲卡永久归档）：队列 + 搁置池迁 [_backlog/queue.md](../_backlog/queue.md)（纯索引，零判断材料），推敲（plans/）与次序（queue.md）一个家分半区；入口链第 3 步、`proposal-scheduled` / `queue-pointer-live` / `entry-chain` 三门禁、`entry-chain-probe` 真值锚同 diff 改锚 | 用户裁决；推敲证据 = [_done/_closed_plans/2026-09-28-retire-roadmap](../_backlog/_done/_closed_plans/2026-09-28-retire-roadmap.md)（首张立卡当日毕业的推敲卡）；[Note](../notes/implemented/2026-09-28-backlog-deliberation-space.md) |
 | D21 | **入口按意图分流（"用它" vs "改它"）**：路由正本 = 本页 §先分流（用户说法 → 文档 → 第一条命令），根 AGENTS.md §入口链与 README Start Here 各一行指针；"启动这个插件"默认理解 = 本仓 run 通道；含糊时判据 = 目标 DSH home（本仓 `dev/harness-home` vs 日用 `~/.dsh`）。禁止再让操作类请求落进队列分支 | 用户定调（2026-09-29「fresh agent 一进来就要立刻明白」，泛化性优先于本人用法）+ 4 个零上下文探针实证 4/4 必须反问、且各自选了不同答案；[Note](../notes/implemented/2026-09-29-cold-start-intent-router.md) |
 | D22 | **对外交付约束：pack 采纳面不得引入用户侧外部服务依赖**——外部账号 / API key / 付费订阅一律不过关（setup 复杂度是交付硬门槛）；裁决优先于能力与价格权衡。首例 = mcp-client 通道选**本地 Playwright MCP**（npx 拉起、零账号零凭据）而非 Firecrawl remote（账号 + key + 按量订阅） | 用户定调（2026-10-02「这工具今后是要交出去给人的……太复杂的话肯定不行」）；[mcp-playwright 采纳 Note](../notes/implemented/2026-10-02-mcp-playwright-adoption.md) |
+| D23 | **条目级验收 TDD 化**：RFC 验收判据逐条绑定检查方式（机械门禁 / 契约测试 / 对账命令 / 人工判据四型），能机械的先立红再实现到绿，实施记录载实际红绿证据——评估先行（D6）的队列条目级投影；流程正本 = [guides/60 §0 验收门](./guides/60-dev-loop.md) | 用户定调（2026-10-05「先考虑怎么测，实现后看测试满足了吗，反复做对；全程要证据，不随性发挥」）；[Note](../notes/implemented/2026-10-05-item-lifecycle-tdd.md) |
 
 ### 待定（阻塞项标 ⛔）
 
