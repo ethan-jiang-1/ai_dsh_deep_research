@@ -12,7 +12,7 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 
 ## Directory Map
 
-布局正本 = [`AGENTS.md`](AGENTS.md) §布局（notes/ 各层语义、scripts/ 与 dev/ 全部工具、运行区）——本文件不复制第二份清单（清单漂移先例：基础整治 C7）。
+先读 [项目驾驭地图](docs/project-map.md)：运行链、脚本责任、测试分层与失败定位；目录纪律见 [AGENTS.md](AGENTS.md) §布局。
 
 ## Commands
 

@@ -1,13 +1,14 @@
 // run-state 回归 — run 操作面状态谓词（keyless；夹具 = 第 12 场真实会话日志的三个时点投影，
-// tests/fixtures/run-state/——走 .jsonl 直读分支，测试路径零子进程，layering 合规；
-// zstd 分支由 watcher/操作侧实战覆盖）。
+// tests/fixtures/run-state/，并构造原生 zstd 多帧与损坏尾帧；测试路径零子进程）。
 //
 // grep 陷阱是本测试的核心断言对象（RFC run-ops-self-diagnosis 的立案证据）：三个夹具的
 // **文本**都含 'ask_user_question'（request/header 工具 schema 必带——grep 判定必然假阳性），
 // 而谓词只认 tool/call 事件的形状——夹具文本含陷阱字样 + 谓词判 0/挂起正确，这一对就是红绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync } from 'node:fs';
+import { zstdCompressSync, constants } from 'node:zlib';
+import { resolveSessionLog, decompressSessionLog } from '../scripts/lib/session-log.mjs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -16,6 +17,52 @@ import { readSessionEvents, toolCallCount, hitlPendingOf, turnOpenOf, bundleStat
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FIX = (name) => join(ROOT, 'tests', 'fixtures', 'run-state', `${name}.jsonl`);
 const loadFix = (name) => readSessionEvents(FIX(name));
+
+// 公共读取接口：真实 append 帧按顺序拼接；坏尾帧不能用旧前缀冒充完整事实。
+test('读取器：多帧压缩日志与不可读坏尾（原生解压）', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'run-log-'));
+  try {
+    const log = join(tmp, 'session.v4.jsonl.zstd');
+    const first = zstdCompressSync(Buffer.from('{"type":"turn/start"}\n'));
+    const second = zstdCompressSync(Buffer.from('{"type":"turn/end"}\n'));
+    writeFileSync(log, Buffer.concat([first, second]));
+    assert.deepEqual(readSessionEvents(log), { readable: true, events: [{ type: 'turn/start' }, { type: 'turn/end' }] });
+    writeFileSync(log, Buffer.concat([first, second.subarray(0, 5)]));
+    assert.deepEqual(readSessionEvents(log), { readable: false, events: [] });
+    const checksummed = zstdCompressSync(Buffer.from('{"type":"turn/end"}\n'), { params: { [constants.ZSTD_c_checksumFlag]: 1 } });
+    for (let i = 0; i < checksummed.length; i++) {
+      writeFileSync(log, Buffer.concat([first, checksummed.subarray(0, i)]));
+      if (i > 0) assert.equal(readSessionEvents(log).readable, false, `截断 ${i} 字节不能成为完整日志`);
+    }
+    assert.equal(decompressSessionLog(first, null), null, '解压能力缺席不启动外部命令');
+    writeFileSync(log, Buffer.concat([first, zstdCompressSync(Buffer.from('{bad-json}\n'))]));
+    assert.equal(readSessionEvents(log).readable, false, '坏 JSONL 行不能静默跳过形成旧前缀');
+    assert.equal(runStateOf({ logPath: join(tmp, 'missing.zstd'), wsRoot: tmp }).readable, false, '缺席压缩日志同样零子进程');
+  } finally { rmSync(tmp, { recursive: true, force: true }); }
+});
+
+test('日志选择：最新 canonical 代优先，缺席不猜路径', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'run-select-'));
+  try {
+    assert.equal(resolveSessionLog(tmp), null);
+    const old = join(tmp, 'session.v3.jsonl.zstd');
+    writeFileSync(old, 'old');
+    assert.equal(resolveSessionLog(tmp), old);
+    const uncompressed = join(tmp, 'session.v4.jsonl');
+    writeFileSync(uncompressed, '{"type":"turn/end"}\n');
+    assert.equal(resolveSessionLog(tmp), uncompressed, 'v4 未压缩日志优先于 v3 压缩日志');
+    rmSync(uncompressed);
+    const current = join(tmp, 'session.v4.jsonl.zstd');
+    writeFileSync(current, 'unreadable newer generation');
+    assert.equal(resolveSessionLog(tmp), current);
+    assert.equal(readSessionEvents(current).readable, false);
+    assert.equal(resolveSessionLog(tmp), current, '新日志损坏时不降级到旧的挂起态');
+    rmSync(current);
+    symlinkSync(join(tmp, 'missing-target'), current);
+    assert.equal(resolveSessionLog(tmp), current, 'v4 断链目录项仍在场，不能降级到 v3');
+    assert.deepEqual(readSessionEvents(current), { readable: false, events: [] });
+  } finally { rmSync(tmp, { recursive: true, force: true }); }
+});
 
 test('读取器：.jsonl 直读可解析（夹具路径零子进程）', () => {
   const { readable, events } = loadFix('answered');
@@ -94,7 +141,7 @@ test('runStateOf 组合：finalWritten=true + turnOpen=true → runSettled=false
 });
 
 test('runStateOf：不可读日志 → readable=false 且挂起/计数为 null（不猜）', () => {
-  const s = runStateOf({ logPath: join(ROOT, 'tests', 'fixtures', 'run-state', '不存在.zstd'), wsRoot: join(ROOT, 'research-workspace') });
+  const s = runStateOf({ logPath: join(ROOT, 'tests', 'fixtures', 'run-state', '不存在.jsonl'), wsRoot: join(ROOT, 'research-workspace') });
   assert.equal(s.readable, false);
   assert.equal(s.hitlPending, null);
   assert.equal(s.askCalls, null);

@@ -87,6 +87,12 @@ client-load-smoke 磁盘真值对账 / watch-run 谓词化）、真入口路径�
   错位，立 [BUG-003](../../_backlog/_done/_fixed_bugs/BUG-003-client-load-smoke-loop-edge-mismatch.md)
   （P2）跟进，不阻断本条目。
 
+## 后续核对
+
+[目录与入口治理 Note](2026-10-05-project-navigability.md) 细化本篇“命名即层”与
+closed set 的证明范围：后缀不决定凭据档位；凭据字符串名单不发现 CDP 经既有会话触发模型的路径。
+分层、默认回归与反证纪律保持有效，独立 smoke 负责其余执行路径。
+
 ## 环境状态
 
 - 工作树含上条目在飞改动 `dev/hitl-answer.mjs`（HITL 代答修复待实弹复验）——本条目未触碰，

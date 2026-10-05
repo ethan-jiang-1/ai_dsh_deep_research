@@ -47,12 +47,19 @@ function callIdOf(event: unknown): string | undefined {
 
 /** tool/result 事件正文文本（content 块的 text 拼接；畸形 → ''）。 */
 function resultTextOf(event: unknown): string {
-  const content = (event as { readonly data?: { readonly message?: { readonly content?: unknown } } } | null)
-    ?.data?.message?.content
+  const message = (event as { readonly data?: { readonly message?: { readonly content?: unknown } } } | null)?.data?.message
+  const content = message?.content
   if (!Array.isArray(content)) return ''
-  return content
-    .map((block) => (typeof block === 'object' && block !== null ? String((block as { readonly text?: unknown }).text ?? '') : ''))
-    .join('')
+  return content.map(resultBlockText).join('')
+}
+
+function resultBlockText(block: unknown): string {
+  if (typeof block !== 'object' || block === null) return ''
+  const value = block as { readonly text?: unknown; readonly type?: unknown; readonly content?: unknown }
+  if (typeof value.text === 'string') return value.text
+  if (value.type !== 'tool-result') return ''
+  if (typeof value.content === 'string') return value.content
+  return Array.isArray(value.content) ? value.content.map(resultBlockText).join('') : ''
 }
 
 /** timed 落定标记（tool-result 正文带 `"pending":true` = 问题仍可答）。 */
@@ -61,8 +68,15 @@ const TIMED_PENDING = /"pending"\s*:\s*true/
 /** 同一 callId 的 tool/result（含嵌套 message.toolCallId 两种携带位——fail-soft 兼容）。 */
 function isResultFor(event: unknown, callId: string | undefined): boolean {
   if (callId === undefined) return false
-  const data = (event as { readonly data?: { readonly message?: { readonly toolCallId?: unknown }, readonly callId?: unknown } } | null)?.data
-  return data?.message?.toolCallId === callId || data?.callId === callId
+  const data = (event as {
+    readonly data?: {
+      readonly message?: { readonly toolCallId?: unknown; readonly source?: { readonly callId?: unknown } }
+      readonly callId?: unknown
+    }
+  } | null)?.data
+  return data?.message?.toolCallId === callId
+    || data?.message?.source?.callId === callId
+    || data?.callId === callId
 }
 
 /** 末位 ask 的定位（index / callId / time / 问数）。 */
@@ -111,7 +125,14 @@ export function foldHitlPending(events: readonly unknown[]): HitlState {
     }
     if (e.type === 'user/message') return { pending: false, since: undefined } // 真人已应（答案批次/新指令）
   }
-  return { pending: true, since: typeof ask.time === 'string' ? ask.time : undefined }
+  return { pending: true, since: eventTimeOf(ask.time) }
+}
+
+function eventTimeOf(time: unknown): string | undefined {
+  if (typeof time === 'string') return time
+  if (typeof time !== 'number' || !Number.isFinite(time)) return undefined
+  const date = new Date(time)
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString()
 }
 
 /** ask 调用携带的问数（args.questions 数组长度；截断 JSON / 畸形 fail-soft → 0）。 */

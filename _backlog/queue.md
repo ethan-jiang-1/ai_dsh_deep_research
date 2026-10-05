@@ -15,8 +15,7 @@
 
 （队列空——待用户取题）
 
-> 队列空 = 全部条目已毕业（历史归 notes/implemented/ + git）；待用户取题或新立项。
-> 效果终验挂起 = 下一场 run 的队友日志 grep 角色技能内容 + 门L 转绿判定
+> 另有既定效果终验挂起 = 下一场 run 的队友日志 grep 角色技能内容 + 门L 转绿判定
 > （[Note](../notes/implemented/2026-10-04-teammate-methodology-delivery.md) 环境状态节）。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）

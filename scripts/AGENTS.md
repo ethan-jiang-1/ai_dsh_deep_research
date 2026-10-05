@@ -1,7 +1,7 @@
 # AGENTS.md — 仓库脚本（门禁与生成器）
 
 `scripts/` 拥有**检查逻辑**：`verify.mjs` 是唯一 L0 聚合入口（门禁清单正本 = [docs/evaluation.md](../docs/evaluation.md) §L0 登记表，本文件不复制计数），其余是分级冒烟与
-观察面投影。上游对应物 = DSH `scripts/AGENTS.md` + `scripts/run-gates.ts`。
+观察/运维与分发生成（[职责地图](../docs/project-map.md)）。上游对应物 = DSH `scripts/AGENTS.md` + `scripts/run-gates.ts`。
 
 ## 新增或改门禁
 
@@ -40,15 +40,14 @@
 
 ## 依赖与分层
 
-- 脚本只用 Node 标准库（`node:test`、`node:zlib`、`node:child_process`）；不引入测试框架。
-- 真模型调用只出现在 keyless/tier 已登记的真模型档脚本里（`l4-lite-smoke`、
-  `team-preflight-smoke`、`entry-chain-probe`、`client-hitl-smoke`）；`tests/` 的 layering
-  守卫禁止 keyless 回归里出现真模型、网络与子进程。
-- 投影类脚本（`run-dashboard.mjs`）**只读**：canonical 源是会话日志与 bundle 文件，产物
-  （HTML）是抛弃型投影，永不入库、永不手改。
-- **命名即层**（DSH 后缀选层的本仓形态；新增检查先命名）：后缀申报证据类型与档位——
+- 不引入测试框架；确定性/门禁支撑尽量用 Node 标准库，浏览器 smoke 使用 Playwright，运行脚本可调用本仓或 DSH 模块。
+- 模型调用须显式申报：独立真模型档见根 [AGENTS §密钥](../AGENTS.md)，CDP `--ask` 按会话档位；
+  默认回归禁模型/浏览器/网络/子进程，静态守卫范围与执行路径审查见 [tests/AGENTS](../tests/AGENTS.md)。
+- 投影类脚本（`run-dashboard.mjs`）只读 canonical 会话日志与 bundle 文件，但会写抛弃型 HTML 投影；
+  HTML 永不入库、永不手改。
+- **命名即层**（DSH 后缀选层的本仓形态；新增检查先命名）：后缀申报证据类型；凭据/调用模式另申报——
   `tests/*.test.mjs` = 唯一 regression 成员（glob 即选中，layering 钉 keyless）；`*-smoke` =
   分级冒烟、`*-probe` = 探针、`*-gate`/`*-audit`/`*-scan` = run bundle 机械门；`scripts/lib/`、
-  `tests/fixtures/` 刻意在一切车道之外。真模型档 = 登记制 closed set：要求凭据（引用
+  `tests/fixtures/` 在执行 glob 外、由 consumer 消费。独立真模型档 = 登记制 closed set：要求凭据（引用
   `.credentials.yaml`）的顶层脚本必须恰为名单（机械对账 = `tests/smoke-contract`——
-  `withModelKey` 是条件透传不作判据），新档位脚本同 diff 进名单与根 AGENTS §密钥。
+  `withModelKey` 是条件透传不作判据）；该检查不发现经现有会话触发模型的路径，新模式须另审查/登记。

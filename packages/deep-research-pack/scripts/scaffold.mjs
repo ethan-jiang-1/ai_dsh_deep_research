@@ -9,7 +9,7 @@
 //   ③ 收尾跑 preflight 报告状态。
 //
 // 用法：
-//   node <pack>/scripts/scaffold.mjs --workspace <研究工作区> [--profile <名>] [--force] [--dry-run]
+//   node <pack>/scripts/scaffold.mjs --workspace <研究工作区> [--profile <名>] [--force] [--dry-run] [--install-only]
 //   或经 bin：dsh-deep-research-scaffold --workspace <dir> [--profile research]
 //
 // 不做的事（有意）：不装 DSH 本体、不写密钥（安全边界：密钥永不落仓库/脚本）。
@@ -27,6 +27,7 @@ const workspace = argOf('workspace') === null ? null : resolve(argOf('workspace'
 const profile = argOf('profile') ?? 'research'
 const force = argv.includes('--force')
 const dryRun = argv.includes('--dry-run')
+const installOnly = argv.includes('--install-only')
 
 const steps = []
 const note = (ok, name, detail) => { steps.push({ ok, name, detail }); console.log(`  ${ok ? '✓' : '✗'} ${name}\n      ${detail}`) }
@@ -84,9 +85,10 @@ if (dryRun) {
   process.exit(failed === 0 ? 0 : 1)
 }
 console.log('\nscaffold: 跑 preflight 复核…\n')
-const pf = spawnSync(process.execPath, [join(PACK, 'scripts', 'preflight.mjs'), '--workspace', workspace, ...(argOf('host') === null ? [] : ['--host', argOf('host')])], { stdio: 'inherit' })
-console.log(`\nscaffold: ${failed === 0 ? '准备完成' : `${failed} 步失败`}（工作区 = ${workspace}，profile = ${profile}）`)
-if (failed === 0) {
+const pf = spawnSync(process.execPath, [join(PACK, 'scripts', 'preflight.mjs'), '--workspace', workspace, ...(argOf('host') === null ? [] : ['--host', argOf('host')]), ...(installOnly ? ['--install-only'] : [])], { stdio: 'inherit' })
+const ok = failed === 0 && pf.status === 0
+console.log(`\nscaffold: ${ok ? installOnly ? '安装准备完成（不代表研究就绪）' : '准备完成' : '准备未完成（检查失败）'}（工作区 = ${workspace}，profile = ${profile}）`)
+if (ok && !installOnly) {
   console.log(`下一步：cd ${workspace} && dsh --profile ${profile}   # 起研究会话；角色 = Deep Research Lead`)
 }
-process.exit(failed === 0 && pf.status === 0 ? 0 : 1)
+process.exit(ok ? 0 : 1)

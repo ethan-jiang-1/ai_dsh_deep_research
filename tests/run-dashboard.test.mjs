@@ -7,6 +7,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   buildModel,
+  deriveStep,
   renderHtml,
   topicEvidenceMatrix,
   gapStats,
@@ -110,10 +111,10 @@ test('渲染壳：关键区块与 meta refresh 在场', () => {
 // ── debug-dashboard-plus（RFC notes/implemented/2026-09-24-debug-dashboard-plus.md）──────
 // 多场扫描 / 场内进度 / 步骤推导 / final 与 review 双命名容纳 / HITL 等待检测（zstd 夹具
 // 测试内生成——node:zlib 原生，无子进程，layering 纪律不破）。
-import { mkdirSync, rmSync, writeFileSync, utimesSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync, utimesSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { zstdCompressSync } from 'node:zlib';
-import { listScenes, sceneState, deriveStep, detectHitlWait } from '../scripts/run-dashboard.mjs';
+import { listScenes, sceneState, detectHitlWait } from '../scripts/run-dashboard.mjs';
 
 const mktmp = () => mkdirSync(join(tmpdir(), `dash-${Math.random().toString(36).slice(2)}`), { recursive: true });
 
@@ -173,18 +174,18 @@ test('场内进度与步骤推导：final/review 双命名容纳 + 流程语义'
   }
 });
 
-test('HITL 等待检测：末事件为未答 ask = 等待；已答/取消 = 不等待', () => {
+test('HITL 等待检测：v4 未答 ask 等待；匹配 callId 的 v3 答案/取消结果关闭', () => {
   const root = mktmp();
   try {
     const sess = join(root, 'sessions', 'grp');
     // 夹具对齐真实日志格式：逐次 append 的 zstd 多帧拼接（一次写入一帧；DSH 实测 357 帧/639 行）
-    const mk = (id, lineGroups) => {
+    const mk = (id, lineGroups, generation = 'v4') => {
       const d = join(sess, id);
       mkdirSync(d, { recursive: true });
       const buf = Buffer.concat(
         lineGroups.map((g) => zstdCompressSync(Buffer.from(g.map((l) => JSON.stringify(l)).join('\n') + '\n'))),
       );
-      writeFileSync(join(d, 'session.v3.jsonl.zstd'), buf);
+      writeFileSync(join(d, `session.${generation}.jsonl.zstd`), buf);
     };
     const t = Date.now();
     const ask = (id, time) => ({ type: 'tool/call', time, data: { callId: id, name: 'ask_user_question', arguments: '{}' } });
@@ -194,16 +195,69 @@ test('HITL 等待检测：末事件为未答 ask = 等待；已答/取消 = 不�
     ]);
     mk('session-answered', [
       [{ type: 'tool/call', time: t - 30000, data: { callId: 'c1', name: 'ask_user_question', arguments: '{}' } },
-       { type: 'tool/result', time: t - 10000, data: { message: { source: { callId: 'c1' } } } }],
-    ]);
+       { type: 'tool/result', time: t - 10000, data: { message: { role: 'user', source: { kind: 'tool', callId: 'c1' }, content: [{ type: 'tool-result', toolCallId: 'c1', content: 'answer' }] } } }],
+    ], 'v3');
     mk('session-cancelled', [
       [{ type: 'tool/call', time: t - 30000, data: { callId: 'c2', name: 'ask_user_question', arguments: '{}' } },
-       { type: 'session/cancel', time: t - 5000 }],
-    ]);
+       { type: 'tool/result', time: t - 5000, data: { message: { role: 'user', source: { kind: 'tool', callId: 'c2' }, content: [{ type: 'tool-result', toolCallId: 'c2', content: 'cancelled' }], isError: true } } }],
+    ], 'v3');
     const waiting = detectHitlWait(join(root, 'sessions'), { maxAgeMs: 3600 * 1000 });
     assert.equal(waiting.length, 1);
     assert.equal(waiting[0].session, 'waiting');
+    assert.equal(waiting[0].since, new Date(t - 30000).toISOString());
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+test('HITL 公共投影：timed pending 与元数据/agent 后续事件不关闭；新代坏尾不回退旧代', () => {
+  const root = mktmp();
+  try {
+    const t = Date.now();
+    const ask = { type: 'tool/call', time: t, data: { callId: 'c', name: 'ask_user_question' } };
+    const pending = (generation) => ({ type: 'tool/result', data: { message: generation === 'v3'
+      ? { role: 'user', source: { kind: 'tool', callId: 'c' }, content: [{ type: 'tool-result', toolCallId: 'c', content: [{ type: 'text', text: '{"pending":true}' }] }] }
+      : { role: 'tool', toolCallId: 'c', content: [{ type: 'text', text: '{"pending":true}' }] } } });
+    const put = (id, generation, events) => {
+      const dir = join(root, 'grp', `session-${id}`);
+      mkdirSync(dir, { recursive: true });
+      const file = join(dir, `session.${generation}.jsonl.zstd`);
+      writeFileSync(file, zstdCompressSync(Buffer.from(events.map(JSON.stringify).join('\n') + '\n')));
+      return file;
+    };
+    for (const generation of ['v3', 'v4']) {
+      put(generation, generation, [ask, pending(generation), { type: 'assistant/message' }, { type: 'session/title' }, { type: 'turn/end' }]);
+    }
+    put('closed', 'v3', [ask]);
+    put('closed', 'v4', [ask, pending('v4'), { type: 'user/message' }]);
+    put('broken', 'v3', [ask]);
+    const broken = put('broken', 'v4', [ask]);
+    writeFileSync(broken, Buffer.concat([zstdCompressSync(Buffer.from(JSON.stringify(ask) + '\n')), Buffer.from([0x28, 0xb5])]));
+    const linkedOld = put('linked', 'v3', [ask]);
+    symlinkSync(join(root, 'missing-log-target'), linkedOld.replace('v3', 'v4'));
+    put('cancel-only', 'v4', [ask, { type: 'session/cancel' }]);
+    const waiting = detectHitlWait(root);
+    assert.deepEqual(waiting.map((w) => w.session).sort(), ['cancel-o', 'v3', 'v4']);
+    assert.ok(waiting.every((w) => w.since === new Date(t).toISOString()));
+    assert.deepEqual(detectHitlWait(root, { maxAgeMs: -1000 }), [], '过期日志不投影');
+    assert.deepEqual(detectHitlWait(join(root, 'missing')), [], '缺席日志 fail-soft');
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test('deriveStep 保留 dashboard 内容解析语义，sceneState.done 保留文件计数', () => {
+  const empty = { question: null, leads: [], stats: { evidence: 0 }, findings: [], review: null, final: null };
+  assert.deepEqual(deriveStep(empty).map((s) => [s.label, s.state]), [
+    ['立项', 'pending'], ['组队', 'pending'], ['侦察', 'pending'], ['挖掘', 'pending'],
+    ['综合', 'pending'], ['审查', 'pending'], ['交付', 'pending'],
+  ]);
+  assert.deepEqual(deriveStep({ ...empty, question: {} }).map((s) => s.state), ['done', 'current', 'pending', 'pending', 'pending', 'pending', 'pending']);
+  assert.equal(deriveStep({ ...empty, final: {} }).at(-1).state, 'current');
+  const root = mktmp();
+  try {
+    writeFileSync(join(root, 'final.md'), '# Final\n');
+    assert.deepEqual(sceneState(root), { lastStep: 'final', done: 1 }, '仅 final 在场不能算前六步完成');
+    rmSync(join(root, 'final.md'));
+    writeFileSync(join(root, 'question.md'), '# Question\n');
+    assert.deepEqual(sceneState(root), { lastStep: 'team', done: 2 }, '组队在场性随立项计数');
+  } finally { rmSync(root, { recursive: true, force: true }); }
 });

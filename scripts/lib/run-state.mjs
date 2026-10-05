@@ -11,31 +11,14 @@
 //     偏差要显性，不能静默放行）。
 //
 // 消费方：scripts/watch-run.mjs（盯场）、dev/hitl-answer.mjs（前置自拒）、
-// tests/run-state.test.mjs（三态夹具——走 .jsonl 直读分支，测试路径零子进程，layering 合规）。
+// tests/run-state.test.mjs（三态夹具与 native log reader，测试路径零子进程，layering 合规）。
 // 运行需 `node --import tsx/esm`（直引 pack .ts 源）。
-import { execSync } from 'node:child_process'
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
+import { readSessionEvents } from './session-log.mjs'
 
-/**
- * 会话日志 → 事件数组。.jsonl 直读（夹具/调试友好，测试路径零子进程）；.zstd 走 zstd -dc
- * （多帧拼接，CLI 对多帧文件按序全解——run 通道实测）。读不了 → readable:false。
- * @param logPath 会话日志路径（.jsonl 或 .zstd）。
- */
-export function readSessionEvents(logPath) {
-  let text = ''
-  if (logPath.endsWith('.jsonl')) {
-    try { text = readFileSync(logPath, 'utf8') } catch { return { readable: false, events: [] } }
-  } else {
-    try {
-      text = execSync(`zstd -dc "${logPath}" 2>/dev/null`, { maxBuffer: 64 * 1024 * 1024 }).toString('utf8')
-    } catch { return { readable: false, events: [] } }
-  }
-  const events = text.split('\n').filter(Boolean)
-    .map((l) => { try { return JSON.parse(l) } catch { return null } }).filter(Boolean)
-  return { readable: true, events }
-}
+export { readSessionEvents }
 
 /**
  * 形状化工具调用计数——grep 假阳性的反义：只认 `tool/call` 事件的 `data.name`，

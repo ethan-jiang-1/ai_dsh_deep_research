@@ -1,18 +1,18 @@
 # AGENTS.md — keyless 回归与夹具（证据放置）
 
-`tests/` 拥有 **keyless 回归**：`pnpm test`（= `node --import tsx/esm --test tests/*.test.mjs`；零依赖、无凭据可跑）。
-它证明的是**契约与形状**，不是产品行为——行为证据归分级冒烟与真模型档（见
-[docs/evaluation.md](../docs/evaluation.md)）。上游对应物 = DSH `snapshots/AGENTS.md`
-的"证据住在被它证明的对象旁边"规则。
+`tests/` 拥有 **keyless 回归**：`pnpm test`（命令正本 = [package.json](../package.json)）。
+它验证契约、纯函数、解析、折算与渲染输出的确定性行为；宿主挂载、浏览器交互与模型行为另取
+分级冒烟证据（见 [docs/evaluation.md](../docs/evaluation.md)）。上游对应物 = DSH
+`snapshots/AGENTS.md` 的“证据住在被它证明的对象旁边”规则。
 
 ## 放置规则（一处证据一个家）
 
 - **`tests/`**：契约测试与守卫（`*.test.mjs`），断言对象是仓库里的自控文件；
-- **`tests/fixtures/`**：只放**测试夹具**（构造的样本文件/会话片段）。运行产物、真会话日志、
-  抓取到的证据**不进这里**——它们归 `dev/smoke-workspace/`（gitignored 运行区）与
-  `research-workspace/` 的 `drt_*`/`archive/`（run bundle 与已交付归档）；
-- 真模型/网络/子进程的检查**不进 `tests/`**：`layering` 守卫在门禁层面拒绝这种越界
-  （keyless 回归必须无凭据可跑），这类证据走 `scripts/*-smoke.mjs` 的对应档。
+- **`tests/fixtures/`**：构造样本与经整理、人审冻结的录制回放语料；由测试或独立回放 smoke
+  消费。原始运行日志、报告与抓取证据归 `dev/smoke-workspace/`、`research-workspace/` 的
+  `drt_*`/`archive/`，夹具不自动进入默认测试 glob；
+- 真模型/浏览器/网络/子进程检查走独立 smoke；默认回归无凭据可跑。`layering` 只静态扫描
+  顶层测试文本，导入模块的执行路径另核查（[执行路径证据](../notes/implemented/2026-10-05-project-navigability.md)）。
 
 ## 写测试时
 

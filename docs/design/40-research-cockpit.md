@@ -17,7 +17,7 @@
 |---|---|---|---|
 | 伞 | 观察面 | 驾驶舱 + 仪表盘投影（D18 原语义） | — |
 | **套件** | **研究驾驶舱（Research Cockpit）** | `src/client/` 的 React 件全体 | **最频** |
-| 共用层 | 折算层（folds） | `src/lib/` 纯函数谓词（keyless 单测；驾驶舱与仪表盘共用） | 少 |
+| 折算层 | folds | `src/lib/` 纯函数谓词（keyless 单测；驾驶舱与 HTML 投影共享 HITL/步骤事实适配） | 少 |
 | 投影 | 仪表盘（run-dashboard） | `scripts/run-dashboard.mjs` 只读 HTML 投影（抛弃型、永不入库） | 少 |
 
 件名保留：「研究状态」页签是驾驶舱**里的一个件**，不与套件名混用；目录名守 DSH 双半
@@ -38,8 +38,8 @@
 
 | 折算 | 输入 → 输出 | 要点 |
 |---|---|---|
-| [hitl-fold](../../packages/deep-research-pack/src/lib/hitl-fold.ts) | journal 事件 → 挂起态 + 流程锚点三态 | 尾扫跳过 `session/*` 元数据，末位回合事件 = 未答的 `ask_user_question` 即挂起；`deriveAnchors` 按 ask 序数定锚（第 1 次=立项确认、第 2 次=交付审阅，超额=中途确认如实显示），已答 = ask 后存在回合事件 |
-| [run-fold](../../packages/deep-research-pack/src/lib/run-fold.ts) | bundle 文件在场性 → 步骤条 / 矩阵 | 与 run-dashboard 投影**共用单一正本**（防两处漂移） |
+| [hitl-fold](../../packages/deep-research-pack/src/lib/hitl-fold.ts) | journal 事件 → 挂起态 + 流程锚点三态 | 末位 ask 状态机保留 timed pending；匹配的非 pending result 或 user/message 关闭挂起；`deriveAnchors` 按问卡内容签名与文件事实定锚，中途确认如实显示 |
+| [run-fold](../../packages/deep-research-pack/src/lib/run-fold.ts) | bundle 文件在场性 → 步骤条 / 矩阵 | 驾驶舱的折算实现；HTML 仪表盘通过 `deriveStep` 适配 dashboard 内容模型后复用步骤事实 |
 | [activity-fold](../../packages/deep-research-pack/src/lib/activity-fold.ts) | journal 事件 → 活动行 | 🔍 检索 / 👥 派出与队员作业中（wait_agent，连续折叠）/ 💬 成员 / 📦 交付；markdown 源标记与原始事件类型名不出正文（噪音过滤，尾部 30 行） |
 | [bundle-bind](../../packages/deep-research-pack/src/lib/bundle-bind.ts) | journal 事件 → 本会话绑定的 run slug + 绑定强度 | 只认 `tool/call` 参数路径里的 `drt_<slug>/`；**写强读弱**——write/edit 命中直接定绑，仅读命中兜底（立项预检读旧 bundle 的错绑防线，2026-09-28 首跑实证） |
 | [tool-card](../../packages/deep-research-pack/src/lib/tool-card.ts) | call/result 切片 → 卡片状态 | running / ok / error / stopped |
@@ -87,8 +87,7 @@
   会话）——`wait_agent` 的"队员作业中"行缓解全静；团队任务细节 = `ui-agent-team` 任务板
   （队员流接入需新数据通道，后续候选）；
 - **组队步无独立文件**：轨道的组队步在场性随立项（cursor 在"立项完成 → 侦察交付"窗口停靠
-  组队——该窗口即组队+侦察进行段，活动流区分两者）；run-dashboard 的步序副本与 run-fold
-  手工同步（G5 已登记合并方向）。
+  组队——该窗口即组队+侦察进行段，活动流区分两者）；HTML 步骤条通过适配器消费同一 `deriveSteps`。
 - **工具卡只 2 张**：`team_task_*` 等协调类工具不进对话渲染流（harness 排除），团队观察
   由 `ui-agent-team` 任务板承担；
 - 活标题与页签体各开一条 follow 流共用 WebSocket 数据面（v1 接受，合流是后续优化）；

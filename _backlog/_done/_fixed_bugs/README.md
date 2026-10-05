@@ -12,3 +12,6 @@
 | [BUG-004](BUG-004-hitl-answer-submit-not-landing.md) | hitl-answer 点击提交不落地——"卡头消"与盘侧 answer 事件脱钩 | （ask-drive 策略库：UI 形状永不判完成 + 盘侧裁决升格 exit 1 + 进程组收割；活体确认 = 确认 run 四问卡 4/4 落盘） | 2026-10-05 |
 | [BUG-005](BUG-005-hitl1-indefinite-wait-no-floor.md) | HITL1 ask 带 wait:-1 无限期等待——timed 护栏被绕过 + 活等待无断连地板 | （persona ask 硬约束行 + run-state askIndefiniteOf + 61 §3/§4 应答通道二分；活体确认 = 两次 ask 零 wait 字段） | 2026-10-05 |
 | [BUG-006](BUG-006-quick-path-skips-hitl-anchors.md) | quick_factual 题型下 lead 自我豁免 HITL1、HITL2 未拍板即 present | （persona HITL1 零例外 + node-gate 门① HITL 锚点门——写 question.md 会话的 HITL1 签名 ask 判据；活体确认 = 同族快题复测照发卡 + 门①③②全 PASS） | 2026-10-05 |
+| [BUG-010](BUG-010-regression-indirect-subprocess.md) | 回归经导入模块启动子进程 | （原生日志解码；执行路径探针 0 次子进程） | 2026-10-05 |
+| [BUG-011](BUG-011-release-smoke-keyless-mismatch.md) | L2 keyless 与部署凭据检查冲突 | （显式安装模式；真实 L2 全绿；默认缺凭据拒绝） | 2026-10-05 |
+| [BUG-012](BUG-012-dashboard-state-divergence.md) | 仪表盘日志/HITL/步骤折算分叉 | （canonical 日志与共享折算；真实浏览器通过） | 2026-10-05 |

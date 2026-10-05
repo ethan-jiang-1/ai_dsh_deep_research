@@ -7,7 +7,7 @@
 // 怎么补也说什么——部署方的第一条命令（配 scaffold.mjs 自动补齐）。
 //
 // 用法：
-//   node <pack>/scripts/preflight.mjs [--workspace <研究工作区>] [--host <profile 目录>]
+//   node <pack>/scripts/preflight.mjs [--workspace <研究工作区>] [--host <profile 目录>] [--install-only]
 //   或经 bin：dsh-deep-research-preflight [--workspace <dir>] [--host <dir>]
 //
 // --host 指向**运行本 pack 的 profile 目录**（其 node_modules 是 peer/团队层的解析锚）；
@@ -21,6 +21,7 @@ import { spawnSync } from 'node:child_process'
 const PACK = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
 const argv = process.argv.slice(2)
+const installOnly = argv.includes('--install-only')
 const argOf = (name) => { const i = argv.indexOf(`--${name}`); return i === -1 ? null : argv[i + 1] }
 const workspace = argOf('workspace') === null ? null : resolve(argOf('workspace'))
 let host = argOf('host') === null ? null : resolve(argOf('host'))
@@ -84,14 +85,18 @@ const record = (ok, name, detail, remedy) => { results.push({ ok, name, detail, 
   record(ok, '构建产物（lib/index.js + lib/client.js）', ok ? '在场' : `缺：${!existsSync(hostHalf) ? 'lib/index.js ' : ''}${!existsSync(clientHalf) ? 'lib/client.js' : ''}`, '源码安装需先构建：cd <pack> && pnpm install && pnpm build（npm 安装的发布包含 lib/，无需构建）')
 }
 
-// ⑥ 模型密钥（两种合法来源：环境变量，或 DSH 凭据文件 $DSH_HOME/.credentials.yaml）
+// ⑥ 模型密钥（默认研究就绪检查；安装验收明确不宣称研究可用）
 {
-  const key = process.env.DEEPSEEK_API_KEY
-  const home = process.env.DSH_HOME ?? join(process.env.HOME ?? '', '.dsh')
-  const credFile = join(resolve(home), '.credentials.yaml')
-  const hasEnv = key !== undefined && key !== ''
-  const hasCred = existsSync(credFile)
-  record(hasEnv || hasCred, '模型密钥 DEEPSEEK_API_KEY', hasEnv ? '环境变量已配置' : hasCred ? `DSH 凭据文件在场（${credFile}）` : '两者皆无——真模型档（研究 run）不可用', 'export DEEPSEEK_API_KEY=<key>，或用 dsh 的凭据配置写入 $DSH_HOME/.credentials.yaml（web 搜索同一把钥匙）')
+  if (installOnly) {
+    record(true, '模型密钥 DEEPSEEK_API_KEY', '安装验收模式：跳过凭据在场检查（不代表研究就绪）', '')
+  } else {
+    const key = process.env.DEEPSEEK_API_KEY
+    const home = process.env.DSH_HOME ?? join(process.env.HOME ?? '', '.dsh')
+    const credFile = join(resolve(home), '.credentials.yaml')
+    const hasEnv = key !== undefined && key !== ''
+    const hasCred = existsSync(credFile)
+    record(hasEnv || hasCred, '模型密钥 DEEPSEEK_API_KEY', hasEnv ? '环境变量已配置' : hasCred ? `DSH 凭据文件在场（${credFile}）` : '两者皆无——真模型档（研究 run）不可用', 'export DEEPSEEK_API_KEY=<key>，或用 dsh 的凭据配置写入 $DSH_HOME/.credentials.yaml（web 搜索同一把钥匙）')
+  }
 }
 
 // ── 输出 ──
@@ -103,6 +108,8 @@ for (const r of results) {
   if (r.ok === false) console.log(`      → ${r.remedy}`)
 }
 console.log(hardFail.length === 0
-  ? '\npreflight: 全绿（本 pack 可用）'
+  ? installOnly
+    ? '\npreflight: 安装验收通过（不代表研究就绪）'
+    : '\npreflight: 全绿（本 pack 可用）'
   : `\npreflight: ${hardFail.length} 项待补（按 → 的补救命令处理；或用 scaffold.mjs 一键补齐）`)
 process.exit(hardFail.length === 0 ? 0 : 1)

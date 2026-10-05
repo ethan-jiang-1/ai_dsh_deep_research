@@ -32,7 +32,7 @@ import { fileURLToPath } from 'node:url'
 import { scrubbedEnv } from './lib/env.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from './lib/vendor-artifacts.mjs'
 import { launchChromium, loadChromium } from './lib/playwright.mjs'
-import { readSessionEvents } from './lib/run-state.mjs'
+import { readSessionEvents, resolveSessionLog } from './lib/session-log.mjs'
 import { sessionBundleOf } from '../packages/deep-research-pack/src/lib/bundle-bind.ts'
 import { deriveSteps } from '../packages/deep-research-pack/src/lib/run-fold.ts'
 import { deriveAnchors, foldHitlPending } from '../packages/deep-research-pack/src/lib/hitl-fold.ts'
@@ -144,11 +144,16 @@ if (sessionGroup === undefined) {
   process.exit(2)
 }
 const candidates = []
-for (const { d, m } of readdirSync(join(sessionsRoot, sessionGroup))
-  .map((d) => ({ d, m: (() => { try { return statSync(join(sessionsRoot, sessionGroup, d, 'session.v4.jsonl.zstd')).mtimeMs } catch { return 0 } })() }))
+for (const { logPath, m } of readdirSync(join(sessionsRoot, sessionGroup))
+  .map((d) => {
+    const logPath = resolveSessionLog(join(sessionsRoot, sessionGroup, d))
+    let m = 0
+    try { if (logPath) m = statSync(logPath).mtimeMs } catch { /* 缺席日志不作为候选 */ }
+    return { logPath, m }
+  })
   .sort((a, b) => b.m - a.m)) {
-  if (m === 0) continue
-  const { readable, events } = readSessionEvents(join(sessionsRoot, sessionGroup, d, 'session.v4.jsonl.zstd'))
+  if (m === 0 || logPath === null) continue
+  const { readable, events } = readSessionEvents(logPath)
   if (!readable || !hasTurns(events) || !isTopLevel(events)) continue
   const title = lastTitleOf(events)
   if (title === null || title.trim() === '') continue

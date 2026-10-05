@@ -69,7 +69,8 @@ cd ~/research-workspace && dsh --profile research
 ```sh
 node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/preflight.mjs \
   --workspace ~/research-workspace
-# 检查：DSH 版本 / 全部平台 peer 包（清单 = pack package.json peerDependencies） / 团队机制层 / 工作区手册+模板 / 构建产物 / 模型密钥
+# 研究就绪检查：DSH 版本 / 全部平台 peer 包 / 团队机制层 / 工作区手册+模板 / 构建产物 / 模型密钥
+# 仅验安装形状（无模型调用、无凭据也可验）：追加 --install-only；它不代表研究就绪。
 ```
 
 ## 研究怎么跑

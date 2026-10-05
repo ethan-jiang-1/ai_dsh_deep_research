@@ -29,7 +29,7 @@
   代理**驱动**已起的通道没问题（run-kickoff / hitl-answer 走 localhost API 全通）。boot 归
   用户终端仍是默认纪律（真实 DNS、零额外件）；
 - **启动请求的呈交纪律（2026-09-30 用户定调）**：用户让"启动/起 web"= 代理**先自己跑通**——
-  boot-run 全序（自检 → 漂移检测 → 补装）红了就当场修（漂移 = 按脚本处方重建 profile；
+  boot-run 全序（自检 → 组合检查/必要补装 → 漂移检测）红了就当场修（漂移 = 按脚本处方重建 profile；
   vendor 产物缺失 = `bash dev/vendor-build.sh`），boot 出横幅后**再验浏览器面**（探针断言
   无 "Failed to load plugins" / 零 console 错误——0.2.0 轮教训：boot 横幅只证宿主侧，
   观察面可能坏着），**全绿才把 URL 交出去**。不呈交"可能能用的东西"；红了不自修就上报 =
@@ -50,7 +50,8 @@
   （`sleep <秒> | node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts --profile research
   -- --port <端口，缺省 3083> --no-open`；web 在 stdin 关闭时会自行退出）。**这条绕过 boot-run 的
   漂移门**（§0 上面"别直接跑 `dsh --profile research`"正为此）：先 `bash dev/boot-run.sh --drift-check`
-  过门再用它；报漂移就按 [guides/62 §改动影响面](./62-plugin-authoring.md) 重建镜像；
+  过门再用它；该模式先检查端口且可初始化环境/补装 profile/写 MCP patch，不是只读探针。
+  报漂移就按 [guides/62 §改动影响面](./62-plugin-authoring.md) 重建镜像；
 - **刷新白屏的判别序**：① `lsof -nP -iTCP:<端口> -sTCP:LISTEN` 有没有监听 → 无 = 进程已停
   （重跑上面任一形态）；② 有监听但仍白屏/401 = token 过期（**每次启动都是新 token**，
   用当次横幅里的 URL；旧 URL 作废）；③ 有监听且 token 新但页面空 = 前端壳产物陈旧

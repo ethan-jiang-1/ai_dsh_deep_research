@@ -54,7 +54,7 @@ logged）——pack 行只引入**现成**能力，这项义务落在 vendor 面
 |---|---|---|
 | 新增研究角色 | `packages/deep-research-pack/presets/critic/`（skill 隔离最干净） | [`.agents/skills/adding-a-research-role`](../../.agents/skills/adding-a-research-role/SKILL.md) |
 | 新增方法论 skill | `presets/lead/skills/synthesis/SKILL.md`（frontmatter `name`/`description` + 方法论正文） | 同上 |
-| 新增/修改 bundle 行 | `packages/deep-research-pack/cordis.patch.yml` + `dev/research.overlay.yml`（两处必须一致） | 漂移检测在 `dev/boot-run.sh` |
+| 新增/修改 bundle 行 | [pack bundle](../../packages/deep-research-pack/cordis.patch.yml) → [生成器](../../dev/render-overlay.mjs) 渲染 overlay | `overlay-fresh` 检生成物；[boot-run](../../dev/boot-run.sh) 检发布集与安装镜像 |
 | 新增机械门禁 | `scripts/verify.mjs` + `docs/evaluation.md` §L0 | [`.agents/skills/writing-a-gate`](../../.agents/skills/writing-a-gate/SKILL.md) |
 | 跑一次研究 | `research-workspace/templates/run/` | [`.agents/skills/running-a-research-run`](../../.agents/skills/running-a-research-run/SKILL.md) |
 

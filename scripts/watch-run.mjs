@@ -9,6 +9,7 @@ import { existsSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { runStateOf, eventsRegressed } from './lib/run-state.mjs'
+import { resolveSessionLog } from './lib/session-log.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const SID = process.argv[2]
@@ -28,8 +29,8 @@ const sessionsRoot = join(home, 'sessions')
 const group = existsSync(sessionsRoot)
   ? readdirSync(sessionsRoot).find((d) => d.includes('research-workspace'))
   : undefined
-const logPath = group !== undefined ? join(sessionsRoot, group, SID, 'session.v4.jsonl.zstd') : null
-if (logPath === null || !existsSync(logPath)) {
+const logPath = group !== undefined ? resolveSessionLog(join(sessionsRoot, group, SID)) : null
+if (logPath === null) {
   console.error(`watch-run: 找不到会话日志（${logPath ?? 'sessions 根缺 research-workspace 组'}）——先 source dev/env.sh 并核对 session id`)
   process.exit(2)
 }

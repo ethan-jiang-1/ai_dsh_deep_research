@@ -13,8 +13,8 @@
 // 用法：source dev/env.sh && node scripts/release-smoke.mjs
 
 import { spawnSync } from 'node:child_process';
-import { scrubbedEnv, withModelKey } from './lib/env.mjs';
-import { existsSync, readFileSync, readdirSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
+import { scrubbedEnv } from './lib/env.mjs';
+import { existsSync, lstatSync, readFileSync, readdirSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { presetRoles } from './lib/roles.mjs';
@@ -29,6 +29,10 @@ if (!home) {
   console.error('release-smoke: 需要 DSH_HOME（先 source dev/env.sh）');
   process.exit(2);
 }
+if (home !== join(ROOT, 'dev', 'harness-home')) {
+  console.error(`release-smoke: refusing non-development DSH_HOME: ${home} (source dev/env.sh)`);
+  process.exit(2);
+}
 const dshSrc = process.env.DSH_SRC ?? ROOT; // 本仓根 = 安装锚（vendor/dsh submodule 在 workspace；原默认 company 借用已随 D10 销账）
 const bin = join(dshSrc, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
 if (!existsSync(bin)) {
@@ -40,6 +44,27 @@ const tmp = join(ROOT, 'dev', 'smoke-workspace', 'release-pack');
 const npmCache = join(ROOT, 'dev', 'smoke-workspace', 'npm-cache');
 const pnpmStore = join(ROOT, 'dev', 'smoke-workspace', 'pnpm-store');
 const profileDir = join(home, 'profiles', PROFILE);
+const probeWs = join(home, 'smoke-scaffold-probe');
+const fixedCleanupTargets = new Map([
+  ['tmp', tmp],
+  ['profile', profileDir],
+  ['probe', probeWs],
+]);
+const assertCleanupTarget = (name, target) => {
+  const expected = fixedCleanupTargets.get(name);
+  if (!expected || resolve(target) !== expected || !expected.startsWith(`${ROOT}/dev/`)) {
+    throw new Error(`release-smoke: refusing to clean unexpected ${name} path: ${target}`);
+  }
+  for (let current = target; current !== ROOT; current = dirname(current)) {
+    if (existsSync(current) && lstatSync(current).isSymbolicLink()) {
+      throw new Error(`release-smoke: refusing symlink cleanup path: ${current}`);
+    }
+  }
+};
+const clean = (name, target) => {
+  assertCleanupTarget(name, target);
+  rmSync(target, { recursive: true, force: true });
+};
 
 const failures = [];
 const step = (ok, label, detail) => {
@@ -47,19 +72,20 @@ const step = (ok, label, detail) => {
   if (!ok) failures.push(label);
 };
 const run = (cmd, args, opts = {}) => spawnSync(cmd, args, { encoding: 'utf8', ...opts });
+for (const [name, target] of fixedCleanupTargets) assertCleanupTarget(name, target);
 
 // ① npm pack
-rmSync(tmp, { recursive: true, force: true });
+clean('tmp', tmp);
 mkdirSync(tmp, { recursive: true });
 console.log('① npm pack …');
-const pack = run('npm', ['pack', '--cache', npmCache, '--pack-destination', tmp], { cwd: PACK });
+const pack = run('npm', ['pack', '--cache', npmCache, '--pack-destination', tmp], { cwd: PACK, env: scrubbedEnv() });
 const tarball = pack.stdout.trim().split('\n').pop();
 step(pack.status === 0 && typeof tarball === 'string' && tarball.endsWith('.tgz') && existsSync(join(tmp, tarball)),
   `pack 产出 tarball（${tarball ?? '无'}）`, pack.stderr.slice(-400));
 
 // ② 干净 profile：先删后建（web 模板：自定义 profile 名走默认只有 dsh-base，起不了 web——
 //    company release.md 实证；--from-default-profile web 补齐 dsh-web-app）
-rmSync(profileDir, { recursive: true, force: true });
+clean('profile', profileDir);
 console.log('② 建 profile（web 模板）…');
 const init = run(process.execPath, ['--import', 'tsx/esm', bin, '--profile', PROFILE, '--from-default-profile', 'web', '--dump-config'],
   { cwd: dshSrc, env: scrubbedEnv({ DSH_HOME: home }) });
@@ -89,30 +115,36 @@ step(Object.keys(packPkg.peerDependencies ?? {}).length > 0, 'peers 在 manifest
 step(Array.isArray(packPkg?.dsh?.compatibility?.dshReleases) && packPkg.dsh.compatibility.dshReleases.includes('dsh-v0.2.0-rc.2'),
   '兼容矩阵钉住当前 tag');
 
-// ④b 部署链证据（pack 自带 bin：真铺一个工作区 → preflight 验它）——"装完能跑"的机械面
+// ④b 安装形状证据（pack 自带 bin：真铺一个工作区 → 安装验收 preflight 验它）
 console.log('④b 部署链（安装副本：scaffold 铺种子 + preflight 复检）…');
-const probeWs = join(home, 'smoke-scaffold-probe');
-rmSync(probeWs, { recursive: true, force: true });
-const scaffoldDry = run(process.execPath, [join(installed, 'scripts', 'scaffold.mjs'), '--workspace', probeWs, '--profile', PROFILE, '--dry-run'],
-  { env: withModelKey({ DSH_HOME: home }) });
+clean('probe', probeWs);
+const scaffoldDry = run(process.execPath, [join(installed, 'scripts', 'scaffold.mjs'), '--install-only', '--workspace', probeWs, '--profile', PROFILE, '--host', profileDir, '--dry-run'],
+  { env: scrubbedEnv({ DSH_HOME: home }) });
 step(scaffoldDry.status === 0 && scaffoldDry.stdout.includes('dry-run') && !existsSync(probeWs),
   'scaffold --dry-run 可预演且未落盘', scaffoldDry.stdout.split('\n').filter((l) => l.includes('✗')).join(' | '));
-const scaffoldReal = run(process.execPath, [join(installed, 'scripts', 'scaffold.mjs'), '--workspace', probeWs, '--profile', PROFILE],
-  { env: withModelKey({ DSH_HOME: home }) });
+const scaffoldReal = run(process.execPath, [join(installed, 'scripts', 'scaffold.mjs'), '--install-only', '--workspace', probeWs, '--profile', PROFILE, '--host', profileDir],
+  { env: scrubbedEnv({ DSH_HOME: home }) });
 console.log(scaffoldReal.stdout.split('\n').map((l) => `    ${l}`).join('\n'));
 const seedTemplates = existsSync(join(probeWs, 'templates', 'run')) ? readdirSync(join(probeWs, 'templates', 'run')).filter((f) => f.endsWith('.md')).length : 0;
 step(scaffoldReal.status === 0 && existsSync(join(probeWs, 'AGENTS.md')) && seedTemplates >= 6,
   'scaffold 真铺种子（手册 + ≥6 模板）', `AGENTS.md=${existsSync(join(probeWs, 'AGENTS.md'))} 模板=${seedTemplates}`);
-const preflight = run(process.execPath, [join(installed, 'scripts', 'preflight.mjs'), '--workspace', probeWs, '--host', profileDir],
-  { env: withModelKey({ DSH_HOME: home }) });
-step(preflight.status === 0, 'preflight 对铺好的工作区全绿（六项机检）',
+const credentialHome = join(tmp, 'credential-home');
+mkdirSync(credentialHome);
+const preflight = run(process.execPath, [join(installed, 'scripts', 'preflight.mjs'), '--install-only', '--workspace', probeWs, '--host', profileDir],
+  { env: scrubbedEnv({ DSH_HOME: credentialHome }) });
+step(preflight.status === 0 && preflight.stdout.includes('安装验收通过（不代表研究就绪）'), 'preflight 安装验收通过（无凭据）',
   preflight.stdout.split('\n').filter((l) => l.includes('✗')).join(' | '));
-rmSync(probeWs, { recursive: true, force: true });
+const readiness = run(process.execPath, [join(installed, 'scripts', 'preflight.mjs'), '--workspace', probeWs, '--host', profileDir],
+  { env: scrubbedEnv({ DSH_HOME: credentialHome }) });
+const rejected = readiness.stdout.split('\n').filter((l) => l.includes('✗'));
+step(readiness.status === 1 && rejected.length === 1 && rejected[0].includes('模型密钥 DEEPSEEK_API_KEY'),
+  '默认 preflight 拒绝缺凭据（保留安装宿主解析锚）', `${readiness.stdout}\n${readiness.stderr}`);
+clean('probe', probeWs);
 
 // ⑤ boot + preset-smoke 断言（安装域通道：无 overlay，走已装 pack 的正式路径）
 console.log('⑤ preset-smoke（安装域：--profile release-check --no-patch）…');
 const smoke = run(process.execPath, [join(ROOT, 'scripts', 'preset-smoke.mjs'), '--profile', PROFILE, '--no-patch', '--port', PORT],
-  { env: withModelKey({ DSH_HOME: home, DSH_SMOKE_REAL: '1' }) });
+  { env: scrubbedEnv({ DSH_HOME: home, DSH_SMOKE_REAL: '1' }) });
 console.log(smoke.stdout.split('\n').map((l) => `    ${l}`).join('\n'));
 step(smoke.status === 0, 'preset-smoke 安装域全绿', smoke.stdout.split('\n').filter((l) => l.includes('FAIL')).join(' | '));
 

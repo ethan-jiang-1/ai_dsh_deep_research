@@ -3,8 +3,8 @@
 // + debug-dashboard-plus：notes/implemented/2026-09-24-debug-dashboard-plus.md）
 //
 // 用法：
-//   node scripts/run-dashboard.mjs <runDir> [--out <html>]          一次性生成
-//   node scripts/run-dashboard.mjs --latest [--out <html>]          多场扫描取最新（SCENE_ROOTS）
+//   node --import tsx/esm scripts/run-dashboard.mjs <runDir> [--out <html>]          一次性生成
+//   node --import tsx/esm scripts/run-dashboard.mjs --latest [--out <html>]          多场扫描取最新（SCENE_ROOTS）
 //   加 --watch --interval <秒> 持续再生成（配合页面 meta refresh；默认 5s）
 //
 // 原则（RFC 定死，勿破）：
@@ -15,7 +15,11 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import * as zlib from 'node:zlib';
+import { resolveSessionLog, readSessionEvents } from './lib/session-log.mjs';
+import { deriveSteps } from '../packages/deep-research-pack/src/lib/run-fold.ts';
+import { foldHitlPending } from '../packages/deep-research-pack/src/lib/hitl-fold.ts';
+
+export { decompressSessionLog } from './lib/session-log.mjs';
 
 /** 多 run 场根（debug-dashboard-plus）：drt 正规场 + ad-hoc 场（无契约，标注呈现不隐藏） */
 const SCENE_ROOTS = [
@@ -25,7 +29,7 @@ const SCENE_ROOTS = [
   { dir: 'research-workspace/archive', kind: 'drt', label: 'drt·归档' },
   { dir: 'dev/harness-home/runs', kind: 'ad-hoc', label: 'ad-hoc·无契约' },
 ];
-/** lead 会话日志根（HITL 等待检测；$DSH_HOME/sessions/<cwd 组>/<会话>/session.v3.jsonl.zstd） */
+/** lead 会话日志根（HITL 等待检测；选择器按 v4/v3 canonical 代际挑选一个物理日志）。 */
 const SESSIONS_ROOT = 'dev/harness-home/sessions';
 /** web 日志（boot-run tee 的横幅，含 token URL——deep-link 用；缺席即不链） */
 const WEB_LOG = 'dev/smoke-workspace/web.log';
@@ -323,86 +327,54 @@ export function sceneState(dir) {
  *  步序正本 = m2-run-mechanics「运行流程总览」：立项（question+topics 一体）→ 组队 → 侦察 →
  *  挖掘 → 综合 → 审查 → 交付；组队无独立文件，在场性随立项（cursor 停靠语义，与 run-fold 同）。 */
 export function deriveStep(model) {
-  const has = {
+  return deriveSteps({
     question: !!model.question,
     team: !!model.question,
     leads: model.leads.length > 0,
-    evidence: model.stats.evidence > 0,
+    evidence: model.stats.evidence,
     findings: model.findings.length > 0,
     review: !!model.review,
     final: !!model.final,
-  };
-  const order = ['question', 'team', 'leads', 'evidence', 'findings', 'review', 'final'];
-  const labels = { question: '立项', team: '组队', leads: '侦察', evidence: '挖掘', findings: '综合', review: '审查', final: '交付' };
-  let lastDone = -1;
-  for (const [i, k] of order.entries()) if (has[k]) lastDone = i;
-  return order.map((k, i) => ({
-    key: k,
-    label: labels[k],
-    state: i < lastDone ? 'done' : i === lastDone ? 'current' : 'pending',
-  }));
+  });
 }
 
-/** DSH 会话日志 = 逐次 append 的 zstd 帧拼接（一次写入一帧；实测 357 帧 / 639 行）。
- *  node:zlib 只有单帧 zstdDecompressSync——按帧魔数（28 B5 2F FD）切段、逐帧解压、拼接。
- *  坏段跳过（魔数误匹配/半截帧，fail-soft）；非帧拼接格式（首字节非魔数）返回 null。 */
-export function decompressSessionLog(buf, decompress = typeof zlib.zstdDecompressSync === 'function' ? zlib.zstdDecompressSync : null) {
-  if (!decompress || !buf || buf.length < 4) return null;
-  const idxs = [];
-  for (let i = 0; i <= buf.length - 4; i++) {
-    if (buf[i] === 0x28 && buf[i + 1] === 0xb5 && buf[i + 2] === 0x2f && buf[i + 3] === 0xfd) idxs.push(i);
-  }
-  if (!idxs.length || idxs[0] !== 0) return null;
-  const parts = [];
-  for (let k = 0; k < idxs.length; k++) {
-    try {
-      parts.push(decompress(buf.subarray(idxs[k], idxs[k + 1] ?? buf.length)));
-    } catch {
-      /* 坏段跳过 */
-    }
-  }
-  return Buffer.concat(parts);
-}
-
-/** HITL 等待检测（真事件流，非启发式）：扫近期会话日志（zstd 多帧逐段解压），一个会话在
- *  "等待" = 它的最后一个事件恰是 ask_user_question 的 tool/call（其后无 tool/result、
- *  无任何后续事件——取消回合会有后续事件，天然排除陈旧挂起）。zstd 缺席/解压失败/
- *  日志畸形 → 跳过该会话（fail-soft）。返回 [{ session, group, since }] 按挂起时间降序。 */
+/** HITL 等待检测：会话日志选择与状态折算分别复用 shared modules；扫描范围和
+ * 最近时间策略仍由 dashboard owner 保持。损坏的 canonical 日志不降级到旧代。 */
 export function detectHitlWait(sessionsRoot = SESSIONS_ROOT, { maxAgeMs = 12 * 3600 * 1000 } = {}) {
   const waiting = [];
-  if (typeof zlib.zstdDecompressSync !== 'function') return waiting; // node 无 zstd → 无检测（fail-soft）
   const cutoff = Date.now() - maxAgeMs;
   let groups = [];
-  try {
-    groups = readdirSync(sessionsRoot);
-  } catch {
-    return waiting;
-  }
+  try { groups = readdirSync(sessionsRoot); } catch { return waiting; }
   for (const g of groups) {
     const gdir = join(sessionsRoot, g);
     let sessions = [];
-    try {
-      sessions = readdirSync(gdir);
-    } catch {
-      continue;
-    }
+    try { sessions = readdirSync(gdir); } catch { continue; }
     for (const s of sessions) {
+      const logFile = resolveSessionLog(join(gdir, s));
+      if (!logFile) continue;
       try {
-        const logFile = join(gdir, s, 'session.v3.jsonl.zstd');
         if (statSync(logFile).mtimeMs < cutoff) continue;
-        const lines = decompressSessionLog(readFileSync(logFile))?.toString('utf8').trim().split('\n');
-        if (!lines || !lines.length) continue;
-        const last = JSON.parse(lines[lines.length - 1]);
-        const d = last.data ?? {};
-        if (last.type === 'tool/call' && d.name === 'ask_user_question') {
-          waiting.push({ session: s.replace(/^session-/, '').slice(0, 8), group: g, since: new Date(last.time).toISOString() });
-        }
+        const { readable, events } = readSessionEvents(logFile);
+        if (!readable) continue;
+        const state = foldHitlPending(events);
+        if (!state.pending) continue;
+        const since = normalizeEventTime(state.since);
+        waiting.push({ session: s.replace(/^session-/, '').slice(0, 8), group: g, since });
       } catch {
         /* 无日志/解压失败/畸形 → 跳过 */
       }
     }
   }
-  return waiting.sort((a, b) => (a.since < b.since ? 1 : -1));
+  return waiting.sort((a, b) => String(b.since).localeCompare(String(a.since)));
+}
+
+function normalizeEventTime(time) {
+  if (typeof time === 'number' && Number.isFinite(time)) return new Date(time).toISOString();
+  if (typeof time === 'string') {
+    const date = new Date(time);
+    if (!Number.isNaN(date.getTime())) return date.toISOString();
+  }
+  return '未知时间';
 }
 
 /** web GUI 基址（deep-link）：从 boot-run tee 的 web 日志抓横幅 URL；缺席返回 null */
