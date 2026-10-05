@@ -10,6 +10,5 @@
 
 ## 研究状态页签 · 人性化活动行（icon + 文本）
 
-💬 I'll run the minimal probe: one search, then one f
 🔍 检索：DSH harness
-💬 探针完成，搜了「DSH harness」（8 条结果），抓了 [developer.aliyun.c
+💬 探针完成，搜了「DSH harness」（8 条结果清单），抓了第一条类官方域名页面 [dshbas

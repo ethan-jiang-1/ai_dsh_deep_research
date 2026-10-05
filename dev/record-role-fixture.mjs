@@ -26,19 +26,23 @@ const BOOT_TIMEOUT_MS = 120_000
 const TURN_TIMEOUT_MS = 240_000
 
 // 角色探针 prompt：一回合、零工具依赖（组装面钉 persona + 工具 schema 即可，工具路径由
-// lead 场景承担）+ 哨兵收尾（A 层逐字命中判据）。
+// lead 场景承担）+ 哨兵收尾（A 层逐字命中判据）。lead 探针 = 2026-09-30 首录原文复用
+// （BUG-013 重录路径：同探针 → 会话形状同构，C 金标准漂移最小化；lead 场景额外承担
+// web_search/web_fetch 工具路径 + C 渲染金标准，故探针带真实检索步）。
 const ROLE_PROMPTS = {
+  lead: '这是一次**观察面录制探针**（最小步骤，不要写任何文件，不要组队）：\n\n1. 用 web_search 搜一次「DSH harness」（结果不求深究，拿到清单即可）；\n2. 用 web_fetch 抓取结果里第一个官方域名的页面（拿到正文即可）；\n3. 完成后直接给一句话总结（"探针完成，搜了 X、抓了 Y"），不要展开分析。\n\n目的：为观察面渲染回归录制一段含 web_search + web_fetch 的最小会话流。\n',
   scout: '用一两句话说明你作为 Scout 的侦察职责与顺位（何时被指派、产出什么），然后另起一行以「探针完成」收尾。不要调用任何工具。',
   analyst: '用一两句话说明你作为 Analyst 的挖掘职责与证据卡纪律（来源四字段、摘录可回溯），然后另起一行以「探针完成」收尾。不要调用任何工具。',
   critic: '用一两句话说明你作为 Critic 的核查职责与狩猎对象（伪造链接、断链、记账不实），然后另起一行以「探针完成」收尾。不要调用任何工具。',
 }
 
 const fail = (msg) => { console.error(`record-role-fixture: ${msg}`); process.exit(2) }
-if (!ROLE || !ROLE_PROMPTS[ROLE]) fail(`需要 --role <角色 id>（可录集 = 此脚本的 ROLE_PROMPTS 键——lead 场景 fixture 已在，不重录）`)
+if (!ROLE || !ROLE_PROMPTS[ROLE]) fail(`需要 --role <角色 id>（可录集 = ROLE_PROMPTS 键，含 lead——重录 = 先删旧 session.v4.jsonl，录制品人审后入库）`)
 if (!process.env.DSH_HOME) fail('未 source dev/env.sh（DSH_HOME 缺席）——与 L1/L2 同档自拒')
 const DSH_HOME = resolve(process.env.DSH_HOME)
 if (!existsSync(join(DSH_HOME, '.credentials.yaml'))) fail('dev home 无凭据文件（.credentials.yaml）——先配置 DEEPSEEK_API_KEY')
-const OUT_DIR = join(ROOT, 'tests', 'fixtures', 'snapshot-research-face', ROLE)
+// lead 场景 fixture 住场景根（历史落点，ui.expected.md 同目录），其余角色住 <role>/ 子目录
+const OUT_DIR = join(ROOT, 'tests', 'fixtures', 'snapshot-research-face', ...(ROLE === 'lead' ? [] : [ROLE]))
 if (existsSync(join(OUT_DIR, 'session.v4.jsonl'))) fail(`${OUT_DIR}/session.v4.jsonl 已在——重录请先删除（录制品人审后入库，不静默覆盖）`)
 
 // ── boot（形状照 snapshot-replay-smoke：vendor 源码 + tsx + research 档，真模型）──
@@ -113,7 +117,10 @@ try {
   console.log(`  回合落定（哨兵在场 + 日志静默）——写 fixture…`)
   mkdirSync(OUT_DIR, { recursive: true })
   writeFileSync(join(OUT_DIR, 'session.v4.jsonl'), logText)
-  writeFileSync(join(OUT_DIR, 'snapshot.yml'), [
+  // lead 场景根的 snapshot.yml 是常驻契约（scenario: research-face-recording + retired-tools
+  // 钉法注释），不随重录改写；其余角色首次录制时生成同款。
+  if (ROLE !== 'lead') {
+    writeFileSync(join(OUT_DIR, 'snapshot.yml'), [
     'version: 1',
     `scenario: research-face-${ROLE}`,
     'profile: research',
@@ -132,7 +139,10 @@ try {
     '  coverage: [retired-tools]',
     '',
   ].join('\n'))
-  console.log(`  已写 ${OUT_DIR}/session.v4.jsonl + snapshot.yml——请人审后入库（git add）。`)
+  }
+  console.log(ROLE === 'lead'
+    ? `  已写 ${OUT_DIR}/session.v4.jsonl（根 snapshot.yml 常驻契约不动；C 金标准刷新 = snapshot-replay-smoke --update-expected + 人审）——请人审后入库（git add）。`
+    : `  已写 ${OUT_DIR}/session.v4.jsonl + snapshot.yml——请人审后入库（git add）。`)
 } finally {
   cleanup()
 }

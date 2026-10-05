@@ -13,7 +13,6 @@
 | Bug | 标题 | 严重级 | 发现 |
 |---|---|---|---|
 | [BUG-008-leads-term-drift-past-delivery](BUG-008-leads-term-drift-past-delivery.md) | leads.md 状态词漂移（建议深挖≠建议挖深）穿透交付——critic 未狩猎、门L 只能事后 | P2 | 2026-10-05 |
-| [BUG-013-lead-replay-persona-stale](BUG-013-lead-replay-persona-stale.md) | Lead 回放 persona 金标准未包含既有 HITL1 零例外规则 | P2 | 2026-10-05 |
 
 ## 卡片模板
 
