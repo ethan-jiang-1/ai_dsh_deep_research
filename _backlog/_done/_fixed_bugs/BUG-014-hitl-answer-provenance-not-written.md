@@ -29,3 +29,4 @@ drt_mistral-api-model-list（2026-10-05，HITL2 代答实录）：hitl-answer �
 - **tests/hitl-provenance.test.mjs**（三断言：行内容 / 追加幂等〔二次=两行〕 / 缺件 fail-loud）——立红实录：首跑模块缺席即红，实现后 3/3 绿；**资产门契约测试同步实抓一次**（lib/hitl-provenance.mjs 未进 scripts/README 索引 → 红 → 补行 → 绿——新资产必须同步索引的门禁闭环当场兑现）；
 - 验证：provenance 3/3 + navigability 9/9、`pnpm verify` 全绿、`pnpm test` 206/206（净增三项）；
 - 活体确认（挂账）：下一次代理代答的运行日志应出现「代理模拟记录已写盘——…question.md + …journal.md」，且 bundle 两文件 grep「代理模拟」命中——若未兑现即回滚本卡状态。
+- **活体确认进展（2026-10-05，drt_mcp-hosts-governance run 实录）**：①**HITL1 窗口边界缺口当场发现并修**——澄清先于 bundle 实例化（persona 合同），原 fail-loud 在 HITL1 代答后会崩；改为**响亮延迟**（答案落地、不崩、记账义务移交操作侧并打印答案内容），HITL1 4/4 落地实测通过（驱动同 diff 提交）；②**lib 写盘路径活体兑现**——操作侧补记调用 `appendProvenance`，答案取会话日志 answer 批**真实四问值**，question.md + journal.md 双文件落「操作侧代理模拟」行；③驱动**自动写盘路径**待 HITL2（bundle 在场场景）兑现；④小疵记账：answer 批形态为 `{id, selected}` 无 prompt 文本，手工补记行显示 `Q「」→「…」`——下次手工补记以 `b.id` 作标签（驱动路径不受影响，其 answered 来自 UI 命中、带真实 prompt）。

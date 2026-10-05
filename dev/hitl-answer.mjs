@@ -303,10 +303,14 @@ try {
     const wsRoot = join(ROOT, 'research-workspace')
     const { activeBundle } = bundleStateOf(wsRoot)
     if (activeBundle === null) {
-      throw new Error('hitl-answer: answer 落地但工作区根无 drt_* bundle——provenance 无处落账，fail-loud（修正入口：核对工作区）')
+      // HITL1 窗口常态：澄清先于 bundle 实例化（persona 合同）——provenance 无法即时落盘，
+      // 响亮延迟不崩溃（answer 已落地，崩溃会让操作者误判答题失败）；记账义务移交操作侧：
+      // bundle 出现后补记（答案内容已逐题打印在下方）。
+      log('hitl-answer: answer 已落地但工作区根无 drt_* bundle（HITL1 窗口常态）——provenance 延迟：bundle 实例化后由操作侧补记，勿隐去')
+    } else {
+      const written = appendProvenance({ bundle: join(wsRoot, activeBundle), date: new Date().toISOString().slice(0, 10), pick: PICK, answered })
+      log(`hitl-answer: 代理模拟记录已写盘——${written.question} + ${written.journal}`)
     }
-    const written = appendProvenance({ bundle: join(wsRoot, activeBundle), date: new Date().toISOString().slice(0, 10), pick: PICK, answered })
-    log(`hitl-answer: 代理模拟记录已写盘——${written.question} + ${written.journal}`)
   } else if (DRY) {
     log('hitl-answer: dry-run——代理模拟记录不写盘')
   } else if (answered.length > 0) {
