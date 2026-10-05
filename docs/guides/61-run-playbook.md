@@ -14,8 +14,8 @@
   （2026-09-28 起 3081 让给别的项目；3080 是本仓开发 GUI，勿占；换端口：
   `DSH_RUN_PORT=<空闲端口> bash dev/boot-run.sh`）。端口已被占时 boot-run 会 fail-loud 并给
   补救，**先看占用者是谁**：若是本仓在飞的 run 通道 → **别另起**，用它（URL/token 见启动横幅或
-  `dev/smoke-workspace/web.log`）；不是 → 换端口，或确认后停掉它（**别盲杀**：那会终局化挂起的
-  HITL 回合）；
+  `dev/smoke-workspace/web.log`）；不是 → 换端口，或确认后停掉它（**别盲杀**：在飞会话的
+  日志尾部可能丢失——BUG-007 卡）；
 - **SPA 抓取通道（mcp-playwright，默认挂载）**：`bash dev/boot-run.sh` 自带本地 Playwright MCP
   （npx 拉起 `@0.0.83`、headless、`direct://` 直连绕过系统代理——SPA 定价页/JS 榜单的渲染抓取）；
   `MCP_PLAYWRIGHT=0` = 显式拆。决定与环境踩坑正本 =

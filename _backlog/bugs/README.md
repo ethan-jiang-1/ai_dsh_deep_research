@@ -14,6 +14,7 @@
 |---|---|---|---|
 | [BUG-007-channel-death-loses-log-tail](BUG-007-channel-death-loses-log-tail.md) | 通道死亡丢会话日志尾部——settled run 回变"挂起未答"假态，盘侧谓词地基晃动 | P1 | 2026-10-05 |
 | [BUG-008-leads-term-drift-past-delivery](BUG-008-leads-term-drift-past-delivery.md) | leads.md 状态词漂移（建议深挖≠建议挖深）穿透交付——critic 未狩猎、门L 只能事后 | P2 | 2026-10-05 |
+| [BUG-009-no-finalization-on-restart](BUG-009-no-finalization-on-restart.md) | 挂起回合通道重启后没有被"终局化"——文档承诺的补写不存在，旧 pending 卡残留 | P2 | 2026-10-05 |
 
 ## 卡片模板
 

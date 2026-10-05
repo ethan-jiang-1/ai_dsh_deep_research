@@ -270,16 +270,27 @@ try {
   log(`hitl-answer: 共作答 ${answered.length} 题${plan.questionCount !== null ? ` / 卡共 ${plan.questionCount} 题` : ''}${submitted ? ' · Submit 已点击' : ' · 未走到 Submit'}`)
   // 盘侧裁决（BUG-004 升格 + 活体验证补切片）：成功判据 = 盘侧 answer 批内容（UI 会预选/
   // 自动推进选中态，点击计数不可作判据——实测点击 0 次而批全 Recommended 的假红形态）。
+  // 读窗有界重试（BUG-007 关联：日志帧批量落盘，answer 事件可能晚于短读窗数秒——等谓词，
+  // 不固定睡；最多 4 读 × 3s，仍不落地才如实红）。
   {
-    let settled = false
-    let batch = []
-    if (!DRY && pendingSid !== null && wsGroup !== null && wsSessionsRoot !== null) {
-      const logPath = join(wsSessionsRoot, wsGroup, pendingSid, 'session.v4.jsonl.zstd')
-      const s2 = runStateOf({ logPath, wsRoot: join(ROOT, 'research-workspace') })
-      batch = plan.callId !== null ? answerBatchOf(readSessionEvents(logPath).events, plan.callId) : []
-      settled = s2.hitlPending === false && batch.length > 0
+    let verdict = null
+    if (DRY) {
+      verdict = driveVerdict({ dryRun: true, settled: false, batch: [], clickCount: answered.length })
+    } else {
+      for (let attempt = 0; attempt < 4; attempt++) {
+        if (attempt > 0) await page.waitForTimeout(3000)
+        const s2 = (pendingSid !== null && wsGroup !== null && wsSessionsRoot !== null)
+          ? runStateOf({ logPath: join(wsSessionsRoot, wsGroup, pendingSid, 'session.v4.jsonl.zstd'), wsRoot: join(ROOT, 'research-workspace') })
+          : { hitlPending: null }
+        const batch = plan.callId !== null && wsGroup !== null && wsSessionsRoot !== null
+          ? answerBatchOf(readSessionEvents(join(wsSessionsRoot, wsGroup, pendingSid, 'session.v4.jsonl.zstd')).events, plan.callId)
+          : []
+        const settled = s2.hitlPending === false && batch.length > 0
+        const candidate = driveVerdict({ dryRun: false, settled, batch, clickCount: answered.length })
+        if (candidate.pass) { verdict = candidate; break }
+        verdict = candidate // 保留最后一次（红），继续重试窗
+      }
     }
-    const verdict = driveVerdict({ dryRun: DRY, settled, batch, clickCount: answered.length })
     log(`hitl-answer: 盘侧裁决——${verdict.reason}`)
     process.exitCode = verdict.exitCode
   }
