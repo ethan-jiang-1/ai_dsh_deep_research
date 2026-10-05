@@ -56,6 +56,10 @@
 正文**，与 Note 毕业 = 正文改写方向相反，故不入本时态地图；次序半区 =
 [queue.md](../_backlog/queue.md)（纯索引）。推敲卡不是任务，fresh agent 开工照旧只看 queue ▶。
 
+## proposed → implemented 的执行纪律（门牌）
+
+从 RFC 到毕业不是"写完再补证据"——**判据可检验化先行、红绿循环推进、真证据才毕业**。流程正本（一个家，不在此复述）= [guides/60 §0 验收门](../docs/guides/60-dev-loop.md)：验收判据逐条绑定检查方式（机械门禁 / 契约测试 / 对账命令 / 人工判据四型），能机械的先立红（判据在实现前必须能失败）；实施期按红→实现→绿循环；收尾逐条对账——**未验项不得写 implemented**，被阻断的检查如实写「阻断 + 原因」。决策登记 = [00-index D23](../docs/00-index.md)；首个完整闭环 = [项目可驾驭性 Phase 1](implemented/2026-10-05-project-navigability-phase1.md)。外部同源参照（同日同定调的姊妹仓落地形态）= `ai_dsh_assitant` notes/README §二之三（钉版登记见 [00-index §外部研究材料](../docs/00-index.md)）。
+
 ## 决定覆盖与取代检查（DSH SDLC reference 01 吸纳，2026-09-24）
 
 来源：`/Users/bowhead/deepseek-harness/_agent_ready_development/sdlc-reference/01-agent-note-lifecycle.md`
