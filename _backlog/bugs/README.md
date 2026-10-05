@@ -10,7 +10,9 @@
 
 ## 活跃列表
 
-（空——BUG-004/005 已修复并活体确认，2026-10-05 迁 [_fixed_bugs/](../_done/_fixed_bugs/README.md)）
+| Bug | 标题 | 严重级 | 发现 |
+|---|---|---|---|
+| [BUG-006-quick-path-skips-hitl-anchors](BUG-006-quick-path-skips-hitl-anchors.md) | quick_factual 题型下 lead 自我豁免 HITL1、HITL2 未拍板即 present——快路径无合同且无门禁可检 | P1 | 2026-10-05 |
 
 ## 卡片模板
 
