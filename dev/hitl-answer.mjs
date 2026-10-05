@@ -21,7 +21,7 @@ import { existsSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { loadChromium, launchChromium } from '../scripts/lib/playwright.mjs'
 import { runStateOf, readSessionEvents, bundleStateOf } from '../scripts/lib/run-state.mjs'
-import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf } from '../scripts/lib/ask-drive.mjs'
+import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf, parseAskQuestions, pickTargetLabel, intentReconcile } from '../scripts/lib/ask-drive.mjs'
 import { appendProvenance, batchToAnswered } from '../scripts/lib/hitl-provenance.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -85,11 +85,11 @@ let wsSessionsRoot = null
 }
 // 驱动计划（点击前读盘侧形态，BUG-005）：卡共几题 + ask 形态。活等待（wait:-1）下
 // timed 600s 放行与文本消息兜底**都不可用**——脚本必须真浏览器答满，操作者必须知道这点。
-let plan = { questionCount: null, indefinite: null, callId: null }
+let plan = { questionCount: null, indefinite: null, callId: null, questions: [] }
 {
   const s1 = readSessionEvents(join(wsSessionsRoot, wsGroup, pendingSid, 'session.v4.jsonl.zstd'))
   const ask = s1.readable ? [...s1.events].reverse().find((j) => j?.type === 'tool/call' && j?.data?.name === 'ask_user_question') : undefined
-  if (ask !== undefined) plan = { ...parseAskArgs(ask.data?.arguments), callId: ask.data?.callId ?? null }
+  if (ask !== undefined) plan = { ...parseAskArgs(ask.data?.arguments), questions: parseAskQuestions(ask.data?.arguments), callId: ask.data?.callId ?? null }
 }
 console.log(`hitl-answer: 驱动计划——卡共 ${plan.questionCount ?? '?'} 题 · 形态 = ${plan.indefinite === true ? 'wait:-1 无限期（⚠ timed 放行与文本兜底均不可用，必须真浏览器答满）' : plan.indefinite === false ? 'timed/默认（600s 放行 + 保持可答）' : '未知（日志读不到 ask 参数）'}`)
 // 模式自报（2026-09-26 教训：`flag/has` 的 `--` 加了两遍 → `--dry-run` 判假，**"dry-run" 实际
@@ -187,7 +187,7 @@ try {
   //    在 DSH UI 上的 actionability 检查会被问询卡挡死——cdp-probe 头注同款实测）。
   const observeCard = async () => page.evaluate(() => {
     const rg = [...document.querySelectorAll('[role="radiogroup"]')].pop()
-    if (!rg) return { radioCount: 0, checkedCount: 0, submitFound: false, submitDisabled: false }
+    if (!rg) return { radioCount: 0, checkedCount: 0, labels: [], checkedLabel: null, submitFound: false, submitDisabled: false }
     const radios = [...rg.querySelectorAll('button[role="radio"]')]
     let scope = rg
     let submit = null
@@ -197,9 +197,13 @@ try {
       scope = cand
       submit = [...scope.querySelectorAll('button')].find((b) => /^(Submit|提交)$/i.test((b.textContent ?? '').trim())) ?? null
     }
+    const labelOf = (b) => (b.textContent ?? '').trim()
+    const checkedRadio = radios.find((b) => b.getAttribute('aria-checked') === 'true') ?? null
     return {
       radioCount: radios.length,
       checkedCount: radios.filter((b) => b.getAttribute('aria-checked') === 'true').length,
+      labels: radios.map(labelOf),
+      checkedLabel: checkedRadio === null ? null : labelOf(checkedRadio),
       submitFound: submit !== null,
       submitDisabled: submit !== null && !!submit.disabled,
     }
@@ -240,14 +244,23 @@ try {
     return false
   })
   let submitted = false
+  // BUG-015 决策层：预选项 vs pick 意图的符合性进决策——目标不可解析（越界/空）时视为相符
+  // 放行（不瞎改选），裁决后的意图对账把关；预选项不符时 nextDriveAction 给 click-option
+  // 先改选目标项（clickOption 的 pick 定位逻辑本就在，劫持机制 = 预选使 Submit 提前可用
+  // 短路了它）。
+  const decideWithIntent = (obs) => {
+    const target = pickTargetLabel(obs.labels, PICK)
+    const selMatch = obs.checkedLabel === null || target.label === null ? undefined : obs.checkedLabel === target.label
+    return nextDriveAction({ ...obs, selectionMatchesIntent: selMatch })
+  }
   for (let step = 1; step <= MAX_STEPS; step++) {
     let obs = await observeCard()
-    let act = nextDriveAction(obs)
+    let act = decideWithIntent(obs)
     if (act.action === 'abort') {
       // 重渲染二次确认：题间切换的瞬态（radioCount=0）不该误判"无卡"——1.2s 后重看一次
       await page.waitForTimeout(1200)
       obs = await observeCard()
-      act = nextDriveAction(obs)
+      act = decideWithIntent(obs)
     }
     if (DRY) { log(`[dry-run] 观察 radio=${obs.radioCount} checked=${obs.checkedCount} submit=${obs.submitFound}/${obs.submitDisabled} → ${act.action}（${act.reason}）`); break }
     if (act.action === 'abort') { log(`hitl-answer: ${act.reason}`); break }
@@ -298,6 +311,19 @@ try {
     log(`hitl-answer: 盘侧裁决——${verdict.reason}`)
     process.exitCode = verdict.exitCode
   }
+  // 意图对账（BUG-015 裁决后半）：盘侧批已落地 ≠ 命令的答案已落地——逐题对 pick 目标，
+  // 不符即响亮红（exit 1）；答案内容仍进 provenance（事实归事实，意图归意图）。
+  let intentFailed = false
+  if (!DRY && process.exitCode === 0 && landedBatch.length > 0 && (plan.questions ?? []).length > 0) {
+    const rec = intentReconcile({ batch: landedBatch, questions: plan.questions, pick: PICK })
+    if (rec.ok) {
+      log(`hitl-answer: 意图对账通过——answer 批与 pick=${PICK} 逐题一致`)
+    } else {
+      intentFailed = true
+      process.exitCode = 1
+      for (const m of rec.mismatches) log(`hitl-answer: ⚠ 意图未达成——Q「${m.id}」pick=${PICK} 目标「${m.expected}」，实际落地「${m.landed}」——答案已落地但不是命令的答案，勿当成功用（BUG-015 对账）`)
+    }
+  }
   // 代理模拟 provenance（BUG-014 正修 ×3）：盘侧裁决通过（answer 真落地）才写盘——数据源 =
   // **实际提交的 answer 批**（batchToAnswered，id 作标签），不以点击日志为准（DSH UI 预选推荐项、
   // 零点击 Submit 时点击日志为空——第二缺口实录：mcp-hosts run HITL2 预选形态零写盘）。
@@ -305,9 +331,10 @@ try {
   // ⚠ 作用域教训（第三缺口实录）：landedBatch 必须声明在裁决块之外——块内声明 + 块外引用
   // = ReferenceError，裁决通过后必崩（答案已落地但 provenance 永远丢失，且 node --check 查不出）。
   const provAnswered = batchToAnswered(landedBatch).length > 0 ? batchToAnswered(landedBatch) : answered
-  if (!DRY && provAnswered.length > 0 && process.exitCode === 0) {
+  if (!DRY && provAnswered.length > 0 && (process.exitCode === 0 || intentFailed)) {
     const wsRoot = join(ROOT, 'research-workspace')
     const { activeBundle } = bundleStateOf(wsRoot)
+    const pickNote = intentFailed ? `${PICK}（意图不符实录：目标未达成，见对账输出——事实仍记账）` : PICK
     if (activeBundle === null) {
       // HITL1 窗口常态：澄清先于 bundle 实例化（persona 合同）——provenance 无法即时落盘，
       // 响亮延迟不崩溃（answer 已落地，崩溃会让操作者误判答题失败）；记账义务移交操作侧：
@@ -321,7 +348,7 @@ try {
       for (let attempt = 0; attempt < 3 && written === null; attempt++) {
         if (attempt > 0) await page.waitForTimeout(2000)
         try {
-          written = appendProvenance({ bundle: join(wsRoot, activeBundle), date: new Date().toISOString().slice(0, 10), pick: PICK, answered: provAnswered })
+          written = appendProvenance({ bundle: join(wsRoot, activeBundle), date: new Date().toISOString().slice(0, 10), pick: pickNote, answered: provAnswered })
         } catch (e) {
           if (attempt === 2) log(`hitl-answer: provenance 写盘失败（3 次重试后）——${String(e?.message ?? e).slice(0, 140)}；记账义务移交操作侧（答案内容已打印），勿隐去`)
         }

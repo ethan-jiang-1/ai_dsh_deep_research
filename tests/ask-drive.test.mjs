@@ -12,7 +12,7 @@
 // ④ ask 形态（wait:-1 无限期）可从盘侧日志判别（BUG-005：活等待的兜底语义不同）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf } from '../scripts/lib/ask-drive.mjs';
+import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf, parseAskQuestions, pickTargetLabel, intentReconcile } from '../scripts/lib/ask-drive.mjs';
 
 test('parseAskArgs：三问卡带 wait:-1 → 3 题 + 无限期（BUG-005 第 5 例现场的盘侧形态）', () => {
   const args = JSON.stringify({
@@ -132,4 +132,81 @@ test('answerBatchOf：从盘侧事件抠 ask 的 answer 批（result 缺席 → 
   assert.deepEqual(answerBatchOf(events, callId), [{ id: 'q1', selected: ['a（Recommended）'] }]);
   assert.deepEqual(answerBatchOf(events.slice(0, 1), callId), [], 'result 未落地 → 空数组');
   assert.deepEqual(answerBatchOf([{ type: 'turn/start' }], callId), []);
+});
+
+// ── BUG-015 契约：pick 实现（决策层）+ 意图对账（裁决后）——license run 劫持实录的机制钉 ──
+// 劫持机制：UI 预选推荐项 → Submit 立即可用 → 旧决策层第一步就 click-submit，clickOption 的
+// pick 逻辑永远够不着。修复 = 决策层带意图符合性（不符先改选）+ 盘侧落地批与 pick 命令对账。
+
+test('parseAskQuestions：完整参数 → 逐题 id / prompt / option 标签（意图解析的输入面）', () => {
+  const args = JSON.stringify({
+    questions: [
+      { id: 'hitl2', question: '定稿还是补研究？', options: [{ label: '定稿（Recommended）' }, { label: '补研究：破单源' }] },
+    ],
+  });
+  assert.deepEqual(parseAskQuestions(args), [
+    { id: 'hitl2', prompt: '定稿还是补研究？', options: ['定稿（Recommended）', '补研究：破单源'] },
+  ]);
+  assert.deepEqual(parseAskQuestions('{not json'), [], '坏串 → 空数组（不猜）');
+  assert.deepEqual(parseAskQuestions(undefined), []);
+});
+
+test('pickTargetLabel：recommended → 带 Recommended 标签；缺席 → 回退首项并标 fallback', () => {
+  const labels = ['定稿（Recommended）', '补研究：破单源'];
+  assert.deepEqual(pickTargetLabel(labels, 'recommended'), { label: '定稿（Recommended）', resolved: 'exact' });
+  assert.deepEqual(pickTargetLabel(['甲', '乙'], 'recommended'), { label: '甲', resolved: 'fallback' }, '无 Recommended 标签 → 回退首项（回退是确定性的，对账仍可判）');
+});
+
+test('pickTargetLabel：first → 首项；数字 N → 第 N 项；越界/空 → 不可解析（label=null，不猜）', () => {
+  const labels = ['甲（Recommended）', '乙', '丙'];
+  assert.deepEqual(pickTargetLabel(labels, 'first'), { label: '甲（Recommended）', resolved: 'exact' });
+  assert.deepEqual(pickTargetLabel(labels, '2'), { label: '乙', resolved: 'exact' });
+  assert.deepEqual(pickTargetLabel(labels, '9'), { label: null, resolved: null }, '越界 → 不猜（对账据此响亮红）');
+  assert.deepEqual(pickTargetLabel([], 'recommended'), { label: null, resolved: null });
+});
+
+test('nextDriveAction：Submit 可用但预选与意图不符 → click-option（先改选再提交）——BUG-015 劫持形态的决策层钉', () => {
+  // license run 劫持实录形态：单题卡、UI 预选推荐项、Submit 已可用、pick=2 意图第二项。
+  const obs = { radioCount: 2, checkedCount: 1, submitFound: true, submitDisabled: false, selectionMatchesIntent: false };
+  const act = nextDriveAction(obs);
+  assert.equal(act.action, 'click-option', 'Submit 可用 ≠ 意图达成——不符先改选');
+  assert.match(act.reason, /意图/, '理由行须点名意图不符');
+});
+
+test('nextDriveAction：selectionMatchesIntent 缺席或相符 + Submit 可用 → click-submit（旧行为不破坏）', () => {
+  const base = { radioCount: 2, checkedCount: 1, submitFound: true, submitDisabled: false };
+  assert.equal(nextDriveAction(base).action, 'click-submit', '缺席（旧调用方）= 视为相符');
+  assert.equal(nextDriveAction({ ...base, selectionMatchesIntent: true }).action, 'click-submit');
+});
+
+test('intentReconcile：落地批与 pick 一致 → ok（含 recommended 回退形态仍可判）', () => {
+  const questions = [{ id: 'hitl2', prompt: 'q', options: ['定稿（Recommended）', '补研究：破单源'] }];
+  const batch = [{ id: 'hitl2', selected: ['补研究：破单源'] }];
+  assert.deepEqual(intentReconcile({ batch, questions, pick: '2' }), { ok: true, mismatches: [] });
+  const batchRec = [{ id: 'hitl2', selected: ['定稿（Recommended）'] }];
+  assert.equal(intentReconcile({ batch: batchRec, questions, pick: 'recommended' }).ok, true);
+});
+
+test('intentReconcile：落地与 pick 不符 → ok=false + 逐题报告——license run 劫持实录形态（答案落地但不是命令的答案）', () => {
+  const questions = [{ id: 'hitl2', prompt: 'q', options: ['定稿（Recommended）', '补研究：破单源'] }];
+  const batch = [{ id: 'hitl2', selected: ['定稿（Recommended）'] }]; // 命令 pick=2，UI 预选被提交
+  const rec = intentReconcile({ batch, questions, pick: '2' });
+  assert.equal(rec.ok, false);
+  assert.equal(rec.mismatches.length, 1);
+  assert.deepEqual(
+    { id: rec.mismatches[0].id, expected: rec.mismatches[0].expected, landed: rec.mismatches[0].landed },
+    { id: 'hitl2', expected: '补研究：破单源', landed: '定稿（Recommended）' },
+  );
+});
+
+test('intentReconcile：目标不可解析（数字越界）→ 红，不猜；批缺席题不误报', () => {
+  const questions = [
+    { id: 'a', prompt: 'q1', options: ['x', 'y'] },
+    { id: 'b', prompt: 'q2', options: ['m（Recommended）', 'n'] },
+  ];
+  const rec = intentReconcile({ batch: [{ id: 'a', selected: ['x'] }], questions, pick: '9' });
+  assert.equal(rec.ok, false, '不可解析目标 = 意图未证实，不放行');
+  assert.equal(rec.mismatches[0].id, 'a');
+  const recOk = intentReconcile({ batch: [{ id: 'a', selected: ['x'] }], questions, pick: 'first' });
+  assert.equal(recOk.ok, true, '批缺席的题（b）不进对账（跳过已由 driveVerdict 显性报告）');
 });

@@ -12,7 +12,7 @@
 
 | Bug | 标题 | 严重级 | 发现 |
 |---|---|---|---|
-| [BUG-015-hitl-answer-pick-unimplemented](BUG-015-hitl-answer-pick-unimplemented.md) | hitl-answer 的 --pick 非默认选项未实现——驱动静默提交 UI 预选项，意图与落地脱节无检测（license-terms run 实录：命令补研究、落地定稿） | P1 | 2026-10-06 |
+| （无活跃卡——bugs 池清零，2026-10-06；最近归档 = BUG-015 pick 实现 + 意图对账〔TDD 23/23〕） | | | |
 
 ## 卡片模板
 
