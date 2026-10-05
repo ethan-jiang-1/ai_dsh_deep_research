@@ -310,8 +310,19 @@ try {
       // bundle 出现后补记（答案内容已逐题打印在下方）。
       log('hitl-answer: answer 已落地但工作区根无 drt_* bundle（HITL1 窗口常态）——provenance 延迟：bundle 实例化后由操作侧补记，勿隐去')
     } else {
-      const written = appendProvenance({ bundle: join(wsRoot, activeBundle), date: new Date().toISOString().slice(0, 10), pick: PICK, answered: provAnswered })
-      log(`hitl-answer: 代理模拟记录已写盘——${written.question} + ${written.journal}`)
+      // 写盘竞态自知：答案落地后 lead 常立即爆发写盘（拍板行 / journal 追加），瞬时 rename
+      // 窗口会让严格版 lib 抛「契约件缺席」——驱动侧有界重试（3 次 × 2s）；仍失败则响亮延迟
+      // 不崩（答案落地是关键副作用，provenance 缺席要大声但不能吞掉答题成功）。
+      let written = null
+      for (let attempt = 0; attempt < 3 && written === null; attempt++) {
+        if (attempt > 0) await page.waitForTimeout(2000)
+        try {
+          written = appendProvenance({ bundle: join(wsRoot, activeBundle), date: new Date().toISOString().slice(0, 10), pick: PICK, answered: provAnswered })
+        } catch (e) {
+          if (attempt === 2) log(`hitl-answer: provenance 写盘失败（3 次重试后）——${String(e?.message ?? e).slice(0, 140)}；记账义务移交操作侧（答案内容已打印），勿隐去`)
+        }
+      }
+      if (written !== null) log(`hitl-answer: 代理模拟记录已写盘——${written.question} + ${written.journal}`)
     }
   } else if (DRY) {
     log('hitl-answer: dry-run——代理模拟记录不写盘')
