@@ -8,7 +8,7 @@
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { runStateOf } from './lib/run-state.mjs'
+import { runStateOf, eventsRegressed } from './lib/run-state.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const SID = process.argv[2]
@@ -37,9 +37,17 @@ const wsRoot = join(ROOT, 'research-workspace')
 
 const deadline = Date.now() + TIMEOUT_MIN * 60 * 1000
 let last = ''
+let prevEvents = null
 while (Date.now() < deadline) {
   await new Promise((r) => setTimeout(r, INTERVAL_S * 1000))
   const s = runStateOf({ logPath, wsRoot })
+  // 日志回退检测（BUG-007 自救面）：同会话事件数变小 = 日志丢尾，此后一切盘侧谓词
+  // （hitlPending/runSettled）都建立在残缺地基上——fail-loud 退出，不带着假象盯场。
+  if (eventsRegressed(prevEvents, s.readable ? s.events : null)) {
+    console.log(`STATE: LOG-REGRESSION（事件数 ${prevEvents} → ${s.events}——通道死亡丢尾，盘侧谓词失效；正本 = bugs/BUG-007 卡）`)
+    process.exit(1)
+  }
+  if (s.readable) prevEvents = s.events
   const line = JSON.stringify(s)
   if (line !== last) {
     console.log(`${new Date().toISOString().slice(11, 19)} ${line}`)

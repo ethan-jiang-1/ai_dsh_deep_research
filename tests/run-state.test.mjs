@@ -11,7 +11,7 @@ import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readSessionEvents, toolCallCount, hitlPendingOf, turnOpenOf, bundleStateOf, runStateOf, askIndefiniteOf } from '../scripts/lib/run-state.mjs';
+import { readSessionEvents, toolCallCount, hitlPendingOf, turnOpenOf, bundleStateOf, runStateOf, askIndefiniteOf, eventsRegressed } from '../scripts/lib/run-state.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FIX = (name) => join(ROOT, 'tests', 'fixtures', 'run-state', `${name}.jsonl`);
@@ -122,4 +122,15 @@ test('askIndefiniteOf：无 ask / 参数坏串 → null（形态未知，不猜�
 test('runStateOf 暴露 askIndefinite 字段（watcher 与代答工具的判定输入）', () => {
   const st = runStateOf({ logPath: FIX('answered'), wsRoot: join(ROOT, 'research-workspace') });
   assert.equal(st.askIndefinite, false, 'answered 夹具的 ask 无 wait 参数 → false');
+});
+
+test('eventsRegressed：同会话事件数回退 = 日志损坏信号（BUG-007：通道死亡丢尾）', () => {
+  assert.equal(eventsRegressed(303, 158), true, '303 → 158 = 丢尾，必须报警');
+  assert.equal(eventsRegressed(158, 158), false, '持平不是回退');
+  assert.equal(eventsRegressed(158, 303), false, '增长是正常追加');
+});
+
+test('eventsRegressed：首轮无前值 / 不可读态 → false（不误报，报警只认确凿回退）', () => {
+  assert.equal(eventsRegressed(null, 158), false, '无前值无从比较');
+  assert.equal(eventsRegressed(303, null), false, '当前不可读（截断帧/路径错）由 readable 单独暴露');
 });

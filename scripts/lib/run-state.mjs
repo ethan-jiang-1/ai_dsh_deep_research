@@ -59,6 +59,18 @@ export function turnOpenOf(events) {
 }
 
 /**
+ * 同会话事件数回退检测（BUG-007 自救面：通道死亡丢日志尾部后，hitl-fold 等盘侧谓词
+ * 会把 settled run 折叠成"挂起未答"假态——日志单调是所有盘侧判据的地基，回退即损坏）。
+ * @param prevCount 上一轮读到的事件数（null = 无前值）。@param curCount 本轮事件数
+ *   （null = 本轮不可读——由 readable 单独暴露，不在此误报）。
+ * @returns true 仅当两个确凿数字存在且 cur < prev。
+ */
+export function eventsRegressed(prevCount, curCount) {
+  if (typeof prevCount !== 'number' || typeof curCount !== 'number') return false
+  return curCount < prevCount
+}
+
+/**
  * 最后一条 ask_user_question 的等待形态（BUG-005：活等待的兜底语义不同——
  * wait:-1 无限期下 timed 600s 放行与文本消息兜底均不可用，只有真浏览器作答一条路）。
  * @returns true = 无限期；false = timed/默认；null = 无 ask 或参数读不出（形态未知不猜测）。
