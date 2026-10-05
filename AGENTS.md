@@ -18,7 +18,7 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 5. **[docs/guides/60-dev-loop.md](docs/guides/60-dev-loop.md)**——开工（§1/§2）与收尾（§4）程序；每步"读什么 → 应知道什么 → 卡住怎么办"的**契约表**与按条目类型的分支 = 该页 §1.1。
 
 开工就绪最小集 = 上列 1–5。仓库全局如何运行、调试、交互和分层验收 → [docs/project-map.md](docs/project-map.md)；**其余一切按需，不强制通读**：验收怎么判 →
-[docs/evaluation.md](docs/evaluation.md)；机制为什么这样 → `docs/design/10-40`；run 怎么操作 →
+[docs/evaluation.md](docs/evaluation.md)；机制为什么这样 → `docs/design/10-50`；run 怎么操作 →
 [guides/61](docs/guides/61-run-playbook.md)。
 
 ## 布局
@@ -38,7 +38,7 @@ vendor/dsh/               pinned submodule（只读铁律——verify vendor-pin
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、NODES.md（节点 I/O 契约
                          全表）、question-patterns.md（判型模式库）、drt_<slug>/（run bundle）、
                          archive/（已交付 run 归档位）、drafts/、templates/run/
-docs/                    00-index（地图+决策台账+术语映射）→ design/10-40 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ evaluation.md（验收合同）
+docs/                    00-index（地图+决策台账+术语映射）→ design/10-50 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ evaluation.md（验收合同）
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）；目录名自带时态，
                          总图 = notes/README.md（将来 proposed/ · 过去 implemented/archived/rejected/
                          postmortem/；立项来历 = 该页 §立项来历——用户定调只进 00-index D 号依据列）：

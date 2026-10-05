@@ -142,8 +142,8 @@ source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --tok
   （objective = 定稿问题 + 交付判据）——goal-round-driver 随 base 在位，中断的回合会
   自动续轮（韧性增益）；lead 在任何 ask 挂起前 pause goal、答后 resume（防空转），
   goal 与 drt_ bundle 互为镜像、冲突以 bundle 文件事实为准；
-- **run 根只有一个正本**：`research-workspace/drt_<slug>/`（D17 契约位）。**位置=状态**：在飞
-  run 住工作区根，交付后由操作侧移入 `research-workspace/archive/<slug>/`（归档不消失——
+- **在飞与归档的位置**：在飞 run 住工作区根，交付后由操作侧移入
+  `research-workspace/archive/<slug>/`（归档不消失——
   仪表盘多 run 总表与 evidence-audit `--latest` 均并扫 archive/）。`dev/harness-home/runs/`
   下的 bundle 是契约前的 ad-hoc 历史（仪表盘标 "ad-hoc·无契约"）——不是这次要恢复的 run，
   也不要删（gitignored 运行数据，是那次研究留下的证据）；
@@ -157,8 +157,7 @@ source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --tok
 
 ## 6. 判定"研究完成"
 
-唯一依据 = **文件事实**：final.md 存在 + lead 会话的 present 声明（手册 §完成判据），
-不是任何人的口头宣告。
+判定正本 = [design/50 §交付判定](../design/50-agent-loop-and-state.md) + [研究手册 §完成判据](../../research-workspace/AGENTS.md)——文件事实链（final.md 当前版 + present 声明 + readiness PASS + audit CRITICAL=0），口头宣告与观察面显示都不算。
 
 ## 7. 归档时收割判型模式（增长协议的收割步）
 

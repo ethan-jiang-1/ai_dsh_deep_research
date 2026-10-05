@@ -95,3 +95,10 @@
   - [evaluation.md §L0](../../docs/evaluation.md) 增「契约回归」登记行（tests/AGENTS 同 diff 登记义务）；
   - **红转绿实录**：契约测试 6 红 1 绿 → 修三处 → 7/7 绿、verify 全绿、tests 201/201。三处 = ①61 链接 `../` 前缀断言细化（合同细化非放宽）；②矩阵行名「验证插件挂载」→「验证挂载（插件真挂载）」——**测试抓到 RFC 词表与文档措辞的真实漂移，改文档不改判据**；③dev README 自指豁免。
   - 余项（R4）：角色 skills 单向指针化（四分之六的 SKILL.md 含状态措辞；动 preset → render-overlay 先于 L1）、README + 根 AGENTS 首屏重排（doc-budgets 处置序）、根 AGENTS 布局「design/10-40」→「10-50」+ entry-chain 门禁成员清单同 diff 同步、61/研究手册深层重述修剪。
+- **R4（2026-10-05，Phase 1 收尾——五文档单向指针化收口 + 首屏重排）**：
+  - **角色 skills / pack README 重述排查（精确模式：恢复｜正本｜仪表盘｜任务板｜session log｜dashboard｜canonical｜交付判定｜goal 全量扫）**：零全局状态重述——命中均为任务板作为协作工具的角色动作描述（team-assembly 派工面）与既有 design/40 指针。**不动 preset** → render-overlay / L1 未触发（未跑 ≠ 通过，如实记档：preset 未改，L1 非本项判据面；skills 的非 owner 地位由契约测试 spot-grep 永久把守）。
+  - **61 两处重述修剪**：§5「run 根只有一个正本（D17 契约位）位置=状态」合同框架句退役 → 「在飞与归档的位置」纯操作面（生命周期事实移入 design/50 状态表行）；§6 交付判定改为指针（design/50 §交付判定 + 手册 §完成判据）。
+  - **根 AGENTS** 两处 `design/10-40` → `10-50`（入口链分流句 + 布局图；行数不变 138/138）。
+  - **entry-chain 门禁成员扩列 design/50**（writing-a-gate 纪律执行：先加载技能全文 → 改 verify.mjs members + evaluation.md 行同步 → **注入反证**：加 bogus 成员 `docs/design/99-bogus.md` → entry-chain FAIL → 还原 → PASS；反证记录入 evaluation.md 该行）。
+  - **README 首屏重排**：Start Here 增第四指针（想看懂运转 → project-map 任务入口矩阵 + design/50 状态合同），Directory Map 节折叠并入该指针（31 → 28 行，预算内净减）。
+  - Phase 1 七项至此全数落地（第 3 项含"验证过、无需改"的如实记录——不发明工作）。验证：契约测试 7/7 + verify 全绿 + tests 201/201。
