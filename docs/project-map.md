@@ -110,6 +110,32 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 回放夹具不能证明模型服从变化后的方法论；真挂载也不能证明研究质量。
 失败先定位到对应层，再扩大验证范围，比让每个变化都跑完整研究更有用。
 
+### 测试词汇对照（传统金字塔词汇 → 本仓形态）
+
+不用 unit / integration / e2e 作组织轴：同一标签下纯核与真 IO 的失败含义不同，**标签回答不了"要什么前置"**——本仓用三轴回答（档位 = 凭什么跑 / 验收面 = 证明了什么 / 命名即层 = 住哪怎么选；正本 = [evaluation](evaluation.md)、[scripts/AGENTS](../scripts/AGENTS.md)、[tests/AGENTS](../tests/AGENTS.md)）。带金字塔词汇来的人按此表对号：
+
+| 传统词汇 | 本仓形态 | 住哪 | 凭据 |
+|---|---|---|---|
+| 单元（纯函数） | run-state / hitl-fold / activity-fold / tool-card / bundle-bind 等谓词与折算断言（消费 [scripts/lib](../scripts/README.md) 纯函数） | `tests/*.test.mjs` | keyless |
+| 契约（结构断言） | layering / smoke-contract / evaluation-contract / presets / export-shape / 各门用例 / navigability-contract | `tests/` + [fixtures](../tests/fixtures/README.md) | keyless |
+| 集成（真子系统） | preset-smoke（L1）/ release-smoke（L2）/ snapshot-replay / client-load | `scripts/` 冒烟族 | keyless（子进程/浏览器，无模型） |
+| 端到端（真模型） | l4-lite / team-preflight / entry-chain-probe / client-hitl；完整 run = L4 全量 | `scripts/` 真模型档 | 需凭据 |
+| 生产审计 | node-gate / schema-scan / evidence-audit（对真实 run bundle） | `scripts/` run 门 | keyless |
+
+### 新检查落家序（加一个检查时按序找家，单一入口）
+
+1. **`tests/*.test.mjs` 契约测试**——断言对象是仓内自控文件、keyless 秒级可判真假。义务：同 diff 在 [evaluation](evaluation.md) 对应面登记；新契约测试带反证（[tests/AGENTS](../tests/AGENTS.md)）；
+2. **一次性检查**——不复现的核对：跑完即弃（运行区临时脚本），证据（命令 + 输出）进条目实施记录；**复现第二次即升格契约测试**，不滞留临时态；
+3. **`*-smoke` 分级冒烟**——需要真子系统（挂载/安装/浏览器/回放）但无模型。义务：后缀申报档位（[scripts/AGENTS](../scripts/AGENTS.md)）；
+4. **真模型档脚本**——需要凭据与模型调用。义务：closed set 登记（`smoke-contract` 门禁对账）；
+5. **verify 门禁**——断言跨条目恒真的仓结构不变量。义务：走 [writing-a-gate](../.agents/skills/writing-a-gate/SKILL.md) 全流程（先想红 + gates 数组与 evaluation 台账两处同步）；
+6. **run 门（`*-gate` / `*-audit` / `*-scan`）**——断言真实 run bundle 的文件事实，随 run 消费；
+7. **`tests/fixtures/` 支撑样本**——taxonomy 建行，consumer 必须真实（[taxonomy](../tests/fixtures/README.md) + 契约测试零孤儿断言）。
+
+新测试资产的**形态**（新后缀 / 新目录）先入词汇表再落文件——词汇表 = [scripts/AGENTS 命名即层](../scripts/AGENTS.md) 与 [tests/AGENTS 放置规则](../tests/AGENTS.md)。
+
+选层的成本原则：穷举矩阵不是目标——**能咬中本次回归的红灯才是**；升档前先问"这个红灯真的会咬中本次改动吗"。
+
 ## 脚本、夹具和结果分别放哪里
 
 | 职责 | 查哪些入口 | 结果/支撑资产 |

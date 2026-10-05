@@ -111,3 +111,41 @@ test('正本门 spot-grep：状态合同词不在非 owner 文档重述', () => 
     }
   }
 });
+
+// ── 测试资产组织契约（条目 = test-asset-organization，2026-10-05 mini RFC）──
+// 词汇桥与落家序是导航合同的一部分，与任务入口矩阵同受机械把守；立红实录见该条目实施记录。
+
+test('资产门：project-map 测试词汇对照五词全覆盖 + 反金字塔理由在场', () => {
+  const map = read('docs/project-map.md');
+  const s = map.indexOf('### 测试词汇对照');
+  assert.ok(s !== -1, 'project-map.md 缺「### 测试词汇对照」节（词汇桥单一入口）');
+  const rest = map.slice(s);
+  const end = rest.slice(1).search(/\n#{2,3} /);
+  const section = end === -1 ? rest : rest.slice(0, end + 1);
+  for (const word of ['单元', '契约', '集成', '端到端', '生产审计']) {
+    assert.ok(section.includes(word), `词汇对照未覆盖「${word}」——带金字塔脑子来的人对不上号`);
+  }
+  assert.ok(section.includes('要什么前置'), '词汇对照缺反金字塔理由（标签回答不了"要什么前置"）');
+  for (const m of section.matchAll(/\]\(([^)#\s]+?)(#[^)]*)?\)/g)) {
+    if (m[1].startsWith('http')) continue;
+    assert.ok(existsSync(join(ROOT, 'docs', m[1])), `词汇对照链接目标缺席：docs/${m[1]}`);
+  }
+});
+
+test('资产门：新检查落家序七步在场 + 成本一句原则 + 链接目标在场', () => {
+  const map = read('docs/project-map.md');
+  const s = map.indexOf('### 新检查落家序');
+  assert.ok(s !== -1, 'project-map.md 缺「### 新检查落家序」节（新检查住哪的单一入口）');
+  const rest = map.slice(s);
+  const end = rest.slice(1).search(/\n#{2,3} /);
+  const section = end === -1 ? rest : rest.slice(0, end + 1);
+  // 七步关键词：契约测试 / 一次性检查（三例回放实锤补的步）/ 冒烟 / 真模型档 / verify 门禁 / run 门 / fixtures
+  for (const step of ['契约测试', '一次性', '*-smoke', '真模型档', 'writing-a-gate', '*-gate', 'fixtures']) {
+    assert.ok(section.includes(step), `落家序缺步或关键词「${step}」`);
+  }
+  assert.ok(section.includes('穷举矩阵不是目标'), '落家序缺成本一句原则');
+  for (const m of section.matchAll(/\]\(([^)#\s]+?)(#[^)]*)?\)/g)) {
+    if (m[1].startsWith('http')) continue;
+    assert.ok(existsSync(join(ROOT, 'docs', m[1])), `落家序链接目标缺席：docs/${m[1]}`);
+  }
+});

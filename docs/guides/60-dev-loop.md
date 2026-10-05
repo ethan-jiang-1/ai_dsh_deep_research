@@ -141,7 +141,8 @@ node packages/deep-research-pack/scripts/scaffold.mjs --workspace <dir>    # 部
 档位词汇（keyless / 真模型档）与密钥定义 = [AGENTS.md §密钥](../../AGENTS.md)；脚本头注各带设计依据
 与 RFC 出处。
 
-三条与面选择同级的纪律（`_agent_ready_development` 吸纳，2026-09-25）：
+五条与面选择同级的纪律（前三条 = `_agent_ready_development` 吸纳，2026-09-25；后两条 = 姊妹仓
+`ai_dsh_assitant` 借入，2026-10-05，钉版见 [00-index §外部研究材料](../00-index.md)）：
 
 - **先加载匹配的开发技能**：任务命中 `.agents/skills/` 某条 description（毕业条目 / 加角色 /
   写门禁 / 跑 run）→ 先读该 `SKILL.md` 全文再动手，不从摘要猜流程；
@@ -150,6 +151,11 @@ node packages/deep-research-pack/scripts/scaffold.mjs --workspace <dir>    # 部
   ——"镜像是否等于 pack 源"；
 - **未运行项如实分开**：交付报告里"未跑"与"通过"分列（例：无凭据自动跳过的 e2e 不算验过
   真实 provider，mock 测试不能替代真实入口证据）。
+- **互补案例规则**：断言是条件命题（"仅当 X"）时，证据必须含非 X 的互补案例——只覆盖单一
+  状态的证据集抓不到状态 bug（姊妹仓实案：首屏证据全是空会话，"仅空会话渲染"看似证毕，
+  实则全状态渲染）；
+- **仪器对准目标，不对准跑者**：检查脚本扫描的对象必须显式锚定目标 home / 目录——扫错
+  对象会拿无关残留凑绿（本仓 evidence-audit 锚定 dev home 自拒是同精神实例）。
 
 ## 3. 开发环境
 
