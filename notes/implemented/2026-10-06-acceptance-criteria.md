@@ -18,7 +18,9 @@
    UNVERIFIED）随关单/journal 记账；
 2. **lead skill**（team-assembly）新增「收活验收」节：判据落在文件上的打开文件核、**不信
    teammate 自报**——既有"收'补完'只认文件事实"（补搜特例）推广到全部派发；当场核不了的
-   （外部状态/模型判断/拿不到的材料）→ UNVERIFIED + 为什么判不了。
+   （外部状态/模型判断/拿不到的材料）→ `UNVERIFIED` **逐字标记**（机械可检索词，与手册
+   "单源——待破"同款固定字符串，意译〔不可核验/待核/无法验证〕不得替代——纪律行为探针
+   首跑咬出词汇漂移后升格，见验证节）+ 为什么判不了。
 
 词汇取自 DeerFlow（checked/holds/UNVERIFIED 分层、禁用 verified/passed 的诚实口径——本仓
 采纳第三态与"判不了要说明"两点）。
@@ -38,4 +40,11 @@
 - `pnpm verify` 全绿（含 pack-workspace-fresh 种子重同步对账）；
 - **真模型档**：`l4-lite-smoke` ALL PASS（四角色 assistant 响应 + scout web_search 工具
   调用——lead 携收活验收节的 skill 真挂载、真响应）；
+- **纪律行为探针**（`discipline-probe.mjs`，真模型档，2026-10-06 同日建成——收活纪律的
+  集成层证据）：**首跑 3/4 咬出真发现**——模型语义合规（拒绝无凭据放行、留痕待验、
+  提议改写判据为可核验形态）但把 UNVERIFIED **意译**成"不可核验"，机械不可检索 →
+  修正一 = skill 升格逐字标记令；**二跑 2/4 暴露探针自身设计缺陷**——"不用工具"指令把
+  模型挡在技能文本之外，测的是 persona 临场发挥而非纪律（persona 自带精神、不带细节）
+  → 修正二 = 探针 v3 改"先 read 技能正本再作答"（同真实 run 开工动作，cwd = 仓根）；
+  **终跑 4/4 ALL PASS**（UNVERIFIED 逐字出场；留档 dev/smoke-workspace/ 供人工复核）；
 - 毕业形态：RFC 由 proposed/ 改写迁 implemented/ + 队列行删除（queue 回 parked）。

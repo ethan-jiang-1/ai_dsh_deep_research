@@ -19,6 +19,7 @@ const REAL_MODEL = [
   'team-preflight-smoke.mjs',
   'entry-chain-probe.mjs',
   'client-hitl-smoke.mjs',
+  'discipline-probe.mjs',
 ];
 
 test('真模型档 closed set：要求凭据（.credentials.yaml）的脚本恰为登记名单', () => {

@@ -48,9 +48,11 @@ spawn_teammate 子**一律 composeFrom lead**（vendor 机制）——队友的�
 派发五件里的③验收判据不是装饰——收活时**逐条机械核验**：判据落在文件上的（产出文件在场、
 frontmatter 字段齐、引用链文件存在）就打开文件核，**不信 teammate 自报**（"收'补完'只认
 文件事实"同款语义，从补搜特例推广到全部派发）；判据当场核不了的（需要外部状态/模型判断/
-你拿不到的证据材料）→ 显式标 **UNVERIFIED + 为什么判不了**，交 critic 狩猎或人工核——
-**UNVERIFIED 是第三态：不是 PASS 也不是 FAIL，永不静默放行**（DeerFlow acceptance_criteria
-语义，oss-dr 借鉴）。收活结论（哪条判据 PASS、哪条 UNVERIFIED）随任务板关单/journal 记账。
+你拿不到的证据材料）→ 显式标注 `UNVERIFIED`——**逐字使用这个英文标记**（机械可检索词，
+与手册"单源——待破"同款：critic 狩猎、操作侧对账、仪表盘都按这个词 grep——"不可核验/
+待核/无法验证"等意译**不得替代**），并附为什么判不了，交 critic 狩猎或人工核——**UNVERIFIED
+是第三态：不是 PASS 也不是 FAIL，永不静默放行**（DeerFlow acceptance_criteria 语义，oss-dr
+借鉴）。收活结论（哪条判据 PASS、哪条 UNVERIFIED）随任务板关单/journal 记账。
 
 ## 反模式
 
