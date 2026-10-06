@@ -75,8 +75,11 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 
 ## 研究怎么跑
 
-1. **HITL1 立项**：对 Lead 说出研究问题 → 一张结构化选项卡三问（研究类型/深度篇幅/时间口径
-   与语言，推荐项置首带 (Recommended)）→ 你点选即定稿；
+1. **HITL1 立项（两段卡）**：对 Lead 说出研究问题 → 第一段三问（研究类型/深度篇幅/时间口径
+   与语言，推荐项置首带 (Recommended)）→ 点选即定稿；Lead 落稿 question.md + topics.md 后发
+   第二段**计划确认卡**（quick_factual 豁免）：≤200 字计划要点 + 三选项——按计划开跑
+   (Recommended) / 修订计划（自由文本意见，附加进计划）/ 放弃；拍板与修订意见落
+   §Decisions 后开工（一轮制，不二次呈卡）；
 2. **静默自主区**：Lead 拆 topic、派 Scout/Analyst/Critic（Agent Teams 通道），证据落
    `drt_<slug>/evidence/`（七字段 frontmatter：source_url / retrieved_at / quality / found_by /
    supports / source_tier / publisher）；Critic 对抗核查出 `review.md`（readiness PASS 是交付前置）；

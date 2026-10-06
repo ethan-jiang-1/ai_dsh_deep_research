@@ -109,9 +109,29 @@ test('lead persona 钉 HITL1 零例外（BUG-006 契约：快路径自我豁免�
 
 test('lead persona 钉 ask 硬约束：禁 wait:-1（BUG-005——模型单参绕过 timed 护栏即无人值守悬挂）', () => {
   const yml = readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8');
-  // 契约文本两个必备面：约束句在场（HITL1/HITL2 通用）+ 明确点名 wait: -1 的禁令
-  assert.match(yml, /ask 调用硬约束（HITL1\/HITL2 通用）/, 'persona 缺 ask 硬约束句——timed 护栏可被模型单参绕过');
+  // 契约文本两个必备面：约束句在场（HITL1 三问与计划确认卡、HITL2 三处 ask 通用）+ 明确点名 wait: -1 的禁令
+  assert.match(yml, /ask 调用硬约束（HITL1 三问与计划确认卡、HITL2 通用）/, 'persona 缺 ask 硬约束句——timed 护栏可被模型单参绕过');
   assert.match(yml, /wait: -1/, 'persona 未点名禁 wait: -1');
   // 双保险：约束句必须同时说明"为什么"（兜底失效后果）——没有后果的禁令对模型是空约束
   assert.match(yml, /兜底/, 'ask 硬约束句未说明违反后果（超时/文本兜底失效）');
+});
+
+test('HITL1 两段卡：计划确认卡钉在模型可见面与合同面（persona + research-brief + 手册 + 模板）', () => {
+  const yml = readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8');
+  const skill = readFileSync(join(PRESETS, 'lead/skills/research-brief/SKILL.md'), 'utf8');
+  const manual = readFileSync(join(ROOT, 'research-workspace/AGENTS.md'), 'utf8');
+  const template = readFileSync(join(ROOT, 'research-workspace/templates/run/question.md'), 'utf8');
+  // persona（行为最强钉）：第二段在场 + quick_factual 豁免 + 推荐项形态 + 拍板落 §Decisions
+  assert.match(yml, /计划确认卡/, 'persona 缺计划确认卡——第二段可被静默跳过');
+  assert.match(yml, /quick_factual 免发/, 'persona 未写 quick_factual 豁免——快答场景会被强塞第二段卡');
+  assert.match(yml, /按计划开跑\(Recommended\)/, '计划确认卡推荐项形态漂移（推荐置首硬格式）');
+  assert.match(yml, /§Decisions（append-only、最新在上）后开工/, '拍板未钉回写记账（§Decisions）');
+  // research-brief（操作面正本）：流程步 + 一轮制
+  assert.match(skill, /计划确认卡/, 'research-brief 缺计划确认步');
+  assert.match(skill, /一轮制/, 'research-brief 缺一轮制（修订不再二次呈卡）');
+  // 手册（跨角色合同）：两段卡语义 + 豁免 + 细则下放指针
+  assert.match(manual, /HITL1 = 两段卡/, '手册缺两段卡合同');
+  assert.match(manual, /quick_factual 豁免/, '手册缺 quick_factual 豁免');
+  // 模板（schema 实例）：Snapshot 确认行
+  assert.match(template, /计划确认:/, 'question.md 模板缺计划确认字段（Snapshot 节）');
 });

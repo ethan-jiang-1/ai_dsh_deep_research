@@ -83,5 +83,23 @@ templates/run/question.md（Snapshot 增行）/ NODES 行 1 + 两点交互边界
 
 ## 实施记录
 
-- S1（2026-10-07）：卡毕业（触发②用户点名）+ 本 RFC + queue ▶ 可自主行落位；
-  触面实施未动——下一步 = 触面①起逐面落（红→绿循环）。
+- S1（2026-10-07）：卡毕业（触发②用户点名）+ 本 RFC + queue ▶ 可自主行落位。
+- S2（2026-10-07）：触面实施完成——**实际落面九件（超出 RFC 预登记的六件，实施期发现如实扩面）**：
+  ①lead persona（`presets/lead.patch.yml` 立项段——行为最强钉：persona 持有 HITL1 零例外/硬格式
+  规则，BUG-006 跳卡修复先例 = persona 钉死；确认卡段 + ask 硬约束改「HITL1 三问与计划确认卡、
+  HITL2 通用」）②research-brief skill（流程第 6 步 + 判据 + 反模式「定稿即开工」+ description）
+  ③研究手册 §交互纪律（两段卡合同句；doc-budgets 红→压缩回一行——细则下放 skill，预算 120 不动）
+  ④模板 question.md（Snapshot 增「计划确认」行 + §Decisions 注释）⑤NODES 行 1 + 两点交互边界节
+  ⑥running-a-research-run §2 ⑦guides/61 §2 ⑧pack README「研究怎么跑」第 1 步（行为合同行）
+  ⑨design/30 HITL1 映射行（L3 对账义务）。种子同步 + overlay 重渲染随做。
+- S3（2026-10-07）：证据梯实录——L0 verify 全绿 + tests 234/234（净 +1：新契约测试
+  「HITL1 两段卡四面在场」，stash 四源文件反证红→还原绿；既有 BUG-005 断言随 ask 硬约束
+  措辞合同真实变化同 diff 改）；L1 真挂载四 preset ALL PASS；snapshot-replay B1 先红
+  （persona 有意变更被捕获）→ lead fixture 真模型重录（BUG-013 程序：git rm + record-role-fixture，
+  9888 字 persona 合同在场含计划确认卡×3/免发/推荐项形态/ask 硬约束新措辞）→ C 金标准重写人审
+  （窄带：检索卡标题钉住、仅收尾活动行随新录如实重写）→ 4 场景 ALL PASS；discipline-probe
+  第五场景「hitl1-plan-card」（双 run 互补对）**先红**（stash 两纪律文本 + overlay 重渲染防 persona
+  污染 → 模型答无标记，exit 1）**后绿**（新文本下 5/5 ALL PASS；人审留档：A = 发计划确认卡
+  ≤200 字三路选项，B = quick_factual 免发直接开工）；l4-lite 四角色 + scout web_search ALL PASS。
+  未跑：entry-chain-probe（改动面不含 docs/AGENTS，收尾门「否则按节奏」豁免，如实分开记账）。
+  run 试点（判据⑥）= 挂账随下一场 run（待用户取题）。

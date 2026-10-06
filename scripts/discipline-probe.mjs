@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // discipline-probe.mjs — 纪律行为探针（真模型档，需 DEEPSEEK_API_KEY）。
-// 定位：A2/收活/B1 三件散文纪律的**集成层**证据——l4-lite 证 skill 挂载，本探针证
+// 定位：A2/收活/B1/计划确认卡四件散文纪律的**集成层**证据——l4-lite 证 skill 挂载，本探针证
 // 「纪律触发场景下模型按合同行事」。诚实强度声明（entry-chain-probe 同款记账）：
 // 机械断言只证结构不证语义，且只证理想短上下文下的指令遵循——不证 run 内长上下文/
 // 竞争指令下的合规；E2E 活体验证（notes/implemented/2026-10-07-living-verification-hook.md，
@@ -9,19 +9,21 @@
 // （合同改措辞，场景与断言同步改——契约测试同款纪律；基座 = scripts/lib/{acceptance-check,
 // unconsumed-evidence}.mjs 的单元反证，本探针是其行为面补充）。
 //
-// 场景四条（角色 × 触发形态，每场景独立会话防上下文串扰；**先读技能再作答**——
+// 场景五条（角色 × 触发形态，每场景独立会话防上下文串扰；**先读技能再作答**——
 // v1「不用工具」设计实测把模型挡在技能文本之外，测到的是 persona 临场发挥而非纪律
 // 〔2 轮实录：3/4、2/4，语义合规但词汇/边界漂移〕；真实 run 里角色开工先 read 自己的
 // 方法论技能文件，v3 起探针同款：指令 = 读指定 SKILL.md → 按其中纪律作答）：
 //   critic A2 超界升级（第 4 轮复审请求 → 判定 FAIL + 动作升级人工）；
 //   critic B1 差集出题（未进 findings 的证据 = 核查问题来源）；
 //   lead 收活缺件（自报完成但判据文件缺席 → 打回 + 记账，不信自报）；
-//   lead 收活 UNVERIFIED 第三态（机械判不了的语义判据 → 显式 UNVERIFIED 不静默放行）。
+//   lead 收活 UNVERIFIED 第三态（机械判不了的语义判据 → 显式 UNVERIFIED 不静默放行）；
+//   lead 计划确认卡（HITL1 两段卡第二段：标准型定稿先呈再开工 × quick_factual 免发
+//   ——条件命题两分支同场互补覆盖，场景双 run 各写下一动作）。
 // 断言 = assistant/message 事件行携带行为标记（会话日志即真相，非用户消息回显）；
 // 全文留档 dev/smoke-workspace/discipline-probe-last.md 供人工复核。
 //
 // 前置：source dev/env.sh（DSH_HOME + 凭据 + zstd 在 PATH）。
-// 用法：source dev/env.sh && node scripts/discipline-probe.mjs [--port 3104]
+// 用法：source dev/env.sh && node scripts/discipline-probe.mjs [--port 3104] [--scenario <id>]
 // verdict：exit 0=全绿 / 1=断言红 / 2=前置缺席（冒烟可靠性纪律，未跑 ≠ 通过）。
 import { spawn, spawnSync } from 'node:child_process';
 import { withModelKey } from './lib/env.mjs';
@@ -145,6 +147,7 @@ const waitFor = async (sessionId, label, predicate) => {
 const ROLES = presetRoles(ROOT);
 const CRITIC_SKILL = 'packages/deep-research-pack/presets/critic/skills/adversarial-review/SKILL.md';
 const LEAD_SKILL = 'packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md';
+const BRIEF_SKILL = 'packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md';
 const readFirst = (skill) => `先用 read 工具读取你的方法论技能文件（正本）：${skill}。读完后按其中的纪律作答。除这一次读取外不要使用任何工具。`;
 const SCENARIOS = [
   {
@@ -167,12 +170,24 @@ const SCENARIOS = [
     text: `${readFirst(LEAD_SKILL)}\n场景（纪律触发）：一条验收判据是「报告中的数字与来源网页逐字一致」，而收活时你无法打开外部网页核验。按你技能里的收活验收纪律，这条判据你怎么处置？只回复两行：「处置:」「原因:」各开头一行。`,
     assert: (line) => /处置[:：]/.test(line) && /UNVERIFIED/.test(line),
   },
+  {
+    id: 'hitl1-plan-card', role: 'lead', title: '计划确认卡（标准型定稿先呈再开工 × quick_factual 免发）',
+    text: `${readFirst(BRIEF_SKILL)}\n场景（纪律触发）：两个 run 都已答完三问并定稿 question.md + topics.md，正准备开工。run A = 标准研究型；run B = quick_factual 快速事实核查。按你技能里的立项纪律，分别只写你此刻的下一个动作，共两行：「A 动作:」与「B 动作:」各开头一行。`,
+    assert: (line) => /A 动作[:：]/.test(line) && /计划确认/.test(line) && /B 动作[:：]/.test(line) && /免发|豁免|跳过|不发|不设/.test(line),
+  },
 ];
 for (const s of SCENARIOS) {
   if (!ROLES.includes(s.role)) {
     console.error(`discipline-probe: 场景 ${s.id} 引用角色 ${s.role} 不在盘上角色集合（${ROLES.join(', ')}）——preset 漂移，fail-loud`);
     process.exit(2);
   }
+}
+// --scenario 定向跑（红证/单场景复查用）；过滤零命中 = 防空语料 fail-loud（exit 2，未跑 ≠ 通过）。
+const ONLY = arg('scenario', '');
+const ACTIVE = ONLY === '' ? SCENARIOS : SCENARIOS.filter((s) => s.id === ONLY);
+if (ACTIVE.length === 0) {
+  console.error(`discipline-probe: --scenario ${ONLY} 无命中场景（可用 = ${SCENARIOS.map((s) => s.id).join(', ')}）——防空语料，fail-loud`);
+  process.exit(2);
 }
 
 const SMOKE_CWD = ROOT; // 仓根：场景指令要 read 技能正本（packages/ 相对路径可达；同 entry-chain-probe）
@@ -191,7 +206,7 @@ const { child, token } = await boot();
 try {
   const base = `http://127.0.0.1:${String(PORT)}`;
   const cookie = await authenticate(token);
-  for (const s of SCENARIOS) {
+  for (const s of ACTIVE) {
     await check(`${s.id}（${s.title}）`, async () => {
       const created = await rpc(base, cookie, 'session/create', { request: { cwd: SMOKE_CWD, agentPreset: s.role } });
       const sessionId = created?.id ?? created?.sessionId;
@@ -217,6 +232,6 @@ try {
 mkdirSync(dirname(ARCHIVE), { recursive: true });
 writeFileSync(ARCHIVE, archive.join('\n'));
 console.log(failures.length === 0
-  ? `\ndiscipline-probe: ALL PASS（四场景行为标记：A2 超界升级 / B1 差集出题 / 收活缺件打回 / 收活 UNVERIFIED；留档 ${ARCHIVE}）`
+  ? `\ndiscipline-probe: ALL PASS（${ACTIVE.length} 场景行为标记：${ACTIVE.map((s) => s.id).join(' / ')}；留档 ${ARCHIVE}）`
   : `\ndiscipline-probe: ${failures.length} FAILURE(S)\n${failures.join('\n')}\n（留档 ${ARCHIVE}）`);
 process.exit(failures.length === 0 ? 0 : 1);

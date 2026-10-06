@@ -82,13 +82,17 @@ frontmatter）。`dev/run-kickoff.mjs` 已默认用 workspaceId 形态把会话�
 
 ## 2. 说什么
 
-- 直接说出研究问题（一句话到一段话皆可）。lead 加载 research-brief skill 走 **HITL1**
-  三问：研究类型（quick_factual / exploratory_map / claim_verification）/ 深度篇幅 /
-  时间口径语言——**一张结构化选项卡**（一次 ask_user_question 携带三问，每问 options
+- 直接说出研究问题（一句话到一段话皆可）。lead 加载 research-brief skill 走 **HITL1 两段卡**：
+  第一段**三问**——研究类型（quick_factual / exploratory_map / claim_verification）/ 深度篇幅 /
+  时间口径语言，**一张结构化选项卡**（一次 ask_user_question 携带三问，每问 options
   化、推荐项置首带（Recommended）），你点选项即拍板（需要改的选项可自由输入）；
-- 拍板后 lead 实例化 run bundle `research-workspace/drt_<slug>/`（question.md 定稿 +
-  topics.md 拆解；立项时 sibling 预检——同名/前缀相关 bundle 已在则先问你）
-  并组队（scout 先行，critic 后置进场），进入静默自主区。
+- 三问答毕 lead 实例化 run bundle `research-workspace/drt_<slug>/`（question.md 定稿 +
+  topics.md 拆解；立项时 sibling 预检——同名/前缀相关 bundle 已在则先问你），随后发
+  **第二段·计划确认卡**（quick_factual 豁免）：≤200 字计划要点瘦卡 +「全文 =
+  question.md / topics.md」指针，三选项——按计划开跑（Recommended）/ 修订计划（自由文本
+  意见，**附加**进计划不替换）/ 放弃（不开跑，bundle 处置照 sibling 预检规矩）；修订意见
+  逐字落 §Decisions 后直接开工（一轮制，不再二次呈卡）；
+- 计划拍板后 lead 组队（scout 先行，critic 后置进场），进入静默自主区。
 
 ## 3. 静默自主区（两点之间你会看到什么）
 

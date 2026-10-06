@@ -18,7 +18,7 @@
 
 | 节点 | 输入（读） | 输出（写） | 下游可开工判据 |
 |---|---|---|---|
-| 立项（HITL1） | 用户三问答案 | question.md（问题定稿 + Purpose + RQ 分解 + Scope/Constraints + HITL1 Snapshot + §Decisions 第 1 条）+ topics.md（T# + must_answer 2–5 问 + scope_role + depends_on） | 两文件在场 |
+| 立项（HITL1，两段卡） | 用户三问答案 + 计划确认拍板（quick_factual 豁免第二段） | question.md（问题定稿 + Purpose + RQ 分解 + Scope/Constraints + HITL1 Snapshot 含计划确认行 + §Decisions 第 1 条含计划确认拍板）+ topics.md（T# + must_answer 2–5 问 + scope_role + depends_on） | 两文件在场 |
 | 组队 | topics.md | spawn 的队员（无独立文件） | 在场性随立项；lead 按 topics 派工 |
 | 侦察 wave0（scout） | topics.md | leads.md（每条：方向 + 状态〔建议挖深/已排除+原因〕+ 支持来源分级 + 关键线索 + 建议 owner 对应 topic） | leads.md 在场 |
 | 挖掘 wave1（analyst） | leads.md（建议挖深条）+ topics.md | evidence/*.md（frontmatter 七字段 + 原文摘录 + 解读 + Question List） | 卡片在场 + 硬字段齐（evidence-audit 机械把守） |
@@ -71,6 +71,7 @@ final/vN（n≥2）在场 → §Decisions 须含 vN 行 + final/v1.md 索引须�
 ## 两点交互边界
 
 整个 run 只有两个人机交互点（HITL1 立项 / HITL2 交付审阅），都由 lead 以结构化选项卡执行；
+HITL1 为**两段卡**（三问 + 计划确认卡——quick_factual 豁免第二段，正本 = 研究手册 §交互纪律）；
 critic 审查步内的 FAIL→修复循环保持**静默**（质量拦截非方向问题）。第 7/8 行判据由
 node-gate 机械把守；**通道死亡时的操作侧补齐必须显式记账**（§Decisions 拍板行标注"操作侧
 代驱/补齐"）——显性化而不是静默，静默缺席 = 门红。审查回边超界（复审 >2 轮）升级走的

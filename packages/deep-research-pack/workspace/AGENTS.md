@@ -109,7 +109,7 @@ bundle（gitignored 运行区）——run 数据的完整性由 critic + 仪表�
 
 ## 交互纪律（两点交互）
 
-整个 run 只有两个人机交互点，都由 lead 执行：**立项对齐（HITL1）**与**交付审阅（HITL2）**——两者都以 `ask_user_question` 的**结构化选项卡**呈现（一次多问 + options + 推荐项置首带（Recommended）；HITL1 固定三问：研究类型/深度篇幅/时间口径与语言，HITL2 选项 = 定稿（推荐）/补研究/修订表述）。
+整个 run 只有两个人机交互点，都由 lead 执行：**立项对齐（HITL1）**与**交付审阅（HITL2）**——都以 `ask_user_question` 的**结构化选项卡**呈现（一次多问 + options + 推荐项置首带（Recommended））。**HITL1 = 两段卡**：第一段固定三问（研究类型/深度篇幅/时间口径与语言），第二段**计划确认卡**——question/topics 定稿后、开工前呈计划要点瘦卡（按计划开跑（推荐）/ 修订计划（意见附加不替换、一轮制不再二次呈卡）/ 放弃；**quick_factual 豁免**），拍板落 question.md §Decisions 第 1 条，形态细则 = lead 的 research-brief skill。HITL2 选项 = 定稿（推荐）/补研究/修订表述。
 两点之间所有角色静默自主推进——不问"要不要继续"、不汇报中间进度、不等确认。
 用户主动发消息时直接回答，但回答不改变既定研究方向与分派。
 

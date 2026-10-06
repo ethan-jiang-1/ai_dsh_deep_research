@@ -27,7 +27,7 @@
 |---|---|---|
 | cdp-probe.mjs | 指定场景显示/点击/会话回复（裸 CDP） | 连已起 GUI；`--ask` 按会话档 |
 | entry-chain-probe.mjs | 入口链时不变四问，软断言 + 留档人工复核 | 真模型档 |
-| discipline-probe.mjs | 散文纪律行为面四场景标记断言（A2 超界 / B1 差集 / 收活缺件 / 收活 UNVERIFIED）+ 留档人工复核 | 真模型档 |
+| discipline-probe.mjs | 散文纪律行为面五场景标记断言（A2 超界 / B1 差集 / 收活缺件 / 收活 UNVERIFIED / 计划确认卡·quick_factual 免发互补对）+ 留档人工复核；`--scenario <id>` 定向跑 | 真模型档 |
 
 ## run 机械门与审计
 
