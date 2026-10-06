@@ -43,6 +43,15 @@ spawn_teammate 子**一律 composeFrom lead**（vendor 机制）——队友的�
 - **补搜独立任务**：gap 补搜走任务板独立 task（写明补哪个 gap、什么算找到——范围锁定），不混进原挖掘任务（实证两场：cn-llm-pricing 专派 analyst-b 三项同 gap、cn-llm-infra task-6 W2-B 补搜）；
 - 收"补完"只认文件事实（新证据卡落 evidence/ + findings.md 更新），不认 teammate 自报。
 
+## 收活验收（判据清单逐条核，2026-10-06 起）
+
+派发五件里的③验收判据不是装饰——收活时**逐条机械核验**：判据落在文件上的（产出文件在场、
+frontmatter 字段齐、引用链文件存在）就打开文件核，**不信 teammate 自报**（"收'补完'只认
+文件事实"同款语义，从补搜特例推广到全部派发）；判据当场核不了的（需要外部状态/模型判断/
+你拿不到的证据材料）→ 显式标 **UNVERIFIED + 为什么判不了**，交 critic 狩猎或人工核——
+**UNVERIFIED 是第三态：不是 PASS 也不是 FAIL，永不静默放行**（DeerFlow acceptance_criteria
+语义，oss-dr 借鉴）。收活结论（哪条判据 PASS、哪条 UNVERIFIED）随任务板关单/journal 记账。
+
 ## 反模式
 
 - 全员到齐再开工（scout 可以先行，analyst 等 leads.md）；

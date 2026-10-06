@@ -29,6 +29,10 @@
 
 **输入侧规矩**：硬输入清单 = 上表"输入（读）"列；缺件 = 本节点亮红灯而非开工，下游对缺失
 输入只有两个动作——上报 lead 或等，**没有"瞎猜补全"这个选项**。清单检查由脚本做，不加记账仪式。
+**委派-收活同构**（2026-10-06 起，oss-dr 借鉴）：lead 派工的验收判据（team-assembly 派发
+五件③④）在收活时逐条机械核验；判不了的判据显式标 **UNVERIFIED**（第三态：不是 PASS 也不
+是 FAIL，交 critic 狩猎或人工核），**永不静默放行**——收活结论（哪条 PASS/哪条 UNVERIFIED）
+随关单/journal 记账。
 
 **编制条件性（quick_factual）**：研究类型 = quick_factual（快速事实核查；HITL1 定、记
 question.md）按 team-assembly 矩阵**不设 scout/analyst 常设编制、critic 轻量 ×1**（编制正本 =
