@@ -11,6 +11,8 @@
 - **不收什么**：抛弃型草稿（按 [AGENTS.md](../../AGENTS.md) 留在树外）；价值越过所有卡
   的留存型参考（留存语义归 docs 索引——[00-index §外部研究材料](../../docs/00-index.md)）。
 - **命名**：`YYYY-MM-DD-<slug>.md`（与卡同款日期编码），slug 指向它服务的卡或主题；卡链接它。
+  **按主题分子目录**（2026-10-06 用户定调）：同主题多份材料归一个子目录（索引对账按
+  basename，子目录合法——`plans-liveness` 用 `git ls-files` 递归扫）；单份材料可留区根。
 - **无状态行、无逐文件门禁**（2026-10-03 借鉴时的 owner 选择）：纯约定；唯一的文件级
   检查是索引交叉对账（本区文件必须被下方索引点名——`plans-liveness` 强制，孤儿即红）。
 - **生命周期——随卡走**：卡毕业时 `git mv` 到
@@ -21,5 +23,5 @@
 
 | 文件 | 服务 | 一句话 |
 |---|---|---|
-| [2026-10-03-strategy-benchmark-sources.md](2026-10-03-strategy-benchmark-sources.md) | [pipeline-polish 面①](../_done/_closed_plans/2026-09-28-pipeline-polish.md) | 专业 DR 三轴对标材料：源仓 research_style_params 全参数化 + Anthropic 工程自述一手 + OpenAI 系统卡物种边界；采纳候选 A/B 带触发条件 |
-| [2026-10-06-per-topic-card-distribution.md](2026-10-06-per-topic-card-distribution.md) | [queue §搁置池「per-topic 地板参数化」](../queue.md) | 候选 A ①步存量标定：25 场可数 / 68 primary topic，中位 13、p25=6、max=53，低于源仓地板 28/68（双条件未满足不立门）；quick_factual 型 6 场口径不可数（无 primary 标记） |
+| [strategy-benchmark/2026-10-03-strategy-benchmark-sources.md](strategy-benchmark/2026-10-03-strategy-benchmark-sources.md) | [pipeline-polish 面①](../_done/_closed_plans/2026-09-28-pipeline-polish.md) | 专业 DR 三轴对标材料：源仓 research_style_params 全参数化 + Anthropic 工程自述一手 + OpenAI 系统卡物种边界；采纳候选 A/B 带触发条件 |
+| [strategy-benchmark/2026-10-06-per-topic-card-distribution.md](strategy-benchmark/2026-10-06-per-topic-card-distribution.md) | [queue §搁置池「per-topic 地板参数化」](../queue.md) | 候选 A ①步存量标定：25 场可数 / 68 primary topic，中位 13、p25=6、max=53，低于源仓地板 28/68（双条件未满足不立门）；quick_factual 型 6 场口径不可数（无 primary 标记） |

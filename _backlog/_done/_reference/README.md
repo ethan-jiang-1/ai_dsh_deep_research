@@ -8,4 +8,6 @@
 
 | 文件 | 服务过的卡 | 日期 |
 |---|---|---|
-| （空——材料随首张毕业卡迁入时建行） | | |
+| [oss-dr-mining/2026-10-06-oss-dr-bundle-digest.md](oss-dr-mining/2026-10-06-oss-dr-bundle-digest.md) | [2026-10-06-oss-dr-lessons](../_closed_plans/2026-10-06-oss-dr-lessons.md)（开源 DR 框架经验挖掘） | 2026-10-06 |
+| [oss-dr-mining/2026-10-06-oss-dr-arch-mining.md](oss-dr-mining/2026-10-06-oss-dr-arch-mining.md) | [2026-10-06-oss-dr-lessons](../_closed_plans/2026-10-06-oss-dr-lessons.md)（开源 DR 框架经验挖掘） | 2026-10-06 |
+| [oss-dr-mining/2026-10-06-oss-dr-followups.md](oss-dr-mining/2026-10-06-oss-dr-followups.md) | [2026-10-06-oss-dr-lessons](../_closed_plans/2026-10-06-oss-dr-lessons.md)（遗留下钻：DeerFlow 5 PR + gptr 归属定谳） | 2026-10-06 |
