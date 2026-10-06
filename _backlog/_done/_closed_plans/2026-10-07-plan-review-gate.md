@@ -1,6 +1,6 @@
 # 推敲：计划确认闸门（plan-review gate）——HITL1 三问之后、开工之前，方向契约先呈用户
 
-> 状态：推敲中｜毕业门判断 = 该做但不现在（待触发）｜下一步 = 用户裁决毕业门（呈批要点 = §毕业门）；触发三选一：跑偏实证 / 用户点名 / 试点点头。源 = ai_deerflow_dr_v3 已落地机制（借鉴为主，候选带触发条件不直接改机制——oss-dr 轮总则）
+> 状态：已毕业·该做（2026-10-07 用户点名提前激活——触发②，会话原话「推进落地」；试点正证〔触发③〕作挂账随下一场 run，正本 = RFC 验收判据第 6 条）｜去向 = queue.md §队列 ▶ 行 + RFC 2026-10-07-plan-review-gate（notes/proposed/；RFC 毕业时本指针随收尾同 diff 更新到 implemented）+ 卡迁 _done/_closed_plans/
 
 ## 背景 / 触发
 
@@ -16,12 +16,12 @@
 源仓谱系：闸门与其已落地的反问机制（interactive-clarification）同源于"跑前对齐"方向。
 
 本仓对照面（缺口同形）：HITL1 现状 = 固定三问（研究类型 / 深度篇幅 / 口径语言——
-[research-brief](../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md)
+[research-brief](../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md)
 skill），问的全是**抽象参数**；三问答完 lead 即定稿 question.md + topics.md
-（[NODES](../../research-workspace/NODES.md) 行 1）并直接开工。**这两份文件就是具体计划**
+（[NODES](../../../research-workspace/NODES.md) 行 1）并直接开工。**这两份文件就是具体计划**
 （问题定稿 + Purpose + RQ 分解 + Scope/Constraints + topic 图）——但用户开工前从未见过
 它们，第一次见到具体化方向 = v1 交付（HITL2）。本仓已记账的有界风险
-（[hitl2 范围轮卡](../_done/_closed_plans/2026-09-28-hitl2-scope-round.md)）："
+（[hitl2 范围轮卡](2026-09-28-hitl2-scope-round.md)）："
 方向性跑偏要等 v1 交付才被用户看见"。
 
 ## 已知与未决
@@ -42,18 +42,18 @@ skill），问的全是**抽象参数**；三问答完 lead 即定稿 question.m
   框架要求 `<research-plan>` 标记包裹，引擎仅标记在场时触发，无标记诚实降级。
 - **本仓载体差异——两处结构性不用搬**：① 源仓计划住在 chat 线程，需物化新文件；本仓
   计划**已有家**：question.md = 方向契约 = bundle 身份核心（跨 rerun 持久，模板自带
-  [HITL1 Alignment Snapshot](../../research-workspace/templates/run/question.md) 节）+
+  [HITL1 Alignment Snapshot](../../../research-workspace/templates/run/question.md) 节）+
   §Decisions append-only 拍板行——不新建文件。② 源仓闸门触发靠引擎检测 plain text 收尾
   （故需标记）；本仓 HITL 载体 = DSH `ask_user_question` 结构化卡，**工具调用即信号**
   （观察面 hitl-fold 既有分类、cockpit 挂起横幅与"等你拍板"活标题零改动）——
   "报告被当计划误触发"这个物种本仓不存在。**教训继承、修法不搬**：闸门触发判据必须
   机械无歧义——本仓形态下天然满足。
-- **B3 否决不撞**（[rejected Note](../../notes/rejected/2026-10-06-hitl-feedback-protocol.md)）：
+- **B3 否决不撞**（[rejected Note](../../../notes/rejected/2026-10-06-hitl-feedback-protocol.md)）：
   B3（deer-flow `[ACCEPTED]`/`[EDIT_PLAN]`）的物种 = 自由文本反馈的**机器路由面**
   （chat interrupt + 未识别输入打回）；本卡物种 = 多一个 ask_user_question 调用点——
   接受/修改语义内嵌选项。B3 的否决理由恰好论证了本卡为什么不需要搬他们的标记协议；
   但两者同属"跑前对齐"邻域，毕业门前须明辨（此处即辨析记录）。
-- **两点交互合同与先例**：[研究手册 §交互纪律](../../research-workspace/AGENTS.md)
+- **两点交互合同与先例**：[研究手册 §交互纪律](../../../research-workspace/AGENTS.md)
   （"整个 run 只有两个人机交互点"）；两段卡在**同一个交互点内**、计数不变的裁定先例 =
   hitl2 范围轮卡 A 形态（"两点合同字面保持"）；D17"HITL1 永不重开"——计划卡在立项窗内
   （两文件落盘后、下游组队前），属扩窗不是 run 启动后重开；判型路径照旧（计划卡在
@@ -69,7 +69,7 @@ skill），问的全是**抽象参数**；三问答完 lead 即定稿 question.m
   `2026-10-07-plan-marker-detection/`（另有前置 `2026-10-07-interactive-clarification/`）
   ——proposal（含 Node Agent Review / Control Placement Review）与 specs delta
   （entry-surface / deerflow-wiring / run-bundle）细节；下钻材料进
-  [reference/](../reference/README.md) 随卡走。
+  [reference/](../../reference/README.md) 随卡走。
 
 未决（四问）：
 
@@ -99,7 +99,7 @@ skill），问的全是**抽象参数**；三问答完 lead 即定稿 question.m
 - **乙 独立计划文件**（源仓 plan-gen1.md 形态）：输——本仓计划已有家（question.md），
   另立 = 一处事实两个家。
 - **丙 第五 planner 角色 / 独立计划节点**：输——源仓同款否决（bounded role 重启）+
-  本仓 [synthesizer-role 否决](../../notes/rejected/2026-09-24-synthesizer-role.md)
+  本仓 [synthesizer-role 否决](../../../notes/rejected/2026-09-24-synthesizer-role.md)
   先例（lead 独任无过载实证）；research-brief 已是 lead 的立项技能。
 - **丁 现状不动**：真候选非稻草人——34 场零跑偏是它的证据；输在有界风险已记账 +
   成本不对称（一张瘦卡 vs 整场跑偏 run）。留作毕业门"放弃"出路。
@@ -117,7 +117,7 @@ skill），问的全是**抽象参数**；三问答完 lead 即定稿 question.m
 
 **判断：该做但不现在（待触发）**——机制成立（载体/家/纪律三件全现成，零引擎零拓扑），
 但本仓零跑偏实证，"零实证疼痛不开工"不自行开工（对标
-[oss-dr 卡](../_done/_closed_plans/2026-10-06-oss-dr-lessons.md) A 档进池形态）。
+[oss-dr 卡](2026-10-06-oss-dr-lessons.md) A 档进池形态）。
 
 - **触发三选一**（任一满足 → 立 RFC + 队列行）：① 一场 run 的 v1 方向/范围被用户大改
   （本可由计划卡拦下的实证——门悖论如实登记：等实证 = 等一次本可避免的跑偏，hitl2
@@ -132,6 +132,6 @@ skill），问的全是**抽象参数**；三问答完 lead 即定稿 question.m
   NODES 行 1 描述同步 + running-a-research-run §2 + guides/61——初步判 = 文本级
   （不动节点 I/O 形状；若后续把确认行升进下游开工判据 = changing-node-topology 程序）。
   种子重同步（sync-pack-workspace）+ 模型可见面 → l4-lite 真模型档
-  （[guides/60 §2](../../docs/guides/60-dev-loop.md) 任务型路由）；行为面 →
+  （[guides/60 §2](../../../docs/guides/60-dev-loop.md) 任务型路由）；行为面 →
   discipline-probe 候选场景"立项跳卡"；证据面 = 试点场 run 通道全链
   （boot-run → HITL1 两段 → journal/§Decisions 记账 → 交付）。

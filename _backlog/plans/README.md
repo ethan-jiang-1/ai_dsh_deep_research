@@ -13,7 +13,7 @@
 
 | 卡 | 一句话 | 毕业门判断 |
 |---|---|---|
-| [plan-review-gate](2026-10-07-plan-review-gate.md) | 借 ai_deerflow_dr_v3 已落地闸门：HITL1 三问后加「计划确认瘦卡」——立项产物（question/topics 定稿）先呈用户拍板再开工 | 该做但不现在（待触发；触发三选一 = v1 跑偏实证 / 用户点名 / 试点点头） |
+| （无活跃卡——plans 池清零，2026-10-07；最近毕业 = plan-review-gate：用户点名提前激活，RFC 住 proposed、▶ 住 queue） | | |
 
 ## 卡片模板
 
