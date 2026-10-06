@@ -3,8 +3,9 @@
 // 定位：A2/收活/B1 三件散文纪律的**集成层**证据——l4-lite 证 skill 挂载，本探针证
 // 「纪律触发场景下模型按合同行事」。诚实强度声明（entry-chain-probe 同款记账）：
 // 机械断言只证结构不证语义，且只证理想短上下文下的指令遵循——不证 run 内长上下文/
-// 竞争指令下的合规；E2E 活体验证挂账（notes/proposed/2026-10-06-living-verification-hook.md）
-// 仍是最终一环，本探针把「唯一证据」降级为「最后一环」。场景与纪律合同同 diff 演进
+// 竞争指令下的合规；E2E 活体验证（notes/implemented/2026-10-07-living-verification-hook.md，
+// 载体 run = archive/drt_open-llm-inference-engine-landscape）已收齐两问全触发证据——本探针
+// 与 run 实证互为印证。场景与纪律合同同 diff 演进
 // （合同改措辞，场景与断言同步改——契约测试同款纪律；基座 = scripts/lib/{acceptance-check,
 // unconsumed-evidence}.mjs 的单元反证，本探针是其行为面补充）。
 //

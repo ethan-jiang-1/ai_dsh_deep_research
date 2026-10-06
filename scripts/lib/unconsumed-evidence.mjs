@@ -1,7 +1,7 @@
 // unconsumed-evidence —— B1（critic 差集出题）的机械基座：evidence/ 池中未被 findings.md
 // 引用的证据卡清单（oss-dr 借鉴 B1 / Co-STORM Moderator 策略：检索到但未被采用的信息是
 // 对抗核查的矿）。纯 fs 只读投影，无门禁语义——角色运行时无 bash 不能自调，本模块供操作侧
-// 收尾核验与活体验证挂账（notes/proposed/2026-10-06-living-verification-hook.md）对账用。
+// 收尾核验与活体验证对账用（E2E 实证 = notes/implemented/2026-10-07-living-verification-hook.md）。
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
