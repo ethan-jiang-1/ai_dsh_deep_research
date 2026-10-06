@@ -102,7 +102,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | L2 安装 | [release-smoke](../scripts/release-smoke.mjs) | 无模型调用；npm 安装可能访问网络；`--install-only` 安装检查跳过凭据；默认 preflight 检查凭据在场 | pack → 重建测试 profile → 安装 → scaffold/preflight → 安装域挂载 |
 | 浏览器加载 | [client-load-smoke](../scripts/client-load-smoke.mjs) | 无模型；真实 web、浏览器、本地通信 | client 装配、页签、渐进面与文件事实对账 |
 | 确定性回放 | [snapshot-replay-smoke](../scripts/snapshot-replay-smoke.mjs) | 无真模型；全角色真实 DSH/RPC/解压子进程；仅 Lead 场景额外浏览器渲染 | 全角色回放完成标记、persona 与选定 request/header 字段逐字一致；Lead 渲染金标准 |
-| 真模型档 | [l4-lite](../scripts/l4-lite-smoke.mjs)、[team-preflight](../scripts/team-preflight-smoke.mjs)、[entry-chain-probe](../scripts/entry-chain-probe.mjs)、[client-hitl](../scripts/client-hitl-smoke.mjs) | 需要模型凭据；调用模型，部分调用 web 工具 | 角色响应/工具调用、团队机制、导航软断言、真实 HITL UI 迁移；不能替代完整研究质量验收 |
+| 真模型档 | [l4-lite](../scripts/l4-lite-smoke.mjs)、[team-preflight](../scripts/team-preflight-smoke.mjs)、[entry-chain-probe](../scripts/entry-chain-probe.mjs)、[discipline-probe](../scripts/discipline-probe.mjs)、[client-hitl](../scripts/client-hitl-smoke.mjs) | 需要模型凭据；调用模型，部分调用 web 工具 | 角色响应/工具调用、团队机制、导航软断言、纪律行为标记断言、真实 HITL UI 迁移；不能替代完整研究质量验收 |
 | 浏览器交互探针 | [cdp-probe](../scripts/cdp-probe.mjs) | 连接已起 GUI；`--ask` 会发送消息并可能触发模型/工具调用 | 指定场景的显示、点击、会话回复；是否调用模型取决于模式与会话 |
 | run 文件审计 | [node-gate](../scripts/node-gate.mjs)、[schema-scan](../scripts/schema-scan.mjs)、[evidence-audit](../scripts/evidence-audit.mjs) | 无主动外网请求；压缩日志读取可能用 zstd 子进程 | 节点在场、部分交接判据、URL/摘录/引用链；部分 CLI 写审计报告 |
 | 完整 L4 | 真实问题的完整研究 run | 模型与真实信息检索、真人 HITL | 报告质量、可追溯结论与整体研究体验 |
@@ -119,7 +119,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 单元（纯函数） | run-state / hitl-fold / activity-fold / tool-card / bundle-bind 等谓词与折算断言（消费 [scripts/lib](../scripts/README.md) 纯函数） | `tests/*.test.mjs` | keyless |
 | 契约（结构断言） | layering / smoke-contract / evaluation-contract / presets / export-shape / 各门用例 / navigability-contract | `tests/` + [fixtures](../tests/fixtures/README.md) | keyless |
 | 集成（真子系统） | preset-smoke（L1）/ release-smoke（L2）/ snapshot-replay / client-load | `scripts/` 冒烟族 | keyless（子进程/浏览器，无模型） |
-| 端到端（真模型） | l4-lite / team-preflight / entry-chain-probe / client-hitl；完整 run = L4 全量 | `scripts/` 真模型档 | 需凭据 |
+| 端到端（真模型） | l4-lite / team-preflight / entry-chain-probe / discipline-probe / client-hitl；完整 run = L4 全量 | `scripts/` 真模型档 | 需凭据 |
 | 生产审计 | node-gate / schema-scan / evidence-audit（对真实 run bundle） | `scripts/` run 门 | keyless |
 
 ### 新检查落家序（加一个检查时按序找家，单一入口）

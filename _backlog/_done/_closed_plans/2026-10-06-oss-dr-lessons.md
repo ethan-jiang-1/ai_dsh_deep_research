@@ -1,9 +1,10 @@
 # 推敲：开源 DR 框架经验挖掘——有什么值得本仓借鉴
 
-> 状态：毕业（2026-10-06 用户呈批裁决）｜毕业门判断 = 该做但不现在（待触发）｜去向 =
-> queue.md §搁置池三行（A1 标题重复门禁 / A2 回边超界语义 / 收活 acceptance_criteria 纪律——
-> 末条由同日遗留下钻兑现）；B/C 档 = 各归其文件被触碰时顺带采纳，出处指针 = 本卡；随卡
-> 材料 = _done/_reference/oss-dr-mining/（digest + arch-mining + followups 下钻）
+> 状态：毕业（2026-10-06 用户呈批裁决）｜毕业门判断 = 该做但不现在（待触发）｜去向 = A1/
+> A2/收活纪律三条候选 2026-10-06 全部由用户点名提前激活毕业（中间站搁置池三行已随毕业清空）：
+> A1 → notes/implemented/2026-10-06-heading-degeneration-gate.md（门R）· A2 → 2026-10-06-review-loop-bound.md ·
+> 收活 → 2026-10-06-acceptance-criteria.md；B1 顺带采纳进 critic skill；B/C 档其余项 = 各归其文件被
+> 触碰时顺带采纳，出处指针 = 本卡；随卡材料 = _done/_reference/oss-dr-mining/（digest + arch-mining + followups）
 
 ## 背景 / 触发
 
