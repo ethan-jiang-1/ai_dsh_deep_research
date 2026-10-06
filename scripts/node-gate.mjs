@@ -53,6 +53,9 @@ export const VERSION_CONTRACT_DATE = '2026-10-03'
 /** 门① 契约日（2026-10-05 = BUG-006 落地日：快路径自我豁免 HITL1 实证后机械化；此前交付不追溯）。 */
 export const HITL_CONTRACT_DATE = '2026-10-05'
 
+/** 门R 契约日（2026-10-06 = oss-dr 借鉴候选 A1 落地日，LDR HeadingRepetitionGuard #6452 形态移植；此前交付不追溯）。 */
+export const HEADING_CONTRACT_DATE = '2026-10-06'
+
 /** 读一个会话日志文件（.jsonl 直读 / .jsonl.zstd 走 zstd CLI——多帧拼接 CLI 可解全帧）。 */
 function readLog(p) {
   if (p.endsWith('.zstd')) {
@@ -371,8 +374,59 @@ export function hitlAskGate(bundleDir, sessionsRoot, hitlDate) {
 }
 
 /**
+ * 门R（标题重复退化门，可导入；keyless；oss-dr 借鉴候选 A1，出处 = 毕业卡
+ * _done/_closed_plans/2026-10-06-oss-dr-lessons.md，下钻与判据出处 =
+ * LDR HeadingRepetitionGuard 事故 #6452——模型失 EOS 反复重发同一标题行直到上下文硬截断，
+ * 30+ 迭代逐字重复全部落入报告；判据阈值 4 同源："a legitimate subsection does not emit
+ * one identical heading four times"，O(1) 计数）。
+ * 判据 = run 根 final.md（当前版）中 verbatim 标题行（#{1,6} 前缀、去尾白后整行比对）
+ * 同一标题出现 ≥4 次 → RED；×3 = 合法下界之外，PASS。
+ * 断代：交付日 < HEADING_CONTRACT_DATE → PRE-CONTRACT 不计红（run bundle 是交付记录）。
+ * 本门不防什么（bound on the reported failure，同 LDR docstring 诚实声明）：近似改写标题、
+ * 正文循环、代码围栏内的 `#` 行计入比对（final.md 罕见围栏标题，误报面可忽略）、无标题退化。
+ * @returns { status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT', detail }
+ */
+export function headingGate(bundleDir, headingDate) {
+  const finalPath = join(bundleDir, 'final.md')
+  if (!existsSync(finalPath)) {
+    return { status: 'N/A', detail: 'final.md 当前版不在场——门R 无对象（在场级违约归 schema-scan，不越界双判）' }
+  }
+  const text = readFileSync(finalPath, 'utf8')
+  const counts = new Map()
+  let total = 0
+  for (const line of text.split('\n')) {
+    const m = line.match(/^#{1,6}\s+(.*\S)?\s*$/)
+    if (!m) continue
+    const title = (m[1] ?? '').trim()
+    if (!title) continue
+    counts.set(title, (counts.get(title) ?? 0) + 1)
+    total++
+  }
+  const date = headingDate ?? deliveryDate(bundleDir)
+  const pre = date !== null && date < HEADING_CONTRACT_DATE
+  const bad = [...counts.entries()].filter(([, n]) => n >= 4)
+  if (bad.length === 0) {
+    return {
+      status: 'PASS',
+      detail:
+        total === 0
+          ? 'final.md 无标题行——本门无重复可判（PASS 带注：只守标题重复，不判无标题退化）'
+          : `final.md 标题 ${total} 条，无同一标题 ≥4 次重复`,
+    }
+  }
+  const listed = bad.map(([t, n]) => `"${t}" ×${n}`).join('、')
+  return {
+    status: pre ? 'PRE-CONTRACT' : 'RED',
+    detail:
+      `同一标题行重复 ≥4 次（LDR #6452 生成退化形态：模型失 EOS 反复重发同一节直到上下文硬截断）——${listed}；` +
+      '修正 = lead 收口去重或重跑该节（本门只守 verbatim 标题重复，不防近似改写/正文循环/无标题退化）' +
+      (pre ? '（契约前交付——如实报告不计红，run bundle 是交付记录不改历史）' : ''),
+  }
+}
+
+/**
  * 门一个 bundle（核心逻辑，可导入；keyless）。
- * @returns { gates: { hitlAsk, hitl2Row, present, leads, version }, red, report }
+ * @returns { gates: { hitlAsk, hitl2Row, present, leads, version, degeneration }, red, report }
  *   每门：{ status: 'PASS'|'PASS-RELAY'|'RED'|'N/A'|'PRE-CONTRACT', detail }
  */
 export function gateBundle(bundleDir, sessionsRoot, opts = {}) {
@@ -414,8 +468,8 @@ export function gateBundle(bundleDir, sessionsRoot, opts = {}) {
     else present = { status: 'RED', detail: 'final.md + readiness PASS 在场，但日志无 present 调用、拍板行也无操作侧补齐标注——静默缺席（G8 形态）' }
   }
 
-  const gates = { hitlAsk: hitlAskGate(bundleDir, sessionsRoot, opts.hitlDate), hitl2Row, present, leads: leadsGate(bundleDir, opts.leadsDate), version: versionGate(bundleDir, opts.versionDate) }
-  const red = [gates.hitlAsk, hitl2Row, present, gates.leads, gates.version].some((g) => g.status === 'RED')
+  const gates = { hitlAsk: hitlAskGate(bundleDir, sessionsRoot, opts.hitlDate), hitl2Row, present, leads: leadsGate(bundleDir, opts.leadsDate), version: versionGate(bundleDir, opts.versionDate), degeneration: headingGate(bundleDir, opts.headingDate) }
+  const red = [gates.hitlAsk, hitl2Row, present, gates.leads, gates.version, gates.degeneration].some((g) => g.status === 'RED')
   const report = `# Node Gate — ${slug}（${new Date().toISOString()}）
 
 > scripts/node-gate.mjs（keyless；契约正本 = research-workspace/NODES.md 第 3/7/8 行 + 回边版本语义节 + BUG-006 门①）。
@@ -427,6 +481,7 @@ export function gateBundle(bundleDir, sessionsRoot, opts = {}) {
 | ② present 声明 | ${present.status} | ${present.detail} |
 | L leads 交接 | ${gates.leads.status} | ${gates.leads.detail} |
 | ④ 版本记账 | ${gates.version.status} | ${gates.version.detail} |
+| R 标题重复 | ${gates.degeneration.status} | ${gates.degeneration.detail} |
 `
   return { gates, red, report }
 }
@@ -469,12 +524,13 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
     process.exit(2)
   }
   const { gates, red, report } = gateBundle(bundleDir, sessionsRoot)
-  console.log(`node-gate: ${basename(bundleDir)} ｜ 门① HITL 锚点 = ${gates.hitlAsk.status} ｜ 门③ §Decisions 拍板行 = ${gates.hitl2Row.status} ｜ 门② present 声明 = ${gates.present.status} ｜ 门L leads 交接 = ${gates.leads.status} ｜ 门④ 版本记账 = ${gates.version.status}`)
+  console.log(`node-gate: ${basename(bundleDir)} ｜ 门① HITL 锚点 = ${gates.hitlAsk.status} ｜ 门③ §Decisions 拍板行 = ${gates.hitl2Row.status} ｜ 门② present 声明 = ${gates.present.status} ｜ 门L leads 交接 = ${gates.leads.status} ｜ 门④ 版本记账 = ${gates.version.status} ｜ 门R 标题重复 = ${gates.degeneration.status}`)
   console.log(`  ① ${gates.hitlAsk.detail}`)
   console.log(`  ③ ${gates.hitl2Row.detail}`)
   console.log(`  ② ${gates.present.detail}`)
   console.log(`  L ${gates.leads.detail}`)
   console.log(`  ④ ${gates.version.detail}`)
+  console.log(`  R ${gates.degeneration.detail}`)
   // 报告写入防护：tests/ 夹具区是 tracked 区——写报告=污染 git（2026-09-29 实测 6 个未跟踪文件，
   // 红证记录见 notes/implemented/2026-09-29-quality-evidence-loop.md）。夹具判定走上面的 stdout。
   if (resolve(bundleDir).startsWith(join(ROOT, 'tests') + '/')) {

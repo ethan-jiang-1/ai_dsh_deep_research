@@ -32,7 +32,7 @@
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
-| node-gate.mjs | 判据级：交付两门②③ + 门L + 门④，报告落 bundle | keyless |
+| node-gate.mjs | 判据级：门①②③④L + 门R（标题重复退化，2026-10-06 起），报告落 bundle | keyless |
 | schema-scan.mjs | 在场级：八节点输出件在场断言（断代定红） | keyless |
 | evidence-audit.mjs | URL/摘录/final 链溯源对账 → audit.md | keyless（须 source dev/env.sh） |
 

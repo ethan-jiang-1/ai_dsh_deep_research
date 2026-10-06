@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { gateBundle, decisionsLines } from '../scripts/node-gate.mjs'
+import { gateBundle, decisionsLines, headingGate } from '../scripts/node-gate.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const FX = join(HERE, 'fixtures', 'node-gate')
@@ -248,4 +248,41 @@ test('门①合规：写过 question.md 的会话里 HITL1 签名 ask 在场（�
   const r = gateBundle(bundle('fixture-complete'), sessions('s-complete'), { hitlDate: '2026-10-06' })
   assert.equal(r.gates.hitlAsk.status, 'PASS', 'HITL1 锚点在场')
   assert.match(r.gates.hitlAsk.detail, /写过 question.md 的会话 1 个：HITL1 签名 ask 1 次/)
+})
+
+// ── 门R（标题重复退化门；oss-dr 候选 A1，LDR #6452 形态；契约日 2026-10-06）──
+// 本节 = 门R 的永久反证记录：先红（夹具在、门未立时本文件导入即红）后绿。
+
+test('门R反证：final.md 同一标题行重复 ≥4 次 → RED（LDR #6452 生成退化形态）', () => {
+  const r = gateBundle(bundle('fixture-heading-degenerate'), sessions('s-complete'))
+  assert.equal(r.gates.degeneration.status, 'RED', '同标题逐字 ×4 必须红——合法小节不会重发四遍')
+  assert.match(r.gates.degeneration.detail, /×4/)
+  assert.equal(r.red, true, '门R 红计入 bundle 红灯')
+})
+
+test('门R边界：同一标题 ×3 → PASS（判据 = ≥4；LDR："a legitimate subsection does not emit one identical heading four times"）', () => {
+  const r = headingGate(bundle('fixture-heading-healthy'), '2026-10-06')
+  assert.equal(r.status, 'PASS', '×3 是判据下界之外的合法形态')
+})
+
+test('门R合规：无重复标题的 final → PASS', () => {
+  const r = gateBundle(bundle('fixture-complete'), sessions('s-complete'))
+  assert.equal(r.gates.degeneration.status, 'PASS')
+})
+
+test('门R断代：交付日早于契约日 2026-10-06 → PRE-CONTRACT 不计红（历史交付不追溯）', () => {
+  const r = headingGate(bundle('fixture-heading-degenerate'), '2026-10-01')
+  assert.equal(r.status, 'PRE-CONTRACT', 'run bundle 是交付记录，不改历史')
+})
+
+test('门R N/A：final.md 缺席 → 无对象（在场级违约归 schema-scan，不越界双判）', () => {
+  const r = headingGate(bundle('fixture-early'), '2026-10-06')
+  assert.equal(r.status, 'N/A')
+})
+
+test('门R隔离：门R红不连坐其他门（其余门在本夹具全 N/A——红灯唯一来源可归因）', () => {
+  const r = gateBundle(bundle('fixture-heading-degenerate'), sessions('s-complete'))
+  assert.equal(r.gates.degeneration.status, 'RED')
+  assert.equal(r.gates.version.status, 'N/A')
+  assert.equal(r.gates.leads.status, 'N/A')
 })
