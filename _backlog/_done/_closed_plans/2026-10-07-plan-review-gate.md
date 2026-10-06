@@ -1,6 +1,6 @@
 # 推敲：计划确认闸门（plan-review gate）——HITL1 三问之后、开工之前，方向契约先呈用户
 
-> 状态：已毕业·该做（2026-10-07 用户点名提前激活——触发②，会话原话「推进落地」；试点正证〔触发③〕作挂账随下一场 run，正本 = RFC 验收判据第 6 条）｜去向 = queue.md §队列 ▶ 行 + RFC 2026-10-07-plan-review-gate（notes/proposed/；RFC 毕业时本指针随收尾同 diff 更新到 implemented）+ 卡迁 _done/_closed_plans/
+> 状态：已毕业·该做（2026-10-07 用户点名提前激活——触发②，会话原话「推进落地」；试点正证〔触发③〕作挂账随下一场 run，正本 = 毕业 Note 验证节挂账条）｜去向 = [毕业 Note](../../../notes/implemented/2026-10-07-plan-review-gate.md)（notes/implemented/，2026-10-07 同日交付：九面落地 + 证据梯五档 + run 试点挂账）+ 本卡迁 _done/_closed_plans/
 
 ## 背景 / 触发
 

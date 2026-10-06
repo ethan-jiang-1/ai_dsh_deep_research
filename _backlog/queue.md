@@ -13,10 +13,7 @@
 
 ## 队列
 
-1. ▶ **计划确认闸门（plan-review-gate）落地**——HITL1 两段卡：触面六件 + 种子同步 +
-   证据梯（L0 / L1 真挂载 / L4-lite / discipline-probe 新场景先红后绿）；run 试点正证
-   挂账随下一场 run（待用户取题）。**可自主**（真模型档面按密钥在场跑，缺席如实挂账）。
-   RFC：[notes/proposed/2026-10-07-plan-review-gate.md](../notes/proposed/2026-10-07-plan-review-gate.md)
+（队列空——待用户取题）
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 
