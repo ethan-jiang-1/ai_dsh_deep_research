@@ -24,6 +24,12 @@ queue 立搭车条目（**等人**型——等下一场 run 取题后随其收�
 
 证据落点 = 该 run 的 journal 收尾段；本条目毕业 = 证据行指向该 journal + 删队列行。
 
+**工具面**（2026-10-06 同日落地，收尾核验可直接调用对账）：`scripts/lib/unconsumed-evidence.mjs`
+（B1 差集投影——evidence/ 未进 findings.md 的卡清单）与 `scripts/lib/acceptance-check.mjs`
+（收活判据 PASS/FAIL/UNVERIFIED 三态机械求值，DeerFlow acceptance_criteria 的 keyless 移植）；
+操作侧用它们把"收活结论/差集出题"对账成机械事实，**不代替** lead 运行时的 skill 纪律
+（角色无 bash）。单元反证 = tests/unconsumed-evidence + tests/acceptance-check（233 条回归内）。
+
 ## 输掉的方案
 
 - **等实证疼痛才验**：风险 = 纪律死字化不可见——疼痛形态恰是"没人发现纪律没被执行"；
