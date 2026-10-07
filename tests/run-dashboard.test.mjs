@@ -234,7 +234,9 @@ test('HITL 公共投影：timed pending 与元数据/agent 后续事件不关闭
     const broken = put('broken', 'v4', [ask]);
     writeFileSync(broken, Buffer.concat([zstdCompressSync(Buffer.from(JSON.stringify(ask) + '\n')), Buffer.from([0x28, 0xb5])]));
     const linkedOld = put('linked', 'v3', [ask]);
-    symlinkSync(join(root, 'missing-log-target'), linkedOld.replace('v3', 'v4'));
+    // 路径构造而非字符串手术：`replace('v3','v4')` 会误命中 mkdtemp 随机目录名里的 'v3'
+    // 子串（实测偶发 ENOENT：目录名 dash-v3… 被替换成不存在的 dash-v4…）
+    symlinkSync(join(root, 'missing-log-target'), join(dirname(linkedOld), 'session.v4.jsonl.zstd'));
     put('cancel-only', 'v4', [ask, { type: 'session/cancel' }]);
     const waiting = detectHitlWait(root);
     assert.deepEqual(waiting.map((w) => w.session).sort(), ['cancel-o', 'v3', 'v4']);

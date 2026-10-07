@@ -13,6 +13,9 @@
   → 【反馈门①】Plan Mode 呈批：完整计划经 exit_plan_mode 给用户批/打回（打回=反馈通道）
   → 实施期【反馈门②】todo_write 活清单：开工列全、完成即勾、steer 即重排（不批量勾）；
     实现按红→绿循环推进——跑检查（红）→ 实现 → 复跑（绿）→ 修 → 复跑，只记实际跑过的
+  → 【反馈门③】收尾前对抗自审（开发技能 reviewing-a-delivery：重读当前 diff，对齐意图/
+    文档/证据选型——交付判断四角色中 agent 可自主承担的语义判断层，判据 = evaluation
+    §完成判断四分离）
   → 同 diff 收尾（§4）：验收判据逐条对账——全绿 + 证据在案才算毕业
 ```
 
@@ -147,7 +150,7 @@ node packages/deep-research-pack/scripts/scaffold.mjs --workspace <dir>    # 部
 `ai_dsh_assitant` 借入，2026-10-05，钉版见 [00-index §外部研究材料](../00-index.md)）：
 
 - **先加载匹配的开发技能**：任务命中 `.agents/skills/` 某条 description（毕业条目 / 加角色 /
-  写门禁 / 跑 run）→ 先读该 `SKILL.md` 全文再动手，不从摘要猜流程；
+  写门禁 / 跑 run / 改轨道 / 交付自审——清单 = 盘上 `.agents/skills/`）→ 先读该 `SKILL.md` 全文再动手，不从摘要猜流程；
 - **查询实际配置树，别从源码猜部署**：`pnpm dsh --profile research --dump-config` 是
   profile/bundle/patch 叠加后的官方查询（"会加载什么"）；`boot-run.sh` 的漂移检测管另一问
   ——"镜像是否等于 pack 源"；
@@ -187,8 +190,9 @@ source dev/env.sh        # DSH_HOME=runtime/harness-home（数据面）+ dsh 别
 
 ## 4. 收尾程序（同 diff，五件）
 
-收尾前置（§0 验收门）：RFC 验收判据逐条对账——全绿 + 实际运行证据在案；任何一条未对账
-即不得毕业。
+收尾前置（§0 验收门 + 反馈门③）：先过对抗自审（开发技能 `reviewing-a-delivery`——重读
+当前 diff，对齐意图/文档/证据选型，未跑项分列），再 RFC 验收判据逐条对账——全绿 + 实际
+运行证据在案；任何一条未对账即不得毕业。
 
 1. docs 只写 now：改过的语义面同步对应文档（合同随代码同 diff）；
 2. 队列行删除 + RFC 毕业到 `notes/implemented/`（日期 = 主题首提日期，含：状态行/决定/

@@ -1,6 +1,6 @@
 ---
 name: reviewing-a-delivery
-description: Use when a change is about to be delivered, a queue item is about to graduate, or the user asks for a review — the adversarial self-review layer between mechanical gates and user acceptance, re-reading the live diff against intent, current docs, and evidence selection.
+description: Use when a change is about to be delivered or a queue item is about to graduate, when a cross-surface diff (pack, docs, scripts, notes 中的多面) needs adversarial review, or when the user asks for a review — the semantic self-review layer between mechanical gates and user acceptance, re-reading the live diff against intent, current docs, and evidence selection.
 ---
 
 # 交付前对抗自审（语义自审层）
@@ -11,14 +11,15 @@ description: Use when a change is about to be delivered, a queue item is about t
 
 ## 这一层补的是什么
 
-交付判断有四个角色，各证明不同的东西：**机械检查**（门禁/契约测试——只证明它执行的
-断言通过）、**语义自审**（本技能——意图-实现-文档-证据是否说的是同一件事）、**用户批准**
-（Plan 呈批/验收——产品取舍归它）、**显式交互**（HITL 等）。本技能承担其中 agent 可自主
-完成的角色——收尾绕过它，质量把关就全部压给用户。
+交付判断四角色（判据正本 = [evaluation §完成判断四分离](../../../docs/evaluation.md)）各
+证明不同的东西：**机械检查**（门禁/契约测试——只证明它执行的断言通过）、**语义自审**
+（本技能——意图-实现-文档-证据是否说的是同一件事）、**用户批准**（Plan 呈批/验收——
+产品取舍归它）、**显式交互**（HITL 等）。本技能承担其中 agent 可自主完成的角色——收尾
+绕过它，质量把关就全部压给用户。
 
 ## 触发
 
-- 条目收尾前（[guides/60 §4](../../../docs/guides/60-dev-loop.md) 之前、毕业复查时）；
+- 条目收尾前（[guides/60 §0](../../../docs/guides/60-dev-loop.md) 反馈门③，位于 §4 收尾之前；毕业复查时）；
 - 用户点名 review / 对质量有疑问时；
 - 改动跨面（同时触及 pack、docs、scripts、notes 中多面）时必做。
 

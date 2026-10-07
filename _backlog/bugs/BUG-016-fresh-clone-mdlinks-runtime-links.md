@@ -20,7 +20,7 @@ md-links 门禁的链接可解析判定检查**盘上存在性**，不区分 tra
 
 ## 复现
 
-`node scripts/smoke/gates-smoke.mjs` 修掉 fixture 补拷逻辑前对照组即红（输出含
+临时移除 `scripts/smoke/gates-smoke.mjs` fixture 的运行区补拷段后运行，对照组即红（输出含
 `[md-links] …链接不可解析 → ../../../../research-workspace/archive/drt_dr-product-landscape/…`）；
 等价人工复现 = clone 本仓到新目录（不带运行区）后 `pnpm verify`。
 

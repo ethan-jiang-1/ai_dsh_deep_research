@@ -85,7 +85,7 @@ function buildFixture() {
   }
   // 补拷被 tracked md 相对链接引用、且盘上存在但未被 git 跟踪的运行区文件（实证：_done/_reference
   // 摘要链接 research-workspace/archive/ 的 run 产物——真仓 verify 绿依赖它们在盘上；副本不补
-  // 则 md-links 在零注入对照组即红，断言空转）。不补 = fresh clone 也会红的真问题，另行登记。
+  // 则 md-links 在零注入对照组即红，断言空转）。不补 = fresh clone 也会红的真问题（BUG-016 在案）。
   const trackedSet = new Set(files);
   const mdFiles = files.filter((f) => f.endsWith('.md'));
   for (const f of mdFiles) {

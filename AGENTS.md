@@ -46,7 +46,7 @@ notes/                   **开发记忆与证据链**（核心流程数据，不
                          冻结入 archived/）；
                          rejected/（否决与搁置——"决定不做"，带重启条件）；postmortem/（事故复盘）
 .agents/skills/          开发技能（DSH 约定路径：project-agents 发现根）：任务匹配即加载的程序化工作记忆
-                         （毕业条目 / 加角色 / 写门禁 / 跑 run / 改轨道）；与产品内 runtime skills（presets/*/skills/）分家
+                         （毕业条目 / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审）；与产品内 runtime skills（presets/*/skills/）分家
 scripts/                 职责分组六目录 + lib/ 支撑库（逐件职责索引 = scripts/README.md）：verify/（L0 门禁聚合 verify.mjs）、smoke/（分级冒烟：preset/release/client-load/snapshot-replay/gates keyless；client-hitl/l4-lite/team-preflight 真模型档）、probe/（cdp 交互探针、entry-chain/discipline 行为探针，真模型档）、run-gates/（node-gate/schema-scan/evidence-audit run bundle 机械门与审计）、run-ops/（watch-run 盯场、run-dashboard 只读投影）、dist/（export-dist 出包→_dist/）、lib/（roles 角色清单访问器[事实源=盘上 presets/] + env/playwright/vendor-artifacts/cdp-driver/run-state 冒烟支撑模块）
 tests/                   keyless 回归（node:test，无测试框架；layering 静态扫描顶层测试文本；执行路径与夹具规则见 tests/AGENTS.md）
 dev/                     vendor-build.sh（vendor 树构建：tsc host/client + typert 产物 + client bundle）、vendor-typert-emit.mjs（typert 产物生成器）、vendor-host-bundle.config.ts（逐包 host 半补建配置：tsdown -c 给缺 lib/index.js 的包补产物）、vendor-host-typert.config.ts（逐包 tsdown 备选配置，留档）、render-overlay.mjs（从 pack 渲染 research.overlay.yml）、sync-pack-workspace.mjs（把 research-workspace 正本同步进 pack 的 workspace/ 种子）、boot-run.sh（run 通道开跑：幂等装+boot web+仪表盘）、run-kickoff.mjs（run 会话驱动）、env.sh（双 home + dsh 机制基线 + pre-commit 钩子激活）、research.overlay.yml（源码域 overlay，**生成物**）、hooks/（pre-commit：verify+tests 红灯拦 commit）
@@ -69,7 +69,7 @@ Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。
 - **时态总图 = [notes/README.md](notes/README.md)**（将来 `proposed/` = 在飞队列条目的 RFC 全文 · 过去
   `implemented/` `archived/`（冻结） `rejected/`（否决与搁置，带重启条件） `postmortem/`；下一步仍只看 [_backlog/queue.md](_backlog/queue.md) ▶）；
 - **写入触发 / 取代检查 / 格式与毕业 = [notes/AGENTS.md](notes/AGENTS.md)**；
-- **任务流程**（毕业条目 / 加角色 / 写门禁 / 跑 run / 改轨道）= `.agents/skills/` 开发技能，按
+- **任务流程**（毕业条目 / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审）= `.agents/skills/` 开发技能，按
   description 触发加载，不占常驻上下文。
 
 原生定义（vendor 树内，本仓不复制）：`vendor/dsh/.agents/notes/README.md`（生命周期/分类/

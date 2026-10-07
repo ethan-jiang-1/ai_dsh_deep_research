@@ -112,11 +112,17 @@ discipline-map + project-map + guides/60–62 + tests·scripts·notes 三份子�
 - 新增：`.agents/skills/reviewing-a-delivery/SKILL.md`、`scripts/smoke/gates-smoke.mjs`、
   `tests/verify-gates.test.mjs`、`_backlog/bugs/BUG-016-fresh-clone-mdlinks-runtime-links.md`。
 - 改动：`docs/evaluation.md`（完成判断四分离节）、`docs/00-index.md`（术语映射三行 + 外部材料
-  登记 + 术语速查无改动）、`docs/discipline-map.md`（源 11）、`docs/project-map.md`（证据表
+  登记）、`docs/discipline-map.md`（源 11）、`docs/project-map.md`（证据表
   门禁自测行）、`docs/guides/60-dev-loop.md`（全档命令 + 任务型路由行）、`scripts/README.md`
   （smoke 表）、`scripts/AGENTS.md`（门禁自测条款，压缩后入预算）、根 `AGENTS.md`（布局树
   smoke 行）、`_backlog/bugs/README.md`（活跃列表）、`_backlog/_done/README.md`（Next BUG ID）。
 - 队列：本条目毕业离队，恢复 parked 态。
+- 复核修正（同日，用户要求对交付做系统性/一致性复查）：新技能接进条目生命周期为
+  **反馈门③**（guides/60 §0/§4——原落地缺流程接线，技能存在但收尾程序不引用）；六处
+  技能清单枚举补齐（其中三处系存量漂移：改轨道缺席）；evaluation 四分离节的"正本"指向
+  纠正（判据正本 = evaluation 自身，discipline-map 源 11 = 来源登记）；"验收四角色"统一为
+  "交付判断四角色"（与技能/discipline-map 用词一致）；技能 description 补跨面触发（正文
+  有而指针缺 = 触发面丢失）；BUG-016 卡复现措辞与 gates-smoke 注释交叉引用收口。
 - 语料钉版身份：`deepseek-harness` @ `bbcf346ddb`（登记于 00-index §外部研究材料；语料自钉
   `dsh-v0.2.0-rc.2` = 本仓 vendor pin 同版——vendor 换 pin 时语料结论随 discipline-map
   §重审触发路径复核）。
