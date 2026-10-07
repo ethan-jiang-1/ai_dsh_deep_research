@@ -13,7 +13,7 @@
 
 ## 队列
 
-▶ **目录治理第二轮（runtime 外移 + scripts 分组）**——[RFC](../notes/proposed/2026-10-07-runtime-scripts-layout.md)（可自主——档 A 已落地 d4b01f6；档 B/C 按 RFC 次序推进，验收六判据绑检查方式）
+1. ▶ **ls-files 门禁族覆盖盲区清扫**——[RFC](../notes/proposed/2026-10-07-lsfiles-gate-coverage-sweep.md)（可自主——目录治理第二轮收口 pin-agreement 时实证同族缺陷，余下消费门禁按 RFC 盘点收口）
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 

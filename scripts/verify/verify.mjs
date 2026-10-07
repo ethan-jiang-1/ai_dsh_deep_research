@@ -442,7 +442,9 @@ function parkedSection() {
     fail(gate, `读不到 submodule 钉身份（commit=${m ? m[1].slice(0, 8) : '?'} tag=${TAG || '?'}）——fail-loud`);
   } else {
     const PIN = m[1];
-    const r = spawnSync('git', ['ls-files'], { cwd: ROOT, encoding: 'utf8' });
+    // quotepath=false：git 默认把非 ASCII 路径转义输出，join 后 existsSync 永远 miss
+    // （2026-10-07 实测 _dist/安装手册.md 因此被静默跳过）——本门禁要真实逐文件读盘，必须拿原文名。
+    const r = spawnSync('git', ['-c', 'core.quotepath=false', 'ls-files'], { cwd: ROOT, encoding: 'utf8' });
     const files = (r.stdout ?? '').split('\n').filter(Boolean)
       // notes/ 整层豁免只对历史层（Note = 冻结快照，pin 复述是过去时，合法）；README.md 与
       // AGENTS.md 是活动指令层（目录地图 + 常设指令），捞回受检（2026-10-04 fresh-agent-doc-audit
@@ -460,9 +462,12 @@ function parkedSection() {
     let hexes = 0, tags = 0, skipped = 0;
     for (const rel of files) {
       const f = join(ROOT, rel);
-      if (!existsSync(f)) continue;
+      // fail-loud（2026-10-07 目录治理第二轮实证）：tracked 但盘上缺席 = 迁移/清扫残留态，
+      // 静默跳过曾让 npm 缓存件的误入库漏检到迁移才现形——缺席与不可读都红。
+      if (!existsSync(f)) { fail(gate, `tracked 文件 ${rel} 盘上缺席——迁移/清扫残留态（git rm --cached 或恢复文件）`); continue; }
+      if (statSync(f).isDirectory()) continue; // tracked 目录型 symlink（.claude/skills→.agents/skills）——结构面归 claude-symlink 门禁，非文本复述面
       let text;
-      try { text = readFileSync(f, 'utf8'); } catch { continue; }
+      try { text = readFileSync(f, 'utf8'); } catch (e) { fail(gate, `tracked 文件 ${rel} 不可读（${e.code || e.message}）——fail-loud`); continue; }
       const lines = text.split('\n');
       for (const h of text.matchAll(/[0-9a-f]{40}/g)) {
         hexes++;

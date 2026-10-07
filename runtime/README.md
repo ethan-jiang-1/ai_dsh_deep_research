@@ -1,6 +1,6 @@
 # runtime/ · 运行态区（gitignored，不入库）
 
-> 目录治理第二轮档 B 自 dev/ 外移（[RFC](../notes/proposed/2026-10-07-runtime-scripts-layout.md)）：dev/ 只住源码驱动，跑出来的东西住这里。
+> 目录治理第二轮档 B 自 dev/ 外移（[毕业 Note](../notes/implemented/2026-10-07-runtime-scripts-layout.md)）：dev/ 只住源码驱动，跑出来的东西住这里。
 
 | 目录 | 性质 |
 |---|---|

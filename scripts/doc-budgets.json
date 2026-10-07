@@ -1,7 +1,7 @@
 {
   "_note": "常驻文档行数上限正本（上游 DSH 用词数 + scripts/doc-budgets.manifest.json；CJK 词数不可靠，本仓用行数等价）。门禁 doc-budgets 强制：登记项必须存在且不超限，仓内新增 AGENTS.md 必须登记。超限处置序 = 下放 > 压缩 > 升顶（升顶须同变更登记理由——上限过低是预算 bug）。",
   "_raises": {
-    "AGENTS.md": "130→132（2026-09-29）：§入口链 增「用 vs 改」意图分流句——冷启动探针实证 4/4 fresh agent 在「启动这个插件」上必须反问，分流句是每轮在场的判据，下放不了。132→138（2026-10-04）：§布局补账——pack src/ 双半源码、research-workspace 的 NODES/判型库、_dist/、双 symlink 行、run 门脚本与 lib 全模块、骨架图声明行（fresh-agent-doc-audit 对账实证 22 条盘上实体不在地图；重项导航是每轮在场事实，下放无更深的家——布局就是它的家）。138→140（2026-10-07）：§布局增 runtime/ 行（两物理行）——运行态区外移根级（目录治理第二轮档 B，RFC = notes/proposed/2026-10-07-runtime-scripts-layout.md）：源码驱动与 gitignored 运行区物理分离是每轮在场的布局事实，dev/ 行不再兼载运行区。",
+    "AGENTS.md": "130→132（2026-09-29）：§入口链 增「用 vs 改」意图分流句——冷启动探针实证 4/4 fresh agent 在「启动这个插件」上必须反问，分流句是每轮在场的判据，下放不了。132→138（2026-10-04）：§布局补账——pack src/ 双半源码、research-workspace 的 NODES/判型库、_dist/、双 symlink 行、run 门脚本与 lib 全模块、骨架图声明行（fresh-agent-doc-audit 对账实证 22 条盘上实体不在地图；重项导航是每轮在场事实，下放无更深的家——布局就是它的家）。138→140（2026-10-07）：§布局增 runtime/ 行（两物理行）——运行态区外移根级（目录治理第二轮档 B，[毕业 Note](../notes/implemented/2026-10-07-runtime-scripts-layout.md)）：源码驱动与 gitignored 运行区物理分离是每轮在场的布局事实，dev/ 行不再兼载运行区。",
     "README.md": "30→31（2026-09-29）：Start Here 增「想用它」意图入口（同上分流句的人类门面对应行）。",
     "scripts/AGENTS.md": "45→54（2026-10-04）：test-strategy 语料采纳——冒烟脚本可靠性纪律四条（verdict 契约/retry 白名单/等显式状态/释放到静默）+ 命名即层规则（后缀申报证据类型与档位/真模型档登记制 closed set）常驻该子树指令层；下放无更深的家（冒烟写作规则的家就是本文件），压缩已清重复条款（verbatim 重复的失败信息条款、范围纪律合并），余 9 行升顶。"
   },
