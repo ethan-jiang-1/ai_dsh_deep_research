@@ -909,6 +909,13 @@ function parkedSection() {
         if (typeof src !== 'string' || src.length === 0) { fail(gate, '条目缺 source 字符串'); continue; }
         if (seen.has(src)) fail(gate, `source 重复登记：${src}`);
         seen.add(src);
+        // 台账不收 node_modules 第三方依赖文件（2026-10-07 fresh clone 终验抓获：cytoscape 的
+        // AGENTS.md 被枚举误收——本机装了 vendor 依赖才存在，fresh clone 的 submodule 只有
+        // tracked 文件 → 源缺席假红。台账的合同对象 = harness 源面，不是装出来的依赖树）
+        if (src.includes('node_modules/')) {
+          fail(gate, `${src}: 台账不收 node_modules 第三方依赖文件（source 合同对象 = harness 源面；本机依赖树才存在的路径会让 fresh clone 断链——BUG-016 同族）`);
+          continue;
+        }
         if (!existsSync(join(ROOT, 'vendor', 'dsh', src))) {
           fail(gate, `${src}: vendor/dsh 里不存在（换 pin 后源文件移位/删除？重审触发——见 discipline-map §重审触发路径）`);
         }
