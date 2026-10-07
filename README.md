@@ -9,6 +9,7 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 - 开工入口链（唯一正本，5 步）= [`AGENTS.md`](AGENTS.md) §入口链——依次读什么、接下来做什么、怎么验收、怎么开工收尾，全在那节。
 - 人类速览"现在干什么"：[`_backlog/queue.md`](_backlog/queue.md) §队列 ▶（全仓唯一"当前"指针）。
 - **跑一次研究**：`bash dev/boot-run.sh` → 浏览器打开横幅 URL（工作区注册/发问题/HITL/交付/恢复全程序 = [`docs/guides/61-run-playbook.md`](docs/guides/61-run-playbook.md)）。
+- **改完怎么验**：选层地图 = [`docs/project-map.md`](docs/project-map.md) §测试怎么选（命令正本 = [`docs/guides/60-dev-loop.md`](docs/guides/60-dev-loop.md) §2，判据 = `docs/evaluation.md`）。
 - 想**用它**（跑一次研究 / 装到自己的 DSH）而不是改它：意图分流表 = [`docs/00-index.md`](docs/00-index.md) §先分流（每种说法的第一条命令）。
 - 想**看懂**项目怎么运转、怎么调试、状态放哪：[`docs/project-map.md`](docs/project-map.md)（任务入口矩阵 + 失败定位）与 [`docs/design/50-agent-loop-and-state.md`](docs/design/50-agent-loop-and-state.md)（Agent Loop 与四类状态合同）。
 
