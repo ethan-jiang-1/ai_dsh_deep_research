@@ -174,9 +174,11 @@ cat <<'STEPS'
 1. 等 web 横幅出现（含本次端口与 token）→ 用浏览器打开该 URL
 2. 新建会话：preset 选 "Deep Research Lead"（默认项），cwd 选 research-workspace/
 3. 说出研究问题 → lead 走 HITL1 三问（研究类型 / 深度篇幅 / 时间口径，每问带推荐）→ 你拍板
-4. 静默自主区（角色不问不报）：进度看四处——① run 仪表盘（runtime/smoke-workspace/dashboard.html：
-   多 run 场清单/流程步骤条/HITL 等待横幅/矩阵/leads/findings/review/journal，5s 刷新）
-   ② 各角色会话实时流 ③ ui-agent-team 任务板（谁领了什么活） ④ deliverables 面板（成品出现处）
+4. 静默自主区（角色不问不报）：进度两层看——
+   在场主面 = Web 里的研究驾驶舱「研究状态」页签（流程轨道/活动流/活标题/HITL 挂起横幅），
+   辅以 ② 各角色会话实时流 ③ ui-agent-team 任务板 ④ deliverables 面板（成品出现处）；
+   离机投影 = run 仪表盘（runtime/smoke-workspace/dashboard.html：多 run 场清单/流程步骤条/
+   HITL 等待横幅/矩阵/leads/findings/review/journal，5s 刷新——只读 fail-soft，不是交付判据）
 5. 仪表盘出现"⏳ 等你拍板（HITL）"横幅 = lead 在等你（HITL1/HITL2）——去 web GUI 答题
 6. HITL2 审阅（证据充分性 + 交付/补研究推荐）→ 拍板 → final/ 版本化交付 + present 声明
    中断恢复：新开 lead 会话只认 research-workspace/drt_<slug>/ 的文件事实。
