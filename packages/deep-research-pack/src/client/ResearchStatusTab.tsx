@@ -344,7 +344,7 @@ export function ResearchStatusTitle(props: PropsRuntime<'sidebar.right.pane.tab.
           else events = [...events, frame.event]
           setHitl(foldHitlPending(events))
         }
-      } catch { /* 活标题 fail-soft */ }
+      } catch (err) { /* 活标题 fail-soft；卸载 abort 不算失败 */ if (!controller.signal.aborted) console.error('[ResearchStatusTab] 活标题流失败', err) }
     })()
     return () => { controller.abort() }
   }, [sessionId])

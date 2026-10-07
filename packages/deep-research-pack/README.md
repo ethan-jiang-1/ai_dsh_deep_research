@@ -42,7 +42,7 @@ dsh --profile research --from-default-profile web --dump-config
 #    出包 = `node scripts/dist/export-dist.mjs`（仓根执行）→ `_dist/` 的 tarball + 安装手册.md（用户视角正本）。
 dsh plugin --profile research add file:/abs/path/to/dsh-deep-research-pack-0.1.0.tgz
 
-# ②b 验证形状（"装好了"的最小判据；下四项缺任一 = 没装上）
+# ②b 验证形状（"装好了"的最小判据；下列各项缺任一 = 没装上）
 dsh --profile research --dump-config   # 应见 preset-lead/scout/analyst/critic + tool-present + ui-agent-team + research-client + session-query-sqlite（openAt: first-search）
 
 # ③ 一键准备：铺工作区种子 + 确保团队机制层在场 + 跑前置检查
@@ -76,14 +76,14 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 ## 研究怎么跑
 
 1. **HITL1 立项（两段卡）**：对 Lead 说出研究问题 → 第一段三问（研究类型/深度篇幅/时间口径
-   与语言，推荐项置首带 (Recommended)）→ 点选即定稿；Lead 落稿 question.md + topics.md 后发
+   与语言，推荐项置首带(Recommended)）→ 点选即定稿；Lead 落稿 question.md + topics.md 后发
    第二段**计划确认卡**（quick_factual 豁免）：≤200 字计划要点 + 三选项——按计划开跑
-   (Recommended) / 修订计划（自由文本意见，附加进计划）/ 放弃；拍板与修订意见落
+   (Recommended)/ 修订计划（自由文本意见，附加进计划）/ 放弃；拍板与修订意见落
    §Decisions 后开工（一轮制，不二次呈卡）；
 2. **静默自主区**：Lead 拆 topic、派 Scout/Analyst/Critic（Agent Teams 通道），证据落
    `drt_<slug>/evidence/`（七字段 frontmatter：source_url / retrieved_at / quality / found_by /
    supports / source_tier / publisher）；Critic 对抗核查出 `review.md`（readiness PASS 是交付前置）；
-3. **HITL2 审阅**：结构化选项卡（按现稿定稿(Recommended) / 补研究 / 修订表述）→ 拍板后交付
+3. **HITL2 审阅**：结构化选项卡（按现稿定稿(Recommended)/ 补研究 / 修订表述）→ 拍板后交付
    `final.md`（每条关键结论附 `[来源: evidence/xx.md]`）；
 4. **观察面**：DSH Web GUI 右栏「研究状态」页签看实时动态（流程轨道 = ◆立项确认 + 立项→
    组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付，↻ rerun 回路自交付审阅可见，人性化活动流，

@@ -56,11 +56,16 @@ export const HITL_CONTRACT_DATE = '2026-10-05'
 /** 门R 契约日（2026-10-06 = oss-dr 借鉴候选 A1 落地日，LDR HeadingRepetitionGuard #6452 形态移植；此前交付不追溯）。 */
 export const HEADING_CONTRACT_DATE = '2026-10-06'
 
-/** 读一个会话日志文件（.jsonl 直读 / .jsonl.zstd 走 zstd CLI——多帧拼接 CLI 可解全帧）。 */
+/** 读一个会话日志文件（.jsonl 直读 / .jsonl.zstd 走 zstd CLI——多帧拼接 CLI 可解全帧）。
+ *  解压失败 stderr 报文件名后按空语料继续——语料缺失偏假红方向，但红必须带线索（fail-loud 最低义务）。 */
 function readLog(p) {
   if (p.endsWith('.zstd')) {
     const r = spawnSync('zstd', ['-dc', p], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
-    return r.status === 0 ? r.stdout : ''
+    if (r.status !== 0) {
+      console.error(`node-gate: 日志解压失败（按空语料继续，判据偏红方向）：${p}`)
+      return ''
+    }
+    return r.stdout
   }
   return readFileSync(p, 'utf8')
 }

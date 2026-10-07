@@ -7,7 +7,7 @@
 //
 // 编制条件性（RFC 2026-09-29-schema-debt-clearance）：研究类型 = quick_factual（记于
 // question.md）按 team-assembly 矩阵不设侦察/挖掘常设编制（scout 与 analyst 的输出件为
-// 条件件），critic 可轻量或不配——节点 3 leads.md
+// 条件件）——节点 3 leads.md
 // 与节点 6 review.md 为**条件件**：类型在场 → 缺席转"编制豁免"注记（不计违约不静默），
 // journal 无补偿把关记账 → WARN；类型不在场而缺席 → 维持违约。豁免依据 = bundle 自带事实
 // （question.md 类型 + journal 记账），不硬编码 bundle 名单（名单是腐蚀源）。

@@ -87,4 +87,3 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 ## 6. 偏离登记（默认严格 DSH/company 纪律，偏离须 D 号 + 约束证据）
 
 簿记正本 = [AGENTS.md §偏离登记簿](../../AGENTS.md)——一处事实一个家，本节不复制表（防双家漂移）。
-当前登记一条：伴随的 node:test/regex 断言选择（已重估维持——零迁移收益，keyless 回归全绿即证据）。

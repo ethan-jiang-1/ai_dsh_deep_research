@@ -195,28 +195,14 @@ function tailAskKind(events: readonly unknown[]): AskKind | undefined {
  * **混合折算（尾窗约束的实测产物，2026-09-28 首跑）**：journal 流的 snapshot 是尾窗
  * （vendor history.ts `DEFAULT_MAX_MESSAGES = 50`），长会话里 ask 的序数与更早的停靠点
  * 不可见——passed 态**由文件事实承载**（question.md 在场 = 立项拍板落盘；final.md 在场 =
- * 交付拍板落盘），journal 尾窗只承载 **pending 态**（末位回合事件 = 未答 ask，与
- * foldHitlPending 同一谓词）。文件事实缺席（bundle 未建/未绑定）时退化为纯尾窗判定：
- * 只显示 pending，不虚构 passed。交付后再来的挂起 ask（契约外的中途确认）如实缀第三锚。
- * @param events - 按 wire 顺序的事件（follow 的 snapshot + 实时流；畸形输入 fail-soft）。
- * @param fileFacts - bundle 文件在场性（face 缺席时省略）。
- * @returns 锚点列表（固定两位 + 契约外挂起追加；永不 throw）。
- */
-/**
- * 折算：journal 事件序列（+ 可选文件事实）→ 流程锚点态（立项确认 / 交付审阅）。
- *
- * **混合折算（尾窗约束的实测产物，2026-09-28 首跑）**：journal 流的 snapshot 是尾窗
- * （vendor history.ts `DEFAULT_MAX_MESSAGES = 50`），长会话里 ask 的序数与更早的停靠点
- * 不可见——passed 态**由文件事实承载**（question.md 在场 = 立项拍板落盘；final.md 在场 =
  * 交付拍板落盘），journal 尾窗只承载 **pending 态**。文件事实缺席（bundle 未建/未绑定）
  * 时退化为纯尾窗判定：只显示 pending，不虚构 passed。
  *
  * **pending 归属按 ask 内容判型（BUG-002，2026-09-30 UX 清扫实测）**：尾部开放 ask 带
  * HITL1 签名（首问 header「研究类型」）→ 立项确认 pending（question.md 已在场 = timed
  * 超时后 lead 按默认草案落盘、真人拍板仍开放的形态——re-open 是诚实态）；带 HITL2 签名
- * （「按现稿定稿」选项）→ 交付审阅 pending；两 signature 皆无 → 契约外「中途确认」缀第三
- * 锚（原第三锚只盖双锚已过形态，现扩到任意窗口）。开放 ask 优先于文件 passed 态——决策点
- * 重新开放时 pending 是诚实显示。
+ * （「按现稿定稿」选项）→ 交付审阅 pending；两 signature 皆无 → 契约外的中途挂起 ask
+ * 如实缀第三锚。开放 ask 优先于文件 passed 态——决策点重新开放时 pending 是诚实显示。
  * @param events - 按 wire 顺序的事件（follow 的 snapshot + 实时流；畸形输入 fail-soft）。
  * @param fileFacts - bundle 文件在场性（face 缺席时省略）。
  * @returns 锚点列表（固定两位 + 契约外挂起追加；永不 throw）。

@@ -8,6 +8,7 @@
     "presets/**",
     "cordis.patch.yml",
     "lib/**",
+    "!lib/*.tsbuildinfo",
     "workspace/**",
     "scripts/**"
   ],

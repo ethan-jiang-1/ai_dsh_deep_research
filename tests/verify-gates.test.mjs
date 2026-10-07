@@ -18,13 +18,16 @@ const gatesMatch = verifySrc.match(/const gates = \[([^\]]+)\]/);
 assert.ok(gatesMatch, 'verify.mjs 的 gates 数组不可解析——本契约测试的前提失效');
 const gatesArray = gatesMatch[1].split(',').map((s) => s.trim().replace(/^'|'$/g, '')).filter(Boolean);
 
-test('gates-smoke 案例表非空且形状完整（gate 字符串 + mutate 函数）', () => {
+test('gates-smoke 案例表非空且形状完整（id 唯一 + gate 字符串 + mutate 函数）', () => {
   assert.ok(CASES.length > 0, '案例表为空——门禁自测面失效（防空语料）');
   for (const c of CASES) {
-    assert.equal(typeof c.gate, 'string', `案例缺 gate 名：${JSON.stringify(c).slice(0, 80)}`);
-    assert.equal(typeof c.mutate, 'function', `案例 ${c.gate} 缺 mutate 注入函数`);
+    assert.equal(typeof c.id, 'string', `案例缺 id：${JSON.stringify(c).slice(0, 80)}`);
+    assert.ok(c.id.length > 0, '案例 id 为空串');
+    assert.equal(typeof c.gate, 'string', `案例 ${c.id} 缺 gate 名`);
+    assert.equal(typeof c.mutate, 'function', `案例 ${c.id} 缺 mutate 注入函数`);
   }
-  assert.equal(new Set(CASES.map((c) => c.gate)).size, CASES.length, '案例 gate 名重复');
+  assert.equal(new Set(CASES.map((c) => c.id)).size, CASES.length,
+    '案例 id 重复（同一门禁可有多个注入形态——id 防整条目重复）');
 });
 
 test('每个案例门禁都真实存在于 verify.mjs gates 数组（改名/退役未跟案例 = 红）', () => {

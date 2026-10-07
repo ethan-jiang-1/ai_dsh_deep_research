@@ -7,8 +7,10 @@
 ## 对话流 · 研究语义卡（web_search 卡标题，状态符不钉）
 
 检索：DSH harness
+检索：DeepSeek Harness GitHub 官方仓库
 
 ## 研究状态页签 · 人性化活动行（icon + 文本）
 
 🔍 检索：DSH harness
-💬 探针完成，搜了一次「DSH harness」（拿到 8 条清单，含 [dsh-continual-h
+🔍 检索：DeepSeek Harness GitHub 官方仓库
+💬 探针完成，搜了 1 次「DSH harness」（返 8 条，全为媒体/博客域名，无 deepsee

@@ -31,7 +31,7 @@
 
 ## HITL1 Alignment Snapshot
 
-- 研究类型: quick_factual | exploratory_map | claim_verification
+- 研究类型: quick_factual | exploratory_map | claim_verification（三分法为初判速记；完整判型 = question-patterns.md，命中其他典型模式时按其 canonical token 填写）
 - 深度与篇幅: 快答 | 标准报告 | 深度报告
 - 口径: 时间范围 / 语言 / 地域 / 排除项
 - 澄清记录: <问了什么、用户定了什么、哪些按主编推荐接受>

@@ -1,8 +1,7 @@
 # Deep Research critic preset —— 0.1.7 形态：一条 @deepseek-ai/dsh-agent-preset 行，
 # 子插件（persona / skills / 工具面 / 研究手册注入）在 config.plugins 内声明。
 # 职责与方法论：docs/design/20-roles.md §critic；映射依据：docs/design/30-methodology-mapping.md。
-# 旧形态（presets/critic/agent.cordis.yml + preset.yml）随 vendor 0.1.7 preset 重设计迁移
-# （RFC notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md）。
+# 迁移史与旧形态 = notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md。
 - insert:
     - id: preset-critic
       name: '@deepseek-ai/dsh-agent-preset'

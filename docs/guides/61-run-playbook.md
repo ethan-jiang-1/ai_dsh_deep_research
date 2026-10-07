@@ -85,11 +85,11 @@ frontmatter）。`dev/run-kickoff.mjs` 已默认用 workspaceId 形态把会话�
 - 直接说出研究问题（一句话到一段话皆可）。lead 加载 research-brief skill 走 **HITL1 两段卡**：
   第一段**三问**——研究类型（quick_factual / exploratory_map / claim_verification）/ 深度篇幅 /
   时间口径语言，**一张结构化选项卡**（一次 ask_user_question 携带三问，每问 options
-  化、推荐项置首带（Recommended）），你点选项即拍板（需要改的选项可自由输入）；
+  化、推荐项置首带(Recommended)），你点选项即拍板（需要改的选项可自由输入）；
 - 三问答毕 lead 实例化 run bundle `research-workspace/drt_<slug>/`（question.md 定稿 +
   topics.md 拆解；立项时 sibling 预检——同名/前缀相关 bundle 已在则先问你），随后发
   **第二段·计划确认卡**（quick_factual 豁免）：≤200 字计划要点瘦卡 +「全文 =
-  question.md / topics.md」指针，三选项——按计划开跑（Recommended）/ 修订计划（自由文本
+  question.md / topics.md」指针，三选项——按计划开跑(Recommended)/ 修订计划（自由文本
   意见，**附加**进计划不替换）/ 放弃（不开跑，bundle 处置照 sibling 预检规矩）；修订意见
   逐字落 §Decisions 后直接开工（一轮制，不再二次呈卡）；
 - 计划拍板后 lead 组队（scout 先行，critic 后置进场），进入静默自主区。
@@ -111,7 +111,7 @@ frontmatter）。`dev/run-kickoff.mjs` 已默认用 workspaceId 形态把会话�
 CLI/host 侧没有 answerer，也没有提交答案的 RPC）——所以代答要用真浏览器：
 
 ```sh
-source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <横幅 token>   # 默认逐题选带（Recommended）的那一项
+source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <横幅 token>   # 默认逐题选带(Recommended)的那一项
 ```
 
 它逐题打印选择结果；**必须**把这次代答如实记进 bundle 的 `question.md` §Decisions 与
@@ -126,7 +126,9 @@ source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --tok
 
 - **拍板前操作侧先跑机械门**：`source dev/env.sh && node scripts/run-gates/node-gate.mjs
   research-workspace/drt_<slug>`——门①/③/L/R 红在场 = 先让 lead 原位修再拍板（红门会
-  穿过 HITL2 落地，lead 自己跑不了门：无 bash）；
+  穿过 HITL2 落地，lead 自己跑不了门：无 bash）。**门②/④ 属拍板后判据**：门②查 present
+  声明、门④查版本记账，两者在拍板前必然缺席——拍板前跑门看到 ② 红（静默缺席形态）=
+  预期态而非缺陷，拍板交付后复跑转绿（门清单正本 = NODES.md 头部图例）；
 - lead 带审阅建议来找你：证据充分性判断 + 交付/补研究推荐 + composition 确认
   （读者是谁 / 用来做什么 / 前景化重点）——拍板后 run 根 `final.md` 当前版落盘 + present 声明交付；
 - 每条关键结论带 `[来源: evidence/xx.md]`，critic 的 review.md readiness: PASS

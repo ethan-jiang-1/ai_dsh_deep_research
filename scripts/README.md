@@ -59,7 +59,7 @@
 | lib/roles.mjs | 冒烟与门禁 | 角色清单访问器（事实源 = 盘上 presets/） |
 | lib/session-log.mjs | run-state、watch-run、回归 | canonical 日志选择与读取（BUG-010） |
 | lib/run-state.mjs | watch-run、仪表盘、回归 | run 操作面状态谓词 |
-| lib/env.mjs | 冒烟族 | 双 home 环境判定 |
+| lib/env.mjs | 冒烟族 | 子进程环境清洗（scrubbedEnv/withModelKey——凭据卫生） |
 | lib/playwright.mjs | 浏览器冒烟 | Playwright 启停支撑 |
 | lib/cdp-driver.mjs | cdp-probe | 裸 CDP 驱动 |
 | lib/ask-drive.mjs | hitl-answer | 代答读窗与谓词 |

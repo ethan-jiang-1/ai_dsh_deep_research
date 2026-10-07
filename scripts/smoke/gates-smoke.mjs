@@ -52,14 +52,27 @@ const removeLedgerRow = (gateName) => (dir) => {
   writeFileSync(p, readFileSync(p, 'utf8').split('\n').filter((l) => !l.startsWith(`| \`${gateName}\``)).join('\n'));
 };
 
+const bareQueuePointer = () => (dir) => {
+  const p = join(dir, '_backlog', 'queue.md');
+  const lines = readFileSync(p, 'utf8').split('\n');
+  let inQueue = false;
+  for (let i = 0; i < lines.length; i++) {
+    if (/^## /.test(lines[i])) { inQueue = /^## 队列/.test(lines[i]); continue; }
+    if (inQueue && /^\d+\.\s+▶/.test(lines[i])) { lines[i] = lines[i].replace(/^\d+\.\s+/, ''); break; } // 有条目态：剥编号 → 裸 ▶（门禁 2026-10-07 补宽的形态）
+  }
+  writeFileSync(p, lines.join('\n'));
+};
+
 /** 承重门禁抽样（增删同 diff：本表 + tests/verify-gates.test.mjs 无需改——它动态对账本表）。
- *  gate = 期望点名的门禁；mutate(dir) = 在 fixture 内注入该门禁负责拦的回归。 */
+ *  id = 案例唯一标识（同一门禁可有多个注入形态，id 防重复条目）；gate = 期望点名的门禁；
+ *  mutate(dir) = 在 fixture 内注入该门禁负责拦的回归。 */
 export const CASES = [
-  { gate: 'md-links', mutate: appendTo('README.md', '\n[死链探针](./definitely-missing-file.md)\n') },
-  { gate: 'md-anchors', mutate: appendTo('README.md', '\n[坏锚探针](AGENTS.md#这个锚点肯定不存在xyz)\n') },
-  { gate: 'note-format', mutate: stripFirstStatusLine(join('notes', 'implemented')) },
-  { gate: 'entry-chain', mutate: breakQueuePointer() },
-  { gate: 'gate-ledger-sync', mutate: removeLedgerRow('dist-manual-version') },
+  { id: 'md-links-dead', gate: 'md-links', mutate: appendTo('README.md', '\n[死链探针](./definitely-missing-file.md)\n') },
+  { id: 'md-anchors-missing', gate: 'md-anchors', mutate: appendTo('README.md', '\n[坏锚探针](AGENTS.md#这个锚点肯定不存在xyz)\n') },
+  { id: 'note-format-no-status', gate: 'note-format', mutate: stripFirstStatusLine(join('notes', 'implemented')) },
+  { id: 'entry-chain-pointer', gate: 'entry-chain', mutate: breakQueuePointer() },
+  { id: 'entry-chain-bare', gate: 'entry-chain', mutate: bareQueuePointer() },
+  { id: 'gate-ledger-sync-row', gate: 'gate-ledger-sync', mutate: removeLedgerRow('dist-manual-version') },
 ];
 
 // ── fixture：tracked 文件副本 + git init/add（git ls-files 驱动的门禁在副本内可用）──
@@ -138,13 +151,13 @@ function main() {
     }
 
     // 案例组：注入 → 目标门禁点名红
-    for (const { gate, mutate } of CASES) {
-      const dir = cloneFixture(base, `case-${gate}`);
+    for (const { id, gate, mutate } of CASES) {
+      const dir = cloneFixture(base, `case-${id}`);
       keep.push(dir);
       mutate(dir);
       const { status, out } = runVerify(dir);
-      if (!/verify: 全绿|处失败/.test(out)) failures.push(`${gate}：verify 未跑完（status=${status}）`);
-      else if (!out.includes(`FAIL  ${gate}`)) failures.push(`${gate}：注入回归未被点名报红——门禁钝化或案例失效`);
+      if (!/verify: 全绿|处失败/.test(out)) failures.push(`${id}：verify 未跑完（status=${status}）`);
+      else if (!out.includes(`FAIL  ${gate}`)) failures.push(`${id}：注入回归未被点名报红——门禁钝化或案例失效`);
     }
 
     if (failures.length > 0) {

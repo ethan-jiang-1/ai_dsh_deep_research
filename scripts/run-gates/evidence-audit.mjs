@@ -88,7 +88,12 @@ export function buildCorpus(root) {
         let text = ''
         if (ent.name.endsWith('.zstd')) {
           const r = spawnSync('zstd', ['-dc', p], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
-          if (r.status !== 0) return
+          if (r.status !== 0) {
+            // 单文件失败不吞整个目录：报文件名后继续 walk（旧实现 return 会静默丢弃同目录剩余全部日志，
+            // 语料缺失偏假红方向且红无线索）
+            console.error(`evidence-audit: 日志解压失败（跳过该文件，语料缺失偏红方向）：${p}`)
+            continue
+          }
           text = r.stdout
         } else text = readFileSync(p, 'utf8')
         const callName = new Map()

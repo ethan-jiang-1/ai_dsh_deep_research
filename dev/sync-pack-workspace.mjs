@@ -11,7 +11,7 @@
 // 漂移门禁 = verify 的 pack-workspace-fresh（跑 --check）。
 //
 // 用法：node dev/sync-pack-workspace.mjs [--check]
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -42,6 +42,25 @@ for (const [rel] of FILES) {
   mkdirSync(dirname(dst), { recursive: true })
   writeFileSync(dst, srcText)
 }
+
+// 孤儿种子对账（双向 freshness）：只对"源有的"文件比对不算 freshness——源删了文件、种子残留
+// 旧件同样是漂移（部署方会装到已删的旧模板；对照 overlay-fresh 的整文件全量 diff 无此盲区）。
+// check 报红；sync 侧真镜像（删孤儿），让 --check 能保证两侧相等。
+const fileSet = new Set(FILES.map(([rel]) => rel))
+const walkDst = (dir) => {
+  for (const ent of readdirSync(dir, { withFileTypes: true })) {
+    const p = join(dir, ent.name)
+    if (ent.isDirectory()) walkDst(p)
+    else if (ent.name.endsWith('.md')) {
+      const rel = p.slice(DST.length + 1)
+      if (!fileSet.has(rel)) {
+        if (check) drift.push(`孤儿种子（源侧已删）:${rel}`)
+        else rmSync(p)
+      }
+    }
+  }
+}
+if (existsSync(DST)) walkDst(DST)
 
 if (check) {
   if (drift.length > 0) {

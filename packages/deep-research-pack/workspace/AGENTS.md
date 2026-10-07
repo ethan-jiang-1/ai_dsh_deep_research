@@ -34,12 +34,12 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
 archive/<slug>/        已交付 run 归档位（2026-09-27 用户指令）：交付后操作侧移入，工作区根
                        只留活跃 run——防题名目录被误读为"待开展课题"；仍可被审计/仪表盘按路径投影
 templates/run/         新 run bundle 的起点模板（只读，不直接写）
-NODES.md               节点 I/O 契约全表（八节点输入/输出/下游可开工判据 + 回边版本语义）——节点开工前对照；机械把守 = schema-scan.mjs（在场级全行）+ node-gate.mjs（判据级：交付两门②③ + 门L leads 交接 + 门④ 版本记账——门编号图例与判据正本 = NODES.md 头部）
+NODES.md               节点 I/O 契约全表（八节点输入/输出/下游可开工判据 + 回边版本语义）——节点开工前对照；机械把守 = schema-scan.mjs（在场级全行）+ node-gate.mjs（判据级门全集 = 门①②③④ + 门L + 门R——编号图例与判据正本 = NODES.md 头部）
 question-patterns.md   判型模式库（HITL1 第一对照面：命中走条目、未命中兜底 + journal 标记行；增长协议正本 = 库尾节）
 ```
 
 模板六件 ↔ question/topics/leads/evidence-entry（= evidence/ 单条模板）/findings/final
-（= final/ 首版模板）；
+（= run 根**当前版报告**模板；final/ 的 vN 记账体**无模板**，按 NODES.md 回边版本语义自构）；
 review.md、drafts/、journal.md 无模板——review 格式住 critic 的 adversarial-review skill，
 drafts/journal 运行时自建。
 
@@ -109,7 +109,7 @@ bundle（gitignored 运行区）——run 数据的完整性由 critic + 仪表�
 
 ## 交互纪律（两点交互）
 
-整个 run 只有两个人机交互点，都由 lead 执行：**立项对齐（HITL1）**与**交付审阅（HITL2）**——都以 `ask_user_question` 的**结构化选项卡**呈现（一次多问 + options + 推荐项置首带（Recommended））。**HITL1 = 两段卡**：第一段固定三问（研究类型/深度篇幅/时间口径与语言），第二段**计划确认卡**——question/topics 定稿后、开工前呈计划要点瘦卡（按计划开跑（推荐）/ 修订计划（意见附加不替换、一轮制不再二次呈卡）/ 放弃；**quick_factual 豁免**），拍板落 question.md §Decisions 第 1 条，形态细则 = lead 的 research-brief skill。HITL2 选项 = 定稿（推荐）/补研究/修订表述。
+整个 run 只有两个人机交互点，都由 lead 执行：**立项对齐（HITL1）**与**交付审阅（HITL2）**——都以 `ask_user_question` 的**结构化选项卡**呈现（一次多问 + options + 推荐项置首带(Recommended)）。**HITL1 = 两段卡**：第一段固定三问（研究类型/深度篇幅/时间口径与语言），第二段**计划确认卡**——question/topics 定稿后、开工前呈计划要点瘦卡（按计划开跑(Recommended)/ 修订计划（意见附加不替换、一轮制不再二次呈卡）/ 放弃；**quick_factual 豁免**），拍板落 question.md §Decisions 第 1 条，形态细则 = lead 的 research-brief skill。HITL2 选项 = 定稿(Recommended)/补研究/修订表述。
 两点之间所有角色静默自主推进——不问"要不要继续"、不汇报中间进度、不等确认。
 用户主动发消息时直接回答，但回答不改变既定研究方向与分派。
 

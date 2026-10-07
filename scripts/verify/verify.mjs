@@ -648,6 +648,15 @@ function parkedSection() {
     if (marks > 1) fail(gate, `queue.md §队列 有 ${marks} 个 ▶——"当前"指针必须唯一（D11）`);
     else if (marks >= 1 && queue.includes(QUEUE_PARKED)) fail(gate, `queue.md §队列 parked 标记与 ▶ 条目并存——矛盾态（队列要么空要么有当前条目）`);
     else if (marks === 0 && !queueParkedState(queue)) fail(gate, `queue.md §队列 无 ▶ 且非 parked 态——全仓唯一"当前"指针缺席（D11；队列空须以 ${QUEUE_PARKED} 行标注且不得残留编号条目）`);
+    // 条目行格式（2026-10-07 补宽：裸 ▶ 行过得了上面的检查却让 entry-chain-probe 的真值锚
+    // 解析失败——门禁与探针的队列格式合同在此对齐）：▶ 必须坐在编号条目行上，编号行
+    // 必须携带粗体主题（探针按 `^N. ▶ **主题**` 解析，2026-10-07 裸 ▶ 实录）。
+    for (const line of queue.split('\n')) {
+      if (/^\d+\.\s/.test(line) && !/^\d+\.\s+(?:▶\s+)?\*\*.+\*\*/.test(line))
+        fail(gate, `queue.md §队列 编号条目行缺粗体主题：${line.slice(0, 40)}…（形态 = N. ▶ **主题**…）`);
+      if (/^\s*▶/.test(line) && !/^\d+\.\s+▶/.test(line))
+        fail(gate, `queue.md §队列 ▶ 指针不在编号条目行上：${line.slice(0, 40)}…（形态 = N. ▶ **主题**…，探针真值锚同款解析）`);
+    }
   }
 }
 
@@ -1210,7 +1219,9 @@ function parkedSection() {
 }
 
 // ── 汇报 ──
-const failed = new Set(failures.map((f) => f.match(/^\[(.+)\]/)[1]));
+// 归因正则钉 [^\]]+（到首个 ] 为止）：贪婪 (.+)\] 会被消息内嵌的 ]（如队列行的 [RFC] 链接）
+// 污染，抓到最后一个 ] ——失败详情在场、门禁行却打 PASS（2026-10-07 gates-smoke 实证抓获）。
+const failed = new Set(failures.map((f) => f.match(/^\[([^\]]+)\]/)[1]));
 for (const g of gates) console.log(`${failed.has(g) ? 'FAIL' : 'PASS'}  ${g}`);
 for (const n of notes) console.log(`note  ${n}`);
 if (failures.length > 0) {

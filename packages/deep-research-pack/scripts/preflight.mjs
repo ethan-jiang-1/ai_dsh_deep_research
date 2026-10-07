@@ -46,7 +46,7 @@ const record = (ok, name, detail, remedy) => { results.push({ ok, name, detail, 
   const r = spawnSync('dsh', ['--version'], { encoding: 'utf8' })
   const found = r.status === 0 ? String(r.stdout).trim() : null
   const ok = found === null ? null : want.some((tag) => found.includes(String(tag).replace(/^dsh-v/, '')))
-  record(ok !== false, 'DSH 版本兼容', found === null ? `无法判定（dsh --version 不可用；本包要求 ${want.join('、')}）` : `宿主 ${found}；本包要求 ${want.join('、')}`, `装匹配版本：npm i -g @deepseek-ai/dsh@${String(want[0] ?? '').replace(/^dsh-v/, '')}`)
+  record(ok, 'DSH 版本兼容', found === null ? `无法判定（dsh --version 不可用；本包要求 ${want.join('、')}）` : `宿主 ${found}；本包要求 ${want.join('、')}`, `装匹配版本：npm i -g @deepseek-ai/dsh@${String(want[0] ?? '').replace(/^dsh-v/, '')}`)
 }
 
 // ② 平台 peer 包（解析锚 = 宿主 profile）
@@ -103,7 +103,7 @@ const record = (ok, name, detail, remedy) => { results.push({ ok, name, detail, 
 const hardFail = results.filter((r) => r.ok === false)
 console.log(`deep-research-pack preflight（pack v${pkg.version}；解析锚：${host ?? PACK}）\n`)
 for (const r of results) {
-  console.log(`  ${r.ok === false ? '✗' : '✓'} ${r.name}`)
+  console.log(`  ${r.ok === false ? '✗' : r.ok == null ? '?' : '✓'} ${r.name}`)
   console.log(`      ${r.detail}`)
   if (r.ok === false) console.log(`      → ${r.remedy}`)
 }

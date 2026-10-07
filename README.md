@@ -25,6 +25,6 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 
 ## Rules In One Screen
 
-- 配置为主的 pack（预设/技能/bundle 行）+ 一个观察面 client 面（D18 单点例外）；Node `^22.19.0 || >=24.0.0`（`engines`，与 vendor 对齐）；测试用 `node:test` + `node:assert`（无测试框架）。
+- 配置为主的 pack（预设/技能/bundle 行）+ 一个观察面 client 面（D18 单点例外）；Node 版本区间与 vendor 对齐（正本 = package.json engines——repo-conventions 门禁对账）；测试用 `node:test` + `node:assert`（无测试框架）。
 - 评估五面（L0 结构 / L1 挂载 / L2 安装 / L3 领域 / L4 交付）不互抵，定义见 `docs/evaluation.md`。
 - 迭代单位 = 垂直轮（最薄全路径 → 逐轮加宽），当前进度看 `_backlog/queue.md` §队列。

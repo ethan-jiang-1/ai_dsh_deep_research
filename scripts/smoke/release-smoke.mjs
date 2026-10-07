@@ -52,7 +52,9 @@ const fixedCleanupTargets = new Map([
 ]);
 const assertCleanupTarget = (name, target) => {
   const expected = fixedCleanupTargets.get(name);
-  if (!expected || resolve(target) !== expected || !expected.startsWith(`${ROOT}/dev/`)) {
+  // 清理白名单前缀 = runtime/ 工具态区（2026-10-07 运行态区外移：tmp/npm 缓存迁 runtime/smoke-workspace，
+  // home 本体钉在 runtime/harness-home——dev/ 前缀是迁移漏改的断链，实测 L2 通道第一步 clean 即崩）
+  if (!expected || resolve(target) !== expected || !expected.startsWith(`${ROOT}/runtime/`)) {
     throw new Error(`release-smoke: refusing to clean unexpected ${name} path: ${target}`);
   }
   for (let current = target; current !== ROOT; current = dirname(current)) {
@@ -143,10 +145,13 @@ clean('probe', probeWs);
 
 // ⑤ boot + preset-smoke 断言（安装域通道：无 overlay，走已装 pack 的正式路径）
 console.log('⑤ preset-smoke（安装域：--profile release-check --no-patch）…');
-const smoke = run(process.execPath, [join(ROOT, 'scripts', 'preset-smoke.mjs'), '--profile', PROFILE, '--no-patch', '--port', PORT],
+// 路径随 762eb6c 目录治理迁 scripts/smoke/——旧平铺路径是迁移漏网（与守卫前缀同族：L2 未跑掩护）
+const smoke = run(process.execPath, [join(ROOT, 'scripts', 'smoke', 'preset-smoke.mjs'), '--profile', PROFILE, '--no-patch', '--port', PORT],
   { env: scrubbedEnv({ DSH_HOME: home, DSH_SMOKE_REAL: '1' }) });
 console.log(smoke.stdout.split('\n').map((l) => `    ${l}`).join('\n'));
-step(smoke.status === 0, 'preset-smoke 安装域全绿', smoke.stdout.split('\n').filter((l) => l.includes('FAIL')).join(' | '));
+step(smoke.status === 0, 'preset-smoke 安装域全绿',
+  [ ...(smoke.stdout || '').split('\n').filter((l) => l.includes('FAIL')),
+    ...(smoke.status !== 0 && !(smoke.stdout || '').trim() ? [`stderr: ${(smoke.stderr || '').slice(-400)}`] : []) ].join(' | '));
 
 console.log(failures.length === 0
   ? '\nrelease-smoke: ALL PASS（真实安装形状可用）'

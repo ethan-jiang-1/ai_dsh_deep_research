@@ -9,7 +9,7 @@
 //   ③ 收尾跑 preflight 报告状态。
 //
 // 用法：
-//   node <pack>/scripts/scaffold.mjs --workspace <研究工作区> [--profile <名>] [--force] [--dry-run] [--install-only]
+//   node <pack>/scripts/scaffold.mjs --workspace <研究工作区> [--profile <名>] [--host <dir>] [--force] [--dry-run] [--install-only]
 //   或经 bin：dsh-deep-research-scaffold --workspace <dir> [--profile research]
 //
 // 不做的事（有意）：不装 DSH 本体、不写密钥（安全边界：密钥永不落仓库/脚本）。
@@ -44,6 +44,7 @@ if (workspace === null) {
     for (const ent of readdirSync(dir, { withFileTypes: true })) {
       const p = join(dir, ent.name)
       if (ent.isDirectory()) walk(p)
+      // 种子当前全 .md；加非 .md 种子时需同步 preflight 的清点口径
       else if (ent.name.endsWith('.md')) files.push(relative(SEED, p))
     }
   }
