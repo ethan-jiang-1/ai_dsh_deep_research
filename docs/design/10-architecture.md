@@ -77,7 +77,7 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 
 ## 5. 环境与验证
 
-- `dev/env.sh`：DSH_HOME 重定向到 `dev/harness-home`（数据面隔离）+ 裸 dsh 拦截（代码面
+- `dev/env.sh`：DSH_HOME 重定向到 `runtime/harness-home`（数据面隔离）+ 裸 dsh 拦截（代码面
   隔离——全局安装随升级漂移，不作机制依据）；机制基线 = 本仓 `vendor/dsh/`（env.sh 的
   dsh 函数与根 `pnpm dsh` 均从钉 tag 源码起，前置 = 根 pnpm install + `dev/vendor-build.sh`
   （vendor 树构建：tsc host/client + typert 产物 + client bundle；构建入口正本 = guides/60 §2）——

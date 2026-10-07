@@ -25,7 +25,7 @@ description: Use when adding, widening, or retiring a mechanical check in script
 **防空语料**：扫描型门禁必须对"扫到 0 个文件/范围被收窄"判红——静默变成空集的门禁等于不存在；
 **边界形态要测**：每个被纳入与被排除的形态各留一条断言（含空格路径、symlink、忽略目录）。
 
-- 覆盖面用 `git ls-files` 驱动 = **tracked-only**：运行区（`dev/harness-home/`、
+- 覆盖面用 `git ls-files` 驱动 = **tracked-only**：运行区（`runtime/harness-home/`、
   `research-workspace/drt_*`）不进 L0，否则 pre-commit 会被 run 产物拦红（实测教训）；
 - 扫描目录时跳过 `.git` / `node_modules`；稀疏态（文件不存在）用 `continue` 防御；
 - 别把"运行区数据完整性"塞进 L0——那属于 run 内的 critic + 观察面谓词。

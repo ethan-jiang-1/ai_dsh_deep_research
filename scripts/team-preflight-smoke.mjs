@@ -165,7 +165,7 @@ const countEvents = (sessionId, predicate) => {
   return n;
 };
 
-const SMOKE_CWD = join(ROOT, 'dev', 'smoke-workspace');
+const SMOKE_CWD = join(ROOT, 'runtime', 'smoke-workspace');
 const LEAD_MARKER = '预检完成-LEAD';
 const SCOUT_MARKER = '预检就绪-SCOUT';
 const ANALYST_MARKER = '预检就绪-ANALYST';

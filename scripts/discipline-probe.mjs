@@ -20,7 +20,7 @@
 //   lead 计划确认卡（HITL1 两段卡第二段：标准型定稿先呈再开工 × quick_factual 免发
 //   ——条件命题两分支同场互补覆盖，场景双 run 各写下一动作）。
 // 断言 = assistant/message 事件行携带行为标记（会话日志即真相，非用户消息回显）；
-// 全文留档 dev/smoke-workspace/discipline-probe-last.md 供人工复核。
+// 全文留档 runtime/smoke-workspace/discipline-probe-last.md 供人工复核。
 //
 // 前置：source dev/env.sh（DSH_HOME + 凭据 + zstd 在 PATH）。
 // 用法：source dev/env.sh && node scripts/discipline-probe.mjs [--port 3104] [--scenario <id>]
@@ -191,7 +191,7 @@ if (ACTIVE.length === 0) {
 }
 
 const SMOKE_CWD = ROOT; // 仓根：场景指令要 read 技能正本（packages/ 相对路径可达；同 entry-chain-probe）
-const ARCHIVE = join(ROOT, 'dev', 'smoke-workspace', 'discipline-probe-last.md');
+const ARCHIVE = join(ROOT, 'runtime', 'smoke-workspace', 'discipline-probe-last.md');
 const failures = [];
 const archive = [`# discipline-probe 留档（${new Date().toISOString()}）——机械断言只证结构不证语义，全文供人工复核`, ''];
 const check = (label, fn) => fn().then(

@@ -7,14 +7,14 @@
 
 ## 0. 开跑（一次性准备 + 每次启动）
 
-- 凭据：真 run 需要模型——`dev/harness-home/.credentials.yaml` 配一次
+- 凭据：真 run 需要模型——`runtime/harness-home/.credentials.yaml` 配一次
   `DEEPSEEK_API_KEY`（见 [AGENTS.md §密钥](../../AGENTS.md)；boot 本身 keyless）；
 - 启动：`bash dev/boot-run.sh`（幂等：组合在位即直接 boot）→ 等横幅
   `http://127.0.0.1:<port>/?token=…` 用浏览器打开。**端口 = `DSH_RUN_PORT`，缺省 3083**
   （2026-09-28 起 3081 让给别的项目；3080 是本仓开发 GUI，勿占；换端口：
   `DSH_RUN_PORT=<空闲端口> bash dev/boot-run.sh`）。端口已被占时 boot-run 会 fail-loud 并给
   补救，**先看占用者是谁**：若是本仓在飞的 run 通道 → **别另起**，用它（URL/token 见启动横幅或
-  `dev/smoke-workspace/web.log`）；不是 → 换端口，或确认后停掉它（**别盲杀**：在飞会话的
+  `runtime/smoke-workspace/web.log`）；不是 → 换端口，或确认后停掉它（**别盲杀**：在飞会话的
   日志尾部可能丢失——BUG-007 卡）；
 - **SPA 抓取通道（mcp-playwright，默认挂载）**：`bash dev/boot-run.sh` 自带本地 Playwright MCP
   （npx 拉起 `@0.0.83`、headless、`direct://` 直连绕过系统代理——SPA 定价页/JS 榜单的渲染抓取）；
@@ -70,7 +70,7 @@
 ```
 
 **自检 / 补登记**：`dev/run-kickoff.mjs` 建会话前就调 `workspace/create`（幂等，RPC 同上）——
-"这台机器登记过没有"不用记；`dev/harness-home` 被重建后本步重新需要。
+"这台机器登记过没有"不用记；`runtime/harness-home` 被重建后本步重新需要。
 
 **为什么关键**：研究手册是**会话 cwd 的 `AGENTS.md`**，DSH 从 cwd 向上发现并注入每个角色
 ——cwd 不是研究工作区，手册就不进上下文（首场 run 因此丢了跨角色证据契约，31 份证据无
@@ -155,7 +155,7 @@ source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --tok
   goal 与 drt_ bundle 互为镜像、冲突以 bundle 文件事实为准；
 - **在飞与归档的位置**：在飞 run 住工作区根，交付后由操作侧移入
   `research-workspace/archive/<slug>/`（归档不消失——
-  仪表盘多 run 总表与 evidence-audit `--latest` 均并扫 archive/）。`dev/harness-home/runs/`
+  仪表盘多 run 总表与 evidence-audit `--latest` 均并扫 archive/）。`runtime/harness-home/runs/`
   下的 bundle 是契约前的 ad-hoc 历史（仪表盘标 "ad-hoc·无契约"）——不是这次要恢复的 run，
   也不要删（gitignored 运行数据，是那次研究留下的证据）；
 - 方向修订：直接告诉 lead——**载体 = steer**（GUI 里打字即 steer；RPC 用 `session/prompt`

@@ -51,7 +51,7 @@ if (home === null) {
   process.exit(2)
 }
 if (!existsSync(join(home, '.credentials.yaml'))) {
-  console.error('client-hitl-smoke: 真模型档需要凭据（dev/harness-home/.credentials.yaml 缺席）')
+  console.error('client-hitl-smoke: 真模型档需要凭据（runtime/harness-home/.credentials.yaml 缺席）')
   process.exit(2)
 }
 if (spawnSync('zstd', ['--version']).status !== 0) {
@@ -235,8 +235,8 @@ try {
     // 观察点（非致命，如实记录）：活标题翻转。盘侧挂起态 + fold 单测 + 页签渲染是硬判据。
     console.log('  （观察点）活标题翻转:', titleFlipped, '| 横幅行:', bannerShown)
     if (titleFlipped && bannerShown) console.log('  PASS 活标题翻转 + 横幅（超出基线的加分证据）')
-    await page.screenshot({ path: join(ROOT, 'dev', 'smoke-workspace', 'client-hitl-smoke.png') }).catch(() => {})
-    console.log('  （截图留档 dev/smoke-workspace/client-hitl-smoke.png 供人工复核）')
+    await page.screenshot({ path: join(ROOT, 'runtime', 'smoke-workspace', 'client-hitl-smoke.png') }).catch(() => {})
+    console.log('  （截图留档 runtime/smoke-workspace/client-hitl-smoke.png 供人工复核）')
 
     // ⑤ fix① 完整验证（RFC right-pane-ux-debt：挂起迁移 → 页签体 revealStatusTab →
     //    openTab 落定时右栏同步骤展开）：收起右栏（页签 dock 不卸载）→ hitl-answer 答掉

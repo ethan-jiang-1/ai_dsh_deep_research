@@ -27,12 +27,12 @@ const SCENE_ROOTS = [
   // 归档场（2026-09-27）：已交付 run 移入 archive/ 后仍进多 run 总表（历史不丢）；
   // label 区分归档，避免与活跃场混淆。
   { dir: 'research-workspace/archive', kind: 'drt', label: 'drt·归档' },
-  { dir: 'dev/harness-home/runs', kind: 'ad-hoc', label: 'ad-hoc·无契约' },
+  { dir: 'runtime/harness-home/runs', kind: 'ad-hoc', label: 'ad-hoc·无契约' },
 ];
 /** lead 会话日志根（HITL 等待检测；选择器按 v4/v3 canonical 代际挑选一个物理日志）。 */
-const SESSIONS_ROOT = 'dev/harness-home/sessions';
+const SESSIONS_ROOT = 'runtime/harness-home/sessions';
 /** web 日志（boot-run tee 的横幅，含 token URL——deep-link 用；缺席即不链） */
-const WEB_LOG = 'dev/smoke-workspace/web.log';
+const WEB_LOG = 'runtime/smoke-workspace/web.log';
 
 // ── 纯解析函数（测试面；全部对畸形输入 fail-soft，永不 throw）──────────────────
 

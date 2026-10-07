@@ -119,7 +119,7 @@ const waitFor = async (sessionId, label, predicate) => {
   throw new Error(`等 ${label} 超时`);
 };
 
-const SMOKE_CWD = join(ROOT, 'dev', 'smoke-workspace');
+const SMOKE_CWD = join(ROOT, 'runtime', 'smoke-workspace');
 const failures = [];
 const check = (label, fn) => fn().then(
   (info) => console.log(`  PASS ${label}${info ? `（${info}）` : ''}`),

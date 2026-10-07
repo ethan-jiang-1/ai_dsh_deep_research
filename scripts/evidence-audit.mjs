@@ -352,7 +352,7 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
   // 同一 bundle 两次跑出 7/88 与 85/88（1807 vs 330 个日志文件），足以把好报告判成"伪造链接"。
   // 处置：默认锚定本仓 dev home；DSH_HOME 指向别处时**先自拒**（同 L1/L2 的 exit 2 纪律），
   // 要审别的 home 就显式 `--sessions <dir>`。
-  const repoHome = join(ROOT, 'dev', 'harness-home')
+  const repoHome = join(ROOT, 'runtime', 'harness-home')
   const envHome = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null
   if (sessionsIdx === -1 && envHome !== null && envHome !== repoHome) {
     console.error(`evidence-audit: DSH_HOME=${envHome} 不是本仓 dev home（${repoHome}）——先 \`source dev/env.sh\`，或显式 --sessions <dir>；本脚本不自作主张换 home（实测会审到别的 home 的会话，结论不可比）`)

@@ -1,4 +1,4 @@
-# dev/ · 入口说明（环境/构建/同步 × run 通道 × 驱动 × 运行区）
+# dev/ · 入口说明（环境/构建/同步 × run 通道 × 驱动）
 
 > 命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)（含 `source dev/env.sh` 前置说明）；run 通道用法 = [Run 指南](../docs/guides/61-run-playbook.md)。本页 = dev/ 每个盘上入口的职责与状态。
 
@@ -6,7 +6,7 @@
 
 | 件 | 职责 |
 |---|---|
-| env.sh | 双 home（DSH_HOME=dev/harness-home）+ 裸 dsh 拦截 + pre-commit 挂载——L1/L2 脚本的前置 |
+| env.sh | 双 home（DSH_HOME=runtime/harness-home）+ 裸 dsh 拦截 + pre-commit 挂载——L1/L2 脚本的前置 |
 | vendor-build.sh | vendor 树构建：tsc host/client + typert 产物 + client bundle + host 半补建 + 前端壳 |
 | vendor-host-bundle.config.ts | host 半补建配置（逐包 tsdown，给缺 lib/index.js 的包补产物） |
 | vendor-host-typert.config.ts | host 半补建备选配置（留档） |
@@ -30,9 +30,6 @@
 | record-role-fixture.mjs | 角色组装面 fixture 录制（真模型档一次性；录制品人审入库后 keyless 永久回放） |
 | hooks/ | pre-commit 钩子（verify+tests 红灯拦 commit；env.sh 幂等挂载 core.hooksPath） |
 
-## 运行区（gitignored，不入库）
+## 运行区（已外移根级 runtime/）
 
-| 目录 | 性质 |
-|---|---|
-| harness-home/ | 开发 DSH home：会话、凭据、插件安装（崩溃半径隔离；日用 ~/.dsh 不动） |
-| smoke-workspace/ | 冒烟与 boot 的运行产物区：日志（*.log）、探针留档（entry-chain-probe-*.md）、release-pack/、run-pack/、npm-cache/（工具态重定向）、dashboard.html 投影——全部非 canonical；regression-process-guard.mjs = 被走查 Note 引用的一次性原型，非正本 |
+harness-home/（开发 DSH home）与 smoke-workspace/（冒烟/boot 运行产物）的职责与状态 = [runtime/README.md](../runtime/README.md)——dev/ 只住源码驱动。

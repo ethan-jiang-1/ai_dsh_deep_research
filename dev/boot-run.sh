@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 # 先 source 再进 strict mode：被 source 的脚本不该继承调用方的 nounset（env.sh 已加花括号
 # 防全角括号陷阱，此为标准防御序——第三方/共享 env 一律裸 source）。
-source "$ROOT/dev/env.sh"   # 双 home（DSH_HOME=dev/harness-home）+ dsh 机制基线函数
+source "$ROOT/dev/env.sh"   # 双 home（DSH_HOME=runtime/harness-home）+ dsh 机制基线函数
 set -euo pipefail
 
 # ⓪ vendor 构建产物自检（RFC vendor-build-guard，2026-09-25）：0.1.7 起启动依赖构建
@@ -24,13 +24,13 @@ PORT="${DSH_RUN_PORT:-3083}"
 # （bundle 文件不受损，但挂起的 HITL 回合会被终局化）——先说清再让人决定。
 if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
   echo "boot-run: 端口 $PORT 已被占用：pid = $(lsof -nP -iTCP:"$PORT" -sTCP:LISTEN -t 2>/dev/null | tr '\n' ' ')" >&2
-  echo "          若是本仓在飞的 run 通道 → 别另起：用它（URL/token 见启动横幅或 dev/smoke-workspace/web.log）" >&2
+  echo "          若是本仓在飞的 run 通道 → 别另起：用它（URL/token 见启动横幅或 runtime/smoke-workspace/web.log）" >&2
   echo "          确要重启或换端口：先停占用者，或 DSH_RUN_PORT=<空闲端口> bash dev/boot-run.sh" >&2
   exit 1
 fi
 PACKDIR="$ROOT/packages/deep-research-pack"
 PROFDIR="$DSH_HOME/profiles/$PROFILE"
-RUNTMP="$ROOT/dev/smoke-workspace/run-pack"
+RUNTMP="$ROOT/runtime/smoke-workspace/run-pack"
 
 # 层版本钉住：与 pack 兼容矩阵同源（dsh-v0.2.0-rc.2 → 0.2.0-rc.2）——升 pin 只改 pack
 # package.json 的 dsh.compatibility.dshReleases，本脚本随之走（vendor 各包版本锁步发布）。
@@ -63,8 +63,8 @@ else
   [ -f "$PROFDIR/cordis.yml" ] || { echo "boot-run: profile 初始化失败（fail-loud）" >&2; exit 1; }
   # 工具态纪律：pnpm store / npm cache 钉进本仓 gitignored 区
   printf 'store-dir=%s\ncache-dir=%s\n' \
-    "$ROOT/dev/smoke-workspace/pnpm-store" "$ROOT/dev/smoke-workspace/npm-cache" > "$PROFDIR/.npmrc"
-  (cd "$PACKDIR" && npm pack --cache "$ROOT/dev/smoke-workspace/npm-cache" --pack-destination "$RUNTMP" >/dev/null)
+    "$ROOT/runtime/smoke-workspace/pnpm-store" "$ROOT/runtime/smoke-workspace/npm-cache" > "$PROFDIR/.npmrc"
+  (cd "$PACKDIR" && npm pack --cache "$ROOT/runtime/smoke-workspace/npm-cache" --pack-destination "$RUNTMP" >/dev/null)
   TGZ="$RUNTMP/$(ls "$RUNTMP")"
   dsh plugin --profile "$PROFILE" add "file:$TGZ"
   dsh plugin --profile "$PROFILE" add "$LAYER"
@@ -95,7 +95,7 @@ $MCP_MARK_BEGIN
         command: npx
         args: ['-y', '@playwright/mcp@0.0.83', '--headless', '--proxy-server', 'direct://', '--proxy-bypass', '*']
         env:
-          npm_config_cache: '$ROOT/dev/smoke-workspace/npm-cache'
+          npm_config_cache: '$ROOT/runtime/smoke-workspace/npm-cache'
         failOnStartupError: true
 $MCP_MARK_END
 MCPROW
@@ -125,7 +125,7 @@ drift_check() {
   #   钩子会跑 `pnpm build`，tsdown 的横幅（`ℹ tsdown v…`）混进 stdout 把 `--json` 载荷污染，
   #   下游 `JSON.parse` 抛 SyntaxError → **漂移检测整条崩掉**（而它正是"镜像是否等于 pack 源"的
   #   唯一机械证明）。本处只要**发布清单**、不要构建，故显式跳过生命周期脚本。
-  shipped="$(cd "$PACKDIR" && npm pack --dry-run --json --ignore-scripts --cache "$ROOT/dev/smoke-workspace/npm-cache" 2>/dev/null | node -e '
+  shipped="$(cd "$PACKDIR" && npm pack --dry-run --json --ignore-scripts --cache "$ROOT/runtime/smoke-workspace/npm-cache" 2>/dev/null | node -e '
     let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => {
       const j = JSON.parse(s);
       for (const f of j[0]?.files ?? []) console.log(f.path);
@@ -153,9 +153,9 @@ fi
 drift_check
 
 # ③ 仪表盘（RFC m2-run-dashboard + debug-dashboard-plus）：--latest 多场扫描
-# （research-workspace/drt_* + dev/harness-home/runs ad-hoc 场）、流程步骤条、
+# （research-workspace/drt_* + runtime/harness-home/runs ad-hoc 场）、流程步骤条、
 # HITL 等待横幅（⏳ 等你拍板）、web GUI deep-link（token 读自下方 tee 的 web.log）。
-DASH_OUT="$ROOT/dev/smoke-workspace/dashboard.html"
+DASH_OUT="$ROOT/runtime/smoke-workspace/dashboard.html"
 mkdir -p "$(dirname "$DASH_OUT")"
 node --import tsx/esm "$ROOT/scripts/run-dashboard.mjs" --latest \
   --out "$DASH_OUT" --watch --interval 5 &
@@ -174,7 +174,7 @@ cat <<'STEPS'
 1. 等 web 横幅出现（含本次端口与 token）→ 用浏览器打开该 URL
 2. 新建会话：preset 选 "Deep Research Lead"（默认项），cwd 选 research-workspace/
 3. 说出研究问题 → lead 走 HITL1 三问（研究类型 / 深度篇幅 / 时间口径，每问带推荐）→ 你拍板
-4. 静默自主区（角色不问不报）：进度看四处——① run 仪表盘（dev/smoke-workspace/dashboard.html：
+4. 静默自主区（角色不问不报）：进度看四处——① run 仪表盘（runtime/smoke-workspace/dashboard.html：
    多 run 场清单/流程步骤条/HITL 等待横幅/矩阵/leads/findings/review/journal，5s 刷新）
    ② 各角色会话实时流 ③ ui-agent-team 任务板（谁领了什么活） ④ deliverables 面板（成品出现处）
 5. 仪表盘出现"⏳ 等你拍板（HITL）"横幅 = lead 在等你（HITL1/HITL2）——去 web GUI 答题
@@ -186,4 +186,4 @@ STEPS
 
 echo "boot-run: boot web（research profile，端口 ${PORT}；Ctrl-C 停止）…"
 # web 输出 tee 进运行区日志：仪表盘 deep-link 从这里抓 token URL（缺席 → 页面不链，fail-soft）
-dsh --profile "$PROFILE" -- --port "$PORT" --no-open 2>&1 | tee "$ROOT/dev/smoke-workspace/web.log"
+dsh --profile "$PROFILE" -- --port "$PORT" --no-open 2>&1 | tee "$ROOT/runtime/smoke-workspace/web.log"

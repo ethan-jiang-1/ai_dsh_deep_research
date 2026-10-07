@@ -7,7 +7,7 @@
 //   1. 全新默认 preset 会话（无研究 pack 上下文污染），cwd = 仓根；
 //   2. prompt 指令只按根 AGENTS.md §入口链 读五步指定文件，答四个时不变问题；
 //   3. 脚本自己从 _backlog/queue.md 抽真值（▶ 条目主题 / 下一条目主题），软断言答案命中
-//      （token 重叠），全文留档 dev/smoke-workspace/ 供人工复核——机械断言只证结构
+//      （token 重叠），全文留档 runtime/smoke-workspace/ 供人工复核——机械断言只证结构
 //      不证语义（SDLC reference 01 同款诚实记账）；
 //   4. 会话日志即真相：assistant/message 事件里找答案文本（不是用户消息回显）。
 //
@@ -32,7 +32,7 @@ const PORT = Number(arg('port', '3102'));
 const BOOT_TIMEOUT_MS = 120_000;
 const TURN_TIMEOUT_MS = 180_000;
 const POLL_MS = 3_000;
-const OUT = join(ROOT, 'dev', 'smoke-workspace');
+const OUT = join(ROOT, 'runtime', 'smoke-workspace');
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
 if (!home) { console.error('probe: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2); }
@@ -250,6 +250,6 @@ const stamp = new Date().toISOString().replace(/[:.]/g, '-');
 writeFileSync(join(OUT, `entry-chain-probe-${stamp}.md`),
   `# 入口链探针留档（${stamp}）\n\n真值：▶ ${gt.cur}；下一条目：${gt.next ?? '无'}\n\n## 模型作答原文\n\n${transcript}\n\n## 判定\n\n${verdict.map(([l, ok]) => `- ${ok ? 'PASS' : 'FAIL'} ${l}`).join('\n')}\n`);
 console.log(failed === 0
-  ? `\nprobe: ALL PASS（答案与入口链一致；留档 dev/smoke-workspace/entry-chain-probe-${stamp}.md 供人工复核）`
+  ? `\nprobe: ALL PASS（答案与入口链一致；留档 runtime/smoke-workspace/entry-chain-probe-${stamp}.md 供人工复核）`
   : `\nprobe: ${failed} FAILURE(S)——机械断言只证结构，语义复核看留档`);
 process.exit(failed === 0 ? 0 : 1);

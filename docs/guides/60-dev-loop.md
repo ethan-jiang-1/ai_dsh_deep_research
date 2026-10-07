@@ -113,7 +113,7 @@ pnpm test                             # L0 keyless 回归（= node --import tsx/
 node dev/render-overlay.mjs            # 生成物：从 pack 渲染 dev/research.overlay.yml（改 pack 后必跑，且**必须先于 L1**）
 node dev/sync-pack-workspace.mjs       # 生成物：把 research-workspace 正本同步进 pack 的 workspace/ 种子（改手册/模板后必跑）
 node dev/hitl-answer.mjs --port 3083 --token <t>   # HITL 代答（代理模拟；默认逐题选推荐项）——answerer 只在浏览器客户端，故用真浏览器
-source dev/env.sh                     # ⚠ 双 home + 裸 dsh 拦截（DSH_HOME=dev/harness-home）；下列 L1/L2 必须先 source，否则脚本自拒 exit 2
+source dev/env.sh                     # ⚠ 双 home + 裸 dsh 拦截（DSH_HOME=runtime/harness-home）；下列 L1/L2 必须先 source，否则脚本自拒 exit 2
 node scripts/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真挂载档（keyless：roster+逐角色建会话+skills 隔离；--profile <p> --no-patch 切安装域通道）
 cd packages/deep-research-pack && pnpm build   # pack 双半构建（tsc -b . + tsdown → lib/index.js + lib/client.js——观察面 client 面，D18）
 node --import tsx/esm scripts/client-load-smoke.mjs    # 观察面 client 面真浏览器加载（keyless：boot web + headless chromium——插件零失败 + 页签与渐进面硬断言；渐进面断言 = 磁盘侧绑定会话的真值对账）
@@ -161,10 +161,10 @@ node packages/deep-research-pack/scripts/scaffold.mjs --workspace <dir>    # 部
 ## 3. 开发环境
 
 ```sh
-source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名（代码面：钉 tag 源码）
+source dev/env.sh        # DSH_HOME=runtime/harness-home（数据面）+ dsh 别名（代码面：钉 tag 源码）
 ```
 
-- **双 home**：开发数据（会话/凭据/插件安装）全部进 `dev/harness-home/`，日用 `~/.dsh`
+- **双 home**：开发数据（会话/凭据/插件安装）全部进 `runtime/harness-home/`，日用 `~/.dsh`
   不动——崩溃半径隔离；
 - **裸 dsh 拦截**：`PATH` 里的全局 dsh 随升级漂移，不作机制依据；机制核对一律走 env.sh
   定义的 dsh（当前指向**本仓 `vendor/dsh` 钉 tag 源码**——升 pin 见根 AGENTS §DSH 源码表）；
@@ -198,7 +198,7 @@ source dev/env.sh        # DSH_HOME=dev/harness-home（数据面）+ dsh 别名�
 3. `pnpm verify` + `pnpm test` 全绿（涉及面按 §2 加跑）；
 4. 入口链探针（条目改动面含 docs/AGENTS 时必跑，否则按节奏）——机械版：
    `source dev/env.sh && node scripts/entry-chain-probe.mjs`（真模型档；时不变问法 × 4，
-   真值机械抽取 + 软断言，留档 dev/smoke-workspace/ 供人工复核；无凭据时退化为语义版人工）；
+   真值机械抽取 + 软断言，留档 runtime/smoke-workspace/ 供人工复核；无凭据时退化为语义版人工）；
 5. commit（窄证据切片：只提交本条目相关改动；pre-commit 钩子自动复跑 verify+tests 拦红灯——§3）。
 
 ## 5. 密钥

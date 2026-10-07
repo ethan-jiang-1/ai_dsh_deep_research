@@ -3,7 +3,7 @@
 # 设计依据：docs/design/10-architecture.md §5；company dev/env.sh 同款机制。
 #
 # 两个隔离面：
-#   ① 数据面：DSH_HOME 重定向到本仓 dev/harness-home —— 开发会话/凭据/插件安装与
+#   ① 数据面：DSH_HOME 重定向到本仓 runtime/harness-home —— 开发会话/凭据/插件安装与
 #      日用 ~/.dsh 互不影响（崩溃半径隔离）；
 #   ② 代码面：拦截裸 `dsh` —— PATH 里的全局安装随升级漂移，不作机制依据；机制核对
 #      一律走钉住 tag 的源码基线。
@@ -17,11 +17,11 @@
 #   平台级 DSH_HOME=~/.dsh——预设优先会让 source 后静默指向日用 home，boot 在日用
 #   home 找不到 profile 时回退写 ~/.dsh/profiles/web/cordis.yml（被会话沙箱 EPERM 拒，
 #   fail-loud 正确行为）。数据面隔离合同（guides/60 §2 命令正本：source 本文件 ⇒
-#   DSH_HOME=dev/harness-home）要求无条件生效。
-if [ -n "${DSH_HOME:-}" ] && [ "$DSH_HOME" != "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/dev/harness-home" ]; then
-  echo "dev/env.sh: 覆盖预设 DSH_HOME（$DSH_HOME → 本仓 dev/harness-home）" >&2
+#   DSH_HOME=runtime/harness-home）要求无条件生效。
+if [ -n "${DSH_HOME:-}" ] && [ "$DSH_HOME" != "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/runtime/harness-home" ]; then
+  echo "dev/env.sh: 覆盖预设 DSH_HOME（$DSH_HOME → 本仓 runtime/harness-home）" >&2
 fi
-export DSH_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/dev/harness-home"
+export DSH_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/runtime/harness-home"
 mkdir -p "$DSH_HOME"
 
 # ② 代码面：dsh = 本仓 vendor 钉 tag 源码基线（vendor/dsh submodule，只读）；确要日用全局版：command dsh

@@ -52,7 +52,7 @@ const RENDER_TIMEOUT_MS = 60_000;
 const FACE_DIR = join(ROOT, 'tests', 'fixtures', 'snapshot-research-face');
 const UNIQUE_TITLE = '快照回放冒烟·渲染面探针';
 const SENTINEL = '探针完成';
-const DSH_HOME = process.env.DSH_HOME ?? join(ROOT, 'dev', 'harness-home');
+const DSH_HOME = process.env.DSH_HOME ?? join(ROOT, 'runtime', 'harness-home');
 const SESSIONS = join(DSH_HOME, 'sessions');
 
 // 场景清单：角色集 = 盘上 presets/（presetRoles——role-list-sync 同源，加角色 + 录 fixture

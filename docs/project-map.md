@@ -141,7 +141,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 职责 | 查哪些入口 | 结果/支撑资产 |
 |---|---|---|
 | 门禁、挂载、安装、浏览器、回放与模型检查 | 上表具名入口 | `tests/` 与 [tests/fixtures taxonomy](../tests/fixtures/README.md) 提供确定性消费路径 |
-| 研究观察与运维 | [watch-run](../scripts/watch-run.mjs)、[run-dashboard](../scripts/run-dashboard.mjs)、[run-kickoff](../dev/run-kickoff.mjs)、[hitl-answer](../dev/hitl-answer.mjs) | `dev/smoke-workspace/` 放日志与 HTML；会话日志在开发 home；bundle 在研究工作区 |
+| 研究观察与运维 | [watch-run](../scripts/watch-run.mjs)、[run-dashboard](../scripts/run-dashboard.mjs)、[run-kickoff](../dev/run-kickoff.mjs)、[hitl-answer](../dev/hitl-answer.mjs) | `runtime/smoke-workspace/` 放日志与 HTML；会话日志在开发 home；bundle 在研究工作区 |
 | 分发生成 | [export-dist](../scripts/export-dist.mjs) | `_dist/` 生成包与安装手册；安装可用性由 L2 证明 |
 | 环境与生成物 | [env](../dev/env.sh)、[vendor-build](../dev/vendor-build.sh)、上方同步生成器 | vendor 构建产物、overlay、发布种子 |
 | 支撑模块 | `scripts/lib/`、pack `src/lib/` | 消费方直接调用接口；测试覆盖纯解析/折算/判据路径 |
@@ -155,9 +155,9 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 
 | 现象 | 先看 | 定位下一步 |
 |---|---|---|
-| 无法启动/镜像漂移 | 本次 [boot-run](../dev/boot-run.sh) 终端报错；进入 web 启动后再看 `dev/smoke-workspace/web.log` | 环境/构建/组合/镜像检查；修复入口见 [Run 指南](guides/61-run-playbook.md) |
+| 无法启动/镜像漂移 | 本次 [boot-run](../dev/boot-run.sh) 终端报错；进入 web 启动后再看 `runtime/smoke-workspace/web.log` | 环境/构建/组合/镜像检查；修复入口见 [Run 指南](guides/61-run-playbook.md) |
 | 页面能开但页签或交互坏 | 浏览器加载/console 与 [client-load-smoke](../scripts/client-load-smoke.mjs) | [驾驶舱](design/40-research-cockpit.md) 装配与数据通道；HITL 行为另用真模型证据 |
-| 研究卡住、工具报错、present 不明 | `dev/harness-home/sessions/<工作区组>/<会话>/` 的事件日志 | [watch-run](../scripts/watch-run.mjs) 看状态；[node-gate](../scripts/node-gate.mjs) 查交付声明 |
+| 研究卡住、工具报错、present 不明 | `runtime/harness-home/sessions/<工作区组>/<会话>/` 的事件日志 | [watch-run](../scripts/watch-run.mjs) 看状态；[node-gate](../scripts/node-gate.mjs) 查交付声明 |
 | 研究内容/交接缺件 | 该 bundle 的问题、证据、发现、审查与最终报告 | [NODES](../research-workspace/NODES.md) + run 机械审计；恢复查 [Run 指南](guides/61-run-playbook.md) |
 | 不知道改什么、怎么验 | 根 [AGENTS.md](../AGENTS.md) 入口链与 [队列](../_backlog/queue.md) | 对应 RFC 与 [开发环](guides/60-dev-loop.md) 任务型路由 |
 

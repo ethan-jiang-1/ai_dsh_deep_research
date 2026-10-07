@@ -22,15 +22,15 @@
 | "改本仓开发流程"（门禁 / docs / notes / 入口链） | 根 [AGENTS.md](../AGENTS.md) §入口链 | 第 3 步队列 ▶ |
 
 **开跑前置**（只对第 1/2 行）：仓根 `pnpm install` 已跑 + `vendor/dsh` submodule 已 init +
-`dev/harness-home/.credentials.yaml` 有 `DEEPSEEK_API_KEY`（boot 本身 keyless）。
+`runtime/harness-home/.credentials.yaml` 有 `DEEPSEEK_API_KEY`（boot 本身 keyless）。
 `bash dev/boot-run.sh` **自己 source `dev/env.sh`**——先 source 不是前置（`AGENTS.md §命令速查`
 那条 ⚠ 只约束 L1/L2 脚本）。要它在你离开后继续服务 = [61 §0](./guides/61-run-playbook.md)
 的"托管后台 + 保持 stdin 打开"形态。
 
 **歧义裁定**（两条规则谁管谁）：用户**未指定别的 DSH home** → 直接走第 1 行，不停下来发问
 （第 1 行的"不要问"只指"别问装哪个 home"；**在飞 run 的接续/新开照下面那条办，该问就问**）；
-只有他明说"装到我日用 / 别人的 DSH"、或目标 home 不是 `dev/harness-home` 时才问一句
-"装到哪个 DSH home？"（本仓开发通道 = `dev/harness-home`，先 `source dev/env.sh`；日用 =
+只有他明说"装到我日用 / 别人的 DSH"、或目标 home 不是 `runtime/harness-home` 时才问一句
+"装到哪个 DSH home？"（本仓开发通道 = `runtime/harness-home`，先 `source dev/env.sh`；日用 =
 `~/.dsh`，**不要** source——两者装的东西不同）。
 
 **每次"启动"前先扫一眼在飞 run**（动作 = `ls -dt research-workspace/drt_*/`，`archive/` 除外；
@@ -100,7 +100,7 @@
 | D18 | **观察面 client 面 = D7 的单点例外，套件名 = 研究驾驶舱（Research Cockpit，2026-09-28 用户拍板）**：例外范围 = 两个插件（`src/client/` client 半 + `src/index.ts` host 半空壳宿主位）+ `src/lib/` 折算纯函数；双半 tsdown 产物 `lib/client.js` + `lib/index.js`，用途限定 = 研究观察/调试；品牌/皮肤面不因此解禁（仍搁置池）。构成的当前事实正本 = [design/40](./design/40-research-cockpit.md) | 用户明确需求（run 期观察分散四处 + HITL 等待不可见实证）+ [琢磨稿](../notes/archived/2026-09-24-ui-observability-surfaces.md)（机制考古，已归档）+ company 同款生长序 + [observability-gui RFC](../notes/implemented/2026-09-24-observability-gui.md)（2026-09-25 马拉松 Stage 0） |
 | D19 | **推敲空间 = 根目录 `_backlog/`**（plans/bugs/_done 全三件；借鉴链 = deerflow → company D31 → 本仓）：决策前四问（该不该做/何时/次序/是否放弃）的家——只载判断材料，**不载次序与授权**（次序唯一 = [_backlog/queue.md](../_backlog/queue.md) §队列，同日 D20 修订——规划面单一化；授权唯一 = guides/60；推敲卡不是任务）；plans 卡 `YYYY-MM-DD-<slug>`（2026-10-03 定调与 notes 树同格式；首借时曾裁 YYMMDD）；毕业四门产出**判断**不开工；门禁 = `plans-liveness` | 用户直派（2026-09-28，裁定：根目录 / 全三件 / 走正门 + 命名裁定）；[Note](../notes/implemented/2026-09-28-backlog-deliberation-space.md)；规矩手册 = [_backlog/README.md](../_backlog/README.md) |
 | D20 | **规划面单一化：roadmap.md 退役**（2026-09-28 用户裁决——先问「有了 _backlog 是否还需要 roadmap」，代理反证倾向保留，用户裁断退役；反证论据随推敲卡永久归档）：队列 + 搁置池迁 [_backlog/queue.md](../_backlog/queue.md)（纯索引，零判断材料），推敲（plans/）与次序（queue.md）一个家分半区；入口链第 3 步、`proposal-scheduled` / `queue-pointer-live` / `entry-chain` 三门禁、`entry-chain-probe` 真值锚同 diff 改锚 | 用户裁决；推敲证据 = [_done/_closed_plans/2026-09-28-retire-roadmap](../_backlog/_done/_closed_plans/2026-09-28-retire-roadmap.md)（首张立卡当日毕业的推敲卡）；[Note](../notes/implemented/2026-09-28-backlog-deliberation-space.md) |
-| D21 | **入口按意图分流（"用它" vs "改它"）**：路由正本 = 本页 §先分流（用户说法 → 文档 → 第一条命令），根 AGENTS.md §入口链与 README Start Here 各一行指针；"启动这个插件"默认理解 = 本仓 run 通道；含糊时判据 = 目标 DSH home（本仓 `dev/harness-home` vs 日用 `~/.dsh`）。禁止再让操作类请求落进队列分支 | 用户定调（2026-09-29「fresh agent 一进来就要立刻明白」，泛化性优先于本人用法）+ 4 个零上下文探针实证 4/4 必须反问、且各自选了不同答案；[Note](../notes/implemented/2026-09-29-cold-start-intent-router.md) |
+| D21 | **入口按意图分流（"用它" vs "改它"）**：路由正本 = 本页 §先分流（用户说法 → 文档 → 第一条命令），根 AGENTS.md §入口链与 README Start Here 各一行指针；"启动这个插件"默认理解 = 本仓 run 通道；含糊时判据 = 目标 DSH home（本仓 `runtime/harness-home` vs 日用 `~/.dsh`）。禁止再让操作类请求落进队列分支 | 用户定调（2026-09-29「fresh agent 一进来就要立刻明白」，泛化性优先于本人用法）+ 4 个零上下文探针实证 4/4 必须反问、且各自选了不同答案；[Note](../notes/implemented/2026-09-29-cold-start-intent-router.md) |
 | D22 | **对外交付约束：pack 采纳面不得引入用户侧外部服务依赖**——外部账号 / API key / 付费订阅一律不过关（setup 复杂度是交付硬门槛）；裁决优先于能力与价格权衡。首例 = mcp-client 通道选**本地 Playwright MCP**（npx 拉起、零账号零凭据）而非 Firecrawl remote（账号 + key + 按量订阅） | 用户定调（2026-10-02「这工具今后是要交出去给人的……太复杂的话肯定不行」）；[mcp-playwright 采纳 Note](../notes/implemented/2026-10-02-mcp-playwright-adoption.md) |
 | D23 | **条目级验收 TDD 化**：RFC 验收判据逐条绑定检查方式（机械门禁 / 契约测试 / 对账命令 / 人工判据四型），能机械的先立红再实现到绿，实施记录载实际红绿证据——评估先行（D6）的队列条目级投影；流程正本 = [guides/60 §0 验收门](./guides/60-dev-loop.md) | 用户定调（2026-10-05「先考虑怎么测，实现后看测试满足了吗，反复做对；全程要证据，不随性发挥」）；[Note](../notes/implemented/2026-10-05-item-lifecycle-tdd.md) |
 
@@ -124,7 +124,7 @@ notes/ 文件）。
 | 开发 harness / 运行 harness | development harness / runtime harness（同一仓库的两面：前者让 agent 看懂、修改、验证自己；后者是产品运行框架） | 本仓两面并存：`packages/deep-research-pack/` 是 runtime 面，`AGENTS.md` + `docs/` + `notes/` + `.agents/skills/` + 门禁是 development 面 |
 | 参与阶梯 | participation ladder（L0 组合 → L1 扩展点 → L2 capability seam → L3 core loop） | [guides/62 §参与阶梯](./guides/62-plugin-authoring.md)（本仓版本：L0 配置行 / L1 preset+skill+观察面 client 面 / L2 尚无 / L3 归上游） |
 | 程序化工作记忆 | procedural memory（可复用工作流 + 专门判断标准） | `.agents/skills/`（开发技能：毕业条目 / 加角色 / 写门禁 / 跑 run）——与产品内 runtime skills（`presets/*/skills/`）严格分家 |
-| plugin / bundle / profile | plugin = 导出 `apply(ctx)` 的模块；bundle = 你编写与分发的单位（`dsh.bundle`）；profile = 用户 `dsh --profile` 启动的环境（`dsh.profile`）——**Nothing is both** | bundle = `packages/deep-research-pack/cordis.patch.yml`；profile = `dev/harness-home/profiles/research/`（镜像；源 = `dev/research.overlay.yml`） |
+| plugin / bundle / profile | plugin = 导出 `apply(ctx)` 的模块；bundle = 你编写与分发的单位（`dsh.bundle`）；profile = 用户 `dsh --profile` 启动的环境（`dsh.profile`）——**Nothing is both** | bundle = `packages/deep-research-pack/cordis.patch.yml`；profile = `runtime/harness-home/profiles/research/`（镜像；源 = `dev/research.overlay.yml`） |
 | run bundle（一次调研的变量容器） | —（本仓原生概念，源头 = DEEP_RESEARCH_HARNESS run bundle） | 载体 = `research-workspace/drt_<slug>/`（契约 = 研究手册目录约定）；**消歧**：DSH "bundle 行"（cordis.patch.yml 配置行）≠ run bundle（一次调研的变量容器），后者禁缩写成裸 "bundle" |
 
 ## 外部研究材料登记（repo 外，只读引用；**钉版** = 路径 + 引用时的 HEAD commit）

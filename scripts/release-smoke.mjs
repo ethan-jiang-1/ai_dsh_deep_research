@@ -29,7 +29,7 @@ if (!home) {
   console.error('release-smoke: 需要 DSH_HOME（先 source dev/env.sh）');
   process.exit(2);
 }
-if (home !== join(ROOT, 'dev', 'harness-home')) {
+if (home !== join(ROOT, 'runtime', 'harness-home')) {
   console.error(`release-smoke: refusing non-development DSH_HOME: ${home} (source dev/env.sh)`);
   process.exit(2);
 }
@@ -40,9 +40,9 @@ if (!existsSync(bin)) {
   process.exit(2);
 }
 
-const tmp = join(ROOT, 'dev', 'smoke-workspace', 'release-pack');
-const npmCache = join(ROOT, 'dev', 'smoke-workspace', 'npm-cache');
-const pnpmStore = join(ROOT, 'dev', 'smoke-workspace', 'pnpm-store');
+const tmp = join(ROOT, 'runtime', 'smoke-workspace', 'release-pack');
+const npmCache = join(ROOT, 'runtime', 'smoke-workspace', 'npm-cache');
+const pnpmStore = join(ROOT, 'runtime', 'smoke-workspace', 'pnpm-store');
 const profileDir = join(home, 'profiles', PROFILE);
 const probeWs = join(home, 'smoke-scaffold-probe');
 const fixedCleanupTargets = new Map([

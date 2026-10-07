@@ -57,7 +57,7 @@ let pendingSid = null // 形如 session-<uuid>；null = 无挂起
 let wsGroup = null
 let wsSessionsRoot = null
 {
-  const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'dev', 'harness-home')
+  const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'runtime', 'harness-home')
   const sessionsRoot = join(home, 'sessions')
   const group = existsSync(sessionsRoot) ? readdirSync(sessionsRoot).find((d) => d.includes('research-workspace')) : undefined
   wsSessionsRoot = sessionsRoot; wsGroup = group

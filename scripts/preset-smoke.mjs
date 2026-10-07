@@ -167,7 +167,7 @@ const check = (label, fn) => fn().then(
   (error) => { failures.push(`${label}: ${error.message}`); console.log(`  FAIL ${label}: ${error.message}`); },
 );
 
-const SMOKE_CWD = join(ROOT, 'dev', 'smoke-workspace');
+const SMOKE_CWD = join(ROOT, 'runtime', 'smoke-workspace');
 const { child, token } = await boot();
 try {
   const base = `http://127.0.0.1:${String(PORT)}`;

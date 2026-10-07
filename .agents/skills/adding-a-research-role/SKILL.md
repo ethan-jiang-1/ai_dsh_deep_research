@@ -28,7 +28,7 @@ description: Use when adding a research role preset, renaming one, or changing a
 - **bundle 装载**：`package.json` 的 `dsh.bundle.patch` 数组补上 `presets/<role>.patch.yml`
   ——0.1.7 的 preset 行随 bundle 装载，漏了它角色不进 roster（`pack-bundle-compat` 红）；
 - **源码域**：`dev/research.overlay.yml` 的 bundle 行——源码域通道（冒烟、探针）走它；
-- **镜像**：`dev/harness-home/profiles/research/` 的 profile 镜像——run 通道走它；
+- **镜像**：`runtime/harness-home/profiles/research/` 的 profile 镜像——run 通道走它；
   `bash dev/boot-run.sh` 的漂移检测会逐文件比 pack 源 vs 镜像，不符即 fail-loud；
 - **roster**：`scripts/lib/roles.mjs` 是访问器，事实源 = 盘上 `presets/`；改完跑
   `role-list-sync` 门禁（角色清单与 pack 对账）；

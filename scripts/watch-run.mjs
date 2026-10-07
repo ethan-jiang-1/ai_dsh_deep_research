@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/watch-run.mjs — run 盯场件（RFC run-ops-self-diagnosis；dev/smoke-workspace/watch-run.mjs
+// scripts/watch-run.mjs — run 盯场件（RFC run-ops-self-diagnosis；runtime/smoke-workspace/watch-run.mjs
 // 原型转正）。谓词 = scripts/lib/run-state.mjs（事件形状，非字符串 grep）。
 //
 // 退出码：0 = HITL-PENDING 或 RUN-SETTLED（stdout `STATE:` 行自报是哪个）；1 = 超时；2 = 用法错。
@@ -24,7 +24,7 @@ if (!SID || !/^[\w-]+$/.test(SID)) {
   console.error('watch-run: 用法 node --import tsx/esm scripts/watch-run.mjs <session-id> [--interval 20] [--timeout-min 90]')
   process.exit(2)
 }
-const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'dev', 'harness-home')
+const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'runtime', 'harness-home')
 const sessionsRoot = join(home, 'sessions')
 const group = existsSync(sessionsRoot)
   ? readdirSync(sessionsRoot).find((d) => d.includes('research-workspace'))

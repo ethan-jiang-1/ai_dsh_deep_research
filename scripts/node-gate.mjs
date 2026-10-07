@@ -492,7 +492,7 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
   const latest = argv.includes('--latest')
   const sessionsIdx = argv.indexOf('--sessions')
   // 会话根解析（同 evidence-audit 纪律）：默认锚定本仓 dev home；DSH_HOME 指向别处先自拒。
-  const repoHome = join(ROOT, 'dev', 'harness-home')
+  const repoHome = join(ROOT, 'runtime', 'harness-home')
   const envHome = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null
   if (sessionsIdx === -1 && envHome !== null && envHome !== repoHome) {
     console.error(`node-gate: DSH_HOME=${envHome} 不是本仓 dev home（${repoHome}）——先 \`source dev/env.sh\`，或显式 --sessions <dir>`)
