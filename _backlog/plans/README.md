@@ -13,7 +13,7 @@
 
 | 卡 | 一句话 | 毕业门判断 |
 |---|---|---|
-| （无活跃卡——plans 池清零，2026-10-07；最近毕业 = plan-review-gate：用户点名提前激活，当日交付〔Note 住 implemented，run 试点正证挂账随下一场 run〕） | | |
+| [cockpit-dashboard-merge](2026-10-07-cockpit-dashboard-merge.md) | 单一看板：run-dashboard 投影是否并入驾驶舱（2026-10-07 导览断线 2 遗留） | 待触发（用户点名或 ≥2 场 run 离机观察体感实证） |
 
 ## 卡片模板
 
