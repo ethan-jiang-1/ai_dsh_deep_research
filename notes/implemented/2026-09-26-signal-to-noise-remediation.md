@@ -88,7 +88,7 @@
 
 ### ③ 投影说谎与静默漂移（工具层，非文档）
 
-- **[run-dashboard.mjs](../../scripts/run-dashboard.mjs) 的 review 折算取首个匹配**：正则
+- **[run-dashboard.mjs](../../scripts/run-ops/run-dashboard.mjs) 的 review 折算取首个匹配**：正则
   `/readiness:\s*(PASS|FAIL)/` 命中**第一处**。实测 run bundle 的 `review.md` 是两相结构
   （首审 `readiness: FAIL` 在前，lead 改稿后的复核终审 `readiness: PASS` 在后），于是**已交付
   的 run 在仪表盘上显示 `readiness: FAIL`、交付 6/7**。夹具

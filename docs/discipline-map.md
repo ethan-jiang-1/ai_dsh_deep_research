@@ -115,7 +115,7 @@ vendor 的事故复盘住在 **`docs/postmortem/`**（10 篇编号条目 + `READ
 | DSH 层 | 能证明 | 本仓对应 | 命令 |
 |---|---|---|---|
 | 编译期 | 类型与穷举分支 | pack 双面编译（host/client 两叶 → `lib/types/**`） | `cd packages/deep-research-pack && pnpm build` |
-| Load / parser | 输入在最早可解析点合法 | L0 门禁 + cordis 行校验 | `node scripts/verify.mjs` |
+| Load / parser | 输入在最早可解析点合法 | L0 门禁 + cordis 行校验 | `node scripts/verify/verify.mjs` |
 | 局部行为 | 模块正例/错误/生命周期 | L0 契约测试 | `pnpm test` |
 | 组装行为 | 真实入口产生预期外部结果 | L1 真挂载 + L2 安装形状 | `preset-smoke`（`DSH_SMOKE_REAL=1`）/ `release-smoke` |
 | 运行时关系 | 活系统中的 owner relationship | 本仓等价物 = 真模型档与 run 内 critic（无 invariant companion 面） | `l4-lite-smoke` / `team-preflight-smoke` / `entry-chain-probe` / `client-hitl-smoke` |
@@ -138,7 +138,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 | `AGENTS.md` | 每轮必须遵守什么 | 情境化长流程、全档命令表 | 入口链、布局树、命令速查、纪律指针 |
 | `docs/` 合同面 | 系统**现在**是什么、怎么用 | 决策历史 | evaluation、discipline-map、guides 60–62 |
 | Skill（`.agents/skills/`） | 面对某类任务怎样调查、判断、验证 | 确定性 pass/fail | 毕业条目 / 加角色 / 写门禁 / 跑 run |
-| 门禁与契约测试 | 一个可机械条件是否满足 | 意图与设计质量 | `scripts/verify.mjs` + `tests/` |
+| 门禁与契约测试 | 一个可机械条件是否满足 | 意图与设计质量 | `scripts/verify/verify.mjs` + `tests/` |
 | Agent Note（`notes/`） | 为什么这样决定、放弃了什么 | 当前 API 的唯一说明 | proposed（将来）/ implemented（过去）|
 | 运行区记录 | 这次实际发生了什么 | 可复现的回归证据 | `drt_*` bundle、会话日志、仪表盘投影 |
 

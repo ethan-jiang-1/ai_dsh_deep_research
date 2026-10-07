@@ -4,7 +4,7 @@
 // 为什么需要它（2026-09-26 跑 run 时实测的环路缺口）：`ask_user_question` 走 `ctx.userQuestions`
 // 的 answerer waterfall，而**全仓唯一的 answerer 是连着 web 的浏览器客户端**——CLI/host 侧没有
 // answerer，也没有提交答案的 RPC（vendor 实测：只有 web 客户端这条 relayed listener）。
-// 于是"代理代跑"在机制上无法作答：`scripts/client-hitl-smoke.mjs` 也明确"触发但不代答"。
+// 于是"代理代跑"在机制上无法作答：`scripts/smoke/client-hitl-smoke.mjs` 也明确"触发但不代答"。
 // 本脚本补上这条缝：用真浏览器把挂起的问询答完，并把每次选择打印出来，供 bundle 的
 // question.md §Decisions 如实记"代理模拟"。
 //

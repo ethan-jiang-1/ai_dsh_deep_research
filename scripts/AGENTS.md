@@ -1,6 +1,6 @@
 # AGENTS.md — 仓库脚本（门禁与生成器）
 
-`scripts/` 拥有**检查逻辑**：`verify.mjs` 是唯一 L0 聚合入口（门禁清单正本 = [docs/evaluation.md](../docs/evaluation.md) §L0 登记表，本文件不复制计数），其余是分级冒烟与
+`scripts/` 拥有**检查逻辑**：`verify/verify.mjs` 是唯一 L0 聚合入口（门禁清单正本 = [docs/evaluation.md](../docs/evaluation.md) §L0 登记表，本文件不复制计数），其余是分级冒烟与
 观察/运维与分发生成（[职责地图](../docs/project-map.md)）。上游对应物 = DSH `scripts/AGENTS.md` + `scripts/run-gates.ts`。
 
 ## 新增或改门禁
@@ -8,7 +8,7 @@
 流程与判据住在 [`.agents/skills/writing-a-gate`](../.agents/skills/writing-a-gate/SKILL.md)
 ——**先想红，再写绿**。本文件只记必须在场的事实：
 
-- `verify.mjs` 的 `gates` 数组与 [docs/evaluation.md](../docs/evaluation.md) §L0 登记表
+- `verify/verify.mjs` 的 `gates` 数组与 [docs/evaluation.md](../docs/evaluation.md) §L0 登记表
   **两处同步**（`gate-ledger-sync` 门禁对账）；每条新门禁带"注入回归 → 红 → 还原 → 绿"的
   反证记录。
 - 失败信息要给出**失败对象 + 违反的规则 + 修正入口**；不确定就 fail-loud，不静默跳过。
@@ -49,5 +49,5 @@
   `tests/*.test.mjs` = 唯一 regression 成员（glob 即选中，layering 钉 keyless）；`*-smoke` =
   分级冒烟、`*-probe` = 探针、`*-gate`/`*-audit`/`*-scan` = run bundle 机械门；`scripts/lib/`、
   `tests/fixtures/` 在执行 glob 外、由 consumer 消费。独立真模型档 = 登记制 closed set：要求凭据（引用
-  `.credentials.yaml`）的顶层脚本必须恰为名单（机械对账 = `tests/smoke-contract`——
+  `.credentials.yaml`）的 `scripts/` 各入口脚本必须恰为名单（机械对账 = `tests/smoke-contract`——
   `withModelKey` 是条件透传不作判据）；该检查不发现经现有会话触发模型的路径，新模式须另审查/登记。

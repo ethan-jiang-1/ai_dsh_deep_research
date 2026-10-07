@@ -16,8 +16,8 @@
 |---|---|---|
 | "启动这个 DSH 插件""跑起来看看""开跑"——**未指定别的 home 时就是本行，直接做、不要停下来问** | [guides/61](./guides/61-run-playbook.md) | `bash dev/boot-run.sh`（**占前台**，Ctrl-C 才停；**别**直接 `dsh --profile research`——那会绕过漂移检测、静默用旧镜像） |
 | "接着上次跑""继续那个研究" | [guides/61 §5](./guides/61-run-playbook.md) | 同一条 `bash dev/boot-run.sh`；起来后新开 lead 会话说"继续 `<slug>` 这个 run" |
-| "装到我的 DSH""部署给别人 / 别的机器" | [pack README §部署](../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../_dist/安装手册.md)（出包 = `node scripts/export-dist.mjs`） | `dsh --profile <p> --from-default-profile web --dump-config`（一次性；写的是 `DSH_HOME` 那个 home） |
-| "只验证插件还能挂载"（开发证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs` |
+| "装到我的 DSH""部署给别人 / 别的机器" | [pack README §部署](../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../_dist/安装手册.md)（出包 = `node scripts/dist/export-dist.mjs`） | `dsh --profile <p> --from-default-profile web --dump-config`（一次性；写的是 `DSH_HOME` 那个 home） |
+| "只验证插件还能挂载"（开发证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs` |
 | "改插件内容"（角色 / skill / 驾驶舱 / 部署面） | [guides/62](./guides/62-plugin-authoring.md) | 该页 §参与阶梯 + §改动影响面 |
 | "改本仓开发流程"（门禁 / docs / notes / 入口链） | 根 [AGENTS.md](../AGENTS.md) §入口链 | 第 3 步队列 ▶ |
 
@@ -136,7 +136,7 @@ notes/ 文件）。
 | 材料（钉版身份） | 内容 | 吸收落点 |
 |---|---|---|
 | `/Users/bowhead/ai_tool_deepresearch/` @ `24ba84636` | 11-phase 生命周期 / wave 语义 / gate 体系 / 证据四层 / 反伪造教训 | [考古报告](../notes/implemented/2026-09-24-deep-research-harness-analysis.md) → 映射表 design/30 |
-| `/Users/bowhead/ai_dsh_company/` @ `3cfa8f1` | 包结构 / patch 语法 / preset 教义 / verify 门禁 / 双 home / 垂直轮 / `_backlog` 推敲空间（D31） | [解剖报告](../notes/implemented/2026-09-24-dsh-plugin-repo-anatomy.md) → design/10 + scripts/verify.mjs + dev/env.sh；推敲空间借入 → 根 `_backlog/` + 门禁 `plans-liveness`（D19，同日 D20 规划面单一化） |
+| `/Users/bowhead/ai_dsh_company/` @ `3cfa8f1` | 包结构 / patch 语法 / preset 教义 / verify 门禁 / 双 home / 垂直轮 / `_backlog` 推敲空间（D31） | [解剖报告](../notes/implemented/2026-09-24-dsh-plugin-repo-anatomy.md) → design/10 + scripts/verify/verify.mjs + dev/env.sh；推敲空间借入 → 根 `_backlog/` + 门禁 `plans-liveness`（D19，同日 D20 规划面单一化） |
 | DSH 插件生态（vendor 能力目录差集 + 第三方市场/清单；2026-09-25 认真版） | 直接竞品 8 个；**我们差异化 = 多角色 + 证据审计 + Teams = 空白位**（搜索/学术/知识库已饱和不扩） | 认真报告 [dsh-plugin-ecosystem](../notes/implemented/2026-09-25-dsh-plugin-ecosystem.md)（已毕业）；粗扫种子见 [dsh-market-scout](../notes/archived/2026-09-24-dsh-market-scout.md)（冻结）→ 落点即该认真报告 |
 | DSH client/UI 扩展面（vendor slots/client-modules/hmr/remotes 正文档 + company client-face 五页签实例，2026-09-24 亲读+双代理考古） | 右栏平台页签契约（sidebarRightTabs + sidebar.right.pane.tab 双半注册）/ 数据通道（agentTeams.view·session.follow·workspaceFiles·@Remote）/ 双半 tsdown 构建契约 / 12 坑 | [琢磨稿](../notes/archived/2026-09-24-ui-observability-surfaces.md)（选项 A–D + 渐进路径 + D7/搁置池张力，已归档）——已落地为观察面 client 面（D18，构成正本 = [design/40](./design/40-research-cockpit.md)）：RFC = [observability-gui](../notes/implemented/2026-09-24-observability-gui.md) |
 | DSH SDLC reference（`/Users/bowhead/deepseek-harness/_agent_ready_development/sdlc-reference/` @ `efdba905b2`，2026-09-24 亲读 01-agent-note-lifecycle） | Agent Note 生命周期：决定覆盖（非提案优先）/ 取代检查硬触发 / 毕业正文改写 / alternatives 必载 / grandfather 条款 / 目录树代替索引 | [notes/README.md §决定覆盖与取代检查](../notes/README.md) + verify 门禁 note-format + [吸纳 Note](../notes/implemented/2026-09-24-note-lifecycle-absorption.md) |

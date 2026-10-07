@@ -53,13 +53,15 @@ test('导航门：任务入口矩阵九任务全覆盖，链接目标全部在�
   }
 });
 
-test('资产门：scripts 职责索引覆盖 scripts 根与 lib 全量盘上入口', () => {
+test('资产门：scripts 职责索引覆盖全部盘上入口（根面 + 职责子目录 + lib 全量）', () => {
   assert.ok(existsSync(join(ROOT, 'scripts/README.md')), 'scripts/README.md 缺席——职责索引（RFC Phase 1 第 4 项）');
   const idx = read('scripts/README.md');
-  const rootEntries = readdirSync(join(ROOT, 'scripts')).filter((f) => f !== 'README.md');
+  // 分组布局（2026-10-07 目录治理档 C）：顶层 = 职责子目录 + 根面（README/AGENTS/doc-budgets.json）；
+  // 索引对组目录点名、对组内文件点名（lib/ 前缀形态）。
+  const topEntries = readdirSync(join(ROOT, 'scripts'), { withFileTypes: true }).filter((e) => e.name !== 'README.md');
   const libEntries = readdirSync(join(ROOT, 'scripts', 'lib'));
-  for (const f of rootEntries) assert.ok(idx.includes(f), `scripts 职责索引未点名：${f}`);
-  for (const f of libEntries) assert.ok(idx.includes(f), `scripts 职责索引未点名：lib/${f}`);
+  for (const ent of topEntries) assert.ok(idx.includes(ent.name), `scripts 职责索引未点名：${ent.name}${ent.isDirectory() ? '/' : ''}`);
+  for (const f of libEntries) assert.ok(idx.includes(`lib/${f}`), `scripts 职责索引未点名：lib/${f}`);
 });
 
 test('资产门：dev 入口说明覆盖 dev 全量盘上入口（含运行区目录）', () => {
@@ -79,7 +81,10 @@ test('资产门：fixtures taxonomy 覆盖全部顶层组，每组 ≥1 真实 c
   assert.ok(groups.length > 0, 'fixtures 顶层零组——防空语料');
   const consumers = [
     ...readdirSync(join(ROOT, 'tests')).filter((f) => f.endsWith('.test.mjs')).map((f) => join('tests', f)),
-    ...readdirSync(join(ROOT, 'scripts')).filter((f) => f.endsWith('.mjs')).map((f) => join('scripts', f)),
+    // 分组布局（2026-10-07）：scripts 入口住职责子目录——逐组一层扫描（lib/ 支撑库单列）
+    ...readdirSync(join(ROOT, 'scripts'), { withFileTypes: true })
+      .filter((e) => e.isDirectory()).flatMap((d) =>
+        readdirSync(join(ROOT, 'scripts', d.name)).filter((f) => f.endsWith('.mjs')).map((f) => join('scripts', d.name, f))),
     ...readdirSync(join(ROOT, 'scripts', 'lib')).filter((f) => f.endsWith('.mjs')).map((f) => join('scripts', 'lib', f)),
   ];
   const texts = Object.fromEntries(consumers.map((c) => [c, read(c)]));

@@ -33,11 +33,11 @@ import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
-import { scrubbedEnv } from './lib/env.mjs';
-import { presetRoles } from './lib/roles.mjs';
-import { loadChromium, launchChromium } from './lib/playwright.mjs';
+import { scrubbedEnv } from '../lib/env.mjs';
+import { presetRoles } from '../lib/roles.mjs';
+import { loadChromium, launchChromium } from '../lib/playwright.mjs';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
   return i === -1 ? fallback : argvOf(i);

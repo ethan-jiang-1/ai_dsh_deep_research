@@ -13,13 +13,13 @@
 // 用法：source dev/env.sh && node scripts/release-smoke.mjs
 
 import { spawnSync } from 'node:child_process';
-import { scrubbedEnv } from './lib/env.mjs';
+import { scrubbedEnv } from '../lib/env.mjs';
 import { existsSync, lstatSync, readFileSync, readdirSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { presetRoles } from './lib/roles.mjs';
+import { presetRoles } from '../lib/roles.mjs';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PROFILE = 'release-check';
 const PORT = '3100';

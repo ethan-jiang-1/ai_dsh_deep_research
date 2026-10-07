@@ -12,7 +12,7 @@ import {
   topicEvidenceMatrix,
   gapStats,
   parseReview,
-} from '../scripts/run-dashboard.mjs';
+} from '../scripts/run-ops/run-dashboard.mjs';
 
 const RUN = join(dirname(fileURLToPath(import.meta.url)), 'fixtures', 'run-dashboard', 'run');
 
@@ -114,7 +114,7 @@ test('渲染壳：关键区块与 meta refresh 在场', () => {
 import { mkdirSync, rmSync, writeFileSync, utimesSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { zstdCompressSync } from 'node:zlib';
-import { listScenes, sceneState, detectHitlWait } from '../scripts/run-dashboard.mjs';
+import { listScenes, sceneState, detectHitlWait } from '../scripts/run-ops/run-dashboard.mjs';
 
 const mktmp = () => mkdirSync(join(tmpdir(), `dash-${Math.random().toString(36).slice(2)}`), { recursive: true });
 

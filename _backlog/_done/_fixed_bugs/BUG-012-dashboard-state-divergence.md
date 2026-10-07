@@ -4,8 +4,8 @@
 
 ## 症状
 
-[仪表盘](../../../scripts/run-dashboard.mjs) 的 `detectHitlWait` 固定读 `session.v3.jsonl.zstd`，
-只认日志最后一条为 ask 工具调用。[watch-run](../../../scripts/watch-run.mjs) 使用 v4 日志，
+[仪表盘](../../../scripts/run-ops/run-dashboard.mjs) 的 `detectHitlWait` 固定读 `session.v3.jsonl.zstd`，
+只认日志最后一条为 ask 工具调用。[watch-run](../../../scripts/run-ops/watch-run.mjs) 使用 v4 日志，
 [驾驶舱 HITL 折算](../../../packages/deep-research-pack/src/lib/hitl-fold.ts) 则保留 timed pending，
 后续 agent 事件也不会自动关闭问卡。
 

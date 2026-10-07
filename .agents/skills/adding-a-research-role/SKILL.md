@@ -32,7 +32,7 @@ description: Use when adding a research role preset, renaming one, or changing a
   `bash dev/boot-run.sh` 的漂移检测会逐文件比 pack 源 vs 镜像，不符即 fail-loud；
 - **roster**：`scripts/lib/roles.mjs` 是访问器，事实源 = 盘上 `presets/`；改完跑
   `role-list-sync` 门禁（角色清单与 pack 对账）；
-- **真模型档覆盖**：`scripts/l4-lite-smoke.mjs` 的 `PROMPTS` 加该角色的标记 prompt——它是
+- **真模型档覆盖**：`scripts/smoke/l4-lite-smoke.mjs` 的 `PROMPTS` 加该角色的标记 prompt——它是
   全角色冒烟，盘上有角色而无覆盖即 exit 2；
 - **台账**：增删角色 = 推翻 D2（角色 = 4 个），先在 `docs/00-index.md` 台账登记新 D 号，
   再动代码——`tests/presets.test.mjs` 的数量哨兵会拦住没登记的增删。
@@ -40,13 +40,13 @@ description: Use when adding a research role preset, renaming one, or changing a
 ## 3. 验证（完成判据，keyless 优先）
 
 ```sh
-node scripts/verify.mjs                    # preset-structure / row-deps / role-list-sync
-node scripts/preset-smoke.mjs              # L1 接线（dump 面）
-DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs   # L1 真挂载：真会话 + 逐角色断言 + skills 隔离
-node scripts/release-smoke.mjs             # L2 真实安装形状（pack → 干净 profile → plugin add）
+node scripts/verify/verify.mjs                    # preset-structure / row-deps / role-list-sync
+node scripts/smoke/preset-smoke.mjs              # L1 接线（dump 面）
+DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs   # L1 真挂载：真会话 + 逐角色断言 + skills 隔离
+node scripts/smoke/release-smoke.mjs             # L2 真实安装形状（pack → 干净 profile → plugin add）
 ```
 
-改了模型可见行（persona/skill 文本）→ 再跑真模型档 `node scripts/l4-lite-smoke.mjs`
+改了模型可见行（persona/skill 文本）→ 再跑真模型档 `node scripts/smoke/l4-lite-smoke.mjs`
 （四角色响应 + scout 工具调用）。**只跑 keyless 不算验过角色行为**——机制基线切换的
 教训（E1 回归）就是漏了 with-key 面。
 

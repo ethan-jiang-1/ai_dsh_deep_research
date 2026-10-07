@@ -26,7 +26,7 @@
 
 1. `dev/` 下无 gitignored 运行区；`runtime/` 承接且 `ls` 可辨（根布局行同步）；
 2. `pnpm verify` + `pnpm test` 全绿；
-3. L1 真挂载 `DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs` ALL PASS（env.sh 新路径实跑）；
+3. L1 真挂载 `DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs` ALL PASS（env.sh 新路径实跑）；
 4. snapshot-replay 实跑绿（运行区新路径实跑）；L2 如实分列；
 5. 现行合同文档（docs/ · 各 AGENTS.md · dev/ · scripts/ · tests/ · .agents/skills）`git grep` 零 `dev/harness-home` / `dev/smoke-workspace` 残留（notes/ 历史豁免）；
 6. 档 C 后 `scripts/` 顶层只剩职责子目录 + README/AGENTS/doc-budgets.json；命令正本与 closed set 对账绿。
@@ -34,3 +34,4 @@
 ## 实施记录
 
 - **档 B 迁移暴露既有卫生漏洞**：`dev/smoke-workspace` 下 16 个 npm 缓存件（`_cacache/_npx`）历史上已被 track 进库（gitignore 不作用于已跟踪文件——.gitignore 头注教训的本仓实例）；此前 pin-agreement 未咬是因门禁对盘上缺席的 tracked 文件 `existsSync → continue` 静默跳过，目录一移走文件在新位置被读出才现形。本次卸 track = gitignore 意图的兑现。**遗留待办**：pin-agreement 的软跳过应升 fail-loud（缺 tracked 文件即红）——走 writing-a-gate 流程另 diff，不在本条目混做。
+- **档 C**：16 脚本 git mv 进六组（verify/smoke/probe/run-gates/run-ops/dist），lib/ 与 doc-budgets.json 不动，scripts/ 顶层只剩组目录 + README/AGENTS/doc-budgets.json。引用面八类全迁（脚本内部 import 与 ROOT 推导、package.json verify、tests 七件 import、smoke-contract closed set、dev/boot-run 与 hooks、合同文档、scripts/README 重写、notes 机械修链 7 文件）；映射外新发现三处消费面（research-workspace 手册与 NODES 的模型可见提法 → sync-pack-workspace 重同步种子、pack README/AGENTS、lead synthesis skill）。两处扫描面随分组适配且**加防空语料判红**（verify env 卫生扫描与 smoke-contract closed set 原本只 readdir 顶层，分组后会静默空转——零入口即红）；判据语义未动。**安装域 profile 携旧绝对路径**（迁移前 boot-run 写入的 cordis.patch.yml npm_config_cache 指向 dev/smoke-workspace，实测持续重生旧目录）：删除 profile 走 boot-run"缺席才补装"自愈，下次 run 重建。

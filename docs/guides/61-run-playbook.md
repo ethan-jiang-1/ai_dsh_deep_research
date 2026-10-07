@@ -122,7 +122,7 @@ source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --tok
 
 ## 4. HITL2（交付审阅）
 
-- **拍板前操作侧先跑机械门**：`source dev/env.sh && node scripts/node-gate.mjs
+- **拍板前操作侧先跑机械门**：`source dev/env.sh && node scripts/run-gates/node-gate.mjs
   research-workspace/drt_<slug>`——门①/③/L/R 红在场 = 先让 lead 原位修再拍板（红门会
   穿过 HITL2 落地，lead 自己跑不了门：无 bash）；
 - lead 带审阅建议来找你：证据充分性判断 + 交付/补研究推荐 + composition 确认

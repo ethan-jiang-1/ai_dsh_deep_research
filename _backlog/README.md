@@ -141,6 +141,6 @@ rejected Note），两者不混。暂停是队列级决定（跟随用户明示�
 - **现在**：`plans-liveness`（每张活跃推敲卡自带状态行户口 **+ 索引交叉对账**：plans/bugs/
   reference/ 与 _done/ 各池里的每个文件必须被其 README 索引点名——孤儿卡即红；反方向
   （索引行点名不存在的文件）= md-links 门禁的职责）——清单唯一源 =
-  [scripts/verify.mjs](../scripts/verify.mjs)，台账 = [evaluation.md §L0](../docs/evaluation.md)；
+  [scripts/verify.mjs](../scripts/verify/verify.mjs)，台账 = [evaluation.md §L0](../docs/evaluation.md)；
   次序半区挂 `proposal-scheduled` / `queue-pointer-live` / `entry-chain`（▶ 唯一 + parked 态）。
 - **有压力再借**：见「明确不借」表末行。

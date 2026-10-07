@@ -32,8 +32,8 @@
 | 观察在飞 run | boot 自带后台仪表盘 + Web 驾驶舱 | 只读投影 | 浏览器 | [驾驶舱设计](design/40-research-cockpit.md) | 页签坏 → client-load-smoke |
 | 回答 HITL | Web GUI 选项卡（产品面）；代理代答 = `dev/hitl-answer.mjs`（开发面） | 是 | 浏览器；代答需真挂起在场 | [Run 指南](guides/61-run-playbook.md) | 卡未弹 → watch-run 看挂起谓词 |
 | 查看 run 状态与交付 | `research-workspace/drt_<slug>/` 文件事实（仪表盘只是投影） | 只读 | keyless | [NODES](../research-workspace/NODES.md) | 交付不明 → node-gate 门②③ |
-| 验证挂载（插件真挂载） | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs` | 否 | keyless 真挂载 | [开发环 §2](guides/60-dev-loop.md) | 红 → preset 源 + render-overlay 后复跑 |
-| 验证安装 | `source dev/env.sh && node scripts/release-smoke.mjs` | 是（测试 profile） | keyless（`--install-only` 跳凭据） | [开发环 §2](guides/60-dev-loop.md) | 红 → pack 发布集对账 |
+| 验证挂载（插件真挂载） | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs` | 否 | keyless 真挂载 | [开发环 §2](guides/60-dev-loop.md) | 红 → preset 源 + render-overlay 后复跑 |
+| 验证安装 | `source dev/env.sh && node scripts/smoke/release-smoke.mjs` | 是（测试 profile） | keyless（`--install-only` 跳凭据） | [开发环 §2](guides/60-dev-loop.md) | 红 → pack 发布集对账 |
 | 查漂移（镜像一致性） | boot-run 漂移门（启动即查，不静默用旧镜像） | 否 | keyless | boot-run 输出 | 红 → 按失败消息重装镜像 |
 | 定位故障 | 下文「调试先看哪份事实」表 | 只读 | keyless | 现象 → 事实源映射 | 事实源看完仍不明 → watch-run / node-gate |
 
@@ -96,15 +96,15 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 
 | 证据 | 入口 | 凭据与外部调用 | 能证明什么 |
 |---|---|---|---|
-| L0 门禁 | `pnpm verify`；[verify](../scripts/verify.mjs) | 无模型；本地 git 与生成器检查子进程 | 结构、链接、预算、同步等机械不变量 |
+| L0 门禁 | `pnpm verify`；[verify](../scripts/verify/verify.mjs) | 无模型；本地 git 与生成器检查子进程 | 结构、链接、预算、同步等机械不变量 |
 | 确定性回归 | `pnpm test`；`tests/*.test.mjs` | 无模型/浏览器/网络/子进程；导入执行路径另核查，见下方限制 | 纯函数行为、解析、状态折算、渲染输出、审计判据与配置契约 |
-| L1 真实挂载 | [preset-smoke](../scripts/preset-smoke.mjs) | 无模型；`DSH_SMOKE_REAL=1` 才起真 DSH，本地 RPC 与子进程 | roster、逐角色创建会话、skills 可见性/隔离；默认档只预检 |
-| L2 安装 | [release-smoke](../scripts/release-smoke.mjs) | 无模型调用；npm 安装可能访问网络；`--install-only` 安装检查跳过凭据；默认 preflight 检查凭据在场 | pack → 重建测试 profile → 安装 → scaffold/preflight → 安装域挂载 |
-| 浏览器加载 | [client-load-smoke](../scripts/client-load-smoke.mjs) | 无模型；真实 web、浏览器、本地通信 | client 装配、页签、渐进面与文件事实对账 |
-| 确定性回放 | [snapshot-replay-smoke](../scripts/snapshot-replay-smoke.mjs) | 无真模型；全角色真实 DSH/RPC/解压子进程；仅 Lead 场景额外浏览器渲染 | 全角色回放完成标记、persona 与选定 request/header 字段逐字一致；Lead 渲染金标准 |
-| 真模型档 | [l4-lite](../scripts/l4-lite-smoke.mjs)、[team-preflight](../scripts/team-preflight-smoke.mjs)、[entry-chain-probe](../scripts/entry-chain-probe.mjs)、[discipline-probe](../scripts/discipline-probe.mjs)、[client-hitl](../scripts/client-hitl-smoke.mjs) | 需要模型凭据；调用模型，部分调用 web 工具 | 角色响应/工具调用、团队机制、导航软断言、纪律行为标记断言、真实 HITL UI 迁移；不能替代完整研究质量验收 |
-| 浏览器交互探针 | [cdp-probe](../scripts/cdp-probe.mjs) | 连接已起 GUI；`--ask` 会发送消息并可能触发模型/工具调用 | 指定场景的显示、点击、会话回复；是否调用模型取决于模式与会话 |
-| run 文件审计 | [node-gate](../scripts/node-gate.mjs)、[schema-scan](../scripts/schema-scan.mjs)、[evidence-audit](../scripts/evidence-audit.mjs) | 无主动外网请求；压缩日志读取可能用 zstd 子进程 | 节点在场、部分交接判据、URL/摘录/引用链；部分 CLI 写审计报告 |
+| L1 真实挂载 | [preset-smoke](../scripts/smoke/preset-smoke.mjs) | 无模型；`DSH_SMOKE_REAL=1` 才起真 DSH，本地 RPC 与子进程 | roster、逐角色创建会话、skills 可见性/隔离；默认档只预检 |
+| L2 安装 | [release-smoke](../scripts/smoke/release-smoke.mjs) | 无模型调用；npm 安装可能访问网络；`--install-only` 安装检查跳过凭据；默认 preflight 检查凭据在场 | pack → 重建测试 profile → 安装 → scaffold/preflight → 安装域挂载 |
+| 浏览器加载 | [client-load-smoke](../scripts/smoke/client-load-smoke.mjs) | 无模型；真实 web、浏览器、本地通信 | client 装配、页签、渐进面与文件事实对账 |
+| 确定性回放 | [snapshot-replay-smoke](../scripts/smoke/snapshot-replay-smoke.mjs) | 无真模型；全角色真实 DSH/RPC/解压子进程；仅 Lead 场景额外浏览器渲染 | 全角色回放完成标记、persona 与选定 request/header 字段逐字一致；Lead 渲染金标准 |
+| 真模型档 | [l4-lite](../scripts/smoke/l4-lite-smoke.mjs)、[team-preflight](../scripts/smoke/team-preflight-smoke.mjs)、[entry-chain-probe](../scripts/probe/entry-chain-probe.mjs)、[discipline-probe](../scripts/probe/discipline-probe.mjs)、[client-hitl](../scripts/smoke/client-hitl-smoke.mjs) | 需要模型凭据；调用模型，部分调用 web 工具 | 角色响应/工具调用、团队机制、导航软断言、纪律行为标记断言、真实 HITL UI 迁移；不能替代完整研究质量验收 |
+| 浏览器交互探针 | [cdp-probe](../scripts/probe/cdp-probe.mjs) | 连接已起 GUI；`--ask` 会发送消息并可能触发模型/工具调用 | 指定场景的显示、点击、会话回复；是否调用模型取决于模式与会话 |
+| run 文件审计 | [node-gate](../scripts/run-gates/node-gate.mjs)、[schema-scan](../scripts/run-gates/schema-scan.mjs)、[evidence-audit](../scripts/run-gates/evidence-audit.mjs) | 无主动外网请求；压缩日志读取可能用 zstd 子进程 | 节点在场、部分交接判据、URL/摘录/引用链；部分 CLI 写审计报告 |
 | 完整 L4 | 真实问题的完整研究 run | 模型与真实信息检索、真人 HITL | 报告质量、可追溯结论与整体研究体验 |
 
 回放夹具不能证明模型服从变化后的方法论；真挂载也不能证明研究质量。
@@ -141,8 +141,8 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 职责 | 查哪些入口 | 结果/支撑资产 |
 |---|---|---|
 | 门禁、挂载、安装、浏览器、回放与模型检查 | 上表具名入口 | `tests/` 与 [tests/fixtures taxonomy](../tests/fixtures/README.md) 提供确定性消费路径 |
-| 研究观察与运维 | [watch-run](../scripts/watch-run.mjs)、[run-dashboard](../scripts/run-dashboard.mjs)、[run-kickoff](../dev/run-kickoff.mjs)、[hitl-answer](../dev/hitl-answer.mjs) | `runtime/smoke-workspace/` 放日志与 HTML；会话日志在开发 home；bundle 在研究工作区 |
-| 分发生成 | [export-dist](../scripts/export-dist.mjs) | `_dist/` 生成包与安装手册；安装可用性由 L2 证明 |
+| 研究观察与运维 | [watch-run](../scripts/run-ops/watch-run.mjs)、[run-dashboard](../scripts/run-ops/run-dashboard.mjs)、[run-kickoff](../dev/run-kickoff.mjs)、[hitl-answer](../dev/hitl-answer.mjs) | `runtime/smoke-workspace/` 放日志与 HTML；会话日志在开发 home；bundle 在研究工作区 |
+| 分发生成 | [export-dist](../scripts/dist/export-dist.mjs) | `_dist/` 生成包与安装手册；安装可用性由 L2 证明 |
 | 环境与生成物 | [env](../dev/env.sh)、[vendor-build](../dev/vendor-build.sh)、上方同步生成器 | vendor 构建产物、overlay、发布种子 |
 | 支撑模块 | `scripts/lib/`、pack `src/lib/` | 消费方直接调用接口；测试覆盖纯解析/折算/判据路径 |
 
@@ -156,8 +156,8 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 现象 | 先看 | 定位下一步 |
 |---|---|---|
 | 无法启动/镜像漂移 | 本次 [boot-run](../dev/boot-run.sh) 终端报错；进入 web 启动后再看 `runtime/smoke-workspace/web.log` | 环境/构建/组合/镜像检查；修复入口见 [Run 指南](guides/61-run-playbook.md) |
-| 页面能开但页签或交互坏 | 浏览器加载/console 与 [client-load-smoke](../scripts/client-load-smoke.mjs) | [驾驶舱](design/40-research-cockpit.md) 装配与数据通道；HITL 行为另用真模型证据 |
-| 研究卡住、工具报错、present 不明 | `runtime/harness-home/sessions/<工作区组>/<会话>/` 的事件日志 | [watch-run](../scripts/watch-run.mjs) 看状态；[node-gate](../scripts/node-gate.mjs) 查交付声明 |
+| 页面能开但页签或交互坏 | 浏览器加载/console 与 [client-load-smoke](../scripts/smoke/client-load-smoke.mjs) | [驾驶舱](design/40-research-cockpit.md) 装配与数据通道；HITL 行为另用真模型证据 |
+| 研究卡住、工具报错、present 不明 | `runtime/harness-home/sessions/<工作区组>/<会话>/` 的事件日志 | [watch-run](../scripts/run-ops/watch-run.mjs) 看状态；[node-gate](../scripts/run-gates/node-gate.mjs) 查交付声明 |
 | 研究内容/交接缺件 | 该 bundle 的问题、证据、发现、审查与最终报告 | [NODES](../research-workspace/NODES.md) + run 机械审计；恢复查 [Run 指南](guides/61-run-playbook.md) |
 | 不知道改什么、怎么验 | 根 [AGENTS.md](../AGENTS.md) 入口链与 [队列](../_backlog/queue.md) | 对应 RFC 与 [开发环](guides/60-dev-loop.md) 任务型路由 |
 

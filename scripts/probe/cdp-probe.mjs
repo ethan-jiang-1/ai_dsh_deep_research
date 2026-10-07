@@ -21,7 +21,7 @@
 //   --keep-browser           保留无头浏览器（打印调试端口供手工检查）
 //
 // stdout 输出一个 JSON verdict；全部期望成立 exit 0，否则 1，用法/环境错 2。
-import { launchCdpBrowser } from './lib/cdp-driver.mjs';
+import { launchCdpBrowser } from '../lib/cdp-driver.mjs';
 import process from 'node:process';
 
 const args = process.argv.slice(2);

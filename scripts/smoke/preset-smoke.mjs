@@ -11,14 +11,14 @@
 // 用法：source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs [--port 3099]
 
 import { spawn, spawnSync } from 'node:child_process';
-import { withModelKey } from './lib/env.mjs';
+import { withModelKey } from '../lib/env.mjs';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { presetRoles } from './lib/roles.mjs';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from './lib/vendor-artifacts.mjs';
+import { presetRoles } from '../lib/roles.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 // 角色清单事实源 = 盘上 presets/ 目录（§3.2；硬编码清单被 verify role-list-sync 咬）

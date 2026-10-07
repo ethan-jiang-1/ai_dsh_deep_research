@@ -9,15 +9,15 @@
 // 用法：source dev/env.sh && node scripts/l4-lite-smoke.mjs [--port 3101]
 
 import { spawn, spawnSync } from 'node:child_process';
-import { withModelKey } from './lib/env.mjs';
+import { withModelKey } from '../lib/env.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { presetRoles } from './lib/roles.mjs';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from './lib/vendor-artifacts.mjs';
+import { presetRoles } from '../lib/roles.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const OVERLAY = join(ROOT, 'dev', 'research.overlay.yml');
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);

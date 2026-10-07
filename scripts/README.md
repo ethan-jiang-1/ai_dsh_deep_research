@@ -1,15 +1,16 @@
 # scripts/ · 职责索引
 
-> 每个盘上入口一行：类 / 证明什么 / 档位 / 事实来源。命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)；子树纪律 = [AGENTS.md](AGENTS.md)；测试资产分层 = [tests/fixtures taxonomy](../tests/fixtures/README.md)。本索引不改脚本路径与命令。
+> 职责分组（2026-10-07 目录治理档 C）：六个子目录 + `lib/` 支撑库；每个盘上入口一行：类 / 证明什么 / 档位。命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)；子树纪律 = [AGENTS.md](AGENTS.md)；测试资产分层 = [tests/fixtures taxonomy](../tests/fixtures/README.md)。本索引不改脚本路径与命令。
 
-## 门禁（L0 聚合）
+## verify/（L0 结构门禁）
 
 | 件 | 证明什么 | 档位 | 事实来源 |
 |---|---|---|---|
 | verify.mjs | 仓结构机械不变量（门禁聚合入口） | keyless | [evaluation §L0 台账](../docs/evaluation.md) |
-| doc-budgets.json | 常驻文档行数上限（配置，被 doc-budgets 门禁消费） | — | 本文件即正本 |
 
-## 分级冒烟
+根面（不分组的配置与指令件）：`doc-budgets.json`（常驻文档行数上限，被 doc-budgets 门禁消费，正本即自身）、`README.md`（本索引）、`AGENTS.md`（子树常设指令：新门禁流程、范围纪律、命名即层）。
+
+## smoke/（分级冒烟）
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
@@ -21,7 +22,7 @@
 | l4-lite-smoke.mjs | 四角色真模型响应 + scout web_search 调用 | 真模型档 |
 | team-preflight-smoke.mjs | spawn_teammate 组队与成员组合画像 | 真模型档 |
 
-## 探针
+## probe/（探针）
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
@@ -29,7 +30,7 @@
 | entry-chain-probe.mjs | 入口链时不变四问，软断言 + 留档人工复核 | 真模型档 |
 | discipline-probe.mjs | 散文纪律行为面五场景标记断言（A2 超界 / B1 差集 / 收活缺件 / 收活 UNVERIFIED / 计划确认卡·quick_factual 免发互补对）+ 留档人工复核；`--scenario <id>` 定向跑 | 真模型档 |
 
-## run 机械门与审计
+## run-gates/（run bundle 机械门与审计）
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
@@ -37,20 +38,20 @@
 | schema-scan.mjs | 在场级：八节点输出件在场断言（断代定红） | keyless |
 | evidence-audit.mjs | URL/摘录/final 链溯源对账 → audit.md | keyless（须 source dev/env.sh） |
 
-## run 观察与运维
+## run-ops/（run 观察与运维）
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
 | watch-run.mjs | 谓词化状态判定（HITL-PENDING / RUN-SETTLED 自报） | keyless |
 | run-dashboard.mjs | 只读 HTML 投影：多 run 扫描 + 步骤条（fail-soft） | keyless |
 
-## 分发
+## dist/（分发）
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
 | export-dist.mjs | pack → `_dist/` 安装包与安装手册 | keyless |
 
-## 支撑库（lib/）
+## lib/（支撑库）
 
 | 模块 | 被谁消费 | 说明 |
 |---|---|---|
@@ -65,7 +66,3 @@
 | lib/acceptance-check.mjs | acceptance-check.test / 收尾核验 | 收活判据机械求值：PASS/FAIL/UNVERIFIED 三态（DeerFlow acceptance_criteria keyless 移植，判不了永不静默放行） |
 | lib/hitl-provenance.mjs | hitl-answer | 代答 provenance 写盘（BUG-014 正修——代理模拟显式记账） |
 | lib/vendor-artifacts.mjs | boot 面护栏（五个入口共用） | vendor 构建产物自检 |
-
-## 指令件
-
-- `AGENTS.md` = 本子树常设指令（新门禁流程、范围纪律、命名即层）。

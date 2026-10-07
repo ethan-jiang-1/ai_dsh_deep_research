@@ -8,10 +8,10 @@
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { runStateOf, eventsRegressed } from './lib/run-state.mjs'
-import { resolveSessionLog } from './lib/session-log.mjs'
+import { runStateOf, eventsRegressed } from '../lib/run-state.mjs'
+import { resolveSessionLog } from '../lib/session-log.mjs'
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const SID = process.argv[2]
 const num = (name, dflt) => {
   const i = process.argv.indexOf(`--${name}`)

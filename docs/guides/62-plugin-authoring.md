@@ -55,7 +55,7 @@ logged）——pack 行只引入**现成**能力，这项义务落在 vendor 面
 | 新增研究角色 | `packages/deep-research-pack/presets/critic/`（skill 隔离最干净） | [`.agents/skills/adding-a-research-role`](../../.agents/skills/adding-a-research-role/SKILL.md) |
 | 新增方法论 skill | `presets/lead/skills/synthesis/SKILL.md`（frontmatter `name`/`description` + 方法论正文） | 同上 |
 | 新增/修改 bundle 行 | [pack bundle](../../packages/deep-research-pack/cordis.patch.yml) → [生成器](../../dev/render-overlay.mjs) 渲染 overlay | `overlay-fresh` 检生成物；[boot-run](../../dev/boot-run.sh) 检发布集与安装镜像 |
-| 新增机械门禁 | `scripts/verify.mjs` + `docs/evaluation.md` §L0 | [`.agents/skills/writing-a-gate`](../../.agents/skills/writing-a-gate/SKILL.md) |
+| 新增机械门禁 | `scripts/verify/verify.mjs` + `docs/evaluation.md` §L0 | [`.agents/skills/writing-a-gate`](../../.agents/skills/writing-a-gate/SKILL.md) |
 | 跑一次研究 | `research-workspace/templates/run/` | [`.agents/skills/running-a-research-run`](../../.agents/skills/running-a-research-run/SKILL.md) |
 
 ## 证据义务（改哪面跑什么）
@@ -65,11 +65,11 @@ AGENTS.md §命令速查）：
 
 | 改动面 | 最小可信证据 |
 |---|---|
-| 角色 preset 行形状（`presets/<role>.patch.yml`：dsh-agent-preset 行 + config.plugins + skills/） | `node scripts/verify.mjs`（`preset-structure` / `row-deps` / `role-list-sync`） |
-| 接线（roster、bundle 行、skills 隔离） | `DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs`（L1 真挂载） |
-| 安装形状（pack → 干净 profile → plugin add） | `node scripts/release-smoke.mjs`（L2） |
-| persona / skill 文本（模型可见） | 追加 `node scripts/l4-lite-smoke.mjs`（真模型档） |
-| docs / AGENTS / queue | 追加 `node scripts/entry-chain-probe.mjs`（真模型档） |
+| 角色 preset 行形状（`presets/<role>.patch.yml`：dsh-agent-preset 行 + config.plugins + skills/） | `node scripts/verify/verify.mjs`（`preset-structure` / `row-deps` / `role-list-sync`） |
+| 接线（roster、bundle 行、skills 隔离） | `DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs`（L1 真挂载） |
+| 安装形状（pack → 干净 profile → plugin add） | `node scripts/smoke/release-smoke.mjs`（L2） |
+| persona / skill 文本（模型可见） | 追加 `node scripts/smoke/l4-lite-smoke.mjs`（真模型档） |
+| docs / AGENTS / queue | 追加 `node scripts/probe/entry-chain-probe.mjs`（真模型档） |
 | 门禁本身 | 注入回归看红 → 还原 → 绿（反证记录进 `docs/evaluation.md`） |
 
 ### 自写代码的证据阶梯（驾驶舱与未来 `src/` 套件；test-strategy 语料五台阶移植）
@@ -105,7 +105,7 @@ DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`�
 本仓开发面的四个生成物各有生成器与新鲜度门禁（漂移即红）：`dev/research.overlay.yml`
 （`dev/render-overlay.mjs` → `overlay-fresh`）、pack 的 `workspace/` 种子
 （`dev/sync-pack-workspace.mjs` → `pack-workspace-fresh`）、run 通道 profile 镜像
-（`dev/boot-run.sh` 幂等重建，逐文件漂移检测）、dist 导出手册（`scripts/export-dist.mjs`
+（`dev/boot-run.sh` 幂等重建，逐文件漂移检测）、dist 导出手册（`scripts/dist/export-dist.mjs`
 → `dist-manual-version`——一条命令出 tarball + 安装手册到 `_dist/`，tarball 不进库，
 手册 tracked；版本动必须重导出，导出不是发布）。
 

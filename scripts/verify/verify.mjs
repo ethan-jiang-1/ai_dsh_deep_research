@@ -10,7 +10,7 @@ import { readFileSync, readdirSync, existsSync, lstatSync, readlinkSync, statSyn
 import { join, dirname, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
@@ -949,11 +949,22 @@ function parkedSection() {
   // 子进程凭据卫生（vendor docs/defensive-patterns.md §27-29）：spawn 的 env 必须洗过，
   // 禁止整体透传 process.env；白名单条目只能在调用点显式写（scripts/lib/env.mjs）。
   if (!existsSync(join(ROOT, 'scripts', 'lib', 'env.mjs'))) fail(gate, 'scripts/lib/env.mjs 缺席（子进程 env 清洗助手）');
-  for (const ent of readdirSync(join(ROOT, 'scripts'), { withFileTypes: true })) {
-    if (!ent.isFile() || !ent.name.endsWith('.mjs')) continue;
-    const text = readFileSync(join(ROOT, 'scripts', ent.name), 'utf8');
+  const scriptsDir = join(ROOT, 'scripts');
+  const scanTargets = [];
+  for (const ent of readdirSync(scriptsDir, { withFileTypes: true })) {
+    if (ent.name === 'lib' || ent.name === 'node_modules') continue;
+    if (ent.isFile() && ent.name.endsWith('.mjs')) scanTargets.push(scriptsDir + '/' + ent.name);
+    else if (ent.isDirectory()) {
+      for (const sub of readdirSync(join(scriptsDir, ent.name), { withFileTypes: true })) {
+        if (sub.isFile() && sub.name.endsWith('.mjs')) scanTargets.push(join(scriptsDir, ent.name, sub.name));
+      }
+    }
+  }
+  if (scanTargets.length === 0) fail(gate, `scripts/ 扫描到 0 个 .mjs 入口——分组结构变了而扫描未跟进（防空语料）`);
+  for (const p of scanTargets) {
+    const text = readFileSync(p, 'utf8');
     if (/env:\s*\{\s*\.\.\.process\.env/.test(text)) {
-      fail(gate, `scripts/${ent.name}: spawn env 整体透传 process.env——改用 scripts/lib/env.mjs 的 scrubbedEnv/withModelKey（凭据卫生）`);
+      fail(gate, `${relative(ROOT, p)}: spawn env 整体透传 process.env——改用 scripts/lib/env.mjs 的 scrubbedEnv/withModelKey（凭据卫生）`);
     }
   }
   const hook = read('dev/hooks/pre-commit');
@@ -1139,23 +1150,23 @@ function parkedSection() {
 }
 
 // ── 门禁 33：dist-manual-version（dist 导出合同——精神移植 ai_dsh_architect docs/distribution.md：
-//    _dist/安装手册.md 是 tracked 生成物（生成器 = scripts/export-dist.mjs），表头版本必须等于
+//    _dist/安装手册.md 是 tracked 生成物（生成器 = scripts/dist/export-dist.mjs），表头版本必须等于
 //    pack 的 package.json 版本，且指名同目录 tarball 的文件名——版本动而手册不重导出即红，
 //    迫使版本 bump 与重导出同 diff。导出目的地 = _dist/（tarball gitignored）。）──
 {
   const gate = 'dist-manual-version';
   const manualPath = join(ROOT, '_dist', '安装手册.md');
   if (!existsSync(manualPath)) {
-    fail(gate, '_dist/安装手册.md 缺席——tracked 生成物必须在库（跑 `node scripts/export-dist.mjs` 导出）');
+    fail(gate, '_dist/安装手册.md 缺席——tracked 生成物必须在库（跑 `node scripts/dist/export-dist.mjs` 导出）');
   } else {
     const manual = readFileSync(manualPath, 'utf8');
     const packVersion = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8')).version;
     const head = manual.split('\n').slice(0, 10).join('\n');
     const m = head.match(/\|\s*版本\s*\|\s*(\S+)\s*\|/);
     if (!m) {
-      fail(gate, '_dist/安装手册.md: 表头 10 行内无「| 版本 | … |」行——手册是 export-dist.mjs 的生成物，勿手写；跑 `node scripts/export-dist.mjs` 重生成');
+      fail(gate, '_dist/安装手册.md: 表头 10 行内无「| 版本 | … |」行——手册是 scripts/dist/export-dist.mjs 的生成物，勿手写；跑 `node scripts/dist/export-dist.mjs` 重生成');
     } else if (m[1] !== packVersion) {
-      fail(gate, `_dist/安装手册.md: 表头版本 ${m[1]} ≠ pack package.json 的 ${packVersion}——版本 bump 必须同 diff 重导出（跑 \`node scripts/export-dist.mjs\` 后提交）`);
+      fail(gate, `_dist/安装手册.md: 表头版本 ${m[1]} ≠ pack package.json 的 ${packVersion}——版本 bump 必须同 diff 重导出（跑 \`node scripts/dist/export-dist.mjs\` 后提交）`);
     }
     const t = head.match(/\|\s*安装包\s*\|\s*`([^`]+)`/);
     if (!t || t[1] !== `dsh-deep-research-pack-${packVersion}.tgz`) {

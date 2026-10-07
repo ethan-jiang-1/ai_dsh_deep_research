@@ -88,14 +88,14 @@ review 审查时间、口径截至）落笔前**先跑 bash `date` 核对**—�
 结论不硬禁（快速事实核查型 run 可能天然单源），但必须显式标注`单源——待破`并在 review.md
 说明风险——**显性化而不是静默**。
 
-**有效证据谓词（观察面对账，分层）**：run 仪表盘（scripts/run-dashboard.mjs）按同一契约
+**有效证据谓词（观察面对账，分层）**：run 仪表盘（scripts/run-ops/run-dashboard.mjs）按同一契约
 渲染——**硬五字段**（source_url / retrieved_at / quality / found_by / supports）全齐才算
 有效证据，缺任一标无效（不计入 topic × evidence 矩阵）；**软二字段**（source_tier /
 publisher）缺失不否决有效性，标"未分级"（旧 run 的存量证据按此显示，不回填——run bundle
 是交付记录，不改历史）；谓词正本 = 本节，tests/evaluation-contract.test.mjs 对账。
 
 **机械强度诚实记账**：本契约的机械检查 = L0 契约测试（七字段在场 + 各执行者副本对账）
-+ 仪表盘渲染谓词（上述）+ **evidence-audit 溯源审计**（`scripts/evidence-audit.mjs`：
++ 仪表盘渲染谓词（上述）+ **evidence-audit 溯源审计**（`scripts/run-gates/evidence-audit.mjs`：
 `source_url` 须被 `web_fetch` **成功取回**（仅出现在搜索结果里不算，MAJOR 单列）；摘录对
 **web-only 语料**回溯（agent 自撰文本已剔除，防自证），覆盖率分档；final 溯源链完整——
 防伪造与转写幻觉，报告落 bundle 的 audit.md）；run 内执法 = critic 狩猎。verify 门禁不扫

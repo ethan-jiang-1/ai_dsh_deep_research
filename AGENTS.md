@@ -47,12 +47,12 @@ notes/                   **开发记忆与证据链**（核心流程数据，不
                          rejected/（否决与搁置——"决定不做"，带重启条件）；postmortem/（事故复盘）
 .agents/skills/          开发技能（DSH 约定路径：project-agents 发现根）：任务匹配即加载的程序化工作记忆
                          （毕业条目 / 加角色 / 写门禁 / 跑 run / 改轨道）；与产品内 runtime skills（presets/*/skills/）分家
-scripts/                 verify.mjs（L0）、preset-smoke.mjs（L1 真挂载，keyless 双通道）、client-load-smoke.mjs（观察面真浏览器）、client-hitl-smoke.mjs（活标题触发，真模型档）、evidence-audit.mjs（证据面机械审计）、node-gate.mjs / schema-scan.mjs（run bundle 机械门：判据级/在场级）、watch-run.mjs（run 盯场）、cdp-probe.mjs（交互探针）、release-smoke.mjs（L2 安装面）、l4-lite-smoke.mjs（L4-lite 真模型）、team-preflight-smoke.mjs（team 机制预检）、entry-chain-probe.mjs（入口链探针，真模型档）、discipline-probe.mjs（纪律行为探针，真模型档）、run-dashboard.mjs（run 只读投影，boot-run 起）、snapshot-replay-smoke.mjs（keyless 回放冒烟）、export-dist.mjs（出包→_dist/）、lib/（roles 角色清单访问器[事实源=盘上 presets/] + env/playwright/vendor-artifacts/cdp-driver/run-state 冒烟支撑模块）
+scripts/                 职责分组六目录 + lib/ 支撑库（逐件职责索引 = scripts/README.md）：verify/（L0 门禁聚合 verify.mjs）、smoke/（分级冒烟：preset/release/client-load/snapshot-replay keyless；client-hitl/l4-lite/team-preflight 真模型档）、probe/（cdp 交互探针、entry-chain/discipline 行为探针，真模型档）、run-gates/（node-gate/schema-scan/evidence-audit run bundle 机械门与审计）、run-ops/（watch-run 盯场、run-dashboard 只读投影）、dist/（export-dist 出包→_dist/）、lib/（roles 角色清单访问器[事实源=盘上 presets/] + env/playwright/vendor-artifacts/cdp-driver/run-state 冒烟支撑模块）
 tests/                   keyless 回归（node:test，无测试框架；layering 静态扫描顶层测试文本；执行路径与夹具规则见 tests/AGENTS.md）
 dev/                     vendor-build.sh（vendor 树构建：tsc host/client + typert 产物 + client bundle）、vendor-typert-emit.mjs（typert 产物生成器）、vendor-host-bundle.config.ts（逐包 host 半补建配置：tsdown -c 给缺 lib/index.js 的包补产物）、vendor-host-typert.config.ts（逐包 tsdown 备选配置，留档）、render-overlay.mjs（从 pack 渲染 research.overlay.yml）、sync-pack-workspace.mjs（把 research-workspace 正本同步进 pack 的 workspace/ 种子）、boot-run.sh（run 通道开跑：幂等装+boot web+仪表盘）、run-kickoff.mjs（run 会话驱动）、env.sh（双 home + dsh 机制基线 + pre-commit 钩子激活）、research.overlay.yml（源码域 overlay，**生成物**）、hooks/（pre-commit：verify+tests 红灯拦 commit）
 runtime/                 运行态区（gitignored）：harness-home/（开发 DSH home：会话/凭据/插件安装）+
                          smoke-workspace/（冒烟与 boot 运行产物）——dev/ 只住源码驱动，跑出来的东西住这里
-_dist/                   对外交付件：安装手册.md（tracked 生成物，生成器 = scripts/export-dist.mjs）
+_dist/                   对外交付件：安装手册.md（tracked 生成物，生成器 = scripts/dist/export-dist.mjs）
                          + 打包 tgz（gitignore）
 （布局 = 骨架图，非全量清单——scripts/dev 全档工具与逐命令说明 = guides/60 §2；
   _backlog 细构[reference/ 资料区、_done 五池] = _backlog/README.md）

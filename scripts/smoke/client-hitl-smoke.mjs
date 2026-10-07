@@ -31,12 +31,12 @@ import { existsSync, readdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
-import { withModelKey } from './lib/env.mjs'
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from './lib/vendor-artifacts.mjs'
-import { launchChromium, loadChromium } from './lib/playwright.mjs'
-import { foldHitlPending } from '../packages/deep-research-pack/src/lib/hitl-fold.ts'
+import { withModelKey } from '../lib/env.mjs'
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs'
+import { launchChromium, loadChromium } from '../lib/playwright.mjs'
+import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`)
   return i === -1 ? fallback : process.argv[i + 1]

@@ -32,7 +32,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -52,7 +52,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -62,7 +62,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -72,7 +72,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -88,7 +88,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -98,7 +98,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -108,7 +108,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -118,7 +118,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -128,7 +128,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -138,7 +138,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -154,7 +154,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -164,7 +164,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -174,7 +174,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -184,7 +184,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -194,7 +194,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -204,7 +204,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -214,7 +214,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -224,7 +224,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -234,7 +234,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -244,7 +244,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -254,7 +254,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -264,7 +264,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -274,7 +274,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -284,7 +284,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -294,7 +294,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -304,7 +304,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -314,7 +314,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -324,7 +324,7 @@
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ],
       "reason": "技能形式约定（frontmatter/正文结构/references 分层）落在本仓 .agents/skills/ 四技能 + dev-skill-format 门禁"
     },
@@ -334,7 +334,7 @@
       "verdict": "adopted",
       "landing": [
         ".claude/skills",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ]
     },
     {
@@ -343,7 +343,7 @@
       "verdict": "adopted",
       "landing": [
         ".editorconfig",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ]
     },
     {
@@ -352,14 +352,14 @@
       "verdict": "adopted",
       "landing": [
         ".gitattributes",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ]
     },
     {
       "source": ".github/AGENTS.md",
       "owns": "Windows 任务跑在 Windows runner（`windows-*` 标签）下并使用原生 `pwsh`",
       "verdict": "na",
-      "reason": "本仓无远端 CI/PR 面（.github 不存在）；等价面 = dev/hooks/pre-commit + scripts/verify.mjs 的本地门禁"
+      "reason": "本仓无远端 CI/PR 面（.github 不存在）；等价面 = dev/hooks/pre-commit + scripts/verify/verify.mjs 的本地门禁"
     },
     {
       "source": "AGENTS.md",
@@ -375,8 +375,8 @@
       "owns": "Form/ownership row: the CLI profile-integration-test AGENTS.md owns shipped-profile cross-package test rules — 7 lines / ~0.8 KB, pure order",
       "verdict": "adapted",
       "landing": [
-        "scripts/release-smoke.mjs",
-        "scripts/preset-smoke.mjs"
+        "scripts/smoke/release-smoke.mjs",
+        "scripts/smoke/preset-smoke.mjs"
       ]
     },
     {
@@ -684,7 +684,7 @@
       "verdict": "adapted",
       "landing": [
         "package.json",
-        "scripts/verify.mjs",
+        "scripts/verify/verify.mjs",
         "pnpm-workspace.yaml"
       ]
     },
@@ -771,7 +771,7 @@
       "verdict": "adapted",
       "landing": [
         "scripts/doc-budgets.json",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ]
     },
     {
@@ -779,7 +779,7 @@
       "owns": "门禁聚合入口 / 文档预算 manifest",
       "verdict": "adapted",
       "landing": [
-        "scripts/verify.mjs",
+        "scripts/verify/verify.mjs",
         "docs/evaluation.md"
       ]
     },
@@ -821,7 +821,7 @@
       "verdict": "adapted",
       "landing": [
         "AGENTS.md",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ]
     },
     {
@@ -830,7 +830,7 @@
       "verdict": "adapted",
       "landing": [
         "AGENTS.md",
-        "scripts/verify.mjs"
+        "scripts/verify/verify.mjs"
       ]
     },
     {

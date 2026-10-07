@@ -13,15 +13,15 @@
 // 用法：source dev/env.sh && node scripts/team-preflight-smoke.mjs [--port 3102]
 
 import { spawn, spawnSync } from 'node:child_process';
-import { withModelKey } from './lib/env.mjs';
+import { withModelKey } from '../lib/env.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { presetRoles } from './lib/roles.mjs';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from './lib/vendor-artifacts.mjs';
+import { presetRoles } from '../lib/roles.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
   return i === -1 ? fallback : process.argv[i + 1];

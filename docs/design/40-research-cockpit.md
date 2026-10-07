@@ -18,7 +18,7 @@
 | 伞 | 观察面 | 驾驶舱 + 仪表盘投影（D18 原语义） | — |
 | **套件** | **研究驾驶舱（Research Cockpit）** | `src/client/` 的 React 件全体 | **最频** |
 | 折算层 | folds | `src/lib/` 纯函数谓词（keyless 单测；驾驶舱与 HTML 投影共享 HITL/步骤事实适配） | 少 |
-| 投影 | 仪表盘（run-dashboard） | `scripts/run-dashboard.mjs` 只读 HTML 投影（抛弃型、永不入库） | 少 |
+| 投影 | 仪表盘（run-dashboard） | `scripts/run-ops/run-dashboard.mjs` 只读 HTML 投影（抛弃型、永不入库） | 少 |
 
 件名保留：「研究状态」页签是驾驶舱**里的一个件**，不与套件名混用；目录名守 DSH 双半
 约定 host/client（不叫 `src/cockpit/`），套件名钉 `src/client/index.ts` 入口头注。

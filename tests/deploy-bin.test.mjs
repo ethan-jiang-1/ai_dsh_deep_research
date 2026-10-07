@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 const PACK = join(dirname(fileURLToPath(import.meta.url)), '..', 'packages', 'deep-research-pack');
 const preflight = readFileSync(join(PACK, 'scripts', 'preflight.mjs'), 'utf8');
 const scaffold = readFileSync(join(PACK, 'scripts', 'scaffold.mjs'), 'utf8');
-const releaseSmoke = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'release-smoke.mjs'), 'utf8');
+const releaseSmoke = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'smoke', 'release-smoke.mjs'), 'utf8');
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
 
 test('preflight：六面检查清单在位（版本/peer/团队层/手册+模板/构建产物/密钥）', () => {

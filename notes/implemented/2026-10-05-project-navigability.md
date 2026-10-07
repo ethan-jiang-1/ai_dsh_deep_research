@@ -24,11 +24,11 @@
 
 ### BUG-011：安装与研究就绪分层
 
-[preflight](../../packages/deep-research-pack/scripts/preflight.mjs) 提供显式 `--install-only`（[BUG-011](../../_backlog/_done/_fixed_bugs/BUG-011-release-smoke-keyless-mismatch.md)）。该模式检查发布安装所需的版本、peer、团队层、工作区和构建产物，但跳过模型凭据检查并明确不宣称研究就绪；默认模式仍检查环境变量或 DSH 凭据文件。[scaffold](../../packages/deep-research-pack/scripts/scaffold.mjs) 转发模式，[release-smoke](../../scripts/release-smoke.mjs) 以清洗环境运行非模型子进程，并验证默认 preflight 会拒绝空凭据 home。
+[preflight](../../packages/deep-research-pack/scripts/preflight.mjs) 提供显式 `--install-only`（[BUG-011](../../_backlog/_done/_fixed_bugs/BUG-011-release-smoke-keyless-mismatch.md)）。该模式检查发布安装所需的版本、peer、团队层、工作区和构建产物，但跳过模型凭据检查并明确不宣称研究就绪；默认模式仍检查环境变量或 DSH 凭据文件。[scaffold](../../packages/deep-research-pack/scripts/scaffold.mjs) 转发模式，[release-smoke](../../scripts/smoke/release-smoke.mjs) 以清洗环境运行非模型子进程，并验证默认 preflight 会拒绝空凭据 home。
 
 ### BUG-012：观察面事实适配
 
-[run-dashboard](../../scripts/run-dashboard.mjs) 的公开适配器修复 [BUG-012](../../_backlog/_done/_fixed_bugs/BUG-012-dashboard-state-divergence.md)，通过 `resolveSessionLog`、`readSessionEvents`、共享 `foldHitlPending` 和共享 `deriveSteps` 取得 canonical 日志、HITL 状态和步骤事实，同时保留 dashboard 的 `deriveStep`、`detectHitlWait`、`buildModel`、`renderHtml` 与 `decompressSessionLog` 公开适配器。它继续只读、fail-soft，并保留自身的内容统计与文件计数投影；观察面不是交付判定。
+[run-dashboard](../../scripts/run-ops/run-dashboard.mjs) 的公开适配器修复 [BUG-012](../../_backlog/_done/_fixed_bugs/BUG-012-dashboard-state-divergence.md)，通过 `resolveSessionLog`、`readSessionEvents`、共享 `foldHitlPending` 和共享 `deriveSteps` 取得 canonical 日志、HITL 状态和步骤事实，同时保留 dashboard 的 `deriveStep`、`detectHitlWait`、`buildModel`、`renderHtml` 与 `decompressSessionLog` 公开适配器。它继续只读、fail-soft，并保留自身的内容统计与文件计数投影；观察面不是交付判定。
 
 ## 输掉的方案
 

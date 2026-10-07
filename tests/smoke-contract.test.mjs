@@ -14,17 +14,34 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const SCRIPTS = join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts');
+// 分组布局（2026-10-07 目录治理档 C）：closed set 随现实迁移——登记路径改为组内相对路径，
+// 判据语义不变（对 scripts/ 全部 .mjs 入口对账；lib/ 是支撑模块不在脚本集内）。
 const REAL_MODEL = [
-  'l4-lite-smoke.mjs',
-  'team-preflight-smoke.mjs',
-  'entry-chain-probe.mjs',
-  'client-hitl-smoke.mjs',
-  'discipline-probe.mjs',
+  'smoke/l4-lite-smoke.mjs',
+  'smoke/team-preflight-smoke.mjs',
+  'probe/entry-chain-probe.mjs',
+  'smoke/client-hitl-smoke.mjs',
+  'probe/discipline-probe.mjs',
 ];
 
+// 收集 scripts/ 下全部 .mjs 入口（verify/smoke/probe/run-gates/run-ops/dist 各组一层），
+// 相对 scripts/ 的路径；目录组收窄为空集时判红（防空语料）。
+function listScriptRels() {
+  const rels = [];
+  for (const ent of readdirSync(SCRIPTS, { withFileTypes: true })) {
+    if (ent.name === 'lib' || ent.name === 'node_modules') continue;
+    if (ent.isDirectory()) {
+      for (const sub of readdirSync(join(SCRIPTS, ent.name), { withFileTypes: true })) {
+        if (sub.isFile() && sub.name.endsWith('.mjs')) rels.push(`${ent.name}/${sub.name}`);
+      }
+    } else if (ent.isFile() && ent.name.endsWith('.mjs')) rels.push(ent.name);
+  }
+  assert.ok(rels.length > 0, 'scripts/ 扫到 0 个 .mjs 入口——分组结构变了而 closed set 未跟进');
+  return rels.sort();
+}
+
 test('真模型档 closed set：要求凭据（.credentials.yaml）的脚本恰为登记名单', () => {
-  const files = readdirSync(SCRIPTS).filter((f) => f.endsWith('.mjs')).sort();
-  const requiring = files.filter((f) => readFileSync(join(SCRIPTS, f), 'utf8').includes('.credentials.yaml'));
+  const requiring = listScriptRels().filter((f) => readFileSync(join(SCRIPTS, f), 'utf8').includes('.credentials.yaml'));
   assert.deepEqual(
     requiring,
     [...REAL_MODEL].sort(),

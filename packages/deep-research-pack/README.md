@@ -39,7 +39,7 @@ dsh --profile research --from-default-profile web --dump-config
 
 # ② 装包：本包 private（未发布 registry）——裸包名解析不到，必须给 tarball 的 file: 形态；
 #    且**必须绝对路径**（`file:` 相对路径按 profile 目录解析，不是你的 cwd）。
-#    出包 = `node scripts/export-dist.mjs`（仓根执行）→ `_dist/` 的 tarball + 安装手册.md（用户视角正本）。
+#    出包 = `node scripts/dist/export-dist.mjs`（仓根执行）→ `_dist/` 的 tarball + 安装手册.md（用户视角正本）。
 dsh plugin --profile research add file:/abs/path/to/dsh-deep-research-pack-0.1.0.tgz
 
 # ②b 验证形状（"装好了"的最小判据；下四项缺任一 = 没装上）
@@ -88,7 +88,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 4. **观察面**：DSH Web GUI 右栏「研究状态」页签看实时动态（流程轨道 = ◆立项确认 + 立项→
    组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付，↻ rerun 回路自交付审阅可见，人性化活动流，
    HITL 挂起横幅点名锚点与参与方式，活标题「研究状态 · ⏳ 等你拍板」，交付节点带 final/ 版本）；
-5. **审计**（本仓开发面）：`node scripts/evidence-audit.mjs <bundle>` 对会话日志机械对账——
+5. **审计**（本仓开发面）：`node scripts/run-gates/evidence-audit.mjs <bundle>` 对会话日志机械对账——
    URL 是否真被抓取过、摘录是否可回溯、final 溯源链是否完整 → `audit.md`。
 
 ## 新增一个研究角色

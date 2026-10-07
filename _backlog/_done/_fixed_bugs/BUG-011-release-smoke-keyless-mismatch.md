@@ -5,7 +5,7 @@
 ## 症状
 
 根 [AGENTS.md](../../../AGENTS.md) 与 [开发环](../../../docs/guides/60-dev-loop.md) 把 L2 标为 keyless，
-定义为无凭据可跑。[release-smoke](../../../scripts/release-smoke.mjs) 要求安装副本的 scaffold 与
+定义为无凭据可跑。[release-smoke](../../../scripts/smoke/release-smoke.mjs) 要求安装副本的 scaffold 与
 preflight 返回成功；[preflight](../../../packages/deep-research-pack/scripts/preflight.mjs) 将
 环境 key 为空且凭据文件缺席计入 hardFail。因此无凭据时部署链不可能全绿。
 

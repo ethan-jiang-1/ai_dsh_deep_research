@@ -117,7 +117,7 @@ client 之前（顺序铁律入脚本注释）、guides/60 路由表补 client-l
 **冒烟侧修正（team-preflight 成员发现，0.2.0 日志格式实证）**：lead 日志的
 `Background subagent <uuid>` 行在 0.2.0 是**完成通知**（只落先完成者，后完成者被收场截断），
 当成员全集会在单成员场景假红（scout 机制实绿但 id 提取缺席——直接读成员会话日志证实其标记在）。
-[team-preflight-smoke.mjs](../../scripts/team-preflight-smoke.mjs) 成员发现改为**按 spawn prompt
+[team-preflight-smoke.mjs](../../scripts/smoke/team-preflight-smoke.mjs) 成员发现改为**按 spawn prompt
 标记内容扫描近窗会话**（窗口 60min）——与 2026-09-25 的顺序免疫修正是同一哲学；lead 日志提取
 检查随之退役。
 

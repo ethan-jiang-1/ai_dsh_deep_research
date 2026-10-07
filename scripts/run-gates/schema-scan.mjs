@@ -25,7 +25,7 @@ import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 export const CONTRACT_DATE = '2026-09-29'
 
 const read = (p) => (existsSync(p) ? readFileSync(p, 'utf8') : null)

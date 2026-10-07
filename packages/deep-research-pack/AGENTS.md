@@ -14,7 +14,7 @@ config.plugins 内声明 persona/skills/工具行）+ `presets/<role>/skills/` +
 - **三处一致**（pack 源 = 唯一真源）：① `dev/research.overlay.yml` 由
   `node dev/render-overlay.mjs` **从 pack 渲染**（门禁 `overlay-fresh` 对账，勿手改）；
   ② `runtime/harness-home/profiles/research/`（run 通道镜像）随 `boot-run.sh` 同步，
-  其漂移检测逐文件比对，不符即 fail-loud；③ 改完 pack 跑 `node scripts/verify.mjs`；
+  其漂移检测逐文件比对，不符即 fail-loud；③ 改完 pack 跑 `node scripts/verify/verify.mjs`；
 - 新增/修改角色走 [`.agents/skills/adding-a-research-role`](../../.agents/skills/adding-a-research-role/SKILL.md)；
 - 行引用的 `@deepseek-ai/*` 必须同时出现在 `peerDependencies`（`row-deps` 门禁）；
 - 角色清单（roster）的事实源 = 盘上 `presets/`，不要在代码里写第二份角色字面量

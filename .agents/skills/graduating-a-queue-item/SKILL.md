@@ -46,7 +46,7 @@ pnpm verify
 pnpm test
 ```
 
-改了 docs/AGENTS/queue → 追加 `node scripts/entry-chain-probe.mjs`（真模型档）。
+改了 docs/AGENTS/queue → 追加 `node scripts/probe/entry-chain-probe.mjs`（真模型档）。
 
 全绿 + RFC 正文已改写 + 队列行已删 → 本条目毕业；commit 用窄证据切片，正文写清
 "条目离队 + 判据如何闭"。

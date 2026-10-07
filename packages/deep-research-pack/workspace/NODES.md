@@ -6,8 +6,8 @@
 > 三要领 = **文件即接口**（节点之间只传 bundle 文件）/ **在场即完成**（输出在场且必备件齐
 > = 节点完成）/ **模板即 schema 实例**（字段级契约住 templates/run/，不另造格式清单）。
 > 加节点/调节点 = 改本表 + 同步 cockpit 渲染与步序正本（改轨道程序住 pipeline-polish 卡
-> 第 7 面）。机械把守两层：**在场级** = `scripts/schema-scan.mjs`（全表输出件在场断言，
-> 断代定红）；**判据级** = `scripts/node-gate.mjs`（v2 = 交付两门〔第 7/8 行〕+ leads 交接门
+> 第 7 面）。机械把守两层：**在场级** = `scripts/run-gates/schema-scan.mjs`（全表输出件在场断言，
+> 断代定红）；**判据级** = `scripts/run-gates/node-gate.mjs`（v2 = 交付两门〔第 7/8 行〕+ leads 交接门
 > 〔第 3 行：方向节字段齐 + primary/comparison topic 覆盖，quick_factual 编制豁免，断代
 > 2026-10-03〕；其余行按证据逐个升格，防假牙齿——只门机械可查事实，不发明数值打分）。
 > 门编号图例：门② = present 声明 · 门③ = §Decisions 拍板行 · 门④ = 版本记账（见回边版本

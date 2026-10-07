@@ -15,11 +15,11 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { resolveSessionLog, readSessionEvents } from './lib/session-log.mjs';
-import { deriveSteps } from '../packages/deep-research-pack/src/lib/run-fold.ts';
-import { foldHitlPending } from '../packages/deep-research-pack/src/lib/hitl-fold.ts';
+import { resolveSessionLog, readSessionEvents } from '../lib/session-log.mjs';
+import { deriveSteps } from '../../packages/deep-research-pack/src/lib/run-fold.ts';
+import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts';
 
-export { decompressSessionLog } from './lib/session-log.mjs';
+export { decompressSessionLog } from '../lib/session-log.mjs';
 
 /** 多 run 场根（debug-dashboard-plus）：drt 正规场 + ad-hoc 场（无契约，标注呈现不隐藏） */
 const SCENE_ROOTS = [
