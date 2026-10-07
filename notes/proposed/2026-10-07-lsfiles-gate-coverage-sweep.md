@@ -20,3 +20,17 @@
 1. 盘点清单落实施记录（几处消费、各自处置与理由）；
 2. 每个改动的门禁带缺席与非 ASCII 两型红证（实测红 → 还原绿）；
 3. `pnpm verify` + `pnpm test` 全绿；台账行同步（gate-ledger-sync 绿）。
+
+## 实施记录
+
+盘点结果（verify.mjs 全部 `git ls-files` 消费面 = 五处）：
+
+| 门禁 | 读内容？ | 处置 |
+|---|---|---|
+| pin-agreement | 是 | 已在目录治理轮收口（quotepath=false + 缺席/不可读红 + 目录型 symlink 放行） |
+| proposed-pointer-live | 是 | 同族收口（本轮） |
+| count-free | 是 | 同族收口（本轮） |
+| doc-now-only | 是（`ls-files '*.md'`——非 ASCII 的 .md 曾被整体跳过，`_dist/安装手册.md` 实测） | 同族收口（本轮） |
+| secrets-untracked | **否**（纯路径后缀/斜杠模式匹配） | 不改——转义形态下 `\.pem$`、`\/\.env` 等模式仍命中原文件，语义天然免疫 quotepath；缺席文件无内容可泄，不适用缺席红 |
+
+红证（2026-10-07，一次注入三型违规于 `_dist/安装手册.md`——收口前被 quotepath 转义整体跳过的非 ASCII live 文档）：三门禁各自红且 file:line 逐字命中（proposed-pointer-live 死指针 / count-free 写死计数 / doc-now-only 变更史措辞）→ 还原绿。台账三行同 diff 登记。

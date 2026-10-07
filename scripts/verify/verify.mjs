@@ -393,7 +393,8 @@ function parkedSection() {
 // 反证形态：把任一头注里的 notes/implemented/ 改回 notes/proposed/ → 本门禁红 → 还原绿。
 {
   const gate = 'proposed-pointer-live';
-  const r = spawnSync('git', ['ls-files'], { cwd: ROOT, encoding: 'utf8' });
+  // 同族收口（2026-10-07 ls-files 清扫）：quotepath=false + 缺席/不可读 fail-loud + 目录型 symlink 放行
+  const r = spawnSync('git', ['-c', 'core.quotepath=false', 'ls-files'], { cwd: ROOT, encoding: 'utf8' });
   if (r.status !== 0) {
     fail(gate, `git ls-files 不可用（${String(r.stderr).slice(0, 120)}）——本门禁覆盖面依赖仓库态，fail-loud`);
   } else {
@@ -405,9 +406,10 @@ function parkedSection() {
       let checked = 0;
       for (const rel of files) {
         const f = join(ROOT, rel);
-        if (!existsSync(f)) continue; // 稀疏态防御（同 md-links）
+        if (!existsSync(f)) { fail(gate, `tracked 文件 ${rel} 盘上缺席——迁移/清扫残留态，fail-loud`); continue; }
+        if (statSync(f).isDirectory()) continue; // 目录型 symlink（.claude/skills）非文本面
         let text;
-        try { text = readFileSync(f, 'utf8'); } catch { continue; }
+        try { text = readFileSync(f, 'utf8'); } catch (e) { fail(gate, `tracked 文件 ${rel} 不可读（${e.code || e.message}）——fail-loud`); continue; }
         for (const m of text.matchAll(/notes\/proposed\/[A-Za-z0-9._-]+\.md/g)) {
           checked++;
           if (!existsSync(join(ROOT, m[0]))) {
@@ -496,16 +498,18 @@ function parkedSection() {
 // 范围：live 文件（排除 notes/ 历史层与 vendor/）。防空语料：0 个文件被检查 → 红。
 {
   const gate = 'count-free';
-  const r = spawnSync('git', ['ls-files'], { cwd: ROOT, encoding: 'utf8' });
+  // 同族收口（2026-10-07 ls-files 清扫）：quotepath=false + 缺席/不可读 fail-loud + 目录型 symlink 放行
+  const r = spawnSync('git', ['-c', 'core.quotepath=false', 'ls-files'], { cwd: ROOT, encoding: 'utf8' });
   const files = (r.stdout ?? '').split('\n').filter(Boolean)
     .filter((f) => !f.startsWith('vendor/') && !f.startsWith('notes/') && f !== 'pnpm-lock.yaml');
   if (files.length === 0) fail(gate, '防空语料：未扫到任何 live 文件');
   else {
     for (const rel of files) {
       const f = join(ROOT, rel);
-      if (!existsSync(f)) continue;
+      if (!existsSync(f)) { fail(gate, `tracked 文件 ${rel} 盘上缺席——迁移/清扫残留态，fail-loud`); continue; }
+      if (statSync(f).isDirectory()) continue; // 目录型 symlink（.claude/skills）非文本面
       let text;
-      try { text = readFileSync(f, 'utf8'); } catch { continue; }
+      try { text = readFileSync(f, 'utf8'); } catch (e) { fail(gate, `tracked 文件 ${rel} 不可读（${e.code || e.message}）——fail-loud`); continue; }
       for (const mm of text.matchAll(/(?<![A-Za-z0-9])[0-9]+ ?(门禁|tests|断言|条源面)/g)) {
         const line = text.slice(0, mm.index).split('\n').length;
         fail(gate, `${rel}:${line} 写死计数"${mm[0]}"——计数有正本（gates 数组 / evaluation §L0 / ls），散文改指正本`);
@@ -523,14 +527,17 @@ function parkedSection() {
 // 防空语料：0 个文件被检查 → 红。
 {
   const gate = 'doc-now-only';
-  const r = spawnSync('git', ['ls-files', '*.md'], { cwd: ROOT, encoding: 'utf8' });
+  // 同族收口（2026-10-07 ls-files 清扫）：quotepath=false（非 ASCII 的 .md 曾被整体跳过，
+  // _dist/安装手册.md 实测）+ 缺席/不可读 fail-loud + 目录型 symlink 放行
+  const r = spawnSync('git', ['-c', 'core.quotepath=false', 'ls-files', '*.md'], { cwd: ROOT, encoding: 'utf8' });
   const files = (r.stdout ?? '').split('\n').filter(Boolean)
     .filter((f) => !f.startsWith('vendor/') && !f.startsWith('notes/') && f !== 'docs/AGENTS.md');
   if (files.length === 0) fail(gate, '防空语料：未扫到任何 live 文档');
   else {
     for (const rel of files) {
       const f = join(ROOT, rel);
-      if (!existsSync(f)) continue;
+      if (!existsSync(f)) { fail(gate, `tracked 文件 ${rel} 盘上缺席——迁移/清扫残留态，fail-loud`); continue; }
+      if (statSync(f).isDirectory()) continue; // 目录型 symlink（.claude/skills）非文本面
       const text = readFileSync(f, 'utf8');
       const lines = text.split('\n');
       for (const mm of text.matchAll(/已销账|修订 →|曾用|首版[^\n]{0,15}已由/g)) {
