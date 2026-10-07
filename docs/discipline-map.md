@@ -199,6 +199,20 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | 快照世代模型 / record-refresh 分叉 / 平台变体 | 单 fixture 单代；`--update-expected` = refresh 语义已具；record = 真录制维持搁置 | 不适用（无格式演进压力） |
 | 七层宪法层 / coverage 门 / run-gates DAG / 性能基准层 / flake 八分类 | 维持五面合同与偏离登记（L0–L4 已是证据形态分层） | 不适用（理由 = 采纳 Note 输掉的方案） |
 
+<a id="source-11"></a>
+## 源 11：_dsh_plugin_agent_ready_development 语料（二代，独立插件仓专版）
+
+> 语料身份与钉版 = [00-index §外部研究材料](00-index.md)；对照总账正本 = [吸收审计毕业 Note](../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md)（通读范围、已具备逐件对照表、痛点归因与输掉的方案）。本表只收**二代增量**结论；一代语料已覆盖的不重复登记。
+
+| 二代语料增量 | 本仓落点 | 状态 |
+|---|---|---|
+| 交付判断四角色：机械检查 / 语义评审 / 批准 / 显式交互——各证明不同的东西，互不冒充 | [evaluation §完成判断四分离](evaluation.md) + [reviewing-a-delivery](../.agents/skills/reviewing-a-delivery/SKILL.md) 技能（语义自审层——agent 可自主完成的角色） | 照搬（判据固化 + 技能载体） |
+| 完成判断公理：能加载 ≠ 有行为证据 ≠ 能安装 ≠ 已获交付批准 | evaluation §完成判断四分离（四结果 ↔ L1 挂载 / L1 行为断言 / L2 / 收尾对账+用户批准） | 照搬 |
+| 门禁自测模式（语料 verify.test.mjs：完整副本 + 真实 verifier 入口 + invalid case 真被拒才算数） | [gates-smoke](../scripts/smoke/gates-smoke.mjs)（临时副本 + 注入回归经真实 verify 入口点名报红 + 零注入对照组防断言空转）+ [tests/verify-gates.test.mjs](../tests/verify-gates.test.mjs)（案例表 ↔ gates 数组静态对账） | 带证据适配（子进程归 smoke 道——layering 禁默认回归 spawn；副本 = tracked 全量 + 被 tracked md 引用的运行区链接目标补拷） |
+| 验证词汇：oracle 独立预期 / real composition / semantic review | [00-index §术语映射](00-index.md) 验证词汇行 | 照搬 |
+| 六误区清单（goal≠验收 / mock-only / 刷新≠接受 / 空 invariant / agent-loop / 不抄主仓治理） | 逐条散落既有登记（D6 / L1 真挂载 / tests·AGENTS fix fixtures / 本表源 1 与 alignment-ledger / 不适用登记）——不另立第二份清单（理由 = RFC 输掉的方案） | 已具备（散落） |
+| 主仓治理全套（Issue/PR policy、weighted approval、stacked PR、release lane、`.github/` 执行层） | 等价物 = 队列制 + pre-commit + 窄切片 + 收尾对账（既有登记）；语料适用边界明文反证该立场 | 不适用（维持） |
+
 ## 重审触发路径
 
 升 pin 时按此清单逐条复核（语料 `_coverage` 模式吸纳）：

@@ -97,6 +97,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 证据 | 入口 | 凭据与外部调用 | 能证明什么 |
 |---|---|---|---|
 | L0 门禁 | `pnpm verify`；[verify](../scripts/verify/verify.mjs) | 无模型；本地 git 与生成器检查子进程 | 结构、链接、预算、同步等机械不变量 |
+| 门禁自测 | [gates-smoke](../scripts/smoke/gates-smoke.mjs) | 无模型；git/node 子进程 | 门禁逻辑回归：注入违规经真实 verify 入口点名报红 + 零注入对照组 |
 | 确定性回归 | `pnpm test`；`tests/*.test.mjs` | 无模型/浏览器/网络/子进程；导入执行路径另核查，见下方限制 | 纯函数行为、解析、状态折算、渲染输出、审计判据与配置契约 |
 | L1 真实挂载 | [preset-smoke](../scripts/smoke/preset-smoke.mjs) | 无模型；`DSH_SMOKE_REAL=1` 才起真 DSH，本地 RPC 与子进程 | roster、逐角色创建会话、skills 可见性/隔离；默认档只预检 |
 | L2 安装 | [release-smoke](../scripts/smoke/release-smoke.mjs) | 无模型调用；npm 安装可能访问网络；`--install-only` 安装检查跳过凭据；默认 preflight 检查凭据在场 | pack → 重建测试 profile → 安装 → scaffold/preflight → 安装域挂载 |

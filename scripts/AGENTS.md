@@ -11,6 +11,7 @@
 - `verify/verify.mjs` 的 `gates` 数组与 [docs/evaluation.md](../docs/evaluation.md) §L0 登记表
   **两处同步**（`gate-ledger-sync` 门禁对账）；每条新门禁带"注入回归 → 红 → 还原 → 绿"的
   反证记录。
+- **门禁自测**：改 verify.mjs 门禁逻辑必跑 `node scripts/smoke/gates-smoke.mjs`（案例表 `CASES` 增删同 diff；`tests/verify-gates.test.mjs` 静态对账案例 ↔ gates 数组）。
 - 失败信息要给出**失败对象 + 违反的规则 + 修正入口**；不确定就 fail-loud，不静默跳过。
 
 ## 范围纪律（实测教训，不是风格偏好）

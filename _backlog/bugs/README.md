@@ -12,7 +12,7 @@
 
 | Bug | 标题 | 严重级 | 发现 |
 |---|---|---|---|
-| （无活跃卡——bugs 池清零，2026-10-06；最近归档 = BUG-015 pick 实现 + 意图对账〔TDD 23/23〕） | | | |
+| [BUG-016](BUG-016-fresh-clone-mdlinks-runtime-links.md) | fresh clone 上 `pnpm verify` 红——_done/_reference 摘要链接运行区归档件 | P2 | 2026-10-07 |
 
 ## 卡片模板
 
