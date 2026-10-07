@@ -35,4 +35,4 @@
 
 - `scripts/` 顶层 = 六组 + README/AGENTS/doc-budgets.json；`runtime/` 在场（harness-home + smoke-workspace）；`dev/` 盘面纯源码驱动。
 - 安装域 research profile 已删：下次 `bash dev/boot-run.sh` 自动补装（首次 boot 走 npm 安装）。
-- 观察登记（未在本条目修）：其余 `git ls-files` 消费门禁（count-free / doc-now-only 等）沿用默认 quotepath 与静默跳过形态，同类非 ASCII 路径与缺席盲区可能在场——已立队列 ▶ 条目（[RFC](../proposed/2026-10-07-lsfiles-gate-coverage-sweep.md)）跟进。
+- 观察登记（未在本条目修）：其余 `git ls-files` 消费门禁（count-free / doc-now-only 等）沿用默认 quotepath 与静默跳过形态，同类非 ASCII 路径与缺席盲区可能在场——已立条目收口（[lsfiles Note](2026-10-07-lsfiles-gate-coverage-sweep.md)）。
