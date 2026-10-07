@@ -138,14 +138,14 @@ test('answerBatchOf：从盘侧事件抠 ask 的 answer 批（result 缺席 → 
 // 劫持机制：UI 预选推荐项 → Submit 立即可用 → 旧决策层第一步就 click-submit，clickOption 的
 // pick 逻辑永远够不着。修复 = 决策层带意图符合性（不符先改选）+ 盘侧落地批与 pick 命令对账。
 
-test('parseAskQuestions：完整参数 → 逐题 id / prompt / option 标签（意图解析的输入面）', () => {
+test('parseAskQuestions：完整参数 → 逐题 id / header / prompt / option 标签（意图解析的输入面；header = provenance 题面富集源，BUG-017）', () => {
   const args = JSON.stringify({
     questions: [
-      { id: 'hitl2', question: '定稿还是补研究？', options: [{ label: '定稿（Recommended）' }, { label: '补研究：破单源' }] },
+      { id: 'hitl2', header: '交付审阅', question: '定稿还是补研究？', options: [{ label: '定稿（Recommended）' }, { label: '补研究：破单源' }] },
     ],
   });
   assert.deepEqual(parseAskQuestions(args), [
-    { id: 'hitl2', prompt: '定稿还是补研究？', options: ['定稿（Recommended）', '补研究：破单源'] },
+    { id: 'hitl2', header: '交付审阅', prompt: '定稿还是补研究？', options: ['定稿（Recommended）', '补研究：破单源'] },
   ]);
   assert.deepEqual(parseAskQuestions('{not json'), [], '坏串 → 空数组（不猜）');
   assert.deepEqual(parseAskQuestions(undefined), []);

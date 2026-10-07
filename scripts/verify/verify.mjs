@@ -95,15 +95,36 @@ function parkedSection() {
   }
 }
 
-// ── 门禁 2：md-links（所有 tracked .md 的相对链接必须可解析；git ls-files 驱动——基础整治 C10）──
+// ── 门禁 2：md-links（所有 tracked .md 的相对链接必须可解析且目标被 git 跟踪；git ls-files 驱动——基础整治 C10）──
 // 原版只扫具名目录（docs/notes/…），根目录其余 tracked .md 逃检——本单子文件初稿 31 条死链
 // 同刻全绿即实证。覆盖面 = tracked 集合（新文件 git add 后纳入）；反引号裸路径不检（设计）。
+// BUG-016 加宽（2026-10-07）：链接目标**盘上存在但未被 git 跟踪**同样红——旧判据查盘上
+// 存在性，绿色依赖机器状态（本机有归档产物就绿，fresh clone 即红，_done/_reference 摘要
+// 链接 research-workspace/archive/ 实证）。链接语法 = 仓内可解析承诺；引用运行区/本机数据
+// 请用反引号散文路径。目录目标按"其下有 tracked 文件"判。
 {
   const gate = 'md-links';
-  const r = spawnSync('git', ['ls-files', '*.md'], { cwd: ROOT, encoding: 'utf8' });
+  // quotepath=false（2026-10-07 ls-files 族收口同款）：非 ASCII 路径（_dist/安装手册.md）的
+  // 引号转义会让 tracked 集合查不到 → 假红；旧版未加此参时该文件被 existsSync 跳过 = 静默漏扫
+  const r = spawnSync('git', ['-c', 'core.quotepath=false', 'ls-files', '*.md'], { cwd: ROOT, encoding: 'utf8' });
   if (r.status !== 0) {
     fail(gate, `git ls-files 不可用（${String(r.stderr).slice(0, 120)}）——本门禁覆盖面依赖仓库态，fail-loud`);
   } else {
+    const lsAll = spawnSync('git', ['-c', 'core.quotepath=false', 'ls-files'], { cwd: ROOT, encoding: 'utf8' });
+    if (lsAll.status !== 0) fail(gate, 'git ls-files（全量）不可用——tracked 目标判定失效，fail-loud');
+    const trackedAll = new Set(lsAll.stdout.split('\n').filter(Boolean));
+    const isTrackedTarget = (abs) => {
+      const rel = relative(ROOT, abs);
+      if (rel.startsWith('..')) return true; // 仓外绝对路径目标（罕见）不在此门禁判
+      if (trackedAll.has(rel)) return true;
+      try {
+        if (statSync(abs).isDirectory()) {
+          const prefix = rel.endsWith('/') ? rel : `${rel}/`;
+          for (const t of trackedAll) if (t.startsWith(prefix)) return true;
+        }
+      } catch { /* 目标不存在由存在性断言管 */ }
+      return false;
+    };
     for (const rel of r.stdout.split('\n').filter(Boolean)) {
       const f = join(ROOT, rel);
       if (!existsSync(f)) continue; // 稀疏态防御
@@ -118,6 +139,7 @@ function parkedSection() {
           if (!target || /^[a-z]+:\/\//i.test(target) || target.startsWith('mailto:')) continue;
           const abs = resolve(dirname(f), target);
           if (!existsSync(abs)) fail(gate, `${rel}: 链接不可解析 → ${target}`);
+          else if (!isTrackedTarget(abs)) fail(gate, `${rel}: 链接目标未被 git 跟踪 → ${target}（链接语法 = 仓内可解析承诺；运行区/本机数据引用请用反引号路径——BUG-016）`);
         }
       }
     }

@@ -17,6 +17,7 @@ import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSyn
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { localDateStr } from '../lib/local-date.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
@@ -79,7 +80,8 @@ try {
         : `${entries.length} 条目，preset 行 ${presetRows}，skill ${skills}，模板 ${templates}`)
 
   // 3. 手册——版本/日期/条目数注入，让它指名它旁边这份产物；步骤 = release-smoke 的路径
-  const date = new Date().toISOString().slice(0, 10)
+  //    日期 = 本地口径（人读日期行；UTC slice 在 00:00–08:00 窗口差一天——BUG-017 同款口径纪律）
+  const date = localDateStr()
   const manual = `# dsh-deep-research-pack 手动安装手册
 
 | | |

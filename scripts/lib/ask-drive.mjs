@@ -23,7 +23,8 @@ export function parseAskArgs(argumentsText) {
  * 解析 ask 的逐题选项面（BUG-015 意图解析的输入）：id / prompt / option 标签清单。
  * 坏串或形态不符 → 空数组（不猜——意图对账对不可解析输入一律响亮红）。
  * @param argumentsText tool/call 事件的 data.arguments 原始串。
- * @returns Array<{id: string, prompt: string, options: string[]}>
+ * @returns Array<{id: string, header: string, prompt: string, options: string[]}>
+ *   header = 问句短标签（persona 硬格式要求每问带 header；provenance 题面富集源，BUG-017）。
  */
 export function parseAskQuestions(argumentsText) {
   let args = {}
@@ -33,6 +34,7 @@ export function parseAskQuestions(argumentsText) {
     .filter((q) => q && typeof q === 'object')
     .map((q) => ({
       id: String(q.id ?? q.question ?? ''),
+      header: String(q.header ?? ''),
       prompt: String(q.question ?? ''),
       options: (Array.isArray(q.options) ? q.options : [])
         .filter((o) => o && typeof o === 'object' && typeof o.label === 'string')

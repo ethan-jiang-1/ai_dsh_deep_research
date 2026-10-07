@@ -12,8 +12,7 @@
 
 | Bug | 标题 | 严重级 | 发现 |
 |---|---|---|---|
-| [BUG-016](BUG-016-fresh-clone-mdlinks-runtime-links.md) | fresh clone 上 `pnpm verify` 红——_done/_reference 摘要链接运行区归档件 | P2 | 2026-10-07 |
-| [BUG-017](BUG-017-provenance-utc-date-mismatch.md) | 代答 provenance 行日期用 UTC——与本地拍板行错位、破坏 append-only 次序 | P2 | 2026-10-07 |
+| （无活跃卡——bugs 池清零，2026-10-07；最近归档 = BUG-016 fresh clone 门禁机器态依赖 + BUG-017 provenance UTC 日期〔两卡均 TDD 先红后绿〕） | | | |
 
 ## 卡片模板
 

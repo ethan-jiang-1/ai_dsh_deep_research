@@ -23,6 +23,7 @@ import { loadChromium, launchChromium } from '../scripts/lib/playwright.mjs'
 import { runStateOf, readSessionEvents, bundleStateOf } from '../scripts/lib/run-state.mjs'
 import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf, parseAskQuestions, pickTargetLabel, intentReconcile } from '../scripts/lib/ask-drive.mjs'
 import { appendProvenance, batchToAnswered } from '../scripts/lib/hitl-provenance.mjs'
+import { localDateStr } from '../scripts/lib/local-date.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 // 与 dev/run-kickoff.mjs 同形：name 自带 `--`（本仓约定，别在 helper 里再加一次）
@@ -330,7 +331,7 @@ try {
   // dry-run 不写；裁决红不写；批与点击日志双空 = answer 未落地不写。HITL1 窗口（无 bundle）响亮延迟。
   // ⚠ 作用域教训（第三缺口实录）：landedBatch 必须声明在裁决块之外——块内声明 + 块外引用
   // = ReferenceError，裁决通过后必崩（答案已落地但 provenance 永远丢失，且 node --check 查不出）。
-  const provAnswered = batchToAnswered(landedBatch).length > 0 ? batchToAnswered(landedBatch) : answered
+  const provAnswered = batchToAnswered(landedBatch, plan.questions).length > 0 ? batchToAnswered(landedBatch, plan.questions) : answered
   if (!DRY && provAnswered.length > 0 && (process.exitCode === 0 || intentFailed)) {
     const wsRoot = join(ROOT, 'research-workspace')
     const { activeBundle } = bundleStateOf(wsRoot)
@@ -348,7 +349,7 @@ try {
       for (let attempt = 0; attempt < 3 && written === null; attempt++) {
         if (attempt > 0) await page.waitForTimeout(2000)
         try {
-          written = appendProvenance({ bundle: join(wsRoot, activeBundle), date: new Date().toISOString().slice(0, 10), pick: pickNote, answered: provAnswered })
+          written = appendProvenance({ bundle: join(wsRoot, activeBundle), date: localDateStr(), pick: pickNote, answered: provAnswered })
         } catch (e) {
           if (attempt === 2) log(`hitl-answer: provenance 写盘失败（3 次重试后）——${String(e?.message ?? e).slice(0, 140)}；记账义务移交操作侧（答案内容已打印），勿隐去`)
         }

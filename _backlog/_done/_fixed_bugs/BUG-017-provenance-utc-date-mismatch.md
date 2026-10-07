@@ -1,6 +1,6 @@
 # BUG-017：代答 provenance 行日期用 UTC——与本地拍板行日期错位，破坏 append-only 次序
 
-> 严重级别：P2（重要）｜发现：2026-10-07｜状态：活跃
+> 严重级别：P2（重要）｜发现：2026-10-07｜状态：活跃 — 已修复 2026-10-07：`scripts/lib/local-date.mjs`（localDateStr = toLocaleDateString('sv')，与 bash date 同源）接管 hitl-answer provenance 与 export-dist 打包日期两处 UTC slice；题面富集 = batchToAnswered questions 参数（header > id > prompt >「（题面缺席）」诚实标记）+ parseAskQuestions 补 header；红绿实录 = tests/local-date + hitl-provenance + ask-drive 三文件先红后绿
 
 ## 症状
 
@@ -29,6 +29,4 @@ evidence-audit/仪表盘若有同款，一并修）。
 
 ## 修复关联
 
-修法 = hitl-answer 的 provenance 日期改本地口径（如 `new Date().toLocaleDateString('sv')` 或
-显式 Asia/Shanghai 格式化）+ 题面缺失补齐 + 横切清扫；发现与登记 = 全仓 DSH-native 审计
-（run 通道面审计代理发现，父会话核实归档实物）。
+已修复（2026-10-07，TDD 路）：①缺陷实录 = 边界时刻（2026-10-07T20:00:00Z）UTC slice 给 10-07、本地给 10-08——mcp-hosts 事故窗口单元级复现；②三个红测试先行（tests/local-date.test.mjs 新立——模块缺席红；hitl-provenance 题面富集用例——空 id 落空串红；ask-drive header 字段——形状合同真实变化同 diff 改锚）；③实现到绿：`local-date.mjs` helper（本地口径，不硬编码时区——工具跟机器走，与手册"先跑 bash date"纪律永一致）；hitl-answer:351 接 helper + batchToAnswered 传 plan.questions；export-dist:82 打包日期同口径；④横切清扫 = 全仓 UTC-date-slice 恰两处、全改（机器比较时间戳保持 UTC ISO 不动）；⑤存量 mcp-hosts 错行留作历史（run bundle 不改写，本卡在案）。

@@ -1,6 +1,6 @@
 # BUG-016：fresh clone 上 `pnpm verify` 红——_done/_reference 摘要链接运行区归档件
 
-> 严重级别：P2（次要）｜发现：2026-10-07｜状态：活跃
+> 严重级别：P2（次要）｜发现：2026-10-07｜状态：活跃 — 已修复 2026-10-07：md-links 加宽"目标未被 git 跟踪 → 红"（quotepath=false）+ 存量 18 条 digest 链接转反引号路径 + navigability Note 同款 1 处 + gates-smoke 拆运行区补拷对冲（对照组在 tracked-only 副本绿 = fresh clone 等价证）；红绿实录 = evaluation §L0 md-links 行反证列
 
 ## 症状
 
@@ -32,6 +32,4 @@ md-links 门禁的链接可解析判定检查**盘上存在性**，不区分 tra
 
 ## 修复关联
 
-候选方向（修复时定）：摘要改述 + 移除运行区链接（引用改外部钉版源）；或 md-links 收紧为
-「tracked .md 的链接目标必须 tracked 或明确白名单」（新门禁走 writing-a-gate 全流程带反证）。
-发现与登记 = [吸收审计毕业 Note](../../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md)；gates-smoke fixture 的运行区补拷为临时对冲（注释在案），修复后可移除。
+已修复（2026-10-07，TDD 路）：①红证 = gates-smoke 新案例 `md-links-untracked`（目标存在但未跟踪）注入不被旧门禁拦——守卫缺位实证；②md-links 加宽断言（链接目标盘上存在且未被 git 跟踪 → 红；目录目标按"其下有 tracked 文件"判；`-c core.quotepath=false` 防 `_dist/安装手册.md` 非 ASCII 路径假红——顺带修掉旧门禁对该文件的静默漏扫）；③真仓 22 处命中实录 → 存量修复（digest 18 条链接 → `label（\`repo 相对路径\`）` 形态，信息不丢；navigability Note 1 处同款）；④gates-smoke 的"运行区链接目标补拷"临时对冲移除——零注入对照组在 tracked-only 副本全 PASS = fresh clone 等价证明；真 fresh clone 终验见交付 commit。发现与登记 = [吸收审计毕业 Note](../../../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md)。

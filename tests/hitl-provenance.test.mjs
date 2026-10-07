@@ -25,6 +25,24 @@ test('batchToAnswered：盘侧 answer 批 → answered 形态（id 作标签—�
   assert.deepEqual(batchToAnswered(null), [], '批缺席 → 空数组（不猜）');
 });
 
+test('batchToAnswered：questions 富集（BUG-017——空 id 不再落空题面；mcp-hosts 实证 Q1「」形态）', () => {
+  const questions = [
+    { id: 'delivery_review', header: '交付审阅', prompt: '成稿质量如何，是否定稿？', options: [] },
+    { id: 'research_type', header: '研究类型', prompt: '这是什么类型的研究？', options: [] },
+  ];
+  // 空 id（'' 非 nullish，旧实现 ?? 链不回退 → 空题面）+ 位序 join → header 标签
+  assert.deepEqual(
+    batchToAnswered([{ id: '', selected: ['按现稿定稿（Recommended）'] }], questions),
+    [{ step: 1, prompt: '交付审阅', selected: '按现稿定稿（Recommended）' }],
+  );
+  // id join 优先于位序（乱序批）
+  assert.equal(batchToAnswered([{ id: 'research_type', selected: ['x'] }], questions)[0].prompt, '研究类型');
+  // 无 questions 时 id 仍在（既有行为不变）
+  assert.equal(batchToAnswered([{ id: 'research_type', selected: ['x'] }])[0].prompt, 'research_type');
+  // 无任何可解析标签 → 诚实标记而非空串（空串 = 静默，与「显性化而不是静默」纪律相悖）
+  assert.equal(batchToAnswered([{ selected: ['x'] }], [])[0].prompt, '（题面缺席）');
+});
+
 test('provenanceLines：两行都带代理模拟标注、作答内容与日期', () => {
   const lines = provenanceLines({ date: '2026-10-05', pick: 'recommended', answered: ANSWERED });
   assert.ok(lines.decisions.includes('操作侧代理模拟'), '§Decisions 行缺代理模拟标注');

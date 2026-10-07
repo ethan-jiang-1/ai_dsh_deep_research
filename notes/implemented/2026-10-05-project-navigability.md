@@ -53,7 +53,7 @@ L2 不调用模型，要求凭据会把安装结构证据与生产研究前置�
 - `tsc -p packages/deep-research-pack/tsconfig.json --noEmit` 与相关脚本语法检查通过。
 - `source dev/env.sh && node scripts/release-smoke.mjs`：ALL PASS；npm pack、干净 profile 安装、scaffold 真铺种子、空凭据安装模式通过、默认模式拒绝，以及安装域四角色真挂载全部通过。
 - `source dev/env.sh && node --import tsx/esm scripts/client-load-smoke.mjs`：ALL PASS；真实浏览器 client 装配、HITL 锚点、步骤条与盘侧文件对账通过。未绑定会话负样本候选不可打开，该断言跳过。
-- `source dev/env.sh && node scripts/entry-chain-probe.mjs`：ALL PASS；正确识别空队列、入口 owner 与开发环，人工复核 [探针原文](../../runtime/smoke-workspace/entry-chain-probe-2026-10-05T10-03-28-369Z.md)。
+- `source dev/env.sh && node scripts/entry-chain-probe.mjs`：ALL PASS；正确识别空队列、入口 owner 与开发环，人工复核探针原文 `runtime/smoke-workspace/entry-chain-probe-2026-10-05T10-03-28-369Z.md`（运行区本机数据，留档非入库件）。
 - `source dev/env.sh && node scripts/snapshot-replay-smoke.mjs`：四角色 A 回放、B2 工具 schema、非 Lead 的 B1 persona，以及 Lead C 渲染金标准通过；Lead B1 persona 失败。失败源为本次未修改的既有 persona 与旧录制语料错位，记为 [BUG-013](../../_backlog/_done/_fixed_bugs/BUG-013-lead-replay-persona-stale.md)（2026-10-05 当日修复闭卡），未放宽比较器或重写金标准。
 - `pnpm verify` 全绿；结构门禁最终通过临时 Git 索引把新增文件纳入 tracked 扫描，真实暂存区保持原样。
 - 执行路径探针：`node --experimental-test-isolation=none --import ./dev/smoke-workspace/regression-process-guard.mjs --test tests/*.test.mjs`，194 项通过、0 次子进程调用。向 guard 注入被吞掉的 `execSync` 后退出 1，证明监测可咬中原缺陷类型。

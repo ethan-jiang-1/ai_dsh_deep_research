@@ -63,11 +63,20 @@ const bareQueuePointer = () => (dir) => {
   writeFileSync(p, lines.join('\n'));
 };
 
+const linkUntrackedTarget = () => (dir) => {
+  // 目标在盘上存在但未被 git 跟踪（BUG-016 形态：tracked md 链接运行区文件——git 绿依赖机器
+  // 状态而非仓库状态；runtime/ 在 .gitignore 内且 fixture 的 git add 已完成 → 恒 untracked）
+  mkdirSync(join(dir, 'runtime'), { recursive: true });
+  writeFileSync(join(dir, 'runtime', 'orphan-probe.md'), '# 孤儿目标\n');
+  appendFileSync(join(dir, 'README.md'), '\n[孤儿探针](runtime/orphan-probe.md)\n');
+};
+
 /** 承重门禁抽样（增删同 diff：本表 + tests/verify-gates.test.mjs 无需改——它动态对账本表）。
  *  id = 案例唯一标识（同一门禁可有多个注入形态，id 防重复条目）；gate = 期望点名的门禁；
  *  mutate(dir) = 在 fixture 内注入该门禁负责拦的回归。 */
 export const CASES = [
   { id: 'md-links-dead', gate: 'md-links', mutate: appendTo('README.md', '\n[死链探针](./definitely-missing-file.md)\n') },
+  { id: 'md-links-untracked', gate: 'md-links', mutate: linkUntrackedTarget() },
   { id: 'md-anchors-missing', gate: 'md-anchors', mutate: appendTo('README.md', '\n[坏锚探针](AGENTS.md#这个锚点肯定不存在xyz)\n') },
   { id: 'note-format-no-status', gate: 'note-format', mutate: stripFirstStatusLine(join('notes', 'implemented')) },
   { id: 'entry-chain-pointer', gate: 'entry-chain', mutate: breakQueuePointer() },
@@ -96,25 +105,9 @@ function buildFixture() {
     if (st.isSymbolicLink()) symlinkSync(readlinkSync(src), dst); // symlink 原样保真（CLAUDE.md → AGENTS.md 等）
     else cpSync(src, dst);
   }
-  // 补拷被 tracked md 相对链接引用、且盘上存在但未被 git 跟踪的运行区文件（实证：_done/_reference
-  // 摘要链接 research-workspace/archive/ 的 run 产物——真仓 verify 绿依赖它们在盘上；副本不补
-  // 则 md-links 在零注入对照组即红，断言空转）。不补 = fresh clone 也会红的真问题（BUG-016 在案）。
-  const trackedSet = new Set(files);
-  const mdFiles = files.filter((f) => f.endsWith('.md'));
-  for (const f of mdFiles) {
-    for (const m of readFileSync(join(ROOT, f), 'utf8').matchAll(/\]\(([^)#\s]+)(?:#[^)]*)?\)/g)) {
-      const t = m[1];
-      if (/^(https?:|mailto:)/.test(t) || t.startsWith('/')) continue;
-      const abs = resolve(ROOT, dirname(f), t);
-      const rel = relative(ROOT, abs);
-      if (rel.startsWith('..') || trackedSet.has(rel)) continue;
-      if (!existsSync(abs)) continue;
-      const dst = join(tmp, rel);
-      if (lstatSync(abs).isDirectory()) mkdirSync(dst, { recursive: true }); // 目录目标只需在场（链接可解析判存在性）
-      else cpSync(abs, dst);
-      trackedSet.add(rel);
-    }
-  }
+  // 副本 = tracked 全量，等价 fresh clone（BUG-016 修复后 tracked md 零运行区链接——曾有的
+  // 18 条 digest 链接已转反引号路径，md-links 加宽断言把守该类不再回来；旧版在此处的
+  // "运行区链接目标补拷"临时对冲随之移除）。
   const r1 = git(tmp, ['init', '-q']);
   const r2 = git(tmp, ['add', '-A']);
   if (r1.status !== 0 || r2.status !== 0) throw new Error(`fixture git init/add 失败：${r1.stderr || r2.stderr}`);

@@ -10,17 +10,27 @@ import { join } from 'node:path';
 /**
  * 盘侧 answer 批 → provenance 的 answered 形态（BUG-014 第二缺口正修：DSH UI 会预选推荐项，
  * 驱动零点击直接 Submit 时点击日志为空——provenance 数据源必须是**实际提交的批**而非点击日志；
- * 批形态 = [{id, selected: [...]}]，以 id 作题目标签）。
+ * 批形态 = [{id, selected: [...]}]）。
+ * BUG-017 题面富集：批可能带空 id（'' 非 nullish，旧 ?? 链不回退 → Q1「」空题面，mcp-hosts
+ * 实证）——questions 参数（ask-drive.parseAskQuestions 产出，含 header/prompt）按 id join、
+ * 位序回退解析标签；标签链 = header > id > prompt >「（题面缺席）」诚实标记（空串 = 静默，
+ * 与「显性化而不是静默」纪律相悖）。
  * @param {Array<{id?: string, prompt?: string, selected?: string[]}>} batch
+ * @param {Array<{id?: string, header?: string, prompt?: string}>} [questions]
  * @returns {Array<{step: number, prompt: string, selected: string}>} 批缺席 → 空数组（不猜）。
  */
-export function batchToAnswered(batch) {
+export function batchToAnswered(batch, questions = []) {
   if (!Array.isArray(batch)) return [];
-  return batch.map((b, i) => ({
-    step: i + 1,
-    prompt: String(b?.id ?? b?.prompt ?? ''),
-    selected: String(Array.isArray(b?.selected) ? (b.selected[0] ?? '') : (b?.selected ?? '')),
-  }));
+  const qs = Array.isArray(questions) ? questions : [];
+  return batch.map((b, i) => {
+    const q = (b?.id ? qs.find((x) => x && x.id === b.id) : undefined) ?? qs[i];
+    const label = (q && q.header) || (b?.id ? String(b.id) : '') || (q && q.prompt) || (b?.prompt ? String(b.prompt) : '') || '（题面缺席）';
+    return {
+      step: i + 1,
+      prompt: String(label),
+      selected: String(Array.isArray(b?.selected) ? (b.selected[0] ?? '') : (b?.selected ?? '')),
+    };
+  });
 }
 
 /**
