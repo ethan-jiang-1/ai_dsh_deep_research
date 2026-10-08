@@ -13,10 +13,7 @@
 
 ## 队列
 
-1. ▶ **recorded-session 义务标定**（研究｜**可自主**）
-   参考卷 `12 §2` 义务零机械面，但"非平凡"是语义判断、易假阳——**先标定后立门禁**：
-   统计近 10 次变更中几次真改 model-visible 面，产出真阳:假阳比与判据形状建议。
-   RFC = [2026-10-08-recorded-session-obligation](../notes/proposed/2026-10-08-recorded-session-obligation.md)
+（队列空——待用户取题）
 
 > 出处 = SDLC Reference 全量对表推敲卡
 > [2026-10-08-sdlc-reference-absorption](_done/_closed_plans/2026-10-08-sdlc-reference-absorption.md)

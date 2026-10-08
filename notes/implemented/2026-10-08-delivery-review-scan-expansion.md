@@ -43,7 +43,8 @@
   live 文档（计数/时变状态）是本仓形态特有的高发面，参考卷没有对应条款不代表本仓不需要。
   **11 是参考卷的数，不是本仓的数**。
 - **同时补 C11（recorded-session 义务机械化）**：C11 性质不同（动机械面）且有独立前置
-  （假阳率标定），另立 [RFC](../proposed/2026-10-08-recorded-session-obligation.md)。不夹带。
+  （假阳率标定），另立独立条目
+  [recorded-session-obligation](2026-10-08-recorded-session-obligation.md)（已毕业）。不夹带。
 
 ## 实际跑过的验证
 
