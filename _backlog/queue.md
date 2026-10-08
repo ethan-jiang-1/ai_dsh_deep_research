@@ -13,7 +13,28 @@
 
 ## 队列
 
-（队列空——待用户取题）
+1. ▶ **语义自审面补盲：交付自审高风险扫描 4 → 11 条**（卫生｜**可自主**）
+   治症状③"质量不知道在哪里"的语义层盲区——现清单 4 条，参考卷 `06 §4` 给 11 条，
+   差额里若干条本仓从未在任何地方检查过（非"少查"是**盲区**）。
+   RFC = [2026-10-08-delivery-review-scan-expansion](../notes/proposed/2026-10-08-delivery-review-scan-expansion.md)
+2. **Note 存量体检：70 篇按三结局分类**（研究｜**可自主**）
+   本仓既定触发器到期未履行（阈值 50，实有 70，重估入口已于 2026-09-24 到齐）。
+   产出进 `_backlog/reference/`，**不动 notes 树**；由分布决定是否落 class 层。
+   RFC = [2026-10-08-notes-stocktake](../notes/proposed/2026-10-08-notes-stocktake.md)
+3. **意图载体总图页（`09-intake` 等价物）**（feature｜**可自主**）
+   治症状②"backlog↔notes 衔接靠人肉字符串、北星文档缺席"——载体 owner/进门/出场散在四处，
+   无单页总图。新建 `docs/design/60-intent-carriers.md` + 索引指针。
+   RFC = [2026-10-08-intent-carriers-north-star](../notes/proposed/2026-10-08-intent-carriers-north-star.md)
+4. **recorded-session 义务标定**（研究｜**可自主**）
+   参考卷 `12 §2` 义务零机械面，但"非平凡"是语义判断、易假阳——**先标定后立门禁**：
+   统计近 10 次变更中几次真改 model-visible 面，产出真阳:假阳比与判据形状建议。
+   RFC = [2026-10-08-recorded-session-obligation](../notes/proposed/2026-10-08-recorded-session-obligation.md)
+
+> 出处 = SDLC Reference 全量对表推敲卡
+> [2026-10-08-sdlc-reference-absorption](_done/_closed_plans/2026-10-08-sdlc-reference-absorption.md)
+> （2026-10-08 按"部分采纳"毕业：C17/C18/C1/C3 已落地，余项择要立上述 RFC）。
+> 卡上第二档其余项（C1 覆盖率 / C7 L3 逐行对账 / C8 L4 ④中断恢复 / C9 L4 ③HITL 静默 /
+> C12 misquote 升格 / C13–C16）**各有独立前置**（缺分布或标定），未立 RFC——需要时回卡取判断材料。
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 

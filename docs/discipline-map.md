@@ -253,7 +253,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
   的现状，因此下列事件发生时须同 diff 复核相关行——① 新增/退役自写代码面（如 D18 驾驶舱
   client 插件）；② 激活或清空某个 notes 层（如 archived/ 2026-09-27 启用）；③ 新增对接面、
   生成物或夹具族（如 snapshot-replay 夹具）。**只认 vendor 换 tag 会让"本仓落点"列单边腐烂**
-  ——实测教训 = [吸收对表推敲卡](../_backlog/plans/2026-10-08-sdlc-reference-absorption.md)
+  ——实测教训 = [吸收对表推敲卡](../_backlog/_done/_closed_plans/2026-10-08-sdlc-reference-absorption.md)
   §二轮复核（当时 10 处 `na`/落点已失真，`align-ledger` 只判存在性、判不出语义过期）；
 - ⚠️ **`不适用` 是"当时不适用"，不是豁免**：写 `不适用` 必须同时给出**可判定的失效条件**
   （"本仓无 X" 形态），由 `align-ledger` 门禁的活性断言机械复核——理由变假即红。**把

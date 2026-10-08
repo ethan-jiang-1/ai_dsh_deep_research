@@ -14,7 +14,7 @@
 
 | 卡 | 一句话 | 毕业门判断 |
 |---|---|---|
-| [2026-10-08-sdlc-reference-absorption](2026-10-08-sdlc-reference-absorption.md) | SDLC Reference 13 页全量对表：notes 管理 / backlog 衔接 / 测试资产三处症状钉到条文级 gap，分三档吸纳候选 | 待定——三处根因已坐实；待用户裁定第二档采哪几项 |
+| （当前无活跃卡） | — | — |
 
 ## 卡片模板
 
