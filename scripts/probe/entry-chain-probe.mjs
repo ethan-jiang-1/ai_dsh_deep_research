@@ -12,7 +12,7 @@
 //   4. 会话日志即真相：assistant/message 事件里找答案文本（不是用户消息回显）。
 //
 // 前置：source dev/env.sh（DSH_HOME + 凭据）；DSH_SRC 默认本仓根（vendor/dsh）。
-// 用法：source dev/env.sh && node scripts/entry-chain-probe.mjs [--port 3102]
+// 用法：source dev/env.sh && node scripts/entry-chain-probe.mjs [--port 3114]
 import { spawn, spawnSync } from 'node:child_process';
 import { withModelKey } from '../lib/env.mjs';
 import { randomUUID } from 'node:crypto';
@@ -28,7 +28,7 @@ const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
   return i === -1 ? fallback : process.argv[i + 1];
 };
-const PORT = Number(arg('port', '3102'));
+const PORT = Number(arg('port', '3114'));
 const BOOT_TIMEOUT_MS = 120_000;
 const TURN_TIMEOUT_MS = 180_000;
 const POLL_MS = 3_000;

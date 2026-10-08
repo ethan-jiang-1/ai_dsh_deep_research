@@ -14,3 +14,8 @@ export const RESEARCH_TITLE_SLOT = 'sidebar.right.pane.tab.title'
 
 /** 研究语义工具卡的 keyed 槽名（tool.call.toolview；key = wire 工具名，见 ResearchToolCard）。 */
 export const RESEARCH_TOOLVIEW_SLOT = 'tool.call.toolview'
+
+/** 研究语义工具卡的 wire 工具名族（toolview 槽的 keyed key——必须与 wire 注册名逐字一致，
+ *  拼错不报错、永不渲染）。族正本住这里（审计 P3 件①收口：曾住 ResearchToolCard.tsx，
+ *  门禁 client-keys 规则③④⑤把守单一正本）。新增研究语义工具卡时在族尾追加 wire 名。 */
+export const RESEARCH_TOOL_KEYS = ['spawn_teammate', 'web_search'] as const

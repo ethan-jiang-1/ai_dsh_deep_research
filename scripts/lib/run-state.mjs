@@ -92,6 +92,8 @@ export function runStateOf({ logPath, wsRoot }) {
   return {
     readable,
     events: events.length,
+    // 会话头 agentPreset（首事件 type:"session"；审计 P3 件⑨）——选卡面按它收窄。
+    preset: readable && events[0]?.type === 'session' ? (events[0].agentPreset ?? null) : null,
     hitlPending: readable ? hitlPendingOf(events).pending : null,
     askCalls: readable ? toolCallCount(events, 'ask_user_question') : null,
     askIndefinite: readable ? askIndefiniteOf(events) : null,
@@ -101,4 +103,14 @@ export function runStateOf({ logPath, wsRoot }) {
     // runSettled = 回合已终 + final 在场。present 缺席不阻塞 settled（由 presentCalls 暴露偏差）。
     runSettled: readable === true && turnOpen === false && bundle.finalWritten,
   }
+}
+
+/**
+ * 盘侧谓词选卡面（审计 P3 件⑨）：HITL 卡只由 lead 发起——挂起候选必须 preset === 'lead'。
+ * 队友会话（preset 为非 lead 的角色，清单正本 = 盘上 presets/）与非 lead 会话的 pending
+ * 不可选，防误答陈旧卡；未知 preset（日志残缺/格式漂移）同样不可选（缺失偏"不答"方向，
+ * 不偏"误答"）。
+ */
+export function leadHitlCandidate(state) {
+  return state?.preset === 'lead' && state?.hitlPending === true
 }

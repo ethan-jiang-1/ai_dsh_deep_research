@@ -8,7 +8,7 @@
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { runStateOf, eventsRegressed } from '../lib/run-state.mjs'
+import { runStateOf, eventsRegressed, leadHitlCandidate } from '../lib/run-state.mjs'
 import { resolveSessionLog } from '../lib/session-log.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -53,8 +53,12 @@ while (Date.now() < deadline) {
   if (line !== last) {
     console.log(`${new Date().toISOString().slice(11, 19)} ${line}`)
     last = line
+    // 选卡面纪律（审计 P3 件⑨）：HITL 挂起谓词只对 lead 有意义——盯到非 lead 会话
+    // 显性提示一次（不硬退：观察面允许盯任意会话，但操作者必须知道谓词语义不同）。
+    if (s.preset !== undefined && s.preset !== null && s.preset !== 'lead')
+      console.error(`watch-run: ⚠ 盯的是 ${s.preset} 会话——hitlPending 对非 lead 会话不构成 HITL 停靠信号（lead 的卡才需要操作侧接手）`)
   }
-  if (s.hitlPending === true) { console.log('STATE: HITL-PENDING'); process.exit(0) }
+  if (leadHitlCandidate(s)) { console.log('STATE: HITL-PENDING'); process.exit(0) }
   if (s.runSettled === true) {
     console.log(`STATE: RUN-SETTLED${s.presentCalls === 0 ? '（⚠ present 声明缺席——偏差，需记档）' : ''}`)
     process.exit(0)

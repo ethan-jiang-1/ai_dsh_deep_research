@@ -10,9 +10,6 @@ import type { ReactNode } from 'react'
 import type { ToolCallViewProps } from '@deepseek-ai/dsh-client-ui-tool/client'
 import { cardStateOf, cardTitleOf, parseArgsObject } from '../lib/tool-card.ts'
 
-/** 官方工具名（wire 注册名）——tool.call.toolview 的 keyed key，逐字一致。 */
-export const RESEARCH_TOOL_KEYS = ['spawn_teammate', 'web_search'] as const
-
 /** 状态色（薄渲染：不引平台组件，纯 style——观察面用途，D18 边界内）。 */
 const STATE_COLOR: Record<string, string> = { running: '#888', ok: '#2a2', error: '#b00', stopped: '#888' }
 

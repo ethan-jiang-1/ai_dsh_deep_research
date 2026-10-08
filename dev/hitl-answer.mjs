@@ -20,7 +20,7 @@ import { resolve, dirname, join } from 'node:path'
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { loadChromium, launchChromium } from '../scripts/lib/playwright.mjs'
-import { runStateOf, readSessionEvents, bundleStateOf } from '../scripts/lib/run-state.mjs'
+import { runStateOf, readSessionEvents, bundleStateOf, leadHitlCandidate } from '../scripts/lib/run-state.mjs'
 import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf, parseAskQuestions, pickTargetLabel, intentReconcile } from '../scripts/lib/ask-drive.mjs'
 import { appendProvenance, batchToAnswered } from '../scripts/lib/hitl-provenance.mjs'
 import { localDateStr } from '../scripts/lib/local-date.mjs'
@@ -74,12 +74,13 @@ let wsSessionsRoot = null
   for (const { d, m } of sids.slice(0, 15)) {
     if (m === 0) continue
     const s = runStateOf({ logPath: join(gdir, d, 'session.v4.jsonl.zstd'), wsRoot: join(ROOT, 'research-workspace') })
-    if (s.hitlPending === true) { pending = d; pendingSid = d; break } // 新者先扫，命中即停
+    if (leadHitlCandidate(s)) { pending = d; pendingSid = d; break } // 新者先扫，命中即停——只认 lead 的挂起
   }
   if (pending === null) {
-    console.error('hitl-answer: 盘侧谓词自拒——最新 15 个会话无真挂起（末位回合事件 ≠ 未答 ask_user_question）。'
+    console.error('hitl-answer: 盘侧谓词自拒——最新 15 个会话无 lead 的真挂起（选卡面已按 preset 收窄：队友会话与非 lead 会话的 pending 不可选，防误答陈旧卡——审计 P3 件⑨）。'
       + '可能：① 卡还没发（request/header 工具 schema 字样不算挂起——grep 会误报，谓词不会）；'
-      + '② 挂起回合已被 web 重启终局化（需向会话发恢复 prompt 让 lead 原样重发）。不开浏览器。')
+      + '② 挂起回合已被 web 重启终局化（需向会话发恢复 prompt 让 lead 原样重发）；'
+      + '③ 挂起的是队友会话（不代答，按 owner 通道处理）。不开浏览器。')
     process.exit(3)
   }
   console.log(`hitl-answer: 盘侧谓词——真挂起会话在场：${pending}`)

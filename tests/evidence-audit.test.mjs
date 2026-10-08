@@ -25,6 +25,8 @@ function fixture({ forged = false, brokenRef = false, derived = false } = {}) {
   // web_fetch 成功时文本以 `Fetched <url> (HTTP 200)` 开头（失败则 `Error: …`）。
   const log = [
     JSON.stringify({ type: 'assistant/message', data: { text: `顺嘴提一句 https://example.com/mentioned-only（非工具事件——不应算数）` } }),
+    // 本 run 立项写调用：真实 run 会话日志必含 bundle slug（语料窗过滤的锚点——件⑧）
+    JSON.stringify({ type: 'tool/call', data: { callId: 'w0', name: 'write', arguments: JSON.stringify({ path: 'drt_fixture/question.md', content: '# Q' }) } }),
     JSON.stringify({ type: 'tool/call', data: { callId: 'c1', name: 'web_fetch', arguments: JSON.stringify({ url: realUrl }) } }),
     JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'c1', role: 'tool', content: [{ type: 'text', text: `Fetched ${realUrl} (HTTP 200)\n\nSPECrate2017_int_base = 228 见 ${realUrl}` }] } } }),
     JSON.stringify({ type: 'tool/call', data: { callId: 'c2', name: 'web_fetch', arguments: JSON.stringify({ url: 'https://blog.example.org/post-x' }) } }),
@@ -153,3 +155,21 @@ test('摘录可回溯（A 的 blockquote 在 tool/result 文本中）', () => {
 });
 
 test('清理夹具', () => { rmSync(TMP, { recursive: true, force: true }); });
+
+test('语料窗：跨 run 会话的 URL 不得为本 run 作证（slug 窗过滤——审计 P3 件⑧）', () => {
+  const { bundle } = fixture();
+  // 另一个 run 的会话（日志不含 drt_fixture slug）：抓取了一个"只在此处出现"的 URL
+  const crossSessions = join(TMP, 'sessions', 'g2', 's2');
+  mkdirSync(crossSessions, { recursive: true });
+  const crossUrl = 'https://crossrun.example.com/only-here';
+  writeFileSync(join(crossSessions, 'session.v4.jsonl'), [
+    JSON.stringify({ type: 'tool/call', data: { callId: 'x1', name: 'web_fetch', arguments: JSON.stringify({ url: crossUrl }) } }),
+    JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'x1', role: 'tool', content: [{ type: 'text', text: `Fetched ${crossUrl} (HTTP 200)\n\n跨 run 内容 ${crossUrl}` }] } } }),
+  ].join('\n'));
+  // 本 run 证据卡把跨 run URL 记为 source_url——窗外语料不得替它作证
+  writeFileSync(join(bundle, 'evidence', 'ev-cross.md'), `---\nsource_url: ${crossUrl}\nretrieved_at: 2026-09-25\nquality: A\nfound_by: analyst\nsupports: T1\nsource_tier: primary\npublisher: crossrun.example.com\n---\n\n# 跨 run 引用\n\n## 原文摘录\n\n> 跨 run 内容 ${crossUrl}\n\n## 解读\n\n不应被窗外语料作证。\n`);
+  const r = auditBundle(bundle, join(TMP, 'sessions'));
+  const forged = r.findings.filter((f) => f.kind === '伪造链接/未溯源' && f.file === 'ev-cross.md');
+  assert.equal(forged.length, 1, `窗外会话的 URL 不得作证（跨 run 污染面）：${JSON.stringify(r.findings)}`);
+  assert.ok(r.stats.windowFiles >= 1 && !r.stats.windowFiles.toString().includes('2'), `窗内文件数应只含本 run 会话：${r.stats.windowFiles}`);
+});

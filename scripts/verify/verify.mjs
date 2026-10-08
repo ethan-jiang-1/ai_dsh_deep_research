@@ -15,7 +15,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'pack-workspace-fresh', 'queue-pointer-live', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'plans-liveness', 'dist-manual-version'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'proposal-scheduled', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'pack-workspace-fresh', 'queue-pointer-live', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'plans-liveness', 'dist-manual-version', 'port-exclusive', 'hooks-active'];
 
 const failures = [];
 const notes = [];
@@ -704,9 +704,13 @@ function parkedSection() {
         fail(gate, `${rel} ${lines} 行 > 预算 ${manifest[rel]} 行——处置序：下放/压缩；升顶须改 manifest 并在同一变更登记理由`);
       }
     }
-    for (const p of allFiles) {
-      const rel = relative(ROOT, p);
-      if (!rel.endsWith('AGENTS.md')) continue;
+    // AGENTS.md 枚举 = tracked-only（git ls-files；md-links 族同款 quotepath=false）。
+    // 2026-10-08 收口（审计 P3 件④）：原 walk(ROOT) 无差别枚举把 gitignored 运行区卷进
+    // 预算登记面——release-smoke probeWs 直接铺工作区（非 node_modules 层）的 AGENTS.md
+    // 实测误红（runtime/smoke-workspace 探针复现）。范围纪律正解 = 覆盖面跟 tracked 走。
+    const lsAgents = spawnSync('git', ['-c', 'core.quotepath=false', 'ls-files', '*AGENTS.md'], { cwd: ROOT, encoding: 'utf8' });
+    if (lsAgents.status !== 0) fail(gate, `git ls-files 不可用（${String(lsAgents.stderr).slice(0, 120)}）——覆盖面依赖仓库态，fail-loud`);
+    for (const rel of lsAgents.stdout.split('\n').filter(Boolean)) {
       if (rel.startsWith('dev/') || rel.startsWith('vendor/')) continue;
       if (!Object.hasOwn(manifest, rel)) fail(gate, `${rel}: 常驻指令文件未登记预算（scripts/doc-budgets.json）`);
     }
@@ -1099,6 +1103,13 @@ function parkedSection() {
     else {
       const keyExports = new Set([...keysFile.matchAll(/export const (\w+) = '/g)].map((m) => m[1]));
       if (keyExports.size === 0) fail(gate, 'keys.ts 无 `export const X = \x27…\x27` 导出（防空集）');
+      // keyed 数组族（工具名族）也以 keys.ts 为唯一正本（审计 P3 件①）：族导出只许住
+      // keys.ts，族值（wire 工具名等）在别处以引号字面量出现即红——值位拼错同样永不渲染。
+      const familyExports = new Map(
+        [...keysFile.matchAll(/export const (\w+) = \[([^\]]*)\]/g)].map((m) => [m[1], [...m[2].matchAll(/'([^']+)'/g)].map((q) => q[1])]),
+      );
+      const familyValues = new Map();
+      for (const [name, vals] of familyExports) for (const v of vals) familyValues.set(v, name);
       for (const f of files) {
         if (f === 'keys.ts') continue;
         const text = readFileSync(join(clientDir, f), 'utf8');
@@ -1121,6 +1132,27 @@ function parkedSection() {
         for (const m of text.matchAll(/\b(?:name|key|id):\s*(\w+)\s*[,}]/g)) {
           if (/^(RESEARCH|TAB|PANE|KEY|SLOT)/.test(m[1]) && !keyExports.has(m[1]))
             fail(gate, `src/client/${f}: 描述符用的 ${m[1]} 不在 keys.ts 导出里`);
+        }
+        // ③ keyed 数组族导出只许住 keys.ts（件①反证：RESEARCH_TOOL_KEYS 曾住 ResearchToolCard.tsx——
+        //    族清单的第二份家 = 漂移面）。豁免 `inject`：Cordis 函数式插件的具名依赖声明
+        //    （宿主合同，非 keyed 槽族——DSH 插件术语页的 name/inject/Config/apply 形态）。
+        for (const m of text.matchAll(/export const (\w+)\s*=\s*\[/g))
+          if (m[1] !== 'inject')
+            fail(gate, `src/client/${f}: keyed 数组族导出 ${m[1]} 出现在 keys.ts 之外（单一正本 = keys.ts）`);
+        // ④ 族值字面量（wire 工具名等）在 keys.ts 之外以引号出现即红——用 keys.ts 的族导出
+        for (const m of text.matchAll(/['"]([^'"]+)['"]/g))
+          if (familyValues.has(m[1]))
+            fail(gate, `src/client/${f}: 工具名族值 "${m[1]}" 字面量出现在 keys.ts 之外（用 ${familyValues.get(m[1])} 导出）`);
+        // ⑤ register 描述符的 shorthand `key,` 形态（无冒号——②的盲区）：取值来源必须可溯到
+        //    keys.ts 导出（for-of 迭代或赋值右值 ∈ keyExports/familyExports）
+        for (const m of text.matchAll(/slots\.register\(\s*\{([^}]*)\}/g)) {
+          for (const s of m[1].matchAll(/\b(key|name|id)\s*[,}]/g)) {
+            const ident = s[1];
+            const bound = new RegExp(`(?:for\\s*\\(\\s*const\\s+${ident}\\s+of\\s+(\\w+)|const\\s+${ident}\\s*=\\s*(\\w+))`).exec(text);
+            const src = bound ? (bound[1] ?? bound[2]) : null;
+            if (!src || (!keyExports.has(src) && !familyExports.has(src)))
+              fail(gate, `src/client/${f}: 描述符 shorthand ${ident}, 的取值来源不可溯到 keys.ts 导出（拼错即永不渲染）`);
+          }
         }
       }
     }
@@ -1245,6 +1277,58 @@ function parkedSection() {
         fail(gate, `src/client/index.ts:${i + 1}: 注册调用不在 scoped.effect 包裹内——registrations are effects（dispose 即撤销贡献），包 effect 或并入既有 effect`);
     });
   }
+}
+
+// ── 门禁 36：port-exclusive（冒烟/探针端口独占——scripts/AGENTS「端口与临时路径自持有」
+//    承诺的机械面；审计 P3 件⑤）。判据：tracked scripts/ 与 dev/ 的 .mjs/.sh 中，端口
+//    缺省声明（`port =` / `PORT=` 赋值行）同一端口号至多一个文件认领；取值引用
+//    DSH_RUN_PORT（run 通道覆写变量）的声明是通道连接方或通道本身（hitl-answer /
+//    run-kickoff / boot-run——连接方跟着通道走不是独占认领），豁免；注释行的用法示例
+//    （`// 用法：… [--port 3101]`）不是声明，不认领。防空语料：0 个声明被检查即红
+//    （检测回归 = 门禁静默空转）。──
+{
+  const gate = 'port-exclusive';
+  const ls = spawnSync('git', ['-c', 'core.quotepath=false', 'ls-files', 'scripts', 'dev'], { cwd: ROOT, encoding: 'utf8' });
+  if (ls.status !== 0) fail(gate, `git ls-files 不可用（${String(ls.stderr).slice(0, 120)}）——覆盖面依赖仓库态，fail-loud`);
+  const claims = new Map();
+  let checked = 0;
+  for (const rel of ls.stdout.split('\n').filter(Boolean)) {
+    if (!/\.(mjs|sh)$/.test(rel)) continue;
+    let text;
+    try { text = readFileSync(join(ROOT, rel), 'utf8'); }
+    catch { fail(gate, `${rel}: tracked 文件不可读——fail-loud`); continue; }
+    text.split('\n').forEach((line, i) => {
+      if (/^\s*(\/\/|#)/.test(line)) return;
+      if (!/\bport\b\s*[:=]/i.test(line)) return;
+      if (/DSH_RUN_PORT/.test(line)) return;
+      const m = line.match(/(\d{4,5})\b/);
+      if (!m) return;
+      checked++;
+      if (!claims.has(m[1])) claims.set(m[1], []);
+      claims.get(m[1]).push(`${rel}:${i + 1}`);
+    });
+  }
+  if (checked === 0) fail(gate, '0 个端口声明被检查（检测回归 = 门禁空转）——fail-loud');
+  for (const [port, at] of claims) {
+    const files = [...new Set(at.map((s) => s.split(':')[0]))];
+    if (files.length > 1)
+      fail(gate, `端口 ${port} 被 ${files.length} 个文件同时认领（${at.join('、')}）——scripts/AGENTS「端口独占」承诺（并发跑各自起 dsh 实例即撞号）；修正 = 改其一缺省端口，或确属通道连接方时显式改走 DSH_RUN_PORT`);
+  }
+}
+
+// ── 门禁 37：hooks-active（pre-commit 激活态；审计 P3 件⑥）。判据：git config
+//    core.hooksPath 指向 dev/hooks（dev/env.sh 幂等设置，相对/绝对路径都认）。为什么在
+//    L0：fresh clone 未 source env.sh = 提交零门禁，红 commit 溜进历史有 postmortem 前科
+//    （毕业漂移复盘）——verify 是收尾必跑命令，在此 fail-loud 让"门禁没激活"在第一次
+//    手跑 verify 时就现形，修正入口直接给出。GIT_* 剥离（scripts/AGENTS 子进程纪律）。──
+{
+  const gate = 'hooks-active';
+  const env = { ...process.env };
+  for (const k of Object.keys(env)) if (k.startsWith('GIT_')) delete env[k];
+  const r = spawnSync('git', ['config', 'core.hooksPath'], { cwd: ROOT, encoding: 'utf8', env });
+  const v = (r.stdout || '').trim().replace(/\/+$/, '');
+  if (r.status !== 0 || !v || !/dev\/hooks$/.test(v.replace(/\\/g, '/')))
+    fail(gate, `pre-commit 门禁未激活（core.hooksPath = ${v || '未设置'}）——本仓提交纪律 = 红灯拦 commit，未激活 = 裸奔；修正 = source dev/env.sh（幂等 git config core.hooksPath dev/hooks）`);
 }
 
 // ── 汇报 ──

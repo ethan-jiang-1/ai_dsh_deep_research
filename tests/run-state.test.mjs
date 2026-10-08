@@ -181,3 +181,21 @@ test('eventsRegressed：首轮无前值 / 不可读态 → false（不误报，�
   assert.equal(eventsRegressed(null, 158), false, '无前值无从比较');
   assert.equal(eventsRegressed(303, null), false, '当前不可读（截断帧/路径错）由 readable 单独暴露');
 });
+
+// ── 盘侧谓词选卡面收窄（审计 P3 件⑨）——先红后绿：preset 字段与谓词未实现时本节即红 ──
+import { leadHitlCandidate } from '../scripts/lib/run-state.mjs';
+
+test('选卡面收窄：runStateOf 暴露会话头 agentPreset，lead 挂起 = 唯一合法候选（件⑨）', () => {
+  const tmp = join(ROOT, 'tests', '.tmp-run-state-probe');
+  mkdirSync(tmp, { recursive: true });
+  try {
+    const lead = runStateOf({ logPath: FIX('pending'), wsRoot: tmp });
+    assert.equal(lead.preset, 'lead', '会话头 agentPreset 必须透出');
+    assert.equal(leadHitlCandidate(lead), true, 'lead 真挂起 = 合法候选');
+    const mate = runStateOf({ logPath: FIX('teammate-pending'), wsRoot: tmp });
+    assert.equal(mate.preset, 'critic');
+    assert.equal(leadHitlCandidate(mate), false, '队友挂起不可选——误答队友陈旧卡反模式');
+    const none = runStateOf({ logPath: FIX('no-card'), wsRoot: tmp });
+    assert.equal(leadHitlCandidate(none), false, '无挂起 = 非候选');
+  } finally { rmSync(tmp, { recursive: true, force: true }); }
+});

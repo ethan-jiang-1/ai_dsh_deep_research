@@ -24,7 +24,7 @@
 //       node scripts/evidence-audit.mjs --latest（取 research-workspace 最新 drt_*——根[在飞]与 archive/[已交付]并扫）
 import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -70,14 +70,16 @@ const stripTrailing = (u) => u.replace(/\/+$/, '')
  * 返回：webUrls（web 事件里出现过的 URL，含搜索结果列表）/ fetchedOk / fetchFailed（web_fetch 的
  * 成败，按 call 的 url 与 result 的 `Fetched …` vs `Error:` 判定）/ webChunks（web 结果正文分片）。
  */
-export function buildCorpus(root) {
+export function buildCorpus(root, slug = null) {
   const webUrls = new Set()
   const fetchedOk = new Set()
   const fetchFailed = new Set()
   const webChunks = []
   let sessionFiles = 0
+  let windowFiles = 0
+  let windowSkipped = 0
   let webEvents = 0
-  if (!existsSync(root)) return { webUrls, fetchedOk, fetchFailed, webChunks, sessionFiles, webEvents }
+  if (!existsSync(root)) return { webUrls, fetchedOk, fetchFailed, webChunks, sessionFiles, windowFiles, windowSkipped, webEvents }
   const isWeb = (name) => name === 'web_fetch' || name === 'web_search'
   const walk = (dir) => {
     for (const ent of readdirSync(dir, { withFileTypes: true })) {
@@ -96,6 +98,12 @@ export function buildCorpus(root) {
           }
           text = r.stdout
         } else text = readFileSync(p, 'utf8')
+        // 语料窗（审计 P3 件⑧）：只认提及本 bundle slug 的会话——跨 run 会话里的 URL
+        // 不得为本 run 作证（污染实证：全 home 语料让别的 run 抓过的 URL 过审）。
+        // 真实 run 会话必含 slug（写 bundle 路径的调用）；I/O 不变（解压后才知道是否在窗内），
+        // 按会话组名预筛是 vendor 私有编码耦合，被否（见 RFC 输掉的方案）。
+        if (slug && !text.includes(slug)) { windowSkipped += 1; continue }
+        windowFiles += 1
         const callName = new Map()
         const callUrl = new Map()
         for (const line of text.split('\n')) {
@@ -137,7 +145,7 @@ export function buildCorpus(root) {
     }
   }
   walk(root)
-  return { webUrls, fetchedOk, fetchFailed, webChunks, sessionFiles, webEvents }
+  return { webUrls, fetchedOk, fetchFailed, webChunks, sessionFiles, windowFiles, windowSkipped, webEvents }
 }
 
 /**
@@ -185,7 +193,10 @@ export function auditBundle(bundleDir, sessionsRoot) {
       evidence.push(rec)
     }
   }
-  const corpus = buildCorpus(sessionsRoot)
+  const corpus = buildCorpus(sessionsRoot, basename(bundleDir))
+  if (basename(bundleDir) && corpus.windowFiles === 0) {
+    findings.push({ level: 'MAJOR', file: '—', kind: '语料窗零命中', detail: `没有会话日志提及 ${basename(bundleDir)}——审计对象与语料不匹配（核对 --sessions 根或 run 是否在本机跑过）；窗内 0 文件 = 三条溯源断言全部失据` })
+  }
   const corpusUrlSet = new Set([...corpus.webUrls].map(stripTrailing))
 
   // ① URL 溯源（三档——2026-09-26 实测细化：原版只有"逐字命中/CRITICAL"两档，把
@@ -320,7 +331,7 @@ export function auditBundle(bundleDir, sessionsRoot) {
   const report = `# Evidence Audit — ${bundleDir.split('/').pop()}（${new Date().toISOString()}）
 
 > 由 scripts/evidence-audit.mjs 生成（keyless 机械对账；正本判据 = 研究手册 §证据文件契约）。
-> 会话语料：${corpus.sessionFiles} 个日志文件、${corpus.webEvents} 个 **web 工具事件**（${corpus.webUrls.size} 个 URL；已剔除 agent 自撰文本——否则摘录审计自证）。
+> 会话语料：${corpus.sessionFiles} 个日志文件（**语料窗**：提及本 run slug 的 ${corpus.windowFiles} 个在窗内${corpus.windowSkipped > 0 ? `、${corpus.windowSkipped} 个窗外不计入对账` : ''}——跨 run URL 不得作证）、${corpus.webEvents} 个 **web 工具事件**（${corpus.webUrls.size} 个 URL；已剔除 agent 自撰文本——否则摘录审计自证）。
 
 ## 概要
 
@@ -344,7 +355,7 @@ ${major.length === 0 ? '（无）' : major.map((f) => `- **${f.file}** [${f.kind
 
 ${info.length === 0 ? '（无）' : info.map((f) => `- **${f.file}** [${f.kind}] ${f.detail}`).join('\n')}
 `
-  return { findings, criticalCount: critical.length, stats: { evidence: evidence.length, withFm: evidence.filter((r) => r.fm).length, urlOk, urlTotal, srcFetched, srcNeverFetched, quoteOk, quoteTotal, quoteComposite, quoteBad, finalRefs, finalBroken, critical: critical.length, major: major.length, info: info.length }, report }
+  return { findings, criticalCount: critical.length, stats: { evidence: evidence.length, withFm: evidence.filter((r) => r.fm).length, urlOk, urlTotal, srcFetched, srcNeverFetched, quoteOk, quoteTotal, quoteComposite, quoteBad, finalRefs, finalBroken, critical: critical.length, major: major.length, info: info.length, sessionFiles: corpus.sessionFiles, windowFiles: corpus.windowFiles, windowSkipped: corpus.windowSkipped }, report }
 }
 
 // ── CLI ──

@@ -1,0 +1,6 @@
+{"type":"assistant/message","data":{"text":"顺嘴提一句 https://example.com/mentioned-only（非工具事件——不应算数）"}}
+{"type":"tool/call","data":{"callId":"w0","name":"write","arguments":"{\"path\":\"drt_fixture/question.md\",\"content\":\"# Q\"}"}}
+{"type":"tool/call","data":{"callId":"c1","name":"web_fetch","arguments":"{\"url\":\"https://example.com/spec/xeon-4314\"}"}}
+{"type":"tool/result","data":{"message":{"toolCallId":"c1","role":"tool","content":[{"type":"text","text":"Fetched https://example.com/spec/xeon-4314 (HTTP 200)\n\nSPECrate2017_int_base = 228 见 https://example.com/spec/xeon-4314"}]}}}
+{"type":"tool/call","data":{"callId":"c2","name":"web_fetch","arguments":"{\"url\":\"https://blog.example.org/post-x\"}"}}
+{"type":"tool/result","data":{"message":{"toolCallId":"c2","role":"tool","content":[{"type":"text","text":"Fetched https://blog.example.org/post-x (HTTP 200)\n\n博客全文 https://blog.example.org/post-x"}]}}}
