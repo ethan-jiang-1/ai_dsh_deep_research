@@ -4,6 +4,11 @@
 
 ## 决定
 
+> **部分取代关系**（互链义务，见 [notes/AGENTS.md §取代检查](../../notes/AGENTS.md)）：
+> 本条是 fresh-agent 信息架构审计的**次轮**（深水区文档 + 盘面机械对账）；
+> 首轮（入口链视角）= [入口链 fresh-agent 审计](2026-09-24-entry-chain-fresh-agent-audit.md)。
+> 两轮决定均有效（首轮管入口链四件，本条管深水区与布局补账），故双方保留。
+
 2026-10-04「打扫卫生」审计（主会话通读治理层 + 两个零上下文子代理分别审深水区文档与盘面/布局机械对账，发现逐条盘上复核）后，用户裁定全修，一条卫生条目收口，已全部落地：
 
 - **七红修复**：① 61 §0(b) 判别标签——删「交付线已在盘、该进 `archive/`」措辞，改「已过审查线、未归档」（NODES 证明 `final/` 版本记账自综合阶段就在场，停在 HITL2 等拍板也是此态；交付判别 = §6 的 run 根 `final.md` + present）；② 62 §词汇 profile 行——「源 = overlay」过期结论改「源 = pack（boot-run 重建；overlay 只是源码域冒烟通道的生成物）」；③ plans 卡命名 `YYMMDD`→`YYYY-MM-DD` 残留四处（根 AGENTS.md 布局、evaluation.md plans-liveness 行①、_closed_plans/README 头注、reference/README 命名行——后两处为执行期新抓的同族）；④ notes/README.md 过期 pin 复述删除，改指根 AGENTS §DSH 源码表；⑤ `final/` ≠ `final.md` 混用三处（手册完成判据句、61 §4 拍板句、61 §0(b) 判别器）；⑥ pack README 折算层补 bundle-bind 成五件（清单正本指 design/40）、「14 个 peer」硬编码计数改「全部 + 清单指针」；⑦ 61 §3「进度看三处」→ 四处，补研究驾驶舱主观察面（链 design/40）。
