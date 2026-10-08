@@ -58,12 +58,12 @@
 
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
-| Agent Note 生命周期（proposed/implemented/rejected + archived 冻结） | notes/ 六目录；archived/ 暂不设（差异表：无低价值存量；引入条件已写 notes/README） | 带证据适配（archived 延后，条件在案） |
+| Agent Note 生命周期（proposed/implemented/rejected + archived 冻结） | notes/ 六目录全在场：proposed/ · implemented/ · **[archived/](../notes/archived/README.md)**（27 篇 + README，2026-09-27 用户指令启用）· rejected/ · postmortem/；冻结纪律 = archived/README | 照搬 |
 | Every new Note triggers a supersession check（同决定搜树：更新/互链/吸收后删） | AGENTS §notes 取代检查 bullet + notes/README §决定覆盖与取代检查（SDLC reference 01 吸纳） | 照搬 |
 | Alternatives considered mandatory（没记击败了什么 = 会重开讼） | guides/60 §4 骨架 + note-format 门禁（## 输掉的方案在场断言） | 照搬 |
 | Implemented Note 保持 current（路径/默认值随实现同 diff；逆转写新 Note 互链） | AGENTS §notes implemented bullet；毕业 = 正文改写（guides/60 §4） | 照搬 |
 | Note 格式机械化（verify-agent-note-format） | verify 门禁 note-format（regex 版 + grandfather 条款——本仓轻量适配） | 带证据适配 |
-| 归档树 append-only hash manifest | archived/ 未设 | 不适用（随 archived 引入重估） |
+| 归档树 append-only hash manifest | [archived/](../notes/archived/README.md) 用"单文件 + `> 归档：<日期>` 行"等价落地（无 triplet/hash 基础设施）；冻结纪律 = 正文永不修改 | 带证据适配（manifest 面不引入——27 篇规模下目录树即清单） |
 
 ## 源 5：postmortem（2026-09-25 二轮更正）
 
@@ -172,7 +172,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | `docs/glossary.md` | 已具备：`docs/00-index.md §术语映射`（一个概念一个 canonical term，含 DSH↔本仓对照） |
 | `docs/development.md` · `docs/testing.md` · `docs/architecture.md` · `docs/cookbook/` · `docs/subsystems/` | 已具备（改名映射）：guides/60 · evaluation + guides/60 §2 · design/10 · guides/61/62 · design/ |
 | `docs/i18n/` · `docs/user/` · `website/` | 不适用：单语、无对外产品文档站与站点投影 |
-| `snapshots/`（session 回放 fixture） | 不适用：无 session 快照测试面；keyless 回归 = 契约测试与夹具（放置规则归 [tests/AGENTS.md](../tests/AGENTS.md)） |
+| `snapshots/`（session 回放 fixture） | **已具备**：[snapshot-replay-smoke](../scripts/smoke/snapshot-replay-smoke.mjs)（keyless，禁 llm-deepseek + 插 vendor `dsh-llm-replay`）+ 四角色夹具 [snapshot-research-face](../tests/fixtures/README.md)（`tests/fixtures/` 七组 taxonomy 之一）；判据见本表源 2 "Snapshot tests" 行 | 带证据适配 |
 | `benchmarks/` · `native/` · `python/` · `patches/` · `apps/` | 不适用：本仓无这些发布 lane 与运行时面 |
 | `CONTRIBUTING.md` · `SAFETY.md` · `SECURITY` · `THIRD_PARTY_NOTICES.md` · `BRAND_GUIDELINES.md` | 不适用：无外部贡献流、无运行时安全授权面、无捆绑第三方代码、无品牌资产 |
 | `.editorconfig` · `.gitattributes` · lint（oxlint）· 重复代码检测（jscpd）· vitest 系列配置 · `lefthook.yml` | 前两件已具备（`repo-conventions` 门禁强制与 vendor 对齐）；后四件未引入（TS 面 = 一个包的 `src/`，测试栈 = node:test）；Markdown 纪律由门禁（md-utf8-newline / md-links / md-anchors / doc-budgets）承担，git 钩子 = `dev/hooks/pre-commit` |
@@ -249,5 +249,14 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 
 - 本表随 vendor 换 tag 重校（queue 触发型条目「升 pin 重校」）；新增三态行同 diff 落
   本表，不在 AGENTS.md 复制（一处事实一个家）；
+- **本仓自身演进同样触发重校**（2026-10-08 增设）：本表的"本仓落点"列描述的是**我们自己**
+  的现状，因此下列事件发生时须同 diff 复核相关行——① 新增/退役自写代码面（如 D18 驾驶舱
+  client 插件）；② 激活或清空某个 notes 层（如 archived/ 2026-09-27 启用）；③ 新增对接面、
+  生成物或夹具族（如 snapshot-replay 夹具）。**只认 vendor 换 tag 会让"本仓落点"列单边腐烂**
+  ——实测教训 = [吸收对表推敲卡](../_backlog/plans/2026-10-08-sdlc-reference-absorption.md)
+  §二轮复核（当时 10 处 `na`/落点已失真，`align-ledger` 只判存在性、判不出语义过期）；
+- ⚠️ **`不适用` 是"当时不适用"，不是豁免**：写 `不适用` 必须同时给出**可判定的失效条件**
+  （"本仓无 X" 形态），由 `align-ledger` 门禁的活性断言机械复核——理由变假即红。**把
+  `不适用` 当成永久免检区 = 依据静默腐烂**（同上教训）；
 - 每轮重校的**重审命中与逐条结论**写进该轮「升 pin 重校」条目的毕业 Note（本表不建维护页、
   不带版本变更史）——历次结论见 [升 pin 重校毕业 Note](../notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md#升-pin-复核结论2026-09-25-毕业)。

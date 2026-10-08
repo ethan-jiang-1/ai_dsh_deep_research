@@ -195,6 +195,9 @@ gitignored 运行区，可重跑复现），聚合成 **80 个唯一源面**。
   （adopted 6 / adapted 58 / na 16）· landing（本仓路径）· reason；
 - 门禁 **`align-ledger`**：① 每条 source 在 `vendor/dsh` 真实存在——**换 pin 后源文件移位即红
   （重审触发器）**；② adopted/adapted 的每处 landing 存在；③ na 必须给理由；
+  （④ 2026-10-08 补宽：na 还须带可机械判定的 `liveness` 缺席断言，断言对象一旦出现即红
+  ——把"`不适用` + 当时为真的理由"这个永久免检区拆掉；见
+  [证据与依据层活性硬化](2026-10-08-evidence-liveness-hardening.md)。本条前三项仍成立。）
 - 门禁 **`repo-conventions`**：与 vendor 本体的机械约定对比——`.editorconfig`（root/LF/尾换行）、
   `.gitattributes`（`* text=auto eol=lf`）、`package.json engines.node` **直接等于** vendor 值、
   pre-commit 含 whitespace 检查、**scripts 不得整体透传 `process.env`**（凭据卫生）。

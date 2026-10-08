@@ -11,6 +11,21 @@ import { join, dirname, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+
+/** 极简 glob（align-ledger 的 na 活性检查用）：`**` 匹配任意层段，`*` 匹配段内任意字符。
+ *  仓内路径统一按 `/` 规范化后再比——不引第三方 glob 依赖（stdlib-only 分层纪律）。 */
+function matchSimpleGlob(pathStr, pattern) {
+  const norm = pathStr.split('\\').join('/');
+  const rx = pattern
+    .split('\\').join('/')
+    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+    .replace(/\*\*\//g, '\u0000')
+    .replace(/\*\*/g, '\u0001')
+    .replace(/\*/g, '[^/]*')
+    .replace(/\u0000/g, '(?:.*/)?')
+    .replace(/\u0001/g, '.*');
+  return new RegExp(`^${rx}$`).test(norm);
+}
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
@@ -299,6 +314,18 @@ function parkedSection() {
       fail(gate, `notes/proposed/${ent}: 缺"输掉的方案"——没记击败了什么的决定会重开讼`);
   });
   // implemented/：骨架在场（决定 + 输掉的方案）；grandfather 条款豁免门禁生效前的遗留形态
+  // 2026-10-08 补宽：加"实际跑过的验证"节断言。动因 = 复核实测该节零校验，而 notes/README.md
+  // 与 evaluation.md 都宣称它是骨架四节之一（文档声明严于门禁 = 缺口）。实测 70 篇里有 25 篇
+  // 的验证内容存在但落在**自造标题**下（## 实际跑过的检查 / ## 验收怎么闭的（逐条）/
+  // ## L1 挂载面（…）…）——正是"当前事实 vs 变更史"漂移的入口。词表取实测变体 + 日期后缀容忍，
+  // 既咬住"根本没有验证节"，又不为格式洁癖逼人重命名历史标题。
+  // 注意：**不能用 `\b` 收尾**——CJK 不是 \w，`验证\b` 在"## 验证"行尾无边界可依，恒不匹配
+  // （实测教训：首版带 \b 导致 40 篇误红，其中 39 篇其实有 `## 验证`）。
+  // 词表按**实测全量标题**归纳（`grep '^## ' notes/implemented/*.md`），不按想象列举：
+  // 本仓证据节的真实命名族 = 验证/检查/验收/实录/记录/实证/探针/全绿/结果/复验…
+  // （如 `## 验收判据` `## 阶段一实录` `## 构建打通 + 双通道全绿` `## 证据（fresh-agent 探针…）`）。
+  // 判定语义 = 该节标题**声称此处有证据**，而非强求统一命名——苛求命名会制造格式洁癖式假红。
+  const VERIFY_SECTION = /^##\s*[^\n]*(验证|检查|验收|实录|记录|实证|探针|全绿|复验|证据)/m;
   each('implemented', (ent, text) => {
     const g = GRANDFATHER.test(text);
     if (!/^> 状态：\*{0,2}implemented\*{0,2}\s*$/m.test(text))
@@ -307,6 +334,15 @@ function parkedSection() {
       fail(gate, `notes/implemented/${ent}: 缺"## 决定"节（遗留形态须标 grandfather 注释，见 notes/README.md）`);
     if (!/^## 输掉的方案/m.test(text) && !g)
       fail(gate, `notes/implemented/${ent}: 缺"## 输掉的方案"节（遗留形态须标 grandfather 注释，见 notes/README.md）`);
+    if (!VERIFY_SECTION.test(text) && !g)
+      fail(gate, `notes/implemented/${ent}: 缺"实际跑过的验证"节——无证据的"完成"不算完成（判定词表见 note-format 实现注释；遗留形态标 grandfather）`);
+    // ── 本断言的**已知边界**（如实登记，不假装它更强）──────────────────────────────
+    // 这是**在场检查**，不是**内容检查**：`## 证据待补` / `## 验证计划（未执行）` 这类空洞
+    // 或自认未执行的标题同样会通过（对抗测试实证）。机械面在这里能保证的只有"作者被逼到
+    // 必须为此开一节"——**证据是否真实充分仍是语义判断**，归 `reviewing-a-delivery` 与
+    // L4 人工判据，不归本门禁。收紧到关键词须出现"跑/测/通过"等执行动词会引入另一类假阳
+    // （合法历史命名被误杀），收益不抵代价（同 §词表按实测标题族归纳 的取舍）。
+    // 与上游对齐：DSH testing policy 明确不声称一切语义规则都可机械化。
   });
   // rejected/：否决状态行（提案体保留，结论在状态行）
   each('rejected', (ent, text) => {
@@ -927,6 +963,40 @@ function parkedSection() {
         if (!['adopted', 'adapted', 'na'].includes(verdict)) { fail(gate, `${src}: verdict 值域外（adopted/adapted/na）`); continue; }
         if (verdict === 'na') {
           if (typeof entry.reason !== 'string' || entry.reason.trim() === '') fail(gate, `${src}: verdict=na 必须给 reason`);
+          // ── na 活性检查（2026-10-08 增设）：`不适用` 是"当时不适用"，不是永久豁免 ──
+          // 病根实证：本门禁原注释自认"只判存在性，不判语义对错"，而 na 的 reason 一旦写下
+          // 即永久免检——2026-10-08 复核实测 10 处 reason 已变假（archived/ 已启用、snapshot
+          // 录制夹具已在场、client 插件代码已自写、UI 样式面已存在），本门禁全绿。依据静默腐烂
+          // 比任何单条 gap 都危险（本表是"什么该做什么不该做"的判断依据本身）。
+          // 机制：每条 na 必须带 liveness 数组，每项 = 一条**可机械判定的缺席断言**
+          // （absent: 仓内相对路径 / globAbsent: glob 模式）。断言在**该路径或匹配存在**时判红
+          // ——即"你当初说本仓没有 X，现在 X 出现了，回来重估这一行"。
+          const live = entry.liveness;
+          if (!Array.isArray(live) || live.length === 0) {
+            fail(gate, `${src}: verdict=na 必须给 liveness（可机械判定的缺席断言数组——"本仓无 X" 形态；无此则 na 成永久免检区，见 discipline-map §维护规则）`);
+          } else {
+            for (const item of live) {
+              if (typeof item?.absent === 'string' && item.absent.length > 0) {
+                // 防空转（2026-10-08 自查抓获 7 处）：断言对象若**就是 vendor 源路径本身**，
+                // 则它永远成立（vendor doc 本来就不会被拷贝进本仓）——这种"装饰性断言"看着
+                // 在场、永不为真实失效而响，等于把免检区换了个写法。真实的失效形态是**本仓
+                // 长出了那个能力面**，故断言必须指向本仓侧的能力载体，不是那份上游文档。
+                if (item.absent === src || src.endsWith(`/${item.absent}`) || item.absent.endsWith(`/${src}`)) {
+                  fail(gate, `${src}: liveness 断言空转——"${item.absent}" 就是 vendor 源路径本身，永不会为真实失效而响；请改指本仓侧能力载体（如生成目录/源码路径）——见 discipline-map §维护规则`);
+                } else if (existsSync(join(ROOT, item.absent))) {
+                  fail(gate, `${src}: na 理由已失效——"${item.absent}" 现在存在（当初登记"本仓无此面"）→ 重估该行 verdict，见 discipline-map §维护规则`);
+                }
+              } else if (typeof item?.globAbsent === 'string' && item.globAbsent.length > 0) {
+                const pat = item.globAbsent;
+                const hit = allFiles.find((f) => matchSimpleGlob(relative(ROOT, f), pat));
+                if (hit) {
+                  fail(gate, `${src}: na 理由已失效——glob "${pat}" 命中 ${relative(ROOT, hit)}（当初登记"本仓无此面"）→ 重估该行 verdict，见 discipline-map §维护规则`);
+                }
+              } else {
+                fail(gate, `${src}: liveness 项须给 absent（路径）或 globAbsent（glob）`);
+              }
+            }
+          }
           continue;
         }
         const landing = entry.landing;

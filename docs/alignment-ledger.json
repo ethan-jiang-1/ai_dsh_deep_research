@@ -14,8 +14,10 @@
     {
       "source": ".agents/notes/archived/AGENTS.md",
       "owns": "Form/ownership row: the archived-notes AGENTS.md owns the sealed-artifact rules — 7 lines / ~0.9 KB, pure orders in three paragraphs, linkin",
-      "verdict": "na",
-      "reason": "本仓未引入 archived 冻结层（缺归档需求）；引入条件写在 notes/README 差异表（未来指导价值低的 implemented 存量出现时）"
+      "verdict": "adopted",
+      "landing": [
+        "notes/archived/README.md"
+      ]
     },
     {
       "source": ".agents/notes/implemented/AGENTS.md",
@@ -79,8 +81,11 @@
     {
       "source": ".agents/skills/dsh-client-ui-ux/SKILL.md",
       "owns": "技能：客户端 UI/UX 判断",
-      "verdict": "na",
-      "reason": "本仓无客户端 UI 面（观察面为开发期只读投影）；同类约定已在 .agents/skills/ 四技能落地"
+      "verdict": "adapted",
+      "landing": [
+        "packages/deep-research-pack/src/client/ResearchStatusTab.tsx",
+        "packages/deep-research-pack/src/client/ResearchToolCard.tsx"
+      ]
     },
     {
       "source": ".agents/skills/dsh-code-review/SKILL.md",
@@ -146,7 +151,12 @@
       "source": ".agents/skills/dsh-create-upgrade-guide/SKILL.md",
       "owns": "技能：对外可感知破坏面（CLI/profiles/cordis.yml 或 settings 键/持久化数据/SDK/wire API/发布包入口）在其引入的变更内即写 docs/upgrade-guide/v<version>/<item>/guide.md，不延后到发布准备期",
       "verdict": "na",
-      "reason": "本仓 pack private、无下游消费者，对外升级指南无承载对象；换 pin 的迁移与重审结论由升 pin Note（notes/implemented/）承载，破坏面记录同源"
+      "reason": "本仓 pack private、无下游消费者，对外升级指南无承载对象；换 pin 的迁移与重审结论由升 pin Note（notes/implemented/）承载，破坏面记录同源",
+      "liveness": [
+        {
+          "absent": "docs/upgrade-guide"
+        }
+      ]
     },
     {
       "source": ".agents/skills/dsh-doc/SKILL.md",
@@ -359,7 +369,12 @@
       "source": ".github/AGENTS.md",
       "owns": "Windows 任务跑在 Windows runner（`windows-*` 标签）下并使用原生 `pwsh`",
       "verdict": "na",
-      "reason": "本仓无远端 CI/PR 面（.github 不存在）；等价面 = dev/hooks/pre-commit + scripts/verify/verify.mjs 的本地门禁"
+      "reason": "本仓无远端 CI/PR 面（.github 不存在）；等价面 = dev/hooks/pre-commit + scripts/verify/verify.mjs 的本地门禁",
+      "liveness": [
+        {
+          "absent": ".github"
+        }
+      ]
     },
     {
       "source": "AGENTS.md",
@@ -383,13 +398,23 @@
       "source": "benchmarks/AGENTS.md",
       "owns": "Form/ownership row: the performance-benchmark AGENTS.md owns required repo-level performance gates whose measured user path crosses package ",
       "verdict": "na",
-      "reason": "本仓无性能基准面（无 benchmark 目录与车道）"
+      "reason": "本仓无性能基准面（无 benchmark 目录与车道）",
+      "liveness": [
+        {
+          "absent": "benchmarks"
+        }
+      ]
     },
     {
       "source": "docs/agent-lifecycle.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
-      "reason": "本仓无 agent 生命周期实现面（消费 base 能力）；生命周期术语在 00-index §术语映射"
+      "reason": "本仓无 agent 生命周期实现面（消费 base 能力）；生命周期术语在 00-index §术语映射",
+      "liveness": [
+        {
+          "absent": "packages/deep-research-pack/src/lib/lifecycle"
+        }
+      ]
     },
     {
       "source": "docs/AGENTS.md",
@@ -403,7 +428,12 @@
       "source": "docs/api-gateway.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
-      "reason": "本仓无 API gateway 子系统"
+      "reason": "本仓无 API gateway 子系统",
+      "liveness": [
+        {
+          "globAbsent": "packages/deep-research-pack/src/**/gateway*"
+        }
+      ]
     },
     {
       "source": "docs/architecture.md",
@@ -417,19 +447,32 @@
       "source": "docs/architecture.zh.md",
       "owns": "双语配对副本（docs/**/*.zh.md 的代表；同类共 28 份）",
       "verdict": "na",
-      "reason": "双语配对副本不携带独立 harness 约定——配对机制本身的结论在 docs/i18n/README.md 一条（单语仓，不适用）；同类不逐条登记"
+      "reason": "双语配对副本不携带独立 harness 约定——配对机制本身的结论在 docs/i18n/README.md 一条（单语仓，不适用）；同类不逐条登记",
+      "liveness": [
+        {
+          "globAbsent": "docs/**/*.zh.md"
+        }
+      ]
     },
     {
       "source": "docs/capability-seams.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
-      "verdict": "na",
-      "reason": "本仓不自建 capability seam（术语已收 plugin/bundle/profile；seam 三角属 vendor 面）"
+      "verdict": "adapted",
+      "landing": [
+        "packages/deep-research-pack/cordis.patch.yml",
+        "packages/deep-research-pack/presets/lead.patch.yml"
+      ]
     },
     {
       "source": "docs/config-catalog.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
-      "reason": "本仓无入库生成目录（生成的 config/tool/persistence catalog 面）；生成态缺席与引入条件登记在 discipline-map 源 7"
+      "reason": "本仓无入库生成目录（生成的 config/tool/persistence catalog 面）；生成态缺席与引入条件登记在 discipline-map 源 7",
+      "liveness": [
+        {
+          "absent": "docs/generated"
+        }
+      ]
     },
     {
       "source": "docs/cookbook/",
@@ -534,19 +577,31 @@
       "source": "docs/cookbook/reviewing-persistence-type-changes.md",
       "owns": "持久化类型变更评审配方",
       "verdict": "na",
-      "reason": "本仓无持久化类型面（session log 由 base 拥有）"
+      "reason": "本仓无持久化类型面（session log 由 base 拥有）",
+      "liveness": [
+        {
+          "absent": "packages/deep-research-pack/src/persistence"
+        }
+      ]
     },
     {
       "source": "docs/cordis-primer.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
-      "verdict": "na",
-      "reason": "Cordis 运行时概念参考属 vendor 面；本仓以 cordis 行消费，不写插件代码"
+      "verdict": "adapted",
+      "landing": [
+        "packages/deep-research-pack/src/client/index.ts"
+      ]
     },
     {
       "source": "docs/deepseek-llm-api-wire-extensions.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
-      "reason": "本仓无自写 LLM 请求扩展面"
+      "reason": "本仓无自写 LLM 请求扩展面",
+      "liveness": [
+        {
+          "globAbsent": "packages/deep-research-pack/src/**/*llm*"
+        }
+      ]
     },
     {
       "source": "docs/defensive-patterns.md",
@@ -569,7 +624,12 @@
       "source": "docs/event-producer-consumer.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
-      "reason": "本仓不定义事件类型（消费 base 事件）"
+      "reason": "本仓不定义事件类型（消费 base 事件）",
+      "liveness": [
+        {
+          "globAbsent": "packages/deep-research-pack/src/**/events*"
+        }
+      ]
     },
     {
       "source": "docs/glossary.md",
@@ -583,25 +643,48 @@
       "source": "docs/graph-atlas.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
-      "reason": "本仓无生成的关系索引面"
+      "reason": "本仓无生成的关系索引面",
+      "liveness": [
+        {
+          "globAbsent": "docs/**/atlas*"
+        }
+      ]
     },
     {
       "source": "docs/i18n/README.md",
       "owns": "范围内的每份文档同时以英文与简体中文维护，因为读者含公司内外的人与 agent",
       "verdict": "na",
-      "reason": "单语仓：无双语配对三件套与 site 投影"
+      "reason": "单语仓：无双语配对三件套与 site 投影",
+      "liveness": [
+        {
+          "absent": "docs/i18n"
+        }
+      ]
     },
     {
       "source": "docs/module-graph.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
-      "reason": "本仓无入库生成物（模块关系图属 from-source 生成目录面）；生成态缺席与引入条件登记在 discipline-map 源 7"
+      "reason": "本仓无入库生成物（模块关系图属 from-source 生成目录面）；生成态缺席与引入条件登记在 discipline-map 源 7",
+      "liveness": [
+        {
+          "absent": "docs/generated"
+        },
+        {
+          "absent": "docs/module-graph.svg"
+        }
+      ]
     },
     {
       "source": "docs/persistence-catalog.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
-      "reason": "本仓无持久化事件声明面"
+      "reason": "本仓无持久化事件声明面",
+      "liveness": [
+        {
+          "globAbsent": "packages/deep-research-pack/**/*persistence*"
+        }
+      ]
     },
     {
       "source": "docs/postmortem/README.md",
@@ -615,13 +698,23 @@
       "source": "docs/rescope.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
-      "reason": "vendor 的 rescope 机制不适用：本仓用 pinned submodule（零分叉，vendor-clean 门禁）"
+      "reason": "vendor 的 rescope 机制不适用：本仓用 pinned submodule（零分叉，vendor-clean 门禁）",
+      "liveness": [
+        {
+          "absent": "patches"
+        }
+      ]
     },
     {
       "source": "docs/session-format-status.md",
       "owns": "用一页专文区分 checkout 的 Session writer 版本与最新已发布格式；其他文档链接到这里，而不是各自重述哪个版本是当前/下一个/未发布。",
       "verdict": "na",
-      "reason": "本仓不定义 session 格式与版本状态（消费 base 能力）"
+      "reason": "本仓不定义 session 格式与版本状态（消费 base 能力）",
+      "liveness": [
+        {
+          "globAbsent": "packages/deep-research-pack/src/**/session-format*"
+        }
+      ]
     },
     {
       "source": "docs/testing.md",
@@ -637,25 +730,39 @@
       "source": "docs/tool-catalog.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
-      "reason": "本仓无生成工具目录面（工具行由 row-deps + L1 真挂载验证）"
+      "reason": "本仓无生成工具目录面（工具行由 row-deps + L1 真挂载验证）",
+      "liveness": [
+        {
+          "absent": "docs/generated"
+        }
+      ]
     },
     {
       "source": "docs/tool-execution-pipeline.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
-      "reason": "本仓无工具执行管线实现面"
+      "reason": "本仓无工具执行管线实现面",
+      "liveness": [
+        {
+          "globAbsent": "packages/deep-research-pack/src/**/pipeline*"
+        }
+      ]
     },
     {
       "source": "docs/ui-radius.md",
       "owns": "客户端 UI 圆角规范",
-      "verdict": "na",
-      "reason": "本仓无客户端 UI 样式面"
+      "verdict": "adapted",
+      "landing": [
+        "packages/deep-research-pack/src/client/ResearchStatusTab.tsx"
+      ]
     },
     {
       "source": "docs/web-styling.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
-      "verdict": "na",
-      "reason": "本仓无客户端 UI/样式面"
+      "verdict": "adapted",
+      "landing": [
+        "packages/deep-research-pack/src/client/ResearchStatusTab.tsx"
+      ]
     },
     {
       "source": "lefthook.yml",
@@ -670,7 +777,12 @@
       "source": "native/system/AGENTS.md",
       "owns": "Form/ownership row: native/system/AGENTS.md owns the @deepseek-ai/node-addon-system workspace (Linux landlock-run confinement executable plu",
       "verdict": "na",
-      "reason": "本仓无 native addon 发布 lane"
+      "reason": "本仓无 native addon 发布 lane",
+      "liveness": [
+        {
+          "absent": "native"
+        }
+      ]
     },
     {
       "source": "package.json",
@@ -703,13 +815,23 @@
       "source": "packages/client/AGENTS.md",
       "owns": "Form/ownership row: packages/client/AGENTS.md owns the rules for packages/client/* and the apps/web build entry — 154 lines / ~25.5 KB (by f",
       "verdict": "na",
-      "reason": "本仓无该包组（唯一包 deep-research-pack：TS 源 + 单点 client 插件，D18）"
+      "reason": "本仓无该包组（唯一包 deep-research-pack：TS 源 + 单点 client 插件，D18）",
+      "liveness": [
+        {
+          "absent": "packages/client"
+        }
+      ]
     },
     {
       "source": "packages/experimental/AGENTS.md",
       "owns": "Form/ownership row: packages/experimental/AGENTS.md owns the rules for experimental packages and explicitly declares itself a supplement to ",
       "verdict": "na",
-      "reason": "本仓无该包组（唯一包 deep-research-pack：TS 源 + 单点 client 插件，D18）"
+      "reason": "本仓无该包组（唯一包 deep-research-pack：TS 源 + 单点 client 插件，D18）",
+      "liveness": [
+        {
+          "absent": "packages/experimental"
+        }
+      ]
     },
     {
       "source": "packages/preset/agent-preset/README.md",
@@ -734,7 +856,12 @@
       "source": "packages/schedule/AGENTS.md",
       "owns": "Form/ownership row: packages/schedule/AGENTS.md owns the rules for packages/schedule/* and announces itself as a supplement to the repositor",
       "verdict": "na",
-      "reason": "本仓无该包组（唯一包 deep-research-pack：TS 源 + 单点 client 插件，D18）"
+      "reason": "本仓无该包组（唯一包 deep-research-pack：TS 源 + 单点 client 插件，D18）",
+      "liveness": [
+        {
+          "absent": "packages/schedule"
+        }
+      ]
     },
     {
       "source": "packages/skill/skill-filesystem/README.md",
@@ -749,7 +876,12 @@
       "source": "packages/web/AGENTS.md",
       "owns": "Form/ownership row: packages/web/AGENTS.md owns one security rule for the web package group and declares itself a supplement to the package ",
       "verdict": "na",
-      "reason": "本仓无该包组（唯一包 deep-research-pack：TS 源 + 单点 client 插件，D18）"
+      "reason": "本仓无该包组（唯一包 deep-research-pack：TS 源 + 单点 client 插件，D18）",
+      "liveness": [
+        {
+          "absent": "packages/web"
+        }
+      ]
     },
     {
       "source": "scripts/AGENTS.md",
@@ -788,26 +920,34 @@
     {
       "source": "snapshots/session/agent-instructions/workspace/AGENTS.md",
       "owns": "This one-line file is not an instruction set but a workspace-seed fixture whose entire content is the sentence 'Root snapshot instruction.',",
-      "verdict": "na",
-      "reason": "本仓无对应发布 lane / 应用面 / 会话录制夹具面"
+      "verdict": "adapted",
+      "landing": [
+        "tests/fixtures/snapshot-research-face/snapshot.yml"
+      ]
     },
     {
       "source": "snapshots/session/agent-instructions/workspace/nested/AGENTS.md",
       "owns": "This one-line file is a workspace-seed fixture whose entire content is the sentence 'Nested snapshot instruction.', verifying that a nested ",
-      "verdict": "na",
-      "reason": "本仓无对应发布 lane / 应用面 / 会话录制夹具面"
+      "verdict": "adapted",
+      "landing": [
+        "tests/fixtures/snapshot-research-face/snapshot.yml"
+      ]
     },
     {
       "source": "snapshots/session/ptc-workspace-context/workspace/AGENTS.md",
       "owns": "This one-line file is a workspace-seed fixture whose entire content is the sentence 'Workspace snapshot root instruction.', providing the ro",
-      "verdict": "na",
-      "reason": "本仓无对应发布 lane / 应用面 / 会话录制夹具面"
+      "verdict": "adapted",
+      "landing": [
+        "tests/fixtures/snapshot-research-face/snapshot.yml"
+      ]
     },
     {
       "source": "snapshots/session/ptc-workspace-context/workspace/nested/AGENTS.md",
       "owns": "This one-line file is a behavioural fixture whose entire content is the order 'When asked for the Code Mode workspace handshake, answer exac",
-      "verdict": "na",
-      "reason": "本仓无对应发布 lane / 应用面 / 会话录制夹具面"
+      "verdict": "adapted",
+      "landing": [
+        "tests/fixtures/snapshot-research-face/snapshot.yml"
+      ]
     },
     {
       "source": "vendor/AGENTS.md",
@@ -831,7 +971,12 @@
       "source": "website/AGENTS.md",
       "owns": "Form/ownership row: website/AGENTS.md owns the VitePress documentation-website adapter — 17 lines / ~1.7 KB, eight prose paragraphs with no ",
       "verdict": "na",
-      "reason": "本仓无文档站/站点投影面"
+      "reason": "本仓无文档站/站点投影面",
+      "liveness": [
+        {
+          "absent": "website"
+        }
+      ]
     }
   ]
 }

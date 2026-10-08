@@ -33,6 +33,26 @@ const stripFirstStatusLine = (dirRel) => (dir) => {
   writeFileSync(p, readFileSync(p, 'utf8').split('\n').filter((l) => !l.startsWith('> 状态：')).join('\n'));
 };
 
+/** 证据节缺席注入（2026-10-08 补宽 note-format 的"## 实际跑过的验证"断言）：
+ *  取第一篇非 grandfather 的 implemented Note，把**所有**含证据词表关键词的二级标题
+ *  改成中性词 `## 附注`——模拟"这篇 Note 根本没有验证节"。
+ *  必须一次改全部：词表含 验证/检查/验收/实录/记录/实证/探针/全绿/复验/证据，只改一个标题
+ *  若该文还有别的证据节则仍是绿的（实测教训：首版只改首个匹配 → 门禁照绿，案例空转）。 */
+const stripVerificationSection = (dirRel) => (dir) => {
+  const d = join(dir, dirRel);
+  const WORD = /^##\s*[^\n]*(验证|检查|验收|实录|记录|实证|探针|全绿|复验|证据)/m;
+  const target = readdirSync(d).filter((f) => f.endsWith('.md') && f !== 'README.md').sort()
+    .find((f) => {
+      const t = readFileSync(join(d, f), 'utf8');
+      return !t.includes('<!-- grandfather:') && WORD.test(t);
+    });
+  if (!target) throw new Error('找不到可注入的 implemented Note（无含证据节的非 grandfather 篇）');
+  const p = join(d, target);
+  const out = readFileSync(p, 'utf8').split('\n')
+    .map((l) => (WORD.test(l) ? '## 附注' : l)).join('\n');
+  writeFileSync(p, out);
+};
+
 const breakQueuePointer = () => (dir) => {
   const p = join(dir, '_backlog', 'queue.md');
   const lines = readFileSync(p, 'utf8').split('\n');
@@ -50,6 +70,39 @@ const breakQueuePointer = () => (dir) => {
 const removeLedgerRow = (gateName) => (dir) => {
   const p = join(dir, 'docs', 'evaluation.md');
   writeFileSync(p, readFileSync(p, 'utf8').split('\n').filter((l) => !l.startsWith(`| \`${gateName}\``)).join('\n'));
+};
+
+/** na 活性注入：把某条 `verdict=na` 的 liveness 缺席前提"变成存在"——即造出它当初声称
+ *  本仓没有的那个面。门禁须报红（"依据静默腐烂"的病根反证，2026-10-08 增设）。
+ *  选 `website/AGENTS.md` 的 `absent: website`：该目录在真仓不存在，副本内可安全创造。 */
+const naLivenessAppears = () => (dir) => {
+  mkdirSync(join(dir, 'website'), { recursive: true });
+  writeFileSync(join(dir, 'website', 'AGENTS.md'), '# 站点探针\n');
+};
+
+/** na 活性注入（装饰性断言形态）：把某条 na 的缺席断言改回 **vendor 源路径本身**
+ *  ——这种断言看着在场、却永不会为真实失效而响（vendor doc 本来就不拷进本仓）。
+ *  门禁须报"断言空转"红，否则免检区只是换了个写法（2026-10-08 自查抓获 7 处）。 */
+const naLivenessDecorative = () => (dir) => {
+  const p = join(dir, 'docs', 'alignment-ledger.json');
+  const ledger = JSON.parse(readFileSync(p, 'utf8'));
+  for (const s of ledger.sources) {
+    if (s.verdict === 'na' && s.source === 'docs/api-gateway.md') {
+      s.liveness = [{ absent: 'docs/api-gateway.md' }];
+    }
+  }
+  writeFileSync(p, `${JSON.stringify(ledger, null, 2)}\n`);
+};
+
+/** na 活性注入（缺字段形态）：删掉某条 na 的 liveness → 门禁须报"必须给 liveness"。
+ *  防"新增 na 行时忘记登记缺席断言"重新变成永久免检区。 */
+const naLivenessMissing = () => (dir) => {
+  const p = join(dir, 'docs', 'alignment-ledger.json');
+  const ledger = JSON.parse(readFileSync(p, 'utf8'));
+  for (const s of ledger.sources) {
+    if (s.verdict === 'na' && s.source === 'website/AGENTS.md') delete s.liveness;
+  }
+  writeFileSync(p, `${JSON.stringify(ledger, null, 2)}\n`);
 };
 
 const bareQueuePointer = () => (dir) => {
@@ -85,15 +138,28 @@ const linkUntrackedTarget = () => (dir) => {
 
 /** 承重门禁抽样（增删同 diff：本表 + tests/verify-gates.test.mjs 无需改——它动态对账本表）。
  *  id = 案例唯一标识（同一门禁可有多个注入形态，id 防重复条目）；gate = 期望点名的门禁；
- *  mutate(dir) = 在 fixture 内注入该门禁负责拦的回归。 */
+ *  mutate(dir) = 在 fixture 内注入该门禁负责拦的回归。
+ *  expect（可选）= 断言红**必须含此子串**；用于"该门禁在副本基线本就非 PASS"的场景——
+ *  此时只查 `FAIL  <gate>` 会因**别的**报因而假绿（断言空转）。凡 gate 在对照组非 PASS 者
+ *  必须给 expect（主流程会强制检查这一点）。 */
 export const CASES = [
   { id: 'md-links-dead', gate: 'md-links', mutate: appendTo('README.md', '\n[死链探针](./definitely-missing-file.md)\n') },
   { id: 'md-links-untracked', gate: 'md-links', mutate: linkUntrackedTarget() },
   { id: 'md-anchors-missing', gate: 'md-anchors', mutate: appendTo('README.md', '\n[坏锚探针](AGENTS.md#这个锚点肯定不存在xyz)\n') },
   { id: 'note-format-no-status', gate: 'note-format', mutate: stripFirstStatusLine(join('notes', 'implemented')) },
+  { id: 'note-format-no-verification', gate: 'note-format', mutate: stripVerificationSection(join('notes', 'implemented')) },
   { id: 'entry-chain-pointer', gate: 'entry-chain', mutate: breakQueuePointer() },
   { id: 'entry-chain-bare', gate: 'entry-chain', mutate: bareQueuePointer() },
   { id: 'gate-ledger-sync-row', gate: 'gate-ledger-sync', mutate: removeLedgerRow('dist-manual-version') },
+  // align-ledger 在副本基线**非 PASS**（vendor/dsh 是 gitlink submodule，副本不拷其内容 →
+  // "vendor 里不存在"是副本环境的固有报因）。故两案例必须带 expect 指名"na 活性"报因，
+  // 否则注入未生效也会因既有的 vendor 报因看到 FAIL 而假绿。
+  { id: 'align-ledger-na-liveness-appears', gate: 'align-ledger', mutate: naLivenessAppears(),
+    expect: 'na 理由已失效——"website" 现在存在' },
+  { id: 'align-ledger-na-liveness-decorative', gate: 'align-ledger', mutate: naLivenessDecorative(),
+    expect: 'liveness 断言空转' },
+  { id: 'align-ledger-na-liveness-missing', gate: 'align-ledger', mutate: naLivenessMissing(),
+    expect: 'website/AGENTS.md: verdict=na 必须给 liveness' },
 ];
 
 // ── fixture：tracked 文件副本 + git init/add（git ls-files 驱动的门禁在副本内可用）──
@@ -151,18 +217,25 @@ function main() {
     keep.push(controlDir);
     const control = runVerify(controlDir);
     if (!/verify: 全绿|处失败/.test(control.out)) failures.push(`对照组：verify 未跑完（status=${control.status}）`);
-    for (const { gate } of CASES) {
-      if (!control.out.includes(`PASS  ${gate}`)) failures.push(`对照组：${gate} 在零注入副本非 PASS——断言空转，先修案例`);
+    for (const { id, gate, expect } of CASES) {
+      const controlPass = control.out.includes(`PASS  ${gate}`);
+      if (!controlPass && !expect) {
+        // 副本基线非 PASS 且未给 expect → 案例组只查 `FAIL <gate>` 会被既有报因蒙混过关
+        failures.push(`对照组：${gate} 在零注入副本非 PASS（${id}）——该门禁属"副本基线非 PASS"类，案例必须给 expect 指名注入报因，否则断言空转`);
+      } else if (controlPass && expect) {
+        failures.push(`对照组：${gate} 在零注入副本已 PASS 却给了 expect（${id}）——expect 多余，或案例基线判断有误`);
+      }
     }
 
-    // 案例组：注入 → 目标门禁点名红
-    for (const { id, gate, mutate } of CASES) {
+    // 案例组：注入 → 目标门禁点名红（带 expect 时须命中该报因）
+    for (const { id, gate, mutate, expect } of CASES) {
       const dir = cloneFixture(base, `case-${id}`);
       keep.push(dir);
       mutate(dir);
       const { status, out } = runVerify(dir);
       if (!/verify: 全绿|处失败/.test(out)) failures.push(`${id}：verify 未跑完（status=${status}）`);
       else if (!out.includes(`FAIL  ${gate}`)) failures.push(`${id}：注入回归未被点名报红——门禁钝化或案例失效`);
+      else if (expect && !out.includes(expect)) failures.push(`${id}：${gate} 报了红但**非本案例的报因**（期望含 ${JSON.stringify(expect)}）——注入未生效或断言被旁路`);
     }
 
     if (failures.length > 0) {

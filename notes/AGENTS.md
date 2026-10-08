@@ -22,7 +22,9 @@
 
 - 头部状态行：`> 状态：<值>`，值 ∈ `proposed | approved | superseded | implemented |
   rejected`，**与所在目录互验**；状态里不带日期与括号（日期在文件名 = 主题首提日期）；
-- implemented 骨架：`## 决定` + `## 输掉的方案`（"没记击败了什么的决定会重开讼"）；
+- implemented 骨架（`note-format` 门禁强制前三节）：`## 决定` + `## 输掉的方案`
+  （"没记击败了什么的决定会重开讼"）+ `## 实际跑过的验证`（**无证据的"完成"不算完成**；
+  标题含 验证/检查/验收/实录/记录/实证/探针/全绿/复验/证据 任一即认，容忍历史命名变体）；
 - proposed RFC：状态行 + 问题/方案/输掉的方案/验收；
 - 章节名映射（本仓 ↔ 上游 canonical）：问题 ↔ `## Problem` · 决定 ↔ `## Decision` ·
   输掉的方案 ↔ `## Alternatives considered` · 验证 ↔ `## Verification`/`## Testing` ·

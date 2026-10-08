@@ -91,9 +91,15 @@ final 位置正确、链 201/201、CRITICAL 0，仅 source_url 残留 2 张（**
    每条关键结论可点回 evidence；
 3. 想看过程：八个仪表盘在 `dev/smoke-workspace/dashboard-drt_*.html`。
 
+## 实际跑过的验证
+
+- 工作树干净，**L0 全绿（31 门禁）**、**tests 58/58**、**L1 / L4-lite ALL PASS**——均在最后一轮
+  pack 改动之后实跑（命令与档位见 [guides/60 §2](../../docs/guides/60-dev-loop.md)）；
+- 八场 run 的逐场实测结论 = 本文件 §平台期判定（第七场 57 卡：日期 0 错、链 201/201、CRITICAL 0；
+  第八场全部为 0）；会话内审计的边界（第八场实测否决）= 本文件 §输掉的方案 第 4 条。
+
 ## 环境状态
 
 - run 通道 3081（token 在 `dev/smoke-workspace/web.log`，8h 保险丝）；八场 bundle 全在盘上；
-- 工作树干净，L0 全绿（31 门禁），tests 58/58，L1/L4-lite ALL PASS（最后一轮 pack 改动后）；
 - 「真人档验收」仍是队列条目（等人，居末位）——它的四项判据里，机械可断言部分已由八场间接覆盖，剩下的
   是你的眼睛与手感。
