@@ -126,11 +126,18 @@ source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --tok
 
 - **拍板前操作侧先跑机械门**：`source dev/env.sh && node scripts/run-gates/node-gate.mjs
   research-workspace/drt_<slug>`——门①/③/L/R 红在场 = 先让 lead 原位修再拍板（红门会
-  穿过 HITL2 落地，lead 自己跑不了门：无 bash）。**门②/④ 属拍板后判据**：门②查 present
-  声明、门④查版本记账，两者在拍板前必然缺席——拍板前跑门看到 ② 红（静默缺席形态）=
-  预期态而非缺陷，拍板交付后复跑转绿（门清单正本 = NODES.md 头部图例）；
+  穿过 HITL2 落地，lead 自己跑不了门：无 bash）。**门②/④/A 属拍板后判据**：门②查 present
+  声明、门④查版本记账、门A 查交付完整性（v1 记账 + audit.md + 记账×readiness 交叉），
+  在拍板前必然缺席——拍板前跑门看到 ②/A 红（静默缺席形态）= 预期态而非缺陷，拍板交付后
+  复跑转绿（门清单正本 = NODES.md 头部图例）；
+- **拍板前操作侧跑证据审计**：`node scripts/run-gates/evidence-audit.mjs
+  research-workspace/drt_<slug>`——报告落 bundle 的 audit.md，**CRITICAL=0 才带审阅建议
+  进 HITL2**（审计判据正本 = 研究手册「机械强度诚实记账」节）；CRITICAL>0 = 证据链有
+  伪造/断链，先让 lead 修证据再回来；review 的 readiness 若为**附条件 PASS**，node-gate
+  门A 会带 ⚠ 注记显性化——拍板时先核条件（裁决归你，机械门不替你拦）；
 - lead 带审阅建议来找你：证据充分性判断 + 交付/补研究推荐 + composition 确认
-  （读者是谁 / 用来做什么 / 前景化重点）——拍板后 run 根 `final.md` 当前版落盘 + present 声明交付；
+  （读者是谁 / 用来做什么 / 前景化重点）——拍板后 run 根 `final.md` 当前版落盘 + present 声明交付
+  + `final/v1.md` 版本记账（门A 交付件齐的最后一环）；
 - 每条关键结论带 `[来源: evidence/xx.md]`，critic 的 review.md readiness: PASS
   是交付前置（无 CRITICAL 未修复才许交付）；
 - **HITL 超时语义（0.2.0 timed ask-user，600s）**：两点挂起 600s 未答 → 工具返回

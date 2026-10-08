@@ -160,7 +160,9 @@ test('门④ 无对象：final/ 仅 v1 记账（无扩张 rerun）→ N/A 显式
 test('门④ 断代：契约前交付日 → PRE-CONTRACT 不计红（kimi 09-26 形态）', () => {
   const g = V('fixture-version-missing-decision', '2026-10-02')
   assert.equal(g.status, 'PRE-CONTRACT')
-  const r = gateBundle(bundle('fixture-version-missing-decision'), undefined, { versionDate: '2026-10-02' })
+  // 门A 同步注入契约前日期：本夹具 review FAIL + final/ 记账在场 = 门A A1 交叉形态，
+  // 不注入则夹具 mtime 漂移会让 r.red 断言不可复现（断代注入纪律——同 schema-scan 成例）。
+  const r = gateBundle(bundle('fixture-version-missing-decision'), undefined, { versionDate: '2026-10-02', auditDate: '2026-10-02' })
   assert.equal(r.red, false, '契约前不计红（run bundle 是交付记录，不改历史）')
 })
 
@@ -285,4 +287,76 @@ test('门R隔离：门R红不连坐其他门（其余门在本夹具全 N/A—�
   assert.equal(r.gates.degeneration.status, 'RED')
   assert.equal(r.gates.version.status, 'N/A')
   assert.equal(r.gates.leads.status, 'N/A')
+})
+
+// ── 门A（交付完整性门；RFC 2026-10-07-delivery-criteria-mechanization；契约日 2026-10-08）──
+// 本节 = 门A 的永久反证记录：先红（夹具在、门未立时 r.gates.delivery 缺席即红）后绿。
+// 形态覆盖：audit.md 缺席（7 bundle 实测形态）/ final/v1.md 缺席（geometry-coaching 形态）/
+// 记账在场 × readiness FAIL 交叉（交付越过审查前置）/ 附条件 PASS（WARN 注记不红）/
+// 合规 / 断代 / N/A。日期注入（夹具 mtime 随检出时间漂——同门L/④ 成例）。
+const A = (name, date) => gateBundle(bundle(name), undefined, { auditDate: date }).gates.delivery
+
+test('门A反证：交付前置达成（readiness PASS + final.md）而 audit.md 缺席 → RED（7 bundle 实测形态）', () => {
+  const g = A('fixture-audit-missing', '2026-10-08')
+  assert.equal(g.status, 'RED', '交付判据含审计 CRITICAL=0——audit.md 载体缺席必须红')
+  assert.match(g.detail, /audit\.md/)
+  assert.match(g.detail, /evidence-audit/)
+})
+
+test('门A反证：交付前置达成而 final/v1.md 版本记账缺席 → RED（geometry-coaching 实测形态）', () => {
+  const g = A('fixture-audit-missing-v1', '2026-10-08')
+  assert.equal(g.status, 'RED', '版本记账是 NODES 第 8 行交付判据之首')
+  assert.match(g.detail, /v1\.md/)
+})
+
+test('门A交叉反证：final/ 记账在场 × readiness FAIL → RED（交付越过审查前置——NODES 第 6 行）', () => {
+  const g = A('fixture-audit-skip-review', '2026-10-08')
+  assert.equal(g.status, 'RED', '审查未过而版本已记账 = 绕过审查前置的交付')
+  assert.match(g.detail, /readiness 非 PASS/)
+  // 隔离性：门②（review 非 PASS → 无对象）不因此连坐
+  const r = gateBundle(bundle('fixture-audit-skip-review'), undefined, { auditDate: '2026-10-08' })
+  assert.equal(r.gates.present.status, 'N/A', '门② 无对象如实呈现')
+})
+
+test('门A附条件形态：readiness PASS（附条件）→ PASS 但带 WARN 注记（显性化不静默，不机械红——HITL2 裁决权威在用户）', () => {
+  const g = A('fixture-audit-conditional', '2026-10-08')
+  assert.equal(g.status, 'PASS', '附条件是 critic 判断——机械红越权；防的是被读作无条件 PASS')
+  assert.match(g.detail, /附条件/, '条件性必须显性化（WARN 注记）')
+})
+
+test('门A合规：readiness PASS + v1 记账 + audit.md → PASS', () => {
+  const g = A('fixture-complete', '2026-10-08')
+  assert.equal(g.status, 'PASS', JSON.stringify(g.detail))
+})
+
+test('门A断代：契约前交付日 → 违约如实报告计 PRE-CONTRACT 不计红（存量由对账步处置）', () => {
+  const g = A('fixture-audit-missing', '2026-10-07')
+  assert.equal(g.status, 'PRE-CONTRACT', 'run bundle 是交付记录，不改历史')
+  // r.red 隔离证明用 A1 形态夹具（其余门全 N/A/PASS；门①注入契约前日期后 PRE-CONTRACT）——
+  // fixture-audit-missing 会连坐门②（era-free）与门①（无会话），不用于红灯聚合断言。
+  const r = gateBundle(bundle('fixture-audit-skip-review'), undefined, { auditDate: '2026-10-07', hitlDate: '2026-10-01' })
+  assert.equal(r.gates.delivery.status, 'PRE-CONTRACT')
+  assert.equal(r.red, false, 'PRE-CONTRACT 不计入红灯（对账步承接，不机械翻旧账）')
+})
+
+test('门A无对象：final.md 缺席 → N/A（bundle 未到交付段，显式标注不静默）', () => {
+  const g = A('fixture-early', '2026-10-08')
+  assert.equal(g.status, 'N/A')
+})
+
+test('门A 豁免形态：quick_factual 无 review.md（编制豁免）而已交付（记账+审计在场）→ PASS 不假红', () => {
+  // deepseek-api-pricing 实测形态：quick_factual 编制豁免 review.md（schema-scan CONDITIONAL 同语义），
+  // 豁免型缺席不得被 A1 判"交付越过审查"——门不重复裁判豁免已在别处成立的事实。
+  const g = A('fixture-audit-quickfactual-delivered', '2026-10-08')
+  assert.equal(g.status, 'PASS', JSON.stringify(g.detail))
+  assert.match(g.detail, /豁免/)
+})
+
+test('门A 豁免反证：非 quick_factual 而记账在场、review.md 缺席 → RED（审查缺席的交付——非豁免形态）', () => {
+  // fixture-audit-missing-v1 无 review 但也无记账；此处需要"记账在场 + review 缺席 + 非豁免"形态：
+  // 复用 fixture-audit-skip-review 不行（它 review 在场且 FAIL）。构造 = fixture-audit-quickfactual
+  // 的镜像——quick_factual 标记剔除即得（本仓 runType 判据 = question.md 类型标记缺席 = other）。
+  const g = A('fixture-audit-noreview-delivered', '2026-10-08')
+  assert.equal(g.status, 'RED')
+  assert.match(g.detail, /review\.md 缺席/)
 })

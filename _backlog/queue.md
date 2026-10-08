@@ -13,8 +13,7 @@
 
 ## 队列
 
-1. ▶ **交付判据机械化 + 归档门红对账**（卫生型）——[RFC](../notes/proposed/2026-10-07-delivery-criteria-mechanization.md)：判据三方不同步收口（audit 在场/CRITICAL=0/附条件 PASS 下沉机械门）+ 存量逐 bundle 判处置 + guides61 补审计步骤；可自主（毕业时处置表呈批）
-2. **审计 P3 收尾轮（门禁小加固与清单对账打包）**（卫生型）——[RFC](../notes/proposed/2026-10-07-audit-p3-closure-round.md)：十件打包（client-keys 收口 / 清单 sync / persona 契约测试 / doc-budgets 范围 / 端口门禁 / pre-commit 激活态 / 路由补行 / 审计语料窗 / 选卡收窄 / 换 pin 技能）；可自主
+1. ▶ **审计 P3 收尾轮（门禁小加固与清单对账打包）**（卫生型）——[RFC](../notes/proposed/2026-10-07-audit-p3-closure-round.md)：十件打包（client-keys 收口 / 清单 sync / persona 契约测试 / doc-budgets 范围 / 端口门禁 / pre-commit 激活态 / 路由补行 / 审计语料窗 / 选卡收窄 / 换 pin 技能）；可自主
 
 ## 搁置池（缺上游 seam 或缺明确需求才进池；复活条件写进行内。2026-09-27 用户定调：搁置即"决定不做"——全文住 notes/rejected/ 并带重启条件，proposed/ 只留队列 TODO）
 

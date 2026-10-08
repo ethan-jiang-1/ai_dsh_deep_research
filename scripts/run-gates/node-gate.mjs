@@ -40,7 +40,7 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { deliveryDate } from '../run-gates/schema-scan.mjs'
+import { deliveryDate, runType } from '../run-gates/schema-scan.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -55,6 +55,20 @@ export const HITL_CONTRACT_DATE = '2026-10-05'
 
 /** 门R 契约日（2026-10-06 = oss-dr 借鉴候选 A1 落地日，LDR HeadingRepetitionGuard #6452 形态移植；此前交付不追溯）。 */
 export const HEADING_CONTRACT_DATE = '2026-10-06'
+
+/** 门A 契约日（2026-10-08 = RFC delivery-criteria-mechanization 毕业日；此前交付不追溯——
+ *  存量缺口由该 RFC 对账步逐 bundle 处置，不机械翻旧账）。 */
+export const AUDIT_CONTRACT_DATE = '2026-10-08'
+
+/** readiness 判定解析（门②/门A 共用的唯一语义源——防两处各写一版 regex 漂移）。
+ *  passLine = 首条匹配行；conditional 认两种实测形态：`PASS（附条件）`（mcp-hosts 143 行）与
+ *  `PASS（条件=先修 M1/M2）`（同 162 行）。2026-10-07 审计实证：附条件 PASS 此前被一律读作
+ *  无条件 PASS——识别不静默、显性化为 WARN 注记（裁决权威在 HITL2 用户，不机械红）。 */
+export function readinessOf(reviewText) {
+  const passLine = reviewText.split('\n').find((l) => /readiness[^.\n]{0,40}PASS/i.test(l))
+  if (passLine === undefined) return { pass: false, conditional: false }
+  return { pass: true, conditional: /附条件|条件\s*[=＝：:]/.test(passLine) }
+}
 
 /** 读一个会话日志文件（.jsonl 直读 / .jsonl.zstd 走 zstd CLI——多帧拼接 CLI 可解全帧）。
  *  解压失败 stderr 报文件名后按空语料继续——语料缺失偏假红方向，但红必须带线索（fail-loud 最低义务）。 */
@@ -430,6 +444,75 @@ export function headingGate(bundleDir, headingDate) {
 }
 
 /**
+ * 门A（交付完整性门，可导入；keyless；RFC 2026-10-07-delivery-criteria-mechanization）。
+ * 为什么存在：NODES.md 第 8 行承诺交付判据 = 版本记账 + present + **审计 CRITICAL=0**，但
+ * audit.md 与 final/v1.md 此前住 schema-scan「尾件缺（分档）」不计红、门④只管 vN≥2——
+ * 2026-10-07 全仓审计实锤 7 个契约期交付 bundle 无 audit.md（交付判据在合同、脚本、操作面
+ * 三方各是不同子集）。触发 = final.md 在场（综合产出在，交付段可判）：
+ *   A1 交叉：final/ 版本记账在场（任何 vN.md）× readiness 非 PASS → RED——交付越过审查
+ *      前置（NODES 第 6 行「PASS = HITL2 前置」）；
+ *   A2 交付件齐（readiness PASS = 交付前置达成，门②同款触发）：final/v1.md 在场（版本
+ *      记账——geometry-coaching 实测缺席形态）+ audit.md 在场（操作侧审计载体，evidence-audit
+ *      写盘）→ 缺席 RED；
+ *   附条件 PASS：按 PASS 计（附条件是 critic 判断，HITL2 裁决权威在用户——机械红越权），
+ *      detail 带 WARN 注记显性化，防"被读作无条件 PASS"的静默误读（mcp-hosts 实测）。
+ * 断代：交付日 < AUDIT_CONTRACT_DATE → PRE-CONTRACT 不计红（run bundle 是交付记录；
+ * 存量由 RFC 对账步处置）。guides61 §4 时序：evidence-audit 拍板前跑（audit.md 先落盘），
+ * v1 记账拍板后落——拍板前 A2 的 v1 缺席 = 预期态（同门②/④），交付后复跑全绿。
+ * @returns { status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT', detail }
+ */
+export function deliveryGate(bundleDir, auditDate) {
+  const finalPath = join(bundleDir, 'final.md')
+  if (!existsSync(finalPath)) {
+    return { status: 'N/A', detail: 'final.md 不在场——门A 无对象（bundle 未到交付段）' }
+  }
+  const finalDir = join(bundleDir, 'final')
+  const versionFiles = existsSync(finalDir) ? readdirSync(finalDir).filter((f) => /^v\d+\.md$/.test(f)) : []
+  const hasReview = existsSync(join(bundleDir, 'review.md'))
+  const reviewText = hasReview ? readFileSync(join(bundleDir, 'review.md'), 'utf8') : ''
+  const { pass: reviewPass, conditional } = readinessOf(reviewText)
+  // quick_factual 编制豁免 review.md（schema-scan CONDITIONAL 同语义同判据源——豁免依据 =
+  // question.md 自带类型标记，不硬编码名单）；豁免型缺席不得被 A1 判"越过审查"。
+  const quickFactual = runType(bundleDir) === 'quick_factual'
+  const delivered = versionFiles.length > 0
+  const problems = []
+  if (delivered && hasReview && !reviewPass) {
+    problems.push(
+      `final/ 版本记账在场（${versionFiles.join(', ')}）而 review readiness 非 PASS——交付越过审查前置（NODES 第 6 行：PASS = HITL2 前置；修正 = 补审查轮使 readiness 判 PASS，或按处置流程显式记账）`,
+    )
+  }
+  if (delivered && !hasReview && !quickFactual) {
+    problems.push('final/ 版本记账在场而 review.md 缺席（非 quick_factual 豁免形态）——审查前置整缺的交付（修正 = 补 review.md 判 readiness，或按处置流程显式记账）')
+  }
+  // A2 交付件齐——触发 = reviewPass（审查放行，记账+审计 owed；拍板前 v1 缺席 = 预期态，同门②/④）
+  // 或记账在场（豁免型交付的唯一触发——deepseek-api-pricing 形态）。
+  if (reviewPass || delivered) {
+    if (!existsSync(join(finalDir, 'v1.md'))) {
+      problems.push('交付前置达成（readiness PASS）但 final/v1.md 版本记账缺席（geometry-coaching 实测形态；修正 = 交付时按 templates/run/final 落 v1 记账）')
+    }
+    if (!existsSync(join(bundleDir, 'audit.md'))) {
+      problems.push('交付前置达成但 audit.md 缺席——操作侧审计未做（NODES 第 8 行交付判据含审计 CRITICAL=0；修正 = 跑 node scripts/run-gates/evidence-audit.mjs <bundle> 落盘审计报告）')
+    }
+  }
+  const date = auditDate ?? deliveryDate(bundleDir)
+  const pre = date !== null && date < AUDIT_CONTRACT_DATE
+  if (problems.length === 0) {
+    const base = !reviewPass && !delivered
+      ? 'final.md 在场而交付段未进入（无版本记账、readiness 非 PASS）——A1/A2 无对象'
+      : '交付件齐：final/v1.md 版本记账 + audit.md 操作侧审计在场'
+    const exemptNote = !hasReview && quickFactual ? '；quick_factual 编制豁免 review.md（豁免依据 = question.md 类型标记）' : ''
+    return { status: 'PASS', detail: base + exemptNote + (conditional ? '；⚠ readiness 为附条件 PASS（条件性显性化——HITL2 拍板前请核条件）' : '') }
+  }
+  return {
+    status: pre ? 'PRE-CONTRACT' : 'RED',
+    detail:
+      problems.join('；') +
+      (conditional ? '；⚠ readiness 为附条件 PASS（条件性显性化）' : '') +
+      (pre ? '（契约前交付——如实报告不计红，存量由对账步处置，run bundle 是交付记录不改历史）' : ''),
+  }
+}
+
+/**
  * 门一个 bundle（核心逻辑，可导入；keyless）。
  * @returns { gates: { hitlAsk, hitl2Row, present, leads, version, degeneration }, red, report }
  *   每门：{ status: 'PASS'|'PASS-RELAY'|'RED'|'N/A'|'PRE-CONTRACT', detail }
@@ -458,7 +541,7 @@ export function gateBundle(bundleDir, sessionsRoot, opts = {}) {
   const finalPath = join(bundleDir, 'final.md')
   const reviewPath = join(bundleDir, 'review.md')
   const reviewText = existsSync(reviewPath) ? readFileSync(reviewPath, 'utf8') : ''
-  const reviewPass = existsSync(reviewPath) && /readiness[^.\n]{0,40}PASS/i.test(reviewText)
+  const reviewPass = readinessOf(reviewText).pass
   const triggered = existsSync(finalPath) && reviewPass
   let present
   if (!existsSync(finalPath)) {
@@ -473,8 +556,8 @@ export function gateBundle(bundleDir, sessionsRoot, opts = {}) {
     else present = { status: 'RED', detail: 'final.md + readiness PASS 在场，但日志无 present 调用、拍板行也无操作侧补齐标注——静默缺席（G8 形态）' }
   }
 
-  const gates = { hitlAsk: hitlAskGate(bundleDir, sessionsRoot, opts.hitlDate), hitl2Row, present, leads: leadsGate(bundleDir, opts.leadsDate), version: versionGate(bundleDir, opts.versionDate), degeneration: headingGate(bundleDir, opts.headingDate) }
-  const red = [gates.hitlAsk, hitl2Row, present, gates.leads, gates.version, gates.degeneration].some((g) => g.status === 'RED')
+  const gates = { hitlAsk: hitlAskGate(bundleDir, sessionsRoot, opts.hitlDate), hitl2Row, present, leads: leadsGate(bundleDir, opts.leadsDate), version: versionGate(bundleDir, opts.versionDate), degeneration: headingGate(bundleDir, opts.headingDate), delivery: deliveryGate(bundleDir, opts.auditDate) }
+  const red = [gates.hitlAsk, hitl2Row, present, gates.leads, gates.version, gates.degeneration, gates.delivery].some((g) => g.status === 'RED')
   const report = `# Node Gate — ${slug}（${new Date().toISOString()}）
 
 > scripts/node-gate.mjs（keyless；契约正本 = research-workspace/NODES.md 第 3/7/8 行 + 回边版本语义节 + BUG-006 门①）。
@@ -487,6 +570,7 @@ export function gateBundle(bundleDir, sessionsRoot, opts = {}) {
 | L leads 交接 | ${gates.leads.status} | ${gates.leads.detail} |
 | ④ 版本记账 | ${gates.version.status} | ${gates.version.detail} |
 | R 标题重复 | ${gates.degeneration.status} | ${gates.degeneration.detail} |
+| A 交付完整性 | ${gates.delivery.status} | ${gates.delivery.detail} |
 `
   return { gates, red, report }
 }
@@ -529,13 +613,14 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
     process.exit(2)
   }
   const { gates, red, report } = gateBundle(bundleDir, sessionsRoot)
-  console.log(`node-gate: ${basename(bundleDir)} ｜ 门① HITL 锚点 = ${gates.hitlAsk.status} ｜ 门③ §Decisions 拍板行 = ${gates.hitl2Row.status} ｜ 门② present 声明 = ${gates.present.status} ｜ 门L leads 交接 = ${gates.leads.status} ｜ 门④ 版本记账 = ${gates.version.status} ｜ 门R 标题重复 = ${gates.degeneration.status}`)
+  console.log(`node-gate: ${basename(bundleDir)} ｜ 门① HITL 锚点 = ${gates.hitlAsk.status} ｜ 门③ §Decisions 拍板行 = ${gates.hitl2Row.status} ｜ 门② present 声明 = ${gates.present.status} ｜ 门L leads 交接 = ${gates.leads.status} ｜ 门④ 版本记账 = ${gates.version.status} ｜ 门R 标题重复 = ${gates.degeneration.status} ｜ 门A 交付完整性 = ${gates.delivery.status}`)
   console.log(`  ① ${gates.hitlAsk.detail}`)
   console.log(`  ③ ${gates.hitl2Row.detail}`)
   console.log(`  ② ${gates.present.detail}`)
   console.log(`  L ${gates.leads.detail}`)
   console.log(`  ④ ${gates.version.detail}`)
   console.log(`  R ${gates.degeneration.detail}`)
+  console.log(`  A ${gates.delivery.detail}`)
   // 报告写入防护：tests/ 夹具区是 tracked 区——写报告=污染 git（2026-09-29 实测 6 个未跟踪文件，
   // 红证记录见 notes/implemented/2026-09-29-quality-evidence-loop.md）。夹具判定走上面的 stdout。
   if (resolve(bundleDir).startsWith(join(ROOT, 'tests') + '/')) {
