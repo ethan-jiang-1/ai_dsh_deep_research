@@ -40,7 +40,7 @@ const stripFirstStatusLine = (dirRel) => (dir) => {
  *  若该文还有别的证据节则仍是绿的（实测教训：首版只改首个匹配 → 门禁照绿，案例空转）。 */
 const stripVerificationSection = (dirRel) => (dir) => {
   const d = join(dir, dirRel);
-  const WORD = /^##\s*[^\n]*(验证|检查|验收|实录|记录|实证|探针|全绿|复验|证据)/m;
+  const WORD = /^##(?!#)\s*[^\n]*(验证|检查|验收|实录|记录|实证|探针|全绿|复验|证据)/m;
   const target = readdirSync(d).filter((f) => f.endsWith('.md') && f !== 'README.md').sort()
     .find((f) => {
       const t = readFileSync(join(d, f), 'utf8');
@@ -50,6 +50,24 @@ const stripVerificationSection = (dirRel) => (dir) => {
   const p = join(d, target);
   const out = readFileSync(p, 'utf8').split('\n')
     .map((l) => (WORD.test(l) ? '## 附注' : l)).join('\n');
+  writeFileSync(p, out);
+};
+
+/** 证据节注入（**否定式标题**形态）：把真实证据节标题换成"## 未验证的猜测"
+ *  ——文字游戏：标题里"验证"二字在场，但它声明的是**没有验证**。
+ *  门禁须仍判红（语义倒置：明说缺席反而满足"要有证据节"，2026-10-08 二轮自审抓获）。 */
+const negateVerificationSection = (dirRel) => (dir) => {
+  const d = join(dir, dirRel);
+  const WORD = /^##(?!#)\s*[^\n]*(验证|检查|验收|实录|记录|实证|探针|全绿|复验|证据)/m;
+  const target = readdirSync(d).filter((f) => f.endsWith('.md') && f !== 'README.md').sort()
+    .find((f) => {
+      const t = readFileSync(join(d, f), 'utf8');
+      return !t.includes('<!-- grandfather:') && WORD.test(t);
+    });
+  if (!target) throw new Error('找不到可注入的 implemented Note（无含证据节的非 grandfather 篇）');
+  const p = join(d, target);
+  const out = readFileSync(p, 'utf8').split('\n')
+    .map((l) => (WORD.test(l) ? '## 未验证的猜测' : l)).join('\n');
   writeFileSync(p, out);
 };
 
@@ -82,13 +100,38 @@ const naLivenessAppears = () => (dir) => {
 
 /** na 活性注入（装饰性断言形态）：把某条 na 的缺席断言改回 **vendor 源路径本身**
  *  ——这种断言看着在场、却永不会为真实失效而响（vendor doc 本来就不拷进本仓）。
- *  门禁须报"断言空转"红，否则免检区只是换了个写法（2026-10-08 自查抓获 7 处）。 */
+ *  门禁须报"断言空转"红，否则免检区只是换了个写法（2026-10-08 自查抓获 7 处）。
+ *  **本案例只锁"断言 = 源路径"这一退化形态**：能力面以换名形态落地（如
+ *  `src/lib/session-v5.ts` 之于 session-format 行）仍不被捕捉——那是 `reReviewOn`
+ *  声明层负责的语义面，无机械判据可锁。勿把本案例读成"能力级腐烂已被覆盖"。 */
 const naLivenessDecorative = () => (dir) => {
   const p = join(dir, 'docs', 'alignment-ledger.json');
   const ledger = JSON.parse(readFileSync(p, 'utf8'));
   for (const s of ledger.sources) {
     if (s.verdict === 'na' && s.source === 'docs/api-gateway.md') {
       s.liveness = [{ absent: 'docs/api-gateway.md' }];
+    }
+  }
+  writeFileSync(p, `${JSON.stringify(ledger, null, 2)}\n`);
+};
+
+/** na 活性注入（globAbsent 形态）：造一份命中 glob 的文件 → 门禁须报"glob 命中"红。
+ *  **此前本分支零覆盖**（首版三个案例全走 absent，而 `matchSimpleGlob` 是新手写的正则
+ *  路由——二轮自审点名"globAbsent 分支完全未被行使"）。 */
+const naLivenessGlob = () => (dir) => {
+  writeFileSync(join(dir, 'docs', 'architecture.zh.md'), '# 双语配对探针\n');
+};
+
+/** na 活性注入（能力面声明缺失形态）：把某条**能力行**的 reReviewOn 删掉且不给 liveness
+ *  → 门禁须报"两者皆无"红。锁的是 2026-10-08 二轮修正后的诚实分层：能力面缺席不得靠
+ *  猜路径冒充机械覆盖（对抗自审实证：造 `src/lib/session-v5.ts` 时首版门禁照旧全绿）。 */
+const naCapabilityUndefended = () => (dir) => {
+  const p = join(dir, 'docs', 'alignment-ledger.json');
+  const ledger = JSON.parse(readFileSync(p, 'utf8'));
+  for (const s of ledger.sources) {
+    if (s.verdict === 'na' && s.source === 'docs/session-format-status.md') {
+      delete s.liveness;
+      delete s.reReviewOn;
     }
   }
   writeFileSync(p, `${JSON.stringify(ledger, null, 2)}\n`);
@@ -148,6 +191,7 @@ export const CASES = [
   { id: 'md-anchors-missing', gate: 'md-anchors', mutate: appendTo('README.md', '\n[坏锚探针](AGENTS.md#这个锚点肯定不存在xyz)\n') },
   { id: 'note-format-no-status', gate: 'note-format', mutate: stripFirstStatusLine(join('notes', 'implemented')) },
   { id: 'note-format-no-verification', gate: 'note-format', mutate: stripVerificationSection(join('notes', 'implemented')) },
+  { id: 'note-format-negated-verification', gate: 'note-format', mutate: negateVerificationSection(join('notes', 'implemented')) },
   { id: 'entry-chain-pointer', gate: 'entry-chain', mutate: breakQueuePointer() },
   { id: 'entry-chain-bare', gate: 'entry-chain', mutate: bareQueuePointer() },
   { id: 'gate-ledger-sync-row', gate: 'gate-ledger-sync', mutate: removeLedgerRow('dist-manual-version') },
@@ -158,6 +202,10 @@ export const CASES = [
     expect: 'na 理由已失效——"website" 现在存在' },
   { id: 'align-ledger-na-liveness-decorative', gate: 'align-ledger', mutate: naLivenessDecorative(),
     expect: 'liveness 断言空转' },
+  { id: 'align-ledger-na-liveness-glob', gate: 'align-ledger', mutate: naLivenessGlob(),
+    expect: 'glob "docs/**/*.zh.md" 命中 docs/architecture.zh.md' },
+  { id: 'align-ledger-na-capability-undefended', gate: 'align-ledger', mutate: naCapabilityUndefended(),
+    expect: 'docs/session-format-status.md: verdict=na 必须给 liveness' },
   { id: 'align-ledger-na-liveness-missing', gate: 'align-ledger', mutate: naLivenessMissing(),
     expect: 'website/AGENTS.md: verdict=na 必须给 liveness' },
 ];
@@ -218,7 +266,10 @@ function main() {
     const control = runVerify(controlDir);
     if (!/verify: 全绿|处失败/.test(control.out)) failures.push(`对照组：verify 未跑完（status=${control.status}）`);
     for (const { id, gate, expect } of CASES) {
-      const controlPass = control.out.includes(`PASS  ${gate}`);
+      // 判据行锚定：verify 每个门禁恰打一行 `${verdict}  ${gate}`（实测），故用带换行边界的
+      // 精确形态而非裸 substring——若 `PASS  <gate>` 与 `FAIL  <gate>` 同时出现，裸
+      // `includes` 会读成"基线 PASS"从而**禁止**本案例需要的 expect（二轮自审点名的脆弱原语）。
+      const controlPass = control.out.includes(`\nPASS  ${gate}\n`);
       if (!controlPass && !expect) {
         // 副本基线非 PASS 且未给 expect → 案例组只查 `FAIL <gate>` 会被既有报因蒙混过关
         failures.push(`对照组：${gate} 在零注入副本非 PASS（${id}）——该门禁属"副本基线非 PASS"类，案例必须给 expect 指名注入报因，否则断言空转`);
@@ -234,7 +285,7 @@ function main() {
       mutate(dir);
       const { status, out } = runVerify(dir);
       if (!/verify: 全绿|处失败/.test(out)) failures.push(`${id}：verify 未跑完（status=${status}）`);
-      else if (!out.includes(`FAIL  ${gate}`)) failures.push(`${id}：注入回归未被点名报红——门禁钝化或案例失效`);
+      else if (!out.includes(`\nFAIL  ${gate}\n`)) failures.push(`${id}：注入回归未被点名报红——门禁钝化或案例失效`);
       else if (expect && !out.includes(expect)) failures.push(`${id}：${gate} 报了红但**非本案例的报因**（期望含 ${JSON.stringify(expect)}）——注入未生效或断言被旁路`);
     }
 

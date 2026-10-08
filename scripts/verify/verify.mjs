@@ -18,7 +18,11 @@ function matchSimpleGlob(pathStr, pattern) {
   const norm = pathStr.split('\\').join('/');
   const rx = pattern
     .split('\\').join('/')
-    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+    // `?` 必须转义（2026-10-08 二轮自审抓获）：漏了它会变成正则量词——`a?b` 匹配 `ab`、
+    // 反而不匹配 `axb`，静默错误。**本匹配器不支持 `?` 单字符语义**（转义后按字面量处理，
+    // 故 `a?b` 只匹配字面 `a?b`）——这是刻意的保守选择：宁可少匹配也不静默错配。
+    // 当前所有 glob 全是 `*` 形态，未用到 `?`。
+    .replace(/[.+^${}()|[\]\\?]/g, '\\$&')
     .replace(/\*\*\//g, '\u0000')
     .replace(/\*\*/g, '\u0001')
     .replace(/\*/g, '[^/]*')
@@ -325,7 +329,16 @@ function parkedSection() {
   // 本仓证据节的真实命名族 = 验证/检查/验收/实录/记录/实证/探针/全绿/结果/复验…
   // （如 `## 验收判据` `## 阶段一实录` `## 构建打通 + 双通道全绿` `## 证据（fresh-agent 探针…）`）。
   // 判定语义 = 该节标题**声称此处有证据**，而非强求统一命名——苛求命名会制造格式洁癖式假红。
-  const VERIFY_SECTION = /^##\s*[^\n]*(验证|检查|验收|实录|记录|实证|探针|全绿|复验|证据)/m;
+  // 证据节判定词表（2026-10-08 增设）。
+  // `^##(?!#)`：**必须恰好是 h2**——`^##` 在 /m 下也会匹配 `###`/`####`（二轮自审抓获，
+  // 当前潜伏：71 篇命中者全走真 `##`，唯一无 h2 的那篇带 grandfather 注释）。
+  // 词表按**实测标题族**归纳，容忍历史命名变体（验证/检查/验收/实录/记录/实证/探针/
+  // 全绿/复验/证据）——不逼统一命名，否则 25 篇有效历史命名被误杀。
+  // 否定式标题必须排除（2026-10-08 二轮自审抓获）：`## 未验证的猜测` / `## 无验证` /
+  // `## 待验证` 原先**因为"验证"二字出现而通过**——即"明说没有证据"反而满足"要有证据节"，
+  // 语义倒置。紧邻否定词 + 证据词 = 该标题在声明缺席，不算证据节。
+  const VERIFY_SECTION = /^##(?!#)\s*[^\n]*(验证|检查|验收|实录|记录|实证|探针|全绿|复验|证据)/m;
+  const VERIFY_NEGATED = /^##(?!#)[^\n]*(未|无|待|免|非|不|尚未)(验证|检查|验收|实录|记录|实证|探针|复验|证据)/m;
   each('implemented', (ent, text) => {
     const g = GRANDFATHER.test(text);
     if (!/^> 状态：\*{0,2}implemented\*{0,2}\s*$/m.test(text))
@@ -334,8 +347,8 @@ function parkedSection() {
       fail(gate, `notes/implemented/${ent}: 缺"## 决定"节（遗留形态须标 grandfather 注释，见 notes/README.md）`);
     if (!/^## 输掉的方案/m.test(text) && !g)
       fail(gate, `notes/implemented/${ent}: 缺"## 输掉的方案"节（遗留形态须标 grandfather 注释，见 notes/README.md）`);
-    if (!VERIFY_SECTION.test(text) && !g)
-      fail(gate, `notes/implemented/${ent}: 缺"实际跑过的验证"节——无证据的"完成"不算完成（判定词表见 note-format 实现注释；遗留形态标 grandfather）`);
+    if ((!VERIFY_SECTION.test(text) || VERIFY_NEGATED.test(text)) && !g)
+      fail(gate, `notes/implemented/${ent}: 缺"实际跑过的验证"节——无证据的"完成"不算完成（否定式标题如"## 未验证的猜测"不算证据节；词表见 note-format 实现注释；遗留形态标 grandfather）`);
     // ── 本断言的**已知边界**（如实登记，不假装它更强）──────────────────────────────
     // 这是**在场检查**，不是**内容检查**：`## 证据待补` / `## 验证计划（未执行）` 这类空洞
     // 或自认未执行的标题同样会通过（对抗测试实证）。机械面在这里能保证的只有"作者被逼到
@@ -963,26 +976,37 @@ function parkedSection() {
         if (!['adopted', 'adapted', 'na'].includes(verdict)) { fail(gate, `${src}: verdict 值域外（adopted/adapted/na）`); continue; }
         if (verdict === 'na') {
           if (typeof entry.reason !== 'string' || entry.reason.trim() === '') fail(gate, `${src}: verdict=na 必须给 reason`);
-          // ── na 活性检查（2026-10-08 增设）：`不适用` 是"当时不适用"，不是永久豁免 ──
+          // ── na 活性检查（2026-10-08 增设；同日二轮修正）──────────────────────────────
           // 病根实证：本门禁原注释自认"只判存在性，不判语义对错"，而 na 的 reason 一旦写下
-          // 即永久免检——2026-10-08 复核实测 10 处 reason 已变假（archived/ 已启用、snapshot
-          // 录制夹具已在场、client 插件代码已自写、UI 样式面已存在），本门禁全绿。依据静默腐烂
-          // 比任何单条 gap 都危险（本表是"什么该做什么不该做"的判断依据本身）。
-          // 机制：每条 na 必须带 liveness 数组，每项 = 一条**可机械判定的缺席断言**
-          // （absent: 仓内相对路径 / globAbsent: glob 模式）。断言在**该路径或匹配存在**时判红
-          // ——即"你当初说本仓没有 X，现在 X 出现了，回来重估这一行"。
+          // 即永久免检——复核实测 10 处 reason 已变假（archived/ 已启用、snapshot 录制夹具已
+          // 在场、client 插件代码已自写、UI 样式面已存在），本门禁全绿。依据静默腐烂比任何
+          // 单条 gap 都危险（本表是"什么该做什么不该做"的判断依据本身）。
+          //
+          // **二轮修正的教训（对抗自审实证，务必保留）**：首版要求每条 na 都给机械缺席断言，
+          // 结果是把"免检区"**换了个写法**而非关掉——断言写的是**猜出来的路径形状**，而 reason
+          // 声称缺席的是**一个能力**，两者只是碰巧相关。实证：造 `src/lib/session-v5.ts`
+          // （session-format 行的自然落点）或 `src/lib/lifecycle.ts`，本门禁照旧全绿。
+          // 一条 glob 无法表达"没有模块实现能力 X"——所以这里**如实分层**，不假装统一覆盖：
+          //   · `liveness`：仅在**目录/文件树的缺席本身就是真实信号**时使用（如 `website/`、
+          //     `.github/`、`packages/client/`）——这些真的有效，断言即为判据；
+          //   · `reReviewOn`：能力面缺席（"本仓无 X 子系统/实现面"）用**声明式人工重估触发
+          //     条件**，写清"X 以什么形态出现时回来重估"。这是诚实的做法：能力级腐烂仍是
+          //     语义判断，归 §维护规则 的三类触发事件与人工重估，不归机械面。
+          // 两者必居其一——都缺才是真的免检区（该判红）。
           const live = entry.liveness;
-          if (!Array.isArray(live) || live.length === 0) {
-            fail(gate, `${src}: verdict=na 必须给 liveness（可机械判定的缺席断言数组——"本仓无 X" 形态；无此则 na 成永久免检区，见 discipline-map §维护规则）`);
-          } else {
+          const reReview = entry.reReviewOn;
+          const hasLive = Array.isArray(live) && live.length > 0;
+          const hasReReview = typeof reReview === 'string' && reReview.trim().length > 0;
+          if (!hasLive && !hasReReview) {
+            fail(gate, `${src}: verdict=na 必须给 liveness（机械缺席断言——仅限"目录/文件树缺席即信号"形态）或 reReviewOn（能力面缺席的声明式人工重估触发条件）；两者皆无 = 永久免检区，见 discipline-map §维护规则`);
+          }
+          if (hasLive) {
             for (const item of live) {
               if (typeof item?.absent === 'string' && item.absent.length > 0) {
-                // 防空转（2026-10-08 自查抓获 7 处）：断言对象若**就是 vendor 源路径本身**，
-                // 则它永远成立（vendor doc 本来就不会被拷贝进本仓）——这种"装饰性断言"看着
-                // 在场、永不为真实失效而响，等于把免检区换了个写法。真实的失效形态是**本仓
-                // 长出了那个能力面**，故断言必须指向本仓侧的能力载体，不是那份上游文档。
+                // 防空转（自查抓获 7 处）：断言对象若**就是 vendor 源路径本身**，则它永远成立
+                // （vendor doc 本来就不会被拷贝进本仓）——看着在场、永不为真实失效而响。
                 if (item.absent === src || src.endsWith(`/${item.absent}`) || item.absent.endsWith(`/${src}`)) {
-                  fail(gate, `${src}: liveness 断言空转——"${item.absent}" 就是 vendor 源路径本身，永不会为真实失效而响；请改指本仓侧能力载体（如生成目录/源码路径）——见 discipline-map §维护规则`);
+                  fail(gate, `${src}: liveness 断言空转——"${item.absent}" 就是 vendor 源路径本身，永不会为真实失效而响；请改指本仓侧能力载体，或改用 reReviewOn——见 discipline-map §维护规则`);
                 } else if (existsSync(join(ROOT, item.absent))) {
                   fail(gate, `${src}: na 理由已失效——"${item.absent}" 现在存在（当初登记"本仓无此面"）→ 重估该行 verdict，见 discipline-map §维护规则`);
                 }

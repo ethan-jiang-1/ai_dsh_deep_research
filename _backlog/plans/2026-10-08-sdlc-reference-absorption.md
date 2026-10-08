@@ -261,9 +261,9 @@
 
 | 项 | 落地形态 | 反证 |
 |---|---|---|
-| **C17** | `align-ledger` 增 `na` 活性断言：每条 `na` 必带 `liveness`（`absent` 路径 / `globAbsent` glob），断言对象一旦出现即红；24 条 `na` 已全量补齐判据 | 四形态注入红→还原绿：① 造 `.github` 咬路径型 ② 造 `docs/*.zh.md` 咬 glob 型 ③ 删 `liveness` 字段咬"必填" ④ 存量补齐后绿。`gates-smoke` 加 2 案例 |
+| **C17** | `align-ledger` 增 `na` 活性依据，**如实分两层**：11 条"目录/文件树缺席即信号"用机械 `liveness`（`absent`/`globAbsent`）；13 条能力面缺席用声明式 `reReviewOn`（一条 glob 无法表达"没有模块实现能力 X"）；两者皆无即红。另防"装饰性断言"（断言=源路径本身） | 六形态注入红→还原绿（含 glob 型、装饰性断言型、能力面两依据皆缺型），`gates-smoke` 加 4 案例（共 14 案例全绿）。**对抗自审打回首版**：首版要求每条都给机械断言，实测造 `src/lib/session-v5.ts` / `lifecycle.ts` 时门禁照旧全绿——即把免检区换了个写法；故改分层，不广告不存在的覆盖 |
 | **C18** | `discipline-map` §维护规则 增设"本仓自身演进同样触发重校"（列三类事件）+ "`不适用` 是当时不适用、不是豁免"条款 | 文档变更，随 `md-links`/`md-anchors` 绿 |
-| **C1** | `note-format` 增 implemented 证据节断言（词表按实测标题族归纳，容忍历史命名变体） | 注入"把验证节标题改中性词"→ 点名红 → 还原绿。**并抓到 1 处真阳性**：`polish-to-plateau` 的机械绿证据原误置 `## 环境状态`（= Consequences）、已归位 Verification |
+| **C1** | `note-format` 增 implemented 证据节断言（恰好 h2 + 证据词族，容忍历史命名变体；**否定式标题判红**——`## 未验证的猜测` 原先因"验证"二字在场而通过） | 注入"改成中性词"与"改成否定式标题"两形态 → 均点名红 → 还原绿。**并抓到 1 处真阳性**：`polish-to-plateau` 的机械绿证据原误置 `## 环境状态`（= Consequences）、已归位 Verification |
 | **C3** | `docs/AGENTS.md` §slop 清单 增"单页自足性终检"（只有 HEAD 的读者能否解析每个引用、核实每条主张）——等价 `dsh-trim-cot-leakage` | 文档变更；受 `doc-budgets` 约束（初版超 3 行，按处置序**压缩**而非升顶） |
 | **10 处失真登记** | `alignment-ledger` 与 `discipline-map` 修正：archived 层、snapshot 录制夹具、cordis 自写插件、client UI/样式面、capability seam 五族共 10 条 `na` 转为 `adopted`/`adapted` 或改写落点 | `pnpm verify` 全绿 + `pnpm test` 252/252 |
 

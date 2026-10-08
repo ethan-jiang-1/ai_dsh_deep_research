@@ -152,11 +152,7 @@
       "owns": "技能：对外可感知破坏面（CLI/profiles/cordis.yml 或 settings 键/持久化数据/SDK/wire API/发布包入口）在其引入的变更内即写 docs/upgrade-guide/v<version>/<item>/guide.md，不延后到发布准备期",
       "verdict": "na",
       "reason": "本仓 pack private、无下游消费者，对外升级指南无承载对象；换 pin 的迁移与重审结论由升 pin Note（notes/implemented/）承载，破坏面记录同源",
-      "liveness": [
-        {
-          "absent": "docs/upgrade-guide"
-        }
-      ]
+      "reReviewOn": "本仓 pack 转为 public 或出现下游消费者（届时对外升级指南有承载对象）时重估"
     },
     {
       "source": ".agents/skills/dsh-doc/SKILL.md",
@@ -410,11 +406,7 @@
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
       "reason": "本仓无 agent 生命周期实现面（消费 base 能力）；生命周期术语在 00-index §术语映射",
-      "liveness": [
-        {
-          "absent": "packages/deep-research-pack/src/lib/lifecycle"
-        }
-      ]
+      "reReviewOn": "本仓出现自写的 agent 生命周期实现面（如 src/lib/ 下的状态机/生命周期折叠模块）时重估"
     },
     {
       "source": "docs/AGENTS.md",
@@ -429,11 +421,7 @@
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
       "reason": "本仓无 API gateway 子系统",
-      "liveness": [
-        {
-          "globAbsent": "packages/deep-research-pack/src/**/gateway*"
-        }
-      ]
+      "reReviewOn": "本仓出现网关/代理入站子系统（任何形态的 gateway 模块或监听面）时重估"
     },
     {
       "source": "docs/architecture.md",
@@ -468,11 +456,7 @@
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
       "reason": "本仓无入库生成目录（生成的 config/tool/persistence catalog 面）；生成态缺席与引入条件登记在 discipline-map 源 7",
-      "liveness": [
-        {
-          "absent": "docs/generated"
-        }
-      ]
+      "reReviewOn": "本仓出现入库生成目录（docs/generated/ 或等价的 from-source 目录投影 + 生成器脚本）时重估"
     },
     {
       "source": "docs/cookbook/",
@@ -578,11 +562,7 @@
       "owns": "持久化类型变更评审配方",
       "verdict": "na",
       "reason": "本仓无持久化类型面（session log 由 base 拥有）",
-      "liveness": [
-        {
-          "absent": "packages/deep-research-pack/src/persistence"
-        }
-      ]
+      "reReviewOn": "本仓出现自写持久化类型面（session log 不再由 base 拥有）时重估"
     },
     {
       "source": "docs/cordis-primer.md",
@@ -597,11 +577,7 @@
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
       "reason": "本仓无自写 LLM 请求扩展面",
-      "liveness": [
-        {
-          "globAbsent": "packages/deep-research-pack/src/**/*llm*"
-        }
-      ]
+      "reReviewOn": "本仓自写 LLM 请求/响应线上扩展（不再由 base 的 provider 层承担）时重估"
     },
     {
       "source": "docs/defensive-patterns.md",
@@ -625,11 +601,7 @@
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
       "reason": "本仓不定义事件类型（消费 base 事件）",
-      "liveness": [
-        {
-          "globAbsent": "packages/deep-research-pack/src/**/events*"
-        }
-      ]
+      "reReviewOn": "本仓开始定义（而非仅消费）事件类型时重估"
     },
     {
       "source": "docs/glossary.md",
@@ -644,11 +616,7 @@
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
       "reason": "本仓无生成的关系索引面",
-      "liveness": [
-        {
-          "globAbsent": "docs/**/atlas*"
-        }
-      ]
+      "reReviewOn": "本仓出现生成的关系索引/图谱面时重估"
     },
     {
       "source": "docs/i18n/README.md",
@@ -666,25 +634,14 @@
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
       "reason": "本仓无入库生成物（模块关系图属 from-source 生成目录面）；生成态缺席与引入条件登记在 discipline-map 源 7",
-      "liveness": [
-        {
-          "absent": "docs/generated"
-        },
-        {
-          "absent": "docs/module-graph.svg"
-        }
-      ]
+      "reReviewOn": "本仓出现入库生成物（模块关系图/依赖图生成器）时重估"
     },
     {
       "source": "docs/persistence-catalog.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
       "reason": "本仓无持久化事件声明面",
-      "liveness": [
-        {
-          "globAbsent": "packages/deep-research-pack/**/*persistence*"
-        }
-      ]
+      "reReviewOn": "本仓自写持久化事件声明面（不再是 base 拥有 session log）时重估"
     },
     {
       "source": "docs/postmortem/README.md",
@@ -710,11 +667,7 @@
       "owns": "用一页专文区分 checkout 的 Session writer 版本与最新已发布格式；其他文档链接到这里，而不是各自重述哪个版本是当前/下一个/未发布。",
       "verdict": "na",
       "reason": "本仓不定义 session 格式与版本状态（消费 base 能力）",
-      "liveness": [
-        {
-          "globAbsent": "packages/deep-research-pack/src/**/session-format*"
-        }
-      ]
+      "reReviewOn": "本仓自写 session 格式或版本状态（不再消费 base 能力）时重估"
     },
     {
       "source": "docs/testing.md",
@@ -731,22 +684,14 @@
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
       "reason": "本仓无生成工具目录面（工具行由 row-deps + L1 真挂载验证）",
-      "liveness": [
-        {
-          "absent": "docs/generated"
-        }
-      ]
+      "reReviewOn": "本仓出现入库生成目录（生成器脚本 + 生成态文档）时重估"
     },
     {
       "source": "docs/tool-execution-pipeline.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
       "reason": "本仓无工具执行管线实现面",
-      "liveness": [
-        {
-          "globAbsent": "packages/deep-research-pack/src/**/pipeline*"
-        }
-      ]
+      "reReviewOn": "本仓自写工具执行管线（不再走 base 的 tool 执行链）时重估"
     },
     {
       "source": "docs/ui-radius.md",
