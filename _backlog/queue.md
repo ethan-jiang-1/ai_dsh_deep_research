@@ -13,11 +13,7 @@
 
 ## 队列
 
-1. ▶ **意图载体总图页（`09-intake` 等价物）**（feature｜**可自主**）
-   治症状②"backlog↔notes 衔接靠人肉字符串、北星文档缺席"——载体 owner/进门/出场散在四处，
-   无单页总图。新建 `docs/design/60-intent-carriers.md` + 索引指针。
-   RFC = [2026-10-08-intent-carriers-north-star](../notes/proposed/2026-10-08-intent-carriers-north-star.md)
-2. **recorded-session 义务标定**（研究｜**可自主**）
+1. ▶ **recorded-session 义务标定**（研究｜**可自主**）
    参考卷 `12 §2` 义务零机械面，但"非平凡"是语义判断、易假阳——**先标定后立门禁**：
    统计近 10 次变更中几次真改 model-visible 面，产出真阳:假阳比与判据形状建议。
    RFC = [2026-10-08-recorded-session-obligation](../notes/proposed/2026-10-08-recorded-session-obligation.md)
