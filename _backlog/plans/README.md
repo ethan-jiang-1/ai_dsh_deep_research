@@ -1,10 +1,11 @@
 # plans/ · 活跃推敲卡
 
 > 一文件一张卡，文件名 `YYYY-MM-DD-<slug>.md`（与 notes 树**同一种日期格式**——2026-10-03
-> 用户定调对齐，替代首借时的 YYMMDD 裁定；归档 `git mv` 文件名不变，日期流在归档侧可读）。
-> 毕业（批准 / 搁置 / 否决 / 消化）时 `git mv` 到
-> [`../_done/_closed_plans/`](../_done/_closed_plans/README.md)，文件名不变、内容不重写，
-> 状态行补去向指针。**用户明示的未裁决暂停**（无毕业判断）走
+> 用户定调对齐，替代首借时的 YYMMDD 裁定；归档 `git mv` 文件名不变，内容不重写，
+> 状态行补去向指针）。毕业（批准 / 搁置 / 否决 / 消化）时 `git mv`：
+> 带活触发器的"不做/维持"裁决 → [`../postponed/`](../postponed/README.md)（2026-10-08 新设）；
+> 其余终局 → [`../_done/_closed_plans/`](../_done/_closed_plans/README.md)。
+> **用户明示的未裁决暂停**（无毕业判断）走
 > [`../_done/_suspended_plans/`](../_done/_suspended_plans/README.md)——暂停非完成，重启
 > 需用户新的优先级决定。推敲时攒的调研材料进 [`../reference/`](../reference/README.md)，
 > 随卡毕业。规矩手册 = [`../README.md`](../README.md)。
@@ -13,7 +14,6 @@
 
 | 卡 | 一句话 | 毕业门判断 |
 |---|---|---|
-| [cockpit-dashboard-merge](2026-10-07-cockpit-dashboard-merge.md) | 单一看板：run-dashboard 投影是否并入驾驶舱（2026-10-07 导览断线 2 遗留） | 待触发（用户点名或 ≥2 场 run 离机观察体感实证） |
 
 ## 卡片模板
 

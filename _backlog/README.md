@@ -54,6 +54,7 @@ _backlog/
 ├── README.md            # 本文件（规矩手册——宪章；活卡/计数/现值一律进各账本）
 ├── queue.md             # 次序半区：队列（▶ = 当前指针，parked 态合法）+ 搁置池——零判断材料
 ├── plans/               # 推敲卡：设计 / 分析 / 调研（文件名 YYYY-MM-DD-slug，与 notes 树同一种日期格式——2026-10-03 定调对齐）
+├── postponed/           # 搁置卡：毕业四门产出"不做/维持"裁决但带活触发器（复活条件写进索引行——per-run 检查义务，2026-10-08 新设）
 ├── bugs/                # 缺陷卡：已发现、不当场修的缺陷（当场修掉的不建档）
 ├── reference/           # 推敲资料区：喂活跃卡的调研材料（随卡毕业迁 _done/_reference/）
 └── _done/               # 归档（位置即状态）：_closed_plans/ + _suspended_plans/ +
@@ -69,7 +70,7 @@ _backlog/
 |---|---|---|
 | 该做（现在/近期） | RFC 落 [notes/proposed/](../notes/proposed/README.md) + [queue.md](queue.md) §队列行（小修可不设 RFC——直接进队列当小条目） | 关闭迁 `_done/_closed_plans/`，状态行记去向指针 |
 | 该做但不现在（待触发） | queue.md §搁置池行（满足其准入判据） | 同上 |
-| 不做（证伪/否决） | 结论并入 owner Note「输掉的方案」，防复犯价值高的迁 [notes/rejected/](../notes/rejected/README.md) | 同上 |
+| 不做（证伪/否决） | 结论并入 owner Note「输掉的方案」，防复犯价值高的迁 [notes/rejected/](../notes/rejected/README.md) | 无触发器终局 → 同上；**带活触发器的**（复活条件 = 未来证据/点名）→ [postponed/](postponed/README.md)（2026-10-08 新设——位置即状态，触发器保持 per-run 可见） |
 | 不用单独记（消化） | 结论已并入某 Note/合同 | 同上，状态行记消化落点 |
 
 **边界**：推敲卡 ≠ 提案——卡可以只有问题没有方案；RFC 必须有问题/方案/验收三件。

@@ -56,9 +56,21 @@ const bareQueuePointer = () => (dir) => {
   const p = join(dir, '_backlog', 'queue.md');
   const lines = readFileSync(p, 'utf8').split('\n');
   let inQueue = false;
+  let hit = false;
+  let sectionEnd = -1;
   for (let i = 0; i < lines.length; i++) {
-    if (/^## /.test(lines[i])) { inQueue = /^## 队列/.test(lines[i]); continue; }
-    if (inQueue && /^\d+\.\s+▶/.test(lines[i])) { lines[i] = lines[i].replace(/^\d+\.\s+/, ''); break; } // 有条目态：剥编号 → 裸 ▶（门禁 2026-10-07 补宽的形态）
+    if (/^## /.test(lines[i])) {
+      if (inQueue) { sectionEnd = i; break; } // 队列节结束（下一节标题）
+      inQueue = /^## 队列/.test(lines[i]);
+      continue;
+    }
+    if (inQueue && /^\d+\.\s+▶/.test(lines[i])) { lines[i] = lines[i].replace(/^\d+\.\s+/, ''); hit = true; break; } // 有条目态：剥编号 → 裸 ▶（门禁 2026-10-07 补宽的形态）
+  }
+  if (!hit && inQueue) {
+    // parked 态（零条目、队列空标记在场）：注入裸 ▶ 行——标记与 ▶ 并存 = 矛盾红（entry-chain
+    // parked 语义）。双态感知（2026-10-08）：单态"剥编号"注入在 parked 队列下是 no-op，
+    // 案例静默失效（实例：P3 毕业后队列恢复 parked，gates-smoke 首次实咬此漂移）。
+    lines.splice(sectionEnd === -1 ? lines.length : sectionEnd, 0, '▶ 裸指针注入（gates-smoke 反证——parked 态形态）', '');
   }
   writeFileSync(p, lines.join('\n'));
 };

@@ -1170,7 +1170,10 @@ function parkedSection() {
 // 反证：注入无状态行卡 → 红；错名卡 → 红；还原 → 绿（记录进毕业 Note）。
 {
   const gate = 'plans-liveness';
-  const plansRel = '_backlog/plans';
+  // 两个推敲卡池：plans/（活跃）+ postponed/（裁决"不做/维持"带活触发器——2026-10-08 新设，
+  // 首卡 cockpit-dashboard-merge；触发器是 per-run 检查义务，户口行同规强制防挂死）。
+  const cardPools = ['_backlog/plans', '_backlog/postponed'];
+  for (const plansRel of cardPools) {
   const readme = join(ROOT, plansRel, 'README.md');
   if (!existsSync(readme)) {
     fail(gate, `${plansRel}/README.md 缺席——推敲空间的规矩手册必须在场（层契约）`);
@@ -1192,15 +1195,17 @@ function parkedSection() {
         if (!statusLine || !/毕业门判断\s*=\s*\S/.test(statusLine))
           fail(gate, `${rel}: 首部 12 行内无「状态：…毕业门判断 = <值>」户口行——推敲卡必须自带毕业门判断（待定/该做/待触发/倾向放弃/…），防挂死稿`);
       }
-      if (cards.length === 0) note(gate, 'plans-liveness：0 张活跃推敲卡（合法空态——首卡立时入检）');
+      if (cards.length === 0) note(gate, `plans-liveness：${plansRel} 0 张卡（合法空态——首卡立时入检）`);
     }
+  }
   }
   // 索引交叉对账（2026-10-03 借鉴 loop_advisor backlog-liveness 的索引成员检查；其三度复发
   // 的教训前置采纳）：每个池里的文件必须被其 README 索引点名——孤儿卡即红（入池必须建行、
   // 移出必须撤行）；反方向（索引行点名不存在的文件）= md-links 门禁职责，此处不重复。
-  // 覆盖：plans/bugs/reference 三个活跃面 + _done 五个归档池。空池合法（0 文件 = 无断言）。
+  // 覆盖：plans/postponed/bugs/reference 活跃面 + _done 五个归档池。空池合法（0 文件 = 无断言）。
   const backlogPools = [
     { dir: '_backlog/plans', readme: '_backlog/plans/README.md' },
+    { dir: '_backlog/postponed', readme: '_backlog/postponed/README.md' },
     { dir: '_backlog/bugs', readme: '_backlog/bugs/README.md' },
     { dir: '_backlog/reference', readme: '_backlog/reference/README.md' },
     { dir: '_backlog/_done/_closed_plans', readme: '_backlog/_done/_closed_plans/README.md' },
