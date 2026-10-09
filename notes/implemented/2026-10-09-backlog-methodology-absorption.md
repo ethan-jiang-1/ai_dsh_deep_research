@@ -26,8 +26,8 @@ queue 搁置池中的结论不再由索引维护，按决定本身回到现有 o
 
 2026-10-09 queue 退役验证：
 
-- `pnpm verify`：全绿（34 gates），含入口链、backlog 活性、文档链接、预算和索引对账。
-- `pnpm test`：264/264 通过。
+- `pnpm verify`：全绿，含入口链、backlog 活性、文档链接、预算和索引对账。
+- `pnpm test`：265/265 通过（含新增 RFC 条件谓词测试）。
 - `node scripts/smoke/gates-smoke.mjs`：19 个注入案例均点名报红，对照组全绿。
 - `source dev/env.sh && node scripts/probe/entry-chain-probe.mjs`：真模型档 Q1–Q3 全通过；原始会话留在 gitignored `runtime/smoke-workspace/`。
 - 历史吸收验证记录在旧提交中，不作为本次结果。
