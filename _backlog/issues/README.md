@@ -7,7 +7,6 @@
 | 卡 | 要解决什么 | 当前环节与未完成项 |
 |---|---|---|
 | [2026-10-09-guard-red-record.md](2026-10-09-guard-red-record.md) | tests 面反证义务机械化（声称守 BUG 的测试必须交红配方） | 待确认范围与存量处置；验收判据已钉 |
-| [2026-10-09-release-smoke-hardening.md](2026-10-09-release-smoke-hardening.md) | L2 安装面五处缺口（client 半断言 ×2 + 浏览器模块表 + 进程卫生 + 两条 L0 加宽） | 待确认安装域断言形态；五件套验收已钉 |
 | [2026-10-09-layering-v2.md](2026-10-09-layering-v2.md) | AST 判法（keyless 约束下）+ import 图守卫（含活暴露面）+ test 命令钉 | 先探明解析路径（vendor 静态分析面盘点） |
 | [2026-10-09-member-activity-stream.md](2026-10-09-member-activity-stream.md) | 队员动作流进渐进面 | 刻意排在下一场研究 run 之后拿真实素材 |
 

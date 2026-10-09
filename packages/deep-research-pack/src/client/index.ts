@@ -20,9 +20,9 @@ import type {} from '@deepseek-ai/dsh-api-remotes/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
-import { RESEARCH_TAB_KEY, RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT } from './keys.ts'
+import { RESEARCH_TAB_KEY, RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT, RESEARCH_TOOL_KEYS } from './keys.ts'
 import { IconGaugeOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
-import { ResearchToolCard, RESEARCH_TOOL_KEYS } from './ResearchToolCard.tsx'
+import { ResearchToolCard } from './ResearchToolCard.tsx'
 import { ResearchStatusTab, ResearchStatusTitle, type JournalFrame } from './ResearchStatusTab.tsx'
 
 /** Required services：槽注册表（renderer）+ 右栏页签注册器 + 右栏导航面（openTab——挂起显性化）+ remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明

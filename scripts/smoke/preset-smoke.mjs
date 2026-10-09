@@ -2,20 +2,24 @@
 // preset-smoke.mjs — L1 真挂载冒烟。
 // keyless 预检档（默认）：环境/安装形状断言，不发任何请求。
 // 真会话档（DSH_SMOKE_REAL=1）：boot 真 web（钉 tag 源码基线 + 源码域 overlay），
-//   roster 断言 → 逐角色 session/create 真挂载 → skills 硬隔离断言。全程 keyless
-//   （组合与冷读，无模型调用）——session/create 才会触发行 config 校验，roster/dump
+//   boot 页模块表行断言 → roster 断言 → 逐角色 session/create 真挂载 → skills 硬隔离断言。
+//   全程 keyless（组合与冷读，无模型调用）——session/create 才会触发行 config 校验，roster/dump
 //   看不见（company postmortem 0001：挂载失败只有真会话抓得到，UI 还吞错）。
+//   模块表行断言（company postmortem 0002 guardrail 的移植）：fetch boot 页断言本包 client 行
+//   在场（served）——行没编进模块表 = client 半静默不存在。served ≠ loadable，真装载归
+//   client-load-smoke（源码域真浏览器）；安装域经 release-smoke ⑤ 委托本脚本覆盖。
 //
 // 前置：DSH_HOME 已设（source dev/env.sh）；DSH_SRC 默认本仓根（vendor/dsh submodule）。
 //   钉 tag 源码基线 + tsx 解析树——D10 偏离下的机制权威）。
 // 用法：source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs [--port 3099]
 
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { withModelKey } from '../lib/env.mjs';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { presetRoles } from '../lib/roles.mjs';
+import { reclaimPort } from '../lib/port-reclaim.mjs';
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -35,6 +39,10 @@ const PORT = Number(arg('port', '3099'));
 const PROFILE = arg('profile', 'web');
 const NO_PATCH = process.argv.includes('--no-patch');
 const BOOT_TIMEOUT_MS = 120_000;
+// 请求预算（company@59551f2 release-smoke 实证值）：RPC/boot 页 fetch 挂死不拖垮整个冒烟。
+// 值级不可证（构造"接受连接但不响应"的服务才能触发 AbortSignal——证的是 Node 语义非本仓逻辑），
+// 申报见 notes/implemented/2026-10-09-release-smoke-hardening.md 件④。
+const REQUEST_TIMEOUT_MS = 15_000;
 
 let failed = false;
 const step = (ok, label, hint) => {
@@ -91,6 +99,7 @@ const rpc = async (base, cookie, endpoint, args) => {
     method: 'POST',
     headers: { 'content-type': 'application/json', cookie },
     body: JSON.stringify({ type: 'client-request', rpcId: `smoke-${++rpcId}`, method: endpoint, payload: { args } }),
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
   const body = await response.json();
   if (body?.result?.ok !== true) {
@@ -99,28 +108,8 @@ const rpc = async (base, cookie, endpoint, args) => {
   return body.result.value;
 };
 
-// 端口自持有纪律（scripts/AGENTS.md「用完释放」）的执行器：实测 web 服务进程**不在** spawn
-// 子进程的进程组里（SIGTERM / 整组 SIGKILL 都够不着——2026-09-26 连跑三次实测，每次跑完端口
-// 仍被占、下一次冒烟直接 EADDRINUSE）。按**端口**收割才可靠：谁还听着这个口就杀谁，杀完验证
-// 释放；不干净就 fail-loud（一个只在单独运行时通过的脚本是脚本的缺陷）。
-const listenersOn = (port) => {
-  const r = spawnSync('lsof', ['-t', '-nP', `-iTCP:${port}`, '-sTCP', 'LISTEN'], { encoding: 'utf8' })
-  if (r.error !== undefined) return null // lsof 缺席：降级为不校验（本仓目标平台在位）
-  return r.stdout.split('\n').map((x) => x.trim()).filter(Boolean)
-}
-const reclaimPort = async (port) => {
-  // 重试收割（2026-09-27 实测）：web 有 supervisor 式的监听重建行为——单次杀+验存在竞态窗口，
-  // 杀完立刻验会漏。三轮"杀→等→验"，仍不干净才 fail-loud。
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const pids = listenersOn(port)
-    if (pids === null) return `lsof 缺席，跳过端口收割校验（本机无 lsof）`
-    if (pids.length === 0) return null
-    for (const pid of pids) { try { process.kill(Number(pid), 'SIGKILL') } catch { /* 已死 */ } }
-    await sleep(800)
-  }
-  const left = listenersOn(port)
-  return left !== null && left.length > 0 ? `端口 ${port} 用后未释放（残留 pid ${left.join(',')}）` : null
-}
+// 端口自持有纪律（scripts/AGENTS.md「用完释放」）的执行器住 scripts/lib/port-reclaim.mjs
+// （实测依据与收割策略的正本在该文件头注；本脚本消费它做 boot 失败兜底与收尾双保险）。
 
 const boot = async () => {
   const argv = ['--import', 'tsx/esm', bin, '--profile', PROFILE];
@@ -172,6 +161,19 @@ const { child, token } = await boot();
 try {
   const base = `http://127.0.0.1:${String(PORT)}`;
   const cookie = await authenticate(PORT, token);
+
+  // ⓪ boot 页模块表行断言（company postmortem 0002 guardrail 的移植，形态 B——用户
+  //    2026-10-09 拍板）：浏览器模块表 = boot 页内嵌的 dsh.client 行表；本包行缺席 =
+  //    client 半静默不存在（宿主侧 roster 照常绿——"host healthy, UI empty"）。行在场
+  //    证明 served；真装载（loadable）归 client-load-smoke 真浏览器断言。
+  //    用 check()（进 failures）而非 step()——真会话档退出码只认 failures。
+  await check('boot 页模块表含本包 client 行（served）', async () => {
+    const bootPage = await fetch(base, { headers: { cookie }, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
+    if (!bootPage.ok) throw new Error(`boot 页 HTTP ${bootPage.status}`);
+    const bootHtml = await bootPage.text();
+    if (!(bootHtml.includes('dsh-deep-research-pack/client.js') || bootHtml.includes('"dsh-deep-research-pack"')))
+      throw new Error('模块表未枚举本包 client 半（served 缺席——host healthy, UI empty 的装配面形态）');
+  });
 
   // ① roster：四角色都在且零 broken
   const roster = await rpc(base, cookie, 'agentPresets/list', {});

@@ -76,6 +76,26 @@ test('release-smoke：破坏性清理仅允许固定路径', () => {
   assert.match(releaseSmoke, /clean\('probe', probeWs\)/, 'release-smoke 未清理固定 probe 目录');
 });
 
+test('release-smoke：安装域 client 半与 peers-only 断言在位（检查清单漂移是静默失效面）', () => {
+  assert.match(releaseSmoke, /join\(installed, 'lib', 'client\.js'\)/, 'release-smoke 缺安装副本 lib/client.js 在场断言');
+  assert.match(releaseSmoke, /dependencies === undefined/, 'release-smoke 缺 dependencies 缺席断言（peers-only 发布形状）');
+  assert.match(releaseSmoke, /boot 页模块表含本包 client 行|module-table|模块表/, 'preset-smoke 委托的模块表行断言未登记进 release-smoke 面');
+});
+
+test('release-smoke：进程卫生三件在位（超时/锁/释放验证）', () => {
+  assert.match(releaseSmoke, /timeoutMs/, 'release-smoke run() 缺超时预算');
+  assert.match(releaseSmoke, /release-smoke\.lock|lockDir/, 'release-smoke 缺并发锁');
+  assert.match(releaseSmoke, /reclaimPort/, 'release-smoke 缺端口释放验证（释放到静默）');
+  assert.match(releaseSmoke, /did not stop; leave runtime files intact/, 'release-smoke 缺退出确认回收的 fail-loud');
+});
+
+test('preset-smoke：模块表行断言与请求预算在位', () => {
+  const presetSmoke = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'smoke', 'preset-smoke.mjs'), 'utf8');
+  assert.match(presetSmoke, /boot 页模块表含本包 client 行/, 'preset-smoke 缺模块表行断言（company postmortem 0002 guardrail）');
+  assert.match(presetSmoke, /dsh-deep-research-pack\/client\.js/, '模块表行断言未钉本包 client 路径');
+  assert.match(presetSmoke, /AbortSignal\.timeout\(REQUEST_TIMEOUT_MS\)/, 'preset-smoke rpc/boot 页 fetch 缺请求预算');
+});
+
 test('bin 入口：两条部署命令在 package.json bin 指向真实脚本', () => {
   assert.equal(pkg.bin?.['dsh-deep-research-preflight'], './scripts/preflight.mjs', 'bin 缺 preflight 映射');
   assert.equal(pkg.bin?.['dsh-deep-research-scaffold'], './scripts/scaffold.mjs', 'bin 缺 scaffold 映射');

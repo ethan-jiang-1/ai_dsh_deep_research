@@ -35,7 +35,11 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'handbook-budget', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'pack-workspace-fresh', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'backlog-liveness', 'dist-manual-version', 'port-exclusive', 'hooks-active'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'client-half', 'row-deps', 'workspace-contract', 'handbook-budget', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'pack-workspace-fresh', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'backlog-liveness', 'dist-manual-version', 'port-exclusive', 'hooks-active'];
+
+// vendor/dsh 钉身份的 tag 面（commit 面 = vendor-pin 门禁的 PIN；pack-bundle-compat 消费它
+// 断言 pack 兼容矩阵含当前 tag——升 pin 时两处同 diff 改；本文件里的 tag 复述受 pin-agreement 对账）
+const VENDOR_TAG = 'dsh-v0.2.0-rc.2';
 
 const failures = [];
 const notes = [];
@@ -208,6 +212,31 @@ const allFiles = walk(ROOT);
     }
     const rel = pkg?.dsh?.compatibility?.dshReleases;
     if (!Array.isArray(rel) || rel.length === 0) fail(gate, 'dsh.compatibility.dshReleases 为空');
+    // 含当前 tag（release-smoke-hardening 件⑤b）：升 pin 忘把新 tag 加进兼容矩阵，原本要到
+    // L2 安装冒烟才现形——提前到 L0 秒级红（判据同 release-smoke ④，事实源前移到 verify）。
+    else if (!rel.includes(VENDOR_TAG))
+      fail(gate, `compatibility.dshReleases 不含当前 vendor tag ${VENDOR_TAG}——升 pin 忘加列（补 packages/deep-research-pack/package.json 的 dsh.compatibility.dshReleases）`);
+  }
+}
+
+// ── 门禁 6-bis：client-half（pack 的 client 半声明闭环——release-smoke-hardening 件⑤a）──
+// 为什么：vendor 的 validateClientHalvesDeclared() 只 glob vendor 树内 packages/client/*，仓外
+// pack 的 client 半在它射程外（company postmortem 0002 §Why every safety net missed it：上游
+// 门禁有 scope，out-of-tree pack 落在外面——本地镜像同款规则）。任一方向脱钩都是静默失效：
+// 有 exports 无声明 = 浏览器模块表永不枚举（client 半等于不存在）；有声明无 exports = 装载
+// 入口缺席。本门禁守声明面；真实安装形状（lib/client.js 在场）归 L2 release-smoke。
+{
+  const gate = 'client-half';
+  const pkgPath = join(PACK, 'package.json');
+  if (!existsSync(pkgPath)) fail(gate, 'deep-research-pack/package.json 不存在');
+  else {
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+    const exportsClient = pkg?.exports?.['./client'] !== undefined;
+    const declaresClient = pkg?.dsh?.client !== undefined;
+    if (exportsClient && !declaresClient)
+      fail(gate, 'exports ./client 但未声明 dsh.client——浏览器模块表永不枚举本包 client 半（补 package.json 的 dsh.client 声明；company postmortem 0002 同款）');
+    else if (declaresClient && !exportsClient)
+      fail(gate, '声明 dsh.client 但 exports 无 ./client——client 半无装载入口（补 exports 的 "./client" 行）');
   }
 }
 

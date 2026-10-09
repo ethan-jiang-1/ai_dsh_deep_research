@@ -203,6 +203,23 @@ export const CASES = [
     const p = join(dir, 'packages/deep-research-pack/presets/lead.patch.yml');
     writeFileSync(p, readFileSync(p, 'utf8').replace(/\n\s*maxBytes: \d+/, ''));
   } },
+  // client-half 双方向（release-smoke-hardening 件⑤a）：exports ./client 与 dsh.client 声明
+  // 任一脱钩都是静默失效（company postmortem 0002：vendor 门禁只 glob 树内包，仓外 pack 射程外）。
+  { id: 'client-half-no-export', gate: 'client-half', mutate: (dir) => {
+    const p = join(dir, 'packages/deep-research-pack/package.json');
+    writeFileSync(p, readFileSync(p, 'utf8').replace('"./client": {', '"./client-probe": {'));
+  } },
+  { id: 'client-half-no-decl', gate: 'client-half', mutate: (dir) => {
+    const p = join(dir, 'packages/deep-research-pack/package.json');
+    writeFileSync(p, readFileSync(p, 'utf8').replace('"client": {', '"client-probe": {'));
+  } },
+  // pack-bundle-compat 含当前 tag（件⑤b）：升 pin 忘把新 tag 加进兼容矩阵——判据前移到 L0，
+  // 别等 L2 安装冒烟才现形。探针值避开 `dsh-v<数字>` 形态（pin-agreement 会把形似 tag 的
+  // 字面量当钉复述对账——探针不是钉声明）。
+  { id: 'pack-bundle-compat-tag-missing', gate: 'pack-bundle-compat', mutate: (dir) => {
+    const p = join(dir, 'packages/deep-research-pack/package.json');
+    writeFileSync(p, readFileSync(p, 'utf8').replace('"dsh-v0.2.0-rc.2"', '"dsh-wrongtag"'));
+  } },
   // align-ledger 在副本基线**非 PASS**（vendor/dsh 是 gitlink submodule，副本不拷其内容 →
   // "vendor 里不存在"是副本环境的固有报因）。故两案例必须带 expect 指名"na 活性"报因，
   // 否则注入未生效也会因既有的 vendor 报因看到 FAIL 而假绿。
