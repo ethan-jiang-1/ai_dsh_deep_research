@@ -11,8 +11,9 @@
 - **`tests/fixtures/`**：构造样本与经整理、人审冻结的录制回放语料；由测试或独立回放 smoke
   消费。原始运行日志、报告与抓取证据归 `runtime/smoke-workspace/`、`research-workspace/` 的
   `drt_*`/`archive/`，夹具不自动进入默认测试 glob；
-- 真模型/浏览器/网络/子进程检查走独立 smoke；默认回归无凭据可跑。`layering` 只静态扫描
-  顶层测试文本，导入模块的执行路径另核查（[执行路径证据](../notes/implemented/2026-10-05-project-navigability.md)）。
+- 真模型/浏览器/网络/子进程检查走独立 smoke；默认回归无凭据可跑。`layering` 守卫五件套 =
+  提及级禁物 + 解析级调用（[lib/keyless-imports](../scripts/lib/keyless-imports.mjs)——夹具
+  字符串不咬）+ import 闭包图（传递引入也红，tests 本地 import 只走 `scripts/lib/`）+ 命令钉 + 有家句。
 
 ## 写测试时
 

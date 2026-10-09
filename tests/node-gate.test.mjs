@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { gateBundle, decisionsLines, headingGate } from '../scripts/run-gates/node-gate.mjs'
+import { gateBundle, decisionsLines, headingGate } from '../scripts/lib/node-gate-core.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const FX = join(HERE, 'fixtures', 'node-gate')

@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { mkdirSync, rmSync, writeFileSync, readFileSync, renameSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { auditBundle } from '../scripts/run-gates/evidence-audit.mjs';
+import { auditBundle } from '../scripts/lib/evidence-audit-core.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const TMP = join(ROOT, 'tests', '.tmp-evidence-audit');

@@ -35,9 +35,9 @@
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
-| node-gate.mjs | 判据级：门①②③④L + 门R（标题重复退化，2026-10-06 起），报告落 bundle | keyless |
+| node-gate.mjs | 判据级：门①②③④L + 门R（标题重复退化，2026-10-06 起），报告落 bundle——判据核心住 lib/node-gate-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless |
 | schema-scan.mjs | 在场级：八节点输出件在场断言（断代定红） | keyless |
-| evidence-audit.mjs | URL/摘录/final 链溯源对账 → audit.md | keyless（须 source dev/env.sh） |
+| evidence-audit.mjs | URL/摘录/final 链溯源对账 → audit.md——判据核心住 lib/evidence-audit-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless（须 source dev/env.sh） |
 
 ## run-ops/（run 观察与运维）
 
@@ -73,3 +73,7 @@
 | lib/replay-scene.mjs | snapshot-replay-smoke | 场景声明消费者：roster/版本/来源形状/路径校验（缺件、串角色、垃圾锚点 fail-loud） |
 | lib/replay-request.mjs | snapshot-replay-smoke | 组装请求面逐条比较：persona、header 全序列、三处 user/message 注入（定向归一化） |
 | lib/port-reclaim.mjs | preset-smoke、release-smoke | 端口收割执行器（按端口杀 + 三轮验证释放；实测依据 = web 孙进程不在子进程组里） |
+| lib/keyless-imports.mjs | tests/layering.test.mjs | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
+| lib/gates-cases.mjs | gates-smoke（驱动）+ verify-gates.test（静态对账） | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
+| lib/node-gate-core.mjs | run-gates/node-gate（驱动）+ node-gate.test | 节点交接契约门判据核心（readLog 注入——纯 reader 默认，zstd CLI 由驱动壳注入） |
+| lib/evidence-audit-core.mjs | run-gates/evidence-audit（驱动）+ evidence-audit.test | 证据溯源审计判据核心（readLog 注入同上） |

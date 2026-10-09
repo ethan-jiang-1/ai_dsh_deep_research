@@ -21,3 +21,4 @@
 | [2026-10-08-sdlc-reference-absorption](2026-10-08-sdlc-reference-absorption.md) | 采纳/适配结果见本卡与 [吸收 Note](../../../notes/implemented/2026-10-09-backlog-methodology-absorption.md) | 2026-10-08 |
 | [2026-10-09-snapshots-adoption](2026-10-09-snapshots-adoption.md) | 首批四角色 replay 切片落地（含 BUG-018 修复与场景声明消费）；[Note](../../../notes/implemented/2026-10-09-snapshots-adoption.md) | 2026-10-09 |
 | [2026-10-09-release-smoke-hardening](2026-10-09-release-smoke-hardening.md) | L2 安装面五件套补齐（形态 B + company 值；含 HEAD pack build 断链真债同修）；[Note](../../../notes/implemented/2026-10-09-release-smoke-hardening.md) | 2026-10-09 |
+| [2026-10-09-layering-v2](2026-10-09-layering-v2.md) | layering 四件套 + 三活暴露面结构收口（TS 解析器移植）；[Note](../../../notes/implemented/2026-10-09-layering-v2.md) | 2026-10-09 |

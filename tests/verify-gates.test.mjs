@@ -1,16 +1,17 @@
 // verify-gates.test.mjs — 门禁自测面的静态契约
 //
 // 真执行体 = scripts/smoke/gates-smoke.mjs（语料 verify.test.mjs 模式：临时副本 + 注入回归 +
-// 真实 verify 入口判红；子进程归 smoke 道——layering 禁默认回归 spawn）。本测试钉住它俩的
-// 接口不漂移：gates-smoke 的案例门禁名必须真实存在于 verify.mjs 的 gates 数组——门禁改名或
-// 退役而案例表没跟 = 本测试红（此时 smoke 的案例会在对照组就红，这里更早、keyless 秒级报因）。
-// 依据 = RFC「DSH 插件开发语料（二代）吸收审计」缺口 2（2026-10-07）。
+// 真实 verify 入口判红；子进程归 smoke 道——layering 禁默认回归 spawn）。案例表住
+// scripts/lib/gates-cases.mjs（纯 fs——layering 二代后 tests 只消费 lib，不 import 驱动壳）。
+// 本测试钉住它俩的接口不漂移：gates-smoke 的案例门禁名必须真实存在于 verify.mjs 的 gates
+// 数组——门禁改名或退役而案例表没跟 = 本测试红（此时 smoke 的案例会在对照组就红，这里更早、
+// keyless 秒级报因）。依据 = RFC「DSH 插件开发语料（二代）吸收审计」缺口 2（2026-10-07）。
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { CASES, CONTROLS } from '../scripts/smoke/gates-smoke.mjs';
+import { CASES, CONTROLS } from '../scripts/lib/gates-cases.mjs';
 
 const here = (p) => new URL(p, import.meta.url);
 const verifySrc = readFileSync(here('../scripts/verify/verify.mjs'), 'utf8');
