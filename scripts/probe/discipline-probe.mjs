@@ -23,7 +23,7 @@
 // 全文留档 runtime/smoke-workspace/discipline-probe-last.md 供人工复核。
 //
 // 前置：source dev/env.sh（DSH_HOME + 凭据 + zstd 在 PATH）。
-// 用法：source dev/env.sh && node scripts/discipline-probe.mjs [--port 3104] [--scenario <id>]
+// 用法：source dev/env.sh && node scripts/probe/discipline-probe.mjs [--port 3104] [--scenario <id>]
 // verdict：exit 0=全绿 / 1=断言红 / 2=前置缺席（冒烟可靠性纪律，未跑 ≠ 通过）。
 import { spawn, spawnSync } from 'node:child_process';
 import { withModelKey } from '../lib/env.mjs';

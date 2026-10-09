@@ -20,8 +20,8 @@
 // 输出：审计报告写 <bundle>/audit.md（run bundle 的新增文件，不改既有文件）+ 控制台摘要；
 //       存在 CRITICAL（伪造链接 / final 断链）→ exit 1（供 CI/收尾判据用）。
 //       （auditBundle() 可导入——tests/ 层禁子进程，keyless 测试走纯 .jsonl 夹具直调。）
-// 用法：node scripts/evidence-audit.mjs <run-bundle-dir> [--sessions <会话根>]（缺省 $DSH_HOME/sessions）
-//       node scripts/evidence-audit.mjs --latest（取 research-workspace 最新 drt_*——根[在飞]与 archive/[已交付]并扫）
+// 用法：node scripts/run-gates/evidence-audit.mjs <run-bundle-dir> [--sessions <会话根>]（缺省 $DSH_HOME/sessions）
+//       node scripts/run-gates/evidence-audit.mjs --latest（取 research-workspace 最新 drt_*——根[在飞]与 archive/[已交付]并扫）
 import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
@@ -330,7 +330,7 @@ export function auditBundle(bundleDir, sessionsRoot) {
   const info = findings.filter((f) => f.level === 'INFO')
   const report = `# Evidence Audit — ${bundleDir.split('/').pop()}（${new Date().toISOString()}）
 
-> 由 scripts/evidence-audit.mjs 生成（keyless 机械对账；正本判据 = 研究手册 §证据文件契约）。
+> 由 scripts/run-gates/evidence-audit.mjs 生成（keyless 机械对账；正本判据 = 研究手册 §证据文件契约）。
 > 会话语料：${corpus.sessionFiles} 个日志文件（**语料窗**：提及本 run slug 的 ${corpus.windowFiles} 个在窗内${corpus.windowSkipped > 0 ? `、${corpus.windowSkipped} 个窗外不计入对账` : ''}——跨 run URL 不得作证）、${corpus.webEvents} 个 **web 工具事件**（${corpus.webUrls.size} 个 URL；已剔除 agent 自撰文本——否则摘录审计自证）。
 
 ## 概要
@@ -398,7 +398,7 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
     bundleDir = cands.length > 0 ? cands[0].p : null
   } else if (bundleArg) bundleDir = resolve(bundleArg)
   if (bundleDir === null || !existsSync(bundleDir)) {
-    console.error('evidence-audit: 用法 node scripts/evidence-audit.mjs <run-bundle-dir> | --latest（bundle 不存在）')
+    console.error('evidence-audit: 用法 node scripts/run-gates/evidence-audit.mjs <run-bundle-dir> | --latest（bundle 不存在）')
     process.exit(2)
   }
   const { stats, report, criticalCount } = auditBundle(bundleDir, sessionsRoot)

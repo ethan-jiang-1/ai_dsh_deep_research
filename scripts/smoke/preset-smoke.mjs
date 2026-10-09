@@ -8,7 +8,7 @@
 //
 // 前置：DSH_HOME 已设（source dev/env.sh）；DSH_SRC 默认本仓根（vendor/dsh submodule）。
 //   钉 tag 源码基线 + tsx 解析树——D10 偏离下的机制权威）。
-// 用法：source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/preset-smoke.mjs [--port 3099]
+// 用法：source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs [--port 3099]
 
 import { spawn, spawnSync } from 'node:child_process';
 import { withModelKey } from '../lib/env.mjs';
@@ -79,7 +79,7 @@ if (failed) {
   console.error('preset-smoke: 预检未过，真会话档不启动');
   process.exit(1);
 }
-step(existsSync(bin), `env: 机制基线源码在位（${bin}）`, '检查 DSH_SRC / company checkout');
+step(existsSync(bin), `env: 机制基线源码在位（${bin}）`, '检查 DSH_SRC / vendor/dsh submodule（基线 = 本仓 vendor 钉 tag）');
 
 const roleSkills = (role) => readdirSync(join(PRESETS, role, 'skills'), { withFileTypes: true })
   .filter((e) => e.isDirectory()).map((e) => e.name).sort();

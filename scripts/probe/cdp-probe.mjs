@@ -8,7 +8,7 @@
 // 借鉴自 ai_dsh_loop_advisor，2026-10-01 owner 指令内化）。
 //
 // 用法：
-//   node scripts/cdp-probe.mjs '<gui-url>' [--open-session '<标题>'] [--open-status]
+//   node scripts/probe/cdp-probe.mjs '<gui-url>' [--open-session '<标题>'] [--open-status]
 //        [--expect-face '<文本>'] [--expect-no-leak '<文本>'] [--ask '<消息>']
 //        [--keep-browser]
 //

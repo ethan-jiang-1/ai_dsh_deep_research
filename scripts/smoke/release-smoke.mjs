@@ -10,7 +10,7 @@
 // §依赖姿态，本仓源码基线 = company 工作区即安装锚）。
 //
 // 前置：DSH_HOME 已设（source dev/env.sh）；DSH_SRC 默认本仓根（vendor/dsh submodule）。
-// 用法：source dev/env.sh && node scripts/release-smoke.mjs
+// 用法：source dev/env.sh && node scripts/smoke/release-smoke.mjs
 
 import { spawnSync } from 'node:child_process';
 import { scrubbedEnv } from '../lib/env.mjs';

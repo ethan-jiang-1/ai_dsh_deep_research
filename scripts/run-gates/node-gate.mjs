@@ -34,8 +34,8 @@
 // 语料反面：无对象必须显式标注，不静默跳过）；PRE-CONTRACT = 契约前违约如实报告不计红。
 // keyless：纯 fs + zstd CLI（同 evidence-audit 通道）；gateBundle() 可导入——tests/ 层禁
 // 子进程，keyless 测试走纯 .jsonl 夹具直调（fixtures/node-gate/，先红后绿的永久反证记录）。
-// 用法：node scripts/node-gate.mjs <run-bundle-dir> [--sessions <会话根>]
-//       node scripts/node-gate.mjs --latest
+// 用法：node scripts/run-gates/node-gate.mjs <run-bundle-dir> [--sessions <会话根>]
+//       node scripts/run-gates/node-gate.mjs --latest
 import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
@@ -560,7 +560,7 @@ export function gateBundle(bundleDir, sessionsRoot, opts = {}) {
   const red = [gates.hitlAsk, hitl2Row, present, gates.leads, gates.version, gates.degeneration, gates.delivery].some((g) => g.status === 'RED')
   const report = `# Node Gate — ${slug}（${new Date().toISOString()}）
 
-> scripts/node-gate.mjs（keyless；契约正本 = research-workspace/NODES.md 第 3/7/8 行 + 回边版本语义节 + BUG-006 门①）。
+> scripts/run-gates/node-gate.mjs（keyless；契约正本 = research-workspace/NODES.md 第 3/7/8 行 + 回边版本语义节 + BUG-006 门①）。
 
 | 门 | 状态 | 说明 |
 |---|---|---|
@@ -609,7 +609,7 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
     bundleDir = cands.length > 0 ? cands[0].p : null
   } else if (bundleArg) bundleDir = resolve(bundleArg)
   if (bundleDir === null || !existsSync(bundleDir)) {
-    console.error('node-gate: 用法 node scripts/node-gate.mjs <run-bundle-dir> | --latest（bundle 不存在）')
+    console.error('node-gate: 用法 node scripts/run-gates/node-gate.mjs <run-bundle-dir> | --latest（bundle 不存在）')
     process.exit(2)
   }
   const { gates, red, report } = gateBundle(bundleDir, sessionsRoot)

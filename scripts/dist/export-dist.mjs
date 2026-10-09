@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // export-dist.mjs — 一条命令出完整交付：tarball + 安装手册 → _dist/。
-// 精神移植自 ai_dsh_architect scripts/export-dist.mjs（docs/distribution.md 的导出合同）：
+// 精神移植自 ai_dsh_architect scripts/dist/export-dist.mjs（docs/distribution.md 的导出合同）：
 //   ① 手册是**生成物**不是手写物——版本/日期/条目数在导出时注入，手册与旁边的 tarball 不能漂移；
 //   ② 打包步骤 = release-smoke 每轮证明的同一条 `npm pack`（cache 钉进仓库 gitignored 区，
 //      工具态纪律：npm 不碰 ~/.npm）；inventory 在导出的产物本体上重申发布边界；
@@ -10,7 +10,7 @@
 //      （verify 门禁 dist-manual-version 钉版本一致：版本动 → 必须同 diff 重导出）。
 // 导出不是发布：不动版本、不跑自带门禁之外的面、不发布任何东西——打包的是当下工作树的 pack。
 //
-// 用法：node scripts/export-dist.mjs
+// 用法：node scripts/dist/export-dist.mjs
 
 import { spawnSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'

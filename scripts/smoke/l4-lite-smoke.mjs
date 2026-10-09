@@ -5,8 +5,8 @@
 // （zstd 解压），断言 `assistant/message` 事件携带标记（不是用户消息回显）与
 // `tool/call` 事件真实出现——事件词汇表来自 2026-09-24 首跑实证（见 implemented Note）。
 //
-// 前置：DSH_HOME（dev home 已配凭据，zstd 在 PATH）；DSH_SRC（默认 /Users/bowhead/ai_dsh_company）。
-// 用法：source dev/env.sh && node scripts/l4-lite-smoke.mjs [--port 3101]
+// 前置：DSH_HOME（dev home 已配凭据，zstd 在 PATH）；DSH_SRC（缺省 = 本仓根——vendor/dsh 钉 tag，E1 起统一默认）。
+// 用法：source dev/env.sh && node scripts/smoke/l4-lite-smoke.mjs [--port 3101]
 
 import { spawn, spawnSync } from 'node:child_process';
 import { withModelKey } from '../lib/env.mjs';

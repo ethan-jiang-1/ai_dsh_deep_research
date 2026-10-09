@@ -867,6 +867,7 @@
       "owns": "This one-line file is not an instruction set but a workspace-seed fixture whose entire content is the sentence 'Root snapshot instruction.',",
       "verdict": "adapted",
       "landing": [
+        "scripts/lib/replay-request.mjs",
         "snapshots/replay/research-face/snapshot.json"
       ]
     },
@@ -875,6 +876,7 @@
       "owns": "This one-line file is a workspace-seed fixture whose entire content is the sentence 'Nested snapshot instruction.', verifying that a nested ",
       "verdict": "adapted",
       "landing": [
+        "scripts/lib/replay-request.mjs",
         "snapshots/replay/research-face/snapshot.json"
       ]
     },
@@ -883,6 +885,7 @@
       "owns": "This one-line file is a workspace-seed fixture whose entire content is the sentence 'Workspace snapshot root instruction.', providing the ro",
       "verdict": "adapted",
       "landing": [
+        "scripts/lib/replay-request.mjs",
         "snapshots/replay/research-face/snapshot.json"
       ]
     },
@@ -891,6 +894,8 @@
       "owns": "This one-line file is a behavioural fixture whose entire content is the order 'When asked for the Code Mode workspace handshake, answer exac",
       "verdict": "adapted",
       "landing": [
+        "scripts/lib/replay-request.mjs",
+        "scripts/smoke/l4-lite-smoke.mjs",
         "snapshots/replay/research-face/snapshot.json"
       ]
     },

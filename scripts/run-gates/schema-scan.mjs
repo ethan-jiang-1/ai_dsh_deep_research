@@ -20,7 +20,7 @@
 // 日期源 = final.md mtime（回退 final/v1.md → question.md）；journal 未来日期 → INFO 异常旗
 // （模型时间感不可信——2026-09-29 实测 7 本 journal 含幻觉未来日期，最远超今 3 周）。
 // keyless 纯 fs；核心可导入（tests/ 层注入 dates 覆盖——夹具 mtime 随检出时间漂，不可作断代依据）。
-// 用法：node scripts/schema-scan.mjs [bundle-dir …]（缺省 = research-workspace/archive/drt_* 全量）
+// 用法：node scripts/run-gates/schema-scan.mjs [bundle-dir …]（缺省 = research-workspace/archive/drt_* 全量）
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'

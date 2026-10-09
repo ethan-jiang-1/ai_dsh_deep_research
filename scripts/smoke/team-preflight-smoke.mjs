@@ -10,7 +10,7 @@
 // 成员发现（首跑实证）：lead 日志的 "Background subagent <uuid>" user/message 行 =
 //   成员 session id 的机制原生记录（roster childId）；行级标记扫描作 fallback。
 // 前置：DSH_HOME（dev home 已配凭据）+ research 组合在位（缺则先跑 dev/boot-run.sh）+ zstd。
-// 用法：source dev/env.sh && node scripts/team-preflight-smoke.mjs [--port 3102]
+// 用法：source dev/env.sh && node scripts/smoke/team-preflight-smoke.mjs [--port 3102]
 
 import { spawn, spawnSync } from 'node:child_process';
 import { withModelKey } from '../lib/env.mjs';
