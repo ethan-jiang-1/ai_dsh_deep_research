@@ -1,6 +1,11 @@
+---
+topic: 深度研究策略对标
+intent: 为 strategy-benchmark 决定提供来源与比较证据。
+---
+
 # 策略层对标材料——面①（专业 DR 三轴：预算分配/迭代深度/终止条件）
 
-> 服务卡：[pipeline-polish 面①](../../_done/_closed_plans/2026-09-28-pipeline-polish.md)（毕业
+> 服务卡：[pipeline-polish issue](../../_archive/settled_issues/2026-09-28-pipeline-polish.md)（毕业
 > Note = notes/implemented/2026-09-28-strategy-benchmark.md）。日期 2026-10-03；全部一手核实
 > （本地文件直读 / HTTP 200 取回），二手转述已标注。
 

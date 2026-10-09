@@ -3,7 +3,7 @@
 > 状态：implemented
 
 出处 = SDLC Reference 全量对表推敲卡
-[2026-10-08-sdlc-reference-absorption](../../_backlog/_done/_closed_plans/2026-10-08-sdlc-reference-absorption.md)
+[2026-10-08-sdlc-reference-absorption](../../_backlog/_archive/settled_issues/2026-10-08-sdlc-reference-absorption.md)
 §候选与取舍 第二档 C10（治症状③"质量不知道在哪里"）。计划体全文见该卡，本 Note = 已交付事实。
 
 ## 决定

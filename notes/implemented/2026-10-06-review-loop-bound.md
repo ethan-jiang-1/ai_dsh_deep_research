@@ -2,9 +2,9 @@
 
 > 状态：implemented
 
-出处 = [_done/_closed_plans/2026-10-06-oss-dr-lessons.md](../../_backlog/_done/_closed_plans/2026-10-06-oss-dr-lessons.md)
+出处 = [_done/_closed_plans/2026-10-06-oss-dr-lessons.md](../../_backlog/_archive/settled_issues/2026-10-06-oss-dr-lessons.md)
 候选 A2（用户 ongoing goal 2026-10-06 点名提前激活）；反面参照原文 =
-[_done/_reference/oss-dr-mining/2026-10-06-oss-dr-arch-mining.md](../../_backlog/_done/_reference/oss-dr-mining/2026-10-06-oss-dr-arch-mining.md) §1c
+[_done/_reference/oss-dr-mining/2026-10-06-oss-dr-arch-mining.md](../../_backlog/_archive/research/oss-dr-mining/2026-10-06-oss-dr-arch-mining.md) §1c
 （gpt-researcher 两条回边有界但超界 fail-open 强 accept）。
 
 ## 决定

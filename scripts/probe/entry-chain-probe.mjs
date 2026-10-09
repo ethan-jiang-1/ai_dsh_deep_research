@@ -5,8 +5,8 @@
 //
 // 设计（时不变原则——company 探针已知盲区：问句期望也会过期，问法必须换任何 ▶ 条目都不变）：
 //   1. 全新默认 preset 会话（无研究 pack 上下文污染），cwd = 仓根；
-//   2. prompt 指令只按根 AGENTS.md §入口链 读五步指定文件，答四个时不变问题；
-//   3. 脚本自己从 _backlog/queue.md 抽真值（▶ 条目主题 / 下一条目主题），软断言答案命中
+//   2. prompt 按根 AGENTS.md 的条件式入口读取，检查可选 queue 指针与用户直派边界；
+//   3. 脚本自己从 _backlog/queue.md 抽真值（若存在：▶ 条目主题 / 下一条目主题），软断言答案命中
 //      （token 重叠），全文留档 runtime/smoke-workspace/ 供人工复核——机械断言只证结构
 //      不证语义（SDLC reference 01 同款诚实记账）；
 //   4. 会话日志即真相：assistant/message 事件里找答案文本（不是用户消息回显）。
@@ -22,6 +22,7 @@ import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as zlib from 'node:zlib';
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
+import { directAuthorizationBoundaryPasses } from '../lib/direct-authorization-boundary.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {
@@ -46,26 +47,20 @@ if (!existsSync(bin)) { console.error(`probe: 机制基线不在位（${bin}）�
 
 // ── 真值抽取（从 _backlog/queue.md 机械读出，不问模型；2026-09-28 D20 迁锚）──────
 function groundTruth() {
-  const queueText = readFileSync(join(ROOT, '_backlog', 'queue.md'), 'utf8');
+  const queuePath = join(ROOT, '_backlog', 'queue.md');
+  if (!existsSync(queuePath)) return { cur: '无队列当前项', next: null };
+  const queueText = readFileSync(queuePath, 'utf8');
   const lines = queueText.split('\n');
   const s = lines.findIndex((l) => /^## 队列/.test(l));
-  if (s === -1) throw new Error('queue.md §队列 缺席');
+  if (s === -1) return { cur: '无队列当前项', next: null };
   const queue = [];
   for (let i = s + 1; i < lines.length; i++) {
     if (/^## /.test(lines[i])) break;
-    const m = /^(\d+)\.\s+(?:▶\s+)?\*\*(.+?)\*\*/.exec(lines[i]);
-    if (m) queue.push({ n: Number(m[1]), theme: m[2] });
+    const m = /^(\d+)\.\s+(▶\s+)?\*\*(.+?)\*\*/.exec(lines[i]);
+    if (m) queue.push({ n: Number(m[1]), current: Boolean(m[2]), theme: m[3] });
   }
-  const cur = queue.find((q) => queueText.split('\n').some((l) => l.includes(`\u25b6 **${q.theme}**`)));
-  if (cur === undefined) {
-    // parked 态（2026-09-28 首次清空起）：队列空 = 全部条目毕业——"当前"= 待用户取题。
-    // 合法形态 = 空态标记在场 + 零编号条目；否则真红。
-    const section = lines.slice(s).join('\n');
-    if (section.includes('（队列空——待用户取题）') && !/^\d+\.\s/m.test(section)) {
-      return { cur: '队列空——待用户取题', next: null };
-    }
-    throw new Error('找不到 ▶ 当前条目（且非 parked 态——队列既无 ▶ 也无空态标记）');
-  }
+  const cur = queue.find((q) => q.current);
+  if (cur === undefined) return { cur: '无队列当前项', next: null };
   const next = queue.find((q) => q.n > cur.n);
   return { cur: cur.theme, next: next?.theme ?? null };
 }
@@ -188,12 +183,12 @@ const waitForAnswer = async (sessionId) => {
 };
 
 // ── 主流程 ───────────────────────────────────────────────────────────────────
-const PROMPT = `你是入口链探针（一次只读审计）。请严格按本仓根目录 AGENTS.md 文件里「入口链」一节定义的顺序，把五步指定的文件全部读完（除此之外不要读任何其他文件，也不要用搜索工具），然后回答以下四个问题。每问恰好一行，格式必须是「Q<n>: <一句话答案>」：
+const PROMPT = `你是入口链探针（一次只读审计，不授予实施权限）。先读根 AGENTS.md 与 docs/00-index.md，再按入口链的条件读取必要文件。本轮点名核对 _backlog/queue.md 的队列内部指针，并核对用户直派的开发路由；不要把所有条件步骤当作普遍前置。每问恰好一行，格式为「Q<n>: <一句话答案>」：
 
-Q1: 按入口链的指引，现在这个仓库应该做什么工作？引用条目的主题名。
-Q2: Q1 的结论来自入口链的第几步、哪个文件？
-Q3: _backlog/queue.md 队列里，排在当前条目之后的下一个条目主题是什么？
-Q4: 入口链规定开工与收尾的程序在哪个文件？`;
+Q1: 只看 _backlog/queue.md 的 §队列，其 ▶ 当前项主题是什么？如果没有 ▶，写“无队列当前项”；不要推断整个仓库没有其他工作。
+Q2: 已明确授权的用户直派局部修改是否必须先排队、建 RFC 或重复请批？说明真实前置边界。
+Q3: §队列里排在当前条目之后的下一个条目主题是什么？不存在则写无下一条目。
+Q4: 开工与收尾程序在哪个文件？`;
 
 const gt = groundTruth();
 console.log(`probe: 真值（机械抽取）——▶ 当前 = ${gt.cur}${gt.next ? `；下一条目 = ${gt.next}` : '（无）'}`);
@@ -227,16 +222,19 @@ try {
   console.log('────────────────────────\n');
 
   const q1 = /^Q1:(.+)$/m.exec(answer)?.[1] ?? '';
+  const q2 = /^Q2:(.+)$/m.exec(answer)?.[1] ?? '';
   const q3 = /^Q3:(.+)$/m.exec(answer)?.[1] ?? '';
   const q4 = /^Q4:(.+)$/m.exec(answer)?.[1] ?? '';
   const hits1 = hitCount(q1, gt.cur);
   const grams1 = bigrams(gt.cur).length;
   verdict.push([`Q1 命中当前条目「${gt.cur}」（bigram ${hits1}/${grams1}）`, hits1 >= Math.min(2, grams1)]);
-  verdict.push([`Q2 指认入口链步骤/文件（含队列或 AGENTS 字样）`, /队列|AGENTS|入口链/i.test(answer)]);
+  verdict.push([`Q2 明确指认用户直派无需先排队且无需建 RFC（词法检查，语义仍须复核）`, directAuthorizationBoundaryPasses(q2)]);
   if (gt.next) {
     const hits3 = hitCount(q3, gt.next);
     const grams3 = bigrams(gt.next).length;
     verdict.push([`Q3 命中下一条目「${gt.next}」（bigram ${hits3}/${grams3}）`, hits3 >= Math.min(2, grams3)]);
+  } else {
+    verdict.push([`Q3 明确无下一条目`, /无|没有|不存在|空/.test(q3)]);
   }
   verdict.push([`Q4 指认 guides/60（开发环）`, /60|开发环|guides/i.test(q4)]);
 } finally {

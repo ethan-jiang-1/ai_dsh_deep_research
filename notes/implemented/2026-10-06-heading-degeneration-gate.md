@@ -2,10 +2,10 @@
 
 > 状态：implemented
 
-出处 = [_done/_closed_plans/2026-10-06-oss-dr-lessons.md](../../_backlog/_done/_closed_plans/2026-10-06-oss-dr-lessons.md)
+出处 = [_done/_closed_plans/2026-10-06-oss-dr-lessons.md](../../_backlog/_archive/settled_issues/2026-10-06-oss-dr-lessons.md)
 候选 A1（用户 2026-10-06 点名提前激活，走完取题→实施→验收→毕业闭环）；机制出处 =
 local-deep-research `HeadingRepetitionGuard`（事故 #6452，材料 =
-[_done/_reference/oss-dr-mining/2026-10-06-oss-dr-arch-mining.md](../../_backlog/_done/_reference/oss-dr-mining/2026-10-06-oss-dr-arch-mining.md) §3c）。
+[_done/_reference/oss-dr-mining/2026-10-06-oss-dr-arch-mining.md](../../_backlog/_archive/research/oss-dr-mining/2026-10-06-oss-dr-arch-mining.md) §3c）。
 
 ## 决定
 

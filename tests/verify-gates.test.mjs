@@ -10,7 +10,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { CASES } from '../scripts/smoke/gates-smoke.mjs';
+import { CASES, CONTROLS } from '../scripts/smoke/gates-smoke.mjs';
 
 const here = (p) => new URL(p, import.meta.url);
 const verifySrc = readFileSync(here('../scripts/verify/verify.mjs'), 'utf8');
@@ -28,6 +28,16 @@ test('gates-smoke 案例表非空且形状完整（id 唯一 + gate 字符串 + 
   }
   assert.equal(new Set(CASES.map((c) => c.id)).size, CASES.length,
     '案例 id 重复（同一门禁可有多个注入形态——id 防整条目重复）');
+});
+
+test('current backlog gate is registered and proposal scheduling is retired', () => {
+  assert.ok(gatesArray.includes('backlog-liveness'), 'backlog-liveness 缺少门禁登记');
+  assert.ok(!gatesArray.includes('plans-liveness'), 'plans-liveness 已被新目录合同取代');
+  assert.ok(!gatesArray.includes('proposal-scheduled'), 'proposed RFC 不要求 queue 行');
+  assert.ok(!verifySrc.includes('全仓唯一"当前"指针缺席'), '可选 queue 不得要求队列内 ▶ 指针');
+  for (const id of ['queue-current-active-issue', 'queue-empty-is-valid', 'entry-chain-empty-queue-is-valid', 'entry-chain-queue-file-is-optional', 'backlog-active-issue']) {
+    assert.ok(CONTROLS.some((c) => c.id === id), `缺少有效形态对照组 ${id}`);
+  }
 });
 
 test('每个案例门禁都真实存在于 verify.mjs gates 数组（改名/退役未跟案例 = 红）', () => {

@@ -1,3 +1,8 @@
+---
+topic: Notes 生命周期
+intent: 为 notes-stocktake 实施 Note 保留已完成的存量体检依据。
+---
+
 # notes/ 存量体检：72 篇 implemented Note 的三结局判定（2026-10-08）
 
 > 服务 = [queue §队列 ① Note 存量体检](../queue.md)（已毕业）｜RFC =

@@ -21,7 +21,7 @@
 
 **方法论连续性**：本仓方法论内核移植自 codex DR harness（docs/design/30-methodology-mapping.md），
 2026-10-03 已做过一轮专业 DR 三轴对标（源仓 + Anthropic 工程自述，材料 =
-[reference/strategy-benchmark/](../../reference/README.md)）。本轮是同一类挖掘的第三个对象
+[strategy-benchmark research](../../research/README.md)）。本轮是同一类挖掘的第三个对象
 面：**开源框架生态**。前一轮的教训直接适用——借鉴候选必须带触发条件，不直接改机制；
 物种不同的路线（如 OpenAI 端到端 RL 单模型）记为"不构成可采纳面"。
 
@@ -33,8 +33,8 @@
 khoj / SkyworkAI 不挖（分诊个案）。
 
 **材料**（判断依据，细节不复制进卡）：
-- 案头路 = [reference/oss-dr-mining/2026-10-06-oss-dr-bundle-digest.md](../_reference/oss-dr-mining/2026-10-06-oss-dr-bundle-digest.md)：27 张 os-* 卡逐家 digest（卡片里有但 final 未收的机制细节）+ 口径红线 + 18 条下钻点；
-- web 路 = [reference/oss-dr-mining/2026-10-06-oss-dr-arch-mining.md](../_reference/oss-dr-mining/2026-10-06-oss-dr-arch-mining.md)：7 家固定问题集深挖（一手 URL 随文）+ 17 条借鉴候选清单。
+- 案头路 = [bundle digest](../research/oss-dr-mining/2026-10-06-oss-dr-bundle-digest.md)：27 张 os-* 卡逐家 digest（卡片里有但 final 未收的机制细节）+ 口径红线 + 18 条下钻点；
+- web 路 = [architecture mining](../research/oss-dr-mining/2026-10-06-oss-dr-arch-mining.md)：7 家固定问题集深挖（一手 URL 随文）+ 17 条借鉴候选清单。
 
 **六问的答案**（对应立卡时的待答问题）：
 1. **分工形态**：各家 plan→collect→write 与本仓八节点同构；"分节并行写作"被 ODR 作者本人两次证伪（workflow 版与 multi-agent 版均因子代理互不通气放弃）→ 本仓"Lead 收口 final.md、Analyst 只供 findings"获**独立第二外证**；最小内核（递归 + researchGoal + learnings 累积）已是事实标准（dzhng 与 gpt-researcher deep_research.py 几乎互为移植）→ 本仓每个重机制可写"相对最小集的增量价值"论证。

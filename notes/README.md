@@ -8,8 +8,8 @@
 
 | 时态 | 问什么 | 唯一入口 | 状态怎么标 |
 |---|---|---|---|
-| **将来** | 接下来做什么 | [_backlog/queue.md §队列 ▶](../_backlog/queue.md)（全仓唯一"当前"指针 + 排队条目 + 搁置池） | 队列行序号；▶ = 当前条目 |
-| **将来（已开工的设计）** | 这个条目打算怎么做 | [`proposed/`](proposed/README.md) 的 RFC 全文 | RFC 头部状态行 `proposed / approved / superseded` |
+| **授权中的工作** | 当前请求或既有授权要求什么 | 用户请求、对应工作记录；需要时查 [_backlog/queue.md](../_backlog/queue.md)（可选排序索引） | 由授权范围与实际工作记录表达；▶ 仅为队列内排序指针 |
+| **将来（待评审的决定）** | 需要显式评审的持久决定是什么 | [`proposed/`](proposed/README.md) 的 RFC 全文 | RFC 头部状态行 `proposed / approved / superseded` |
 | **过去（已交付）** | 当初为什么这么决定、放弃了什么 | [`implemented/`](implemented/README.md) | 目录即状态（文件名 = 首提日期 + 主题） |
 | **过去（否决与事故）** | 哪些路别再走、哪些坑踩过 | [`rejected/`](rejected/README.md) · [`postmortem/`](postmortem/README.md) | 目录即状态（rejected 另有结论状态行） |
 | **过去（冻结）** | 不再指导当前工作的已交付决定去哪了 | [`archived/`](archived/README.md) | 目录即状态 + 文件内 `> 归档：<日期>` 行（冻结快照，正文永不改） |
@@ -24,11 +24,7 @@
 追加式存档文件）；立项原话全文 = git 历史（`notes/intents.md` 2026-10-04 退役——冻结存档
 与 D 号台账双载体，噪声大于信息，用户裁定剔除）。
 
-**`proposed/` = 在飞队列条目的规划面**：只有 [_backlog/queue.md](../_backlog/queue.md) §队列
-条目的 RFC 住这里（一文件一条目）。
-2026-09-27 用户定调：**搁置即"决定不做"**——搁置条目全文住 [rejected/](rejected/README.md)
-并带重启条件，搁置池行直接链它，`proposed/` 不再收搁置条目。下一步看 queue ▶，不是看这个
-目录。同理，`implemented/` 远厚于队列，也不表示积压：过去的决定层本来就比队列厚。
+**`proposed/` = 需要显式评审的持久决定提案**：RFC 在决定需实现前形成明确范围、备选和验收时使用；它不要求有 queue 行，也不是一般执行工作的前置。获授权工作按授权范围执行；只有需要跨步骤/跨会话排序时才使用 [_backlog/queue.md](../_backlog/queue.md) 可选索引。`rejected/` 保留仍有防复犯价值的否决理由，并记录适用范围或重启条件。
 
 ## 为什么内部按生命周期分，不按时间分
 
@@ -42,7 +38,7 @@
 
 | 路径 | 放什么 | 进门条件 | 出门 |
 |---|---|---|---|
-| `proposed/` | **在飞队列条目的 RFC 全文**（一文件一条目：问题/方案/输掉的方案/验收判据） | [_backlog/queue.md](../_backlog/queue.md) §队列须有对应条目（verify 门禁 `proposal-scheduled` 强制） | 队列条目收尾 → 迁 `implemented/`；不再做的条目 → 否决迁 `rejected/`（搁置池行链 rejected/ 文件） |
+| `proposed/` | 需显式评审的持久决定 RFC（问题/方案/输掉的方案/验收） | 决定需在实现前形成可评审的持久记录；不要求 queue 行 | 交付并需维护决定理由 → 改写迁 `implemented/`；有防复犯价值的否决 → `rejected/` |
 | `implemented/` | 已落地的决定记录（决定/输掉的方案/实际跑过的验证/环境状态） | RFC 毕业，或用户直派任务的交付（**不必从 proposed/ 起步**） | **活的**：事实随实现维护；逆转另写新 Note 互链 |
 | `rejected/` | 被否决的方案——**只保留仍能阻止一次诱人重犯的** | 方案被否决且理由有未来价值 | 不再有防复犯价值 → 直接删（不留空壳） |
 | `postmortem/` | 事故复盘（事故叙事的唯一合法层） | 出现值得记的事故 | 事实澄清后仍留（历史记录） |
@@ -51,10 +47,7 @@
 
 细则见各子目录 README（每个子目录都有 README，`note-status` 门禁强制在场）。
 
-**规划面在树外**：根目录 [_backlog/](../_backlog/README.md) = 唯一规划面（2026-09-28 用户
-裁决 roadmap.md 退役，D20）——推敲半区 [plans/](../_backlog/plans/README.md) 卡毕业**不重写
-正文**，与 Note 毕业 = 正文改写方向相反，故不入本时态地图；次序半区 =
-[queue.md](../_backlog/queue.md)（纯索引）。推敲卡不是任务，fresh agent 开工照旧只看 queue ▶。
+问题澄清与执行分开：[_backlog/](../_backlog/README.md) 收录待澄清问题、查证材料、缺陷和按需方法；它不是实施许可或前置门。[_backlog/queue.md](../_backlog/queue.md) 仅供已授权的多步/多会话工作按需排序，不表示全仓所有当前工作。`proposed/` 仅承载需要显式评审的持久决定提案。
 
 ## proposed → implemented 的执行纪律（门牌）
 
@@ -68,7 +61,7 @@
 
 - **Note 义务边界 = 持久决定理由**（代码/测试/现有文档解释不了的"为什么"）；机械/局部编辑
   豁免。**不必从 proposed/ 起步**：决定已做出并随当前变更交付 → 直接进 `implemented/`
-  （proposed/ 只服务"重大工作未构建、需先评审" = 本仓队列 RFC）。
+  （proposed/ 只服务需要显式评审的持久决定，不由任务大小或是否排队决定）。
 - **每新增一篇 Note 触发取代检查**（搜活动树同决定/同机制）：
   - 已有 owner 拥有同一决定 → **更新它**，不建重复 Note；
   - **部分取代** → 双方保留 + 相对 Markdown 链接互链，更新仍有效的事实（"逆转写新 Note

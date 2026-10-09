@@ -7,7 +7,8 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 ## Start Here
 
 - 开工入口链（唯一正本，5 步）= [`AGENTS.md`](AGENTS.md) §入口链——依次读什么、接下来做什么、怎么验收、怎么开工收尾，全在那节。
-- 人类速览"现在干什么"：[`_backlog/queue.md`](_backlog/queue.md) §队列 ▶（全仓唯一"当前"指针）。
+- 问题澄清与证据入口：[`_backlog/README.md`](_backlog/README.md)；问题、调研、方法与缺陷按需使用，backlog 不是实施前置。
+- 已授权多步/多会话工作的可选次序：[`_backlog/queue.md`](_backlog/queue.md)（不授予授权，也不代表所有当前工作）。
 - **跑一次研究**：`bash dev/boot-run.sh` → 浏览器打开横幅 URL（工作区注册/发问题/HITL/交付/恢复全程序 = [`docs/guides/61-run-playbook.md`](docs/guides/61-run-playbook.md)）。
 - **改完怎么验**：选层地图 = [`docs/project-map.md`](docs/project-map.md) §测试怎么选（命令正本 = [`docs/guides/60-dev-loop.md`](docs/guides/60-dev-loop.md) §2，判据 = `docs/evaluation.md`）。
 - 想**用它**（跑一次研究 / 装到自己的 DSH）而不是改它：意图分流表 = [`docs/00-index.md`](docs/00-index.md) §先分流（每种说法的第一条命令）。
@@ -27,4 +28,4 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 
 - 配置为主的 pack（预设/技能/bundle 行）+ 一个观察面 client 面（D18 单点例外）；Node 版本区间与 vendor 对齐（正本 = package.json engines——repo-conventions 门禁对账）；测试用 `node:test` + `node:assert`（无测试框架）。
 - 评估五面（L0 结构 / L1 挂载 / L2 安装 / L3 领域 / L4 交付）不互抵，定义见 `docs/evaluation.md`。
-- 迭代单位 = 垂直轮（最薄全路径 → 逐轮加宽），当前进度看 `_backlog/queue.md` §队列。
+- 迭代单位 = 垂直轮（最薄全路径 → 逐轮加宽）；已授权工作的顺序需要持久索引时，按需使用 `_backlog/queue.md`。

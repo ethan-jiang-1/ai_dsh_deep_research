@@ -1,6 +1,6 @@
 # 开源 DR 框架架构深挖（web 一手调研）
 
-> 服务卡：[_backlog/_closed_plans/2026-10-06-oss-dr-lessons.md](../../_closed_plans/2026-10-06-oss-dr-lessons.md)。
+> 服务卡：[2026-10-06-oss-dr-lessons](../../settled_issues/2026-10-06-oss-dr-lessons.md)。
 > 截至：**2026-10-06**（`bash date` 输出 2026-10-06 14:10 CST；本卡所有"当前/截至"类日期与 star 数口径均以此为抓取当刻）。
 > 方法声明：只用一手来源——GitHub 仓库元数据（api.github.com）、README/源码原文（raw.githubusercontent.com）、作者博客原文；每条关键判断带完整 https URL；引文只放原文（引文块内），标注在引文块外；数字带口径。抓取通道说明：本会话 `web_fetch` 工具 DNS 层不可用（`resolves to a non-public IP address`），全部抓取经 `curl` 完成，抓取内容与一手来源无差。以下各节凡标"未取得（失败形态）"处均为如实记录，不臆断"官方没有"。
 > 对比对象：packages/deep-research-pack（四角色 Lead/Scout/Analyst/Critic 经 DSH Agent Teams 协作；文件契约链 question.md→topics.md→leads.md→evidence/→findings.md→review.md→final.md+journal.md；八节点 I/O 契约含回边；机械门禁 node-gate/schema-scan/evidence-audit；两个人机交互点 HITL1/HITL2；方法论内核移植自 codex DR harness，2026-10-03 已对标 Anthropic multi-agent 工程自述与 OpenAI DR 系统卡）。

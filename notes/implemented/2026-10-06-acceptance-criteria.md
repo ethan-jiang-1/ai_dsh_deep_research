@@ -2,9 +2,9 @@
 
 > 状态：implemented
 
-出处 = [_done/_closed_plans/2026-10-06-oss-dr-lessons.md](../../_backlog/_done/_closed_plans/2026-10-06-oss-dr-lessons.md)
+出处 = [_done/_closed_plans/2026-10-06-oss-dr-lessons.md](../../_backlog/_archive/settled_issues/2026-10-06-oss-dr-lessons.md)
 （用户 ongoing goal 2026-10-06 点名提前激活，A2 毕业后同 goal 顺带推进）；下钻依据 =
-[_done/_reference/oss-dr-mining/2026-10-06-oss-dr-followups.md](../../_backlog/_done/_reference/oss-dr-mining/2026-10-06-oss-dr-followups.md)
+[_done/_reference/oss-dr-mining/2026-10-06-oss-dr-followups.md](../../_backlog/_archive/research/oss-dr-mining/2026-10-06-oss-dr-followups.md)
 （DeerFlow 5 PR 逐个下钻：acceptance_criteria = 父侧 1,396 行纯函数零 LLM 核查 + UNVERIFIED
 永不静默放行）。
 

@@ -1,3 +1,9 @@
+---
+status: 活跃
+severity: P1
+opened: 2026-10-08
+---
+
 # BUG-018：snapshot-replay B 层广告覆盖 skill 与工具行，实际对三处 `user/message` 注入全不覆盖
 
 > 严重级别：P1（重要）｜发现：2026-10-08｜状态：活跃
@@ -91,5 +97,5 @@ B2 只比 `request/header` 的 tools；C 层只比渲染面 → **A/B/C 三层�
    ——无论选哪种修法，**声明面必须与实际比对面一致**。
 
 标定材料（逐次判定 / 真阳假阳 / 9 类候选面表 / 两轮对抗自审记录）=
-[`_backlog/reference/2026-10-08-model-visible-calibration.md`](../../_backlog/reference/2026-10-08-model-visible-calibration.md)；
+[模型可见面标定](../research/2026-10-08-model-visible-calibration.md)；
 判决与依据 = [recorded-session-obligation 条目](../../notes/implemented/2026-10-08-recorded-session-obligation.md)。

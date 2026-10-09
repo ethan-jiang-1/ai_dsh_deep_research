@@ -238,9 +238,9 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
   按 [源 10](#source-10) 重校。
 - **本仓立卡的 vendor seam 缺口**（升 pin 时核上游是否已修——已修即撤本行，未修带证据重估）：
   会话日志逐帧 / 逐 turn flush + SIGTERM finalizer 清缓冲、至少 turn 边界强制落盘
-  （[BUG-007 卡](../_backlog/_done/_fixed_bugs/BUG-007-channel-death-loses-log-tail.md)）；
+  （[BUG-007 卡](../_backlog/_archive/fixed_bugs/BUG-007-channel-death-loses-log-tail.md)）；
   boot 时对 turnOpen 会话做中断对账、补写 `turn/end` + `end-seed` 终局事件
-  （[BUG-009 卡](../_backlog/_done/_fixed_bugs/BUG-009-no-finalization-on-restart.md)）。
+  （[BUG-009 卡](../_backlog/_archive/fixed_bugs/BUG-009-no-finalization-on-restart.md)）。
 
 复核结论（"无命中/改写哪几行"）连同新 tag 与日期，写进该轮「升 pin 重校」条目的毕业 Note
 ——**逐条结论本身即是重审记录**，不另建维护页（避免第二份会漂移的清单）。
@@ -253,7 +253,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
   的现状，因此下列事件发生时须同 diff 复核相关行——① 新增/退役自写代码面（如 D18 驾驶舱
   client 插件）；② 激活或清空某个 notes 层（如 archived/ 2026-09-27 启用）；③ 新增对接面、
   生成物或夹具族（如 snapshot-replay 夹具）。**只认 vendor 换 tag 会让"本仓落点"列单边腐烂**
-  ——实测教训 = [吸收对表推敲卡](../_backlog/_done/_closed_plans/2026-10-08-sdlc-reference-absorption.md)
+  ——实测教训 = [吸收对表推敲卡](../_backlog/_archive/settled_issues/2026-10-08-sdlc-reference-absorption.md)
   §二轮复核（当时 10 处 `na`/落点已失真，`align-ledger` 只判存在性、判不出语义过期）；
 - ⚠️ **`不适用` 是"当时不适用"，不是豁免**：写 `不适用` 必须同时给出**可判定的失效条件**
   （"本仓无 X" 形态），由 `align-ledger` 门禁的活性断言机械复核——理由变假即红。**把

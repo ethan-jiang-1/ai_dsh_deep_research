@@ -1,41 +1,38 @@
 ---
 name: graduating-a-queue-item
-description: Use when a queue item is delivered or abandoned and must leave the queue — moving its RFC from notes/proposed/ to notes/implemented/, rewriting the plan voice into shipped facts, deleting the queue line, and closing the gates.
+description: Use when authorized work tracked in the optional queue is completed or stopped and its index row must be updated or removed; graduate a proposed RFC only when one exists and its persistent decision rationale needs retention.
 ---
 
 # 毕业一个队列条目
 
 本技能是 **guidance，不是 checklist**：按实际 diff 与风险选择动作，完成判据在各步末；相关技能：[`.agents/skills/writing-a-gate`](../writing-a-gate/SKILL.md) · [`.agents/skills/running-a-research-run`](../running-a-research-run/SKILL.md)。
 
-条目收尾是一次**原子移动**：队列行、RFC 位置、正文时态、门禁、台账同一步完成。
-判据由 `docs/evaluation.md` 与该条目的 RFC §验收 拥有；本技能只给执行顺序与判断点。
+队列是已授权工作的可选顺序索引，不是授权来源。收尾时只更新该索引行及实际存在、且适用的 RFC/Note；不为队列项补造 RFC。
+判据由 `docs/evaluation.md` 与已存在的授权要求或验收记录拥有；本技能只给索引收尾顺序与判断点。
 
 ## 1. 先判是否真的可以毕业
 
-打开 RFC 的 §验收判据，逐条指出**跑过的命令或读过的文件**。任何一条只能靠"应该没问题"
-回答 → 条目未完成，停在这里继续做。
+按用户授权与改动面确认实际验收要求；若存在 RFC，则逐条对账其 §验收判据并指出实际证据。任何已约定判据只能靠"应该没问题"回答 → 工作未验收，停在这里继续做。
 
-判据至少包含：该面的最小真检查（L0/L1/L2/L4 中适用者）全绿；实际跑过的验证有记录；
-未运行项如实分开（"未跑"不是"通过"）。
+适用的最小真检查（L0/L1/L2/L4）须通过；实际运行证据与未运行项分开记录（"未跑"不是"通过"）。
 
-## 2. 毕业 = 正文改写，不是改路径
+## 2. RFC 存在时才毕业 Note
 
-把计划体改写成已交付事实体：
+只有当该队列工作确有 `notes/proposed/` RFC，且交付后持久决定理由仍需维护时，才把 RFC 改写为已交付事实并迁入 `implemented/`：
 
-- 未来时态、迁移计划、待办清单删除——它们若仍有效，属于新条目而非本 Note；
-- 每条 §验收判据对应一段"实际怎么验的"（命令 + 结果 + 日期）；
-- 决定与输掉的方案保持在场（`note-format` 门禁断言 `## 决定` + `## 输掉的方案`）；
-- 遗留形态（门禁生效前、无法重建骨架的旧 Note）标 `<!-- grandfather: … -->` 注释，不追改。
+- 删除未来时态和迁移计划；未完成的新工作单独记录，避免混入已交付决定；
+- 实际验证按要求记录命令、结果和日期；未运行项如实标出；
+- 决定与输掉的方案保持在场；遵循 [notes/AGENTS](../../../notes/README.md) 的骨架与取代检查。
 
-只 `git mv` 不改正文 = 未来计划伪装成当前事实；`note-format` 不查这一点，靠这一步。
+若无 RFC，或无需持久决定 Note，不创建替代文档；仅按 [notes/AGENTS](../../../notes/README.md) 判定是否有 Note 义务。
 
-## 3. 移动、删行、对账
+## 3. 更新可选索引与对账
 
-1. `git mv notes/proposed/<file>.md notes/implemented/<file>.md`；
-2. 删 `_backlog/queue.md` §队列 的条目行；后续条目重编号；**▶ 指针必须恰好一个**（`entry-chain` 门禁）；
-3. 若条目引入或修改了机制：docs 合同面同 diff 更新（`docs/` 只写 now）；
-4. 全仓清扫指回旧路径的链接（`md-links` + `md-anchors` 门禁）；
-5. 条目产生的新事实（新坑、新机制）→ 新条目或事实进 Note，不入队列历史。
+1. 队列中的已完成或停止条目从对应位置移除/更新，保留有效的后续次序；
+2. **▶ 仅表示队列内当前顺序项**，不得据此推断未登记的工作未授权或不存在；
+3. 若对应 RFC 按 §2 毕业，迁移后修复入站 Markdown 链接；
+4. 若条目引入或修改机制：docs 合同面同 diff 更新（`docs/` 只写 now）；
+5. 按改动范围运行链接、结构与回归检查；新发现问题归其 owner，不塞入队列历史。
 
 ## 4. 收尾验证（完成判据）
 
@@ -48,5 +45,4 @@ pnpm test
 
 改了 docs/AGENTS/queue → 追加 `node scripts/probe/entry-chain-probe.mjs`（真模型档）。
 
-全绿 + RFC 正文已改写 + 队列行已删 → 本条目毕业；commit 用窄证据切片，正文写清
-"条目离队 + 判据如何闭"。
+适用验收全绿 + 队列索引已更新 + 如有 RFC 已按 §2 收尾 → 条目离队；commit 用窄证据切片说明实际交付与证据。

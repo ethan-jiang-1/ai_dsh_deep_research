@@ -1,17 +1,9 @@
-# _done/ · 归档（位置即状态；fresh agent 默认忽略，点名才读）
+# _done/ compatibility pointer
 
-> 已毕业的推敲卡、已修复的缺陷卡与**暂停件**（暂停非完成）住这里。`git mv` 迁入、
-> 文件名不变、内容不重写——迁移时只在卡的状态行补去向指针（暂停不加判断）。**Next BUG
-> ID 权威在本文件**（编号权威住归档侧）；各池索引住在子目录 README。规矩手册 =
-> [`../README.md`](../README.md)。
+归档索引已移至 [_archive/](../_archive/README.md)。此兼容页保留旧入口，便于历史记录与外部引用定位；新增或更新的归档请使用 `_archive/` 下对应池的 README。
 
-## 目录
+- [已结问题](../_archive/settled_issues/README.md)
+- [已修缺陷](../_archive/fixed_bugs/README.md)
+- [调研归档](../_archive/research/README.md)
 
-- [_closed_plans/](_closed_plans/README.md) — 已毕业推敲卡（无编号，按 `YYYY-MM-DD-slug` 查）
-- [_suspended_plans/](_suspended_plans/README.md) — 暂停的推敲卡（未裁决、非完成，重启条件随卡）
-- [_fixed_bugs/](_fixed_bugs/README.md) — 已修复缺陷卡（逐行索引）
-- [_suspended_bugs/](_suspended_bugs/README.md) — 暂停缺陷卡（已查明、修复未确认，编号保留）
-- [_reference/](_reference/README.md) — 随毕业卡归档的推敲资料（无编号，按 slug 查）
-
-**Next BUG ID: BUG-018**（新号 = 已分配最大号 + 1，[_fixed_bugs/](_fixed_bugs/README.md)
-∪ [bugs/](../bugs/README.md) ∪ [_suspended_bugs/](_suspended_bugs/README.md) 一起算）
+下一个缺陷号由 [fixed bugs 索引](../_archive/fixed_bugs/README.md) 与活跃 [bugs](../bugs/README.md) 共同确定。

@@ -1,3 +1,8 @@
+---
+topic: 运行时可见面
+intent: 为 recorded-session 义务标定与 BUG-018 保存被消费的判定证据。
+---
+
 # recorded-session 义务标定：判据不可按路径立（且 smoke 广告了它不覆盖的面）
 
 > 服务 = [recorded-session-obligation 条目](../../notes/implemented/2026-10-08-recorded-session-obligation.md)（已毕业）

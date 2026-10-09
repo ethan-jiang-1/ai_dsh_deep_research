@@ -1,30 +1,14 @@
-# proposed/ — RFC 停机坪（将来时：在飞队列条目的设计）
+# proposed/ — 需要显式评审的持久决定提案
 
-> **时态：将来**（设计稿，尚未交付）。放 **[_backlog/queue.md](../../_backlog/queue.md) §队列
-> 条目的全文 RFC**（一文件一条目：
-> 问题/方案/输掉的方案/验收判据）。队列行（queue.md §队列）只有排序与指针，发现与状态分家。
-> **搁置条目不住这里**（2026-09-27 用户定调：搁置即"决定不做"，全文住
-> [rejected/](../rejected/README.md) 并带重启条件，搁置池行直接链它）。
+本目录只放需要实现前显式评审的持久决定 RFC。一份 RFC 明确问题、方案、真实比较过的备选和验收；不为每项工作、问题卡或队列行生成 RFC。
 
-## 空目录 = 没有在飞条目（少见）
-
-本目录与 [_backlog/queue.md](../../_backlog/queue.md) §队列双向挂链（`proposal-scheduled` 门禁
-强制：每份 RFC 在 §队列有归宿；孤儿提案红）。接下来做什么仍只看
-[queue.md §队列 ▶](../../_backlog/queue.md)（全仓唯一"当前"指针）。三个时态各住哪里，见
-[notes/README](../README.md) 的时态表。
+RFC 不要求出现在 [_backlog/queue.md](../../_backlog/queue.md)。队列仅为已授权多步/多会话工作提供可选排序，不授权；空目录不表示仓库没有工作。
 
 ## 规则
 
-1. 进门条件：[_backlog/queue.md](../../_backlog/queue.md) §队列有对应条目（verify 门禁
-   `proposal-scheduled` 强制）；
-2. 毕业：条目收尾时 RFC 迁 `notes/implemented/`（日期+主题命名），队列行删除——**毕业 =
-   正文改写**（计划体 → 已交付事实体，见 [guides/60 §4](../../docs/guides/60-dev-loop.md)）；
-   不再做的条目 → 否决迁 `rejected/`；
-3. 状态行写在 RFC 自己头部，**裸值**（`> 状态：proposed` / `approved` / `superseded`，不带日期括号——
-   其余 provenance 落正文），不写进队列索引；
-4. 落地次序住队列行：多条 RFC 服务同一队列条目时，次序登记在该队列行——本目录按
-   文件管理，文件名不携带次序（从名字看不出先后，以队列行为准）；
-5. 用户直派的任务**不必**先进这里：决定已作出并随当前变更交付 → 直接进 `implemented/`；
-6. 验收判据可检验化（[guides/60 §0 验收门](../../docs/guides/60-dev-loop.md)，D23）：每条
-   判据绑定检查方式（机械门禁 / 契约测试 / 对账命令 / 人工判据四型），能机械的先立红再
-   实现到绿；实施记录载实际跑过的红绿证据——无证据的"完成"不算毕业。
+1. 进门条件：持久决定理由需要明确评审，且当前已有可评审的范围、备选与验收要求；
+2. RFC 状态行写裸值 `> 状态：proposed` / `approved` / `superseded`；其他 provenance 放正文；
+3. 经明确批准后按授权范围实施；RFC 状态不替代用户授权；
+4. 实际交付后，如决定理由仍需长期维护，将正文改写为已交付事实并迁 `notes/implemented/`，不能仅改路径；规则见 [notes/AGENTS](../AGENTS.md)；
+5. 已否决且有防复犯价值的决定按 [rejected/](../rejected/README.md) 规则留存；一般授权工作不必经 proposed；
+6. 验收证据先行：适用的机械判据先立红再实现到绿，人工判据记录实际走查；未运行或被阻断检查如实列出。执行与收尾见 [guides/60](../../docs/guides/60-dev-loop.md)。

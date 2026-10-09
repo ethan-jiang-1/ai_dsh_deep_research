@@ -16,7 +16,7 @@
    的盘侧镜像公式，停留在 BUG-002 前的旧启发式。修复 = smoke 删手抄公式、**直调 lib 同一
    函数**（零镜像可漂移），描边/回边两断言随合流谓词；附带修复绑定富度（最新会话可能是
    收尾判终态短会话——BUG-001 同族第三例，改近窗内取事件最多者）。缺陷卡已迁
-   [_fixed_bugs](../../_backlog/_done/_fixed_bugs/README.md)。
+   [_fixed_bugs](../../_backlog/_archive/fixed_bugs/README.md)。
 3. **四角色组装面 keyless 钉住**：`dev/record-role-fixture.mjs` 录制工具（真模型档一次性：
    research 档短会话 + 哨兵「探针完成」收尾 + 日志静默判定——team-preflight 时序教训的
    同款应用）+ 三角色 fixture 入库（scout/analyst/critic，各 persona 全文与角色差异化工具

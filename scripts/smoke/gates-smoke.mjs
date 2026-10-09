@@ -71,17 +71,47 @@ const negateVerificationSection = (dirRel) => (dir) => {
   writeFileSync(p, out);
 };
 
-const breakQueuePointer = () => (dir) => {
+const ISSUE_NAME = '2099-01-01-probe.md';
+const ISSUE_TEXT = '---\nstatus: 推敲中\nopened: 2099-01-01\n---\n\n# Probe\n> 状态：推敲中｜可关闭：否\n';
+
+function fixtureFile(dir, rel, text, indexed = true) {
+  const path = join(dir, rel);
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, text);
+  if (indexed) appendFileSync(join(dirname(path), 'README.md'), `\n[${rel.split('/').at(-1)}](${rel.split('/').at(-1)})\n`);
+  const result = git(dir, ['add', '--', rel]);
+  if (result.status !== 0) throw new Error(`fixture git add failed: ${result.stderr}`);
+}
+
+const backlogIssue = (change = (text) => text, indexed = true) => (dir) =>
+  fixtureFile(dir, `_backlog/issues/${ISSUE_NAME}`, change(ISSUE_TEXT), indexed);
+
+const queueWithTarget = (target = `issues/${ISSUE_NAME}`) => (dir) => {
+  backlogIssue()(dir);
+  const path = join(dir, '_backlog', 'queue.md');
+  const original = readFileSync(path, 'utf8');
+  writeFileSync(path, original.replace(/(^## 队列[^\n]*\n)[\s\S]*?(?=^## |$(?![\s\S]))/m,
+    `$1\n1. ▶ **Probe**（可自主）—— [record](${target})\n\n`));
+};
+
+const duplicateQueuePointer = () => (dir) => {
+  const p = join(dir, '_backlog', 'queue.md');
+  backlogIssue()(dir);
+  const lines = readFileSync(p, 'utf8').split('\n');
+  const queueIndex = lines.findIndex((line) => /^## 队列/.test(line));
+  lines.splice(queueIndex + 1, 0, '1. ▶ **探针指针一**（已授权）—— [record](issues/2099-01-01-probe.md)',
+    '2. ▶ **探针指针二**（已授权）—— [record](issues/2099-01-01-probe.md)');
+  writeFileSync(p, lines.join('\n'));
+};
+
+const noQueueFile = () => (dir) => rmSync(join(dir, '_backlog', 'queue.md'));
+
+const emptyOptionalQueue = () => (dir) => {
   const p = join(dir, '_backlog', 'queue.md');
   const lines = readFileSync(p, 'utf8').split('\n');
-  let inQueue = false;
-  let mutated = false;
-  for (let i = 0; i < lines.length; i++) {
-    if (/^## /.test(lines[i])) { inQueue = /^## 队列/.test(lines[i]); continue; }
-    if (!inQueue) continue;
-    if (/^\s*▶/.test(lines[i])) { lines[i] = lines[i].replace('▶', ''); mutated = true; break; } // 有条目态：剥 ▶（零 ▶ + 无空态标记 = 红）
-  }
-  if (!mutated) lines.splice(lines.findIndex((l) => /^## 队列/.test(l)) + 1, 0, '1. ▶ **探针条目**（矛盾态：空态标记与 ▶ 并存 = 红）'); // parked 态：制造矛盾
+  const start = lines.findIndex((line) => /^## 队列/.test(line));
+  const end = lines.findIndex((line, index) => index > start && /^## /.test(line));
+  lines.splice(start + 1, end < 0 ? lines.length : end - start - 1);
   writeFileSync(p, lines.join('\n'));
 };
 
@@ -148,29 +178,6 @@ const naLivenessMissing = () => (dir) => {
   writeFileSync(p, `${JSON.stringify(ledger, null, 2)}\n`);
 };
 
-const bareQueuePointer = () => (dir) => {
-  const p = join(dir, '_backlog', 'queue.md');
-  const lines = readFileSync(p, 'utf8').split('\n');
-  let inQueue = false;
-  let hit = false;
-  let sectionEnd = -1;
-  for (let i = 0; i < lines.length; i++) {
-    if (/^## /.test(lines[i])) {
-      if (inQueue) { sectionEnd = i; break; } // 队列节结束（下一节标题）
-      inQueue = /^## 队列/.test(lines[i]);
-      continue;
-    }
-    if (inQueue && /^\d+\.\s+▶/.test(lines[i])) { lines[i] = lines[i].replace(/^\d+\.\s+/, ''); hit = true; break; } // 有条目态：剥编号 → 裸 ▶（门禁 2026-10-07 补宽的形态）
-  }
-  if (!hit && inQueue) {
-    // parked 态（零条目、队列空标记在场）：注入裸 ▶ 行——标记与 ▶ 并存 = 矛盾红（entry-chain
-    // parked 语义）。双态感知（2026-10-08）：单态"剥编号"注入在 parked 队列下是 no-op，
-    // 案例静默失效（实例：P3 毕业后队列恢复 parked，gates-smoke 首次实咬此漂移）。
-    lines.splice(sectionEnd === -1 ? lines.length : sectionEnd, 0, '▶ 裸指针注入（gates-smoke 反证——parked 态形态）', '');
-  }
-  writeFileSync(p, lines.join('\n'));
-};
-
 const linkUntrackedTarget = () => (dir) => {
   // 目标在盘上存在但未被 git 跟踪（BUG-016 形态：tracked md 链接运行区文件——git 绿依赖机器
   // 状态而非仓库状态；runtime/ 在 .gitignore 内且 fixture 的 git add 已完成 → 恒 untracked）
@@ -192,8 +199,19 @@ export const CASES = [
   { id: 'note-format-no-status', gate: 'note-format', mutate: stripFirstStatusLine(join('notes', 'implemented')) },
   { id: 'note-format-no-verification', gate: 'note-format', mutate: stripVerificationSection(join('notes', 'implemented')) },
   { id: 'note-format-negated-verification', gate: 'note-format', mutate: negateVerificationSection(join('notes', 'implemented')) },
-  { id: 'entry-chain-pointer', gate: 'entry-chain', mutate: breakQueuePointer() },
-  { id: 'entry-chain-bare', gate: 'entry-chain', mutate: bareQueuePointer() },
+  { id: 'entry-chain-duplicate-pointer', gate: 'entry-chain', mutate: duplicateQueuePointer() },
+  { id: 'queue-current-archived-issue', gate: 'queue-pointer-live', mutate: queueWithTarget('../_archive/settled_issues/2099-01-01-old.md') },
+  { id: 'queue-current-implemented', gate: 'queue-pointer-live', mutate: queueWithTarget('../notes/implemented/2026-09-24-entry-chain-probe.md') },
+  { id: 'queue-current-duplicate', gate: 'queue-pointer-live', mutate: duplicateQueuePointer() },
+  { id: 'backlog-issue-no-frontmatter', gate: 'backlog-liveness', mutate: backlogIssue(() => '# Probe\n> 状态：推敲中｜可关闭：否\n') },
+  { id: 'backlog-issue-closeable', gate: 'backlog-liveness', mutate: backlogIssue((text) => text.replace('可关闭：否', '可关闭：是')) },
+  { id: 'backlog-issue-orphan', gate: 'backlog-liveness', mutate: backlogIssue((text) => text, false) },
+  { id: 'backlog-bug-severity', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-999-probe.md', '---\nstatus: 活跃\nseverity: P3\nopened: 2099-01-01\n---\n\n# Probe\n') },
+  { id: 'backlog-research-status', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/research/2099-01-01-probe.md', '---\ntopic: Probe\nintent: "Evidence"\nstatus: 活跃\n---\n\n# Probe\n') },
+  { id: 'backlog-method-no-trigger', gate: 'backlog-liveness', mutate: (dir) => {
+    const path = join(dir, '_backlog/methods/issue-to-note.md');
+    writeFileSync(path, readFileSync(path, 'utf8').replace(/^whenToUse:.*\n/m, ''));
+  } },
   { id: 'gate-ledger-sync-row', gate: 'gate-ledger-sync', mutate: removeLedgerRow('dist-manual-version') },
   // align-ledger 在副本基线**非 PASS**（vendor/dsh 是 gitlink submodule，副本不拷其内容 →
   // "vendor 里不存在"是副本环境的固有报因）。故两案例必须带 expect 指名"na 活性"报因，
@@ -210,6 +228,14 @@ export const CASES = [
     expect: 'website/AGENTS.md: verdict=na 必须给 liveness' },
 ];
 
+export const CONTROLS = [
+  { id: 'queue-current-active-issue', gate: 'queue-pointer-live', mutate: queueWithTarget() },
+  { id: 'queue-empty-is-valid', gate: 'queue-pointer-live', mutate: emptyOptionalQueue() },
+  { id: 'entry-chain-empty-queue-is-valid', gate: 'entry-chain', mutate: emptyOptionalQueue() },
+  { id: 'entry-chain-queue-file-is-optional', gate: 'entry-chain', mutate: noQueueFile() },
+  { id: 'backlog-active-issue', gate: 'backlog-liveness', mutate: backlogIssue() },
+];
+
 // ── fixture：tracked 文件副本 + git init/add（git ls-files 驱动的门禁在副本内可用）──
 
 function git(dir, args) {
@@ -220,7 +246,7 @@ function buildFixture() {
   const tmp = mkdtempSync(join(tmpdir(), 'gates-smoke-'));
   const ls = git(ROOT, ['ls-files', '-z']);
   if (ls.status !== 0) throw new Error(`git ls-files 失败：${String(ls.stderr).slice(0, 200)}`);
-  const files = ls.stdout.split('\0').filter(Boolean);
+  const files = [...new Set([...ls.stdout.split('\0').filter(Boolean), 'scripts/lib/backlog-liveness.mjs'])];
   if (files.length < 50) throw new Error(`tracked 清单异常少（${files.length}）——fixture 建立中止`);
   for (const f of files) {
     const src = join(ROOT, f);
@@ -276,6 +302,15 @@ function main() {
       } else if (controlPass && expect) {
         failures.push(`对照组：${gate} 在零注入副本已 PASS 却给了 expect（${id}）——expect 多余，或案例基线判断有误`);
       }
+    }
+
+    for (const { id, gate, mutate } of CONTROLS) {
+      const dir = cloneFixture(base, `control-${id}`);
+      keep.push(dir);
+      mutate(dir);
+      const { status, out } = runVerify(dir);
+      if (!/verify: 全绿|处失败/.test(out) || !out.includes(`\nPASS  ${gate}\n`))
+        failures.push(`${id}: valid shape did not pass ${gate} (status=${status})`);
     }
 
     // 案例组：注入 → 目标门禁点名红（带 expect 时须命中该报因）

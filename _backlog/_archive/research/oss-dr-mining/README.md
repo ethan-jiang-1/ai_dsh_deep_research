@@ -1,6 +1,6 @@
 # oss-dr-mining/ · 开源 DR 框架经验挖掘资料区
 
-> 服务卡：[../_closed_plans/2026-10-06-oss-dr-lessons.md](../../_closed_plans/2026-10-06-oss-dr-lessons.md)
+> 服务卡：[../settled_issues/2026-10-06-oss-dr-lessons.md](../../settled_issues/2026-10-06-oss-dr-lessons.md)
 > （2026-10-06 立卡，用户定调；同日毕业落搁置池，本区随卡归档）。两路挖掘：案头（bundle
 > os-* 卡 digest）+ web 深挖（活跃项目架构与方法论，一手来源：GitHub README / docs / source）。
 

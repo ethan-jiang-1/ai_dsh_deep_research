@@ -69,7 +69,7 @@ skill），问的全是**抽象参数**；三问答完 lead 即定稿 question.m
   `2026-10-07-plan-marker-detection/`（另有前置 `2026-10-07-interactive-clarification/`）
   ——proposal（含 Node Agent Review / Control Placement Review）与 specs delta
   （entry-surface / deerflow-wiring / run-bundle）细节；下钻材料进
-  [reference/](../../reference/README.md) 随卡走。
+  [research](../../research/README.md) 随卡走。
 
 未决（四问）：
 

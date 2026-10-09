@@ -1,11 +1,11 @@
 # bugs/ · 活跃缺陷卡
 
 > 一文件一张卡：`BUG-<NNN>-<slug>.md`。修完 `git mv` 到
-> [`../_done/_fixed_bugs/`](../_done/_fixed_bugs/README.md)，文件名不变、内容不重写。
+> [`../_archive/fixed_bugs/`](../_archive/fixed_bugs/README.md)，文件名不变、内容不重写。
 > **调查过、修复未确认**的缺陷 `git mv` 到
-> [`../_done/_suspended_bugs/`](../_done/_suspended_bugs/README.md)（编号保留——暂停非
+> [`../_archive/suspended_bugs/`](../_archive/suspended_bugs/README.md)（编号保留——暂停非
 > 完成，重启需用户新的优先级决定）。**编号权威在归档侧**：新号 =
-> [../_done/README.md](../_done/README.md) 的 Next BUG ID（已分配最大号 + 1，活跃 ∪
+> [../_archive/fixed_bugs/README.md](../_archive/fixed_bugs/README.md) 的 Next BUG ID（已分配最大号 + 1，活跃 ∪
 > 归档一起算）。规矩手册 = [`../README.md`](../README.md)。
 
 ## 活跃列表

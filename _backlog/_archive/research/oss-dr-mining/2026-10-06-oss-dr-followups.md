@@ -1,6 +1,6 @@
 # 开源 DR 挖掘遗留下钻（DeerFlow PR ×5 + gptr 归属核查）
 
-> 服务卡：[_closed_plans/2026-10-06-oss-dr-lessons.md](../../_closed_plans/2026-10-06-oss-dr-lessons.md)
+> 服务卡：[2026-10-06-oss-dr-lessons](../../settled_issues/2026-10-06-oss-dr-lessons.md)
 > （毕业卡「DeerFlow 可验证执行四件套」待下钻注记 + gptr"retriever 插件化"引用归属疑点）。
 > 前程材料：[2026-10-06-oss-dr-arch-mining.md](2026-10-06-oss-dr-arch-mining.md)（web 深挖正本，§2 deer-flow 节与收尾候选清单）。
 > 截至：**2026-10-06**（`bash date` 输出 2026-10-06 16:16 CST；本卡所有"当前/截至"类日期与数字口径均以此为抓取当刻）。

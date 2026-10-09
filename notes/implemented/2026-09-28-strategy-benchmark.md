@@ -2,9 +2,9 @@
 
 > 状态：implemented
 
-出处：[pipeline-polish 卡](../../_backlog/_done/_closed_plans/2026-09-28-pipeline-polish.md) 面①（最后
+出处：[pipeline-polish 卡](../../_backlog/_archive/settled_issues/2026-09-28-pipeline-polish.md) 面①（最后
 待立卡面；研究型——产出判断材料非机制）。对标材料 = [reference/
-2026-10-03-strategy-benchmark-sources](../../_backlog/reference/strategy-benchmark/2026-10-03-strategy-benchmark-sources.md)。
+2026-10-03-strategy-benchmark-sources](../../_backlog/research/strategy-benchmark/2026-10-03-strategy-benchmark-sources.md)。
 
 ## 决定
 

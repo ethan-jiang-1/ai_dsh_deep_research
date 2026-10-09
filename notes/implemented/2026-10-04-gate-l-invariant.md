@@ -5,7 +5,7 @@
 ## 决定
 
 门L（node-gate 的 leads 交接门）判据从**字面形态**（h2 `## 方向:` 节计数）升格为**交接
-不变量**（判据来源 = [leads-topic-shape 推敲卡毕业判断](../../_backlog/_done/_closed_plans/2026-10-04-leads-topic-shape.md)，三场验收 run 实物 + 用户批准）：
+不变量**（判据来源 = [leads-topic-shape 推敲卡毕业判断](../../_backlog/_archive/settled_issues/2026-10-04-leads-topic-shape.md)，三场验收 run 实物 + 用户批准）：
 
 1. **不变量（门守，题型无关）**：leads.md 含 ≥1 个"字段齐的方向单元"——任意层级
    `#{2,4}` 的节 + 四字段行齐（状态合法值/支持来源带 A–D 分级/关键线索/建议 owner 带

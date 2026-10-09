@@ -13,13 +13,11 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 
 1. **本文件**——布局 + 命令速查 + 纪律 + `notes/` 地位 + 本链的定义；
 2. **[docs/00-index.md](docs/00-index.md)**——文档地图 + 决策台账（D 号）+ 术语映射；
-3. **[_backlog/queue.md](_backlog/queue.md) §队列 ▶**——全仓唯一"当前"条目；行内标注**可执行性**（"等人 / 可自主"）——标"等人"时正确动作是向用户取题，不是开工；队列空（`（队列空——待用户取题）` parked 标记）同此——取题，不是找活凑数；
-4. 该条目在 **[notes/proposed/](notes/proposed/)** 的 RFC——条目全文（问题/方案/输掉的方案/验收）；
-5. **[docs/guides/60-dev-loop.md](docs/guides/60-dev-loop.md)**——开工（§1/§2）与收尾（§4）程序；每步"读什么 → 应知道什么 → 卡住怎么办"的**契约表**与按条目类型的分支 = 该页 §1.1。
+3. 按本轮授权进入工作：用户直派按请求范围执行；需澄清、查证或记录的问题按 [意图载体总图](docs/design/60-intent-carriers.md) 路由到 `_backlog/issues/`、`bugs/`、`research/` 或 `methods/`。Backlog 不是实施前置门；
+4. 仅当工作已获授权且需要跨步骤或跨会话排序/恢复时，查 [_backlog/queue.md](_backlog/queue.md) 对应队列行。队列是可选顺序索引，不授权、不代表所有当前工作；
+5. **[docs/guides/60-dev-loop.md](docs/guides/60-dev-loop.md)**——按改动面选择验收与收尾。仅当持久决定需要显式评审时，才为该项建立 [notes/proposed/](notes/proposed/) RFC。
 
-开工就绪最小集 = 上列 1–5。仓库全局如何运行、调试、交互和分层验收 → [docs/project-map.md](docs/project-map.md)；**其余一切按需，不强制通读**：验收怎么判 →
-[docs/evaluation.md](docs/evaluation.md)；机制为什么这样 → `docs/design/10-50`；run 怎么操作 →
-[guides/61](docs/guides/61-run-playbook.md)。
+开工就绪最小集 = 上列 1–3，后续按任务需要读取。仓库全局如何运行、调试、交互和分层验收 → [docs/project-map.md](docs/project-map.md)；验收怎么判 → [docs/evaluation.md](docs/evaluation.md)；意图载体边界 → [docs/design/60-intent-carriers.md](docs/design/60-intent-carriers.md)；run 怎么操作 → [guides/61](docs/guides/61-run-playbook.md)。
 
 ## 布局
 
@@ -29,9 +27,8 @@ CLAUDE.md→AGENTS.md、.claude/skills→.agents/skills    两条 symlink（编�
 子树 AGENTS.md            docs/ · scripts/ · notes/ · packages/deep-research-pack/ · tests/ 各一份——只放该
                          子树的指令（根只放每轮常驻指令；上游 22 个子树 AGENTS.md 同构）
 README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令正本 = guides/60 §2，不复制）
-_backlog/                 规划面单入口（D20，roadmap.md 已退役）：queue.md = 纯队列索引（▶ 唯一"当前"
-                          指针 + 搁置池，零判断材料）；plans/ 推敲卡（YYYY-MM-DD-slug，只载判断材料）、
-                          bugs/ 缺陷卡、_done/ 归档（位置即状态）；推敲卡不是任务；手册 = _backlog/README.md
+_backlog/                 问题澄清与证据区：issues/、bugs/、research/、methods/、triggers.md、_archive/；
+                          queue.md 是已授权多步/多会话工作的可选顺序索引，不授予授权；手册 = _backlog/README.md
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 随队列条目——见 pnpm-workspace.yaml 头注）
 packages/deep-research-pack/   唯一自写包（配置为主 + 研究驾驶舱[Research Cockpit，观察面 client 套件，D18，构成正本 = docs/design/40-research-cockpit.md]）：presets/<role>.patch.yml（0.1.7 形态=一条 @deepseek-ai/dsh-agent-preset 行，config.plugins 内声明 persona/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、cordis.patch.yml（bundle 行）、workspace/（工作区种子：手册+模板，生成物）、scripts/{preflight,scaffold}.mjs（部署 bin）、src/client/ 与 src/lib/（驾驶舱 client 半与折算纯函数，构建产物 lib/）；交付与部署形态 = guides/62，合同 = 包 README
 vendor/dsh/               pinned submodule（只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，tag/commit 见 §DSH 源码表）
@@ -42,7 +39,7 @@ docs/                    00-index（地图+决策台账+术语映射）→ desig
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）；目录名自带时态，
                          总图 = notes/README.md（将来 proposed/ · 过去 implemented/archived/rejected/
                          postmortem/；立项来历 = 该页 §立项来历——用户定调只进 00-index D 号依据列）：
-                         proposed/（在飞队列条目的 RFC）→ implemented/（不再指导未来工作者
+                         proposed/（需显式评审的持久决定 RFC）→ implemented/（不再指导未来工作者
                          冻结入 archived/）；
                          rejected/（否决与搁置——"决定不做"，带重启条件）；postmortem/（事故复盘）
 .agents/skills/          开发技能（DSH 约定路径：project-agents 发现根）：任务匹配即加载的程序化工作记忆
@@ -55,10 +52,10 @@ runtime/                 运行态区（gitignored）：harness-home/（开发 D
 _dist/                   对外交付件：安装手册.md（tracked 生成物，生成器 = scripts/dist/export-dist.mjs）
                          + 打包 tgz（gitignore）
 （布局 = 骨架图，非全量清单——scripts/dev 全档工具与逐命令说明 = guides/60 §2；
-  _backlog 细构[reference/ 资料区、_done 五池] = _backlog/README.md）
+  _backlog 细构[问题、方法、调研与归档] = _backlog/README.md）
 ```
 
-接下来开发什么 = §入口链 第 3 步的 ▶ 条目；开工/收尾程序 = 第 5 步。
+本轮工作以用户请求和已有授权为准；开工/收尾程序 = 第 5 步。
 
 ## `notes/`：开发记忆（常设指令）
 
@@ -66,8 +63,8 @@ _dist/                   对外交付件：安装手册.md（tracked 生成物�
 理由的变更**（代码/测试/现有文档说不清的"为什么选它、放弃了什么"）才需**同一变更**新增或更新
 Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。细则是子树指令，不在这里复述：
 
-- **时态总图 = [notes/README.md](notes/README.md)**（将来 `proposed/` = 在飞队列条目的 RFC 全文 · 过去
-  `implemented/` `archived/`（冻结） `rejected/`（否决与搁置，带重启条件） `postmortem/`；下一步仍只看 [_backlog/queue.md](_backlog/queue.md) ▶）；
+- **时态总图 = [notes/README.md](notes/README.md)**（`proposed/` = 需显式评审的持久决定提案；
+  `implemented/` `archived/`（冻结） `rejected/`（防复犯的否决理由） `postmortem/` = 决定与证据记忆）；
 - **写入触发 / 取代检查 / 格式与毕业 = [notes/AGENTS.md](notes/AGENTS.md)**；
 - **任务流程**（毕业条目 / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审）= `.agents/skills/` 开发技能，按
   description 触发加载，不占常驻上下文。

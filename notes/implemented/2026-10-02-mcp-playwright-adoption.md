@@ -3,7 +3,7 @@
 > 状态：implemented
 
 归宿：用户直派（mcp-client 推敲卡
-[261002](../../_backlog/_done/_closed_plans/2026-10-02-mcp-client-adoption.md)
+[261002](../../_backlog/_archive/settled_issues/2026-10-02-mcp-client-adoption.md)
 两轮呈批毕业——2026-10-02：Firecrawl 价格问询后拍板本地 Playwright MCP）。机制四未知数源码结论
 与候选对比材料 = 毕业卡全文（内容不重写，本 Note 只存决定、淘汰理由与验证）。
 

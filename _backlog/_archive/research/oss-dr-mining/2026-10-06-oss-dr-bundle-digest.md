@@ -1,6 +1,6 @@
 # 开源 DR 面 bundle 证据 digest（案头）
 
-> **服务卡**：[_backlog/_closed_plans/2026-10-06-oss-dr-lessons.md](../../_closed_plans/2026-10-06-oss-dr-lessons.md) ｜ **截至日期**：2026-10-06（本机 `bash date` = Tue Oct 6 14:10:13 CST 2026，与 run 口径日一致）
+> **服务卡**：[2026-10-06-oss-dr-lessons](../../settled_issues/2026-10-06-oss-dr-lessons.md) ｜ **截至日期**：2026-10-06（本机 `bash date` = Tue Oct 6 14:10:13 CST 2026，与 run 口径日一致）
 > **口径声明**：本文是对已交付 run bundle `research-workspace/archive/drt_dr-product-landscape/` 的**二手消化**——只读本地文件、不联网；原始证据以 bundle 卡为准，本文每条结论带 `[来源: evidence/os-xx.md]` 指针，链接指向 bundle 内对应卡。引文行只放原文（卡片自己的标注不进引文块）。凡卡片没写的，标"未取得"，不臆断。
 > **输入面**：evidence/ 实存 `os-*` 卡 **27 张**（ls 逐一核对；final.md §6 头部写"26 张"而其分项 3+6+11+7=27——簿记差 1，见 §三.5）+ final.md §1.5/§3/§5 G6·G7 + leads.md §6/§7 + findings.md F21–F25 + review.md 三轮 os 相关记录。
 > **链接基准注记**：本文按"从 `_backlog/reference/oss-dr-mining/` 出发"取**三层**相对前缀 `../../../research-workspace/archive/drt_dr-product-landscape/…`（任务书示例写 `../../`，按该起点实算少一层，这里以可解析为准）。
