@@ -4,7 +4,14 @@
 
 ## 活跃清单
 
-（当前无活跃问题卡。最近结卡 = [snapshots 首批落点](../_archive/settled_issues/2026-10-09-snapshots-adoption.md)——首批四角色 replay 切片含 BUG-018 修复与场景声明消费。）
+| 卡 | 要解决什么 | 当前环节与未完成项 |
+|---|---|---|
+| [2026-10-09-guard-red-record.md](2026-10-09-guard-red-record.md) | tests 面反证义务机械化（声称守 BUG 的测试必须交红配方） | 待确认范围与存量处置；验收判据已钉 |
+| [2026-10-09-release-smoke-hardening.md](2026-10-09-release-smoke-hardening.md) | L2 安装面五处缺口（client 半断言 ×2 + 浏览器模块表 + 进程卫生 + 两条 L0 加宽） | 待确认安装域断言形态；五件套验收已钉 |
+| [2026-10-09-layering-v2.md](2026-10-09-layering-v2.md) | AST 判法（keyless 约束下）+ import 图守卫（含活暴露面）+ test 命令钉 | 先探明解析路径（vendor 静态分析面盘点） |
+| [2026-10-09-member-activity-stream.md](2026-10-09-member-activity-stream.md) | 队员动作流进渐进面 | 刻意排在下一场研究 run 之后拿真实素材 |
+
+（四卡同源于 [company 钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md) 的候选登记——用户 2026-10-09 授权全部推进；执行序由会话 plan 组织，本表不是队列。）
 ## 写一张卡
 
 文件名为 `YYYY-MM-DD-<slug>.md`。开头先让下一位读者知道：解决什么、现在什么情况、还缺什么、下一步是什么。讨论中的事实、假设和建议分别写清，历史推演放在当前情况之后。
