@@ -2,7 +2,7 @@
 
 > 状态：rejected
 
-归宿：plugin-shelf-adoption（queue ▶ 2026-09-30）第三梯队辨析项；调研全文 = 辨析子代理报告
+归宿：本 Note 拥有否决理由与重启条件；采纳目录扫描见 [plugin-shelf-adoption](../implemented/2026-09-30-plugin-shelf-adoption.md)；调研全文 = 辨析子代理报告
 （2026-09-30，vendor `dsh-v0.2.0-rc.2` 源码逐行核对），本 Note 存蒸馏结论与重启条件。
 
 ## 决定

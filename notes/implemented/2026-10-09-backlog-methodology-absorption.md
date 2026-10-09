@@ -15,17 +15,22 @@
 ## 输掉的方案
 
 - **把每张 issue 等同 implementation plan，并要求全部 issue 毕业成 RFC + queue 行**：会把来源仓的问题澄清职责重新变成必经审批/实施通道，混淆问题已想清楚与工作已授权。
-- **把 queue 作为所有工作的唯一入口或授权依据**：与本轮明确的 backlog 边界相冲突；同时保留 queue 的既有用户决定，仅限已授权工作的可选排序用途。
+- **把 queue 作为所有工作的唯一入口或授权依据，或保留为可选排序索引**：前者混淆授权与问题澄清；后者仍维持用户明确判定为复杂化的机制。本轮裁决完整退役仓级 queue，不另建清单。
 - **把来源仓协作系统逐项照搬**：本仓是单人文件工作流，没有 GitHub Issue/Project 事件源；采用本地问题卡、方法和归档形态，而非远端 tracker 状态机。
+
+## 历史裁决 owner
+
+queue 搁置池中的结论不再由索引维护，按决定本身回到现有 owner：workflow adoption → [rejected Note](../rejected/2026-09-30-workflow-adoption.md)；browser-use adoption → [rejected Note](../rejected/2026-09-30-browser-use-adoption.md)；UI skin → [rejected Note](../rejected/2026-09-24-ui-skin.md)；专职 synthesizer → [rejected Note](../rejected/2026-09-24-synthesizer-role.md)；floor gate → [rejected Note](../rejected/2026-09-24-floor-gates.md)；LICENSE → [rejected Note](../rejected/2026-09-24-license.md)；frontmatter caliber → [rejected Note](../rejected/2026-09-24-frontmatter-caliber-gate.md)；per-topic floor 数据 → [strategy benchmark Note](2026-09-28-strategy-benchmark.md) 与其 research 数据；HITL2 条件范围轮 → [_backlog settled issue](../../_backlog/_archive/settled_issues/2026-09-28-hitl2-scope-round.md)。重启条件留在各 owner 内，不复制成新清单。
 
 ## 实际跑过的验证
 
-以下为 2026-10-09 吸收提交时的历史验证，并非本次 queue 退役验证：
+2026-10-09 queue 退役验证：
 
-- `pnpm verify`：36 个门禁全绿，含 `backlog-liveness`、queue/RFC 指针与文档链接检查。
-- `pnpm test`：265/265 通过，含 issue/RFC 授权边界的词法反例测试。
-- `node scripts/smoke/gates-smoke.mjs`：22 个真实入口注入案例均点名报红，对照组与空 queue 合法态全绿。
-- 日期 `2026-10-09` 由系统 `date +%F` 实际核验。
+- `pnpm verify`：全绿（34 gates），含入口链、backlog 活性、文档链接、预算和索引对账。
+- `pnpm test`：264/264 通过。
+- `node scripts/smoke/gates-smoke.mjs`：19 个注入案例均点名报红，对照组全绿。
+- `source dev/env.sh && node scripts/probe/entry-chain-probe.mjs`：真模型档 Q1–Q3 全通过；原始会话留在 gitignored `runtime/smoke-workspace/`。
+- 历史吸收验证记录在旧提交中，不作为本次结果。
 
 ## 环境状态
 

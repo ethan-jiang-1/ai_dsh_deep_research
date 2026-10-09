@@ -19,7 +19,7 @@ import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as zlib from 'node:zlib';
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
-import { directAuthorizationBoundaryPasses } from '../lib/direct-authorization-boundary.mjs';
+import { directAuthorizationBoundaryPasses, rfcBoundaryPasses } from '../lib/direct-authorization-boundary.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {
@@ -187,7 +187,7 @@ try {
   const q2 = /^Q2:(.+)$/m.exec(answer)?.[1] ?? '';
   const q3 = /^Q3:(.+)$/m.exec(answer)?.[1] ?? '';
   verdict.push(['Q1 明确按用户授权范围执行且无需重复请批', directAuthorizationBoundaryPasses(q1)]);
-  verdict.push(['Q2 RFC 仅用于需显式评审的持久决定', /仅当|只有|需要显式评审/.test(q2) && /不是普遍|不是一般|不必.*实施/.test(q2)]);
+  verdict.push(['Q2 RFC 仅适用于需显式评审的持久决定，不是实施普遍前置', rfcBoundaryPasses(q2)]);
   verdict.push(['Q3 指认 guides/60（开发环）', /60|开发环|guides/i.test(q3)]);
 } finally {
   child.kill('SIGTERM');
