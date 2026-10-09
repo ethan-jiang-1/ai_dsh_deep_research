@@ -1,11 +1,19 @@
 #!/usr/bin/env node
 // release-smoke.mjs — L2 安装面冒烟（keyless，起真 DSH 环境、无模型调用）：真实安装形状的完成定义。
-// 定义：docs/evaluation.md §L2。程序照搬 ai_dsh_company docs/release.md §发布冒烟（按本仓裁剪）：
+// 定义：docs/evaluation.md §L2。裁剪自 ai_dsh_company docs/release.md §发布冒烟（钉版复核 2026-10-09
+// 对照 company@59551f2 修订本头注；差异 = 有意裁剪，逐条如下）：
 //   ① npm pack（npm cache 重定向进仓库 gitignored 区——纪律：工具态不越界）
 //   ② 干净 profile（先删后建，从 web 模板）+ .npmrc（pnpm store/cache 钉 repo 内）
 //   ③ dsh plugin --profile release-check add file:<tarball>（⚠ --profile 挂在 plugin 子命令上）
-//   ④ manifest 断言：bundles reconcile / 安装副本带 presets / peers 在 manifest / 兼容矩阵在场
+//   ④ manifest 断言：bundles reconcile / 安装副本带 presets / peers 在 manifest / 兼容矩阵含当前 tag
 //   ⑤ boot + preset-smoke 断言（安装域通道：--profile release-check --no-patch）
+// 与 company 当前版的差异（复核登记，待吸收项见钉版复核 Note）：
+//   - 不显式重建产物：pack 的 prepack 跑 build（company 加 rm lib 防增量陈旧态——我们以
+//     prepack 覆盖"构建发生"，rm-lib 防御未取）；
+//   - CLI 走 tsx 源码基线（本仓 dsh 命令本身即源码——D10 销账；company 用 built bin）；
+//   - 未断言安装副本 lib/client.js 在场与 dependencies 缺席（company 有，吸收候选）；
+//   - 无安装域浏览器模块表断言（client 半在安装域的装配无人验——吸收候选）；
+//   - run() 无超时/并发锁/进程组回收（company 有完整进程卫生——吸收候选）。
 // peers 装不进 profile 无碍（声明语义；行解析安装锚先于 profile 目录——company release.md
 // §依赖姿态，本仓源码基线 = company 工作区即安装锚）。
 //

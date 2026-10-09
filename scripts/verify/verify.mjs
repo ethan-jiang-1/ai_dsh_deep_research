@@ -35,7 +35,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'pack-workspace-fresh', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'backlog-liveness', 'dist-manual-version', 'port-exclusive', 'hooks-active'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'handbook-budget', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'pack-workspace-fresh', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'backlog-liveness', 'dist-manual-version', 'port-exclusive', 'hooks-active'];
 
 const failures = [];
 const notes = [];
@@ -242,6 +242,43 @@ const allFiles = walk(ROOT);
   // 旧契约化石镜像让 lead 按 runs/<slug> 行动）——存在即红。
   if (existsSync(join(ROOT, 'runtime', 'harness-home', 'AGENTS.md')))
     fail(gate, 'runtime/harness-home/AGENTS.md 化石镜像在场（手册唯一注入通道 = cwd projectRoot）——删除它');
+}
+
+// ── 门禁 8-bis：handbook-budget（手册注入字节预算，2026-10-09 钉版复核吸收）──
+// 为什么：agent-instructions 的 maxBytes 超限时**静默截断**（vendor render 先丢更宽的指令文件、
+// 再截最具体的文件）——company 实测事故：preset 钉 16384 时手册 1.2KB，手册长到 17.4KB 后
+// 成员会话从某节中句起整段丢失、"工作纪律"节从未注入（company handbook-budget 门禁出生现场，
+// 2026-10-02；源 = company@59551f2 checks/run-gates.mjs:99–117）。本仓同构风险：手册是四角色
+// 会话的注入正本，doc-budgets 的**行数**栅栏管不到**字节**截断。正本 = research-workspace/AGENTS.md
+// （pack 种子由 pack-workspace-fresh 保证同步，不重复查）。
+{
+  const gate = 'handbook-budget';
+  const handbookPath = join(ROOT, 'research-workspace', 'AGENTS.md');
+  if (!existsSync(handbookPath)) fail(gate, 'research-workspace/AGENTS.md 不存在（workspace-contract 同报）');
+  else {
+    const handbookBytes = readFileSync(handbookPath).length;
+    // 逐文件收集（不摊平）：单个 preset 丢 maxBytes 行时，摊平数组只剩三个一致值会静默放行——
+    // 该角色手册失去截断防线而门禁绿（钉版复核对抗自审 S1；company 原版同款洞，此处收紧）。
+    const perPreset = readdirSync(PRESETS).filter((f) => f.endsWith('.patch.yml')).map((f) => ({
+      role: f.replace(/\.patch\.yml$/, ''),
+      budgets: [...readFileSync(join(PRESETS, f), 'utf8').matchAll(/maxBytes:\s*(\d+)/g)].map((m) => Number(m[1])),
+    }));
+    if (perPreset.length === 0) fail(gate, 'presets 下零个 *.patch.yml——防空语料');
+    const bare = perPreset.filter((e) => e.budgets.length === 0);
+    if (bare.length > 0)
+      fail(gate, `preset ${bare.map((e) => e.role).join(', ')} 缺 maxBytes 声明——该角色的 agent-instructions 无字节预算，手册超限即静默截断（补 packages/deep-research-pack/presets/<role>.patch.yml 的 maxBytes 行）`);
+    else {
+      const budgets = perPreset.flatMap((e) => e.budgets);
+      if (new Set(budgets).size !== 1)
+        fail(gate, `各 preset 的 maxBytes 不一致：${budgets.join(', ')}——预算应同值（改 packages/deep-research-pack/presets/<role>.patch.yml）`);
+      else {
+        const maxBytes = budgets[0];
+        const margin = 1024; // render 包装开销余量（intro/省略注记——company 同款）
+        if (handbookBytes + margin > maxBytes)
+          fail(gate, `手册 ${handbookBytes}B + ${margin}B 余量 > maxBytes ${maxBytes}——agent-instructions 正在静默截断手册尾部（升 preset maxBytes 或先瘦身 research-workspace/AGENTS.md）`);
+      }
+    }
+  }
 }
 
 // ── 门禁 9：pack-contract-sync（pack 的 tracked yml/md 零 runs/ 旧契约路径——persona

@@ -44,6 +44,14 @@ L4-lite 需凭据（真模型档）；未跑项如实分列，不算通过。
 `dev/boot-run.sh` 漂移检测会红（**预期态**——agent-team-profile 层版本随兼容矩阵变了）：
 按其处方删旧 profile 重建，别手改镜像。
 
+## 5-bis. 证据层（升 pin 必红，不许降档凑绿）
+
+`snapshots/` 场景证据随模型可见输入漂移：升 pin 后 `snapshot-replay` 的 **B·headers 面必红**
+（组装请求头随新 vendor 变），这是**预期真红**，不是噪声。处置 = 真模型重录 `research-face`
+整组 + 同步 `snapshot.json` 的场景身份（recordedAt / 钉版）；**不许**为凑绿削减判据集或降档——
+判据集由消费者固定不可削减（BUG-018 教训）。判定日期与 recordedAt 是两件事。
+见 [snapshots/README](../../../snapshots/README.md)、[guides/60 §2](../../../docs/guides/60-dev-loop.md)。
+
 ## 6. 毕业
 
 升 pin 毕业 Note（`notes/implemented/`）= 重审结论的正本：四处身份落点、逐源重审结论、

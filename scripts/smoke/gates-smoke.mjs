@@ -184,6 +184,25 @@ export const CASES = [
     writeFileSync(path, readFileSync(path, 'utf8').replace(/^whenToUse:.*\n/m, ''));
   } },
   { id: 'gate-ledger-sync-row', gate: 'gate-ledger-sync', mutate: removeLedgerRow('dist-manual-version') },
+  // handbook-budget 事故形态：四 preset 同降过限（手册字节 + 余量 > maxBytes）——company
+  // 同构面出过真实事故（手册 17.4KB 超预算后注入静默截断，2026-10-09 钉版复核吸收）。
+  { id: 'handbook-budget-truncated', gate: 'handbook-budget', mutate: (dir) => {
+    for (const f of readdirSync(join(dir, 'packages/deep-research-pack/presets'))) {
+      if (!f.endsWith('.patch.yml')) continue;
+      const p = join(dir, 'packages/deep-research-pack/presets', f);
+      // 不钉字面值：预算将来升到任何值，本注入都把四 preset 一致压到 8000（< 手册字节 + 余量）
+      writeFileSync(p, readFileSync(p, 'utf8').replace(/maxBytes: \d+/g, 'maxBytes: 8000'));
+    }
+  } },
+  { id: 'handbook-budget-mismatch', gate: 'handbook-budget', mutate: (dir) => {
+    const p = join(dir, 'packages/deep-research-pack/presets/lead.patch.yml');
+    writeFileSync(p, readFileSync(p, 'utf8').replace(/maxBytes: \d+/, 'maxBytes: 8192'));
+  } },
+  // S1 事故形态（对抗自审抓获）：单个 preset 丢 maxBytes 行——摊平收集会静默放行，逐文件收集必须红
+  { id: 'handbook-budget-bare-preset', gate: 'handbook-budget', mutate: (dir) => {
+    const p = join(dir, 'packages/deep-research-pack/presets/lead.patch.yml');
+    writeFileSync(p, readFileSync(p, 'utf8').replace(/\n\s*maxBytes: \d+/, ''));
+  } },
   // align-ledger 在副本基线**非 PASS**（vendor/dsh 是 gitlink submodule，副本不拷其内容 →
   // "vendor 里不存在"是副本环境的固有报因）。故两案例必须带 expect 指名"na 活性"报因，
   // 否则注入未生效也会因既有的 vendor 报因看到 FAIL 而假绿。

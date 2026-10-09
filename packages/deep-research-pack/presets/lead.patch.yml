@@ -1,4 +1,4 @@
-# Deep Research lead preset —— 0.1.7 形态：一条 @deepseek-ai/dsh-agent-preset 行，
+# Deep Research lead preset —— 单行形态：一条 @deepseek-ai/dsh-agent-preset 行，
 # 子插件（persona / skills / 工具面 / 研究手册注入）在 config.plugins 内声明。
 # 职责与方法论：docs/design/20-roles.md §lead；映射依据：docs/design/30-methodology-mapping.md。
 # 迁移史与旧形态 = notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md。

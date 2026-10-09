@@ -18,6 +18,12 @@ subagent 派活），角色分工天然对齐研究波的语义。
 **事实的 owner 全表**住研究手册（research-workspace/AGENTS.md）——一处事实一个家，
 L3 判据 2 的载体；任何两类事实不得双 owner 或无 owner。
 
+**teammate 的组合继承语义**（company presets.md 四形态矩阵，钉版复核 2026-10-09 登记）：
+scout/analyst/critic 作为 teammate 或 one-shot child 会话时，加载的是 **Lead 的组合**
+（composeFrom ⇒ lead preset），成员身份来自成员名 + 任务书 + 工作区手册注入，而**不是**
+成员角色自己的 preset——名册角色名 ≠ 该会话加载的 preset。各自 role preset 只在**根会话**
+（直接以该角色开新会话）时生效。
+
 ## 1. persona 要素（每角色 prefix 必含）
 
 1. 身份与领地（广度/深度/把关的分工宣言，含"不做什么"的边界）；
