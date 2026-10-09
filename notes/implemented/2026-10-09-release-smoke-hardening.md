@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-同轮关闭的推敲卡：[_backlog/_archive/settled_issues/2026-10-09-release-smoke-hardening.md](../../_backlog/_archive/settled_issues/2026-10-09-release-smoke-hardening.md)（探查实录与形态拍板记录在卡上）。
+同轮关闭的推敲卡：[_backlog/_archived/settled_issues/2026-10-09-release-smoke-hardening.md](../../_backlog/_archived/settled_issues/2026-10-09-release-smoke-hardening.md)（探查实录与形态拍板记录在卡上）。
 
 ## 决定
 

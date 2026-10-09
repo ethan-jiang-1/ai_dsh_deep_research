@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-来源推敲卡：[2026-10-05-test-asset-organization](../../_backlog/_archive/settled_issues/2026-10-05-test-asset-organization.md)（深想轮两实验与六点裁决随卡归档）。用户 2026-10-05 点名 ongoing goal 优先推进：R1 深想当日毕业 → R2 立红落地 → R3 对账收尾（D23 第二例闭环）。
+来源推敲卡：[2026-10-05-test-asset-organization](../../_backlog/_archived/settled_issues/2026-10-05-test-asset-organization.md)（深想轮两实验与六点裁决随卡归档）。用户 2026-10-05 点名 ongoing goal 优先推进：R1 深想当日毕业 → R2 立红落地 → R3 对账收尾（D23 第二例闭环）。
 
 ## 问题
 

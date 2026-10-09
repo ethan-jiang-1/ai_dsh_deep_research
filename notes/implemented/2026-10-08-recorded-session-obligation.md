@@ -2,9 +2,9 @@
 
 > 状态：implemented
 
-出处 = 推敲卡 [2026-10-08-sdlc-reference-absorption](../../_backlog/_archive/settled_issues/2026-10-08-sdlc-reference-absorption.md)
+出处 = 推敲卡 [2026-10-08-sdlc-reference-absorption](../../_backlog/_archived/settled_issues/2026-10-08-sdlc-reference-absorption.md)
 （§候选与取舍 第二档 C11 + §毕业门"缺什么证据才能判"）。标定报告全文 =
-[_backlog/research/2026-10-08-model-visible-calibration.md](../../_backlog/_archive/research/2026-10-08-model-visible-calibration.md)。
+[_backlog/research/2026-10-08-model-visible-calibration.md](../../_backlog/_archived/research/2026-10-08-model-visible-calibration.md)。
 
 ## 决定
 

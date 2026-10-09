@@ -5,7 +5,7 @@
 > **重启条件**：DSH 的 HITL 面出现机械路由/脚本化答案处理（需要程序判读用户反馈、而非 LLM
 > 阅读理解）时重提；此前本条为**不做的决定**，不是待办。
 
-出处 = oss-dr 毕业卡 B 档 B3（[_done/_closed_plans/2026-10-06-oss-dr-lessons.md](../../_backlog/_archive/settled_issues/2026-10-06-oss-dr-lessons.md)）；
+出处 = oss-dr 毕业卡 B 档 B3（[_done/_closed_plans/2026-10-06-oss-dr-lessons.md](../../_backlog/_archived/settled_issues/2026-10-06-oss-dr-lessons.md)）；
 2026-10-06 定调会话用户委托判断（原话要点："你对我们项目很熟悉，你帮着判断判断"），判定依据 =
 载体差异分析，非用户逐条拍板。
 

@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-出处 = 推敲卡 [2026-10-08-sdlc-reference-absorption](../../_backlog/_archive/settled_issues/2026-10-08-sdlc-reference-absorption.md)
+出处 = 推敲卡 [2026-10-08-sdlc-reference-absorption](../../_backlog/_archived/settled_issues/2026-10-08-sdlc-reference-absorption.md)
 （§候选与取舍 第二档 C19 + §毕业门 ②"建议先做一次 notes 存量体检"）。体验报告全文 =
 [_backlog/research/2026-10-08-notes-stocktake.md](../../_backlog/research/2026-10-08-notes-stocktake.md)。
 

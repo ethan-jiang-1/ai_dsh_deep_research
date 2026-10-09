@@ -13,12 +13,12 @@
 - **新研究的 frontmatter**：字段顺序为 `topic`、`intent`，不写 `status`。topic 使用简短主题名；intent 用一行说明材料存在的用途，不替代证据正文。既有材料迁移只在需要时补这两项元数据，正文保留。
 - 每份研究材料须由本 README 的索引点名，索引记录当前消费者；链接与索引结构按本仓 `pnpm verify` 实际检查范围维护。
 - **生命周期——随卡走**：卡毕业时 `git mv` 到
-  [`../_archive/research/`](../_archive/research/README.md)，文件名与证据正文保留，修复搬迁所需链接；最后一个活跃消费者离开后迁出。已有关联下游消费者的材料继续留在活跃 research，并登记全部消费者。
+  [`../_archived/research/`](../_archived/research/README.md)，文件名与证据正文保留，修复搬迁所需链接；最后一个活跃消费者离开后迁出。已有关联下游消费者的材料继续留在活跃 research，并登记全部消费者。
 
 ## 索引
 
 | 文件 | 服务 | 一句话 |
 |---|---|---|
 | [2026-10-08-notes-stocktake.md](2026-10-08-notes-stocktake.md) | [notes-stocktake implemented Note](../../notes/implemented/2026-10-08-notes-stocktake.md) | 72 篇 implemented 三结局体检：**结论 = 归档判据本身不可靠**——宽口径 72/72 全留、严格口径 23 归档、对抗证伪 8/8 打回；硬数据 = 72 篇 / 61 家族（检索不靠猜）/ archived 自 09-28 后零归档；根因 = 进门条件无可执行面（verify.mjs 里 archived 仅 2 处注释） |
-| [strategy-benchmark/2026-10-03-strategy-benchmark-sources.md](strategy-benchmark/2026-10-03-strategy-benchmark-sources.md) | [pipeline-polish issue](../_archive/settled_issues/2026-09-28-pipeline-polish.md) | 专业 DR 三轴对标材料：源仓 research_style_params 全参数化 + Anthropic 工程自述一手 + OpenAI 系统卡物种边界；采纳候选 A/B 带触发条件 |
+| [strategy-benchmark/2026-10-03-strategy-benchmark-sources.md](strategy-benchmark/2026-10-03-strategy-benchmark-sources.md) | [pipeline-polish issue](../_archived/settled_issues/2026-09-28-pipeline-polish.md) | 专业 DR 三轴对标材料：源仓 research_style_params 全参数化 + Anthropic 工程自述一手 + OpenAI 系统卡物种边界；采纳候选 A/B 带触发条件 |
 | [strategy-benchmark/2026-10-06-per-topic-card-distribution.md](strategy-benchmark/2026-10-06-per-topic-card-distribution.md) | [策略对标材料](strategy-benchmark/2026-10-03-strategy-benchmark-sources.md) | 候选 A ①步存量标定：25 场可数 / 68 primary topic，中位 13、p25=6、max=53，低于源仓地板 28/68（双条件未满足不立门）；quick_factual 型 6 场口径不可数（无 primary 标记） |

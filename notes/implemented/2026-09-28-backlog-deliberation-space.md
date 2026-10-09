@@ -52,7 +52,7 @@
 
 - **保留 roadmap 双层（本仓初版倾向，用户同日裁断否决）**：论据（推敲与次序互补、门禁网
   挂载其上、借鉴源同日保留 ROADMAP）全部成立并随首张推敲卡永久归档
-  （[_done/_closed_plans/2026-09-28-retire-roadmap](../../_backlog/_archive/settled_issues/2026-09-28-retire-roadmap.md)），
+  （[_done/_closed_plans/2026-09-28-retire-roadmap](../../_backlog/_archived/settled_issues/2026-09-28-retire-roadmap.md)），
   但两个规划入口的真实成本（双指针纪律、入口链分叉、fresh agent 二跳）被裁断大于复用价值；
   反证论据按位置即状态原样保留，重新提出合并前先读该卡。
 - **notes/ 下子目录**：卡毕业纪律（内容不重写）与 Note 毕业纪律（正文必须改写）方向相反，

@@ -25,9 +25,9 @@ function fixture(t) {
     writeFileSync(path, text);
     if (tracked && !files.includes(`_backlog/${rel}`)) files.push(`_backlog/${rel}`);
   };
-  put('README.md'); put('triggers.md'); put('_archive/README.md');
-  for (const shelf of ['issues', 'bugs', 'research', 'methods', '_archive/settled_issues',
-    '_archive/suspended_issues', '_archive/fixed_bugs', '_archive/suspended_bugs', '_archive/research']) put(`${shelf}/README.md`);
+  put('README.md'); put('triggers.md'); put('_archived/README.md');
+  for (const shelf of ['issues', 'bugs', 'research', 'methods', '_archived/settled_issues',
+    '_archived/suspended_issues', '_archived/fixed_bugs', '_archived/suspended_bugs', '_archived/research']) put(`${shelf}/README.md`);
   for (const name of METHOD_NAMES) put(`methods/${name}.md`, `---\nname: ${name}\ndescription: Method\nwhenToUse: Need it\n---\n\n# Method\n`);
   put('methods/README.md', METHOD_NAMES.map((n) => `${n}.md`).join('\n'));
   return { repo, root, files, put, check: () => backlogLivenessProblems(root, files) };
@@ -40,10 +40,10 @@ function issue(f, text = ISSUE_TEXT, name = ISSUE) {
 
 test('empty shelves and indexed legacy archives remain valid', (t) => {
   const f = fixture(t);
-  f.put('_archive/settled_issues/legacy.md', '# Frozen legacy decision\n');
-  f.put('_archive/settled_issues/README.md', 'legacy.md\n');
-  f.put('_archive/research/topic/legacy.md', '# Frozen evidence\n');
-  f.put('_archive/research/README.md', 'topic/legacy.md\n');
+  f.put('_archived/settled_issues/legacy.md', '# Frozen legacy decision\n');
+  f.put('_archived/settled_issues/README.md', 'legacy.md\n');
+  f.put('_archived/research/topic/legacy.md', '# Frozen evidence\n');
+  f.put('_archived/research/README.md', 'topic/legacy.md\n');
   assert.deepEqual(f.check(), []);
 });
 
@@ -83,8 +83,8 @@ test('bugs preserve BUG numbers and enforce severity; archive status metadata is
   assert.deepEqual(f.check(), []);
   f.put('bugs/BUG-018-sample.md', '---\nstatus: 活跃\nseverity: P3\nopened: 2026-10-08\n---\n');
   assert.ok(f.check().some((p) => p.includes('needs severity')));
-  f.put('_archive/fixed_bugs/BUG-001-legacy.md', '---\nstatus: 活跃\nseverity: P1\nopened: 2026-10-08\n---\n');
-  f.put('_archive/fixed_bugs/README.md', 'BUG-001-legacy.md\n');
+  f.put('_archived/fixed_bugs/BUG-001-legacy.md', '---\nstatus: 活跃\nseverity: P1\nopened: 2026-10-08\n---\n');
+  f.put('_archived/fixed_bugs/README.md', 'BUG-001-legacy.md\n');
   assert.ok(f.check().some((p) => p.includes('invalid status for shelf')));
 });
 

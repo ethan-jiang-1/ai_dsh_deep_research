@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-出处 = 推敲卡 [2026-10-07-plan-review-gate](../../_backlog/_archive/settled_issues/2026-10-07-plan-review-gate.md)
+出处 = 推敲卡 [2026-10-07-plan-review-gate](../../_backlog/_archived/settled_issues/2026-10-07-plan-review-gate.md)
 （借鉴 ai_deerflow_dr_v3 已落地机制——对标 Gemini Deep Research 的跑前计划确认，双 change
 真梯验证在案；2026-10-07 用户点名「推进落地」提前激活毕业门触发②，判断材料全文住卡）。
 

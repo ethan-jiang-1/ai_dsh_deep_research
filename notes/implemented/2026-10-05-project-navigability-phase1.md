@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-来源推敲卡：[2026-10-05-project-navigability-phase1](../../_backlog/_archive/settled_issues/2026-10-05-project-navigability-phase1.md)（判断材料与取舍过程随卡归档，铁律 = 内容不重写）。用户 2026-10-05 授权 ongoing goal 全程自主推进（R1 授权落档 → R2 基线与立红 → R3–R4 实现 → R5 对账 → R6 毕业收尾）；同日 steer = 条目级验收 TDD 化（D23），本条目为其首个完整应用。
+来源推敲卡：[2026-10-05-project-navigability-phase1](../../_backlog/_archived/settled_issues/2026-10-05-project-navigability-phase1.md)（判断材料与取舍过程随卡归档，铁律 = 内容不重写）。用户 2026-10-05 授权 ongoing goal 全程自主推进（R1 授权落档 → R2 基线与立红 → R3–R4 实现 → R5 对账 → R6 毕业收尾）；同日 steer = 条目级验收 TDD 化（D23），本条目为其首个完整应用。
 
 ## 问题
 

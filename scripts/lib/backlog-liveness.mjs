@@ -3,10 +3,10 @@ import { join } from 'node:path';
 
 const CARD_STATES = {
   issues: ['推敲中', '等人拍板'], bugs: ['活跃'],
-  '_archive/settled_issues': ['已结'], '_archive/suspended_issues': ['叫停'],
-  '_archive/fixed_bugs': ['已修'], '_archive/suspended_bugs': ['待修'],
+  '_archived/settled_issues': ['已结'], '_archived/suspended_issues': ['叫停'],
+  '_archived/fixed_bugs': ['已修'], '_archived/suspended_bugs': ['待修'],
 };
-const SHELVES = [...Object.keys(CARD_STATES), 'research', '_archive/research', 'methods'];
+const SHELVES = [...Object.keys(CARD_STATES), 'research', '_archived/research', 'methods'];
 const METHODS = ['requirements-elicitation', 'requirements-probes', 'requirements-synthesis',
   'validation-design', 'validation-evidence', 'validation-judgment', 'issue-to-note'];
 const DATE_SLUG = /^\d{4}-\d{2}-\d{2}-[a-z0-9]+(?:-[a-z0-9]+)*\.md$/;
@@ -45,7 +45,7 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
   const files = (shelf) => trackedFiles.filter((p) => p.startsWith(`_backlog/${shelf}/`)
     && p.endsWith('.md') && !p.endsWith('/README.md'))
     .map((p) => p.slice(`_backlog/${shelf}/`.length));
-  for (const rel of ['README.md', 'triggers.md', '_archive/README.md', ...SHELVES.map((s) => `${s}/README.md`)]) {
+  for (const rel of ['README.md', 'triggers.md', '_archived/README.md', ...SHELVES.map((s) => `${s}/README.md`)]) {
     if (!tracked.has(`_backlog/${rel}`)) problems.push(`_backlog/${rel} must be tracked (required layout)`);
     usable(rel);
   }
@@ -62,7 +62,7 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
       if (!usable(rel)) continue;
       if (!index.includes(name)) problems.push(`${loc} missing from ${indexPath} index`);
       const text = read(rel);
-      const archived = shelf.startsWith('_archive/');
+      const archived = shelf.startsWith('_archived/');
       const research = shelf.endsWith('research');
       if (!research && name.includes('/')) problems.push(`${loc} cards and methods must be flat files`);
       const parsed = metadata(text);

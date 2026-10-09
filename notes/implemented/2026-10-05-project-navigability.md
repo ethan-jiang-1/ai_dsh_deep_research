@@ -25,15 +25,15 @@
 
 ### BUG-010：默认回归读取器
 
-新增 [session-log](../../scripts/lib/session-log.mjs) 作为 canonical 日志选择与读取接口（[BUG-010](../../_backlog/_archive/fixed_bugs/BUG-010-regression-indirect-subprocess.md)）。它按 v4、v3 代际选择物理日志，使用 Node 原生 zstd 解码，校验连续 Zstandard 帧边界，并把坏帧、截断尾帧和坏 JSONL 行作为整份日志不可读。`run-state` 与 `watch-run` 共用该接口，默认回归的 `.jsonl`、压缩多帧、损坏尾部和缺席路径都在真实导入执行路径覆盖。
+新增 [session-log](../../scripts/lib/session-log.mjs) 作为 canonical 日志选择与读取接口（[BUG-010](../../_backlog/_archived/fixed_bugs/BUG-010-regression-indirect-subprocess.md)）。它按 v4、v3 代际选择物理日志，使用 Node 原生 zstd 解码，校验连续 Zstandard 帧边界，并把坏帧、截断尾帧和坏 JSONL 行作为整份日志不可读。`run-state` 与 `watch-run` 共用该接口，默认回归的 `.jsonl`、压缩多帧、损坏尾部和缺席路径都在真实导入执行路径覆盖。
 
 ### BUG-011：安装与研究就绪分层
 
-[preflight](../../packages/deep-research-pack/scripts/preflight.mjs) 提供显式 `--install-only`（[BUG-011](../../_backlog/_archive/fixed_bugs/BUG-011-release-smoke-keyless-mismatch.md)）。该模式检查发布安装所需的版本、peer、团队层、工作区和构建产物，但跳过模型凭据检查并明确不宣称研究就绪；默认模式仍检查环境变量或 DSH 凭据文件。[scaffold](../../packages/deep-research-pack/scripts/scaffold.mjs) 转发模式，[release-smoke](../../scripts/smoke/release-smoke.mjs) 以清洗环境运行非模型子进程，并验证默认 preflight 会拒绝空凭据 home。
+[preflight](../../packages/deep-research-pack/scripts/preflight.mjs) 提供显式 `--install-only`（[BUG-011](../../_backlog/_archived/fixed_bugs/BUG-011-release-smoke-keyless-mismatch.md)）。该模式检查发布安装所需的版本、peer、团队层、工作区和构建产物，但跳过模型凭据检查并明确不宣称研究就绪；默认模式仍检查环境变量或 DSH 凭据文件。[scaffold](../../packages/deep-research-pack/scripts/scaffold.mjs) 转发模式，[release-smoke](../../scripts/smoke/release-smoke.mjs) 以清洗环境运行非模型子进程，并验证默认 preflight 会拒绝空凭据 home。
 
 ### BUG-012：观察面事实适配
 
-[run-dashboard](../../scripts/run-ops/run-dashboard.mjs) 的公开适配器修复 [BUG-012](../../_backlog/_archive/fixed_bugs/BUG-012-dashboard-state-divergence.md)，通过 `resolveSessionLog`、`readSessionEvents`、共享 `foldHitlPending` 和共享 `deriveSteps` 取得 canonical 日志、HITL 状态和步骤事实，同时保留 dashboard 的 `deriveStep`、`detectHitlWait`、`buildModel`、`renderHtml` 与 `decompressSessionLog` 公开适配器。它继续只读、fail-soft，并保留自身的内容统计与文件计数投影；观察面不是交付判定。
+[run-dashboard](../../scripts/run-ops/run-dashboard.mjs) 的公开适配器修复 [BUG-012](../../_backlog/_archived/fixed_bugs/BUG-012-dashboard-state-divergence.md)，通过 `resolveSessionLog`、`readSessionEvents`、共享 `foldHitlPending` 和共享 `deriveSteps` 取得 canonical 日志、HITL 状态和步骤事实，同时保留 dashboard 的 `deriveStep`、`detectHitlWait`、`buildModel`、`renderHtml` 与 `decompressSessionLog` 公开适配器。它继续只读、fail-soft，并保留自身的内容统计与文件计数投影；观察面不是交付判定。
 
 ## 输掉的方案
 
@@ -59,7 +59,7 @@ L2 不调用模型，要求凭据会把安装结构证据与生产研究前置�
 - `source dev/env.sh && node scripts/release-smoke.mjs`：ALL PASS；npm pack、干净 profile 安装、scaffold 真铺种子、空凭据安装模式通过、默认模式拒绝，以及安装域四角色真挂载全部通过。
 - `source dev/env.sh && node --import tsx/esm scripts/client-load-smoke.mjs`：ALL PASS；真实浏览器 client 装配、HITL 锚点、步骤条与盘侧文件对账通过。未绑定会话负样本候选不可打开，该断言跳过。
 - `source dev/env.sh && node scripts/entry-chain-probe.mjs`：ALL PASS；正确识别空队列、入口 owner 与开发环，人工复核探针原文 `runtime/smoke-workspace/entry-chain-probe-2026-10-05T10-03-28-369Z.md`（运行区本机数据，留档非入库件）。
-- `source dev/env.sh && node scripts/snapshot-replay-smoke.mjs`：四角色 A 回放、B2 工具 schema、非 Lead 的 B1 persona，以及 Lead C 渲染金标准通过；Lead B1 persona 失败。失败源为本次未修改的既有 persona 与旧录制语料错位，记为 [BUG-013](../../_backlog/_archive/fixed_bugs/BUG-013-lead-replay-persona-stale.md)（2026-10-05 当日修复闭卡），未放宽比较器或重写金标准。
+- `source dev/env.sh && node scripts/snapshot-replay-smoke.mjs`：四角色 A 回放、B2 工具 schema、非 Lead 的 B1 persona，以及 Lead C 渲染金标准通过；Lead B1 persona 失败。失败源为本次未修改的既有 persona 与旧录制语料错位，记为 [BUG-013](../../_backlog/_archived/fixed_bugs/BUG-013-lead-replay-persona-stale.md)（2026-10-05 当日修复闭卡），未放宽比较器或重写金标准。
 - `pnpm verify` 全绿；结构门禁最终通过临时 Git 索引把新增文件纳入 tracked 扫描，真实暂存区保持原样。
 - 执行路径探针：`node --experimental-test-isolation=none --import ./dev/smoke-workspace/regression-process-guard.mjs --test tests/*.test.mjs`，194 项通过、0 次子进程调用。向 guard 注入被吞掉的 `execSync` 后退出 1，证明监测可咬中原缺陷类型。
 - 反证：日志选择器临时用跟随 symlink 的 `statSync` 替代目录项检查，断链 v4 选择与 dashboard 测试变红；`sceneState.done` 临时改成最后步索引加一，final-only 断言变红。合计 3 项失败，还原后同套用例通过。

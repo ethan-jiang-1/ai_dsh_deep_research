@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-出处 = 推敲卡 [2026-10-08-sdlc-reference-absorption](../../_backlog/_archive/settled_issues/2026-10-08-sdlc-reference-absorption.md)
+出处 = 推敲卡 [2026-10-08-sdlc-reference-absorption](../../_backlog/_archived/settled_issues/2026-10-08-sdlc-reference-absorption.md)
 （§候选与取舍 第一档 C2 + §逐面 gap 表 B 面）。判断材料全文住卡。
 
 ## 决定

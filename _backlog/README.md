@@ -19,11 +19,11 @@
 
 | 结果 | 处理 |
 |---|---|
-| 有结论 | 迁至 [_archive/settled_issues](./_archive/settled_issues/README.md)，保留文件名与讨论正文，补状态、去向并更新索引 |
-| 用户明确叫停但尚无结论 | 迁至 [_archive/suspended_issues](./_archive/suspended_issues/README.md)，重新讨论需新的明确决定 |
-| 缺陷已修 | 迁至 [_archive/fixed_bugs](./_archive/fixed_bugs/README.md) |
-| 缺陷确认但未修 | 迁至 [_archive/suspended_bugs](./_archive/suspended_bugs/README.md) |
-| 不再有活跃消费者的研究 | 迁至 [_archive/research](./_archive/research/README.md) |
+| 有结论 | 迁至 [_archived/settled_issues](./_archived/settled_issues/README.md)，保留文件名与讨论正文，补状态、去向并更新索引 |
+| 用户明确叫停但尚无结论 | 迁至 [_archived/suspended_issues](./_archived/suspended_issues/README.md)，重新讨论需新的明确决定 |
+| 缺陷已修 | 迁至 [_archived/fixed_bugs](./_archived/fixed_bugs/README.md) |
+| 缺陷确认但未修 | 迁至 [_archived/suspended_bugs](./_archived/suspended_bugs/README.md) |
+| 不再有活跃消费者的研究 | 迁至 [_archived/research](./_archived/research/README.md) |
 
 搬迁用 `git mv`，保留历史正文，修复必要的相对链接并更新来源和目标索引。旧记录不为适配新模板而重写。研究仍被活跃 issue、bug 或已授权工作消费时，留在活跃 research 并登记消费者。
 
@@ -36,7 +36,7 @@
 | [research](./research/README.md) | 服务卡片的较长证据材料 | `topic`、一行 `intent`；不设 status |
 | [methods](./methods/README.md) | 澄清、查证、综合、验收与交接方法 | 按当前缺口选择，不默认每卡走完整流程 |
 | [triggers](./triggers.md) | 会自然遇到、可能改变旧决定的具体观察 | 可选短索引，完整理由留 owner |
-| [_archive](./_archive/README.md) | 已离开活跃区的卡片与研究 | 按结果分池并维护各自索引 |
+| [_archived](./_archived/README.md) | 已离开活跃区的卡片与研究 | 按结果分池并维护各自索引 |
 
 新 issue frontmatter 顺序为 `status`、`opened`；bug 为 `status`、`severity`、`opened`；research 为 `topic`、`intent`，不可带 `status`。历史归档可保留旧形态。各 README 是对应文件清单；`pnpm verify` 的结构检查只证明被检查的形状，不证明卡片判断、证据质量、用户授权或实施验收。
 

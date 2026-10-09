@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-出处 = 推敲卡 [2026-10-08-sdlc-reference-absorption](../../_backlog/_archive/settled_issues/2026-10-08-sdlc-reference-absorption.md)
+出处 = 推敲卡 [2026-10-08-sdlc-reference-absorption](../../_backlog/_archived/settled_issues/2026-10-08-sdlc-reference-absorption.md)
 （SDLC reference 全量对表 + 二轮复核）。用户 2026-10-08 指令「能修的修，能补的补」，
 判断材料全文住卡（§二轮复核 + §落地记录）。
 

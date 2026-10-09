@@ -65,7 +65,7 @@ agent-instructions 的 maxBytes 超限时 vendor **静默截断**手册尾部—
 
 ### 前提澄清（snapshots 分析报告）
 
-本仓 2026-10-09 的 [company snapshots 分析](../../_backlog/_archive/research/2026-10-09-company-snapshots-analysis.md)
+本仓 2026-10-09 的 [company snapshots 分析](../../_backlog/_archived/research/2026-10-09-company-snapshots-analysis.md)
 在 `fb01c74` 上完成，**已包含** runnable 3→1 的两个 commit（e01b761/3b2df76，merge-base 已核）；
 其后到 `59551f2` snapshots 面仅 12 个文件、约 29 变更行的 README 说明级修正——报告结论仍然成立，
 无需重做。

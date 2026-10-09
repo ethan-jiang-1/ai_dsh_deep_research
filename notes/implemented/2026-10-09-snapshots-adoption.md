@@ -2,9 +2,9 @@
 
 > 状态：implemented
 
-出处 = 推敲卡 [2026-10-09-snapshots-adoption](../../_backlog/_archive/settled_issues/2026-10-09-snapshots-adoption.md)（§推荐候选 + §关闭条件）
-与来源分析 [_backlog/research/2026-10-09-company-snapshots-analysis.md](../../_backlog/_archive/research/2026-10-09-company-snapshots-analysis.md)。
-缺陷判决与实测 = [BUG-018](../../_backlog/_archive/fixed_bugs/BUG-018-snapshot-replay-advertised-coverage.md) +
+出处 = 推敲卡 [2026-10-09-snapshots-adoption](../../_backlog/_archived/settled_issues/2026-10-09-snapshots-adoption.md)（§推荐候选 + §关闭条件）
+与来源分析 [_backlog/research/2026-10-09-company-snapshots-analysis.md](../../_backlog/_archived/research/2026-10-09-company-snapshots-analysis.md)。
+缺陷判决与实测 = [BUG-018](../../_backlog/_archived/fixed_bugs/BUG-018-snapshot-replay-advertised-coverage.md) +
 [recorded-session 义务标定](2026-10-08-recorded-session-obligation.md)。
 部分取代 [keyless-snapshot-lane](2026-09-24-keyless-snapshot-lane.md)（该篇仍拥有回放通道选型；本文取代其
 "声明住 `snapshot.yml`、`tests/fixtures/` 落点"的部分）。

@@ -12,7 +12,7 @@ opened: 2026-10-09
 **当前情况：** 出处 = [company 钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md)（候选①，三路复核一致排最高价值）。company 原版（`checks/run-gates.mjs` guard-red-record，commit 5c050ea）：spec 标题带 BUG-nnn ⇒ ①事故卡路径可解析（悬空编号红）②文件内有「负例留证」块逐编号对齐；其自认边界 = 只证明红法写在旁边，不证明留证是真的。本仓 verify 面的 gates-smoke 是**真注入真红**，更强；本卡要把同等强度带到 tests 面。
 
 **未决问题：**
-1. **BUG 卡双址**：本仓活跃卡住 `_backlog/bugs/`、已修卡住 `_backlog/_archive/fixed_bugs/`——解析时两址并查（company 只认归档址）；
+1. **BUG 卡双址**：本仓活跃卡住 `_backlog/bugs/`、已修卡住 `_backlog/_archived/fixed_bugs/`——解析时两址并查（company 只认归档址）；
 2. **判据源**：node:test 的 `test('...')` 标题串（对应 company 的 spec 标题）；
 3. **留证形态**：负例留证块（散文）**或** 永久夹具案例在场，二选一即可——本仓已有「夹具语义由消费它的契约测试钉住」惯例（node-gate/schema-scan 即永久反证记录），不必逼所有测试养散文留证；
 4. **存量处置**：先盘点哪些 `tests/*.test.mjs` 标题带 BUG 声明（已知 ≥ ask-drive 四处）——逐个补留证，还是 grandfather 豁免存量只管增量？（倾向：盘点后按件决，豁免要留理由。）

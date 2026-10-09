@@ -1,16 +1,16 @@
 # bugs/ · 活跃缺陷卡
 
 > 一文件一张卡：`BUG-<NNN>-<slug>.md`。修完 `git mv` 到
-> [`../_archive/fixed_bugs/`](../_archive/fixed_bugs/README.md)，文件名不变、内容不重写。
+> [`../_archived/fixed_bugs/`](../_archived/fixed_bugs/README.md)，文件名不变、内容不重写。
 > **调查过、修复未确认**的缺陷 `git mv` 到
-> [`../_archive/suspended_bugs/`](../_archive/suspended_bugs/README.md)（编号保留——暂停非
+> [`../_archived/suspended_bugs/`](../_archived/suspended_bugs/README.md)（编号保留——暂停非
 > 完成，重启需用户新的优先级决定）。**编号权威在归档侧**：新号 =
-> [../_archive/fixed_bugs/README.md](../_archive/fixed_bugs/README.md) 的 Next BUG ID（已分配最大号 + 1，活跃 ∪
+> [../_archived/fixed_bugs/README.md](../_archived/fixed_bugs/README.md) 的 Next BUG ID（已分配最大号 + 1，活跃 ∪
 > 归档一起算）。规矩手册 = [`../README.md`](../README.md)。
 
 ## 活跃列表
 
-（无活跃缺陷卡；最近归档 = [BUG-018](../_archive/fixed_bugs/BUG-018-snapshot-replay-advertised-coverage.md) snapshot-replay 声明覆盖大于实际覆盖〔B 层补齐比对面 + 覆盖面自守〕。）
+（无活跃缺陷卡；最近归档 = [BUG-018](../_archived/fixed_bugs/BUG-018-snapshot-replay-advertised-coverage.md) snapshot-replay 声明覆盖大于实际覆盖〔B 层补齐比对面 + 覆盖面自守〕。）
 
 ## 卡片模板
 

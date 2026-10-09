@@ -49,8 +49,8 @@ opened: YYYY-MM-DD
 
 按 [入口的关闭条件](../README.md) 检查。需要后续处理的只申请下游处理，是否成为 note 由下游决定；卡上记录结论和申请去向。满足条件后，头部写 `可关闭：是` 并在同次改动中归档，不留在活跃清单。
 
-- 有结论：用 `git mv` 进 [settled_issues](../_archive/settled_issues/README.md)，`status` 改为 `已结`，状态行补结论与去向。
-- 被用户明确叫停、尚无结论：进 [suspended_issues](../_archive/suspended_issues/README.md)，`status` 改为 `叫停`。重新讨论需要用户明确的新决定。
+- 有结论：用 `git mv` 进 [settled_issues](../_archived/settled_issues/README.md)，`status` 改为 `已结`，状态行补结论与去向。
+- 被用户明确叫停、尚无结论：进 [suspended_issues](../_archived/suspended_issues/README.md)，`status` 改为 `叫停`。重新讨论需要用户明确的新决定。
 
 搬迁保留文件名和讨论正文，修相对链接，更新两边清单。`pnpm verify` 检查清单、frontmatter，以及已声明可以关闭却仍留在活跃区的卡；旧字段保持兼容。
 

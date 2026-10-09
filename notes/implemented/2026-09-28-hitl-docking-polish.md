@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-出处：[pipeline-polish 卡](../../_backlog/_archive/settled_issues/2026-09-28-pipeline-polish.md) 2026-10-03 基座
+出处：[pipeline-polish 卡](../../_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md) 2026-10-03 基座
 适配复查后面⑤首棒（主序 ⑤→②→③→④ 第一棒，2026-10-03 用户拍板开工）。
 
 ## 决定
@@ -19,7 +19,7 @@
 4. **HITL1 侧有意不动**：样本 3/4 卡点全在 HITL2 侧与通道，问项拟法判据已在
    （research-brief 三问结构 + 模式库判型痕）——无失败实证不改判据（floor 教训同源）。
 5. **hitl2-scope-round 试点预案不入模型可见面**：触发条件未发生（搁置池行照旧），预案正本
-   留 [_done 卡](../../_backlog/_archive/settled_issues/2026-09-28-hitl2-scope-round.md)。
+   留 [_done 卡](../../_backlog/_archived/settled_issues/2026-09-28-hitl2-scope-round.md)。
 
 ## 输掉的方案
 

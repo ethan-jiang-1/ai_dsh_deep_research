@@ -26,7 +26,7 @@
 
 **不搬**（源头有、本仓弃）：Engine/rb_status/rb_queue/rb_trace CLI 机制（D4 弃 CLI 引擎，
 journal.md + 会话日志承担血统）；per-bundle BUNDLE_ENTRY/BUNDLE_MAP（十件套固定契约 +
-手册 agent-instructions 注入使 per-bundle 地图冗余）；dpt_archive 归档区（bundle 本就不进
+手册 agent-instructions 注入使 per-bundle 地图冗余）；dpt_archived 归档区（bundle 本就不进
 git，暂无归档需求）。
 
 ## 输掉的方案

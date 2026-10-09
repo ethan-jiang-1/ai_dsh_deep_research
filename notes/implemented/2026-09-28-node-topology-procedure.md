@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-出处：[pipeline-polish 卡](../../_backlog/_archive/settled_issues/2026-09-28-pipeline-polish.md) 面⑦（收尾
+出处：[pipeline-polish 卡](../../_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md) 面⑦（收尾
 棒；主序 ⑤②③④ 已毕业 2026-10-03）。
 
 ## 决定
