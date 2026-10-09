@@ -205,6 +205,15 @@ export const CASES = [
     const p = join(dir, 'packages/deep-research-pack/package.json');
     writeFileSync(p, readFileSync(p, 'utf8').replace('"dsh-v0.2.0-rc.2"', '"dsh-wrongtag"'));
   } },
+  // guard-red-record（tests 面反证义务机械化）：标题声明无留证 / 悬空编号双形态。
+  { id: 'guard-red-record-no-record', gate: 'guard-red-record', mutate: (dir) => {
+    const p = join(dir, 'tests', 'local-date.test.mjs');
+    appendFileSync(p, "\ntest('探针：声称守卫 BUG-004 但本文件无留证', () => {});\n");
+  } },
+  { id: 'guard-red-record-dangling', gate: 'guard-red-record', mutate: (dir) => {
+    const p = join(dir, 'tests', 'local-date.test.mjs');
+    appendFileSync(p, "\ntest('探针：悬空编号 BUG-999', () => {});\n");
+  } },
   // align-ledger 在副本基线**非 PASS**（vendor/dsh 是 gitlink submodule，副本不拷其内容 →
   // "vendor 里不存在"是副本环境的固有报因）。故两案例必须带 expect 指名"na 活性"报因，
   // 否则注入未生效也会因既有的 vendor 报因看到 FAIL 而假绿。
@@ -222,4 +231,14 @@ export const CASES = [
 
 export const CONTROLS = [
   { id: 'backlog-active-issue', gate: 'backlog-liveness', mutate: backlogIssue() },
+  // guard-red-record 双址正向：活跃 bugs/ 卡 + 带留证的标题声明 → 门禁照常 PASS
+  //（活跃址解析；CONTROLS 断言目标门禁 PASS，其他门禁红不拦——活跃探针卡不满足
+  //  全部门禁形状属预期）。
+  { id: 'guard-red-record-active-bug', gate: 'guard-red-record', mutate: (dir) => {
+    writeFileSync(join(dir, '_backlog', 'bugs', 'BUG-991-probe.md'),
+      '---\nstatus: 活跃\nseverity: P2\nopened: 2099-01-01\n---\n\n# Probe\n');
+    appendFileSync(join(dir, '_backlog', 'bugs', 'README.md'), '\n[BUG-991-probe](BUG-991-probe.md)\n');
+    appendFileSync(join(dir, 'tests', 'local-date.test.mjs'),
+      "\n// 负例留证 2099-01-01：BUG-991——探针负例正本 = 本行（改判据 → 红；还原 → 绿）。\ntest('探针：活跃卡声明 BUG-991', () => {});\n");
+  } },
 ];

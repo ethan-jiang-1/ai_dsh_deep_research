@@ -35,7 +35,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'client-half', 'row-deps', 'workspace-contract', 'handbook-budget', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'pack-workspace-fresh', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'backlog-liveness', 'dist-manual-version', 'port-exclusive', 'hooks-active'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'client-half', 'guard-red-record', 'row-deps', 'workspace-contract', 'handbook-budget', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'pack-workspace-fresh', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'backlog-liveness', 'dist-manual-version', 'port-exclusive', 'hooks-active'];
 
 // vendor/dsh 钉身份的 tag 面（commit 面 = vendor-pin 门禁的 PIN；pack-bundle-compat 消费它
 // 断言 pack 兼容矩阵含当前 tag——升 pin 时两处同 diff 改；本文件里的 tag 复述受 pin-agreement 对账）
@@ -238,6 +238,53 @@ const allFiles = walk(ROOT);
     else if (declaresClient && !exportsClient)
       fail(gate, '声明 dsh.client 但 exports 无 ./client——client 半无装载入口（补 exports 的 "./client" 行）');
   }
+}
+
+// ── 门禁 6-ter：guard-red-record（tests 面反证义务机械化——2026-10-09 卡收官）──
+// 为什么：「新契约测试带反证」此前是 tests/AGENTS 的散文义务（「只交付绿 = 不知道测试会不会
+// 咬人」）——verify 门禁面有 gates-smoke（真注入真红），tests 面零机械：标题声称守卫具体事故
+// （BUG-nnn）的测试，红配方只在头注散文里，走没走没人拦。判法（company checks/run-gates.mjs
+// guard-red-record@5c050ea 移植 + 本仓适配：双址解析 + 夹具留证第二形态 + 防空语料）：
+//   ① 守卫声明 = test/it 标题串带 BUG-nnn——标题是"我在守一条具体不变量"的正式声明，
+//      注释提 BUG 号只是解释（不算声明）；
+//   ② 事故卡双址可解析：_backlog/bugs/（活跃）∪ _backlog/_archived/fixed_bugs/（已修）——
+//      悬空编号 = 声称守一个不存在的过去 → 红；
+//   ③ 逐编号留证：文件里有「// 负例留证 YYYY-MM-DD：…BUG-nnn…」块（散文红配方）或
+//      「// 夹具留证 YYYY-MM-DD：…BUG-nnn…」（指名永久负例夹具——本仓「夹具语义由消费它的
+//      契约测试钉住」惯例），一篇声明 N 个事故就要 N 条，不许一条笼统行糊过去。
+// ⚠ 本门禁不证明的：它不制造回归不跑测试，故不证明留证是真的（留证写了但假，本门禁看不出
+//   ——那靠人复现）；它证明"声称守卫具体事故的测试必须交出红法写在旁边的配方"。
+{
+  const gate = 'guard-red-record';
+  const bugDirs = [join(ROOT, '_backlog', 'bugs'), join(ROOT, '_backlog', '_archived', 'fixed_bugs')];
+  const bugCardExists = (n) => bugDirs.some((d) => existsSync(d) && readdirSync(d).some((f) => f.startsWith(`BUG-${n}-`)));
+  const problems = [];
+  let claims = 0;
+  const testFiles = readdirSync(join(ROOT, 'tests')).filter((f) => f.endsWith('.test.mjs'));
+  if (testFiles.length === 0) fail(gate, '防空语料：tests/ 下零个 *.test.mjs——扫描面失效');
+  for (const f of testFiles.sort()) {
+    const text = readFileSync(join(ROOT, 'tests', f), 'utf8');
+    // ① 标题里的 BUG 号 = 守卫声明（node:test 的 test('…')；含 await t.test 子测形态）
+    const claimed = new Set();
+    for (const m of text.matchAll(/^\s*(?:await\s+)?(?:t\.)?(?:test|it)\(\s*['"`][^'"`]*?(BUG-\d{3})/gm)) claimed.add(m[1]);
+    if (claimed.size === 0) continue;
+    for (const id of [...claimed].sort()) {
+      claims++;
+      const num = id.slice(4);
+      // ② 双址解析
+      if (!bugCardExists(num)) {
+        problems.push(`${f}：标题声称守卫 ${id}，但 _backlog/bugs/ 与 _backlog/_archived/fixed_bugs/ 都没有 ${id}-* 卡（悬空事故号）`);
+        continue;
+      }
+      // ③ 留证块（首行带标签+日期，续行 //；ID 在块内任意位置即可）——负例/夹具二选一形态
+      const record = new RegExp(`^\\s*//\\s*(?:负例留证|夹具留证)\\s+\\d{4}-\\d{2}-\\d{2}：(?:[^\\n]*\\n(?:\\s*//[^\\n]*\\n)*)?[^\\n]*${id}`, 'm');
+      if (!record.test(text)) {
+        problems.push(`${f}：标题声称守卫 ${id}，但文件里没有「// 负例留证/夹具留证 YYYY-MM-DD：…${id}…」块（这条守卫没人知道能不能红——tests/AGENTS「只交付绿 = 不知道测试会不会咬人」）`);
+      }
+    }
+  }
+  if (claims === 0) fail(gate, '防空语料：tests 标题零个 BUG-nnn 守卫声明被扫到——判据源失效（已知 ask-drive 等多处带声明）');
+  else if (problems.length > 0) fail(gate, `这些测试声称守卫具体事故却没交出可复核的红配方：${problems.join('；')}`);
 }
 
 // ── 门禁 7：row-deps（preset 与 bundle 行引用的 @deepseek-ai/* 包必须在 peerDependencies）──

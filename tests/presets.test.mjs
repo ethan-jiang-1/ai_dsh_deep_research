@@ -2,6 +2,13 @@
 // row-deps）同源判据（keyless，进程内文件断言）。
 // 0.1.7 preset 重设计：preset = `presets/<role>.patch.yml` 里的一条 `@deepseek-ai/dsh-agent-preset`
 // 行（config 带 id/name/description/order/plugins）；角色技能仍在 `presets/<role>/skills/`。
+//
+// 负例留证 2026-10-09：BUG-008——adversarial-review SKILL 删狩猎节 / 白名单词「建议挖深」/
+//   近形漂移点名「建议深挖」任一 →「critic adversarial-review」测红；还原 → 绿。
+// 负例留证 2026-10-09：BUG-006——lead.patch.yml 删「HITL1 零例外」句或「推荐档」操作 →
+//   「lead persona 钉 HITL1 零例外」测红；还原 → 绿。
+// 负例留证 2026-10-09：BUG-005——lead.patch.yml 删「ask 调用硬约束」句 / 「wait: -1」点名 →
+//   「lead persona 钉 ask 硬约束」测红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';

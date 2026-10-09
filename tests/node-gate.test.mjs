@@ -209,6 +209,8 @@ test('门L v3 真违约钉：过程底稿组织（无任何字段行）→ RED�
 })
 
 // ── 门①（HITL 锚点门，2026-10-05；BUG-006 实证反证）──
+// 夹具留证 2026-10-09：BUG-006——永久负例 = fixtures/node-gate 的「question.md 在场而关联会话零
+//   ask」场景组（`s-no-ask`；夹具语义由本测试钉住）；hitlAskGate 判据松化（零签名也判 PASS）→ 门①反证测红。
 
 test('门①反证：question.md 在场而关联会话零 ask → RED（BUG-006 形态：HITL1 自我豁免不可见即违法）', () => {
   const r = gateBundle(bundle('fixture-complete'), sessions('s-no-ask'), { hitlDate: '2026-10-06' })

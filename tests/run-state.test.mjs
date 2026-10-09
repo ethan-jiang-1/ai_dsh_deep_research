@@ -1,6 +1,9 @@
 // run-state 回归 — run 操作面状态谓词（keyless；夹具 = 第 12 场真实会话日志的三个时点投影，
 // tests/fixtures/run-state/，并构造原生 zstd 多帧与损坏尾帧；测试路径零子进程）。
 //
+// 负例留证 2026-10-09：BUG-005——askIndefiniteOf 不认 wait:-1（恒 false/null）→ 对应测红；还原 → 绿。
+// 负例留证 2026-10-09：BUG-007——eventsRegressed 判定恒 false（不认事件数回退）→ 对应测红；还原 → 绿。
+//
 // grep 陷阱是本测试的核心断言对象（RFC run-ops-self-diagnosis 的立案证据）：三个夹具的
 // **文本**都含 'ask_user_question'（request/header 工具 schema 必带——grep 判定必然假阳性），
 // 而谓词只认 tool/call 事件的形状——夹具文本含陷阱字样 + 谓词判 0/挂起正确，这一对就是红绿。

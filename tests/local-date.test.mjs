@@ -2,6 +2,9 @@
 // 纪律同源 = 研究手册「日期最小契约：先跑 bash date」：人读日期 = 系统本地日；
 // UTC ISO slice 在本地 00:00–08:00 窗口差一天（mcp-hosts 归档实证：HITL2 代答行日期
 // 早于 HITL1 定稿，append-only 次序破坏）。机器比较用的时间戳保持 UTC ISO，不走本 helper。
+//
+// 负例留证 2026-10-09：BUG-017——localDateStr 改回 UTC slice（正修前的原始红形态）→ 边界
+//   时刻断言红（UTC 口径差一天）；还原 → 绿。红绿实录 = BUG-017 卡修复关联。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { localDateStr } from '../scripts/lib/local-date.mjs';

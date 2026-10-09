@@ -6,7 +6,6 @@
 
 | 卡 | 要解决什么 | 当前环节与未完成项 |
 |---|---|---|
-| [2026-10-09-guard-red-record.md](2026-10-09-guard-red-record.md) | tests 面反证义务机械化（声称守 BUG 的测试必须交红配方） | 待确认范围与存量处置；验收判据已钉 |
 | [2026-10-09-member-activity-stream.md](2026-10-09-member-activity-stream.md) | 队员动作流进渐进面 | 刻意排在下一场研究 run 之后拿真实素材 |
 
 （四卡同源于 [company 钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md) 的候选登记——用户 2026-10-09 授权全部推进；执行序由会话 plan 组织，本表不是队列。）

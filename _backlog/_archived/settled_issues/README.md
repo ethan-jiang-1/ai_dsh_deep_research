@@ -22,3 +22,4 @@
 | [2026-10-09-snapshots-adoption](2026-10-09-snapshots-adoption.md) | 首批四角色 replay 切片落地（含 BUG-018 修复与场景声明消费）；[Note](../../../notes/implemented/2026-10-09-snapshots-adoption.md) | 2026-10-09 |
 | [2026-10-09-release-smoke-hardening](2026-10-09-release-smoke-hardening.md) | L2 安装面五件套补齐（形态 B + company 值；含 HEAD pack build 断链真债同修）；[Note](../../../notes/implemented/2026-10-09-release-smoke-hardening.md) | 2026-10-09 |
 | [2026-10-09-layering-v2](2026-10-09-layering-v2.md) | layering 四件套 + 三活暴露面结构收口（TS 解析器移植）；[Note](../../../notes/implemented/2026-10-09-layering-v2.md) | 2026-10-09 |
+| [2026-10-09-guard-red-record](2026-10-09-guard-red-record.md) | tests 面反证义务机械化（双址 + 留证二选一；存量 14 声明零豁免全留证）；[Note](../../../notes/implemented/2026-10-09-guard-red-record.md) | 2026-10-09 |

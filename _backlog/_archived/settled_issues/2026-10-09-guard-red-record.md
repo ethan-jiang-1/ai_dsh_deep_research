@@ -1,15 +1,15 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-10-09
 ---
 
 # 推敲：guard-red-record 本仓化——把 tests 面的反证义务机械化
 
-> 立卡：2026-10-09 ｜ 状态：推敲中 ｜ 类型：Task ｜ 可关闭：否
+> 立卡：2026-10-09 ｜ 状态：已结——门禁落地（双址 + 负例/夹具留证二选一 + 防空语料），存量盘点 = 7 文件 14 条标题声明**全部逐件补真留证、零豁免**（清单：ask-drive〔004/005/015/017〕· hitl-fold〔002〕· hitl-provenance〔014/017〕· local-date〔017〕· node-gate〔006 夹具形态〕· presets〔008/006/005〕· run-state〔005/007〕）；证据与去向 = [guard-red-record Note](../../../notes/implemented/2026-10-09-guard-red-record.md) ｜ 类型：Task ｜ 可关闭：是
 
-**问题与期望结果：** 本仓"新契约测试带反证"是散文义务（[tests/AGENTS](../../tests/AGENTS.md)「同 diff 注入回归看红……只交付绿 = 不知道测试会不会咬人」），verify 门禁面已被 gates-smoke 机械化到超出 company 水平，但 **tests 面无任何机械**——[ask-drive.test.mjs](../../tests/ask-drive.test.mjs) 标题已带 BUG-004/005/015/017 守卫声明，红配方只在头注散文与夹具里，走没走没人拦。期望：标题声称守卫具体事故（BUG-nnn）的测试必须交出**可复核的红配方**，散文义务变机械面。
+**问题与期望结果：** 本仓"新契约测试带反证"是散文义务（[tests/AGENTS](../../../tests/AGENTS.md)「同 diff 注入回归看红……只交付绿 = 不知道测试会不会咬人」），verify 门禁面已被 gates-smoke 机械化到超出 company 水平，但 **tests 面无任何机械**——[ask-drive.test.mjs](../../../tests/ask-drive.test.mjs) 标题已带 BUG-004/005/015/017 守卫声明，红配方只在头注散文与夹具里，走没走没人拦。期望：标题声称守卫具体事故（BUG-nnn）的测试必须交出**可复核的红配方**，散文义务变机械面。
 
-**当前情况：** 出处 = [company 钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md)（候选①，三路复核一致排最高价值）。company 原版（`checks/run-gates.mjs` guard-red-record，commit 5c050ea）：spec 标题带 BUG-nnn ⇒ ①事故卡路径可解析（悬空编号红）②文件内有「负例留证」块逐编号对齐；其自认边界 = 只证明红法写在旁边，不证明留证是真的。本仓 verify 面的 gates-smoke 是**真注入真红**，更强；本卡要把同等强度带到 tests 面。
+**当前情况：** 出处 = [company 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md)（候选①，三路复核一致排最高价值）。company 原版（`checks/run-gates.mjs` guard-red-record，commit 5c050ea）：spec 标题带 BUG-nnn ⇒ ①事故卡路径可解析（悬空编号红）②文件内有「负例留证」块逐编号对齐；其自认边界 = 只证明红法写在旁边，不证明留证是真的。本仓 verify 面的 gates-smoke 是**真注入真红**，更强；本卡要把同等强度带到 tests 面。
 
 **未决问题：**
 1. **BUG 卡双址**：本仓活跃卡住 `_backlog/bugs/`、已修卡住 `_backlog/_archived/fixed_bugs/`——解析时两址并查（company 只认归档址）；
@@ -26,7 +26,7 @@ opened: 2026-10-09
 
 ## 关闭条件
 
-- 门禁落地且反证实录（注入"带声明无留证"→ 红 → 还原 → 绿），登记 [evaluation.md §L0](../../docs/evaluation.md) 台账 + gates-smoke 案例；
+- 门禁落地且反证实录（注入"带声明无留证"→ 红 → 还原 → 绿），登记 [evaluation.md §L0](../../../docs/evaluation.md) 台账 + gates-smoke 案例；
 - 存量盘点结论落卡（补齐/豁免逐件带理由）；
 - `pnpm verify` / `pnpm test` / `gates-smoke` 全绿。
 

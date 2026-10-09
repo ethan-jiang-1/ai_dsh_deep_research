@@ -2,6 +2,11 @@
 // 不许只打印承诺（BUG-014 症状实录：驱动输出声称"写进 bundle 的 question.md §Decisions 与
 // journal.md"，两文件零命中，拍板行误归因"用户"）。立红记录：2026-10-05 首跑 = 模块缺席即红；
 // 反证（缺件 fail-loud）同套钉住。红绿实录见 BUG-014 卡修复关联。
+//
+// 负例留证 2026-10-09：BUG-014（补记，正修红录见卡）——batchToAnswered 批缺席返回 null /
+//   丢 id 标签（provenance 数据源缺席）→「盘侧 answer 批」测红；还原 → 绿。
+// 负例留证 2026-10-09：BUG-017——空 id 走 ?? 链不回退 header（旧实现即红形态：空题面落盘）→
+//   「questions 富集」deepEqual 红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';

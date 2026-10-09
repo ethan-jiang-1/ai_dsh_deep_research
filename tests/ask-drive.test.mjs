@@ -10,6 +10,15 @@
 // ② Submit 可用 = 唯一提交动作；无卡可读 = 交回盘侧裁决，不自行宣布完成；
 // ③ 盘侧复核是 verdict（不落地 = 红），不是警告；
 // ④ ask 形态（wait:-1 无限期）可从盘侧日志判别（BUG-005：活等待的兜底语义不同）。
+//
+// 负例留证 2026-10-09：BUG-004——driveVerdict 判据弱化（result 缺席 / UI 自报也当 settled 放行）
+//   →「driveVerdict：未 settled」测红；还原判据 → 绿。
+// 负例留证 2026-10-09：BUG-005——parseAskArgs 丢 wait 参数（或把 -1 当默认 timed）→「三问卡带
+//   wait:-1」测红；还原 → 绿。
+// 负例留证 2026-10-09：BUG-015——决策层退回「Submit 可用即 click-submit」（去意图符合性）→
+//   「nextDriveAction：Submit 可用但预选与意图不符」测红；还原 → 绿。
+// 负例留证 2026-10-09：BUG-017——parseAskQuestions 丢 header 字段（题面富集源缺席）→ deepEqual
+//   红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf, parseAskQuestions, pickTargetLabel, intentReconcile } from '../scripts/lib/ask-drive.mjs';

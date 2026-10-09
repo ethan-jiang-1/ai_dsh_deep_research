@@ -1,6 +1,9 @@
 // hitl-fold 回归 — HITL 挂起折算（keyless；v5 谓词 = 末位 ask 状态机：0.2.0 timed ask-user
 // 适配——timed 超时落定〔tool/result 带 "pending":true〕后问题仍可答 = 仍挂起；agent 自身
 // 事件不关闭 ask；answers 形态 result / 其后的 user/message 才关闭。legacy 在飞 = 其后无事件。）
+//
+// 负例留证 2026-10-09：BUG-002——deriveAnchors 判型退化（尾位无签名 ask / HITL1 重发误归
+//   「交付审阅」pending——即 BUG-002 原始误标形态）→ 本文件两条 BUG-002 测齐红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { deriveAnchors, foldHitlPending } from '../packages/deep-research-pack/src/lib/hitl-fold.ts';
