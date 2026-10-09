@@ -5,7 +5,7 @@ description: Use when starting, babysitting, or resuming a deep-research run —
 
 # 跑一次研究 run
 
-本技能是 **guidance，不是 checklist**：按实际 diff 与风险选择动作，完成判据在各步末；相关技能：[`.agents/skills/graduating-a-queue-item`](../graduating-a-queue-item/SKILL.md) · [`.agents/skills/adding-a-research-role`](../adding-a-research-role/SKILL.md)。
+本技能是 **guidance，不是 checklist**：按实际 diff 与风险选择动作，完成判据在各步末；相关技能：[`.agents/skills/adding-a-research-role`](../adding-a-research-role/SKILL.md)。
 
 run 的操作面是**文件 + 会话通道**，不是代码。启动器、观察面、交付落位的细则在
 [guides/61](../../../docs/guides/61-run-playbook.md)；本技能给顺序与判断点。

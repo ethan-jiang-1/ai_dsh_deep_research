@@ -1,5 +1,5 @@
 import { existsSync, lstatSync, readFileSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
+import { join } from 'node:path';
 
 const CARD_STATES = {
   issues: ['推敲中', '等人拍板'], bugs: ['活跃'],
@@ -94,21 +94,4 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
     }
   }
   return problems;
-}
-
-/** Current work records use real Markdown links, not slug mentions or historical shelves. */
-export function currentWorkRecordProblems(repoRoot, block) {
-  const refs = [...block.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)]
-    .map((m) => m[1].replace(/^<|>$/g, '').split('#')[0])
-    .filter((target) => !/^[a-z]+:/i.test(target));
-  const allowed = (path) => path.endsWith('.md') && !path.endsWith('/README.md') && [
-    join(repoRoot, '_backlog', 'issues'), join(repoRoot, 'notes', 'proposed'),
-  ].includes(dirname(path));
-  const resolved = refs.flatMap((target) => {
-    const candidates = [resolve(repoRoot, target), resolve(repoRoot, '_backlog', target)];
-    return [...new Set(candidates)].filter(allowed);
-  });
-  if (resolved.length === 0) return ['current queue item must link an active issue or proposed RFC'];
-  return resolved.filter((path) => !existsSync(path) || !lstatSync(path).isFile() || lstatSync(path).isSymbolicLink())
-    .map((path) => `current work record missing or not a regular file: ${path}`);
 }

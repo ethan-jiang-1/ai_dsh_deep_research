@@ -34,10 +34,10 @@ test('current backlog gate is registered and proposal scheduling is retired', ()
   assert.ok(gatesArray.includes('backlog-liveness'), 'backlog-liveness 缺少门禁登记');
   assert.ok(!gatesArray.includes('plans-liveness'), 'plans-liveness 已被新目录合同取代');
   assert.ok(!gatesArray.includes('proposal-scheduled'), 'proposed RFC 不要求 queue 行');
-  assert.ok(!verifySrc.includes('全仓唯一"当前"指针缺席'), '可选 queue 不得要求队列内 ▶ 指针');
-  for (const id of ['queue-current-active-issue', 'queue-empty-is-valid', 'entry-chain-empty-queue-is-valid', 'entry-chain-queue-file-is-optional', 'backlog-active-issue']) {
-    assert.ok(CONTROLS.some((c) => c.id === id), `缺少有效形态对照组 ${id}`);
-  }
+  assert.ok(!gatesArray.includes('queue-pointer-live'), '仓级 queue 门禁已退役');
+  assert.ok(!verifySrc.includes('queueSection'), '入口链不得读取仓级 queue');
+  assert.ok(CONTROLS.some((c) => c.id === 'backlog-active-issue'));
+  assert.ok(CASES.some((c) => c.id === 'entry-chain-no-title'));
 });
 
 test('每个案例门禁都真实存在于 verify.mjs gates 数组（改名/退役未跟案例 = 红）', () => {

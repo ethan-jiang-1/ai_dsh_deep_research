@@ -5,7 +5,7 @@ intent: 为 notes-stocktake 实施 Note 保留已完成的存量体检依据。
 
 # notes/ 存量体检：72 篇 implemented Note 的三结局判定（2026-10-08）
 
-> 服务 = [queue §队列 ① Note 存量体检](../queue.md)（已毕业）｜RFC =
+> 服务 = [吸收 Note](../../notes/implemented/2026-10-09-backlog-methodology-absorption.md) 中的 Note 存量体检材料（已完成）｜RFC =
 > [2026-10-08-notes-stocktake](../../notes/implemented/2026-10-08-notes-stocktake.md)。
 > 本材料**只做体检、不动 notes 树**（`git status --short notes/` 在本轮体检期间为空）。
 

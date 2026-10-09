@@ -7,15 +7,14 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 ## 入口链（唯一正本——其他文件一律指回本节，不再各自复述）
 
 > **先分流**：先按 [00-index §先分流](docs/00-index.md) 选行，再读该行指向的文档；下面这条
-> 1–5 步链**只在"改本仓"时适用**（用户说启动 / 跑研究 / 装插件 = "用它"，先看那节）。
+> 1–4 步链**只在"改本仓"时适用**（用户说启动 / 跑研究 / 装插件 = "用它"，先看那节）。
 
 按序读，不跳：
 
 1. **本文件**——布局 + 命令速查 + 纪律 + `notes/` 地位 + 本链的定义；
 2. **[docs/00-index.md](docs/00-index.md)**——文档地图 + 决策台账（D 号）+ 术语映射；
 3. 按本轮授权进入工作：用户直派按请求范围执行；需澄清、查证或记录的问题按 [意图载体总图](docs/design/60-intent-carriers.md) 路由到 `_backlog/issues/`、`bugs/`、`research/` 或 `methods/`。Backlog 不是实施前置门；
-4. 仅当工作已获授权且需要跨步骤或跨会话排序/恢复时，查 [_backlog/queue.md](_backlog/queue.md) 对应队列行。队列是可选顺序索引，不授权、不代表所有当前工作；
-5. **[docs/guides/60-dev-loop.md](docs/guides/60-dev-loop.md)**——按改动面选择验收与收尾。仅当持久决定需要显式评审时，才为该项建立 [notes/proposed/](notes/proposed/) RFC。
+4. **[docs/guides/60-dev-loop.md](docs/guides/60-dev-loop.md)**——按改动面选择验收与收尾。仅当持久决定需要显式评审时，才为该项建立 [notes/proposed/](notes/proposed/) RFC。
 
 开工就绪最小集 = 上列 1–3，后续按任务需要读取。仓库全局如何运行、调试、交互和分层验收 → [docs/project-map.md](docs/project-map.md)；验收怎么判 → [docs/evaluation.md](docs/evaluation.md)；意图载体边界 → [docs/design/60-intent-carriers.md](docs/design/60-intent-carriers.md)；run 怎么操作 → [guides/61](docs/guides/61-run-playbook.md)。
 
@@ -28,8 +27,8 @@ CLAUDE.md→AGENTS.md、.claude/skills→.agents/skills    两条 symlink（编�
                          子树的指令（根只放每轮常驻指令；上游 22 个子树 AGENTS.md 同构）
 README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令正本 = guides/60 §2，不复制）
 _backlog/                 问题澄清与证据区：issues/、bugs/、research/、methods/、triggers.md、_archive/；
-                          queue.md 是已授权多步/多会话工作的可选顺序索引，不授予授权；手册 = _backlog/README.md
-package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 随队列条目——见 pnpm-workspace.yaml 头注）
+                          手册 = _backlog/README.md
+package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 按实际构建需求——见 pnpm-workspace.yaml 头注）
 packages/deep-research-pack/   唯一自写包（配置为主 + 研究驾驶舱[Research Cockpit，观察面 client 套件，D18，构成正本 = docs/design/40-research-cockpit.md]）：presets/<role>.patch.yml（0.1.7 形态=一条 @deepseek-ai/dsh-agent-preset 行，config.plugins 内声明 persona/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、cordis.patch.yml（bundle 行）、workspace/（工作区种子：手册+模板，生成物）、scripts/{preflight,scaffold}.mjs（部署 bin）、src/client/ 与 src/lib/（驾驶舱 client 半与折算纯函数，构建产物 lib/）；交付与部署形态 = guides/62，合同 = 包 README
 vendor/dsh/               pinned submodule（只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，tag/commit 见 §DSH 源码表）
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、NODES.md（节点 I/O 契约
@@ -55,7 +54,7 @@ _dist/                   对外交付件：安装手册.md（tracked 生成物�
   _backlog 细构[问题、方法、调研与归档] = _backlog/README.md）
 ```
 
-本轮工作以用户请求和已有授权为准；开工/收尾程序 = 第 5 步。
+本轮工作以用户请求和已有授权为准；开工/收尾程序 = 第 4 步。
 
 ## `notes/`：开发记忆（常设指令）
 

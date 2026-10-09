@@ -17,14 +17,13 @@
   → 同 diff 收尾（§4）：按适用验收判据对账，报告实际证据与未运行项
 
 可选支路：问题需澄清/查证 → _backlog/issues/ 与按需 methods/research/；
-已授权工作需跨步骤/跨会话排序 → queue.md；持久决定需显式评审 → notes/proposed/ RFC
+持久决定需显式评审 → notes/proposed/ RFC
 ```
 
 - 两门都是 DSH 自带机制（base bundle，零接线）；**不要发明 tasks.md**（DSH 明文否决计划
   文件："a plan directory creates a second durable home"——会话日志即计划与清单的持久真相）。
 - **验收门（TDD 式，[D23](../00-index.md)）**：对已授权工作，在实施前把可判定的验收判据绑定检查方式；可机械者先立红，人工判据明确记录走查证据。验收尚不明确时，澄清是当前任务需要，不会自动阻断已授权且可独立推进的工作；证据设计复用本仓现有 owner，不另造队列。四条硬边界：①**改断言迁就实现不是修法**——断言只在行为/合同真实变化时同 diff 改（[tests/AGENTS](../../tests/AGENTS.md)）；②**未验项不得写 implemented**，被阻断检查如实注明；③**复发升格**——implemented 缺真实验证证据复发时，才考虑升为机械门禁并配负例；④证据和结论不得超出检查实际证明的范围（依据见 [00-index §外部研究材料](../00-index.md) 与 [item-lifecycle-tdd Note](../../notes/implemented/2026-10-05-item-lifecycle-tdd.md)）。
 - 多步实施按可独立验收结果拆解；小问题不强行拆成子任务。一次需要多个相互独立的人类判断时，分别记录问题与依赖，不把它们伪装成执行步骤。
-- `queue.md` 是可选索引：仅对已有授权、需要跨步或跨会话排序/恢复的工作使用。
 - steer（用户插话）开启新 turn = 清单重排的信号，看得见反馈被吸收。
 
 ## 1. 六步闭环（实施期）
@@ -37,7 +36,6 @@
 |---|---|---|---|
 | 所有改仓工作 | 根 `AGENTS.md`、`docs/00-index.md` | 仓库形态、相关 owner、现行决策 | 只问仓库概况时，到此为止 |
 | 需澄清或查证 | 对应 [_backlog/issues/](../../_backlog/issues/README.md)、按需 methods/research | 目标、范围、已知事实、未决问题和下一步 | 暂停依赖未决点的判断；独立且已授权的工作照常继续 |
-| 已授权且需跨步/跨会话排序 | [_backlog/queue.md](../../_backlog/queue.md) 对应行 | 顺序与恢复信息；队列本身不授权 | 缺少授权时，向用户确认范围；队列空不是取题指令 |
 | 持久决定需显式评审 | 对应 [notes/proposed/](../../notes/proposed/) RFC | 被评审的决定、备选与验收 | 不需显式评审时无需创建 RFC |
 | 任何实施工作 | 本页 §1/§2 与 §4 | 与改动面相称的证据和收尾动作 | 按任务类型路由验证 |
 
@@ -46,7 +44,7 @@
 - **代码 / 卫生型** → 本页 §1.2 六步闭环 + §2 面选择表与任务型路由表 + §4 收尾；
 - **研究 run 型** → [guides/61](61-run-playbook.md)（含**硬前置**：`research-workspace` 必须已注册进
   DSH，否则研究手册不进上下文）+ 开发技能 `running-a-research-run`；
-- **队列条目毕业** → `graduating-a-queue-item`；**加/改角色** → `adding-a-research-role`；
+- **交付收尾** → `reviewing-a-delivery`；**加/改角色** → `adding-a-research-role`；
   **加/改门禁** → `writing-a-gate`；**加/调节点轨道** → `changing-node-topology`。
 
 任务命中 `.agents/skills/` 某条 description（上列五个）时**先读该 `SKILL.md` 全文再动手**，不从
@@ -69,7 +67,7 @@
 | L1 挂载 | preset 内容/结构改动（其完成定义） | `DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs`（源码域，keyless）；安装域加 `--profile <p> --no-patch` |
 | L2 安装 | 包结构/release 相关改动 | `node scripts/smoke/release-smoke.mjs`（pack→干净 profile→plugin add→安装域冒烟；无模型调用，安装验收使用 `--install-only`，默认 preflight 仍检查凭据） |
 | L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `node --import tsx/esm --test tests/evaluation-contract.test.mjs` |
-| L4 交付 | 里程碑级 | L4-lite 冒烟（需 `DEEPSEEK_API_KEY`）/ 完整 run（队列条目） |
+| L4 交付 | 里程碑级 | L4-lite 冒烟（需 `DEEPSEEK_API_KEY`）/ 完整 run（授权范围） |
 
 判据与负面判据（什么算"框架不合理"）见 [evaluation.md](../evaluation.md)——面与面不互抵。
 
@@ -90,7 +88,7 @@
 | 改部署面（preflight / scaffold / 发布集） | pack `scripts/` + `package.json` 的 files/bin | — | L0 + L2 | 部署 Note | `release-smoke` ALL PASS |
 | 换 vendor pin | `.gitmodules` + pack 兼容矩阵 | `vendor-build.sh`（含 host 半补建 + 前端壳重建）→ 逐条重审（含 agent-team 合同 diff 与货架增量对账——正本 = [discipline-map §重审触发路径](../discipline-map.md)） | L0 + L1 + L2 + client-load-smoke + L4-lite（0.2.0 轮实证：漏跑观察面 = client bundle 的 build-time externals 漂移漏网） | 升 pin 毕业 Note（重审结论正本） | 全档绿 + 重审入 Note |
 | 纯文档 / 卫生 | 文档自身 | — | L0 | 仅持久决定理由才写 | 门禁绿 |
-| **用户直派** | 按本轮授权直接执行；如需跨步排序可选登记 queue；仅需显式评审的持久决定才建立 RFC；交付后按 notes 规则决定是否记录决定理由 | 同对应任务型 | 同对应任务型 | 同对应任务型 | 同对应任务型 |
+| **用户直派** | 按本轮授权直接执行；如需跨步排序使用会话内 todo；仅需显式评审的持久决定才建立 RFC；交付后按 notes 规则决定是否记录决定理由 | 同对应任务型 | 同对应任务型 | 同对应任务型 | 同对应任务型 |
 
 **值级改动**（只改一个配置**值**，如超时/阈值/开关）：本仓**没有值级断言**——门禁只证结构，L1 只证
 "还能挂载"。所以 done 只能证到"仍挂载 + 文档同步"；要可证伪就**同 diff 补一条断言**（进 `tests/` 或
@@ -182,7 +180,7 @@ source dev/env.sh        # DSH_HOME=runtime/harness-home（数据面）+ dsh 别
 收尾前置（§0 验收门 + 反馈门③）：按本轮授权与已有验收判据逐项核对；适用判据全部有实际证据，未运行或受阻项明确列出。存在 RFC 时同时确认实现没有偏离获批内容。
 
 1. docs 只写 now：改过的语义面同步对应文档（合同随代码同 diff）；
-2. 若有对应 queue 行，更新或删除该行；若有 proposed RFC 且决定理由需长期保留，将正文改写为已交付事实后迁 `notes/implemented/`。该 Note 含状态行/决定/输掉的方案/实际跑过的验证/环境状态；正文改写与状态格式见 [notes/AGENTS](../../notes/AGENTS.md)，并非每项交付都要求 Note；
+2. 若有 proposed RFC 且决定理由需长期保留，将正文改写为已交付事实后迁 `notes/implemented/`。该 Note 含状态行/决定/输掉的方案/实际跑过的验证/环境状态；正文改写与状态格式见 [notes/AGENTS](../../notes/AGENTS.md)，并非每项交付都要求 Note；
 3. `pnpm verify` + `pnpm test` 全绿（涉及面按 §2 加跑）；
 4. 入口链探针（条目改动面含 docs/AGENTS 时必跑，否则按节奏）——机械版：`source dev/env.sh && node scripts/probe/entry-chain-probe.mjs`（真模型档；真值机械抽取 + 软断言；无凭据时退化为语义版人工）；
 5. commit（窄证据切片：只提交本条目相关改动；pre-commit 钩子自动复跑 verify+tests 拦红灯——§3）。
@@ -205,7 +203,6 @@ the regression）。反证记录进对应 implemented Note。
 按本轮授权与真实工作痕迹恢复，不维护第二份控制状态：
 
 1. 用户当前请求及仍有效的授权范围；
-2. 如该工作已加入 [_backlog/queue.md](../../_backlog/queue.md)，读取对应索引行（它只表示顺序）；
 3. 若适用，读取问题卡、已批准 RFC 或工作记录，不假定每项工作都有这些载体；
 4. `git log`、`git status` 与工作树，确认已提交和未提交的实际进度，先解决记录与现场不一致再继续。
 

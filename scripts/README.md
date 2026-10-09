@@ -69,4 +69,4 @@
 | lib/local-date.mjs | hitl-answer、export-dist | 人读日期行本地口径（与 bash date 同源；BUG-017 正修——UTC slice 凌晨窗口差一天） |
 | lib/vendor-artifacts.mjs | boot 面护栏（五个入口共用） | vendor 构建产物自检 |
 | lib/backlog-liveness.mjs | verify/backlog-liveness | 问题卡、缺陷、调研、方法与归档索引的结构合同；被 verify 入口与 keyless 回归消费 |
-| lib/direct-authorization-boundary.mjs | entry-chain-probe | 用户直派工作与可选 queue/RFC 边界的词面判定；由探针与 keyless 回归消费 |
+| lib/direct-authorization-boundary.mjs | entry-chain-probe | 按授权范围执行、无需重复请批的词面判定；由探针与 keyless 回归消费 |

@@ -45,7 +45,7 @@ run-state 谓词，通常自动——改文件名/轨道序才动）。
 
 - Note（同 diff）：决定 + 输掉的方案 + 验证 + 环境状态——新判据的反证记录入登记；
 - 推翻既有决定（如节点数、回边三分）→ docs/00-index D 号同变更登记；
-- queue 行删除 + RFC 毕业（graduating-a-queue-item 技能接管）。
+- 交付收尾与决定记录由 [reviewing-a-delivery](../reviewing-a-delivery/SKILL.md) 处理。
 
 ## 已知坑（实测在案）
 

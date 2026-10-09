@@ -3,13 +3,13 @@
 // 门禁登记表（正本）：docs/evaluation.md §L0——与本脚本 gates 数组经门禁 gate-ledger-sync
 // 机械对账（登记与实现漂移即红）；每条门禁的反证记录 = 表末列所指 notes/。
 // 移植自 ai_dsh_company/scripts/verify.mjs（按当前规模裁剪；vendor-pin/client-half/proposal
-// 全量版随对应能力落地启用，见根 _backlog/queue.md）。
+// 全量版随对应能力落地启用，见对应 owner 文档。
 
 import { spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync, existsSync, lstatSync, readlinkSync, statSync } from 'node:fs';
 import { join, dirname, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { backlogLivenessProblems, currentWorkRecordProblems } from '../lib/backlog-liveness.mjs';
+import { backlogLivenessProblems } from '../lib/backlog-liveness.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -35,7 +35,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'pack-workspace-fresh', 'queue-pointer-live', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'backlog-liveness', 'dist-manual-version', 'port-exclusive', 'hooks-active'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'row-deps', 'workspace-contract', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'pack-workspace-fresh', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'backlog-liveness', 'dist-manual-version', 'port-exclusive', 'hooks-active'];
 
 const failures = [];
 const notes = [];
@@ -52,23 +52,6 @@ function walk(dir, out = []) {
   return out;
 }
 const allFiles = walk(ROOT);
-
-// _backlog/queue.md §队列 节切片（当前指针只认队列节，搁置池与头注不算）。
-// 文件缺席或节缺席 → null（fail 由调用侧出，报因按语境）。
-function queueSection() {
-  const p = join(ROOT, '_backlog', 'queue.md');
-  if (!existsSync(p)) return null;
-  const lines = readFileSync(p, 'utf8').split('\n');
-  const s = lines.findIndex((l) => /^## 队列/.test(l));
-  if (s === -1) return null;
-  const out = [];
-  for (let i = s + 1; i < lines.length; i++) {
-    if (/^## /.test(lines[i])) break;
-    out.push(lines[i]);
-  }
-  return out.join('\n');
-}
-
 
 // ── 门禁 1：md-utf8 / newline（所有 tracked .md 严格 UTF-8、恰一个结尾换行；git
 //    ls-files 驱动——运行区（gitignored bundle/profile 镜像）不扫，研究手册合同既有；
@@ -344,7 +327,7 @@ function queueSection() {
 }
 
 // ── 门禁 13：vendor-pin（vendor/dsh submodule 在位且钉住 dsh-v0.2.0-rc.2 = 639ed01539；
-//    D10 销账的机械面——机制权威自持，队列「vendor-submodule-and-pnpm-dsh」）──
+//    D10 销账的机械面——机制权威自持）──
 {
   const gate = 'vendor-pin';
   const PIN = '639ed015397290b3745d163aafe02ffee4aa3f84';
@@ -375,27 +358,6 @@ function queueSection() {
   else if (r.stdout.trim()) fail(gate, `vendor/dsh 有未提交改动（只读铁律）：${r.stdout.trim().split('\n')[0]}…`);
 }
 
-// ── 门禁 27：queue-pointer-live（可选队列中存在的 ▶ 指向活跃问题卡或 RFC）──
-// 队列可以没有当前项；若出现 ▶，只允许一个且必须指向未归档的问题卡或 proposed RFC。
-{
-  const gate = 'queue-pointer-live';
-  const queue = queueSection();
-  if (queue !== null) {
-    const qLines = queue.split('\n');
-    const pointerIdx = qLines.map((l, i) => (l.includes('▶') ? i : -1)).filter((i) => i !== -1);
-    if (pointerIdx.length > 1) {
-      fail(gate, `可选队列最多一个 ▶（实测 ${pointerIdx.length} 处）`);
-    } else if (pointerIdx.length === 1) {
-      // 条目块 = ▶ 行起，到下一个编号条目 / 节标题 / 毕业注记为止（链接可在续行）
-      let end = qLines.length;
-      for (let i = pointerIdx[0] + 1; i < qLines.length; i++) {
-        if (/^\d+\.\s/.test(qLines[i]) || /^##\s/.test(qLines[i]) || qLines[i].startsWith('（')) { end = i; break; }
-      }
-      const block = qLines.slice(pointerIdx[0], end).join('\n');
-      for (const problem of currentWorkRecordProblems(ROOT, block)) fail(gate, problem);
-    }
-  }
-}
 // ── 门禁 28：proposed-pointer-live（live 文件里指向 notes/proposed/<x>.md 的具体指针必须存在）──
 // 为什么：md-links/md-anchors 只扫 tracked .md 的 Markdown 链接语法，**非 .md 文件里的指针逃检**
 // ——2026-09-26 清扫实测 13 处已 404 的 notes/proposed/ 指针（presets 头注 ×4、dev ×3、scripts ×3、
@@ -430,7 +392,7 @@ function queueSection() {
           }
         }
       }
-      if (checked === 0) note(gate, '零个 live proposed 指针（合法：RFC 与 queue 无强制配对）');
+      if (checked === 0) note(gate, '零个 live proposed 指针（合法：RFC 仅在持久决定需要显式评审时使用）');
       else note(gate, `${checked} 个 live 指针全部可解析`);
     }
   }
@@ -632,8 +594,7 @@ function queueSection() {
 // ── 门禁 19：entry-chain（入口链存在性投影——正本 = 根 AGENTS.md §入口链）──
 // md-links 已机械覆盖全部 tracked .md 的链接解析；本门禁补它的盲区：① 入口链中以反引号/
 // 散文指针提到的成员文件（`docs/design/10-40` 等——md-links 不检非链接形态）必须在场；
-// queue.md 与 queue.md §队列 是可选入口；若存在只检查条目与 ▶ 的结构，不要求条目或当前指针。
-// 改入口链结构 = 同 diff 更新本清单（成员清单是入口链的存在性投影，非第二正本）。
+// 入口链成员清单是入口链的存在性投影；改入口链结构时同 diff 更新本清单。 = 同 diff 更新本清单（成员清单是入口链的存在性投影，非第二正本）。
 {
   const gate = 'entry-chain';
   const members = ['AGENTS.md', 'docs/00-index.md', '_backlog/issues', 'notes/proposed',
@@ -648,17 +609,6 @@ function queueSection() {
   }
   if (existsSync(join(ROOT, 'AGENTS.md')) && !/^## 入口链/m.test(readFileSync(join(ROOT, 'AGENTS.md'), 'utf8')))
     fail(gate, 'AGENTS.md 缺 §入口链 标题——入口链定义的家');
-  const queue = queueSection();
-  if (queue !== null) {
-    const marks = (queue.match(/▶/g) ?? []).length;
-    if (marks > 1) fail(gate, `可选 queue.md §队列最多一个 ▶，实测 ${marks} 个`);
-    for (const line of queue.split('\n')) {
-      if (/^\d+\.\s/.test(line) && !/^\d+\.\s+(?:▶\s+)?\*\*.+\*\*/.test(line))
-        fail(gate, `queue.md §队列 编号条目行缺粗体主题：${line.slice(0, 40)}…（形态 = N. ▶ **主题**…）`);
-      if (/^\s*▶/.test(line) && !/^\d+\.\s+▶/.test(line))
-        fail(gate, `queue.md §队列 ▶ 指针不在编号条目行上：${line.slice(0, 40)}…（形态 = N. ▶ **主题**…）`);
-    }
-  }
 }
 
 // ── 门禁 20：doc-budgets（常驻文档预算——上游 verify-doc-budgets 的等价物：预算由
@@ -819,9 +769,8 @@ function queueSection() {
 
 // ── 门禁 11b：note-graduation-rewrite（implemented 活跃 Note 零计划体残留——"毕业 = 正文改写"
 //    的机器面，2026-09-27 立项。此前只有 skill 散文约束无机械守卫；roadmap-graduation-drift
-//    事故（postmortem 在案）是毕业时序纪律失守的近亲——队列指针半边已有 queue-pointer-live
-//    把守，正文改写这半边由此补上。判据窄带（2026-09-27 探针：候选词表对活跃区 31 篇全量
-//    零命中零误报——宁窄勿宽，漏报由 graduating-a-queue-item skill 语义兜底）：
+//    事故（postmortem 在案）是毕业时序纪律失守的近亲。判据窄带（2026-09-27 探针：候选词表对
+//    活跃区 31 篇全量零命中零误报——宁窄勿宽，语义边界由 delivered Note 与自审确认）：
 //    ① RFC 专有**裸**节名 `## 验收`（implemented 骨架 = 决定/输掉的方案/实际跑过的验证/环境
 //       状态；带后缀的历史变体 `## 验收判据`/`## 验收怎么闭的` 是既有事实体形态，不追改）；
 //    ② 行内计划体标记：TODO/TBD/待办/待实施/下一步将/接下来将/将迁移/将新增。
@@ -863,7 +812,7 @@ function queueSection() {
         const bare = raw.replace(/`[^`]*`/g, '');
         for (const [label, re] of markers) {
           if (re.test(bare)) {
-            fail(gate, `notes/implemented/${f}:${i + 1} 命中${label}——计划体残留。毕业 = 正文改写（计划体 → 已交付事实体，删未来时态/待办清单；见 .agents/skills/graduating-a-queue-item），只改路径不改正文 = 未来计划伪装成当前事实`);
+            fail(gate, `notes/implemented/${f}:${i + 1} 命中${label}——计划体残留。毕业 = 正文改写（计划体 → 已交付事实体，删未来时态/待办清单；见 notes/AGENTS.md），只改路径不改正文 = 未来计划伪装成当前事实`);
           }
         }
       }

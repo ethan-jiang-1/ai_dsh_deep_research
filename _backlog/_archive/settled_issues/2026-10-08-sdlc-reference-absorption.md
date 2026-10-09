@@ -1,6 +1,6 @@
 # 推敲：SDLC Reference 全量对表——notes 管理 / backlog 衔接 / 测试资产三处的 gap 与吸纳
 
-> 状态：已毕业·部分采纳（2026-10-08 用户指令"推动落地"）｜去向 = 本卡迁 `_done/_closed_plans/` + 四个 RFC 立入 [queue.md §队列](../../queue.md)（C10 语义扫描 ▶ / C19 存量体检 / C2 北星页 / C11 标定）
+> 状态：已毕业·部分采纳（2026-10-08 用户指令"推动落地"）｜去向 = 本卡迁 `_done/_closed_plans/` + 四个 RFC 立入 [backlog 方法论吸收](../../../notes/implemented/2026-10-09-backlog-methodology-absorption.md)（C10 语义扫描 ▶ / C19 存量体检 / C2 北星页 / C11 标定）
 > 已落地 = C17 + C18 + C1 + C3 + 10 处失真登记（见 §落地记录）｜未立 RFC 的第二档项各有独立前置（缺分布或标定），判断材料留在本卡
 
 ## 背景 / 触发

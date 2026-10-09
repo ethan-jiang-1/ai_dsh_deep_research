@@ -56,9 +56,9 @@
 
 1. **floor 数值门禁弃用**（wave0 每题源数下限等）：参数化质量下限换成 skill 纪律文本，
    失去机械强制性。补偿：critic 的 readiness 判据清单含"关键结论证据 ≥ A/B 级"硬项；
-   多场 run 实证 critic 散文审查无滑坡（数值 floor 有假绿风险）——**维持搁置**；
+   多场 run 实证 critic 散文审查无滑坡（数值 floor 有假绿风险）——**维持**；
    其可实现核心（抓取强度/摘录覆盖率/final 链/日期）已由 evidence-audit 机械审计吸收，
-   复活条件 = run 出现质量滑坡实证（[_backlog/queue.md §搁置池](../../_backlog/queue.md)）。
+   重议须同时出现质量下降与 evidence-audit 证据不足，详见[裁决](../../notes/rejected/2026-09-24-floor-gates.md)。
 2. **提交前验证降格**：codex 的 dry-submit schema 校验换成 critic 狩猎。代价：critic 也
    是 LLM，可能漏。补偿：readiness 判据清单逐条勾选格式 + lead 的 veto 纪律。
 3. **确定性 readiness 降格为语义审查**：失去"纯结构、零语义"的预检层。补偿：模板文件

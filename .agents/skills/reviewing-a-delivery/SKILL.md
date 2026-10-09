@@ -1,12 +1,11 @@
 ---
 name: reviewing-a-delivery
-description: Use when a change is about to be delivered or a queue item is about to graduate, when a cross-surface diff (pack, docs, scripts, notes 中的多面) needs adversarial review, or when the user asks for a review — the semantic self-review layer between mechanical gates and user acceptance, re-reading the live diff against intent, current docs, and evidence selection.
+description: Use when preparing delivery, when a cross-surface diff (pack, docs, scripts, notes 中的多面) needs adversarial review, or when the user asks for a review — the semantic self-review layer between mechanical gates and user acceptance, re-reading the live diff against intent, current docs, and evidence selection.
 ---
 
 # 交付前对抗自审（语义自审层）
 
 本技能是 **guidance，不是 checklist**：按实际 diff 与风险选择检查深度；相关技能：
-[`.agents/skills/graduating-a-queue-item`](../graduating-a-queue-item/SKILL.md) ·
 [`.agents/skills/writing-a-gate`](../writing-a-gate/SKILL.md)。
 
 ## 这一层补的是什么
@@ -106,8 +105,8 @@ description: Use when a change is about to be delivered or a queue item is about
     本仓实例：`gates-smoke` 的零注入对照组 + 注入组双轨；新门禁必须同 diff 带反证；
     改断言迁就实现不是修法（`guides/60 §0` 硬边界②）。
 11. **proposed Note 被实现时同 diff 移动并改写为 present-tense shipped reality**：
-    计划体不许留在 implemented。本仓实例：队列条目毕业 = RFC 迁 `implemented/` + **正文
-    改写**（删未来时态）+ 队列行删除；机械侧 = `note-graduation-rewrite` +
+    计划体不许留在 implemented。本仓实例：交付后的 RFC 迁 `implemented/` + **正文
+    改写**（删未来时态）；机械侧 = `note-graduation-rewrite` +
     `note-status` + `proposed-pointer-live`。查：本次实现的条目，其 RFC 是否同 diff 移动
     并改写（只改路径不改正文 = 未来计划伪装成当前事实）。
 

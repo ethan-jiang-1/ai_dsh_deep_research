@@ -14,7 +14,7 @@
    （缺陷卡）+ `_done/`（归档：_closed_plans/ + _fixed_bugs/），六份 README 规矩手册自
    company 移植改写；规划面单入口（D20）后加次序半区 queue.md，目录 = 推敲 + 次序一个家分半区。
 2. **红线（company D23 教训正面化）**：推敲卡只载判断材料（问题/证据/候选/取舍），不载
-   次序与授权——次序唯一 = [_backlog/queue.md](../../_backlog/queue.md) §队列，授权唯一 =
+   次序与授权——次序唯一 = [queue 退役与当前边界](2026-10-09-backlog-methodology-absorption.md) §队列，授权唯一 =
    [guides/60](../../docs/guides/60-dev-loop.md)；推敲卡不是任务，入口链结构不变（第 3 步
    改锚 queue.md）。
 3. **半区互斥（D20 增）**：queue.md 只载次序与归宿、零判断内容；plans/ 卡零调度——互越

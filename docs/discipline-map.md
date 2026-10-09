@@ -1,6 +1,6 @@
 # discipline-map — DSH 纪律全量枚举（三态表）
 
-> 层：合同（该遵守什么）。本表 = AGENTS.md §纪律首版枚举子集的**全量替换正本**（队列条目
+> 层：合同（该遵守什么）。本表 = AGENTS.md §纪律首版枚举子集的**全量替换正本**（工作记录
 > 「dsh-discipline 全量枚举」2026-09-24 毕业；AGENTS.md 只留指针）。枚举方法 = vendor 逐源
 > 清点（"你无法继承你从没清点过的东西"），每行三态：**照搬**（原样继承，带本仓落点）/
 > **带证据适配**（语义保留、载体改造，带证据）/ **不适用**（带理由——本仓无该设施对应面）。
@@ -176,7 +176,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | `benchmarks/` · `native/` · `python/` · `patches/` · `apps/` | 不适用：本仓无这些发布 lane 与运行时面 |
 | `CONTRIBUTING.md` · `SAFETY.md` · `SECURITY` · `THIRD_PARTY_NOTICES.md` · `BRAND_GUIDELINES.md` | 不适用：无外部贡献流、无运行时安全授权面、无捆绑第三方代码、无品牌资产 |
 | `.editorconfig` · `.gitattributes` · lint（oxlint）· 重复代码检测（jscpd）· vitest 系列配置 · `lefthook.yml` | 前两件已具备（`repo-conventions` 门禁强制与 vendor 对齐）；后四件未引入（TS 面 = 一个包的 `src/`，测试栈 = node:test）；Markdown 纪律由门禁（md-utf8-newline / md-links / md-anchors / doc-budgets）承担，git 钩子 = `dev/hooks/pre-commit` |
-| `LICENSE` | **未决（非遗漏）**：本仓 `private: true` 未分发；已进 [_backlog/queue.md 搁置池](../_backlog/queue.md)，复活条件 = 对外分发前定许可证 |
+| `LICENSE` | **未决（非遗漏）**：本仓 `private: true` 未分发；决定与重启条件见 [许可证裁决](../notes/rejected/2026-09-24-license.md)，复活条件 = 对外分发前定许可证 |
 
 <a id="source-10"></a>
 ## 源 10：_digested/test-strategy 语料（测试策略消化 11 篇，基线 = 本仓 pin）
@@ -211,7 +211,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | 门禁自测模式（语料 verify.test.mjs：完整副本 + 真实 verifier 入口 + invalid case 真被拒才算数） | [gates-smoke](../scripts/smoke/gates-smoke.mjs)（临时副本 + 注入回归经真实 verify 入口点名报红 + 零注入对照组防断言空转）+ [tests/verify-gates.test.mjs](../tests/verify-gates.test.mjs)（案例表 ↔ gates 数组静态对账） | 带证据适配（子进程归 smoke 道——layering 禁默认回归 spawn；副本 = tracked 全量 + 被 tracked md 引用的运行区链接目标补拷） |
 | 验证词汇：oracle 独立预期 / real composition / semantic review | [00-index §术语映射](00-index.md) 验证词汇行 | 照搬 |
 | 六误区清单（goal≠验收 / mock-only / 刷新≠接受 / 空 invariant / agent-loop / 不抄主仓治理） | 逐条散落既有登记（D6 / L1 真挂载 / tests·AGENTS fix fixtures / 本表源 1 与 alignment-ledger / 不适用登记）——不另立第二份清单（理由 = [毕业 Note](../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md) 输掉的方案） | 已具备（散落） |
-| 主仓治理全套（Issue/PR policy、weighted approval、stacked PR、release lane、`.github/` 执行层） | 等价物 = 队列制 + pre-commit + 窄切片 + 收尾对账（既有登记）；语料适用边界明文反证该立场 | 不适用（维持） |
+| 主仓治理全套（Issue/PR policy、weighted approval、stacked PR、release lane、`.github/` 执行层） | 等价物 = pre-commit + 窄切片 + 收尾对账（既有登记）；语料适用边界明文反证该立场 | 不适用（维持） |
 
 ## 重审触发路径
 
@@ -247,7 +247,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 
 ## 维护规则
 
-- 本表随 vendor 换 tag 重校（queue 触发型条目「升 pin 重校」）；新增三态行同 diff 落
+- 本表随 vendor 换 tag 重校（升级 vendor pin 时重校）；新增三态行同 diff 落
   本表，不在 AGENTS.md 复制（一处事实一个家）；
 - **本仓自身演进同样触发重校**（2026-10-08 增设）：本表的"本仓落点"列描述的是**我们自己**
   的现状，因此下列事件发生时须同 diff 复核相关行——① 新增/退役自写代码面（如 D18 驾驶舱

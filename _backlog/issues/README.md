@@ -6,6 +6,7 @@
 
 | 卡 | 要解决什么 | 当前环节与未完成项 |
 |---|---|---|
+| [2026-10-09-snapshots-adoption.md](2026-10-09-snapshots-adoption.md) | 确定插件研发 snapshots 的首批落点 | 已完成来源研究；待确认 fixture 迁移、BUG-018 修复和验收切片 |
 
 
 ## 写一张卡

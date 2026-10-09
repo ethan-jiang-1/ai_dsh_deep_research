@@ -5,7 +5,7 @@ description: Use when adding, widening, or retiring a mechanical check in script
 
 # 新增一条机械门禁
 
-本技能是 **guidance，不是 checklist**：按实际 diff 与风险选择动作，完成判据在各步末；相关技能：[`.agents/skills/graduating-a-queue-item`](../graduating-a-queue-item/SKILL.md)。
+本技能是 **guidance，不是 checklist**：按实际 diff 与风险选择动作，完成判据在各步末；相关技能：[`.agents/skills/reviewing-a-delivery`](../reviewing-a-delivery/SKILL.md)。
 
 门禁的价值只在"它会红"。一条永远为绿的脚本不是保护，是假安全感（DSH testing policy：
 *A guard only guards if the regression fails it*）。所以顺序是：**先想红，再写绿**。

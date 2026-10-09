@@ -25,7 +25,7 @@
 - implemented 骨架（`note-format` 门禁强制前三节）：`## 决定` + `## 输掉的方案`
   （"没记击败了什么的决定会重开讼"）+ `## 实际跑过的验证`（**无证据的"完成"不算完成**；
   标题含 验证/检查/验收/实录/记录/实证/探针/全绿/复验/证据 任一即认，容忍历史命名变体）；
-- proposed RFC：仅在持久决定需要显式评审时使用；状态行 + 问题/方案/输掉的方案/验收。RFC 不要求对应 queue 行，也不是实施工作的普遍前置；
+- proposed RFC：仅在持久决定需要显式评审时使用；状态行 + 问题/方案/输掉的方案/验收。RFC 不是实施工作的普遍前置；
 - 章节名映射（本仓 ↔ 上游 canonical）：问题 ↔ `## Problem` · 决定 ↔ `## Decision` ·
   输掉的方案 ↔ `## Alternatives considered` · 验证 ↔ `## Verification`/`## Testing` ·
   环境状态 ↔ `## Consequences`；
@@ -34,7 +34,7 @@
 ## 毕业与命名
 
 - RFC 毕业 = **正文改写**（计划体 → 已交付事实体，删未来时态与迁移计划）+ 迁
-  `implemented/`；仅在有对应 queue 行时更新或删除它。只改路径不改正文 = 未来计划伪装成当前事实；
+  `implemented/`。只改路径不改正文 = 未来计划伪装成当前事实；
 - 毕业 Note 不再指导未来工作时 → 搬 `archived/` 冻结（进门条件与纪律 =
   [notes/archived/README.md](archived/README.md)；vendor `dsh-archive-agent-notes` 校准：
   按未来决策价值判定，不按年龄字数；红证/台账引用/负知识/复活条件在身者留活跃）；

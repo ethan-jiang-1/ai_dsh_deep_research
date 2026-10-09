@@ -5,7 +5,7 @@ intent: 为可选的 per-topic 数量地板决策保留存量标定数据。
 
 # per-topic 卡数存量分布（候选 A 标定 ①步，2026-10-06）
 
-> 喂 [_backlog/queue.md](../../queue.md) §搁置池「per-topic evidence 数量地板参数化」行——复活路径 ①存量标定（本文件）→ ②新 run 增记（进行中：mistral T1=14、mcp-hosts T1=3/T2=8/T3=4/T4=6/T6=12/T7=15 已随场记 journal）→ ③分布实证「低卡数 **且** wave2 返工」场次 → 立门。生成方式 = 一次性脚本逐场读 topics.md（scope_role: primary）× evidence frontmatter（supports 字段），脚本已弃（数据在此钉版）。
+> 依据 [策略对标来源](2026-10-03-strategy-benchmark-sources.md) 的重议条件——复活路径 ①存量标定（本文件）→ ②新 run 增记（进行中：mistral T1=14、mcp-hosts T1=3/T2=8/T3=4/T4=6/T6=12/T7=15 已随场记 journal）→ ③分布实证「低卡数 **且** wave2 返工」场次 → 立门。生成方式 = 一次性脚本逐场读 topics.md（scope_role: primary）× evidence frontmatter（supports 字段），脚本已弃（数据在此钉版）。
 
 ## 分布总览（n = 68 个 primary topic，25 场可数 / 31 场总量）
 

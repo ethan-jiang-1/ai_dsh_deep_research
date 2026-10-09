@@ -86,35 +86,6 @@ function fixtureFile(dir, rel, text, indexed = true) {
 const backlogIssue = (change = (text) => text, indexed = true) => (dir) =>
   fixtureFile(dir, `_backlog/issues/${ISSUE_NAME}`, change(ISSUE_TEXT), indexed);
 
-const queueWithTarget = (target = `issues/${ISSUE_NAME}`) => (dir) => {
-  backlogIssue()(dir);
-  const path = join(dir, '_backlog', 'queue.md');
-  const original = readFileSync(path, 'utf8');
-  writeFileSync(path, original.replace(/(^## 队列[^\n]*\n)[\s\S]*?(?=^## |$(?![\s\S]))/m,
-    `$1\n1. ▶ **Probe**（可自主）—— [record](${target})\n\n`));
-};
-
-const duplicateQueuePointer = () => (dir) => {
-  const p = join(dir, '_backlog', 'queue.md');
-  backlogIssue()(dir);
-  const lines = readFileSync(p, 'utf8').split('\n');
-  const queueIndex = lines.findIndex((line) => /^## 队列/.test(line));
-  lines.splice(queueIndex + 1, 0, '1. ▶ **探针指针一**（已授权）—— [record](issues/2099-01-01-probe.md)',
-    '2. ▶ **探针指针二**（已授权）—— [record](issues/2099-01-01-probe.md)');
-  writeFileSync(p, lines.join('\n'));
-};
-
-const noQueueFile = () => (dir) => rmSync(join(dir, '_backlog', 'queue.md'));
-
-const emptyOptionalQueue = () => (dir) => {
-  const p = join(dir, '_backlog', 'queue.md');
-  const lines = readFileSync(p, 'utf8').split('\n');
-  const start = lines.findIndex((line) => /^## 队列/.test(line));
-  const end = lines.findIndex((line, index) => index > start && /^## /.test(line));
-  lines.splice(start + 1, end < 0 ? lines.length : end - start - 1);
-  writeFileSync(p, lines.join('\n'));
-};
-
 const removeLedgerRow = (gateName) => (dir) => {
   const p = join(dir, 'docs', 'evaluation.md');
   writeFileSync(p, readFileSync(p, 'utf8').split('\n').filter((l) => !l.startsWith(`| \`${gateName}\``)).join('\n'));
@@ -199,10 +170,10 @@ export const CASES = [
   { id: 'note-format-no-status', gate: 'note-format', mutate: stripFirstStatusLine(join('notes', 'implemented')) },
   { id: 'note-format-no-verification', gate: 'note-format', mutate: stripVerificationSection(join('notes', 'implemented')) },
   { id: 'note-format-negated-verification', gate: 'note-format', mutate: negateVerificationSection(join('notes', 'implemented')) },
-  { id: 'entry-chain-duplicate-pointer', gate: 'entry-chain', mutate: duplicateQueuePointer() },
-  { id: 'queue-current-archived-issue', gate: 'queue-pointer-live', mutate: queueWithTarget('../_archive/settled_issues/2099-01-01-old.md') },
-  { id: 'queue-current-implemented', gate: 'queue-pointer-live', mutate: queueWithTarget('../notes/implemented/2026-09-24-entry-chain-probe.md') },
-  { id: 'queue-current-duplicate', gate: 'queue-pointer-live', mutate: duplicateQueuePointer() },
+  { id: 'entry-chain-no-title', gate: 'entry-chain', mutate: (dir) => {
+    const p = join(dir, 'AGENTS.md');
+    writeFileSync(p, readFileSync(p, 'utf8').replace(/^## 入口链.*$/m, '## 探针替代标题'));
+  } },
   { id: 'backlog-issue-no-frontmatter', gate: 'backlog-liveness', mutate: backlogIssue(() => '# Probe\n> 状态：推敲中｜可关闭：否\n') },
   { id: 'backlog-issue-closeable', gate: 'backlog-liveness', mutate: backlogIssue((text) => text.replace('可关闭：否', '可关闭：是')) },
   { id: 'backlog-issue-orphan', gate: 'backlog-liveness', mutate: backlogIssue((text) => text, false) },
@@ -229,10 +200,6 @@ export const CASES = [
 ];
 
 export const CONTROLS = [
-  { id: 'queue-current-active-issue', gate: 'queue-pointer-live', mutate: queueWithTarget() },
-  { id: 'queue-empty-is-valid', gate: 'queue-pointer-live', mutate: emptyOptionalQueue() },
-  { id: 'entry-chain-empty-queue-is-valid', gate: 'entry-chain', mutate: emptyOptionalQueue() },
-  { id: 'entry-chain-queue-file-is-optional', gate: 'entry-chain', mutate: noQueueFile() },
   { id: 'backlog-active-issue', gate: 'backlog-liveness', mutate: backlogIssue() },
 ];
 

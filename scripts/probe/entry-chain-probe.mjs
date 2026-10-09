@@ -5,11 +5,8 @@
 //
 // 设计（时不变原则——company 探针已知盲区：问句期望也会过期，问法必须换任何 ▶ 条目都不变）：
 //   1. 全新默认 preset 会话（无研究 pack 上下文污染），cwd = 仓根；
-//   2. prompt 按根 AGENTS.md 的条件式入口读取，检查可选 queue 指针与用户直派边界；
-//   3. 脚本自己从 _backlog/queue.md 抽真值（若存在：▶ 条目主题 / 下一条目主题），软断言答案命中
-//      （token 重叠），全文留档 runtime/smoke-workspace/ 供人工复核——机械断言只证结构
-//      不证语义（SDLC reference 01 同款诚实记账）；
-//   4. 会话日志即真相：assistant/message 事件里找答案文本（不是用户消息回显）。
+//   2. prompt 按根 AGENTS.md 条件式入口读取，核验授权边界与开发环路由；
+//   3. 会话日志即真相：assistant/message 事件里找答案文本（不是用户消息回显），全文留档供人工复核。
 //
 // 前置：source dev/env.sh（DSH_HOME + 凭据）；DSH_SRC 默认本仓根（vendor/dsh）。
 // 用法：source dev/env.sh && node scripts/entry-chain-probe.mjs [--port 3114]
@@ -44,39 +41,6 @@ if (!existsSync(join(home, '.credentials.yaml'))) {
 const dshSrc = process.env.DSH_SRC ?? ROOT; // 本仓根 = 安装锚（vendor/dsh submodule）
 const bin = join(dshSrc, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
 if (!existsSync(bin)) { console.error(`probe: 机制基线不在位（${bin}）——git submodule update --init`); process.exit(2); }
-
-// ── 真值抽取（从 _backlog/queue.md 机械读出，不问模型；2026-09-28 D20 迁锚）──────
-function groundTruth() {
-  const queuePath = join(ROOT, '_backlog', 'queue.md');
-  if (!existsSync(queuePath)) return { cur: '无队列当前项', next: null };
-  const queueText = readFileSync(queuePath, 'utf8');
-  const lines = queueText.split('\n');
-  const s = lines.findIndex((l) => /^## 队列/.test(l));
-  if (s === -1) return { cur: '无队列当前项', next: null };
-  const queue = [];
-  for (let i = s + 1; i < lines.length; i++) {
-    if (/^## /.test(lines[i])) break;
-    const m = /^(\d+)\.\s+(▶\s+)?\*\*(.+?)\*\*/.exec(lines[i]);
-    if (m) queue.push({ n: Number(m[1]), current: Boolean(m[2]), theme: m[3] });
-  }
-  const cur = queue.find((q) => q.current);
-  if (cur === undefined) return { cur: '无队列当前项', next: null };
-  const next = queue.find((q) => q.n > cur.n);
-  return { cur: cur.theme, next: next?.theme ?? null };
-}
-
-// 主题命中（软断言）：主题切成 ≥2 字 token，答案命中 ≥2 个即认——中文无空格，取滑窗 bigram。
-const bigrams = (s) => {
-  const t = s.replace(/[（(].*?[)）]/g, '').replace(/\s+/g, '');
-  const out = new Set();
-  for (let i = 0; i < t.length - 1; i++) out.add(t.slice(i, i + 2));
-  return [...out];
-};
-const hitCount = (answer, theme) => {
-  const grams = bigrams(theme);
-  if (!grams.length) return 0;
-  return grams.filter((g) => answer.includes(g)).length;
-};
 
 // ── DSH 会话面（照抄 l4-lite 实证骨架）──────────────────────────────────────
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -175,7 +139,7 @@ const waitForAnswer = async (sessionId) => {
       } catch { /* 畸形行跳过 */ }
     }
     last = texts.join('\n');
-    if ((last.match(/^Q[1-4]:/gm) ?? []).length >= 4) return last;
+    if ((last.match(/^Q[1-3]:/gm) ?? []).length >= 3) return last;
     // 挂起等待人类（探针会话不该发生）：发现 open ask 即失败
     if (log.split('\n').at(-1)?.includes('"ask_user_question"')) throw new Error('模型反问人类——探针问题必须自足');
   }
@@ -183,15 +147,13 @@ const waitForAnswer = async (sessionId) => {
 };
 
 // ── 主流程 ───────────────────────────────────────────────────────────────────
-const PROMPT = `你是入口链探针（一次只读审计，不授予实施权限）。先读根 AGENTS.md 与 docs/00-index.md，再按入口链的条件读取必要文件。本轮点名核对 _backlog/queue.md 的队列内部指针，并核对用户直派的开发路由；不要把所有条件步骤当作普遍前置。每问恰好一行，格式为「Q<n>: <一句话答案>」：
+const PROMPT = `你是入口链探针（一次只读审计，不授予实施权限）。先读根 AGENTS.md 与 docs/00-index.md，再按入口链的条件读取必要文件；不要把所有条件步骤当作普遍前置。每问恰好一行，格式为「Q<n>: <一句话答案>」：
 
-Q1: 只看 _backlog/queue.md 的 §队列，其 ▶ 当前项主题是什么？如果没有 ▶，写“无队列当前项”；不要推断整个仓库没有其他工作。
-Q2: 已明确授权的用户直派局部修改是否必须先排队、建 RFC 或重复请批？说明真实前置边界。
-Q3: §队列里排在当前条目之后的下一个条目主题是什么？不存在则写无下一条目。
-Q4: 开工与收尾程序在哪个文件？`;
+Q1: 用户本轮明确授权的局部修改按什么范围执行？是否需要重复请批？
+Q2: RFC 是否是一般实施工作的普遍前置？它在哪种持久决定情况下才需要？
+Q3: 开工与收尾程序在哪个文件？`;
 
-const gt = groundTruth();
-console.log(`probe: 真值（机械抽取）——▶ 当前 = ${gt.cur}${gt.next ? `；下一条目 = ${gt.next}` : '（无）'}`);
+console.log('probe: 真值——本仓不设仓级 queue 当前项，授权范围与 guides/60 是判断依据');
 // boot 前自检（RFC vendor-build-guard）：0.1.7 起启动依赖构建产物，缺失时报错隐晦——
 // 提前拦成一行 remedy。exit 2 = 环境前置缺失（与"未 source env"同档）。
 {
@@ -224,19 +186,9 @@ try {
   const q1 = /^Q1:(.+)$/m.exec(answer)?.[1] ?? '';
   const q2 = /^Q2:(.+)$/m.exec(answer)?.[1] ?? '';
   const q3 = /^Q3:(.+)$/m.exec(answer)?.[1] ?? '';
-  const q4 = /^Q4:(.+)$/m.exec(answer)?.[1] ?? '';
-  const hits1 = hitCount(q1, gt.cur);
-  const grams1 = bigrams(gt.cur).length;
-  verdict.push([`Q1 命中当前条目「${gt.cur}」（bigram ${hits1}/${grams1}）`, hits1 >= Math.min(2, grams1)]);
-  verdict.push([`Q2 明确指认用户直派无需先排队且无需建 RFC（词法检查，语义仍须复核）`, directAuthorizationBoundaryPasses(q2)]);
-  if (gt.next) {
-    const hits3 = hitCount(q3, gt.next);
-    const grams3 = bigrams(gt.next).length;
-    verdict.push([`Q3 命中下一条目「${gt.next}」（bigram ${hits3}/${grams3}）`, hits3 >= Math.min(2, grams3)]);
-  } else {
-    verdict.push([`Q3 明确无下一条目`, /无|没有|不存在|空/.test(q3)]);
-  }
-  verdict.push([`Q4 指认 guides/60（开发环）`, /60|开发环|guides/i.test(q4)]);
+  verdict.push(['Q1 明确按用户授权范围执行且无需重复请批', directAuthorizationBoundaryPasses(q1)]);
+  verdict.push(['Q2 RFC 仅用于需显式评审的持久决定', /仅当|只有|需要显式评审/.test(q2) && /不是普遍|不是一般|不必.*实施/.test(q2)]);
+  verdict.push(['Q3 指认 guides/60（开发环）', /60|开发环|guides/i.test(q3)]);
 } finally {
   child.kill('SIGTERM');
   await sleep(300);
@@ -246,7 +198,7 @@ for (const [label, ok] of verdict) console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${lab
 const failed = verdict.filter(([, ok]) => !ok).length;
 const stamp = new Date().toISOString().replace(/[:.]/g, '-');
 writeFileSync(join(OUT, `entry-chain-probe-${stamp}.md`),
-  `# 入口链探针留档（${stamp}）\n\n真值：▶ ${gt.cur}；下一条目：${gt.next ?? '无'}\n\n## 模型作答原文\n\n${transcript}\n\n## 判定\n\n${verdict.map(([l, ok]) => `- ${ok ? 'PASS' : 'FAIL'} ${l}`).join('\n')}\n`);
+  `# 入口链探针留档（${stamp}）\n\n真值：本仓不设仓级 queue 当前项\n\n## 模型作答原文\n\n${transcript}\n\n## 判定\n\n${verdict.map(([l, ok]) => `- ${ok ? 'PASS' : 'FAIL'} ${l}`).join('\n')}\n`);
 console.log(failed === 0
   ? `\nprobe: ALL PASS（答案与入口链一致；留档 runtime/smoke-workspace/entry-chain-probe-${stamp}.md 供人工复核）`
   : `\nprobe: ${failed} FAILURE(S)——机械断言只证结构，语义复核看留档`);

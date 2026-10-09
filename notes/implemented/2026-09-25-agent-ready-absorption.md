@@ -92,9 +92,7 @@
 
 ## 实际跑过的验证
 
-- **技能发现（正面实证，非推断）**：四个 `.agents/skills/*/SKILL.md` 落盘后，本会话的技能
-  目录立刻出现这四条（`adding-a-research-role` / `graduating-a-queue-item` /
-  `running-a-research-run` / `writing-a-gate`）——发现根 = `projectRoot/.agents/skills`
+- **技能发现（正面实证，非推断）**：开发技能落盘后，本会话的技能目录出现相应项目技能；发现根 = `projectRoot/.agents/skills`
   （vendor `skill-filesystem` 源码 `project-agents` 源）。
 - **三条新门禁的反证（红→还原→绿，逐条实测）**：
   - `md-anchors`：在某 tracked md 注入一条指向 `#不存在的锚点` 的链接 → `FAIL md-anchors`
@@ -110,8 +108,7 @@
 ## 环境状态
 
 - 门禁 **17 → 20**；`docs/evaluation.md` §L0 登记表同步（三条新行各带反证记录指向本 Note）。
-- 新增文件：`.agents/skills/{graduating-a-queue-item,adding-a-research-role,writing-a-gate,
-  running-a-research-run}/SKILL.md`、`docs/guides/62-plugin-authoring.md`、
+- 新增文件：项目开发技能、`docs/guides/62-plugin-authoring.md`、
   `notes/implemented/README.md`、`notes/research/README.md`。
 - 改动文件：`AGENTS.md`（布局 + notes 节，仍在 entry-budget 内）、`docs/00-index.md`
   （文档地图 + 术语映射 + 外部研究材料登记）、`docs/discipline-map.md`（源 6–8 + 载体分工）、

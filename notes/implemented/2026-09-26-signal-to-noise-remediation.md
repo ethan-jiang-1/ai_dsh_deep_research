@@ -33,7 +33,7 @@
 | 9 | [README.md](../../README.md) Rules | "Node >= 20" | `engines.node` = `^22.19.0 \|\| >=24.0.0`（`repo-conventions` 门禁强制等于 vendor） |
 | 10 | [AGENTS.md](../../AGENTS.md) 偏离登记簿 + [design/10](../../docs/design/10-architecture.md) §6 | "23 tests 绿即证据" | 现为 **53 tests** |
 | 11 | [notes/README](../README.md) §时态表后 | "`implemented/` 有 26 篇而队列只有 2 条" | 现为 **40 篇 / 1 条**——手抄计数住在一张"时态地图"里 |
-| 12 | [roadmap.md](../../_backlog/queue.md) 队列节尾 | "（已毕业离队 2026-09-26：…）"12 行历史块 | 与同文件头注"完成即离队（历史归 notes/ + git，**队列里看不见它**）"及 D13 自相矛盾；且随毕业无限增长，把唯一"当前"指针埋掉 |
+| 12 | [backlog 历史决策](2026-10-09-backlog-methodology-absorption.md) 队列节尾 | "（已毕业离队 2026-09-26：…）"12 行历史块 | 与同文件头注"完成即离队（历史归 notes/ + git，**队列里看不见它**）"及 D13 自相矛盾；且随毕业无限增长，把唯一"当前"指针埋掉 |
 | 13 | [ui-skin RFC](../rejected/2026-09-24-ui-skin.md) · [research-type-coverage RFC](2026-09-25-research-type-coverage.md) | 把"▶ 观察面 GUI 化"当作当前指针引用 | 该条目已毕业，▶ 已移交 |
 | 14 | [discipline-map](../../docs/discipline-map.md) 图例 · [alignment-ledger](../../docs/alignment-ledger.json) ×4 | "纯配置仓/纯配置 deep-research-pack" | 同 #4 |
 | 15 | 非 `.md` tracked 文件里的 RFC 指针（**13 处**，机械复算）：`presets/{lead,analyst,critic,scout}.patch.yml:5`、`dev/boot-run.sh:3`、`dev/vendor-build.sh:7`、`dev/vendor-typert-emit.mjs:3`、`scripts/entry-chain-probe.mjs:3`、`scripts/run-dashboard.mjs:2-3`、`tests/run-dashboard.test.mjs:1,92`、`docs/alignment-ledger.json:722` | 指 `notes/proposed/<某 RFC>.md` | 该 RFC 已毕业迁 `implemented/`——指针 404。**门禁盲区**：`md-links`/`md-anchors` 只扫 tracked `.md` 的链接语法，yml/sh/mjs/json 注释逃检。preset 头注尤其要紧——它是**模型可见**文本 |
@@ -56,7 +56,7 @@
 |---|---|---|
 | 1 [AGENTS.md](../../AGENTS.md) | 139 行 | 稠密且必要，但**命令表约 70 行是"还不知道条目就用不上"的细节**——略多 |
 | 2 [00-index](../../docs/00-index.md) | 104 行 | **过载**：只需"有哪些文档"+"▶ 是唯一当前指针"两件事，拿到的是 D1–D18 全台账 + 术语映射 + 外部材料登记 |
-| 3 [roadmap.md](../../_backlog/queue.md) | 40 行 | **本链最佳一步**：一屏、一个 ▶、次序依据如实交代"为什么静默期推不动" |
+| 3 [backlog 历史决策](2026-10-09-backlog-methodology-absorption.md) | 40 行 | **本链最佳一步**：一屏、一个 ▶、次序依据如实交代"为什么静默期推不动" |
 | 4 该条目 RFC | 38 行 | 尺寸对、**内容坏**（§问题① 第 17 行）——唯一必须满足的那一节不可用 |
 | 5 [guides/60](../../docs/guides/60-dev-loop.md) | 115 行 | 对**代码型**条目对；对研究型条目是**错的那一半**（见下） |
 

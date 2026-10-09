@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { backlogLivenessProblems, currentWorkRecordProblems } from '../scripts/lib/backlog-liveness.mjs';
+import { backlogLivenessProblems } from '../scripts/lib/backlog-liveness.mjs';
 
 const METHOD_NAMES = ['requirements-elicitation', 'requirements-probes', 'requirements-synthesis',
   'validation-design', 'validation-evidence', 'validation-judgment', 'issue-to-note'];
@@ -131,17 +131,4 @@ test('tracked space-name file is checked; symlinks fail; untracked and runtime f
   symlinkSync('../README.md', link);
   f.files.push('_backlog/issues/link.md');
   assert.ok(f.check().some((p) => p.includes('must be a regular file')));
-});
-
-test('queue targets accept active issue or RFC links, including anchors; archive/implemented/missing fail', (t) => {
-  const f = fixture(t);
-  issue(f);
-  assert.deepEqual(currentWorkRecordProblems(f.repo, `1. ▶ **Work** [record](_backlog/issues/${ISSUE}#scope)`), []);
-  assert.deepEqual(currentWorkRecordProblems(f.repo, `1. ▶ **Work** [record](issues/${ISSUE}#scope)`), []);
-  const rfcPath = `../notes/proposed/${'2026-10-08-rfc'}.md`;
-  f.put(rfcPath, '# RFC\n', false);
-  assert.deepEqual(currentWorkRecordProblems(f.repo, `1. ▶ **Work** [RFC](${rfcPath})`), []);
-  for (const target of ['_archive/settled_issues/2026-10-08-old.md', '../notes/implemented/2026-10-08-done.md', 'issues/missing.md', 'issues/README.md']) {
-    assert.ok(currentWorkRecordProblems(f.repo, `[record](${target})`).length, target);
-  }
 });
