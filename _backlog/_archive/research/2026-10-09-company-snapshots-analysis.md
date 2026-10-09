@@ -137,11 +137,11 @@ vendor 提供 `assertConsumed()` 检查未绑定脚本和少驱动调用；compa
 
 ## 8. 本仓已经有什么、实际缺什么
 
-本仓已具备 snapshots 思路的核心部分。四角色录制在 [fixtures taxonomy:11](../../tests/fixtures/README.md)，独立 [snapshot-replay-smoke:58](../../scripts/smoke/snapshot-replay-smoke.mjs) 经真实 DSH CLI、research profile 与 Web RPC 创建研究会话，用 llm-replay 替换模型；B 层比较 persona 和工具 schema，Lead 另有 C 层渲染期望。它不属于默认 `pnpm test`，因此默认回归绿不能推出回放通过。[测试职责:150](../../docs/project-map.md)
+本仓已具备 snapshots 思路的核心部分。四角色录制在 [fixtures taxonomy:11](../../../tests/fixtures/README.md)，独立 [snapshot-replay-smoke:58](../../../scripts/smoke/snapshot-replay-smoke.mjs) 经真实 DSH CLI、research profile 与 Web RPC 创建研究会话，用 llm-replay 替换模型；B 层比较 persona 和工具 schema，Lead 另有 C 层渲染期望。它不属于默认 `pnpm test`，因此默认回归绿不能推出回放通过。[测试职责:150](../../../docs/project-map.md)
 
 | 对照面 | 本仓实际情况 | 借鉴的增量 |
 |---|---|---|
-| 会话驱动的集成证据 | 已有四角色回放，住 tests/fixtures/snapshot-research-face | 可整组迁为 snapshots/replay/research-face，消费者同步迁移；纯函数夹具继续留 tests/fixtures |
+| 会话驱动的集成证据 | 已有四角色回放，住 `snapshots/replay/research-face`（观察时在 `tests/fixtures/snapshot-research-face`） | 整组迁移已含消费者同步；纯函数夹具继续留 tests/fixtures |
 | 探针历史证据 | entry-chain 按时间写输出；discipline 反复覆盖 last.md，均在 gitignored 运行区 | 有持久决定或 bug 消费的运行才精选成完整场景，保留日志、输入、判据、身份和结果；普通输出仍留 runtime |
 | 研究事实与执行事实 | bundle 为研究事实正本，DSH session 为执行事件正本 | 研究归档继续用既有 archive；snapshot 只保存需要复核/回归的独立证据，不建立第二运行状态账 |
 | 场景声明 | fixture 有 snapshot.yml，但自写 smoke 没有读取它 | 声明由消费脚本校验；名称、profile、格式、覆盖面、日志和期望引用须与驱动一致 |
@@ -149,9 +149,9 @@ vendor 提供 `assertConsumed()` 检查未绑定脚本和少驱动调用；compa
 | 工作区外部效果 | 当前角色探针未比较完整 before/expected 文件树 | 为写文件、恢复、交付等具体需求建立隔离场景，独立编写 before/expected，不拿实际运行副本当期望 |
 | 录制保存 | 录制器要求先删除旧 session.v4，再录同名文件 | 区分 Session 格式版本与录制次数；同格式重录用新场景修订或受审更新，不能把录制次数伪装成 session.v5 |
 
-来源分别为 [smoke 路径与版本选择:52](../../scripts/smoke/snapshot-replay-smoke.mjs)、[真实装配与回放 patch:120](../../scripts/smoke/snapshot-replay-smoke.mjs)、[实际 B 层比较:226](../../scripts/smoke/snapshot-replay-smoke.mjs)、[fixture 声明](../../tests/fixtures/snapshot-research-face/snapshot.yml)、[录制前置与输出:40](../../dev/record-role-fixture.mjs)、[discipline 输出:194](../../scripts/probe/discipline-probe.mjs)、[entry-chain 输出:248](../../scripts/probe/entry-chain-probe.mjs)、[运行区忽略规则:13](../../.gitignore) 与 [四类运行事实:21](../../docs/design/50-agent-loop-and-state.md)。本轮静态阅读确认自写 smoke 未读取 snapshot.yml；该声明不能被描述成已执行的覆盖守卫。
+来源分别为 [smoke 路径与版本选择:52](../../../scripts/smoke/snapshot-replay-smoke.mjs)、[真实装配与回放 patch:120](../../../scripts/smoke/snapshot-replay-smoke.mjs)、[实际 B 层比较:226](../../../scripts/smoke/snapshot-replay-smoke.mjs)、[场景声明](../../../snapshots/replay/research-face/snapshot.json)、[录制前置与输出:40](../../../dev/record-role-fixture.mjs)、[discipline 输出:194](../../../scripts/probe/discipline-probe.mjs)、[entry-chain 输出:248](../../../scripts/probe/entry-chain-probe.mjs)、[运行区忽略规则:13](../../../.gitignore) 与 [四类运行事实:21](../../../docs/design/50-agent-loop-and-state.md)。观察时自写 smoke 未读取场景声明；落点实施与本报告建议的差异由 [snapshots 落点 issue](../settled_issues/2026-10-09-snapshots-adoption.md) 记录。
 
-[BUG-018](../bugs/BUG-018-snapshot-replay-advertised-coverage.md) 已记录工作区手册、skill-catalog、runtime-context 三类 user/message 注入漏比较，以及源仓实测的漏判。本轮复核 systemTextOf 与 B 层实现确认该缺口仍在；没有重新进行注入或回放实验。skill 正文只在实际读取它的场景中比较，不将 persona 点名技能或 catalog description 当成正文覆盖。[既有标定结论:36](../../notes/implemented/2026-10-08-recorded-session-obligation.md)
+[BUG-018](../fixed_bugs/BUG-018-snapshot-replay-advertised-coverage.md) 已记录工作区手册、skill-catalog、runtime-context 三类 user/message 注入漏比较，以及源仓实测的漏判。本轮复核 systemTextOf 与 B 层实现确认该缺口仍在；没有重新进行注入或回放实验。skill 正文只在实际读取它的场景中比较，不将 persona 点名技能或 catalog description 当成正文覆盖。[既有标定结论:36](../../../notes/implemented/2026-10-08-recorded-session-obligation.md)
 
 DSH 原生 session-snapshot 完整套件提供 manifest、关系保真身份 token、prompt/schema sidecar、完整文件树与协议适配；但其入口直接导入 vitest，只能在 vitest 中使用。[原生库限制:12](/Users/bowhead/ai_dsh_company/vendor/dsh/packages/test-support/session-snapshot/README.md) 本仓约定 Node 标准库与 node:test，不因目录借鉴顺带引入测试框架；可复用不依赖框架的源码接口前，须核对其导出与依赖，不能直接复制整个 suite。
 
@@ -169,7 +169,7 @@ snapshots/
   visual/<scene>/<run>/         需要复核的浏览器证据，注明真实/合成
 ```
 
-archive 与 corpora 仅在出现独立消费者时建立。研究 run 继续住 research-workspace/drt_* 与 archive；纯判据样本继续住 tests/fixtures；普通运行产物继续住 runtime/smoke-workspace。company 的 CHARTER/journal 收敛业务流程不适用于本仓研究 bundle，不能照搬为额外归档动作。[本仓事实 owner:25](../../docs/design/50-agent-loop-and-state.md)、[夹具放置规则:10](../../tests/AGENTS.md)、[已有归档方式:167](../../docs/guides/61-run-playbook.md)
+archive 与 corpora 仅在出现独立消费者时建立。研究 run 继续住 research-workspace/drt_* 与 archive；纯判据样本继续住 tests/fixtures；普通运行产物继续住 runtime/smoke-workspace。company 的 CHARTER/journal 收敛业务流程不适用于本仓研究 bundle，不能照搬为额外归档动作。[本仓事实 owner:25](../../../docs/design/50-agent-loop-and-state.md)、[夹具放置规则:10](../../../tests/AGENTS.md)、[已有归档方式:167](../../../docs/guides/61-run-playbook.md)
 
 推荐顺序：
 
@@ -179,6 +179,6 @@ archive 与 corpora 仅在出现独立消费者时建立。研究 run 继续住 
 4. 精选一次有持久消费者的探针作为落地样例，保存完整日志和失败结果，避免只保成功答案或持续覆盖 last.md。快照为该次证据，不能倒推当前运行状态。
 5. 对外部效果有明确需求时，才添加小型独立 before/expected 场景，例如文件写入或恢复；比较完整文件清单与字节，先注入缺文件、额外文件、错误内容证明判据能拒绝。
 
-只加结构守卫不能推出回放绿。结构检查应使用本仓 tracked-only 规则，并从同一场景读取真正被驱动使用的路径；执行判据必须由独立回放命令验证。无需机械照搬 company 的 64/16 MiB 数值，先量本仓精选资产，再根据实际增长决定预算。泛化路径门禁已有假阳/漏判标定，不能把“改某文件就强制重录”当作覆盖修复。[本仓标定:19](../../notes/implemented/2026-10-08-recorded-session-obligation.md)、[脚本范围纪律:17](../../scripts/AGENTS.md)
+只加结构守卫不能推出回放绿。结构检查应使用本仓 tracked-only 规则，并从同一场景读取真正被驱动使用的路径；执行判据必须由独立回放命令验证。无需机械照搬 company 的 64/16 MiB 数值，先量本仓精选资产，再根据实际增长决定预算。泛化路径门禁已有假阳/漏判标定，不能把“改某文件就强制重录”当作覆盖修复。[本仓标定:19](../../../notes/implemented/2026-10-08-recorded-session-obligation.md)、[脚本范围纪律:17](../../../scripts/AGENTS.md)
 
 本轮完成的是来源分析与本仓借鉴建议；未创建 snapshots 目录、未迁移 fixture、未修 BUG-018、未新增采集器或回放门禁，也未重新运行来源仓的 replay。报告与研究索引的结构校验结果以本轮实际命令输出为准。

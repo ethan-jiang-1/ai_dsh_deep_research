@@ -17,7 +17,7 @@
 | preset-smoke.mjs | L1 真挂载：roster、逐角色建会话、skills 隔离 | keyless（`DSH_SMOKE_REAL=1` 起真 DSH，无模型） |
 | release-smoke.mjs | L2 安装形状：pack → 干净 profile → plugin add → 安装域冒烟 | keyless（`--install-only` 跳凭据） |
 | client-load-smoke.mjs | 观察面真浏览器装配、页签与渐进面对账 | keyless（浏览器） |
-| snapshot-replay-smoke.mjs | 四角色组装面回放 + Lead 渲染金标准 | keyless（RPC/解压子进程，无模型） |
+| snapshot-replay-smoke.mjs | 场景 manifest 驱动的四角色组装面回放（persona/header 全序列/三处注入）+ 声明的渲染金标准 | keyless（RPC/解压子进程，无模型） |
 | gates-smoke.mjs | 门禁自测：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组 | keyless（git/node 子进程，无模型） |
 | client-hitl-smoke.mjs | 活标题触发与挂起显性化 | 真模型档 |
 | l4-lite-smoke.mjs | 四角色真模型响应 + scout web_search 调用 | 真模型档 |
@@ -70,3 +70,5 @@
 | lib/vendor-artifacts.mjs | boot 面护栏（五个入口共用） | vendor 构建产物自检 |
 | lib/backlog-liveness.mjs | verify/backlog-liveness | 问题卡、缺陷、调研、方法与归档索引的结构合同；被 verify 入口与 keyless 回归消费 |
 | lib/direct-authorization-boundary.mjs | entry-chain-probe | 按授权范围执行、无需重复请批的词面判定；由探针与 keyless 回归消费 |
+| lib/replay-scene.mjs | snapshot-replay-smoke | 场景声明消费者：roster/版本/来源形状/路径校验（缺件、串角色、垃圾锚点 fail-loud） |
+| lib/replay-request.mjs | snapshot-replay-smoke | 组装请求面逐条比较：persona、header 全序列、三处 user/message 注入（定向归一化） |

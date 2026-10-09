@@ -1,12 +1,14 @@
 ---
-status: 活跃
+status: 已修
 severity: P1
 opened: 2026-10-08
 ---
 
 # BUG-018：snapshot-replay B 层广告覆盖 skill 与工具行，实际对三处 `user/message` 注入全不覆盖
 
-> 严重级别：P1（重要）｜发现：2026-10-08｜状态：活跃
+> 严重级别：P1（重要）｜发现：2026-10-08｜状态：已修 2026-10-09：B 层改为逐条判据
+> （persona / 全部 `request/header` / 三处 `user/message` 注入），并新增"基线外注入种类即红"的
+> 覆盖面自守；四角色真模型重录后回放全绿。判决与实施 = [snapshots 采纳 Note](../../../notes/implemented/2026-10-09-snapshots-adoption.md)。
 
 ## 症状
 
@@ -98,4 +100,4 @@ B2 只比 `request/header` 的 tools；C 层只比渲染面 → **A/B/C 三层�
 
 标定材料（逐次判定 / 真阳假阳 / 9 类候选面表 / 两轮对抗自审记录）=
 [模型可见面标定](../research/2026-10-08-model-visible-calibration.md)；
-判决与依据 = [recorded-session-obligation 条目](../../notes/implemented/2026-10-08-recorded-session-obligation.md)。
+判决与依据 = [recorded-session-obligation 条目](../../../notes/implemented/2026-10-08-recorded-session-obligation.md)。

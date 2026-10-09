@@ -19,3 +19,4 @@
 | [2026-10-07-plan-review-gate](2026-10-07-plan-review-gate.md) | 评审门实施；[Note](../../../notes/implemented/2026-10-07-plan-review-gate.md) | 2026-10-07 |
 | [2026-10-07-cockpit-dashboard-merge](2026-10-07-cockpit-dashboard-merge.md) | 暂不合并；观察触发条件见 [triggers](../../triggers.md) | 2026-10-07 |
 | [2026-10-08-sdlc-reference-absorption](2026-10-08-sdlc-reference-absorption.md) | 采纳/适配结果见本卡与 [吸收 Note](../../../notes/implemented/2026-10-09-backlog-methodology-absorption.md) | 2026-10-08 |
+| [2026-10-09-snapshots-adoption](2026-10-09-snapshots-adoption.md) | 首批四角色 replay 切片落地（含 BUG-018 修复与场景声明消费）；[Note](../../../notes/implemented/2026-10-09-snapshots-adoption.md) | 2026-10-09 |

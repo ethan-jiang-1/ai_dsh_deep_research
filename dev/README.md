@@ -27,7 +27,7 @@
 | 件 | 职责 |
 |---|---|
 | hitl-answer.mjs | HITL 代答（代理模拟；answerer 在浏览器客户端，先盘侧谓词自拒） |
-| record-role-fixture.mjs | 角色组装面 fixture 录制（真模型档一次性；录制品人审入库后 keyless 永久回放） |
+| record-role-fixture.mjs | 角色组装面 fixture 录制（真模型档一次性；录制品人审入库 + 在场景声明登记 source 身份，此后 keyless 永久回放） |
 | hooks/ | pre-commit 钩子（verify+tests 红灯拦 commit；env.sh 幂等挂载 core.hooksPath） |
 
 ## 运行区（已外移根级 runtime/）

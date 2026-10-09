@@ -83,7 +83,7 @@ AGENTS.md §命令速查）：
 | ② 行为 / 谓词 | `src/lib/` 每个折算谓词有正例 + 错误路径用例，同 diff 交付 | `tests/*.test.mjs` |
 | ③ 注册生命周期 | slot / 页签 / 活标题注册全量包 `scoped.effect(...)`——dispose 即撤销贡献，零裸注册 | verify 门禁 `client-effect-wrap` |
 | ④ 真挂载 | pack 构建产物经真 DSH web 装载（真入口路径；挂载失败只有真会话抓得到） | `client-load-smoke`（真浏览器断言清单） |
-| ⑤ 组装面 | persona / 工具 schema 走 snapshot-replay B 层（组装请求 diff）；用户可见面走 C 层渲染金标准 | `snapshot-replay-smoke` |
+| ⑤ 组装面 | persona、全部 request/header 与三处 user/message 注入（工作区指令 / skill 目录 / 运行时上下文）走 snapshot-replay B 层（组装请求 diff）；用户可见面走 C 层渲染金标准 | `snapshot-replay-smoke` + 场景声明 [snapshots/replay/research-face/snapshot.json](../../snapshots/replay/research-face/snapshot.json) |
 
 ## 交付与部署形态（本包怎么送到用户手里）
 

@@ -2,7 +2,7 @@
 // record-role-fixture.mjs — 角色组装面 fixture 录制工具（dev 工具态，非检查——命名语法不覆盖）。
 // 为 snapshot-replay-smoke 的多场景化录制 per-role canned 会话：boot research 档（真模型档，
 // 需 DEEPSEEK_API_KEY）→ 以 <role> preset 建会话 → 发角色探针 prompt（含哨兵指令）→ 等回合
-// 落定（哨兵出现 + 日志静默）→ 解压会话日志写 fixture + snapshot.yml（人审后入库）。
+// 落定（哨兵出现 + 日志静默）→ 解压会话日志写 fixture（人审后入库；场景声明由人登记）。
 // 录一次，之后 keyless 永久回放（B 层组装请求 diff 钉 persona 全文 + 工具 schema）。
 // ⚠ 副作用自知：每次录制在 dev home 会话组留一段一次性探针会话（事件数只有真实 run 的
 // 零头）——量大后会污染 client-load-smoke 的绑定窗（实红教训），按标题前缀
@@ -41,8 +41,8 @@ if (!ROLE || !ROLE_PROMPTS[ROLE]) fail(`需要 --role <角色 id>（可录集 = 
 if (!process.env.DSH_HOME) fail('未 source dev/env.sh（DSH_HOME 缺席）——与 L1/L2 同档自拒')
 const DSH_HOME = resolve(process.env.DSH_HOME)
 if (!existsSync(join(DSH_HOME, '.credentials.yaml'))) fail('dev home 无凭据文件（.credentials.yaml）——先配置 DEEPSEEK_API_KEY')
-// lead 场景 fixture 住场景根（历史落点，ui.expected.md 同目录），其余角色住 <role>/ 子目录
-const OUT_DIR = join(ROOT, 'tests', 'fixtures', 'snapshot-research-face', ...(ROLE === 'lead' ? [] : [ROLE]))
+// 角色 fixture 住场景目录根（lead 的历史落点，ui.expected.md 同目录），其余角色住 <role>/ 子目录
+const OUT_DIR = join(ROOT, 'snapshots', 'replay', 'research-face', ...(ROLE === 'lead' ? [] : [ROLE]))
 if (existsSync(join(OUT_DIR, 'session.v4.jsonl'))) fail(`${OUT_DIR}/session.v4.jsonl 已在——重录请先删除（录制品人审后入库，不静默覆盖）`)
 
 // ── boot（形状照 snapshot-replay-smoke：vendor 源码 + tsx + research 档，真模型）──
@@ -117,32 +117,12 @@ try {
   console.log(`  回合落定（哨兵在场 + 日志静默）——写 fixture…`)
   mkdirSync(OUT_DIR, { recursive: true })
   writeFileSync(join(OUT_DIR, 'session.v4.jsonl'), logText)
-  // lead 场景根的 snapshot.yml 是常驻契约（scenario: research-face-recording + retired-tools
-  // 钉法注释），不随重录改写；其余角色首次录制时生成同款。
-  if (ROLE !== 'lead') {
-    writeFileSync(join(OUT_DIR, 'snapshot.yml'), [
-    'version: 1',
-    `scenario: research-face-${ROLE}`,
-    'profile: research',
-    `composition: research-face-${ROLE}`,
-    'recording: live',
-    'header:',
-    `  class: research-face-${ROLE}`,
-    '  pin: true',
-    '  systemPromptSource: chat-turn',
-    '  toolSchemasSource: chat-turn',
-    'sessionFormat:',
-    '  # 同 lead 场景契约：request/header 的工具 schema 随 fixture 冻结（retired-tools 语义），',
-    '  # 钉在当前 format 版本 4。声明后 record/refresh 不改写本 fixture（有意变更走新一代',
-    '  # session.vN.jsonl + 人审）。',
-    '  version: 4',
-    '  coverage: [retired-tools]',
-    '',
-  ].join('\n'))
-  }
-  console.log(ROLE === 'lead'
-    ? `  已写 ${OUT_DIR}/session.v4.jsonl（根 snapshot.yml 常驻契约不动；C 金标准刷新 = snapshot-replay-smoke --update-expected + 人审）——请人审后入库（git add）。`
-    : `  已写 ${OUT_DIR}/session.v4.jsonl + snapshot.yml——请人审后入库（git add）。`)
+  // 场景身份住 snapshots/replay/research-face/snapshot.json（replay smoke 的实际驱动输入）。
+  // 录制器不代写它：manifest 是正本，新角色/重录后由人把录制身份（codeAnchor/vendor/recordedAt）
+  // 填进对应 case——smoke 会因 case 集 ≠ 盘上 presets/ 而 fail-loud，漏登记不会静默通过。
+  const rel = ROLE === 'lead' ? 'session.v4.jsonl' : `${ROLE}/session.v4.jsonl`
+  console.log(`  已写 ${OUT_DIR}/session.v4.jsonl——请在 snapshots/replay/research-face/snapshot.json 登记 case「${ROLE}」（fixture: ${rel} + 录制身份），人审后入库（git add）。`)
+  if (ROLE === 'lead') console.log('  C 金标准刷新 = snapshot-replay-smoke --update-expected + 人审。')
 } finally {
   cleanup()
 }

@@ -10,7 +10,7 @@
 ## 根因（源码核对）
 
 [Lead preset](../../../packages/deep-research-pack/presets/lead.patch.yml) 包含既有的“HITL1 零例外”与 ask 约束规则，
-录制的 [Lead 语料](../../../tests/fixtures/snapshot-research-face/session.v4.jsonl) 仍是较旧 persona。首个差异位于第 473 字符。
+录制的 [Lead 语料](../../../snapshots/replay/research-face/session.v4.jsonl) 仍是较旧 persona。首个差异位于第 473 字符。
 本次目录治理未修改该 preset（`git diff --exit-code HEAD -- packages/deep-research-pack/presets/lead.patch.yml` 通过），
 因此本次浏览器/折算改动不是该 B1 差异来源。
 

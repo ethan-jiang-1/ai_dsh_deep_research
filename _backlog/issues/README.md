@@ -4,11 +4,7 @@
 
 ## 活跃清单
 
-| 卡 | 要解决什么 | 当前环节与未完成项 |
-|---|---|---|
-| [2026-10-09-snapshots-adoption.md](2026-10-09-snapshots-adoption.md) | 确定插件研发 snapshots 的首批落点 | 已完成来源研究；待确认 fixture 迁移、BUG-018 修复和验收切片 |
-
-
+（当前无活跃问题卡。最近结卡 = [snapshots 首批落点](../_archive/settled_issues/2026-10-09-snapshots-adoption.md)——首批四角色 replay 切片含 BUG-018 修复与场景声明消费。）
 ## 写一张卡
 
 文件名为 `YYYY-MM-DD-<slug>.md`。开头先让下一位读者知道：解决什么、现在什么情况、还缺什么、下一步是什么。讨论中的事实、假设和建议分别写清，历史推演放在当前情况之后。

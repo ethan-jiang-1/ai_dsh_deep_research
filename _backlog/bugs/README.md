@@ -10,11 +10,7 @@
 
 ## 活跃列表
 
-| Bug | 标题 | 严重级 | 发现 |
-|---|---|---|---|
-| [BUG-018](BUG-018-snapshot-replay-advertised-coverage.md) | snapshot-replay B 层广告覆盖 skill 与工具行，实际对三处 `user/message` 注入全不覆盖 | P1 | 2026-10-08 |
-
-（2026-10-07 曾清零；最近归档 = BUG-016 fresh clone 门禁机器态依赖 + BUG-017 provenance UTC 日期〔两卡均 TDD 先红后绿〕。）
+（无活跃缺陷卡；最近归档 = [BUG-018](../_archive/fixed_bugs/BUG-018-snapshot-replay-advertised-coverage.md) snapshot-replay 声明覆盖大于实际覆盖〔B 层补齐比对面 + 覆盖面自守〕。）
 
 ## 卡片模板
 

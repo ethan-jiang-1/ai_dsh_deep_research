@@ -4,7 +4,7 @@
 
 出处 = 推敲卡 [2026-10-08-sdlc-reference-absorption](../../_backlog/_archive/settled_issues/2026-10-08-sdlc-reference-absorption.md)
 （§候选与取舍 第二档 C11 + §毕业门"缺什么证据才能判"）。标定报告全文 =
-[_backlog/research/2026-10-08-model-visible-calibration.md](../../_backlog/research/2026-10-08-model-visible-calibration.md)。
+[_backlog/research/2026-10-08-model-visible-calibration.md](../../_backlog/_archive/research/2026-10-08-model-visible-calibration.md)。
 
 ## 决定
 
@@ -14,7 +14,7 @@
 参考卷原条款（DSH `docs/testing.md` "When a snapshot test is required"）：非平凡
 model-visible 变化 → **同一 PR 内**新增或更新 keyless recorded-session 夹具。
 本仓等价物 = [snapshot-replay-smoke](../../scripts/smoke/snapshot-replay-smoke.mjs) 的
-`tests/fixtures/snapshot-research-face/`。
+`snapshots/replay/research-face/`。
 
 ### 核心数据
 

@@ -426,13 +426,12 @@ const allFiles = walk(ROOT);
       // submodule 一致；扩围反证实录 = evaluation.md 本行）。
       .filter((f) => !f.startsWith('vendor/') && f !== 'pnpm-lock.yaml'
         && !(f.startsWith('notes/') && f !== 'notes/README.md' && f !== 'notes/AGENTS.md'))
-      // 快照 fixture 豁免（2026-09-27）：录制的会话流里含 harness 自身的版本戳（system-reminder
-      // 注入的构建身份）——那是 vendor 规范化契约说的"挥发性身份"（fixture 定形时 tokenize），
-      // 不是本仓的钉声明；钉死在 fixtures 录制流上会与每次重录打架。
-      .filter((f) => !f.startsWith('tests/fixtures/snapshot-'))
-      // run-state 夹具同款豁免（2026-09-27）：同为录制会话日志的投影——lead 的 grep 研究动作
-      // 参数里出现 DSH 版本 tag 字样是实录数据（本次 pre-commit 咬住的实录即红证），不是钉声明。
-      .filter((f) => !f.startsWith('tests/fixtures/run-state/'));
+      // 录制会话流豁免（2026-09-27 立，2026-10-09 随夹具迁入 snapshots/replay/ 合并）：录制的
+      // 会话流里含 harness 自身的版本戳（system-reminder 注入的构建身份）与录制时的本仓 commit
+      // ——那是 vendor 规范化契约说的"挥发性身份"与历史证据身份，不是本仓的钉声明；钉死在
+      // 录制流上会与每次重录打架。run-state 夹具（同为录制日志投影）与 snapshots/replay/ 场景
+      // 声明（codeAnchor 记录制 git 身份）同由本条覆盖；snapshots/ 其余文件（如 README）仍受检。
+      .filter((f) => !f.startsWith('tests/fixtures/run-state/') && !f.startsWith('snapshots/replay/'));
     let hexes = 0, tags = 0, skipped = 0;
     for (const rel of files) {
       const f = join(ROOT, rel);

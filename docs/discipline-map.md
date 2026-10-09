@@ -42,7 +42,7 @@
 | Prefer the real implementation over a mock | L1 真挂载档（真会话断言工具/skill 面——dump/roster 可见不算） | 照搬 |
 | The with-key policy: inference is cheap（语义面用真模型证） | 真模型档脚本（清单正本 = AGENTS §密钥）；入口链探针 = 语义漂移的真模型检测 | 照搬 |
 | Test resolution: source plane only | keyless 回归断言 tracked 源文件（md-utf8-newline 改 git ls-files 驱动即为此则——运行区不扫，live run 实证） | 带证据适配 |
-| Snapshot tests（关键用户可见变更更新录制快照） | 等价物 = snapshot-replay-smoke 三层判据（A 回放收尾逐字命中 / B 组装请求 diff = persona + 工具 schema / C 渲染金标准）+ 真模型档会话日志断言（zstd 逐事件）+ `client-load-smoke` 真浏览器断言；真录制通道不做——B 层 diff 已是模型可见变更的独立 keyless 信号（输掉的方案 = test-strategy 采纳 Note） | 带证据适配 |
+| Snapshot tests（关键用户可见变更更新录制快照） | 等价物 = snapshot-replay-smoke 三层判据（A 回放收尾逐字命中 / B 组装请求 diff = persona + 全部 request/header + 三处 user/message 注入〔工作区指令 / skill 目录 / 运行时上下文〕/ C 渲染金标准）+ 真模型档会话日志断言（zstd 逐事件）+ `client-load-smoke` 真浏览器断言；真录制通道不做——B 层 diff 已是模型可见变更的独立 keyless 信号（输掉的方案 = test-strategy 采纳 Note） | 带证据适配 |
 | Test subprocess launch modes（构建产物/源码启动模式分立） | 本仓不设双启动模式：冒烟子进程一律走 tsx 源码通道（`node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts`）；构建产物另有在场断言（`lib/client.js` 经 exports["./client"] 由 `client-load-smoke` 加载，缺件由 `vendor-artifacts` 自检拦） | 不适用 |
 
 ## 源 3：vendor docs/AGENTS.md（文档标准）
@@ -172,7 +172,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | `docs/glossary.md` | 已具备：`docs/00-index.md §术语映射`（一个概念一个 canonical term，含 DSH↔本仓对照） |
 | `docs/development.md` · `docs/testing.md` · `docs/architecture.md` · `docs/cookbook/` · `docs/subsystems/` | 已具备（改名映射）：guides/60 · evaluation + guides/60 §2 · design/10 · guides/61/62 · design/ |
 | `docs/i18n/` · `docs/user/` · `website/` | 不适用：单语、无对外产品文档站与站点投影 |
-| `snapshots/`（session 回放 fixture） | **已具备**：[snapshot-replay-smoke](../scripts/smoke/snapshot-replay-smoke.mjs)（keyless，禁 llm-deepseek + 插 vendor `dsh-llm-replay`）+ 四角色夹具 [snapshot-research-face](../tests/fixtures/README.md)（`tests/fixtures/` 七组 taxonomy 之一）；判据见本表源 2 "Snapshot tests" 行 | 带证据适配 |
+| `snapshots/`（session 回放 fixture） | **已具备**：[snapshots/](../snapshots/README.md) 场景证据层——四角色场景 [场景证据层 snapshots/](../snapshots/README.md) 的 `snapshot.json` 由 [replay-scene](../scripts/lib/replay-scene.mjs) 消费并驱动 [snapshot-replay-smoke](../scripts/smoke/snapshot-replay-smoke.mjs)（keyless，禁 llm-deepseek + 插 vendor `dsh-llm-replay`）；纯函数夹具仍住 `tests/fixtures/`；判据见本表源 2 "Snapshot tests" 行 | 带证据适配 |
 | `benchmarks/` · `native/` · `python/` · `patches/` · `apps/` | 不适用：本仓无这些发布 lane 与运行时面 |
 | `CONTRIBUTING.md` · `SAFETY.md` · `SECURITY` · `THIRD_PARTY_NOTICES.md` · `BRAND_GUIDELINES.md` | 不适用：无外部贡献流、无运行时安全授权面、无捆绑第三方代码、无品牌资产 |
 | `.editorconfig` · `.gitattributes` · lint（oxlint）· 重复代码检测（jscpd）· vitest 系列配置 · `lefthook.yml` | 前两件已具备（`repo-conventions` 门禁强制与 vendor 对齐）；后四件未引入（TS 面 = 一个包的 `src/`，测试栈 = node:test）；Markdown 纪律由门禁（md-utf8-newline / md-links / md-anchors / doc-budgets）承担，git 钩子 = `dev/hooks/pre-commit` |
