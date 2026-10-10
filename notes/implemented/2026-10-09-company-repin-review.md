@@ -103,9 +103,10 @@ README 证据边界同句。**无需返工**；其 06/07（bug 复现 playbook�
 
 ### 其他外部材料钉版状态（如实记账）
 
-- `_dsh_plugin_agent_ready_development` `bbcf346ddb`→`fb862eed5c`（约 20 提交：FAQ 21
-  「快照证据该不该进 git」+ sdlc Reference 演进）与 `ai_dsh_assitant` `576c5f8`→`ef10237`
-  （约 170 提交）均已前进——结论待复核（钉版表记录的是我们吸收时的版本，本身不失效）；
+- `_dsh_plugin_agent_ready_development` `bbcf346ddb`→`ad6f5319dc`（24 提交）与 `ai_dsh_assitant`
+  `576c5f8`→`202a27b`（全仓 210 提交，吸收两路径 141）已于 2026-10-10 复核——两债吸收面
+  结论维持，重钉 + 债 2 行描述改述已落地（逐面判定与证据 =
+  [外部钉版债复核材料](../../_backlog/research/2026-10-10-external-repin-review.md)）；
 - `_agent_ready_development` 老路径已不存在（一代语料，2026-09-25 已吸收，二代语料已取代）；
 - vendor/dsh 上游无新 tag（`git ls-remote` 核对，最高仍为 `dsh-v0.2.0-rc.2`）——本轮无需升 pin。
 
