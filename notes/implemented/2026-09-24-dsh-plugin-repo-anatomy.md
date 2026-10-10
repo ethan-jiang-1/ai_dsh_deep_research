@@ -40,7 +40,7 @@
 
 ## 3. preset.yml 与 agent.cordis.yml 字段语义
 
-**preset.yml**：`name`（显示名，如 `wochen CEO`）、`description`（一句话职责）、`order`（roster 排序）。preset id=目录名，须匹配 `/^[a-z0-9][a-z0-9-]*$/`。
+**preset.yml**：`name`（显示名，如 `wochen CEO`——company 2026-10-10 起显示名前缀换代为「梦之队 <角色>」，本句保留当时实形态）、`description`（一句话职责）、`order`（roster 排序）。preset id=目录名，须匹配 `/^[a-z0-9][a-z0-9-]*$/`。
 
 **agent.cordis.yml row 类型**（CEO 实例）：
 - `persona`（dsh-persona）：`config.prefix` 注 system prompt；可选 `complete: true`/`includeRuntimeContext: false`

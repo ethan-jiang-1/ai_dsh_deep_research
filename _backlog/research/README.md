@@ -19,6 +19,7 @@
 
 | 文件 | 服务 | 一句话 |
 |---|---|---|
+| [2026-10-10-company-drift-review.md](2026-10-10-company-drift-review.md) | [company 钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md) | company 漂移复核（59551f2→b19e9ed，7 提交）：五簇全维持、证据锚零腐烂（run-gates/release.md 区间零 diff）；三条吸收候选登记（事实阻塞闸门 HITL 高价值）；重钉 b19e9ed 落地 |
 | [2026-10-10-bare-path-audit.md](2026-10-10-bare-path-audit.md) | [company 钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md) | 裸路径死指针盘点：主范围 30.6% 死中**真断链仅 16 条（2.5%）**、浅引用是风格大头；7 处改写清偿 + 9 处裁定为占位符/假想/自注；**处置 = 不立通用门禁**（无消费者/存量小/重叠），重启条件已登记 |
 | [2026-10-10-preset-config-audit.md](2026-10-10-preset-config-audit.md) | [company 钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md) | preset config 面对照盘点（vendor config-catalog 正本）：**零漂移不需要修**——全部硬性必填字段在场、preset 间共享值逐字一致；未声明可用面登记备查 |
 | [2026-10-10-external-repin-review.md](2026-10-10-external-repin-review.md) | [company 钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md) | 两笔钉版债复核：二代语料（24 提交六吸收面全维持）+ ai_dsh_assitant（141 提交核心维持、钉版行描述须改述）——重钉 ad6f5319dc / 202a27b 已落地 |
