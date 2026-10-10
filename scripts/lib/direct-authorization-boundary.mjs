@@ -2,8 +2,13 @@ const normalize = (text) => text.replace(/[，。；、———()（）\s]/g, '
 
 export const rfcBoundaryPasses = (answer) => {
   const text = normalize(answer);
-  const hasException = /持久决定.{0,24}显式评审/.test(text) && /(?:只有|仅当|才.{0,16}建立)/.test(text);
-  const rejectsUniversal = /(?:不是|并非|不作为|非).{0,16}(?:普遍前置|一般实施工作|实施前置门)/.test(text);
+  // 词面层 = 留档语义复核的召回预过滤（职责是召回语义正确的形态，不是规定措辞）。
+  // 2026-10-10 真模型双跑实录与放宽依据 = notes/implemented/2026-10-10-entry-chain-probe-lexical-recall.md。
+  // ①限定语接受 只有/仅当/仅在/只在/才——「仅在/只在…时…建立」含长括注展开是模型自然措辞；
+  // ②普遍前置的拒绝接受显式短语（不是…普遍前置）或对问句的直接否定起句（「不是——」）。
+  const hasException = /持久决定.{0,24}显式评审/.test(text) && /(?:只有|仅当|仅在|只在|才).{0,60}建立/.test(text);
+  const rejectsUniversal = /(?:不是|并非|不作为|非).{0,16}(?:普遍前置|一般实施工作|实施前置门)/.test(text)
+    || /^(?:不是|并非)/.test(text);
   return hasException && rejectsUniversal;
 };
 
