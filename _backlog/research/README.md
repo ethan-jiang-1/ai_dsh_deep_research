@@ -19,6 +19,7 @@
 
 | 文件 | 服务 | 一句话 |
 |---|---|---|
+| [2026-10-10-bare-path-audit.md](2026-10-10-bare-path-audit.md) | [company 钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md) | 裸路径死指针盘点：主范围 30.6% 死中**真断链仅 16 条（2.5%）**、浅引用是风格大头；7 处改写清偿 + 9 处裁定为占位符/假想/自注；**处置 = 不立通用门禁**（无消费者/存量小/重叠），重启条件已登记 |
 | [2026-10-10-preset-config-audit.md](2026-10-10-preset-config-audit.md) | [company 钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md) | preset config 面对照盘点（vendor config-catalog 正本）：**零漂移不需要修**——全部硬性必填字段在场、preset 间共享值逐字一致；未声明可用面登记备查 |
 | [2026-10-10-external-repin-review.md](2026-10-10-external-repin-review.md) | [company 钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md) | 两笔钉版债复核：二代语料（24 提交六吸收面全维持）+ ai_dsh_assitant（141 提交核心维持、钉版行描述须改述）——重钉 ad6f5319dc / 202a27b 已落地 |
 | [2026-10-10-teammate-channel-probe.md](2026-10-10-teammate-channel-probe.md) | [member-activity-stream 卡](../issues/2026-10-09-member-activity-stream.md) | 队员动作流三通道 vendor 同 pin 实测（rc.2 源码锚点）：session.follow = 任意会话可 follow、journal 同词表、无已知并发上限——**唯一动作粒度通道**；agentTeam 投影 = roster+任务板+turn 级 running（无动作级事件），但它是**队员会话 id 唯一发现源**（spawn_teammate 返回已证不带 id）；新 @Remote = typert 生成步硬前置、仓外零先例、当前不采纳 |

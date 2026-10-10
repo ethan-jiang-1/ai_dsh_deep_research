@@ -93,8 +93,9 @@ README 证据边界同句。**无需返工**；其 06/07（bug 复现 playbook�
 - **layering 二代**（中高）：AST 判法（动态 import/密钥间接引用现逃检）+ import 图守卫
   （`tests/verify-gates.test.mjs` import gates-smoke.mjs 靠约定安全）+ package.json test
   命令形状钉；
-- **盘点后定**（中）：bare-path（live 文档反引号裸路径，company 实测 21.3% 死指针率）、
-  preset-required-config（对照 vendor config-catalog 盘点我方行 config 面）；
+- **盘点后定**（中）：两候选均已于 2026-10-10 盘点收口——preset-required-config 零漂移
+  不需要修（[盘点材料](../../_backlog/research/2026-10-10-preset-config-audit.md)）；
+  bare-path 真断链 16 条清偿/裁定完毕、不立通用门禁（[盘点材料](../../_backlog/research/2026-10-10-bare-path-audit.md)）；
 - **触发条件型**（已登记 [snapshots/README](../../snapshots/README.md)）：场景 glob 发现 +
   资格三态 + 判定日期（第二场景族 / 首个永久红场景时）；snapshots 体积预算（累积型类别入库时）；
 - **运维规则**（已写进 [bumping-vendor-pin 技能](../../.agents/skills/bumping-vendor-pin/SKILL.md)

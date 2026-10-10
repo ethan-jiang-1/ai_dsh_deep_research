@@ -58,7 +58,7 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 | 通道 | 载体 | 用途 | 边界依据 |
 |---|---|---|---|
 | **Agent Teams（主通道）** | `agent-team` + `tool-agent-team`（vendor **agent-team-profile 层**行：profile 装 `@…-agent-team-profile@<pin 派生>`——版本由 `dev/boot-run.sh` 从 pack 兼容矩阵同源派生，`packages/deep-research-pack/package.json` 的 `dsh.compatibility.dshReleases[0]` 去 `dsh-v` 前缀，带实战 config + company D18 机械禁令——control / list-agents 禁用、subagent 强制 one-shot；A 定案） | 持续对话、任务板、多轮往返：scout 汇报 → analyst 接力 → critic 审查 → analyst 补证 | 续驶语义归 team：team-scoped 会话里 continuable child 不可达（company D18 实证）——层把边界从纪律文本升级为组合层禁令 |
-| subagent（工人） | `tool-subagent`（preset 行，**one-shot**——company D18 对齐：层强制 one-shot 但实测 preset 行覆盖 profile 行，preset 须同声明；RFC m2-p1-run-channel；maxDepth 未显式声明 → vendor rc.2 默认 1，worker 不能再生 grandchild，与单点查证用法相容） | 单点快捷查证、并行铺方向/深挖 | 前台拿结果；连续对话不归它。**机制边界**：one-shot worker 的工具目录里看得到 Team 工具但调不通（vendor `tool-agent-team/README.md` known limitation，同 pin 适用）——派工方应让 worker 明确别调 `spawn_teammate` / `team_task_*` / `wait_agent` |
+| subagent（工人） | `tool-subagent`（preset 行，**one-shot**——company D18 对齐：层强制 one-shot 但实测 preset 行覆盖 profile 行，preset 须同声明；RFC m2-p1-run-channel；maxDepth 未显式声明 → vendor rc.2 默认 1，worker 不能再生 grandchild，与单点查证用法相容） | 单点快捷查证、并行铺方向/深挖 | 前台拿结果；连续对话不归它。**机制边界**：one-shot worker 的工具目录里看得到 Team 工具但调不通（vendor `packages/experimental/tool-agent-team/README.md` known limitation，同 pin 适用）——派工方应让 worker 明确别调 `spawn_teammate` / `team_task_*` / `wait_agent` |
 | present（交付） | `tool-present`（bundle + lead preset） | 成品声明：final.md 是唯一成品 | 非 lead 的 present = 过程稿展示（研究手册三态） |
 
 ## 4. 工具面（四角色共同基座 + 差异）
