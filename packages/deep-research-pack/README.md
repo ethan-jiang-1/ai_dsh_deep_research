@@ -40,7 +40,7 @@ dsh --profile research --from-default-profile web --dump-config
 # ② 装包：本包 private（未发布 registry）——裸包名解析不到，必须给 tarball 的 file: 形态；
 #    且**必须绝对路径**（`file:` 相对路径按 profile 目录解析，不是你的 cwd）。
 #    出包 = `node scripts/dist/export-dist.mjs`（仓根执行）→ `_dist/` 的 tarball + 安装手册.md（用户视角正本）。
-dsh plugin --profile research add file:/abs/path/to/dsh-deep-research-pack-0.1.0.tgz
+dsh plugin --profile research add file:/abs/path/to/dsh-deep-research-pack-<版本>.tgz
 
 # ②b 验证形状（"装好了"的最小判据；下列各项缺任一 = 没装上）
 dsh --profile research --dump-config   # 应见 preset-lead/scout/analyst/critic + tool-present + ui-agent-team + research-client + session-query-sqlite（openAt: first-search）

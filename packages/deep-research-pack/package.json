@@ -1,6 +1,6 @@
 {
   "name": "dsh-deep-research-pack",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "Deep Research multi-role plugin pack: 4 research role presets (Lead / Scout / Analyst / Critic) + host bundle rows (preset roster, deliverables, team UI). Team mechanics come from the dsh-experimental-agent-team-profile layer installed per profile. Methodology kernel from codex Deep Research harness. Design docs: docs/00-index.md",
