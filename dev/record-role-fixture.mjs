@@ -8,8 +8,12 @@
 // 零头）——量大后会污染 client-load-smoke 的绑定窗（实红教训），按标题前缀
 // 「用一两句话说明你作为」定期清理即可。
 // 用法：source dev/env.sh && node --import tsx/esm dev/record-role-fixture.mjs --role scout [--port 3105]
+// BUG-019 修复：MCP server 经 npx 冷启动连接可能晚于首回合请求组装（时序骰子，实录 6 录
+// 4 赢 2 输；宿主 stdout/logs 均无就绪信号可等）——写盘前验 MCP 组谓词，缺组即废弃本录并
+// 有界重试，连续落败 fail-loud；mirror 无 mcp 行（MCP_PLAYWRIGHT=0 形态）时谓词不适用。
+// 等待/重试替代时序运气（scripts/AGENTS「等待显式状态」——此处显式状态 = 产出件谓词）。
 import { spawn, execSync } from 'node:child_process'
-import { writeFileSync, existsSync, mkdirSync, readdirSync, mkdtempSync, statSync } from 'node:fs'
+import { writeFileSync, readFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
@@ -24,6 +28,10 @@ const PORT = Number(argOf('port', '3105'))
 const SENTINEL = '探针完成'
 const BOOT_TIMEOUT_MS = 120_000
 const TURN_TIMEOUT_MS = 240_000
+// BUG-019：MCP 组谓词（marker = mcp-resources 插件的 resource 工具名——请求工具表含它
+// ⟺ MCP server 已在首请求前连接完毕）与有界重试上限。
+const MCP_MARKER = 'list_mcp_resources'
+const MAX_ATTEMPTS = 3
 
 // 角色探针 prompt：一回合、零工具依赖（组装面钉 persona + 工具 schema 即可，工具路径由
 // lead 场景承担）+ 哨兵收尾（A 层逐字命中判据）。lead 探针 = 2026-09-30 首录原文复用
@@ -45,84 +53,114 @@ if (!existsSync(join(DSH_HOME, '.credentials.yaml'))) fail('dev home 无凭据�
 const OUT_DIR = join(ROOT, 'snapshots', 'replay', 'research-face', ...(ROLE === 'lead' ? [] : [ROLE]))
 if (existsSync(join(OUT_DIR, 'session.v4.jsonl'))) fail(`${OUT_DIR}/session.v4.jsonl 已在——重录请先删除（录制品人审后入库，不静默覆盖）`)
 
-// ── boot（形状照 snapshot-replay-smoke：vendor 源码 + tsx + research 档，真模型）──
+// mirror 是否声明 mcp 行：决定 MCP 组谓词是否适用（MCP_PLAYWRIGHT=0 形态无此行，
+// 竞态与 MCP 组都不存在，谓词跳过——fail-loud 不误伤该形态）。
+const mirrorPatch = join(DSH_HOME, 'profiles', 'research', 'cordis.patch.yml')
+const expectMcp = existsSync(mirrorPatch) && /mcp|playwright/i.test(readFileSync(mirrorPatch, 'utf8'))
+
+// ── boot + 录一次：返回会话日志全文；spawn/cleanup 每次尝试独立（含 fail 路径——
+//    process.exit 跳过 finally，故 fatal 一律 throw，由顶层统一打印并退出）。──
 const VENDOR = join(ROOT, 'vendor', 'dsh')
 const bin = join(VENDOR, 'apps', 'cli', 'src', 'bin.ts')
-const BOOT_START = Date.now()
-const child = spawn(process.execPath, ['--import', 'tsx/esm', bin, '--profile', 'research', '--', '--port', String(PORT), '--no-open'], { cwd: VENDOR, env: withModelKey(scrubbedEnv({ DSH_HOME, PATH: process.env.PATH })), stdio: ['ignore', 'pipe', 'pipe'], detached: true })
-let output = ''
-let childGone = false
-child.on('exit', () => { childGone = true })
-const banner = new Promise((res, rej) => {
-  const onData = (chunk) => {
-    output += String(chunk)
-    const m = new RegExp(`http://127\\.0\\.0\\.1:${PORT}/\\?token=(\\S+)`).exec(output)
-    if (m !== null) res({ token: m[1] })
+
+const recordOnce = async () => {
+  const child = spawn(process.execPath, ['--import', 'tsx/esm', bin, '--profile', 'research', '--', '--port', String(PORT), '--no-open'], { cwd: VENDOR, env: withModelKey(scrubbedEnv({ DSH_HOME, PATH: process.env.PATH })), stdio: ['ignore', 'pipe', 'pipe'], detached: true })
+  let output = ''
+  let childGone = false
+  child.on('exit', () => { childGone = true })
+  const banner = new Promise((res, rej) => {
+    const onData = (chunk) => {
+      output += String(chunk)
+      const m = new RegExp(`http://127\\.0\\.0\\.1:${PORT}/\\?token=(\\S+)`).exec(output)
+      if (m !== null) res({ token: m[1] })
+    }
+    child.stdout.on('data', onData)
+    child.stderr.on('data', onData)
+    child.on('exit', (code) => rej(new Error(`web 进程提前退出（code ${String(code)}）\n${output.slice(-600)}`)))
+    setTimeout(() => rej(new Error(`等待启动横幅超时\n${output.slice(-600)}`)), BOOT_TIMEOUT_MS)
+  })
+  const cleanup = () => { try { process.kill(-child.pid, 'SIGKILL') } catch { child.kill('SIGKILL') } }
+  try {
+    const { token } = await banner
+    const base = `http://127.0.0.1:${PORT}`
+    const response0 = await fetch(`${base}/?token=${token}`, { redirect: 'manual' })
+    const cookie = (response0.headers.getSetCookie?.() ?? []).map((c) => c.split(';')[0]).join('; ')
+    let rpcId = 0
+    const rpc = async (endpoint, args) => {
+      const response = await fetch(`${base}/api/${endpoint}`, {
+        method: 'POST', headers: { 'content-type': 'application/json', cookie },
+        body: JSON.stringify({ type: 'client-request', rpcId: `rec-${++rpcId}`, method: endpoint, payload: { args } }),
+      })
+      const body = await response.json()
+      if (body?.result?.ok !== true) throw new Error(`${endpoint} 失败: ${body?.result?.error?.message ?? JSON.stringify(body).slice(0, 200)}`)
+      return body.result.value
+    }
+
+    const ws = await rpc('workspace/create', { request: { path: join(ROOT, 'research-workspace') } })
+    const workspaceId = ws?.workspace?.workspaceId ?? ws?.workspaceId
+    const created = await rpc('session/create', { request: { workspaceId, agentPreset: ROLE } })
+    const sessionId = created?.id ?? created?.sessionId
+    console.log(`  会话已建（preset=${ROLE}，id=${sessionId}）——发探针 prompt…`)
+    await rpc('session/prompt', { request: { requestId: randomUUID(), sessionId, mode: 'queue', content: [{ type: 'text', text: ROLE_PROMPTS[ROLE] }] } })
+
+    // ── 等回合落定：本会话日志出现哨兵 + 日志静默（连续 3 次轮询字节数不变——team-preflight
+    //    时序教训：标记早现 ≠ 回合完成）──
+    const SESSIONS = join(DSH_HOME, 'sessions')
+    const group = readdirSync(SESSIONS).find((d) => d.includes('research-workspace'))
+    const logOf = (sid) => join(SESSIONS, group, sid, 'session.v4.jsonl.zstd')
+    const readLog = (log) => { try { return execSync(`zstd -dc "${log}" 2>/dev/null`, { maxBuffer: 64 * 1024 * 1024 }).toString('utf8') } catch { return null } }
+    let logText = null
+    let lastSize = -1
+    let quietRounds = 0
+    const deadline = Date.now() + TURN_TIMEOUT_MS
+    while (Date.now() < deadline) {
+      await sleep(4_000)
+      logText = readLog(logOf(sessionId))
+      if (logText === null) { if (childGone) break; continue }
+      const hasSentinel = logText.includes(SENTINEL)
+      const size = statSync(logOf(sessionId)).size
+      quietRounds = size === lastSize ? quietRounds + 1 : 0
+      lastSize = size
+      if (hasSentinel && quietRounds >= 3) break
+      if (childGone) break
+    }
+    if (logText === null || !logText.includes(SENTINEL)) {
+      const err = new Error(`回合未在 ${TURN_TIMEOUT_MS / 1000}s 内落定（哨兵「${SENTINEL}」缺席）——真模型回合未走通`)
+      err.fatal = true
+      throw err
+    }
+    return logText
+  } finally {
+    cleanup()
   }
-  child.stdout.on('data', onData)
-  child.stderr.on('data', onData)
-  child.on('exit', (code) => rej(new Error(`web 进程提前退出（code ${String(code)}）\n${output.slice(-600)}`)))
-  setTimeout(() => rej(new Error(`等待启动横幅超时\n${output.slice(-600)}`)), BOOT_TIMEOUT_MS)
-})
-const cleanup = () => { try { process.kill(-child.pid, 'SIGKILL') } catch { child.kill('SIGKILL') } }
+}
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
+// ── MCP 组谓词 + 有界重试（BUG-019）：工具表缺 MCP 组 = 竞态输家，回放 B 层必假红——
+//    废弃不写盘，重试；连续落败 fail-loud（带处置入口）。 ──
+let logText = null
 try {
-  const { token } = await banner
-  const base = `http://127.0.0.1:${PORT}`
-  const response0 = await fetch(`${base}/?token=${token}`, { redirect: 'manual' })
-  const cookie = (response0.headers.getSetCookie?.() ?? []).map((c) => c.split(';')[0]).join('; ')
-  let rpcId = 0
-  const rpc = async (endpoint, args) => {
-    const response = await fetch(`${base}/api/${endpoint}`, {
-      method: 'POST', headers: { 'content-type': 'application/json', cookie },
-      body: JSON.stringify({ type: 'client-request', rpcId: `rec-${++rpcId}`, method: endpoint, payload: { args } }),
-    })
-    const body = await response.json()
-    if (body?.result?.ok !== true) throw new Error(`${endpoint} 失败: ${body?.result?.error?.message ?? JSON.stringify(body).slice(0, 200)}`)
-    return body.result.value
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    if (attempt > 1) console.log(`  第 ${attempt}/${MAX_ATTEMPTS} 次尝试（上次工具表缺 MCP 组——BUG-019 竞态，已废弃不写盘）…`)
+    logText = await recordOnce()
+    if (!expectMcp || logText.includes(MCP_MARKER)) break
+    console.log(`  工具表缺 MCP 组（首请求组装早于 MCP server 连接）——废弃本次录制品，不写盘`)
+    logText = null
   }
-
-  const ws = await rpc('workspace/create', { request: { path: join(ROOT, 'research-workspace') } })
-  const workspaceId = ws?.workspace?.workspaceId ?? ws?.workspaceId
-  const created = await rpc('session/create', { request: { workspaceId, agentPreset: ROLE } })
-  const sessionId = created?.id ?? created?.sessionId
-  console.log(`  会话已建（preset=${ROLE}，id=${sessionId}）——发探针 prompt…`)
-  await rpc('session/prompt', { request: { requestId: randomUUID(), sessionId, mode: 'queue', content: [{ type: 'text', text: ROLE_PROMPTS[ROLE] }] } })
-
-  // ── 等回合落定：本会话日志出现哨兵 + 日志静默（连续 3 次轮询字节数不变——team-preflight
-  //    时序教训：标记早现 ≠ 回合完成）──
-  const SESSIONS = join(DSH_HOME, 'sessions')
-  const group = readdirSync(SESSIONS).find((d) => d.includes('research-workspace'))
-  const logOf = (sid) => join(SESSIONS, group, sid, 'session.v4.jsonl.zstd')
-  const readLog = (log) => { try { return execSync(`zstd -dc "${log}" 2>/dev/null`, { maxBuffer: 64 * 1024 * 1024 }).toString('utf8') } catch { return null } }
-  let logText = null
-  let lastSize = -1
-  let quietRounds = 0
-  const deadline = Date.now() + TURN_TIMEOUT_MS
-  while (Date.now() < deadline) {
-    await sleep(4_000)
-    logText = readLog(logOf(sessionId))
-    if (logText === null) { if (childGone) break; continue }
-    const hasSentinel = logText.includes(SENTINEL)
-    const size = statSync(logOf(sessionId)).size
-    quietRounds = size === lastSize ? quietRounds + 1 : 0
-    lastSize = size
-    if (hasSentinel && quietRounds >= 3) break
-    if (childGone) break
-  }
-  if (logText === null || !logText.includes(SENTINEL)) {
-    fail(`回合未在 ${TURN_TIMEOUT_MS / 1000}s 内落定（哨兵「${SENTINEL}」缺席）——真模型回合未走通`)
-  }
-  console.log(`  回合落定（哨兵在场 + 日志静默）——写 fixture…`)
-  mkdirSync(OUT_DIR, { recursive: true })
-  writeFileSync(join(OUT_DIR, 'session.v4.jsonl'), logText)
-  // 场景身份住 snapshots/replay/research-face/snapshot.json（replay smoke 的实际驱动输入）。
-  // 录制器不代写它：manifest 是正本，新角色/重录后由人把录制身份（codeAnchor/vendor/recordedAt）
-  // 填进对应 case——smoke 会因 case 集 ≠ 盘上 presets/ 而 fail-loud，漏登记不会静默通过。
-  const rel = ROLE === 'lead' ? 'session.v4.jsonl' : `${ROLE}/session.v4.jsonl`
-  console.log(`  已写 ${OUT_DIR}/session.v4.jsonl——请在 snapshots/replay/research-face/snapshot.json 登记 case「${ROLE}」（fixture: ${rel} + 录制身份），人审后入库（git add）。`)
-  if (ROLE === 'lead') console.log('  C 金标准刷新 = snapshot-replay-smoke --update-expected + 人审。')
-} finally {
-  cleanup()
+} catch (e) {
+  console.error(`record-role-fixture: ${e.message ?? e}`)
+  process.exit(e.fatal ? 2 : 1)
 }
+if (logText === null) {
+  fail(`连续 ${MAX_ATTEMPTS} 次录制工具表均缺 MCP 组（BUG-019 竞态）——检查 mirror 的 mcp 行与 npx 可达性；若修复已入库则此路径为回归（卡 = _backlog/bugs/BUG-019-recorder-mcp-race.md，已修则在其 fixed_bugs 归档）`)
+}
+console.log(`  回合落定（${expectMcp ? 'MCP 组在场 + ' : ''}哨兵在场 + 日志静默）——写 fixture…`)
+mkdirSync(OUT_DIR, { recursive: true })
+writeFileSync(join(OUT_DIR, 'session.v4.jsonl'), logText)
+// 场景身份住 snapshots/replay/research-face/snapshot.json（replay smoke 的实际驱动输入）。
+// 录制器不代写它：manifest 是正本，新角色/重录后由人把录制身份（codeAnchor/vendor/recordedAt）
+// 填进对应 case——smoke 会因 case 集 ≠ 盘上 presets/ 而 fail-loud，漏登记不会静默通过。
+const rel = ROLE === 'lead' ? 'session.v4.jsonl' : `${ROLE}/session.v4.jsonl`
+console.log(`  已写 ${OUT_DIR}/session.v4.jsonl——请在 snapshots/replay/research-face/snapshot.json 登记 case「${ROLE}」（fixture: ${rel} + 录制身份），人审后入库（git add）。`)
+if (ROLE === 'lead') console.log('  C 金标准刷新 = snapshot-replay-smoke --update-expected + 人审。')
