@@ -22,14 +22,12 @@ config.plugins 内声明 persona/skills/工具行）+ `presets/<role>/skills/` +
 
 ## 模型可见文本（persona / skill / 手册）
 
-- 它们**进模型请求**，因此属"模型可见"面：改动要跑真模型档证据（`l4-lite-smoke`），
-  只跑 keyless 不算验过行为；skills 按角色硬隔离（`preset-structure` + L1 真挂载断言）；
-- 运行中的 web 进程缓存 boot 时的文本：改完必须重启 run 通道才生效（实测：spawn 出的成员
-  拿到修复前的 persona）。
+- 它们**进模型请求** = "模型可见"面：证据阶梯（真模型档 + snapshot B 层）与重启要求 =
+  [adding-a-research-role 技能 §3–4](../../.agents/skills/adding-a-research-role/SKILL.md)；
+  skills 按角色硬隔离（`preset-structure` + L1 真挂载断言）。
 
 ## 文档义务
 
 - 包 README 拥有配置、行为、**部署前置**、限制与扩展点（当前合同）；行为或发布集改变同 diff 更新；
 - 部署面（preflight/scaffold/workspace 种子）改动要跑 `release-smoke`（L2 安装形状）；
-- 已知限制与延后工作放固定节 `## 已知限制与延后工作`（上游
-  `## Known Limitations and Deferred Work` 同构）。
+- 已知限制与延后工作放固定节 `## 已知限制与延后工作`（上游 Known Limitations 节同构）。

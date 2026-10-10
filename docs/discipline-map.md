@@ -53,6 +53,9 @@
 | Wordcount budgets（入口文件行数顶） | verify 门禁 `doc-budgets`（逐件行数上限——vendor verify-doc-budgets 裁剪版；上限正本 = [scripts/doc-budgets.json](../scripts/doc-budgets.json)，此处不复制计数；超顶处置序 = 下放>压缩>升顶须同变更登记理由） | 带证据适配 |
 | Cross-reference with machine-checkable links, never free prose | md-links 门禁（方括号+圆括号语法全 tracked md）+ entry-chain 门禁（反引号指针盲区补齐） | 带证据适配（反引号裸路径不检 = 已知盲区，entry-chain 探针语义面兜底） |
 | Slop checklist（文档废话清单） | 行文规范沿袭（定性吸收，未机械化） | 带证据适配 |
+| 一段一行（`verify-md-wrap` 门禁） | 硬折行 ~90 列 | 不适用（登记偏离）：中文优先仓折行是既有惯例，整仓重排会淹没审阅（成本 > 收益）；引入条件 = 转英文或双语文档时 |
+| 双语配对：`*.zh.md` + `.i18n.yaml` hash sidecar | 单语仓 | 不适用（转双语或对外分发时重估） |
+| 站点投影：`website/.generated/` | 无站点 | 不适用（无对外文档站） |
 
 ## 源 4：vendor .agents/notes/（Note 生命周期规则）
 
