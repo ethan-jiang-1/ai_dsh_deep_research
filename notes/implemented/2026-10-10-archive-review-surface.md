@@ -24,7 +24,7 @@
     承接（六处同步清单 + 四条已知坑，2026-10-08 体检核实），活面零引用（本 diff 全量解析
     扫描实证）✓；历史理由值得保留 ✓。
   - **hitl-docking-polish**：完整交付 ✓；操作内容（SSRF 守卫机理 + 代理变量配方全文）已由
-    [guides/61 §HITL1](../../docs/guides/61-run-playbook.md) 承接（2026-10-08 体检核实），
+    [guides/61 §0 开跑](../../docs/guides/61-run-playbook.md) 承接（2026-10-08 体检核实），
     残余的"实证与 vendor 依据"指针按登记制显式化为历史出处 ✓；历史理由值得保留 ✓。
   - 搬移纪律照 [archived/README](../archived/README.md)：唯一机械编辑 = 状态行下插归档行；
     入链重定向（guides/61 ×1、[stocktake Note](2026-10-08-notes-stocktake.md) ×2、
@@ -62,9 +62,13 @@
 
 ## 环境状态
 
-- 登记簿 20 条（docs/ ×10、notes/implemented ×7、guides ×2、pack README ×1——按 (源,目标)
-  对计数）；archived 语料 29 篇（27 + 本轮 2）。
+- 登记簿 24 条（docs/ ×10、notes/implemented ×9、_backlog ×4〔research 材料 ×2 + settled 卡
+  重定向 ×2〕、pack README ×1——按 (源,目标) 对计数）。口径沿革：存量 15 + 归档裁定新增 5
+  + 裁定 Note 自引 2 + settled 卡路径重定向 2 = 24（首版记 20 系漏计后两笔，对抗自审抓获）。
+  archived 语料 29 篇（27 + 本轮 2）。
 - stocktake 三条候选的最终状态：候选 1 = 本门禁落地；候选 2（class 层）维持不引入；
   候选 3 = 两篇裁定归档（本 Note）。
 - 已知限制：登记簿只覆盖 Markdown 链接形态的引用；反引号路径与代码内引用的覆盖面
-  归 bare-path 盘点（2026-10-10 进行中）另行决定。
+  归 bare-path 盘点（2026-10-10 进行中）另行决定。门禁的几何边界（逐行内联式扫描：
+  参考式定义 / 跨行链接 / 围栏内 / HTML href 四形态逃逸，与 md-links 共享）如实登记在
+  [evaluation 台账行已知边界](../../docs/evaluation.md)。

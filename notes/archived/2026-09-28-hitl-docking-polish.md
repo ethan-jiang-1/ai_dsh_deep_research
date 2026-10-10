@@ -2,7 +2,7 @@
 
 > 状态：implemented
 >
-> 归档：2026-10-10（notes-stocktake 边界个案 A 裁定：操作内容已由 docs/guides/61 §HITL1 全文承接〔2026-10-08 体检核实〕，残余出处指针按 archived-note-pointer 登记制显式化——裁定记录 = `notes/implemented/2026-10-10-archive-review-surface.md`）
+> 归档：2026-10-10（notes-stocktake 边界个案 A 裁定：操作内容已由 docs/guides/61 §0 开跑全文承接〔2026-10-08 体检核实〕，残余出处指针按 archived-note-pointer 登记制显式化——裁定记录 = `notes/implemented/2026-10-10-archive-review-surface.md`）
 
 出处：[pipeline-polish 卡](../../_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md) 2026-10-03 基座
 适配复查后面⑤首棒（主序 ⑤→②→③→④ 第一棒，2026-10-03 用户拍板开工）。

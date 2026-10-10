@@ -158,7 +158,11 @@ export const CASES = [
   { id: 'archived-pointer-stale-entry', gate: 'archived-note-pointer', mutate: (dir) => {
     const p = join(dir, 'scripts', 'archived-note-pointers.json');
     const book = JSON.parse(readFileSync(p, 'utf8'));
-    book.pointers[0].target = 'notes/archived/2099-01-01-nonexistent-probe.md';
+    // 按 (source, target) 定位而非下标——首条目将来被清掉/移位时案例语义不漂（对抗自审 S4）
+    const entry = book.pointers.find((e) => e.source === 'docs/00-index.md'
+      && e.target === 'notes/archived/2026-09-24-ui-observability-surfaces.md');
+    if (!entry) throw new Error('登记簿找不到定位条目（00-index → ui-observability-surfaces）——案例失效');
+    entry.target = 'notes/archived/2099-01-01-nonexistent-probe.md';
     writeFileSync(p, `${JSON.stringify(book, null, 2)}\n`);
   } },
   { id: 'note-format-no-status', gate: 'note-format', mutate: stripFirstStatusLine(join('notes', 'implemented')) },
