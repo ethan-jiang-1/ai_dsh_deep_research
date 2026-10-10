@@ -24,7 +24,7 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 CLAUDE.md→AGENTS.md、.claude/skills→.agents/skills    两条 symlink（编辑真文件；后者让 Claude 系
                          harness 发现同一批开发技能——verify 门禁 claude-symlink 校验）
 子树 AGENTS.md            docs/ · scripts/ · notes/ · packages/deep-research-pack/ · tests/ 各一份——只放该
-                         子树的指令（根只放每轮常驻指令；上游 22 份 AGENTS.md〔含根〕同构）
+                         子树的指令（根只放每轮常驻指令；vendor 树内 22 份同构；本仓另有研究手册与 pack 种子副本两份 AGENTS.md，见各自行）
 README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令正本 = guides/60 §2，不复制）
 _backlog/                 问题澄清与证据区：issues/、bugs/、research/、methods/、triggers.md、_archived/；
                           手册 = _backlog/README.md
@@ -33,7 +33,7 @@ packages/deep-research-pack/   唯一自写包（配置为主 + 研究驾驶舱[
 vendor/dsh/               pinned submodule（只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，tag/commit 见 §DSH 源码表）
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、NODES.md（节点 I/O 契约
                          全表）、question-patterns.md（判型模式库）、drt_<slug>/（run bundle）、
-                         archive/（已交付 run 归档位）、drafts/、templates/run/
+                         archive/（已交付 run 归档位）、drafts/（开发侧跨 run 草稿，非 run 产物）、templates/run/
 docs/                    00-index（地图+决策台账+术语映射）→ design/10-60 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ evaluation.md（验收合同）
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）；目录名自带时态，
                          总图 = notes/README.md（将来 proposed/ · 过去 implemented/archived/rejected/
@@ -78,7 +78,7 @@ Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。
 ## 命令速查（全档正本 = [guides/60 §2](docs/guides/60-dev-loop.md)）
 
 ```sh
-source dev/env.sh    # ⚠ 前置：双 home + 裸 dsh 拦截（DSH_HOME=runtime/harness-home）；L1/L2 必须先 source，否则脚本自拒 exit 2（run 通道 dev/boot-run.sh 自 source，勿重复）
+source dev/env.sh    # ⚠ 前置：双 home + 裸 dsh 拦截（DSH_HOME=runtime/harness-home）；L1/L2 及标注「须先 source」的脚本（evidence-audit / snapshot-replay）必须先 source，否则自拒 exit 2（run 通道 dev/boot-run.sh 自 source，勿重复）
 pnpm verify          # L0 结构门禁（keyless，收尾必跑）
 pnpm test            # L0 keyless 回归（唯一登记的测试命令）
 ```
@@ -93,7 +93,7 @@ release-smoke 无模型调用，安装验收使用 `--install-only` 跳过模型
 discipline-probe（纪律行为探针）、client-hitl-smoke、dev/record-role-fixture（fixture 录制）与完整 L4；CDP `--ask` 按当前会话模型档处理（模式表 = [项目地图](docs/project-map.md)）。
 
 L4-lite 真模型冒烟需要 `DEEPSEEK_API_KEY`：开发 home（`runtime/harness-home/.credentials.yaml`）配一次
-即可，永不提交密钥；web 搜索无需独立 key——base 的 `web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，与 chat 同一把钥匙（实证：vendor base bundle cordis.patch.yml）。
+即可，永不提交密钥；web 搜索无需独立 key——base 的 `web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，与 chat 同一把钥匙（实证：vendor `packages/bundle/base/cordis.patch.yml` 的 web-search-deepseek 行）。
 
 ## DSH 源码：机制权威在哪
 

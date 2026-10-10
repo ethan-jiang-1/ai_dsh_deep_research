@@ -86,7 +86,7 @@
 | 加 / 改机械门禁 | `verify.mjs` gates 数组 + `evaluation.md` §L0 台账（案例表有增删再动 `gates-smoke.mjs`） | **注入回归红 → 还原 → 绿** → gates-smoke | L0 + gates-smoke | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 + gates-smoke 绿 |
 | 改 run 通道工具 / 审计门（boot-run / watch-run / hitl-answer / run-dashboard / evidence-audit / node-gate / schema-scan / snapshot-replay） | 对应 `scripts/` / `dev/` 脚本 | — | L0 + 对应 `tests/*.test.mjs` 契约测试必跑（用例即其反证记录） | 判据变更才写 Note | 对应契约测试绿 |
 | 改 scripts/lib 支撑模块 / dev 基建本体（`lib/*.mjs`、env.sh、render-overlay、sync-pack-workspace） | 支撑模块 + 其**全部消费方**（消费面 grep：roles.mjs 的角色枚举消费方、render-overlay → `overlay-fresh`、sync → `pack-workspace-fresh`、run-state → watch-run/hitl-answer/run-dashboard） | 消费方门禁在同 diff 复跑 | L0 + lib 对应契约测试 | 判据变更才写 Note | 消费方门禁与契约测试绿 |
-| 改工作区手册 / 模板 | `research-workspace/` 正本 → `sync-pack-workspace` | sync → verify | L0 | — | `pack-workspace-fresh` 绿 |
+| 改工作区手册 / 模板（结构性调整：模板增删 / 路径与格式修正；**手册正文文本 = 模型可见，走上行〔改 persona / skill / 手册文本〕**） | `research-workspace/` 正本 → `sync-pack-workspace` | sync → verify | L0 | — | `pack-workspace-fresh` 绿 |
 | 改部署面（preflight / scaffold / 发布集） | pack `scripts/` + `package.json` 的 files/bin | — | L0 + L2 | 部署 Note | `release-smoke` ALL PASS |
 | 换 vendor pin | `.gitmodules` + pack 兼容矩阵 | `vendor-build.sh`（含 host 半补建 + 前端壳重建）→ 逐条重审（含 agent-team 合同 diff 与货架增量对账——正本 = [discipline-map §重审触发路径](../discipline-map.md)） | L0 + L1 + L2 + client-load-smoke + L4-lite（0.2.0 轮实证：漏跑观察面 = client bundle 的 build-time externals 漂移漏网） | 升 pin 毕业 Note（重审结论正本） | 全档绿 + 重审入 Note |
 | 纯文档 / 卫生 | 文档自身 | — | L0 | 仅持久决定理由才写 | 门禁绿 |
@@ -151,6 +151,16 @@ node packages/deep-research-pack/scripts/scaffold.mjs --workspace <dir>    # 部
   对象会拿无关残留凑绿（本仓 evidence-audit 锚定 dev home 自拒是同精神实例）。
 
 ## 3. 开发环境
+
+### 3.0 fresh clone 一次性准备（改仓 L0 的前置）
+
+```sh
+git clone --recurse-submodules <本仓 URL>   # 或 clone 后补：git submodule update --init vendor/dsh
+pnpm install                                # 根 workspace（devDeps 以 link:vendor/dsh 解析——vendor-links 门禁）
+pnpm verify && pnpm test                    # L0 应全绿（无需 vendor 构建产物）
+```
+
+vendor 构建产物（`bash dev/vendor-build.sh`）是 L1/L2/run 通道/`pnpm dsh` 的前置（0.1.7 起启动依赖构建产物），L0 不需要；run 通道凭据前置见 [00-index §先分流](../00-index.md)。
 
 ```sh
 source dev/env.sh        # DSH_HOME=runtime/harness-home（数据面）+ dsh 别名（代码面：钉 tag 源码）

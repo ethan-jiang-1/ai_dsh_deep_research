@@ -90,7 +90,7 @@ boot 的镜像一致性检查只证明发布集与安装副本一致；overlay �
 
 ## 测试怎么选
 
-L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字塔。
+L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字塔；与 [guides/62 参与阶梯](guides/62-plugin-authoring.md) 的 L0–L3（扩展点层级）编号无关。
 本仓已经有确定性行为测试与多种集成证据；端到端位于最外层。命令、前置与必跑面查
 [开发环 §2](guides/60-dev-loop.md)，判据查 [evaluation](evaluation.md)。
 
@@ -128,7 +128,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 1. **`tests/*.test.mjs` 契约测试**——断言对象是仓内自控文件、keyless 秒级可判真假。义务：同 diff 在 [evaluation](evaluation.md) 对应面登记；新契约测试带反证（[tests/AGENTS](../tests/AGENTS.md)）；
 2. **一次性检查**——不复现的核对：跑完即弃（运行区临时脚本），证据（命令 + 输出）进条目实施记录；**复现第二次即升格契约测试**，不滞留临时态；
 3. **`*-smoke` 分级冒烟**——需要真子系统（挂载/安装/浏览器/回放）但无模型。义务：后缀申报档位（[scripts/AGENTS](../scripts/AGENTS.md)）；
-4. **真模型档脚本**——需要凭据与模型调用。义务：closed set 登记（`smoke-contract` 门禁对账）；
+4. **真模型档脚本**——需要凭据与模型调用。义务：closed set 登记（`smoke-contract` 契约测试对账）；
 5. **verify 门禁**——断言跨条目恒真的仓结构不变量。义务：走 [writing-a-gate](../.agents/skills/writing-a-gate/SKILL.md) 全流程（先想红 + gates 数组与 evaluation 台账两处同步）；
 6. **run 门（`*-gate` / `*-audit` / `*-scan`）**——断言真实 run bundle 的文件事实，随 run 消费；
 7. **`tests/fixtures/` 支撑样本**——taxonomy 建行，consumer 必须真实（[taxonomy](../tests/fixtures/README.md) + 契约测试零孤儿断言）。
