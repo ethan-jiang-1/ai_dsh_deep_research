@@ -49,8 +49,8 @@
 
 严格轮给出 23 篇名录，但对抗证伪在抽样 8 篇上 **8/8 找出反例**（未兑现承诺 /
 假承接 / 被现行面当正本引用 / 判据悬空）。仅两篇经手工复核接近干净承接
-（[hitl-docking-polish](../../notes/implemented/2026-09-28-hitl-docking-polish.md)、
-[node-topology-procedure](../../notes/implemented/2026-09-28-node-topology-procedure.md)），
+（[hitl-docking-polish](../../notes/archived/2026-09-28-hitl-docking-polish.md)、
+[node-topology-procedure](../../notes/archived/2026-09-28-node-topology-procedure.md)），
 且前者仍有"承接了但没完全承接"的边界。按
 [archived/README](../../notes/archived/README.md)"边界个案用判断并留档"，
 **两篇列为待裁定，不在本轮归档**——判据本身不可靠时批量归档，就是用坏尺子量生产线。
@@ -113,3 +113,6 @@
   并在 [reference/README](../../_backlog/research/README.md) 索引建行（`plans-liveness` 把守）。
 - 新增承载物：report 内的"严格口径问法"（"机制若消失，哪次具体未来变更会变差"）
   是本次唯一可复用的产出——后续若给归档判定补复核面，判据形状可直接取它。
+- 后续（2026-10-10）：本报告 §下一步候选 1 已落地（`archived-note-pointer` 门禁 +
+  `scripts/archived-note-pointers.json` 登记簿），候选 3 的两篇边界个案已裁定归档——
+  见 [archive-review-surface Note](2026-10-10-archive-review-surface.md)。

@@ -7,7 +7,7 @@
 
 import { spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync, existsSync, lstatSync, readlinkSync, statSync } from 'node:fs';
-import { join, dirname, resolve, relative } from 'node:path';
+import { join, dirname, resolve, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { backlogLivenessProblems } from '../lib/backlog-liveness.mjs';
 
@@ -35,7 +35,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'client-half', 'guard-red-record', 'row-deps', 'workspace-contract', 'handbook-budget', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'pack-workspace-fresh', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'backlog-liveness', 'dist-manual-version', 'port-exclusive', 'hooks-active'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'archived-note-pointer', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'client-half', 'guard-red-record', 'row-deps', 'workspace-contract', 'handbook-budget', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'pack-workspace-fresh', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'backlog-liveness', 'dist-manual-version', 'port-exclusive', 'hooks-active'];
 
 // vendor/dsh 钉身份的 tag 面（commit 面 = vendor-pin 门禁的 PIN；pack-bundle-compat 消费它
 // 断言 pack 兼容矩阵含当前 tag——升 pin 时两处同 diff 改；本文件里的 tag 复述受 pin-agreement 对账）
@@ -817,6 +817,93 @@ const allFiles = walk(ROOT);
           if (!anchorsFor(abs).has(decodeURIComponent(frag))) {
             fail(gate, `${rel}: 锚点不可解析 → ${m[1]}（目标文件无此标题或 a-id）`);
           }
+        }
+      }
+    }
+  }
+}
+
+// ── 门禁 3b：archived-note-pointer（归档判定的可复核面——notes-stocktake 体检
+//    （_backlog/research/2026-10-08-notes-stocktake.md）结论"归档判据在本仓不可靠"的机械
+//    切片：活面（notes/archived/ 之外的 tracked .md）以 Markdown 链接引用
+//    notes/archived/<具体 Note> 前，必须在 scripts/archived-note-pointers.json 登记
+//    （历史指针类，逐条带理由——登记动作 = 活面显式承认"我在引用冻结件"；被引用还想归档
+//    的 Note 由此在对账面上现形，进门条件 2 的语义判断保留给人）。红 = ①未登记的
+//    活面→archived 链接；②登记条目失真（源文件已无此链接）；③登记条目失存（源/目标不在
+//    盘上、未跟踪、目标不在 archived）；④archived 语料非空但活面扫描集为空（范围收窄
+//    防空）。notes/archived/README.md 索引导航豁免。反引号裸路径不检（与 md-links 同边界
+//    ——wide 盘点另行决定）。──
+{
+  const gate = 'archived-note-pointer';
+  const regPath = join(ROOT, 'scripts', 'archived-note-pointers.json');
+  const ls = spawnSync('git', ['-c', 'core.quotepath=false', 'ls-files', '*.md'], { cwd: ROOT, encoding: 'utf8' });
+  if (ls.status !== 0) {
+    fail(gate, `git ls-files 不可用（${String(ls.stderr).slice(0, 120)}）——本门禁覆盖面依赖仓库态，fail-loud`);
+  } else if (!existsSync(regPath)) {
+    fail(gate, 'scripts/archived-note-pointers.json 缺席——登记簿是本门禁的判定面，fail-loud');
+  } else {
+    const all = ls.stdout.split('\n').filter(Boolean);
+    const archived = all.filter((p) => p.startsWith('notes/archived/') && p.endsWith('.md') && !p.endsWith('README.md'));
+    const live = all.filter((p) => !p.startsWith('notes/archived/'));
+    if (archived.length === 0) {
+      fail(gate, 'notes/archived/ 零 Note——冻结语料为空，本门禁失去把守对象（真清空须同变更退役本门禁，不许静默空转）');
+    } else if (live.length === 0) {
+      fail(gate, '活面 .md 扫描集为空而 archived 语料非空——tracked 范围被收窄，fail-loud');
+    }
+    // 观测集：活面 Markdown 链接解析进 archived 的 (源, 目标) 对（代码围栏外；README 豁免）
+    const observed = new Map();
+    for (const rel of live) {
+      const f = join(ROOT, rel);
+      if (!existsSync(f)) continue; // 稀疏态防御
+      const text = readFileSync(f, 'utf8');
+      let inFence = false;
+      for (const line of text.split('\n')) {
+        if (line.trimStart().startsWith('```')) { inFence = !inFence; continue; }
+        if (inFence) continue;
+        for (const m of line.matchAll(/\[[^\]]*\]\(<?([^)\s]+?)>?(?:\s+"[^"]*")?\)/g)) {
+          let t = m[1];
+          if (/^[a-z]+:/i.test(t)) continue; // URL / mailto
+          t = t.split('#')[0];
+          if (!t) continue; // 纯锚
+          const relTarget = relative(ROOT, resolve(dirname(f), t)).split(sep).join('/');
+          if (relTarget.startsWith('..')) continue; // 仓外目标不判
+          if (!relTarget.startsWith('notes/archived/') || !relTarget.endsWith('.md') || relTarget.endsWith('README.md')) continue;
+          const key = `${rel}\u0000${relTarget}`;
+          observed.set(key, (observed.get(key) ?? 0) + 1);
+        }
+      }
+    }
+    let entries;
+    try { entries = JSON.parse(readFileSync(regPath, 'utf8')).pointers; } catch (e) {
+      fail(gate, `登记簿不可解析（${String(e).slice(0, 80)}）`);
+      entries = null;
+    }
+    if (entries !== null) {
+      if (!Array.isArray(entries)) fail(gate, '登记簿 pointers 不是数组');
+      const registered = new Set();
+      for (const [i, e] of entries.entries()) {
+        if (typeof e?.source !== 'string' || typeof e?.target !== 'string' || typeof e?.reason !== 'string' || !e.reason.trim()) {
+          fail(gate, `登记簿第 ${i + 1} 条形状非法（需 source/target/reason 且 reason 非空）`);
+          continue;
+        }
+        if (e.source.startsWith('notes/archived/')) fail(gate, `登记条目源在 archived 内（登记簿只收活面）：${e.source}`);
+        const key = `${e.source}\u0000${e.target}`;
+        registered.add(key);
+        if (!all.includes(e.source)) fail(gate, `登记条目失存（源不在 tracked .md）：${e.source} → ${e.target}`);
+        if (!archived.includes(e.target)) {
+          fail(gate, `登记条目失存（目标不在 notes/archived/）：${e.source} → ${e.target}（Note 复活/移位时同步登记簿）`);
+        }
+      }
+      for (const [key, count] of observed) {
+        if (!registered.has(key)) {
+          const [s, t] = key.split('\u0000');
+          fail(gate, `${s}: 未登记的活面→archived 链接 → ${t}（×${count}）——归档前解除引用，或在 scripts/archived-note-pointers.json 登记为历史指针（带理由）`);
+        }
+      }
+      for (const key of registered) {
+        if (!observed.has(key)) {
+          const [s, t] = key.split('\u0000');
+          fail(gate, `登记条目失真（源文件已无此链接）：${s} → ${t}——更新或删除该条目`);
         }
       }
     }

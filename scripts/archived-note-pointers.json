@@ -1,0 +1,125 @@
+{
+  "comment": "活面→notes/archived 具名 Note 的 Markdown 链接登记簿（历史指针类）。owner = verify 门禁 archived-note-pointer：未登记的此类链接即红；登记条目失真/失存也红。登记动作 = 活面显式承认'我在引用冻结件'；引用现行权威请改指活跃载体而不是登记。维护：Note 移位/复活时同步本簿；条目按 (source, target) 对登记，同对多链接算一条。",
+  "pointers": [
+    {
+      "source": "docs/00-index.md",
+      "target": "notes/archived/2026-09-24-ui-observability-surfaces.md",
+      "reason": "决策台账 D18 行与外部研究材料表的琢磨稿指针（行内标注'已归档'——观察面选项推敲与十二坑考古的历史家）"
+    },
+    {
+      "source": "docs/00-index.md",
+      "target": "notes/archived/2026-09-24-dsh-market-scout.md",
+      "reason": "外部研究材料表：DSH 插件生态行的粗扫种子指针（行内标注'冻结'，认真报告已毕业为现行的 dsh-plugin-ecosystem）"
+    },
+    {
+      "source": "docs/design/40-research-cockpit.md",
+      "target": "notes/archived/2026-09-28-cockpit-naming.md",
+      "reason": "头部定名快照指针 + §7 历史指针（演进链末环'定名'——该节明示'为什么当初这么选'住 notes 树）"
+    },
+    {
+      "source": "docs/design/40-research-cockpit.md",
+      "target": "notes/archived/2026-09-24-ui-observability-surfaces.md",
+      "reason": "§7 历史指针（演进链首环：选项推敲 + company 十二坑考古）"
+    },
+    {
+      "source": "docs/design/40-research-cockpit.md",
+      "target": "notes/archived/2026-09-25-research-status-ui.md",
+      "reason": "§7 历史指针（UI 优先改版）"
+    },
+    {
+      "source": "docs/design/40-research-cockpit.md",
+      "target": "notes/archived/2026-09-26-bundle-face-wiring.md",
+      "reason": "§7 历史指针（渐进面接通根因链）"
+    },
+    {
+      "source": "docs/design/40-research-cockpit.md",
+      "target": "notes/archived/2026-09-28-right-pane-ux-debt.md",
+      "reason": "§7 历史指针（挂起显性化 + 会话绑定）"
+    },
+    {
+      "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-09-24-foundation-remediation.md",
+      "reason": "L0 登记表 md-links/role-list-sync/gate-ledger-sync 三行的反证出处列引基础整治 Note（红→还原绿实证的历史家；现行执行体 = 门禁本体与 gates-smoke 常驻案例）"
+    },
+    {
+      "source": "docs/guides/61-run-playbook.md",
+      "target": "notes/archived/2026-09-26-bundle-face-wiring.md",
+      "reason": "会话建在别处则渐进面缺席的实测根因指针（根因链历史家；操作事实已在本页现行正文）"
+    },
+    {
+      "source": "notes/implemented/2026-09-24-noise-sweep.md",
+      "target": "notes/archived/2026-09-24-l4-lite-m1-done.md",
+      "reason": "体检对账行引 m1-done Note（其独有内容'会话日志事件词汇表 + M1 证据链'的冻结家——noise-sweep 自身的归档判定记录）"
+    },
+    {
+      "source": "notes/implemented/2026-09-24-noise-sweep.md",
+      "target": "notes/archived/2026-09-24-foundation-remediation.md",
+      "reason": "backfill 指针说明行（'backfill 内为指针非家'——归档去向的历史注记）"
+    },
+    {
+      "source": "notes/implemented/2026-09-25-research-type-coverage.md",
+      "target": "notes/archived/2026-09-26-run-loop-hardening.md",
+      "reason": "六处缺陷清单的历史出处指针（run 环硬化记录的冻结家）"
+    },
+    {
+      "source": "notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md",
+      "target": "notes/archived/2026-09-24-dsh-discipline.md",
+      "reason": "'原文只在 git'的下放决定历史指针（dsh-discipline 毕业快照）"
+    },
+    {
+      "source": "notes/implemented/2026-09-26-signal-to-noise-remediation.md",
+      "target": "notes/archived/2026-09-26-bundle-face-wiring.md",
+      "reason": "workspaceFiles 接通状态的证据指针（'= 已接通'的历史判定记录）"
+    },
+    {
+      "source": "packages/deep-research-pack/README.md",
+      "target": "notes/archived/2026-09-25-marathon2-retrospective.md",
+      "reason": "4 卡方案回退理由的复盘指针（行内标注'冻结层'）"
+    },
+    {
+      "source": "docs/guides/61-run-playbook.md",
+      "target": "notes/archived/2026-09-28-hitl-docking-polish.md",
+      "reason": "HITL1 停靠打磨的实证与 vendor 依据出处指针（stocktake 边界个案 A 裁定 2026-10-10：SSRF 守卫机理与代理变量配方已全文承进本页，指针登记为历史出处）"
+    },
+    {
+      "source": "notes/implemented/2026-10-08-notes-stocktake.md",
+      "target": "notes/archived/2026-09-28-hitl-docking-polish.md",
+      "reason": "体检报告历史引用（记录该归档候选当时的承接核实状态；2026-10-10 已裁定归档）"
+    },
+    {
+      "source": "notes/implemented/2026-10-08-notes-stocktake.md",
+      "target": "notes/archived/2026-09-28-node-topology-procedure.md",
+      "reason": "体检报告历史引用（同上——SKILL 承接已核实、活面零引用，2026-10-10 裁定归档）"
+    },
+    {
+      "source": "_backlog/research/2026-10-08-notes-stocktake.md",
+      "target": "notes/archived/2026-09-28-hitl-docking-polish.md",
+      "reason": "体检材料历史引用（边界个案小节分析对象；2026-10-10 已裁定归档，仅路径重定向）"
+    },
+    {
+      "source": "_backlog/research/2026-10-08-notes-stocktake.md",
+      "target": "notes/archived/2026-09-28-node-topology-procedure.md",
+      "reason": "体检材料历史引用（同上）"
+    },
+    {
+      "source": "notes/implemented/2026-10-10-archive-review-surface.md",
+      "target": "notes/archived/2026-09-28-hitl-docking-polish.md",
+      "reason": "裁定记录指向归档快照（两案裁定与承接核实的正本——本门禁同 diff 的裁定 Note）"
+    },
+    {
+      "source": "notes/implemented/2026-10-10-archive-review-surface.md",
+      "target": "notes/archived/2026-09-28-node-topology-procedure.md",
+      "reason": "同上"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
+      "target": "notes/archived/2026-09-28-hitl-docking-polish.md",
+      "reason": "已结卡结论指向面⑤首棒 Note（其交付记录的历史家；2026-10-10 裁定归档，路径重定向）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
+      "target": "notes/archived/2026-09-28-node-topology-procedure.md",
+      "reason": "已结卡指向拓扑流程 Note（SKILL 承接核实后 2026-10-10 裁定归档，路径重定向）"
+    }
+  ]
+}

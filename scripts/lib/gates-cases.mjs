@@ -152,6 +152,15 @@ export const CASES = [
   { id: 'md-links-dead', gate: 'md-links', mutate: appendTo('README.md', '\n[死链探针](./definitely-missing-file.md)\n') },
   { id: 'md-links-untracked', gate: 'md-links', mutate: linkUntrackedTarget() },
   { id: 'md-anchors-missing', gate: 'md-anchors', mutate: appendTo('README.md', '\n[坏锚探针](AGENTS.md#这个锚点肯定不存在xyz)\n') },
+  // archived-note-pointer（归档判定复核面）双形态：①活面加未登记的→archived 链接（归档
+  // 前必须解除引用或登记）；②登记条目目标改不存在路径（失存——Note 移位/复活须同步登记簿）。
+  { id: 'archived-pointer-unregistered', gate: 'archived-note-pointer', mutate: appendTo('README.md', '\n[归档指针探针](notes/archived/2026-09-24-ui-observability-surfaces.md)\n') },
+  { id: 'archived-pointer-stale-entry', gate: 'archived-note-pointer', mutate: (dir) => {
+    const p = join(dir, 'scripts', 'archived-note-pointers.json');
+    const book = JSON.parse(readFileSync(p, 'utf8'));
+    book.pointers[0].target = 'notes/archived/2099-01-01-nonexistent-probe.md';
+    writeFileSync(p, `${JSON.stringify(book, null, 2)}\n`);
+  } },
   { id: 'note-format-no-status', gate: 'note-format', mutate: stripFirstStatusLine(join('notes', 'implemented')) },
   { id: 'note-format-no-verification', gate: 'note-format', mutate: stripVerificationSection(join('notes', 'implemented')) },
   { id: 'note-format-negated-verification', gate: 'note-format', mutate: negateVerificationSection(join('notes', 'implemented')) },

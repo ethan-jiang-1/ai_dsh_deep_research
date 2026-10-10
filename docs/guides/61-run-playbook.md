@@ -25,7 +25,7 @@
   段 198.18.x.x）即拒，**网络本身是通的**（node fetch 直连可达）。会话内确需自起通道时，
   启动环境注入标准代理变量即可：`http_proxy`/`https_proxy` 指向本机代理出口——代理跳跳过
   本地解析、DNS 归代理侧，守卫不再触发（实证与 vendor 依据 =
-  [hitl-docking-polish Note](../../notes/implemented/2026-09-28-hitl-docking-polish.md)）；
+  [hitl-docking-polish Note](../../notes/archived/2026-09-28-hitl-docking-polish.md)）；
   代理**驱动**已起的通道没问题（run-kickoff / hitl-answer 走 localhost API 全通）。boot 归
   用户终端仍是默认纪律（真实 DNS、零额外件）；
 - **启动请求的呈交纪律（2026-09-30 用户定调）**：用户让"启动/起 web"= 代理**先自己跑通**——

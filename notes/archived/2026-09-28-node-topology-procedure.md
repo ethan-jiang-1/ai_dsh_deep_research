@@ -1,6 +1,8 @@
 # 节点拓扑演进程序——改轨道六处同步技能（pipeline-polish 面⑦）
 
 > 状态：implemented
+>
+> 归档：2026-10-10（notes-stocktake 边界个案 B 裁定：六处同步清单 + 四条已知坑已由 changing-node-topology SKILL 全文承接〔2026-10-08 体检核实〕，活面零引用——裁定记录 = `notes/implemented/2026-10-10-archive-review-surface.md`）
 
 出处：[pipeline-polish 卡](../../_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md) 面⑦（收尾
 棒；主序 ⑤②③④ 已毕业 2026-10-03）。

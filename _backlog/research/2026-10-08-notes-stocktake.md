@@ -95,11 +95,11 @@ intent: 为 notes-stocktake 实施 Note 保留已完成的存量体检依据。
 不是"严格口径全错"。它至少实证了宽口径的系统性偏宽，并给出两篇**经过承接核实**的
 archive 候选，两处承接主张我都手工复核过：
 
-- [hitl-docking-polish](../../notes/implemented/2026-09-28-hitl-docking-polish.md)
+- [hitl-docking-polish](../../notes/archived/2026-09-28-hitl-docking-polish.md)
   → [guides/61:23-28](../../docs/guides/61-run-playbook.md) 确有 SSRF 守卫机理
   与代理变量配方全文（已 commit）；⚠️ 但该行末仍链回本 Note 作"实证与 vendor 依据"
   ——**这是"承接了，但没有完全承接"的边界个案**，不是干净的 archive。
-- [node-topology-procedure](../../notes/implemented/2026-09-28-node-topology-procedure.md)
+- [node-topology-procedure](../../notes/archived/2026-09-28-node-topology-procedure.md)
   → [changing-node-topology SKILL](../../.agents/skills/changing-node-topology/SKILL.md)
   确有六处同步清单 + 四条已知坑（`rg` 命中）；此篇最接近干净 archive。
 
