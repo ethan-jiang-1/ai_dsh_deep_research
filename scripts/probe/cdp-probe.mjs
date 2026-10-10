@@ -128,7 +128,7 @@ try {
   const paneText = async () => evaluate(`(() => {
     const t = document.body?.innerText ?? '';
     const i = t.indexOf('研究状态');
-    return i >= 0 ? t.slice(i, i + 800) : t.slice(0, 300)
+    return i >= 0 ? t.slice(i, i + 4000) : t.slice(0, 300)
   })()`);
 
   if (openSessionTitle !== undefined) {

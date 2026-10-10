@@ -43,9 +43,19 @@ export type JournalFrame =
   | { readonly kind: 'history'; readonly events: readonly unknown[] }
   | { readonly kind: 'event'; readonly event: unknown }
 
+/** follow 目标：普通会话 id，或 subagent 会话的持久父地址。队员（teammate）会话 origin =
+ *  subagent，纯 id 形态被 host 守卫拒（session/agent-busy "subagent Sessions require their
+ *  durable parent address"——2026-10-11 首验实测，三条队员流全灭）；父地址形态 = 官方
+ *  ui-session 同款（vendor session.ts sessionAddress()）。mode 'unknown' = 观察者不断言
+ *  队员的 one-shot/continuable 形态（host 侧 mode 对账跳过）。结构性子集，wire 类型 =
+ *  vendor SessionAddress。 */
+export type FollowTarget =
+  | SessionId
+  | { readonly kind: 'subagent'; readonly parentSessionId: SessionId; readonly childSessionId: SessionId; readonly mode: 'unknown' }
+
 /** 页签体注入面：journal 流 + 文件读取闭包（绑定 remote.workspaceFiles）+ 挂起显性化入口。 */
 export interface ResearchStatusTabInjected {
-  readonly follow: (sessionId: SessionId, signal: AbortSignal) => AsyncGenerator<JournalFrame>
+  readonly follow: (target: FollowTarget, signal: AbortSignal) => AsyncGenerator<JournalFrame>
   /** 列工作区目录；不可达 → null。 */
   readonly listDir: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<readonly { type: string; name: string }[] | null>
   /** 读工作区文本文件（首窗）；不可达 → null。 */
@@ -157,7 +167,8 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   //    lead 流同一 WebSocket 数据面——通道探明：gateway 无流数上限）；AbortController 统一
   //    回收。首帧 snapshot 为全量历史（量级 ≈ lead 同阶）——行截尾部、计数全量，折算住 lib。
   useEffect(() => {
-    if (memberIds === '') { setMemberSummaries({}); return }
+    const sessionId = props.sessionId
+    if (memberIds === '' || sessionId === undefined) { setMemberSummaries({}); return }
     const controller = new AbortController()
     const state: Record<string, MemberActivitySummary> = {}
     let alive = true
@@ -165,7 +176,12 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     void Promise.all(ids.map(async (id) => {
       try {
         let events: unknown[] = []
-        for await (const frame of props.follow(id, controller.signal)) {
+        // 队员 = subagent 会话：follow 必须走持久父地址（parent = 本 lead 会话；mode unknown
+        // 不断言队员形态）——纯 id 形态被 host 守卫拒（2026-10-11 首验实测）。
+        for await (const frame of props.follow(
+          { kind: 'subagent', parentSessionId: sessionId, childSessionId: id, mode: 'unknown' },
+          controller.signal,
+        )) {
           if (frame.kind === 'history') events = [...frame.events]
           else events = [...events, frame.event]
           if (!alive) return
@@ -177,7 +193,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       }
     }))
     return () => { alive = false; controller.abort() }
-  }, [memberIds])
+  }, [memberIds, props.sessionId])
 
   // ② bundle 渐进面（绑定本会话的 run；slug 变化即扫 + 30s 定时——文件在场性不高频）
   // G4（RFC cockpit-flow-face）：read 弱绑定在挂起期不作渐进面依据——立项预检读取旧 bundle

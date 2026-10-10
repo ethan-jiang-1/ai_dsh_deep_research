@@ -10,7 +10,11 @@
 
 ## 活跃列表
 
-（无活跃缺陷卡；最近归档 = [BUG-019](../_archived/fixed_bugs/BUG-019-recorder-mcp-race.md) 录制器 MCP 竞态——写盘前 MCP 组谓词 + 有界重试，守卫 = tests/replay-fixtures.test.mjs。）
+| 卡 | 症状一句话 | 严重级 |
+|---|---|---|
+| [BUG-020-hitl-answer-provenance-misattribution.md](BUG-020-hitl-answer-provenance-misattribution.md) | 代答 provenance 落账目标 = drt_* 字典序最后一位，误归给无关在飞 bundle | P2 |
+
+（最近归档 = [BUG-019](../_archived/fixed_bugs/BUG-019-recorder-mcp-race.md) 录制器 MCP 竞态——写盘前 MCP 组谓词 + 有界重试，守卫 = tests/replay-fixtures.test.mjs。）
 
 ## 卡片模板
 

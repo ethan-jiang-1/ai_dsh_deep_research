@@ -1,13 +1,13 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-10-09
 ---
 
 # 推敲：队员活动流进渐进面——观察面的队员会话可见性
 
-> 立卡：2026-10-09 ｜ 状态：推敲中 ｜ 类型：Feature ｜ 可关闭：否
+> 立卡：2026-10-09 ｜ 状态：已结（2026-10-11 验收 4/4 绿，证据 = 真实 run drt_mcp-security-landscape 首验）｜ 类型：Feature ｜ 可关闭：是
 
-**问题与期望结果：** 研究驾驶舱的渐进面只 follow lead 会话——scout/analyst/critic 作为 teammate 的检索与取证动作住在各自会话，不进 lead journal，run 期观察队员得逐个开会话或切 ui-agent-team 任务板。出处 = [pack README 已知限制](../../packages/deep-research-pack/README.md)登记的后续候选 + [钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md)。期望：run 期在观察面一处看见队员在干什么，不用逐会话翻。
+**问题与期望结果：** 研究驾驶舱的渐进面只 follow lead 会话——scout/analyst/critic 作为 teammate 的检索与取证动作住在各自会话，不进 lead journal，run 期观察队员得逐个开会话或切 ui-agent-team 任务板。出处 = [pack README 已知限制](../../../packages/deep-research-pack/README.md)登记的后续候选 + [钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md)。期望：run 期在观察面一处看见队员在干什么，不用逐会话翻。
 
 **当前情况：** 现有缓解 = `wait_agent` 的"队员作业中"活动行（全静缓解）+ ui-agent-team 任务板（任务粒度）。缺的是队员**动作粒度**的流。company client-face 有先例可参照（8 页签里的 presence/board 从 sessions 座位的 agentTeam 投影读行数据——2026-10-09 复核确认的数据通道形态）。**通道供给侧已探明**（2026-10-10，vendor 同 pin 源码锚点）=[通道探明材料](../research/2026-10-10-teammate-channel-probe.md)：动作粒度唯一可达通道 = 多路 follow 队员会话（任意会话可 follow、journal 同词表、无已知并发上限）；agentTeam 投影天花板 = roster+任务板+turn 级 running（但它是**队员会话 id 的唯一发现源**——spawn_teammate 返回不带 id，源码实测）；新 @Remote = typert 生成步硬前置、仓外零先例、当前不采纳。**本卡刻意排在下一场研究 run 之后**：先拿真实 run 的观察素材定"多痛、要什么粒度"，再动工——不猜需求。
 
@@ -26,10 +26,10 @@ opened: 2026-10-09
 |---|---|---|---|---|---|---|
 | 1 | 队员动作折算（🔍 检索词 / 🌐 抓取目标 / ⚠️ 失败行；计数与尾部截断） | 确定性逻辑 | 注入合成事件（形状取自真实归档 journal）：web_search call、web_fetch call、fetch 成败 result、非目标工具 | 非目标工具滤除（read/write/edit 不进流）；失败有独立行；空事件 = 空区 | `tests/member-activity-fold.test.mjs` + `pnpm test`（红→绿） | 无 |
 | 2 | 无团队负例：无 teammate 行 → 队员区不渲染 | 编排（客户端） | 无团队会话（投影无 agentTeam/无 teammate） | 有团队正例（#3）互补 | `client-load-smoke` 扩展断言（keyless 真浏览器） | 无 |
-| 3 | 有团队正例：roster + 折叠区 + 动作行 + 错误徽标 | 编排（客户端） | 真实团队（投影 teammate 行 + 队员 journal 流） | — | **待首验**（下一场真实 run 或可选真模型档 smoke；投影不进 journal，keyless 回放不可造正例——通道材料实证） | 无 |
+| 3 | 有团队正例：roster + 折叠区 + 动作行 + 错误徽标 | 编排（客户端） | 真实团队（投影 teammate 行 + 队员 journal 流） | — | **通过**（2026-10-11 真实 run 首验：client-load-smoke 正例断言全绿〔roster↔spawn 逐名对账〕+ 真通道 CDP 探针 ⑦ 区实证） | 无 |
 | 4 | design/40 构成/边界/分工句 + pack README 已知限制更新 | 文档合同 | 队员区进构成节；任务板 vs 动作流分工句；限制行退役 | — | `pnpm verify`（md 门禁）+ 文档评审 | 无 |
 
-**下一步：** 通道供给侧探明已完成并落 [research 材料](../research/2026-10-10-teammate-channel-probe.md)（2026-10-10）。剩余关键路径 = 下一场研究 run：需求侧按下方观察清单收割 → 回答未决 2/3 + 未决 1 的选型决定 → 最薄切片实施（改动面 = `src/client/` + 多路 follow 接线〔队员 id 从 agentTeam 投影行取〕+ client-load-smoke 断言 + design/40 同步）。
+**下一步：**（收卡时收拢——本行原为"等 run 收割需求再实施"的旧计划，已被同日需求侧定夺〔归档素材挖掘替代等 run〕与实施记录超越；最终完成情况见下方 2026-10-11 首验轮实施记录。）
 
 ## 方案与取舍
 
@@ -54,7 +54,23 @@ opened: 2026-10-09
 - 顺带修（同 diff）：**client-load-smoke 深列表脆弱性**——dev home 累积 250+ 会话把目标埋 8 层 "Show N more sessions"，单次展开够不着（实测复现 + CDP 探针独立证实非 Playwright actionability 问题）→ clickRowByText 改循环展开（60 轮上限，至目标在场/按钮消失）；修复后冒烟 ALL PASS 复归。诊断脚本住 runtime/（gitignored 一次性）。
 - 通道材料遗留 #1（队员 journal 真实形状）由归档挖掘闭环（见 §需求侧定夺）；遗留 #2（N 流稳定性）的最薄证据 = 首验时多路 follow 同开（gateway 无上限，源码级 + 单 lead 双流既有实证）。
 
-**下一步**：#3 首验（下一场真实 run——断言已就位自动生效）→ 全绿后按关闭条件收档。
+## 实施记录（2026-10-11 · 首验轮——真实 run `drt_mcp-security-landscape`）
+
+首验载体 = 低把握题目真实 run（MCP 服务器生态安全面盘点 2025–2026，四编制：scout + analyst×2 + critic 后置；run 已交付归档 `archive/drt_mcp-security-landscape`）。**验收 #3 通过**；首验本身抓出一窝真缺陷并当场修复：
+
+- **⑦ 区核心缺陷（已修）**：队员会话 origin = subagent，多路 follow 用纯 sessionId 形态被 host 守卫全拒（`session/agent-busy "subagent Sessions require their durable parent address"`——三条队员流全灭）。修复 = follow 目标扩为 `FollowTarget`（普通 id ∪ 持久父地址 `{kind:'subagent', parentSessionId, childSessionId, mode:'unknown'}`，官方 ui-session `sessionAddress()` 同款；mode 'unknown' 跳过形态对账）。通道材料"任意会话可 follow"对 subagent 会话**不成立**——实证修正记录见 [Note](../../../notes/implemented/2026-10-11-member-activity-first-validation.md)，材料按纪律归档不回改。
+- **smoke 正例环境缺口（已修）**：client-load-smoke 自起 web 只带 client 面（ui-agent-team），无 agent-team host 行（A 定案：组合归 run 通道 profile 层）→ 投影恒缺、正例断言永不咬合。修复 = smoke 运行时生成"overlay + agent-team host 行"合并补丁再 boot（行内容镜像 vendor agent-team-profile 层 rc.2 config；实证：新 host 从盘上持久状态重算 roster 全量在场）。
+- **断言三处修复**：① 证据计数/交付态/停靠点期望改**断言时刻现扫**（journal 重读 + 文件现扫）+ 跨 30s 刷新周期复核——首验红"UI 4 份 vs 快照 2 份" = boot 前快照对在飞 run 的时点竞态；② 轨道 current 计数收窄到七步名——⑦ 区队员 phase 圆点（"● scout-security"）同用"● "前缀，裸 `startsWith` 假红（● ×5）；③ 复核环加 **reload 再水化**——被跟会话在别的 host 上活跃推进时，被动侧日志尾部追平可超 30s。
+- **N 流稳定性（通道材料遗留 #2 闭环）**：lead + 4 队员多路 follow 同开，三个 host 实例（run 通道 3083 + 冒烟自起 3109 + 对照测试 3111）各自稳定、console 零错。
+- **验收 #3 证据**：client-load-smoke ALL PASS（"队员 roster = 盘侧 spawn 名对账（一个不漏）"正例断言首次咬合：scout-security、analyst-vuln、analyst-spec、critic-review）+ 真通道 CDP 探针 ⑦ 区实证（四人折叠区 + 🔍/🌐/⚠️ 真实计数 + 错误徽标）。
+- **顺带发现（独立登记）**：[BUG-020](../../bugs/BUG-020-hitl-answer-provenance-misattribution.md)（hitl-answer 代答 provenance 误归给无关在飞 bundle——字典序 activeBundle 无归属判定，两次误落 drt_cn-moe-2026，已手工迁移修复，代码修复待做）。
+
+## 关闭条件核对（2026-10-11）
+
+- 数据通道选型有 vendor 同 pin 实测依据 ✅（通道探明材料 + 本轮 subagent 守卫实证修正）；
+- 最薄切片落地且 client-load-smoke 真浏览器断言全绿 + design/40 同步 ✅（ALL PASS，含首验正例）；
+- 与任务板的分工边界写进 design/40 ✅。
+
 
 ## 关闭条件
 

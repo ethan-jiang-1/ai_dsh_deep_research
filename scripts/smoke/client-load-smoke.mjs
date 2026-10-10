@@ -26,7 +26,7 @@
 // 都认（根=在飞 / archive/=已交付）。断言的磁盘认证源 = 磁盘侧扫出的最新绑定会话（跑过 run
 // 即有），其 bundle 的 evidence 计数/交付态/问题行以盘上真值对账——不再自造探针 bundle。
 import { spawn } from 'node:child_process'
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { scrubbedEnv } from '../lib/env.mjs'
@@ -92,11 +92,32 @@ const authenticate = async (base, token) => {
   return cookies.map((c) => c.split(';')[0]).join('; ')
 }
 
-/** boot web（源码域 overlay 通道），等到启动横幅打印带 token 的 URL。 */
+// boot 用补丁 = 源码域 overlay + agent-team host 行（**有团队正例环境**，2026-10-11 首验定案）：
+// ⑦ 区 roster（agentTeam 投影）由 agent-team **host 插件**计算——research.overlay.yml 只带
+// client 面（ui-agent-team），不带 host 行（A 定案：团队机制组合归 run 通道 profile 层）。
+// 无此行则投影恒缺、members 恒空，"spawn ↔ roster 对账"正例断言永远咬合不上（首验实测红）；
+// 补行后新 host 从盘上持久状态重算 roster 全量在场（同日二验实证）。行内容镜像 vendor
+// agent-team-profile 层（rc.2 同款 config）——升 pin 随 bump-vendor-pin 重校。
+// 追加位置 = overlay 末尾的 insert 列表（render-overlay 产物 insert 块到 EOF 收口）。
+const TEAM_ROW = `
+    - id: agent-team
+      name: '@deepseek-ai/dsh-experimental-agent-team'
+      config:
+        maxMembers: 8
+        maxTasks: 256
+        maxPendingMessagesPerMember: 64
+        maxMessageBytes: 65536
+        disposalTimeoutMs: 5000
+`
+const teamPatchPath = join(ROOT, 'runtime', 'smoke-workspace', 'client-load-team.overlay.yml')
+mkdirSync(dirname(teamPatchPath), { recursive: true })
+writeFileSync(teamPatchPath, readFileSync(join(ROOT, 'dev', 'research.overlay.yml'), 'utf8') + TEAM_ROW, 'utf8')
+
+/** boot web（源码域 overlay 通道 + agent-team host 行），等到启动横幅打印带 token 的 URL。 */
 async function boot() {
   const child = spawn(
     process.execPath,
-    ['--import', 'tsx/esm', bin, '--profile', 'web', '--patch', join(ROOT, 'dev', 'research.overlay.yml'),
+    ['--import', 'tsx/esm', bin, '--profile', 'web', '--patch', teamPatchPath,
       '--', '--port', String(PORT), '--no-open'],
     { cwd: ROOT, env: scrubbedEnv({ DSH_HOME: home }), stdio: ['ignore', 'pipe', 'pipe'] },
   )
@@ -160,7 +181,7 @@ for (const { logPath, m } of readdirSync(join(sessionsRoot, sessionGroup))
   const slug = sessionBundleOf(events)
   // 尾窗挂起谓词（BUG-003 合流：回边盘侧真值 = deriveAnchors 直调——锚点判型走 lib 同一
   // 函数，不再手抄镜像；events 留存供 fileFacts 合成）
-  if (slug !== undefined) candidates.push({ title, slug, events, eventCount: events.length, tailAskPending: foldHitlPending(events).pending })
+  if (slug !== undefined) candidates.push({ title, slug, events, logPath, eventCount: events.length, tailAskPending: foldHitlPending(events).pending })
   else if (unboundCandidates.length < 5) unboundCandidates.push({ title })
   if (candidates.length >= 5 && unboundCandidates.length >= 1) break
 }
@@ -182,8 +203,12 @@ const bundleBaseOf = (slug) => {
   }
   return null
 }
-const expectedFace = boundSession !== null && bundleBaseOf(boundSession.slug) !== null ? (() => {
-  const base = bundleBaseOf(boundSession.slug)
+// 盘侧真值取数函数化（2026-10-11 首验教训）：绑定对象可能是在飞 run——evidence/final.md
+// 随分析员写盘而增长，boot 前取的快照到断言时刻可能已过期（实测首验红：UI 4 份 vs 快照 2 份）。
+// 断言处用 fileFaceOf 现扫；快照版 expectedFace 只供前置判空与非时敏字段（问题行）。
+const fileFaceOf = (slug) => {
+  const base = bundleBaseOf(slug)
+  if (base === null) return null
   const names = new Set(readdirSync(base))
   const evidenceCount = existsSync(join(base, 'evidence')) ? readdirSync(join(base, 'evidence')).filter((f) => f.endsWith('.md')).length : 0
   const questionText = names.has('question.md') ? readFileSync(join(base, 'question.md'), 'utf8') : null
@@ -202,7 +227,8 @@ const expectedFace = boundSession !== null && bundleBaseOf(boundSession.slug) !=
     final: names.has('final.md'),
   })
   return { base, evidenceCount, delivered: names.has('final.md'), hasQuestion: names.has('question.md'), firstLine, steps }
-})() : null
+}
+const expectedFace = boundSession !== null ? fileFaceOf(boundSession.slug) : null
 
 // 锚点断言的取态源标注（BUG-003 卡"牵出的失败类"收口）：步骤/done = deriveSteps（lib 同源）·
 // 锚点 passed/pending = deriveAnchors（lib 同源）· 证据计数/交付态/问题行 = 盘侧文件事实 ·
@@ -355,7 +381,48 @@ try {
       if (capOk) {
         await wait(6_000)
         const paneText = await paneTextOf()
-        const seg = paneText.slice(paneText.indexOf('研究状态'))
+        let seg = paneText.slice(paneText.indexOf('研究状态'))
+        // UI/盘侧时点竞态收口（2026-10-11 首验两红）：①UI bundle 面有 30s 刷新周期（slug
+        // 变化即扫 + 定时），盘侧文件现扫可领先 UI 一拍；②lead journal 快照取自 boot 前，
+        // 挂起/锚点期望拿旧态对 UI 实时态会假红（实测：快照 HITL2 挂起 vs UI 停靠点已过 2）。
+        // 处置 = 两侧都现扫（journal 重读 + 文件现扫），不一致跨刷新周期复核一次，仍不一致
+        // 才判红；后续断言用复核后的快照对。
+        const parseUiFace = (segText) => ({
+          evidence: Number((segText.match(/证据 (\d+) 份/) ?? [])[1] ?? Number.NaN),
+          delivered: segText.includes('已交付'),
+          passed: Number((segText.match(/停靠点已过 (\d+) 个/) ?? [])[1] ?? Number.NaN),
+        })
+        let faceNow = null
+        const diskSideNow = () => {
+          const { readable, events } = readSessionEvents(boundSession.logPath)
+          if (readable && events.length > 0) {
+            boundSession = { ...boundSession, events, tailAskPending: foldHitlPending(events).pending }
+          }
+          faceNow = fileFaceOf(boundSession.slug) ?? expectedFace
+          const anchors = deriveAnchors(boundSession.events, { question: faceNow.hasQuestion, delivered: faceNow.delivered })
+          return { evidence: faceNow.evidenceCount, delivered: faceNow.delivered, passed: anchors.filter((a) => a.state === 'passed').length, anchors }
+        }
+        let diskSide = diskSideNow()
+        let uiFace = parseUiFace(seg)
+        // 不一致即再水化复核（有界两轮）：仅等待不够——被跟会话若在**别的 host** 上活跃推进
+        // （run 通道 3083 起飞、本 smoke 自起 web 是被动跟读者），被动侧日志尾部追平可超过
+        // 30s 刷新周期（2026-10-11 首验实测：HITL2 ask 落盘后 smoke 浏览器仍渲染旧尾部）；
+        // reload 强制重 follow → host 重读 journal 发新快照。仍不一致才判红。
+        for (let attempt = 0; attempt < 2
+          && (uiFace.evidence !== diskSide.evidence || uiFace.delivered !== diskSide.delivered || uiFace.passed !== diskSide.passed); attempt++) {
+          await wait(20_000)
+          await page.reload({ waitUntil: 'domcontentloaded' })
+          await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
+          await wait(4_000)
+          if (!(await clickRowByText(boundSession.title))) break
+          await wait(4_000)
+          if (!(await openPane())) break
+          await wait(6_000)
+          const paneAgain = await paneTextOf()
+          seg = paneAgain.slice(paneAgain.indexOf('研究状态'))
+          uiFace = parseUiFace(seg)
+          diskSide = diskSideNow()
+        }
         // 渐进面硬断言（会话绑定 + 位置=状态两位置：证据计数/交付态/问题行与磁盘真值对账）
         const stepsOk = ['立项', '组队', '侦察', '挖掘', '综合', '审查', '交付'].every((x) => seg.includes(x))
         step(stepsOk, '步骤条真数据（流程轨道七步 = 定义流程——本会话绑定的 bundle）')
@@ -363,7 +430,9 @@ try {
         // 造成双琥珀歧义误读）——✓/●/○ 与仪表盘同语法；current 唯一；done 绿字；重入点描边。
         const rail = await page.evaluate((lbls) => {
           const spans = [...document.querySelectorAll('span')]
-          const cur = spans.filter((n) => (n.textContent ?? '').trim().startsWith('● '))
+          // current 计数收窄到七步名（2026-10-11 首验红：⑦ 区队员 phase 圆点同用 "● " 前缀
+          // ——● scout-security 等——裸 startsWith 会把队员行算成 current，● ×5 假红）。
+          const cur = spans.filter((n) => /^● (立项|组队|侦察|挖掘|综合|审查|交付)$/.test((n.textContent ?? '').trim()))
           const greenDone = (lbl) => spans.some((n) => (n.textContent ?? '').trim() === `✓ ${lbl}` && getComputedStyle(n).color === 'rgb(22, 163, 74)')
           const ev = spans.find((n) => (n.textContent ?? '').trim() === '✓ 挖掘')
           return { cur: cur.length, greens: lbls.filter(greenDone), reentry: ev === undefined ? null : getComputedStyle(ev).outlineStyle }
@@ -371,19 +440,18 @@ try {
         step(rail.cur === 1, '轨道 current 唯一（● 恰一枚——双高亮歧义回归红）', `● ×${rail.cur}`)
         // done 期望 = 盘侧 deriveSteps 真值（BUG-001 轮修正：绑到的会话不一定是已交付 run，
         // 在飞 bundle 只做了一部分步骤——期望随磁盘走，不再隐含"六步全绿"）
-        const expectedDone = expectedFace.steps.filter((s) => s.state === 'done').length
+        const expectedDone = faceNow.steps.filter((s) => s.state === 'done').length
         step(rail.greens.length === expectedDone, '轨道 done = 盘侧步态真值（✓ 绿字步数与 deriveSteps 对账）', `绿字 ${rail.greens.length} / 盘侧期望 ${expectedDone}：${rail.greens.join('、') || '无'}`)
         // 重入点描边与 ↻ 回边 = 交付审阅锚非 upcoming 的轨道面（BUG-003 合流：盘侧直调
         // deriveAnchors 与 UI 同一函数——mid-flow HITL1/契约外挂起不亮回边，HITL2 挂起亮）。
-        const diskAnchors = deriveAnchors(boundSession.events, { question: expectedFace.hasQuestion, delivered: expectedFace.delivered })
+        const diskAnchors = diskSide.anchors
         const loopExpected = diskAnchors[1] !== undefined && diskAnchors[1].state !== 'upcoming'
         step(loopExpected ? rail.reentry === 'dashed' : (rail.reentry === null || rail.reentry === 'none'),
           '重入点描边（回边落点 = 挖掘；交付审阅非 upcoming 才描边）', `outline=${rail.reentry ?? '无'}（loopOn=${loopExpected}）`)
-        const evMatch = seg.match(/证据 (\d+) 份/)
-        step(evMatch !== null && Number(evMatch[1]) === expectedFace.evidenceCount,
-          '证据计数 = 磁盘真值（会话绑定 + 根/archive 两位置）', evMatch ? `${evMatch[0]}（磁盘 ${expectedFace.evidenceCount}）` : '未渲染')
-        const delivOk = expectedFace.delivered ? seg.includes('已交付') : !seg.includes('已交付')
-        step(delivOk, '交付状态 = 磁盘真值', expectedFace.delivered ? 'final.md 在场 → ✅ 已交付' : '无 final.md → 如实不显')
+        step(Number.isInteger(uiFace.evidence) && uiFace.evidence === faceNow.evidenceCount,
+          '证据计数 = 磁盘真值（会话绑定 + 根/archive 两位置）', `UI ${uiFace.evidence} / 磁盘 ${faceNow.evidenceCount}`)
+        const delivOk = uiFace.delivered === faceNow.delivered
+        step(delivOk, '交付状态 = 磁盘真值', faceNow.delivered ? 'final.md 在场 → ✅ 已交付' : '无 final.md → 如实不显')
         // 锚点入轨断言（RFC cockpit-flow-face）：轨道渲染 + 诚实线计数与盘侧文件事实对账
         const railOk = seg.includes('◆立项确认') && seg.includes('◆交付审阅')
         step(railOk, '流程轨道渲染（◆立项确认 + ◆交付审阅在场）')

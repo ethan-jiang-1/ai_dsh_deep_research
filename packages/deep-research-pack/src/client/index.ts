@@ -23,7 +23,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
 import { RESEARCH_TAB_KEY, RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT, RESEARCH_TOOL_KEYS } from './keys.ts'
 import { IconGaugeOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import { ResearchToolCard } from './ResearchToolCard.tsx'
-import { ResearchStatusTab, ResearchStatusTitle, type JournalFrame } from './ResearchStatusTab.tsx'
+import { ResearchStatusTab, ResearchStatusTitle, type JournalFrame, type FollowTarget } from './ResearchStatusTab.tsx'
 
 /** Required services：槽注册表（renderer）+ 右栏页签注册器 + 右栏导航面（openTab——挂起显性化）+ remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
  *  父级则取 .session 炸 "without injecting it"，只声明子级则取父属性炸 "without inject"）。 */
@@ -37,9 +37,10 @@ export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'r
 export function apply(ctx: ClientContext): void {
   ctx.inject(['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles'], (scoped) => {
     // journal 流式源（company 同款最小投影）：snapshot 给历史、event 给实时；
-    // wire 形状 → 领域形状的折算住这里（纯装配），展示住组件。
-    const follow = async function* (sessionId: SessionId, signal: AbortSignal): AsyncGenerator<JournalFrame> {
-      const address = { kind: 'session' as const, sessionId }
+    // wire 形状 → 领域形状的折算住这里（纯装配），展示住组件。目标两形态：普通会话 id /
+    // subagent 持久父地址（队员会话——纯 id 被 host 守卫拒，见 FollowTarget 注释）。
+    const follow = async function* (target: FollowTarget, signal: AbortSignal): AsyncGenerator<JournalFrame> {
+      const address = typeof target === 'string' ? { kind: 'session' as const, sessionId: target } : target
       for await (const frame of scoped.remote.session.follow({ address }, signal)) {
         if (frame.type === 'snapshot') {
           yield { kind: 'history', events: frame.records.map((record) => record.event) }
