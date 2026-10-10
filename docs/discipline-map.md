@@ -50,7 +50,7 @@
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
 | Tier 分类法：一处事实一个家（docs 只写 now） | 00-index 组织原则；docs/notes/_backlog 三层分工 | 照搬 |
-| Wordcount budgets（入口文件行数顶） | verify 门禁 `doc-budgets`（AGENTS ≤140 / README ≤30——vendor verify-doc-budgets 裁剪版；上限正本 = [scripts/doc-budgets.json](../scripts/doc-budgets.json)；超顶处置序 = 下放>压缩>升顶须同变更登记理由） | 带证据适配 |
+| Wordcount budgets（入口文件行数顶） | verify 门禁 `doc-budgets`（逐件行数上限——vendor verify-doc-budgets 裁剪版；上限正本 = [scripts/doc-budgets.json](../scripts/doc-budgets.json)，此处不复制计数；超顶处置序 = 下放>压缩>升顶须同变更登记理由） | 带证据适配 |
 | Cross-reference with machine-checkable links, never free prose | md-links 门禁（方括号+圆括号语法全 tracked md）+ entry-chain 门禁（反引号指针盲区补齐） | 带证据适配（反引号裸路径不检 = 已知盲区，entry-chain 探针语义面兜底） |
 | Slop checklist（文档废话清单） | 行文规范沿袭（定性吸收，未机械化） | 带证据适配 |
 
@@ -58,12 +58,12 @@
 
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
-| Agent Note 生命周期（proposed/implemented/rejected + archived 冻结） | notes/ 六目录全在场：proposed/ · implemented/ · **[archived/](../notes/archived/README.md)**（27 篇 + README，2026-09-27 用户指令启用）· rejected/ · postmortem/；冻结纪律 = archived/README | 照搬 |
+| Agent Note 生命周期（proposed/implemented/rejected + archived 冻结） | notes/ 五目录全在场：proposed/ · implemented/ · **[archived/](../notes/archived/README.md)**（冻结快照，2026-09-27 用户指令启用）· rejected/ · postmortem/；冻结纪律 = archived/README | 照搬 |
 | Every new Note triggers a supersession check（同决定搜树：更新/互链/吸收后删） | AGENTS §notes 取代检查 bullet + notes/README §决定覆盖与取代检查（SDLC reference 01 吸纳） | 照搬 |
 | Alternatives considered mandatory（没记击败了什么 = 会重开讼） | guides/60 §4 骨架 + note-format 门禁（## 输掉的方案在场断言） | 照搬 |
 | Implemented Note 保持 current（路径/默认值随实现同 diff；逆转写新 Note 互链） | AGENTS §notes implemented bullet；毕业 = 正文改写（guides/60 §4） | 照搬 |
 | Note 格式机械化（verify-agent-note-format） | verify 门禁 note-format（regex 版 + grandfather 条款——本仓轻量适配） | 带证据适配 |
-| 归档树 append-only hash manifest | [archived/](../notes/archived/README.md) 用"单文件 + `> 归档：<日期>` 行"等价落地（无 triplet/hash 基础设施）；冻结纪律 = 正文永不修改 | 带证据适配（manifest 面不引入——27 篇规模下目录树即清单） |
+| 归档树 append-only hash manifest | [archived/](../notes/archived/README.md) 用"单文件 + `> 归档：<日期>` 行"等价落地（无 triplet/hash 基础设施）；冻结纪律 = 正文永不修改 | 带证据适配（manifest 面不引入——当前规模下目录树即清单） |
 
 ## 源 5：postmortem（2026-09-25 二轮更正）
 
@@ -82,8 +82,8 @@ vendor 的事故复盘住在 **`docs/postmortem/`**（10 篇编号条目 + `READ
 
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
-| 两类同名 Skill 严格区分：repository development Skills（`.agents/skills/`，服务改仓库的 coding agent）vs runtime Skill capability（`packages/skill/`，服务产品内 agent） | 本仓两侧都有且分家：`.agents/skills/`（四个开发技能）+ `packages/deep-research-pack/presets/*/skills/`（研究角色运行时技能） | 照搬 |
-| Skill 的定位 = 可复用工作流 + 专门判断标准（不是产品 API，也不是自动门禁） | 四个开发技能各带触发条件/步骤/完成判据；机制细节仍链接 owner 文档而非复制 | 照搬 |
+| 两类同名 Skill 严格区分：repository development Skills（`.agents/skills/`，服务改仓库的 coding agent）vs runtime Skill capability（`packages/skill/`，服务产品内 agent） | 本仓两侧都有且分家：`.agents/skills/`（开发技能，清单 = 盘上目录）+ `packages/deep-research-pack/presets/*/skills/`（研究角色运行时技能） | 照搬 |
+| Skill 的定位 = 可复用工作流 + 专门判断标准（不是产品 API，也不是自动门禁） | 各开发技能带触发条件/步骤/完成判据；机制细节仍链接 owner 文档而非复制 | 照搬 |
 | 五步调用：Match（description 命中）→ Load（读全文，不从摘要猜）→ Resolve sources（读 owner）→ Apply judgment → Verify and report | 技能正文按此组织；`dev-skill-format` 门禁断言 frontmatter 在场且 `name` = 目录名 | 带证据适配（门禁为 regex 版，非 vendor 的 schema 校验） |
 | Skill ≠ gate：机械可判的下沉到类型/脚本/invariant，语义留给 review | 本仓分工表见末节「载体分工」 | 照搬 |
 | 按需加载控制上下文成本（progressive disclosure） | AGENTS 只放常驻（入口链 + 布局树 + 三行命令速查 + 指针），完整命令与流程按需加载（全档命令正本 = guides/60 §2） | 照搬 |
@@ -101,8 +101,9 @@ vendor 的事故复盘住在 **`docs/postmortem/`**（10 篇编号条目 + `READ
 | 投影（canonical 源的抛弃型派生物） | `website/.generated/`（vendor 站点产物，不入库） | `dev/smoke-workspace/dashboard.html`（canonical = 会话日志 + bundle 文件） | 随时可重建；永不手改、永不入库 |
 
 **一个事实一个 owner / 目录树即清单 / 不建第二份索引**：`notes/` 不设集中 INDEX（路径 =
-生命周期 + 日期 + 主题）；`research/` 例外地有一份 README 目录表（人类视角的状态面），
-其新鲜度由 `note-status` 门禁对账——这是本仓对"不建索引"的**登记偏离**：人读场景优先。
+生命周期 + 日期 + 主题）；各子目录的 README 门牌（`note-status` 门禁强制在场）是本仓对
+"不建索引"的**登记偏离**：人读场景优先（原 `research/` 索引面随其 2026-09-27 清并并入
+implemented/ 而退役）。
 
 **vendor = 所有权边界**：DSH 把框架层 vendor 进仓（可审计、可打补丁、钉版本）并要求
 "离上游的每一处分叉都留痕"；本仓用 **pinned submodule**（钉 commit，只读铁律，`vendor-pin`
@@ -137,7 +138,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 |---|---|---|---|
 | `AGENTS.md` | 每轮必须遵守什么 | 情境化长流程、全档命令表 | 入口链、布局树、命令速查、纪律指针 |
 | `docs/` 合同面 | 系统**现在**是什么、怎么用 | 决策历史 | evaluation、discipline-map、guides 60–62 |
-| Skill（`.agents/skills/`） | 面对某类任务怎样调查、判断、验证 | 确定性 pass/fail | 毕业条目 / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 |
+| Skill（`.agents/skills/`） | 面对某类任务怎样调查、判断、验证 | 确定性 pass/fail | 换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 |
 | 门禁与契约测试 | 一个可机械条件是否满足 | 意图与设计质量 | `scripts/verify/verify.mjs` + `tests/` |
 | Agent Note（`notes/`） | 为什么这样决定、放弃了什么 | 当前 API 的唯一说明 | proposed（将来）/ implemented（过去）|
 | 运行区记录 | 这次实际发生了什么 | 可复现的回归证据 | `drt_*` bundle、会话日志、仪表盘投影 |
@@ -161,7 +162,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 | Note 头三行恰为 `# Agent Note: <title>` / 空 / `Status: <status>`（**裸值，无日期括号**），与生命周期目录互验；rejected 的理由用 `—` 附在状态行 | `> 状态：<裸值>` + 目录互验（`note-format` 门禁）；rejected 允许 `— 一行理由`；章节名映射（问题↔Problem · 决定↔Decision · 输掉的方案↔Alternatives considered · 验证↔Verification · 环境状态↔Consequences）登记在 notes/AGENTS.md | 带证据适配（头三行结构与裸值照搬；`## Problem` 不强制于遗留篇——grandfather） |
 | 包 README 的 `## Known Limitations and Deferred Work` 固定节 | `## 已知限制与延后工作` 写进 docs/AGENTS.md 与包 AGENTS | 照搬 |
 | 根 AGENTS 的 “Editing these instructions” 节 | 根新增 §编辑这些指令（预算 manifest / 子树归属 / 门禁把守） | 照搬 |
-| `.agents/skills/` 命名带产品前缀（`dsh-`），少数通用技能无前缀 | 四个开发技能无前缀（与 vendor 的 `agent-experience`、`record-browser-gif` 同风格） | 已具备 |
+| `.agents/skills/` 命名带产品前缀（`dsh-`），少数通用技能无前缀 | 开发技能无前缀（与 vendor 的 `agent-experience`、`record-browser-gif` 同风格） | 已具备 |
 | **一段一行**（`verify-md-wrap` 门禁） | 硬折行 ~90 列 | **不适用**：中文优先仓折行是既有惯例，整仓重排会淹没审阅（成本 > 收益）；引入条件 = 转英文或双语文档 |
 | `docs/defensive-patterns.md`（高风险缺陷模式：生命周期/并发/子进程/teardown——供 review 逐条扫） | 主体 = vendor 的 TypeScript 代码模式清单；本仓 TS 面（`src/client/` 观察面 + `src/lib/` 折算）不另立第二份清单——**可迁移的部分已分居**：门禁与子进程陷阱 → [scripts/AGENTS.md](../scripts/AGENTS.md)，事故与教训 → notes/postmortem/ 与各毕业 Note | 不适用（不另建第二份清单，避免与上述 home 漂移） |
 vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗漏"的误读）：

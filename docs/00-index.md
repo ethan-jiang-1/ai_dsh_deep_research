@@ -33,11 +33,9 @@
 "装到哪个 DSH home？"（本仓开发通道 = `runtime/harness-home`，先 `source dev/env.sh`；日用 =
 `~/.dsh`，**不要** source——两者装的东西不同）。
 
-**每次"启动"前先扫一眼在飞 run**（动作 = `ls -dt research-workspace/drt_*/`，`archive/` 除外；
-细判据 = [61 §0](./guides/61-run-playbook.md)）：**根目录下每个未归档 bundle 都要报出来**——
-(a) 无 `final/` 或 `review.md` 非 `readiness: PASS` = 在飞 → 问"接续它还是新开"；(b) 有 `final/`
-且 PASS = 交付线已在盘、未归档 → 问"先归档再新开，还是补研究"（`present` 声明盘上不可验，
-归档前请用户确认）。两类都带上 slug + mtime，**都不自己挑**。
+**每次"启动"前先扫一眼在飞 run**：根目录下每个未归档 bundle（`archive/` 除外）都要报出来，
+接续 / 归档 / 新开问用户、带上 slug + mtime、**都不自己挑**——分类判据与问询全文 =
+[61 §0](./guides/61-run-playbook.md)。
 
 ## 文档组织原则
 
@@ -125,7 +123,7 @@ notes/ 文件）。
 | **研究驾驶舱（Research Cockpit）** | —（本仓原生套件名，2026-09-28 用户拍板）：观察面 client 套件——页签 / 工具卡 / 活标题 / 挂起显性化 + 渲染装配；分层：观察面（伞）→ 驾驶舱（套件，最频改）+ 折算层（`src/lib` 谓词，共用）+ 仪表盘（`run-dashboard` 只读投影）；**当前事实正本 = [design/40](./design/40-research-cockpit.md)** | `packages/deep-research-pack/src/client/`（目录名守 DSH 双半约定 host/client——套件名钉入口头注）+ `src/lib/` |
 | 开发 harness / 运行 harness | development harness / runtime harness（同一仓库的两面：前者让 agent 看懂、修改、验证自己；后者是产品运行框架） | 本仓两面并存：`packages/deep-research-pack/` 是 runtime 面，`AGENTS.md` + `docs/` + `notes/` + `.agents/skills/` + 门禁是 development 面 |
 | 参与阶梯 | participation ladder（L0 组合 → L1 扩展点 → L2 capability seam → L3 core loop） | [guides/62 §参与阶梯](./guides/62-plugin-authoring.md)（本仓版本：L0 配置行 / L1 preset+skill+观察面 client 面 / L2 尚无 / L3 归上游） |
-| 程序化工作记忆 | procedural memory（可复用工作流 + 专门判断标准） | `.agents/skills/`（开发技能：毕业条目 / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审——清单 = 盘上目录）——与产品内 runtime skills（`presets/*/skills/`）严格分家 |
+| 程序化工作记忆 | procedural memory（可复用工作流 + 专门判断标准） | `.agents/skills/`（开发技能：换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审——清单 = 盘上目录）——与产品内 runtime skills（`presets/*/skills/`）严格分家 |
 | plugin / bundle / profile | plugin = 导出 `apply(ctx)` 的模块；bundle = 你编写与分发的单位（`dsh.bundle`）；profile = 用户 `dsh --profile` 启动的环境（`dsh.profile`）——**Nothing is both** | bundle = `packages/deep-research-pack/cordis.patch.yml`；profile = `runtime/harness-home/profiles/research/`（镜像；源 = pack——`boot-run.sh` 从 pack 重建；overlay 只是源码域冒烟通道的生成物） |
 | run bundle（一次调研的变量容器） | —（本仓原生概念，源头 = DEEP_RESEARCH_HARNESS run bundle） | 载体 = `research-workspace/drt_<slug>/`（契约 = 研究手册目录约定）；**消歧**：DSH "bundle 行"（cordis.patch.yml 配置行）≠ run bundle（一次调研的变量容器），后者禁缩写成裸 "bundle" |
 | 独立预期（金标准） | oracle（测试判定的独立来源——刷新录制不许顺手改写判定标准；record/refresh ≠ 接受新行为） | vendor `docs/testing.md`（verify the world, not the self-report）+ `snapshots/AGENTS.md`；本仓载体 = snapshot-replay C 层渲染金标准 + [tests/AGENTS](../tests/AGENTS.md)「fix fixtures, not normalizers」 |
@@ -145,7 +143,7 @@ notes/ 文件）。
 | DSH 插件生态（vendor 能力目录差集 + 第三方市场/清单；2026-09-25 认真版） | 直接竞品 8 个；**我们差异化 = 多角色 + 证据审计 + Teams = 空白位**（搜索/学术/知识库已饱和不扩） | 认真报告 [dsh-plugin-ecosystem](../notes/implemented/2026-09-25-dsh-plugin-ecosystem.md)（已毕业）；粗扫种子见 [dsh-market-scout](../notes/archived/2026-09-24-dsh-market-scout.md)（冻结）→ 落点即该认真报告 |
 | DSH client/UI 扩展面（vendor slots/client-modules/hmr/remotes 正文档 + company client-face 多页签实例〔8 页签〕，2026-09-24 亲读+双代理考古；2026-10-09 钉版复核校正页签计数与通道名） | 右栏平台页签契约（sidebarRightTabs + sidebar.right.pane.tab 双半注册）/ 数据通道（agentTeam 投影〔sessions 座位，rc.2 起；旧名 remote.agentTeams.view〕·session.follow·workspaceFiles·@Remote）/ 双半 tsdown 构建契约 / 12 坑 | [琢磨稿](../notes/archived/2026-09-24-ui-observability-surfaces.md)（选项 A–D + 渐进路径 + D7/搁置池张力，已归档）——已落地为观察面 client 面（D18，构成正本 = [design/40](./design/40-research-cockpit.md)）：RFC = [observability-gui](../notes/implemented/2026-09-24-observability-gui.md) |
 | DSH SDLC reference（`/Users/bowhead/deepseek-harness/_agent_ready_development/sdlc-reference/` @ `efdba905b2`，2026-09-24 亲读 01-agent-note-lifecycle） | Agent Note 生命周期：决定覆盖（非提案优先）/ 取代检查硬触发 / 毕业正文改写 / alternatives 必载 / grandfather 条款 / 目录树代替索引 | [notes/README.md §决定覆盖与取代检查](../notes/README.md) + verify 门禁 note-format + [吸纳 Note](../notes/implemented/2026-09-24-note-lifecycle-absorption.md) |
-| **`_agent_ready_development/` 全语料** @ `efdba905b2`（三视角 37 篇 + `_coverage` 维护页 + 语料 verify.mjs，2026-09-25 全文通读；语料自身钉 DSH `dsh-v0.1.7-rc.1`） | 开发 harness 原理（知识归属/载体分工/参与阶梯/分层反馈/运行时查询/仓库分类学/插件作者入口）+ 语料级门禁（锚点、目录 README、钉版外链）+ 维护页（re-pin 轮次与重审触发） | [吸纳 Note](../notes/implemented/2026-09-25-agent-ready-absorption.md)（三态清单）→ `.agents/skills/`（四个开发技能）、[guides/62](./guides/62-plugin-authoring.md)、[discipline-map](./discipline-map.md) 源 6–8、[notes/README](../notes/README.md)，新门禁 `md-anchors` / `note-status` / `dev-skill-format` |
+| **`_agent_ready_development/` 全语料** @ `efdba905b2`（三视角 37 篇 + `_coverage` 维护页 + 语料 verify.mjs，2026-09-25 全文通读；语料自身钉 DSH `dsh-v0.1.7-rc.1`） | 开发 harness 原理（知识归属/载体分工/参与阶梯/分层反馈/运行时查询/仓库分类学/插件作者入口）+ 语料级门禁（锚点、目录 README、钉版外链）+ 维护页（re-pin 轮次与重审触发） | [吸纳 Note](../notes/implemented/2026-09-25-agent-ready-absorption.md)（三态清单）→ `.agents/skills/`（开发技能，清单 = 盘上目录）、[guides/62](./guides/62-plugin-authoring.md)、[discipline-map](./discipline-map.md) 源 6–8、[notes/README](../notes/README.md)，新门禁 `md-anchors` / `note-status` / `dev-skill-format` |
 | **`_digested/test-strategy/`** @ `639ed01539`（DSH 测试体系消化 11 篇：思想九教义 / 七层证据形态 / 快照机制 / CI 防假绿 / 可靠性纪律 / 插件测试五台阶；语料自报基线 = 本仓 vendor pin 同 commit——pin bump 后随 [discipline-map 重审触发路径](discipline-map.md#重审触发路径) 更新对账） | 测试策略增量吸收 | [采纳 Note](../notes/implemented/2026-10-04-test-strategy-adoption.md)（对照总账正本）→ [discipline-map 源 10](discipline-map.md)、[guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md)、[scripts/AGENTS §冒烟脚本可靠性纪律](../scripts/AGENTS.md)、[tests/AGENTS](../tests/AGENTS.md) |
 | `/Users/bowhead/ai_dsh_assitant/` @ `202a27b`（2026-10-10 复核重钉；notes/ SDLC 治理：notes/README = 分类 owner + §二之三 test-first 证据环——四条纪律〔第 3 条上游 2026-10 改述为证据由交付记录承载〕+ 复发升格触发器已移居其复发追踪 Note；同日与 D23 同源定调的姊妹仓独立落地） | notes/README 门牌节 + 验收门四条硬边界（未成熟不进实施 / 掩盖修法禁 / 未验不得写 implemented / 复发升门禁） | [D23 Note](../notes/implemented/2026-10-05-item-lifecycle-tdd.md)（强化段）→ [guides/60 §0 验收门](guides/60-dev-loop.md)、[notes/README §执行纪律](../notes/README.md)；2026-10-10 复核 = [外部钉版债复核材料](../_backlog/research/2026-10-10-external-repin-review.md)（本仓落点零修改） |
 | `/Users/bowhead/ai_dsh_assitant/_backlog/` @ `202a27b`（外部材料参考仓快照；非 vendor pin；2026-10-10 随上行走廊一并重钉） | 问题澄清优先、按需方法、证据/问题/交接分层、大小按决策依赖控制；本仓适配 = 会话内 plan/todo 组织实施、日期命名与 notes 对齐、复用本地证据命令与单人仓文件载体 | [Backlog 方法论吸收 Note](../notes/implemented/2026-10-09-backlog-methodology-absorption.md) → `_backlog/` owner 与 [intent carriers](design/60-intent-carriers.md)；外部 commit 仅作参考版本，不进入 vendor pin 一致性 |

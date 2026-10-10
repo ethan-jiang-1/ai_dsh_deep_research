@@ -77,6 +77,9 @@
 frontmatter）。`dev/run-kickoff.mjs` 已默认用 workspaceId 形态把会话建在 research-workspace。
 
 - web GUI 新建会话：preset 选 **Deep Research Lead**（默认项），工作区选 **research-workspace**；
+- 无 GUI 手（代理操作）：`node dev/run-kickoff.mjs --port 3083 --token <横幅 token>
+  [--prompt-file <file>]` 建 Lead 会话（workspace/create 幂等自检已内建；全档参数 =
+  [guides/60 §2](./60-dev-loop.md)）；
 - 只跟 lead 对话——它是唯一入口与出口：立项、组队、派活、综合、交付全归它；
   scout / analyst / critic 是它的队员，不直接听你指挥。
 
@@ -169,6 +172,12 @@ source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --tok
   仪表盘多 run 总表与 evidence-audit `--latest` 均并扫 archive/）。`runtime/harness-home/runs/`
   下的 bundle 是契约前的 ad-hoc 历史（仪表盘标 "ad-hoc·无契约"）——不是这次要恢复的 run，
   也不要删（gitignored 运行数据，是那次研究留下的证据）；
+- **续跑已交付（已归档）run**：同在飞形态——新开 lead 会话说「继续 `archive/<slug>` 这个 run」；
+  lead 依赖的是 bundle 文件事实而非位置（归档位在其 cwd 之下可读；仪表盘与 evidence-audit
+  `--latest` 均并扫 archive/）。续跑语义 = rerun 三分：表述修订原位改、证据扩张落 `final/`
+  v(n+1)（交付后操作侧重新归档）、结构性另起新 bundle（正本 =
+  [NODES 回边版本语义](../../research-workspace/NODES.md)）；候选不止一个时全部报出问用户，
+  不自己挑（同 §0 纪律）；
 - 方向修订：直接告诉 lead——**载体 = steer**（GUI 里打字即 steer；RPC 用 `session/prompt`
   的 `mode: 'steer'`，running 中的 agent 在下一步边界消费）；lead 记账（§Decisions 追加）
   后原地补搜（不算 rerun）。**queue 模式的消息（代驱脚本缺省形态）在 run 的单超长 turn

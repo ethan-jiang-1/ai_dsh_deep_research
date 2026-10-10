@@ -117,12 +117,13 @@ dsh plugin --profile research add file:/path/to/${tarballName}
 dsh --profile research --dump-config
 \`\`\`
 
-输出里应能看到四样东西：
+输出里应能看到五样东西：
 
 - \`id: preset-lead\`（以及 preset-scout / preset-analyst / preset-critic）——四角色 preset；
 - \`id: tool-present\` —— HITL 选项卡工具行；
 - \`id: ui-agent-team\` —— 团队协作通道的可视面；
-- \`id: research-client\` —— 研究驾驶舱（浏览器端）的挂载行。
+- \`id: research-client\` —— 研究驾驶舱（浏览器端）的挂载行；
+- \`id: session-query-sqlite\` —— 会话内检索（SQLite，首次搜索时打开）。
 
 ## 三、铺研究工作区（角色的纪律从 cwd 注入，缺这步角色没有证据契约）
 

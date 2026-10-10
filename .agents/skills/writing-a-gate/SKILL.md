@@ -30,12 +30,16 @@ description: Use when adding, widening, or retiring a mechanical check in script
 - 扫描目录时跳过 `.git` / `node_modules`；稀疏态（文件不存在）用 `continue` 防御；
 - 别把"运行区数据完整性"塞进 L0——那属于 run 内的 critic + 观察面谓词。
 
-## 3. 写实现并登记（同一步，三处）
+## 3. 写实现并登记（同一步，三处 + 自测两处）
 
 1. `scripts/verify/verify.mjs`：加 `gates` 数组项 + 实现块（块注释写设计依据与实证出处）；
 2. `docs/evaluation.md` §L0 门禁登记表：加一行（断言什么 + 反证记录），
    与 `gate-ledger-sync` 门禁对账——**两处不同步即红**；
 3. 需要新契约断言时同步 `tests/`（keyless，零依赖）。
+
+门禁逻辑有增删时另有两处随行：`scripts/smoke/gates-smoke.mjs` 的案例表 `CASES`（注入案例
+增删同 diff）与 `tests/verify-gates.test.mjs`（案例 ↔ gates 数组静态对账）；改完必跑
+`node scripts/smoke/gates-smoke.mjs`（[scripts/AGENTS.md](../../../scripts/AGENTS.md)）。
 
 ## 4. 反证（完成判据）
 

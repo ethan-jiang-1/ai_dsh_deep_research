@@ -24,7 +24,7 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 CLAUDE.md→AGENTS.md、.claude/skills→.agents/skills    两条 symlink（编辑真文件；后者让 Claude 系
                          harness 发现同一批开发技能——verify 门禁 claude-symlink 校验）
 子树 AGENTS.md            docs/ · scripts/ · notes/ · packages/deep-research-pack/ · tests/ 各一份——只放该
-                         子树的指令（根只放每轮常驻指令；上游 22 个子树 AGENTS.md 同构）
+                         子树的指令（根只放每轮常驻指令；上游 22 份 AGENTS.md〔含根〕同构）
 README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令正本 = guides/60 §2，不复制）
 _backlog/                 问题澄清与证据区：issues/、bugs/、research/、methods/、triggers.md、_archived/；
                           手册 = _backlog/README.md
@@ -34,7 +34,7 @@ vendor/dsh/               pinned submodule（只读铁律——verify vendor-pin
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、NODES.md（节点 I/O 契约
                          全表）、question-patterns.md（判型模式库）、drt_<slug>/（run bundle）、
                          archive/（已交付 run 归档位）、drafts/、templates/run/
-docs/                    00-index（地图+决策台账+术语映射）→ design/10-50 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ evaluation.md（验收合同）
+docs/                    00-index（地图+决策台账+术语映射）→ design/10-60 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ evaluation.md（验收合同）
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）；目录名自带时态，
                          总图 = notes/README.md（将来 proposed/ · 过去 implemented/archived/rejected/
                          postmortem/；立项来历 = 该页 §立项来历——用户定调只进 00-index D 号依据列）：
@@ -42,7 +42,7 @@ notes/                   **开发记忆与证据链**（核心流程数据，不
                          冻结入 archived/）；
                          rejected/（否决与搁置——"决定不做"，带重启条件）；postmortem/（事故复盘）
 .agents/skills/          开发技能（DSH 约定路径：project-agents 发现根）：任务匹配即加载的程序化工作记忆
-                         （毕业条目 / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审）；与产品内 runtime skills（presets/*/skills/）分家
+                         （换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审）；与产品内 runtime skills（presets/*/skills/）分家
 scripts/                 职责分组六目录 + lib/ 支撑库（逐件职责索引 = scripts/README.md）：verify/（L0 门禁聚合 verify.mjs）、smoke/（分级冒烟：preset/release/client-load/snapshot-replay/gates keyless；client-hitl/l4-lite/team-preflight 真模型档）、probe/（cdp 交互探针、entry-chain/discipline 行为探针，真模型档）、run-gates/（node-gate/schema-scan/evidence-audit run bundle 机械门与审计）、run-ops/（watch-run 盯场、run-dashboard 只读投影）、dist/（export-dist 出包→_dist/）、lib/（roles 角色清单访问器[事实源=盘上 presets/] + env/playwright/vendor-artifacts/cdp-driver/run-state 冒烟支撑模块）
 tests/                   keyless 回归（node:test，无测试框架；layering 守卫五件套：提及级禁物+解析级调用+import 闭包图+test 命令钉+有家句——规则见 tests/AGENTS.md）
 snapshots/               场景证据层：整组录制资产 + 场景声明 snapshot.json（消费 = snapshot-replay-smoke
@@ -67,7 +67,7 @@ Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。
 - **时态总图 = [notes/README.md](notes/README.md)**（`proposed/` = 需显式评审的持久决定提案；
   `implemented/` `archived/`（冻结） `rejected/`（防复犯的否决理由） `postmortem/` = 决定与证据记忆）；
 - **写入触发 / 取代检查 / 格式与毕业 = [notes/AGENTS.md](notes/AGENTS.md)**；
-- **任务流程**（毕业条目 / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审）= `.agents/skills/` 开发技能，按
+- **任务流程**（换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审）= `.agents/skills/` 开发技能，按
   description 触发加载，不占常驻上下文。
 
 原生定义（vendor 树内，本仓不复制）：`vendor/dsh/.agents/notes/README.md`（生命周期/分类/
@@ -90,7 +90,7 @@ pnpm test            # L0 keyless 回归（唯一登记的测试命令）
 档位词汇：**keyless** = 无凭据可跑；preset-smoke 真挂载档无模型调用、不需要 key。
 release-smoke 无模型调用，安装验收使用 `--install-only` 跳过模型就绪检查；默认 preflight 仍检查凭据在场；
 **真模型档** = 需凭据并调用模型：l4-lite-smoke、team-preflight-smoke、entry-chain-probe、
-discipline-probe（纪律行为探针）、client-hitl-smoke 与完整 L4；CDP `--ask` 按当前会话模型档处理（模式表 = [项目地图](docs/project-map.md)）。
+discipline-probe（纪律行为探针）、client-hitl-smoke、dev/record-role-fixture（fixture 录制）与完整 L4；CDP `--ask` 按当前会话模型档处理（模式表 = [项目地图](docs/project-map.md)）。
 
 L4-lite 真模型冒烟需要 `DEEPSEEK_API_KEY`：开发 home（`runtime/harness-home/.credentials.yaml`）配一次
 即可，永不提交密钥；web 搜索无需独立 key——base 的 `web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，与 chat 同一把钥匙（实证：vendor base bundle cordis.patch.yml）。
@@ -135,4 +135,5 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 
 ## 术语速查
 
-概念 → 官方载体 → 源码路径 = [00-index §术语映射](docs/00-index.md)；探索路由（vendor 树）= `docs/architecture.md` → `docs/capability-seams.md` → 具体 package README。
+概念 → 官方载体 → 源码路径 = [00-index §术语映射](docs/00-index.md)；探索路由（vendor 树）=
+`vendor/dsh/docs/architecture.md` → `vendor/dsh/docs/capability-seams.md` → 具体 package README。

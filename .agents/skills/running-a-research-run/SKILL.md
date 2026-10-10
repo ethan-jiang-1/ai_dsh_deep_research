@@ -13,7 +13,7 @@ run 的操作面是**文件 + 会话通道**，不是代码。启动器、观察
 ## 1. 开跑前
 
 - 题面：一次调研 = 一个 run bundle（`research-workspace/drt_<slug>/`）。同名/前缀相关
-  bundle 已在 → 先问用户，不擅自另起（bundle 身份 = 方向契约）；
+  bundle 已在（**含 `archive/` 归档**，同手册立项预检）→ 先问用户，不擅自另起（bundle 身份 = 方向契约）；
 - **开跑前先扫未归档 run**：`research-workspace/drt_*/`（`archive/` 除外）——根目录下**每个** bundle
   都要报出来，分两类：(a) 无 `final/` 或 `review.md` 不是 `readiness: PASS` = 在飞 → 问**接续它还是
   新开**（接续做法 = §3）；(b) 有 `final/` 且 PASS = 交付线已在盘但未归档 → 问**先归档再新开，还是

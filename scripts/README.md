@@ -35,7 +35,7 @@
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
-| node-gate.mjs | 判据级：门①②③④L + 门R（标题重复退化，2026-10-06 起），报告落 bundle——判据核心住 lib/node-gate-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless |
+| node-gate.mjs | 判据级：门①②③④ + 门L + 门R（标题重复退化，2026-10-06 起）+ 门A（交付完整性，2026-10-08 起；图例正本 = research-workspace/NODES.md 头部），报告落 bundle——判据核心住 lib/node-gate-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless |
 | schema-scan.mjs | 在场级：八节点输出件在场断言（断代定红） | keyless |
 | evidence-audit.mjs | URL/摘录/final 链溯源对账 → audit.md——判据核心住 lib/evidence-audit-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless（须 source dev/env.sh） |
 

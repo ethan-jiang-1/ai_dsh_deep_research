@@ -37,6 +37,8 @@
 | [methods](./methods/README.md) | 澄清、查证、综合、验收与交接方法 | 按当前缺口选择，不默认每卡走完整流程 |
 | [triggers](./triggers.md) | 会自然遇到、可能改变旧决定的具体观察 | 可选短索引，完整理由留 owner |
 | [_archived](./_archived/README.md) | 已离开活跃区的卡片与研究 | 按结果分池并维护各自索引 |
+| [_done](./_done/README.md) | 改名兼容指针（旧归档入口 → `_archived/`） | 自述页，不新增内容 |
+| [_postponed_plans](./_postponed_plans/README.md) | 改名兼容指针（延后决定 → [triggers](./triggers.md) 索引） | 自述页，不新增内容 |
 
 新 issue frontmatter 顺序为 `status`、`opened`；bug 为 `status`、`severity`、`opened`；research 为 `topic`、`intent`，不可带 `status`。历史归档可保留旧形态。各 README 是对应文件清单；`pnpm verify` 的结构检查只证明被检查的形状，不证明卡片判断、证据质量、用户授权或实施验收。
 
