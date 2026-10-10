@@ -7,10 +7,8 @@
 ## 对话流 · 研究语义卡（web_search 卡标题，状态符不钉）
 
 检索：DSH harness
-检索：DeepSeek Harness 官方 文档 site:github.com
 
 ## 研究状态页签 · 人性化活动行（icon + 文本）
 
 🔍 检索：DSH harness
-🔍 检索：DeepSeek Harness 官方 文档 site:github.com
-💬 探针完成，搜了 2 次（「DSH harness」8 条 + 补充「官方文档」8 条，全部为第三方报
+💬 探针完成，搜了「DSH harness」（8 条结果，含 [DoNews](https://www.

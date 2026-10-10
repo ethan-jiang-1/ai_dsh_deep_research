@@ -11,9 +11,9 @@
       "fixture": "session.v4.jsonl",
       "renderExpected": "ui.expected.md",
       "source": {
-        "codeAnchor": "b25b5157d831d76ada9a8192d6fd24b063dfa7da",
+        "codeAnchor": "845f8b9ad0bbf755046bd2ce0bdf4dd843c02d20",
         "vendor": "639ed015397290b3745d163aafe02ffee4aa3f84",
-        "recordedAt": "2026-10-09T10:22:29.125Z",
+        "recordedAt": "2026-10-10T09:39:37.000Z",
         "recording": "live"
       }
     },
@@ -22,9 +22,9 @@
       "preset": "scout",
       "fixture": "scout/session.v4.jsonl",
       "source": {
-        "codeAnchor": "b25b5157d831d76ada9a8192d6fd24b063dfa7da",
+        "codeAnchor": "845f8b9ad0bbf755046bd2ce0bdf4dd843c02d20",
         "vendor": "639ed015397290b3745d163aafe02ffee4aa3f84",
-        "recordedAt": "2026-10-09T10:16:44.217Z",
+        "recordedAt": "2026-10-10T09:16:00.000Z",
         "recording": "live"
       }
     },
@@ -33,9 +33,9 @@
       "preset": "analyst",
       "fixture": "analyst/session.v4.jsonl",
       "source": {
-        "codeAnchor": "b25b5157d831d76ada9a8192d6fd24b063dfa7da",
+        "codeAnchor": "845f8b9ad0bbf755046bd2ce0bdf4dd843c02d20",
         "vendor": "639ed015397290b3745d163aafe02ffee4aa3f84",
-        "recordedAt": "2026-10-09T10:18:28.634Z",
+        "recordedAt": "2026-10-10T09:18:00.000Z",
         "recording": "live"
       }
     },
@@ -44,9 +44,9 @@
       "preset": "critic",
       "fixture": "critic/session.v4.jsonl",
       "source": {
-        "codeAnchor": "b25b5157d831d76ada9a8192d6fd24b063dfa7da",
+        "codeAnchor": "845f8b9ad0bbf755046bd2ce0bdf4dd843c02d20",
         "vendor": "639ed015397290b3745d163aafe02ffee4aa3f84",
-        "recordedAt": "2026-10-09T10:20:22.631Z",
+        "recordedAt": "2026-10-10T09:21:00.000Z",
         "recording": "live"
       }
     }

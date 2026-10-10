@@ -10,7 +10,11 @@
 
 ## 活跃列表
 
-（无活跃缺陷卡；最近归档 = [BUG-018](../_archived/fixed_bugs/BUG-018-snapshot-replay-advertised-coverage.md) snapshot-replay 声明覆盖大于实际覆盖〔B 层补齐比对面 + 覆盖面自守〕。）
+| 卡 | 一句话 | 严重级 |
+|---|---|---|
+| [BUG-019](BUG-019-recorder-mcp-race.md) | 录制器不等 MCP server 就绪即发探针——fixture 工具表随机缺 MCP 组，回放对账才现形 | P2 |
+
+（最近归档 = [BUG-018](../_archived/fixed_bugs/BUG-018-snapshot-replay-advertised-coverage.md) snapshot-replay 声明覆盖大于实际覆盖〔B 层补齐比对面 + 覆盖面自守〕。）
 
 ## 卡片模板
 
