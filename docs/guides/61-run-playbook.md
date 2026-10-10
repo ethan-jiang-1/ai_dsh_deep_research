@@ -16,6 +16,23 @@
   补救，**先看占用者是谁**：若是本仓在飞的 run 通道 → **别另起**，用它（URL/token 见启动横幅或
   `runtime/smoke-workspace/web.log`）；不是 → 换端口，或确认后停掉它（**别盲杀**：在飞会话的
   日志尾部可能丢失——BUG-007 卡）；
+- **启动请求的呈交纪律（2026-09-30 用户定调）**：用户让"启动/起 web"= 代理**先自己跑通**——
+  boot-run 全序（自检 → 组合检查/必要补装 → 漂移检测）红了就当场修（漂移 = 按脚本处方重建 profile；
+  vendor 产物缺失 = `bash dev/vendor-build.sh`），boot 出横幅后**再验浏览器面**（探针断言
+  无 "Failed to load plugins" / 零 console 错误——0.2.0 轮教训：boot 横幅只证宿主侧，
+  观察面可能坏着），**全绿才把 URL 交出去**。不呈交"可能能用的东西"；红了不自修就上报 =
+  失职；
+- **启动前先判"接续还是新开"**：`ls -dt research-workspace/drt_*/`（`archive/` 除外）——**根目录下
+  每个未归档 bundle 都要报出来**，分两类：(a) 无 `final/` 或 `review.md` 不是 `readiness: PASS`
+  = **在飞**（含停在 HITL2 等拍板的形态——`final/` 随交付四步落地，交付前不在场；扩张版 vN
+  随 rerun）→ 问"接续它还是新开"（接续做法 = §5）；(b) 有 `final/` 且 PASS = **交付线已在盘、
+  未归档**——按 [NODES](../../research-workspace/NODES.md) 交付行，交付判别 = §6（run 根
+  `final.md` + `present` 声明）→ 问"先归档再新开，还是补研究（rerun）"。两类都带上 slug +
+  mtime，**都不自己挑**；present 声明不在 bundle 文件里（node-gate 门② 查 lead 会话日志），
+  (b) 类归档前请用户确认。
+
+### 0.1 特殊形态与排障（按需读，首跑不需要）
+
 - **SPA 抓取通道（mcp-playwright，默认挂载）**：`bash dev/boot-run.sh` 自带本地 Playwright MCP
   （npx 拉起 `@0.0.83`、headless、`direct://` 直连绕过系统代理——SPA 定价页/JS 榜单的渲染抓取）；
   `MCP_PLAYWRIGHT=0` = 显式拆。决定与环境踩坑正本 =
@@ -28,31 +45,17 @@
   [hitl-docking-polish Note](../../notes/archived/2026-09-28-hitl-docking-polish.md)）；
   代理**驱动**已起的通道没问题（run-kickoff / hitl-answer 走 localhost API 全通）。boot 归
   用户终端仍是默认纪律（真实 DNS、零额外件）；
-- **启动请求的呈交纪律（2026-09-30 用户定调）**：用户让"启动/起 web"= 代理**先自己跑通**——
-  boot-run 全序（自检 → 组合检查/必要补装 → 漂移检测）红了就当场修（漂移 = 按脚本处方重建 profile；
-  vendor 产物缺失 = `bash dev/vendor-build.sh`），boot 出横幅后**再验浏览器面**（探针断言
-  无 "Failed to load plugins" / 零 console 错误——0.2.0 轮教训：boot 横幅只证宿主侧，
-  观察面可能坏着），**全绿才把 URL 交出去**。不呈交"可能能用的东西"；红了不自修就上报 =
-  失职。
-- **启动前先判"接续还是新开"**：`ls -dt research-workspace/drt_*/`（`archive/` 除外）——**根目录下
-  每个未归档 bundle 都要报出来**，分两类：(a) 无 `final/` 或 `review.md` 不是 `readiness: PASS`
-  = **在飞**（含停在 HITL2 等拍板的形态——`final/` 随交付四步落地，交付前不在场；扩张版 vN
-  随 rerun）→ 问"接续它还是新开"（接续做法 = §5）；(b) 有 `final/` 且 PASS = **交付线已在盘、
-  未归档**——按 [NODES](../../research-workspace/NODES.md) 交付行，交付判别 = §6（run 根
-  `final.md` + `present` 声明）→ 问"先归档再新开，还是补研究（rerun）"。两类都带上 slug +
-  mtime，**都不自己挑**；present 声明不在 bundle 文件里（node-gate 门② 查 lead 会话日志），
-  (b) 类归档前请用户确认。
+- **web 进程生命周期（实测约束）**：`boot-run.sh` 把 web 跑在**前台**并用 trap 管子进程——
+  **脚本退出即 web 停**（这是特性：不留孤儿）。因此：
 
-**web 进程生命周期（实测约束）**：`boot-run.sh` 把 web 跑在**前台**并用 trap 管子进程——
-**脚本退出即 web 停**（这是特性：不留孤儿）。因此：
-
-- 交互式使用 = 让 `boot-run.sh` 待在终端里（Ctrl-C 才停）；
-- 需要它在你离开后继续服务 = 用**托管后台任务**跑 web，并**保持 stdin 打开**
-  （`sleep <秒> | node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts --profile research
-  -- --port <端口，缺省 3083> --no-open`；web 在 stdin 关闭时会自行退出）。**这条绕过 boot-run 的
-  漂移门**（§0 上面"别直接跑 `dsh --profile research`"正为此）：先 `bash dev/boot-run.sh --drift-check`
-  过门再用它；该模式先检查端口且可初始化环境/补装 profile/写 MCP patch，不是只读探针。
-  报漂移就按 [guides/62 §改动影响面](./62-plugin-authoring.md) 重建镜像；
+  - 交互式使用 = 让 `boot-run.sh` 待在终端里（Ctrl-C 才停）；
+  - 需要它在你离开后继续服务 = 用**托管后台任务**跑 web，并**保持 stdin 打开**
+    （`sleep <秒> | node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts --profile research
+    -- --port <端口，缺省 3083> --no-open`；web 在 stdin 关闭时会自行退出）。**这条绕过 boot-run 的
+    漂移门**（[00-index §先分流](../00-index.md) 首行"别直接 `dsh --profile research`"正为此——
+    同理：绕过漂移检测、静默用旧镜像）：先 `bash dev/boot-run.sh --drift-check`
+    过门再用它；该模式先检查端口且可初始化环境/补装 profile/写 MCP patch，不是只读探针。
+    报漂移就按 [guides/62 §改动影响面](./62-plugin-authoring.md) 重建镜像；
 - **刷新白屏的判别序**：① `lsof -nP -iTCP:<端口> -sTCP:LISTEN` 有没有监听 → 无 = 进程已停
   （重跑上面任一形态）；② 有监听但仍白屏/401 = token 过期（**每次启动都是新 token**，
   用当次横幅里的 URL；旧 URL 作废）；③ 有监听且 token 新但页面空 = 前端壳产物陈旧
