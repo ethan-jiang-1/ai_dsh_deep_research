@@ -1,11 +1,14 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-10-10
 ---
 
 # 推敲：egress 模式探针与自适应 boot——直连/TUN 两态自动判定与分支
 
-> 立卡：2026-10-10 ｜ 状态：推敲中 ｜ 类型：Feature ｜ 可关闭：否
+> 立卡：2026-10-10 ｜ 状态：已结 2026-10-10 ｜ 类型：Feature ｜ 可关闭：是
+>
+> **结论**：两态自适应 boot 已实施并验收——#1（探针分类）/#2（代理机制）/#3（直连态零变化）/#5（61 §0.1 两态文档）绿，实录见 §实施记录（commit 4083724）；#4（B/C 态现场端到端）按 validation-evidence §1b blocked 登记，补证触发 = [triggers.md](../../triggers.md)。
+> **去向**：不另立 Note——持久理由已由三处共同承载（[guides/61 §0.1](../../../docs/guides/61-run-playbook.md) 的两态合同、本卡设计与证据、`scripts/lib/egress*.mjs` 头注的机制说明），无第四家需要；下游处理申请 = 无（现存结论已自答，按 issue-to-note §1 末项关闭）。
 
 **问题与期望结果：** 本机 egress 环境在两种形态之间**流动**（同日实测翻转，见下），静态配置永远有一半时间错——写死代理毒害直连态，不写代理则 TUN 态全红。期望 = boot 前自动判定 egress 模式，**按态分支**：直连态零变化、TUN 态自动给出出口、无网态显性警告。**硬约束（用户定调 2026-10-10）：两种状况都必须支持，都是一等公民——不支持其中一态 = 修一半。**
 
@@ -13,7 +16,7 @@ opened: 2026-10-10
 
 - **上午 ≤11:41（TUN/fake-IP 态）**：`research-workspace/drt_cn-moe-2026/journal.md` 自记——web_fetch 全域名撞 `resolves to a non-public IP address`（12 主机 29 次全红，含 `127.0.0.1` 控制组），journal 归因 = DNS 答 198.18.x.x 假 IP、DSH SSRF 守卫拒非公网答案；run 由此卡死在立项期。
 - **晚 18:16 起（直连态）**：本日重录的 lead fixture（snapshots/replay/research-face）web_fetch **零** SSRF 错误；`dns.promises.lookup`（DSH 守卫同款路径）对 example.com / arxiv.org / huggingface.co 全部返回真实公网 IP；OS 级 curl 亦 200。
-- **vendor 机制（只读核实）**：守卫 = `vendor/dsh/packages/web/web-fetch-http/src/network.ts` 的 `resolvePublicAddresses`（逐答案校验公网性，非公网即 WEB_BLOCKED_URL）；**设计内旁路** = `proxyRouteFor` 读进程 env `http_proxy`/`https_proxy`/`no_proxy`（`util/http-proxy/src/policy.ts:40-42`）——有代理路由时走 `requestVia`，**代理侧解析，守卫不再触发**。此即 [guides/61 §0.1](../../docs/guides/61-run-playbook.md) 处方的机制本体。
+- **vendor 机制（只读核实）**：守卫 = `vendor/dsh/packages/web/web-fetch-http/src/network.ts` 的 `resolvePublicAddresses`（逐答案校验公网性，非公网即 WEB_BLOCKED_URL）；**设计内旁路** = `proxyRouteFor` 读进程 env `http_proxy`/`https_proxy`/`no_proxy`（`util/http-proxy/src/policy.ts:40-42`）——有代理路由时走 `requestVia`，**代理侧解析，守卫不再触发**。此即 [guides/61 §0.1](../../../docs/guides/61-run-playbook.md) 处方的机制本体。
 - **旁证史**：10-09 录制的旧 lead fixture（git 历史）内嵌 10 处 SSRF 错误串——TUN 态的失败卡烙进了渲染金标准；61 §0.1 记载 2026-09-28 同型事故。同环境异日异态 = 反复咬人的根源。
 
 **状态分类学与判定矩阵：**

@@ -58,7 +58,7 @@
 | 模块 | 被谁消费 | 说明 |
 |---|---|---|
 | lib/roles.mjs | 冒烟与门禁 | 角色清单访问器（事实源 = 盘上 presets/） |
-| lib/egress.mjs | egress-probe CLI、boot-run 自检 | egress 三态判定核心（注入式 lookup/checkHttp；分类语义 = DSH SSRF 守卫同款：任一答案非公网即 walled；设计 = [egress issue](../_backlog/issues/2026-10-10-egress-mode-probe.md)） |
+| lib/egress.mjs | egress-probe CLI、boot-run 自检 | egress 三态判定核心（注入式 lookup/checkHttp；分类语义 = DSH SSRF 守卫同款：任一答案非公网即 walled；设计 = [egress issue](../_backlog/_archived/settled_issues/2026-10-10-egress-mode-probe.md)） |
 | lib/egress-proxy.mjs | egress-proxy CLI、egress-proxy-smoke | 自旋本地 HTTP 代理核心（CONNECT 隧道 + 绝对 URI 转发；TUN 态 DSH fetch 出口；机制证据住 smoke 道——layering ③ 禁 tests 引入网络内置） |
 | lib/session-log.mjs | run-state、watch-run、回归 | canonical 日志选择与读取（BUG-010） |
 | lib/run-state.mjs | watch-run、仪表盘、回归 | run 操作面状态谓词 |

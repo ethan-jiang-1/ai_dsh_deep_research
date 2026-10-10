@@ -1,5 +1,5 @@
 // scripts/lib/egress.mjs — egress 模式判定核心（纯函数 + 注入式 IO）。
-// 家与验收矩阵 = _backlog/issues/2026-10-10-egress-mode-probe.md；合同叙述 = guides/61 §0.1。
+// 家与验收矩阵 = _backlog/_archived/settled_issues/2026-10-10-egress-mode-probe.md；合同叙述 = guides/61 §0.1。
 // 真 IO 的 CLI = dev/egress-probe.mjs（dev 工具态；本文件不调用 fetch，回归层可 import）。
 // 为什么必须走 getaddrinfo 路径：DSH SSRF 守卫（vendor web-fetch-http/src/network.ts）用
 // node:dns/promises 的 lookup({all:true, order:'verbatim'}) 逐答案校验公网性——探针注入的

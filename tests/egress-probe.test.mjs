@@ -1,5 +1,5 @@
 // tests/egress-probe.test.mjs — egress 三态判定核心的注入式契约测试。
-// 家 = scripts/lib/egress.mjs（核心）；设计与验收矩阵 = _backlog/issues/2026-10-10-egress-mode-probe.md；
+// 家 = scripts/lib/egress.mjs（核心）；设计与验收矩阵 = _backlog/_archived/settled_issues/2026-10-10-egress-mode-probe.md；
 // 真 IO 的 CLI = dev/egress-probe.mjs（dev 工具态，不进回归层）。分类语义与 vendor SSRF 守卫同款：
 // 逐主机**全部**答案公网才算该主机可过（守卫对混合答案集整体拒绝——network.ts 逐答案校验）。
 

@@ -2,7 +2,7 @@
 // 用途：TUN/fake-IP 态给 DSH web_fetch 设代理出口——代理侧经 OS 解析（fake-IP → TUN 透明
 // 路由，OS 级 HTTP 通则本代理必通），DSH 的 SSRF 守卫在代理路由下不再做本地公网校验
 // （vendor util/http-proxy proxyRouteFor 读 http_proxy/https_proxy；机理见 issue 卡）。
-// 家与验收 = _backlog/issues/2026-10-10-egress-mode-probe.md；CLI = dev/egress-proxy.mjs。
+// 家与验收 = _backlog/_archived/settled_issues/2026-10-10-egress-mode-probe.md；CLI = dev/egress-proxy.mjs。
 // 回环机制测试 = tests/egress-proxy.test.mjs（证明隧道转发；不证明真实外网可达）。
 
 import { createServer, request as httpRequest } from 'node:http';

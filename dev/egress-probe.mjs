@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // dev/egress-probe.mjs — egress 模式判定 CLI（真 IO；核心 = scripts/lib/egress.mjs 注入式，tests 可测核心）。
-// 家与验收 = _backlog/issues/2026-10-10-egress-mode-probe.md；boot-run 自检消费 stdout 首行。
+// 家与验收 = _backlog/_archived/settled_issues/2026-10-10-egress-mode-probe.md；boot-run 自检消费 stdout 首行。
 // 用法：node dev/egress-probe.mjs [--json] → stdout 首行 = direct|tun|offline（exit 0——模式是事实不是错误）。
 // 探针自身故障兜底：任何异常打印 direct + stderr 说明——回落零变化默认，不拦 boot。
 import { lookup } from 'node:dns/promises';

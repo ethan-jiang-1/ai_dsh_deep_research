@@ -29,7 +29,7 @@ if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/
   exit 1
 fi
 
-# ⓪½ egress 模式判定（issue _backlog/issues/2026-10-10-egress-mode-probe.md；两态一等公民）：
+# ⓪½ egress 模式判定（issue _backlog/_archived/settled_issues/2026-10-10-egress-mode-probe.md；两态一等公民）：
 #    direct = 直连（DNS 答真实公网 IP）零变化；tun = TUN/fake-IP 态（SSRF 守卫将拒 web_fetch，
 #    web 启动前在下方 ②½ 设代理出口）；offline = 无 egress 显性警告。探针 = dev/egress-probe.mjs
 #    （keyless 秒级，走 getaddrinfo 路径——与守卫同款）；探针自身故障回落 direct（零变化默认）。

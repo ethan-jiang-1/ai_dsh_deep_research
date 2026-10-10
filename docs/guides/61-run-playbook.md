@@ -37,7 +37,7 @@
   （npx 拉起 `@0.0.83`、headless、`direct://` 直连绕过系统代理——SPA 定价页/JS 榜单的渲染抓取）；
   `MCP_PLAYWRIGHT=0` = 显式拆。决定与环境踩坑正本 =
   [mcp-playwright 采纳 Note](../../notes/implemented/2026-10-02-mcp-playwright-adoption.md)；
-- **egress 两态与 boot 自动分支**（[egress-mode-probe 卡](../../_backlog/issues/2026-10-10-egress-mode-probe.md)）：本机 egress 在**直连态**（DNS 答真实公网 IP——`web_fetch` 原生可用）与 **TUN/fake-IP 态**（OS 级网络通、DNS 答 198.18.x.x 段——DSH 的 SSRF 守卫逐答案校验公网性，`web_fetch` 全域被拒；`web_search` 不受影响）之间流动，不靠静态假设——boot-run 自检自动判定并打印模式行：直连态零变化；TUN 态自动设 DSH fetch 代理出口（自旋本地转发代理，或 `DSH_EGRESS_OUTLET=http://127.0.0.1:<口>` 用自己的代理口——代理路由下守卫按设计旁路：vendor `util/http-proxy` 读 `http_proxy`/`https_proxy`，代理侧解析；`no_proxy` 同步保 localhost RPC）；无网态显性警告（研究 run 无法取证——证据契约要求 `source_url` 真实抓取）。手动判定 = `node dev/egress-probe.mjs`（keyless 秒级）；机理实证 = [hitl-docking-polish Note](../../notes/archived/2026-09-28-hitl-docking-polish.md)；
+- **egress 两态与 boot 自动分支**（[egress-mode-probe 卡](../../_backlog/_archived/settled_issues/2026-10-10-egress-mode-probe.md)）：本机 egress 在**直连态**（DNS 答真实公网 IP——`web_fetch` 原生可用）与 **TUN/fake-IP 态**（OS 级网络通、DNS 答 198.18.x.x 段——DSH 的 SSRF 守卫逐答案校验公网性，`web_fetch` 全域被拒；`web_search` 不受影响）之间流动，不靠静态假设——boot-run 自检自动判定并打印模式行：直连态零变化；TUN 态自动设 DSH fetch 代理出口（自旋本地转发代理，或 `DSH_EGRESS_OUTLET=http://127.0.0.1:<口>` 用自己的代理口——代理路由下守卫按设计旁路：vendor `util/http-proxy` 读 `http_proxy`/`https_proxy`，代理侧解析；`no_proxy` 同步保 localhost RPC）；无网态显性警告（研究 run 无法取证——证据契约要求 `source_url` 真实抓取）。手动判定 = `node dev/egress-probe.mjs`（keyless 秒级）；机理实证 = [hitl-docking-polish Note](../../notes/archived/2026-09-28-hitl-docking-polish.md)；
 - **web 进程生命周期（实测约束）**：`boot-run.sh` 把 web 跑在**前台**并用 trap 管子进程——
   **脚本退出即 web 停**（这是特性：不留孤儿）。因此：
 

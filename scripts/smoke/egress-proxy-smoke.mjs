@@ -2,7 +2,7 @@
 // scripts/smoke/egress-proxy-smoke.mjs — 自旋本地代理的回环机制冒烟（keyless，零外网、零凭据）。
 // 为什么是 smoke 不是 tests/*.test.mjs：代理核心 import node:http/net——layering ③ 禁止 tests
 // import 闭包引入网络内置（与 port-reclaim 之 spawnSync 同款归属：能力件住 smoke 道）。
-// 家与验收 = _backlog/issues/2026-10-10-egress-mode-probe.md（验收 #2）。
+// 家与验收 = _backlog/_archived/settled_issues/2026-10-10-egress-mode-probe.md（验收 #2）。
 // verdict 契约：绿/红/未跑三态（数码正本 = scripts/AGENTS 冒烟脚本可靠性纪律，此处不复述）。
 
 import { createServer as createHttpServer, request as httpRequest } from 'node:http';
