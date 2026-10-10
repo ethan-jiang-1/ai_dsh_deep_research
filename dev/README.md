@@ -13,6 +13,8 @@
 | vendor-typert-emit.mjs | typert 产物生成器 |
 | render-overlay.mjs | 生成器：从 pack 渲染 `dev/research.overlay.yml`（改 pack 后必跑，先于 L1） |
 | sync-pack-workspace.mjs | 生成器：research-workspace 正本 → pack workspace/ 种子 |
+| egress-probe.mjs | egress 模式判定 CLI（direct / tun / offline；核心 = `scripts/lib/egress.mjs`，boot-run 自检消费；设计 = egress issue 卡） |
+| egress-proxy.mjs | 自旋本地转发代理 CLI（TUN 态 DSH fetch 出口；核心 = `scripts/lib/egress-proxy.mjs`；缺省端口 14200，boot-run 子进程方式起、随 web 回收） |
 | research.overlay.yml | **生成物**（render-overlay 产出，勿手改）——源码域 overlay |
 
 ## run 通道

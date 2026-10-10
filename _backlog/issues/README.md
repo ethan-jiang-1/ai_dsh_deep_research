@@ -7,7 +7,7 @@
 | 卡 | 要解决什么 | 当前环节与未完成项 |
 |---|---|---|
 | [2026-10-09-member-activity-stream.md](2026-10-09-member-activity-stream.md) | 队员动作流进渐进面 | 刻意排在下一场研究 run 之后拿真实素材 |
-| [2026-10-10-egress-mode-probe.md](2026-10-10-egress-mode-probe.md) | egress 两态（直连/TUN）自动判定与 boot 分支——同日实测翻转，静态配置必错一半 | 设计已定稿待用户确认：出口三选 + 两态硬约束；验收五条在卡内 |
+| [2026-10-10-egress-mode-probe.md](2026-10-10-egress-mode-probe.md) | egress 两态（直连/TUN）自动判定与 boot 分支——同日实测翻转，静态配置必错一半 | 已实施：#1–#3、#5 绿，#4 blocked 等 B/C 态现场补证（见卡内实施记录） |
 
 （四卡同源于 [company 钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md) 的候选登记——用户 2026-10-09 授权全部推进；执行序由会话 plan 组织，本表不是队列。）
 ## 写一张卡

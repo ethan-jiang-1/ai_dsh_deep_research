@@ -37,14 +37,7 @@
   （npx 拉起 `@0.0.83`、headless、`direct://` 直连绕过系统代理——SPA 定价页/JS 榜单的渲染抓取）；
   `MCP_PLAYWRIGHT=0` = 显式拆。决定与环境踩坑正本 =
   [mcp-playwright 采纳 Note](../../notes/implemented/2026-10-02-mcp-playwright-adoption.md)；
-- **通道默认由用户终端起**：代理会话内后台起的通道，`web_fetch` 会全域名撞"resolves to a
-  non-public IP"解析墙——机理 = DSH 的 SSRF 守卫做本地 DNS 解析、见非公共 IP（会话 fake-IP
-  段 198.18.x.x）即拒，**网络本身是通的**（node fetch 直连可达）。会话内确需自起通道时，
-  启动环境注入标准代理变量即可：`http_proxy`/`https_proxy` 指向本机代理出口——代理跳跳过
-  本地解析、DNS 归代理侧，守卫不再触发（实证与 vendor 依据 =
-  [hitl-docking-polish Note](../../notes/archived/2026-09-28-hitl-docking-polish.md)）；
-  代理**驱动**已起的通道没问题（run-kickoff / hitl-answer 走 localhost API 全通）。boot 归
-  用户终端仍是默认纪律（真实 DNS、零额外件）；
+- **egress 两态与 boot 自动分支**（[egress-mode-probe 卡](../../_backlog/issues/2026-10-10-egress-mode-probe.md)）：本机 egress 在**直连态**（DNS 答真实公网 IP——`web_fetch` 原生可用）与 **TUN/fake-IP 态**（OS 级网络通、DNS 答 198.18.x.x 段——DSH 的 SSRF 守卫逐答案校验公网性，`web_fetch` 全域被拒；`web_search` 不受影响）之间流动，不靠静态假设——boot-run 自检自动判定并打印模式行：直连态零变化；TUN 态自动设 DSH fetch 代理出口（自旋本地转发代理，或 `DSH_EGRESS_OUTLET=http://127.0.0.1:<口>` 用自己的代理口——代理路由下守卫按设计旁路：vendor `util/http-proxy` 读 `http_proxy`/`https_proxy`，代理侧解析；`no_proxy` 同步保 localhost RPC）；无网态显性警告（研究 run 无法取证——证据契约要求 `source_url` 真实抓取）。手动判定 = `node dev/egress-probe.mjs`（keyless 秒级）；机理实证 = [hitl-docking-polish Note](../../notes/archived/2026-09-28-hitl-docking-polish.md)；
 - **web 进程生命周期（实测约束）**：`boot-run.sh` 把 web 跑在**前台**并用 trap 管子进程——
   **脚本退出即 web 停**（这是特性：不留孤儿）。因此：
 

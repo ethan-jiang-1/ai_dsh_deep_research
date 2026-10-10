@@ -28,6 +28,14 @@ if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/
   echo "          确要重启或换端口：先停占用者，或 DSH_RUN_PORT=<空闲端口> bash dev/boot-run.sh" >&2
   exit 1
 fi
+
+# ⓪½ egress 模式判定（issue _backlog/issues/2026-10-10-egress-mode-probe.md；两态一等公民）：
+#    direct = 直连（DNS 答真实公网 IP）零变化；tun = TUN/fake-IP 态（SSRF 守卫将拒 web_fetch，
+#    web 启动前在下方 ②½ 设代理出口）；offline = 无 egress 显性警告。探针 = dev/egress-probe.mjs
+#    （keyless 秒级，走 getaddrinfo 路径——与守卫同款）；探针自身故障回落 direct（零变化默认）。
+EGRESS_MODE="$(node "$ROOT/dev/egress-probe.mjs" 2>/dev/null || echo direct)"
+echo "boot-run: egress 模式 = $EGRESS_MODE"
+
 PACKDIR="$ROOT/packages/deep-research-pack"
 PROFDIR="$DSH_HOME/profiles/$PROFILE"
 RUNTMP="$ROOT/runtime/smoke-workspace/run-pack"
@@ -151,6 +159,32 @@ if [ "${1:-}" = "--drift-check" ]; then
   exit 0
 fi
 drift_check
+
+# ②½ egress 出口（仅 web 启动路径——--drift-check 模式已在上方 exit）：tun 态给 DSH fetch 设
+#     代理出口——SSRF 守卫按设计旁路（vendor util/http-proxy 读 http_proxy/https_proxy，代理侧
+#     解析）。自旋代理 = dev/egress-proxy.mjs（本 shell 子进程，随 cleanup 的 pkill -P $$ 回收）；
+#     DSH_EGRESS_OUTLET 指定自己的代理口时优先。no_proxy 同步设，保通道自身 localhost RPC。
+if [ "$EGRESS_MODE" = "tun" ]; then
+  if [ -n "${DSH_EGRESS_OUTLET:-}" ]; then
+    export http_proxy="$DSH_EGRESS_OUTLET" https_proxy="$DSH_EGRESS_OUTLET"
+    echo "boot-run: TUN 态——DSH fetch 出口 = $DSH_EGRESS_OUTLET（DSH_EGRESS_OUTLET 指定）"
+  else
+    node "$ROOT/dev/egress-proxy.mjs" --port 14200 >/dev/null 2>&1 &
+    for _ in $(seq 1 40); do
+      lsof -nP -iTCP:14200 -sTCP:LISTEN >/dev/null 2>&1 && break
+      sleep 0.25
+    done
+    if lsof -nP -iTCP:14200 -sTCP:LISTEN >/dev/null 2>&1; then
+      export http_proxy="http://127.0.0.1:14200" https_proxy="http://127.0.0.1:14200"
+      echo "boot-run: TUN 态——自旋本地转发代理 = http://127.0.0.1:14200（随 web 一并回收）"
+    else
+      echo "boot-run: ⚠ 自旋出口 10s 未就绪——web_fetch 将被 SSRF 守卫全域拒；可设 DSH_EGRESS_OUTLET=http://127.0.0.1:<代理口> 重跑" >&2
+    fi
+  fi
+  export no_proxy="localhost,127.0.0.1,::1"
+elif [ "$EGRESS_MODE" = "offline" ]; then
+  echo "boot-run: ⚠ 本环境无 egress——web_fetch 不可用：研究 run 无法取证（证据契约要求 source_url 真实抓取），仅可无网操作" >&2
+fi
 
 # ③ 仪表盘（RFC m2-run-dashboard + debug-dashboard-plus）：--latest 多场扫描
 # （research-workspace/drt_* + runtime/harness-home/runs ad-hoc 场）、流程步骤条、

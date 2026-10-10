@@ -19,6 +19,7 @@
 | client-load-smoke.mjs | 观察面真浏览器装配、页签与渐进面对账 | keyless（浏览器） |
 | snapshot-replay-smoke.mjs | 场景 manifest 驱动的四角色组装面回放（persona/header 全序列/三处注入）+ 声明的渲染金标准 | keyless（RPC/解压子进程，无模型） |
 | gates-smoke.mjs | 门禁自测：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组 | keyless（git/node 子进程，无模型） |
+| egress-proxy-smoke.mjs | 自旋本地代理回放机制：CONNECT 隧道透传 / 上游不可达 502 / 绝对 URI 转发（零外网回环；为什么是 smoke 不是 tests = layering ③ 禁 tests 闭包引入 http/net 内置） | keyless |
 | client-hitl-smoke.mjs | 活标题触发与挂起显性化 | 真模型档 |
 | l4-lite-smoke.mjs | 四角色真模型响应 + scout web_search 调用 | 真模型档 |
 | team-preflight-smoke.mjs | spawn_teammate 组队与成员组合画像 | 真模型档 |
@@ -57,6 +58,8 @@
 | 模块 | 被谁消费 | 说明 |
 |---|---|---|
 | lib/roles.mjs | 冒烟与门禁 | 角色清单访问器（事实源 = 盘上 presets/） |
+| lib/egress.mjs | egress-probe CLI、boot-run 自检 | egress 三态判定核心（注入式 lookup/checkHttp；分类语义 = DSH SSRF 守卫同款：任一答案非公网即 walled；设计 = [egress issue](../_backlog/issues/2026-10-10-egress-mode-probe.md)） |
+| lib/egress-proxy.mjs | egress-proxy CLI、egress-proxy-smoke | 自旋本地 HTTP 代理核心（CONNECT 隧道 + 绝对 URI 转发；TUN 态 DSH fetch 出口；机制证据住 smoke 道——layering ③ 禁 tests 引入网络内置） |
 | lib/session-log.mjs | run-state、watch-run、回归 | canonical 日志选择与读取（BUG-010） |
 | lib/run-state.mjs | watch-run、仪表盘、回归 | run 操作面状态谓词 |
 | lib/env.mjs | 冒烟族 | 子进程环境清洗（scrubbedEnv/withModelKey——凭据卫生） |
