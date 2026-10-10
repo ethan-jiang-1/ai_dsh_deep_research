@@ -19,6 +19,7 @@
 
 | 文件 | 服务 | 一句话 |
 |---|---|---|
+| [2026-10-10-teammate-channel-probe.md](2026-10-10-teammate-channel-probe.md) | [member-activity-stream 卡](../issues/2026-10-09-member-activity-stream.md) | 队员动作流三通道 vendor 同 pin 实测（rc.2 源码锚点）：session.follow = 任意会话可 follow、journal 同词表、无已知并发上限——**唯一动作粒度通道**；agentTeam 投影 = roster+任务板+turn 级 running（无动作级事件），但它是**队员会话 id 唯一发现源**（spawn_teammate 返回已证不带 id）；新 @Remote = typert 生成步硬前置、仓外零先例、当前不采纳 |
 | [2026-10-08-notes-stocktake.md](2026-10-08-notes-stocktake.md) | [notes-stocktake implemented Note](../../notes/implemented/2026-10-08-notes-stocktake.md) | 72 篇 implemented 三结局体检：**结论 = 归档判据本身不可靠**——宽口径 72/72 全留、严格口径 23 归档、对抗证伪 8/8 打回；硬数据 = 72 篇 / 61 家族（检索不靠猜）/ archived 自 09-28 后零归档；根因 = 进门条件无可执行面（verify.mjs 里 archived 仅 2 处注释） |
 | [strategy-benchmark/2026-10-03-strategy-benchmark-sources.md](strategy-benchmark/2026-10-03-strategy-benchmark-sources.md) | [pipeline-polish issue](../_archived/settled_issues/2026-09-28-pipeline-polish.md) | 专业 DR 三轴对标材料：源仓 research_style_params 全参数化 + Anthropic 工程自述一手 + OpenAI 系统卡物种边界；采纳候选 A/B 带触发条件 |
 | [strategy-benchmark/2026-10-06-per-topic-card-distribution.md](strategy-benchmark/2026-10-06-per-topic-card-distribution.md) | [策略对标材料](strategy-benchmark/2026-10-03-strategy-benchmark-sources.md) | 候选 A ①步存量标定：25 场可数 / 68 primary topic，中位 13、p25=6、max=53，低于源仓地板 28/68（双条件未满足不立门）；quick_factual 型 6 场口径不可数（无 primary 标记） |
