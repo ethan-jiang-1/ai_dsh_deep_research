@@ -1,12 +1,16 @@
 ---
-status: 活跃
+status: 已修
 severity: P2
 opened: 2026-10-10
 ---
 
 # BUG-019：录制器 MCP 竞态——不等 MCP server 就绪即发探针，fixture 工具表随机缺 MCP 组
 
-> 严重级别：P2（次要）｜发现：2026-10-10｜状态：活跃
+> 严重级别：P2（次要）｜发现：2026-10-10｜状态：已修 2026-10-10：写盘前 MCP 组谓词 +
+> 有界重试（commit 94264cd）——宿主 stdout/logs/web.log 实证无就绪信号可等，产出件谓词
+> 替代时序运气；mirror 无 mcp 行（MCP_PLAYWRIGHT=0）形态谓词跳过；顺带修 fail 路径孤儿
+> 进程（fatal 一律 throw，cleanup 必达）。验收 = 连续 3 次重录全含 MCP 组（实录 3/3，
+> marker ×2 each）+ keyless 守卫 tests/replay-fixtures.test.mjs（负例留证内嵌）。
 
 ## 症状
 
@@ -37,6 +41,9 @@ fixture 工具表在「含 MCP 组」与「不含」之间随机：
 
 ## 修复关联
 
-候选 = 发探针前等**显式就绪信号**（web 日志的 MCP 连接线，或首列工具表含 mcp 组的盘侧
-谓词），替代时序运气——修法对齐 scripts/AGENTS「等待显式状态」；修复义务 = 修后连续重录
-N 次全含 MCP 组 + 本卡关闭。本轮临时处置 = 重录至竞态落对（已入库存件），判据不受影响。
+落地 = commit 94264cd（dev/record-role-fixture.mjs 重构：每次尝试独立 boot/cleanup + 写盘前
+MCP 组谓词 + MAX_ATTEMPTS=3 有界重试 + 连续落败 fail-loud 带处置入口；mirror 无 mcp 行时
+谓词跳过；顺带修 fail 路径孤儿进程）。卡内『等日志信号』候选实证不可行（捕获 boot 30s 零
+mcp 行），落点 = 第二候选『盘侧谓词』。守卫 = tests/replay-fixtures.test.mjs（负例留证内嵌：
+剥 marker 红 → 还原绿）。验收实录 = 3/3 连续重录全含 MCP 组 + snapshot-replay-smoke
+ALL PASS（重录后 lead 金标准按设计 --update-expected + 人审）。
