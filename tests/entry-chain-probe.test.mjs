@@ -21,6 +21,9 @@ test('RFC probe recognizes the contract without requiring one phrase order', () 
   assert.equal(rfcBoundaryPasses('不是——RFC 只在「持久决定需要显式评审（需在实现前持久化被评审、且理由无法由代码/测试/现有文档说明）」时为该项建立（D12、意图载体总图）。'), true);
   assert.equal(rfcBoundaryPasses('所有实施都必须先建 RFC。'), false);
   assert.equal(rfcBoundaryPasses('RFC 不是普遍前置。'), false);
+  // 假阳性负例（2026-10-10 对抗自审实测：补丁前「无需显式评审」被 /持久决定.{0,24}显式评审/ 放行）：
+  assert.equal(rfcBoundaryPasses('不是——持久决定无需显式评审，仅在任何工作时建立 RFC 即可。'), false);
+  assert.equal(rfcBoundaryPasses('持久决定不需要显式评审，随时可以建 RFC，不是普遍前置。'), false);
 });
 
 test('direct authorization probe rejects statements that invent approval prerequisites', () => {

@@ -34,6 +34,8 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
 archive/<slug>/        已交付 run 归档位（2026-09-27 用户指令）：交付后操作侧移入，工作区根
                        只留活跃 run——防题名目录被误读为"待开展课题"；仍可被审计/仪表盘按路径投影
 templates/run/         新 run bundle 的起点模板（只读，不直接写）
+drafts/（仓库根）      开发侧跨 run 草稿（tracked 仓库内容；**非 run 产物，角色不写不读**——
+                       run 内过程稿 = 各 bundle 自己的 drafts/，见上）
 NODES.md               节点 I/O 契约全表（八节点输入/输出/下游可开工判据 + 回边版本语义）——节点开工前对照；机械把守 = schema-scan.mjs（在场级全行）+ node-gate.mjs（判据级门全集 = 门①②③④ + 门L + 门R + 门A——编号图例与判据正本 = NODES.md 头部）
 question-patterns.md   判型模式库（HITL1 第一对照面：命中走条目、未命中兜底 + journal 标记行；增长协议正本 = 库尾节）
 ```
