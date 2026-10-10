@@ -6,7 +6,7 @@
 
 | 卡 | 要解决什么 | 当前环节与未完成项 |
 |---|---|---|
-| [2026-10-09-member-activity-stream.md](2026-10-09-member-activity-stream.md) | 队员动作流进渐进面 | 刻意排在下一场研究 run 之后拿真实素材 |
+| [2026-10-09-member-activity-stream.md](2026-10-09-member-activity-stream.md) | 队员动作流进渐进面 | 已实施（2026-10-10）：折算 5 测试绿 + 冒烟双负例绿 + 文档同步；#3 有团队正例待下一场真实 run 首验（断言已编码自动生效） |
 
 （四卡同源于 [company 钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md) 的候选登记——用户 2026-10-09 授权全部推进；执行序由会话 plan 组织，本表不是队列。）
 ## 写一张卡

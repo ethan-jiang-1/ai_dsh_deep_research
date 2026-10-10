@@ -119,9 +119,11 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 - **会话必须建在**研究工作区里**才能看到渐进面**：页签读的是会话工作区根（`workspaceFiles`），
   run bundle 在工作区内才可见——故需先把研究工作区注册进 DSH（`workspace/create`），再用
   `workspaceId` 形态建会话（`dev/run-kickoff.mjs` 已默认此形态）；建在别处的会话只显示活动流；
-- **页签活动流只 follow lead 会话**：队员（scout/analyst/critic）的检索与取证动作在各自会话，
-  不进 lead journal——`wait_agent` 的"队员作业中"行缓解全静，团队任务细节看 `ui-agent-team`
-  任务板（队员流接入需新数据通道，是后续候选）；
+- **队员动态折叠区（检索/抓取/出错粒度）**：lead 活动流照旧；队员动作经 agentTeam 投影发现
+  队员会话 + 多路 follow，折进每人折叠区（默认折叠，🔍/🌐/⚠️ 计数徽标；定夺与证据 =
+  [member-activity-stream 卡](../../_backlog/issues/2026-10-09-member-activity-stream.md)）。
+  文件读写级动作不入流（噪音定夺）；任务粒度看 `ui-agent-team` 任务板——两面板分工不重复；
+  有团队正例首验 = 下一场真实 run；
 - **`workspace/` 种子是快照**：由 `dev/sync-pack-workspace.mjs` 从仓库正本同步（门禁
   `pack-workspace-fresh` 防漂移）；种子只铺新工作区，**不覆盖**已存在文件（`--force` 除外）；
 - **皮肤/品牌层**与**专职 synthesizer 角色**的重议条件分别由 [ui-skin](../../notes/rejected/2026-09-24-ui-skin.md) 和 [synthesizer](../../notes/rejected/2026-09-24-synthesizer-role.md) 拥有；

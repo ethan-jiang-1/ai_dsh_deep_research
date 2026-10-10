@@ -1,14 +1,17 @@
 /**
  * 「研究状态」页签体（UI 优先版：把界面弄对——RFC research-status-ui）。
  *
- * 自上而下六区（一眼回答"研究到哪了、谁在干什么、等没等我、我在哪出手"）：
+ * 自上而下七区（一眼回答"研究到哪了、谁在干什么、等没等我、我在哪出手"）：
  *   ① HITL 挂起横幅（点名锚点 + 参与指引——hitl-fold.deriveAnchors）；
  *   ② 流程轨道 = ◆立项确认 + 七步 + ◆交付审阅（锚点段从 journal 折算、步骤段从 bundle 文件
  *      在场性折算——两段数据源分开，HITL1 等待时 bundle 未建而锚点仍在场）；
  *   ③ 研究问题行（question.md 首行，剥 markdown 强调符）；
  *   ④ 团队动态 = 人性化活动流（activity-fold：🔍/👥/💬/📦，噪音过滤——**原始事件类型名不出正文**）；
  *   ⑤ 证据概览 + 交付状态（evidence/ 计数 + final 在场 → ✅ 已交付 + rerun 三分静线）；
- *   ⑥ 决策诚实线（停靠点已过 → 指路 question.md §Decisions——谁答的不复制进 UI，家在文件）。
+ *   ⑥ 决策诚实线（停靠点已过 → 指路 question.md §Decisions——谁答的不复制进 UI，家在文件）；
+ *   ⑦ 队员动态折叠区（member-activity-stream，2026-10-10 定夺：agentTeam 投影取 roster（队员
+ *      会话 id 的唯一发现源——spawn 返回不带 id，通道探明实证）→ 多路 follow 队员会话 →
+ *      member-activity 折算检索/抓取/出错行，每人一节默认折叠；任务粒度归 ui-agent-team 任务板）。
  *
  * 会话绑定（RFC right-pane-ux-debt，2026-09-28）：渐进面只显示**本会话自己的** run bundle
  * （bundle-bind：journal 工具调用路径识别 `drt_<slug>/`），位置=状态两个位置都认——根（在飞）
@@ -31,7 +34,9 @@ import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { deriveAnchors, foldHitlPending, type HitlState, type RunAnchor } from '../lib/hitl-fold.ts'
 import { deriveSteps, type RunStep } from '../lib/run-fold.ts'
 import { foldActivityRows, type ActivityRow } from '../lib/activity-fold.ts'
+import { foldMemberActivity, type MemberActivitySummary } from '../lib/member-activity.ts'
 import { sessionBindingOf, type SessionBinding } from '../lib/bundle-bind.ts'
+import type { TeamProjection } from '@deepseek-ai/dsh-experimental-agent-team/client'
 
 /** journal 帧的最小投影（wire 形状 → 领域形状）。 */
 export type JournalFrame =
@@ -88,6 +93,15 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   // 切换丢失。旧会话正被观察（绑定/挂起）时，切换后重开状态页签（revealStatusTab）。
   const prevSidRef = useRef<string | undefined>(undefined)
   const wasObservingRef = useRef(false)
+  const [memberSummaries, setMemberSummaries] = useState<Readonly<Record<string, MemberActivitySummary>>>({})
+
+  // ⑦ 队员 roster（agentTeam 投影——标准 props 注入的会话投影钩子；队员会话 id 的唯一发现源，
+  //    通道探明材料实证：spawn_teammate 返回不带 id）。prop 存在性由宿主决定且稳定，
+  //    与 vendor client-ui-agent-team 的 prop-hook 同款调用形态。
+  const useProjection = props.useProjection
+  const team: TeamProjection | undefined = useProjection !== undefined ? useProjection('agentTeam') : undefined
+  const members = team?.members.filter((m) => m.role === 'teammate') ?? []
+  const memberIds = members.map((m) => m.id).sort().join(',')
 
   // ① journal 流 → 活动行 + HITL 谓词 + 会话绑定输入
   useEffect(() => {
@@ -138,6 +152,32 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     }
     prevSidRef.current = props.sessionId
   }, [props.sessionId])
+
+  // ⑦ 队员动作流（member-activity-stream）：roster 变化即重开多路 follow（每队员一条，与
+  //    lead 流同一 WebSocket 数据面——通道探明：gateway 无流数上限）；AbortController 统一
+  //    回收。首帧 snapshot 为全量历史（量级 ≈ lead 同阶）——行截尾部、计数全量，折算住 lib。
+  useEffect(() => {
+    if (memberIds === '') { setMemberSummaries({}); return }
+    const controller = new AbortController()
+    const state: Record<string, MemberActivitySummary> = {}
+    let alive = true
+    const ids = memberIds.split(',') as SessionId[]
+    void Promise.all(ids.map(async (id) => {
+      try {
+        let events: unknown[] = []
+        for await (const frame of props.follow(id, controller.signal)) {
+          if (frame.kind === 'history') events = [...frame.events]
+          else events = [...events, frame.event]
+          if (!alive) return
+          state[id] = foldMemberActivity(events)
+          setMemberSummaries({ ...state })
+        }
+      } catch (cause) {
+        if (!controller.signal.aborted) console.error('[research-status] 队员流失败', id, String(cause))
+      }
+    }))
+    return () => { alive = false; controller.abort() }
+  }, [memberIds])
 
   // ② bundle 渐进面（绑定本会话的 run；slug 变化即扫 + 30s 定时——文件在场性不高频）
   // G4（RFC cockpit-flow-face）：read 弱绑定在挂起期不作渐进面依据——立项预检读取旧 bundle
@@ -325,6 +365,32 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           </div>
         ))}
       </div>
+      {/* ⑦ 队员动态折叠区（每人一节，默认折叠；动作粒度 = 检索/抓取/出错——任务粒度归 ui-agent-team 任务板，不双 home） */}
+      {members.length > 0 && (
+        <div style={{ marginTop: 10, fontSize: 12 }}>
+          <div style={{ opacity: 0.55, marginBottom: 4 }}>队员动态（检索 / 抓取 / 出错）</div>
+          {members.map((m) => {
+            const summary = memberSummaries[m.id]
+            return (
+              <details key={m.id} style={{ marginBottom: 4 }}>
+                <summary style={{ cursor: 'pointer' }}>
+                  <span style={{ fontWeight: 600 }}>{m.phase === 'active' ? '● ' : m.phase === 'failed' ? '✕ ' : '○ '}{m.name}</span>
+                  <span style={{ opacity: 0.6 }}>　🔍{summary?.searchCount ?? 0} · 🌐{summary?.fetchCount ?? 0}{(summary?.errorCount ?? 0) > 0 ? ` · ⚠️${summary?.errorCount}` : ''}</span>
+                </summary>
+                <div style={{ paddingLeft: 14, lineHeight: 1.7 }}>
+                  {(summary?.rows ?? []).map((r, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 6 }}>
+                      <span>{r.icon}</span>
+                      <span style={{ flex: 1 }}>{r.text}</span>
+                    </div>
+                  ))}
+                  {(summary?.rows ?? []).length === 0 && <span style={{ opacity: 0.5 }}>（暂无可见动作）</span>}
+                </div>
+              </details>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

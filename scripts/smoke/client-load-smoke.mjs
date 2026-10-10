@@ -301,12 +301,14 @@ try {
       return false
     }
     if (await scan()) return true
-    // 目标沉到「Show N more sessions」折叠区 → 展开后重试一次（BUG-002 轮：验证会话
-    // 被后续探针会话挤出近列表——按标题定位必须能穿透折叠）
-    const more = page.getByText(/Show \d+ more sessions/).first()
-    if (await more.isVisible({ timeout: 4000 }).catch(() => false)) {
+    // 深列表循环展开（2026-10-10 实测：dev home 累积 250+ 会话，目标会话可埋 8 层
+    // "Show N more sessions"——单次展开够不着。逐层点开直到目标在场/按钮消失/轮上限；
+    // 每层揭示数个会话，1.8s 稳定窗）。探针会话污染的定期清理正本 = 录制器头注。
+    for (let round = 0; round < 60; round++) {
+      const more = page.getByText(/Show \d+ more sessions/).first()
+      if (!(await more.isVisible({ timeout: 1500 }).catch(() => false))) break
       await more.click().catch(() => {})
-      await wait(3000)
+      await wait(1800)
       if (await scan()) return true
     }
     // 仍不可见 → 走「Search sessions」按名字定位（深列表的权威路径；React 受控输入
@@ -398,6 +400,23 @@ try {
         }
         const qOk = expectedFace.firstLine !== null && seg.includes(expectedFace.firstLine.slice(0, 12))
         step(qOk, '研究问题行 = question.md 首行', expectedFace.firstLine?.slice(0, 24) ?? '')
+        // 队员动态折叠区（member-activity-stream，2026-10-10）：盘侧 spawn 名 ↔ agentTeam 投影
+        // roster 对账（投影 = 队员会话 id 的唯一发现源，通道探明实证）；spawn 在场而区缺席 =
+        // 投影或接线异常；绑定会话本身是队员（无 spawn、roster 住 lead）与无团队 → 区不渲染。
+        const spawnNames = boundSession.events
+          .filter((e) => e?.type === 'tool/call' && e?.data?.name === 'spawn_teammate')
+          .map((e) => { try { return JSON.parse(e.data.arguments).name } catch { return null } })
+          .filter((n) => typeof n === 'string' && n !== '')
+        if (spawnNames.length > 0) {
+          const memberArea = seg.includes('队员动态')
+          step(memberArea, '队员动态折叠区在场（盘侧 spawn 在场 → 投影 roster 渲染）', `spawn=[${spawnNames.join('、')}]`)
+          if (memberArea) {
+            const missingNames = spawnNames.filter((n) => !seg.includes(n))
+            step(missingNames.length === 0, '队员 roster = 盘侧 spawn 名对账（一个不漏）', missingNames.length > 0 ? `缺：${missingNames.join('、')}` : spawnNames.join('、'))
+          }
+        } else {
+          step(!seg.includes('队员动态'), '无团队（无 spawn / 队员会话）→ 队员动态不渲染（负例——不冒充）')
+        }
       }
     }
   }
@@ -423,6 +442,8 @@ try {
       // 时，锚点轨道带占位步骤在场是有意行为（cockpit-flow-face：锚点段从 journal 画）。
       const leaked = ['已交付', '证据 ', '停靠点已过'].filter((x) => seg2.includes(x))
       step(leaked.length === 0, '未绑定会话：零别家渐进面泄漏', leaked.length > 0 ? leaked.join('、') : '')
+      // 无团队负例（member-activity-stream）：无 spawn 的会话不渲染队员区（不冒充团队面）。
+      step(!seg2.includes('队员动态'), '未绑定会话：队员动态不渲染（无团队负例）')
       break
     }
     if (unboundSession === null) console.log('  note  未绑定会话负样本：候选都不可点开（子会话不进侧栏？跳过）')
