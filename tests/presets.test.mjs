@@ -165,6 +165,12 @@ test('HITL1 业务决策简报：字段钉在模板与采集规则（模板 + re
   assert.match(skill, /不设固定第四问/, '业务决策简报缺「不设固定第四问」声明——信息充分性触发可能漂移为固定问');
 });
 
+test('HITL1 归档预检问并入第一段卡：skill 钉面（2026-10-11 run 实证 lead 自发行为，合同补授权）', () => {
+  const skill = readFileSync(join(PRESETS, 'lead/skills/research-brief/SKILL.md'), 'utf8');
+  assert.match(skill, /归档预检问可并入第一段卡/, '预检问并入卡未获合同授权——实证自发行为缺钉面');
+  assert.match(skill, /不单独再打断/, '预检并入缺「不单独打断」语义（与两点交互减打断目标一致）');
+});
+
 test('报告首屏决策摘要：模板节名与生成/审查合同钉（模板 + synthesis + adversarial-review）', () => {
   const template = readFileSync(join(ROOT, 'research-workspace/templates/run/final.md'), 'utf8');
   const synthesis = readFileSync(join(PRESETS, 'lead/skills/synthesis/SKILL.md'), 'utf8');

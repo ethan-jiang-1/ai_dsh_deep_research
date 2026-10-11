@@ -40,7 +40,7 @@ HITL1 语义由 `tests/presets.test.mjs`「HITL1 两段卡」四处对账测试�
 
 **挂账现状（2026-10-11）**：run 观察与人工走查被环境阻断——外网 egress 不可达（`drt_cn-moe-2026` journal 实证 12 主机 29 抓 0 成，本日复测 github/example/arxiv 同阻）；定向 kickoff 已备 `runtime/kickoff-ux-verify.md`（gitignored），通道恢复即可开跑核验。
 
-**真实 run 阶段一核验（2026-10-11，`drt_deepseek-model-upgrade`）**：通过——四问卡 `wait` 参数缺席（timed 护栏在位）、推荐置首带说明、判型真实命中模式库 P5 并注明；**业务决策简报五字段由题面直接落格 Snapshot、零重复追问**（question.md 澄清记录显式写明「五项用户在题面已给全，未重复问」）。未观察到：计划确认卡（第二段）——lead turn 2 写盘后遭模型空响应终止（`assistant/attempt` 无消息 → `turn/end`），通道重启将会话终局化（`end-seed`），恢复发送失效；该观察 + 人工走查维持挂账。
+**真实 run 阶段一核验（2026-10-11，`drt_deepseek-model-upgrade`）**：通过——四问卡 `wait` 参数缺席（timed 护栏在位）、推荐置首带说明、判型真实命中模式库 P5 并注明；**业务决策简报五字段由题面直接落格 Snapshot、零重复追问**（question.md 澄清记录显式写明「五项用户在题面已给全，未重复问」）。未观察到：计划确认卡（第二段）——lead turn 2 写盘后遭模型空响应终止（`assistant/attempt` 无消息 → `turn/end`），通道重启将会话终局化（`end-seed`），恢复发送失效；该观察 + 人工走查维持挂账。**核验暴露的合同缺口已修**：第四问被 lead 用作归档预检（正确行为）但合同未授权该形态——research-brief skill 补「归档预检问可并入第一段卡（第四问位）」钉面（同 diff 契约断言，persona 不动避免 fixture 重录）。
 
 ## 关闭条件
 

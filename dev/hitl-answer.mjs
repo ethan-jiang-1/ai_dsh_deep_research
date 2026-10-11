@@ -132,7 +132,9 @@ try {
   //    现在：①初始等待加长到 6s；②click 失败要**报出来**；③点完校验主视图真的切到了该会话
   //    （正文里出现会话标题或问询卡片），没切就换目标再点一次。
   const rows = page.locator('span[class*="_root_"]')
+  const rowTexts = [] // 诊断样本：每次行扫收集可见行文本，找不到目标时报给操作者对照
   const openSession = async () => {
+    rowTexts.length = 0
     const n = await rows.count()
     for (let i = 0; i < Math.min(n, 80); i++) {
       const el = rows.nth(i)
@@ -140,6 +142,7 @@ try {
       const box = await el.boundingBox().catch(() => null)
       if (box === null || box.x >= 256) continue
       const text = ((await el.textContent()) ?? '').trim()
+      if (text !== '') rowTexts.push(text.slice(0, 60))
       const match = SESSION !== null ? text.includes(SESSION) : text.includes('Waiting for answer')
       if (!match) continue
       try { await el.click({ timeout: 10_000 }) } catch (e) { log(`hitl-answer: ⚠ 行点击失败（${String(e).slice(0, 90)}）——换下一个目标`) ; continue }
@@ -153,6 +156,31 @@ try {
     return title !== null && body.includes(title.slice(0, 20)) // 或主视图标题 = 会话标题
   }
   let opened = await openSession()
+  if (opened === null) {
+    // 分组展开一轮后重扫（2026-10-11 run 实证：目标会话在折叠组里，默认行扫找空）——
+    // 只在第一轮 miss 后展开，避免把已展开的组点收起。expandGroup 形态 = client-load-smoke 同款。
+    const expandGroup = async (groupTitle) => {
+      const n = await rows.count()
+      for (let i = 0; i < Math.min(n, 300); i++) {
+        const el = rows.nth(i)
+        if (!(await el.isVisible().catch(() => false))) continue
+        const box = await el.boundingBox().catch(() => null)
+        if (box === null || box.x >= 256) continue
+        const text = ((await el.textContent()) ?? '').trim()
+        if (text.startsWith(groupTitle) && !text.includes('New Session')) {
+          await el.click({ timeout: 6_000 }).catch(() => {})
+          await page.waitForTimeout(2000)
+          return true
+        }
+      }
+      return false
+    }
+    for (const g of ['research-workspace', 'harness-home', 'Ungrouped', 'rehearsal-workspace']) {
+      if (rowTexts.some((t) => t.startsWith(g))) await expandGroup(g)
+    }
+    await page.waitForTimeout(800)
+    opened = await openSession()
+  }
   if (opened !== null && !(await activated(opened))) {
     log('hitl-answer: 点击后主视图没切过去——重试一次（点标题文本）')
     const t2 = page.locator(`text=${(opened.match(/[^A-Za-z]+/) ?? ['x'])[0].slice(0, 8)}`).first()
@@ -164,6 +192,8 @@ try {
     // 预期态，不是异常：没有待答会话时给一句人话 + 非零退出（原来抛栈，操作者要自己读 trace）
     console.error(`hitl-answer: 侧栏没有待答会话（--session=${SESSION ?? '（缺省：Waiting for answer）'}）——`
       + '可能：① 该 HITL 已被答过；② 挂起回合被 web 重启终局化（需向会话发恢复 prompt 让 lead 原样重发问询）。')
+    console.error('hitl-answer: 侧栏可见行样本（展开后仍未见目标时对照）：'
+      + (rowTexts.slice(0, 8).join(' ⏐ ') || '（侧栏零可见行）'))
     process.exit(3)
   }
   log(`hitl-answer: 已打开会话「${opened}」`)
