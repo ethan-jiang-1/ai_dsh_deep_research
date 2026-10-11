@@ -40,6 +40,8 @@ HITL1 语义由 `tests/presets.test.mjs`「HITL1 两段卡」四处对账测试�
 
 **挂账现状（2026-10-11）**：run 观察与人工走查被环境阻断——外网 egress 不可达（`drt_cn-moe-2026` journal 实证 12 主机 29 抓 0 成，本日复测 github/example/arxiv 同阻）；定向 kickoff 已备 `runtime/kickoff-ux-verify.md`（gitignored），通道恢复即可开跑核验。
 
+**真实 run 阶段一核验（2026-10-11，`drt_deepseek-model-upgrade`）**：通过——四问卡 `wait` 参数缺席（timed 护栏在位）、推荐置首带说明、判型真实命中模式库 P5 并注明；**业务决策简报五字段由题面直接落格 Snapshot、零重复追问**（question.md 澄清记录显式写明「五项用户在题面已给全，未重复问」）。未观察到：计划确认卡（第二段）——lead turn 2 写盘后遭模型空响应终止（`assistant/attempt` 无消息 → `turn/end`），通道重启将会话终局化（`end-seed`），恢复发送失效；该观察 + 人工走查维持挂账。
+
 ## 关闭条件
 
 实现已落在 skill、模板及其种子镜像，结构化输入和计划卡能按上述样例工作，测试与对账通过；若实施中需要改变两点交互合同，另建持久决定评审，不在本卡扩大范围。
