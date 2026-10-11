@@ -66,6 +66,12 @@ opened: 2026-10-11
 **门禁复跑更正（操作侧，2026-10-11 20:2x —— 上段为首次跑门口径，两处发现均已收口，勿按红处置）**：①`evidence-audit` 的 MAJOR 6（全为 `evidence/t1-deepseek-updates-zh.md` 的目录锚点行被当摘录）经**纯编辑**修正后复跑 = CRITICAL **0** / MAJOR **0** / INFO 1（摘录回溯 452/453、复合 1、**不符 0**；URL 溯源 70/70；`source_url` 真抓过 11/11；final 引用链 57/57 无断链），exit 0；②`node-gate` 门L 经**两轮机械修**（状态值散文 → 白名单合法值；再补「支持来源（A–D 分级）」与「关键线索」两行）后复跑 **exit 0**：门① HITL 锚点 / 门③ §Decisions 拍板行 / 门② present 声明 / 门L leads 交接 / 门R 标题重复 / 门A 交付完整性全 PASS，门④ N/A（无扩张 rerun，显式标注）；③`schema-scan` exit 0 —— 核心 schema 全齐。三道门报告已落 bundle 内 `audit.md` / `node-gate.md`（`audit.md` 本身即门A 判据的交付件之一）。两轮修均为机械/契约修，**不改任何结论、不需新拍板**。
 **更正「挂账解除」的口径**：技术面挂账解除成立，但**人工判据两项仍缺**，不随交付自动闭合——①四组样例（快速事实 / 市场比较 / 断言核验 / 趋势预测）与四类反例（单源 / 冲突口径 / 缺成本输入 / 过时资料）的首屏人工走查**无记录**（材料齐备于 [2026-10-11-decision-report-samples.md](../../research-workspace/drafts/2026-10-11-decision-report-samples.md)，该文件自述 human judgment pending）；②业务读者复述判据未做。另：判据「首屏与正文、findings/review 不矛盾」目前**无直接断言**——node-gate / schema-scan 源码零「首屏 / 决策摘要」字样，现仅由门R（标题重复）代理，是否补直接断言另议。
 
+**验收判定（2026-10-11，逐行）**
+
+- ②-a 四组样例 + 四类反例首屏走查 = **human judgment pending**（材料与两张记录表已备，等业务读者）。
+- ②-b「首屏与正文、findings/review 不矛盾」= **pass（口径已修正）**：用户 2026-10-11 拍板降格为人工判据，门R / 门A 只作代理信号——原表该行的「确定性」主张**已撤回**，不再留假牙。
+- 表内确定性行（模板六段 / 证据溯源 / 门面）= 模板与镜像由 `tests/presets.test.mjs` + `pack-workspace-fresh` 钉住；真实 bundle 上 `evidence-audit`（CRITICAL 0 / MAJOR 0）、`node-gate`（全门 PASS）、`schema-scan`（全齐）均 exit 0——见上文「真实 run 交付核验」。
+
 ## 关闭条件
 
 报告模板与生成/审查要求已实现，四组样例和反例有验证记录，组合冒烟及文档对账通过。不得以样例写得流畅或机械结构通过代替证据支撑检查。
