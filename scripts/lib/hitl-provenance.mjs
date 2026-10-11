@@ -5,6 +5,7 @@
 // 纯函数与写盘器分离；keyless 契约测试钉住（tests/hitl-provenance.test.mjs——含缺件
 // fail-loud 反证）。消费方 = dev/hitl-answer.mjs（盘侧裁决通过后调用）。
 import { appendFileSync, existsSync } from 'node:fs';
+import { sessionBindingOf } from '../../packages/deep-research-pack/src/lib/bundle-bind.ts';
 import { join } from 'node:path';
 
 /**
@@ -69,4 +70,20 @@ export function appendProvenance({ bundle, date, pick, answered }) {
   appendFileSync(question, `\n${lines.decisions}\n`);
   appendFileSync(journal, `\n${lines.journal}\n`);
   return { question, journal };
+}
+
+/**
+ * 代答 provenance 的归属判定（BUG-020 正修）：目标 bundle = **被答会话自己的 bundle-bind**
+ * （sessionBindingOf，与驾驶舱同一谓词），不再查工作区根字典序——旧 bundleStateOf().activeBundle
+ * 启发式在"别的在飞 bundle 在场 + 新 run 未实例化"时误归（2026-10-11 MCP run 三问卡与
+ * sibling 卡两次实测，误落 drt_cn-moe-2026）。
+ * 规则 = **仅写命中归属**：write/edit 进某 bundle 是"这场 run 是它"的权威信号；仅读命中
+ * （立项预检 / 恢复会话）一律延迟——两种读在此不可靠区分（任何 ask 都置 kickoff 信号），而
+ * 误归的代价（污染他 run 的 append-only 记录）远大于延迟的代价（操作侧按打印内容补记）。
+ * @param {ReadonlyArray<unknown>} events 被答会话 journal 事件（调用方现读，勿用陈旧快照）。
+ * @returns {string | null} bundle slug（无 drt_ 前缀）；无可归属 → null（延迟补记分支）。
+ */
+export function attributionBundleOf(events) {
+  const binding = sessionBindingOf(events);
+  return binding.boundBy === 'write' ? binding.slug : null;
 }

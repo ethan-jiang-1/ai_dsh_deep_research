@@ -63,7 +63,7 @@ opened: 2026-10-09
 - **断言三处修复**：① 证据计数/交付态/停靠点期望改**断言时刻现扫**（journal 重读 + 文件现扫）+ 跨 30s 刷新周期复核——首验红"UI 4 份 vs 快照 2 份" = boot 前快照对在飞 run 的时点竞态；② 轨道 current 计数收窄到七步名——⑦ 区队员 phase 圆点（"● scout-security"）同用"● "前缀，裸 `startsWith` 假红（● ×5）；③ 复核环加 **reload 再水化**——被跟会话在别的 host 上活跃推进时，被动侧日志尾部追平可超 30s。
 - **N 流稳定性（通道材料遗留 #2 闭环）**：lead + 4 队员多路 follow 同开，三个 host 实例（run 通道 3083 + 冒烟自起 3109 + 对照测试 3111）各自稳定、console 零错。
 - **验收 #3 证据**：client-load-smoke ALL PASS（"队员 roster = 盘侧 spawn 名对账（一个不漏）"正例断言首次咬合：scout-security、analyst-vuln、analyst-spec、critic-review）+ 真通道 CDP 探针 ⑦ 区实证（四人折叠区 + 🔍/🌐/⚠️ 真实计数 + 错误徽标）。
-- **顺带发现（独立登记）**：[BUG-020](../../bugs/BUG-020-hitl-answer-provenance-misattribution.md)（hitl-answer 代答 provenance 误归给无关在飞 bundle——字典序 activeBundle 无归属判定，两次误落 drt_cn-moe-2026，已手工迁移修复，代码修复待做）。
+- **顺带发现（独立登记）**：[BUG-020](../fixed_bugs/BUG-020-hitl-answer-provenance-misattribution.md)（hitl-answer 代答 provenance 误归给无关在飞 bundle——字典序 activeBundle 无归属判定，两次误落 drt_cn-moe-2026，已手工迁移修复，代码修复待做）。
 
 ## 关闭条件核对（2026-10-11）
 

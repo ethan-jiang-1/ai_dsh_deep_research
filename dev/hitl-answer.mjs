@@ -20,9 +20,9 @@ import { resolve, dirname, join } from 'node:path'
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { loadChromium, launchChromium } from '../scripts/lib/playwright.mjs'
-import { runStateOf, readSessionEvents, bundleStateOf, leadHitlCandidate } from '../scripts/lib/run-state.mjs'
+import { runStateOf, readSessionEvents, leadHitlCandidate } from '../scripts/lib/run-state.mjs'
 import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf, parseAskQuestions, pickTargetLabel, intentReconcile } from '../scripts/lib/ask-drive.mjs'
-import { appendProvenance, batchToAnswered } from '../scripts/lib/hitl-provenance.mjs'
+import { appendProvenance, attributionBundleOf, batchToAnswered } from '../scripts/lib/hitl-provenance.mjs'
 import { localDateStr } from '../scripts/lib/local-date.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -335,13 +335,17 @@ try {
   const provAnswered = batchToAnswered(landedBatch, plan.questions).length > 0 ? batchToAnswered(landedBatch, plan.questions) : answered
   if (!DRY && provAnswered.length > 0 && (process.exitCode === 0 || intentFailed)) {
     const wsRoot = join(ROOT, 'research-workspace')
-    const { activeBundle } = bundleStateOf(wsRoot)
+    // 归属 = 被答会话自己的 bundle-bind（BUG-020 正修）：仅写命中归属，仅读/无绑定走延迟
+    // 分支——旧字典序 activeBundle 在无关在飞 bundle 在场时误归（两次实测）。journal **现读**
+    // （答案落地后 lead 可能已追加事件；绑定只增不减，现读信号面最全）。
+    const eventsNow = readSessionEvents(join(wsSessionsRoot, wsGroup, pendingSid, 'session.v4.jsonl.zstd')).events
+    const attributed = attributionBundleOf(eventsNow)
     const pickNote = intentFailed ? `${PICK}（意图不符实录：目标未达成，见对账输出——事实仍记账）` : PICK
-    if (activeBundle === null) {
-      // HITL1 窗口常态：澄清先于 bundle 实例化（persona 合同）——provenance 无法即时落盘，
-      // 响亮延迟不崩溃（answer 已落地，崩溃会让操作者误判答题失败）；记账义务移交操作侧：
-      // bundle 出现后补记（答案内容已逐题打印在下方）。
-      log('hitl-answer: answer 已落地但工作区根无 drt_* bundle（HITL1 窗口常态）——provenance 延迟：bundle 实例化后由操作侧补记，勿隐去')
+    if (attributed === null) {
+      // 无写命中 = HITL1 窗口常态（澄清先于 bundle 实例化）或仅读绑定（预检/恢复，证据不足
+      // 不归属）——provenance 响亮延迟不崩溃（answer 已落地，崩溃会让操作者误判答题失败）；
+      // 记账义务移交操作侧：bundle 出现/确认后补记（答案内容已逐题打印在下方）。
+      log('hitl-answer: answer 已落地但被答会话无可归属 bundle（仅写命中才归属——HITL1 窗口 / 立项预检期常态）——provenance 延迟：bundle 实例化后由操作侧补记，勿隐去')
     } else {
       // 写盘竞态自知：答案落地后 lead 常立即爆发写盘（拍板行 / journal 追加），瞬时 rename
       // 窗口会让严格版 lib 抛「契约件缺席」——驱动侧有界重试（3 次 × 2s）；仍失败则响亮延迟
@@ -350,7 +354,7 @@ try {
       for (let attempt = 0; attempt < 3 && written === null; attempt++) {
         if (attempt > 0) await page.waitForTimeout(2000)
         try {
-          written = appendProvenance({ bundle: join(wsRoot, activeBundle), date: localDateStr(), pick: pickNote, answered: provAnswered })
+          written = appendProvenance({ bundle: join(wsRoot, `drt_${attributed}`), date: localDateStr(), pick: pickNote, answered: provAnswered })
         } catch (e) {
           if (attempt === 2) log(`hitl-answer: provenance 写盘失败（3 次重试后）——${String(e?.message ?? e).slice(0, 140)}；记账义务移交操作侧（答案内容已打印），勿隐去`)
         }
