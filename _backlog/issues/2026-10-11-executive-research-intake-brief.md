@@ -42,7 +42,11 @@ HITL1 语义由 `tests/presets.test.mjs`「HITL1 两段卡」四处对账测试�
 
 **真实 run 阶段一核验（2026-10-11，`drt_deepseek-model-upgrade`）**：通过——四问卡 `wait` 参数缺席（timed 护栏在位）、推荐置首带说明、判型真实命中模式库 P5 并注明；**业务决策简报五字段由题面直接落格 Snapshot、零重复追问**（question.md 澄清记录显式写明「五项用户在题面已给全，未重复问」）。未观察到：计划确认卡（第二段）——lead turn 2 写盘后遭模型空响应终止（`assistant/attempt` 无消息 → `turn/end`），通道重启将会话终局化（`end-seed`），恢复发送失效；该观察 + 人工走查维持挂账。**核验暴露的合同缺口已修**：第四问被 lead 用作归档预检（正确行为）但合同未授权该形态——research-brief skill 补「归档预检问可并入第一段卡（第四问位）」钉面（同 diff 契约断言，persona 不动避免 fixture 重录）。
 
-**真实 run 阶段二核验（2026-10-11，重开会话 `drt_deepseek-default-upgrade`）**：通过——**计划确认卡构成实测**：卡上含业务决策简报行（决定/比较/输出/主要未知）、三选项形态、`wait` 缺席，lead 并自然引用②的新结构（「判决落 final §决策摘要」）；拍板落账走通。**实测违纪一处**：计划卡正文 461 字，超 ≤200 字纪律——模型遵守率数据点（skill 有纪律、执行超限），按「试点场次遵守率决定是否升格机械门」挂账，不当场改措辞。**附带兑现**：hitl-answer 加固路径端到端走通（无 `--session` 默认发现成功）+ provenance 延迟补记机制被工具显式提示。运行中断与恢复（队员失败通知、lead turn 空响应停滞、通道重启、bundle 文件续跑审计）显性记账于 run journal round 2；操作侧续推工具缺陷另立 [BUG-021](../bugs/BUG-021-cdp-probe-ask-send-fail.md)。
+**真实 run 阶段二核验（2026-10-11，重开会话 `drt_deepseek-default-upgrade`）**：通过——**计划确认卡构成实测**：卡上含业务决策简报行（决定/比较/输出/主要未知）、三选项形态、`wait` 缺席，lead 并自然引用②的新结构（「判决落 final §决策摘要」）；拍板落账走通。**实测违纪一处**：计划卡正文 461 字，超 ≤200 字纪律——模型遵守率数据点（skill 有纪律、执行超限），按「试点场次遵守率决定是否升格机械门」挂账，不当场改措辞。**附带兑现**：hitl-answer 加固路径端到端走通（无 `--session` 默认发现成功）+ provenance 延迟补记机制被工具显式提示。运行中断与恢复（队员失败通知、lead turn 空响应停滞、通道重启、bundle 文件续跑审计）显性记账于 run journal round 2；操作侧续推工具缺陷另立 [BUG-021](../_archived/fixed_bugs/BUG-021-cdp-probe-ask-send-fail.md)。
+
+**真实 run 阶段三核验（2026-10-11，续跑至交付 `drt_deepseek-default-upgrade`）**：run 已交付——run 根 `final.md` v1 当前版 + `final/v1.md` 版本记账 + `present` 声明 + `question.md` §Decisions HITL2 拍板行，四步齐；HITL2 由用户经 GUI 实拍「按现稿定稿」（ask 20:13:37 → 答 20:14:26，**49 秒**，非 600s 超时自动落定，也不是操作侧代答）。本阶段**未产生新计划卡**（HITL1 在续跑前已完成），故 ≤200 字遵守率**无新数据点**，461 字违纪数据点仍为唯一观测。三道机械门对真实 bundle（`source dev/env.sh` 后跑，报告落 bundle 内 `audit.md` / `node-gate.md`）：`evidence-audit` exit 0 —— CRITICAL 0 / MAJOR 0 / INFO 1、URL 溯源 70/70、`source_url` 真抓过 11/11、摘录回溯 452/453（不符 0）、final 引用链 57/57；`node-gate` exit 0 —— 门① HITL 锚点 / 门③ §Decisions 拍板行 / 门② present 声明 / 门L leads 交接 / 门R / 门A 全 PASS，门④ N/A（无扩张 rerun，显式标注）；`schema-scan` exit 0 —— 核心 schema 全齐。
+**仍缺（人工判据）**：四类输入样例的问/不问清单走查（材料本身尚未制作）；业务读者复述计划卡。
+**记账修正待办**：上文所引阶段一 bundle `drt_deepseek-model-upgrade` **不在盘**——`research-workspace/`（在飞区）与 `archive/`（已交付区）全无，全仓仅本卡一处提及；`drt_*` 非 git 跟踪对象故无历史可查 → 阶段一结论的分母与用户原话**不可回溯**，须在卡上补记不可回溯说明，或删除该引用。
 
 ## 关闭条件
 

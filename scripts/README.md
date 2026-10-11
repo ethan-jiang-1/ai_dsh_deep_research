@@ -65,6 +65,7 @@
 | lib/env.mjs | 冒烟族 | 子进程环境清洗（scrubbedEnv/withModelKey——凭据卫生） |
 | lib/playwright.mjs | 浏览器冒烟 | Playwright 启停支撑 |
 | lib/cdp-driver.mjs | cdp-probe | 裸 CDP 驱动 |
+| lib/inject-reconcile.mjs | cdp-probe、inject-reconcile.test | 注入消息「落盘对账」判据（BUG-021 正修：日志里出现本条 user/message 才算送达；时间下界防同文假阳） |
 | lib/ask-drive.mjs | hitl-answer | 代答读窗与谓词 |
 | lib/unconsumed-evidence.mjs | unconsumed-evidence.test / 收尾核验 | B1 机械基座：evidence/ 未进 findings.md 的差集投影（critic 差集出题的操作侧对账） |
 | lib/acceptance-check.mjs | acceptance-check.test / 收尾核验 | 收活判据机械求值：PASS/FAIL/UNVERIFIED 三态（DeerFlow acceptance_criteria keyless 移植，判不了永不静默放行） |

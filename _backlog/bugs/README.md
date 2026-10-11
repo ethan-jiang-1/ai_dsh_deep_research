@@ -12,9 +12,10 @@
 
 | 文件 | 一句话 |
 |---|---|
-| [BUG-021](BUG-021-cdp-probe-ask-send-fail.md) | cdp-probe `--ask` 发送系统性失败（asked:false 三连，消息不落盘）——操作侧自由消息干预面失效，修复方向 = journal 对账判据 + 选择器对齐（P2） |
 
-（最近归档 = [BUG-020](../_archived/fixed_bugs/BUG-020-hitl-answer-provenance-misattribution.md) hitl-answer 代答 provenance 误归——归属谓词化（仅写命中），反证五用例；再前一单 = [BUG-019](../_archived/fixed_bugs/BUG-019-recorder-mcp-race.md) 录制器 MCP 竞态——写盘前 MCP 组谓词 + 有界重试，守卫 = tests/replay-fixtures.test.mjs。）
+（暂无活跃缺陷卡。）
+
+（最近归档 = [BUG-021](../_archived/fixed_bugs/BUG-021-cdp-probe-ask-send-fail.md) cdp-probe `--ask` 判据改会话日志落盘对账——选择器状态机对齐 + stop 陷阱设防 + fail-loud 四态，真模型两阶段 E2E 全绿；再前一单 = [BUG-020](../_archived/fixed_bugs/BUG-020-hitl-answer-provenance-misattribution.md) hitl-answer 代答 provenance 误归——归属谓词化（仅写命中），反证五用例。）
 
 ## 卡片模板
 
