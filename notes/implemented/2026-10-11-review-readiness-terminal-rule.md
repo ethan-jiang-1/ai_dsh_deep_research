@@ -49,4 +49,4 @@ PASS 判定」，用于门②/门A），与「终局判定」不同意图——�
 - L0：`pnpm verify` 全绿、`pnpm test` **369/369**（含本模块 9 用例与既有 `run-dashboard.test.mjs`
   的两相用例保持绿）。
 
-事故与验收记录：[③驾驶舱卡](../../_backlog/issues/2026-10-11-executive-research-ux-delivery.md)（③-a 行）。
+事故与验收记录：[③驾驶舱卡](../../_backlog/_archived/settled_issues/2026-10-11-executive-research-ux-delivery.md)（③-a 行）。

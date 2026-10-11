@@ -25,3 +25,6 @@
 | [2026-10-09-guard-red-record](2026-10-09-guard-red-record.md) | tests 面反证义务机械化（双址 + 留证二选一；存量 14 声明零豁免全留证）；[Note](../../../notes/implemented/2026-10-09-guard-red-record.md) | 2026-10-09 |
 | [2026-10-10-egress-mode-probe](2026-10-10-egress-mode-probe.md) | egress 两态自适应 boot 已实施（#1–#3、#5 验收绿，实录在卡内；commit 4083724）；#4 B/C 态现场补证触发 = [triggers](../../triggers.md)；不另立 Note（去向见卡） | 2026-10-10 |
 | [2026-10-09-member-activity-stream](2026-10-09-member-activity-stream.md) | 队员动作流 4/4 验收绿（2026-10-11 真实 run 首验：subagent follow 持久父地址 + smoke 正例环境 + 断言三修）；[Note](../../../notes/implemented/2026-10-11-member-activity-first-validation.md) | 2026-10-11 |
+| [2026-10-11-executive-research-intake-brief](2026-10-11-executive-research-intake-brief.md) | HITL1 业务决策简报落地；真 run 三阶段核验 + 业务读者走查通过；结转 = 计划卡字数升硬门前置（连续 ≥3 场达标） | 2026-10-11 |
+| [2026-10-11-executive-research-decision-report](2026-10-11-executive-research-decision-report.md) | 决策摘要首屏六段落地；真实 bundle 三门口 exit 0 + 走查通过；「不矛盾」判据按拍板降格人工判据 | 2026-10-11 |
+| [2026-10-11-executive-research-ux-delivery](2026-10-11-executive-research-ux-delivery.md) | 驾驶舱业务摘要层与纠偏路径落地；真浏览器断言 + 构成正本 + 窄门 + 两面一致性核对；结转 = HITL 挂起态实录 waiting | 2026-10-11 |

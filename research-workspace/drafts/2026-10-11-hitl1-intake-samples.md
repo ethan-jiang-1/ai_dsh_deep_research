@@ -1,6 +1,6 @@
 # HITL1 立项样例集（四类输入 + 快速事实豁免态）
 
-> **用途**：[①立项简报卡](../../_backlog/issues/2026-10-11-executive-research-intake-brief.md)「四类输入样例的问/不问清单」——人工走查（①-b）的输入材料。**虚拟样例**：题面均为虚构业务场景，不含真实客户信息，不作为研究结论。
+> **用途**：[①立项简报卡](../../_backlog/_archived/settled_issues/2026-10-11-executive-research-intake-brief.md)「四类输入样例的问/不问清单」——人工走查（①-b）的输入材料。**虚拟样例**：题面均为虚构业务场景，不含真实客户信息，不作为研究结论。
 > **判据来源**：persona HITL1 段（`packages/deep-research-pack/presets/lead.patch.yml`）· research-brief skill §3/§6（`packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md`）· 判型模式库（`research-workspace/question-patterns.md`）。
 > **走查方式**：逐类核对三件事——「期望问」是否**出现**、「期望不问」是否**未**出现、「负例」是否**未**发生；结果记文末走查记录表。任何一类缺「期望问」或「期望不问」块，本材料即不完整。
 
@@ -106,4 +106,6 @@
 | D 命中困惑信号 | ☐ | ☐ | ☐ | |
 | E 快速事实豁免 | ☐ | ☐ | ☐ | |
 
+> **走查结论（2026-10-11，业务读者）：五类全部通过**——用户逐项看完后确认「都还可以」（**整表口头确认，未逐格勾选**；如需补记具体卡住点/原话可回填本表）。
+>
 > 走查口径：**技术绿不替代本表**——本表记录的是业务读者的判断（业务语言是否可读、追问是否打扰），不因 L0/冒烟全绿而免填。真实 run 的提问行为分布另由 L4-lite 或真 run 观察取证（①-a 材料的证据边界到此为止）。

@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-出处 = 推敲卡 [2026-10-11-executive-research-intake-brief](../../_backlog/issues/2026-10-11-executive-research-intake-brief.md)
+出处 = 推敲卡 [2026-10-11-executive-research-intake-brief](../../_backlog/_archived/settled_issues/2026-10-11-executive-research-intake-brief.md)
 （用户 2026-10-11 直派落地；设计依据 = 研究稿
 [2026-10-11-executive-research-ux](../../_backlog/research/2026-10-11-executive-research-ux/index.md)
 P0 候选①「立项补业务决策简报」）。机制基座 = [计划确认闸门 Note](2026-10-07-plan-review-gate.md)
@@ -32,7 +32,7 @@ HITL1 第一段新增**业务决策简报**采集（决策对象 / 待决定事�
   研究稿 P0 判据「采取信息充分性触发，不得把决策字段机械设为每次必答」；
 - **第三个 HITL 决策点**（运行中业务简报呈报/审批）：直接改两点交互合同——无证据证明
   价值超过打断成本；运行中补充信息的消费路径是独立未决问题，住
-  [2026-10-11-executive-research-ux-delivery](../../_backlog/issues/2026-10-11-executive-research-ux-delivery.md)，
+  [2026-10-11-executive-research-ux-delivery](../../_backlog/_archived/settled_issues/2026-10-11-executive-research-ux-delivery.md)，
   不含在本变更；
 - **自由文本反馈协议**（`[ACCEPTED]` 标记）：[hitl-feedback-protocol 否决](../rejected/2026-10-06-hitl-feedback-protocol.md)
   同款理由——结构化选项已承载接受/修改语义；

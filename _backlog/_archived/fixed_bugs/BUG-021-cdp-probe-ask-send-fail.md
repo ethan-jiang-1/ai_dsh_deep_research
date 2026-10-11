@@ -35,7 +35,7 @@ opened: 2026-10-11
 
 ## 复现
 
-通道活着 + 会话在场（任意状态）→ `node scripts/probe/cdp-probe.mjs '<gui-url>' --open-session '<标题子串>' --ask '<消息>'` → 输出 `asked: false`，journal 无新 user/message。2026-10-11 三次复现实录见 [①卡挂账段](../../issues/2026-10-11-executive-research-intake-brief.md) 与 `drt_deepseek-default-upgrade/journal.md` round 2 操作侧记账。
+通道活着 + 会话在场（任意状态）→ `node scripts/probe/cdp-probe.mjs '<gui-url>' --open-session '<标题子串>' --ask '<消息>'` → 输出 `asked: false`，journal 无新 user/message。2026-10-11 三次复现实录见 [①卡挂账段](../settled_issues/2026-10-11-executive-research-intake-brief.md) 与 `drt_deepseek-default-upgrade/journal.md` round 2 操作侧记账。
 
 ## 牵出的失败类
 

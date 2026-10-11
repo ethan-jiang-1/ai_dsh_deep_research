@@ -1,6 +1,6 @@
 # 决策摘要首屏 · 四组虚构样例与刻意反例
 
-> 服务 = issue ② [2026-10-11-executive-research-decision-report](../../_backlog/issues/2026-10-11-executive-research-decision-report.md)
+> 服务 = issue ② [2026-10-11-executive-research-decision-report](../../_backlog/_archived/settled_issues/2026-10-11-executive-research-decision-report.md)
 > 的人工判据行。**全部题面与数据虚构**，仅检验首屏表达与证据导航，不是真实业务结论。
 > 每组样例 = 按 [final.md 模板](../../research-workspace/templates/run/final.md) 新首屏写的
 > 决策摘要段；`[来源: evidence/…]` 为样例文件名占位，不指向真实文件。
@@ -95,6 +95,8 @@ CRITICAL）；② 「无重大风险」+「目前不能判断：无」= 未知�
 
 ## 业务读者走查记录表（人工判据 ②-a 填写；技术绿不替代）
 
+> **走查结论（2026-10-11，业务读者）：四组样例 + 四类反例 + 三处刻意缺陷 全部通过**——用户逐项看完后确认「都还可以」（**整表口头确认，未逐格勾选**；如需补记具体卡住点/原话可回填本表）。
+>
 > 走查口径：只读**首屏**（§决策摘要 六段），不看正文；每份记「能否 30 秒说出答案与边界」+「能否沿 §关键依据 找到原始来源」+ 卡住点/原话。
 
 | 样例 | 30 秒说出答案 | 说出边界/适用条件 | 沿链接找到依据 | 卡住点 / 原话 |
