@@ -115,7 +115,8 @@ node scripts/smoke/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（真模�
 node scripts/smoke/team-preflight-smoke.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + company D18 one-shot worker 探针）
 bash dev/boot-run.sh                  # run 通道：自检→组合检查/必要补装→漂移门；仪表盘后台观察、web 前台 3083；用法 = 61
 node --import tsx/esm scripts/run-ops/run-dashboard.mjs --latest --out <html>   # run 只读投影（多场扫描 + 步骤条 + HITL 等待横幅；--watch 持续再生成）
-node scripts/run-ops/plan-card-stats.mjs   # 计划确认卡字数跨场分布（keyless，须先 source；判 ①-c 升硬门前置「连续 ≥3 场 ≤200 字达标」）
+node scripts/run-ops/plan-card-stats.mjs   # 计划确认卡字数跨场分布
+node scripts/run-ops/provider-error-stats.mjs   # 上游流错误（回合被终结）跨场分布——BUG-022 的"可数"面（keyless，须先 source）（keyless，须先 source；判 ①-c 升硬门前置「连续 ≥3 场 ≤200 字达标」）
 node dev/run-kickoff.mjs --port 3083 --token <横幅 token> --prompt-file <file>        # run 会话驱动（建会话+发 kickoff）
 node --import tsx/esm scripts/run-ops/watch-run.mjs <session-id>   # run 盯场（谓词化状态判定：事件形状，非字符串 grep——HITL-PENDING/RUN-SETTLED 时退出自报；grep 会误报 request/header 工具 schema）
 node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <t>   # HITL 代答（代理模拟；默认逐题选推荐项——先盘侧谓词自拒：无真挂起不开浏览器；answerer 只在浏览器客户端，故用真浏览器）

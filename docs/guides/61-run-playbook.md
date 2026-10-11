@@ -164,6 +164,11 @@ BUG-020）。
 - 任何时候可关页面/停机。恢复 = 重跑 `boot-run.sh` → 新开 lead 会话说
   "继续 <slug> 这个 run"——lead 只凭 `drt_<slug>/` 的文件事实重建上下文，
   不依赖聊天记忆；
+- **通道还活着、只是回合停摆**（模型空响应 / 厂商流错误打断，会话未终局化）→ **不必新开**：
+  `node dev/run-kickoff.mjs --port 3083 --token <t> --session <会话 id> --prompt <恢复指令>`
+  即向该会话注入指令唤醒（等价于你在 GUI 手打一句）。该模式**自带送达对账**：exit 0 =
+  会话日志里已出现这条 `user/message`，1 = 未对账（多半是该会话已终局化或日志尾部未落盘
+  → 走上面"重跑 + 新会话"那条路），2 = 用法/前置错（续跑模式需先 `source dev/env.sh`）；
 - **会话日志尾部在通道死亡时不保证**（SIGTERM 后未落盘缓冲蒸发实测）——"文件即真相"只对
   bundle 文件断言；盘侧谓词消费日志前先过回退检测（watch-run 内建，回退即 fail-loud），
   跨会话取证的结论要意识到日志可能被截断（[BUG-007 卡](../../_backlog/_archived/fixed_bugs/BUG-007-channel-death-loses-log-tail.md)）；

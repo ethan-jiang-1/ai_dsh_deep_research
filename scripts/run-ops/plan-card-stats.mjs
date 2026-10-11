@@ -11,10 +11,9 @@
 //
 // 用法：source dev/env.sh && node scripts/run-ops/plan-card-stats.mjs [--days 30] [--group <子串>] [--json]
 // 退出码：0 = 正常输出（超限与否不是本工具的判据）/ 2 = 用法或前置错（未 source dev/env.sh）
-import { readdirSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
+import { readSessionText, sessionLogsSince } from '../lib/session-log.mjs';
 import { planCardsOf, PLAN_CARD_LIMIT } from '../lib/plan-card.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -32,26 +31,17 @@ if (home === null) {
   process.exit(2);
 }
 const sessionsRoot = join(home, 'sessions');
-const cutoff = Date.now() - DAYS * 86400 * 1000;
 
 const rows = [];
 const unreadable = [];
-let scanned = 0;
-for (const group of readdirSync(sessionsRoot)) {
-  if (!group.includes(GROUP)) continue;
-  for (const sid of readdirSync(join(sessionsRoot, group))) {
-    const dir = join(sessionsRoot, group, sid);
-    const log = resolveSessionLog(dir);
-    if (log === null) continue;
-    const mtime = statSync(log).mtimeMs;
-    if (mtime < cutoff) continue;
-    scanned++;
-    const text = readSessionText(log);
-    // 不可读 ≠ 空语料：坏帧显式记档（偏"数据缺失"方向，不静默当 0 张卡）
-    if (text === null) { unreadable.push(sid); continue; }
-    for (const card of planCardsOf(text)) {
-      rows.push({ ...card, session: sid, when: new Date(mtime).toISOString().slice(0, 10) });
-    }
+const sessions = sessionLogsSince(sessionsRoot, { days: DAYS, group: GROUP });
+const scanned = sessions.length;
+for (const { sessionId, logPath, mtimeMs } of sessions) {
+  const text = readSessionText(logPath);
+  // 不可读 ≠ 空语料：坏帧显式记档（偏"数据缺失"方向，不静默当 0 张卡）
+  if (text === null) { unreadable.push(sessionId); continue; }
+  for (const card of planCardsOf(text)) {
+    rows.push({ ...card, session: sessionId, when: new Date(mtimeMs).toISOString().slice(0, 10) });
   }
 }
 rows.sort((a, b) => b.questionChars - a.questionChars);

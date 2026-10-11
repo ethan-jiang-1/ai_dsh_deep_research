@@ -9,7 +9,9 @@
 //
 // 两阶段断言（起一条一次性通道 + 独立 workspace，**绝不打在交付会话上**）：
 //   ①空闲态：提交按钮 = `Send message` → sent + **landed**（journal 对账命中本会话日志）
-//   ②在飞态（子代理挂着，turn 保持 open 且非挂起）：提交按钮 = `Queue message` → sent
+//   ②续跑唤醒：`dev/run-kickoff.mjs --session <id>` 向**既有会话**注入恢复指令——该工具**自带送达
+//     对账**（exit 0 = 会话日志出现本条；1 = 未对账），文档承诺的恢复动作（guides/61 §5）在此有常驻证据。
+//   ③在飞态（子代理挂着，turn 保持 open 且非挂起）：提交按钮 = `Queue message` → sent
 //     —— 这正是生产现场旧探针零命中的形态。**本阶段不硬判落盘**：排队消息由服务端在 turn 取用时
 //     才写日志，时机可能远超探针轮询窗；"发出 → 落盘"整条链由阶段①硬证。
 // 顺带观测（信息，不作硬判据）：挂起态该位置只有 stop → 探针拒点（keyless 面已钉，这里只记实况）。
@@ -134,20 +136,36 @@ try {
   check('① 对账打在本会话日志上（自动探测 id 与建会话一致）', A.verdict?.reconcile?.sessionId === sessionId);
   check('① logPath 指向本会话', typeof A.verdict?.reconcile?.logPath === 'string' && A.verdict.reconcile.logPath.includes(sessionId));
 
-  // ── 阶段②：在飞态 → Queue message（生产现场形态）──
+  // ── 阶段②：续跑唤醒（既有会话注入 + journal 对账）──
+  const RESUME = '恢复指令测试：请只回复「恢复收到」四个字，不要做任何其他事。';
+  const resumeRun = await new Promise((res) => {
+    const proc = spawn(process.execPath, [join(ROOT, 'dev', 'run-kickoff.mjs'), '--port', String(PORT), '--token', token, '--session', sessionId, '--prompt', RESUME], { cwd: ROOT, env: scrubbedEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
+    let outText = '';
+    let errText = '';
+    proc.stdout.on('data', (c) => { outText += String(c); });
+    proc.stderr.on('data', (c) => { errText += String(c); });
+    proc.on('exit', (code) => res({ code, outText, errText }));
+  });
+  console.log(`cdp-ask-smoke: 续跑模式 exit=${resumeRun.code}；stderr: ${resumeRun.errText.trim().split('\n').pop() ?? ''}`);
+  // 工具自带送达对账（exit 0 = 会话日志出现本条；1 = 未对账；2 = 用法/前置）——故这里断言它的判定，
+  // 不再在冒烟里写第二份轮询（同一判据两版实现 = 本仓反复吃过的漂移）。
+  check('② 续跑模式 exit 0（= 工具自报"送达已对账"）', resumeRun.code === 0);
+  check('② 续跑模式回报的就是既有会话 id（未新建）', resumeRun.outText.trim() === sessionId);
+
+  // ── 阶段③：在飞态 → Queue message（生产现场形态）──
   await rpc('session/prompt', { request: { requestId: randomUUID(), sessionId, mode: 'queue', content: [{ type: 'text', text: '请立刻 spawn 一个名为 cdp-ask-holder 的 teammate，让它写一份 600 字以上的中文《文件命名规范》说明（越详细越好），然后你等它返回并汇报要点。不要问我任何问题。' }] } });
   await sleep(12_000); // 等子代理真起来（turn 保持 running 且非挂起 → primary 按钮 = queue/steer）
   const B = await runProbe('第二条（排队注入）：请只回复「探针收到」四个字，不要做任何其他事。');
-  console.log('=== 阶段②（在飞态）verdict 节选 ===');
+  console.log('=== 阶段③（在飞态）verdict 节选 ===');
   console.log(JSON.stringify({ sent: B.verdict?.sent, sentBy: B.verdict?.sentBy, landed: B.verdict?.landed, answered: B.verdict?.answered, reconcile: B.verdict?.reconcile, failed: B.verdict?.failed }, null, 1));
-  check('② sentBy ∈ 在飞态 send 家族（Queue message / Steer message）——旧探针在此构造性零命中',
+  check('③ sentBy ∈ 在飞态 send 家族（Queue message / Steer message）——旧探针在此构造性零命中',
     typeof B.verdict?.sentBy === 'string' && ['Queue message', 'Steer message'].includes(B.verdict.sentBy));
-  check('② 对账目标 = 本会话（自动探测拿到的是本会话 id）', B.verdict?.reconcile?.sessionId === sessionId);
-  // ② 的落盘**不作硬判据**：排队消息由服务端在 turn 取用时才写日志，时机可能远超探针的 18s 轮询窗
+  check('③ 对账目标 = 本会话（自动探测拿到的是本会话 id）', B.verdict?.reconcile?.sessionId === sessionId);
+  // ③ 的落盘**不作硬判据**：排队消息由服务端在 turn 取用时才写日志，时机可能远超探针的 18s 轮询窗
   // （实测同代码两次跑一次 landed 一次 not-landed）。"发出并落盘"这条链已由阶段①（空闲态）硬证；
   // 本阶段证的是**在飞态标签被命中**——那正是生产现场旧探针构造性零命中的那一层。
-  console.log(`（信息）阶段② landed=${String(B.verdict?.landed)}（reconcile=${B.verdict?.reconcile?.status ?? 'null'}）——排队落盘时机由服务端定，不作为判据。`);
-  if (B.verdict?.answered !== true) console.log('（信息）阶段② answered=false 与判据无关：本阶段判"标签是否被命中"，不是等模型回复。');
+  console.log(`（信息）阶段③ landed=${String(B.verdict?.landed)}（reconcile=${B.verdict?.reconcile?.status ?? 'null'}）——排队落盘时机由服务端定，不作为判据。`);
+  if (B.verdict?.answered !== true) console.log('（信息）阶段③ answered=false 与判据无关：本阶段判"标签是否被命中"，不是等模型回复。');
 } catch (error) {
   console.error(`cdp-ask-smoke: 运行期失败——${error.message}`);
   checks.push(['运行期无异常', false]);
@@ -168,6 +186,6 @@ for (const [name, ok] of checks) {
   if (!ok) allOk = false;
 }
 console.log(allOk
-  ? 'cdp-ask-smoke: ALL PASS（空闲态 Send message 发出并落盘 + 在飞态 Queue message 标签命中；在飞态落盘时机不作判据）'
+  ? 'cdp-ask-smoke: ALL PASS（空闲态发出并落盘 + 续跑唤醒落盘 + 在飞态 Queue message 标签命中；在飞态落盘时机不作判据）'
   : 'cdp-ask-smoke: FAILURE(S)——见上（真 UI 上发出/落盘未全绿）');
 process.exit(allOk ? 0 : 1);

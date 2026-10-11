@@ -3,7 +3,7 @@
 // The regression surface is deliberately small: callers choose policy (group, age,
 // selected session), while this module chooses one physical log and decodes it
 // without a shell or external subprocess.
-import { lstatSync, readFileSync } from 'node:fs'
+import { existsSync, lstatSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import * as zlib from 'node:zlib'
 
@@ -85,6 +85,37 @@ export function decompressSessionLog(buf, decompress = typeof zlib.zstdDecompres
     return null
   }
   return Buffer.concat(parts)
+}
+
+/**
+ * 列出会话根下**近窗口内**的会话日志（按 cwd 分组；组名不含 `group` 子串即跳过）。
+ * 扫描逻辑只此一份：plan-card-stats / provider-error-stats 等投影工具共用，免得各写一份
+ * 遍历+过滤（"同一判据两版实现"是本仓反复吃过的漂移）。
+ *
+ * @param {string} sessionsRoot 会话根（一般是 `$DSH_HOME/sessions`）
+ * @param {{days?: number, group?: string}} [opts] 窗口天数（缺省 30）与组名子串过滤（缺省不过滤）
+ * @returns {Array<{sessionId: string, group: string, dir: string, logPath: string, mtimeMs: number}>}
+ *   按 mtime 降序；`logPath` 由 [resolveSessionLog] 选canonical 代际，缺日志的会话不计入。
+ */
+export function sessionLogsSince(sessionsRoot, opts = {}) {
+  const days = typeof opts.days === 'number' ? opts.days : 30;
+  const groupFilter = typeof opts.group === 'string' ? opts.group : '';
+  const cutoff = Date.now() - days * 86400 * 1000;
+  const out = [];
+  if (!existsSync(sessionsRoot)) return out;
+  for (const group of readdirSync(sessionsRoot)) {
+    if (!group.includes(groupFilter)) continue;
+    for (const sessionId of readdirSync(join(sessionsRoot, group))) {
+      const dir = join(sessionsRoot, group, sessionId);
+      const logPath = resolveSessionLog(dir);
+      if (logPath === null) continue;
+      let mtimeMs;
+      try { mtimeMs = statSync(logPath).mtimeMs; } catch { continue; }
+      if (mtimeMs < cutoff) continue;
+      out.push({ sessionId, group, dir, logPath, mtimeMs });
+    }
+  }
+  return out.sort((a, b) => b.mtimeMs - a.mtimeMs);
 }
 
 /** Read JSONL or concatenated zstd JSONL as text（不解 JSON——给按行/按文本判据的消费者用）。
