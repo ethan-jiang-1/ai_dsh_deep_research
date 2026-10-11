@@ -177,7 +177,7 @@ test('场内进度与步骤推导：final/review 双命名容纳 + 流程语义'
 test('HITL 等待检测：v4 未答 ask 等待；匹配 callId 的 v3 答案/取消结果关闭', () => {
   const root = mktmp();
   try {
-    const sess = join(root, 'sessions', 'grp');
+    const sess = join(root, 'sessions', '--x-research-workspace--');
     // 夹具对齐真实日志格式：逐次 append 的 zstd 多帧拼接（一次写入一帧；DSH 实测 357 帧/639 行）
     const mk = (id, lineGroups, generation = 'v4') => {
       const d = join(sess, id);
@@ -201,6 +201,11 @@ test('HITL 等待检测：v4 未答 ask 等待；匹配 callId 的 v3 答案/取
       [{ type: 'tool/call', time: t - 30000, data: { callId: 'c2', name: 'ask_user_question', arguments: '{}' } },
        { type: 'tool/result', time: t - 5000, data: { message: { role: 'user', source: { kind: 'tool', callId: 'c2' }, content: [{ type: 'tool-result', toolCallId: 'c2', content: 'cancelled' }], isError: true } } }],
     ], 'v3');
+    // 反证夹具：**冒烟工作区**组里的同形挂起**不得**被投影（run 投影只扫 run 工作区）
+    const smoke = join(root, 'sessions', '--x-runtime-smoke-workspace--');
+    mkdirSync(join(smoke, 'session-smoke'), { recursive: true });
+    writeFileSync(join(smoke, 'session-smoke', 'session.v4.jsonl.zstd'),
+      zstdCompressSync(Buffer.from(JSON.stringify(ask('cs', t - 40000)) + '\n')));
     const waiting = detectHitlWait(join(root, 'sessions'), { maxAgeMs: 3600 * 1000 });
     assert.equal(waiting.length, 1);
     assert.equal(waiting[0].session, 'waiting');
@@ -219,7 +224,7 @@ test('HITL 公共投影：timed pending 与元数据/agent 后续事件不关闭
       ? { role: 'user', source: { kind: 'tool', callId: 'c' }, content: [{ type: 'tool-result', toolCallId: 'c', content: [{ type: 'text', text: '{"pending":true}' }] }] }
       : { role: 'tool', toolCallId: 'c', content: [{ type: 'text', text: '{"pending":true}' }] } } });
     const put = (id, generation, events) => {
-      const dir = join(root, 'grp', `session-${id}`);
+      const dir = join(root, '--x-research-workspace--', `session-${id}`);
       mkdirSync(dir, { recursive: true });
       const file = join(dir, `session.${generation}.jsonl.zstd`);
       writeFileSync(file, zstdCompressSync(Buffer.from(events.map(JSON.stringify).join('\n') + '\n')));

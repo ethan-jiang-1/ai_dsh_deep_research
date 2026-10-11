@@ -338,14 +338,20 @@ export function deriveStep(model) {
   });
 }
 
-/** HITL 等待检测：会话日志选择与状态折算分别复用 shared modules；扫描范围和
- * 最近时间策略仍由 dashboard owner 保持。损坏的 canonical 日志不降级到旧代。 */
-export function detectHitlWait(sessionsRoot = SESSIONS_ROOT, { maxAgeMs = 12 * 3600 * 1000 } = {}) {
+/** HITL 等待检测：会话日志选择与状态折算分别复用 shared modules；扫描范围（**只扫 run 工作区组**，
+ * 见循环内注释）与最近时间策略由 dashboard owner 保持。损坏的 canonical 日志不降级到旧代。
+ * @param opts.groupMarker 组名必须含该子串；传 `null` 表示不筛（测试与特殊场景用）。 */
+export function detectHitlWait(sessionsRoot = SESSIONS_ROOT, { maxAgeMs = 12 * 3600 * 1000, groupMarker = 'research-workspace' } = {}) {
   const waiting = [];
   const cutoff = Date.now() - maxAgeMs;
   let groups = [];
   try { groups = readdirSync(sessionsRoot); } catch { return waiting; }
   for (const g of groups) {
+    // 只扫 **run 工作区** 的会话组：dashboard 是 run 投影，冒烟/开发工作区的会话不是 run。
+    // 2026-10-11 实测：冒烟会话里遗留的挂起问被报成「⏳ 等你拍板（HITL）」，与盘侧 run-state
+    // 谓词（RUN-SETTLED）不一致——两处观察面就同一问题给出相反答案，正是本仓要避免的形态。
+    // 组名 = cwd 的 slug，故 run 工作区的判据与 watch-run 同款（`includes('research-workspace')`）。
+    if (groupMarker !== null && !g.includes(groupMarker)) continue;
     const gdir = join(sessionsRoot, g);
     let sessions = [];
     try { sessions = readdirSync(gdir); } catch { continue; }
