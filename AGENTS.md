@@ -90,7 +90,7 @@ pnpm test            # L0 keyless 回归（唯一登记的测试命令）
 档位词汇：**keyless** = 无凭据可跑；preset-smoke 真挂载档无模型调用、不需要 key。
 release-smoke 无模型调用，安装验收使用 `--install-only` 跳过模型就绪检查；默认 preflight 仍检查凭据在场；
 **真模型档** = 需凭据并调用模型：l4-lite-smoke、team-preflight-smoke、entry-chain-probe、
-discipline-probe（纪律行为探针）、client-hitl-smoke、dev/record-role-fixture（fixture 录制）与完整 L4；CDP `--ask` 按当前会话模型档处理（模式表 = [项目地图](docs/project-map.md)）。
+discipline-probe（纪律行为探针）、client-hitl-smoke、cdp-ask-smoke（探针 --ask 端到端）、dev/record-role-fixture（fixture 录制）与完整 L4；CDP `--ask` 按当前会话模型档处理（模式表 = [项目地图](docs/project-map.md)）。
 
 L4-lite 真模型冒烟需要 `DEEPSEEK_API_KEY`：开发 home（`runtime/harness-home/.credentials.yaml`）配一次
 即可，永不提交密钥；web 搜索无需独立 key——base 的 `web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，与 chat 同一把钥匙（实证：vendor `packages/bundle/base/cordis.patch.yml` 的 web-search-deepseek 行）。

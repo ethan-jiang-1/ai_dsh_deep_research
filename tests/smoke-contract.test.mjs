@@ -21,6 +21,7 @@ const REAL_MODEL = [
   'smoke/team-preflight-smoke.mjs',
   'probe/entry-chain-probe.mjs',
   'smoke/client-hitl-smoke.mjs',
+  'smoke/cdp-ask-smoke.mjs',
   'probe/discipline-probe.mjs',
 ];
 

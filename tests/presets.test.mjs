@@ -136,6 +136,10 @@ test('HITL1 两段卡：计划确认卡钉在模型可见面与合同面（perso
   // research-brief（操作面正本）：流程步 + 一轮制
   assert.match(skill, /计划确认卡/, 'research-brief 缺计划确认步');
   assert.match(skill, /一轮制/, 'research-brief 缺一轮制（修订不再二次呈卡）');
+  // 计划卡字数纪律（①-c：WARN 级检出 + 措辞收紧同源）：计数口径与"呈卡前先数字数"必须留在 skill——
+  // 删掉即红，否则门禁侧的 WARN 记账会变成没人听的数字（门禁实现 = node-gate 门①，两态夹具在 tests/fixtures）。
+  assert.match(skill, /呈卡前先数字数/, 'research-brief 缺"呈卡前先数字数"自查步——超限卡会被递给用户');
+  assert.match(skill, /全部字符/, 'research-brief 缺字数口径句（口径 = ask 的 question 字段全部字符）');
   // 手册（跨角色合同）：两段卡语义 + 豁免 + 细则下放指针
   assert.match(manual, /HITL1 = 两段卡/, '手册缺两段卡合同');
   assert.match(manual, /quick_factual 豁免/, '手册缺 quick_factual 豁免');

@@ -31,6 +31,7 @@ import process from 'node:process';
 import { launchCdpBrowser } from '../lib/cdp-driver.mjs';
 import { readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs';
 import { reconcileInjectedMessage } from '../lib/inject-reconcile.mjs';
+import { pickSendTarget } from '../lib/probe-send-target.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -204,29 +205,40 @@ try {
     if (verdict.typed === 'no-editable') verdict.sent = 'no-composer';
     else {
       const sendAtMs = Date.now();
-      verdict.sendProbe = await evaluate(`(() => {
-        const SEND = ['Send message', 'Queue message', 'Steer message', '发送消息', '排队发送', '插话发送'];
-        const STOP = ['Stop generating', '停止生成'];
+      // 判定与 DOM 访问分工：**页面只读按钮表与 composer 坐标**，选谁/拒点住
+      // `scripts/lib/probe-send-target.mjs`（纯函数，keyless 钉住状态机与 stop 陷阱），
+      // 再由页面按索引点击——BUG-021 的两条现场规则因此有常驻资产，而不是只活在 evaluate 字符串里。
+      const dom = await evaluate(`(() => {
         const composer = document.querySelector('[data-composer-input]')
           ?? document.querySelector('[contenteditable="true"]') ?? document.querySelector('textarea');
         const cy = composer === null ? null : composer.getBoundingClientRect().y;
-        const buttons = [...document.querySelectorAll('button')];
-        const label = (b) => (b.getAttribute('aria-label') ?? '').trim();
-        const nearComposer = (b) => cy === null || Math.abs(b.getBoundingClientRect().y - cy) < 140;
-        const candidates = buttons.filter(b => SEND.includes(label(b)));
-        const stopNear = buttons.filter(b => STOP.includes(label(b)) && nearComposer(b)).map(label);
-        const pick = candidates.filter(nearComposer)[0] ?? null;
-        if (pick !== null) pick.click();
         return {
           composerY: cy === null ? null : Math.round(cy),
-          picked: pick === null ? null : label(pick),
-          candidateLabels: candidates.map(label),
-          stopLabelsNear: stopNear,
-          ariaLabelsNearComposer: buttons.filter(nearComposer).map(label).filter(l => l !== '').slice(0, 12),
+          buttons: [...document.querySelectorAll('button')].map((b) => ({
+            label: (b.getAttribute('aria-label') ?? '').trim(),
+            y: Math.round(b.getBoundingClientRect().y),
+          })),
         };
       })()`);
-      verdict.sent = verdict.sendProbe?.picked == null ? 'no-send-button' : 'sent';
-      verdict.sentBy = verdict.sendProbe?.picked ?? null;
+      const target = pickSendTarget({ buttons: dom?.buttons ?? [], composerY: dom?.composerY ?? null });
+      verdict.sendProbe = {
+        composerY: dom?.composerY ?? null,
+        picked: target.picked,
+        reason: target.reason,
+        candidateLabels: target.candidateLabels,
+        stopLabelsNear: target.stopLabelsNear,
+        ariaLabelsNearComposer: target.labelsNear,
+      };
+      if (target.pickedIndex !== null) {
+        await evaluate(`(() => {
+          const b = [...document.querySelectorAll('button')][${target.pickedIndex}];
+          if (b === undefined) return false;
+          b.click();
+          return true;
+        })()`);
+      }
+      verdict.sent = target.picked === null ? (target.reason === 'stop-only' ? 'stop-only' : 'no-send-button') : 'sent';
+      verdict.sentBy = target.picked;
       if (verdict.sent === 'sent') {
         // ── 落盘对账（BUG-021 修复核心）────────────────────────────────────────────
         // 「点了发送」≠「消息进了会话」。判据 = 会话日志里出现本条 user/message（时间下界 =
@@ -292,8 +304,12 @@ try {
     // 把真因盖掉，是 BUG-021 症状"静默失效"的直接来源。
     const rc = verdict.reconcile ?? {};
     if (verdict.sent !== 'sent') {
-      verdict.failed = `ask 未发出（sent=${verdict.sent}，sentBy=${verdict.sentBy ?? 'null'}）: `
-        + `send 家族候选=${JSON.stringify(verdict.sendProbe?.candidateLabels ?? [])} `
+      // stop-only 是**危险态**（该位置只有"停止生成"）：探针按设计拒点——盲点会掐断在飞 turn。
+      // 与"压根没有 send 家族按钮"分开报，免得把危险态读成普通缺按钮。
+      verdict.failed = (verdict.sendProbe?.reason === 'stop-only'
+        ? 'ask 未发出：该位置只有 stop 家族按钮（拒点，未掐断在飞 turn）'
+        : `ask 未发出（sent=${verdict.sent}，sentBy=${verdict.sentBy ?? 'null'}）`)
+        + `: send 家族候选=${JSON.stringify(verdict.sendProbe?.candidateLabels ?? [])} `
         + `composer 带 aria-label 按钮=${JSON.stringify(verdict.sendProbe?.ariaLabelsNearComposer ?? [])} `
         + `stop 家族在场=${JSON.stringify(verdict.sendProbe?.stopLabelsNear ?? [])}`;
     } else if (verdict.landed === true) {
