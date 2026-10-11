@@ -61,6 +61,9 @@ profile_ok() {
   done
 }
 
+# 两道闸分工（别合并）：profile_ok 查组合**在场**（幂等跳过安装的依据，只看文件存在）；
+# drift_check（下方 ②）查**内容**（pack 源 ↔ 镜像逐文件比对）——绿了前者不代表镜像新鲜，
+# 陈旧镜像靠后者拦（2026-10-11 实测：镜像 client 旧于源半天，本函数绿、漂移检测红拦下）。
 if profile_ok; then
   echo "boot-run: research profile 组合在位（幂等跳过安装）"
 else
