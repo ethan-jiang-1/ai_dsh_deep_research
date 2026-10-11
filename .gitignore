@@ -9,6 +9,12 @@
 #   不作用于已跟踪文件，只有门禁抓得到（历史实证：tarball 曾误提交，efcf56d 清除）。
 
 # ── ① 位置性运行区（可按需 ! 再包含夹具）──
+# runtime/ 根下散装运行产物（kickoff-*.md、*.overlay.yml 等 run 驱动留档，docker 运行态，不入库）；
+# 目录本体与三份资产（README.md + 两个子目录）进库，故逐项再包含
+runtime/*
+!runtime/README.md
+!runtime/harness-home/
+!runtime/smoke-workspace/
 # 开发 DSH_HOME 的运行残留（目录本体进库，内容不进）
 runtime/harness-home/*
 !runtime/harness-home/.gitkeep

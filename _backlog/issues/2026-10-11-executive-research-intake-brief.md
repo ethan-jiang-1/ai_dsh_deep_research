@@ -38,6 +38,8 @@ HITL1 语义由 `tests/presets.test.mjs`「HITL1 两段卡」四处对账测试�
 
 必跑面（任务型路由「改 persona / skill / 手册文本」行）：L0 + `render-overlay` 先于 L1（skill 文本）+ `pack-workspace-fresh`（模板）。模型行为证据走 L4-lite 或真实 run 观察，无凭据时如实标注「未运行项」；业务读者复述属人工判据，技术绿不替代。
 
+**挂账现状（2026-10-11）**：run 观察与人工走查被环境阻断——外网 egress 不可达（`drt_cn-moe-2026` journal 实证 12 主机 29 抓 0 成，本日复测 github/example/arxiv 同阻）；定向 kickoff 已备 `runtime/kickoff-ux-verify.md`（gitignored），通道恢复即可开跑核验。
+
 ## 关闭条件
 
 实现已落在 skill、模板及其种子镜像，结构化输入和计划卡能按上述样例工作，测试与对账通过；若实施中需要改变两点交互合同，另建持久决定评审，不在本卡扩大范围。

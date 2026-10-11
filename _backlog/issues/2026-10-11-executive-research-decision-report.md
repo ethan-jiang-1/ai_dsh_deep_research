@@ -37,6 +37,8 @@ opened: 2026-10-11
 
 必跑面（任务型路由）：L0 + `render-overlay` 先于 L1（skill 文本）+ `pack-workspace-fresh`（模板）+ `tests/evaluation-contract.test.mjs`（证据合同面）。真实报告行为证据按授权走 L4-lite 或真实 run，无凭据时如实标注「未运行项」；人工判据单独记录，不用技术绿或样本百分比替代产品判断。
 
+**挂账现状（2026-10-11）**：真实 run 首屏观察被环境阻断——外网 egress 不可达（`drt_cn-moe-2026` journal 实证 12 主机 29 抓 0 成，本日复测 github/example/arxiv 同阻），现在开跑只会产出全「目前不能判断」的空证据 bundle；定向 kickoff 已备 `runtime/kickoff-ux-verify.md`（gitignored），通道恢复即可开跑核验。
+
 ## 关闭条件
 
 报告模板与生成/审查要求已实现，四组样例和反例有验证记录，组合冒烟及文档对账通过。不得以样例写得流畅或机械结构通过代替证据支撑检查。
