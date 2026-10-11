@@ -12,7 +12,7 @@
 //   ③去掉 `kind === 'error'` 判据 → 用例 4 红（正常回合被算成错误）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { turnEndErrorsOf, tallyTurnEndErrors } from '../scripts/lib/provider-errors.mjs';
+import { turnEndErrorsOf, tallyTurnEndErrors, retryEventsOf } from '../scripts/lib/provider-errors.mjs';
 
 // 真实形态（2026-10-11 实测）：error 对象里 message 在前、code 在后
 const turnEnd = (seq, reason) => JSON.stringify({ type: 'turn/end', seq, time: 1791720000000 + seq, data: { turn: 6, reason } });
@@ -70,5 +70,47 @@ test('聚合：同 code+message 计数，按次数降序（不同措辞分开计
   assert.deepEqual(tally, [
     { key: 'MALFORMED_RESPONSE: A', count: 2 },
     { key: 'TRANSPORT: B', count: 1 },
+  ]);
+});
+
+// ── 重试事件（llm/retry）：缓解是否真在拦截的直接证据 ──
+
+const retryEvent = (seq, failure, extra = {}) => JSON.stringify({
+  type: 'llm/retry', seq, time: 1791720000000 + seq,
+  data: { retryId: `r${seq}`, turn: 1, step: 2, provider: 'deepseek-official', mode: 'normal', retry: 1, delayMs: 468.6, failure, ...extra },
+});
+
+test('重试抽取：取 `data.failure.code`，并带上 retry / delayMs / provider', () => {
+  const retries = retryEventsOf(retryEvent(516, { message: 'DeepSeek Messages transport failed', code: 'TRANSPORT' }));
+  assert.equal(retries.length, 1);
+  assert.equal(retries[0].code, 'TRANSPORT');
+  assert.equal(retries[0].retry, 1);
+  assert.equal(retries[0].provider, 'deepseek-official');
+  assert.ok(retries[0].delayMs > 0);
+});
+
+test('陷阱钉住：`policyKey` 里列着整个可重试码表，**不得**被当成本次失败码（按行文本计数会全错）', () => {
+  const policyKey = JSON.stringify(['normal', 5, ['EMPTY_RESPONSE', 'RATE_LIMIT', 'SERVER', 'TIMEOUT', 'TRANSPORT', 'MALFORMED_RESPONSE']]);
+  const line = retryEvent(1, { message: 'DeepSeek Messages transport failed', code: 'TRANSPORT' }, { policyKey });
+  assert.ok(line.includes('MALFORMED_RESPONSE'), '前提：该行文本里确实含 MALFORMED_RESPONSE 字样');
+  const retries = retryEventsOf(line);
+  assert.equal(retries[0].code, 'TRANSPORT', '判据必须是 failure.code——行文本含该码 ≠ 本次因该码重试');
+});
+
+test('重试抽取：`llm/retry-started`（无 failure）与畸形行不计入、不 throw', () => {
+  const started = JSON.stringify({ type: 'llm/retry-started', seq: 9, data: { retryId: 'r', turn: 1, step: 2, retry: 1 } });
+  assert.deepEqual(retryEventsOf([started, '{"type":"llm/retry" broken', ''].join('\n')), []);
+  assert.deepEqual(retryEventsOf(null), []);
+});
+
+test('重试聚合：按 `failure.code: message` 计数（可与终局计数并列判读）', () => {
+  const retries = retryEventsOf([
+    retryEvent(1, { message: 'M', code: 'TRANSPORT' }),
+    retryEvent(2, { message: 'M', code: 'TRANSPORT' }),
+    retryEvent(3, { message: 'X', code: 'MALFORMED_RESPONSE' }),
+  ].join('\n'));
+  assert.deepEqual(tallyTurnEndErrors(retries), [
+    { key: 'TRANSPORT: M', count: 2 },
+    { key: 'MALFORMED_RESPONSE: X', count: 1 },
   ]);
 });

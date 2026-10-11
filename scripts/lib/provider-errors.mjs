@@ -34,6 +34,39 @@ export function turnEndErrorsOf(logText) {
   return out;
 }
 
+/**
+ * 抽取日志里所有**请求重试**事件（`llm/retry`；由 vendor `llm-retry` 插件在 `agent/request-error`
+ * 决定重试时 append）。这是"缓解是否真的在拦截"的**直接证据**——某码出现在这里 = 它被重试了；
+ * 某码只在 `turn/end` 里出现 = 它不在可重试集（或重试已耗尽）。
+ *
+ * ⚠ 判据只能取 `data.failure.code`：事件里还有个 `policyKey` 字段**列出了整个可重试码表**
+ * （2026-10-11 实测形如 `["normal",5,["EMPTY_RESPONSE",…,"MALFORMED_RESPONSE"]]`）——按"行文本含某码"
+ * 计数会把**每一次**重试都算成那个码（本文件第一版正则式猜法同族错误）。测试夹具钉住了这个陷阱。
+ *
+ * @param {string} logText 会话日志全文（已解压）
+ * @returns {Array<{seq:number|null, code:string, message:string, retry:number|null, delayMs:number|null, provider:string|null}>}
+ */
+export function retryEventsOf(logText) {
+  const out = [];
+  if (typeof logText !== 'string' || logText === '') return out;
+  for (const line of logText.split('\n')) {
+    if (!line.includes('llm/retry')) continue;
+    let event;
+    try { event = JSON.parse(line); } catch { continue; }
+    if (event?.type !== 'llm/retry') continue;
+    const failure = event?.data?.failure;
+    out.push({
+      seq: typeof event?.seq === 'number' ? event.seq : null,
+      code: typeof failure?.code === 'string' ? failure.code : 'UNKNOWN',
+      message: typeof failure?.message === 'string' ? failure.message : '',
+      retry: typeof event?.data?.retry === 'number' ? event.data.retry : null,
+      delayMs: typeof event?.data?.delayMs === 'number' ? event.data.delayMs : null,
+      provider: typeof event?.data?.provider === 'string' ? event.data.provider : null,
+    });
+  }
+  return out;
+}
+
 /** 把抽取结果聚成 `code: message → 次数`（供投影打印；同类不同措辞分开计，不做归一化猜测）。 */
 export function tallyTurnEndErrors(errors) {
   const tally = new Map();

@@ -13,7 +13,7 @@
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readSessionText, sessionLogsSince } from '../lib/session-log.mjs';
-import { turnEndErrorsOf, tallyTurnEndErrors } from '../lib/provider-errors.mjs';
+import { turnEndErrorsOf, tallyTurnEndErrors, retryEventsOf } from '../lib/provider-errors.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {
@@ -33,29 +33,43 @@ const sessionsRoot = join(home, 'sessions');
 
 const perSession = [];
 const unreadable = [];
+const allRetries = [];
 for (const { sessionId, logPath, mtimeMs } of sessionLogsSince(sessionsRoot, { days: DAYS, group: GROUP })) {
   const text = readSessionText(logPath);
   // 不可读 ≠ 无错误：坏帧显式记档（偏"数据缺失"方向，不静默当 0 次）
   if (text === null) { unreadable.push(sessionId); continue; }
   const errors = turnEndErrorsOf(text);
-  if (errors.length > 0) perSession.push({ sessionId, when: new Date(mtimeMs).toISOString().slice(0, 16).replace('T', ' '), errors });
+  const when = new Date(mtimeMs).toISOString().slice(0, 16).replace('T', ' ');
+  if (errors.length > 0) perSession.push({ sessionId, when, errors });
+  // 重试事件 = "缓解是否真在拦截"的直接证据（某码出现在这里 = 它被重试了）
+  allRetries.push(...retryEventsOf(text).map((r) => ({ ...r, sessionId, when })));
 }
 const all = perSession.flatMap((s) => s.errors);
 const tally = tallyTurnEndErrors(all);
+const retryTally = tallyTurnEndErrors(allRetries);
 
 if (JSON_OUT) {
-  console.log(JSON.stringify({ root: sessionsRoot, sessions: perSession.length, total: all.length, tally, perSession, unreadable }, null, 1));
+  console.log(JSON.stringify({ root: sessionsRoot, sessions: perSession.length, total: all.length, tally, retries: { total: allRetries.length, tally: retryTally }, perSession, unreadable }, null, 1));
 } else {
   console.log(`provider-error-stats: 近 ${DAYS} 天 · 组含 "${GROUP}" → 命中 ${perSession.length} 个会话 / ${all.length} 次「回合被错误终结」（root=${sessionsRoot}）`);
   for (const s of perSession.sort((a, b) => (a.when < b.when ? 1 : -1))) {
     console.log(`  ${s.when}  ${s.sessionId.slice(0, 26)}  错误 ${s.errors.length} 次  首因=${s.errors[0].code}`);
   }
   if (tally.length > 0) {
-    console.log('按形态汇总（code: message → 次数）：');
+    console.log('终局（turn/end error；code: message → 次数）：');
     for (const t of tally) console.log(`  ×${String(t.count).padStart(3)}  ${t.key.slice(0, 110)}`);
   } else {
-    console.log('（窗口内无命中——防空语料，显式报出而非静默 0）');
+    console.log('（窗口内无终局命中——防空语料，显式报出而非静默 0）');
   }
+  console.log(`请求重试（llm/retry）：共 ${allRetries.length} 次`);
+  for (const t of retryTally) console.log(`  ×${String(t.count).padStart(3)}  ${t.key.slice(0, 110)}`);
+  // 判读行：把"重试 vs 终局"两者并列，直接回答"缓解有没有在拦截"
+  const retriedCodes = new Set(retryTally.map((t) => t.key.split(':')[0]));
+  const terminalOnly = tally.map((t) => t.key.split(':')[0]).filter((c) => !retriedCodes.has(c));
+  console.log(terminalOnly.length > 0
+    ? `判读：**只有终局、从未出现重试**的码 = ${[...new Set(terminalOnly)].join('、')}——不在可重试集（或重试耗尽）`
+    : '判读：窗口内每个终局码都出现过重试——没有"一次即死"的码');
+  console.log('（某码出现在"请求重试"里 = 它已被拦截；这就是 MALFORMED_RESPONSE 缓解生效的判据）');
   if (unreadable.length > 0) console.log(`⚠ 日志不可读 ${unreadable.length} 份（坏帧/读失败，已排除在统计外）：${unreadable.slice(0, 5).join('、')}`);
   console.log('恢复程序与缺陷记录 = _backlog/bugs/BUG-022-provider-stream-malformed-turn-kill.md'
     + '（恢复工具 = dev/run-kickoff.mjs --session，自带送达对账）。');
