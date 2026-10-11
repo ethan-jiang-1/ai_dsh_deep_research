@@ -14,7 +14,7 @@
 
 | 用户的说法 | 走哪（该事的唯一 owner） | 首个动作 |
 |---|---|---|
-| "启动这个 DSH 插件""跑起来看看""开跑"——**未指定别的 home 时就是本行，直接做、不要停下来问** | [guides/61](./guides/61-run-playbook.md) | `bash dev/boot-run.sh`（**占前台**，Ctrl-C 才停；**别**直接 `dsh --profile research`——那会绕过漂移检测、静默用旧镜像） |
+| "启动这个 DSH 插件""在单独的 DSH 环境（隔离 home）里跑/启动""跑起来看看""开跑"——**未指定别的 home 时就是本行，直接做、不要停下来问** | [guides/61](./guides/61-run-playbook.md) | `bash dev/boot-run.sh`（**占前台**，Ctrl-C 才停；**别**直接 `dsh --profile research`——那会绕过漂移检测、静默用旧镜像） |
 | "接着上次跑""继续那个研究" | [guides/61 §5](./guides/61-run-playbook.md) | 同一条 `bash dev/boot-run.sh`；起来后新开 lead 会话说"继续 `<slug>` 这个 run" |
 | "装到我的 DSH""部署给别人 / 别的机器" | [pack README §部署](../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../_dist/安装手册.md)（出包 = `node scripts/dist/export-dist.mjs`） | `dsh --profile <p> --from-default-profile web --dump-config`（一次性；写的是 `DSH_HOME` 那个 home） |
 | "只验证插件还能挂载"（开发证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs` |

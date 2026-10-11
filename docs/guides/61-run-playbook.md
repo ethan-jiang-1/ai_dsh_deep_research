@@ -8,7 +8,9 @@
 ## 0. 开跑（一次性准备 + 每次启动）
 
 - 凭据：真 run 需要模型——`runtime/harness-home/.credentials.yaml` 配一次
-  `DEEPSEEK_API_KEY`（见 [AGENTS.md §密钥](../../AGENTS.md)；boot 本身 keyless）；
+  `DEEPSEEK_API_KEY`（见 [AGENTS.md §密钥](../../AGENTS.md)；boot 本身 keyless）。
+  启动横幅出来后自查一步：`grep -q DEEPSEEK runtime/harness-home/.credentials.yaml`——
+  boot 不查凭据，缺了要到 lead 首次调模型才炸（启动成功 ≠ 能跑研究）；
 - 启动：`bash dev/boot-run.sh`（幂等：组合在位即直接 boot）→ 等横幅
   `http://127.0.0.1:<port>/?token=…` 用浏览器打开。**端口 = `DSH_RUN_PORT`，缺省 3083**
   （2026-09-28 起 3081 让给别的项目；3080 是本仓开发 GUI，勿占；换端口：
@@ -20,7 +22,8 @@
   boot-run 全序（自检 → 组合检查/必要补装 → 漂移检测）红了就当场修（漂移 = 按脚本处方重建 profile；
   vendor 产物缺失 = `bash dev/vendor-build.sh`），boot 出横幅后**再验浏览器面**（探针断言
   无 "Failed to load plugins" / 零 console 错误——0.2.0 轮教训：boot 横幅只证宿主侧，
-  观察面可能坏着），**全绿才把 URL 交出去**。不呈交"可能能用的东西"；红了不自修就上报 =
+  观察面可能坏着），**全绿才把 URL 交出去**（人话版判据：GUI 里 preset 选单含四个
+  Deep Research 角色、会话右栏有「研究状态」页签——任一缺席 = 插件没挂上）。不呈交"可能能用的东西"；红了不自修就上报 =
   失职；
 - **启动前先判"接续还是新开"**：`ls -dt research-workspace/drt_*/`（`archive/` 除外）——**根目录下
   每个未归档 bundle 都要报出来**，分两类：(a) 无 `final/` 或 `review.md` 不是 `readiness: PASS`
@@ -42,13 +45,16 @@
   **脚本退出即 web 停**（这是特性：不留孤儿）。因此：
 
   - 交互式使用 = 让 `boot-run.sh` 待在终端里（Ctrl-C 才停）；
-  - 需要它在你离开后继续服务 = 用**托管后台任务**跑 web，并**保持 stdin 打开**
-    （`sleep <秒> | node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts --profile research
-    -- --port <端口，缺省 3083> --no-open`；web 在 stdin 关闭时会自行退出）。**这条绕过 boot-run 的
-    漂移门**（[00-index §先分流](../00-index.md) 首行"别直接 `dsh --profile research`"正为此——
-    同理：绕过漂移检测、静默用旧镜像）：先 `bash dev/boot-run.sh --drift-check`
-    过门再用它；该模式先检查端口且可初始化环境/补装 profile/写 MCP patch，不是只读探针。
-    报漂移就按 [guides/62 §改动影响面](./62-plugin-authoring.md) 重建镜像；
+  - 需要它在你离开后继续服务（agent 驱动 / 无人值守）= 无人值守形态两条路按场景选：
+    - **托管后台 job 直接跑 `bash dev/boot-run.sh`（首选）**——自检/补装/漂移门全走，
+      实测一场 run 全程存活（2026-10-11：web 未因 stdin 退出）；
+    - **裸命令 + 睡眠管道（备用）**：宿主会关后台 job 的 stdin 时用（症状 = web 自行退出）：
+      `sleep <秒> | node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts --profile research
+      -- --port <端口，缺省 3083> --no-open`。**这条绕过 boot-run 的漂移门**（
+      [00-index §先分流](../00-index.md) 首行"别直接 `dsh --profile research`"正为此——
+      同理：绕过漂移检测、静默用旧镜像）：先 `bash dev/boot-run.sh --drift-check` 过门再用它；
+      该模式先检查端口且可初始化环境/补装 profile/写 MCP patch，不是只读探针。报漂移就按
+      [guides/62 §改动影响面](./62-plugin-authoring.md) 重建镜像；
 - **刷新白屏的判别序**：① `lsof -nP -iTCP:<端口> -sTCP:LISTEN` 有没有监听 → 无 = 进程已停
   （重跑上面任一形态）；② 有监听但仍白屏/401 = token 过期（**每次启动都是新 token**，
   用当次横幅里的 URL；旧 URL 作废）；③ 有监听且 token 新但页面空 = 前端壳产物陈旧
@@ -116,6 +122,11 @@ source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --tok
 它逐题打印选择结果；**必须**把这次代答如实记进 bundle 的 `question.md` §Decisions 与
 `journal.md`，标注"代理模拟"（它替的是人，不是人）。HITL1 与 HITL2 都走同一条命令。
 代答是否成功以工具尾部的**盘侧裁决**退出码为准（0 = answer 落地 / 1 = 未落地），UI 自报不算数。
+
+选会话语义（多 run 并存时必读）：盘侧谓词固定选 research-workspace 组**日志最新**的 lead 挂起
+会话；`--session <标题子串>` 只改浏览器点开哪一行，不改变谓词的选会话——两者不一致时以谓词为准。
+落账归属 = 被答会话**写命中**的 bundle（仅写才落盘；仅读/无绑定响亮延迟，操作侧按打印内容补记——
+BUG-020）。
 
 **应答通道按 ask 形态二分**（形态 = 盘侧 ask 参数，hitl-answer 的驱动计划会打印）：timed 形态
 （缺省 600s）超时转 pending 后，真浏览器与文本消息两条路都通；活等待（`wait: -1`）只有真浏览器
