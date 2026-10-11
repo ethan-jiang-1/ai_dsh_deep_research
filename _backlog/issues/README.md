@@ -4,7 +4,11 @@
 
 ## 活跃清单
 
-（无活跃问题卡。）
+| 文件 | 交付物 |
+|---|---|
+| `2026-10-11-executive-research-ux-delivery.md` | 研究驾驶舱业务进度与纠偏路径 |
+| `2026-10-11-executive-research-intake-brief.md` | HITL1 业务决策简报 |
+| `2026-10-11-executive-research-decision-report.md` | 决策摘要报告与证据核查 |
 ## 写一张卡
 
 文件名为 `YYYY-MM-DD-<slug>.md`。开头先让下一位读者知道：解决什么、现在什么情况、还缺什么、下一步是什么。讨论中的事实、假设和建议分别写清，历史推演放在当前情况之后。
