@@ -15,3 +15,4 @@
 | [2026-10-10-preset-config-audit.md](2026-10-10-preset-config-audit.md) | [company 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md) | 2026-10-10 |
 | [2026-10-10-external-repin-review.md](2026-10-10-external-repin-review.md) | [company 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md) | 2026-10-10 |
 | [2026-10-10-external-repin-review-round2.md](2026-10-10-external-repin-review-round2.md) | [company 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md) | 2026-10-10 |
+| [2026-10-11-executive-research-ux/index.md](2026-10-11-executive-research-ux/index.md) | [①立项简报](../settled_issues/2026-10-11-executive-research-intake-brief.md) + [②决策报告](../settled_issues/2026-10-11-executive-research-decision-report.md) + [③驾驶舱](../settled_issues/2026-10-11-executive-research-ux-delivery.md)（三卡 2026-10-11 全部已结） | 2026-10-11 |

@@ -4,7 +4,7 @@
 
 出处 = 推敲卡 [2026-10-11-executive-research-intake-brief](../../_backlog/_archived/settled_issues/2026-10-11-executive-research-intake-brief.md)
 （用户 2026-10-11 直派落地；设计依据 = 研究稿
-[2026-10-11-executive-research-ux](../../_backlog/research/2026-10-11-executive-research-ux/index.md)
+[2026-10-11-executive-research-ux](../../_backlog/_archived/research/2026-10-11-executive-research-ux/index.md)
 P0 候选①「立项补业务决策简报」）。机制基座 = [计划确认闸门 Note](2026-10-07-plan-review-gate.md)
 ——HITL1 两段卡结构与四处对账面由其拥有，本篇只记业务决策简报这一扩展的决定理由。
 

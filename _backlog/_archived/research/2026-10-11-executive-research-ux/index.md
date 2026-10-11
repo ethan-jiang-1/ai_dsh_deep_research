@@ -73,7 +73,7 @@ DSH 当前源码/文档可核验的构件包括：结构化多问/推荐选项�
 
 进度摘要必须区分“已拿到来源”与“已形成结论”。可写“已取得准入政策资料；市场规模的两种统计口径尚不一致，正在核对”，前提是 findings/evidence 真有这些事实。只有工具事件时写“正在核对市场规模来源，尚未形成判断”；不要从搜索 query 或文件数推断已经弄清市场。
 
-本轮 notes 检索命中并阅读了 [HITL 反馈协议否决记录](../../../notes/rejected/2026-10-06-hitl-feedback-protocol.md)：DSH 选项本身已经承载接受/修订语义，当前没有机器判读自由文本反馈的需求，因此不建议另加 `[ACCEPTED]` 等协议。还阅读了 [UI skin 否决记录](../../../notes/rejected/2026-09-24-ui-skin.md)：研究驾驶舱与品牌皮肤目的不同；皮肤需求仅在用户点名 demo/品牌需求时重启。本文驾驶舱建议仅指信息架构/内容表达试验，不包含品牌化或高管专属皮肤，也不构成其授权。检索还命中计划确认闸门、驾驶舱流程与真人验收记录；未展开的历史条目不充当本轮已验证证据。
+本轮 notes 检索命中并阅读了 [HITL 反馈协议否决记录](../../../../notes/rejected/2026-10-06-hitl-feedback-protocol.md)：DSH 选项本身已经承载接受/修订语义，当前没有机器判读自由文本反馈的需求，因此不建议另加 `[ACCEPTED]` 等协议。还阅读了 [UI skin 否决记录](../../../../notes/rejected/2026-09-24-ui-skin.md)：研究驾驶舱与品牌皮肤目的不同；皮肤需求仅在用户点名 demo/品牌需求时重启。本文驾驶舱建议仅指信息架构/内容表达试验，不包含品牌化或高管专属皮肤，也不构成其授权。检索还命中计划确认闸门、驾驶舱流程与真人验收记录；未展开的历史条目不充当本轮已验证证据。
 
 ## 试用与验收
 
@@ -109,8 +109,8 @@ DSH 当前源码/文档可核验的构件包括：结构化多问/推荐选项�
 - 本仓 DSH 多查询决策：多查询搜索 Note = `vendor/dsh/.agents/notes/archived/feature/2026-08-17-web-search-multiple-queries.zh.md`（架构实现与预算取舍；历史决策，非社区采纳率资料）。
 - 本仓 DSH 问题/计划原语：`vendor/dsh/packages/interaction/tool-ask-user/README.zh.md`、`vendor/dsh/packages/interaction/user-questions/README.zh.md`、`vendor/dsh/packages/client/ui-user-questions/src/client/PlanReviewPanel.tsx`。
 - DSH 历史会话搜索实现先例：Web 会话搜索 Note = `vendor/dsh/.agents/notes/archived/feature/2026-07-27-web-session-search.zh.md`（描述可见性、取消、截断、故障回退及中文 token 召回边界；仅为归档实现记录，不证明当前发布或启用状态）。
-- 本仓研究驾驶舱当前事实：[研究驾驶舱设计](../../../docs/design/40-research-cockpit.md)、[ResearchStatusTab](../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx)；团队和证据工作流约定：[`research-workspace/AGENTS.md`](../../../research-workspace/AGENTS.md)。
-- 本仓立项实现：[research-brief skill](../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md)；既有产品一手来源路由草稿：[2026-09-29-hitl1-intake-routing-survey.md](../../../research-workspace/drafts/2026-09-29-hitl1-intake-routing-survey.md)。后者是仓库研究草稿，本文未重新抓取其中所有外链。
+- 本仓研究驾驶舱当前事实：[研究驾驶舱设计](../../../../docs/design/40-research-cockpit.md)、[ResearchStatusTab](../../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx)；团队和证据工作流约定：[`research-workspace/AGENTS.md`](../../../../research-workspace/AGENTS.md)。
+- 本仓立项实现：[research-brief skill](../../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md)；既有产品一手来源路由草稿：[2026-09-29-hitl1-intake-routing-survey.md](../../../../research-workspace/drafts/2026-09-29-hitl1-intake-routing-survey.md)。后者是仓库研究草稿，本文未重新抓取其中所有外链。
 - 外部直接研究先例：OpenAI Deep Research API guide <https://developers.openai.com/api/docs/guides/deep-research>；Gemini Deep Research API <https://ai.google.dev/gemini-api/docs/deep-research>；Anthropic Research help center <https://support.anthropic.com/en/articles/11088861-use-research-on-claude>；ClariQ paper <https://arxiv.org/abs/2009.11352>。本报告将其作为不同交互形态的例子，未据此宣称高管 UX 定论；需依赖具体行为时应重新核对页面当前内容。
 
 **限制：** 公开 DSH 社区采纳率、企业高管真实使用评价和本仓用户行为数据均未取得。DSH 仓内 archived Notes 展示项目机制历史，不是社区最佳实践调查。对外页面本轮虽尝试抓取，但网络策略阻断且未取得正文；其中产品行为只来自仓库旧调研草稿，不视为当前已核实事实。

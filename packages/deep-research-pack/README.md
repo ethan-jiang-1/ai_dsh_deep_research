@@ -123,7 +123,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 本包在 bundle 层按 id 替换 base 的 `llm-deepseek` 行，把上游流畸形码 `MALFORMED_RESPONSE` 并入
 **有界**重试：`retryPolicy.mode: normal`、`maxRetries: 5`、`retryableCodes` = 出厂五项 +
 `MALFORMED_RESPONSE`（退避沿用出厂默认）。理由是研究 run 的**停摆代价**：一次畸形流事件会当场终结
-回合，可能让一个 wave 的产出全废（实测分母与恢复程序 = `_backlog/bugs/BUG-022-provider-stream-malformed-turn-kill.md`；
+回合，可能让一个 wave 的产出全废（实测分母与恢复程序 = `_backlog/_archived/suspended_bugs/BUG-022-provider-stream-malformed-turn-kill.md`；
 决定理由与"未运行项" = `notes/implemented/2026-10-11-provider-malformed-response-retry.md`）。
 
 这**不是**对上游缺陷的修复（事件顺序违约发生在 vendor 只读层），只是把"一次畸形 = 一次停摆"降为

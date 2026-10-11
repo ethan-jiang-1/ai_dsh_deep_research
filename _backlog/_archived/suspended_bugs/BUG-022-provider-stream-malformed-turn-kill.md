@@ -1,5 +1,5 @@
 ---
-status: 活跃
+status: 待修
 severity: P1
 opened: 2026-10-11
 ---
@@ -37,7 +37,7 @@ source dev/env.sh && node scripts/run-ops/provider-error-stats.mjs --days 3
 1. **通道活着、只是回合停摆**（本卡形态）→ 不必新开：
    `node dev/run-kickoff.mjs --port 3083 --token <t> --session <会话 id> --prompt <恢复指令>`
    （exit 0 = 会话日志已出现这条 `user/message`；1 = 未对账 → 该会话多半已终局化，走第 2 条）；
-2. **通道已死** → 重跑 `dev/boot-run.sh` + 新开 lead 会话（[guides/61 §5](../../docs/guides/61-run-playbook.md)）；
+2. **通道已死** → 重跑 `dev/boot-run.sh` + 新开 lead 会话（[guides/61 §5](../../../docs/guides/61-run-playbook.md)）；
 3. **诊断纪律**：遇到"跑着跑着不动了"，先跑上面的统计命令确认是不是本卡形态，再决定恢复路径——
    不要先归因"模型不会做"。
 
@@ -59,7 +59,15 @@ source dev/env.sh && node scripts/run-ops/provider-error-stats.mjs --days 3
 - **可缓解（事前拦截）**：pack bundle 层把 `MALFORMED_RESPONSE` 并入 `llm-deepseek` 的**有界**重试
   （`mode: normal` / `maxRetries: 5` / 出厂五项 + 该码；出厂集**不含**它，故此前一次畸形即终结）。
   组合正证据 = `dsh --profile web --patch dev/research.overlay.yml --dump-config` 可见该策略；
-  理由与"未运行项（畸形流真被重试无现场证据）" = [Note](../../notes/implemented/2026-10-11-provider-malformed-response-retry.md)。
+  理由与"未运行项（畸形流真被重试无现场证据）" = [Note](../../../notes/implemented/2026-10-11-provider-malformed-response-retry.md)。
   **生效时点** = 下一次通道启动（profile 镜像由 `boot-run.sh` 漂移检测重建）。
 
 **复发即更新**：分母随每次复发由上述命令重算，不抄历史数字（口径正本 = 抽取模块 + 本卡）。
+
+**暂停（2026-10-11，用户明示）与重启条件**：本卡移入暂停池——上游只读 seam，本仓修不了；本地三件
+（可数/可恢复/可诊断）+ 有界重试缓解均已落。**回活跃区重判的触发**（任一出现即 `git mv` 回 `bugs/`）：
+
+1. `node scripts/run-ops/provider-error-stats.mjs` 的判读行显示 **MALFORMED_RESPONSE 已出现重试、
+   但终局计数不降**（= 缓解不足，需要新办法：降并发 / 换档 / 上游催修）；
+2. **换 vendor pin** 后上游仍未修（`bumping-vendor-pin` 的重审面）；
+3. 出现**新的畸形形态**（新 code / 新 message），现抽取面未覆盖。

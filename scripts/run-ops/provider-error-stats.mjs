@@ -71,7 +71,7 @@ if (JSON_OUT) {
     : '判读：窗口内每个终局码都出现过重试——没有"一次即死"的码');
   console.log('（某码出现在"请求重试"里 = 它已被拦截；这就是 MALFORMED_RESPONSE 缓解生效的判据）');
   if (unreadable.length > 0) console.log(`⚠ 日志不可读 ${unreadable.length} 份（坏帧/读失败，已排除在统计外）：${unreadable.slice(0, 5).join('、')}`);
-  console.log('恢复程序与缺陷记录 = _backlog/bugs/BUG-022-provider-stream-malformed-turn-kill.md'
+  console.log('恢复程序与缺陷记录 = _backlog/_archived/suspended_bugs/BUG-022-provider-stream-malformed-turn-kill.md'
     + '（恢复工具 = dev/run-kickoff.mjs --session，自带送达对账）。');
 }
 process.exit(0);

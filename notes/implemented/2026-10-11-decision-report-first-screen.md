@@ -4,7 +4,7 @@
 
 出处 = 推敲卡 [2026-10-11-executive-research-decision-report](../../_backlog/_archived/settled_issues/2026-10-11-executive-research-decision-report.md)
 （用户 2026-10-11 直派落地；设计依据 = 研究稿
-[2026-10-11-executive-research-ux](../../_backlog/research/2026-10-11-executive-research-ux/index.md)
+[2026-10-11-executive-research-ux](../../_backlog/_archived/research/2026-10-11-executive-research-ux/index.md)
 P0 候选③「结论可信度可判断」）。
 
 ## 决定
