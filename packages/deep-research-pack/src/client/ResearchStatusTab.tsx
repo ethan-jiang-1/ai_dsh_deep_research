@@ -34,6 +34,7 @@ import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { deriveAnchors, foldHitlPending, type HitlState, type RunAnchor } from '../lib/hitl-fold.ts'
 import { deriveSteps, type RunStep } from '../lib/run-fold.ts'
 import { deriveBusinessBrief, type BusinessBrief } from '../lib/brief-fold.ts'
+import { terminalReadiness } from '../lib/review-readiness.ts'
 import { foldActivityRows, type ActivityRow } from '../lib/activity-fold.ts'
 import { foldMemberActivity, type MemberActivitySummary } from '../lib/member-activity.ts'
 import { sessionBindingOf, type SessionBinding } from '../lib/bundle-bind.ts'
@@ -234,13 +235,14 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           const finalDir = names.has('final') ? await props.listDir(sessionId, `${base}/final`, new AbortController().signal) : null
           if (stopped) return
           const versions = finalDir?.filter((e) => e.type === 'file' && /^v\d+\.md$/.test(e.name)).length ?? 0
-          // review 终局 readiness（业务摘要审查态的数据源）：多轮 review 取末位匹配——
-          // 两相 review（首审 FAIL → 复核 PASS）以终局为准，与 run-dashboard 同款语义。
+          // review 终局 readiness（业务摘要审查态的数据源）：判定规则收在 pack lib
+          // `review-readiness.terminalReadiness`——只认**行首**判定行、取最后一条。2026-10-11
+          // 实测：旧的未锚行首末位匹配会把文末附录里保留的首轮 `readiness: FAIL`（血统记录）
+          // 读成终局，把已交付 run 报成「审查修复中」。
           const reviewText = names.has('review.md') ? await props.readFile(sessionId, `${base}/review.md`, new AbortController().signal) : null
           if (stopped) return
-          const readinessMatches = reviewText !== null ? [...reviewText.matchAll(/readiness:\s*(PASS|FAIL)/gi)] : []
-          const lastReadiness = readinessMatches.length > 0 ? readinessMatches[readinessMatches.length - 1]?.[1]?.toUpperCase() ?? null : null
-          const reviewFail = lastReadiness === 'FAIL' ? true : lastReadiness === 'PASS' ? false : null
+          const readiness = terminalReadiness(reviewText)
+          const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : null
           const questionText = names.has('question.md') ? await props.readFile(sessionId, `${base}/question.md`, new AbortController().signal) : null
           if (stopped) return
           // G3（RFC cockpit-flow-face）：剥 markdown 强调符再截断——`**` 与反引号是源文件

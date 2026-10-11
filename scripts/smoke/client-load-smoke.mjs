@@ -36,6 +36,8 @@ import { readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs'
 import { sessionBundleOf } from '../../packages/deep-research-pack/src/lib/bundle-bind.ts'
 import { deriveSteps } from '../../packages/deep-research-pack/src/lib/run-fold.ts'
 import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
+import { deriveBusinessBrief } from '../../packages/deep-research-pack/src/lib/brief-fold.ts'
+import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const arg = (name, fallback) => {
@@ -213,7 +215,19 @@ const fileFaceOf = (slug) => {
   const evidenceCount = existsSync(join(base, 'evidence')) ? readdirSync(join(base, 'evidence')).filter((f) => f.endsWith('.md')).length : 0
   const questionText = names.has('question.md') ? readFileSync(join(base, 'question.md'), 'utf8') : null
   // G3（RFC cockpit-flow-face）：与页签同口径——剥 markdown 强调符再截断（72 字 + 省略号）。
-  const firstLine = questionText?.split('\n').find((l) => l.trim() !== '' && !l.startsWith('#'))?.replace(/\*\*/g, '').replace(/`/g, '').trim().slice(0, 72) ?? null
+  const rawLine = questionText?.split('\n').find((l) => l.trim() !== '' && !l.startsWith('#')) ?? null
+  const flatLine = rawLine !== null ? rawLine.replace(/\*\*/g, '').replace(/`/g, '').trim() : null
+  const firstLine = flatLine === null ? null : flatLine.slice(0, 72)
+  // 业务摘要 goal 的期望值必须用**客户端同款**截断（>72 补省略号）——上面那行是不补省略号的
+  // 既有形态（研究问题行断言按首 12 字锚定，不受影响），两者不可混用。
+  const questionLine = flatLine === null || flatLine === '' ? null : flatLine.length > 72 ? `${flatLine.slice(0, 72)}…` : flatLine
+  // review 终局 readiness：规则与客户端**同源**（pack lib `review-readiness.terminalReadiness`）——
+  // 冒烟里不再抄第二版 regex。2026-10-11 实测教训：抄来的「未锚行首末位匹配」把 review.md 文末
+  // 附录保留的首轮 `readiness: FAIL` 读成终局，于是盘侧期望与 UI 渲染对不上（红得对）。
+  const reviewText = names.has('review.md') ? readFileSync(join(base, 'review.md'), 'utf8') : null
+  const readiness = terminalReadiness(reviewText)
+  const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : null
+  const versions = existsSync(join(base, 'final')) ? readdirSync(join(base, 'final')).filter((f) => /^v\d+\.md$/.test(f)).length : 0
   // 步态盘侧真值（BUG-001 轮修正）：done/current 期望随磁盘文件走——绑到的会话不一定是
   // 已交付 run（在飞 bundle 只做了一部分步骤）；deriveSteps 与页签同一谓词，期望值不再
   // 隐含"六步全绿 + 回边"的已交付假设。
@@ -226,7 +240,7 @@ const fileFaceOf = (slug) => {
     review: names.has('review.md'),
     final: names.has('final.md'),
   })
-  return { base, evidenceCount, delivered: names.has('final.md'), hasQuestion: names.has('question.md'), firstLine, steps }
+  return { base, evidenceCount, delivered: names.has('final.md'), hasQuestion: names.has('question.md'), firstLine, questionLine, steps, reviewFail, versions }
 }
 const expectedFace = boundSession !== null ? fileFaceOf(boundSession.slug) : null
 
@@ -468,6 +482,43 @@ try {
         }
         const qOk = expectedFace.firstLine !== null && seg.includes(expectedFace.firstLine.slice(0, 12))
         step(qOk, '研究问题行 = question.md 首行', expectedFace.firstLine?.slice(0, 24) ?? '')
+        // ⓪ 业务摘要层真值对账（issue 2026-10-11-executive-research-ux-delivery ③-a）：新摘要层
+        // 此前**零浏览器断言**（2026-10-11 实测 client-load-smoke 命中 0）。判据 = 盘侧直调
+        // brief-fold.deriveBusinessBrief（UI 同一函数）按组件同源输入算期望值，再逐行断言渲染
+        // 文本——期望来自磁盘事实而非组件自报，故能咬住"漏行 / 写死文案 / 只渲染部分五问"。
+        const hitlNow = foldHitlPending(boundSession.events)
+        const pendingNow = diskAnchors.find((a) => a.state === 'pending')
+        const expectedBrief = deriveBusinessBrief({
+          bundleBound: true, // 本分支只在绑定会话上跑；未绑定态另有负例断言（③ 的 fail-soft 面）
+          kickoffHold: false, // boundBy=write 的会话不进立项预检窗（BUG-001 第二窗口）
+          hitlPending: hitlNow.pending,
+          pendingKind: pendingNow === undefined ? null : pendingNow.key === 'anchor-1' ? 'hitl1' : pendingNow.key === 'anchor-2' ? 'hitl2' : 'unknown',
+          pendingQuestions: pendingNow?.questions ?? 0,
+          hasQuestion: faceNow.hasQuestion,
+          questionLine: faceNow.questionLine,
+          currentStage: faceNow.steps.find((s) => s.state === 'current')?.label ?? null,
+          findingsPresent: faceNow.steps.find((s) => s.key === 'findings')?.state === 'done',
+          reviewFail: faceNow.reviewFail,
+          delivered: faceNow.delivered,
+          versions: faceNow.versions,
+          lastDecisionKind: null, // 当前数据面未读——组件同款如实缺省，不猜
+          openItems: [],
+        })
+        const briefLines = [
+          expectedBrief.stageLine,
+          expectedBrief.knownLine,
+          expectedBrief.actionLine,
+          ...(expectedBrief.unknownLine === null ? [] : [expectedBrief.unknownLine]),
+        ]
+        const briefMissing = briefLines.filter((line) => !seg.includes(line))
+        const goalOk = expectedBrief.goalKnown
+          ? faceNow.questionLine !== null && seg.includes(`🎯 ${faceNow.questionLine.slice(0, 12)}`)
+          : seg.includes('🎯 尚未确认')
+        step(goalOk && briefMissing.length === 0,
+          '业务摘要层 = 盘侧 brief-fold 真值（五问逐行对账）',
+          briefMissing.length === 0
+            ? `goal=${expectedBrief.goal.slice(0, 16)}… ｜ stage=${expectedBrief.stageLine}`
+            : `缺行：${briefMissing.map((l) => l.slice(0, 16)).join(' ｜ ')}`)
         // 队员动态折叠区（member-activity-stream，2026-10-10）：盘侧 spawn 名 ↔ agentTeam 投影
         // roster 对账（投影 = 队员会话 id 的唯一发现源，通道探明实证）；spawn 在场而区缺席 =
         // 投影或接线异常；绑定会话本身是队员（无 spawn、roster 住 lead）与无团队 → 区不渲染。
@@ -512,6 +563,10 @@ try {
       step(leaked.length === 0, '未绑定会话：零别家渐进面泄漏', leaked.length > 0 ? leaked.join('、') : '')
       // 无团队负例（member-activity-stream）：无 spawn 的会话不渲染队员区（不冒充团队面）。
       step(!seg2.includes('队员动态'), '未绑定会话：队员动态不渲染（无团队负例）')
+      // ⓪ 摘要层 fail-soft 负例（③-a 互补态）：无 bundle 绑定时 goal 必须如实「尚未确认」，
+      // 不生成替代目标、不借用别家 run 的问题行（brief-fold 的 unbound 分支）。
+      step(seg2.includes('🎯 尚未确认'), '未绑定会话：摘要层如实「尚未确认」（不生成替代目标）',
+        (seg2.match(/🎯 [^\n]{0,24}/) ?? ['（未找到 🎯 行）'])[0])
       break
     }
     if (unboundSession === null) console.log('  note  未绑定会话负样本：候选都不可点开（子会话不进侧栏？跳过）')

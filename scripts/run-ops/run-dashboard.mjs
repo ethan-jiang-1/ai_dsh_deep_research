@@ -18,6 +18,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { resolveSessionLog, readSessionEvents } from '../lib/session-log.mjs';
 import { deriveSteps } from '../../packages/deep-research-pack/src/lib/run-fold.ts';
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts';
+import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts';
 
 export { decompressSessionLog } from '../lib/session-log.mjs';
 
@@ -213,17 +214,16 @@ export function parseFindings(text) {
   return findings;
 }
 
-/** review.md → { readiness, critical, major, minor }；无 readiness 行返回 null。
- *  readiness 取**最后一处** = 终局判定：review.md 允许两相（首审 + lead 改稿后的复核终审，
- *  复核在文末再写一次 `## readiness:`），首审判定留在文中作为留痕。取首个匹配会把已交付的
- *  run 报成 FAIL（真实形态实证；见 Note 2026-09-26-signal-to-noise-remediation §问题③）。 */
+/** review.md → { readiness, critical, major, minor }；无判定行返回 null。
+ *  readiness 取**终局判定**：规则收在 pack lib `review-readiness.terminalReadiness`（只认**行首**
+ *  判定行、取最后一条）。2026-10-11 实测修正：旧的未锚行首末位匹配会把 review.md 文末附录按
+ *  critic skill 契约保留的首轮 `readiness: FAIL`（轮次血统）读成终局，把已交付 run 报成 FAIL。 */
 export function parseReview(text) {
-  const all = [...text.matchAll(/readiness:\s*(PASS|FAIL)/g)];
-  if (all.length === 0) return null;
-  const rd = all[all.length - 1];
+  const readiness = terminalReadiness(text);
+  if (readiness === null) return null;
   const count = (re) => (text.match(re) || []).length;
   return {
-    readiness: rd[1],
+    readiness,
     critical: count(/^- C\d+:/gm),
     major: count(/^- M\d+:/gm),
     minor: count(/^- m\d+:/gm),
