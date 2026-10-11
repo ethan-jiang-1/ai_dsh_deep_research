@@ -24,6 +24,27 @@
     path: ':memory:'
     openAt: first-search
 
+# ── 上游流畸形事件并入有界重试（BUG-022 的本地缓解）：llm-retry 只重试 `retryPolicy.retryableCodes`
+#    里的码，而默认集 = [EMPTY_RESPONSE, RATE_LIMIT, SERVER, TIMEOUT, TRANSPORT] ——
+#    `MALFORMED_RESPONSE` 不在内，故一次畸形流事件即终结回合、不重试（2026-10-11 实测：近 3 天
+#    17 会话 / 46 次，lead 与队员都被打中）。此处把该码并入有界重试（maxRetries 5 + 默认退避，
+#    参数与出厂默认同值），其余码原样重述——Loader 方言：replace 行的 config 整体替换、不深合并。
+#    该行在 base 里无 config，故重述无副作用；不含 name（避免新增 peerDependency，只按 id 定向）。
+#    判据与分母 = _backlog/bugs/BUG-022-provider-stream-malformed-turn-kill.md；理由 = Note
+#    notes/implemented/2026-10-11-provider-malformed-response-retry.md。
+- id: llm-deepseek
+  config:
+    retryPolicy:
+      mode: normal
+      maxRetries: 5
+      retryableCodes:
+        - EMPTY_RESPONSE
+        - RATE_LIMIT
+        - SERVER
+        - TIMEOUT
+        - TRANSPORT
+        - MALFORMED_RESPONSE
+
 - insert:
     # ── web 工具：不在此声明。实证结论（RFC web-tool-rows）：web seam / web-search-deepseek /
     #    web-fetch-http / tool-web 四行全部是 dsh-base 出厂行——providers 与 seam 留在 host 面，

@@ -49,12 +49,17 @@ source dev/env.sh && node scripts/run-ops/provider-error-stats.mjs --days 3
 
 ## 修复关联
 
-**未修（上游 seam，随 vendor 换 tag 重估**——同 BUG-007/009 的 vendor seam 记法）。本仓侧三件已落：
+**未修（上游 seam，随 vendor 换 tag 重估**——同 BUG-007/009 的 vendor seam 记法）。本仓侧四件已落：
 
 - **可数**：`scripts/run-ops/provider-error-stats.mjs`（跨场分布）+ `scripts/lib/provider-errors.mjs`
   （抽取唯一语义源，`tests/provider-errors.test.mjs` 6 用例钉住"只认 turn/end、不双算 attempt"）；
 - **可恢复**：`dev/run-kickoff.mjs --session`（续跑唤醒，自带 journal 送达对账），冒烟断言在
   `scripts/smoke/cdp-ask-smoke.mjs` 阶段②；
 - **可诊断**：本节恢复程序 + guides/61 §5 步骤。
+- **可缓解（事前拦截）**：pack bundle 层把 `MALFORMED_RESPONSE` 并入 `llm-deepseek` 的**有界**重试
+  （`mode: normal` / `maxRetries: 5` / 出厂五项 + 该码；出厂集**不含**它，故此前一次畸形即终结）。
+  组合正证据 = `dsh --profile web --patch dev/research.overlay.yml --dump-config` 可见该策略；
+  理由与"未运行项（畸形流真被重试无现场证据）" = [Note](../../notes/implemented/2026-10-11-provider-malformed-response-retry.md)。
+  **生效时点** = 下一次通道启动（profile 镜像由 `boot-run.sh` 漂移检测重建）。
 
 **复发即更新**：分母随每次复发由上述命令重算，不抄历史数字（口径正本 = 抽取模块 + 本卡）。

@@ -16,6 +16,18 @@
   config:
     path: ':memory:'
     openAt: first-search
+- id: llm-deepseek
+  config:
+    retryPolicy:
+      mode: normal
+      maxRetries: 5
+      retryableCodes:
+        - EMPTY_RESPONSE
+        - RATE_LIMIT
+        - SERVER
+        - TIMEOUT
+        - TRANSPORT
+        - MALFORMED_RESPONSE
 
 - insert:
     # ── analyst.patch.yml（由 dev/render-overlay.mjs 从 pack 渲染）──
