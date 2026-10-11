@@ -25,13 +25,17 @@
 `runtime/harness-home/.credentials.yaml` 有 `DEEPSEEK_API_KEY`（boot 本身 keyless）。
 `bash dev/boot-run.sh` **自己 source `dev/env.sh`**——先 source 不是前置（`AGENTS.md §命令速查`
 那条 ⚠ 只约束 L1/L2 脚本）。要它在你离开后继续服务 = [61 §0](./guides/61-run-playbook.md)
-的"托管后台 + 保持 stdin 打开"形态。
+的无人值守形态（§0.1 两路）。
 
 **歧义裁定**（两条规则谁管谁）：用户**未指定别的 DSH home** → 直接走第 1 行，不停下来发问
 （第 1 行的"不要问"只指"别问装哪个 home"；**在飞 run 的接续/新开照下面那条办，该问就问**）；
 只有他明说"装到我日用 / 别人的 DSH"、或目标 home 不是 `runtime/harness-home` 时才问一句
 "装到哪个 DSH home？"（本仓开发通道 = `runtime/harness-home`，先 `source dev/env.sh`；日用 =
 `~/.dsh`，**不要** source——两者装的东西不同）。
+
+**裸动词也指第 1 行**："启动一下""启动一下这个""起一下"这类不点名对象的说法，指称由语境
+唯一消解——本仓里能被"启动"的就是插件的 DSH 环境，没有第二物。照第 1 行直接做，**不反问
+"启动什么"**；仅当当下对话正围着另一个明确可启动物（某条冒烟 / 探针 / 脚本）时才跟随该物。
 
 **每次"启动"前先扫一眼在飞 run**：根目录下每个未归档 bundle（`archive/` 除外）都要报出来，
 接续 / 归档 / 新开问用户、带上 slug + mtime、**都不自己挑**——分类判据与问询全文 =
