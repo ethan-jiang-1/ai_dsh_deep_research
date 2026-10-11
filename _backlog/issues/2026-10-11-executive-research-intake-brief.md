@@ -15,23 +15,26 @@ opened: 2026-10-11
 
 三卡落地次序 = ①本卡 → ②决策报告 `2026-10-11-executive-research-decision-report.md` → ③驾驶舱 `2026-10-11-executive-research-ux-delivery.md`。本卡无前置依赖，且是后两者的数据上游：question.md 的业务字段同时喂报告的「建议与适用条件」与驾驶舱的「当前目标」。
 
-## 实施范围
+## 实施范围（四处对账面 + 镜像，同 diff 联动）
 
-- 修改 `packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md`：定义决策对象、待决定事项、比较选项、截止时间、成功标准/约束的采集规则；已提供的信息不重复问，缺项只有在会改变研究范围时才追问，未知值显式标 open。
-- 修改 `research-workspace/templates/run/question.md`：增加业务决策简报字段和 HITL1 对齐快照字段；不写入不必要的敏感信息，不改变 question.md owner。
-- 修改 `research-workspace/templates/run/final.md` 之外的计划确认文案来源，使 plan-review 包含决定、比较范围、输出形式、主要未知和研究投入影响；继续使用现有三种计划动作和一轮制修订语义。
-- 同步 `packages/deep-research-pack/workspace/` 的种子文件（如该目录持有对应模板），并更新必要的文档契约。
+HITL1 语义由 `tests/presets.test.mjs`「HITL1 两段卡」四处对账测试钉住（persona + research-brief + 手册 + 模板），改动必须四处联动，漏一处即红：
+
+- `packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md`：业务决策简报字段（决策对象 / 待决定事项 / 比较选项 / 截止时间 / 成功标准与约束）的采集规则并入既有第四问触发机制——已提供不重复问，缺项仅在会改变研究范围时随第四问追问，未知标 open；计划确认卡要点改从 question.md 业务字段生成（决定 / 比较范围 / 输出形式 / 主要未知 / 研究投入影响），三种计划动作与一轮制不变。
+- `research-workspace/templates/run/question.md`：HITL1 Alignment Snapshot 增业务决策简报字段；不写入敏感信息，owner 不变。
+- `packages/deep-research-pack/presets/lead.patch.yml`（persona）：第一段「三问固定为」契约句保持为真；仅在第四问触发句需涵盖业务决策澄清时同 diff 补句；「HITL1 零例外」「ask 调用硬约束」等既有契约句原样保留。
+- `research-workspace/AGENTS.md` §交互纪律：仅在两段卡描述需提及业务简报时同 diff 补句；「HITL1 = 两段卡」「quick_factual 豁免」合同句保持为真。
+- 镜像不手改：`node dev/sync-pack-workspace.mjs` 从 research-workspace 正本同步进 `packages/deep-research-pack/workspace/templates/run/question.md`，`pack-workspace-fresh` 把守。
 - 不改变 HITL1 两段结构、quick_factual 豁免、HITL1 永不重开、topic 编制或团队调度。
 
 ## 验收标准
 
 | 判据 | 行为类 | 检查方式与证据 owner | 负例 / 互补 |
 |---|---|---|---|
-| question.md 模板含业务决策简报字段（决策对象 / 待决定事项 / 比较选项 / 期限 / 成功标准与约束 / open 显式标注） | 确定性 | tests/ 契约测试断言模板字段在场（沿既有「HITL1 两段卡」persona+skill+手册+模板四处对账先例，先红后绿）；`sync-pack-workspace` 后 `pack-workspace-fresh` 绿 | 删任一字段测试变红；quick_factual 豁免样例计划卡仍免发（互补态） |
+| question.md 模板含业务决策简报字段（决策对象 / 待决定事项 / 比较选项 / 期限 / 成功标准与约束 / open 显式标注） | 确定性 | `tests/presets.test.mjs` 新增契约断言（沿「HITL1 两段卡」四处对账先例，先红后绿；tests/ 契约测试无 evaluation.md 登记面——该台账只登记 verify.mjs 门禁）；`sync-pack-workspace` 后 `pack-workspace-fresh` 绿 | 删任一字段测试变红；quick_factual 豁免样例计划卡仍免发（互补态） |
 | 采集按信息充分性触发：已提供不重复问，未知标 open 不脑补 | 模型行为 | L4-lite 或定向 run 观察 lead 实际提问，走查记录含分母与用户原话 | 样例含用户已答字段仍被追问 = 负例命中 |
 | 四类输入样例（信息充分 / 缺不影响范围 / 缺会改变范围 / 命中困惑信号）各有明确的问与不问清单 | 模型行为 | 人工走查四份样例，逐份记录出现与不出现 | 命中困惑信号样例只叠加模式库澄清问，不变成固定第四问 |
 | 计划卡业务语言：业务读者能说出决定、比较选项、交付物、最大未知，无需理解 `quick_factual` 等 token | 模型行为 + 人工判据 | 真实计划卡文案走查，人工判据单独记录 | 文案露出内部 token 或术语 = 负例 |
-| 合同不扩张：无第三个 HITL 点、无固定第四问、无 `[ACCEPTED]` 协议；修订仍一轮制附加进 Decisions | 确定性 | 契约测试禁词负例（植入越界文案先红后绿）+ L1 挂载 | — |
+| 合同不扩张：无第三个 HITL 点、无固定第四问、无 `[ACCEPTED]` 协议；修订仍一轮制附加进 Decisions | 确定性 | `tests/presets.test.mjs` 禁词断言（`[ACCEPTED]` doesNotMatch + 「不设固定第四问」positive 钉，注入反证先红后绿）+ L1 挂载 | — |
 
 必跑面（任务型路由「改 persona / skill / 手册文本」行）：L0 + `render-overlay` 先于 L1（skill 文本）+ `pack-workspace-fresh`（模板）。模型行为证据走 L4-lite 或真实 run 观察，无凭据时如实标注「未运行项」；业务读者复述属人工判据，技术绿不替代。
 

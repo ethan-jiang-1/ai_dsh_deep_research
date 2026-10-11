@@ -6,11 +6,11 @@
 
 ## 对话流 · 研究语义卡（web_search 卡标题，状态符不钉）
 
-检索：DSH harness · DeepSeek Harness DSH
-检索：DeepSeek Harness official site deepseek.com DSH · site:deeps
+检索：DSH harness
+检索：DeepSeek Harness 官方 github deepseek-ai
 
 ## 研究状态页签 · 人性化活动行（icon + 文本）
 
-🔍 检索：DSH harness · DeepSeek Harness DSH
-🔍 检索：DeepSeek Harness official site deepseek.
-💬 探针完成，搜了「DSH harness」（8 条清单，含 [极客公园](https://www.ge
+🔍 检索：DSH harness
+🔍 检索：DeepSeek Harness 官方 github deepseek-ai
+💬 探针完成，搜了 1 次「DSH harness」（返回 8 条清单，官方域名只命中 GitHub d

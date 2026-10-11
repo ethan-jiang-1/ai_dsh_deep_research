@@ -142,3 +142,48 @@ test('HITL1 两段卡：计划确认卡钉在模型可见面与合同面（perso
   // 模板（schema 实例）：Snapshot 确认行
   assert.match(template, /计划确认:/, 'question.md 模板缺计划确认字段（Snapshot 节）');
 });
+
+test('HITL1 业务决策简报：字段钉在模板与采集规则（模板 + research-brief + persona 第四问触发）', () => {
+  const yml = readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8');
+  const skill = readFileSync(join(PRESETS, 'lead/skills/research-brief/SKILL.md'), 'utf8');
+  const template = readFileSync(join(ROOT, 'research-workspace/templates/run/question.md'), 'utf8');
+  // 模板（schema 实例）：Snapshot 业务决策简报行——五字段 + open 显式形态
+  assert.match(template, /业务决策简报/, 'question.md 模板缺业务决策简报字段（HITL1 Alignment Snapshot）');
+  for (const field of ['决策对象', '待决定事项', '比较选项', '期限', '成功标准与约束']) {
+    assert.match(template, new RegExp(field), `业务决策简报缺字段：${field}`);
+  }
+  assert.match(template, /尚未确认/, '业务决策简报缺 open 显式形态（缺项标尚未确认，禁止脑补）');
+  // research-brief（操作面正本）：信息充分性触发 + 已提供不重复问 + 范围判据
+  assert.match(skill, /业务决策简报/, 'research-brief 缺业务决策简报采集规则');
+  assert.match(skill, /会改变研究范围/, '采集缺范围触发判据（缺项仅在会改变研究范围时随第四问追问）');
+  assert.match(skill, /不重复问/, '采集缺「已提供不重复问」纪律');
+  // persona（行为最强钉）：第四问触发句涵盖业务决策澄清
+  assert.match(yml, /业务决策/, 'persona 第四问触发未涵盖业务决策澄清——简报字段可被静默跳过');
+  // 合同不扩张：无自由文本协议、无固定第四问（业务简报只走信息充分性触发）
+  assert.doesNotMatch(skill, /\[ACCEPTED\]/, 'research-brief 出现 [ACCEPTED] 自由文本协议——违反 hitl-feedback-protocol 否决记录');
+  assert.doesNotMatch(yml, /\[ACCEPTED\]/, 'persona 出现 [ACCEPTED] 自由文本协议——违反 hitl-feedback-protocol 否决记录');
+  assert.match(skill, /不设固定第四问/, '业务决策简报缺「不设固定第四问」声明——信息充分性触发可能漂移为固定问');
+});
+
+test('报告首屏决策摘要：模板节名与生成/审查合同钉（模板 + synthesis + adversarial-review）', () => {
+  const template = readFileSync(join(ROOT, 'research-workspace/templates/run/final.md'), 'utf8');
+  const synthesis = readFileSync(join(PRESETS, 'lead/skills/synthesis/SKILL.md'), 'utf8');
+  const review = readFileSync(join(PRESETS, 'critic/skills/adversarial-review/SKILL.md'), 'utf8');
+  // 模板（schema 实例）：首屏六段 + 待定形态 + 快速事实缩略注记 + 来源链形态
+  for (const section of ['决策摘要', '备选与取舍', '关键依据', '最强反证', '目前不能判断', '下一步']) {
+    assert.match(template, new RegExp(`## ${section}`), `final.md 模板缺首屏节：${section}`);
+  }
+  assert.match(template, /待定/, '「下一步」缺待定形态（未获用户指定的负责人/期限不编造）');
+  assert.match(template, /quick_factual 型 run/, '缺快速事实缩略注记（首屏不逼成商业建议——互补态）');
+  assert.match(template, /来源: evidence\//, '模板缺来源链形态');
+  // synthesis（生成正本）：首屏纪律
+  assert.match(synthesis, /决策摘要/, 'synthesis 缺决策摘要首屏纪律');
+  assert.match(synthesis, /目前不能判断/, 'synthesis 缺不足如实呈现纪律');
+  assert.match(synthesis, /唯一推荐/, 'synthesis 缺「证据不足不硬给唯一推荐」纪律');
+  assert.match(synthesis, /待定/, 'synthesis 缺待定形态（不编造负责人/期限）');
+  // adversarial-review（审查正本）：首屏狩猎线
+  assert.match(review, /决策摘要/, 'adversarial-review 缺首屏决策摘要核查线');
+  assert.match(review, /目前不能判断/, 'adversarial-review 缺「未知写成确定」核查点');
+  // 合同不扩张：自由文本协议禁词（hitl-feedback-protocol 否决同款）
+  assert.doesNotMatch(template + synthesis + review, /\[ACCEPTED\]/, '报告合同面出现自由文本协议禁词');
+});

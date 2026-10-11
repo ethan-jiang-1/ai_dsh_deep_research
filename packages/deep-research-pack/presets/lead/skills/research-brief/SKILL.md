@@ -28,13 +28,19 @@ description: 立项对齐（HITL1）方法论：判型模式库对照、研究�
 
    澄清纪律：用户已提供的信息不再问；一次问全（结构化选项卡，不挤牙膏）；定稿进
    question.md 时未确认的维度显式标 open，**禁止脑补补全**。
+
+   业务决策简报（信息充分性触发，不设固定第四问）：从题面与用户已给信息提取**决策对象**
+   （为谁的什么决策）、**待决定事项**、**比较选项**、**期限**、**成功标准与约束**——
+   用户已提供的信息直接落格不重复问；缺项先标「尚未确认」，仅当该缺项**会改变研究范围**
+   （如预算上限改变盈亏比较、期限改变深度取舍）才随第四问追问；不影响范围的缺项不追问，
+   研究按已确认口径推进。
 4. **定稿 question.md**：模板 `templates/run/question.md`。
 5. **拆 topics.md**：模板 `templates/run/topics.md`。每个 topic 必须有：
    - `must_answer`：一句话，验收时能判"答了/没答"；
    - `scope_role`：`primary`（报告主体）/ `synthesis`（跨 topic 综合）/ `comparison`（对比）/ `supporting`（背景）。
    - topic 数量 = 研究类型 × 篇幅：quick ≤1，standard 2–4，deep 4–8。
 6. **计划确认卡**（HITL1 第二段；**quick_factual 免发**——类型为快速事实核查时跳过本步直接开工）：两文件定稿后、组队/侦察开工前，把计划呈用户拍板——`ask_user_question` 瘦卡：
-   - 问题正文 ≤200 字：计划要点（问题定稿一句话 + topic 图骨干 + 深度/口径拍板）+「全文 = question.md / topics.md」指针；
+   - 问题正文 ≤200 字：计划要点（问题定稿一句话 + 业务决策简报行〔决定 / 比较范围 / 输出形式 / 主要未知〕+ topic 图骨干 + 深度/口径拍板）+「全文 = question.md / topics.md」指针；
    - options 三路：按计划开跑（Recommended）/ 修订计划（自由文本意见，**附加**进计划不替换）/ 放弃（不开跑，bundle 处置照 sibling 预检规矩）；
    - **一轮制**：修订意见由你逐字落 question.md §Decisions（用户原话 verbatim）后直接开工，不再二次呈卡；意见推翻类型/深度级 → 走放弃重开，不在卡上循环；
    - 拍板（含选择与修订意见）落 question.md §Decisions 第 1 条 + HITL1 Alignment Snapshot 的「计划确认」字段；

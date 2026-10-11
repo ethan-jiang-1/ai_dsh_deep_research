@@ -33,6 +33,7 @@ import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { deriveAnchors, foldHitlPending, type HitlState, type RunAnchor } from '../lib/hitl-fold.ts'
 import { deriveSteps, type RunStep } from '../lib/run-fold.ts'
+import { deriveBusinessBrief, type BusinessBrief } from '../lib/brief-fold.ts'
 import { foldActivityRows, type ActivityRow } from '../lib/activity-fold.ts'
 import { foldMemberActivity, type MemberActivitySummary } from '../lib/member-activity.ts'
 import { sessionBindingOf, type SessionBinding } from '../lib/bundle-bind.ts'
@@ -77,6 +78,8 @@ interface BundleFace {
   readonly delivered: boolean
   /** final/ 版本记账数（v*.md）——≥2 即发生过证据扩张 rerun。 */
   readonly versions: number
+  /** review.md 终局 readiness（多轮取末位：true=FAIL / false=PASS / null=未观测）。 */
+  readonly reviewFail: boolean | null
 }
 
 /** 30s 重扫间隔（bundle 文件变化不高频；团队面板同款节奏）。 */
@@ -231,6 +234,13 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           const finalDir = names.has('final') ? await props.listDir(sessionId, `${base}/final`, new AbortController().signal) : null
           if (stopped) return
           const versions = finalDir?.filter((e) => e.type === 'file' && /^v\d+\.md$/.test(e.name)).length ?? 0
+          // review 终局 readiness（业务摘要审查态的数据源）：多轮 review 取末位匹配——
+          // 两相 review（首审 FAIL → 复核 PASS）以终局为准，与 run-dashboard 同款语义。
+          const reviewText = names.has('review.md') ? await props.readFile(sessionId, `${base}/review.md`, new AbortController().signal) : null
+          if (stopped) return
+          const readinessMatches = reviewText !== null ? [...reviewText.matchAll(/readiness:\s*(PASS|FAIL)/gi)] : []
+          const lastReadiness = readinessMatches.length > 0 ? readinessMatches[readinessMatches.length - 1]?.[1]?.toUpperCase() ?? null : null
+          const reviewFail = lastReadiness === 'FAIL' ? true : lastReadiness === 'PASS' ? false : null
           const questionText = names.has('question.md') ? await props.readFile(sessionId, `${base}/question.md`, new AbortController().signal) : null
           if (stopped) return
           // G3（RFC cockpit-flow-face）：剥 markdown 强调符再截断——`**` 与反引号是源文件
@@ -253,6 +263,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
             evidenceCount,
             delivered: names.has('final.md'),
             versions,
+            reviewFail,
           })
           return
         }
@@ -277,6 +288,29 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const passedCount = anchors.filter((a) => a.state === 'passed').length
   const pendingAnchor = anchors.find((a) => a.state === 'pending')
   const steps = face !== null ? face.steps : deriveSteps({ question: false, team: false, leads: false, evidence: 0, findings: false, review: false, final: false })
+  // 业务摘要（issue 2026-10-11-executive-research-ux-delivery）：既有事实源 → 五问折算。
+  // 计数进不了本层（brief-fold 输入面无计数——类型级禁词，keyless 单测钉）；挂起种类由
+  // 锚点 key 折算（anchor-1=hitl1 / anchor-2=hitl2 / 其余=契约外 unknown），不引 hitl-fold
+  // 内部函数；§Decisions 末位拍板当前数据面未读——lastDecisionKind 如实 null。
+  const brief: BusinessBrief = useMemo(
+    () => deriveBusinessBrief({
+      bundleBound: !unbound && binding.slug !== undefined,
+      kickoffHold,
+      hitlPending: hitl.pending,
+      pendingKind: pendingAnchor !== undefined ? (pendingAnchor.key === 'anchor-1' ? 'hitl1' : pendingAnchor.key === 'anchor-2' ? 'hitl2' : 'unknown') : null,
+      pendingQuestions: pendingAnchor?.questions ?? 0,
+      hasQuestion: face?.hasQuestion ?? false,
+      questionLine: face?.questionLine ?? null,
+      currentStage: face !== null ? steps.find((s) => s.state === 'current')?.label ?? null : null,
+      findingsPresent: (face?.steps.find((s) => s.key === 'findings')?.state === 'done'),
+      reviewFail: face?.reviewFail ?? null,
+      delivered: face?.delivered ?? false,
+      versions: face?.versions ?? 0,
+      lastDecisionKind: null,
+      openItems: [],
+    }),
+    [unbound, binding.slug, kickoffHold, hitl.pending, pendingAnchor, face, steps],
+  )
   const anchorChip = (a: RunAnchor) => (
     <span key={a.key} style={{ padding: '2px 8px', borderRadius: 4, fontWeight: a.state === 'pending' ? 700 : 400, background: a.state === 'pending' ? '#f59e0b33' : a.state === 'passed' ? '#22c55e22' : '#0000000d', color: a.state === 'pending' ? '#b45309' : a.state === 'passed' ? '#16a34a' : '#888' }}>
       ◆{a.label}{a.state === 'pending' && a.questions > 0 ? `（${a.questions} 问）` : ''} {a.state === 'pending' ? '⏳' : a.state === 'passed' ? '✓' : '·'}
@@ -317,6 +351,16 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           ⏳ 等你拍板——{pendingAnchor?.label ?? '决定'}{pendingAnchor !== undefined && pendingAnchor.questions > 0 ? `（${pendingAnchor.questions} 问）` : ''}：在会话里的问题卡上点选项即可（推荐项已置首）
         </div>
       )}
+      {/* ⓪ 业务摘要层（issue 2026-10-11-executive-research-ux-delivery）：五问业务语言——
+          研究什么 / 已确认什么 / 未知什么 / 我是否要操作；折算住 brief-fold（计数不进本层），
+          组件薄渲染。 */}
+      <div style={{ marginBottom: 10, padding: '8px 12px', borderRadius: 6, background: '#22c55e14', border: '1px solid #22c55e33', fontSize: 13, lineHeight: 1.7 }}>
+        <div style={{ fontWeight: 700 }}>🎯 {brief.goal}</div>
+        <div>{brief.stageLine}</div>
+        <div style={{ opacity: 0.85 }}>{brief.knownLine}</div>
+        {brief.unknownLine !== null && <div style={{ color: '#b45309' }}>⚠ {brief.unknownLine}</div>}
+        <div style={{ fontWeight: brief.userActionNeeded ? 700 : 400, color: brief.userActionNeeded ? '#b45309' : undefined }}>{brief.actionLine}</div>
+      </div>
       {/* ② 流程轨道：◆立项确认 + 主轨 + ◆交付审阅 + 交付；↻ 回边 = 拍板的分支后果画进流程 */}
       {railVisible && (
         <>

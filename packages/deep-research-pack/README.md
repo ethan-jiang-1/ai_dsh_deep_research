@@ -76,15 +76,19 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 ## 研究怎么跑
 
 1. **HITL1 立项（两段卡）**：对 Lead 说出研究问题 → 第一段三问（研究类型/深度篇幅/时间口径
-   与语言，推荐项置首带(Recommended)）→ 点选即定稿；Lead 落稿 question.md + topics.md 后发
-   第二段**计划确认卡**（quick_factual 豁免）：≤200 字计划要点 + 三选项——按计划开跑
+   与语言，推荐项置首带(Recommended)），并按信息充分性采集业务决策简报（决策对象/待决定
+   事项/比较选项/期限/成功标准与约束——已提供直接落格不重复问，缺项标「尚未确认」，仅在
+   会改变研究范围时随第四问追问）→ 点选即定稿；Lead 落稿 question.md + topics.md 后发
+   第二段**计划确认卡**（quick_factual 豁免）：≤200 字计划要点（含业务决策简报行）+ 三选项
+   ——按计划开跑
    (Recommended)/ 修订计划（自由文本意见，附加进计划）/ 放弃；拍板与修订意见落
    §Decisions 后开工（一轮制，不二次呈卡）；
 2. **静默自主区**：Lead 拆 topic、派 Scout/Analyst/Critic（Agent Teams 通道），证据落
    `drt_<slug>/evidence/`（七字段 frontmatter：source_url / retrieved_at / quality / found_by /
    supports / source_tier / publisher）；Critic 对抗核查出 `review.md`（readiness PASS 是交付前置）；
 3. **HITL2 审阅**：结构化选项卡（按现稿定稿(Recommended)/ 补研究 / 修订表述）→ 拍板后交付
-   `final.md`（每条关键结论附 `[来源: evidence/xx.md]`）；
+   `final.md`（每条关键结论附 `[来源: evidence/xx.md]`；报告首屏 = 决策摘要：建议与适用条件 /
+   备选取舍 / 关键依据 / 最强反证 / 目前不能判断 / 下一步——快速事实型缩略为答案+口径+依据+限制）；
 4. **观察面**：DSH Web GUI 右栏「研究状态」页签看实时动态（流程轨道 = ◆立项确认 + 立项→
    组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付，↻ rerun 回路自交付审阅可见，人性化活动流，
    HITL 挂起横幅点名锚点与参与方式，活标题「研究状态 · ⏳ 等你拍板」，交付节点带 final/ 版本）；

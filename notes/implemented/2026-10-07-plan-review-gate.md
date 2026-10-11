@@ -14,9 +14,10 @@ HITL1 从固定三问升级为**两段卡**——两点交互合同字面保持�
 
 1. 第一段不变：三问结构化卡（研究类型/深度篇幅/口径语言，推荐置首）；
 2. 第二段**计划确认卡**：question.md + topics.md 定稿后、组队/侦察开工前发——≤200 字
-   计划要点瘦卡（问题定稿一句话 + topic 图骨干 + 深度/口径拍板）+「全文 = question.md /
-   topics.md」指针；options = 按计划开跑（Recommended）/ 修订计划（自由文本意见**附加**
-   不替换）/ 放弃（不开跑，bundle 处置照 sibling 预检规矩）；
+   计划要点瘦卡（问题定稿一句话 + topic 图骨干 + 深度/口径拍板；2026-10-11 起要点增
+   业务决策简报行，扩展决定 = [HITL1 业务决策简报](2026-10-11-hitl1-business-brief.md)）
+   +「全文 = question.md / topics.md」指针；options = 按计划开跑（Recommended）/ 修订计划
+   （自由文本意见**附加**不替换）/ 放弃（不开跑，bundle 处置照 sibling 预检规矩）；
 3. **一轮制**：修订意见逐字落 §Decisions 后直接开工，不再二次呈卡；意见推翻类型/深度级
    → 走放弃重开，不在卡上循环；
 4. 拍板落 question.md §Decisions 第 1 条 + HITL1 Alignment Snapshot「计划确认」行；
