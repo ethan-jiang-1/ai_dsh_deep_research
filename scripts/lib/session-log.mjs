@@ -87,14 +87,25 @@ export function decompressSessionLog(buf, decompress = typeof zlib.zstdDecompres
   return Buffer.concat(parts)
 }
 
-/** Read JSONL or concatenated zstd JSONL without spawning a decoder process. */
-export function readSessionEvents(logPath) {
+/** Read JSONL or concatenated zstd JSONL as text（不解 JSON——给按行/按文本判据的消费者用）。
+ *  返回 null = 不可读（坏帧/读失败）；此即"日志不可读"的唯一判定点，消费者须显式区分，不得当空语料。 */
+export function readSessionText(logPath) {
   try {
     const raw = readFileSync(logPath)
     const text = logPath.endsWith('.jsonl')
       ? raw.toString('utf8')
       : decompressSessionLog(raw)?.toString('utf8')
-    if (text === null || text === undefined) return { readable: false, events: [] }
+    return text === null || text === undefined ? null : text
+  } catch {
+    return null
+  }
+}
+
+/** Read JSONL or concatenated zstd JSONL without spawning a decoder process. */
+export function readSessionEvents(logPath) {
+  try {
+    const text = readSessionText(logPath)
+    if (text === null) return { readable: false, events: [] }
     const events = text.split('\n').filter((line) => line.trim()).map((line) => JSON.parse(line))
     if (events.some((event) => !event || typeof event !== 'object' || Array.isArray(event))) return { readable: false, events: [] }
     return { readable: true, events }

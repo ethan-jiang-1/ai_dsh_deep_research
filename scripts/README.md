@@ -47,6 +47,7 @@
 |---|---|---|
 | watch-run.mjs | 谓词化状态判定（HITL-PENDING / RUN-SETTLED 自报） | keyless |
 | run-dashboard.mjs | 只读 HTML 投影：多 run 扫描 + 步骤条（fail-soft） | keyless |
+| plan-card-stats.mjs | 计划确认卡字数的跨场分布投影（判 ①-c 的升硬门前置「连续 ≥3 场达标」；口径与识别 = lib/plan-card.mjs，与 node-gate 门① 同源） | keyless（须 source dev/env.sh） |
 
 ## dist/（分发）
 
@@ -62,6 +63,7 @@
 | lib/egress.mjs | egress-probe CLI、boot-run 自检 | egress 三态判定核心（注入式 lookup/checkHttp；分类语义 = DSH SSRF 守卫同款：任一答案非公网即 walled；设计 = [egress issue](../_backlog/_archived/settled_issues/2026-10-10-egress-mode-probe.md)） |
 | lib/egress-proxy.mjs | egress-proxy CLI、egress-proxy-smoke | 自旋本地 HTTP 代理核心（CONNECT 隧道 + 绝对 URI 转发；TUN 态 DSH fetch 出口；机制证据住 smoke 道——layering ③ 禁 tests 引入网络内置） |
 | lib/session-log.mjs | run-state、watch-run、回归 | canonical 日志选择与读取（BUG-010） |
+| lib/plan-card.mjs | node-gate 门①、plan-card-stats、run-ops 投影 | 计划确认卡识别与字数口径（唯一语义源：标签「按计划开跑」+ `question` 字段全长 + 阈值 200） |
 | lib/run-state.mjs | watch-run、仪表盘、回归 | run 操作面状态谓词 |
 | lib/env.mjs | 冒烟族 | 子进程环境清洗（scrubbedEnv/withModelKey——凭据卫生） |
 | lib/playwright.mjs | 浏览器冒烟 | Playwright 启停支撑 |

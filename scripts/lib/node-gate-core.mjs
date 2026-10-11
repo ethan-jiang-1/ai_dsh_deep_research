@@ -7,6 +7,7 @@
 // 注入（scripts/run-gates/node-gate.mjs——多帧拼接日志靠 CLI 解全帧，行为不变）。
 // 消费方：scripts/run-gates/node-gate.mjs（驱动壳）+ tests/node-gate.test.mjs（纯 .jsonl 夹具直调）。
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { planCardsOf } from './plan-card.mjs'
 import { basename, join } from 'node:path'
 import { deliveryDate, runType } from '../run-gates/schema-scan.mjs'
 
@@ -311,10 +312,9 @@ export function hitlAskGate(bundleDir, sessionsRoot, hitlDate, readLog = plainLo
   let hitl1Signed = 0
   let writerSessions = 0
   // 计划确认卡正文字数记账（HITL1 第二段，skill §6 纪律 = question 字段全长 ≤200 字）。
-  // 严重级 = **WARN**（记账不拦交付）：存量标定 2/2 超限（461 / 246 字，2026-10-11 扫描 612 场），
-  // 硬门会拦下每一场交付；升硬门的前置 = 措辞收紧后遵守率改善（判据与升格条件见 ①卡 ①-c 行）。
-  const PLAN_CARD_MARK = '按计划开跑'
-  const PLAN_CARD_LIMIT = 200
+  // 识别与口径住 `scripts/lib/plan-card.mjs`（唯一语义源，与跨场投影工具同源——防两版判据漂移）。
+  // 严重级 = **WARN**（记账不拦交付）：存量标定 2/2 超限（461 / 246 字），硬门会拦下每一场交付；
+  // 升硬门的前置 = 措辞收紧后连续 ≥3 场达标（判据与升格条件 = notes/implemented/2026-10-11-plan-card-length-warn.md）。
   let planCards = 0
   const planCardOver = []
   if (sessionsRoot && existsSync(sessionsRoot)) {
@@ -339,25 +339,15 @@ export function hitlAskGate(bundleDir, sessionsRoot, hitlDate, readLog = plainLo
           if (d?.name === 'ask_user_question') {
             sessionAsks++
             if (/研究类型/.test(args)) sessionSigned++
-            // 计划确认卡识别 = options 里出现「按计划开跑」（卡上固定选项之一，比"正文含计划字样"稳）
-            if (args.includes(PLAN_CARD_MARK)) {
-              const raw = d?.arguments
-              let payload = null
-              try { payload = typeof raw === 'string' ? JSON.parse(raw) : (raw ?? null) } catch { payload = null }
-              for (const q of payload?.questions ?? []) {
-                const labels = (q?.options ?? []).map((o) => String(o?.label ?? ''))
-                if (!labels.some((l) => l.includes(PLAN_CARD_MARK))) continue
-                planCards++
-                const len = String(q?.question ?? '').length
-                if (len > PLAN_CARD_LIMIT) planCardOver.push(len)
-              }
-            }
           }
         }
         if (!sessionWrites) continue
         writerSessions++
         asks += sessionAsks
         hitl1Signed += sessionSigned
+        const cards = planCardsOf(text)
+        planCards += cards.length
+        for (const c of cards) if (c.overLimit) planCardOver.push(c.questionChars)
       }
     }
     scan(sessionsRoot)
