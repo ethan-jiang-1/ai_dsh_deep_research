@@ -10,3 +10,8 @@
 | [2026-10-08-model-visible-calibration.md](2026-10-08-model-visible-calibration.md) | [recorded-session 义务标定](../../../notes/implemented/2026-10-08-recorded-session-obligation.md) + [BUG-018](../fixed_bugs/BUG-018-snapshot-replay-advertised-coverage.md) | 2026-10-08 |
 | [2026-10-09-company-snapshots-analysis.md](2026-10-09-company-snapshots-analysis.md) | [snapshots 落点](../settled_issues/2026-10-09-snapshots-adoption.md) | 2026-10-09 |
 | [2026-10-10-teammate-channel-probe.md](2026-10-10-teammate-channel-probe.md) | [2026-10-09-member-activity-stream](../settled_issues/2026-10-09-member-activity-stream.md) | 2026-10-10 |
+| [2026-10-10-company-drift-review.md](2026-10-10-company-drift-review.md) | [company 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md) | 2026-10-10 |
+| [2026-10-10-bare-path-audit.md](2026-10-10-bare-path-audit.md) | [company 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md) | 2026-10-10 |
+| [2026-10-10-preset-config-audit.md](2026-10-10-preset-config-audit.md) | [company 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md) | 2026-10-10 |
+| [2026-10-10-external-repin-review.md](2026-10-10-external-repin-review.md) | [company 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md) | 2026-10-10 |
+| [2026-10-10-external-repin-review-round2.md](2026-10-10-external-repin-review-round2.md) | [company 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md) | 2026-10-10 |

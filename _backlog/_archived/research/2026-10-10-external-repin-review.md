@@ -5,7 +5,7 @@ intent: 为 company 钉版复核 Note 登记的两笔"结论待复核"债提供�
 
 # 外部钉版债复核：二代语料 + ai_dsh_assitant（2026-10-10）
 
-> 服务 = [company 钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md)
+> 服务 = [company 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md)
 > §其他外部材料钉版状态登记的两笔"结论待复核"。方法 = 只读（外部仓零改动）；范围窄化如实
 > 分列——上游后续提交不自动等于"我们错了"，逐面对内容判定。
 

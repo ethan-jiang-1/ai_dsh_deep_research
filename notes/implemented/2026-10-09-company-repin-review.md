@@ -94,8 +94,8 @@ README 证据边界同句。**无需返工**；其 06/07（bug 复现 playbook�
   （`tests/verify-gates.test.mjs` import gates-smoke.mjs 靠约定安全）+ package.json test
   命令形状钉；
 - **盘点后定**（中）：两候选均已于 2026-10-10 盘点收口——preset-required-config 零漂移
-  不需要修（[盘点材料](../../_backlog/research/2026-10-10-preset-config-audit.md)）；
-  bare-path 真断链 16 条清偿/裁定完毕、不立通用门禁（[盘点材料](../../_backlog/research/2026-10-10-bare-path-audit.md)）；
+  不需要修（[盘点材料](../../_backlog/_archived/research/2026-10-10-preset-config-audit.md)）；
+  bare-path 真断链 16 条清偿/裁定完毕、不立通用门禁（[盘点材料](../../_backlog/_archived/research/2026-10-10-bare-path-audit.md)）；
 - **触发条件型**（已登记 [snapshots/README](../../snapshots/README.md)）：场景 glob 发现 +
   资格三态 + 判定日期（第二场景族 / 首个永久红场景时）；snapshots 体积预算（累积型类别入库时）；
 - **运维规则**（已写进 [bumping-vendor-pin 技能](../../.agents/skills/bumping-vendor-pin/SKILL.md)
@@ -107,7 +107,7 @@ README 证据边界同句。**无需返工**；其 06/07（bug 复现 playbook�
 - `_dsh_plugin_agent_ready_development` `bbcf346ddb`→`ad6f5319dc`（24 提交）与 `ai_dsh_assitant`
   `576c5f8`→`202a27b`（全仓 210 提交，吸收两路径 141）已于 2026-10-10 复核——两债吸收面
   结论维持，重钉 + 债 2 行描述改述已落地（逐面判定与证据 =
-  [外部钉版债复核材料](../../_backlog/research/2026-10-10-external-repin-review.md)）；
+  [外部钉版债复核材料](../../_backlog/_archived/research/2026-10-10-external-repin-review.md)）；
 - `_agent_ready_development` 老路径已不存在（一代语料，2026-09-25 已吸收，二代语料已取代）；
 - vendor/dsh 上游无新 tag（`git ls-remote` 核对，最高仍为 `dsh-v0.2.0-rc.2`）——本轮无需升 pin。
 

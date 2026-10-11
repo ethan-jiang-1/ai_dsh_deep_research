@@ -5,7 +5,7 @@ intent: 为 company 钉版行的再次前进提供逐提交判定与重钉依据
 
 # company 钉版漂移复核（2026-10-10）
 
-> 服务 = [2026-10-09 钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md)
+> 服务 = [2026-10-09 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md)
 > 的下一轮（钉版纪律：不一致即"上游已前进、结论待复核"——本轮清偿）。
 > 方法 = 只读（company 侧 log/diff/show，本仓侧 grep/read，双方零写入）；
 > 漂移面 = `59551f2..b19e9ed`（7 提交 / 79 文件 / +2552 −298）。

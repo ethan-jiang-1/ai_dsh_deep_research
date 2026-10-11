@@ -5,7 +5,7 @@ intent: 为 company 钉版复核 Note「盘点后定」候选 bare-path 提供�
 
 # live 文档反引号裸路径死指针盘点（2026-10-10）
 
-> 服务 = [company 钉版复核 Note](../../notes/implemented/2026-10-09-company-repin-review.md)
+> 服务 = [company 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md)
 > 「盘点后定」候选（company 同款盘点实测 21.3% 死指针率）。方法 = 只读脚本扫 tracked .md 的
 > inline code span（剥 frontmatter/围栏块），三级解析（相对所在目录 → 仓库根 → vendor/dsh
 > 前缀回退）+ 盘上存在性判活；死后按同名/同主干/历史归因。判定规则与豁免类全录于
@@ -32,7 +32,7 @@ intent: 为 company 钉版复核 Note「盘点后定」候选 bare-path 提供�
 2. `docs/discipline-map.md`：`vendor/README.md` 缺 /dsh 段 → `vendor/dsh/README.md`；
 3. `docs/design/10-architecture.md`：`tool-agent-team/README.md` 补全 → `packages/experimental/tool-agent-team/README.md`；
 4. `docs/AGENTS.md` ×2 + `docs/discipline-map.md` ×1：`.i18n.yaml` / `website/.generated/` 为 vendor 侧机制/产物，注记"产物不入库"消歧；
-5. `docs/guides/60-dev-loop.md:3-5`：幽灵引用——`2026-09-23-dsh-inround-task-surface.md` 在本仓全历史、company 钉版树（`59551f2`）均不存在（审计 + 本轮 `ls-tree` 复核双证），"轮内任务面"真实权威 = D11/D20 台账行 + [Backlog 方法论吸收 Note](../../notes/implemented/2026-10-09-backlog-methodology-absorption.md)，已改指。
+5. `docs/guides/60-dev-loop.md:3-5`：幽灵引用——`2026-09-23-dsh-inround-task-surface.md` 在本仓全历史、company 钉版树（`59551f2`）均不存在（审计 + 本轮 `ls-tree` 复核双证），"轮内任务面"真实权威 = D11/D20 台账行 + [Backlog 方法论吸收 Note](../../../notes/implemented/2026-10-09-backlog-methodology-absorption.md)，已改指。
 
 **裁定不改 ×9**（机械规则的边界误报，留档免得复扫再报）：
 - `research-workspace/drt_<slug>/` 占位符 ×7（00-index ×2、design/10、design/50、discipline-map、guides/61、project-map）：`drt_<slug>` 是模式 token 不是字面指针——位置=状态语义（在飞根 / `archive/` 已交付）各行都在或由 D17 承载；当前无在飞 run 属合法状态，非断链；
@@ -48,4 +48,4 @@ intent: 为 company 钉版复核 Note「盘点后定」候选 bare-path 提供�
 2. **存量太小**：真断链仅 16 条且已清偿/裁定归零，门禁防"再犯"，先清偿再观察；
 3. **浅引用是风格**：177 条浅引用在包内语境可读，强判 = 恒红或大量白名单维护。
 
-重启条件（登记）：若未来真断链复发且现有门禁判不到，立窄门禁——只钉主范围、只判 X 类、浅引用显式白名单，按 [writing-a-gate](../../.agents/skills/writing-a-gate/SKILL.md) 带反证。
+重启条件（登记）：若未来真断链复发且现有门禁判不到，立窄门禁——只钉主范围、只判 X 类、浅引用显式白名单，按 [writing-a-gate](../../../.agents/skills/writing-a-gate/SKILL.md) 带反证。
