@@ -20,6 +20,8 @@
 // verdict 契约（scripts/AGENTS §冒烟脚本可靠性纪律）：exit 0 = 全绿 / 1 = 断言红 / 2 = 未跑
 // （未 source dev/env.sh、缺凭据、vendor 产物缺失）——**未跑 ≠ 通过**。
 // 端口自持有：3115（认领制；用完释放到静默）。
+// 遗留物（预期，与其它冒烟一致）：每次跑在 `runtime/smoke-workspace/` 留一个同名工作区目录、并在
+// 会话根留一个 `…-cdp-ask-<ts>--` 会话组——那是失败时的事后证据（成功也不清，磁盘代价可忽略）。
 // 用法：source dev/env.sh && node scripts/smoke/cdp-ask-smoke.mjs [--port 3115]
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
