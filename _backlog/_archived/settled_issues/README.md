@@ -29,3 +29,4 @@
 | [2026-10-11-executive-research-decision-report](2026-10-11-executive-research-decision-report.md) | 决策摘要首屏六段落地；真实 bundle 三门口 exit 0 + 走查通过；「不矛盾」判据按拍板降格人工判据 | 2026-10-11 |
 | [2026-10-11-executive-research-ux-delivery](2026-10-11-executive-research-ux-delivery.md) | 驾驶舱业务摘要层与纠偏路径落地；真浏览器断言 + 构成正本 + 窄门 + 两面一致性核对；结转 = HITL 挂起态实录 waiting | 2026-10-11 |
 | [2026-10-11-recovery-action-instrument-gap](2026-10-11-recovery-action-instrument-gap.md) | 文档承诺的恢复动作缺可复跑工具 → 落 `run-kickoff --session`（自带送达对账）+ 冒烟断言 + guides/61 步骤；类级触发登记 triggers.md | 2026-10-11 |
+| [2026-10-12-backlog-process-borrow](2026-10-12-backlog-process-borrow.md) | backlog 制度显性化借鉴（loop_advisor @ b43be87）全套落地：入口两张票/缺陷通道含修复就绪自授权/双轨状态生命周期/agent 门牌/门禁收紧；[借鉴 Note](../../../notes/implemented/2026-10-12-backlog-process-borrow.md) | 2026-10-12 |

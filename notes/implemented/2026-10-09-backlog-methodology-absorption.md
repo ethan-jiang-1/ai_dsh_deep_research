@@ -12,6 +12,8 @@
 
 `notes/proposed/` 只用于需要显式评审的持久决定；不因工作复杂、进入队列或建立 issue 而自动创建 RFC。直接授权的工作按授权范围执行，后续持久决定理由遵循 notes 规则。
 
+制度骨架之上的显性化扩展（入口两张票、缺陷修复通道含「修复就绪」P1/P2 自授权例外、双轨状态生命周期、`_backlog/AGENTS.md` 门牌）= [借鉴 Note](2026-10-12-backlog-process-borrow.md)（[D24](../../docs/00-index.md)）；本篇决定全部维持。
+
 ## 输掉的方案
 
 - **把每张 issue 等同 implementation plan，并要求全部 issue 毕业成 RFC + queue 行**：会把来源仓的问题澄清职责重新变成必经审批/实施通道，混淆问题已想清楚与工作已授权。

@@ -23,11 +23,11 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 ```
 CLAUDE.md→AGENTS.md、.claude/skills→.agents/skills    两条 symlink（编辑真文件；后者让 Claude 系
                          harness 发现同一批开发技能——verify 门禁 claude-symlink 校验）
-子树 AGENTS.md            docs/ · scripts/ · notes/ · packages/deep-research-pack/ · tests/ 各一份——只放该
+子树 AGENTS.md            docs/ · scripts/ · notes/ · packages/deep-research-pack/ · tests/ · _backlog 各一份——只放该
                          子树的指令（根只放每轮常驻指令；vendor 树内 22 份同构；本仓另有研究手册与 pack 种子副本两份 AGENTS.md，见各自行）
 README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令正本 = guides/60 §2，不复制）
 _backlog/                 问题澄清与证据区：issues/、bugs/、research/、methods/、triggers.md、_archived/；
-                          手册 = _backlog/README.md
+                          手册 = _backlog/README.md、子树门牌 = _backlog/AGENTS.md（修复授权/状态生命周期速览）
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 按实际构建需求——见 pnpm-workspace.yaml 头注）
 packages/deep-research-pack/   唯一自写包（配置为主 + 研究驾驶舱[Research Cockpit，观察面 client 套件，D18，构成正本 = docs/design/40-research-cockpit.md]）：presets/<role>.patch.yml（单行形态=一条 @deepseek-ai/dsh-agent-preset 行，config.plugins 内声明 persona/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、cordis.patch.yml（bundle 行）、workspace/（工作区种子：手册+模板，生成物）、scripts/{preflight,scaffold}.mjs（部署 bin）、src/client/ 与 src/lib/（驾驶舱 client 半与折算纯函数，构建产物 lib/）；交付与部署形态 = guides/62，合同 = 包 README
 vendor/dsh/               pinned submodule（只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，tag/commit 见 §DSH 源码表）
@@ -129,7 +129,7 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 
 `CLAUDE.md` symlink `AGENTS.md`（编辑真文件）。根 AGENTS.md 只放**每轮都要在场的常驻指令**
 （每条 1–3 行 + 链到 home）；子树专属指令放该子树的 `AGENTS.md`（`docs/` · `scripts/` ·
-`notes/` · `packages/deep-research-pack/` · `tests/`）。入口链成员与行数上限分别由 `entry-chain` 与
+`notes/` · `packages/deep-research-pack/` · `tests/` · `_backlog`）。入口链成员与行数上限分别由 `entry-chain` 与
 `doc-budgets` 门禁把守；上限在 [scripts/doc-budgets.json](scripts/doc-budgets.json)，
 超限处置序 = 下放 > 压缩 > 升顶（升顶须同变更登记理由——上限过低是预算 bug）。
 

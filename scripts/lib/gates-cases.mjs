@@ -57,7 +57,7 @@ const negateVerificationSection = (dirRel) => (dir) => {
 };
 
 const ISSUE_NAME = '2099-01-01-probe.md';
-const ISSUE_TEXT = '---\nstatus: 推敲中\nopened: 2099-01-01\n---\n\n# Probe\n> 状态：推敲中｜可关闭：否\n';
+const ISSUE_TEXT = '---\nstatus: 推敲中\nopened: 2099-01-01\n---\n\n# Probe\n> 状态：推敲中｜结论倾向：未定｜可关闭：否\n';
 
 function fixtureFile(dir, rel, text, indexed = true) {
   const path = join(dir, rel);
@@ -180,7 +180,13 @@ export const CASES = [
   { id: 'backlog-issue-no-frontmatter', gate: 'backlog-liveness', mutate: backlogIssue(() => '# Probe\n> 状态：推敲中｜可关闭：否\n') },
   { id: 'backlog-issue-closeable', gate: 'backlog-liveness', mutate: backlogIssue((text) => text.replace('可关闭：否', '可关闭：是')) },
   { id: 'backlog-issue-orphan', gate: 'backlog-liveness', mutate: backlogIssue((text) => text, false) },
-  { id: 'backlog-bug-severity', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-999-probe.md', '---\nstatus: 活跃\nseverity: P3\nopened: 2099-01-01\n---\n\n# Probe\n') },
+  { id: 'backlog-bug-severity', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-999-probe.md', '---\nstatus: 排查中\nseverity: P3\nopened: 2099-01-01\n---\n\n# Probe\n> 严重级别：P3｜发现：2099-01-01｜状态：排查中\n') },
+  // 生命周期互查案例（loop_advisor 借鉴 2026-10-12）：issues 结论倾向闭集头 / 状态行镜像漂移 /
+  // bugs 枚举越界 / bugs 镜像漂移——四形态各一条，注入均须被 backlog-liveness 点名报红。
+  { id: 'backlog-issue-graduation-open', gate: 'backlog-liveness', mutate: backlogIssue((text) => text.replace('结论倾向：未定', '结论倾向：尽快给个说法')) },
+  { id: 'backlog-issue-mirror-drift', gate: 'backlog-liveness', mutate: backlogIssue((text) => text.replace('> 状态：推敲中｜', '> 状态：等人拍板｜')) },
+  { id: 'backlog-bug-enum-invalid', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-998-probe.md', '---\nstatus: 修复中\nseverity: P1\nopened: 2099-01-01\n---\n\n# Probe\n> 严重级别：P1｜发现：2099-01-01｜状态：修复中\n') },
+  { id: 'backlog-bug-mirror-drift', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-997-probe.md', '---\nstatus: 排查中\nseverity: P1\nopened: 2099-01-01\n---\n\n# Probe\n> 严重级别：P1｜发现：2099-01-01｜状态：修复就绪\n') },
   { id: 'backlog-research-status', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/research/2099-01-01-probe.md', '---\ntopic: Probe\nintent: "Evidence"\nstatus: 活跃\n---\n\n# Probe\n') },
   { id: 'backlog-method-no-trigger', gate: 'backlog-liveness', mutate: (dir) => {
     const path = join(dir, '_backlog/methods/issue-to-note.md');
@@ -258,7 +264,7 @@ export const CONTROLS = [
   //  全部门禁形状属预期）。
   { id: 'guard-red-record-active-bug', gate: 'guard-red-record', mutate: (dir) => {
     writeFileSync(join(dir, '_backlog', 'bugs', 'BUG-991-probe.md'),
-      '---\nstatus: 活跃\nseverity: P2\nopened: 2099-01-01\n---\n\n# Probe\n');
+      '---\nstatus: 排查中\nseverity: P2\nopened: 2099-01-01\n---\n\n# Probe\n> 严重级别：P2（次要）｜发现：2099-01-01｜状态：排查中\n');
     appendFileSync(join(dir, '_backlog', 'bugs', 'README.md'), '\n[BUG-991-probe](BUG-991-probe.md)\n');
     appendFileSync(join(dir, 'tests', 'local-date.test.mjs'),
       "\n// 负例留证 2099-01-01：BUG-991——探针负例正本 = 本行（改判据 → 红；还原 → 绿）。\ntest('探针：活跃卡声明 BUG-991', () => {});\n");

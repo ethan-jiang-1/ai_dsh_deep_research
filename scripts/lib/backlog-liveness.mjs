@@ -2,10 +2,11 @@ import { existsSync, lstatSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const CARD_STATES = {
-  issues: ['推敲中', '等人拍板'], bugs: ['活跃'],
+  issues: ['推敲中', '等人拍板'], bugs: ['排查中', '修复就绪', '修复落地', '等人拍板'],
   '_archived/settled_issues': ['已结'], '_archived/suspended_issues': ['叫停'],
   '_archived/fixed_bugs': ['已修'], '_archived/suspended_bugs': ['待修'],
 };
+const GRADUATION = ['未定', '现在做', '以后做', '不做', '并入已有'];
 const SHELVES = [...Object.keys(CARD_STATES), 'research', '_archived/research', 'methods'];
 const METHODS = ['requirements-elicitation', 'requirements-probes', 'requirements-synthesis',
   'validation-design', 'validation-evidence', 'validation-judgment', 'issue-to-note'];
@@ -27,6 +28,14 @@ function metadata(text) {
   }
   return { fields };
 }
+
+// 状态行 = 卡头 12 行内首条 `> …状态：…` 引用行（加粗剥壳）；镜像记号 = 状态值取到空白/竖线/
+// 括号为止并剥 🔒。生命周期互查（loop_advisor 借鉴，钉版见 docs/00-index §外部研究材料）：
+// 活跃卡状态行记号必须等于 frontmatter status（frontmatter = 阶段唯一家，状态行 = 镜像 + 历史）；
+// issues 另须带结论倾向闭集头。归档卡豁免——历史形态保留，退出值只查 CARD_STATES。
+const statusLineOf = (text) => text.split('\n').slice(0, 12)
+  .find((line) => /^>\s*.*状态[：:]/.test(line))?.replaceAll('**', '');
+const phaseOf = (line) => /状态[：:]\s*([^\s｜|\n（(]*)/.exec(line)?.[1]?.replace(/🔒/g, '').trim();
 
 /** Check current backlog structure over tracked files; empty active shelves are deliberately legal. */
 export function backlogLivenessProblems(backlogRoot, trackedFiles) {
@@ -81,15 +90,27 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
         if (!CARD_STATES[shelf].includes(fields.get('status'))) problems.push(`${loc} invalid status for shelf`);
         if (!DATE.test(fields.get('opened') ?? '')) problems.push(`${loc} needs opened: YYYY-MM-DD`);
         if (shelf.endsWith('bugs') && !['P0', 'P1', 'P2'].includes(fields.get('severity'))) problems.push(`${loc} needs severity: P0/P1/P2`);
+        const statusLine = statusLineOf(text);
         if (shelf === 'issues') {
           if (!DATE_SLUG.test(name)) problems.push(`${loc} filename must be YYYY-MM-DD-<slug>.md`);
-          const statusLine = text.split('\n').slice(0, 12).find((line) => /^>\s*.*状态[：:]/.test(line))?.replaceAll('**', '');
           if (!statusLine || !/可关闭\s*[：:=＝]\s*否(?=[｜|\n（(]|$)/.test(statusLine))
             problems.push(`${loc} active status line must declare 可关闭：否`);
           if (statusLine && /可关闭\s*[：:=＝]\s*是(?=[｜|\n（(]|$)/.test(statusLine))
             problems.push(`${loc} is closeable but still active; archive in the same change`);
         }
         if (shelf === 'bugs' && !/^BUG-\d{3}-[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(name)) problems.push(`${loc} filename must preserve BUG-<NNN>-<slug>.md`);
+        if (!archived) {
+          if (statusLine) {
+            const phase = phaseOf(statusLine);
+            if (phase !== fields.get('status'))
+              problems.push(`${loc} status line must mirror frontmatter status (状态：${fields.get('status')}；记号 = ${phase ?? '（无）'})`);
+          } else if (shelf === 'bugs') {
+            problems.push(`${loc} active bug needs a status line mirroring frontmatter status (状态：${fields.get('status')})`);
+          }
+          if (shelf === 'issues' && statusLine
+            && !new RegExp(`结论倾向[：:]\\s*(?:${GRADUATION.join('|')})`).test(statusLine))
+            problems.push(`${loc} active status line needs 结论倾向 head: <${GRADUATION.join('|')}> + 自由说明`);
+        }
       }
     }
   }

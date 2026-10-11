@@ -47,7 +47,7 @@
 
 细则见各子目录 README（每个子目录都有 README，`note-status` 门禁强制在场）。
 
-问题澄清与执行分开：[_backlog/](../_backlog/README.md) 收录待澄清问题、查证材料、缺陷和按需方法；它不是实施许可或前置门。`proposed/` 仅承载需要显式评审的持久决定提案。
+问题澄清与执行分开：[_backlog/](../_backlog/README.md) 收录待澄清问题、查证材料、缺陷和按需方法；它不是实施许可或前置门（唯一带日期的范围例外 = 修复就绪缺陷卡的 P1/P2 有界修复，[D24](../docs/00-index.md)）。`proposed/` 仅承载需要显式评审的持久决定提案。
 
 ## proposed → implemented 的执行纪律（门牌）
 
