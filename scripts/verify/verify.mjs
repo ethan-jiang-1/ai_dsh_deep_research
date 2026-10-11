@@ -35,7 +35,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'archived-note-pointer', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'client-half', 'guard-red-record', 'row-deps', 'workspace-contract', 'handbook-budget', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'pack-workspace-fresh', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'backlog-liveness', 'dist-manual-version', 'port-exclusive', 'hooks-active'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'archived-note-pointer', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'client-half', 'guard-red-record', 'row-deps', 'workspace-contract', 'handbook-budget', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'cockpit-doc-registry', 'pack-workspace-fresh', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'backlog-liveness', 'dist-manual-version', 'port-exclusive', 'hooks-active'];
 
 // vendor/dsh 钉身份的 tag 面（commit 面 = vendor-pin 门禁的 PIN；pack-bundle-compat 消费它
 // 断言 pack 兼容矩阵含当前 tag——升 pin 时两处同 diff 改；本文件里的 tag 复述受 pin-agreement 对账）
@@ -1389,6 +1389,28 @@ const allFiles = walk(ROOT);
       if (registration.test(l) && !/\bscoped\.effect\(/.test(l))
         fail(gate, `src/client/index.ts:${i + 1}: 注册调用不在 scoped.effect 包裹内——registrations are effects（dispose 即撤销贡献），包 effect 或并入既有 effect`);
     });
+  }
+}
+
+// ── 门禁 35：cockpit-doc-registry（驾驶舱构成正本 ↔ 盘上模块登记；issue ③-b 用户拍板
+//    「补一条窄 verify 门」）。规则：`packages/deep-research-pack/src/client/` 与 `src/lib/`
+//    下每个 .ts/.tsx 的文件名必须出现在构成正本 `docs/design/40-research-cockpit.md` 里——
+//    正本是驾驶舱构成的唯一说明，模块上了盘而正本没跟上 = 文档说谎（2026-10-11 实测形态：
+//    业务摘要层 brief-fold 与 review-readiness 上线后，正本仍写「七区」「六件」）。
+//    防空集：两目录合计 0 个模块 / 正本缺席 → 红（静默变空集的门禁等于不存在）。──
+{
+  const gate = 'cockpit-doc-registry';
+  const docPath = join(ROOT, 'docs', 'design', '40-research-cockpit.md');
+  const moduleDirs = [join(PACK, 'src', 'client'), join(PACK, 'src', 'lib')];
+  if (!existsSync(docPath)) fail(gate, 'docs/design/40-research-cockpit.md 缺席（驾驶舱构成正本）');
+  else {
+    const doc = readFileSync(docPath, 'utf8');
+    const modules = moduleDirs.flatMap((dir) => (existsSync(dir) ? readdirSync(dir).filter((f) => /\.(ts|tsx)$/.test(f)).map((f) => join(dir, f)) : []));
+    if (modules.length === 0) fail(gate, 'src/client 与 src/lib 下 0 个 .ts/.tsx（防空集：驾驶舱 client 面与折算层常在）');
+    else for (const abs of modules) {
+      if (!doc.includes(abs.slice(abs.lastIndexOf(sep) + 1)))
+        fail(gate, `${relative(ROOT, abs)} 未在构成正本登记（修正 = 在 docs/design/40-research-cockpit.md §2 的件表或折算层表加一行：文件链接 + 职责）`);
+    }
   }
 }
 

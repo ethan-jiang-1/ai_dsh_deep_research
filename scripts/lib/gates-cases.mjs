@@ -148,6 +148,11 @@ const linkUntrackedTarget = () => (dir) => {
  *  expect（可选）= 断言红**必须含此子串**；用于"该门禁在副本基线本就非 PASS"的场景——
  *  此时只查 `FAIL  <gate>` 会因**别的**报因而假绿（断言空转）。凡 gate 在对照组非 PASS 者
  *  必须给 expect（主流程会强制检查这一点）。 */
+/** 未登记模块注入（cockpit-doc-registry）：丢一个 pack 模块进 src/lib/，不改构成正本。 */
+const dropUnregisteredModule = (dirRel) => (dir) => {
+  writeFileSync(join(dir, dirRel, 'probe-unregistered-module.ts'), 'export const probeUnregistered = 0\n');
+};
+
 export const CASES = [
   { id: 'md-links-dead', gate: 'md-links', mutate: appendTo('README.md', '\n[死链探针](./definitely-missing-file.md)\n') },
   { id: 'md-links-untracked', gate: 'md-links', mutate: linkUntrackedTarget() },
@@ -240,6 +245,10 @@ export const CASES = [
     expect: 'docs/session-format-status.md: verdict=na 必须给 liveness' },
   { id: 'align-ledger-na-liveness-missing', gate: 'align-ledger', mutate: naLivenessMissing(),
     expect: 'website/AGENTS.md: verdict=na 必须给 liveness' },
+  // 未登记模块注入（cockpit-doc-registry）：往 pack 的 src/lib/ 丢一个新模块、不动构成正本
+  // ——模拟"模块上了盘、正本没跟上"（2026-10-11 实测形态：brief-fold / review-readiness 上线
+  // 后正本仍写「七区」「六件」）。git add 由驱动壳统一执行，故 tracked 面能看见它。
+  { id: 'cockpit-doc-registry-unregistered-module', gate: 'cockpit-doc-registry', mutate: dropUnregisteredModule('packages/deep-research-pack/src/lib') },
 ];
 
 export const CONTROLS = [

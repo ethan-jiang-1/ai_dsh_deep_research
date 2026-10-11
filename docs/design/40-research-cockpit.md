@@ -27,14 +27,14 @@
 
 | 件 | 文件 | 职责 |
 |---|---|---|
-| 研究状态页签 | [ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) | 右栏页签，自上而下七区：① HITL 挂起横幅（点名锚点 + 参与指引）② 流程轨道 = ◆立项确认 + 立项→组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付（步序正本 = [m2-run-mechanics 运行流程总览](../../notes/implemented/2026-09-24-m2-run-mechanics.md)；↻ rerun 回路自交付审阅可见：补研究回挖掘 / 修订表述原位改 / 另起新 bundle；交付节点带 final/ 版本；步态符号 ✓已过/●进行中/○未到——done 绿字、current 琥珀唯一、回边落点重入描边（与仪表盘同语法，图例行随轨））③ 研究问题行 ④ 人性化活动流 ⑤ 证据计数 + 交付状态 ⑥ 决策诚实线（指路 question.md §Decisions）⑦ 队员动态折叠区（[member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)：agentTeam 投影取 roster → 多路 follow 队员会话 → 检索/抓取/出错动作行，每人一节默认折叠 + 计数徽标） |
+| 研究状态页签 | [ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) | 右栏页签，自上而下八区：⓪ 业务摘要层（五问业务语言 = 研究什么 / 已确认什么 / 未知什么 / 你现在要不要操作；折算住 brief-fold，计数进不了本层）① HITL 挂起横幅（点名锚点 + 参与指引）② 流程轨道 = ◆立项确认 + 立项→组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付（步序正本 = [m2-run-mechanics 运行流程总览](../../notes/implemented/2026-09-24-m2-run-mechanics.md)；↻ rerun 回路自交付审阅可见：补研究回挖掘 / 修订表述原位改 / 另起新 bundle；交付节点带 final/ 版本；步态符号 ✓已过/●进行中/○未到——done 绿字、current 琥珀唯一、回边落点重入描边（与仪表盘同语法，图例行随轨））③ 研究问题行 ④ 人性化活动流 ⑤ 证据计数 + 交付状态 ⑥ 决策诚实线（指路 question.md §Decisions）⑦ 队员动态折叠区（[member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)：agentTeam 投影取 roster → 多路 follow 队员会话 → 检索/抓取/出错动作行，每人一节默认折叠 + 计数徽标） |
 | 活标题 | 同上（`ResearchStatusTitle`） | 挂起时页签名变「研究状态 · ⏳ 等你拍板」 |
 | 研究语义工具卡 | [ResearchToolCard.tsx](../../packages/deep-research-pack/src/client/ResearchToolCard.tsx) + [tool-card.ts](../../packages/deep-research-pack/src/lib/tool-card.ts) | 对话流卡片：`spawn_teammate` → 组队卡、`web_search` → 检索卡（2 张） |
 | 挂起显性化 | [index.ts](../../packages/deep-research-pack/src/client/index.ts)（`revealStatusTab`） | pending false→true 迁移时 `openTab` 右栏自动展开；页签 dock 折叠态保持挂载（观察者常在） |
 | keyed 常量 | [keys.ts](../../packages/deep-research-pack/src/client/keys.ts) | 字面量唯一正本（`client-keys` 门禁对账——拼错不报错、永不渲染） |
 | host 半 | [src/index.ts](../../packages/deep-research-pack/src/index.ts) | 空壳宿主位（bundle 行 name = 包名；浏览器半经 `exports["./client"]` 装配） |
 
-折算层六件（`src/lib/`，全部纯函数、fail-soft 永不 throw）：
+折算层八件（`src/lib/`，全部纯函数、fail-soft 永不 throw）：
 
 | 折算 | 输入 → 输出 | 要点 |
 |---|---|---|
@@ -44,6 +44,8 @@
 | [bundle-bind](../../packages/deep-research-pack/src/lib/bundle-bind.ts) | journal 事件 → 本会话绑定的 run slug + 绑定强度 | 只认 `tool/call` 参数路径里的 `drt_<slug>/`；**写强读弱**——write/edit 命中直接定绑，仅读命中兜底（立项预检读旧 bundle 的错绑防线，2026-09-28 首跑实证） |
 | [tool-card](../../packages/deep-research-pack/src/lib/tool-card.ts) | call/result 切片 → 卡片状态 | running / ok / error / stopped |
 | [member-activity](../../packages/deep-research-pack/src/lib/member-activity.ts) | 队员 journal 事件 → 检索/抓取/出错动作行 + 全量计数 | 粒度定夺 = [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)（2026-10-10 用户三问：文件读写不入流）；失败行剥 "Error: " 工程前缀；行截尾窗与 activity-fold 同款 |
+| [brief-fold](../../packages/deep-research-pack/src/lib/brief-fold.ts) | 既有事实源投影 → 业务摘要五问 | 输入面**不含**证据计数与工具调用数（计数在类型层面进不了完成态文案，keyless 禁词单测钉）；九态优先级 = 挂起 > 立项预检窗 > 未绑定 > 审查 FAIL > 已交付 > 推进中；派生不出的状态显式缺省，不虚构 |
+| [review-readiness](../../packages/deep-research-pack/src/lib/review-readiness.ts) | review.md 全文 → 终局 readiness 三态 | 只认**行首**判定行、取最后一条：文末附录保留的轮次血统（如首轮 `readiness: FAIL`）是行内引用，不得夺权；空模板 `PASS \| FAIL`、无判定行或输入畸形 → `null`（不猜）。驾驶舱、仪表盘与 client-load-smoke 同源消费 |
 
 ## 3. 数据通道与接线
 
