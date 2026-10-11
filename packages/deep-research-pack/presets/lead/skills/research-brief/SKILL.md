@@ -44,7 +44,8 @@ description: 立项对齐（HITL1）方法论：判型模式库对照、研究�
    - `scope_role`：`primary`（报告主体）/ `synthesis`（跨 topic 综合）/ `comparison`（对比）/ `supporting`（背景）。
    - topic 数量 = 研究类型 × 篇幅：quick ≤1，standard 2–4，deep 4–8。
 6. **计划确认卡**（HITL1 第二段；**quick_factual 免发**——类型为快速事实核查时跳过本步直接开工）：两文件定稿后、组队/侦察开工前，把计划呈用户拍板——`ask_user_question` 瘦卡：
-   - 问题正文 ≤200 字：计划要点（问题定稿一句话 + 业务决策简报行〔决定 / 比较范围 / 输出形式 / 主要未知〕+ topic 图骨干 + 深度/口径拍板）+「全文 = question.md / topics.md」指针；
+   - 问题正文 **≤200 字**——口径 = `ask_user_question` 的 `question` 字段**全部字符**（含业务简报行与「全文 = …」指针）：计划要点（问题定稿一句话 + 业务决策简报行〔决定 / 比较范围 / 输出形式 / 主要未知〕+ topic 图骨干 + 深度/口径拍板）+「全文 = question.md / topics.md」指针；
+   - **呈卡前先数字数**：超限就删次要项再提交（例如逐条 topic 名压成「T1–T4」骨干、括号旁白删净），**不把超限卡递给用户**——交付门按同一口径记账超限（461 字实测 = 超限 2.3 倍，属违纪）；
    - options 三路：按计划开跑（Recommended）/ 修订计划（自由文本意见，**附加**进计划不替换）/ 放弃（不开跑，bundle 处置照 sibling 预检规矩）；
    - **一轮制**：修订意见由你逐字落 question.md §Decisions（用户原话 verbatim）后直接开工，不再二次呈卡；意见推翻类型/深度级 → 走放弃重开，不在卡上循环；
    - 拍板（含选择与修订意见）落 question.md §Decisions 第 1 条 + HITL1 Alignment Snapshot 的「计划确认」字段；

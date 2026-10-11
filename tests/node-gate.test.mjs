@@ -224,6 +224,20 @@ test('门①合规：关联会话含 HITL1 签名 ask（研究类型问）→ PA
   assert.match(r.gates.hitlAsk.detail, /HITL1 签名 ask 1 次/)
 })
 
+test('门①WARN：计划确认卡正文超 ≤200 字 → PASS 但 detail 记账（WARN 不拦交付）', () => {
+  const r = gateBundle(bundle('fixture-complete'), sessions('s-plan-over'), { hitlDate: '2026-10-06' })
+  assert.equal(r.gates.hitlAsk.status, 'PASS', '超限是 WARN 不是红——存量 2/2 超限下硬门会拦下每一场')
+  assert.match(r.gates.hitlAsk.detail, /WARN 计划确认卡正文超 ≤200 字纪律：261 字/)
+  assert.equal(r.red, false, 'WARN 不拦交付')
+})
+
+test('门①互补态：计划确认卡正文 ≤200 字 → 无 WARN，detail 记合规（条件判据的另一半）', () => {
+  const r = gateBundle(bundle('fixture-complete'), sessions('s-plan-ok'), { hitlDate: '2026-10-06' })
+  assert.equal(r.gates.hitlAsk.status, 'PASS')
+  assert.doesNotMatch(r.gates.hitlAsk.detail, /WARN/)
+  assert.match(r.gates.hitlAsk.detail, /计划确认卡正文合规（1 张 ≤200 字）/)
+})
+
 test('门①N/A：question.md 缺席 → 无对象（方向契约未立，不越界）', () => {
   const r = gateBundle(bundle('fixture-no-question'), sessions('s-complete'))
   assert.equal(r.gates.hitlAsk.status, 'N/A')

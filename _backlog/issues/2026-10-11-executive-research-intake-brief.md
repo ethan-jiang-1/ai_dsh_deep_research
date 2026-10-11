@@ -64,10 +64,13 @@ HITL1 语义由 `tests/presets.test.mjs`「HITL1 两段卡」四处对账测试�
 - 行为：HITL1 第二段计划确认卡的**问题正文** ≤200 字（skill 与 persona 的既有纪律），交付时被机械检出而非靠自觉。
 - 类：模型行为（生成）+ 确定性检出。
 - 输入/状态：存量标定 = 近 30 天 612 场会话扫描，命中计划卡 **2 张：461 字 / 246 字 → 2/2 超限**（2026-10-11 实测，扫描器 `runtime/scan-plan-cards.mjs`）；互补态 = 合规卡（<200 字）应放行。
-- 判定与失败信号：新 run-gate 在 bundle 会话日志里量该正文；超限 → 门红；**失败信号 = 超限却门绿（漏检）**。
-- 负例/互补：**先证负例**——注入一张 461 字卡 → 门必红，再算门成立（`writing-a-gate` 程序）；合规卡 → 绿。
-- 证据 owner：候选 = `scripts/run-gates/`（run 期行为，**不能塞进 `verify.mjs`**——那是仓库结构门）或 node-gate 新门（判据核心入 `lib/node-gate-core.mjs`，fixtures 入 `tests/`）；**不能证**：文案是否业务可读（属 ①-b）。
-- 人工判据：无。**已定（2026-10-11 用户拍板）= 先落 WARN 级检出 + 收紧措辞**：门只记账不拦交付（2/2 超限下硬门会拦下每一场），同 diff 收紧 persona/skill 的计划卡字数句；待遵守率改善后再评估升硬门（升格条件写进卡，不靠记忆）。
+- 判定与失败信号：**已落**——node-gate 门① 的 detail 按同一口径记账（`ask` 的 `question` 字段全长）；超限 → **WARN 注记**（status 仍 PASS、不拦交付）；**失败信号 = 超限却无注记（漏检）**。
+- 负例/互补：**两态夹具均已证**——`fixtures/node-gate/sessions/s-plan-over`（261 字卡 → detail 出 WARN 并记字数）、`s-plan-ok`（99 字卡 → 无 WARN、记「正文合规（1 张 ≤200 字）」）；真实 bundle 复核 = `drt_deepseek-default-upgrade` 出「⚠ WARN …：461 字 / 246 字」且 node-gate exit 0。
+- 证据 owner：`scripts/lib/node-gate-core.mjs` 的 `hitlAskGate`（门①，run 期行为；**不能塞进 `verify.mjs`**——那是仓库结构门）+ `tests/node-gate.test.mjs` 两用例；**不能证**：文案是否业务可读（属 ①-b）、模型下一场是否真遵守（要 ①-b 与真实 run 观察）。
+- 人工判据：无。
+- **处置（2026-10-11 用户拍板 + 已落）**：①**WARN 级检出**落在 node-gate 门①（同 diff 同数据的自然落点，报告落 bundle 的 `node-gate.md`）——硬门会拦下每一场（存量 2/2 超限），故先记账；②**收紧措辞**改在 skill 正文（`presets/lead/skills/research-brief/SKILL.md` §6）：写明计数口径（`question` 字段全部字符，含指针行）+ **呈卡前先数字数**、超限先删次要项再提交——**不动 persona**（persona 属模型可见面且触发 lead fixture 重录，skill 正文不进组装请求，改动面更小）。
+- **升硬门的前置条件（写进卡，不靠记忆）**：措辞收紧后新场次计划卡 ≤200 字达标（连续 ≥3 场）→ 把门①的 WARN 升为 RED；若仍超限，先继续收敛 skill 而非升门。
+- 必跑面（本次改动实跑）：`render-overlay`（pack 改）· L1 `preset-smoke` **ALL PASS**（四 preset 真挂载）· L4-lite **ALL PASS**（四角色响应 + scout `web_search`）· L0 `verify` 全绿 / `pnpm test` 376-376（新增门①两用例）。
 
 **①-d 记账修正：阶段一引用的 bundle 不在盘**
 - 行为：卡面不再引用无法回溯的证据源。

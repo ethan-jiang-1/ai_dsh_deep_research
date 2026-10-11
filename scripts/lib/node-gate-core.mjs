@@ -310,6 +310,13 @@ export function hitlAskGate(bundleDir, sessionsRoot, hitlDate, readLog = plainLo
   let asks = 0
   let hitl1Signed = 0
   let writerSessions = 0
+  // 计划确认卡正文字数记账（HITL1 第二段，skill §6 纪律 = question 字段全长 ≤200 字）。
+  // 严重级 = **WARN**（记账不拦交付）：存量标定 2/2 超限（461 / 246 字，2026-10-11 扫描 612 场），
+  // 硬门会拦下每一场交付；升硬门的前置 = 措辞收紧后遵守率改善（判据与升格条件见 ①卡 ①-c 行）。
+  const PLAN_CARD_MARK = '按计划开跑'
+  const PLAN_CARD_LIMIT = 200
+  let planCards = 0
+  const planCardOver = []
   if (sessionsRoot && existsSync(sessionsRoot)) {
     const scan = (dir) => {
       for (const ent of readdirSync(dir, { withFileTypes: true })) {
@@ -332,6 +339,19 @@ export function hitlAskGate(bundleDir, sessionsRoot, hitlDate, readLog = plainLo
           if (d?.name === 'ask_user_question') {
             sessionAsks++
             if (/研究类型/.test(args)) sessionSigned++
+            // 计划确认卡识别 = options 里出现「按计划开跑」（卡上固定选项之一，比"正文含计划字样"稳）
+            if (args.includes(PLAN_CARD_MARK)) {
+              const raw = d?.arguments
+              let payload = null
+              try { payload = typeof raw === 'string' ? JSON.parse(raw) : (raw ?? null) } catch { payload = null }
+              for (const q of payload?.questions ?? []) {
+                const labels = (q?.options ?? []).map((o) => String(o?.label ?? ''))
+                if (!labels.some((l) => l.includes(PLAN_CARD_MARK))) continue
+                planCards++
+                const len = String(q?.question ?? '').length
+                if (len > PLAN_CARD_LIMIT) planCardOver.push(len)
+              }
+            }
           }
         }
         if (!sessionWrites) continue
@@ -351,7 +371,16 @@ export function hitlAskGate(bundleDir, sessionsRoot, hitlDate, readLog = plainLo
         (pre ? '（契约前交付——如实报告不计红，run bundle 是交付记录不改历史）' : ''),
     }
   }
-  return { status: 'PASS', detail: `写过 question.md 的会话 ${writerSessions} 个：HITL1 签名 ask ${hitl1Signed} 次（总 ask ${asks} 次）——锚点在场` }
+  return { status: 'PASS', detail: `写过 question.md 的会话 ${writerSessions} 个：HITL1 签名 ask ${hitl1Signed} 次（总 ask ${asks} 次）——锚点在场` + planCardNote(planCards, planCardOver) }
+}
+
+/** 计划确认卡字数 WARN 注记（判据与升格条件见 ①卡 ①-c 行；口径 = ask 的 question 字段全长）。 */
+function planCardNote(planCards, planCardOver) {
+  if (planCardOver.length > 0) {
+    return `；⚠ WARN 计划确认卡正文超 ≤200 字纪律：${planCardOver.map((n) => `${n} 字`).join(' / ')}`
+      + '（口径 = ask 的 question 字段全长；先记账不拦交付——升硬门的前置 = 措辞收紧后遵守率改善）'
+  }
+  return planCards > 0 ? `；计划确认卡正文合规（${planCards} 张 ≤200 字）` : ''
 }
 
 /**
