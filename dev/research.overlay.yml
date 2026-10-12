@@ -212,6 +212,7 @@
           # 只挂 lead（单 run 单 owner）；观察面 GoalBar（ui-goal）web 层自带。
           - id: tool-goal
             name: '@deepseek-ai/dsh-tool-goal'
+          # tool-present：lead 的自包含授权（bundle 层 host 注册见 cordis.patch.yml 同名行）
           - id: tool-present
             name: '@deepseek-ai/dsh-tool-present'
           - id: tool-web
@@ -304,7 +305,8 @@
     # ── web 工具：不在此声明。实证结论（RFC web-tool-rows）：web seam / web-search-deepseek /
     #    web-fetch-http / tool-web 四行全部是 dsh-base 出厂行——providers 与 seam 留在 host 面，
     #    模型面 tool-web 行随各 preset 声明。此处 insert 反而会与 surface 的 preset-scoping 设计打架。──
-    # ── 交付物声明工具（base 无此行）──
+    # ── 交付物声明工具（base 无此行；host 面注册。lead 的工具授权另在 lead.patch.yml
+    #    plugins 自包含声明——preset 层与 bundle 层分工，非 D16 同层重复行）──
     - id: tool-present
       name: '@deepseek-ai/dsh-tool-present'
     # ── 团队机制行（agent-team / tool-agent-team）不在此声明（RFC m2-p1-run-channel A 定案）：

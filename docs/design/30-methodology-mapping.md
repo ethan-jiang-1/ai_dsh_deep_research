@@ -1,6 +1,7 @@
 # 30 · 方法论映射：codex Deep Research harness 内核 → DSH 载体
 
 > 层：设计（为什么）。这是 [evaluation.md](../evaluation.md) L3 领域面的核心载体：
+> 读完去哪：角色内容与信噪比防线落点 = [20](./20-roles.md)；观察面构成 = [40](./40-research-cockpit.md)。
 > 生命周期每一环节在本插件的落点，或带证据的弃用理由。考古来源 =
 > [deep-research-harness-analysis（考古报告）](../../notes/implemented/2026-09-24-deep-research-harness-analysis.md)
 > （codex harness 11-phase 生命周期 / wave 语义 / gate 体系 / 证据四层 / 8 条实证教训）。

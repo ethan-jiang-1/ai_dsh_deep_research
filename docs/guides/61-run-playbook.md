@@ -79,7 +79,7 @@
 ——cwd 不是研究工作区，手册就不进上下文（首场 run 因此丢了跨角色证据契约，31 份证据无
 frontmatter）。`dev/run-kickoff.mjs` 已默认用 workspaceId 形态把会话建在 research-workspace。
 
-- web GUI 新建会话：preset 选 **Deep Research Lead**（默认项），工作区选 **research-workspace**；
+- web GUI 新建会话：preset 选 Deep Research Lead（默认项），工作区选 research-workspace；
 - 无 GUI 手（代理操作）：`node dev/run-kickoff.mjs --port 3083 --token <横幅 token>
   [--prompt-file <file>]` 建 Lead 会话（workspace/create 幂等自检已内建；全档参数 =
   [guides/60 §2](./60-dev-loop.md)）；

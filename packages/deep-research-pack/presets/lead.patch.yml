@@ -62,6 +62,7 @@
           # 只挂 lead（单 run 单 owner）；观察面 GoalBar（ui-goal）web 层自带。
           - id: tool-goal
             name: '@deepseek-ai/dsh-tool-goal'
+          # tool-present：lead 的自包含授权（bundle 层 host 注册见 cordis.patch.yml 同名行）
           - id: tool-present
             name: '@deepseek-ai/dsh-tool-present'
           - id: tool-web
