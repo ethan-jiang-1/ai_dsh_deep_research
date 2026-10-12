@@ -4,9 +4,6 @@
 
 ## 活跃清单
 
-- [2026-10-12-research-preference-templates.md](2026-10-12-research-preference-templates.md) — 研究方法配置总卡：已确认意图、方法/预设语义与首版范围；子卡依赖入口。
-- [2026-10-12-research-method-run-lifecycle.md](2026-10-12-research-method-run-lifecycle.md) — 单次研究闭环：HITL1 选择/覆写、快照、全渠道派工、恢复/变更与只读回看。
-- [2026-10-12-research-method-profile-management.md](2026-10-12-research-method-profile-management.md) — 长期管理与复用：默认/显式保存、作用域、持久化及 D7/D18 架构边界；是否纳入首版待定。
 - [2026-10-12-research-preference-detail-ux.md](2026-10-12-research-preference-detail-ux.md) — 研究偏好详情查看与分区编辑 UX（右栏面板期 1.5）：Modal 详情、Menu 操作、分阶段编辑；方案已细化待确认。
 
 ## 写一张卡

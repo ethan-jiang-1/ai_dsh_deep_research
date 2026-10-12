@@ -134,7 +134,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 
 ## 已知限制与延后工作
 
-- **研究方法配置首版边界**：方法 = 调查路径指导，不新增强制预算/来源数硬门，readiness 不自动验证方法承诺之外的新合同；用户方法库 `method-library.md` 是**工作区本地用户数据**（Lead 显式维护），无版本史、无跨设备同步、无共享；高承诺学术模式（系统综述类）不在预设；Settings 管理页不做（需显式重议 D7/D18 架构边界，见 [_backlog 长期管理卡](../../_backlog/issues/2026-10-12-research-method-profile-management.md)）；
+- **研究方法配置首版边界**：方法 = 调查路径指导，不新增强制预算/来源数硬门，readiness 不自动验证方法承诺之外的新合同；用户方法库 `method-library.md` 是**工作区本地用户数据**（Lead 显式维护），无版本史、无跨设备同步、无共享；高承诺学术模式（系统综述类）不在预设；Settings 管理页不做（需显式重议 D7/D18 架构边界，见 [_backlog 长期管理卡](../../_backlog/_archived/settled_issues/2026-10-12-research-method-profile-management.md)）；
 
 - **会话必须建在**研究工作区里**才能看到渐进面**：页签读的是会话工作区根（`workspaceFiles`），
   run bundle 在工作区内才可见——故需先把研究工作区注册进 DSH（`workspace/create`），再用

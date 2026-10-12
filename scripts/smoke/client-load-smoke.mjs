@@ -39,6 +39,7 @@ import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pac
 import { deriveBusinessBrief } from '../../packages/deep-research-pack/src/lib/brief-fold.ts'
 import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
 import { foldActivityRows } from '../../packages/deep-research-pack/src/lib/activity-fold.ts'
+import { streamFailureOf } from '../../packages/deep-research-pack/src/lib/stream-failure.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const arg = (name, fallback) => {
@@ -598,6 +599,33 @@ try {
     const paneText = await paneTextOf()
     const paneOk = paneText.includes('研究状态') && (paneText.includes('💬') || paneText.includes('（研究中'))
     step(paneOk, '页签体渲染（keyed 槽体挂对 key + follow 通道接通）')
+    // 流畸形死亡恢复指引（BUG-023 修复①）：盘侧 streamFailureOf 真值 ↔ UI 横幅对账——
+    // 末位回合死于上游流失败且无新回合接手才显示；用真实死亡会话（如渐进面探针会话）作正例。
+    const openedEvents = (() => {
+      const matches = []
+      for (const g of readdirSync(join(home, 'sessions'))) {
+        const gd = join(home, 'sessions', g)
+        let dirs; try { dirs = readdirSync(gd) } catch { continue }
+        for (const d of dirs) {
+          const lp = resolveSessionLog(join(gd, d))
+          if (!lp) continue
+          try {
+            const { readable, events } = readSessionEvents(lp)
+            if (!readable) continue
+            const title = events.filter((e) => e?.type === 'session/title').at(-1)?.data?.title
+            if (title === SESSION_TITLE) matches.push(events)
+          } catch { /* 缺席日志不作为候选 */ }
+        }
+      }
+      return matches.length > 0 ? matches : null
+    })()
+    if (openedEvents !== null) {
+      // 标题可撞车（smoke 每跑造一个探针会话）——同题任一会话死亡即期待横幅（正面证据）；
+      // 负例（存活不显示）由 stream-failure keyless 测试覆盖。
+      const hintExpected = openedEvents.some((ev) => streamFailureOf(ev).dead)
+      step(paneText.includes('上游模型流连续异常') === hintExpected,
+        '流失败恢复指引 = 盘侧 streamFailureOf 真值（死亡会话显示、存活会话不显示）', `expected=${hintExpected}`)
+    }
     const humanRows = (paneText.match(/🔍|👥|💬|📦/gu) ?? []).length
     // 行数与**本会话自己的** foldActivityRows 折算对账（数据无关断言）：快答型 run 走
     // subagent 通道、lead journal 人性化行天然少（实测 2 行）——≥3 的旧地板把会话形状
@@ -646,8 +674,13 @@ try {
         const segC = tc.slice(tc.indexOf('研究配置'))
         const builtinOk = ['事实核查', '领域地图', '主张核查', '方案比较'].every((n) => segC.includes(n))
         step(builtinOk, '研究配置页签体：内置偏好四条在场（只读表渲染）')
-        const libOk = segC.includes('我的偏好库') && (segC.includes('还没有保存的偏好') || segC.includes('用于本次'))
-        step(libOk, '研究配置页签体：偏好库区在场（空态或条目投影）')
+        // 库区断言随库状态走（盘侧 method-library.md 真值）：空库 → 引导文案；有条目 → 条目名/默认徽标在场。
+        const libFile = join(ROOT, 'research-workspace', 'method-library.md')
+        const hasEntries = existsSync(libFile) && /^## /m.test(readFileSync(libFile, 'utf8'))
+        const libOk = segC.includes('我的偏好库') && (hasEntries
+          ? (segC.includes('格局调研') || segC.includes('默认偏好'))
+          : segC.includes('还没有保存的偏好'))
+        step(libOk, '研究配置页签体：偏好库区 = 盘侧库状态真值（空态引导 / 条目投影）', hasEntries ? '库有条目' : '库为空')
         // 详情 Modal（detail-ux 期 1.5）：点内置条目名称 → 四分区 + 内置操作在场 → 关闭。
         const nameBtn = page.getByRole('button', { name: /事实核查 ›/ }).first()
         if (await nameBtn.isVisible({ timeout: 6_000 }).catch(() => false)) {

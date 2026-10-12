@@ -23,6 +23,9 @@ runtime/harness-home/*
 # templates/ 与研究手册（AGENTS.md）是资产，进库
 research-workspace/drt_*
 research-workspace/archive/
+# 用户方法库（D25）：工作区本地用户数据——README 明载「无版本史」；内容是 runtime truth，
+# 不进版本控制（进库的只有 pack 侧格式正本 = lead 的 research-brief skill）。
+research-workspace/method-library.md
 # 排练/冒烟残留
 runtime/smoke-workspace/*
 !runtime/smoke-workspace/.gitkeep

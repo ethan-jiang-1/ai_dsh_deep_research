@@ -1,11 +1,13 @@
 ---
-status: 等人拍板
+status: 已结
 opened: 2026-10-12
 ---
 
 # 推敲：Deep Research 研究方法配置——总体边界与预设模型
 
-> 立卡：2026-10-12 ｜ 状态：等人拍板 ｜ 类型：Feature ｜ 结论倾向：现在做——首版已实施，待用户 review 交付说明后定稿 ｜ 可关闭：否
+> 立卡：2026-10-12 ｜ 状态：已结（2026-10-12）｜ 类型：Feature ｜ 结论倾向：现在做——首版已实施，待用户 review 交付说明后定稿 ｜ 可关闭：是
+
+**关闭结论（2026-10-12）**：首版一轮落地并经用户实测（面板体验正反馈已录）。总体语义、四预设（事实核查/领域地图/主张核查/方案比较）、HITL1 方法行（普通 run 计划卡 + quick 自动采用）、question.md「研究方法（本次实际采用）」节、派工/恢复引用、对话式用户方法库、右栏「研究配置」面板（[D25](../../../docs/00-index.md)）与偏好详情/编辑（[detail-ux 卡](../../issues/2026-10-12-research-preference-detail-ux.md)）全部交付；真实走查 = 快答 run 全链 + 普通 run 方法节/方法行（session log 原文）+ 偏好库保存路径（steer→Lead 写四字段库文件）。系统综述/跨设备/期 2 直写 = 排除或留重议条件（见[长期管理卡](2026-10-12-research-method-profile-management.md)）。**Note 义务判断**：设计决定理由已由本卡组（归档可检索）+ D25 台账承载，不另立 implemented Note。
 
 **问题与期望结果：** 用户希望在 Deep Research 中选择常用研究方法并可自定义，让整次研究的相关节点采用连贯的调查、核验与综合方法；同时需要可理解的 DSH 交互和适当的管理/复用能力。本卡拥有总体意图、方法与既有概念的边界、预设内容及首版范围，具体单次流程和长期管理由下列子卡承载。
 **当前情况：** 用户已认可“研究方法配置”名称与整体意图，并授权结合当前实现规划、拆分 issue，再推敲落地；尚未授权功能实施。现有问卡有来源偏好/User Research Controls，缺的是可复用配方及跨节点解析、传递。统一依据见 [综合研究](../research/2026-10-12-research-preferences.md)。
@@ -35,11 +37,11 @@ opened: 2026-10-12
 
 ## 概念与架构边界
 
-已知事实：类型/判型影响 topic 与编制，深度/篇幅影响投入和输出；run bundle 是研究事实正本，fresh teammate 不继承 Lead 历史，派工要明确传递。依据为 [research-brief](../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md)、[team-assembly](../../packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md) 与 [状态模型](../../docs/design/50-agent-loop-and-state.md)。
+已知事实：类型/判型影响 topic 与编制，深度/篇幅影响投入和输出；run bundle 是研究事实正本，fresh teammate 不继承 Lead 历史，派工要明确传递。依据为 [research-brief](../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md)、[team-assembly](../../../packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md) 与 [状态模型](../../../docs/design/50-agent-loop-and-state.md)。
 
 建议的边界：方法预设提供调查路径默认，本次方法是实际采用内容；两者与 DSH agent preset、DSH profile 消歧。Purpose、Scope、预算不复制为第二份可编辑正本。来源/摘录/独立性等共同要求不被预设降级；方法不能替用户授权工具、增加角色或跳过既有审查。
 
-当前 [D7/D18](../../docs/00-index.md) 自写代码用途限定研究观察/调试，[Cockpit](../../docs/design/40-research-cockpit.md) 是只读派生观察。DSH Settings 可扩展是技术事实，采用它开发管理功能是待决方案；可能需要显式重议架构边界，不因本次拆卡自动改变合同。
+当前 [D7/D18](../../../docs/00-index.md) 自写代码用途限定研究观察/调试，[Cockpit](../../../docs/design/40-research-cockpit.md) 是只读派生观察。DSH Settings 可扩展是技术事实，采用它开发管理功能是待决方案；可能需要显式重议架构边界，不因本次拆卡自动改变合同。
 
 ## 方案与取舍
 
@@ -78,10 +80,10 @@ opened: 2026-10-12
 
 ## 关闭条件
 
-总体语义、预设边界与首版范围有依据且获必要确认；未展开内容和排除项明确，子卡收到准确问题与依赖。需要下游处理时按 [本仓交接方法](../methods/issue-to-note.md) 记录申请与去向；未满足则保持活跃。关闭不代替子卡结论或功能验收。
+总体语义、预设边界与首版范围有依据且获必要确认；未展开内容和排除项明确，子卡收到准确问题与依赖。需要下游处理时按 [本仓交接方法](../../methods/issue-to-note.md) 记录申请与去向；未满足则保持活跃。关闭不代替子卡结论或功能验收。
 
 ## 综合记录
 
 2026-10-12（实施）：按用户实施授权落地首版——内置四方法预设（事实核查/领域地图/主张核查/方案比较）+ HITL1 推荐/确认（quick_factual 自动采用）+ question.md「研究方法（本次实际采用）」节快照 + 全渠道派工/恢复引用 + 对话式用户方法库（method-library.md，显式才写）。实施期拍板与依据 = 单次卡「落地执行记录」。Settings 管理页不做（D7/D18 需显式重议）；Cockpit 方法摘要延后（核心闭环优先，属只读观察增强）。状态翻转 推敲中→等人拍板：实施完成，待用户 review 交付说明。
 
-2026-10-12：按用户要求，将连续研究与 UX 讨论综合为当前正文，并拆出单次研究、长期管理两张独立问题卡。撤回原卡中“只影响搜索还是总体方法”等已获回答的旧未知；保留已比较方案而不把建议转成决定。使用 [综合方法](../methods/requirements-synthesis.md) 与 [验收设计](../methods/validation-design.md)；完整读取本机 to-spec/to-tickets 源码作适配，覆盖其 tracker、ready-for-agent 与发布默认，不建立实施队列。
+2026-10-12：按用户要求，将连续研究与 UX 讨论综合为当前正文，并拆出单次研究、长期管理两张独立问题卡。撤回原卡中“只影响搜索还是总体方法”等已获回答的旧未知；保留已比较方案而不把建议转成决定。使用 [综合方法](../../methods/requirements-synthesis.md) 与 [验收设计](../../methods/validation-design.md)；完整读取本机 to-spec/to-tickets 源码作适配，覆盖其 tracker、ready-for-agent 与发布默认，不建立实施队列。

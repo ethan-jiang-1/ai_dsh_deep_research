@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-出处 = [长期管理卡](../../_backlog/issues/2026-10-12-research-method-profile-management.md) 期 1
+出处 = [长期管理卡](../../_backlog/_archived/settled_issues/2026-10-12-research-method-profile-management.md) 期 1
 （用户 2026-10-12 拍板「做期 1：显示 + 一键指令」）；架构依据 = 00-index **D25**（D7/D18 有界
 扩展）；详细 UX 推敲（Modal 详情 / 分区编辑 / 四字段库格式）= [1.5 卡](../../_backlog/issues/2026-10-12-research-preference-detail-ux.md)
 （**同一变更一并交付**：四字段格式 + Modal 详情/分区编辑/基于内置新建）；驾驶舱构成正本 = [design/40](../../docs/design/40-research-cockpit.md)；

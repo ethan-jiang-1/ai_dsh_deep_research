@@ -1,11 +1,13 @@
 ---
-status: 等人拍板
+status: 已结
 opened: 2026-10-12
 ---
 
 # 推敲：研究方法配置——单次研究选择、执行与恢复
 
-> 立卡：2026-10-12 ｜ 状态：等人拍板 ｜ 类型：Feature ｜ 结论倾向：现在做——闭环已实施并过真实 run 验证，待用户 review ｜ 可关闭：否
+> 立卡：2026-10-12 ｜ 状态：已结（2026-10-12）｜ 类型：Feature ｜ 结论倾向：现在做——闭环已实施并过真实 run 验证，待用户 review ｜ 可关闭：是
+
+**关闭结论（2026-10-12）**：单次闭环全链有据——快答 run（方法自动采用→方法节落格→subagent/轻量 critic→readiness PASS→交付→归档→操作侧 audit CRITICAL 0）+ 普通 run（计划确认卡**方法行**经 session log 原文实证「方法：领域地图（官方域优先、每实体一条可核源、口径对齐）」、方法节按题面改编、七 topic 契约）；偏好库保存路径 = steer→Lead 新建四字段库条目（journal 记用户原话与建库动作）。pending/queue/恢复语义实测与 [运行指南](../../../docs/guides/61-run-playbook.md) 一致（timed 超时未答不当作同意——Lead 正确拒绝把沉默当拍板）。遗留：本普通 run 的计划确认卡留用户在 GUI 亲自拍板（真实卡片在场，正好体验方法行）。
 
 **问题与期望结果：** 用户选择或调整方法后，希望整次研究按该方法工作，并能在恢复、重派和交付回看时知道实际采用了什么。本卡推敲从 HITL1 输入到 run 快照、角色执行、恢复与只读展示的完整路径，避免只加一个选项却没有行为或恢复依据。
 **当前情况：** [总卡](2026-10-12-research-preference-templates.md) 已记录用户意图；问卡有原始约束，Lead 派工已有自包含要求，run bundle 是研究事实正本。当前没有独立的方法快照及其传递约定。机制和节点映射见 [综合研究](../research/2026-10-12-research-preferences.md)。
@@ -21,13 +23,13 @@ opened: 2026-10-12
 
 ## 现行边界
 
-[research-brief](../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md) 的未知标 open、两段 HITL1、计划确认 ≤200 字及一轮修订是前置约束。skill 写已给信息不重复问，而 [Lead persona](../../packages/deep-research-pack/presets/lead.patch.yml) 要求已有答案仍发三问确认；这是待核对的现行表述张力，不能用新方法悄悄改写其中一处。quick_factual 不发第二段计划卡，不代表不记录当次方法；其单点 subagent 与轻量 Critic 也需得到适用内容。
+[research-brief](../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md) 的未知标 open、两段 HITL1、计划确认 ≤200 字及一轮修订是前置约束。skill 写已给信息不重复问，而 [Lead persona](../../../packages/deep-research-pack/presets/lead.patch.yml) 要求已有答案仍发三问确认；这是待核对的现行表述张力，不能用新方法悄悄改写其中一处。quick_factual 不发第二段计划卡，不代表不记录当次方法；其单点 subagent 与轻量 Critic 也需得到适用内容。
 
-[team-assembly](../../packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md) 的编制矩阵和派发五件仍是底座。spawn、已有队员新 task/消息、重派以及一次性查证都需考虑方法送达；不能只验证初次 spawn 或假定队员历史已包含最新要求。
+[team-assembly](../../../packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md) 的编制矩阵和派发五件仍是底座。spawn、已有队员新 task/消息、重派以及一次性查证都需考虑方法送达；不能只验证初次 spawn 或假定队员历史已包含最新要求。
 
-[状态模型](../../docs/design/50-agent-loop-and-state.md) 决定恢复仅依 run bundle；[NODES 回边](../../research-workspace/NODES.md#回边版本语义d17) 决定补研究回挖掘、表述修订原位、结构性另起 bundle、HITL1 不重开。[运行指南](../../docs/guides/61-run-playbook.md) 另有活跃 run 的 steer 方向修订，Lead 记 Decisions 后原地补搜，不算 rerun。冻结初始内容不能取消此能力；须区分明确修订与一般提问，记录变化并将新要求送给受影响队员。
+[状态模型](../../../docs/design/50-agent-loop-and-state.md) 决定恢复仅依 run bundle；[NODES 回边](../../../research-workspace/NODES.md#回边版本语义d17) 决定补研究回挖掘、表述修订原位、结构性另起 bundle、HITL1 不重开。[运行指南](../../../docs/guides/61-run-playbook.md) 另有活跃 run 的 steer 方向修订，Lead 记 Decisions 后原地补搜，不算 rerun。冻结初始内容不能取消此能力；须区分明确修订与一般提问，记录变化并将新要求送给受影响队员。
 
-呈现默认要兼容 [synthesis](../../packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md) 的报告要求与 quick 缩略；核查要求要保留 [Critic 轻量豁免](../../packages/deep-research-pack/presets/critic/skills/adversarial-review/SKILL.md)。方法增加的承诺如何判偏离、何时 UNVERIFIED/MAJOR/FAIL 仍需明确，原 readiness 不自动证明它们兑现。方法偏离由相关角色在其 owner 文件及 journal 记录，操作侧 audit 不由 Lead 或队员修改。
+呈现默认要兼容 [synthesis](../../../packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md) 的报告要求与 quick 缩略；核查要求要保留 [Critic 轻量豁免](../../../packages/deep-research-pack/presets/critic/skills/adversarial-review/SKILL.md)。方法增加的承诺如何判偏离、何时 UNVERIFIED/MAJOR/FAIL 仍需明确，原 readiness 不自动证明它们兑现。方法偏离由相关角色在其 owner 文件及 journal 记录，操作侧 audit 不由 Lead 或队员修改。
 
 ## 方案与取舍
 
@@ -58,7 +60,7 @@ opened: 2026-10-12
 
 ## 验收标准
 
-以下是已知意图与现行边界对应的标准草案，条件项等方案确定后才定稿；本轮只交准备材料，不宣称已通过运行验收。证据命令的适用面归 [开发指南](../../docs/guides/60-dev-loop.md)，具体新增断言需后续设计。
+以下是已知意图与现行边界对应的标准草案，条件项等方案确定后才定稿；本轮只交准备材料，不宣称已通过运行验收。证据命令的适用面归 [开发指南](../../../docs/guides/60-dev-loop.md)，具体新增断言需后续设计。
 
 | 行为与类别 | 输入/状态 | 通过信号与失败信号 | 负例/恢复 | 证据 owner 与限度 | 人判断 |
 |---|---|---|---|---|---|
@@ -91,4 +93,4 @@ opened: 2026-10-12
 
 ## 关闭条件
 
-本次闭环的交互、正本、送达、恢复和变更方案有依据；必要产品选择已确认，条件标准已定稿；后续处理申请与范围按 [交接方法](../methods/issue-to-note.md) 记录。仍缺事实或用户判断则保留准确缺口，不将规划完成写成运行行为已验收。
+本次闭环的交互、正本、送达、恢复和变更方案有依据；必要产品选择已确认，条件标准已定稿；后续处理申请与范围按 [交接方法](../../methods/issue-to-note.md) 记录。仍缺事实或用户判断则保留准确缺口，不将规划完成写成运行行为已验收。

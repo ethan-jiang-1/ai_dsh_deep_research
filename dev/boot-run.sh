@@ -184,7 +184,10 @@ if [ "$EGRESS_MODE" = "tun" ]; then
       echo "boot-run: ⚠ 自旋出口 10s 未就绪——web_fetch 将被 SSRF 守卫全域拒；可设 DSH_EGRESS_OUTLET=http://127.0.0.1:<代理口> 重跑" >&2
     fi
   fi
-  export no_proxy="localhost,127.0.0.1,::1"
+  # LLM/搜索 API 流不 ride fetch 出口（BUG-023 根因收口）：出口代理会撕裂 SSE 流
+  # （"event precedes message_start"——直连同刻探针正常、出口路径必死实证）。
+  # api.deepseek.com 进 no_proxy = LLM 流与 search API 直连；web_fetch 照走出口（SSRF 旁路不变）。
+  export no_proxy="localhost,127.0.0.1,::1,api.deepseek.com"
 elif [ "$EGRESS_MODE" = "offline" ]; then
   echo "boot-run: ⚠ 本环境无 egress——web_fetch 不可用：研究 run 无法取证（证据契约要求 source_url 真实抓取），仅可无网操作" >&2
 fi

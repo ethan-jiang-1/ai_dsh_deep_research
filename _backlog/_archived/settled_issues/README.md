@@ -30,3 +30,6 @@
 | [2026-10-11-executive-research-ux-delivery](2026-10-11-executive-research-ux-delivery.md) | 驾驶舱业务摘要层与纠偏路径落地；真浏览器断言 + 构成正本 + 窄门 + 两面一致性核对；结转 = HITL 挂起态实录 waiting | 2026-10-11 |
 | [2026-10-11-recovery-action-instrument-gap](2026-10-11-recovery-action-instrument-gap.md) | 文档承诺的恢复动作缺可复跑工具 → 落 `run-kickoff --session`（自带送达对账）+ 冒烟断言 + guides/61 步骤；类级触发登记 triggers.md | 2026-10-11 |
 | [2026-10-12-backlog-process-borrow](2026-10-12-backlog-process-borrow.md) | backlog 制度显性化借鉴（loop_advisor @ b43be87）全套落地：入口两张票/缺陷通道含修复就绪自授权/双轨状态生命周期/agent 门牌/门禁收紧；[借鉴 Note](../../../notes/implemented/2026-10-12-backlog-process-borrow.md) | 2026-10-12 |
+| [2026-10-12-research-preference-templates](2026-10-12-research-preference-templates.md) | 研究方法配置总卡：四预设 + HITL1 方法行 + run 方法节 + 用户方法库 + 右栏面板（D25）全部落地；快答/普通双 run 走查 + 库保存路径实证；[Note](../../../notes/implemented/2026-10-12-research-method-config.md) | 2026-10-12 |
+| [2026-10-12-research-method-run-lifecycle](2026-10-12-research-method-run-lifecycle.md) | 单次闭环：快答全链 + 普通 run 方法节/方法行（session log 原文）；pending/queue/恢复语义实测与 playbook 一致；计划卡留用户 GUI 拍板体验 | 2026-10-12 |
+| [2026-10-12-research-method-profile-management](2026-10-12-research-method-profile-management.md) | 长期复用：对话五动词 + 右栏面板 + 详情/分区编辑落地；库保存路径真实走查；期 2 直写 = 不做（暂），重议条件在卡 | 2026-10-12 |

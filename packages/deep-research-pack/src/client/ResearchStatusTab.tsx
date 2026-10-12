@@ -38,6 +38,7 @@ import { terminalReadiness } from '../lib/review-readiness.ts'
 import { foldActivityRows, type ActivityRow } from '../lib/activity-fold.ts'
 import { foldMemberActivity, type MemberActivitySummary } from '../lib/member-activity.ts'
 import { sessionBindingOf, type SessionBinding } from '../lib/bundle-bind.ts'
+import { streamFailureOf } from '../lib/stream-failure.ts'
 import type { TeamProjection } from '@deepseek-ai/dsh-experimental-agent-team/client'
 
 /** journal 帧的最小投影（wire 形状 → 领域形状）。 */
@@ -279,6 +280,8 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
 
   // 锚点 = 混合折算（尾窗约束的实测产物，RFC cockpit-flow-face）：passed 态由文件事实承载
   // （question.md/final.md 在场），pending 态由 journal 尾窗承载——face 缺席时退化为纯尾窗判定。
+  // 流畸形死亡（BUG-023 修复①）：journal 尾窗折算，与 HITL 挂起互斥显示（挂起时主横幅让位）。
+  const streamFailure = useMemo(() => streamFailureOf(journalEvents), [journalEvents])
   const anchors = useMemo(
     () => deriveAnchors(journalEvents, face !== null ? { question: face.hasQuestion, delivered: face.delivered } : undefined),
     [journalEvents, face],
@@ -354,6 +357,13 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       {hitl.pending && (
         <div style={{ fontWeight: 700, padding: '8px 12px', marginBottom: 10, borderRadius: 6, background: '#f59e0b33', border: '1px solid #f59e0b66' }}>
           ⏳ 等你拍板——{pendingAnchor?.label ?? '决定'}{pendingAnchor !== undefined && pendingAnchor.questions > 0 ? `（${pendingAnchor.questions} 问）` : ''}：在会话里的问题卡上点选项即可（推荐项已置首）
+        </div>
+      )}
+      {/* 流畸形死亡恢复指引（BUG-023 修复①）：末位回合死于上游流失败且无新回合接手时，
+          给人话恢复路径——不虚构"研究失败"，档案都在 bundle。折算 = stream-failure.ts。 */}
+      {streamFailure.dead && !hitl.pending && (
+        <div style={{ fontWeight: 600, padding: '8px 12px', marginBottom: 10, borderRadius: 6, background: '#ef444418', border: '1px solid #ef444440' }}>
+          ⚠️ 上游模型流连续异常，刚才那回合没跑成——研究档案都在。等一两分钟，在对话里发「继续」即可接着跑。
         </div>
       )}
       {/* ⓪ 业务摘要层（issue 2026-10-11-executive-research-ux-delivery）：五问业务语言——

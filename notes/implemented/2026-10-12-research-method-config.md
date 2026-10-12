@@ -3,10 +3,10 @@
 > 状态：implemented
 
 出处 = 推敲卡三卡簇（用户 2026-10-12 授权实施）：
-[总卡](../../_backlog/issues/2026-10-12-research-preference-templates.md)（总体边界与预设模型）·
-[单次卡](../../_backlog/issues/2026-10-12-research-method-run-lifecycle.md)（单次选择/执行/恢复）·
-[长期卡](../../_backlog/issues/2026-10-12-research-method-profile-management.md)（长期管理，未实施）；
-统一依据 = [综合研究](../../_backlog/research/2026-10-12-research-preferences.md)。机制基座 =
+[总卡](../../_backlog/_archived/settled_issues/2026-10-12-research-preference-templates.md)（总体边界与预设模型）·
+[单次卡](../../_backlog/_archived/settled_issues/2026-10-12-research-method-run-lifecycle.md)（单次选择/执行/恢复）·
+[长期卡](../../_backlog/_archived/settled_issues/2026-10-12-research-method-profile-management.md)（长期管理，未实施）；
+统一依据 = [综合研究](../../_backlog/_archived/research/2026-10-12-research-preferences.md)。机制基座 =
 [计划确认闸门 Note](2026-10-07-plan-review-gate.md)——HITL1 两段卡结构与豁免规则由其拥有，
 [HITL1 业务决策简报 Note](2026-10-11-hitl1-business-brief.md) 拥有第四问触发机制；本篇只记
 「方法」这一新增维度的决定理由。

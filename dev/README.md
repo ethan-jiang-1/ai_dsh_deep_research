@@ -23,6 +23,7 @@
 |---|---|
 | boot-run.sh | run 通道正式启动面：自检 → 组合检查/补装 → 漂移门 → boot web 3083 → 后台仪表盘（自 source env.sh） |
 | run-kickoff.mjs | run 会话驱动：建 lead 会话 + 发 kickoff（GUI 的 RPC 替代入口） |
+| stream-guard.mjs | 流畸形死亡自动恢复守卫（读会话日志 → `streamFailureOf` 折算 → 冷却后经 session/prompt 注入「继续」；`--once` 单次巡检）。**状态 = 实验件**：目的与 BUG-023 候选③ 同源，而候选③ 的前提（上游持续窗口）已被 2026-10-12 对照实验推翻（真实根因 = 出口代理撕裂流，见 [流直连 Note](../notes/implemented/2026-10-12-llm-stream-direct-no-proxy.md)）——故本守卫现仅对「直连路径再现」有意义；**已知缺陷（未修）**：末行 `process.exit(recovered \|\| !recovered ? 0 : 0)` 恒真 = 头注承诺的「退出码 1 = 未恢复放弃」在常规路径永不可达；无门禁/测试/文档消费 |
 
 ## 开发驱动
 
