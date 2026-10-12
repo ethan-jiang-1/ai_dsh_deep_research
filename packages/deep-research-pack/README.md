@@ -76,10 +76,14 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 ## 研究怎么跑
 
 1. **HITL1 立项（两段卡）**：对 Lead 说出研究问题 → 第一段三问（研究类型/深度篇幅/时间口径
-   与语言）+ 按需采集业务决策简报 → 点选即定稿；Lead 落稿 question.md + topics.md 后发第二段
-   **计划确认卡**（quick_factual 豁免）——按计划开跑(Recommended)/ 修订计划（意见附加）/ 放弃，
-   拍板即开工（一轮制）。卡的硬格式细则（简报字段、≤200 字、推荐项置首）正本 = 研究手册
-   §交互纪律与 Lead 的 research-brief skill——本页不复述防漂移；
+   与语言）+ 按需采集业务决策简报 → 点选即定稿；Lead 按判型推荐**研究方法**（内置四预设：
+   事实核查/领域地图/主张核查/方案比较——回答"怎样调查、核验、综合"，与类型/深度互不替代），
+   落稿 question.md 的「研究方法（本次实际采用）」节；Lead 落稿 question.md + topics.md 后发
+   第二段**计划确认卡**（quick_factual 豁免；含方法行，quick_factual 的方法自动采用并落格）——
+   按计划开跑(Recommended)/ 修订计划（意见附加，含用自然语言调整方法）/ 放弃，
+   拍板即开工（一轮制）。卡的硬格式细则（简报字段、≤200 字、推荐项置首）与方法预设、推荐
+   映射、用户方法库（`method-library.md`，显式才写）的细则正本 = 研究手册 §交互纪律与
+   Lead 的 research-brief skill——本页不复述防漂移；
 2. **静默自主区**：Lead 拆 topic、派 Scout/Analyst/Critic（Agent Teams 通道），证据落
    `drt_<slug>/evidence/`（七字段 frontmatter：source_url / retrieved_at / quality / found_by /
    supports / source_tier / publisher）；Critic 对抗核查出 `review.md`（readiness PASS 是交付前置）；
@@ -127,6 +131,8 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 "一次畸形 = 最多六次尝试"。上层设置（`settings` 的 `llm-deepseek:` 段）仍可覆盖本策略。
 
 ## 已知限制与延后工作
+
+- **研究方法配置首版边界**：方法 = 调查路径指导，不新增强制预算/来源数硬门，readiness 不自动验证方法承诺之外的新合同；用户方法库 `method-library.md` 是**工作区本地用户数据**（Lead 显式维护），无版本史、无跨设备同步、无共享；高承诺学术模式（系统综述类）不在预设；Settings 管理页不做（需显式重议 D7/D18 架构边界，见 [_backlog 长期管理卡](../../_backlog/issues/2026-10-12-research-method-profile-management.md)）；
 
 - **会话必须建在**研究工作区里**才能看到渐进面**：页签读的是会话工作区根（`workspaceFiles`），
   run bundle 在工作区内才可见——故需先把研究工作区注册进 DSH（`workspace/create`），再用

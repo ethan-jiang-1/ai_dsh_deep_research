@@ -23,7 +23,7 @@
 
 | 节点 | 输入（读） | 输出（写） | 下游可开工判据 |
 |---|---|---|---|
-| 立项（HITL1，两段卡） | 用户三问答案 + 计划确认拍板（quick_factual 豁免第二段） | question.md（问题定稿 + Purpose + RQ 分解 + Scope/Constraints + HITL1 Snapshot 含计划确认行 + §Decisions 第 1 条含计划确认拍板）+ topics.md（T# + must_answer 2–5 问 + scope_role + depends_on） | 两文件在场 |
+| 立项（HITL1，两段卡） | 用户三问答案 + 计划确认拍板（quick_factual 豁免第二段） | question.md（问题定稿 + Purpose + RQ 分解 + Scope/Constraints + 研究方法节〔本次实际采用〕+ HITL1 Snapshot 含研究方法与计划确认行 + §Decisions 第 1 条含计划确认拍板）+ topics.md（T# + must_answer 2–5 问 + scope_role + depends_on） | 两文件在场 |
 | 组队 | topics.md | spawn 的队员（无独立文件） | 在场性随立项；lead 按 topics 派工 |
 | 侦察 wave0（scout） | topics.md | leads.md（每条：方向 + 状态〔建议挖深/已排除+原因〕+ 支持来源分级 + 检索器〔单一达标「单检索器——待破」〕+ 关键线索 + 建议 owner 对应 topic） | leads.md 在场 |
 | 挖掘 wave1（analyst） | leads.md（建议挖深条）+ topics.md | evidence/*.md（frontmatter 七字段 + 原文摘录 + 解读 + Question List） | 卡片在场 + 硬字段齐（evidence-audit 机械把守） |

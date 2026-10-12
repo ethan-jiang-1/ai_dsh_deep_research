@@ -24,6 +24,7 @@ topic 图定稿后、任何 spawn 之前加载。**名单定下来之前不 spaw
 
 - 每个 topic 单一 owner（一个 analyst 负责的 topic 不重叠）；
 - 每份派发（spawn prompt 与任务板 description 同标准）写全**五件**——任务板没有 reviewed/evidence 字段，验收约定不会被 service 自动解释，只认描述文本：①读哪些文件（question.md/topics.md/leads.md）；②产出什么文件；③验收判据；④怎么验证（可执行检查：evidence frontmatter 齐全、final 引用链真实、口径字段在场）；⑤**方法论装载**（见下节——spawn_teammate 子按角色硬隔离拿不到队友的技能，必须显式指路）；
+- 每份派发点名本次方法关键动作：从 question.md「研究方法（本次实际采用）」节摘该角色相关的调查要求写进任务（scout→信息源策略、analyst→检验策略、critic→核查点）——方法名不替代五件任何一件，fresh 队员靠这条拿到自己的做法；
 - 任务完不成时派发里带修订动作（缺口的处理路径：定向补搜 / 降级标 gap / 上报重派），收"完成"只认文件事实与验证结果，不认 teammate 自报；
 - critic 在草稿成型后才进场（提前进场没有可审对象，浪费一轮）。
 
