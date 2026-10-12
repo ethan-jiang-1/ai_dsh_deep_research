@@ -26,7 +26,7 @@ RFC 被否决后**不能留在 `proposed/`**：该目录只承载仍需显式评
 ## 文件形状
 
 ```
-notes/rejected/yyyy-mm-dd-<主题>.md
+notes/rejected/YYYY-MM-DD-<主题>.md
 ```
 
 头部状态行：`> 状态：rejected`（**裸值**：不带日期与括号，日期在文件名里；否决理由住正文，不进状态行），

@@ -25,7 +25,7 @@
 
 **两点交互纪律**（codex "静默自律" spec 的移植）：HITL1 与 HITL2 之间所有角色静默自主
 推进，不问"要不要继续"、不汇报中间进度；用户主动发消息直接回答但不改变既定方向——
-写进研究手册（research-workspace/AGENTS.md §交互纪律）。
+写进[研究手册](../../research-workspace/AGENTS.md) §交互纪律。
 
 ## 2. 弃用清单（codex 特定 → 为什么弃 + DSH 原生等价物）
 

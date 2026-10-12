@@ -5,6 +5,7 @@
 > 输掉了什么"的演进史住 notes 树（§7 指针）。套件名 = 研究驾驶舱（Research Cockpit，
 > 2026-09-28 用户拍板），命名分层表正本 = 本页 §1；命名决定的历史与输掉的备选 =
 > [cockpit-naming 快照](../../notes/archived/2026-09-28-cockpit-naming.md)。
+> 读完去哪：运行模型与四类状态 = [50](./50-agent-loop-and-state.md)。
 
 ## 1. 定位与命名分层
 

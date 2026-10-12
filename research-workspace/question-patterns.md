@@ -172,7 +172,7 @@ drt_zhipu-api-pricing（**跨 run 复现 4 次**——本库最早的自证模�
 - **澄清问法**：从哪个事件/时间算起？（按题给推荐）；「稳」的判据？（推荐：主流生态
   官方支持 + 迁移指南齐备，可改）。
 
-## 增长协议（本库如何生长——防膨胀两道闸；外部范式依据 = drafts/self-growing-pattern-library-research.md）
+## 增长协议（本库如何生长——防膨胀两道闸；外部范式依据 = drafts/self-growing-pattern-library-research.md，开发侧文件，角色无需读）
 
 1. **落痕**（run 内，lead）：立项 journal 行固定携带判型结果——命中：
    `判型命中=P<#>`；未命中：`判型未命中：<题面特征一句话>；兜底=<三分法哪类/怎么派>`。

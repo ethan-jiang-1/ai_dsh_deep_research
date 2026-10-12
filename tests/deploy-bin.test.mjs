@@ -15,10 +15,10 @@ const scaffold = readFileSync(join(PACK, 'scripts', 'scaffold.mjs'), 'utf8');
 const releaseSmoke = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'smoke', 'release-smoke.mjs'), 'utf8');
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
 
-test('preflight：六面检查清单在位（版本/peer/团队层/手册+模板/构建产物/密钥）', () => {
+test('preflight：六面检查清单在位（版本/peer/团队层/手册+节点+判型+模板/构建产物/密钥）', () => {
   // record( 调用点级断言：钉运行时检查名，注释里的字样不算数（反证实测：只改 record 名、
   // 留注释 → 必须红——includes() 子串断言会被注释满足而假绿）。
-  for (const name of ['DSH 版本兼容', '平台 peer 包', '团队机制层', '研究工作区手册', 'run 模板', '构建产物', '模型密钥']) {
+  for (const name of ['DSH 版本兼容', '平台 peer 包', '团队机制层', '研究工作区手册', '节点契约', '判型模式库', 'run 模板', '构建产物', '模型密钥']) {
     assert.match(preflight, new RegExp(`record\\([^)]*${name}`), `preflight 缺 record 检查项「${name}」——检查清单漂移`);
   }
   assert.match(preflight, /dshReleases/, 'preflight 版本判据须读 dsh.compatibility.dshReleases（版本钉死正本）');
