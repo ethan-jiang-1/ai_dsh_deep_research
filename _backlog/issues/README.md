@@ -4,7 +4,7 @@
 
 ## 活跃清单
 
-（暂无活跃问题卡。）
+- [2026-10-12-research-preference-templates.md](2026-10-12-research-preference-templates.md) — 研究偏好模板与跨节点传递：产品边界、HITL1 交互及用户自定义。
 
 ## 写一张卡
 

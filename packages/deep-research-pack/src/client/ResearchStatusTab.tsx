@@ -346,7 +346,10 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const A2_COL = 8
 
   return (
-    <div style={{ padding: 12 }}>
+    // 滚动义务在页签体自己（vendor .tabBody = overflow:hidden 的定高 flex 列——BUG 2026-10-12
+    // 用户报告：活动流超长即被裁且不可滚）：根容器 flex:1 + minHeight:0 吃满宿主高，
+    // 双轴 auto 自滚。
+    <div style={{ padding: 12, flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'auto' }}>
       {/* ① HITL 挂起横幅（最醒目位置；点名锚点 + 参与指引——"怎么参与"在需要那一刻说清） */}
       {hitl.pending && (
         <div style={{ fontWeight: 700, padding: '8px 12px', marginBottom: 10, borderRadius: 6, background: '#f59e0b33', border: '1px solid #f59e0b66' }}>
