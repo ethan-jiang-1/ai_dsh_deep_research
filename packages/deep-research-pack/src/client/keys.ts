@@ -6,6 +6,9 @@
 /** 「研究状态」页签：sidebarRightTabs.register 的 id 与 sidebar.right.pane.tab 槽的 key。 */
 export const RESEARCH_TAB_KEY = 'dsh-deep-research-pack/research-status'
 
+/** 「研究配置」页签（D25 管理中继面）：同槽第二 key。 */
+export const RESEARCH_CONFIG_TAB_KEY = 'dsh-deep-research-pack/research-config'
+
 /** 「研究状态」页签的 keyed 槽名（sidebar.right.pane.tab）。 */
 export const RESEARCH_PANE_SLOT = 'sidebar.right.pane.tab'
 

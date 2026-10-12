@@ -38,6 +38,7 @@ import { deriveSteps } from '../../packages/deep-research-pack/src/lib/run-fold.
 import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { deriveBusinessBrief } from '../../packages/deep-research-pack/src/lib/brief-fold.ts'
 import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
+import { foldActivityRows } from '../../packages/deep-research-pack/src/lib/activity-fold.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const arg = (name, fallback) => {
@@ -598,10 +599,74 @@ try {
     const paneOk = paneText.includes('研究状态') && (paneText.includes('💬') || paneText.includes('（研究中'))
     step(paneOk, '页签体渲染（keyed 槽体挂对 key + follow 通道接通）')
     const humanRows = (paneText.match(/🔍|👥|💬|📦/gu) ?? []).length
-    step(humanRows >= 3, '人性化活动流在场（≥3 行）', humanRows + ' 行')
+    // 行数与**本会话自己的** foldActivityRows 折算对账（数据无关断言）：快答型 run 走
+    // subagent 通道、lead journal 人性化行天然少（实测 2 行）——≥3 的旧地板把会话形状
+    // 误当断言对象（2026-10-12 实红）。渲染在场（≥1）+ 盘侧折算一致才是行为事实。
+    const expectedRows = SESSION_TITLE !== null && boundSession !== null && SESSION_TITLE === boundSession.title
+      ? foldActivityRows(boundSession.events).length
+      : null
+    step(humanRows >= 1 && (expectedRows === null || humanRows === expectedRows),
+      '人性化活动流 = journal 折算真值（行数与 foldActivityRows 对账）',
+      `${humanRows} 行（盘侧期望 ${expectedRows ?? 'n/a'}）`)
     const rawNoise = ['step/end', 'step/start', 'tool/call', 'assistant/message', 'turn/end', 'turn/start'].filter((x) => paneText.includes(x))
     step(rawNoise.length === 0, '页签正文无原始事件类型名（噪音已过滤）', rawNoise.length > 0 ? rawNoise.slice(0, 2).join('、') : '')
   }
+
+  // 第一遍 c：「研究配置」页签（D25 期 1 管理中继面）——guide 胶囊在场 + 页签体渲染
+  // （内置偏好只读表 + 偏好库空态/条目）。防"拼错不报错、永不渲染"（company 坑 1 的
+  // 渲染级对账；keyed 字面量另由 client-keys 门禁静态对账）。
+  {
+    await page.reload({ waitUntil: 'domcontentloaded' })
+    await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
+    await wait(5_000)
+    const targetTitle = SESSION_TITLE_ARG ?? boundSession?.title ?? unboundSession?.title
+    const openedC = targetTitle !== null && await clickRowByText(targetTitle)
+    if (openedC) {
+      await wait(3_000)
+      const expandC = page.getByRole('button', { name: 'Open right sidebar' })
+      if (await expandC.count() > 0) await expandC.first().click({ timeout: 8_000 }).catch(() => {})
+      await wait(1_500)
+      // 胶囊在 guide 页（dock「New tab」打开）；已停靠的芯片也可点——两条路都试。
+      let capC = page.getByRole('button', { name: /研究配置/ }).first()
+      let capOkC = await capC.isVisible({ timeout: 4_000 }).catch(() => false)
+      if (!capOkC) {
+        const addTab = page.getByRole('button', { name: 'New tab' }).first()
+        if (await addTab.count() > 0) {
+          await addTab.click({ timeout: 5_000 }).catch(() => {})
+          await wait(2_000)
+          capC = page.getByRole('button', { name: /研究配置/ }).first()
+          capOkC = await capC.isVisible({ timeout: 10_000 }).catch(() => false)
+        }
+      }
+      step(capOkC, '「研究配置」guide 胶囊在场（tab 类型注册成功 + guide 页可达）')
+      if (capOkC) {
+        await capC.click({ timeout: 5_000 }).catch(() => {})
+        await wait(3_000)
+        const tc = await paneTextOf()
+        const segC = tc.slice(tc.indexOf('研究配置'))
+        const builtinOk = ['事实核查', '领域地图', '主张核查', '方案比较'].every((n) => segC.includes(n))
+        step(builtinOk, '研究配置页签体：内置偏好四条在场（只读表渲染）')
+        const libOk = segC.includes('我的偏好库') && (segC.includes('还没有保存的偏好') || segC.includes('用于本次'))
+        step(libOk, '研究配置页签体：偏好库区在场（空态或条目投影）')
+        // 详情 Modal（detail-ux 期 1.5）：点内置条目名称 → 四分区 + 内置操作在场 → 关闭。
+        const nameBtn = page.getByRole('button', { name: /事实核查 ›/ }).first()
+        if (await nameBtn.isVisible({ timeout: 6_000 }).catch(() => false)) {
+          await nameBtn.click({ timeout: 5_000 }).catch(() => {})
+          await wait(1_500)
+          const modalText = await paneTextOf()
+          const modalOk = ['找什么资料', '怎么核实', '报告怎么写', '明确不承诺', '基于此自定义', '用于本次研究'].every((s) => modalText.includes(s))
+          step(modalOk, '研究配置详情 Modal：四分区 + 内置操作在场（读态）')
+          await page.getByRole('button', { name: '关闭详情' }).first().click({ timeout: 5_000 }).catch(() => {})
+          await wait(1_000)
+        } else {
+          step(false, '研究配置详情 Modal：条目名称钮不可见（渲染回归）')
+        }
+      }
+    } else {
+      console.log('  note  研究配置页签探针：无会话可开（跳过——先有任一会话再验）')
+    }
+  }
+
 
   await browser.close()
 } catch (error) {

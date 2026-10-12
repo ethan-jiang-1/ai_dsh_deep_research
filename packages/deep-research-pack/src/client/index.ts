@@ -20,10 +20,11 @@ import type {} from '@deepseek-ai/dsh-api-remotes/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
-import { RESEARCH_TAB_KEY, RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT, RESEARCH_TOOL_KEYS } from './keys.ts'
-import { IconGaugeOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
+import { RESEARCH_TAB_KEY, RESEARCH_CONFIG_TAB_KEY, RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT, RESEARCH_TOOL_KEYS } from './keys.ts'
+import { IconGaugeOutlineRegular, IconSettingsOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import { ResearchToolCard } from './ResearchToolCard.tsx'
 import { ResearchStatusTab, ResearchStatusTitle, type JournalFrame, type FollowTarget } from './ResearchStatusTab.tsx'
+import { ResearchConfigTab } from './ResearchConfigTab.tsx'
 
 /** Required services：槽注册表（renderer）+ 右栏页签注册器 + 右栏导航面（openTab——挂起显性化）+ remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
  *  父级则取 .session 炸 "without injecting it"，只声明子级则取父属性炸 "without inject"）。 */
@@ -59,6 +60,32 @@ export function apply(ctx: ClientContext): void {
       // 占位符；2026-09-28 用户点名要 icon）：仪表盘 = 状态监测语义，与检索/工具图标不撞
       guide: [{ id: RESEARCH_TAB_KEY, order: 1, title: () => '研究状态', description: () => '研究 run 的步骤、等待与证据状态', icon: IconGaugeOutlineRegular }],
     }), 'deep-research-pack: research-status tab type')
+
+    // 「研究配置」页签（D25 期 1 管理中继面）：显示偏好库投影 + 生成管理指令发 Lead——
+    // 面板不直写文件（写路径唯一 = Lead，模型可见、会话日志留痕）。
+    scoped.effect(() => scoped.sidebarRightTabs.register({
+      id: RESEARCH_CONFIG_TAB_KEY,
+      kind: 'research-config',
+      priority: 'extension',
+      title: () => '研究配置',
+      guide: [{ id: RESEARCH_CONFIG_TAB_KEY, order: 2, title: () => '研究配置', description: () => '内置偏好与我的偏好库——一键把管理指令交给 Lead', icon: IconSettingsOutlineRegular }],
+    }), 'deep-research-pack: research-config tab type')
+
+    // 管理指令发送闭包（D25 期 1）：session/prompt——默认 steer（在飞 run 即时消费），
+    // 失败降级 queue（空闲会话排程）；两态结果回执给面板，不静默。requestId 铸造 =
+    // vendor 同款（session.ts beginSubmission：randomUUID as SessionRequestId）。
+    const sendInstruction = async (sessionId: SessionId, text: string): Promise<{ ok: boolean; detail: string }> => {
+      const requestId = crypto.randomUUID() as import('@deepseek-ai/dsh-api-remotes/client').SessionRequestId
+      const base = { requestId, sessionId, content: [{ type: 'text' as const, text }] }
+      try {
+        const steer = await scoped.remote.session.prompt({ ...base, mode: 'steer' }, new AbortController().signal)
+        if (steer.ok) return { ok: true, detail: '已发送给 Lead' }
+        const queued = await scoped.remote.session.prompt({ ...base, mode: 'queue' }, new AbortController().signal)
+        return queued.ok ? { ok: true, detail: '已发送给 Lead' } : { ok: false, detail: String(queued.error ?? '未知错误') }
+      } catch (cause) {
+        return { ok: false, detail: String(cause) }
+      }
+    }
 
     // workspaceFiles 闭包（bundle 渐进面数据通道；company cultivation 同款，失败降级 null）
     const listDir = async (sessionId: SessionId, path: string, signal: AbortSignal) => {
@@ -99,6 +126,10 @@ export function apply(ctx: ClientContext): void {
       scoped.slots.register(
         { name: RESEARCH_PANE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow, listDir, readFile, revealStatusTab }) },
         ResearchStatusTab,
+      ),
+      scoped.slots.register(
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_CONFIG_TAB_KEY, inject: () => ({ readFile, sendInstruction }) },
+        ResearchConfigTab,
       ),
     ]), 'deep-research-pack: research-status pane')
 

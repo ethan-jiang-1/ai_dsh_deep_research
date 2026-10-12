@@ -93,6 +93,8 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 4. **观察面**：DSH Web GUI 右栏「研究状态」页签看实时动态（流程轨道 = ◆立项确认 + 立项→
    组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付，↻ rerun 回路自交付审阅可见，人性化活动流，
    HITL 挂起横幅点名锚点与参与方式，活标题「研究状态 · ⏳ 等你拍板」，交付节点带 final/ 版本）；
+   右栏「研究配置」页签（D25 管理中继面）看内置偏好与我的偏好库，操作按钮生成管理指令交
+   当前会话 Lead 执行（面板不直写文件）；
 5. **审计**（本仓开发面）：`node scripts/run-gates/evidence-audit.mjs <bundle>` 对会话日志机械对账——
    URL 是否真被抓取过、摘录是否可回溯、final 溯源链是否完整 → `audit.md`。
 
