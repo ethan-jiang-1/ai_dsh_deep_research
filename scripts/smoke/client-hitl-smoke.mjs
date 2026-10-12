@@ -25,7 +25,7 @@
 //      → 断言右栏**自动展开** + 横幅在场。
 //
 // 前置：source dev/env.sh；DEEPSEEK_API_KEY 已配；pack 已构建；zstd CLI 在 PATH。
-// 用法：source dev/env.sh && node --import tsx/esm scripts/client-hitl-smoke.mjs [--port 3113]
+// 用法：source dev/env.sh && node --import tsx/esm scripts/smoke/client-hitl-smoke.mjs [--port 3113]
 import { spawn, spawnSync } from 'node:child_process'
 import { existsSync, readdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'

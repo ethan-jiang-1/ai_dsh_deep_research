@@ -27,12 +27,23 @@
 
 | 件 | 文件 | 职责 |
 |---|---|---|
-| 研究状态页签 | [ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) | 右栏页签，自上而下八区：⓪ 业务摘要层（五问业务语言 = 研究什么 / 已确认什么 / 未知什么 / 你现在要不要操作；折算住 brief-fold，计数进不了本层）① HITL 挂起横幅（点名锚点 + 参与指引）② 流程轨道 = ◆立项确认 + 立项→组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付（步序正本 = [m2-run-mechanics 运行流程总览](../../notes/implemented/2026-09-24-m2-run-mechanics.md)；↻ rerun 回路自交付审阅可见：补研究回挖掘 / 修订表述原位改 / 另起新 bundle；交付节点带 final/ 版本；步态符号 ✓已过/●进行中/○未到——done 绿字、current 琥珀唯一、回边落点重入描边（与仪表盘同语法，图例行随轨））③ 研究问题行 ④ 人性化活动流 ⑤ 证据计数 + 交付状态 ⑥ 决策诚实线（指路 question.md §Decisions）⑦ 队员动态折叠区（[member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)：agentTeam 投影取 roster → 多路 follow 队员会话 → 检索/抓取/出错动作行，每人一节默认折叠 + 计数徽标） |
+| 研究状态页签 | [ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) | 右栏页签，自上而下八区（逐区职责见下表） |
 | 活标题 | 同上（`ResearchStatusTitle`） | 挂起时页签名变「研究状态 · ⏳ 等你拍板」 |
 | 研究语义工具卡 | [ResearchToolCard.tsx](../../packages/deep-research-pack/src/client/ResearchToolCard.tsx) + [tool-card.ts](../../packages/deep-research-pack/src/lib/tool-card.ts) | 对话流卡片：`spawn_teammate` → 组队卡、`web_search` → 检索卡（2 张） |
 | 挂起显性化 | [index.ts](../../packages/deep-research-pack/src/client/index.ts)（`revealStatusTab`） | pending false→true 迁移时 `openTab` 右栏自动展开；页签 dock 折叠态保持挂载（观察者常在） |
 | keyed 常量 | [keys.ts](../../packages/deep-research-pack/src/client/keys.ts) | 字面量唯一正本（`client-keys` 门禁对账——拼错不报错、永不渲染） |
 | host 半 | [src/index.ts](../../packages/deep-research-pack/src/index.ts) | 空壳宿主位（bundle 行 name = 包名；浏览器半经 `exports["./client"]` 装配） |
+
+页签八区（自上而下）：
+
+| 区 | 职责 |
+|---|---|
+| ⓪ 业务摘要层 | 五问业务语言（研究什么 / 已确认什么 / 未知什么 / 你现在要不要操作）；折算住 brief-fold，计数不进本层 |
+| ① HITL 挂起横幅 | 点名锚点 + 参与指引 |
+| ② 流程轨道 | ◆立项确认 + 立项→组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付（步序正本 = [NODES](../../research-workspace/NODES.md)；↻ rerun 回路自交付审阅可见：补研究回挖掘 / 修订表述原位改 / 另起新 bundle；交付节点带 final/ 版本；步态符号 ✓已过 / ●进行中 / ○未到——done 绿字、current 琥珀唯一、回边落点重入描边，与仪表盘同语法） |
+| ③④⑤ 现状三件 | ③ 研究问题行 · ④ 人性化活动流 · ⑤ 证据计数 + 交付状态 |
+| ⑥ 决策诚实线 | 指路 question.md §Decisions |
+| ⑦ 队员动态折叠区 | [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)：agentTeam 投影取 roster → 多路 follow 队员会话 → 检索/抓取/出错动作行，每人一节默认折叠 + 计数徽标 |
 
 折算层八件（`src/lib/`，全部纯函数、fail-soft 永不 throw）：
 
@@ -76,7 +87,7 @@
 |---|---|---|
 | keyless 真浏览器 | `client-load-smoke` | 插件零失败 + 页签渲染 + 渐进面与**磁盘真值对账**（证据计数/交付态/问题行）+ 锚点轨道与诚实线对账（盘侧独立重算）+ 未绑定负样本 |
 | 真模型档 | `client-hitl-smoke` | 活标题翻转 + 横幅 + 挂起迁移 → 右栏自动展开（端到端） |
-| keyless 单测 | `pnpm test` | 折算五件纯函数（hitl/run/activity/bundle-bind/tool-card 各有测试文件） |
+| keyless 单测 | `pnpm test` | 折算谓词纯函数（§2 所列折算各有测试文件） |
 
 改动路由（怎么改、按什么次序）= [guides/60 §2 任务型路由表](../guides/60-dev-loop.md)
 「改驾驶舱」行：`src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进

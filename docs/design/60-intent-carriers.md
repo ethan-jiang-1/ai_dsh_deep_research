@@ -1,7 +1,7 @@
 # 60 · 意图载体总图：意图从哪进、从哪出
 
 本页拥有的事实 = 本仓意图载体的 owner、用途、适用条件与出场方式。规则正文住各自 owner，本页只给总图与指针。
-对照物 = DSH SDLC 参考卷 `09-intake-and-work-items.md`；本仓按单人文件工作流适配，不承接其 GitHub Issue/Project 状态机。
+对照物 = DSH SDLC 参考卷 `09-intake-and-work-items.md`（仓外语料，钉版登记 = [00-index §外部研究材料](../00-index.md)，仓内不可解析）；本仓按单人文件工作流适配，不承接其 GitHub Issue/Project 状态机。
 读入口 = [00-index §文档地图](../00-index.md)。
 
 ## 一、载体清单
@@ -9,7 +9,7 @@
 | 载体 | owner（规则正文） | 拥有的唯一事实 | 适用条件 | 出场方式 |
 |---|---|---|---|---|
 | [`_backlog/issues/`](../../_backlog/issues/README.md) 问题卡 | [_backlog/README](../../_backlog/README.md) | 问题、目标、已知与未决、结论和必要交接 | 需要跨轮澄清或留存问题判断；不是实施前置 | 有结论并满足关闭条件后，归档或指向现有决定 |
-| [`_backlog/bugs/`](../../_backlog/bugs/README.md) 缺陷卡 | [_backlog/README](../../_backlog/README.md) | 已发现但本次不修的缺陷 | 确认暂不修；当场修的无需建卡 | 修复或查明未修后归档 |
+| [`_backlog/bugs/`](../../_backlog/bugs/README.md) 缺陷卡 | [_backlog/README](../../_backlog/README.md) | 已发现但本次不修的缺陷 | 确认暂不修（当场修的无需建卡）；翻「修复就绪」即自带 P1/P2 修理型修复授权（[D24](../00-index.md) 唯一例外——P0 与触面例外走等人拍板） | 修复或查明未修后归档 |
 | [`_backlog/research/`](../../_backlog/research/README.md) 调研 | [_backlog/README](../../_backlog/README.md) | 被活跃问题引用的长篇证据与研究材料 | 需要保留并服务问题判断 | 最后一张活跃问题卡离开时归档 |
 | [`_backlog/methods/`](../../_backlog/methods/README.md) 方法 | [_backlog/README](../../_backlog/README.md) | 需求澄清、查证、验收设计、证据路由与判断的按需方法 | 只加载当前问题所需方法；不是实施授权 | 随实践维护，不载具体问题进度 |
 | [`_backlog/triggers.md`](../../_backlog/triggers.md) | [_backlog/README](../../_backlog/README.md) | 工作中可直接观察到的重议条件 | 仅当遗漏会导致重犯，且触发能在正常工作中遇到 | 条件到场后按新决定重进；否则由 owner 保留结论 |

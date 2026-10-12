@@ -3,12 +3,12 @@
  * （borrowed verbatim from ai_dsh_loop_advisor/scripts/lib/cdp-driver.mjs，
  * 2026-10-01 owner 指令内化——Playwright actionability 会被 DSH 的 Preview Notice
  * 横幅与行内按钮挡死，裸 CDP evaluate/click 绕过全部可点性检查，见本仓
- * scripts/cdp-probe.mjs 的驾驶舱场景。）
+ * scripts/probe/cdp-probe.mjs 的驾驶舱场景。）
  * connect over the Chrome DevTools Protocol, and expose evaluate/click plus
  * the page's own console problems and uncaught exceptions.
  *
  * This module is project-agnostic — copy it into any repo that ships a web
- * UI and write a scenario against it (see scripts/cdp-probe.mjs for the
+ * UI and write a scenario against it (see scripts/probe/cdp-probe.mjs for the
  * loop-advisor scenario and docs/cdp-probe.md for the pattern and the
  * environment gotchas this driver already handles).
  *

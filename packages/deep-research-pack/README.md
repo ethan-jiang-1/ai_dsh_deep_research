@@ -17,10 +17,10 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 
 | 位置 | 内容 | 随包发布 |
 |---|---|---|
-| `presets/<role>.patch.yml` | 四角色 preset（0.1.7 形态：一条 `@deepseek-ai/dsh-agent-preset` 行，config.plugins 内声明 persona/skills/工具行） | ✓ |
+| `presets/<role>.patch.yml` | 四角色 preset（DSH 0.1.7 起的形态：一条 `@deepseek-ai/dsh-agent-preset` 行，config.plugins 内声明 persona/skills/工具行） | ✓ |
 | `presets/<role>/skills/<n>/SKILL.md` | 研究方法论技能（各角色清单正本 = 盘上 `presets/<role>/skills/` 目录，bundle 自动发现——新增免改本行） | ✓ |
 | `cordis.patch.yml` | bundle 行：preset roster（default: lead）+ 会话全文检索开关（`session-query-sqlite` `openAt: first-search`——FTS 惰性开，`:memory:` 每进程重建；检索工具行在 lead/critic preset）+ `tool-present` + 团队可视面 `ui-agent-team` + 本包 client 面 | ✓ |
-| `workspace/` | **研究工作区种子**：研究手册（`AGENTS.md`：证据契约/目录约定/完成判据）+ `templates/run/` 六件模板 | ✓ |
+| `workspace/` | **研究工作区种子**：研究手册（`AGENTS.md`：证据契约/目录约定/完成判据）+ `NODES.md`（节点 I/O 契约）+ `question-patterns.md`（判型库）+ `templates/run/` 六件模板 | ✓ |
 | `src/client/` → `lib/client.js` | **研究驾驶舱**（Research Cockpit——观察面 client 面，D18 单点例外；构成正本 = [design/40](../../docs/design/40-research-cockpit.md)）：右栏「研究状态」页签（流程轨道锚点/人性化活动流/活标题/HITL 横幅/参与指引/决策诚实线）+ 研究语义工具卡 + 挂起显性化 | ✓ 构建产物 |
 | `src/lib/` → `lib/types/lib/` | 纯函数折算（清单正本 = [design/40](../../docs/design/40-research-cockpit.md)）——keyless 单测直接断言 | ✓ 构建产物 |
 | `scripts/preflight.mjs` · `scripts/scaffold.mjs` | 部署前置检查 + 一键准备（见下） | ✓ |
@@ -143,7 +143,6 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
   `pack-workspace-fresh` 防漂移）；种子只铺新工作区，**不覆盖**已存在文件（`--force` 除外）；
 - **皮肤/品牌层**与**专职 synthesizer 角色**的重议条件分别由 [ui-skin](../../notes/rejected/2026-09-24-ui-skin.md) 和 [synthesizer](../../notes/rejected/2026-09-24-synthesizer-role.md) 拥有；
 - **工具卡 = 2 张**（spawn_teammate / web_search）；`team_task_*` 与其他协调类工具
-  （wait_agent / list_agents / send_message）**不进对话流**（2026-09-27 实测：流里 0 出现，
-  harness 把协调类工具排除在对话渲染外）——团队任务的观察由 ui-agent-team 任务板与 To-dos
+  （wait_agent / list_agents / send_message）**不进对话流**（实测：harness 把协调类工具排除在对话渲染外）——团队任务的观察由 ui-agent-team 任务板与 To-dos
   折叠承担，无需卡片（4 卡方案的回退理由 = [marathon2 复盘](../../notes/archived/2026-09-25-marathon2-retrospective.md)，冻结层）；
 - **版本兼容面窄**：只声明 `dsh-v0.2.0-rc.2`（pre-stable API，peer 版本号不精确钉死）。

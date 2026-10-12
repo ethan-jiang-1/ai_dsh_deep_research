@@ -1,3 +1,4 @@
+// replay-scene 回归 — 场景声明消费判据（roster / 来源形状 / 路径越界 fail-loud）。
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, realpathSync, symlinkSync } from 'node:fs';

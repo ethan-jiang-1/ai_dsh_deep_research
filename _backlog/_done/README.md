@@ -6,4 +6,4 @@
 - [已修缺陷](../_archived/fixed_bugs/README.md)
 - [调研归档](../_archived/research/README.md)
 
-下一个缺陷号由 [fixed bugs 索引](../_archived/fixed_bugs/README.md) 与活跃 [bugs](../bugs/README.md) 共同确定。
+下一个缺陷号规则（活跃 ∪ 全部归档池取最大号 + 1）= [bugs/README](../bugs/README.md)。

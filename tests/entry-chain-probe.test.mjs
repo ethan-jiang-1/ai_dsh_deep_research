@@ -1,3 +1,5 @@
+// entry-chain-probe 词面判据回归 — direct-authorization-boundary 的授权边界判定（按授权范围
+// 直接执行 / 需请批分界）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { directAuthorizationBoundaryPasses, rfcBoundaryPasses } from '../scripts/lib/direct-authorization-boundary.mjs';

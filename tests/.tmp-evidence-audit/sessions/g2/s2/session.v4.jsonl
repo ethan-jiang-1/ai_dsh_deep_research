@@ -1,2 +1,0 @@
-{"type":"tool/call","data":{"callId":"x1","name":"web_fetch","arguments":"{\"url\":\"https://crossrun.example.com/only-here\"}"}}
-{"type":"tool/result","data":{"message":{"toolCallId":"x1","role":"tool","content":[{"type":"text","text":"Fetched https://crossrun.example.com/only-here (HTTP 200)\n\n跨 run 内容 https://crossrun.example.com/only-here"}]}}}

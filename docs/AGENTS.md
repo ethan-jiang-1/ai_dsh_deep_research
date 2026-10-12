@@ -9,9 +9,9 @@
 | 层 | 拥有 | 不放什么 |
 |---|---|---|
 | 根 [AGENTS.md](../AGENTS.md) | 每轮都要在场的常驻指令（每条 1–3 行，链到 home） | 教程、历史故事、情境化长流程 |
-| 子树 `AGENTS.md`（本文件、`scripts/`、`packages/*`、`notes/`） | 只属于该子树的指令 | 根已承载的仓级规则 |
+| 子树 `AGENTS.md`（本文件、`scripts/`、`packages/*`、`notes/`、`tests/`、`_backlog`） | 只属于该子树的指令 | 根已承载的仓级规则 |
 | `docs/00-index.md` | 文档地图 + 决策台账（D 号）+ 术语映射 | 教程正文、决策理由 |
-| `docs/design/` | 系统**现在**怎么组成（架构/角色/方法论映射） | 当前 API 的唯一说明（→ 源码/README） |
+| `docs/design/` | 系统**现在**怎么组成、为什么这样组成（架构/角色/方法论映射/机制依据） | 当前 API 的唯一说明（→ 源码/README） |
 | `docs/guides/` | 按任务怎么操作（60 开发环 / 61 run / 62 插件作者） | 设计理由（→ notes/implemented） |
 | `docs/discipline-map.md` · [evaluation.md](evaluation.md) | 纪律三态表 · 验收合同与门禁台账 | 变更史 |
 | `notes/` | 为什么这样决定、放弃了什么、跑了什么验证 | 当前合同（→ `docs/`） |

@@ -1,3 +1,4 @@
+// replay-request 回归 — 组装请求面比较判据（注入种类 / 定向归一化边界）。
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';

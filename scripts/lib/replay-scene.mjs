@@ -1,3 +1,5 @@
+// 场景声明消费者：roster / 版本 / 来源形状 / 路径校验（缺件、串角色、垃圾锚点 fail-loud）。
+// 消费 = snapshot-replay-smoke；场景声明 = snapshots/replay/research-face/snapshot.json（字段表 = snapshots/README）。
 // Replay manifest consumer: A replay is mandatory; these five B judges cannot be reduced.
 import { readFileSync, lstatSync, realpathSync } from 'node:fs';
 import { resolve, join, dirname, isAbsolute, relative, win32 } from 'node:path';

@@ -28,15 +28,16 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
   final/               版本记账：v1.md = 版本索引与关键事实回溯；证据扩张 rerun 才落 v2.md
                        全文并在此登记（owner: lead）——**final/ 只放版本记账，不放当前版全文**
   final.md             当前版权威副本 = **run 根（bundle 顶层）的 final.md**——[来源: evidence/]
-                       相对 run 根解析。**不放 final/ 里**（2026-09-26 实测：第五场 lead 放进了
-                       final/，位置漂移、审计还静默跳过——正本钉死在 run 根）
-  journal.md           运行纪要（追加式，所有角色可写；跨 rerun 累积血统）
-archive/<slug>/        已交付 run 归档位（2026-09-27 用户指令）：交付后操作侧移入，工作区根
+                       相对 run 根解析。**不放 final/ 里**（final/ 曾被误用作全文位：位置漂移
+                       且审计静默跳过——正本钉死在 run 根）
+  journal.md           运行纪要（追加式，最新在上；所有角色可写；跨 rerun 累积血统）
+archive/drt_<slug>/    已交付 run 归档位：交付后操作侧移入，工作区根
                        只留活跃 run——防题名目录被误读为"待开展课题"；仍可被审计/仪表盘按路径投影
 templates/run/         新 run bundle 的起点模板（只读，不直接写）
-drafts/（仓库根）      开发侧跨 run 草稿（tracked 仓库内容；**非 run 产物，角色不写不读**——
+drafts/（工作区根）    开发侧跨 run 草稿（仅开发仓在场，部署侧无；**非 run 产物，角色不写不读**——
                        run 内过程稿 = 各 bundle 自己的 drafts/，见上）
-NODES.md               节点 I/O 契约全表（八节点输入/输出/下游可开工判据 + 回边版本语义）——节点开工前对照；机械把守 = schema-scan.mjs（在场级全行）+ node-gate.mjs（判据级门全集 = 门①②③④ + 门L + 门R + 门A——编号图例与判据正本 = NODES.md 头部）
+NODES.md               节点 I/O 契约全表（八节点输入/输出/下游可开工判据 + 回边版本语义）——节点开工前对照；
+                       机械把守（开发仓操作侧工具）= schema-scan（在场级）+ node-gate（判据级门①②③④+L+R+A，图例 = NODES.md 头部）
 question-patterns.md   判型模式库（HITL1 第一对照面：命中走条目、未命中兜底 + journal 标记行；增长协议正本 = 库尾节）
 ```
 
@@ -68,8 +69,9 @@ frontmatter 必须有（七字段）：`source_url`（真实抓取过的 URL）/
 **口径最小契约**（与 frontmatter 同级）：数字/规格类摘录须带测量条件口径（版本/配置/
 时间/原文限定语至少两项；口径不明写"口径不明"）——所有角色按此判。
 **日期最小契约**（与 frontmatter 同级）：任何"当前 / 截至 / 查询时间"类日期（含 `retrieved_at`、
-review 审查时间、口径截至）落笔前**先跑 bash `date` 核对**——模型时间感不可信（2026-09-26
-实测五场交付物日期全错）；抓取时间以 fetch 当刻系统日期为准。所有角色按此判。
+review 审查时间、口径截至）**不得凭时间感直写**（角色会话无命令执行能力）——校准信号按序取：
+①web 工具响应与所抓页面自带日期；②用户消息与本 run 既有文件已落笔日期；都缺或冲突 → 写
+「日期不确定（依据：…）」，不静默编造。所有角色按此判。
 **摘录最小契约**（与 frontmatter 同级）：引文行**只放原文**——卡片自己的标注（标签/URL/
 `（同上…）`/`旁证｜…`）不进 `>` 行，写在引文块外或解读节；**多段摘录逐段逐字**，段间省略标
 `[…]`，不拼接不连续句；**表格按单元格摘录**，不整行/跨行合并；**`source_url` 必须成功抓取过**
@@ -90,18 +92,18 @@ review 审查时间、口径截至）落笔前**先跑 bash `date` 核对**—�
 结论不硬禁（快速事实核查型 run 可能天然单源），但必须显式标注`单源——待破`并在 review.md
 说明风险——**显性化而不是静默**。
 
-**有效证据谓词（观察面对账，分层）**：run 仪表盘（scripts/run-ops/run-dashboard.mjs）按同一契约
+**有效证据谓词（观察面对账，分层；开发仓操作侧）**：run 仪表盘（run-dashboard）按同一契约
 渲染——**硬五字段**（source_url / retrieved_at / quality / found_by / supports）全齐才算
 有效证据，缺任一标无效（不计入 topic × evidence 矩阵）；**软二字段**（source_tier /
 publisher）缺失不否决有效性，标"未分级"（旧 run 的存量证据按此显示，不回填——run bundle
 是交付记录，不改历史）；谓词正本 = 本节，tests/evaluation-contract.test.mjs 对账。
 
-**机械强度诚实记账**：本契约的机械检查 = L0 契约测试（七字段在场 + 各执行者副本对账）
-+ 仪表盘渲染谓词（上述）+ **evidence-audit 溯源审计**（`scripts/run-gates/evidence-audit.mjs`：
-`source_url` 须被 `web_fetch` **成功取回**（仅出现在搜索结果里不算，MAJOR 单列）；摘录对
-**web-only 语料**回溯（agent 自撰文本已剔除，防自证），覆盖率分档；final 溯源链完整——
-防伪造与转写幻觉，报告落 bundle 的 audit.md）；run 内执法 = critic 狩猎。verify 门禁不扫
-bundle（gitignored 运行区）——run 数据的完整性由 critic + 仪表盘 + audit 呈现，不在 L0。
+**机械强度诚实记账**（开发仓操作侧工具链，部署侧由人审承担）：机械检查 = 契约测试（七字段
+在场 + 各执行者副本对账）+ 仪表盘渲染谓词（上述）+ **evidence-audit 溯源审计**（`source_url`
+须被 `web_fetch` **成功取回**（仅出现在搜索结果里不算，MAJOR 单列）；摘录对 web-only 语料
+回溯（agent 自撰文本已剔除，防自证），覆盖率分档；final 溯源链完整——防伪造与转写幻觉，
+报告落 bundle 的 audit.md）；run 内执法 = critic 狩猎——run 数据完整性由 critic + 仪表盘 +
+audit 呈现，不在仓级结构门。
 
 ## 交付物三态
 
@@ -111,7 +113,10 @@ bundle（gitignored 运行区）——run 数据的完整性由 critic + 仪表�
 
 ## 交互纪律（两点交互）
 
-整个 run 只有两个人机交互点，都由 lead 执行：**立项对齐（HITL1）**与**交付审阅（HITL2）**——都以 `ask_user_question` 的**结构化选项卡**呈现（一次多问 + options + 推荐项置首带(Recommended)）。**HITL1 = 两段卡**：第一段固定三问（研究类型/深度篇幅/时间口径与语言），第二段**计划确认卡**——question/topics 定稿后、开工前呈计划要点瘦卡（按计划开跑(Recommended)/ 修订计划（意见附加不替换、一轮制不再二次呈卡）/ 放弃；**quick_factual 豁免**），拍板落 question.md §Decisions 第 1 条，形态细则 = lead 的 research-brief skill。HITL2 选项 = 定稿(Recommended)/补研究/修订表述。
+整个 run 只有两个人机交互点，都由 lead 执行：**立项对齐（HITL1）**与**交付审阅（HITL2）**——都以 `ask_user_question` 的**结构化选项卡**呈现（一次多问 + options + 推荐项置首带(Recommended)）。
+
+**HITL1 = 两段卡**：第一段固定三问（研究类型/深度篇幅/时间口径与语言），第二段**计划确认卡**——question/topics 定稿后、开工前呈计划要点瘦卡（按计划开跑(Recommended)/ 修订计划（意见附加不替换、一轮制不再二次呈卡）/ 放弃；**quick_factual 豁免**），拍板落 question.md §Decisions 第 1 条，形态细则 = lead 的 research-brief skill；**HITL2 选项** = 定稿(Recommended)/补研究/修订表述。
+
 两点之间所有角色静默自主推进——不问"要不要继续"、不汇报中间进度、不等确认。
 用户主动发消息时直接回答，但回答不改变既定研究方向与分派。
 

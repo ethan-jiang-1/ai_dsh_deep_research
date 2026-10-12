@@ -30,10 +30,10 @@
 | 维度 | 参考卷 `09` | 本仓 |
 |---|---|---|
 | Issue 模板 / `.github/` | Issue 表单 + 模板 | 不存在（无 `.github/`，有意简化） |
-| 状态机 | 六态事件驱动 | **无状态机**；状态 = 位置 |
-| "当前"指针 | Project 看板 | `queue.md` 的 `▶`，全仓唯一（`queue-pointer-live` 把守） |
+| 状态机 | 六态事件驱动 | **无状态机**；阶段 = frontmatter status + 目录粗段（D24 后细化） |
+| "当前"指针 | Project 看板 | 无队列指针——`queue.md` 2026-10-09 随队列机制整体退役（[吸收 Note](2026-10-09-backlog-methodology-absorption.md)，D11/D20） |
 | 载体清单 | 单一 intake 页 | 10 类（含本仓特有的推敲场三件 plans/bugs/reference） |
-| 需求来源 | Issue | 用户直派 + 推敲卡毕业双入口 |
+| 需求来源 | Issue | 用户直派 + 推敲卡已结双入口 |
 
 ## 输掉的方案
 
@@ -81,6 +81,8 @@
 ## 环境状态
 
 - 队列条目毕业：RFC 迁入本目录并改写为事实体；`_backlog/queue.md` 该行删除，
-  **▶ 移交"recorded-session 义务标定"**（本轮队列最后一条）。
+  **▶ 移交"recorded-session 义务标定"**（本轮队列最后一条）。**后续（2026-10-09）**：
+  `queue.md` 与队列机制整体退役（[吸收 Note](2026-10-09-backlog-methodology-absorption.md)）——
+  上两行是当时交付事实，现行模型 = 工作由用户授权 + 会话内 plan/todo。
 - 新增承载物：`docs/design/60-intent-carriers.md`（77 行）+ `00-index` 索引行。
 - 未改：`verify.mjs`、`evaluation.md`、`tests/`、pack 面、`notes/` 树既有 Note。

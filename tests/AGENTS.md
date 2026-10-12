@@ -13,7 +13,8 @@
   `drt_*`/`archive/`，夹具不自动进入默认测试 glob；
 - 真模型/浏览器/网络/子进程检查走独立 smoke；默认回归无凭据可跑。`layering` 守卫五件套 =
   提及级禁物 + 解析级调用（[lib/keyless-imports](../scripts/lib/keyless-imports.mjs)——夹具
-  字符串不咬）+ import 闭包图（传递引入也红，tests 本地 import 只走 `scripts/lib/`）+ 命令钉 + 有家句。
+  字符串不咬）+ import 闭包图（传递引入也红；从 `scripts/` 树只许 import `lib/`，pack
+  `src/lib` 纯件另由闭包图背书）+ 命令钉 + 有家句。
 
 ## 写测试时
 

@@ -20,7 +20,7 @@
 | plugin | 导出 `apply(ctx)` 的 TS 模块；注册即 `apply(ctx)`，配置经 cordis schema 校验 | 本仓自写两个插件（D18 单点例外，构成正本 = [design/40](../design/40-research-cockpit.md)）：`src/index.ts`（host 半空壳 = 观察面宿主位）与 `src/client/index.ts`（client 半：注册右栏「研究状态」页签 / 活标题 / 研究语义工具卡）；新插件从 `vendor/dsh/docs/user/develop/basic/` 起步 |
 | bundle | 你编写与分发的单位（`dsh.bundle`）——回答"这个包贡献什么"，是插入/覆盖 plugin rows 的 patch 层 | `packages/deep-research-pack/cordis.patch.yml` + 包内 `presets/`、`skills/` |
 | profile | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）——回答"哪些 bundle 按什么顺序组成" | `runtime/harness-home/profiles/research/`（镜像；源 = pack——`boot-run.sh` 从 pack 重建；overlay 只是源码域冒烟通道的生成物） |
-| preset | 一个 agent 形态：persona 行 + skills + 工具行 | `presets/<role>.patch.yml`（preset 行）+ `presets/<role>/skills/`（lead / scout / analyst / critic） |
+| preset | 一个 agent 形态：persona 行 + skills + 工具行 | `presets/<role>.patch.yml`（preset 行）+ `presets/<role>/skills/`（角色清单 = 盘上 presets/） |
 | patch / overlay | 层叠覆盖条目（id 定向的 config 覆盖、禁用、插入） | `dev/research.overlay.yml`（源码域通道的镜像源） |
 
 **Nothing is both**：bundle 与 profile 是两个 manifest 的两种东西，别把本包写成 profile。
@@ -43,7 +43,7 @@ logged）——pack 行只引入**现成**能力，这项义务落在 vendor 面
 
 ## 新行为落在哪：按顺序问归属
 
-1. 只是替换配置或组合？→ L0（改 cordis 行 / bundle 行，跑 L1+L2 冒烟）；
+1. 只是替换配置或组合？→ 阶梯 L0（改 cordis 行 / bundle 行；证据跑评估面 L1+L2 冒烟）；
 2. 能由现有 preset / skill / 工具行表达？→ L1（先看有没有可复制的范本）；
 3. 是需要可替换 Provider、由 Consumer 通过稳定 Service Definition 使用的完整能力？→ L2；
 4. 无论哪层，它是否新增模型可见、且必须在 reload / resume / fork 后重建的事实？→ 横切
@@ -102,7 +102,8 @@ DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`�
 工作区是**纪律的载体**：DSH 的 agent-instructions 从会话 cwd 向上发现 `AGENTS.md` 并注入每个
 角色——手册不在工作区，四个角色就没有证据契约与完成判据。安装步骤（用户视角）与前置
 检查 = [pack README](../../packages/deep-research-pack/README.md)；部署工具 = 包内两条 bin
-（`dsh-deep-research-preflight` 检查、`dsh-deep-research-scaffold` 铺种子 + 补团队层）。
+（`dsh-deep-research-preflight` 检查、`dsh-deep-research-scaffold` 铺种子 + 补团队层——
+tarball 装法不生成 PATH bin，用安装副本内脚本全路径，见 pack README §部署）。
 
 本仓开发面的四个生成物各有生成器与新鲜度门禁（漂移即红）：`dev/research.overlay.yml`
 （`dev/render-overlay.mjs` → `overlay-fresh`）、pack 的 `workspace/` 种子
@@ -126,7 +127,7 @@ DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`�
 | 加部署脚本 / bin | `package.json` 的 `files` + `bin` | `release-smoke`（L2：真装一次，装完能跑） |
 | 加观察面 client 面能力 | `src/client/` + `tsconfig.client.json` 的 include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `client-load-smoke`（真浏览器）+ `client-keys` 门禁 |
 | 改 persona / skill / 手册文本（模型可见） | 同 diff 跑真模型档；运行中的 web 缓存 boot 文本，须重启通道 | `l4-lite-smoke`（真模型档） |
-| 换 vendor pin | `dev/vendor-build.sh` 全链重建 + 逐条重审 | 升 pin 毕业记录（[2026-09-25](../../notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md)） |
+| 换 vendor pin | `dev/vendor-build.sh` 全链重建 + 逐条重审 | 升 pin 毕业记录（[0.1.7 轮](../../notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md) · [0.2.0 轮](../../notes/implemented/2026-09-30-vendor-pin-bump-020rc2.md)） |
 | 改 profile 镜像 | 不手改——改 pack 源后跑 `bash dev/boot-run.sh`：组合不完整/缺席时它重建，漂移时它 **exit 1** 并打印 `rm -rf <profile>` 补救（直接 `dsh --profile research` 会静默用旧镜像） | boot-run 漂移检测（fail-loud） |
 
 **一句话规则**：源改一处（pack），生成物跑生成器，证据按面选档（keyless 证管道 / 真模型档

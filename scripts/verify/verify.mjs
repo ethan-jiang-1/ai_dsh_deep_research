@@ -703,10 +703,11 @@ const allFiles = walk(ROOT);
   }
 }
 
-// ── 门禁 19：entry-chain（入口链存在性投影——正本 = 根 AGENTS.md §入口链）──
-// md-links 已机械覆盖全部 tracked .md 的链接解析；本门禁补它的盲区：① 入口链中以反引号/
-// 散文指针提到的成员文件（`docs/design/10-40` 等——md-links 不检非链接形态）必须在场；
-// 入口链成员清单是入口链的存在性投影；改入口链结构时同 diff 更新本清单。 = 同 diff 更新本清单（成员清单是入口链的存在性投影，非第二正本）。
+// ── 门禁 19：entry-chain（文档链骨干存在性——正本 = 根 AGENTS.md §入口链与 §布局）──
+// md-links 已机械覆盖全部 tracked .md 的链接解析；本门禁补它的盲区：文档链骨干成员
+// （根/子树 AGENTS.md、00-index、design、guides、evaluation——含仅以反引号/散文指针
+// 提到的，md-links 不检非链接形态）必须在场。成员清单是链的存在性投影，非第二正本；
+// 改链结构时同 diff 更新本清单。
 {
   const gate = 'entry-chain';
   const members = ['AGENTS.md', 'docs/00-index.md', '_backlog/issues', 'notes/proposed',
@@ -715,7 +716,7 @@ const allFiles = walk(ROOT);
     'docs/design/50-agent-loop-and-state.md',
     'docs/guides/61-run-playbook.md',
     'docs/guides/62-plugin-authoring.md', 'docs/AGENTS.md', 'scripts/AGENTS.md', 'notes/AGENTS.md',
-    'packages/deep-research-pack/AGENTS.md'];
+    'packages/deep-research-pack/AGENTS.md', 'tests/AGENTS.md', '_backlog/AGENTS.md'];
   for (const rel of members) {
     if (!existsSync(join(ROOT, rel))) fail(gate, `入口链成员缺席：${rel}（正本 = AGENTS.md §入口链；改链须同 diff 更新本门禁清单）`);
   }

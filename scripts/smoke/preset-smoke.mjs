@@ -10,7 +10,7 @@
 //   client-load-smoke（源码域真浏览器）；安装域经 release-smoke ⑤ 委托本脚本覆盖。
 //
 // 前置：DSH_HOME 已设（source dev/env.sh）；DSH_SRC 默认本仓根（vendor/dsh submodule）。
-//   钉 tag 源码基线 + tsx 解析树——D10 偏离下的机制权威）。
+//   钉 tag 源码基线 + tsx 解析树——机制权威）。
 // 用法：source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs [--port 3099]
 
 import { spawn } from 'node:child_process';

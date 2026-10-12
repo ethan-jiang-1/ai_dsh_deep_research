@@ -1,3 +1,5 @@
+// unconsumed-evidence 回归 — B1 差集投影（evidence/ 未进 findings.md 的差集，critic 出题的
+// 操作侧对账基座）；夹具 = tests/fixtures/review-aids。
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { dirname, join } from 'node:path'

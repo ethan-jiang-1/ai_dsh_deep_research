@@ -1,3 +1,6 @@
+// backlog-liveness — 问题卡、缺陷、调研、方法与归档索引的结构合同（frontmatter 状态 / 结论倾向
+// 闭集头 / 状态行镜像互查 / 池成员索引点名）。消费 = verify 门禁 backlog-liveness 与
+// tests/backlog-liveness.test；规则正本 = _backlog/README（门禁只证结构，不证判断质量）。
 import { existsSync, lstatSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 

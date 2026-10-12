@@ -1,3 +1,5 @@
+// acceptance-check 回归 — 收活判据三态求值（PASS / FAIL / UNVERIFIED，判不了永不静默放行）；
+// 夹具 = tests/fixtures/review-aids/bundle-acceptance。
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { dirname, join } from 'node:path'

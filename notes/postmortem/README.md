@@ -38,10 +38,7 @@ notes/postmortem/yyyy-mm-dd-<主题>.md      # 日期 = 主题首提日期，与
 `evaluation.md` 记"它现在是什么"。引用**外部**复盘（如 company postmortem 0001–0003）不是
 本目录的条目——外部材料登记在 [00-index §外部研究材料](../../docs/00-index.md)。
 
-## 当前条目
-
-- [2026-09-26-roadmap-graduation-drift](2026-09-26-roadmap-graduation-drift.md)——队列 ▶ 指向已完成
-  条目（毕业手续漏做 + commit message 与 diff 不符）；新增防线 = 门禁 `queue-pointer-live`。
+条目即目录树（不建手抄索引）：现存 [2026-09-26-roadmap-graduation-drift](2026-09-26-roadmap-graduation-drift.md)（队列指针指向已完成条目；新增防线 = 门禁 `queue-pointer-live`）。
 
 未达事故门槛的教训性记录（如 l4-lite 复跑修掉的两个真 bug）留在 `implemented/` 的"实际跑过的
 验证"里，不追溯迁移。

@@ -10,7 +10,7 @@
 //
 // 用法：
 //   node <pack>/scripts/scaffold.mjs --workspace <研究工作区> [--profile <名>] [--host <dir>] [--force] [--dry-run] [--install-only]
-//   或经 bin：dsh-deep-research-scaffold --workspace <dir> [--profile research]
+//   或经 bin：dsh-deep-research-scaffold --workspace <dir> [--profile research]（registry 安装形态；tarball 装法无 PATH bin，用本文件全路径）
 //
 // 不做的事（有意）：不装 DSH 本体、不写密钥（安全边界：密钥永不落仓库/脚本）。
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs'

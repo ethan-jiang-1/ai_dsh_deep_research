@@ -120,6 +120,11 @@
       "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
       "target": "notes/archived/2026-09-28-node-topology-procedure.md",
       "reason": "已结卡指向拓扑流程 Note（SKILL 承接核实后 2026-10-10 裁定归档，路径重定向）"
+    },
+    {
+      "source": "docs/discipline-map.md",
+      "target": "notes/archived/2026-09-24-dsh-discipline.md",
+      "reason": "头部枚举方法行的首轮清点实录指针（历史出处；现行三态正本 = 本表自身）"
     }
   ]
 }

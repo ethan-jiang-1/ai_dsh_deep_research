@@ -1,3 +1,5 @@
+// node-gate 回归 — 节点交接契约门判据（门①②③④ L / R / A）；夹具 = tests/fixtures/node-gate
+//（用例即永久反证记录——改夹具应预期变红）。
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { dirname, join } from 'node:path'

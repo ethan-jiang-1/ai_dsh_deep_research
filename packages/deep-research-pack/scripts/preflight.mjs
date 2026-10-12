@@ -8,7 +8,7 @@
 //
 // 用法：
 //   node <pack>/scripts/preflight.mjs [--workspace <研究工作区>] [--host <profile 目录>] [--install-only]
-//   或经 bin：dsh-deep-research-preflight [--workspace <dir>] [--host <dir>]
+//   或经 bin：dsh-deep-research-preflight [--workspace <dir>] [--host <dir>]（registry 安装形态；tarball 装法无 PATH bin，用本文件全路径）
 //
 // --host 指向**运行本 pack 的 profile 目录**（其 node_modules 是 peer/团队层的解析锚）；
 // 缺省先按本包位置解析（装进 profile 后即正确），再试 $DSH_HOME/profiles/*。

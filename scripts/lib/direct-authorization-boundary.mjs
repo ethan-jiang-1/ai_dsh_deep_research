@@ -1,3 +1,6 @@
+// direct-authorization-boundary — entry-chain-probe 的词面判据：按授权范围直接执行、无需
+// 重复请批的边界判定。消费 = scripts/probe/entry-chain-probe.mjs 与 tests/entry-chain-probe.test；
+// 词面口径与放宽实录 = notes/implemented/2026-10-10-entry-chain-probe-lexical-recall.md。
 const normalize = (text) => text.replace(/[，。；、———()（）\s]/g, '');
 
 export const rfcBoundaryPasses = (answer) => {

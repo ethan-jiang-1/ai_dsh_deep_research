@@ -9,7 +9,9 @@ import { fileURLToPath } from 'node:url';
 import { auditBundle } from '../scripts/lib/evidence-audit-core.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const TMP = join(ROOT, 'tests', '.tmp-evidence-audit');
+// 运行时暂存区：走 .gitignore 既有 `_tmp/` 约定（临时区不是版本控制对象——曾以
+// tests/.tmp-evidence-audit 落盘且被误提交，2026-10-12 卫生轮迁址并除名）。
+const TMP = join(ROOT, 'tests', '_tmp', 'evidence-audit');
 
 /** 造夹具：bundle（evidence + final）+ sessions（纯 .jsonl 工具事件）。 */
 function fixture({ forged = false, brokenRef = false, derived = false } = {}) {

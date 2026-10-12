@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// scripts/watch-run.mjs — run 盯场件（RFC run-ops-self-diagnosis；runtime/smoke-workspace/watch-run.mjs
-// 原型转正）。谓词 = scripts/lib/run-state.mjs（事件形状，非字符串 grep）。
+// scripts/run-ops/watch-run.mjs — run 盯场件（RFC run-ops-self-diagnosis）。谓词 =
+// scripts/lib/run-state.mjs（事件形状，非字符串 grep）。
 //
 // 退出码：0 = HITL-PENDING 或 RUN-SETTLED（stdout `STATE:` 行自报是哪个）；1 = 超时；2 = 用法错。
-// 用法：node --import tsx/esm scripts/watch-run.mjs <session-id> [--interval 20] [--timeout-min 90]
-//   （须先 source dev/env.sh——DSH_HOME 定位会话根）
+// 用法：node --import tsx/esm scripts/run-ops/watch-run.mjs <session-id> [--interval 20] [--timeout-min 90]
+//   （会话根 = $DSH_HOME，缺省回退本仓 runtime/harness-home；显式 source dev/env.sh 更稳）
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'

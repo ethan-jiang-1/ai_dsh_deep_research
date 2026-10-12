@@ -1,8 +1,8 @@
 # _fixed_bugs/ · 已修复缺陷卡
 
 > 从 [`../../bugs/`](../../bugs/README.md) `git mv` 迁入；文件名不变、内容不重写。
-> **Next BUG ID = 已分配最大号 + 1（本目录 ∪ 活跃 bugs/ 一起算）**——权威值看
-> [`../README.md`](../README.md)，本表逐行登记。
+> 编号规则唯一权威 = [../../bugs/README](../../bugs/README.md)（Next BUG ID =
+> 活跃 bugs/ ∪ 全部归档池〔fixed + suspended〕的最大号 + 1）；本表逐行登记已修卡。
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|

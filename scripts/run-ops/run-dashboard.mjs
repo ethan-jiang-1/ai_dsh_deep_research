@@ -3,8 +3,8 @@
 // + debug-dashboard-plus：notes/implemented/2026-09-24-debug-dashboard-plus.md）
 //
 // 用法：
-//   node --import tsx/esm scripts/run-dashboard.mjs <runDir> [--out <html>]          一次性生成
-//   node --import tsx/esm scripts/run-dashboard.mjs --latest [--out <html>]          多场扫描取最新（SCENE_ROOTS）
+//   node --import tsx/esm scripts/run-ops/run-dashboard.mjs <runDir> [--out <html>]          一次性生成
+//   node --import tsx/esm scripts/run-ops/run-dashboard.mjs --latest [--out <html>]          多场扫描取最新（SCENE_ROOTS）
 //   加 --watch --interval <秒> 持续再生成（配合页面 meta refresh；默认 5s）
 //
 // 原则（RFC 定死，勿破）：

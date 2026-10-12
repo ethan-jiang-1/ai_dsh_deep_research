@@ -13,7 +13,7 @@
 | 文件 | 一句话 |
 |---|---|
 
-（最近暂停 = [BUG-022](../_archived/suspended_bugs/BUG-022-provider-stream-malformed-turn-kill.md) 上游流畸形事件——本仓修不了，重启条件见卡；最近归档 = [BUG-021](../_archived/fixed_bugs/BUG-021-cdp-probe-ask-send-fail.md) cdp-probe `--ask` 判据改会话日志落盘对账——选择器状态机对齐 + stop 陷阱设防 + fail-loud 四态，真模型两阶段 E2E 全绿；再前一单 = [BUG-020](../_archived/fixed_bugs/BUG-020-hitl-answer-provenance-misattribution.md) hitl-answer 代答 provenance 误归——归属谓词化（仅写命中），反证五用例。）
+（近况看两池索引：[暂停](../_archived/suspended_bugs/README.md) · [已修](../_archived/fixed_bugs/README.md)；新卡编号 = 活跃 ∪ 全部归档池取最大号 + 1，规则唯一权威 = 本页。）
 
 ## 缺陷通道（卡怎么走到已修）
 
@@ -71,7 +71,7 @@ opened: YYYY-MM-DD
 
 # BUG-<NNN>：<一句话标题>
 
-> 严重级别：P0（阻断）/ P1（重要）/ P2（次要）｜发现：YYYY-MM-DD｜状态：排查中
+> 严重级别：<P0｜P1｜P2>｜发现：YYYY-MM-DD｜状态：排查中
 
 ## 症状
 观察到什么错误行为（现场、报错、复现路径）。

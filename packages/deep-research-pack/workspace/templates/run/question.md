@@ -31,7 +31,7 @@
 
 ## HITL1 Alignment Snapshot
 
-- 研究类型: quick_factual | exploratory_map | claim_verification（三分法为初判速记；完整判型 = question-patterns.md，命中其他典型模式时按其 canonical token 填写）
+- 研究类型: quick_factual | exploratory_map | claim_verification（三分法为初判速记；完整判型 = question-patterns.md——命中条目按其分派结论落型，未设专型的模式按兜底归 exploratory_map）
 - 深度与篇幅: 快答 | 标准报告 | 深度报告
 - 口径: 时间范围 / 语言 / 地域 / 排除项
 - 业务决策简报: 决策对象=<为谁的什么决策> / 待决定事项=<一句话> / 比较选项=<选项集 | 尚未确认> / 期限=<用户给的时限 | 尚未确认> / 成功标准与约束=<验收口径 | 尚未确认>——已提供直接落格不重复问；缺项标「尚未确认」，仅当缺项会改变研究范围时随第四问追问

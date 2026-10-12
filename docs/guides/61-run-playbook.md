@@ -13,21 +13,22 @@
   boot 不查凭据，缺了要到 lead 首次调模型才炸（启动成功 ≠ 能跑研究）；
 - 启动：`bash dev/boot-run.sh`（幂等：组合在位即直接 boot）→ 等横幅
   `http://127.0.0.1:<port>/?token=…` 用浏览器打开。**端口 = `DSH_RUN_PORT`，缺省 3083**
-  （2026-09-28 起 3081 让给别的项目；3080 是本仓开发 GUI，勿占；换端口：
+  （3080 = 本仓开发 GUI、3081 = 已让渡外部项目，均勿占；换端口：
   `DSH_RUN_PORT=<空闲端口> bash dev/boot-run.sh`）。端口已被占时 boot-run 会 fail-loud 并给
   补救，**先看占用者是谁**：若是本仓在飞的 run 通道 → **别另起**，用它（URL/token 见启动横幅或
   `runtime/smoke-workspace/web.log`）；不是 → 换端口，或确认后停掉它（**别盲杀**：在飞会话的
   日志尾部可能丢失——BUG-007 卡）；
-- **启动请求的呈交纪律（2026-09-30 用户定调）**：用户让"启动/起 web"= 代理**先自己跑通**——
-  boot-run 全序（自检 → 组合检查/必要补装 → 漂移检测）红了就当场修（漂移 = 按脚本处方重建 profile；
-  vendor 产物缺失 = `bash dev/vendor-build.sh`），boot 出横幅后**再验浏览器面**（探针断言
-  无 "Failed to load plugins" / 零 console 错误——0.2.0 轮教训：boot 横幅只证宿主侧，
-  观察面可能坏着），**全绿才把 URL 交出去**（人话版判据：GUI 里 preset 选单含四个
-  Deep Research 角色、会话右栏有「研究状态」页签——任一缺席 = 插件没挂上）。不呈交"可能能用的东西"；红了不自修就上报 =
-  失职；
+- **启动请求的呈交纪律（2026-09-30 用户定调）**：用户让"启动/起 web" = 代理**先自己跑通再交 URL**，三步序：
+  ① boot-run 全序（自检 → 组合检查/必要补装 → 漂移检测）红了当场修——漂移 = 按脚本处方重建
+  profile；vendor 产物缺失 = `bash dev/vendor-build.sh`；
+  ② boot 出横幅后验浏览器面：探针断言无 "Failed to load plugins" / 零 console 错误
+  （boot 横幅只证宿主侧，观察面可能坏着——0.2.0 轮教训）；
+  ③ 全绿才把 URL 交出去（人话判据：GUI 里 preset 选单含四个 Deep Research 角色、会话右栏有
+  「研究状态」页签——任一缺席 = 插件没挂上）。不呈交"可能能用的东西"；红了不自修就上报 = 失职；
 - **启动前先判"接续还是新开"**：`ls -dt research-workspace/drt_*/`（`archive/` 除外）——**根目录下
   每个未归档 bundle 都要报出来**，分两类：(a) 无 `final/` 或 `review.md` 不是 `readiness: PASS`
-  = **在飞**（含停在 HITL2 等拍板的形态——`final/` 随交付四步落地，交付前不在场；扩张版 vN
+  = **在飞**（含停在 HITL2 等拍板的形态——`final/` 记账随交付动作〔拍板行 → run 根 final.md +
+  记账 → present → goal complete〕落地，交付前不在场；扩张版 vN
   随 rerun）→ 问"接续它还是新开"（接续做法 = §5）；(b) 有 `final/` 且 PASS = **交付线已在盘、
   未归档**——按 [NODES](../../research-workspace/NODES.md) 交付行，交付判别 = §6（run 根
   `final.md` + `present` 声明）→ 问"先归档再新开，还是补研究（rerun）"。两类都带上 slug +
@@ -53,7 +54,7 @@
       -- --port <端口，缺省 3083> --no-open`。**这条绕过 boot-run 的漂移门**（
       [00-index §先分流](../00-index.md) 首行"别直接 `dsh --profile research`"正为此——
       同理：绕过漂移检测、静默用旧镜像）：先 `bash dev/boot-run.sh --drift-check` 过门再用它；
-      该模式先检查端口且可初始化环境/补装 profile/写 MCP patch，不是只读探针。报漂移就按
+  `--drift-check` 模式会检查端口且可初始化环境/补装 profile/写 MCP patch，不是只读探针。报漂移就按
       [guides/62 §改动影响面](./62-plugin-authoring.md) 重建镜像；
 - **刷新白屏的判别序**：① `lsof -nP -iTCP:<端口> -sTCP:LISTEN` 有没有监听 → 无 = 进程已停
   （重跑上面任一形态）；② 有监听但仍白屏/401 = token 过期（**每次启动都是新 token**，
@@ -140,7 +141,7 @@ BUG-020）。
   声明、门④查版本记账、门A 查交付完整性（v1 记账 + audit.md + 记账×readiness 交叉），
   在拍板前必然缺席——拍板前跑门看到 ②/A 红（静默缺席形态）= 预期态而非缺陷，拍板交付后
   复跑转绿（门清单正本 = NODES.md 头部图例）；
-- **拍板前操作侧跑证据审计**：`node scripts/run-gates/evidence-audit.mjs
+- **拍板前操作侧跑证据审计**（须先 `source dev/env.sh`）：`node scripts/run-gates/evidence-audit.mjs
   research-workspace/drt_<slug>`——报告落 bundle 的 audit.md，**CRITICAL=0 才带审阅建议
   进 HITL2**（审计判据正本 = 研究手册「机械强度诚实记账」节）；CRITICAL>0 = 证据链有
   伪造/断链，先让 lead 修证据再回来；review 的 readiness 若为**附条件 PASS**，node-gate

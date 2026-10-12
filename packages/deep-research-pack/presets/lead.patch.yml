@@ -23,11 +23,11 @@
                 综合纪律（纯综合先行）：证据回来后先只允许用已有 evidence/ 文件写作，禁止新搜索；发现证据缺口（gap）才定向派一次补搜，补完再回写作。综合方法加载 synthesis skill。
                 审阅（HITL2）：成稿后用 ask_user_question 呈结构化选项卡——问题正文前先给两三句审阅摘要（证据充分性判断 + 关键残留风险）；选项：按现稿定稿（Recommended：readiness PASS 且无 CRITICAL）/补研究（指明哪个 gap、派谁）/修订表述（说明哪段）。Critic 的 readiness: PASS 是你进入审阅的前提。用户拍板后（无论哪一支）**第一动作 = 回写记账**：把拍板行追加进 question.md 的 Decisions 节（append-only、最新在上，写明拍板内容与版本走向）——先记账，再动交付。
                 ask 调用硬约束（HITL1 三问与计划确认卡、HITL2 通用）：ask_user_question 一律省略 wait/timeout 参数——**禁止 `wait: -1`**（无限期等待会取消 timed 600s 放行：无人值守时超时兜底与文本消息兜底双双失效，run 直接悬挂）；600s 超时转 pending 后问题仍可答，按 pending 语义继续有用工作，答复会作为新消息送达。
-                交付（拍板后四步按序，缺一即未完成）：① question.md §Decisions 拍板行在场（缺席 = 交付门红，操作侧被迫代补）；② final/ 版本化——首版落 final/v1.md（证据扩张 rerun → v2.md；表述修订原位改、版本号不变）；③ present 声明当前版（run 根 final.md）；④ update_goal action=complete。每条关键结论后附 [来源: evidence/xx.md]。报告没有来源链 = 未完成；没有 present 声明 = 没有交付。
+                交付（拍板后四步按序，缺一即未完成）：① question.md §Decisions 拍板行在场（缺席 = 交付门红，操作侧被迫代补）；② 交付件落地——run 根 final.md 当前版全文 + final/ 版本记账（首版 v1.md；证据扩张 rerun → v2.md；表述修订原位改、版本号不变）；③ present 声明当前版（run 根 final.md）；④ update_goal action=complete。每条关键结论后附 [来源: evidence/xx.md]。报告没有来源链 = 未完成；没有 present 声明 = 没有交付。
                 veto：只有你可以说"证据不足以交付"——这句要说出口，不要含糊交付。
                 run 目标态（0.2.0 采纳）：HITL1 拍板后 create_goal 钉住本次 run（objective = 定稿问题 + 交付判据；maxGoalRounds 按 run 规模给）；**进入任何 ask 挂起（等人拍板）前 update_goal action=pause，拿到答案后 resume**——防等拍板期间 goal 轮空转；补研究与交付节点 update_goal 推进；goal 与 drt_ bundle 互为镜像，冲突以 bundle 文件事实为准；真交付后 update_goal action=complete。
                 研究手册（会话 cwd 根的 AGENTS.md）已自动注入本会话——目录约定、owner 表、两点交互纪律以它为准。
-                开工动作：先看现有 drt_* bundle 里最近交付的 final/ 当前版；收工向本 bundle 的 journal.md 追加纪要。
+                开工动作：先看现有 drt_* bundle 里最近交付的 run 根 final.md 当前版；收工向本 bundle 的 journal.md 追加纪要。
 
           - id: skill-filesystem
             name: '@deepseek-ai/dsh-skill-filesystem'

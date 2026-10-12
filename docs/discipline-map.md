@@ -1,10 +1,29 @@
 # discipline-map — DSH 纪律全量枚举（三态表）
 
-> 层：合同（该遵守什么）。本表 = AGENTS.md §纪律首版枚举子集的**全量替换正本**（工作记录
-> 「dsh-discipline 全量枚举」2026-09-24 毕业；AGENTS.md 只留指针）。枚举方法 = vendor 逐源
-> 清点（"你无法继承你从没清点过的东西"），每行三态：**照搬**（原样继承，带本仓落点）/
-> **带证据适配**（语义保留、载体改造，带证据）/ **不适用**（带理由——本仓无该设施对应面）。
-> 源头 = vendor/dsh submodule（tag dsh-v0.2.0-rc.2，只读铁律）。
+> 层：合同（该遵守什么）。本表 = [AGENTS.md §纪律](../AGENTS.md) 的**全量正本**（AGENTS.md
+> 只留速查关键词与指针）；枚举方法 = vendor 逐源清点（"你无法继承你从没清点过的东西"——
+> 首轮清点实录 = [dsh-discipline Note](../notes/archived/2026-09-24-dsh-discipline.md)）。
+> 每行三态：**照搬**（原样继承，带本仓落点）/ **带证据适配**（语义保留、载体改造，带证据）/
+> **不适用**（带理由——本仓无该设施对应面）。源头 = vendor/dsh submodule（tag
+> dsh-v0.2.0-rc.2，只读铁律）。
+
+## 源目录（按需查询入口）
+
+| 源 | 出处 | 主题 |
+|---|---|---|
+| 源 1 | vendor 根 AGENTS.md · Conventions | 全局不变量（fail-loud · model-visible ⟺ logged · registrations are effects） |
+| 源 2 | vendor docs/testing.md | 测试教义（verify the world · 真入口 · with-key） |
+| 源 3 | vendor docs/AGENTS.md | 文档标准 |
+| 源 4 | vendor .agents/notes/ | Note 生命周期 |
+| 源 5 | vendor docs/postmortem/ | 事故复盘 |
+| 源 6 | vendor .agents/skills/ | 开发 Skill |
+| 源 7 | repo-harness/08 | 仓库分类学与维护形态 |
+| 源 8 | repo-harness/05/07 | 反馈分层与评估框架 |
+| 源 9 | vendor/dsh 仓库结构 | submodule 结构面 |
+| 源 10 | _digested/test-strategy 语料 | 测试策略增量 |
+| 源 11 | 二代语料 | 独立插件仓开发闭环 |
+
+（载体分工 · 重审触发路径 · 维护规则 = 文末三节。）
 
 ## 源 1：vendor 根 AGENTS.md · Conventions
 
@@ -68,12 +87,12 @@
 | Note 格式机械化（verify-agent-note-format） | verify 门禁 note-format（regex 版 + grandfather 条款——本仓轻量适配） | 带证据适配 |
 | 归档树 append-only hash manifest | [archived/](../notes/archived/README.md) 用"单文件 + `> 归档：<日期>` 行"等价落地（无 triplet/hash 基础设施）；冻结纪律 = 正文永不修改 | 带证据适配（manifest 面不引入——当前规模下目录树即清单） |
 
-## 源 5：postmortem（2026-09-25 二轮更正）
+## 源 5：vendor docs/postmortem/（事故复盘）
 
-vendor 的事故复盘住在 **`docs/postmortem/`**（10 篇编号条目 + `README.md` 定义进门判据），
-不在 `.agents/notes/` 下——一轮核对时查错路径，写成"空目录"，此处更正。判据 = **bug 到达了
-不该到达的地方**（真实用户 / 已合并 PR / 一次 release），产出重点是"为什么流程放它过去"
-与随后新增的 guardrail；编号 `NNNN-<slug>`，双语三件套。
+vendor 的事故复盘住在 **`docs/postmortem/`**（编号条目 + `README.md` 定义进门判据），
+不在 `.agents/notes/` 下。判据 = **bug 到达了不该到达的地方**（真实用户 / 已合并 PR /
+一次 release），产出重点是"为什么流程放它过去"与随后新增的 guardrail；编号 `NNNN-<slug>`，
+双语三件套。
 
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
@@ -101,7 +120,7 @@ vendor 的事故复盘住在 **`docs/postmortem/`**（10 篇编号条目 + `READ
 | 生成 + freshness 门禁 | tool/config/persistence catalog、module-graph | `dev/research.overlay.yml`（门禁 `overlay-fresh`；[evaluation.md](evaluation.md) §L0 登记为"本仓首个 tracked 生成物"）+ `packages/deep-research-pack/workspace/` 种子（门禁 `pack-workspace-fresh`，正本 = `research-workspace/`） | 改源不重生成即红（两条门禁机械对账） |
 | 混合（生成区嵌手写页） | subsystem 页的 cordis-surface 区、type-equiv 块 | `packages/deep-research-pack/presets/<role>.patch.yml`（手写）↔ `dev/research.overlay.yml`（渲染生成）+ profile 镜像（同事实的第二落点）——由 `boot-run.sh` 漂移检测承担 freshness | 漂移即 fail-loud |
 | 录制（机器写、人审、封存不改） | snapshots/、archived Note、persistence releases | run bundle（`research-workspace/drt_*` 在飞 + `archive/` 已交付）——gitignored 运行区，事实由 bundle 文件承载 | 不进 L0（运行区不扫）；完整性归 run 内 critic + 观察面谓词 |
-| 投影（canonical 源的抛弃型派生物） | `website/.generated/`（vendor 站点产物，不入库） | `dev/smoke-workspace/dashboard.html`（canonical = 会话日志 + bundle 文件） | 随时可重建；永不手改、永不入库 |
+| 投影（canonical 源的抛弃型派生物） | `website/.generated/`（vendor 站点产物，不入库） | `runtime/smoke-workspace/dashboard.html`（canonical = 会话日志 + bundle 文件） | 随时可重建；永不手改、永不入库 |
 
 **一个事实一个 owner / 目录树即清单 / 不建第二份索引**：`notes/` 不设集中 INDEX（路径 =
 生命周期 + 日期 + 主题）；各子目录的 README 门牌（`note-status` 门禁强制在场）是本仓对
@@ -156,7 +175,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
-| **子树 `AGENTS.md` 层**：根只放每轮常驻指令（1–3 行 + 链 home），子树专属指令放子树 `AGENTS.md`（vendor 22 份） | 五份子树 AGENTS.md（`docs/` · `scripts/` · `notes/` · `packages/deep-research-pack/` · [tests/](../tests/AGENTS.md)）；`entry-chain` 门禁把守成员在场 | 照搬 |
+| **子树 `AGENTS.md` 层**：根只放每轮常驻指令（1–3 行 + 链 home），子树专属指令放子树 `AGENTS.md`（vendor 22 份） | 六份子树 AGENTS.md（`docs/` · `scripts/` · `notes/` · `packages/deep-research-pack/` · [tests/](../tests/AGENTS.md) · [_backlog](../_backlog/AGENTS.md)）；`entry-chain` 门禁把守成员在场 | 照搬 |
 | `docs/AGENTS.md` = 文档标准：层级归属（一个事实一个家）/ 写作规则 / slop 清单 / 预算处置序 / 机检链接 | [docs/AGENTS.md](AGENTS.md)：tier 表、写作规则、slop 清单（中文适配）、`## 已知限制与延后工作` 节约定 | 带证据适配 |
 | 预算由 **manifest 拥有**（`scripts/doc-budgets.manifest.json`），门禁拒超限**与缺登记** | [scripts/doc-budgets.json](../scripts/doc-budgets.json) + 门禁 `doc-budgets`（登记项须存在且不超限；仓内新增 AGENTS.md 未登记即红） | 带证据适配（度量词数 → 行数：CJK 词数不可靠） |
 | `scripts/AGENTS.md` = 门禁写作规则（无 shell / 端口与临时路径自持有 / 只在单独运行通过的 spec 是缺陷） | [scripts/AGENTS.md](../scripts/AGENTS.md)：范围（git ls-files tracked-only）、剥 `GIT_*`、端口独占、stdlib-only 分层 | 带证据适配（换成我们的实测教训） |
