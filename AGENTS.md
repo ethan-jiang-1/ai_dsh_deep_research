@@ -44,11 +44,11 @@ notes/                   **开发记忆与证据链**（核心流程数据，不
                          rejected/（否决——"决定不做"，带重启条件；非搁置池）；postmortem/（事故复盘）
 .agents/skills/          开发技能（DSH 约定路径：project-agents 发现根）：任务匹配即加载的程序化工作记忆
                          （换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审）；与产品内 runtime skills（presets/*/skills/）分家
-scripts/                 职责分组六目录 + lib/ 支撑库（逐件职责索引 = scripts/README.md）：verify/（L0 门禁聚合 verify.mjs）、smoke/（分级冒烟：preset/release/client-load/snapshot-replay/gates/egress-proxy keyless；client-hitl/l4-lite/team-preflight/cdp-ask 真模型档）、probe/（cdp 交互探针、entry-chain/discipline 行为探针，真模型档）、run-gates/（node-gate/schema-scan/evidence-audit run bundle 机械门与审计）、run-ops/（watch-run 盯场、run-dashboard 只读投影、plan-card/provider-error 两投影）、dist/（export-dist 出包→_dist/）、lib/（roles 角色清单访问器[事实源=盘上 presets/] + env/playwright/vendor-artifacts/cdp-driver/run-state 冒烟支撑模块）
+scripts/                 职责分组六目录 + lib/ 支撑库：verify/（L0 门禁聚合）、smoke/（分级冒烟，keyless/真模型档逐件申报）、probe/（交互与行为探针）、run-gates/（run bundle 机械门与审计）、run-ops/（run 观察与运维投影）、dist/（出包→_dist/）、lib/（冒烟/门禁支撑模块）——逐件职责与档位 = scripts/README.md
 tests/                   keyless 回归（node:test，无测试框架；layering 守卫五件套：提及级禁物+解析级调用+import 闭包图+test 命令钉+有家句——规则见 tests/AGENTS.md）
 snapshots/               场景证据层：整组录制资产 + 场景声明 snapshot.json（消费 = snapshot-replay-smoke
                          经 scripts/lib/replay-scene.mjs）；分类与证据边界 = snapshots/README.md
-dev/                     vendor-build.sh（vendor 树构建：tsc host/client + typert 产物 + client bundle）、vendor-typert-emit.mjs（typert 产物生成器）、vendor-host-bundle.config.ts（逐包 host 半补建配置：tsdown -c 给缺 lib/index.js 的包补产物）、egress-probe/egress-proxy.mjs（网络出口：模式判定 CLI + 本地代理，boot-run 依赖）、render-overlay.mjs（从 pack 渲染 research.overlay.yml）、sync-pack-workspace.mjs（把 research-workspace 正本同步进 pack 的 workspace/ 种子）、boot-run.sh（run 通道开跑：幂等装+boot web+仪表盘）、run-kickoff.mjs（run 会话驱动）、hitl-answer.mjs（HITL 代答）、record-role-fixture.mjs（fixture 录制）、env.sh（双 home + dsh 机制基线 + pre-commit 钩子激活）、research.overlay.yml（源码域 overlay，**生成物**）、hooks/（pre-commit：verify+tests 红灯拦 commit）
+dev/                     源码驱动与 run 通道：env.sh（双 home + 裸 dsh 拦截 + pre-commit 挂载）、vendor-build.sh（vendor 树构建）、render-overlay / sync-pack-workspace（两份 tracked 生成物的生成器）、boot-run.sh（run 通道开跑，自 source env.sh）、run-kickoff / hitl-answer（会话驱动与 HITL 代答）、egress-probe / egress-proxy（网络出口，boot-run 依赖）、record-role-fixture（fixture 录制）、research.overlay.yml（**生成物**，勿手改）、hooks/（pre-commit 红灯拦 commit）——逐件职责 = dev/README.md
 runtime/                 运行态区（gitignored）：harness-home/（开发 DSH home：会话/凭据/插件安装）+
                          smoke-workspace/（冒烟与 boot 运行产物）——dev/ 只住源码驱动，跑出来的东西住这里
 _dist/                   对外交付件：安装手册.md（tracked 生成物，生成器 = scripts/dist/export-dist.mjs）
@@ -79,7 +79,7 @@ Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。
 ## 命令速查（全档正本 = [guides/60 §2](docs/guides/60-dev-loop.md)）
 
 ```sh
-source dev/env.sh    # ⚠ 前置：双 home + 裸 dsh 拦截（DSH_HOME=runtime/harness-home）；L1/L2 与须先 source 的脚本必须先 source（清单正本 = scripts/README 档位列，如 evidence-audit / snapshot-replay / run-ops 两投影），未 source 自拒 exit 2（run 通道 dev/boot-run.sh 自 source，勿重复）
+source dev/env.sh    # ⚠ 前置：双 home + 裸 dsh 拦截（DSH_HOME=runtime/harness-home）；L1/L2 与须先 source 的脚本必须先 source（清单正本 = scripts/README 档位列），未 source 自拒 exit 2（run 通道 dev/boot-run.sh 自 source，勿重复）
 pnpm verify          # L0 结构门禁（keyless，收尾必跑）
 pnpm test            # L0 keyless 回归（唯一登记的测试命令）
 ```
@@ -90,8 +90,8 @@ pnpm test            # L0 keyless 回归（唯一登记的测试命令）
 
 档位词汇：**keyless** = 无凭据可跑；preset-smoke 真挂载档无模型调用、不需要 key。
 release-smoke 无模型调用，安装验收使用 `--install-only` 跳过模型就绪检查；默认 preflight 仍检查凭据在场；
-**真模型档** = 需凭据并调用模型：l4-lite-smoke、team-preflight-smoke、entry-chain-probe、
-discipline-probe（纪律行为探针）、client-hitl-smoke、cdp-ask-smoke（探针 --ask 端到端）、dev/record-role-fixture（fixture 录制）与完整 L4；CDP `--ask` 按当前会话模型档处理（模式表 = [项目地图](docs/project-map.md)）。
+**真模型档** = 需凭据并调用模型——closed set 名单正本 = `tests/smoke-contract` 机械对账
+（现含 l4-lite / team-preflight / entry-chain、discipline 探针 / client-hitl / cdp-ask / record-role-fixture 与完整 L4）；CDP `--ask` 按当前会话档处理（模式表 = [项目地图](docs/project-map.md)）。
 
 L4-lite 真模型冒烟需要 `DEEPSEEK_API_KEY`：开发 home（`runtime/harness-home/.credentials.yaml`）配一次
 即可，永不提交密钥；web 搜索无需独立 key——base 的 `web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，与 chat 同一把钥匙（实证：vendor `packages/bundle/base/cordis.patch.yml` 的 web-search-deepseek 行）。

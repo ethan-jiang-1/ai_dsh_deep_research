@@ -64,7 +64,7 @@ for (const r of ROLES) {
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
 step(!!home, 'env: DSH_HOME 已设置（先 source dev/env.sh）', '未设置则只能停在 keyless 预检');
 
-const dshSrc = process.env.DSH_SRC ?? ROOT; // 本仓根 = 安装锚（vendor/dsh submodule 在 workspace；原默认 company 借用已随 D10 销账）
+const dshSrc = process.env.DSH_SRC ?? ROOT; // 本仓根 = 安装锚（vendor/dsh submodule 在 workspace）
 const bin = join(dshSrc, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
 
 if (process.env.DSH_SMOKE_REAL !== '1') {

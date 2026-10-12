@@ -52,7 +52,7 @@ if (home !== join(ROOT, 'runtime', 'harness-home')) {
   console.error(`release-smoke: refusing non-development DSH_HOME: ${home} (source dev/env.sh)`);
   process.exit(2);
 }
-const dshSrc = process.env.DSH_SRC ?? ROOT; // 本仓根 = 安装锚（vendor/dsh submodule 在 workspace；原默认 company 借用已随 D10 销账）
+const dshSrc = process.env.DSH_SRC ?? ROOT; // 本仓根 = 安装锚（vendor/dsh submodule 在 workspace）
 const bin = join(dshSrc, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
 if (!existsSync(bin)) {
   console.error(`release-smoke: 机制基线源码不在位（${bin}）——检查 DSH_SRC`);
