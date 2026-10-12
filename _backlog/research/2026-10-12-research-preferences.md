@@ -1,228 +1,141 @@
 ---
-topic: Deep Research 研究偏好
-intent: 为研究偏好模板 issue 梳理本仓机制、现有先例与候选设计。
+topic: Deep Research 研究方法配置
+intent: 为研究方法配置总卡及单次研究、长期复用子卡提供统一的概念、机制证据与候选落地依据。
 ---
 
-# Deep Research 研究偏好：初步研究
+# Deep Research 研究方法配置：综合研究依据
 
-## 研究问题
+## 当前结论与使用边界
 
-如何让用户选择常见的研究偏好模板，并允许自定义，使偏好在一次 Deep Research 的各阶段中持续影响方法选择，同时保持证据合同和研究流程可控？
+用户意图已明确：提供可理解的研究方法预设，允许自定义，使一次研究的相关节点采用连贯的方法；同时推敲 DSH 内的选择、管理和复用体验。用户认可名称“研究方法配置”，当前是推敲打磨阶段，可研究、规划、拆卡并做隔离可逆实验；正式落地前须提交有证据支持的详细方案供用户 review，尚未授权功能实现。授权正本见总卡。
 
-## 结论摘要
+推荐把预设作为配方，把本次实际采用的方法解析成 run 快照，再由 Lead 按任务节选传递。研究类型回答“研究什么形态的问题”，深度/篇幅回答“投入多少、交付多长”，方法配置回答“怎样调查、核验和综合”。三者可有关联，但不能互相偷偷改写。
 
-这不是单纯的“搜索设置”。用户要控制的是研究方法：不同偏好应改变问题拆解、搜什么、如何选择来源、何时交叉核验/寻找反证、如何表达不确定性，以及最终报告面向何种用途。搜索只是其中一部分。
+本材料是当前综合依据，不是产品合同。已确认意图、现行架构事实和方案建议分别列出；首批预设、字段、默认选择、快照位置、变更边界和长期管理范围仍待推敲。决策与未决问题由 [总卡](../issues/2026-10-12-research-preference-templates.md) 及其子卡承载；本页不重复维护决策状态。
 
-建议把它作为一次 run 的**研究方法配置**（working label: research profile），而不是新增研究角色、改 Agent Teams 编排，或把长篇全局指令注入所有会话。用户选模板并可覆写少量字段；Lead 在立项时将配置固化进 run bundle，再将与当前任务相关的摘要明确写入派工 prompt。各角色仍执行已有的角色 skill 和共享证据合同。
+## 概念与配置模型建议
 
-此处是方案建议，不是已决定的产品合同。偏好类别、可编辑字段、每次 run 是否允许变更，以及哪些维度能被机械门禁验证，仍需产品裁定。
-
-## 本仓当前机制
-
-### 已存在的相关输入
-
-- HITL1 已询问研究类型、深度与篇幅、时间口径/语言；`quick_factual`、`exploratory_map`、`claim_verification` 影响立项和组队。这些回答定义任务形态，但不是完整的方法偏好配置。
-- question.md 模板的 `Constraints` 已有“来源偏好”和“User Research Controls: 未提供 <或用户的硬性控制指令>”字段。因此原始用户约束已有落点；缺少的是把选中的 recipe 解析为跨节点可操作的共享方法，并显式区分硬性用户控制与模板默认。
-- `question-patterns.md` 是题型判型库，命中后指导问卡、topic 骨架和分派；它按题目类型应用，不是用户选择的跨题型研究风格。
-- 本仓已有“策略层参数化”先例：策略 benchmark 记录了来源数量、交叉验证、反例搜索、补搜轮次、质量偏好等不同性质参数。其结论指出，确定性数量项适合显式参数与 gate；质量判断留给 agent guidance；不能把隐藏默认散落在 prompt。
-
-### 跨节点传递
-
-- 研究角色共享 cwd，`research-workspace/AGENTS.md` 适合放跨角色、不随 run 改变的证据合同；它明确规定一次 run 的变量只写在 `drt_<slug>/`。
-- run bundle 已有 `question.md`（研究方向、范围与 HITL1 决定）、`topics.md`、`journal.md` 等运行态文件。偏好选择属于 run 变量，宜与方向契约关联并在 bundle 中保留可追溯快照。
-- DSH `agent-instructions` 将适用的工作区指令作为 durable context 加载给每个 agent，但它的职责是 workspace 指令发现，不是按 run 选择偏好的配置系统。
-- DSH `spawn_teammate` 的输入是 Lead 明确构造的 `prompt`，`fresh` 默认不继承 Lead 历史；`fork` 继承历史。当前 team-assembly 规则也要求派工自包含，并显式让队友读取其角色 skill。因此不能假设所有 teammate 自动看到 Lead 曾选择的偏好；派工时应传递任务相关的精简摘要或指向可读的 run 文件并明确先读。
-
-## 领域先例与来源
-
-### 研究偏好应是多维取舍
-
-本仓既有 strategy benchmark 把研究策略分成预算分配、迭代深度、终止条件，并对具体参数区分“可机械判定”与“Agent guidance”。它已列举每 topic 来源地板、独立支撑、质量层级、反例搜索、交叉验证和补搜轮次。可复用此分类，不应另起一套相互冲突的数量合同。
-
-Perplexity Agent API 当前档位明确把 research depth、source coverage、latency 作为取舍面，并以 request overrides 调整预设配置；可见预设应是可解释、可覆写的默认值，不应把所有研究差异压成一项“深度”。这属于开发者 API，不等同于消费者 UI。来源：[Perplexity Agent API presets](https://docs.perplexity.ai/docs/agent-api/presets)。
-
-Anthropic 工程团队的多代理研究系统也可作架构先例，但本次取得的具体研究证据主要来自以下可直接核实的官方文档，故不以 Anthropic 摘要支撑数值或硬性规则。
-
-### 学术方法不是一个“更深”档位
-
-Cochrane Handbook Chapter 4 将识别符合条件研究的搜索视为有计划的方法：预先计划搜索，尽量高敏感度地覆盖合格研究，相关时间段和信息源不应随意排除语言或出版状态。扩大覆盖通常会接受较低精确率，说明穷尽程度、来源覆盖、时间和筛选标准需要明确，而不是简单增加搜索次数。
-
-JBI 方法手册区分范围综述与系统综述问题：探索证据版图可用 PCC（Population, Concept, Context）等宽问题框定，目的不同可以采用其他结构。JBI 对范围综述通常不主张默认进行 risk-of-bias appraisal，除非研究目的需要映射证据质量等；这说明不同研究目标应使用不同方法合同，而不是同一方法的“轻/重”强度旋钮。
-
-PRISMA-ScR 提供范围综述的报告清单。PRISMA/PRISMA-S 是报告指引，不是质量认证，也不能单凭套用模板就宣称一次 AI web research 是系统综述。若产品提供系统证据综述预设，必须明确其要求的 protocol、可复核检索式/信息源、资格标准、筛选过程、适用时的 appraisal 和报告材料；普通 web 搜索不能冒充数据库级穷尽检索。
-
-- [Cochrane Handbook, Chapter 4: Searching for and selecting studies](https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-04)
-- [JBI Manual, Defining and aligning objectives and questions](https://jbi-global.atlassian.net/wiki/spaces/MANUAL/pages/355862687/10.2.3+Defining+and+aligning+the+objective+s+and+question+s)
-- [JBI Manual, Critical appraisal or risk-of-bias assessment](https://jbi-global.atlassian.net/wiki/spaces/MANUAL/pages/355862791/10.2.8+Critical+appraisal+or+risk-of-bias+assessment)
-- [PRISMA-ScR](https://www.prisma-statement.org/scoping)
-- [PRISMA Search (PRISMA-S)](https://www.prisma-statement.org/prisma-search)
-
-### 面向用户的深度研究产品先例
-
-OpenAI Academy 的 Deep Research 官方指南建议在 prompt 中具体说明目标、范围、时间框架和所需输出；同时支持连接来源应用、限制或优先特定域名而仍允许开放 web，并在执行中调整方向。这证明用户可理解并使用的控制项是目标/范围/输出与来源策略，不只是一个抽象“风格”名称。它描述产品使用方式，不是可复现的多节点编排规范，不能据此推断本仓应模仿其内部机制。
-
-- [OpenAI Academy: Deep research](https://academy.openai.com/public/clubs/work-users-ynjqu/resources/deep-research)
-- [OpenAI: Introducing deep research](https://openai.com/index/introducing-deep-research/)
-- [OpenAI Help Center: Deep research in ChatGPT](https://help.openai.com/en/articles/10500283-deep-research-in-chatgpt)
-
-Perplexity 当前 Agent API 文档提供 fast/low/medium/high/xhigh 档位，说明档位与研究深度、来源覆盖和延迟的取舍相关；来源域过滤与优先级可以独立配置。文档还体现产品标签会变更，因此本仓宜持久化解析后的偏好内容，而不只存外部产品式的模式名。
-
-- [Perplexity Agent API presets](https://docs.perplexity.ai/docs/agent-api/presets)
-
-OpenAI Academy、Perplexity、Cochrane、JBI 与 PRISMA 官方页面由研究代理只读 HTTP 获取全文；当前会话的 web_fetch 对部分外站域名解析失败。Anthropic 页面仅有搜索入口，未将其细节作为确定性结论。
-
-## 候选偏好模板
-
-下列是待验证的用户语言草案，不是定稿清单。首版宜用少量清晰、互斥度较好的“默认取向”，并允许用户自定义/覆写；同一个模板不得替用户更改事实方向或硬性证据规则。
-
-| 候选模板 | 主要目标 | 可能改变的研究行为 | 不应改变 |
-|---|---|---|---|
-| 快速事实核查 | 尽快核实单一事实、数字或状态 | 优先权威一手来源；尽量短检索链；对高风险/易变事实做独立确认；精简报告 | 不得把未取得写成不存在；仍标单源和口径限制 |
-| 科学/学术研究 | 理解研究证据及其限制 | 优先原始论文、注册/标准/数据；比较方法、样本、测量和局限；区分共识与单篇结果 | 不自动宣称系统综述；除非用户选定，不保证穷尽检索 |
-| 系统证据综述 | 可复核地汇集某个明确领域的研究 | 规定数据库/信息源、时间、查询式、纳排标准、筛选与排除理由、覆盖缺口 | 不能把普通 web 搜索伪装成数据库级穷尽检索 |
-| 深度探索/领域地图 | 发现新兴领域结构与未知问题 | 扩宽来源和主题图；容许多轮探索；整理概念、阵营、时间线、开放问题与反例 | 不以来源数量代替覆盖质量；保留事实/推断区分 |
-| 断言/决策核查 | 判断主张或支持实际选择 | 对称搜索支持与反对证据；比较选项、约束、情境和时效性；显式列反证与不确定性 | 不让偏好预设结论；事实证据与推荐价值判断分开 |
-
-“市场/竞品比较”可能是一个常见场景模板，但更可能是问题模式或报告视角，不一定应与“科学研究/深度探索”并列为同一分类轴。需要用户体验验证。
-
-## 建议的配置模型
-
-用一个轻量结构表达 profile，而不是每个模板各自复制长篇 prompt：
-
-- `goal`：核实事实 / 理解证据 / 探索领域 / 支持决定等；
-- `source_policy`：优先信息源、排除或谨慎来源、是否要求原始来源；
-- `search_policy`：广度/深度倾向、必须探索的反方/反例、时效与地域限制；
-- `evidence_policy`：独立核验强度、适用的质量评估、不能确认时如何标注；
-- `output_policy`：读者/用途、篇幅、呈现结构；
-- `overrides`：用户自由文本或对有限字段的覆写。
-
-需把确定性参数与指导性原则分开：
-
-- **硬合同**：既有证据字段、引用可追溯、独立来源的定义、诚实报告单源/缺口等，不能被偏好降低。
-- **显式参数**：若用户选择系统证据综述，检索信息源、时间范围、纳排标准等可作为 run 内要求；能机械检查的才加门禁。
-- **Agent guidance**：探索方向、来源优先级、何时追问反例、面向读者的分析角度，应作为可执行的指导语并由角色分别应用。
-
-## 机制建议
-
-1. HITL1 现有研究类型回答继续负责任务形态；增加一个可选“研究方法”选择，避免与 quick/standard/deep 篇幅深度混为一谈。
-2. 选择模板后，把解析后的 profile 快照落到该 run bundle 的方向/决策记录中。模板是初始值；模板标识与用户覆写同时可追溯。
-3. Lead 负责把 profile 映射成各节点需要的少量动作：Scout 收来源发现策略；Analyst 收证据提取、核验与反证要求；Critic 收与 profile 对应的审查问题；Lead 收综合与报告视角。
-4. 所有派工 prompt 指向同一 run profile，并内联当前派工相关的必要摘要，满足当前的自包含派工约定。不能只依赖 `fresh`/`fork` 历史继承。
-5. 保留用户自定义的“其他/自定义”入口；明确自定义可以增加方法指导，但不能覆盖证据合同、工具权限、HITL 边界或 Team 编排授权。
-6. 先对一个样本 run 做可逆试写，检查各角色是否真的采取不同且一致的行为，再决定是否建标准模板、改问卡/模板和种子镜像。结构字段固定后再考虑机械验证。
-
-## 主要风险与待决问题
-
-- **概念重叠**：现有研究类型、深度、判型模式、研究偏好可能让 HITL1 变成多张近义菜单；交互需证明新增选择带来用户可感知的控制，而非仅增加术语。
-- **偏好歧义**：“深度探索”不代表学术证据；“科学研究”也不必然等于系统综述。建议用模板一句话说明使用场景、默认行为与不保证事项。
-- **偏好冲突**：用户可能既要快又要穷尽。需要说明冲突时何者优先，是提示用户选择，还是系统将偏好降级并记明缺口。
-- **过强默认**：数量阈值和质量等级可能制造假牙齿；先复用现有 benchmark 证据，新增数值需有实测依据。
-- **资料核验限制**：OpenAI Help Center 消费者帮助页面返回 HTTP 403，Anthropic 页面正文未复核；OpenAI Academy、Perplexity API、Cochrane、JBI 与 PRISMA 官方页面已由研究代理全文核实。API 能力不等于消费者 UI 能力，学术报告指引也不等于研究质量认证。
-
-## 引用的本仓材料
-
-- [研究手册](../../research-workspace/AGENTS.md)：run 变量归 bundle；跨角色证据合同；当前 HITL1 选择。
-- [节点契约](../../research-workspace/NODES.md)：八节点输入/输出与现有 run 节点边界。
-- [research-brief skill](../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md)：HITL1 的研究类型、深度和口径问法。
-- [team-assembly skill](../../packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md)：spawn prompt 自包含及方法论显式装载。
-- [策略 benchmark](strategy-benchmark/2026-10-03-strategy-benchmark-sources.md)：策略参数的三轴对照及参数化先例。
-- DSH vendor 源码 pin：`packages/context/agent-instructions/README.md`；`packages/experimental/tool-agent-team/src/index.ts`（spawn prompt/context contract）。
-
-## 来源复核状态
-
-本材料包含本仓源码/文档直读，以及由研究代理只读 HTTP 取得的 OpenAI Academy、Perplexity、Cochrane、JBI、PRISMA 官方页面。当前会话的 web_fetch 对部分外站 DNS 失败；Anthropic 页面仅有搜索入口，未用作确定性结论。没有据此引用未验证数字。
-
-## 深挖综合：偏好应是“配方”，维度才是稳定模型
-
-外部产品给用户的是可理解的预设或控制项，内部实现把它们拆成不同配置。学术方法的对照进一步说明，研究目标不同，流程也会不同：scope map 的 PCC 问题框架与系统综述 PICO/资格条件不是更浅与更深的同一流程；质量 appraisal 也不是默认适用于所有综述。因此用户入口可以是模板，底层不应是互斥的一个枚举字段，而应由有限的维度组成。
-
-建议的概念分层：
-
-1. **研究问题/用途**：要理解的现象、待核验主张或待支持决策。这与现有 `question.md` Purpose、RQ、Scope 同源，不重复造另一份。
-2. **方法配方**：为达到目的采取什么调查路径，例如探索地图、断言反证、方案比较、研究证据综合。
-3. **执行预算**：快答/标准/深度、时间或步骤预算。复用已有 HITL1 深度，不让“深度探索”模板暗中覆写预算。
-4. **交付形式**：目标读者、篇幅和报告结构，复用现有问卡与报告合同，允许模板提供默认。
-5. **不变质量底线**：真实来源链、明确证据不足、独立性口径、日期/摘录约定等，所有方法共享，用户偏好不可关闭。
-
-底层 profile 维度建议控制在五类，避免直接暴露过多滑杆：
-
-| 维度 | 对 Agent 的影响 | 首版建议表达 |
+| 概念 | 承载内容 | 与现有实现的关系 |
 |---|---|---|
-| 目标模式 | 立项提问、topics 组织方式 | 地图探索 / 主张核查 / 方案比较 / 证据综合 |
-| 范围与覆盖 | 包含/排除、时间/地域/语言、覆盖广度 | 用户给的硬边界 + 模板建议；未知保持 open |
-| 信息源策略 | 来源优先/允许/排除、域名限制或优先 | 例如官方/原始研究优先；默认仍可开放 web |
-| 检验策略 | 支持/反对证据、交叉验证、质量 appraisal 是否适用 | 由方法配方指定动作，质量/风险判断按领域适用，不用统一分数代替 |
-| 综合与呈现 | 比较逻辑、结构、读者 | 决策摘要、证据地图、主张-反证、研究限制等可读结果 |
+| 研究问题与用途 | 为谁解决什么问题、范围、待回答事项 | 复用 question.md 的 Purpose/RQ/Scope，不造第二份问题正本 |
+| 研究类型与判型 | 任务形态、topic 骨架和既有编制依据 | 现有三分法与 question-patterns；配置应协调它们，不能直接替代 |
+| 研究方法预设 | 可理解的默认调查路径与适用说明 | 用户选择的起点；不等于 DSH agent preset 或 DSH profile |
+| 本次方法快照 | 预设身份/版本、实际采用内容、用户覆写和未决限制 | 属于 drt_<slug> run 变量；不能只存一个预设名 |
+| 执行预算与交付长度 | 快答/标准/深度、时间、篇幅 | 继续由现有用户输入承担；方法名称不隐含改变预算 |
+| 共同质量底线 | 来源链、摘录、独立性、日期、缺口与 readiness | 复用研究手册与角色技能，不能通过自定义降低 |
 
-**搜索预算/延迟不列作方法本身**：它应继续是已有深度/篇幅选项或运行时约束。Perplexity API 的产品设计明确把深度、覆盖、延迟作为预设取舍；本仓已有快答/标准/深度。若后续引入 profile-specific stop behavior，仍要把它映射回一个可见的预算/停止说明，而不是制造第二个隐形“深度”。
+底层维度建议收敛为五组：目标模式、范围与覆盖、信息源策略、检验策略、综合与呈现。预设提供默认；用户可调整被允许的字段并补充文字。Scope、Purpose、深度等已有事实仍有原 owner，方法配置只关联或提供待确认建议，避免重复存储成两份可编辑值。字段名与存储格式尚未定。
 
-## 建议的首批模板边界
+需要区分三种内容：既有不可降低的质量要求；可检查的显式参数；依靠模型执行和判断的指导。比如“优先官方来源”是指导，不能据此宣称已实现搜索 provider 的域名硬过滤；固定来源数或检索轮数也不能凭预设名称新增。
 
-建议把模板做成预填上述维度的 recipe，每项均可查看和调整；模板不是不可组合的模式锁。
+建议的解析原则是：共同质量与权限边界约束所有配置；已明确的用户要求高于预设默认；预设只填未指定项。不能兑现的要求或彼此冲突的硬约束须显性说明，不能静默忽略或将用户立场当结论。自由文本可成为已确认的研究任务指导，但不授权工具、改变角色权限或覆盖共享纪律。
 
-| 模板草案 | 目标与主路径 | 主要交叉核查 | 不应宣称 |
+## 候选预设与承诺边界
+
+下表是待验证的用户语言与行为草案，数量和是否首发由总卡裁定。事实核查与主张核查可能过于接近，需要用实际题面和选项说明验证是否值得分开。
+
+| 候选预设 | 主要调查路径 | 可观察变化 | 承诺限制 |
 |---|---|---|---|
-| 事实核查 | 尽快答一个具体事实/数值/状态；问清时点、口径、对象 | 官方或原始来源优先；对易变/高影响事实找独立确认 | 不承诺领域覆盖或系统综述 |
-| 领域地图 | 界定主题后发现概念、阵营、子领域和开放问题；适合探索与摸底 | 不同视角/来源类型，识别盲点与结构性分歧 | 不把未覆盖方向说成不存在 |
-| 主张核查 | 将一个 claim 拆成可证伪命题；同时搜支持与反例 | 反方证据、原始材料、来源依赖关系、时效 | 不预设用户主张为真或假 |
-| 方案比较 | 明确决策者、选项、标准、约束与时间；按一致维度比较 | 每个选项都用相同标准；查官方规格、局限、反证和适用条件 | 不把价值权衡伪装成客观事实 |
-| 研究证据综合（高级/显式限制） | 对明确研究问题总结论文/数据，说明研究设计与证据差异 | 方法、样本、测量、局限；是否评价偏倚要按目的决定 | 除非工具与流程确实支持，否则不宣称 systematic/scoping review，也不宣称穷尽 |
+| 事实核查 | 对具体事实、数字或状态校准对象、时点与口径 | 官方/原始来源优先；检查易变信息和独立确认 | 不承诺领域覆盖；“快速”由预算决定 |
+| 领域地图 | 发现概念、子领域、阵营与开放问题 | topics 和来源覆盖拓宽，显式标盲点 | 不把未覆盖说成不存在；“深度”由预算决定 |
+| 主张核查 | 拆成可证伪命题，查支持与反证 | 对称检索、原始材料和来源依赖分析 | 不预设主张真伪，不支持只找赞同材料 |
+| 方案比较 | 明确决策对象、选项与一致比较标准 | 对各选项查相同维度、限制和适用情境 | 价值权衡与事实分开；不替用户决定偏好 |
+| 研究证据综合（高级候选） | 对明确问题整理论文/数据及研究设计差异 | 抽取样本、测量、方法、局限；按目的判断是否做质量评价 | 不自动宣称 systematic/scoping review 或穷尽检索 |
 
-“科学/学术研究”太宽，宜作为“研究证据综合”入口的通俗别名/说明，而非让用户以为选它就会自动成为系统综述。系统综述若将来支持，应是带协议、筛选记录和可复现检索产物的专门高承诺工作模式，不应作为一般偏好预设伪实现。
+“科学/学术研究”可作为证据综合的说明，但太宽，不能单独代表一种严密研究程序。“系统综述”属于高承诺专门模式：需要协议、可复核检索式与信息源、资格标准、筛选/排除记录、适用时的 appraisal 和报告材料。当前不把它列作普通预设候选；如将来要支持，需另证工具和流程具备相应能力。
 
-建议首版不提供通用的“说服型/只找支持材料”风格，也不允许用户将反证检查设为禁用；可以调节篇幅和分析重点，但不能让偏好将用户立场预设成研究结论。
+## 本仓已核实事实
 
-## 对应本仓八节点
+- [问卡模板](../../research-workspace/templates/run/question.md) 的 Constraints 已含来源偏好和 User Research Controls，HITL1 Snapshot 已含类型、深度、口径；缺的是跨节点解析和传递，不是所有输入都要新造。
+- [research-brief](../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md) 先查判型模式库，未知标 open。HITL1 有三问与计划确认两段，quick_factual 豁免第二段；计划确认 question 字段总长 ≤200 字，修订附加且一轮制。skill 写“已给信息不重复问”，而 [Lead persona](../../packages/deep-research-pack/presets/lead.patch.yml) 明确即使已给答案仍发三问供确认；两处存在表述张力，不能用新方法规划悄悄选择一种解释。新增问法需核对实际合同与模型行为。
+- [team-assembly](../../packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md) 以研究类型组织编制，派发五件包含读文件、写文件、验收、验证和方法论装载。当前 teammate composeFrom Lead，不会因名为 Scout/Analyst/Critic 自动获得该角色技能；派工要显式读取对应技能文件。一次性查证通道也需同样得到本次方法要求。
+- [NODES](../../research-workspace/NODES.md) 以文件作为节点接口，缺输入不得猜；两点交互不新增日常停点。补研究回挖掘并增加报告版本，表述修订不变版本，结构性变更另起 run bundle，HITL1 永不重开。
+- [状态模型](../../docs/design/50-agent-loop-and-state.md) 规定 run bundle 是研究事实正本，session log 是执行事件正本，goal/任务板是辅助，Cockpit 是只读派生观察。新会话只凭 bundle 应能恢复研究，不能重新从当前全局预设解析旧 run。
+- [D7/D17/D18](../../docs/00-index.md) 规定框架不持 per-run 状态，pack 的自写 JS 例外用途限定观察/调试。[Cockpit 设计](../../docs/design/40-research-cockpit.md) 不提供方法编辑或长期管理正本。新增配置管理代码不能因为已有 client 构建链就视为已获授权。
+- [策略 benchmark](strategy-benchmark/2026-10-03-strategy-benchmark-sources.md) 是外部参数系统与本仓的对照研究，不是本仓已有参数计算器。本仓深度主要是 prompt/topic 规模指导，不代表已有强制 token、延迟或检索预算；新增方法不另起冲突的来源数、独立性或补搜上限合同。
+- [Critic 轻量模式](../../packages/deep-research-pack/presets/critic/skills/adversarial-review/SKILL.md#轻量模式quick_factual-薄路径) 豁免完整反例/交叉验证狩猎；自定义不可削弱现有适用要求，不等于每种方法都必须做同样检查。新增方法承诺是否进入 MAJOR/FAIL 或 UNVERIFIED 需设计，原 readiness 不会自动检验新承诺。
+- [synthesis](../../packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md) 规定首屏六段与 quick 缩略及来源清单。方法呈现应在既有格式内调整分析重点；替换报告硬要求属于待决改动。角色会话无命令执行能力，audit.md 由操作侧写；方法偏离的角色记录不能派给 Lead 写入 audit。
 
-| 节点 | profile 的实际作用 | 适合持有的位置/机制 |
+## DSH 可借用能力及限制
+
+机制依据以本仓 pinned vendor 为准；日用 GUI 的 Inspect 结果只说明那个运行版本，不能代替开发基线。
+
+| 能力 | 已核实依据 | 对本需求的含义与限制 |
 |---|---|---|
-| HITL1 立项 | 显示模板及一句话结果预览；读取用户覆写；检查问题、方法、预算是否冲突；将最终解析结果冻结 | question.md 的 HITL1 snapshot/Constraints 或一个 profile 子文件；最终位置需避免和 Purpose/Scope 重复 |
-| 组队 | 根据方法需要决定 Scout/Analyst/Critic 是否参与、派工顺序和验收焦点；不可擅自推翻现有编制经验 | Lead skill 将 profile 摘要与 topics 共同用于 team-assembly |
-| Scout wave0 | 定来源版图、要搜的角度、域优先/排除、反方路线；标示覆盖边界和已排除理由 | 每个 spawn prompt 明确“读取 profile + Scout 节选”；产出仍用 leads.md |
-| Analyst wave1 | 按 topic 收证据、回答 question list、执行交叉核验或方法学抽取；不对所有领域强制套同一 appraisal | spawn prompt + evidence-extraction skill；证据卡已有字段不变 |
-| 综合 wave2 | 依据 profile 的综合逻辑组织 findings：地图/比较/claim 主张-反证/研究结果综合 | Lead synthesis skill 读取冻结 profile；findings/final 保持 owner 不变 |
-| Critic | 以该方法的失败模式审查：覆盖遗漏、非对称比较、反证缺失、研究限制失真；仍共享 readiness 硬门 | Critic spawn prompt 明确方法特定审查 checklist；review.md readiness 不降级 |
-| HITL2 | 将结论、残余风险与方法承诺是否兑现呈给用户；补研究仍由用户拍板 | 现有 HITL2，不新增交互停点 |
-| 交付 | 报告标明实际方法、重要覆盖限制和偏离；不可把 profile 名称当质量证明 | final.md 或 audit/journal 中显式记录完成/偏离状态，最终合同另定 |
+| spawn prompt 与上下文模式 | tool-agent-team〔V1〕、Agent Teams〔V2〕 | fresh 不继承 Lead 历史，派工须自包含；不能仅存预设名或指望聊天记忆 |
+| 共享工作目录与指令发现 | agent-instructions〔V3〕、in-process spawn〔V4〕 | 初始指令链按 cwd 加载；更深 AGENTS 在该 agent 成功触到更深路径后下一请求才生效，不是即时广播 |
+| prompt section/context | system-prompt〔V5〕 | 可做 agent-scoped 注入，但需要安装和生命周期关联；当前 spawn 工具不提供调用者的 child setup hook，不是最薄首选 |
+| Settings UI 扩展 | ui-settings〔V6〕、槽类型〔V7〕 | 有 settings.section 页面与 settings.general.item 行；它们是 UI 位置，不自动提供本产品的字段、持久化 owner 或模型送达 |
+| 持久配置与修订写入 | settings〔V8〕 | active profile 的 patch 持久化；仅暴露活动、唯一可寻址 entry 的 volatile 字段；旧 revision 写入被拒；声明 schema 不会自动得到一张现成管理页 |
+| 当前会话与未来默认分开 | permission UX〔V9〕 | 可借鉴“默认只影响以后创建的对象”；不能推断已存在研究方法命令、选择器或保存工具 |
+| Cockpit 文件与事件通道 | [client 入口](../../packages/deep-research-pack/src/client/index.ts) | 现有 remote.session.follow 与 remote.workspaceFiles 读取当前 run；读取失败要与空配置区别，观察面不写入研究事实 |
 
-节点不需要各自再发明“风格”。应该有一个 run profile 正本，由 Lead 在阶段派工时投影成小而具体的动作要求。Profile 对一次 run 内可见但按节点节选，避免所有角色重复收到整份配置。
+Settings 是候选管理路径，需要新增真正消费方法数据的 owner，评估 profile 范围、配置重载、部署与现行代码边界。另一候选是工作区内独立的用户预设库，由 Lead 在开跑前显式读取；它便于携带但同样需要确定位置、写权限与读取协议。两者尚未选定，也不能两处同时成为权威库。
 
-## 适配 DSH：首选 prompt payload，不首选插件机制
+不把 method 配置塞进每个 DSH 角色 preset；这会把每次研究变量变成框架组合变更。run 下的 AGENTS 可作为自说明补充，但不能作为 fresh child 首次开工的唯一送达途径。
 
-### 已核实能力
+## 候选单次研究闭环
 
-- 工作区 instructions：`dsh-agent-instructions` 在每个 agent 的 session cwd 上读取适用的 `AGENTS.md`；初始 baseline 包含 project root 到 cwd 的链。成功通过工作区工具读/写/编辑更深层目录后，**该 agent 自己的下一步**才收到对应局部指令。参见 vendor `packages/context/agent-instructions/README.md:28-36`、`src/index.ts:127-150,296-337`。
-- Team spawn：`spawn_teammate` 接受完整 `prompt` 和 `fresh|fork`，默认 fresh；in-process 子代理继承工作目录，但 fresh 不继承 Lead 对话历史。child 会收到 Lead 填写的 prompt 作为初始用户消息。参见 vendor `packages/experimental/tool-agent-team/src/index.ts:175-210`、`packages/subagent/subagent-spawn-in-process/README.md:30-32`。
-- 可选 prompt API：DSH `systemPrompt.section()` / `context()` 支持注册全局或 agent-scoped 的 prompt 内容；Agent scoped 注册在其生命周期内生效，模型可见 prompt/context 要进入 session log。参见 vendor `packages/core/system-prompt/src/index.ts:52-123,451-497` 与 `packages/core/system-prompt/README.md:135-151`。
+| 节点/场景 | 方法配置的作用 | 保留的 owner 与边界 |
+|---|---|---|
+| HITL1 | 显示推荐及理由、接收覆写、暴露重要冲突，确认实际内容 | question 的已有字段仍是正本；快照放 question 还是独立文件由单次研究卡比较 |
+| 组队 | 提供节点动作和审查重点，与题型编制协调 | 不因预设擅自跳过 Critic、改变授权或重写团队拓扑 |
+| Scout | 来源版图、搜索角度、支持/反方路线、覆盖限制 | 输出仍由 Scout 写 leads |
+| Analyst/一次性查证 | 证据抽取、核验动作、适用的研究方法比较 | 证据七字段、摘录与 Question List 不降级 |
+| Lead 综合 | 按地图/主张/比较/证据综合组织 findings 与报告 | findings/final owner 不变，Scope/Purpose 不复制成第二份可编辑值 |
+| Critic | 检查覆盖遗漏、非对称比较、反证缺失或研究限制 | 原 readiness 与证据底线仍适用；方法名不证明质量 |
+| HITL2/交付 | 报告实际采取的方法、重要偏离与限制 | 延续现有补研究/表述修订/结构性另起语义 |
+| 恢复/重派 | 从本次快照重建节点要求 | 不受全局预设改名、删除或升级影响 |
 
-### 为什么局部 AGENTS 不是首选 profile 通道
+推荐 HITL1 固定初始快照；后续不能原地改写当时确认内容。允许哪些调整，须映射既有 Decisions 与回边：保持方法的补证据沿用快照；表述修订不触发换方法；改变研究结构或整体方法的情形需判断是否另起 bundle。冻结不等于模型能保证全部执行，不能兑现时要留下偏离依据。
 
-run 下的 `drt_<slug>/AGENTS.md` 可能被 instruction loader 发现，但不会因目录创建或 Lead 读取自动传给 fresh child：child 有自己的 session 与文件 touch projection，且初始 cwd 是 `research-workspace/`。局部指令仅在该 child 用受支持的 filesystem tool 成功触到 bundle 内文件后，才会在其下一个 step 生效。它可作为 run 内容补充/自说明，但初次派工仍必须自包含，不能把“指向文件”误作“文件已注入”。
+旧 run 没有方法快照应如实标“未记录”，不能按当前默认回填为用户曾选定。损坏、未知版本或未解析的配置与“未选择”不是同一状态；禁止默默退回默认后继续假装按原方法执行。问卡仍 pending、答案已返回但文件未落盘、半成品快照也不能被视为已确认；恢复应核对可追溯依据，不把沉默当接受。
 
-### 推荐的最薄适配路径
+[运行指南](../../docs/guides/61-run-playbook.md) 已有 steer 方向修订：Lead 记 Decisions 后补搜，不等于 HITL2 rerun。冻结初始内容不能取消该通道；需定义允许变化、送达已有队员及旧产物的处理。归档续跑、路径迁移和并行 run 也应绑定各自 bundle，不串用当前默认。具体恢复与修正行为归单次研究卡。
 
-1. **用户入口**：现有 HITL1 结构化卡加一个可选研究方法模板选择；沿用研究类型、深度、口径问题，不把三个维度塞进同一组选项。选项说明模板“默认会怎样做”与“不会保证什么”。
-2. **run 正本**：把用户选项解析成有版本的 profile 快照放入新 bundle。可先沿用 `question.md` 的 `Constraints` / `HITL1 Alignment Snapshot`，或另设 `research-method.md`；优先选择一个家，避免 question 与 profile 双写。固定 profile label + 解析字段 + user overrides + 已知不支持/冲突。
-3. **model delivery**：Lead 先读 run profile，再把节点适用的有限字段连同现有五件派工要素放入每个 `spawn_teammate` prompt/任务描述。prompt 用稳定小节和逐字字段投影，不依赖 child 的历史或 child 先读嵌套 AGENTS 才能开工。
-4. **角色知识**：固定角色技能仍定义“怎样做好 Scout/Analyst/Critic”；profile 只决定这次优先做哪些研究动作。角色 skill 可加一条指令：“每个 run 先读取该 bundle 的方法配置，并按派工提供的节点映射执行”；不必复制所有模板文本到每份 skill。
-5. **验证**：先把 2 个 profile 写成样例快照，用同一个问题做差分试写；检查真实 search query/source pattern、证据对象、反证覆盖、报告结构是否产生预期差异，并检查共同硬底线没变。确定 schema 后再增加 L0 契约测试与 pack workspace 镜像门禁；模型行为需要真组合/session snapshot，不靠静态文案断言证明。
+## UX 与长期管理候选
 
-这一路径借用 DSH 现有 bundle/preset、agent-instructions、工具 schema、Agent Teams prompt 与 session logging。新增 plugin、Config 字段、Service 或 Host extension 仅在后续要跨 preset/run 复用并且确有模型可见性/可追溯需求时再考虑。运行时 `systemPrompt.context()` 不是首选：它需要代码态 session→bundle 关联和 per-agent 安装，当前 `spawn_teammate` tool schema 没有向调用者提供 child setup hook，增加改造面。
+当次选择应贴着研究问题：用户可接受推荐、选其他方法或微调；展示“会怎样做”与限制，不要求先完成复杂管理。用户没指定不能被记录成显式偏好；默认/推荐与用户确认的来源要分开。新增问法须与现有三问、计划确认和 quick 豁免协调，避免多一套近义菜单。
 
-## 可靠验收：判断“影响行为”而非“提示在场”
+长期复用的候选体验：内置预设可查看，单次调整不自动修改原预设；用户显式“另存为”才得到可复用定义。Settings 可作为管理入口候选，默认值只影响新 run。另一方案先只做内置预设与当次覆写，以减少初期配置管理负担；它并不排除以后增加保存能力。两种范围都还未由用户裁定。
 
-分四层验收，不用“看到模板出现在 prompt”当成功：
+Cockpit 建议只读展示已绑定 run 的方法摘要、关键实际选项和配置缺失/偏离，指向研究事实；既不显示当前全局默认冒充运行配置，也不因读取成功标记“方法已兑现”。方法编辑、长期库管理和额外运行停点不随观察展示一起引入。
 
-1. **实例化正确**：HITL1 的选择、模板版本、覆写与冲突结果被持久化；用户回看能复述本次 profile。
-2. **送达正确**：每份派工任务含 profile ID/版本和与节点匹配的字段；fresh child 不依赖 Lead history；重派/补研究沿用同一 run snapshot，除非有明确方向变更记录。
-3. **行为区分成立**：相同问题/预算下，两个方法配方的 Scout query/来源分布、Analyst evidence/质疑结构或 Critic checklist 至少一项按预期不同；不能只看模型自述。
-4. **不变量保留**：引用真实可追溯、证据摘录合同、未取到≠没有、单源和不确定性明确、不伪称系统综述、Critic readiness 仍按原门判。
+长期管理还需定：配置作用于哪个 profile 或工作区；如何确保新 Lead 实际读取保存内容；内置更新如何保护自定义；删除预设怎样影响未来默认；并发写冲突/保存失败如何保留草稿。精确字段、API 与交互可在路径选定后查证；当前不承诺跨设备同步、模板分享或完整版本管理。
 
-建议首个验证对照用“领域地图”vs“主张核查”，因为它们会带来明确可观察差异：topic 结构/来源广度 vs claim 分解/对称反证。先用记录回放或可逆样例试写，无需先扩成完整商业 UI。用户体验人工判据仍是：能否从短说明选对模板、能否找到自定义入口、HITL1 是否因新增一问过载。
+## 验证路线与证据限制
 
-## 仍需用户 review 的判断
+验证区分三层，不把提示词在场当作行为成立：
 
-- 用户入口是否选“研究方法”一个预设，还是允许多个独立 recipe 维度组合；建议一期预设为主、详情可覆写。
-- 适合首发的三四个模板：建议事实核查、领域地图、主张核查、方案比较；“研究证据综合”在严格承诺和局限说明下另列高级选项。
-- profile 正本先放 question.md snapshot 还是独立文件；建议 schema 未稳定前最小化，冻结字段增多后再拆独立 `research-method.md`。
-- 是否允许 run 中途变更 profile；建议初始选定后冻结，方向性变化走已有 Decision/HITL2，记录影响范围，避免队员对同一个 topic 套不同隐式方法。
+1. 确定性：选择来源、预设版本、覆写、缺失/冲突与恢复处理；快照不因库变化被重解析。固定格式后在既有文件读取/折算接口设计断言，不预造 schema 或数量门。
+2. 编排：真实 Lead 派工与 fresh child 请求/读取中有同一快照的任务要求；查证 worker 也覆盖。L1 只证明挂载，keyless 回放只证明声明的装配面；若节点硬输入变化，按既有拓扑同步方法另行处理。
+3. 模型：同题同预算，以领域地图与主张核查作候选对照；先写预期差异，再观察实际 query、来源、证据与综合/审查动作。至少覆盖不同角色；内容相同而只改名称即不成立。真模型观察可在已授权的隔离推敲实验范围内开展，本轮未跑；实验成功不等于用户已批准正式落地。
+
+UX 另需真人判断选项能否理解、临时调整与保存是否分得清；keyless 浏览器可证控件与磁盘真值一致，不能证用户负担或研究质量。具体标准与证据 owner 在承载该行为的 issue，机械检查不替代人判断。
+
+## 外部先例与来源复核范围
+
+- [Perplexity Agent API presets](https://docs.perplexity.ai/docs/agent-api/presets)：深度、来源覆盖、延迟的取舍及 request override 是配置分层先例；属于开发者 API，不能当本仓消费者 UI 或搜索 provider 能力证据。
+- [OpenAI Academy: Deep research](https://academy.openai.com/public/clubs/work-users-ynjqu/resources/deep-research)：目标、范围、时间、输出与来源选择是用户语言先例；不据此推断其内部多节点机制。
+- [Cochrane Chapter 4](https://www.cochrane.org/authors/handbooks-and-manuals/handbook/current/chapter-04)：检索需按问题和资格条件规划，覆盖与精确度存在取舍，不能等同于增加搜索次数。
+- [JBI 问题框定](https://jbi-global.atlassian.net/wiki/spaces/MANUAL/pages/355862687/10.2.3+Defining+and+aligning+the+objective+s+and+question+s)、[JBI critical appraisal](https://jbi-global.atlassian.net/wiki/spaces/MANUAL/pages/355862791/10.2.8+Critical+appraisal+or+risk-of-bias+assessment)：范围综述与系统综述目的有别，质量评价是否适用依研究目的，不能默认对所有 web research 套统一评分。
+- [PRISMA-ScR](https://www.prisma-statement.org/scoping)、[PRISMA-S](https://www.prisma-statement.org/prisma-search)：报告指引与可复核检索材料的参照，不是研究质量认证。
+- [OpenAI 发布页](https://openai.com/index/introducing-deep-research/) 与 [Help Center 入口](https://help.openai.com/en/articles/10500283-deep-research-in-chatgpt) 保留为定位来源；Help Center 正文 HTTP 403，未据其细节作结论。Anthropic 正文未复核，不用来支撑参数或硬性规则。
+
+前轮研究代理报告以只读 HTTP 获取 Academy、Perplexity、Cochrane、JBI 与 PRISMA 全文；主会话 web_fetch 对部分外站 DNS 失败。本轮保留这些结论的归因，没有重新获取外部全文，也没有将代理报告升级成独立二次复核。仓内机制依据来自本轮与前轮直接读取；外部产品页面会漂移，需要精确借用字段/数值时应重新复核。
+
+## Vendor 源面定位
+
+机制来源位于本仓 [pinned vendor](../../vendor/dsh)；下列路径相对仓根，编号仅用于本页定位，不是产品或门禁编号。
+
+```text
+V1: tool-agent-team — vendor/dsh/packages/experimental/tool-agent-team/src/index.ts
+V2: Agent Teams — vendor/dsh/packages/experimental/agent-team/README.md
+V3: agent-instructions — vendor/dsh/packages/context/agent-instructions/README.md
+V4: in-process spawn — vendor/dsh/packages/subagent/subagent-spawn-in-process/README.md
+V5: system-prompt — vendor/dsh/packages/core/system-prompt/README.md
+V6: ui-settings — vendor/dsh/packages/client/ui-settings/README.md
+V7: 槽类型 — vendor/dsh/packages/client/ui-settings/src/client/contract/slots.ts
+V8: settings — vendor/dsh/packages/settings/settings/README.md
+V9: permission UX — vendor/dsh/packages/client/ui-permission-presets/README.md
+```
