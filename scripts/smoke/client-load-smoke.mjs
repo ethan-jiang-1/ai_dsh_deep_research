@@ -42,6 +42,7 @@ import { deriveBusinessBrief } from '../../packages/deep-research-pack/src/lib/b
 import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
 import { foldActivityRows } from '../../packages/deep-research-pack/src/lib/activity-fold.ts'
 import { streamFailureOf } from '../../packages/deep-research-pack/src/lib/stream-failure.ts'
+import { SELFTEST_LIBRARY } from '../lib/selftest-library.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const arg = (name, fallback) => {
@@ -817,6 +818,118 @@ try {
     }
   }
 
+  // ── 自测例库工作区（2026-10-13 用户委托自测轮 → 固化为常驻断言）：抛弃型工作区 + 12 形态
+  // 例库（单一正本 = scripts/lib/selftest-library.mjs，与 tests/library-fold 电池共用）驱动真
+  // 面板逐例对账——含 BUG-025 修复面（legacy 单块渲染 / 混居双块 / 编辑预填 / 整段载荷回执）。
+  // 种子与探针会话自产自销（runtime/smoke-workspace/ 下覆盖写），不触 research-workspace
+  // 用户库；探针会话残留与渐进面探针同规（定期清理正本 = 录制器头注）。
+  {
+    const SELFTEST_DIR = join(ROOT, 'runtime', 'smoke-workspace', 'lib-selftest')
+    mkdirSync(SELFTEST_DIR, { recursive: true })
+    writeFileSync(join(SELFTEST_DIR, 'method-library.md'), SELFTEST_LIBRARY)
+    const ws2 = await rpc(base, cookie, 'workspace/create', { request: { path: SELFTEST_DIR } })
+    const ws2Id = ws2?.workspace?.workspaceId ?? ws2?.workspaceId
+    const created2 = typeof ws2Id === 'string' ? await rpc(base, cookie, 'session/create', { request: { workspaceId: ws2Id, agentPreset: 'lead' } }) : null
+    const probe2Id = created2?.sessionId ?? created2?.id
+    const probe2Ok = typeof probe2Id === 'string'
+    step(probe2Ok, '自测工作区 + lead 探针会话已建（抛弃型，12 形态例库种子）', probe2Ok ? 'lib-selftest' : 'workspace/session RPC 未返回 id')
+    if (probe2Ok) {
+      await rpc(base, cookie, 'session/rename', { request: { sessionId: probe2Id, title: '自测例库探针会话' } })
+      await page.reload({ waitUntil: 'domcontentloaded' })
+      await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
+      await wait(5_000)
+      await expandGroup('lib-selftest')
+      const openedS = await clickRowByText('自测例库探针会话')
+      if (openedS) {
+        await wait(3_000)
+        const expandS = page.getByRole('button', { name: 'Open right sidebar' })
+        if (await expandS.count() > 0) await expandS.first().click({ timeout: 8_000 }).catch(() => {})
+        await wait(1_500)
+        const capS = page.getByRole('button', { name: /研究配置/ }).first()
+        if (await capS.isVisible({ timeout: 6_000 }).catch(() => false)) {
+          await capS.click({ timeout: 5_000 }).catch(() => {})
+          await wait(2_500)
+          let ts = await paneTextOf()
+          const seg = ts.slice(ts.indexOf('研究配置'))
+          // ① 列表全形态投影：例名齐 + 摘要真值（分区优先 / 旧文兜底）+ 默认徽标 + 重名两条
+          const namesOk = ['全量四字段', '部分字段', '空值分区', '旧格式条目', '混合条目', '名称', '空条目', '杂项行条目', '旧格式续行', '缩进行条目'].every((n) => seg.includes(n))
+          const summaryOk = seg.includes('官方域优先') && seg.includes('广度优先铺方向') && seg.includes('新字段在场')
+          const dupOk = seg.split('同名条目').length - 1 >= 2
+          const badgeOk = seg.includes('默认偏好')
+          step(namesOk && summaryOk && dupOk && badgeOk, '自测例库·列表投影：12 形态全名 + 摘要真值 + 重名两条 + 默认徽标',
+            [namesOk ? '' : '例名缺席', summaryOk ? '' : '摘要不符', dupOk ? '' : '重名未两条', badgeOk ? '' : '徽标缺席'].filter((s) => s !== '').join('；') || '全中')
+          // ② BUG-025·纯旧格式条目：单块「自定义要求」，无 4×（未设置）噪音
+          await page.getByRole('button', { name: /旧格式条目 ›/ }).first().click({ timeout: 5_000 }).catch(() => {})
+          await wait(1_500)
+          ts = await paneTextOf()
+          const legacyReadOk = ts.includes('自定义要求') && ts.includes('广度优先铺方向') && ts.includes('地图类问题适用') && ts.includes('来源：') && !ts.includes('（未设置）')
+          step(legacyReadOk, '自测例库·BUG-025 修复面：纯旧格式详情 = 单块「自定义要求」（无未设置噪音）')
+          // ③ BUG-025·编辑预填 + 整段载荷回执（发送目标 = 本探针会话，抛弃型）
+          await page.getByRole('button', { name: '编辑内容' }).first().click({ timeout: 5_000 }).catch(() => {})
+          await wait(1_000)
+          const ta = page.locator('textarea')
+          const taCount = await ta.count().catch(() => 0)
+          const legacyDraft = taCount === 5 ? await ta.nth(4).inputValue().catch(() => '') : ''
+          step(taCount === 5 && legacyDraft.includes('广度优先铺方向'), '自测例库·BUG-025 修复面：编辑态旧正文预填（4 分区 + 1 旧正文）', `textarea ${taCount} 区`)
+          await page.getByRole('button', { name: '把修改交给 Lead' }).first().click({ timeout: 5_000 }).catch(() => {})
+          let legacyReceipt = null
+          for (let i = 0; i < 10; i++) {
+            await wait(1_000)
+            const t2 = await paneTextOf()
+            if (t2.includes('已发给 Lead：把研究偏好「旧格式条目」改为：广度优先铺方向；地图类问题适用；曾是默认')) { legacyReceipt = 'ok'; break }
+            const at = t2.indexOf('发送失败，草稿已保留：')
+            if (at !== -1) { legacyReceipt = t2.slice(at, at + 120); break }
+          }
+          step(legacyReceipt === 'ok', '自测例库·BUG-025 修复面：旧格式整段载荷回执（Lead 迁移路径）', legacyReceipt === 'ok' ? '改为：广度优先铺方向；地图类问题适用；曾是默认' : String(legacyReceipt ?? '10s 无回执'))
+          // ④ 混居条目：四分区 + 「自定义要求（旧）」双块；编辑预填分区与旧正文并存
+          await page.reload({ waitUntil: 'domcontentloaded' })
+          await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
+          await wait(5_000)
+          await expandGroup('lib-selftest')
+          const reopenedS = await clickRowByText('自测例库探针会话')
+          if (reopenedS) {
+            await wait(3_000)
+            const expandR = page.getByRole('button', { name: 'Open right sidebar' })
+            if (await expandR.count() > 0) await expandR.first().click({ timeout: 8_000 }).catch(() => {})
+            await wait(1_500)
+            const capR = page.getByRole('button', { name: /研究配置/ }).first()
+            if (await capR.isVisible({ timeout: 6_000 }).catch(() => false)) {
+              await capR.click({ timeout: 5_000 }).catch(() => {})
+              await wait(2_500)
+              await page.getByRole('button', { name: /混合条目 ›/ }).first().click({ timeout: 5_000 }).catch(() => {})
+              await wait(1_500)
+              ts = await paneTextOf()
+              const mixedReadOk = ts.includes('找什么资料') && ts.includes('新字段在场') && ts.includes('自定义要求（旧）') && ts.includes('旧文残留')
+              step(mixedReadOk, '自测例库·混居条目：四分区 + 自定义要求（旧）双块（内容零丢失）')
+              await page.getByRole('button', { name: '编辑内容' }).first().click({ timeout: 5_000 }).catch(() => {})
+              await wait(1_000)
+              const ta2 = page.locator('textarea')
+              const c2 = await ta2.count().catch(() => 0)
+              const firstDraft = c2 === 5 ? await ta2.first().inputValue().catch(() => '') : ''
+              const lastDraft = c2 === 5 ? await ta2.nth(4).inputValue().catch(() => '') : ''
+              step(c2 === 5 && firstDraft.includes('新字段在场') && lastDraft.includes('旧文残留'), '自测例库·混居编辑：分区预填 + 旧正文预填并存', `textarea ${c2} 区`)
+              await page.getByRole('button', { name: '放弃' }).first().click({ timeout: 5_000 }).catch(() => {})
+              await wait(1_000)
+              // ⑤ 空值分区：缺席分区显式「（未设置）」，在场分区有内容
+              await page.getByRole('button', { name: /空值分区 ›/ }).first().click({ timeout: 5_000 }).catch(() => {})
+              await wait(1_500)
+              ts = await paneTextOf()
+              step(ts.includes('逐字转写') && ts.includes('（未设置）'), '自测例库·空值分区：缺席显式未设置、在场有内容')
+              await page.getByRole('button', { name: '关闭详情' }).first().click({ timeout: 5_000 }).catch(() => {})
+            } else {
+              step(false, '自测例库·混居/空值断言：探针会话上「研究配置」胶囊不可见')
+            }
+          } else {
+            step(false, '自测例库·混居/空值断言：探针会话行复开失败')
+          }
+        } else {
+          step(false, '自测例库：探针会话上「研究配置」胶囊不可见')
+        }
+      } else {
+        step(false, '自测例库：探针会话行不可点')
+      }
+    }
+  }
 
   await browser.close()
 } catch (error) {
