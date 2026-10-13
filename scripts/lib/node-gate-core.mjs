@@ -9,7 +9,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { planCardsOf } from './plan-card.mjs'
 import { basename, join } from 'node:path'
-import { deliveryDate, runType } from '../run-gates/schema-scan.mjs'
+import { deliveryDate, runType } from './schema-scan-core.mjs'
 
 /** 门 L 契约日（2026-10-03 = RFC wave0-leads-polish 落地日；此前交付的 bundle 不追溯）。 */
 export const LEADS_CONTRACT_DATE = '2026-10-03'
