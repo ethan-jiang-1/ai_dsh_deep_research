@@ -50,11 +50,15 @@
   **教训：pack 改动面含 client 时，`tsc -b` 是 test 不可替代的一道**；
 - **L1 真挂载**：`preset-smoke`（`DSH_SMOKE_REAL=1`）**ALL PASS**（4 preset + skills 硬隔离）；
 - **浏览器真装配**：`client-load-smoke` **ALL PASS**，含新页签断言组（guide 胶囊在场 /
-  内置四条在场 / 偏好库区在场 / **详情 Modal 四分区 + 内置操作在场**；2026-10-13 收结轮补齐
-  detail-ux 验收行：库条目详情读态（无「基于此自定义」）/ 内置无编辑入口负例 / 编辑草稿
-  四区预填 / 删除二次确认（到确认层即取消）/ **编辑发送回执**——发送目标 = 冒烟自建的
-  抛弃型 lead 探针会话，指令逐字进其 journal、keyless 无凭据回合即败消费，不触真实 run）
-  + 既有观察面全部真数据对账；
+  内置四条在场 / 偏好库区在场 / **详情 Modal 四分区 + 内置操作在场（含内置无编辑入口负例）**；
+  2026-10-13 自测轮补：库条目详情读态 / 编辑草稿四区预填 / 删除二次确认 + **抛弃型自测工作区
+  12 形态例库对账**〔scripts/lib/selftest-library.mjs 单一正本，与 tests/library-fold 电池共用；
+  legacy 单块渲染 / 混居双块 / 空值分区——BUG-025 修复面〕。**发送链路断言不进冒烟**：keyless
+  档契约 = 无模型调用，dev home 持凭据，任何 session/prompt 都会唤醒真模型 lead〔当日事故
+  实录〕——载荷逻辑由 tests/library-fold 电池逐字钉）+ 既有观察面全部真数据对账；
+- **自测轮两缺陷收口（2026-10-13，例库电池发现）**：[BUG-025](../../_backlog/_archived/fixed_bugs/BUG-025-legacy-detail-modal-and-edit-drop.md)
+  legacy 详情/编辑流丢 legacyText + [BUG-026](../../_backlog/_archived/fixed_bugs/BUG-026-library-read-40-line-truncation.md)
+  库读写死 40 行静默截断——修复后 smoke/test/verify 全绿，红证在卡；
 - **顺带修复旧假红（实录，两轮）**：活动流断言旧地板「≥3 行」在本会话形状（快答型 run = 2 行）
   下为假红 → 改为「≥1 且 = `foldActivityRows` 折算真值」的数据无关对账，实测
   `2 行（盘侧期望 2）`；2026-10-13 收结轮同断言再红（富会话 16 行 vs 全量折算 25 行）——
@@ -62,10 +66,11 @@
   surface append 消息事件定切点，页含切点到末尾**全部**事件），盘侧期望却折全量日志 →
   期望改按同窗复刻折算（冒烟 `clientHistoryWindowOf`），16=16 闭合；队员会话
   （spawn_teammate 在场）时 emoji 计数无法归属 lead 面，精确对账显性降级 n/a；
-- **未跑（如实分开）**：UX 真人实测（选项文案/分区名/「改这节」粒度是否好懂 = 用户实测判据）·
-  面板指令经**真模型 Lead 执行**的端到端合取项——分解后各链已证（点击→prompt→回执与指令
-  逐字进会话 journal = keyless 冒烟证；Lead 动库写四字段条目 = 会话内 steer 指令真模型证，
-  「格局调研」入库）· 期 2 一切。
+- **未跑（如实分开）**：UX 真人实测（选项文案/分区名/「改这节」粒度是否好懂 = 用户实测判据；
+  2026-10-13 用户拍板不等实测直接收结，手感判断显性延后）· 面板指令经真模型 Lead 执行的
+  合取项**已由当日事故性实证**（冒烟误发的面板格式指令唤醒真 lead：加载 skill → 逐字对账
+  → 同内容幂等重写库条目 + 记账——链路全通；事故复盘与数据还原见自测轮交付记录，教训 =
+  冒烟永不 session/prompt）· 期 2 一切。
 
 ## 环境状态
 

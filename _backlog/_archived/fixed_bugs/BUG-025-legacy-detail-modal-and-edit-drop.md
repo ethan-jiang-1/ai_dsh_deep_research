@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-10-13
 ---
 
 # BUG-025：旧格式偏好条目——详情 Modal 不渲染「自定义要求」单块、编辑流丢 legacyText 发空载荷
 
-> 立卡：2026-10-13 ｜ 状态：修复就绪（建卡即就绪：根因证据与修法在卡内）｜ severity：P2 ｜ 发现：detail-ux 收结后用户委托自测轮（12 形态例电池）
+> 立卡：2026-10-13 ｜ 状态：已修（2026-10-13 修复落地 + 判据证据全录；红证在卡）｜ severity：P2 ｜ 发现：detail-ux 收结后用户委托自测轮（12 形态例电池）
 
 **症状（可复现）：**
 1. 库中含旧格式条目（`- 调查要求:` / `- 适用说明:` 行）时，右栏「研究配置」→ 点该条目名称 → 详情 Modal 四分区全部显示「（未设置）」——旧正文不可见（列表卡片摘要反而有旧文首行，摘要与详情互相矛盾）。
@@ -14,11 +14,11 @@ opened: 2026-10-13
 
 **发现路径：** 2026-10-13 用户委托自测（"完全是自测……造各种各样的例子，测一下看看对还是不对"）——12 形态例电池跑 `foldLibrary`：旧格式条目折算正确（`legacyText` 非空、四 sections 全 null）；再核组件 `setDetail` 发现读态只携 `sections/provenance/isDefault`，`legacyText` 未进 `DetailState`。探针实证：`editInstruction({sections: 全空草稿, legacyText: null})` → `'把研究偏好「X」改为：'`。
 
-**违反的规格：** [detail-ux 卡（已结）](../_archived/settled_issues/2026-10-12-research-preference-detail-ux.md)「库格式升级」节——"向后兼容：旧条目（`调查要求`/`适用说明`）详情按『自定义要求』单块渲染，Lead 下次编辑该条时顺手迁移到新格式"。
+**违反的规格：** [detail-ux 卡（已结）](../settled_issues/2026-10-12-research-preference-detail-ux.md)「库格式升级」节——"向后兼容：旧条目（`调查要求`/`适用说明`）详情按『自定义要求』单块渲染，Lead 下次编辑该条时顺手迁移到新格式"。
 
 **严重级：** P2——当前生产库只有四字段条目（「格局调研」），无实时受害数据；但破坏已交付承诺的兼容路径，且编辑流可产生破坏性指令。
 
-**根因（证据已确认）：** 组件 = [ResearchConfigTab.tsx](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx)——① 读态渲染只有 `SECTIONS.map(sectionBlock(...))`，无 legacy 单块分支；② 编辑态草稿只从 `entry.sections` 初始化；③ 保存钮把 `legacyText: null` 硬编码进合成条目再调 `editInstruction`（lib 函数本身正确——legacy 路径在场，只是组件没喂）。
+**根因（证据已确认）：** 组件 = [ResearchConfigTab.tsx](../../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx)——① 读态渲染只有 `SECTIONS.map(sectionBlock(...))`，无 legacy 单块分支；② 编辑态草稿只从 `entry.sections` 初始化；③ 保存钮把 `legacyText: null` 硬编码进合成条目再调 `editInstruction`（lib 函数本身正确——legacy 路径在场，只是组件没喂）。
 
 **修法（选定）：** `legacyText` 贯穿 `DetailState`——读态纯旧格式条目渲染单块「自定义要求」（逐行剥前缀）；新旧混居条目四分区 + 「自定义要求（旧）」块并存（内容零丢失）；编辑态源条目有 legacyText 时加「自定义要求（旧正文）」预填文本域，保存把草稿 legacyText 喂给 `editInstruction`（四分区留空 → 旧格式整段载荷 = Lead 迁移路径；填分区 → 四字段载荷，旧文已见过、迁移为明示选择）；列表摘要改为分区优先、旧文兜底。
 
@@ -31,3 +31,7 @@ opened: 2026-10-13
 5. 证据：`pnpm test`（library-fold 例库电池钉混合态指令=分区胜出等）+ `client-load-smoke` 自测工作区块（抛弃型 12 形态例库真浏览器对账：legacy 单块 / 混合双块 / 空值分区 / 默认徽标 / legacy 编辑预填与发送回执）全绿；红证 = 修复前 smoke 断言看红一次。
 
 **授权：** 用户 2026-10-13 会话指令——"有问题可以先报 bug 之后，然后自行解决，直到最后没有任何问题"。本卡修复按此显式授权自行落地（触及 pack client 行为，超出默认 P1/P2 自授权边界，用户显式授权覆盖）。
+
+## 修复记录（2026-10-13）
+
+修复 = `legacyText` 贯穿 `DetailState`：读态纯旧格式条目渲染单块「自定义要求」（逐行剥前缀）；混居条目四分区 + 「自定义要求（旧）」双块（内容零丢失）；编辑态源条目有 legacyText 时加「自定义要求（旧正文）」预填文本域，保存把草稿 legacyText 喂 `editInstruction`（四分区留空 → 旧格式整段载荷 = Lead 迁移路径）；列表摘要改分区优先、旧文兜底。判据逐项证据：①②③④ = client-load-smoke 自测工作区块断言全绿（legacy 单块无未设置噪音 / textarea 5 区含旧正文预填 / 混居双块 + 双预填并存 / 摘要分区优先）；⑤ = `pnpm test` **424/424**（含 library-fold 12 形态例库电池——混合态指令=分区胜出、legacy 整段载荷逐字）+ `pnpm verify` 全绿 + smoke **ALL PASS**。红证 = 修复前同断言实红（旧组件：4×（未设置）渲染、textarea 4 区无旧正文、空载荷）+ 电池注入回归 5 红（`- 调查要求X:` 前缀破坏 → 还原后绿）。判据③的「回执」部分以电池载荷逐字 + 编辑预填断言承载（发送链路断言因 keyless 契约移出冒烟——dev home 持凭据，session/prompt 会唤醒真模型；教训实录见 detail-ux 卡收结验证记录）。

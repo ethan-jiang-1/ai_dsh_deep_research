@@ -20,8 +20,8 @@ import {
 
 /** 页签体注入面：库文件读取 + 指令发送闭包（index.ts 装配，绑定 remote）。 */
 export interface ResearchConfigTabInjected {
-  /** 读工作区文本文件；不可达 → null。 */
-  readonly readFile: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<string | null>
+  /** 读工作区文本文件（limit = 行上限，缺省 40——库读传大限防截断，见 BUG-026）；不可达 → null。 */
+  readonly readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) => Promise<string | null>
   /** 发送指令给当前会话 Lead（steer→queue 降级在闭包内）；ok=false 时 detail = 原因。 */
   readonly sendInstruction: (sessionId: SessionId, text: string) => Promise<{ ok: boolean; detail: string }>
 }
@@ -77,10 +77,10 @@ const BUILTIN_PREFERENCES: readonly BuiltinPreference[] = [
 /** 库文件路径（工作区根；格式正本 = research-brief skill「用户方法库」）。 */
 const LIBRARY_PATH = 'method-library.md'
 
-/** 详情三态。 */
+/** 详情三态（读态携 legacyText：纯旧格式条目单块渲染、混居条目四分区外追加；编辑态 legacy = 旧正文草稿，null = 源条目无旧正文——BUG-025）。 */
 type DetailState =
-  | { readonly mode: 'read'; readonly kind: 'builtin' | 'library'; readonly name: string; readonly sections: LibrarySections; readonly provenance: string | null; readonly isDefault: boolean }
-  | { readonly mode: 'edit'; readonly name: string; readonly sections: LibrarySections }
+  | { readonly mode: 'read'; readonly kind: 'builtin' | 'library'; readonly name: string; readonly sections: LibrarySections; readonly provenance: string | null; readonly isDefault: boolean; readonly legacyText: string | null }
+  | { readonly mode: 'edit'; readonly name: string; readonly sections: LibrarySections; readonly legacy: string | null }
   | { readonly mode: 'create'; readonly sourceName: string; readonly drafts: { name: string } & LibrarySections }
 
 /** 四分区的固定呈现序与用户语言标签（= skill 库格式正本）。 */
@@ -106,7 +106,9 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
 
   const sessionId = props.sessionId
   const reload = useCallback(async (sid: SessionId) => {
-    const text = await props.readFile(sid, LIBRARY_PATH, new AbortController().signal)
+    // 库读行上限 1000（BUG-026：写死 40 会静默截断多条目库——≥150 条目量级，留 vendor
+    // maxLines〔默认 5000〕配置余量）
+    const text = await props.readFile(sid, LIBRARY_PATH, new AbortController().signal, 1000)
     setEntries(foldLibrary(text))
   }, [props.readFile])
 
@@ -155,7 +157,7 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
         <MenuItemButton onSelect={() => {
           setMenuFor(null)
           const entry = entries?.find((e) => e.name === name)
-          if (entry !== undefined) setDetail({ mode: 'edit', name: entry.name, sections: { ...entry.sections } })
+          if (entry !== undefined) setDetail({ mode: 'edit', name: entry.name, sections: { ...entry.sections }, legacy: entry.legacyText === null ? null : legacyLinesOf(entry.legacyText).join('\n') })
         }}>编辑内容</MenuItemButton>
       )}
       {!opts.isBuiltin && (
@@ -184,6 +186,20 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
     </div>
   )
 
+  /** 旧格式正文逐行剥前缀（读态单块与编辑态预填共用；剥完为空的行丢弃）。 */
+  const legacyLinesOf = (legacyText: string): readonly string[] =>
+    legacyText.split('\n').map((l) => l.replace(/^- (调查要求|适用说明|默认偏好):\s*/, '').trim()).filter((l) => l !== '')
+
+  /** 旧格式正文呈现块：纯旧格式条目 = 单块「自定义要求」（无 4×未设置噪音）；混居条目 = 四分区之外追加「自定义要求（旧）」，内容零丢失。 */
+  const legacyBlock = (label: string, lines: readonly string[]) => (
+    <div key={label} style={{ marginBottom: 8 }}>
+      <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.7 }}>{label}</div>
+      {lines.length === 0
+        ? <div style={{ fontSize: 13, lineHeight: 1.6 }}>（未设置）</div>
+        : lines.map((l, i) => <div key={i} style={{ fontSize: 13, lineHeight: 1.6 }}>{l}</div>)}
+    </div>
+  )
+
   const detailModal = (() => {
     if (detail === null) return null
     const drafts = detail.mode === 'read' ? null : detail.mode === 'edit' ? detail.sections : detail.mode === 'create' ? detail.drafts : null
@@ -201,7 +217,7 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
             }}>基于此自定义</Button>
           )
           : (
-            <Button variant="outline" onClick={() => setDetail({ mode: 'edit', name: detail.name, sections: { ...detail.sections } })}>编辑内容</Button>
+            <Button variant="outline" onClick={() => setDetail({ mode: 'edit', name: detail.name, sections: { ...detail.sections }, legacy: detail.legacyText === null ? null : legacyLinesOf(detail.legacyText).join('\n') })}>编辑内容</Button>
           )}
         <Button variant="primary" onClick={() => { void send(instructionOf('use-now', detail.name), () => setDetail(null)); }}>用于本次研究</Button>
       </>
@@ -211,7 +227,10 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
         <Button variant="ghost" onClick={() => setDetail(null)}>放弃</Button>
         <Button variant="primary" disabled={sending} onClick={() => {
           if (detail.mode === 'edit') {
-            void send(editInstruction({ name: detail.name, provenance: null, isDefault: false, sections: detail.sections, legacyText: null }), () => setDetail(null))
+            // 旧正文草稿喂给 editInstruction：四分区留空 + 旧文在场 → 旧格式整段载荷（Lead 迁移路径）；
+            // 旧文清空或分区已填 → 四字段载荷（旧文用户已见过，迁移为明示选择）。
+            const legacyText = detail.legacy !== null && detail.legacy.trim() !== '' ? detail.legacy : null
+            void send(editInstruction({ name: detail.name, provenance: null, isDefault: false, sections: detail.sections, legacyText }), () => setDetail(null))
           } else if (detail.drafts.name.trim() !== '') {
             void send(createInstruction(detail.drafts.name.trim(), detail.drafts, detail.sourceName), () => setDetail(null))
           }
@@ -234,7 +253,15 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
           </div>
         )}
         {detail.mode === 'read'
-          ? SECTIONS.map(({ key, label }) => sectionBlock(label, detail.sections[key]))
+          ? (detail.kind === 'library' && detail.legacyText !== null && SECTIONS.every(({ key }) => detail.sections[key] === null)
+              // 纯旧格式条目：单块「自定义要求」（detail-ux 卡库格式升级节的兼容承诺）
+              ? legacyBlock('自定义要求', legacyLinesOf(detail.legacyText))
+              : (
+                <>
+                  {SECTIONS.map(({ key, label }) => sectionBlock(label, detail.sections[key]))}
+                  {detail.kind === 'library' && detail.legacyText !== null ? legacyBlock('自定义要求（旧）', legacyLinesOf(detail.legacyText)) : null}
+                </>
+                ))
           : SECTIONS.map(({ key, label }) => (
             <div key={label} style={{ marginBottom: 8 }}>
               <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.7 }}>{label}</div>
@@ -245,6 +272,17 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
               />
             </div>
           ))}
+        {detail.mode === 'edit' && detail.legacy !== null && (
+          <div style={{ marginBottom: 8 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.7 }}>自定义要求（旧正文）</div>
+            <textarea
+              value={detail.legacy}
+              onChange={(ev) => setDetail({ ...detail, legacy: ev.target.value })}
+              style={{ width: '100%', boxSizing: 'border-box', fontSize: 13, lineHeight: 1.5, padding: 6, borderRadius: 4, border: '1px solid #00000033', minHeight: 52 }}
+            />
+            <div style={{ fontSize: 11, opacity: 0.55, marginTop: 2 }}>旧格式正文：四分区留空时按此整段发给 Lead（由它迁移到新格式）；改填四分区则以四分区为准。</div>
+          </div>
+        )}
         {detail.mode === 'read' && detail.kind === 'library' && (
           <div style={{ fontSize: 12, opacity: 0.55 }}>
             想从这条出发做一份新的？点下方「编辑内容」改完后用 ⋯ 菜单另存——当前版本直接改。
@@ -270,26 +308,26 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
     />
   ) : null
 
+  /** 列表摘要：分区在场优先（新 canonical），纯旧格式条目退回旧文首行（BUG-025：摘要与详情不再互相矛盾）。 */
   const summaryOfEntry = (entry: LibraryEntry): string | null => {
-    if (entry.legacyText !== null) {
-      const first = entry.legacyText.split('\n')[0]
-      return (first ?? '').replace(/^- /, '').trim() || null
-    }
-    return entry.sections.source ?? entry.sections.verify ?? entry.sections.report
+    const section = entry.sections.source ?? entry.sections.verify ?? entry.sections.report
+    if (section !== null) return section
+    if (entry.legacyText !== null) return legacyLinesOf(entry.legacyText)[0] ?? null
+    return null
   }
 
   return (
     <div style={{ padding: 12, flex: 1, minHeight: 0, overflowY: 'auto', fontSize: 13, lineHeight: 1.7 }}>
       <div style={{ fontWeight: 700, marginBottom: 2 }}>研究偏好</div>
       <div style={{ opacity: 0.6, marginBottom: 8, fontSize: 12 }}>点名称看它具体怎么干活；每次研究自动推荐、可换。</div>
-      {BUILTIN_PREFERENCES.map((b) => card(b.name, b.sections.source, false, { isBuiltin: true }, () => setDetail({ mode: 'read', kind: 'builtin', name: b.name, sections: b.sections, provenance: null, isDefault: false })))}
+      {BUILTIN_PREFERENCES.map((b) => card(b.name, b.sections.source, false, { isBuiltin: true }, () => setDetail({ mode: 'read', kind: 'builtin', name: b.name, sections: b.sections, provenance: null, isDefault: false, legacyText: null })))}
       <div style={{ fontWeight: 700, margin: '10px 0 2px' }}>我的偏好库</div>
       <div style={{ opacity: 0.6, marginBottom: 6, fontSize: 12 }}>保存的常用做法（存于本工作区）；⋯ 菜单里管理。</div>
       {entries === null && <div style={{ opacity: 0.5 }}>（读取偏好库…）</div>}
       {entries !== null && entries.length === 0 && (
         <div style={{ opacity: 0.55, marginBottom: 6 }}>还没有保存的偏好——研究中说「记住这种做法」，或基于上面的内置偏好自定义。</div>
       )}
-      {entries !== null && entries.map((e) => card(e.name, summaryOfEntry(e), e.isDefault, { isBuiltin: false }, () => setDetail({ mode: 'read', kind: 'library', name: e.name, sections: { ...e.sections }, provenance: e.provenance, isDefault: e.isDefault })))}
+      {entries !== null && entries.map((e) => card(e.name, summaryOfEntry(e), e.isDefault, { isBuiltin: false }, () => setDetail({ mode: 'read', kind: 'library', name: e.name, sections: { ...e.sections }, provenance: e.provenance, isDefault: e.isDefault, legacyText: e.legacyText })))}
       {receipt !== null && (
         <div style={{ marginTop: 8, padding: '6px 10px', borderRadius: 6, fontSize: 12, background: receipt.ok ? '#22c55e14' : '#ef444414', color: receipt.ok ? '#166534' : '#b91c1c' }}>
           {receipt.text}

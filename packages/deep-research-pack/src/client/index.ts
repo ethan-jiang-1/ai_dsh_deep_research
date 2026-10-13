@@ -117,9 +117,12 @@ export function apply(ctx: ClientContext): void {
         return null
       }
     }
-    const readFile = async (sessionId: SessionId, path: string, signal: AbortSignal) => {
+    // limit 参数化（BUG-026）：默认 40 行 = bundle 渐进面小读取的历史选择（question.md 首行
+    // 等）；「研究配置」页签的库读传大限（多条目库 >40 行，写死会静默截断——vendor 契约
+    // limit 上限 = 配置 maxLines，默认 5000）。
+    const readFile = async (sessionId: SessionId, path: string, signal: AbortSignal, limit = 40) => {
       try {
-        const result = await scoped.remote.workspaceFiles.read(sessionId, path, { limit: 40 }, signal)
+        const result = await scoped.remote.workspaceFiles.read(sessionId, path, { limit }, signal)
         if (!result.ok) {
           console.error('[research-status] workspaceFiles.read 失败', JSON.stringify({ path, error: result.error }))
           return null

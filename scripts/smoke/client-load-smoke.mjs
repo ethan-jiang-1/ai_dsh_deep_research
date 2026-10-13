@@ -12,7 +12,9 @@
 // ✅ 已交付 / 问题行渲染（首场 run 真数据）——它证明 app 渲染完成且本包 client 入口成功 apply +
 // keyed 槽体挂对 key；另有活动流断言（人性化行在场、原始事件类型名零残留）；「研究配置」
 // 页签组（D25/detail-ux：内置与库条目详情读态、内置无编辑入口负例、编辑草稿、删除二次
-// 确认、编辑发送回执——发送目标 = 本冒烟自建的抛弃型 lead 探针会话）。
+// 确认 + 抛弃型自测工作区的 12 形态例库对账——**零提示零发送**：keyless 档契约 = 无模型
+// 调用，dev home 持凭据，任何 session/prompt 都会唤醒真模型 lead〔2026-10-13 事故实录〕；
+// 发送链路载荷由 tests/library-fold 电池钉）。
 //
 // 通道：源码域（--profile web --patch dev/research.overlay.yml，与 preset-smoke 真挂载档
 // 同款——boot 起自本仓，行包名经根 node_modules 解析到 pack 源码树，浏览器经
@@ -188,8 +190,17 @@ for (const { logPath, m } of readdirSync(join(sessionsRoot, sessionGroup))
   const slug = sessionBundleOf(events)
   // 尾窗挂起谓词（BUG-003 合流：回边盘侧真值 = deriveAnchors 直调——锚点判型走 lib 同一
   // 函数，不再手抄镜像；events 留存供 fileFacts 合成）
-  if (slug !== undefined) candidates.push({ title, slug, events, logPath, eventCount: events.length, tailAskPending: foldHitlPending(events).pending })
-  else if (unboundCandidates.length < 5) unboundCandidates.push({ title })
+  // 绑定候选排除（2026-10-13 自测轮定案）：①本冒烟自建的探针标题会话——事故实录：被面板
+  // 指令唤醒的真模型 lead 会在探针壳里长成富会话并绑到真 bundle，混入渐进面真值源；②近
+  // 30 分钟仍写盘的会话——在飞 run 与断言存在竞态，渐进面断言的稳定前提 = 绑定对象静止
+  // （当日实红：绑到在飞 run 后 UI NaN / 行数漂移）。两者只出绑定候选；未绑定负样本不受限。
+  const probeTitled = title === '渐进面探针会话'
+  const stillHot = Date.now() - m < 30 * 60_000
+  if (slug !== undefined) {
+    // 绑定但被排除（探针壳 / 在飞）不进任何候选——塞进未绑定候选会污染负样本（当日实红：
+    // 点到绑定探针 → 渐进面无提示行）
+    if (!probeTitled && !stillHot) candidates.push({ title, slug, events, logPath, eventCount: events.length, tailAskPending: foldHitlPending(events).pending })
+  } else if (unboundCandidates.length < 5) unboundCandidates.push({ title })
   if (candidates.length >= 5 && unboundCandidates.length >= 1) break
 }
 // 绑定 = 近窗内（新→旧前 5 个 slug 会话）**富度地板之上取最新**：观察面断言的意图对象是
@@ -774,41 +785,11 @@ try {
             step(false, '研究配置库条目：名称钮不可见（渲染回归）')
           }
 
-          // 发送回执（面板 → remote.session.prompt → 回执 UI）——发送目标 = 本冒烟自建的
-          // lead 探针会话（research-workspace 内、每跑新建的抛弃型会话）：指令进抛弃会话，
-          // keyless 无凭据 → 排程回合即败、消息被失败回合消费，不触真实 run；载荷 = 未改动
-          // 的整条编辑指令（若日后被人打开该探针会话执行，也是同内容幂等重写，无语义变更）。
-          const probeClicked = await clickRowByText('渐进面探针会话')
-          if (probeClicked) {
-            await wait(3_000)
-            // 会话切换后右栏页签重挂载——重走展开 + 胶囊（幂等）
-            const expandP = page.getByRole('button', { name: 'Open right sidebar' })
-            if (await expandP.count() > 0) await expandP.first().click({ timeout: 8_000 }).catch(() => {})
-            await wait(1_500)
-            const capP = page.getByRole('button', { name: /研究配置/ }).first()
-            if (await capP.isVisible({ timeout: 6_000 }).catch(() => false)) {
-              await capP.click({ timeout: 5_000 }).catch(() => {})
-              await wait(2_500)
-              await page.getByRole('button', { name: /格局调研 ›/ }).first().click({ timeout: 5_000 }).catch(() => {})
-              await wait(1_000)
-              await page.getByRole('button', { name: '编辑内容' }).first().click({ timeout: 5_000 }).catch(() => {})
-              await wait(1_000)
-              await page.getByRole('button', { name: '把修改交给 Lead' }).first().click({ timeout: 5_000 }).catch(() => {})
-              let receipt = null
-              for (let i = 0; i < 10; i++) {
-                await wait(1_000)
-                const t2 = await paneTextOf()
-                if (t2.includes('已发给 Lead：把研究偏好「格局调研」改为：')) { receipt = 'ok'; break }
-                const at = t2.indexOf('发送失败，草稿已保留：')
-                if (at !== -1) { receipt = t2.slice(at, at + 120); break }
-              }
-              step(receipt === 'ok', '研究配置编辑发送：回执在场（指令全文 + 已发给 Lead）', receipt === 'ok' ? '已发给 Lead：把研究偏好「格局调研」改为：…' : String(receipt ?? '10s 无回执'))
-            } else {
-              step(false, '研究配置编辑发送：探针会话上「研究配置」胶囊不可见')
-            }
-          } else {
-            step(false, '研究配置编辑发送：探针会话行不可点')
-          }
+          // 发送链路断言（2026-10-13 自测轮移除）：面板→session/prompt→回执曾以「发给抛弃型
+          // 探针会话」为安全假设——实测推翻：dev home 持有凭据，任何 session/prompt 都会唤醒
+          // 真模型 lead（事故实录：探针壳里的 lead 读写了 research-workspace 用户数据）。本冒烟
+          // keyless 档契约 = 无模型调用——发送链路的浏览器断言整体移除，载荷逻辑由
+          // tests/library-fold 例库电池钉（editInstruction 逐字），面板编辑态草稿断言保留在上块。
         } else {
           console.log('  note  研究配置库条目断言：盘侧库为空（跳过——先有库条目再验）')
         }
@@ -829,105 +810,99 @@ try {
     writeFileSync(join(SELFTEST_DIR, 'method-library.md'), SELFTEST_LIBRARY)
     const ws2 = await rpc(base, cookie, 'workspace/create', { request: { path: SELFTEST_DIR } })
     const ws2Id = ws2?.workspace?.workspaceId ?? ws2?.workspaceId
+    // 绑定路径 = 最新会话默认视图：session/create 一个 lib-selftest 工作区的会话（不重命名、
+    // 不发消息、不点侧栏行——空白会话被侧栏隐藏且搜索排除，但 web 重载后默认打开最新会话，
+    // 两轮探针实证）→ active 会话 cwd = 种子目录 →「研究配置」页签按会话工作区读
+    // method-library.md → 12 形态例库投影。零提示零唤醒（keyless 档契约 = 无模型调用；
+    // 2026-10-13 自测轮事故实录：dev home 持有凭据，session/prompt 会唤醒真模型 lead）。
     const created2 = typeof ws2Id === 'string' ? await rpc(base, cookie, 'session/create', { request: { workspaceId: ws2Id, agentPreset: 'lead' } }) : null
     const probe2Id = created2?.sessionId ?? created2?.id
-    const probe2Ok = typeof probe2Id === 'string'
-    step(probe2Ok, '自测工作区 + lead 探针会话已建（抛弃型，12 形态例库种子）', probe2Ok ? 'lib-selftest' : 'workspace/session RPC 未返回 id')
+    const probe2Ok = typeof ws2Id === 'string' && typeof probe2Id === 'string'
+    step(probe2Ok, '自测工作区 + 最新会话已建（抛弃型，12 形态例库种子）', probe2Ok ? 'lib-selftest' : 'workspace/session RPC 未返回 id')
     if (probe2Ok) {
-      await rpc(base, cookie, 'session/rename', { request: { sessionId: probe2Id, title: '自测例库探针会话' } })
+      // 清持久化布局态（上轮 pass 点开的会话会在重载时恢复为 active——清 storage 后 web
+      // 回落默认视图 = 最新会话 = 本探针；两轮探针实证默认视图行为）
+      await page.evaluate(() => { localStorage.clear(); sessionStorage.clear() }).catch(() => {})
       await page.reload({ waitUntil: 'domcontentloaded' })
       await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
       await wait(5_000)
-      await expandGroup('lib-selftest')
-      const openedS = await clickRowByText('自测例库探针会话')
-      if (openedS) {
-        await wait(3_000)
+      // 重载后默认视图 = 最新会话（= 上面的 lib-selftest 探针）——直接开右栏页签断言
         const expandS = page.getByRole('button', { name: 'Open right sidebar' })
         if (await expandS.count() > 0) await expandS.first().click({ timeout: 8_000 }).catch(() => {})
         await wait(1_500)
-        const capS = page.getByRole('button', { name: /研究配置/ }).first()
+        let capS = page.getByRole('button', { name: /研究配置/ }).first()
+        if (!(await capS.isVisible({ timeout: 6_000 }).catch(() => false))) {
+          const addTabS = page.getByRole('button', { name: 'New tab' }).first()
+          if (await addTabS.count() > 0) {
+            await addTabS.click({ timeout: 5_000 }).catch(() => {})
+            await wait(2_000)
+            capS = page.getByRole('button', { name: /研究配置/ }).first()
+          }
+        }
         if (await capS.isVisible({ timeout: 6_000 }).catch(() => false)) {
           await capS.click({ timeout: 5_000 }).catch(() => {})
           await wait(2_500)
+          // 条目加载是异步 readFile——轮询至尾条目按钮在场。innerText 对滚动折叠区不含尾条目
+          // 文本（Chromium innerText 只取滚动容器可视区——首版文本断言实红：尾两名缺席）；
+          // 按钮可见性（Playwright isVisible 判 display/visibility，不判视口）是正确判据。
           let ts = await paneTextOf()
+          const tailBtn = page.getByRole('button', { name: /^缩进行条目 ›/ }).first()
+          for (let i = 0; i < 10 && !(await tailBtn.isVisible().catch(() => false)); i++) {
+            await wait(1_000)
+          }
+          // ① 列表全形态投影：12 例名按钮齐 + 重名两钮 + 摘要/徽标真值（文本面）
+          const entryNames = ['全量四字段', '部分字段', '空值分区', '旧格式条目', '混合条目', '名称', '同名条目', '空条目', '杂项行条目', '旧格式续行', '缩进行条目']
+          const missing = []
+          for (const n of entryNames) {
+            const ok = await page.getByRole('button', { name: new RegExp(`^${n} ›`) }).first().isVisible({ timeout: 1_500 }).catch(() => false)
+            if (!ok) missing.push(n)
+          }
+          const dupCount = await page.getByRole('button', { name: /^同名条目 ›/ }).count().catch(() => 0)
           const seg = ts.slice(ts.indexOf('研究配置'))
-          // ① 列表全形态投影：例名齐 + 摘要真值（分区优先 / 旧文兜底）+ 默认徽标 + 重名两条
-          const namesOk = ['全量四字段', '部分字段', '空值分区', '旧格式条目', '混合条目', '名称', '空条目', '杂项行条目', '旧格式续行', '缩进行条目'].every((n) => seg.includes(n))
           const summaryOk = seg.includes('官方域优先') && seg.includes('广度优先铺方向') && seg.includes('新字段在场')
-          const dupOk = seg.split('同名条目').length - 1 >= 2
           const badgeOk = seg.includes('默认偏好')
-          step(namesOk && summaryOk && dupOk && badgeOk, '自测例库·列表投影：12 形态全名 + 摘要真值 + 重名两条 + 默认徽标',
-            [namesOk ? '' : '例名缺席', summaryOk ? '' : '摘要不符', dupOk ? '' : '重名未两条', badgeOk ? '' : '徽标缺席'].filter((s) => s !== '').join('；') || '全中')
+          step(missing.length === 0 && dupCount === 2 && summaryOk && badgeOk, '自测例库·列表投影：12 形态全名按钮 + 重名两钮 + 摘要真值 + 默认徽标',
+            [missing.length === 0 ? '' : `例名缺席：${missing.join('、')}`, dupCount === 2 ? '' : `重名 ${dupCount} 钮`, summaryOk ? '' : '摘要不符', badgeOk ? '' : '徽标缺席'].filter((s) => s !== '').join('；') || '全中')
           // ② BUG-025·纯旧格式条目：单块「自定义要求」，无 4×（未设置）噪音
           await page.getByRole('button', { name: /旧格式条目 ›/ }).first().click({ timeout: 5_000 }).catch(() => {})
           await wait(1_500)
           ts = await paneTextOf()
           const legacyReadOk = ts.includes('自定义要求') && ts.includes('广度优先铺方向') && ts.includes('地图类问题适用') && ts.includes('来源：') && !ts.includes('（未设置）')
           step(legacyReadOk, '自测例库·BUG-025 修复面：纯旧格式详情 = 单块「自定义要求」（无未设置噪音）')
-          // ③ BUG-025·编辑预填 + 整段载荷回执（发送目标 = 本探针会话，抛弃型）
+          // ③ BUG-025·编辑预填（4 分区 + 1 旧正文；不发送——载荷文本由 tests/library-fold
+          // 电池逐字钉，发送链路断言因 keyless 契约移除，见上块注）
           await page.getByRole('button', { name: '编辑内容' }).first().click({ timeout: 5_000 }).catch(() => {})
           await wait(1_000)
           const ta = page.locator('textarea')
           const taCount = await ta.count().catch(() => 0)
           const legacyDraft = taCount === 5 ? await ta.nth(4).inputValue().catch(() => '') : ''
           step(taCount === 5 && legacyDraft.includes('广度优先铺方向'), '自测例库·BUG-025 修复面：编辑态旧正文预填（4 分区 + 1 旧正文）', `textarea ${taCount} 区`)
-          await page.getByRole('button', { name: '把修改交给 Lead' }).first().click({ timeout: 5_000 }).catch(() => {})
-          let legacyReceipt = null
-          for (let i = 0; i < 10; i++) {
-            await wait(1_000)
-            const t2 = await paneTextOf()
-            if (t2.includes('已发给 Lead：把研究偏好「旧格式条目」改为：广度优先铺方向；地图类问题适用；曾是默认')) { legacyReceipt = 'ok'; break }
-            const at = t2.indexOf('发送失败，草稿已保留：')
-            if (at !== -1) { legacyReceipt = t2.slice(at, at + 120); break }
-          }
-          step(legacyReceipt === 'ok', '自测例库·BUG-025 修复面：旧格式整段载荷回执（Lead 迁移路径）', legacyReceipt === 'ok' ? '改为：广度优先铺方向；地图类问题适用；曾是默认' : String(legacyReceipt ?? '10s 无回执'))
+          await page.getByRole('button', { name: '放弃' }).first().click({ timeout: 5_000 }).catch(() => {})
+          await wait(1_000)
           // ④ 混居条目：四分区 + 「自定义要求（旧）」双块；编辑预填分区与旧正文并存
-          await page.reload({ waitUntil: 'domcontentloaded' })
-          await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
-          await wait(5_000)
-          await expandGroup('lib-selftest')
-          const reopenedS = await clickRowByText('自测例库探针会话')
-          if (reopenedS) {
-            await wait(3_000)
-            const expandR = page.getByRole('button', { name: 'Open right sidebar' })
-            if (await expandR.count() > 0) await expandR.first().click({ timeout: 8_000 }).catch(() => {})
-            await wait(1_500)
-            const capR = page.getByRole('button', { name: /研究配置/ }).first()
-            if (await capR.isVisible({ timeout: 6_000 }).catch(() => false)) {
-              await capR.click({ timeout: 5_000 }).catch(() => {})
-              await wait(2_500)
-              await page.getByRole('button', { name: /混合条目 ›/ }).first().click({ timeout: 5_000 }).catch(() => {})
-              await wait(1_500)
-              ts = await paneTextOf()
-              const mixedReadOk = ts.includes('找什么资料') && ts.includes('新字段在场') && ts.includes('自定义要求（旧）') && ts.includes('旧文残留')
-              step(mixedReadOk, '自测例库·混居条目：四分区 + 自定义要求（旧）双块（内容零丢失）')
-              await page.getByRole('button', { name: '编辑内容' }).first().click({ timeout: 5_000 }).catch(() => {})
-              await wait(1_000)
-              const ta2 = page.locator('textarea')
-              const c2 = await ta2.count().catch(() => 0)
-              const firstDraft = c2 === 5 ? await ta2.first().inputValue().catch(() => '') : ''
-              const lastDraft = c2 === 5 ? await ta2.nth(4).inputValue().catch(() => '') : ''
-              step(c2 === 5 && firstDraft.includes('新字段在场') && lastDraft.includes('旧文残留'), '自测例库·混居编辑：分区预填 + 旧正文预填并存', `textarea ${c2} 区`)
-              await page.getByRole('button', { name: '放弃' }).first().click({ timeout: 5_000 }).catch(() => {})
-              await wait(1_000)
-              // ⑤ 空值分区：缺席分区显式「（未设置）」，在场分区有内容
-              await page.getByRole('button', { name: /空值分区 ›/ }).first().click({ timeout: 5_000 }).catch(() => {})
-              await wait(1_500)
-              ts = await paneTextOf()
-              step(ts.includes('逐字转写') && ts.includes('（未设置）'), '自测例库·空值分区：缺席显式未设置、在场有内容')
-              await page.getByRole('button', { name: '关闭详情' }).first().click({ timeout: 5_000 }).catch(() => {})
-            } else {
-              step(false, '自测例库·混居/空值断言：探针会话上「研究配置」胶囊不可见')
-            }
-          } else {
-            step(false, '自测例库·混居/空值断言：探针会话行复开失败')
-          }
+          await page.getByRole('button', { name: /混合条目 ›/ }).first().click({ timeout: 5_000 }).catch(() => {})
+          await wait(1_500)
+          ts = await paneTextOf()
+          const mixedReadOk = ts.includes('找什么资料') && ts.includes('新字段在场') && ts.includes('自定义要求（旧）') && ts.includes('旧文残留')
+          step(mixedReadOk, '自测例库·混居条目：四分区 + 自定义要求（旧）双块（内容零丢失）')
+          await page.getByRole('button', { name: '编辑内容' }).first().click({ timeout: 5_000 }).catch(() => {})
+          await wait(1_000)
+          const ta2 = page.locator('textarea')
+          const c2 = await ta2.count().catch(() => 0)
+          const firstDraft = c2 === 5 ? await ta2.first().inputValue().catch(() => '') : ''
+          const lastDraft = c2 === 5 ? await ta2.nth(4).inputValue().catch(() => '') : ''
+          step(c2 === 5 && firstDraft.includes('新字段在场') && lastDraft.includes('旧文残留'), '自测例库·混居编辑：分区预填 + 旧正文预填并存', `textarea ${c2} 区`)
+          await page.getByRole('button', { name: '放弃' }).first().click({ timeout: 5_000 }).catch(() => {})
+          await wait(1_000)
+          // ⑤ 空值分区：缺席分区显式「（未设置）」，在场分区有内容
+          await page.getByRole('button', { name: /空值分区 ›/ }).first().click({ timeout: 5_000 }).catch(() => {})
+          await wait(1_500)
+          ts = await paneTextOf()
+          step(ts.includes('逐字转写') && ts.includes('（未设置）'), '自测例库·空值分区：缺席显式未设置、在场有内容')
+          await page.getByRole('button', { name: '关闭详情' }).first().click({ timeout: 5_000 }).catch(() => {})
         } else {
-          step(false, '自测例库：探针会话上「研究配置」胶囊不可见')
+          step(false, '自测例库：lib-selftest 新会话上「研究配置」胶囊不可见')
         }
-      } else {
-        step(false, '自测例库：探针会话行不可点')
-      }
     }
   }
 
