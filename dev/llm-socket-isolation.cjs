@@ -1,0 +1,65 @@
+// dev/llm-socket-isolation.cjs — api.deepseek.com 请求的 socket 隔离（NODE_OPTIONS 预载，
+// 用户指令 2026-10-13：「LLM 沟通和 web search 沟通不要复用 socket，用独立的 socket」）。
+// 依据（postmortem 2026-10-13）：上游边缘对长命复用连接有相位性故障（零响应头 + 未声明 brotli 体，
+// 实拍 64 健康 → 2 秒 → 23 垃圾的硬切换），而全新连接在 150+ 次受控请求中从未失败。
+// 隔离版 soak 实证：LLM 流隔离后零异常，但**留在共享池的搜索客户端挨了 44 次零头**——故全量隔离。
+// 语义：api.deepseek.com 的 POST /messages（LLM 流 + web_search 两类性质）→ 每请求一次性
+// undici Agent（connections:1），响应体读尽后关闭——**永不复用 socket**；其余流量透传。
+// 不改路由、不改协议、不碰 vendor；移除 = 摘掉 NODE_OPTIONS 一行。
+// 家 = postmortem 2026-10-13 + 本文件头注；验收 = 隔离 soak（全量隔离后零头 = 0）。
+const PATH = require('node:path');
+const TAG = '[llm-socket-isolation]';
+const AGENT_MAX_LIFETIME_MS = 10 * 60_000; // 兜底：流未终结也限时关闭，防 socket 泄漏
+let undiciCache = null;
+const undiciOf = () => {
+  if (undiciCache === null) {
+    try {
+      const { execSync } = require('node:child_process');
+      const dir = execSync(`ls -d ${PATH.join(__dirname, '..', 'vendor', 'dsh', 'node_modules', '.pnpm', 'undici@*', 'node_modules', 'undici')} 2>/dev/null | head -1`, { encoding: 'utf8' }).trim();
+      if (dir === '') throw new Error('vendor pnpm 树里找不到 undici');
+      undiciCache = require(PATH.join(dir, 'index.js')) ?? createRequireFallback(dir);
+    } catch (e) {
+      console.error(`${TAG} 初始化失败（LLM 请求退回全局池）: ${e.message}`);
+      undiciCache = false;
+    }
+  }
+  return undiciCache || null;
+};
+function createRequireFallback(dir) {
+  const { createRequire } = require('node:module');
+  return createRequire(PATH.join(dir, 'package.json'))('undici');
+}
+const orig = globalThis.fetch;
+let rideCount = 0;
+globalThis.fetch = async function llmSocketIsolationFetch(input, init) {
+  try {
+    const url = typeof input === 'string' ? input : (input && input.url) ?? String(input);
+    const isDeepSeekPost = url.includes('api.deepseek.com')
+      && url.includes('/messages')
+      && (init && init.method) === 'POST';
+    if (!isDeepSeekPost) return orig(input, init);
+    const undici = undiciOf();
+    if (undici === null) return orig(input, init);
+    rideCount += 1;
+    const n = rideCount;
+    if (n <= 3) console.warn(`${TAG} 第 ${n} 次骑行一次性连接（此后的不再逐条打印）`);
+    const agent = new undici.Agent({ connections: 1 });
+    const headers = init.headers instanceof Headers ? Object.fromEntries(init.headers.entries()) : (init.headers ?? {});
+    const res = await undici.fetch(url, { method: 'POST', headers, body: init.body, dispatcher: agent });
+    // 生命周期：响应体读尽（tee 旁路跟随到真末尾——vendor 在 message_stop 后弃读也不影响）
+    // 或超时兜底 → 关闭 Agent（socket 随之释放，永不回池）。
+    let closed = false;
+    const close = () => { if (!closed) { closed = true; agent.close().catch(() => {}); } };
+    setTimeout(close, AGENT_MAX_LIFETIME_MS).unref?.();
+    if (res.body) {
+      const [a, b] = res.body.tee();
+      (async () => { const rd = b.getReader(); try { for (;;) { const { done } = await rd.read(); if (done) break; } } catch { /* 供应商侧弃读/中断均视为结束 */ } finally { close(); } })();
+      return new Response(a, { status: res.status, statusText: res.statusText, headers: res.headers });
+    }
+    close();
+    return res;
+  } catch (e) {
+    console.error(`${TAG} 守卫自身异常（透传原始 fetch）: ${e.message}`);
+    return orig(input, init);
+  }
+};

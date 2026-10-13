@@ -31,6 +31,7 @@
 | 研究状态页签 | [ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) | 右栏页签，自上而下八区（逐区职责见下表） |
 | 活标题 | 同上（`ResearchStatusTitle`） | 挂起时页签名变「研究状态 · ⏳ 等你拍板」 |
 | 流失败恢复指引 | [stream-failure.ts](../../packages/deep-research-pack/src/lib/stream-failure.ts) + ResearchStatusTab.tsx | 末位回合死于上游流失败（MALFORMED_RESPONSE 族）且无新回合接手 → 人话横幅「等一两分钟发『继续』」；折算纯函数，BUG-023 修复① |
+| 品牌（虎鲸 Orca） | [BrandMark.tsx](../../packages/deep-research-pack/src/client/BrandMark.tsx) | 宿主 `sidebar.brand.mark` + `sidebar.brand.name` 两槽的 single occupant（替换内置鱼形 logo 与本地构建标签）——用户定调 2026-10-13 |
 | 研究配置页签 | [ResearchConfigTab.tsx](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) + [library-fold.ts](../../packages/deep-research-pack/src/lib/library-fold.ts) | 右栏页签（D25 期 1 管理中继面）：内置偏好（只读）+ 我的偏好库投影（`method-library.md`）+ 管理指令生成经 `session/prompt` 交 Lead（steer→queue 降级）——**面板不直写文件** |
 | 研究语义工具卡 | [ResearchToolCard.tsx](../../packages/deep-research-pack/src/client/ResearchToolCard.tsx) + [tool-card.ts](../../packages/deep-research-pack/src/lib/tool-card.ts) | 对话流卡片：`spawn_teammate` → 组队卡、`web_search` → 检索卡（2 张） |
 | 挂起显性化 | [index.ts](../../packages/deep-research-pack/src/client/index.ts)（`revealStatusTab`） | pending false→true 迁移时 `openTab` 右栏自动展开；页签 dock 折叠态保持挂载（观察者常在） |

@@ -2,7 +2,10 @@
 // record-role-fixture.mjs — 角色组装面 fixture 录制工具（dev 工具态，非检查——命名语法不覆盖）。
 // 为 snapshot-replay-smoke 的多场景化录制 per-role canned 会话：boot research 档（真模型档，
 // 需 DEEPSEEK_API_KEY）→ 以 <role> preset 建会话 → 发角色探针 prompt（含哨兵指令）→ 等回合
-// 落定（哨兵出现 + 日志静默）→ 解压会话日志写 fixture（人审后入库；场景声明由人登记）。
+// 落定（哨兵出现在 **assistant 文本** + 日志静默）→ 解压会话日志写 fixture（人审后入库；
+// 场景声明由人登记）。哨兵只认 assistant 文本：prompt 原文自带「探针完成」字样，全文 grep
+// 会把死回合（上游流畸形耗尽重试、无任何 assistant 文本）误收成合格录制品——2026-10-13
+// 实录 6 连 MALFORMED_RESPONSE 的死回合被旧判据误收，折算层（缺 assistant 文本）才咬住。
 // 录一次，之后 keyless 永久回放（B 层组装请求 diff 钉 persona 全文 + 工具 schema）。
 // ⚠ 副作用自知：每次录制在 dev home 会话组留一段一次性探针会话（事件数只有真实 run 的
 // 零头）——量大后会污染 client-load-smoke 的绑定窗（实红教训），按标题前缀
@@ -64,7 +67,9 @@ const VENDOR = join(ROOT, 'vendor', 'dsh')
 const bin = join(VENDOR, 'apps', 'cli', 'src', 'bin.ts')
 
 const recordOnce = async () => {
-  const child = spawn(process.execPath, ['--import', 'tsx/esm', bin, '--profile', 'research', '--', '--port', String(PORT), '--no-open'], { cwd: VENDOR, env: withModelKey(scrubbedEnv({ DSH_HOME, PATH: process.env.PATH })), stdio: ['ignore', 'pipe', 'pipe'], detached: true })
+  // LLM 流 socket 隔离预载（用户指令 2026-10-13：一次性连接不复用——postmortem 2026-10-13）
+  const iso = join(ROOT, 'dev', 'llm-socket-isolation.cjs')
+  const child = spawn(process.execPath, ['--import', 'tsx/esm', bin, '--profile', 'research', '--', '--port', String(PORT), '--no-open'], { cwd: VENDOR, env: withModelKey(scrubbedEnv({ DSH_HOME, PATH: process.env.PATH, NODE_OPTIONS: `--require ${iso}` })), stdio: ['ignore', 'pipe', 'pipe'], detached: true })
   let output = ''
   let childGone = false
   child.on('exit', () => { childGone = true })
@@ -109,6 +114,13 @@ const recordOnce = async () => {
     const group = readdirSync(SESSIONS).find((d) => d.includes('research-workspace'))
     const logOf = (sid) => join(SESSIONS, group, sid, 'session.v4.jsonl.zstd')
     const readLog = (log) => { try { return execSync(`zstd -dc "${log}" 2>/dev/null`, { maxBuffer: 64 * 1024 * 1024 }).toString('utf8') } catch { return null } }
+    // 哨兵只认 assistant 文本（data.message.content 的 text 部分）——与折算层同款取法；
+    // prompt 回显里的哨兵字样不算数（死回合防误收，2026-10-13）。
+    const assistantTextsOf = (text) => text.split('\n').filter(Boolean)
+      .map((l) => { try { return JSON.parse(l) } catch { return null } }).filter(Boolean)
+      .filter((j) => j.type === 'assistant/message')
+      .map((j) => (j.data?.message?.content ?? []).filter((c) => c.type === 'text').map((c) => c.text).join(''))
+      .filter(Boolean)
     let logText = null
     let lastSize = -1
     let quietRounds = 0
@@ -117,15 +129,15 @@ const recordOnce = async () => {
       await sleep(4_000)
       logText = readLog(logOf(sessionId))
       if (logText === null) { if (childGone) break; continue }
-      const hasSentinel = logText.includes(SENTINEL)
+      const hasSentinel = assistantTextsOf(logText).some((t) => t.includes(SENTINEL))
       const size = statSync(logOf(sessionId)).size
       quietRounds = size === lastSize ? quietRounds + 1 : 0
       lastSize = size
       if (hasSentinel && quietRounds >= 3) break
       if (childGone) break
     }
-    if (logText === null || !logText.includes(SENTINEL)) {
-      const err = new Error(`回合未在 ${TURN_TIMEOUT_MS / 1000}s 内落定（哨兵「${SENTINEL}」缺席）——真模型回合未走通`)
+    if (logText === null || !assistantTextsOf(logText).some((t) => t.includes(SENTINEL))) {
+      const err = new Error(`回合未在 ${TURN_TIMEOUT_MS / 1000}s 内落定（哨兵「${SENTINEL}」未出现在任何 assistant 文本里——死回合/上游失败窗口不收）——真模型回合未走通`)
       err.fatal = true
       throw err
     }

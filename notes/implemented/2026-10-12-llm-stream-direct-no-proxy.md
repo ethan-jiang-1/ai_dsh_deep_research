@@ -4,9 +4,11 @@
 
 ## 决定
 
-`dev/boot-run.sh` 的 TUN 态分支在既有 `no_proxy` 上追加 **`api.deepseek.com`**：LLM 流与
-web_search API **直连**；`http_proxy/https_proxy` 自旋出口只服务 `web_fetch`（SSRF 守卫按设计
-旁路不变）。
+LLM 流与 web_search API **永远直连**，不走任何出口代理。2026-10-12 的落地形态 = boot-run TUN
+分支追加 `no_proxy=api.deepseek.com`（`http_proxy/https_proxy` 自旋出口只服务 `web_fetch`）；
+2026-10-13 起该分支随网络干预整体拆除（[网络零干预
+Note](../rejected/2026-10-13-network-vanilla-restore.md)）——本仓不再设任何代理 env，「LLM 流
+直连」从分支行为升级为结构保证。本 Note 保留的价值 = 教训与复发观察。
 
 ## 为什么（2026-10-12 实证，BUG-023）
 
@@ -27,10 +29,10 @@ TUN 态下 `http_proxy` 此前设给**整个 DSH 进程**——LLM 的 SSE 流�
 
 ## 边界与复发观察
 
-- VPN/tun 态本身不受影响：web_fetch 走出口（GFW 侧外网可抓），LLM/search 直连（国内 API）。
+- TUN/fake-IP 态下 `web_fetch` 会被原生 SSRF 守卫拒（环境形态问题，本仓不干预——见网络零干预 Note）；LLM/search 直连不受影响。
 - 若**直连路径**再现同签名畸形，那才是上游/模型面问题——从会话日志量化分布后再议重试策略
   （[triggers.md 行](../../_backlog/triggers.md)）。
 - 相关：[BUG-023 已修卡](../../_backlog/_archived/fixed_bugs/BUG-023-provider-malformed-storm-exhausts-retry.md)、
   [BUG-022 悬挂卡](../../_backlog/_archived/suspended_bugs/BUG-022-provider-stream-malformed-turn-kill.md)、
   [有界重试 Note](2026-10-11-provider-malformed-response-retry.md)、
-  [run 指南 §egress](../../docs/guides/61-run-playbook.md)。
+  [run 指南 §0.1](../../docs/guides/61-run-playbook.md)。

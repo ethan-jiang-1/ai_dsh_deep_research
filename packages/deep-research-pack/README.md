@@ -146,7 +146,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
   有团队正例首验 = 下一场真实 run；
 - **`workspace/` 种子是快照**：由 `dev/sync-pack-workspace.mjs` 从仓库正本同步（门禁
   `pack-workspace-fresh` 防漂移）；种子只铺新工作区，**不覆盖**已存在文件（`--force` 除外）；
-- **皮肤/品牌层**与**专职 synthesizer 角色**的重议条件分别由 [ui-skin](../../notes/rejected/2026-09-24-ui-skin.md) 和 [synthesizer](../../notes/rejected/2026-09-24-synthesizer-role.md) 拥有；
+- **品牌名与品牌标**已按 [ui-skin](../../notes/rejected/2026-09-24-ui-skin.md) 的重启条件窄复活落地（虎鲸 Orca，mark/name 两槽注入——[Note](../../notes/implemented/2026-10-13-orca-brand.md)）；**皮肤层**（配色/主题）与**专职 synthesizer 角色**的重议条件仍分别由 [ui-skin](../../notes/rejected/2026-09-24-ui-skin.md) 和 [synthesizer](../../notes/rejected/2026-09-24-synthesizer-role.md) 拥有；
 - **工具卡 = 2 张**（spawn_teammate / web_search）；`team_task_*` 与其他协调类工具
   （wait_agent / list_agents / send_message）**不进对话流**（实测：harness 把协调类工具排除在对话渲染外）——团队任务的观察由 ui-agent-team 任务板与 To-dos
   折叠承担，无需卡片（4 卡方案的回退理由 = [marathon2 复盘](../../notes/archived/2026-09-25-marathon2-retrospective.md)，冻结层）；

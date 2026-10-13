@@ -126,7 +126,7 @@ UX 另需真人判断选项能否理解、临时调整与保存是否分得清�
 
 ## Vendor 源面定位
 
-机制来源位于本仓 [pinned vendor](../../../vendor/dsh)；下列路径相对仓根，编号仅用于本页定位，不是产品或门禁编号。
+机制来源位于本仓 `vendor/dsh`（pinned submodule）；下列路径相对仓根，编号仅用于本页定位，不是产品或门禁编号。
 
 ```text
 V1: tool-agent-team — vendor/dsh/packages/experimental/tool-agent-team/src/index.ts

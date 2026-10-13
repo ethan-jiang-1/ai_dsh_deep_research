@@ -82,11 +82,11 @@ A 级）——该页在 drt_cn-dr-products 判"不可判定"、本次 run 故障
 **Recommendation → 已拍板：常驻（2026-10-03 用户定调「默认开」）**——boot-run 默认挂载
 （`MCP_PLAYWRIGHT=0` 显式拆）、版本钉 `@playwright/mcp@0.0.83`。依据：覆盖力决定性、token
 成本可承受、零账号
-（D22 合规）、浏览器渲染不可替代（web_fetch 只回壳页）。已知 trade-off 随行：`--proxy-server
-direct://` 修复 Chromium 渲染但**打断 playwright 服务器进程的 `page.request.get` 子通道**（Node 侧
-把 "direct" 当代理主机名解析，`ENOTFOUND direct`——critic 独立复测钉死因果）；该子通道的原职能由
-`web_fetch` 覆盖，净损失≈0。更优参数组合（两通道兼得）留作已知限制，重估条件 = 出现需要服务器进程
-请求通道的 run 实证。
+（D22 合规）、浏览器渲染不可替代（web_fetch 只回壳页）。启动参数里的 `--proxy-server direct://
+--proxy-bypass *` 已随 2026-10-13 网络零干预决定去除（[网络零干预
+Note](../rejected/2026-10-13-network-vanilla-restore.md)——浏览器网络继承环境）；随之解除的既有
+trade-off：该参数曾**打断 playwright 服务器进程的 `page.request.get` 子通道**（Node 侧把 "direct"
+当代理主机名解析，`ENOTFOUND direct`——critic 独立复测钉死因果），去除后子通道随环境直连恢复可用。
 
 **browser-use C3 tally**：本场 run **零新增** `js-render-blocked-no-workaround` 案例（渲染通道把
 智谱案例从"不可得"变"可得"）——browser-use 常设评估的必要性进一步下降，C1/C2/C3 判据维持。

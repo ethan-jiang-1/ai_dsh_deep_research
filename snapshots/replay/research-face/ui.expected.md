@@ -11,4 +11,4 @@
 ## 研究状态页签 · 人性化活动行（icon + 文本）
 
 🔍 检索：DSH harness
-💬 探针完成，搜了「DSH harness」（命中 8 条清单，来自 [极客公园](https://w.
+💬 探针完成，搜了「DSH harness」（8 条结果清单，含 npm 包 dsh-continual

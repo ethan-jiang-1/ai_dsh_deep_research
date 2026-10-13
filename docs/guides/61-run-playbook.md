@@ -38,11 +38,17 @@
 ### 0.1 特殊形态与排障（按需读，首跑不需要）
 
 - **SPA 抓取通道（mcp-playwright，默认挂载）**：`bash dev/boot-run.sh` 自带本地 Playwright MCP
-  （npx 拉起 `@0.0.83`、headless、`direct://` 直连绕过系统代理——SPA 定价页/JS 榜单的渲染抓取）；
-  `MCP_PLAYWRIGHT=0` = 显式拆。决定与环境踩坑正本 =
+  （npx 拉起 `@0.0.83`、headless——SPA 定价页/JS 榜单的渲染抓取；不设任何代理参数，浏览器网络
+  继承环境）；`MCP_PLAYWRIGHT=0` = 显式拆。决定与环境踩坑正本 =
   [mcp-playwright 采纳 Note](../../notes/implemented/2026-10-02-mcp-playwright-adoption.md)；
-- **egress 两态与 boot 自动分支**（[egress-mode-probe 卡](../../_backlog/_archived/settled_issues/2026-10-10-egress-mode-probe.md)）：本机 egress 在**直连态**（DNS 答真实公网 IP——`web_fetch` 原生可用）与 **TUN/fake-IP 态**（OS 级网络通、DNS 答 198.18.x.x 段——DSH 的 SSRF 守卫逐答案校验公网性，`web_fetch` 全域被拒；`web_search` 不受影响）之间流动，不靠静态假设——boot-run 自检自动判定并打印模式行：直连态零变化；TUN 态自动设 DSH fetch 代理出口（自旋本地转发代理，或 `DSH_EGRESS_OUTLET=http://127.0.0.1:<口>` 用自己的代理口——代理路由下守卫按设计旁路：vendor `util/http-proxy` 读 `http_proxy`/`https_proxy`，代理侧解析；`no_proxy` 同步保 localhost RPC）；无网态显性警告（研究 run 无法取证——证据契约要求 `source_url` 真实抓取）。手动判定 = `node dev/egress-probe.mjs`（keyless 秒级）；机理实证 = [hitl-docking-polish Note](../../notes/archived/2026-09-28-hitl-docking-polish.md)；
-  - **LLM/search API 流永远直连**（boot-run TUN 态 `no_proxy=api.deepseek.com`，2026-10-12）：出口代理会撕裂 SSE 流（BUG-023）——遇「event precedes message_start」先查代理路径，不要先怀疑上游；决定理由 = [Note](../../notes/implemented/2026-10-12-llm-stream-direct-no-proxy.md)
+- **网络 = 原生 DSH 行为（零干预）**：boot-run 不探测网络形态、不设任何代理 env、不起任何代理
+  进程——代理路由（vendor `util/http-proxy` 原生读 `http_proxy`/`https_proxy`/`no_proxy`）与 SSRF
+  守卫都是 vendor 缺省行为，设不设代理完全由用户环境决定。环境处于 TUN/fake-IP 态时 `web_fetch`
+  可能被原生守卫拒（`web_search` 不受影响）——那是环境形态问题，换网络环境即可，本仓不干预；
+  用户自设代理 env 时 LLM SSE 流可能被撕裂（BUG-023 教训——遇「event precedes message_start」
+  先查代理路径，不要先怀疑上游）。零干预的理由与拆掉的方案 =
+  [网络零干预 Note](../../notes/rejected/2026-10-13-network-vanilla-restore.md)；
+  - **出问题第一步 = 诊断**：`node scripts/run-ops/stream-diagnostics.mjs --session <标题|id>`（或 `--recent N`）——输出模型尝试时间线、失败密度、provider/重试策略实名、该会话的工具调用与检索查询、宿主 boot 事实；判定行直接给"链路/上游态 vs 间歇性"。
 - **web 进程生命周期（实测约束）**：`boot-run.sh` 把 web 跑在**前台**并用 trap 管子进程——
   **脚本退出即 web 停**（这是特性：不留孤儿）。因此：
 

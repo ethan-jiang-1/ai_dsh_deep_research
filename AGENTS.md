@@ -48,7 +48,7 @@ scripts/                 职责分组六目录 + lib/ 支撑库：verify/（L0 �
 tests/                   keyless 回归（node:test，无测试框架；layering 守卫五件套：提及级禁物+解析级调用+import 闭包图+test 命令钉+有家句——规则见 tests/AGENTS.md）
 snapshots/               场景证据层：整组录制资产 + 场景声明 snapshot.json（消费 = snapshot-replay-smoke
                          经 scripts/lib/replay-scene.mjs）；分类与证据边界 = snapshots/README.md
-dev/                     源码驱动与 run 通道：env.sh（双 home + 裸 dsh 拦截 + pre-commit 挂载）、vendor-build.sh（vendor 树构建）、render-overlay / sync-pack-workspace（两份 tracked 生成物的生成器）、boot-run.sh（run 通道开跑，自 source env.sh）、run-kickoff / hitl-answer（会话驱动与 HITL 代答）、egress-probe / egress-proxy（网络出口，boot-run 依赖）、record-role-fixture（fixture 录制）、research.overlay.yml（**生成物**，勿手改）、hooks/（pre-commit 红灯拦 commit）——逐件职责 = dev/README.md
+dev/                     源码驱动与 run 通道：env.sh（双 home + 裸 dsh 拦截 + pre-commit 挂载）、vendor-build.sh（vendor 树构建）、render-overlay / sync-pack-workspace（两份 tracked 生成物的生成器）、boot-run.sh（run 通道开跑，自 source env.sh）、run-kickoff / hitl-answer（会话驱动与 HITL 代答）、record-role-fixture（fixture 录制）、research.overlay.yml（**生成物**，勿手改）、hooks/（pre-commit 红灯拦 commit）——逐件职责 = dev/README.md
 runtime/                 运行态区（gitignored）：harness-home/（开发 DSH home：会话/凭据/插件安装）+
                          smoke-workspace/（冒烟与 boot 运行产物）——dev/ 只住源码驱动，跑出来的东西住这里
 _dist/                   对外交付件：安装手册.md（tracked 生成物，生成器 = scripts/dist/export-dist.mjs）

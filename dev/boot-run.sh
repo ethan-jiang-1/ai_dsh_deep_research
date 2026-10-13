@@ -29,13 +29,6 @@ if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/
   exit 1
 fi
 
-# ⓪½ egress 模式判定（issue _backlog/_archived/settled_issues/2026-10-10-egress-mode-probe.md；两态一等公民）：
-#    direct = 直连（DNS 答真实公网 IP）零变化；tun = TUN/fake-IP 态（SSRF 守卫将拒 web_fetch，
-#    web 启动前在下方 ②½ 设代理出口）；offline = 无 egress 显性警告。探针 = dev/egress-probe.mjs
-#    （keyless 秒级，走 getaddrinfo 路径——与守卫同款）；探针自身故障回落 direct（零变化默认）。
-EGRESS_MODE="$(node "$ROOT/dev/egress-probe.mjs" 2>/dev/null || echo direct)"
-echo "boot-run: egress 模式 = $EGRESS_MODE"
-
 PACKDIR="$ROOT/packages/deep-research-pack"
 PROFDIR="$DSH_HOME/profiles/$PROFILE"
 RUNTMP="$ROOT/runtime/smoke-workspace/run-pack"
@@ -104,7 +97,7 @@ $MCP_MARK_BEGIN
         serverName: playwright
         transport: stdio
         command: npx
-        args: ['-y', '@playwright/mcp@0.0.83', '--headless', '--proxy-server', 'direct://', '--proxy-bypass', '*']
+        args: ['-y', '@playwright/mcp@0.0.83', '--headless']
         env:
           npm_config_cache: '$ROOT/runtime/smoke-workspace/npm-cache'
         failOnStartupError: true
@@ -163,35 +156,6 @@ if [ "${1:-}" = "--drift-check" ]; then
 fi
 drift_check
 
-# ②½ egress 出口（仅 web 启动路径——--drift-check 模式已在上方 exit）：tun 态给 DSH fetch 设
-#     代理出口——SSRF 守卫按设计旁路（vendor util/http-proxy 读 http_proxy/https_proxy，代理侧
-#     解析）。自旋代理 = dev/egress-proxy.mjs（本 shell 子进程，随 cleanup 的 pkill -P $$ 回收）；
-#     DSH_EGRESS_OUTLET 指定自己的代理口时优先。no_proxy 同步设，保通道自身 localhost RPC。
-if [ "$EGRESS_MODE" = "tun" ]; then
-  if [ -n "${DSH_EGRESS_OUTLET:-}" ]; then
-    export http_proxy="$DSH_EGRESS_OUTLET" https_proxy="$DSH_EGRESS_OUTLET"
-    echo "boot-run: TUN 态——DSH fetch 出口 = $DSH_EGRESS_OUTLET（DSH_EGRESS_OUTLET 指定）"
-  else
-    node "$ROOT/dev/egress-proxy.mjs" --port 14200 >/dev/null 2>&1 &
-    for _ in $(seq 1 40); do
-      lsof -nP -iTCP:14200 -sTCP:LISTEN >/dev/null 2>&1 && break
-      sleep 0.25
-    done
-    if lsof -nP -iTCP:14200 -sTCP:LISTEN >/dev/null 2>&1; then
-      export http_proxy="http://127.0.0.1:14200" https_proxy="http://127.0.0.1:14200"
-      echo "boot-run: TUN 态——自旋本地转发代理 = http://127.0.0.1:14200（随 web 一并回收）"
-    else
-      echo "boot-run: ⚠ 自旋出口 10s 未就绪——web_fetch 将被 SSRF 守卫全域拒；可设 DSH_EGRESS_OUTLET=http://127.0.0.1:<代理口> 重跑" >&2
-    fi
-  fi
-  # LLM/搜索 API 流不 ride fetch 出口（BUG-023 根因收口）：出口代理会撕裂 SSE 流
-  # （"event precedes message_start"——直连同刻探针正常、出口路径必死实证）。
-  # api.deepseek.com 进 no_proxy = LLM 流与 search API 直连；web_fetch 照走出口（SSRF 旁路不变）。
-  export no_proxy="localhost,127.0.0.1,::1,api.deepseek.com"
-elif [ "$EGRESS_MODE" = "offline" ]; then
-  echo "boot-run: ⚠ 本环境无 egress——web_fetch 不可用：研究 run 无法取证（证据契约要求 source_url 真实抓取），仅可无网操作" >&2
-fi
-
 # ③ 仪表盘（RFC m2-run-dashboard + debug-dashboard-plus）：--latest 多场扫描
 # （research-workspace/drt_* + runtime/harness-home/runs ad-hoc 场）、流程步骤条、
 # HITL 等待横幅（⏳ 等你拍板）、web GUI deep-link（token 读自下方 tee 的 web.log）。
@@ -227,5 +191,8 @@ cat <<'STEPS'
 STEPS
 
 echo "boot-run: boot web（research profile，端口 ${PORT}；Ctrl-C 停止）…"
+# LLM 流 socket 隔离（用户指令 2026-10-13：LLM 流式请求走一次性连接不复用——上游边缘对
+# 长命复用连接有相位性故障，postmortem 2026-10-13；移除 = 删本行）
+export NODE_OPTIONS="--require $ROOT/dev/llm-socket-isolation.cjs${NODE_OPTIONS:+ $NODE_OPTIONS}"
 # web 输出 tee 进运行区日志：仪表盘 deep-link 从这里抓 token URL（缺席 → 页面不链，fail-soft）
 dsh --profile "$PROFILE" -- --port "$PORT" --no-open 2>&1 | tee "$ROOT/runtime/smoke-workspace/web.log"

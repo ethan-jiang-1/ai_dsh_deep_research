@@ -20,11 +20,14 @@ import type {} from '@deepseek-ai/dsh-api-remotes/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
-import { RESEARCH_TAB_KEY, RESEARCH_CONFIG_TAB_KEY, RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT, RESEARCH_TOOL_KEYS } from './keys.ts'
+// 品牌槽（`sidebar.brand.mark` / `sidebar.brand.name`）声明在 ui-sidebar 的 SlotMap——类型增强导入即登记槽名。
+import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
+import { RESEARCH_TAB_KEY, RESEARCH_CONFIG_TAB_KEY, RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT, RESEARCH_TOOL_KEYS, RESEARCH_BRAND_MARK_SLOT, RESEARCH_BRAND_NAME_SLOT } from './keys.ts'
 import { IconGaugeOutlineRegular, IconSettingsOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import { ResearchToolCard } from './ResearchToolCard.tsx'
 import { ResearchStatusTab, ResearchStatusTitle, type JournalFrame, type FollowTarget } from './ResearchStatusTab.tsx'
 import { ResearchConfigTab } from './ResearchConfigTab.tsx'
+import { OrcaMark, OrcaName } from './BrandMark.tsx'
 
 /** Required services：槽注册表（renderer）+ 右栏页签注册器 + 右栏导航面（openTab——挂起显性化）+ remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
  *  父级则取 .session 炸 "without injecting it"，只声明子级则取父属性炸 "without inject"）。 */
@@ -60,6 +63,17 @@ export function apply(ctx: ClientContext): void {
       // 占位符；2026-09-28 用户点名要 icon）：仪表盘 = 状态监测语义，与检索/工具图标不撞
       guide: [{ id: RESEARCH_TAB_KEY, order: 1, title: () => '研究状态', description: () => '研究 run 的步骤、等待与证据状态', icon: IconGaugeOutlineRegular }],
     }), 'deep-research-pack: research-status tab type')
+
+    // 研究通道品牌（用户定调 2026-10-13：虎鲸 Orca）——宿主侧栏 brand.mark / brand.name 两槽的
+    // single occupant（fallback 内置鱼形 logo 与本地构建标签被本登记替换；槽契约 =
+    // ui-sidebar contract/slots.ts——mark 收 {size}，name 空 owner share）。
+    scoped.effect(() => scoped.slots.inject(RESEARCH_BRAND_MARK_SLOT, () => [
+      scoped.slots.register({ name: RESEARCH_BRAND_MARK_SLOT }, OrcaMark),
+    ]), 'deep-research-pack: orca brand mark')
+
+    scoped.effect(() => scoped.slots.inject(RESEARCH_BRAND_NAME_SLOT, () => [
+      scoped.slots.register({ name: RESEARCH_BRAND_NAME_SLOT }, OrcaName),
+    ]), 'deep-research-pack: orca brand name')
 
     // 「研究配置」页签（D25 期 1 管理中继面）：显示偏好库投影 + 生成管理指令发 Lead——
     // 面板不直写文件（写路径唯一 = Lead，模型可见、会话日志留痕）。

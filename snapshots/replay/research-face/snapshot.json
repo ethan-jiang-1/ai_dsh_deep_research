@@ -11,9 +11,9 @@
       "fixture": "session.v4.jsonl",
       "renderExpected": "ui.expected.md",
       "source": {
-        "codeAnchor": "c4889592ea54e5eac2553b38715c4146456388f6",
+        "codeAnchor": "e670ded9237dc90e9e91a138e7df7815759d4ff0",
         "vendor": "639ed015397290b3745d163aafe02ffee4aa3f84",
-        "recordedAt": "2026-10-11T23:50:07.000Z",
+        "recordedAt": "2026-10-13T02:22:17.000Z",
         "recording": "live"
       }
     },
