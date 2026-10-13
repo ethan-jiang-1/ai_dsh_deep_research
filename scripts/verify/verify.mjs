@@ -35,7 +35,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账；新增门禁两处同步）
-const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'archived-note-pointer', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'client-half', 'guard-red-record', 'row-deps', 'workspace-contract', 'handbook-budget', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'cockpit-doc-registry', 'pack-workspace-fresh', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'backlog-liveness', 'dist-manual-version', 'port-exclusive', 'hooks-active'];
+const gates = ['md-utf8-newline', 'md-links', 'md-anchors', 'archived-note-pointer', 'preset-structure', 'claude-symlink', 'pack-bundle-compat', 'client-half', 'guard-red-record', 'row-deps', 'workspace-contract', 'handbook-budget', 'pack-contract-sync', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'vendor-pin', 'vendor-clean', 'secrets-untracked', 'role-list-sync', 'gate-ledger-sync', 'entry-chain', 'doc-budgets', 'align-ledger', 'repo-conventions', 'vendor-links', 'overlay-fresh', 'client-keys', 'client-effect-wrap', 'cockpit-doc-registry', 'pack-workspace-fresh', 'proposed-pointer-live', 'pin-agreement', 'count-free', 'doc-now-only', 'backlog-liveness', 'dist-manual-version', 'workspace-versioning', 'port-exclusive', 'hooks-active'];
 
 // vendor/dsh 钉身份的 tag 面（commit 面 = vendor-pin 门禁的 PIN；pack-bundle-compat 消费它
 // 断言 pack 兼容矩阵含当前 tag——升 pin 时两处同 diff 改；本文件里的 tag 复述受 pin-agreement 对账）
@@ -1390,6 +1390,54 @@ const allFiles = walk(ROOT);
       if (registration.test(l) && !/\bscoped\.effect\(/.test(l))
         fail(gate, `src/client/index.ts:${i + 1}: 注册调用不在 scoped.effect 包裹内——registrations are effects（dispose 即撤销贡献），包 effect 或并入既有 effect`);
     });
+  }
+}
+
+// ── 门禁 2-bis：workspace-versioning（工作区版本控制边界）。规则：工作区跟踪面的规则住在
+//    两个**必须被跟踪**的规则文件里——`research-workspace/.gitignore.example`（运行区拒收名单，
+//    同时是随 pack 分发的种子正本；包内名带 `.example` 因为 npm pack 永不打包 `.gitignore`
+//    文件名，scaffold 落地时改回本名）与 `research-workspace/drafts/.gitignore`（开发证据
+//    白名单：探针稿与 dry-run 输出默认拒收）。为什么机械化：本仓根 .gitignore 对工作区不生效，
+//    `git add -A` 又只加已跟踪文件——**"规则文件在库"本身就是边界存在的唯一形式**：正本一丢，
+//    pack 照旧发布、本仓静默失去边界。覆盖面的重点在**内容与形态**：裸 `*` 拒收全部会把被
+//    跨目录引用的材料一起拒收（fixture 实测全新 clone 后 drafts 全丢、md-links 红），故门禁
+//    同时钉"显式列名单"（出现裸 `*` 即红）与三条运行区拒收行的在场。防空语料：正本/种子/
+//    drafts 任一缺席、正本与种子不逐字节相等、缺任一拒收行 → 红（拒收行丢了，安装方一次
+//    `git add -A` 就把整个 run 历史提交进他自己的库）。──
+{
+  const gate = 'workspace-versioning';
+  const seed = join(PACK, 'workspace', '.gitignore.example');
+  const scaffoldPath = join(PACK, 'scripts', 'scaffold.mjs');
+  const rootRules = join(ROOT, 'research-workspace', '.gitignore.example');
+  const draftsRules = join(ROOT, 'research-workspace', 'drafts', '.gitignore');
+  const seedText = existsSync(seed) ? readFileSync(seed, 'utf8') : null;
+  if (seedText === null) fail(gate, 'packages/deep-research-pack/workspace/.gitignore.example 缺席——安装方将拿不到工作区忽略规则（修正 = 补正本后跑 `node dev/sync-pack-workspace.mjs`）');
+  else {
+    // 种子名 = `.gitignore.example` 而非 `.gitignore`：npm pack 永不打包名为 .gitignore 的文件
+    // （`files: ["workspace/**"]` 也照删，实测）——种子若叫 .gitignore，安装方永远收不到它。
+    // 故这里同时钉"包内没有 .gitignore（那意味着选了随包会被丢的名字）"与"scaffold 会改名落地"。
+    if (existsSync(join(PACK, 'workspace', '.gitignore')))
+      fail(gate, 'packages/deep-research-pack/workspace/.gitignore 在场——npm pack 永不打包该文件名，种子会从 tarball 里静默消失（修正 = 用 .gitignore.example 形态）');
+    const scaffoldSrc = existsSync(scaffoldPath) ? readFileSync(scaffoldPath, 'utf8') : '';
+    if (!/ent\.name === '\.gitignore\.example'/.test(scaffoldSrc))
+      fail(gate, 'scaffold.mjs 的种子收集器不认 .gitignore.example——规则不会铺到安装方工作区');
+    if (!/'\.gitignore\.example'\s*\?\s*'\.gitignore'/.test(scaffoldSrc))
+      fail(gate, 'scaffold.mjs 未把 .gitignore.example 落地成工作区根 .gitignore——铺开的是个不会生效的名字');
+    if (!existsSync(rootRules)) fail(gate, 'research-workspace/.gitignore.example 不在位——工作区跟踪面的规则正本（修正 = 重建后跑 `node dev/sync-pack-workspace.mjs`）');
+    else if (readFileSync(rootRules, 'utf8') !== seedText) fail(gate, 'research-workspace/.gitignore.example 与 pack 种子 workspace/.gitignore.example 不一致——正本与分发件漂移（修正 = `node dev/sync-pack-workspace.mjs`）');
+    if (!existsSync(draftsRules)) fail(gate, 'research-workspace/drafts/.gitignore 不在位——开发证据白名单（新探针稿会默认可被 git add）');
+    // 拒收清单 = 三个运行区名字。形态是**显式列名单**而非裸 `*` 拒收全部：工作区里还有被
+    // 文档与测试跨目录引用的材料（本仓 drafts/ 开发证据），裸 `*` 会连它们一起拒收——fixture
+    // 实测全新 clone 后 drafts 全丢、md-links 红（见 Note §实际跑过的验证）。名单少一项
+    // 就等于该类运行区重新可提交，故逐项钉。
+    const denies = ['drt_*/', 'archive/', 'method-library.md'];
+    for (const deny of denies) {
+      const escaped = deny.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      if (!new RegExp(`^\\s*${escaped}\\s*$`, 'm').test(seedText))
+        fail(gate, `种子 workspace/.gitignore.example 缺拒收行 \`${deny}\`——安装方该类运行区重新可被 git add（修正 = 改正本 research-workspace/.gitignore.example 后跑 \`node dev/sync-pack-workspace.mjs\`）`);
+    }
+    if (/^\s*\*\s*$/m.test(seedText))
+      fail(gate, '种子 workspace/.gitignore.example 出现裸 `*` 整目录拒收——它会连工作区里被跨目录引用的材料（如 drafts/ 开发证据）一起拒收，全新 clone 后链接与测试同时失效（修正 = 改回显式列名单）');
   }
 }
 

@@ -19,13 +19,18 @@ runtime/*
 runtime/harness-home/*
 !runtime/harness-home/.gitkeep
 # 研究运行时状态：run bundle（drt_<slug>/，含桥接 symlink——无尾斜杠使 pattern 同时覆盖
-# 目录与符号链接，防 symlink 误入 git）内容是 runtime truth，不进版本控制；
-# templates/ 与研究手册（AGENTS.md）是资产，进库
+# 目录与符号链接，防 symlink 误入 git）内容是 runtime truth，不进版本控制
 research-workspace/drt_*
 research-workspace/archive/
 # 用户方法库（D25）：工作区本地用户数据——README 明载「无版本史」；内容是 runtime truth，
 # 不进版本控制（进库的只有 pack 侧格式正本 = lead 的 research-brief skill）。
+# 安装方无根 .gitignore——工作区自带的规则种子 = packages/deep-research-pack/workspace/.gitignore，
+# 由 scaffold 铺开（本文件不作用于用户工作区）
 research-workspace/method-library.md
+# 研究工作区的跟踪面：本仓 track 工作区**资产**（手册/NODES/判型库/run 模板）与 drafts/ 下的
+# **开发证据**，其余（run 产物、探针稿、用户数据）不入库。drafts/ 自身规则 = 其内 .gitignore
+# （* + 白名单；嵌套 gitignore 的 ! 须排在 * 之后才生效）；安装方走 pack 种子（workspace/），
+# 不携带本仓 drafts/——开发草稿不进安装包。规则正本 = 研究手册「目录约定」
 # 排练/冒烟残留
 runtime/smoke-workspace/*
 !runtime/smoke-workspace/.gitkeep

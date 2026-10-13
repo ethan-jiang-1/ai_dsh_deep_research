@@ -1,0 +1,10 @@
+# drafts/ 只收开发证据（仓内文档/测试引用的材料），探针稿与 dry-run 输出不收。
+# deny-by-default：`*` 拒收一切（转义见下），再用 `!` 放行——`!` 须排在拒收行之后
+# （gitignore 后匹配者胜）；已 tracked 的文件不受规则作用，新证据要先显式 ! 放行再 git add。
+*
+!.gitignore
+!2026-09-29-hitl1-intake-routing-survey.md
+!2026-10-11-decision-report-samples.md
+!2026-10-11-hitl1-intake-samples.md
+!scout-retriever-probe.md
+!self-growing-pattern-library-research.md

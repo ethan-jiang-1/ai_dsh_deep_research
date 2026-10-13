@@ -18,7 +18,7 @@ const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
 test('preflight：六面检查清单在位（版本/peer/团队层/手册+节点+判型+模板/构建产物/密钥）', () => {
   // record( 调用点级断言：钉运行时检查名，注释里的字样不算数（反证实测：只改 record 名、
   // 留注释 → 必须红——includes() 子串断言会被注释满足而假绿）。
-  for (const name of ['DSH 版本兼容', '平台 peer 包', '团队机制层', '研究工作区手册', '节点契约', '判型模式库', 'run 模板', '构建产物', '模型密钥']) {
+  for (const name of ['DSH 版本兼容', '平台 peer 包', '团队机制层', '研究工作区手册', '节点契约', '判型模式库', '工作区 .gitignore', 'run 模板', '构建产物', '模型密钥']) {
     assert.match(preflight, new RegExp(`record\\([^)]*${name}`), `preflight 缺 record 检查项「${name}」——检查清单漂移`);
   }
   assert.match(preflight, /dshReleases/, 'preflight 版本判据须读 dsh.compatibility.dshReleases（版本钉死正本）');
@@ -29,6 +29,17 @@ test('preflight：六面检查清单在位（版本/peer/团队层/手册+节点
 test('preflight：fail-loud verdict + 失败给补救命令（缺什么说什么、怎么补也说什么）', () => {
   assert.match(preflight, /process\.exit\(hardFail\.length === 0 \? 0 : 1\)/, 'preflight 缺 fail-loud exit 判定——待补项会以退出码 0 溜走');
   assert.match(preflight, /→ \$\{r\.remedy\}/, 'preflight 失败项未打印补救命令（→ remedy）');
+});
+
+test('scaffold：工作区忽略规则随安装下发（包内 .gitignore.example → 落地 .gitignore）', () => {
+  // 为什么钉：种子是"装到就有"的唯一形态，收集器只认 .md 时规则静默不发——安装方工作区
+  // 没有本仓根 .gitignore 兜底，一次 git add -A 就把 run bundle 历史提交进他自己的库。
+  // 为什么是两个名字：npm pack **永不打包名为 .gitignore 的文件**（files: ["workspace/**"]
+  // 也照删），种子的包内名因此是 .gitignore.example，落地时才改回 .gitignore。
+  assert.match(scaffold, /ent\.name === '\.gitignore\.example'/,
+    'scaffold 种子收集器不认 .gitignore.example——工作区忽略规则不会随 scaffold 铺开');
+  assert.match(scaffold, /'\.gitignore\.example'\s*\?\s*'\.gitignore'/,
+    'scaffold 未把种子改名落地为 .gitignore——铺开的是个永不生效的文件名');
 });
 
 test('scaffold：幂等形状 + 收尾 preflight + workspace 必填 fail-loud', () => {

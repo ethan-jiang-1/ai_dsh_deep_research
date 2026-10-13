@@ -12,7 +12,7 @@
 | vendor-host-typert.config.ts | host 半补建备选配置（留档） |
 | vendor-typert-emit.mjs | typert 产物生成器 |
 | render-overlay.mjs | 生成器：从 pack 渲染 `dev/research.overlay.yml`（改 pack 后必跑，先于 L1） |
-| sync-pack-workspace.mjs | 生成器：research-workspace 正本 → pack workspace/ 种子 |
+| sync-pack-workspace.mjs | 生成器：research-workspace 正本（含工作区 `.gitignore`）→ pack workspace/ 种子 |
 | research.overlay.yml | **生成物**（render-overlay 产出，勿手改）——源码域 overlay |
 
 ## run 通道

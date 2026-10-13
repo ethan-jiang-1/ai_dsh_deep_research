@@ -97,7 +97,7 @@ DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`�
 | DSH 本体 | 平台（`@deepseek-ai/dsh-base` + `dsh-web-app` 两个 bundle） | 用户装 DSH |
 | 本包 | 一个 bundle（`dsh-deep-research-pack`） | 本仓 |
 | 团队机制层 | 另一个 bundle（`@deepseek-ai/dsh-experimental-agent-team-profile`） | vendor（本包**故意不声明**团队行——组合与实战 config 归该层，RFC m2-p1-run-channel A 定案） |
-| 研究工作区 | 会话 cwd 的目录（手册 `AGENTS.md` + `templates/run/`） | 本包 `workspace/` 种子（`dev/sync-pack-workspace.mjs` 同步） |
+| 研究工作区 | 会话 cwd 的目录（手册 `AGENTS.md` + `NODES.md` + `question-patterns.md` + `templates/run/` + 版本控制规则 `.gitignore`） | 本包 `workspace/` 种子（`dev/sync-pack-workspace.mjs` 同步） |
 
 工作区是**纪律的载体**：DSH 的 agent-instructions 从会话 cwd 向上发现 `AGENTS.md` 并注入每个
 角色——手册不在工作区，四个角色就没有证据契约与完成判据。安装步骤（用户视角）与前置
@@ -123,7 +123,7 @@ tarball 装法不生成 PATH bin，用安装副本内脚本全路径，见 pack 
 | 加/换一条 bundle 行（host 共享面） | `cordis.patch.yml` → `node dev/render-overlay.mjs` 重渲染；行引用的 `@deepseek-ai/*` 进 `peerDependencies` | `overlay-fresh` / `row-deps` 门禁 + L1 真挂载 + L2 安装形状 |
 | 加一个研究角色 | `presets/<role>.patch.yml` + `package.json` 的 `dsh.bundle.patch` 数组 + `l4-lite-smoke` 的 `PROMPTS` + 台账 D 号（D2 是角色数） | `preset-smoke` 真挂载（L1）+ `preset-structure` / `role-list-sync` |
 | 加一个方法论 skill | `presets/<role>/skills/<n>/SKILL.md`（frontmatter `name` 逐字等于目录名）；persona 若点名 skill 名须同 diff 对账（四个 preset 的 persona 均有硬引用） | `preset-structure` + L1 的 skills 隔离断言 |
-| 改研究手册 / run 模板 | 改 `research-workspace/` 正本 → `node dev/sync-pack-workspace.mjs` 同步进 pack | `pack-workspace-fresh` 门禁 |
+| 改研究手册 / 模板 / 工作区 `.gitignore` | 改 `research-workspace/` 正本 → `node dev/sync-pack-workspace.mjs` 同步进 pack | `pack-workspace-fresh` + `workspace-versioning` 门禁 |
 | 加部署脚本 / bin | `package.json` 的 `files` + `bin` | `release-smoke`（L2：真装一次，装完能跑） |
 | 加观察面 client 面能力 | `src/client/` + `tsconfig.client.json` 的 include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `client-load-smoke`（真浏览器）+ `client-keys` 门禁 |
 | 改 persona / skill / 手册文本（模型可见） | 同 diff 跑真模型档；运行中的 web 缓存 boot 文本，须重启通道 | `l4-lite-smoke`（真模型档） |

@@ -65,6 +65,7 @@ try {
     'package/lib/index.js',
     'package/lib/client.js',
     'package/workspace/AGENTS.md',
+    'package/workspace/.gitignore.example',
     'package/scripts/preflight.mjs',
     'package/scripts/scaffold.mjs',
   ]

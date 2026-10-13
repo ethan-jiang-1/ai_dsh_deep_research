@@ -44,15 +44,20 @@ if (workspace === null) {
     for (const ent of readdirSync(dir, { withFileTypes: true })) {
       const p = join(dir, ent.name)
       if (ent.isDirectory()) walk(p)
-      // 种子当前全 .md；加非 .md 种子时需同步 preflight 的清点口径
-      else if (ent.name.endsWith('.md')) files.push(relative(SEED, p))
+      // 种子 = .md + `.gitignore.example`。为什么不是 `.gitignore` 本身：**npm pack 永不打包
+      // 名为 .gitignore 的文件**（实测：`files: ["workspace/**"]` 也照删，见 worktree 里
+      // untracked seed 不进 tarball）——种子必须以非该名的形态随包，落地时再改成目标名。
+      else if (ent.name.endsWith('.md') || ent.name === '.gitignore.example') files.push(relative(SEED, p))
     }
   }
   walk(SEED)
   let written = 0
   let skipped = 0
   for (const rel of files) {
-    const dst = join(workspace, rel)
+    // 包内名 → 落地名：`.gitignore.example` 铺成工作区根的 `.gitignore`（安装方工作区没有
+    // 本仓根 .gitignore 兜底，这份规则随种子一起生效）。
+    const dstRel = rel === '.gitignore.example' ? '.gitignore' : rel
+    const dst = join(workspace, dstRel)
     if (existsSync(dst) && !force) { skipped += 1; continue }
     if (!dryRun) {
       mkdirSync(dirname(dst), { recursive: true })

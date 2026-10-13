@@ -63,7 +63,7 @@ const record = (ok, name, detail, remedy) => { results.push({ ok, name, detail, 
   record(found.length > 0, '团队机制层（spawn_teammate 等）', found.length > 0 ? `在场：${found.join('、')}` : '缺席——四角色协作主通道不可用', 'dsh plugin --profile <p> add @deepseek-ai/dsh-experimental-agent-team-profile（本包故意不声明团队行：组合与实战 config 归该层）')
 }
 
-// ④ 研究工作区（手册 = 会话 cwd 的 AGENTS.md；模板 = run bundle 起点）
+// ④ 研究工作区（手册 = 会话 cwd 的 AGENTS.md；模板 = run bundle 起点；.gitignore = 运行区拒收）
 {
   if (workspace === null) {
     record(true, '研究工作区', '未指定（--workspace <目录> 可检查；scaffold.mjs 可一键生成）', `node ${join(PACK, 'scripts', 'scaffold.mjs')} --workspace <目录>`)
@@ -71,15 +71,18 @@ const record = (ok, name, detail, remedy) => { results.push({ ok, name, detail, 
     const manual = join(workspace, 'AGENTS.md')
     const nodesDoc = join(workspace, 'NODES.md')
     const patternsDoc = join(workspace, 'question-patterns.md')
+    const ignore = join(workspace, '.gitignore')
     const templates = join(workspace, 'templates', 'run')
     const hasManual = existsSync(manual)
     const hasNodes = existsSync(nodesDoc)
     const hasPatterns = existsSync(patternsDoc)
+    const hasIgnore = existsSync(ignore)
     const tplCount = existsSync(templates) ? readdirSync(templates).filter((f) => f.endsWith('.md')).length : 0
     const seedRemedy = `cp -r ${join(PACK, 'workspace')}/. ${workspace}/`
     record(hasManual, `研究工作区手册（${manual}）`, hasManual ? `在场（${readFileSync(manual, 'utf8').split('\n').length} 行）` : '缺席——角色将没有研究纪律（证据契约/目录约定/完成判据全失效）', seedRemedy)
     record(hasNodes, `节点契约（${nodesDoc}）`, hasNodes ? '在场' : '缺席——节点开工判据与回边版本语义不可查', seedRemedy)
     record(hasPatterns, `判型模式库（${patternsDoc}）`, hasPatterns ? '在场' : '缺席——HITL1 判型失去第一对照面', seedRemedy)
+    record(hasIgnore, `工作区 .gitignore（${ignore}）`, hasIgnore ? '在场（run 产物默认拒收）' : '缺席——工作区若进 git，一次 git add -A 会把 run bundle/归档/用户方法库一起提交', seedRemedy)
     record(tplCount >= 6, `run 模板（${templates}）`, `${tplCount} 个（期望 ≥6）`, seedRemedy)
   }
 }

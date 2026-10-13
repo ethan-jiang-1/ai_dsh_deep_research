@@ -20,11 +20,18 @@ const SRC = join(ROOT, 'research-workspace')
 const DST = join(ROOT, 'packages', 'deep-research-pack', 'workspace')
 const check = process.argv.includes('--check')
 
-/** 种子文件清单（手册 + 节点契约 + 判型模式库 + run 模板；drt_ 开头的 run bundle 运行区不进种子）。 */
+/** 种子文件清单（手册 + 节点契约 + 判型模式库 + 工作区 `.gitignore.example` + run 模板；
+ *  drt_ 开头的 run bundle 运行区不进种子）。为什么是 `.gitignore.example` 而不是 `.gitignore`：
+ *  **npm pack 永不打包名为 .gitignore 的文件**（`files: ["workspace/**"]` 也照删，实测），
+ *  而这份规则必须随包——安装方工作区是独立 git 仓，没有本仓根 .gitignore 兜底，不带它，
+ *  一次 `git add -A` 就把几十个 run bundle 提交进用户库。scaffold 落地时改名回 `.gitignore`。
+ *  加种子时同步 scaffold 的收集器与 export-dist 的清单断言；`workspace/` 下的非清单文件由
+ *  下方 fileSet 判定报红（漏登记不静默）。 */
 const FILES = [
   ['AGENTS.md', 'AGENTS.md'],
   ['NODES.md', 'NODES.md'],
   ['question-patterns.md', 'question-patterns.md'],
+  ['.gitignore.example', '.gitignore.example'],
   ...readdirSync(join(SRC, 'templates', 'run')).filter((f) => f.endsWith('.md')).sort()
     .map((f) => [`templates/run/${f}`, `templates/run/${f}`]),
 ]
@@ -51,7 +58,8 @@ const walkDst = (dir) => {
   for (const ent of readdirSync(dir, { withFileTypes: true })) {
     const p = join(dir, ent.name)
     if (ent.isDirectory()) walkDst(p)
-    else if (ent.name.endsWith('.md')) {
+    // 全扩展名扫描：只扫 .md 会让非 .md 种子（.gitignore）成为免检区——漏登记不报红（静默漏发）
+    else {
       const rel = p.slice(DST.length + 1)
       if (!fileSet.has(rel)) {
         if (check) drift.push(`孤儿种子（源侧已删）:${rel}`)
