@@ -353,6 +353,37 @@ try {
   const wait = (ms) => new Promise((r) => setTimeout(r, ms))
   // expandGroup / 候选分组名 = lib/web-ui-nav.mjs 唯一正本（与 hitl-answer 共享——2026-10-13
   // 结构重构收敛，原本地双份句法已漂移）。
+  // 页面就绪序列（reload → New Session 首屏字样 → 稳定窗）——收口本文件六处同形重复；
+  // settleMs 逐调用点保持原值（各处的稳定窗是实测调的，不统一）。
+  const awaitAppReady = async (settleMs) => {
+    await page.reload({ waitUntil: 'domcontentloaded' })
+    await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
+    await wait(settleMs)
+  }
+  // 「研究配置」guide 胶囊打开序列：先试已停靠芯片（展开右栏后直接在场），不在则走 dock
+  // 「New tab」开 guide 页再试——两条路都试（company 配方核心）。时序参数逐调用点保持
+  // 原值（探测窗/重试窗/点击后稳定窗是各上下文实测调的，不统一）；返回 ok = 胶囊已点开。
+  const openGuideCapsule = async (probeMs, retryMs, afterClickMs) => {
+    const expand = page.getByRole('button', { name: 'Open right sidebar' })
+    if (await expand.count() > 0) await expand.first().click({ timeout: 8_000 }).catch(() => {})
+    await wait(1_500)
+    let cap = page.getByRole('button', { name: /研究配置/ }).first()
+    let ok = await cap.isVisible({ timeout: probeMs }).catch(() => false)
+    if (!ok) {
+      const addTab = page.getByRole('button', { name: 'New tab' }).first()
+      if (await addTab.count() > 0) {
+        await addTab.click({ timeout: 5_000 }).catch(() => {})
+        await wait(2_000)
+        cap = page.getByRole('button', { name: /研究配置/ }).first()
+        ok = await cap.isVisible({ timeout: retryMs }).catch(() => false)
+      }
+    }
+    if (ok) {
+      await cap.click({ timeout: 5_000 }).catch(() => {})
+      await wait(afterClickMs)
+    }
+    return ok
+  }
   const clickRowByText = async (text) => {
     const scan = async () => {
       const rows = page.locator('span[class*="_root_"]')
@@ -407,9 +438,7 @@ try {
   const paneTextOf = () => page.evaluate(() => document.body?.innerText ?? '')
 
   // 第一遍：绑定会话（磁盘侧定位——渐进面真数据 = 本会话自己的 bundle，磁盘认证对账）
-  await page.reload({ waitUntil: 'domcontentloaded' })
-  await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
-  await wait(6_000)
+  await awaitAppReady(6_000)
   const boundOk = boundSession !== null && expectedFace !== null
   step(boundOk, '磁盘侧找到绑定 run 的带历史会话（渐进面真数据源）', boundOk ? `「${boundSession.title}」→ drt_${boundSession.slug}` : '缺——先跑一场 run（run 通道现用 workspaceId 形态建会话）')
   if (boundOk) {
@@ -452,9 +481,7 @@ try {
         for (let attempt = 0; attempt < 2
           && (uiFace.evidence !== diskSide.evidence || uiFace.delivered !== diskSide.delivered || uiFace.passed !== diskSide.passed); attempt++) {
           await wait(20_000)
-          await page.reload({ waitUntil: 'domcontentloaded' })
-          await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
-          await wait(4_000)
+          await awaitAppReady(4_000)
           if (!(await clickRowByText(boundSession.title))) break
           await wait(4_000)
           if (!(await openPane())) break
@@ -571,9 +598,7 @@ try {
   //（候选逐个试到能点开为止——子代理子会话可能不进侧栏，标题垃圾的跳过）
   if (unboundCandidates.length > 0) {
     for (const cand of unboundCandidates) {
-      await page.reload({ waitUntil: 'domcontentloaded' })
-      await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
-      await wait(5_000)
+      await awaitAppReady(5_000)
       const opened2 = await clickRowByText(cand.title)
       if (!opened2) continue
       await wait(4_000)
@@ -603,9 +628,7 @@ try {
 
   // 第二遍：既有会话（有历史 → 活动流断言）。先 reload：第一遍点击后侧栏可能重排/滚动，
   // 直接找行会 miss（实测）——reload 回到干净列表态。
-  await page.reload({ waitUntil: 'domcontentloaded' })
-  await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
-  await wait(5_000)
+  await awaitAppReady(5_000)
   const SESSION_TITLE = SESSION_TITLE_ARG ?? boundSession?.title ?? null
   let sessionOk = SESSION_TITLE !== null && await clickRowByText(SESSION_TITLE)
   if (!sessionOk && SESSION_TITLE !== null) {
@@ -681,32 +704,15 @@ try {
   // （内置偏好只读表 + 偏好库空态/条目）。防"拼错不报错、永不渲染"（company 坑 1 的
   // 渲染级对账；keyed 字面量另由 client-keys 门禁静态对账）。
   {
-    await page.reload({ waitUntil: 'domcontentloaded' })
-    await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
-    await wait(5_000)
+    await awaitAppReady(5_000)
     const targetTitle = SESSION_TITLE_ARG ?? boundSession?.title ?? unboundSession?.title
     const openedC = targetTitle !== null && await clickRowByText(targetTitle)
     if (openedC) {
       await wait(3_000)
-      const expandC = page.getByRole('button', { name: 'Open right sidebar' })
-      if (await expandC.count() > 0) await expandC.first().click({ timeout: 8_000 }).catch(() => {})
-      await wait(1_500)
       // 胶囊在 guide 页（dock「New tab」打开）；已停靠的芯片也可点——两条路都试。
-      let capC = page.getByRole('button', { name: /研究配置/ }).first()
-      let capOkC = await capC.isVisible({ timeout: 4_000 }).catch(() => false)
-      if (!capOkC) {
-        const addTab = page.getByRole('button', { name: 'New tab' }).first()
-        if (await addTab.count() > 0) {
-          await addTab.click({ timeout: 5_000 }).catch(() => {})
-          await wait(2_000)
-          capC = page.getByRole('button', { name: /研究配置/ }).first()
-          capOkC = await capC.isVisible({ timeout: 10_000 }).catch(() => false)
-        }
-      }
+      const capOkC = await openGuideCapsule(4_000, 10_000, 3_000)
       step(capOkC, '「研究配置」guide 胶囊在场（tab 类型注册成功 + guide 页可达）')
       if (capOkC) {
-        await capC.click({ timeout: 5_000 }).catch(() => {})
-        await wait(3_000)
         const tc = await paneTextOf()
         const segC = tc.slice(tc.indexOf('研究配置'))
         const builtinOk = ['事实核查', '领域地图', '主张核查', '方案比较'].every((n) => segC.includes(n))
@@ -809,25 +815,9 @@ try {
       // 清持久化布局态（上轮 pass 点开的会话会在重载时恢复为 active——清 storage 后 web
       // 回落默认视图 = 最新会话 = 本探针；两轮探针实证默认视图行为）
       await page.evaluate(() => { localStorage.clear(); sessionStorage.clear() }).catch(() => {})
-      await page.reload({ waitUntil: 'domcontentloaded' })
-      await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
-      await wait(5_000)
+      await awaitAppReady(5_000)
       // 重载后默认视图 = 最新会话（= 上面的 lib-selftest 探针）——直接开右栏页签断言
-        const expandS = page.getByRole('button', { name: 'Open right sidebar' })
-        if (await expandS.count() > 0) await expandS.first().click({ timeout: 8_000 }).catch(() => {})
-        await wait(1_500)
-        let capS = page.getByRole('button', { name: /研究配置/ }).first()
-        if (!(await capS.isVisible({ timeout: 6_000 }).catch(() => false))) {
-          const addTabS = page.getByRole('button', { name: 'New tab' }).first()
-          if (await addTabS.count() > 0) {
-            await addTabS.click({ timeout: 5_000 }).catch(() => {})
-            await wait(2_000)
-            capS = page.getByRole('button', { name: /研究配置/ }).first()
-          }
-        }
-        if (await capS.isVisible({ timeout: 6_000 }).catch(() => false)) {
-          await capS.click({ timeout: 5_000 }).catch(() => {})
-          await wait(2_500)
+        if (await openGuideCapsule(6_000, 6_000, 2_500)) {
           // 条目加载是异步 readFile——轮询至尾条目按钮在场。innerText 对滚动折叠区不含尾条目
           // 文本（Chromium innerText 只取滚动容器可视区——首版文本断言实红：尾两名缺席）；
           // 按钮可见性（Playwright isVisible 判 display/visibility，不判视口）是正确判据。
