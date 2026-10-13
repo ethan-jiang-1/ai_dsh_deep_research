@@ -10,7 +10,9 @@
 // 断言 13+ 条（前置条件 + 渐进面硬断言 + 活动流）：① 页面无 "Failed to load plugins"；② console
 // 无 `failed to apply loader entry`；③ 「研究状态」页签可见、可点，点开后步骤条七步 / 证据计数 /
 // ✅ 已交付 / 问题行渲染（首场 run 真数据）——它证明 app 渲染完成且本包 client 入口成功 apply +
-// keyed 槽体挂对 key；另有活动流断言（人性化行在场、原始事件类型名零残留）。
+// keyed 槽体挂对 key；另有活动流断言（人性化行在场、原始事件类型名零残留）；「研究配置」
+// 页签组（D25/detail-ux：内置与库条目详情读态、内置无编辑入口负例、编辑草稿、删除二次
+// 确认、编辑发送回执——发送目标 = 本冒烟自建的抛弃型 lead 探针会话）。
 //
 // 通道：源码域（--profile web --patch dev/research.overlay.yml，与 preset-smoke 真挂载档
 // 同款——boot 起自本仓，行包名经根 node_modules 解析到 pack 源码树，浏览器经
@@ -243,6 +245,31 @@ const fileFaceOf = (slug) => {
     final: names.has('final.md'),
   })
   return { base, evidenceCount, delivered: names.has('final.md'), hasQuestion: names.has('question.md'), firstLine, questionLine, steps, reviewFail, versions }
+}
+// vendor follow 开窗快照的盘侧复刻（对账同窗，勿折全量日志）：语义 = api/session-controller
+// src/history.ts `paginate` + `DEFAULT_MAX_MESSAGES = 50`——从日志末尾倒序数 50 条 surface
+// append 消息事件（user/message | assistant/message），第 50 条处（其 sourceEventSeqs 组
+// 起点更早则取组起点；seq = 稠密零基下标）定为切点，页 = 切点到末尾的**全部**事件（非
+// 消息事件一并含入）——窗口远大于「50 条事件」。pack client follow 未带 maxMessages →
+// UI 活动流折的正是这窗（2026-10-13 实红：全量折算 25 行 vs 窗折算 16 行 = UI 实测）。
+const HISTORY_MESSAGE_WINDOW = 50
+const clientHistoryWindowOf = (events) => {
+  let counted = 0
+  let cut = 0
+  for (let i = events.length - 1; i >= 0; i--) {
+    const e = events[i]
+    if ((e?.type === 'user/message' || e?.type === 'assistant/message') && e?.surfaceOp === 'append') {
+      counted++
+      if (counted >= HISTORY_MESSAGE_WINDOW) {
+        cut = i
+        if (Array.isArray(e?.sourceEventSeqs)) {
+          for (const s of e.sourceEventSeqs) if (typeof s === 'number' && s < cut) cut = s
+        }
+        break
+      }
+    }
+  }
+  return events.slice(cut)
 }
 const expectedFace = boundSession !== null ? fileFaceOf(boundSession.slug) : null
 
@@ -627,12 +654,24 @@ try {
         '流失败恢复指引 = 盘侧 streamFailureOf 真值（死亡会话显示、存活会话不显示）', `expected=${hintExpected}`)
     }
     const humanRows = (paneText.match(/🔍|👥|💬|📦/gu) ?? []).length
-    // 行数与**本会话自己的** foldActivityRows 折算对账（数据无关断言）：快答型 run 走
-    // subagent 通道、lead journal 人性化行天然少（实测 2 行）——≥3 的旧地板把会话形状
-    // 误当断言对象（2026-10-12 实红）。渲染在场（≥1）+ 盘侧折算一致才是行为事实。
-    const expectedRows = SESSION_TITLE !== null && boundSession !== null && SESSION_TITLE === boundSession.title
-      ? foldActivityRows(boundSession.events).length
-      : null
+    // 行数与**本会话自己的**折算对账（数据无关断言）。两次实红家谱：① 2026-10-12——≥3
+    // 旧地板把快答型会话形状（lead journal 天然 2 行）误当断言对象，改「≥1 + 与盘侧折算
+    // 一致」；② 2026-10-13——盘侧期望折**全量日志**（25 行）而 UI 按 vendor follow 开窗
+    // 快照折算（16 行；616 事件、切点 288）——对账对象错位，期望改按 clientHistoryWindowOf
+    // 同窗折算（复刻语义 = session-controller history.ts paginate：倒数十 50 条 surface
+    // append 消息事件定切点，页含切点到末尾全部事件）。断言时刻重读日志，防在飞 run 采数
+    // 漂移（fileFaceOf 同款纪律）；队员会话（spawn_teammate 在场）页含队员动态行、emoji
+    // 计数无法归属 lead 面——精确对账显性降级 n/a，不静默放宽。
+    const expectedRows = (() => {
+      if (SESSION_TITLE === null || boundSession === null || SESSION_TITLE !== boundSession.title) return null
+      let events = boundSession.events
+      try {
+        const fresh = readSessionEvents(boundSession.logPath)
+        if (fresh.readable) events = fresh.events
+      } catch { /* 日志缺席/损坏时退回 boot 期快照 */ }
+      if (events.some((e) => e?.type === 'tool/call' && e?.data?.name === 'spawn_teammate')) return null
+      return foldActivityRows(clientHistoryWindowOf(events)).length
+    })()
     step(humanRows >= 1 && (expectedRows === null || humanRows === expectedRows),
       '人性化活动流 = journal 折算真值（行数与 foldActivityRows 对账）',
       `${humanRows} 行（盘侧期望 ${expectedRows ?? 'n/a'}）`)
@@ -688,11 +727,89 @@ try {
           await wait(1_500)
           const modalText = await paneTextOf()
           const modalOk = ['找什么资料', '怎么核实', '报告怎么写', '明确不承诺', '基于此自定义', '用于本次研究'].every((s) => modalText.includes(s))
-          step(modalOk, '研究配置详情 Modal：四分区 + 内置操作在场（读态）')
+            && !modalText.includes('编辑内容')
+          step(modalOk, '研究配置详情 Modal：四分区 + 内置操作在场（读态；内置无编辑入口）')
           await page.getByRole('button', { name: '关闭详情' }).first().click({ timeout: 5_000 }).catch(() => {})
           await wait(1_000)
         } else {
           step(false, '研究配置详情 Modal：条目名称钮不可见（渲染回归）')
+        }
+        // 库条目详情/编辑草稿/删除二次确认（detail-ux 期 1.5 验收行补全；库有条目才有对象）：
+        // 编辑只到草稿层即放弃、删除只到确认层即取消——本组零发送；发送回执单独走下方
+        // 抛弃型探针会话。
+        if (hasEntries) {
+          const libName = page.getByRole('button', { name: /格局调研 ›/ }).first()
+          if (await libName.isVisible({ timeout: 6_000 }).catch(() => false)) {
+            await libName.click({ timeout: 5_000 }).catch(() => {})
+            await wait(1_500)
+            let t = await paneTextOf()
+            const libModalOk = ['找什么资料', '怎么核实', '报告怎么写', '明确不承诺', '编辑内容', '用于本次研究', '来源：'].every((s) => t.includes(s))
+              && !t.includes('基于此自定义')
+            step(libModalOk, '研究配置详情 Modal（库条目）：四分区 + 编辑入口在场（读态，无「基于此自定义」）')
+            // 编辑态：四分区草稿预填 + 单保存钮 + 放弃；放弃不发送
+            await page.getByRole('button', { name: '编辑内容' }).first().click({ timeout: 5_000 }).catch(() => {})
+            await wait(1_000)
+            const drafts = page.locator('textarea')
+            const draftCount = await drafts.count().catch(() => 0)
+            const draftPrefill = draftCount === 4 ? await drafts.first().inputValue().catch(() => '') : ''
+            t = await paneTextOf()
+            const editOk = draftCount === 4 && draftPrefill.includes('官方域优先')
+              && ['把修改交给 Lead', '放弃'].every((s) => t.includes(s))
+            step(editOk, '研究配置编辑态：四分区草稿预填 + 单保存钮在场', draftCount === 4 ? '草稿 4 区，首区预填' : `textarea ${draftCount} 区`)
+            await page.getByRole('button', { name: '放弃' }).first().click({ timeout: 5_000 }).catch(() => {})
+            await wait(1_000)
+            // 删除二次确认：⋯ 菜单 → 删除… → 确认 Modal → 取消（不发送）
+            await page.getByRole('button', { name: '格局调研 的操作' }).first().click({ timeout: 5_000 }).catch(() => {})
+            await wait(1_000)
+            const hasSetDefault = await page.getByRole('menuitem', { name: '设为默认' }).isVisible({ timeout: 4_000 }).catch(() => false)
+            await page.getByRole('menuitem', { name: '删除…' }).first().click({ timeout: 5_000 }).catch(() => {})
+            await wait(1_000)
+            t = await paneTextOf()
+            const confirmOk = t.includes('删除「格局调研」？') && t.includes('确认删除') && t.includes('取消')
+            step(confirmOk && hasSetDefault, '研究配置删除：⋯ 菜单 → 二次确认 Modal 在场（取消不发送）', hasSetDefault ? '' : '「设为默认」菜单项缺席')
+            await page.getByRole('button', { name: '取消' }).first().click({ timeout: 5_000 }).catch(() => {})
+            await wait(1_000)
+          } else {
+            step(false, '研究配置库条目：名称钮不可见（渲染回归）')
+          }
+
+          // 发送回执（面板 → remote.session.prompt → 回执 UI）——发送目标 = 本冒烟自建的
+          // lead 探针会话（research-workspace 内、每跑新建的抛弃型会话）：指令进抛弃会话，
+          // keyless 无凭据 → 排程回合即败、消息被失败回合消费，不触真实 run；载荷 = 未改动
+          // 的整条编辑指令（若日后被人打开该探针会话执行，也是同内容幂等重写，无语义变更）。
+          const probeClicked = await clickRowByText('渐进面探针会话')
+          if (probeClicked) {
+            await wait(3_000)
+            // 会话切换后右栏页签重挂载——重走展开 + 胶囊（幂等）
+            const expandP = page.getByRole('button', { name: 'Open right sidebar' })
+            if (await expandP.count() > 0) await expandP.first().click({ timeout: 8_000 }).catch(() => {})
+            await wait(1_500)
+            const capP = page.getByRole('button', { name: /研究配置/ }).first()
+            if (await capP.isVisible({ timeout: 6_000 }).catch(() => false)) {
+              await capP.click({ timeout: 5_000 }).catch(() => {})
+              await wait(2_500)
+              await page.getByRole('button', { name: /格局调研 ›/ }).first().click({ timeout: 5_000 }).catch(() => {})
+              await wait(1_000)
+              await page.getByRole('button', { name: '编辑内容' }).first().click({ timeout: 5_000 }).catch(() => {})
+              await wait(1_000)
+              await page.getByRole('button', { name: '把修改交给 Lead' }).first().click({ timeout: 5_000 }).catch(() => {})
+              let receipt = null
+              for (let i = 0; i < 10; i++) {
+                await wait(1_000)
+                const t2 = await paneTextOf()
+                if (t2.includes('已发给 Lead：把研究偏好「格局调研」改为：')) { receipt = 'ok'; break }
+                const at = t2.indexOf('发送失败，草稿已保留：')
+                if (at !== -1) { receipt = t2.slice(at, at + 120); break }
+              }
+              step(receipt === 'ok', '研究配置编辑发送：回执在场（指令全文 + 已发给 Lead）', receipt === 'ok' ? '已发给 Lead：把研究偏好「格局调研」改为：…' : String(receipt ?? '10s 无回执'))
+            } else {
+              step(false, '研究配置编辑发送：探针会话上「研究配置」胶囊不可见')
+            }
+          } else {
+            step(false, '研究配置编辑发送：探针会话行不可点')
+          }
+        } else {
+          console.log('  note  研究配置库条目断言：盘侧库为空（跳过——先有库条目再验）')
         }
       }
     } else {
