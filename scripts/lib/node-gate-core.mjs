@@ -27,6 +27,16 @@ export const HEADING_CONTRACT_DATE = '2026-10-06'
  *  存量缺口由该 RFC 对账步逐 bundle 处置，不机械翻旧账）。 */
 export const AUDIT_CONTRACT_DATE = '2026-10-08'
 
+/** 断代判定（各门共用形状）：asOf 注入日期优先、缺席回退交付日（deliveryDate = final.md
+ *  mtime 族）；无日期可断 = 从严（false——可定日期而不定 = 逃逸口，schema-scan 成例）。 */
+function isPreContract(bundleDir, asOf, contractDate) {
+  const date = asOf ?? deliveryDate(bundleDir)
+  return date !== null && date < contractDate
+}
+
+/** PRE-CONTRACT 详情后缀（五门共用；门A 另有带「存量由对账步处置」的长形态）。 */
+const PRE_CONTRACT_NOTE = '（契约前交付——如实报告不计红，run bundle 是交付记录不改历史）'
+
 /** 纯日志 reader：.jsonl 直读；.zstd 报线索后按空语料继续（语料缺失偏假红方向——红必须带线索）。
  *  zstd CLI 解压由驱动壳注入，本模块零子进程。 */
 export const plainLogReader = (p) => {
@@ -118,13 +128,12 @@ export function leadsGate(bundleDir, leadsDate) {
   if (dirs.length === 0) {
     // 防空语料（空集显式）——断代在先：契约前 0 单元 = PRE-CONTRACT 如实报告不计红
     // （selfhosted/siliconflow 自由体 leads.md 实测抓出早退跳断代的缺陷）。
-    const dateEmpty = leadsDate ?? deliveryDate(bundleDir)
-    const preEmpty = dateEmpty !== null && dateEmpty < LEADS_CONTRACT_DATE
+    const preEmpty = isPreContract(bundleDir, leadsDate, LEADS_CONTRACT_DATE)
     return {
       status: preEmpty ? 'PRE-CONTRACT' : 'RED',
       detail:
         'leads.md 在场但 0 个字段齐的方向单元（任意层级/任意组织轴的节，含「- 状态:」或「- 建议 owner:」行即算）——防空语料（空集显式；修正 = 按 templates/run/leads.md：每个可派发方向/实体一节，四字段行齐）' +
-        (preEmpty ? '（契约前交付——如实报告不计红，run bundle 是交付记录不改历史）' : ''),
+        (preEmpty ? PRE_CONTRACT_NOTE : ''),
     }
   }
   const problems = []
@@ -204,8 +213,7 @@ export function leadsGate(bundleDir, leadsDate) {
     }
   }
   // 断代（同 schema-scan 成例）：无日期可断 = 从严；pre-contract = 如实报告不计红
-  const date = leadsDate ?? deliveryDate(bundleDir)
-  const preContract = date !== null && date < LEADS_CONTRACT_DATE
+  const preContract = isPreContract(bundleDir, leadsDate, LEADS_CONTRACT_DATE)
   let status
   let detail
   if (problems.length === 0) {
@@ -216,7 +224,7 @@ export function leadsGate(bundleDir, leadsDate) {
     detail = `字段齐方向单元 ${dirs.length}（挖深 ${dig}/排除 ${excluded}）；${cov}${coverageNote}`
   } else {
     status = preContract ? 'PRE-CONTRACT' : 'RED'
-    detail = problems.join('；') + coverageNote + (preContract ? '（契约前交付——如实报告不计红，run bundle 是交付记录不改历史）' : '')
+    detail = problems.join('；') + coverageNote + (preContract ? PRE_CONTRACT_NOTE : '')
   }
   return { status, detail }
 }
@@ -275,8 +283,7 @@ export function versionGate(bundleDir, versionDate) {
       }
     }
   }
-  const date = versionDate ?? deliveryDate(bundleDir)
-  const preContract = date !== null && date < VERSION_CONTRACT_DATE
+  const preContract = isPreContract(bundleDir, versionDate, VERSION_CONTRACT_DATE)
   if (problems.length === 0) {
     return {
       status: 'PASS',
@@ -287,7 +294,7 @@ export function versionGate(bundleDir, versionDate) {
     status: preContract ? 'PRE-CONTRACT' : 'RED',
     detail:
       problems.join('；') +
-      (preContract ? '（契约前交付——如实报告不计红，run bundle 是交付记录不改历史）' : ''),
+      (preContract ? PRE_CONTRACT_NOTE : ''),
   }
 }
 
@@ -352,13 +359,12 @@ export function hitlAskGate(bundleDir, sessionsRoot, hitlDate, readLog = plainLo
     }
     scan(sessionsRoot)
   }
-  const date = hitlDate ?? deliveryDate(bundleDir)
-  const pre = date !== null && date < HITL_CONTRACT_DATE
+  const pre = isPreContract(bundleDir, hitlDate, HITL_CONTRACT_DATE)
   if (hitl1Signed === 0) {
     return {
       status: pre ? 'PRE-CONTRACT' : 'RED',
       detail: `写过 question.md 的会话 ${writerSessions} 个、ask ${asks} 次，但 HITL1 签名（研究类型问）0 次——两 HITL 锚点之首缺失（BUG-006 形态：快路径自我豁免；persona 契约 = 任何研究请求先 HITL1，零例外）` +
-        (pre ? '（契约前交付——如实报告不计红，run bundle 是交付记录不改历史）' : ''),
+        (pre ? PRE_CONTRACT_NOTE : ''),
     }
   }
   return { status: 'PASS', detail: `写过 question.md 的会话 ${writerSessions} 个：HITL1 签名 ask ${hitl1Signed} 次（总 ask ${asks} 次）——锚点在场` + planCardNote(planCards, planCardOver) }
@@ -402,8 +408,7 @@ export function headingGate(bundleDir, headingDate) {
     counts.set(title, (counts.get(title) ?? 0) + 1)
     total++
   }
-  const date = headingDate ?? deliveryDate(bundleDir)
-  const pre = date !== null && date < HEADING_CONTRACT_DATE
+  const pre = isPreContract(bundleDir, headingDate, HEADING_CONTRACT_DATE)
   const bad = [...counts.entries()].filter(([, n]) => n >= 4)
   if (bad.length === 0) {
     return {
@@ -420,7 +425,7 @@ export function headingGate(bundleDir, headingDate) {
     detail:
       `同一标题行重复 ≥4 次（LDR #6452 生成退化形态：模型失 EOS 反复重发同一节直到上下文硬截断）——${listed}；` +
       '修正 = lead 收口去重或重跑该节（本门只守 verbatim 标题重复，不防近似改写/正文循环/无标题退化）' +
-      (pre ? '（契约前交付——如实报告不计红，run bundle 是交付记录不改历史）' : ''),
+      (pre ? PRE_CONTRACT_NOTE : ''),
   }
 }
 
@@ -475,8 +480,7 @@ export function deliveryGate(bundleDir, auditDate) {
       problems.push('交付前置达成但 audit.md 缺席——操作侧审计未做（NODES 第 8 行交付判据含审计 CRITICAL=0；修正 = 跑 node scripts/run-gates/evidence-audit.mjs <bundle> 落盘审计报告）')
     }
   }
-  const date = auditDate ?? deliveryDate(bundleDir)
-  const pre = date !== null && date < AUDIT_CONTRACT_DATE
+  const pre = isPreContract(bundleDir, auditDate, AUDIT_CONTRACT_DATE)
   if (problems.length === 0) {
     const base = !reviewPass && !delivered
       ? 'final.md 在场而交付段未进入（无版本记账、readiness 非 PASS）——A1/A2 无对象'
@@ -494,66 +498,65 @@ export function deliveryGate(bundleDir, auditDate) {
 }
 
 /**
- * 门一个 bundle（核心逻辑，可导入；keyless）。opts.readLog 注入日志 reader（默认纯 reader
- * ——.zstd 走空语料偏红；驱动壳注入 zstd CLI reader 读全帧）。
- * @returns { gates: { hitlAsk, hitl2Row, present, leads, version, degeneration }, red, report }
- *   每门：{ status: 'PASS'|'PASS-RELAY'|'RED'|'N/A'|'PRE-CONTRACT', detail }
+ * 门③：final/ 版本记账在场 → §Decisions 须含 HITL2 拍板行（从 gateBundle 内联提函数——
+ * 与其余各门同构；rows 供门② 的操作侧补齐判定复用，单一来源）。
+ * @returns { gate: { status, detail }, rows: HITL2 拍板行列表 }
  */
-export function gateBundle(bundleDir, sessionsRoot, opts = {}) {
-  const readLog = opts.readLog ?? plainLogReader
-  const slug = basename(bundleDir)
-  // 门③：final/ 版本记账在场 → §Decisions 须含 HITL2 拍板行
+function hitl2RowGate(bundleDir) {
   const finalDir = join(bundleDir, 'final')
   const versionFiles = existsSync(finalDir) ? readdirSync(finalDir).filter((f) => f.endsWith('.md')) : []
   const qPath = join(bundleDir, 'question.md')
   const qText = existsSync(qPath) ? readFileSync(qPath, 'utf8') : null
   const dec = qText ? decisionsLines(qText) : []
   const hitl2Rows = dec.filter((l) => /HITL2/.test(l))
-  let hitl2Row
+  let gate
   if (versionFiles.length === 0) {
-    hitl2Row = { status: 'N/A', detail: 'final/ 版本记账不在场——门③无对象（bundle 未到交付段；显式标注，不静默跳过）' }
+    gate = { status: 'N/A', detail: 'final/ 版本记账不在场——门③无对象（bundle 未到交付段；显式标注，不静默跳过）' }
   } else if (!qText) {
-    hitl2Row = { status: 'RED', detail: 'final/ 记账在场但 question.md 缺席——方向契约文件失踪，fail-loud（不静默跳过）' }
+    gate = { status: 'RED', detail: 'final/ 记账在场但 question.md 缺席——方向契约文件失踪，fail-loud（不静默跳过）' }
   } else if (hitl2Rows.length === 0) {
-    hitl2Row = { status: 'RED', detail: `final/ 记账在场（${versionFiles.join(', ')}）但 §Decisions 无任何 HITL2 拍板行——版本落盘先于用户裁决（G8 形态）` }
+    gate = { status: 'RED', detail: `final/ 记账在场（${versionFiles.join(', ')}）但 §Decisions 无任何 HITL2 拍板行——版本落盘先于用户裁决（G8 形态）` }
   } else {
-    hitl2Row = { status: 'PASS', detail: `§Decisions 含 ${hitl2Rows.length} 条 HITL2 拍板行` }
+    gate = { status: 'PASS', detail: `§Decisions 含 ${hitl2Rows.length} 条 HITL2 拍板行` }
   }
+  return { gate, rows: hitl2Rows }
+}
 
-  // 门②：final.md 当前版 + review readiness PASS → present 声明在日志（或显式操作侧补齐记账）
+/**
+ * 门②：final.md 当前版 + review readiness PASS → present 声明在日志（或显式操作侧补齐记账）。
+ * 从 gateBundle 内联提函数（与其余各门同构）；hitl2Rows 由门③ 供给（操作侧补齐行的唯一来源）。
+ */
+function presentGate(bundleDir, sessionsRoot, hitl2Rows, readLog) {
+  const slug = basename(bundleDir)
   const finalPath = join(bundleDir, 'final.md')
   const reviewPath = join(bundleDir, 'review.md')
   const reviewText = existsSync(reviewPath) ? readFileSync(reviewPath, 'utf8') : ''
   const reviewPass = readinessOf(reviewText).pass
-  const triggered = existsSync(finalPath) && reviewPass
-  let present
   if (!existsSync(finalPath)) {
-    present = { status: 'N/A', detail: 'final.md 当前版不在场——门②无对象' }
-  } else if (!reviewPass) {
-    present = { status: 'N/A', detail: 'review.md readiness 非 PASS——HITL2 前置未达成，交付门②无对象' }
-  } else {
-    const inLog = presentInLogs(sessionsRoot, slug, readLog)
-    const relayRow = hitl2Rows.find((l) => /操作侧/.test(l))
-    if (inLog) present = { status: 'PASS', detail: '会话日志含指向本 bundle 的 present 声明' }
-    else if (relayRow) present = { status: 'PASS-RELAY', detail: '日志无 present 调用，但 §Decisions 拍板行显式标注操作侧补齐（通道死亡恢复路径，如实记账）——放行带注' }
-    else present = { status: 'RED', detail: 'final.md + readiness PASS 在场，但日志无 present 调用、拍板行也无操作侧补齐标注——静默缺席（G8 形态）' }
+    return { status: 'N/A', detail: 'final.md 当前版不在场——门②无对象' }
   }
+  if (!reviewPass) {
+    return { status: 'N/A', detail: 'review.md readiness 非 PASS——HITL2 前置未达成，交付门②无对象' }
+  }
+  const inLog = presentInLogs(sessionsRoot, slug, readLog)
+  const relayRow = hitl2Rows.find((l) => /操作侧/.test(l))
+  if (inLog) return { status: 'PASS', detail: '会话日志含指向本 bundle 的 present 声明' }
+  if (relayRow) return { status: 'PASS-RELAY', detail: '日志无 present 调用，但 §Decisions 拍板行显式标注操作侧补齐（通道死亡恢复路径，如实记账）——放行带注' }
+  return { status: 'RED', detail: 'final.md + readiness PASS 在场，但日志无 present 调用、拍板行也无操作侧补齐标注——静默缺席（G8 形态）' }
+}
 
+/**
+ * 门一个 bundle（核心逻辑，可导入；keyless）。opts.readLog 注入日志 reader（默认纯 reader
+ * ——.zstd 走空语料偏红；驱动壳注入 zstd CLI reader 读全帧）。
+ * @returns { gates: { hitlAsk, hitl2Row, present, leads, version, degeneration }, red }
+ *   每门：{ status: 'PASS'|'PASS-RELAY'|'RED'|'N/A'|'PRE-CONTRACT', detail }。
+ *   Markdown 报告渲染住驱动壳（呈现归壳、判据归核——tests 只断言 gates/red）。
+ */
+export function gateBundle(bundleDir, sessionsRoot, opts = {}) {
+  const readLog = opts.readLog ?? plainLogReader
+  const { gate: hitl2Row, rows: hitl2Rows } = hitl2RowGate(bundleDir)
+  const present = presentGate(bundleDir, sessionsRoot, hitl2Rows, readLog)
   const gates = { hitlAsk: hitlAskGate(bundleDir, sessionsRoot, opts.hitlDate, readLog), hitl2Row, present, leads: leadsGate(bundleDir, opts.leadsDate), version: versionGate(bundleDir, opts.versionDate), degeneration: headingGate(bundleDir, opts.headingDate), delivery: deliveryGate(bundleDir, opts.auditDate) }
   const red = [gates.hitlAsk, hitl2Row, present, gates.leads, gates.version, gates.degeneration, gates.delivery].some((g) => g.status === 'RED')
-  const report = `# Node Gate — ${slug}（${new Date().toISOString()}）
-
-> scripts/run-gates/node-gate.mjs（keyless；契约正本 = research-workspace/NODES.md 第 3/7/8 行 + 回边版本语义节 + BUG-006 门①）。
-
-| 门 | 状态 | 说明 |
-|---|---|---|
-| ① HITL 锚点 | ${gates.hitlAsk.status} | ${gates.hitlAsk.detail} |
-| ③ §Decisions 拍板行 | ${hitl2Row.status} | ${hitl2Row.detail} |
-| ② present 声明 | ${present.status} | ${present.detail} |
-| L leads 交接 | ${gates.leads.status} | ${gates.leads.detail} |
-| ④ 版本记账 | ${gates.version.status} | ${gates.version.detail} |
-| R 标题重复 | ${gates.degeneration.status} | ${gates.degeneration.detail} |
-| A 交付完整性 | ${gates.delivery.status} | ${gates.delivery.detail} |
-`
-  return { gates, red, report }
+  return { gates, red }
 }

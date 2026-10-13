@@ -96,7 +96,23 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
     console.error('node-gate: 用法 node scripts/run-gates/node-gate.mjs <run-bundle-dir> | --latest（bundle 不存在）')
     process.exit(2)
   }
-  const { gates, red, report } = gateBundle(bundleDir, sessionsRoot, { readLog })
+  const { gates, red } = gateBundle(bundleDir, sessionsRoot, { readLog })
+  // Markdown 报告渲染（2026-10-13 从 node-gate-core.gateBundle 移入——呈现归壳、判据归核；
+  // tests 只断言 gates/red，渲染的唯一消费方就是本壳，格式逐字不变）。
+  const report = `# Node Gate — ${basename(bundleDir)}（${new Date().toISOString()}）
+
+> scripts/run-gates/node-gate.mjs（keyless；契约正本 = research-workspace/NODES.md 第 3/7/8 行 + 回边版本语义节 + BUG-006 门①）。
+
+| 门 | 状态 | 说明 |
+|---|---|---|
+| ① HITL 锚点 | ${gates.hitlAsk.status} | ${gates.hitlAsk.detail} |
+| ③ §Decisions 拍板行 | ${gates.hitl2Row.status} | ${gates.hitl2Row.detail} |
+| ② present 声明 | ${gates.present.status} | ${gates.present.detail} |
+| L leads 交接 | ${gates.leads.status} | ${gates.leads.detail} |
+| ④ 版本记账 | ${gates.version.status} | ${gates.version.detail} |
+| R 标题重复 | ${gates.degeneration.status} | ${gates.degeneration.detail} |
+| A 交付完整性 | ${gates.delivery.status} | ${gates.delivery.detail} |
+`
   console.log(`node-gate: ${basename(bundleDir)} ｜ 门① HITL 锚点 = ${gates.hitlAsk.status} ｜ 门③ §Decisions 拍板行 = ${gates.hitl2Row.status} ｜ 门② present 声明 = ${gates.present.status} ｜ 门L leads 交接 = ${gates.leads.status} ｜ 门④ 版本记账 = ${gates.version.status} ｜ 门R 标题重复 = ${gates.degeneration.status} ｜ 门A 交付完整性 = ${gates.delivery.status}`)
   console.log(`  ① ${gates.hitlAsk.detail}`)
   console.log(`  ③ ${gates.hitl2Row.detail}`)
