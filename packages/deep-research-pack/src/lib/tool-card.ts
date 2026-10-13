@@ -3,6 +3,8 @@
  * 卡片 = call/result 切片的纯函数，keyless 单测直接断言，不读活状态可回放）。
  */
 
+import { argsObjectOf, normalizeQueries } from './journal-wire.ts'
+
 /** 卡片生命周期。 */
 export type CardState = 'running' | 'ok' | 'error' | 'stopped'
 
@@ -23,17 +25,12 @@ export function cardStateOf(block: object): CardState {
   return b.isError ? 'error' : 'ok'
 }
 
-/** 解析入参 JSON；截断前缀 → null（调用方回退原文）。 */
+/** 解析入参 JSON；截断前缀 → null（调用方回退原文）。
+ *  解析核 = journal-wire.argsObjectOf（共享正本）；本件哨兵 = null 且**拒数组**（卡片入参
+ *  是对象形态——数组进卡片标题取字段全是 undefined，按原实现拒之）。 */
 export function parseArgsObject(argsRaw: string): ToolCardArgs | null {
-  try {
-    const parsed = JSON.parse(argsRaw) as unknown
-    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
-      return parsed as ToolCardArgs
-    }
-  } catch {
-    // 截断的 JSON：交给调用方回退。
-  }
-  return null
+  const obj = argsObjectOf(argsRaw)
+  return obj !== null && !Array.isArray(obj) ? (obj as ToolCardArgs) : null
 }
 
 /** 工具卡标题行（研究语义）：spawn → 成员与职责；web_search → 查询词。 */
@@ -45,8 +42,7 @@ export function cardTitleOf(toolName: string, args: ToolCardArgs | null, argsRaw
       return `组队：${name}${desc === '' ? '' : ` — ${desc.slice(0, 50)}`}`
     }
     if (toolName === 'web_search') {
-      const list = Array.isArray(args.queries) ? args.queries.filter((q): q is string => typeof q === 'string' && q.trim() !== '') : []
-      const q = list.join(' · ')
+      const q = normalizeQueries(args.queries).join(' · ')
       return q === '' ? '检索' : `检索：${q.slice(0, 60)}`
     }
 

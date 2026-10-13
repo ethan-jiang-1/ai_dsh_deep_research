@@ -11,6 +11,8 @@
  * `data.message.isError === true` + "Error: " 文本前缀（WebError/WEB_BLOCKED_URL 实例）。
  */
 
+import { argValueOf, contentTextParts, normalizeQueries } from './journal-wire.ts'
+
 /** 一条队员动作行。 */
 export interface MemberActionRow {
   readonly icon: '🔍' | '🌐' | '⚠️'
@@ -43,17 +45,9 @@ interface EventLike {
   } | undefined
 }
 
-/** 从 call 的 arguments（JSON 字符串或对象）取字段原值；截断 JSON → null。 */
-function argValueOf(args: unknown, key: string): unknown {
-  let obj: unknown = args
-  if (typeof args === 'string') {
-    try { obj = JSON.parse(args) } catch { return null }
-  }
-  if (typeof obj !== 'object' || obj === null) return null
-  return (obj as Record<string, unknown>)[key] ?? null
-}
-
-/** 从 call 的 arguments 取字符串字段；截断 JSON / 非字符串 → undefined。 */
+/** 从 call 的 arguments 取字符串字段；截断 JSON / 非字符串 / 空串 → undefined。
+ *  解析核 = journal-wire.argValueOf（共享正本）；本包装保留本件的哨兵语义（空串拒收——
+ *  与 activity-fold 的 argOf 分叉点，实测行为差异钉在各自测试里）。 */
 function argOf(args: unknown, key: string): string | undefined {
   const value = argValueOf(args, key)
   return typeof value === 'string' && value !== '' ? value : undefined
@@ -61,14 +55,7 @@ function argOf(args: unknown, key: string): string | undefined {
 
 /** 失败 result 的正文（content 数组 text 项拼接，剥 "Error: " 工程前缀）。 */
 function errorTextOf(content: unknown): string {
-  if (!Array.isArray(content)) return '(工具失败)'
-  const parts: string[] = []
-  for (const c of content) {
-    if (typeof c === 'object' && c !== null && (c as { type?: unknown }).type === 'text') {
-      const t = (c as { text?: unknown }).text
-      if (typeof t === 'string') parts.push(t)
-    }
-  }
+  const parts = contentTextParts(content)
   const joined = parts.join(' ').replace(/^Error:\s*/, '').trim()
   return joined === '' ? '(工具失败)' : joined
 }
@@ -90,8 +77,7 @@ export function foldMemberActivity(events: readonly unknown[]): MemberActivitySu
     if (e.type === 'tool/call') {
       const name = e.data?.name
       if (name === 'web_search') {
-        const args = argValueOf(e.data?.arguments, 'queries')
-        const list = Array.isArray(args) ? args.filter((q) => typeof q === 'string' && q.trim() !== '') : []
+        const list = normalizeQueries(argValueOf(e.data?.arguments, 'queries'))
         if (list.length > 0) {
           searchCount++
           rows.push({ icon: '🔍', text: `检索：${list.join(' · ').slice(0, 40)}`, time })

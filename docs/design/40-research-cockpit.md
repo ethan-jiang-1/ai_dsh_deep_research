@@ -49,11 +49,12 @@
 | ⑥ 决策诚实线 | 指路 question.md §Decisions |
 | ⑦ 队员动态折叠区 | [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)：agentTeam 投影取 roster → 多路 follow 队员会话 → 检索/抓取/出错动作行，每人一节默认折叠 + 计数徽标 |
 
-折算层八件（`src/lib/`，全部纯函数、fail-soft 永不 throw）：
+折算层九件（`src/lib/`，全部纯函数、fail-soft 永不 throw；journal-wire 为五个入参折算件共享的 wire 解析核）：
 
 | 折算 | 输入 → 输出 | 要点 |
 |---|---|---|
 | [hitl-fold](../../packages/deep-research-pack/src/lib/hitl-fold.ts) | journal 事件 → 挂起态 + 流程锚点三态 | 末位 ask 状态机保留 timed pending；匹配的非 pending result 或 user/message 关闭挂起；`deriveAnchors` 按问卡内容签名与文件事实定锚，中途确认如实显示 |
+| [journal-wire](../../packages/deep-research-pack/src/lib/journal-wire.ts) | wire 入参/正文 → 解析共享核 | 「JSON 字符串或对象 + 截断容错」的单一正本 + queries / content text 归一；各消费方保留自己的失败哨兵（null / undefined / false / 0 / 'unknown'），本件只供解析核 |
 | [run-fold](../../packages/deep-research-pack/src/lib/run-fold.ts) | bundle 文件在场性 → 步骤条 / 矩阵 | 驾驶舱的折算实现；HTML 仪表盘通过 `deriveStep` 适配 dashboard 内容模型后复用步骤事实 |
 | [activity-fold](../../packages/deep-research-pack/src/lib/activity-fold.ts) | journal 事件 → 活动行 | 🔍 检索 / 👥 派出与队员作业中（wait_agent，连续折叠）/ 💬 成员 / 📦 交付；markdown 源标记与原始事件类型名不出正文（噪音过滤，尾部 30 行） |
 | [bundle-bind](../../packages/deep-research-pack/src/lib/bundle-bind.ts) | journal 事件 → 本会话绑定的 run slug + 绑定强度 | 只认 `tool/call` 参数路径里的 `drt_<slug>/`；**写强读弱**——write/edit 命中直接定绑，仅读命中兜底（立项预检读旧 bundle 的错绑防线，2026-09-28 首跑实证） |

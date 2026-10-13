@@ -7,6 +7,8 @@
  * 不扫用户消息文本——问句里顺带提到别的 bundle 不构成绑定（只有真的在 bundle 里动手才算）。
  */
 
+import { argsObjectOf } from './journal-wire.ts'
+
 /** journal 事件的最小形状（wire 事件；只取折算要用的字段）。 */
 interface BindEventLike {
   readonly type?: unknown
@@ -30,13 +32,11 @@ export interface SessionBinding {
   readonly kickoffSeen: boolean
 }
 
-/** 从调用参数（JSON 字符串或对象）里找 `drt_<slug>/` 路径形态；找不到 → undefined。 */
+/** 从调用参数（JSON 字符串或对象）里找 `drt_<slug>/` 路径形态；找不到 → undefined。
+ *  解析核 = journal-wire.argsObjectOf（共享正本）；本件哨兵 = undefined（缺/截断不算绑定）。 */
 function slugInArgs(args: unknown): string | undefined {
-  let obj: unknown = args
-  if (typeof args === 'string') {
-    try { obj = JSON.parse(args) } catch { return undefined } // 截断 JSON（流式前缀）——不算
-  }
-  if (typeof obj !== 'object' || obj === null) return undefined
+  const obj = argsObjectOf(args)
+  if (obj === null) return undefined
   const m = /drt_([a-z0-9][a-z0-9-]*)\//.exec(JSON.stringify(obj))
   return m?.[1]
 }
@@ -45,12 +45,8 @@ function slugInArgs(args: unknown): string | undefined {
 function isKickoffCall(name: string, args: unknown): boolean {
   if (name === 'ask_user_question') return true
   if (name !== 'skill') return false
-  let obj: unknown = args
-  if (typeof args === 'string') {
-    try { obj = JSON.parse(args) } catch { return false }
-  }
-  if (typeof obj !== 'object' || obj === null) return false
-  return (obj as { readonly name?: unknown }).name === 'research-brief'
+  const obj = argsObjectOf(args)
+  return obj !== null && obj.name === 'research-brief'
 }
 
 /**

@@ -16,6 +16,8 @@
  * 组件薄渲染。client bundle 经 tsdown 打包此文件（tsc client 面含 src/lib）。
  */
 
+import { argsObjectOf } from './journal-wire.ts'
+
 /** 一个 journal 事件的最小形状（wire 事件；只取折算要用的字段）。 */
 export interface JournalEventLike {
   readonly type?: unknown
@@ -135,14 +137,12 @@ function eventTimeOf(time: unknown): string | undefined {
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString()
 }
 
-/** ask 调用携带的问数（args.questions 数组长度；截断 JSON / 畸形 fail-soft → 0）。 */
+/** ask 调用携带的问数（args.questions 数组长度；截断 JSON / 畸形 fail-soft → 0）。
+ *  解析核 = journal-wire.argsObjectOf（共享正本）；本件哨兵 = 0。 */
 function askQuestionCount(args: unknown): number {
-  let obj: unknown = args
-  if (typeof args === 'string') {
-    try { obj = JSON.parse(args) } catch { return 0 }
-  }
-  if (typeof obj !== 'object' || obj === null) return 0
-  const qs = (obj as Record<string, unknown>).questions
+  const obj = argsObjectOf(args)
+  if (obj === null) return 0
+  const qs = obj.questions
   return Array.isArray(qs) ? qs.length : 0
 }
 
@@ -165,12 +165,10 @@ export interface AnchorFileFacts {
  */
 type AskKind = 'hitl1' | 'hitl2' | 'unknown'
 
+/** 开放 ask 的归属判型（解析核 = journal-wire.argsObjectOf；本件哨兵 = 'unknown'）。 */
 function askKindOf(args: unknown): AskKind {
-  let obj: unknown = args
-  if (typeof args === 'string') {
-    try { obj = JSON.parse(args) } catch { return 'unknown' }
-  }
-  if (typeof obj !== 'object' || obj === null) return 'unknown'
+  const obj = argsObjectOf(args)
+  if (obj === null) return 'unknown'
   const text = JSON.stringify(obj)
   if (text.includes('按现稿定稿')) return 'hitl2'
   if (text.includes('研究类型')) return 'hitl1'
