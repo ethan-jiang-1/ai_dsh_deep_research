@@ -110,23 +110,35 @@ function findLastAsk(events: readonly unknown[]): LastAsk | undefined {
 }
 
 /**
- * 折算：journal 事件序列 → HITL 挂起态（末位 ask 状态机，见文件头注的 v5 谓词）。
- * @param events - 按 wire 顺序的事件（follow 的 snapshot 历史或实时流；畸形输入 fail-soft）。
- * @returns 挂起态（永不 throw）。
+ * 末位 ask 状态机核（v5 谓词的单一正本——foldHitlPending 与 deriveAnchors 共用；挂起时携
+ * ask（问数/判型/时间），不挂起时 ask 为 undefined）。谓词语义逐字不变；2026-10-13 结构
+ * 重构收口：此前 deriveAnchors 经尾部包装各调一次 foldHitlPending / findLastAsk，同一事件
+ * 流被状态机扫多遍——现在一次扫描出三件（挂起态 + 问数 + 判型）。
  */
-export function foldHitlPending(events: readonly unknown[]): HitlState {
+function lastAskStateMachine(events: readonly unknown[]): { pending: boolean; ask: LastAsk | undefined } {
   const ask = findLastAsk(events)
-  if (ask === undefined) return { pending: false, since: undefined }
+  if (ask === undefined) return { pending: false, ask: undefined }
   for (let j = ask.index + 1; j < events.length; j++) {
     const event = events[j]
     if (typeof event !== 'object' || event === null) continue
     const e = event as JournalEventLike
     if (e.type === 'tool/result' && isResultFor(event, ask.callId)) {
       if (TIMED_PENDING.test(resultTextOf(event))) continue // timed 超时落定：仍可答，继续找关闭事件
-      return { pending: false, since: undefined } // answers 形态或错误/取消：已终
+      return { pending: false, ask: undefined } // answers 形态或错误/取消：已终
     }
-    if (e.type === 'user/message') return { pending: false, since: undefined } // 真人已应（答案批次/新指令）
+    if (e.type === 'user/message') return { pending: false, ask: undefined } // 真人已应（答案批次/新指令）
   }
+  return { pending: true, ask }
+}
+
+/**
+ * 折算：journal 事件序列 → HITL 挂起态（末位 ask 状态机，见文件头注的 v5 谓词）。
+ * @param events - 按 wire 顺序的事件（follow 的 snapshot 历史或实时流；畸形输入 fail-soft）。
+ * @returns 挂起态（永不 throw）。
+ */
+export function foldHitlPending(events: readonly unknown[]): HitlState {
+  const { pending, ask } = lastAskStateMachine(events)
+  if (!pending || ask === undefined) return { pending: false, since: undefined }
   return { pending: true, since: eventTimeOf(ask.time) }
 }
 
@@ -175,18 +187,6 @@ function askKindOf(args: unknown): AskKind {
   return 'unknown'
 }
 
-/** 尾窗内末位开放 ask 携带的问数（无挂起 → 0；挂起期间 agent 自身事件不改变问数）。 */
-function tailPendingQuestions(events: readonly unknown[]): number {
-  if (!foldHitlPending(events).pending) return 0
-  return findLastAsk(events)?.questions ?? 0
-}
-
-/** 末位开放 ask 的归属（无挂起 → undefined）。 */
-function tailAskKind(events: readonly unknown[]): AskKind | undefined {
-  if (!foldHitlPending(events).pending) return undefined
-  return findLastAsk(events)?.kind ?? 'unknown'
-}
-
 /**
  * 折算：journal 事件序列（+ 可选文件事实）→ 流程锚点态（立项确认 / 交付审阅）。
  *
@@ -206,9 +206,11 @@ function tailAskKind(events: readonly unknown[]): AskKind | undefined {
  * @returns 锚点列表（固定两位 + 契约外挂起追加；永不 throw）。
  */
 export function deriveAnchors(events: readonly unknown[], fileFacts?: AnchorFileFacts): readonly RunAnchor[] {
-  const tailUnanswered = foldHitlPending(events).pending
-  const pendingQs = tailPendingQuestions(events)
-  const kind = tailAskKind(events)
+  // 一次扫描取三件（挂起态 + 问数 + 判型）——状态机单一正本 lastAskStateMachine（原先
+  // 经尾部包装各扫一遍：foldHitlPending ×3 + findLastAsk ×2，语义无差纯重复）。
+  const { pending: tailUnanswered, ask } = lastAskStateMachine(events)
+  const pendingQs = tailUnanswered && ask !== undefined ? ask.questions : 0
+  const kind = tailUnanswered && ask !== undefined ? ask.kind : undefined
   const q = fileFacts?.question ?? false
   const f = fileFacts?.delivered ?? false
   const slots: RunAnchor[] = []
