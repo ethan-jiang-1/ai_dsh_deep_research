@@ -4,7 +4,7 @@
 
 ## 活跃清单
 
-- [2026-10-12-research-preference-detail-ux.md](2026-10-12-research-preference-detail-ux.md) — 研究偏好详情查看与分区编辑 UX（右栏面板期 1.5）：Modal 详情、Menu 操作、分阶段编辑；方案已细化待确认。
+（当前无活跃卡——最后一张 2026-10-12-research-preference-detail-ux 已于 2026-10-13 归档 [settled_issues](../_archived/settled_issues/README.md)。）
 
 ## 写一张卡
 

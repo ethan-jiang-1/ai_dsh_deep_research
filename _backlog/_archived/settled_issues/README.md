@@ -33,3 +33,4 @@
 | [2026-10-12-research-preference-templates](2026-10-12-research-preference-templates.md) | 研究方法配置总卡：四预设 + HITL1 方法行 + run 方法节 + 用户方法库 + 右栏面板（D25）全部落地；快答/普通双 run 走查 + 库保存路径实证；[Note](../../../notes/implemented/2026-10-12-research-method-config.md) | 2026-10-12 |
 | [2026-10-12-research-method-run-lifecycle](2026-10-12-research-method-run-lifecycle.md) | 单次闭环：快答全链 + 普通 run 方法节/方法行（session log 原文）；pending/queue/恢复语义实测与 playbook 一致；计划卡留用户 GUI 拍板体验 | 2026-10-12 |
 | [2026-10-12-research-method-profile-management](2026-10-12-research-method-profile-management.md) | 长期复用：对话五动词 + 右栏面板 + 详情/分区编辑落地；库保存路径真实走查；期 2 直写 = 不做（暂），重议条件在卡 | 2026-10-12 |
+| [2026-10-12-research-preference-detail-ux](2026-10-12-research-preference-detail-ux.md) | 偏好详情/分区编辑 UX（期 1.5）收结：四项用户任务实现 + keyless/browser/真模型走查证据全绿；UX 真人手感按用户拍板显性延后（有问题另开新卡）；[Note](../../../notes/implemented/2026-10-12-research-config-tab.md) | 2026-10-13 |
