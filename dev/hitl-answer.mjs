@@ -24,6 +24,8 @@ import { runStateOf, readSessionEvents, leadHitlCandidate } from '../scripts/lib
 import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf, parseAskQuestions, pickTargetLabel, intentReconcile } from '../scripts/lib/ask-drive.mjs'
 import { appendProvenance, attributionBundleOf, batchToAnswered } from '../scripts/lib/hitl-provenance.mjs'
 import { localDateStr } from '../scripts/lib/local-date.mjs'
+import { researchWorkspaceGroup } from '../scripts/lib/session-log.mjs'
+import { expandGroup, SIDEBAR_GROUP_CANDIDATES } from '../scripts/lib/web-ui-nav.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 // 与 dev/run-kickoff.mjs 同形：name 自带 `--`（本仓约定，别在 helper 里再加一次）
@@ -60,7 +62,7 @@ let wsSessionsRoot = null
 {
   const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'runtime', 'harness-home')
   const sessionsRoot = join(home, 'sessions')
-  const group = existsSync(sessionsRoot) ? readdirSync(sessionsRoot).find((d) => d.includes('research-workspace')) : undefined
+  const group = researchWorkspaceGroup(sessionsRoot)
   wsSessionsRoot = sessionsRoot; wsGroup = group
   if (group === undefined) {
     console.error('hitl-answer: 找不到 research-workspace 会话组——先 source dev/env.sh')
@@ -158,25 +160,10 @@ try {
   let opened = await openSession()
   if (opened === null) {
     // 分组展开一轮后重扫（2026-10-11 run 实证：目标会话在折叠组里，默认行扫找空）——
-    // 只在第一轮 miss 后展开，避免把已展开的组点收起。expandGroup 形态 = client-load-smoke 同款。
-    const expandGroup = async (groupTitle) => {
-      const n = await rows.count()
-      for (let i = 0; i < Math.min(n, 300); i++) {
-        const el = rows.nth(i)
-        if (!(await el.isVisible().catch(() => false))) continue
-        const box = await el.boundingBox().catch(() => null)
-        if (box === null || box.x >= 256) continue
-        const text = ((await el.textContent()) ?? '').trim()
-        if (text.startsWith(groupTitle) && !text.includes('New Session')) {
-          await el.click({ timeout: 6_000 }).catch(() => {})
-          await page.waitForTimeout(2000)
-          return true
-        }
-      }
-      return false
-    }
-    for (const g of ['research-workspace', 'harness-home', 'Ungrouped', 'rehearsal-workspace']) {
-      if (rowTexts.some((t) => t.startsWith(g))) await expandGroup(g)
+    // 只在第一轮 miss 后展开，避免把已展开的组点收起。expandGroup 与候选分组名 =
+    // lib/web-ui-nav.mjs 唯一正本（与 client-load-smoke 共享——2026-10-13 结构重构收敛）。
+    for (const g of SIDEBAR_GROUP_CANDIDATES) {
+      if (rowTexts.some((t) => t.startsWith(g))) await expandGroup(page, g)
     }
     await page.waitForTimeout(800)
     opened = await openSession()

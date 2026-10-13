@@ -28,6 +28,14 @@ export function resolveSessionLog(sessionDir) {
   return null
 }
 
+/** research-workspace 组的目录名（run 通道组名约定 = 组名含该子串；组随会话 cwd 走）。
+ *  组不在场（未 source env.sh / 无 run 历史）→ undefined。三消费方（client-load-smoke /
+ *  hitl-answer / watch-run）原各写一份同款一行——收敛为唯一正本（2026-10-13 结构重构）。 */
+export function researchWorkspaceGroup(sessionsRoot) {
+  if (!existsSync(sessionsRoot)) return undefined
+  return readdirSync(sessionsRoot).find((d) => d.includes('research-workspace'))
+}
+
 /** Decode concatenated native zstd frames. A bad frame makes the whole read unreadable. */
 const ZSTD_MAGIC = 0xfd2fb528
 

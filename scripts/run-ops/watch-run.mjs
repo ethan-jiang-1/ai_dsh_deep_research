@@ -5,11 +5,10 @@
 // 退出码：0 = HITL-PENDING 或 RUN-SETTLED（stdout `STATE:` 行自报是哪个）；1 = 超时；2 = 用法错。
 // 用法：node --import tsx/esm scripts/run-ops/watch-run.mjs <session-id> [--interval 20] [--timeout-min 90]
 //   （会话根 = $DSH_HOME，缺省回退本仓 runtime/harness-home；显式 source dev/env.sh 更稳）
-import { existsSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { runStateOf, eventsRegressed, leadHitlCandidate } from '../lib/run-state.mjs'
-import { resolveSessionLog } from '../lib/session-log.mjs'
+import { researchWorkspaceGroup, resolveSessionLog } from '../lib/session-log.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const SID = process.argv[2]
@@ -26,9 +25,7 @@ if (!SID || !/^[\w-]+$/.test(SID)) {
 }
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'runtime', 'harness-home')
 const sessionsRoot = join(home, 'sessions')
-const group = existsSync(sessionsRoot)
-  ? readdirSync(sessionsRoot).find((d) => d.includes('research-workspace'))
-  : undefined
+const group = researchWorkspaceGroup(sessionsRoot)
 const logPath = group !== undefined ? resolveSessionLog(join(sessionsRoot, group, SID)) : null
 if (logPath === null) {
   console.error(`watch-run: 找不到会话日志（${logPath ?? 'sessions 根缺 research-workspace 组'}）——先 source dev/env.sh 并核对 session id`)

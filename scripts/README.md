@@ -61,7 +61,7 @@
 | 模块 | 被谁消费 | 说明 |
 |---|---|---|
 | lib/roles.mjs | 冒烟与门禁 | 角色清单访问器（事实源 = 盘上 presets/） |
-| lib/session-log.mjs | run-state、watch-run、回归 | canonical 日志选择与读取（BUG-010） |
+| lib/session-log.mjs | run-state、watch-run、client-load-smoke、hitl-answer、回归 | canonical 日志选择与读取 + research-workspace 组发现（BUG-010；组发现 = 2026-10-13 三处同款一行收敛） |
 | lib/provider-errors.mjs | provider-error-stats、provider-errors.test | 回合被上游流错误终结的结构化抽取（唯一语义源：只认 `turn/end` + `reason.kind=error`，不双算 `assistant/attempt`） |
 | lib/plan-card.mjs | node-gate 门①、plan-card-stats、run-ops 投影 | 计划确认卡识别与字数口径（唯一语义源：标签「按计划开跑」+ `question` 字段全长 + 阈值 200） |
 | lib/run-state.mjs | watch-run、仪表盘、回归 | run 操作面状态谓词 |
@@ -71,6 +71,7 @@
 | lib/inject-reconcile.mjs | cdp-probe、inject-reconcile.test | 注入消息「落盘对账」判据（BUG-021 正修：日志里出现本条 user/message 才算送达；时间下界防同文假阳） |
 | lib/probe-send-target.mjs | cdp-probe、probe-send-target.test | 提交按钮判定纯函数（BUG-021 正修：send 家族六标签状态机 + **stop 家族拒点** + composer 邻近窗；页面只读 DOM 与执行点击） |
 | lib/ask-drive.mjs | hitl-answer | 代答读窗与谓词 |
+| lib/web-ui-nav.mjs | client-load-smoke、hitl-answer | 观察面侧栏导航共享件：折叠组展开（expandGroup）+ 候选分组名——两消费方逐字双份的收敛（零依赖，page 鸭子类型；真浏览器证据归消费方冒烟档） |
 | lib/unconsumed-evidence.mjs | unconsumed-evidence.test / 收尾核验 | B1 机械基座：evidence/ 未进 findings.md 的差集投影（critic 差集出题的操作侧对账） |
 | lib/acceptance-check.mjs | acceptance-check.test / 收尾核验 | 收活判据机械求值：PASS/FAIL/UNVERIFIED 三态（DeerFlow acceptance_criteria keyless 移植，判不了永不静默放行） |
 | lib/hitl-provenance.mjs | hitl-answer | 代答 provenance 写盘（BUG-014 正修——代理模拟显式记账；BUG-017 题面富集） |

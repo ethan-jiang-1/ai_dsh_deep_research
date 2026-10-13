@@ -36,7 +36,8 @@ import { fileURLToPath } from 'node:url'
 import { scrubbedEnv } from '../lib/env.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs'
 import { launchChromium, loadChromium } from '../lib/playwright.mjs'
-import { readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs'
+import { readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
+import { expandGroup, SIDEBAR_GROUP_CANDIDATES } from '../lib/web-ui-nav.mjs'
 import { sessionBundleOf } from '../../packages/deep-research-pack/src/lib/bundle-bind.ts'
 import { deriveSteps } from '../../packages/deep-research-pack/src/lib/run-fold.ts'
 import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
@@ -155,7 +156,7 @@ const step = (ok, label, info = '') => {
 // ── 磁盘侧：扫绑定会话（渐进面真数据源）与未绑定会话（不显示别家数据的负样本）──
 // 绑定谓词 = pack bundle-bind（journal 工具调用路径里的 drt_<slug>/）；带历史 = 有回合。
 const sessionsRoot = join(home, 'sessions')
-const sessionGroup = existsSync(sessionsRoot) ? readdirSync(sessionsRoot).find((d) => d.includes('research-workspace')) : undefined
+const sessionGroup = researchWorkspaceGroup(sessionsRoot)
 const hasTurns = (events) => events.some((j) => j?.type === 'turn/end')
 // 顶层会话才进侧栏（子代理子会话 delegationDepth > 0——run 12 实测其不显示，点了也白点）
 const isTopLevel = (events) => {
@@ -350,23 +351,8 @@ try {
   await rpc(base, cookie, 'session/rename', { request: { sessionId: probeSessionId, title: PROBE_TITLE } })
 
   const wait = (ms) => new Promise((r) => setTimeout(r, ms))
-  const expandGroup = async (groupTitle) => {
-    const rows = page.locator('span[class*="_root_"]')
-    const n = await rows.count()
-    for (let i = 0; i < Math.min(n, 300); i++) {
-      const el = rows.nth(i)
-      if (!(await el.isVisible().catch(() => false))) continue
-      const box = await el.boundingBox().catch(() => null)
-      if (box === null || box.x >= 256) continue
-      const text = (await el.textContent() ?? '').trim()
-      if (text.startsWith(groupTitle) && !text.includes('New Session')) {
-        await el.click({ timeout: 6_000 }).catch(() => {})
-        await wait(2_000)
-        return true
-      }
-    }
-    return false
-  }
+  // expandGroup / 候选分组名 = lib/web-ui-nav.mjs 唯一正本（与 hitl-answer 共享——2026-10-13
+  // 结构重构收敛，原本地双份句法已漂移）。
   const clickRowByText = async (text) => {
     const scan = async () => {
       const rows = page.locator('span[class*="_root_"]')
@@ -625,8 +611,8 @@ try {
   if (!sessionOk && SESSION_TITLE !== null) {
     // 折叠态：逐组展开后重试（侧栏只展开 active 会话所在的组；目标会话的组随其 cwd
     // 走——BUG-002 清扫轮实证：老 ad-hoc 会话在 harness-home 组，不在 research-workspace）
-    for (const g of ['research-workspace', 'harness-home', 'Ungrouped', 'rehearsal-workspace']) {
-      await expandGroup(g)
+    for (const g of SIDEBAR_GROUP_CANDIDATES) {
+      await expandGroup(page, g)
       sessionOk = await clickRowByText(SESSION_TITLE)
       if (sessionOk) break
     }
