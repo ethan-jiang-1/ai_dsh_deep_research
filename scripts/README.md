@@ -45,7 +45,7 @@
 | 件 | 证明什么 | 档位 |
 |---|---|---|
 | watch-run.mjs | 谓词化状态判定（HITL-PENDING / RUN-SETTLED 自报） | keyless（会话根缺省回退开发 home；显式 source 更稳） |
-| run-dashboard.mjs | 只读 HTML 投影：多 run 扫描 + 步骤条（fail-soft） | keyless |
+| run-dashboard.mjs | 只读 HTML 投影：多 run 扫描 + 步骤条（fail-soft；纯管线住 lib/run-dashboard-core.mjs，本件 = CLI 壳） | keyless |
 | stream-diagnostics.mjs | 流失败归因诊断（run-ops）：模型尝试时间线/失败密度/provider 与重试策略实名/工具调用与检索查询/宿主 boot 事实——出问题第一步跑它 | keyless（读会话日志与 boot 日志） |
 | provider-error-stats.mjs | 上游流错误（回合被终结）的跨场分布投影（BUG-022 的"可数"面；判据与抽取 = lib/provider-errors.mjs） | keyless（须 source dev/env.sh） |
 | plan-card-stats.mjs | 计划确认卡字数的跨场分布投影（判 ①-c 的升硬门前置「连续 ≥3 场达标」；口径与识别 = lib/plan-card.mjs，与 node-gate 门① 同源） | keyless（须 source dev/env.sh） |
@@ -87,4 +87,5 @@
 | lib/gates-cases.mjs | gates-smoke（驱动）+ verify-gates.test（静态对账） | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
 | lib/node-gate-core.mjs | run-gates/node-gate（驱动）+ node-gate.test | 节点交接契约门判据核心（readLog 注入——纯 reader 默认，zstd CLI 由驱动壳注入） |
 | lib/schema-scan-core.mjs | run-gates/schema-scan（壳）+ schema-scan.test + node-gate-core | 节点 I/O 契约在场级断言判据核（交付日/研究类型/条件件豁免/断代定红——从 run-gates 下沉修 lib→入口层反向依赖） |
+| lib/run-dashboard-core.mjs | run-dashboard（壳）+ run-dashboard.test + run-fold.test | M2 run 观察面纯管线：解析 → 场景 → 模型 → HTML 渲染（全 fail-soft；CLI/watch/写盘归壳） |
 | lib/evidence-audit-core.mjs | run-gates/evidence-audit（驱动）+ evidence-audit.test | 证据溯源审计判据核心（readLog 注入同上） |

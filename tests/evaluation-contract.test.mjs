@@ -55,7 +55,7 @@ test('证据契约七字段在各执行者副本全部在场（对账，防静�
 });
 
 test('有效证据谓词分层：硬五字段定有效性、软二字段标未分级（仪表盘渲染层与手册对账）', async () => {
-  const { parseEvidenceDir } = await import('../scripts/run-ops/run-dashboard.mjs');
+  const { parseEvidenceDir } = await import('../scripts/lib/run-dashboard-core.mjs');
   const { mkdirSync, rmSync, writeFileSync } = await import('node:fs');
   const tmp = join(ROOT, 'tests', '.tmp-evidence-predicate');
   rmSync(tmp, { recursive: true, force: true });

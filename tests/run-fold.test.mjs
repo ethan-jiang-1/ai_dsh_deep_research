@@ -5,7 +5,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { deriveSteps, topicEvidenceMatrixCells } from '../packages/deep-research-pack/src/lib/run-fold.ts';
-import { parseTopics, parseEvidenceDir } from '../scripts/run-ops/run-dashboard.mjs';
+import { parseTopics, parseEvidenceDir } from '../scripts/lib/run-dashboard-core.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 // 位置=状态：bundle 在飞住工作区根，交付后移入 archive/——两处按序找（缺席 = 干净检出，下方守卫跳过）
