@@ -557,8 +557,8 @@ function gitOnce(args) {
 }
 
 // ── client-keys（观察面 client 的 keyed 字面量单一正本——company 坑 1：
-//    "a typo simply never renders"，key 拼错不报错永不渲染。规则：① key/槽名字面量只许住
-//    src/client/keys.ts（别处出现即红——杜绝第二份会漂移的清单）；② slots.inject 的第一参、
+//    "a typo simply never renders"，key 拼错不报错永不渲染。规则：① src/client/ 下任意层级的
+//    key/槽名字面量只许住 src/client/keys.ts（别处出现即红——杜绝第二份会漂移的清单）；② slots.inject 的第一参，
 //    register 描述符的 name/key/id 只许用标识符（引号字面量即红），且必须出自 keys.ts 的导出；
 //    ③ keys.ts 至少一个导出、src/client 至少一个文件（防空集——D18 边界内 client 面常在）。）──
 {
@@ -566,10 +566,11 @@ function gitOnce(args) {
   const clientDir = join(PACK, 'src', 'client');
   if (!existsSync(clientDir)) { fail(gate, 'packages/deep-research-pack/src/client/ 缺席（D18：观察面 client 面常在）'); }
   else {
-    const files = readdirSync(clientDir).filter((f) => /\.(ts|tsx)$/.test(f));
+    const files = walk(clientDir).filter((abs) => /\.(ts|tsx)$/.test(abs)).map((abs) => relative(clientDir, abs));
     if (files.length === 0) fail(gate, 'src/client/ 无 .ts/.tsx（防空集：D18 边界内 client 面常在）');
-    const keysFile = files.includes('keys.ts') ? readFileSync(join(clientDir, 'keys.ts'), 'utf8') : '';
-    if (!files.includes('keys.ts')) fail(gate, 'src/client/ 缺 keys.ts（keyed 字面量的唯一正本）');
+    const keysPath = join(clientDir, 'keys.ts');
+    const keysFile = existsSync(keysPath) ? readFileSync(keysPath, 'utf8') : '';
+    if (!existsSync(keysPath)) fail(gate, 'src/client/ 缺 keys.ts（keyed 字面量的唯一正本）');
     else {
       const keyExports = new Set([...keysFile.matchAll(/export const (\w+) = '/g)].map((m) => m[1]));
       if (keyExports.size === 0) fail(gate, 'keys.ts 无 `export const X = \x27…\x27` 导出（防空集）');
@@ -652,8 +653,9 @@ function gitOnce(args) {
 }
 
 // ── cockpit-doc-registry（驾驶舱构成正本 ↔ 盘上模块登记；issue ③-b 用户拍板
-//    「补一条窄 verify 门」）。规则：`packages/deep-research-pack/src/client/` 与 `src/lib/`
-//    下每个 .ts/.tsx 的文件名必须出现在构成正本 `docs/design/40-research-cockpit.md` 里——
+//    「补一条窄 verify 门」）。规则：`packages/deep-research-pack/src/client/` 任意层级与 `src/lib/`
+//    下每个 .ts/.tsx 的 pack-root-relative path（src/client/... 或 src/lib/...）必须出现在构成正本
+//    `docs/design/40-research-cockpit.md` 里——只比 basename 会让同名模块互相遮盖。
 //    正本是驾驶舱构成的唯一说明，模块上了盘而正本没跟上 = 文档说谎（2026-10-11 实测形态：
 //    业务摘要层 brief-fold 与 review-readiness 上线后，正本仍写「七区」「六件」）。
 //    防空集：两目录合计 0 个模块 / 正本缺席 → 红（静默变空集的门禁等于不存在）。──
@@ -664,11 +666,13 @@ function gitOnce(args) {
   if (!existsSync(docPath)) fail(gate, 'docs/design/40-research-cockpit.md 缺席（驾驶舱构成正本）');
   else {
     const doc = readFileSync(docPath, 'utf8');
-    const modules = moduleDirs.flatMap((dir) => (existsSync(dir) ? readdirSync(dir).filter((f) => /\.(ts|tsx)$/.test(f)).map((f) => join(dir, f)) : []));
+    const modules = moduleDirs.flatMap((dir) => (existsSync(dir) ? walk(dir).filter((f) => /\.(ts|tsx)$/.test(f)) : []));
+    const registeredModulePath = (modulePath) => doc.includes(`\`${modulePath}\``) || doc.includes(`/${modulePath})`);
     if (modules.length === 0) fail(gate, 'src/client 与 src/lib 下 0 个 .ts/.tsx（防空集：驾驶舱 client 面与折算层常在）');
     else for (const abs of modules) {
-      if (!doc.includes(abs.slice(abs.lastIndexOf(sep) + 1)))
-        fail(gate, `${relative(ROOT, abs)} 未在构成正本登记（修正 = 在 docs/design/40-research-cockpit.md §2 的件表或折算层表加一行：文件链接 + 职责）`);
+      const modulePath = relative(PACK, abs).split(sep).join('/');
+      if (!registeredModulePath(modulePath))
+        fail(gate, `${relative(ROOT, abs)} 未在构成正本登记（修正 = 在 docs/design/40-research-cockpit.md §2 的件表或折算层表加一行：pack-root-relative 路径 + 职责）`);
     }
   }
 }

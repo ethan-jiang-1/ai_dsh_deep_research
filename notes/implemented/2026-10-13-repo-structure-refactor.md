@@ -24,6 +24,17 @@
 - **冒烟内部收口**：client-load-smoke 就绪序列六处 → `awaitAppReady(settleMs)`、guide 胶囊
   两处 → `openGuideCapsule(三时序参数)`——时长逐调用点保原值。
 
+### 同一结构目标的追加切片
+
+- **驾驶舱队员订阅归私有 hook**：多路 teammate follow、history 替换/event 追加、折算、取消与
+  fail-soft 日志集中在 `src/client/research-status/useMemberActivity.ts`。父组件保留 roster 投影、
+  state slot 和 effect 调用位置；lead/HITL、会话连续性、bundle 刷新及 JSX 未移动。
+- **内部目录仍受结构门禁约束**：`client-keys` 与 `cockpit-doc-registry` 递归扫描 client 源码；
+  构成正本列出私有 hook 与类型模块。门禁聚合入口仍是单文件 `verify.mjs`。
+- **smoke 参考模型与浏览器断言分开**：会话候选和 bundle 文件事实集中在 smoke 私有
+  `client-load-reference.mjs`；缺组 exit 2、expectedFace 取值点、刷新读、全部浏览器断言顺序仍归
+  `client-load-smoke.mjs`。
+
 ## 输掉的方案
 
 - **verify.mjs 拆 `gates/<name>.mjs` 每门禁一模块**：合同 churn（scripts/AGENTS、README、
@@ -41,7 +52,7 @@
 - **Phase 8 时序参数统一**（六处稳定窗、两处胶囊探测窗取同一值）：各时长是各上下文实测调
   的，统一即行为变化。
 - **单消费方助手进 lib**（awaitAppReady/openGuideCapsule）：单一使用者不成缝——留在
-  client-load-smoke 本地，lib 只收真共享件（避免假设缝）。
+  client-load-smoke 本地，lib 只收真共享件（避免假设缝）；同理，历史窗口折算仍邻接其唯一断言消费点。
 
 ## 实际跑过的验证
 
@@ -59,6 +70,16 @@
   被 evaluation-contract 测试当场咬红（layering 注释点名的动态字面量形态）后补正。
 - **机械对账**：verify 重排经逐门禁代码体逐字对账（除 12 处 spawn 替换）；run-dashboard
   切分经首尾行锚点断言逐字搬移。
+- **后续零行为切片复验**：`pnpm test`（428/428）、`pnpm verify`、pack build、真浏览器
+  `client-load-smoke` 均通过；`gates-smoke` 零注入对照与有效形态控制通过，45 个注入案例均由
+  目标门禁点名报红；`git diff --check` 通过。
+- **递归扫描反证**：首轮递归前 gates-smoke 未能由 `client-keys` / `cockpit-doc-registry` 点名
+  嵌套 client/模块回归；递归后再以同名 `types.ts` 注入确认 basename 登记会漏检，随后改为
+  src-relative 路径校验。最终反证覆盖嵌套 client/lib、同名模块、空格路径、`.ts` 文件链接；
+  `node_modules` 与目录链接控制通过。
+- **未运行**：`release-smoke`（未改安装/部署面）、`snapshot-replay-smoke`（未改模型可见组装面）、
+  `client-hitl-smoke`（未改 reveal/session-switch 路径）与真模型 `team-preflight-smoke`；本次
+  `client-load-smoke` 的实际会话没有 teammate 正例，队员订阅非空路径由原 effect 逐句搬移与 pack build 覆盖，未声称 live 正例已验证。
 
 ## 环境状态
 

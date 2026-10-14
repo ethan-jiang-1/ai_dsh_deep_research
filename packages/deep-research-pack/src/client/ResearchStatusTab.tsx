@@ -30,45 +30,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { deriveAnchors, foldHitlPending, type HitlState, type RunAnchor } from '../lib/hitl-fold.ts'
 import { deriveSteps, type RunStep } from '../lib/run-fold.ts'
 import { deriveBusinessBrief, type BusinessBrief } from '../lib/brief-fold.ts'
 import { terminalReadiness } from '../lib/review-readiness.ts'
 import { foldActivityRows, type ActivityRow } from '../lib/activity-fold.ts'
-import { foldMemberActivity, type MemberActivitySummary } from '../lib/member-activity.ts'
+import { useMemberActivity } from './research-status/useMemberActivity.ts'
+import type { MemberActivitySummary } from '../lib/member-activity.ts'
+import type { ResearchStatusTabInjected, ResearchStatusTabProps } from './research-status/types.ts'
 import { sessionBindingOf, type SessionBinding } from '../lib/bundle-bind.ts'
 import { streamFailureOf } from '../lib/stream-failure.ts'
 import type { TeamProjection } from '@deepseek-ai/dsh-experimental-agent-team/client'
-
-/** journal 帧的最小投影（wire 形状 → 领域形状）。 */
-export type JournalFrame =
-  | { readonly kind: 'history'; readonly events: readonly unknown[] }
-  | { readonly kind: 'event'; readonly event: unknown }
-
-/** follow 目标：普通会话 id，或 subagent 会话的持久父地址。队员（teammate）会话 origin =
- *  subagent，纯 id 形态被 host 守卫拒（session/agent-busy "subagent Sessions require their
- *  durable parent address"——2026-10-11 首验实测，三条队员流全灭）；父地址形态 = 官方
- *  ui-session 同款（vendor session.ts sessionAddress()）。mode 'unknown' = 观察者不断言
- *  队员的 one-shot/continuable 形态（host 侧 mode 对账跳过）。结构性子集，wire 类型 =
- *  vendor SessionAddress。 */
-export type FollowTarget =
-  | SessionId
-  | { readonly kind: 'subagent'; readonly parentSessionId: SessionId; readonly childSessionId: SessionId; readonly mode: 'unknown' }
-
-/** 页签体注入面：journal 流 + 文件读取闭包（绑定 remote.workspaceFiles）+ 挂起显性化入口。 */
-export interface ResearchStatusTabInjected {
-  readonly follow: (target: FollowTarget, signal: AbortSignal) => AsyncGenerator<JournalFrame>
-  /** 列工作区目录；不可达 → null。 */
-  readonly listDir: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<readonly { type: string; name: string }[] | null>
-  /** 读工作区文本文件（首窗）；不可达 → null。 */
-  readonly readFile: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<string | null>
-  /** 挂起显性化：pending 迁移时由页签体调用（openTab——右栏同步骤展开）。 */
-  readonly revealStatusTab: () => void
-}
-
-/** 槽标准 props + 注入面。 */
-export type ResearchStatusTabProps = PropsRuntime<'sidebar.right.pane.tab'> & ResearchStatusTabInjected
+export type { FollowTarget, JournalFrame, ResearchStatusTabInjected, ResearchStatusTabProps } from './research-status/types.ts'
 
 /** bundle 渐进面模型（问题行 + 步骤 + 证据 + 交付）。 */
 interface BundleFace {
@@ -109,7 +82,6 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const prevSidRef = useRef<string | undefined>(undefined)
   const wasObservingRef = useRef(false)
   const [memberSummaries, setMemberSummaries] = useState<Readonly<Record<string, MemberActivitySummary>>>({})
-
   // ⑦ 队员 roster（agentTeam 投影——标准 props 注入的会话投影钩子；队员会话 id 的唯一发现源，
   //    通道探明材料实证：spawn_teammate 返回不带 id）。prop 存在性由宿主决定且稳定，
   //    与 vendor client-ui-agent-team 的 prop-hook 同款调用形态。
@@ -168,37 +140,13 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     prevSidRef.current = props.sessionId
   }, [props.sessionId])
 
-  // ⑦ 队员动作流（member-activity-stream）：roster 变化即重开多路 follow（每队员一条，与
-  //    lead 流同一 WebSocket 数据面——通道探明：gateway 无流数上限）；AbortController 统一
-  //    回收。首帧 snapshot 为全量历史（量级 ≈ lead 同阶）——行截尾部、计数全量，折算住 lib。
-  useEffect(() => {
-    const sessionId = props.sessionId
-    if (memberIds === '' || sessionId === undefined) { setMemberSummaries({}); return }
-    const controller = new AbortController()
-    const state: Record<string, MemberActivitySummary> = {}
-    let alive = true
-    const ids = memberIds.split(',') as SessionId[]
-    void Promise.all(ids.map(async (id) => {
-      try {
-        let events: unknown[] = []
-        // 队员 = subagent 会话：follow 必须走持久父地址（parent = 本 lead 会话；mode unknown
-        // 不断言队员形态）——纯 id 形态被 host 守卫拒（2026-10-11 首验实测）。
-        for await (const frame of props.follow(
-          { kind: 'subagent', parentSessionId: sessionId, childSessionId: id, mode: 'unknown' },
-          controller.signal,
-        )) {
-          if (frame.kind === 'history') events = [...frame.events]
-          else events = [...events, frame.event]
-          if (!alive) return
-          state[id] = foldMemberActivity(events)
-          setMemberSummaries({ ...state })
-        }
-      } catch (cause) {
-        if (!controller.signal.aborted) console.error('[research-status] 队员流失败', id, String(cause))
-      }
-    }))
-    return () => { alive = false; controller.abort() }
-  }, [memberIds, props.sessionId])
+  // ⑦ 队员动作流（member-activity-stream）：roster 变化即重开多路 follow。
+  useMemberActivity({
+    memberIds,
+    sessionId: props.sessionId,
+    follow: props.follow,
+    setMemberSummaries,
+  })
 
   // ② bundle 渐进面（绑定本会话的 run；slug 变化即扫 + 30s 定时——文件在场性不高频）
   // G4（RFC cockpit-flow-face）：read 弱绑定在挂起期不作渐进面依据——立项预检读取旧 bundle

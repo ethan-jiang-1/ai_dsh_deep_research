@@ -3,8 +3,8 @@
 // 静态对账消费本表——驱动面（smoke 道，起子进程）不得被 tests import，案例表因此住 lib；
 // 每 mutate 只做纯 fs 操作，git add 由驱动壳在 mutate 后统一执行，本模块零子进程）。
 // 消费方：scripts/smoke/gates-smoke.mjs（真执行体）+ tests/verify-gates.test.mjs（静态对账）。
-import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { dirname, join, relative } from 'node:path';
 
 // ── 注入手法（每条 = 该门禁负责拦的真实回归；静态契约测试对账 gate 名 ↔ verify gates 数组）──
 
@@ -149,8 +149,39 @@ const linkUntrackedTarget = () => (dir) => {
  *  此时只查 `FAIL  <gate>` 会因**别的**报因而假绿（断言空转）。凡 gate 在对照组非 PASS 者
  *  必须给 expect（主流程会强制检查这一点）。 */
 /** 未登记模块注入（cockpit-doc-registry）：丢一个 pack 模块进 src/lib/，不改构成正本。 */
-const dropUnregisteredModule = (dirRel) => (dir) => {
-  writeFileSync(join(dir, dirRel, 'probe-unregistered-module.ts'), 'export const probeUnregistered = 0\n');
+const dropUnregisteredModule = (dirRel, basename = 'probe-unregistered-module.ts') => (dir) => {
+  const target = join(dir, dirRel, basename);
+  mkdirSync(dirname(target), { recursive: true });
+  writeFileSync(target, 'export const probeUnregistered = 0\n');
+};
+
+/** 嵌套 client 源码中的 keyed 字面量（client-keys）：新增内部目录后仍须走 keys.ts 单一正本。 */
+const addNestedClientKey = (subdir = 'research-status') => (dir) => {
+  const target = join(dir, 'packages/deep-research-pack/src/client', subdir, 'probe-key.ts');
+  mkdirSync(dirname(target), { recursive: true });
+  writeFileSync(target, "export const probe = 'sidebar.right.pane.tab'\n");
+};
+
+/** .ts 符号链接本身是 client 源码入口，仍需按链接路径登记并检查目标内容。 */
+const addSymlinkClientKey = () => (dir) => {
+  const source = join(dir, 'packages/deep-research-pack/src/probe-key-target.ts');
+  const link = join(dir, 'packages/deep-research-pack/src/client/research-status/probe-key-link.ts');
+  mkdirSync(dirname(source), { recursive: true });
+  mkdirSync(dirname(link), { recursive: true });
+  writeFileSync(source, "export const probe = 'sidebar.right.pane.tab'\n");
+  symlinkSync(relative(dirname(link), source), link);
+};
+
+/** 被忽略的 node_modules 与指向外部目录的符号链接不属于 client 模块扫描面。 */
+const addIgnoredClientPaths = () => (dir) => {
+  const ignored = join(dir, 'packages/deep-research-pack/src/client/node_modules/probe.ts');
+  const targetDir = join(dir, 'packages/deep-research-pack/src/external-client-probe');
+  const linkDir = join(dir, 'packages/deep-research-pack/src/client/external-probe');
+  mkdirSync(dirname(ignored), { recursive: true });
+  mkdirSync(targetDir, { recursive: true });
+  writeFileSync(ignored, "export const probe = 'sidebar.right.pane.tab'\n");
+  writeFileSync(join(targetDir, 'probe.ts'), "export const probe = 'sidebar.right.pane.tab'\n");
+  symlinkSync(relative(dirname(linkDir), targetDir), linkDir, 'dir');
 };
 
 export const CASES = [
@@ -255,6 +286,15 @@ export const CASES = [
   // ——模拟"模块上了盘、正本没跟上"（2026-10-11 实测形态：brief-fold / review-readiness 上线
   // 后正本仍写「七区」「六件」）。git add 由驱动壳统一执行，故 tracked 面能看见它。
   { id: 'cockpit-doc-registry-unregistered-module', gate: 'cockpit-doc-registry', mutate: dropUnregisteredModule('packages/deep-research-pack/src/lib') },
+  { id: 'cockpit-doc-registry-unregistered-nested-client-module', gate: 'cockpit-doc-registry', mutate: dropUnregisteredModule('packages/deep-research-pack/src/client/research-status') },
+  { id: 'cockpit-doc-registry-duplicate-basename', gate: 'cockpit-doc-registry', mutate: dropUnregisteredModule('packages/deep-research-pack/src/client/other-status', 'types.ts') },
+  { id: 'cockpit-doc-registry-unregistered-nested-lib-module', gate: 'cockpit-doc-registry', mutate: dropUnregisteredModule('packages/deep-research-pack/src/lib/nested') },
+  { id: 'cockpit-doc-registry-unregistered-spaced-module', gate: 'cockpit-doc-registry', mutate: dropUnregisteredModule('packages/deep-research-pack/src/client/research status') },
+  { id: 'cockpit-doc-registry-symlink-client-module', gate: 'cockpit-doc-registry', mutate: addSymlinkClientKey() },
+  { id: 'client-keys-nested-client-key-literal', gate: 'client-keys', mutate: addNestedClientKey() },
+  { id: 'client-keys-nested-spaced-client-key', gate: 'client-keys', mutate: addNestedClientKey('research status') },
+  { id: 'client-keys-symlink-module-key-literal', gate: 'client-keys', mutate: addSymlinkClientKey() },
+
   // 工作区运行区拒收行被删（workspace-versioning）：种子丢掉 `drt_*/` 行——安装方一次
   // `git add -A` 就把整个 run 历史提交进他自己的库。正本同改保 pack-workspace-fresh 绿
   // （否则红的是新鲜度门禁，本案例会因别的报因假绿）。
@@ -291,4 +331,6 @@ export const CONTROLS = [
     appendFileSync(join(dir, 'tests', 'local-date.test.mjs'),
       "\n// 负例留证 2099-01-01：BUG-991——探针负例正本 = 本行（改判据 → 红；还原 → 绿）。\ntest('探针：活跃卡声明 BUG-991', () => {});\n");
   } },
+  { id: 'client-keys-ignore-node-modules-and-directory-symlink', gate: 'client-keys', mutate: addIgnoredClientPaths() },
+  { id: 'cockpit-doc-registry-ignore-node-modules-and-directory-symlink', gate: 'cockpit-doc-registry', mutate: addIgnoredClientPaths() },
 ];
