@@ -7,6 +7,7 @@
 | 卡 | 一句话 |
 |---|---|
 | [2026-10-15-terminal-readiness-line-form-tolerance](2026-10-15-terminal-readiness-line-form-tolerance.md) | 终局 readiness 的行形态容忍度：装饰形态读不出使 13 场已交付 bundle 降为"未判定"——建议窄放宽，待拍板 |
+| [2026-10-15-unclosed-bundles-disposition](2026-10-15-unclosed-bundles-disposition.md) | 活动区 13 个未归档 bundle 处置：4 场有 final.md 未闭合（2 场伪造 CRITICAL）+ 9 场未交付——分三类待你拍板 |
 | [2026-10-15-hitl-answer-and-test-surface-hardening](2026-10-15-hitl-answer-and-test-surface-hardening.md) | hitl-answer 与测试面三条小硬化候选（侧栏扫描上限文案／library 列断言／`--custom` 语义）——留痕待触发 |
 
 （上一张 2026-10-12-research-preference-detail-ux 已于 2026-10-13 归档 [settled_issues](../_archived/settled_issues/README.md)。）
