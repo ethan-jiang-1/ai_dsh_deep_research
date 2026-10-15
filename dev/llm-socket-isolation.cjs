@@ -31,6 +31,7 @@ function createRequireFallback(dir) {
 }
 const orig = globalThis.fetch;
 let rideCount = 0;
+let unisolatedCount = 0;
 globalThis.fetch = async function llmSocketIsolationFetch(input, init) {
   let issued = false; // 一次性请求是否已发出——已发出则任何异常都原样抛出，绝不回落双发
   try {
@@ -40,7 +41,13 @@ globalThis.fetch = async function llmSocketIsolationFetch(input, init) {
       && (init && init.method) === 'POST';
     if (!isDeepSeekPost) return orig(input, init);
     const undici = undiciOf();
-    if (undici === null) return orig(input, init);
+    if (undici === null) {
+      // 初始化失败的回落必须**逐次可数**（BUG-028 判据底线：回退路径可数且不静默）。
+      // undiciOf() 只记一次初始化日志并缓存失败——不在此逐次计数，长跑里整段未隔离将无迹可循。
+      unisolatedCount += 1;
+      console.warn(`${TAG} ⚠ 未隔离请求 #${unisolatedCount}（undici 不可用——回落全局池；核法 = 本行计数 + 修 vendor 构建产物）`);
+      return orig(input, init);
+    }
     rideCount += 1;
     const n = rideCount;
     if (n <= 3) console.warn(`${TAG} 第 ${n} 次骑行一次性连接（此后的不再逐条打印）`);
