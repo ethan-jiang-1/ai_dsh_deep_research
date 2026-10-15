@@ -35,6 +35,16 @@ opened: 2026-10-15
 2. **假 unknown（4 场）**：终局 PASS 读成未判定 —— 观察面显示"未判定"，门禁 fail-closed 不核验。
 3. **读对（6 场）**：含 3 场真 FAIL、2 场真无判定/已知缺陷、1 场 PASS（plain 形态）。
 
+**后果实证（渲染级，2026-10-15；仪表盘与驾驶舱同用该纯函数）：**
+
+| 组 | bundle | 仪表盘实际渲染 | 文件真值 |
+|---|---|---|---|
+| 假 FAIL | drt_agent-memory-landscape / drt_cn-agentic-parity / drt_cn-us-open-source | **`review readiness: FAIL`** | 终局 PASS |
+| 假 unknown | drt_deepseek-chat-price-check / drt_kimi-api-pricing / drt_zhipu-api-pricing / drt_open-llm-inference-engine-landscape | **该行整行缺席**（未判定） | 终局 PASS |
+| 对照（读对） | drt_cn-llm-pricing-2026-10 / drt_qwen-dashscope-pricing | `review readiness: PASS` | PASS ✓ |
+
+复跑：`node --import tsx/esm scripts/run-ops/run-dashboard.mjs research-workspace/archive/<slug> --out /tmp/d.html` 后从渲染文本取 `review readiness` 行。**已交付 run 被显示为"审查 FAIL"是可复现的用户可见错误**，不是纸面推断。
+
 **旁证（排除项已完成）**：pack 纯函数与 node-gate `.mjs` 镜像在 9 种形态上**同判**（无镜像分叉）；`--update-expected` 与金标准无关；"取最后一条"语义正确，问题只在**形态容忍度**。
 
 **未决问题：** 窄放宽的边界取到哪一档？建议：只接受**行首判定行**的装饰变体（加粗/反引号包裹、块引用与标题标记、值后 `（最终）` 类后缀），**明确排除**行内提及（承诺句）与表格单元（需行内匹配，会放历史引用夺权——与 Note 的"行内引用不得夺权"直接冲突）。表格单元那条的代价 = 该场继续"未判定"（该场本身是 FAIL，方向安全）。
