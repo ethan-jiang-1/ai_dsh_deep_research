@@ -30,7 +30,7 @@ opened: 2026-10-15
 | bundle | 条数 | 复核结论 | 证据 |
 |---|---|---|---|
 | `drt_nvidia-dc-gpu-share`（在飞） | 1 | **假红（类别①：抽取形态）** | 该 URL 在本 run 自己的 `web_fetch` 结果里出现 7 次，仅以 %XX 编码/协议相对/裸域名形态；容错解码后抽出 9 条命中 |
-| `drt_cn-llm-pricing-2026-10`（归档） | 2 | **假红（类别②：非 web 工具取证）** | 该域名出现在本 run **语料窗内**会话的 `mcp__playwright__browser_run_code_unsafe` 调用/结果里（3 call + 4 result；原文含 `//q.alyasset.com/npm.combo/@ali/…`）——浏览器 MCP 是真实取回，但 `isWeb` 只认 `web_fetch`/`web_search` |
+| `drt_cn-llm-pricing-2026-10`（归档） | 2 | **假红（类别②：非 web 工具取证）** | 该域名出现在本 run **语料窗内**会话的浏览器 MCP 工具结果里（`mcp__playwright__browser_run_code_unsafe`，3 call + 4 result；原文为页面 HTML：`<title>千问AI平台</title>` 与 `scripts:["//q.alyasset.com/npm.combo/…"]`）——**边界（2026-10-15 自查修正）**：日志证明的是"该域名出现在**浏览器取回的内容**里（作为页面脚本源）"，**未**证明"浏览器单独抓取过该 URL"；`isWeb` 只认 `web_fetch`/`web_search`，故审计既看不到该域名、也无法按"内容引用 vs 主动抓取"分级——这正是类别②要拍板的契约点 |
 | `drt_ai-coding-security`（在飞） | 1 | 成立 | 该域名仅出现在**别场** mcp-* 会话的 web_search 结果里；跨 run 语料窗设计上不予作证（有意行为） |
 | `drt_geometry-coaching`（归档） | 1 | 成立（另一类问题） | 证据里的 `source_url` 本身就是 `https://…` 占位串——证据质量缺陷，非抽取缺陷 |
 
