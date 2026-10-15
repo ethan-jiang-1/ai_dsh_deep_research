@@ -27,13 +27,25 @@ opened: 2026-10-15
 
 `drt_ai-coding-security` 的 `open-vsx.org` CRITICAL：全量日志里该域名仅 1 次命中，落在**别场**（`drt_mcp-security-landscape`/`drt_mcp-hosts-governance`/`drt_mcp-server-ecosystem`）的 `web_search` 结果里。`buildCorpus` 的**语料窗**（只认提及本 bundle slug 的会话）是**有意设计**（"跨 run 会话里的 URL 不得为本 run 作证"，防污染实证），故该场"本 run 未取证"的判定**成立**；仅报告措辞"任何 web 工具事件"应限定为"本 run 的任何 web 工具事件"。
 
+## 修法可行性预验证（scratch，未改仓；2026-10-15）
+
+对 `baffd6ea…` 会话（nvidia 场，本 run 自己的 lead 会话）的 8 条含域名 tool/result payload：
+
+| 抽取方式 | 命中该域名 |
+|---|---|
+| 现行 `URL_RE` 原样 | **0** |
+| **容错逐 `%XX` 解码副本**后再抽取 | **9**（含 `https://www.companieshistory.com/ai-market-share-by-company/&rut=…`） |
+| 负例（凭空域名 `not-in-log.invalid`） | 0 ✓（不造 URL） |
+
+**坑（本轮自己踩到并记录）**：先试的"整串 `decodeURIComponent(payload)`"在真实 HTML payload 上**抛错**（存在孤立 `%`），被 try/catch 吞掉后**静默退化为原串 → 0 命中**——修法必须是**逐 `%XX` 序列容错解码**，不能整串解码。
+
 ## 根因（已实测确认）
 
 URL 抽取只认字面 `http(s)://` 形态，未处理三类真实存在的引用形态：**%XX 百分号编码**（搜索引擎重定向参数 `uddg=`）、**协议相对 `//host/…`**、**无 scheme 的裸域名/链接文本**。搜索列表页（本仓 `web_fetch` 的常见目标——DuckDuckGo/Bing HTML）恰好只用这些形态承载目标 URL。
 
 ## 修复判据（拍板后按此验收）
 
-1. **抽取器扩形态**（`scripts/lib/evidence-audit-core.mjs` 的 `URL_RE`/`urlsOf`）：对 payload 先做**百分号解码**副本再抽取；识别**协议相对 `//host/…`** 与**裸域名/链接文本**（后者只用于"域名级出现"判定，不冒充 URL 级命中）。
+1. **抽取器扩形态**（`scripts/lib/evidence-audit-core.mjs` 的 `URL_RE`/`urlsOf`）：对 payload 做**逐 `%XX` 容错解码**副本再抽取（**不得整串 decodeURIComponent**——真实 payload 会抛错并静默失效，见 §修法可行性预验证）；识别**协议相对 `//host/…`** 与**裸域名/链接文本**（后者只用于"域名级出现"判定，不冒充 URL 级命中）。
 2. **档位分离不被抹平**：仍须保留"**见过但未抓过**"= MAJOR 档（`fetchedOk` 不含它），只有"本 run 语料窗内域名与 URL 都不出现"才 CRITICAL——即本修法**不得**把 MAJOR 洗成通过。
 3. **真实数据红→绿**：`drt_nvidia-dc-gpu-share` 复跑后该条从 CRITICAL 降为 MAJOR（"未抓过"），门A 复判随之变化；`drt_ai-coding-security` 的 open-vsx 条**维持** CRITICAL（本 run 未取证），措辞改为"本 run 的 web 工具事件"。
 4. **反证**：注入"确实从没出现过的 URL"用例仍判 CRITICAL；注入"出现在搜索结果里但未抓过"用例判 MAJOR（两条负例钉住档位边界）。
