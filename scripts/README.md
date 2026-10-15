@@ -46,7 +46,7 @@
 |---|---|---|
 | watch-run.mjs | 谓词化状态判定（HITL-PENDING / RUN-SETTLED 自报） | keyless（会话根缺省回退开发 home；显式 source 更稳） |
 | run-dashboard.mjs | 只读 HTML 投影：多 run 扫描 + 步骤条（fail-soft；纯管线住 lib/run-dashboard-core.mjs，本件 = CLI 壳） | keyless |
-| stream-diagnostics.mjs | 流失败归因诊断（run-ops）：模型尝试时间线/失败密度/provider 与重试策略实名/工具调用与检索查询/宿主 boot 事实——出问题第一步跑它 | keyless（读会话日志与 boot 日志） |
+| stream-diagnostics.mjs | 流失败归因诊断（run-ops）：模型尝试时间线/失败密度/provider 与重试策略实名/工具调用与检索查询——出问题第一步跑它；`--recent N` 限制最近 N 个有模型活动的会话 | keyless（读会话日志） |
 | provider-error-stats.mjs | 上游流错误（回合被终结）的跨场分布投影（BUG-022 的"可数"面；判据与抽取 = lib/provider-errors.mjs） | keyless（须 source dev/env.sh） |
 | plan-card-stats.mjs | 计划确认卡字数的跨场分布投影（判 ①-c 的升硬门前置「连续 ≥3 场达标」；口径与识别 = lib/plan-card.mjs，与 node-gate 门① 同源） | keyless（须 source dev/env.sh） |
 
@@ -64,6 +64,7 @@
 | lib/session-log.mjs | run-state、watch-run、client-load-smoke、hitl-answer、回归 | canonical 日志选择与读取 + research-workspace 组发现（BUG-010；组发现 = 2026-10-13 三处同款一行收敛） |
 | lib/provider-errors.mjs | provider-error-stats、provider-errors.test | 回合被上游流错误终结的结构化抽取（唯一语义源：只认 `turn/end` + `reason.kind=error`，不双算 `assistant/attempt`） |
 | lib/plan-card.mjs | node-gate 门①、plan-card-stats、run-ops 投影 | 计划确认卡识别与字数口径（唯一语义源：标签「按计划开跑」+ `question` 字段全长 + 阈值 200） |
+| lib/stream-diagnostics-core.mjs | stream-diagnostics.mjs、stream-diagnostics.test.mjs | 模型活动会话筛选（活动事件预筛后再按日志 mtime 取最近 N）+ 尝试时间线投影（assistant/message 计成功、assistant/attempt 计失败/无落面，终态三判 alive-or-idle/recovered/dead） |
 | lib/run-state.mjs | watch-run、仪表盘、回归 | run 操作面状态谓词 |
 | lib/env.mjs | 冒烟族 | 子进程环境清洗（scrubbedEnv/withModelKey——凭据卫生） |
 | lib/playwright.mjs | 浏览器冒烟 | Playwright 启停支撑 |
