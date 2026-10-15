@@ -14,6 +14,8 @@
 |---|---|
 | [BUG-024](BUG-024-direct-path-malformed-storm-recurrence.md) | 直连路径再现畸形风暴（`event precedes message_start`）——大会话重试全灭、小会话零失败，BUG-023 判据②触发条件成立（收卡判据待实地大会话观察，见卡内盘点） |
 
+| [BUG-028](BUG-028-llm-socket-isolation-silent-fallback.md) | 隔离守卫自身异常时静默透传原始 fetch——"隔离下"判读可能名不副实（回退路径不可数；牵出 BUG-024） |
+
 （近况看两池索引：[暂停](../_archived/suspended_bugs/README.md) · [已修](../_archived/fixed_bugs/README.md)；新卡编号 = 活跃 ∪ 全部归档池取最大号 + 1，规则唯一权威 = 本页。）
 
 ## 缺陷通道（卡怎么走到已修）

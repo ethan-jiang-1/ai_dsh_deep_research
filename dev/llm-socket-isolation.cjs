@@ -63,3 +63,9 @@ globalThis.fetch = async function llmSocketIsolationFetch(input, init) {
     return orig(input, init);
   }
 };
+// 预载自证（boot-run 导出 DSH_ISOLATION_ANNOUNCE=1）：让 boot 日志留下**确定性**证据行。
+// 逐请求的"第 N 次骑行"行只在真有 LLM/web_search 调用时出现，故判读"隔离下"前不能只靠它；
+// 本行在预载成功装载时无条件打印（stderr → boot-run 的 tee 进 web.log）。缺席 = 未隔离。
+if (process.env.DSH_ISOLATION_ANNOUNCE === '1') {
+  console.warn(`${TAG} 预载已生效 pid=${process.pid}（判读"隔离下"前先核本行；缺席 = 未隔离）`);
+}

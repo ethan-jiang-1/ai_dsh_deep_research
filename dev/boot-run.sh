@@ -193,6 +193,14 @@ STEPS
 echo "boot-run: boot web（research profile，端口 ${PORT}；Ctrl-C 停止）…"
 # LLM 流 socket 隔离（用户指令 2026-10-13：LLM 流式请求走一次性连接不复用——上游边缘对
 # 长命复用连接有相位性故障，postmortem 2026-10-13；移除 = 删本行）
-export NODE_OPTIONS="--require $ROOT/dev/llm-socket-isolation.cjs${NODE_OPTIONS:+ $NODE_OPTIONS}"
+ISOLATION_GUARD="$ROOT/dev/llm-socket-isolation.cjs"
+if [ ! -f "$ISOLATION_GUARD" ]; then
+  echo "boot-run: 隔离预载件缺席（$ISOLATION_GUARD）——拒绝在未隔离通道上启动；先恢复该文件" >&2
+  exit 2
+fi
+# DSH_ISOLATION_ANNOUNCE：让预载在 boot 日志打一行确定性自证（判读"隔离下"的核验锚点 =
+# web.log 检索 llm-socket-isolation 预载行；见 _backlog/triggers.md 处置序）
+export NODE_OPTIONS="--require $ISOLATION_GUARD${NODE_OPTIONS:+ $NODE_OPTIONS}"
+export DSH_ISOLATION_ANNOUNCE=1
 # web 输出 tee 进运行区日志：仪表盘 deep-link 从这里抓 token URL（缺席 → 页面不链，fail-soft）
 dsh --profile "$PROFILE" -- --port "$PORT" --no-open 2>&1 | tee "$ROOT/runtime/smoke-workspace/web.log"

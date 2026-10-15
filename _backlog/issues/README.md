@@ -4,7 +4,12 @@
 
 ## 活跃清单
 
-（当前无活跃卡——最后一张 2026-10-12-research-preference-detail-ux 已于 2026-10-13 归档 [settled_issues](../_archived/settled_issues/README.md)。）
+| 卡 | 一句话 |
+|---|---|
+| [2026-10-15-terminal-readiness-line-form-tolerance](2026-10-15-terminal-readiness-line-form-tolerance.md) | 终局 readiness 的行形态容忍度：装饰形态读不出使 13 场已交付 bundle 降为"未判定"——建议窄放宽，待拍板 |
+| [2026-10-15-hitl-answer-and-test-surface-hardening](2026-10-15-hitl-answer-and-test-surface-hardening.md) | hitl-answer 与测试面三条小硬化候选（侧栏扫描上限文案／library 列断言／`--custom` 语义）——留痕待触发 |
+
+（上一张 2026-10-12-research-preference-detail-ux 已于 2026-10-13 归档 [settled_issues](../_archived/settled_issues/README.md)。）
 
 ## 写一张卡
 
