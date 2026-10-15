@@ -12,8 +12,9 @@
 
 | 文件 | 一句话 |
 |---|---|
+| [BUG-029](BUG-029-evidence-audit-url-extraction-encoded-forms.md) | evidence-audit URL 抽取漏百分号编码/协议相对形态——搜索列表里见过的 URL 被误判「伪造链接」CRITICAL（把 MAJOR 升格、打红门A） |
 
-（当前无活跃卡。近况看两池索引：[暂停](../_archived/suspended_bugs/README.md) · [已修](../_archived/fixed_bugs/README.md)；新卡编号 = 活跃 ∪ 全部归档池取最大号 + 1，规则唯一权威 = 本页。）
+（近况看两池索引：[暂停](../_archived/suspended_bugs/README.md) · [已修](../_archived/fixed_bugs/README.md)；新卡编号 = 活跃 ∪ 全部归档池取最大号 + 1，规则唯一权威 = 本页。）
 
 ## 缺陷通道（卡怎么走到已修）
 
