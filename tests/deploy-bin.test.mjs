@@ -31,6 +31,22 @@ test('preflight：fail-loud verdict + 失败给补救命令（缺什么说什么
   assert.match(preflight, /→ \$\{r\.remedy\}/, 'preflight 失败项未打印补救命令（→ remedy）');
 });
 
+test('preflight：无 research 且多个 profile 时不按目录顺序任意推断 host', () => {
+  assert.match(preflight, /const pick = names\.includes\('research'\) \? 'research' : names\.length === 1 \? names\[0\] : undefined/,
+    '多个非 research profile 时必须不选 host，让包位置或显式 --host 决定解析锚');
+});
+
+test('preflight：未知 DSH 版本保留退出码 0，但总结必须显式标未验证', () => {
+  assert.match(preflight, /const unknown = results\.filter\(\(r\) => r\.ok === null\)/,
+    'preflight 未单独识别无法判定项');
+  assert.ok(preflight.includes('通过（含未验证项：${unknown.map((r) => r.name).join(\'、\')}）'),
+    '默认模式的总结未列出未验证项');
+  assert.ok(preflight.includes('安装验收通过（不代表研究就绪；未验证项：${unknown.map((r) => r.name).join(\'、\')}）'),
+    '安装模式的总结未列出未验证项');
+  assert.match(preflight, /process\.exit\(hardFail\.length === 0 \? 0 : 1\)/,
+    '未知项不得改变原 fail-loud 退出码合同（L2 无全局 dsh 时仍 exit 0）');
+});
+
 test('scaffold：工作区忽略规则随安装下发（包内 .gitignore.example → 落地 .gitignore）', () => {
   // 为什么钉：种子是"装到就有"的唯一形态，收集器只认 .md 时规则静默不发——安装方工作区
   // 没有本仓根 .gitignore 兜底，一次 git add -A 就把 run bundle 历史提交进他自己的库。
@@ -47,6 +63,29 @@ test('scaffold：幂等形状 + 收尾 preflight + workspace 必填 fail-loud', 
   assert.match(scaffold, /process\.exit\(2\)/, 'scaffold 缺 --workspace 必填的 exit(2) 前置拦截');
   assert.ok(scaffold.includes('preflight.mjs'), 'scaffold 收尾必须复核 preflight（准备完成 ≠ 检查通过）');
   assert.ok(scaffold.includes('agent-team-profile'), 'scaffold 团队层组合缺失——四角色协作主通道不可用');
+});
+
+test('scaffold：收尾 preflight 使用 --profile 对应的 profile 解析锚', () => {
+  assert.match(scaffold, /const explicitHost = argOf\('host'\)/,
+    'scaffold 未单独保留显式 --host 参数');
+  assert.match(scaffold, /const dshHome = resolve\(process\.env\.DSH_HOME \?\? join\(process\.env\.HOME \?\? '', '\.dsh'\)\)/,
+    'scaffold 未从 DSH_HOME 或 $HOME/.dsh 确定 profile 根');
+  assert.match(scaffold, /const targetHost = join\(dshHome, 'profiles', profile\)/,
+    'scaffold 未从 --profile 推导目标 profile 目录');
+  assert.match(scaffold, /const preflightHost = explicitHost \?\? \(existsSync\(join\(targetHost, 'package\.json'\)\) \? targetHost : null\)/,
+    '未显式 --host 时，scaffold 应仅在目标 profile package.json 在场时推导 host');
+  assert.match(scaffold, /const preflightHostArgs = preflightHost === null \? \['--no-host-inference'\] : \['--host', preflightHost\]/,
+    '目标 profile 尚未初始化时未禁止 preflight 回退到 research 等其他 profile');
+  assert.match(scaffold, /\.\.\.preflightHostArgs/,
+    'scaffold 未将显式或推导出的目标 host 参数转发给 preflight');
+  assert.match(preflight, /const noHostInference = argv\.includes\('--no-host-inference'\)/,
+    'preflight 未识别 scaffold 禁止错误 profile 推断的参数');
+  assert.match(preflight, /if \(host === null && !noHostInference && process\.env\.DSH_HOME !== undefined\)/,
+    'preflight 仍会在 scaffold 禁止推断时选择其他 profile');
+  assert.match(preflight, /const requireFrom = host === null\s*\? noHostInference \? null : createRequire\(import\.meta\.url\)/,
+    '目标 profile 不存在时，preflight 仍可能从 pack 位置解析 peer 包');
+  assert.match(preflight, /if \(requireFrom === null\) return false/,
+    '目标 profile 不存在时，peer/团队检查未按无法解析处理');
 });
 
 test('scaffold 安全边界：零密钥面（不装 DSH 本体、不写密钥——有意不做的事钉死）', () => {

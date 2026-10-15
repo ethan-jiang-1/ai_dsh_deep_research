@@ -430,7 +430,9 @@ try {
         // ↻ 回边盘侧真值（BUG-003 合流）：直调 hitl-fold.deriveAnchors（UI 同一函数）取
         // 交付审阅锚态——旧手抄公式（delivered ∨ tailAskPending）停留在 BUG-002 前的
         // 「一律记交付审阅」旧启发式，mid-flow 挂起被误判为回边应亮，废。
-        step(loopExpected === seg.includes('↻ 补研究'), '↻ rerun 回边 = 盘侧真值（deriveAnchors 合流，交付审阅锚非 upcoming）', `loopOn=${loopExpected}（anchor-2=${String(diskAnchors[1]?.state)} tailAskPending=${boundSession.tailAskPending}）`)
+        const rerunLabels = ['补研究 = 同 bundle 回挖掘、final/ vN+1', '表述修订 = 原位改、版本不变', '结构性重构 = 另起新 bundle']
+        const rerunLabelsVisible = rerunLabels.every((label) => seg.includes(label))
+        step(loopExpected === seg.includes('↻ rerun 图例（非执行记录）') && (!loopExpected || rerunLabelsVisible), '↻ rerun 三分图例 = NODES 合同（图例不证明执行；v2+ 文件版本才是证据扩张凭据）', `loopOn=${loopExpected} labelsVisible=${rerunLabelsVisible}（anchor-2=${String(diskAnchors[1]?.state)} tailAskPending=${boundSession.tailAskPending}）`)
         if (anchorBound && diskAnchors.some((a) => a.state === 'passed')) {
           // 停靠点诚实线（BUG-003 同族收口）：passed 计数 = diskAnchors（lib 同一函数）——
           // pending 覆盖 passed 的 re-open 语义（BUG-002）在此与 UI 天然一致；旧

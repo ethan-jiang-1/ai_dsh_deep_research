@@ -2,7 +2,9 @@
 //（用例即永久反证记录——改夹具应预期变红）。
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { dirname, join } from 'node:path'
+import { cpSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { basename, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { gateBundle, decisionsLines, headingGate } from '../scripts/lib/node-gate-core.mjs'
 
@@ -10,6 +12,34 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 const FX = join(HERE, 'fixtures', 'node-gate')
 const bundle = (name) => join(FX, 'bundles', name)
 const sessions = (name) => join(FX, 'sessions', name)
+const structuredAudit = (slug, criticalCount = 0, criticalBody = '（无）') => `# Evidence Audit — ${slug}（2026-10-08T00:00:00.000Z）
+
+## 概要
+
+| 检查 | 结果 |
+|---|---|
+| 发现 | CRITICAL ${criticalCount} · MAJOR 0 · INFO 0 |
+
+## CRITICAL（伪造链接 / 溯源断链）
+
+${criticalBody}
+
+## MAJOR（契约不符 / 转写不符）
+
+（无）
+`
+const withCompleteBundle = (run) => {
+  const tempBase = realpathSync(tmpdir())
+  const tempRoot = mkdtempSync(join(tempBase, 'node-gate-test-'))
+  const tempBundle = join(tempRoot, 'fixture-complete')
+  cpSync(bundle('fixture-complete'), tempBundle, { recursive: true })
+  try { return run(tempBundle) } finally {
+    if (dirname(tempRoot) !== tempBase || !basename(tempRoot).startsWith('node-gate-test-')) {
+      throw new Error(`refusing cleanup outside node-gate temp: ${tempRoot}`)
+    }
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
+}
 
 // 反证先行（writing-a-gate）：先红后绿——本文件是 node-gate 两门的永久反证记录。
 // 形态覆盖：门③缺拍板行 / 门②缺 present / 合规双绿 / 操作侧补齐（PASS-RELAY）/
@@ -340,6 +370,118 @@ test('门A附条件形态：readiness PASS（附条件）→ PASS 但带 WARN �
   const g = A('fixture-audit-conditional', '2026-10-08')
   assert.equal(g.status, 'PASS', '附条件是 critic 判断——机械红越权；防的是被读作无条件 PASS')
   assert.match(g.detail, /附条件/, '条件性必须显性化（WARN 注记）')
+})
+
+test('门A合规：真实 evidence-audit 摘要 + 空 CRITICAL 章节 → PASS', () => {
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'audit.md'), structuredAudit('fixture-complete'))
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'PASS', JSON.stringify(g.detail))
+  })
+})
+
+test('门A反证：有效零 CRITICAL 报告标题属于另一 bundle → RED', () => {
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'audit.md'), structuredAudit('another-bundle'))
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'RED', JSON.stringify(g.detail))
+    assert.match(g.detail, /bundle|目录|标识/i)
+  })
+})
+
+test('门A反证：fixture 微缩 stub 不构成正式操作侧审计 → RED', () => {
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'audit.md'), '# Audit — fixture\n\nCRITICAL = 0\n')
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'RED', JSON.stringify(g.detail))
+    assert.match(g.detail, /报告格式无效/)
+  })
+})
+
+test('门A反证：真实报告摘要 CRITICAL 非零 → RED', () => {
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'audit.md'), structuredAudit('fixture-complete', 2, '- **evidence/a.md** [未溯源] bad URL\n- **evidence/b.md** [未溯源] other URL'))
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'RED', JSON.stringify(g.detail))
+    assert.match(g.detail, /CRITICAL.*2|2.*CRITICAL/)
+  })
+})
+
+test('门A反证：审计摘要缺少显式 CRITICAL 计数 → RED', () => {
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'audit.md'), '# Evidence Audit — fixture-complete\n\n## 概要\n\n| 检查 | 结果 |\n|---|---|\n| 发现 | 无发现 |\n\n## CRITICAL（伪造链接 / 溯源断链）\n\n（无）\n')
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'RED', JSON.stringify(g.detail))
+    assert.match(g.detail, /CRITICAL/)
+  })
+})
+
+test('门A反证：审计摘要与 CRITICAL 章节内容不一致 → RED', () => {
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'audit.md'), structuredAudit('fixture-complete', 0, '- **evidence/a.md** [未溯源] bad URL'))
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'RED', JSON.stringify(g.detail))
+    assert.match(g.detail, /CRITICAL|审计/)
+  })
+})
+
+test('门A反证：缺少 CRITICAL 章节的报告 → RED', () => {
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'audit.md'), '# Evidence Audit — fixture-complete\n\n## 概要\n\n| 检查 | 结果 |\n|---|---|\n| 发现 | CRITICAL 0 · MAJOR 0 · INFO 0 |\n\n## MAJOR\n\n（无）\n')
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'RED', JSON.stringify(g.detail))
+    assert.match(g.detail, /CRITICAL/)
+  })
+})
+
+test('node-gate 终局 readiness：早期 PASS 后终局 FAIL → RED', () => {
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'review.md'), '## readiness: PASS\n\n第一轮通过。\n\n## readiness: FAIL\n')
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'RED', JSON.stringify(g.detail))
+    assert.match(g.detail, /readiness 非 PASS/)
+  })
+})
+
+test('node-gate 终局 readiness：早期 FAIL 后终局 PASS → PASS', () => {
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'review.md'), '## readiness: FAIL\n\n已按意见修订。\n\n## readiness: PASS\n')
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'PASS', JSON.stringify(g.detail))
+  })
+})
+
+test('node-gate 终局 readiness：历史行内 PASS 不取代终局 FAIL → RED', () => {
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'review.md'), '## readiness: FAIL\n\n历史记录：第一轮曾有 `readiness: PASS`。\n')
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'RED', JSON.stringify(g.detail))
+  })
+})
+
+test('node-gate 终局 readiness：PASS 注记说明 prior FAIL 已修复 → PASS', () => {
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'review.md'), '## readiness: FAIL\n\n## readiness: PASS (prior FAIL fixed)\n')
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'PASS', JSON.stringify(g.detail))
+  })
+})
+
+test('node-gate 终局 readiness：空模板不构成 PASS → RED', () => {
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'review.md'), '## readiness: PASS | FAIL\n')
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'RED', JSON.stringify(g.detail))
+  })
+})
+
+test('node-gate 终局 readiness：最终 PASS 的附条件注记仍显性保留', () => {
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'review.md'), '## readiness: FAIL\n\n## readiness: PASS（条件=先修 M1）\n')
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'PASS', JSON.stringify(g.detail))
+    assert.match(g.detail, /附条件 PASS/)
+  })
 })
 
 test('门A合规：readiness PASS + v1 记账 + audit.md → PASS', () => {

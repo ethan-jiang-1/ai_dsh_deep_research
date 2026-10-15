@@ -25,6 +25,7 @@ const argv = process.argv.slice(2)
 const argOf = (name) => { const i = argv.indexOf(`--${name}`); return i === -1 ? null : argv[i + 1] }
 const workspace = argOf('workspace') === null ? null : resolve(argOf('workspace'))
 const profile = argOf('profile') ?? 'research'
+const explicitHost = argOf('host')
 const force = argv.includes('--force')
 const dryRun = argv.includes('--dry-run')
 const installOnly = argv.includes('--install-only')
@@ -91,7 +92,11 @@ if (dryRun) {
   process.exit(failed === 0 ? 0 : 1)
 }
 console.log('\nscaffold: 跑 preflight 复核…\n')
-const pf = spawnSync(process.execPath, [join(PACK, 'scripts', 'preflight.mjs'), '--workspace', workspace, ...(argOf('host') === null ? [] : ['--host', argOf('host')]), ...(installOnly ? ['--install-only'] : [])], { stdio: 'inherit' })
+const dshHome = resolve(process.env.DSH_HOME ?? join(process.env.HOME ?? '', '.dsh'))
+const targetHost = join(dshHome, 'profiles', profile)
+const preflightHost = explicitHost ?? (existsSync(join(targetHost, 'package.json')) ? targetHost : null)
+const preflightHostArgs = preflightHost === null ? ['--no-host-inference'] : ['--host', preflightHost]
+const pf = spawnSync(process.execPath, [join(PACK, 'scripts', 'preflight.mjs'), '--workspace', workspace, ...preflightHostArgs, ...(installOnly ? ['--install-only'] : [])], { stdio: 'inherit' })
 const ok = failed === 0 && pf.status === 0
 console.log(`\nscaffold: ${ok ? installOnly ? '安装准备完成（不代表研究就绪）' : '准备完成' : '准备未完成（检查失败）'}（工作区 = ${workspace}，profile = ${profile}）`)
 if (ok && !installOnly) {

@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs'
 import { sessionBundleOf } from '../../packages/deep-research-pack/src/lib/bundle-bind.ts'
-import { deriveSteps } from '../../packages/deep-research-pack/src/lib/run-fold.ts'
+import { deriveSteps, latestRunVersion } from '../../packages/deep-research-pack/src/lib/run-fold.ts'
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
 
@@ -99,7 +99,7 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
     const reviewText = names.has('review.md') ? readFileSync(join(base, 'review.md'), 'utf8') : null
     const readiness = terminalReadiness(reviewText)
     const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : null
-    const versions = existsSync(join(base, 'final')) ? readdirSync(join(base, 'final')).filter((f) => /^v\d+\.md$/.test(f)).length : 0
+    const versions = existsSync(join(base, 'final')) ? latestRunVersion(readdirSync(join(base, 'final'))) : 0
     // 步态盘侧真值（BUG-001 轮修正）：done/current 期望随磁盘文件走——绑到的会话不一定是
     // 已交付 run（在飞 bundle 只做了一部分步骤）；deriveSteps 与页签同一谓词，期望值不再
     // 隐含"六步全绿 + 回边"的已交付假设。

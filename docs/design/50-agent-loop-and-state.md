@@ -33,4 +33,4 @@
 
 ## 交付判定
 
-"研究完成"的唯一依据 = 文件事实链：run 根 `final.md` 当前版 + lead 的 present 声明 + review.md readiness PASS + audit CRITICAL=0。判据正本 = [研究手册 §完成判据](../../research-workspace/AGENTS.md) 与 NODES.md 交付行；机械把守 = node-gate（门②③④ + 门A 交付完整性）。口头宣告、观察面显示、任务板状态都不是交付依据。
+"研究完成"的唯一依据 = 文件事实链：run 根 `final.md` 当前版 + review.md 终局 readiness PASS + `question.md` §Decisions 的 HITL2 拍板行 + `final/v1.md` 版本索引 + Lead 的 present 声明 + 可解析的 audit.md 显式 `CRITICAL=0`。判据正本 = [研究手册 §完成判据](../../research-workspace/AGENTS.md) 与 NODES.md 交付行；机械把守 = node-gate（门②③④ + 门A 交付完整性）。口头宣告、观察面显示、任务板状态都不是交付依据。

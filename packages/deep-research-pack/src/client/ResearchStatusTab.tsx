@@ -7,7 +7,7 @@
  *      在场性折算——两段数据源分开，HITL1 等待时 bundle 未建而锚点仍在场）；
  *   ③ 研究问题行（question.md 首行，剥 markdown 强调符）；
  *   ④ 团队动态 = 人性化活动流（activity-fold：🔍/👥/💬/📦，噪音过滤——**原始事件类型名不出正文**）；
- *   ⑤ 证据概览 + 交付状态（evidence/ 计数 + final 在场 → ✅ 已交付 + rerun 三分静线）；
+ *   ⑤ 证据概览 + 交付状态（evidence/ 计数 + final 在场 → ✅ 已交付 + rerun 三分图例）；
  *   ⑥ 决策诚实线（停靠点已过 → 指路 question.md §Decisions——谁答的不复制进 UI，家在文件）；
  *   ⑦ 队员动态折叠区（member-activity-stream，2026-10-10 定夺：agentTeam 投影取 roster（队员
  *      会话 id 的唯一发现源——spawn 返回不带 id，通道探明实证）→ 多路 follow 队员会话 →
@@ -31,7 +31,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { deriveAnchors, foldHitlPending, type HitlState, type RunAnchor } from '../lib/hitl-fold.ts'
-import { deriveSteps, type RunStep } from '../lib/run-fold.ts'
+import { deriveSteps, latestRunVersion, type RunStep } from '../lib/run-fold.ts'
 import { deriveBusinessBrief, type BusinessBrief } from '../lib/brief-fold.ts'
 import { terminalReadiness } from '../lib/review-readiness.ts'
 import { foldActivityRows, type ActivityRow } from '../lib/activity-fold.ts'
@@ -51,7 +51,7 @@ interface BundleFace {
   readonly steps: readonly RunStep[]
   readonly evidenceCount: number
   readonly delivered: boolean
-  /** final/ 版本记账数（v*.md）——≥2 即发生过证据扩张 rerun。 */
+  /** final/ 中最高 vN.md 编号——≥2 即有证据扩张 rerun 记账。 */
   readonly versions: number
   /** review.md 终局 readiness（多轮取末位：true=FAIL / false=PASS / null=未观测）。 */
   readonly reviewFail: boolean | null
@@ -180,10 +180,10 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           const evidenceDir = await props.listDir(sessionId, `${base}/evidence`, new AbortController().signal)
           if (stopped) return
           const evidenceCount = evidenceDir?.filter((e) => e.type === 'file' && e.name.endsWith('.md')).length ?? 0
-          // final/ 版本记账（D17：证据扩张 rerun 落 v2.md+）——回路表达的数据源
+          // final/ 版本记账（D17：证据扩张 rerun 落 v2.md+）——读目录内最高真实版本号作为回路表达的数据源
           const finalDir = names.has('final') ? await props.listDir(sessionId, `${base}/final`, new AbortController().signal) : null
           if (stopped) return
-          const versions = finalDir?.filter((e) => e.type === 'file' && /^v\d+\.md$/.test(e.name)).length ?? 0
+          const versions = latestRunVersion(finalDir?.filter((e) => e.type === 'file').map((e) => e.name) ?? [])
           // review 终局 readiness（业务摘要审查态的数据源）：判定规则收在 pack lib
           // `review-readiness.terminalReadiness`——只认**行首**判定行、取最后一条。2026-10-11
           // 实测：旧的未锚行首末位匹配会把文末附录里保留的首轮 `readiness: FAIL`（血统记录）
@@ -332,9 +332,9 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
             <div key={n.key} style={{ gridRow: 1, gridColumn: i + 1 }}>{n.chip}</div>
           ))}
           {loopVisible && (
-            <div style={{ gridRow: 2, gridColumn: `${EV_COL} / ${A2_COL + 1}`, position: 'relative', margin: '4px 6px 0', border: '1px dashed #c08a2e', borderTop: 'none', borderRadius: '0 0 8px 8px', padding: '2px 6px 3px', color: '#b45309', textAlign: 'center', whiteSpace: 'nowrap' }}>
+            <div style={{ gridRow: 2, gridColumn: `${EV_COL} / ${A2_COL + 1}`, position: 'relative', margin: '4px 6px 0', border: '1px dashed #c08a2e', borderTop: 'none', borderRadius: '0 0 8px 8px', padding: '2px 6px 3px', color: '#b45309', textAlign: 'center', minWidth: 0, lineHeight: 1.4, whiteSpace: 'normal' }}>
               <span style={{ position: 'absolute', top: -9, left: 3, fontSize: 10, color: '#b45309' }}>▲</span>
-              ↻ 补研究（final/ 下一版）· 修订表述原位改{face !== null && face.versions >= 2 ? ` · 已落 v${face.versions}` : ''}
+              ↻ rerun 图例（非执行记录）：补研究 = 同 bundle 回挖掘、final/ vN+1；表述修订 = 原位改、版本不变；结构性重构 = 另起新 bundle{face !== null && face.versions >= 2 ? ` · 本 bundle 已有 v${face.versions}（证据扩张）` : ''}
             </div>
           )}
         </div>

@@ -37,7 +37,7 @@ export interface BriefInputs {
   readonly reviewFail?: boolean | null
   /** final.md 当前版在场（已交付文件事实）。 */
   readonly delivered?: boolean
-  /** final/ 版本记账数（≥2 = 发生过证据扩张 rerun）。 */
+  /** final/ 中最高版本号（≥2 = 有证据扩张 rerun 记账）。 */
   readonly versions?: number
   /** §Decisions 末位拍板（approve/more/rewrite——当前数据面未读，null 如实缺省）。 */
   readonly lastDecisionKind?: 'approve' | 'more' | 'rewrite' | null

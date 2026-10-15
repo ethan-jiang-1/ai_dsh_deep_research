@@ -15,7 +15,7 @@
 > 语义节）· 门L = leads 交接门（L = leads）· 门R = 标题重复退化门（final.md 同一标题 ≥4 次
 > = 生成退化，2026-10-06 起，出处 = oss-dr 借鉴 A1 / LDR #6452）· 门A = 交付完整性门
 > （第 8 行交付判据下沉：final/ 记账在场 × readiness 非 PASS 交叉断言 + 交付前置达成时
-> final/v1.md 记账与 audit.md 操作侧审计在场；附条件 PASS 显性化为 WARN 注记不机械红——
+> final/v1.md 记账与**当前 bundle 对应的可解析 audit.md** 在场；摘要与 CRITICAL 节条目数须一致且显式 `CRITICAL=0`；附条件 PASS 显性化为 WARN 注记不机械红——
 > 裁决权威在 HITL2 用户；契约日 2026-10-08，出处 = delivery-criteria-mechanization RFC）——
 > 编号 = node-gate 实装序，与表行序无关。
 
@@ -30,7 +30,7 @@
 | 综合 wave2（synthesis） | evidence/ 全部 + topics.md | findings.md（F# 结论 + 支撑证据 + gap 四态）+ final.md 当前版（run 根；版本记账归 final/） | findings + final 当前版在场 |
 | 审查（critic） | findings.md + final 当前版 + evidence/ | review.md（readiness: PASS/FAIL + CRITICAL/MAJOR 清单） | review 在场且 readiness 判完；PASS = HITL2 前置 |
 | 交付审阅（HITL2） | review.md + final 当前版 | question.md §Decisions 追加拍板行 | **§Decisions 行在场**（node-gate 门③） |
-| 交付 | 拍板分支后果 | final/ 版本记账（vN.md）+ present 声明 + 操作侧 audit.md | **版本记账 + present + 审计 CRITICAL=0**（present = node-gate 门②） |
+| 交付 | 拍板分支后果 | final/ 版本记账（vN.md）+ present 声明 + 当前 bundle 对应的可解析操作侧 audit.md | **版本记账 + present + 报告摘要与 CRITICAL 节一致且 `CRITICAL=0`**（present = node-gate 门②） |
 
 **输入侧规矩**：硬输入清单 = 上表"输入（读）"列；缺件 = 本节点亮红灯而非开工，下游对缺失
 输入只有两个动作——上报 lead 或等，**没有"瞎猜补全"这个选项**。清单检查由脚本做，不加记账仪式。

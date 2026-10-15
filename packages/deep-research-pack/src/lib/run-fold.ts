@@ -1,11 +1,10 @@
 /**
  * run-fold.ts —— 观察面共享折算（run-dashboard 的纯折算移植为共享 TS，单一正本）。
  *
- * 数据/展示分层（RFC observability-completion）：折算住本文件（keyless 单测直接断言，
- * 含首场 run 真实 bundle 期望值）；run-dashboard.mjs（HTML 投影）与「研究状态」页签
- * （client 面）都消费这一份——防两处漂移。
+ * 数据/展示分层：七步折算住本文件（keyless 单测直接断言）；run-dashboard.mjs（HTML 投影）
+ * 与「研究状态」页签（client 面）都消费这一份，保持步骤语义一致。
  *
- * 移植面：步骤条推导（deriveStep）与矩阵折算（topicEvidenceMatrix）——页签需要的两个；
+ * 移植面：步骤条推导（deriveSteps）——页签与 HTML 仪表盘共用；
  * parse*（文件 → 模型）留在 run-dashboard（它直接读盘，client 走 workspaceFiles 数据面
  * 自行取文件内容后喂这里的折算）。
  */
@@ -29,6 +28,18 @@ export interface RunStep {
   readonly key: string
   readonly label: string
   readonly state: 'done' | 'current' | 'pending'
+}
+
+/** 版本目录的最高 vN 编号；稀疏记账按真实最高编号显示，不用文件数冒充版本。 */
+export function latestRunVersion(files: readonly string[]): number {
+  let latest = 0
+  for (const file of files) {
+    const match = /^v([1-9]\d*)\.md$/.exec(file)
+    if (match === null || match[1] === undefined) continue
+    const version = Number(match[1])
+    if (Number.isSafeInteger(version)) latest = Math.max(latest, version)
+  }
+  return latest
 }
 
 const STEP_ORDER = ['question', 'team', 'leads', 'evidence', 'findings', 'review', 'final'] as const
@@ -57,29 +68,5 @@ export function deriveSteps(inputs: RunStepInputs): readonly RunStep[] {
     key: k,
     label: STEP_LABELS[k],
     state: i < lastDone ? 'done' : i === lastDone ? 'current' : 'pending',
-  }))
-}
-
-/** 矩阵的一格输入（topic × evidence 计数）。 */
-export interface MatrixCell {
-  readonly topicKey: string
-  readonly mustAnswer: string
-  readonly evidenceCount: number
-}
-
-/**
- * topic × evidence 矩阵折算：每个 topic 的有效证据计数。
- * @param topics - [{ key, mustAnswer }]（来自 topics.md 折算）。
- * @param evidence - [{ supports }]（有效证据——硬五字段全齐的）。
- * @returns 矩阵行。
- */
-export function topicEvidenceMatrixCells(
-  topics: readonly { key: string; mustAnswer: string }[],
-  evidence: readonly { supports: string }[],
-): readonly MatrixCell[] {
-  return topics.map((t) => ({
-    topicKey: t.key,
-    mustAnswer: t.mustAnswer,
-    evidenceCount: evidence.filter((e) => e.supports === t.key).length,
   }))
 }

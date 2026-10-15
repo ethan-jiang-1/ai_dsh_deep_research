@@ -20,7 +20,7 @@ const INTERVAL_S = num('interval', 20)
 const TIMEOUT_MIN = num('timeout-min', 90)
 
 if (!SID || !/^[\w-]+$/.test(SID)) {
-  console.error('watch-run: 用法 node --import tsx/esm scripts/watch-run.mjs <session-id> [--interval 20] [--timeout-min 90]')
+  console.error('watch-run: 用法 node --import tsx/esm scripts/run-ops/watch-run.mjs <session-id> [--interval 20] [--timeout-min 90]')
   process.exit(2)
 }
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'runtime', 'harness-home')

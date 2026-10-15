@@ -9,9 +9,10 @@
 // 用法：
 //   node <pack>/scripts/preflight.mjs [--workspace <研究工作区>] [--host <profile 目录>] [--install-only]
 //   或经 bin：dsh-deep-research-preflight [--workspace <dir>] [--host <dir>]（registry 安装形态；tarball 装法无 PATH bin，用本文件全路径）
+//   --no-host-inference 为 scaffold 内部参数：目标 profile 尚未初始化时禁止解析其他 profile。
 //
-// --host 指向**运行本 pack 的 profile 目录**（其 node_modules 是 peer/团队层的解析锚）；
-// 缺省先按本包位置解析（装进 profile 后即正确），再试 $DSH_HOME/profiles/*。
+// 缺省宿主解析锚：从 $DSH_HOME 选 research 或唯一可用 profile；其余多 profile 情形不推断，
+// 回退到本包位置（适合 pack 已安装在目标 profile 的场景）。
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join, resolve } from 'node:path'
@@ -22,20 +23,28 @@ const PACK = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
 const argv = process.argv.slice(2)
 const installOnly = argv.includes('--install-only')
+const noHostInference = argv.includes('--no-host-inference')
 const argOf = (name) => { const i = argv.indexOf(`--${name}`); return i === -1 ? null : argv[i + 1] }
 const workspace = argOf('workspace') === null ? null : resolve(argOf('workspace'))
 let host = argOf('host') === null ? null : resolve(argOf('host'))
-// 缺省宿主推断：$DSH_HOME/profiles/<唯一或 research>（多 profile 时优先 research）
-if (host === null && process.env.DSH_HOME !== undefined) {
+// 缺省从 $DSH_HOME 可用 profiles 选择解析锚：有 research 时用它，只有一个可用 profile 时用唯一项；
+// 其他多 profile 情形不推断，按本包位置解析。显式 --host 可覆盖该选择。
+// scaffold 用 --no-host-inference 禁止从其他 profile 或 pack 安装位置解析 peer。
+if (host === null && !noHostInference && process.env.DSH_HOME !== undefined) {
   const profiles = join(resolve(process.env.DSH_HOME), 'profiles')
   if (existsSync(profiles)) {
     const names = readdirSync(profiles).filter((n) => existsSync(join(profiles, n, 'package.json')))
-    const pick = names.includes('research') ? 'research' : names[0]
+    const pick = names.includes('research') ? 'research' : names.length === 1 ? names[0] : undefined
     if (pick !== undefined) host = join(profiles, pick)
   }
 }
-const requireFrom = host === null ? createRequire(import.meta.url) : createRequire(join(host, 'package.json'))
-const resolveFrom = (name) => { try { requireFrom.resolve(name); return true } catch { return false } }
+const requireFrom = host === null
+  ? noHostInference ? null : createRequire(import.meta.url)
+  : createRequire(join(host, 'package.json'))
+const resolveFrom = (name) => {
+  if (requireFrom === null) return false
+  try { requireFrom.resolve(name); return true } catch { return false }
+}
 
 const results = []
 const record = (ok, name, detail, remedy) => { results.push({ ok, name, detail, remedy }) }
@@ -111,15 +120,21 @@ const record = (ok, name, detail, remedy) => { results.push({ ok, name, detail, 
 
 // ── 输出 ──
 const hardFail = results.filter((r) => r.ok === false)
-console.log(`deep-research-pack preflight（pack v${pkg.version}；解析锚：${host ?? PACK}）\n`)
+const unknown = results.filter((r) => r.ok === null)
+const resolutionAnchor = host ?? (noHostInference ? '目标 profile 未就绪' : PACK)
+console.log(`deep-research-pack preflight（pack v${pkg.version}；解析锚：${resolutionAnchor}）\n`)
 for (const r of results) {
   console.log(`  ${r.ok === false ? '✗' : r.ok == null ? '?' : '✓'} ${r.name}`)
   console.log(`      ${r.detail}`)
   if (r.ok === false) console.log(`      → ${r.remedy}`)
 }
 console.log(hardFail.length === 0
-  ? installOnly
-    ? '\npreflight: 安装验收通过（不代表研究就绪）'
-    : '\npreflight: 全绿（本 pack 可用）'
+  ? unknown.length > 0
+    ? installOnly
+      ? `\npreflight: 安装验收通过（不代表研究就绪；未验证项：${unknown.map((r) => r.name).join('、')}）`
+      : `\npreflight: 通过（含未验证项：${unknown.map((r) => r.name).join('、')}）`
+    : installOnly
+      ? '\npreflight: 安装验收通过（不代表研究就绪）'
+      : '\npreflight: 全绿（本 pack 可用）'
   : `\npreflight: ${hardFail.length} 项待补（按 → 的补救命令处理；或用 scaffold.mjs 一键补齐）`)
 process.exit(hardFail.length === 0 ? 0 : 1)

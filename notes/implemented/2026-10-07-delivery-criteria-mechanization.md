@@ -26,11 +26,10 @@
   - A1b：记账在场 × review.md 缺席 × 非 quick_factual → RED（审查整缺的交付）；豁免判据与
     schema-scan CONDITIONAL 同源同判据（`runType`，不硬编码名单）——deepseek-api-pricing
     实测豁免形态驱动，防假阳性；
-  - A2：交付前置达成（readiness PASS，或豁免型已记账）→ final/v1.md 版本记账 + audit.md
-    操作侧审计须在场；quick_factual 无 review 的交付由「记账在场」触发（拍板前零红噪）；
+  - A2：交付前置达成（readiness PASS，或豁免型已记账）→ final/v1.md 版本记账 + 与 bundle 身份匹配、可解析且 `CRITICAL=0` 的 audit.md 操作侧审计须在场；quick_factual 无 review 的交付由「记账在场」触发（拍板前零红噪）；
   - **附条件 PASS = PASS 计 + ⚠ WARN 注记显性化，不机械红**：条件性是 critic 判断、HITL2
     裁决权威在用户，机械红越权；防的是"被读作无条件 PASS"的静默误读。`PASS（附条件）`与
-    `PASS（条件=…）`两实测形态均识别，`readinessOf()` 为门②/门A 共用唯一语义源。
+    `PASS（条件=…）` 两种实测形态识别，并输出附条件 WARN；终局行判定规则见[readiness Note](2026-10-11-review-readiness-terminal-rule.md)。
 - **落点 = node-gate，schema-scan 不动**：断言触发依赖交付形态（final/ 记账、readiness 判定），
   schema-scan 是无触发器的无条件在场级（NODES.md 头部两层正本语义）；audit.md/final/v1.md
   维持其「尾件缺（分档）」注记位。
@@ -93,10 +92,7 @@
 - **证据选型（任务型路由对账）**：改动面 = run-gates 脚本 + tests 夹具 + 工作区手册正本与
   种子 + guides61——路由行「改工作区手册/模板」= L0 档（sync → verify +
   pack-workspace-fresh）；preset/plugin 行未动，**L1/L2 无对象未跑**（如实分列，非"通过"）。
-- **未修项分列**：run-dashboard（观察面只读投影）对附条件 PASS 仍读作无条件——判据语义
-  已在 readinessOf() 收口（node-gate 面），观察面呈现修正不在本条目范围；修法 =
-  run-dashboard 复用 readinessOf() 或按门A 注记形态投影，触发条件 = 下次改 run-dashboard
-  或用户点名。
+- **Readiness 显示边界（本轮范围外）**：本轮实现记录了 node-gate 对附条件 PASS 的 WARN 语义；终局判定现由驾驶舱、仪表盘、冒烟与 node-gate 收敛，当前规则与证据见[终局 readiness Note](2026-10-11-review-readiness-terminal-rule.md)。
 
 ## 环境状态
 

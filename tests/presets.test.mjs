@@ -46,6 +46,7 @@ test('每个角色 preset 行完整（0.1.7 形态：一条 dsh-agent-preset 行
       const fm = readFileSync(join(dir, 'skills', s.name, 'SKILL.md'), 'utf8').split('---');
       assert.ok(fm.length >= 3, `${r}/${s.name}: SKILL.md 有 frontmatter`);
       assert.match(fm[1], new RegExp(`^name:\\s*${s.name}\\s*$`, 'm'), `${r}/${s.name}: frontmatter name=目录名`);
+      assert.match(fm[1], /^description:\s*\S.*$/m, `${r}/${s.name}: frontmatter description 必须非空`);
     }
   }
 });

@@ -11,7 +11,7 @@
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import { resolveSessionLog, readSessionEvents } from './session-log.mjs';
-import { deriveSteps } from '../../packages/deep-research-pack/src/lib/run-fold.ts';
+import { deriveSteps, latestRunVersion } from '../../packages/deep-research-pack/src/lib/run-fold.ts';
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts';
 import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts';
 
@@ -438,8 +438,9 @@ export function buildModel(runDir) {
   if (rText === null) model.missing.push('review.md');
   model.review = rText ? parseReview(rText) : null;
   try {
-    const fins = readdirSync(join(runDir, 'final')).filter((x) => /^v\d+\.md$/.test(x)).sort();
-    if (fins.length) model.final = { file: `final/${fins[fins.length - 1]}`, versioned: true };
+    const versions = readdirSync(join(runDir, 'final'));
+    const latest = latestRunVersion(versions);
+    if (latest > 0) model.final = { file: `final/v${latest}.md`, versioned: true };
   } catch {
     /* final/ 缺席 → 试 final.md */
   }

@@ -74,8 +74,9 @@ review 审查时间、口径截至）**不得凭时间感直写**（角色会话
 「日期不确定（依据：…）」，不静默编造。所有角色按此判。
 **摘录最小契约**（与 frontmatter 同级）：引文行**只放原文**——卡片自己的标注（标签/URL/
 `（同上…）`/`旁证｜…`）不进 `>` 行，写在引文块外或解读节；**多段摘录逐段逐字**，段间省略标
-`[…]`，不拼接不连续句；**表格按单元格摘录**，不整行/跨行合并；**`source_url` 必须成功抓取过**
-（`web_fetch` 真实取回，搜索结果里出现过不算）。四条均为 evidence-audit 机检项——所有角色按此判。
+`[…]`，不拼接不连续句；**表格按单元格摘录**，不整行/跨行合并；`source_url` 必须由 `web_fetch` 成功取回，搜索结果里出现过不算。所有角色按此判。
+
+机械边界：evidence-audit 检查 `source_url` 是否成功抓取，并对原文摘录节中的 `>` 文本与 web-only 语料作覆盖率核验；它不判注释是否混入引文，也不验证段落或表格单元格的拆分结构。`retrieved_at` 只检查字段在场，不校准日期。以上内容与结构要求仍须由 critic 按契约审阅；机械命中不是完整合规证明。
 
 **信源分级表（source_tier 唯一正本；scout 的质量分级与 quality 字段共用 A–D，tier 描述
 信源身份、quality 描述内容质量，两者独立）**：
@@ -98,12 +99,10 @@ review 审查时间、口径截至）**不得凭时间感直写**（角色会话
 publisher）缺失不否决有效性，标"未分级"（旧 run 的存量证据按此显示，不回填——run bundle
 是交付记录，不改历史）；谓词正本 = 本节，tests/evaluation-contract.test.mjs 对账。
 
-**机械强度诚实记账**（开发仓操作侧工具链，部署侧由人审承担）：机械检查 = 契约测试（七字段
-在场 + 各执行者副本对账）+ 仪表盘渲染谓词（上述）+ **evidence-audit 溯源审计**（`source_url`
-须被 `web_fetch` **成功取回**（仅出现在搜索结果里不算，MAJOR 单列）；摘录对 web-only 语料
-回溯（agent 自撰文本已剔除，防自证），覆盖率分档；final 溯源链完整——防伪造与转写幻觉，
-报告落 bundle 的 audit.md）；run 内执法 = critic 狩猎——run 数据完整性由 critic + 仪表盘 +
-audit 呈现，不在仓级结构门。
+**机械强度诚实记账**（开发仓操作侧工具链，部署侧由人审承担）：契约测试核七字段在场与执行者副本对账；
+仪表盘按上文谓词投影。**evidence-audit 溯源审计**核 `source_url` 的成功抓取、摘录文本对 web-only
+语料的覆盖率与 final 引用链，结果落 bundle 的 audit.md。它不校验日期校准或摘录版式、分段、逐格结构；
+这些语义与结构约束由 critic 狩猎，不在仓级结构门中。
 
 ## 交付物三态
 
@@ -122,6 +121,6 @@ audit 呈现，不在仓级结构门。
 
 ## 完成判据（verify the world）
 
-- final.md 当前版（run 根）每条关键结论附 `[来源: evidence/xx.md]` 且文件真实存在、内容真实支撑；
-- 没有 CRITICAL 未修复的 review.md 就没有 final 交付（readiness: PASS 前置）；
-- "研究完成"的唯一依据是文件事实（run 根 `final.md` 当前版 + present 声明），不是任何人的口头宣告。
+- run 根 `final.md` 当前版的关键结论有真实存在且内容支撑的 `[来源: evidence/xx.md]`；`review.md` 的终局 readiness 为 PASS 后才进入 HITL2。
+- 交付记账含 `final/v1.md`，`question.md` §Decisions 有 HITL2 拍板行，Lead 有 `present` 声明，操作侧 `audit.md` 的标题匹配当前 bundle，且报告可解析、摘要与 CRITICAL 节计数一致并显式 `CRITICAL=0`。
+- "研究完成"的唯一依据是以上文件事实链，不是任何人的口头宣告。

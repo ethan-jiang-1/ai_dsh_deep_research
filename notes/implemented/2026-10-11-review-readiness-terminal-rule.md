@@ -16,13 +16,9 @@
 2. **取最后一条**行首判定（两相 review：首审 FAIL → 复核 PASS，终局在文末）。
 3. **不猜**：无判定行 / 空模板 `## readiness: PASS | FAIL`（两词并存）/ 输入缺席或畸形 → `null`。
 
-消费方三处（同一函数，不再各写 regex）：驾驶舱 `ResearchStatusTab.tsx`（`reviewFail` 三态）、
-真浏览器冒烟 `scripts/smoke/client-load-smoke.mjs`（盘侧真值镜像）、`scripts/run-ops/run-dashboard.mjs`
-（`parseReview` 的终局口径）。
+消费方：驾驶舱 `ResearchStatusTab.tsx`、真浏览器冒烟 `scripts/smoke/client-load-smoke.mjs`、`scripts/lib/run-dashboard-core.mjs` 直接调用本函数；node-gate 在独立纯 `.mjs` 判据边界镜像同一行规则，并由 `gateBundle` 测试覆盖。
 
-**不纳入**：`scripts/lib/node-gate-core.mjs` 的 `readinessOf` 是**另一种**语义（交付门上问「是否存在
-PASS 判定」，用于门②/门A），与「终局判定」不同意图——强行合并会把两个问题塞进一个函数；它的行为在
-`drt_deepseek-default-upgrade` 上实测正确（返回 PASS）。差异在此记录，不静默。
+交付门也使用终局 readiness：HITL2 的前置必须是 review.md 最后一条有效行首判定为 PASS，历史轮次中的 PASS 不能越过后续 FAIL。node-gate 仍单独提取终局行的附条件标记作为 WARN，不把条件裁决权交给机械门禁。
 
 ## 输掉的方案
 
@@ -32,7 +28,7 @@ PASS 判定」，用于门②/门A），与「终局判定」不同意图——�
   但 review.md 按 critic skill 契约在文末附录保留首轮 `readiness: FAIL` 的血统记录 → 该规则把附录
   当终局，仪表盘/镜像把已交付 run 报成「审查修复中」，与 UI 渲染对不上。
 - **改成取首个匹配**：反向夺权——两相 review 里首审 FAIL 会盖掉复核 PASS。
-- **把 `node-gate-core.readinessOf` 一并统一**：语义不同（见上），统一即混淆；差异显性记录更诚实。
+- **历史上的分离顾虑（已被后续裁定取代）**：早期曾把 node-gate 的「存在 PASS」视为与终局判定不同意图；交付门实际必须看最后有效判定，否则旧 PASS 会掩盖后续 FAIL，故现统一终局语义。
 - **改契约让 review.md 不写历史**：critic skill 明确要求「每轮复审留轮次记账」，改契约迁就实现是
   本末倒置；正确做法是让**读取方**分辨判定与引用。
 

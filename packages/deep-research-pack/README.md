@@ -9,7 +9,7 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 > **研究驾驶舱** = 观察面 client 套件的套件名（2026-09-28 定名）：右栏「研究状态」页签 +
 > 研究语义工具卡 + 活标题 + 挂起显性化（pending 自动展开右栏）——静默自主期看仪表、HITL
 > 挂起时接手的地方；页签含**流程轨道**（◆立项确认 + 七步 + ◆交付审阅——两个 HITL 停靠点
-> 常驻可见）+ 参与指引 + 决策诚实线 + rerun 三分提示；折算谓词住 `src/lib/`（keyless 单测，
+> 常驻可见）+ 参与指引 + 决策诚实线 + rerun 三分图例（不代表已发生 rerun；证据扩张以 v2+ 文件版本为证）；折算谓词住 `src/lib/`（keyless 单测，
 > 与 run-dashboard 投影共用）。
 > 构成的当前事实正本 = [docs/design/40-research-cockpit.md](../../docs/design/40-research-cockpit.md)。
 
@@ -69,7 +69,10 @@ cd ~/research-workspace && dsh --profile research
 ```sh
 node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/preflight.mjs \
   --workspace ~/research-workspace
+# 若 DSH_HOME 有 research profile，preflight 优先用它；无 research 时仅在唯一 profile 可用时推断，
+# 多个 profile 则不任意挑选，按本包位置解析，或用 --host <profile 目录> 明确指定。
 # 研究就绪检查：DSH 版本 / 全部平台 peer 包 / 团队机制层 / 工作区手册+模板 / 构建产物 / 模型密钥
+# 若 dsh --version 不可用，版本项标记为未验证并写入摘要，不阻断安装验收或冒充全绿。
 # 仅验安装形状（无模型调用、无凭据也可验）：追加 --install-only；它不代表研究就绪。
 ```
 
@@ -92,7 +95,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
    备选取舍 / 关键依据 / 最强反证 / 目前不能判断 / 下一步——快速事实型缩略为答案+口径+依据+限制）；
 4. **观察面**：DSH Web GUI 右栏「研究状态」页签看实时动态（流程轨道 = ◆立项确认 + 立项→
    组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付，↻ rerun 回路自交付审阅可见，人性化活动流，
-   HITL 挂起横幅点名锚点与参与方式，活标题「研究状态 · ⏳ 等你拍板」，交付节点带 final/ 版本）；
+   HITL 挂起横幅点名锚点与参与方式，活标题「研究状态 · ⏳ 等你拍板」，交付节点显示 `final/` 中的最高有效版本号（vN）；仅 v2+ 文件是证据扩张版本记录。）；
    右栏「研究配置」页签（D25 管理中继面）看内置偏好与我的偏好库，操作按钮生成管理指令交
    当前会话 Lead 执行（面板不直写文件）；
 5. **审计**（本仓开发面）：`node scripts/run-gates/evidence-audit.mjs <bundle>` 对会话日志机械对账——

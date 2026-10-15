@@ -1,11 +1,10 @@
 // 终局 readiness 判定回归（review-readiness）——驾驶舱/仪表盘/冒烟的共用语义源。
 //
-// 为什么存在：同一概念在仓里有三版实现且语义分叉（node-gate-core 取首个 PASS 行；
-// run-dashboard 取末位匹配；客户端与 client-load-smoke 各抄一版），2026-10-11 被
-// ③-a 的新断言当场抓出真实后果——`drt_deepseek-default-upgrade` 已交付且终局 PASS，
-// 但 review.md 文末附录按 critic skill 契约保留了首轮 `readiness: FAIL` 的血统记录，
-// 未锚行首的"末位匹配"把它读成终局 → 仪表盘/镜像把已交付 run 报成「审查修复中」。
-// 本模块把**终局**语义收成一处：只认**行首**判定行，取最后一条（历史行内引用不算）。
+// 为什么存在：终局 readiness 的读法曾在 node-gate、run-dashboard、客户端与浏览器冒烟间分叉。
+// 2026-10-11 的真实后果是 `drt_deepseek-default-upgrade` 已交付且终局 PASS，但 review.md
+// 文末附录按 critic skill 契约保留首轮 `readiness: FAIL` 血统记录，未锚行首的末位匹配把历史 FAIL
+// 读成终局。本模块拥有 canonical 规则：只认行首判定行，取最后一条（历史行内引用不算）；
+// node-gate 在 .mjs 纯判据边界本地镜像此规则。
 //
 // 反证（同 diff 注入实测，红→还原→绿）：
 //   ①改回未锚行首的末位匹配 `matchAll(/readiness:\s*(PASS|FAIL)/g)` → 用例 3 红（附录 FAIL 夺权）；
@@ -67,6 +66,11 @@ test('终局判定：通篇只有行内引用（无行首判定行）→ null（
   const text = ['## 说明', '上一场 review 的结论是（第 1 轮 readiness: FAIL），本场尚未审查。', ''].join('\n');
   assert.equal(terminalReadiness(text), null);
 });
+
+test('终局判定：PASS 注记引用已修复的历史 FAIL 仍为有效终局 → PASS', () => {
+  const text = '## readiness: FAIL\n\n## readiness: PASS (prior FAIL fixed)\n'
+  assert.equal(terminalReadiness(text), 'PASS')
+})
 
 test('终局判定：空模板 `## readiness: PASS | FAIL` 两词并存 → null（未判定，不把模板当结论）', () => {
   assert.equal(terminalReadiness('## readiness: PASS | FAIL\n判据清单：\n'), null);

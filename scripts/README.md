@@ -36,7 +36,7 @@
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
-| node-gate.mjs | 判据级：门①②③④ + 门L + 门R（标题重复退化，2026-10-06 起）+ 门A（交付完整性，2026-10-08 起；图例正本 = research-workspace/NODES.md 头部），报告落 bundle——判据核心住 lib/node-gate-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless |
+| node-gate.mjs | 判据级：门①②③④ + 门L + 门R（标题重复退化，2026-10-06 起）+ 门A（交付完整性，2026-10-08 起；图例正本 = research-workspace/NODES.md 头部），报告落 bundle——判据核心住 lib/node-gate-core.mjs 门面及领域模块（本件 = CLI 壳 + zstd reader 注入） | keyless |
 | schema-scan.mjs | 在场级：八节点输出件在场断言（断代定红；判据核住 lib/schema-scan-core.mjs，本件 = CLI 壳） | keyless |
 | evidence-audit.mjs | URL/摘录/final 链溯源对账 → audit.md——判据核心住 lib/evidence-audit-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless（须 source dev/env.sh） |
 
@@ -85,7 +85,11 @@
 | lib/selftest-library.mjs | tests/library-fold.test.mjs、client-load-smoke（自测工作区种子） | 「研究配置」面板/library-fold 自测例库单一正本：12 形态条目（四字段/部分/空值/旧格式/混居/重名/空条目/杂项行/续行/缩进），两处共用防形态漂移 |
 | lib/keyless-imports.mjs | tests/layering.test.mjs | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
 | lib/gates-cases.mjs | gates-smoke（驱动）+ verify-gates.test（静态对账） | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
-| lib/node-gate-core.mjs | run-gates/node-gate（驱动）+ node-gate.test | 节点交接契约门判据核心（readLog 注入——纯 reader 默认，zstd CLI 由驱动壳注入） |
+| lib/node-gate-core.mjs | run-gates/node-gate（驱动）+ node-gate.test | 兼容门面与 bundle 判据聚合（保留 `gateBundle` 与原有导出） |
+| lib/node-gate-contracts.mjs | node-gate-run-gates、node-gate-delivery-gate | 交付日期合同、readiness 与 decisions 行解析 |
+| lib/node-gate-session-gates.mjs | node-gate-core | HITL、present 与 §Decisions 会话门 |
+| lib/node-gate-run-gates.mjs | node-gate-core | leads、版本与标题退化门 |
+| lib/node-gate-delivery-gate.mjs | node-gate-core | 门A 交付完整性判据 |
 | lib/schema-scan-core.mjs | run-gates/schema-scan（壳）+ schema-scan.test + node-gate-core | 节点 I/O 契约在场级断言判据核（交付日/研究类型/条件件豁免/断代定红——从 run-gates 下沉修 lib→入口层反向依赖） |
 | lib/run-dashboard-core.mjs | run-dashboard（壳）+ run-dashboard.test + run-fold.test | M2 run 观察面纯管线：解析 → 场景 → 模型 → HTML 渲染（全 fail-soft；CLI/watch/写盘归壳） |
 | lib/evidence-audit-core.mjs | run-gates/evidence-audit（驱动）+ evidence-audit.test | 证据溯源审计判据核心（readLog 注入同上） |

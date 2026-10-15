@@ -155,11 +155,13 @@ test('场内进度与步骤推导：final/review 双命名容纳 + 流程语义'
     mkdirSync(join(run, 'final'));
     writeFileSync(join(run, 'final', 'v1.md'), 'x');
     writeFileSync(join(run, 'final', 'v2.md'), 'x');
+    writeFileSync(join(run, 'final', 'v9.md'), 'x');
+    writeFileSync(join(run, 'final', 'v10.md'), 'x');
     const st = sceneState(run);
     assert.equal(st.lastStep, 'final');
     assert.equal(st.done, 7);
     const m = buildModel(run);
-    assert.deepEqual(m.final, { file: 'final/v2.md', versioned: true }); // 最大版号 = 当前版
+    assert.deepEqual(m.final, { file: 'final/v10.md', versioned: true }); // 最大数值版号 = 当前版
     assert.equal(m.review.readiness, 'PASS');
     const steps = deriveStep(m);
     assert.equal(steps.find((s) => s.key === 'final').state, 'current');

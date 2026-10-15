@@ -3,8 +3,159 @@
 // 面板只生成不直写）。红证：模块缺席/断言松绑即红（node --test 直接可验）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 import { foldLibrary, instructionOf, editInstruction, createInstruction } from '../packages/deep-research-pack/src/lib/library-fold.ts';
 import { SELFTEST_LIBRARY } from '../scripts/lib/selftest-library.mjs';
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const METHOD_PRESETS_SKILL = join(ROOT, 'packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md');
+const CLIENT_PREFERENCES_SOURCE = join(ROOT, 'packages/deep-research-pack/src/client/ResearchConfigTab.tsx');
+const METHOD_PRESET_HEADERS = ['方法', '给用户的一句话', '信息源策略', '检验策略', '综合与呈现', '明确不承诺'];
+
+// Expected projection is deliberately independent from the client constant and parsed from the canonical skill.
+const EXPECTED_BUILTIN_PREFERENCES = [
+  {
+    name: '事实核查',
+    sections: {
+      source: '官方/原始来源优先，第三方只作线索',
+      verify: '逐字转写核对；关键来源独立重抓；单源结论显式标注',
+      report: '快答首屏：答案+口径+依据+限制',
+      limit: '不做领域覆盖；"快"由深度决定',
+    },
+  },
+  {
+    name: '领域地图',
+    sections: {
+      source: '广度优先铺方向，多类来源交叉定位阵营',
+      verify: '覆盖对账：每个子域至少一条可核来源；盲点显式标注',
+      report: '地图式：分节定位+关系+时效边界',
+      limit: '不把未覆盖说成不存在',
+    },
+  },
+  {
+    name: '主张核查',
+    sections: {
+      source: '对称检索：正反同权重；追原始出处',
+      verify: '反例权重最高；判定四态（成立/部分/不成立/证据不足）',
+      report: '判定+证据强度分级+最强反证单列',
+      limit: '不预设真伪；不做只找赞同的检索',
+    },
+  },
+  {
+    name: '方案比较',
+    sections: {
+      source: '各选项同维度查证；厂商资料与实际使用反馈并重',
+      verify: '口径对齐才可比；价值权衡与事实分开',
+      report: '维度化对比+适用情境+取舍说明',
+      limit: '不替用户决定偏好；无场景不推唯一答案',
+    },
+  },
+];
+
+function markdownTableCells(line) {
+  const cells = [];
+  let cell = '';
+  let codeTicks = 0;
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '`') {
+      let count = 1;
+      while (line[i + count] === '`') count++;
+      codeTicks = codeTicks === 0 ? count : codeTicks === count ? 0 : codeTicks;
+      cell += '`'.repeat(count);
+      i += count - 1;
+    } else if (char === '\\' && line[i + 1] === '|') {
+      cell += '|';
+      i++;
+    } else if (char === '|' && codeTicks === 0) {
+      cells.push(cell.trim());
+      cell = '';
+    } else {
+      cell += char;
+    }
+  }
+  cells.push(cell.trim());
+  if (cells[0] === '') cells.shift();
+  if (cells.at(-1) === '') cells.pop();
+  return cells;
+}
+
+function builtinPreferencesFromSkill() {
+  const lines = readFileSync(METHOD_PRESETS_SKILL, 'utf8').split(/\r?\n/);
+  const headerIndex = lines.findIndex((line) => {
+    const cells = markdownTableCells(line);
+    return cells.length === METHOD_PRESET_HEADERS.length && cells.every((cell, i) => cell === METHOD_PRESET_HEADERS[i]);
+  });
+  assert.notEqual(headerIndex, -1, 'research-brief skill 方法预设表头缺席或发生变化');
+  const separator = markdownTableCells(lines[headerIndex + 1] ?? '');
+  assert.equal(separator.length, METHOD_PRESET_HEADERS.length, '方法预设表格分隔行列数变化');
+  assert.ok(separator.every((cell) => /^:?-{3,}:?$/.test(cell)), '方法预设表格分隔行格式变化');
+
+  const rows = [];
+  for (const line of lines.slice(headerIndex + 2)) {
+    if (line.trim() === '' || !line.includes('|')) break;
+    const cells = markdownTableCells(line);
+    assert.equal(cells.length, METHOD_PRESET_HEADERS.length, '方法预设表格行列数变化');
+    rows.push({
+      name: cells[0],
+      sections: { source: cells[2], verify: cells[3], report: cells[4], limit: cells[5] },
+    });
+  }
+  return rows;
+}
+
+function builtinPreferencesFromClient() {
+  const source = readFileSync(CLIENT_PREFERENCES_SOURCE, 'utf8');
+  const file = ts.createSourceFile(CLIENT_PREFERENCES_SOURCE, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  assert.deepEqual(file.parseDiagnostics, [], 'ResearchConfigTab.tsx 无法由 TypeScript AST 解析');
+
+  let initializer;
+  const findDeclaration = (node) => {
+    if (ts.isVariableDeclaration(node) && node.name.getText(file) === 'BUILTIN_PREFERENCES') initializer = node.initializer;
+    ts.forEachChild(node, findDeclaration);
+  };
+  findDeclaration(file);
+  assert.ok(initializer !== undefined && ts.isArrayLiteralExpression(initializer), 'BUILTIN_PREFERENCES 必须保持为可静态对账的数组字面量');
+
+  const objectProperties = (expression, label) => {
+    assert.ok(ts.isObjectLiteralExpression(expression), `${label} 必须保持为对象字面量`);
+    const properties = new Map();
+    for (const property of expression.properties) {
+      assert.ok(ts.isPropertyAssignment(property) && (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)), `${label} 含无法静态对账的成员`);
+      const key = property.name.text;
+      assert.ok(!properties.has(key), `${label} 存在重复字段 ${key}`);
+      properties.set(key, property.initializer);
+    }
+    return properties;
+  };
+
+  const stringValue = (expression, label) => {
+    assert.ok(ts.isStringLiteral(expression), `${label} 必须是字符串字面量`);
+    return expression.text;
+  };
+
+  return initializer.elements.map((element, index) => {
+    const label = `BUILTIN_PREFERENCES[${index}]`;
+    const fields = objectProperties(element, label);
+    assert.deepEqual([...fields.keys()].sort(), ['name', 'sections'], `${label} 字段形状变化`);
+    return {
+      name: stringValue(fields.get('name'), `${label}.name`),
+      sections: Object.fromEntries([...objectProperties(fields.get('sections'), `${label}.sections`)].map(([key, value]) => [
+        key,
+        stringValue(value, `${label}.sections.${key}`),
+      ])),
+    };
+  });
+}
+
+test('内置研究偏好与 research-brief 方法预设表逐字段一致', () => {
+  const canonical = builtinPreferencesFromSkill();
+  assert.deepEqual(builtinPreferencesFromClient(), canonical, '客户端内置偏好必须逐字段投影 canonical skill 表');
+  assert.deepEqual(canonical, EXPECTED_BUILTIN_PREFERENCES, 'canonical skill 方法预设表发生了需显式审视的内容变化');
+});
 
 const v2 = [
   '# 用户方法库（Lead 维护；仅用户显式要求时写入）',
