@@ -32,6 +32,7 @@ function createRequireFallback(dir) {
 const orig = globalThis.fetch;
 let rideCount = 0;
 globalThis.fetch = async function llmSocketIsolationFetch(input, init) {
+  let issued = false; // 一次性请求是否已发出——已发出则任何异常都原样抛出，绝不回落双发
   try {
     const url = typeof input === 'string' ? input : (input && input.url) ?? String(input);
     const isDeepSeekPost = url.includes('api.deepseek.com')
@@ -45,21 +46,30 @@ globalThis.fetch = async function llmSocketIsolationFetch(input, init) {
     if (n <= 3) console.warn(`${TAG} 第 ${n} 次骑行一次性连接（此后的不再逐条打印）`);
     const agent = new undici.Agent({ connections: 1 });
     const headers = init.headers instanceof Headers ? Object.fromEntries(init.headers.entries()) : (init.headers ?? {});
-    const res = await undici.fetch(url, { method: 'POST', headers, body: init.body, dispatcher: agent });
     // 生命周期：响应体读尽（tee 旁路跟随到真末尾——vendor 在 message_stop 后弃读也不影响）
     // 或超时兜底 → 关闭 Agent（socket 随之释放，永不回池）。
     let closed = false;
     const close = () => { if (!closed) { closed = true; agent.close().catch(() => {}); } };
     setTimeout(close, AGENT_MAX_LIFETIME_MS).unref?.();
+    issued = true;
+    let res;
+    try {
+      // signal 保留调用方取消语义
+      res = await undici.fetch(url, { method: 'POST', headers, body: init.body, ...(init.signal === undefined ? {} : { signal: init.signal }), dispatcher: agent });
+    } catch (e) {
+      close(); // 失败必须关 Agent——否则每次失败泄漏一条 socket/句柄（长跑实证）
+      throw e; // 不回落共享池：交给 vendor 重试策略（重试再走隔离 = 新连接）
+    }
     if (res.body) {
       const [a, b] = res.body.tee();
-      (async () => { const rd = b.getReader(); try { for (;;) { const { done } = await rd.read(); if (done) break; } } catch { /* 供应商侧弃读/中断均视为结束 */ } finally { close(); } })();
+      (async () => { try { const rd = b.getReader(); try { for (;;) { const { done } = await rd.read(); if (done) break; } } catch { /* 弃读/中断视为结束 */ } } catch { /* getReader 失败也视为结束 */ } finally { close(); } })();
       return new Response(a, { status: res.status, statusText: res.statusText, headers: res.headers });
     }
     close();
     return res;
   } catch (e) {
-    console.error(`${TAG} 守卫自身异常（透传原始 fetch）: ${e.message}`);
+    if (issued) throw e; // 已发出过一次性请求：原样抛，绝不双发、绝不踩共享池
+    console.error(`${TAG} 预载侧异常（透传全局池）: ${e.message}`);
     return orig(input, init);
   }
 };
