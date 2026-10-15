@@ -6,7 +6,7 @@ opened: 2026-10-15
 
 # BUG-028：隔离守卫自身异常时静默透传原始 fetch——"隔离下"判读可能名不副实
 
-> 状态：排查中（2026-10-15 由 BUG-024 收卡盘点牵出；根因未证）｜发现：2026-10-15（回读 10-13 隔离激活 boot 日志时发现 3 条回退行）｜关联：[BUG-024](BUG-024-direct-path-malformed-storm-recurrence.md)（隔离缓解本体的收卡判据在彼卡；本卡只关"回退失效模式"）
+> 状态：排查中（2026-10-15 由 BUG-024 收卡盘点牵出；根因未证）｜发现：2026-10-15（回读 10-13 隔离激活 boot 日志时发现 3 条回退行）｜关联：[BUG-024](../_archived/fixed_bugs/BUG-024-direct-path-malformed-storm-recurrence.md)（隔离缓解本体的收卡判据在彼卡；本卡只关"回退失效模式"）
 
 ## 症状
 
@@ -40,6 +40,6 @@ opened: 2026-10-15
 
 ## 参考
 
-- [BUG-024](BUG-024-direct-path-malformed-storm-recurrence.md) §收卡判据盘点第 4 条（本卡的出处）；
+- [BUG-024](../_archived/fixed_bugs/BUG-024-direct-path-malformed-storm-recurrence.md) §收卡判据盘点第 4 条（本卡的出处）；
 - [postmortem 2026-10-13](../../notes/postmortem/2026-10-13-llm-stream-malformed-storm.md)（隔离缓解的依据与 soak 结论）；
 - [triggers](../triggers.md) 处置序（"核隔离预载在场"——本卡修好后该步才真的可信）。
