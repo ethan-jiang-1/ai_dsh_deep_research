@@ -12,8 +12,7 @@
 
 | 文件 | 一句话 |
 |---|---|
-| [BUG-024](BUG-024-direct-path-malformed-storm-recurrence.md) | 直连路径再现畸形风暴（`event precedes message_start`）——大会话重试全灭、小会话零失败，BUG-023 判据②触发条件成立 |
-| [BUG-027](BUG-027-snapshot-replay-c5-activity-row-flicker.md) | snapshot-replay C5 渲染金标准间歇性红——💬 活动行有时 20s 内不渲染（A/B 层全绿；捕获时序与金标准内容已排除） |
+| [BUG-024](BUG-024-direct-path-malformed-storm-recurrence.md) | 直连路径再现畸形风暴（`event precedes message_start`）——大会话重试全灭、小会话零失败，BUG-023 判据②触发条件成立（收卡判据待实地大会话观察，见卡内盘点） |
 
 （近况看两池索引：[暂停](../_archived/suspended_bugs/README.md) · [已修](../_archived/fixed_bugs/README.md)；新卡编号 = 活跃 ∪ 全部归档池取最大号 + 1，规则唯一权威 = 本页。）
 

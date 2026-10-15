@@ -107,6 +107,10 @@ for (const sc of SCENARIOS) {
   const assistantTexts = fixtureLines.filter((j) => j.type === 'assistant/message')
     .map((j) => (j.data?.message?.content ?? []).filter((c) => c.type === 'text').map((c) => c.text).join(''))
     .filter(Boolean);
+  // 客户端历史就绪的期望值取自录制夹具本身（盘侧真值；回放保留录制 callId——实测锚逐字命中）。
+  // 不取自渲染金标准：就绪谓词只决定"何时捕获"，不参与"捕获得对不对"（比对器与断言不变）。
+  const replayCallIds = fixtureLines.filter((j) => j.type === 'tool/call')
+    .map((j) => j.data?.callId).filter((id) => typeof id === 'string' && id !== '');
   if (!firstPrompt || assistantTexts.length === 0) {
     failures.push(`[${sc.id}] fixture 折算失败（缺用户 prompt 或 assistant 文本）`);
     continue;
@@ -337,6 +341,21 @@ for (const sc of SCENARIOS) {
             }
             return cards;
           });
+          // C0 客户端历史就绪：录制夹具的 tool/call 全数挂上 chat 后才捕获（BUG-027 正修）。
+          // 失败场实录：捕获时 4 个录制调用只挂上 1 个（会话历史仍在流式加载），卡片与「研究
+          // 状态」活动行同缺末条 → C5 假红；固定 sleep 与"行稳定窗"都会在"部分数据已稳定"时
+          // 放行，故用盘侧真值（夹具 callId）作显式就绪谓词。期望值 0 个调用的场景视为就绪。
+          let mountedCalls = [];
+          let callsReady = replayCallIds.length === 0;
+          const callsDeadline = Date.now() + 30000;
+          while (!callsReady && Date.now() < callsDeadline) {
+            mountedCalls = await page.evaluate(() =>
+              Array.from(document.querySelectorAll('[data-chat-call-id]')).map((el) => el.getAttribute('data-chat-call-id')));
+            callsReady = replayCallIds.every((id) => mountedCalls.includes(id));
+            if (!callsReady) await sleep(300);
+          }
+          step(callsReady, `[${sc.id}] C0b 客户端历史就绪（夹具 tool/call 全挂后才捕获）`,
+            replayCallIds.length === 0 ? '夹具零 tool/call——就绪无对象' : `挂载 ${mountedCalls.filter((id) => replayCallIds.includes(id)).length}/${replayCallIds.length}`);
           await scrollTo('top');
           await sleep(1000);
           const seen = new Set(await collectCards());
