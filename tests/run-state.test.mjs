@@ -9,13 +9,13 @@
 // 而谓词只认 tool/call 事件的形状——夹具文本含陷阱字样 + 谓词判 0/挂起正确，这一对就是红绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync } from 'node:fs';
+import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, utimesSync } from 'node:fs';
 import { zstdCompressSync, constants } from 'node:zlib';
-import { resolveSessionLog, decompressSessionLog } from '../scripts/lib/session-log.mjs';
+import { resolveSessionLog, sessionLogsInGroup, decompressSessionLog } from '../scripts/lib/session-log.mjs';
 import { tmpdir } from 'node:os';
-import { join, dirname } from 'node:path';
+import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readSessionEvents, toolCallCount, hitlPendingOf, turnOpenOf, bundleStateOf, runStateOf, askIndefiniteOf, eventsRegressed } from '../scripts/lib/run-state.mjs';
+import { readSessionEvents, toolCallCount, hitlPendingOf, turnOpenOf, bundleStateOf, runStateOf, sessionTitleOf, askIndefiniteOf, eventsRegressed } from '../scripts/lib/run-state.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FIX = (name) => join(ROOT, 'tests', 'fixtures', 'run-state', `${name}.jsonl`);
@@ -64,6 +64,60 @@ test('日志选择：最新 canonical 代优先，缺席不猜路径', () => {
     symlinkSync(join(tmp, 'missing-target'), current);
     assert.equal(resolveSessionLog(tmp), current, 'v4 断链目录项仍在场，不能降级到 v3');
     assert.deepEqual(readSessionEvents(current), { readable: false, events: [] });
+  } finally { rmSync(tmp, { recursive: true, force: true }); }
+});
+
+test('组内会话日志：按 canonical 路径及 mtime 列出，坏的新日志不降级为挂起候选', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'run-group-'));
+  const group = join(tmp, 'research-workspace');
+  const readable = readFileSync(FIX('no-card'));
+  const pending = readFileSync(FIX('pending'));
+  const base = Date.parse('2026-01-01T00:00:00Z');
+  mkdirSync(group);
+  const put = (sessionId, files, rank) => {
+    const dir = join(group, sessionId);
+    mkdirSync(dir);
+    for (const [name, contents] of files) writeFileSync(join(dir, name), contents);
+    const canonicalName = basename(resolveSessionLog(dir));
+    const when = new Date(base + rank * 60_000);
+    utimesSync(join(dir, canonicalName), when, when);
+  };
+  try {
+    put('v4-compressed', [['session.v4.jsonl.zstd', zstdCompressSync(readable)]], 4);
+    put('v4-plain', [['session.v4.jsonl', readable]], 3);
+    put('v3-compressed', [['session.v3.jsonl.zstd', zstdCompressSync(readable)]], 2);
+    put('v3-plain', [['session.v3.jsonl', readable]], 1);
+    // The higher generation is present but unreadable. Its older v3 sibling contains a real lead-pending
+    // shape and must not be resurrected as a candidate by fallback.
+    put('broken-v4-no-downgrade', [
+      ['session.v4.jsonl.zstd', Buffer.from('not a zstd frame')],
+      ['session.v3.jsonl', pending],
+    ], 5);
+    mkdirSync(join(group, 'no-log'));
+    const unrecognized = join(group, 'unrecognized');
+    mkdirSync(unrecognized);
+    writeFileSync(join(unrecognized, 'session.v5.jsonl'), pending);
+
+    const sessions = sessionLogsInGroup(group);
+    assert.deepEqual(sessions.map(({ sessionId }) => sessionId), [
+      'broken-v4-no-downgrade', 'v4-compressed', 'v4-plain', 'v3-compressed', 'v3-plain',
+    ]);
+    const byId = new Map(sessions.map((session) => [session.sessionId, session]));
+    for (const [sessionId, filename] of [
+      ['v4-compressed', 'session.v4.jsonl.zstd'],
+      ['v4-plain', 'session.v4.jsonl'],
+      ['v3-compressed', 'session.v3.jsonl.zstd'],
+      ['v3-plain', 'session.v3.jsonl'],
+    ]) {
+      assert.equal(byId.get(sessionId).logPath, join(group, sessionId, filename));
+    }
+    const broken = byId.get('broken-v4-no-downgrade');
+    assert.equal(broken.logPath, join(group, 'broken-v4-no-downgrade', 'session.v4.jsonl.zstd'));
+    const state = runStateOf({ logPath: broken.logPath, wsRoot: tmp });
+    assert.equal(state.readable, false);
+    assert.equal(state.hitlPending, null);
+    assert.equal(leadHitlCandidate(state), false, '坏的新版日志不能借旧版挂起内容成为候选');
+    assert.ok(sessions.every((session, i) => i === 0 || sessions[i - 1].mtimeMs >= session.mtimeMs), '结果按 mtime 降序');
   } finally { rmSync(tmp, { recursive: true, force: true }); }
 });
 
@@ -126,6 +180,15 @@ test('bundleStateOf：位置=状态——工作区根 drt_* 才是在飞；final
     mkdirSync(join(tmp, 'archive', 'drt_old'), { recursive: true });
     assert.equal(bundleStateOf(tmp).bundles.length, 1, 'archive/ 下的 drt_* 不算在飞');
   } finally { rmSync(tmp, { recursive: true, force: true }) }
+});
+
+test('sessionTitleOf：读取最新可用 session/title，并对缺席标题保持 null', () => {
+  assert.equal(sessionTitleOf([
+    { type: 'session/title', data: { title: '首次标题' } },
+    { type: 'session/title', data: { title: '最新标题' } },
+  ]), '最新标题');
+  assert.equal(sessionTitleOf([{ type: 'session/title', data: { title: '  ' } }]), null);
+  assert.equal(sessionTitleOf([]), null);
 });
 
 test('runStateOf 组合：finalWritten=true + turnOpen=true → runSettled=false（判定过急的教训）', () => {
@@ -192,7 +255,12 @@ test('选卡面收窄：runStateOf 暴露会话头 agentPreset，lead 挂起 = �
   const tmp = join(ROOT, 'tests', '.tmp-run-state-probe');
   mkdirSync(tmp, { recursive: true });
   try {
-    const lead = runStateOf({ logPath: FIX('pending'), wsRoot: tmp });
+    const ordinary = runStateOf({ logPath: FIX('pending'), wsRoot: tmp });
+    assert.equal(Object.hasOwn(ordinary, 'sessionId'), false, '默认 watcher 投影不暴露 raw session ID');
+    assert.equal(Object.hasOwn(ordinary, 'title'), false, '默认 watcher 投影不暴露会话标题');
+    const lead = runStateOf({ logPath: FIX('pending'), wsRoot: tmp, includeSessionIdentity: true });
+    assert.equal(lead.sessionId, 'session-2e246686-b978-48e5-a87f-3bbcdb255105', 'UI 目标 session ID 必须取自 canonical 日志头');
+    assert.equal(lead.title, 'DSH 后续版本与 agent-team 转正', '显式标题子串必须来自最新 session/title');
     assert.equal(lead.preset, 'lead', '会话头 agentPreset 必须透出');
     assert.equal(leadHitlCandidate(lead), true, 'lead 真挂起 = 合法候选');
     const mate = runStateOf({ logPath: FIX('teammate-pending'), wsRoot: tmp });

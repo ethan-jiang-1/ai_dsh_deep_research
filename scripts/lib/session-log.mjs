@@ -36,6 +36,21 @@ export function researchWorkspaceGroup(sessionsRoot) {
   return readdirSync(sessionsRoot).find((d) => d.includes('research-workspace'))
 }
 
+/** List canonical logs in one session group, newest mtime first; inaccessible logs are omitted. */
+export function sessionLogsInGroup(groupDir) {
+  if (!existsSync(groupDir)) return []
+  const out = []
+  for (const sessionId of readdirSync(groupDir)) {
+    const dir = join(groupDir, sessionId)
+    const logPath = resolveSessionLog(dir)
+    if (logPath === null) continue
+    let mtimeMs
+    try { mtimeMs = statSync(logPath).mtimeMs } catch { continue }
+    out.push({ sessionId, dir, logPath, mtimeMs })
+  }
+  return out.sort((a, b) => b.mtimeMs - a.mtimeMs)
+}
+
 /** Decode concatenated native zstd frames. A bad frame makes the whole read unreadable. */
 const ZSTD_MAGIC = 0xfd2fb528
 

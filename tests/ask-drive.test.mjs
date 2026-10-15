@@ -21,7 +21,7 @@
 //   红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf, parseAskQuestions, pickTargetLabel, intentReconcile } from '../scripts/lib/ask-drive.mjs';
+import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf, parseAskQuestions, optionIndexToClick, pickTargetLabel, intentReconcile, selectPendingSession, hitlUiIdentityOf, hitlUiSessionOf, questionCardKeyOf } from '../scripts/lib/ask-drive.mjs';
 
 test('parseAskArgs：三问卡带 wait:-1 → 3 题 + 无限期（BUG-005 第 5 例现场的盘侧形态）', () => {
   const args = JSON.stringify({
@@ -164,6 +164,78 @@ test('pickTargetLabel：recommended → 带 Recommended 标签；缺席 → 回�
   const labels = ['定稿（Recommended）', '补研究：破单源'];
   assert.deepEqual(pickTargetLabel(labels, 'recommended'), { label: '定稿（Recommended）', resolved: 'exact' });
   assert.deepEqual(pickTargetLabel(['甲', '乙'], 'recommended'), { label: '甲', resolved: 'fallback' }, '无 Recommended 标签 → 回退首项（回退是确定性的，对账仍可判）');
+});
+
+test('optionIndexToClick：预选项不符合 pick 时点击目标项，而非重复点击错误预选', () => {
+  const labels = ['定稿（Recommended）', '补研究：破单源'];
+  assert.equal(optionIndexToClick({ optionLabels: labels, checkedIndex: 0, pick: '2' }), 1);
+  assert.equal(optionIndexToClick({ optionLabels: labels, checkedIndex: 1, pick: '2' }), 1, '意图相符且需推进时允许复点当前项');
+  assert.equal(optionIndexToClick({ optionLabels: labels, checkedIndex: null, pick: '2' }), 1, '没有预选时选择 pick 目标');
+  assert.equal(optionIndexToClick({ optionLabels: labels, checkedIndex: 0, pick: '9' }), 0, '目标不可解析时不猜改，保留当前项并由盘侧对账裁决');
+});
+
+test('selectPendingSession：明确标题必须唯一且仍挂起；缺省选择最近待答并要求 UI 可定位', () => {
+  const candidates = [
+    { sessionId: 's1', canonicalSessionId: 's1', logPath: '/s1.jsonl', title: 'Run Alpha', pending: true },
+    { sessionId: 's2', canonicalSessionId: 's2', logPath: '/s2.jsonl', title: 'Run Beta', pending: true },
+    { sessionId: 's3', canonicalSessionId: 's3', logPath: '/s3.jsonl', title: 'Run Archived', pending: false },
+  ];
+  assert.equal(selectPendingSession(candidates, 'Beta').candidate.sessionId, 's2');
+  assert.equal(selectPendingSession(candidates, 'Beta').candidate.logPath, '/s2.jsonl', 'UI session ID 与盘侧 canonical 日志必须来自同一个候选');
+  assert.equal(selectPendingSession(candidates, 'Archived').reason, 'session-not-pending');
+  assert.equal(selectPendingSession(candidates, 'Run').reason, 'session-title-ambiguous');
+  assert.equal(selectPendingSession(candidates).candidate.sessionId, 's1');
+  assert.equal(selectPendingSession([{ sessionId: 's4', canonicalSessionId: 's4', logPath: '/s4', title: null, pending: true }]).candidate.sessionId, 's4');
+  assert.equal(selectPendingSession([{ sessionId: 's5', logPath: '/s5', title: 'Untitled', pending: true }]).reason, 'session-id-unavailable');
+});
+
+test('selectPendingSession：标题/UI 目录身份必须与 canonical 日志头 ID 一致', () => {
+  const mismatched = { sessionId: 'directory-a', canonicalSessionId: 'header-b', logPath: '/a/session.jsonl', title: 'Run Alpha', pending: true };
+  assert.equal(selectPendingSession([mismatched]).reason, 'session-id-mismatch');
+  assert.equal(selectPendingSession([mismatched], 'Alpha').reason, 'session-id-mismatch');
+  const matching = { ...mismatched, canonicalSessionId: 'directory-a' };
+  assert.equal(selectPendingSession([matching]).candidate.sessionId, 'directory-a');
+});
+
+test('questionCardKeyOf：缺 session ID 或 callId 时不合成卡身份', () => {
+  assert.equal(questionCardKeyOf('session-target', 'call-target'), 'question:session-target:call-target');
+  assert.equal(questionCardKeyOf('', 'call-target'), null);
+  assert.equal(questionCardKeyOf('session-target', null), null);
+});
+
+test('hitlUiSessionOf：标题与全页文字不能代替主视图 session ID', () => {
+  const base = { targetSessionId: 'session-target', activeSessionIds: ['session-target'], selectedSessionIds: ['session-target'] };
+  assert.deepEqual(hitlUiSessionOf(base), { ready: true, reason: null });
+  assert.equal(hitlUiSessionOf({ ...base, activeSessionIds: ['session-old'] }).reason, 'active-session-mismatch');
+  assert.equal(hitlUiSessionOf({ ...base, activeSessionIds: [] }).reason, 'active-session-unavailable');
+  assert.equal(hitlUiSessionOf({ ...base, activeSessionIds: [null] }).reason, 'active-session-unavailable');
+  assert.equal(hitlUiSessionOf({ ...base, activeSessionIds: ['session-target', 'session-old'] }).reason, 'active-session-ambiguous');
+  assert.equal(hitlUiSessionOf({ ...base, selectedSessionIds: [] }).reason, 'session-row-not-selected');
+  assert.equal(hitlUiSessionOf({ ...base, selectedSessionIds: ['session-target', 'session-old'] }).reason, 'session-row-ambiguous');
+});
+
+test('hitlUiIdentityOf：只有主视图和唯一 ask 卡都匹配目标 session/callId 才可交互', () => {
+  const targetSessionId = 'session-target';
+  const callId = 'call-target';
+  const expectedCardKey = questionCardKeyOf(targetSessionId, callId);
+  const base = {
+    targetSessionId,
+    callId,
+    activeSessionIds: [targetSessionId],
+    selectedSessionIds: [targetSessionId],
+    cardKeys: [expectedCardKey],
+  };
+  assert.deepEqual(hitlUiIdentityOf(base), { ready: true, reason: null, cardKey: expectedCardKey });
+  assert.equal(hitlUiIdentityOf({ ...base, activeSessionIds: ['session-old'] }).reason, 'active-session-mismatch');
+  assert.equal(hitlUiIdentityOf({ ...base, cardKeys: [] }).reason, 'ask-card-unavailable');
+  assert.equal(hitlUiIdentityOf({ ...base, cardKeys: [null] }).reason, 'ask-card-identity-unavailable');
+  assert.equal(hitlUiIdentityOf({ ...base, cardKeys: ['question:session-old:call-old'] }).reason, 'ask-card-mismatch');
+  assert.equal(hitlUiIdentityOf({ ...base, cardKeys: [expectedCardKey, expectedCardKey] }).reason, 'ask-card-ambiguous');
+  assert.equal(hitlUiIdentityOf({ ...base, callId: null }).reason, 'ask-call-id-unavailable');
+});
+
+test('optionIndexToClick：空选项返回 null（不猜）', () => {
+  assert.equal(optionIndexToClick({ optionLabels: [], checkedIndex: null, pick: 'recommended' }), null);
 });
 
 test('pickTargetLabel：first → 首项；数字 N → 第 N 项；越界/空 → 不可解析（label=null，不猜）', () => {

@@ -10,7 +10,7 @@
 //     （回合已终 + final 在场；present 缺席由 presentCalls 单独暴露，不并入 settled——
 //     偏差要显性，不能静默放行）。
 //
-// 消费方：scripts/watch-run.mjs（盯场）、dev/hitl-answer.mjs（前置自拒）、
+// 消费方：scripts/run-ops/watch-run.mjs（盯场）、dev/hitl-answer.mjs（前置自拒）、
 // tests/run-state.test.mjs（三态夹具与 native log reader，测试路径零子进程，layering 合规）。
 // 运行需 `node --import tsx/esm`（直引 pack .ts 源）。
 import { existsSync, readdirSync } from 'node:fs'
@@ -67,6 +67,16 @@ export function askIndefiniteOf(events) {
   return args.wait === -1
 }
 
+/** Latest non-empty title assigned to a session; missing title remains unknown. */
+export function sessionTitleOf(events) {
+  let title = null
+  for (const event of Array.isArray(events) ? events : []) {
+    const value = event?.type === 'session/title' ? event?.data?.title : null
+    if (typeof value === 'string' && value.trim() !== '') title = value.trim()
+  }
+  return title
+}
+
 /**
  * 工作区 run bundle 状态（位置=状态：工作区根 drt_* = 在飞；已交付归 archive/ 不在此列）。
  * @param wsRoot 研究工作区根。
@@ -83,16 +93,24 @@ export function bundleStateOf(wsRoot) {
 
 /**
  * 会话 + 工作区组合快照（watcher 与前置自拒的判定输入；全字段可 JSON 序列化打日志）。
- * @param params logPath 会话日志路径；wsRoot 研究工作区根。
+ * @param params.logPath canonical 会话日志路径。
+ * @param params.wsRoot 研究工作区根。
+ * @param params.includeSessionIdentity 仅需按 UI 会话身份选路时设 true；默认日志快照不暴露标题与 id。
  */
-export function runStateOf({ logPath, wsRoot }) {
+export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false }) {
   const { readable, events } = readSessionEvents(logPath)
   const bundle = bundleStateOf(wsRoot)
   const turnOpen = readable ? turnOpenOf(events) : null
+  const identity = includeSessionIdentity === true
+    ? {
+      sessionId: readable && events[0]?.type === 'session' && typeof events[0].id === 'string' ? events[0].id : null,
+      title: readable ? sessionTitleOf(events) : null,
+    }
+    : {}
   return {
     readable,
     events: events.length,
-    // 会话头 agentPreset（首事件 type:"session"；审计 P3 件⑨）——选卡面按它收窄。
+    ...identity,
     preset: readable && events[0]?.type === 'session' ? (events[0].agentPreset ?? null) : null,
     hitlPending: readable ? hitlPendingOf(events).pending : null,
     askCalls: readable ? toolCallCount(events, 'ask_user_question') : null,

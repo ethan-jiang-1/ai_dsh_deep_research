@@ -42,6 +42,17 @@ export function parseAskQuestions(argumentsText) {
     }))
 }
 
+function targetOptionIndex(labels, pick) {
+  if (labels.length === 0) return null
+  if (pick === 'recommended') {
+    const index = labels.findIndex((label) => /Recommended/i.test(label))
+    return index >= 0 ? index : 0
+  }
+  if (pick === 'first') return 0
+  const n = Number(pick)
+  return pick !== '' && Number.isInteger(n) && n >= 1 && n <= labels.length ? n - 1 : null
+}
+
 /**
  * pick 目标解析（BUG-015：pick 从装饰性参数变驱动决策输入）。
  * recommended → 带 Recommended 标签的首个（缺席 → 回退首项，resolved='fallback'——回退是
@@ -52,17 +63,102 @@ export function parseAskQuestions(argumentsText) {
  */
 export function pickTargetLabel(optionLabels, pick) {
   const labels = Array.isArray(optionLabels) ? optionLabels.filter((l) => typeof l === 'string') : []
-  if (labels.length === 0) return { label: null, resolved: null }
-  if (pick === 'recommended') {
-    const hit = labels.find((l) => /Recommended/i.test(l))
-    return hit !== undefined ? { label: hit, resolved: 'exact' } : { label: labels[0], resolved: 'fallback' }
+  const index = targetOptionIndex(labels, pick)
+  if (index === null) return { label: null, resolved: null }
+  const fallback = pick === 'recommended' && !labels.some((label) => /Recommended/i.test(label))
+  return { label: labels[index], resolved: fallback ? 'fallback' : 'exact' }
+}
+
+/** Choose a radio to click: correct a mismatching preselection; otherwise retain UI re-click progression. */
+export function optionIndexToClick({ optionLabels, checkedIndex, pick }) {
+  const labels = Array.isArray(optionLabels) ? optionLabels.filter((label) => typeof label === 'string') : []
+  if (labels.length === 0) return null
+  const current = Number.isInteger(checkedIndex) && checkedIndex >= 0 && checkedIndex < labels.length ? checkedIndex : null
+  const target = targetOptionIndex(labels, pick)
+  if (target !== null && target !== current) return target
+  if (current !== null) return current
+  return target
+}
+
+/** Build the pinned Client card key for one Session and ask_user_question call. */
+export function questionCardKeyOf(sessionId, callId) {
+  if (typeof sessionId !== 'string' || sessionId.trim() === ''
+    || typeof callId !== 'string' || callId.trim() === '') return null
+  return `question:${sessionId}:${callId}`
+}
+
+/**
+ * Check that the main conversation and selected sidebar row name one Session.
+ *
+ * 浏览器边界孪生：真判据在 dev/hitl-answer.mjs 的 page.evaluate 内（每次动作同轮复核，防竞态）；
+ * page 边界无法共享闭包，故本函数 + 下方 hitlUiIdentityOf 是同一组规则的 keyless 可测正本
+ * （tests/ask-drive.test.mjs 钉 mutation：会话不符/歧义/缺席、卡陈旧/歧义/缺身份）。两处规则
+ * 改动必须同步——这是有意的重复，不是可删的死 API。
+ */
+export function hitlUiSessionOf({ targetSessionId, activeSessionIds = [], selectedSessionIds = [] } = {}) {
+  if (typeof targetSessionId !== 'string' || targetSessionId.trim() === '') {
+    return { ready: false, reason: 'target-session-unavailable' }
   }
-  if (pick === 'first') return { label: labels[0], resolved: 'exact' }
-  const n = Number(pick)
-  if (pick !== '' && Number.isFinite(n) && n >= 1 && n <= labels.length) {
-    return { label: labels[n - 1], resolved: 'exact' }
+  const active = Array.isArray(activeSessionIds) ? activeSessionIds : []
+  if (active.length === 0) return { ready: false, reason: 'active-session-unavailable' }
+  if (active.length !== 1) return { ready: false, reason: 'active-session-ambiguous' }
+  if (typeof active[0] !== 'string' || active[0] === '') return { ready: false, reason: 'active-session-unavailable' }
+  if (active[0] !== targetSessionId) return { ready: false, reason: 'active-session-mismatch' }
+  const selected = Array.isArray(selectedSessionIds) ? selectedSessionIds : []
+  if (selected.length === 0) return { ready: false, reason: 'session-row-not-selected' }
+  if (selected.length !== 1) return { ready: false, reason: 'session-row-ambiguous' }
+  if (typeof selected[0] !== 'string' || selected[0] === '') return { ready: false, reason: 'session-row-not-selected' }
+  if (selected[0] !== targetSessionId) return { ready: false, reason: 'session-row-ambiguous' }
+  return { ready: true, reason: null }
+}
+
+/**
+ * Check that one visible ask card is the selected Session's exact tool call.
+ * @param facts - Session identity, ask call ID, and visible ask-card keys.
+ * @returns ready only for one selected Session with its one expected ask card.
+ */
+export function hitlUiIdentityOf(facts) {
+  const { targetSessionId, callId, activeSessionIds = [], selectedSessionIds = [], cardKeys = [] } = facts ?? {}
+  const session = hitlUiSessionOf({ targetSessionId, activeSessionIds, selectedSessionIds })
+  if (!session.ready) return session
+  const expectedCardKey = questionCardKeyOf(targetSessionId, callId)
+  if (expectedCardKey === null) return { ready: false, reason: 'ask-call-id-unavailable' }
+  const cards = Array.isArray(cardKeys) ? cardKeys : []
+  if (cards.length === 0) return { ready: false, reason: 'ask-card-unavailable' }
+  if (cards.length !== 1) return { ready: false, reason: 'ask-card-ambiguous' }
+  if (typeof cards[0] !== 'string' || cards[0] === '') return { ready: false, reason: 'ask-card-identity-unavailable' }
+  if (cards[0] !== expectedCardKey) return { ready: false, reason: 'ask-card-mismatch' }
+  return { ready: true, reason: null, cardKey: expectedCardKey }
+}
+/**
+ * Select one pending session: the newest pending candidate by default, or one unique title-substring match.
+ * Both the directory ID (UI row) and canonical log-header ID must exist and agree.
+ */
+export function selectPendingSession(candidates, requestedTitle = null) {
+  const sessions = Array.isArray(candidates) ? candidates.filter((candidate) => candidate && typeof candidate === 'object') : []
+  const query = typeof requestedTitle === 'string' ? requestedTitle.trim() : ''
+  const pending = sessions.filter((candidate) => candidate.pending === true)
+  const identityError = (candidate) => {
+    if (typeof candidate.sessionId !== 'string' || candidate.sessionId.trim() === ''
+      || typeof candidate.canonicalSessionId !== 'string' || candidate.canonicalSessionId.trim() === '') {
+      return 'session-id-unavailable'
+    }
+    return candidate.sessionId === candidate.canonicalSessionId ? null : 'session-id-mismatch'
   }
-  return { label: null, resolved: null }
+  if (query === '') {
+    if (pending.length === 0) return { candidate: null, reason: 'no-pending-session' }
+    const candidate = pending[0]
+    const reason = identityError(candidate)
+    return reason === null ? { candidate, reason: null } : { candidate: null, reason }
+  }
+  const matches = sessions.filter((candidate) => typeof candidate.title === 'string' && candidate.title.includes(query))
+  if (matches.length === 0) return { candidate: null, reason: 'session-not-found' }
+  if (matches.length !== 1) return { candidate: null, reason: 'session-title-ambiguous' }
+  const candidate = matches[0]
+  const identityReason = identityError(candidate)
+  if (identityReason !== null) return { candidate: null, reason: identityReason }
+  if (candidate.pending !== true) return { candidate: null, reason: 'session-not-pending' }
+  return { candidate, reason: null }
 }
 
 /**

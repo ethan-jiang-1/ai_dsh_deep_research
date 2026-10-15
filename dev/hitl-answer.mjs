@@ -12,20 +12,18 @@
 //   node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <横幅 token> [--session <标题子串>]
 //                            [--pick recommended|first|<1-based index>] [--custom <文本>]
 //                            [--max-steps 8] [--dry-run]
-// 行为：**先盘侧谓词自拒**（无真挂起会话即退出，不开浏览器——2026-09-27 实录：grep 误报
-//       "卡已挂起"后代答空转找卡）→ 打开 web → 关测试须知模态 → 点开侧栏里"Waiting for
-//       answer"的会话 → 逐题作答（默认选带 Recommended 的那一项）→ 提交 → 打印每题的选择。
+// 行为：**先盘侧谓词自拒**（无真挂起会话即退出，不开浏览器）→ 精确按 session ID 打开同一会话
+//       → 逐题作答（默认选带 Recommended 的那一项）→ 提交 → 打印每题的选择。
 // 注意：**必须**在 question.md §Decisions 与 journal.md 标注"代理模拟"——它替的是人，不是人。
 import { resolve, dirname, join } from 'node:path'
-import { existsSync, readdirSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
+import { once } from 'node:events'
 import { loadChromium, launchChromium } from '../scripts/lib/playwright.mjs'
 import { runStateOf, readSessionEvents, leadHitlCandidate } from '../scripts/lib/run-state.mjs'
-import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf, parseAskQuestions, pickTargetLabel, intentReconcile } from '../scripts/lib/ask-drive.mjs'
+import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf, parseAskQuestions, pickTargetLabel, optionIndexToClick, selectPendingSession, intentReconcile, questionCardKeyOf } from '../scripts/lib/ask-drive.mjs'
 import { appendProvenance, attributionBundleOf, batchToAnswered } from '../scripts/lib/hitl-provenance.mjs'
 import { localDateStr } from '../scripts/lib/local-date.mjs'
-import { researchWorkspaceGroup } from '../scripts/lib/session-log.mjs'
-import { expandGroup, SIDEBAR_GROUP_CANDIDATES } from '../scripts/lib/web-ui-nav.mjs'
+import { researchWorkspaceGroup, sessionLogsInGroup } from '../scripts/lib/session-log.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 // 与 dev/run-kickoff.mjs 同形：name 自带 `--`（本仓约定，别在 helper 里再加一次）
@@ -40,11 +38,116 @@ const TOKEN = flag('--token', null)
 // 空串/纯空白 = 未指定（2026-09-27 实录：`--session ""` 使 text.includes('') 恒真 →
 // 点开侧栏第一个无关会话——flag 解析不得把空串当"已指定"）
 const rawSession = flag('--session', null)
-const SESSION = rawSession !== null && rawSession.trim() !== '' ? rawSession : null // 标题子串；缺省 = 侧栏里第一个 "Waiting for answer"
+const SESSION = rawSession !== null && rawSession.trim() !== '' ? rawSession : null // 标题子串；缺省 = 最新盘侧挂起
 const PICK = flag('--pick', 'recommended') // recommended | first | <1-based index>
 const CUSTOM = flag('--custom', null)
 const MAX_STEPS = Number(flag('--max-steps', '8'))
 const DRY = has('--dry-run')
+const NO_TARGET_SESSION = Symbol('no target session row')
+const stopForMissingUiSession = () => {
+  process.exitCode = 3
+  throw NO_TARGET_SESSION
+}
+
+/** Revalidate the target Session and ask card in the same DOM turn as each action. */
+function operateOnTargetCard({ targetSessionId, expectedCardKey, action = 'identity', index, value }) {
+  const visible = (element) => {
+    for (let current = element; current !== null; current = current.parentElement) {
+      const rect = current.getBoundingClientRect()
+      const style = getComputedStyle(current)
+      if (rect.width <= 0 || rect.height <= 0 || style.display === 'none' || style.visibility === 'hidden'
+        || style.opacity === '0' || current.getAttribute('aria-hidden') === 'true') return false
+    }
+    return true
+  }
+  const active = [...document.querySelectorAll('[data-conversation-content]')].filter(visible)
+  if (active.length !== 1) return { ready: false, reason: active.length === 0 ? 'active-session-unavailable' : 'active-session-ambiguous' }
+  if (active[0].getAttribute('data-conversation-session') !== targetSessionId) return { ready: false, reason: 'active-session-mismatch' }
+  const selected = [...document.querySelectorAll('[data-row-key^="session:"][aria-selected="true"]')].filter(visible)
+  if (selected.length !== 1) return { ready: false, reason: selected.length === 0 ? 'session-row-not-selected' : 'session-row-ambiguous' }
+  if (selected[0].getAttribute('data-row-key') !== `session:${targetSessionId}`) return { ready: false, reason: 'session-row-ambiguous' }
+  if (action === 'session') return { ready: true, reason: null }
+  const composers = [...active[0].querySelectorAll('[data-conversation-region="composer"]')].filter(visible)
+  const cards = composers.flatMap((composer) => [...composer.querySelectorAll('[data-question-key], [data-plan-review-key]')].filter(visible))
+  if (cards.length === 0) return { ready: false, reason: 'ask-card-unavailable' }
+  if (cards.length !== 1) return { ready: false, reason: 'ask-card-ambiguous' }
+  const card = cards[0]
+  const cardKey = card.getAttribute('data-question-key') ?? card.getAttribute('data-plan-review-key')
+  if (cardKey !== expectedCardKey) return { ready: false, reason: 'ask-card-mismatch' }
+  if (action === 'identity') return { ready: true, reason: null, cardKey }
+  const groups = [...card.querySelectorAll('[role="radiogroup"]')]
+  if (groups.length !== 1) return { ready: false, reason: groups.length === 0 ? 'radio-group-unavailable' : 'radio-group-ambiguous' }
+  const group = groups[0]
+  const radios = [...group.querySelectorAll('button[role="radio"]')]
+  const labels = radios.map((button) => (button.textContent ?? '').trim())
+  if (action === 'observe') {
+    let scope = group
+    let submits = []
+    for (let up = 0; up < 4 && scope && submits.length === 0; up++) {
+      scope = scope.parentElement
+      if (scope === null || !card.contains(scope)) break
+      submits = [...scope.querySelectorAll('button')].filter((button) => /^(Submit|提交)$/i.test((button.textContent ?? '').trim()))
+    }
+    if (submits.length > 1) return { ready: false, reason: 'submit-ambiguous' }
+    const checkedRadios = radios.filter((button) => button.getAttribute('aria-checked') === 'true')
+    const checked = checkedRadios[0] ?? null
+    return {
+      ready: true,
+      reason: null,
+      radioCount: radios.length,
+      checkedCount: checkedRadios.length,
+      checkedIndex: checked === null ? null : radios.indexOf(checked),
+      labels: radios.map((button) => (button.textContent ?? '').trim()),
+      checkedLabel: checked === null ? null : (checked.textContent ?? '').trim(),
+      submitFound: submits.length === 1,
+      submitDisabled: submits.length === 1 && !!submits[0].disabled,
+    }
+  }
+  if (action === 'click-option') {
+    if (Array.isArray(expectedLabels) && (expectedLabels.length !== radios.length
+      || expectedLabels.some((label, i) => label !== labels[i]))) {
+      return { ready: false, reason: 'question-options-changed' }
+    }
+    if (!Number.isInteger(index) || index < 0 || index >= radios.length) return { ready: false, reason: 'radio-index-unavailable' }
+    const radio = radios[index]
+    radio.scrollIntoView({ block: 'center' })
+    radio.click()
+    let prompt = group
+    for (let up = 0; up < 4 && prompt.parentElement !== null && card.contains(prompt.parentElement); up++) prompt = prompt.parentElement
+    return {
+      ready: true,
+      reason: null,
+      label: (radio.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 120),
+      prompt: (prompt.textContent ?? '').replace(/\s+/g, ' ').slice(0, 140),
+    }
+  }
+  if (action === 'click-submit') {
+    let scope = group
+    const submits = []
+    for (let up = 0; up < 4 && scope !== null && submits.length === 0; up++) {
+      scope = scope.parentElement
+      if (scope === null || !card.contains(scope)) break
+      submits.push(...[...scope.querySelectorAll('button')].filter((button) => /^(Submit|提交)$/i.test((button.textContent ?? '').trim())))
+    }
+    if (submits.length !== 1) return { ready: false, reason: submits.length === 0 ? 'submit-unavailable' : 'submit-ambiguous' }
+    if (submits[0].disabled) return { ready: false, reason: 'submit-disabled' }
+    submits[0].scrollIntoView({ block: 'center' })
+    submits[0].click()
+    return { ready: true, reason: null, clicked: true }
+  }
+  if (action === 'custom') {
+    const fields = [...card.querySelectorAll('textarea, input[type="text"]')].filter(visible)
+    if (fields.length !== 1) return { ready: false, reason: fields.length === 0 ? 'custom-field-unavailable' : 'custom-field-ambiguous' }
+    const field = fields[0]
+    if (field.disabled) return { ready: false, reason: 'custom-field-disabled' }
+    const prototype = field instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype
+    Object.getOwnPropertyDescriptor(prototype, 'value').set.call(field, value)
+    field.dispatchEvent(new InputEvent('input', { bubbles: true, data: value, inputType: 'insertText' }))
+    field.dispatchEvent(new Event('change', { bubbles: true }))
+    return { ready: true, reason: null, filled: true }
+  }
+  return { ready: false, reason: 'action-unavailable' }
+}
 
 if (!TOKEN) {
   console.error('缺 --token（web 横幅里的 token）')
@@ -52,53 +155,57 @@ if (!TOKEN) {
 }
 
 // ⓪⁻ 盘侧前置谓词（RFC run-ops-self-diagnosis）：开浏览器前，先按**事件形状**判定
-//    research-workspace 组最新会话里有没有真挂起（末位回合事件 = 未答 ask_user_question）。
+//    research-workspace 组最新 15 条 canonical 日志里有没有真挂起（末位回合事件 = 未答 ask_user_question）。
 //    request/header 里的工具 schema 字样不构成挂起——那正是 grep 假阳性的形态。无真挂起即
 //    自拒，不开浏览器空转。
-// 以下三个模块级变量 = 谓词块的发现结果，尾部盘侧复核复用（2026-10-03：块作用域提升）。
-let pendingSid = null // 形如 session-<uuid>；null = 无挂起
-let wsGroup = null
-let wsSessionsRoot = null
+let pendingLogPath = null
+let uiTargetSessionId = null
 {
   const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'runtime', 'harness-home')
   const sessionsRoot = join(home, 'sessions')
   const group = researchWorkspaceGroup(sessionsRoot)
-  wsSessionsRoot = sessionsRoot; wsGroup = group
   if (group === undefined) {
     console.error('hitl-answer: 找不到 research-workspace 会话组——先 source dev/env.sh')
     process.exit(2)
   }
   const gdir = join(sessionsRoot, group)
-  const sids = readdirSync(gdir)
-    .map((d) => ({ d, m: (() => { try { return statSync(join(gdir, d, 'session.v4.jsonl.zstd')).mtimeMs } catch { return 0 } })() }))
-    .sort((a, b) => b.m - a.m)
-  let pending = null
-  for (const { d, m } of sids.slice(0, 15)) {
-    if (m === 0) continue
-    const s = runStateOf({ logPath: join(gdir, d, 'session.v4.jsonl.zstd'), wsRoot: join(ROOT, 'research-workspace') })
-    if (leadHitlCandidate(s)) { pending = d; pendingSid = d; break } // 新者先扫，命中即停——只认 lead 的挂起
-  }
-  if (pending === null) {
-    console.error('hitl-answer: 盘侧谓词自拒——最新 15 个会话无 lead 的真挂起（选卡面已按 preset 收窄：队友会话与非 lead 会话的 pending 不可选，防误答陈旧卡——审计 P3 件⑨）。'
-      + '可能：① 卡还没发（request/header 工具 schema 字样不算挂起——grep 会误报，谓词不会）；'
-      + '② 挂起回合已被 web 重启终局化（需向会话发恢复 prompt 让 lead 原样重发）；'
-      + '③ 挂起的是队友会话（不代答，按 owner 通道处理）。不开浏览器。')
+  const candidates = sessionLogsInGroup(gdir).slice(0, 15).map((session) => {
+    const state = runStateOf({ logPath: session.logPath, wsRoot: join(ROOT, 'research-workspace'), includeSessionIdentity: true })
+    return { ...session, canonicalSessionId: state.sessionId, title: state.title, pending: state.readable && leadHitlCandidate(state) }
+  })
+  const selected = selectPendingSession(candidates, SESSION)
+  if (selected.candidate === null) {
+    const why = {
+      'no-pending-session': '最新 15 个会话无 lead 的真挂起',
+      'session-title-ambiguous': '标题子串匹配不唯一——拒绝让 UI 与盘侧日志错配',
+      'session-not-found': `最新 15 个会话里找不到 --session「${SESSION}」`,
+      'session-not-pending': `--session「${SESSION}」匹配的会话不处于 lead 挂起态`,
+      'session-id-unavailable': '候选缺少 UI 会话身份标识，无法保证判决日志与浏览器目标一致',
+    }[selected.reason] ?? '无法唯一定位挂起会话'
+    console.error(`hitl-answer: 盘侧谓词自拒——${why}。不开浏览器。`)
     process.exit(3)
   }
-  console.log(`hitl-answer: 盘侧谓词——真挂起会话在场：${pending}`)
+  pendingLogPath = selected.candidate.logPath
+  uiTargetSessionId = selected.candidate.sessionId
+  console.log(`hitl-answer: 盘侧谓词——真挂起会话在场：${uiTargetSessionId}「${selected.candidate.title ?? '无标题'}」`)
 }
 // 驱动计划（点击前读盘侧形态，BUG-005）：卡共几题 + ask 形态。活等待（wait:-1）下
 // timed 600s 放行与文本消息兜底**都不可用**——脚本必须真浏览器答满，操作者必须知道这点。
 let plan = { questionCount: null, indefinite: null, callId: null, questions: [] }
 {
-  const s1 = readSessionEvents(join(wsSessionsRoot, wsGroup, pendingSid, 'session.v4.jsonl.zstd'))
+  const s1 = pendingLogPath !== null ? readSessionEvents(pendingLogPath) : { readable: false, events: [] }
   const ask = s1.readable ? [...s1.events].reverse().find((j) => j?.type === 'tool/call' && j?.data?.name === 'ask_user_question') : undefined
   if (ask !== undefined) plan = { ...parseAskArgs(ask.data?.arguments), questions: parseAskQuestions(ask.data?.arguments), callId: ask.data?.callId ?? null }
+}
+const expectedCardKey = questionCardKeyOf(uiTargetSessionId, plan.callId)
+if (expectedCardKey === null) {
+  console.error('hitl-answer: 盘侧挂起 ask 缺少可用 callId，无法绑定唯一 UI 卡片——拒绝打开浏览器并作答')
+  process.exit(3)
 }
 console.log(`hitl-answer: 驱动计划——卡共 ${plan.questionCount ?? '?'} 题 · 形态 = ${plan.indefinite === true ? 'wait:-1 无限期（⚠ timed 放行与文本兜底均不可用，必须真浏览器答满）' : plan.indefinite === false ? 'timed/默认（600s 放行 + 保持可答）' : '未知（日志读不到 ask 参数）'}`)
 // 模式自报（2026-09-26 教训：`flag/has` 的 `--` 加了两遍 → `--dry-run` 判假，**"dry-run" 实际
 // 执行了代答**。此后开局即打印模式，操作者一眼能看出它到底会不会点。）
-console.log(`hitl-answer: 模式 = ${DRY ? 'dry-run（只看不点）' : '实答（会提交）'} · pick=${PICK} · session=${SESSION ?? '（侧栏第一个待答）'}`)
+console.log(`hitl-answer: 模式 = ${DRY ? 'dry-run（只看不点）' : '实答（会提交）'} · pick=${PICK} · session=${SESSION ?? '（盘侧最新挂起）'}`)
 
 const answered = []
 const log = (m) => console.log(m)
@@ -108,8 +215,8 @@ const browser = await launchChromium(chromium)
 // ⚠ 视口要够高（2026-09-27 第七场实测）：题干超长的问询卡会把选项行挤到 y≈2300+，
 // 1100 高的视口里选项在折叠线下方、Playwright 在该容器里自动滚动不生效 → click 超时被
 // catch 吞掉 → Submit 一直 disabled、答了 8 次全没提交。2600 覆盖至今见过的最长卡。
-const page = await browser.newPage({ viewport: { width: 1600, height: 2600 } })
 try {
+  const page = await browser.newPage({ viewport: { width: 1600, height: 2600 } })
   await page.goto(`http://127.0.0.1:${PORT}/?token=${TOKEN}`, { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(6000)
 
@@ -122,7 +229,10 @@ try {
     if (!(await dlg.isVisible().catch(() => false))) continue
     for (const lbl of ['button:has-text("Continue")', 'button:has-text("我知道了")', 'button:has-text("Got it")']) {
       const b = dlg.locator(lbl).first()
-      if (await b.isVisible().catch(() => false)) { await b.click().catch(() => {}); break }
+      if (await b.isVisible().catch(() => false)) {
+        try { await b.click() } catch (error) { log(`hitl-answer: ⚠ 测试须知按钮点击失败（${String(error).slice(0, 90)}）`) }
+        break
+      }
     }
     break
   }
@@ -134,134 +244,114 @@ try {
   //    现在：①初始等待加长到 6s；②click 失败要**报出来**；③点完校验主视图真的切到了该会话
   //    （正文里出现会话标题或问询卡片），没切就换目标再点一次。
   const rows = page.locator('span[class*="_root_"]')
+  const sessionRows = page.locator('[data-row-key^="session:"]')
+  const workspaceRows = page.locator('[data-row-key^="workspace:"]')
+  const overflowRows = page.locator('[data-row-key^="overflow:"]')
   const rowTexts = [] // 诊断样本：每次行扫收集可见行文本，找不到目标时报给操作者对照
+  const findTargetRow = async () => {
+    const n = await sessionRows.count()
+    for (let i = 0; i < Math.min(n, 300); i++) {
+      const el = sessionRows.nth(i)
+      if (await el.getAttribute('data-row-key') === `session:${uiTargetSessionId}`) return el
+    }
+    return null
+  }
+  const expandOneSidebarSection = async () => {
+    for (const [items, attr] of [[workspaceRows, 'aria-expanded'], [overflowRows, 'aria-expanded']]) {
+      const n = await items.count()
+      for (let i = 0; i < Math.min(n, 300); i++) {
+        const el = items.nth(i)
+        if (!(await el.isVisible().catch(() => false)) || await el.getAttribute(attr) !== 'false') continue
+        const box = await el.boundingBox().catch(() => null)
+        if (box === null || box.x >= 256) continue
+        try { await el.click({ timeout: 10_000 }) } catch (e) { log(`hitl-answer: ⚠ 侧栏展开失败（${String(e).slice(0, 90)}）`); return false }
+        await page.waitForTimeout(120)
+        return true
+      }
+    }
+    return false
+  }
+  const revealTargetRow = async () => {
+    for (let attempt = 0; attempt < 300; attempt++) {
+      const row = await findTargetRow()
+      if (row !== null && await row.isVisible().catch(() => false)) return row
+      if (!(await expandOneSidebarSection())) return null
+    }
+    return null
+  }
+  const inspectUi = async (action = 'identity', fields = {}) => page.evaluate(operateOnTargetCard, {
+    targetSessionId: uiTargetSessionId,
+    expectedCardKey,
+    action,
+    ...fields,
+  })
   const openSession = async () => {
     rowTexts.length = 0
     const n = await rows.count()
-    for (let i = 0; i < Math.min(n, 80); i++) {
+    for (let i = 0; i < Math.min(n, 300); i++) {
       const el = rows.nth(i)
       if (!(await el.isVisible().catch(() => false))) continue
       const box = await el.boundingBox().catch(() => null)
       if (box === null || box.x >= 256) continue
       const text = ((await el.textContent()) ?? '').trim()
       if (text !== '') rowTexts.push(text.slice(0, 60))
-      const match = SESSION !== null ? text.includes(SESSION) : text.includes('Waiting for answer')
-      if (!match) continue
-      try { await el.click({ timeout: 10_000 }) } catch (e) { log(`hitl-answer: ⚠ 行点击失败（${String(e).slice(0, 90)}）——换下一个目标`) ; continue }
-      return text.slice(0, 60)
     }
-    return null
+    const row = await revealTargetRow()
+    if (row === null) return null
+    const text = ((await row.textContent()) ?? '').trim()
+    const box = await row.boundingBox().catch(() => null)
+    if (box === null || box.x >= 256) return null
+    try { await row.click({ timeout: 10_000 }) } catch (e) { log(`hitl-answer: ⚠ 目标会话行点击失败（${String(e).slice(0, 90)}）`); return null }
+    return text.slice(0, 60)
   }
-  const activated = async (title) => {
-    const body = await page.evaluate(() => document.body.innerText).catch(() => '')
-    if (/Waiting for your action|Recommended|Submit/.test(body)) return true // 问询卡片在场
-    return title !== null && body.includes(title.slice(0, 20)) // 或主视图标题 = 会话标题
-  }
+  const activated = async () => (await inspectUi('session')).ready
   let opened = await openSession()
-  if (opened === null) {
-    // 分组展开一轮后重扫（2026-10-11 run 实证：目标会话在折叠组里，默认行扫找空）——
-    // 只在第一轮 miss 后展开，避免把已展开的组点收起。expandGroup 与候选分组名 =
-    // lib/web-ui-nav.mjs 唯一正本（与 client-load-smoke 共享——2026-10-13 结构重构收敛）。
-    for (const g of SIDEBAR_GROUP_CANDIDATES) {
-      if (rowTexts.some((t) => t.startsWith(g))) await expandGroup(page, g)
+  if (opened !== null && !(await activated())) {
+    log('目标行已点击，但主视图 session ID 尚未切到目标——按 session ID 重试一次')
+    const row = await findTargetRow()
+    if (row !== null) {
+      try { await row.click({ timeout: 8_000 }) } catch (error) { log(`hitl-answer: ⚠ 目标会话重试点击失败（${String(error).slice(0, 90)}）`) }
     }
-    await page.waitForTimeout(800)
-    opened = await openSession()
-  }
-  if (opened !== null && !(await activated(opened))) {
-    log('hitl-answer: 点击后主视图没切过去——重试一次（点标题文本）')
-    const t2 = page.locator(`text=${(opened.match(/[^A-Za-z]+/) ?? ['x'])[0].slice(0, 8)}`).first()
-    await t2.click({ timeout: 8_000 }).catch(() => {})
     await page.waitForTimeout(2500)
-    if (!(await activated(opened))) log('hitl-answer: ⚠ 重试后仍未激活——继续等卡片，若超时则如实报告')
+    if (!(await activated())) {
+      log('重试后主视图 session ID 仍不匹配——拒绝在未确认的会话视图代答')
+      stopForMissingUiSession()
+    }
   }
   if (opened === null) {
-    // 预期态，不是异常：没有待答会话时给一句人话 + 非零退出（原来抛栈，操作者要自己读 trace）
-    console.error(`hitl-answer: 侧栏没有待答会话（--session=${SESSION ?? '（缺省：Waiting for answer）'}）——`
-      + '可能：① 该 HITL 已被答过；② 挂起回合被 web 重启终局化（需向会话发恢复 prompt 让 lead 原样重发问询）。')
+    console.error(`hitl-answer: 侧栏没有目标会话行（session id=${uiTargetSessionId}，--session=${SESSION ?? '（盘侧最新挂起）'}）——`
+      + '可能：① 该会话已归档或不在侧栏可见范围；② 挂起回合被 web 重启终局化（需向会话发恢复 prompt 让 lead 原样重发问询）。')
     console.error('hitl-answer: 侧栏可见行样本（展开后仍未见目标时对照）：'
       + (rowTexts.slice(0, 8).join(' ⏐ ') || '（侧栏零可见行）'))
-    process.exit(3)
+    process.exitCode = 3
+    throw NO_TARGET_SESSION
   }
   log(`hitl-answer: 已打开会话「${opened}」`)
 
-  // ①b 等卡片渲染（实测：点开会话后卡片不是立刻就有——问询可能正在写、或视图还在挂载。
-  //     固定 sleep 会漏，故轮询到出现为止；超时才放弃。）
-  const cardReady = async () => {
-    for (const sel of ['text=/Waiting for your action/', '[class*="_option_"]', 'text=/Recommended/']) {
-      if (await page.locator(sel).first().isVisible().catch(() => false)) return true
-    }
-    return false
-  }
+  // Wait until both the active conversation and its one visible ask card match the disk-selected session/call.
+  const cardReady = async () => (await inspectUi('identity')).ready
   let ready = false
   for (let i = 0; i < 40; i++) {
     if (await cardReady()) { ready = true; break }
     await page.waitForTimeout(1000)
   }
-  if (!ready) log('hitl-answer: 等了 40s 仍未见问询卡片——会话可能已不在待答态（问询被终局化或已答）')
+  if (!ready) {
+    const identity = await inspectUi('identity')
+    log(`hitl-answer: 等待目标会话 ask 卡超时或身份未匹配（${identity.reason ?? 'identity-unavailable'}）——拒绝操作任何页面卡片`)
+    stopForMissingUiSession()
+  }
   await page.waitForTimeout(600)
 
   // ② 策略驱动作答（BUG-004 重写）：观察 → nextDriveAction → 动作，UI 形状**永不**判完成；
   //    提交成功与否由尾部盘侧裁决（driveVerdict）唯一判定。点击走 DOM 原生派发（Playwright
   //    在 DSH UI 上的 actionability 检查会被问询卡挡死——cdp-probe 头注同款实测）。
-  const observeCard = async () => page.evaluate(() => {
-    const rg = [...document.querySelectorAll('[role="radiogroup"]')].pop()
-    if (!rg) return { radioCount: 0, checkedCount: 0, labels: [], checkedLabel: null, submitFound: false, submitDisabled: false }
-    const radios = [...rg.querySelectorAll('button[role="radio"]')]
-    let scope = rg
-    let submit = null
-    for (let up = 0; up < 4 && scope && submit === null; up++) {
-      const cand = scope.parentElement
-      if (!cand) break
-      scope = cand
-      submit = [...scope.querySelectorAll('button')].find((b) => /^(Submit|提交)$/i.test((b.textContent ?? '').trim())) ?? null
-    }
-    const labelOf = (b) => (b.textContent ?? '').trim()
-    const checkedRadio = radios.find((b) => b.getAttribute('aria-checked') === 'true') ?? null
-    return {
-      radioCount: radios.length,
-      checkedCount: radios.filter((b) => b.getAttribute('aria-checked') === 'true').length,
-      labels: radios.map(labelOf),
-      checkedLabel: checkedRadio === null ? null : labelOf(checkedRadio),
-      submitFound: submit !== null,
-      submitDisabled: submit !== null && !!submit.disabled,
-    }
-  })
-  const clickOption = async () => page.evaluate((pick) => {
-    const rg = [...document.querySelectorAll('[role="radiogroup"]')].pop()
-    if (!rg) return null
-    const radios = [...rg.querySelectorAll('button[role="radio"]')]
-    if (radios.length === 0) return null
-    const checked = radios.find((b) => b.getAttribute('aria-checked') === 'true')
-    let want = null
-    if (checked === undefined) {
-      if (pick === 'recommended') want = radios.find((b) => /Recommended/i.test(b.textContent ?? '')) ?? null
-      else if (pick !== 'first' && Number.isFinite(Number(pick))) want = radios[Number(pick) - 1] ?? null
-      if (want === null) want = radios[0]
-    }
-    const el = checked ?? want
-    el.scrollIntoView({ block: 'center' })
-    el.click()
-    let p = rg
-    for (let i = 0; i < 4 && p; i++) p = p.parentElement
-    return {
-      label: (el.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 120),
-      prompt: p ? (p.textContent ?? '').replace(/\s+/g, ' ').slice(0, 140) : '(未取到题干)',
-    }
-  }, PICK)
-  const clickSubmit = async () => page.evaluate(() => {
-    const rg = [...document.querySelectorAll('[role="radiogroup"]')].pop()
-    if (!rg) return false
-    let scope = rg
-    for (let up = 0; up < 4 && scope; up++) {
-      const cand = scope.parentElement
-      if (!cand) break
-      scope = cand
-      const submit = [...scope.querySelectorAll('button')].find((b) => /^(Submit|提交)$/i.test((b.textContent ?? '').trim()))
-      if (submit && !submit.disabled) { submit.scrollIntoView({ block: 'center' }); submit.click(); return true }
-    }
-    return false
-  })
+  const observeCard = async () => inspectUi('observe')
+  const clickOption = async (index, expectedLabels) => inspectUi('click-option', { index, expectedLabels })
+  const fillCustom = async (value) => inspectUi('custom', { value })
+  const clickSubmit = async () => {
+    const result = await inspectUi('click-submit')
+    return result.ready && result.clicked === true
+  }
   let submitted = false
   // BUG-015 决策层：预选项 vs pick 意图的符合性进决策——目标不可解析（越界/空）时视为相符
   // 放行（不瞎改选），裁决后的意图对账把关；预选项不符时 nextDriveAction 给 click-option
@@ -274,21 +364,29 @@ try {
   }
   for (let step = 1; step <= MAX_STEPS; step++) {
     let obs = await observeCard()
+    if (obs.ready !== true) {
+      // 重渲染瞬态（卡片切换中）给一次复看机会；身份仍未对上即停——绝不操作未验证的卡。
+      await page.waitForTimeout(1200)
+      obs = await observeCard()
+      if (obs.ready !== true) { log(`hitl-answer: 卡片身份校验失败（${obs.reason ?? 'identity-unavailable'}）——拒绝操作，交盘侧裁决`); break }
+    }
     let act = decideWithIntent(obs)
     if (act.action === 'abort') {
       // 重渲染二次确认：题间切换的瞬态（radioCount=0）不该误判"无卡"——1.2s 后重看一次
       await page.waitForTimeout(1200)
       obs = await observeCard()
+      if (obs.ready !== true) { log(`hitl-answer: 卡片身份校验失败（${obs.reason ?? 'identity-unavailable'}）——拒绝操作，交盘侧裁决`); break }
       act = decideWithIntent(obs)
     }
     if (DRY) { log(`[dry-run] 观察 radio=${obs.radioCount} checked=${obs.checkedCount} submit=${obs.submitFound}/${obs.submitDisabled} → ${act.action}（${act.reason}）`); break }
     if (act.action === 'abort') { log(`hitl-answer: ${act.reason}`); break }
     if (act.action === 'click-option') {
-      const hit = await clickOption()
-      if (hit === null) { log('hitl-answer: 选项点击未命中——如实停止（盘侧裁决收口）'); break }
+      const index = optionIndexToClick({ optionLabels: obs.labels, checkedIndex: obs.checkedIndex, pick: PICK })
+      const hit = index === null ? null : await clickOption(index, obs.labels)
+      if (hit === null || hit.ready !== true) { log(`hitl-answer: 选项点击未命中或题面已变化（${hit?.reason ?? 'index-unavailable'}）——如实停止（盘侧裁决收口）`); break }
       if (CUSTOM !== null) {
-        const box = page.locator('textarea, input[type="text"]').first()
-        if (await box.isVisible().catch(() => false)) { await box.fill(CUSTOM).catch(() => {}); await page.waitForTimeout(200) }
+        const filled = await fillCustom(CUSTOM)
+        if (filled.ready !== true) log(`hitl-answer: ⚠ custom 填写未落在目标卡上（${filled.reason ?? 'custom-unavailable'}）——如实跳过`)
       }
       answered.push({ step, prompt: hit.prompt, selected: hit.label })
       log(`hitl-answer: 第 ${step} 题 ← ${hit.label}`)
@@ -296,7 +394,8 @@ try {
       continue
     }
     // click-submit
-    if (await clickSubmit()) { submitted = true; log(`hitl-answer: 已答 ${answered.length} 题——Submit 已点击`); break }
+    const submittedNow = await clickSubmit()
+    if (submittedNow) { submitted = true; log(`hitl-answer: 已答 ${answered.length} 题——Submit 已点击`); break }
     await page.waitForTimeout(700) // 提交钮被重渲染 → 回环重观察
   }
 
@@ -315,11 +414,11 @@ try {
     } else {
       for (let attempt = 0; attempt < 4; attempt++) {
         if (attempt > 0) await page.waitForTimeout(3000)
-        const s2 = (pendingSid !== null && wsGroup !== null && wsSessionsRoot !== null)
-          ? runStateOf({ logPath: join(wsSessionsRoot, wsGroup, pendingSid, 'session.v4.jsonl.zstd'), wsRoot: join(ROOT, 'research-workspace') })
+        const s2 = pendingLogPath !== null
+          ? runStateOf({ logPath: pendingLogPath, wsRoot: join(ROOT, 'research-workspace') })
           : { hitlPending: null }
-        const batch = plan.callId !== null && wsGroup !== null && wsSessionsRoot !== null
-          ? answerBatchOf(readSessionEvents(join(wsSessionsRoot, wsGroup, pendingSid, 'session.v4.jsonl.zstd')).events, plan.callId)
+        const batch = plan.callId !== null && pendingLogPath !== null
+          ? answerBatchOf(readSessionEvents(pendingLogPath).events, plan.callId)
           : []
         const settled = s2.hitlPending === false && batch.length > 0
         const candidate = driveVerdict({ dryRun: false, settled, batch, clickCount: answered.length })
@@ -355,7 +454,7 @@ try {
     // 归属 = 被答会话自己的 bundle-bind（BUG-020 正修）：仅写命中归属，仅读/无绑定走延迟
     // 分支——旧字典序 activeBundle 在无关在飞 bundle 在场时误归（两次实测）。journal **现读**
     // （答案落地后 lead 可能已追加事件；绑定只增不减，现读信号面最全）。
-    const eventsNow = readSessionEvents(join(wsSessionsRoot, wsGroup, pendingSid, 'session.v4.jsonl.zstd')).events
+    const eventsNow = pendingLogPath !== null ? readSessionEvents(pendingLogPath).events : []
     const attributed = attributionBundleOf(eventsNow)
     const pickNote = intentFailed ? `${PICK}（意图不符实录：目标未达成，见对账输出——事实仍记账）` : PICK
     if (attributed === null) {
@@ -384,12 +483,25 @@ try {
     log('hitl-answer: 未提交成功（盘侧裁决红）——不写 provenance（answer 未落地，如实）')
   }
   for (const a of answered) log(`  Q${a.step}: ${a.prompt}\n     → ${a.selected}`)
+} catch (error) {
+  if (error !== NO_TARGET_SESSION) throw error
 } finally {
-  try { await browser.close() } catch {}
+  try { await browser.close() } catch (error) { log(`hitl-answer: browser.close 失败（${String(error?.message ?? error).slice(0, 120)}）`) }
   // 进程收割（BUG-004 放大器加固）：close 后主进程若仍活着（exitCode null）→ SIGKILL 兜底。
-  // 僵尸 client 持有与通道的 websocket，会把宿主侧 ask 等待孤儿化（BUG-005 联动前提）。
+  // SIGKILL 后等待 exit；close/kill 失败显性报告而不伪装资源已释放。
   const proc = typeof browser.process === 'function' ? browser.process() : null
-  if (proc !== null && proc !== undefined && proc.pid !== undefined && proc.exitCode === null) {
-    try { process.kill(proc.pid, 'SIGKILL') } catch {}
+  if (proc !== null && proc !== undefined && proc.pid !== undefined && proc.exitCode === null && proc.signalCode === null) {
+    const exited = once(proc, 'exit').then(() => true, (error) => {
+      log(`hitl-answer: 子进程退出监听失败（${String(error?.message ?? error).slice(0, 120)}）`)
+      return false
+    })
+    let signalled = false
+    try {
+      process.kill(proc.pid, 'SIGKILL')
+      signalled = true
+    } catch (error) {
+      if (error?.code !== 'ESRCH') log(`hitl-answer: SIGKILL 子进程失败（${String(error?.message ?? error).slice(0, 120)}）`)
+    }
+    if (signalled) await exited
   }
 }
