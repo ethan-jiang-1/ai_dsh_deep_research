@@ -499,12 +499,15 @@ try {
     }
     if (act.action === 'click-option') {
       const index = optionIndexToClick({ optionLabels: obs.labels, checkedIndex: obs.checkedIndex, pick: PICK })
-      const hit = index === null ? null : await clickOption(index, obs.labels)
-      if (hit === null || hit.ready !== true) { log(`hitl-answer: 选项点击未命中或题面已变化（${hit?.reason ?? 'index-unavailable'}）——如实停止（盘侧裁决收口）`); break }
+      // ⚠ 顺序铁律（2026-10-16 两次"空批"实测根因）：UI 的"自定义文本"是**替换选择**语义——
+      // 填 custom 会**清空已选选项**，于是 answer 批为空（盘侧以"空批等于把沉默当拍板"拒绝）。
+      // 故 option 题必须**先填 custom、后点选项**（选项是登记动作，必须最后落）。
       if (CUSTOM !== null && !customConsumed) {
         const filled = await fillCustom(CUSTOM)
         if (filled.ready !== true) log(`hitl-answer: ⚠ custom 填写未落在目标卡上（${filled.reason ?? 'custom-unavailable'}）——如实跳过`)
       }
+      const hit = index === null ? null : await clickOption(index, obs.labels)
+      if (hit === null || hit.ready !== true) { log(`hitl-answer: 选项点击未命中或题面已变化（${hit?.reason ?? 'index-unavailable'}）——如实停止（盘侧裁决收口）`); break }
       answered.push({ step, prompt: hit.prompt, selected: hit.label })
       log(`hitl-answer: 第 ${step} 题 ← ${hit.label}`)
       await page.waitForTimeout(900) // 等选中态/翻页渲染
