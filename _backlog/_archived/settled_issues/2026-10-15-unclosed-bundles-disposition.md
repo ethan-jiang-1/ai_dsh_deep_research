@@ -85,3 +85,5 @@ Q1「A 类前两场」明确委托 agent 代判（原话：*"我判断不出来�
 - 本次补写的 `audit.md`/`node-gate.md` **保留**（它们是"未闭合"的机械证据，随 bundle 一起停放）。
 
 **补记（2026-10-16 晚）**：A 类第一场 `drt_nvidia-dc-gpu-share` **已交付归档**——用户授权 agent 以"操作侧代理模拟"身份代答其 HITL2（`dev/hitl-answer.mjs` 驱动，provenance 如实落在 bundle 的 `question.md`/`journal.md`）；复活流程 = 移回工作区根 → lead 续跑（补抓 companieshistory 页并复核结论、修正一处方向性断言、重新呈 HITL2）→ 门①②③④R**A 全 PASS**、审计 **CRITICAL 0**、URL 溯源 50/50 → 移入 `research-workspace/archive/`。活动区由此回到 0 个未归档 run。
+**补记（2026-10-16 夜）**：A 类第二场 `drt_ai-coding-security` **已交付归档**——lead 定向整改两处：① 补抓 `open-vsx.org`（HTTP 200 + 逐字返回体 + `/error` 同路径复核 → 取回后仍无文档级正文，故把该引用**如实降级**并写进证据卡，未删字了事）；② 门L 三条（方向 H 状态值回合法集、I/J 补支持来源 + A–D 分级、关键线索/owner 行齐）。核验 = 门①③②L④R**A 全 PASS** + 审计 **CRITICAL 0**（80 份证据 · URL 溯源 216/221）→ 移入 `archive/`；HITL2 由操作侧代理模拟代签（provenance 在 bundle 的 question.md/journal.md）。
+**副产物**：该场的 HITL2 卡（选项题 + 可选题、逐题翻页）暴露并当场修掉 `dev/hitl-answer.mjs` 三处缺陷（`expectedLabels` 潜伏未绑定 · 终局提交与推进钮未分离 · 推进钮搜法）；含一次"空批提交"实测——盘侧按"空批等于把沉默当拍板"正确拒绝放行，守卫工作正常。
