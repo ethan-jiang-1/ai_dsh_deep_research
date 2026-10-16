@@ -10,6 +10,11 @@
 
 ## 活跃列表
 
+| 卡 | 一句话 |
+|---|---|
+| [BUG-031](BUG-031-hitl-answer-sidebar-session-rows-unrendered.md) | hitl-answer 在长跑通道实例上侧栏零 session 行（组能展开但行不渲染、无搜索兜底）——恢复路径 = 重启通道 + 新会话 |
+
+
 （当前无活跃缺陷卡——BUG-030 已于 2026-10-16 修复归档。）
 
 （近况看两池索引：[暂停](../_archived/suspended_bugs/README.md) · [已修](../_archived/fixed_bugs/README.md)；新卡编号 = 活跃 ∪ 全部归档池取最大号 + 1，规则唯一权威 = 本页。）
