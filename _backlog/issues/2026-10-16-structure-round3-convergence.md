@@ -60,6 +60,20 @@ stdout 形态比对（波动字段白名单化）。
 | `discipline-probe` | 3104 | `web` + overlay | `dp-` | 200 | 16MB | 同上（16MB） |
 | `entry-chain-probe` | 3114 | `web` + **无 patch** | `probe-` | 200 | 待迁移时逐行确认 | 同上 |
 
+**批次① 改前留档结果（2026-10-16，命令 = guides/60 §2 正本逐条）**：
+
+| 站点 | 首次跑 | 分类重跑 | 归类 | 处置 |
+|---|---|---|---|---|
+| `l4-lite-smoke` | exit 0 ✓（1:23） | — | 绿 | 改前基线可用 |
+| `team-preflight-smoke` | exit 0 ✓（0:41） | — | 绿 | 改前基线可用 |
+| `discipline-probe` | exit 0 ✓（0:58） | — | 绿 | 改前基线可用 |
+| `entry-chain-probe` | exit 1（stderr「等答案超时（最后文本片段：无）」） | **exit 0 ✓** | **偶发外部阻断**（模型 180s 未作答） | 取重跑绿为改前基线 |
+| `client-hitl-smoke` | exit 1（⑤b 挂起卡已答 / ⑤c 答后回合闭合） | **exit 1（同两条）** | **既存确定性红**（该文件本轮零改动，非本轮引入） | 按卡纪律"该站点改动退回本地副本，如实分列，不阻塞其余"——**本轮不迁移**该站点，红态入档 |
+
+留档落点 = `runtime/smoke-workspace/b2-baseline-2026-10-16/`（`site-before/` = 批次① 首次，
+`recheck/` = 分类重跑；运行区 gitignored）。**B2 迁移范围因此收敛为 4 站点**
+（l4-lite / team-preflight / discipline / entry-chain）。
+
 **自动保存的两个判定证据**（迁移时直接用，不必重查）：
 
 1. **代际选择等价性**：本地 `readSessionLog` 用 `readdirSync(...).find(首匹配)`，canonical 用显式代际优先
