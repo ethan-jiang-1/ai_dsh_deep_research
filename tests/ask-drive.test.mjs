@@ -21,7 +21,7 @@
 //   红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf, parseAskQuestions, optionIndexToClick, pickTargetLabel, intentReconcile, selectPendingSession, hitlUiIdentityOf, hitlUiSessionOf, questionCardKeyOf } from '../scripts/lib/ask-drive.mjs';
+import { answerBatchOf, driveVerdict, hitlUiIdentityOf, hitlUiSessionOf, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict } from '../scripts/lib/ask-drive.mjs';
 
 test('parseAskArgs：三问卡带 wait:-1 → 3 题 + 无限期（BUG-005 第 5 例现场的盘侧形态）', () => {
   const args = JSON.stringify({
@@ -338,4 +338,31 @@ test('nextDriveAction：选项题已预选但 Submit 禁用、Next 可用 → **
 test('nextDriveAction：零 radio 且推进钮也禁用 → 仍 abort（不空转，fail-loud）', () => {
   const act = nextDriveAction({ radioCount: 0, checkedCount: 0, submitFound: true, submitDisabled: true, advanceFound: true, advanceDisabled: true });
   assert.equal(act.action, 'abort', JSON.stringify(act));
+});
+
+// ── 侧栏找不到目标行时的错因判据（BUG-031：通道实例老化 vs 目标确实不在侧栏）──
+test('sidebarMissVerdict：扫窗命中 → cap（不是"不在侧栏"）', () => {
+  const v = sidebarMissVerdict({ renderedSessionRows: 0, collapsedGroups: 0, capHit: true, diskPending: true });
+  assert.equal(v.kind, 'cap', JSON.stringify(v));
+});
+
+test('sidebarMissVerdict：UI 零会话行 + 组已全展开 + 盘侧确有挂起 → aging（疑通道实例老化，处置=重启通道+新会话）', () => {
+  const v = sidebarMissVerdict({ renderedSessionRows: 0, collapsedGroups: 0, capHit: false, diskPending: true });
+  assert.equal(v.kind, 'aging', JSON.stringify(v));
+  assert.match(v.message, /重启通道/);
+});
+
+test('sidebarMissVerdict：仍有折叠组在 → absent（不能断言老化——先展开再说）', () => {
+  const v = sidebarMissVerdict({ renderedSessionRows: 0, collapsedGroups: 2, capHit: false, diskPending: true });
+  assert.equal(v.kind, 'absent', JSON.stringify(v));
+});
+
+test('sidebarMissVerdict：渲染出了会话行但目标不在其中 → absent（真不在侧栏）', () => {
+  const v = sidebarMissVerdict({ renderedSessionRows: 12, collapsedGroups: 0, capHit: false, diskPending: true });
+  assert.equal(v.kind, 'absent', JSON.stringify(v));
+});
+
+test('sidebarMissVerdict：盘侧已无挂起（目标非真挂起）→ absent（别把"已答/已终局"说成老化）', () => {
+  const v = sidebarMissVerdict({ renderedSessionRows: 0, collapsedGroups: 0, capHit: false, diskPending: false });
+  assert.equal(v.kind, 'absent', JSON.stringify(v));
 });

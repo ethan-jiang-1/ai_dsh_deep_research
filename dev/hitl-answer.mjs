@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url'
 import { once } from 'node:events'
 import { loadChromium, launchChromium } from '../scripts/lib/playwright.mjs'
 import { runStateOf, readSessionEvents, leadHitlCandidate } from '../scripts/lib/run-state.mjs'
-import { parseAskArgs, nextDriveAction, driveVerdict, answerBatchOf, parseAskQuestions, pickTargetLabel, optionIndexToClick, selectPendingSession, intentReconcile, questionCardKeyOf } from '../scripts/lib/ask-drive.mjs'
+import {answerBatchOf, driveVerdict, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict} from '../scripts/lib/ask-drive.mjs'
 import { appendProvenance, attributionBundleOf, batchToAnswered } from '../scripts/lib/hitl-provenance.mjs'
 import { localDateStr } from '../scripts/lib/local-date.mjs'
 import { researchWorkspaceGroup, sessionLogsInGroup } from '../scripts/lib/session-log.mjs'
@@ -339,6 +339,17 @@ try {
   const capHits = new Map() // kind → total（逐类记账：超限时可能多类同时命中，报单一类会漏信息）
   const noteCap = (kind, total) => { if (total > ROW_SCAN_CAP) capHits.set(kind, total) }
   const rowTexts = [] // 诊断样本：每次行扫收集可见行文本，找不到目标时报给操作者对照
+  // 仍折叠的组数（BUG-031）：>0 说明还没展开完，不能断言"通道实例老化"——先把可展开的都展开。
+  const collapsedGroupCount = async () => {
+    let n = 0
+    for (const items of [workspaceRows, overflowRows]) {
+      const total = await items.count()
+      for (let i = 0; i < Math.min(total, ROW_SCAN_CAP); i++) {
+        if (await items.nth(i).getAttribute('aria-expanded') === 'false') n++
+      }
+    }
+    return n
+  }
   const findTargetRow = async () => {
     const n = await sessionRows.count()
     noteCap('session 行', n)
@@ -413,8 +424,16 @@ try {
     }
   }
   if (opened === null) {
-    console.error(`hitl-answer: 侧栏没有目标会话行（session id=${uiTargetSessionId}，--session=${SESSION ?? '（盘侧最新挂起）'}）——`
-      + '可能：① 该会话已归档或不在侧栏可见范围；② 挂起回合被 web 重启终局化（需向会话发恢复 prompt 让 lead 原样重发问询）。')
+    // 错因判据（BUG-031）：把"目标不在侧栏"与"通道实例老化（UI 渲染不出会话行）"分开说——
+    // 旧文案在老化现场是误导的（让操作者去查归档/终局化，两条都不成立）。
+    const verdict = sidebarMissVerdict({
+      renderedSessionRows: await sessionRows.count().catch(() => 0),
+      collapsedGroups: await collapsedGroupCount().catch(() => 0),
+      capHit: capHits.size > 0,
+      diskPending: selected?.candidate?.pending === true,
+    })
+    console.error(`hitl-answer: 侧栏没有目标会话行（session id=${uiTargetSessionId}，--session=${SESSION ?? '（盘侧最新挂起）'}）`
+      + `——错因判据 = ${verdict.kind}：${verdict.message}`)
     if (capHits.size > 0) {
     const detail = [...capHits].map(([kind, total]) => `${kind} ${total} 条`).join('、')
     console.error(`hitl-answer: ⚠ 扫描上限（上限 ${ROW_SCAN_CAP}）——${detail}：目标可能在**未扫描区间**`

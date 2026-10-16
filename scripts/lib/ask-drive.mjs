@@ -268,3 +268,32 @@ export function driveVerdict(s) {
   }
   return { pass: true, exitCode: 0, reason: `盘侧复核通过——answer 批 ${nonEmpty}/${items.length} 题实质作答${skipped > 0 ? `（跳过 ${skipped} 题，显性记账）` : ''}${clicks}` }
 }
+
+/**
+ * 侧栏找不到目标行时的**错因判据**（BUG-031，2026-10-16 实卡暴露）：把"目标不在侧栏"与
+ * **通道实例老化**（UI 渲染不出会话行）分开——旧文案在老化现场是误导的（它让操作者去查归档/终局化，
+ * 而两条都不成立；实测恢复路径 = 重启通道 + 新会话）。
+ * @param obs renderedSessionRows（UI 里 `session:` 行条数）/ collapsedGroups（仍折叠的
+ *   workspace·overflow 组数——>0 说明还没展开完，不能断言老化）/ capHit（是否有行扫命中上限）/
+ *   diskPending（盘侧是否确有该会话的挂起问询——去答的前提；facts: 盘侧为准）。
+ * @returns {kind: 'cap'|'aging'|'absent', message}——kind 决定处置，message 人话依据。
+ */
+export function sidebarMissVerdict(obs) {
+  const { renderedSessionRows, collapsedGroups, capHit, diskPending } = obs ?? {}
+  if (capHit === true) {
+    return { kind: 'cap', message: '行数超扫描上限——目标可能在**未扫描区间**（别按"已归档/被终局化"处置）' }
+  }
+  if ((renderedSessionRows ?? 0) === 0 && (collapsedGroups ?? 0) === 0 && diskPending === true) {
+    return {
+      kind: 'aging',
+      message: 'UI 侧栏**零会话行**且组已全展开，而盘侧确有该会话的挂起问询——**疑通道实例老化**'
+        + '（渲染/懒加载未解析）。处置 = 重启通道（`bash dev/boot-run.sh`）+ 用**新会话**接手续跑；'
+        + '不要在旧实例上反复重试或按"已归档"处理。',
+    }
+  }
+  return {
+    kind: 'absent',
+    message: '可能：① 该会话已归档或不在侧栏可见范围；② 挂起回合被 web 重启终局化'
+      + '（需向会话发恢复 prompt 让 lead 原样重发问询）。',
+  }
+}

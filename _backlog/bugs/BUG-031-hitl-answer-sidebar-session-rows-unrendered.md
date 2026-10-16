@@ -1,13 +1,14 @@
 ---
-status: 排查中
+status: 修复落地
 severity: P2
 opened: 2026-10-16
 ---
 
 # BUG-031：hitl-answer 在长跑通道实例上"侧栏零 session 行"——组能展开但行不渲染，且无搜索兜底
 
-> 状态：排查中 — 根因待定（已排除"组未展开"与"行被扫窗截断"两种假设，见证据）；
-> **恢复路径已验证**：重启通道 + 新会话即可正常代答（本轮实测）。
+> 状态：**修复落地** — 判据已实现并 keyless 验证；**老化实例不可按需复现**（重启即消失），
+> 故"在复现实例上复看"一项**未跑**（如实记，见 §验证边界）。**恢复路径已验证**：
+> 重启通道 + 新会话即可正常代答（实测）。
 
 ## 症状
 
@@ -45,3 +46,24 @@ opened: 2026-10-16
 - 受影响工具：[dev/hitl-answer.mjs](../../dev/hitl-answer.mjs)（其侧栏扫描上限错因区分卡已结，见
   [settled 卡](../_archived/settled_issues/2026-10-15-hitl-answer-and-test-surface-hardening.md)）；
 - 操作手册的恢复路径正本：[guides/61 §5](../../docs/guides/61-run-playbook.md)。
+
+## 修复落地（2026-10-16）
+
+- **判据层**：`scripts/lib/ask-drive.mjs` 新增 `sidebarMissVerdict({renderedSessionRows, collapsedGroups,
+  capHit, diskPending})` → `kind ∈ cap | aging | absent`：`cap` = 行数超扫描上限；`aging` = **UI 零会话行
+  且组已全展开，而盘侧确有挂起**（疑通道实例老化，文案直接给处置 = 重启通道 + 新会话）；`absent` = 其余
+  （仍折叠 / 渲染出会话行但目标不在 / 盘侧已无挂起）。
+- **接线**：`dev/hitl-answer.mjs` 失败路径改为打印 `错因判据 = <kind>：<message>`，并新增
+  `collapsedGroupCount()` 助手（workspace + overflow 组里 `aria-expanded="false"` 的条数）。
+- **keyless 证据**：`tests/ask-drive.test.mjs` 五例先红后绿（cap / aging / 仍折叠→absent /
+  有行但目标不在→absent / 盘侧无挂起→absent）。
+- **活体证据**：接线后对真实通道跑通「盘侧有挂起 → 打开会话 → 点 Submit」路径；另一例同类现场
+  （**被重启终局化的旧 ask**：UI 卡在场但点不动、盘侧答复永不落地——盘侧裁决如实红、**不写 provenance**）
+  见 `research-workspace/archive/drt_cn-moe-2026/journal.md` 的操作侧附记。
+
+## 验证边界（未跑项，如实）
+
+- **"改后在同一老化实例上复看"未跑**：老化实例随重启消失，无法按需重建（本卡不假设可复现）；
+  判据正确性由 keyless 五例 + 正常路径回归（`client-hitl-smoke`）保证；
+- **侧栏搜索兜底（判据 2）未做**：本次实测该实例上搜索框也救不回来（workspace 行清空、`session:` 仍 0），
+  故不作为必然兜底；若后续复现出"搜索可用但列表不渲染"的形态，再按判据 2 补。
