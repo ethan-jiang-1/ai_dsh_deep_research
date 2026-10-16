@@ -19,6 +19,7 @@ const METHOD_PRESET_HEADERS = ['方法', '给用户的一句话', '信息源策�
 const EXPECTED_BUILTIN_PREFERENCES = [
   {
     name: '事实核查',
+    summary: '核准具体事实/数字/状态的对象、时点与口径',
     sections: {
       source: '官方/原始来源优先，第三方只作线索',
       verify: '逐字转写核对；关键来源独立重抓；单源结论显式标注',
@@ -28,6 +29,7 @@ const EXPECTED_BUILTIN_PREFERENCES = [
   },
   {
     name: '领域地图',
+    summary: '摸清谁在做什么、到哪一步',
     sections: {
       source: '广度优先铺方向，多类来源交叉定位阵营',
       verify: '覆盖对账：每个子域至少一条可核来源；盲点显式标注',
@@ -37,6 +39,7 @@ const EXPECTED_BUILTIN_PREFERENCES = [
   },
   {
     name: '主张核查',
+    summary: '查证一个说法是真是假',
     sections: {
       source: '对称检索：正反同权重；追原始出处',
       verify: '反例权重最高；判定四态（成立/部分/不成立/证据不足）',
@@ -46,6 +49,7 @@ const EXPECTED_BUILTIN_PREFERENCES = [
   },
   {
     name: '方案比较',
+    summary: '把几个选项放在同一标准下比',
     sections: {
       source: '各选项同维度查证；厂商资料与实际使用反馈并重',
       verify: '口径对齐才可比；价值权衡与事实分开',
@@ -83,35 +87,8 @@ function markdownTableCells(line) {
   return cells;
 }
 
-// 「给用户的一句话」列（方法预设表第 2 列，2026-10-15 卡第 2 条）：该列是**模型可见**表的一列
-// （lead 读它回答"这个预设是干什么的"），但**客户端不投影它**——面板内置卡显示的是 sections.source。
-// 此前测试解析后丢弃该列 → 改它无人咬；现按列级数据钉住（不改客户端契约：面板显示面属 D25 期 1 设计，
-// 要改是产品决定，不是测试硬化）。
-const EXPECTED_BUILTIN_ONE_LINERS = [
-  ['事实核查', '核准具体事实/数字/状态的对象、时点与口径'],
-  ['领域地图', '摸清谁在做什么、到哪一步'],
-  ['主张核查', '查证一个说法是真是假'],
-  ['方案比较', '把几个选项放在同一标准下比'],
-];
-
-/** 只取「给用户的一句话」列（与 builtinPreferencesFromSkill 同一次解析口径）。 */
-function builtinOneLinersFromSkill() {
-  const lines = readFileSync(METHOD_PRESETS_SKILL, 'utf8').split(/\r?\n/);
-  const headerIndex = lines.findIndex((line) => {
-    const cells = markdownTableCells(line);
-    return cells.length === METHOD_PRESET_HEADERS.length && cells.every((cell, i) => cell === METHOD_PRESET_HEADERS[i]);
-  });
-  assert.notEqual(headerIndex, -1, 'research-brief skill 方法预设表头缺席或发生变化');
-  const rows = [];
-  for (const line of lines.slice(headerIndex + 2)) {
-    if (line.trim() === '' || !line.includes('|')) break;
-    const cells = markdownTableCells(line);
-    assert.equal(cells.length, METHOD_PRESET_HEADERS.length, '方法预设表格行列数变化');
-    rows.push([cells[0], cells[1]]);
-  }
-  return rows;
-}
-
+// canonical：从 research-brief skill 的**方法预设表**解析（含第 2 列「给用户的一句话」——
+// 2026-10-16 起客户端卡面显示它，故三方对钉：客户端 ↔ skill 表 ↔ 本文件期望）。
 function builtinPreferencesFromSkill() {
   const lines = readFileSync(METHOD_PRESETS_SKILL, 'utf8').split(/\r?\n/);
   const headerIndex = lines.findIndex((line) => {
@@ -130,6 +107,7 @@ function builtinPreferencesFromSkill() {
     assert.equal(cells.length, METHOD_PRESET_HEADERS.length, '方法预设表格行列数变化');
     rows.push({
       name: cells[0],
+      summary: cells[1], // 「给用户的一句话」：客户端卡面显示它（2026-10-16 拍板）→ 纳入 canonical 三方对钉
       sections: { source: cells[2], verify: cells[3], report: cells[4], limit: cells[5] },
     });
   }
@@ -169,9 +147,10 @@ function builtinPreferencesFromClient() {
   return initializer.elements.map((element, index) => {
     const label = `BUILTIN_PREFERENCES[${index}]`;
     const fields = objectProperties(element, label);
-    assert.deepEqual([...fields.keys()].sort(), ['name', 'sections'], `${label} 字段形状变化`);
+    assert.deepEqual([...fields.keys()].sort(), ['name', 'sections', 'summary'], `${label} 字段形状变化（summary = 「给用户的一句话」列，2026-10-16 起面板卡面显示它）`);
     return {
       name: stringValue(fields.get('name'), `${label}.name`),
+      summary: stringValue(fields.get('summary'), `${label}.summary`),
       sections: Object.fromEntries([...objectProperties(fields.get('sections'), `${label}.sections`)].map(([key, value]) => [
         key,
         stringValue(value, `${label}.sections.${key}`),
@@ -184,8 +163,7 @@ test('内置研究偏好与 research-brief 方法预设表逐字段一致', () =
   const canonical = builtinPreferencesFromSkill();
   assert.deepEqual(builtinPreferencesFromClient(), canonical, '客户端内置偏好必须逐字段投影 canonical skill 表');
   assert.deepEqual(canonical, EXPECTED_BUILTIN_PREFERENCES, 'canonical skill 方法预设表发生了需显式审视的内容变化');
-  // 列级：第 2 列「给用户的一句话」（此前只解析不判——改它无人咬）
-  assert.deepEqual(builtinOneLinersFromSkill(), EXPECTED_BUILTIN_ONE_LINERS, '「给用户的一句话」列发生变化（须显式审视：它是模型可见表的一列）');
+
 });
 
 const v2 = [

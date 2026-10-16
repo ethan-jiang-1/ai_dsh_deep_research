@@ -29,15 +29,20 @@ export interface ResearchConfigTabInjected {
 /** 槽标准 props + 注入面。 */
 export type ResearchConfigTabProps = PropsRuntime<'sidebar.right.pane.tab'> & ResearchConfigTabInjected
 
-/** 内置研究偏好（只读；内容正本 = research-brief skill 方法预设表——此处仅投影）。 */
+/** 内置研究偏好（只读；内容正本 = research-brief skill 方法预设表——此处仅投影）。
+ *  `summary` = 该表第 2 列「给用户的一句话」——**卡面显示的就是它**（2026-10-16 用户拍板：
+ *  面板是用户面，就显示专门为用户写的那句话；四分区详情仍在详情弹窗，不丢信息）。
+ *  三处同钉（客户端 ↔ skill 表 ↔ 测试期望），漂移即红：tests/library-fold.test.mjs。 */
 interface BuiltinPreference {
   readonly name: string
+  readonly summary: string
   readonly sections: LibrarySections
 }
 
 const BUILTIN_PREFERENCES: readonly BuiltinPreference[] = [
   {
     name: '事实核查',
+    summary: '核准具体事实/数字/状态的对象、时点与口径',
     sections: {
       source: '官方/原始来源优先，第三方只作线索',
       verify: '逐字转写核对；关键来源独立重抓；单源结论显式标注',
@@ -47,6 +52,7 @@ const BUILTIN_PREFERENCES: readonly BuiltinPreference[] = [
   },
   {
     name: '领域地图',
+    summary: '摸清谁在做什么、到哪一步',
     sections: {
       source: '广度优先铺方向，多类来源交叉定位阵营',
       verify: '覆盖对账：每个子域至少一条可核来源；盲点显式标注',
@@ -56,6 +62,7 @@ const BUILTIN_PREFERENCES: readonly BuiltinPreference[] = [
   },
   {
     name: '主张核查',
+    summary: '查证一个说法是真是假',
     sections: {
       source: '对称检索：正反同权重；追原始出处',
       verify: '反例权重最高；判定四态（成立/部分/不成立/证据不足）',
@@ -65,6 +72,7 @@ const BUILTIN_PREFERENCES: readonly BuiltinPreference[] = [
   },
   {
     name: '方案比较',
+    summary: '把几个选项放在同一标准下比',
     sections: {
       source: '各选项同维度查证；厂商资料与实际使用反馈并重',
       verify: '口径对齐才可比；价值权衡与事实分开',
@@ -320,7 +328,7 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
     <div style={{ padding: 12, flex: 1, minHeight: 0, overflowY: 'auto', fontSize: 13, lineHeight: 1.7 }}>
       <div style={{ fontWeight: 700, marginBottom: 2 }}>研究偏好</div>
       <div style={{ opacity: 0.6, marginBottom: 8, fontSize: 12 }}>点名称看它具体怎么干活；每次研究自动推荐、可换。</div>
-      {BUILTIN_PREFERENCES.map((b) => card(b.name, b.sections.source, false, { isBuiltin: true }, () => setDetail({ mode: 'read', kind: 'builtin', name: b.name, sections: b.sections, provenance: null, isDefault: false, legacyText: null })))}
+      {BUILTIN_PREFERENCES.map((b) => card(b.name, b.summary, false, { isBuiltin: true }, () => setDetail({ mode: 'read', kind: 'builtin', name: b.name, sections: b.sections, provenance: null, isDefault: false, legacyText: null })))}
       <div style={{ fontWeight: 700, margin: '10px 0 2px' }}>我的偏好库</div>
       <div style={{ opacity: 0.6, marginBottom: 6, fontSize: 12 }}>保存的常用做法（存于本工作区）；⋯ 菜单里管理。</div>
       {entries === null && <div style={{ opacity: 0.5 }}>（读取偏好库…）</div>}
