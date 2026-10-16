@@ -29,11 +29,11 @@
 // 渐进面读**会话 journal 工具调用路径绑定的 bundle**（bundle-bind 谓词），位置=状态两个位置
 // 都认（根=在飞 / archive/=已交付）。断言的磁盘认证源 = 磁盘侧扫出的最新绑定会话（跑过 run
 // 即有），其 bundle 的 evidence 计数/交付态/问题行以盘上真值对账——不再自造探针 bundle。
-import { spawn } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { scrubbedEnv } from '../lib/env.mjs'
+import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs'
 import { launchChromium, loadChromium } from '../lib/playwright.mjs'
 import { readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
@@ -82,23 +82,12 @@ if (!existsSync(bin)) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 // ── RPC（造"会话建在 research-workspace"的条件——渐进面断言的前提）──
-let rpcSeq = 0
-const rpc = async (base, cookie, endpoint, args) => {
-  const res = await fetch(`${base}/api/${endpoint}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', cookie },
-    body: JSON.stringify({ type: 'client-request', rpcId: `cls-${++rpcSeq}`, method: endpoint, payload: { args } }),
-  })
-  const body = await res.json()
-  if (body?.result?.ok !== true) throw new Error(`${endpoint} 失败：${JSON.stringify(body?.result?.error ?? body).slice(0, 200)}`)
-  return body.result.value
-}
-const authenticate = async (base, token) => {
-  const res = await fetch(`${base}/?token=${token}`, { redirect: 'manual' })
-  const cookies = res.headers.getSetCookie?.() ?? []
-  if (cookies.length === 0) throw new Error('token 交换没拿到 cookie')
-  return cookies.map((c) => c.split(';')[0]).join('; ')
-}
+// RPC 正本 = lib/web-harness.makeRpc（原值逐字参数化：前缀 `cls-`、**无** AbortSignal 预算、
+// 失败文案（全角冒号）与 200 字符截断）
+const rpc = makeRpc({
+  prefix: 'cls-',
+  errorOf: (endpoint, body) => `${endpoint} 失败：${JSON.stringify(body?.result?.error ?? body).slice(0, 200)}`,
+})
 
 // boot 用补丁 = 源码域 overlay + agent-team host 行（**有团队正例环境**，2026-10-11 首验定案）：
 // ⑦ 区 roster（agentTeam 投影）由 agent-team **host 插件**计算——research.overlay.yml 只带
@@ -121,28 +110,15 @@ const teamPatchPath = join(ROOT, 'runtime', 'smoke-workspace', 'client-load-team
 mkdirSync(dirname(teamPatchPath), { recursive: true })
 writeFileSync(teamPatchPath, readFileSync(join(ROOT, 'dev', 'research.overlay.yml'), 'utf8') + TEAM_ROW, 'utf8')
 
-/** boot web（源码域 overlay 通道 + agent-team host 行），等到启动横幅打印带 token 的 URL。 */
+/** boot web（源码域 overlay 通道 + agent-team host 行），等到启动横幅打印带 token 的 URL。
+ *  启停与横幅等待正本 = lib/web-harness.bootWeb；本件的原值：非 detached、`scrubbedEnv`、
+ *  超时 BOOT_TIMEOUT_MS、尾部 800 字符（**无**失败收割包装——本站点原样即无）。 */
 async function boot() {
-  const child = spawn(
-    process.execPath,
-    ['--import', 'tsx/esm', bin, '--profile', 'web', '--patch', teamPatchPath,
-      '--', '--port', String(PORT), '--no-open'],
-    { cwd: ROOT, env: scrubbedEnv({ DSH_HOME: home }), stdio: ['ignore', 'pipe', 'pipe'] },
-  )
-  let output = ''
-  const banner = new Promise((resolveBanner, rejectBanner) => {
-    const onData = (chunk) => {
-      output += String(chunk)
-      const match = new RegExp(`http://127\\.0\\.0\\.1:${PORT}/\\?token=(\\S+)`).exec(output)
-      if (match !== null) resolveBanner({ token: match[1] })
-    }
-    child.stdout.on('data', onData)
-    child.stderr.on('data', onData)
-    child.on('exit', (code) => rejectBanner(new Error(`web 进程提前退出（code ${String(code)}）\n${output.slice(-800)}`)))
-    setTimeout(() => rejectBanner(new Error(`等待启动横幅超时\n${output.slice(-800)}`)), BOOT_TIMEOUT_MS)
+  const booted = await bootWeb({
+    bin, cwd: ROOT, profile: 'web', patchPath: teamPatchPath, port: PORT,
+    env: scrubbedEnv({ DSH_HOME: home }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 800,
   })
-  const { token } = await banner
-  return { child, token }
+  return { child: booted.child, token: booted.token }
 }
 
 const failures = []
