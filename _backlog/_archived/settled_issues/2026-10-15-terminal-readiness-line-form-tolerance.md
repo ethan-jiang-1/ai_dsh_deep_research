@@ -1,11 +1,11 @@
 ---
-status: 等人拍板
+status: 已结
 opened: 2026-10-15
 ---
 
 # 推敲：终局 readiness 的行形态容忍度——装饰形态读不出使 13 场已交付 bundle 降为"未判定"
 
-> 立卡：2026-10-15 ｜ 状态：等人拍板（方向已判：建议窄放宽；实施触及 pack 公共行为 + 已记录决定，需用户拍板）｜ 类型：Task ｜ 结论倾向：现在做（窄放宽）｜ 可关闭：否
+> 立卡：2026-10-15 ｜ 状态：已结 — 用户 2026-10-16 拍板取 **(A) 窄放宽**（只收行首判定行的装饰变体）；两侧（pack 纯函数 + node-gate 镜像）同 diff 落地，验收标准五条全绿（装饰语料逐条读出 · 不夺权负例钉住 · 52 场对账迁移 8 场且两侧同判 0 差异 · 渲染级复跑 PASS · [规则 Note 已按新事实改写](../../../notes/implemented/2026-10-11-review-readiness-terminal-rule.md)）｜ 类型：Task ｜ 结论倾向：现在做（窄放宽）｜ 可关闭：是
 
 **问题与期望结果：** 「review.md 终局 readiness」的读取规则（正本 = `packages/deep-research-pack/src/lib/review-readiness.ts`，node-gate 在纯 `.mjs` 侧镜像）只认**行首判定行**的契约形态与既有兼容集（`## readiness: PASS|FAIL`、`**readiness: …**`、中文冒号、列表项前缀）。真实交付里存在**同义但带装饰**的行首判定，规则读不出 → 返回 `null`（未判定）。期望：真终局判定无论装饰如何都能读出，同时**行内提及与表格单元仍不得夺权**（历史血统记录不得覆盖终局）。
 
@@ -61,6 +61,26 @@ opened: 2026-10-15
 
 ## 参考
 
-- [终局 readiness 规则 Note](../../notes/implemented/2026-10-11-review-readiness-terminal-rule.md)（本卡要动的已记录决定）；
+- [终局 readiness 规则 Note](../../../notes/implemented/2026-10-11-review-readiness-terminal-rule.md)（本卡要动的已记录决定）；
 - 差分对账方法（可复跑）：HEAD 隔离 worktree + `cp -Rp` 保留 mtime（断代走 mtime 族，`cp -R` 会假红 12 场——已实测）；
 - 受影响的观察面消费方 = `src/client/ResearchStatusTab.tsx`、`scripts/lib/run-dashboard-core.mjs`、`scripts/smoke/client-load-smoke.mjs`。
+
+## 落地结果（2026-10-16，(A) 窄放宽）
+
+放宽的是"读得出"，不是"放得过"：判定值仍只有 PASS/FAIL、仍取最后一条；边界 = 装饰前缀有**形状上限**
+（短标签至多 1 枚、标题文字至多 1 段），行内提及 / 表格单元 / 长前缀历史标题照旧不夺权。
+
+| 验收标准 | 结果 |
+|---|---|
+| ① 真实形态语料：假 FAIL 归零 + 假 unknown 同 | ✓ 8 场迁移全部落地：3 场假 FAIL（agent-memory / cn-agentic-parity / cn-us-open-source）+ 4 场假 unknown（chat-price-check / kimi / zhipu / open-llm-inference）→ PASS；`null` 形态收敛到 1 场（`drt_cn-llm-infra`，真无判定行） |
+| ② 不夺权负例 | ✓ 行内提及（mcp 承诺句）· 表格单元 · 长前缀历史标题 · 标题散文堆叠/标签链 · 装饰后的空模板，逐条断言（pack + node-gate 两侧） |
+| ③ 真实数据对账 | ✓ 41 场有 review.md 的 bundle 全扫：新分布 PASS 36 / FAIL 4 / null 1；"非 PASS"子集 = 4 场真 FAIL + 1 场真无判定（原 13 场 → 5 场），**该子集仍不 PASS** |
+| ④ 两处同判 | ✓ pack 纯函数 ↔ node-gate `.mjs` 镜像全语料**不同判 0**；两侧用例同 diff（`tests/review-readiness.test.mjs` + `tests/node-gate.test.mjs`） |
+| ⑤ Note 同步 | ✓ [2026-10-11 规则 Note](../../../notes/implemented/2026-10-11-review-readiness-terminal-rule.md) 的兼容集与边界按新事实改写；L0 全绿（`pnpm verify` + `pnpm test` 468/468） |
+
+**超出卡面预期的一处**（如实登记）：`drt_geometry-coaching` 原判"已知缺陷场 / 读对 ✓（null）"，实际它的
+`## 结论先行：**readiness: PASS**（第四轮复核收口…）` 是合规的行首判定行（短标签 + 标题标记），放宽后读作
+PASS——按规则语义这是正确读数（该场 review.md 确有多处终局 PASS 声明，缺陷在 evidence 链而非审查结论）。
+
+**渲染级后果**：`run-dashboard` 对 `drt_cn-agentic-parity`（原 `readiness: FAIL`）与
+`drt_deepseek-chat-price-check`（原整行缺席）复跑 → 均渲染 `readiness: PASS`。

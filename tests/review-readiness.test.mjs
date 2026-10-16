@@ -75,3 +75,41 @@ test('终局判定：PASS 注记引用已修复的历史 FAIL 仍为有效终局
 test('终局判定：空模板 `## readiness: PASS | FAIL` 两词并存 → null（未判定，不把模板当结论）', () => {
   assert.equal(terminalReadiness('## readiness: PASS | FAIL\n判据清单：\n'), null);
 });
+
+// ── 2026-10-16 窄放宽 (A)：行首判定行的**装饰形态**（13 场真实 review.md 逐字语料）──────────
+// 动因：13 场已交付 bundle 的终局判定带装饰（加粗/反引号/块引用/标题标记/短标签/箭头/值后缀），
+// 旧规则读不出 → 3 场被更早的历史 FAIL 夺权（假 FAIL）、4 场"未判定"（假 unknown）。
+// 边界未动：行内提及、表格单元、长前缀历史标题仍不得夺权。
+test('终局判定（窄放宽）：装饰形态真实语料逐条读得出', () => {
+  const cases = [
+    ['## 终验 readiness: **PASS**', 'PASS'],                                   // drt_agent-memory-landscape
+    ['**`readiness: PASS` 维持不变，且效力范围已按 `final/final.md` 实体复核完毕。**', 'PASS'], // drt_cn-agentic-parity
+    ['**⇒ 复核结论：`readiness: PASS`**（零 CRITICAL；五条判据全勾）', 'PASS'],      // drt_cn-us-open-source
+    ['→ **`readiness: PASS`**（放行至 HITL2；MAJOR-1 建议在定稿前补 2 句）', 'PASS'], // drt_deepseek-chat-price-check
+    ['> **## readiness: PASS（最终）**', 'PASS'],                                // drt_kimi-api-pricing
+    ['**`readiness: PASS`** —— 无 CRITICAL 未修复；价格主体经独立重抓逐格复核', 'PASS'], // drt_zhipu-api-pricing
+    ['**第 2 轮结论**：**`readiness: PASS`（维持）**。**MAJOR 0（全部关单）**', 'PASS'], // drt_open-llm-inference-engine-landscape
+    ['## 结论先行：**readiness: PASS**（第四轮复核收口）', 'PASS'],                  // drt_geometry-coaching
+    ['**结论行：`readiness: PASS`**', 'PASS'],                                   // 同场文首形态
+  ];
+  for (const [line, want] of cases) assert.equal(terminalReadiness(`${line}\n`), want, line);
+});
+
+test('终局判定（窄放宽）：不夺权负例逐条钉住（真实语料 + 边界形态）', () => {
+  // 承诺句（drt_mcp-server-ecosystem 末条）：真判定 = 更早的 FAIL + veto，承诺不得夺权
+  const promise = ['**readiness: FAIL**（首轮）', '', '**复评判据**：第 1、2 项落地后（第 3 项选定一种并落地），我将重新抓取受影响 URL 复核并给出 `readiness: PASS`。**在第 1、2 项修复前，本 critic 明确行使 veto：证据尚不足以按现稿交付。**'].join('\n');
+  assert.equal(terminalReadiness(promise), 'FAIL', '承诺句不得夺权');
+  // 表格单元：即使写 PASS 也不夺权（该形态要行内匹配才能读到）
+  assert.equal(terminalReadiness('## readiness: FAIL\n\n| —— **结论** —— | **readiness: PASS** |\n'), 'FAIL', '表格单元不得夺权');
+  // 长前缀历史标题（散文前缀）不得夺权
+  assert.equal(terminalReadiness('## readiness: FAIL\n\n# 复核轮（Round 2，2026-09-27）——**readiness: PASS**\n'), 'FAIL', '长前缀历史标题不得夺权');
+  // 装饰前缀的形状上限：标题散文 >1 段 / 标签 >1 枚都过不去（否则"标题里提过 readiness"会整体夺权）
+  assert.equal(terminalReadiness('## 第二轮 复审 结论 说明 readiness: PASS\n'), null, '标题散文堆叠不构成判定行');
+  assert.equal(terminalReadiness('## 一审：二审：readiness: PASS\n'), null, '标签链不构成判定行');
+  // 行内提及（prose 中段）：不构成判定行
+  assert.equal(terminalReadiness('findings.md 已一致）**够得上交付**；`readiness: PASS` 是我基于文件事实的判定。\n'), null, 'prose 行内提及不构成判定行');
+  // 旧负例在放宽后仍成立：附录里的轮次血统引用
+  assert.equal(terminalReadiness(['readiness: PASS', '', '## 附录 A：第 1 轮判级历史', '', '- **第 1 轮（首次审查）**：`readiness: FAIL` —— **CRITICAL 1**（…）'].join('\n')), 'PASS', '轮次血统引用不得夺权');
+  // 空模板的装饰形态同样不算判定
+  assert.equal(terminalReadiness('> **`readiness: PASS | FAIL`**\n'), null, '装饰后的空模板仍是空模板');
+});

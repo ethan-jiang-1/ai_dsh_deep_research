@@ -27,16 +27,62 @@ export function isPreContract(bundleDir, asOf, contractDate) {
 /** PRE-CONTRACT 详情后缀（五门共用；门A 另有带「存量由对账步处置」的长形态）。 */
 export const PRE_CONTRACT_NOTE = '（契约前交付——如实报告不计红，run bundle 是交付记录不改历史）'
 
-/** readiness 终局判定：仅认行首 verdict row，最后一条有效判定生效；正文历史引用不夺权。
- * 与 pack terminalReadiness 保持兼容，但 keyless .mjs 不导入 TS 源。条件 PASS 只对终局判定标注。 */
+/** 装饰前缀的形状上限（与 pack `review-readiness.ts` 同值同义，本地镜像勿单独调）：
+ *  短标签至多 1 枚、标题文字至多 1 段——判定词之前不许堆散文。 */
+const VERDICT_PREFIX_MAX_LABELS = 1
+const VERDICT_PREFIX_MAX_HEADING_CHUNKS = 1
+/** 剥去行首装饰，返回以 `readiness` 开头的剩余文本；未到判定词返回 null。
+ *  装饰 = 块引用/空白 · 列表符 · 箭头 · 标题标记与短标题文字 · 加粗/反引号 · 短标签（≤10 字 + 冒号）。 */
+function stripVerdictDecor(line) {
+  let s = line
+  let labels = 0
+  let headingChunks = 0
+  let heading = false
+  for (let i = 0; i < 12; i++) {
+    if (/^readiness\b/i.test(s)) return s
+    const before = s
+    let m = /^[\s>→⇒]+/.exec(s)
+    if (m !== null) s = s.slice(m[0].length)
+    m = /^[-*+]\s+/.exec(s)
+    if (m !== null) s = s.slice(m[0].length)
+    if (/^readiness\b/i.test(s)) return s
+    m = /^#{1,6}\s*/.exec(s)
+    if (m !== null) { heading = true; s = s.slice(m[0].length) } else {
+      m = /^(?:\*\*|__|`{1,2})\s*/.exec(s)
+      if (m !== null) { s = s.slice(m[0].length); continue }
+    }
+    if (/^readiness\b/i.test(s)) return s
+    m = /^[^|\n：:]{1,10}[：:]\s*/.exec(s)
+    if (m !== null) {
+      if (labels >= VERDICT_PREFIX_MAX_LABELS) return null
+      labels += 1; s = s.slice(m[0].length); continue
+    }
+    if (heading) {
+      m = /^[^|\n：:]{1,9}\s+/.exec(s)
+      if (m !== null) {
+        if (headingChunks >= VERDICT_PREFIX_MAX_HEADING_CHUNKS) return null
+        headingChunks += 1; s = s.slice(m[0].length); continue
+      }
+    }
+    if (s === before) break
+  }
+  return /^readiness\b/i.test(s) ? s : null
+}
+const VERDICT_LINE = /^readiness\s*[:：]\s*(?:\*\*|__|`{1,2})?\s*(PASS|FAIL)\b/i
+const EMPTY_TEMPLATE = /^readiness\s*[:：]\s*(?:\*\*|__|`{1,2})?\s*PASS\s*\|\s*FAIL[\s`*_]*$/i
+
+/** readiness 终局判定：仅认行首 verdict row（装饰变体见 stripVerdictDecor），最后一条有效判定生效；
+ * 正文历史引用不夺权。与 pack terminalReadiness 保持兼容（装饰容忍 = 2026-10-16 窄放宽 (A)，
+ * 两侧同 diff 同步；keyless .mjs 不导入 TS 源）。条件 PASS 只对终局判定标注。 */
 export function readinessOf(reviewText) {
-  const verdictRow = /^\s*(?:[-*+]\s+)?(?:#{1,6}\s*)?\**\s*readiness\s*[:：]\s*\**\s*(PASS|FAIL)\b/i
   let terminal = null
   for (const line of String(reviewText ?? '').split('\n')) {
-    const match = verdictRow.exec(line)
-    if (match === null) continue
+    const rest = stripVerdictDecor(line)
+    if (rest === null) continue
     // 空模板 `readiness: PASS | FAIL` 是完整占位行；带额外说明的是判定，不是模板。
-    if (/^\s*(?:[-*+]\s+)?(?:#{1,6}\s*)?\**\s*readiness\s*[:：]\s*\**\s*PASS\s*\|\s*FAIL\**\s*$/i.test(line)) continue
+    if (EMPTY_TEMPLATE.test(rest)) continue
+    const match = VERDICT_LINE.exec(rest)
+    if (match === null) continue
     terminal = { verdict: match[1].toUpperCase(), line }
   }
   if (terminal?.verdict !== 'PASS') return { pass: false, conditional: false }

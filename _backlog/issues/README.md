@@ -6,12 +6,11 @@
 
 | 卡 | 一句话 |
 |---|---|
-| [2026-10-15-terminal-readiness-line-form-tolerance](2026-10-15-terminal-readiness-line-form-tolerance.md) | 终局 readiness 的行形态容忍度：装饰形态读不出使 13 场已交付 bundle 降为"未判定"——建议窄放宽，待拍板 |
-| [2026-10-15-unclosed-bundles-disposition](2026-10-15-unclosed-bundles-disposition.md) | 活动区 13 个未归档 bundle 处置：4 场有 final.md 未闭合（2 场伪造 CRITICAL）+ 9 场未交付——分三类待你拍板 |
+| [2026-10-15-unclosed-bundles-disposition](2026-10-15-unclosed-bundles-disposition.md) | 活动区 13 个未归档 bundle 处置：4 场有 final.md 未闭合（BUG-029 修复后 nvidia 场 CRITICAL 已归零、另一场"本 run 未取证"成立）+ 9 场未交付——分三类待你拍板 |
 | [2026-10-15-hitl-answer-and-test-surface-hardening](2026-10-15-hitl-answer-and-test-surface-hardening.md) | hitl-answer 与测试面三条小硬化候选（侧栏扫描上限文案／library 列断言／`--custom` 语义）——留痕待触发 |
 | [2026-10-16-structure-round3-convergence](2026-10-16-structure-round3-convergence.md) | 第三轮结构收敛计划（已拍板）：web harness ~7 份近重复收单一正本（参数保形零行为变化）+ frontmatter/zstd 小件 + 触发登记——实施等用户逐阶段发起 |
 
-（上一张 2026-10-12-research-preference-detail-ux 已于 2026-10-13 归档 [settled_issues](../_archived/settled_issues/README.md)。）
+（最近归档：[readiness 行形态容忍度](../_archived/settled_issues/2026-10-15-terminal-readiness-line-form-tolerance.md) 2026-10-16 窄放宽落地（A）；[research-preference-detail-ux](../_archived/settled_issues/2026-10-12-research-preference-detail-ux.md) 2026-10-13。）
 
 ## 写一张卡
 

@@ -484,6 +484,27 @@ test('node-gate 终局 readiness：最终 PASS 的附条件注记仍显性保留
   })
 })
 
+test('node-gate 终局 readiness（窄放宽 2026-10-16）：装饰形态的终局 PASS 读得出 → PASS', () => {
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'review.md'), '## readiness: FAIL\n\n**`readiness: PASS` 维持不变，且效力范围已按 `final/final.md` 实体复核完毕。**\n')
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'PASS', JSON.stringify(g.detail))
+  })
+})
+
+test('node-gate 终局 readiness（窄放宽）：承诺句/表格单元仍不夺权 → RED', () => {
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'review.md'), '**readiness: FAIL**（首轮）\n\n**复评判据**：修复后我将重新抓取并给出 `readiness: PASS`。**在此之前行使 veto。**\n')
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'RED', JSON.stringify(g.detail))
+  })
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'review.md'), '## readiness: FAIL\n\n| —— **结论** —— | **readiness: PASS** |\n')
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'RED', JSON.stringify(g.detail))
+  })
+})
+
 test('门A合规：readiness PASS + v1 记账 + audit.md → PASS', () => {
   const g = A('fixture-complete', '2026-10-08')
   assert.equal(g.status, 'PASS', JSON.stringify(g.detail))
