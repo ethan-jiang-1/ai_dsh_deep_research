@@ -13,8 +13,8 @@
 //   钉 tag 源码基线 + tsx 解析树——机制权威）。
 // 用法：source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs [--port 3099]
 
-import { spawn } from 'node:child_process';
 import { withModelKey } from '../lib/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -93,61 +93,37 @@ const roleSkills = (role) => readdirSync(join(PRESETS, role, 'skills'), { withFi
   .filter((e) => e.isDirectory()).map((e) => e.name).sort();
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-let rpcId = 0;
-const rpc = async (base, cookie, endpoint, args) => {
-  const response = await fetch(`${base}/api/${endpoint}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', cookie },
-    body: JSON.stringify({ type: 'client-request', rpcId: `smoke-${++rpcId}`, method: endpoint, payload: { args } }),
-    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-  });
-  const body = await response.json();
-  if (body?.result?.ok !== true) {
-    throw new Error(`${endpoint} 失败: ${body?.result?.error?.message ?? JSON.stringify(body).slice(0, 200)}`);
-  }
-  return body.result.value;
-};
+// RPC 正本 = lib/web-harness.makeRpc（原值逐字参数化：前缀 `smoke-`、AbortSignal 预算 15s、
+// 失败文案与 200 字符截断）
+const rpc = makeRpc({
+  prefix: 'smoke-',
+  timeoutMs: REQUEST_TIMEOUT_MS,
+  errorOf: (endpoint, body) => `${endpoint} 失败: ${body?.result?.error?.message ?? JSON.stringify(body).slice(0, 200)}`,
+});
 
 // 端口自持有纪律（scripts/AGENTS.md「用完释放」）的执行器住 scripts/lib/port-reclaim.mjs
 // （实测依据与收割策略的正本在该文件头注；本脚本消费它做 boot 失败兜底与收尾双保险）。
 
+// boot 正本 = lib/web-harness.bootWeb（端口、boot 环境、超时、失败尾部字符都留本站点）；
+// **失败收割留本站点**（组杀 + 端口回收——各站点判据不同，不进共享件）。
 const boot = async () => {
-  const argv = ['--import', 'tsx/esm', bin, '--profile', PROFILE];
-  if (!NO_PATCH) argv.push('--patch', OVERLAY);
-  argv.push('--', '--port', String(PORT), '--no-open');
-  // detached = 组长（2026-09-26 实测修复）：web 会再派生子进程（真正的服务进程），SIGTERM 直杀
-  // 只达直接子进程、孙进程成孤儿占住端口——一次全绿的 L1 跑完后泄漏的孤儿让下一次冒烟直接
-  // EADDRINUSE。组长模式让我们能整组收割（process.kill(-pid)）。
-  const child = spawn(process.execPath, argv, { cwd: dshSrc, env: withModelKey({ DSH_HOME: home }), stdio: ['ignore', 'pipe', 'pipe'], detached: true });
-  let output = '';
-  const banner = new Promise((resolveBanner, rejectBanner) => {
-    const onData = (chunk) => {
-      output += String(chunk);
-      const m = new RegExp(`http://127\\.0\\.0\\.1:${PORT}/\\?token=(\\S+)`).exec(output);
-      if (m !== null) resolveBanner({ token: m[1] });
-    };
-    child.stdout.on('data', onData);
-    child.stderr.on('data', onData);
-    child.on('exit', (code) => rejectBanner(new Error(`web 进程提前退出（code ${String(code)}）\n${output.slice(-800)}`)));
-    setTimeout(() => rejectBanner(new Error(`等待启动横幅超时\n${output.slice(-800)}`)), BOOT_TIMEOUT_MS);
-  });
+  let child = null;
   try {
-    const { token } = await banner;
-    return { child, token };
+    const booted = await bootWeb({
+      bin, cwd: dshSrc, profile: PROFILE, patchPath: NO_PATCH ? null : OVERLAY, port: PORT,
+      env: withModelKey({ DSH_HOME: home }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 800,
+    });
+    child = booted.child;
+    return { child: booted.child, token: booted.token };
   } catch (e) {
     // 启动失败（横幅超时 / web 早退）也不能留活口——原版直接 throw，child 成孤儿
-    try { process.kill(-child.pid, 'SIGKILL') } catch { child.kill('SIGKILL') }
+    if (child !== null) {
+      try { process.kill(-child.pid, 'SIGKILL') } catch { child.kill('SIGKILL') }
+    }
     const leak = await reclaimPort(PORT);
     if (leak !== null) console.error(`[preset-smoke] ${leak}`);
     throw e;
   }
-};
-
-const authenticate = async (port, token) => {
-  const response = await fetch(`http://127.0.0.1:${String(port)}/?token=${token}`, { redirect: 'manual' });
-  const cookies = response.headers.getSetCookie?.() ?? [];
-  if (cookies.length === 0) throw new Error('token 交换没有拿到 cookie');
-  return cookies.map((c) => c.split(';')[0]).join('; ');
 };
 
 const failures = [];
@@ -160,7 +136,7 @@ const SMOKE_CWD = join(ROOT, 'runtime', 'smoke-workspace');
 const { child, token } = await boot();
 try {
   const base = `http://127.0.0.1:${String(PORT)}`;
-  const cookie = await authenticate(PORT, token);
+  const cookie = await authenticate(base, token);
 
   // ⓪ boot 页模块表行断言（company postmortem 0002 guardrail 的移植，形态 B——用户
   //    2026-10-09 拍板）：浏览器模块表 = boot 页内嵌的 dsh.client 行表；本包行缺席 =
