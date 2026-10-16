@@ -99,7 +99,7 @@ B1 的**改前基线**要三站点先绿，跑基线时暴露两件事——都�
 display:none / visibility:hidden / opacity:0 / aria-hidden 照查）。**活体验证** = `client-hitl-smoke`
 **ALL PASS**（⑤b→⑤c→⑤d→⑤e→⑤f 全绿）——该文件既有卡此前记"该路径无法活体验证"，本轮推翻。
 按 backlog 纪律"当场修掉的缺陷不建档"，修复记录并入同文件既有卡
-（[hitl-answer 三条硬化](../../_backlog/issues/2026-10-15-hitl-answer-and-test-surface-hardening.md) §附）。
+（[hitl-answer 三条硬化](../../_backlog/_archived/settled_issues/2026-10-15-hitl-answer-and-test-surface-hardening.md) §附）。
 
 ## 未跑与阻断（如实分列）
 
