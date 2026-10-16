@@ -11,6 +11,7 @@
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import { resolveSessionLog, readSessionEvents } from './session-log.mjs';
+import { splitFrontmatter } from './frontmatter.mjs';
 import { deriveSteps, latestRunVersion } from '../../packages/deep-research-pack/src/lib/run-fold.ts';
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts';
 import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts';
@@ -30,17 +31,7 @@ const WEB_LOG = 'runtime/smoke-workspace/web.log';
 
 // ── 纯解析函数（测试面；全部对畸形输入 fail-soft，永不 throw）──────────────────
 
-/** 拆 frontmatter：`---` 围栏内的 `key: value` 行 → 对象；无围栏返回 fm: null */
-export function splitFrontmatter(text) {
-  const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/.exec(text);
-  if (!m) return { fm: null, body: text };
-  const fm = {};
-  for (const line of m[1].split(/\r?\n/)) {
-    const kv = /^([A-Za-z_][\w-]*):\s*(.*)$/.exec(line);
-    if (kv) fm[kv[1]] = kv[2].trim();
-  }
-  return { fm, body: m[2] };
-}
+// frontmatter 拆分正本 = lib/frontmatter.mjs（2026-10-16 收敛，两 core 曾各持逐字副本）
 
 /** 取 `## <title>` 节正文（到下一个 ## 为止）；不存在返回 null */
 function sectionBody(text, title) {

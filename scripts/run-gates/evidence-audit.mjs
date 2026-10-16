@@ -27,11 +27,11 @@
 // CLI 可解全帧）注入。
 // 用法：node scripts/run-gates/evidence-audit.mjs <run-bundle-dir> [--sessions <会话根>]（缺省 $DSH_HOME/sessions）
 //       node scripts/run-gates/evidence-audit.mjs --latest（取 research-workspace 最新 drt_*——根[在飞]与 archive/[已交付]并扫）
-import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { auditBundle } from '../lib/evidence-audit-core.mjs'
+import { readZstdText } from '../lib/zstd-read.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -41,12 +41,13 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
  *  注入给 auditBundle 的 opts.readLog（lib 默认纯 reader 不解压 .zstd）。 */
 function readLog(p) {
   if (!p.endsWith('.zstd')) return readFileSync(p, 'utf8')
-  const r = spawnSync('zstd', ['-dc', p], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
-  if (r.status !== 0) {
+  const r = readZstdText(p) // 解压段正本 = lib/zstd-read.mjs（多帧拼接靠 zstd CLI）
+  if (!r.ok) {
+    // 本壳失败契约：**跳过该文件**（null）——语料缺失偏红方向；半份语料不得当全份
     console.error(`evidence-audit: 日志解压失败（跳过该文件，语料缺失偏红方向）：${p}`)
     return null
   }
-  return r.stdout
+  return r.text
 }
 
 // ── CLI ──

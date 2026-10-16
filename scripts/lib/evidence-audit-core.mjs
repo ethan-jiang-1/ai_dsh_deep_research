@@ -9,6 +9,7 @@
 // 消费方：scripts/run-gates/evidence-audit.mjs（驱动壳）+ tests/evidence-audit.test.mjs（纯 .jsonl 夹具直调）。
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
+import { splitFrontmatter } from './frontmatter.mjs'
 
 /** 纯日志 reader：.jsonl 直读；.zstd 报线索后返回 null（跳过文件，语料缺失偏红方向）。
  *  zstd CLI 解压由驱动壳注入，本模块零子进程。 */
@@ -20,17 +21,6 @@ export const plainLogReader = (p) => {
   return readFileSync(p, 'utf8')
 }
 
-/** 拆 frontmatter（与 run-dashboard 同款逻辑；独立副本——audit 不依赖 dashboard 的副作用面）。 */
-export function splitFrontmatter(text) {
-  const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/.exec(text)
-  if (!m) return { fm: null, body: text }
-  const fm = {}
-  for (const line of m[1].split(/\r?\n/)) {
-    const kv = /^([A-Za-z_][\w-]*):\s*(.*)$/.exec(line)
-    if (kv) fm[kv[1]] = kv[2].trim()
-  }
-  return { fm, body: m[2] }
-}
 
 // 尾部清理集（2026-09-26 实测修复）：原版只剥 ASCII `.,;:)]`，于是证据卡里形如
 // `` `https://x/y`（HTTP 200） `` 的写法被抽成 `https://x/y`（HTTP`——**不匹配语料 → 假 CRITICAL**。

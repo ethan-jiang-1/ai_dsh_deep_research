@@ -36,11 +36,11 @@
 // .jsonl 夹具直调（fixtures/node-gate/，先红后绿的永久反证记录）。
 // 用法：node scripts/run-gates/node-gate.mjs <run-bundle-dir> [--sessions <会话根>]
 //       node scripts/run-gates/node-gate.mjs --latest
-import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { gateBundle } from '../lib/node-gate-core.mjs'
+import { readZstdText } from '../lib/zstd-read.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -49,12 +49,13 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
  *  最低义务）。注入给 gateBundle 的 opts.readLog（lib 默认纯 reader 不解压 .zstd）。 */
 function readLog(p) {
   if (p.endsWith('.zstd')) {
-    const r = spawnSync('zstd', ['-dc', p], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
-    if (r.status !== 0) {
+    const r = readZstdText(p) // 解压段正本 = lib/zstd-read.mjs（多帧拼接靠 zstd CLI）
+    if (!r.ok) {
+      // 本壳失败契约：**按空语料继续**（''）——缺失偏假红方向，但红必须带线索（fail-loud 最低义务）
       console.error(`node-gate: 日志解压失败（按空语料继续，判据偏红方向）：${p}`)
       return ''
     }
-    return r.stdout
+    return r.text
   }
   return readFileSync(p, 'utf8')
 }
