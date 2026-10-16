@@ -48,6 +48,28 @@ stdout 形态比对（波动字段白名单化）。
 - 形态不同的内闭包不硬收敛：cdp-ask / snapshot-replay 的内层 rpc、dev/run-kickoff 的 rpc——留本地记"刻意不收敛"（与 2026-10-13"测试须知模态两处刻意不收敛"同原则）；
 - vendor 产物由各脚本 assertVendorArtifacts 自检把守，缺席先 `bash dev/vendor-build.sh` 复跑；改前一轮留档 → 改后复跑 → stdout 形态一致（时间戳 / 时长 / token 类波动字段白名单化后 diff）；任一档被外部阻断 → 该站点改动退回本地副本，如实分列，不阻塞其余。
 
+### Phase B2 参数保形原值表（批次① 采集，2026-10-16）
+
+五站点的近重复面与**逐项原值**（迁移时参数化，不得取中值/缺省）：
+
+| 站点 | 端口 | boot profile / patch | rpcId 前缀 | 错误截断 | zstd maxBuffer | 本地日志读法 |
+|---|---|---|---|---|---|---|
+| `l4-lite-smoke` | 3101 | `web` + overlay | `l4-` | 200 | 16MB | `sessionDirOf` 双形态 + 首匹配 + zstd CLI |
+| `team-preflight-smoke` | 3102 | **`PROFILE`（research 安装域）· 无 patch** | `tp-` | **300** | **32MB**（两处） | 同上 |
+| `client-hitl-smoke` | 3113 | `web` + overlay | `ch-` | **300** | **64MB** | 无 `sessionDirOf`（仅一处 `zstd -dc`） |
+| `discipline-probe` | 3104 | `web` + overlay | `dp-` | 200 | 16MB | 同上（16MB） |
+| `entry-chain-probe` | 3114 | `web` + **无 patch** | `probe-` | 200 | 待迁移时逐行确认 | 同上 |
+
+**自动保存的两个判定证据**（迁移时直接用，不必重查）：
+
+1. **代际选择等价性**：本地 `readSessionLog` 用 `readdirSync(...).find(首匹配)`，canonical 用显式代际优先
+   （`session.v4.jsonl.zstd` → `session.v4.jsonl` → v3…）。实测 dev home **1886 个会话目录里多形态 = 0**
+   → 两条规则在当前语料上等价；迁移 `readSessionLog` 换 canonical 时按此结论申报（连同卡上已声明的
+   解压通路变更 zstd CLI → node zlib：**同输出、不同路**）。
+2. **BUG-030 同族核对（负结果）**：`l4-lite` 与 `discipline-probe` 已明写"`assistant/message` 事件行携带标记
+   （**不是用户消息回显**）"，`team-preflight` 另有"模型会在确认语里早现标记 → 静默是唯一可靠完成信号"的
+   时序教训——**五站点无 BUG-030 同族实例**，迁移时不必再改判据。
+
 ### Phase D · 触发登记
 
 [triggers](../triggers.md) 两行：verify.mjs 拆分重议（条件 = 门禁继续增长 / 追加块编辑摩擦成实测痛点，正本 = verify-domain-regroup Note）；tests/ 分域（条件 = 检索开始靠猜或文件数显著上升，正本 = test-asset-organization Note）。
