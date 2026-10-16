@@ -32,17 +32,21 @@ const bannerRe = (port) => new RegExp(`http://127\\.0\\.0\\.1:${port}/\\?token=(
  * @param {number} o.timeoutMs  等横幅超时
  * @param {number} o.tailChars  失败信息里附的输出尾部字符数（各站点原值）
  * @param {string[]} [o.extraArgs]  `--` 之后的额外参数（各站点自持）
+ * @param {boolean} [o.detached]  是否让子进程当组长（**原值保形，勿统一**）：组长能被整组收割
+ *   （preset-smoke / snapshot-replay 的 `process.kill(-pid)` 依赖它），非组长随父进程组走
+ *   （client-load 等原本如此——把它悄悄改成组长会改 Ctrl-C 与孤儿回收的行为）
  * @returns {Promise<{child: import('node:child_process').ChildProcess, token: string}>}
  *          横幅失败 → reject（收割留调用方；见文件头注）。
  */
-export function bootWeb({ bin, cwd, profile, patchPath = null, port, env, timeoutMs, tailChars, extraArgs = [] }) {
+export function bootWeb({ bin, cwd, profile, patchPath = null, port, env, timeoutMs, tailChars, extraArgs = [], detached = true }) {
   if (typeof port !== 'number' || !Number.isInteger(port)) throw new TypeError('bootWeb: port 必填且为整数（端口 owner = 调用站点）')
   const argv = ['--import', 'tsx/esm', bin, '--profile', profile]
   if (patchPath !== null) argv.push('--patch', patchPath)
   argv.push('--', '--port', String(port), '--no-open', ...extraArgs)
-  // detached = 组长（2026-09-26 实测）：web 会再派生子进程（真正的服务进程），SIGTERM 直杀只达直接
-  // 子进程、孙进程成孤儿占住端口——组长模式让调用方能整组收割（process.kill(-pid)）。
-  const child = spawn(process.execPath, argv, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'], detached: true })
+  // detached 由调用方给（默认组长）：web 会再派生子进程（真正的服务进程），SIGTERM 直杀只达直接
+  // 子进程、孙进程成孤儿占住端口——组长模式让调用方能整组收割（process.kill(-pid)）；**没有这一
+  // 需求的站点必须显式 false**（保形：改了进程组就改了 Ctrl-C 与孤儿回收的行为）。
+  const child = spawn(process.execPath, argv, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'], detached })
   let output = ''
   const banner = new Promise((resolve, reject) => {
     const onData = (chunk) => {

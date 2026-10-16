@@ -10,8 +10,9 @@
 //
 // 前置：source dev/env.sh（DSH_HOME + 凭据）；DSH_SRC 默认本仓根（vendor/dsh）。
 // 用法：source dev/env.sh && node scripts/probe/entry-chain-probe.mjs [--port 3114]
-import { spawn, spawnSync } from 'node:child_process';
 import { withModelKey } from '../lib/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
+import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, writeFileSync } from 'node:fs';
 import { readdirSync, readFileSync } from 'node:fs';
@@ -44,46 +45,21 @@ if (!existsSync(bin)) { console.error(`probe: 机制基线不在位（${bin}）�
 
 // ── DSH 会话面（照抄 l4-lite 实证骨架）──────────────────────────────────────
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-let rpcId = 0;
-// RPC 协议照抄 l4-lite 实证：/api/<method> + client-request 包裹 + result.ok/value
-const rpc = async (base, cookie, endpoint, args) => {
-  const response = await fetch(`${base}/api/${endpoint}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', cookie },
-    body: JSON.stringify({ type: 'client-request', rpcId: `probe-${++rpcId}`, method: endpoint, payload: { args } }),
-  });
-  const body = await response.json();
-  if (body?.result?.ok !== true) {
-    throw new Error(`${endpoint} 失败: ${body?.result?.error?.message ?? JSON.stringify(body).slice(0, 200)}`);
-  }
-  return body.result.value;
-};
+// RPC 正本 = lib/web-harness.makeRpc（原值：前缀 `probe-`、无 AbortSignal 预算、
+// 失败文案与 200 字符截断逐字保形）
+const rpc = makeRpc({
+  prefix: 'probe-',
+  errorOf: (endpoint, body) => `${endpoint} 失败: ${body?.result?.error?.message ?? JSON.stringify(body).slice(0, 200)}`,
+});
 
-const boot = async () => {
-  const child = spawn(process.execPath,
-    ['--import', 'tsx/esm', bin, '--profile', 'web', '--', '--port', String(PORT), '--no-open'],
-    { cwd: dshSrc, env: withModelKey({ DSH_HOME: home }), stdio: ['ignore', 'pipe', 'pipe'] });
-  let output = '';
-  const banner = new Promise((resolveBanner, rejectBanner) => {
-    const onData = (chunk) => {
-      output += String(chunk);
-      const m = new RegExp(`http://127\\.0\\.0\\.1:${PORT}/\\?token=(\\S+)`).exec(output);
-      if (m !== null) resolveBanner({ token: m[1] });
-    };
-    child.stdout.on('data', onData);
-    child.stderr.on('data', onData);
-    child.on('exit', (code) => rejectBanner(new Error(`web 提前退出（${String(code)}）\n${output.slice(-600)}`)));
-    setTimeout(() => rejectBanner(new Error(`boot 超时\n${output.slice(-600)}`)), BOOT_TIMEOUT_MS);
-  });
-  return { child, token: (await banner).token };
-};
+// 启停与横幅等待正本 = lib/web-harness.bootWeb（原值：**非组长** detached:false、
+// withModelKey({DSH_HOME}) 环境、超时 BOOT_TIMEOUT_MS、失败尾部 600 字符、无 --patch）
+const boot = async () => bootWeb({
+  bin, cwd: dshSrc, profile: 'web', patchPath: null, port: PORT,
+  env: withModelKey({ DSH_HOME: home }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 600,
+  detached: false,
+});
 
-const authenticate = async (token) => {
-  const response = await fetch(`http://127.0.0.1:${String(PORT)}/?token=${token}`, { redirect: 'manual' });
-  const cookies = response.headers.getSetCookie?.() ?? [];
-  if (cookies.length === 0) throw new Error('token 交换没拿到 cookie');
-  return cookies.map((c) => c.split(';')[0]).join('; ');
-};
 
 // 会话日志读取：zstd 多帧切段解压（node:zlib 单帧 API；DSH 日志 = 逐次 append 帧拼接，
 // debug-dashboard-plus 实证 357 帧/639 行）。按 session id 扫描定位，不猜 cwd 编码。
@@ -113,13 +89,12 @@ const decompressLog = (buf) => {
   return Buffer.concat(parts).toString('utf8');
 };
 const readSessionLog = (sessionId) => {
-  const dir = sessionDirOf(sessionId);
+  const dir = sessionDirOf(sessionId); // 本地：双形态目录发现（canonical 无此形态，保形留下）
   if (dir === null) return '';
-  const file = readdirSync(dir).find((f) => f.endsWith('.jsonl.zstd') || f.endsWith('.jsonl'));
-  if (file === undefined) return '';
-  const p = join(dir, file);
-  if (!file.endsWith('.zstd')) return readFileSync(p, 'utf8');
-  try { return decompressLog(readFileSync(p)); } catch { return ''; }
+  // 选择与解压归 canonical（session-log.mjs）：代际优先 + node zlib（同输出、不同路；差异记 Note）。
+  const logPath = resolveSessionLog(dir);
+  if (logPath === null) return '';
+  return readSessionText(logPath) ?? '';
 };
 
 /** 轮询直到 assistant 完成作答：等会话日志出现 ≥4 行 "Q<n>:" 的 assistant/message 文本。 */
@@ -169,7 +144,7 @@ let verdict = [];
 let transcript = '';
 try {
   const base = `http://127.0.0.1:${String(PORT)}`;
-  const cookie = await authenticate(token);
+  const cookie = await authenticate(base, token);
   const created = await rpc(base, cookie, 'session/create', { request: { cwd: ROOT, agentPreset: 'standard' } });
   const sessionId = created?.sessionId ?? created?.id;
   if (typeof sessionId !== 'string') throw new Error('无会话 id');

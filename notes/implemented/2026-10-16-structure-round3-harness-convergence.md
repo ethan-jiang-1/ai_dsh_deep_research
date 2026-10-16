@@ -104,6 +104,22 @@ B1 的**改前基线**要三站点先绿，跑基线时暴露两件事——都�
   （只等 tool/call，不等 assistant 文本折出的活动行）。
 - **Phase D（触发登记）**：**已交付**——[triggers](../../_backlog/triggers.md) 新增两行（`verify.mjs` 拆分重议、
   `tests/` 分域），每行带**可观察**的重议条件与决定正本链接（D-1：`pnpm verify` 绿 + md-links 把守链接）。
-- **B2（真模型档五站点）**：未开始——`l4-lite-smoke` / `team-preflight-smoke` / `client-hitl-smoke` /
-  `discipline-probe` / `entry-chain-probe` 的 harness 收敛 + `session-log` canonical 化需逐件真跑取证，
-  与主线真模型段排开（本阶段申报的判据变更：解压通路 zstd CLI → node zlib，同输出不同路）。
+- **B2（真模型档站点）**：**已交付 4/5**（`l4-lite-smoke` / `team-preflight-smoke` / `discipline-probe` /
+  `entry-chain-probe`）——接 `web-harness`（原值保形：端口 · `profile`+patch（entry-chain/team-preflight 无
+  patch、后者走 `research` 安装域）· rpcId 前缀 `l4-`/`tp-`/`dp-`/`probe-` · 失败文案与 200 vs 300 截断 ·
+  **非组长 `detached:false`**）+ `sessionDirOf` 保留本地、`readSessionLog` 换 canonical
+  `resolveSessionLog` + `readSessionText`。第 5 站点 `client-hitl-smoke` **既存确定性红**（⑤b 代答未落地 /
+  ⑤c 回合未闭合，两跑同两条，文件零改动）→ 按卡纪律"外部阻断站点改动退回本地副本、如实分列"**未迁移**。
+  - **申报的判据变更（三处，均为等价或去截断面）**：① 解压通路 zstd CLI → node zlib（同输出、不同路）；
+    ② 文件选择首匹配 → canonical 代际优先（实测 dev home **1886 个会话目录多形态 = 0** → 等价）；
+    ③ 原 `maxBuffer`（16/32MB）截断上限取消（node zlib 全量解压——去掉一个静默截断面）；
+    另 boot 失败文案统一为共享件措辞（仅失败路径可见）。
+  - **零行为证据（判定面）**：真模型跑无法逐字比 → 判据 = 退出码 + **判定行集合**（标签本名，括号内
+    运行期细节剔除）+ 汇总行：改前/改后 **4/4 站点形态一致、各自 ALL PASS**；留档
+    `runtime/smoke-workspace/b2-baseline-2026-10-16/`（`site-before/` · `recheck/` · `site-after/`）。
+  - **两处真模型波动（非迁移引入，已分类）**：`entry-chain` 批次① 首跑「等答案超时」→ 重跑绿，取重跑为基线；
+    `team-preflight` 批次② 首跑 lead 跳过 `spawn_teammate`/`list_agents`/`subagent`（3 FAIL）→
+    **同代码重跑 2/2 ALL PASS**，取绿跑入对账（红跑留档 `team-preflight-batch2.*`）。
+  - **顺带修正 B1 的一处保形失真**：`bootWeb` 原恒 `detached: true`，而 `client-load-smoke` 原本**非组长**——
+    共享件加 `detached` 参数（默认 true），client-load 显式 `false` 回填原拓扑（改进程组会改 Ctrl-C 与
+    孤儿回收行为）；回填后 client-load 复跑仍 ALL PASS。

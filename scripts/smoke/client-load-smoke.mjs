@@ -111,12 +111,13 @@ mkdirSync(dirname(teamPatchPath), { recursive: true })
 writeFileSync(teamPatchPath, readFileSync(join(ROOT, 'dev', 'research.overlay.yml'), 'utf8') + TEAM_ROW, 'utf8')
 
 /** boot web（源码域 overlay 通道 + agent-team host 行），等到启动横幅打印带 token 的 URL。
- *  启停与横幅等待正本 = lib/web-harness.bootWeb；本件的原值：非 detached、`scrubbedEnv`、
+ *  启停与横幅等待正本 = lib/web-harness.bootWeb；本件的原值：非组长（detached: false）、`scrubbedEnv`、
  *  超时 BOOT_TIMEOUT_MS、尾部 800 字符（**无**失败收割包装——本站点原样即无）。 */
 async function boot() {
   const booted = await bootWeb({
     bin, cwd: ROOT, profile: 'web', patchPath: teamPatchPath, port: PORT,
     env: scrubbedEnv({ DSH_HOME: home }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 800,
+    detached: false, // 原值：本站点非组长（不整组收割；收尾用 child.kill('SIGTERM')）
   })
   return { child: booted.child, token: booted.token }
 }

@@ -12,8 +12,10 @@
 // 前置：DSH_HOME（dev home 已配凭据）+ research 组合在位（缺则先跑 dev/boot-run.sh）+ zstd。
 // 用法：source dev/env.sh && node scripts/smoke/team-preflight-smoke.mjs [--port 3102]
 
-import { spawn, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { withModelKey } from '../lib/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
+import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
@@ -67,45 +69,21 @@ const profDir = join(home, 'profiles', PROFILE);
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-let rpcId = 0;
-const rpc = async (base, cookie, endpoint, args) => {
-  const response = await fetch(`${base}/api/${endpoint}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', cookie },
-    body: JSON.stringify({ type: 'client-request', rpcId: `tp-${++rpcId}`, method: endpoint, payload: { args } }),
-  });
-  const body = await response.json();
-  if (body?.result?.ok !== true) {
-    throw new Error(`${endpoint} 失败: ${body?.result?.error?.message ?? JSON.stringify(body).slice(0, 300)}`);
-  }
-  return body.result.value;
-};
+// RPC 正本 = lib/web-harness.makeRpc（原值：前缀 `tp-`、无 AbortSignal 预算、
+// 失败文案与 300 字符截断逐字保形）
+const rpc = makeRpc({
+  prefix: 'tp-',
+  errorOf: (endpoint, body) => `${endpoint} 失败: ${body?.result?.error?.message ?? JSON.stringify(body).slice(0, 300)}`,
+});
 
-const boot = async () => {
-  const child = spawn(process.execPath,
-    ['--import', 'tsx/esm', bin, '--profile', PROFILE, '--', '--port', String(PORT), '--no-open'],
-    { cwd: dshSrc, env: withModelKey({ DSH_HOME: home }), stdio: ['ignore', 'pipe', 'pipe'] });
-  let output = '';
-  const banner = new Promise((resolveBanner, rejectBanner) => {
-    const onData = (chunk) => {
-      output += String(chunk);
-      const m = new RegExp(`http://127\\.0\\.0\\.1:${PORT}/\\?token=(\\S+)`).exec(output);
-      if (m !== null) resolveBanner({ token: m[1] });
-    };
-    child.stdout.on('data', onData);
-    child.stderr.on('data', onData);
-    child.on('exit', (code) => rejectBanner(new Error(`web 提前退出（${String(code)}）\n${output.slice(-600)}`)));
-    setTimeout(() => rejectBanner(new Error(`boot 超时\n${output.slice(-600)}`)), BOOT_TIMEOUT_MS);
-  });
-  return { child, token: (await banner).token };
-};
+// 启停与横幅等待正本 = lib/web-harness.bootWeb（原值：**非组长** detached:false、
+// withModelKey({DSH_HOME}) 环境、超时 BOOT_TIMEOUT_MS、失败尾部 600 字符）
+const boot = async () => bootWeb({
+  bin, cwd: dshSrc, profile: PROFILE, patchPath: null, port: PORT,
+  env: withModelKey({ DSH_HOME: home }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 600,
+  detached: false,
+});
 
-const authenticate = async (token) => {
-  const response = await fetch(`http://127.0.0.1:${String(PORT)}/?token=${token}`, { redirect: 'manual' });
-  const cookies = response.headers.getSetCookie?.() ?? [];
-  if (cookies.length === 0) throw new Error('token 交换没拿到 cookie');
-  return cookies.map((c) => c.split(';')[0]).join('; ');
-};
 
 // ── 会话日志读取（会话日志即真相；按 session id 扫描定位，不猜 cwd 编码）──
 const sessionsRoot = join(home, 'sessions');
@@ -120,14 +98,14 @@ const sessionDirOf = (sessionId) => {
   return null;
 };
 const readSessionLog = (sessionId) => {
-  const dir = sessionDirOf(sessionId);
+  const dir = sessionDirOf(sessionId); // 本地：双形态目录发现（canonical 无此形态，保形留下）
   if (dir === null) return '';
-  const file = readdirSync(dir).find((f) => f.endsWith('.jsonl.zstd') || f.endsWith('.jsonl'));
-  if (file === undefined) return '';
-  const p = join(dir, file);
-  if (!file.endsWith('.zstd')) return readFileSync(p, 'utf8');
-  const r = spawnSync('zstd', ['-dc', p], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
-  return r.status === 0 ? r.stdout : '';
+  // 选择与解压归 canonical（session-log.mjs）：代际优先（v4.zstd → v4 → v3…）+ node zlib。
+  // 契约差（已记 Note）：原首匹配 → 代际优先（dev home 1886 目录多形态=0，等价）；
+  // 原 zstd CLI（maxBuffer 截断上限）→ node zlib 全量解压（同输出、不同路）。
+  const logPath = resolveSessionLog(dir);
+  if (logPath === null) return '';
+  return readSessionText(logPath) ?? '';
 };
 
 /** 等回合真正落定：日志行数连续 QUIET_POLLS 次轮询不变（多步工具回合没有 turn/end 事件，
@@ -195,7 +173,7 @@ const check = (label, fn) => fn().then(
 const { child, token } = await boot();
 try {
   const base = `http://127.0.0.1:${String(PORT)}`;
-  const cookie = await authenticate(token);
+  const cookie = await authenticate(base, token);
 
   let leadId = null;
   await check('lead 会话挂载（research 安装域）', async () => {
