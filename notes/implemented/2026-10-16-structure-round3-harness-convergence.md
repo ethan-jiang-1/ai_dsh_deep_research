@@ -92,5 +92,14 @@ B1 的**改前基线**要三站点先绿，跑基线时暴露两件事——都�
   即**产品行为正确、断言错**：判据用未限域的 `page.locator('textarea')` 计数，页面多一个 textarea
   就红。**修复** = 三处 textarea 断言锚到 Modal（`[role="dialog"] textarea`）——意图不变（两条旧正文
   用例仍断言"Modal 内 5 区"），去掉的是与判据无关的页面级耦合。
-- **B1 本身（web-harness 单一正本）**：本轮**未动手**——基线阶段被上述两件副作用 + 一条既有断言红占满；
-  三站点基线现已全绿（这就是 B1 的"改前留档"前提），B1 的参数保形表、三站点迁移与 B2/D 均未开始。
+- **B1（web-harness 单一正本）**：三站点**已迁移**（每站点独立 diff）——`preset-smoke` ALL PASS、
+  `client-load-smoke` ALL PASS（42 条）、`snapshot-replay-smoke` 除下述**既有间歇**外全绿。
+  参数保形原值：preset `smoke-`/15s AbortSignal/200 截断/组杀+收端口；client-load `cls-`/**无**超时/
+  全角冒号文案/非 detached；snapshot-replay 内层 rpc **刻意不收敛**（闭包形态 `(endpoint, args)`，
+  与 makeRpc 的 `(base, cookie, endpoint, args)` 不同形——硬收敛即行为改写）。
+- **`snapshot-replay` 的 C5 是既有间歇**（非本轮引入）：迁移版 4 跑 1 绿，**未迁移的对照脚本 2 跑 1 绿 1 红**
+  ——同机同客户端对照即复现；形态 = 活动行少一行（2→1），卡片部分一致。已立
+  [BUG-030](../../_backlog/bugs/BUG-030-snapshot-replay-c5-activity-row-flicker-recurrence.md)（P2，排查中；
+  按"已修永不重开、复发 = 引用旧卡的新卡"引用 BUG-027），假设 = C0b 就绪谓词覆盖面 < 断言面
+  （只等 tool/call，不等 assistant 文本折出的活动行）。
+- **B2 / D**：未开始（B2 真模型五站点与主线真模型段排开；D = triggers 两行）。

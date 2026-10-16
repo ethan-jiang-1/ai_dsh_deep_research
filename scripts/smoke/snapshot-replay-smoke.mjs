@@ -29,13 +29,14 @@
 // 用法：source dev/env.sh && node scripts/smoke/snapshot-replay-smoke.mjs [--port 3103] [--update-expected] [--scenario <id>]
 // 红证（实录）：改 fixture 内一条 assistant 文本 → A 红；改 fixture persona/注入文本或工具 schema
 //   一词 → 对应 B 条红；改 fixture 一条 web_search 查询词 → C 红；各自还原 → 绿。
-import { spawn, execSync } from 'node:child_process';
+import { execSync } from 'node:child_process';
 import { writeFileSync, existsSync, readFileSync, readdirSync, mkdtempSync, statSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
-import { scrubbedEnv } from '../lib/env.mjs';
+import { scrubbedEnv } from '../lib/env.mjs'
+import { authenticate, bootWeb } from '../lib/web-harness.mjs';
 import { presetRoles } from '../lib/roles.mjs';
 import { loadReplayScene } from '../lib/replay-scene.mjs';
 import { compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds } from '../lib/replay-request.mjs';
@@ -147,21 +148,17 @@ for (const sc of SCENARIOS) {
   const bin = join(VENDOR, 'apps', 'cli', 'src', 'bin.ts');
   const BOOT_START = Date.now();
   const dshSrc = VENDOR;
-  const child = spawn(process.execPath, ['--import', 'tsx/esm', bin, '--profile', 'research', '--patch', patchPath, '--', '--port', String(PORT), '--no-open'], { cwd: dshSrc, env: scrubbedEnv({ DSH_HOME, PATH: process.env.PATH }), stdio: ['ignore', 'pipe', 'pipe'], detached: true });
-  let output = '';
+  // 启停与横幅等待正本 = lib/web-harness.bootWeb（原值：detached 组长、scrubbedEnv(含 PATH)、
+  // 超时 BOOT_TIMEOUT_MS、尾部 600 字符）；**内层 rpc 刻意不收敛**——它是闭包形态
+  // （`rpc(endpoint, args)` 捕获 base/cookie），与 makeRpc 的 `(base, cookie, endpoint, args)`
+  // 不同形，硬收敛即行为改写（round3 卡「输掉的方案」）。
+  const booted = await bootWeb({
+    bin, cwd: dshSrc, profile: 'research', patchPath, port: PORT,
+    env: scrubbedEnv({ DSH_HOME, PATH: process.env.PATH }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 600,
+  });
+  const child = booted.child;
   let childGone = false;
   child.on('exit', () => { childGone = true; });
-  const banner = new Promise((res, rej) => {
-    const onData = (chunk) => {
-      output += String(chunk);
-      const m = new RegExp(`http://127\\.0\\.0\\.1:${PORT}/\\?token=(\\S+)`).exec(output);
-      if (m !== null) res({ token: m[1] });
-    };
-    child.stdout.on('data', onData);
-    child.stderr.on('data', onData);
-    child.on('exit', (code) => rej(new Error(`web 进程提前退出（code ${String(code)}）\n${output.slice(-600)}`)));
-    setTimeout(() => rej(new Error(`等待启动横幅超时\n${output.slice(-600)}`)), BOOT_TIMEOUT_MS);
-  });
   const cleanup = () => {
     try { process.kill(-child.pid, 'SIGKILL') } catch { child.kill('SIGKILL') }
   };
@@ -174,13 +171,9 @@ for (const sc of SCENARIOS) {
   });
   let replayLogText = null;
   try {
-    const { token } = await banner;
+    const { token } = booted;
     const base = `http://127.0.0.1:${PORT}`;
-    const auth = async () => {
-      const response = await fetch(`${base}/?token=${token}`, { redirect: 'manual' });
-      return (response.headers.getSetCookie?.() ?? []).map((c) => c.split(';')[0]).join('; ');
-    };
-    const cookie = await auth();
+    const cookie = await authenticate(base, token);
     let rpcId = 0;
     const rpc = async (endpoint, args) => {
       const response = await fetch(`${base}/api/${endpoint}`, {
