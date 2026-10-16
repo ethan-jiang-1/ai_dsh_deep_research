@@ -53,10 +53,16 @@ const stopForMissingUiSession = () => {
 function operateOnTargetCard({ targetSessionId, expectedCardKey, action = 'identity', index, value }) {
   const visible = (element) => {
     for (let current = element; current !== null; current = current.parentElement) {
-      const rect = current.getBoundingClientRect()
       const style = getComputedStyle(current)
-      if (rect.width <= 0 || rect.height <= 0 || style.display === 'none' || style.visibility === 'hidden'
+      // `display: contents` 的元素**不生成盒子**——rect 恒 0×0 是布局语义，不是"隐藏"
+      // （2026-10-16 实测根因：DSH web 的会话容器外有三层 display:contents 包装，旧判据据此把
+      //  可见会话判成 `active-session-unavailable` → 拒绝代答 exit 3 → client-hitl-smoke ⑤b/⑤c
+      //  连跑四次恒红。零盒祖先必须跳过尺寸检查，其余隐藏信号照查。）
+      if (style.display === 'none' || style.visibility === 'hidden'
         || style.opacity === '0' || current.getAttribute('aria-hidden') === 'true') return false
+      if (style.display === 'contents') continue
+      const rect = current.getBoundingClientRect()
+      if (rect.width <= 0 || rect.height <= 0) return false
     }
     return true
   }

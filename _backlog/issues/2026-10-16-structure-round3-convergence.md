@@ -5,7 +5,7 @@ opened: 2026-10-16
 
 # 计划：第三轮结构收敛——web harness 单一正本、小件收口与触发登记
 
-> 立卡：2026-10-16 ｜ 状态：等人拍板 — 2026-10-16 用户按推荐次序批准开工；**Phase A / B1 / B2（4/5 站点）/ D 已交付**（验收判据全绿，证据 = [round3 Note](../../notes/implemented/2026-10-16-structure-round3-harness-convergence.md)），**只剩 B2（真模型档五站点）** 等真模型窗口；另在 B1 路上立了 [BUG-030](../_archived/fixed_bugs/BUG-030-snapshot-replay-c5-activity-row-flicker-recurrence.md)（既有间歇，非本卡引入）｜ 类型：Task ｜ 结论倾向：现在做（三点已拍板）｜ 可关闭：否
+> 立卡：2026-10-16 ｜ 状态：等人拍板 — 2026-10-16 用户按推荐次序批准开工；**Phase A / B1 / B2（5/5 站点）/ D 已交付**（验收判据全绿，证据 = [round3 Note](../../notes/implemented/2026-10-16-structure-round3-harness-convergence.md)），**只剩 B2（真模型档五站点）** 等真模型窗口；另在 B1 路上立了 [BUG-030](../_archived/fixed_bugs/BUG-030-snapshot-replay-c5-activity-row-flicker-recurrence.md)（既有间歇，非本卡引入）｜ 类型：Task ｜ 结论倾向：现在做（三点已拍板）｜ 可关闭：否
 
 **问题与期望结果：** 2026-10-16 用户委托的全仓结构评审（结构 / 臃肿 / SOLID 三问），经取代检查对齐 2026-10-13 两篇结构 Note 后确认：剩余的真实改善面集中在上轮刻意避开的区间——那轮硬约束"零行为变化 + 红即回滚"、未跑真模型档面，而 DSH web harness 家族的 ~7 份近重复（`rpc` / `boot` 横幅等待 / `authenticate` / 本地会话日志读法 / 谓词轮询，约 500 行）恰恰集中在真模型档脚本里。本卡承载已拍板的收敛计划。期望结果 = 重复面收敛为单一正本、参数保形零行为变化、每阶段有可机械执行的验收判据。
 
@@ -19,6 +19,7 @@ opened: 2026-10-16
 同 diff Note 落盘（[round3 Note](../../notes/implemented/2026-10-16-structure-round3-harness-convergence.md)）、
 自审见 Note §未跑与阻断（`client-hitl-smoke` 既存确定性红 = 外部阻断，按 B2-4 分列不阻塞）——
 **唯余用户确认**：确认后本卡转 `可关闭：是` 并同次变更归档 settled_issues。
+（B2 第 5 站点的既存红已于本轮诊断并当场修复 → 已无外部阻断项。）
 
 **下一步（2026-10-16 进度更新）：** Phase A / B1 / D **已交付**（每阶段独立 diff + 验收判据全绿 + 同 diff Note，
 证据与"未跑与阻断"分列 = [round3 Note](../../notes/implemented/2026-10-16-structure-round3-harness-convergence.md)）；
@@ -71,11 +72,11 @@ stdout 形态比对（波动字段白名单化）。
 | `team-preflight-smoke` | exit 0 ✓（0:41） | — | 绿 | 改前基线可用 |
 | `discipline-probe` | exit 0 ✓（0:58） | — | 绿 | 改前基线可用 |
 | `entry-chain-probe` | exit 1（stderr「等答案超时（最后文本片段：无）」） | **exit 0 ✓** | **偶发外部阻断**（模型 180s 未作答） | 取重跑绿为改前基线 |
-| `client-hitl-smoke` | exit 1（⑤b 挂起卡已答 / ⑤c 答后回合闭合） | **exit 1（同两条）** | **既存确定性红**（该文件本轮零改动，非本轮引入） | 按卡纪律"该站点改动退回本地副本，如实分列，不阻塞其余"——**本轮不迁移**该站点，红态入档 |
+| `client-hitl-smoke` | exit 1（⑤b 挂起卡已答 / ⑤c 答后回合闭合） | **exit 1（同两条）** | **既存确定性红 → 已诊断并修复**（根因在 `dev/hitl-answer.mjs` 的可见性判据：把 `display:contents` 祖先当隐藏） | 修后 ALL PASS → **同批迁移**，判定面形态一致（exit 0→0 · 11 条判定行逐条一致） |
 
-留档落点 = `runtime/smoke-workspace/b2-baseline-2026-10-16/`（`site-before/` = 批次① 首次，
-`recheck/` = 分类重跑；运行区 gitignored）。**B2 迁移范围因此收敛为 4 站点**
-（l4-lite / team-preflight / discipline / entry-chain）。
+留档落点 = `runtime/smoke-workspace/b2-baseline-2026-10-16/`（`site-before/` = 批次① 首次、
+`recheck/` = 分类重跑、`site-after/` = 批次②、`client-hitl-pre|post/` = 第 5 站点修后/迁移后；运行区 gitignored）。
+**B2 = 5/5 站点交付**（含第 5 站点：先修 `hitl-answer` 判据、再迁移、再对账）。
 
 **自动保存的两个判定证据**（迁移时直接用，不必重查）：
 

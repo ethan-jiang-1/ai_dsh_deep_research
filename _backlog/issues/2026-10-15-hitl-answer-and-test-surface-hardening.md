@@ -28,3 +28,18 @@ opened: 2026-10-15
 
 - 侧栏上限与 custom 语义所在 = [dev/hitl-answer.mjs](../../dev/hitl-answer.mjs)（本轮已把 custom 填写收窄到目标卡内并 fail-loud 记录失败）；
 - 库面板读数上限的姊妹卡 = [BUG-026](../_archived/fixed_bugs/BUG-026-library-read-40-line-truncation.md)（已修，同族"上限静默截断"）。
+
+## 附：2026-10-16 同文件已修（当场修掉、不另建档）
+
+诊断 `client-hitl-smoke` 既存确定性红（⑤b/⑤c，四跑同两条）时定位到**本文件自身**的判据缺陷并当场修复：
+
+- **根因**：`operateOnTargetCard` 的 `visible()` 把"零尺寸祖先"一律当隐藏，而 DSH web 的会话容器外有
+  **三层 `display: contents` 包装**——`display:contents` 不生成盒子，`getBoundingClientRect()` 恒 0×0
+  是布局语义。于是守卫判 `active-session-unavailable` → 拒绝代答（exit 3）。
+- **证据**：四次复现同一 exit 3；守卫 reason = `active-session-unavailable` 且 `total=1 / sid 匹配 /
+  选中行匹配 / dialogs=0 / masks=0`；祖先链阻塞项 = `DIV[rect 0x0|display:contents|pos:static|overflow:visible|children:1]` ×3。
+- **修法**：`display: contents` 的元素跳过尺寸检查（其余隐藏信号 display:none / visibility:hidden /
+  opacity:0 / aria-hidden 照查）。
+- **活体验证（本卡此前记"该路径无法活体验证"——本轮已推翻）**：修复后 `client-hitl-smoke`
+  **ALL PASS**（⑤b 挂起卡已答 → ⑤c 回合闭合 → ⑤d 二次挂起 → ⑤e 右栏自动展开 → ⑤f 横幅在场）。
+- 三件待触发硬化（本卡正文）**不受影响，仍按原触发条件待命**。

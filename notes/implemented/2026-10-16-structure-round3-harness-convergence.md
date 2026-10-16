@@ -82,6 +82,25 @@ B1 的**改前基线**要三站点先绿，跑基线时暴露两件事——都�
    **遗留触发**：下次因别的原因重录 fixture 时，顺带把手册的目录约定与 `web-only 语料` 措辞
    （BUG-029 后应为"取回语料"）一起同步进手册。
 
+### client-hitl 既存红：根因在 `dev/hitl-answer.mjs` 自己的可见性判据（2026-10-16 当场修掉）
+
+批次① 实测 `client-hitl-smoke` 确定性红（⑤b「挂起卡已答」/⑤c「答后回合闭合」，四跑同两条，
+代答子进程 exit 3 = fail-closed）。诊断链：
+
+1. 补诊断打印子进程输出 → `hitl-answer` 报"目标行已点击，但主视图 session ID 尚未切到目标……拒绝在
+   未确认的会话视图代答"；
+2. 补守卫 reason → **`active-session-unavailable`**；同刻 DOM 现场 = `total=1`（唯一会话容器）、`sid` 与
+   目标**匹配**、选中行**匹配**、`dialogs=0 / masks=0`——却判"不可见"；
+3. 补祖先级定位 → 阻塞项 = 三层 `DIV[rect 0x0 | display:contents | pos:static | overflow:visible]`。
+   **`display: contents` 不生成盒子**（rect 恒 0×0 是布局语义），旧 `visible()` 把"零尺寸祖先"一律当隐藏
+   → 可见会话被判不可见 → 拒绝代答。
+
+**修法** = `operateOnTargetCard` 的 `visible()` 对 `display: contents` 祖先跳过尺寸检查（其余隐藏信号
+display:none / visibility:hidden / opacity:0 / aria-hidden 照查）。**活体验证** = `client-hitl-smoke`
+**ALL PASS**（⑤b→⑤c→⑤d→⑤e→⑤f 全绿）——该文件既有卡此前记"该路径无法活体验证"，本轮推翻。
+按 backlog 纪律"当场修掉的缺陷不建档"，修复记录并入同文件既有卡
+（[hitl-answer 三条硬化](../../_backlog/issues/2026-10-15-hitl-answer-and-test-surface-hardening.md) §附）。
+
 ## 未跑与阻断（如实分列）
 
 - **B1 三个站点的改前基线**：`preset-smoke` ALL PASS ✓、`snapshot-replay`（修副产物后）ALL PASS ✓、
@@ -104,12 +123,13 @@ B1 的**改前基线**要三站点先绿，跑基线时暴露两件事——都�
   （只等 tool/call，不等 assistant 文本折出的活动行）。
 - **Phase D（触发登记）**：**已交付**——[triggers](../../_backlog/triggers.md) 新增两行（`verify.mjs` 拆分重议、
   `tests/` 分域），每行带**可观察**的重议条件与决定正本链接（D-1：`pnpm verify` 绿 + md-links 把守链接）。
-- **B2（真模型档站点）**：**已交付 4/5**（`l4-lite-smoke` / `team-preflight-smoke` / `discipline-probe` /
+- **B2（真模型档站点）**：**已交付 5/5**（`l4-lite-smoke` / `team-preflight-smoke` / `discipline-probe` /
   `entry-chain-probe`）——接 `web-harness`（原值保形：端口 · `profile`+patch（entry-chain/team-preflight 无
   patch、后者走 `research` 安装域）· rpcId 前缀 `l4-`/`tp-`/`dp-`/`probe-` · 失败文案与 200 vs 300 截断 ·
   **非组长 `detached:false`**）+ `sessionDirOf` 保留本地、`readSessionLog` 换 canonical
-  `resolveSessionLog` + `readSessionText`。第 5 站点 `client-hitl-smoke` **既存确定性红**（⑤b 代答未落地 /
-  ⑤c 回合未闭合，两跑同两条，文件零改动）→ 按卡纪律"外部阻断站点改动退回本地副本、如实分列"**未迁移**。
+  `resolveSessionLog` + `readSessionText`。第 5 站点 `client-hitl-smoke` 的**既存确定性红已先诊断后修**
+  （根因 = `dev/hitl-answer.mjs` 的可见性判据把 `display:contents` 祖先当隐藏，见下"client-hitl 既存红"节），
+  修后基线绿 → 同批迁移 → 判定面形态一致（exit 0→0 · 11 条判定行逐条一致）。
   - **申报的判据变更（三处，均为等价或去截断面）**：① 解压通路 zstd CLI → node zlib（同输出、不同路）；
     ② 文件选择首匹配 → canonical 代际优先（实测 dev home **1886 个会话目录多形态 = 0** → 等价）；
     ③ 原 `maxBuffer`（16/32MB）截断上限取消（node zlib 全量解压——去掉一个静默截断面）；

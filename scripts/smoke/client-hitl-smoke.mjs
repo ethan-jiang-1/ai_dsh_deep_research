@@ -26,12 +26,14 @@
 //
 // 前置：source dev/env.sh；DEEPSEEK_API_KEY 已配；pack 已构建；zstd CLI 在 PATH。
 // 用法：source dev/env.sh && node --import tsx/esm scripts/smoke/client-hitl-smoke.mjs [--port 3113]
-import { spawn, spawnSync } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
 import { withModelKey } from '../lib/env.mjs'
+import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs'
+import { readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs'
 import { launchChromium, loadChromium } from '../lib/playwright.mjs'
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
@@ -73,45 +75,23 @@ const step = (ok, label, info = '') => {
   console.log(`  ${ok ? 'PASS' : 'FAIL'} ${label}${info ? `（${info}）` : ''}`)
   if (!ok) failures.push(label)
 }
-let rpcId = 0
-const rpc = async (base, cookie, endpoint, args) => {
-  const response = await fetch(`${base}/api/${endpoint}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', cookie },
-    body: JSON.stringify({ type: 'client-request', rpcId: `ch-${++rpcId}`, method: endpoint, payload: { args } }),
-  })
-  const body = await response.json()
-  if (body?.result?.ok !== true) throw new Error(`${endpoint} 失败: ${body?.result?.error?.message ?? JSON.stringify(body).slice(0, 300)}`)
-  return body.result.value
-}
-const authenticate = async (base, token) => {
-  const response = await fetch(`${base}/?token=${token}`, { redirect: 'manual' })
-  const cookies = response.headers.getSetCookie?.() ?? []
-  if (cookies.length === 0) throw new Error('token 交换没拿到 cookie')
-  return cookies.map((c) => c.split(';')[0]).join('; ')
-}
+// RPC 正本 = lib/web-harness.makeRpc（原值：前缀 `ch-`、无 AbortSignal 预算、失败文案与 300 截断）
+const rpc = makeRpc({
+  prefix: 'ch-',
+  errorOf: (endpoint, body) => `${endpoint} 失败: ${body?.result?.error?.message ?? JSON.stringify(body).slice(0, 300)}`,
+})
 
 // ── boot web（源码域 overlay；真模型档 env）──
 const bin = join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts')
-const child = spawn(
-  process.execPath,
-  ['--import', 'tsx/esm', bin, '--profile', 'web', '--patch', join(ROOT, 'dev', 'research.overlay.yml'),
-    '--', '--port', String(PORT), '--no-open'],
-  { cwd: ROOT, env: withModelKey({ DSH_HOME: home }), stdio: ['ignore', 'pipe', 'pipe'] },
-)
-let output = ''
-const banner = new Promise((resolveBanner, rejectBanner) => {
-  const onData = (chunk) => {
-    output += String(chunk)
-    const m = new RegExp(`http://127\\.0\\.0\\.1:${PORT}/\\?token=(\\S+)`).exec(output)
-    if (m !== null) resolveBanner({ token: m[1] })
-  }
-  child.stdout.on('data', onData)
-  child.stderr.on('data', onData)
-  child.on('exit', (code) => rejectBanner(new Error(`web 进程提前退出（code ${String(code)}）\n${output.slice(-600)}`)))
-  setTimeout(() => rejectBanner(new Error(`等待启动横幅超时\n${output.slice(-600)}`)), BOOT_TIMEOUT_MS)
+// 启停与横幅等待正本 = lib/web-harness.bootWeb（原值：**非组长** detached:false、overlay 通道、
+// withModelKey({DSH_HOME}) 环境、超时 BOOT_TIMEOUT_MS、失败尾部 600 字符）
+const booted = await bootWeb({
+  bin, cwd: ROOT, profile: 'web', patchPath: join(ROOT, 'dev', 'research.overlay.yml'), port: PORT,
+  env: withModelKey({ DSH_HOME: home }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 600,
+  detached: false,
 })
-const webTail = () => output.slice(-1200)
+const child = booted.child
+const webTail = () => booted.output().slice(-1200)
 
 // ── 盘侧（多帧 zstd 会话日志）──
 const sessionsRoot = join(home, 'sessions')
@@ -119,21 +99,20 @@ const logOfSession = (sid) => {
   const bare = String(sid).replace(/^session-/, '')
   for (const g of readdirSync(sessionsRoot)) for (const s of readdirSync(join(sessionsRoot, g))) {
     if (s === sid || s === `session-${bare}`) {
-      const f = readdirSync(join(sessionsRoot, g, s)).find((x) => x.endsWith('.jsonl.zstd'))
-      return f === undefined ? null : join(sessionsRoot, g, s, f)
+      // 目录发现留本地（双形态扫描）；日志选择/解压归 canonical（代际优先 + node zlib；
+      // 原为"首个 *.jsonl.zstd"+zstd CLI——差异记 Note：语料上等价 + 取消 maxBuffer 截断面）
+      return resolveSessionLog(join(sessionsRoot, g, s))
     }
   }
   return null
 }
 const logEvents = (f) => {
-  const r = spawnSync('zstd', ['-dc', f], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
-  return r.status === 0
-    ? r.stdout.trim().split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l) } catch { return null } }).filter(Boolean)
-    : []
+  if (f === null) return []
+  return readSessionEvents(f).events
 }
 
 try {
-  const { token } = await banner
+  const { token } = booted
   const base = `http://127.0.0.1:${PORT}`
   const cookie = await authenticate(base, token)
 
