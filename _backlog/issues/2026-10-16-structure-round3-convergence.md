@@ -5,7 +5,7 @@ opened: 2026-10-16
 
 # 计划：第三轮结构收敛——web harness 单一正本、小件收口与触发登记
 
-> 立卡：2026-10-16 ｜ 状态：等人拍板 — 2026-10-16 用户按推荐次序批准开工；**Phase A / B1 / D 已交付**（验收判据全绿，证据 = [round3 Note](../../notes/implemented/2026-10-16-structure-round3-harness-convergence.md)），**只剩 B2（真模型档五站点）** 等真模型窗口；另在 B1 路上立了 [BUG-030](../bugs/BUG-030-snapshot-replay-c5-activity-row-flicker-recurrence.md)（既有间歇，非本卡引入）｜ 类型：Task ｜ 结论倾向：现在做（三点已拍板）｜ 可关闭：否
+> 立卡：2026-10-16 ｜ 状态：等人拍板 — 2026-10-16 用户按推荐次序批准开工；**Phase A / B1 / D 已交付**（验收判据全绿，证据 = [round3 Note](../../notes/implemented/2026-10-16-structure-round3-harness-convergence.md)），**只剩 B2（真模型档五站点）** 等真模型窗口；另在 B1 路上立了 [BUG-030](../_archived/fixed_bugs/BUG-030-snapshot-replay-c5-activity-row-flicker-recurrence.md)（既有间歇，非本卡引入）｜ 类型：Task ｜ 结论倾向：现在做（三点已拍板）｜ 可关闭：否
 
 **问题与期望结果：** 2026-10-16 用户委托的全仓结构评审（结构 / 臃肿 / SOLID 三问），经取代检查对齐 2026-10-13 两篇结构 Note 后确认：剩余的真实改善面集中在上轮刻意避开的区间——那轮硬约束"零行为变化 + 红即回滚"、未跑真模型档面，而 DSH web harness 家族的 ~7 份近重复（`rpc` / `boot` 横幅等待 / `authenticate` / 本地会话日志读法 / 谓词轮询，约 500 行）恰恰集中在真模型档脚本里。本卡承载已拍板的收敛计划。期望结果 = 重复面收敛为单一正本、参数保形零行为变化、每阶段有可机械执行的验收判据。
 

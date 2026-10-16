@@ -117,3 +117,31 @@ export function compareReplayRequests(expectedEvents, actualEvents) {
     )),
   ];
 }
+
+// ── 回合落定判据（BUG-030 正修；单一正本）──────────────────────────────────────────────
+// 消费 = snapshot-replay-smoke A 层（"回放回合是否走完"）+ dev/record-role-fixture（录制收尾）。
+// 为什么必须单独成件：哨兵字样**写在录制 prompt 里**，用"全文 includes"判回合完成会在 user/message
+// 一落盘时立刻放行（BUG-030 实测：A 层提前放行 → 后续层在回合在飞时执行 → 渲染金标准缺末行）。
+
+/** 会话日志文本 → assistant 消息文本清单（`data.message.content` 的 text 项拼接）。 */
+export function assistantTextsOf(logText) {
+  return String(logText ?? '').split('\n').filter(Boolean)
+    .map((line) => { try { return JSON.parse(line) } catch { return null } }).filter(Boolean)
+    .filter((event) => event.type === 'assistant/message')
+    .map((event) => (event.data?.message?.content ?? []).filter((c) => c.type === 'text').map((c) => c.text).join(''))
+    .filter(Boolean)
+}
+
+/** 收尾哨兵是否已**由 assistant 消息**落地——prompt/回执回显里的同名字样不算数（BUG-030 根因）。 */
+export function sentinelInAssistantText(logText, sentinel) {
+  return assistantTextsOf(logText).some((text) => text.includes(sentinel))
+}
+
+/** 回合是否以 `completed` 结束（`turn/end` 显式态；缺席或非 completed = 未结束，fail-loud 不静默放行）。 */
+export function turnCompleted(logText) {
+  return String(logText ?? '').split('\n').filter(Boolean).some((line) => {
+    let event = null
+    try { event = JSON.parse(line) } catch { return false }
+    return event?.type === 'turn/end' && event?.data?.reason?.kind === 'completed'
+  })
+}

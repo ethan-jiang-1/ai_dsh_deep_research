@@ -10,9 +10,7 @@
 
 ## 活跃列表
 
-| 文件 | 一句话 |
-|---|---|
-| [BUG-030](BUG-030-snapshot-replay-c5-activity-row-flicker-recurrence.md) | snapshot-replay C5 渲染金标准间歇性红——活动行只渲染 1/2；对照实验证明与站点迁移无关（BUG-027 复发，新卡引用旧卡） |
+（当前无活跃缺陷卡——BUG-030 已于 2026-10-16 修复归档。）
 
 （近况看两池索引：[暂停](../_archived/suspended_bugs/README.md) · [已修](../_archived/fixed_bugs/README.md)；新卡编号 = 活跃 ∪ 全部归档池取最大号 + 1，规则唯一权威 = 本页。）
 

@@ -99,7 +99,7 @@ B1 的**改前基线**要三站点先绿，跑基线时暴露两件事——都�
   与 makeRpc 的 `(base, cookie, endpoint, args)` 不同形——硬收敛即行为改写）。
 - **`snapshot-replay` 的 C5 是既有间歇**（非本轮引入）：迁移版 4 跑 1 绿，**未迁移的对照脚本 2 跑 1 绿 1 红**
   ——同机同客户端对照即复现；形态 = 活动行少一行（2→1），卡片部分一致。已立
-  [BUG-030](../../_backlog/bugs/BUG-030-snapshot-replay-c5-activity-row-flicker-recurrence.md)（P2，排查中；
+  [BUG-030](../../_backlog/_archived/fixed_bugs/BUG-030-snapshot-replay-c5-activity-row-flicker-recurrence.md)（P2，排查中；
   按"已修永不重开、复发 = 引用旧卡的新卡"引用 BUG-027），假设 = C0b 就绪谓词覆盖面 < 断言面
   （只等 tool/call，不等 assistant 文本折出的活动行）。
 - **Phase D（触发登记）**：**已交付**——[triggers](../../_backlog/triggers.md) 新增两行（`verify.mjs` 拆分重议、

@@ -22,6 +22,7 @@ import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
 import { scrubbedEnv, withModelKey } from '../scripts/lib/env.mjs'
+import { sentinelInAssistantText } from '../scripts/lib/replay-request.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const argv = process.argv.slice(2)
@@ -114,13 +115,8 @@ const recordOnce = async () => {
     const group = readdirSync(SESSIONS).find((d) => d.includes('research-workspace'))
     const logOf = (sid) => join(SESSIONS, group, sid, 'session.v4.jsonl.zstd')
     const readLog = (log) => { try { return execSync(`zstd -dc "${log}" 2>/dev/null`, { maxBuffer: 64 * 1024 * 1024 }).toString('utf8') } catch { return null } }
-    // 哨兵只认 assistant 文本（data.message.content 的 text 部分）——与折算层同款取法；
-    // prompt 回显里的哨兵字样不算数（死回合防误收，2026-10-13）。
-    const assistantTextsOf = (text) => text.split('\n').filter(Boolean)
-      .map((l) => { try { return JSON.parse(l) } catch { return null } }).filter(Boolean)
-      .filter((j) => j.type === 'assistant/message')
-      .map((j) => (j.data?.message?.content ?? []).filter((c) => c.type === 'text').map((c) => c.text).join(''))
-      .filter(Boolean)
+    // 哨兵只认 assistant 文本 + 等日志静默（死回合防误收，2026-10-13）。判据正本 =
+    // lib/replay-request（BUG-030 起与 snapshot-replay-smoke A 层同源，不再各持一份）。
     let logText = null
     let lastSize = -1
     let quietRounds = 0
@@ -129,14 +125,14 @@ const recordOnce = async () => {
       await sleep(4_000)
       logText = readLog(logOf(sessionId))
       if (logText === null) { if (childGone) break; continue }
-      const hasSentinel = assistantTextsOf(logText).some((t) => t.includes(SENTINEL))
+      const hasSentinel = sentinelInAssistantText(logText, SENTINEL)
       const size = statSync(logOf(sessionId)).size
       quietRounds = size === lastSize ? quietRounds + 1 : 0
       lastSize = size
       if (hasSentinel && quietRounds >= 3) break
       if (childGone) break
     }
-    if (logText === null || !assistantTextsOf(logText).some((t) => t.includes(SENTINEL))) {
+    if (logText === null || !sentinelInAssistantText(logText, SENTINEL)) {
       const err = new Error(`回合未在 ${TURN_TIMEOUT_MS / 1000}s 内落定（哨兵「${SENTINEL}」未出现在任何 assistant 文本里——死回合/上游失败窗口不收）——真模型回合未走通`)
       err.fatal = true
       throw err

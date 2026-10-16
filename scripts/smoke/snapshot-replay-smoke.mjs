@@ -39,7 +39,7 @@ import { scrubbedEnv } from '../lib/env.mjs'
 import { authenticate, bootWeb } from '../lib/web-harness.mjs';
 import { presetRoles } from '../lib/roles.mjs';
 import { loadReplayScene } from '../lib/replay-scene.mjs';
-import { compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds } from '../lib/replay-request.mjs';
+import { compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds, sentinelInAssistantText, turnCompleted } from '../lib/replay-request.mjs';
 import { loadChromium, launchChromium } from '../lib/playwright.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -211,12 +211,18 @@ for (const sc of SCENARIOS) {
       const fresh = existsSync(ownLog) && statSync(ownLog).mtimeMs >= BOOT_START;
       if (fresh) {
         const text = readLog(ownLog);
-        if (text !== null && text.includes(SENTINEL)) { finalOk = true; replayLogText = text; break }
+        // 回合落定判据正本 = lib/replay-request（BUG-030 正修）：哨兵**只认 assistant 文本**
+        // ——哨兵字样写在录制 prompt 里，旧的全日志 includes 会在 user/message 一落盘就放行，
+        // 后续层于是在回合在飞时执行（实测 = C5 金标准缺末行，4 红 / 6 跑）。另要求 turn/end
+        // 显式 completed：把"推断回合走完"换成"等显式状态"，非 completed 即判未走通（fail-loud）。
+        if (text !== null && sentinelInAssistantText(text, SENTINEL)) {
+          if (turnCompleted(text)) { finalOk = true; replayLogText = text; break }
+        }
       }
       if (childGone) { failures.push(`[${sc.id}] web 进程在回合结束前退出`); break }
     }
     step(finalOk, `[${sc.id}] A 回放通路（零真模型调用完整回放；收尾文本逐字命中；只认本次新写日志）`,
-      finalOk ? '' : `回放回合未在 ${TURN_TIMEOUT_MS / 1000}s 内出现录制收尾文本（"${SENTINEL}"）——canned 回放未走通`);
+      finalOk ? '' : `回放回合未在 ${TURN_TIMEOUT_MS / 1000}s 内以 completed 走完并让收尾文本（"${SENTINEL}"）落进 assistant 消息——canned 回放未走通`);
 
     // ── B 层：组装请求 diff（persona + 全序列 request/header + 三处 user/message 注入，
     //    双侧定向归一化后逐条比对；判据由 manifest 声明、consumer 固定为全集）──

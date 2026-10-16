@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds } from '../scripts/lib/replay-request.mjs';
+import { compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds, sentinelInAssistantText, turnCompleted } from '../scripts/lib/replay-request.mjs';
 import { presetRoles } from '../scripts/lib/roles.mjs';
 import { fileURLToPath } from 'node:url';
 
@@ -252,3 +252,33 @@ for (const [id, kind] of [['persona', 'system-prompt'], ['agent-instructions', '
     assert.ok(results.filter((item) => item.id !== id).every((item) => item.ok));
   });
 }
+
+// ── BUG-030 正修：回合落定判据只认 assistant 文本 + turn/end 显式态 ──────────────────────
+// 复现的坑：哨兵「探针完成」写在录制 prompt 里，A 层用**全文 includes** 判回合完成 → user/message
+// 一落盘就放行 → 后续层在回合在飞时执行 → C5 金标准缺末行（当日 4 红 / 6 跑）。
+// 判据正本 = 录制器 dev/record-role-fixture.mjs（2026-10-13 因同一坑改过），此处收成共享件。
+const line = (event) => JSON.stringify(event);
+test('回合落定：哨兵只出现在 prompt 回显（user/message、agent/inbox/spliced）→ 不算落定', () => {
+  const log = [
+    line({ type: 'agent/inbox/spliced', data: { text: '…以「探针完成」收尾。' } }),
+    line({ type: 'user/message', data: { message: { content: [{ type: 'text', text: '…以「探针完成」收尾。' }] } } }),
+    line({ type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '我在查资料。' }] } } }),
+    line({ type: 'turn/end', data: { turn: 1, reason: { kind: 'completed' } } }),
+  ].join('\n');
+  assert.equal(sentinelInAssistantText(log, '探针完成'), false, 'prompt 回显不得当收尾');
+});
+
+test('回合落定：哨兵出现在 assistant 文本里 → 落定', () => {
+  const log = [
+    line({ type: 'user/message', data: { message: { content: [{ type: 'text', text: '以「探针完成」收尾' }] } } }),
+    line({ type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '探针完成，搜了 X、抓了 Y' }] } } }),
+  ].join('\n');
+  assert.equal(sentinelInAssistantText(log, '探针完成'), true);
+});
+
+test('回合结束显式态：turn/end 缺席或非 completed → 未结束（fail-loud 不静默放行）', () => {
+  const assistant = line({ type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '探针完成' }] } } });
+  assert.equal(turnCompleted([assistant].join('\n')), false, '缺 turn/end 即未结束');
+  assert.equal(turnCompleted([assistant, line({ type: 'turn/end', data: { turn: 1, reason: { kind: 'error' } } })].join('\n')), false, '非 completed 不算结束');
+  assert.equal(turnCompleted([assistant, line({ type: 'turn/end', data: { turn: 1, reason: { kind: 'completed' } } })].join('\n')), true);
+});
