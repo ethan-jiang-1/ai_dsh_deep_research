@@ -10,6 +10,7 @@
 # 显式列名单把"运行区"和"要留档的东西"分开，漏项表现为用户可见的"该拒的没拒"。
 drt_*/
 archive/
+_abandoned/
 method-library.md
 # 资产不需要放行行（未被上面拒收）；要留档某次交付时加 `!` 行即可：
 # !drt_<slug>/final.md

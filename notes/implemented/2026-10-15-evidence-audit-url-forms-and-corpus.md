@@ -54,5 +54,5 @@
 ## 关联
 
 - 缺陷卡 = [BUG-029](../../_backlog/_archived/fixed_bugs/BUG-029-evidence-audit-url-extraction-encoded-forms.md)；
-- 下游处置卡 = [未归档 bundle 处置](../../_backlog/issues/2026-10-15-unclosed-bundles-disposition.md)
+- 下游处置卡 = [未归档 bundle 处置](../../_backlog/_archived/settled_issues/2026-10-15-unclosed-bundles-disposition.md)
   （A 类前两场的定性随本修复更新）。

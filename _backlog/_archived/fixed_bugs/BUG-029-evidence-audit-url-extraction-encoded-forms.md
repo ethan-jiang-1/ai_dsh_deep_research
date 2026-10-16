@@ -68,7 +68,7 @@ URL 抽取只认字面 `http(s)://` 形态，未处理三类真实存在的引�
 
 ## 参考
 
-- 触发场景卡：[未闭合 bundle 处置](../../issues/2026-10-15-unclosed-bundles-disposition.md)（本卡结论直接改其 A 类前两场的定性）；
+- 触发场景卡：[未闭合 bundle 处置](../settled_issues/2026-10-15-unclosed-bundles-disposition.md)（本卡结论直接改其 A 类前两场的定性）；
 - 审计契约三条断言 = `scripts/run-gates/evidence-audit.mjs` 头注；
 - 相邻失败类：BUG-027/028 族"机械面自身可信度"。
 

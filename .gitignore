@@ -22,6 +22,7 @@ runtime/harness-home/*
 # 目录与符号链接，防 symlink 误入 git）内容是 runtime truth，不进版本控制
 research-workspace/drt_*
 research-workspace/archive/
+research-workspace/_abandoned/
 # 用户方法库（D25）：工作区本地用户数据——README 明载「无版本史」；内容是 runtime truth，
 # 不进版本控制（进库的只有 pack 侧格式正本 = lead 的 research-brief skill）。
 # 安装方无根 .gitignore——工作区自带的规则种子 = packages/deep-research-pack/workspace/.gitignore，

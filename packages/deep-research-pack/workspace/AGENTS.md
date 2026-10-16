@@ -27,12 +27,13 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
   drafts/              过程稿（owner: 各角色，按需）
   final/               版本记账：v1.md = 版本索引与关键事实回溯；证据扩张 rerun 才落 v2.md
                        全文并在此登记（owner: lead）——**final/ 只放版本记账，不放当前版全文**
-  final.md             当前版权威副本 = **run 根（bundle 顶层）的 final.md**——[来源: evidence/]
-                       相对 run 根解析。**不放 final/ 里**（final/ 曾被误用作全文位：位置漂移
-                       且审计静默跳过——正本钉死在 run 根）
+  final.md             当前版权威副本 = **run 根（bundle 顶层）的 final.md**（[来源: evidence/] 相对 run 根解析）；
+                       **不放 final/ 里**——final/ 曾被误用作全文位（位置漂移 + 审计静默跳过），正本钉死 run 根
   journal.md           运行纪要（追加式，最新在上；所有角色可写；跨 rerun 累积血统）
-archive/drt_<slug>/    已交付 run 归档位：交付后操作侧移入，工作区根
-                       只留活跃 run——防题名目录被误读为"待开展课题"；仍可被审计/仪表盘按路径投影
+archive/drt_<slug>/    已交付 run 归档位：交付后操作侧移入，工作区根只留活跃 run——防题名目录被
+                       误读为"待开展课题"；仍可被审计/仪表盘按路径投影
+_abandoned/drt_<slug>/ 未交付 run 停放位（2026-10-16 立）：停摆/"未闭合但不再投入"的 run 由操作侧移入——
+                       保留全部文件与会话日志，不占 archive/ 已交付语义；复活 = 移回工作区根 + lead 说明目标
 templates/run/         新 run bundle 的起点模板（只读，不直接写）
 drafts/（工作区根）    开发侧跨 run 草稿（仅开发仓在场，部署侧无；**非 run 产物，角色不写不读**——
                        run 内过程稿 = 各 bundle 自己的 drafts/，见上）
@@ -76,7 +77,7 @@ review 审查时间、口径截至）**不得凭时间感直写**（角色会话
 `（同上…）`/`旁证｜…`）不进 `>` 行，写在引文块外或解读节；**多段摘录逐段逐字**，段间省略标
 `[…]`，不拼接不连续句；**表格按单元格摘录**，不整行/跨行合并；`source_url` 必须由 `web_fetch` 成功取回，搜索结果里出现过不算。所有角色按此判。
 
-机械边界：evidence-audit 检查 `source_url` 是否成功抓取，并对原文摘录节中的 `>` 文本与 web-only 语料作覆盖率核验；它不判注释是否混入引文，也不验证段落或表格单元格的拆分结构。`retrieved_at` 只检查字段在场，不校准日期。以上内容与结构要求仍须由 critic 按契约审阅；机械命中不是完整合规证明。
+机械边界：evidence-audit 检查 `source_url` 是否成功抓取，并对原文摘录节中的 `>` 文本与取回语料（web + MCP 结果）作覆盖率核验；它不判注释是否混入引文，也不验证段落或表格单元格的拆分结构。`retrieved_at` 只检查字段在场，不校准日期。以上内容与结构要求仍须由 critic 按契约审阅；机械命中不是完整合规证明。
 
 **信源分级表（source_tier 唯一正本；scout 的质量分级与 quality 字段共用 A–D，tier 描述
 信源身份、quality 描述内容质量，两者独立）**：
@@ -100,7 +101,7 @@ publisher）缺失不否决有效性，标"未分级"（旧 run 的存量证据�
 是交付记录，不改历史）；谓词正本 = 本节，tests/evaluation-contract.test.mjs 对账。
 
 **机械强度诚实记账**（开发仓操作侧工具链，部署侧由人审承担）：契约测试核七字段在场与执行者副本对账；
-仪表盘按上文谓词投影。**evidence-audit 溯源审计**核 `source_url` 的成功抓取、摘录文本对 web-only
+仪表盘按上文谓词投影。**evidence-audit 溯源审计**核 `source_url` 的成功抓取、摘录文本对取回
 语料的覆盖率与 final 引用链，结果落 bundle 的 audit.md。它不校验日期校准或摘录版式、分段、逐格结构；
 这些语义与结构约束由 critic 狩猎，不在仓级结构门中。
 
