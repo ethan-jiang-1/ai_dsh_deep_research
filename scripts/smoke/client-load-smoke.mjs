@@ -659,7 +659,10 @@ try {
             // 编辑态：四分区草稿预填 + 单保存钮 + 放弃；放弃不发送
             await page.getByRole('button', { name: '编辑内容' }).first().click({ timeout: 5_000 }).catch(() => {})
             await wait(1_000)
-            const drafts = page.locator('textarea')
+            // 作用域收窄（2026-10-16）：原为全页 `page.locator('textarea')`——页面里任何别的
+            // textarea（实测：一个空 textarea 排在四分区之前）都会把计数顶成 5，断言红而产品正确。
+            // 判据意图 = "编辑态恰有四分区草稿 + 单保存钮"，故锚在 Modal（role=dialog）内。
+            const drafts = page.locator('[role="dialog"] textarea')
             const draftCount = await drafts.count().catch(() => 0)
             const draftPrefill = draftCount === 4 ? await drafts.first().inputValue().catch(() => '') : ''
             t = await paneTextOf()
@@ -755,7 +758,7 @@ try {
           // 电池逐字钉，发送链路断言因 keyless 契约移除，见上块注）
           await page.getByRole('button', { name: '编辑内容' }).first().click({ timeout: 5_000 }).catch(() => {})
           await wait(1_000)
-          const ta = page.locator('textarea')
+          const ta = page.locator('[role="dialog"] textarea')
           const taCount = await ta.count().catch(() => 0)
           const legacyDraft = taCount === 5 ? await ta.nth(4).inputValue().catch(() => '') : ''
           step(taCount === 5 && legacyDraft.includes('广度优先铺方向'), '自测例库·BUG-025 修复面：编辑态旧正文预填（4 分区 + 1 旧正文）', `textarea ${taCount} 区`)
@@ -769,7 +772,7 @@ try {
           step(mixedReadOk, '自测例库·混居条目：四分区 + 自定义要求（旧）双块（内容零丢失）')
           await page.getByRole('button', { name: '编辑内容' }).first().click({ timeout: 5_000 }).catch(() => {})
           await wait(1_000)
-          const ta2 = page.locator('textarea')
+          const ta2 = page.locator('[role="dialog"] textarea')
           const c2 = await ta2.count().catch(() => 0)
           const firstDraft = c2 === 5 ? await ta2.first().inputValue().catch(() => '') : ''
           const lastDraft = c2 === 5 ? await ta2.nth(4).inputValue().catch(() => '') : ''

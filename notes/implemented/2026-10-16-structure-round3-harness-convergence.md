@@ -84,12 +84,13 @@ B1 的**改前基线**要三站点先绿，跑基线时暴露两件事——都�
 
 ## 未跑与阻断（如实分列）
 
-- **B1 三个站点的改前基线**：`preset-smoke` ALL PASS ✓、`snapshot-replay` 修复副产物后 ALL PASS ✓、
-  `client-load` **1 条既有失败**——`研究配置编辑态：四分区草稿预填 + 单保存钮在场（textarea 5 区）`。
-  归因证据：①断言住在 `ResearchConfigTab.tsx`（今日零改动），与本人改动过的两个客户端文件
-  （`review-readiness.ts` / `ResearchStatusTab.tsx`）无 import 关系；②该失败在 B1 动手**之前**的基线跑里
-  就在（`/tmp/b1-baseline/client-load.log`）；③断言用未限域的 `page.locator('textarea')` 计数，
-  页面多一个 textarea 即红——形似脆弱断言而非产品缺陷。**处置** = 单列不阻塞（本卡纪律：单站点红只回滚
-  该站点），B1-3 的"ALL PASS"因此**未达成**，需先判该断言是修是换。
-- **B1 本身（web-harness 单一正本）**：本轮**未动手**——基线阶段即被上述两件副作用占满；B1 的参数保形表、
-  三站点迁移与 B2/D 均未开始。
+- **B1 三个站点的改前基线**：`preset-smoke` ALL PASS ✓、`snapshot-replay`（修副产物后）ALL PASS ✓、
+  `client-load` 曾 1 条红 → **已诊断并修断言**，现 **ALL PASS**（B1-2/B1-3/B1-4 三站点基线全绿）。
+  那条红 = `研究配置编辑态：四分区草稿预填 + 单保存钮在场（textarea 5 区）`：临时诊断打印五个
+  textarea 的可见性与值 → **#1–#4 正是四分区且逐字预填**、#0 是一个**空的、Modal 之外**的
+  textarea（页面级，非本包渲染——本包 client 只有两处 `<textarea>` JSX：分区草稿与旧正文块）。
+  即**产品行为正确、断言错**：判据用未限域的 `page.locator('textarea')` 计数，页面多一个 textarea
+  就红。**修复** = 三处 textarea 断言锚到 Modal（`[role="dialog"] textarea`）——意图不变（两条旧正文
+  用例仍断言"Modal 内 5 区"），去掉的是与判据无关的页面级耦合。
+- **B1 本身（web-harness 单一正本）**：本轮**未动手**——基线阶段被上述两件副作用 + 一条既有断言红占满；
+  三站点基线现已全绿（这就是 B1 的"改前留档"前提），B1 的参数保形表、三站点迁移与 B2/D 均未开始。
