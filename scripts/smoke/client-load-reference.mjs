@@ -70,9 +70,15 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
   })()
 
   // 绑定 bundle 的磁盘真值（evidence 计数 / 交付态 / 问题行首行——与页签折算同口径；
-  // slug 无 drt_ 前缀、目录名有——拼回；位置=状态两位置）
+  // slug 无 drt_ 前缀、目录名有——拼回）。位置=状态**三位置**：工作区根（在飞）/ archive/
+  // （已交付）/ _abandoned/（未交付停放，2026-10-16 立）——观测面按绑定会话找盘上真值，
+  // 停在哪一处都是同一份 bundle（停放场照样有渐进面；不认第三处 = 会话绑定的 run 被判"缺"）。
   const bundleBaseOf = (slug) => {
-    for (const base of [join(root, 'research-workspace', `drt_${slug}`), join(root, 'research-workspace', 'archive', `drt_${slug}`)]) {
+    for (const base of [
+      join(root, 'research-workspace', `drt_${slug}`),
+      join(root, 'research-workspace', 'archive', `drt_${slug}`),
+      join(root, 'research-workspace', '_abandoned', `drt_${slug}`),
+    ]) {
       if (existsSync(base)) return base
     }
     return null

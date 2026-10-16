@@ -62,3 +62,34 @@ Phase A 验收判据（计划卡 §验收标准 A-1…A-5）逐条：
   无 pack 行为改动、无凭据面；Phase A 全程 keyless。
 - 未跑：Phase B1（web-harness 单一正本 + keyless 三站点）与 B2（真模型档五站点）、Phase D（触发登记）
   ——按计划等用户逐阶段发令；B2 与主线真模型段排开跑。
+
+## 顺带修复与两条实测发现（处置工作的副产物，2026-10-16）
+
+B1 的**改前基线**要三站点先绿，跑基线时暴露两件事——都不是 B1 引入的，但都由当日处置工作触发：
+
+1. **位置=状态是三个位置，工具面要认第三处**。未交付 bundle 迁入 `research-workspace/_abandoned/`
+   后：`client-load-reference.mjs` 的绑定 bundle 解析（原两处：根 / archive）找不到会话绑定的 run
+   → 观察面冒烟的"磁盘侧真值"前置直接判缺；驾驶舱 `ResearchStatusTab.tsx` 同款两处列表则让
+   **UI 侧**读不到 bundle（渐进面凭空消失）。两处同 diff 补第三位置（`_abandoned/` 末位：根 > archive >
+   _abandoned 的优先级不变）。**判据**：补后 client-load 的 6 条渐进面对账（轨道/证据计数/问题行/业务摘要）
+   从红转绿。
+2. **手册是模型可见输入——改它就要真模型重录**。给手册加 `_abandoned/` 目录约定后，
+   `snapshot-replay` 的 B 层 `agent-instructions` 四角色全红（录制件里存的是旧手册全文，diff 首个分歧
+   正是被改写的行）。正本程序 = 重录该场景（真模型档）+ 人审登记 `source` 身份（`snapshots/README` §维护）。
+   **本轮改走另一条**：把约定落在工作区规则文件 `.gitignore.example`（不进会话、不影响录制基线）+
+   停放区 README + 处置卡，手册回退到与录制件一致的字节。理由 = 研究角色**不接触**停放区（它是操作侧
+   区域，`_abandoned/` 的存在语义是"不在流水线里"），一条不影响模型行为的约定不值得一次真模型重录。
+   **遗留触发**：下次因别的原因重录 fixture 时，顺带把手册的目录约定与 `web-only 语料` 措辞
+   （BUG-029 后应为"取回语料"）一起同步进手册。
+
+## 未跑与阻断（如实分列）
+
+- **B1 三个站点的改前基线**：`preset-smoke` ALL PASS ✓、`snapshot-replay` 修复副产物后 ALL PASS ✓、
+  `client-load` **1 条既有失败**——`研究配置编辑态：四分区草稿预填 + 单保存钮在场（textarea 5 区）`。
+  归因证据：①断言住在 `ResearchConfigTab.tsx`（今日零改动），与本人改动过的两个客户端文件
+  （`review-readiness.ts` / `ResearchStatusTab.tsx`）无 import 关系；②该失败在 B1 动手**之前**的基线跑里
+  就在（`/tmp/b1-baseline/client-load.log`）；③断言用未限域的 `page.locator('textarea')` 计数，
+  页面多一个 textarea 即红——形似脆弱断言而非产品缺陷。**处置** = 单列不阻塞（本卡纪律：单站点红只回滚
+  该站点），B1-3 的"ALL PASS"因此**未达成**，需先判该断言是修是换。
+- **B1 本身（web-harness 单一正本）**：本轮**未动手**——基线阶段即被上述两件副作用占满；B1 的参数保形表、
+  三站点迁移与 B2/D 均未开始。

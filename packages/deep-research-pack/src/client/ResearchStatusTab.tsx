@@ -171,9 +171,11 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     let stopped = false
     const scan = async () => {
       try {
-        // 位置=状态：根（在飞）优先，archive/（已交付）次之——会话绑定的 run 两个位置都认；
+        // 位置=状态**三位置**：根（在飞）优先，archive/（已交付）次之，_abandoned/（未交付停放，
+        // 2026-10-16 立）末之——会话绑定的 run 三处都认：停放的 bundle 照样是这场会话的工作产物，
+        // 显示其渐进面比显示"缺"更如实（不认第三处 = 移出活动区的 run 在驾驶舱里凭空消失）。
         // slug 不含 drt_ 前缀（bundle-bind 谓词剥掉），目录名带前缀——拼回。
-        for (const base of [`drt_${boundSlug}`, `archive/drt_${boundSlug}`]) {
+        for (const base of [`drt_${boundSlug}`, `archive/drt_${boundSlug}`, `_abandoned/drt_${boundSlug}`]) {
           const files = await props.listDir(sessionId, base, new AbortController().signal)
           if (files === null || stopped || files.length === 0) continue
           const names = new Set(files.map((f) => f.name))
