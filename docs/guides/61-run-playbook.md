@@ -178,6 +178,12 @@ BUG-020）。
   即向该会话注入指令唤醒（等价于你在 GUI 手打一句）。该模式**自带送达对账**：exit 0 =
   会话日志里已出现这条 `user/message`，1 = 未对账（多半是该会话已终局化或日志尾部未落盘
   → 走上面"重跑 + 新会话"那条路），2 = 用法/前置错（续跑模式需先 `source dev/env.sh`）；
+- **通道跑久后 UI 可能"零会话行"**（实测约 5 小时后：侧栏组能展开成 `aria-expanded=true`，却渲染不出任何
+  `session:` 行；代答于是报"侧栏没有目标会话行"）——**不是**归档、也不是回合终局化。处置 = 重跑
+  `boot-run.sh` + **新会话**；`hitl-answer` 自 2026-10-16 起在报错里给「错因判据 = aging」这一行
+  （判据正本 = [BUG-031](../../_backlog/bugs/BUG-031-hitl-answer-sidebar-session-rows-unrendered.md)）；
+- **被通道重启终局化的 ask 会永久留在盘上算 pending**（UI 卡在场但点不动、答复永不落地，盘侧谓词会继续
+  把它当"最新挂起"报出）→ 别去答它：重开新会话说"继续 <slug> 这个 run"，让 lead 原样重发问询；
 - **会话日志尾部在通道死亡时不保证**（SIGTERM 后未落盘缓冲蒸发实测）——"文件即真相"只对
   bundle 文件断言；盘侧谓词消费日志前先过回退检测（watch-run 内建，回退即 fail-loud），
   跨会话取证的结论要意识到日志可能被截断（[BUG-007 卡](../../_backlog/_archived/fixed_bugs/BUG-007-channel-death-loses-log-tail.md)）；
