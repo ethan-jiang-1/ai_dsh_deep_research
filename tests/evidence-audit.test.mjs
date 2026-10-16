@@ -1,6 +1,10 @@
 // evidence-audit 回归 — 溯源审计三断言（keyless，纯 .jsonl 夹具直调 auditBundle——
 // tests/ 层禁子进程，zstd 路径由真实 bundle 的基线审计覆盖，不进 L0）。
 // 红证形态：伪造 source_url / final 断链 / 反引号占位豁免 / 契约不符分级。
+// 负例留证 2026-10-16：BUG-029——先写测试后实现，三条新测试全红（伪造链接清单多出 ev-enc/ev-mcp）。
+//   注入①`urlsOf` 去容错解码副本（`[text, decodePct(text)]` → `[text]`）→ 13/14 红（编码形态回到伪造）；
+//   注入②`isMcpTool` 恒 false（MCP 结果不进语料）→ 13/14 红（ev-mcp 判「域名与 URL 都未出现」）；
+//   各自还原 → 16/16 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdirSync, rmSync, writeFileSync, readFileSync, renameSync } from 'node:fs';
@@ -157,6 +161,90 @@ test('摘录可回溯（A 的 blockquote 在 tool/result 文本中）', () => {
 });
 
 test('清理夹具', () => { rmSync(TMP, { recursive: true, force: true }); });
+
+// ── BUG-029：抽取器形态与取证路径（2026-10-16 修）────────────────────────────────
+// 真日志里目标 URL 的承载形态 = 搜索引擎重定向参数（%XX 编码）/ 协议相对 //host / 无 scheme 裸域名；
+// 浏览器 MCP 是真实的取回路径。原抽取器只认字面 http(s):// 且只认 web_fetch/web_search，
+// 于是"本 run 真见过"被判「伪造链接」CRITICAL（假红率实测 3/5）并把门A 打红。
+// 本组钉两件事：①这些形态读得出；②档位不被抹平（见过但没抓过仍是 MAJOR，不是通过）。
+function fixtureForms() {
+  rmSync(TMP, { recursive: true, force: true });
+  const bundle = join(TMP, 'drt_forms');
+  const sessions = join(TMP, 'sessions', 'g1', 's1');
+  mkdirSync(join(bundle, 'evidence'), { recursive: true });
+  mkdirSync(sessions, { recursive: true });
+  const encClaim = 'https://www.companieshistory.com/ai-market-share-by-company/';
+  const protoClaim = 'https://cdn.example-target.com/data/set.json';
+  const bareClaim = 'https://www.bare-target.com/dataset/';
+  const mcpClaim = 'https://q.alyasset.com/npm.combo/pkg.js';
+  const argOnly = 'https://arg-only.example.net/never-retrieved';
+  const never = 'https://not-in-log.invalid/x';
+  const log = [
+    // 语料窗锚点：真实 run 会话必含 bundle slug
+    JSON.stringify({ type: 'tool/call', data: { callId: 'w0', name: 'write', arguments: JSON.stringify({ path: 'drt_forms/question.md', content: '# Q' }) } }),
+    // ① 搜索引擎重定向参数：目标 URL 只以 %XX 编码形态出现（nvidia 场实测形态）
+    JSON.stringify({ type: 'tool/call', data: { callId: 'f1', name: 'web_fetch', arguments: JSON.stringify({ url: 'https://duckduckgo.com/html/?q=idc+ai+market' }) } }),
+    JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'f1', role: 'tool', content: [{ type: 'text', text: 'Fetched https://duckduckgo.com/html/?q=idc+ai+market (HTTP 200)\n\n<a href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.companieshistory.com%2Fai%2Dmarket%2Dshare%2Dby%2Dcompany%2F&rut=9f2a">IDC 81%</a>' }] } } }),
+    // ② 页面内协议相对资源（无 scheme）
+    JSON.stringify({ type: 'tool/call', data: { callId: 'f2', name: 'web_fetch', arguments: JSON.stringify({ url: 'https://docs.example-target.com/index.html' }) } }),
+    JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'f2', role: 'tool', content: [{ type: 'text', text: 'Fetched https://docs.example-target.com/index.html (HTTP 200)\n\n<script src="//cdn.example-target.com/data/set.json"></script>' }] } } }),
+    // ③ 链接文本为裸域名，href 指向别处（无 scheme 承载）
+    JSON.stringify({ type: 'tool/call', data: { callId: 'f3', name: 'web_fetch', arguments: JSON.stringify({ url: 'https://linkhub.example.com/list' }) } }),
+    JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'f3', role: 'tool', content: [{ type: 'text', text: 'Fetched https://linkhub.example.com/list (HTTP 200)\n\n<a href="//linkhub.example.com/r?u=1">www.bare-target.com/dataset/</a>' }] } } }),
+    // ④ 浏览器 MCP：真实取回路径（类别②取向 (a)）——结果里的协议相对脚本源
+    JSON.stringify({ type: 'tool/call', data: { callId: 'm1', name: 'mcp__playwright__browser_run_code_unsafe', arguments: JSON.stringify({ code: 'await page.goto("https://portal.example.com")' }) } }),
+    JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'm1', role: 'tool', content: [{ type: 'text', text: '<title>千问AI平台</title><script src="//q.alyasset.com/npm.combo/pkg.js"></script>' }] } } }),
+    // ⑤ 负例边界：只出现在 MCP **调用参数**（agent 自撰代码）里的 URL 不作证
+    JSON.stringify({ type: 'tool/call', data: { callId: 'm2', name: 'mcp__playwright__browser_run_code_unsafe', arguments: JSON.stringify({ code: `await page.fill('#q', '${argOnly}')` }) } }),
+    JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'm2', role: 'tool', content: [{ type: 'text', text: '已填入搜索框（无 URL 内容）' }] } } }),
+  ].join('\n');
+  writeFileSync(join(sessions, 'session.v4.jsonl'), log);
+  const ev = (name, url) => writeFileSync(join(bundle, 'evidence', name), `---\nsource_url: ${url}\nretrieved_at: 2026-10-16\nquality: A\nfound_by: analyst\nsupports: T1\nsource_tier: primary\npublisher: example.com\n---\n\n# ${name}\n\n来源：${url}\n\n## 原文摘录\n\n> 这是一条足够长的原文摘录占位（形态回归只查 URL 溯源档位）。\n`);
+  ev('ev-enc.md', encClaim);
+  ev('ev-proto.md', protoClaim);
+  ev('ev-bare.md', bareClaim);
+  ev('ev-mcp.md', mcpClaim);
+  ev('ev-argonly.md', argOnly);
+  ev('ev-never.md', never);
+  writeFileSync(join(bundle, 'final.md'), '# Final\n\n结论 [来源: evidence/ev-enc.md]\n');
+  return { bundle, sessions };
+}
+
+test('BUG-029 正例：编码 / 协议相对 / 裸域名 / MCP 取回——都不判伪造', () => {
+  const { bundle, sessions } = fixtureForms();
+  const r = auditBundle(bundle, sessions);
+  const forged = r.findings.filter((f) => f.kind === '伪造链接/未溯源');
+  assert.deepEqual(forged.map((f) => f.file).sort(), ['ev-argonly.md', 'ev-never.md'],
+    `只有"真没出现过"的两份可判伪造：${JSON.stringify(r.findings.filter((f) => f.level === 'CRITICAL'))}`);
+  // 编码形态与裸域名只到"域名见过"档
+  const hostOnly = r.findings.filter((f) => f.kind === '仅域名可溯源').map((f) => f.file).sort();
+  assert.deepEqual(hostOnly, ['ev-bare.md', 'ev-enc.md'], `编码/裸域名应落在 MAJOR 仅域名档：${JSON.stringify(hostOnly)}`);
+  // 协议相对（含 MCP 结果里的）达到 URL 级命中——不该再有任何 URL 溯源类发现（source_url 未抓取仍留，见下条）
+  const urlLevel = new Set(r.findings.filter((f) => f.kind === '伪造链接/未溯源' || f.kind === '仅域名可溯源').map((f) => f.file));
+  assert.ok(!urlLevel.has('ev-proto.md'), '协议相对形态应达到 URL 级可溯源');
+  assert.ok(!urlLevel.has('ev-mcp.md'), 'MCP 取回结果里的 URL 应可溯源（类别②取向 (a)）');
+  assert.equal(r.stats.urlOk, 2, `两条 URL 级命中（proto + mcp）：${r.stats.urlOk}/${r.stats.urlTotal}`);
+});
+
+test('BUG-029 档位边界：见过但没抓过仍是 MAJOR，不洗成通过（负例两条）', () => {
+  const { bundle, sessions } = fixtureForms();
+  const r = auditBundle(bundle, sessions);
+  const srcFindings = r.findings.filter((f) => f.kind === 'source_url 未抓取');
+  assert.deepEqual(srcFindings.map((f) => f.file).sort(),
+    ['ev-argonly.md', 'ev-bare.md', 'ev-enc.md', 'ev-mcp.md', 'ev-never.md', 'ev-proto.md'],
+    `六条 source_url 都只是"出现过"（或更弱），必须全部留 MAJOR：${JSON.stringify(srcFindings)}`);
+  assert.equal(r.stats.srcFetched, 0, '本夹具里没有任何 source_url 真被抓取过——不许洗成通过');
+  assert.ok(srcFindings.some((f) => f.detail.includes('仅域名出现过')), '域名级见过的措辞要如实（不是"从未出现过"）');
+  assert.equal(r.criticalCount, 2, '仅两条"从未出现"判 CRITICAL（防空语料/断链不在此夹具）');
+});
+
+test('BUG-029 措辞限定「本 run」：跨 run 语料不进窗，判定与文案都要说清', () => {
+  const { bundle, sessions } = fixtureForms();
+  const r = auditBundle(bundle, sessions);
+  const hit = r.findings.find((f) => f.kind === '伪造链接/未溯源' && f.file === 'ev-never.md');
+  assert.ok(hit !== undefined, '凭空 URL 仍判 CRITICAL');
+  assert.ok(hit.detail.includes('本 run'), `判定文案须限定"本 run 语料窗"：${hit.detail}`);
+});
 
 test('语料窗：跨 run 会话的 URL 不得为本 run 作证（slug 窗过滤——审计 P3 件⑧）', () => {
   const { bundle } = fixture();

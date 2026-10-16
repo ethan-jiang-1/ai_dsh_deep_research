@@ -3,14 +3,16 @@
 // 溯源断链——RFC evidence-reliability L3）。
 //
 // 为什么存在：evidence/*.md 是模型从 tool result **手写**的——URL 可伪造、引句可转写错/编造、
-// final 引用可断链。会话日志存着全部真相（model-visible ⟺ logged：每次 web 工具调用的
+// final 引用可断链。会话日志存着全部真相（model-visible ⟺ logged：每次取回工具调用的
 // 原始结果都在 zstd 日志里），本工具拿它对账，把"谁知道是不是幻觉"变成机检报告。
 //
 // 三条断言（RFC 判据）：
 //   ① source_url 溯源：evidence 声称的每个 URL（frontmatter source_url，无 frontmatter 的
-//      存量文件则取正文全部 http(s) 链接）必须在会话日志的**工具事件**（tool/call 与
-//      tool/result）里真实出现过——模型口头提过的 URL 不算（防伪造链接）；
-//   ② 摘录转写回溯：原文摘录（blockquote）规范化后在工具结果语料中可找到（防转写幻觉；
+//      存量文件则取正文全部 http(s) 链接）必须**在本 run 语料窗内的取回事件里**真实出现过——
+//      取回事件 = web_fetch/web_search 的调用与结果 + **MCP 工具结果**（浏览器 MCP 是真实取回
+//      路径，2026-10-16 BUG-029 类别②）；URL 形态含 %XX 编码 / 协议相对 `//host` / 裸域名
+//      （裸域名只算"域名见过"，不冒充 URL 级命中）。模型口头提过的 URL 不算（防伪造链接）；
+//   ② 摘录转写回溯：原文摘录（blockquote）规范化后在取回结果语料中可找到（防转写幻觉；
 //      规范化 = 去空白/markdown 强调符 + 小写——CJK 安全；匹配不到的如实列出，报告覆盖率）；
 //   ③ final 溯源链：final/ 当前版每条 [来源: evidence/xx.md] 指向真实存在的证据文件
 //      （**反引号内的格式说明占位不算引用**——首场 run 审计的假阳性，实测修正）。

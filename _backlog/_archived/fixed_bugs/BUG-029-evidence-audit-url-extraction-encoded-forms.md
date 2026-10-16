@@ -1,12 +1,12 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-10-15
 ---
 
 # BUG-029：evidence-audit 的溯源语料漏两类真实取证路径（编码/协议相对形态 · 非 web 工具的抓取）——CRITICAL「伪造链接」档假红率 3/5
 
-> 状态：等人拍板（根因已实测确认 + 修法选定 + 修复判据写就；**修复触及 run 机械门判据 → 不自授权**，按缺陷通道转此态）｜发现：2026-10-15（复核 BUG-024 收卡盘点牵出的两场审计 CRITICAL 时实证）
+> 状态：已修 — 用户 2026-10-16 拍板类别②取 (a)「纳入浏览器/MCP 取回」并按推荐次序批准开工（BUG-029 → readiness → 处置）；修复进树、修复判据五条全绿（契约 16/16 · 全量 52 场 CRITICAL 79→73 且按 URL 身份新增 0 · nvidia 场 exit 1→0、门A RED→PASS），去向 = [evidence-audit 语料与形态 Note](../../../notes/implemented/2026-10-15-evidence-audit-url-forms-and-corpus.md)｜发现：2026-10-15（复核 BUG-024 收卡盘点牵出的两场审计 CRITICAL 时实证）
 
 ## 症状
 
@@ -36,7 +36,7 @@ opened: 2026-10-15
 
 → **CRITICAL 档假红率 3/5（60%）**：一个专职"防伪造"的档位把真实交付标成伪造，并因此打红门A。
 
-**类别②的契约问题（需一并拍板）**：本仓已采纳 MCP Playwright（[2026-10-02 采纳 Note](../../notes/implemented/2026-10-02-mcp-playwright-adoption.md)），浏览器抓取是**真实的取回路径**。修法有两条取向：**(a)** 把浏览器/MCP 类抓取纳入溯源语料（推荐——与"是否真取回"的判据目的同向）；**(b)** 明确排除并在报告里如实标注"经非 web 工具取回，本工具不核验"，避免误标伪造。无论取哪条，都不得让"确实取回过"被标成"伪造"。
+**类别②的契约问题（需一并拍板）**：本仓已采纳 MCP Playwright（[2026-10-02 采纳 Note](../../../notes/implemented/2026-10-02-mcp-playwright-adoption.md)），浏览器抓取是**真实的取回路径**。修法有两条取向：**(a)** 把浏览器/MCP 类抓取纳入溯源语料（推荐——与"是否真取回"的判据目的同向）；**(b)** 明确排除并在报告里如实标注"经非 web 工具取回，本工具不核验"，避免误标伪造。无论取哪条，都不得让"确实取回过"被标成"伪造"。
 
 ## 对照（同批另一场，**不是**本缺陷）
 
@@ -68,6 +68,22 @@ URL 抽取只认字面 `http(s)://` 形态，未处理三类真实存在的引�
 
 ## 参考
 
-- 触发场景卡：[未闭合 bundle 处置](../issues/2026-10-15-unclosed-bundles-disposition.md)（本卡结论直接改其 A 类前两场的定性）；
+- 触发场景卡：[未闭合 bundle 处置](../../issues/2026-10-15-unclosed-bundles-disposition.md)（本卡结论直接改其 A 类前两场的定性）；
 - 审计契约三条断言 = `scripts/run-gates/evidence-audit.mjs` 头注；
 - 相邻失败类：BUG-027/028 族"机械面自身可信度"。
+
+## 修复关联
+
+2026-10-16 落地（用户拍板：类别②取 (a)「纳入浏览器/MCP 取回」，并按推荐次序批准开工）：
+
+- **判据核** = `scripts/lib/evidence-audit-core.mjs`：`urlsOf` 加"逐 `%XX` 序列容错解码副本 + 协议相对 `//host` 归一"，
+  新增 `hostsOf` 裸域名（只喂域名级判定）；`buildCorpus` 把 **MCP 工具结果**纳入语料（调用参数不入——自证面）；
+  `fetchedOk` 仍只认 `web_fetch`（档位不升格）；CRITICAL / 仅域名 / `source_url 未抓取` 措辞按证据强度改写并限定"本 run"；
+- **驱动壳头注**（三条断言）同 diff 同步；**契约测试** `tests/evidence-audit.test.mjs` 新增三条 + 负例留证块；
+- **决定记录** = [evidence-audit 语料与形态 Note](../../../notes/implemented/2026-10-15-evidence-audit-url-forms-and-corpus.md)
+  （决定 / 输掉的方案 / 全量对账 / 环境状态）；
+- **修复判据逐条**：①形态扩宽 ✓（正例四形态）②档位分离不被抹平 ✓（负例两条 + 全量 `source_url 未抓取` 72→72）
+  ③真实数据红→绿 ✓（nvidia 1→0 且门A RED→PASS、cn-llm-pricing 4→0、ai-coding-security 维持且措辞限定"本 run"、
+  geometry-coaching 维持）④反证 ✓（两路注入各看红；"确实从没出现过"用例仍判 CRITICAL）⑤L0 全绿 + 对账 ✓
+  （52 场 = 活跃 14 + 归档 38：CRITICAL 79→73，按 URL 身份新增 0；原判据写"37 场归档"，实际归档 38 场一并扫）；
+- **下游**：A 类前两场定性已随本修复更新（见触发场景卡）。

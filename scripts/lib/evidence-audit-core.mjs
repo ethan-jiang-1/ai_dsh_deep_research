@@ -39,7 +39,42 @@ export function splitFrontmatter(text) {
 // 会把内层引号转义成 `\"`，于是 URL 尾巴上粘一个 `\`——抽成 `https://x/y\` 与卡片的干净 URL 对不上，
 // 直接导致"真抓过的 source_url 被判没抓过"。URL 内本就不会出现反斜杠。
 const URL_RE = /https?:\/\/[^\s>)）』」"'\]，。；`（\\]+/g
-const urlsOf = (text) => [...text.matchAll(URL_RE)].map((m) => m[0].replace(/[.,;:)\]`）】」'"\\]+$/, ''))
+const TRIM_TAIL = /[.,;:)\]`）】」'"\\]+$/
+
+// 协议相对 `//host/…`（2026-10-16 BUG-029 实测补）：搜索列表/页面源码里的链接常以 //host 承载，
+// 抽取器原先只认字面 http(s):// → 目标 URL 读不出 → 假 CRITICAL。前视排除 `:` 与 `/`：
+// 否则会从 `https://host/…` 中间再切一份出来（重复计数）。命中后补 `https:` 归一（两边同规）。
+const PROTO_REL_RE = /(?<![:/\w])\/\/(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,}(?::\d+)?(?:[/?#][^\s>)）』」"'\]，。；`（\\]*)?/g
+// 裸域名 / 链接文本（2026-10-16 同上）：**只喂"域名级出现过"判定，不冒充 URL 级命中**。
+// 尾部标签要求纯字母（≥2）——滤掉 `session.v4` / `v1.2` 这类版本号形态；误收 `final.md`
+// 之类无害（hosts 集只被"声称 URL 的 host"查询，多收不产生命中）。
+const BARE_HOST_RE = /(?:^|[^\w./@-])((?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,})(?![\w-])/g
+
+// 逐 `%XX` 序列容错解码（BUG-029 修法硬约束）：抽取前先造一份解码副本。
+// ⚠ **不得整串 decodeURIComponent**——真实 payload 含孤立 `%`（HTML/CSS 里常见）会抛错，
+// try/catch 吞掉后退化为原串 → 静默 0 命中（本轮先踩到的坑，卡片 §修法可行性预验证 有记录）。
+// 逐序列粒度：坏序列原样保留，不牵连同串的好序列。
+const decodePct = (s) => s.replace(/(?:%[0-9A-Fa-f]{2})+/g, (seq) => {
+  try { return decodeURIComponent(seq) } catch { return seq }
+})
+
+/** 抽 URL：原串 + 容错解码副本各扫一遍（编码形态 / 协议相对都归一成 `http(s)://…`）。 */
+const urlsOf = (text) => {
+  const out = []
+  for (const variant of [text, decodePct(text)]) {
+    for (const m of variant.matchAll(URL_RE)) out.push(m[0].replace(TRIM_TAIL, ''))
+    for (const m of variant.matchAll(PROTO_REL_RE)) out.push(`https:${m[0].replace(TRIM_TAIL, '')}`)
+  }
+  return out
+}
+/** 抽裸域名（域名级判定专用；不产生 URL 级命中）。 */
+const hostsOf = (text) => {
+  const out = []
+  for (const variant of [text, decodePct(text)]) {
+    for (const m of variant.matchAll(BARE_HOST_RE)) out.push(m[1].toLowerCase())
+  }
+  return out
+}
 /** 规范化（CJK 安全）：去全部空白 + markdown 强调符 + 小写。 */
 // 去空白 + markdown 语法符（强调/引用/标题/列表/表格分隔 `|`）+ **引号/书名号类装饰符** +
 // **反斜杠转义**。引号与转义都是实测补的：59 条逐字摘录只因卡片用 `"…"` 包住原文被判失败；
@@ -47,9 +82,18 @@ const urlsOf = (text) => [...text.matchAll(URL_RE)].map((m) => m[0].replace(/[.,
 // 来源页无转义）整条失配——判据是"文字是否来自来源"，不是"装饰与转义是否一致"。
 export const normalize = (s) => s.replace(/[\\\s>*_`#·•|"'“”‘’「」『』]+/gu, '').toLowerCase()
 const stripTrailing = (u) => u.replace(/\/+$/, '')
+/** 声称 URL → host（含端口）；非法 URL 返回 null（不 throw、不猜）。 */
+const hostOf = (u) => { try { return new URL(u).host } catch { return null } }
 
 /**
- * 会话日志语料——**只认 web 工具事件**（`web_fetch` / `web_search` 的 call 与 result）。
+ * 会话日志语料——**只认取回类工具事件**：`web_fetch` / `web_search` 的 call 与 result，
+ * 加 **MCP 工具的结果**（2026-10-16 BUG-029 类别②取向 (a)：本仓已采纳本地 Playwright MCP，
+ * 浏览器取回是真实取证路径——把"MCP 读回过"判成"伪造"是量具说谎）。
+ *
+ * ⚠ MCP **调用参数**不进语料（与 web 工具不同）：web_fetch/web_search 的参数**就是取回目标**
+ * （`url` / `query`，语义即"我要取这个"）；MCP 参数是 agent 自撰的任意代码/文本，把它算作
+ * 取证会把"在脚本里写过一个 URL"洗成"取回过"——那正是本审计要防的自证。MCP 只认**结果**
+ * （外部返回的内容）。裸域名同理只从结果里抽。
  *
  * ⚠ 为什么必须剔除 agent 自撰文本（2026-09-26 实测的重大缺陷）：原版吞掉**全部** tool/call 与
  * tool/result，其中 `write` 的 arguments **就是被审的那张证据卡本身**、`read`/`grep` 的 result 又把
@@ -58,20 +102,24 @@ const stripTrailing = (u) => u.replace(/\/+$/, '')
  * 51/368。更糟的是：任何 normalize 放宽都会把它推成 446/446 满堂红（实测未溯源的 167/167、35/35
  * 全部被"修好"）——**一个能自证的审计等于不存在**。
  *
- * 返回：webUrls（web 事件里出现过的 URL，含搜索结果列表）/ fetchedOk / fetchFailed（web_fetch 的
- * 成败，按 call 的 url 与 result 的 `Fetched …` vs `Error:` 判定）/ webChunks（web 结果正文分片）。
+ * 返回：webUrls（取回事件里出现过的 URL——含搜索结果列表、编码/协议相对/裸域名形态的归一）/
+ * bareHosts（只以裸域名形态出现过的 host，仅供域名级判定）/ fetchedOk / fetchFailed（web_fetch 的
+ * 成败，按 call 的 url 与 result 的 `Fetched …` vs `Error:` 判定——**MCP 不计入**：浏览器内容里
+ * 出现某 URL 不等于"单独抓取过该 URL"，档位不许因此升级）/ webChunks（取回结果正文分片）。
  */
 export function buildCorpus(root, slug = null, readLog = plainLogReader) {
   const webUrls = new Set()
+  const bareHosts = new Set()
   const fetchedOk = new Set()
   const fetchFailed = new Set()
   const webChunks = []
   let sessionFiles = 0
   let windowFiles = 0
   let windowSkipped = 0
-  let webEvents = 0
-  if (!existsSync(root)) return { webUrls, fetchedOk, fetchFailed, webChunks, sessionFiles, windowFiles, windowSkipped, webEvents }
-  const isWeb = (name) => name === 'web_fetch' || name === 'web_search'
+  let retrievalEvents = 0
+  if (!existsSync(root)) return { webUrls, bareHosts, fetchedOk, fetchFailed, webChunks, sessionFiles, windowFiles, windowSkipped, retrievalEvents }
+  const isFetchTool = (name) => name === 'web_fetch' || name === 'web_search'
+  const isMcpTool = (name) => typeof name === 'string' && name.startsWith('mcp__')
   const walk = (dir) => {
     for (const ent of readdirSync(dir, { withFileTypes: true })) {
       const p = join(dir, ent.name)
@@ -99,8 +147,8 @@ export function buildCorpus(root, slug = null, readLog = plainLogReader) {
           if (e.type === 'tool/call' || e.type === 'tool-call') {
             const name = e.data?.name
             callName.set(e.data?.callId, name)
-            if (isWeb(name)) {
-              webEvents += 1
+            if (isFetchTool(name)) {
+              retrievalEvents += 1
               const us = urlsOf(payload)
               for (const u of us) webUrls.add(u)
               if (name === 'web_fetch' && us.length > 0) callUrl.set(e.data.callId, us[0])
@@ -110,9 +158,12 @@ export function buildCorpus(root, slug = null, readLog = plainLogReader) {
           // tool/result：按 callId 反查工具名（result 自身不带名字）
           const id = e.data?.message?.toolCallId ?? e.data?.toolCallId
           const name = callName.get(id)
-          if (!isWeb(name)) continue
-          webEvents += 1
+          const mcp = isMcpTool(name)
+          if (!isFetchTool(name) && !mcp) continue
+          retrievalEvents += 1
           for (const u of urlsOf(payload)) webUrls.add(u)
+          // 裸域名只从**结果**（外部内容）里抽：调用参数是 agent 自撰文本，不作证
+          for (const h of hostsOf(payload)) bareHosts.add(h)
           const body = JSON.stringify(e.data?.message?.content ?? '')
           if (name === 'web_fetch') {
             const target = callUrl.get(id)
@@ -128,7 +179,7 @@ export function buildCorpus(root, slug = null, readLog = plainLogReader) {
     }
   }
   walk(root)
-  return { webUrls, fetchedOk, fetchFailed, webChunks, sessionFiles, windowFiles, windowSkipped, webEvents }
+  return { webUrls, bareHosts, fetchedOk, fetchFailed, webChunks, sessionFiles, windowFiles, windowSkipped, retrievalEvents }
 }
 
 /**
@@ -190,10 +241,14 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = plainLogReader 
   //    · 域名也没命中 → CRITICAL「域名与 URL 都未出现」
   // 比 host（含端口）而不是 origin：实测 run 的卡片常写 `http://…` 而日志里是 `https://…`
   // （或反之），用 origin 比会把**同一站点**判成"域名也没抓过"→ 假 CRITICAL（实测 61 次命中被误判）。
+  // 2026-10-16（BUG-029）：域名来源含 **bareHosts**（只以裸域名形态出现过的 host——链接文本/正文）；
+  // 它只喂本判定，不产生 URL 级命中（"域名见过" ≠ "该 URL 取回过"）。
   const hosts = new Set()
   for (const u of corpusUrlSet) {
-    try { hosts.add(new URL(u).host) } catch { /* 非法 URL 跳过 */ }
+    const h = hostOf(u)
+    if (h !== null) hosts.add(h)
   }
+  for (const h of corpus.bareHosts) hosts.add(h)
   const fetchedOkSet = new Set([...corpus.fetchedOk].map(stripTrailing))
   const fetchFailedSet = new Set([...corpus.fetchFailed].map(stripTrailing))
   let urlOk = 0
@@ -210,23 +265,28 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = plainLogReader 
       if (fetchedOkSet.has(su)) srcFetched += 1
       else {
         srcNeverFetched += 1
-        const kind = fetchFailedSet.has(su) ? '声明抓取但抓取失败' : (corpusUrlSet.has(su) ? '仅出现在搜索结果、未真正抓取' : 'source_url 从未出现在任何 web 工具事件里')
+        const srcHost = hostOf(src)
+        // 四档措辞按**证据强度**分（BUG-029：域名出现过却写"从未出现"= 措辞说谎；档位不变，仍是 MAJOR）
+        const kind = fetchFailedSet.has(su) ? '声明抓取但抓取失败'
+          : (corpusUrlSet.has(su) ? '取回语料里出现过、未真正抓取'
+            : (srcHost !== null && hosts.has(srcHost) ? '仅域名出现过、该 URL 未被抓取' : '本 run 取回语料里从未出现过'))
         findings.push({ level: 'MAJOR', file: rec.file, kind: 'source_url 未抓取', detail: `${kind}：${src.slice(0, 100)}` })
       }
     }
     for (const u of rec.claimedUrls) {
       urlTotal += 1
       if (corpusUrlSet.has(stripTrailing(u))) { urlOk += 1; continue }
-      let host = null
-      try { host = new URL(u).host } catch { /* 非法 URL */ }
+      const host = hostOf(u)
       if (host !== null && hosts.has(host)) {
-        findings.push({ level: 'MAJOR', file: rec.file, kind: '仅域名可溯源', detail: `具体路径未在 web 工具事件中出现（域名出现过）：${u.slice(0, 100)}` })
+        findings.push({ level: 'MAJOR', file: rec.file, kind: '仅域名可溯源', detail: `具体路径未在本 run 取回语料中出现（域名出现过）：${u.slice(0, 100)}` })
         continue
       }
-      findings.push({ level: 'CRITICAL', file: rec.file, kind: '伪造链接/未溯源', detail: `域名与 URL 都未出现在任何 web 工具事件里：${u.slice(0, 100)}` })
+      // 措辞限定「本 run」：跨 run 语料窗是**有意设计**（窗外会话不得作证），说"任何 web 工具事件"
+      // 会把"别的 run 搜到过"读成"哪儿都没有"（BUG-029 复核：ai-coding-security 那场判定成立，错的是措辞）。
+      findings.push({ level: 'CRITICAL', file: rec.file, kind: '伪造链接/未溯源', detail: `域名与 URL 都未出现在本 run 语料窗内的取回事件里（web_fetch/web_search/MCP 结果）：${u.slice(0, 100)}` })
     }
   }
-  // ② 摘录转写回溯（web-only 语料 + **限定在 `## 原文摘录` 节内** + 覆盖率分档）
+  // ② 摘录转写回溯（取回工具语料 + **限定在 `## 原文摘录` 节内** + 覆盖率分档）
   //    为什么限节：原版扫正文全部 `^>` 行，实测 5 条未溯源行根本不在摘录节里（在 §解读 或节外），
   //    而且 `>` 被复用为"卡片自己的注"（指针/标签），那些不是摘录主张。
   //    为什么用覆盖率而不是二值：语料修正后，**复合摘录**（多段拼接）与**被截断的抓取**是合法形态，
@@ -315,7 +375,7 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = plainLogReader 
   const report = `# Evidence Audit — ${bundleDir.split('/').pop()}（${new Date().toISOString()}）
 
 > 由 scripts/run-gates/evidence-audit.mjs 生成（keyless 机械对账；正本判据 = 研究手册 §证据文件契约）。
-> 会话语料：${corpus.sessionFiles} 个日志文件（**语料窗**：提及本 run slug 的 ${corpus.windowFiles} 个在窗内${corpus.windowSkipped > 0 ? `、${corpus.windowSkipped} 个窗外不计入对账` : ''}——跨 run URL 不得作证）、${corpus.webEvents} 个 **web 工具事件**（${corpus.webUrls.size} 个 URL；已剔除 agent 自撰文本——否则摘录审计自证）。
+> 会话语料：${corpus.sessionFiles} 个日志文件（**语料窗**：提及本 run slug 的 ${corpus.windowFiles} 个在窗内${corpus.windowSkipped > 0 ? `、${corpus.windowSkipped} 个窗外不计入对账` : ''}——跨 run URL 不得作证）、${corpus.retrievalEvents} 个 **取回事件**（web_fetch/web_search 的调用与结果 + MCP 工具结果；${corpus.webUrls.size} 个 URL；已剔除 agent 自撰文本——否则摘录审计自证）。
 
 ## 概要
 

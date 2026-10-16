@@ -17,12 +17,12 @@ opened: 2026-10-15
 
 | bundle | final | 门③ 拍板行 | 门② present | 门A | 审计 |
 |---|---|---|---|---|---|
-| `drt_nvidia-dc-gpu-share` | ✓ | **RED** | PASS | **RED** | ~~CRITICAL 1 = 伪造链接~~ → **2026-10-15 复核：疑为审计假红**（该 URL **在本 run 自己的 web_fetch 结果里以百分号编码/协议相对形态出现**，抽取器漏抽；正确定性 = "搜索列表里见过、本 run 未抓过" = MAJOR 档，见 [BUG-029](../../_backlog/bugs/BUG-029-evidence-audit-url-extraction-encoded-forms.md)）；仍缺 HITL2 拍板行 |
-| `drt_ai-coding-security` | ✓ | PASS | PASS | **RED** | CRITICAL **1 = 本 run 未取证**（`open-vsx.org` 仅出现在**别场** mcp-* 的 web_search 结果里，跨 run 语料窗设计上不予作证——实质成立，措辞应限定"本 run"）；另门L RED（方向 H 缺分级、覆盖缺口 T7/T8） |
+| `drt_nvidia-dc-gpu-share` | ✓ | **RED** | PASS | **PASS** | ~~CRITICAL 1 = 伪造链接~~ → **已判假红并修复**：该 URL 在本 run 自己的 `web_fetch` 结果里以百分号编码/协议相对形态出现，抽取器漏抽；[BUG-029](../../_backlog/_archived/fixed_bugs/BUG-029-evidence-audit-url-extraction-encoded-forms.md) 2026-10-16 修复后复跑 = CRITICAL **0**（该条降为 MAJOR「仅域名可溯源」+ MAJOR「仅域名出现过、该 URL 未被抓取」），门A **RED → PASS**、脚本 exit 1 → 0；仍缺 HITL2 拍板行（门③ RED） |
+| `drt_ai-coding-security` | ✓ | PASS | PASS | **RED** | CRITICAL **1 = 本 run 未取证**（`open-vsx.org` 仅出现在**别场** mcp-* 的 web_search 结果里，跨 run 语料窗设计上不予作证——实质成立；措辞已随 [BUG-029](../../_backlog/_archived/fixed_bugs/BUG-029-evidence-audit-url-extraction-encoded-forms.md) 修复限定为"本 run 语料窗内"）；另门L RED（方向 H 缺分级、覆盖缺口 T7/T8） |
 | `drt_anthropic-latest-model` | ✓ | **RED** | **RED** | PASS | CRITICAL 0（审计干净） |
 | `drt_cn-moe-2026` | ✓ | **RED** | N/A | **RED** | CRITICAL 0 |
 
-**建议（按 2026-10-15 复核修正）**：前两场都不是"凭空编造 URL"，而是"**引用了本 run 未曾真正抓取的页面**"——最省且正确的路线 = **补一次真实抓取**（`web_fetch` 该 URL，核内容是否支撑结论；支撑则补摘录重跑审计，不支撑则换源或修结论）。nvidia 场另需等 [BUG-029](../../_backlog/bugs/BUG-029-evidence-audit-url-extraction-encoded-forms.md) 的抽取修复后复判档位。前两场（伪造）如按旧定性则优先走**补证据重审**——人工核该 URL 是否真实存在：存在则补一次真实 `web_fetch` + 修正摘录 + 重跑 `evidence-audit`；不存在则修结论或换源（若结论依赖伪造源 → 退回对应节点补研究，需真模型 run）。后两场（审计干净但缺 HITL2 拍板行/present）不能按已交付归档；建议要么补齐闭合（拍板 + present，人/真模型介入），要么与 C 类同办。
+**建议（按 2026-10-15 复核修正）**：前两场都不是"凭空编造 URL"，而是"**引用了本 run 未曾真正抓取的页面**"——最省且正确的路线 = **补一次真实抓取**（`web_fetch` 该 URL，核内容是否支撑结论；支撑则补摘录重跑审计，不支撑则换源或修结论）。nvidia 场的档位复判已完成（[BUG-029](../../_backlog/_archived/fixed_bugs/BUG-029-evidence-audit-url-extraction-encoded-forms.md) 2026-10-16 修复 → CRITICAL 0，档位落在"仅域名出现过、该 URL 未被抓取"；剩下的是补证据而不是修判据）。前两场如按旧定性则优先走**补证据重审**——人工核该 URL 是否真实存在：存在则补一次真实 `web_fetch` + 修正摘录 + 重跑 `evidence-audit`；不存在则修结论或换源（若结论依赖伪造源 → 退回对应节点补研究，需真模型 run）。后两场（审计干净但缺 HITL2 拍板行/present）不能按已交付归档；建议要么补齐闭合（拍板 + present，人/真模型介入），要么与 C 类同办。
 
 ### B 类 · 已交付且审计通过（0 场）
 
