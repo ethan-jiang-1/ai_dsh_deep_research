@@ -83,6 +83,35 @@ function markdownTableCells(line) {
   return cells;
 }
 
+// 「给用户的一句话」列（方法预设表第 2 列，2026-10-15 卡第 2 条）：该列是**模型可见**表的一列
+// （lead 读它回答"这个预设是干什么的"），但**客户端不投影它**——面板内置卡显示的是 sections.source。
+// 此前测试解析后丢弃该列 → 改它无人咬；现按列级数据钉住（不改客户端契约：面板显示面属 D25 期 1 设计，
+// 要改是产品决定，不是测试硬化）。
+const EXPECTED_BUILTIN_ONE_LINERS = [
+  ['事实核查', '核准具体事实/数字/状态的对象、时点与口径'],
+  ['领域地图', '摸清谁在做什么、到哪一步'],
+  ['主张核查', '查证一个说法是真是假'],
+  ['方案比较', '把几个选项放在同一标准下比'],
+];
+
+/** 只取「给用户的一句话」列（与 builtinPreferencesFromSkill 同一次解析口径）。 */
+function builtinOneLinersFromSkill() {
+  const lines = readFileSync(METHOD_PRESETS_SKILL, 'utf8').split(/\r?\n/);
+  const headerIndex = lines.findIndex((line) => {
+    const cells = markdownTableCells(line);
+    return cells.length === METHOD_PRESET_HEADERS.length && cells.every((cell, i) => cell === METHOD_PRESET_HEADERS[i]);
+  });
+  assert.notEqual(headerIndex, -1, 'research-brief skill 方法预设表头缺席或发生变化');
+  const rows = [];
+  for (const line of lines.slice(headerIndex + 2)) {
+    if (line.trim() === '' || !line.includes('|')) break;
+    const cells = markdownTableCells(line);
+    assert.equal(cells.length, METHOD_PRESET_HEADERS.length, '方法预设表格行列数变化');
+    rows.push([cells[0], cells[1]]);
+  }
+  return rows;
+}
+
 function builtinPreferencesFromSkill() {
   const lines = readFileSync(METHOD_PRESETS_SKILL, 'utf8').split(/\r?\n/);
   const headerIndex = lines.findIndex((line) => {
@@ -155,6 +184,8 @@ test('内置研究偏好与 research-brief 方法预设表逐字段一致', () =
   const canonical = builtinPreferencesFromSkill();
   assert.deepEqual(builtinPreferencesFromClient(), canonical, '客户端内置偏好必须逐字段投影 canonical skill 表');
   assert.deepEqual(canonical, EXPECTED_BUILTIN_PREFERENCES, 'canonical skill 方法预设表发生了需显式审视的内容变化');
+  // 列级：第 2 列「给用户的一句话」（此前只解析不判——改它无人咬）
+  assert.deepEqual(builtinOneLinersFromSkill(), EXPECTED_BUILTIN_ONE_LINERS, '「给用户的一句话」列发生变化（须显式审视：它是模型可见表的一列）');
 });
 
 const v2 = [

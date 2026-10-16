@@ -12,7 +12,7 @@ opened: 2026-10-16
 **当前情况：**
 
 1. **取代检查已完成**——评审初稿中与既有裁决相撞的三条已撤回：verify.mjs 文件级拆分（重启条件正本 = [verify-domain-regroup](../../../notes/implemented/2026-10-13-verify-domain-regroup.md)）、clientHistoryWindowOf 下沉 lib 与 readLog 换 canonical 之外的收敛边界（[repo-structure-refactor](../../../notes/implemented/2026-10-13-repo-structure-refactor.md) 输掉的方案）、tests/ 分域（[test-asset-organization](../../../notes/implemented/2026-10-05-test-asset-organization.md)）。
-2. **三点已拍板（2026-10-16 用户）**：① Phase B 做 B1+B2 全量，真模型档五站点逐件复跑取证；② verify.mjs 不拆，重议条件登记进 [triggers](../../triggers.md)；③ hitl-answer 长函数本轮不动——其三条硬化候选仍归 [2026-10-15 卡](../../issues/2026-10-15-hitl-answer-and-test-surface-hardening.md)，两卡互不接管。
+2. **三点已拍板（2026-10-16 用户）**：① Phase B 做 B1+B2 全量，真模型档五站点逐件复跑取证；② verify.mjs 不拆，重议条件登记进 [triggers](../../triggers.md)；③ hitl-answer 长函数本轮不动——其三条硬化候选仍归 [2026-10-15 卡](2026-10-15-hitl-answer-and-test-surface-hardening.md)，两卡互不接管。
 3. **两条实证修正了计划形态**：① [run-dashboard-core](../../../scripts/lib/run-dashboard-core.mjs) 与 [evidence-audit-core](../../../scripts/lib/evidence-audit-core.mjs) 的 `splitFrontmatter` 逻辑逐字相同，可收敛——evidence-audit 侧"独立副本——不依赖 dashboard 副作用面"的理由在两核均纯化为 lib 纯件后失效，中立第三方模块比任一消费方更小；② 两个 run-gates 壳的 `readLog` **语义不同**（[node-gate](../../../scripts/run-gates/node-gate.mjs) 解压失败返回 `''` 空语料继续、[evidence-audit](../../../scripts/run-gates/evidence-audit.mjs) 返回 `null` 跳过该文件——失败契约是各自判据的载重墙，头注实证），且解压通路（zstd CLI）与 canonical [session-log](../../../scripts/lib/session-log.mjs)（node zlib）不同——**不换 canonical**（那是行为变化），只抽逐字相同的 zstd CLI 调用段为共享小件。
 
 **未决问题：** 无技术未决。**关闭条件核对（2026-10-16）**：A/B1/B2/D 四阶段均已交付、验收判据全绿、
@@ -98,7 +98,7 @@ stdout 形态比对（波动字段白名单化）。
 - clientHistoryWindowOf 下沉 lib——单消费方不成缝（2026-10-13 裁决）；
 - readLog 换 canonical session-log——失败契约与解压通路双差异 = 行为变化，超出零行为边界；
 - 内闭包形态 rpc（cdp-ask / snapshot-replay / run-kickoff）硬收敛——形态差异非逐字重复；
-- hitl-answer `operateOnTargetCard` 分段——驱动面无直接契约测试、验证面薄，收益不抵；与 [2026-10-15 卡](../../issues/2026-10-15-hitl-answer-and-test-surface-hardening.md) 的触发条件（下次改该文件时顺带）合并考虑；
+- hitl-answer `operateOnTargetCard` 分段——驱动面无直接契约测试、验证面薄，收益不抵；与 [2026-10-15 卡](2026-10-15-hitl-answer-and-test-surface-hardening.md) 的触发条件（下次改该文件时顺带）合并考虑；
 - tests/ 分域、run-dashboard-core 再拆、ResearchStatusTab 再拆——既有裁决维持。
 
 ## 验收标准

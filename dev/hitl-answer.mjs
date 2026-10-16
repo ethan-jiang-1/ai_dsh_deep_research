@@ -288,10 +288,19 @@ try {
   const sessionRows = page.locator('[data-row-key^="session:"]')
   const workspaceRows = page.locator('[data-row-key^="workspace:"]')
   const overflowRows = page.locator('[data-row-key^="overflow:"]')
+  // 侧栏行扫描上限（2026-10-15 卡第 1 条）：原为三处内联 `Math.min(n, 300)`；提为常量便于
+  // 文案引用与反证注入。命中上限与"目标不在侧栏"是**两种因**，报错要分开（下面 capHit 记录）。
+  const ROW_SCAN_CAP = 300
+  // 命中上限的记录（卡第 1 条）：某次行扫因窗满而提前结束 ≠ "目标不在侧栏"——报错要分开说，
+  // 否则超限场会被误导成"归档/终局化"处置（旧文案实测：零上限时报"侧栏没有目标会话行"且
+  // 样本区显示"（侧栏零可见行）"，而行明明在场）。
+  const capHits = new Map() // kind → total（逐类记账：超限时可能多类同时命中，报单一类会漏信息）
+  const noteCap = (kind, total) => { if (total > ROW_SCAN_CAP) capHits.set(kind, total) }
   const rowTexts = [] // 诊断样本：每次行扫收集可见行文本，找不到目标时报给操作者对照
   const findTargetRow = async () => {
     const n = await sessionRows.count()
-    for (let i = 0; i < Math.min(n, 300); i++) {
+    noteCap('session 行', n)
+    for (let i = 0; i < Math.min(n, ROW_SCAN_CAP); i++) {
       const el = sessionRows.nth(i)
       if (await el.getAttribute('data-row-key') === `session:${uiTargetSessionId}`) return el
     }
@@ -300,7 +309,8 @@ try {
   const expandOneSidebarSection = async () => {
     for (const [items, attr] of [[workspaceRows, 'aria-expanded'], [overflowRows, 'aria-expanded']]) {
       const n = await items.count()
-      for (let i = 0; i < Math.min(n, 300); i++) {
+      noteCap('分组行', n)
+      for (let i = 0; i < Math.min(n, ROW_SCAN_CAP); i++) {
         const el = items.nth(i)
         if (!(await el.isVisible().catch(() => false)) || await el.getAttribute(attr) !== 'false') continue
         const box = await el.boundingBox().catch(() => null)
@@ -329,7 +339,8 @@ try {
   const openSession = async () => {
     rowTexts.length = 0
     const n = await rows.count()
-    for (let i = 0; i < Math.min(n, 300); i++) {
+    noteCap('可见行（诊断样本）', n)
+    for (let i = 0; i < Math.min(n, ROW_SCAN_CAP); i++) {
       const el = rows.nth(i)
       if (!(await el.isVisible().catch(() => false))) continue
       const box = await el.boundingBox().catch(() => null)
@@ -362,7 +373,13 @@ try {
   if (opened === null) {
     console.error(`hitl-answer: 侧栏没有目标会话行（session id=${uiTargetSessionId}，--session=${SESSION ?? '（盘侧最新挂起）'}）——`
       + '可能：① 该会话已归档或不在侧栏可见范围；② 挂起回合被 web 重启终局化（需向会话发恢复 prompt 让 lead 原样重发问询）。')
-    console.error('hitl-answer: 侧栏可见行样本（展开后仍未见目标时对照）：'
+    if (capHits.size > 0) {
+    const detail = [...capHits].map(([kind, total]) => `${kind} ${total} 条`).join('、')
+    console.error(`hitl-answer: ⚠ 扫描上限（上限 ${ROW_SCAN_CAP}）——${detail}：目标可能在**未扫描区间**`
+      + '（与"不在侧栏"不同因——先扩窗或收窄候选再重试，别按"已归档/被终局化"处置）')
+    if (rowTexts.length === 0) console.error('hitl-answer: 注：下面的"侧栏可见行样本"为空同样可能由扫描上限造成——不代表侧栏真的没有行。')
+  }
+  console.error('hitl-answer: 侧栏可见行样本（展开后仍未见目标时对照）：'
       + (rowTexts.slice(0, 8).join(' ⏐ ') || '（侧栏零可见行）'))
     process.exitCode = 3
     throw NO_TARGET_SESSION

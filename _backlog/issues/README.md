@@ -4,9 +4,9 @@
 
 ## 活跃清单
 
-| 卡 | 一句话 |
-|---|---|
-| [2026-10-15-hitl-answer-and-test-surface-hardening](2026-10-15-hitl-answer-and-test-surface-hardening.md) | hitl-answer 与测试面三条小硬化候选（侧栏扫描上限文案／library 列断言／`--custom` 语义）——留痕待触发 |
+（当前无活跃问题卡——最近一张 2026-10-15-hitl-answer 三条硬化已于 2026-10-16 全部落地并归档。）
+
+（历史清单见下方归档索引；卡模板与写法见下节。）
 
 （最近归档：[未归档 bundle 处置](../_archived/settled_issues/2026-10-15-unclosed-bundles-disposition.md) 2026-10-16 执行完毕（14 场迁 `_abandoned/`，活动区清零）；[readiness 行形态容忍度](../_archived/settled_issues/2026-10-15-terminal-readiness-line-form-tolerance.md) 2026-10-16 窄放宽落地（A）；[research-preference-detail-ux](../_archived/settled_issues/2026-10-12-research-preference-detail-ux.md) 2026-10-13。）
 
