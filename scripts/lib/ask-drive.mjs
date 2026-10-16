@@ -167,12 +167,20 @@ export function selectPendingSession(candidates, requestedTitle = null) {
  * 若预选与 pick 意图不符，必须先改选目标项（license run 劫持实录：命令 pick=2 被预选项
  * 静默顶替）。radio 在场就继续点；无卡可读交回盘侧裁决。不存在"UI 形状判完成"的分支。
  * @param obs radioCount / checkedCount / submitFound / submitDisabled；selectionMatchesIntent
- *   （可选）当前预选项是否符合 pick 意图——缺席 = 视为相符（旧调用方兼容）。
- * @returns action = 'click-submit' | 'click-option' | 'abort'，reason 人话依据。
+ *   （可选）当前预选项是否符合 pick 意图——缺席 = 视为相符（旧调用方兼容）；
+ *   **纯文本题面**（2026-10-16 新增，触发 = nvidia HITL2 实卡）：textFieldAvailable
+ *   （本卡唯一可填文本域在场）/ textValue（其现值）/ textAnswer（命令给的作答文本）。
+ * @returns action = 'click-submit' | 'click-option' | 'fill-text' | 'abort'，reason 人话依据。
  */
 export function nextDriveAction(obs) {
-  const { radioCount, checkedCount, submitFound, submitDisabled, selectionMatchesIntent } = obs ?? {}
+  const { radioCount, checkedCount, submitFound, submitDisabled, selectionMatchesIntent, textFieldAvailable, textValue, textAnswer } = obs ?? {}
   const intentOk = selectionMatchesIntent !== false
+  // 纯文本题面（无选项 + 有文本域）：**先填后交**，且按"现值 ≠ 作答文本"幂等——填完复观察即走
+  // 提交分支，不会回环。没给作答文本时不猜：落到末尾 abort（与旧行为一致，fail-loud）。
+  if ((radioCount ?? 0) === 0 && textFieldAvailable === true
+    && typeof textAnswer === 'string' && textAnswer !== '' && textValue !== textAnswer) {
+    return { action: 'fill-text', reason: '本题为纯文本题——先填入作答文本再推进' }
+  }
   if (submitFound === true && submitDisabled === false && intentOk) {
     return { action: 'click-submit', reason: 'Submit 可用（全部必答题已选中）' }
   }

@@ -83,3 +83,5 @@ Q1「A 类前两场」明确委托 agent 代判（原话：*"我判断不出来�
   pack 种子 `packages/deep-research-pack/workspace/`，`pack-workspace-fresh` 门禁对账）；
 - A 类四场在搬迁前用真入口复跑了门与审计（现态见上表；nvidia 门A 已随 BUG-029 修复转 PASS）；
 - 本次补写的 `audit.md`/`node-gate.md` **保留**（它们是"未闭合"的机械证据，随 bundle 一起停放）。
+
+**补记（2026-10-16 晚）**：A 类第一场 `drt_nvidia-dc-gpu-share` **已交付归档**——用户授权 agent 以"操作侧代理模拟"身份代答其 HITL2（`dev/hitl-answer.mjs` 驱动，provenance 如实落在 bundle 的 `question.md`/`journal.md`）；复活流程 = 移回工作区根 → lead 续跑（补抓 companieshistory 页并复核结论、修正一处方向性断言、重新呈 HITL2）→ 门①②③④R**A 全 PASS**、审计 **CRITICAL 0**、URL 溯源 50/50 → 移入 `research-workspace/archive/`。活动区由此回到 0 个未归档 run。

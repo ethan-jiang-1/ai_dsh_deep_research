@@ -19,6 +19,16 @@ opened: 2026-10-15
 
 3. **`--custom` 语义非一等公民**：现行为"点完选项后把文本填进**当前题**的 custom 字段"，而 UI 的单选自定义是"替换选择"语义（`packages/.../QuestionComposer.tsx` 的 `draftCustom` 会清空 selected）。候选 = 升格为"纯文本作答"路径（先填 custom 再推进）。
    为何不现在做：**YAGNI**——历史使用证据显示被用的是 `--pick`（BUG-015 族），无 `--custom` 实战需求；等真实需要再改，改时须连带 `optionIndexToClick` 的意图对账。
+   **2026-10-16 触发并落地**（真实需求出现）：nvidia 交付闭合的 HITL2 卡 Q1 是**自由文本题**（逐题翻页形态：
+   1 个 textarea + `Next` 钮、零 radio），旧驱动观察 `radio=0` → abort「无选项可读」→ **整张卡答不了**。
+   落地四件：①判据层 `lib/ask-drive.nextDriveAction` 新增 **`fill-text`**（无选项 + 有文本域 + 给了作答文本 → 先填；
+   按「现值 ≠ 作答文本」幂等防回环；未给文本仍 abort 不猜）；②页面侧**零 radio 一律按文本题面观察**
+   （报 `textFieldAvailable/textValue`），推进钮认 `Next/继续/下一题`——**仅零 radio 时**（选项题面只认 `Submit`，
+   逐字不变）；③**翻页 ≠ 提交**：点击结果带 `kind`（advance 继续循环 / final 收尾；旧行为把翻页当终局提交会提前 break）；
+   ④`--custom` 文本被文本题消费后不再当选项题的补充文本（防串题）。
+   证据 = keyless 四例先红后绿（`tests/ask-drive.test.mjs` 34/34）· 对实卡 dry-run 观察面转正 ·
+   **实答落地**（盘侧裁决「1/2 实质作答 + 意图对账通过」+ provenance 写盘）· `client-hitl-smoke` 回归 ALL PASS。
+   `optionIndexToClick` 与意图对账**未动**（卡上原话的约束）。
 
 **未决问题：** 第 3 条是否已有真实使用场景（若有，优先级从"待触发"升为"现在做"）。
 

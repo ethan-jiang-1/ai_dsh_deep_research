@@ -82,10 +82,38 @@ function operateOnTargetCard({ targetSessionId, expectedCardKey, action = 'ident
   if (cardKey !== expectedCardKey) return { ready: false, reason: 'ask-card-mismatch' }
   if (action === 'identity') return { ready: true, reason: null, cardKey }
   const groups = [...card.querySelectorAll('[role="radiogroup"]')]
-  if (groups.length !== 1) return { ready: false, reason: groups.length === 0 ? 'radio-group-unavailable' : 'radio-group-ambiguous' }
-  const group = groups[0]
-  const radios = [...group.querySelectorAll('button[role="radio"]')]
+  if (groups.length > 1) return { ready: false, reason: 'radio-group-ambiguous' }
+  const group = groups[0] ?? card
+  const radios = groups.length === 1 ? [...group.querySelectorAll('button[role="radio"]')] : []
   const labels = radios.map((button) => (button.textContent ?? '').trim())
+  // 纯文本题面（2026-10-16 实卡触发：HITL2 卡 Q1 = 自由文本题，逐题翻页形态——1 个 textarea +
+  // 「Next」推进钮、零 radio）。旧实现要求恰一个 radiogroup 且从中取 radios，于是这题报
+  // radioCount=0 → 判据层 abort「无选项可读」→ 整张卡答不了。现在：零 radio 一律按文本题面观察，
+  // 由判据层（lib/ask-drive）决定填文本；推进钮认 Next/继续（**仅零 radio 时**，选项题面照旧只认 Submit）。
+  if (radios.length === 0 && (action === 'observe' || action === 'custom')) {
+    const fields = [...card.querySelectorAll('textarea, input[type="text"]')].filter(visible)
+    if (action === 'custom') {
+      if (fields.length !== 1) return { ready: false, reason: fields.length === 0 ? 'custom-field-unavailable' : 'custom-field-ambiguous' }
+      const field = fields[0]
+      if (field.disabled) return { ready: false, reason: 'custom-field-disabled' }
+      const proto = field instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype
+      Object.getOwnPropertyDescriptor(proto, 'value').set.call(field, value)
+      field.dispatchEvent(new InputEvent('input', { bubbles: true, data: value, inputType: 'insertText' }))
+      field.dispatchEvent(new Event('change', { bubbles: true }))
+      return { ready: true, reason: null, filled: true }
+    }
+    const advance = [...card.querySelectorAll('button')]
+      .filter((button) => /^(Submit|提交|Next|继续|下一题)$/i.test((button.textContent ?? '').trim()))
+    return {
+      ready: true, reason: null, radioCount: 0, checkedCount: 0, checkedIndex: null,
+      labels: [], checkedLabel: null,
+      submitFound: advance.length >= 1,
+      submitDisabled: advance.length >= 1 && advance.every((b) => b.disabled),
+      textFieldAvailable: fields.length === 1,
+      textValue: fields.length === 1 ? String(fields[0].value ?? '') : null,
+    }
+  }
+  if (groups.length !== 1) return { ready: false, reason: 'radio-group-unavailable' }
   if (action === 'observe') {
     let scope = group
     let submits = []
@@ -107,6 +135,8 @@ function operateOnTargetCard({ targetSessionId, expectedCardKey, action = 'ident
       checkedLabel: checked === null ? null : (checked.textContent ?? '').trim(),
       submitFound: submits.length === 1,
       submitDisabled: submits.length === 1 && !!submits[0].disabled,
+      textFieldAvailable: [...card.querySelectorAll('textarea, input[type="text"]')].filter(visible).length === 1,
+      textValue: null,
     }
   }
   if (action === 'click-option') {
@@ -130,16 +160,21 @@ function operateOnTargetCard({ targetSessionId, expectedCardKey, action = 'ident
   if (action === 'click-submit') {
     let scope = group
     const submits = []
+    const re = radios.length === 0 ? /^(Submit|提交|Next|继续|下一题)$/i : /^(Submit|提交)$/i
     for (let up = 0; up < 4 && scope !== null && submits.length === 0; up++) {
       scope = scope.parentElement
       if (scope === null || !card.contains(scope)) break
-      submits.push(...[...scope.querySelectorAll('button')].filter((button) => /^(Submit|提交)$/i.test((button.textContent ?? '').trim())))
+      submits.push(...[...scope.querySelectorAll('button')].filter((button) => re.test((button.textContent ?? '').trim())))
     }
     if (submits.length !== 1) return { ready: false, reason: submits.length === 0 ? 'submit-unavailable' : 'submit-ambiguous' }
     if (submits[0].disabled) return { ready: false, reason: 'submit-disabled' }
+    const text = (submits[0].textContent ?? '').trim()
+    // 逐题翻页形态（2026-10-16 实卡）：零 radio 时按钮可能是「Next/继续」——**翻页 ≠ 提交**，
+    // 报 kind 让驱动继续循环（旧行为把翻页当终局提交 → 提前 break → answer 未落地）。
+    const kind = /^(Next|继续|下一题)$/i.test(text) ? 'advance' : 'final'
     submits[0].scrollIntoView({ block: 'center' })
     submits[0].click()
-    return { ready: true, reason: null, clicked: true }
+    return { ready: true, reason: null, clicked: true, kind }
   }
   if (action === 'custom') {
     const fields = [...card.querySelectorAll('textarea, input[type="text"]')].filter(visible)
@@ -356,9 +391,10 @@ try {
   const fillCustom = async (value) => inspectUi('custom', { value })
   const clickSubmit = async () => {
     const result = await inspectUi('click-submit')
-    return result.ready && result.clicked === true
+    return result.ready && result.clicked === true ? { clicked: true, kind: result.kind ?? 'final' } : { clicked: false, kind: null }
   }
   let submitted = false
+  let customConsumed = false // --custom 文本是否已作为纯文本题作答消费掉
   // BUG-015 决策层：预选项 vs pick 意图的符合性进决策——目标不可解析（越界/空）时视为相符
   // 放行（不瞎改选），裁决后的意图对账把关；预选项不符时 nextDriveAction 给 click-option
   // 先改选目标项（clickOption 的 pick 定位逻辑本就在，劫持机制 = 预选使 Submit 提前可用
@@ -366,7 +402,7 @@ try {
   const decideWithIntent = (obs) => {
     const target = pickTargetLabel(obs.labels, PICK)
     const selMatch = obs.checkedLabel === null || target.label === null ? undefined : obs.checkedLabel === target.label
-    return nextDriveAction({ ...obs, selectionMatchesIntent: selMatch })
+    return nextDriveAction({ ...obs, selectionMatchesIntent: selMatch, textAnswer: CUSTOM })
   }
   for (let step = 1; step <= MAX_STEPS; step++) {
     let obs = await observeCard()
@@ -386,11 +422,20 @@ try {
     }
     if (DRY) { log(`[dry-run] 观察 radio=${obs.radioCount} checked=${obs.checkedCount} submit=${obs.submitFound}/${obs.submitDisabled} → ${act.action}（${act.reason}）`); break }
     if (act.action === 'abort') { log(`hitl-answer: ${act.reason}`); break }
+    if (act.action === 'fill-text') {
+      customConsumed = true // 该文本已作为本题作答消费——不再当作选项题的补充文本（防串题）
+      const filled = await fillCustom(CUSTOM)
+      if (filled.ready !== true) { log(`hitl-answer: 纯文本题填入未命中（${filled.reason ?? 'custom-unavailable'}）——如实停止`); break }
+      answered.push({ step, prompt: obs.prompt ?? null, selected: `（文本作答）${String(CUSTOM).slice(0, 60)}` })
+      log(`hitl-answer: 第 ${step} 题 ← 文本作答（${String(CUSTOM).slice(0, 40)}…）`)
+      await page.waitForTimeout(900)
+      continue
+    }
     if (act.action === 'click-option') {
       const index = optionIndexToClick({ optionLabels: obs.labels, checkedIndex: obs.checkedIndex, pick: PICK })
       const hit = index === null ? null : await clickOption(index, obs.labels)
       if (hit === null || hit.ready !== true) { log(`hitl-answer: 选项点击未命中或题面已变化（${hit?.reason ?? 'index-unavailable'}）——如实停止（盘侧裁决收口）`); break }
-      if (CUSTOM !== null) {
+      if (CUSTOM !== null && !customConsumed) {
         const filled = await fillCustom(CUSTOM)
         if (filled.ready !== true) log(`hitl-answer: ⚠ custom 填写未落在目标卡上（${filled.reason ?? 'custom-unavailable'}）——如实跳过`)
       }
@@ -399,9 +444,14 @@ try {
       await page.waitForTimeout(900) // 等选中态/翻页渲染
       continue
     }
-    // click-submit
-    const submittedNow = await clickSubmit()
-    if (submittedNow) { submitted = true; log(`hitl-answer: 已答 ${answered.length} 题——Submit 已点击`); break }
+    // click-submit（kind=advance 只是翻页：继续循环，不算提交成功）
+    const now = await clickSubmit()
+    if (now.clicked && now.kind === 'advance') {
+      log(`hitl-answer: 已答 ${answered.length} 题——翻页（Next）已点击，继续下一题`)
+      await page.waitForTimeout(900)
+      continue
+    }
+    if (now.clicked) { submitted = true; log(`hitl-answer: 已答 ${answered.length} 题——Submit 已点击`); break }
     await page.waitForTimeout(700) // 提交钮被重渲染 → 回环重观察
   }
 

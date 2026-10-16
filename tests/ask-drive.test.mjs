@@ -291,3 +291,25 @@ test('intentReconcile：目标不可解析（数字越界）→ 红，不猜；�
   const recOk = intentReconcile({ batch: [{ id: 'a', selected: ['x'] }], questions, pick: 'first' });
   assert.equal(recOk.ok, true, '批缺席的题（b）不进对账（跳过已由 driveVerdict 显性报告）');
 });
+
+// ── 纯文本作答题（2026-10-16 真实需求触发：nvidia 交付闭合的 HITL2 卡 Q1 是自由文本题，
+//    旧驱动观察 radio=0 → abort「无选项可读」→ 整张卡答不了）──
+test('nextDriveAction：纯文本题（无选项 + 有可填字段 + 给了作答文本）→ fill-text', () => {
+  const act = nextDriveAction({ radioCount: 0, checkedCount: 0, submitFound: false, submitDisabled: false, textFieldAvailable: true, textValue: '', textAnswer: '按现稿定稿' });
+  assert.equal(act.action, 'fill-text', JSON.stringify(act));
+});
+
+test('nextDriveAction：纯文本题已填到位（textValue === textAnswer）→ 不再重复填（幂等，防回环）', () => {
+  const act = nextDriveAction({ radioCount: 0, checkedCount: 0, submitFound: true, submitDisabled: false, textFieldAvailable: true, textValue: '按现稿定稿', textAnswer: '按现稿定稿' });
+  assert.equal(act.action, 'click-submit', JSON.stringify(act));
+});
+
+test('nextDriveAction：无选项又没给作答文本 → 仍 abort（不猜、fail-loud，旧行为不松）', () => {
+  const act = nextDriveAction({ radioCount: 0, checkedCount: 0, submitFound: false, submitDisabled: false, textFieldAvailable: true, textValue: '' });
+  assert.equal(act.action, 'abort', JSON.stringify(act));
+});
+
+test('nextDriveAction：有选项时文本面不夺权（老路径逐字不变）', () => {
+  const act = nextDriveAction({ radioCount: 2, checkedCount: 0, submitFound: false, submitDisabled: false, textFieldAvailable: true, textValue: '', textAnswer: 'x' });
+  assert.equal(act.action, 'click-option', JSON.stringify(act));
+});
