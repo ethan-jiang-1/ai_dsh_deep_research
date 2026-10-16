@@ -50,7 +50,10 @@ const stopForMissingUiSession = () => {
 }
 
 /** Revalidate the target Session and ask card in the same DOM turn as each action. */
-function operateOnTargetCard({ targetSessionId, expectedCardKey, action = 'identity', index, value }) {
+function operateOnTargetCard({ targetSessionId, expectedCardKey, action = 'identity', index, value, expectedLabels }) {
+  // ⚠ expectedLabels 必须在这里绑定：click-option 分支的"题面未变"校验引用它，而它是**未绑定即抛
+  // ReferenceError**（2026-10-16 实卡现场：`expectedLabels is not defined`）。存取自 e42155b 引入校验时
+  // 漏绑，此后一直潜伏——只在"必须点选项"的卡上才被求值（预选推荐项的卡直接走 Submit 分支，故从未暴露）。
   const visible = (element) => {
     for (let current = element; current !== null; current = current.parentElement) {
       const style = getComputedStyle(current)
@@ -83,8 +86,13 @@ function operateOnTargetCard({ targetSessionId, expectedCardKey, action = 'ident
   if (action === 'identity') return { ready: true, reason: null, cardKey }
   const groups = [...card.querySelectorAll('[role="radiogroup"]')]
   if (groups.length > 1) return { ready: false, reason: 'radio-group-ambiguous' }
-  const group = groups[0] ?? card
-  const radios = groups.length === 1 ? [...group.querySelectorAll('button[role="radio"]')] : []
+  // 锚点选择（2026-10-16 实卡修正）：radiogroup **真的含 radio** 时才以它为锚（选项题面，逐项校验用）；
+  // 零 radio 题面（纯文本题 / 可选题）以 **card** 为锚——否则"向上找 Submit/Next/Skip"会从**已翻过去的
+  // 旧题容器**出发，找不到当前题的按钮（实测：HITL2 Q2 可选文本题的 Skip 恒找不到 → 每次点击 ready=false
+  // → 驱动静默空转到步数用尽，表现成"共作答 N 题 / 未走到 Submit"而盘侧仍挂起）。
+  const radiosIn = (el) => [...el.querySelectorAll('button[role="radio"]')]
+  const group = groups.length === 1 && radiosIn(groups[0]).length > 0 ? groups[0] : card
+  const radios = group === card ? [] : radiosIn(group)
   const labels = radios.map((button) => (button.textContent ?? '').trim())
   // 纯文本题面（2026-10-16 实卡触发：HITL2 卡 Q1 = 自由文本题，逐题翻页形态——1 个 textarea +
   // 「Next」推进钮、零 radio）。旧实现要求恰一个 radiogroup 且从中取 radios，于是这题报
@@ -102,13 +110,19 @@ function operateOnTargetCard({ targetSessionId, expectedCardKey, action = 'ident
       field.dispatchEvent(new Event('change', { bubbles: true }))
       return { ready: true, reason: null, filled: true }
     }
-    const advance = [...card.querySelectorAll('button')]
-      .filter((button) => /^(Submit|提交|Next|继续|下一题)$/i.test((button.textContent ?? '').trim()))
+    // 终局提交（Submit/提交）与推进钮（Next/继续/Skip/跳过）**分开报**（2026-10-16 实卡修正）：
+    // 旧版把两者并成一个集合，于是"Skip 可用 + Submit 禁用"被报成可提交，点击面又因两个匹配
+    // 落空 → 驱动静默空转 8 轮（诊断实录：btns=[…, "Skip", "Submit(禁用)"]，submit=true/false）。
+    const all = [...card.querySelectorAll('button')]
+    const finals = all.filter((b) => /^(Submit|提交)$/i.test((b.textContent ?? '').trim()))
+    const advances = all.filter((b) => /^(Next|继续|下一题|Skip|跳过)$/i.test((b.textContent ?? '').trim()))
     return {
       ready: true, reason: null, radioCount: 0, checkedCount: 0, checkedIndex: null,
       labels: [], checkedLabel: null,
-      submitFound: advance.length >= 1,
-      submitDisabled: advance.length >= 1 && advance.every((b) => b.disabled),
+      submitFound: finals.length === 1,
+      submitDisabled: finals.length !== 1 || !!finals[0].disabled,
+      advanceFound: advances.length >= 1,
+      advanceDisabled: advances.length === 0 || advances.every((b) => b.disabled),
       textFieldAvailable: fields.length === 1,
       textValue: fields.length === 1 ? String(fields[0].value ?? '') : null,
     }
@@ -135,6 +149,10 @@ function operateOnTargetCard({ targetSessionId, expectedCardKey, action = 'ident
       checkedLabel: checked === null ? null : (checked.textContent ?? '').trim(),
       submitFound: submits.length === 1,
       submitDisabled: submits.length === 1 && !!submits[0].disabled,
+      ...(() => {
+        const adv = [...card.querySelectorAll('button')].filter((b) => /^(Next|继续|下一题|Skip|跳过)$/i.test((b.textContent ?? '').trim()))
+        return { advanceFound: adv.length >= 1, advanceDisabled: adv.length === 0 || adv.every((b) => b.disabled) }
+      })(),
       textFieldAvailable: [...card.querySelectorAll('textarea, input[type="text"]')].filter(visible).length === 1,
       textValue: null,
     }
@@ -157,10 +175,34 @@ function operateOnTargetCard({ targetSessionId, expectedCardKey, action = 'ident
       prompt: (prompt.textContent ?? '').replace(/\s+/g, ' ').slice(0, 140),
     }
   }
+  if (action === 'click-advance') {
+    // 推进钮可能**同时**有 Skip 与 Next（2026-10-16 实卡实测：两个都可用 → 旧版判 ambiguous 而停）。
+    // 按 UI 自身语义定序，取第一个"在场且可用"的：**文本域有正文 → 先 Next（带正文推进）；
+    // 空 → 先 Skip（跳过可选题）**。定序后不再有歧义分支。
+    const field = [...card.querySelectorAll('textarea, input[type="text"]')].filter(visible)[0] ?? null
+    const hasText = field !== null && String(field.value ?? '').trim() !== ''
+    const order = hasText ? ['Next', '继续', '下一题', 'Skip', '跳过'] : ['Skip', '跳过', 'Next', '继续', '下一题']
+    // ⚠ 逐层搜、每层按序找（2026-10-16 自伤修正）：旧版从 radiogroup 起搜且"pool 非空即停"，
+    // 于是只看到该题自身的选项钮——**卡片层的 Skip/Next 永远看不到**（实测 advance-unavailable）。
+    let scope = group
+    for (let up = 0; up < 5 && scope !== null; up++) {
+      const buttons = [...scope.querySelectorAll('button')].filter((b) => !b.disabled)
+      for (const want of order) {
+        const hit = buttons.find((b) => (b.textContent ?? '').trim().toLowerCase() === want.toLowerCase())
+        if (hit === undefined) continue
+        hit.scrollIntoView({ block: 'center' })
+        hit.click()
+        return { ready: true, reason: null, clicked: true, kind: 'advance', label: want }
+      }
+      scope = scope.parentElement
+      if (scope === null || !card.contains(scope)) break
+    }
+    return { ready: false, reason: 'advance-unavailable' }
+  }
   if (action === 'click-submit') {
     let scope = group
     const submits = []
-    const re = radios.length === 0 ? /^(Submit|提交|Next|继续|下一题)$/i : /^(Submit|提交)$/i
+    const re = /^(Submit|提交)$/i // 推进钮（Next/Skip…）走 click-advance——此处只点终局提交
     for (let up = 0; up < 4 && scope !== null && submits.length === 0; up++) {
       scope = scope.parentElement
       if (scope === null || !card.contains(scope)) break
@@ -171,7 +213,7 @@ function operateOnTargetCard({ targetSessionId, expectedCardKey, action = 'ident
     const text = (submits[0].textContent ?? '').trim()
     // 逐题翻页形态（2026-10-16 实卡）：零 radio 时按钮可能是「Next/继续」——**翻页 ≠ 提交**，
     // 报 kind 让驱动继续循环（旧行为把翻页当终局提交 → 提前 break → answer 未落地）。
-    const kind = /^(Next|继续|下一题)$/i.test(text) ? 'advance' : 'final'
+    const kind = /^(Next|继续|下一题|Skip|跳过)$/i.test(text) ? 'advance' : 'final'
     submits[0].scrollIntoView({ block: 'center' })
     submits[0].click()
     return { ready: true, reason: null, clicked: true, kind }
@@ -445,6 +487,13 @@ try {
       if (filled.ready !== true) { log(`hitl-answer: 纯文本题填入未命中（${filled.reason ?? 'custom-unavailable'}）——如实停止`); break }
       answered.push({ step, prompt: obs.prompt ?? null, selected: `（文本作答）${String(CUSTOM).slice(0, 60)}` })
       log(`hitl-answer: 第 ${step} 题 ← 文本作答（${String(CUSTOM).slice(0, 40)}…）`)
+      await page.waitForTimeout(900)
+      continue
+    }
+    if (act.action === 'click-advance') {
+      const adv = await inspectUi('click-advance')
+      if (adv.ready !== true || adv.clicked !== true) { log(`hitl-answer: 推进钮点击未命中（${adv.reason ?? 'advance-unavailable'}）——如实停止`); break }
+      log(`hitl-answer: 第 ${step} 轮 —— 推进钮「${adv.label ?? 'Skip/Next'}」已点击（不代表提交）`)
       await page.waitForTimeout(900)
       continue
     }

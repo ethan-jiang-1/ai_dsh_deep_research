@@ -313,3 +313,29 @@ test('nextDriveAction：有选项时文本面不夺权（老路径逐字不变�
   const act = nextDriveAction({ radioCount: 2, checkedCount: 0, submitFound: false, submitDisabled: false, textFieldAvailable: true, textValue: '', textAnswer: 'x' });
   assert.equal(act.action, 'click-option', JSON.stringify(act));
 });
+
+// ── 终局提交 vs 推进钮（2026-10-16 实卡：HITL2 第二题可选文本，Skip 可用 / Submit 禁用）──
+test('nextDriveAction：零 radio 且 Submit 禁用、Skip 可用 → click-advance（可选文本题的标准出口）', () => {
+  const act = nextDriveAction({ radioCount: 0, checkedCount: 0, submitFound: true, submitDisabled: true, advanceFound: true, advanceDisabled: false, textFieldAvailable: true, textValue: '' });
+  assert.equal(act.action, 'click-advance', JSON.stringify(act));
+});
+
+test('nextDriveAction：零 radio 且 Submit 可用 → click-submit（终局提交优先，不被推进钮夺权）', () => {
+  const act = nextDriveAction({ radioCount: 0, checkedCount: 0, submitFound: true, submitDisabled: false, advanceFound: true, advanceDisabled: false });
+  assert.equal(act.action, 'click-submit', JSON.stringify(act));
+});
+
+test('nextDriveAction：选项题未选 → 不因推进钮可用而跳题（仍 click-option）', () => {
+  const act = nextDriveAction({ radioCount: 3, checkedCount: 0, submitFound: false, submitDisabled: false, advanceFound: true, advanceDisabled: false });
+  assert.equal(act.action, 'click-option', JSON.stringify(act));
+});
+
+test('nextDriveAction：选项题已预选但 Submit 禁用、Next 可用 → **仍 click-option**（预选≠登记；按推进钮会交空批）', () => {
+  const act = nextDriveAction({ radioCount: 3, checkedCount: 1, submitFound: true, submitDisabled: true, advanceFound: true, advanceDisabled: false });
+  assert.equal(act.action, 'click-option', JSON.stringify(act));
+});
+
+test('nextDriveAction：零 radio 且推进钮也禁用 → 仍 abort（不空转，fail-loud）', () => {
+  const act = nextDriveAction({ radioCount: 0, checkedCount: 0, submitFound: true, submitDisabled: true, advanceFound: true, advanceDisabled: true });
+  assert.equal(act.action, 'abort', JSON.stringify(act));
+});

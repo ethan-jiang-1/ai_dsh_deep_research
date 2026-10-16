@@ -170,10 +170,11 @@ export function selectPendingSession(candidates, requestedTitle = null) {
  *   （可选）当前预选项是否符合 pick 意图——缺席 = 视为相符（旧调用方兼容）；
  *   **纯文本题面**（2026-10-16 新增，触发 = nvidia HITL2 实卡）：textFieldAvailable
  *   （本卡唯一可填文本域在场）/ textValue（其现值）/ textAnswer（命令给的作答文本）。
- * @returns action = 'click-submit' | 'click-option' | 'fill-text' | 'abort'，reason 人话依据。
+ * @returns action = 'click-submit' | 'click-advance' | 'click-option' | 'fill-text' | 'abort'，reason 人话依据。
+ *   （`click-advance` = 点推进钮翻页，**不代表提交成功**；终局判据仍只看盘侧 answer 批。）
  */
 export function nextDriveAction(obs) {
-  const { radioCount, checkedCount, submitFound, submitDisabled, selectionMatchesIntent, textFieldAvailable, textValue, textAnswer } = obs ?? {}
+  const { radioCount, checkedCount, submitFound, submitDisabled, advanceFound, advanceDisabled, selectionMatchesIntent, textFieldAvailable, textValue, textAnswer } = obs ?? {}
   const intentOk = selectionMatchesIntent !== false
   // 纯文本题面（无选项 + 有文本域）：**先填后交**，且按"现值 ≠ 作答文本"幂等——填完复观察即走
   // 提交分支，不会回环。没给作答文本时不猜：落到末尾 abort（与旧行为一致，fail-loud）。
@@ -186,6 +187,15 @@ export function nextDriveAction(obs) {
   }
   if (submitFound === true && submitDisabled === false && !intentOk) {
     return { action: 'click-option', reason: '本题待答——预选项与 pick 意图不符，先改选目标项再提交（Submit 可用 ≠ 意图达成，BUG-015）' }
+  }
+  // 推进钮（Next/继续/Skip/跳过）≠ 终局提交（2026-10-16 实卡：HITL2 第二题是可选题，
+  // Skip 可用而 Submit 禁用——旧判据把两者混作一个集合，既误报 submitDisabled，又让点击面
+  // 因"两个匹配"静默空转）。允许时机：本题无选项（纯文本/可选题），或选项题**已选**（选择已登记）。
+  // ⚠ **只在零选项题面**（纯文本题 / 可选题）生效：选项题上"已预选"≠"已登记"——UI 的推荐项是**预选**，
+  // 只有点它才进 answer 批；此时按推进钮会交**空批**（2026-10-16 实测：盘侧以"空批等于把沉默当拍板"拒绝）。
+  // 所以选项题一律走 click-option（点已选项 = 登记 + 前进，旧行为正确）。
+  if (advanceFound === true && advanceDisabled === false && (radioCount ?? 0) === 0) {
+    return { action: 'click-advance', reason: '本题无可提交态——点推进钮（Skip/Next）继续' }
   }
   if ((radioCount ?? 0) > 0) {
     const picked = (checkedCount ?? 0) > 0 ? '复点已选中项推进（复点即翻页）' : '点推荐项'
