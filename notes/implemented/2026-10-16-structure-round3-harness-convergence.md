@@ -102,4 +102,8 @@ B1 的**改前基线**要三站点先绿，跑基线时暴露两件事——都�
   [BUG-030](../../_backlog/bugs/BUG-030-snapshot-replay-c5-activity-row-flicker-recurrence.md)（P2，排查中；
   按"已修永不重开、复发 = 引用旧卡的新卡"引用 BUG-027），假设 = C0b 就绪谓词覆盖面 < 断言面
   （只等 tool/call，不等 assistant 文本折出的活动行）。
-- **B2 / D**：未开始（B2 真模型五站点与主线真模型段排开；D = triggers 两行）。
+- **Phase D（触发登记）**：**已交付**——[triggers](../../_backlog/triggers.md) 新增两行（`verify.mjs` 拆分重议、
+  `tests/` 分域），每行带**可观察**的重议条件与决定正本链接（D-1：`pnpm verify` 绿 + md-links 把守链接）。
+- **B2（真模型档五站点）**：未开始——`l4-lite-smoke` / `team-preflight-smoke` / `client-hitl-smoke` /
+  `discipline-probe` / `entry-chain-probe` 的 harness 收敛 + `session-log` canonical 化需逐件真跑取证，
+  与主线真模型段排开（本阶段申报的判据变更：解压通路 zstd CLI → node zlib，同输出不同路）。
