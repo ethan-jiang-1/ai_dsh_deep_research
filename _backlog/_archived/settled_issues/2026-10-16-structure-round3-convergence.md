@@ -1,28 +1,28 @@
 ---
-status: 等人拍板
+status: 已结
 opened: 2026-10-16
 ---
 
 # 计划：第三轮结构收敛——web harness 单一正本、小件收口与触发登记
 
-> 立卡：2026-10-16 ｜ 状态：等人拍板 — 2026-10-16 用户按推荐次序批准开工；**Phase A / B1 / B2（5/5 站点）/ D 已交付**（验收判据全绿，证据 = [round3 Note](../../notes/implemented/2026-10-16-structure-round3-harness-convergence.md)），**只剩 B2（真模型档五站点）** 等真模型窗口；另在 B1 路上立了 [BUG-030](../_archived/fixed_bugs/BUG-030-snapshot-replay-c5-activity-row-flicker-recurrence.md)（既有间歇，非本卡引入）｜ 类型：Task ｜ 结论倾向：现在做（三点已拍板）｜ 可关闭：否
+> 立卡：2026-10-16 ｜ 状态：已结 — 2026-10-16 用户按推荐次序批准开工、交付后确认关闭；**Phase A / B1 / B2（5/5 站点）/ D 全部交付**（验收判据全绿，证据 = [round3 Note](../../../notes/implemented/2026-10-16-structure-round3-harness-convergence.md)），**只剩 B2（真模型档五站点）** 等真模型窗口；另在 B1 路上立了 [BUG-030](../fixed_bugs/BUG-030-snapshot-replay-c5-activity-row-flicker-recurrence.md)（既有间歇，非本卡引入）｜ 类型：Task ｜ 结论倾向：现在做（三点已拍板）｜ 可关闭：是（用户 2026-10-16 确认）
 
 **问题与期望结果：** 2026-10-16 用户委托的全仓结构评审（结构 / 臃肿 / SOLID 三问），经取代检查对齐 2026-10-13 两篇结构 Note 后确认：剩余的真实改善面集中在上轮刻意避开的区间——那轮硬约束"零行为变化 + 红即回滚"、未跑真模型档面，而 DSH web harness 家族的 ~7 份近重复（`rpc` / `boot` 横幅等待 / `authenticate` / 本地会话日志读法 / 谓词轮询，约 500 行）恰恰集中在真模型档脚本里。本卡承载已拍板的收敛计划。期望结果 = 重复面收敛为单一正本、参数保形零行为变化、每阶段有可机械执行的验收判据。
 
 **当前情况：**
 
-1. **取代检查已完成**——评审初稿中与既有裁决相撞的三条已撤回：verify.mjs 文件级拆分（重启条件正本 = [verify-domain-regroup](../../notes/implemented/2026-10-13-verify-domain-regroup.md)）、clientHistoryWindowOf 下沉 lib 与 readLog 换 canonical 之外的收敛边界（[repo-structure-refactor](../../notes/implemented/2026-10-13-repo-structure-refactor.md) 输掉的方案）、tests/ 分域（[test-asset-organization](../../notes/implemented/2026-10-05-test-asset-organization.md)）。
-2. **三点已拍板（2026-10-16 用户）**：① Phase B 做 B1+B2 全量，真模型档五站点逐件复跑取证；② verify.mjs 不拆，重议条件登记进 [triggers](../triggers.md)；③ hitl-answer 长函数本轮不动——其三条硬化候选仍归 [2026-10-15 卡](2026-10-15-hitl-answer-and-test-surface-hardening.md)，两卡互不接管。
-3. **两条实证修正了计划形态**：① [run-dashboard-core](../../scripts/lib/run-dashboard-core.mjs) 与 [evidence-audit-core](../../scripts/lib/evidence-audit-core.mjs) 的 `splitFrontmatter` 逻辑逐字相同，可收敛——evidence-audit 侧"独立副本——不依赖 dashboard 副作用面"的理由在两核均纯化为 lib 纯件后失效，中立第三方模块比任一消费方更小；② 两个 run-gates 壳的 `readLog` **语义不同**（[node-gate](../../scripts/run-gates/node-gate.mjs) 解压失败返回 `''` 空语料继续、[evidence-audit](../../scripts/run-gates/evidence-audit.mjs) 返回 `null` 跳过该文件——失败契约是各自判据的载重墙，头注实证），且解压通路（zstd CLI）与 canonical [session-log](../../scripts/lib/session-log.mjs)（node zlib）不同——**不换 canonical**（那是行为变化），只抽逐字相同的 zstd CLI 调用段为共享小件。
+1. **取代检查已完成**——评审初稿中与既有裁决相撞的三条已撤回：verify.mjs 文件级拆分（重启条件正本 = [verify-domain-regroup](../../../notes/implemented/2026-10-13-verify-domain-regroup.md)）、clientHistoryWindowOf 下沉 lib 与 readLog 换 canonical 之外的收敛边界（[repo-structure-refactor](../../../notes/implemented/2026-10-13-repo-structure-refactor.md) 输掉的方案）、tests/ 分域（[test-asset-organization](../../../notes/implemented/2026-10-05-test-asset-organization.md)）。
+2. **三点已拍板（2026-10-16 用户）**：① Phase B 做 B1+B2 全量，真模型档五站点逐件复跑取证；② verify.mjs 不拆，重议条件登记进 [triggers](../../triggers.md)；③ hitl-answer 长函数本轮不动——其三条硬化候选仍归 [2026-10-15 卡](../../issues/2026-10-15-hitl-answer-and-test-surface-hardening.md)，两卡互不接管。
+3. **两条实证修正了计划形态**：① [run-dashboard-core](../../../scripts/lib/run-dashboard-core.mjs) 与 [evidence-audit-core](../../../scripts/lib/evidence-audit-core.mjs) 的 `splitFrontmatter` 逻辑逐字相同，可收敛——evidence-audit 侧"独立副本——不依赖 dashboard 副作用面"的理由在两核均纯化为 lib 纯件后失效，中立第三方模块比任一消费方更小；② 两个 run-gates 壳的 `readLog` **语义不同**（[node-gate](../../../scripts/run-gates/node-gate.mjs) 解压失败返回 `''` 空语料继续、[evidence-audit](../../../scripts/run-gates/evidence-audit.mjs) 返回 `null` 跳过该文件——失败契约是各自判据的载重墙，头注实证），且解压通路（zstd CLI）与 canonical [session-log](../../../scripts/lib/session-log.mjs)（node zlib）不同——**不换 canonical**（那是行为变化），只抽逐字相同的 zstd CLI 调用段为共享小件。
 
 **未决问题：** 无技术未决。**关闭条件核对（2026-10-16）**：A/B1/B2/D 四阶段均已交付、验收判据全绿、
-同 diff Note 落盘（[round3 Note](../../notes/implemented/2026-10-16-structure-round3-harness-convergence.md)）、
+同 diff Note 落盘（[round3 Note](../../../notes/implemented/2026-10-16-structure-round3-harness-convergence.md)）、
 自审见 Note §未跑与阻断（`client-hitl-smoke` 既存确定性红 = 外部阻断，按 B2-4 分列不阻塞）——
 **唯余用户确认**：确认后本卡转 `可关闭：是` 并同次变更归档 settled_issues。
 （B2 第 5 站点的既存红已于本轮诊断并当场修复 → 已无外部阻断项。）
 
 **下一步（2026-10-16 进度更新）：** Phase A / B1 / D **已交付**（每阶段独立 diff + 验收判据全绿 + 同 diff Note，
-证据与"未跑与阻断"分列 = [round3 Note](../../notes/implemented/2026-10-16-structure-round3-harness-convergence.md)）；
+证据与"未跑与阻断"分列 = [round3 Note](../../../notes/implemented/2026-10-16-structure-round3-harness-convergence.md)）；
 **待办 = B2**：`l4-lite-smoke` / `team-preflight-smoke` / `client-hitl-smoke` / `discipline-probe` /
 `entry-chain-probe` 五站点的 harness 收敛 + 本地 `sessionDirOf`/`readSessionLog` 换 canonical
 `session-log`（申报判据变更：解压通路 zstd CLI → node zlib，同输出不同路），改前留档 → 改后逐件真跑 →
@@ -34,7 +34,7 @@ stdout 形态比对（波动字段白名单化）。
 
 - 新增 `scripts/lib/frontmatter.mjs`（splitFrontmatter 唯一正本）+ zstd CLI 文本解压小件（两壳共享段：spawnSync `zstd -dc` + 64MB maxBuffer）；
 - 两 core 改 import、两壳改调用并各留 2–3 行失败包装（`''` 继续 / `null` 跳过——原契约不动）；
-- 同步面：[scripts/README](../../scripts/README.md) lib 表两行（navigability 资产门对账）；无门禁 / 测试改动；
+- 同步面：[scripts/README](../../../scripts/README.md) lib 表两行（navigability 资产门对账）；无门禁 / 测试改动；
 - 实施首步 = 复跑三壳并留存基线（stdout + 报告文件拷贝 + HTML——keyless 秒级；报告文件会被重跑覆盖，先拷贝）。evidence-audit `--latest` 当前真态 = exit 1 + CRITICAL 1（在飞 bundle 零证据），该红样本保留用于证明零行为。
 
 ### Phase B1 · web-harness 单一正本 + keyless 三站点
@@ -90,7 +90,7 @@ stdout 形态比对（波动字段白名单化）。
 
 ### Phase D · 触发登记
 
-[triggers](../triggers.md) 两行：verify.mjs 拆分重议（条件 = 门禁继续增长 / 追加块编辑摩擦成实测痛点，正本 = verify-domain-regroup Note）；tests/ 分域（条件 = 检索开始靠猜或文件数显著上升，正本 = test-asset-organization Note）。
+[triggers](../../triggers.md) 两行：verify.mjs 拆分重议（条件 = 门禁继续增长 / 追加块编辑摩擦成实测痛点，正本 = verify-domain-regroup Note）；tests/ 分域（条件 = 检索开始靠猜或文件数显著上升，正本 = test-asset-organization Note）。
 
 ### 输掉的方案（不做，有裁决或实证背书）
 
@@ -98,7 +98,7 @@ stdout 形态比对（波动字段白名单化）。
 - clientHistoryWindowOf 下沉 lib——单消费方不成缝（2026-10-13 裁决）；
 - readLog 换 canonical session-log——失败契约与解压通路双差异 = 行为变化，超出零行为边界；
 - 内闭包形态 rpc（cdp-ask / snapshot-replay / run-kickoff）硬收敛——形态差异非逐字重复；
-- hitl-answer `operateOnTargetCard` 分段——驱动面无直接契约测试、验证面薄，收益不抵；与 [2026-10-15 卡](2026-10-15-hitl-answer-and-test-surface-hardening.md) 的触发条件（下次改该文件时顺带）合并考虑；
+- hitl-answer `operateOnTargetCard` 分段——驱动面无直接契约测试、验证面薄，收益不抵；与 [2026-10-15 卡](../../issues/2026-10-15-hitl-answer-and-test-surface-hardening.md) 的触发条件（下次改该文件时顺带）合并考虑；
 - tests/ 分域、run-dashboard-core 再拆、ResearchStatusTab 再拆——既有裁决维持。
 
 ## 验收标准
@@ -115,7 +115,7 @@ stdout 形态比对（波动字段白名单化）。
 | B1 | B1-3 | 观察面 | `source dev/env.sh && node --import tsx/esm scripts/smoke/client-load-smoke.mjs` | ALL PASS |
 | B1 | B1-4 | 回放 | `source dev/env.sh && node scripts/smoke/snapshot-replay-smoke.mjs` | ALL PASS |
 | B2 | B2-1 | L0 | `pnpm verify` + `pnpm test` | 全绿 |
-| B2 | B2-2 | 真模型档 | 五件各自命令实跑（命令正本 = [guides/60 §2](../../docs/guides/60-dev-loop.md)） | 各自 ALL PASS |
+| B2 | B2-2 | 真模型档 | 五件各自命令实跑（命令正本 = [guides/60 §2](../../../docs/guides/60-dev-loop.md)） | 各自 ALL PASS |
 | B2 | B2-3 | 零行为对比 | 改前留档 → 改后复跑 | stdout 形态一致（波动字段白名单化后 diff） |
 | B2 | B2-4 | 未跑项分列 | 交付报告 | 阻断站点退回本地 + 如实分列，不阻塞其余 |
 | D | D-1 | 登记形态 | `pnpm verify` | 绿 + triggers 行格式一致 + 链接落决定正本（md-links 把守） |

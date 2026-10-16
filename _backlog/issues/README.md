@@ -7,7 +7,6 @@
 | 卡 | 一句话 |
 |---|---|
 | [2026-10-15-hitl-answer-and-test-surface-hardening](2026-10-15-hitl-answer-and-test-surface-hardening.md) | hitl-answer 与测试面三条小硬化候选（侧栏扫描上限文案／library 列断言／`--custom` 语义）——留痕待触发 |
-| [2026-10-16-structure-round3-convergence](2026-10-16-structure-round3-convergence.md) | 第三轮结构收敛计划（已拍板）：web harness ~7 份近重复收单一正本（参数保形零行为变化）+ frontmatter/zstd 小件 + 触发登记——实施等用户逐阶段发起 |
 
 （最近归档：[未归档 bundle 处置](../_archived/settled_issues/2026-10-15-unclosed-bundles-disposition.md) 2026-10-16 执行完毕（14 场迁 `_abandoned/`，活动区清零）；[readiness 行形态容忍度](../_archived/settled_issues/2026-10-15-terminal-readiness-line-form-tolerance.md) 2026-10-16 窄放宽落地（A）；[research-preference-detail-ux](../_archived/settled_issues/2026-10-12-research-preference-detail-ux.md) 2026-10-13。）
 

@@ -5,7 +5,7 @@
 ## 决定
 
 2026-10-16 用户委托的全仓结构评审（结构 / 臃肿 / SOLID 三问）收敛为一张计划卡
-（[2026-10-16-structure-round3-convergence](../../_backlog/issues/2026-10-16-structure-round3-convergence.md)；
+（[2026-10-16-structure-round3-convergence](../../_backlog/_archived/settled_issues/2026-10-16-structure-round3-convergence.md)；
 取代检查已对齐前两轮裁决——[repo-structure-refactor](2026-10-13-repo-structure-refactor.md)（输掉的方案：
 `clientHistoryWindowOf` 下沉、`readLog` 换 canonical、内闭包 rpc 硬收敛）与
 [verify-domain-regroup](2026-10-13-verify-domain-regroup.md)（`verify.mjs` 拆分重启条件））。

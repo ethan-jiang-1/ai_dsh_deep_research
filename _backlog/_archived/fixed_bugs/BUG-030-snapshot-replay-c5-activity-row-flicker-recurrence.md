@@ -100,4 +100,4 @@ tool/call 面。
 - **测试** = `tests/replay-request.test.mjs` 三例（先红后绿）；
 - **决定记录** = [回合落定判据 Note](../../../notes/implemented/2026-10-16-replay-turn-settled-predicate.md)（含被证伪的假设与撤回记录）；
 - **后续观察面**：本卡是"消费侧没跟上录制侧判据"的一例——B2 五站点若也有自家哨兵/落定判据，迁移时按同一正本核对
-  （已写入 [round3 卡](../../issues/2026-10-16-structure-round3-convergence.md) 的 B2 待办语境）。
+  （已写入 [round3 卡](../settled_issues/2026-10-16-structure-round3-convergence.md) 的 B2 待办语境）。
