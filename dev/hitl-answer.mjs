@@ -200,13 +200,20 @@ function operateOnTargetCard({ targetSessionId, expectedCardKey, action = 'ident
     return { ready: false, reason: 'advance-unavailable' }
   }
   if (action === 'click-submit') {
-    let scope = group
-    const submits = []
     const re = /^(Submit|提交)$/i // 推进钮（Next/Skip…）走 click-advance——此处只点终局提交
-    for (let up = 0; up < 4 && scope !== null && submits.length === 0; up++) {
-      scope = scope.parentElement
-      if (scope === null || !card.contains(scope)) break
-      submits.push(...[...scope.querySelectorAll('button')].filter((button) => re.test((button.textContent ?? '').trim())))
+    const submits = []
+    if (radios.length === 0) {
+      // 零 radio 题面：锚点就是 card（见上面的锚点选择），而本函数是"从锚点**向上**找"——
+      // 从 card 往上第一步就跳出卡片（`!card.contains(scope)`）⇒ 永远找不到按钮、静默空转。
+      // 故零 radio 时**直接在 card 内找**（2026-10-17 自检卡实测：卡在 Q2 空转 7 轮）。
+      submits.push(...[...card.querySelectorAll('button')].filter((button) => re.test((button.textContent ?? '').trim())))
+    } else {
+      let scope = group
+      for (let up = 0; up < 4 && scope !== null && submits.length === 0; up++) {
+        scope = scope.parentElement
+        if (scope === null || !card.contains(scope)) break
+        submits.push(...[...scope.querySelectorAll('button')].filter((button) => re.test((button.textContent ?? '').trim())))
+      }
     }
     if (submits.length !== 1) return { ready: false, reason: submits.length === 0 ? 'submit-unavailable' : 'submit-ambiguous' }
     if (submits[0].disabled) return { ready: false, reason: 'submit-disabled' }
@@ -578,10 +585,13 @@ try {
   // custom 进批复核（BUG-032）：盘侧裁决与意图对账都只看 selected——**给了 --custom 却没进批**
   // 必须响亮红（否则操作侧以为修法已送达，实际 lead 只收到一个 label）。处置指向 = 改用
   // `run-kickoff --prompt-file` 注入（注入通道可靠，本轮已验证）。
+  let customMissing = false
   if (!DRY && process.exitCode === 0 && CUSTOM !== null && !customLandedInBatch({ batch: landedBatch, custom: CUSTOM })) {
+    // 答复**已落地**（盘侧裁决通过），只是那段说明没进批——与 intentFailed 同族：事实照记、结果响亮红。
     console.error('hitl-answer: ⚠ **custom 文本未进答复批**——UI 的自定义是"替换选择"语义（同一问题二者只能留一个），'
       + 'lead 收不到这段说明（只看到选项 label）。处置：长修法改走 `dev/run-kickoff.mjs --session <id> --prompt-file <文件>` 注入。')
     process.exitCode = 1
+    customMissing = true
   }
   // 意图对账（BUG-015 裁决后半）：盘侧批已落地 ≠ 命令的答案已落地——逐题对 pick 目标，
   // 不符即响亮红（exit 1）；答案内容仍进 provenance（事实归事实，意图归意图）。
@@ -603,7 +613,7 @@ try {
   // ⚠ 作用域教训（第三缺口实录）：landedBatch 必须声明在裁决块之外——块内声明 + 块外引用
   // = ReferenceError，裁决通过后必崩（答案已落地但 provenance 永远丢失，且 node --check 查不出）。
   const provAnswered = batchToAnswered(landedBatch, plan.questions).length > 0 ? batchToAnswered(landedBatch, plan.questions) : answered
-  if (!DRY && provAnswered.length > 0 && (process.exitCode === 0 || intentFailed)) {
+  if (!DRY && provAnswered.length > 0 && (process.exitCode === 0 || intentFailed || customMissing)) {
     const wsRoot = join(ROOT, 'research-workspace')
     // 归属 = 被答会话自己的 bundle-bind（BUG-020 正修）：仅写命中归属，仅读/无绑定走延迟
     // 分支——旧字典序 activeBundle 在无关在飞 bundle 在场时误归（两次实测）。journal **现读**

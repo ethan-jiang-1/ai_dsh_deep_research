@@ -12,7 +12,6 @@
 
 | 卡 | 一句话 |
 |---|---|
-| [BUG-032](BUG-032-hitl-answer-custom-text-dropped-from-answer-batch.md) | `hitl-answer --custom` 文本未进答复批（四道自检全绿但 lead 收不到修法 → 回合空转） |
 | [BUG-031](BUG-031-hitl-answer-sidebar-session-rows-unrendered.md) | hitl-answer 在长跑通道实例上侧栏零 session 行（组能展开但行不渲染、无搜索兜底）——恢复路径 = 重启通道 + 新会话 |
 
 
