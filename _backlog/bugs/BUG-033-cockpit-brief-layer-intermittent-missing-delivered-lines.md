@@ -26,7 +26,8 @@ opened: 2026-10-17
   浏览器断言走到过**（在飞 run 上两侧同假，断言恒过）；
 - 红：`FAIL 业务摘要层 = 盘侧 brief-fold 真值（五问逐行对账）（缺行：报告已交付 ｜ 当前版已交付；历史拍板见 que ｜ 你现在无需操作；需要继续研究时在）`
   （留档 `runtime/smoke-workspace/cls-brief-intermittent/fail-1.log`）；
-- 绿：紧接重跑 **PASS**（同输入、同命令），随后 3 连 PASS（4 绿 / 1 红）；
+- 绿：紧接重跑 **PASS**（同输入、同命令），随后 **10 连 PASS** ⇒ 实测复现率 **1 / 11**（同输入、同命令；
+  2026-10-17 两批：1 红 + 4 绿，再 6 连绿）——**低频间歇**，不是确定性缺口；
 - 排除项：`delivered` 在客户端只有一个来源（`ResearchStatusTab.tsx:217` 的 `names.has('final.md')` →
   同一 `face.delivered`），摘要 `useMemo` 的依赖数组**含 `face` 与 `steps`**（`:251` 起）⇒ 不是
   "漏依赖"这种静态缺法。
