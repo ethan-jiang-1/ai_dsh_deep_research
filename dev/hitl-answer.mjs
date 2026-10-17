@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url'
 import { once } from 'node:events'
 import { loadChromium, launchChromium } from '../scripts/lib/playwright.mjs'
 import { runStateOf, readSessionEvents, leadHitlCandidate } from '../scripts/lib/run-state.mjs'
-import {answerBatchOf, driveVerdict, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict} from '../scripts/lib/ask-drive.mjs'
+import {answerBatchOf, customLandedInBatch, driveVerdict, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict} from '../scripts/lib/ask-drive.mjs'
 import { appendProvenance, attributionBundleOf, batchToAnswered } from '../scripts/lib/hitl-provenance.mjs'
 import { localDateStr } from '../scripts/lib/local-date.mjs'
 import { researchWorkspaceGroup, sessionLogsInGroup } from '../scripts/lib/session-log.mjs'
@@ -518,15 +518,17 @@ try {
     }
     if (act.action === 'click-option') {
       const index = optionIndexToClick({ optionLabels: obs.labels, checkedIndex: obs.checkedIndex, pick: PICK })
-      // ⚠ 顺序铁律（2026-10-16 两次"空批"实测根因）：UI 的"自定义文本"是**替换选择**语义——
-      // 填 custom 会**清空已选选项**，于是 answer 批为空（盘侧以"空批等于把沉默当拍板"拒绝）。
-      // 故 option 题必须**先填 custom、后点选项**（选项是登记动作，必须最后落）。
+      const hit = index === null ? null : await clickOption(index, obs.labels)
+      if (hit === null || hit.ready !== true) { log(`hitl-answer: 选项点击未命中或题面已变化（${hit?.reason ?? 'index-unavailable'}）——如实停止（盘侧裁决收口）`); break }
+      // ⚠ 顺序按**意图**定（BUG-032 定案，2026-10-17）：UI 的"自定义文本"是**替换选择**语义——
+      // 同一问题上「选择」与「自定义」只能留一个（批形态实测：`selected:[] + custom:"…"` 或 `selected:["label"]`）。
+      // 故：给了 `--custom` 就让它**胜出**（点完再填，文本进批；代价 = 选项 label 被替换，stop 语义上
+      // 这正是"用户的答复是这段话"）；没给就只点选项。反过来的顺序会让文本被点击清掉——lead 只看到
+      // label、看不到修法（2026-10-17 实测：两次下达修法静默丢失、回合空转）。
       if (CUSTOM !== null && !customConsumed) {
         const filled = await fillCustom(CUSTOM)
         if (filled.ready !== true) log(`hitl-answer: ⚠ custom 填写未落在目标卡上（${filled.reason ?? 'custom-unavailable'}）——如实跳过`)
       }
-      const hit = index === null ? null : await clickOption(index, obs.labels)
-      if (hit === null || hit.ready !== true) { log(`hitl-answer: 选项点击未命中或题面已变化（${hit?.reason ?? 'index-unavailable'}）——如实停止（盘侧裁决收口）`); break }
       answered.push({ step, prompt: hit.prompt, selected: hit.label })
       log(`hitl-answer: 第 ${step} 题 ← ${hit.label}`)
       await page.waitForTimeout(900) // 等选中态/翻页渲染
@@ -572,6 +574,14 @@ try {
     }
     log(`hitl-answer: 盘侧裁决——${verdict.reason}`)
     process.exitCode = verdict.exitCode
+  }
+  // custom 进批复核（BUG-032）：盘侧裁决与意图对账都只看 selected——**给了 --custom 却没进批**
+  // 必须响亮红（否则操作侧以为修法已送达，实际 lead 只收到一个 label）。处置指向 = 改用
+  // `run-kickoff --prompt-file` 注入（注入通道可靠，本轮已验证）。
+  if (!DRY && process.exitCode === 0 && CUSTOM !== null && !customLandedInBatch({ batch: landedBatch, custom: CUSTOM })) {
+    console.error('hitl-answer: ⚠ **custom 文本未进答复批**——UI 的自定义是"替换选择"语义（同一问题二者只能留一个），'
+      + 'lead 收不到这段说明（只看到选项 label）。处置：长修法改走 `dev/run-kickoff.mjs --session <id> --prompt-file <文件>` 注入。')
+    process.exitCode = 1
   }
   // 意图对账（BUG-015 裁决后半）：盘侧批已落地 ≠ 命令的答案已落地——逐题对 pick 目标，
   // 不符即响亮红（exit 1）；答案内容仍进 provenance（事实归事实，意图归意图）。

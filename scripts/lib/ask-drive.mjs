@@ -297,3 +297,17 @@ export function sidebarMissVerdict(obs) {
       + '（需向会话发恢复 prompt 让 lead 原样重发问询）。',
   }
 }
+
+/**
+ * `--custom` 的文本**是否真进了答复批**（BUG-032：UI 的自定义是"替换选择"语义——同一问题上
+ * 选择与自定义只能留一个；驱动自报成功 ≠ lead 收得到那段说明）。
+ * 进批形态（实测）= `{id, selected: [], custom: "<文本>"}`；静默丢失形态 = `{id, selected: ["<label>"]}`。
+ * @param obs batch（answerBatchOf 的批）/ custom（命令给的文本）
+ * @returns boolean——custom 为空/全空白时不判"在场"（false），缺省不制造假绿。
+ */
+export function customLandedInBatch(obs) {
+  const { batch, custom } = obs ?? {}
+  const needle = typeof custom === 'string' ? custom.trim() : ''
+  if (needle === '') return false
+  return (Array.isArray(batch) ? batch : []).some((a) => typeof a?.custom === 'string' && a.custom.includes(needle))
+}

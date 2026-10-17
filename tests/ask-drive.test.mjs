@@ -21,7 +21,7 @@
 //   红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { answerBatchOf, driveVerdict, hitlUiIdentityOf, hitlUiSessionOf, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict } from '../scripts/lib/ask-drive.mjs';
+import { answerBatchOf, customLandedInBatch, driveVerdict, hitlUiIdentityOf, hitlUiSessionOf, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict } from '../scripts/lib/ask-drive.mjs';
 
 test('parseAskArgs：三问卡带 wait:-1 → 3 题 + 无限期（BUG-005 第 5 例现场的盘侧形态）', () => {
   const args = JSON.stringify({
@@ -365,4 +365,25 @@ test('sidebarMissVerdict：渲染出了会话行但目标不在其中 → absent
 test('sidebarMissVerdict：盘侧已无挂起（目标非真挂起）→ absent（别把"已答/已终局"说成老化）', () => {
   const v = sidebarMissVerdict({ renderedSessionRows: 0, collapsedGroups: 0, capHit: false, diskPending: false });
   assert.equal(v.kind, 'absent', JSON.stringify(v));
+});
+
+// ── custom 文本是否真进答复批（BUG-032：UI 自定义是"替换选择"语义，二者只能留一个）──
+test('customLandedInBatch：批里带 custom 文本 → true（真进批的形态：selected:[] + custom）', () => {
+  const batch = [{ id: 'q1', selected: [], custom: '仍需一处修订（我逐项核过盘面）：\n\n① …' }];
+  assert.equal(customLandedInBatch({ batch, custom: '仍需一处修订（我逐项核过盘面）：' }), true);
+});
+
+test('customLandedInBatch：批里只有选项 label、没有 custom → false（本次实测的静默丢失形态）', () => {
+  const batch = [{ id: 'q1', selected: ['修订表述（说明哪段）'] }];
+  assert.equal(customLandedInBatch({ batch, custom: '仍需一处修订：① 拆括号' }), false);
+});
+
+test('customLandedInBatch：空批 → false；custom 为空串 → false（缺省不判"在场"）', () => {
+  assert.equal(customLandedInBatch({ batch: [], custom: 'x' }), false);
+  assert.equal(customLandedInBatch({ batch: [{ id: 'q1', selected: [], custom: 'y' }], custom: '   ' }), false);
+});
+
+test('customLandedInBatch：多题批里任一带该文本即 true', () => {
+  const batch = [{ id: 'q1', selected: ['定稿'] }, { id: 'q2', selected: [], custom: '具体指明项：§一 压短' }];
+  assert.equal(customLandedInBatch({ batch, custom: '具体指明项：§一 压短' }), true);
 });
