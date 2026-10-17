@@ -249,6 +249,10 @@ if (!TOKEN) {
 //    request/header 里的工具 schema 字样不构成挂起——那正是 grep 假阳性的形态。无真挂起即
 //    自拒，不开浏览器空转。
 let pendingLogPath = null
+// 盘侧"目标真挂起"的事实（供侧栏失败路径的错因判据用）：在选会话时记一次，
+// 不在失败路径重算（`selected` 的作用域只在那段选择逻辑里——2026-10-17 注入实测：
+// 直接引用它会在失败路径抛 ReferenceError，即"该报的话报不出来反而崩"）。
+let diskPendingTarget = false
 let uiTargetSessionId = null
 {
   const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'runtime', 'harness-home')
@@ -275,6 +279,7 @@ let uiTargetSessionId = null
     console.error(`hitl-answer: 盘侧谓词自拒——${why}。不开浏览器。`)
     process.exit(3)
   }
+  diskPendingTarget = selected.candidate.pending === true
   pendingLogPath = selected.candidate.logPath
   uiTargetSessionId = selected.candidate.sessionId
   console.log(`hitl-answer: 盘侧谓词——真挂起会话在场：${uiTargetSessionId}「${selected.candidate.title ?? '无标题'}」`)
@@ -437,7 +442,7 @@ try {
       renderedSessionRows: await sessionRows.count().catch(() => 0),
       collapsedGroups: await collapsedGroupCount().catch(() => 0),
       capHit: capHits.size > 0,
-      diskPending: selected?.candidate?.pending === true,
+      diskPending: diskPendingTarget,
     })
     console.error(`hitl-answer: 侧栏没有目标会话行（session id=${uiTargetSessionId}，--session=${SESSION ?? '（盘侧最新挂起）'}）`
       + `——错因判据 = ${verdict.kind}：${verdict.message}`)

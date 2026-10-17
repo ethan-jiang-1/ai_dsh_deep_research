@@ -12,7 +12,6 @@
 
 | 卡 | 一句话 |
 |---|---|
-| [BUG-031](BUG-031-hitl-answer-sidebar-session-rows-unrendered.md) | hitl-answer 在长跑通道实例上侧栏零 session 行（组能展开但行不渲染、无搜索兜底）——恢复路径 = 重启通道 + 新会话 |
 
 
 （当前无活跃缺陷卡——BUG-030 已于 2026-10-16 修复归档。）

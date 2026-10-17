@@ -1,14 +1,14 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-10-16
 ---
 
 # BUG-031：hitl-answer 在长跑通道实例上"侧栏零 session 行"——组能展开但行不渲染，且无搜索兜底
 
-> 状态：**修复落地** — 判据已实现并 keyless 验证；**老化实例不可按需复现**（重启即消失），
-> 故"在复现实例上复看"一项**未跑**（如实记，见 §验证边界）。**恢复路径已验证**：
-> 重启通道 + 新会话即可正常代答（实测）。
+> 状态：**已修** — 现象在真实老化实例上**现场观测过**（组可展开却零会话行），判据由 keyless 五例 +
+> **接线红注入**双向验证；**接线红注入还咬出操作侧自己的一个真错**（见 §修复落地 4，失败路径原本会崩）。
+> **唯一未跑项** = "改后在同一老化实例上复看"（老化随重启消失、不可按需重建，如实记）。
 
 ## 症状
 
@@ -43,9 +43,9 @@ opened: 2026-10-16
 
 ## 参考
 
-- 受影响工具：[dev/hitl-answer.mjs](../../dev/hitl-answer.mjs)（其侧栏扫描上限错因区分卡已结，见
-  [settled 卡](../_archived/settled_issues/2026-10-15-hitl-answer-and-test-surface-hardening.md)）；
-- 操作手册的恢复路径正本：[guides/61 §5](../../docs/guides/61-run-playbook.md)。
+- 受影响工具：[dev/hitl-answer.mjs../../../dev/hitl-answer.mjs)（其侧栏扫描上限错因区分卡已结，见
+  [settled 卡](../settled_issues/2026-10-15-hitl-answer-and-test-surface-hardening.md)）；
+- 操作手册的恢复路径正本：[guides/61 §5../../../docs/guides/61-run-playbook.md)。
 
 ## 修复落地（2026-10-16）
 
@@ -60,6 +60,15 @@ opened: 2026-10-16
 - **活体证据**：接线后对真实通道跑通「盘侧有挂起 → 打开会话 → 点 Submit」路径；另一例同类现场
   （**被重启终局化的旧 ask**：UI 卡在场但点不动、盘侧答复永不落地——盘侧裁决如实红、**不写 provenance**）
   见 `research-workspace/archive/drt_cn-moe-2026/journal.md` 的操作侧附记。
+
+## 接线红注入（2026-10-17）
+
+强制走"找不到目标行"路径（调用点 + 两个判据输入三点注入）→ 驱动输出：
+`侧栏没有目标会话行（…）——错因判据 = aging：UI 侧栏**零会话行**且组已全展开，而盘侧确有该会话的挂起问询
+——**疑通道实例老化**（渲染/懒加载未解析）。处置 = 重启通道 + 用**新会话**接手续跑…` ✓
+**注入咬出的真错**：判据里 `diskPending: selected?.candidate?.pending === true` 引用的 `selected`
+**不在失败路径的作用域**（它只活在选会话那段）→ 失败路径会抛 `ReferenceError` **崩掉**（"该报的话报不出来
+反而崩"）。修法 = 选会话时记一个模块级事实 `diskPendingTarget`，失败路径只读它。修后同注入报出上述判据。
 
 ## 验证边界（未跑项，如实）
 
