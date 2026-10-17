@@ -221,7 +221,7 @@ function gitOnce(args) {
 }
 
 // ── archived-note-pointer（归档判定的可复核面——notes-stocktake 体检
-//    （_backlog/research/2026-10-08-notes-stocktake.md）结论"归档判据在本仓不可靠"的机械
+//    （_backlog/_archived/research/2026-10-08-notes-stocktake.md）结论"归档判据在本仓不可靠"的机械
 //    切片：活面（notes/archived/ 之外的 tracked .md）以 Markdown 链接引用
 //    notes/archived/<具体 Note> 前，必须在 scripts/archived-note-pointers.json 登记
 //    （历史指针类，逐条带理由——登记动作 = 活面显式承认"我在引用冻结件"；被引用还想归档

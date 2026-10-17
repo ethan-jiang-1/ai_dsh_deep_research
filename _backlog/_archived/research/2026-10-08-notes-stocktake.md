@@ -5,8 +5,8 @@ intent: 为 notes-stocktake 实施 Note 保留已完成的存量体检依据。
 
 # notes/ 存量体检：72 篇 implemented Note 的三结局判定（2026-10-08）
 
-> 服务 = [吸收 Note](../../notes/implemented/2026-10-09-backlog-methodology-absorption.md) 中的 Note 存量体检材料（已完成）｜RFC =
-> [2026-10-08-notes-stocktake](../../notes/implemented/2026-10-08-notes-stocktake.md)。
+> 服务 = [吸收 Note](../../../notes/implemented/2026-10-09-backlog-methodology-absorption.md) 中的 Note 存量体检材料（已完成）｜RFC =
+> [2026-10-08-notes-stocktake](../../../notes/implemented/2026-10-08-notes-stocktake.md)。
 > 本材料**只做体检、不动 notes 树**（`git status --short notes/` 在本轮体检期间为空）。
 
 ## 一句话结论
@@ -20,10 +20,10 @@ intent: 为 notes-stocktake 实施 Note 保留已完成的存量体检依据。
 
 链条（不是"漏做"，是"入口到齐、重估没做"）：
 
-1. [notes/README.md:91](../../notes/README.md) 自述 class 层引入条件 =
+1. [notes/README.md:91](../../../notes/README.md) 自述 class 层引入条件 =
    "`implemented/` 超过**约 50 篇**，**或检索开始靠猜**"；
 2. 实际 = **72 篇**（体检当日 `ls notes/implemented/*.md` 去 README）；
-3. [2026-09-24-note-lifecycle-absorption.md:36-37](../../notes/implemented/2026-09-24-note-lifecycle-absorption.md)
+3. [2026-09-24-note-lifecycle-absorption.md:36-37](../../../notes/implemented/2026-09-24-note-lifecycle-absorption.md)
    当年否决 class 层，但**登记了重估入口**；
 4. 该入口 2026-09-24 随条目毕业成 `docs/discipline-map.md`——**重估本身从未执行**。
 
@@ -32,7 +32,7 @@ intent: 为 notes-stocktake 实施 Note 保留已完成的存量体检依据。
 | 项 | 值 | 命令 |
 |---|---|---|
 | implemented 篇数 | **72** | `ls notes/implemented/*.md \| grep -v README \| wc -l` |
-| 自述阈值 | 约 50 | [notes/README.md:91](../../notes/README.md) |
+| 自述阈值 | 约 50 | [notes/README.md:91](../../../notes/README.md) |
 | archived 篇数 | 27 | `ls notes/archived/*.md \| grep -v README \| wc -l` |
 | archived 冻结日期 | **23 篇 = 2026-09-27，4 篇 = 2026-09-28**，此后**零归档** | `rg -o "归档：\d{4}-\d{2}-\d{2}" notes/archived/*.md` |
 | proposal/ 在飞 | 3 | 队列行为证 |
@@ -76,18 +76,18 @@ intent: 为 notes-stocktake 实施 Note 保留已完成的存量体检依据。
 对抗证伪要求"打开承接文件、确认里面写着该 Note **独有**的理由（为什么选它 / 放弃了
 什么 / 哪条非显然陷阱），而不只是结论形状"，结果 8/8 全部找出反例，四类：
 
-1. **未兑现承诺（硬豁免）**——[human-gate-acceptance](../../notes/implemented/2026-09-26-human-gate-acceptance.md)
+1. **未兑现承诺（硬豁免）**——[human-gate-acceptance](../../../notes/implemented/2026-09-26-human-gate-acceptance.md)
    正文自写"**复查口常开**……结论补记本 Note"，即它自己声明未来还会被改 → 不能冻结；
-   [living-verification-hook](../../notes/implemented/2026-10-07-living-verification-hook.md)
+   [living-verification-hook](../../../notes/implemented/2026-10-07-living-verification-hook.md)
    自留"低卡数据点入候选 A 标定池…**待候选 A 复核**"。
-2. **假承接**——[acceptance-criteria](../../notes/implemented/2026-10-06-acceptance-criteria.md)：
+2. **假承接**——[acceptance-criteria](../../../notes/implemented/2026-10-06-acceptance-criteria.md)：
    `NODES.md` / skill / `acceptance-check.mjs` 只留"UNVERIFIED 结论形状"，而本篇独有
    "判据是 model-supplied 不可信通道数据须框定"等理由全仓无第二处。
-3. **被现行面当正本引用**——[r1-scaffold](../../notes/implemented/2026-09-24-r1-scaffold.md)
+3. **被现行面当正本引用**——[r1-scaffold](../../../notes/implemented/2026-09-24-r1-scaffold.md)
    被 `docs/evaluation.md` 门禁登记表引为红证出处（该表由 `gate-ledger-sync` 机械对账）；
-   [agent-ready-absorption](../../notes/implemented/2026-09-25-agent-ready-absorption.md)
+   [agent-ready-absorption](../../../notes/implemented/2026-09-25-agent-ready-absorption.md)
    被 `evaluation.md` 引用 10 次。
-4. **判据悬空**——[note-lifecycle-absorption](../../notes/implemented/2026-09-24-note-lifecycle-absorption.md)
+4. **判据悬空**——[note-lifecycle-absorption](../../../notes/implemented/2026-09-24-note-lifecycle-absorption.md)
    （class 层重估入口的正本）若归档，本次体检自己的判据就没有出处。
 
 ### 反向：严格口径也确实抓到了宽口径漏掉的真东西
@@ -95,16 +95,16 @@ intent: 为 notes-stocktake 实施 Note 保留已完成的存量体检依据。
 不是"严格口径全错"。它至少实证了宽口径的系统性偏宽，并给出两篇**经过承接核实**的
 archive 候选，两处承接主张我都手工复核过：
 
-- [hitl-docking-polish](../../notes/archived/2026-09-28-hitl-docking-polish.md)
-  → [guides/61:23-28](../../docs/guides/61-run-playbook.md) 确有 SSRF 守卫机理
+- [hitl-docking-polish](../../../notes/archived/2026-09-28-hitl-docking-polish.md)
+  → [guides/61:23-28](../../../docs/guides/61-run-playbook.md) 确有 SSRF 守卫机理
   与代理变量配方全文（已 commit）；⚠️ 但该行末仍链回本 Note 作"实证与 vendor 依据"
   ——**这是"承接了，但没有完全承接"的边界个案**，不是干净的 archive。
-- [node-topology-procedure](../../notes/archived/2026-09-28-node-topology-procedure.md)
-  → [changing-node-topology SKILL](../../.agents/skills/changing-node-topology/SKILL.md)
+- [node-topology-procedure](../../../notes/archived/2026-09-28-node-topology-procedure.md)
+  → [changing-node-topology SKILL](../../../.agents/skills/changing-node-topology/SKILL.md)
   确有六处同步清单 + 四条已知坑（`rg` 命中）；此篇最接近干净 archive。
 
 **两篇都是边界个案，不足以支撑"批量归档 23 篇"。**按
-[archived/README §进门条件](../../notes/archived/README.md)"边界个案用判断并留档"，
+[archived/README §进门条件](../../../notes/archived/README.md)"边界个案用判断并留档"，
 本报告把它们列为**待裁定**，不在本轮执行归档。
 
 ## 根因：判据轴没有可执行面

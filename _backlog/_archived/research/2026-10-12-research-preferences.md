@@ -52,7 +52,7 @@ intent: 为研究方法配置总卡及单次研究、长期复用子卡提供统
 - [NODES](../../../research-workspace/NODES.md) 以文件作为节点接口，缺输入不得猜；两点交互不新增日常停点。补研究回挖掘并增加报告版本，表述修订不变版本，结构性变更另起 run bundle，HITL1 永不重开。
 - [状态模型](../../../docs/design/50-agent-loop-and-state.md) 规定 run bundle 是研究事实正本，session log 是执行事件正本，goal/任务板是辅助，Cockpit 是只读派生观察。新会话只凭 bundle 应能恢复研究，不能重新从当前全局预设解析旧 run。
 - [D7/D17/D18](../../../docs/00-index.md) 规定框架不持 per-run 状态，pack 的自写 JS 例外用途限定观察/调试。[Cockpit 设计](../../../docs/design/40-research-cockpit.md) 不提供方法编辑或长期管理正本。新增配置管理代码不能因为已有 client 构建链就视为已获授权。
-- [策略 benchmark](../../research/strategy-benchmark/2026-10-03-strategy-benchmark-sources.md) 是外部参数系统与本仓的对照研究，不是本仓已有参数计算器。本仓深度主要是 prompt/topic 规模指导，不代表已有强制 token、延迟或检索预算；新增方法不另起冲突的来源数、独立性或补搜上限合同。
+- [策略 benchmark](strategy-benchmark/2026-10-03-strategy-benchmark-sources.md) 是外部参数系统与本仓的对照研究，不是本仓已有参数计算器。本仓深度主要是 prompt/topic 规模指导，不代表已有强制 token、延迟或检索预算；新增方法不另起冲突的来源数、独立性或补搜上限合同。
 - [Critic 轻量模式](../../../packages/deep-research-pack/presets/critic/skills/adversarial-review/SKILL.md#轻量模式quick_factual-薄路径) 豁免完整反例/交叉验证狩猎；自定义不可削弱现有适用要求，不等于每种方法都必须做同样检查。新增方法承诺是否进入 MAJOR/FAIL 或 UNVERIFIED 需设计，原 readiness 不会自动检验新承诺。
 - [synthesis](../../../packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md) 规定首屏六段与 quick 缩略及来源清单。方法呈现应在既有格式内调整分析重点；替换报告硬要求属于待决改动。角色会话无命令执行能力，audit.md 由操作侧写；方法偏离的角色记录不能派给 Lead 写入 audit。
 

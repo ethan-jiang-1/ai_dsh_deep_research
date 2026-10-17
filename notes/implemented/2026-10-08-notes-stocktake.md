@@ -4,7 +4,7 @@
 
 出处 = 推敲卡 [2026-10-08-sdlc-reference-absorption](../../_backlog/_archived/settled_issues/2026-10-08-sdlc-reference-absorption.md)
 （§候选与取舍 第二档 C19 + §毕业门 ②"建议先做一次 notes 存量体检"）。体验报告全文 =
-[_backlog/research/2026-10-08-notes-stocktake.md](../../_backlog/research/2026-10-08-notes-stocktake.md)。
+[_backlog/_archived/research/2026-10-08-notes-stocktake.md](../../_backlog/_archived/research/2026-10-08-notes-stocktake.md)。
 
 ## 决定
 
@@ -109,7 +109,7 @@
 
 - 队列条目毕业：RFC 迁入本目录并改写为事实体；`_backlog/queue.md` 该行删除，
   **▶ 移交"意图载体总图页"**。
-- 体检报告住 [_backlog/research/2026-10-08-notes-stocktake.md](../../_backlog/research/2026-10-08-notes-stocktake.md)
+- 体检报告住 [_backlog/_archived/research/2026-10-08-notes-stocktake.md](../../_backlog/_archived/research/2026-10-08-notes-stocktake.md)
   并在 [reference/README](../../_backlog/research/README.md) 索引建行（`plans-liveness` 把守）。
 - 新增承载物：report 内的"严格口径问法"（"机制若消失，哪次具体未来变更会变差"）
   是本次唯一可复用的产出——后续若给归档判定补复核面，判据形状可直接取它。

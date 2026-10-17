@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-出处 = [notes-stocktake 体检](../../_backlog/research/2026-10-08-notes-stocktake.md) §下一步候选 1
+出处 = [notes-stocktake 体检](../../_backlog/_archived/research/2026-10-08-notes-stocktake.md) §下一步候选 1
 （"给归档判定补一层可复核面——推荐先做"）与候选 3（两篇边界个案待裁定，前提 = 候选 1 落地）；
 用户 2026-10-10 指令「把剩下要做的都做了吧」。
 
@@ -28,7 +28,7 @@
     残余的"实证与 vendor 依据"指针按登记制显式化为历史出处 ✓；历史理由值得保留 ✓。
   - 搬移纪律照 [archived/README](../archived/README.md)：唯一机械编辑 = 状态行下插归档行；
     入链重定向（guides/61 ×1、[stocktake Note](2026-10-08-notes-stocktake.md) ×2、
-    [体检材料](../../_backlog/research/2026-10-08-notes-stocktake.md) ×2）仅改相对路径。
+    [体检材料（已归档）](../../_backlog/_archived/research/2026-10-08-notes-stocktake.md) ×2）仅改相对路径。
 
 ## 输掉的方案
 

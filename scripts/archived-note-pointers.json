@@ -87,12 +87,12 @@
       "reason": "体检报告历史引用（同上——SKILL 承接已核实、活面零引用，2026-10-10 裁定归档）"
     },
     {
-      "source": "_backlog/research/2026-10-08-notes-stocktake.md",
+      "source": "_backlog/_archived/research/2026-10-08-notes-stocktake.md",
       "target": "notes/archived/2026-09-28-hitl-docking-polish.md",
       "reason": "体检材料历史引用（边界个案小节分析对象；2026-10-10 已裁定归档，仅路径重定向）"
     },
     {
-      "source": "_backlog/research/2026-10-08-notes-stocktake.md",
+      "source": "_backlog/_archived/research/2026-10-08-notes-stocktake.md",
       "target": "notes/archived/2026-09-28-node-topology-procedure.md",
       "reason": "体检材料历史引用（同上）"
     },
