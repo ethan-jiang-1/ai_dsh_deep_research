@@ -66,6 +66,11 @@ U4（新增「时间线与信号」）由此获得行为证据，支持它留在
 
 ## 原始证据位置
 
-- b 组 bundle：`research-workspace/drt_anthropic-claude-release-line/`（含 `final/v1.md` 记账）；
-- a 组 bundle：`research-workspace/drt_anthropic-claude-release-line-map/`（含 `final/v1.md`＋`v2.md`）；
+> **2026-10-18 归位**：本记录涉及的 4 个 A/B bundle（P8 两组 + P6 两组）已按仓规移入
+> `research-workspace/_abandoned/`（实验件、非交付物；根下只留**在飞**场次）。P8-a 的 v2 rerun
+> 记账（`final/v1.md`＋`v2.md`）随 bundle 一并迁移；同批移入的还有探针场次 `drt_deepseek-api-model-list`。
+> 用户的在飞 run（`drt_ai-coding-sec-practices`，停在 HITL2）**未动**。
+
+- b 组 bundle：`research-workspace/_abandoned/drt_anthropic-claude-release-line/`（含 `final/v1.md` 记账）；
+- a 组 bundle：`research-workspace/_abandoned/drt_anthropic-claude-release-line-map/`（含 `final/v1.md`＋`v2.md`）；
 - 对照提取器：`runtime/ab-compare.mjs`（只读投影：方法行／证据 tier 分布／域数／final 骨架）。
