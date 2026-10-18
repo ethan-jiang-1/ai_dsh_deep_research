@@ -190,7 +190,8 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           // `review-readiness.terminalReadiness`——只认**行首**判定行、取最后一条。2026-10-11
           // 实测：旧的未锚行首末位匹配会把文末附录里保留的首轮 `readiness: FAIL`（血统记录）
           // 读成终局，把已交付 run 报成「审查修复中」。
-          const reviewText = names.has('review.md') ? await props.readFile(sessionId, `${base}/review.md`, new AbortController().signal) : null
+          // review.md 读上限显式给足（BUG-036：默认 40 行会把终局判定行截在窗口外，UI 与盘侧期望对不上）
+          const reviewText = names.has('review.md') ? await props.readFile(sessionId, `${base}/review.md`, new AbortController().signal, 600) : null
           if (stopped) return
           const readiness = terminalReadiness(reviewText)
           const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : null

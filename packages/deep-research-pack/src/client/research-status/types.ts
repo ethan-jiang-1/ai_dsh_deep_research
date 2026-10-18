@@ -22,7 +22,9 @@ export interface ResearchStatusTabInjected {
   /** 列工作区目录；不可达 → null。 */
   readonly listDir: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<readonly { type: string; name: string }[] | null>
   /** 读工作区文本文件（首窗）；不可达 → null。 */
-  readonly readFile: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<string | null>
+  /** limit = 行上限（缺省 40——bundle 渐进面小读取的历史选择；读 review.md / question.md 这类
+   *  判据落在全文里的文件时须显式给足，见 BUG-036）。 */
+  readonly readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) => Promise<string | null>
   /** 挂起显性化：pending 迁移时由页签体调用（openTab——右栏同步骤展开）。 */
   readonly revealStatusTab: () => void
 }

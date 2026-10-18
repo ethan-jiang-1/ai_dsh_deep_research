@@ -84,16 +84,46 @@ const EMPTY_TEMPLATE = /^readiness\s*[:：]\s*(?:\*\*|__|`{1,2})?\s*PASS\s*\|\s*
  */
 export function terminalReadiness(reviewText: string | null | undefined): Readiness | null {
   if (typeof reviewText !== 'string' || reviewText.trim() === '') return null
-  let last: Readiness | null = null
-  for (const line of reviewText.split('\n')) {
+  // 两条候选路径 + 一种仲裁（BUG-036，2026-10-18 实测）：
+  //  · 规范路径 = 装饰剥离后行首即 `readiness:`（现状，含 `## readiness:` 等）；
+  //  · 轮次路径 = **行首标记之后直接是「第 N 轮」**的标题行（`# 第 2 轮（复审）—— readiness: PASS`）
+  //    ——规范路径的前缀预算吃不下这种插入语，而它恰恰是**最新一轮**最自然的写法；
+  //  · 仲裁：**无轮次标注者视为终局**（canonical 形态优先，取最后一条）；**全带轮次时轮次高者胜**
+  //    （文末附录保留的旧轮记录因此不再夺权——BUG-036 的现场形态）。
+  // 行内引用（`- **第 1 轮**：\`readiness: FAIL\` 血统`）两条路径都不认：轮次路径要求标记后**紧接**「第」，
+  // 加粗/散文前缀即落空。
+  const ROUND_HEADING = /^\s*(?:[>#\-+]\s*)*第\s*([0-9]+)\s*轮[^\n]{0,24}?readiness\s*[:：]\s*(?:\*\*|__|`{1,2})?\s*(PASS|FAIL)\b/i
+  interface Candidate { readonly value: Readiness; readonly round: number | null; readonly index: number }
+  const candidates: Candidate[] = []
+  const lines = reviewText.split('\n')
+  for (const [index, line] of lines.entries()) {
     const rest = stripVerdictDecor(line)
-    if (rest === null) continue
-    if (EMPTY_TEMPLATE.test(rest)) continue
-    const match = VERDICT_LINE.exec(rest)
-    if (match === null) continue
-    const value = match[1]
-    if (value === undefined) continue // noUncheckedIndexedAccess：捕获组缺席即跳过，不 cast 掩盖
-    last = value.toUpperCase() as Readiness
+    if (rest !== null && !EMPTY_TEMPLATE.test(rest)) {
+      const match = VERDICT_LINE.exec(rest)
+      const value = match?.[1]
+      if (value !== undefined) {
+        const round = /第\s*([0-9]+)\s*轮|轮次\s*[:：]?\s*([0-9]+)|\bround\s*([0-9]+)\b/i.exec(line)
+        const roundText = round?.[1] ?? round?.[2] ?? round?.[3]
+        candidates.push({ value: value.toUpperCase() as Readiness, round: roundText === undefined ? null : Number(roundText), index })
+        continue
+      }
+    }
+    const roundMatch = ROUND_HEADING.exec(line)
+    const roundValue = roundMatch?.[2]
+    const roundNo = roundMatch?.[1]
+    if (roundValue !== undefined && roundNo !== undefined) {
+      candidates.push({ value: roundValue.toUpperCase() as Readiness, round: Number(roundNo), index })
+    }
   }
-  return last
+  if (candidates.length === 0) return null
+  const unlabeled = candidates.filter((c) => c.round === null)
+  if (unlabeled.length > 0) return unlabeled[unlabeled.length - 1]!.value
+  // 全带轮次：轮次最大者胜；同轮次取更靠后的一条（末位为准）。
+  let best = candidates[0]!
+  for (const candidate of candidates) {
+    const rank = candidate.round ?? 0
+    const bestRank = best.round ?? 0
+    if (rank > bestRank || (rank === bestRank && candidate.index > best.index)) best = candidate
+  }
+  return best.value
 }
