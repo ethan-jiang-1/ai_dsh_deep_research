@@ -86,7 +86,21 @@ if (resumeSessionId !== null) {
     : null;
   const logPath = sessionDir === null ? null : resolveSessionLog(sessionDir);
   const sinceMs = Date.now() - 1000;
+  // 关闭挂起问询前的记账（BUG-041）：**续跑分支才是官方恢复路径**（`--session` 发自由文本关闭挂起），
+  // ⚠ 2026-10-18 实测教训：本仓有**两个** session/prompt 站点（新建 / 续跑），接线一度落在新建分支 →
+  // 恢复路径关单时静默不记账（连跳过原因都没打印）。记账只属于"续跑关挂起"这一支。
+  const closing = await closingRowForPending()
   await rpc('session/prompt', { request: { requestId: randomUUID(), sessionId: resumeSessionId, mode: 'queue', content: [{ type: 'text', text: prompt }] } });
+  console.error(`run-kickoff: prompt 已送入已存会话 ${String(resumeSessionId).slice(0, 8)}…（续跑）`)
+  if (closing !== null) {
+    try {
+      const row = closingProvenanceRow({ cardKey: closing.cardKey, text: prompt, date: new Date().toISOString().slice(0, 10) })
+      appendDecisionsRow({ bundle: closing.bundleDir, row, journalNote: `**挂起问询由操作侧自由文本关闭（记账行已落 §Decisions）**：${closing.cardKey}` })
+      console.error(`run-kickoff: 关闭挂起的记账行已落 §Decisions（${closing.cardKey} → bundle ${closing.slug}）`)
+    } catch (error) {
+      console.error(`run-kickoff: ⚠ 记账行落地失败（${String(error).slice(0, 120)}）——请人工按记账纪律补记`)
+    }
+  }
   let landed = false;
   if (logPath === null) {
     console.error(`run-kickoff: ⚠ 找不到会话日志（会话 ${resumeSessionId.slice(0, 12)}… 不在 ${sessionsRoot} 下）——注入已发出但**未对账**`);
@@ -129,20 +143,10 @@ if (prompt) {
   // 关闭 HITL 卡之后，交付段 §Decisions 没有对应行，门②/门③ 如实判红而复盘看不出谁在何时答的。
   // 故先取"这条会话是否有挂起 + 挂起是哪张卡"，发送成功后按代驱记账纪律补一行（bundle 归属由
   // hitl-provenance 的既有谓词判定；归属不唯一就如实跳过并提示人工补记）。
-  const closing = await closingRowForPending()
   await rpc('session/prompt', {
     request: { requestId: randomUUID(), sessionId, mode: 'queue', content: [{ type: 'text', text: prompt }] },
   });
   console.error(`run-kickoff: prompt 已送入会话 ${sessionId.slice(0, 8)}…（cwd=${cwd}, preset=${preset}）`);
-  if (closing !== null) {
-    try {
-      const row = closingProvenanceRow({ cardKey: closing.cardKey, text: prompt, date: new Date().toISOString().slice(0, 10) })
-      appendDecisionsRow({ bundle: closing.bundleDir, row, journalNote: `**挂起问询由操作侧自由文本关闭（记账行已落 §Decisions）**：${closing.cardKey}` })
-      console.error(`run-kickoff: 关闭挂起的记账行已落 §Decisions（${closing.cardKey} → bundle ${closing.slug}）`)
-    } catch (error) {
-      console.error(`run-kickoff: ⚠ 记账行落地失败（${String(error).slice(0, 120)}）——请人工按 notes/implemented 的记账纪律补记`)
-    }
-  }
 }
 
 /**
