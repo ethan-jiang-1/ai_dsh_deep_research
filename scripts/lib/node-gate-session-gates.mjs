@@ -125,13 +125,26 @@ function planCardNote(planCards, planCardOver) {
  * 与其余各门同构；rows 供门② 的操作侧补齐判定复用，单一来源）。
  * @returns { gate: { status, detail }, rows: HITL2 拍板行列表 }
  */
+/**
+ * 一行 §Decisions 是否算「HITL2 拍板行」（单一判据；门③ 与门A 共用）。
+ * 两条已文档化形态都认：① 字面 `HITL2`；② **代理代答 provenance 行**（`hitl-answer` 驱动，
+ * 行内点明「交付审阅」且带「代理模拟」标记——操作侧代驱的显式记账纪律，见 hitl-provenance）。
+ * @param line §Decisions 的单行文本。
+ * @returns 是否计为 HITL2 拍板行。
+ */
+export function isHitl2Row(line) {
+  if (/HITL2/.test(line)) return true
+  return /交付审阅/.test(line) && /代理模拟|hitl-answer/.test(line)
+}
+
 export function hitl2RowGate(bundleDir) {
   const finalDir = join(bundleDir, 'final')
   const versionFiles = existsSync(finalDir) ? readdirSync(finalDir).filter((f) => f.endsWith('.md')) : []
   const qPath = join(bundleDir, 'question.md')
   const qText = existsSync(qPath) ? readFileSync(qPath, 'utf8') : null
   const dec = qText ? decisionsLines(qText) : []
-  const hitl2Rows = dec.filter((l) => /HITL2/.test(l))
+  const hitl2Rows = dec.filter((l) => isHitl2Row(l))
+  const proxyRows = hitl2Rows.filter((l) => !/HITL2/.test(l))
   let gate
   if (versionFiles.length === 0) {
     gate = { status: 'N/A', detail: 'final/ 版本记账不在场——门③无对象（bundle 未到交付段；显式标注，不静默跳过）' }
@@ -140,7 +153,11 @@ export function hitl2RowGate(bundleDir) {
   } else if (hitl2Rows.length === 0) {
     gate = { status: 'RED', detail: `final/ 记账在场（${versionFiles.join(', ')}）但 §Decisions 无任何 HITL2 拍板行——版本落盘先于用户裁决（G8 形态）` }
   } else {
-    gate = { status: 'PASS', detail: `§Decisions 含 ${hitl2Rows.length} 条 HITL2 拍板行` }
+    gate = {
+      status: 'PASS',
+      detail: `§Decisions 含 ${hitl2Rows.length} 条 HITL2 拍板行`
+        + (proxyRows.length > 0 ? `（其中 ${proxyRows.length} 条为**代理代答 provenance**——已按显式记账纪律落行）` : ''),
+    }
   }
   return { gate, rows: hitl2Rows }
 }

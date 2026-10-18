@@ -7,6 +7,8 @@ import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { gateBundle, decisionsLines, headingGate } from '../scripts/lib/node-gate-core.mjs'
+import { isHitl2Row } from '../scripts/lib/node-gate-session-gates.mjs'
+import { leadsGate } from '../scripts/lib/node-gate-run-gates.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const FX = join(HERE, 'fixtures', 'node-gate')
@@ -541,3 +543,29 @@ test('门A 豁免反证：非 quick_factual 而记账在场、review.md 缺席 �
   assert.equal(g.status, 'RED')
   assert.match(g.detail, /review\.md 缺席/)
 })
+
+// ── 端到端实测暴露的两处门禁判据缺口（BUG-038/039，2026-10-18）────────────────────────
+// 负例留证 2026-10-18：BUG-038（门L 分级判据不容忍 `**A**` 加粗 → 对已分级条目假红）与
+//   BUG-039（门③ 不认代理代答 provenance 行；门A 不认「未决项升级到用户裁决」这条既定路径）。
+//   红配方（038）：把门L 的分级判据改回 `/[(（]\s*[ABCD]\b/`（不剥强调）→ 本文件 bold-grade 例红。
+//   红配方（039）：删掉 isHitl2Row 的"代理代答"分支 → 本文件代理行例红；
+//     删掉门A 的 escalationNoted/escalationAdjudicated 判据 → escalation 例红。
+test('isHitl2Row：字面 HITL2 与代理代答 provenance 都算拍板行；仅提"交付审阅"不算（BUG-039）', () => {
+  assert.equal(isHitl2Row('- 2026-10-18 HITL2 定稿（用户原话: "可以"）'), true);
+  assert.equal(isHitl2Row('- 2026-10-18｜**HITL 交互 = 操作侧代理模拟（hitl-answer 驱动，pick=recommended）**：Q1「交付审阅」→「按现稿定稿（Recommended）」'), true);
+  assert.equal(isHitl2Row('- 2026-10-18 计划确认卡：「交付审阅」按推荐开跑'), false, '没有代理标记的普通提及不算拍板行');
+  assert.equal(isHitl2Row('- 2026-10-18 用户要求修订表述'), false);
+});
+
+test('门L分级判据：加粗/逗号分隔的分级算已分级；真无分级仍判红（BUG-038）', () => {
+  const r = leadsGate(bundle('fixture-leads-bold-grade'), '2026-10-09');
+  const flat = JSON.stringify(r);
+  assert.doesNotMatch(flat, /A1[^"]*无 A–D 分级|A1｜加粗分级[^"]*无 A–D 分级/, '加粗分级不得被判"未分级"');
+  assert.match(flat, /A2｜真无分级[\s\S]{0,80}无 A–D 分级/, '真无分级的条目必须仍判红（红灯形态保住）');
+});
+
+test('门A升级路径：readiness FAIL + 未决项升级记账 + HITL2 拍板行 → 不判"越过审查前置"（BUG-039）', () => {
+  const g = A('fixture-escalation-adjudicated', '2026-10-08');
+  assert.notEqual(g.status, 'RED', '按既定处置（未决项升级到用户裁决）走的交付不该被判越过前置');
+  assert.doesNotMatch(String(g.detail), /越过审查前置/);
+});

@@ -42,3 +42,5 @@
 | [BUG-035](BUG-035-hitl-answer-sidebar-session-invisible.md) | 侧栏懒渲染下"扫不到会话"被误判成实例老化：加搜索兜底 + 策略纯函数 + 负例留证；强制注入绿证通过 | 2026-10-18 |
 | [BUG-037](BUG-037-hitl-answer-aging-verdict-misleading.md) | 兜底已试搜索仍不命中 → 判据改 not-in-scope（处置改为核对标题/续跑，文案不再提重启）；keyless 反证 + 强制端到端反证 | 2026-10-18 |
 | [BUG-036](BUG-036-cockpit-brief-layer-pending-review-line-missing.md) | 摘要层缺行：终局判据加轮次路径+仲裁（附录旧轮不夺权）＋ UI 读 review 足额 limit；单测先红后绿 + 冒烟 ALL PASS | 2026-10-18 |
+| [BUG-038](BUG-038-node-gate-leads-grade-markdown-intolerance.md) | 门L 分级判据不容忍 `**A**` 加粗 → 17 条假红；改为剥强调后认「括号/逗号 + 独立 A–D」，真问题仍红 | 2026-10-18 |
+| [BUG-039](BUG-039-node-gate-proxy-answer-and-escalation-path.md) | 门③ 认代理代答 provenance 行（RED→PASS）；门A 机械认「未决项升级到用户裁决」路径（收窄：须两件同时在场）；同场那处门A 红经查是对的（运行纪律） | 2026-10-18 |

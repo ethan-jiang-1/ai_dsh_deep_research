@@ -13,7 +13,7 @@
 > 门编号图例：门① = HITL 锚点门（HITL1 选项卡真实在场——BUG-006 落地，契约日 2026-10-05）·
 > 门② = present 声明 · 门③ = §Decisions 拍板行 · 门④ = 版本记账（见回边版本
 > 语义节）· 门L = leads 交接门（L = leads）· 门R = 标题重复退化门（final.md 同一标题 ≥4 次
-> = 生成退化，2026-10-06 起，出处 = oss-dr 借鉴 A1 / LDR #6452）· 门A = 交付完整性门
+> = 生成退化，2026-10-06 起，出处 = oss-dr 借鉴 A1 / LDR #6452）· 门A = 交付完整性门（readiness 非 PASS 时：review.md 有升级/未决项记账 **且** §Decisions 有 HITL2 拍板行——含代理代答 provenance——即按"升级到用户裁决"路径，不判越过前置；见 notes/implemented/2026-10-18-node-gate-judgment-widening.md）
 > （第 8 行交付判据下沉：final/ 记账在场 × readiness 非 PASS 交叉断言 + 交付前置达成时
 > final/v1.md 记账与**当前 bundle 对应的可解析 audit.md** 在场；摘要与 CRITICAL 节条目数须一致且显式 `CRITICAL=0`；附条件 PASS 显性化为 WARN 注记不机械红——
 > 裁决权威在 HITL2 用户；契约日 2026-10-08，出处 = delivery-criteria-mechanization RFC）——

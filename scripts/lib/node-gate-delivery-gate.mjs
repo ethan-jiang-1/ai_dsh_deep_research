@@ -3,6 +3,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { runType } from './schema-scan-core.mjs'
 import { AUDIT_CONTRACT_DATE, isPreContract, readinessOf, auditCriticalCount } from './node-gate-contracts.mjs'
+import { isHitl2Row } from './node-gate-session-gates.mjs'
 
 /**
  * 门A（交付完整性门，可导入；keyless；RFC 2026-10-07-delivery-criteria-mechanization）。
@@ -37,7 +38,18 @@ export function deliveryGate(bundleDir, auditDate) {
   const quickFactual = runType(bundleDir) === 'quick_factual'
   const delivered = versionFiles.length > 0
   const problems = []
-  if (delivered && hasReview && !reviewPass) {
+  // A1 的**升级路径**（BUG-039，2026-10-18 端到端实测）：readiness FAIL 且审查轮用尽时，手册与
+  // brief-fold 的既定处置 = 「审查未决项已按上限升级到本次审阅——由你裁决」；此时 §Decisions 有
+  // HITL2 拍板行（含代理代答 provenance）= 处置已显式记账 → 不判"越过审查前置"（原来只写在修正
+  // 提示里、代码不认，导致按处置流程走的 run 反而红）。判据与门③ 同源（isHitl2Row）。
+  const qTextA1 = existsSync(join(bundleDir, 'question.md')) ? readFileSync(join(bundleDir, 'question.md'), 'utf8') : ''
+  // 收窄（同轮实测）：光有 HITL2 行不够——必须**同时**有"升级"这条既定处置的痕迹（review.md 里
+  // 的未决项升级记账），否则任何提到 HITL2 的 bundle 都会 blanket 豁免 A1（红灯形态丢失）。
+  const escalationNoted = /升级|未决项/.test(reviewText)
+  const escalationAdjudicated = escalationNoted && qTextA1
+    .split('\n')
+    .some((l) => /^\s*-/.test(l) && isHitl2Row(l))
+  if (delivered && hasReview && !reviewPass && !escalationAdjudicated) {
     problems.push(
       `final/ 版本记账在场（${versionFiles.join(', ')}）而 review readiness 非 PASS——交付越过审查前置（NODES 第 6 行：PASS = HITL2 前置；修正 = 补审查轮使 readiness 判 PASS，或按处置流程显式记账）`,
     )
