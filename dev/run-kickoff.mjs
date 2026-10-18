@@ -158,23 +158,24 @@ async function closingRowForPending() {
     const { attributionBundleOf } = await import('../scripts/lib/hitl-provenance.mjs')
     const sessionsRoot = join(process.env.DSH_HOME ?? '', 'sessions')
     const group = researchWorkspaceGroup(sessionsRoot)
-    if (group === undefined) return null
+    if (group === undefined) { console.error('run-kickoff: 记账跳过——找不到 research-workspace 会话组'); return null }
     const logPath = resolveSessionLog(join(sessionsRoot, group, sessionId))
     if (logPath === null) { console.error('run-kickoff: 记账跳过——会话日志不在（' + sessionId.slice(0, 8) + '）'); return null }
     // ⚠ readSessionEvents 返回 `{readable, events}` **不是数组**（2026-10-18 实测踩坑三次：喂对象会让
     // fold 抛错，而此前被 catch 吞掉 → 静默不记账）。此处按契约取 .events，并把失败原因打出来（fail-loud）。
     const read = readSessionEvents(logPath)
     const events = Array.isArray(read) ? read : (read?.events ?? [])
-    if (foldHitlPending(events).pending !== true) return null
+    if (foldHitlPending(events).pending !== true) { console.error('run-kickoff: 记账跳过——该会话当前无挂起问询（foldHitlPending=false）'); return null }
     const lastAsk = [...events].reverse().find((e) => e?.type === 'tool/call' && e?.data?.name === 'ask_user_question')
     const questions = parseAskQuestions(lastAsk?.data?.arguments)
     const cardKey = isDeliveryReviewCard(questions) ? 'anchor-2' : 'anchor-1'
     const slug = attributionBundleOf(events)
-    if (slug === null) return null
+    if (slug === null) { console.error('run-kickoff: 记账跳过——归属未定（attributionBundleOf=null：该会话尚无 write/edit 命中任何 bundle，按纪律延迟补记）'); return null }
     for (const base of ['research-workspace', join('research-workspace', 'archive'), join('research-workspace', '_abandoned')]) {
       const dir = join(ROOT, base, `drt_${String(slug).replace(/^drt_/, '')}`)
       if (existsSync(join(dir, 'question.md'))) return { cardKey, bundleDir: dir, slug: `drt_${String(slug).replace(/^drt_/, '')}` }
     }
+    console.error('run-kickoff: 记账跳过——三位置找不到 drt_' + String(slug).replace(/^drt_/, '') + ' 的 question.md')
     return null
   } catch (error) {
     console.error('run-kickoff: ⚠ 记账判定异常（如实报告，不静默）——' + String(error).slice(0, 140))
