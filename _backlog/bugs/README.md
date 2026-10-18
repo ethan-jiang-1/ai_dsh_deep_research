@@ -103,3 +103,4 @@ opened: YYYY-MM-DD
 **状态行追写法**（位置即状态）：卡在本目录时 `状态：` 记号镜像 frontmatter（`pnpm verify` 互查），随翻转更新；判断与去向**追加**在记号之后，既有记录不删除——翻到 `已修` 时形如 `状态：已修 — <结论，Note 指针>（YYYY-MM-DD）`；进暂停池**不加任何判断**（没有判断落地）。
 
 **边界**：当场修掉的缺陷不建档（轮次 Note 照旧）；建档 = 发现时决定不当场修。把每个 bug 当**契约探针**——一个具体缺陷往往牵出一类失败，顺藤摸瓜值得横切排查。
+| [BUG-040](BUG-040-terminal-readiness-two-copies-drift.md) | 终局 readiness 两版实现漂移：pack 的 `terminalReadiness` 已加轮次仲裁、门的 `readinessOf` 未跟随 → 同一 bundle 两处判不同 |

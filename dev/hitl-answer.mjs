@@ -15,13 +15,15 @@
 // 行为：**先盘侧谓词自拒**（无真挂起会话即退出，不开浏览器）→ 精确按 session ID 打开同一会话
 //       → 逐题作答（默认选带 Recommended 的那一项）→ 提交 → 打印每题的选择。
 // 注意：**必须**在 question.md §Decisions 与 journal.md 标注"代理模拟"——它替的是人，不是人。
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { once } from 'node:events'
 import { loadChromium, launchChromium } from '../scripts/lib/playwright.mjs'
 import { runStateOf, readSessionEvents, leadHitlCandidate } from '../scripts/lib/run-state.mjs'
+import { terminalReadiness } from '../packages/deep-research-pack/src/lib/review-readiness.ts'
 import { clickSearchResultByTitle, searchSessionByTitle } from '../scripts/lib/web-ui-nav.mjs'
-import {answerBatchOf, customLandedInBatch, driveVerdict, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict} from '../scripts/lib/ask-drive.mjs'
+import {deliveryAnswerGuard, isDeliveryReviewCard, answerBatchOf, customLandedInBatch, driveVerdict, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict} from '../scripts/lib/ask-drive.mjs'
 import { appendProvenance, attributionBundleOf, batchToAnswered } from '../scripts/lib/hitl-provenance.mjs'
 import { localDateStr } from '../scripts/lib/local-date.mjs'
 import { researchWorkspaceGroup, sessionLogsInGroup } from '../scripts/lib/session-log.mjs'
@@ -267,7 +269,7 @@ let uiTargetTitle = null
   const gdir = join(sessionsRoot, group)
   const candidates = sessionLogsInGroup(gdir).slice(0, 15).map((session) => {
     const state = runStateOf({ logPath: session.logPath, wsRoot: join(ROOT, 'research-workspace'), includeSessionIdentity: true })
-    return { ...session, canonicalSessionId: state.sessionId, title: state.title, pending: state.readable && leadHitlCandidate(state) }
+    return { ...session, canonicalSessionId: state.sessionId, title: state.title, bundle: state.active ?? null, pending: state.readable && leadHitlCandidate(state) }
   })
   const selected = selectPendingSession(candidates, SESSION)
   if (selected.candidate === null) {
@@ -299,6 +301,32 @@ const expectedCardKey = questionCardKeyOf(uiTargetSessionId, plan.callId)
 if (expectedCardKey === null) {
   console.error('hitl-answer: 盘侧挂起 ask 缺少可用 callId，无法绑定唯一 UI 卡片——拒绝打开浏览器并作答')
   process.exit(3)
+}
+// 交付代答闸（2026-10-18 端到端实测的运行纪律）：交付审阅卡在场而 review readiness 非 PASS 时，
+// **默认推荐档**会把「定稿」投给一份未过审的报告 = 交付越过前置；默认档自拒（人工裁决或显式指定）。
+{
+  const isDelivery = isDeliveryReviewCard(plan.questions ?? [])
+  if (isDelivery) {
+    const slug = selected.candidate.bundle ?? null
+    let readiness = null
+    if (slug !== null) {
+      for (const base of ['research-workspace', join('research-workspace', 'archive'), join('research-workspace', '_abandoned')]) {
+        const reviewPath = join(ROOT, base, slug, 'review.md')
+        if (existsSync(reviewPath)) {
+          // 用**pack 的终局判据**（与 UI 同源；BUG-036 已把轮次仲裁修在它那里）。
+          // ⚠ 门的副本 readinessOf 尚未跟随 → 同一 bundle 两处判不同的漂移，见 BUG-040 卡。
+          readiness = terminalReadiness(readFileSync(reviewPath, 'utf8'))
+          break
+        }
+      }
+    }
+    const verdict = deliveryAnswerGuard({ isDeliveryCard: true, readiness, pick: PICK })
+    if (!verdict.allow) {
+      console.error('hitl-answer: ⛔ 交付代答闸自拒——' + verdict.reason)
+      process.exit(4)
+    }
+    if (verdict.reason !== '') console.log('hitl-answer: 交付代答闸放行注记——' + verdict.reason)
+  }
 }
 console.log(`hitl-answer: 驱动计划——卡共 ${plan.questionCount ?? '?'} 题 · 形态 = ${plan.indefinite === true ? 'wait:-1 无限期（⚠ timed 放行与文本兜底均不可用，必须真浏览器答满）' : plan.indefinite === false ? 'timed/默认（600s 放行 + 保持可答）' : '未知（日志读不到 ask 参数）'}`)
 // 模式自报（2026-09-26 教训：`flag/has` 的 `--` 加了两遍 → `--dry-run` 判假，**"dry-run" 实际

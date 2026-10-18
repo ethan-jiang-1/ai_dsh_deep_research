@@ -21,7 +21,7 @@
 //   红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { answerBatchOf, customLandedInBatch, driveVerdict, hitlUiIdentityOf, hitlUiSessionOf, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict } from '../scripts/lib/ask-drive.mjs';
+import { deliveryAnswerGuard, isDeliveryReviewCard, answerBatchOf, customLandedInBatch, driveVerdict, hitlUiIdentityOf, hitlUiSessionOf, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict } from '../scripts/lib/ask-drive.mjs';
 
 test('parseAskArgs：三问卡带 wait:-1 → 3 题 + 无限期（BUG-005 第 5 例现场的盘侧形态）', () => {
   const args = JSON.stringify({
@@ -401,4 +401,25 @@ test('customLandedInBatch：空批 → false；custom 为空串 → false（缺�
 test('customLandedInBatch：多题批里任一带该文本即 true', () => {
   const batch = [{ id: 'q1', selected: ['定稿'] }, { id: 'q2', selected: [], custom: '具体指明项：§一 压短' }];
   assert.equal(customLandedInBatch({ batch, custom: '具体指明项：§一 压短' }), true);
+});
+
+// 负例留证 2026-10-18：代答在 review FAIL 态给交付卡投「定稿」→ 交付越过前置（端到端实测）。
+//   红配方：删掉 deliveryAnswerGuard 的 `if (pick !== 'recommended')` 与自拒分支 → 下方用例红。
+test('交付代答闸：默认档遇 readiness 非 PASS 的交付卡必须自拒；显式指定才放行（运行纪律）', () => {
+  const refuse = deliveryAnswerGuard({ isDeliveryCard: true, readiness: 'FAIL', pick: 'recommended' });
+  assert.equal(refuse.allow, false, '默认档不得把定稿投给未过审的报告');
+  assert.match(refuse.reason, /越过前置|PASS/, '要说明依据');
+  assert.match(refuse.reason, /--pick|人工/, '要给出路');
+  assert.equal(deliveryAnswerGuard({ isDeliveryCard: true, readiness: 'PASS' }).allow, true, 'PASS 态正常放行');
+  assert.equal(deliveryAnswerGuard({ isDeliveryCard: true, readiness: 'FAIL', pick: '2' }).allow, true, '操作者显式指定 = 有意为之');
+  assert.equal(deliveryAnswerGuard({ isDeliveryCard: true, readiness: null, pick: 'recommended' }).allow, false, '无判定行同样不放行');
+  assert.equal(deliveryAnswerGuard({ isDeliveryCard: false, readiness: 'FAIL' }).allow, true, '非交付卡不受此闸约束');
+});
+
+test('交付审阅卡识别：选项含定稿+补研究/修订族才认；HITL1 三问卡不认', () => {
+  const hitl2 = [{ header: '交付审阅', options: [{ label: '按现稿定稿 (Recommended)' }, { label: '补研究' }, { label: '修订表述' }] }];
+  const hitl1 = [{ header: '研究类型', options: [{ label: '探索性全景 (Recommended)' }, { label: '快速事实核查' }] }];
+  assert.equal(isDeliveryReviewCard(hitl2), true);
+  assert.equal(isDeliveryReviewCard(hitl1), false);
+  assert.equal(isDeliveryReviewCard([]), false);
 });

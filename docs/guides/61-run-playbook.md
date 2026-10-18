@@ -125,6 +125,7 @@ CLI/host 侧没有 answerer，也没有提交答案的 RPC）——所以代答�
 
 ```sh
 source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <横幅 token>   # 默认逐题选带(Recommended)的那一项
+> **交付代答闸**（2026-10-18）：交付审阅卡在场而 review readiness 非 PASS 时，`hitl-answer` 的**默认推荐档会自拒**（exit 4）——请人工裁决，或显式 `--pick <非定稿项>`/`--custom` 表明有意为之（依据 = notes/implemented/2026-10-18-hitl-proxy-delivery-guard.md）。
 ```
 
 它逐题打印选择结果；**必须**把这次代答如实记进 bundle 的 `question.md` §Decisions 与

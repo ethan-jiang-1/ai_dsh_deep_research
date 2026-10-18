@@ -323,3 +323,34 @@ export function customLandedInBatch(obs) {
   if (needle === '') return false
   return (Array.isArray(batch) ? batch : []).some((a) => typeof a?.custom === 'string' && a.custom.includes(needle))
 }
+
+/**
+ * 交付审阅卡识别（HITL2）：选项集含 定稿/补研究/修订表述 三族即认定（手册 HITL2 选项正本 =
+ * research-workspace/AGENTS.md §交互纪律——不抄死文案，按族匹配）。
+ * @param questions parseAskQuestions 的产物。
+ * @returns 是否交付审阅卡。
+ */
+export function isDeliveryReviewCard(questions) {
+  const labels = (Array.isArray(questions) ? questions : []).flatMap((q) => (Array.isArray(q?.options) ? q.options.map((o) => String(o?.label ?? o ?? '')) : []))
+  return labels.some((l) => /定稿/.test(l)) && labels.some((l) => /补研究|修订/.test(l))
+}
+
+/**
+ * 交付代答闸（2026-10-18 端到端实测的**运行纪律**）：交付审阅卡在场而 review readiness 非 PASS 时，
+ * **默认推荐档**会把「定稿」投给一份未过审的报告 = 交付越过前置（NODES 第 6 行「PASS = HITL2 前置」）。
+ * 故默认档自拒；操作者**显式**指定（--pick/--custom）视为有意为之，放行并留痕。
+ * @param obs isDeliveryCard（isDeliveryReviewCard）/ readiness（'PASS'|'FAIL'|null）/ pick（默认档名）。
+ * @returns {allow, reason}——allow=false 时 reason 给人话出路。
+ */
+export function deliveryAnswerGuard(obs) {
+  const { isDeliveryCard = false, readiness = null, pick = 'recommended' } = obs ?? {}
+  if (!isDeliveryCard) return { allow: true, reason: '' }
+  if (readiness === 'PASS') return { allow: true, reason: '' }
+  if (pick !== 'recommended') return { allow: true, reason: '操作者显式指定作答（非默认推荐档）——按显式意图执行并留痕' }
+  return {
+    allow: false,
+    reason: `交付审阅卡在场而 review readiness 非 PASS（${readiness ?? '无判定行'}）——默认推荐档会把「定稿」`
+      + '投给一份未过审的报告（交付越过前置，NODES 第 6 行）。出路：① 人工在 GUI 里裁决；'
+      + '② 显式 --pick <非定稿项序号>（如补研究）或 --custom "<意见>"；③ 先补审查轮使 readiness 判 PASS。',
+  }
+}
