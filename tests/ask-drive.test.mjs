@@ -21,6 +21,8 @@
 //   红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { closingProvenanceRow } from '../scripts/lib/hitl-provenance.mjs'
+import { isHitl2Row } from '../scripts/lib/node-gate-session-gates.mjs'
 import { deliveryAnswerGuard, isDeliveryReviewCard, answerBatchOf, customLandedInBatch, driveVerdict, hitlUiIdentityOf, hitlUiSessionOf, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict } from '../scripts/lib/ask-drive.mjs';
 
 test('parseAskArgs：三问卡带 wait:-1 → 3 题 + 无限期（BUG-005 第 5 例现场的盘侧形态）', () => {
@@ -422,4 +424,21 @@ test('交付审阅卡识别：选项含定稿+补研究/修订族才认；HITL1 
   assert.equal(isDeliveryReviewCard(hitl2), true);
   assert.equal(isDeliveryReviewCard(hitl1), false);
   assert.equal(isDeliveryReviewCard([]), false);
+});
+
+// 负例留证 2026-10-18：BUG-041（用 `run-kickoff --session` 发自由文本关闭挂起问询——仓里官方的恢复手段
+//   ——不落任何记账 → 交付段 §Decisions 无 HITL2 行，门②/门③ 如实判红，而复盘时看不出"谁在何时答的"）。
+//   红配方：删掉 closingProvenanceRow 的「交付审阅」/「代理模拟」措辞或去掉该函数调用 → 下方用例红。
+test('自由文本关闭挂起的记账行：含卡名 + 代理标记 + 文本摘录，且被门的 isHitl2Row 认作拍板行（同钉）', () => {
+  const row = closingProvenanceRow({ cardKey: 'anchor-2', text: '按现稿定稿，别再改了', date: '2026-10-18' });
+  assert.match(row, /交付审阅/, '要写明关的是哪张卡');
+  assert.match(row, /代理模拟|操作侧/, '要标明作答者非用户本人');
+  assert.match(row, /按现稿定稿/, '要留文本摘录（复盘依据）');
+  assert.equal(isHitl2Row(row), true, '门侧判据必须认这条行——否则记账白落（同钉）');
+});
+
+test('自由文本关闭挂起的记账行：HITL1 卡不得被门认成 HITL2 拍板行（不越权）', () => {
+  const row = closingProvenanceRow({ cardKey: 'anchor-1', text: '按计划开跑', date: '2026-10-18' });
+  assert.match(row, /计划确认|HITL1/);
+  assert.equal(isHitl2Row(row), false, 'HITL1 的记账不能顶替交付拍板行');
 });

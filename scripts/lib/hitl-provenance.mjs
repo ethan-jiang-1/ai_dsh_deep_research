@@ -87,3 +87,39 @@ export function attributionBundleOf(events) {
   const binding = sessionBindingOf(events);
   return binding.boundBy === 'write' ? binding.slug : null;
 }
+
+/**
+ * 自由文本关闭挂起的记账行（BUG-041，2026-10-18）：`run-kickoff --session <id> --prompt "<文本>"`
+ * 是仓里官方的恢复手段，但它不走结构化作答 → 此前**不落任何记账**，于是交付段 §Decisions 无 HITL2 行、
+ * 门②/门③ 如实判红，而复盘看不出"谁在何时答的、答了什么"。
+ * 措辞与门侧 `isHitl2Row` **同钉**：交付审阅卡的行必须写明「交付审阅」+「代理模拟」，否则记账白落。
+ * @param obs cardKey（'anchor-1'|'anchor-2'|其它）/ text（操作者发的自由文本）/ date。
+ * @returns §Decisions 行（字符串）。
+ */
+export function closingProvenanceRow({ cardKey = 'unknown', text = '', date = '' } = {}) {
+  const card = cardKey === 'anchor-2'
+    ? '交付审阅'
+    : cardKey === 'anchor-1' ? '计划确认（HITL1）' : `未知卡（${cardKey}）`
+  const excerpt = String(text).replace(/\s+/g, ' ').trim().slice(0, 60)
+  return `- ${date}｜**HITL 交互 = 操作侧代理模拟（run-kickoff 自由文本关闭挂起）**：${card} → 「${excerpt}」`
+    + '——作答者非用户本人，按代驱显式记账纪律落此行。'
+}
+
+/**
+ * 把一行 §Decisions 追加进目标 bundle（question.md 与 journal.md 双写——与 appendProvenance 同契约：
+ * bundle 路径缺席或契约件不全即 throw，拒绝静默）。
+ * @param obs bundle（bundle 目录路径）/ row（要追加的记账行）/ journalNote（journal 侧人话备注）。
+ */
+export function appendDecisionsRow({ bundle, row, journalNote = '' }) {
+  if (typeof bundle !== 'string' || bundle.length === 0) {
+    throw new Error('appendDecisionsRow: bundle 路径缺席——无 run bundle 可落账，拒绝静默')
+  }
+  const question = join(bundle, 'question.md')
+  const journal = join(bundle, 'journal.md')
+  for (const f of [question, journal]) {
+    if (!existsSync(f)) throw new Error(`appendDecisionsRow: ${f} 缺席——bundle 契约件不全，拒绝静默跳过`)
+  }
+  appendFileSync(question, `\n${row}\n`)
+  if (journalNote !== '') appendFileSync(journal, `\n- ${journalNote}\n`)
+  return { question, journal }
+}

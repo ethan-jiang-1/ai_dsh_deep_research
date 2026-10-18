@@ -125,8 +125,55 @@ if (typeof sessionId !== 'string') throw new Error(`无会话 id：${JSON.string
 console.log(sessionId);
 
 if (prompt) {
+  // 关闭挂起问询前的记账（BUG-041，2026-10-18）：**这条恢复路径此前不落任何记账**——用自由文本
+  // 关闭 HITL 卡之后，交付段 §Decisions 没有对应行，门②/门③ 如实判红而复盘看不出谁在何时答的。
+  // 故先取"这条会话是否有挂起 + 挂起是哪张卡"，发送成功后按代驱记账纪律补一行（bundle 归属由
+  // hitl-provenance 的既有谓词判定；归属不唯一就如实跳过并提示人工补记）。
+  const closing = await closingRowForPending()
   await rpc('session/prompt', {
     request: { requestId: randomUUID(), sessionId, mode: 'queue', content: [{ type: 'text', text: prompt }] },
   });
   console.error(`run-kickoff: prompt 已送入会话 ${sessionId.slice(0, 8)}…（cwd=${cwd}, preset=${preset}）`);
+  if (closing !== null) {
+    try {
+      const row = closingProvenanceRow({ cardKey: closing.cardKey, text: prompt, date: new Date().toISOString().slice(0, 10) })
+      appendDecisionsRow({ bundle: closing.bundleDir, row, journalNote: `**挂起问询由操作侧自由文本关闭（记账行已落 §Decisions）**：${closing.cardKey}` })
+      console.error(`run-kickoff: 关闭挂起的记账行已落 §Decisions（${closing.cardKey} → bundle ${closing.slug}）`)
+    } catch (error) {
+      console.error(`run-kickoff: ⚠ 记账行落地失败（${String(error).slice(0, 120)}）——请人工按 notes/implemented 的记账纪律补记`)
+    }
+  }
+}
+
+/**
+ * 取"本会话是否有挂起 + 是哪张卡 + 归属 bundle"（BUG-041 记账用；无挂起/归属不唯一 → null，静默返回，
+ * 由调用方决定是否提示）。判据源：会话日志事件（foldHitlPending）+ 末位 ask 的问题头（isDeliveryReviewCard）。
+ */
+async function closingRowForPending() {
+  try {
+    const { readSessionEvents, resolveSessionLog } = await import('../scripts/lib/session-log.mjs')
+    const { foldHitlPending } = await import('../packages/deep-research-pack/src/lib/hitl-fold.ts')
+    const { parseAskQuestions } = await import('../scripts/lib/ask-drive.mjs')
+    const { isDeliveryReviewCard } = await import('../scripts/lib/ask-drive.mjs')
+    const { attributionBundleOf } = await import('../scripts/lib/hitl-provenance.mjs')
+    const sessionsRoot = join(process.env.DSH_HOME ?? '', 'sessions')
+    const group = researchWorkspaceGroup(sessionsRoot)
+    if (group === undefined) return null
+    const logPath = resolveSessionLog(join(sessionsRoot, group, sessionId))
+    if (logPath === null) return null
+    const events = readSessionEvents(logPath)
+    if (foldHitlPending(events).pending !== true) return null
+    const lastAsk = [...events].reverse().find((e) => e?.type === 'tool/call' && e?.data?.name === 'ask_user_question')
+    const questions = parseAskQuestions(lastAsk?.data?.arguments)
+    const cardKey = isDeliveryReviewCard(questions) ? 'anchor-2' : 'anchor-1'
+    const slug = attributionBundleOf(events)
+    if (slug === null) return null
+    for (const base of ['research-workspace', join('research-workspace', 'archive'), join('research-workspace', '_abandoned')]) {
+      const dir = join(ROOT, base, `drt_${String(slug).replace(/^drt_/, '')}`)
+      if (existsSync(join(dir, 'question.md'))) return { cardKey, bundleDir: dir, slug: `drt_${String(slug).replace(/^drt_/, '')}` }
+    }
+    return null
+  } catch {
+    return null
+  }
 }

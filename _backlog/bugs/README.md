@@ -14,6 +14,7 @@
 |---|---|
 | [BUG-034](../_archived/fixed_bugs/BUG-034-client-load-smoke-selftest-capsule-intermittent.md) | client-load-smoke「自测例库」块偶发打不开配置胶囊（8 跑 2 红）——整组断言静默跳过；根因未定位 |
 | [BUG-035](../_archived/fixed_bugs/BUG-035-hitl-answer-sidebar-session-invisible.md) | hitl-answer 在 research-workspace 找不到挂起会话（自报 aging 判据被重启证伪）——代答链路断 |
+| [BUG-041](BUG-041-recovery-path-leaves-no-hitl-provenance.md) | 官方恢复路径（`run-kickoff --session` 自由文本关挂起）不落任何 HITL 记账 → 交付段记账链断、门②/门③ 如实判红 |
 
 | 卡 | 一句话 |
 |---|---|
