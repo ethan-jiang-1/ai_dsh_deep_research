@@ -155,7 +155,7 @@ if (prompt) {
  */
 async function closingRowForPending() {
   try {
-    const { readSessionEvents, resolveSessionLog } = await import('../scripts/lib/session-log.mjs')
+    const { readSessionEvents, resolveSessionLog, researchWorkspaceGroup } = await import('../scripts/lib/session-log.mjs')
     const { foldHitlPending } = await import('../packages/deep-research-pack/src/lib/hitl-fold.ts')
     const { parseAskQuestions } = await import('../scripts/lib/ask-drive.mjs')
     const { isDeliveryReviewCard } = await import('../scripts/lib/ask-drive.mjs')
