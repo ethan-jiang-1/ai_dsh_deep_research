@@ -17,7 +17,8 @@
 
 ## 索引
 
-（当前无活跃材料——三条已随消费者毕业迁入 [_archived/research/](../_archived/research/)：notes-stocktake 体检 + strategy-benchmark 两份。）
+（三条已随消费者毕业迁入 [_archived/research/](../_archived/research/)：notes-stocktake 体检 + strategy-benchmark 两份。）
 
 | 文件 | 服务 | 一句话 |
 |---|---|---|
+| [2026-10-18-method-config-ux-external.md](2026-10-18-method-config-ux-external.md) | [研究配置（方法库）UX 推敲](../issues/2026-10-18-research-method-config-ux.md) | 外部先例与验证边界：通用产品方法不可配（Microsoft 拒绝站点白名单）、垂直产品把配置做成"可复用作业"（Hebbia 项目指令 / AlphaSense Skill 五入口）、生效态必须显式（Claude 静默降级） |
