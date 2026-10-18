@@ -160,8 +160,11 @@ async function closingRowForPending() {
     const group = researchWorkspaceGroup(sessionsRoot)
     if (group === undefined) return null
     const logPath = resolveSessionLog(join(sessionsRoot, group, sessionId))
-    if (logPath === null) return null
-    const events = readSessionEvents(logPath)
+    if (logPath === null) { console.error('run-kickoff: 记账跳过——会话日志不在（' + sessionId.slice(0, 8) + '）'); return null }
+    // ⚠ readSessionEvents 返回 `{readable, events}` **不是数组**（2026-10-18 实测踩坑三次：喂对象会让
+    // fold 抛错，而此前被 catch 吞掉 → 静默不记账）。此处按契约取 .events，并把失败原因打出来（fail-loud）。
+    const read = readSessionEvents(logPath)
+    const events = Array.isArray(read) ? read : (read?.events ?? [])
     if (foldHitlPending(events).pending !== true) return null
     const lastAsk = [...events].reverse().find((e) => e?.type === 'tool/call' && e?.data?.name === 'ask_user_question')
     const questions = parseAskQuestions(lastAsk?.data?.arguments)
@@ -173,7 +176,8 @@ async function closingRowForPending() {
       if (existsSync(join(dir, 'question.md'))) return { cardKey, bundleDir: dir, slug: `drt_${String(slug).replace(/^drt_/, '')}` }
     }
     return null
-  } catch {
+  } catch (error) {
+    console.error('run-kickoff: ⚠ 记账判定异常（如实报告，不静默）——' + String(error).slice(0, 140))
     return null
   }
 }
