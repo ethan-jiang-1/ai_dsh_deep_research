@@ -12,6 +12,7 @@
 //   ③删空串守卫（`text === '' → null` 放行）→ 用例 7 红。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readinessOf } from '../scripts/lib/node-gate-contracts.mjs'
 import { terminalReadiness } from '../packages/deep-research-pack/src/lib/review-readiness.ts';
 
 test('终局判定：首行 frontmatter 形态（readiness: PASS）→ PASS', () => {
@@ -133,4 +134,28 @@ test('终局判定（窄放宽）：不夺权负例逐条钉住（真实语料 +
   assert.equal(terminalReadiness(['readiness: PASS', '', '## 附录 A：第 1 轮判级历史', '', '- **第 1 轮（首次审查）**：`readiness: FAIL` —— **CRITICAL 1**（…）'].join('\n')), 'PASS', '轮次血统引用不得夺权');
   // 空模板的装饰形态同样不算判定
   assert.equal(terminalReadiness('> **`readiness: PASS | FAIL`**\n'), null, '装饰后的空模板仍是空模板');
+});
+
+// 负例留证 2026-10-18：BUG-040（终局 readiness 两版实现漂移：pack 加了轮次仲裁、门的 readinessOf 未跟随，
+//   同一 bundle 一处判 PASS、一处判 FAIL）。红配方：把 readinessOf 改回自带的"最后一条胜"循环
+//   （或删掉它对 terminalVerdictLine 的委托）→ 下方 AB 两例红。
+test('跨实现一致（BUG-040）：门 readinessOf.pass 必须等于 pack 终局判定为 PASS', () => {
+  const cases = [
+    'readiness: PASS',
+    ['# 第 2 轮（复审）—— readiness: **PASS**', '', '---', '', '## 第 1 轮 readiness: FAIL', ''].join('\n'),
+    '## readiness: FAIL',
+    '## readiness: PASS（附条件：补两条来源后放行）',
+    ['- **第 1 轮**：`readiness: FAIL`（血统）', '', '## readiness: PASS', ''].join('\n'),
+    '没有任何判定行',
+  ];
+  for (const text of cases) {
+    assert.equal(readinessOf(text).pass, terminalReadiness(text) === 'PASS', `两版判据必须同判：${JSON.stringify(text.slice(0, 40))}`);
+  }
+});
+
+test('跨实现一致（BUG-040）：附条件 PASS 仍算 pass（门独有语义不得被委托丢掉）', () => {
+  const t = '## readiness: PASS（附条件：补两条来源后放行）';
+  assert.equal(readinessOf(t).pass, true);
+  assert.equal(readinessOf(t).conditional, true, '附条件标记必须保留');
+  assert.equal(readinessOf('## readiness: PASS').conditional, false);
 });

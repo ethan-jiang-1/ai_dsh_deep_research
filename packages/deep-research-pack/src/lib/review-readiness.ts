@@ -82,7 +82,7 @@ const EMPTY_TEMPLATE = /^readiness\s*[:：]\s*(?:\*\*|__|`{1,2})?\s*PASS\s*\|\s*
  * @param reviewText review.md 全文（null/undefined/空白 → null）
  * @returns `'PASS' | 'FAIL' | null`
  */
-export function terminalReadiness(reviewText: string | null | undefined): Readiness | null {
+export function terminalVerdictLine(reviewText: string | null | undefined): { value: Readiness; line: string } | null {
   if (typeof reviewText !== 'string' || reviewText.trim() === '') return null
   // 两条候选路径 + 一种仲裁（BUG-036，2026-10-18 实测）：
   //  · 规范路径 = 装饰剥离后行首即 `readiness:`（现状，含 `## readiness:` 等）；
@@ -117,13 +117,22 @@ export function terminalReadiness(reviewText: string | null | undefined): Readin
   }
   if (candidates.length === 0) return null
   const unlabeled = candidates.filter((c) => c.round === null)
-  if (unlabeled.length > 0) return unlabeled[unlabeled.length - 1]!.value
-  // 全带轮次：轮次最大者胜；同轮次取更靠后的一条（末位为准）。
-  let best = candidates[0]!
-  for (const candidate of candidates) {
-    const rank = candidate.round ?? 0
-    const bestRank = best.round ?? 0
-    if (rank > bestRank || (rank === bestRank && candidate.index > best.index)) best = candidate
-  }
-  return best.value
+  const winner = unlabeled.length > 0
+    ? unlabeled[unlabeled.length - 1]!
+    : (() => {
+        // 全带轮次：轮次最大者胜；同轮次取更靠后的一条（末位为准）。
+        let best = candidates[0]!
+        for (const candidate of candidates) {
+          const rank = candidate.round ?? 0
+          const bestRank = best.round ?? 0
+          if (rank > bestRank || (rank === bestRank && candidate.index > best.index)) best = candidate
+        }
+        return best
+      })()
+  return { value: winner.value, line: lines[winner.index] ?? '' }
+}
+
+/** 终局 readiness 值（`terminalVerdictLine` 的薄壳——**判据单一正本**，消费方别各写一份）。 */
+export function terminalReadiness(reviewText: string | null | undefined): Readiness | null {
+  return terminalVerdictLine(reviewText)?.value ?? null
 }

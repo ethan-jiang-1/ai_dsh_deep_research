@@ -44,3 +44,4 @@
 | [BUG-036](BUG-036-cockpit-brief-layer-pending-review-line-missing.md) | 摘要层缺行：终局判据加轮次路径+仲裁（附录旧轮不夺权）＋ UI 读 review 足额 limit；单测先红后绿 + 冒烟 ALL PASS | 2026-10-18 |
 | [BUG-038](BUG-038-node-gate-leads-grade-markdown-intolerance.md) | 门L 分级判据不容忍 `**A**` 加粗 → 17 条假红；改为剥强调后认「括号/逗号 + 独立 A–D」，真问题仍红 | 2026-10-18 |
 | [BUG-039](BUG-039-node-gate-proxy-answer-and-escalation-path.md) | 门③ 认代理代答 provenance 行（RED→PASS）；门A 机械认「未决项升级到用户裁决」路径（收窄：须两件同时在场）；同场那处门A 红经查是对的（运行纪律） | 2026-10-18 |
+| [BUG-040](BUG-040-terminal-readiness-two-copies-drift.md) | 终局 readiness 收归单一正本：pack 导出 `terminalVerdictLine`、门的 `readinessOf` 委托（只留附条件语义）、三份副本删除；跨实现一致契约测试先红后绿 | 2026-10-18 |

@@ -36,3 +36,16 @@
   夹具加在 `tests/fixtures/node-gate/bundles/`；**负例留证块**写明两条红配方（还原旧正则 / 删分支）。
   `pnpm test` **524/524** 绿；既有 4 条 A1 反证未改仍绿。
 - **L0**：`pnpm verify` 全绿。
+
+## 追加（BUG-040，同日）：终局 readiness 收归单一正本
+
+- **病**：`readinessOf`（门侧）与 `terminalReadiness`（pack/UI 侧）各持一份"最后一条胜"的循环。
+  BUG-036 把轮次仲裁只修在 pack 那份 → 同一 bundle「UI 判 PASS、门判 FAIL」（实测：
+  `drt_cambricon-commercial-sustainability` 与用户的在飞 run 都中）。
+- **治**：pack 导出 `terminalVerdictLine`（"哪一行是终局"的唯一正本，含轮次路径 + 仲裁），
+  `terminalReadiness` 变薄壳；门侧 `readinessOf` 委托它，**只保留门独有的附条件语义**；
+  门侧三份装饰副本删除。导入方向沿用既有先例（`scripts/lib/hitl-provenance.mjs` → pack TS lib）。
+- **钉**：`tests/review-readiness.test.mjs` 增"跨实现一致"两例（六种文本 + 附条件语义），
+  **先红后绿**；`pnpm test` 528/528、`pnpm verify` 全绿、三场真 bundle 同判。
+- **预期后果（写下来免得被当回归）**：readiness 由 FAIL 变 PASS 的旧 bundle 会**唤醒**此前 N/A 的门②/③。
+  cambricon 那场因此露出真实缺口（代答后未落 present 声明）——判据更真，不是新引入的红。

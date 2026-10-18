@@ -1,5 +1,6 @@
 // node-gate-contracts.mjs — cross-gate contract dates and report parsers (keyless pure logic).
 import { deliveryDate } from './schema-scan-core.mjs'
+import { terminalVerdictLine } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
 
 /** 门 L 契约日（2026-10-03 = RFC wave0-leads-polish 落地日；此前交付的 bundle 不追溯）。 */
 export const LEADS_CONTRACT_DATE = '2026-10-03'
@@ -33,59 +34,15 @@ const VERDICT_PREFIX_MAX_LABELS = 1
 const VERDICT_PREFIX_MAX_HEADING_CHUNKS = 1
 /** 剥去行首装饰，返回以 `readiness` 开头的剩余文本；未到判定词返回 null。
  *  装饰 = 块引用/空白 · 列表符 · 箭头 · 标题标记与短标题文字 · 加粗/反引号 · 短标签（≤10 字 + 冒号）。 */
-function stripVerdictDecor(line) {
-  let s = line
-  let labels = 0
-  let headingChunks = 0
-  let heading = false
-  for (let i = 0; i < 12; i++) {
-    if (/^readiness\b/i.test(s)) return s
-    const before = s
-    let m = /^[\s>→⇒]+/.exec(s)
-    if (m !== null) s = s.slice(m[0].length)
-    m = /^[-*+]\s+/.exec(s)
-    if (m !== null) s = s.slice(m[0].length)
-    if (/^readiness\b/i.test(s)) return s
-    m = /^#{1,6}\s*/.exec(s)
-    if (m !== null) { heading = true; s = s.slice(m[0].length) } else {
-      m = /^(?:\*\*|__|`{1,2})\s*/.exec(s)
-      if (m !== null) { s = s.slice(m[0].length); continue }
-    }
-    if (/^readiness\b/i.test(s)) return s
-    m = /^[^|\n：:]{1,10}[：:]\s*/.exec(s)
-    if (m !== null) {
-      if (labels >= VERDICT_PREFIX_MAX_LABELS) return null
-      labels += 1; s = s.slice(m[0].length); continue
-    }
-    if (heading) {
-      m = /^[^|\n：:]{1,9}\s+/.exec(s)
-      if (m !== null) {
-        if (headingChunks >= VERDICT_PREFIX_MAX_HEADING_CHUNKS) return null
-        headingChunks += 1; s = s.slice(m[0].length); continue
-      }
-    }
-    if (s === before) break
-  }
-  return /^readiness\b/i.test(s) ? s : null
-}
-const VERDICT_LINE = /^readiness\s*[:：]\s*(?:\*\*|__|`{1,2})?\s*(PASS|FAIL)\b/i
-const EMPTY_TEMPLATE = /^readiness\s*[:：]\s*(?:\*\*|__|`{1,2})?\s*PASS\s*\|\s*FAIL[\s`*_]*$/i
 
 /** readiness 终局判定：仅认行首 verdict row（装饰变体见 stripVerdictDecor），最后一条有效判定生效；
  * 正文历史引用不夺权。与 pack terminalReadiness 保持兼容（装饰容忍 = 2026-10-16 窄放宽 (A)，
  * 两侧同 diff 同步；keyless .mjs 不导入 TS 源）。条件 PASS 只对终局判定标注。 */
 export function readinessOf(reviewText) {
-  let terminal = null
-  for (const line of String(reviewText ?? '').split('\n')) {
-    const rest = stripVerdictDecor(line)
-    if (rest === null) continue
-    // 空模板 `readiness: PASS | FAIL` 是完整占位行；带额外说明的是判定，不是模板。
-    if (EMPTY_TEMPLATE.test(rest)) continue
-    const match = VERDICT_LINE.exec(rest)
-    if (match === null) continue
-    terminal = { verdict: match[1].toUpperCase(), line }
-  }
-  if (terminal?.verdict !== 'PASS') return { pass: false, conditional: false }
+  // 判据单一正本（BUG-040）：**哪一行是终局**由 pack 的 `terminalVerdictLine` 说了算
+  // （轮次仲裁修在它那里，见 BUG-036/notes 2026-10-18）；本函数只保留门独有的**附条件**语义。
+  const terminal = terminalVerdictLine(reviewText)
+  if (terminal === null || terminal.value !== 'PASS') return { pass: false, conditional: false }
   return { pass: true, conditional: /附条件|条件\s*[=＝：:]/.test(terminal.line) }
 }
 
