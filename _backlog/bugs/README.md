@@ -12,7 +12,6 @@
 
 | 卡 | 一句话 |
 |---|---|
-| [BUG-033](BUG-033-cockpit-brief-layer-intermittent-missing-delivered-lines.md) | 驾驶舱「业务摘要层」间歇缺"已交付态"三行（同读取里状态面已 ✅；~1/5 红）——机制待钉（时序窗口假设） |
 
 | 卡 | 一句话 |
 |---|---|

@@ -373,6 +373,24 @@ try {
           diskSide = diskSideNow()
         }
         // 渐进面硬断言（会话绑定 + 位置=状态两位置：证据计数/交付态/问题行与磁盘真值对账）
+        // 摘要块就绪谓词（BUG-033，2026-10-17）：芯片（✅ 已交付 / 证据计数）与业务摘要块**不在同一帧**可用——
+        // 摘要块滞后时落读会假红（合成水化延迟实测：读点命中 0/3、+1.5s 仍 0/3、+3.0s 才 3/3，而芯片
+        // UI-✅/UI-face.delivered 一开始就在场）。处置 = **等显式状态**：有界轮询到摘要块（🎯 行）在场再判，
+        // 并在块就绪后刷新**同一快照**（seg/uiFace）供后续断言使用。理由 = 浏览器渲染边界（scripts/AGENTS
+        // 的重试白名单）。⚠ 不是掩盖产品错态：产品侧数百 ms–数秒内自愈，等的是"自愈后的稳定态"；
+        // 若摘要块**始终**不渲染，本等待耗尽后断言照红（有界 20×1s）。
+        for (let i = 0; i < 20 && !seg.includes('🎯'); i++) {
+          await wait(1_000)
+          const t = await paneTextOf()
+          seg = t.slice(t.indexOf('研究状态'))
+          uiFace = parseUiFace(seg)
+        }
+        await wait(300) // 摘要块在场后再让一帧（避免读到"块在、行未满"的边界帧）
+        {
+          const t = await paneTextOf()
+          const settled = t.slice(t.indexOf('研究状态'))
+          if (settled.includes('🎯')) { seg = settled; uiFace = parseUiFace(seg) }
+        }
         const stepsOk = ['立项', '组队', '侦察', '挖掘', '综合', '审查', '交付'].every((x) => seg.includes(x))
         step(stepsOk, '步骤条真数据（流程轨道七步 = 定义流程——本会话绑定的 bundle）')
         // 步态语法回归（2026-09-28 trial 实测反馈：done 与 pending 都读成"没走过" + ▲ 粘连
