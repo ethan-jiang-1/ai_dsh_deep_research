@@ -41,3 +41,4 @@
 | [BUG-034](BUG-034-client-load-smoke-selftest-capsule-intermittent.md) | 自测例库块偶发打不开配置胶囊：改为按 id 显式打开（不再依赖"默认视图＝最新会话"）＋打不开如实报红；注入红证 + 绿跑，口径订正后 0/4 复现 | 2026-10-18 |
 | [BUG-035](BUG-035-hitl-answer-sidebar-session-invisible.md) | 侧栏懒渲染下"扫不到会话"被误判成实例老化：加搜索兜底 + 策略纯函数 + 负例留证；强制注入绿证通过 | 2026-10-18 |
 | [BUG-037](BUG-037-hitl-answer-aging-verdict-misleading.md) | 兜底已试搜索仍不命中 → 判据改 not-in-scope（处置改为核对标题/续跑，文案不再提重启）；keyless 反证 + 强制端到端反证 | 2026-10-18 |
+| [BUG-036](BUG-036-cockpit-brief-layer-pending-review-line-missing.md) | 摘要层缺行：终局判据加轮次路径+仲裁（附录旧轮不夺权）＋ UI 读 review 足额 limit；单测先红后绿 + 冒烟 ALL PASS | 2026-10-18 |

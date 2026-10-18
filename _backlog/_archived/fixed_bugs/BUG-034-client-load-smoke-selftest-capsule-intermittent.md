@@ -59,7 +59,7 @@ FAIL 自测例库：lib-selftest 新会话上「研究配置」胶囊不可见
   （列表投影／BUG-025 复现面／编辑预填／混居／空值分区全绿）；本卡症状**三跑零复现**。
   → 复现率口径 = **口径订正后 3 跑 0 红**；原"8 跑 2 红"含 1 条已剔除的错配因，真实率无从估计（样本太小）。
 - 同跑另有两处红，均**不同因**、已分流：① 摘要层缺「审查未决项已按上限升级」= 新立
-  [BUG-036](../../bugs/BUG-036-cockpit-brief-layer-pending-review-line-missing.md)（BUG-033 同族）；② 库条目详情负例断言
+  [BUG-036](BUG-036-cockpit-brief-layer-pending-review-line-missing.md)（BUG-033 同族）；② 库条目详情负例断言
   被新文案「基于此自定义」四字误伤 = 冒烟断言假红（已改按**角色**判按钮，见该 diff）。
 - **选定修法已实施（2026-10-18，同 diff）**：自测例库块改为 `openSessionById(page, probe2Id)` **按 id 显式打开**
   （直达 `data-row-key`，行不在 DOM 时走搜索兜底），不再依赖"重载后默认视图＝最新会话"；打不开时
@@ -86,4 +86,4 @@ FAIL 自测例库：lib-selftest 新会话上「研究配置」胶囊不可见
   按 id 直达行键（行不在 DOM 时走搜索兜底），打不开如实报红（不再静默跳过整块）；
 - **复现率（口径订正后）**：0/4 跑复现（原"8 跑 2 红"含 1 条已剔除的调用侧错配因）；**样本小，如实记账**；
 - **残留**：本块另有一条与本卡不同因的确定性红（摘要层缺行）→ 已另立
-  [BUG-036](../../bugs/BUG-036-cockpit-brief-layer-pending-review-line-missing.md)。
+  [BUG-036](BUG-036-cockpit-brief-layer-pending-review-line-missing.md)。
