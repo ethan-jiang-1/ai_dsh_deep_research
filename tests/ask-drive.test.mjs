@@ -352,6 +352,21 @@ test('sidebarMissVerdict：UI 零会话行 + 组已全展开 + 盘侧确有挂�
   assert.match(v.message, /重启通道/);
 });
 
+// 负例留证 2026-10-18：BUG-037（兜底已试搜索仍不命中 → 仍打"疑实例老化 → 重启"的误诊文案）。
+//   红配方：删掉 sidebarMissVerdict 里的 `if (triedSearch === true && searchHit !== true)` 分支
+//           → 下方 not-in-scope 用例红（落回 aging/absent），且"不含重启"断言也红。
+test('sidebarMissVerdict：兜底搜索已试且未命中 → not-in-scope，且不得再把"重启"当处置（BUG-037）', () => {
+  const v = sidebarMissVerdict({ renderedSessionRows: 0, collapsedGroups: 0, capHit: false, diskPending: true, triedSearch: true, searchHit: false });
+  assert.equal(v.kind, 'not-in-scope', JSON.stringify(v));
+  assert.doesNotMatch(v.message, /重启/, '搜索兜底都试过了，还把重启当处置 = 误诊');
+  assert.match(v.message, /标题/, '要给出可执行的对账动作');
+});
+
+test('sidebarMissVerdict：搜索命中则不走 miss 判据（该分支前提 = searchHit 非 true）', () => {
+  const v = sidebarMissVerdict({ renderedSessionRows: 0, collapsedGroups: 0, capHit: false, diskPending: true, triedSearch: true, searchHit: true });
+  assert.notEqual(v.kind, 'not-in-scope', JSON.stringify(v));
+});
+
 test('sidebarMissVerdict：仍有折叠组在 → absent（不能断言老化——先展开再说）', () => {
   const v = sidebarMissVerdict({ renderedSessionRows: 0, collapsedGroups: 2, capHit: false, diskPending: true });
   assert.equal(v.kind, 'absent', JSON.stringify(v));

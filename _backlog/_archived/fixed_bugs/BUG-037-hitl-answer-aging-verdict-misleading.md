@@ -1,12 +1,12 @@
 ---
-status: 排查中
+status: 已修
 severity: P2
 opened: 2026-10-18
 ---
 
 # BUG-037：hitl-answer 兜底触发后仍打「疑实例老化（处置 = 重启）」——误诊文案 + 已被证伪的处置
 
-> 状态：**排查中**（根因与修法已明，未实施）— 从 [BUG-035](../_archived/fixed_bugs/BUG-035-hitl-answer-sidebar-session-invisible.md)
+> 状态：**已修**（2026-10-18，判据与文案实施 + 强制端到端反证通过后归档）— 从 [BUG-035](BUG-035-hitl-answer-sidebar-session-invisible.md)
 > 闭环时的残留带出（归档卡冻结、不可执行，故另立）。
 
 ## 症状
@@ -37,3 +37,19 @@ opened: 2026-10-18
    `not-in-scope` 且**不含"重启"**；
 2. 正常路径（搜索命中）不得打任何 miss 判据（现行为已正确，加断言钉住）；
 3. `ask-drive` 的判据用例（keyless）随判据改名同步 —— 无回归。
+
+## 闭环（2026-10-18）
+
+- **修法（已实施）**：`scripts/lib/ask-drive.mjs` 的 `sidebarMissVerdict` 加**兜底尝试史**入参
+  （`triedSearch`/`searchHit`），并新增 `not-in-scope` 分支——两路扫描都没命中**且搜索兜底也已试过未命中**
+  时：判据不再叫"实例老化"，处置改为"核对 `--session` 子串与盘侧 `title`、必要时 run-kickoff 续跑"，
+  **`not-in-scope` 文案里不再出现"重启"**；`aging` 分支保留但把"重启"降为"不是第一处置（实测无效）"。
+  `dev/hitl-answer.mjs` 在兜底路径记录并传递 `triedSearch`/`searchHit`。
+- **修复判据①（keyless 反证 + 负例留证）**：新增两例（not-in-scope 且 `doesNotMatch /重启/`；searchHit=true
+  时不走该分支）。反证：删掉新分支 → 该例红（实做）→ 还原绿。`tests/ask-drive.test.mjs` 带
+  `guard-red-record` 要求的负例留证块。
+- **修复判据②（强制端到端反证，决定性）**：注入 `HITL_FORCE_MISS=1`（扫行/展开致盲 + 搜索故意搜不存在
+  的标题）→ 对一条真挂起会话，工具输出
+  `错因判据 = not-in-scope：… 处置 = 核对 --session 子串与盘侧 title …（本情形与通道实例无关）`，
+  **全文无"重启"作为处置**；注入随后还原（grep 计数 0）。
+- **残留**：无（`aging` 分支保留为"渲染未解析"的可能态，但不再把重启当第一处置）。

@@ -390,6 +390,8 @@ try {
     }
     return false
   }
+  let searchTried = false
+  let searchHit = false
   const revealTargetRow = async () => {
     for (let attempt = 0; attempt < 300; attempt++) {
       const row = await findTargetRow()
@@ -401,11 +403,13 @@ try {
     // 走搜索路径再扫一次；不再把"扫不到"判成"实例老化/需重启"（重启已被实测证伪）。
     const title = uiTargetTitle
     if (title !== null && title !== undefined && title !== '') {
+      searchTried = true
       if (await searchSessionByTitle(page, title)) {
         log(`hitl-answer: 侧栏扫行未命中 → 走搜索路径（"Search sessions" 输入「${String(title).slice(0, 40)}」）`)
         // 搜索结果**不带行键**（实测）→ 按文本点；是否真切到目标由 openSession 的 activated() 复核
         if (await clickSearchResultByTitle(page, title)) {
           log('hitl-answer: 已点搜索结果（结果行无行键，改为按文本点）——等主视图 session id 复核')
+          searchHit = true
           return 'search-clicked' // 哨兵：点击已发生，openSession 直接交给 activated() 复核
         }
       }
@@ -461,6 +465,8 @@ try {
       collapsedGroups: await collapsedGroupCount().catch(() => 0),
       capHit: capHits.size > 0,
       diskPending: diskPendingTarget,
+      triedSearch: searchTried,
+      searchHit,
     })
     console.error(`hitl-answer: 侧栏没有目标会话行（session id=${uiTargetSessionId}，--session=${SESSION ?? '（盘侧最新挂起）'}）`
       + `——错因判据 = ${verdict.kind}：${verdict.message}`)

@@ -275,20 +275,32 @@ export function driveVerdict(s) {
  * 而两条都不成立；实测恢复路径 = 重启通道 + 新会话）。
  * @param obs renderedSessionRows（UI 里 `session:` 行条数）/ collapsedGroups（仍折叠的
  *   workspace·overflow 组数——>0 说明还没展开完，不能断言老化）/ capHit（是否有行扫命中上限）/
- *   diskPending（盘侧是否确有该会话的挂起问询——去答的前提；facts: 盘侧为准）。
- * @returns {kind: 'cap'|'aging'|'absent', message}——kind 决定处置，message 人话依据。
+ *   diskPending（盘侧是否确有该会话的挂起问询——去答的前提；facts: 盘侧为准）/
+ *   triedSearch·searchHit（**兜底尝试史**：是否已走搜索、搜索是否命中——BUG-037 加）。
+ * @returns {kind: 'cap'|'aging'|'not-in-scope'|'absent', message}——kind 决定处置，message 人话依据。
  */
 export function sidebarMissVerdict(obs) {
-  const { renderedSessionRows, collapsedGroups, capHit, diskPending } = obs ?? {}
+  const { renderedSessionRows, collapsedGroups, capHit, diskPending, triedSearch, searchHit } = obs ?? {}
   if (capHit === true) {
     return { kind: 'cap', message: '行数超扫描上限——目标可能在**未扫描区间**（别按"已归档/被终局化"处置）' }
+  }
+  // 兜底已试过搜索仍没命中（BUG-037）：此时"零会话行"不是实例老化的证据——搜索是权威路径，
+  // 它也没命中就说明目标不在可达范围/标题不匹配。**重启实测无效**，不再作为处置。
+  if (triedSearch === true && searchHit !== true) {
+    return {
+      kind: 'not-in-scope',
+      message: '扫行与逐组展开都没命中，**搜索兜底也已试过且未命中**——目标可能不属于侧栏可见范围'
+        + '（例如 --cwd 形态的会话不进侧栏），或盘侧标题与 UI 显示的标题不一致。'
+        + '处置 = 核对 `--session` 子串与盘侧 `title` 是否一致；必要时用 run-kickoff 续跑该会话。'
+        + '（本情形与通道实例无关，别再按"实例故障"处理。）',
+    }
   }
   if ((renderedSessionRows ?? 0) === 0 && (collapsedGroups ?? 0) === 0 && diskPending === true) {
     return {
       kind: 'aging',
-      message: 'UI 侧栏**零会话行**且组已全展开，而盘侧确有该会话的挂起问询——**疑通道实例老化**'
-        + '（渲染/懒加载未解析）。处置 = 重启通道（`bash dev/boot-run.sh`）+ 用**新会话**接手续跑；'
-        + '不要在旧实例上反复重试或按"已归档"处理。',
+      message: 'UI 侧栏**零会话行**且组已全展开，而盘侧确有该会话的挂起问询——疑渲染/懒加载未解析。'
+        + '处置 = 先让工具走搜索兜底（本仓已内置）；仍不命中则按 `not-in-scope` 核对标题，'
+        + '**不要**以"重启通道"为第一处置（实测无效）。',
     }
   }
   return {

@@ -15,7 +15,6 @@
 | [BUG-034](../_archived/fixed_bugs/BUG-034-client-load-smoke-selftest-capsule-intermittent.md) | client-load-smoke「自测例库」块偶发打不开配置胶囊（8 跑 2 红）——整组断言静默跳过；根因未定位 |
 | [BUG-035](../_archived/fixed_bugs/BUG-035-hitl-answer-sidebar-session-invisible.md) | hitl-answer 在 research-workspace 找不到挂起会话（自报 aging 判据被重启证伪）——代答链路断 |
 | [BUG-036](BUG-036-cockpit-brief-layer-pending-review-line-missing.md) | 驾驶舱摘要层缺「审查未决项已按上限升级到本次审阅」一行（BUG-033 同族，自然复现 1 次；不重开旧卡） |
-| [BUG-037](BUG-037-hitl-answer-aging-verdict-misleading.md) | hitl-answer 兜底触发后仍打「疑实例老化（处置 = 重启）」——误诊文案 + 已被证伪的处置 |
 
 | 卡 | 一句话 |
 |---|---|
