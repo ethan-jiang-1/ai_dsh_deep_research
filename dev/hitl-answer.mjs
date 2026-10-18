@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url'
 import { once } from 'node:events'
 import { loadChromium, launchChromium } from '../scripts/lib/playwright.mjs'
 import { runStateOf, readSessionEvents, leadHitlCandidate } from '../scripts/lib/run-state.mjs'
+import { clickSearchResultByTitle, searchSessionByTitle } from '../scripts/lib/web-ui-nav.mjs'
 import {answerBatchOf, customLandedInBatch, driveVerdict, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict} from '../scripts/lib/ask-drive.mjs'
 import { appendProvenance, attributionBundleOf, batchToAnswered } from '../scripts/lib/hitl-provenance.mjs'
 import { localDateStr } from '../scripts/lib/local-date.mjs'
@@ -254,6 +255,7 @@ let pendingLogPath = null
 // 直接引用它会在失败路径抛 ReferenceError，即"该报的话报不出来反而崩"）。
 let diskPendingTarget = false
 let uiTargetSessionId = null
+let uiTargetTitle = null
 {
   const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'runtime', 'harness-home')
   const sessionsRoot = join(home, 'sessions')
@@ -282,7 +284,8 @@ let uiTargetSessionId = null
   diskPendingTarget = selected.candidate.pending === true
   pendingLogPath = selected.candidate.logPath
   uiTargetSessionId = selected.candidate.sessionId
-  console.log(`hitl-answer: 盘侧谓词——真挂起会话在场：${uiTargetSessionId}「${selected.candidate.title ?? '无标题'}」`)
+  uiTargetTitle = selected.candidate.title ?? null
+  console.log(`hitl-answer: 盘侧谓词——真挂起会话在场：${uiTargetSessionId}「${uiTargetTitle ?? '无标题'}」`)
 }
 // 驱动计划（点击前读盘侧形态，BUG-005）：卡共几题 + ask 形态。活等待（wait:-1）下
 // timed 600s 放行与文本消息兜底**都不可用**——脚本必须真浏览器答满，操作者必须知道这点。
@@ -391,7 +394,21 @@ try {
     for (let attempt = 0; attempt < 300; attempt++) {
       const row = await findTargetRow()
       if (row !== null && await row.isVisible().catch(() => false)) return row
-      if (!(await expandOneSidebarSection())) return null
+      if (!(await expandOneSidebarSection())) break
+    }
+    // 懒渲染兜底（BUG-035 正修，2026-10-18 实测）：侧栏列表可能**根本不含目标会话行**
+    // （分组行在场、会话行不在 DOM），而 `Search sessions` 能搜到同一条——扫行/展开够不着时
+    // 走搜索路径再扫一次；不再把"扫不到"判成"实例老化/需重启"（重启已被实测证伪）。
+    const title = uiTargetTitle
+    if (title !== null && title !== undefined && title !== '') {
+      if (await searchSessionByTitle(page, title)) {
+        log(`hitl-answer: 侧栏扫行未命中 → 走搜索路径（"Search sessions" 输入「${String(title).slice(0, 40)}」）`)
+        // 搜索结果**不带行键**（实测）→ 按文本点；是否真切到目标由 openSession 的 activated() 复核
+        if (await clickSearchResultByTitle(page, title)) {
+          log('hitl-answer: 已点搜索结果（结果行无行键，改为按文本点）——等主视图 session id 复核')
+          return 'search-clicked' // 哨兵：点击已发生，openSession 直接交给 activated() 复核
+        }
+      }
     }
     return null
   }
@@ -415,6 +432,7 @@ try {
     }
     const row = await revealTargetRow()
     if (row === null) return null
+    if (row === 'search-clicked') return 'search-clicked' // 点击已在兜底里完成，不重复点
     const text = ((await row.textContent()) ?? '').trim()
     const box = await row.boundingBox().catch(() => null)
     if (box === null || box.x >= 256) return null

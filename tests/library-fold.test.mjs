@@ -7,13 +7,16 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { foldLibrary, instructionOf, editInstruction, createInstruction } from '../packages/deep-research-pack/src/lib/library-fold.ts';
+import { foldLibrary, instructionOf, editInstruction, createInstruction, summaryOfEntry, SUMMARY_MAX_LENGTH, SECTION_LABELS, libraryReadStateOf } from '../packages/deep-research-pack/src/lib/library-fold.ts';
 import { SELFTEST_LIBRARY } from '../scripts/lib/selftest-library.mjs';
+import { locateSessionStrategy } from '../scripts/lib/web-ui-nav.mjs';
+import { METHOD_PRESETS_SKILL_PATH, methodPresetsFromSkillFile, patternMethodMappingFromSkill, baselineDisciplinesFromSkill } from '../scripts/lib/method-presets.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const METHOD_PRESETS_SKILL = join(ROOT, 'packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md');
+// 解析器 = scripts/lib/method-presets.mjs（与 client-load-smoke 共用的唯一解析入口；防第四份
+// 手写副本漂移——总卡发现 14）。本文件只负责"客户端常量 ↔ skill 表 ↔ 期望"三方对钉。
+const METHOD_PRESETS_SKILL = join(ROOT, METHOD_PRESETS_SKILL_PATH);
 const CLIENT_PREFERENCES_SOURCE = join(ROOT, 'packages/deep-research-pack/src/client/ResearchConfigTab.tsx');
-const METHOD_PRESET_HEADERS = ['方法', '给用户的一句话', '信息源策略', '检验策略', '综合与呈现', '明确不承诺'];
 
 // Expected projection is deliberately independent from the client constant and parsed from the canonical skill.
 const EXPECTED_BUILTIN_PREFERENCES = [
@@ -57,75 +60,43 @@ const EXPECTED_BUILTIN_PREFERENCES = [
       limit: '不替用户决定偏好；无场景不推唯一答案',
     },
   },
+  {
+    name: '时间线与信号',
+    summary: '按官方节点排时间线，用预列指标判断走到哪了',
+    sections: {
+      source: '官方变更点（release notes／changelog／公告／生效日）为骨，媒体报道为肉；每个节点必须落在官方出处上',
+      verify: '每节点带日期与出处；「现状」标注截至时刻；先列可观察指标与阈值，再下趋势判断；趋势与事实分句',
+      report: '首屏仍走既有骨架（六段或快速缩略）；正文按时间线组织（节点＋日期＋出处）→ 现状截点 → 指标读数表 → 趋势判断（显式标「判断」）→ 覆盖边界',
+      limit: '不做无时间窗的预测；不把趋势判断写成事实',
+    },
+  },
 ];
 
-function markdownTableCells(line) {
-  const cells = [];
-  let cell = '';
-  let codeTicks = 0;
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    if (char === '`') {
-      let count = 1;
-      while (line[i + count] === '`') count++;
-      codeTicks = codeTicks === 0 ? count : codeTicks === count ? 0 : codeTicks;
-      cell += '`'.repeat(count);
-      i += count - 1;
-    } else if (char === '\\' && line[i + 1] === '|') {
-      cell += '|';
-      i++;
-    } else if (char === '|' && codeTicks === 0) {
-      cells.push(cell.trim());
-      cell = '';
-    } else {
-      cell += char;
-    }
-  }
-  cells.push(cell.trim());
-  if (cells[0] === '') cells.shift();
-  if (cells.at(-1) === '') cells.pop();
-  return cells;
-}
+// canonical 解析 = scripts/lib/method-presets.mjs（表头/行列数/防空集 fail-loud；与
+// client-load-smoke 共用同一入口）——本文件不再自带第二份 Markdown 表解析器。
 
-// canonical：从 research-brief skill 的**方法预设表**解析（含第 2 列「给用户的一句话」——
-// 2026-10-16 起客户端卡面显示它，故三方对钉：客户端 ↔ skill 表 ↔ 本文件期望）。
-function builtinPreferencesFromSkill() {
-  const lines = readFileSync(METHOD_PRESETS_SKILL, 'utf8').split(/\r?\n/);
-  const headerIndex = lines.findIndex((line) => {
-    const cells = markdownTableCells(line);
-    return cells.length === METHOD_PRESET_HEADERS.length && cells.every((cell, i) => cell === METHOD_PRESET_HEADERS[i]);
-  });
-  assert.notEqual(headerIndex, -1, 'research-brief skill 方法预设表头缺席或发生变化');
-  const separator = markdownTableCells(lines[headerIndex + 1] ?? '');
-  assert.equal(separator.length, METHOD_PRESET_HEADERS.length, '方法预设表格分隔行列数变化');
-  assert.ok(separator.every((cell) => /^:?-{3,}:?$/.test(cell)), '方法预设表格分隔行格式变化');
-
-  const rows = [];
-  for (const line of lines.slice(headerIndex + 2)) {
-    if (line.trim() === '' || !line.includes('|')) break;
-    const cells = markdownTableCells(line);
-    assert.equal(cells.length, METHOD_PRESET_HEADERS.length, '方法预设表格行列数变化');
-    rows.push({
-      name: cells[0],
-      summary: cells[1], // 「给用户的一句话」：客户端卡面显示它（2026-10-16 拍板）→ 纳入 canonical 三方对钉
-      sections: { source: cells[2], verify: cells[3], report: cells[4], limit: cells[5] },
-    });
-  }
-  return rows;
-}
-
-function builtinPreferencesFromClient() {
+function clientSourceFile() {
   const source = readFileSync(CLIENT_PREFERENCES_SOURCE, 'utf8');
   const file = ts.createSourceFile(CLIENT_PREFERENCES_SOURCE, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
   assert.deepEqual(file.parseDiagnostics, [], 'ResearchConfigTab.tsx 无法由 TypeScript AST 解析');
+  return file;
+}
 
+/** 取客户端顶层字面量数组（可静态对账性 = 同钉前提；改成动态构造即红）。 */
+function clientArrayLiteral(file, name) {
   let initializer;
   const findDeclaration = (node) => {
-    if (ts.isVariableDeclaration(node) && node.name.getText(file) === 'BUILTIN_PREFERENCES') initializer = node.initializer;
+    if (ts.isVariableDeclaration(node) && node.name.getText(file) === name) initializer = node.initializer;
     ts.forEachChild(node, findDeclaration);
   };
   findDeclaration(file);
-  assert.ok(initializer !== undefined && ts.isArrayLiteralExpression(initializer), 'BUILTIN_PREFERENCES 必须保持为可静态对账的数组字面量');
+  assert.ok(initializer !== undefined && ts.isArrayLiteralExpression(initializer), `${name} 必须保持为可静态对账的数组字面量`);
+  return initializer;
+}
+
+function builtinPreferencesFromClient() {
+  const file = clientSourceFile();
+  const initializer = clientArrayLiteral(file, 'BUILTIN_PREFERENCES');
 
   const objectProperties = (expression, label) => {
     assert.ok(ts.isObjectLiteralExpression(expression), `${label} 必须保持为对象字面量`);
@@ -160,10 +131,145 @@ function builtinPreferencesFromClient() {
 }
 
 test('内置研究偏好与 research-brief 方法预设表逐字段一致', () => {
-  const canonical = builtinPreferencesFromSkill();
+  const canonical = methodPresetsFromSkillFile(METHOD_PRESETS_SKILL);
   assert.deepEqual(builtinPreferencesFromClient(), canonical, '客户端内置偏好必须逐字段投影 canonical skill 表');
   assert.deepEqual(canonical, EXPECTED_BUILTIN_PREFERENCES, 'canonical skill 方法预设表发生了需显式审视的内容变化');
 
+});
+
+// ── 显示名一致性（发现 13 修复，2026-10-18）：面板曾显示「找什么资料／明确不承诺」而指令载荷
+// 写「找来源／不承诺」——用户按 A 改、指令说 B。正本 = lib SECTION_LABELS（库格式与指令同源），
+// 客户端 SECTIONS 只是呈现副本；两处逐字逐序不一致即红（此前无人把守这一面）。
+function sectionsFromClient() {
+  const file = clientSourceFile();
+  const initializer = clientArrayLiteral(file, 'SECTIONS');
+  return initializer.elements.map((element, index) => {
+    const label = `SECTIONS[${index}]`;
+    assert.ok(ts.isObjectLiteralExpression(element), `${label} 必须保持为对象字面量`);
+    const fields = new Map();
+    for (const property of element.properties) {
+      assert.ok(ts.isPropertyAssignment(property) && (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)), `${label} 含无法静态对账的成员`);
+      fields.set(property.name.text, property.initializer);
+    }
+    assert.deepEqual([...fields.keys()].sort(), ['key', 'label'], `${label} 字段形状变化`);
+    assert.ok(ts.isStringLiteral(fields.get('key')), `${label}.key 必须是字符串字面量`);
+    assert.ok(ts.isStringLiteral(fields.get('label')), `${label}.label 必须是字符串字面量`);
+    return { key: fields.get('key').text, label: fields.get('label').text };
+  });
+}
+
+test('显示名一致性：客户端 SECTIONS 标签 ↔ lib SECTION_LABELS 逐字逐序一致', () => {
+  assert.deepEqual(sectionsFromClient(), SECTION_LABELS.map(({ key, label }) => ({ key, label })),
+    '面板显示标签必须与库格式/指令载荷同名（发现 13：曾漂移为「找什么资料／明确不承诺」）');
+});
+
+// ── 显式化面的同钉（2026-10-18）：推荐映射表、六条底线、两个定制入口的指令逐字——正本都在
+// research-brief skill（模型面）；面板是投影。此前这三面**无人把守**（发现 13 同族：显示面与
+// 正本漂移没人管）。
+function clientStringArray(file, name) {
+  return clientArrayLiteral(file, name).elements.map((element, index) => {
+    assert.ok(ts.isStringLiteral(element), `${name}[${index}] 必须是字符串字面量`);
+    return element.text;
+  });
+}
+
+function clientStringLiteral(file, name) {
+  let initializer;
+  const findDeclaration = (node) => {
+    if (ts.isVariableDeclaration(node) && node.name.getText(file) === name) initializer = node.initializer;
+    ts.forEachChild(node, findDeclaration);
+  };
+  findDeclaration(file);
+  assert.ok(initializer !== undefined && ts.isStringLiteral(initializer), `${name} 必须保持为字符串字面量`);
+  return initializer.text;
+}
+
+function patternRulesFromClient() {
+  const file = clientSourceFile();
+  return clientArrayLiteral(file, 'PATTERN_METHOD_RULES').elements.map((element, index) => {
+    const label = `PATTERN_METHOD_RULES[${index}]`;
+    assert.ok(ts.isObjectLiteralExpression(element), `${label} 必须保持为对象字面量`);
+    const fields = new Map();
+    for (const property of element.properties) {
+      assert.ok(ts.isPropertyAssignment(property) && (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)), `${label} 含无法静态对账的成员`);
+      fields.set(property.name.text, property.initializer);
+    }
+    assert.deepEqual([...fields.keys()].sort(), ['method', 'patterns'], `${label} 字段形状变化`);
+    return { patterns: fields.get('patterns').text, method: fields.get('method').text };
+  });
+}
+
+test('推荐映射 / 六条底线 / 两个入口指令逐字 = skill 投影（同钉）', () => {
+  const skillText = readFileSync(METHOD_PRESETS_SKILL, 'utf8');
+  const file = clientSourceFile();
+  assert.deepEqual(patternRulesFromClient(), patternMethodMappingFromSkill(skillText),
+    '面板「什么时候用它」与推荐规则说明位的取值必须逐字投影 skill 的判型→打法映射表');
+  assert.deepEqual(clientStringArray(file, 'BASELINE_DISCIPLINES'), baselineDisciplinesFromSkill(skillText),
+    '面板「任何打法都改不掉」一行必须逐字投影 skill 的共同底线句（防第二份手抄清单）');
+  for (const name of ['DRAFT_INSTRUCTION', 'DISTILL_INSTRUCTION']) {
+    assert.ok(skillText.includes(clientStringLiteral(file, name)),
+      `${name} 必须逐字出现在 research-brief skill 的管理动词节（会进模型面——面板与 Lead 行为不许两套话）`);
+  }
+});
+
+// 领域示范（子卡② ②-5）：厚条目 = 只读示范，不进「内置打法」清单（判型映射表里没有它）——
+// 它的四字段逐字同钉 skill 的「领域示范」节（面板是投影）。
+function demoEntryFromClient() {
+  const file = clientSourceFile();
+  let initializer;
+  const findDeclaration = (node) => {
+    if (ts.isVariableDeclaration(node) && node.name.getText(file) === 'DEMO_ENTRY') initializer = node.initializer;
+    ts.forEachChild(node, findDeclaration);
+  };
+  findDeclaration(file);
+  assert.ok(initializer !== undefined && ts.isObjectLiteralExpression(initializer), 'DEMO_ENTRY 必须保持为可静态对账的对象字面量');
+  const fields = new Map();
+  for (const property of initializer.properties) {
+    assert.ok(ts.isPropertyAssignment(property) && ts.isIdentifier(property.name), 'DEMO_ENTRY 含无法静态对账的成员');
+    fields.set(property.name.text, property.initializer);
+  }
+  assert.deepEqual([...fields.keys()].sort(), ['name', 'sections'], 'DEMO_ENTRY 字段形状变化');
+  assert.ok(ts.isStringLiteral(fields.get('name')), 'DEMO_ENTRY.name 必须是字符串字面量');
+  const sections = new Map();
+  assert.ok(ts.isObjectLiteralExpression(fields.get('sections')), 'DEMO_ENTRY.sections 必须保持为对象字面量');
+  for (const property of fields.get('sections').properties) {
+    assert.ok(ts.isPropertyAssignment(property) && ts.isIdentifier(property.name), 'DEMO_ENTRY.sections 含无法静态对账的成员');
+    assert.ok(ts.isStringLiteral(property.initializer), `DEMO_ENTRY.sections.${property.name.text} 必须是字符串字面量`);
+    sections.set(property.name.text, property.initializer.text);
+  }
+  return { name: fields.get('name').text, sections };
+}
+
+test('领域示范：四字段逐字 = skill「领域示范」节（厚条目体例投影）', () => {
+  const skillText = readFileSync(METHOD_PRESETS_SKILL, 'utf8');
+  const demo = demoEntryFromClient();
+  assert.ok(skillText.includes(`## ${demo.name}（`), `skill 里必须有「## ${demo.name}（…）」条目`);
+  for (const key of ['source', 'verify', 'report', 'limit']) {
+    assert.ok(skillText.includes(demo.sections.get(key)), `领域示范的 ${key} 必须逐字出现在 skill 的领域示范节`);
+  }
+  assert.ok(demo.sections.get('limit').includes('不构成投资建议'), '不承诺字段必须写明不构成投资建议（核实结论要求）');
+});
+
+test('libraryReadStateOf：「无结果」与「失败」分家（文件不在 / 在而读不回 / 目录不可达 / 正常）', () => {
+  const F = [{ type: 'file', name: 'method-library.md' }];
+  assert.equal(libraryReadStateOf('# 库\n', F, 'method-library.md'), 'ok');
+  assert.equal(libraryReadStateOf('', [], 'method-library.md'), 'absent', '文件不在 = 新工作区的正常空态（不是失败）');
+  assert.equal(libraryReadStateOf(null, F, 'method-library.md'), 'unreadable', '在而读不回 = 如实报读不到，不冒充"正在读取"');
+  assert.equal(libraryReadStateOf(null, null, 'method-library.md'), 'unreadable', '目录面不可达 = unreadable');
+  assert.equal(libraryReadStateOf('# 库\n', [{ type: 'dir', name: 'method-library.md' }], 'method-library.md'), 'absent', '同名目录不算文件');
+});
+
+test('summaryOfEntry：剥 markdown 源标记 + 截断（发现 11：** 字面星号与长条目不截断）', () => {
+  const [bold] = foldLibrary('## 加粗条目（2026-10-18）\n- 找来源: 只钻一遍**官方**来源，`retrieved_at` 必填\n');
+  assert.equal(summaryOfEntry(bold), '只钻一遍官方来源，retrieved_at 必填');
+  const long = foldLibrary(`## 长条目（2026-10-18）\n- 找来源: ${'甲'.repeat(100)}\n`);
+  const summary = summaryOfEntry(long[0]);
+  assert.equal(summary.length, SUMMARY_MAX_LENGTH + 1, '超长摘要必须截断到 SUMMARY_MAX_LENGTH + 省略号');
+  assert.ok(summary.endsWith('…'), '截断必须补省略号（不在字中间装作完整句）');
+  // 边界注记：只剥 `**` 与反引号（源文件标记），不解析其他 markdown——卡片是纯文本节点。
+  const [onlyBold] = foldLibrary('## 只剩标记（2026-10-18）\n- 找来源: **\n');
+  assert.equal(summaryOfEntry(onlyBold), null, '剥完为空 → null（不编造空串）');
+  assert.equal(summaryOfEntry(foldLibrary('## 空条目（2026-10-18）\n')[0]), null);
 });
 
 const v2 = [
@@ -329,4 +435,40 @@ test('电池·指令族与容错：部分字段 createInstruction 只载非 null
     assert.deepEqual(foldLibrary(weird), [], `容错输入不编造条目：${JSON.stringify(weird)}`);
   }
   assert.equal(battery().length, 12);
+});
+
+// ── 文案关键句的静态钉（2026-10-18 零上下文探针后加）─────────────────────────────
+// 为什么住这里而不是冒烟：探针点出的三处高风险错读（"保存"像是已生效、"来源链"与"找来源"混同、
+// 改动是否影响在跑的这场）都是**静态 JSX 文案**；而冒烟的真浏览器断言本轮受侧栏会话行不渲染
+// 影响（见 BUG-035）会整块静默跳过——静态钉保证这几句无论环境如何都在。
+// 边界：它证"文案在场且没被删"，不证"渲染出来长什么样"（渲染面归 client-load-smoke）。
+const COPY_PINS = [
+  '一条「研究偏好」＝一条打法', // 术语一句话表（打法/偏好/条目 收敛）
+  '都是给 Lead 发一条指令', // 指令 vs 回执 的机制一句
+  '改动影响的是', // 影响范围：之后的研究 vs 正在跑的这场
+  '交给 Lead 新建', // 「保存」类按钮必须写明是发给 Lead（最危险一条）
+  '面板不直接改文件', // 与上句配对，禁止读成"已保存"
+  '「基于此自定义」新建的副本同样受这六条约束', // 自定义不能突破底线
+  '「来源链」管的是', // 来源链 ≠ 找来源
+  'readiness = critic 在 review.md 给的终局判定', // 唯一英文词有解释
+];
+
+test('面板关键文案静态钉：术语表/影响范围/底线区别/按钮语义在场（探针三处高风险错读）', () => {
+  const source = readFileSync(CLIENT_PREFERENCES_SOURCE, 'utf8');
+  const missing = COPY_PINS.filter((pin) => !source.includes(pin));
+  assert.deepEqual(missing, [], `以下关键文案不在场（删改即红——它们是零上下文探针点出的防错读句）：${missing.join('、')}`);
+});
+
+// 负例留证 2026-10-18：BUG-035（侧栏懒渲染下"扫不到会话"被误判成实例老化/需重启）。
+//   红配方一：把 locateSessionStrategy 的 `if (!triedSearch && …) return 'search'` 改成
+//             `if (false) return 'search'`（即"扫不到就放弃"）→ 本文件该例如实报红（已实测）。
+//   红配方二（端到端）：删掉 dev/hitl-answer.mjs 里 revealTargetRow 末尾的 searchSessionByTitle
+//             兜底 → 对一条不在侧栏列表的挂起会话，工具复现"侧栏没有目标会话行"。
+test('侧栏定位策略：扫不到且手上有标题 → 必须走搜索（BUG-035 的 keyless 钉）', () => {
+  assert.equal(locateSessionStrategy({ foundByScan: true }), 'accept');
+  assert.equal(locateSessionStrategy({ foundByExpand: true }), 'accept');
+  assert.equal(locateSessionStrategy({ title: '某会话' }), 'search', '扫行/展开都没命中 → 走搜索，不许直接判"不存在"');
+  assert.equal(locateSessionStrategy({ title: '某会话', triedSearch: true }), 'give-up', '搜索也试过才可放弃');
+  assert.equal(locateSessionStrategy({}), 'give-up', '无标题可搜 → 如实放弃');
+  assert.equal(locateSessionStrategy({ title: '   ' }), 'give-up', '空标题不算可搜');
 });

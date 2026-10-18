@@ -21,4 +21,5 @@
 
 | 文件 | 服务 | 一句话 |
 |---|---|---|
-| [2026-10-18-method-config-ux-external.md](2026-10-18-method-config-ux-external.md) | [研究配置（方法库）UX 推敲](../issues/2026-10-18-research-method-config-ux.md) | 外部先例与验证边界：通用产品方法不可配（Microsoft 拒绝站点白名单）、垂直产品把配置做成"可复用作业"（Hebbia 项目指令 / AlphaSense Skill 五入口）、生效态必须显式（Claude 静默降级） |
+| [2026-10-18-method-config-ux-external.md](2026-10-18-method-config-ux-external.md) | [研究配置（方法库）UX 推敲](../_archived/settled_issues/2026-10-18-research-method-config-ux.md) | 外部先例与验证边界：通用产品方法不可配（Microsoft 拒绝站点白名单）、垂直产品把配置做成"可复用作业"（Hebbia 项目指令 / AlphaSense Skill 五入口）、生效态必须显式（Claude 静默降级） |
+| [2026-10-18-method-config-ux-ab.md](2026-10-18-method-config-ux-ab.md) | [打法清单与判型映射](../_archived/settled_issues/2026-10-18-research-method-preset-mapping.md) | 真模型 A/B：同题两打法（唯一自变量 = 方法行）——U4 成立（时间线骨架 vs 三张地图，方法确实改行为，并实证 run 级覆写）；U3 未跑（如实记账） |

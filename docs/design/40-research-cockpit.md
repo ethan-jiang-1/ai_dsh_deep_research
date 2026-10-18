@@ -32,7 +32,7 @@
 | 活标题 | 同上（`ResearchStatusTitle`） | 挂起时页签名变「研究状态 · ⏳ 等你拍板」 |
 | 流失败恢复指引 | [stream-failure.ts](../../packages/deep-research-pack/src/lib/stream-failure.ts) + ResearchStatusTab.tsx | 末位回合死于上游流失败（MALFORMED_RESPONSE 族）且无新回合接手 → 人话横幅「等一两分钟发『继续』」；折算纯函数，BUG-023 修复① |
 | 品牌（虎鲸 Orca） | [BrandMark.tsx](../../packages/deep-research-pack/src/client/BrandMark.tsx) | 宿主 `sidebar.brand.mark` + `sidebar.brand.name` 两槽的 single occupant（替换内置鱼形 logo 与本地构建标签）——用户定调 2026-10-13 |
-| 研究配置页签 | [ResearchConfigTab.tsx](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) + [library-fold.ts](../../packages/deep-research-pack/src/lib/library-fold.ts) | 右栏页签（D25 期 1 管理中继面）：内置偏好（只读）+ 我的偏好库投影（`method-library.md`）+ 管理指令生成经 `session/prompt` 交 Lead（steer→queue 降级）——**面板不直写文件** |
+| 研究配置页签 | [ResearchConfigTab.tsx](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) + [library-fold.ts](../../packages/deep-research-pack/src/lib/library-fold.ts) + [method-of-question.ts](../../packages/deep-research-pack/src/lib/method-of-question.ts) + [receipt-fold.ts](../../packages/deep-research-pack/src/lib/receipt-fold.ts) + [text-fold.ts](../../packages/deep-research-pack/src/lib/text-fold.ts) | 右栏页签（D25 期 1 管理中继面 ＋ 2026-10-18 显式化期）：四区 = ① 本次研究（本次采用＋来源＋换一条，读 question.md 方法节五态）② 内置打法（只读卡：一句话 ＋ 什么时候用它 ＋ 标本位）③ 我的偏好库（`method-library.md` 投影）④ 底线条（六条共同底线 ＋ 两个定制入口）＋ 就地回执三态（已发送／Lead 已回话／已落盘对账）；管理指令经 `session/prompt` 交 Lead（steer→queue 降级）——**面板不直写文件**；显示面与 skill 四处同钉（内置表／推荐映射／共同底线／两入口逐字，tests/library-fold 把守） |
 | 研究语义工具卡 | [ResearchToolCard.tsx](../../packages/deep-research-pack/src/client/ResearchToolCard.tsx) + [tool-card.ts](../../packages/deep-research-pack/src/lib/tool-card.ts) | 对话流卡片：`spawn_teammate` → 组队卡、`web_search` → 检索卡（2 张） |
 | 挂起显性化 | [index.ts](../../packages/deep-research-pack/src/client/index.ts)（`revealStatusTab`） | pending false→true 迁移时 `openTab` 右栏自动展开；页签 dock 折叠态保持挂载（观察者常在） |
 | keyed 常量 | [keys.ts](../../packages/deep-research-pack/src/client/keys.ts) | 字面量唯一正本（`client-keys` 门禁对账——拼错不报错、永不渲染） |
@@ -49,7 +49,7 @@
 | ⑥ 决策诚实线 | 指路 question.md §Decisions |
 | ⑦ 队员动态折叠区 | [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)：agentTeam 投影取 roster → 多路 follow 队员会话 → 检索/抓取/出错动作行，每人一节默认折叠 + 计数徽标 |
 
-折算层九件（`src/lib/`，全部纯函数、fail-soft 永不 throw；journal-wire 为五个入参折算件共享的 wire 解析核）：
+折算层十二件（`src/lib/`，全部纯函数、fail-soft 永不 throw；journal-wire 为五个入参折算件共享的 wire 解析核）：
 
 | 折算 | 输入 → 输出 | 要点 |
 |---|---|---|
@@ -62,6 +62,9 @@
 | [member-activity](../../packages/deep-research-pack/src/lib/member-activity.ts) | 队员 journal 事件 → 检索/抓取/出错动作行 + 全量计数 | 粒度定夺 = [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)（2026-10-10 用户三问：文件读写不入流）；失败行剥 "Error: " 工程前缀；行截尾窗与 activity-fold 同款 |
 | [brief-fold](../../packages/deep-research-pack/src/lib/brief-fold.ts) | 既有事实源投影 → 业务摘要五问 | 输入面**不含**证据计数与工具调用数（计数在类型层面进不了完成态文案，keyless 禁词单测钉）；九态优先级 = 挂起 > 立项预检窗 > 未绑定 > 审查 FAIL > 已交付 > 推进中；派生不出的状态显式缺省，不虚构 |
 | [review-readiness](../../packages/deep-research-pack/src/lib/review-readiness.ts) | review.md 全文 → 终局 readiness 三态 | 只认**行首**判定行、取最后一条：文末附录保留的轮次血统（如首轮 `readiness: FAIL`）是行内引用，不得夺权；空模板 `PASS \| FAIL`、无判定行或输入畸形 → `null`（不猜）。驾驶舱、仪表盘与 client-load-smoke 直接消费；node-gate 在纯 `.mjs` 边界镜像同一规则并由 `gateBundle` 回归覆盖 |
+| [text-fold](../../packages/deep-research-pack/src/lib/text-fold.ts) | markdown 行内文本 → 可进纯文本节点的文本 | 剥 `**` 与反引号 ＋ 压空白 ＋ 截断补省略号；状态页签与配置页签曾各写一遍同款逻辑（发现 11：`**` 字面星号上卡面、长摘要拉爆列表）——本件是唯一正本 |
+| [method-of-question](../../packages/deep-research-pack/src/lib/method-of-question.ts) | question.md 文本 ＋ bundle 在场性 → 「本次研究」区五态 | 无 run／文件缺／未记录／无法判定／已记录；**判不了就说判不了**——绝不回落成默认打法名（旧 run 未记录 = 合法形态，不回填）；读方法节须显式足额 limit（模板第 32–40 行卡默认 40 行，BUG-026 同族） |
+| [receipt-fold](../../packages/deep-research-pack/src/lib/receipt-fold.ts) | 发送结果 ＋ 回话信号 ＋ 库前后快照 → 回执三态与 diff | 已发送（prompt ok）／Lead 已回话（发送**之后**的 assistant 事件）／已落盘（回读对账出 diff：`把「找来源」从 A 改成 B`）；对账读不出变化就退到已回话，不冒充落地（发现 4） |
 
 ## 3. 数据通道与接线
 

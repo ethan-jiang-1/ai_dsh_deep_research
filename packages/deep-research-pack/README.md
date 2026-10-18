@@ -79,8 +79,8 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 ## 研究怎么跑
 
 1. **HITL1 立项（两段卡）**：对 Lead 说出研究问题 → 第一段三问（研究类型/深度篇幅/时间口径
-   与语言）+ 按需采集业务决策简报 → 点选即定稿；Lead 按判型推荐**研究方法**（内置四预设：
-   事实核查/领域地图/主张核查/方案比较——回答"怎样调查、核验、综合"，与类型/深度互不替代），
+   与语言）+ 按需采集业务决策简报 → 点选即定稿；Lead 按判型推荐**研究方法**（内置预设：
+   事实核查/领域地图/主张核查/方案比较/时间线与信号——回答"怎样调查、核验、综合"，与类型/深度互不替代），
    落稿 question.md 的「研究方法（本次实际采用）」节；Lead 落稿 question.md + topics.md 后发
    第二段**计划确认卡**（quick_factual 豁免；含方法行，quick_factual 的方法自动采用并落格）——
    按计划开跑(Recommended)/ 修订计划（意见附加，含用自然语言调整方法）/ 放弃，
@@ -96,8 +96,11 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 4. **观察面**：DSH Web GUI 右栏「研究状态」页签看实时动态（流程轨道 = ◆立项确认 + 立项→
    组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付，↻ rerun 回路自交付审阅可见，人性化活动流，
    HITL 挂起横幅点名锚点与参与方式，活标题「研究状态 · ⏳ 等你拍板」，交付节点显示 `final/` 中的最高有效版本号（vN）；仅 v2+ 文件是证据扩张版本记录。）；
-   右栏「研究配置」页签（D25 管理中继面）看内置偏好与我的偏好库，操作按钮生成管理指令交
-   当前会话 Lead 执行（面板不直写文件）；
+   右栏「研究配置」页签（D25 管理中继面）四区——**本次研究**（这次用的是哪条打法 ＋ 一键换，读
+   question.md 研究方法节）／**内置打法**（一句话 ＋ 什么时候用它 ＋ 标本位）／**我的偏好库**／
+   **底线条**（六条共同底线 ＋ 两个定制入口：让 Lead 帮我起草、从本次 run 沉淀）；操作按钮生成
+   管理指令交当前会话 Lead 执行，并就地回执三态（已发送／Lead 已回话／已落盘对账——回读库文件
+   对出改了哪一句）；**面板不直写文件**；
 5. **审计**（本仓开发面）：`node scripts/run-gates/evidence-audit.mjs <bundle>` 对会话日志机械对账——
    URL 是否真被抓取过、摘录是否可回溯、final 溯源链是否完整 → `audit.md`。
 
@@ -137,7 +140,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 
 ## 已知限制与延后工作
 
-- **研究方法配置首版边界**：方法 = 调查路径指导，不新增强制预算/来源数硬门，readiness 不自动验证方法承诺之外的新合同；用户方法库 `method-library.md` 是**工作区本地用户数据**（Lead 显式维护），无版本史、无跨设备同步、无共享；高承诺学术模式（系统综述类）不在预设；Settings 管理页不做（需显式重议 D7/D18 架构边界，见 [_backlog 长期管理卡](../../_backlog/_archived/settled_issues/2026-10-12-research-method-profile-management.md)）；
+- **研究方法配置首版边界**：方法 = 调查路径指导，不新增强制预算/来源数硬门，readiness 不自动验证方法承诺之外的新合同；用户方法库 `method-library.md` 是**工作区本地用户数据**（同工作区的会话都看得到，换工作区不带；Lead 显式维护，无版本史、无跨设备同步）；高承诺学术模式（系统综述类）不在预设；Settings 管理页不做（需显式重议 D7/D18 架构边界，见 [_backlog 长期管理卡](../../_backlog/_archived/settled_issues/2026-10-12-research-method-profile-management.md)）；方法库的增长纪律（命中计数／休眠）与库规模能力（分组／搜索／导入导出／跨工作区）、交付工件的表格档、领域包升格为字段——四项延后，重议条件登记在 [_backlog/triggers.md](../../_backlog/triggers.md)；
 
 - **会话必须建在**研究工作区里**才能看到渐进面**：页签读的是会话工作区根（`workspaceFiles`），
   run bundle 在工作区内才可见——故需先把研究工作区注册进 DSH（`workspace/create`），再用

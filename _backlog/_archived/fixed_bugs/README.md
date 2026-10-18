@@ -38,3 +38,5 @@
 | [BUG-033](BUG-033-cockpit-brief-layer-intermittent-missing-delivered-lines.md) | 驾驶舱「业务摘要层」间歇缺"已交付态"三行——机制 = 读点部分水化（芯片先到、摘要块后到）；修法 = 断言侧有界等摘要块就绪 + 刷新同一快照（合成注入 12s 延迟下红→绿） | 2026-10-17 |
 | [BUG-031](BUG-031-hitl-answer-sidebar-session-rows-unrendered.md) | hitl-answer 在长跑通道实例上侧栏零 session 行（组能展开但行不渲染）——`sidebarMissVerdict` 错因判据（aging/absent/cap）+ 接线红注入（顺带修掉失败路径 ReferenceError） | 2026-10-17 |
 | [BUG-032](BUG-032-hitl-answer-custom-text-dropped-from-answer-batch.md) | hitl-answer `--custom` 文本未进答复批（修法静默丢失、回合空转）——纵深防御：文本按意图胜出 + 硬进批复核；另修零 radio 提交钮查找 | 2026-10-17 |
+| [BUG-034](BUG-034-client-load-smoke-selftest-capsule-intermittent.md) | 自测例库块偶发打不开配置胶囊：改为按 id 显式打开（不再依赖"默认视图＝最新会话"）＋打不开如实报红；注入红证 + 绿跑，口径订正后 0/4 复现 | 2026-10-18 |
+| [BUG-035](BUG-035-hitl-answer-sidebar-session-invisible.md) | 侧栏懒渲染下"扫不到会话"被误判成实例老化：加搜索兜底 + 策略纯函数 + 负例留证；强制注入绿证通过 | 2026-10-18 |

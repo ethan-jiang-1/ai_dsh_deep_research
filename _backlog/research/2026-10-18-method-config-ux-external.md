@@ -5,7 +5,7 @@ intent: 为研究配置（方法库）UX 推敲卡提供外部产品做法与验
 
 # 研究方法配置：外部产品先例
 
-> 服务卡 = [研究配置（方法库）UX 推敲](../issues/2026-10-18-research-method-config-ux.md)。
+> 服务卡 = [研究配置（方法库）UX 推敲](../_archived/settled_issues/2026-10-18-research-method-config-ux.md)。
 > 抓取日 2026-10-18。**证据分级逐条标注**：**主会话亲读** = 本会话 `web_fetch` 成功并读过正文；
 > **代理回报** = 子代理亲读并回报原文，主会话**未复核原文**；**取不到** = 网络边界阻断，不用来
 > 支撑任何结论。未标注分级的段落一律视为推断，不是证据。
@@ -100,7 +100,7 @@ Reddit 帖 `1kllqxq` 开头："I got kinda pissed that Deep Research would alway
 
 | 场景 | 一手源（具体） | 口径陷阱 | 检验与冲突裁决 | 工件 | 不承诺 | 依据 |
 |---|---|---|---|---|---|---|
-| 投研·尽调 | 招股书／年报／交易所公告／监管备案／工商登记 | 财年 vs 自然年；GAAP vs non-GAAP；SBC 与一次性项；汇率取数日 | 三方对账；客户与供应商集中度；证伪优先 | IC memo（论点／关键假设／反证／敏感性） | 不构成投资建议、不给目标价 | 领域常识（待核） |
+| 投研·尽调 | 招股书／年报／交易所公告／监管备案／工商登记（渠道点名与警示见 §7） | 财年 vs 自然年；GAAP vs non-GAAP；一次性项（SBC 单列须软化）；即期汇率与近似汇率 | **交叉印证**（三表勾稽＋第三方函证＋独立来源复核；"三方对账"无权威出处，已改名）＋客户与供应商集中度＋职业怀疑（"证伪优先"降级为本工具纪律） | IC memo（论点／关键假设／反证／敏感性——**本工具模板，无监管文本**） | 不构成投资建议、不给目标价 | **已核实**（2026-10-18 外部核实轮，逐格判决与一手 URL 见 §7） |
 | 医药·临床 | PubMed、Cochrane、临床指南、FDA/NMPA/EMA 批件、ClinicalTrials.gov 注册记录 | 适应症／剂量／终点／人群／线数；预印本 vs 已发表 | 研究设计分级；利益冲突；发表偏倚；**质量评价是否适用依研究目的** | PICO 证据表 ＋ 不确定度 | 不做诊疗建议、不替代说明书 | **仓内已复核**：Cochrane Ch.4 检索规划、JBI 问题框定与 critical appraisal（[2026-10-12 研究依据](../_archived/research/2026-10-12-research-preferences.md)） |
 | 学术·文献综述 | Web of Science／Scopus／arXiv／PubMed ＋ 前后向引文追踪 | 纳入排除标准、时间窗、语言、研究类型 | 检索式留痕（可复现）、去重、筛选记录 | 文献矩阵 ＋ 研究空白 | 不宣称 systematic review | **仓内已复核**：PRISMA-S／PRISMA-ScR 是报告指引与可复核检索材料，不是质量认证（同上） |
 | 专利／IP | CNIPA／USPTO／EPO 公开文本、权利要求、同族、法律状态 | 申请日 vs 公开日 vs 优先权日；法律状态；权利要求范围 vs 说明书 | 权利要求逐条比对；FTO 属法律判断，我们只做事实梳理 | 权利要求对比表 ＋ 权利人地图 | 不出具侵权／FTO 法律意见 | 领域常识（待核） |
@@ -116,3 +116,28 @@ Reddit 帖 `1kllqxq` 开头："I got kinda pissed that Deep Research would alway
 - 本文 §1.2、§2.3、§2.4、§3 为**代理回报**，主会话未复核原文；引用前须重新取回原文（产品页面漂移快，Microsoft 页自称 2026-08 更新，Claude 页自称本周更新）。
 - 子代理另交一份"分行业方法论表"（含 PRISMA 27 项 / GRADE / Admiralty A–F·1–6 / ICD 203 / FAR Part 15 / ATT&CK 等），其正文**自述全部未经核实**——本文与消费卡**均不采信**。分行业依据以仓内已复核材料为准：[2026-10-12-research-preferences](../_archived/research/2026-10-12-research-preferences.md) §外部先例（Cochrane Ch.4 / JBI / PRISMA-S·ScR，前轮研究代理只读 HTTP 取得全文）与 [HITL1 接收·判型·澄清调研](../../research-workspace/drafts/2026-09-29-hitl1-intake-routing-survey.md)（CIA Tradecraft / ClariQ / Rose & Levinson，亲读一手）。
 - **未查**：各产品"保存的指令"之间的优先级语义（账号级 < 项目级 < 本次 < 用户当场明确要求）。这是本设计的核心未决问题之一，**当前零证据**。
+
+## 7. 投研·尽调行的核实记录（2026-10-18 外部核实轮）
+
+**用途**：§5 该行的每一格逐条核实，产出可引用的一手 URL ＋ 逐字引语；核实后的「可发布形态」四字段
+已落进 research-brief skill 的「领域示范」节（面板只读示范位的正本）。
+
+**逐格判决**：一手源 = 可核（须点名渠道）；财年/自然年 = 可核；GAAP/non-GAAP = 可核（正确表述 =
+"量化调节表 ＋ 与最可比 GAAP 等量或更显著 ＋ 不得误导"）；一次性项 = 可核，**SBC 单列须软化**
+（SEC 对 SBC 的专门立场原文取不到，不写"SEC 禁止剔除股权激励"）；汇率 = 可核（规范用语是"交易发生日
+／资产负债表日即期汇率 ＋ 近似汇率须披露确定方法"，"取数日"不是规范用语）；**"三方对账" = 需改名**
+（无权威出处 → 交叉印证：三表勾稽 ＋ 第三方函证 ＋ 独立来源复核）；集中度 = 可核（披露与尽调必查项）；
+**"证伪优先" = 降级为本工具纪律**（权威只支持职业怀疑与"不得只挑有利项"）；**IC memo 四要素 = 降级为
+本工具模板**（无任何可引用的监管或准则文本）；不承诺 = 自我边界声明，无需外部核实。
+
+**可引一手来源（逐一实测抓取）**：
+- 港股：<https://en-rules.hkex.com.hk/sites/default/files/net_file_store/Guide_for_New_Listing_Applicants_(November_2023)_(clean_version).pdf>（Guide 3.1 合理查询 / 3.7 前五大客户与供应商、集中度与对手方风险 / 3.11 non-GAAP 定义与"不得只挑有利项"）
+- 美国规则正文（eCFR 官方 API，versioner 2025-01-01）：<https://www.ecfr.gov/current/title-17/chapter-II/part-244>（Reg G §244.100）、<https://www.ecfr.gov/current/title-17/chapter-II/part-229>（Reg S-K Item 10(e)/101(c)(1)(i)/101(h)(4)(vi)/305(a)(1)(ii)(A)）、<https://www.ecfr.gov/current/title-17/chapter-II/part-240/section-240.13a-10>（改财年过渡期报告）
+- 中国：<https://www.gov.cn/gongbao/content/2021/content_5605111.htm>（证券法 2021 施行，第八条/第十二条）、<https://www.csrc.gov.cn/csrc/c101954/c7121950/content.shtml>（格式准则第57号公告）、<https://www.samr.gov.cn:9090/xyjgs/flfg/art/2024/art_be55c2e3a54a43e5ab12794c9dc87600.html>（企业信息公示暂行条例 2024 修订；**第六条＋第九条：资产总额/营业收入等由企业选择是否公示——不能当财务底稿**）、<http://www.npc.gov.cn/zgrdw/npc/flsyywd/flwd/2002-04/16/content_291930.htm>（会计年度＝公历年度）、<http://kjs.mof.gov.cn/zt/kjzzss/kuaijizhunzeshishi/200806/t20080618_46229.htm>（企业会计准则第19号 外币折算 第十至十二条）、<https://www.csrc.gov.cn/csrc/c101802/c1004905/content.shtml>（非经常性损益〔2008〕43号）
+- 审计与伦理：<https://www.frc.org.uk/documents/8824/ISA_UK_505_Revised_October_2023_Updated_October_2025.pdf>（外部函证定义与"A15 口头答复不构成外部函证"）、FRC 职业判断指引（2022-06，职业怀疑定义）、CFA Standard V(A)（合理充分的依据）
+
+**未取到（一律未作证据引用）**：sec.gov / investor.gov（403 限流）、pcaobus.org（Cloudflare 403）、
+ifrs.org（订阅墙）、iosco.org PDF（403）、web.archive.org（不可达）、csrc.gov.cn 规则正文附件与
+沪深交易所公告 PDF（WAF 拦成 HTML）、香港《上市规则》条文原文（en-rules 为 JS 应用）、
+《会计法》条文原文（SPA/API 取不到，改用中国人大网释义页）。**处置**：需要这些原文时换环境补测；
+在此之前只引上列已实测页面，或引公告号与生效日。

@@ -87,6 +87,7 @@
 | lib/replay-request.mjs | snapshot-replay-smoke | 组装请求面逐条比较：persona、header 全序列、三处 user/message 注入（定向归一化） |
 | lib/port-reclaim.mjs | preset-smoke、release-smoke | 端口收割执行器（按端口杀 + 三轮验证释放；实测依据 = web 孙进程不在子进程组里） |
 | lib/selftest-library.mjs | tests/library-fold.test.mjs、client-load-smoke（自测工作区种子） | 「研究配置」面板/library-fold 自测例库单一正本：12 形态条目（四字段/部分/空值/旧格式/混居/重名/空条目/杂项行/续行/缩进），两处共用防形态漂移 |
+| lib/method-presets.mjs | tests/library-fold.test.mjs、client-load-smoke | research-brief skill「方法预设」表的唯一解析入口（表头/行列数/防空集 fail-loud）——内置名单不再各写一份手写副本（总卡发现 14） |
 | lib/keyless-imports.mjs | tests/layering.test.mjs | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
 | lib/gates-cases.mjs | gates-smoke（驱动）+ verify-gates.test（静态对账） | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
 | lib/node-gate-core.mjs | run-gates/node-gate（驱动）+ node-gate.test | 兼容门面与 bundle 判据聚合（保留 `gateBundle` 与原有导出） |

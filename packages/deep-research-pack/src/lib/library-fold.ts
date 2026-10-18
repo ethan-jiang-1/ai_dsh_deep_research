@@ -4,6 +4,7 @@
  * 条目 = `## <名>（日期，来源）〔默认偏好?〕` 二级标题，正文四字段（找来源/怎么核实/报告怎么写/不承诺）；
  * 旧格式（`调查要求`/`适用说明`）兼容读入 legacyText。解析容错：空/无条目 → 空数组。
  */
+import { flattenMarkdownInline, truncateWithEllipsis } from './text-fold.ts'
 
 /** 偏好四分区（用户语言键；skill 格式正本同名）。 */
 export interface LibrarySections {
@@ -83,8 +84,10 @@ export function foldLibrary(text: string | null): readonly LibraryEntry[] {
   return entries
 }
 
-/** 分区键的用户语言名（指令拼装序 = 呈现序）。 */
-const SECTION_LABELS: readonly { key: keyof LibrarySections; label: string }[] = [
+/** 分区键的用户语言名（指令拼装序 = 呈现序）。**显示标签正本**——客户端 `SECTIONS` 是它的
+ *  呈现副本（同一序、同一逐字标签；由 tests/library-fold 的"显示名一致性"断言对钉，2026-10-18
+ *  修发现 13：面板曾显示「找什么资料／明确不承诺」而指令写「找来源／不承诺」）。 */
+export const SECTION_LABELS: readonly { key: keyof LibrarySections; label: string }[] = [
   { key: 'source', label: '找来源' },
   { key: 'verify', label: '怎么核实' },
   { key: 'report', label: '报告怎么写' },
@@ -125,6 +128,31 @@ export function createInstruction(name: string, sections: LibrarySections, sourc
 /** 期 1 简单动词（面板 ⋯ 菜单其余项）。 */
 export type SimpleAction = 'use-now' | 'set-default' | 'remove'
 
+/** 卡片摘要的显示口径（发现 11 修复，2026-10-18）：库文本是 markdown，摘要要进纯文本 div——
+ *  源文件标记（`**` 强调、反引号）不是内容，先剥再截断；截断补省略号，不在字中间装作完整句。
+ *  与状态页签的研究问题行同款口径（ResearchStatusTab G3，同 72 字）。 */
+export const SUMMARY_MAX_LENGTH = 72
+
+/**
+ * 条目卡面摘要：分区在场优先（source → verify → report），纯旧格式条目退回旧文首行。
+ * @param entry - 库条目投影。
+ * @param maxLength - 截断长度（默认 SUMMARY_MAX_LENGTH）。
+ * @returns 可直接渲染进纯文本节点的摘要；无内容 → null（不编造）。
+ */
+export function summaryOfEntry(entry: LibraryEntry, maxLength: number = SUMMARY_MAX_LENGTH): string | null {
+  const section = entry.sections.source ?? entry.sections.verify ?? entry.sections.report
+  const raw = section ?? (entry.legacyText === null ? null : legacyLinesOf(entry.legacyText)[0] ?? null)
+  if (raw === null) return null
+  const flat = flattenMarkdownInline(raw)
+  if (flat === '') return null
+  return truncateWithEllipsis(flat, maxLength)
+}
+
+/** 旧格式正文逐行剥前缀（摘要、详情读态与编辑态预填共用口径；剥完为空的行丢弃）。 */
+export function legacyLinesOf(legacyText: string): readonly string[] {
+  return legacyText.split('\n').map((l) => l.replace(/^- (调查要求|适用说明|默认偏好):\s*/, '').trim()).filter((l) => l !== '')
+}
+
 /** 期 1 简单指令（逐字正本 = skill 管理动词）。 */
 export function instructionOf(action: SimpleAction, name: string): string {
   switch (action) {
@@ -135,4 +163,27 @@ export function instructionOf(action: SimpleAction, name: string): string {
     case 'remove':
       return `删掉研究偏好「${name}」`
   }
+}
+
+/** 库读状态（component 只画；判定住此处以便 keyless 钉）。 */
+export type LibraryReadState = 'ok' | 'absent' | 'unreadable'
+
+/**
+ * 折算「偏好库读没读回来」——**「无结果」≠「失败」**（外部状态文案准则：No result is different
+ * from failure）：目录列举拿不到 = unreadable；文件不在 = absent（新工作区的正常空态）；文件在而
+ * 文本读不回 = unreadable；其余 = ok。
+ * @param text - `readFile` 结果（null = 没读回来）。
+ * @param files - `listDir` 结果（null = 目录面不可达）。
+ * @param path - 库文件相对路径。
+ * @returns 三态之一（loading 归组件首读态，不进本函数）。
+ */
+export function libraryReadStateOf(
+  text: string | null,
+  files: readonly { readonly type: string; readonly name: string }[] | null,
+  path: string,
+): LibraryReadState {
+  if (files === null) return 'unreadable'
+  const present = files.some((f) => f.type === 'file' && f.name === path)
+  if (!present) return 'absent'
+  return text === null ? 'unreadable' : 'ok'
 }

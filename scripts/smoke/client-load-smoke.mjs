@@ -38,12 +38,13 @@ import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.
 import { launchChromium, loadChromium } from '../lib/playwright.mjs'
 import { readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
 import { prepareClientLoadReference } from './client-load-reference.mjs'
-import { expandGroup, SIDEBAR_GROUP_CANDIDATES } from '../lib/web-ui-nav.mjs'
+import { expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES } from '../lib/web-ui-nav.mjs'
 import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { deriveBusinessBrief } from '../../packages/deep-research-pack/src/lib/brief-fold.ts'
 import { foldActivityRows } from '../../packages/deep-research-pack/src/lib/activity-fold.ts'
 import { streamFailureOf } from '../../packages/deep-research-pack/src/lib/stream-failure.ts'
 import { SELFTEST_LIBRARY } from '../lib/selftest-library.mjs'
+import { METHOD_PRESETS_SKILL_PATH, methodPresetsFromSkillFile } from '../lib/method-presets.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const arg = (name, fallback) => {
@@ -317,6 +318,9 @@ try {
     return ok
   }
   const paneTextOf = () => page.evaluate(() => document.body?.innerText ?? '')
+  // 弹窗内容读 textContent（不看滚动位置）：详情正文内滚后，innerText 只含可视区文本——
+  // 用它断言"块在场"会随滚动位置假红（2026-10-18 实测缺陷修复的配套）。
+  const dialogTextOf = () => page.locator('[role="dialog"]').first().textContent().catch(() => '')
 
   // 第一遍：绑定会话（磁盘侧定位——渐进面真数据 = 本会话自己的 bundle，磁盘认证对账）
   await awaitAppReady(6_000)
@@ -520,6 +524,16 @@ try {
       // 不生成替代目标、不借用别家 run 的问题行（brief-fold 的 unbound 分支）。
       step(seg2.includes('🎯 尚未确认'), '未绑定会话：摘要层如实「尚未确认」（不生成替代目标）',
         (seg2.match(/🎯 [^\n]{0,24}/) ?? ['（未找到 🎯 行）'])[0])
+      // 互补案例（子卡① ①-1／①-6）：未绑定会话上「本次研究」区必须走**无 run** 态——给入口、
+      // 不借用别家 run 的方法名、不回落默认打法（单测覆盖五态，这里钉真浏览器上的那一态）。
+      if (await openGuideCapsule(6_000, 6_000, 2_500)) {
+        const cfg = (await dialogTextOf()) ?? ''
+        const cfgText = cfg !== '' ? cfg : await paneTextOf()
+        const noRunOk = cfgText.includes('本会话暂无研究') && !cfgText.includes('本次研究：')
+        step(noRunOk, '未绑定会话·本次研究区：无 run 态如实（给入口、不回落默认打法名）')
+      } else {
+        console.log('  note  未绑定会话·本次研究区：配置胶囊不可开（跳过——右栏态依赖）')
+      }
       break
     }
     if (unboundSession === null) console.log('  note  未绑定会话负样本：候选都不可点开（子会话不进侧栏？跳过）')
@@ -616,24 +630,60 @@ try {
       if (capOkC) {
         const tc = await paneTextOf()
         const segC = tc.slice(tc.indexOf('研究配置'))
-        const builtinOk = ['事实核查', '领域地图', '主张核查', '方案比较'].every((n) => segC.includes(n))
-        step(builtinOk, '研究配置页签体：内置偏好四条在场（只读表渲染）')
+        // 内置名单从 skill 表**解析派生**（2026-10-18：原为手写四条字面量——skill 加一行而
+        // 面板没渲染时它照样绿〔子集检查〕，是第四份手写副本；总卡发现 14）。解析器 =
+        // scripts/lib/method-presets.mjs（与 tests/library-fold 共用同一入口）。
+        const builtinNames = methodPresetsFromSkillFile(join(ROOT, METHOD_PRESETS_SKILL_PATH)).map((row) => row.name)
+        const missingBuiltin = builtinNames.filter((n) => !segC.includes(n))
+        step(missingBuiltin.length === 0, '研究配置页签体：内置偏好全部在场（名单从 skill 表派生）',
+          missingBuiltin.length > 0 ? `缺 ${missingBuiltin.join('、')}` : `${builtinNames.length} 条`)
         // 库区断言随库状态走（盘侧 method-library.md 真值）：空库 → 引导文案；有条目 → 条目名/默认徽标在场。
         const libFile = join(ROOT, 'research-workspace', 'method-library.md')
         const hasEntries = existsSync(libFile) && /^## /m.test(readFileSync(libFile, 'utf8'))
+        // 空态文案 2026-10-18 分两支（外部状态文案准则：无结果 ≠ 失败）：文件不在 = 「本工作区还没有
+        // 偏好库」；文件在但空 = 「偏好库是空的」；读不回 = 「读不到 method-library.md」。
         const libOk = segC.includes('我的偏好库') && (hasEntries
           ? (segC.includes('格局调研') || segC.includes('默认偏好'))
-          : segC.includes('还没有保存的偏好'))
+          : (segC.includes('本工作区还没有偏好库') || segC.includes('偏好库是空的')))
         step(libOk, '研究配置页签体：偏好库区 = 盘侧库状态真值（空态引导 / 条目投影）', hasEntries ? '库有条目' : '库为空')
+        // 显式化三面（子卡① ①-3／①-4，2026-10-18）——呈现位在场：
+        //   ①「本次研究」区：五态之一如实在场（绑定会话多为 recorded，未绑定/旧 run 走其余态）
+        //   ② 六条共同底线一行（正本 = skill 的共同底线句，同钉 = tests/library-fold）
+        //   ③ 两个定制入口按钮 ＋ 推荐规则说明位 ＋ 每卡「什么时候用它」
+        const zoneStateOk = ['本次研究：', '本会话暂无研究', 'question.md 不在', '未记录，不替你回填', '面板不猜']
+          .some((s) => segC.includes(s))
+        step(segC.includes('本次研究') && zoneStateOk, '「本次研究」区在场：本次采用/来源或四态如实文案')
+        const baselineOk = ['任何打法都改不掉', '来源链', '逐字摘录', '独立信源', '日期校准', '缺口显式', 'readiness']
+          .every((s) => segC.includes(s))
+        step(baselineOk, '底线条：六条共同底线逐字在场（改不掉的边界显式化）')
+        const entriesOk = ['让 Lead 帮我起草', '从本次 run 沉淀'].every((s) => segC.includes(s))
+        step(entriesOk, '底线条：两个定制入口按钮在场')
+        const ruleHintOk = segC.includes('推荐怎么算出来的') && segC.includes('什么时候用它：')
+        step(ruleHintOk, '推荐规则说明位 ＋ 每卡「什么时候用它」在场（判型→打法可见）')
+        // 回执区在场（①-2）：keyless 档禁止发送（2026-10-13 事故实录），三态**渲染**由
+        // tests/receipt-fold 纯函数钉；此处只证回执区在场且三态词汇面向用户可辨。
+        const receiptZoneOk = segC.includes('改动的回执会显示在这里') && segC.includes('已发送') && segC.includes('已回话') && segC.includes('已落盘')
+        step(receiptZoneOk, '回执区在场（空闲态）：三态词汇可辨（已发送／已回话／已落盘）')
+        const demoOk = segC.includes('领域示范（只读）') && segC.includes('投研尽调（示范）') && segC.includes('抄体例，不抄内容')
+        step(demoOk, '领域示范（只读）：厚条目在场（四字段颗粒度可对照）')
+        // 零上下文探针（2026-10-18）点出的三处高风险错读，逐条钉在场：
+        //   ①「保存」类按钮必须写明是发给 Lead（面板不写文件）——否则用户以为已生效；
+        //   ② 术语一句话表（研究偏好＝打法）与"指令 vs 回执"的机制说明；
+        //   ③ 改动影响范围（之后的研究 vs 正在跑的那场）。
+        const glossaryOk = segC.includes('一条「研究偏好」＝一条打法') && segC.includes('都是给 Lead 发一条指令')
+        step(glossaryOk, '术语表在场：研究偏好＝打法 ＋ 指令/回执机制一行说清')
         // 详情 Modal（detail-ux 期 1.5）：点内置条目名称 → 四分区 + 内置操作在场 → 关闭。
         const nameBtn = page.getByRole('button', { name: /事实核查 ›/ }).first()
         if (await nameBtn.isVisible({ timeout: 6_000 }).catch(() => false)) {
           await nameBtn.click({ timeout: 5_000 }).catch(() => {})
           await wait(1_500)
-          const modalText = await paneTextOf()
-          const modalOk = ['找什么资料', '怎么核实', '报告怎么写', '明确不承诺', '基于此自定义', '用于本次研究'].every((s) => modalText.includes(s))
+          const modalText = (await dialogTextOf()) ?? ''
+          const modalOk = ['找来源', '怎么核实', '报告怎么写', '不承诺', '基于此自定义', '用于本次研究'].every((s) => modalText.includes(s))
             && !modalText.includes('编辑内容')
           step(modalOk, '研究配置详情 Modal：四分区 + 内置操作在场（读态；内置无编辑入口）')
+          const explicitOk = ['谁读它', '管不到', '任何打法都改不掉（共同底线）', '偏好只能往上加要求', '产出长这样', '什么时候会推荐它', '「基于此自定义」新建的副本同样受这六条约束', '「来源链」管的是']
+            .every((s) => modalText.includes(s))
+          step(explicitOk, '研究配置详情：执行面表（谁读它/在哪生效/管不到）＋ 底线块 ＋ 标本骨架 ＋ 推荐说明在场')
           await page.getByRole('button', { name: '关闭详情' }).first().click({ timeout: 5_000 }).catch(() => {})
           await wait(1_000)
         } else {
@@ -647,9 +697,12 @@ try {
           if (await libName.isVisible({ timeout: 6_000 }).catch(() => false)) {
             await libName.click({ timeout: 5_000 }).catch(() => {})
             await wait(1_500)
-            let t = await paneTextOf()
-            const libModalOk = ['找什么资料', '怎么核实', '报告怎么写', '明确不承诺', '编辑内容', '用于本次研究', '来源：'].every((s) => t.includes(s))
-              && !t.includes('基于此自定义')
+            let t = (await dialogTextOf()) ?? ''
+            // 「无基于此自定义」按**角色**判按钮在场，不按文本判——2026-10-18 实测假红：
+            // 底线块的说明句里合法地提到了「基于此自定义」这四个字（讲"自定义副本同样受底线约束"）。
+            const builtinBtn = await page.getByRole('button', { name: '基于此自定义' }).count().catch(() => -1)
+            const libModalOk = ['找来源', '怎么核实', '报告怎么写', '不承诺', '编辑内容', '用于本次研究', '来源：'].every((s) => t.includes(s))
+              && builtinBtn === 0
             step(libModalOk, '研究配置详情 Modal（库条目）：四分区 + 编辑入口在场（读态，无「基于此自定义」）')
             // 编辑态：四分区草稿预填 + 单保存钮 + 放弃；放弃不发送
             await page.getByRole('button', { name: '编辑内容' }).first().click({ timeout: 5_000 }).catch(() => {})
@@ -675,6 +728,8 @@ try {
             t = await paneTextOf()
             const confirmOk = t.includes('删除「格局调研」？') && t.includes('确认删除') && t.includes('取消')
             step(confirmOk && hasSetDefault, '研究配置删除：⋯ 菜单 → 二次确认 Modal 在场（取消不发送）', hasSetDefault ? '' : '「设为默认」菜单项缺席')
+          const affectOk = segC.includes('改动影响的是') && segC.includes('结果看下面的回执')
+          step(affectOk, '影响范围与指令机制在场：改动影响之后的研究 ＋ 换一条=发指令')
             await page.getByRole('button', { name: '取消' }).first().click({ timeout: 5_000 }).catch(() => {})
             await wait(1_000)
           } else {
@@ -720,7 +775,12 @@ try {
       // 回落默认视图 = 最新会话 = 本探针；两轮探针实证默认视图行为）
       await page.evaluate(() => { localStorage.clear(); sessionStorage.clear() }).catch(() => {})
       await awaitAppReady(5_000)
-      // 重载后默认视图 = 最新会话（= 上面的 lib-selftest 探针）——直接开右栏页签断言
+      // BUG-034 选定修法（2026-10-18）：**不再依赖"重载后默认视图＝最新会话"**——那句假设在会话
+      // 数量增长后不成立（本块偶发红即此）。改为按 session id 显式打开本块刚建的会话（直达
+      // data-row-key，行不在 DOM 时走搜索兜底）；打不开就如实报红，不静默跳过整块。
+      const openedSelf = await openSessionById(page, probe2Id, null)
+      step(openedSelf.found, '自测例库：本块会话按 id 显式打开（不依赖默认视图）', `via=${openedSelf.via}`)
+      if (openedSelf.found) {
         if (await openGuideCapsule(6_000, 6_000, 2_500)) {
           // 条目加载是异步 readFile——轮询至尾条目按钮在场。innerText 对滚动折叠区不含尾条目
           // 文本（Chromium innerText 只取滚动容器可视区——首版文本断言实红：尾两名缺席）；
@@ -746,7 +806,7 @@ try {
           // ② BUG-025·纯旧格式条目：单块「自定义要求」，无 4×（未设置）噪音
           await page.getByRole('button', { name: /旧格式条目 ›/ }).first().click({ timeout: 5_000 }).catch(() => {})
           await wait(1_500)
-          ts = await paneTextOf()
+          ts = (await dialogTextOf()) ?? ''
           const legacyReadOk = ts.includes('自定义要求') && ts.includes('广度优先铺方向') && ts.includes('地图类问题适用') && ts.includes('来源：') && !ts.includes('（未设置）')
           step(legacyReadOk, '自测例库·BUG-025 修复面：纯旧格式详情 = 单块「自定义要求」（无未设置噪音）')
           // ③ BUG-025·编辑预填（4 分区 + 1 旧正文；不发送——载荷文本由 tests/library-fold
@@ -762,8 +822,8 @@ try {
           // ④ 混居条目：四分区 + 「自定义要求（旧）」双块；编辑预填分区与旧正文并存
           await page.getByRole('button', { name: /混合条目 ›/ }).first().click({ timeout: 5_000 }).catch(() => {})
           await wait(1_500)
-          ts = await paneTextOf()
-          const mixedReadOk = ts.includes('找什么资料') && ts.includes('新字段在场') && ts.includes('自定义要求（旧）') && ts.includes('旧文残留')
+          ts = (await dialogTextOf()) ?? ''
+          const mixedReadOk = ts.includes('找来源') && ts.includes('新字段在场') && ts.includes('自定义要求（旧）') && ts.includes('旧文残留')
           step(mixedReadOk, '自测例库·混居条目：四分区 + 自定义要求（旧）双块（内容零丢失）')
           await page.getByRole('button', { name: '编辑内容' }).first().click({ timeout: 5_000 }).catch(() => {})
           await wait(1_000)
@@ -778,11 +838,12 @@ try {
           await page.getByRole('button', { name: /空值分区 ›/ }).first().click({ timeout: 5_000 }).catch(() => {})
           await wait(1_500)
           ts = await paneTextOf()
-          step(ts.includes('逐字转写') && ts.includes('（未设置）'), '自测例库·空值分区：缺席显式未设置、在场有内容')
+          step((await dialogTextOf() ?? '').includes('逐字转写') && ((await dialogTextOf()) ?? '').includes('（未设置）'), '自测例库·空值分区：缺席显式未设置、在场有内容')
           await page.getByRole('button', { name: '关闭详情' }).first().click({ timeout: 5_000 }).catch(() => {})
         } else {
           step(false, '自测例库：lib-selftest 新会话上「研究配置」胶囊不可见')
         }
+      }
     }
   }
 
