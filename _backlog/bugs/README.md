@@ -14,6 +14,7 @@
 |---|---|
 | [BUG-034](../_archived/fixed_bugs/BUG-034-client-load-smoke-selftest-capsule-intermittent.md) | client-load-smoke「自测例库」块偶发打不开配置胶囊（8 跑 2 红）——整组断言静默跳过；根因未定位 |
 | [BUG-035](../_archived/fixed_bugs/BUG-035-hitl-answer-sidebar-session-invisible.md) | hitl-answer 在 research-workspace 找不到挂起会话（自报 aging 判据被重启证伪）——代答链路断 |
+| [BUG-042](BUG-042-method-library-seed-absent-no-pointer.md) | 偏好库 `method-library.md` 从不播种、手册不指路——面板宣称"我的偏好库"而盘上无此文件 |
 
 | 卡 | 一句话 |
 |---|---|
