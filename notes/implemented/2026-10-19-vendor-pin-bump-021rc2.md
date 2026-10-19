@@ -92,6 +92,7 @@ names …」的间接引用，具体 checkout 路径与 GUI 端口落在 runtime
 | `l4-lite-smoke`（真模型） | **ALL PASS**（四角色 assistant 响应 + scout web_search 真调用） |
 | `client-load-smoke` | **55 PASS**（侧栏选行修正后） |
 | `snapshot-replay-smoke` | **ALL PASS**（4 场景 A 回放 + B 组装 diff + C 渲染金标准；金标准已按新 pin 真重录） |
+| `e2e-021rc2`（常驻 `--profile research` 实例，`--url` 模式） | **ALL PASS 7/7**——① 四角色连续成组、②「研究状态」643 字真数据、③「研究配置」2169 字真数据、本插件面零故障 |
 | **L4 端到端真模型 run** | **跑通**：`drt_semver-caret-prerelease`（HITL1 → 取证 15 张 evidence 卡 → 纯综合 → critic 两轮审查 FAIL→PASS → HITL2 拍板 → final.md + final/v1.md + present + goal complete） |
 
 端到端 run 的核心结论另经**独立实证**复核：`^0.2.1-rc.2` ≡ `>=0.2.1-rc.2 <0.3.0-0` + per-tuple
@@ -157,7 +158,89 @@ names …」的间接引用，具体 checkout 路径与 GUI 端口落在 runtime
 把全表 na 改成 `N/A` 使解析归零 → 报 `只解析到 0 条「不适用」行（下限 10）`。两次还原后均回绿。
 `gates-smoke` 全绿（47 个注入案例均被点名报红）。
 
+## 0.2.1 的首次真兼容回归：preset order 撞车（用户实测发现，本 Note 追加）
+
+**症状（用户 2026-10-19 在 3085 上亲眼看到）**：角色列表里四个研究角色被内置模式隔开——
+`Lead | Standard | PTC | Scout | Analyst | Minimal | Creator | Critic`。
+
+**根因**：`presets/<role>.patch.yml` 的 `config.order` 是本包自 0.1.7 起就写死的 `1/2/3/4`；
+0.2.1 给 web-app bundle 新插了四个出厂 preset，`order` 恰好也是 `1/2/3/4`
+（`preset-standard/ptc/minimal/cordis`，`dsh --profile research --dump-config` 可直读）。
+两套同号 → 排序交错。**0.1.7 时只有我们四个，所以这个缺陷被完全遮蔽**——它不是本轮引入的
+错误，是本轮**暴露**的既有错误。
+
+**修法**：`order` 整体挪到内置之后（lead 5 / scout 6 / analyst 7 / critic 8），四个连续。
+`order` 是 `z.number()` 无上限，不占用"自定义排序权重"之类语义槽；挪到高于出厂档位是
+"扩展后置"的自然表达，也保证将来 web-app 再加出厂 preset（只要仍从 1 递增）不会再次插进来。
+
+**为什么不在 registry 上调 `default`/索引开关**：`agent-preset-registry` 的 `default` 只决定
+**选中态**，不决定**排列顺序**；把默认设成 lead 并不能让四个角色相邻（本轮实测确认）。
+
+**回归锁 = `scripts/smoke/e2e-021rc2.mjs` ①**：读角色选择器全部 preset 名，断言四个研究角色
+占据**连续下标**。反证实录：把 overlay 的 order 还原成 `1/2/3/4` → `FAIL ① …连续=false
+序列=[Deep Research Lead | Standard mode | PTC mode | …]`（逐字复现用户看到的现象）；
+改回 `5/6/7/8` → 回绿。
+
+## 端到端验收（用户 2026-10-19 指令：不许再让 owner 手测）
+
+新增 `scripts/smoke/e2e-021rc2.mjs`（登记在 [scripts/README.md](../../scripts/README.md) 冒烟表）：
+自 boot 真实例 → ① 角色成组 → 进绑定 run 的会话 → ②「研究状态」胶囊可点 + 页签体真数据 →
+③「研究配置」同上 → ④ 本插件面零故障（JS 异常 / `deep-research` 资源 4xx）。判据 = 脚本全绿。
+
+本脚本当场抓到一个**与本次升级无关但必然发生的既有缺陷**并修掉：`research-status` 的
+`listDir` 对 `drt_*/evidence` 不存在的情况打 `console.error`——而 run 早期（scaffold 完、
+分析员还没写第一份证据）**没有** `evidence/` 目录是合法空态。0.2.1 通道里
+`drt_cn-us-agriculture-gap` 正好是这个状态，页签把正常空态当故障报红。
+修法：`workspace-file/not-found` 按空列表降级、不打 error；其他 code / 抛错仍然 fail-loud
+（[index.ts](../../packages/deep-research-pack/src/client/index.ts) `listDir` 注释记了完整理由与
+"为什么不能一律静默"）。
+
+**测出来的两个"假红"也记下来，避免下一个人重踩**：
+
+- `/api/changes.summary` 进会话后 404：**对照实测**（stock `web` profile 不挂本包）同样 404，
+  是宿主既有行为，不作兼容判据。脚本因此只收 `deep-research` 面的资源失败。
+- 角色 seat 标签只在**首屏**（新会话输入框旁）在场；进了会话就是交付面。断言必须排在进会话
+  **之前**，否则读出 `四个角色=0`。
+
+## 0.2.1 的第二个真兼容断裂：brand 槽同优先级重复注册会抛错，并中断整个 apply
+
+用户报「两个 panel 都看不到了」（四个角色在、两个页签消失）。定位出来的因果链比预想的深，
+记全，因为它决定了本包的一条硬纪律：
+
+1. **0.2.1 的官方侧栏自己注册了 `sidebar.brand.mark`**（0.1.7 没有）。`ui-slots` 的 single 槽
+   只允许**完全相同 priority** 被占一次：同优先级撞车 → `throw`，
+   「register at a different priority to shadow it (lowest renders)」
+   （`vendor/dsh/packages/client/ui-slots/src/index.ts` 的 `case 'single'` 分支——vendor 树只读，
+   按 BUG-016 用反引号路径不建链接）。
+2. 我们的 `apply` 在 brand mark 处抛错 → **apply 从这里截断**，后面那条 `sidebarRightTabs.register`
+   （「研究配置」）根本没执行；而它前面那条（「研究状态」）已注册，于是出现"一个在、一个不在"
+   的半截状态。极限情况下连「研究状态」也不可见（entry 整体 failed：
+   `web boot: 1 entry did not activate`）。
+3. **为什么 `client-load-smoke` 当时是绿的**：它断言的是页签体与交互，跑在"注册刚发生"的窗口里；
+   而 `ctx.inject(..., scoped => ...)` 的作用域在回调结束后失活，`scoped.effect` 的 disposer
+   会把注册一起撤掉。**"注册成功" ≠ "一直存在"**。实测判据只有一条：等页面稳定后，
+   在**常驻实例**上读 `[data-sidebar-right-session]` 的 innerText。
+
+修法（两处，都最小）：
+
+- `slots.register({ name: RESEARCH_BRAND_MARK_SLOT, priority: -1 }, OrcaMark)`（name 槽同）——
+  用最低 band 遮蔽官方默认 occupant，这是 vendor 自己给的唯一合法路径；
+- 页签注册保持 `ctx.inject` + `scoped.effect` 的原有形态（不动生命周期契约），只修撞车。
+
+**硬纪律（新增）**：本包任何 `slots.register` 进 single 槽，必须显式写 priority，
+默认 0 = 与官方抢座 = 抛错 + 静默截断 apply。已有先例：研究语义工具卡此前就因同键同优先级
+被迫用 `priority: -1`——同一个坑第二次踩，这次升到纪律层。
+
+诊断手法留档（下一个人省 2 小时）：在 `apply` 里临时 `try/catch` + `console.error`，看首个
+抛出的 Error 文本；再用 `entries()` / `guide()` 在**根 ctx** 上取样（`scoped` 上取会抛
+`cannot get required service ... in inactive context`——这条报错本身就是"作用域已失活"的铁证）。
+
 ## 输掉的方案
+
+- **「把四个角色塞进一个分组/子菜单」**：先想过按 kind 或分组标签收拢，但 vendor 的 preset
+  注册面（`@deepseek-ai/dsh-agent-preset` 行）**只有 `order`** 这一个排序杠杆，没有分组字段
+  （`z.number()` schema 直读）。造分组要么改 vendor（只读铁律），要么在 client 半自绘选择器
+  （把宿主 UI 复制一份，与"循 DSH 而不发明"冲突）。挪 order 是最小杠杆。
 
 - **「放宽归一到凑绿」**：`snapshots/README` 明令禁止（fix fixtures, not normalizers）。本轮所有
   期望红都以**真重录**收口；归一化的改动只发生在上游真的搬家时，且零归一化方向（删死规则）

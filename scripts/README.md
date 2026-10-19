@@ -17,6 +17,7 @@
 | preset-smoke.mjs | L1 真挂载：boot 页模块表行（client 半 served）、roster、逐角色建会话、skills 隔离 | keyless（`DSH_SMOKE_REAL=1` 起真 DSH，无模型） |
 | release-smoke.mjs | L2 安装形状：pack → 干净 profile → plugin add → manifest/安装域 client 半断言 → 安装域冒烟 → 端口释放验证（进程卫生：超时预算 + 并发锁 + 退出确认） | keyless（`--install-only` 跳凭据） |
 | client-load-smoke.mjs | 观察面真浏览器装配、页签与渐进面对账（磁盘参考选择 = client-load-reference.mjs） | keyless（浏览器） |
+| e2e-021rc2.mjs | **升级端到端验收**（0.2.1-rc.2 起）：① 四个研究角色在角色列表里连续成组（内置 standard/ptc/minimal/creator 与 pack order 撞车的回归锁）② 右栏「研究状态」胶囊可点 + 页签体真数据 ③「研究配置」同上 ④ 本插件面零故障；真实实例走完用户路径，不靠人眼 | keyless（浏览器；须先 source dev/env.sh） |
 | snapshot-replay-smoke.mjs | 场景 manifest 驱动的四角色组装面回放（persona/header 全序列/三处注入）+ 声明的渲染金标准 | keyless（RPC/解压子进程，无模型；须先 source dev/env.sh） |
 | gates-smoke.mjs | 门禁自测：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组 | keyless（git/node 子进程，无模型） |
 | client-hitl-smoke.mjs | 活标题触发与挂起显性化 | 真模型档 |

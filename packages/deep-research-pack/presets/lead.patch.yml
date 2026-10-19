@@ -9,7 +9,7 @@
         id: lead
         name: Deep Research Lead
         description: 研究请求的唯一入口与出口——立项对齐、拆解组队、综合定稿与交付；对报告质量负全责
-        order: 1
+        order: 5
         plugins:
           - id: persona
             name: '@deepseek-ai/dsh-persona'

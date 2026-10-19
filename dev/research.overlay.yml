@@ -37,7 +37,7 @@
         id: analyst
         name: Deep Research Analyst
         description: 深度挖掘——question-list 驱动的证据抽取、交叉验证与反例搜索；证据链可回溯
-        order: 3
+        order: 7
         plugins:
           - id: persona
             name: '@deepseek-ai/dsh-persona'
@@ -99,7 +99,7 @@
         id: critic
         name: Deep Research Critic
         description: 对抗核查——无来源结论狩猎、证据质量审计、交付前质量门；对"看起来完成了"过敏
-        order: 4
+        order: 8
         plugins:
           - id: persona
             name: '@deepseek-ai/dsh-persona'
@@ -159,7 +159,7 @@
         id: lead
         name: Deep Research Lead
         description: 研究请求的唯一入口与出口——立项对齐、拆解组队、综合定稿与交付；对报告质量负全责
-        order: 1
+        order: 5
         plugins:
           - id: persona
             name: '@deepseek-ai/dsh-persona'
@@ -246,7 +246,7 @@
         id: scout
         name: Deep Research Scout
         description: 广度侦察——query 多样化、来源发现与质量分级、候选方向图；只指路，不下结论
-        order: 2
+        order: 6
         plugins:
           - id: persona
             name: '@deepseek-ai/dsh-persona'

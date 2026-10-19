@@ -68,11 +68,11 @@ export function apply(ctx: ClientContext): void {
     // single occupant（fallback 内置鱼形 logo 与本地构建标签被本登记替换；槽契约 =
     // ui-sidebar contract/slots.ts——mark 收 {size}，name 空 owner share）。
     scoped.effect(() => scoped.slots.inject(RESEARCH_BRAND_MARK_SLOT, () => [
-      scoped.slots.register({ name: RESEARCH_BRAND_MARK_SLOT }, OrcaMark),
+      scoped.slots.register({ name: RESEARCH_BRAND_MARK_SLOT, priority: -1 }, OrcaMark),
     ]), 'deep-research-pack: orca brand mark')
 
     scoped.effect(() => scoped.slots.inject(RESEARCH_BRAND_NAME_SLOT, () => [
-      scoped.slots.register({ name: RESEARCH_BRAND_NAME_SLOT }, OrcaName),
+      scoped.slots.register({ name: RESEARCH_BRAND_NAME_SLOT, priority: -1 }, OrcaName),
     ]), 'deep-research-pack: orca brand name')
 
     // 「研究配置」页签（D25 期 1 管理中继面）：显示偏好库投影 + 生成管理指令发 Lead——
@@ -108,6 +108,12 @@ export function apply(ctx: ClientContext): void {
         if (!result.ok) {
           // 诊断面（RFC research-status-ui 的 bundle 渐进面）：把真实失败原因打到 console，
           // 便于 client-load-smoke 抓取——静默吞错会让"数据面不可达"与"目录为空"无法区分。
+          // 例外：`workspace-file/not-found` = 目录尚未产出（run 早期证据面还没建、刚 scaffold
+          // 的 bundle 只有 question/topics），是**合法空态**而非故障——按空列表降级、不打 error
+          // （2026-10-19 0.2.1-rc.2 端到端实测：drt_cn-us-agriculture-gap 无 evidence/ 目录，
+          // 页签把正常空态当故障报红）。真故障（权限/通道/其他 code）仍然 fail-loud。
+          const code = (result.error as { code?: string } | undefined)?.code
+          if (code === 'workspace-file/not-found') return []
           console.error('[research-status] workspaceFiles.list 失败', JSON.stringify({ path, error: result.error }))
           return null
         }
