@@ -23,6 +23,7 @@ const REAL_MODEL = [
   'smoke/client-hitl-smoke.mjs',
   'smoke/cdp-ask-smoke.mjs',
   'probe/discipline-probe.mjs',
+  'probe/method-library-probe.mjs',
 ];
 
 // 收集 scripts/ 下全部 .mjs 入口（verify/smoke/probe/run-gates/run-ops/dist 各组一层），

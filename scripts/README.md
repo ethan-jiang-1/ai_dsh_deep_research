@@ -31,6 +31,7 @@
 |---|---|---|
 | cdp-probe.mjs | 指定场景显示/点击/会话回复（裸 CDP） | 连已起 GUI；`--ask` 按会话档 |
 | entry-chain-probe.mjs | 授权范围、RFC 条件与开发环路径三问，词面断言 + 留档人工复核 | 真模型档 |
+| method-library-probe.mjs | 偏好库可发现性三问（文件名/位置、当前条目数、点名条目缺席时是否如实说），cwd = 临时研究工作区。修复判据 #4 的机器化证明（BUG-042） | 真模型档 |
 | discipline-probe.mjs | 散文纪律行为面五场景标记断言（A2 超界 / B1 差集 / 收活缺件 / 收活 UNVERIFIED / 计划确认卡·quick_factual 免发互补对）+ 留档人工复核；`--scenario <id>` 定向跑 | 真模型档 |
 
 ## run-gates/（run bundle 机械门与审计）

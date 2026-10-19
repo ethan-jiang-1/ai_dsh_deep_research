@@ -5,7 +5,7 @@ opened: 2026-10-19
 
 # 推敲：右栏加「终稿」页签——交付前空、交付后渲染 final.md，全程不泄漏中间过程
 
-> 立卡：2026-10-19 ｜ 状态：推敲中 ｜ 类型：Feature ｜ 结论倾向：倾向现在做 ｜ 可关闭：否
+> 立卡：2026-10-19 ｜ 状态：推敲中 ｜ 类型：Feature ｜ 结论倾向：现在做（渲染层与交付信号都现成，剩下是取舍与一次真机确认）｜ 可关闭：否
 
 **问题与期望结果：** 研究跑完，用户最想先看的是那份终稿（`drt_<slug>/final.md`）。现在它只出现在
 会话流里（Lead 的 closing prose + `present` 卡片），要开就得去 Files 页签按路径翻。用户原话：
@@ -62,7 +62,7 @@ drafts）漏进来**。
 
 **与其它卡的关系：**
 
-- 与 [BUG-042](../bugs/BUG-042-method-library-seed-absent-no-pointer.md) 独立，都属"观察面宣称
-  存在而实际不可用"这一类，但 final 页签是**新增**、BUG-042 是**既有功能失效**。
+- 与 [BUG-042](../_archived/fixed_bugs/BUG-042-method-library-seed-absent-no-pointer.md) 独立，都属"观察面宣称
+  存在而实际不可用"这一类，但 final 页签是**新增**、BUG-042 是**既有功能失效**（该卡已于 2026-10-19 修复归档）。
 - 与「研究配置」显式化那轮（已归档 `2026-10-18-research-config-panel-explicitness`）同一观察面，
   复用其空态与回执样式语言。

@@ -20,6 +20,9 @@ const SRC = join(ROOT, 'research-workspace')
 const DST = join(ROOT, 'packages', 'deep-research-pack', 'workspace')
 const check = process.argv.includes('--check')
 
+/** 独立种子：随包走但**不从正本同步**（见下方守卫段注释）。 */
+const SEED_ONLY = 'method-library.md'
+
 /** 种子文件清单（手册 + 节点契约 + 判型模式库 + 工作区 `.gitignore.example` + run 模板；
  *  drt_ 开头的 run bundle 运行区不进种子）。为什么是 `.gitignore.example` 而不是 `.gitignore`：
  *  **npm pack 永不打包名为 .gitignore 的文件**（`files: ["workspace/**"]` 也照删，实测），
@@ -68,7 +71,40 @@ const walkDst = (dir) => {
     }
   }
 }
+// 独立种子必须在孤儿对账**之前**登记，否则会被判成"源侧已删"删掉。
+if (existsSync(join(DST, SEED_ONLY))) fileSet.add(SEED_ONLY)
+
 if (existsSync(DST)) walkDst(DST)
+
+// 独立种子（**不参与正本同步**）：`method-library.md` 是用户个人偏好库，正本在运行场
+// （research-workspace/）且内容是**每个部署方各自积累**的，绝不能被本仓的正本覆盖传播——
+// 那会把一个人的偏好塞进所有人的新工作区。但包必须自带一份**合法空架子**，否则新工作区
+// 里这个文件永远不存在，观察面宣称的「我的偏好库」在盘上缺席（BUG-042）。
+// 因此单独把守三件事：在场、是空架子（无 `## ` 条目标题）、四字段骨架行在场。
+{
+  const seedPath = join(DST, SEED_ONLY)
+  if (!existsSync(seedPath)) {
+    const msg = `sync-pack-workspace: 独立种子缺席 → ${SEED_ONLY}（新工作区将没有偏好库）`
+    if (check) drift.push(`${SEED_ONLY}（包内缺席）`)
+    else console.error(msg)
+  } else {
+    const seedText = readFileSync(seedPath, 'utf8')
+    // 空架子判据：允许被 <!-- 注释掉的模板条目标题，但**不得有注释外的 `## ` 条目**。
+    const liveBody = seedText.replace(/<!--[\s\S]*?-->/g, '')
+    if (/^## /m.test(liveBody)) {
+      if (check) drift.push(`${SEED_ONLY}（含个人条目，种子必须是空架子）`)
+      else console.error(`sync-pack-workspace: ${SEED_ONLY} 含注释外条目——种子必须是无偏好的空架子`)
+    }
+    for (const field of ['找来源', '怎么核实', '报告怎么写', '不承诺']) {
+      if (!seedText.includes(field)) {
+        if (check) drift.push(`${SEED_ONLY}（缺四字段骨架：${field}）`)
+        else console.error(`sync-pack-workspace: ${SEED_ONLY} 缺四字段骨架：${field}`)
+      }
+    }
+  }
+  // 孤儿对账会把这个文件当"源侧已删"删掉——独立种子必须豁免。
+  fileSet.add(SEED_ONLY)
+}
 
 if (check) {
   if (drift.length > 0) {

@@ -16,29 +16,30 @@ harness 只读：presets、skills、本手册、templates/ 对任何一次研究
 drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research Topic，目录名即方向；
                        slug 由主编立项时定，kebab-case；立项 sibling 预检：同名/前缀相关
                        bundle 已在（**含 archive/ 归档**）→ 问用户，不擅自另起）
-  question.md          方向契约：研究问题定稿 + Purpose/RQ 分解/Scope/Constraints + HITL1
-                       对齐快照 + Decisions（append-only 方向修订记录，最新在上）——跨
-                       rerun 持久，bundle 身份核心（owner: lead）
+  question.md          方向契约：问题定稿 + Purpose/RQ/Scope/Constraints + HITL1 对齐快照 +
+                       Decisions（append-only，最新在上）——跨 rerun 持久，bundle 身份核心（lead）
   topics.md            topic 图：must_answer（问题列表 2–5 问）+ scope_role（owner: lead）
   leads.md             候选方向清单（owner: scout）
   evidence/            证据文件，一条一档（owner: analyst）
   findings.md          发现账本：结论 + 支撑 + gap 状态（owner: lead）
   review.md            对抗核查报告（owner: critic）
   drafts/              过程稿（owner: 各角色，按需）
-  final/               版本记账：v1.md = 版本索引与关键事实回溯；证据扩张 rerun 才落 v2.md
-                       全文并在此登记（owner: lead）——**final/ 只放版本记账，不放当前版全文**
-  final.md             当前版权威副本 = **run 根（bundle 顶层）的 final.md**——[来源: evidence/]
-                       相对 run 根解析。**不放 final/ 里**（final/ 曾被误用作全文位：位置漂移
-                       且审计静默跳过——正本钉死在 run 根）
+  final/               版本记账：v1.md = 索引与关键事实回溯；证据扩张 rerun 才落 v2.md（lead）——
+                       **只放版本记账，不放当前版全文**
+  final.md             当前版权威副本 = **run 根（bundle 顶层）的 final.md**，[来源:] 相对 run 根解析；
+                       **不放 final/ 里**（曾被误用作全文位：位置漂移且审计静默跳过——正本钉死在 run 根）
   journal.md           运行纪要（追加式，最新在上；所有角色可写；跨 rerun 累积血统）
-archive/drt_<slug>/    已交付 run 归档位：交付后操作侧移入，工作区根
-                       只留活跃 run——防题名目录被误读为"待开展课题"；仍可被审计/仪表盘按路径投影
+archive/drt_<slug>/    已交付 run 归档位（交付后操作侧移入，工作区根只留活跃 run；仍可被审计投影）
 templates/run/         新 run bundle 的起点模板（只读，不直接写）
-drafts/（工作区根）    开发侧跨 run 草稿（仅开发仓在场，部署侧无；**非 run 产物，角色不写不读**——
-                       run 内过程稿 = 各 bundle 自己的 drafts/，见上）
-NODES.md               节点 I/O 契约全表（八节点输入/输出/下游可开工判据 + 回边版本语义）——节点开工前对照；
-                       机械把守（开发仓操作侧工具）= schema-scan（在场级）+ node-gate（判据级门①②③④+L+R+A，图例 = NODES.md 头部）
-question-patterns.md   判型模式库（HITL1 第一对照面：命中走条目、未命中兜底 + journal 标记行；增长协议正本 = 库尾节）
+drafts/（工作区根）    开发侧跨 run 草稿（仅开发仓在场，角色不写不读——run 内过程稿见上）
+NODES.md               节点 I/O 契约全表（八节点 I/O + 下游可开工判据 + 回边版本语义）；机械把守 =
+                       schema-scan（在场级）+ node-gate（判据级门①②③④+L+R+A，图例 = NODES.md 头部）
+question-patterns.md   判型模式库（HITL1 第一对照面；命中走条目、未命中兜底 + journal 标记行；增长协议 = 库尾节）
+method-library.md      用户研究偏好库（工作区根；lead 维护；四字段 = 找来源/怎么核实/报告怎么写/不承诺）。
+                       立项先读：题面点名的偏好名 → 按该条目执行并在 §Decisions 记"采用库条目 X"；未点名
+                       但库有条目 → HITL1 方法行给推荐参考。**三态**：在场→用；缺席→说"还没存过偏好、本次
+                       用内置打法"（别静默）；读不回→如实说"文件在但读不到"及原因，**绝不降级成"没有
+                       偏好"**。点名条目不在库里 → 明说，不声称"已按该偏好执行"。管理动词仅显式触发
 ```
 
 模板六件 ↔ question/topics/leads/evidence-entry（= evidence/ 单条模板）/findings/final

@@ -69,3 +69,8 @@ packages/deep-research-pack/lib/
 
 # playwright MCP 的运行时产物（快照/截图，随浏览器工具调用重现）
 .playwright-mcp/
+
+# dev/ 只住源码驱动（布局约定），run 产物住 research-workspace/ 或 runtime/。
+# 此处是误落位的活跃 run bundle（2026-10-19 曾在跑）：不跟踪，免得 git add -A 把整场
+# run 提交进库，也免得它的 evidence 内部链接把 pre-commit 的 md-links 拦红。
+dev/harness-home/

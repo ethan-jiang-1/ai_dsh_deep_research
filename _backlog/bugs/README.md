@@ -14,13 +14,13 @@
 |---|---|
 | [BUG-034](../_archived/fixed_bugs/BUG-034-client-load-smoke-selftest-capsule-intermittent.md) | client-load-smoke「自测例库」块偶发打不开配置胶囊（8 跑 2 红）——整组断言静默跳过；根因未定位 |
 | [BUG-035](../_archived/fixed_bugs/BUG-035-hitl-answer-sidebar-session-invisible.md) | hitl-answer 在 research-workspace 找不到挂起会话（自报 aging 判据被重启证伪）——代答链路断 |
-| [BUG-042](BUG-042-method-library-seed-absent-no-pointer.md) | 偏好库 `method-library.md` 从不播种、手册不指路——面板宣称"我的偏好库"而盘上无此文件 |
 
 | 卡 | 一句话 |
 |---|---|
 
 
-（当前无活跃缺陷卡——BUG-030 已于 2026-10-16 修复归档。）
+（当前无活跃缺陷卡——BUG-042 已于 2026-10-19 修复归档到
+[fixed 池](../_archived/fixed_bugs/BUG-042-method-library-seed-absent-no-pointer.md)。）
 
 （近况看两池索引：[暂停](../_archived/suspended_bugs/README.md) · [已修](../_archived/fixed_bugs/README.md)；新卡编号 = 活跃 ∪ 全部归档池取最大号 + 1，规则唯一权威 = 本页。）
 
