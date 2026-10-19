@@ -74,6 +74,8 @@
 | lib/cdp-driver.mjs | cdp-probe | 裸 CDP 驱动 |
 | lib/inject-reconcile.mjs | cdp-probe、inject-reconcile.test | 注入消息「落盘对账」判据（BUG-021 正修：日志里出现本条 user/message 才算送达；时间下界防同文假阳） |
 | lib/probe-send-target.mjs | cdp-probe、probe-send-target.test | 提交按钮判定纯函数（BUG-021 正修：send 家族六标签状态机 + **stop 家族拒点** + composer 邻近窗；页面只读 DOM 与执行点击） |
+| lib/probe-status-tab.mjs | cdp-probe（`--open-status`）、run-driver、probe-status-tab.test | 右栏「研究状态」页签判定纯函数：胶囊按**标题 span 逐字**匹配（拒绝描述串入 / 近似标题）、页签体只认 `[data-sidebar-right-tab]`（不拿会话正文当观察面） |
+| lib/run-channel.mjs | dev/run-driver、run-driver-contract.test | run 通道驱动判据纯函数：web.log → 当前 GUI URL（取最后一条横幅）、浏览器面 verdict → 呈交判决（GREEN / RED / NOT-RUN） |
 | lib/ask-drive.mjs | hitl-answer | 代答读窗与谓词 |
 | lib/web-ui-nav.mjs | client-load-smoke、hitl-answer | 观察面侧栏导航共享件：折叠组展开（expandGroup）+ 候选分组名——两消费方逐字双份的收敛（零依赖，page 鸭子类型；真浏览器证据归消费方冒烟档） |
 | lib/unconsumed-evidence.mjs | unconsumed-evidence.test / 收尾核验 | B1 机械基座：evidence/ 未进 findings.md 的差集投影（critic 差集出题的操作侧对账） |

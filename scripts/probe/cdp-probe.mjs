@@ -32,6 +32,7 @@ import { launchCdpBrowser } from '../lib/cdp-driver.mjs';
 import { readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs';
 import { reconcileInjectedMessage } from '../lib/inject-reconcile.mjs';
 import { pickSendTarget } from '../lib/probe-send-target.mjs';
+import { pickStatusTab } from '../lib/probe-status-tab.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -146,17 +147,71 @@ try {
       return true
     })()`) === true;
   };
+  // 页签选择/打开判据 = scripts/lib/probe-status-tab.mjs（纯函数，keyless 钉住）。页面只读 DOM，
+  // 选谁与判绿归纯函数——旧版有两个缺陷（2026-10-19 run-driver 落地时实测）：①点右栏后只等
+  // 1.5s 就查按钮（右栏未挂载完 → 假红）；②paneText 取 body.innerText 里「研究状态」首现处
+  // （会话正文提到这四个字 → 假阳）。现在：等页签**体**出现（`[data-sidebar-right-tab]` data
+  // 钩子，不是会话正文）、按标题 span 精确匹配胶囊。
+  const readStatusDom = () => evaluate(`(() => {
+    // 标题 span 取按钮里最深的叶子（**不用 class*= 匹配**：哈希类名会连带容器，把描述串进来
+    // ——2026-10-19 实测 [class*="entryTitle"] 命中的是含描述的容器，页签因此永远"找不到"）。
+    const titleOf = (b) => {
+      const leaves = Array.from(b.querySelectorAll('span,div')).filter(e => e.children.length === 0 && (e.textContent ?? '').length > 0);
+      return leaves.length > 0 ? (leaves[0].textContent ?? '') : ''
+    }
+    return {
+      buttons: [...document.querySelectorAll('button')].map(b => ({
+        label: (b.getAttribute('aria-label') ?? '').trim(),
+        title: titleOf(b),
+        guideEntry: b.getAttribute('data-sidebar-right-guide-entry'),
+      })),
+      tabBodies: [...document.querySelectorAll('[data-sidebar-right-tab]')].map(e => e.textContent ?? ''),
+    }
+  })()`);
   const openStatusPane = async () => {
-    await evaluate(`(() => { const b = document.querySelector('[aria-label="Open right sidebar"]'); if (b) b.click(); return !!b })()`);
-    await new Promise((resolve) => { setTimeout(resolve, 1500) });
-    const visible = await evaluate(`(() => { const b = Array.from(document.querySelectorAll('button')).find(x => (x.textContent ?? '').includes('研究状态')); if (b) { b.click(); return true } return false })()`) === true;
-    await new Promise((resolve) => { setTimeout(resolve, 5000) });
-    return visible;
+    // 右栏展开按钮**首屏可能尚未挂载**（2026-10-19 探针实测：frameMounted 后立即查仍是 missing，
+    // 固定单击一次 = 什么都没发生，于是后面 12 轮都在"找不到页签"——假红）。故展开也进循环按
+    // 状态重试（幂等：已展开时按钮变 Collapse right sidebar，不再点）。
+    let expanded = false;
+    for (let i = 0; i < 12 && !expanded; i++) {
+      expanded = await evaluate(`(() => {
+        if (document.querySelector('[data-sidebar-right-open]') !== null) return true;
+        const b = document.querySelector('[aria-label="Open right sidebar"]');
+        if (b === null) return false;
+        b.click();
+        return false
+      })()`) === true;
+      if (!expanded) await new Promise((resolve) => { setTimeout(resolve, 1000) });
+    }
+    // 等待页签体出现（显式状态，不用固定 sleep 当证据）：右栏挂载 + 页签点开后体才渲染。
+    // 判据 = `[data-sidebar-right-tab]` 里出现了目标页签体（不是会话正文里出现这四个字）。
+    let opened = false;
+    let clicked = false;
+    for (let i = 0; i < 12 && !opened; i++) {
+      await new Promise((resolve) => { setTimeout(resolve, 1000) });
+      const dom = await readStatusDom();
+      const pick = pickStatusTab({ buttons: dom?.buttons ?? [], title: '研究状态' });
+      if (!clicked && pick.pickedIndex !== null) {
+        // 只点一次：点开后面板就位，下一次读到的已是页签体（重复点会把同一页签再切一次，
+        // 实测无害但徒增噪声）——选中判据见下：`clicked` 计数进 --debug-pane。
+        clicked = await evaluate(`(() => { const b = [...document.querySelectorAll('button')][${pick.pickedIndex}]; if (b === undefined) return false; b.click(); return true })()`) === true;
+        await new Promise((resolve) => { setTimeout(resolve, 1500) });
+      }
+      const after = await readStatusDom();
+      // 判据 = 页签体在场且**标题已切到目标**（页签体首轮可能只渲染标题 span——实测时序）：
+      // 认标题或正文任一处，不要求正文里出现目标词（未绑定 run 的正常面也该算"页签开了"）。
+      const bodies = after?.tabBodies ?? [];
+      opened = bodies.some((t) => typeof t === 'string' && t.indexOf('研究状态') !== -1);
+    }
+    return opened;
   };
   const paneText = async () => evaluate(`(() => {
-    const t = document.body?.innerText ?? '';
-    const i = t.indexOf('研究状态');
-    return i >= 0 ? t.slice(i, i + 4000) : t.slice(0, 300)
+    // 页签体优先（不拿会话正文当观察面——那会把对话里提到的词读成页签内容）。多条命中时取
+    // **最长**的一条：页签标题 span 与面板 body 共享同一 data 钩子，标题那条只有四个字。
+    const bodies = [...document.querySelectorAll('[data-sidebar-right-tab]')].map(e => e.textContent ?? '');
+    const hit = bodies.filter(t => t.includes('研究状态')).sort((a, b) => b.length - a.length)[0];
+    if (hit !== undefined) return hit.slice(0, 4000);
+    return (document.body?.innerText ?? '').slice(0, 300)
   })()`);
 
   if (openSessionTitle !== undefined) {

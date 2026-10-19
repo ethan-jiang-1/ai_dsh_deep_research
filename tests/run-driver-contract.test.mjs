@@ -1,0 +1,81 @@
+// run 通道驱动入口契约回归（用户指令 2026-10-19："驱动插件是最常用的命令，内化固定"）。
+// 断言对象 = 仓库自控文件（keyless、纯 fs、零子进程、零网络——layering 守卫范围）。
+//
+// 为什么要有这条：启动通道的三步序（boot → 验浏览器面 → 交 URL）此前只活在 guides/61 散文里，
+// 每次启动都要现场拼命令（端口/token 从 web.log 掏、探针用哪面、什么算绿全靠记性）——"承诺了
+// 动作却没有工具 = 动作不可复跑"（dev/run-kickoff.mjs 头注同款教训）。`dev/run-driver.mjs` 是
+// 该序的可复跑入口；本测试钉住它的**行为形状**（verdict 契约、token 来源、URL 抽取、端口回退），
+// 不重跑真浏览器（那是 entry 自身的活）。
+//
+// 立红记录：2026-10-19 首跑——run-driver.mjs 与 dev/README 索引行均缺席即红；实现后转绿。
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync, existsSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+// 判据住 scripts/lib/run-channel.mjs（壳 = dev/run-driver.mjs 含 spawn，测试不许进其 import
+// 闭包——layering 守卫；2026-10-19 实测红后按分层修正）
+import { guiUrlFromWebLog, runDriverVerdict } from '../scripts/lib/run-channel.mjs';
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
+
+test('入口在位：dev/run-driver.mjs + dev/README 索引行（navigability 资产门同期）', () => {
+  assert.ok(existsSync(join(ROOT, 'dev/run-driver.mjs')), 'dev/run-driver.mjs 缺席——启动驱动入口');
+  assert.ok(read('dev/README.md').includes('run-driver.mjs'), 'dev/README 未点名 run-driver.mjs');
+});
+
+test('URL 抽取：只认最后一条横幅（web.log 每次 boot 截断写，退化形态 fail-loud）', () => {
+  const real = '[llm-socket-isolation] 预载已生效 pid=56754\n'
+    + 'dsh web: http://127.0.0.1:3084/?token=x3tG2xyRrPcMcE0Rgm9PTuaztBg1uAI-vGPXBirf3n8\n';
+  assert.equal(guiUrlFromWebLog(real), 'http://127.0.0.1:3084/?token=x3tG2xyRrPcMcE0Rgm9PTuaztBg1uAI-vGPXBirf3n8');
+  // 多横幅（人工 append 过）→ 取最后一条：旧 token 作废，用旧的必 401
+  const two = real + 'dsh web: http://127.0.0.1:3099/?token=NEWER\n';
+  assert.equal(guiUrlFromWebLog(two), 'http://127.0.0.1:3099/?token=NEWER');
+  // 退化形态：空文件 / 无横幅 / 无 token → null（调用方据此 fail-loud，不猜端口）
+  assert.equal(guiUrlFromWebLog(''), null);
+  assert.equal(guiUrlFromWebLog('boot 中…\n'), null);
+  assert.equal(guiUrlFromWebLog('dsh web: http://127.0.0.1:3084/\n'), null);
+});
+
+test('verdict 契约：exit 0=全绿 / 1=断言红 / 2=未跑；消息面出现即不绿', () => {
+  const green = runDriverVerdict({
+    probe: { booted: true, frameMounted: true, statusPaneOpen: true, expectFaceHeld: true, consoleProblems: [], exceptions: [] },
+    expectFace: '研究状态', composing: false,
+  });
+  assert.equal(green.exit, 0);
+  assert.equal(green.checks.length, 4);
+
+  // expect-face 未命中 → 红（观察面页签缺席 = 插件没挂上）
+  const noFace = runDriverVerdict({
+    probe: { booted: true, frameMounted: true, statusPaneOpen: true, expectFaceHeld: false, consoleProblems: [], exceptions: [] },
+    expectFace: '研究状态', composing: false,
+  });
+  assert.equal(noFace.exit, 1);
+
+  // 页签打不开 → 红（statusPaneOpen=false 时 expectFaceHeld 可能为 null——不许当绿）
+  const noPane = runDriverVerdict({
+    probe: { booted: true, frameMounted: true, statusPaneOpen: false, expectFaceHeld: null, consoleProblems: [], exceptions: [] },
+    expectFace: '研究状态', composing: false,
+  });
+  assert.equal(noPane.exit, 1);
+
+  // console 错误 → 红（"boot 横幅只证宿主侧，观察面可能坏着"）
+  const noisy = runDriverVerdict({
+    probe: { booted: true, frameMounted: true, statusPaneOpen: true, expectFaceHeld: true, consoleProblems: ['x'], exceptions: [] },
+    expectFace: '研究状态', composing: false,
+  });
+  assert.equal(noisy.exit, 1);
+
+  // 组合在写（pack 改动未重建）→ 未跑，不是红也不是绿
+  const composing = runDriverVerdict({ probe: {}, expectFace: '研究状态', composing: true });
+  assert.equal(composing.exit, 2);
+});
+
+test('驱动入口不绕过漂移门：boot 必须经 dev/boot-run.sh，禁止直起 dsh --profile research', () => {
+  const src = read('dev/run-driver.mjs');
+  assert.ok(src.includes('boot-run.sh'), 'run-driver 未走 boot-run（绕过漂移检测、静默用旧镜像）');
+  // 裸起 profile 只在 boot-run 内部合法；驱动入口自己的代码里不许出现
+  assert.ok(!/--profile\s+['"]?research/.test(src.replace(/^.*boot-run\.sh.*$/gm, '')),
+    'run-driver 直起 research profile——绕过漂移门（guides/61 §0.1）');
+});

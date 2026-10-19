@@ -96,3 +96,8 @@ roadmap 触发型条目「升 pin 重校」。
 
 **处置**：run 通道已回退 company 基线恢复服务（web 3081 + HITL2 问询重发成功，横幅在案）；
 E1 的 keyless 面与 web-profile 真模型面维持切换；回归排查 = 队列新条目「E1 通道回归排查」。
+
+## 后续（pin 换代）
+
+本条钉的是「把 vendor 做进 workspace 并立门禁」这个机制决定，实例值（tag/commit）随换 pin 变更，
+不属本条决定内容。首次换代 = [2026-10-19 vendor pin 升到 dsh-v0.2.1-rc.2](2026-10-19-vendor-pin-bump-021rc2.md)。

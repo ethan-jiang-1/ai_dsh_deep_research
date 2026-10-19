@@ -84,7 +84,7 @@
 | 改 persona / skill / 手册文本（模型可见） | pack 源 + `research-workspace/` 正本 | `render-overlay` 先于 L1（L1 挂的是 overlay，不是 pack 源）→ L1 → **snapshot-replay B 层**（模型可见文本变化的 keyless 秒级信号；比对面 = persona 全文 + 全部 request/header + 三处 `user/message` 注入〔工作区手册全文 / skill 目录 description / 运行时上下文〕——**skill 正文不进组装请求**，其证据 = L1 可见面 + L4-lite 行为；有意变更 → 红 = 已捕获，走重录场景[真模型档，同 diff 更新 `snapshot.json` 的 source 身份]或 `--update-expected` 重写金标准 + 人审）→ **重启 run 通道**（web 缓存 boot 时文本）。金标准只许重写，不许放宽比对或归一化凑绿——fix fixtures, not normalizers | L0 + L1 + L4-lite | 同上 | 真模型档证据 + L1 绿 |
 | **改驾驶舱**（观察面 client 面——`src/client/` 套件，[构成正本](../design/40-research-cockpit.md)） | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `pnpm build` → `client-load-smoke`（改挂起显性化再跑 `client-hitl-smoke`） | L0 + client-load-smoke | 同上 | 真浏览器断言全绿 |
 | 加 / 改机械门禁 | `verify.mjs` gates 数组 + `evaluation.md` §L0 台账（案例表有增删再动 `gates-smoke.mjs`） | **注入回归红 → 还原 → 绿** → gates-smoke | L0 + gates-smoke | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 + gates-smoke 绿 |
-| 改 run 通道工具 / 审计门（boot-run / watch-run / hitl-answer / run-dashboard / evidence-audit / node-gate / schema-scan / snapshot-replay） | 对应 `scripts/` / `dev/` 脚本 | — | L0 + 对应 `tests/*.test.mjs` 契约测试必跑（用例即其反证记录） | 判据变更才写 Note | 对应契约测试绿 |
+| 改 run 通道工具 / 审计门（run-driver / boot-run / watch-run / hitl-answer / run-dashboard / evidence-audit / node-gate / schema-scan / snapshot-replay） | 对应 `scripts/` / `dev/` 脚本 | — | L0 + 对应 `tests/*.test.mjs` 契约测试必跑（用例即其反证记录） | 判据变更才写 Note | 对应契约测试绿 |
 | 改 scripts/lib 支撑模块 / dev 基建本体（`lib/*.mjs`、env.sh、render-overlay、sync-pack-workspace） | 支撑模块 + 其**全部消费方**（消费面 grep：roles.mjs 的角色枚举消费方、render-overlay → `overlay-fresh`、sync → `pack-workspace-fresh`、run-state → watch-run/hitl-answer/run-dashboard） | 消费方门禁在同 diff 复跑 | L0 + lib 对应契约测试 | 判据变更才写 Note | 消费方门禁与契约测试绿 |
 | 改工作区手册 / 模板（结构性调整：模板增删 / 路径与格式修正；**手册正文文本 = 模型可见，走上行〔改 persona / skill / 手册文本〕**） | `research-workspace/` 正本 → `sync-pack-workspace` | sync → verify | L0 | — | `pack-workspace-fresh` 绿 |
 | 改部署面（preflight / scaffold / 发布集） | pack `scripts/` + `package.json` 的 files/bin | — | L0 + L2 | 部署 Note | `release-smoke` ALL PASS |
@@ -113,7 +113,8 @@ node scripts/probe/cdp-probe.mjs '<gui-url>' --open-session '<标题>' --open-st
 node scripts/smoke/release-smoke.mjs        # L2 真实安装形状：pack→干净 profile→plugin add→安装域冒烟；无模型调用，安装模式跳过模型就绪检查
 node scripts/smoke/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：四角色响应 + scout web_search 调用）
 node scripts/smoke/team-preflight-smoke.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + company D18 one-shot worker 探针）
-bash dev/boot-run.sh                  # run 通道：自检→组合检查/必要补装→漂移门；仪表盘后台观察、web 前台 3083；用法 = 61
+node dev/run-driver.mjs up          # **run 通道驱动入口（常用）**：起/复用通道 + 验浏览器面 + 呈交块（exit 0 可呈交/1 红/2 未跑）；probe = 只验已起通道；url = 打印当前 URL
+bash dev/boot-run.sh                  # run 通道底层启动面：自检→组合检查/必要补装→漂移门；仪表盘后台观察、web 前台 3083；用法 = 61（驱动入口内部调它）
 node --import tsx/esm scripts/run-ops/run-dashboard.mjs --latest --out <html>   # run 只读投影（多场扫描 + 步骤条 + HITL 等待横幅；--watch 持续再生成）
 node scripts/run-ops/plan-card-stats.mjs   # 计划确认卡字数跨场分布（keyless，须先 source；判 ①-c 升硬门前置「连续 ≥3 场 ≤200 字达标」）
 node scripts/run-ops/provider-error-stats.mjs   # 上游流错误（回合被终结）跨场分布——BUG-022 的"可数"面（keyless，须先 source）
