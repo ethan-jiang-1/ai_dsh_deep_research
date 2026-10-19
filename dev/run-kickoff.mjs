@@ -89,7 +89,7 @@ if (resumeSessionId !== null) {
   // 关闭挂起问询前的记账（BUG-041）：**续跑分支才是官方恢复路径**（`--session` 发自由文本关闭挂起），
   // ⚠ 2026-10-18 实测教训：本仓有**两个** session/prompt 站点（新建 / 续跑），接线一度落在新建分支 →
   // 恢复路径关单时静默不记账（连跳过原因都没打印）。记账只属于"续跑关挂起"这一支。
-  const closing = await closingRowForPending()
+  const closing = await closingRowForPending(resumeSessionId)
   await rpc('session/prompt', { request: { requestId: randomUUID(), sessionId: resumeSessionId, mode: 'queue', content: [{ type: 'text', text: prompt }] } });
   console.error(`run-kickoff: prompt 已送入已存会话 ${String(resumeSessionId).slice(0, 8)}…（续跑）`)
   if (closing !== null) {
@@ -153,7 +153,7 @@ if (prompt) {
  * 取"本会话是否有挂起 + 是哪张卡 + 归属 bundle"（BUG-041 记账用；无挂起/归属不唯一 → null，静默返回，
  * 由调用方决定是否提示）。判据源：会话日志事件（foldHitlPending）+ 末位 ask 的问题头（isDeliveryReviewCard）。
  */
-async function closingRowForPending() {
+async function closingRowForPending(sid) {
   try {
     const { readSessionEvents, resolveSessionLog, researchWorkspaceGroup } = await import('../scripts/lib/session-log.mjs')
     const { foldHitlPending } = await import('../packages/deep-research-pack/src/lib/hitl-fold.ts')
@@ -163,8 +163,8 @@ async function closingRowForPending() {
     const sessionsRoot = join(process.env.DSH_HOME ?? '', 'sessions')
     const group = researchWorkspaceGroup(sessionsRoot)
     if (group === undefined) { console.error('run-kickoff: 记账跳过——找不到 research-workspace 会话组'); return null }
-    const logPath = resolveSessionLog(join(sessionsRoot, group, sessionId))
-    if (logPath === null) { console.error('run-kickoff: 记账跳过——会话日志不在（' + sessionId.slice(0, 8) + '）'); return null }
+    const logPath = resolveSessionLog(join(sessionsRoot, group, sid))
+    if (logPath === null) { console.error('run-kickoff: 记账跳过——会话日志不在（' + String(sid).slice(0, 8) + '）'); return null }
     // ⚠ readSessionEvents 返回 `{readable, events}` **不是数组**（2026-10-18 实测踩坑三次：喂对象会让
     // fold 抛错，而此前被 catch 吞掉 → 静默不记账）。此处按契约取 .events，并把失败原因打出来（fail-loud）。
     const read = readSessionEvents(logPath)
