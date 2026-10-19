@@ -106,6 +106,28 @@ opened: 2026-10-18
   `关闭挂起的记账行已落 §Decisions` 打印 + 行/备注/`isHitl2Row` 三项为真。取证要求（教训）：
   输出**落文件后 grep**，不要 `| tail -N`（本轮因此丢过一次关键行）。
 
+## 缺陷⑥⑦与链路收敛（2026-10-19 凌晨）
+
+关单输出**落文件后 grep**（上一轮的取证教训已生效）交出后两层真因：
+
+- **⑥ `sessionId` 时序死区**：续跑分支的记账块引用了**后声明**的 `sessionId`（那是新建分支的变量）
+  → `ReferenceError: Cannot access 'sessionId' before initialization`。**已修**：改传 `resumeSessionId` 参数。
+- **⑦ 导入缺失**：`closingProvenanceRow`/`appendDecisionsRow` 的 import **从未真正插入**（我此前两次
+  "核验"都假绿：一次把**调用点**误当导入行、一次锚点正则不匹配）。**已修**并**按导入行本身**核验
+  （`grep '^import.*hitl-provenance'` 命中）。
+
+**至此记账链路共 7 个缺陷全部修完**：① 静默 catch ② `readSessionEvents` 形态 ③ 跳过分支静默
+④ 接线站点错位（新建 vs 续跑）⑤ `researchWorkspaceGroup` 未导入 ⑥ `sessionId` TDZ ⑦ 记账行函数未导入。
+—— **每一个都是 fail-loud 自己报出来的**（把静默改成会说话，才可能一层层剥到底）。
+
+## 判据#3 现状（仍未达成，如实）
+
+- 已分别验证：判定链在真数据上解析正确（卡种=交付 ✓ 归属 ✓ bundle 命中 ✓）；记账行形态被门侧
+  `isHitl2Row` 认（同钉单测 ✓）；接线在**正确分支**且符号齐（静态核验 ✓）。
+- **未观测到**：一次真相交卡关单时的行落地。最近两跑均因 ⑥⑦ 失败（已修）；最后一次尝试（修复后）
+  卡在 HITL1 代答的 `spawnSync` 里（驱动器阻塞，已终止）。
+- 下一跑只需：复用活通道 → 跑到交付卡 → 关单 → `grep 记账行已落 runtime/.e2e041-run.log`。
+
 ## 边界（写清楚免得被误用）
 
 - **不追改历史 bundle**：`drt_cambricon-commercial-sustainability` 的红是**当时事实的如实记录**，
