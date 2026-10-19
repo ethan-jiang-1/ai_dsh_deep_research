@@ -6,6 +6,7 @@
 
 | 卡 | 一句话 |
 |---|---|
+| [2026-10-19-final-tab-in-sidebar.md](2026-10-19-final-tab-in-sidebar.md) | 右栏加「终稿」页签：交付前空态、交付后整篇渲染 `final.md`、全程不泄漏中间过程。渲染层（`ui-sidebar-documentpreview` 已挂，kind `text` 兼 Markdown）与交付信号（`present` → `deliverables/presented` 事件）都现成；硬阻塞 = 该事件是**轮次级**，跨会话打开老 run 取不到 |
 | [2026-10-19-discipline-map-semantic-drift.md](2026-10-19-discipline-map-semantic-drift.md) | discipline-map 全表 76 行语义重读暴露 **9 行**落点不符/三态可疑（不是过时，是描述与实体不对应）：源 1 #6/#12、源 3 #3/#4、源 9 #10/#11、源 10 #5/#8、源 11 #5。`align-ledger` 只判存在性判不出语义过期，本轮已实测到代价（源 10 两行判「不适用」而等价物早在仓里）。附两笔：ledger `owns` 47/108 条被截断在 140 字、语料基线自报落后本仓 pin |
 | [2026-10-18-research-method-config-ux.md](../_archived/settled_issues/2026-10-18-research-method-config-ux.md)（**总卡**） | 「研究配置」的问题不在样式在**轴**：方法轴是题面轴的影子且与判型库错位、面板与 run 脱节、回执 ≠ 落地、内置不成示范（408 字 vs 70 字）。总卡持边界与共识（四轴模型 / 15 条发现 / 三轮评审回执 / 调查面），实施分派两张子卡；工件合同与领域包升格留未决池 |
 | [2026-10-18-research-config-panel-explicitness.md](../_archived/settled_issues/2026-10-18-research-config-panel-explicitness.md)（子卡①） | 面板显式化：本次研究区 / 回执三态 / 卡面与详情（谁读它 · 底线 · 管不到）/ 字段名统一 / 修 `**` 字面渲染。证据面 = keyless 浏览器；只碰客户端与测试 |
