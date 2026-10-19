@@ -330,9 +330,13 @@ export function customLandedInBatch(obs) {
  * @param questions parseAskQuestions 的产物。
  * @returns 是否交付审阅卡。
  */
-export function isDeliveryReviewCard(questions) {
+export function isDeliveryReviewCard(questions, askText = '') {
   const labels = (Array.isArray(questions) ? questions : []).flatMap((q) => (Array.isArray(q?.options) ? q.options.map((o) => String(o?.label ?? o ?? '')) : []))
-  return labels.some((l) => /定稿/.test(l)) && labels.some((l) => /补研究|修订/.test(l))
+  if (labels.some((l) => /定稿/.test(l)) && labels.some((l) => /补研究|修订/.test(l))) return true
+  // 文本级兜底（BUG-041 缺陷⑧，2026-10-19 实测）：真交付卡的选项集不一定同时含"补研究/修订"族
+  // （当日那张只有「按现稿定稿」+「继续打磨」形态）→ 仅按选项标签会把交付卡误判成计划卡，记账行卡名写错。
+  // 故接受调用方传入的 ask 参数原文，命中「交付审阅/定稿」即认（与驱动器/探针判据同钉）。
+  return /交付审阅|定稿/.test(String(askText))
 }
 
 /**

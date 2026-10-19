@@ -173,7 +173,8 @@ async function closingRowForPending(sid) {
     if (foldHitlPending(events).pending !== true) { console.error('run-kickoff: 记账跳过——该会话当前无挂起问询（foldHitlPending=false）'); return null }
     const lastAsk = [...events].reverse().find((e) => e?.type === 'tool/call' && e?.data?.name === 'ask_user_question')
     const questions = parseAskQuestions(lastAsk?.data?.arguments)
-    const cardKey = isDeliveryReviewCard(questions) ? 'anchor-2' : 'anchor-1'
+    // 传 ask 原文：真交付卡的选项集不一定含"补研究/修订"族（缺陷⑧），文本级判据是同钉正本
+    const cardKey = isDeliveryReviewCard(questions, JSON.stringify(lastAsk?.data?.arguments ?? {})) ? 'anchor-2' : 'anchor-1'
     const slug = attributionBundleOf(events)
     if (slug === null) { console.error('run-kickoff: 记账跳过——归属未定（attributionBundleOf=null：该会话尚无 write/edit 命中任何 bundle，按纪律延迟补记）'); return null }
     for (const base of ['research-workspace', join('research-workspace', 'archive'), join('research-workspace', '_abandoned')]) {

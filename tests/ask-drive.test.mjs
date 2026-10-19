@@ -442,3 +442,10 @@ test('自由文本关闭挂起的记账行：HITL1 卡不得被门认成 HITL2 �
   assert.match(row, /计划确认|HITL1/);
   assert.equal(isHitl2Row(row), false, 'HITL1 的记账不能顶替交付拍板行');
 });
+
+test('交付审阅卡识别（缺陷⑧）：选项缺"补研究/修订"族时，靠 ask 原文兜底（实测形态）', () => {
+  const realCard = [{ header: '交付审阅', options: [{ label: '按现稿定稿 (Recommended)' }, { label: '继续打磨' }] }];
+  assert.equal(isDeliveryReviewCard(realCard), false, '仅按选项标签时识别不到——这正是缺陷⑧');
+  assert.equal(isDeliveryReviewCard(realCard, JSON.stringify(realCard)), true, '原文含「交付审阅」→ 必须认（同钉）');
+  assert.equal(isDeliveryReviewCard([{ header: '研究类型', options: [{ label: '探索性全景' }] }], '研究类型/深度/口径'), false, '计划卡不得误认');
+});

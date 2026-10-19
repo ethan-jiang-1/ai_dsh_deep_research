@@ -1,13 +1,13 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-10-18
 ---
 
 # BUG-041：官方恢复路径（`run-kickoff --session` 自由文本关挂起）不落任何 HITL 记账
 
-> 状态：**修复落地**（修法已进树 + 单测/同钉反证；**端到端绿证待跑**——需一场真挂起 + kickoff 关单）。
-> 从 [BUG-040](../_archived/fixed_bugs/BUG-040-terminal-readiness-two-copies-drift.md) 闭环时带出：
+> 状态：**已修**（2026-10-19：判据#3 端到端达成——真相交卡存活窗内关单，记账行落地且被门侧认作拍板行）。
+> 从 [BUG-040](BUG-040-terminal-readiness-two-copies-drift.md) 闭环时带出：
 > readiness 判据修正后，`drt_cambricon-commercial-sustainability` 的门②/门③ 由 N/A 转**如实判红**。
 
 ## 症状与根因
@@ -133,3 +133,24 @@ opened: 2026-10-18
 - **不追改历史 bundle**：`drt_cambricon-commercial-sustainability` 的红是**当时事实的如实记录**，
   禁止手改它的 §Decisions 去"修绿"（append-only 记录 + 文件即真相）；
 - 本修法只保证**今后**走这条恢复路径会留痕；自由文本关单仍**不等价于**结构化代答（内容取舍责任在操作者）。
+
+## 闭环（2026-10-19：判据#3 达成）
+
+**现场**：真 run 跑到交付段、交付卡**存活窗内**（`PENDING=true DELIVERY=true`）→ 用官方恢复路径关单：
+
+```
+run-kickoff: 关闭挂起的记账行已落 §Decisions（anchor-2 → bundle drt_anthropic-claude-release-line-timeline）
+判据#3：行=true 备注=true isHitl2Row=true
+行样本：- 2026-10-19｜**HITL 交互 = 操作侧代理模拟（run-kickoff 自由文本关闭挂起）**：交付审阅 →
+        「按现稿定稿，无需修订。」——作答者非用户本人，按代驱显式记账纪律落此行。
+```
+
+三项判据全真：§Decisions 行在场 ✓、journal 备注在场 ✓、**门侧 `isHitl2Row` 认作 HITL2 拍板行** ✓（卡名正确）。
+
+**链路共 8 个缺陷全部修完**（①静默 catch ②`readSessionEvents` 形态 ③跳过分支静默 ④接线站点错位
+⑤`researchWorkspaceGroup` 未导入 ⑥`sessionId` 时序死区 ⑦记账行函数未导入 ⑧交付卡识别只认选项标签
+——真卡选项集不含"补研究/修订"族时会误判成计划卡，行就写错卡名）。**8 个全是 fail-loud 自己报出来的。**
+
+**两次"假绿"的教训（写下来防复犯）**：核验脚本把**调用点**当导入行（第 ⑦ 条的第一次）、以及
+本仓 `readSessionEvents` 非数组形态——**验证必须查目标本身**（`grep '^import…'` 查导入行、直接调用
+函数看返回值），不能靠"脚本打印成功"。
