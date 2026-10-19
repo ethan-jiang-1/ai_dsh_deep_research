@@ -12,6 +12,16 @@ test('direct authorization probe accepts authorized scope without invented prere
   assert.equal(directAuthorizationBoundaryPasses('按用户本轮请求的授权范围直接执行，不需重复请批。'), true);
   assert.equal(directAuthorizationBoundaryPasses('按用户本轮请求（或已有明确授权）的范围直接执行——用户直派即当轮授权范围，不需重复请批。'), true);
   assert.equal(directAuthorizationBoundaryPasses('仅在本轮请求或已有明确授权划定的范围内执行，无需重复请批——呈批门只在任务复杂或用户主动要求时使用。'), true);
+  // 2026-10-19 真模型实录（entry-chain-probe Q1 原话）：模型用「不用逐次重复请批」表达同一语义，
+  // 而否定词清单当时只列 不需/无需/不必/不需要/不要求，独漏「不用」→ 语义正确的回答被判红。
+  // 词面层职责是召回语义正确的形态、不是规定措辞，故补词而非收紧模型。
+  assert.equal(directAuthorizationBoundaryPasses('按本轮用户明确请求划定的范围直接执行（用户直派就是当轮授权）；在这个范围内不用逐次重复请批，只有超出该范围时才需要再请批。'), true);
+  assert.equal(directAuthorizationBoundaryPasses('按本轮请求的授权范围直接执行，不用重复请批。'), true);
+  // 2026-10-19 同一探针连续三次真模型实录，每次换个说法都判红——三个词形都要锁住：
+  // ①「不用逐次重复请批」（否定词漏「不用」）②「不需要重复请求批准」（动作面只认「请批」）
+  // ③「用户本轮请求划定的范围」（授权来源只认「授权」，漏了「用户直派」这个合同核心形态）。
+  assert.equal(directAuthorizationBoundaryPasses('应当按用户本轮请求和已有授权划定的范围直接执行（复杂工作用会话内 plan/todo 组织），不需要重复请求批准。'), true);
+  assert.equal(directAuthorizationBoundaryPasses('按本轮用户明确请求划定的范围直接执行；在这个范围内不用逐次重复请批。'), true);
 });
 
 test('RFC probe recognizes the contract without requiring one phrase order', () => {
