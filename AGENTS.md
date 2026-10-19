@@ -27,7 +27,7 @@ CLAUDE.md→AGENTS.md、.claude/skills→.agents/skills    两条 symlink（编�
                          子树的指令（根只放每轮常驻指令；vendor 树内 28 份同构；本仓另有研究手册与 pack 种子副本两份 AGENTS.md，见各自行）
 README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令正本 = guides/60 §2，不复制）
 _backlog/                 问题澄清与证据区：issues/、bugs/、research/、methods/、triggers.md、_archived/（另有
-                          _done/、_postponed_plans/ 改名兼容指针，见 _backlog/README 载体导航）；
+                          _done/ 改名兼容指针，见 _backlog/README 载体导航）；
                           手册 = _backlog/README.md、子树门牌 = _backlog/AGENTS.md（修复授权/状态生命周期速览）
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 按实际构建需求——见 pnpm-workspace.yaml 头注）
 packages/deep-research-pack/   唯一自写包（配置为主 + 研究驾驶舱[Research Cockpit，观察面 client 套件，D18，构成正本 = docs/design/40-research-cockpit.md]）：presets/<role>.patch.yml（单行形态=一条 @deepseek-ai/dsh-agent-preset 行，DSH 0.1.7 起同形态，config.plugins 内声明 persona/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、cordis.patch.yml（bundle 行）、workspace/（工作区种子：手册+NODES+判型库+模板，生成物）、scripts/{preflight,scaffold}.mjs（部署 bin）、src/client/ 与 src/lib/（驾驶舱 client 半与折算纯函数，构建产物 lib/）；交付与部署形态 = guides/62，合同 = 包 README
