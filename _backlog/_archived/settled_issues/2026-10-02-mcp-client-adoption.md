@@ -6,7 +6,7 @@
 
 2026-10-02 DSH 新语料反省发现：2026-09-30 插件货架盘点（[plugin-shelf-adoption](../../../notes/implemented/2026-09-30-plugin-shelf-adoption.md)，11 项收口）**漏了 mcp-client**——它在语料里归"扩展机制与运营"组，不在研究相关的显眼八类；当时语料消化不全导致盘点盲区（本卡即该反省的收口产物之一）。缺口真实性侧：[browser-use 否决 Note](../../../notes/rejected/2026-09-30-browser-use-adoption.md) 实证 15 场归档 run 中 13 场命中 SPA 证据失败，绕行对冲大半后残余硬缺口 = 无静态出口的消费端 SPA 定价页与 JS 榜单。mcp-client 是 DSH 接外部抓取/检索 server 的官方通道（每 server 一行，工具以 `mcp__<server>__<tool>` 注册进 `ctx.tools`）。
 
-## 已知与未决（vendor `dsh-v0.2.0-rc.2` 源码核对，2026-10-02，深挖子代理报告 + 本仓交叉实证）
+## 已知与未决（vendor 当轮 pin 源码核对，2026-10-02；当轮 tag 属外部材料口径，深挖子代理报告 + 本仓交叉实证）
 
 四个未知数全部落源码解决：
 

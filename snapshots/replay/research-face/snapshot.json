@@ -11,9 +11,9 @@
       "fixture": "session.v4.jsonl",
       "renderExpected": "ui.expected.md",
       "source": {
-        "codeAnchor": "e670ded9237dc90e9e91a138e7df7815759d4ff0",
-        "vendor": "639ed015397290b3745d163aafe02ffee4aa3f84",
-        "recordedAt": "2026-10-13T02:22:17.000Z",
+        "codeAnchor": "718a7ff714fbc7c36989061a4b5c881ed4bd4acc",
+        "vendor": "687f282e8625c6b8d11ff58211a90524be2e4317",
+        "recordedAt": "2026-10-19T06:27:54.000Z",
         "recording": "live"
       }
     },
@@ -22,9 +22,9 @@
       "preset": "scout",
       "fixture": "scout/session.v4.jsonl",
       "source": {
-        "codeAnchor": "c4889592ea54e5eac2553b38715c4146456388f6",
-        "vendor": "639ed015397290b3745d163aafe02ffee4aa3f84",
-        "recordedAt": "2026-10-11T23:52:46.000Z",
+        "codeAnchor": "718a7ff714fbc7c36989061a4b5c881ed4bd4acc",
+        "vendor": "687f282e8625c6b8d11ff58211a90524be2e4317",
+        "recordedAt": "2026-10-19T06:27:54.000Z",
         "recording": "live"
       }
     },
@@ -33,9 +33,9 @@
       "preset": "analyst",
       "fixture": "analyst/session.v4.jsonl",
       "source": {
-        "codeAnchor": "c4889592ea54e5eac2553b38715c4146456388f6",
-        "vendor": "639ed015397290b3745d163aafe02ffee4aa3f84",
-        "recordedAt": "2026-10-12T00:10:27.000Z",
+        "codeAnchor": "718a7ff714fbc7c36989061a4b5c881ed4bd4acc",
+        "vendor": "687f282e8625c6b8d11ff58211a90524be2e4317",
+        "recordedAt": "2026-10-19T06:27:54.000Z",
         "recording": "live"
       }
     },
@@ -44,9 +44,9 @@
       "preset": "critic",
       "fixture": "critic/session.v4.jsonl",
       "source": {
-        "codeAnchor": "c4889592ea54e5eac2553b38715c4146456388f6",
-        "vendor": "639ed015397290b3745d163aafe02ffee4aa3f84",
-        "recordedAt": "2026-10-12T00:12:25.000Z",
+        "codeAnchor": "718a7ff714fbc7c36989061a4b5c881ed4bd4acc",
+        "vendor": "687f282e8625c6b8d11ff58211a90524be2e4317",
+        "recordedAt": "2026-10-19T06:27:54.000Z",
         "recording": "live"
       }
     }

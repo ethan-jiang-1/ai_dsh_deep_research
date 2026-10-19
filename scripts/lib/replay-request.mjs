@@ -12,20 +12,26 @@ const headersOf = (events) => events.filter((event) => event?.type === 'request/
   return { config: { provider: header?.config?.provider, model: header?.config?.model }, tools: header?.tools };
 });
 
-// These slots are rendered by app-boot/addHarnessSourceSection and web-app/webSurfacePrompt.
-// No SHA, URL, path, or date elsewhere in persona/manual/schema text is normalized.
-const normalizePersona = (text) => text
-  .replace(/^(The DeepSeek Harness implementation checkout is at )(?:\/|[A-Za-z]:[\\/])[^\n]+?(\. The checkout location and current working directory are separate values and may differ;)/gm,
-    '$1<replay:harness-root>$2')
-  .replace(/^(You are interacting with the user through the DeepSeek Harness Web GUI at http:\/\/127\.0\.0\.1:)\d+(\. When the user refers to)/gm,
-    '$1<replay:gui-port>$2');
+// 0.2.1 起（换 pin 实红核对）：boot 引导身份**不再嵌进 persona 正文**。上游把两处可变值改写为
+// 指回 runtime context 的**间接引用**——persona 只剩「The runtime context names the DeepSeek
+// Harness implementation checkout…」与「…through the DeepSeek Harness Web GUI whose URL the
+// runtime context names…」两句无值句子，具体路径/端口下移到 runtime-context 三行（implementation
+// checkout / Web GUI URL / file policy workspace）。故 persona 归一化**清零**——留着旧 replace 是
+// 死规则（永不命中 = 假装在防漂移），零归一化才如实声明「persona 无可变令牌」。
+// No SHA, URL, path, or date in persona/manual/schema text is normalized.
+const normalizePersona = (text) => text;
 
-// sandbox-policy/renderPolicyContext embeds JSON.stringify(workspaceRoot) in this exact sentence.
+// runtime-context 承担可变身份（逐行独立归一——只归值，句式与其余正文不动）：
+// ① 录制/回放端口必不同（录制 dev/record-role-fixture 默认 3105、回放 smoke 默认 3103），
+//    端口是 boot 生成物而非契约内容；② checkout 根随 clone 位置；③ 工作区根嵌在 sandbox 策略句。
 // Policy mode, permissions, tool inventory and all other runtime text remain unchanged.
-const normalizeRuntime = (text) => text.replace(
-  /^(Current DSH file policy: workspace-write\. Any available operation enforced by the DSH file sandbox may modify files under the session workspace: )"(?:[^"\\\n]|\\.)*"(\. Some platform temporary areas may also be writable\.)$/gm,
-  '$1"<replay:workspace-root>"$2',
-);
+const normalizeRuntime = (text) => text
+  .replace(/^(Current DeepSeek Harness Web GUI URL: "http:\/\/127\.0\.0\.1:)\d+("\.)$/gm,
+    '$1<replay:gui-port>$2')
+  .replace(/^(Current DeepSeek Harness implementation checkout: )"(?:[^"\\\n]|\\.)*"\.$/gm,
+    '$1"<replay:harness-root>".')
+  .replace(/^(Current DSH file policy: workspace-write\. Any available operation enforced by the DSH file sandbox may modify files under the session workspace: )"(?:[^"\\\n]|\\.)*"(\. Some platform temporary areas may also be writable\.)$/gm,
+    '$1"<replay:workspace-root>"$2');
 
 const normalizeContent = (content, kind) => Array.isArray(content) ? content.map((part) => {
   if (part?.type !== 'text' || typeof part.text !== 'string') return part;

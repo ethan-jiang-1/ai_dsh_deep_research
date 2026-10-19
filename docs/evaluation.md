@@ -44,7 +44,7 @@
 | `note-status` | notes/ 每子目录有 README.md（含 archived/ 冻结层）；research/ 状态行与索引对账断言条件化保留（research/ 已清并，目录重现即复活） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) |
 | `note-graduation-rewrite` | implemented/ 活跃 Note 零计划体残留：裸节名 `## 验收`（RFC 专有形状）与未来时态标记（词表正本 = verify.mjs 本门禁块 markers 数组，不抄第二份）零容忍；grandfather 豁免、archived/ 与 README 不扫、空扫描范围即红；带后缀变体（`## 验收判据` 等）是既有事实体形态不追改，漏报由毕业 skill 语义兜底 | [graduation-rewrite-gate Note](../notes/implemented/2026-09-27-graduation-rewrite-gate.md) |
 | `dev-skill-format` | `.agents/skills/*/SKILL.md` 在场 + frontmatter `name` = 目录名 + `description` 以 "Use " 开头（形状坏了 = 技能静默不触发，比写错正文更难发现） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) |
-| `vendor-pin` | vendor/dsh submodule 在位：.gitmodules 正源 URL + 钉 commit `639ed01539`（tag dsh-v0.2.0-rc.2） | [vendor-submodule Note](../notes/implemented/2026-09-24-vendor-submodule.md) |
+| `vendor-pin` | vendor/dsh submodule 在位：.gitmodules 正源 URL + 钉 commit `687f282e86`（tag dsh-v0.2.1-rc.2） | [vendor-submodule Note](../notes/implemented/2026-09-24-vendor-submodule.md) |
 | `vendor-clean` | vendor/dsh `git status --porcelain` 零未提交改动（机制权威不许就地改） | [vendor-submodule Note](../notes/implemented/2026-09-24-vendor-submodule.md) |
 | `secrets-untracked` | tracked 清单零敏感/残留物（credentials/.env/.pem/.tgz/.log/…） | [入口链审计 Note](../notes/implemented/2026-09-24-entry-chain-fresh-agent-audit.md) |
 | `role-list-sync` | 角色清单单一事实源 = 盘上 presets/；代码（scripts/tests/dev 的 .mjs/.sh）里角色清单字面量（单行 ≥3 角色名 / `[...]` 块 ≥3 角色名字符串）即红——检测名从盘上现取 | [基础整治 Note](../notes/archived/2026-09-24-foundation-remediation.md) |

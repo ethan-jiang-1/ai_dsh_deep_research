@@ -29,7 +29,7 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 
 ## 部署（四步）
 
-**前置**：DSH 版本必须是 `dsh-v0.2.0-rc.2`（`dsh.compatibility.dshReleases` 钉死）。
+**前置**：DSH 版本必须是 `dsh-v0.2.1-rc.2`（`dsh.compatibility.dshReleases` 钉死）。
 
 ```sh
 # ① 建 profile——自定义名默认只带 dsh-base（起不了 web，也就没有 GUI）；须先取 web 模板。
@@ -156,4 +156,4 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 - **工具卡 = 2 张**（spawn_teammate / web_search）；`team_task_*` 与其他协调类工具
   （wait_agent / list_agents / send_message）**不进对话流**（实测：harness 把协调类工具排除在对话渲染外）——团队任务的观察由 ui-agent-team 任务板与 To-dos
   折叠承担，无需卡片（4 卡方案的回退理由 = [marathon2 复盘](../../notes/archived/2026-09-25-marathon2-retrospective.md)，冻结层）；
-- **版本兼容面窄**：只声明 `dsh-v0.2.0-rc.2`（pre-stable API，peer 版本号不精确钉死）。
+- **版本兼容面窄**：只声明 `dsh-v0.2.1-rc.2`（pre-stable API，peer 版本号不精确钉死）。

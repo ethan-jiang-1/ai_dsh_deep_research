@@ -37,7 +37,7 @@
 
 **计数**：连续无救场计数 **3/3——第一阶段判据达成**（2026-10-04 三场验收 run 连续）（本场判不过）。
 
-**2026-10-03 基座适配复查**（用户拍板开始推进第二阶段，触发本轮逐面对照）——卡片成文（09-28）后基座动了一轮：vendor pin 仍钉 `dsh-v0.2.0-rc.2`（fetch 全 tag 确认无新 tag），调整 = 0.2.0 适配与其上的采纳面：插件货架三件（timed ask-user 600s + hitl-fold v5／tool-goal 护栏〔pilot 一场真 run 已验〕／session-query 五工具进 lead+critic）、mcp-playwright 常驻（默认挂载）、NODES.md 八节点契约 + schema-scan（在场级全行）+ node-gate v1（交付两门 + PASS-RELAY 操作侧补齐通道）、BUG-001/002 观察面诚实性修复、guides/61 §0 通道纪律（通道必须用户终端起）。逐面判定：
+**2026-10-03 基座适配复查**（用户拍板开始推进第二阶段，触发本轮逐面对照）——卡片成文（09-28）后基座动了一轮：vendor pin 当时仍钉旧 tag（fetch 全 tag 确认无新 tag；旧 tag = 该轮外部材料口径，现 pin 见 AGENTS.md），调整 = 0.2.0 适配与其上的采纳面：插件货架三件（timed ask-user 600s + hitl-fold v5／tool-goal 护栏〔pilot 一场真 run 已验〕／session-query 五工具进 lead+critic）、mcp-playwright 常驻（默认挂载）、NODES.md 八节点契约 + schema-scan（在场级全行）+ node-gate v1（交付两门 + PASS-RELAY 操作侧补齐通道）、BUG-001/002 观察面诚实性修复、guides/61 §0 通道纪律（通道必须用户终端起）。逐面判定：
 
 - ① 策略对标——**适应**；喂料更新：模型能力轴已由 [dispatch-distillation 毕业](../../../notes/implemented/2026-09-29-dispatch-distillation.md)占用（任务派发合同四件入 team-assembly），搜索预算变量新增渲染通道成本；
 - ② wave0——**适应**；新变量 = 渲染通道改侦察可达面（SPA 线索不再天然排除，样本 4 正证）；

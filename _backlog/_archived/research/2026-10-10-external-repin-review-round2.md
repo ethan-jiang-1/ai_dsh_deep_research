@@ -46,7 +46,7 @@ intent: 为 00-index 两行钉版的再次前进提供逐提交判定与逐吸�
 | 上轮候选①：事实阻塞闸门 HITL | **候选仍候选，形态上游改判（登记新形态）** | 同日两连改：hitl-fact-gate Note（闸门骨架+待补料枚举+依赖链冻结）→ fact-finding-ladder Note **改判**（HITL 从"唯一获取通道"降为"最后手段"——先打能力探针、换通道穷举八条 bash/镜像/浏览器打法，穷尽仍卡壳才准 HITL；补 schedule 复算审计锚与 follow-up 执行/决策两型）。**本仓无落点需跟改**（候选登记不实施）；若未来实施，以改判后形态为准——「待补料机器可查枚举 + 依赖链整链禁完成」核心不变，新增前置义务"通道穷举"与"卡壳必跳出" |
 | 上轮候选②：认领让位/owner-bound 覆盖权 | **维持** | 证据锚 `docs/multi-human.md` 区间**零 diff**（实测）；手册该节仅日期行补"2026-10-10 补认领让位与覆盖权" |
 | 上轮候选③：BUG-007 read 屏障判读注意项 | **维持** | 区间无反证（probes 面零改动） |
-| vendor 同 pin 声明 | **维持** | 区间 submodule 指针**零 diff**；HEAD 实测 `vendor/dsh @ 639ed01539`（dsh-v0.2.0-rc.2，工作树干净）= 本仓 pin 逐字同版 |
+| vendor 同 pin 声明 | **维持** | 区间 submodule 指针**零 diff**；HEAD 实测 `vendor/dsh @ 639ed01539`（观察时 tag，工作树干净；本仓 pin 现已升 dsh-v0.2.1-rc.2）= 本仓 pin 逐字同版 |
 
 ## B. ai_dsh_assitant（202a27b → 7dc4ff6，12 提交）
 

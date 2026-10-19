@@ -49,7 +49,7 @@ const gates = [
 
 // vendor/dsh 钉身份的 tag 面（commit 面 = vendor-pin 门禁的 PIN；pack-bundle-compat 消费它
 // 断言 pack 兼容矩阵含当前 tag——升 pin 时两处同 diff 改；本文件里的 tag 复述受 pin-agreement 对账）
-const VENDOR_TAG = 'dsh-v0.2.0-rc.2';
+const VENDOR_TAG = 'dsh-v0.2.1-rc.2';
 
 const failures = [];
 const notes = [];
@@ -897,11 +897,11 @@ function gitOnce(args) {
 
 // ══ 域 D · vendor 对齐（钉身份/对齐台账/仓规约定/vendored 解析） ══
 
-// ── vendor-pin（vendor/dsh submodule 在位且钉住 dsh-v0.2.0-rc.2 = 639ed01539；
+// ── vendor-pin（vendor/dsh submodule 在位且钉住 dsh-v0.2.1-rc.2 = 687f282e86；
 //    D10 销账的机械面——机制权威自持）──
 {
   const gate = 'vendor-pin';
-  const PIN = '639ed015397290b3745d163aafe02ffee4aa3f84';
+  const PIN = '687f282e8625c6b8d11ff58211a90524be2e4317';
   if (!existsSync(join(ROOT, '.gitmodules'))) fail(gate, '.gitmodules 缺席');
   else {
     const gm = readFileSync(join(ROOT, '.gitmodules'), 'utf8');
@@ -912,7 +912,7 @@ function gitOnce(args) {
   const r = gitOnce(['submodule', 'status', 'vendor/dsh']);
   const m = r.stdout ? /^[-+ ]?([0-9a-f]{40})/.exec(r.stdout.trim()) : null;
   if (!m) fail(gate, 'submodule status 不可读——检查 git submodule init/update');
-  else if (m[1] !== PIN) fail(gate, `vendor/dsh 钉在 ${m[1].slice(0, 8)}——应为 ${PIN.slice(0, 8)}（dsh-v0.2.0-rc.2）`);
+  else if (m[1] !== PIN) fail(gate, `vendor/dsh 钉在 ${m[1].slice(0, 8)}——应为 ${PIN.slice(0, 8)}（dsh-v0.2.1-rc.2）`);
 }
 
 // ── vendor-clean（vendor/dsh 只读铁律：零未提交改动——机制权威不许就地改）──

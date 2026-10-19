@@ -270,14 +270,24 @@ try {
     const scan = async () => {
       const rows = page.locator('span[class*="_root_"]')
       const n = await rows.count()
+      // 同名行择取（2026-10-19 实红：绑定标题「Claude 模型发布线追踪」是
+      // 「Anthropic Claude 模型发布线追踪」的子串，侧栏新→旧扫描先撞上后者——点开的是
+      // 另一场 run，摘要层/队员/活动流三条断言全按错会话判红，看着像 pin 回归实为选行缺陷）。
+      // 取法 = 全遍历后择一：完全等优先，否则取最长共同后缀里最短的那行（子串被前缀/
+      // 后缀包住的行比无关短行更可能是目标），仍并列才按侧栏顺序（新→旧）取首个。
+      let exact = null
+      const partial = []
       for (let i = 0; i < Math.min(n, 300); i++) {
         const el = rows.nth(i)
         if (!(await el.isVisible().catch(() => false))) continue
         const box = await el.boundingBox().catch(() => null)
         if (box === null || box.x >= 256) continue // 只认左栏（中央区同名 class 会抢匹配）
         const rowText = (await el.textContent() ?? '').trim()
-        if (rowText.includes(text)) { await el.click({ timeout: 10_000 }).catch(() => {}); return true }
+        if (rowText === text) { exact = el; break }
+        if (rowText.includes(text)) partial.push({ el, len: rowText.length })
       }
+      const pick = exact ?? (partial.length === 0 ? null : partial.sort((a, b) => a.len - b.len)[0].el)
+      if (pick !== null) { await pick.click({ timeout: 10_000 }).catch(() => {}); return true }
       return false
     }
     if (await scan()) return true
@@ -545,13 +555,30 @@ try {
   // 直接找行会 miss（实测）——reload 回到干净列表态。
   await awaitAppReady(5_000)
   const SESSION_TITLE = SESSION_TITLE_ARG ?? boundSession?.title ?? null
-  let sessionOk = SESSION_TITLE !== null && await clickRowByText(SESSION_TITLE)
+  // 打开方式 = **按 sessionId 精定位优先**（2026-10-19 换 pin 实红）：标题匹配是文本启发式，
+  // dev home 里存在标题互为子串的会话（「Claude 模型发布线追踪」⊂「Anthropic Claude 模型发布线
+  // 追踪」），一旦点到别家会话，活动流/队员/摘要三条断言就按错对象判红（表现像 pin 回归，
+  // 实为选行缺陷）。绑定会话的 id 就在其日志目录名里（权威），`[data-row-key]` 定位不经文本。
+  const boundSessionId = boundSession?.logPath !== undefined
+    ? boundSession.logPath.split(/[/\\]/).slice(-2)[0] ?? null
+    : null
+  let sessionOk = false
+  // 标题路线先行**只为拿到它的深列表展开能力**：`clickRowByText` 内含「Show N more sessions」
+  // 逐层展开 + Search sessions 兜底（reload 后侧栏只渲染首屏，目标行常在折叠层里）；
+  // 它的取行已改成精确等优先（子串只作退路），故标题含于别家标题的情况不再误点。
+  if (SESSION_TITLE !== null) sessionOk = await clickRowByText(SESSION_TITLE)
+  if (!sessionOk && boundSessionId !== null) {
+    sessionOk = (await openSessionById(page, boundSessionId, SESSION_TITLE)).found
+  }
   if (!sessionOk && SESSION_TITLE !== null) {
     // 折叠态：逐组展开后重试（侧栏只展开 active 会话所在的组；目标会话的组随其 cwd
-    // 走——BUG-002 清扫轮实证：老 ad-hoc 会话在 harness-home 组，不在 research-workspace）
+    // 走——BUG-002 清扫轮实证：老 ad-hoc 会话在 harness-home 组，不在 research-workspace）。
+    // 每展开一组，先按 id 精定位、再退回标题匹配——行未渲染时 `[data-row-key]` 也查不到，
+    // 展开是前置条件，两者都在展开后重试（否则 id 路线在折叠态永远假红）。
     for (const g of SIDEBAR_GROUP_CANDIDATES) {
       await expandGroup(page, g)
-      sessionOk = await clickRowByText(SESSION_TITLE)
+      if (boundSessionId !== null) sessionOk = (await openSessionById(page, boundSessionId, SESSION_TITLE)).found
+      if (!sessionOk && SESSION_TITLE !== null) sessionOk = await clickRowByText(SESSION_TITLE)
       if (sessionOk) break
     }
   }

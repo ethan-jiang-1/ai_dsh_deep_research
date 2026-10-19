@@ -5,7 +5,7 @@ intent: 为本轮用户直派的 snapshots 借鉴分析保存来源机制、本�
 
 # ai_dsh_company snapshots：存储、回放、消费与归档机制
 
-观察日期为环境墙钟 **2026-10-09 CST**。只读调查参考仓，未启动模型、回放进程或测试，未修改参考仓；下文“实测”均明确指源仓已留存的实测记录。第 1–7 节分析来源仓，第 8–9 节对照本仓并提出借鉴建议；本轮未实施目录迁移或修复回放。观察时 company HEAD = `fb01c7492313`；其 vendor HEAD = `639ed015397290b3745d163aafe02ffee4aa3f84`，与参考仓[根 AGENTS:49–74](/Users/bowhead/ai_dsh_company/AGENTS.md) 钉住的 `dsh-v0.2.0-rc.2` 一致。快照树没有自己的入口 AGENTS；规则由[快照 README:1–15](/Users/bowhead/ai_dsh_company/snapshots/README.md) 拥有，DSH 原生 recorded-session 合同由[vendor snapshots AGENTS:1–17](/Users/bowhead/ai_dsh_company/vendor/dsh/snapshots/AGENTS.md) 拥有。
+观察日期为环境墙钟 **2026-10-09 CST**。只读调查参考仓，未启动模型、回放进程或测试，未修改参考仓；下文“实测”均明确指源仓已留存的实测记录。第 1–7 节分析来源仓，第 8–9 节对照本仓并提出借鉴建议；本轮未实施目录迁移或修复回放。观察时 company HEAD = `fb01c7492313`；其 vendor HEAD 与参考仓[根 AGENTS:49–74](/Users/bowhead/ai_dsh_company/AGENTS.md) 钉住的 `dsh-v0.2.0-rc.2` 一致。快照树没有自己的入口 AGENTS；规则由[快照 README:1–15](/Users/bowhead/ai_dsh_company/snapshots/README.md) 拥有，DSH 原生 recorded-session 合同由[vendor snapshots AGENTS:1–17](/Users/bowhead/ai_dsh_company/vendor/dsh/snapshots/AGENTS.md) 拥有。
 
 ## 主要结论
 

@@ -33,7 +33,7 @@ PACKDIR="$ROOT/packages/deep-research-pack"
 PROFDIR="$DSH_HOME/profiles/$PROFILE"
 RUNTMP="$ROOT/runtime/smoke-workspace/run-pack"
 
-# 层版本钉住：与 pack 兼容矩阵同源（dsh-v0.2.0-rc.2 → 0.2.0-rc.2）——升 pin 只改 pack
+# 层版本钉住：与 pack 兼容矩阵同源（dsh-v0.2.1-rc.2 → 0.2.1-rc.2）——升 pin 只改 pack
 # package.json 的 dsh.compatibility.dshReleases，本脚本随之走（vendor 各包版本锁步发布）。
 LAYER_VER="$(node -e "console.log(require('$PACKDIR/package.json').dsh.compatibility.dshReleases[0].replace(/^dsh-v/,''))")"
 LAYER="@deepseek-ai/dsh-experimental-agent-team-profile@$LAYER_VER"
@@ -43,9 +43,20 @@ LAYER="@deepseek-ai/dsh-experimental-agent-team-profile@$LAYER_VER"
 # profile_ok 在新增角色后永远返回假，幂等静默失效、每次调用都走重建分支）。
 profile_ok() {
   [ -f "$PROFDIR/package.json" ] || return 1
+  # 版本面同一函数内查（2026-10-19 换 pin 实红）：只查 bundles 在场会把**旧 pin 的**组合判成
+  # 在位（幂等跳过重建），随后新 runtime 拒绝加载旧版 team 层——报「plugin version
+  # 0.2.0-rc.2 is incompatible with dsh 0.2.1-rc.2 … Exact-version exemption: not active」
+  # 并卡在启动横幅（表现 = snapshot-replay / run 通道超时，根因在 profile 未随 pin 重钉）。
+  # 故 deps 里两层版本必须逐字等于本次期望：pack 副本版本 + LAYER_VER。
   node -e "
-    const b = new Set(require('$PROFDIR/package.json').dsh?.profile?.bundles ?? []);
-    process.exit(b.has('dsh-deep-research-pack') && b.has('@deepseek-ai/dsh-experimental-agent-team-profile') ? 0 : 1);
+    const pkg = require('$PROFDIR/package.json');
+    const b = new Set(pkg.dsh?.profile?.bundles ?? []);
+    const packWant = require('$PACKDIR/package.json').version;
+    const okBundles = b.has('dsh-deep-research-pack') && b.has('@deepseek-ai/dsh-experimental-agent-team-profile');
+    const okPack = pkg.dependencies?.['dsh-deep-research-pack'] !== undefined
+      && require('$PROFDIR/node_modules/dsh-deep-research-pack/package.json').version === packWant;
+    const okLayer = pkg.dependencies?.['@deepseek-ai/dsh-experimental-agent-team-profile'] === '$LAYER_VER';
+    process.exit(okBundles && okPack && okLayer ? 0 : 1);
   " || return 1
   local r
   for r in "$PACKDIR"/presets/*.patch.yml; do

@@ -5,7 +5,7 @@
 > 首轮清点实录 = [dsh-discipline Note](../notes/archived/2026-09-24-dsh-discipline.md)）。
 > 每行三态：**照搬**（原样继承，带本仓落点）/ **带证据适配**（语义保留、载体改造，带证据）/
 > **不适用**（带理由——本仓无该设施对应面）。源头 = vendor/dsh submodule（tag
-> dsh-v0.2.0-rc.2，只读铁律）。
+> dsh-v0.2.1-rc.2，只读铁律）。
 
 ## 源目录（按需查询入口）
 

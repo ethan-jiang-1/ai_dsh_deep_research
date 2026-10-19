@@ -258,7 +258,7 @@ export const CASES = [
   // 字面量当钉复述对账——探针不是钉声明）。
   { id: 'pack-bundle-compat-tag-missing', gate: 'pack-bundle-compat', mutate: (dir) => {
     const p = join(dir, 'packages/deep-research-pack/package.json');
-    writeFileSync(p, readFileSync(p, 'utf8').replace('"dsh-v0.2.0-rc.2"', '"dsh-wrongtag"'));
+    writeFileSync(p, readFileSync(p, 'utf8').replace('"dsh-v0.2.1-rc.2"', '"dsh-wrongtag"'));
   } },
   // guard-red-record（tests 面反证义务机械化）：标题声明无留证 / 悬空编号双形态。
   { id: 'guard-red-record-no-record', gate: 'guard-red-record', mutate: (dir) => {

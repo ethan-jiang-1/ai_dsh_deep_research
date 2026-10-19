@@ -69,27 +69,55 @@ test('runtime workspace identity can vary while its exact sandbox and approval r
   const expected = fixture();
   const actual = structuredClone(expected);
   const context = byKind(actual, 'runtime-context').data;
-  const workspacePath = /session workspace: ("(?:[^"\\]|\\.)*")\./.exec(context.content[0].text)?.[1];
+  // 取参必须**限定在策略句内**（0.2.1 起 runtime-context 另有 `Current working directory:` 行
+  // 也嵌同一个路径——裸 replace 会先命中那一行，等于测错了槽：2026-10-19 换 pin 实红）。
+  const policyLine = /^Current DSH file policy: workspace-write\..*$/m.exec(context.content[0].text)?.[0];
+  assert.ok(policyLine, 'the recorded sandbox policy sentence is present');
+  const workspacePath = /session workspace: ("(?:[^"\\]|\\.)*")\./.exec(policyLine)?.[1];
   assert.ok(workspacePath, 'the recorded sandbox policy embeds a workspace identity');
-  context.content[0].text = context.content[0].text.replace(workspacePath, '"/tmp/replay space/workspace"');
+  context.content[0].text = context.content[0].text.replace(policyLine, policyLine.replace(workspacePath, '"/tmp/replay space/workspace"'));
   assert.equal(verdict(expected, actual, 'runtime-context').ok, true);
-  context.content[0].text = context.content[0].text.replace('workspace-write', 'danger-full-access');
+  // 工作目录那一行**不**归一（只归策略句里的槽）：改它必须红。
+  context.content[0].text = (byKind(expected, 'runtime-context').data.content[0].text)
+    .replace(/^Current working directory: ".+"\.$/m, 'Current working directory: "/elsewhere".');
+  assert.equal(verdict(expected, actual, 'runtime-context').ok, false);
+  // 策略模式本身是契约内容，不可归一。
+  context.content[0].text = byKind(expected, 'runtime-context').data.content[0].text.replace('workspace-write', 'danger-full-access');
   assert.equal(verdict(expected, actual, 'runtime-context').ok, false);
 });
 
-test('persona normalizes only boot-generated GUI port and harness checkout location', () => {
+// 0.2.1 换 pin 后的分工（旧断言钉的是「persona 里嵌 URL/路径」——上游已改为间接引用，
+// 具体值下移 runtime-context；旧断言于是随基线换代变红，是本条改写的原因，不是放宽）：
+// persona 侧**零归一化**必须由「persona 确实无可变令牌」+「正文任一字节改动即红」两头钉住。
+test('persona carries no boot-generated identity and is compared verbatim', () => {
   const expected = fixture();
   const actual = structuredClone(expected);
   const persona = messageOf(byKind(actual, 'system-prompt'));
   const original = persona.content[0].text;
-  assert.match(original, /^You are interacting with the user through the DeepSeek Harness Web GUI at http:\/\/127\.0\.0\.1:\d+\./m);
-  assert.match(original, /^The DeepSeek Harness implementation checkout is at /m);
-  persona.content[0].text = original
-    .replace(/(Web GUI at http:\/\/127\.0\.0\.1:)\d+(\. When)/, (_match, prefix, suffix) => `${prefix}3999${suffix}`)
-    .replace(/(implementation checkout is at )[^\n]+?(\. The checkout location)/,
-      '$1/tmp/dsh.checkout/vendor/dsh/$2');
-  assert.notEqual(persona.content[0].text, original, 'both boot identities must actually change');
-  assert.equal(verdict(expected, actual, 'persona').ok, true);
+  assert.doesNotMatch(original, /127\.0\.0\.1/, 'boot identity values moved out of persona at 0.2.1');
+  assert.doesNotMatch(original, /implementation checkout: "/, 'boot identity values moved out of persona at 0.2.1');
+  // 零归一化 = 逐字比较：persona 正文任何改动都必须红（含「看起来可变」的 URL/路径字样）。
+  persona.content[0].text = original.replace(/Web GUI/, 'Web GUi');
+  assert.equal(verdict(expected, actual, 'persona').ok, false);
+  persona.content[0].text = original + '\nhttp://127.0.0.1:3999 /tmp/dsh.checkout';
+  assert.equal(verdict(expected, actual, 'persona').ok, false);
+});
+
+test('runtime-context normalizes only boot-generated GUI port, harness checkout and workspace root', () => {
+  const expected = fixture();
+  const actual = structuredClone(expected);
+  const context = byKind(actual, 'runtime-context').data;
+  const original = context.content[0].text;
+  assert.match(original, /^Current DeepSeek Harness Web GUI URL: "http:\/\/127\.0\.0\.1:\d+"\.$/m);
+  assert.match(original, /^Current DeepSeek Harness implementation checkout: ".+"\.$/m);
+  context.content[0].text = original
+    .replace(/^(Current DeepSeek Harness Web GUI URL: "http:\/\/127\.0\.0\.1:)\d+("\.)$/m, '$13999$2')
+    .replace(/^(Current DeepSeek Harness implementation checkout: )".+"\.$/m, '$1"/tmp/dsh.checkout/vendor/dsh/".');
+  assert.notEqual(context.content[0].text, original, 'both boot identities must actually change');
+  assert.equal(verdict(expected, actual, 'runtime-context').ok, true);
+  // 端口之外的正文改动仍须红（归一化只碰这三个槽，不吞别的差异）。
+  context.content[0].text = original.replace(/^Current working directory: /m, 'Current working dir: ');
+  assert.equal(verdict(expected, actual, 'runtime-context').ok, original === context.content[0].text);
 });
 
 for (const id of IDS) {

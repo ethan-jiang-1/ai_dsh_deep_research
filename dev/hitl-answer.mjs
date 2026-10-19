@@ -258,6 +258,11 @@ let pendingLogPath = null
 let diskPendingTarget = false
 let uiTargetSessionId = null
 let uiTargetTitle = null
+// 交付代答闸要按 bundle 读 review.md 定 readiness（见下方 isDelivery 段）——同样**必须在选择
+// 逻辑里取出并提到外层**：`selected` 出了那段作用域就没了（2026-10-19 端到端实测：
+// dev/hitl-answer.mjs:310 直接引用 selected.candidate.bundle → ReferenceError，
+// 交付审阅卡这条路径从未被走到过，所以缺陷一直没暴露）。
+let pendingBundle = null
 {
   const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'runtime', 'harness-home')
   const sessionsRoot = join(home, 'sessions')
@@ -269,7 +274,10 @@ let uiTargetTitle = null
   const gdir = join(sessionsRoot, group)
   const candidates = sessionLogsInGroup(gdir).slice(0, 15).map((session) => {
     const state = runStateOf({ logPath: session.logPath, wsRoot: join(ROOT, 'research-workspace'), includeSessionIdentity: true })
-    return { ...session, canonicalSessionId: state.sessionId, title: state.title, bundle: state.active ?? null, pending: state.readable && leadHitlCandidate(state) }
+    // 字段名 = `activeBundle`（runStateOf 的返回契约）。曾写成 `state.active`（不存在的字段）→
+    // bundle 恒 null → 交付代答闸读不到 review.md 的 readiness，只能报「无判定行」自拒
+    // （2026-10-19 端到端实测：HITL2 推荐档被误挡，review 明明已 PASS）。
+    return { ...session, canonicalSessionId: state.sessionId, title: state.title, bundle: state.activeBundle ?? null, pending: state.readable && leadHitlCandidate(state) }
   })
   const selected = selectPendingSession(candidates, SESSION)
   if (selected.candidate === null) {
@@ -287,6 +295,7 @@ let uiTargetTitle = null
   pendingLogPath = selected.candidate.logPath
   uiTargetSessionId = selected.candidate.sessionId
   uiTargetTitle = selected.candidate.title ?? null
+  pendingBundle = selected.candidate.bundle ?? null
   console.log(`hitl-answer: 盘侧谓词——真挂起会话在场：${uiTargetSessionId}「${uiTargetTitle ?? '无标题'}」`)
 }
 // 驱动计划（点击前读盘侧形态，BUG-005）：卡共几题 + ask 形态。活等待（wait:-1）下
@@ -307,7 +316,7 @@ if (expectedCardKey === null) {
 {
   const isDelivery = isDeliveryReviewCard(plan.questions ?? [])
   if (isDelivery) {
-    const slug = selected.candidate.bundle ?? null
+    const slug = pendingBundle
     let readiness = null
     if (slug !== null) {
       for (const base of ['research-workspace', join('research-workspace', 'archive'), join('research-workspace', '_abandoned')]) {

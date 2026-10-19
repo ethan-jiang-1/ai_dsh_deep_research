@@ -222,7 +222,7 @@ try {
   step(Object.keys(installedManifest.peerDependencies ?? {}).length > 0 && installedManifest.dependencies === undefined,
     'manifest peers-only（peers 在场、dependencies 缺席）',
     installedManifest.dependencies ? `dependencies=${Object.keys(installedManifest.dependencies).join(',')}` : undefined);
-  step(Array.isArray(installedManifest?.dsh?.compatibility?.dshReleases) && installedManifest.dsh.compatibility.dshReleases.includes('dsh-v0.2.0-rc.2'),
+  step(Array.isArray(installedManifest?.dsh?.compatibility?.dshReleases) && installedManifest.dsh.compatibility.dshReleases.includes('dsh-v0.2.1-rc.2'),
     '兼容矩阵钉住当前 tag');
 
   // ④b 安装形状证据（pack 自带 bin：真铺一个工作区 → 安装验收 preflight 验它）
