@@ -1,10 +1,12 @@
 {
   "_note": "对齐台账（机读正本）：vendor/dsh（钉 @ 687f282e8625c6b8d11ff58211a90524be2e4317（0.2.1-rc.2 轮））的 development-harness 源面逐项结论。门禁 align-ledger 强制三件事：① 每条 source 在 vendor/dsh 里真实存在（换 pin 后文件移位/删除即红——这就是重审触发器）；② verdict=adopted/adapted 的每处 landing 在仓内真实存在；③ verdict=na 必须给 reason。人读视图 = docs/discipline-map.md 源 1–9。 覆盖规则：结构面逐条登记——vendor 每个 AGENTS.md（不含 snapshots/session 夹具与 node_modules 第三方依赖文件——fresh clone 的 submodule 无依赖树，登记它 = 机器态依赖）、每个开发技能 SKILL.md、顶层 docs/*.md 与 docs/cookbook/*.md（非 .zh.md 副本）、以及根文件（package.json/.editorconfig/.gitattributes/lefthook.yml/vendor/README.md/snapshots/AGENTS.md/.github/AGENTS.md/packages/README.md/scripts/run-gates.ts/scripts/doc-budgets.manifest.json）；双语 .zh.md 副本按类登记（不携带独立约定，配对机制见 docs/i18n/README.md 一条）。门禁 align-ledger 强制该覆盖（缺登记即红）。 landing 粒度 = 该约定的本仓载体（可为类级：例如各 cookbook 篇 → guides/62 + docs/AGENTS.md；技能形式约定 → .agents/skills/ + dev-skill-format 门禁）。",
+  "_ownsTruncation": "ownsTruncated: true 标记 = 该条 owns 在早期建账时被硬截断在 139–140 字符，末尾常是半截词（如 \"thr\"、\"linkin\"）；完整原文仓内不存在第二份，无法补回。需要该约定的当前措辞时**读 vendor/dsh/<source> 原文**，不要把 owns 字符串当完整依据。（2026-10-19 处置：不放宽字段长度——放宽只保今后，救不回已丢的；改存引用锚点。裁决见 _backlog/issues/2026-10-19-discipline-map-semantic-drift.md §四项裁决 3。）",
   "_evidence": "逐条原始行（810 条）在 runtime/smoke-workspace/inventory/{root-packaging,subtree-agents,dev-skills,docs-standards,packages-evidence}.json（gitignored 运行区，可重跑 workflow vendor-inventory-to-files 复现）",
   "sources": [
     {
       "source": ".agents/notes/AGENTS.md",
       "owns": "Form/ownership row: the Agent Notes tree AGENTS.md owns the note lifecycle standing orders — 7 lines / ~0.8 KB, essentially pure orders (thr",
+      "ownsTruncated": true,
       "verdict": "adopted",
       "landing": [
         "notes/AGENTS.md",
@@ -14,6 +16,7 @@
     {
       "source": ".agents/notes/archived/AGENTS.md",
       "owns": "Form/ownership row: the archived-notes AGENTS.md owns the sealed-artifact rules — 7 lines / ~0.9 KB, pure orders in three paragraphs, linkin",
+      "ownsTruncated": true,
       "verdict": "adopted",
       "landing": [
         "notes/archived/README.md"
@@ -22,6 +25,7 @@
     {
       "source": ".agents/notes/implemented/AGENTS.md",
       "owns": "Form/ownership row: the implemented-notes AGENTS.md owns shipped-note currency rules — 13 lines / ~1.0 KB, pure orders with one `##` heading",
+      "ownsTruncated": true,
       "verdict": "adopted",
       "landing": [
         "notes/implemented/README.md",
@@ -60,6 +64,7 @@
     {
       "source": ".agents/skills/dsh-archive-agent-notes/SKILL.md",
       "owns": "新增 Note 触发限定范围的取代审计：按未来决策价值把 implemented Note 分保留/归档、rejected 只留仍能阻止诱人重犯的、proposed 永不归档，归档只走冻结 triplet 机制（原样搬 foo.md/foo.zh.md/foo.i18n.yaml",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -70,6 +75,7 @@
     {
       "source": ".agents/skills/dsh-ci-test-reliability/SKILL.md",
       "owns": "资源必须原子分配（listen(0) 后读实际地址、mkdtemp 建私有临时根），进程全局状态按「记下原值是否缺席 → 精确还原 → 立即注册清理 → try/finally 最小作用域」处理，同步靠可观察状态而非 sleep，teardown 必须 dispose 到 qui",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -80,6 +86,7 @@
     {
       "source": ".agents/skills/dsh-ci-test-reliability/references/ci-flake-diagnosis.md",
       "owns": "诊断请求保持只读（不给修复、重跑或改 CI 的授权）；先冻结证据（repo/workflow/job/commit SHA/runner 标签/时间戳/精确失败命令/首个稳定失败签名，基础设施消息与测试输出分开）；按八类分类（host-resource collision、inc",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -99,6 +106,7 @@
     {
       "source": ".agents/skills/dsh-code-review/SKILL.md",
       "owns": "审阅前先取 PR 的 live base/head 并跑 change-scope 定范围（retarget 或 merge 后必须重取重跑）；把新增散文的语义审阅、文档与代码同 diff 一致、注册项清理等列为阻断要求；报告按 defect/location/impact/ev",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -109,6 +117,7 @@
     {
       "source": ".agents/skills/dsh-create-upgrade-guide/SKILL.md",
       "owns": "技能：对外可感知破坏面（CLI/profiles/cordis.yml 或 settings 键/持久化数据/SDK/wire API/发布包入口）在其引入的变更内即写 docs/upgrade-guide/v<version>/<item>/guide.md，不延后到发布准备期",
+      "ownsTruncated": true,
       "verdict": "na",
       "reason": "本仓 pack private、无下游消费者，对外升级指南无承载对象；换 pin 的迁移与重审结论由升 pin Note（notes/implemented/）承载，破坏面记录同源",
       "reReviewOn": "本仓 pack 转为 public 或出现下游消费者（届时对外升级指南有承载对象）时重估"
@@ -116,6 +125,7 @@
     {
       "source": ".agents/skills/dsh-doc/SKILL.md",
       "owns": "文档 kind 一对一映射唯一模板；页序固定为 YAML → H1 → 语言切换器 → Summary → Table of Contents → 用户面到开发者面 → 可选 Further Exploration → 末节 Dev Note；每个操作/命令/默认值声明必须实跑复",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -126,6 +136,7 @@
     {
       "source": ".agents/skills/dsh-doc/references/metadata-links-i18n.md",
       "owns": "package README 的 frontmatter 只允许 description + kind（明确拒收 name、audience、tags 与 README 级 i18n，键小写连字符）；kind 按机械顺序推导（packages 组地图 → dsh.bundle.p",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -136,6 +147,7 @@
     {
       "source": ".agents/skills/dsh-doc/references/review.md",
       "owns": "新人测试：无仓库上下文的专业工程师在 3–5 个互链页内应能答出产品做什么、怎么安全用、状态存哪、谁拥有、怎么失败、在哪改；每条 material 断言对最强 owner 校验（包元数据/公开类型与 JSDoc/运行时代码/测试/生成目录/活动 Note），操作类断言以实跑为唯一",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -146,6 +158,7 @@
     {
       "source": ".agents/skills/dsh-doc/references/structure-hierarchy.md",
       "owns": "页序自 YAML 起、到末节 Dev Note 止；Summary 三到五句，Table of Contents 只导航不描述性展开；内容按读者深度排序（基本使用 → 高级配置 → 开发者细节）；每个实质 H2 先给一段定向段落再放表格/代码/H3；重开发者细节与 Dev Not",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -156,6 +169,7 @@
     {
       "source": ".agents/skills/dsh-doc/references/style.md",
       "owns": "Summary 三到五句一段（英文包 README 另有 100 wc -w 词上限门禁）；受控技术英语：点名 actor 与动作、一概念一个稳定术语、优先直接动词、一句一指令、拆分号与长从句，20/25 词只是复核提示而非门禁，绝不为了长度删改 must/may/never/时",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -166,6 +180,7 @@
     {
       "source": ".agents/skills/dsh-doc/references/website-sync.md",
       "owns": "站点 manifest（website/docs.ts）是显式公开白名单：改已发布页只动 canonical 源，新页加一条 manifest，移动/删除要原子更新源+manifest+入站链接；DocsPage 每个字段（source/route/label/sidebar/s",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -176,6 +191,7 @@
     {
       "source": ".agents/skills/dsh-doc/templates/package-bundle.md",
       "owns": "bundle 模板只在 manifest 声明 dsh.bundle.patch 时使用：先给实测过的 dsh plugin --profile <name> add/remove 安装路径与层语义（说明 in-box bundle 从哪解析、reconcile 激活什么、缺声明",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -186,6 +202,7 @@
     {
       "source": ".agents/skills/dsh-doc/templates/package-group.md",
       "owns": "组地图模板：用于 packages/README.md 与 packages/<group>/README.md，只做地图——一段定向句 + 每直接包一行（链接 + 一行职责，职责只讲贡献不讲内部）+ Related documentation（链邻接 owner 并各配短语）+",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -196,6 +213,7 @@
     {
       "source": ".agents/skills/dsh-doc/templates/package-library.md",
       "owns": "库模板：入口是普通模块 API、不向 composition 注册任何东西；与 package-reference 的三点差别 = 不写 profile 安装路径、不写挂载配置、Model Experience 只写门禁指派的形式（多数 none 或 indirect，绝不发明不",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -206,6 +224,7 @@
     {
       "source": ".agents/skills/dsh-doc/templates/package-reference.md",
       "owns": "插件包 README 骨架：frontmatter 为 description + kind: package-reference；正文依次是 # <包名>、语言切换器、Summary（≤100 词）、Table of Contents、-----、Use this packag",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -225,6 +244,7 @@
     {
       "source": ".agents/skills/dsh-find-simplifications/SKILL.md",
       "owns": "简化候选必须有消费者分类证据（production / non-production / ambiguous，rg 搜精确符号后再读调用点）才算强候选：无生产消费者、同一事实两种表示、声明 seam 但无消费者、手写可换维护依赖、只保护未用 API 的测试都算；小到不值得立 No",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -235,6 +255,7 @@
     {
       "source": ".agents/skills/dsh-merging-stacked-prs/SKILL.md",
       "owns": "同仓依赖链一律走 GitHub 官方 stacked-PR 对象：先 gh stack --version 硬停检查、用 PullRequest.stack 与 stackEntry.position 的 GraphQL 查询认证成员与顺序（不以 base 分支推断代替），gh ",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -254,6 +275,7 @@
     {
       "source": ".agents/skills/dsh-pre-push-checks/SKILL.md",
       "owns": "push 前按 diff 实际触及的面选最小证据、拒绝反射式跑全量套件：文档/Note/目录类跑 doc-sync、模型或编辑器可见输出跑所属 keyless snapshot、清单/构建/worker 入口跑 build+hygiene、跨包行为才放 profile 或 CI ",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -264,6 +286,7 @@
     {
       "source": ".agents/skills/dsh-prose-standard/SKILL.md",
       "owns": "修剪只删装饰不删命题：actor 与动作、条件时机与顺序、must/may/never 情态、负保证与例外、所有权/副作用/失败模式/后果逐条保留；按散文位置定必需覆盖（公共 JSDoc 写调用方可见的返回差异与抛错、内部注释只写非显然不变量、README 写消费者合同、技能要声",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -274,6 +297,7 @@
     {
       "source": ".agents/skills/dsh-prose-standard/references/examples.md",
       "owns": "用 Over-trimmed / Balanced / Over-detailed 三态对照把「完整命题」落成可判定样例：必须保留 actor 与作用域、处置顺序与失败可见性、所有权变更点与完成保证、throw 与状态前置、映射中丢弃或改写的字段、measured 这类 prov",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -293,6 +317,7 @@
     {
       "source": ".agents/skills/dsh-speed-up-perf/SKILL.md",
       "owns": "先测未优化工作负载再改生产代码，并记录 measurement card（用户操作与可观察完成条件 / 固定工作负载维度与种子 / 生产入口路径 / 时钟起止与排除项 / 内存可达与瞬态口径 / 原始样本与判定阈值 / 行为测试）；端到端与组件相位分开测；每个改动要求负控（收紧后",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -303,6 +328,7 @@
     {
       "source": ".agents/skills/dsh-translate-docs/SKILL.md",
       "owns": "只在用户显式点名时运行（frontmatter disable-model-invocation: true + user-invocable: true，禁从其他技能或推断触发）；按变更类型分路——更新走 briefing 驱动的最小对照修改（不整篇重译）、新配对才委派子代理整",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -313,6 +339,7 @@
     {
       "source": ".agents/skills/dsh-trim-cot-leakage/SKILL.md",
       "owns": "唯一判据 = HEAD 读者在无会话记录/PR 线程/未提交草稿的情况下能否解析每个引用并验证每条断言；按八类泄漏逐条处理（死设计引用、PR/栈视角、变更叙事与版本戳、评审编排、对评审者辩解、过程复述、hedge 残留、作者语言残留）；改写义务性句子前先枚举该段全部命题，保留 i",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -323,6 +350,7 @@
     {
       "source": ".agents/skills/dsh-trim-cot-leakage/references/examples.md",
       "owns": "按泄漏类别给 leaked → fixed 对照，并单列 Overcorrection traps：把义务（pending migration）改成背书（sanctioned）、把假设/未来标记删成已交付特性、连同过程转述一起删掉同句里的真事实、以及删掉 measured 之类 ",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -333,6 +361,7 @@
     {
       "source": ".agents/skills/dsh-trim-cot-leakage/references/recall-batteries.md",
       "owns": "探针集纪律：ripgrep 必须加 --hidden --glob '!.git/**'（否则漏掉 .agents/），排除项放最后以免被后续 include 重新纳入，自然语言行加 -i 而代码模式行不加，短语要加词界，零命中必须先打中已知正例、噪声模式必须先拒绝近似负例，中英",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -343,6 +372,7 @@
     {
       "source": ".agents/skills/record-browser-gif/SKILL.md",
       "owns": "改产品可见 GUI 行为的 PR 必须附 GIF：从该 PR 树的真实 server + 真 key + 真实模型轮次录制，一个故事板 = 一次证据运行（不得拼接不同 run 的帧），正文旁声明被演示的 commit SHA、树的来源、模式例外与是否真跑了模型轮次；录制与发布分离",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -353,6 +383,7 @@
     {
       "source": ".agents/skills/record-browser-gif/scripts/encode_gif.py",
       "owns": "编码器 CLI 的脚本契约：一切错误走 fail() 的单行 error: 退出（可自行修正的措辞）；数值参数在 argparse 层按 positive / nonnegative / finite 校验，拒绝 nan 与 inf；缺 ffmpeg/ffprobe 时只报告依赖",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -363,6 +394,7 @@
     {
       "source": ".agents/skills/record-browser-gif/scripts/test_encode_gif.py",
       "owns": "用 unittest 驱动真实 ffmpeg/ffprobe 子进程：setUp 里造三段纯色 WebM 夹具与 tempfile 私有根并注册 cleanup，断言 trim/speed/final-hold/palette 顺序与默认保留全片时长；对每类非法参数（负 star",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         ".agents/skills/",
@@ -420,6 +452,7 @@
     {
       "source": "apps/cli/tests/profiles/AGENTS.md",
       "owns": "Form/ownership row: the CLI profile-integration-test AGENTS.md owns shipped-profile cross-package test rules — 7 lines / ~0.8 KB, pure order",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         "scripts/smoke/release-smoke.mjs",
@@ -429,6 +462,7 @@
     {
       "source": "benchmarks/AGENTS.md",
       "owns": "Form/ownership row: the performance-benchmark AGENTS.md owns required repo-level performance gates whose measured user path crosses package ",
+      "ownsTruncated": true,
       "verdict": "na",
       "reason": "本仓无性能基准面（无 benchmark 目录与车道）",
       "liveness": [
@@ -440,6 +474,7 @@
     {
       "source": "docs/AGENTS.md",
       "owns": "Form/ownership row: docs/AGENTS.md owns the repository documentation standard — 75 lines / ~10.6 KB, pure orders in five sections (Document ",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         "docs/AGENTS.md"
@@ -558,6 +593,7 @@
     {
       "source": "docs/cookbook/adding-a-tool.md",
       "owns": "模型可见工具必须满足的最小形状：defineTool 声明 name/description（模型所见）/parameters/output schema 与 render，execute 收到由 schema 推出的类型化 args 与携带不可变身份与 token 的 exec",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         "docs/guides/62-plugin-authoring.md",
@@ -780,6 +816,7 @@
     {
       "source": "native/system/AGENTS.md",
       "owns": "Form/ownership row: native/system/AGENTS.md owns the @deepseek-ai/node-addon-system workspace (Linux landlock-run confinement executable plu",
+      "ownsTruncated": true,
       "verdict": "na",
       "reason": "本仓无 native addon 发布 lane",
       "liveness": [
@@ -827,6 +864,7 @@
     {
       "source": "packages/client/AGENTS.md",
       "owns": "Form/ownership row: packages/client/AGENTS.md owns the rules for packages/client/* and the apps/web build entry — 154 lines / ~25.5 KB (by f",
+      "ownsTruncated": true,
       "verdict": "na",
       "reason": "本仓无该包组（唯一包 deep-research-pack：TS 源 + 单点 client 插件，D18）",
       "liveness": [
@@ -838,6 +876,7 @@
     {
       "source": "packages/experimental/AGENTS.md",
       "owns": "Form/ownership row: packages/experimental/AGENTS.md owns the rules for experimental packages and explicitly declares itself a supplement to ",
+      "ownsTruncated": true,
       "verdict": "na",
       "reason": "本仓无该包组（唯一包 deep-research-pack：TS 源 + 单点 client 插件，D18）",
       "liveness": [
@@ -859,6 +898,7 @@
     {
       "source": "packages/schedule/AGENTS.md",
       "owns": "Form/ownership row: packages/schedule/AGENTS.md owns the rules for packages/schedule/* and announces itself as a supplement to the repositor",
+      "ownsTruncated": true,
       "verdict": "na",
       "reason": "本仓无该包组（唯一包 deep-research-pack：TS 源 + 单点 client 插件，D18）",
       "liveness": [
@@ -879,6 +919,7 @@
     {
       "source": "packages/web/AGENTS.md",
       "owns": "Form/ownership row: packages/web/AGENTS.md owns one security rule for the web package group and declares itself a supplement to the package ",
+      "ownsTruncated": true,
       "verdict": "na",
       "reason": "本仓无该包组（唯一包 deep-research-pack：TS 源 + 单点 client 插件，D18）",
       "liveness": [
@@ -890,6 +931,7 @@
     {
       "source": "scripts/AGENTS.md",
       "owns": "Form/ownership row: scripts/AGENTS.md owns the repository gate-script rules — 5 lines / ~0.8 KB, two dense unordered paragraphs with no bull",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         "scripts/AGENTS.md"
@@ -924,6 +966,7 @@
     {
       "source": "snapshots/session/agent-instructions/workspace/AGENTS.md",
       "owns": "This one-line file is not an instruction set but a workspace-seed fixture whose entire content is the sentence 'Root snapshot instruction.',",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         "scripts/lib/replay-request.mjs",
@@ -933,6 +976,7 @@
     {
       "source": "snapshots/session/agent-instructions/workspace/nested/AGENTS.md",
       "owns": "This one-line file is a workspace-seed fixture whose entire content is the sentence 'Nested snapshot instruction.', verifying that a nested ",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         "scripts/lib/replay-request.mjs",
@@ -942,6 +986,7 @@
     {
       "source": "snapshots/session/ptc-workspace-context/workspace/AGENTS.md",
       "owns": "This one-line file is a workspace-seed fixture whose entire content is the sentence 'Workspace snapshot root instruction.', providing the ro",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         "scripts/lib/replay-request.mjs",
@@ -951,6 +996,7 @@
     {
       "source": "snapshots/session/ptc-workspace-context/workspace/nested/AGENTS.md",
       "owns": "This one-line file is a behavioural fixture whose entire content is the order 'When asked for the Code Mode workspace handshake, answer exac",
+      "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
         "scripts/lib/replay-request.mjs",
@@ -979,6 +1025,7 @@
     {
       "source": "website/AGENTS.md",
       "owns": "Form/ownership row: website/AGENTS.md owns the VitePress documentation-website adapter — 17 lines / ~1.7 KB, eight prose paragraphs with no ",
+      "ownsTruncated": true,
       "verdict": "na",
       "reason": "本仓无文档站/站点投影面",
       "liveness": [

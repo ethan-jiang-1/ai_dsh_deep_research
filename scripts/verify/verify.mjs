@@ -42,7 +42,7 @@ const gates = [
   'md-utf8-newline', 'md-links', 'md-anchors', 'archived-note-pointer', 'count-free', 'doc-now-only', 'doc-budgets',
   'preset-structure', 'pack-bundle-compat', 'client-half', 'row-deps', 'pack-contract-sync', 'role-list-sync', 'client-keys', 'client-effect-wrap', 'cockpit-doc-registry',
   'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'proposed-pointer-live',
-  'vendor-pin', 'vendor-clean', 'pin-agreement', 'align-ledger', 'discipline-na-trigger', 'repo-conventions', 'vendor-links',
+  'vendor-pin', 'vendor-clean', 'pin-agreement', 'align-ledger', 'discipline-na-trigger', 'discipline-state-vocab', 'repo-conventions', 'vendor-links',
   'workspace-contract', 'handbook-budget', 'workspace-versioning', 'overlay-fresh', 'pack-workspace-fresh', 'dist-manual-version',
   'claude-symlink', 'secrets-untracked', 'guard-red-record', 'gate-ledger-sync', 'entry-chain', 'backlog-liveness', 'port-exclusive', 'hooks-active',
 ];
@@ -1166,6 +1166,66 @@ function gitOnce(args) {
     }
     for (const m of missing) {
       fail(gate, `${m}；修正 = 在状态列补一个可判定的重估触发（重估/失效条件/复活条件/引入条件/触发条件之一）——见 docs/discipline-map.md §维护规则「不适用是当时不适用，不是豁免」`);
+    }
+  }
+}
+
+// ── discipline-state-vocab（状态列三态值域机检——docs/discipline-map.md）
+//
+//    病根实证（2026-10-19 全表逐条语义重读）：表头明写「每行三态」，值域 = 照搬 / 带证据适配 /
+//    不适用。实测状态列出现值域外写法（`已具备`、`前两件已具备`）。这不是措辞洁癖：`已具备`
+//    （"本来就有"）与 `带证据适配`（"改造过、带证据"）维护语义不同——前者暗示无需重校，后者要求
+//    每次换 pin 重验。把后者写成前者 = 悄悄给该行签免检，而本表价值恰恰是"换 pin 后逐行重校"。
+//    `discipline-na-trigger` 只管「不适用」行的触发条件，管不到值域越界。
+//
+//    判据：**按表头定位状态列**（表头单元格含「状态」的那一列），逐数据行取该列真值、剥 `**`，
+//    首词必须属于闭集 THREE_STATES。不按固定列序猜——本文档并存 10 张「| DSH 做法 | 本仓落点 |
+//    状态 |」表与 2 张两列处置表（`| vendor 文件/目录 | 本仓处置 |`），后者的第二列出现"已具备"
+//    属正常记述，不是状态声称；按列序判会把它们误红。
+//    **不做全文正则**（同 discipline-na-trigger：正文常引述别的状态词）。
+//
+//    范围与防空：只读 docs/discipline-map.md 一个 tracked 文件；解析出 0 张带状态列的表、
+//    0 行状态数据行，或状态行数少于 MIN_ROWS 即判红（表格改版 → 门禁静默变空集，等于不存在）。
+{
+  const gate = 'discipline-state-vocab';
+  const mapPath = join(ROOT, 'docs', 'discipline-map.md');
+  // 当前实测 10 张状态表、80 行状态数据行；留余量到 60，防重分类合理减少时假红。
+  const MIN_ROWS = 60;
+  const THREE_STATES = ['照搬', '带证据适配', '不适用'];
+  if (!existsSync(mapPath)) fail(gate, 'docs/discipline-map.md 缺席——纪律全量枚举的人读正本');
+  else {
+    const lines = readFileSync(mapPath, 'utf8').split('\n');
+    let stateCount = 0;
+    let tablesWithState = 0;
+    const offenders = [];
+    // 逐表扫描：遇表头行 + 下一行是分隔行 = 一张表
+    for (let i = 0; i < lines.length - 1; i++) {
+      const header = lines[i];
+      if (!/^\|/.test(header) || !/^\|[\s\-:|]+\|$/.test(lines[i + 1])) continue;
+      const headCols = header.split('|').slice(1, -1).map((c) => c.trim());
+      const stateIdx = headCols.findIndex((c) => c.includes('状态'));
+      if (stateIdx === -1) continue;
+      tablesWithState++;
+      // 走该表的数据行直到出表
+      for (let j = i + 2; j < lines.length && /^\|/.test(lines[j]); j++) {
+        const cols = lines[j].split('|').slice(1, -1).map((c) => c.trim());
+        if (cols.length <= stateIdx) continue;
+        const state = cols[stateIdx].replace(/\*\*/g, '').trim();
+        if (state === '') continue;
+        stateCount++;
+        if (!THREE_STATES.some((t) => state.startsWith(t))) {
+          const head = state.split(/[（(：:，,\s]/)[0];
+          offenders.push(`「${cols[0].replace(/\*\*/g, '').slice(0, 46)}」——状态列写的是「${head}」，不在三态值域内（全值："${state.slice(0, 40)}"）`);
+        }
+      }
+    }
+    if (tablesWithState === 0) {
+      fail(gate, 'docs/discipline-map.md 未解析出任何「状态」列表——表头改版或解析失效（防空语料）');
+    } else if (stateCount < MIN_ROWS) {
+      fail(gate, `只解析到 ${stateCount} 行状态列（下限 ${MIN_ROWS}，当前应约 80）——解析失效或整表被改窄（防空语料）`);
+    }
+    for (const m of offenders) {
+      fail(gate, `${m}；修正 = 状态列首词改成 照搬 / 带证据适配 / 不适用 之一（语义差别见 docs/discipline-map.md 表头：已具备暗示免于重校，带证据适配要求每次换 pin 重验）`);
     }
   }
 }

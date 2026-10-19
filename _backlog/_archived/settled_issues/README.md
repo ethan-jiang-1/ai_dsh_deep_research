@@ -4,6 +4,7 @@
 
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-10-19-discipline-map-semantic-drift](2026-10-19-discipline-map-semantic-drift.md) | 9 行失真逐条裁决（2 条补门禁被否、改归类/改措辞）+ 新增门禁 `discipline-state-vocab`；两笔遗留：`owns` 截断改存引用锚点、语料基线漂移登记待更新；[Note](../../../notes/implemented/2026-10-19-discipline-map-semantic-drift.md) | 2026-10-19 |
 | [2026-09-28-retire-roadmap](2026-09-28-retire-roadmap.md) | 退役 roadmap；[backlog deliberation Note](../../../notes/implemented/2026-09-28-backlog-deliberation-space.md) | 2026-09-28 |
 | [2026-09-28-node-io-schema](2026-09-28-node-io-schema.md) | 节点 I/O schema；[Note](../../../notes/implemented/2026-09-28-node-io-schema.md) | 2026-09-29 |
 | [2026-09-28-hitl2-scope-round](2026-09-28-hitl2-scope-round.md) | 暂缓 HITL2 条件范围轮；复活条件按卡内记录 | 2026-09-29 |

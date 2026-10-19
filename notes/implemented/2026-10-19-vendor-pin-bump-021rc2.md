@@ -121,9 +121,10 @@ names …」的间接引用，具体 checkout 路径与 GUI 端口落在 runtime
 「落点不符 / 三态可疑」——它们不是过时，而是**落点描述与实体不完全对应或三态归类站不住**
 （例如把单行正则门禁称作「照搬」、把上游「禁 commit id 引用」的机检面记成 md-links 盲区、
 声称的「承重四文件抽检」在采纳 Note 里并不存在）。修它们要先补门禁或重写归类理由，
-**不是本轮 pin 升级能顺手收口的**，已立卡
-[2026-10-19-discipline-map-semantic-drift](../../_backlog/issues/2026-10-19-discipline-map-semantic-drift.md)
-待处置，不在本 Note 冒充已修。
+**不是本轮 pin 升级能顺手收口的**，已立卡待处置，不在本 Note 冒充已修。
+后续（2026-10-19 同轮）：9 行已逐条裁决并落地——详见
+[discipline-map 语义漂移 Note](2026-10-19-discipline-map-semantic-drift.md)（含新增门禁
+`discipline-state-vocab`、两项"不动手"的裁决理由、以及一条"案例绿 ≠ 案例有效"的教训）。
 
 源 5（3 行）、源 6（5 行）实读后**全部成立**：源 5 的进门判据原文、tier 表位置、双语三件套均与
 `vendor/dsh/docs/postmortem/README.md`、`docs/AGENTS.md:27` 一致；源 6 的两类 Skill 分家、

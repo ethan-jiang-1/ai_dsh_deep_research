@@ -158,6 +158,49 @@ const naRowsVanished = () => (dir) => {
   writeFileSync(p, out.join('\n'));
 };
 
+/** 三态值域越界注入：把一行状态列改成闭集外的「已具备」→ discipline-state-vocab 须点名报红。 */
+const stateVocabOutOfDomain = () => (dir) => {
+  const p = join(dir, 'docs', 'discipline-map.md');
+  const lines = readFileSync(p, 'utf8').split(String.fromCharCode(10));
+  const out = lines.map((line) => {
+    if (!line.startsWith('| 证据匹配面')) return line;
+    return line.replace(/\| 照搬（[\s\S]*?\|$/, '| 已具备（增量 = 常驻化） |');
+  });
+  writeFileSync(p, out.join(String.fromCharCode(10)));
+};
+
+/** 防空语料注入：把绝大多数状态行的状态列**清空** → 门禁能解析的状态行骤降到下限以下，
+ *  须报「解析失效或整表被改窄」的下限守卫，而不是静默变绿。
+ *
+ *  为什么不用"改表头"注入（2026-10-19 首版，已废弃）：只改一部分表头时门禁仍解析到足够
+ *  行数，守卫不触发；全改表头时**两条守卫同时成立**，禁掉任一条案例照样红——案例分不清
+ *  是哪条守卫在起作用，等于空转（实测：注释掉 tablesWithState 守卫后案例仍绿）。
+ *  清空状态列只触发下限守卫一条，归因唯一。
+ *  注意清空 ≠ 写成合法值：写「照搬」会保持行数与合法性，案例同样空转（本函数第二版踩过）。 */
+const stateRowsVanished = () => (dir) => {
+  const p = join(dir, 'docs', 'discipline-map.md');
+  const lines = readFileSync(p, 'utf8').split(String.fromCharCode(10));
+  const out = [...lines];
+  const KEEP_FROM = 12; // 只保留前 12 行状态列，其余清空 → 远低于下限 60
+  let seen = 0;
+  for (let i = 0; i < lines.length - 1; i++) {
+    const isHeader = /^\|/.test(lines[i]) && /^\|[\s\-:|]+\|$/.test(lines[i + 1]);
+    if (!isHeader) continue;
+    const headCols = lines[i].split('|').slice(1, -1).map((c) => c.trim());
+    const idx = headCols.findIndex((c) => c.includes('状态'));
+    if (idx === -1) continue;
+    for (let j = i + 2; j < lines.length && /^\|/.test(lines[j]); j++) {
+      seen++;
+      if (seen <= KEEP_FROM) continue;
+      const cells = out[j].split('|');
+      // split('|') 后 cells[0] 是空串，表头第 idx 列对应 cells[idx + 1]
+      if (cells.length > idx + 1) cells[idx + 1] = ' ';
+      out[j] = cells.join('|');
+    }
+  }
+  writeFileSync(p, out.join(String.fromCharCode(10)));
+};
+
 const linkUntrackedTarget = () => (dir) => {
   // 目标在盘上存在但未被 git 跟踪（BUG-016 形态：tracked md 链接运行区文件——git 绿依赖机器
   // 状态而非仓库状态）。探针必须放在 .gitignore 真覆盖的路径（runtime/smoke-workspace/*）——
@@ -313,6 +356,8 @@ export const CASES = [
   // （evaluation.md §L0 登记表该行），此处只断言"被点名报红"。
   { id: 'discipline-na-trigger-missing', gate: 'discipline-na-trigger', mutate: naTriggerMissing() },
   { id: 'discipline-na-trigger-rows-vanished', gate: 'discipline-na-trigger', mutate: naRowsVanished() },
+  { id: 'discipline-state-vocab-out-of-domain', gate: 'discipline-state-vocab', mutate: stateVocabOutOfDomain() },
+  { id: 'discipline-state-vocab-rows-vanished', gate: 'discipline-state-vocab', mutate: stateRowsVanished() },
   // 未登记模块注入（cockpit-doc-registry）：往 pack 的 src/lib/ 丢一个新模块、不动构成正本
   // ——模拟"模块上了盘、正本没跟上"（2026-10-11 实测形态：brief-fold / review-readiness 上线
   // 后正本仍写「七区」「六件」）。git add 由驱动壳统一执行，故 tracked 面能看见它。
