@@ -805,7 +805,20 @@ try {
       // BUG-034 选定修法（2026-10-18）：**不再依赖"重载后默认视图＝最新会话"**——那句假设在会话
       // 数量增长后不成立（本块偶发红即此）。改为按 session id 显式打开本块刚建的会话（直达
       // data-row-key，行不在 DOM 时走搜索兜底）；打不开就如实报红，不静默跳过整块。
-      const openedSelf = await openSessionById(page, probe2Id, null)
+      //
+      // 2026-10-19 补：上面"行不在 DOM 时走搜索兜底"当时**并不成立**——调用传的 title 是 null，
+      // 而 openSessionById 的搜索兜底需要标题（locateSessionStrategy 对 null title 直接 give-up）。
+      // 于是本块在"探针会话的组被折叠"时稳定假红，且 `if (openedSelf.found)` 把整块 12 形态例库
+      // 断言一起吞掉（覆盖损失 > 报错本身）。侧栏只展开 active 组（见上方 boundSessionId 同款
+      // 注释），探针会话住在 lib-selftest 工作区组，故必须**逐组展开后重试**才能直达。
+      let openedSelf = await openSessionById(page, probe2Id, null)
+      if (!openedSelf.found) {
+        for (const g of SIDEBAR_GROUP_CANDIDATES) {
+          await expandGroup(page, g)
+          openedSelf = await openSessionById(page, probe2Id, null)
+          if (openedSelf.found) break
+        }
+      }
       step(openedSelf.found, '自测例库：本块会话按 id 显式打开（不依赖默认视图）', `via=${openedSelf.via}`)
       if (openedSelf.found) {
         if (await openGuideCapsule(6_000, 6_000, 2_500)) {
