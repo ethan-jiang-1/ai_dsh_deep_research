@@ -24,7 +24,7 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 CLAUDE.md→AGENTS.md、.claude/skills→.agents/skills    两条 symlink（编辑真文件；后者让 Claude 系
                          harness 发现同一批开发技能——verify 门禁 claude-symlink 校验）
 子树 AGENTS.md            docs/ · scripts/ · notes/ · packages/deep-research-pack/ · tests/ · _backlog 各一份——只放该
-                         子树的指令（根只放每轮常驻指令；vendor 树内 22 份同构；本仓另有研究手册与 pack 种子副本两份 AGENTS.md，见各自行）
+                         子树的指令（根只放每轮常驻指令；vendor 树内 28 份同构；本仓另有研究手册与 pack 种子副本两份 AGENTS.md，见各自行）
 README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令正本 = guides/60 §2，不复制）
 _backlog/                 问题澄清与证据区：issues/、bugs/、research/、methods/、triggers.md、_archived/（另有
                           _done/、_postponed_plans/ 改名兼容指针，见 _backlog/README 载体导航）；

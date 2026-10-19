@@ -87,6 +87,9 @@ names …」的间接引用，具体 checkout 路径与 GUI 端口落在 runtime
 | L0 `pnpm test` | **542/542 pass** |
 | L1 `DSH_SMOKE_REAL=1 preset-smoke` | **ALL PASS**（4 个 preset 全部真挂载绿） |
 | L2 `release-smoke --install-only` | **ALL PASS**（真实安装形状可用） |
+| `entry-chain-probe`（真模型） | **ALL PASS**（3 问：授权范围/ RFC 非实施前置 / 指认 guides/60） |
+| `team-preflight-smoke`（真模型） | **ALL PASS**（spawn_teammate ×2 真调用、成员发现与响应、无角色 preset 组合画像） |
+| `l4-lite-smoke`（真模型） | **ALL PASS**（四角色 assistant 响应 + scout web_search 真调用） |
 | `client-load-smoke` | **55 PASS**（侧栏选行修正后） |
 | `snapshot-replay-smoke` | **ALL PASS**（4 场景 A 回放 + B 组装 diff + C 渲染金标准；金标准已按新 pin 真重录） |
 | **L4 端到端真模型 run** | **跑通**：`drt_semver-caret-prerelease`（HITL1 → 取证 15 张 evidence 卡 → 纯综合 → critic 两轮审查 FAIL→PASS → HITL2 拍板 → final.md + final/v1.md + present + goal complete） |
@@ -94,10 +97,37 @@ names …」的间接引用，具体 checkout 路径与 GUI 端口落在 runtime
 端到端 run 的核心结论另经**独立实证**复核：`^0.2.1-rc.2` ≡ `>=0.2.1-rc.2 <0.3.0-0` + per-tuple
 预发布准入；12 个边界版本用 `semver.satisfies` 实跑，与报告判定 12/12 一致。
 
-**未跑档（如实申报）**：L4-lite / team-preflight / entry-chain 各自是独立脚本，本轮用一场完整
-真模型 run 覆盖了同一类证据面（真模型 + 真装配 + 真交付），未逐个另跑；`discipline-map` 的
-逐源三态重核对照 `docs/discipline-map.md` 已完成到「108 条源面已对账」的机械面，**逐条语义
-重读仅覆盖本轮受影响的构建链与归一化面**，未全表通读。
+三个真模型档（entry-chain / team-preflight / L4-lite）**逐个单独跑过**，不是用端到端 run 顶替。
+
+### discipline-map 逐条语义重读（76 行全表）
+
+`align-ledger` 只判**存在性**（源在、落点在），判不出语义过期。本轮按
+[discipline-map §重审触发路径](../../docs/discipline-map.md)做了全表**逐行**重读：
+76 条纪律行（照搬 34 / 带证据适配 25 / 不适用 17），每行**读上游原文 + 读本仓落点实体**，
+不只看台账互相引用。结果 **9 行判定不成立，已同 diff 修正**：
+
+| 源 | # | 问题 | 修正 |
+|---|---|---|---|
+| 1 | 15 | 规则 `Runtime invariants assert owned relationships` 已被 0.2.1 **删除**（pin 0.1.7 有、0.2.1 零命中），台账仍按旧原文并列 | 标注删除 + 复活条件 |
+| 4 | 4 | 落点指 `AGENTS §notes implemented bullet`，该 bullet 已于 2026-09-25 下放删除 | 改指 `notes/implemented/README.md` + `notes/README.md` |
+| 9 | 1 | vendor 子树 AGENTS.md 计数 22 → **28**（新增 6 份 snapshot 夹具） | 根 AGENTS.md 与本表两处同步为 28 |
+| 9 | 12 | `docs/defensive-patterns.md` 在 0.2.1 已拆成**五卷目录**（双语对 + i18n） | 更新形态描述 |
+| 10 | 9 | 判「不适用」，实况相反——`replay-scene.mjs` 早有 14 条比较前守卫 | 改「带证据适配」并登记该落点 |
+| 10 | 10 | 判「不适用」，实况相反——`sessionFormat` 钉代已落地 | 改「带证据适配」，仅平台变体不适用 |
+| 11 | 3 | 状态写「副本 = tracked 全量 + 补拷」，补拷已随 BUG-016 移除 | 改为「tracked 全量，等价 fresh clone」 |
+
+另有 **9 行**（源 1 #6/#12、源 3 #3/#4、源 9 #10/#11、源 10 #5/#8、源 11 #5）判定为
+「落点不符 / 三态可疑」——它们不是过时，而是**落点描述与实体不完全对应或三态归类站不住**
+（例如把单行正则门禁称作「照搬」、把上游「禁 commit id 引用」的机检面记成 md-links 盲区、
+声称的「承重四文件抽检」在采纳 Note 里并不存在）。修它们要先补门禁或重写归类理由，
+**不是本轮 pin 升级能顺手收口的**，已立卡
+[2026-10-19-discipline-map-semantic-drift](../../_backlog/issues/2026-10-19-discipline-map-semantic-drift.md)
+待处置，不在本 Note 冒充已修。
+
+源 5（3 行）、源 6（5 行）实读后**全部成立**：源 5 的进门判据原文、tier 表位置、双语三件套均与
+`vendor/dsh/docs/postmortem/README.md`、`docs/AGENTS.md:27` 一致；源 6 的两类 Skill 分家、
+`dev-skill-format` 门禁形态与渐进披露教义（出处 = vendor `.agents/notes/archived/feature/2026-07-05-skill-system.md`，
+非 README）均核对属实。
 
 ## 输掉的方案
 

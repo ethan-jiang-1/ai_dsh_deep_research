@@ -43,7 +43,7 @@
 | Design each tool's UI presentation up front（呈现先于实现设计） | preset persona/skill 文本 = 工具的行为呈现面，R1 起逐角色先定稿再挂载；观察面 = 先 RFC 后实现（run-dashboard/debug-dashboard-plus 皆然） | 带证据适配 |
 | Plan unit/e2e/snapshot coverage for seams | evaluation.md 五面合同（L0–L4）先于框架定案（D6） | 带证据适配 |
 | Registrations are effects（一切贡献走 ctx.effect，register 返回 disposer） | client 面 `src/client/index.ts`：四处注册全量 `scoped.effect(...)` 包裹（页签类型 `sidebarRightTabs.register` / 页签槽体 / 活标题槽体 / 工具卡循环逐 key `slots.inject`） | 照搬（D18 后本仓有自写 cordis 插件代码；证据 = 门禁 `client-effect-wrap` 全量断言 + `client-load-smoke` 真浏览器挂载断言） |
-| Runtime invariants assert owned relationships（invariant 包规则） | 同上 | 不适用 |
+| ~~Runtime invariants assert owned relationships~~（invariant 包规则） | **vendor 0.2.1 已删除**该条与布局行 `runtime-diagnostics/`，`packages/` 下亦无 invariant 组——本仓无需落点。**复活条件** = 上游恢复 invariant 包族 | 不适用（上游已移除——2026-10-19 复核：pin 0.1.7 有该条、0.2.1 零命中） |
 | Typed events / declaration merging / assertNever / waterfall next() / branded ids / Trust TypeScript / explicit request-spec split | TS 面（`src/client/` 观察面 + `src/lib/` 折算）只**消费** vendor 的声明合并类型（`import type {} from '@deepseek-ai/dsh-*/client'`），不 author 会话事件、不注册服务或 waterfall 监听器、无跨边界自持 id、无 request/spec 默认化面 | 不适用（无对应机制面；本仓开始 author 事件或服务时重估） |
 | Keep compiler faces explicit（host/client 各出叶配置，根仅 solution） | `packages/deep-research-pack/tsconfig.host.json` · `tsconfig.client.json` 两叶（各自拉不同的 Context 类型增强）+ solution-only 根 `tsconfig.json`（`files: []` + references）；构建 = `tsc -b .` | 照搬 |
 | ESM everywhere / 包命名与 rescope / cordis peer 约定 | 不发布 npm 包（private pack 经 plugin add 分发） | 不适用 |
@@ -83,7 +83,7 @@
 | Agent Note 生命周期（proposed/implemented/rejected + archived 冻结） | notes/ 五目录全在场：proposed/ · implemented/ · **[archived/](../notes/archived/README.md)**（冻结快照，2026-09-27 用户指令启用）· rejected/ · postmortem/；冻结纪律 = archived/README | 照搬 |
 | Every new Note triggers a supersession check（同决定搜树：更新/互链/吸收后删） | AGENTS §notes 取代检查 bullet + notes/README §决定覆盖与取代检查（SDLC reference 01 吸纳） | 照搬 |
 | Alternatives considered mandatory（没记击败了什么 = 会重开讼） | guides/60 §4 骨架 + note-format 门禁（## 输掉的方案在场断言） | 照搬 |
-| Implemented Note 保持 current（路径/默认值随实现同 diff；逆转写新 Note 互链） | AGENTS §notes implemented bullet；毕业 = 正文改写（guides/60 §4） | 照搬 |
+| Implemented Note 保持 current（路径/默认值随实现同 diff；逆转写新 Note 互链） | [notes/implemented/README.md](../notes/implemented/README.md) 头注 + [notes/README.md](../notes/README.md) 时态表；毕业 = 正文改写（guides/60 §4）。（根 AGENTS §notes 已压成指针，具体条文在子树——2026-10-19 复核修正） | 照搬 |
 | Note 格式机械化（verify-agent-note-format） | verify 门禁 note-format（regex 版 + grandfather 条款——本仓轻量适配） | 带证据适配 |
 | 归档树 append-only hash manifest | [archived/](../notes/archived/README.md) 用"单文件 + `> 归档：<日期>` 行"等价落地（无 triplet/hash 基础设施）；冻结纪律 = 正文永不修改 | 带证据适配（manifest 面不引入——当前规模下目录树即清单） |
 
@@ -175,7 +175,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
-| **子树 `AGENTS.md` 层**：根只放每轮常驻指令（1–3 行 + 链 home），子树专属指令放子树 `AGENTS.md`（vendor 22 份） | 六份子树 AGENTS.md（`docs/` · `scripts/` · `notes/` · `packages/deep-research-pack/` · [tests/](../tests/AGENTS.md) · [_backlog](../_backlog/AGENTS.md)）；`entry-chain` 门禁把守成员在场 | 照搬 |
+| **子树 `AGENTS.md` 层**：根只放每轮常驻指令（1–3 行 + 链 home），子树专属指令放子树 `AGENTS.md`（vendor 28 份） | 六份子树 AGENTS.md（`docs/` · `scripts/` · `notes/` · `packages/deep-research-pack/` · [tests/](../tests/AGENTS.md) · [_backlog](../_backlog/AGENTS.md)）；`entry-chain` 门禁把守成员在场 | 照搬 |
 | `docs/AGENTS.md` = 文档标准：层级归属（一个事实一个家）/ 写作规则 / slop 清单 / 预算处置序 / 机检链接 | [docs/AGENTS.md](AGENTS.md)：tier 表、写作规则、slop 清单（中文适配）、`## 已知限制与延后工作` 节约定 | 带证据适配 |
 | 预算由 **manifest 拥有**（`scripts/doc-budgets.manifest.json`），门禁拒超限**与缺登记** | [scripts/doc-budgets.json](../scripts/doc-budgets.json) + 门禁 `doc-budgets`（登记项须存在且不超限；仓内新增 AGENTS.md 未登记即红） | 带证据适配（度量词数 → 行数：CJK 词数不可靠） |
 | `scripts/AGENTS.md` = 门禁写作规则（无 shell / 端口与临时路径自持有 / 只在单独运行通过的 spec 是缺陷） | [scripts/AGENTS.md](../scripts/AGENTS.md)：范围（git ls-files tracked-only）、剥 `GIT_*`、端口独占、stdlib-only 分层 | 带证据适配（换成我们的实测教训） |
@@ -186,7 +186,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 | 根 AGENTS 的 “Editing these instructions” 节 | 根新增 §编辑这些指令（预算 manifest / 子树归属 / 门禁把守） | 照搬 |
 | `.agents/skills/` 命名带产品前缀（`dsh-`），少数通用技能无前缀 | 开发技能无前缀（与 vendor 的 `agent-experience`、`record-browser-gif` 同风格） | 已具备 |
 | **一段一行**（`verify-md-wrap` 门禁） | 硬折行 ~90 列 | **不适用**：中文优先仓折行是既有惯例，整仓重排会淹没审阅（成本 > 收益）；引入条件 = 转英文或双语文档 |
-| `docs/defensive-patterns.md`（高风险缺陷模式：生命周期/并发/子进程/teardown——供 review 逐条扫） | 主体 = vendor 的 TypeScript 代码模式清单；本仓 TS 面（`src/client/` 观察面 + `src/lib/` 折算）不另立第二份清单——**可迁移的部分已分居**：门禁与子进程陷阱 → [scripts/AGENTS.md](../scripts/AGENTS.md)，事故与教训 → notes/postmortem/ 与各毕业 Note | 不适用（不另建第二份清单，避免与上述 home 漂移） |
+| `docs/defensive-patterns/`（0.2.1 起为五卷目录：general / package-surface / client-components / conversation-and-session / remote-and-api，双语对 + i18n sidecar；高风险缺陷模式供 review 逐条扫） | 主体 = vendor 的 TypeScript 代码模式清单；本仓 TS 面（`src/client/` 观察面 + `src/lib/` 折算）不另立第二份清单——**可迁移的部分已分居**：门禁与子进程陷阱 → [scripts/AGENTS.md](../scripts/AGENTS.md)，事故与教训 → notes/postmortem/ 与各毕业 Note | 不适用（不另建第二份清单，避免与上述 home 漂移） |
 vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗漏"的误读）：
 
 | vendor 文件/目录 | 本仓处置 |
@@ -218,8 +218,8 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | fix fixtures, not normalizers（证据不许磨到跟 bug 吻合） | [tests/AGENTS「改夹具先想红」](../tests/AGENTS.md) + guides/60 金标准红线（只许 `--update-expected` 重写，不许放宽比对） | 照搬 |
 | 后缀即层 / 命名即所有权（expected-filenames 门禁强制改名） | [scripts/AGENTS §依赖与分层「命名即层」](../scripts/AGENTS.md)（后缀申报证据类型与档位）+ 真模型档登记制 closed set（tests/smoke-contract 对账"要求凭据的脚本恰为名单"） | 带证据适配（本仓车道 = glob + 目录形态，非多 vitest 配置） |
 | prove-it-red 前向化到契约测试（不只门禁） | tests/AGENTS 反证规则 + 承重四文件抽检（实录 = 采纳 Note） | 照搬 |
-| fixture 守卫先于比较（形状 corpus 层） | 不另建——夹具语义已被消费测试逐个钉死（node-gate / schema-scan 用例即永久反证记录），形状层 = 重复保护 | 不适用（防重复机制） |
-| 快照世代模型 / record-refresh 分叉 / 平台变体 | 单 fixture 单代；`--update-expected` = refresh 语义已具；record = 真录制维持搁置 | 不适用（无格式演进压力） |
+| fixture 守卫先于比较（形状 corpus 层） | [scripts/lib/replay-scene.mjs](../scripts/lib/replay-scene.mjs)：比较前 fail-loud 拒绝相对路径/穿越/**symlink**/manifest 结构/角色 roster 齐整/case 唯一/**夹具路径重复**（14 条守卫）；消费测试钉语义，守卫钉形状，两层不同面 | 带证据适配（2026-10-19 复核修正：原判「不适用」与实况相反——等价物早已在该模块） |
+| 快照世代模型 / record-refresh 分叉 / 平台变体 | `sessionFormat` 钉代（replay-scene.mjs:58 强制 = 4，换代须新 `session.vN.jsonl` + 人审，snapshots/README 登记）；`--update-expected` = refresh 语义；record = 真录制（dev/record-role-fixture）；**平台变体（posixOnly/pwshOnly）不适用**（本仓单平台） | 带证据适配（世代/refresh 已落地；仅平台变体不适用——2026-10-19 复核修正原「不适用」整行） |
 | 七层宪法层 / coverage 门 / run-gates DAG / 性能基准层 / flake 八分类 | 维持五面合同与偏离登记（L0–L4 已是证据形态分层） | 不适用（理由 = 采纳 Note 输掉的方案） |
 
 <a id="source-11"></a>
@@ -231,7 +231,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 |---|---|---|
 | 交付判断四角色：机械检查 / 语义评审 / 批准 / 显式交互——各证明不同的东西，互不冒充 | [evaluation §完成判断四分离](evaluation.md) + [reviewing-a-delivery](../.agents/skills/reviewing-a-delivery/SKILL.md) 技能（语义自审层——agent 可自主完成的角色） | 照搬（判据固化 + 技能载体） |
 | 完成判断公理：能加载 ≠ 有行为证据 ≠ 能安装 ≠ 已获交付批准 | evaluation §完成判断四分离（四结果 ↔ L1 挂载 / L1 行为断言 / L2 / 收尾对账+用户批准） | 照搬 |
-| 门禁自测模式（语料 verify.test.mjs：完整副本 + 真实 verifier 入口 + invalid case 真被拒才算数） | [gates-smoke](../scripts/smoke/gates-smoke.mjs)（临时副本 + 注入回归经真实 verify 入口点名报红 + 零注入对照组防断言空转）+ [tests/verify-gates.test.mjs](../tests/verify-gates.test.mjs)（案例表 ↔ gates 数组静态对账） | 带证据适配（子进程归 smoke 道——layering 禁默认回归 spawn；副本 = tracked 全量 + 被 tracked md 引用的运行区链接目标补拷） |
+| 门禁自测模式（语料 verify.test.mjs：完整副本 + 真实 verifier 入口 + invalid case 真被拒才算数） | [gates-smoke](../scripts/smoke/gates-smoke.mjs)（临时副本 + 注入回归经真实 verify 入口点名报红 + 零注入对照组防断言空转）+ [tests/verify-gates.test.mjs](../tests/verify-gates.test.mjs)（案例表 ↔ gates 数组静态对账） | 带证据适配（子进程归 smoke 道——layering 禁默认回归 spawn；副本 = tracked 全量，等价 fresh clone——曾有的「运行区链接目标补拷」对冲已随 BUG-016 修复移除） |
 | 验证词汇：oracle 独立预期 / real composition / semantic review | [00-index §术语映射](00-index.md) 验证词汇行 | 照搬 |
 | 六误区清单（goal≠验收 / mock-only / 刷新≠接受 / 空 invariant / agent-loop / 不抄主仓治理） | 逐条散落既有登记（D6 / L1 真挂载 / tests·AGENTS fix fixtures / 本表源 1 与 alignment-ledger / 不适用登记）——不另立第二份清单（理由 = [毕业 Note](../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md) 输掉的方案） | 已具备（散落） |
 | 主仓治理全套（Issue/PR policy、weighted approval、stacked PR、release lane、`.github/` 执行层） | 等价物 = pre-commit + 窄切片 + 收尾对账（既有登记）；语料适用边界明文反证该立场 | 不适用（维持） |
