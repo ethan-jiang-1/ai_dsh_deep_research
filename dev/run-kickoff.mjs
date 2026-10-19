@@ -14,6 +14,7 @@
 //   node dev/run-kickoff.mjs --port 3083 --token <t> --session <id> (--prompt <text> | --prompt-file <f>)
 // 输出：session id（stdout，一行）——后续日志核对/仪表盘观察用它定位。
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { appendDecisionsRow, closingProvenanceRow } from '../scripts/lib/hitl-provenance.mjs'
 import { join } from 'node:path';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
