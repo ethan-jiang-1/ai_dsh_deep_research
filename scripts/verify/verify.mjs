@@ -42,7 +42,7 @@ const gates = [
   'md-utf8-newline', 'md-links', 'md-anchors', 'archived-note-pointer', 'count-free', 'doc-now-only', 'doc-budgets',
   'preset-structure', 'pack-bundle-compat', 'client-half', 'row-deps', 'pack-contract-sync', 'role-list-sync', 'client-keys', 'client-effect-wrap', 'cockpit-doc-registry',
   'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'proposed-pointer-live',
-  'vendor-pin', 'vendor-clean', 'pin-agreement', 'align-ledger', 'repo-conventions', 'vendor-links',
+  'vendor-pin', 'vendor-clean', 'pin-agreement', 'align-ledger', 'discipline-na-trigger', 'repo-conventions', 'vendor-links',
   'workspace-contract', 'handbook-budget', 'workspace-versioning', 'overlay-fresh', 'pack-workspace-fresh', 'dist-manual-version',
   'claude-symlink', 'secrets-untracked', 'guard-red-record', 'gate-ledger-sync', 'entry-chain', 'backlog-liveness', 'port-exclusive', 'hooks-active',
 ];
@@ -1117,6 +1117,55 @@ function gitOnce(args) {
         for (const m of missing.slice(0, 8)) fail(gate, `未登记：${m}（结构面须逐条进台账；新增上游子树/技能时同 diff 登记）`);
         if (missing.length > 8) fail(gate, `另有 ${missing.length - 8} 条未登记（见上）`);
       }
+    }
+  }
+}
+
+// ── discipline-na-trigger（人读表「不适用」行的免检区闭合——docs/discipline-map.md）
+//
+//    病根实证（2026-10-19 全表逐条语义重读）：discipline-map §维护规则 白纸黑字承诺
+//    「写 `不适用` 必须同时给出**可判定的失效条件**……由 `align-ledger` 门禁的活性断言
+//    机械复核——理由变假即红」。但 `align-ledger` 只读 docs/alignment-ledger.json（108 条
+//    文件级），**从不读人读表**——那句承诺对 discipline-map 的 16 条「不适用」行根本没兑现。
+//    实测代价：源 10 有 2 行判「不适用」，而等价物早已在 scripts/lib/replay-scene.mjs 里
+//    （14 条比较前守卫、sessionFormat 钉代），台账记成"没做"——依据静默腐烂。
+//
+//    判据：状态列（第 3 列）真值以「不适用」开头的每一行，必须含一个可判定的重估触发词
+//    （重估 / 失效条件 / 复活条件 / 引入条件 / 触发条件）。**按状态列真值判，不做全文正则**
+//    ——「带证据适配（……原判「不适用」与实况相反……）」这类行正文含"不适用"字样但判定不是
+//    na，全文正则会把它们误红。剥 `**` 后取前缀，是唯一稳定形态。
+//
+//    范围与防空：只读 docs/discipline-map.md 这一个 tracked 文件；解析出 0 行或 na 行数
+//    少于 MIN_NA_ROWS 即判红（表格改版/正则失效 → 门禁静默变空集，等于不存在）。
+{
+  const gate = 'discipline-na-trigger';
+  const mapPath = join(ROOT, 'docs', 'discipline-map.md');
+  // 当前实测 16 行；留余量到 10，防"重分类使行数合理下降"时假红，又能抓住解析失效。
+  const MIN_NA_ROWS = 10;
+  const TRIGGER = /重估|失效条件|复活条件|引入条件|触发条件/;
+  if (!existsSync(mapPath)) fail(gate, 'docs/discipline-map.md 缺席——纪律全量枚举的人读正本');
+  else {
+    const lines = readFileSync(mapPath, 'utf8').split('\n');
+    // 表格数据行：以 | 开头、非分隔行、非表头
+    const rows = lines.filter((l) => /^\|/.test(l) && !/^\|[\s\-:|]+\|$/.test(l) && !/^\|\s*DSH 做法/.test(l));
+    if (rows.length === 0) fail(gate, 'docs/discipline-map.md 未解析出任何表格数据行——表格改版或解析正则失效（防空语料）');
+    let naCount = 0;
+    const missing = [];
+    for (const row of rows) {
+      const cols = row.split('|').slice(1, -1).map((s) => s.trim());
+      if (cols.length < 3) continue;
+      const state = cols[2].replace(/\*\*/g, '').trim();
+      if (!state.startsWith('不适用')) continue;
+      naCount++;
+      if (!TRIGGER.test(state)) {
+        missing.push(`「${cols[0].replace(/\*\*/g, '').slice(0, 46)}」——状态列只写了理由（"${state.slice(0, 48)}"），没写什么情况下来重估`);
+      }
+    }
+    if (naCount < MIN_NA_ROWS) {
+      fail(gate, `只解析到 ${naCount} 条「不适用」行（下限 ${MIN_NA_ROWS}）——解析失效或整表被改窄（防空语料）`);
+    }
+    for (const m of missing) {
+      fail(gate, `${m}；修正 = 在状态列补一个可判定的重估触发（重估/失效条件/复活条件/引入条件/触发条件之一）——见 docs/discipline-map.md §维护规则「不适用是当时不适用，不是豁免」`);
     }
   }
 }

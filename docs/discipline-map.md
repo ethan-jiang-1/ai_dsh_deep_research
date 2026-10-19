@@ -43,13 +43,13 @@
 | Design each tool's UI presentation up front（呈现先于实现设计） | preset persona/skill 文本 = 工具的行为呈现面，R1 起逐角色先定稿再挂载；观察面 = 先 RFC 后实现（run-dashboard/debug-dashboard-plus 皆然） | 带证据适配 |
 | Plan unit/e2e/snapshot coverage for seams | evaluation.md 五面合同（L0–L4）先于框架定案（D6） | 带证据适配 |
 | Registrations are effects（一切贡献走 ctx.effect，register 返回 disposer） | client 面 `src/client/index.ts`：四处注册全量 `scoped.effect(...)` 包裹（页签类型 `sidebarRightTabs.register` / 页签槽体 / 活标题槽体 / 工具卡循环逐 key `slots.inject`） | 照搬（D18 后本仓有自写 cordis 插件代码；证据 = 门禁 `client-effect-wrap` 全量断言 + `client-load-smoke` 真浏览器挂载断言） |
-| ~~Runtime invariants assert owned relationships~~（invariant 包规则） | **vendor 0.2.1 已删除**该条与布局行 `runtime-diagnostics/`，`packages/` 下亦无 invariant 组——本仓无需落点。**复活条件** = 上游恢复 invariant 包族 | 不适用（上游已移除——2026-10-19 复核：pin 0.1.7 有该条、0.2.1 零命中） |
+| ~~Runtime invariants assert owned relationships~~（invariant 包规则） | **vendor 0.2.1 已删除**该条与布局行 `runtime-diagnostics/`，`packages/` 下亦无 invariant 组——本仓无需落点。**复活条件** = 上游恢复 invariant 包族 | 不适用（上游已移除——2026-10-19 复核：pin 0.1.7 有该条、0.2.1 零命中；**复活条件**：上游恢复 invariant 包族时） |
 | Typed events / declaration merging / assertNever / waterfall next() / branded ids / Trust TypeScript / explicit request-spec split | TS 面（`src/client/` 观察面 + `src/lib/` 折算）只**消费** vendor 的声明合并类型（`import type {} from '@deepseek-ai/dsh-*/client'`），不 author 会话事件、不注册服务或 waterfall 监听器、无跨边界自持 id、无 request/spec 默认化面 | 不适用（无对应机制面；本仓开始 author 事件或服务时重估） |
 | Keep compiler faces explicit（host/client 各出叶配置，根仅 solution） | `packages/deep-research-pack/tsconfig.host.json` · `tsconfig.client.json` 两叶（各自拉不同的 Context 类型增强）+ solution-only 根 `tsconfig.json`（`files: []` + references）；构建 = `tsc -b .` | 照搬 |
-| ESM everywhere / 包命名与 rescope / cordis peer 约定 | 不发布 npm 包（private pack 经 plugin add 分发） | 不适用 |
+| ESM everywhere / 包命名与 rescope / cordis peer 约定 | 不发布 npm 包（private pack 经 plugin add 分发） | 不适用（本仓无 npm 发布面——**重估触发**：pack 转为公开发布、或需与其他插件共享 peer 依赖时） |
 | Client UI copy is locale-owned | client UI 文案硬编码中文（`src/client/ResearchStatusTab.tsx` · `ResearchToolCard.tsx`——如 `研究状态 · ⏳ 等你拍板`），无 locale 字典面；单语仓不引入 `t`/字典 | 不适用（转多语或对外分发时重估） |
-| Choose PR history deliberately / GitHub stacks / Labels taxonomy | 无 GitHub PR 流（本地单仓窄切片提交） | 不适用（等价物 = 窄证据切片 commit 纪律 + pre-commit 门禁） |
-| Both SDKs project the loop | 无 SDK 维护面 | 不适用 |
+| Choose PR history deliberately / GitHub stacks / Labels taxonomy | 无 GitHub PR 流（本地单仓窄切片提交） | 不适用（等价物 = 窄证据切片 commit 纪律 + pre-commit 门禁；**重估触发**：需多 commit 叠加审阅的 PR 流出现时） |
+| Both SDKs project the loop | 无 SDK 维护面 | 不适用（本仓不维护任何 SDK——**重估触发**：本仓开始对外提供 SDK 或需要同时投影两种运行时面时） |
 
 ## 源 2：vendor docs/testing.md
 
@@ -62,7 +62,7 @@
 | The with-key policy: inference is cheap（语义面用真模型证） | 真模型档脚本（清单正本 = AGENTS §密钥）；入口链探针 = 语义漂移的真模型检测 | 照搬 |
 | Test resolution: source plane only | keyless 回归断言 tracked 源文件（md-utf8-newline 改 git ls-files 驱动即为此则——运行区不扫，live run 实证） | 带证据适配 |
 | Snapshot tests（关键用户可见变更更新录制快照） | 等价物 = snapshot-replay-smoke 三层判据（A 回放收尾逐字命中 / B 组装请求 diff = persona + 全部 request/header + 三处 user/message 注入〔工作区指令 / skill 目录 / 运行时上下文〕/ C 渲染金标准）+ 真模型档会话日志断言（zstd 逐事件）+ `client-load-smoke` 真浏览器断言；真录制通道不做——B 层 diff 已是模型可见变更的独立 keyless 信号（输掉的方案 = test-strategy 采纳 Note） | 带证据适配 |
-| Test subprocess launch modes（构建产物/源码启动模式分立） | 本仓不设双启动模式：冒烟子进程一律走 tsx 源码通道（`node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts`）；构建产物另有在场断言（`lib/client.js` 经 exports["./client"] 由 `client-load-smoke` 加载，缺件由 `vendor-artifacts` 自检拦） | 不适用 |
+| Test subprocess launch modes（构建产物/源码启动模式分立） | 本仓不设双启动模式：冒烟子进程一律走 tsx 源码通道（`node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts`）；构建产物另有在场断言（`lib/client.js` 经 exports["./client"] 由 `client-load-smoke` 加载，缺件由 `vendor-artifacts` 自检拦） | 不适用（现无分立需求——**重估触发**：冒烟开始以构建产物（非 tsx 源码）启动 CLI，或引入第二种启动入口时） |
 
 ## 源 3：vendor docs/AGENTS.md（文档标准）
 
@@ -74,7 +74,7 @@
 | Slop checklist（文档废话清单） | 行文规范沿袭（定性吸收，未机械化） | 带证据适配 |
 | 一段一行（`verify-md-wrap` 门禁） | 硬折行 ~90 列 | 不适用（登记偏离）：中文优先仓折行是既有惯例，整仓重排会淹没审阅（成本 > 收益）；引入条件 = 转英文或双语文档时 |
 | 双语配对：`*.zh.md` + `.i18n.yaml` hash sidecar | 单语仓 | 不适用（转双语或对外分发时重估） |
-| 站点投影：`website/.generated/` | 无站点 | 不适用（无对外文档站） |
+| 站点投影：`website/.generated/` | 无站点 | 不适用（本仓无对外文档站——**重估触发**：建立对外文档站或站点投影时） |
 
 ## 源 4：vendor .agents/notes/（Note 生命周期规则）
 
@@ -98,7 +98,7 @@ vendor 的事故复盘住在 **`docs/postmortem/`**（编号条目 + `README.md`
 |---|---|---|
 | 事故复盘的进门判据（到达不该到达的地方）+ 编号条目 + 必须链接由事故催生的 guardrails | [notes/postmortem/README.md](../notes/postmortem/README.md)：同一判据、五节骨架（症状/为什么没早发现/根因/修复/新增防线）；现存条目 = [2026-09-26-roadmap-graduation-drift.md](../notes/postmortem/2026-09-26-roadmap-graduation-drift.md)（日期-slug）；产物落 `evaluation.md` 才闭环 | 带证据适配 |
 | 层的位置：`docs/postmortem/`（与"当前合同"同层，属文档 tier 表一行） | `notes/postmortem/`（开发记忆层） | 带证据适配（登记偏离：我们的 docs 只写 now，事故叙事归 notes 时间层；差异理由 = notes 是"为什么/发生过什么"的唯一时间层） |
-| 双子语三件套 | 单语 | 不适用（同全仓单语登记） |
+| 双子语三件套 | 单语 | 不适用（同全仓单语登记——**重估触发**：转双语交付时） |
 
 ## 源 6：vendor .agents/skills/（开发 Skill——2026-09-25 吸纳，`.agents/skills/` 落地）
 
@@ -186,7 +186,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 | 根 AGENTS 的 “Editing these instructions” 节 | 根新增 §编辑这些指令（预算 manifest / 子树归属 / 门禁把守） | 照搬 |
 | `.agents/skills/` 命名带产品前缀（`dsh-`），少数通用技能无前缀 | 开发技能无前缀（与 vendor 的 `agent-experience`、`record-browser-gif` 同风格） | 已具备 |
 | **一段一行**（`verify-md-wrap` 门禁） | 硬折行 ~90 列 | **不适用**：中文优先仓折行是既有惯例，整仓重排会淹没审阅（成本 > 收益）；引入条件 = 转英文或双语文档 |
-| `docs/defensive-patterns/`（0.2.1 起为五卷目录：general / package-surface / client-components / conversation-and-session / remote-and-api，双语对 + i18n sidecar；高风险缺陷模式供 review 逐条扫） | 主体 = vendor 的 TypeScript 代码模式清单；本仓 TS 面（`src/client/` 观察面 + `src/lib/` 折算）不另立第二份清单——**可迁移的部分已分居**：门禁与子进程陷阱 → [scripts/AGENTS.md](../scripts/AGENTS.md)，事故与教训 → notes/postmortem/ 与各毕业 Note | 不适用（不另建第二份清单，避免与上述 home 漂移） |
+| `docs/defensive-patterns/`（0.2.1 起为五卷目录：general / package-surface / client-components / conversation-and-session / remote-and-api，双语对 + i18n sidecar；高风险缺陷模式供 review 逐条扫） | 主体 = vendor 的 TypeScript 代码模式清单；本仓 TS 面（`src/client/` 观察面 + `src/lib/` 折算）不另立第二份清单——**可迁移的部分已分居**：门禁与子进程陷阱 → [scripts/AGENTS.md](../scripts/AGENTS.md)，事故与教训 → notes/postmortem/ 与各毕业 Note | 不适用（不另建第二份清单，避免与上述 home 漂移；**重估触发**：本仓 TS 面扩大到需独立缺陷模式清单时） |
 vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗漏"的误读）：
 
 | vendor 文件/目录 | 本仓处置 |
@@ -220,7 +220,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | prove-it-red 前向化到契约测试（不只门禁） | tests/AGENTS 反证规则 + 承重四文件抽检（实录 = 采纳 Note） | 照搬 |
 | fixture 守卫先于比较（形状 corpus 层） | [scripts/lib/replay-scene.mjs](../scripts/lib/replay-scene.mjs)：比较前 fail-loud 拒绝相对路径/穿越/**symlink**/manifest 结构/角色 roster 齐整/case 唯一/**夹具路径重复**（14 条守卫）；消费测试钉语义，守卫钉形状，两层不同面 | 带证据适配（2026-10-19 复核修正：原判「不适用」与实况相反——等价物早已在该模块） |
 | 快照世代模型 / record-refresh 分叉 / 平台变体 | `sessionFormat` 钉代（replay-scene.mjs:58 强制 = 4，换代须新 `session.vN.jsonl` + 人审，snapshots/README 登记）；`--update-expected` = refresh 语义；record = 真录制（dev/record-role-fixture）；**平台变体（posixOnly/pwshOnly）不适用**（本仓单平台） | 带证据适配（世代/refresh 已落地；仅平台变体不适用——2026-10-19 复核修正原「不适用」整行） |
-| 七层宪法层 / coverage 门 / run-gates DAG / 性能基准层 / flake 八分类 | 维持五面合同与偏离登记（L0–L4 已是证据形态分层） | 不适用（理由 = 采纳 Note 输掉的方案） |
+| 七层宪法层 / coverage 门 / run-gates DAG / 性能基准层 / flake 八分类 | 维持五面合同与偏离登记（L0–L4 已是证据形态分层） | 不适用（理由 = 采纳 Note 输掉的方案；**重估触发**：现有 L0–L4 分层被证明不足（出现该分层接不住的真实缺陷类别）时） |
 
 <a id="source-11"></a>
 ## 源 11：_dsh_plugin_agent_ready_development 语料（二代，独立插件仓专版）
@@ -234,7 +234,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | 门禁自测模式（语料 verify.test.mjs：完整副本 + 真实 verifier 入口 + invalid case 真被拒才算数） | [gates-smoke](../scripts/smoke/gates-smoke.mjs)（临时副本 + 注入回归经真实 verify 入口点名报红 + 零注入对照组防断言空转）+ [tests/verify-gates.test.mjs](../tests/verify-gates.test.mjs)（案例表 ↔ gates 数组静态对账） | 带证据适配（子进程归 smoke 道——layering 禁默认回归 spawn；副本 = tracked 全量，等价 fresh clone——曾有的「运行区链接目标补拷」对冲已随 BUG-016 修复移除） |
 | 验证词汇：oracle 独立预期 / real composition / semantic review | [00-index §术语映射](00-index.md) 验证词汇行 | 照搬 |
 | 六误区清单（goal≠验收 / mock-only / 刷新≠接受 / 空 invariant / agent-loop / 不抄主仓治理） | 逐条散落既有登记（D6 / L1 真挂载 / tests·AGENTS fix fixtures / 本表源 1 与 alignment-ledger / 不适用登记）——不另立第二份清单（理由 = [毕业 Note](../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md) 输掉的方案） | 已具备（散落） |
-| 主仓治理全套（Issue/PR policy、weighted approval、stacked PR、release lane、`.github/` 执行层） | 等价物 = pre-commit + 窄切片 + 收尾对账（既有登记）；语料适用边界明文反证该立场 | 不适用（维持） |
+| 主仓治理全套（Issue/PR policy、weighted approval、stacked PR、release lane、`.github/` 执行层） | 等价物 = pre-commit + 窄切片 + 收尾对账（既有登记）；语料适用边界明文反证该立场 | 不适用（维持——**重估触发**：引入外部贡献者或多包发布需治理流程时） |
 
 ## 重审触发路径
 

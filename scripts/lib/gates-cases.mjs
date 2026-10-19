@@ -132,6 +132,32 @@ const naLivenessMissing = () => (dir) => {
   writeFileSync(p, `${JSON.stringify(ledger, null, 2)}\n`);
 };
 
+/** discipline-map 人读表「不适用」行的免检区注入（缺重估触发形态）：把某行状态列还原成
+ *  只写理由、不写触发条件的裸形态 → 门禁须报"没写什么情况下来重估"。
+ *  防"新增 na 行时忘记给失效条件"重新变成永久免检区（该规则写在 discipline-map §维护规则，
+ *  原先由 align-ledger 名义上复核，实际它只读 JSON 从不读人读表——2026-10-19 实证）。 */
+const naTriggerMissing = () => (dir) => {
+  const p = join(dir, 'docs', 'discipline-map.md');
+  const lines = readFileSync(p, 'utf8').split('\n');
+  const out = lines.map((line) => {
+    if (!line.startsWith('| 站点投影：')) return line;
+    return line.replace(/\| 不适用（[^|]*\|$/, '| 不适用（无对外文档站） |');
+  });
+  writeFileSync(p, out.join('\n'));
+};
+
+/** 防空语料注入：把全部 na 行的「不适用」改成 N/A → 门禁解析到 0 条，须报下限守卫而非静默绿。
+ *  防"表格改版/正则失效使门禁静默变空集"（空门禁等于不存在）。 */
+const naRowsVanished = () => (dir) => {
+  const p = join(dir, 'docs', 'discipline-map.md');
+  const out = readFileSync(p, 'utf8').split('\n').map((line) => {
+    const cols = line.split('|');
+    if (cols.length > 4 && /不适用/.test(cols[3])) cols[3] = cols[3].replace(/不适用/g, 'N/A');
+    return cols.join('|');
+  });
+  writeFileSync(p, out.join('\n'));
+};
+
 const linkUntrackedTarget = () => (dir) => {
   // 目标在盘上存在但未被 git 跟踪（BUG-016 形态：tracked md 链接运行区文件——git 绿依赖机器
   // 状态而非仓库状态）。探针必须放在 .gitignore 真覆盖的路径（runtime/smoke-workspace/*）——
@@ -282,6 +308,11 @@ export const CASES = [
     expect: 'docs/session-format-status.md: verdict=na 必须给 liveness' },
   { id: 'align-ledger-na-liveness-missing', gate: 'align-ledger', mutate: naLivenessMissing(),
     expect: 'website/AGENTS.md: verdict=na 必须给 liveness' },
+  // 本门禁在零注入副本基线 PASS（只读 docs/discipline-map.md，副本里是实拷贝），按驱动壳
+  // 约定「基线 PASS 则不给 expect」——注入报因的精确性由真实仓反证记录背书
+  // （evaluation.md §L0 登记表该行），此处只断言"被点名报红"。
+  { id: 'discipline-na-trigger-missing', gate: 'discipline-na-trigger', mutate: naTriggerMissing() },
+  { id: 'discipline-na-trigger-rows-vanished', gate: 'discipline-na-trigger', mutate: naRowsVanished() },
   // 未登记模块注入（cockpit-doc-registry）：往 pack 的 src/lib/ 丢一个新模块、不动构成正本
   // ——模拟"模块上了盘、正本没跟上"（2026-10-11 实测形态：brief-fold / review-readiness 上线
   // 后正本仍写「七区」「六件」）。git add 由驱动壳统一执行，故 tracked 面能看见它。
