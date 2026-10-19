@@ -34,7 +34,7 @@
 | Files end with exactly one trailing newline | verify 门禁 md-utf8-newline（tracked 全量） | 照搬 |
 | Add/update an Agent Note **only for lasting decision rationale**（机械与局部编辑——含本地 UI 呈现/交互——豁免；0.1.7 判据自 0.1.5 的 non-trivial 全量收窄） | AGENTS §notes 写入触发（同 diff）+ notes/AGENTS.md §什么时候必须写 Note + note-format 门禁 | 照搬（判据按 0.1.7 收窄） |
 | Plugins, not loop changes（新行为走扩展点，不改 agent-loop） | 组合面（preset/skill/bundle 行）+ 观察面 client 面（`src/client/` 只注册页签/工具卡槽，D18） | 带证据适配（两处贡献都走 DSH 扩展点；agent-loop 属 vendor，本仓零改动——client 面只用 `slots`/`sidebarRightTabs` 注册面） |
-| Prefer maintained dependencies over hand-rolling（真能删掉自 owned 代码与测试时） | 测试栈 node:test、zstd 解压 node:zlib、regex 断言——全部维护中的标准件；tsx/pnpm 构建链引入（vendor 落地）而非自造 | 照搬 |
+| Prefer maintained dependencies over hand-rolling（真能删掉自 owned 代码与测试时） | 测试栈 node:test、regex 断言——维护中的标准件顶掉自造；tsx/pnpm 构建链引入（vendor 落地）而非自造。**zstd 解压是反例且有意为之**：`scripts/lib/zstd-read.mjs` 走 `spawnSync('zstd')` 调 CLI，非 `node:zlib`——多帧拼接日志 node:zlib 只解第一帧（2026-09-24 实测整轮误判「1 事件」），该项否决见 [observability-gui](../notes/implemented/2026-09-24-observability-gui.md) 与 [layering-v2](../notes/implemented/2026-10-09-layering-v2.md) 输掉的方案 | 带证据适配（标准件**确实删掉自 owned 代码与测试**的两处兑现：测试栈、构建链；zstd 一项经实测后**主动保留自 owned 调用段**——判据的后半句「确实删掉」不成立时就不替换，正是本规则的边界，非偏离） |
 | Tests describe behavior, not correctness（过时行为随测试一起改） | tests/ 契约测试（evaluation-contract 对手册谓词、dashboard 对文件形状）；行为变更同 diff 改锚 | 照搬 |
 | No hardcoded tunables（部署可变量必须是 config 字段） | preset 工具行 config（tool-todo allowParallelInProgress、tool-web 超时）皆声明为 config；层版本钉在 pack 兼容矩阵 | 带证据适配（载体 = cordis 行 config 而非代码 Config 类型） |
 | TODO 标记分级（FIXME/TODO/XXX 按紧急度） | 沿用（仓内出现时按此分级） | 照搬 |

@@ -22,7 +22,7 @@ opened: 2026-10-19
 
 | 源 | # | 规则 | 判定 | 失真点 |
 |---|---|---|---|---|
-| 1 | 6 | Prefer maintained dependencies over hand-rolling | 落点不符 | 上游判据是「替换后**确实删掉自 owned 代码与测试**」；落点写的是"选用维护中的标准件"，不涉删除。且证据与盘上不符：落点称 zstd 走 `node:zlib`，实际 `scripts/lib/zstd-read.mjs` 调外部 `spawnSync('zstd', ...)` |
+| ~~1~~ | ~~6~~ | ~~Prefer maintained dependencies over hand-rolling~~ | **已修（2026-10-19）** | 原记「zstd 解压 node:zlib」与盘上相反——实为 `scripts/lib/zstd-read.mjs` 的 `spawnSync('zstd')`。且 node:zlib 在 [observability-gui](../../notes/implemented/2026-09-24-observability-gui.md) 与 [layering-v2](../../notes/implemented/2026-10-09-layering-v2.md) 里明列**输掉的方案**（多帧拼接只解第一帧，实测误判「1 事件」）——本表把弃案写成了采纳事实。已改为如实记述并降「照搬」为「带证据适配」 |
 | 1 | 12 | Design each tool's UI presentation up front | 落点不符 | 所称「R1 起逐角色先定稿再挂载」在 R1 scaffold Note 中零字记载；所称 RFC `2026-09-24-debug-dashboard-plus.md` 路径已悬空（实际随 `2026-09-24-observability-gui.md` 落地） |
 | 3 | 3 | Cross-reference with machine-checkable links | 三态可疑 | 上游有**两个**机检面（md-links + 禁 commit id 引用）；本仓只落 md-links，第二个零对应物。原记「带证据适配」，但语义被收窄，且所称"entry-chain 语义兜底"名不副实（entry-chain 只断言文件存在，不判指针语义） |
 | 3 | 4 | Slop checklist | 三态可疑 | 上游把 slop 清单写成**可运行审计**（9 条）；本仓已机械化其中至少两条（`count-free`、`doc-now-only` 门禁），台账却仍写"定性吸收，未机械化"——与既有门禁事实相悖 |
