@@ -31,7 +31,7 @@ PASS + 文末附录第 1 轮 FAIL"形态，正是 BUG-036 修的那种；门侧�
 1. 定"谁为正本"：`node-gate-contracts.readinessOf` 的 `{pass, conditional}` 里 **conditional（附条件 PASS）**
    是门独有语义，不能简单删——正解候选 = `readinessOf` 的三态部分**委托** pack 的 `terminalReadiness`，
    只保留 conditional 检测；
-2. 委托前先跑 `tests/node-gate.test.mjs` / `tests/review-readiness.test.mjs` 两套夹具看红，
+2. 委托前先跑 `tests/run/node-gate.test.mjs` / `tests/run/review-readiness.test.mjs` 两套夹具看红，
    确认没有第二处语义差异（尤其"附条件 PASS 不算 PASS"的既有判据）；
 3. 收口标准 = 同一 bundle 两个入口同判（加一条**跨实现一致**的契约测试钉住）。
 

@@ -5,6 +5,22 @@
 分级冒烟证据（见 [docs/evaluation.md](../docs/evaluation.md)）。上游对应物 = DSH
 `snapshots/AGENTS.md` 的“证据住在被它证明的对象旁边”规则。
 
+## 分域（2026-10-20 用户指令：目录映射源代码）
+
+`tests/**/*.test.mjs` 是默认回归的递归发现面；`fixtures/` 与 `_tmp/` 不在发现面内。
+新测试按**被测面**入域，不放在 `tests/` 顶层：
+
+| 目录 | 映射的源代码/面 | 放什么 |
+|---|---|---|
+| `run/` | run 通道、run 状态、HITL、run 门与审计、观察/回放、run-ops/probe | `scripts/lib/{run-*,hitl-*,node-gate-*,evidence-audit*,schema-scan*,replay-*,probe-*,session-*,bundle-*,review-readiness,final-target,ask-drive,...}` 的回归 |
+| `cockpit/` | pack client 观察面与其折算 | `packages/deep-research-pack/src/lib/{brief,library,method,receipt}-*` 等驾驶舱折算 |
+| `pack/` | pack 结构、preset、导出与部署 | presets 形状、export-shape、deploy-bin |
+| `contracts/` | 跨仓合同/文档/门禁自测/测试基础设施 | evaluation、navigability、layering、smoke-contract、verify-gates、backlog-liveness、docs-consistency |
+| `fixtures/` | 构造样本与冻结录制语料 | 测试/smoke 消费；taxonomy = [fixtures/README](fixtures/README.md) |
+
+域内文件名 = 被测模块名 + `.test.mjs`（如 `run/run-state.test.mjs` ↔ `scripts/lib/run-state.mjs`）；
+一文件测多个面时按**主语**归域，跨域合同放 `contracts/`。
+
 ## 放置规则（一处证据一个家）
 
 - **`tests/`**：契约测试与守卫（`*.test.mjs`），断言对象是仓库里的自控文件；
@@ -14,15 +30,17 @@
 - 真模型/浏览器/网络/子进程检查走独立 smoke；默认回归无凭据可跑。`layering` 守卫五件套 =
   提及级禁物 + 解析级调用（[lib/keyless-imports](../scripts/lib/keyless-imports.mjs)——夹具
   字符串不咬）+ import 闭包图（传递引入也红；从 `scripts/` 树只许 import `lib/`，pack
-  `src/lib` 纯件另由闭包图背书）+ 命令钉 + 有家句。
+  `src/lib` 纯件另由闭包图背书）+ 命令钉 + 有家句。违规样本只住 `fixtures/`，不回头污染域。
 
 ## 写测试时
 
-- **命名即申报**：`*.test.mjs` 命名即进 regression（`pnpm test` 的 glob 选中机制，layering
-  守卫钉 keyless）——新检查先想清它是不是 keyless 契约证据再命名；支援件住 `lib/`、
-  `fixtures/`（glob 之外，import 不注册测试）。档位语法正本 = [scripts/AGENTS §依赖与分层](../scripts/AGENTS.md)；
+- **命名即申报**：`*.test.mjs` 命名即进 regression（递归 glob 选中，`layering` 钉 keyless）——
+  新检查先想清它是不是 keyless 契约证据再命名；支援件住 `lib/`、`fixtures/`（glob 之外，
+  import 不注册测试）；
 - **verify the world**：断言重读文件或观察持久状态，不信"代码里已经设好了"；
-- **新契约测试带反证**：同 diff 注入回归看红（改夹具 / 松判据 / 删断言皆是回归手法）再还原——只交付绿 = 不知道测试会不会咬人。声称守卫具体事故（标题带 BUG-nnn）须留「负例留证/夹具留证」块——机械面 = verify 门禁 `guard-red-record`；
+- **新契约测试带反证**：同 diff 注入回归看红（改夹具 / 松判据 / 删断言皆是回归手法）再还原——
+  只交付绿 = 不知道测试会不会咬人。声称守卫具体事故（标题带 BUG-nnn）须留「负例留证/夹具留证」
+  块——机械面 = verify 门禁 `guard-red-record`；
 - **改夹具先想红**：夹具语义由消费它的契约测试钉住（node-gate / schema-scan 的用例即永久反证
   记录）——改夹具应预期变红，绿了说明钉歪了；
 - 新契约（手册谓词、门禁登记、模板形状）→ 同 diff 加测试，并在

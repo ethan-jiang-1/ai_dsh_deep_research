@@ -91,7 +91,7 @@ README 证据边界同句。**无需返工**；其 06/07（bug 复现 playbook�
   断言 + 安装域浏览器模块表断言 + run() 超时/并发锁/进程组回收；可连同 client-half 门禁
   （exports./client ⟺ dsh.client 双向）与 pack-compat「含当前 tag」提前到 L0 打包一张卡；
 - **layering 二代**（中高）：AST 判法（动态 import/密钥间接引用现逃检）+ import 图守卫
-  （`tests/verify-gates.test.mjs` import gates-smoke.mjs 靠约定安全）+ package.json test
+  （`tests/contracts/verify-gates.test.mjs` import gates-smoke.mjs 靠约定安全）+ package.json test
   命令形状钉；
 - **盘点后定**（中）：两候选均已于 2026-10-10 盘点收口——preset-required-config 零漂移
   不需要修（[盘点材料](../../_backlog/_archived/research/2026-10-10-preset-config-audit.md)）；

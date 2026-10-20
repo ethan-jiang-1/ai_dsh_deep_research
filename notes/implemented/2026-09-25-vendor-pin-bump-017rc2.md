@@ -54,7 +54,7 @@
    （`session/create` 的 `agentPreset` 取值）、`release-smoke.mjs`（干净 profile 安装形状）；
 4. 门禁面：`preset-structure`（断言 preset.yml 三字段 + agent.cordis.yml + ≥1 SKILL.md）、
    `role-list-sync`（角色清单事实源）、`pack-bundle-compat`（patch 指向）；
-5. 测试面：`tests/presets.test.mjs`、`tests/evaluation-contract.test.mjs`；
+5. 测试面：`tests/pack/presets.test.mjs`、`tests/contracts/evaluation-contract.test.mjs`；
 6. 文档面：`docs/guides/62-plugin-authoring.md`（插件作者入口的 preset 形态）、`design/10`、
    `design/20`（角色）、`00-index` 术语映射、`discipline-map` 源 1–9、`alignment-ledger` 的
    preset 相关条目、`research-workspace/AGENTS.md`（若引用 preset 路径）。
@@ -92,7 +92,7 @@
   （`vendor-clean` 绿）；`git diff --submodule=short` 显示 gitlink `fb2c4b9e` → `477b4f4205`。
   tag 经 GitHub `ls-remote` 确认是最新 RC（本机镜像只到 `dsh-v0.1.7-rc.1`）。
 - **引用更新**：13 个文件里的旧 tag/commit 字样全部换新（AGENTS / verify.mjs / release-smoke /
-  tests/presets.test.mjs / design-10 / discipline-map / evaluation / alignment-ledger /
+  tests/pack/presets.test.mjs / design-10 / discipline-map / evaluation / alignment-ledger /
   notes-README / vendor-submodule Note / absorption Note / anatomy 报告 / pack package.json）；
   历史性记录（research 报告）加"（当时 pin）"标注，不冒充现行值。
 - **台账收口**：移位源改指 `packages/preset/agent-presets/README.md` →
@@ -133,7 +133,7 @@
 - 门禁迁移：`preset-structure`（新形态断言）、`pack-bundle-compat`（数组 + 必须携带 preset patch）、
   `row-deps`、`role-list-sync`（角色 = `presets/*.patch.yml`）——全绿；
 - 脚本/测试/文档：`lib/roles.mjs`、`preset-smoke`、`release-smoke`、`team-preflight`、
-  `boot-run.sh`（镜像检测按 patch 文件）、`tests/presets.test.mjs`、`tests/evaluation-contract.test.mjs`、
+  `boot-run.sh`（镜像检测按 patch 文件）、`tests/pack/presets.test.mjs`、`tests/contracts/evaluation-contract.test.mjs`、
   pack README/AGENTS、guides/62、design/20、00-index 术语映射、`adding-a-research-role` 技能、
   evaluation 台账行。
 

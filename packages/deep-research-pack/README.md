@@ -107,7 +107,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 ## 新增一个研究角色
 
 **第 0 步（先于一切代码）**：增删角色 = 推翻 D2（角色 = 4 个，见 docs/00-index.md 台账）——
-先在台账登记新 D 号，再动手。tests 的数量哨兵（tests/presets.test.mjs）会机械拦住没登记的增删。
+先在台账登记新 D 号，再动手。tests 的数量哨兵（tests/pack/presets.test.mjs）会机械拦住没登记的增删。
 
 1. `presets/<role>.patch.yml`：一条 `@deepseek-ai/dsh-agent-preset` 行，`config` 带
    id/name/description/order + plugins（自包含组合：persona 行 + skills roots + 工具行 +

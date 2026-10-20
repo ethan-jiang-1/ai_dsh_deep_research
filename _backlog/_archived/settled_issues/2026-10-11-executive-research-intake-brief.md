@@ -19,7 +19,7 @@ opened: 2026-10-11
 
 ## 实施范围（四处对账面 + 镜像，同 diff 联动）
 
-HITL1 语义由 `tests/presets.test.mjs`「HITL1 两段卡」四处对账测试钉住（persona + research-brief + 手册 + 模板），改动必须四处联动，漏一处即红：
+HITL1 语义由 `tests/pack/presets.test.mjs`「HITL1 两段卡」四处对账测试钉住（persona + research-brief + 手册 + 模板），改动必须四处联动，漏一处即红：
 
 - `packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md`：业务决策简报字段（决策对象 / 待决定事项 / 比较选项 / 截止时间 / 成功标准与约束）的采集规则并入既有第四问触发机制——已提供不重复问，缺项仅在会改变研究范围时随第四问追问，未知标 open；计划确认卡要点改从 question.md 业务字段生成（决定 / 比较范围 / 输出形式 / 主要未知 / 研究投入影响），三种计划动作与一轮制不变。
 - `research-workspace/templates/run/question.md`：HITL1 Alignment Snapshot 增业务决策简报字段；不写入敏感信息，owner 不变。
@@ -32,11 +32,11 @@ HITL1 语义由 `tests/presets.test.mjs`「HITL1 两段卡」四处对账测试�
 
 | 判据 | 行为类 | 检查方式与证据 owner | 负例 / 互补 |
 |---|---|---|---|
-| question.md 模板含业务决策简报字段（决策对象 / 待决定事项 / 比较选项 / 期限 / 成功标准与约束 / open 显式标注） | 确定性 | `tests/presets.test.mjs` 新增契约断言（沿「HITL1 两段卡」四处对账先例，先红后绿；tests/ 契约测试无 evaluation.md 登记面——该台账只登记 verify.mjs 门禁）；`sync-pack-workspace` 后 `pack-workspace-fresh` 绿 | 删任一字段测试变红；quick_factual 豁免样例计划卡仍免发（互补态） |
+| question.md 模板含业务决策简报字段（决策对象 / 待决定事项 / 比较选项 / 期限 / 成功标准与约束 / open 显式标注） | 确定性 | `tests/pack/presets.test.mjs` 新增契约断言（沿「HITL1 两段卡」四处对账先例，先红后绿；tests/ 契约测试无 evaluation.md 登记面——该台账只登记 verify.mjs 门禁）；`sync-pack-workspace` 后 `pack-workspace-fresh` 绿 | 删任一字段测试变红；quick_factual 豁免样例计划卡仍免发（互补态） |
 | 采集按信息充分性触发：已提供不重复问，未知标 open 不脑补 | 模型行为 | L4-lite 或定向 run 观察 lead 实际提问，走查记录含分母与用户原话 | 样例含用户已答字段仍被追问 = 负例命中 |
 | 四类输入样例（信息充分 / 缺不影响范围 / 缺会改变范围 / 命中困惑信号）各有明确的问与不问清单 | 模型行为 | 人工走查四份样例，逐份记录出现与不出现 | 命中困惑信号样例只叠加模式库澄清问，不变成固定第四问 |
 | 计划卡业务语言：业务读者能说出决定、比较选项、交付物、最大未知，无需理解 `quick_factual` 等 token | 模型行为 + 人工判据 | 真实计划卡文案走查，人工判据单独记录 | 文案露出内部 token 或术语 = 负例 |
-| 合同不扩张：无第三个 HITL 点、无固定第四问、无 `[ACCEPTED]` 协议；修订仍一轮制附加进 Decisions | 确定性 | `tests/presets.test.mjs` 禁词断言（`[ACCEPTED]` doesNotMatch + 「不设固定第四问」positive 钉，注入反证先红后绿）+ L1 挂载 | — |
+| 合同不扩张：无第三个 HITL 点、无固定第四问、无 `[ACCEPTED]` 协议；修订仍一轮制附加进 Decisions | 确定性 | `tests/pack/presets.test.mjs` 禁词断言（`[ACCEPTED]` doesNotMatch + 「不设固定第四问」positive 钉，注入反证先红后绿）+ L1 挂载 | — |
 
 必跑面（任务型路由「改 persona / skill / 手册文本」行）：L0 + `render-overlay` 先于 L1（skill 文本）+ `pack-workspace-fresh`（模板）。模型行为证据走 L4-lite 或真实 run 观察，无凭据时如实标注「未运行项」；业务读者复述属人工判据，技术绿不替代。
 
@@ -50,7 +50,7 @@ HITL1 语义由 `tests/presets.test.mjs`「HITL1 两段卡」四处对账测试�
 - 输入/状态：`research-workspace/drafts/` 现有四份草稿（含 ② 的报告样例），**无本项材料**（2026-10-11 实测）；互补态 = 只有一两类、或只有样例没有清单。
 - 判定与失败信号：四类齐 + 每类问/不问清单齐；**失败信号 = 缺类或缺清单**（走查开口即空转）。
 - 负例/互补：快速事实类的豁免态必须出现在样例里（quick_factual 不问业务字段仍成立）。
-- 证据 owner：`research-workspace/drafts/2026-10-11-hitl1-intake-samples.md`（五类节 + 每类三块 + 走查记录表）+ 形状契约测试 `tests/hitl1-intake-samples.test.mjs`（能证：类/块/条目/表格不烂；**不能证**：模型真实提问行为与文案业务可读性——那要看 ①-b）
+- 证据 owner：`research-workspace/drafts/2026-10-11-hitl1-intake-samples.md`（五类节 + 每类三块 + 走查记录表）+ 形状契约测试 `tests/run/hitl1-intake-samples.test.mjs`（能证：类/块/条目/表格不烂；**不能证**：模型真实提问行为与文案业务可读性——那要看 ①-b）
 - 人工判据：无（材料写作本身不是判据；判据是 ①-b 的走查）。
 
 **①-b 四类样例走查 + 业务读者复述（人工判据批次）**
@@ -68,7 +68,7 @@ HITL1 语义由 `tests/presets.test.mjs`「HITL1 两段卡」四处对账测试�
 - 输入/状态：存量标定 = 近 30 天 612 场会话扫描，命中计划卡 **2 张：461 字 / 246 字 → 2/2 超限**（2026-10-11 实测，扫描器 `runtime/scan-plan-cards.mjs`）；互补态 = 合规卡（<200 字）应放行。
 - 判定与失败信号：**已落**——node-gate 门① 的 detail 按同一口径记账（`ask` 的 `question` 字段全长）；超限 → **WARN 注记**（status 仍 PASS、不拦交付）；**失败信号 = 超限却无注记（漏检）**。
 - 负例/互补：**两态夹具均已证**——`fixtures/node-gate/sessions/s-plan-over`（261 字卡 → detail 出 WARN 并记字数）、`s-plan-ok`（99 字卡 → 无 WARN、记「正文合规（1 张 ≤200 字）」）；真实 bundle 复核 = `drt_deepseek-default-upgrade` 出「⚠ WARN …：461 字 / 246 字」且 node-gate exit 0。
-- 证据 owner：`scripts/lib/node-gate-core.mjs` 的 `hitlAskGate`（门①，run 期行为；**不能塞进 `verify.mjs`**——那是仓库结构门）+ `tests/node-gate.test.mjs` 两用例；**不能证**：文案是否业务可读（属 ①-b）、模型下一场是否真遵守（要 ①-b 与真实 run 观察）。
+- 证据 owner：`scripts/lib/node-gate-core.mjs` 的 `hitlAskGate`（门①，run 期行为；**不能塞进 `verify.mjs`**——那是仓库结构门）+ `tests/run/node-gate.test.mjs` 两用例；**不能证**：文案是否业务可读（属 ①-b）、模型下一场是否真遵守（要 ①-b 与真实 run 观察）。
 - 人工判据：无。
 - **处置（2026-10-11 用户拍板 + 已落）**：①**WARN 级检出**落在 node-gate 门①（同 diff 同数据的自然落点，报告落 bundle 的 `node-gate.md`）——硬门会拦下每一场（存量 2/2 超限），故先记账；②**收紧措辞**改在 skill 正文（`presets/lead/skills/research-brief/SKILL.md` §6）：写明计数口径（`question` 字段全部字符，含指针行）+ **呈卡前先数字数**、超限先删次要项再提交——**不动 persona**（persona 属模型可见面且触发 lead fixture 重录，skill 正文不进组装请求，改动面更小）。
 - **升硬门的前置条件（写进卡，不靠记忆）**：措辞收紧后新场次计划卡 ≤200 字达标（连续 ≥3 场）→ 把门①的 WARN 升为 RED；若仍超限，先继续收敛 skill 而非升门。

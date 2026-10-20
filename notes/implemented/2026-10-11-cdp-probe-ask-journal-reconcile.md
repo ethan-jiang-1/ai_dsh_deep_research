@@ -51,7 +51,7 @@ verdict 契约 0/1/2）：两阶段 = 空闲态 `Send message` 发出并落盘�
 
 ## 实际跑过的验证
 
-- **keyless 契约测试**（`tests/inject-reconcile.test.mjs`，7 用例）先红后绿；**四路反证注入**各看红一次
+- **keyless 契约测试**（`tests/run/inject-reconcile.test.mjs`，7 用例）先红后绿；**四路反证注入**各看红一次
   再还原：①恒 `landed:true` → 4 红；②丢时间下界 → 1 红；③只扫末条事件 → 1 红；④类型过滤失效 → 1 红；
   还原后 7/7 绿。
 - **真模型两阶段 E2E**（一次性通道 3115 + 独立 workspace；刻意不打在交付会话上；该驱动已转正为 `scripts/smoke/cdp-ask-smoke.mjs`）**全绿**：①空闲态 `sentBy=Send message` + `landed=true`（seq 9）+ 自动探测的
@@ -65,10 +65,10 @@ verdict 契约 0/1/2）：两阶段 = 空闲态 `Send message` 发出并落盘�
 
 事故卡与修复关联：[BUG-021](../../_backlog/_archived/fixed_bugs/BUG-021-cdp-probe-ask-send-fail.md)。
 
-- **判定纯函数化后**（2026-10-11）：`tests/probe-send-target.test.mjs` 9 用例（空闲／在飞／插话＋中文三态／
+- **判定纯函数化后**（2026-10-11）：`tests/run/probe-send-target.test.mjs` 9 用例（空闲／在飞／插话＋中文三态／
   **挂起态拒点**／邻近窗／无 send 家族／空表防空语料／composerY 读数失败退化）；三路反证注入各看红一次
   （删 stop 拒点 → 2 红、去邻近窗 → 1 红、删空表守卫 → 1 红）。
 - **登记 smoke 首跑**：`node scripts/smoke/cdp-ask-smoke.mjs` **ALL PASS**（空闲态发出 + 落盘、在飞态
   `Queue message` 标签命中、对账目标 = 建会话 id）；阶段② 落盘按上文口径记为信息项。
-- **措辞契约**：`tests/presets.test.mjs` 加两条断言钉住 research-brief 的字数口径与「呈卡前先数字数」
+- **措辞契约**：`tests/pack/presets.test.mjs` 加两条断言钉住 research-brief 的字数口径与「呈卡前先数字数」
   （删该句 → 红 → 还原绿），与 node-gate 门① 的 WARN 记账同源。

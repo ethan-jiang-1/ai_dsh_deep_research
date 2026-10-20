@@ -5,13 +5,13 @@
 ## 症状
 
 [测试指令](../../../tests/AGENTS.md) 规定默认回归无模型、浏览器、网络与子进程。
-[run-state 测试](../../../tests/run-state.test.mjs) 的不可读日志用例传入不存在的 `.zstd` 路径，
+[run-state 测试](../../../tests/run/run-state.test.mjs) 的不可读日志用例传入不存在的 `.zstd` 路径，
 [读取器](../../../scripts/lib/run-state.mjs) 会先执行 `execSync` 启动 shell/zstd，再捕获失败并返回不可读。
 `pnpm test` 可以全绿，不能证明实际执行路径没有子进程。
 
 ## 根因（源码核对）
 
-[layering](../../../tests/layering.test.mjs) 仅扫描顶层测试文件文本，不追踪 import 后的执行路径。
+[layering](../../../tests/contracts/layering.test.mjs) 仅扫描顶层测试文件文本，不追踪 import 后的执行路径。
 读取器的 `.jsonl` 路径直接读文件，其他路径走解压子进程；测试的错误样本选中了后者。
 
 ## 复现

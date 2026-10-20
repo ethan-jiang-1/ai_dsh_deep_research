@@ -42,8 +42,8 @@ CI/pre-commit 接入不在范围内。落点与验收记录 = [snapshots 采纳 
   消费者 = `snapshot.json` → [replay-scene](../../../scripts/lib/replay-scene.mjs) → [snapshot-replay-smoke](../../../scripts/smoke/snapshot-replay-smoke.mjs)；
   可证明边界 = 固定转录下的装配/循环/日志与已声明效果，不含真实模型行为。
 - **反例**：manifest 缺字段、串角色、缺件、越界/symlink 路径、重复 fixture、缩减判据集均在加载期被拒
-  （案例 = [replay-scene.test.mjs](../../../tests/replay-scene.test.mjs)）；比对面单测与"基线外注入种类即红"守卫见
-  [replay-request.test.mjs](../../../tests/replay-request.test.mjs)。
+  （案例 = [replay-scene.test.mjs](../../../tests/run/replay-scene.test.mjs)）；比对面单测与"基线外注入种类即红"守卫见
+  [replay-request.test.mjs](../../../tests/run/replay-request.test.mjs)。
 - **默认入口真实回放**：`source dev/env.sh && node scripts/smoke/snapshot-replay-smoke.mjs` 四角色
   A + B 判据 + coverage 自守 + lead 渲染金标准通过（`pnpm verify` / `pnpm test` 同轮绿）。
 - **BUG-018** 已修复并归档（[fixed_bugs 卡](../fixed_bugs/BUG-018-snapshot-replay-advertised-coverage.md)）；

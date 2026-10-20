@@ -42,7 +42,7 @@
 
 ## 实际跑过的验证（2026-09-28）
 
-- `tests/bundle-bind.test.mjs` 8/8（绑定/无绑定/恢复/转续/用户消息不构成绑定/截断 fail-soft/
+- `tests/run/bundle-bind.test.mjs` 8/8（绑定/无绑定/恢复/转续/用户消息不构成绑定/截断 fail-soft/
   畸形 fail-soft/slug 形态边界）；
 - `client-load-smoke` ALL PASS：绑定会话（「恢复 drt_dsh run 的研究状态」→ drt_dsh-release-watch，
   archive 位）四项磁盘认证全对（证据 24=磁盘 24 · 已交付 · 问题行逐字）+ 未绑定负样本双断言

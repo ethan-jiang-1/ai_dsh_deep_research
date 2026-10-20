@@ -30,15 +30,15 @@ client-load-smoke 磁盘真值对账 / watch-run 谓词化）、真入口路径�
    §自写代码证据阶梯（五台阶：导出守卫 → 行为谓词 → 注册生命周期 → 真挂载 → 组装面——将来
    任何 `src/` 套件对号入座）；根 AGENTS §纪律常驻「证据匹配面」行（密钥节压缩腾位，132/132
    维持）；tests/AGENTS 前向反证规则 + 改夹具先想红。
-3. **机械**：`tests/export-shape.test.mjs`（插件两半 named exports / 零 default / inject
-   形状；host 半空 inject 合法有注）；`tests/smoke-contract.test.mjs`（真模型档 verdict 契约
+3. **机械**：`tests/pack/export-shape.test.mjs`（插件两半 named exports / 零 default / inject
+   形状；host 半空 inject 合法有注）；`tests/contracts/smoke-contract.test.mjs`（真模型档 verdict 契约
    机械钉住——行为本已合规，零脚本改动）；`src/client/index.ts` 工具卡循环 `scoped.effect`
    包裹收口（registrations are effects 达成全量包裹，源 1 行的裸注册例外消除）+ verify 门禁
    `client-effect-wrap`（防空语料：零注册即红；层边界 = 只查 index.ts 装配位）。
 4. **命名即层**（用户点名的语料实践——"后缀即层"的本仓移植）：scripts/AGENTS §依赖与分层
    立命名规则（后缀申报证据类型与档位：`.test.mjs` = 唯一 regression 成员、`*-smoke` /
    `*-probe` / `*-gate`/`*-audit`/`*-scan` / 支援件在车道外）+ **真模型档登记制 closed
-   set**——`tests/smoke-contract` 机械对账"要求凭据（引用 `.credentials.yaml`）的顶层脚本
+   set**——`tests/contracts/smoke-contract.test.mjs` 机械对账"要求凭据（引用 `.credentials.yaml`）的顶层脚本
    必须恰为名单"。判据事实：`withModelKey` 是条件透传（keyless 冒烟也合法调用，release-smoke
    实测四处调用），不能作档位判据；**凭据要求**（缺席即 exit 2）才是——文本标记恰好干净切出
    四脚本。今后"真模型档"是有机器账面的封闭词表，新档位脚本同 diff 进名单。

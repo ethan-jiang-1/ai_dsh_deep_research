@@ -28,7 +28,7 @@ discipline-map + project-map + guides/60–62 + tests·scripts·notes 三份子�
 | 缺口 | 判断依据（语料出处） | 落点 |
 |---|---|---|
 | 语义自审层缺席——交付判断四角色（机械检查/语义评审/批准/显式交互）中 agent 可自主承担的角色未程序化 | 卷一闭环第 7 步 + sdlc-reference 06 | `.agents/skills/reviewing-a-delivery/SKILL.md`（blocking requirements 本仓化） |
-| 门禁自测缺席——门禁反证全是一次性人工实录，verify.mjs 自身零自动回归，门禁钝化机器发现不了 | 语料 verify.test.mjs 模式 | `scripts/smoke/gates-smoke.mjs` + `tests/verify-gates.test.mjs` |
+| 门禁自测缺席——门禁反证全是一次性人工实录，verify.mjs 自身零自动回归，门禁钝化机器发现不了 | 语料 verify.test.mjs 模式 | `scripts/smoke/gates-smoke.mjs` + `tests/contracts/verify-gates.test.mjs` |
 | 完成判断公理与验证词汇不显性——四分离公理只隐含在 L0–L4 里，oracle/real composition/semantic review 词汇缺席 | 卷一 00-index + 术语页 | evaluation §完成判断四分离 + 00-index §术语映射验证词汇行 |
 
 **不适用维持**：主仓治理全套（Issue/PR policy、weighted approval、stacked PR、release lane、
@@ -53,7 +53,7 @@ discipline-map + project-map + guides/60–62 + tests·scripts·notes 三份子�
 - **B 门禁自测**：落点在实施中修正（原方案把执行体放 tests/ 撞 layering 门禁——默认回归禁
   spawn），改为 smoke 道执行体 + 静态契约：`gates-smoke.mjs`（tracked 全量副本 + 被 tracked md
   引用的运行区链接目标补拷 + git init + 注入违规经真实 verify 入口点名报红 + 零注入对照组防
-  断言空转；verdict 契约 0/1/2；失败保留临时目录）+ `tests/verify-gates.test.mjs`（案例门禁名
+  断言空转；verdict 契约 0/1/2；失败保留临时目录）+ `tests/contracts/verify-gates.test.mjs`（案例门禁名
   ↔ verify gates 数组对账——门禁改名/退役未跟案例即红）。承重抽样 = md-links / md-anchors /
   note-format / entry-chain / gate-ledger-sync。
 - **C 完成判断公理固化**：evaluation 新节「完成判断四分离」（公理 + 四结果 ↔ L1 挂载 / L1 行为
@@ -110,7 +110,7 @@ discipline-map + project-map + guides/60–62 + tests·scripts·notes 三份子�
 ## 环境状态
 
 - 新增：`.agents/skills/reviewing-a-delivery/SKILL.md`、`scripts/smoke/gates-smoke.mjs`、
-  `tests/verify-gates.test.mjs`、`_backlog/bugs/BUG-016-fresh-clone-mdlinks-runtime-links.md`。
+  `tests/contracts/verify-gates.test.mjs`、`_backlog/bugs/BUG-016-fresh-clone-mdlinks-runtime-links.md`。
 - 改动：`docs/evaluation.md`（完成判断四分离节）、`docs/00-index.md`（术语映射三行 + 外部材料
   登记）、`docs/discipline-map.md`（源 11）、`docs/project-map.md`（证据表
   门禁自测行）、`docs/guides/60-dev-loop.md`（全档命令 + 任务型路由行）、`scripts/README.md`

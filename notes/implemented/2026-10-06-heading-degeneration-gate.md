@@ -38,7 +38,7 @@ PRE-CONTRACT 如实报告不计红（门L/门④ 断代成例同构）。
 
 ## 验证
 
-- 反证先红后绿：`tests/node-gate.test.mjs` 门R 六断言（RED / ×3 边界 PASS / 合规 PASS /
+- 反证先红后绿：`tests/run/node-gate.test.mjs` 门R 六断言（RED / ×3 边界 PASS / 合规 PASS /
   PRE-CONTRACT 断代 / N/A 无对象 / 隔离不连坐）+ 夹具 `fixture-heading-{degenerate,healthy}`；
   门未立时导入即红（6 fail 实录），立后 222/222 绿；
 - 注入回归（真 bundle）：`drt_geometry-coaching` 副本注入同标题 ×4 → 门R RED（原始输出：

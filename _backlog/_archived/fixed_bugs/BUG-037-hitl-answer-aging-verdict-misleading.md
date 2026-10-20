@@ -46,7 +46,7 @@ opened: 2026-10-18
   **`not-in-scope` 文案里不再出现"重启"**；`aging` 分支保留但把"重启"降为"不是第一处置（实测无效）"。
   `dev/hitl-answer.mjs` 在兜底路径记录并传递 `triedSearch`/`searchHit`。
 - **修复判据①（keyless 反证 + 负例留证）**：新增两例（not-in-scope 且 `doesNotMatch /重启/`；searchHit=true
-  时不走该分支）。反证：删掉新分支 → 该例红（实做）→ 还原绿。`tests/ask-drive.test.mjs` 带
+  时不走该分支）。反证：删掉新分支 → 该例红（实做）→ 还原绿。`tests/run/ask-drive.test.mjs` 带
   `guard-red-record` 要求的负例留证块。
 - **修复判据②（强制端到端反证，决定性）**：注入 `HITL_FORCE_MISS=1`（扫行/展开致盲 + 搜索故意搜不存在
   的标题）→ 对一条真挂起会话，工具输出

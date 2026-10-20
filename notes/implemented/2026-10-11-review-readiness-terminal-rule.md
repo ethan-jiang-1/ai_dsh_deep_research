@@ -69,7 +69,7 @@
 
 ## 实际跑过的验证
 
-- `tests/review-readiness.test.mjs` 9 用例：先红（模块缺席）→ 实现 → 9/9 绿。关键用例 = **真实形态**
+- `tests/run/review-readiness.test.mjs` 9 用例：先红（模块缺席）→ 实现 → 9/9 绿。关键用例 = **真实形态**
   （终局 PASS + 文末附录保留首轮 FAIL 的行内引用 → 仍 PASS）。
 - **两路反证注入**（红→还原→绿）：①改回未锚行首的末位匹配 → 2 红；②改成取首个匹配 → 2 红。
 - **真浏览器负例证明**（`validation-design` §3 要求新守卫先证负例）：把驾驶舱摘要层的
@@ -84,8 +84,8 @@
 
 ## 窄放宽轮的验证（2026-10-16）
 
-- **契约测试先红后绿**：`tests/review-readiness.test.mjs` 新增"装饰形态真实语料逐条读得出"与
-  "不夺权负例逐条钉住"两条；`tests/node-gate.test.mjs` 新增镜像侧装饰 PASS / 承诺句与表格单元 RED 两条
+- **契约测试先红后绿**：`tests/run/review-readiness.test.mjs` 新增"装饰形态真实语料逐条读得出"与
+  "不夺权负例逐条钉住"两条；`tests/run/node-gate.test.mjs` 新增镜像侧装饰 PASS / 承诺句与表格单元 RED 两条
   ——实现前 2 红 → 实现后 80/80 绿（两文件）。
 - **两处同判**：52 场扫描（41 场有 review.md）中 pack 纯函数与 node-gate `.mjs` 镜像**不同判 0**；
   旧码/新码差分 = 8 场迁移，全部落在预期集（3 场假 FAIL 归零 + 4 场假 unknown 归零 + geometry 场

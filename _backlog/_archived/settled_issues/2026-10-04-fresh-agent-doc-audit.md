@@ -23,7 +23,7 @@
 3. **YYMMDD ↔ YYYY-MM-DD（2026-10-03 翻案未同步，两处）**【已核：grep 三处对照 + verify.mjs 门禁 32 源码】：`AGENTS.md:32`（布局）与 `docs/evaluation.md:64`（plans-liveness 台账行①）仍写 plans 卡 `YYMMDD-slug`；门禁实断言 `YYYY-MM-DD-<slug>.md`、[../README.md](../README.md) 铁律节与 `_done/_closed_plans/` 七张归档卡【抽验坐实：7 张】全是新格式。**照根 AGENTS 命名立卡会被门禁咬红**。没炸的原因：plans 当前 0 卡（空态免检）。
 4. **notes/README.md:88 钉 tag 过期**【已核：盘上 `git -C vendor/dsh describe`】：写旧版 tag（0.1.7-rc.2——去 `dsh-` 前缀记录（旧版 = 外部材料口径，防 pin-agreement 误报），防 pin-agreement 把证据引文当复述咬），盘上 submodule 实为 `dsh-v0.2.0-rc.2`（根 AGENTS §DSH 源码表正确）。
 5. **final/ ≠ final.md 混用族（三处）**【已核 ①，抽验坐实 ②，③ 与红 1 同源】：① `research-workspace/AGENTS.md:120` 完成判据写「文件事实（**final/ 当前版** + present 声明）」，同页 30–34 行刚钉死「final/ 只放版本记账，不放当前版全文；当前版权威副本 = run 根 final.md」——此句每场 run 注入每个角色；② `docs/guides/61-run-playbook.md:112`「拍板后 **final/ 当前版**落盘」同款混用（卡质量审查期新收）；③ 61 §0(b) 的「有 final/ = 交付线」判别。
-6. **pack README 折算层计数相左**【抽验坐实：design/40:37 逐字「折算层五件」+ `src/lib/bundle-bind.ts`/`tests/bundle-bind.test.mjs` 在盘】：`packages/deep-research-pack/README.md` 写四件（activity-fold / hitl-fold / run-fold / tool-card），构成正本 `docs/design/40-research-cockpit.md` 明文五件。README 自链"构成正本 = design/40"却与之不一致；另 README:72 硬编码「14 个平台 peer 包」（count-free 句式盲区）。
+6. **pack README 折算层计数相左**【抽验坐实：design/40:37 逐字「折算层五件」+ `src/lib/bundle-bind.ts`/`tests/run/bundle-bind.test.mjs` 在盘】：`packages/deep-research-pack/README.md` 写四件（activity-fold / hitl-fold / run-fold / tool-card），构成正本 `docs/design/40-research-cockpit.md` 明文五件。README 自链"构成正本 = design/40"却与之不一致；另 README:72 硬编码「14 个平台 peer 包」（count-free 句式盲区）。
 7. **遗漏型相左**【已核：grep 61 全文零"驾驶舱"】：guides/61 全文零处提到研究驾驶舱；§3（61:94）说"进度看三处"（消息流 / 任务板 / deliverables），而 design/40 与 pack README 把驾驶舱定位为 run 期观察主面。操作入口页不知道自己 ship 的观察面。
 
 ### 黄：困惑 / 噪音（不阻塞，扫荡时顺手）

@@ -212,11 +212,11 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 |---|---|---|
 | 证据匹配面（改动的面 ↔ 证据类型） | [guides/60 §2 任务型路由表](guides/60-dev-loop.md) + [guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md) + 根 AGENTS §纪律常驻指针 | 照搬（增量 = 常驻化：路由表与阶梯本就分住 guides/60 §2 与 guides/62，本条只是把指针常驻进根 AGENTS§纪律） |
 | 可靠性三纪律：retry 白名单 / 等待显式状态 / 释放到静默 | [scripts/AGENTS §冒烟脚本可靠性纪律](../scripts/AGENTS.md) | 照搬（载体 = 冒烟脚本层） |
-| 防假绿 verdict 契约（0 绿 / 1 红 / 2 未跑；未跑 ≠ 通过） | 真模型档脚本既有行为 → scripts/AGENTS.md 契约化 + `tests/smoke-contract.test.mjs` 机械钉住 | 带证据适配（行为先在，语料后成文） |
-| 插件五台阶证据阶梯（导出守卫 → 行为 → 注册生命周期 → 真挂载 → 组装面） | [guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md) + `tests/export-shape.test.mjs`（台阶①）+ verify 门禁 `client-effect-wrap`（台阶③） | 带证据适配（自写代码面 = 驾驶舱） |
+| 防假绿 verdict 契约（0 绿 / 1 红 / 2 未跑；未跑 ≠ 通过） | 真模型档脚本既有行为 → scripts/AGENTS.md 契约化 + `tests/contracts/smoke-contract.test.mjs` 机械钉住 | 带证据适配（行为先在，语料后成文） |
+| 插件五台阶证据阶梯（导出守卫 → 行为 → 注册生命周期 → 真挂载 → 组装面） | [guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md) + `tests/pack/export-shape.test.mjs`（台阶①）+ verify 门禁 `client-effect-wrap`（台阶③） | 带证据适配（自写代码面 = 驾驶舱） |
 | registrations are effects 的 HMR 投影（dispose 即撤销贡献） | 驾驶舱 slot 注册包 effect + 门禁 `client-effect-wrap` 静态把守（正则查包裹，不判 dispose 是否真发生）；HMR 行为断言不做（迭代循环走重启）。2026-10-19 实测该门禁的盲区：`ctx.inject(..., scoped => scoped.effect(...))` 里 scoped 作用域在回调返回后失活，注册被静默撤销，门禁照绿——静态包裹证明不了生命周期正确 | 带证据适配（静态收口形态；dispose 行为面未验证，2026-10-19 撞到真失效一次，修法 = 效果挂根 ctx 而非注入作用域） |
 | fix fixtures, not normalizers（证据不许磨到跟 bug 吻合） | [tests/AGENTS「改夹具先想红」](../tests/AGENTS.md) + guides/60 金标准红线（只许 `--update-expected` 重写，不许放宽比对） | 照搬 |
-| 后缀即层 / 命名即所有权（expected-filenames 门禁强制改名） | [scripts/AGENTS §依赖与分层「命名即层」](../scripts/AGENTS.md)（后缀申报证据类型与档位）+ 真模型档登记制 closed set（tests/smoke-contract 对账"要求凭据的脚本恰为名单"） | 带证据适配（本仓车道 = glob + 目录形态，非多 vitest 配置） |
+| 后缀即层 / 命名即所有权（expected-filenames 门禁强制改名） | [scripts/AGENTS §依赖与分层「命名即层」](../scripts/AGENTS.md)（后缀申报证据类型与档位）+ 真模型档登记制 closed set（tests/contracts/smoke-contract.test.mjs 对账"要求凭据的脚本恰为名单"） | 带证据适配（本仓车道 = glob + 目录形态，非多 vitest 配置） |
 | prove-it-red 前向化到契约测试（不只门禁） | tests/AGENTS 的反证规则（新契约测试同 diff 注入回归看红再还原）+ 门禁 `guard-red-record` 机械把守「负例留证/夹具留证」块。所称「承重四文件抽检」在采纳 Note 中**不存在**（原记误引），已删 | 带证据适配（规则与门禁都在位；但「抽检」这一执行形态本仓未确立，不为无实据的做法背书） |
 | fixture 守卫先于比较（形状 corpus 层） | [scripts/lib/replay-scene.mjs](../scripts/lib/replay-scene.mjs)：比较前 fail-loud 拒绝相对路径/穿越/**symlink**/manifest 结构/角色 roster 齐整/case 唯一/**夹具路径重复**（14 条守卫）；消费测试钉语义，守卫钉形状，两层不同面 | 带证据适配（2026-10-19 复核修正：原判「不适用」与实况相反——等价物早已在该模块） |
 | 快照世代模型 / record-refresh 分叉 / 平台变体 | `sessionFormat` 钉代（replay-scene.mjs:58 强制 = 4，换代须新 `session.vN.jsonl` + 人审，snapshots/README 登记）；`--update-expected` = refresh 语义；record = 真录制（dev/record-role-fixture）；**平台变体（posixOnly/pwshOnly）不适用**（本仓单平台） | 带证据适配（世代/refresh 已落地；仅平台变体不适用——2026-10-19 复核修正原「不适用」整行） |
@@ -231,7 +231,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 |---|---|---|
 | 交付判断四角色：机械检查 / 语义评审 / 批准 / 显式交互——各证明不同的东西，互不冒充 | [evaluation §完成判断四分离](evaluation.md) + [reviewing-a-delivery](../.agents/skills/reviewing-a-delivery/SKILL.md) 技能（语义自审层——agent 可自主完成的角色） | 照搬（判据固化 + 技能载体） |
 | 完成判断公理：能加载 ≠ 有行为证据 ≠ 能安装 ≠ 已获交付批准 | evaluation §完成判断四分离（四结果 ↔ L1 挂载 / L1 行为断言 / L2 / 收尾对账+用户批准） | 照搬 |
-| 门禁自测模式（语料 verify.test.mjs：完整副本 + 真实 verifier 入口 + invalid case 真被拒才算数） | [gates-smoke](../scripts/smoke/gates-smoke.mjs)（临时副本 + 注入回归经真实 verify 入口点名报红 + 零注入对照组防断言空转）+ [tests/verify-gates.test.mjs](../tests/verify-gates.test.mjs)（案例表 ↔ gates 数组静态对账） | 带证据适配（子进程归 smoke 道——layering 禁默认回归 spawn；副本 = tracked 全量，等价 fresh clone——曾有的「运行区链接目标补拷」对冲已随 BUG-016 修复移除） |
+| 门禁自测模式（语料 verify.test.mjs：完整副本 + 真实 verifier 入口 + invalid case 真被拒才算数） | [gates-smoke](../scripts/smoke/gates-smoke.mjs)（临时副本 + 注入回归经真实 verify 入口点名报红 + 零注入对照组防断言空转）+ [tests/contracts/verify-gates.test.mjs](../tests/contracts/verify-gates.test.mjs)（案例表 ↔ gates 数组静态对账） | 带证据适配（子进程归 smoke 道——layering 禁默认回归 spawn；副本 = tracked 全量，等价 fresh clone——曾有的「运行区链接目标补拷」对冲已随 BUG-016 修复移除） |
 | 验证词汇：oracle 独立预期 / real composition / semantic review | [00-index §术语映射](00-index.md) 验证词汇行 | 照搬 |
 | 六误区清单（goal≠验收 / mock-only / 刷新≠接受 / 空 invariant / agent-loop / 不抄主仓治理） | 逐条散落既有登记（D6 / L1 真挂载 / tests·AGENTS fix fixtures / 本表源 1 与 alignment-ledger / 不适用登记）——不另立第二份清单（理由 = [毕业 Note](../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md) 输掉的方案） | 带证据适配（散落形态：六条各自有登记载体，本条不另立第二份清单——理由见毕业 Note 输掉的方案；散落 = 需按条检索，不是免检） |
 | 主仓治理全套（Issue/PR policy、weighted approval、stacked PR、release lane、`.github/` 执行层） | 等价物 = pre-commit + 窄切片 + 收尾对账（既有登记）；语料适用边界明文反证该立场 | 不适用（维持——**重估触发**：引入外部贡献者或多包发布需治理流程时） |

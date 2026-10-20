@@ -16,7 +16,7 @@
 - **三个资产索引**：[scripts/README](../../scripts/README.md)（门禁 / 冒烟 / 探针 / 审计 / 观察 / 分发 / 库 × 档位 × 事实来源，26 入口全点名）、[dev/README](../../dev/README.md)（环境/构建/同步 · run 通道 · 驱动 · 运行区，15 入口全点名，运行区标非 canonical）、[tests/fixtures/README](../../tests/fixtures/README.md)（六组 taxonomy：consumer / 证明内容 / 冻结规则 / 回归面）。
 - **单向指针化**：61 §5 合同框架句（"run 根只有一个正本…位置=状态"）退役为纯操作面，§6 交付判定改指针；角色 skills 与 pack README 经精确排查（恢复/正本/仪表盘/任务板/session log/dashboard/canonical/交付判定/goal 九模式全量扫）零全局状态重述，一字未动——非 owner 地位由契约测试 spot-grep 永久把守。
 - **首屏**：README Start Here 增"想看懂"第四指针并折叠 Directory Map（31→28 行）；根 AGENTS 两处 `design/10-40`→`10-50`（138 行不变）；entry-chain 门禁成员扩 design/50。
-- **契约回归**：`tests/navigability-contract.test.mjs` 七组断言（design/50 在场与合同词、三面指针、矩阵九任务与链接目标、三索引全覆盖、fixture 每组 ≥1 真实 consumer 零孤儿、状态合同词非 owner 零重述）进默认回归；[evaluation.md §L0](../../docs/evaluation.md) 登记契约回归行。
+- **契约回归**：`tests/contracts/navigability-contract.test.mjs` 七组断言（design/50 在场与合同词、三面指针、矩阵九任务与链接目标、三索引全覆盖、fixture 每组 ≥1 真实 consumer 零孤儿、状态合同词非 owner 零重述）进默认回归；[evaluation.md §L0](../../docs/evaluation.md) 登记契约回归行。
 - **窄迁评估：不迁目录**——稳定 owner（部分成立，各职责类有 owner 面但共享目录）、独立生命周期（不成立，verify 每轮 / smoke 按改动面 / run 门每 run 交叉）、独立发现范围（不成立，tests glob、scripts readdir、smoke-contract 顶层扫描、真模型档 closed set、`import.meta.url` 相对路径全部依赖顶层结构）三者不同时成立；索引承载认知成本。触发条件维持推敲卡原文：三者同时成立时另立窄迁 RFC。
 - **方法论副产品（D23 首例）**：判据四型绑定 → 红状态不落 git（沿门禁反证先例，红证记录在案）→ 实现到绿同 diff 提交；对账命令须复用契约判据源、不手抄第二份（两次手抄两次形态错的实录教训）。
 

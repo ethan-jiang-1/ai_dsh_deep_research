@@ -77,7 +77,7 @@ tool/call 面。
 
 ## 修复判据
 
-1. **单元级（keyless，确定性）**：新谓词在 `tests/replay-request.test.mjs` 留三例——哨兵只出现在
+1. **单元级（keyless，确定性）**：新谓词在 `tests/run/replay-request.test.mjs` 留三例——哨兵只出现在
    `user/message`/`agent/inbox/spliced`（prompt 回显）→ **不算落定**；出现在 `assistant/message` 文本 → 落定；
    `turn/end` 缺失或 `reason.kind !== 'completed'` → 回合未结束。**先红后绿**留档。
 2. **现场级反证（确定性对比）**：把 A 层判据临时改回全文 grep → 记录 A 层放行时刻（应为第一个轮询节拍 ≈4s，
@@ -97,7 +97,7 @@ tool/call 面。
 - **lib** = `scripts/lib/replay-request.mjs` 新增 `assistantTextsOf` / `sentinelInAssistantText` / `turnCompleted`（判据唯一正本）；
 - **消费方** = `scripts/smoke/snapshot-replay-smoke.mjs` A 层（哨兵 + `turn/end` completed 双条件，fail-loud 文案同步）·
   `dev/record-role-fixture.mjs`（删本地 `assistantTextsOf` 副本，改消费共享件——消灭单边漂移的来源）；
-- **测试** = `tests/replay-request.test.mjs` 三例（先红后绿）；
+- **测试** = `tests/run/replay-request.test.mjs` 三例（先红后绿）；
 - **决定记录** = [回合落定判据 Note](../../../notes/implemented/2026-10-16-replay-turn-settled-predicate.md)（含被证伪的假设与撤回记录）；
 - **后续观察面**：本卡是"消费侧没跟上录制侧判据"的一例——B2 五站点若也有自家哨兵/落定判据，迁移时按同一正本核对
   （已写入 [round3 卡](../settled_issues/2026-10-16-structure-round3-convergence.md) 的 B2 待办语境）。

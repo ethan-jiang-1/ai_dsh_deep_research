@@ -37,7 +37,7 @@
 
 - 改前红（实录）：2026-10-10 真模型双跑 `node scripts/probe/entry-chain-probe.mjs`，
   Q1/Q3 PASS、Q2 两次 FAIL 且作答语义正确（留档 = `runtime/smoke-workspace/entry-chain-probe-*.md`）；
-- 正例入库：两条实录作答进 [tests/entry-chain-probe.test.mjs](../../tests/entry-chain-probe.test.mjs)
+- 正例入库：两条实录作答进 [tests/run/entry-chain-probe.test.mjs](../../tests/run/entry-chain-probe.test.mjs)
   作永久正例（旧判据下为红）；
 - 放宽后复跑探针：Q1/Q2/Q3 全 PASS；`pnpm verify` + `pnpm test` 全绿。
 

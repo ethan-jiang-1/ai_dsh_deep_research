@@ -75,7 +75,7 @@ opened: 2026-10-15
 | ① 真实形态语料：假 FAIL 归零 + 假 unknown 同 | ✓ 8 场迁移全部落地：3 场假 FAIL（agent-memory / cn-agentic-parity / cn-us-open-source）+ 4 场假 unknown（chat-price-check / kimi / zhipu / open-llm-inference）→ PASS；`null` 形态收敛到 1 场（`drt_cn-llm-infra`，真无判定行） |
 | ② 不夺权负例 | ✓ 行内提及（mcp 承诺句）· 表格单元 · 长前缀历史标题 · 标题散文堆叠/标签链 · 装饰后的空模板，逐条断言（pack + node-gate 两侧） |
 | ③ 真实数据对账 | ✓ 41 场有 review.md 的 bundle 全扫：新分布 PASS 36 / FAIL 4 / null 1；"非 PASS"子集 = 4 场真 FAIL + 1 场真无判定（原 13 场 → 5 场），**该子集仍不 PASS** |
-| ④ 两处同判 | ✓ pack 纯函数 ↔ node-gate `.mjs` 镜像全语料**不同判 0**；两侧用例同 diff（`tests/review-readiness.test.mjs` + `tests/node-gate.test.mjs`） |
+| ④ 两处同判 | ✓ pack 纯函数 ↔ node-gate `.mjs` 镜像全语料**不同判 0**；两侧用例同 diff（`tests/run/review-readiness.test.mjs` + `tests/run/node-gate.test.mjs`） |
 | ⑤ Note 同步 | ✓ [2026-10-11 规则 Note](../../../notes/implemented/2026-10-11-review-readiness-terminal-rule.md) 的兼容集与边界按新事实改写；L0 全绿（`pnpm verify` + `pnpm test` 468/468） |
 
 **超出卡面预期的一处**（如实登记）：`drt_geometry-coaching` 原判"已知缺陷场 / 读对 ✓（null）"，实际它的

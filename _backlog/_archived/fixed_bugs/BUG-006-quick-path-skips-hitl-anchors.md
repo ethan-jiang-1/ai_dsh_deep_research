@@ -56,7 +56,7 @@ SPA 榜单快答题（P1 单点事实）全程 **askCalls = 0**：
   （研究类型问）ask ≥1，零 ask 红；断代 HITL_CONTRACT_DATE=2026-10-05 不追溯。
   判据三轮真数据打磨（路径提及绑定 → 邻场 ask 串场；时间锚 → 历史场次穿透；终态 =
   写事件会话绑定 + JSON 转义斜杠 normalize——presentInLogs 同款先例，每轮反证进
-  tests/node-gate.test.mjs）。
+  tests/run/node-gate.test.mjs）。
 - 活体确认：探针 D（drt_openai-context-window）同族快答题 HITL1 照发 → 交付 →
   门①③②全 PASS；探针 A 现场（drt_swebench-verified-top）门① RED + 门③ G8 双红留档。
 

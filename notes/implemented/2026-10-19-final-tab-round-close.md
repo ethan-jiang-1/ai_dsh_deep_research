@@ -56,7 +56,7 @@ DSH 打开会话即把焦点放进 composer。把"焦点在输入框"当成"正�
 
 ## 实际跑过的验证
 
-- **keyless**：`tests/final-target.test.mjs` 11 条（认领范围 / 交付折叠 / 读面定表 / 三位置回退 /
+- **keyless**：`tests/run/final-target.test.mjs` 11 条（认领范围 / 交付折叠 / 读面定表 / 三位置回退 /
   自动打开判据 / 草稿让路）；反证三次实跑（放宽 `canOpen` → 范围红；去掉焦点保护 → 判据红；
   把"空输入框"当草稿 → 新用例红），还原后绿。
 - **真浏览器**：`client-load-smoke` ALL PASS——终稿端到端（打开已交付冷会话 → ⑤ 交付门 → 页签

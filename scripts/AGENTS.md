@@ -11,7 +11,7 @@
 - `verify/verify.mjs` 的 `gates` 数组与 [docs/evaluation.md](../docs/evaluation.md) §L0 登记表
   **两处同步**（`gate-ledger-sync` 门禁对账）；每条新门禁带"注入回归 → 红 → 还原 → 绿"的
   反证记录。
-- **门禁自测**：改 verify.mjs 门禁逻辑必跑 `node scripts/smoke/gates-smoke.mjs`（案例表 `CASES` 增删同 diff；`tests/verify-gates.test.mjs` 静态对账案例 ↔ gates 数组）。
+- **门禁自测**：改 verify.mjs 门禁逻辑必跑 `node scripts/smoke/gates-smoke.mjs`（案例表 `CASES` 增删同 diff；`tests/contracts/verify-gates.test.mjs` 静态对账案例 ↔ gates 数组）。
 - 失败信息要给出**失败对象 + 违反的规则 + 修正入口**；不确定就 fail-loud，不静默跳过。
 
 ## 范围纪律（实测教训，不是风格偏好）
@@ -47,8 +47,8 @@
 - 投影类脚本（`run-dashboard.mjs`）只读 canonical 会话日志与 bundle 文件，但会写抛弃型 HTML 投影；
   HTML 永不入库、永不手改。
 - **命名即层**（DSH 后缀选层的本仓形态；新增检查先命名）：后缀申报证据类型；凭据/调用模式另申报——
-  `tests/*.test.mjs` = 唯一 regression 成员（glob 即选中，layering 钉 keyless）；`*-smoke` =
+  `tests/**/*.test.mjs` = 唯一 regression 成员（递归 glob 即选中，`fixtures/`/`_tmp/` 除外；layering 钉 keyless）；`*-smoke` =
   分级冒烟、`*-probe` = 探针、`*-gate`/`*-audit`/`*-scan` = run bundle 机械门；`scripts/lib/`、
   `tests/fixtures/` 在执行 glob 外、由 consumer 消费。独立真模型档 = 登记制 closed set：要求凭据（引用
-  `.credentials.yaml`）的 `scripts/` 各入口脚本必须恰为名单（机械对账 = `tests/smoke-contract`——
+  `.credentials.yaml`）的 `scripts/` 各入口脚本必须恰为名单（机械对账 = `tests/contracts/smoke-contract.test.mjs`——
   `withModelKey` 是条件透传不作判据）；该检查不发现经现有会话触发模型的路径，新模式须另审查/登记。

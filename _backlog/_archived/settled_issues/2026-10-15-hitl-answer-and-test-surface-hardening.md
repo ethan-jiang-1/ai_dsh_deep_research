@@ -20,9 +20,9 @@ opened: 2026-10-15
    **反证（确定性，零上限注入）**：把上限临时压到 0 → 目标行**在场**，旧文案报"侧栏没有目标会话行…可能①已归档②被终局化"+
    "（侧栏零可见行）"（双重误导）；改后同一注入报出上述显式行 + 样本注；**上限还原 300 后正常路径照常**（dry-run 观察到卡并给出 click-submit）。
 
-2. **`tests/library-fold.test.mjs` 缺「给用户的一句话」列对账**：其余列都有逐列断言，仅此列不对等。候选修法 = 补一条列级断言（12 形态例库复用既有夹具）。
+2. **`tests/cockpit/library-fold.test.mjs` 缺「给用户的一句话」列对账**：其余列都有逐列断言，仅此列不对等。候选修法 = 补一条列级断言（12 形态例库复用既有夹具）。
    为何不现在做：纯增量、零风险，但价值低；可与下次 library 面板/例库改动合并。
-   **2026-10-16 落地（列级断言）**：`tests/library-fold.test.mjs` 新增 `EXPECTED_BUILTIN_ONE_LINERS`（4 条人审值）
+   **2026-10-16 落地（列级断言）**：`tests/cockpit/library-fold.test.mjs` 新增 `EXPECTED_BUILTIN_ONE_LINERS`（4 条人审值）
    + `builtinOneLinersFromSkill()`（同表同口径解析该列）+ 同测试内断言。
    **实测澄清（比卡上原描述更准）**：该列**不在**客户端 `BUILTIN_PREFERENCES` 里——面板内置卡显示的是
    `sections.source`；所以正解 = **按数据钉住该列**（不改客户端契约：面板显示面属 D25 期 1 设计，要改是产品决定）。
@@ -37,7 +37,7 @@ opened: 2026-10-15
    （报 `textFieldAvailable/textValue`），推进钮认 `Next/继续/下一题`——**仅零 radio 时**（选项题面只认 `Submit`，
    逐字不变）；③**翻页 ≠ 提交**：点击结果带 `kind`（advance 继续循环 / final 收尾；旧行为把翻页当终局提交会提前 break）；
    ④`--custom` 文本被文本题消费后不再当选项题的补充文本（防串题）。
-   证据 = keyless 四例先红后绿（`tests/ask-drive.test.mjs` 34/34）· 对实卡 dry-run 观察面转正 ·
+   证据 = keyless 四例先红后绿（`tests/run/ask-drive.test.mjs` 34/34）· 对实卡 dry-run 观察面转正 ·
    **实答落地**（盘侧裁决「1/2 实质作答 + 意图对账通过」+ provenance 写盘）· `client-hitl-smoke` 回归 ALL PASS。
    `optionIndexToClick` 与意图对账**未动**（卡上原话的约束）。
 

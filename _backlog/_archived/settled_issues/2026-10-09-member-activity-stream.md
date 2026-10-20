@@ -24,7 +24,7 @@ opened: 2026-10-09
 
 | # | 行为 | 类别 | 输入态 / 信号 | 反例与互补态 | 证据 owner（能证/不能证） | 人工判断 |
 |---|---|---|---|---|---|---|
-| 1 | 队员动作折算（🔍 检索词 / 🌐 抓取目标 / ⚠️ 失败行；计数与尾部截断） | 确定性逻辑 | 注入合成事件（形状取自真实归档 journal）：web_search call、web_fetch call、fetch 成败 result、非目标工具 | 非目标工具滤除（read/write/edit 不进流）；失败有独立行；空事件 = 空区 | `tests/member-activity-fold.test.mjs` + `pnpm test`（红→绿） | 无 |
+| 1 | 队员动作折算（🔍 检索词 / 🌐 抓取目标 / ⚠️ 失败行；计数与尾部截断） | 确定性逻辑 | 注入合成事件（形状取自真实归档 journal）：web_search call、web_fetch call、fetch 成败 result、非目标工具 | 非目标工具滤除（read/write/edit 不进流）；失败有独立行；空事件 = 空区 | `tests/run/member-activity-fold.test.mjs` + `pnpm test`（红→绿） | 无 |
 | 2 | 无团队负例：无 teammate 行 → 队员区不渲染 | 编排（客户端） | 无团队会话（投影无 agentTeam/无 teammate） | 有团队正例（#3）互补 | `client-load-smoke` 扩展断言（keyless 真浏览器） | 无 |
 | 3 | 有团队正例：roster + 折叠区 + 动作行 + 错误徽标 | 编排（客户端） | 真实团队（投影 teammate 行 + 队员 journal 流） | — | **通过**（2026-10-11 真实 run 首验：client-load-smoke 正例断言全绿〔roster↔spawn 逐名对账〕+ 真通道 CDP 探针 ⑦ 区实证） | 无 |
 | 4 | design/40 构成/边界/分工句 + pack README 已知限制更新 | 文档合同 | 队员区进构成节；任务板 vs 动作流分工句；限制行退役 | — | `pnpm verify`（md 门禁）+ 文档评审 | 无 |
@@ -46,7 +46,7 @@ opened: 2026-10-09
 
 ## 实施记录（2026-10-10）
 
-- 验收 #1 **通过**：`tests/member-activity-fold.test.mjs` 5/5（红→绿：模块未建红 → 实现绿；事件形状 = 归档 journal 实证——web_search 参数 `queries` 数组、web_fetch 参数 `url`、失败 result `isError:true` + "Error: " 前缀）。
+- 验收 #1 **通过**：`tests/run/member-activity-fold.test.mjs` 5/5（红→绿：模块未建红 → 实现绿；事件形状 = 归档 journal 实证——web_search 参数 `queries` 数组、web_fetch 参数 `url`、失败 result `isError:true` + "Error: " 前缀）。
 - 验收 #2 **通过**：`client-load-smoke` **ALL PASS**——新增两处无团队负例断言（绑定会话遍 + 未绑定会话遍）；正例断言（盘侧 spawn 名 ↔ 投影 roster 对账）已编码，当前绑定会话（cn-moe 停滞 lead，未组队）走负例分支——断言届时随真实团队自动生效。
 - 验收 #3 **待首验**：投影不进 journal（实测 token-factory lead journal grep `agentTeam` = 0——投影走宿主控制流，会话日志无此事件），keyless 回放道不可造正例；首验 = 下一场真实 run（client-load-smoke 的 spawn 对账断言自动咬合）。
 - 验收 #4 **通过**：design/40（构成表 + 折算层六件 + ⑦ 区描述 + 已知边界重写含分工句）+ pack README 限制行更新；`pnpm verify` 全绿（staged 后）、`pnpm test` 332/332（含新增 5）。

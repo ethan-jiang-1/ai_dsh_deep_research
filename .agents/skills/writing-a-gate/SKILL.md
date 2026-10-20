@@ -38,7 +38,7 @@ description: Use when adding, widening, or retiring a mechanical check in script
 3. 需要新契约断言时同步 `tests/`（keyless，零依赖）。
 
 门禁逻辑有增删时另有两处随行：`scripts/smoke/gates-smoke.mjs` 的案例表 `CASES`（注入案例
-增删同 diff）与 `tests/verify-gates.test.mjs`（案例 ↔ gates 数组静态对账）；改完必跑
+增删同 diff）与 `tests/contracts/verify-gates.test.mjs`（案例 ↔ gates 数组静态对账）；改完必跑
 `node scripts/smoke/gates-smoke.mjs`（[scripts/AGENTS.md](../../../scripts/AGENTS.md)）。
 
 ## 4. 反证（完成判据）

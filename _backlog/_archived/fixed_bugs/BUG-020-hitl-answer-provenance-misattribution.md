@@ -6,7 +6,7 @@ opened: 2026-10-11
 
 # BUG-020：hitl-answer 代答 provenance 误归给无关在飞 bundle
 
-> 严重级别：P2｜发现：2026-10-11｜状态：活跃 — 已修复 2026-10-11：归属谓词化（仅写命中归属，仅读一律延迟补记），字典序启发式全废；反证 = tests/hitl-provenance.test.mjs attributionBundleOf 五用例
+> 严重级别：P2｜发现：2026-10-11｜状态：活跃 — 已修复 2026-10-11：归属谓词化（仅写命中归属，仅读一律延迟补记），字典序启发式全废；反证 = tests/run/hitl-provenance.test.mjs attributionBundleOf 五用例
 
 ## 症状
 
@@ -31,4 +31,4 @@ operator 工具的**落账目标启发式**类缺陷：`activeBundle` 字典序�
 
 建议：落账前做归属判定（被答会话日志提过且盘上在场的 `drt_<slug>`，要求唯一匹配；sibling 预检会提其他 slug——需按 ask 卡同 turn 的提及或唯一性收窄）；无唯一匹配 = 走既有"延迟补记"分支。修复带反证测试（红：无关 bundle 在场 + 新 run 未实例化时，落账目标必须是延迟分支而非字典序选中）。2026-10-11 误记两条已由操作侧手工迁移修复（见 MCP run 的 journal 记账）。
 
-落地（2026-10-11，同卡修复）：①归属谓词 = `attributionBundleOf`（scripts/lib/hitl-provenance.mjs，import 驾驶舱同一 bundle-bind 谓词）——**仅写命中归属，仅读/无绑定 = 延迟分支**（误归代价 ≫ 延迟代价的不对称裁决：立项预检读与恢复会话读在信号面不可靠区分——任何 ask 都置 kickoff 信号——故保守侧）；②hitl-answer 落账块改**现读**被答会话 journal 喂谓词；③横切排查（本卡「牵出的失败类」）：`bundleStateOf().activeBundle` 写目标消费者仅 hitl-answer 一处；runStateOf 内部消费 = 只读投影（契约由 tests/run-state.test.mjs 钉住，不动）；④反证 = tests/hitl-provenance.test.mjs 五用例——裸形态（写/读都归属）红 2 例（仅读误归洞）→ 收紧转绿；旧字典序对同 fixtures 演算 = 'drt_zeta' ≠ 归属期望 'drt_beta'（一次性留痕）。
+落地（2026-10-11，同卡修复）：①归属谓词 = `attributionBundleOf`（scripts/lib/hitl-provenance.mjs，import 驾驶舱同一 bundle-bind 谓词）——**仅写命中归属，仅读/无绑定 = 延迟分支**（误归代价 ≫ 延迟代价的不对称裁决：立项预检读与恢复会话读在信号面不可靠区分——任何 ask 都置 kickoff 信号——故保守侧）；②hitl-answer 落账块改**现读**被答会话 journal 喂谓词；③横切排查（本卡「牵出的失败类」）：`bundleStateOf().activeBundle` 写目标消费者仅 hitl-answer 一处；runStateOf 内部消费 = 只读投影（契约由 tests/run/run-state.test.mjs 钉住，不动）；④反证 = tests/run/hitl-provenance.test.mjs 五用例——裸形态（写/读都归属）红 2 例（仅读误归洞）→ 收紧转绿；旧字典序对同 fixtures 演算 = 'drt_zeta' ≠ 归属期望 'drt_beta'（一次性留痕）。

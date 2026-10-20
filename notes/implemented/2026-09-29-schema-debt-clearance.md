@@ -24,7 +24,7 @@
 - **全量复扫收敛**：`node scripts/schema-scan.mjs` → 违约地图 **契约前 0/14**（修前 6/14）｜契约期 0/0（无对象，不宣称）｜**编制豁免 5 件显性列出**（kimi/qwen/zhipu/deepseek 的 leads.md + deepseek 的 review.md，全部"类型见 question.md"）｜**WARN 0**（5 本 journal 补偿记账全部在场）；exit 0。
 - **归位实证**：agentic-parity `final/` 只余 v1.md；run 根 `final.md` mtime 保持 2026-09-27（`stat` 核对——断代不受扰动）；scan 判定从"缺席 + 位置漂移"转"全齐"。
 - **backfill 实证**：cpu-gap findings.md 档头 backfill 标记在场；F1–F8 支撑证据文件名全部实指 evidence/ 真档（与 final.md 引用同源）；G1–G12 与 final.md §六 12 项一一对应。
-- **编制条件性反证**：`node --test tests/schema-scan.test.mjs` **9 断言全过**（原 6 + 新 3：quick_factual 缺 leads/review → 豁免不红且无 WARN / journal 无记账 → WARN 不静默不红 / 无类型标记缺条件件 → 维持红）。夹具 = `tests/fixtures/schema-scan/` 8 mini bundle（+drt-quickfactual / drt-quickfactual-silent / drt-notyped-missing-leads）。
+- **编制条件性反证**：`node --test tests/run/schema-scan.test.mjs` **9 断言全过**（原 6 + 新 3：quick_factual 缺 leads/review → 豁免不红且无 WARN / journal 无记账 → WARN 不静默不红 / 无类型标记缺条件件 → 维持红）。夹具 = `tests/fixtures/schema-scan/` 8 mini bundle（+drt-quickfactual / drt-quickfactual-silent / drt-notyped-missing-leads）。
 - **门回归**：node-gate 夹具 6 形态 CLI exit 矩阵不变（3 红 3 绿——本轮零门改动）。
 - **L0**：`pnpm verify` 全绿；`pnpm test` 全绿（schema-scan 9 断言在内）。
 

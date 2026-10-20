@@ -27,7 +27,7 @@ HITL2 交付卡，而**代理代答默认取推荐档 = 「定稿」** → 交�
 
 ## 实际跑过的验证
 
-- **契约测试**（`tests/ask-drive.test.mjs`）：默认档 FAIL 自拒（含"给依据 + 给出路"断言）、PASS 放行、
+- **契约测试**（`tests/run/ask-drive.test.mjs`）：默认档 FAIL 自拒（含"给依据 + 给出路"断言）、PASS 放行、
   显式 pick 放行、无判定行不放行、非交付卡不受约束；卡识别正反例各一。**负例留证块**写明红配方
   （删自拒分支 → 该例红；实做看过红）。
 - **真数据核对**：对 `drt_anthropic-claude-release-line-timeline`（终局 FAIL）→ 自拒 ✓；

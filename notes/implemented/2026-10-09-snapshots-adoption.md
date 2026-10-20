@@ -68,11 +68,11 @@
   对抗自审抓获首版只查 `user/message` 且"恰好覆盖"断言是集合与自身比较（恒真），本版已改为可证伪不变量。
 - **来源形状反证**：垃圾锚点（非 hex 的 codeAnchor/vendor、不可解析的 recordedAt）先红 → 形状校验与
   `unknown-historical` 合法标记并存 → 绿。
-- **比对面单测反证**（实现期实录，住 [replay-request.test.mjs](../../tests/replay-request.test.mjs)）：
+- **比对面单测反证**（实现期实录，住 [replay-request.test.mjs](../../tests/run/replay-request.test.mjs)）：
   后续 header 改 model、定向归一化缺失、缺席/空 content/缺 provider-model-tools 各形态先红后绿。
 - **pin-agreement 扩围反证**：夹具迁入 `snapshots/` 未带豁免 → 逐个录制流点名 ≠ submodule HEAD → 红；
   豁免收拢到 `snapshots/replay/` + `run-state` → 绿。
-- **声明消费者反证**（住 [replay-scene.test.mjs](../../tests/replay-scene.test.mjs)）：模块缺失、ONLY 未知、
+- **声明消费者反证**（住 [replay-scene.test.mjs](../../tests/run/replay-scene.test.mjs)）：模块缺失、ONLY 未知、
   schema 版本、绝对/穿越/symlink 路径、重复 fixture 各形态先红后绿。
 - **L0**：`pnpm verify` 全绿 + `pnpm test` 全绿；`node scripts/smoke/gates-smoke.mjs` 全绿（对照组零注入 + 各注入案例均被点名报红）。
 - **默认入口复现**：`source dev/env.sh && node scripts/smoke/snapshot-replay-smoke.mjs` 连跑两次（含一次

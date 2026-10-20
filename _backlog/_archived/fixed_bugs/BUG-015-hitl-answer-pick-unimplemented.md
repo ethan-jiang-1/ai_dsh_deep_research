@@ -32,6 +32,6 @@
 - **决策层修复**：`nextDriveAction` 增可选参 `selectionMatchesIntent`（缺席 = 相符，旧调用方零破坏）——Submit 可用但预选与意图不符 → **click-option 先改选再提交**（"Submit 可用 ≠ 意图达成"）；驱动侧 `decideWithIntent` 用 `pickTargetLabel(obs.labels, PICK)` vs `checkedLabel` 算符合性（目标不可解析 → 放行交对账把关，不瞎改选）；
 - **意图对账**（裁决后半）：新 `intentReconcile({batch, questions, pick})`——盘侧 answer 批逐题对 pick 目标解析结果，不符即**响亮红（exit 1）+ 逐题报告**（"答案已落地但不是命令的答案，勿当成功用"）；答案内容仍进 provenance（事实归事实、意图归意图，pick 字段标注不符实录）；
 - **配套纯函数**：`parseAskQuestions`（ask 参数 → 逐题 id/prompt/option 标签——意图解析的输入面）+ `pickTargetLabel`（recommended 精确/回退两态、first、数字 N、越界 null 不猜）；
-- **测试**：tests/ask-drive.test.mjs 增八断言（parseAskQuestions 两形态 / pickTargetLabel 四态 / 决策层劫持形态钉 + 旧行为不破坏 / 对账一致-不符-不可解析三态）——立红实录：导出缺席即红（0/1），实现后 23/23 绿；
+- **测试**：tests/run/ask-drive.test.mjs 增八断言（parseAskQuestions 两形态 / pickTargetLabel 四态 / 决策层劫持形态钉 + 旧行为不破坏 / 对账一致-不符-不可解析三态）——立红实录：导出缺席即红（0/1），实现后 23/23 绿；
 - 验证：ask-drive 23/23 + `pnpm verify` 全绿 + `pnpm test` 216/216（净增八项）；
 - 活体确认（挂账）：下一次非默认 pick 代答——决策层改选形态（预选项不符 → click-option 改选）与对账抓获形态（若仍不符 → exit 1 响亮）双验证，未兑现即回滚本卡状态。

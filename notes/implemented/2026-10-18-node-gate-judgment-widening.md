@@ -45,7 +45,7 @@
 - **治**：pack 导出 `terminalVerdictLine`（"哪一行是终局"的唯一正本，含轮次路径 + 仲裁），
   `terminalReadiness` 变薄壳；门侧 `readinessOf` 委托它，**只保留门独有的附条件语义**；
   门侧三份装饰副本删除。导入方向沿用既有先例（`scripts/lib/hitl-provenance.mjs` → pack TS lib）。
-- **钉**：`tests/review-readiness.test.mjs` 增"跨实现一致"两例（六种文本 + 附条件语义），
+- **钉**：`tests/run/review-readiness.test.mjs` 增"跨实现一致"两例（六种文本 + 附条件语义），
   **先红后绿**；`pnpm test` 528/528、`pnpm verify` 全绿、三场真 bundle 同判。
 - **预期后果（写下来免得被当回归）**：readiness 由 FAIL 变 PASS 的旧 bundle 会**唤醒**此前 N/A 的门②/③。
   cambricon 那场因此露出真实缺口（代答后未落 present 声明）——判据更真，不是新引入的红。

@@ -47,7 +47,7 @@
 - 探针④ bugs 镜像漂移（frontmatter `排查中` / 状态行 `修复就绪`）→ 红：`[backlog-liveness] _backlog/bugs/BUG-997-probe.md status line must mirror frontmatter status (状态：排查中；记号 = 修复就绪)`；还原 → 绿。
 - 还原后复查：backlog-liveness 无红，探针文件与索引行零残留（盘上与 git index 双查）。
 
-常驻反证 = gates-smoke 案例表新增四形态注入（`backlog-issue-graduation-open` / `backlog-issue-mirror-drift` / `backlog-bug-enum-invalid` / `backlog-bug-mirror-drift`）+ `backlog-bug-severity` 案例与 `guard-red-record-active-bug` 正例改新枚举形态；契约测试 = `tests/backlog-liveness.test.mjs`（生命周期全值/镜像漂移/倾向头越界/闭集全值通过/归档豁免/🔒 记号不破坏镜像断言）。
+常驻反证 = gates-smoke 案例表新增四形态注入（`backlog-issue-graduation-open` / `backlog-issue-mirror-drift` / `backlog-bug-enum-invalid` / `backlog-bug-mirror-drift`）+ `backlog-bug-severity` 案例与 `guard-red-record-active-bug` 正例改新枚举形态；契约测试 = `tests/contracts/backlog-liveness.test.mjs`（生命周期全值/镜像漂移/倾向头越界/闭集全值通过/归档豁免/🔒 记号不破坏镜像断言）。
 
 全量收尾（2026-10-12）：`pnpm verify` 全绿；`pnpm test` 全绿；`node scripts/smoke/gates-smoke.mjs` 全绿（对照组零注入全 PASS + 注入案例均被点名报红）。
 

@@ -52,8 +52,8 @@ L2 不调用模型，要求凭据会把安装结构证据与生产研究前置�
 ## 验证
 
 - `pnpm test`：194 passed，0 failed。
-- `pnpm exec node --import tsx/esm --test tests/run-state.test.mjs tests/run-dashboard.test.mjs tests/hitl-fold.test.mjs`：50 passed，0 failed。
-- `node --test tests/deploy-bin.test.mjs`：10 passed，0 failed。
+- `pnpm exec node --import tsx/esm --test tests/run/run-state.test.mjs tests/run/run-dashboard.test.mjs tests/run/hitl-fold.test.mjs`：50 passed，0 failed。
+- `node --test tests/pack/deploy-bin.test.mjs`：10 passed，0 failed。
 - BUG-011 隔离 CLI：空凭据 home 下 `--install-only` 退出 0，默认模式退出 1，且默认模式只拒绝模型密钥检查。
 - `tsc -p packages/deep-research-pack/tsconfig.json --noEmit` 与相关脚本语法检查通过。
 - `source dev/env.sh && node scripts/release-smoke.mjs`：ALL PASS；npm pack、干净 profile 安装、scaffold 真铺种子、空凭据安装模式通过、默认模式拒绝，以及安装域四角色真挂载全部通过。

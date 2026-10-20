@@ -29,4 +29,4 @@ evidence-audit/仪表盘若有同款，一并修）。
 
 ## 修复关联
 
-已修复（2026-10-07，TDD 路）：①缺陷实录 = 边界时刻（2026-10-07T20:00:00Z）UTC slice 给 10-07、本地给 10-08——mcp-hosts 事故窗口单元级复现；②三个红测试先行（tests/local-date.test.mjs 新立——模块缺席红；hitl-provenance 题面富集用例——空 id 落空串红；ask-drive header 字段——形状合同真实变化同 diff 改锚）；③实现到绿：`local-date.mjs` helper（本地口径，不硬编码时区——工具跟机器走，与手册"先跑 bash date"纪律永一致）；hitl-answer:351 接 helper + batchToAnswered 传 plan.questions；export-dist:82 打包日期同口径；④横切清扫 = 全仓 UTC-date-slice 恰两处、全改（机器比较时间戳保持 UTC ISO 不动）；⑤存量 mcp-hosts 错行留作历史（run bundle 不改写，本卡在案）。
+已修复（2026-10-07，TDD 路）：①缺陷实录 = 边界时刻（2026-10-07T20:00:00Z）UTC slice 给 10-07、本地给 10-08——mcp-hosts 事故窗口单元级复现；②三个红测试先行（tests/run/local-date.test.mjs 新立——模块缺席红；hitl-provenance 题面富集用例——空 id 落空串红；ask-drive header 字段——形状合同真实变化同 diff 改锚）；③实现到绿：`local-date.mjs` helper（本地口径，不硬编码时区——工具跟机器走，与手册"先跑 bash date"纪律永一致）；hitl-answer:351 接 helper + batchToAnswered 传 plan.questions；export-dist:82 打包日期同口径；④横切清扫 = 全仓 UTC-date-slice 恰两处、全改（机器比较时间戳保持 UTC ISO 不动）；⑤存量 mcp-hosts 错行留作历史（run bundle 不改写，本卡在案）。

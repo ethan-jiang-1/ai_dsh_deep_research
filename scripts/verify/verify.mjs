@@ -1531,10 +1531,13 @@ function gitOnce(args) {
   const bugCardExists = (n) => bugDirs.some((d) => existsSync(d) && readdirSync(d).some((f) => f.startsWith(`BUG-${n}-`)));
   const problems = [];
   let claims = 0;
-  const testFiles = readdirSync(join(ROOT, 'tests')).filter((f) => f.endsWith('.test.mjs'));
+  // 2026-10-20 起 tests/ 按域分子目录（run/cockpit/pack/contracts）：递归扫描，fixtures/_tmp 除外。
+  const testFiles = walk(join(ROOT, 'tests')).filter((f) => f.endsWith('.test.mjs')
+    && !f.includes(`${sep}fixtures${sep}`) && !f.includes(`${sep}_tmp${sep}`));
   if (testFiles.length === 0) fail(gate, '防空语料：tests/ 下零个 *.test.mjs——扫描面失效');
-  for (const f of testFiles.sort()) {
-    const text = readFileSync(join(ROOT, 'tests', f), 'utf8');
+  for (const file of testFiles.sort()) {
+    const f = relative(ROOT, file);
+    const text = readFileSync(file, 'utf8');
     // ① 标题里的 BUG 号 = 守卫声明（node:test 的 test('…')；含 await t.test 子测形态）
     const claimed = new Set();
     for (const m of text.matchAll(/^\s*(?:await\s+)?(?:t\.)?(?:test|it)\(\s*['"`][^'"`]*?(BUG-\d{3})/gm)) claimed.add(m[1]);

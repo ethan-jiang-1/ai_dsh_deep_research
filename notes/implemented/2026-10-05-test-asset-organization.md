@@ -13,7 +13,7 @@
 - **[project-map §测试怎么选](../../docs/project-map.md) 增两节，成为单一入口**：「测试词汇对照」——金字塔词汇（单元 / 契约 / 集成 / 端到端 / 生产审计）× 本仓形态 × 住哪 × 凭据表，反金字塔理由 = **标签回答不了"要什么前置"**，本仓三轴（档位 / 验收面 / 命名即层）各答什么；「新检查落家序」——**七步修正版**：①契约测试（义务 = evaluation 对应面登记 + 带反证）→ ②一次性检查（跑完即弃、证据进实施记录，**复现第二次即升格契约测试**——三例回放实锤补的步）→ ③`*-smoke`（后缀申报档位）→ ④真模型档（closed set 登记）→ ⑤verify 门禁（[writing-a-gate](../../.agents/skills/writing-a-gate/SKILL.md) 全流程）→ ⑥run 门 → ⑦fixtures（taxonomy 建行 + 零孤儿断言）；新测试资产**形态先入词汇表再落文件**；
 - **成本只成文一句原则**：穷举矩阵不是目标，能咬中本次回归的红灯才是；
 - **[guides/60 §2](../../docs/guides/60-dev-loop.md) 纪律三条 → 五条**：借入姊妹仓 `ai_dsh_assitant`（钉版 [00-index §外部研究材料](../../docs/00-index.md)）的互补案例规则（条件命题的证据必须含互补案例——单一状态的证据集抓不到状态 bug）与仪器对准目标（检查显式锚定目标 home，扫错对象拿无关残留凑绿）；
-- **机械把守**：[tests/navigability-contract.test.mjs](../../tests/navigability-contract.test.mjs) 扩两组常驻断言（词汇五词 + 反金字塔理由 + 链接解析；七步关键词 + 成本原则 + 链接解析）。
+- **机械把守**：[tests/contracts/navigability-contract.test.mjs](../../tests/contracts/navigability-contract.test.mjs) 扩两组常驻断言（词汇五词 + 反金字塔理由 + 链接解析；七步关键词 + 成本原则 + 链接解析）。
 
 ## 输掉的方案
 

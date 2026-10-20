@@ -60,7 +60,7 @@ opened: 2026-10-11
    `--session`——消息可能进了别的会话）／`not-landed`／`log-unreadable`（在飞尾帧不完整，fail-closed）
    ——不再一律冒充「未见模型回复」。
 
-**验证（已跑）**：keeless 契约测试 `tests/inject-reconcile.test.mjs` 先红后绿 7/7，**四路反证注入**各看红
+**验证（已跑）**：keeless 契约测试 `tests/run/inject-reconcile.test.mjs` 先红后绿 7/7，**四路反证注入**各看红
 一次再还原（恒 true→4 红／丢时间下界→1 红／只扫末条→1 红／类型过滤失效→1 红）；**真模型两阶段 E2E**
 （一次性通道 + 独立 workspace，刻意不打在交付会话上）**全绿**——①空闲态 `sentBy=Send message` +
 `landed=true`（seq 9）+ 自动探测会话 id 与建会话 id 一致；②**在飞态 `sentBy=Queue message` +

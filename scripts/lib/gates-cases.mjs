@@ -1,8 +1,8 @@
 // gates-cases.mjs — 门禁自测的注入案例表（纯 fs 注入手法 + CASES/CONTROLS 数据）。
-// 从 scripts/smoke/gates-smoke.mjs 拆出（2026-10-09 layering 二代：tests/verify-gates.test.mjs
+// 从 scripts/smoke/gates-smoke.mjs 拆出（2026-10-09 layering 二代：tests/contracts/verify-gates.test.mjs
 // 静态对账消费本表——驱动面（smoke 道，起子进程）不得被 tests import，案例表因此住 lib；
 // 每 mutate 只做纯 fs 操作，git add 由驱动壳在 mutate 后统一执行，本模块零子进程）。
-// 消费方：scripts/smoke/gates-smoke.mjs（真执行体）+ tests/verify-gates.test.mjs（静态对账）。
+// 消费方：scripts/smoke/gates-smoke.mjs（真执行体）+ tests/contracts/verify-gates.test.mjs（静态对账）。
 import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 
@@ -211,7 +211,7 @@ const linkUntrackedTarget = () => (dir) => {
   appendFileSync(join(dir, 'README.md'), '\n[孤儿探针](runtime/smoke-workspace/orphan-probe.md)\n');
 };
 
-/** 承重门禁抽样（增删同 diff：本表 + tests/verify-gates.test.mjs 无需改——它动态对账本表）。
+/** 承重门禁抽样（增删同 diff：本表 + tests/contracts/verify-gates.test.mjs 无需改——它动态对账本表）。
  *  id = 案例唯一标识（同一门禁可有多个注入形态，id 防重复条目）；gate = 期望点名的门禁；
  *  mutate(dir) = 在 fixture 内注入该门禁负责拦的回归（纯 fs——git add 由驱动壳统一执行）。
  *  expect（可选）= 断言红**必须含此子串**；用于"该门禁在副本基线本就非 PASS"的场景——
@@ -350,11 +350,11 @@ export const CASES = [
   } },
   // guard-red-record（tests 面反证义务机械化）：标题声明无留证 / 悬空编号双形态。
   { id: 'guard-red-record-no-record', gate: 'guard-red-record', mutate: (dir) => {
-    const p = join(dir, 'tests', 'local-date.test.mjs');
+    const p = join(dir, 'tests', 'run', 'local-date.test.mjs');
     appendFileSync(p, "\ntest('探针：声称守卫 BUG-004 但本文件无留证', () => {});\n");
   } },
   { id: 'guard-red-record-dangling', gate: 'guard-red-record', mutate: (dir) => {
-    const p = join(dir, 'tests', 'local-date.test.mjs');
+    const p = join(dir, 'tests', 'run', 'local-date.test.mjs');
     appendFileSync(p, "\ntest('探针：悬空编号 BUG-999', () => {});\n");
   } },
   // align-ledger 在副本基线**非 PASS**（vendor/dsh 是 gitlink submodule，副本不拷其内容 →
@@ -431,7 +431,7 @@ export const CONTROLS = [
     writeFileSync(join(dir, '_backlog', 'bugs', 'BUG-991-probe.md'),
       '---\nstatus: 排查中\nseverity: P2\nopened: 2099-01-01\n---\n\n# Probe\n> 严重级别：P2（次要）｜发现：2099-01-01｜状态：排查中\n');
     appendFileSync(join(dir, '_backlog', 'bugs', 'README.md'), '\n[BUG-991-probe](BUG-991-probe.md)\n');
-    appendFileSync(join(dir, 'tests', 'local-date.test.mjs'),
+    appendFileSync(join(dir, 'tests', 'run', 'local-date.test.mjs'),
       "\n// 负例留证 2099-01-01：BUG-991——探针负例正本 = 本行（改判据 → 红；还原 → 绿）。\ntest('探针：活跃卡声明 BUG-991', () => {});\n");
   } },
   { id: 'client-keys-ignore-node-modules-and-directory-symlink', gate: 'client-keys', mutate: addIgnoredClientPaths() },

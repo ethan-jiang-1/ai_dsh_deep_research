@@ -23,7 +23,7 @@ RFC 讨论的拍板）。护栏 = 共享模块 `scripts/lib/vendor-artifacts.mjs
 - **接线范围比 RFC 原定宽**：RFC 只列 boot-run + preset-smoke；实施时核实 l4-lite /
   team-preflight / entry-chain-probe 同样真 boot（都 spawn `bin.ts --port`）——同一共享
   模块每处三行，全接（scripts 纪律："一个只在单独运行时通过的脚本是脚本的缺陷"）。
-- **测试**：`tests/vendor-artifacts.test.mjs` 五断言（ok 不误报 / 缺 client 红证形态 /
+- **测试**：`tests/run/vendor-artifacts.test.mjs` 五断言（ok 不误报 / 缺 client 红证形态 /
   typert 面 / vendor 整缺席边界不崩 / remedy 在场）+ 静态夹具两形态
   （`tests/fixtures/vendor-artifacts/{ok,missing-client}/`）；夹具放置遵 tests/AGENTS.md
   （构造样本住 fixtures/；初版运行时临时树方案废弃）。

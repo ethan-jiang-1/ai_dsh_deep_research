@@ -101,7 +101,7 @@
   bundle 的 audit.md（evidence-audit 补跑产出）、token-factory §Decisions 追认行。
 - 改动：`docs/guides/61-run-playbook.md`（§4 审计步 + 门A 预期态）、
   `research-workspace/NODES.md`（图例）+ `research-workspace/AGENTS.md`（门全集枚举）+
-  pack workspace 种子（sync 重生成）、`tests/node-gate.test.mjs`（+9 用例）。
+  pack workspace 种子（sync 重生成）、`tests/run/node-gate.test.mjs`（+9 用例）。
 - 队列：本条目毕业离队，▶ 移交「审计 P3 收尾轮」。
 - 归档区门禁现状：除豁免登记 7 bundle 的既有红门（门①/②/③/L 如实保留）外，契约期交付
   bundle 门A 全绿。

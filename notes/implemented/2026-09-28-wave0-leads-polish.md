@@ -43,7 +43,7 @@
 
 - **先红后绿**（writing-a-gate 完成判据）：11 个新形态夹具
   （`tests/fixtures/node-gate/bundles/fixture-leads-*`）先红（实现前 tests 11 失败）后绿；
-  红绿记录 = `tests/node-gate.test.mjs` 永久反证（健康双绿 / 缺状态 / 状态非法 / 挖深缺
+  红绿记录 = `tests/run/node-gate.test.mjs` 永久反证（健康双绿 / 缺状态 / 状态非法 / 挖深缺
   来源 / 排除无原因 / 覆盖缺口 / 空集 / 豁免 N/A / 缺席 N/A / 断代 PRE-CONTRACT 不计红 /
   隔离性不连坐）。
 - **L0**：verify 34 门全绿 + tests 133/0（+11）。

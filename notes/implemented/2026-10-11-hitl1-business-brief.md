@@ -22,7 +22,7 @@ HITL1 第一段新增**业务决策简报**采集（决策对象 / 待决定事�
    计划卡从研究参数摘要升级为业务可读简报；三种计划动作与一轮制不变；
 4. 落面四处（同 diff）：persona 第四问句 + 计划要点（`lead.patch.yml`）· research-brief
    skill 采集规则（第 3 步）与计划卡构成（第 6 步）· 模板 question.md Snapshot 行 ·
-   pack README「研究怎么跑」§1；契约钉 = `tests/presets.test.mjs`「HITL1 业务决策简报」
+   pack README「研究怎么跑」§1；契约钉 = `tests/pack/presets.test.mjs`「HITL1 业务决策简报」
    （模板五字段在场 + 尚未确认形态 + skill 触发判据 + `[ACCEPTED]` 禁词 + 「不设固定
    第四问」positive 钉）。
 
@@ -41,7 +41,7 @@ HITL1 第一段新增**业务决策简报**采集（决策对象 / 待决定事�
 
 ## 实际跑过的验证
 
-- 立红：`tests/presets.test.mjs` 新断言先红（「question.md 模板缺业务决策简报字段」实录）
+- 立红：`tests/pack/presets.test.mjs` 新断言先红（「question.md 模板缺业务决策简报字段」实录）
   → 实现转绿（focused 11/11）；注入反证：skill 注入「[ACCEPTED]」→ 禁词断言红 → 还原绿；
 - L0：verify 全绿 + tests 338/338（净 +1）；
 - L1：preset-smoke 真挂载四 preset ALL PASS；

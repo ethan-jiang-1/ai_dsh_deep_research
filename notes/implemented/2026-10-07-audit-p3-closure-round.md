@@ -16,7 +16,7 @@
 |---|---|---|---|
 | 1 | client-keys 收口 | `RESEARCH_TOOL_KEYS` 搬进 `src/client/keys.ts`（族正本）；门禁补三规则：keyed 数组族导出只许住 keys.ts（Cordis `inject` 合同豁免——首跑误咬后收窄）、族值引号字面量别处即红、register 描述符 shorthand `key,` 取值溯源（无冒号盲区） | **加宽首跑实咬真债**（族正本漂移）→ 搬正本转绿；注入内联族数组 → 族值+shorthand 双规则齐红 → 还原绿；`pnpm build` 通过；client-load-smoke 8/10（加载/渐进面/零泄漏全绿；2 FAIL = 侧栏可见性环境陈旧——**stash A/B 对拍**：旧客户端同型两红，证明与 diff 无关） |
 | 2 | README 清单对账 | 选**纯指路**而非 sync 门禁（role-list-sync 完整哲学 = 消灭手抄副本而非守卫它；"六个/五件"计数同 count-free 腐坏形态） | pack README 21/25 行改指路（清单正本 = 盘上目录 / design/40）；grep 手抄清单清零；零新门禁成本 |
-| 3 | persona↔fold 签名契约 | `tests/hitl-signature-contract.test.mjs`：从 fold 源**提取**判型签名断言 lead persona 逐字携带（不手抄第二份词表，双向钉） | 注入删 persona「按现稿定稿」→ 红（BUG-002 形态捕获）→ 还原绿；防空语料断言在案 |
+| 3 | persona↔fold 签名契约 | `tests/run/hitl-signature-contract.test.mjs`：从 fold 源**提取**判型签名断言 lead persona 逐字携带（不手抄第二份词表，双向钉） | 注入删 persona「按现稿定稿」→ 红（BUG-002 形态捕获）→ 还原绿；防空语料断言在案 |
 | 4 | doc-budgets ls-files 化 | AGENTS.md 枚举 walk→`git ls-files`（tracked-only） | **误红实证先行**：runtime 探针 AGENTS.md 注入 → 旧实现红（潜伏面坐实）→ 修后探针在场仍绿；tracked 未登记注入仍红（守卫力在） |
 | 5 | 端口独占门禁 | 新门禁 `port-exclusive`：tracked scripts/+dev/ 端口缺省声明查重；`DSH_RUN_PORT` 引用豁免（通道连接方）；0 声明防空语料 | **首跑实咬真债** 3102 双认领（team-preflight × entry-chain-probe，file:line 逐字）+ 3105 二咬（人记不住注册表的教学案例）→ entry-chain-probe 迁 3114；注入 3101→3102 红 → 还原绿 |
 | 6 | pre-commit 激活态 | 新门禁 `hooks-active`：`core.hooksPath` 指向 dev/hooks（GIT_* 剥离） | unset → 红（修正入口 = source dev/env.sh）→ 重设还原绿 |
@@ -50,7 +50,7 @@
 ## 环境状态
 
 - 新增：门禁 `port-exclusive` / `hooks-active`（verify gates 数组 + evaluation §L0 台账行）、
-  `tests/hitl-signature-contract.test.mjs`、`tests/fixtures/run-state/teammate-pending.jsonl`、
+  `tests/run/hitl-signature-contract.test.mjs`、`tests/fixtures/run-state/teammate-pending.jsonl`、
   `.agents/skills/bumping-vendor-pin/SKILL.md`。
 - 改动：`scripts/verify/verify.mjs`（doc-budgets tracked-only 化 + client-keys 三规则 +
   两新门禁）、`scripts/run-gates/evidence-audit.mjs`（slug 语料窗 + 窗计数透出）、

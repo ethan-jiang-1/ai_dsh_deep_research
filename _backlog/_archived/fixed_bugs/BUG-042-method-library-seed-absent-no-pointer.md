@@ -40,8 +40,8 @@ opened: 2026-10-19
 本仓已有代码承认空态是**正常**状态，但"正常空态"不等于"应当缺席文件"：
 
 ```
-tests/library-fold.test.mjs:256  'absent'     = 文件不在 = 新工作区的正常空态（不是失败）
-tests/library-fold.test.mjs:257  'unreadable' = 在而读不回 = 如实报读不到，不冒充"正在读取"
+tests/cockpit/library-fold.test.mjs:256  'absent'     = 文件不在 = 新工作区的正常空态（不是失败）
+tests/cockpit/library-fold.test.mjs:257  'unreadable' = 在而读不回 = 如实报读不到，不冒充"正在读取"
 ```
 
 `libraryReadStateOf()` 的三态（`ok` / `absent` / `unreadable`）已经在观察面落地；**但 Lead 立项时

@@ -79,7 +79,7 @@ URL 抽取只认字面 `http(s)://` 形态，未处理三类真实存在的引�
 - **判据核** = `scripts/lib/evidence-audit-core.mjs`：`urlsOf` 加"逐 `%XX` 序列容错解码副本 + 协议相对 `//host` 归一"，
   新增 `hostsOf` 裸域名（只喂域名级判定）；`buildCorpus` 把 **MCP 工具结果**纳入语料（调用参数不入——自证面）；
   `fetchedOk` 仍只认 `web_fetch`（档位不升格）；CRITICAL / 仅域名 / `source_url 未抓取` 措辞按证据强度改写并限定"本 run"；
-- **驱动壳头注**（三条断言）同 diff 同步；**契约测试** `tests/evidence-audit.test.mjs` 新增三条 + 负例留证块；
+- **驱动壳头注**（三条断言）同 diff 同步；**契约测试** `tests/run/evidence-audit.test.mjs` 新增三条 + 负例留证块；
 - **决定记录** = [evidence-audit 语料与形态 Note](../../../notes/implemented/2026-10-15-evidence-audit-url-forms-and-corpus.md)
   （决定 / 输掉的方案 / 全量对账 / 环境状态）；
 - **修复判据逐条**：①形态扩宽 ✓（正例四形态）②档位分离不被抹平 ✓（负例两条 + 全量 `source_url 未抓取` 72→72）

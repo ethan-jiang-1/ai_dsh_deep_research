@@ -30,7 +30,7 @@
 
 ## 实际跑过的验证
 
-- **单元级（keyless，确定性）**：`tests/replay-request.test.mjs` 新增三例（哨兵只在 prompt 回显 → 不算落定；
+- **单元级（keyless，确定性）**：`tests/run/replay-request.test.mjs` 新增三例（哨兵只在 prompt 回显 → 不算落定；
   在 assistant 文本 → 落定；`turn/end` 缺席/非 completed → 未结束）。**先红**（模块不提供该导出）→ 实现 → 44/44 绿。
 - **现场级反证（确定性，非概率）**：把冒烟 A 层临时改回全文 `includes` 并在放行点打印回合状态 →
   实测 `回合已完成=false` 即放行（同一跑里 C0b 随即以「挂载 3/4」红）——**上游提前放行可确定性复现**；

@@ -36,7 +36,7 @@
 | 12 | [backlog 历史决策](2026-10-09-backlog-methodology-absorption.md) 队列节尾 | "（已毕业离队 2026-09-26：…）"12 行历史块 | 与同文件头注"完成即离队（历史归 notes/ + git，**队列里看不见它**）"及 D13 自相矛盾；且随毕业无限增长，把唯一"当前"指针埋掉 |
 | 13 | [ui-skin RFC](../rejected/2026-09-24-ui-skin.md) · [research-type-coverage RFC](2026-09-25-research-type-coverage.md) | 把"▶ 观察面 GUI 化"当作当前指针引用 | 该条目已毕业，▶ 已移交 |
 | 14 | [discipline-map](../../docs/discipline-map.md) 图例 · [alignment-ledger](../../docs/alignment-ledger.json) ×4 | "纯配置仓/纯配置 deep-research-pack" | 同 #4 |
-| 15 | 非 `.md` tracked 文件里的 RFC 指针（**13 处**，机械复算）：`presets/{lead,analyst,critic,scout}.patch.yml:5`、`dev/boot-run.sh:3`、`dev/vendor-build.sh:7`、`dev/vendor-typert-emit.mjs:3`、`scripts/entry-chain-probe.mjs:3`、`scripts/run-dashboard.mjs:2-3`、`tests/run-dashboard.test.mjs:1,92`、`docs/alignment-ledger.json:722` | 指 `notes/proposed/<某 RFC>.md` | 该 RFC 已毕业迁 `implemented/`——指针 404。**门禁盲区**：`md-links`/`md-anchors` 只扫 tracked `.md` 的链接语法，yml/sh/mjs/json 注释逃检。preset 头注尤其要紧——它是**模型可见**文本 |
+| 15 | 非 `.md` tracked 文件里的 RFC 指针（**13 处**，机械复算）：`presets/{lead,analyst,critic,scout}.patch.yml:5`、`dev/boot-run.sh:3`、`dev/vendor-build.sh:7`、`dev/vendor-typert-emit.mjs:3`、`scripts/entry-chain-probe.mjs:3`、`scripts/run-dashboard.mjs:2-3`、`tests/run/run-dashboard.test.mjs:1,92`、`docs/alignment-ledger.json:722` | 指 `notes/proposed/<某 RFC>.md` | 该 RFC 已毕业迁 `implemented/`——指针 404。**门禁盲区**：`md-links`/`md-anchors` 只扫 tracked `.md` 的链接语法，yml/sh/mjs/json 注释逃检。preset 头注尤其要紧——它是**模型可见**文本 |
 | 16 | [research-type-coverage RFC](2026-09-25-research-type-coverage.md) §验收 | 13 行里有孤儿子项（无父项）、游离右括号、`（原验收如下）` 把一节劈成两份互相竞争的清单；且无 `实施记录` 节 | 该 RFC 是 ▶ 条目的**唯一验收正本**，而 guides/60 §7 的中断恢复又要求读"文末实施记录"——fresh agent 必须满足的那一节恰好不可用 |
 | 17 | `dev/harness-home/runs/cn-ai-chip-adoption/`（旧 `runs/` 契约残留）与 `research-workspace/drt_*` | 两个 run 根并存，`run-dashboard` 两处都扫 | D17 已把 run bundle 定为 `research-workspace/drt_<slug>/`；旧根是 A→B 变迁残留，让"哪个才是这次的 run"需要猜 |
 | 18 | [README.md](../../README.md) Rules | "测试用 `node:test` + `node:assert`，**零 npm 依赖**" | `package.json` 有 25 个 devDependencies；[AGENTS.md](../../AGENTS.md) 偏离登记簿自己记着"首版零 npm 依赖原则……已重估维持"——README 在复述一条已被放弃的原则 |
@@ -257,7 +257,7 @@ research/README 行 3 格对 4 列表头）；**门禁盲区同类**（fixture �
 | `pin-agreement` | (a) | live 文件里每个 40 位 hex = submodule HEAD；每个 `dsh-v*` = submodule tag（外部归属行豁免） | 把 alignment-ledger 的 commit 改成 `477b4f420505…` → 红：`docs/alignment-ledger.json:2 的 commit 477b4f420505… ≠ submodule HEAD 477b4f420553…` → 还原 → 绿 |
 | `count-free` | (b) | live 文件不写硬编码计数（门禁/tests/断言/条源面） | 在 AGENTS.md 写 `28 门禁` → 红（AGENTS.md + CLAUDE.md 两处，symlink 双报）→ 还原 → 绿。**首跑即咬红本门禁自己的注释**（注释里照抄了历史计数）——它有效的第一份证据 |
 | `doc-now-only` | (c) | live 文档禁「已销账 / 修订 → / 曾用 / 首版…已由…替换」（`docs/AGENTS.md` 与含本门禁名的行豁免） | 在 AGENTS.md 注入「已销账」→ 红 → 还原 → 绿 |
-| （非门禁）投影终局 | (d) | 多相 `review.md` 取终局判定 | 由 `tests/run-dashboard.test.mjs` 的 **inline 两相文本**断言覆盖（非 fixture）；红证 = 同一份真实 `review.md` 上旧规则 FAIL / 新规则 PASS |
+| （非门禁）投影终局 | (d) | 多相 `review.md` 取终局判定 | 由 `tests/run/run-dashboard.test.mjs` 的 **inline 两相文本**断言覆盖（非 fixture）；红证 = 同一份真实 `review.md` 上旧规则 FAIL / 新规则 PASS |
 
 **宽版 `ref-paths` 被否的取证**（原计划要"任意仓内路径都必须可解析"）：原型扫描 live 120 文件得
 75 处命中，其中 62 处是**未加前缀的 vendor 树引用**；加 vendor 回退后剩 13 处，逐条核**全是误报**

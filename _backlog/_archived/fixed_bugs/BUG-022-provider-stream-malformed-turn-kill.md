@@ -65,7 +65,7 @@ source dev/env.sh && node scripts/run-ops/provider-error-stats.mjs --days 3
 **已修（由 BUG-024 的 socket 隔离修复；本卡 2026-10-11 的"上游事件顺序违约"根因假设撤回，见 §撤回与后继）**——原记录的"未修（上游 seam）"不再为真；本仓侧四件仍有效：
 
 - **可数**：`scripts/run-ops/provider-error-stats.mjs`（跨场分布）+ `scripts/lib/provider-errors.mjs`
-  （抽取唯一语义源，`tests/provider-errors.test.mjs` 6 用例钉住"只认 turn/end、不双算 attempt"）；
+  （抽取唯一语义源，`tests/run/provider-errors.test.mjs` 6 用例钉住"只认 turn/end、不双算 attempt"）；
 - **可恢复**：`dev/run-kickoff.mjs --session`（续跑唤醒，自带 journal 送达对账），冒烟断言在
   `scripts/smoke/cdp-ask-smoke.mjs` 阶段②；
 - **可诊断**：本节恢复程序 + guides/61 §5 步骤。

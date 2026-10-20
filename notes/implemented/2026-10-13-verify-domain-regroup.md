@@ -38,7 +38,7 @@ C notes 技能 / D vendor 对齐 / E 工作区生成物 / F 仓规环境）导�
   「旧文本 + 五组 spawn 替换」归一化下与新文本逐字相等方可写盘；实测先在 doc-budgets 上
   咬住一处抽取误把域横幅计入段尾 → 修抽取逻辑后通过（对账器自身先红后绿的实录）。
 - `pnpm verify` 重排前后全绿（门禁 PASS 集不变，仅报告行序随域序变化）；
-- `pnpm test` 全绿（含 [tests/verify-gates.test.mjs](../../tests/verify-gates.test.mjs) 的
+- `pnpm test` 全绿（含 [tests/contracts/verify-gates.test.mjs](../../tests/contracts/verify-gates.test.mjs) 的
   案例 ↔ gates 数组静态对账——数组多行化后其正则解析仍咬合）；
 - `node scripts/smoke/gates-smoke.mjs` 全绿（对照组零注入全 PASS + 全部注入案例点名报红），
   即门禁判据在重排 + spawn 收口后逐条仍会咬真实回归。

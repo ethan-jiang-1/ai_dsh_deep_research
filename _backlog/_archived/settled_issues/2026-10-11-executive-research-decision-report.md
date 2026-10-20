@@ -37,7 +37,7 @@ opened: 2026-10-11
 | 四种反例（单源 / 冲突口径 / 缺成本输入 / 过时资料）首屏显性说明限制 | 模型行为 + 人工判据 | 人工走查反例样例；critic/lead skill 合同行进契约测试 | Critic 放行刻意植入的无依据建议 = 负例命中 |
 | 首屏与正文、findings/review 不矛盾；无未修复 CRITICAL 才进入交付 | 确定性 | `node-gate` + `schema-scan` 对合成 bundle 现行断言保持绿 | — |
 
-必跑面（任务型路由）：L0 + `render-overlay` 先于 L1（skill 文本）+ `pack-workspace-fresh`（模板）+ `tests/evaluation-contract.test.mjs`（证据合同面）。真实报告行为证据按授权走 L4-lite 或真实 run，无凭据时如实标注「未运行项」；人工判据单独记录，不用技术绿或样本百分比替代产品判断。
+必跑面（任务型路由）：L0 + `render-overlay` 先于 L1（skill 文本）+ `pack-workspace-fresh`（模板）+ `tests/contracts/evaluation-contract.test.mjs`（证据合同面）。真实报告行为证据按授权走 L4-lite 或真实 run，无凭据时如实标注「未运行项」；人工判据单独记录，不用技术绿或样本百分比替代产品判断。
 
 ### 在办行（2026-10-11 按 `methods/validation-design` 补全字段）
 
@@ -72,7 +72,7 @@ opened: 2026-10-11
 
 - ②-a 四组样例 + 四类反例首屏走查 = **human judgment pending**（材料与两张记录表已备，等业务读者）。
 - ②-b「首屏与正文、findings/review 不矛盾」= **pass（口径已修正）**：用户 2026-10-11 拍板降格为人工判据，门R / 门A 只作代理信号——原表该行的「确定性」主张**已撤回**，不再留假牙。
-- 表内确定性行（模板六段 / 证据溯源 / 门面）= 模板与镜像由 `tests/presets.test.mjs` + `pack-workspace-fresh` 钉住；真实 bundle 上 `evidence-audit`（CRITICAL 0 / MAJOR 0）、`node-gate`（全门 PASS）、`schema-scan`（全齐）均 exit 0——见上文「真实 run 交付核验」。
+- 表内确定性行（模板六段 / 证据溯源 / 门面）= 模板与镜像由 `tests/pack/presets.test.mjs` + `pack-workspace-fresh` 钉住；真实 bundle 上 `evidence-audit`（CRITICAL 0 / MAJOR 0）、`node-gate`（全门 PASS）、`schema-scan`（全齐）均 exit 0——见上文「真实 run 交付核验」。
 
 ## 关闭条件
 

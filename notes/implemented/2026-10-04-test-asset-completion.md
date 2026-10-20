@@ -7,7 +7,7 @@
 按证据缺口盘点（方法承袭 [test-strategy 采纳 Note](2026-10-04-test-strategy-adoption.md)），
 补齐三处测试资产；载体全部沿用既有机制（node:test / 场景化回放冒烟 / lib 折算层），零新框架。
 
-1. **部署 bin 契约测试**（`tests/deploy-bin.test.mjs`）：静态钉 `preflight` 的六面检查清单
+1. **部署 bin 契约测试**（`tests/pack/deploy-bin.test.mjs`）：静态钉 `preflight` 的六面检查清单
    （版本/peer/团队层/手册+模板/构建产物/密钥——**record 调用点级**断言，注释字样不算数）+
    fail-loud verdict + 失败补救命令 + `scaffold` 幂等形状与**零密钥面**安全边界 + bin 映射。
    运行时真实路径归 L2 release-smoke（tests/ 层禁子进程，静态契约与 L2 分工闭合该面）。

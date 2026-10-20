@@ -37,7 +37,7 @@
   与 `publisher`（注册域）；
 - 分级表唯一正本 = 研究手册（research-workspace/AGENTS.md）；scout 的"质量分级"persona 与
   此对齐（同一套词，不再散文自创）；
-- evidence 契约五字段 → 七字段（`tests/evaluation-contract.test.mjs` 对账点同步）。
+- evidence 契约五字段 → 七字段（`tests/contracts/evaluation-contract.test.mjs` 对账点同步）。
 
 **L2 交叉验证纪律（手册合同 + critic 职责）**
 

@@ -25,7 +25,7 @@
 
 ## 实际跑过的验证
 
-- `tests/run-driver-contract.test.mjs`：入口在位、URL 抽取（最后一条横幅）、verdict 契约、
+- `tests/run/run-driver-contract.test.mjs`：入口在位、URL 抽取（最后一条横幅）、verdict 契约、
   boot-run 不绕过、四入口首动作一致；新增首动作断言先红（README 仍指 boot-run）后绿。
 - `client-load-smoke`：用主绑定已交付会话 ALL PASS；失败/异常留 `runtime/smoke-workspace/client-load-*`
   四件套（page.png/page.html/console.txt/meta.json），异常注入时实测落盘且 `read_image` 可见页面。

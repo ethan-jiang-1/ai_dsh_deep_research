@@ -41,7 +41,7 @@
 
 ## 实际跑过的验证（2026-09-27）
 
-- `tests/run-state.test.mjs` 9/9 绿（三态谓词 + grep 陷阱对偶断言：三个夹具文本均含
+- `tests/run/run-state.test.mjs` 9/9 绿（三态谓词 + grep 陷阱对偶断言：三个夹具文本均含
   'ask_user_question'（schema）而 no-card 判 pending=false/askCalls=0——陷阱在场、谓词不误报，
   红绿内嵌；finalWritten=true+turnOpen=true → runSettled=false 的第 12 场实录形态断言）；
 - **live 实证**：谓词模块对在飞 run 12 判出正确细粒度状态（hitlPending=false / askCalls=1 /

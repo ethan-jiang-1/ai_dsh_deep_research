@@ -98,14 +98,14 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 |---|---|---|---|
 | L0 门禁 | `pnpm verify`；[verify](../scripts/verify/verify.mjs) | 无模型；本地 git 与生成器检查子进程 | 结构、链接、预算、同步等机械不变量 |
 | 门禁自测 | [gates-smoke](../scripts/smoke/gates-smoke.mjs) | 无模型；git/node 子进程 | 门禁逻辑回归：注入违规经真实 verify 入口点名报红 + 零注入对照组 |
-| 确定性回归 | `pnpm test`；`tests/*.test.mjs` | 无模型/浏览器/网络/子进程；导入执行路径另核查，见下方限制 | 纯函数行为、解析、状态折算、渲染输出、审计判据与配置契约 |
+| 确定性回归 | `pnpm test`；`tests/**/*.test.mjs` | 无模型/浏览器/网络/子进程；导入执行路径另核查，见下方限制 | 纯函数行为、解析、状态折算、渲染输出、审计判据与配置契约 |
 | 类型检查 | `pnpm typecheck`；pack 的 `tsconfig.*.json` | 需要 vendor 构建产物；不调模型 | pack 双半 TypeScript 类型面（`src/client` + `src/lib` + host 壳） |
 | L1 真实挂载 | [preset-smoke](../scripts/smoke/preset-smoke.mjs) | 无模型；`DSH_SMOKE_REAL=1` 才起真 DSH，本地 RPC 与子进程 | roster、逐角色创建会话、skills 可见性/隔离；默认档只预检 |
 | L2 安装 | [release-smoke](../scripts/smoke/release-smoke.mjs) | 无模型调用；npm 安装可能访问网络；`--install-only` 安装检查跳过凭据；默认 preflight 检查凭据在场 | pack → 重建测试 profile → 安装 → scaffold/preflight → 安装域挂载 |
 | 浏览器加载 | [client-load-smoke](../scripts/smoke/client-load-smoke.mjs) | 无模型；真实 web、浏览器、本地通信 | client 装配、页签、渐进面与文件事实对账 |
 | 升级端到端 | [e2e-021rc2](../scripts/smoke/e2e-021rc2.mjs) | 无模型调用；真实例或自 boot + 浏览器；须先 source | 角色 order 成组（内置 preset 撞车回归锁）、研究状态/配置页签真数据、本插件面零故障 |
 | 确定性回放 | [snapshot-replay-smoke](../scripts/smoke/snapshot-replay-smoke.mjs) | 无真模型；全角色真实 DSH/RPC/解压子进程；仅声明渲染期望的场景额外浏览器渲染 | 场景声明驱动的全角色回放完成标记；persona、全部 request/header 与三处 user/message 注入逐条一致；声明的渲染金标准 |
-| 真模型档 | [smoke-contract](../tests/smoke-contract.test.mjs) 登记的 REAL_MODEL 闭集（成员以测试为准） | 需要模型凭据；调用模型，部分调用 web 工具 | 角色响应/工具调用、团队机制、导航软断言、纪律行为标记断言、真实 HITL UI 迁移、交互探针端到端；不能替代完整研究质量验收。`dev/record-role-fixture` 是独立录制工具，不属于该闭集；完整研究 run 属 L4。 |
+| 真模型档 | [smoke-contract](../tests/contracts/smoke-contract.test.mjs) 登记的 REAL_MODEL 闭集（成员以测试为准） | 需要模型凭据；调用模型，部分调用 web 工具 | 角色响应/工具调用、团队机制、导航软断言、纪律行为标记断言、真实 HITL UI 迁移、交互探针端到端；不能替代完整研究质量验收。`dev/record-role-fixture` 是独立录制工具，不属于该闭集；完整研究 run 属 L4。 |
 | 浏览器交互探针 | [cdp-probe](../scripts/probe/cdp-probe.mjs) | 连接已起 GUI；`--ask` 会发送消息并可能触发模型/工具调用 | 指定场景的显示、点击、会话回复；是否调用模型取决于模式与会话 |
 | 偏好库可发现性 | [method-library-probe](../scripts/probe/method-library-probe.mjs) | 真模型档；cwd = 临时研究工作区 | 偏好库文件名/位置、条目数、点名条目缺席时如实说（BUG-042 修复判据的机器化证明） |
 | run 文件审计 | [node-gate](../scripts/run-gates/node-gate.mjs)、[schema-scan](../scripts/run-gates/schema-scan.mjs)、[evidence-audit](../scripts/run-gates/evidence-audit.mjs) | 无主动外网请求；压缩日志读取可能用 zstd 子进程 | 节点在场、部分交接判据、URL/摘录/引用链；部分 CLI 写审计报告 |
@@ -121,7 +121,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 
 | 传统词汇 | 本仓形态 | 住哪 | 凭据 |
 |---|---|---|---|
-| 单元（纯函数） | run-state / hitl-fold / activity-fold / tool-card / bundle-bind 等谓词与折算断言（消费 [scripts/lib](../scripts/README.md) 纯函数） | `tests/*.test.mjs` | keyless |
+| 单元（纯函数） | run-state / hitl-fold / activity-fold / tool-card / bundle-bind 等谓词与折算断言（消费 [scripts/lib](../scripts/README.md) 纯函数） | `tests/<domain>/*.test.mjs` | keyless |
 | 契约（结构断言） | layering / smoke-contract / evaluation-contract / presets / export-shape / 各门用例 / navigability-contract | `tests/` + [fixtures](../tests/fixtures/README.md) | keyless |
 | 集成（真子系统） | preset-smoke（L1）/ release-smoke（L2）/ snapshot-replay / client-load | `scripts/` 冒烟族 | keyless（子进程/浏览器，无模型） |
 | 端到端（真模型） | l4-lite / team-preflight / entry-chain-probe / discipline-probe / client-hitl；完整 run = L4 全量 | `scripts/` 真模型档 | 需凭据 |
@@ -129,7 +129,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 
 ### 新检查落家序（加一个检查时按序找家，单一入口）
 
-1. **`tests/*.test.mjs` 契约测试**——断言对象是仓内自控文件、keyless 秒级可判真假。义务：同 diff 在 [evaluation](evaluation.md) 对应面登记；新契约测试带反证（[tests/AGENTS](../tests/AGENTS.md)）；
+1. **`tests/<domain>/*.test.mjs` 契约测试**——断言对象是仓内自控文件、keyless 秒级可判真假。义务：同 diff 在 [evaluation](evaluation.md) 对应面登记；新契约测试带反证（[tests/AGENTS](../tests/AGENTS.md)）；
 2. **一次性检查**——不复现的核对：跑完即弃（运行区临时脚本），证据（命令 + 输出）进条目实施记录；**复现第二次即升格契约测试**，不滞留临时态；
 3. **`*-smoke` 分级冒烟**——需要真子系统（挂载/安装/浏览器/回放）但无模型。义务：后缀申报档位（[scripts/AGENTS](../scripts/AGENTS.md)）；
 4. **真模型档脚本**——需要凭据与模型调用。义务：closed set 登记（`smoke-contract` 契约测试对账）；
@@ -152,7 +152,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 支撑模块 | `scripts/lib/`、pack `src/lib/` | 消费方直接调用接口；测试覆盖纯解析/折算/判据路径 |
 
 后缀申报检查种类，不能单凭 `smoke`/`probe` 判断是否需要 key。
-`tests/*.test.mjs` 是默认回归的选中范围；fixture 和 lib 不自动成为测试成员。
+`tests/**/*.test.mjs`（递归 glob）是默认回归的选中范围；`fixtures/` 与 `_tmp/` 除外；fixture 和 lib 不自动成为测试成员。
 夹具包括人工构造样本与经整理、人审冻结的录制回放语料；未经整理的真实运行日志保留在运行区。
 回放资产由独立 smoke 消费，不能把“pnpm test 绿”理解为“所有回放/浏览器场景已跑”。
 

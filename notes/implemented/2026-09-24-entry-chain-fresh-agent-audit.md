@@ -125,7 +125,7 @@ README 与 AGENTS 零矛盾、60 §5 与 AGENTS §密钥零矛盾、模板对应
 README ×2、verify 头注 + 门禁 8 路径；md-links 门禁范围纳入根 roadmap.md。
 
 **终扫（系统结构面）发现与处置**：design/10 §2 与 pack README 的 bundle 内容描述仍写
-"web 工具"——D9 实证前的旧措辞（机器真相早已由 tests/presets.test.mjs 守卫：web 行
+"web 工具"——D9 实证前的旧措辞（机器真相早已由 tests/pack/presets.test.mjs 守卫：web 行
 不得进 bundle），散文未跟上机器。两处改为 roster + present + 团队三行。
 
 **终扫结论**（四 preset 实读 + overlay + 测试断言逐项核对）：工具面与 design/10 §4

@@ -109,7 +109,7 @@ opened: 2026-10-18
 - **只为 P6 加一条新 override 规则**：否——P5/P6/P7 共享同一条 override，单改会牵动 P5/P7；
 - **映射表建在 `question-patterns.md`**：**待定**（U16）——它是**工作区种子**，受 `dev/sync-pack-workspace.mjs` 与 `pack-workspace-fresh` 的同步规则约束，且属模型可见面；若建在那里，需与 skill 表明确单一正本；
 - **用"工作区种子示例"代替厚内置条目**：否——两道障碍（种子清单与新门禁需同 diff 更新；`workspace/.gitignore.example` 已把 `method-library.md` 划为运行区）；
-- **冒烟内置名单继续手写字面量**：否（三轮复核建议）——修法取向 = 冒烟期望从 skill 表**解析派生**（`tests/library-fold.test.mjs` 已有同款 Markdown 表解析器可复用/抽公共），消除第四份手写副本；具体实现落地时定。
+- **冒烟内置名单继续手写字面量**：否（三轮复核建议）——修法取向 = 冒烟期望从 skill 表**解析派生**（`tests/cockpit/library-fold.test.mjs` 已有同款 Markdown 表解析器可复用/抽公共），消除第四份手写副本；具体实现落地时定。
 
 ## 验收标准
 
@@ -118,7 +118,7 @@ opened: 2026-10-18
 | ②-1 | 映射修正：**P8 → 时间线与信号**（R3a 直接改）；**P6 → 证伪优先走 run 级覆写试验**（R3b，不进内置）；P2 保持事实核查 | **真模型 A/B**（同题两打法，看 query／来源／证据／综合动作差异）＋ 一场真实 run |
 | ②-2 | 标本的**内容与载体**按 R7 落地（映射表 ＋ 载体决策），数据面覆盖"部署工作区零 run"的形态（**呈现位**由子卡① 负责） | 机械断言 ＋ 真人判（U6） |
 | ②-3 | 「让 Lead 帮我起草」与「从本次 run 沉淀」两个入口**功能可用**（按钮在场由子卡① 负责），指令逐字进 journal | 载荷逐字 = keyless 断言；落地 = 真模型走查 |
-| ②-4 | **同钉同步（实测四处＋发现 15 两处）**：`BUILTIN_PREFERENCES` ↔ skill 表 ↔ `tests/library-fold.test.mjs` ↔ `client-load-smoke` 内置名单（总卡发现 14），任一已钉侧改字即红；外加模板 `采用:` 行＋种子同步 ↔ pack README 句（总卡发现 15），列入同 diff 检查单 | `pnpm test` ＋ `client-load-smoke`；每条新断言先对改前版本看过红 |
+| ②-4 | **同钉同步（实测四处＋发现 15 两处）**：`BUILTIN_PREFERENCES` ↔ skill 表 ↔ `tests/cockpit/library-fold.test.mjs` ↔ `client-load-smoke` 内置名单（总卡发现 14），任一已钉侧改字即红；外加模板 `采用:` 行＋种子同步 ↔ pack README 句（总卡发现 15），列入同 diff 检查单 | `pnpm test` ＋ `client-load-smoke`；每条新断言先对改前版本看过红 |
 | ②-5 | 厚内置「领域示范」条目在场（体例见总卡 §拟交付物；**前置** = 题材行先核实或改用仓内已核发行——材料纪律：待核行不进模型面文件，见总卡 §拟交付物 前置注） | 同钉面同步 ＋ 真模型档 |
 
 > **前置纪律（盲审反方意见 1）**：②-1 的第二条（P6）与 ②-5 **不得在任何 A/B 证据之前进内置**——否则是扩大未验证面。P8 修正不受此限（它修的是矛盾）。

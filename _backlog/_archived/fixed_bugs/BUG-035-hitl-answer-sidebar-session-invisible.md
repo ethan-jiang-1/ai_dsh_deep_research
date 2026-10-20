@@ -43,7 +43,7 @@ e2e-ask-1791723407228 ⏐ smoke-workspace
 
 ## 影响
 
-- **冒烟会话型断言同时失效**：`client-load-smoke` 的绑定会话/既有会话两类断言红，且**主配置块无 else 分支 → 整组断言静默跳过**（"未跑"伪装成"通过"）；本轮新加的面板文案断言因此改由 keyless 静态钉承载（`tests/library-fold.test.mjs` 的文案钉）；
+- **冒烟会话型断言同时失效**：`client-load-smoke` 的绑定会话/既有会话两类断言红，且**主配置块无 else 分支 → 整组断言静默跳过**（"未跑"伪装成"通过"）；本轮新加的面板文案断言因此改由 keyless 静态钉承载（`tests/cockpit/library-fold.test.mjs` 的文案钉）；
 - **代答链路断**：任何"代理模拟跑 run"的流程（含 A/B、验收走查、无人值守长跑）在需要 HITL 时
   只能退到通道的 timed 语义（600s 放行 + Lead 自标代理模拟）——能跑，但**答不上具体选项**（本轮
   P6-a 就是这样跑完的）；
@@ -68,7 +68,7 @@ e2e-ask-1791723407228 ⏐ smoke-workspace
    `locateSessionStrategy`（策略 = 正本，I/O 在被调方）；
 2. `dev/hitl-answer.mjs`：`revealTargetRow` 展开用尽后走搜索再扫一次（`uiTargetTitle` 取自盘侧候选），
    不再把"扫不到"直接判成老化；
-3. keyless 钉：`tests/library-fold.test.mjs` 的策略用例（含**负例留证**块，guard-red-record 门禁形状）。
+3. keyless 钉：`tests/cockpit/library-fold.test.mjs` 的策略用例（含**负例留证**块，guard-red-record 门禁形状）。
 
 ## 强制注入复核（2026-10-18，本轮新证据）
 

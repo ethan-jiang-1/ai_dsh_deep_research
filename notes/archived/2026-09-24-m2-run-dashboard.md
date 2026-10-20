@@ -83,7 +83,7 @@
 - 实施中抓到并修一个 CLI bug：flag 不在场时 `splice(indexOf(...), 1)` 变 `splice(-1, 1)`
   倒删末参（两个症状同根：一次性模式丢 runDir、--latest 模式误报用法错误）——改 take()
   守卫后两模式冒烟通过；
-- `tests/run-dashboard.test.mjs`（8 断言）+ fixture run 目录 = 契约形状实例（A/D 级证据各一、
+- `tests/run/run-dashboard.test.mjs`（8 断言）+ fixture run 目录 = 契约形状实例（A/D 级证据各一、
   findings 两条含 contradicted、leads 含已排除行、review readiness: PASS）；
 - **红绿反证**：sed 注入 fixture 的 evidence quality A→B → 矩阵分布 + 渲染壳两断言红 →
   还原 → 8/8 绿（2026-09-24，方法 = 改 fixture 数字，非改断言）；

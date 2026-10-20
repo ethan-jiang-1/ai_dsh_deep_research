@@ -32,7 +32,7 @@
 
 ## 实际跑过的验证
 
-- **契约测试先红后绿**：[tests/evidence-audit.test.mjs](../../tests/evidence-audit.test.mjs) 新增三条
+- **契约测试先红后绿**：[tests/run/evidence-audit.test.mjs](../../tests/run/evidence-audit.test.mjs) 新增三条
   （形态正例四形态 / 档位边界负例 / 措辞限定），实现前 3 条红 → 实现后 **16/16 绿**。
 - **两路注入反证**（各自还原 → 绿，留证块在测试文件头）：①`urlsOf` 去容错解码副本 → 两条新测试红；
   ②`isMcpTool` 恒 false（MCP 结果不进语料）→ 两条新测试红（`ev-mcp` 判"域名与 URL 都未出现"）。

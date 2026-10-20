@@ -49,7 +49,7 @@ hitl-answer 的成功判据应同样以盘侧 answer 事件落地为准（工具
 - **`scripts/lib/ask-drive.mjs`（新）**：驱动策略与裁决抽成纯函数——`nextDriveAction`
   （观察→动作；UI 形状永不判完成，Submit 可用 = 唯一提交动作）、`driveVerdict`
   （盘侧复核从警告升格 verdict：仍挂起/一题未答 = exit 1，遵循冒烟 verdict 契约）、
-  `parseAskArgs`（盘侧 ask 形态判别，兼 BUG-005）；`tests/ask-drive.test.mjs` 11 例
+  `parseAskArgs`（盘侧 ask 形态判别，兼 BUG-005）；`tests/run/ask-drive.test.mjs` 11 例
   契约钉（含第 5 例现场形态回归钉：多题卡换题头 + Submit 禁用 → 必须继续点选项）。
 - **`dev/hitl-answer.mjs` 重接**：逐题循环改策略驱动（弃"卡头消"判据，重渲染二次确认防
   瞬态误 abort）；驱动前打印盘侧计划（卡共 N 题 + timed/无限期形态）；DOM 原生点击

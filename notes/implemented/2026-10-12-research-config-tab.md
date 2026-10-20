@@ -26,7 +26,7 @@
    `sections.source`（信息源策略句），而专门写给用户的那句短话只进模型面、面板从不显示；
    面板是**用户面**，显示的就该是为用户写的那句，四分区详情仍在详情弹窗（不丢信息）。
    三处同钉防漂移：客户端 `BUILTIN_PREFERENCES[].summary` ↔ skill 表第 2 列 ↔ 测试期望
-   （[tests/library-fold.test.mjs](../../tests/library-fold.test.mjs)，任一侧改字即红）；
+   （[tests/cockpit/library-fold.test.mjs](../../tests/cockpit/library-fold.test.mjs)，任一侧改字即红）；
 5. **库格式升级到四字段**（`- 找来源:` / `- 怎么核实:` / `- 报告怎么写:` / `- 不承诺:`）——
    旧格式（`调查要求`/`适用说明`）只读兼容进 `legacyText`，Lead 编辑该条时顺手迁移，
    不做批量迁移脚本；
@@ -80,7 +80,7 @@
   → 同内容幂等重写库条目 + 记账——链路全通；事故复盘与数据还原见自测轮交付记录，教训 =
   冒烟永不 session/prompt）· 期 2 一切。
 
-- **2026-10-16 补钉（卡面一句话）**：`tests/library-fold.test.mjs` 三方对钉（客户端 ↔ skill 表 ↔ 期望），
+- **2026-10-16 补钉（卡面一句话）**：`tests/cockpit/library-fold.test.mjs` 三方对钉（客户端 ↔ skill 表 ↔ 期望），
   两向注入反证各看红一次（改 skill 该列 / 改客户端该字段）→ 还原绿；客户端重建 +
   `client-load-smoke` **ALL PASS**（内置四条在场、详情四分区在场）；L0 全绿（475/475）。
 

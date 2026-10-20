@@ -55,7 +55,7 @@ opened: 2026-10-16
   （仍折叠 / 渲染出会话行但目标不在 / 盘侧已无挂起）。
 - **接线**：`dev/hitl-answer.mjs` 失败路径改为打印 `错因判据 = <kind>：<message>`，并新增
   `collapsedGroupCount()` 助手（workspace + overflow 组里 `aria-expanded="false"` 的条数）。
-- **keyless 证据**：`tests/ask-drive.test.mjs` 五例先红后绿（cap / aging / 仍折叠→absent /
+- **keyless 证据**：`tests/run/ask-drive.test.mjs` 五例先红后绿（cap / aging / 仍折叠→absent /
   有行但目标不在→absent / 盘侧无挂起→absent）。
 - **活体证据**：接线后对真实通道跑通「盘侧有挂起 → 打开会话 → 点 Submit」路径；另一例同类现场
   （**被重启终局化的旧 ask**：UI 卡在场但点不动、盘侧答复永不落地——盘侧裁决如实红、**不写 provenance**）

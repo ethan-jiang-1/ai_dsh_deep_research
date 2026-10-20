@@ -26,7 +26,7 @@
 
 ## 验证
 
-- **反证先行（tests/fixtures/node-gate/ 六形态，永久反证记录）**：缺拍板行 → 门③ RED（门②隔离 PASS）；缺 present 且无操作侧标注 → 门② RED（门③隔离 PASS）；合规形态双绿；操作侧补齐 → PASS-RELAY 放行；未到交付段 → 双 N/A 显式；question.md 失踪 → fail-loud RED。`node --test tests/node-gate.test.mjs` **7/7**。
+- **反证先行（tests/fixtures/node-gate/ 六形态，永久反证记录）**：缺拍板行 → 门③ RED（门②隔离 PASS）；缺 present 且无操作侧标注 → 门② RED（门③隔离 PASS）；合规形态双绿；操作侧补齐 → PASS-RELAY 放行；未到交付段 → 双 N/A 显式；question.md 失踪 → fail-loud RED。`node --test tests/run/node-gate.test.mjs` **7/7**。
 - **真数据红证**：合规归档 bundle 拷贝抽掉 HITL2 拍板行 → **双 RED exit 1**（"RED AS EXPECTED"）——红在真实数据上成立，不在夹具上自证。
 - **真实 bundle**：`drt_cn-us-open-model-ecosystem` 双 PASS（日志 present 调用实锤）；`drt_cn-us-open-source` 门③ PASS + 门② PASS-RELAY（操作侧补齐显式记账——恰为本次通道死收尾的实录）。报告落各 bundle `node-gate.md`。
 - **L4-lite 真模型档**：`source dev/env.sh && node scripts/l4-lite-smoke.mjs` → **ALL PASS**（四角色挂载 + assistant 标记响应 + scout web_search 工具调用真实发生）——新鲜启动即载入新手册文本（含 NODES.md 指针）；当时无在飞通道，重启语义由新鲜启动得证（2026-09-29）。

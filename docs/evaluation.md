@@ -22,7 +22,7 @@
 ### L0 结构面（机械门禁，keyless）
 
 - **定义**：仓库结构、文件卫生、preset 三件套完整性、vendor 铁律（如采用 submodule）等机械可查的不变量。
-- **最小真检查**：`node scripts/verify/verify.mjs`（或 `pnpm verify`）+ `pnpm test`（= `node --import tsx/esm --test tests/*.test.mjs`，本仓唯一登记的测试命令）——均 keyless、秒级。改驾驶舱（client 面，D18）时加跑 `node scripts/smoke/client-load-smoke.mjs`（headless 真浏览器断言：插件零失败横幅 / 无 loader entry 失败 / 本包 client bundle 进 /plugins/ 批次 / 页签渐进面与活动流，清单以脚本为准；失败自动留 `runtime/smoke-workspace/client-load-*` 的 png/html/console/meta 现场；无窗口内交付目标 = exit 2 SKIP，未跑 ≠ 通过）——路由正本 = [guides/60 §2 改驾驶舱行](./guides/60-dev-loop.md)。
+- **最小真检查**：`node scripts/verify/verify.mjs`（或 `pnpm verify`）+ `pnpm test`（= `node --import tsx/esm --test 'tests/**/*.test.mjs'`，本仓唯一登记的测试命令）——均 keyless、秒级。改驾驶舱（client 面，D18）时加跑 `node scripts/smoke/client-load-smoke.mjs`（headless 真浏览器断言：插件零失败横幅 / 无 loader entry 失败 / 本包 client bundle 进 /plugins/ 批次 / 页签渐进面与活动流，清单以脚本为准；失败自动留 `runtime/smoke-workspace/client-load-*` 的 png/html/console/meta 现场；无窗口内交付目标 = exit 2 SKIP，未跑 ≠ 通过）——路由正本 = [guides/60 §2 改驾驶舱行](./guides/60-dev-loop.md)。
 - **门禁登记表**（正本在此；与 `scripts/verify/verify.mjs` 的 gates 数组经门禁 `gate-ledger-sync` 机械对账——加门禁须两处同步，漏一处即红）。**列形纪律**：断言列只写现在为真的合同；反证列只留一行指针——注入红/还原绿全程与案例正文住对应 Note 与 [gates-smoke](../scripts/smoke/gates-smoke.mjs) 案例表，本表不复述叙事：
 
 | 门禁 | 断言什么 | 反证指针 |
@@ -71,7 +71,7 @@
 | `workspace-versioning` | 工作区版本控制边界：`research-workspace/.gitignore.example`（运行区拒收名单，同时是随 pack 分发的种子正本——包内名带 `.example` 是因为 npm pack 永不打包 `.gitignore` 文件名）与 `research-workspace/drafts/.gitignore`（开发证据白名单）必须在库，且正本与 `packages/deep-research-pack/workspace/.gitignore.example` 逐字节相等（改一处即红）；运行区拒收行 `drt_*/`/`archive/`/`_abandoned/`/`method-library.md` 逐项在场；**出现裸 `*` 整目录拒收即红**——它会把被跨目录引用的 `drafts/` 证据一起拒收，全新 clone 后链接与测试同批失效 | 反证 = `gates-smoke` 注入案例（删 `drt_*/` 行 / 加裸 `*` / 删 drafts 白名单）；形态依据 = [工作区版本控制边界 Note](../notes/implemented/2026-10-13-workspace-versioning-boundary.md) |
 | `cockpit-doc-registry` | 驾驶舱构成正本 ↔ 盘上模块登记：递归扫描 `packages/deep-research-pack/src/client/` 与 `src/lib/`，每个 .ts/.tsx 模块的 pack-root-relative 路径必须出现在 [构成正本](design/40-research-cockpit.md)里——同名文件不能互相遮盖；防空语料：两目录合计 0 个模块或正本缺席即红。反证 = `gates-smoke` 覆盖 client/lib 嵌套文件、同名模块、含空格路径、符号链接模块及忽略目录/目录链接 | 规则来源 = [③驾驶舱卡 ③-b 行](../_backlog/_archived/settled_issues/2026-10-11-executive-research-ux-delivery.md) |
 
-- **契约回归**（`pnpm test` 守卫族的面对应登记）：可驾驭性契约 = [tests/navigability-contract.test.mjs](../tests/navigability-contract.test.mjs)（design/50 与状态合同唯一正本、任务入口矩阵九任务与链接目标、scripts/dev/fixtures 资产索引全覆盖、fixture 每组真实 consumer 零孤儿——D23 立红与反证记录 = [项目可驾驭性 Phase 1 Note](../notes/implemented/2026-10-05-project-navigability-phase1.md)）；fixture 分类 = [tests/fixtures/README.md](../tests/fixtures/README.md)；其余守卫的归属见各自文件头注。
+- **契约回归**（`pnpm test` 守卫族的面对应登记）：可驾驭性契约 = [tests/contracts/navigability-contract.test.mjs](../tests/contracts/navigability-contract.test.mjs)（design/50 与状态合同唯一正本、任务入口矩阵九任务与链接目标、scripts/dev/fixtures 资产索引全覆盖、fixture 每组真实 consumer 零孤儿——D23 立红与反证记录 = [项目可驾驭性 Phase 1 Note](../notes/implemented/2026-10-05-project-navigability-phase1.md)）；fixture 分类 = [tests/fixtures/README.md](../tests/fixtures/README.md)；其余守卫的归属见各自文件头注。
 - **通过判据**：全绿；`verify` 的门禁清单与 `tests/` 守卫一一登记在案，每条带反证记录（上表）。
 - **何时跑**：每轮 goal 续驶必跑。
 
@@ -92,7 +92,7 @@
 ### L3 领域面（Deep Research 方法论完整性 — 本项目独有）
 
 - **定义**：从 codex Deep Research harness（`/Users/bowhead/ai_tool_deepresearch`）提炼的方法论在本插件上有完整落点，且**用 DSH 原生载体**实现。
-- **最小真检查**：`docs/design/30-methodology-mapping.md`（映射表）审查 + `tests/evaluation-contract.test.mjs` 的 keyless 断言。
+- **最小真检查**：`docs/design/30-methodology-mapping.md`（映射表）审查 + `tests/contracts/evaluation-contract.test.mjs` 的 keyless 断言。
 - **通过判据**（四条全要）：
   1. **生命周期映射完整**：研究生命周期每一环节（立项对齐 / 广度侦察 / 深度挖掘 / 综合写作 / 质量把关 / 审阅交付）在映射表有 DSH 落点（preset persona / skill / agent-team / todo / present…），或带证据的显式弃用理由；
   2. **角色分工单一职责**：每角色一个 owner 列（职责、产出物、验收判据）；任何两类事实不得双 owner 或无 owner；
@@ -109,7 +109,7 @@
 （source_url / retrieved_at / quality / found_by / supports）全齐才算有效证据，缺任一标无效
 （不计入 topic × evidence 矩阵）；**软二字段**（source_tier / publisher）缺失不否决有效性，
 标"未分级"（旧 run 的存量证据按此显示，不回填——run bundle 是交付记录，不改历史）；谓词正本 =
-本节，tests/evaluation-contract.test.mjs 对账。
+本节，tests/contracts/evaluation-contract.test.mjs 对账。
 
 **机械强度诚实记账**：契约测试核七字段在场与执行者副本对账；仪表盘按上文谓词投影。
 **evidence-audit 溯源审计**核 `source_url` 的成功抓取、摘录文本对 web-only 语料的覆盖率与
