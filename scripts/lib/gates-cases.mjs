@@ -390,6 +390,59 @@ export const CASES = [
   { id: 'client-keys-nested-spaced-client-key', gate: 'client-keys', mutate: addNestedClientKey('research status') },
   { id: 'client-keys-symlink-module-key-literal', gate: 'client-keys', mutate: addSymlinkClientKey() },
 
+  // ── 2026-10-21 卫生轮 B4 补员：老门禁常驻反证。背景：verify 门禁总量中仅少部分有常驻
+  //    案例（一次性 Note 红证不防 verify 重构致钝化）；本批优先补「mutate 便宜 × 判据复杂」
+  //    的文本门禁。不适合副本注入的四道（vendor-pin / vendor-clean / pin-agreement /
+  //    hooks-active——断言对象 = submodule 真实状态或本机 git config，fixture 副本天然不可达）
+  //    在 docs/evaluation.md §L0 各行的反证指针列登记理由，本表不收。──
+  // count-free：向 live 文档注入硬计数行（数字 + 四计数名词之一）。源码里数字经运算拼出——
+  // count-free 的扫描面包含本文件，写死「数字+名词」字面会咬到真仓的这张表自己。
+  { id: 'count-free-hard-count', gate: 'count-free', mutate: (dir) => {
+      appendFileSync(join(dir, 'scripts', 'README.md'), `\n探针行：本仓现共有 ${21 + 22} 门禁，计数正本 = verify 的 gates 数组。\n`);
+    } },
+  // doc-now-only：向 live 文档注入变更史措辞（禁词写在 .mjs 源码里合法——该门禁只扫 *.md）。
+  { id: 'doc-now-only-changelog-word', gate: 'doc-now-only', mutate: (dir) => {
+      appendFileSync(join(dir, 'scripts', 'README.md'), '\n> 历史注记：早期版本的问题单已销账，此处仅存档。\n');
+    } },
+  // role-list-sync：往单一事实源访问器自身注入角色清单字面量（门禁守的正是「清单只住盘上
+  // presets/」被破坏的形态）。角色名从盘上 presets/ 现取（与门禁检测同源），本表源码零角色
+  // 名字面量——字面写死会先咬到真仓的这张表。
+  { id: 'role-list-sync-roster-literal', gate: 'role-list-sync', mutate: (dir) => {
+      const roles = readdirSync(join(dir, 'packages', 'deep-research-pack', 'presets'))
+        .filter((f) => f.endsWith('.patch.yml')).map((f) => f.replace(/\.patch\.yml$/, '')).sort();
+      if (roles.length < 3) throw new Error('presets/ 角色不足——注入前提失效');
+      appendFileSync(join(dir, 'scripts', 'lib', 'roles.mjs'), `\nexport const probeRoster = [${roles.map((r) => `'${r}'`).join(', ')}]\n`);
+    } },
+  // preset-structure：删一个 config 字段行（order）——字段摊平收集会静默放行，逐字段检查必须红。
+  // （该行在 preset patch 的 insert 正文内，同 clone 里 overlay-fresh 也会红——非目标报因不碍判。）
+  { id: 'preset-structure-field-missing', gate: 'preset-structure', mutate: (dir) => {
+      const p = join(dir, 'packages', 'deep-research-pack', 'presets', 'lead.patch.yml');
+      writeFileSync(p, readFileSync(p, 'utf8').replace(/\n\s*order: \d+/, ''));
+    } },
+  // row-deps：删一条 peerDependencies 行——preset 行引用的包失去声明（真实回归 = 新增行忘登记；
+  // 挑 @deepseek-ai/dsh-agent-preset：四个 preset patch 行都引用它，一处删除即报）。
+  { id: 'row-deps-peer-missing', gate: 'row-deps', mutate: (dir) => {
+      const p = join(dir, 'packages', 'deep-research-pack', 'package.json');
+      writeFileSync(p, readFileSync(p, 'utf8').replace(/.*"@deepseek-ai\/dsh-agent-preset": "[^"]*",\n/, ''));
+    } },
+  // overlay-fresh：改生成物一字节（registry 默认 preset 指向）——手改生成物 = 与渲染器漂移。
+  { id: 'overlay-fresh-stale-byte', gate: 'overlay-fresh', mutate: (dir) => {
+      const p = join(dir, 'dev', 'research.overlay.yml');
+      writeFileSync(p, readFileSync(p, 'utf8').replace('default: lead', 'default: probe'));
+    } },
+  // pack-workspace-fresh：删一件种子（节点契约）——正本仍在、种子缺席即漂移。
+  { id: 'pack-workspace-fresh-seed-missing', gate: 'pack-workspace-fresh', mutate: (dir) => {
+      rmSync(join(dir, 'packages', 'deep-research-pack', 'workspace', 'NODES.md'));
+    } },
+  // repo-conventions：本门禁在副本基线**非 PASS**（fixture 无 vendor/dsh/package.json → engines
+  // 对齐无证据源）——按驱动壳约定必须带 expect 指名注入报因（同 align-ledger 族），
+  // 否则注入未生效也会被既有报因蒙混成绿。注入 = .editorconfig 丢 root 声明。
+  { id: 'repo-conventions-editorconfig-root-missing', gate: 'repo-conventions', mutate: (dir) => {
+      const p = join(dir, '.editorconfig');
+      writeFileSync(p, readFileSync(p, 'utf8').replace('root = true', 'root = false'));
+    },
+    expect: '.editorconfig 缺 "root = true"' },
+
   // 工作区运行区拒收行被删（workspace-versioning）：种子丢掉 `drt_*/` 行——安装方一次
   // `git add -A` 就把整个 run 历史提交进他自己的库。正本同改保 pack-workspace-fresh 绿
   // （否则红的是新鲜度门禁，本案例会因别的报因假绿）。
