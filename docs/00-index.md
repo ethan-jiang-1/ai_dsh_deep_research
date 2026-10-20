@@ -19,7 +19,7 @@
 | "装到我的 DSH""部署给别人 / 别的机器" | [pack README §部署](../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../_dist/安装手册.md)（出包 = `node scripts/dist/export-dist.mjs`） | `dsh --profile <p> --from-default-profile web --dump-config`（一次性；写的是 `DSH_HOME` 那个 home） |
 | "只验证插件还能挂载"（开发证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs` |
 | "改插件内容"（角色 / skill / 驾驶舱 / 部署面） | [guides/62](./guides/62-plugin-authoring.md) | 该页 §参与阶梯 + §改动影响面 |
-| "改本仓开发流程或仓库文档"（门禁 / docs / notes / 入口链 / 各 README；随包分发的 pack 文档走上行） | 根 [AGENTS.md](../AGENTS.md) §入口链 | 按请求范围进入第 3 步 |
+| "改本仓开发流程或仓库文档"（门禁 / docs / notes / 入口链 / 各 README；`packages/deep-research-pack/` 内随包分发的文档走上行"改插件内容"） | [guides/60 §1](./guides/60-dev-loop.md) | 按工作类型分支（入口链第 3–4 步在此展开） |
 
 **开跑前置**（只对第 1/2 行）：仓根 `pnpm install` 已跑 + `vendor/dsh` submodule 已 init +
 `runtime/harness-home/.credentials.yaml` 有 `DEEPSEEK_API_KEY`（boot 本身 keyless）。
@@ -95,7 +95,7 @@ D 号正文 = [decisions.md](./decisions.md)（按需查，不在本页通读；
 | web 搜索/抓取 | `dsh-tool-web` + search/fetch provider | `packages/web/tool-web` + `web-search-deepseek` + `web-fetch-http` |
 | 成品交付 | `present` 工具 explicit deliveries | `packages/fs/tool-present` + `client/ui-deliverables` |
 | 研究工作区 | 会话 cwd + `agent-instructions` 注入手册 | `packages/context/agent-instructions` |
-| **研究驾驶舱（Research Cockpit）** | —（本仓原生套件名，2026-09-28 用户拍板）：观察面 client 套件——页签 / 工具卡 / 活标题 / 挂起显性化 + 渲染装配；分层：观察面（伞）→ 驾驶舱（套件，最频改）+ 折算层（`src/lib` 谓词，共用）+ 仪表盘（`run-dashboard` 只读投影）；**当前事实正本 = [design/40](./design/40-research-cockpit.md)** | `packages/deep-research-pack/src/client/`（目录名守 DSH 双半约定 host/client——套件名钉入口头注）+ `src/lib/` |
+| **研究驾驶舱（Research Cockpit）** | —（本仓原生套件名）：观察面 client 套件（观察面伞下最频改的一件） | `packages/deep-research-pack/src/client/` + `src/lib/`；分层与构成正本 = [design/40](./design/40-research-cockpit.md) |
 | 开发 harness / 运行 harness | development harness / runtime harness（同一仓库的两面：前者让 agent 看懂、修改、验证自己；后者是产品运行框架） | 本仓两面并存：`packages/deep-research-pack/` 是 runtime 面，`AGENTS.md` + `docs/` + `notes/` + `.agents/skills/` + 门禁是 development 面 |
 | 参与阶梯 | participation ladder（S0 组合 → S1 扩展点 → S2 capability seam → S3 core loop；前缀 S 与评估五面 L 分离，D27） | [guides/62 §参与阶梯](./guides/62-plugin-authoring.md)（本仓版本：S0 配置行 / S1 preset+skill+观察面 client 面 / S2 尚无 / S3 归上游） |
 | 程序化工作记忆 | procedural memory（可复用工作流 + 专门判断标准） | `.agents/skills/`（开发技能：换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷——清单 = 盘上目录）——与产品内 runtime skills（`presets/*/skills/`）严格分家 |

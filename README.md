@@ -7,15 +7,11 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 ## Start Here
 
 - 开工入口链（唯一正本，4 步）= [`AGENTS.md`](AGENTS.md) §入口链——依次读什么、接下来做什么、怎么验收、怎么开工收尾，全在那节。
-- 问题澄清与证据入口：[`_backlog/README.md`](_backlog/README.md)；问题、调研、方法与缺陷按需使用，backlog 不是实施前置。
-- **跑一次研究**：`node dev/run-driver.mjs up`（起/复用通道 → 验浏览器面 → 打印呈交 URL；底层前台启动 = `bash dev/boot-run.sh`）→ 浏览器打开呈交块里的 URL（工作区注册/发问题/HITL/交付/恢复全程序 = [`docs/guides/61-run-playbook.md`](docs/guides/61-run-playbook.md)）。
-- **改完怎么验**：选层地图 = [`docs/project-map.md`](docs/project-map.md) §测试怎么选（命令正本 = [`docs/guides/60-dev-loop.md`](docs/guides/60-dev-loop.md) §2，判据 = `docs/evaluation.md`）。
+- 问题澄清与证据入口：[`_backlog/README.md`](_backlog/README.md)——问题、调研、方法与缺陷按需使用（非实施前置）。
+- **跑一次研究**：`node dev/run-driver.mjs up`（起/复用通道 + 验浏览器面 + 打印呈交 URL；用法全程序 = [`docs/guides/61-run-playbook.md`](docs/guides/61-run-playbook.md)）。
+- **改完怎么验**：选层地图 = [`docs/project-map.md`](docs/project-map.md) §测试怎么选（命令正本 = [`docs/guides/60-dev-loop.md`](docs/guides/60-dev-loop.md) §2 含全档与 `source dev/env.sh` 前置；判据 = `docs/evaluation.md`）——本文件不复制命令表。
 - 想**用它**（跑一次研究 / 装到自己的 DSH）而不是改它：意图分流表 = [`docs/00-index.md`](docs/00-index.md) §先分流（每种说法的第一条命令）。
 - 想**看懂**项目怎么运转、怎么调试、状态放哪：[`docs/project-map.md`](docs/project-map.md)（任务入口矩阵 + 失败定位）与 [`docs/design/50-agent-loop-and-state.md`](docs/design/50-agent-loop-and-state.md)（Agent Loop 与四类状态合同）。
-
-## Commands
-
-命令表正本 = [`docs/guides/60-dev-loop.md`](docs/guides/60-dev-loop.md) §2（L0/L1/L2/真模型档/run 通道全档，含 `source dev/env.sh` 前置说明）；[`AGENTS.md`](AGENTS.md) 只留速查与指针——本文件不复制。
 
 ## 研发宪章（2026-09-27 用户定调）
 
