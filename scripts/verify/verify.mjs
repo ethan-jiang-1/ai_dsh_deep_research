@@ -78,6 +78,49 @@ function gitOnce(args) {
   return gitSpawnCache.get(key);
 }
 
+/** tracked 文件枚举四件套（gitOnce 同款纪律——ls-files 族 fail-loud 文本面的共同形态收口）。
+ *  沿革：2026-10-07 ls-files 清扫把逐文件读盘门禁统一为 quotepath=false + 缺席/不可读 fail-loud
+ *  + 目录型 symlink 放行（实证 = notes/implemented/2026-10-07-lsfiles-gate-coverage-sweep.md）；
+ *  门禁继续增长后四件套逐字抄写开始漂移（2026-10-21 六维卫生轮 维度2），收口为本助手。
+ *  收口面（只此四件，不多不少）：
+ *   ① 枚举：`git -c core.quotepath=false ls-files [glob]`（经 gitOnce 去重子进程；quotepath=false =
+ *      非 ASCII 路径（_dist/安装手册.md 实测）不得被引号转义成 join 后 existsSync 永远 miss 的假名）；
+ *   ② ls-files 不可用 → fail-loud（覆盖面依赖仓库态，静默空转的门禁等于不存在）；
+ *   ③ 过滤后防空语料下限（exclude = 门禁自己的范围声明，扫描集被收窄成空集 → 红）；
+ *   ④ 逐文件三判：盘上缺席 fail-loud（迁移/清扫残留态不是合法稀疏态——静默跳过曾让 npm
+ *      缓存件的误入库漏检到目录迁移才现形，2026-10-07 目录治理第二轮实证）/ 目录型 symlink 放行
+ *      （.claude/skills→.agents/skills——结构面归 claude-symlink 门禁，非文本面）/ 不可读 fail-loud。
+ *  **精确保形**（沿 gitOnce 先例：助手只去重样板，不改语义）：失败消息三要素（失败对象+违反
+ *  规则+修正入口）不丢，文案收敛为族内最富模板；门禁保留自己的 exclude、检测逻辑与特形防空
+ *  下限。不套本助手的特形（勿为收口而硬套）：防空按"检查对象计数"而非文件数的门禁
+ *  （pin-agreement 的 hex/tag 下限留在门禁内、port-exclusive 的端口声明计数）、tracked 文件
+ *  缺席走稀疏态防御的 md 链接族（md-utf8-newline / md-links / md-anchors /
+ *  archived-note-pointer——缺席对它们是合法稀疏态）、纯名单不读盘的门禁（secrets-untracked /
+ *  doc-budgets）、-z 定径枚举（backlog-liveness）。
+ *  返回 null = 枚举层已红（②③），调用方结束本门禁；否则返回 [{rel, text}]（rel = 仓根相对路径）。 */
+function trackedFiles({ gate, glob, exclude, emptyMsg }) {
+  const r = gitOnce(['-c', 'core.quotepath=false', 'ls-files', ...(glob ? [glob] : [])]);
+  if (r.status !== 0) {
+    fail(gate, `git ls-files 不可用（${String(r.stderr).slice(0, 120)}）——本门禁覆盖面依赖仓库态，fail-loud`);
+    return null;
+  }
+  const files = r.stdout.split('\n').filter(Boolean).filter((f) => !(exclude ?? (() => false))(f));
+  if (files.length === 0) {
+    fail(gate, emptyMsg ?? '防空语料：tracked 扫描集为空——范围被收窄或 git ls-files 失效，fail-loud');
+    return null;
+  }
+  const out = [];
+  for (const rel of files) {
+    const f = join(ROOT, rel);
+    if (!existsSync(f)) { fail(gate, `tracked 文件 ${rel} 盘上缺席——迁移/清扫残留态（git rm --cached 或恢复文件），fail-loud`); continue; }
+    if (statSync(f).isDirectory()) continue; // 目录型 symlink（.claude/skills→.agents/skills）非文本面——结构面归 claude-symlink 门禁
+    let text;
+    try { text = readFileSync(f, 'utf8'); } catch (e) { fail(gate, `tracked 文件 ${rel} 不可读（${e.code || e.message}）——fail-loud`); continue; }
+    out.push({ rel, text });
+  }
+  return out;
+}
+
 
 // ══ 域 A · md 文档卫生（tracked .md 的字节/链接/锚点/措辞合同） ══
 
@@ -315,22 +358,16 @@ function gitOnce(args) {
 // 范围：live 文件（排除 notes/ 历史层与 vendor/）。防空语料：0 个文件被检查 → 红。
 {
   const gate = 'count-free';
-  // 同族收口（2026-10-07 ls-files 清扫）：quotepath=false + 缺席/不可读 fail-loud + 目录型 symlink 放行
-  const r = gitOnce(['-c', 'core.quotepath=false', 'ls-files']);
-  const files = (r.stdout ?? '').split('\n').filter(Boolean)
-    .filter((f) => !f.startsWith('vendor/') && !f.startsWith('notes/') && f !== 'pnpm-lock.yaml');
-  if (files.length === 0) fail(gate, '防空语料：未扫到任何 live 文件');
-  else {
-    for (const rel of files) {
-      const f = join(ROOT, rel);
-      if (!existsSync(f)) { fail(gate, `tracked 文件 ${rel} 盘上缺席——迁移/清扫残留态，fail-loud`); continue; }
-      if (statSync(f).isDirectory()) continue; // 目录型 symlink（.claude/skills）非文本面
-      let text;
-      try { text = readFileSync(f, 'utf8'); } catch (e) { fail(gate, `tracked 文件 ${rel} 不可读（${e.code || e.message}）——fail-loud`); continue; }
-      for (const mm of text.matchAll(/(?<![A-Za-z0-9])[0-9]+ ?(门禁|tests|断言|条源面)/g)) {
-        const line = text.slice(0, mm.index).split('\n').length;
-        fail(gate, `${rel}:${line} 写死计数"${mm[0]}"——计数有正本（gates 数组 / evaluation §L0 / ls），散文改指正本`);
-      }
+  // 枚举四件套收口（形态正本 = trackedFiles 助手头注）；范围与防空语料措辞是本门禁自己的。
+  const files = trackedFiles({
+    gate,
+    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f === 'pnpm-lock.yaml',
+    emptyMsg: '防空语料：未扫到任何 live 文件',
+  });
+  if (files) for (const { rel, text } of files) {
+    for (const mm of text.matchAll(/(?<![A-Za-z0-9])[0-9]+ ?(门禁|tests|断言|条源面)/g)) {
+      const line = text.slice(0, mm.index).split('\n').length;
+      fail(gate, `${rel}:${line} 写死计数"${mm[0]}"——计数有正本（gates 数组 / evaluation §L0 / ls），散文改指正本`);
     }
   }
 }
@@ -344,24 +381,21 @@ function gitOnce(args) {
 // 防空语料：0 个文件被检查 → 红。
 {
   const gate = 'doc-now-only';
-  // 同族收口（2026-10-07 ls-files 清扫）：quotepath=false（非 ASCII 的 .md 曾被整体跳过，
-  // _dist/安装手册.md 实测）+ 缺席/不可读 fail-loud + 目录型 symlink 放行
-  const r = gitOnce(['-c', 'core.quotepath=false', 'ls-files', '*.md']);
-  const files = (r.stdout ?? '').split('\n').filter(Boolean)
-    .filter((f) => !f.startsWith('vendor/') && !f.startsWith('notes/') && f !== 'docs/AGENTS.md');
-  if (files.length === 0) fail(gate, '防空语料：未扫到任何 live 文档');
-  else {
-    for (const rel of files) {
-      const f = join(ROOT, rel);
-      if (!existsSync(f)) { fail(gate, `tracked 文件 ${rel} 盘上缺席——迁移/清扫残留态，fail-loud`); continue; }
-      if (statSync(f).isDirectory()) continue; // 目录型 symlink（.claude/skills）非文本面
-      const text = readFileSync(f, 'utf8');
-      const lines = text.split('\n');
-      for (const mm of text.matchAll(/已销账|修订 →|曾用|首版[^\n]{0,15}已由/g)) {
-        const line = text.slice(0, mm.index).split('\n').length;
-        if ((lines[line - 1] ?? '').includes('doc-now-only')) continue; // 规则自身的表述行
-        fail(gate, `${rel}:${line} 含变更史措辞"${mm[0]}"——live 文档只写 now；历史归 notes/ 与 git`);
-      }
+  // 枚举四件套收口（形态正本 = trackedFiles 助手头注——quotepath=false 即非 ASCII 的 .md 不再被
+  // 引号转义输出而静默漏扫，_dist/安装手册.md 实测；不可读改为报红而非裸读崩栈）；豁免与
+  // 防空语料措辞是本门禁自己的。
+  const files = trackedFiles({
+    gate,
+    glob: '*.md',
+    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f === 'docs/AGENTS.md',
+    emptyMsg: '防空语料：未扫到任何 live 文档',
+  });
+  if (files) for (const { rel, text } of files) {
+    const lines = text.split('\n');
+    for (const mm of text.matchAll(/已销账|修订 →|曾用|首版[^\n]{0,15}已由/g)) {
+      const line = text.slice(0, mm.index).split('\n').length;
+      if ((lines[line - 1] ?? '').includes('doc-now-only')) continue; // 规则自身的表述行
+      fail(gate, `${rel}:${line} 含变更史措辞"${mm[0]}"——live 文档只写 now；历史归 notes/ 与 git`);
     }
   }
 }
@@ -866,34 +900,25 @@ function gitOnce(args) {
 // 反证形态：把任一头注里的 notes/implemented/ 改回 notes/proposed/ → 本门禁红 → 还原绿。
 {
   const gate = 'proposed-pointer-live';
-  // 同族收口（2026-10-07 ls-files 清扫）：quotepath=false + 缺席/不可读 fail-loud + 目录型 symlink 放行
-  const r = gitOnce(['-c', 'core.quotepath=false', 'ls-files']);
-  if (r.status !== 0) {
-    fail(gate, `git ls-files 不可用（${String(r.stderr).slice(0, 120)}）——本门禁覆盖面依赖仓库态，fail-loud`);
-  } else {
-    const files = r.stdout.split('\n').filter(Boolean)
-      .filter((f) => !f.startsWith('vendor/') && !f.startsWith('notes/') && f !== 'pnpm-lock.yaml');
-    if (files.length === 0) {
-      fail(gate, '防空语料：未扫到任何 live 文件——范围被收窄或 git ls-files 失效');
-    } else {
-      let checked = 0;
-      for (const rel of files) {
-        const f = join(ROOT, rel);
-        if (!existsSync(f)) { fail(gate, `tracked 文件 ${rel} 盘上缺席——迁移/清扫残留态，fail-loud`); continue; }
-        if (statSync(f).isDirectory()) continue; // 目录型 symlink（.claude/skills）非文本面
-        let text;
-        try { text = readFileSync(f, 'utf8'); } catch (e) { fail(gate, `tracked 文件 ${rel} 不可读（${e.code || e.message}）——fail-loud`); continue; }
-        for (const m of text.matchAll(/notes\/proposed\/[A-Za-z0-9._-]+\.md/g)) {
-          checked++;
-          if (!existsSync(join(ROOT, m[0]))) {
-            const line = text.slice(0, m.index).split('\n').length;
-            fail(gate, `${rel}:${line} 指向 ${m[0]}——该文件不在 notes/proposed/（已毕业？毕业须同 diff 改指 notes/implemented/）`);
-          }
+  // 枚举四件套收口（形态正本 = trackedFiles 助手头注）；范围与防空语料措辞是本门禁自己的。
+  const files = trackedFiles({
+    gate,
+    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f === 'pnpm-lock.yaml',
+    emptyMsg: '防空语料：未扫到任何 live 文件——范围被收窄或 git ls-files 失效',
+  });
+  if (files) {
+    let checked = 0;
+    for (const { rel, text } of files) {
+      for (const m of text.matchAll(/notes\/proposed\/[A-Za-z0-9._-]+\.md/g)) {
+        checked++;
+        if (!existsSync(join(ROOT, m[0]))) {
+          const line = text.slice(0, m.index).split('\n').length;
+          fail(gate, `${rel}:${line} 指向 ${m[0]}——该文件不在 notes/proposed/（已毕业？毕业须同 diff 改指 notes/implemented/）`);
         }
       }
-      if (checked === 0) note(gate, '零个 live proposed 指针（合法：RFC 仅在持久决定需要显式评审时使用）');
-      else note(gate, `${checked} 个 live 指针全部可解析`);
     }
+    if (checked === 0) note(gate, '零个 live proposed 指针（合法：RFC 仅在持久决定需要显式评审时使用）');
+    else note(gate, `${checked} 个 live 指针全部可解析`);
   }
 }
 
@@ -949,31 +974,25 @@ function gitOnce(args) {
     fail(gate, `读不到 submodule 钉身份（commit=${m ? m[1].slice(0, 8) : '?'} tag=${TAG || '?'}）——fail-loud`);
   } else {
     const PIN = m[1];
-    // quotepath=false：git 默认把非 ASCII 路径转义输出，join 后 existsSync 永远 miss
-    // （2026-10-07 实测 _dist/安装手册.md 因此被静默跳过）——本门禁要真实逐文件读盘，必须拿原文名。
-    const r = gitOnce(['-c', 'core.quotepath=false', 'ls-files']);
-    const files = (r.stdout ?? '').split('\n').filter(Boolean)
+    // 枚举四件套收口（形态正本 = trackedFiles 助手头注——quotepath=false 的实证即 _dist/安装手册.md
+    // 曾被引号转义输出而静默漏扫）；豁免面与钉身份防空下限是本门禁自己的。
+    const files = trackedFiles({
+      gate,
       // notes/ 整层豁免只对历史层（Note = 冻结快照，pin 复述是过去时，合法）；README.md 与
       // AGENTS.md 是活动指令层（目录地图 + 常设指令），捞回受检（2026-10-04 fresh-agent-doc-audit
       // 扩围：notes/README.md 曾携带 0.1.7 时代的过期 tag 而本门禁不咬——活动层复述面必须与
       // submodule 一致；扩围反证实录 = evaluation.md 本行）。
-      .filter((f) => !f.startsWith('vendor/') && f !== 'pnpm-lock.yaml'
-        && !(f.startsWith('notes/') && f !== 'notes/README.md' && f !== 'notes/AGENTS.md'))
       // 录制会话流豁免（2026-09-27 立，2026-10-09 随夹具迁入 snapshots/replay/ 合并）：录制的
       // 会话流里含 harness 自身的版本戳（system-reminder 注入的构建身份）与录制时的本仓 commit
       // ——那是 vendor 规范化契约说的"挥发性身份"与历史证据身份，不是本仓的钉声明；钉死在
       // 录制流上会与每次重录打架。run-state 夹具（同为录制日志投影）与 snapshots/replay/ 场景
       // 声明（codeAnchor 记录制 git 身份）同由本条覆盖；snapshots/ 其余文件（如 README）仍受检。
-      .filter((f) => !f.startsWith('tests/fixtures/run-state/') && !f.startsWith('snapshots/replay/'));
+      exclude: (f) => f.startsWith('vendor/') || f === 'pnpm-lock.yaml'
+        || (f.startsWith('notes/') && f !== 'notes/README.md' && f !== 'notes/AGENTS.md')
+        || f.startsWith('tests/fixtures/run-state/') || f.startsWith('snapshots/replay/'),
+    });
     let hexes = 0, tags = 0, skipped = 0;
-    for (const rel of files) {
-      const f = join(ROOT, rel);
-      // fail-loud（2026-10-07 目录治理第二轮实证）：tracked 但盘上缺席 = 迁移/清扫残留态，
-      // 静默跳过曾让 npm 缓存件的误入库漏检到迁移才现形——缺席与不可读都红。
-      if (!existsSync(f)) { fail(gate, `tracked 文件 ${rel} 盘上缺席——迁移/清扫残留态（git rm --cached 或恢复文件）`); continue; }
-      if (statSync(f).isDirectory()) continue; // tracked 目录型 symlink（.claude/skills→.agents/skills）——结构面归 claude-symlink 门禁，非文本复述面
-      let text;
-      try { text = readFileSync(f, 'utf8'); } catch (e) { fail(gate, `tracked 文件 ${rel} 不可读（${e.code || e.message}）——fail-loud`); continue; }
+    if (files) for (const { rel, text } of files) {
       const lines = text.split('\n');
       for (const h of text.matchAll(/[0-9a-f]{40}/g)) {
         hexes++;
