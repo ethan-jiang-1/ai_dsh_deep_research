@@ -1589,7 +1589,7 @@ function gitOnce(args) {
   const members = ['AGENTS.md', 'docs/00-index.md', '_backlog/issues', 'notes/proposed',
     'docs/guides/60-dev-loop.md', 'docs/evaluation.md', 'docs/design/10-architecture.md',
     'docs/design/20-roles.md', 'docs/design/30-methodology-mapping.md', 'docs/design/40-research-cockpit.md',
-    'docs/design/50-agent-loop-and-state.md',
+    'docs/design/50-agent-loop-and-state.md', 'docs/design/60-intent-carriers.md',
     'docs/guides/61-run-playbook.md',
     'docs/guides/62-plugin-authoring.md', 'docs/AGENTS.md', 'scripts/AGENTS.md', 'notes/AGENTS.md',
     'packages/deep-research-pack/AGENTS.md', 'tests/AGENTS.md', '_backlog/AGENTS.md'];

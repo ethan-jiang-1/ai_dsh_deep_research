@@ -273,6 +273,9 @@ export const CASES = [
   { id: 'note-format-no-status', gate: 'note-format', mutate: stripFirstStatusLine(join('notes', 'implemented')) },
   { id: 'note-format-no-verification', gate: 'note-format', mutate: stripVerificationSection(join('notes', 'implemented')) },
   { id: 'note-format-negated-verification', gate: 'note-format', mutate: negateVerificationSection(join('notes', 'implemented')) },
+  { id: 'entry-chain-member-missing', gate: 'entry-chain', mutate: (dir) => {
+    rmSync(join(dir, 'docs', 'design', '60-intent-carriers.md'));
+  } },
   { id: 'entry-chain-no-title', gate: 'entry-chain', mutate: (dir) => {
     const p = join(dir, 'AGENTS.md');
     writeFileSync(p, readFileSync(p, 'utf8').replace(/^## 入口链.*$/m, '## 探针替代标题'));

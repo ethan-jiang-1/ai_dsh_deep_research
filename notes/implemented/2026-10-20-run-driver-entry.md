@@ -31,6 +31,6 @@
   四件套（page.png/page.html/console.txt/meta.json），异常注入时实测落盘且 `read_image` 可见页面。
 - `cdp-driver.screenshot`：data URL 探针实测输出 900×457 PNG（`runtime/smoke-workspace/cdp-screenshot-probe.png`）。
 - `e2e-021rc2`：0.2.1-rc.2 上 ALL PASS（角色 order 成组 / 状态与配置页签真数据 / 插件零故障）。
-- `node dev/run-driver.mjs url` 无存活通道时 exit 0 + 提示先 `up`（预期）；真实通道 `up`
+- `node dev/run-driver.mjs url` 无存活通道时 exit 2 + 提示先 `up`（预期）；真实通道 `up`
   未在本轮重跑（已有通道未起，起通道会占端口/造会话），如实记录为未跑项。
 - `pnpm verify` + `pnpm test` 全绿（含 `docs-consistency` 与 `session-events` 新契约）。
