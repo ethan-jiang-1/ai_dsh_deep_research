@@ -158,6 +158,9 @@ BUG-020）。
   进 HITL2**（审计判据正本 = 研究手册「机械强度诚实记账」节）；CRITICAL>0 = 证据链有
   伪造/断链，先让 lead 修证据再回来；review 的 readiness 若为**附条件 PASS**，node-gate
   门A 会带 ⚠ 注记显性化——拍板时先核条件（裁决归你，机械门不替你拦）；
+- **拍板后操作侧跑一次验收（原子动作）**：`source dev/env.sh && node scripts/run-ops/run-accept.mjs
+  research-workspace/drt_<slug>`——node-gate + evidence-audit + 未来日期 sanity 三件同次跑；绿写
+  `acceptance.md`；复核后加 `--archive` 才移入 `archive/drt_<slug>/`。门 A/审计/日期红时不要手工归档。
 - lead 带审阅建议来找你：证据充分性判断 + 交付/补研究推荐 + composition 确认
   （读者是谁 / 用来做什么 / 前景化重点）——拍板后 run 根 `final.md` 当前版落盘 + present 声明交付
   + `final/v1.md` 版本记账（门A 交付件齐的最后一环）；

@@ -52,6 +52,7 @@
 | stream-diagnostics.mjs | 流失败归因诊断（run-ops）：模型尝试时间线/失败密度/provider 与重试策略实名/工具调用与检索查询——出问题第一步跑它；`--recent N` 限制最近 N 个有模型活动的会话 | keyless（读会话日志） |
 | provider-error-stats.mjs | 上游流错误（回合被终结）的跨场分布投影（BUG-022 的"可数"面；判据与抽取 = lib/provider-errors.mjs） | keyless（须 source dev/env.sh） |
 | plan-card-stats.mjs | 计划确认卡字数的跨场分布投影（判 ①-c 的升硬门前置「连续 ≥3 场达标」；口径与识别 = lib/plan-card.mjs，与 node-gate 门① 同源） | keyless（须 source dev/env.sh） |
+| run-accept.mjs | **交付验收原子动作**：node-gate（门 A/交付两门）+ evidence-audit（audit.md）+ 未来日期 sanity → 绿写 acceptance.md，`--archive` 才移入 archive/；日期判据 = lib/bundle-date-sanity.mjs | keyless（须先 source dev/env.sh） |
 
 ## dist/（分发）
 
