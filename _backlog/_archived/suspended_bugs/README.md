@@ -9,6 +9,7 @@
 
 ## 索引
 
-| BUG | 标题 | 为何暂停 |
-|---|---|---|
-| [BUG-022](BUG-022-provider-stream-malformed-turn-kill.md) | 上游流畸形事件当场终结回合——run 停摆主因（previously P1） | 上游只读 seam，本仓修不了；本地已落=有界重试缓解 + 统计仪器 + 恢复工具 + 恢复程序；重启条件见卡内（重试出现但终局不降／换 pin 后未修／新畸形形态） |
+当前无暂停缺陷卡。
+
+（BUG-022 已于 2026-10-20 重判：根因假设被 2026-10-13 postmortem 推翻、由 BUG-024 socket 隔离修复，
+卡已迁 [fixed 池](../fixed_bugs/BUG-022-provider-stream-malformed-turn-kill.md)。）

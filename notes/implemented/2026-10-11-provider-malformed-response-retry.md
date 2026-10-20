@@ -55,5 +55,5 @@
 - **生效时点**：改动随**下一次通道启动**生效（run 通道的 profile 镜像由 `boot-run.sh` 的漂移检测
   重建；本次未重启通道，故线上通道仍是旧组合）。
 
-判据与分母 = [BUG-022](../../_backlog/_archived/suspended_bugs/BUG-022-provider-stream-malformed-turn-kill.md)（活卡，复发时由
+判据与分母 = [BUG-022](../../_backlog/_archived/fixed_bugs/BUG-022-provider-stream-malformed-turn-kill.md)（活卡，复发时由
 `scripts/run-ops/provider-error-stats.mjs` 重算）。

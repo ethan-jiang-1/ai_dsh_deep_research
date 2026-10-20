@@ -5,7 +5,7 @@ intent: 为打法清单与映射子卡 ②-1 提供"方法是否真的改行为"
 
 # 研究方法 A/B 记录（2026-10-18，子卡② ②-1 的证据）
 
-> 服务卡 = [打法清单与判型映射](../_archived/settled_issues/2026-10-18-research-method-preset-mapping.md)
+> 服务卡 = [打法清单与判型映射](../settled_issues/2026-10-18-research-method-preset-mapping.md)
 > 的 ②-1（U3/U4）；协议与题面 = `runtime/ab-prompts/`（含四条题面与对照判据表，运行区不入库）。
 
 ## 协议（唯一自变量 = 方法行）
@@ -49,7 +49,7 @@ U4（新增「时间线与信号」）由此获得行为证据，支持它留在
 先于亮点、证据三级分开"，源结构也几乎同型（都靠 secondary 为主：35/47 vs 26/33）。也就是说
 「证伪优先」相对 P6 默认「方案比较」的**边际差异 = 结构侧重**，不是调查路径的另起一条。
 
-**结论（按卡的允许形态）**：**证据不足以支撑进内置，保持 run 级覆写**——与 [子卡②](../_archived/settled_issues/2026-10-18-research-method-preset-mapping.md)
+**结论（按卡的允许形态）**：**证据不足以支撑进内置，保持 run 级覆写**——与 [子卡②](../settled_issues/2026-10-18-research-method-preset-mapping.md)
 的 R3b 决定一致，且本轮拿到了"为什么增量有限"的具体机制（判型操作单已覆盖大部分证伪纪律）。
 **若下一轮仍要评估进内置**，前置 = 换一道**判型操作单不预设红旗纪律**的题（P8/P3 类）再做一组。
 
@@ -61,7 +61,7 @@ U4（新增「时间线与信号」）由此获得行为证据，支持它留在
 2. **单题单次**：各一条 run，非统计证据；措辞级差异不采信，只采信骨架/路径级差异；
 3. **代理模拟**：两组 HITL 均由 `hitl-answer` 取推荐档（provenance 已落 bundle）；真人手感
    （U6/U7/U9/U15）不在本记录范围；
-4. **环境事件**：a 组的停摆与唤醒是上游/环境现象（同族 = [provider 流错误 postmortem](../../notes/postmortem/2026-10-13-llm-stream-malformed-storm.md)），
+4. **环境事件**：a 组的停摆与唤醒是上游/环境现象（同族 = [provider 流错误 postmortem](../../../notes/postmortem/2026-10-13-llm-stream-malformed-storm.md)），
    与本轮 pack 改动无关。
 
 ## 原始证据位置

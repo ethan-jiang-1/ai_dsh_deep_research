@@ -94,6 +94,13 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
         if (!DATE.test(fields.get('opened') ?? '')) problems.push(`${loc} needs opened: YYYY-MM-DD`);
         if (shelf.endsWith('bugs') && !['P0', 'P1', 'P2'].includes(fields.get('severity'))) problems.push(`${loc} needs severity: P0/P1/P2`);
         const statusLine = statusLineOf(text);
+        // 归档卡的退出值：已结/已修 = 已离开活跃区，状态行（含历史头）不得再写可关闭：否。
+        // 只看卡头 25 行——正文里的历史讨论可以引用旧值，卡头是当前记账面。
+        if (archived && ['已结', '已修'].includes(fields.get('status'))) {
+          const head = text.split('\n').slice(0, 25).join('\n');
+          if (/可关闭\s*[：:=＝]\s*否/.test(head))
+            problems.push(`${loc} 已归档（${fields.get('status')}）仍写可关闭：否——退出值必须与归档同次翻转为是`);
+        }
         if (shelf === 'issues') {
           if (!DATE_SLUG.test(name)) problems.push(`${loc} filename must be YYYY-MM-DD-<slug>.md`);
           if (!statusLine || !/可关闭\s*[：:=＝]\s*否(?=[｜|\n（(]|$)/.test(statusLine))
@@ -115,6 +122,23 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
             problems.push(`${loc} active status line needs 结论倾向 head: <${GRADUATION.join('|')}> + 自由说明`);
         }
       }
+    }
+  }
+  // 活跃索引 = 在办清单，不是归档导航：`## 活跃清单/列表` 节里的链接不得指向 _archived/。
+  // 2026-10-20 审计 P0-3：bugs/issues 两页都把已归档卡列在"活跃"表里，fresh agent 会接手已结工作。
+  for (const shelf of ['issues', 'bugs']) {
+    const indexPath = `${shelf}/README.md`;
+    if (!existsSync(join(backlogRoot, indexPath))) continue;
+    const index = read(indexPath);
+    const heading = /^##\s*活跃(?:清单|列表)[^\n]*$/m.exec(index);
+    if (heading === null) continue;
+    const start = heading.index + heading[0].length;
+    const next = index.indexOf('\n## ', start);
+    const section = index.slice(start, next === -1 ? undefined : next);
+    for (const match of section.matchAll(/\]\(([^)]+)\)/g)) {
+      // 池索引（.../README.md）是导航，不是"在办卡"；只抓具名卡链接。
+      if (match[1].includes('_archived/') && !match[1].endsWith('/README.md'))
+        problems.push(`_backlog/${indexPath} 活跃清单指向已归档卡：${match[1]}——活跃区只列在办卡`);
     }
   }
   return problems;

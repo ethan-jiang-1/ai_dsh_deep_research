@@ -33,6 +33,6 @@ TUN 态下 `http_proxy` 此前设给**整个 DSH 进程**——LLM 的 SSE 流�
 - 若**直连路径**再现同签名畸形，那才是上游/模型面问题——从会话日志量化分布后再议重试策略
   （[triggers.md 行](../../_backlog/triggers.md)）。
 - 相关：[BUG-023 已修卡](../../_backlog/_archived/fixed_bugs/BUG-023-provider-malformed-storm-exhausts-retry.md)、
-  [BUG-022 悬挂卡](../../_backlog/_archived/suspended_bugs/BUG-022-provider-stream-malformed-turn-kill.md)、
+  [BUG-022 悬挂卡](../../_backlog/_archived/fixed_bugs/BUG-022-provider-stream-malformed-turn-kill.md)、
   [有界重试 Note](2026-10-11-provider-malformed-response-retry.md)、
   [run 指南 §0.1](../../docs/guides/61-run-playbook.md)。

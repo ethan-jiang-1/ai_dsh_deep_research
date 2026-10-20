@@ -172,3 +172,24 @@ test('tracked space-name file is checked; symlinks fail; untracked and runtime f
   f.files.push('_backlog/issues/link.md');
   assert.ok(f.check().some((p) => p.includes('must be a regular file')));
 });
+
+test('活跃清单不得指向已归档卡（2026-10-20 P0-3 反证）', (t) => {
+  const f = fixture(t);
+  f.put('_archived/settled_issues/legacy.md', '# Frozen legacy\n');
+  f.put('_archived/settled_issues/README.md', 'legacy.md\n');
+  f.put('issues/README.md', '## 活跃清单\n\n（当前无在办。）\n');
+  assert.deepEqual(f.check(), []);
+  f.put('issues/README.md', '## 活跃清单\n\n| 卡 |\n|---|\n| [legacy](../_archived/settled_issues/legacy.md) | 已归档 |\n');
+  assert.ok(f.check().some((p) => p.includes('活跃清单指向已归档卡')), '归档卡出现在活跃清单必须红');
+});
+
+test('已结/已修归档卡不得保留可关闭：否（2026-10-20 P0-3 反证）', (t) => {
+  const f = fixture(t);
+  f.put('_archived/settled_issues/legacy.md',
+    '---\nstatus: 已结\nopened: 2026-10-08\n---\n\n# Frozen legacy\n> 状态：已结｜可关闭：否\n');
+  f.put('_archived/settled_issues/README.md', 'legacy.md\n');
+  assert.ok(f.check().some((p) => p.includes('已归档（已结）仍写可关闭：否')), '归档后仍写否必须红');
+  f.put('_archived/settled_issues/legacy.md',
+    '---\nstatus: 已结\nopened: 2026-10-08\n---\n\n# Frozen legacy\n> 状态：已结｜可关闭：是\n');
+  assert.deepEqual(f.check(), []);
+});

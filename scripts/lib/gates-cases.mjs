@@ -286,6 +286,17 @@ export const CASES = [
   { id: 'backlog-issue-graduation-open', gate: 'backlog-liveness', mutate: backlogIssue((text) => text.replace('结论倾向：未定', '结论倾向：尽快给个说法')) },
   { id: 'backlog-issue-mirror-drift', gate: 'backlog-liveness', mutate: backlogIssue((text) => text.replace('> 状态：推敲中｜', '> 状态：等人拍板｜')) },
   { id: 'backlog-bug-enum-invalid', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-998-probe.md', '---\nstatus: 修复中\nseverity: P1\nopened: 2099-01-01\n---\n\n# Probe\n> 严重级别：P1｜发现：2099-01-01｜状态：修复中\n') },
+  // 活跃索引幽灵 / 归档退出值（2026-10-20 P0-3 扩）：两形态各一条。
+  { id: 'backlog-active-index-ghost', gate: 'backlog-liveness', mutate: (dir) => {
+    const p = join(dir, '_backlog', 'issues', 'README.md');
+    const text = readFileSync(p, 'utf8');
+    writeFileSync(p, text.replace(/^## 活跃清单\n/m, '## 活跃清单\n\n| [幽灵](../_archived/settled_issues/2026-10-18-research-method-config-ux.md) | 已归档 |\n'));
+  } },
+  { id: 'backlog-archived-closeable-no', gate: 'backlog-liveness', mutate: (dir) => {
+    const p = join(dir, '_backlog', '_archived', 'settled_issues', '2026-10-18-research-method-config-ux.md');
+    const text = readFileSync(p, 'utf8');
+    writeFileSync(p, text.replace('可关闭：是', '可关闭：否'));
+  } },
   { id: 'backlog-bug-mirror-drift', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-997-probe.md', '---\nstatus: 排查中\nseverity: P1\nopened: 2099-01-01\n---\n\n# Probe\n> 严重级别：P1｜发现：2099-01-01｜状态：修复就绪\n') },
   { id: 'backlog-research-status', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/research/2099-01-01-probe.md', '---\ntopic: Probe\nintent: "Evidence"\nstatus: 活跃\n---\n\n# Probe\n') },
   { id: 'backlog-method-no-trigger', gate: 'backlog-liveness', mutate: (dir) => {

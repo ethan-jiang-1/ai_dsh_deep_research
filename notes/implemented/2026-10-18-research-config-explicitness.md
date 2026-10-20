@@ -9,7 +9,7 @@
 标签向库格式统一、U16 映射表住 research-brief skill）。前身（期 1 + 1.5）=
 [研究配置页签 Note](2026-10-12-research-config-tab.md)（本 Note **扩展**它：D25「面板不直写文件」
 不变）。构成正本 = [design/40 §2](../../docs/design/40-research-cockpit.md)；核实材料 =
-[外部先例与分行业草案](../../_backlog/research/2026-10-18-method-config-ux-external.md)。
+[外部先例与分行业草案](../../_backlog/_archived/research/2026-10-18-method-config-ux-external.md)。
 
 ## 决定
 
@@ -88,7 +88,7 @@
 - **真模型 A/B（2026-10-18）**：P8 事态题同题两打法（唯一自变量 = 方法行，HITL 取推荐档、代理模拟
   已落 provenance）——b 组（时间线与信号）产出「时间线 → 现状截点 → 指标读数表 → 趋势判断」，
   a 组（领域地图）产出「渠道/族谱/制度三张地图」：方法**确实改行为**，并顺带实证 run 级覆写机制；
-  记录 = [A/B 记录](../../_backlog/research/2026-10-18-method-config-ux-ab.md)；
+  记录 = [A/B 记录](../../_backlog/_archived/research/2026-10-18-method-config-ux-ab.md)；
 - **环境修复（本轮附带）**：pack 改动使 run 通道的**安装镜像**漂移（boot-run 漂移检测红）——按该
   检测自带的第二种补救"逐文件 cp 同步"修好（覆盖 17 / 新建 12 个发布件），3084 通道起于
   `pack 漂移检测绿`；未重启 3083（其挂起回合会被终局化），故 3083 的**在飞会话**不受影响；

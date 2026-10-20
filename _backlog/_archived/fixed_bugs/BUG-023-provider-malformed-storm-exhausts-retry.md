@@ -10,7 +10,7 @@ opened: 2026-10-12
 
 ## 症状
 
-[BUG-022](../suspended_bugs/BUG-022-provider-stream-malformed-turn-kill.md) 的同签名畸形
+[BUG-022](BUG-022-provider-stream-malformed-turn-kill.md) 的同签名畸形
 （`event precedes message_start` / `MALFORMED_RESPONSE`）在 2026-10-12 午后起呈**持续窗口**：
 bundle 层有界重试（`maxRetries: 5`，[Note](../../../notes/implemented/2026-10-11-provider-malformed-response-retry.md)）
 在位且确实逐次尝试（`llm/retry` / `llm/retry-started` 事件在场），但窗口内**每次重试都畸形**——
@@ -55,7 +55,7 @@ TUN 态下 `http_proxy/https_proxy` 设给整个 DSH 进程，LLM 流被迫 ride
 
 ## 参考
 
-[BUG-022](../suspended_bugs/BUG-022-provider-stream-malformed-turn-kill.md)（ suspended：本仓修不了的上游事件顺序违约）·
+[BUG-022](BUG-022-provider-stream-malformed-turn-kill.md)（ suspended：本仓修不了的上游事件顺序违约）·
 [重试 Note](../../../notes/implemented/2026-10-11-provider-malformed-response-retry.md)（有界重试决策与"未运行项"）
 
 ## 修复落地（2026-10-12，判据①）

@@ -1,12 +1,12 @@
 ---
-status: 待修
+status: 已修
 severity: P1
 opened: 2026-10-11
 ---
 
 # BUG-022：上游流畸形事件当场终结回合——run 停摆的主因（本仓修不了，可数可恢复）
 
-> 严重级别：P1（重要——2026-10-11 一天内多次打断交付链，含挖掘波整队失效）｜发现：2026-10-11｜状态：活跃
+> 严重级别：P1（重要——2026-10-11 一天内多次打断交付链，含挖掘波整队失效）｜发现：2026-10-11｜状态：已修（2026-10-20 归档：由 BUG-024 socket 隔离修复；原根因假设撤回，见 §撤回与后继）
 
 ## 症状
 
@@ -20,6 +20,19 @@ code: "MALFORMED_RESPONSE" } }`。**会话不被终局化**（无 `end-seed`）�
 
 上游流事件顺序违约（`event precedes message_start`：`message_start` 之前先到了别的事件）。发生在
 **vendor 只读层**，本仓无法修——vendor 是 pinned submodule（只读铁律），模型客户端不归本仓。
+
+## 撤回与后继（2026-10-20 审计）
+
+**原根因假设撤回**：本卡 2026-10-11 的"上游流事件顺序违约"是当时未取证的解释。2026-10-13
+[postmortem](../../../notes/postmortem/2026-10-13-llm-stream-malformed-storm.md) 用受控实验与字节取证
+把根因定到**上游边缘对长命复用连接的相位性故障**（200 + 零响应头 + 未声明压缩体；同进程按会话分层），
+修复 = [BUG-024](BUG-024-direct-path-malformed-storm-recurrence.md) 的 socket 隔离
+（`dev/llm-socket-isolation.cjs`，boot-run 预载；LLM 流与 web_search 每请求一次性连接、永不复用）。
+隔离 soak 832 响应 3 命中且 1 次重试自愈、22 会话零死亡（见 postmortem 与 BUG-024 卡）。
+
+**后继**：本卡由 BUG-024 覆盖后归档；复发 = 新卡引用本卡（不重开）。仍值得盯的窗口：① socket
+隔离被摘除/失效；② 隔离下再现 `event precedes message_start` 风暴；③ 新畸形形态。前两者先读
+postmortem 与 [_backlog/triggers.md](../../triggers.md) 的对应触发行。
 
 ## 复现与分母（可复跑）
 
@@ -49,7 +62,7 @@ source dev/env.sh && node scripts/run-ops/provider-error-stats.mjs --days 3
 
 ## 修复关联
 
-**未修（上游 seam，随 vendor 换 tag 重估**——同 BUG-007/009 的 vendor seam 记法）。本仓侧四件已落：
+**已修（由 BUG-024 的 socket 隔离修复；本卡 2026-10-11 的"上游事件顺序违约"根因假设撤回，见 §撤回与后继）**——原记录的"未修（上游 seam）"不再为真；本仓侧四件仍有效：
 
 - **可数**：`scripts/run-ops/provider-error-stats.mjs`（跨场分布）+ `scripts/lib/provider-errors.mjs`
   （抽取唯一语义源，`tests/provider-errors.test.mjs` 6 用例钉住"只认 turn/end、不双算 attempt"）；
@@ -64,10 +77,6 @@ source dev/env.sh && node scripts/run-ops/provider-error-stats.mjs --days 3
 
 **复发即更新**：分母随每次复发由上述命令重算，不抄历史数字（口径正本 = 抽取模块 + 本卡）。
 
-**暂停（2026-10-11，用户明示）与重启条件**：本卡移入暂停池——上游只读 seam，本仓修不了；本地三件
-（可数/可恢复/可诊断）+ 有界重试缓解均已落。**回活跃区重判的触发**（任一出现即 `git mv` 回 `bugs/`）：
-
-1. `node scripts/run-ops/provider-error-stats.mjs` 的判读行显示 **MALFORMED_RESPONSE 已出现重试、
-   但终局计数不降**（= 缓解不足，需要新办法：降并发 / 换档 / 上游催修）；
-2. **换 vendor pin** 后上游仍未修（`bumping-vendor-pin` 的重审面）；
-3. 出现**新的畸形形态**（新 code / 新 message），现抽取面未覆盖。
+**归档与回归（2026-10-20）**：本卡已从暂停池迁入 fixed 池；复发 = 新卡引用本卡（不重开）。仍值得盯的窗口：① socket
+隔离被摘除或失效；② 隔离下再现 `event precedes message_start` 风暴；③ 新畸形形态。前两者先读 postmortem
+2026-10-13 与 [_backlog/triggers.md](../../triggers.md) 的对应触发行，不在本卡重开。
