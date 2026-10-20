@@ -11,10 +11,10 @@
 
 | 目录 | 映射的源代码/面 | 放什么 |
 |---|---|---|
-| `run/` | run 通道、run 状态、HITL、run 门与审计、观察/回放、run-ops/probe | `scripts/lib/{run-*,hitl-*,node-gate-*,evidence-audit*,schema-scan*,replay-*,probe-*,session-*,bundle-*,review-readiness,final-target,ask-drive,...}` 的回归 |
-| `cockpit/` | pack client 观察面与其折算 | `packages/deep-research-pack/src/lib/{brief,library,method,receipt}-*` 等驾驶舱折算 |
+| `run/` | run 通道、run 状态、HITL、run 门与审计、观察/回放、run-ops/probe | `scripts/lib` 对应模块的回归（模块清单 = 盘上 `scripts/lib/` 目录，不在此枚举） |
+| `cockpit/` | pack client 观察面与其折算 | pack `src/lib` 折算模块的回归（清单 = 盘上 `src/lib/` 目录） |
 | `pack/` | pack 结构、preset、导出与部署 | presets 形状、export-shape、deploy-bin |
-| `contracts/` | 跨仓合同/文档/门禁自测/测试基础设施 | evaluation、navigability、layering、smoke-contract、verify-gates、backlog-liveness、docs-consistency |
+| `contracts/` | 跨仓合同/文档/门禁自测/测试基础设施 | 清单 = 盘上 `contracts/` 目录（evaluation、navigability、layering 等） |
 | `fixtures/` | 构造样本与冻结录制语料 | 测试/smoke 消费；taxonomy = [fixtures/README](fixtures/README.md) |
 
 域内文件名 = 被测模块名 + `.test.mjs`（如 `run/run-state.test.mjs` ↔ `scripts/lib/run-state.mjs`）；
