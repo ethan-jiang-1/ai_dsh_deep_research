@@ -38,7 +38,7 @@ research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手�
 docs/                    00-index（地图+术语映射；D 号台账 = decisions.md）→ design/10-60 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ evaluation.md（验收合同）
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）；目录名自带时态，
                          总图 = notes/README.md（将来 proposed/ · 过去 implemented/archived/rejected/
-                         postmortem/；立项来历 = 该页 §立项来历——用户定调只进 00-index D 号依据列）：
+                         postmortem/；立项来历 = 该页 §立项来历——用户定调只进 decisions.md D 号依据列）：
                          proposed/（需显式评审的持久决定 RFC）→ implemented/（活的决定记忆；不再指导
                          未来者迁 archived/ 冻结）；
                          rejected/（否决——"决定不做"，带重启条件；非搁置池）；postmortem/（事故复盘）

@@ -214,8 +214,9 @@ try {
     // 观察点（非致命，如实记录）：活标题翻转。盘侧挂起态 + fold 单测 + 页签渲染是硬判据。
     console.log('  （观察点）活标题翻转:', titleFlipped, '| 横幅行:', bannerShown)
     if (titleFlipped && bannerShown) console.log('  PASS 活标题翻转 + 横幅（超出基线的加分证据）')
-    await page.screenshot({ path: join(ROOT, 'runtime', 'smoke-workspace', 'client-hitl-smoke.png') }).catch(() => {})
-    console.log('  （截图留档 runtime/smoke-workspace/client-hitl-smoke.png 供人工复核）')
+    const shot = join(ROOT, 'runtime', 'smoke-workspace', `client-hitl-${new Date().toISOString().replace(/[:.]/g, '-')}.png`)
+    await page.screenshot({ path: shot, fullPage: true }).catch(() => {})
+    console.log(`  （截图留档 ${shot} 供人工复核）`)
 
     // ⑤ fix① 完整验证（RFC right-pane-ux-debt：挂起迁移 → 页签体 revealStatusTab →
     //    openTab 落定时右栏同步骤展开）：收起右栏（页签 dock 不卸载）→ hitl-answer 答掉
