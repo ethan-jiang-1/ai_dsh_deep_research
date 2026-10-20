@@ -1,6 +1,6 @@
 # 推敲：测试资产的组织——档位、验收面与传统金字塔词汇的桥
 
-> 状态：已毕业｜毕业门判断 = 该做（候选 A+：A + 成本一句 + 负知识）｜去向 = [毕业 Note](../../../notes/implemented/2026-10-05-test-asset-organization.md)（2026-10-05 用户点名 ongoing goal，当日交付）
+> 状态：已毕业｜毕业门判断 = 该做（候选 A+：A + 成本一句 + 负知识）｜去向 = [毕业 Note](../../../notes/archived/2026-10-05-test-asset-organization.md)（2026-10-05 用户点名 ongoing goal，当日交付）
 
 ## 背景 / 触发
 

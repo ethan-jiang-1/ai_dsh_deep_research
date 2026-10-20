@@ -12,7 +12,7 @@
 
 ## 机制载体现状（判据的家的指针）
 
-- 门L = `scripts/node-gate.mjs` 的 leads 交接门（v2：字段齐 + topic 覆盖 + 状态值域 + 支持来源 + 防空语料——判据正本 = [wave0-leads-polish Note](../../../notes/implemented/2026-09-28-wave0-leads-polish.md)）；
+- 门L = `scripts/node-gate.mjs` 的 leads 交接门（v2：字段齐 + topic 覆盖 + 状态值域 + 支持来源 + 防空语料——判据正本 = [wave0-leads-polish Note](../../../notes/archived/2026-09-28-wave0-leads-polish.md)）；
 - 模板 = `research-workspace/templates/run/leads.md`（scout 读的是它——分形示范若缺席，模板即沉默教唆）；
 - 消费方 = analyst 的挖掘派发（分形与否影响 wave1 任务板粒度——判型规则不能只看 scout 视角）。
 

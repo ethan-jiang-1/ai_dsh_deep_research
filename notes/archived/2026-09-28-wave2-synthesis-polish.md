@@ -1,6 +1,8 @@
 # wave2 综合打磨——版本记账门④（pipeline-polish 面④）
 
 > 状态：implemented
+>
+> 归档：2026-10-20（pipeline-polish 面④已落地，版本记账门现由 NODES/node-gate 承载）
 
 出处：[pipeline-polish 卡](../../_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md) 面④（主序
 ⑤→②→③→④ 第四棒；面⑤②③已毕业 2026-10-03）。

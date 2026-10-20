@@ -1,6 +1,8 @@
 # RFC：M2 计划形状升级——把 rb_plan 的范围纪律与修订记录吸收进模板
 
 > 状态：implemented
+>
+> 归档：2026-10-20（run 模板形状已定型并由 templates/NODES 承载；本 Note 为当时 RFC 依据）
 
 2026-09-24 · 归宿：roadmap ▶「首个完整研究 run」 依据：源头仓亲读实证——`dpt_rb_glm-5-3-deepseek-v4-domestic-chips/rb_plan.md`（真实 run 的计划书实物）对照本仓 `research-workspace/templates/run/`。
 

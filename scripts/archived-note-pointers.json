@@ -125,6 +125,61 @@
       "source": "docs/external-materials.md",
       "target": "notes/archived/2026-09-24-ui-observability-surfaces.md",
       "reason": "外部材料表 DSH client/UI 扩展面行：琢磨稿历史指针（行内标注“已归档”）"
+    },
+    {
+      "source": "_backlog/_archived/research/2026-10-08-notes-stocktake.md",
+      "target": "notes/archived/2026-10-07-living-verification-hook.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-28-node-io-schema.md",
+      "target": "notes/archived/2026-09-28-node-io-schema.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
+      "target": "notes/archived/2026-09-28-wave0-leads-polish.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
+      "target": "notes/archived/2026-09-28-wave1-dig-polish.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
+      "target": "notes/archived/2026-09-28-wave2-synthesis-polish.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-04-leads-topic-shape.md",
+      "target": "notes/archived/2026-09-28-wave0-leads-polish.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-05-test-asset-organization.md",
+      "target": "notes/archived/2026-10-05-test-asset-organization.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-16-structure-round3-convergence.md",
+      "target": "notes/archived/2026-10-05-test-asset-organization.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-09-28-node-io-schema.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-10-05-test-asset-organization.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "notes/rejected/2026-09-24-frontmatter-caliber-gate.md",
+      "target": "notes/archived/2026-09-24-m2-data-caliber.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
     }
   ]
 }

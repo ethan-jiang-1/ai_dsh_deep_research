@@ -1,6 +1,8 @@
 # 活体验证挂账——A2 + 收活纪律 E2E 证据收口（drt_open-llm-inference-engine-landscape）
 
 > 状态：implemented
+>
+> 归档：2026-10-20（单场 run 的活体验证挂账已随交付收口，无未来决策价值）
 
 出处 = 本文件（由 proposed/ 改写迁入）；载体 run =
 research-workspace/archive/drt_open-llm-inference-engine-landscape（2026-10-07 交付归档，

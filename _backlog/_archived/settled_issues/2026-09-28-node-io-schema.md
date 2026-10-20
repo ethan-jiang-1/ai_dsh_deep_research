@@ -1,6 +1,6 @@
 # 推敲：节点 I/O schema——上下游的交接约定
 
-> 状态：已毕业·该做（近期）（2026-09-29 用户点名提前并定案：落点 A2〔NODES.md 新文件住契约全表 + 手册一行指针〕+ node-gate 小切口②③〔§Decisions 拍板行门 + present 声明门〕；C 形态同日翻案——分量够，不等第二阶段）｜去向 = 已授权后交付 + [毕业 Note](../../../notes/implemented/2026-09-28-node-io-schema.md) + 本卡迁 _done/_closed_plans/
+> 状态：已毕业·该做（近期）（2026-09-29 用户点名提前并定案：落点 A2〔NODES.md 新文件住契约全表 + 手册一行指针〕+ node-gate 小切口②③〔§Decisions 拍板行门 + present 声明门〕；C 形态同日翻案——分量够，不等第二阶段）｜去向 = 已授权后交付 + [毕业 Note](../../../notes/archived/2026-09-28-node-io-schema.md) + 本卡迁 _done/_closed_plans/
 
 ## 背景 / 触发
 

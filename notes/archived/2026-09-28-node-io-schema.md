@@ -1,6 +1,8 @@
 # 节点 I/O 契约显式化（NODES.md + node-gate ②③）
 
 > 状态：implemented
+>
+> 归档：2026-10-20（节点 I/O 契约已由 NODES.md 与后续 node-gate 演进取代（2026-10-07/10-18））
 
 ## 问题
 

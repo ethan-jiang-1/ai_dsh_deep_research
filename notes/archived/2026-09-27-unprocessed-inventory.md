@@ -1,6 +1,8 @@
 # 未加工内容盘点与四阶段处置（用户"盘算后推进"指令的收尾）
 
 > 状态：implemented
+>
+> 归档：2026-10-20（一次性盘点已处置完毕，无未来决策价值）
 
 来源：用户 2026-09-27 指令——"应该还有大量没用加工的内容，在 roadmap 与 notes/proposed 里，
 盘算拟定计划后往前推进"。盘点结论与直觉相反：**搁置池五条的复活条件全部未满足**（硬挖 = 违反
@@ -18,7 +20,7 @@
    多引擎路由无法在 pack 层复刻——vendor web seam 是**单 provider 语义、明文拒绝隐藏优先级链**
    （配置 provider 不可用 → 结构化错误，不自动换；`available()` 判凭据不判健康）。vendor 现成
    exa/perplexity 两个 provider 的换源路径留给用户（需新凭据）。全文见
-   [search-fallback-seam](2026-09-27-search-fallback-seam.md)。
+   [search-fallback-seam](../implemented/2026-09-27-search-fallback-seam.md)。
 2. **B 观察面 team_task 卡 → 前提被实测推翻，已回退**：实现 4 张卡后用 run 7 历史（29 次调用）
    重放验证 → 0 渲染；深挖发现**协调类工具根本不进对话流**（wait_agent/list_agents/send_message/
    team_task_* 在渲染流里 0 出现；研究类正常——web_fetch 56 / read 252 / edit 140），团队任务的

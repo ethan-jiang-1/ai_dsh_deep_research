@@ -78,7 +78,7 @@ intent: 为 notes-stocktake 实施 Note 保留已完成的存量体检依据。
 
 1. **未兑现承诺（硬豁免）**——[human-gate-acceptance](../../../notes/implemented/2026-09-26-human-gate-acceptance.md)
    正文自写"**复查口常开**……结论补记本 Note"，即它自己声明未来还会被改 → 不能冻结；
-   [living-verification-hook](../../../notes/implemented/2026-10-07-living-verification-hook.md)
+   [living-verification-hook](../../../notes/archived/2026-10-07-living-verification-hook.md)
    自留"低卡数据点入候选 A 标定池…**待候选 A 复核**"。
 2. **假承接**——[acceptance-criteria](../../../notes/implemented/2026-10-06-acceptance-criteria.md)：
    `NODES.md` / skill / `acceptance-check.mjs` 只留"UNVERIFIED 结论形状"，而本篇独有

@@ -1,10 +1,12 @@
 # 测试资产补全——四角色组装面 / 部署 bin 契约 / BUG-003 修复
 
 > 状态：implemented
+>
+> 归档：2026-10-20（测试资产缺口已由后续 tests 分域与现行契约补全，本 Note 无未来决策价值）
 
 ## 决定
 
-按证据缺口盘点（方法承袭 [test-strategy 采纳 Note](2026-10-04-test-strategy-adoption.md)），
+按证据缺口盘点（方法承袭 [test-strategy 采纳 Note](../implemented/2026-10-04-test-strategy-adoption.md)），
 补齐三处测试资产；载体全部沿用既有机制（node:test / 场景化回放冒烟 / lib 折算层），零新框架。
 
 1. **部署 bin 契约测试**（`tests/pack/deploy-bin.test.mjs`）：静态钉 `preflight` 的六面检查清单
@@ -63,7 +65,7 @@
 
 ## 后续核对
 
-[目录与入口治理 Note](2026-10-05-project-navigability.md) 补充本篇证据范围：
+[目录与入口治理 Note](../implemented/2026-10-05-project-navigability.md) 补充本篇证据范围：
 L2 安装验收使用 `--install-only`，默认 preflight 仍检查凭据；run-state 日志读取使用原生解码并在坏帧时 fail-soft。
 这组边界不改变本篇已交付的角色回放、部署形状断言与 BUG-003 修复。
 

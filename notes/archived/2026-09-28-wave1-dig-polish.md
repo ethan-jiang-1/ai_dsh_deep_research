@@ -1,6 +1,8 @@
 # wave1 挖掘打磨——未取得纪律与事中调度编典（pipeline-polish 面③）
 
 > 状态：implemented
+>
+> 归档：2026-10-20（pipeline-polish 面③已落地，挖掘纪律现由 skills/手册承载）
 
 出处：[pipeline-polish 卡](../../_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md) 面③（主序
 ⑤→②→③→④ 第三棒；面⑤②已毕业 2026-10-03）。

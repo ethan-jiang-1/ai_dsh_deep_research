@@ -1,6 +1,8 @@
 # wave0 侦察打磨——leads 计数对账与交接门升格（pipeline-polish 面②）
 
 > 状态：implemented
+>
+> 归档：2026-10-20（pipeline-polish 面②已落地，leads 门语义现由 NODES/node-gate 与测试承载）
 
 出处：[pipeline-polish 卡](../../_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md) 面②（主序
 ⑤→②→③→④ 第二棒；面⑤首棒已毕业 2026-10-03）。
