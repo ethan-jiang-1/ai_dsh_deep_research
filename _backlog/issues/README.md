@@ -4,7 +4,7 @@
 
 ## 活跃清单
 
-（当前无在办问题卡。新问题按下方模板建卡；已结卡见 [settled 池](../_archived/settled_issues/README.md)。）
+- [2026-10-21-dynamic-research-dag.md](2026-10-21-dynamic-research-dag.md) — 动态研究 DAG 与多层 subagent 编排（推敲中；机制盘点在 [research/dynamic-research-dag](../research/dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md)）。
 
 ## 最近归档
 
