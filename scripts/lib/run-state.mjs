@@ -119,6 +119,10 @@ export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false }) 
     events: events.length,
     ...identity,
     preset: readable && events[0]?.type === 'session' ? (events[0].agentPreset ?? null) : null,
+    // teammate 身份信号（加性字段）：teammate 会话的 agentPreset 继承父会话组合（实盘 =
+    // 'lead'），preset 字段对它们不表身份；真信号 = 首事件 origin==='subagent'。无 origin
+    // 的顶层会话（kickoff/GUI 建）→ false；不可读 → null（不猜）。
+    teammate: readable && events[0]?.type === 'session' ? events[0].origin === 'subagent' : null,
     hitlPending: readable ? hitlPendingOf(events).pending : null,
     askCalls: readable ? toolCallCount(events, 'ask_user_question') : null,
     askIndefinite: readable ? askIndefiniteOf(events) : null,

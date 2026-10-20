@@ -28,12 +28,24 @@ export function resolveSessionLog(sessionDir) {
   return null
 }
 
+/** 组名含子串的首个会话组目录名；根缺席或无命中 → undefined。
+ *  组过滤盲区的逃生口（2026-10-21 卫生轮 维度6 件①）：researchWorkspaceGroup 只认
+ *  research-workspace 组（run 通道约定），dev home 的冒烟/自测组（dev-smoke-workspace /
+ *  runtime-smoke-workspace / lib-selftest 等）对观察工具不可见——症状发生在冒烟会话时
+ *  「刚才发生了什么」入口失效。需要跨组观察的消费者（session-events / watch-run 的
+ *  --group）用本函数自带子串；无命中返回 undefined，由调用方 fail-loud（列在场组），
+ *  不静默换组。 */
+export function findGroup(sessionsRoot, substring) {
+  if (!existsSync(sessionsRoot)) return undefined
+  return readdirSync(sessionsRoot).find((d) => d.includes(substring))
+}
+
 /** research-workspace 组的目录名（run 通道组名约定 = 组名含该子串；组随会话 cwd 走）。
  *  组不在场（未 source env.sh / 无 run 历史）→ undefined。三消费方（client-load-smoke /
- *  hitl-answer / watch-run）原各写一份同款一行——收敛为唯一正本（2026-10-13 结构重构）。 */
+ *  hitl-answer / watch-run）原各写一份同款一行——收敛为唯一正本（2026-10-13 结构重构）；
+ *  判据本体复用 findGroup（子串可参数化的那一份），缺省子串 = research-workspace。 */
 export function researchWorkspaceGroup(sessionsRoot) {
-  if (!existsSync(sessionsRoot)) return undefined
-  return readdirSync(sessionsRoot).find((d) => d.includes('research-workspace'))
+  return findGroup(sessionsRoot, 'research-workspace')
 }
 
 /** List canonical logs in one session group, newest mtime first; inaccessible logs are omitted. */

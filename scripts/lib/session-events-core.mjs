@@ -21,6 +21,14 @@ const short = (value, max = MAX_TEXT) => {
   return text.length > max ? `${text.slice(0, max)}…` : text
 }
 
+/** 标题人读化：剥掉 harness 兜底标题里的 `<system-reminder>` 前缀噪声（该形态来自
+ *  system-reminder 文本被截断充当会话标题，teammate 会话高发），保留 teammate 名等
+ *  有效信息。非字符串输入 → ''（fail-soft，与 textOfContent 同口径）。 */
+export function readableTitle(title) {
+  if (typeof title !== 'string') return ''
+  return title.replace(/^<system-reminder>\s*/, '')
+}
+
 function argsSummary(args) {
   if (typeof args === 'string') {
     try { return short(JSON.parse(args)) } catch { return short(args) }
@@ -57,7 +65,7 @@ export function eventSummary(event) {
       return `session${typeof preset === 'string' ? ` preset=${preset}` : ''}`
     }
     case 'session/title':
-      return `title ${short(data.title ?? '')}`
+      return `title ${short(readableTitle(data.title ?? ''))}`
     default:
       return `${type} ${short(data)}`
   }

@@ -114,9 +114,34 @@ test('渲染壳：关键区块与 meta refresh 在场', () => {
 import { mkdirSync, rmSync, writeFileSync, utimesSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { zstdCompressSync } from 'node:zlib';
-import { listScenes, sceneState, detectHitlWait } from '../../scripts/lib/run-dashboard-core.mjs';
+import { listScenes, sceneState, detectHitlWait, isArchivedScene } from '../../scripts/lib/run-dashboard-core.mjs';
 
 const mktmp = () => mkdirSync(join(tmpdir(), `dash-${Math.random().toString(36).slice(2)}`), { recursive: true });
+
+// --latest stdout 归档标注（2026-10-21 卫生轮 维度6 件④，红先行）：isArchivedScene 未实现时
+// 本断言 import 即红；还原后绿。背景：全部归档后 --latest 把最新归档场当"当前 run"报
+// `run: drt_x`——只看一行会误以为在飞；HTML 内有归档标注而 stdout 无。判据正本（哪个 label
+// 算归档）住 core，CLI 壳只问本函数。
+test('isArchivedScene：归档 label 判据（--latest stdout 标注的知识正本住 core）', () => {
+  const root = mktmp();
+  try {
+    const rw = join(root, 'rw');
+    const ar = join(root, 'archive');
+    mkdirSync(join(rw, 'drt_a'), { recursive: true });
+    mkdirSync(join(ar, 'drt_b'), { recursive: true });
+    const scenes = listScenes([
+      { dir: rw, kind: 'drt', label: 'drt' },
+      { dir: ar, kind: 'drt', label: 'drt·归档' },
+    ]);
+    const bySlug = new Map(scenes.map((s) => [s.slug, s]));
+    assert.equal(isArchivedScene(bySlug.get('drt_b')), true, '归档根下的场 = 已归档');
+    assert.equal(isArchivedScene(bySlug.get('drt_a')), false, '工作区根下的场 = 在飞');
+    assert.equal(isArchivedScene(undefined), false, '无场（空仓 --latest）不标注');
+    assert.equal(isArchivedScene({ label: null }), false, 'label 缺席不猜');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
 
 test('多场扫描：drt_ 前缀过滤 + ad-hoc 全收 + mtime 降序', () => {
   const root = mktmp();

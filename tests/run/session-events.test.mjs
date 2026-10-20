@@ -1,9 +1,12 @@
 // session-events-core 回归 — 会话事件摘要/筛选/尾部（keyless 纯函数；CLI 壳 = session-events.mjs）。
 // 反证口径：事件形状字段错位、时间缺失、空筛选、负数 tail 各有一条；不依赖真日志。
+// teammate 标题反证（2026-10-21 卫生轮 维度6 件⑤，红先行）：readableTitle 未实现时本节
+// import 即红；还原后绿。背景：teammate 会话标题 = harness 兜底截断的 system-reminder
+// 原文（`<system-reminder> You are teammate "crit` 式），前缀噪声盖掉 teammate 名。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  eventSummary, eventClock, formatEventLine, filterEvents, tailEvents, textOfContent,
+  eventSummary, eventClock, formatEventLine, filterEvents, tailEvents, textOfContent, readableTitle,
 } from '../../scripts/lib/session-events-core.mjs'
 
 test('eventSummary：tool/call 解析 JSON 字符串参数并截断；未知事件保留 type', () => {
@@ -50,4 +53,18 @@ test('textOfContent：字符串/文本段/非文本段', () => {
   assert.equal(textOfContent('x'), 'x')
   assert.equal(textOfContent([{ type: 'text', text: 'a' }, { type: 'image' }, { type: 'text', text: 'b' }]), 'a b')
   assert.equal(textOfContent(null), '')
+})
+
+test('readableTitle：strip <system-reminder> 前缀，保留 teammate 名等有效信息', () => {
+  assert.equal(readableTitle('<system-reminder> You are teammate "crit'), 'You are teammate "crit')
+  assert.equal(readableTitle('<system-reminder>  You are teammate "anal'), 'You are teammate "anal', '多个空白一并剥')
+  assert.equal(readableTitle('你是 Deep Research 团队的取证 wor'), '你是 Deep Research 团队的取证 wor', '无该前缀原样')
+  assert.equal(readableTitle('<system-reminder>'), '', '只剩前缀 → 空（CLI 显示兜底标题）')
+  assert.equal(readableTitle(null), '', '非字符串输入不炸（fail-soft）')
+})
+
+test('eventSummary：session/title 用 readableTitle 摘要（teammate 标题可读）', () => {
+  const e = { type: 'session/title', data: { title: '<system-reminder> You are teammate "crit' } }
+  assert.equal(eventSummary(e), 'title You are teammate "crit')
+  assert.equal(eventSummary({ type: 'session/title', data: { title: '正常标题' } }), 'title 正常标题')
 })

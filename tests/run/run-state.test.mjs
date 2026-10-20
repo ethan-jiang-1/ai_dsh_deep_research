@@ -295,6 +295,40 @@ test('eventsRegressed：首轮无前值 / 不可读态 → false（不误报，�
 // ── 盘侧谓词选卡面收窄（审计 P3 件⑨）——先红后绿：preset 字段与谓词未实现时本节即红 ──
 import { leadHitlCandidate } from '../../scripts/lib/run-state.mjs';
 
+// ── teammate 信号（2026-10-21 卫生轮 维度6 件②）——先红后绿：teammate 字段未实现时本节即红 ──
+// 背景：teammate 会话首事件 agentPreset 继承 "lead"（实盘 336/550 场 origin=subagent 且
+// agentPreset=lead），只读 events[0].agentPreset 会让「盯的是非 lead 会话」提醒对 teammate
+// 永不触发。真实身份信号 = 首事件 origin==='subagent'。
+
+test('teammate 信号：首事件 origin=subagent → teammate=true（agentPreset 继承 lead 不表身份）', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'run-state-mate-'));
+  try {
+    const log = join(tmp, 's.jsonl');
+    writeFileSync(log, [
+      { type: 'session', id: 's', agentPreset: 'lead', origin: 'subagent' },
+      { type: 'turn/start' },
+      { type: 'turn/end' },
+    ].map((e) => JSON.stringify(e)).join('\n') + '\n');
+    const s = runStateOf({ logPath: log, wsRoot: tmp });
+    assert.equal(s.preset, 'lead', 'preset 字段仍是继承值（加性不动）');
+    assert.equal(s.teammate, true, 'origin=subagent 才是 teammate 的身份信号');
+  } finally { rmSync(tmp, { recursive: true, force: true }) }
+});
+
+test('teammate 信号：无 origin（顶层会话）→ teammate=false；不可读 → null（不猜）', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'run-state-top-'));
+  try {
+    const log = join(tmp, 's.jsonl');
+    writeFileSync(log, [
+      { type: 'session', id: 's', agentPreset: 'critic' },
+      { type: 'turn/start' },
+      { type: 'turn/end' },
+    ].map((e) => JSON.stringify(e)).join('\n') + '\n');
+    assert.equal(runStateOf({ logPath: log, wsRoot: tmp }).teammate, false, 'kickoff 建的顶层 critic 会话不是 teammate');
+    assert.equal(runStateOf({ logPath: join(tmp, 'missing.jsonl'), wsRoot: tmp }).teammate, null, '不可读不猜');
+  } finally { rmSync(tmp, { recursive: true, force: true }) }
+});
+
 test('选卡面收窄：runStateOf 暴露会话头 agentPreset，lead 挂起 = 唯一合法候选（件⑨）', () => {
   const tmp = join(ROOT, 'tests', '.tmp-run-state-probe');
   mkdirSync(tmp, { recursive: true });

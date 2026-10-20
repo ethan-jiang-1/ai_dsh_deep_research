@@ -266,6 +266,12 @@ export function listScenes(roots = SCENE_ROOTS) {
   return scenes.sort((a, b) => b.mtimeMs - a.mtimeMs);
 }
 
+/** 场是否归档场（--latest stdout 归档标注的判据正本：哪个 label 算归档住 core，CLI 壳
+ *  只问本函数不重复持知识）。label 缺席/无场 → false（不标注，不猜）。 */
+export function isArchivedScene(scene) {
+  return typeof scene?.label === 'string' && scene.label.includes('归档');
+}
+
 /** 场内进度速览（stat-only，不解析内容）：走到哪一步 / 完成几件。
  *  final 双命名容纳：final/v*.md（契约）或 final.md（ad-hoc 化石命名）；review 同理。 */
 export function sceneState(dir) {

@@ -7,15 +7,17 @@
 // 本壳复用唯一解码正本（session-log.mjs）与纯摘要/筛选核（session-events-core.mjs）。
 //
 // 用法：node --import tsx/esm scripts/run-ops/session-events.mjs <session-id|标题子串>
-//         [--tail N] [--type <type 子串>] [--grep <原文子串>] [--json] [--sessions <dir>]
+//         [--tail N] [--type <type 子串>] [--grep <原文子串>] [--json] [--sessions <dir>] [--group <组名子串>]
 //   --tail 0 = 全部（默认 30）；--json = 原始事件逐行 JSON（不再摘要）。
+//   --group 覆盖缺省 research-workspace 组（组过滤盲区逃生口：冒烟/自测会话组如
+//   dev-smoke-workspace 也读得到；无命中 fail-loud 列在场组）。
 // 退出码：0 = 打印；1 = 标题歧义（列出候选）；2 = 用法/前置/日志不可读。
-import { existsSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { researchWorkspaceGroup, sessionLogsInGroup, readSessionEvents } from '../lib/session-log.mjs'
+import { findGroup, sessionLogsInGroup, readSessionEvents } from '../lib/session-log.mjs'
 import { sessionTitleOf } from '../lib/run-state.mjs'
-import { filterEvents, tailEvents, formatEventLine } from '../lib/session-events-core.mjs'
+import { filterEvents, tailEvents, formatEventLine, readableTitle } from '../lib/session-events-core.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2)
@@ -26,17 +28,19 @@ const opt = (name, fallback = undefined) => {
 const flag = (name) => argv.includes(name)
 const target = argv.find((a) => !a.startsWith('--') && argv[argv.indexOf(a) - 1] !== '--sessions'
   && argv[argv.indexOf(a) - 1] !== '--tail' && argv[argv.indexOf(a) - 1] !== '--type'
-  && argv[argv.indexOf(a) - 1] !== '--grep')
+  && argv[argv.indexOf(a) - 1] !== '--grep' && argv[argv.indexOf(a) - 1] !== '--group')
 
 if (target === undefined || flag('--help')) {
-  console.error('session-events: 用法 node --import tsx/esm scripts/run-ops/session-events.mjs <session-id|标题子串> [--tail N] [--type <子串>] [--grep <子串>] [--json] [--sessions <dir>]')
+  console.error('session-events: 用法 node --import tsx/esm scripts/run-ops/session-events.mjs <session-id|标题子串> [--tail N] [--type <子串>] [--grep <子串>] [--json] [--sessions <dir>] [--group <组名子串>]')
   process.exit(2)
 }
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'runtime', 'harness-home')
 const sessionsRoot = resolve(opt('--sessions', join(home, 'sessions')))
-const group = researchWorkspaceGroup(sessionsRoot)
+const groupSub = opt('--group', 'research-workspace')
+const group = findGroup(sessionsRoot, groupSub)
 if (group === undefined) {
-  console.error(`session-events: 找不到 research-workspace 会话组（${sessionsRoot}）——先 source dev/env.sh，或 --sessions 指到正确根`)
+  const groups = existsSync(sessionsRoot) ? readdirSync(sessionsRoot) : []
+  console.error(`session-events: --group ${groupSub} 无命中会话组（根 ${sessionsRoot}；在场组：${groups.join('、') || '（空）'}）——换子串（如 dev-smoke-workspace / runtime-smoke-workspace），或 --sessions 指到正确根`)
   process.exit(2)
 }
 const logs = sessionLogsInGroup(join(sessionsRoot, group))
@@ -73,7 +77,11 @@ if (!readable) {
   console.error(`session-events: 日志不可读（坏帧/读失败）：${selected.logPath}`)
   process.exit(2)
 }
-const title = matchedTitle ?? sessionTitleOf(events) ?? '(无标题)'
+const title = (() => {
+  const raw = matchedTitle ?? sessionTitleOf(events)
+  if (raw === null || readableTitle(raw) === '') return '(无标题)'
+  return readableTitle(raw)
+})()
 const type = opt('--type')
 const grep = opt('--grep')
 const tail = Number(opt('--tail', '30'))
