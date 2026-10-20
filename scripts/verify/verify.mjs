@@ -129,7 +129,10 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
 //    旧版全树 walk 曾被 live run 的 leads.md 双尾换行咬红，2026-09-24 修正范围）──
 {
   const gate = 'md-utf8-newline';
-  const r = gitOnce(['ls-files', '*.md']);
+  // quotepath=false（2026-10-21 卫生轮补宽，md-links 同款先例）：非 ASCII tracked 路径
+  //（_dist/安装手册.md）被引号转义后 existsSync miss → 稀疏态 continue 静默跳过 = 漏扫；
+  // 反证 = gates-smoke 案例 md-utf8-newline-nonascii-path（先红后绿实录见案例注释）。
+  const r = gitOnce(['-c', 'core.quotepath=false', 'ls-files', '*.md']);
   if (r.status !== 0) fail(gate, `git ls-files 不可用（${String(r.stderr).slice(0, 120)}）——fail-loud`);
   else {
     for (const rel of r.stdout.split('\n').filter(Boolean)) {
@@ -238,7 +241,9 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
     if (!cache.has(f)) cache.set(f, existsSync(f) ? anchorsOf(f) : new Set());
     return cache.get(f);
   };
-  const r = gitOnce(['ls-files', '*.md']);
+  // quotepath=false（2026-10-21 卫生轮补宽，同 md-utf8-newline/md-links 先例）：非 ASCII tracked
+  // 路径的引号转义会让 existsSync miss → 静默跳过；反证 = gates-smoke 案例 md-anchors-nonascii-path。
+  const r = gitOnce(['-c', 'core.quotepath=false', 'ls-files', '*.md']);
   if (r.status !== 0) fail(gate, 'git ls-files 不可用——覆盖面依赖仓库态，fail-loud');
   else {
     for (const rel of r.stdout.split('\n').filter(Boolean)) {

@@ -257,6 +257,18 @@ export const CASES = [
   { id: 'md-links-dead', gate: 'md-links', mutate: appendTo('README.md', '\n[死链探针](./definitely-missing-file.md)\n') },
   { id: 'md-links-untracked', gate: 'md-links', mutate: linkUntrackedTarget() },
   { id: 'md-anchors-missing', gate: 'md-anchors', mutate: appendTo('README.md', '\n[坏锚探针](AGENTS.md#这个锚点肯定不存在xyz)\n') },
+  // 非 ASCII 路径形态（2026-10-21 卫生轮补宽）：md-utf8-newline / md-anchors 的 ls-files 原无
+  // core.quotepath=false——非 ASCII tracked 路径（_dist/安装手册.md）被引号转义后 existsSync
+  // miss → 稀疏态 continue 静默跳过 = md-links 已修过的同款漏扫（BUG-016 家族）。案例先红实录：
+  // 注入违反到非 ASCII 路径，旧实现下两门禁不点名（案例红）→ 补 quotepath → 点名报红（案例绿）。
+  { id: 'md-utf8-newline-nonascii-path', gate: 'md-utf8-newline', mutate: (dir) => {
+    const p = join(dir, '_dist', '安装手册.md');
+    if (!existsSync(p)) throw new Error('夹具缺 _dist/安装手册.md（非 ASCII tracked 路径样本）——案例失效');
+    const t = readFileSync(p, 'utf8');
+    if (!t.endsWith('\n')) throw new Error('样本本就无尾换行——注入形态失效（先修样本再挂案例）');
+    writeFileSync(p, t.replace(/\n$/, ''));
+  } },
+  { id: 'md-anchors-nonascii-path', gate: 'md-anchors', mutate: appendTo(join('_dist', '安装手册.md'), '\n[坏锚探针](../README.md#这个锚点肯定不存在xyz)\n') },
   // archived-note-pointer（归档判定复核面）双形态：①活面加未登记的→archived 链接（归档
   // 前必须解除引用或登记）；②登记条目目标改不存在路径（失存——Note 移位/复活须同步登记簿）。
   { id: 'archived-pointer-unregistered', gate: 'archived-note-pointer', mutate: appendTo('README.md', '\n[归档指针探针](notes/archived/2026-09-24-ui-observability-surfaces.md)\n') },

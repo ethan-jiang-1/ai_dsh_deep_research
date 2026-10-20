@@ -66,6 +66,12 @@ function runVerify(dir) {
   return { status: r.status, out: `${r.stdout || ''}\n${r.stderr || ''}` };
 }
 
+/** 判据行锚定：verify 每门禁恰打一行 `${verdict}  ${gate}`（scripts/verify/verify.mjs 末行循环）——
+ *  ^…$m 行锚定判 PASS/FAIL，防后缀门禁名 substring 误配；首行（无前置换行）同样命中。 */
+function gateVerdict(out, verdict, gate) {
+  return new RegExp(`^${verdict}  ${gate.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'm').test(out);
+}
+
 // ── 主流程 ──
 
 function main() {
@@ -81,10 +87,11 @@ function main() {
     const control = runVerify(controlDir);
     if (!/verify: 全绿|处失败/.test(control.out)) failures.push(`对照组：verify 未跑完（status=${control.status}）`);
     for (const { id, gate, expect } of CASES) {
-      // 判据行锚定：verify 每个门禁恰打一行 `${verdict}  ${gate}`（实测），故用带换行边界的
-      // 精确形态而非裸 substring——若 `PASS  <gate>` 与 `FAIL  <gate>` 同时出现，裸
-      // `includes` 会读成"基线 PASS"从而**禁止**本案例需要的 expect（二轮自审点名的脆弱原语）。
-      const controlPass = control.out.includes(`\nPASS  ${gate}\n`);
+      // 判据行锚定（gateVerdict 助手）：verify 每个门禁恰打一行 `${verdict}  ${gate}`（实测），
+      // 行首行尾锚定防后缀门禁名误配；旧 `\n…\n` includes 形态对输出首行（md-utf8-newline——
+      // 域 A 首个门禁）失明：首行无前置换行，2026-10-21 卫生轮首条靶向它的案例暴露此缺陷
+      // （对照组假红 + 案例红永不转绿），故改 ^…$m 锚定。
+      const controlPass = gateVerdict(control.out, 'PASS', gate);
       if (!controlPass && !expect) {
         // 副本基线非 PASS 且未给 expect → 案例组只查 `FAIL <gate>` 会被既有报因蒙混过关
         failures.push(`对照组：${gate} 在零注入副本非 PASS（${id}）——该门禁属"副本基线非 PASS"类，案例必须给 expect 指名注入报因，否则断言空转`);
@@ -99,7 +106,7 @@ function main() {
       mutate(dir);
       git(dir, ['add', '-A']); // tracked-only 门禁要看见注入的新文件（gitignored 探针天然不入）
       const { status, out } = runVerify(dir);
-      if (!/verify: 全绿|处失败/.test(out) || !out.includes(`\nPASS  ${gate}\n`))
+      if (!/verify: 全绿|处失败/.test(out) || !gateVerdict(out, 'PASS', gate))
         failures.push(`${id}: valid shape did not pass ${gate} (status=${status})`);
     }
 
@@ -111,7 +118,7 @@ function main() {
       git(dir, ['add', '-A']); // 同上：mutate 的新文件统一入 tracked 集（案例 mutate 本身是纯 fs）
       const { status, out } = runVerify(dir);
       if (!/verify: 全绿|处失败/.test(out)) failures.push(`${id}：verify 未跑完（status=${status}）`);
-      else if (!out.includes(`\nFAIL  ${gate}\n`)) failures.push(`${id}：注入回归未被点名报红——门禁钝化或案例失效`);
+      else if (!gateVerdict(out, 'FAIL', gate)) failures.push(`${id}：注入回归未被点名报红——门禁钝化或案例失效`);
       else if (expect && !out.includes(expect)) failures.push(`${id}：${gate} 报了红但**非本案例的报因**（期望含 ${JSON.stringify(expect)}）——注入未生效或断言被旁路`);
     }
 
