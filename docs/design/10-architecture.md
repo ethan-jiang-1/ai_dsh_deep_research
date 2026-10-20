@@ -89,4 +89,4 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 
 ## 6. 偏离登记（默认严格 DSH/company 纪律，偏离须 D 号 + 约束证据）
 
-簿记正本 = [AGENTS.md §偏离登记簿](../../AGENTS.md)——一处事实一个家，本节不复制表（防双家漂移）。
+簿记正本 = [decisions.md](../decisions.md) D 号台账（当前偏离 = D26）——一处事实一个家，本节不复制表（防双家漂移）。
