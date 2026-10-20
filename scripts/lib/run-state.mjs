@@ -16,6 +16,7 @@
 import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
+import { sessionBindingOf } from '../../packages/deep-research-pack/src/lib/bundle-bind.ts'
 import { readSessionEvents } from './session-log.mjs'
 
 export { readSessionEvents }
@@ -78,21 +79,23 @@ export function sessionTitleOf(events) {
 }
 
 /**
- * 工作区 run bundle 状态（位置=状态：工作区根 drt_* = 在飞；已交付归 archive/ 不在此列）。
+ * 工作区 run bundle 清单（位置=状态：工作区根 drt_* = 在飞；已交付归 archive/ 不在此列）。
+ * **只列清单，不猜 active**：会话 → bundle 的归属必须走 `sessionBindingOf`（bundle-bind，
+ * 写强读弱）。旧版按字典序取最后一个当 activeBundle，在多 run 并存时把会话绑到别的 bundle
+ * （2026-10-20 审计 P0-5 实测：r1 会话被报成 semver）；同款启发式 2026-10-11 已在
+ * HITL provenance 上误归过（BUG-020，见 hitl-provenance.mjs 注释）。
  * @param wsRoot 研究工作区根。
  */
 export function bundleStateOf(wsRoot) {
-  const bundles = existsSync(wsRoot) ? readdirSync(wsRoot).filter((d) => d.startsWith('drt_')) : []
-  const active = bundles.sort().at(-1) ?? null
   return {
-    bundles,
-    activeBundle: active,
-    finalWritten: active !== null && existsSync(join(wsRoot, active, 'final.md')),
+    bundles: existsSync(wsRoot) ? readdirSync(wsRoot).filter((d) => d.startsWith('drt_')) : [],
   }
 }
 
 /**
  * 会话 + 工作区组合快照（watcher 与前置自拒的判定输入；全字段可 JSON 序列化打日志）。
+ * activeBundle / finalWritten / runSettled 只跟**本会话绑定**的 bundle 走；无绑定 = null
+ * （不猜、不拿别的 bundle 的 final 冒充落定）。
  * @param params.logPath canonical 会话日志路径。
  * @param params.wsRoot 研究工作区根。
  * @param params.includeSessionIdentity 仅需按 UI 会话身份选路时设 true；默认日志快照不暴露标题与 id。
@@ -107,6 +110,10 @@ export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false }) 
       title: readable ? sessionTitleOf(events) : null,
     }
     : {}
+  const binding = readable ? sessionBindingOf(events) : { slug: undefined, boundBy: undefined, kickoffSeen: false }
+  const activeBundle = typeof binding.slug === 'string' ? `drt_${binding.slug}` : null
+  // null = 无绑定/不可读，不能判；false = 绑定的 bundle 无 final；true = 有。
+  const finalWritten = activeBundle === null ? null : existsSync(join(wsRoot, activeBundle, 'final.md'))
   return {
     readable,
     events: events.length,
@@ -118,8 +125,12 @@ export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false }) 
     presentCalls: readable ? toolCallCount(events, 'present') : null,
     turnOpen,
     ...bundle,
-    // runSettled = 回合已终 + final 在场。present 缺席不阻塞 settled（由 presentCalls 暴露偏差）。
-    runSettled: readable === true && turnOpen === false && bundle.finalWritten,
+    activeBundle,
+    bundleBinding: binding.boundBy ?? null,
+    finalWritten,
+    // runSettled = 回合已终 + **本会话绑定 bundle** 的 final 在场。无绑定 → false（未知不是落定）；
+    // present 缺席不阻塞 settled（由 presentCalls 暴露偏差）。
+    runSettled: readable === true && turnOpen === false && finalWritten === true,
   }
 }
 

@@ -164,18 +164,16 @@ test('turnOpenOf：无回合事件 → false；仅 turn/start → true', () => {
   assert.equal(turnOpenOf([{ type: 'turn/start' }, { type: 'turn/end' }]), false);
 });
 
-test('bundleStateOf：位置=状态——工作区根 drt_* 才是在飞；final 在场 ≠ run 落定', () => {
+test('bundleStateOf：位置=状态——工作区根 drt_* 才是在飞；只列清单，不猜 active', () => {
   const tmp = mkdtempSync(join(tmpdir(), 'run-state-'));
   try {
     let s = bundleStateOf(tmp);
-    assert.deepEqual([s.bundles, s.activeBundle, s.finalWritten], [[], null, false]);
+    assert.deepEqual(s.bundles, []);
+    assert.equal(Object.hasOwn(s, 'activeBundle'), false, '清单函数不猜会话归属——归属归 bundle-bind');
+    assert.equal(Object.hasOwn(s, 'finalWritten'), false, '清单函数不猜落定——落定归 runStateOf');
     mkdirSync(join(tmp, 'drt_probe'));
     s = bundleStateOf(tmp);
-    assert.equal(s.activeBundle, 'drt_probe');
-    assert.equal(s.finalWritten, false, '无 final.md');
-    writeFileSync(join(tmp, 'drt_probe', 'final.md'), '# 交付');
-    s = bundleStateOf(tmp);
-    assert.equal(s.finalWritten, true);
+    assert.deepEqual(s.bundles, ['drt_probe']);
     // archive/ 不计在飞（位置=状态：已交付归档不在根）
     mkdirSync(join(tmp, 'archive', 'drt_old'), { recursive: true });
     assert.equal(bundleStateOf(tmp).bundles.length, 1, 'archive/ 下的 drt_* 不算在飞');
@@ -191,18 +189,64 @@ test('sessionTitleOf：读取最新可用 session/title，并对缺席标题保�
   assert.equal(sessionTitleOf([]), null);
 });
 
-test('runStateOf 组合：finalWritten=true + turnOpen=true → runSettled=false（判定过急的教训）', () => {
+test('runStateOf 组合：会话绑定的 final 在场 + turnOpen=true → runSettled=false（判定过急的教训）', () => {
   const tmp = mkdtempSync(join(tmpdir(), 'run-state-ws-'));
   try {
     mkdirSync(join(tmp, 'drt_x'));
     writeFileSync(join(tmp, 'drt_x', 'final.md'), '# 交付');
-    const s = runStateOf({ logPath: FIX('pending'), wsRoot: tmp });
-    // pending 夹具：回合开着 + final 在场——第 12 场实录形态（final 落盘 ≠ 完成）
-    assert.equal(s.hitlPending, true);
+    const log = join(tmp, 's.jsonl');
+    writeFileSync(log, [
+      { type: 'session', id: 's', agentPreset: 'lead' },
+      { type: 'tool/call', data: { name: 'write', arguments: JSON.stringify({ path: 'drt_x/question.md' }) } },
+      { type: 'turn/start' },
+    ].map((e) => JSON.stringify(e)).join('\n') + '\n');
+    const s = runStateOf({ logPath: log, wsRoot: tmp });
+    assert.equal(s.activeBundle, 'drt_x');
+    assert.equal(s.bundleBinding, 'write');
     assert.equal(s.finalWritten, true);
     assert.equal(s.turnOpen, true);
     assert.equal(s.runSettled, false, '回合未终 → 不许报落定');
     assert.equal(s.presentCalls, 0);
+  } finally { rmSync(tmp, { recursive: true, force: true }) }
+});
+
+test('runStateOf：多 bundle 时按会话绑定，不按字典序取最后一个（审计 P0-5 反证）', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'run-state-multi-'));
+  try {
+    mkdirSync(join(tmp, 'drt_a'));
+    mkdirSync(join(tmp, 'drt_z'));
+    writeFileSync(join(tmp, 'drt_z', 'final.md'), '# 别的 run 的交付');
+    const log = join(tmp, 's.jsonl');
+    writeFileSync(log, [
+      { type: 'session', id: 's', agentPreset: 'lead' },
+      { type: 'tool/call', data: { name: 'write', arguments: JSON.stringify({ path: 'drt_a/question.md' }) } },
+      { type: 'turn/start' },
+      { type: 'turn/end' },
+    ].map((e) => JSON.stringify(e)).join('\n') + '\n');
+    const s = runStateOf({ logPath: log, wsRoot: tmp });
+    // 旧实现按字典序取 drt_z → finalWritten=true/runSettled=true；本测试先红后绿。
+    assert.equal(s.activeBundle, 'drt_a');
+    assert.equal(s.finalWritten, false, 'drt_z 的 final 不得冒充本会话落定');
+    assert.equal(s.runSettled, false);
+  } finally { rmSync(tmp, { recursive: true, force: true }) }
+});
+
+test('runStateOf：无 bundle 绑定 → activeBundle/finalWritten 为 null，不猜（不拿别家 final 冒充）', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'run-state-unbound-'));
+  try {
+    mkdirSync(join(tmp, 'drt_x'));
+    writeFileSync(join(tmp, 'drt_x', 'final.md'), '# 别的 run');
+    const log = join(tmp, 's.jsonl');
+    writeFileSync(log, [
+      { type: 'session', id: 's', agentPreset: 'lead' },
+      { type: 'turn/start' },
+      { type: 'turn/end' },
+    ].map((e) => JSON.stringify(e)).join('\n') + '\n');
+    const s = runStateOf({ logPath: log, wsRoot: tmp });
+    assert.equal(s.activeBundle, null);
+    assert.equal(s.bundleBinding, null);
+    assert.equal(s.finalWritten, null);
+    assert.equal(s.runSettled, false, '无绑定 = 未知，不是落定');
   } finally { rmSync(tmp, { recursive: true, force: true }) }
 });
 
