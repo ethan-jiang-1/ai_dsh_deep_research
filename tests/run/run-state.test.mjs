@@ -12,6 +12,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, utimesSync } from 'node:fs';
 import { zstdCompressSync, constants } from 'node:zlib';
 import { resolveSessionLog, sessionLogsInGroup, decompressSessionLog } from '../../scripts/lib/session-log.mjs';
+import { zstdFrame, writeZstdLog } from '../fixtures/events.mjs';
 import { tmpdir } from 'node:os';
 import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -26,19 +27,21 @@ test('读取器：多帧压缩日志与不可读坏尾（原生解压）', () =>
   const tmp = mkdtempSync(join(tmpdir(), 'run-log-'));
   try {
     const log = join(tmp, 'session.v4.jsonl.zstd');
-    const first = zstdCompressSync(Buffer.from('{"type":"turn/start"}\n'));
-    const second = zstdCompressSync(Buffer.from('{"type":"turn/end"}\n'));
-    writeFileSync(log, Buffer.concat([first, second]));
+    // 帧构造正本 = tests/fixtures/events.mjs（zstdFrame / writeZstdLog）；checksum 特参帧与
+    // 逐字节截断手术留在本地——它们是本测试的主语（读取器要扛的损坏形态），不是样板。
+    const first = zstdFrame('{"type":"turn/start"}\n');
+    const second = zstdFrame('{"type":"turn/end"}\n');
+    writeZstdLog(log, [first, second]);
     assert.deepEqual(readSessionEvents(log), { readable: true, events: [{ type: 'turn/start' }, { type: 'turn/end' }] });
-    writeFileSync(log, Buffer.concat([first, second.subarray(0, 5)]));
+    writeZstdLog(log, [first, second.subarray(0, 5)]);
     assert.deepEqual(readSessionEvents(log), { readable: false, events: [] });
     const checksummed = zstdCompressSync(Buffer.from('{"type":"turn/end"}\n'), { params: { [constants.ZSTD_c_checksumFlag]: 1 } });
     for (let i = 0; i < checksummed.length; i++) {
-      writeFileSync(log, Buffer.concat([first, checksummed.subarray(0, i)]));
+      writeZstdLog(log, [first, checksummed.subarray(0, i)]);
       if (i > 0) assert.equal(readSessionEvents(log).readable, false, `截断 ${i} 字节不能成为完整日志`);
     }
     assert.equal(decompressSessionLog(first, null), null, '解压能力缺席不启动外部命令');
-    writeFileSync(log, Buffer.concat([first, zstdCompressSync(Buffer.from('{bad-json}\n'))]));
+    writeZstdLog(log, [first, '{bad-json}\n']);
     assert.equal(readSessionEvents(log).readable, false, '坏 JSONL 行不能静默跳过形成旧前缀');
     assert.equal(runStateOf({ logPath: join(tmp, 'missing.zstd'), wsRoot: tmp }).readable, false, '缺席压缩日志同样零子进程');
   } finally { rmSync(tmp, { recursive: true, force: true }); }
@@ -83,9 +86,9 @@ test('组内会话日志：按 canonical 路径及 mtime 列出，坏的新日�
     utimesSync(join(dir, canonicalName), when, when);
   };
   try {
-    put('v4-compressed', [['session.v4.jsonl.zstd', zstdCompressSync(readable)]], 4);
+    put('v4-compressed', [['session.v4.jsonl.zstd', zstdFrame(readable)]], 4);
     put('v4-plain', [['session.v4.jsonl', readable]], 3);
-    put('v3-compressed', [['session.v3.jsonl.zstd', zstdCompressSync(readable)]], 2);
+    put('v3-compressed', [['session.v3.jsonl.zstd', zstdFrame(readable)]], 2);
     put('v3-plain', [['session.v3.jsonl', readable]], 1);
     // The higher generation is present but unreadable. Its older v3 sibling contains a real lead-pending
     // shape and must not be resurrected as a candidate by fallback.

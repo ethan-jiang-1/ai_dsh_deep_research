@@ -7,24 +7,26 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts';
+import { toolCall, toolResult } from '../fixtures/events.mjs';
 
-const ask = (time, callId = 'call_1') => ({ type: 'tool/call', data: { name: 'ask_user_question', callId }, time });
-const other = (name) => ({ type: 'tool/call', data: { name }, time: '2026-09-25T10:00:00Z' });
-const askWithQs = (n, time) => ({
-  type: 'tool/call',
-  data: { name: 'ask_user_question', arguments: JSON.stringify({ questions: Array.from({ length: n }, () => ({})) }) },
+// 事件构造走 tests/fixtures/events.mjs（wire 正本）；本文件的语义包装（v5 谓词的形态 defaults）留下。
+const ask = (time, callId = 'call_1') => toolCall({ name: 'ask_user_question', callId, time });
+const other = (name) => toolCall({ name, time: '2026-09-25T10:00:00Z' });
+const askWithQs = (n, time) => toolCall({
+  name: 'ask_user_question',
+  arguments: { questions: Array.from({ length: n }, () => ({})) },
   time,
 });
 /** timed 超时落定的 tool/result（对应该 ask 的 callId，正文带 pending:true 标记）。 */
-const timedPendingResult = (callId = 'call_1') => ({
-  type: 'tool/result',
-  data: { message: { role: 'tool', toolCallId: callId, content: [{ type: 'text', text: JSON.stringify({ pending: true, callId, message: 'No answer batch arrived before the timeout.' }) }] } },
+const timedPendingResult = (callId = 'call_1') => toolResult({
+  callId,
+  text: JSON.stringify({ pending: true, callId, message: 'No answer batch arrived before the timeout.' }),
   time: '2026-09-25T12:10:00Z',
 });
 /** answers 形态的 tool/result（已答）。 */
-const answeredResult = (callId = 'call_1') => ({
-  type: 'tool/result',
-  data: { message: { role: 'tool', toolCallId: callId, content: [{ type: 'text', text: JSON.stringify({ answers: [{ id: 'q1', selected: ['a'] }] }) }] } },
+const answeredResult = (callId = 'call_1') => toolResult({
+  callId,
+  text: JSON.stringify({ answers: [{ id: 'q1', selected: ['a'] }] }),
   time: '2026-09-25T12:01:00Z',
 });
 

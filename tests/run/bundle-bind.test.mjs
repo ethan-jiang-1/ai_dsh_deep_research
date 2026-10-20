@@ -3,8 +3,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { sessionBindingOf, sessionBundleOf } from '../../packages/deep-research-pack/src/lib/bundle-bind.ts';
+import { toolCall } from '../fixtures/events.mjs';
 
-const call = (name, args) => ({ type: 'tool/call', data: { name, arguments: typeof args === 'string' ? args : JSON.stringify(args) } });
+// wire 正本 = tests/fixtures/events.mjs；字符串 arguments 原样传（坏 JSON 负例形态）。
+const call = (name, args) => toolCall({ name, arguments: args });
 const ev = (type, data = {}) => ({ type, data });
 
 test('write/edit 调用携带 bundle 内路径 → 绑定该 slug', () => {

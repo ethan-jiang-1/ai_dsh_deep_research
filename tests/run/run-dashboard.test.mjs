@@ -113,8 +113,8 @@ test('渲染壳：关键区块与 meta refresh 在场', () => {
 // 测试内生成——node:zlib 原生，无子进程，layering 纪律不破）。
 import { mkdirSync, rmSync, writeFileSync, utimesSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { zstdCompressSync } from 'node:zlib';
 import { listScenes, sceneState, detectHitlWait, isArchivedScene } from '../../scripts/lib/run-dashboard-core.mjs';
+import { toolCall, writeZstdLog } from '../fixtures/events.mjs';
 
 const mktmp = () => mkdirSync(join(tmpdir(), `dash-${Math.random().toString(36).slice(2)}`), { recursive: true });
 
@@ -206,16 +206,14 @@ test('HITL 等待检测：v4 未答 ask 等待；匹配 callId 的 v3 答案/取
   try {
     const sess = join(root, 'sessions', '--x-research-workspace--');
     // 夹具对齐真实日志格式：逐次 append 的 zstd 多帧拼接（一次写入一帧；DSH 实测 357 帧/639 行）
+    // ——帧构造正本 = tests/fixtures/events.mjs 的 writeZstdLog。
     const mk = (id, lineGroups, generation = 'v4') => {
       const d = join(sess, id);
       mkdirSync(d, { recursive: true });
-      const buf = Buffer.concat(
-        lineGroups.map((g) => zstdCompressSync(Buffer.from(g.map((l) => JSON.stringify(l)).join('\n') + '\n'))),
-      );
-      writeFileSync(join(d, `session.${generation}.jsonl.zstd`), buf);
+      writeZstdLog(join(d, `session.${generation}.jsonl.zstd`), lineGroups);
     };
     const t = Date.now();
-    const ask = (id, time) => ({ type: 'tool/call', time, data: { callId: id, name: 'ask_user_question', arguments: '{}' } });
+    const ask = (id, time) => toolCall({ callId: id, name: 'ask_user_question', arguments: '{}', time });
     mk('session-waiting', [
       [{ type: 'session', time: t - 60000 }, { type: 'turn/start', time: t - 50000 }],
       [ask('c1', t - 30000)], // 最后一帧 = 未答 ask → 等待
@@ -231,8 +229,7 @@ test('HITL 等待检测：v4 未答 ask 等待；匹配 callId 的 v3 答案/取
     // 反证夹具：**冒烟工作区**组里的同形挂起**不得**被投影（run 投影只扫 run 工作区）
     const smoke = join(root, 'sessions', '--x-runtime-smoke-workspace--');
     mkdirSync(join(smoke, 'session-smoke'), { recursive: true });
-    writeFileSync(join(smoke, 'session-smoke', 'session.v4.jsonl.zstd'),
-      zstdCompressSync(Buffer.from(JSON.stringify(ask('cs', t - 40000)) + '\n')));
+    writeZstdLog(join(smoke, 'session-smoke', 'session.v4.jsonl.zstd'), [[ask('cs', t - 40000)]]);
     const waiting = detectHitlWait(join(root, 'sessions'), { maxAgeMs: 3600 * 1000 });
     assert.equal(waiting.length, 1);
     assert.equal(waiting[0].session, 'waiting');
@@ -253,9 +250,7 @@ test('HITL 公共投影：timed pending 与元数据/agent 后续事件不关闭
     const put = (id, generation, events) => {
       const dir = join(root, '--x-research-workspace--', `session-${id}`);
       mkdirSync(dir, { recursive: true });
-      const file = join(dir, `session.${generation}.jsonl.zstd`);
-      writeFileSync(file, zstdCompressSync(Buffer.from(events.map(JSON.stringify).join('\n') + '\n')));
-      return file;
+      return writeZstdLog(join(dir, `session.${generation}.jsonl.zstd`), [events]);
     };
     for (const generation of ['v3', 'v4']) {
       put(generation, generation, [ask, pending(generation), { type: 'assistant/message' }, { type: 'session/title' }, { type: 'turn/end' }]);
@@ -264,7 +259,7 @@ test('HITL 公共投影：timed pending 与元数据/agent 后续事件不关闭
     put('closed', 'v4', [ask, pending('v4'), { type: 'user/message' }]);
     put('broken', 'v3', [ask]);
     const broken = put('broken', 'v4', [ask]);
-    writeFileSync(broken, Buffer.concat([zstdCompressSync(Buffer.from(JSON.stringify(ask) + '\n')), Buffer.from([0x28, 0xb5])]));
+    writeZstdLog(broken, [[ask], Buffer.from([0x28, 0xb5])]); // 坏尾帧 = 原始字节帧原样入列
     const linkedOld = put('linked', 'v3', [ask]);
     // 路径构造而非字符串手术：`replace('v3','v4')` 会误命中 mkdtemp 随机目录名里的 'v3'
     // 子串（实测偶发 ENOENT：目录名 dash-v3… 被替换成不存在的 dash-v4…）

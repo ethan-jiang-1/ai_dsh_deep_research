@@ -20,6 +20,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { provenanceLines, appendProvenance, batchToAnswered, attributionBundleOf, appendDecisionsRow, closingProvenanceRow } from '../../scripts/lib/hitl-provenance.mjs';
+import { toolCall } from '../fixtures/events.mjs';
 
 const ANSWERED = [
   { step: 1, prompt: '定稿还是补研究？', selected: '按现稿定稿交付（Recommended）' },
@@ -101,8 +102,9 @@ test('appendProvenance：缺件 fail-loud——bundle 缺 journal.md 即抛并�
 });
 
 // ── attributionBundleOf（BUG-020 正修）：归属 = 被答会话自己的 bundle-bind，字典序全废 ──
-// fixtures 事件构造（wire 形状：data.arguments 为 JSON 字符串——与真 journal 一致）。
-const call = (name, args) => ({ type: 'tool/call', data: { name, arguments: JSON.stringify(args) } });
+// fixtures 事件构造（wire 形状正本 = tests/fixtures/events.mjs：data.arguments 为 JSON 字符串
+// ——与真 journal 一致）。
+const call = (name, args) => toolCall({ name, arguments: args });
 const writeInto = (slug) => call('write', { file_path: `drt_${slug}/question.md`, content: '# Q' });
 const readInto = (slug) => call('read', { file_path: `drt_${slug}/journal.md` });
 const kickoffAsk = () => call('ask_user_question', { questions: [{ header: '研究类型', options: [] }] });

@@ -10,5 +10,6 @@
 | run-dashboard/ | [run-dashboard.test.mjs](../run/run-dashboard.test.mjs) | 仪表盘折算投影（日志选择、HITL 折算、步骤投影） | 同上 | 是 |
 | vendor-artifacts/ | [vendor-artifacts.test.mjs](../run/vendor-artifacts.test.mjs)（夹具路径经参数喂给 [scripts/lib/vendor-artifacts.mjs](../../scripts/lib/vendor-artifacts.mjs)） | vendor 构建产物自检判据（齐全/缺失两形态） | 纯 fs 静态夹具 | 是 |
 | review-aids/ | [unconsumed-evidence.test.mjs](../run/unconsumed-evidence.test.mjs) + [acceptance-check.test.mjs](../run/acceptance-check.test.mjs) | 散文纪律的机械基座用例：B1 差集投影 + 收活判据三态求值（先红后绿反证） | 契约日用例即反证——改夹具应预期变红 | 是 |
+| [events.mjs](events.mjs)（文件级支援件——工厂非语料组；孤儿检查只扫目录组，本行 = 导航登记） | [hitl-fold](../run/hitl-fold.test.mjs) / [hitl-provenance](../run/hitl-provenance.test.mjs) / [bundle-bind](../run/bundle-bind.test.mjs) / [activity-fold](../run/activity-fold.test.mjs) / [member-activity-fold](../run/member-activity-fold.test.mjs) / [evidence-audit](../run/evidence-audit.test.mjs) / [run-dashboard](../run/run-dashboard.test.mjs) / [run-state](../run/run-state.test.mjs) | 会话事件 wire-shape 构造工厂：tool call/result 配对（arguments 为 JSON 字符串的真日志形态）+ zstd 多帧日志文件——这两个形态的单一构造正本 | 支援件非冻结语料——语义由消费测试钉住（改工厂应预期变红） | 否（glob 外，import 不注册测试） |
 
 > 会话回放场景（整组录制资产 + 场景声明）住仓根 [`snapshots/`](../../snapshots/README.md)——它是独立于纯函数夹具的证据层，消费入口与分类边界由该页拥有。

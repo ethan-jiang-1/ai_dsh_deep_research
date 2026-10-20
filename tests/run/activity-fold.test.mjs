@@ -2,9 +2,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { foldActivityRows } from '../../packages/deep-research-pack/src/lib/activity-fold.ts';
+import { toolCall } from '../fixtures/events.mjs';
 
 const ev = (type, data = {}, time) => ({ type, data, time });
-const call = (name, args, time) => ev('tool/call', { name, arguments: JSON.stringify(args) }, time);
+// wire 正本 = tests/fixtures/events.mjs（arguments 对象 → JSON 字符串）。
+const call = (name, args, time) => toolCall({ name, arguments: args, time });
 
 test('四类出行事件 → 四类行', () => {
   const rows = foldActivityRows([

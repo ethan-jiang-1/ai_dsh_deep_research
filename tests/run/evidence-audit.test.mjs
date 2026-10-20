@@ -11,6 +11,7 @@ import { mkdirSync, rmSync, rmdirSync, writeFileSync, readFileSync, renameSync }
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { auditBundle } from '../../scripts/lib/evidence-audit-core.mjs';
+import { toolCall, toolResult } from '../fixtures/events.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 // 运行时暂存区：走 .gitignore 既有 `_tmp/` 约定（临时区不是版本控制对象——曾以
@@ -36,17 +37,18 @@ function fixture({ forged = false, brokenRef = false, derived = false } = {}) {
   mkdirSync(sessions, { recursive: true });
   // 会话日志：一个 web_search 工具事件（call + result 都带真 URL；result 带可回溯文本）
   const realUrl = 'https://example.com/spec/xeon-4314';
-  // 真实形态（2026-09-26 按真日志对齐）：call = {callId,name,arguments(JSON 字符串)}；
-  // result = {message:{toolCallId,content:[{type:'text',text}]}}——**result 不带工具名**，靠 callId 反查；
-  // web_fetch 成功时文本以 `Fetched <url> (HTTP 200)` 开头（失败则 `Error: …`）。
+  // 真实形态（2026-09-26 按真日志对齐，wire 正本 = tests/fixtures/events.mjs）：call =
+  // {callId,name,arguments(JSON 字符串)}；result = {message:{toolCallId,content:[{type:'text',
+  // text}]}}——**result 不带工具名**，靠 callId 反查；web_fetch 成功时文本以
+  // `Fetched <url> (HTTP 200)` 开头（失败则 `Error: …`）。
   const log = [
     JSON.stringify({ type: 'assistant/message', data: { text: `顺嘴提一句 https://example.com/mentioned-only（非工具事件——不应算数）` } }),
     // 本 run 立项写调用：真实 run 会话日志必含 bundle slug（语料窗过滤的锚点——件⑧）
-    JSON.stringify({ type: 'tool/call', data: { callId: 'w0', name: 'write', arguments: JSON.stringify({ path: 'drt_fixture/question.md', content: '# Q' }) } }),
-    JSON.stringify({ type: 'tool/call', data: { callId: 'c1', name: 'web_fetch', arguments: JSON.stringify({ url: realUrl }) } }),
-    JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'c1', role: 'tool', content: [{ type: 'text', text: `Fetched ${realUrl} (HTTP 200)\n\nSPECrate2017_int_base = 228 见 ${realUrl}` }] } } }),
-    JSON.stringify({ type: 'tool/call', data: { callId: 'c2', name: 'web_fetch', arguments: JSON.stringify({ url: 'https://blog.example.org/post-x' }) } }),
-    JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'c2', role: 'tool', content: [{ type: 'text', text: 'Fetched https://blog.example.org/post-x (HTTP 200)\n\n博客全文 https://blog.example.org/post-x' }] } } }),
+    JSON.stringify(toolCall({ callId: 'w0', name: 'write', arguments: { path: 'drt_fixture/question.md', content: '# Q' } })),
+    JSON.stringify(toolCall({ callId: 'c1', name: 'web_fetch', arguments: { url: realUrl } })),
+    JSON.stringify(toolResult({ callId: 'c1', text: `Fetched ${realUrl} (HTTP 200)\n\nSPECrate2017_int_base = 228 见 ${realUrl}` })),
+    JSON.stringify(toolCall({ callId: 'c2', name: 'web_fetch', arguments: { url: 'https://blog.example.org/post-x' } })),
+    JSON.stringify(toolResult({ callId: 'c2', text: 'Fetched https://blog.example.org/post-x (HTTP 200)\n\n博客全文 https://blog.example.org/post-x' })),
   ].join('\n');
   writeFileSync(join(sessions, 'session.v4.jsonl'), log);
   // 证据文件 A：契约完整 + URL 可溯源 + 摘录可回溯
@@ -190,22 +192,22 @@ function fixtureForms() {
   const never = 'https://not-in-log.invalid/x';
   const log = [
     // 语料窗锚点：真实 run 会话必含 bundle slug
-    JSON.stringify({ type: 'tool/call', data: { callId: 'w0', name: 'write', arguments: JSON.stringify({ path: 'drt_forms/question.md', content: '# Q' }) } }),
+    JSON.stringify(toolCall({ callId: 'w0', name: 'write', arguments: { path: 'drt_forms/question.md', content: '# Q' } })),
     // ① 搜索引擎重定向参数：目标 URL 只以 %XX 编码形态出现（nvidia 场实测形态）
-    JSON.stringify({ type: 'tool/call', data: { callId: 'f1', name: 'web_fetch', arguments: JSON.stringify({ url: 'https://duckduckgo.com/html/?q=idc+ai+market' }) } }),
-    JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'f1', role: 'tool', content: [{ type: 'text', text: 'Fetched https://duckduckgo.com/html/?q=idc+ai+market (HTTP 200)\n\n<a href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.companieshistory.com%2Fai%2Dmarket%2Dshare%2Dby%2Dcompany%2F&rut=9f2a">IDC 81%</a>' }] } } }),
+    JSON.stringify(toolCall({ callId: 'f1', name: 'web_fetch', arguments: { url: 'https://duckduckgo.com/html/?q=idc+ai+market' } })),
+    JSON.stringify(toolResult({ callId: 'f1', text: 'Fetched https://duckduckgo.com/html/?q=idc+ai+market (HTTP 200)\n\n<a href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.companieshistory.com%2Fai%2Dmarket%2Dshare%2Dby%2Dcompany%2F&rut=9f2a">IDC 81%</a>' })),
     // ② 页面内协议相对资源（无 scheme）
-    JSON.stringify({ type: 'tool/call', data: { callId: 'f2', name: 'web_fetch', arguments: JSON.stringify({ url: 'https://docs.example-target.com/index.html' }) } }),
-    JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'f2', role: 'tool', content: [{ type: 'text', text: 'Fetched https://docs.example-target.com/index.html (HTTP 200)\n\n<script src="//cdn.example-target.com/data/set.json"></script>' }] } } }),
+    JSON.stringify(toolCall({ callId: 'f2', name: 'web_fetch', arguments: { url: 'https://docs.example-target.com/index.html' } })),
+    JSON.stringify(toolResult({ callId: 'f2', text: 'Fetched https://docs.example-target.com/index.html (HTTP 200)\n\n<script src="//cdn.example-target.com/data/set.json"></script>' })),
     // ③ 链接文本为裸域名，href 指向别处（无 scheme 承载）
-    JSON.stringify({ type: 'tool/call', data: { callId: 'f3', name: 'web_fetch', arguments: JSON.stringify({ url: 'https://linkhub.example.com/list' }) } }),
-    JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'f3', role: 'tool', content: [{ type: 'text', text: 'Fetched https://linkhub.example.com/list (HTTP 200)\n\n<a href="//linkhub.example.com/r?u=1">www.bare-target.com/dataset/</a>' }] } } }),
+    JSON.stringify(toolCall({ callId: 'f3', name: 'web_fetch', arguments: { url: 'https://linkhub.example.com/list' } })),
+    JSON.stringify(toolResult({ callId: 'f3', text: 'Fetched https://linkhub.example.com/list (HTTP 200)\n\n<a href="//linkhub.example.com/r?u=1">www.bare-target.com/dataset/</a>' })),
     // ④ 浏览器 MCP：真实取回路径（类别②取向 (a)）——结果里的协议相对脚本源
-    JSON.stringify({ type: 'tool/call', data: { callId: 'm1', name: 'mcp__playwright__browser_run_code_unsafe', arguments: JSON.stringify({ code: 'await page.goto("https://portal.example.com")' }) } }),
-    JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'm1', role: 'tool', content: [{ type: 'text', text: '<title>千问AI平台</title><script src="//q.alyasset.com/npm.combo/pkg.js"></script>' }] } } }),
+    JSON.stringify(toolCall({ callId: 'm1', name: 'mcp__playwright__browser_run_code_unsafe', arguments: { code: 'await page.goto("https://portal.example.com")' } })),
+    JSON.stringify(toolResult({ callId: 'm1', text: '<title>千问AI平台</title><script src="//q.alyasset.com/npm.combo/pkg.js"></script>' })),
     // ⑤ 负例边界：只出现在 MCP **调用参数**（agent 自撰代码）里的 URL 不作证
-    JSON.stringify({ type: 'tool/call', data: { callId: 'm2', name: 'mcp__playwright__browser_run_code_unsafe', arguments: JSON.stringify({ code: `await page.fill('#q', '${argOnly}')` }) } }),
-    JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'm2', role: 'tool', content: [{ type: 'text', text: '已填入搜索框（无 URL 内容）' }] } } }),
+    JSON.stringify(toolCall({ callId: 'm2', name: 'mcp__playwright__browser_run_code_unsafe', arguments: { code: `await page.fill('#q', '${argOnly}')` } })),
+    JSON.stringify(toolResult({ callId: 'm2', text: '已填入搜索框（无 URL 内容）' })),
   ].join('\n');
   writeFileSync(join(sessions, 'session.v4.jsonl'), log);
   const ev = (name, url) => writeFileSync(join(bundle, 'evidence', name), `---\nsource_url: ${url}\nretrieved_at: 2026-10-16\nquality: A\nfound_by: analyst\nsupports: T1\nsource_tier: primary\npublisher: example.com\n---\n\n# ${name}\n\n来源：${url}\n\n## 原文摘录\n\n> 这是一条足够长的原文摘录占位（形态回归只查 URL 溯源档位）。\n`);
@@ -262,8 +264,8 @@ test('语料窗：跨 run 会话的 URL 不得为本 run 作证（slug 窗过滤
   mkdirSync(crossSessions, { recursive: true });
   const crossUrl = 'https://crossrun.example.com/only-here';
   writeFileSync(join(crossSessions, 'session.v4.jsonl'), [
-    JSON.stringify({ type: 'tool/call', data: { callId: 'x1', name: 'web_fetch', arguments: JSON.stringify({ url: crossUrl }) } }),
-    JSON.stringify({ type: 'tool/result', data: { message: { toolCallId: 'x1', role: 'tool', content: [{ type: 'text', text: `Fetched ${crossUrl} (HTTP 200)\n\n跨 run 内容 ${crossUrl}` }] } } }),
+    JSON.stringify(toolCall({ callId: 'x1', name: 'web_fetch', arguments: { url: crossUrl } })),
+    JSON.stringify(toolResult({ callId: 'x1', text: `Fetched ${crossUrl} (HTTP 200)\n\n跨 run 内容 ${crossUrl}` })),
   ].join('\n'));
   // 本 run 证据卡把跨 run URL 记为 source_url——窗外语料不得替它作证
   writeFileSync(join(bundle, 'evidence', 'ev-cross.md'), `---\nsource_url: ${crossUrl}\nretrieved_at: 2026-09-25\nquality: A\nfound_by: analyst\nsupports: T1\nsource_tier: primary\npublisher: crossrun.example.com\n---\n\n# 跨 run 引用\n\n## 原文摘录\n\n> 跨 run 内容 ${crossUrl}\n\n## 解读\n\n不应被窗外语料作证。\n`);
