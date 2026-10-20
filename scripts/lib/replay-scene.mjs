@@ -1,12 +1,47 @@
-// 场景声明消费者：roster / 版本 / 来源形状 / 路径校验（缺件、串角色、垃圾锚点 fail-loud）。
-// 消费 = snapshot-replay-smoke；场景声明 = snapshots/replay/research-face/snapshot.json（字段表 = snapshots/README）。
+// 场景声明消费者：roster / 版本 / 来源形状 / 路径校验（缺件、串角色、垃圾锚点 fail-loud）
+// + 场景集发现（snapshots/replay/*/snapshot.json 全集）。消费 = snapshot-replay-smoke；
+// 场景声明 = 各场景集目录的 snapshot.json（字段表 = snapshots/README）。
 // Replay manifest consumer: A replay is mandatory; these five B judges cannot be reduced.
-import { readFileSync, lstatSync, realpathSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, lstatSync, realpathSync } from 'node:fs';
 import { resolve, join, dirname, isAbsolute, relative, win32 } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const JUDGES = ['persona', 'headers', 'agent-instructions', 'skill-catalog', 'runtime-context'];
+
+/**
+ * 场景集发现：replay 根下含 snapshot.json 的直接子目录（场景集边界 =
+ * snapshots/replay/<face>/snapshot.json）。替代此前硬钉的 research-face——往 replay/
+ * 放新场景集即被发现，全仓可见。
+ * fail-loud 三态：根不可读 / 零场景集（空语料 = 没有回放面，不静默绿）/ only 无命中
+ * （列在场集；定向是全名不是子串——子串静默缩场景是反向失败模式）。symlink 目录项
+ * 不是目录（Dirent 不跟随），与 loadReplayScene 的场景防 symlink 判据同向。
+ * @param {string} replayRoot snapshots/replay 绝对路径。
+ * @param {{only?: string}} [opts] only = 定向单集全名（--face）。
+ * @returns {string[]} 场景集目录名（字典序——跑序确定）。
+ */
+export function discoverReplayFaces(replayRoot, { only } = {}) {
+  let entries;
+  try {
+    entries = readdirSync(replayRoot, { withFileTypes: true });
+  } catch (error) {
+    throw new Error(`Replay root ${replayRoot}: cannot read (${error.code}); fix snapshots/replay`);
+  }
+  const faces = entries
+    .filter((ent) => ent.isDirectory() && existsSync(join(replayRoot, ent.name, 'snapshot.json')))
+    .map((ent) => ent.name)
+    .sort();
+  if (faces.length === 0) {
+    throw new Error(`Replay root ${replayRoot}: zero scene sets with snapshot.json (empty corpus = no replay surface); fix snapshots/replay`);
+  }
+  if (only !== undefined) {
+    if (!faces.includes(only)) {
+      throw new Error(`Replay face ${String(only)} not found; available: ${faces.join(', ')}`);
+    }
+    return [only];
+  }
+  return faces;
+}
 
 // Check each component with lstat: realpath alone would accept in-scene symlinks.
 function scenePath(base, path, field, directory = false) {

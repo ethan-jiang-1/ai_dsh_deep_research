@@ -32,5 +32,5 @@
 
 - 目前只有 `replay/research-face` 一个场景族；探针与视觉证据的分类尚未建立。
 - 场景不进入默认 `pnpm test` 与 pre-commit 链，靠 [开发环的任务型路由表](../docs/guides/60-dev-loop.md) 与重录程序驱动。
-- **场景发现硬编码**：`snapshot-replay-smoke` 只认 `research-face` 一个场景目录——往 `snapshots/replay/` 放新场景全仓不可见（company runnable 3→1 实测推翻的负例④同款失败模式）。**触发条件**：第二个场景族落地或首个场景降为永久证据时，把场景发现改为 glob `snapshots/replay/*/snapshot.json`，并引入资格三态（runnable/证据）+ 带判定日期的资格理由 + 声明↔盘面秒级结构门禁（company replay-scene-liveness 形态）——判定日期与 recordedAt 是两件事（录制时刻 ≠ 判据最近全绿时刻），场景数增长后缺它即过期不可见。
+- **场景资格三态未立**：场景集发现已是发现式——`snapshots/replay/` 下含 `snapshot.json` 的全部目录都进冒烟（判据核 = [lib/replay-scene.discoverReplayFaces](../scripts/lib/replay-scene.mjs)；`snapshot-replay-smoke --face <name>` 定向单集），新场景集落地即被发现；但 runnable（进冒烟）与证据（只留档不跑）尚无区分。**触发条件**：首个声明"不跑冒烟"的场景集或首个降为永久证据的场景集出现时，立资格三态 + 带判定日期的资格理由 + 声明↔盘面秒级结构门禁（company replay-scene-liveness 形态）——判定日期与 recordedAt 是两件事（录制时刻 ≠ 判据最近全绿时刻），场景数增长后缺它即过期不可见。
 - **体积预算未立**：当前总量有界（单场景族、无按次累积来源）。**触发条件**：任何"每轮一份"的累积型证据类别（探针按次留档、轮末拷贝）入库时，立总量 + 唯一无界源分类子预算（company 64/16 MiB 形态）。

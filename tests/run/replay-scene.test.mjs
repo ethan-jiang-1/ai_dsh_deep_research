@@ -1,4 +1,8 @@
-// replay-scene 回归 — 场景声明消费判据（roster / 来源形状 / 路径越界 fail-loud）。
+// replay-scene 回归 — 场景声明消费判据（roster / 来源形状 / 路径越界 fail-loud）+
+// 场景集发现（discoverReplayFaces：硬编码 research-face 的参数化替代）。
+// 发现反证（红先行实录，2026-10-21 卫生轮 维度6 件⑦）：discoverReplayFaces 未实现时
+// 本节 import 即红；还原后绿。背景：snapshot-replay-smoke 硬钉 research-face——往
+// snapshots/replay/ 放新场景全仓不可见（snapshots/README 已登记的已知限制，本函数 = 修复）。
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, realpathSync, symlinkSync } from 'node:fs';
@@ -6,7 +10,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { presetRoles } from '../../scripts/lib/roles.mjs';
-import { loadReplayScene } from '../../scripts/lib/replay-scene.mjs';
+import { loadReplayScene, discoverReplayFaces } from '../../scripts/lib/replay-scene.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const ROLES = presetRoles(ROOT);
@@ -206,4 +210,52 @@ test('provenance must be a checkable anchor or the honest unknown marker, never 
   manifest.cases[1].source = { ...SOURCE };
   save();
   assert.equal(loadReplayScene(dir, ROLES).cases.length, ROLES.length);
+});
+
+// ── 场景集发现（discoverReplayFaces）——snapshots/replay/*/snapshot.json 全集发现 ──
+
+test('discoverReplayFaces：含 snapshot.json 的直接子目录全集（字典序）；非场景目录/文件不收', (t) => {
+  const root = realpathSync(mkdtempSync(join(realpathSync(tmpdir()), 'replay-faces-')));
+  t.after(() => { rmSync(root, { recursive: true, force: true }); });
+  for (const face of ['zeta-face', 'alpha-face']) {
+    mkdirSync(join(root, face));
+    writeFileSync(join(root, face, 'snapshot.json'), '{}\n');
+  }
+  mkdirSync(join(root, 'not-a-face')); // 无 snapshot.json 的目录 = 非场景集
+  writeFileSync(join(root, 'stray.md'), 'x'); // 根下散文件不收
+  assert.deepEqual(discoverReplayFaces(root), ['alpha-face', 'zeta-face']);
+});
+
+test('discoverReplayFaces：--face 定向单集；无命中 fail-loud 列在场集', (t) => {
+  const root = realpathSync(mkdtempSync(join(realpathSync(tmpdir()), 'replay-faces-only-')));
+  t.after(() => { rmSync(root, { recursive: true, force: true }); });
+  for (const face of ['alpha-face', 'zeta-face']) {
+    mkdirSync(join(root, face));
+    writeFileSync(join(root, face, 'snapshot.json'), '{}\n');
+  }
+  assert.deepEqual(discoverReplayFaces(root, { only: 'zeta-face' }), ['zeta-face']);
+  assert.throws(() => discoverReplayFaces(root, { only: 'nope' }), /nope.*alpha-face.*zeta-face|not found/i);
+  assert.throws(() => discoverReplayFaces(root, { only: 'alpha' }), /not found/i, '定向是全名不是子串——防静默缩场景');
+});
+
+test('discoverReplayFaces：空根 / 根缺席 / symlink 场景集 → fail-loud（防空语料 + 不绕过场景防symlink判据）', (t) => {
+  const root = realpathSync(mkdtempSync(join(realpathSync(tmpdir()), 'replay-faces-empty-')));
+  t.after(() => { rmSync(root, { recursive: true, force: true }); });
+  mkdirSync(join(root, 'real-face'));
+  writeFileSync(join(root, 'real-face', 'snapshot.json'), '{}\n');
+  // 混合根：真场景集 + symlink 场景集 → 只发现真的（symlink 目录项不是目录，Dirent 不跟随）
+  const linkRoot = join(root, 'link-root');
+  mkdirSync(linkRoot);
+  mkdirSync(join(linkRoot, 'real-in-link'));
+  writeFileSync(join(linkRoot, 'real-in-link', 'snapshot.json'), '{}\n');
+  symlinkSync(join(root, 'real-face'), join(linkRoot, 'linked-face'));
+  assert.deepEqual(discoverReplayFaces(linkRoot), ['real-in-link'], 'symlink 场景集不发现（loadReplayScene 同判据拒收）');
+  // 全 symlink 根 = 零可用场景集 → 空语料 fail-loud（静默 [] = 回放面静默消失）
+  const allLink = join(root, 'all-link-root');
+  mkdirSync(allLink);
+  symlinkSync(join(root, 'real-face'), join(allLink, 'linked-face'));
+  assert.throws(() => discoverReplayFaces(allLink), /zero scene sets/i);
+  mkdirSync(join(root, 'empty-root'));
+  assert.throws(() => discoverReplayFaces(join(root, 'empty-root')), /zero scene sets/i, '零场景集 = 空语料，不静默绿');
+  assert.throws(() => discoverReplayFaces(join(root, 'absent-root')), /cannot read/i);
 });

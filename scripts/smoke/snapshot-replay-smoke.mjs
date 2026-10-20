@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // scripts/smoke/snapshot-replay-smoke.mjs — keyless 回放冒烟（keyless-snapshot 四件套之四）。
-// 场景集由 snapshots/replay/research-face/snapshot.json 声明（消费 = scripts/lib/replay-scene.mjs；
+// 场景集 = snapshots/replay/ 下含 snapshot.json 的全部目录（发现判据 =
+// lib/replay-scene.discoverReplayFaces；`--face <name>` 定向单集，缺省发现全部逐场景跑——
 // case 集仍与盘上 presets/ 精确对账）——每场景独立 boot + 回放，A/B 层全角色；
 // C 渲染金标准只在声明了 renderExpected 的场景跑（渲染面与角色无绑定，逐角色金标准是重复证据
 // ——RFC test-asset-completion 输掉的方案 3）。
@@ -26,11 +27,12 @@
 // 录制：新角色或重录用 `node --import tsx/esm dev/record-role-fixture.mjs --role <r>`
 // （with-key 一次，之后 keyless 永久回放；录制品人审后入库，并在场景声明登记 source 身份）。
 //
-// 用法：source dev/env.sh && node scripts/smoke/snapshot-replay-smoke.mjs [--port 3103] [--update-expected] [--scenario <id>]
+// 用法：source dev/env.sh && node scripts/smoke/snapshot-replay-smoke.mjs [--port 3103] [--update-expected] [--scenario <id>] [--face <name>]
+//   --scenario <id> 在每个选中场景集内都必须在场（缺席即 fail-loud exit 2，不静默缩场景）。
 // 红证（实录）：改 fixture 内一条 assistant 文本 → A 红；改 fixture persona/注入文本或工具 schema
 //   一词 → 对应 B 条红；改 fixture 一条 web_search 查询词 → C 红；各自还原 → 绿。
 import { execSync } from 'node:child_process';
-import { writeFileSync, existsSync, readFileSync, readdirSync, mkdtempSync, statSync } from 'node:fs';
+import { writeFileSync, existsSync, readFileSync, mkdtempSync, statSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -38,7 +40,8 @@ import { randomUUID } from 'node:crypto';
 import { scrubbedEnv } from '../lib/env.mjs'
 import { authenticate, bootWeb } from '../lib/web-harness.mjs';
 import { presetRoles } from '../lib/roles.mjs';
-import { loadReplayScene } from '../lib/replay-scene.mjs';
+import { loadReplayScene, discoverReplayFaces } from '../lib/replay-scene.mjs';
+import { researchWorkspaceGroup } from '../lib/session-log.mjs';
 import { compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds, sentinelInAssistantText, turnCompleted } from '../lib/replay-request.mjs';
 import { loadChromium, launchChromium } from '../lib/playwright.mjs';
 
@@ -50,21 +53,25 @@ const arg = (name, fallback) => {
 const argvOf = (i) => process.argv[i + 1];
 const PORT = Number(arg('port', '3103'));
 const ONLY = arg('scenario'); // --scenario <id> 单场景跑（红证定向/迭代用；缺省全场景）
+const FACE_ONLY = arg('face'); // --face <name> 定向单场景集（全名）；缺省 = 发现全部场景集逐场景跑
 const UPDATE_EXPECTED = process.argv.includes('--update-expected');
 const BOOT_TIMEOUT_MS = 120_000;
 const TURN_TIMEOUT_MS = 240_000;
 const RENDER_TIMEOUT_MS = 60_000;
-const FACE_DIR = join(ROOT, 'snapshots', 'replay', 'research-face');
+const REPLAY_ROOT = join(ROOT, 'snapshots', 'replay');
 const UNIQUE_TITLE = '快照回放冒烟·渲染面探针';
 const SENTINEL = '探针完成';
 const DSH_HOME = process.env.DSH_HOME ?? join(ROOT, 'runtime', 'harness-home');
 const SESSIONS = join(DSH_HOME, 'sessions');
 
 // manifest 是实际驱动的输入；完整角色集、全部判据与文件引用由 consumer 校验。
-let scene;
-try { scene = loadReplayScene(FACE_DIR, presetRoles(ROOT), { only: ONLY }); }
+// 发现 + 全部场景集声明先校验后跑（坏声明 = 前置缺席 = exit 2，不在半路上才爆）。
+let SCENES;
+try {
+  const faces = discoverReplayFaces(REPLAY_ROOT, { only: FACE_ONLY });
+  SCENES = faces.map((face) => ({ face, scene: loadReplayScene(join(REPLAY_ROOT, face), presetRoles(ROOT), { only: ONLY }) }));
+}
 catch (error) { console.error(`snapshot-replay-smoke: ${error.message}`); process.exit(2); }
-const SCENARIOS = scene.cases;
 if (!process.env.DSH_HOME) {
   console.error('snapshot-replay-smoke: 未 source dev/env.sh（DSH_HOME 缺席）——与 L1/L2 同档自拒');
   process.exit(2);
@@ -96,9 +103,10 @@ const step = (ok, label, info = '') => {
 };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-for (const sc of SCENARIOS) {
+for (const { face, scene } of SCENES) {
+  for (const sc of scene.cases) {
   if (ONLY !== undefined && ONLY !== '' && sc.id !== ONLY) continue
-  console.log(`\n── 场景 ${sc.id} ──`);
+  console.log(`\n── 场景 ${face}/${sc.id} ──`);
   const FIXTURE = sc.fixture;
   const fixtureLines = parseLines(readFileSync(FIXTURE, 'utf8'));
   const userTexts = fixtureLines.filter((j) => j.type === 'user/message')
@@ -113,7 +121,7 @@ for (const sc of SCENARIOS) {
   const replayCallIds = fixtureLines.filter((j) => j.type === 'tool/call')
     .map((j) => j.data?.callId).filter((id) => typeof id === 'string' && id !== '');
   if (!firstPrompt || assistantTexts.length === 0) {
-    failures.push(`[${sc.id}] fixture 折算失败（缺用户 prompt 或 assistant 文本）`);
+    failures.push(`[${face}/${sc.id}] fixture 折算失败（缺用户 prompt 或 assistant 文本）`);
     continue;
   }
 
@@ -198,7 +206,7 @@ for (const sc of SCENARIOS) {
     // ── A 层：轮询**本场景本次创建的会话 id** 的日志（mtime ≥ BOOT_START——旧回放会话不算数）──
     // 不扫同组其他会话目录：四角色共用同一 session 组，跨目录扫描会把上一场景的日志当成本场景的
     // （实测假红：某场景比到了前一场景的 persona 与 skill catalog）。
-    const group = readdirSync(SESSIONS).find((d) => d.includes('research-workspace'));
+    const group = researchWorkspaceGroup(SESSIONS);
     const ownLog = join(SESSIONS, group, sessionId, 'session.v4.jsonl.zstd');
     const readLog = (log) => {
       try { return execSync(`zstd -dc "${log}" 2>/dev/null`, { maxBuffer: 64 * 1024 * 1024 }).toString('utf8') }
@@ -219,9 +227,9 @@ for (const sc of SCENARIOS) {
           if (turnCompleted(text)) { finalOk = true; replayLogText = text; break }
         }
       }
-      if (childGone) { failures.push(`[${sc.id}] web 进程在回合结束前退出`); break }
+      if (childGone) { failures.push(`[${face}/${sc.id}] web 进程在回合结束前退出`); break }
     }
-    step(finalOk, `[${sc.id}] A 回放通路（零真模型调用完整回放；收尾文本逐字命中；只认本次新写日志）`,
+    step(finalOk, `[${face}/${sc.id}] A 回放通路（零真模型调用完整回放；收尾文本逐字命中；只认本次新写日志）`,
       finalOk ? '' : `回放回合未在 ${TURN_TIMEOUT_MS / 1000}s 内以 completed 走完并让收尾文本（"${SENTINEL}"）落进 assistant 消息——canned 回放未走通`);
 
     // ── B 层：组装请求 diff（persona + 全序列 request/header + 三处 user/message 注入，
@@ -229,16 +237,16 @@ for (const sc of SCENARIOS) {
     if (finalOk) {
       const liveLines = parseLines(replayLogText);
       for (const verdict of compareReplayRequests(fixtureLines, liveLines)) {
-        step(verdict.ok, `[${sc.id}] B·${verdict.id}`, verdict.ok ? verdict.detail.replace(`${verdict.id}: `, '') : verdict.detail);
+        step(verdict.ok, `[${face}/${sc.id}] B·${verdict.id}`, verdict.ok ? verdict.detail.replace(`${verdict.id}: `, '') : verdict.detail);
       }
       // 覆盖面自守（BUG-018 的失败类 = 声明的覆盖 > 实际的覆盖）：两个方向都要响——
       // ① 基线（人审过的录制）不得携带未被比对面覆盖的注入种类：重录把新面静默吸进基线 = 盲区复长；
       // ② 回放里出现基线没有的种类 = 新的模型可见注入面，须先入比对面再重录基线。
       const uncovered = unjudgedInjectionKinds(fixtureLines);
-      step(uncovered.length === 0, `[${sc.id}] B·coverage 基线注入种类均在比对面内`,
+      step(uncovered.length === 0, `[${face}/${sc.id}] B·coverage 基线注入种类均在比对面内`,
         uncovered.length === 0 ? '' : `基线携带未登记注入种类：${uncovered.join(', ')}——先加入 replay-request 的 JUDGED_KINDS 与对应判据，再重录`);
       const drifted = unexpectedInjectionKinds(fixtureLines, liveLines);
-      step(drifted.length === 0, `[${sc.id}] B·coverage 回放无基线外注入种类`,
+      step(drifted.length === 0, `[${face}/${sc.id}] B·coverage 回放无基线外注入种类`,
         drifted.length === 0 ? '' : `回放新增基线未记录的注入种类：${drifted.join(', ')}——重录基线并把该面加入比对面`);
     }
 
@@ -278,7 +286,7 @@ for (const sc of SCENARIOS) {
             .then(() => true).catch(() => false);
         };
         const workspaceOpen = await chooserCleared();
-        step(workspaceOpen, `[${sc.id}] C0a 回放工作区已打开（非工作区选择态）`,
+        step(workspaceOpen, `[${face}/${sc.id}] C0a 回放工作区已打开（非工作区选择态）`,
           workspaceOpen ? '' : '工作区选择态未消失——侧栏会话行不会出现');
         // 侧栏找本次会话（唯一标题；只认左栏可见行——client-load-smoke 同款配方）。点击后验证
         // 对话区真渲染（录制 prompt 文本在场），未开成则试下一个同命行（重排竞态兜底）。
@@ -314,7 +322,7 @@ for (const sc of SCENARIOS) {
             .map((b) => (b.textContent ?? '').trim()).filter((t) => t !== '' && t.length < 24).slice(0, 24);
           return `匹配行 ${0}；可见按钮：${buttons.join(' | ')}；正文：${(document.body?.innerText ?? '').replace(/\n+/g, ' ⏎ ').slice(0, 500)}`;
         });
-        step(opened, `[${sc.id}] C0 回放会话在侧栏可开且对话区真渲染（唯一标题定位 + Chat 页签 + 录制 prompt 在场）`,
+        step(opened, `[${face}/${sc.id}] C0 回放会话在侧栏可开且对话区真渲染（唯一标题定位 + Chat 页签 + 录制 prompt 在场）`,
           openDiag.replace('匹配行 0', `匹配行 ${matchedRows.length}`));
         if (opened) {
           // 等 chat 历史真渲染（工具调用锚点在场——ToolCall 的 DOM 锚 data-chat-call-id）
@@ -353,7 +361,7 @@ for (const sc of SCENARIOS) {
             callsReady = replayCallIds.every((id) => mountedCalls.includes(id));
             if (!callsReady) await sleep(300);
           }
-          step(callsReady, `[${sc.id}] C0b 客户端历史就绪（夹具 tool/call 全挂后才捕获）`,
+          step(callsReady, `[${face}/${sc.id}] C0b 客户端历史就绪（夹具 tool/call 全挂后才捕获）`,
             replayCallIds.length === 0 ? '夹具零 tool/call——就绪无对象' : `挂载 ${mountedCalls.filter((id) => replayCallIds.includes(id)).length}/${replayCallIds.length}`);
           await scrollTo('top');
           await sleep(1000);
@@ -369,7 +377,7 @@ for (const sc of SCENARIOS) {
           const anchors = await page.evaluate(() =>
             Array.from(document.querySelectorAll('[data-chat-call-id]'))
               .map((el) => `${(el.getAttribute('data-chat-call-id') ?? '').slice(0, 14)}:${(el.textContent ?? '').trim().slice(0, 40)}`));
-          step(cardList.length > 0, `[${sc.id}] C1 对话流研究语义卡提取非空（防空语料——空提取 = 假绿）`,
+          step(cardList.length > 0, `[${face}/${sc.id}] C1 对话流研究语义卡提取非空（防空语料——空提取 = 假绿）`,
             `${cardList.length} 卡；chat 调用锚 ${anchors.length} 个${anchors.length > 0 ? `：${anchors.slice(0, 4).join(' / ')}` : ''}`);
           // 「研究状态」页签：展开右栏 + 点 guide 胶囊（client-load-smoke 同款配方）
           const expand = page.getByRole('button', { name: 'Open right sidebar' });
@@ -412,10 +420,10 @@ for (const sc of SCENARIOS) {
               await sleep(400);
             }
           }
-          step(capOk, `[${sc.id}] C2 「研究状态」页签在场（右栏展开 + guide 胶囊可点）`);
-          step(paneRows.length > 0, `[${sc.id}] C3 页签活动行提取非空（防空语料）`, `${paneRows.length} 行`);
+          step(capOk, `[${face}/${sc.id}] C2 「研究状态」页签在场（右栏展开 + guide 胶囊可点）`);
+          step(paneRows.length > 0, `[${face}/${sc.id}] C3 页签活动行提取非空（防空语料）`, `${paneRows.length} 行`);
           step(consoleErrors.filter((t) => t.includes('research-status') || t.includes('deep-research')).length === 0,
-            `[${sc.id}] C4 本包 client 无 console 报错`, consoleErrors.slice(0, 2).join(' | ').slice(0, 200));
+            `[${face}/${sc.id}] C4 本包 client 无 console 报错`, consoleErrors.slice(0, 2).join(' | ').slice(0, 200));
           const EXPECTED = sc.renderExpected;
           const projection = [
             `# ui.expected —— 渲染金标准（scenario: ${scene.scenario}）`,
@@ -435,13 +443,13 @@ for (const sc of SCENARIOS) {
           ].join('\n');
           if (UPDATE_EXPECTED) {
             writeFileSync(EXPECTED, projection);
-            step(true, `[${sc.id}] C5 金标准已重写（--update-expected）`, `卡片 ${cardList.length} · 活动行 ${paneRows.length}——内容需人审后提交`);
+            step(true, `[${face}/${sc.id}] C5 金标准已重写（--update-expected）`, `卡片 ${cardList.length} · 活动行 ${paneRows.length}——内容需人审后提交`);
           } else if (existsSync(EXPECTED)) {
             const expected = readFileSync(EXPECTED, 'utf8');
             const ok = expected === projection;
-            step(ok, `[${sc.id}] C5 渲染金标准逐字一致（卡片 + 活动行）`, ok ? `${cardList.length} 卡 · ${paneRows.length} 行` : diffExcerpt(expected, projection));
+            step(ok, `[${face}/${sc.id}] C5 渲染金标准逐字一致（卡片 + 活动行）`, ok ? `${cardList.length} 卡 · ${paneRows.length} 行` : diffExcerpt(expected, projection));
           } else {
-            step(false, `[${sc.id}] C5 渲染金标准缺席`, `先跑 --update-expected 生成（${EXPECTED}）`);
+            step(false, `[${face}/${sc.id}] C5 渲染金标准缺席`, `先跑 --update-expected 生成（${EXPECTED}）`);
           }
         }
       } finally {
@@ -449,13 +457,14 @@ for (const sc of SCENARIOS) {
       }
     }
   } catch (error) {
-    failures.push(`[${sc.id}] ${error.message}`);
+    failures.push(`[${face}/${sc.id}] ${error.message}`);
   } finally {
     cleanup();
   }
+  }
 }
 
-const ranCount = SCENARIOS.filter((sc) => ONLY === undefined || ONLY === '' || sc.id === ONLY).length;
+const ranCount = SCENES.reduce((n, { scene }) => n + scene.cases.length, 0);
 console.log(failures.length === 0
   ? `\nsnapshot-replay-smoke: ALL PASS（${ranCount} 场景 A 回放通路 + B 组装请求 diff + 声明的渲染金标准${UPDATE_EXPECTED ? '——金标准已重写待人审' : ''}）`
   : `\nsnapshot-replay-smoke: ${failures.length} FAILURE(S)\n${failures.join('\n')}`);
