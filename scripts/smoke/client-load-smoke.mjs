@@ -896,6 +896,19 @@ try {
     step(stripState, '终稿静音条三态之一在场（盘上事实，不编造）',
       stripState ? stripText.slice(0, 40) : `静音条=${JSON.stringify(stripText)}`)
     step(!/drt_[^\s]+\/(question|topics|evidence|drafts)/.test(finalText), '终稿页签不泄漏中间过程路径（负例）')
+    // 页签自带的滚动口（2026-10-20 用户实测报障：vendor `.tabBody` 是 overflow:hidden 的定高
+    // flex 列，页签不自己开滚动口 → 长正文被裁且滚不动）。断言 = 正文容器可溢出且 scrollTop 能动。
+    const scrollProbe = await page.evaluate(() => {
+      const btn = [...document.querySelectorAll('button')].find((b) => (b.textContent ?? '').trim().startsWith('过程'))
+      const root = btn?.parentElement?.parentElement
+      if (root == null) return { ok: false, why: 'no root' }
+      const scroller = [...root.children].find((c) => getComputedStyle(c).overflowY === 'auto')
+      if (scroller == null) return { ok: false, why: 'no scroller' }
+      const overflows = scroller.scrollHeight > scroller.clientHeight + 4
+      scroller.scrollTop = 240
+      return { ok: overflows && scroller.scrollTop > 0, why: `sh=${scroller.scrollHeight} ch=${scroller.clientHeight} top=${scroller.scrollTop}` }
+    })
+    step(scrollProbe.ok, '终稿页签自带滚动口（长正文可滚、不被裁）', scrollProbe.why)
   } else {
     step(false, '终稿端到端：至少一条已交付会话在 UI 里显示 ⑤ 交付门',
       `候选 ${deliveredSessions.length} 条：${deliveredSessions.map((c) => c.title).join(' ｜ ')}`)

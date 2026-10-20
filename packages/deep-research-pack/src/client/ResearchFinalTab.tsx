@@ -213,26 +213,32 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   const stateStyle = pass === false
     ? { color: '#b45309', fontWeight: 600 }
     : undefined
+  // 滚动义务在页签体自己：vendor 的 `.tabBody` 是定高 flex 列且 `overflow: hidden`，
+  // 内容超出即被裁且不可滚（2026-10-20 用户实测报障：终稿页签不滚）。同款约定见
+  // ResearchStatusTab 根容器（2026-10-12 同一类 BUG 的修法）——根吃满高度，正文区自滚，
+  // 静音条固定不随文滚动。
   return (
-    <div style={{ padding: '8px 12px 40px', fontSize: 13.5, lineHeight: 1.75, overflowWrap: 'anywhere' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       {stale && (
-        <div style={BAR}>
+        <div style={{ ...BAR, margin: '8px 12px 0', flexShrink: 0 }}>
           <span style={{ flex: 1 }}>终稿有更新</span>
           <button type="button" style={LINK_BUTTON} onClick={() => { void load(new AbortController().signal) }}>重新读取</button>
         </div>
       )}
-      <div style={STRIP} title={resolved ?? plan.final}>
+      <div style={{ ...STRIP, padding: '3px 12px 7px', flexShrink: 0 }} title={resolved ?? plan.final}>
         <span style={stateStyle}>{state}</span>
         <span style={{ flex: 1 }} />
         <button type="button" style={LINK_BUTTON} onClick={() => { tab.tab.actions.openTab(RESEARCH_STATUS_TAB_KIND) }}>过程 →</button>
       </div>
-      <MarkdownText text={text} labels={MARKDOWN_LABELS} />
-      {!eof && (
-        <div style={{ marginTop: 12, fontSize: 11.5, opacity: 0.6 }}>
-          已加载前 {loadedLines} 行 · <button type="button" style={LINK_BUTTON} onClick={() => { void load(new AbortController().signal, loadedLines + 1, text) }}>继续加载</button>
-        </div>
-      )}
-      {failure !== null && <div style={{ marginTop: 12, fontSize: 11.5, color: '#b00' }}>{failure}</div>}
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', padding: '0 12px 40px', fontSize: 13.5, lineHeight: 1.75, overflowWrap: 'anywhere' }}>
+        <MarkdownText text={text} labels={MARKDOWN_LABELS} />
+        {!eof && (
+          <div style={{ marginTop: 12, fontSize: 11.5, opacity: 0.6 }}>
+            已加载前 {loadedLines} 行 · <button type="button" style={LINK_BUTTON} onClick={() => { void load(new AbortController().signal, loadedLines + 1, text) }}>继续加载</button>
+          </div>
+        )}
+        {failure !== null && <div style={{ marginTop: 12, fontSize: 11.5, color: '#b00' }}>{failure}</div>}
+      </div>
     </div>
   )
 }
