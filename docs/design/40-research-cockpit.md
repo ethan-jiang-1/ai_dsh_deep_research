@@ -33,6 +33,7 @@
 | 流失败恢复指引 | [stream-failure.ts](../../packages/deep-research-pack/src/lib/stream-failure.ts) + ResearchStatusTab.tsx | 末位回合死于上游流失败（MALFORMED_RESPONSE 族）且无新回合接手 → 人话横幅「等一两分钟发『继续』」；折算纯函数，BUG-023 修复① |
 | 品牌（虎鲸 Orca） | [BrandMark.tsx](../../packages/deep-research-pack/src/client/BrandMark.tsx) | 宿主 `sidebar.brand.mark` + `sidebar.brand.name` 两槽的 single occupant（替换内置鱼形 logo 与本地构建标签）——用户定调 2026-10-13 |
 | 研究配置页签 | [ResearchConfigTab.tsx](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) + [library-fold.ts](../../packages/deep-research-pack/src/lib/library-fold.ts) + [method-of-question.ts](../../packages/deep-research-pack/src/lib/method-of-question.ts) + [receipt-fold.ts](../../packages/deep-research-pack/src/lib/receipt-fold.ts) + [text-fold.ts](../../packages/deep-research-pack/src/lib/text-fold.ts) | 右栏页签（D25 期 1 管理中继面 ＋ 2026-10-18 显式化期）：四区 = ① 本次研究（本次采用＋来源＋换一条，读 question.md 方法节五态）② 内置打法（只读卡：一句话 ＋ 什么时候用它 ＋ 标本位）③ 我的偏好库（`method-library.md` 投影）④ 底线条（六条共同底线 ＋ 两个定制入口）＋ 就地回执三态（已发送／Lead 已回话／已落盘对账）；管理指令经 `session/prompt` 交 Lead（steer→queue 降级）——**面板不直写文件**；显示面与 skill 四处同钉（内置表／推荐映射／共同底线／两入口逐字，tests/library-fold 把守） |
+| 终稿页签 | [ResearchFinalTab.tsx](../../packages/deep-research-pack/src/client/ResearchFinalTab.tsx) + [final-target.ts](../../packages/deep-research-pack/src/lib/final-target.ts) | 右栏页签：**接管 `drt_<slug>/final.md` 的文件地址**（`extension` 带；交付卡片、结句内联引用、Files 树落到同一页签）——交付后整篇渲染 run 根 `final.md`。静音条三态由盘上事实承载（`已交付 · vN` / `未定稿` / `审查未过`），`过程 →` 回研究状态。读面是一张定表（`final.md` / `review.md` / `final/`），路径按三位置回退（原位 → `archive/` → `_abandoned/`） |
 | 研究语义工具卡 | [ResearchToolCard.tsx](../../packages/deep-research-pack/src/client/ResearchToolCard.tsx) + [tool-card.ts](../../packages/deep-research-pack/src/lib/tool-card.ts) | 对话流卡片：`spawn_teammate` → 组队卡、`web_search` → 检索卡（2 张） |
 | 挂起显性化 | [index.ts](../../packages/deep-research-pack/src/client/index.ts)（`revealStatusTab`） | pending false→true 迁移时 `openTab` 右栏自动展开；页签 dock 折叠态保持挂载（观察者常在） |
 | keyed 常量 | [keys.ts](../../packages/deep-research-pack/src/client/keys.ts) | 字面量唯一正本（`client-keys` 门禁对账——拼错不报错、永不渲染） |
@@ -59,6 +60,7 @@
 | [activity-fold](../../packages/deep-research-pack/src/lib/activity-fold.ts) | journal 事件 → 活动行 | 🔍 检索 / 👥 派出与队员作业中（wait_agent，连续折叠）/ 💬 成员 / 📦 交付；markdown 源标记与原始事件类型名不出正文（噪音过滤，尾部 30 行） |
 | [bundle-bind](../../packages/deep-research-pack/src/lib/bundle-bind.ts) | journal 事件 → 本会话绑定的 run slug + 绑定强度 | 只认 `tool/call` 参数路径里的 `drt_<slug>/`；**写强读弱**——write/edit 命中直接定绑，仅读命中兜底（立项预检读旧 bundle 的错绑防线，2026-09-28 首跑实证） |
 | [tool-card](../../packages/deep-research-pack/src/lib/tool-card.ts) | call/result 切片 → 卡片状态 | running / ok / error / stopped |
+| [final-target](../../packages/deep-research-pack/src/lib/final-target.ts) | journal 交付事件 / 文件地址 / 终稿路径 → 本次交付 + 会话文件 + 读面定表 + 自动打开判据 | `present`（`deliverables/presented`）是交付的机械判据（node-gate 门②）；`final.md` 在场只说明"有终稿可审"（综合步就落盘），不是交付。地址认领只收三个位置（根 / `archive/` / `_abandoned/`），`drafts/final.md` 与绝对域全拒；交付记录的位置失效时按三位置回退（`finalCandidates`）；自动打开 = `shouldOpenFinal`（有交付 / `callId` 未开过 / 焦点不在可编辑元素） |
 | [member-activity](../../packages/deep-research-pack/src/lib/member-activity.ts) | 队员 journal 事件 → 检索/抓取/出错动作行 + 全量计数 | 粒度定夺 = [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)（2026-10-10 用户三问：文件读写不入流）；失败行剥 "Error: " 工程前缀；行截尾窗与 activity-fold 同款 |
 | [brief-fold](../../packages/deep-research-pack/src/lib/brief-fold.ts) | 既有事实源投影 → 业务摘要五问 | 输入面**不含**证据计数与工具调用数（计数在类型层面进不了完成态文案，keyless 禁词单测钉）；九态优先级 = 挂起 > 立项预检窗 > 未绑定 > 审查 FAIL > 已交付 > 推进中；派生不出的状态显式缺省，不虚构 |
 | [review-readiness](../../packages/deep-research-pack/src/lib/review-readiness.ts) | review.md 全文 → 终局 readiness 三态 | 只认**行首**判定行、取最后一条：文末附录保留的轮次血统（如首轮 `readiness: FAIL`）是行内引用，不得夺权；空模板 `PASS \| FAIL`、无判定行或输入畸形 → `null`（不猜）。驾驶舱、仪表盘与 client-load-smoke 直接消费；node-gate 在纯 `.mjs` 边界镜像同一规则并由 `gateBundle` 回归覆盖 |
@@ -73,6 +75,12 @@
   （会话工作区文件）喂 bundle 渐进面（失败降级 null + `console.error` 便于冒烟抓取）；
 - **0.1.7 实证坑**：remote 命名空间**两级都要声明**（`remote` + `remote.session`），
   只声明一级必炸；
+- **交付判据口径**：终稿的"已交付"只认 `present` 见证（`deliverables/presented`，门②）；`final.md`
+  在场是"可审"不是"已交"——⑤ 的措辞与门都按此分流（`brief-fold` 的 `delivered` 输入同步改用交付事实）；
+- **交付监听（终稿的出现时机）**：插件层跟随**在屏会话**（`sidebarRight.mounted`）的 journal，
+  只认 **live 帧**里的 `deliverables/presented`（开场快照是回合窗口，回放触发 = 每次重载都弹）；
+  指向终稿 → `openResource(文件地址)` 一次。`callId` 去重（关掉不再弹）、焦点在可编辑元素时不打断、
+  只对在屏会话动作——这是本包唯一一处"替用户打开东西"；
 - **接线三件套**：`package.json` 的 `dsh.client`（platform: web + 平台 inject）↔
   `exports["./client"]` ↔ [cordis.patch.yml](../../packages/deep-research-pack/cordis.patch.yml)
   的 `research-client` insert 行；
@@ -93,7 +101,7 @@
 
 | 面 | 命令 | 断言什么 |
 |---|---|---|
-| keyless 真浏览器 | `client-load-smoke` | 插件零失败 + 页签渲染 + 渐进面与**磁盘真值对账**（证据计数/交付态/问题行）+ 锚点轨道与诚实线对账（盘侧独立重算）+ 未绑定负样本 |
+| keyless 真浏览器 | `client-load-smoke` | 插件零失败 + 页签渲染 + 渐进面与**磁盘真值对账**（证据计数 / 交付态〔= `present` 见证〕/ 问题行）+ 锚点轨道与诚实线对账（盘侧独立重算）+ 未绑定负样本 + 终稿页签端到端（⑤ 交付门 → 正文与盘侧首标题对账） |
 | 真模型档 | `client-hitl-smoke` | 活标题翻转 + 横幅 + 挂起迁移 → 右栏自动展开（端到端） |
 | keyless 单测 | `pnpm test` | 折算谓词纯函数（§2 所列折算各有测试文件） |
 
@@ -117,6 +125,14 @@
 - **工具卡只 2 张**：`team_task_*` 等协调类工具不进对话渲染流（harness 排除），团队观察
   由 `ui-agent-team` 任务板承担；
 - 活标题与页签体各开一条 follow 流共用 WebSocket 数据面（v1 接受，合流是后续优化）；
+- 终稿页签的标题固定「终稿」（不做活标题）：同一会话先后跑两场研究会有两个同名页签，靠静音条的
+  run 路径（hover）与正文 H1 区分——真咬到再升活标题；
+- 交付门的判据是 `present` 事件在 journal 窗口内（回合窗口 ≈ 最近 50 条消息）：窗口外的老交付
+  只显示承诺行、不显示「✅ 已交付」——宁可少说，不虚报；
+- 终稿路径按三位置回退读（交付记录的是当时位置，bundle 归档/停放后原路径失效——首条端到端
+  实测即撞上 `drt_anthropic-claude-release-line-timeline` 已归档）；
+- 自动打开只在**现场**交付事件上触发（回放不触发），keyless 冒烟无真模型交付：该路径的接线
+  只有 `shouldOpenFinal` 的 keyless 证据，端到端观察留待下一场真实 run；
 - 从未开过页签的会话无 dock 观察者——挂起信号由 vendor 侧栏 Answer 徽标兜底；
 - 版本兼容面窄：只声明 `dsh-v0.2.1-rc.2`。
 

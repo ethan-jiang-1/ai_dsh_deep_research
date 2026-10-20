@@ -37,11 +37,12 @@ import { terminalReadiness } from '../lib/review-readiness.ts'
 import { foldActivityRows, type ActivityRow } from '../lib/activity-fold.ts'
 import { useMemberActivity } from './research-status/useMemberActivity.ts'
 import type { MemberActivitySummary } from '../lib/member-activity.ts'
-import type { ResearchStatusTabInjected, ResearchStatusTabProps } from './research-status/types.ts'
+import type { ResearchStatusTabProps, ResearchStatusTitleInjected } from './research-status/types.ts'
 import { sessionBindingOf, type SessionBinding } from '../lib/bundle-bind.ts'
 import { streamFailureOf } from '../lib/stream-failure.ts'
+import { latestFinalDelivery } from '../lib/final-target.ts'
 import type { TeamProjection } from '@deepseek-ai/dsh-experimental-agent-team/client'
-export type { FollowTarget, JournalFrame, ResearchStatusTabInjected, ResearchStatusTabProps } from './research-status/types.ts'
+export type { FollowTarget, JournalFrame, ResearchStatusTabInjected, ResearchStatusTabProps, ResearchStatusTitleInjected } from './research-status/types.ts'
 
 /** bundle 渐进面模型（问题行 + 步骤 + 证据 + 交付）。 */
 interface BundleFace {
@@ -231,6 +232,10 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
 
   // 锚点 = 混合折算（尾窗约束的实测产物，RFC cockpit-flow-face）：passed 态由文件事实承载
   // （question.md/final.md 在场），pending 态由 journal 尾窗承载——face 缺席时退化为纯尾窗判定。
+  // 交付事实（issue 2026-10-19）：`present` 声明 = 交付的机械判据（node-gate 门②）；`final.md`
+  // 在场只说明"有终稿可审"（综合步就落盘），两者不可互相顶替——⑤ 的措辞与门都由此分流。
+  const delivery = useMemo(() => latestFinalDelivery(journalEvents), [journalEvents])
+
   // 流畸形死亡（BUG-023 修复①）：journal 尾窗折算，与 HITL 挂起互斥显示（挂起时主横幅让位）。
   const streamFailure = useMemo(() => streamFailureOf(journalEvents), [journalEvents])
   const anchors = useMemo(
@@ -260,12 +265,12 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       currentStage: face !== null ? steps.find((s) => s.state === 'current')?.label ?? null : null,
       findingsPresent: (face?.steps.find((s) => s.key === 'findings')?.state === 'done'),
       reviewFail: face?.reviewFail ?? null,
-      delivered: face?.delivered ?? false,
+      delivered: delivery !== null,
       versions: face?.versions ?? 0,
       lastDecisionKind: null,
       openItems: [],
     }),
-    [unbound, binding.slug, kickoffHold, hitl.pending, pendingAnchor, face, steps],
+    [unbound, binding.slug, kickoffHold, hitl.pending, pendingAnchor, face, steps, delivery],
   )
   const anchorChip = (a: RunAnchor) => (
     <span key={a.key} style={{ padding: '2px 8px', borderRadius: 4, fontWeight: a.state === 'pending' ? 700 : 400, background: a.state === 'pending' ? '#f59e0b33' : a.state === 'passed' ? '#22c55e22' : '#0000000d', color: a.state === 'pending' ? '#b45309' : a.state === 'passed' ? '#16a34a' : '#888' }}>
@@ -356,11 +361,21 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       {face?.questionLine !== null && face?.questionLine !== undefined && (
         <div style={{ fontWeight: 600, marginBottom: 6, lineHeight: 1.4 }}>{face.questionLine}</div>
       )}
-      {/* ⑤ 证据概览 + 交付状态 + 版本（final/ 记账 ≥v2 = 发生过证据扩张 rerun） */}
+      {/* ⑤ 证据概览 + 交付状态 + 版本（final/ 记账 ≥v2 = 发生过证据扩张 rerun）
+         交付态 = `present` 见证（门②），不是 `final.md` 在场——后者在综合步就有，是"可审"不是"已交"。
+          已交付 → 门（读终稿）；未交付 → 承诺（终稿将在交付后自动出现在右栏，许在用户已经在看的地方）。 */}
       {face !== null && (
-        <div style={{ display: 'flex', gap: 12, marginBottom: 10, fontSize: 13, opacity: 0.85 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10, fontSize: 13, opacity: 0.85 }}>
           <span>证据 {face.evidenceCount} 份</span>
-          {face.delivered && <span style={{ color: '#16a34a', fontWeight: 600 }}>✅ 已交付</span>}
+          {delivery !== null && <span style={{ color: '#16a34a', fontWeight: 600 }}>✅ 已交付</span>}
+          {delivery !== null && props.sessionId !== undefined && (
+            <button
+              type="button"
+              onClick={() => { props.openFinal(props.sessionId as NonNullable<typeof props.sessionId>, delivery.path) }}
+              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}
+            >读终稿 →</button>
+          )}
+          {delivery === null && <span style={{ opacity: 0.6 }}>终稿将在交付后自动出现在右栏</span>}
           {face.versions >= 2 && <span style={{ fontWeight: 600 }}>v{face.versions}</span>}
         </div>
       )}
@@ -422,7 +437,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
 }
 
 /** 活标题（HITL 挂起时"研究状态 · ⏳ 等你拍板"）——共享 journal 流折算。 */
-export function ResearchStatusTitle(props: PropsRuntime<'sidebar.right.pane.tab.title'> & ResearchStatusTabInjected): ReactNode {
+export function ResearchStatusTitle(props: PropsRuntime<'sidebar.right.pane.tab.title'> & ResearchStatusTitleInjected): ReactNode {
   const [hitl, setHitl] = useState<HitlState>({ pending: false, since: undefined })
   const sessionId = props.sessionId
   useEffect(() => {

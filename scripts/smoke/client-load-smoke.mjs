@@ -36,13 +36,14 @@ import { scrubbedEnv } from '../lib/env.mjs'
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs'
 import { launchChromium, loadChromium } from '../lib/playwright.mjs'
-import { readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
+import { clientHistoryWindow, readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
 import { prepareClientLoadReference } from './client-load-reference.mjs'
-import { expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES } from '../lib/web-ui-nav.mjs'
+import { expandGroup, openSessionById, openSessionByTitle, SIDEBAR_GROUP_CANDIDATES } from '../lib/web-ui-nav.mjs'
 import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { deriveBusinessBrief } from '../../packages/deep-research-pack/src/lib/brief-fold.ts'
 import { foldActivityRows } from '../../packages/deep-research-pack/src/lib/activity-fold.ts'
 import { streamFailureOf } from '../../packages/deep-research-pack/src/lib/stream-failure.ts'
+import { latestFinalDelivery } from '../../packages/deep-research-pack/src/lib/final-target.ts'
 import { SELFTEST_LIBRARY } from '../lib/selftest-library.mjs'
 import { METHOD_PRESETS_SKILL_PATH, methodPresetsFromSkillFile } from '../lib/method-presets.mjs'
 
@@ -138,7 +139,7 @@ if (sessionGroup === undefined) {
   console.error('client-load-smoke: dev home sessions 里没有 research-workspace 会话组——先 source dev/env.sh 并跑一场 run')
   process.exit(2)
 }
-const { boundSession: initialBoundSession, unboundCandidates, fileFaceOf } = prepareClientLoadReference({ root: ROOT, sessionsRoot, sessionGroup })
+const { boundSession: initialBoundSession, unboundCandidates, deliveredSessions, fileFaceOf } = prepareClientLoadReference({ root: ROOT, sessionsRoot, sessionGroup })
 let boundSession = initialBoundSession
 
 // vendor follow 开窗快照的盘侧复刻（对账同窗，勿折全量日志）：语义 = api/session-controller
@@ -147,25 +148,7 @@ let boundSession = initialBoundSession
 // 起点更早则取组起点；seq = 稠密零基下标）定为切点，页 = 切点到末尾的**全部**事件（非
 // 消息事件一并含入）——窗口远大于「50 条事件」。pack client follow 未带 maxMessages →
 // UI 活动流折的正是这窗（2026-10-13 实红：全量折算 25 行 vs 窗折算 16 行 = UI 实测）。
-const HISTORY_MESSAGE_WINDOW = 50
-const clientHistoryWindowOf = (events) => {
-  let counted = 0
-  let cut = 0
-  for (let i = events.length - 1; i >= 0; i--) {
-    const e = events[i]
-    if ((e?.type === 'user/message' || e?.type === 'assistant/message') && e?.surfaceOp === 'append') {
-      counted++
-      if (counted >= HISTORY_MESSAGE_WINDOW) {
-        cut = i
-        if (Array.isArray(e?.sourceEventSeqs)) {
-          for (const s of e.sourceEventSeqs) if (typeof s === 'number' && s < cut) cut = s
-        }
-        break
-      }
-    }
-  }
-  return events.slice(cut)
-}
+const clientHistoryWindowOf = clientHistoryWindow
 const expectedFace = boundSession !== null ? fileFaceOf(boundSession.slug) : null
 
 // 锚点断言的取态源标注（BUG-003 卡"牵出的失败类"收口）：步骤/done = deriveSteps（lib 同源）·
@@ -365,7 +348,14 @@ try {
           }
           faceNow = fileFaceOf(boundSession.slug) ?? expectedFace
           const anchors = deriveAnchors(boundSession.events, { question: faceNow.hasQuestion, delivered: faceNow.delivered })
-          return { evidence: faceNow.evidenceCount, delivered: faceNow.delivered, passed: anchors.filter((a) => a.state === 'passed').length, anchors }
+          // 交付态 = present 见证（与页签同源折算 = lib/final-target）；final.md 在场仍是步态/锚点
+          // 的输入（交付阶段 current），两者不互相顶替——2026-10-20 起 UI ⑤ 的 ✅ 只认 present。
+          const delivery = latestFinalDelivery(clientHistoryWindowOf(boundSession.events))
+          return {
+            evidence: faceNow.evidenceCount, delivered: delivery !== null, delivery,
+            deliveredFile: faceNow.delivered, base: faceNow.base,
+            passed: anchors.filter((a) => a.state === 'passed').length, anchors,
+          }
         }
         let diskSide = diskSideNow()
         let uiFace = parseUiFace(seg)
@@ -431,8 +421,10 @@ try {
           '重入点描边（回边落点 = 挖掘；交付审阅非 upcoming 才描边）', `outline=${rail.reentry ?? '无'}（loopOn=${loopExpected}）`)
         step(Number.isInteger(uiFace.evidence) && uiFace.evidence === faceNow.evidenceCount,
           '证据计数 = 磁盘真值（会话绑定 + 根/archive 两位置）', `UI ${uiFace.evidence} / 磁盘 ${faceNow.evidenceCount}`)
-        const delivOk = uiFace.delivered === faceNow.delivered
-        step(delivOk, '交付状态 = 磁盘真值', faceNow.delivered ? 'final.md 在场 → ✅ 已交付' : '无 final.md → 如实不显')
+        const delivOk = uiFace.delivered === diskSide.delivered
+        step(delivOk, '交付态 = present 见证（门②）而非 final.md 在场',
+          diskSide.delivered ? `present → ✅ 已交付 · 读终稿（${diskSide.delivery.path}）`
+            : `无 present → 只显示承诺行（final.md 在场=${diskSide.deliveredFile}）`)
         // 锚点入轨断言（RFC cockpit-flow-face）：轨道渲染 + 诚实线计数与盘侧文件事实对账
         const railOk = seg.includes('◆立项确认') && seg.includes('◆交付审阅')
         step(railOk, '流程轨道渲染（◆立项确认 + ◆交付审阅在场）')
@@ -468,7 +460,9 @@ try {
           currentStage: faceNow.steps.find((s) => s.state === 'current')?.label ?? null,
           findingsPresent: faceNow.steps.find((s) => s.key === 'findings')?.state === 'done',
           reviewFail: faceNow.reviewFail,
-          delivered: faceNow.delivered,
+          // delivered = present 见证（组件同源输入 = lib/final-target 的窗口折叠），不是 final.md
+          // 在场——两者在综合完成到交付之间不同，混用会在这段窗口里假红/假绿。
+          delivered: diskSide.delivered,
           versions: faceNow.versions,
           lastDecisionKind: null, // 当前数据面未读——组件同款如实缺省，不猜
           openItems: [],
@@ -775,6 +769,88 @@ try {
     } else {
       console.log('  note  研究配置页签探针：无会话可开（跳过——先有任一会话再验）')
     }
+  }
+
+  // ── 终稿页签端到端（issue 2026-10-19）──────────────────────────────────────────
+  // 独立目标 = dev home 里已交付的冷会话。为什么独立：主渐进面断言绑的会话可能在飞（present
+  // 未发生），而终稿的出现时机只在交付之后——拿在飞 run 验它只会永远 SKIP。
+  // 选取方式是**在 UI 里试**而不是盘侧预判：状态页签的开场快照窗口（≥50 消息且跨 ≥2 回合）
+  // 与盘侧复刻不必逐事件等价，盘侧"窗口内有 present"不保证 UI 这一窗里也有（2026-10-20 实测
+  // 两跑两个候选一有一无）。所以逐个候选打开 → 找门 → 找到即验。
+  // 到达会话的两条路：按标题（clickRowByText，自带 Show more 深展开）→ 仍不在则点工作区行展开
+  // 该组（左栏按工作区分组、手风琴式；组收起时会话行根本不进 DOM）。
+  const expandResearchWorkspace = async () => {
+    const rows = page.locator('[data-row-key^="workspace:"]')
+    const n = await rows.count()
+    for (let i = 0; i < n; i++) {
+      const el = rows.nth(i)
+      const t = ((await el.textContent()) ?? '').trim()
+      if (t.includes('research-workspace')) {
+        await el.click({ timeout: 8_000 }).catch(() => {})
+        await wait(2_500)
+        return true
+      }
+    }
+    return false
+  }
+  const openStatusTab = async () => {
+    const expandBtn = page.getByRole('button', { name: 'Open right sidebar' })
+    if (await expandBtn.count() > 0 && await expandBtn.first().isVisible().catch(() => false)) {
+      await expandBtn.first().click({ timeout: 8_000 }).catch(() => {})
+      await wait(1_500)
+    }
+    const capsuleVisible = async () => page.getByRole('button', { name: /研究状态/ }).first().isVisible().catch(() => false)
+    const chip = page.getByRole('tab', { name: /研究状态/ }).first()
+    if (await chip.isVisible().catch(() => false)) { await chip.click({ timeout: 5_000 }).catch(() => {}); return true }
+    if (await capsuleVisible()) { await page.getByRole('button', { name: /研究状态/ }).first().click({ timeout: 5_000 }).catch(() => {}); return true }
+    const addTab = page.getByRole('button', { name: /^(New tab|新标签页)$/ }).first()
+    if (await addTab.isVisible().catch(() => false)) {
+      await addTab.click({ timeout: 5_000 }).catch(() => {})
+      await wait(1_500)
+      if (await capsuleVisible()) { await page.getByRole('button', { name: /研究状态/ }).first().click({ timeout: 5_000 }).catch(() => {}); return true }
+    }
+    return false
+  }
+  let deliveredTarget = null
+  let doorFound = false
+  for (const candidate of deliveredSessions) {
+    let opened = await clickRowByText(candidate.title)
+    if (!opened) { await expandResearchWorkspace(); opened = await clickRowByText(candidate.title) }
+    if (!opened) opened = (await openSessionById(page, candidate.sessionId, candidate.title)).found
+    if (!opened) continue
+    await wait(4_000)
+    if (!(await openStatusTab())) continue
+    await wait(5_000)
+    // 交付门来自 journal 流（present 事件），有界等待（≤15s）
+    const door = page.getByRole('button', { name: /读终稿/ }).first()
+    for (let i = 0; i < 5 && !doorFound; i++) {
+      doorFound = await door.isVisible().catch(() => false)
+      if (!doorFound) await wait(3_000)
+    }
+    if (doorFound) { deliveredTarget = candidate; break }
+  }
+  if (deliveredTarget !== null && doorFound) {
+    step(true, '交付目标会话可开且 ⑤ 交付门在场（present 见证）', `${deliveredTarget.title} → ${deliveredTarget.path}`)
+    await page.getByRole('button', { name: /读终稿/ }).first().click({ timeout: 6_000 }).catch(() => {})
+    await wait(4_000)
+    const finalText = await paneTextOf()
+    const base = fileFaceOf(deliveredTarget.slug)?.base ?? null
+    const finalBody = typeof base === 'string' ? readFileSync(join(base, 'final.md'), 'utf8') : ''
+    // 首标题对账：两侧都剥掉 markdown 记号再比（H1 里的 `code` / **强调** 渲染后不留记号，
+    // 拿原文直比会把"渲染正确"判成红——2026-10-20 实测）。
+    const normalize = (text) => text.replace(/[\s*`#>_[\]()|\-—–:：]/g, '')
+    const heading = normalize((finalBody.split('\n').find((l) => l.trim().startsWith('#')) ?? '').replace(/^#+\s*/, '')).slice(0, 12)
+    const tabTitles = await page.evaluate(() => [...document.querySelectorAll('[role="tab"]')].map((n) => (n.textContent ?? '').trim()))
+    const onFinalTab = tabTitles.some((t) => t.includes('终稿'))
+    step(onFinalTab, '交付门点开 → 页签标题「终稿」（extension 带接管了文件地址）', `tabs=${JSON.stringify(tabTitles)}`)
+    step(heading !== '' && normalize(finalText).includes(heading), '终稿页签渲染 final.md 正文（与盘侧首标题对账）', heading)
+    const stripState = /已交付 · v\d|未定稿|审查未过/.test(finalText)
+    step(stripState, '终稿静音条三态之一在场（盘上事实，不编造）',
+      stripState ? '' : finalText.slice(-240).replace(/\s+/g, ' '))
+    step(!/drt_[^\s]+\/(question|topics|evidence|drafts)/.test(finalText), '终稿页签不泄漏中间过程路径（负例）')
+  } else {
+    step(false, '终稿端到端：至少一条已交付会话在 UI 里显示 ⑤ 交付门',
+      `候选 ${deliveredSessions.length} 条：${deliveredSessions.map((c) => c.title).join(' ｜ ')}`)
   }
 
   // ── 自测例库工作区（2026-10-13 用户委托自测轮 → 固化为常驻断言）：抛弃型工作区 + 12 形态

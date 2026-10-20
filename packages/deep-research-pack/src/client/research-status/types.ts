@@ -27,6 +27,13 @@ export interface ResearchStatusTabInjected {
   readonly readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) => Promise<string | null>
   /** 挂起显性化：pending 迁移时由页签体调用（openTab——右栏同步骤展开）。 */
   readonly revealStatusTab: () => void
+  /** 终稿门：按会话 + 终稿相对路径打开「终稿」页签（文件地址；同地址幂等，已开则聚焦）。 */
+  readonly openFinal: (sessionId: SessionId, path: string) => void
+}
+
+/** 活标题注入面：只需要 journal 流（挂起谓词）——标题不读文件、不开面。 */
+export interface ResearchStatusTitleInjected {
+  readonly follow: (target: FollowTarget, signal: AbortSignal) => AsyncGenerator<JournalFrame>
 }
 
 /** 槽标准 props + 注入面。 */

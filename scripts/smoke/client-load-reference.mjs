@@ -1,10 +1,11 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs'
+import { clientHistoryWindow, readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs'
 import { sessionBundleOf } from '../../packages/deep-research-pack/src/lib/bundle-bind.ts'
 import { deriveSteps, latestRunVersion } from '../../packages/deep-research-pack/src/lib/run-fold.ts'
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
+import { latestFinalDelivery } from '../../packages/deep-research-pack/src/lib/final-target.ts'
 
 /**
  * 从 dev home 会话与研究 bundle 盘上事实建立 client-load 冒烟的参考对象。
@@ -29,12 +30,16 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
 
   const unboundCandidates = []
   const candidates = []
-  for (const { logPath, m } of readdirSync(join(sessionsRoot, sessionGroup))
+  // 终稿端到端的独立目标：dev home 里最新一场**已交付**（journal 有 present）的冷会话。
+  // 为什么独立：渐进面断言绑的会话可能在飞——终稿只在交付之后出现，不能拿在飞 run 验它。
+  const deliveredSessions = []
+  let scanned = 0
+  for (const { logPath, m, sessionId } of readdirSync(join(sessionsRoot, sessionGroup))
     .map((d) => {
       const logPath = resolveSessionLog(join(sessionsRoot, sessionGroup, d))
       let m = 0
       try { if (logPath) m = statSync(logPath).mtimeMs } catch { /* 缺席日志不作为候选 */ }
-      return { logPath, m }
+      return { logPath, m, sessionId: d }
     })
     .sort((a, b) => b.m - a.m)) {
     if (m === 0 || logPath === null) continue
@@ -51,18 +56,36 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
     // （当日实红：绑到在飞 run 后 UI NaN / 行数漂移）。两者只出绑定候选；未绑定负样本不受限。
     const probeTitled = title === '渐进面探针会话'
     const stillHot = Date.now() - m < 30 * 60_000
+    // 交付目标必须落在**客户端窗口内**：follow 开场快照 = 最近 50 条消息，窗口外的交付在状态页签
+    // 里看不见（只显示承诺行）——拿全量日志选目标会选到"历史上交付过、但这会儿看不见"的会话。
+    // `tail` = 交付事件离日志末尾的距离（越小越新），选取顺序按它排。
+    const windowed = clientHistoryWindow(events)
+    const delivery = latestFinalDelivery(windowed)
+    // 窗口内还必须**绑得上 bundle**（状态页签的会话绑定也只在窗口里认）：否则 ⑤ 区整个不渲染，
+    // 目标会话打开了也看不到交付门（2026-10-20 实测：全量日志有绑定、窗口内没有 → 未绑定态）。
+    if (slug !== undefined && sessionBundleOf(windowed) === slug
+      && delivery !== null && !probeTitled && !stillHot && deliveredSessions.length < 8) {
+      let tail = Number.POSITIVE_INFINITY
+      for (let i = windowed.length - 1; i >= 0; i--) {
+        if (latestFinalDelivery([windowed[i]]) !== null) { tail = windowed.length - 1 - i; break }
+      }
+      deliveredSessions.push({ sessionId, title, slug, path: delivery.path, eventCount: events.length, tail })
+    }
     if (slug !== undefined) {
       // 绑定但被排除（探针壳 / 在飞）不进任何候选——塞进未绑定候选会污染负样本（当日实红：
       // 点到绑定探针 → 渐进面无提示行）
       if (!probeTitled && !stillHot) candidates.push({ title, slug, events, logPath, eventCount: events.length, tailAskPending: foldHitlPending(events).pending })
     } else if (unboundCandidates.length < 5) unboundCandidates.push({ title })
-    if (candidates.length >= 5 && unboundCandidates.length >= 1) break
+    scanned++
+    if (candidates.length >= 5 && unboundCandidates.length >= 1 && deliveredSessions.length >= 3) break
+    if (scanned >= 150) break
   }
   // 绑定 = 近窗内（新→旧前 5 个 slug 会话）**富度地板之上取最新**：观察面断言的意图对象是
   // 真实 run 的渐进面，而一次性短会话（录制/红证探针/收尾判终态）事件数只有真实 run 的零头
   // （BUG-001 同族：期望随绑定态漂移——第三例即短会话被绑定）。地板按事件数划线，取最新
   // 保证 GUI 侧栏可见性（旧富会话可能被侧栏窗口挤出——实红教训）。
   const RICH_FLOOR = 60
+  deliveredSessions.sort((a, b) => a.tail - b.tail)
   const boundSession = (() => {
     const rich = candidates.filter((c) => c.eventCount >= RICH_FLOOR)
     const pool = rich.length > 0 ? rich : candidates
@@ -121,5 +144,5 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
     return { base, evidenceCount, delivered: names.has('final.md'), hasQuestion: names.has('question.md'), firstLine, questionLine, steps, reviewFail, versions }
   }
 
-  return { boundSession, unboundCandidates, fileFaceOf }
+  return { boundSession, unboundCandidates, deliveredSessions, fileFaceOf }
 }

@@ -9,6 +9,24 @@ export const RESEARCH_TAB_KEY = 'dsh-deep-research-pack/research-status'
 /** 「研究配置」页签（D25 管理中继面）：同槽第二 key。 */
 export const RESEARCH_CONFIG_TAB_KEY = 'dsh-deep-research-pack/research-config'
 
+/** 「研究状态」页签的 kind（openTab 用；同页签类型注册的 discriminator）。 */
+export const RESEARCH_STATUS_TAB_KIND = 'research-status'
+
+/** 「研究配置」页签的 kind（openTab 用）。 */
+export const RESEARCH_CONFIG_TAB_KIND = 'research-config'
+
+/** 「终稿」页签：接管 `drt_<slug>/final.md` 文件地址的页签类型 id（= 槽体 key）。 */
+export const RESEARCH_FINAL_TAB_KEY = 'dsh-deep-research-pack/research-final'
+
+/** 「终稿」页签的 kind（页签类型 discriminator；注册与路由同值）。 */
+export const RESEARCH_FINAL_KIND = 'research-final'
+
+/** 「终稿」认领的地址 glob（含分隔符 → 整路径匹配；认领范围另由 canOpen 收窄到三个位置）。 */
+export const RESEARCH_FINAL_PATTERN = '**/final.md'
+
+/** 「终稿」认领的地址 glob（无分隔符 → 按 basename 任意深度匹配，与上一行互补）。 */
+export const RESEARCH_FINAL_PATTERN_ROOT = 'final.md'
+
 /** 「研究状态」页签的 keyed 槽名（sidebar.right.pane.tab）。 */
 export const RESEARCH_PANE_SLOT = 'sidebar.right.pane.tab'
 

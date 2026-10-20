@@ -167,3 +167,34 @@ export function readSessionEvents(logPath) {
     return { readable: false, events: [] }
   }
 }
+
+/** 客户端 follow 开窗快照的盘侧复刻（对账同一窗口）：语义 = api/session-controller
+ *  `paginate` + `DEFAULT_MAX_MESSAGES = 50`——从日志末尾倒序数 50 条 surface append 消息事件
+ *  （user/message | assistant/message），第 50 条处（其 sourceEventSeqs 组起点更早则取组起点；
+ *  seq = 稠密零基下标）定为切点，页 = 切点到末尾的全部事件（非消息事件一并含入）。
+ *  唯一正本：client-load-smoke 与交付目标选取（client-load-reference）共用——两处各写一份
+ *  就是"同一判据两版实现"。 */
+export const CLIENT_HISTORY_MESSAGE_WINDOW = 50
+
+/**
+ * @param {readonly any[]} events - 会话日志事件（seq 序）。
+ * @returns {any[]} 客户端开场快照可见的事件窗。
+ */
+export function clientHistoryWindow(events) {
+  let counted = 0
+  let cut = 0
+  for (let i = events.length - 1; i >= 0; i--) {
+    const e = events[i]
+    if ((e?.type === 'user/message' || e?.type === 'assistant/message') && e?.surfaceOp === 'append') {
+      counted++
+      if (counted >= CLIENT_HISTORY_MESSAGE_WINDOW) {
+        cut = i
+        if (Array.isArray(e?.sourceEventSeqs)) {
+          for (const s of e.sourceEventSeqs) if (typeof s === 'number' && s < cut) cut = s
+        }
+        break
+      }
+    }
+  }
+  return events.slice(cut)
+}
