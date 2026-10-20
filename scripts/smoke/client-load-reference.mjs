@@ -33,6 +33,9 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
   // 终稿端到端的独立目标：dev home 里最新一场**已交付**（journal 有 present）的冷会话。
   // 为什么独立：渐进面断言绑的会话可能在飞——终稿只在交付之后出现，不能拿在飞 run 验它。
   const deliveredSessions = []
+  // 标题频次：dev home 里存在多份近同名会话（「…发布线跟踪/追踪」四变体），按标题点开
+  // 必然可能点到另一条——绑定对象优先选**标题唯一**的候选（2026-10-20 实测假红根因）。
+  const titleCounts = new Map()
   let scanned = 0
   for (const { logPath, m, sessionId } of readdirSync(join(sessionsRoot, sessionGroup))
     .map((d) => {
@@ -47,7 +50,17 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
     if (!readable || !hasTurns(events) || !isTopLevel(events)) continue
     const title = lastTitleOf(events)
     if (title === null || title.trim() === '') continue
-    const slug = sessionBundleOf(events)
+    titleCounts.set(title, (titleCounts.get(title) ?? 0) + 1)
+    // 绑定谓词按**客户端窗口**取（UI 折的就是开场快照那一窗）：全量日志绑上、窗内没有
+    // bundle 动作的老会话，页签会显示"未绑定"——拿全量 log 当期望会假红（2026-10-20 实测）。
+    const windowedEvents = clientHistoryWindow(events)
+    const slug = sessionBundleOf(windowedEvents)
+    // 会话身份 marker：末条 assistant 正文片段——按行键点开后用它核"主视图真的切过去了"
+    // （点到了行 ≠ 视图切换成功；2026-10-20 五问假红就是"以为开了 A、其实还在 B"）。
+    const assistantTexts = events.filter((e) => e?.type === 'assistant/message')
+      .map((e) => (e.data?.message?.content ?? []).filter((c) => c?.type === 'text').map((c) => c.text).join(' ').trim())
+      .filter((t) => t.length >= 40)
+    const marker = assistantTexts.length > 0 ? assistantTexts[assistantTexts.length - 1].slice(0, 24) : null
     // 尾窗挂起谓词（BUG-003 合流：回边盘侧真值 = deriveAnchors 直调——锚点判型走 lib 同一
     // 函数，不再手抄镜像；events 留存供 fileFacts 合成）
     // 绑定候选排除（2026-10-13 自测轮定案）：①本冒烟自建的探针标题会话——事故实录：被面板
@@ -59,12 +72,10 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
     // 交付目标必须落在**客户端窗口内**：follow 开场快照 = 最近 50 条消息，窗口外的交付在状态页签
     // 里看不见（只显示承诺行）——拿全量日志选目标会选到"历史上交付过、但这会儿看不见"的会话。
     // `tail` = 交付事件离日志末尾的距离（越小越新），选取顺序按它排。
-    const windowed = clientHistoryWindow(events)
+    const windowed = windowedEvents
     const delivery = latestFinalDelivery(windowed)
-    // 窗口内还必须**绑得上 bundle**（状态页签的会话绑定也只在窗口里认）：否则 ⑤ 区整个不渲染，
-    // 目标会话打开了也看不到交付门（2026-10-20 实测：全量日志有绑定、窗口内没有 → 未绑定态）。
-    if (slug !== undefined && sessionBundleOf(windowed) === slug
-      && delivery !== null && !probeTitled && !stillHot && deliveredSessions.length < 8) {
+    // 交付目标也只在**窗口内可绑**时成立（否则 ⑤ 区整个不渲染，门根本不存在）。
+    if (slug !== undefined && delivery !== null && !probeTitled && !stillHot && deliveredSessions.length < 8) {
       let tail = Number.POSITIVE_INFINITY
       for (let i = windowed.length - 1; i >= 0; i--) {
         if (latestFinalDelivery([windowed[i]]) !== null) { tail = windowed.length - 1 - i; break }
@@ -74,7 +85,7 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
     if (slug !== undefined) {
       // 绑定但被排除（探针壳 / 在飞）不进任何候选——塞进未绑定候选会污染负样本（当日实红：
       // 点到绑定探针 → 渐进面无提示行）
-      if (!probeTitled && !stillHot) candidates.push({ title, slug, events, logPath, eventCount: events.length, tailAskPending: foldHitlPending(events).pending })
+      if (!probeTitled && !stillHot) candidates.push({ sessionId, title, slug, events, logPath, eventCount: events.length, marker, tailAskPending: foldHitlPending(windowedEvents).pending })
     } else if (unboundCandidates.length < 5) unboundCandidates.push({ title })
     scanned++
     if (candidates.length >= 5 && unboundCandidates.length >= 1 && deliveredSessions.length >= 3) break
@@ -89,7 +100,8 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
   const boundSession = (() => {
     const rich = candidates.filter((c) => c.eventCount >= RICH_FLOOR)
     const pool = rich.length > 0 ? rich : candidates
-    return pool.length > 0 ? pool[0] : null
+    const unique = pool.filter((c) => titleCounts.get(c.title) === 1)
+    return unique.length > 0 ? unique[0] : (pool.length > 0 ? pool[0] : null)
   })()
 
   // 绑定 bundle 的磁盘真值（evidence 计数 / 交付态 / 问题行首行——与页签折算同口径；

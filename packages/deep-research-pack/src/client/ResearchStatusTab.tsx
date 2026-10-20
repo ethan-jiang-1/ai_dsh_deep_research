@@ -192,7 +192,22 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           // 实测：旧的未锚行首末位匹配会把文末附录里保留的首轮 `readiness: FAIL`（血统记录）
           // 读成终局，把已交付 run 报成「审查修复中」。
           // review.md 读上限显式给足（BUG-036：默认 40 行会把终局判定行截在窗口外，UI 与盘侧期望对不上）
-          const reviewText = names.has('review.md') ? await props.readFile(sessionId, `${base}/review.md`, new AbortController().signal, 600) : null
+          // review.md 翻页读到 eof：终局判定在文末，固定行窗会读到中间轮次的旧 FAIL
+          //（2026-10-20 实测：1448 行文件、判据行在 1442，600 行窗读到 571 行的 FAIL）。
+          const readAllPages = async (path: string): Promise<string | null> => {
+            const signal = new AbortController().signal
+            const chunks: string[] = []
+            let offset = 1
+            for (let page = 0; page < 40; page += 1) {
+              const result = await props.readPage(sessionId, path, signal, offset, 500)
+              if (result === null) return page === 0 ? null : chunks.join('\n')
+              chunks.push(result.text)
+              offset += Math.max(result.lines, 1)
+              if (result.eof || result.lines === 0) break
+            }
+            return chunks.join('\n')
+          }
+          const reviewText = names.has('review.md') ? await readAllPages(`${base}/review.md`) : null
           if (stopped) return
           const readiness = terminalReadiness(reviewText)
           const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : null

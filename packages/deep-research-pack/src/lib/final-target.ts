@@ -28,6 +28,26 @@ export interface FinalDelivery {
 }
 
 /**
+ * 焦点所在的元素里是否**真有一份草稿**（决定自动打开要不要让路）。
+ * 只看"焦点在输入框"不够：DSH 打开会话即自动聚焦 composer，空输入框也被判成"正在写"，
+ * 自动打开会被永久压住（2026-10-20 真 run 实测：focused=true 把交付弹面吃掉）。
+ * @param active - 当前焦点元素的形态（DOM 元素或其结构子集）。
+ * @returns 是否有未发送的草稿。
+ */
+export function draftInProgress(active: {
+  readonly tagName?: unknown
+  readonly value?: unknown
+  readonly isContentEditable?: unknown
+  readonly textContent?: unknown
+} | null | undefined): boolean {
+  if (active === null || active === undefined) return false
+  const tag = typeof active.tagName === 'string' ? active.tagName.toUpperCase() : ''
+  const text = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
+  if (tag === 'TEXTAREA' || tag === 'INPUT') return text(active.value) !== ''
+  return active.isContentEditable === true && text(active.textContent) !== ''
+}
+
+/**
  * 终稿自动打开的唯一判据（纯函数，观测面 index.ts 的交付监听只调用它）。
  * 三条同时成立才开：有交付 · 该次交付（sessionId + callId）没开过 · 焦点不在可编辑元素。
  * 第三条 = 不打断正在写下一条消息的人（回合尾卡与⑤的门仍在，人不会被挡在外面）。

@@ -10,9 +10,10 @@
  *   `final.md`（正文）· `review.md`（审查判定，静音条用）· `final/` 目录（版本记账）。
  * 别的任何路径都不读——"中间过程不泄漏"在结构上成立，不是口头承诺。
  *
- * 静音条的三态全部由**盘上事实**承载，不编造：
- *   `final/` 有 vN → `已交付 · vN`（版本记账是交付节点的产物，node-gate 门③ 禁止它先于
- *   用户裁决落盘）；`review.md` 判 FAIL → `审查未过`；其余 → `未定稿`。
+ * 静音条只讲**盘上事实**，不替交付背书：`review.md` 判 FAIL → `审查未过`；`final/` 有 vN →
+ * `vN`；否则 → `当前版`。**不写"已交付"**——2026-10-20 真 run 实测：`final/v1.md` 在 HITL2
+ * 之前就落盘（门③ 禁的正是这个，但模型会先写），所以版本目录不是交付凭证；"已交付"只由
+ * 状态页签⑤ 的 `present` 见证说（journal 事实），不与本页争这个话。
  *   "何时出现"由 index.ts 的交付监听（`deliverables/presented`）负责，本组件不判断交付——渲染
  *   只依赖文件，所以重载、切会话、恢复布局都能自证。
  *
@@ -208,10 +209,10 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   }
   if (text === null) return <div style={MESSAGE}>（终稿未能读取）</div>
 
-  const state = pass === false ? '审查未过' : versions >= 1 ? `已交付 · v${versions}` : '未定稿'
+  const state = pass === false ? '审查未过' : versions >= 1 ? `v${versions}` : '当前版'
   const stateStyle = pass === false
     ? { color: '#b45309', fontWeight: 600 }
-    : versions >= 1 ? { color: '#16a34a', fontWeight: 600 } : undefined
+    : undefined
   return (
     <div style={{ padding: '8px 12px 40px', fontSize: 13.5, lineHeight: 1.75, overflowWrap: 'anywhere' }}>
       {stale && (

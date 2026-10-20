@@ -27,6 +27,11 @@ export interface ResearchStatusTabInjected {
   readonly readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) => Promise<string | null>
   /** 挂起显性化：pending 迁移时由页签体调用（openTab——右栏同步骤展开）。 */
   readonly revealStatusTab: () => void
+  /** 读一页（offset 从 1 起；返回本页行数与是否到文末）；不可达 → null。
+   *  review.md 这类"终局判定在文末"的长文件必须翻到 eof——固定行窗会读到中间轮次的旧判定
+   *  （2026-10-20 实测：1448 行的 review.md，630 行窗内读到第 571 行的 `readiness: FAIL`，
+   *  把已交付 run 报成"审查修复中"；BUG-036 同族）。 */
+  readonly readPage: (sessionId: SessionId, path: string, signal: AbortSignal, offset: number, limit: number) => Promise<{ text: string; lines: number; eof: boolean } | null>
   /** 终稿门：按会话 + 终稿相对路径打开「终稿」页签（文件地址；同地址幂等，已开则聚焦）。 */
   readonly openFinal: (sessionId: SessionId, path: string) => void
 }

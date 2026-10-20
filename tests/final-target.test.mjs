@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  finalAddressOf, finalCandidates, finalPathOf, finalReadPlan, isFinalAddress, latestFinalDelivery,
+  draftInProgress, finalAddressOf, finalCandidates, finalPathOf, finalReadPlan, isFinalAddress, latestFinalDelivery,
   sessionFileOf, shouldOpenFinal,
 } from '../packages/deep-research-pack/src/lib/final-target.ts';
 
@@ -107,4 +107,15 @@ test('shouldOpenFinal：有交付 + 未开过 + 焦点不在输入框 → 才开
   assert.equal(shouldOpenFinal(delivery, new Set(['s1:call-1']), 's1', false), false);
   // 去重键吃会话：同一 callId 在别的会话里不冲突
   assert.equal(shouldOpenFinal(delivery, new Set(['s2:call-1']), 's1', false), true);
+});
+
+test('draftInProgress：空输入框不算在写（会话打开即聚焦 composer 的实测形态）', () => {
+  assert.equal(draftInProgress({ tagName: 'TEXTAREA', value: '' }), false);
+  assert.equal(draftInProgress({ tagName: 'TEXTAREA', value: '   ' }), false);
+  assert.equal(draftInProgress({ tagName: 'TEXTAREA', value: '写到一半的话' }), true);
+  assert.equal(draftInProgress({ tagName: 'INPUT', value: 'x' }), true);
+  assert.equal(draftInProgress({ tagName: 'BODY' }), false);
+  assert.equal(draftInProgress({ tagName: 'DIV', isContentEditable: true, textContent: '' }), false);
+  assert.equal(draftInProgress({ tagName: 'DIV', isContentEditable: true, textContent: '草稿' }), true);
+  assert.equal(draftInProgress(null), false);
 });

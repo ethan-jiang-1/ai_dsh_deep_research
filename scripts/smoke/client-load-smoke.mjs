@@ -301,6 +301,46 @@ try {
     }
     return false
   }
+  /** 按 **session id 行键** 确定性打开会话：标题在 dev home 里会重名（「…发布线跟踪」多份），
+   *  按标题点会打开另一条——期望侧绑的却是参考对象选的那条，五问对账因此假红（2026-10-20 实测）。
+   *  序：行键在场 → 点；否则**展开** research-workspace 组（手风琴：已展开时点击会收起，需再点回来）
+   *  → 再点；仍不在 → 逐层「Show more sessions」；最后才退回标题定位。 */
+  const openSessionByRowKey = async (sessionId, title) => {
+    const key = `[data-row-key="session:${sessionId}"]`
+    const sessionRows = () => page.locator('[data-row-key^="session:"]').count()
+    const tryClick = async () => {
+      const row = page.locator(key)
+      if (await row.count() > 0 && await row.first().isVisible().catch(() => false)) {
+        await row.first().click({ timeout: 8_000 }).catch(() => {})
+        return true
+      }
+      return false
+    }
+    if (await tryClick()) return true
+    const wsRows = page.locator('[data-row-key^="workspace:"]')
+    const n = await wsRows.count()
+    for (let i = 0; i < n; i++) {
+      const el = wsRows.nth(i)
+      if (!((await el.textContent()) ?? '').includes('research-workspace')) continue
+      const before = await sessionRows()
+      await el.click({ timeout: 8_000 }).catch(() => {})
+      await wait(2_000)
+      const after = await sessionRows()
+      // 手风琴：本来展开着的组被点成收起（行数掉到 0）→ 再点一次展开回来
+      if (before > 0 && after < before) { await el.click({ timeout: 8_000 }).catch(() => {}); await wait(2_000) }
+      break
+    }
+    if (await tryClick()) return true
+    for (let round = 0; round < 40; round++) {
+      const more = page.getByText(/Show \d+ more sessions/).first()
+      if (!(await more.isVisible({ timeout: 1_500 }).catch(() => false))) break
+      await more.click({ timeout: 4_000 }).catch(() => {})
+      await wait(1_500)
+      if (await tryClick()) return true
+    }
+    return title !== null && await clickRowByText(title)
+  }
+
   const openPane = async () => {
     const expand = page.getByRole('button', { name: 'Open right sidebar' })
     if (await expand.count() > 0) await expand.first().click({ timeout: 8_000 }).catch(() => {})
@@ -320,8 +360,15 @@ try {
   const boundOk = boundSession !== null && expectedFace !== null
   step(boundOk, '磁盘侧找到绑定 run 的带历史会话（渐进面真数据源）', boundOk ? `「${boundSession.title}」→ drt_${boundSession.slug}` : '缺——先跑一场 run（run 通道现用 workspaceId 形态建会话）')
   if (boundOk) {
-    const opened = await clickRowByText(boundSession.title)
-    step(opened, '绑定会话在侧栏可开（按磁盘侧标题定位）')
+    const opened = await openSessionByRowKey(boundSession.sessionId, boundSession.title)
+    await wait(3_000)
+    // marker 来自 journal 的**原始 Markdown**（可能含链接/反引号），页面上是渲染后的文本——
+    // 两侧都剥掉记号再比（2026-10-20 实测：原文 `[final.md](drt_…)` 在 UI 里只剩 `final.md`）。
+    const normalizeText = (text) => text.replace(/[\s[\]()*`#>_]/g, '')
+    const markerNeedle = boundSession.marker === null ? null : normalizeText(boundSession.marker).slice(0, 12)
+    const onTarget = opened && (markerNeedle === null || normalizeText(await paneTextOf()).includes(markerNeedle))
+    step(opened && onTarget, '绑定会话在侧栏可开且主视图已切换（行键 + 身份 marker）',
+      onTarget ? `marker=${JSON.stringify(markerNeedle)}` : `marker 未命中：${JSON.stringify(markerNeedle)}`)
     if (opened) {
       await wait(4_000)
       const capOk = await openPane()
@@ -335,9 +382,15 @@ try {
         // 挂起/锚点期望拿旧态对 UI 实时态会假红（实测：快照 HITL2 挂起 vs UI 停靠点已过 2）。
         // 处置 = 两侧都现扫（journal 重读 + 文件现扫），不一致跨刷新周期复核一次，仍不一致
         // 才判红；后续断言用复核后的快照对。
-        const parseUiFace = (segText) => ({
-          evidence: Number((segText.match(/证据 (\d+) 份/) ?? [])[1] ?? Number.NaN),
-          delivered: segText.includes('已交付'),
+        // ⑤ 行按**元素**读（整段文本会被聊天里的"已交付"污染——2026-10-20 实测假绿：
+        // UI 明明"未绑定"、断言却因聊天正文里出现过"已交付"而判过）。
+        const faceRowText = () => page.evaluate(() => {
+          const span = [...document.querySelectorAll('span')].find((n) => /^证据 \d+ 份$/.test((n.textContent ?? '').trim()))
+          return span?.parentElement?.innerText ?? ''
+        })
+        const parseUiFace = (segText, rowText) => ({
+          evidence: Number((rowText.match(/证据 (\d+) 份/) ?? segText.match(/证据 (\d+) 份/) ?? [])[1] ?? Number.NaN),
+          delivered: /已交付/.test(rowText),
           passed: Number((segText.match(/停靠点已过 (\d+) 个/) ?? [])[1] ?? Number.NaN),
         })
         let faceNow = null
@@ -347,7 +400,8 @@ try {
             boundSession = { ...boundSession, events, tailAskPending: foldHitlPending(events).pending }
           }
           faceNow = fileFaceOf(boundSession.slug) ?? expectedFace
-          const anchors = deriveAnchors(boundSession.events, { question: faceNow.hasQuestion, delivered: faceNow.delivered })
+          // 锚点也按**客户端窗口**折（UI 的 journalEvents = 开场快照那一窗；全量 log 会假红）
+          const anchors = deriveAnchors(clientHistoryWindowOf(boundSession.events), { question: faceNow.hasQuestion, delivered: faceNow.delivered })
           // 交付态 = present 见证（与页签同源折算 = lib/final-target）；final.md 在场仍是步态/锚点
           // 的输入（交付阶段 current），两者不互相顶替——2026-10-20 起 UI ⑤ 的 ✅ 只认 present。
           const delivery = latestFinalDelivery(clientHistoryWindowOf(boundSession.events))
@@ -358,7 +412,7 @@ try {
           }
         }
         let diskSide = diskSideNow()
-        let uiFace = parseUiFace(seg)
+        let uiFace = parseUiFace(seg, await faceRowText())
         // 不一致即再水化复核（有界两轮）：仅等待不够——被跟会话若在**别的 host** 上活跃推进
         // （run 通道 3083 起飞、本 smoke 自起 web 是被动跟读者），被动侧日志尾部追平可超过
         // 30s 刷新周期（2026-10-11 首验实测：HITL2 ask 落盘后 smoke 浏览器仍渲染旧尾部）；
@@ -373,7 +427,7 @@ try {
           await wait(6_000)
           const paneAgain = await paneTextOf()
           seg = paneAgain.slice(paneAgain.indexOf('研究状态'))
-          uiFace = parseUiFace(seg)
+          uiFace = parseUiFace(seg, await faceRowText())
           diskSide = diskSideNow()
         }
         // 渐进面硬断言（会话绑定 + 位置=状态两位置：证据计数/交付态/问题行与磁盘真值对账）
@@ -387,13 +441,13 @@ try {
           await wait(1_000)
           const t = await paneTextOf()
           seg = t.slice(t.indexOf('研究状态'))
-          uiFace = parseUiFace(seg)
+          uiFace = parseUiFace(seg, await faceRowText())
         }
         await wait(300) // 摘要块在场后再让一帧（避免读到"块在、行未满"的边界帧）
         {
           const t = await paneTextOf()
           const settled = t.slice(t.indexOf('研究状态'))
-          if (settled.includes('🎯')) { seg = settled; uiFace = parseUiFace(seg) }
+          if (settled.includes('🎯')) { seg = settled; uiFace = parseUiFace(seg, await faceRowText()) }
         }
         const stepsOk = ['立项', '组队', '侦察', '挖掘', '综合', '审查', '交付'].every((x) => seg.includes(x))
         step(stepsOk, '步骤条真数据（流程轨道七步 = 定义流程——本会话绑定的 bundle）')
@@ -447,7 +501,10 @@ try {
         // 此前**零浏览器断言**（2026-10-11 实测 client-load-smoke 命中 0）。判据 = 盘侧直调
         // brief-fold.deriveBusinessBrief（UI 同一函数）按组件同源输入算期望值，再逐行断言渲染
         // 文本——期望来自磁盘事实而非组件自报，故能咬住"漏行 / 写死文案 / 只渲染部分五问"。
-        const hitlNow = foldHitlPending(boundSession.events)
+        // 与 UI 同窗：页签折的是 follow 开场快照那一窗，不是全量日志（2026-10-20 实测：
+        // 绑到已交付的老会话时，全量 fold 的挂起/交付态与窗内不同 → 业务摘要期望假红）。
+        const windowedEvents = clientHistoryWindowOf(boundSession.events)
+        const hitlNow = foldHitlPending(windowedEvents)
         const pendingNow = diskAnchors.find((a) => a.state === 'pending')
         const expectedBrief = deriveBusinessBrief({
           bundleBound: true, // 本分支只在绑定会话上跑；未绑定态另有负例断言（③ 的 fail-soft 面）
@@ -481,7 +538,7 @@ try {
           '业务摘要层 = 盘侧 brief-fold 真值（五问逐行对账）',
           briefMissing.length === 0
             ? `goal=${expectedBrief.goal.slice(0, 16)}… ｜ stage=${expectedBrief.stageLine}`
-            : `缺行：${briefMissing.map((l) => l.slice(0, 16)).join(' ｜ ')}`)
+            : `缺行：${briefMissing.map((l) => l.slice(0, 16)).join(' ｜ ')} ｜ 会话=${boundSession.title} ｜ 期望stage=${expectedBrief.stageLine} ｜ UI=${seg.slice(0, 260).replace(/\s+/g, ' ')}`)
         // 队员动态折叠区（member-activity-stream，2026-10-10）：盘侧 spawn 名 ↔ agentTeam 投影
         // roster 对账（投影 = 队员会话 id 的唯一发现源，通道探明实证）；spawn 在场而区缺席 =
         // 投影或接线异常；绑定会话本身是队员（无 spawn、roster 住 lead）与无团队 → 区不渲染。
@@ -779,20 +836,6 @@ try {
   // 两跑两个候选一有一无）。所以逐个候选打开 → 找门 → 找到即验。
   // 到达会话的两条路：按标题（clickRowByText，自带 Show more 深展开）→ 仍不在则点工作区行展开
   // 该组（左栏按工作区分组、手风琴式；组收起时会话行根本不进 DOM）。
-  const expandResearchWorkspace = async () => {
-    const rows = page.locator('[data-row-key^="workspace:"]')
-    const n = await rows.count()
-    for (let i = 0; i < n; i++) {
-      const el = rows.nth(i)
-      const t = ((await el.textContent()) ?? '').trim()
-      if (t.includes('research-workspace')) {
-        await el.click({ timeout: 8_000 }).catch(() => {})
-        await wait(2_500)
-        return true
-      }
-    }
-    return false
-  }
   const openStatusTab = async () => {
     const expandBtn = page.getByRole('button', { name: 'Open right sidebar' })
     if (await expandBtn.count() > 0 && await expandBtn.first().isVisible().catch(() => false)) {
@@ -811,12 +854,11 @@ try {
     }
     return false
   }
+
   let deliveredTarget = null
   let doorFound = false
   for (const candidate of deliveredSessions) {
-    let opened = await clickRowByText(candidate.title)
-    if (!opened) { await expandResearchWorkspace(); opened = await clickRowByText(candidate.title) }
-    if (!opened) opened = (await openSessionById(page, candidate.sessionId, candidate.title)).found
+    const opened = await openSessionByRowKey(candidate.sessionId, candidate.title)
     if (!opened) continue
     await wait(4_000)
     if (!(await openStatusTab())) continue
@@ -844,9 +886,15 @@ try {
     const onFinalTab = tabTitles.some((t) => t.includes('终稿'))
     step(onFinalTab, '交付门点开 → 页签标题「终稿」（extension 带接管了文件地址）', `tabs=${JSON.stringify(tabTitles)}`)
     step(heading !== '' && normalize(finalText).includes(heading), '终稿页签渲染 final.md 正文（与盘侧首标题对账）', heading)
-    const stripState = /已交付 · v\d|未定稿|审查未过/.test(finalText)
+    // 静音条断言必须读**静音条元素**：整页 innerText 会被聊天里的「当前版报告」误命中
+    // （2026-10-20 实测：扫全页把"当前版"当成了静音条命中，产品其实显示 v1）。
+    const stripText = await page.evaluate(() => {
+      const btn = [...document.querySelectorAll('button')].find((b) => (b.textContent ?? '').trim().startsWith('过程'))
+      return btn === undefined ? '' : (btn.parentElement?.innerText ?? '').replace(/\s+/g, ' ').trim()
+    })
+    const stripState = /审查未过|当前版|\bv\d+\b/.test(stripText)
     step(stripState, '终稿静音条三态之一在场（盘上事实，不编造）',
-      stripState ? '' : finalText.slice(-240).replace(/\s+/g, ' '))
+      stripState ? stripText.slice(0, 40) : `静音条=${JSON.stringify(stripText)}`)
     step(!/drt_[^\s]+\/(question|topics|evidence|drafts)/.test(finalText), '终稿页签不泄漏中间过程路径（负例）')
   } else {
     step(false, '终稿端到端：至少一条已交付会话在 UI 里显示 ⑤ 交付门',

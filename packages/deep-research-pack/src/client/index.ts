@@ -34,7 +34,7 @@ import { ResearchStatusTab, ResearchStatusTitle, type JournalFrame, type FollowT
 import { ResearchConfigTab } from './ResearchConfigTab.tsx'
 import { ResearchFinalTab } from './ResearchFinalTab.tsx'
 import { OrcaMark, OrcaName } from './BrandMark.tsx'
-import { finalAddressOf, isFinalAddress, latestFinalDelivery, shouldOpenFinal } from '../lib/final-target.ts'
+import { draftInProgress, finalAddressOf, isFinalAddress, latestFinalDelivery, shouldOpenFinal } from '../lib/final-target.ts'
 
 /** Required services：槽注册表（renderer）+ 右栏页签注册器 + 右栏导航面（openTab——挂起显性化）+ remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
  *  父级则取 .session 炸 "without injecting it"，只声明子级则取父属性炸 "without inject"）。 */
@@ -201,7 +201,7 @@ export function apply(ctx: ClientContext): void {
 
     scoped.effect(() => scoped.slots.inject(RESEARCH_PANE_SLOT, () => [
       scoped.slots.register(
-        { name: RESEARCH_PANE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow, listDir, readFile, revealStatusTab, openFinal }) },
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow, listDir, readFile, readPage, revealStatusTab, openFinal }) },
         ResearchStatusTab,
       ),
       scoped.slots.register(
@@ -248,10 +248,9 @@ export function apply(ctx: ClientContext): void {
       const opened = new Set<string>()
       let followed: SessionId | undefined
       let controller: AbortController | undefined
-      const focusedInEditor = () => {
-        const el = document.activeElement as HTMLElement | null
-        return el !== null && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.isContentEditable)
-      }
+      // 让路判据 = "焦点里有真草稿"（不是"焦点在输入框"）：会话打开即聚焦 composer，
+      // 空输入框不算在写——见 lib/final-target.draftInProgress 的实测来由。
+      const focusedInEditor = () => draftInProgress(document.activeElement)
       const stop = () => { controller?.abort(); controller = undefined; followed = undefined }
       const watch = (sessionId: SessionId) => {
         if (followed === sessionId) return
