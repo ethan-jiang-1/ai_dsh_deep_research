@@ -1,3 +1,7 @@
+// useMemberActivity.ts — 订阅队员 journal 流并折算每人动态摘要的 React hook（client 半）。
+// 被谁消费：src/client/ResearchStatusTab.tsx（队员活动区数据源；折算口径住 lib/member-activity.ts）。
+// 怎么不改坏：cleanup 顺序（先 alive=false 再 abort）与 history→event 语义是流式合同，
+// 改动须对照 2026-10-11 首验的三条队员流实测记录（纯 id follow 被 host 守卫拒的形态）。
 import { useEffect } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { foldMemberActivity, type MemberActivitySummary } from '../../lib/member-activity.ts'

@@ -508,12 +508,12 @@ try {
     console.error(`hitl-answer: 侧栏没有目标会话行（session id=${uiTargetSessionId}，--session=${SESSION ?? '（盘侧最新挂起）'}）`
       + `——错因判据 = ${verdict.kind}：${verdict.message}`)
     if (capHits.size > 0) {
-    const detail = [...capHits].map(([kind, total]) => `${kind} ${total} 条`).join('、')
-    console.error(`hitl-answer: ⚠ 扫描上限（上限 ${ROW_SCAN_CAP}）——${detail}：目标可能在**未扫描区间**`
-      + '（与"不在侧栏"不同因——先扩窗或收窄候选再重试，别按"已归档/被终局化"处置）')
-    if (rowTexts.length === 0) console.error('hitl-answer: 注：下面的"侧栏可见行样本"为空同样可能由扫描上限造成——不代表侧栏真的没有行。')
-  }
-  console.error('hitl-answer: 侧栏可见行样本（展开后仍未见目标时对照）：'
+      const detail = [...capHits].map(([kind, total]) => `${kind} ${total} 条`).join('、')
+      console.error(`hitl-answer: ⚠ 扫描上限（上限 ${ROW_SCAN_CAP}）——${detail}：目标可能在**未扫描区间**`
+        + '（与"不在侧栏"不同因——先扩窗或收窄候选再重试，别按"已归档/被终局化"处置）')
+      if (rowTexts.length === 0) console.error('hitl-answer: 注：下面的"侧栏可见行样本"为空同样可能由扫描上限造成——不代表侧栏真的没有行。')
+    }
+    console.error('hitl-answer: 侧栏可见行样本（展开后仍未见目标时对照）：'
       + (rowTexts.slice(0, 8).join(' ⏐ ') || '（侧栏零可见行）'))
     process.exitCode = 3
     throw NO_TARGET_SESSION

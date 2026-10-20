@@ -7,7 +7,7 @@
 //   各自还原 → 16/16 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, rmSync, writeFileSync, readFileSync, renameSync } from 'node:fs';
+import { mkdirSync, rmSync, rmdirSync, writeFileSync, readFileSync, renameSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { auditBundle } from '../../scripts/lib/evidence-audit-core.mjs';
@@ -16,6 +16,16 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 // 运行时暂存区：走 .gitignore 既有 `_tmp/` 约定（临时区不是版本控制对象——曾以
 // tests/.tmp-evidence-audit 落盘且被误提交，2026-10-12 卫生轮迁址并除名）。
 const TMP = join(ROOT, 'tests', '_tmp', 'evidence-audit');
+
+/** 夹具暂存区清理（finally——对齐 node-gate.test 形态）：每个用例跑完必清，不依赖末位
+ *  清理测试（此前仅 fixture 开头 rmSync，末段用例后 tests/_tmp/evidence-audit/ 留盘——
+ *  2026-10-21 卫生轮 B7 统一两种卫生标准；进程被杀才可能留盘）。 */
+const withTmpCleanup = (fn) => {
+  try { return fn() } finally {
+    rmSync(TMP, { recursive: true, force: true });
+    try { rmdirSync(join(ROOT, 'tests', '_tmp')) } catch { /* 非空 = 并行他用，留给它 */}
+  }
+};
 
 /** 造夹具：bundle（evidence + final）+ sessions（纯 .jsonl 工具事件）。 */
 function fixture({ forged = false, brokenRef = false, derived = false } = {}) {
@@ -52,7 +62,7 @@ function fixture({ forged = false, brokenRef = false, derived = false } = {}) {
   return { bundle, sessions, realUrl };
 }
 
-test('干净 bundle：URL 全溯源、摘录回溯、final 链完整、无 CRITICAL', () => {
+test('干净 bundle：URL 全溯源、摘录回溯、final 链完整、无 CRITICAL', () => withTmpCleanup(() => {
   const { bundle, sessions } = fixture();
   const r = auditBundle(bundle, sessions);
   assert.equal(r.criticalCount, 0, `不应有 CRITICAL：${JSON.stringify(r.findings)}`);
@@ -60,9 +70,9 @@ test('干净 bundle：URL 全溯源、摘录回溯、final 链完整、无 CRITI
   assert.equal(r.stats.urlOk, 2, '两个 URL 都在 web 工具事件里（A 的 spec + B 的 blog）');
   assert.equal(r.stats.srcFetched, 1, 'A 的 source_url 真抓过（web_fetch 成功）');
   assert.equal(r.stats.srcNeverFetched, 0, '干净夹具里没有"声明却没抓"的 source_url');
-});
+}));
 
-test('B 的正文 URL 不在语料 → 伪造链接 CRITICAL（URL 溯源只认工具事件）', () => {
+test('B 的正文 URL 不在语料 → 伪造链接 CRITICAL（URL 溯源只认工具事件）', () => withTmpCleanup(() => {
   const { bundle, sessions } = fixture();
   // 显式拿掉 blog 的工具事件（模拟"模型口述过但从未真取"）
   const logPath = join(sessions, 'session.v4.jsonl');
@@ -71,17 +81,17 @@ test('B 的正文 URL 不在语料 → 伪造链接 CRITICAL（URL 溯源只认�
   const forged = r.findings.filter((f) => f.kind === '伪造链接/未溯源');
   assert.equal(forged.length, 1, 'ev-b.md 的域名与 URL 都不在任何工具事件 → CRITICAL');
   assert.equal(forged[0].file, 'ev-b.md');
-});
+}));
 
-test('同域但路径未抓过 → MAJOR「仅域名可溯源」，不是伪造（三档判据的第二档）', () => {
+test('同域但路径未抓过 → MAJOR「仅域名可溯源」，不是伪造（三档判据的第二档）', () => withTmpCleanup(() => {
   const { bundle, sessions } = fixture({ derived: true });
   const r = auditBundle(bundle, sessions);
   const derived = r.findings.filter((f) => f.kind === '仅域名可溯源');
   assert.equal(derived.length, 1, '域名在语料里、该路径不在 → MAJOR 而非 CRITICAL');
   assert.equal(r.criticalCount, 0, '域名抓过就不该判伪造');
-});
+}));
 
-test('source_url 只出现在搜索结果、没真抓过 → MAJOR（契约要"真实抓取过"，原审计只查"出现过"）', () => {
+test('source_url 只出现在搜索结果、没真抓过 → MAJOR（契约要"真实抓取过"，原审计只查"出现过"）', () => withTmpCleanup(() => {
   const { bundle, sessions } = fixture();
   // 把 A 的 source_url 换成一个只在 web_search 结果里出现过的 URL（抓过的是另一个）
   const evA = join(bundle, 'evidence', 'ev-a.md');
@@ -93,9 +103,9 @@ test('source_url 只出现在搜索结果、没真抓过 → MAJOR（契约要"�
   const hit = r.findings.filter((f) => f.kind === 'source_url 未抓取' && f.file === 'ev-a.md');
   assert.equal(hit.length, 1, '未真抓过的 source_url → MAJOR 单列');
   assert.equal(r.criticalCount, 0, '它出现在 web 事件里，所以不是伪造（只是没抓）');
-});
+}));
 
-test('红证①：伪造 source_url → CRITICAL；还原后消失', () => {
+test('红证①：伪造 source_url → CRITICAL；还原后消失', () => withTmpCleanup(() => {
   const { bundle, sessions } = fixture({ forged: true });
   const r = auditBundle(bundle, sessions);
   const hit = r.findings.filter((f) => f.kind === '伪造链接/未溯源' && f.file === 'ev-a.md');
@@ -103,17 +113,17 @@ test('红证①：伪造 source_url → CRITICAL；还原后消失', () => {
   assert.equal(r.criticalCount, 1, 'A 伪造 URL → 唯一 CRITICAL（B 的 blog 事件在场可溯源）');
   const clean = auditBundle(...(() => { const f = fixture(); return [f.bundle, f.sessions] })());
   assert.equal(clean.findings.filter((f) => f.file === 'ev-a.md' && f.kind === '伪造链接/未溯源').length, 0, '还原后 A 不再红');
-});
+}));
 
-test('红证②：final 断链 → CRITICAL 溯源断链', () => {
+test('红证②：final 断链 → CRITICAL 溯源断链', () => withTmpCleanup(() => {
   const { bundle, sessions } = fixture({ brokenRef: true });
   const r = auditBundle(bundle, sessions);
   const hit = r.findings.filter((f) => f.kind === '溯源断链');
   assert.equal(hit.length, 1);
   assert.ok(hit[0].detail.includes('not-exist.md'));
-});
+}));
 
-test('final.md 挪进 final/ → MAJOR 位置违约，但链检查仍执行（第五场 run 实测漂移的回归钉）', () => {
+test('final.md 挪进 final/ → MAJOR 位置违约，但链检查仍执行（第五场 run 实测漂移的回归钉）', () => withTmpCleanup(() => {
   const { bundle, sessions } = fixture();
   // 把根 final.md 挪进 final/ —— 第五场 lead 的真实形态
   mkdirSync(join(bundle, 'final'), { recursive: true });
@@ -123,9 +133,9 @@ test('final.md 挪进 final/ → MAJOR 位置违约，但链检查仍执行（�
   assert.equal(hit.length, 1, '当前版不在 run 根 → MAJOR 单列（契约钉死在 run 根）');
   assert.equal(r.criticalCount, 0, '位置违约不是伪造');
   assert.ok(r.stats.finalRefs >= 1, '链检查不能因位置漂移而丢——仍要对实际位置执行');
-});
+}));
 
-test('final.md 两处都没有 → CRITICAL 防空语料（原版静默跳过 = 检查不存在）', () => {
+test('final.md 两处都没有 → CRITICAL 防空语料（原版静默跳过 = 检查不存在）', () => withTmpCleanup(() => {
   const { bundle, sessions } = fixture();
   rmSync(join(bundle, 'final.md'));
   const r = auditBundle(bundle, sessions);
@@ -133,15 +143,15 @@ test('final.md 两处都没有 → CRITICAL 防空语料（原版静默跳过 = 
   assert.equal(hit.length, 1, '没有 final.md 必须报，不许静默跳过');
   assert.equal(r.criticalCount, 1, 'final 缺席 = CRITICAL（不是"0/0 通过"）');
   assert.equal(r.stats.finalRefs, 0, '确实无对象可查');
-});
+}));
 
-test('反引号内的格式占位（evidence/xx.md）不算引用（首场 run 假阳性修正的回归钉）', () => {
+test('反引号内的格式占位（evidence/xx.md）不算引用（首场 run 假阳性修正的回归钉）', () => withTmpCleanup(() => {
   const { bundle, sessions } = fixture();
   const r = auditBundle(bundle, sessions);
   assert.equal(r.stats.finalRefs, 1, '只认 ev-a 那一条真引用');
-});
+}));
 
-test('无 frontmatter → 契约不符 MAJOR；有 frontmatter 缺软字段 → INFO 未分级', () => {
+test('无 frontmatter → 契约不符 MAJOR；有 frontmatter 缺软字段 → INFO 未分级', () => withTmpCleanup(() => {
   const { bundle, sessions } = fixture();
   const r = auditBundle(bundle, sessions);
   assert.equal(r.findings.filter((f) => f.kind === '契约不符' && f.file === 'ev-b.md').length, 1, 'B 无 frontmatter → MAJOR');
@@ -151,16 +161,15 @@ test('无 frontmatter → 契约不符 MAJOR；有 frontmatter 缺软字段 → 
   wf(p, rf(p, 'utf8').replace('source_tier: primary\npublisher: example.com\n', ''));
   const r2 = auditBundle(bundle, sessions);
   assert.equal(r2.findings.filter((f) => f.kind === '未分级' && f.file === 'ev-a.md').length, 1, '缺软字段 → INFO 未分级（不否决有效性——分层谓词）');
-});
+}));
 
-test('摘录可回溯（A 的 blockquote 在 tool/result 文本中）', () => {
+test('摘录可回溯（A 的 blockquote 在 tool/result 文本中）', () => withTmpCleanup(() => {
   const { bundle, sessions } = fixture();
   const r = auditBundle(bundle, sessions);
   assert.equal(r.stats.quoteOk, 1, 'A 的摘录可回溯');
   assert.equal(r.stats.quoteTotal, 1);
-});
+}));
 
-test('清理夹具', () => { rmSync(TMP, { recursive: true, force: true }); });
 
 // ── BUG-029：抽取器形态与取证路径（2026-10-16 修）────────────────────────────────
 // 真日志里目标 URL 的承载形态 = 搜索引擎重定向参数（%XX 编码）/ 协议相对 //host / 无 scheme 裸域名；
@@ -210,7 +219,7 @@ function fixtureForms() {
   return { bundle, sessions };
 }
 
-test('BUG-029 正例：编码 / 协议相对 / 裸域名 / MCP 取回——都不判伪造', () => {
+test('BUG-029 正例：编码 / 协议相对 / 裸域名 / MCP 取回——都不判伪造', () => withTmpCleanup(() => {
   const { bundle, sessions } = fixtureForms();
   const r = auditBundle(bundle, sessions);
   const forged = r.findings.filter((f) => f.kind === '伪造链接/未溯源');
@@ -224,9 +233,9 @@ test('BUG-029 正例：编码 / 协议相对 / 裸域名 / MCP 取回——都�
   assert.ok(!urlLevel.has('ev-proto.md'), '协议相对形态应达到 URL 级可溯源');
   assert.ok(!urlLevel.has('ev-mcp.md'), 'MCP 取回结果里的 URL 应可溯源（类别②取向 (a)）');
   assert.equal(r.stats.urlOk, 2, `两条 URL 级命中（proto + mcp）：${r.stats.urlOk}/${r.stats.urlTotal}`);
-});
+}));
 
-test('BUG-029 档位边界：见过但没抓过仍是 MAJOR，不洗成通过（负例两条）', () => {
+test('BUG-029 档位边界：见过但没抓过仍是 MAJOR，不洗成通过（负例两条）', () => withTmpCleanup(() => {
   const { bundle, sessions } = fixtureForms();
   const r = auditBundle(bundle, sessions);
   const srcFindings = r.findings.filter((f) => f.kind === 'source_url 未抓取');
@@ -236,17 +245,17 @@ test('BUG-029 档位边界：见过但没抓过仍是 MAJOR，不洗成通过（
   assert.equal(r.stats.srcFetched, 0, '本夹具里没有任何 source_url 真被抓取过——不许洗成通过');
   assert.ok(srcFindings.some((f) => f.detail.includes('仅域名出现过')), '域名级见过的措辞要如实（不是"从未出现过"）');
   assert.equal(r.criticalCount, 2, '仅两条"从未出现"判 CRITICAL（防空语料/断链不在此夹具）');
-});
+}));
 
-test('BUG-029 措辞限定「本 run」：跨 run 语料不进窗，判定与文案都要说清', () => {
+test('BUG-029 措辞限定「本 run」：跨 run 语料不进窗，判定与文案都要说清', () => withTmpCleanup(() => {
   const { bundle, sessions } = fixtureForms();
   const r = auditBundle(bundle, sessions);
   const hit = r.findings.find((f) => f.kind === '伪造链接/未溯源' && f.file === 'ev-never.md');
   assert.ok(hit !== undefined, '凭空 URL 仍判 CRITICAL');
   assert.ok(hit.detail.includes('本 run'), `判定文案须限定"本 run 语料窗"：${hit.detail}`);
-});
+}));
 
-test('语料窗：跨 run 会话的 URL 不得为本 run 作证（slug 窗过滤——审计 P3 件⑧）', () => {
+test('语料窗：跨 run 会话的 URL 不得为本 run 作证（slug 窗过滤——审计 P3 件⑧）', () => withTmpCleanup(() => {
   const { bundle } = fixture();
   // 另一个 run 的会话（日志不含 drt_fixture slug）：抓取了一个"只在此处出现"的 URL
   const crossSessions = join(TMP, 'sessions', 'g2', 's2');
@@ -262,4 +271,4 @@ test('语料窗：跨 run 会话的 URL 不得为本 run 作证（slug 窗过滤
   const forged = r.findings.filter((f) => f.kind === '伪造链接/未溯源' && f.file === 'ev-cross.md');
   assert.equal(forged.length, 1, `窗外会话的 URL 不得作证（跨 run 污染面）：${JSON.stringify(r.findings)}`);
   assert.ok(r.stats.windowFiles >= 1 && !r.stats.windowFiles.toString().includes('2'), `窗内文件数应只含本 run 会话：${r.stats.windowFiles}`);
-});
+}));

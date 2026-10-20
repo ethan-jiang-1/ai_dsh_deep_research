@@ -2,8 +2,7 @@
 
 `tests/` 拥有 **keyless 回归**：`pnpm test`（命令正本 = [package.json](../package.json)）。
 它验证契约、纯函数、解析、折算与渲染输出的确定性行为；宿主挂载、浏览器交互与模型行为另取
-分级冒烟证据（见 [docs/evaluation.md](../docs/evaluation.md)）。上游对应物 = DSH
-`snapshots/AGENTS.md` 的“证据住在被它证明的对象旁边”规则。
+分级冒烟证据（[docs/evaluation.md](../docs/evaluation.md)）；上游对应物 = DSH `snapshots/AGENTS.md` 的“证据住在被它证明的对象旁边”。
 
 ## 分域（2026-10-20 用户指令：目录映射源代码）
 
@@ -19,7 +18,8 @@
 | `fixtures/` | 构造样本与冻结录制语料 | 测试/smoke 消费；taxonomy = [fixtures/README](fixtures/README.md) |
 
 域内文件名 = 被测模块名 + `.test.mjs`（如 `run/run-state.test.mjs` ↔ `scripts/lib/run-state.mjs`）；
-一文件测多个面时按**主语**归域，跨域合同放 `contracts/`。
+一文件测多个面按**主语**归域，跨域合同放 `contracts/`——pack src/lib 的 run 族折算（journal-wire 类）归
+`run/`，跨 scripts/lib 与 pack 的驾驶舱数据面（method-presets 类）归 `cockpit/`；与 verify 门禁同源的双断言面（`pack/presets.test` ↔ role-list-sync/preset-structure/row-deps/pack-bundle-compat）登记 = 该测试头注。
 
 ## 放置规则（一处证据一个家）
 

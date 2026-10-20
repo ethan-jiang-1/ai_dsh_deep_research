@@ -11,6 +11,8 @@
 // 故用绝对路径且**不设 root**——tsdown 默认 root = entry 的公共祖先（`<pkg>/lib/types`），
 // 输出才会是 `<pkg>/lib/index.js`（与 vendor 自身构建的产物形状一致）；设 `root: cwd` 会得到
 // `lib/lib/types/*` 的嵌套错误形状。
+// 退役条件：vendor 干净树上自身 `build:lib:host` 可直接跑通（根单元 entry glob 前置被修）即
+// 可删本件——它是备选路径留档（dev/README 行），不是常驻构建环节，别当依赖维护。
 import { join } from 'node:path'
 import { typertPlugin } from '../vendor/dsh/packages/typert/generator/lib/types/tsdown-plugin.js'
 

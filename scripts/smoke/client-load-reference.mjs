@@ -1,3 +1,7 @@
+// client-load-reference.mjs — client-load 冒烟的磁盘参考对象构建器（smoke 层支援件）。
+// 被谁消费：scripts/smoke/client-load-smoke.mjs（静态 import）与 scripts/smoke/e2e-021rc2.mjs
+// （动态 import）——绑定候选排序/过滤、富度地板、终稿目标与 bundle 根优先于 archive 的选取
+// 顺序都是这两处冒烟的期望值合同。怎么不改坏：改选取或排序判据 = 同 diff 改两冒烟的期望值。
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { clientHistoryWindow, readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs'
