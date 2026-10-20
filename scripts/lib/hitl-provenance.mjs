@@ -4,7 +4,7 @@
 // 误归因"用户"（BUG-014 症状实录 = mistral run，操作侧手工补记救回）。
 // 纯函数与写盘器分离；keyless 契约测试钉住（tests/hitl-provenance.test.mjs——含缺件
 // fail-loud 反证）。消费方 = dev/hitl-answer.mjs（盘侧裁决通过后调用）。
-import { appendFileSync, existsSync } from 'node:fs';
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { sessionBindingOf } from '../../packages/deep-research-pack/src/lib/bundle-bind.ts';
 import { join } from 'node:path';
 
@@ -106,9 +106,12 @@ export function closingProvenanceRow({ cardKey = 'unknown', text = '', date = ''
 }
 
 /**
- * 把一行 §Decisions 追加进目标 bundle（question.md 与 journal.md 双写——与 appendProvenance 同契约：
- * bundle 路径缺席或契约件不全即 throw，拒绝静默）。
- * @param obs bundle（bundle 目录路径）/ row（要追加的记账行）/ journalNote（journal 侧人话备注）。
+ * 把一行 §Decisions 追加进目标 bundle（question.md 节内插入 + journal.md 双写——与
+ * appendProvenance 同契约：bundle 路径缺席或契约件不全即 throw，拒绝静默）。
+ * 节内插入 = 下一个 `## ` 节之前、§Decisions 既有行之后（节在文件尾的模板形态两者等价）；
+ * §Decisions 节缺席 fail-loud——盲 append 到文件尾在尾随节形态下会把记账行落到节外，
+ * 而 node-gate 门③（isHitl2Row）只读节内行 = 记账白落（2026-10-21 卫生轮立红实录）。
+ * @param obs bundle（bundle 目录路径）/ row（要追加的记账行）/ journalNote（journal 侧人话备注；空串 = 不写 journal）。
  */
 export function appendDecisionsRow({ bundle, row, journalNote = '' }) {
   if (typeof bundle !== 'string' || bundle.length === 0) {
@@ -119,7 +122,20 @@ export function appendDecisionsRow({ bundle, row, journalNote = '' }) {
   for (const f of [question, journal]) {
     if (!existsSync(f)) throw new Error(`appendDecisionsRow: ${f} 缺席——bundle 契约件不全，拒绝静默跳过`)
   }
-  appendFileSync(question, `\n${row}\n`)
+  writeFileSync(question, insertDecisionsRow(readFileSync(question, 'utf8'), row))
   if (journalNote !== '') appendFileSync(journal, `\n- ${journalNote}\n`)
   return { question, journal }
+}
+
+/** §Decisions 节内插入一行（纯函数；追加式不改写既有内容，空 journalNote 形态由调用方持有）。 */
+function insertDecisionsRow(text, row) {
+  const head = /^##\s*Decisions.*$/m.exec(text)
+  if (head === null) throw new Error('appendDecisionsRow: question.md 缺 ## Decisions 节——拒绝静默落错节（修正入口：核对 bundle 的 question.md 模板形态）')
+  const after = text.slice(head.index + head[0].length)
+  const next = /^##\s.*$/m.exec(after)
+  const at = next === null ? text.length : head.index + head[0].length + next.index
+  const before = text.slice(0, at)
+  const rest = text.slice(at)
+  const sep = before.endsWith('\n\n') ? '' : before.endsWith('\n') ? '\n' : '\n\n'
+  return before + sep + row + '\n' + (rest === '' ? '' : rest.startsWith('\n') ? rest.slice(1) : '\n' + rest)
 }

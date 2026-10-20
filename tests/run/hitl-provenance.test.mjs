@@ -19,7 +19,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { provenanceLines, appendProvenance, batchToAnswered, attributionBundleOf } from '../../scripts/lib/hitl-provenance.mjs';
+import { provenanceLines, appendProvenance, batchToAnswered, attributionBundleOf, appendDecisionsRow, closingProvenanceRow } from '../../scripts/lib/hitl-provenance.mjs';
 
 const ANSWERED = [
   { step: 1, prompt: '定稿还是补研究？', selected: '按现稿定稿交付（Recommended）' },
@@ -134,4 +134,73 @@ test('attributionBundleOf：无任何绑定 → null（零 bundle 与预检期�
 
 test('attributionBundleOf：写命中盖过立项窗口的预检读（计划确认卡形态——定稿写入后归属新 bundle）', () => {
   assert.equal(attributionBundleOf([kickoffAsk(), readInto('old'), writeInto('new')]), 'new');
+});
+
+// ── appendDecisionsRow（BUG-041 的写盘半边，2026-10-21 六维卫生轮补守卫）──
+// 负例留证 2026-10-21：BUG-041——run-kickoff 自由文本关闭挂起（官方恢复手段）的落账函数此前
+//   零测试消费（export 级对账实证；同形事故 BUG-014/041 均「声称写盘实际没写」）。红绿实录：
+//   ①「尾随节」与「§Decisions 缺节 fail-loud」两用例首跑即红——旧实现盲 append 到文件尾，
+//   question.md 在 §Decisions 后有尾随节时记账行落节外（node-gate 门③ isHitl2Row 只读节内行
+//   = 记账白落），缺节时静默落错位；②改节内插入 + 缺节 fail-loud 后全绿；③sabotage（journal
+//   双写降级 no-op）→ journal 断言红 → 还原绿。
+
+test('appendDecisionsRow：记账行落 §Decisions 节内 + journal 双写；二次调用追加式（BUG-041 写盘半边）', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'adr-'));
+  const bundle = join(dir, 'drt_probe');
+  mkdirSync(bundle);
+  writeFileSync(join(bundle, 'question.md'), '# Q\n\n## Decisions（append-only，最新在上）\n\n- 旧拍板行\n');
+  writeFileSync(join(bundle, 'journal.md'), '# Journal\n\n- 旧记账行\n');
+  try {
+    const row = closingProvenanceRow({ cardKey: 'anchor-2', text: '定稿', date: '2026-10-21' });
+    const written = appendDecisionsRow({ bundle, row, journalNote: '自由文本关闭挂起' });
+    assert.ok(written.question.endsWith('question.md'), '返回路径异常');
+    const q = readFileSync(join(bundle, 'question.md'), 'utf8');
+    assert.ok(q.includes('- 旧拍板行'), 'question.md 既有内容被改写');
+    assert.ok(q.indexOf('## Decisions') < q.indexOf('操作侧代理模拟'), '记账行落到 §Decisions 节之前');
+    const j = readFileSync(join(bundle, 'journal.md'), 'utf8');
+    assert.ok(j.includes('自由文本关闭挂起'), 'journal 双写未落');
+    appendDecisionsRow({ bundle, row, journalNote: '' });
+    const q2 = readFileSync(join(bundle, 'question.md'), 'utf8');
+    assert.ok((q2.match(/操作侧代理模拟/g) ?? []).length === 2, '幂等追加失败（二次应两行）');
+    const j2 = readFileSync(join(bundle, 'journal.md'), 'utf8');
+    assert.ok((j2.match(/自由文本关闭挂起/g) ?? []).length === 1, '空 journalNote 不应写 journal');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('appendDecisionsRow：§Decisions 后有尾随节 → 行落节内而非文件尾（门③只读节内行，2026-10-21 立红）', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'adr-tail-'));
+  const bundle = join(dir, 'drt_probe');
+  mkdirSync(bundle);
+  writeFileSync(join(bundle, 'question.md'), '# Q\n\n## Decisions\n\n- 旧拍板行\n\n## 附录\n\n附录内容\n');
+  writeFileSync(join(bundle, 'journal.md'), '# Journal\n');
+  try {
+    const row = '- 2026-10-21｜**HITL 交互 = 操作侧代理模拟（run-kickoff 自由文本关闭挂起）**：交付审阅 → 「定稿」——作答者非用户本人。';
+    appendDecisionsRow({ bundle, row });
+    const q = readFileSync(join(bundle, 'question.md'), 'utf8');
+    const appendixAt = q.indexOf('## 附录');
+    assert.ok(appendixAt > q.indexOf('## Decisions'), '夹具形态错误');
+    assert.ok(q.indexOf('操作侧代理模拟') < appendixAt, '记账行落到 §Decisions 节外（尾随节形态）——门③ isHitl2Row 读不到 = 记账白落');
+    assert.ok(q.includes('附录内容'), '尾随节内容被改写');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('appendDecisionsRow：缺件 fail-loud——bundle 缺席 / 契约件不全 / §Decisions 节缺席各报因，不静默', () => {
+  assert.throws(() => appendDecisionsRow({ bundle: '', row: '- x' }), /bundle 路径缺席/);
+  const dir = mkdtempSync(join(tmpdir(), 'adr-neg-'));
+  const bundle = join(dir, 'drt_probe');
+  mkdirSync(bundle);
+  writeFileSync(join(bundle, 'question.md'), '# Q\n');
+  try {
+    assert.throws(
+      () => appendDecisionsRow({ bundle, row: '- x' }),
+      /journal\.md/,
+      '缺 journal.md 应 fail-loud 报出文件名',
+    );
+    writeFileSync(join(bundle, 'journal.md'), '# J\n');
+    assert.throws(
+      () => appendDecisionsRow({ bundle, row: '- x' }),
+      /## Decisions/,
+      'question.md 缺 §Decisions 节应 fail-loud——盲落 = 静默错位',
+    );
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });
