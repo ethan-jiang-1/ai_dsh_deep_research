@@ -16,6 +16,22 @@
 // 调用，dev home 持凭据，任何 session/prompt 都会唤醒真模型 lead〔2026-10-13 事故实录〕；
 // 发送链路载荷由 tests/library-fold 电池钉）。
 //
+// 相位地图（2026-10-21 相位化重构；相位函数定义序 = 执行序，原"第一遍 c 排在第二遍之后"
+// 的命名/顺序错位已消灭——相位名按物理执行顺序编号）：
+//   setup    前置：RPC 建工作区/探针会话 + 真浏览器就位 + 装配断言①-④ → setupProbeSession
+//   pass-1   绑定会话渐进面（磁盘真值对账）→ pass1BoundFacePhase（本件）
+//   pass-2   未绑定会话负样本 → pass2UnboundNegativePhase（本件）
+//   pass-3   既有会话活动流 → pass3ActivityStreamPhase（本件）
+//   pass-4   「研究配置」页签 → pass4ConfigTabPhase（client-load-config.mjs）
+//   pass-5   终稿页签端到端 → pass5FinalDeliveryPhase（本件）
+//   pass-6   自测例库工作区 → pass6SelftestLibraryPhase（client-load-config.mjs）
+// 模块构成：本件 = boot/RPC/断言收集器 + 文件级共享 helper（awaitAppReady/openGuideCapsule/
+//   clickRowByText/openSessionByRowKey/openPane/paneTextOf/dialogTextOf——相位间共用，不再
+//   闭包在 try 内）+ pass-1/2/3/5；scripts/smoke/client-load-config.mjs = pass-4/pass-6
+//   （「研究配置」页签面——验证的是不同页签，拆独立模块；boot 入口与端口 3109 不变，
+//   不新增 smoke 面、不动 route 表）；scripts/smoke/client-load-reference.mjs = 磁盘参考
+//   对象构建器（绑定/未绑定/交付候选选取合同）。
+//
 // 通道：源码域（--profile web --patch dev/research.overlay.yml，与 preset-smoke 真挂载档
 // 同款——boot 起自本仓，行包名经根 node_modules 解析到 pack 源码树，浏览器经
 // exports["./client"] 取已构建的 lib/client.js）。
@@ -38,14 +54,13 @@ import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.
 import { launchChromium, loadChromium } from '../lib/playwright.mjs'
 import { clientHistoryWindow, readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
 import { prepareClientLoadReference } from './client-load-reference.mjs'
+import { pass4ConfigTabPhase, pass6SelftestLibraryPhase } from './client-load-config.mjs'
 import { expandGroup, openSessionById, openSessionByTitle, SIDEBAR_GROUP_CANDIDATES } from '../lib/web-ui-nav.mjs'
 import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { deriveBusinessBrief } from '../../packages/deep-research-pack/src/lib/brief-fold.ts'
 import { foldActivityRows } from '../../packages/deep-research-pack/src/lib/activity-fold.ts'
 import { streamFailureOf } from '../../packages/deep-research-pack/src/lib/stream-failure.ts'
 import { latestFinalDelivery } from '../../packages/deep-research-pack/src/lib/final-target.ts'
-import { SELFTEST_LIBRARY } from '../lib/selftest-library.mjs'
-import { METHOD_PRESETS_SKILL_PATH, methodPresetsFromSkillFile } from '../lib/method-presets.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const arg = (name, fallback) => {
@@ -184,8 +199,156 @@ const saveArtifacts = async (reason, extra = {}) => {
     return null
   }
 }
-try {
-  // 造渐进面断言的前提：注册研究工作区 + 用 workspaceId 形态建会话（bundle 在该工作区根内）
+
+// ══ 文件级共享 helper（2026-10-21 相位化：原闭包在 try 内、缩深 7-8 层，提为文件级——
+//    相位函数与 client-load-config.mjs 的 pass-4/pass-6 共用；page 按 Playwright 鸭子类型传参）══
+
+const wait = (ms) => new Promise((r) => setTimeout(r, ms))
+// expandGroup / 候选分组名 = lib/web-ui-nav.mjs 唯一正本（与 hitl-answer 共享——2026-10-13
+// 结构重构收敛，原本地双份句法已漂移）。
+// 页面就绪序列（reload → New Session 首屏字样 → 稳定窗）——收口本文件六处同形重复；
+// settleMs 逐调用点保持原值（各处的稳定窗是实测调的，不统一）。
+async function awaitAppReady(page, settleMs) {
+  await page.reload({ waitUntil: 'domcontentloaded' })
+  await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
+  await wait(settleMs)
+}
+// 「研究配置」guide 胶囊打开序列：先试已停靠芯片（展开右栏后直接在场），不在则走 dock
+// 「New tab」开 guide 页再试——两条路都试（company 配方核心）。时序参数逐调用点保持
+// 原值（探测窗/重试窗/点击后稳定窗是各上下文实测调的，不统一）；返回 ok = 胶囊已点开。
+async function openGuideCapsule(page, probeMs, retryMs, afterClickMs) {
+  const expand = page.getByRole('button', { name: 'Open right sidebar' })
+  if (await expand.count() > 0) await expand.first().click({ timeout: 8_000 }).catch(() => {})
+  await wait(1_500)
+  let cap = page.getByRole('button', { name: /研究配置/ }).first()
+  let ok = await cap.isVisible({ timeout: probeMs }).catch(() => false)
+  if (!ok) {
+    const addTab = page.getByRole('button', { name: 'New tab' }).first()
+    if (await addTab.count() > 0) {
+      await addTab.click({ timeout: 5_000 }).catch(() => {})
+      await wait(2_000)
+      cap = page.getByRole('button', { name: /研究配置/ }).first()
+      ok = await cap.isVisible({ timeout: retryMs }).catch(() => false)
+    }
+  }
+  if (ok) {
+    await cap.click({ timeout: 5_000 }).catch(() => {})
+    await wait(afterClickMs)
+  }
+  return ok
+}
+const clickRowByText = async (page, text) => {
+  const scan = async () => {
+    const rows = page.locator('span[class*="_root_"]')
+    const n = await rows.count()
+    // 同名行择取（2026-10-19 实红：绑定标题「Claude 模型发布线追踪」是
+    // 「Anthropic Claude 模型发布线追踪」的子串，侧栏新→旧扫描先撞上后者——点开的是
+    // 另一场 run，摘要层/队员/活动流三条断言全按错会话判红，看着像 pin 回归实为选行缺陷）。
+    // 取法 = 全遍历后择一：完全等优先，否则取最长共同后缀里最短的那行（子串被前缀/
+    // 后缀包住的行比无关短行更可能是目标），仍并列才按侧栏顺序（新→旧）取首个。
+    let exact = null
+    const partial = []
+    for (let i = 0; i < Math.min(n, 300); i++) {
+      const el = rows.nth(i)
+      if (!(await el.isVisible().catch(() => false))) continue
+      const box = await el.boundingBox().catch(() => null)
+      if (box === null || box.x >= 256) continue // 只认左栏（中央区同名 class 会抢匹配）
+      const rowText = (await el.textContent() ?? '').trim()
+      if (rowText === text) { exact = el; break }
+      if (rowText.includes(text)) partial.push({ el, len: rowText.length })
+    }
+    const pick = exact ?? (partial.length === 0 ? null : partial.sort((a, b) => a.len - b.len)[0].el)
+    if (pick !== null) { await pick.click({ timeout: 10_000 }).catch(() => {}); return true }
+    return false
+  }
+  if (await scan()) return true
+  // 深列表循环展开（2026-10-10 实测：dev home 累积 250+ 会话，目标会话可埋 8 层
+  // "Show N more sessions"——单次展开够不着。逐层点开直到目标在场/按钮消失/轮上限；
+  // 每层揭示数个会话，1.8s 稳定窗）。探针会话污染的定期清理正本 = 录制器头注。
+  for (let round = 0; round < 60; round++) {
+    const more = page.getByText(/Show \d+ more sessions/).first()
+    if (!(await more.isVisible({ timeout: 1500 }).catch(() => false))) break
+    await more.click().catch(() => {})
+    await wait(1800)
+    if (await scan()) return true
+  }
+  // 仍不可见 → 走「Search sessions」按名字定位（深列表的权威路径；React 受控输入
+  // 用 native setter + input 事件——execCommand 不触发受控更新）
+  const searchOpened = await page.evaluate(() => { const b = document.querySelector('[aria-label="Search sessions"]'); if (b === null) return false; b.click(); return true })
+  if (searchOpened) {
+    await wait(1500)
+    await page.evaluate((t) => {
+      const i = Array.from(document.querySelectorAll('input')).find(x => x.getBoundingClientRect().width > 0)
+      if (i === undefined) return
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
+      setter.call(i, t)
+      i.dispatchEvent(new Event('input', { bubbles: true }))
+    }, text)
+    await wait(2500)
+    if (await scan()) return true
+  }
+  return false
+}
+/** 按 **session id 行键** 确定性打开会话：标题在 dev home 里会重名（「…发布线跟踪」多份），
+ *  按标题点会打开另一条——期望侧绑的却是参考对象选的那条，五问对账因此假红（2026-10-20 实测）。
+ *  序：行键在场 → 点；否则**展开** research-workspace 组（手风琴：已展开时点击会收起，需再点回来）
+ *  → 再点；仍不在 → 逐层「Show more sessions」；最后才退回标题定位。 */
+const openSessionByRowKey = async (page, sessionId, title) => {
+  const key = `[data-row-key="session:${sessionId}"]`
+  const sessionRows = () => page.locator('[data-row-key^="session:"]').count()
+  const tryClick = async () => {
+    const row = page.locator(key)
+    if (await row.count() > 0 && await row.first().isVisible().catch(() => false)) {
+      await row.first().click({ timeout: 8_000 }).catch(() => {})
+      return true
+    }
+    return false
+  }
+  if (await tryClick()) return true
+  const wsRows = page.locator('[data-row-key^="workspace:"]')
+  const n = await wsRows.count()
+  for (let i = 0; i < n; i++) {
+    const el = wsRows.nth(i)
+    if (!((await el.textContent()) ?? '').includes('research-workspace')) continue
+    const before = await sessionRows()
+    await el.click({ timeout: 8_000 }).catch(() => {})
+    await wait(2_000)
+    const after = await sessionRows()
+    // 手风琴：本来展开着的组被点成收起（行数掉到 0）→ 再点一次展开回来
+    if (before > 0 && after < before) { await el.click({ timeout: 8_000 }).catch(() => {}); await wait(2_000) }
+    break
+  }
+  if (await tryClick()) return true
+  for (let round = 0; round < 40; round++) {
+    const more = page.getByText(/Show \d+ more sessions/).first()
+    if (!(await more.isVisible({ timeout: 1_500 }).catch(() => false))) break
+    await more.click({ timeout: 4_000 }).catch(() => {})
+    await wait(1_500)
+    if (await tryClick()) return true
+  }
+  return title !== null && await clickRowByText(page, title)
+}
+
+async function openPane(page) {
+  const expand = page.getByRole('button', { name: 'Open right sidebar' })
+  if (await expand.count() > 0) await expand.first().click({ timeout: 8_000 }).catch(() => {})
+  await wait(1_500)
+  const capsule = page.getByRole('button', { name: /研究状态/ }).first()
+  const ok = await capsule.isVisible({ timeout: 12_000 }).catch(() => false)
+  if (ok) { await capsule.click({ timeout: 5_000 }).catch(() => {}); await wait(4_000) }
+  return ok
+}
+const paneTextOf = (page) => page.evaluate(() => document.body?.innerText ?? '')
+// 弹窗内容读 textContent（不看滚动位置）：详情正文内滚后，innerText 只含可视区文本——
+// 用它断言"块在场"会随滚动位置假红（2026-10-18 实测缺陷修复的配套）。
+const dialogTextOf = (page) => page.locator('[role="dialog"]').first().textContent().catch(() => '')
+
+// ══ 相位函数（定义序 = 执行序；共享状态 = 模块级 boundSession/unboundSession/page）══
+
+/** setup：造渐进面断言的前提——注册研究工作区 + workspaceId 形态建探针会话（bundle 在该
+ *  工作区根内）+ 真浏览器就位 + 装配断言①-④ + 探针会话改名。返回 { base, cookie }（pass-6
+ *  的抛弃型工作区 RPC 复用）。 */
+async function setupProbeSession() {
   const base = `http://127.0.0.1:${PORT}`
   const cookie = await authenticate(base, token)
   const ws = await rpc(base, cookie, 'workspace/create', { request: { path: join(ROOT, 'research-workspace') } })
@@ -235,173 +398,37 @@ try {
   //    e) 页签体渲染 journal 流且 snapshot 历史 ≥1 事件。
   const cont = page.getByRole('button', { name: /continue/i }).first()
   if (await cont.isVisible().catch(() => false)) await cont.click({ timeout: 6_000 }).catch(() => {})
-  await new Promise((r) => setTimeout(r, 1_500))
+  await wait(1_500)
 
-  // ── 两遍断言：探针会话（research-workspace，验渐进面真数据）+ 既有会话（验活动流）──
+  // ── 探针会话改名（两遍断言的前置：探针会话=research-workspace，验渐进面真数据；
+  //    既有会话验活动流）──
   const PROBE_TITLE = '渐进面探针会话'
   await rpc(base, cookie, 'session/rename', { request: { sessionId: probeSessionId, title: PROBE_TITLE } })
+  return { base, cookie }
+}
 
-  const wait = (ms) => new Promise((r) => setTimeout(r, ms))
-  // expandGroup / 候选分组名 = lib/web-ui-nav.mjs 唯一正本（与 hitl-answer 共享——2026-10-13
-  // 结构重构收敛，原本地双份句法已漂移）。
-  // 页面就绪序列（reload → New Session 首屏字样 → 稳定窗）——收口本文件六处同形重复；
-  // settleMs 逐调用点保持原值（各处的稳定窗是实测调的，不统一）。
-  const awaitAppReady = async (settleMs) => {
-    await page.reload({ waitUntil: 'domcontentloaded' })
-    await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
-    await wait(settleMs)
-  }
-  // 「研究配置」guide 胶囊打开序列：先试已停靠芯片（展开右栏后直接在场），不在则走 dock
-  // 「New tab」开 guide 页再试——两条路都试（company 配方核心）。时序参数逐调用点保持
-  // 原值（探测窗/重试窗/点击后稳定窗是各上下文实测调的，不统一）；返回 ok = 胶囊已点开。
-  const openGuideCapsule = async (probeMs, retryMs, afterClickMs) => {
-    const expand = page.getByRole('button', { name: 'Open right sidebar' })
-    if (await expand.count() > 0) await expand.first().click({ timeout: 8_000 }).catch(() => {})
-    await wait(1_500)
-    let cap = page.getByRole('button', { name: /研究配置/ }).first()
-    let ok = await cap.isVisible({ timeout: probeMs }).catch(() => false)
-    if (!ok) {
-      const addTab = page.getByRole('button', { name: 'New tab' }).first()
-      if (await addTab.count() > 0) {
-        await addTab.click({ timeout: 5_000 }).catch(() => {})
-        await wait(2_000)
-        cap = page.getByRole('button', { name: /研究配置/ }).first()
-        ok = await cap.isVisible({ timeout: retryMs }).catch(() => false)
-      }
-    }
-    if (ok) {
-      await cap.click({ timeout: 5_000 }).catch(() => {})
-      await wait(afterClickMs)
-    }
-    return ok
-  }
-  const clickRowByText = async (text) => {
-    const scan = async () => {
-      const rows = page.locator('span[class*="_root_"]')
-      const n = await rows.count()
-      // 同名行择取（2026-10-19 实红：绑定标题「Claude 模型发布线追踪」是
-      // 「Anthropic Claude 模型发布线追踪」的子串，侧栏新→旧扫描先撞上后者——点开的是
-      // 另一场 run，摘要层/队员/活动流三条断言全按错会话判红，看着像 pin 回归实为选行缺陷）。
-      // 取法 = 全遍历后择一：完全等优先，否则取最长共同后缀里最短的那行（子串被前缀/
-      // 后缀包住的行比无关短行更可能是目标），仍并列才按侧栏顺序（新→旧）取首个。
-      let exact = null
-      const partial = []
-      for (let i = 0; i < Math.min(n, 300); i++) {
-        const el = rows.nth(i)
-        if (!(await el.isVisible().catch(() => false))) continue
-        const box = await el.boundingBox().catch(() => null)
-        if (box === null || box.x >= 256) continue // 只认左栏（中央区同名 class 会抢匹配）
-        const rowText = (await el.textContent() ?? '').trim()
-        if (rowText === text) { exact = el; break }
-        if (rowText.includes(text)) partial.push({ el, len: rowText.length })
-      }
-      const pick = exact ?? (partial.length === 0 ? null : partial.sort((a, b) => a.len - b.len)[0].el)
-      if (pick !== null) { await pick.click({ timeout: 10_000 }).catch(() => {}); return true }
-      return false
-    }
-    if (await scan()) return true
-    // 深列表循环展开（2026-10-10 实测：dev home 累积 250+ 会话，目标会话可埋 8 层
-    // "Show N more sessions"——单次展开够不着。逐层点开直到目标在场/按钮消失/轮上限；
-    // 每层揭示数个会话，1.8s 稳定窗）。探针会话污染的定期清理正本 = 录制器头注。
-    for (let round = 0; round < 60; round++) {
-      const more = page.getByText(/Show \d+ more sessions/).first()
-      if (!(await more.isVisible({ timeout: 1500 }).catch(() => false))) break
-      await more.click().catch(() => {})
-      await wait(1800)
-      if (await scan()) return true
-    }
-    // 仍不可见 → 走「Search sessions」按名字定位（深列表的权威路径；React 受控输入
-    // 用 native setter + input 事件——execCommand 不触发受控更新）
-    const searchOpened = await page.evaluate(() => { const b = document.querySelector('[aria-label="Search sessions"]'); if (b === null) return false; b.click(); return true })
-    if (searchOpened) {
-      await wait(1500)
-      await page.evaluate((t) => {
-        const i = Array.from(document.querySelectorAll('input')).find(x => x.getBoundingClientRect().width > 0)
-        if (i === undefined) return
-        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
-        setter.call(i, t)
-        i.dispatchEvent(new Event('input', { bubbles: true }))
-      }, text)
-      await wait(2500)
-      if (await scan()) return true
-    }
-    return false
-  }
-  /** 按 **session id 行键** 确定性打开会话：标题在 dev home 里会重名（「…发布线跟踪」多份），
-   *  按标题点会打开另一条——期望侧绑的却是参考对象选的那条，五问对账因此假红（2026-10-20 实测）。
-   *  序：行键在场 → 点；否则**展开** research-workspace 组（手风琴：已展开时点击会收起，需再点回来）
-   *  → 再点；仍不在 → 逐层「Show more sessions」；最后才退回标题定位。 */
-  const openSessionByRowKey = async (sessionId, title) => {
-    const key = `[data-row-key="session:${sessionId}"]`
-    const sessionRows = () => page.locator('[data-row-key^="session:"]').count()
-    const tryClick = async () => {
-      const row = page.locator(key)
-      if (await row.count() > 0 && await row.first().isVisible().catch(() => false)) {
-        await row.first().click({ timeout: 8_000 }).catch(() => {})
-        return true
-      }
-      return false
-    }
-    if (await tryClick()) return true
-    const wsRows = page.locator('[data-row-key^="workspace:"]')
-    const n = await wsRows.count()
-    for (let i = 0; i < n; i++) {
-      const el = wsRows.nth(i)
-      if (!((await el.textContent()) ?? '').includes('research-workspace')) continue
-      const before = await sessionRows()
-      await el.click({ timeout: 8_000 }).catch(() => {})
-      await wait(2_000)
-      const after = await sessionRows()
-      // 手风琴：本来展开着的组被点成收起（行数掉到 0）→ 再点一次展开回来
-      if (before > 0 && after < before) { await el.click({ timeout: 8_000 }).catch(() => {}); await wait(2_000) }
-      break
-    }
-    if (await tryClick()) return true
-    for (let round = 0; round < 40; round++) {
-      const more = page.getByText(/Show \d+ more sessions/).first()
-      if (!(await more.isVisible({ timeout: 1_500 }).catch(() => false))) break
-      await more.click({ timeout: 4_000 }).catch(() => {})
-      await wait(1_500)
-      if (await tryClick()) return true
-    }
-    return title !== null && await clickRowByText(title)
-  }
-
-  const openPane = async () => {
-    const expand = page.getByRole('button', { name: 'Open right sidebar' })
-    if (await expand.count() > 0) await expand.first().click({ timeout: 8_000 }).catch(() => {})
-    await wait(1_500)
-    const capsule = page.getByRole('button', { name: /研究状态/ }).first()
-    const ok = await capsule.isVisible({ timeout: 12_000 }).catch(() => false)
-    if (ok) { await capsule.click({ timeout: 5_000 }).catch(() => {}); await wait(4_000) }
-    return ok
-  }
-  const paneTextOf = () => page.evaluate(() => document.body?.innerText ?? '')
-  // 弹窗内容读 textContent（不看滚动位置）：详情正文内滚后，innerText 只含可视区文本——
-  // 用它断言"块在场"会随滚动位置假红（2026-10-18 实测缺陷修复的配套）。
-  const dialogTextOf = () => page.locator('[role="dialog"]').first().textContent().catch(() => '')
-
-  // 第一遍：绑定会话（磁盘侧定位——渐进面真数据 = 本会话自己的 bundle，磁盘认证对账）
-  await awaitAppReady(6_000)
+/** pass-1：绑定会话（磁盘侧定位——渐进面真数据 = 本会话自己的 bundle，磁盘认证对账）。 */
+async function pass1BoundFacePhase() {
+  await awaitAppReady(page, 6_000)
   const boundOk = boundSession !== null && expectedFace !== null
   step(boundOk, '磁盘侧找到绑定 run 的带历史会话（渐进面真数据源）', boundOk ? `「${boundSession.title}」→ drt_${boundSession.slug}` : '缺——先跑一场 run（run 通道现用 workspaceId 形态建会话）')
   if (boundOk) {
-    const opened = await openSessionByRowKey(boundSession.sessionId, boundSession.title)
+    const opened = await openSessionByRowKey(page, boundSession.sessionId, boundSession.title)
     await wait(3_000)
     // marker 来自 journal 的**原始 Markdown**（可能含链接/反引号），页面上是渲染后的文本——
     // 两侧都剥掉记号再比（2026-10-20 实测：原文 `[final.md](drt_…)` 在 UI 里只剩 `final.md`）。
     const normalizeText = (text) => text.replace(/[\s[\]()*`#>_]/g, '')
     const markerNeedle = boundSession.marker === null ? null : normalizeText(boundSession.marker).slice(0, 12)
-    const onTarget = opened && (markerNeedle === null || normalizeText(await paneTextOf()).includes(markerNeedle))
+    const onTarget = opened && (markerNeedle === null || normalizeText(await paneTextOf(page)).includes(markerNeedle))
     step(opened && onTarget, '绑定会话在侧栏可开且主视图已切换（行键 + 身份 marker）',
       onTarget ? `marker=${JSON.stringify(markerNeedle)}` : `marker 未命中：${JSON.stringify(markerNeedle)}`)
     if (opened) {
       await wait(4_000)
-      const capOk = await openPane()
+      const capOk = await openPane(page)
       step(capOk, '「研究状态」guide 胶囊在场（tab 类型注册成功 + 右栏展开）')
       if (capOk) {
         await wait(6_000)
-        const paneText = await paneTextOf()
+        const paneText = await paneTextOf(page)
         let seg = paneText.slice(paneText.indexOf('研究状态'))
         // UI/盘侧时点竞态收口（2026-10-11 首验两红）：①UI bundle 面有 30s 刷新周期（slug
         // 变化即扫 + 定时），盘侧文件现扫可领先 UI 一拍；②lead journal 快照取自 boot 前，
@@ -446,12 +473,12 @@ try {
         for (let attempt = 0; attempt < 2
           && (uiFace.evidence !== diskSide.evidence || uiFace.delivered !== diskSide.delivered || uiFace.passed !== diskSide.passed); attempt++) {
           await wait(20_000)
-          await awaitAppReady(4_000)
-          if (!(await clickRowByText(boundSession.title))) break
+          await awaitAppReady(page, 4_000)
+          if (!(await clickRowByText(page, boundSession.title))) break
           await wait(4_000)
-          if (!(await openPane())) break
+          if (!(await openPane(page))) break
           await wait(6_000)
-          const paneAgain = await paneTextOf()
+          const paneAgain = await paneTextOf(page)
           seg = paneAgain.slice(paneAgain.indexOf('研究状态'))
           uiFace = parseUiFace(seg, await faceRowText())
           diskSide = diskSideNow()
@@ -465,13 +492,13 @@ try {
         // 若摘要块**始终**不渲染，本等待耗尽后断言照红（有界 20×1s）。
         for (let i = 0; i < 20 && !seg.includes('🎯'); i++) {
           await wait(1_000)
-          const t = await paneTextOf()
+          const t = await paneTextOf(page)
           seg = t.slice(t.indexOf('研究状态'))
           uiFace = parseUiFace(seg, await faceRowText())
         }
         await wait(300) // 摘要块在场后再让一帧（避免读到"块在、行未满"的边界帧）
         {
-          const t = await paneTextOf()
+          const t = await paneTextOf(page)
           const settled = t.slice(t.indexOf('研究状态'))
           if (settled.includes('🎯')) { seg = settled; uiFace = parseUiFace(seg, await faceRowText()) }
         }
@@ -498,7 +525,7 @@ try {
         const diskAnchors = diskSide.anchors
         const loopExpected = diskAnchors[1] !== undefined && diskAnchors[1].state !== 'upcoming'
         step(loopExpected ? rail.reentry === 'dashed' : (rail.reentry === null || rail.reentry === 'none'),
-          '重入点描边（回边落点 = 挖掘；交付审阅非 upcoming 才描边）', `outline=${rail.reentry ?? '无'}（loopOn=${loopExpected}）`)
+          '重入点描边（回边落点 = 挖掘；交付审阅非 upcoming 才扫边）', `outline=${rail.reentry ?? '无'}（loopOn=${loopExpected}）`)
         step(Number.isInteger(uiFace.evidence) && uiFace.evidence === faceNow.evidenceCount,
           '证据计数 = 磁盘真值（会话绑定 + 根/archive 两位置）', `UI ${uiFace.evidence} / 磁盘 ${faceNow.evidenceCount}`)
         const delivOk = uiFace.delivered === diskSide.delivered
@@ -585,19 +612,21 @@ try {
       }
     }
   }
+}
 
-  // 第一遍 b（负样本，有样本才跑）：未绑定会话 → 提示行在场 + 零别家渐进面泄漏
-  //（候选逐个试到能点开为止——子代理子会话可能不进侧栏，标题垃圾的跳过）
+/** pass-2：未绑定会话负样本（有样本才跑）——提示行在场 + 零别家渐进面泄漏
+ * （候选逐个试到能点开为止——子代理子会话可能不进侧栏，标题垃圾的跳过）。 */
+async function pass2UnboundNegativePhase() {
   if (unboundCandidates.length > 0) {
     for (const cand of unboundCandidates) {
-      await awaitAppReady(5_000)
-      const opened2 = await clickRowByText(cand.title)
+      await awaitAppReady(page, 5_000)
+      const opened2 = await clickRowByText(page, cand.title)
       if (!opened2) continue
       await wait(4_000)
-      const capOk2 = await openPane()
+      const capOk2 = await openPane(page)
       if (!capOk2) continue
       await wait(5_000)
-      const t2 = await paneTextOf()
+      const t2 = await paneTextOf(page)
       const seg2 = t2.slice(t2.indexOf('研究状态'))
       unboundSession = cand
       step(seg2.includes('本会话未绑定 run bundle'), '未绑定会话：提示行在场（如实说明，不冒充）', cand.title)
@@ -613,9 +642,9 @@ try {
         (seg2.match(/🎯 [^\n]{0,24}/) ?? ['（未找到 🎯 行）'])[0])
       // 互补案例（子卡① ①-1／①-6）：未绑定会话上「本次研究」区必须走**无 run** 态——给入口、
       // 不借用别家 run 的方法名、不回落默认打法（单测覆盖五态，这里钉真浏览器上的那一态）。
-      if (await openGuideCapsule(6_000, 6_000, 2_500)) {
-        const cfg = (await dialogTextOf()) ?? ''
-        const cfgText = cfg !== '' ? cfg : await paneTextOf()
+      if (await openGuideCapsule(page, 6_000, 6_000, 2_500)) {
+        const cfg = (await dialogTextOf(page)) ?? ''
+        const cfgText = cfg !== '' ? cfg : await paneTextOf(page)
         const noRunOk = cfgText.includes('本会话暂无研究') && !cfgText.includes('本次研究：')
         step(noRunOk, '未绑定会话·本次研究区：无 run 态如实（给入口、不回落默认打法名）')
       } else {
@@ -627,10 +656,12 @@ try {
   } else {
     console.log('  note  未绑定会话负样本：无样本（跳过——先跑 snapshot-replay 冒烟产生纯检索会话）')
   }
+}
 
-  // 第二遍：既有会话（有历史 → 活动流断言）。先 reload：第一遍点击后侧栏可能重排/滚动，
-  // 直接找行会 miss（实测）——reload 回到干净列表态。
-  await awaitAppReady(5_000)
+/** pass-3：既有会话（有历史 → 活动流断言）。先 reload：此前相位点击后侧栏可能重排/滚动，
+ *  直接找行会 miss（实测）——reload 回到干净列表态。 */
+async function pass3ActivityStreamPhase() {
+  await awaitAppReady(page, 5_000)
   const SESSION_TITLE = SESSION_TITLE_ARG ?? boundSession?.title ?? null
   // 打开方式 = **按 sessionId 精定位优先**（2026-10-19 换 pin 实红）：标题匹配是文本启发式，
   // dev home 里存在标题互为子串的会话（「Claude 模型发布线追踪」⊂「Anthropic Claude 模型发布线
@@ -643,7 +674,7 @@ try {
   // 标题路线先行**只为拿到它的深列表展开能力**：`clickRowByText` 内含「Show N more sessions」
   // 逐层展开 + Search sessions 兜底（reload 后侧栏只渲染首屏，目标行常在折叠层里）；
   // 它的取行已改成精确等优先（子串只作退路），故标题含于别家标题的情况不再误点。
-  if (SESSION_TITLE !== null) sessionOk = await clickRowByText(SESSION_TITLE)
+  if (SESSION_TITLE !== null) sessionOk = await clickRowByText(page, SESSION_TITLE)
   if (!sessionOk && boundSessionId !== null) {
     sessionOk = (await openSessionById(page, boundSessionId, SESSION_TITLE)).found
   }
@@ -655,15 +686,15 @@ try {
     for (const g of SIDEBAR_GROUP_CANDIDATES) {
       await expandGroup(page, g)
       if (boundSessionId !== null) sessionOk = (await openSessionById(page, boundSessionId, SESSION_TITLE)).found
-      if (!sessionOk && SESSION_TITLE !== null) sessionOk = await clickRowByText(SESSION_TITLE)
+      if (!sessionOk && SESSION_TITLE !== null) sessionOk = await clickRowByText(page, SESSION_TITLE)
       if (sessionOk) break
     }
   }
   step(sessionOk, '既有会话在场（journal 数据源；折叠组自动展开）', sessionOk ? SESSION_TITLE : 'dev home 缺该会话——用 --session 指定')
   if (sessionOk) {
     await wait(5_000)
-    await openPane()
-    const paneText = await paneTextOf()
+    await openPane(page)
+    const paneText = await paneTextOf(page)
     const paneOk = paneText.includes('研究状态') && (paneText.includes('💬') || paneText.includes('（研究中'))
     step(paneOk, '页签体渲染（keyed 槽体挂对 key + follow 通道接通）')
     // 流畸形死亡恢复指引（BUG-023 修复①）：盘侧 streamFailureOf 真值 ↔ UI 横幅对账——
@@ -718,150 +749,17 @@ try {
     const rawNoise = ['step/end', 'step/start', 'tool/call', 'assistant/message', 'turn/end', 'turn/start'].filter((x) => paneText.includes(x))
     step(rawNoise.length === 0, '页签正文无原始事件类型名（噪音已过滤）', rawNoise.length > 0 ? rawNoise.slice(0, 2).join('、') : '')
   }
+}
 
-  // 第一遍 c：「研究配置」页签（D25 期 1 管理中继面）——guide 胶囊在场 + 页签体渲染
-  // （内置偏好只读表 + 偏好库空态/条目）。防"拼错不报错、永不渲染"（company 坑 1 的
-  // 渲染级对账；keyed 字面量另由 client-keys 门禁静态对账）。
-  {
-    await awaitAppReady(5_000)
-    const targetTitle = SESSION_TITLE_ARG ?? boundSession?.title ?? unboundSession?.title
-    const openedC = targetTitle !== null && await clickRowByText(targetTitle)
-    if (openedC) {
-      await wait(3_000)
-      // 胶囊在 guide 页（dock「New tab」打开）；已停靠的芯片也可点——两条路都试。
-      const capOkC = await openGuideCapsule(4_000, 10_000, 3_000)
-      step(capOkC, '「研究配置」guide 胶囊在场（tab 类型注册成功 + guide 页可达）')
-      if (capOkC) {
-        const tc = await paneTextOf()
-        const segC = tc.slice(tc.indexOf('研究配置'))
-        // 内置名单从 skill 表**解析派生**（2026-10-18：原为手写四条字面量——skill 加一行而
-        // 面板没渲染时它照样绿〔子集检查〕，是第四份手写副本；总卡发现 14）。解析器 =
-        // scripts/lib/method-presets.mjs（与 tests/library-fold 共用同一入口）。
-        const builtinNames = methodPresetsFromSkillFile(join(ROOT, METHOD_PRESETS_SKILL_PATH)).map((row) => row.name)
-        const missingBuiltin = builtinNames.filter((n) => !segC.includes(n))
-        step(missingBuiltin.length === 0, '研究配置页签体：内置偏好全部在场（名单从 skill 表派生）',
-          missingBuiltin.length > 0 ? `缺 ${missingBuiltin.join('、')}` : `${builtinNames.length} 条`)
-        // 库区断言随库状态走（盘侧 method-library.md 真值）：空库 → 引导文案；有条目 → 条目名/默认徽标在场。
-        const libFile = join(ROOT, 'research-workspace', 'method-library.md')
-        const hasEntries = existsSync(libFile) && /^## /m.test(readFileSync(libFile, 'utf8'))
-        // 空态文案 2026-10-18 分两支（外部状态文案准则：无结果 ≠ 失败）：文件不在 = 「本工作区还没有
-        // 偏好库」；文件在但空 = 「偏好库是空的」；读不回 = 「读不到 method-library.md」。
-        const libOk = segC.includes('我的偏好库') && (hasEntries
-          ? (segC.includes('格局调研') || segC.includes('默认偏好'))
-          : (segC.includes('本工作区还没有偏好库') || segC.includes('偏好库是空的')))
-        step(libOk, '研究配置页签体：偏好库区 = 盘侧库状态真值（空态引导 / 条目投影）', hasEntries ? '库有条目' : '库为空')
-        // 显式化三面（子卡① ①-3／①-4，2026-10-18）——呈现位在场：
-        //   ①「本次研究」区：五态之一如实在场（绑定会话多为 recorded，未绑定/旧 run 走其余态）
-        //   ② 六条共同底线一行（正本 = skill 的共同底线句，同钉 = tests/library-fold）
-        //   ③ 两个定制入口按钮 ＋ 推荐规则说明位 ＋ 每卡「什么时候用它」
-        const zoneStateOk = ['本次研究：', '本会话暂无研究', 'question.md 不在', '未记录，不替你回填', '面板不猜']
-          .some((s) => segC.includes(s))
-        step(segC.includes('本次研究') && zoneStateOk, '「本次研究」区在场：本次采用/来源或四态如实文案')
-        const baselineOk = ['任何打法都改不掉', '来源链', '逐字摘录', '独立信源', '日期校准', '缺口显式', 'readiness']
-          .every((s) => segC.includes(s))
-        step(baselineOk, '底线条：六条共同底线逐字在场（改不掉的边界显式化）')
-        const entriesOk = ['让 Lead 帮我起草', '从本次 run 沉淀'].every((s) => segC.includes(s))
-        step(entriesOk, '底线条：两个定制入口按钮在场')
-        const ruleHintOk = segC.includes('推荐怎么算出来的') && segC.includes('什么时候用它：')
-        step(ruleHintOk, '推荐规则说明位 ＋ 每卡「什么时候用它」在场（判型→打法可见）')
-        // 回执区在场（①-2）：keyless 档禁止发送（2026-10-13 事故实录），三态**渲染**由
-        // tests/receipt-fold 纯函数钉；此处只证回执区在场且三态词汇面向用户可辨。
-        const receiptZoneOk = segC.includes('改动的回执会显示在这里') && segC.includes('已发送') && segC.includes('已回话') && segC.includes('已落盘')
-        step(receiptZoneOk, '回执区在场（空闲态）：三态词汇可辨（已发送／已回话／已落盘）')
-        const demoOk = segC.includes('领域示范（只读）') && segC.includes('投研尽调（示范）') && segC.includes('抄体例，不抄内容')
-        step(demoOk, '领域示范（只读）：厚条目在场（四字段颗粒度可对照）')
-        // 零上下文探针（2026-10-18）点出的三处高风险错读，逐条钉在场：
-        //   ①「保存」类按钮必须写明是发给 Lead（面板不写文件）——否则用户以为已生效；
-        //   ② 术语一句话表（研究偏好＝打法）与"指令 vs 回执"的机制说明；
-        //   ③ 改动影响范围（之后的研究 vs 正在跑的那场）。
-        const glossaryOk = segC.includes('一条「研究偏好」＝一条打法') && segC.includes('都是给 Lead 发一条指令')
-        step(glossaryOk, '术语表在场：研究偏好＝打法 ＋ 指令/回执机制一行说清')
-        // 详情 Modal（detail-ux 期 1.5）：点内置条目名称 → 四分区 + 内置操作在场 → 关闭。
-        const nameBtn = page.getByRole('button', { name: /事实核查 ›/ }).first()
-        if (await nameBtn.isVisible({ timeout: 6_000 }).catch(() => false)) {
-          await nameBtn.click({ timeout: 5_000 }).catch(() => {})
-          await wait(1_500)
-          const modalText = (await dialogTextOf()) ?? ''
-          const modalOk = ['找来源', '怎么核实', '报告怎么写', '不承诺', '基于此自定义', '用于本次研究'].every((s) => modalText.includes(s))
-            && !modalText.includes('编辑内容')
-          step(modalOk, '研究配置详情 Modal：四分区 + 内置操作在场（读态；内置无编辑入口）')
-          const explicitOk = ['谁读它', '管不到', '任何打法都改不掉（共同底线）', '偏好只能往上加要求', '产出长这样', '什么时候会推荐它', '「基于此自定义」新建的副本同样受这六条约束', '「来源链」管的是']
-            .every((s) => modalText.includes(s))
-          step(explicitOk, '研究配置详情：执行面表（谁读它/在哪生效/管不到）＋ 底线块 ＋ 标本骨架 ＋ 推荐说明在场')
-          await page.getByRole('button', { name: '关闭详情' }).first().click({ timeout: 5_000 }).catch(() => {})
-          await wait(1_000)
-        } else {
-          step(false, '研究配置详情 Modal：条目名称钮不可见（渲染回归）')
-        }
-        // 库条目详情/编辑草稿/删除二次确认（detail-ux 期 1.5 验收行补全；库有条目才有对象）：
-        // 编辑只到草稿层即放弃、删除只到确认层即取消——本组零发送；发送回执单独走下方
-        // 抛弃型探针会话。
-        if (hasEntries) {
-          const libName = page.getByRole('button', { name: /格局调研 ›/ }).first()
-          if (await libName.isVisible({ timeout: 6_000 }).catch(() => false)) {
-            await libName.click({ timeout: 5_000 }).catch(() => {})
-            await wait(1_500)
-            let t = (await dialogTextOf()) ?? ''
-            // 「无基于此自定义」按**角色**判按钮在场，不按文本判——2026-10-18 实测假红：
-            // 底线块的说明句里合法地提到了「基于此自定义」这四个字（讲"自定义副本同样受底线约束"）。
-            const builtinBtn = await page.getByRole('button', { name: '基于此自定义' }).count().catch(() => -1)
-            const libModalOk = ['找来源', '怎么核实', '报告怎么写', '不承诺', '编辑内容', '用于本次研究', '来源：'].every((s) => t.includes(s))
-              && builtinBtn === 0
-            step(libModalOk, '研究配置详情 Modal（库条目）：四分区 + 编辑入口在场（读态，无「基于此自定义」）')
-            // 编辑态：四分区草稿预填 + 单保存钮 + 放弃；放弃不发送
-            await page.getByRole('button', { name: '编辑内容' }).first().click({ timeout: 5_000 }).catch(() => {})
-            await wait(1_000)
-            // 作用域收窄（2026-10-16）：原为全页 `page.locator('textarea')`——页面里任何别的
-            // textarea（实测：一个空 textarea 排在四分区之前）都会把计数顶成 5，断言红而产品正确。
-            // 判据意图 = "编辑态恰有四分区草稿 + 单保存钮"，故锚在 Modal（role=dialog）内。
-            const drafts = page.locator('[role="dialog"] textarea')
-            const draftCount = await drafts.count().catch(() => 0)
-            const draftPrefill = draftCount === 4 ? await drafts.first().inputValue().catch(() => '') : ''
-            t = await paneTextOf()
-            const editOk = draftCount === 4 && draftPrefill.includes('官方域优先')
-              && ['把修改交给 Lead', '放弃'].every((s) => t.includes(s))
-            step(editOk, '研究配置编辑态：四分区草稿预填 + 单保存钮在场', draftCount === 4 ? '草稿 4 区，首区预填' : `textarea ${draftCount} 区`)
-            await page.getByRole('button', { name: '放弃' }).first().click({ timeout: 5_000 }).catch(() => {})
-            await wait(1_000)
-            // 删除二次确认：⋯ 菜单 → 删除… → 确认 Modal → 取消（不发送）
-            await page.getByRole('button', { name: '格局调研 的操作' }).first().click({ timeout: 5_000 }).catch(() => {})
-            await wait(1_000)
-            const hasSetDefault = await page.getByRole('menuitem', { name: '设为默认' }).isVisible({ timeout: 4_000 }).catch(() => false)
-            await page.getByRole('menuitem', { name: '删除…' }).first().click({ timeout: 5_000 }).catch(() => {})
-            await wait(1_000)
-            t = await paneTextOf()
-            const confirmOk = t.includes('删除「格局调研」？') && t.includes('确认删除') && t.includes('取消')
-            step(confirmOk && hasSetDefault, '研究配置删除：⋯ 菜单 → 二次确认 Modal 在场（取消不发送）', hasSetDefault ? '' : '「设为默认」菜单项缺席')
-          const affectOk = segC.includes('改动影响的是') && segC.includes('结果看下面的回执')
-          step(affectOk, '影响范围与指令机制在场：改动影响之后的研究 ＋ 换一条=发指令')
-            await page.getByRole('button', { name: '取消' }).first().click({ timeout: 5_000 }).catch(() => {})
-            await wait(1_000)
-          } else {
-            step(false, '研究配置库条目：名称钮不可见（渲染回归）')
-          }
-
-          // 发送链路断言（2026-10-13 自测轮移除）：面板→session/prompt→回执曾以「发给抛弃型
-          // 探针会话」为安全假设——实测推翻：dev home 持有凭据，任何 session/prompt 都会唤醒
-          // 真模型 lead（事故实录：探针壳里的 lead 读写了 research-workspace 用户数据）。本冒烟
-          // keyless 档契约 = 无模型调用——发送链路的浏览器断言整体移除，载荷逻辑由
-          // tests/library-fold 例库电池钉（editInstruction 逐字），面板编辑态草稿断言保留在上块。
-        } else {
-          console.log('  note  研究配置库条目断言：盘侧库为空（跳过——先有库条目再验）')
-        }
-      }
-    } else {
-      console.log('  note  研究配置页签探针：无会话可开（跳过——先有任一会话再验）')
-    }
-  }
-
-  // ── 终稿页签端到端（issue 2026-10-19）──────────────────────────────────────────
-  // 独立目标 = dev home 里已交付的冷会话。为什么独立：主渐进面断言绑的会话可能在飞（present
-  // 未发生），而终稿的出现时机只在交付之后——拿在飞 run 验它只会永远 SKIP。
-  // 选取方式是**在 UI 里试**而不是盘侧预判：状态页签的开场快照窗口（≥50 消息且跨 ≥2 回合）
-  // 与盘侧复刻不必逐事件等价，盘侧"窗口内有 present"不保证 UI 这一窗里也有（2026-10-20 实测
-  // 两跑两个候选一有一无）。所以逐个候选打开 → 找门 → 找到即验。
-  // 到达会话的两条路：按标题（clickRowByText，自带 Show more 深展开）→ 仍不在则点工作区行展开
-  // 该组（左栏按工作区分组、手风琴式；组收起时会话行根本不进 DOM）。
+/** pass-5：终稿页签端到端（issue 2026-10-19）——独立目标 = dev home 里已交付的冷会话。
+ *  为什么独立：主渐进面断言绑的会话可能在飞（present 未发生），而终稿的出现时机只在
+ *  交付之后——拿在飞 run 验它只会永远 SKIP。选取方式是**在 UI 里试**而不是盘侧预判：
+ *  状态页签的开场快照窗口（≥50 消息且跨 ≥2 回合）与盘侧复刻不必逐事件等价，盘侧"窗口内
+ *  有 present"不保证 UI 这一窗里也有（2026-10-20 实测两跑两个候选一有一无）。所以逐个
+ *  候选打开 → 找门 → 找到即验。到达会话的两条路：按标题（clickRowByText，自带 Show more
+ *  深展开）→ 仍不在则点工作区行展开该组（左栏按工作区分组、手风琴式；组收起时会话行
+ *  根本不进 DOM）。 */
+async function pass5FinalDeliveryPhase() {
   const openStatusTab = async () => {
     const expandBtn = page.getByRole('button', { name: 'Open right sidebar' })
     if (await expandBtn.count() > 0 && await expandBtn.first().isVisible().catch(() => false)) {
@@ -895,7 +793,7 @@ try {
   let deliveredTarget = null
   let doorFound = false
   for (const candidate of finalCandidates) {
-    const opened = await openSessionByRowKey(candidate.sessionId, candidate.title)
+    const opened = await openSessionByRowKey(page, candidate.sessionId, candidate.title)
     if (!opened) { trials.push({ ...candidate, opened: false, statusTab: false, door: false }); continue }
     await wait(4_000)
     const statusTab = await openStatusTab()
@@ -914,7 +812,7 @@ try {
     step(true, '交付目标会话可开且 ⑤ 交付门在场（present 见证）', `${deliveredTarget.title} → ${deliveredTarget.path}`)
     await page.getByRole('button', { name: /读终稿/ }).first().click({ timeout: 6_000 }).catch(() => {})
     await wait(4_000)
-    const finalText = await paneTextOf()
+    const finalText = await paneTextOf(page)
     const base = fileFaceOf(deliveredTarget.slug)?.base ?? null
     const finalBody = typeof base === 'string' ? readFileSync(join(base, 'final.md'), 'utf8') : ''
     // 首标题对账：两侧都剥掉 markdown 记号再比（H1 里的 `code` / **强调** 渲染后不留记号，
@@ -955,117 +853,27 @@ try {
     console.log(`  SKIP 终稿端到端：无窗口内交付目标（${finalCandidates.length} 候选）`)
     if (trials.length > 0) console.log(`       trials=${JSON.stringify(trials)}`)
   }
+}
 
-  // ── 自测例库工作区（2026-10-13 用户委托自测轮 → 固化为常驻断言）：抛弃型工作区 + 12 形态
-  // 例库（单一正本 = scripts/lib/selftest-library.mjs，与 tests/library-fold 电池共用）驱动真
-  // 面板逐例对账——含 BUG-025 修复面（legacy 单块渲染 / 混居双块 / 编辑预填 / 整段载荷回执）。
-  // 种子与探针会话自产自销（runtime/smoke-workspace/ 下覆盖写），不触 research-workspace
-  // 用户库；探针会话残留与渐进面探针同规（定期清理正本 = 录制器头注）。
-  {
-    const SELFTEST_DIR = join(ROOT, 'runtime', 'smoke-workspace', 'lib-selftest')
-    mkdirSync(SELFTEST_DIR, { recursive: true })
-    writeFileSync(join(SELFTEST_DIR, 'method-library.md'), SELFTEST_LIBRARY)
-    const ws2 = await rpc(base, cookie, 'workspace/create', { request: { path: SELFTEST_DIR } })
-    const ws2Id = ws2?.workspace?.workspaceId ?? ws2?.workspaceId
-    // 绑定路径 = 最新会话默认视图：session/create 一个 lib-selftest 工作区的会话（不重命名、
-    // 不发消息、不点侧栏行——空白会话被侧栏隐藏且搜索排除，但 web 重载后默认打开最新会话，
-    // 两轮探针实证）→ active 会话 cwd = 种子目录 →「研究配置」页签按会话工作区读
-    // method-library.md → 12 形态例库投影。零提示零唤醒（keyless 档契约 = 无模型调用；
-    // 2026-10-13 自测轮事故实录：dev home 持有凭据，session/prompt 会唤醒真模型 lead）。
-    const created2 = typeof ws2Id === 'string' ? await rpc(base, cookie, 'session/create', { request: { workspaceId: ws2Id, agentPreset: 'lead' } }) : null
-    const probe2Id = created2?.sessionId ?? created2?.id
-    const probe2Ok = typeof ws2Id === 'string' && typeof probe2Id === 'string'
-    step(probe2Ok, '自测工作区 + 最新会话已建（抛弃型，12 形态例库种子）', probe2Ok ? 'lib-selftest' : 'workspace/session RPC 未返回 id')
-    if (probe2Ok) {
-      // 清持久化布局态（上轮 pass 点开的会话会在重载时恢复为 active——清 storage 后 web
-      // 回落默认视图 = 最新会话 = 本探针；两轮探针实证默认视图行为）
-      await page.evaluate(() => { localStorage.clear(); sessionStorage.clear() }).catch(() => {})
-      await awaitAppReady(5_000)
-      // BUG-034 选定修法（2026-10-18）：**不再依赖"重载后默认视图＝最新会话"**——那句假设在会话
-      // 数量增长后不成立（本块偶发红即此）。改为按 session id 显式打开本块刚建的会话（直达
-      // data-row-key，行不在 DOM 时走搜索兜底）；打不开就如实报红，不静默跳过整块。
-      //
-      // 2026-10-19 补：上面"行不在 DOM 时走搜索兜底"当时**并不成立**——调用传的 title 是 null，
-      // 而 openSessionById 的搜索兜底需要标题（locateSessionStrategy 对 null title 直接 give-up）。
-      // 于是本块在"探针会话的组被折叠"时稳定假红，且 `if (openedSelf.found)` 把整块 12 形态例库
-      // 断言一起吞掉（覆盖损失 > 报错本身）。侧栏只展开 active 组（见上方 boundSessionId 同款
-      // 注释），探针会话住在 lib-selftest 工作区组，故必须**逐组展开后重试**才能直达。
-      let openedSelf = await openSessionById(page, probe2Id, null)
-      if (!openedSelf.found) {
-        for (const g of SIDEBAR_GROUP_CANDIDATES) {
-          await expandGroup(page, g)
-          openedSelf = await openSessionById(page, probe2Id, null)
-          if (openedSelf.found) break
-        }
-      }
-      step(openedSelf.found, '自测例库：本块会话按 id 显式打开（不依赖默认视图）', `via=${openedSelf.via}`)
-      if (openedSelf.found) {
-        if (await openGuideCapsule(6_000, 6_000, 2_500)) {
-          // 条目加载是异步 readFile——轮询至尾条目按钮在场。innerText 对滚动折叠区不含尾条目
-          // 文本（Chromium innerText 只取滚动容器可视区——首版文本断言实红：尾两名缺席）；
-          // 按钮可见性（Playwright isVisible 判 display/visibility，不判视口）是正确判据。
-          let ts = await paneTextOf()
-          const tailBtn = page.getByRole('button', { name: /^缩进行条目 ›/ }).first()
-          for (let i = 0; i < 10 && !(await tailBtn.isVisible().catch(() => false)); i++) {
-            await wait(1_000)
-          }
-          // ① 列表全形态投影：12 例名按钮齐 + 重名两钮 + 摘要/徽标真值（文本面）
-          const entryNames = ['全量四字段', '部分字段', '空值分区', '旧格式条目', '混合条目', '名称', '同名条目', '空条目', '杂项行条目', '旧格式续行', '缩进行条目']
-          const missing = []
-          for (const n of entryNames) {
-            const ok = await page.getByRole('button', { name: new RegExp(`^${n} ›`) }).first().isVisible({ timeout: 1_500 }).catch(() => false)
-            if (!ok) missing.push(n)
-          }
-          const dupCount = await page.getByRole('button', { name: /^同名条目 ›/ }).count().catch(() => 0)
-          const seg = ts.slice(ts.indexOf('研究配置'))
-          const summaryOk = seg.includes('官方域优先') && seg.includes('广度优先铺方向') && seg.includes('新字段在场')
-          const badgeOk = seg.includes('默认偏好')
-          step(missing.length === 0 && dupCount === 2 && summaryOk && badgeOk, '自测例库·列表投影：12 形态全名按钮 + 重名两钮 + 摘要真值 + 默认徽标',
-            [missing.length === 0 ? '' : `例名缺席：${missing.join('、')}`, dupCount === 2 ? '' : `重名 ${dupCount} 钮`, summaryOk ? '' : '摘要不符', badgeOk ? '' : '徽标缺席'].filter((s) => s !== '').join('；') || '全中')
-          // ② BUG-025·纯旧格式条目：单块「自定义要求」，无 4×（未设置）噪音
-          await page.getByRole('button', { name: /旧格式条目 ›/ }).first().click({ timeout: 5_000 }).catch(() => {})
-          await wait(1_500)
-          ts = (await dialogTextOf()) ?? ''
-          const legacyReadOk = ts.includes('自定义要求') && ts.includes('广度优先铺方向') && ts.includes('地图类问题适用') && ts.includes('来源：') && !ts.includes('（未设置）')
-          step(legacyReadOk, '自测例库·BUG-025 修复面：纯旧格式详情 = 单块「自定义要求」（无未设置噪音）')
-          // ③ BUG-025·编辑预填（4 分区 + 1 旧正文；不发送——载荷文本由 tests/library-fold
-          // 电池逐字钉，发送链路断言因 keyless 契约移除，见上块注）
-          await page.getByRole('button', { name: '编辑内容' }).first().click({ timeout: 5_000 }).catch(() => {})
-          await wait(1_000)
-          const ta = page.locator('[role="dialog"] textarea')
-          const taCount = await ta.count().catch(() => 0)
-          const legacyDraft = taCount === 5 ? await ta.nth(4).inputValue().catch(() => '') : ''
-          step(taCount === 5 && legacyDraft.includes('广度优先铺方向'), '自测例库·BUG-025 修复面：编辑态旧正文预填（4 分区 + 1 旧正文）', `textarea ${taCount} 区`)
-          await page.getByRole('button', { name: '放弃' }).first().click({ timeout: 5_000 }).catch(() => {})
-          await wait(1_000)
-          // ④ 混居条目：四分区 + 「自定义要求（旧）」双块；编辑预填分区与旧正文并存
-          await page.getByRole('button', { name: /混合条目 ›/ }).first().click({ timeout: 5_000 }).catch(() => {})
-          await wait(1_500)
-          ts = (await dialogTextOf()) ?? ''
-          const mixedReadOk = ts.includes('找来源') && ts.includes('新字段在场') && ts.includes('自定义要求（旧）') && ts.includes('旧文残留')
-          step(mixedReadOk, '自测例库·混居条目：四分区 + 自定义要求（旧）双块（内容零丢失）')
-          await page.getByRole('button', { name: '编辑内容' }).first().click({ timeout: 5_000 }).catch(() => {})
-          await wait(1_000)
-          const ta2 = page.locator('[role="dialog"] textarea')
-          const c2 = await ta2.count().catch(() => 0)
-          const firstDraft = c2 === 5 ? await ta2.first().inputValue().catch(() => '') : ''
-          const lastDraft = c2 === 5 ? await ta2.nth(4).inputValue().catch(() => '') : ''
-          step(c2 === 5 && firstDraft.includes('新字段在场') && lastDraft.includes('旧文残留'), '自测例库·混居编辑：分区预填 + 旧正文预填并存', `textarea ${c2} 区`)
-          await page.getByRole('button', { name: '放弃' }).first().click({ timeout: 5_000 }).catch(() => {})
-          await wait(1_000)
-          // ⑤ 空值分区：缺席分区显式「（未设置）」，在场分区有内容
-          await page.getByRole('button', { name: /空值分区 ›/ }).first().click({ timeout: 5_000 }).catch(() => {})
-          await wait(1_500)
-          ts = await paneTextOf()
-          step((await dialogTextOf() ?? '').includes('逐字转写') && ((await dialogTextOf()) ?? '').includes('（未设置）'), '自测例库·空值分区：缺席显式未设置、在场有内容')
-          await page.getByRole('button', { name: '关闭详情' }).first().click({ timeout: 5_000 }).catch(() => {})
-        } else {
-          step(false, '自测例库：lib-selftest 新会话上「研究配置」胶囊不可见')
-        }
-      }
-    }
-  }
+// ══ 主流程（相位执行序 = 相位地图；异常/失败现场与判定收尾在此）══
 
+try {
+  const { base, cookie } = await setupProbeSession()
+  await pass1BoundFacePhase()
+  await pass2UnboundNegativePhase()
+  await pass3ActivityStreamPhase()
+  // pass-4「研究配置」/ pass-6 自测例库 = client-load-config.mjs（「研究配置」页签面；
+  // env 注入主件文件级 helper 与调用时刻的 boundSession/unboundSession 快照）
+  await pass4ConfigTabPhase({
+    page, step, wait, root: ROOT, sessionTitleArg: SESSION_TITLE_ARG,
+    boundSession, unboundSession,
+    awaitAppReady, openGuideCapsule, clickRowByText, paneTextOf, dialogTextOf,
+  })
+  await pass5FinalDeliveryPhase()
+  await pass6SelftestLibraryPhase({
+    page, step, wait, root: ROOT, rpc, base, cookie,
+    awaitAppReady, openGuideCapsule, paneTextOf, dialogTextOf,
+  })
 } catch (error) {
   failures.push(`浏览器断言异常: ${error.message}`)
   console.error(`  FAIL 浏览器断言异常: ${error.message}`)
