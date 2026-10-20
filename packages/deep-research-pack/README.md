@@ -6,9 +6,9 @@ Deep Research 插件包：**四角色 preset + 研究方法论技能 + 研究驾
 一次调研 = 一支四人研究团队（Lead 主编 / Scout 侦察 / Analyst 分析 / Critic 核查）在 DSH 的
 Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bundle 落 `drt_<slug>/`）。
 
-> **研究驾驶舱** = 观察面 client 套件的套件名（2026-09-28 定名）：右栏「研究状态」页签 +
-> 研究语义工具卡 + 活标题 + 挂起显性化（pending 自动展开右栏）——静默自主期看仪表、HITL
-> 挂起时接手的地方；页签含**流程轨道**（◆立项确认 + 七步 + ◆交付审阅——两个 HITL 停靠点
+> **研究驾驶舱** = 观察面 client 套件的套件名（2026-09-28 定名）：右栏「研究状态」/「研究配置」
+> 页签 + 交付那一刻出现的「终稿」页签 + 研究语义工具卡 + 活标题 + 挂起显性化（pending 自动展开
+> 右栏）——静默自主期看仪表、HITL 挂起时接手、交付后读成品的地方；页签含**流程轨道**（◆立项确认 + 七步 + ◆交付审阅——两个 HITL 停靠点
 > 常驻可见）+ 参与指引 + 决策诚实线 + rerun 三分图例（不代表已发生 rerun；证据扩张以 v2+ 文件版本为证）；折算谓词住 `src/lib/`（keyless 单测，
 > 与 run-dashboard 投影共用）。
 > 构成的当前事实正本 = [docs/design/40-research-cockpit.md](../../docs/design/40-research-cockpit.md)。
@@ -21,7 +21,7 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 | `presets/<role>/skills/<n>/SKILL.md` | 研究方法论技能（各角色清单正本 = 盘上 `presets/<role>/skills/` 目录，bundle 自动发现——新增免改本行） | ✓ |
 | `cordis.patch.yml` | bundle 行：preset roster（default: lead）+ 会话全文检索开关（`session-query-sqlite` `openAt: first-search`——FTS 惰性开，`:memory:` 每进程重建；检索工具行在 lead/critic preset）+ `tool-present` + 团队可视面 `ui-agent-team` + 本包 client 面 | ✓ |
 | `workspace/` | **研究工作区种子**：研究手册（`AGENTS.md`：证据契约/目录约定/完成判据）+ `NODES.md`（节点 I/O 契约）+ `question-patterns.md`（判型库）+ `templates/run/` 六件模板 + `.gitignore`（包内名 `.gitignore.example`——npm 不打包 `.gitignore` 文件，安装时由 scaffold 落地成本名；工作区纳入版本控制时拒收 run bundle/归档/方法库，留档加 `!路径`） | ✓ |
-| `src/client/` → `lib/client.js` | **研究驾驶舱**（Research Cockpit——观察面 client 面，D18 单点例外；构成正本 = [design/40](../../docs/design/40-research-cockpit.md)）：右栏「研究状态」页签（流程轨道锚点/人性化活动流/活标题/HITL 横幅/参与指引/决策诚实线）+ 研究语义工具卡 + 挂起显性化 | ✓ 构建产物 |
+| `src/client/` → `lib/client.js` | **研究驾驶舱**（Research Cockpit——观察面 client 面，D18 单点例外；构成正本 = [design/40](../../docs/design/40-research-cockpit.md)）：右栏「研究状态」页签（流程轨道锚点/人性化活动流/活标题/HITL 横幅/参与指引/决策诚实线）+ 「研究配置」页签 + 「终稿」页签（接管 `drt_<slug>/final.md` 的文件地址，交付时自动开一次）+ 研究语义工具卡 + 挂起显性化 | ✓ 构建产物 |
 | `src/lib/` → `lib/types/lib/` | 纯函数折算（清单正本 = [design/40](../../docs/design/40-research-cockpit.md)）——keyless 单测直接断言 | ✓ 构建产物 |
 | `scripts/preflight.mjs` · `scripts/scaffold.mjs` | 部署前置检查 + 一键准备（见下） | ✓ |
 
