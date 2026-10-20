@@ -393,6 +393,14 @@ export const CASES = [
   } },
   // 种子退化成裸 `*` 拒收全部（workspace-versioning）：它会把被跨目录引用的材料一起拒收——
   // 全新 clone 里 drafts 开发证据全丢，md-links 随之红（fixture 实测形态）。
+  // 未交付停放位拒收行被删（workspace-versioning）：种子丢掉 `_abandoned/` 行——未交付
+  // run 会被安装方一次 `git add -A` 提交进库；正本同改保 pack-workspace-fresh 绿。
+  { id: 'workspace-versioning-abandoned-denial-missing', gate: 'workspace-versioning', mutate: (dir) => {
+    for (const rel of ['research-workspace/.gitignore.example', 'packages/deep-research-pack/workspace/.gitignore.example']) {
+      const p = join(dir, rel);
+      writeFileSync(p, readFileSync(p, 'utf8').split('\n').filter((l) => l.trim() !== '_abandoned/').join('\n'));
+    }
+  } },
   { id: 'workspace-versioning-blanket-star', gate: 'workspace-versioning', mutate: (dir) => {
     for (const rel of ['research-workspace/.gitignore.example', 'packages/deep-research-pack/workspace/.gitignore.example']) {
       const p = join(dir, rel);

@@ -11,6 +11,7 @@
   "scripts": {
     "verify": "node scripts/verify/verify.mjs",
     "test": "node --import tsx/esm --test tests/*.test.mjs",
+    "typecheck": "tsc -b packages/deep-research-pack --pretty false",
     "dsh": "node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts"
   },
   "devDependencies": {

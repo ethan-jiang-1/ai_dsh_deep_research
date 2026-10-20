@@ -2,11 +2,11 @@
 
 > 状态：implemented
 
-归宿：`vendor/dsh` submodule pin 换代（`dsh-v0.1.7-rc.2` → `dsh-v0.2.1-rc.2`）；插件兼容性 = 已实证
+归宿：`vendor/dsh` submodule pin 换代（`dsh-v0.2.0-rc.2` → `dsh-v0.2.1-rc.2`）；插件兼容性 = 已实证
 
 ## 决定
 
-`vendor/dsh` 从 `639ed01`（`dsh-v0.1.7-rc.2`）升到 `687f282e86`（`dsh-v0.2.1-rc.2`），
+`vendor/dsh` 从 `639ed01`（`dsh-v0.2.0-rc.2`）升到 `687f282e86`（`dsh-v0.2.1-rc.2`），
 pack 的 18 个 peerDeps 与 `dsh.compatibility.dshReleases` 同步到 `^0.2.1-rc.2` / `dsh-v0.2.1-rc.2`。
 **兼容性结论 = 兼容**，证据见下「验证证据」全档（含真模型端到端 run）。
 

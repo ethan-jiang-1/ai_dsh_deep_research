@@ -64,3 +64,11 @@ test('真模型档脚本：收尾 exit(断言红 1 / 全绿 0) 在场（失败�
     assert.match(src, /process\.exit\([^()]*\?\s*0\s*:\s*1\s*\)/, `${f} 缺收尾 exit(绿0/红1) 判定——断言红可能以退出码 0 溜走`);
   }
 });
+
+// 2026-10-20 审计 P1-5：preset-smoke 缺 DSH_HOME 时曾把前置缺席判成断言红（exit 1），
+// 而 guides/60 / AGENTS / adding-a-research-role 都写"未 source 自拒 exit 2"。
+// 这条只钉形状：前置分支必须明确 exit 2（未跑），不能落到预检失败/真会话红。
+test('preset-smoke：缺 DSH_HOME 走 exit 2（未跑，不是断言红）', () => {
+  const src = readFileSync(join(SCRIPTS, 'smoke', 'preset-smoke.mjs'), 'utf8');
+  assert.match(src, /if \(!home\)[\s\S]{0,240}process\.exit\(2\)/, 'preset-smoke 缺 DSH_HOME 未明确 exit 2');
+});

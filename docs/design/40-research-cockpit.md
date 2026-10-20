@@ -50,7 +50,7 @@
 | ⑥ 决策诚实线 | 指路 question.md §Decisions |
 | ⑦ 队员动态折叠区 | [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)：agentTeam 投影取 roster → 多路 follow 队员会话 → 检索/抓取/出错动作行，每人一节默认折叠 + 计数徽标 |
 
-折算层十二件（`src/lib/`，全部纯函数、fail-soft 永不 throw；journal-wire 为五个入参折算件共享的 wire 解析核）：
+折算层（`src/lib/`，全部纯函数、fail-soft 永不 throw；全量清单 = 盘上目录；下表为核心折算件，`library-fold` / `stream-failure` 见上表组件行；journal-wire 为五个入参折算件共享的 wire 解析核）：
 
 | 折算 | 输入 → 输出 | 要点 |
 |---|---|---|
@@ -64,9 +64,9 @@
 | [member-activity](../../packages/deep-research-pack/src/lib/member-activity.ts) | 队员 journal 事件 → 检索/抓取/出错动作行 + 全量计数 | 粒度定夺 = [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)（2026-10-10 用户三问：文件读写不入流）；失败行剥 "Error: " 工程前缀；行截尾窗与 activity-fold 同款 |
 | [brief-fold](../../packages/deep-research-pack/src/lib/brief-fold.ts) | 既有事实源投影 → 业务摘要五问 | 输入面**不含**证据计数与工具调用数（计数在类型层面进不了完成态文案，keyless 禁词单测钉）；九态优先级 = 挂起 > 立项预检窗 > 未绑定 > 审查 FAIL > 已交付 > 推进中；派生不出的状态显式缺省，不虚构 |
 | [review-readiness](../../packages/deep-research-pack/src/lib/review-readiness.ts) | review.md 全文 → 终局 readiness 三态 | 只认**行首**判定行、取最后一条：文末附录保留的轮次血统（如首轮 `readiness: FAIL`）是行内引用，不得夺权；空模板 `PASS \| FAIL`、无判定行或输入畸形 → `null`（不猜）。驾驶舱、仪表盘与 client-load-smoke 直接消费；node-gate 在纯 `.mjs` 边界镜像同一规则并由 `gateBundle` 回归覆盖 |
-| [text-fold](../../packages/deep-research-pack/src/lib/text-fold.ts) | markdown 行内文本 → 可进纯文本节点的文本 | 剥 `**` 与反引号 ＋ 压空白 ＋ 截断补省略号；状态页签与配置页签曾各写一遍同款逻辑（发现 11：`**` 字面星号上卡面、长摘要拉爆列表）——本件是唯一正本 |
+| [text-fold](../../packages/deep-research-pack/src/lib/text-fold.ts) | markdown 行内文本 → 可进纯文本节点的文本 | 剥 `**` 与反引号 ＋ 压空白 ＋ 截断补省略号；状态页签与配置页签共用本件（`**` 字面星号上卡面、长摘要拉爆列表——唯一正本在本件） |
 | [method-of-question](../../packages/deep-research-pack/src/lib/method-of-question.ts) | question.md 文本 ＋ bundle 在场性 → 「本次研究」区五态 | 无 run／文件缺／未记录／无法判定／已记录；**判不了就说判不了**——绝不回落成默认打法名（旧 run 未记录 = 合法形态，不回填）；读方法节须显式足额 limit（模板第 32–40 行卡默认 40 行，BUG-026 同族） |
-| [receipt-fold](../../packages/deep-research-pack/src/lib/receipt-fold.ts) | 发送结果 ＋ 回话信号 ＋ 库前后快照 → 回执三态与 diff | 已发送（prompt ok）／Lead 已回话（发送**之后**的 assistant 事件）／已落盘（回读对账出 diff：`把「找来源」从 A 改成 B`）；对账读不出变化就退到已回话，不冒充落地（发现 4） |
+| [receipt-fold](../../packages/deep-research-pack/src/lib/receipt-fold.ts) | 发送结果 ＋ 回话信号 ＋ 库前后快照 → 回执三态与 diff | 已发送（prompt ok）／Lead 已回话（发送**之后**的 assistant 事件）／已落盘（回读对账出 diff：`把「找来源」从 A 改成 B`）；对账读不出变化就退到已回话，不冒充落地 |
 
 ## 3. 数据通道与接线
 
@@ -133,7 +133,7 @@
 - 交付门的判据是 `present` 事件在 journal 窗口内（回合窗口 ≈ 最近 50 条消息）：窗口外的老交付
   只显示承诺行、不显示「✅ 已交付」——宁可少说，不虚报；
 - 终稿路径按三位置回退读（交付记录的是当时位置，bundle 归档/停放后原路径失效——首条端到端
-  实测即撞上 `drt_anthropic-claude-release-line-timeline` 已归档）；
+  实测即撞上某次已归档 run）；
 - 自动打开只在**现场**交付事件上触发（回放不触发），keyless 冒烟无真模型交付：该路径的接线
   只有 `shouldOpenFinal` 的 keyless 证据，端到端观察留待下一场真实 run；
 - 从未开过页签的会话无 dock 观察者——挂起信号由 vendor 侧栏 Answer 徽标兜底；

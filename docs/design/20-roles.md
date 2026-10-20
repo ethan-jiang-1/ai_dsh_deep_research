@@ -37,7 +37,7 @@ scout/analyst/critic 作为 teammate 或 one-shot child 会话时，加载的是
 
 每角色一个技能目录：`presets/<role>/skills/<n>/SKILL.md`，一技能一目录。**当前有哪些
 skill = 盘上目录本身**（单一事实源：`ls packages/deep-research-pack/presets/<role>/skills/`）——
-此处不复制清单：复制即缓存，加删 skill 会静默漏项（基础整治 C8）。本节只说明技能面
+此处不复制清单：复制即缓存，加删 skill 会静默漏项。本节只说明技能面
 承载什么：**方法论条目 ↔ skill 的映射正本 = [30-methodology-mapping.md](./30-methodology-mapping.md)**
 （L3 载体，合同随代码同 diff）；每条方法论纪律写在承载它的 SKILL.md 正文里；
 跨角色硬契约（证据 frontmatter 等）住[研究手册](../../research-workspace/AGENTS.md)。

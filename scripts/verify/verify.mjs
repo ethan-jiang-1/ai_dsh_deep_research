@@ -1379,7 +1379,7 @@ function gitOnce(args) {
 //    `git add -A` 又只加已跟踪文件——**"规则文件在库"本身就是边界存在的唯一形式**：正本一丢，
 //    pack 照旧发布、本仓静默失去边界。覆盖面的重点在**内容与形态**：裸 `*` 拒收全部会把被
 //    跨目录引用的材料一起拒收（fixture 实测全新 clone 后 drafts 全丢、md-links 红），故门禁
-//    同时钉"显式列名单"（出现裸 `*` 即红）与三条运行区拒收行的在场。防空语料：正本/种子/
+//    同时钉"显式列名单"（出现裸 `*` 即红）与四条运行区拒收行的在场。防空语料：正本/种子/
 //    drafts 任一缺席、正本与种子不逐字节相等、缺任一拒收行 → 红（拒收行丢了，安装方一次
 //    `git add -A` 就把整个 run 历史提交进他自己的库）。──
 {
@@ -1408,7 +1408,7 @@ function gitOnce(args) {
     // 文档与测试跨目录引用的材料（本仓 drafts/ 开发证据），裸 `*` 会连它们一起拒收——fixture
     // 实测全新 clone 后 drafts 全丢、md-links 红（见 Note §实际跑过的验证）。名单少一项
     // 就等于该类运行区重新可提交，故逐项钉。
-    const denies = ['drt_*/', 'archive/', 'method-library.md'];
+    const denies = ['drt_*/', 'archive/', '_abandoned/', 'method-library.md'];
     for (const deny of denies) {
       const escaped = deny.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       if (!new RegExp(`^\\s*${escaped}\\s*$`, 'm').test(seedText))

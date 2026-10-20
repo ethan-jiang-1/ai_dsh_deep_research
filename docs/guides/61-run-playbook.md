@@ -86,8 +86,7 @@
 "这台机器登记过没有"不用记；`runtime/harness-home` 被重建后本步重新需要。
 
 **为什么关键**：研究手册是**会话 cwd 的 `AGENTS.md`**，DSH 从 cwd 向上发现并注入每个角色
-——cwd 不是研究工作区，手册就不进上下文（首场 run 因此丢了跨角色证据契约，31 份证据无
-frontmatter）。`dev/run-kickoff.mjs` 已默认用 workspaceId 形态把会话建在 research-workspace。
+——cwd 不是研究工作区，手册就不进上下文，跨角色证据契约随之丢失。`dev/run-kickoff.mjs` 已默认用 workspaceId 形态把会话建在 research-workspace。
 
 - web GUI 新建会话：preset 选 Deep Research Lead（默认项），工作区选 research-workspace；
 - 无 GUI 手（代理操作）：`node dev/run-kickoff.mjs --port 3083 --token <横幅 token>
@@ -128,8 +127,9 @@ CLI/host 侧没有 answerer，也没有提交答案的 RPC）——所以代答�
 
 ```sh
 source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <横幅 token>   # 默认逐题选带(Recommended)的那一项
-> **交付代答闸**（2026-10-18）：交付审阅卡在场而 review readiness 非 PASS 时，`hitl-answer` 的**默认推荐档会自拒**（exit 4）——请人工裁决，或显式 `--pick <非定稿项>`/`--custom` 表明有意为之（依据 = notes/implemented/2026-10-18-hitl-proxy-delivery-guard.md）。
 ```
+
+> **交付代答闸**（2026-10-18）：交付审阅卡在场而 review readiness 非 PASS 时，`hitl-answer` 的**默认推荐档会自拒**（exit 4）——请人工裁决，或显式 `--pick <非定稿项>`/`--custom` 表明有意为之（依据 = [hitl-proxy-delivery-guard](../../notes/implemented/2026-10-18-hitl-proxy-delivery-guard.md)）。
 
 它逐题打印选择结果；**必须**把这次代答如实记进 bundle 的 `question.md` §Decisions 与
 `journal.md`，标注"代理模拟"（它替的是人，不是人）。HITL1 与 HITL2 都走同一条命令。
@@ -202,11 +202,11 @@ BUG-020）。
   lead 在任何 ask 挂起前 pause goal、答后 resume（防空转），
   goal 与 drt_ bundle 互为镜像、冲突以 bundle 文件事实为准；
 - **在飞与归档的位置**：在飞 run 住工作区根，交付后由操作侧移入
-  `research-workspace/archive/<slug>/`（归档不消失——
+  `research-workspace/archive/drt_<slug>/`（归档不消失——
   仪表盘多 run 总表与 evidence-audit `--latest` 均并扫 archive/）。`runtime/harness-home/runs/`
   下的 bundle 是契约前的 ad-hoc 历史（仪表盘标 "ad-hoc·无契约"）——不是这次要恢复的 run，
   也不要删（gitignored 运行数据，是那次研究留下的证据）；
-- **续跑已交付（已归档）run**：同在飞形态——新开 lead 会话说「继续 `archive/<slug>` 这个 run」；
+- **续跑已交付（已归档）run**：同在飞形态——新开 lead 会话说「继续 `archive/drt_<slug>` 这个 run」；
   lead 依赖的是 bundle 文件事实而非位置（归档位在其 cwd 之下可读；仪表盘与 evidence-audit
   `--latest` 均并扫 archive/）。续跑语义 = rerun 三分：表述修订原位改、证据扩张落 `final/`
   v(n+1)（交付后操作侧重新归档）、结构性另起新 bundle（正本 =

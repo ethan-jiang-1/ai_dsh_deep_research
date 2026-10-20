@@ -1,10 +1,10 @@
-# 00 · 文档地图、组织原则与决策台账
+# 00 · 文档地图、组织原则与正本指针
 
 本目录是"DSH Deep Research 插件"项目的文档层。性质：**当前合同 + 设计依据**——实现开始后，
 随代码同 diff 维护"现在为真"的部分；单次决策与时间线归 `notes/`。
 
-> **读法（省上下文）**：入口链第 2 步只需要本页 §文档地图（下面那张表）——**别通读决策台账**；
-> D 号按需查（改到哪个机制就查哪条），术语映射与外部材料登记同理。
+> **读法（省上下文）**：入口链第 2 步只读本页 §先分流 + §文档地图 + §术语映射；
+> D 号台账 = [decisions.md](./decisions.md)、外部材料 = [external-materials.md](./external-materials.md)，按需跳。
 
 ## 先分流：用户要"用它"还是"改它"
 
@@ -59,6 +59,8 @@
 | 文档 | 层 | 回答什么 |
 |---|---|---|
 | [project-map.md](./project-map.md) | 导航 | 人和 Agent 的驾驭地图：运行链、职责划分、测试资产分层与失败定位入口 |
+| [decisions.md](./decisions.md) | 导航/合同 | D 号台账正文（按需查；决策理由/输掉的方案归 notes/） |
+| [external-materials.md](./external-materials.md) | 导航/合同 | 外部材料钉版身份与吸收落点（按需查） |
 | [evaluation.md](./evaluation.md) | 合同 | 评估五面（L0 结构/L1 挂载/L2 安装/L3 领域/L4 交付）与里程碑矩阵——**先于框架定案** |
 | [design/10-architecture.md](./design/10-architecture.md) | 设计 | repo 形态与组合层（单包四角色）；通道选型（agent-team 主通道）；工具面；偏离登记 |
 | [design/20-roles.md](./design/20-roles.md) | 设计 | 四角色内容：职责 owner 表、persona 要素、skills 面（清单 = 盘上目录）、信噪比策略落点 |
@@ -77,45 +79,10 @@
 
 ## 决策台账
 
-> 编号空间：本表 D 号 = 本仓决策；引用他仓决策必须带仓前缀（company D15/D18/D23 =
-> `ai_dsh_company` 台账，vendor 出处直指 vendor 树）——裸 D 号一律指本表。
+D 号正文 = [decisions.md](./decisions.md)（按需查，不在本页通读；新决策只进该页，本页不再复制）。
+本页只保留"先去哪读"的地图与术语；决策理由/输掉的方案仍归 `notes/`。
 
-### 已定（写代码前不再讨论）
-
-| # | 决定 | 依据/出处 |
-|---|---|---|
-| D1 | **自写包 = 1 个**（`deep-research-pack`）；行多包少，角色是 preset 目录不是包 | company D1 同构；[10-architecture](./design/10-architecture.md) |
-| D2 | **角色 = 4 个**：Lead（主编）/ Scout（侦察）/ Analyst（分析）/ Critic（核查）；wave2 综合归 Lead（最薄队形——首场完整 run 实测 lead 独任综合无过载，专职 synthesizer 维持搁置）。**角色清单的事实源 = 盘上 `packages/deep-research-pack/presets/` 目录**（基础整治 §3.2）：JS 消费点经 `scripts/lib/roles.mjs` 枚举、bash 用目录枚举，硬编码清单被 verify 门禁 `role-list-sync` 咬；增删角色 = 推翻本条，先登记新 D 号（tests 数量哨兵会拦） | 用户指令（多角色分工）；[20-roles](./design/20-roles.md) |
-| D3 | **协作主通道 = Agent Teams**（spawn_teammate 组队 + 任务板）；单点快捷查证走 one-shot subagent——续驶语义归 team（company D18 实证边界：team-scoped 会话里 continuable child 不可达，不重蹈）。**偏离登记**：官方 POLICY 是 opt-in——「仅用户显式要求才建队友」（vendor `packages/experimental/tool-agent-team/src/index.ts:31`）；本产品即该显式要求的物化，preset 钉默认通道 = 部署层预授权，有意为之 | 用户指令；company D18；vendor POLICY 原文；[10-architecture §3](./design/10-architecture.md) |
-| D4 | **方法论内核 = codex harness 考古十条**（两 HITL 锚点 + 三波 + 证据身份链 + 声明式质量门 + 反伪造审计）；markdown 控制面与 CLI 状态机不采纳；不建立本仓 markdown 工作队列；执行顺序由会话内任务面组织 | [方法论映射](./design/30-methodology-mapping.md)；[harness 考古报告](../notes/implemented/2026-09-24-deep-research-harness-analysis.md) |
-| D5 | **证据身份链 = 唯一自建残留**：evidence frontmatter 文件契约 + critic 狩猎，不做 CLI 引擎（完成判定锚定文件事实而非账本外观——codex 教训 1 的轻量等价物） | [30 §证据身份链](./design/30-methodology-mapping.md)；evaluation.md L3 判据 3 |
-| D6 | **评估先行**：docs/evaluation.md 五面合同先于框架定案；完成定义 = 该面最小真检查；goal complete 的唯一条件 = 里程碑矩阵全绿 | 用户指令；company D15 |
-| D7 | **首版 = 纯配置包**：pack 内零自写 JS、零构建；UI 用现成 `ui-agent-team`。**单点例外 = 观察面 client 面（D18）**：例外范围 = 两个插件（`src/client/` client 半 + `src/index.ts` host 半空壳宿主位）与 `src/lib/` 纯函数折算，构建产物 `lib/client.js` + `lib/index.js`（guides/62 双半契约），用途限定研究观察/调试。**边界澄清（基础整治 §3.7 补）**：约束对象是 `packages/deep-research-pack/`（发布产物）；仓级 `scripts/`、`tests/` 的工具 JS（verify/roles/run-dashboard 等）不受此限 | company D5 同教义（第 0 天零自定义 JS）；例外范围与用途限定见 D18 行 |
-| D8 | **迭代单位 = 垂直轮 + 八成把握先行**：最薄全路径先行 → 逐轮加宽；不追求一次想透 | 用户指令（迭代纠错优先于完美规划）；原借鉴 company D11（company 已于其 D23/D24/D32 退役轮次制——本条现行依据 = 用户指令，company 引用为历史借鉴） |
-| D9 | **web 工具行（已实证）**：模型面 `tool-web` 行随 preset（config 照抄 base：`fetch: true` = 注册 `web_fetch` 的布尔开关，`searchTimeoutMs: 60000` = 搜索预算；`fetchTimeoutMs` 本仓不设、走 vendor schema 默认 30000 ms——字段语义正本 = vendor `packages/web/tool-web/README.md`）；providers（web seam / web-search-deepseek / web-fetch-http）是 base host 面出厂行，不进本包 bundle 也不随 preset；DeepSeek 搜索 `apiKeyEnv: DEEPSEEK_API_KEY` 与 chat 同钥匙 | [10 §4](./design/10-architecture.md)；[web-tool-rows 毕业 Note](../notes/implemented/2026-09-24-web-tool-rows.md) |
-| D10 | **vendor submodule = 机制权威**：本仓 `vendor/dsh/` pinned submodule（只读铁律；tag 与钉 commit 正本 = [AGENTS.md §DSH 源码表](../AGENTS.md)）；机制核对与验证会话一律走它，全局安装不作机制依据；verify 门禁 `vendor-pin`/`vendor-clean` 把守 | [evaluation.md §L0](./evaluation.md#l0-结构面机械门禁keyless)；[10 §1](./design/10-architecture.md) |
-| D11 | **工作由用户请求授权**：直接按授权范围执行；复杂工作按需使用会话内 plan/todo，不设仓库任务队列或唯一当前指针 | 用户裁决（2026-10-09「其实应该消除它，把问题复杂化了」）；[吸收与移除理由](../notes/implemented/2026-10-09-backlog-methodology-absorption.md) |
-| D12 | **RFC 按持久决定需要使用**：仅当决定需要显式评审时建立，不是实施工作的普遍前置 | [吸收 Note](../notes/implemented/2026-10-09-backlog-methodology-absorption.md)；[notes 规则](../notes/AGENTS.md) |
-| D13 | **status rots 拆除**：docs 只写 now，不复述易腐状态；当前工作由用户本轮请求及已有授权决定，不由文档状态或 agent 自选 | 用户指令（立项定调；来历与原话去向 = [notes/README §立项来历](../notes/README.md)）；[evaluation.md §3 尾注](./evaluation.md) |
-| D14 | **preset-smoke 双通道**：源码域（web 出厂 profile + overlay 指向本仓 presets 源码，迭代快）+ 安装域（`--profile <p> --no-patch` 走 plugin add 正式路径）；断言同构（roster/逐角色 create/skills 隔离），L1 用前者、L2 用后者；boot 起自本仓 vendor/dsh 钉 tag 源码（tsx 解析树；E1 起统一默认，原 company checkout 借用已随 D10 销账），overlay/roots 用绝对路径 | [L1/L2 绿灯 Note](../notes/implemented/2026-09-24-l1-l2-green.md) |
-| D15 | **release-smoke 形状**：照 company release.md 五步（pack → 干净 profile 先删后建 → `plugin --profile add file:` → manifest 断言 → 安装域冒烟）；工具态（npm cache/pnpm store）全重定向进 repo gitignored 区；peers 是声明语义（安装锚兜底解析，非安装要求） | 同上 |
-| D16 | **团队组合归 vendor agent-team-profile 层**（P1 A 定案）：run 通道 profile 装 `@…-agent-team-profile@<pin>`（版本从 pack 兼容矩阵同源派生，`dev/boot-run.sh` 执行）；本包 bundle 撤 agent-team / tool-agent-team 两行（同行 id 双 insert = 重复行，实证）；ui-agent-team 观察行留本包；三 preset 的 tool-subagent 声明 **one-shot** 对齐 company D18（差分实验实证 preset 行覆盖 profile 行——不对齐则层禁令被自家声明抵消；D3 原文"one-shot subagent"的漂移顺带修复） | [P1 毕业 Note](../notes/implemented/2026-09-24-m2-p1-run-channel.md)；[10 §2/§3](./design/10-architecture.md)；[61 指南](./guides/61-run-playbook.md) |
-| D17 | **harness / run bundle 分离**（`研究报告 = harness(bundle)`）：harness（pack+手册+templates+docs/notes）只读、零 per-run 状态、run 期间零写入；run bundle = `research-workspace/drt_<slug>/`（一调研一 bundle，drt = Deep Research Topic，目录名即方向），持全部变量（判定式：恢复这次研究所需）；**位置=状态**——在飞住工作区根，交付后由操作侧移入 `research-workspace/archive/`（2026-09-27）；rerun 三分（表述修订 polish 版本不变 / 证据扩张 final/ 下一版 / 结构性另起新 bundle+sibling 预检）；框架文档不出现具体题目 | 用户拍板（2026-09-24，源头 DEEP_RESEARCH_HARNESS 概念比对后定）；[10 §1 第一性分层](./design/10-architecture.md)；[Note](../notes/implemented/2026-09-24-run-bundle-drt-separation.md)；[研究手册](../research-workspace/AGENTS.md)（归档约定正本） |
-| D18 | **观察面 client 面 = D7 的单点例外，套件名 = 研究驾驶舱（Research Cockpit，2026-09-28 用户拍板）**：例外范围 = 两个插件（`src/client/` client 半 + `src/index.ts` host 半空壳宿主位）+ `src/lib/` 折算纯函数；双半 tsdown 产物 `lib/client.js` + `lib/index.js`，用途限定 = 研究观察/调试；品牌/皮肤面不因此纳入；重议条件由 [ui-skin 否决 Note](../notes/rejected/2026-09-24-ui-skin.md) 承载。构成的当前事实正本 = [design/40](./design/40-research-cockpit.md) | 用户明确需求（run 期观察分散四处 + HITL 等待不可见实证）+ [琢磨稿](../notes/archived/2026-09-24-ui-observability-surfaces.md)（机制考古，已归档）+ company 同款生长序 + [observability-gui RFC](../notes/implemented/2026-09-24-observability-gui.md)（2026-09-25 马拉松 Stage 0） |
-| D19 | **问题澄清与证据区 = 根目录 `_backlog/`**：吸纳 `ai_dsh_assitant/_backlog` 的 issues / bugs / research / methods / triggers / archive 思路；`_backlog` 承载问题澄清、查证、结论与必要交接，**不是实施前置门，也不授予实施授权**。`issues/` 是问题卡，不是 implementation plan；问题可直接以用户授权进入执行。notes/proposed RFC 仅在持久决定需要显式评审时建立；日期命名延续 `YYYY-MM-DD-<slug>` 与 notes 一致 | 用户指令（2026-10-09）；[历史决定与吸收理由](../notes/implemented/2026-10-09-backlog-methodology-absorption.md)；规矩手册 = [_backlog/README.md](../_backlog/README.md)；制度显性化扩展与修复授权例外 = [借鉴 Note](../notes/implemented/2026-10-12-backlog-process-borrow.md)（D24） |
-| D20 | **不设独立 roadmap 或仓库任务队列**：问题、证据与持久决定各住实际 owner；执行顺序由会话内 plan/todo 表达 | 用户裁决（2026-10-09）；[吸收 Note](../notes/implemented/2026-10-09-backlog-methodology-absorption.md)；[轮内任务面](./guides/60-dev-loop.md) |
-| D21 | **入口按意图分流（"用它" vs "改它"）**：路由正本 = 本页 §先分流（用户说法 → 文档 → 第一条命令），根 AGENTS.md §入口链与 README Start Here 各一行指针；"启动这个插件"默认理解 = 本仓 run 通道；含糊时判据 = 目标 DSH home（本仓 `runtime/harness-home` vs 日用 `~/.dsh`）。操作类请求按「用它」路径处理 | 用户定调（2026-09-29「fresh agent 一进来就要立刻明白」，泛化性优先于本人用法）+ 4 个零上下文探针实证 4/4 必须反问、且各自选了不同答案；[Note](../notes/implemented/2026-09-29-cold-start-intent-router.md) |
-| D22 | **对外交付约束：pack 采纳面不得引入用户侧外部服务依赖**——外部账号 / API key / 付费订阅一律不过关（setup 复杂度是交付硬门槛）；裁决优先于能力与价格权衡。首例 = mcp-client 通道选**本地 Playwright MCP**（npx 拉起、零账号零凭据）而非 Firecrawl remote（账号 + key + 按量订阅） | 用户定调（2026-10-02「这工具今后是要交出去给人的……太复杂的话肯定不行」）；[mcp-playwright 采纳 Note](../notes/implemented/2026-10-02-mcp-playwright-adoption.md) |
-| D23 | **条目级验收 TDD 化**：RFC 验收判据逐条绑定检查方式（机械门禁 / 契约测试 / 对账命令 / 人工判据四型），能机械的先立红再实现到绿，实施记录载实际红绿证据——评估先行（D6）的授权工作级投影；流程正本 = [guides/60 §0 验收门](./guides/60-dev-loop.md) | 用户定调（2026-10-05「先考虑怎么测，实现后看测试满足了吗，反复做对；全程要证据，不随性发挥」）；[Note](../notes/implemented/2026-10-05-item-lifecycle-tdd.md) |
-| D24 | **backlog 制度显性化（loop_advisor 借鉴）**：入口两张票（问题清楚 + 验收手段随格式：issue `## 验收标准` / bug `## 修复判据`）；缺陷通道成文——延后缺陷卡翻「修复就绪」（根因有证据 + 修法选定 + 修复判据写就）即自带 **P1/P2 修理型修复的实施授权**（D11 的带日期范围例外），P0 或触及入口链/门禁与验收合同/文档合同/pack 公共行为/已记录决定的修复不自授权、走 等人拍板；双轨 frontmatter 状态生命周期（状态行镜像互查 + 翻转法则 + issues 结论倾向闭集头 未定/现在做/以后做/不做/并入已有）；agent 门牌 = `_backlog/AGENTS.md` | 用户三项裁定（2026-10-12）；[借鉴 Note](../notes/implemented/2026-10-12-backlog-process-borrow.md)；钉版 = 本页 §外部研究材料 loop_advisor 行 |
-| D25 | **研究配置管理中继面（D7/D18 有界扩展，2026-10-12 用户拍板期 1）**：右栏新增「研究配置」页签（与「研究状态」并列）——显示内置偏好与工作区 `method-library.md` 投影 + 生成管理指令经 `session/prompt` 交给 Lead 执行；**面板不直写文件**——业务写入唯一路径 = Lead（模型可见、会话日志留痕）；期 2（直写库文件/Settings）未拍板，动工前需独立评审。构成登记随 [design/40](./design/40-research-cockpit.md) | 用户拍板（2026-10-12，ask_user_question 选「做期 1：显示 + 一键指令」）；[长期管理卡期 1/期 2 记录](../_backlog/_archived/settled_issues/2026-10-12-research-method-profile-management.md)；实现 = [ResearchConfigTab.tsx](../packages/deep-research-pack/src/client/ResearchConfigTab.tsx)；决定理由与输掉的方案 = [研究配置页签 Note](../notes/implemented/2026-10-12-research-config-tab.md)。**2026-10-18 显式化期**（用户拍板 R8：面板主职责取「看与改」为主，「选」只留明确入口）：四区 = 本次研究／内置打法／我的偏好库／底线条 ＋ 就地回执三态（已发送／Lead 已回话／已落盘对账）；本次研究区读 question.md 方法节**五态如实**（判不了就说判不了，不回落默认打法名）；**判型 → 打法映射表住 research-brief skill**（面板投影 ＋ 同钉，U16 落点）；同钉面扩到显示标签／推荐映射／六条底线／两入口逐字／领域示范，冒烟内置名单改为从 skill 表解析派生——决定理由与全部证据 = [研究配置面板显式化 Note](../notes/implemented/2026-10-18-research-config-explicitness.md) |
-
-### 待定（阻塞项标 ⛔）
-
-当前无待定问题。新开放问题出现时在此登记（`# | 问题 | 归宿` 三列，归宿指向 D 号或
-notes/ 文件）。
-
-## 术语映射（本项目 ↔ DSH 官方 ↔ vendor/dsh 源码）
+## 术语映射
 
 | 本项目 | DSH 官方 | vendor/dsh 落点 |
 |---|---|---|
@@ -137,22 +104,6 @@ notes/ 文件）。
 | 真实组合 | real composition（经 Loader 与真实入口组合，只 mock 外部服务/非确定输入；mock-only 单测证明不了组合成立） | vendor `docs/testing.md`（test the real entry path）；本仓载体 = L1 真挂载 + L2 安装域 |
 | 语义评审（对抗自审） | semantic review（意图-实现-文档-证据对齐的判断层，可由 agent 执行，不可机械化） | vendor `dsh-code-review` skill；本仓载体 = [reviewing-a-delivery](../.agents/skills/reviewing-a-delivery/SKILL.md) + 收尾对账（[guides/60 §4](guides/60-dev-loop.md)） |
 
-## 外部研究材料登记（repo 外，只读引用；**钉版** = 路径 + 引用时的 HEAD commit）
+## 外部研究材料登记
 
-钉版纪律（_agent_ready_development 语料吸纳）：repo 外引用必须能以固定身份复核。本机参考仓
-以 `路径 @ <short sha>` 记录；复核 = `git -C <路径> log -1 --format=%H` 与下表比对，不一致
-即"上游已前进、结论待复核"（重审触发路径见 [discipline-map](discipline-map.md#重审触发路径)）。
-
-| 材料（钉版身份） | 内容 | 吸收落点 |
-|---|---|---|
-| `/Users/bowhead/ai_tool_deepresearch/` @ `24ba84636` | 11-phase 生命周期 / wave 语义 / gate 体系 / 证据四层 / 反伪造教训 | [考古报告](../notes/implemented/2026-09-24-deep-research-harness-analysis.md) → 映射表 design/30 |
-| `/Users/bowhead/ai_dsh_company/` @ `bf76d36`（2026-10-10 钉，参考仓） | 包结构 / patch 语法 / preset 教义 / verify 门禁 / 双 home / `_backlog` 推敲空间（company D31）；vendor 同 pin | [解剖报告](../notes/implemented/2026-09-24-dsh-plugin-repo-anatomy.md) → design/10 + scripts/verify/verify.mjs + dev/env.sh；推敲空间借入 → 根 `_backlog/` + 门禁 `backlog-liveness`（D19/D20）；历轮钉版复核（逐条重审结论无一被推翻；候选与触发条件随材料）= [company 钉版复核 Note](../notes/implemented/2026-10-09-company-repin-review.md) · [漂移复核材料](../_backlog/_archived/research/2026-10-10-company-drift-review.md) · [第二轮复核材料](../_backlog/_archived/research/2026-10-10-external-repin-review-round2.md)（候选①上游改判：通道穷举优先、HITL=最后手段——未来实施须按改判后形态立卡） |
-| DSH 插件生态（vendor 能力目录差集 + 第三方市场/清单；2026-09-25 认真版） | 直接竞品 8 个；**我们差异化 = 多角色 + 证据审计 + Teams = 空白位**（搜索/学术/知识库已饱和不扩） | 认真报告 [dsh-plugin-ecosystem](../notes/implemented/2026-09-25-dsh-plugin-ecosystem.md)（已毕业）；粗扫种子见 [dsh-market-scout](../notes/archived/2026-09-24-dsh-market-scout.md)（冻结）→ 落点即该认真报告 |
-| DSH client/UI 扩展面（vendor slots/client-modules/hmr/remotes 正文档 + company client-face 多页签实例〔8 页签〕） | 右栏平台页签契约（sidebarRightTabs + sidebar.right.pane.tab 双半注册）/ 数据通道（agentTeam 投影〔sessions 座位，rc.2 起；旧名 remote.agentTeams.view〕·session.follow·workspaceFiles·@Remote）/ 双半 tsdown 构建契约 / 12 坑 | [琢磨稿](../notes/archived/2026-09-24-ui-observability-surfaces.md)（选项 A–D + 渐进路径，已归档）——已落地为观察面 client 面（D18，构成正本 = [design/40](./design/40-research-cockpit.md)）：RFC = [observability-gui](../notes/implemented/2026-09-24-observability-gui.md) |
-| DSH SDLC reference（`/Users/bowhead/deepseek-harness/_dsh_plugin_agent_ready_development/sdlc-reference/` @ `ad6f5319dc`；01-agent-note-lifecycle 初读于一代语料时期（@ `efdba905b2`），钉版身份存档 = [吸纳 Note](../notes/implemented/2026-09-24-note-lifecycle-absorption.md)） | Agent Note 生命周期：决定覆盖（非提案优先）/ 取代检查硬触发 / 毕业正文改写 / alternatives 必载 / grandfather 条款 / 目录树代替索引 | [notes/README.md §决定覆盖与取代检查](../notes/README.md) + verify 门禁 note-format + [吸纳 Note](../notes/implemented/2026-09-24-note-lifecycle-absorption.md) |
-| **一代全语料吸收登记**（`_agent_ready_development/` @ `efdba905b2`，语料；现行语料 = 下文二代行；语料自身钉 DSH `dsh-v0.1.7-rc.1`） | 开发 harness 原理（知识归属/载体分工/参与阶梯/分层反馈/运行时查询/仓库分类学/插件作者入口；三视角 37 篇）+ 语料级门禁（锚点、目录 README、钉版外链）+ 维护页（re-pin 轮次与重审触发） | [吸纳 Note](../notes/implemented/2026-09-25-agent-ready-absorption.md)（三态清单）→ `.agents/skills/`（开发技能，清单 = 盘上目录）、[guides/62](./guides/62-plugin-authoring.md)、[discipline-map](./discipline-map.md) 源 6–8、[notes/README](../notes/README.md)，新门禁 `md-anchors` / `note-status` / `dev-skill-format` |
-| **`_digested/test-strategy/`** @ `639ed01539`（DSH 测试体系消化 11 篇：思想九教义 / 七层证据形态 / 快照机制 / CI 防假绿 / 可靠性纪律 / 插件测试五台阶；**语料自报基线 `639ed01539`（= v0.2.0-rc.2），本仓 pin 已 `687f282e86`（0.2.1-rc.2）——两者已不同步**：2026-10-19 pin bump 时未重跑 `_digested/`，此处如实登记为「待更新」，不假装已对齐。重议条件 = ① 下次 pin bump 时必须重跑；② 出现「语料结论与本仓现状冲突」的实例时立即重跑。平时随 [discipline-map 重审触发路径](discipline-map.md#重审触发路径) 对账） | 测试策略增量吸收 | [采纳 Note](../notes/implemented/2026-10-04-test-strategy-adoption.md)（对照总账正本）→ [discipline-map 源 10](discipline-map.md)、[guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md)、[scripts/AGENTS §冒烟脚本可靠性纪律](../scripts/AGENTS.md)、[tests/AGENTS](../tests/AGENTS.md) |
-| `/Users/bowhead/ai_dsh_assitant/` @ `7dc4ff6`（2026-10-10 钉，参考仓；姊妹仓——与 D23 同源定调的独立落地） | notes/README 门牌节 + 验收门四条硬边界（未成熟不进实施 / 掩盖修法禁 / 未验不得写 implemented / 复发升门禁；第 3 条上游 2026-10 改述为"证据由交付记录承载"） | [D23 Note](../notes/implemented/2026-10-05-item-lifecycle-tdd.md)（强化段）→ [guides/60 §0 验收门](guides/60-dev-loop.md)、[notes/README §执行纪律](../notes/README.md)；历轮复核 = [外部钉版债复核材料](../_backlog/_archived/research/2026-10-10-external-repin-review.md) · [第二轮复核材料](../_backlog/_archived/research/2026-10-10-external-repin-review-round2.md) |
-| `/Users/bowhead/ai_dsh_assitant/_backlog/` @ `7dc4ff6`（外部材料参考仓快照，非 vendor pin） | 问题澄清优先、按需方法、证据/问题/交接分层、大小按决策依赖控制；本仓适配 = 会话内 plan/todo 组织实施、日期命名与 notes 对齐、复用本地证据命令与单人仓文件载体 | [Backlog 方法论吸收 Note](../notes/implemented/2026-10-09-backlog-methodology-absorption.md) → `_backlog/` owner 与 [intent carriers](design/60-intent-carriers.md)；复核 = [第二轮复核材料](../_backlog/_archived/research/2026-10-10-external-repin-review-round2.md)；外部 commit 仅作参考版本，不进入 vendor pin 一致性 |
-| `/Users/bowhead/ai_dsh_loop_advisor/_backlog/` @ `b43be87`（外部材料参考仓快照，非 vendor pin；2026-10-12 借鉴时点钉版，源卡 = 该仓 issues/2026-10-12-backlog-process-made-explicit.md） | backlog 制度显性化全套：入口两张票、缺陷修复通道（修复就绪=自授权 + 严重/触面例外）、双轨状态生命周期（闭集枚举 + 翻转法则 + 镜像互查）、agent 门牌 | [借鉴 Note](../notes/implemented/2026-10-12-backlog-process-borrow.md)（三态表）→ `_backlog/` 全区（入口/两轨 README/门牌）+ [backlog-liveness](../scripts/lib/backlog-liveness.mjs) + D24；借鉴卡 = [settled issue](../_backlog/_archived/settled_issues/2026-10-12-backlog-process-borrow.md) |
-| **`_dsh_plugin_agent_ready_development/`** @ `ad6f5319dc`（二代语料，换代重写：面向独立 DSH 插件仓的三卷——native-development-model / sdlc-reference / repo-harness + `_coverage` 维护页 + 语料自测 verify.test.mjs；语料自钉 DSH `dsh-v0.2.0-rc.2` = 旧 vendor pin 同版（现 pin 已升 dsh-v0.2.1-rc.2，待复核）；一代语料已吸纳，见上行） | 独立插件仓开发闭环（外部结果先行 / owner 路由 / 条件性记录 / 完整垂直切片 / 测试观察真实对象 / 安装形态验证 / 语义评审四角色）+ 完成判断公理（能加载 ≠ 有行为证据 ≠ 能安装 ≠ 已获交付批准）+ 主仓精确条款与适用边界 | [吸收审计毕业 Note](../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md)（三态表 + 三缺口）→ discipline-map 源 11、[evaluation §完成判断四分离](evaluation.md)、`.agents/skills/reviewing-a-delivery`、`scripts/smoke/gates-smoke.mjs` + `tests/verify-gates.test.mjs`；复核 = [外部钉版债复核材料](../_backlog/_archived/research/2026-10-10-external-repin-review.md) |
+外部材料、钉版身份与吸收落点 = [external-materials.md](./external-materials.md)（按需查；本页不复制）。

@@ -1,6 +1,8 @@
 # RFC：M2 铺垫 P1——run 启动通道与操作指南
 
 > 状态：implemented
+>
+> 后继：2026-10-20 起 agent 启动首动作 = [run-driver 入口](2026-10-20-run-driver-entry.md)（本节端口/入口已同步为 3083 / run-driver）。
 
 归宿：roadmap 队列行已销账（▶ 移交「M2 铺垫 P2」）；定案登记 00-index **D16**。依据：market 粗扫 §2/§4（agent-team-profile 候选基础）+ release-smoke 实证配方（pack → web 模板 profile → `plugin add file:`）+ design/10 §3（通道选型）+ m2-run-dashboard RFC L0（观察面）+ m2-run-mechanics RFC（HITL 两点流程出处）。以下正文为 proposed 原貌（定案依据），毕业记录在文末。
 
@@ -28,9 +30,9 @@ M2 的完成定义 = 一次完整 run（L4 全量四判据），但 **run 的启
 
 - **转正而非新建**：research profile 从"冒烟副产品"变成文档化的常设 run 通道
   （名字语义对、形状对、凭据走 home 级已配）；
-- 开跑就绪脚本 **`dev/boot-run.sh`（幂等）**：source dev/env.sh → 校验 profile 组合
+- 开跑就绪脚本 **`node dev/run-driver.mjs up`（内部 `dev/boot-run.sh`，幂等）**：source dev/env.sh → 校验 profile 组合
   在位（roster 四角色 + presets；缺则 pack → `plugin add file:` 补装）→
-  `dsh web --profile research -- --port 3081 --no-open` → 打印入口步骤（与操作指南
+  `dsh web --profile research -- --port 3083 --no-open` → 打印入口步骤（与操作指南
   同源一句话版）；
 - keyless：安装与 boot 零模型调用（release-smoke 已实证整条通道）。
 

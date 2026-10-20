@@ -51,7 +51,7 @@
 | run-dashboard.mjs | 只读 HTML 投影：多 run 扫描 + 步骤条（fail-soft；纯管线住 lib/run-dashboard-core.mjs，本件 = CLI 壳） | keyless |
 | stream-diagnostics.mjs | 流失败归因诊断（run-ops）：模型尝试时间线/失败密度/provider 与重试策略实名/工具调用与检索查询——出问题第一步跑它；`--recent N` 限制最近 N 个有模型活动的会话 | keyless（读会话日志） |
 | provider-error-stats.mjs | 上游流错误（回合被终结）的跨场分布投影（BUG-022 的"可数"面；判据与抽取 = lib/provider-errors.mjs） | keyless（须 source dev/env.sh） |
-| plan-card-stats.mjs | 计划确认卡字数的跨场分布投影（判 ①-c 的升硬门前置「连续 ≥3 场达标」；口径与识别 = lib/plan-card.mjs，与 node-gate 门① 同源） | keyless（须 source dev/env.sh） |
+| plan-card-stats.mjs | 计划确认卡字数的跨场分布投影（升硬门前置 = 连续多场达标；口径与识别 = lib/plan-card.mjs，与 node-gate 门① 同源） | keyless（须 source dev/env.sh） |
 | run-accept.mjs | **交付验收原子动作**：node-gate（门 A/交付两门）+ evidence-audit（audit.md）+ 未来日期 sanity → 绿写 acceptance.md，`--archive` 才移入 archive/；日期判据 = lib/bundle-date-sanity.mjs | keyless（须先 source dev/env.sh） |
 
 ## dist/（分发）
@@ -65,9 +65,9 @@
 | 模块 | 被谁消费 | 说明 |
 |---|---|---|
 | lib/roles.mjs | 冒烟与门禁 | 角色清单访问器（事实源 = 盘上 presets/） |
-| lib/frontmatter.mjs | run-dashboard-core、evidence-audit-core | `---` frontmatter 拆分**唯一正本**（两 core 曾各持逐字相同的副本；2026-10-16 结构收敛 §A） |
+| lib/frontmatter.mjs | run-dashboard-core、evidence-audit-core | `---` frontmatter 拆分**唯一正本**（两 core 共用同一实现） |
 | lib/zstd-read.mjs | node-gate、evidence-audit（两壳） | zstd CLI 文本解压**唯一调用段**（多帧拼接靠 CLI；成功/失败结构化返回，**失败契约留各壳**：`''` 继续 vs `null` 跳过） |
-| lib/web-harness.mjs | preset-smoke（首批）· client-load-smoke / snapshot-replay-smoke 逐站点迁移中 | DSH web 冒烟族**启停与通道唯一正本**：`bootWeb`（等启动横幅拿 token）+ `authenticate` + `makeRpc`；**参数保形**——端口/超时/尾部字符/rpcId 前缀/失败文案与收割方式全留各站点（2026-10-16 结构收敛 §B） |
+| lib/web-harness.mjs | preset-smoke（首批）· client-load-smoke / snapshot-replay-smoke 逐站点迁移中 | DSH web 冒烟族**启停与通道唯一正本**：`bootWeb`（等启动横幅拿 token）+ `authenticate` + `makeRpc`；**参数保形**——端口/超时/尾部字符/rpcId 前缀/失败文案与收割方式全留各站点 |
 | lib/session-log.mjs | run-state、watch-run、client-load-smoke、hitl-answer、回归 | canonical 日志选择与读取 + research-workspace 组发现（BUG-010；组发现 = 2026-10-13 三处同款一行收敛） |
 | lib/provider-errors.mjs | provider-error-stats、provider-errors.test | 回合被上游流错误终结的结构化抽取（唯一语义源：只认 `turn/end` + `reason.kind=error`，不双算 `assistant/attempt`） |
 | lib/plan-card.mjs | node-gate 门①、plan-card-stats、run-ops 投影 | 计划确认卡识别与字数口径（唯一语义源：标签「按计划开跑」+ `question` 字段全长 + 阈值 200） |

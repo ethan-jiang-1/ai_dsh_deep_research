@@ -1,7 +1,7 @@
 # 60 · 意图载体总图：意图从哪进、从哪出
 
 本页拥有的事实 = 本仓意图载体的 owner、用途、适用条件与出场方式。规则正文住各自 owner，本页只给总图与指针。
-对照物 = DSH SDLC 参考卷 `09-intake-and-work-items.md`（仓外语料，钉版登记 = [00-index §外部研究材料](../00-index.md)，仓内不可解析）；本仓按单人文件工作流适配，不承接其 GitHub Issue/Project 状态机。
+对照物 = DSH SDLC 参考卷 `09-intake-and-work-items.md`（仓外语料，钉版登记 = [external-materials.md](../external-materials.md)，仓内不可解析）；本仓按单人文件工作流适配，不承接其 GitHub Issue/Project 状态机。
 读入口 = [00-index §文档地图](../00-index.md)。
 
 ## 一、载体清单

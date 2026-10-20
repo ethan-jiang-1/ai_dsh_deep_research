@@ -10,7 +10,7 @@
 开发本插件时，coding agent 同时读**两个仓库**：本仓（插件内容）与 `vendor/dsh/`（机制本体）。
 两边沿用同一套概念时，同样的检索模式与判断标准都成立；哪边自造词汇，agent 就要在哪边重建
 一套局部模型（仓外语料 `_agent_ready_development/repo-harness/09-plugin-author-entry.md` §4——
-钉版与路径登记 = [00-index §外部研究材料](../00-index.md)，仓内不可解析）。
+钉版与路径登记 = [external-materials.md](../external-materials.md)，仓内不可解析）。
 本页把本仓的落点钉在那些概念上。
 
 ## 词汇（与 DSH 对齐，不允许自造同义词）

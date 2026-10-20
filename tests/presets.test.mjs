@@ -1,5 +1,5 @@
-// presets 结构回归 — 与 scripts/verify/verify.mjs 门禁 4/6/7（preset-structure / pack-bundle-compat /
-// row-deps）同源判据（keyless，进程内文件断言）。
+// presets 结构回归 — 与 scripts/verify/verify.mjs 的 preset-structure / pack-bundle-compat /
+// row-deps 同源判据（keyless，进程内文件断言；不写门禁序号，序号随域重排会腐）。
 // 0.1.7 preset 重设计：preset = `presets/<role>.patch.yml` 里的一条 `@deepseek-ai/dsh-agent-preset`
 // 行（config 带 id/name/description/order/plugins）；角色技能仍在 `presets/<role>/skills/`。
 //

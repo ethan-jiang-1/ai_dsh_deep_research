@@ -23,7 +23,7 @@
 
 - 两门都是 DSH 自带机制（base bundle，零接线）；**不要发明 tasks.md**（DSH 明文否决计划
   文件："a plan directory creates a second durable home"——会话日志即计划与清单的持久真相）。
-- **验收门（TDD 式，[D23](../00-index.md)）**：对已授权工作，在实施前把可判定的验收判据绑定检查方式；可机械者先立红，人工判据明确记录走查证据。验收尚不明确时，澄清是当前任务需要，不会自动阻断已授权且可独立推进的工作；证据设计复用本仓现有 owner，不另造队列。四条硬边界：①**改断言迁就实现不是修法**——断言只在行为/合同真实变化时同 diff 改（[tests/AGENTS](../../tests/AGENTS.md)）；②**未验项不得写 implemented**，被阻断检查如实注明；③**复发升格**——implemented 缺真实验证证据复发时，才考虑升为机械门禁并配负例；④证据和结论不得超出检查实际证明的范围（依据见 [00-index §外部研究材料](../00-index.md) 与 [item-lifecycle-tdd Note](../../notes/implemented/2026-10-05-item-lifecycle-tdd.md)）。
+- **验收门（TDD 式，[D23](../00-index.md)）**：对已授权工作，在实施前把可判定的验收判据绑定检查方式；可机械者先立红，人工判据明确记录走查证据。验收尚不明确时，澄清是当前任务需要，不会自动阻断已授权且可独立推进的工作；证据设计复用本仓现有 owner，不另造队列。四条硬边界：①**改断言迁就实现不是修法**——断言只在行为/合同真实变化时同 diff 改（[tests/AGENTS](../../tests/AGENTS.md)）；②**未验项不得写 implemented**，被阻断检查如实注明；③**复发升格**——implemented 缺真实验证证据复发时，才考虑升为机械门禁并配负例；④证据和结论不得超出检查实际证明的范围（依据见 [external-materials.md](../external-materials.md) 与 [item-lifecycle-tdd Note](../../notes/implemented/2026-10-05-item-lifecycle-tdd.md)）。
 - 多步实施按可独立验收结果拆解；小问题不强行拆成子任务。一次需要多个相互独立的人类判断时，分别记录问题与依赖，不把它们伪装成执行步骤。
 - steer（用户插话）开启新 turn = 清单重排的信号，看得见反馈被吸收。
 
@@ -83,6 +83,7 @@
 | 改 preset 结构（角色/工具行/roster 接线；新增 skill 文件按下行） | pack 源 `presets/` | **`render-overlay` 先于 L1**（L1 挂的是 overlay，不是 pack 源） | L0 + L1 | 行为/发布集变才写 Note | 四角色真挂载绿 + 文档同步 |
 | 改 persona / skill / 手册文本（模型可见） | pack 源 + `research-workspace/` 正本 | `render-overlay` 先于 L1（L1 挂的是 overlay，不是 pack 源）→ L1 → **snapshot-replay B 层**（模型可见文本变化的 keyless 秒级信号；比对面 = persona 全文 + 全部 request/header + 三处 `user/message` 注入〔工作区手册全文 / skill 目录 description / 运行时上下文〕——**skill 正文不进组装请求**，其证据 = L1 可见面 + L4-lite 行为；有意变更 → 红 = 已捕获，走重录场景[真模型档，同 diff 更新 `snapshot.json` 的 source 身份]或 `--update-expected` 重写金标准 + 人审）→ **重启 run 通道**（web 缓存 boot 时文本）。金标准只许重写，不许放宽比对或归一化凑绿——fix fixtures, not normalizers | L0 + L1 + L4-lite | 同上 | 真模型档证据 + L1 绿 |
 | **改驾驶舱**（观察面 client 面——`src/client/` 套件，[构成正本](../design/40-research-cockpit.md)） | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `pnpm build` → `client-load-smoke`（改挂起显性化再跑 `client-hitl-smoke`） | L0 + client-load-smoke | 同上 | 真浏览器断言全绿 |
+| 改 `src/lib/` 纯函数 / 类型面（pack 两半的编译面） | 对应 `src/lib` / `src/client` 类型位 | `pnpm typecheck` → `pnpm test`（typecheck 前置 = vendor 构建产物在场） | L0 + typecheck | 同上 | typecheck + 对应测试绿 |
 | 加 / 改机械门禁 | `verify.mjs` gates 数组 + `evaluation.md` §L0 台账（案例表有增删再动 `gates-smoke.mjs`） | **注入回归红 → 还原 → 绿** → gates-smoke | L0 + gates-smoke | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 + gates-smoke 绿 |
 | 改 run 通道工具 / 审计门（run-driver / boot-run / watch-run / hitl-answer / run-dashboard / evidence-audit / node-gate / schema-scan / snapshot-replay） | 对应 `scripts/` / `dev/` 脚本 | — | L0 + 对应 `tests/*.test.mjs` 契约测试必跑（用例即其反证记录） | 判据变更才写 Note | 对应契约测试绿 |
 | 改 scripts/lib 支撑模块 / dev 基建本体（`lib/*.mjs`、env.sh、render-overlay、sync-pack-workspace） | 支撑模块 + 其**全部消费方**（消费面 grep：roles.mjs 的角色枚举消费方、render-overlay → `overlay-fresh`、sync → `pack-workspace-fresh`、run-state → watch-run/hitl-answer/run-dashboard） | 消费方门禁在同 diff 复跑 | L0 + lib 对应契约测试 | 判据变更才写 Note | 消费方门禁与契约测试绿 |
@@ -102,6 +103,7 @@
 bash dev/vendor-build.sh              # vendor 树构建（换 pin 后必做：--clean 清陈旧产物；tsc host/client + typert 产物 + client bundle + host 半补建 + 前端壳重建——0.1.7 起启动依赖构建产物）
 pnpm verify                           # L0 结构门禁（keyless，收尾必跑）
 pnpm test                             # L0 keyless 回归（= node --import tsx/esm --test tests/*.test.mjs；唯一登记的测试命令）
+pnpm typecheck                        # pack 双半 TS 类型检查（tsc -b；前置 = vendor 构建产物在场；fresh clone 的 L0 不跑）
 node scripts/smoke/gates-smoke.mjs    # 门禁自测（keyless：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组；改 verify.mjs 门禁逻辑必跑）
 node dev/render-overlay.mjs            # 生成物：从 pack 渲染 dev/research.overlay.yml（改 pack 后必跑，且**必须先于 L1**）
 node dev/sync-pack-workspace.mjs       # 生成物：把 research-workspace 正本同步进 pack 的 workspace/ 种子（改手册/模板后必跑）
@@ -110,13 +112,16 @@ node scripts/smoke/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE
 cd packages/deep-research-pack && pnpm build   # pack 双半构建（tsc -b . + tsdown → lib/index.js + lib/client.js——观察面 client 面，D18）
 node --import tsx/esm scripts/smoke/client-load-smoke.mjs    # 观察面 client 面真浏览器加载（keyless：boot web + headless chromium——插件零失败 + 页签与渐进面硬断言；渐进面断言 = 磁盘侧绑定会话的真值对账；失败留 png/html/console/meta 现场；无窗口内交付目标 = exit 2 SKIP）
 node scripts/probe/cdp-probe.mjs '<gui-url>' --open-session '<标题>' --open-status --expect-face '<文本>' [--expect-no-leak '<文本>'] [--ask '<消息>']   # 交互探针（裸 CDP，借鉴 ai_dsh_loop_advisor）：Playwright actionability 被 DSH UI 挡死时的交互驱动工具——JS 派发点击/输入，JSON 判决；--ask = 完整产品环（输入→发送→等回复）。老会话可能要先在 GUI 里让它进侧栏近列表
+node scripts/smoke/e2e-021rc2.mjs            # 升级端到端（keyless 浏览器：角色 order 成组 + 状态/配置页签真数据 + 插件零故障；失败留现场）
 node scripts/smoke/release-smoke.mjs        # L2 真实安装形状：pack→干净 profile→plugin add→安装域冒烟；无模型调用，安装模式跳过模型就绪检查
+node scripts/probe/method-library-probe.mjs  # 偏好库可发现性三问（真模型档；BUG-042 修复判据）
 node scripts/smoke/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：四角色响应 + scout web_search 调用）
 node scripts/smoke/team-preflight-smoke.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + company D18 one-shot worker 探针）
 node dev/run-driver.mjs up          # **run 通道驱动入口（常用）**：起/复用通道 + 验浏览器面 + 呈交块（exit 0 可呈交/1 红/2 未跑）；probe = 只验已起通道；url = 打印当前 URL
 bash dev/boot-run.sh                  # run 通道底层启动面：自检→组合检查/必要补装→漂移门；仪表盘后台观察、web 前台 3083；用法 = 61（驱动入口内部调它）
+node scripts/run-ops/stream-diagnostics.mjs --recent N   # 流失败归因诊断（尝试时间线/失败密度/provider 实名；出问题第一步）
 node --import tsx/esm scripts/run-ops/run-dashboard.mjs --latest --out <html>   # run 只读投影（多场扫描 + 步骤条 + HITL 等待横幅；--watch 持续再生成）
-node scripts/run-ops/plan-card-stats.mjs   # 计划确认卡字数跨场分布（keyless，须先 source；判 ①-c 升硬门前置「连续 ≥3 场 ≤200 字达标」）
+node scripts/run-ops/plan-card-stats.mjs   # 计划确认卡字数跨场分布（keyless，须先 source；升硬门前置 = 连续多场 ≤200 字达标）
 node scripts/run-ops/provider-error-stats.mjs   # 上游流错误（回合被终结）跨场分布——BUG-022 的"可数"面（keyless，须先 source）
 node dev/run-kickoff.mjs --port 3083 --token <横幅 token> --prompt-file <file>        # run 会话驱动（建会话+发 kickoff）
 node --import tsx/esm scripts/run-ops/watch-run.mjs <session-id>   # run 盯场（谓词化状态判定：事件形状，非字符串 grep——HITL-PENDING/RUN-SETTLED 时退出自报；grep 会误报 request/header 工具 schema）
@@ -141,7 +146,7 @@ node packages/deep-research-pack/scripts/scaffold.mjs --workspace <dir>    # 部
 与 RFC 出处。
 
 五条与面选择同级的纪律（前三条 = `_agent_ready_development` 吸纳，2026-09-25；后两条 = 姊妹仓
-`ai_dsh_assitant` 借入，2026-10-05，钉版见 [00-index §外部研究材料](../00-index.md)）：
+`ai_dsh_assitant` 借入，2026-10-05，钉版见 [external-materials.md](../external-materials.md)）：
 
 - **先加载匹配的开发技能**：任务命中 `.agents/skills/` 某条 description（换 pin / 加角色 /
   写门禁 / 跑 run / 改轨道 / 交付自审——清单 = 盘上 `.agents/skills/`）→ 先读该 `SKILL.md` 全文再动手，不从摘要猜流程；
@@ -204,7 +209,7 @@ source dev/env.sh        # DSH_HOME=runtime/harness-home（数据面）+ dsh 别
 
 ## 5. 密钥
 
-- 独立真模型档 = l4-lite-smoke、team-preflight-smoke、entry-chain-probe、discipline-probe、client-hitl-smoke、cdp-ask-smoke 与 dev/record-role-fixture（fixture 录制）；
+- 独立真模型档 = `tests/smoke-contract.test.mjs` 的 REAL_MODEL 闭集（成员以测试为准；`dev/record-role-fixture` 是单独录制工具，完整 run 属 L4）；
   调用凭据可在开发 home 配置（根 [AGENTS §密钥](../../AGENTS.md)）。CDP `--ask` 按当前会话档位；
   永不提交密钥；
 - L1 真挂载无模型调用、无凭据可跑；L2 安装验收无模型调用并使用 `--install-only`，默认 preflight 仍检查凭据在场；

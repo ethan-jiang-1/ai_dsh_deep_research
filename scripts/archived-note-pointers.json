@@ -2,12 +2,12 @@
   "comment": "活面→notes/archived 具名 Note 的 Markdown 链接登记簿（历史指针类）。owner = verify 门禁 archived-note-pointer：未登记的此类链接即红；登记条目失真/失存也红。登记动作 = 活面显式承认'我在引用冻结件'；引用现行权威请改指活跃载体而不是登记。维护：Note 移位/复活时同步本簿；条目按 (source, target) 对登记，同对多链接算一条。",
   "pointers": [
     {
-      "source": "docs/00-index.md",
+      "source": "docs/decisions.md",
       "target": "notes/archived/2026-09-24-ui-observability-surfaces.md",
       "reason": "决策台账 D18 行与外部研究材料表的琢磨稿指针（行内标注'已归档'——观察面选项推敲与十二坑考古的历史家）"
     },
     {
-      "source": "docs/00-index.md",
+      "source": "docs/external-materials.md",
       "target": "notes/archived/2026-09-24-dsh-market-scout.md",
       "reason": "外部研究材料表：DSH 插件生态行的粗扫种子指针（行内标注'冻结'，认真报告已毕业为现行的 dsh-plugin-ecosystem）"
     },
@@ -120,6 +120,11 @@
       "source": "docs/discipline-map.md",
       "target": "notes/archived/2026-09-24-dsh-discipline.md",
       "reason": "头部枚举方法行的首轮清点实录指针（历史出处；现行三态正本 = 本表自身）"
+    },
+    {
+      "source": "docs/external-materials.md",
+      "target": "notes/archived/2026-09-24-ui-observability-surfaces.md",
+      "reason": "外部材料表 DSH client/UI 扩展面行：琢磨稿历史指针（行内标注“已归档”）"
     }
   ]
 }

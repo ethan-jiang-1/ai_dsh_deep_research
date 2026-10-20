@@ -62,7 +62,12 @@ for (const r of ROLES) {
 }
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
-step(!!home, 'env: DSH_HOME 已设置（先 source dev/env.sh）', '未设置则只能停在 keyless 预检');
+// 前置缺席 = 未跑（verdict 契约 exit 2），不是断言红——旧版先跑完 keyless 预检再 exit 1，
+// 把"没 source"读成"L1 失败"（2026-10-20 审计 P1-5）。
+if (!home) {
+  console.error('preset-smoke: 需要 DSH_HOME（先 source dev/env.sh）——按 verdict 契约 exit 2（未跑，不是断言红）');
+  process.exit(2);
+}
 
 const dshSrc = process.env.DSH_SRC ?? ROOT; // 本仓根 = 安装锚（vendor/dsh submodule 在 workspace）
 const bin = join(dshSrc, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');

@@ -99,13 +99,17 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | L0 门禁 | `pnpm verify`；[verify](../scripts/verify/verify.mjs) | 无模型；本地 git 与生成器检查子进程 | 结构、链接、预算、同步等机械不变量 |
 | 门禁自测 | [gates-smoke](../scripts/smoke/gates-smoke.mjs) | 无模型；git/node 子进程 | 门禁逻辑回归：注入违规经真实 verify 入口点名报红 + 零注入对照组 |
 | 确定性回归 | `pnpm test`；`tests/*.test.mjs` | 无模型/浏览器/网络/子进程；导入执行路径另核查，见下方限制 | 纯函数行为、解析、状态折算、渲染输出、审计判据与配置契约 |
+| 类型检查 | `pnpm typecheck`；pack 的 `tsconfig.*.json` | 需要 vendor 构建产物；不调模型 | pack 双半 TypeScript 类型面（`src/client` + `src/lib` + host 壳） |
 | L1 真实挂载 | [preset-smoke](../scripts/smoke/preset-smoke.mjs) | 无模型；`DSH_SMOKE_REAL=1` 才起真 DSH，本地 RPC 与子进程 | roster、逐角色创建会话、skills 可见性/隔离；默认档只预检 |
 | L2 安装 | [release-smoke](../scripts/smoke/release-smoke.mjs) | 无模型调用；npm 安装可能访问网络；`--install-only` 安装检查跳过凭据；默认 preflight 检查凭据在场 | pack → 重建测试 profile → 安装 → scaffold/preflight → 安装域挂载 |
 | 浏览器加载 | [client-load-smoke](../scripts/smoke/client-load-smoke.mjs) | 无模型；真实 web、浏览器、本地通信 | client 装配、页签、渐进面与文件事实对账 |
+| 升级端到端 | [e2e-021rc2](../scripts/smoke/e2e-021rc2.mjs) | 无模型调用；真实例或自 boot + 浏览器；须先 source | 角色 order 成组（内置 preset 撞车回归锁）、研究状态/配置页签真数据、本插件面零故障 |
 | 确定性回放 | [snapshot-replay-smoke](../scripts/smoke/snapshot-replay-smoke.mjs) | 无真模型；全角色真实 DSH/RPC/解压子进程；仅声明渲染期望的场景额外浏览器渲染 | 场景声明驱动的全角色回放完成标记；persona、全部 request/header 与三处 user/message 注入逐条一致；声明的渲染金标准 |
-| 真模型档 | [l4-lite](../scripts/smoke/l4-lite-smoke.mjs)、[team-preflight](../scripts/smoke/team-preflight-smoke.mjs)、[entry-chain-probe](../scripts/probe/entry-chain-probe.mjs)、[discipline-probe](../scripts/probe/discipline-probe.mjs)、[client-hitl](../scripts/smoke/client-hitl-smoke.mjs)、[cdp-ask](../scripts/smoke/cdp-ask-smoke.mjs)——[smoke-contract](../tests/smoke-contract.test.mjs) 登记的 `scripts/` 真模型闭集 | 需要模型凭据；调用模型，部分调用 web 工具 | 角色响应/工具调用、团队机制、导航软断言、纪律行为标记断言、真实 HITL UI 迁移、交互探针端到端；不能替代完整研究质量验收。`dev/record-role-fixture` 是独立录制工具，不属于该闭集；完整研究 run 属 L4。 |
+| 真模型档 | [smoke-contract](../tests/smoke-contract.test.mjs) 登记的 REAL_MODEL 闭集（成员以测试为准） | 需要模型凭据；调用模型，部分调用 web 工具 | 角色响应/工具调用、团队机制、导航软断言、纪律行为标记断言、真实 HITL UI 迁移、交互探针端到端；不能替代完整研究质量验收。`dev/record-role-fixture` 是独立录制工具，不属于该闭集；完整研究 run 属 L4。 |
 | 浏览器交互探针 | [cdp-probe](../scripts/probe/cdp-probe.mjs) | 连接已起 GUI；`--ask` 会发送消息并可能触发模型/工具调用 | 指定场景的显示、点击、会话回复；是否调用模型取决于模式与会话 |
+| 偏好库可发现性 | [method-library-probe](../scripts/probe/method-library-probe.mjs) | 真模型档；cwd = 临时研究工作区 | 偏好库文件名/位置、条目数、点名条目缺席时如实说（BUG-042 修复判据的机器化证明） |
 | run 文件审计 | [node-gate](../scripts/run-gates/node-gate.mjs)、[schema-scan](../scripts/run-gates/schema-scan.mjs)、[evidence-audit](../scripts/run-gates/evidence-audit.mjs) | 无主动外网请求；压缩日志读取可能用 zstd 子进程 | 节点在场、部分交接判据、URL/摘录/引用链；部分 CLI 写审计报告 |
+| 交付验收 | [run-accept](../scripts/run-ops/run-accept.mjs) | 无模型；须先 source；会跑 node-gate/evidence-audit | 门 A + 审计（CRITICAL=0）+ 未来日期 sanity；绿写 acceptance.md，`--archive` 才归档 |
 | 完整 L4 | 真实问题的完整研究 run | 模型与真实信息检索、真人 HITL | 报告质量、可追溯结论与整体研究体验 |
 
 回放夹具不能证明模型服从变化后的方法论；真挂载也不能证明研究质量。
@@ -159,6 +163,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 无法启动/镜像漂移 | 本次 [boot-run](../dev/boot-run.sh) 终端报错；进入 web 启动后再看 `runtime/smoke-workspace/web.log` | 环境/构建/组合/镜像检查；修复入口见 [Run 指南](guides/61-run-playbook.md) |
 | 页面能开但页签或交互坏 | 浏览器加载/console 与 [client-load-smoke](../scripts/smoke/client-load-smoke.mjs) | [驾驶舱](design/40-research-cockpit.md) 装配与数据通道；HITL 行为另用真模型证据 |
 | 研究卡住、工具报错、present 不明 | 先用 [session-events](../scripts/run-ops/session-events.mjs) 看该会话的事件尾部；原始日志仍在 `runtime/harness-home/sessions/<工作区组>/<会话>/` | [watch-run](../scripts/run-ops/watch-run.mjs) 看状态；[node-gate](../scripts/run-gates/node-gate.mjs) 查交付声明 |
+| 模型回合被流错误终结 / 重试风暴 | [stream-diagnostics](../scripts/run-ops/stream-diagnostics.mjs) `--session <id>` 或 `--recent N` | 模型尝试时间线/失败密度/provider 与重试策略实名；处置 = [Run 指南 §0.1](guides/61-run-playbook.md) |
 | 研究内容/交接缺件 | 该 bundle 的问题、证据、发现、审查与最终报告 | [NODES](../research-workspace/NODES.md) + run 机械审计；恢复查 [Run 指南](guides/61-run-playbook.md) |
 | 不知道改什么、怎么验 | 根 [AGENTS.md](../AGENTS.md) 入口链与本轮请求授权 | 对应 RFC 与 [开发环](guides/60-dev-loop.md) 任务型路由 |
 

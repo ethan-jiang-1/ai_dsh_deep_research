@@ -20,7 +20,7 @@
 差，仍要探索出最终答案在哪）；工程范式参考 `ai_dsh_company`，方法论参考
 `ai_tool_deepresearch`（codex 成熟 harness）；多角色（preset）+ Agent Teams 主通道、
 评估先行、八成把握垂直轮为立项当日定调。定调语义已全数落进
-[00-index 决策台账](../docs/00-index.md)（D 号依据列引原话——**新定调只进 D 号**，不再有
+[decisions.md 决策台账](../docs/decisions.md)（D 号依据列引原话——**新定调只进 D 号**，不再有
 追加式存档文件）；立项原话全文 = git 历史（`notes/intents.md` 2026-10-04 退役——冻结存档
 与 D 号台账双载体，噪声大于信息，用户裁定剔除）。
 
@@ -81,7 +81,7 @@
 | 维度 | vendor `.agents/notes/` | 本仓 |
 |---|---|---|
 | 路径 | `.agents/notes/`（隐藏、agent 面） | `notes/`（顶层、人机共面）——人验收时直接看得到；`.agents/skills/` 已按 vendor 约定落地，notes 留在顶层是**登记的偏离**（代价：与 vendor 路径不同构；收益：人类可发现性） |
-| 第二轴 | 生命周期 + **class 子目录**（feature/bug-fix/simplification/architecture/process/testing），closed set 由门禁脚本校验 | **无 class 层**（2026-10-10 阈值重估维持）：文件名 = 首提日期 + 主题已承载检索面——机制名检索实测逐词命中（2026-10-12 时点，89 篇下）；class 五类对吸收/审计类为主的构成分辨力低，且批量搬家 = 全仓链接与登记簿重写的审阅噪声（超过 50 篇的计数阈值已越过而检索未失效，计数本身不构成触发）。**引入条件（可判定）**：机制名检索实测失败（已知存在的条目搜不到），或出现按类别批量审阅/浏览的常态工作流 |
+| 第二轴 | 生命周期 + **class 子目录**（feature/bug-fix/simplification/architecture/process/testing），closed set 由门禁脚本校验 | **无 class 层**（2026-10-10 阈值重估维持）：文件名 = 首提日期 + 主题已承载检索面——机制名检索实测逐词命中（2026-10-12 时点；篇数以 `ls notes/implemented` 为准）；class 五类对吸收/审计类为主的构成分辨力低，且批量搬家 = 全仓链接与登记簿重写的审阅噪声（超过 50 篇的计数阈值已越过而检索未失效，计数本身不构成触发）。**引入条件（可判定）**：机制名检索实测失败（已知存在的条目搜不到），或出现按类别批量审阅/浏览的常态工作流 |
 | 冻结层 | `archived/`（implemented 可归档，归档树永久冻结） | **已设**（2026-09-27 用户指令激活）：单语单文件 + `> 归档：<日期>` 行，等价上游 triplet+hash seal 的本仓落地；判定 = vendor `dsh-archive-agent-notes` 的"未来决策价值"校准 |
 | 格式骨架 | `## Problem` / `Decision` / `Alternatives considered` / `Verification` 强制，`verify-agent-note-format` 门禁 | 中文骨架：决定 / 输掉的方案 / 实际跑过的验证 / 环境状态（guides/60 §4）+ **轻量门禁 `note-format`**——**前 3 节机械强制**（含验证节，2026-10-08 补齐；词表容忍历史命名变体），`环境状态` 暂只由 guides/60 §4 声明、无门禁 |
 | 取代检查 | 子树 AGENTS.md 硬触发：每新增 Note 搜同决定/同机制，完整取代同 PR 归档旧 triplet | 同（2026-09-24 吸纳：更新 owner / 部分互链 / 完整吸收后才删旧——见上节） |

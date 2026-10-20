@@ -12,7 +12,7 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 按序读，不跳：
 
 1. **本文件**——布局 + 命令速查 + 纪律 + `notes/` 地位 + 本链的定义；
-2. **[docs/00-index.md](docs/00-index.md)**——文档地图 + 决策台账（D 号）+ 术语映射；
+2. **[docs/00-index.md](docs/00-index.md)**——文档地图 + 术语映射（D 号台账 = [decisions.md](docs/decisions.md)，按需跳）；
 3. 按本轮授权进入工作：用户直派按请求范围执行；需澄清、查证或记录的问题按 [意图载体总图](docs/design/60-intent-carriers.md) 路由到 `_backlog/issues/`、`bugs/`、`research/`、`methods/` 或 `triggers.md`（可观察重议条件）。Backlog 不是实施前置门；
 4. **[docs/guides/60-dev-loop.md](docs/guides/60-dev-loop.md)**——按改动面选择验收与收尾。仅当持久决定需要显式评审时，才为该项建立 [notes/proposed/](notes/proposed/) RFC。
 
@@ -35,7 +35,7 @@ vendor/dsh/               pinned submodule（只读铁律——verify vendor-pin
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、NODES.md（节点 I/O 契约
                          全表）、question-patterns.md（判型模式库）、drt_<slug>/（run bundle）、
                          archive/（已交付 run 归档位）、drafts/（开发侧跨 run 草稿，非 run 产物）、templates/run/
-docs/                    00-index（地图+决策台账+术语映射）→ design/10-60 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ evaluation.md（验收合同）
+docs/                    00-index（地图+术语映射；D 号台账 = decisions.md）→ design/10-60 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ evaluation.md（验收合同）
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）；目录名自带时态，
                          总图 = notes/README.md（将来 proposed/ · 过去 implemented/archived/rejected/
                          postmortem/；立项来历 = 该页 §立项来历——用户定调只进 00-index D 号依据列）：
@@ -90,7 +90,7 @@ pnpm test            # L0 keyless 回归（唯一登记的测试命令）
 
 档位词汇：**keyless** = 无凭据可跑；preset-smoke 真挂载档无模型调用、不需要 key。
 release-smoke 无模型调用，安装验收使用 `--install-only` 跳过模型就绪检查；默认 preflight 仍检查凭据在场；
-**真模型档** = 需凭据并调用模型；`scripts/` 入口 closed set 正本 = [smoke-contract](tests/smoke-contract.test.mjs)（l4-lite / team-preflight / entry-chain / discipline / client-hitl / cdp-ask）。`dev/record-role-fixture` 是单独录制工具，完整研究 run 属 L4，均不在该脚本闭集中；档位与验收面见[项目地图](docs/project-map.md)。CDP `--ask` 按当前会话档处理（模式表 = [项目地图](docs/project-map.md)）。
+**真模型档** = 需凭据并调用模型；`scripts/` 入口 closed set 正本 = [smoke-contract](tests/smoke-contract.test.mjs)（成员清单 = 该测试的 REAL_MODEL；本行不复制名单）。`dev/record-role-fixture` 是单独录制工具，完整研究 run 属 L4，均不在该脚本闭集中；档位与验收面见[项目地图](docs/project-map.md)。CDP `--ask` 按当前会话档处理（模式表 = [项目地图](docs/project-map.md)）。
 
 L4-lite 真模型冒烟需要 `DEEPSEEK_API_KEY`：开发 home（`runtime/harness-home/.credentials.yaml`）配一次
 即可，永不提交密钥；web 搜索无需独立 key——base 的 `web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，与 chat 同一把钥匙（实证：vendor `packages/bundle/base/cordis.patch.yml` 的 web-search-deepseek 行）。
@@ -101,7 +101,7 @@ L4-lite 真模型冒烟需要 `DEEPSEEK_API_KEY`：开发 home（`runtime/harnes
 |---|---|---|
 | ① 开发基线（唯一权威） | `vendor/dsh/`（本仓 pinned submodule，tag `dsh-v0.2.1-rc.2` @ `687f282e86`，只读铁律——verify vendor-pin/vendor-clean 把守） | 机制核对与验证会话一律走它（dev/env.sh 的 dsh 函数与 `pnpm dsh` 从此处源码起） |
 | ② 日用全局安装 | npm 全局（`which dsh`） | 与本 repo 开发无关；版本随全局漂移，行为不作机制依据 |
-| ③ 参考仓 | `/Users/bowhead/ai_dsh_company/`（插件工程范式）、`/Users/bowhead/ai_tool_deepresearch/`（方法论源头） | 只读参考；吸收落点登记在 00-index §外部研究材料 |
+| ③ 参考仓 | `/Users/bowhead/ai_dsh_company/`（插件工程范式）、`/Users/bowhead/ai_tool_deepresearch/`（方法论源头） | 只读参考；吸收落点登记在 docs/external-materials.md |
 
 DSH 全局不变量（fail-loud / model-visible ⟺ logged / registrations are effects / plugins
 not loop changes）= vendor 树根 AGENTS.md Conventions 节。

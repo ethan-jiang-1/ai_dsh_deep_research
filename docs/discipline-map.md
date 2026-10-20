@@ -204,7 +204,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 <a id="source-10"></a>
 ## 源 10：_digested/test-strategy 语料（测试策略消化 11 篇，基线 = 本仓 pin）
 
-> 语料身份与吸收落点 = [00-index §外部研究材料](00-index.md)；对照总账正本 = test-strategy 采纳
+> 语料身份与吸收落点 = [external-materials.md](external-materials.md)；对照总账正本 = test-strategy 采纳
 > Note（[notes/implemented/2026-10-04-test-strategy-adoption.md](../notes/implemented/2026-10-04-test-strategy-adoption.md)）。
 > 本表只收语料带来的**增量**结论；与源 1–9 重复的教义不重复登记。
 
@@ -225,7 +225,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 <a id="source-11"></a>
 ## 源 11：_dsh_plugin_agent_ready_development 语料（二代，独立插件仓专版）
 
-> 语料身份与钉版 = [00-index §外部研究材料](00-index.md)；对照总账正本 = [吸收审计毕业 Note](../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md)（通读范围、已具备逐件对照表、痛点归因与输掉的方案）。本表只收**二代增量**结论；一代语料已覆盖的不重复登记。
+> 语料身份与钉版 = [external-materials.md](external-materials.md)；对照总账正本 = [吸收审计毕业 Note](../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md)（通读范围、已具备逐件对照表、痛点归因与输掉的方案）。本表只收**二代增量**结论；一代语料已覆盖的不重复登记。
 
 | 二代语料增量 | 本仓落点 | 状态 |
 |---|---|---|
@@ -257,7 +257,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
   全量盘点——它在语料中不归研究显眼类；语料 `_digested/plugin-inventory/` 随新基线更新后
   一并对账，防同类盲区）。
 - `_digested/` 语料专题随新基线更新后一并对账（test-strategy 的钉法见
-  [00-index §外部研究材料](00-index.md)）：语料自报基线 ≠ 新 pin 即该专题待更新，增量结论
+  [external-materials.md](external-materials.md)）：语料自报基线 ≠ 新 pin 即该专题待更新，增量结论
   按 [源 10](#source-10) 重校。
 - **本仓立卡的 vendor seam 缺口**（升 pin 时核上游是否已修——已修即撤本行，未修带证据重估）：
   会话日志逐帧 / 逐 turn flush + SIGTERM finalizer 清缓冲、至少 turn 边界强制落盘
