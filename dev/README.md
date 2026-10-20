@@ -19,7 +19,7 @@
 
 | 件 | 职责 |
 |---|---|
-| run-driver.mjs | **驱动入口（启动/验证/呈交一条命令）**：`up` 起通道（经 boot-run，不绕漂移门）或复用已在飞的 → 用 cdp-probe 验浏览器面 → 打印呈交块；`probe` 对已起通道只验面；`url` 打印当前通道 URL。verdict = exit 0 可呈交 / 1 红（不得呈交）/ 2 未跑。通道事实唯一来源 = `web.log` 最后一条横幅 |
+| run-driver.mjs | **驱动入口（启动/验证/呈交一条命令）**：`up` 起通道（经 boot-run，不绕漂移门）或复用已在飞的 → 用 cdp-probe 验浏览器面 + 截图 → 打印呈交块；`probe` 对已起通道只验面；`url` 打印当前通道 URL。verdict = exit 0 可呈交 / 1 红（不得呈交）/ 2 未跑；verdict JSON + `run-driver-status.png` 落 `runtime/smoke-workspace/`。通道事实唯一来源 = `web.log` 最后一条横幅 |
 | boot-run.sh | run 通道正式启动面：自检 → 组合检查/补装 → 漂移门 → boot web 3083 → 后台仪表盘（自 source env.sh） |
 | llm-socket-isolation.cjs | api.deepseek.com socket 隔离预载（NODE_OPTIONS）：LLM 流与 web_search 两类请求均每请求一次性连接、永不复用；上游边缘对长命复用连接有相位性故障（[postmortem](../notes/postmortem/2026-10-13-llm-stream-malformed-storm.md)），移除 = 摘 boot-run 一行 |
 | run-kickoff.mjs | run 会话驱动：建 lead 会话 + 发 kickoff（GUI 的 RPC 替代入口） |

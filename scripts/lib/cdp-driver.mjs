@@ -160,9 +160,38 @@ export async function launchCdpBrowser({ url, chromeBin, windowSize = '1600,1000
     return 'clicked';
   })()`);
 
+  /**
+   * 页面截图（agent 的"看见页面"入口）：CDP `Page.captureScreenshot` → PNG 文件。
+   * fullPage=true 时用 cssContentSize 做 clip，避免只截视口；失败抛错（调用方决定是否致命）。
+   * @param {string} filePath 输出路径；父目录自动创建。
+   * @param {{fullPage?: boolean}} [options]
+   * @returns {Promise<{path: string, bytes: number}>}
+   */
+  const screenshot = async (filePath, { fullPage = true } = {}) => {
+    let clip;
+    if (fullPage) {
+      const metrics = await send('Page.getLayoutMetrics');
+      const size = metrics.result?.cssContentSize ?? metrics.result?.contentSize;
+      if (size !== undefined) clip = { x: 0, y: 0, width: size.width, height: size.height, scale: 1 };
+    }
+    const reply = await send('Page.captureScreenshot', {
+      format: 'png', fromSurface: true, captureBeyondViewport: fullPage,
+      ...(clip === undefined ? {} : { clip }),
+    });
+    const data = reply.result?.data;
+    if (typeof data !== 'string') {
+      throw new Error(`Page.captureScreenshot 失败：${reply.result?.exceptionDetails?.text ?? '无 data'}`);
+    }
+    const buf = Buffer.from(data, 'base64');
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, buf);
+    return { path: filePath, bytes: buf.length };
+  };
+
   const handle = {
     evaluate,
     click,
+    screenshot,
     consoleProblems: problems,
     exceptions,
     profileDir,

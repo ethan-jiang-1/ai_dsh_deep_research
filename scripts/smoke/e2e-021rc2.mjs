@@ -18,7 +18,7 @@
 //   node scripts/smoke/e2e-021rc2.mjs --session '<标题>' # 指定绑定了 drt_ 的会话标题
 //
 // 前置：先 `source dev/env.sh`（DSH_HOME 与 dsh 解析都要）；未 source 自拒 exit 2。
-import { existsSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -227,9 +227,27 @@ async function assertRoleGrouping(page) {
 
 const instance = givenUrl === null ? await bootInstance() : { url: givenUrl, stop: () => {} }
 const browser = await (await loadChromium(ROOT)).launch()
+let page = null
+let consoleProblems = []
+// 失败现场（审计 P0-4）：agent 的可见证据——截图 + DOM + console + meta，成功不写。
+const saveArtifacts = async (reason) => {
+  if (page === null) return
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-')
+  const dir = join(ROOT, 'runtime', 'smoke-workspace', `e2e-021rc2-${stamp}`)
+  try {
+    mkdirSync(dir, { recursive: true })
+    await page.screenshot({ path: join(dir, 'page.png'), fullPage: true }).catch(() => {})
+    writeFileSync(join(dir, 'page.html'), await page.content().catch(() => ''))
+    writeFileSync(join(dir, 'console.txt'), consoleProblems.join('\n'))
+    writeFileSync(join(dir, 'meta.json'), JSON.stringify({ reason, at: new Date().toISOString(), failures, consoleProblems }, null, 2))
+    console.error(`e2e-021rc2: 失败现场 ${dir}（page.png / page.html / console.txt / meta.json）`)
+  } catch (error) {
+    console.error(`e2e-021rc2: 现场保存失败：${error.message}`)
+  }
+}
 try {
-  const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } })
-  const consoleProblems = []
+  page = await browser.newPage({ viewport: { width: 1600, height: 1000 } })
+  consoleProblems = []
   // 只收**本仓插件面**的故障：JS 异常一律收（apply 抛错会把 UI 砖掉）；资源失败只收 URL 带
   // deep-research 的。宿主自身接口的既有 4xx 不作判据——对照实测（2026-10-19，stock web
   // profile 不挂本包）：`/api/changes.summary` 进会话后同样 404，计入本脚本即与本升级无关的假红。
@@ -307,7 +325,11 @@ try {
       ? '\ne2e-021rc2: ALL PASS（0.2.1-rc.2 上插件端到端兼容）'
       : `\ne2e-021rc2: ${String(failures.length)} FAILURE(S) —— ${failures.join(' / ')}`,
   )
+} catch (error) {
+  failures.push(`浏览器断言异常: ${error.message}`)
+  console.error(`  FAIL 浏览器断言异常: ${error.message}`)
 } finally {
+  if (failures.length > 0) await saveArtifacts('assertions')
   await browser.close().catch(() => {})
   instance.stop()
 }

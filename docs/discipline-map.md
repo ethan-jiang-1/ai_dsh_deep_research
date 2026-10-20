@@ -160,7 +160,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 |---|---|---|---|
 | `AGENTS.md` | 每轮必须遵守什么 | 情境化长流程、全档命令表 | 入口链、布局树、命令速查、纪律指针 |
 | `docs/` 合同面 | 系统**现在**是什么、怎么用 | 决策历史 | evaluation、discipline-map、guides 60–62 |
-| Skill（`.agents/skills/`） | 面对某类任务怎样调查、判断、验证 | 确定性 pass/fail | 换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 |
+| Skill（`.agents/skills/`） | 面对某类任务怎样调查、判断、验证 | 确定性 pass/fail | 换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷 |
 | 门禁与契约测试 | 一个可机械条件是否满足 | 意图与设计质量 | `scripts/verify/verify.mjs` + `tests/` |
 | Agent Note（`notes/`） | 为什么这样决定、放弃了什么 | 当前 API 的唯一说明 | proposed（将来）/ implemented（过去）|
 | 运行区记录 | 这次实际发生了什么 | 可复现的回归证据 | `drt_*` bundle、会话日志、仪表盘投影 |

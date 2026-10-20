@@ -125,6 +125,7 @@ async function boot() {
 }
 
 const failures = []
+const skipped = []
 const step = (ok, label, info = '') => {
   console.log(`  ${ok ? 'PASS' : 'FAIL'} ${label}${info ? `（${info}）` : ''}`)
   if (!ok) failures.push(label)
@@ -158,6 +159,31 @@ const anchorBound = boundSession !== null && expectedFace !== null
 
 const { child, token } = await boot()
 let page
+let browser = null
+let consoleErrors = []
+let artifactsSaved = null
+// 失败现场（审计 P0-4）：截图 + DOM + console + meta。agent 的"看见页面"最小证据；
+// 成功不写，失败/异常写 timestamped 目录，路径打印到 stderr。
+const saveArtifacts = async (reason, extra = {}) => {
+  if (page === null || page === undefined || artifactsSaved !== null) return artifactsSaved
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-')
+  const dir = join(ROOT, 'runtime', 'smoke-workspace', `client-load-${stamp}`)
+  try {
+    mkdirSync(dir, { recursive: true })
+    await page.screenshot({ path: join(dir, 'page.png'), fullPage: true }).catch(() => {})
+    writeFileSync(join(dir, 'page.html'), await page.content().catch(() => ''))
+    writeFileSync(join(dir, 'console.txt'), consoleErrors.join('\n'))
+    writeFileSync(join(dir, 'meta.json'), JSON.stringify({
+      reason, at: new Date().toISOString(), failures, skipped, extra, consoleErrors,
+    }, null, 2))
+    artifactsSaved = dir
+    console.error(`client-load-smoke: 失败现场 ${dir}（page.png / page.html / console.txt / meta.json）`)
+    return dir
+  } catch (error) {
+    console.error(`client-load-smoke: 现场保存失败：${error.message}`)
+    return null
+  }
+}
 try {
   // 造渐进面断言的前提：注册研究工作区 + 用 workspaceId 形态建会话（bundle 在该工作区根内）
   const base = `http://127.0.0.1:${PORT}`
@@ -170,9 +196,9 @@ try {
   step(typeof probeSessionId === 'string', '探针会话已建在 research-workspace（workspaceId 形态）', String(probeSessionId).slice(8, 16))
 
   const chromium = await loadChromium(ROOT)
-  const browser = await launchChromium(chromium)
+  browser = await launchChromium(chromium)
   page = await browser.newPage()
-  const consoleErrors = []
+  consoleErrors = []
   const urls = []
   page.on('response', (r) => urls.push(r.url()))
   page.on('console', (msg) => {
@@ -855,13 +881,25 @@ try {
     return false
   }
 
+  // 终稿端到端：优先主渐进面绑定的已交付会话（同一窗、已在手），再退冷会话候选。
+  // 旧实现只扫冷会话；盘侧窗口与 UI 窗不等时把"没找到目标"判成硬红（审计 P0-4）。
+  const finalCandidates = []
+  const boundFace = boundSession !== null ? fileFaceOf(boundSession.slug) : null
+  if (boundFace?.delivered === true && boundSession !== null) {
+    finalCandidates.push({ sessionId: boundSession.sessionId, title: boundSession.title, slug: boundSession.slug, source: 'bound' })
+  }
+  for (const c of deliveredSessions) {
+    if (!finalCandidates.some((x) => x.sessionId === c.sessionId)) finalCandidates.push({ ...c, source: 'cold' })
+  }
+  const trials = []
   let deliveredTarget = null
   let doorFound = false
-  for (const candidate of deliveredSessions) {
+  for (const candidate of finalCandidates) {
     const opened = await openSessionByRowKey(candidate.sessionId, candidate.title)
-    if (!opened) continue
+    if (!opened) { trials.push({ ...candidate, opened: false, statusTab: false, door: false }); continue }
     await wait(4_000)
-    if (!(await openStatusTab())) continue
+    const statusTab = await openStatusTab()
+    if (!statusTab) { trials.push({ ...candidate, opened: true, statusTab: false, door: false }); continue }
     await wait(5_000)
     // 交付门来自 journal 流（present 事件），有界等待（≤15s）
     const door = page.getByRole('button', { name: /读终稿/ }).first()
@@ -869,6 +907,7 @@ try {
       doorFound = await door.isVisible().catch(() => false)
       if (!doorFound) await wait(3_000)
     }
+    trials.push({ ...candidate, opened: true, statusTab: true, door: doorFound })
     if (doorFound) { deliveredTarget = candidate; break }
   }
   if (deliveredTarget !== null && doorFound) {
@@ -910,8 +949,11 @@ try {
     })
     step(scrollProbe.ok, '终稿页签自带滚动口（长正文可滚、不被裁）', scrollProbe.why)
   } else {
-    step(false, '终稿端到端：至少一条已交付会话在 UI 里显示 ⑤ 交付门',
-      `候选 ${deliveredSessions.length} 条：${deliveredSessions.map((c) => c.title).join(' ｜ ')}`)
+    // 前置未建立 ≠ 断言红：候选窗/时序不保证 UI 这一窗里有交付门。显式 SKIP 并让脚本
+    // exit 2（未跑），不制造假红；trials 给下一跳排查面。
+    skipped.push(`终稿端到端：无窗口内交付目标（${finalCandidates.length} 候选）`)
+    console.log(`  SKIP 终稿端到端：无窗口内交付目标（${finalCandidates.length} 候选）`)
+    if (trials.length > 0) console.log(`       trials=${JSON.stringify(trials)}`)
   }
 
   // ── 自测例库工作区（2026-10-13 用户委托自测轮 → 固化为常驻断言）：抛弃型工作区 + 12 形态
@@ -1024,16 +1066,22 @@ try {
     }
   }
 
-  await browser.close()
 } catch (error) {
   failures.push(`浏览器断言异常: ${error.message}`)
   console.error(`  FAIL 浏览器断言异常: ${error.message}`)
+  await saveArtifacts('exception', { error: error.message })
 } finally {
+  if (failures.length > 0) await saveArtifacts('assertions')
+  if (browser !== null) await browser.close().catch(() => {})
   child.kill('SIGTERM')
   await sleep(300)
 }
 
-console.log(failures.length === 0
-  ? '\nclient-load-smoke: ALL PASS（观察面 client 面真浏览器加载绿）'
-  : `\nclient-load-smoke: ${failures.length} FAILURE(S)\n${failures.join('\n')}`)
-process.exit(failures.length === 0 ? 0 : 1)
+if (failures.length === 0) {
+  console.log(skipped.length === 0
+    ? '\nclient-load-smoke: ALL PASS（观察面 client 面真浏览器加载绿）'
+    : `\nclient-load-smoke: ALL PASS + ${skipped.length} SKIP（未跑 ≠ 通过）：\n${skipped.join('\n')}`)
+} else {
+  console.log(`\nclient-load-smoke: ${failures.length} FAILURE(S)\n${failures.join('\n')}`)
+}
+process.exit(failures.length > 0 ? 1 : skipped.length > 0 ? 2 : 0)

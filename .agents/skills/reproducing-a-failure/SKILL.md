@@ -6,7 +6,9 @@ description: Use when a bug cannot be reproduced on demand, is intermittent or e
 # 复现找现场（间歇性/环境依赖缺陷的方法论）
 
 范本事故 = [LLM 流 MALFORMED 风暴 postmortem](../../../notes/postmortem/2026-10-13-llm-stream-malformed-storm.md)；
-可复用工具 = `runtime/smoke-workspace/llm-stream-forensics-2026-10-13/` 里的 `capture2.cjs`（透明 fetch tee）。
+可复用工具 = **本仓当前无 tracked 实现**；按 §2 的透明 fetch/connection tee 现场重建（一次性工具住
+`runtime/`，不要把 runtime 路径当长期资产）。2026-10-20 审计确认旧指针
+`runtime/smoke-workspace/llm-stream-forensics-2026-10-13/capture2.cjs` 已随运行区清理消失。
 核心律：**抓字节先于理论**——错误字符串是通用遮羞布，原始字节才说真话。
 
 ## 1. 阶梯负载定触发器（在全新受控对象上）

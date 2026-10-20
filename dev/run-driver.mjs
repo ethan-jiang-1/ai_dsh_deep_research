@@ -65,13 +65,15 @@ function channelState() {
 
 // ── 浏览器面验证（子进程 = scripts/probe/cdp-probe.mjs，真值的唯一实现）──────────
 
-function probeFace(url, expectFace) {
-  const r = spawnSync(process.execPath, [
+function probeFace(url, expectFace, screenshotPath = undefined) {
+  const args = [
     join(ROOT, 'scripts/probe/cdp-probe.mjs'),
     url,
     '--open-status',
     '--expect-face', expectFace,
-  ], { encoding: 'utf8', cwd: ROOT, timeout: 300_000 });
+  ];
+  if (screenshotPath !== undefined) args.push('--screenshot', screenshotPath);
+  const r = spawnSync(process.execPath, args, { encoding: 'utf8', cwd: ROOT, timeout: 300_000 });
   let verdict = null;
   try {
     verdict = JSON.parse(r.stdout);
@@ -112,13 +114,18 @@ if (sub === 'probe') {
     console.error(`run-driver probe: 找不到 ${given !== null ? `端口 ${given}` : '任何'}通道的横幅 URL（web.log = ${WEB_LOG}）——先 up`);
     process.exit(2);
   }
-  const { verdict, error } = probeFace(url, expectFace);
+  const shot = join(ROOT, 'runtime', 'smoke-workspace', 'run-driver-probe.png');
+  const { verdict, error } = probeFace(url, expectFace, shot);
   if (verdict === null) {
     console.error(`run-driver probe: ${error}`);
     process.exit(1);
   }
   const v = runDriverVerdict({ probe: verdict, expectFace, composing: false });
-  console.log(JSON.stringify({ url, ...v, statusPaneText: verdict.statusPaneText?.slice(0, 600) }, null, 2));
+  const payload = { url, ...v, statusPaneText: verdict.statusPaneText?.slice(0, 600), screenshot: verdict.screenshot ?? null };
+  const out = join(ROOT, 'runtime', 'smoke-workspace', 'run-driver-probe-verdict.json');
+  writeFileSync(out, JSON.stringify(payload, null, 2));
+  console.log(JSON.stringify(payload, null, 2));
+  console.error(`run-driver probe: 截图 ${verdict.screenshot ?? '（无）'}；verdict ${out}`);
   process.exit(v.exit);
 }
 
@@ -189,18 +196,23 @@ if (noProbe) {
   process.exit(2);
 }
 
-const { verdict, error } = probeFace(state.url, expectFace);
+const shot = join(ROOT, 'runtime', 'smoke-workspace', 'run-driver-status.png');
+const { verdict, error } = probeFace(state.url, expectFace, shot);
 if (verdict === null) {
   console.error(`run-driver: ${error}`);
   process.exit(1);
 }
 const v = runDriverVerdict({ probe: verdict, expectFace, composing: false });
 const submitted = v.exit === 0;
+const payload = { url: state.url, port: state.port, ...v, statusPaneText: verdict.statusPaneText?.slice(0, 600), screenshot: verdict.screenshot ?? null };
+const out = join(ROOT, 'runtime', 'smoke-workspace', 'run-driver-verdict.json');
+writeFileSync(out, JSON.stringify(payload, null, 2));
 console.log('──────────────────────────── 呈交块 ────────────────────────────');
 console.log(`通道 URL：${state.url}`);
 console.log(`浏览器面：${v.level}${submitted ? '' : `（${v.reason}）`}`);
+console.log(`可见证据：${verdict.screenshot ?? '（截图失败，见 verdict）'} ｜ 判定：${out}`);
 console.log('自检判据：GUI 里 preset 选单含四个 Deep Research 角色、会话右栏有「研究状态」页签');
 console.log('───────────────────────────────────────────────────────────────');
-console.log(JSON.stringify({ url: state.url, port: state.port, ...v, statusPaneText: verdict.statusPaneText?.slice(0, 600) }, null, 2));
+console.log(JSON.stringify(payload, null, 2));
 process.exit(submitted ? 0 : 1);
 }

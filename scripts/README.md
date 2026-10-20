@@ -16,8 +16,8 @@
 |---|---|---|
 | preset-smoke.mjs | L1 真挂载：boot 页模块表行（client 半 served）、roster、逐角色建会话、skills 隔离 | keyless（`DSH_SMOKE_REAL=1` 起真 DSH，无模型） |
 | release-smoke.mjs | L2 安装形状：pack → 干净 profile → plugin add → manifest/安装域 client 半断言 → 安装域冒烟 → 端口释放验证（进程卫生：超时预算 + 并发锁 + 退出确认） | keyless（`--install-only` 跳凭据） |
-| client-load-smoke.mjs | 观察面真浏览器装配、页签与渐进面对账（磁盘参考选择 = client-load-reference.mjs） | keyless（浏览器） |
-| e2e-021rc2.mjs | **升级端到端验收**（0.2.1-rc.2 起）：① 四个研究角色在角色列表里连续成组（内置 standard/ptc/minimal/creator 与 pack order 撞车的回归锁）② 右栏「研究状态」胶囊可点 + 页签体真数据 ③「研究配置」同上 ④ 本插件面零故障；真实实例走完用户路径，不靠人眼 | keyless（浏览器；须先 source dev/env.sh） |
+| client-load-smoke.mjs | 观察面真浏览器装配、页签与渐进面对账（磁盘参考选择 = client-load-reference.mjs）；失败留现场（png/html/console/meta），无窗口内交付目标 = exit 2 SKIP | keyless（浏览器） |
+| e2e-021rc2.mjs | **升级端到端验收**（0.2.1-rc.2 起）：① 四个研究角色在角色列表里连续成组（内置 standard/ptc/minimal/creator 与 pack order 撞车的回归锁）② 右栏「研究状态」胶囊可点 + 页签体真数据 ③「研究配置」同上 ④ 本插件面零故障；真实实例走完用户路径，不靠人眼 | keyless（浏览器；须先 source dev/env.sh；失败留现场） |
 | snapshot-replay-smoke.mjs | 场景 manifest 驱动的四角色组装面回放（persona/header 全序列/三处注入）+ 声明的渲染金标准 | keyless（RPC/解压子进程，无模型；须先 source dev/env.sh） |
 | gates-smoke.mjs | 门禁自测：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组 | keyless（git/node 子进程，无模型） |
 | client-hitl-smoke.mjs | 活标题触发与挂起显性化 | 真模型档 |
@@ -47,6 +47,7 @@
 | 件 | 证明什么 | 档位 |
 |---|---|---|
 | watch-run.mjs | 谓词化状态判定（HITL-PENDING / RUN-SETTLED 自报） | keyless（会话根缺省回退开发 home；显式 source 更稳） |
+| session-events.mjs | **会话事件尾部**（agent 的"刚才发生了什么"入口）：id/标题 → `[HH:MM:SS] type 摘要`；`--tail/--type/--grep/--json`；摘要与筛选 = lib/session-events-core.mjs | keyless（读会话日志；须先 source） |
 | run-dashboard.mjs | 只读 HTML 投影：多 run 扫描 + 步骤条（fail-soft；纯管线住 lib/run-dashboard-core.mjs，本件 = CLI 壳） | keyless |
 | stream-diagnostics.mjs | 流失败归因诊断（run-ops）：模型尝试时间线/失败密度/provider 与重试策略实名/工具调用与检索查询——出问题第一步跑它；`--recent N` 限制最近 N 个有模型活动的会话 | keyless（读会话日志） |
 | provider-error-stats.mjs | 上游流错误（回合被终结）的跨场分布投影（BUG-022 的"可数"面；判据与抽取 = lib/provider-errors.mjs） | keyless（须 source dev/env.sh） |

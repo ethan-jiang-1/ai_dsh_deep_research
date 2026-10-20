@@ -47,9 +47,9 @@
   DSH，否则研究手册不进上下文）+ 开发技能 `running-a-research-run`；
 - **交付收尾** → `reviewing-a-delivery`；**加/改角色** → `adding-a-research-role`；
   **加/改门禁** → `writing-a-gate`；**加/调节点轨道** → `changing-node-topology`；
-  **换 vendor pin** → `bumping-vendor-pin`。
+  **换 vendor pin** → `bumping-vendor-pin`；**间歇/环境依赖缺陷** → `reproducing-a-failure`。
 
-任务命中 `.agents/skills/` 某条 description（上列六个）时**先读该 `SKILL.md` 全文再动手**，不从
+任务命中 `.agents/skills/` 某条 description（上列七个）时**先读该 `SKILL.md` 全文再动手**，不从
 摘要猜流程。
 
 ### 1.2 六步闭环
@@ -108,7 +108,7 @@ node dev/sync-pack-workspace.mjs       # 生成物：把 research-workspace 正�
 source dev/env.sh                     # ⚠ 双 home + 裸 dsh 拦截（DSH_HOME=runtime/harness-home）；下列 L1/L2 必须先 source，否则脚本自拒 exit 2
 node scripts/smoke/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真挂载档（keyless：roster+逐角色建会话+skills 隔离；--profile <p> --no-patch 切安装域通道）
 cd packages/deep-research-pack && pnpm build   # pack 双半构建（tsc -b . + tsdown → lib/index.js + lib/client.js——观察面 client 面，D18）
-node --import tsx/esm scripts/smoke/client-load-smoke.mjs    # 观察面 client 面真浏览器加载（keyless：boot web + headless chromium——插件零失败 + 页签与渐进面硬断言；渐进面断言 = 磁盘侧绑定会话的真值对账）
+node --import tsx/esm scripts/smoke/client-load-smoke.mjs    # 观察面 client 面真浏览器加载（keyless：boot web + headless chromium——插件零失败 + 页签与渐进面硬断言；渐进面断言 = 磁盘侧绑定会话的真值对账；失败留 png/html/console/meta 现场；无窗口内交付目标 = exit 2 SKIP）
 node scripts/probe/cdp-probe.mjs '<gui-url>' --open-session '<标题>' --open-status --expect-face '<文本>' [--expect-no-leak '<文本>'] [--ask '<消息>']   # 交互探针（裸 CDP，借鉴 ai_dsh_loop_advisor）：Playwright actionability 被 DSH UI 挡死时的交互驱动工具——JS 派发点击/输入，JSON 判决；--ask = 完整产品环（输入→发送→等回复）。老会话可能要先在 GUI 里让它进侧栏近列表
 node scripts/smoke/release-smoke.mjs        # L2 真实安装形状：pack→干净 profile→plugin add→安装域冒烟；无模型调用，安装模式跳过模型就绪检查
 node scripts/smoke/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：四角色响应 + scout web_search 调用）
@@ -120,6 +120,7 @@ node scripts/run-ops/plan-card-stats.mjs   # 计划确认卡字数跨场分布�
 node scripts/run-ops/provider-error-stats.mjs   # 上游流错误（回合被终结）跨场分布——BUG-022 的"可数"面（keyless，须先 source）
 node dev/run-kickoff.mjs --port 3083 --token <横幅 token> --prompt-file <file>        # run 会话驱动（建会话+发 kickoff）
 node --import tsx/esm scripts/run-ops/watch-run.mjs <session-id>   # run 盯场（谓词化状态判定：事件形状，非字符串 grep——HITL-PENDING/RUN-SETTLED 时退出自报；grep 会误报 request/header 工具 schema）
+node --import tsx/esm scripts/run-ops/session-events.mjs <session-id|标题> --tail 30   # 会话事件尾部（agent 看"刚才发生了什么"：tool/call、tool/result、turn/end 摘要；--type/--grep/--json）
 node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <t>   # HITL 代答（代理模拟；默认逐题选推荐项——先盘侧谓词自拒：无真挂起不开浏览器；answerer 只在浏览器客户端，故用真浏览器）
 pnpm dsh <args…>                      # 机制基线 CLI（vendor/dsh 钉 tag 源码；等价 dev/env.sh 的 dsh 函数）
 node --import tsx/esm scripts/smoke/client-hitl-smoke.mjs   # 观察面活标题触发验证（真模型档：RPC followup 造挂起态 + 盘侧谓词 + 浏览器观察点）

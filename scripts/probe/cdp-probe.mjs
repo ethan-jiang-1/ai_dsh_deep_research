@@ -50,6 +50,7 @@ const expectNoLeak = opt('--expect-no-leak');
 const ask = opt('--ask');
 const sessionOverride = opt('--session');
 const keepBrowser = flag('--keep-browser');
+const screenshotPath = opt('--screenshot');
 // 会话根：显式 > 环境（source dev/env.sh 后 = 本仓 dev home）> 本仓缺省。用哪个根进 verdict
 // （不复刻 evidence-audit 的"外来 DSH_HOME 自拒"：那儿误审会判出假 CRITICAL；这儿错根只会
 //  报 session-log-not-found，可见、fail-loud，不静默给绿）。
@@ -103,7 +104,7 @@ if (handle.failed !== undefined) {
   process.exit(1);
 }
 verdict.booted = true;
-const { evaluate, consoleProblems, exceptions } = handle;
+const { evaluate, screenshot, consoleProblems, exceptions } = handle;
 verdict.consoleProblems = consoleProblems;
 verdict.exceptions = exceptions;
 
@@ -385,6 +386,14 @@ try {
 } finally {
   verdict.consoleProblems = consoleProblems.slice(0, 10);
   verdict.exceptions = exceptions.slice(0, 10);
+  // 截图必须在 settle 前：agent 的可见证据（失败也留）——路径由调用方给，父目录自动建。
+  if (screenshotPath !== undefined) {
+    try {
+      verdict.screenshot = (await screenshot(screenshotPath, { fullPage: true })).path;
+    } catch (error) {
+      verdict.screenshotError = String(error?.message ?? error).slice(0, 300);
+    }
+  }
   if (!keepBrowser) await handle.settle();
 }
 
