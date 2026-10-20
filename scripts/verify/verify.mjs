@@ -149,7 +149,7 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
 
 // ── md-links（所有 tracked .md 的相对链接必须可解析且目标被 git 跟踪；git ls-files 驱动——基础整治 C10）──
 // 原版只扫具名目录（docs/notes/…），根目录其余 tracked .md 逃检——本单子文件初稿 31 条死链
-// 同刻全绿即实证。覆盖面 = tracked 集合（新文件 git add 后纳入）；反引号裸路径不检（设计）。
+// 同刻全绿即实证。覆盖面 = tracked 集合（未 staged 的新文件扫不到——pre-commit 在 staged 后兜住）；反引号裸路径不检（设计）。
 // BUG-016 加宽（2026-10-07）：链接目标**盘上存在但未被 git 跟踪**同样红——旧判据查盘上
 // 存在性，绿色依赖机器状态（本机有归档产物就绿，fresh clone 即红，_done/_reference 摘要
 // 链接 research-workspace/archive/ 实证）。链接语法 = 仓内可解析承诺；引用运行区/本机数据
@@ -268,11 +268,13 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
 //    切片：活面（notes/archived/ 之外的 tracked .md）以 Markdown 链接引用
 //    notes/archived/<具体 Note> 前，必须在 scripts/archived-note-pointers.json 登记
 //    （历史指针类，逐条带理由——登记动作 = 活面显式承认"我在引用冻结件"；被引用还想归档
-//    的 Note 由此在对账面上现形，进门条件 2 的语义判断保留给人）。红 = ①未登记的
+//    的 Note 由此在对账面上现形，归档进门条件的语义判断（「不再可能指导未来变更」）保留给人）。红 = ①未登记的
 //    活面→archived 链接；②登记条目失真（源文件已无此链接）；③登记条目失存（源/目标不在
 //    盘上、未跟踪、目标不在 archived）；④archived 语料非空但活面扫描集为空（范围收窄
 //    防空）。notes/archived/README.md 索引导航豁免。反引号裸路径不检（与 md-links 同边界
-//    ——wide 盘点另行决定）。──
+//    ——wide 盘点另行决定）。已知边界：参考式定义 / 跨行链接 / 代码围栏内 / HTML href
+//    四形态逃逸（收窄 = 独立 writing-a-gate 轮，启动条件 = 出现真实的该形态引用）；带
+//    title 链接本门禁可捕（正则容忍尾注 title）而 md-links 失明（其正则遇空格即弃）。──
 {
   const gate = 'archived-note-pointer';
   const regPath = join(ROOT, 'scripts', 'archived-note-pointers.json');
@@ -356,6 +358,9 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
 // 即为它有效的第一份证据）。计数有正本（gates 数组 / evaluation 台账 / ls），散文里的副本
 // 只会腐烂——一律改成"查正本"。
 // 范围：live 文件（排除 notes/ 历史层与 vendor/）。防空语料：0 个文件被检查 → 红。
+// 已知边界：只检阿拉伯数字 + 四个名词（门禁/tests/断言/条源面），中文数字与枚举不检
+// （2026-10-20 审计实证：十二件/9 环节/三条/六个 均曾漂移）；关键枚举改指正本，语义面
+// 由 docs-consistency 契约承接。
 {
   const gate = 'count-free';
   // 枚举四件套收口（形态正本 = trackedFiles 助手头注）；范围与防空语料措辞是本门禁自己的。
@@ -1622,10 +1627,11 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
     fail(gate, 'AGENTS.md 缺 §入口链 标题——入口链定义的家');
 }
 
-// ── backlog-liveness (required shelves, metadata, and indexes). ──
-// Structural contract only; it does not judge issue quality or decision correctness. Active records
-// carry current metadata; archived legacy evidence bodies stay untouched. Empty shelves are legal,
-// while missing/untracked institutional files fail loudly instead of silently shrinking the scope.
+// ── backlog-liveness（backlog 各池的结构与生命周期合同——规则正本 = _backlog/README.md，
+//    实现 = scripts/lib/backlog-liveness.mjs）。只证结构：不证明结论、证据质量或实施授权；
+//    活跃卡带当前 metadata，归档正文保留不追补；空池合法，制度文件缺席/未跟踪即红（防空）。
+//    已知边界：acceptance-presence 族（修复就绪缺 `## 修复判据`、结论倾向「现在做」缺
+//    `## 验收标准`）under-pressure 未落地——补齐时同 diff 扩 backlog-liveness.mjs。──
 {
   const gate = 'backlog-liveness';
   const r = spawnSync('git', ['ls-files', '-z', '_backlog/'], { cwd: ROOT, encoding: 'utf8' });
