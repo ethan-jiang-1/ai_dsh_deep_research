@@ -47,9 +47,9 @@
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
-| watch-run.mjs | 谓词化状态判定（HITL-PENDING / RUN-SETTLED 自报） | keyless（会话根缺省回退开发 home；显式 source 更稳） |
-| session-events.mjs | **会话事件尾部**（agent 的"刚才发生了什么"入口）：id/标题 → `[HH:MM:SS] type 摘要`；`--tail/--type/--grep/--json`；摘要与筛选 = lib/session-events-core.mjs | keyless（读会话日志；须先 source） |
-| run-dashboard.mjs | 只读 HTML 投影：多 run 扫描 + 步骤条（fail-soft；纯管线住 lib/run-dashboard-core.mjs，本件 = CLI 壳） | keyless |
+| watch-run.mjs | 谓词化状态判定（HITL-PENDING / RUN-SETTLED 自报）；teammate 会话（首事件 origin=subagent）显性提示「hitlPending 不构成停靠信号」；TIMEOUT 文案带归档提示（bundle 已归档 → 盯旧会话永不落定）；`--group <子串>` 换组盯场（缺省 research-workspace） | keyless（会话根缺省回退开发 home；显式 source 更稳） |
+| session-events.mjs | **会话事件尾部**（agent 的"刚才发生了什么"入口）：id/标题 → `[HH:MM:SS] type 摘要`；`--tail/--type/--grep/--json/--group`（组过滤盲区逃生口——冒烟/自测组可读，缺省 research-workspace）；teammate 标题 strip `<system-reminder>` 前缀；摘要与筛选 = lib/session-events-core.mjs | keyless（读会话日志；须先 source） |
+| run-dashboard.mjs | 只读 HTML 投影：多 run 扫描 + 步骤条 + 归档场 stdout 标注（fail-soft；纯管线住 lib/run-dashboard-core.mjs，本件 = CLI 壳） | keyless |
 | stream-diagnostics.mjs | 流失败归因诊断（run-ops）：模型尝试时间线/失败密度/provider 与重试策略实名/工具调用与检索查询——出问题第一步跑它；`--recent N` 限制最近 N 个有模型活动的会话 | keyless（读会话日志） |
 | provider-error-stats.mjs | 上游流错误（回合被终结）的跨场分布投影（BUG-022 的"可数"面；判据与抽取 = lib/provider-errors.mjs） | keyless（须 source dev/env.sh） |
 | plan-card-stats.mjs | 计划确认卡字数的跨场分布投影（升硬门前置 = 连续多场达标；口径与识别 = lib/plan-card.mjs，与 node-gate 门① 同源） | keyless（须 source dev/env.sh） |
