@@ -6,5 +6,6 @@
 |---|---|
 | harness-home/ | 开发 DSH home（`dev/env.sh` 的 `DSH_HOME`）：会话、凭据、插件安装（崩溃半径隔离；日用 ~/.dsh 不动） |
 | smoke-workspace/ | 冒烟与 boot 的运行产物区：日志（*.log）、探针留档（entry-chain-probe-*.md）、release-pack/、run-pack/、npm-cache/（工具态重定向）、dashboard.html 投影——全部非 canonical；regression-process-guard.mjs = 被走查 Note 引用的一次性原型，非正本 |
+| scenes/ | scene-capture 场景包区：每包五件套 page.png / page.html / body.txt / console.txt / meta.json（token 脱敏；抓取与读取入口 = scripts/run-ops/scene-capture.mjs，读取判据 = scripts/lib/scene-pack.mjs） |
 
 runtime/ 根级散件（kickoff-*.md、opnote-*.md、一次性诊断 .mjs 等）= run 驱动留档，同属 gitignored 运行区，随需清理、无索引义务。
