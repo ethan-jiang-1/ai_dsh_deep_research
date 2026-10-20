@@ -264,7 +264,7 @@ export const CASES = [
     const p = join(dir, 'scripts', 'archived-note-pointers.json');
     const book = JSON.parse(readFileSync(p, 'utf8'));
     // 按 (source, target) 定位而非下标——首条目将来被清掉/移位时案例语义不漂（对抗自审 S4）
-    const entry = book.pointers.find((e) => e.source === 'docs/00-index.md'
+    const entry = book.pointers.find((e) => e.source === 'docs/decisions.md'
       && e.target === 'notes/archived/2026-09-24-ui-observability-surfaces.md');
     if (!entry) throw new Error('登记簿找不到定位条目（00-index → ui-observability-surfaces）——案例失效');
     entry.target = 'notes/archived/2099-01-01-nonexistent-probe.md';
@@ -287,6 +287,11 @@ export const CASES = [
   { id: 'backlog-issue-mirror-drift', gate: 'backlog-liveness', mutate: backlogIssue((text) => text.replace('> 状态：推敲中｜', '> 状态：等人拍板｜')) },
   { id: 'backlog-bug-enum-invalid', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-998-probe.md', '---\nstatus: 修复中\nseverity: P1\nopened: 2099-01-01\n---\n\n# Probe\n> 严重级别：P1｜发现：2099-01-01｜状态：修复中\n') },
   // 活跃索引幽灵 / 归档退出值（2026-10-20 P0-3 扩）：两形态各一条。
+  // `_` 前缀真实路径也受 doc-budgets（2026-10-20 P1）：给 `_backlog/AGENTS.md` 追加超预算行。
+  { id: 'doc-budgets-underscore-file', gate: 'doc-budgets', mutate: (dir) => {
+    const p = join(dir, '_backlog', 'AGENTS.md');
+    writeFileSync(p, readFileSync(p, 'utf8') + '\n'.repeat(60));
+  } },
   { id: 'backlog-active-index-ghost', gate: 'backlog-liveness', mutate: (dir) => {
     const p = join(dir, '_backlog', 'issues', 'README.md');
     const text = readFileSync(p, 'utf8');

@@ -50,7 +50,7 @@
 | `role-list-sync` | 角色清单单一事实源 = 盘上 presets/；代码（scripts/tests/dev 的 .mjs/.sh）里角色清单字面量（单行 ≥3 角色名 / `[...]` 块 ≥3 角色名字符串）即红——检测名从盘上现取 | [基础整治 Note](../notes/archived/2026-09-24-foundation-remediation.md) |
 | `gate-ledger-sync` | 本表门禁名集合 = verify 脚本 gates 数组（登记与实现不漂移） | [基础整治 Note](../notes/archived/2026-09-24-foundation-remediation.md) |
 | `entry-chain` | 根入口链与子树指令门牌成员在场（六份子树 AGENTS.md 在成员清单内），AGENTS 的入口链标题存在；链接解析归 md-links | gates-smoke `entry-chain-no-title` 注入案例 + [review-driven-hardening Note](../notes/implemented/2026-09-24-review-driven-hardening.md)；成员扩围反证（移除 `tests/AGENTS.md`/`_backlog/AGENTS.md` 看红→还原绿）= 2026-10-12 卫生轮实录 |
-| `doc-budgets` | 常驻文档预算：[scripts/doc-budgets.json](../scripts/doc-budgets.json) 拥有上限（登记项必须存在且不超限；仓内新增 AGENTS.md 必须登记——缺登记即红）。行数度量（CJK 词数不可靠）；超限处置序 = 下放 > 压缩 > 升顶（升顶须同变更登记理由）；AGENTS.md 枚举 = tracked-only | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) + [审计 P3 收尾轮](../notes/implemented/2026-10-07-audit-p3-closure-round.md) |
+| `doc-budgets` | 常驻文档预算：[scripts/doc-budgets.json](../scripts/doc-budgets.json) 拥有上限（登记项必须存在且不超限；仓内新增 AGENTS.md 必须登记——缺登记即红）。行数度量（CJK 词数不可靠）；超限处置序 = 下放 > 压缩 > 升顶（升顶须同变更登记理由）；AGENTS.md 枚举 = tracked-only；`_` 前缀的真实路径（`_backlog/AGENTS.md`）同样受预算（metadata 键才是例外） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) + [审计 P3 收尾轮](../notes/implemented/2026-10-07-audit-p3-closure-round.md) |
 | `align-ledger` | [alignment-ledger.json](alignment-ledger.json) 机读对账（↔ vendor/dsh ↔ 本仓落点）：source 在 vendor/dsh 存在（换 pin 源移位即红 = 重审触发器）· adopted/adapted 的 landing 存在 · na 必须给理由 + 活性依据且如实分两层——①机械缺席断言（路径 `absent` / glob `globAbsent`，仅限"目录/文件树缺席本身就是信号"形态，断言对象不得是 vendor 源路径本身——装饰性断言 = 换写法的免检区）②能力面缺席用 `reReviewOn` 声明式重估触发条件（一条 glob 表达不了"没有实现能力 X"，不假装机械覆盖）；**两者皆无即红**（"不适用"是当时不适用，不是永久免检区） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) + na 活性二轮复核 = [推敲卡](../_backlog/_archived/settled_issues/2026-10-08-sdlc-reference-absorption.md)；gates-smoke 案例常驻 |
 | `discipline-state-vocab` | [discipline-map.md](discipline-map.md) 的**三态值域**：表头写着「每行三态」（照搬 / 带证据适配 / 不适用），本门禁按**表头定位状态列**（表头含「状态」的那列），逐数据行验首词属于闭集，越界即红。不按固定列序判——本文档并存 10 张三列状态表与 2 张两列处置表（后者第二列出现「已具备」属正常记述）。防空语料：解析出 0 张状态表、或状态行 < 60 即红 | 反证 = 2026-10-19 首次运行即红，抓出 2 行 `已具备`（`证据匹配面`/`六误区清单`）→ 改 `照搬`/`带证据适配` 后绿；来历 = [语义漂移卡](../_backlog/_archived/settled_issues/2026-10-19-discipline-map-semantic-drift.md)（「已具备」暗示免于重校，「带证据适配」要求每次换 pin 重验，混用 = 悄悄签免检）；gates-smoke 案例常驻 |
 | `discipline-na-trigger` | [discipline-map.md](discipline-map.md) 人读表的**免检区闭合**：状态列真值以「不适用」开头的每行，必须含可判定的重估触发词（重估/失效条件/复活条件/引入条件/触发条件）。**按状态列真值判、不做全文正则**——正文含"不适用"字样但判定为"带证据适配"的行不得误红。防空语料：解析出 0 行或 na 行 < 10 即红 | 反证 = 2026-10-19 注入回归：把一行状态列还原成裸 `不适用` → 该门禁红、还原后绿；来历 = [vendor-pin-bump-021rc2](../notes/implemented/2026-10-19-vendor-pin-bump-021rc2.md)（§维护规则 承诺的"由门禁复核"原未兑现——`align-ledger` 只读 JSON，从不读人读表）；gates-smoke 案例常驻 |
@@ -62,7 +62,7 @@
 | `client-effect-wrap` | 驾驶舱 slot/页签/活标题注册全量包 `scoped.effect`（registrations are effects 的 dispose 即撤销贡献——零裸注册）+ 防空语料（`src/client/index.ts` 零注册调用即红）；层边界 = 只查 index.ts 登记装配位 | [test-strategy 采纳 Note](../notes/implemented/2026-10-04-test-strategy-adoption.md) |
 | `proposed-pointer-live` | live 文件（tracked，**排除 `notes/` 历史层**与 vendor/）里指向 `notes/proposed/<x>.md` 的**具体指针**必须存在——`md-links`/`md-anchors` 只扫 `.md` 的链接语法，非 `.md` 注释里的指针是它们的盲区（preset 头注还随包分发）。防空语料：0 个 live 文件、或 0 个指针被检查即红（零个具体 RFC 指针合法）；tracked 文件缺席/不可读即红 + `quotepath=false` | [信噪整治 RFC](../notes/implemented/2026-09-26-signal-to-noise-remediation.md) + [lsfiles RFC](../notes/implemented/2026-10-07-lsfiles-gate-coverage-sweep.md) |
 | `pin-agreement` | live 文件里的**钉身份复述**必须与 submodule 实际状态一致：每个 40 位 hex 串 = submodule HEAD；每个 `dsh-v*` tag = submodule tag（同行带外部归属标记「语料/参考仓/company/外部材料」的豁免——是别的仓的 pin）；notes/ 历史层豁免，活动指令层受检；录制语料层（`snapshots/replay/` 与 `tests/fixtures/run-state/`）豁免——录制流的 vendor 构建戳是挥发性身份、场景声明 codeAnchor 是录制时的本仓 commit，均非本仓钉声明。防空语料：0 个 hex 或 0 个 tag 被检查即红；tracked 文件盘上缺席或不可读即红 | [信噪比整治 RFC](../notes/implemented/2026-09-26-signal-to-noise-remediation.md)；扩围与收口 = [fresh-agent-doc-audit](../notes/implemented/2026-10-04-fresh-agent-doc-audit.md) / [runtime-scripts Note](../notes/implemented/2026-10-07-runtime-scripts-layout.md) / [snapshots 采纳 Note](../notes/implemented/2026-10-09-snapshots-adoption.md) |
-| `count-free` | live 文件不写硬编码计数（`<数> 门禁` / `<数> tests` / `<数> 断言` / `<数> 条源面`）——计数有正本（gates 数组 / 本表 §L0 / `ls`），散文副本必腐；防空语料：0 个 live 文件即红；tracked 文件缺席/不可读即红 + `quotepath=false` | [信噪比整治 RFC](../notes/implemented/2026-09-26-signal-to-noise-remediation.md) + [lsfiles RFC](../notes/implemented/2026-10-07-lsfiles-gate-coverage-sweep.md) |
+| `count-free` | live 文件不写硬编码计数（`<数> 门禁` / `<数> tests` / `<数> 断言` / `<数> 条源面`）——计数有正本（gates 数组 / 本表 §L0 / `ls`），散文副本必腐；**已知边界**：只检阿拉伯数字 + 四个名词（门禁/tests/断言/条源面），中文数字与枚举不检（2026-10-20 审计实证：十二件/9 环节/三条/六个均曾漂移；关键枚举改指正本 + `docs-consistency` 契约承接）；防空语料：0 个 live 文件即红；tracked 文件缺席/不可读即红 + `quotepath=false` | [信噪比整治 RFC](../notes/implemented/2026-09-26-signal-to-noise-remediation.md) + [lsfiles RFC](../notes/implemented/2026-10-07-lsfiles-gate-coverage-sweep.md) |
 | `port-exclusive` | 端口独占（scripts/AGENTS「端口与临时路径自持有」的机械面）：tracked scripts/ + dev/ 的 .mjs/.sh 端口缺省声明（`port =`/`PORT=` 赋值行；注释行用法示例不认领）同一端口号至多一文件认领；引用 `DSH_RUN_PORT` 的声明 = run 通道连接方/通道本身（hitl-answer/run-kickoff/boot-run），豁免；防空语料：0 个声明被检查即红 | [审计 P3 收尾轮 Note](../notes/implemented/2026-10-07-audit-p3-closure-round.md) |
 | `hooks-active` | pre-commit 激活态：`git config core.hooksPath` 指向 dev/hooks（dev/env.sh 幂等设置，相对/绝对都认）——fresh clone 未 source env.sh = 提交零门禁（红 commit 溜进历史有 postmortem 前科），在手跑 verify 时 fail-loud 并给出修正入口；GIT_* 剥离（子进程纪律） | [审计 P3 收尾轮 Note](../notes/implemented/2026-10-07-audit-p3-closure-round.md) |
 | `doc-now-only` | live 文档只写 now，不写变更史：禁「已销账 / 修订 → / 曾用 / 首版…已由…替换」（`docs/AGENTS.md` 自身豁免——它是这条规则的家，必须能举例禁用词；含『doc-now-only』字样的自我引用行另豁免）；防空语料：0 个 live 文档即红；tracked 文档缺席/不可读即红 + `quotepath=false` | [信噪比整治 RFC](../notes/implemented/2026-09-26-signal-to-noise-remediation.md) + [lsfiles RFC](../notes/implemented/2026-10-07-lsfiles-gate-coverage-sweep.md) |
@@ -99,6 +99,22 @@
   3. **证据可追溯载体存在**：最终报告的关键结论 → 来源的追溯链有明确文件载体与格式约定（verify the world 的领域版：结论抽查必须能落到来源文件）；
   4. **信噪比策略显式**：对"搜索结果信噪比差"的处置有显式机制（来源质量分级 / 多源交叉 / 弃用判据），写进角色方法论，不能只靠模型自觉。
 - **何时跑**：方法论/preset 内容改动时；框架里程碑必跑。
+
+### 证据谓词与机械强度（开发仓观察面，非模型可见）
+
+> 2026-10-20 从研究手册移出：这两段只服务开发仓的仪表盘/审计工具链，研究角色（含部署侧）
+> 不需要；手册只留角色必须遵守的证据契约。
+
+**有效证据谓词（观察面对账，分层）**：run 仪表盘（run-dashboard）按同一契约渲染——**硬五字段**
+（source_url / retrieved_at / quality / found_by / supports）全齐才算有效证据，缺任一标无效
+（不计入 topic × evidence 矩阵）；**软二字段**（source_tier / publisher）缺失不否决有效性，
+标"未分级"（旧 run 的存量证据按此显示，不回填——run bundle 是交付记录，不改历史）；谓词正本 =
+本节，tests/evaluation-contract.test.mjs 对账。
+
+**机械强度诚实记账**：契约测试核七字段在场与执行者副本对账；仪表盘按上文谓词投影。
+**evidence-audit 溯源审计**核 `source_url` 的成功抓取、摘录文本对 web-only 语料的覆盖率与
+final 引用链，结果落 bundle 的 audit.md。它不校验日期校准或摘录版式、分段、逐格结构；这些语义
+与结构约束由 critic 狩猎，不在仓级结构门中。
 
 ### L4 交付面（真模型端到端 — 唯一证明"研究做得好"）
 

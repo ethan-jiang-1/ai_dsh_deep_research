@@ -379,7 +379,9 @@ function gitOnce(args) {
     let manifest = {};
     try { manifest = JSON.parse(readFileSync(manifestPath, 'utf8')); }
     catch (error) { fail(gate, `doc-budgets.json 不是合法 JSON：${String(error).slice(0, 80)}`); }
-    const budgeted = Object.keys(manifest).filter((k) => !k.startsWith('_'));
+    // `_` 前缀默认是 manifest 元数据键（_note/_raises）；但 `_backlog/AGENTS.md` 是真实路径，
+    // 也必须受预算（2026-10-20 审计 P1：旧过滤把它的 48 行预算静默跳过）。
+    const budgeted = Object.keys(manifest).filter((k) => !k.startsWith('_') || k.endsWith('.md'));
     for (const rel of budgeted) {
       const f = join(ROOT, rel);
       if (!existsSync(f)) { fail(gate, `${rel}: 已登记预算但文件缺席`); continue; }

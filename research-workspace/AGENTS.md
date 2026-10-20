@@ -27,7 +27,7 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
   final/               版本记账：v1.md = 索引与关键事实回溯；证据扩张 rerun 才落 v2.md（lead）——
                        **只放版本记账，不放当前版全文**
   final.md             当前版权威副本 = **run 根（bundle 顶层）的 final.md**，[来源:] 相对 run 根解析；
-                       **不放 final/ 里**（曾被误用作全文位：位置漂移且审计静默跳过——正本钉死在 run 根）
+                       **不放 final/ 里**（位置漂移会让审计静默跳过——正本钉死在 run 根）
   journal.md           运行纪要（追加式，最新在上；所有角色可写；跨 rerun 累积血统）
 archive/drt_<slug>/    已交付 run 归档位（交付后操作侧移入，工作区根只留活跃 run；仍可被审计投影）
 templates/run/         新 run bundle 的起点模板（只读，不直接写）
@@ -93,17 +93,6 @@ review 审查时间、口径截至）**不得凭时间感直写**（角色会话
 独立性 = **不同注册域，且非同一通稿/转载链**（判定归 critic：同源两票不算两票）。单源
 结论不硬禁（快速事实核查型 run 可能天然单源），但必须显式标注`单源——待破`并在 review.md
 说明风险——**显性化而不是静默**。
-
-**有效证据谓词（观察面对账，分层；开发仓操作侧）**：run 仪表盘（run-dashboard）按同一契约
-渲染——**硬五字段**（source_url / retrieved_at / quality / found_by / supports）全齐才算
-有效证据，缺任一标无效（不计入 topic × evidence 矩阵）；**软二字段**（source_tier /
-publisher）缺失不否决有效性，标"未分级"（旧 run 的存量证据按此显示，不回填——run bundle
-是交付记录，不改历史）；谓词正本 = 本节，tests/evaluation-contract.test.mjs 对账。
-
-**机械强度诚实记账**（开发仓操作侧工具链，部署侧由人审承担）：契约测试核七字段在场与执行者副本对账；
-仪表盘按上文谓词投影。**evidence-audit 溯源审计**核 `source_url` 的成功抓取、摘录文本对 web-only
-语料的覆盖率与 final 引用链，结果落 bundle 的 audit.md。它不校验日期校准或摘录版式、分段、逐格结构；
-这些语义与结构约束由 critic 狩猎，不在仓级结构门中。
 
 ## 交付物三态
 
