@@ -29,7 +29,7 @@
 
 ## 恢复优先级
 
-断点续跑只认 run bundle 的文件事实：重跑 [boot-run](../../dev/boot-run.sh) → 新开 lead 会话 → "继续 <slug>"——lead 只凭 bundle 重建上下文，不依赖聊天记忆。session log 佐证执行事件，但不充当研究事实；观察面与任务板不参与恢复判定（操作步骤 = [Run 指南 §5](../guides/61-run-playbook.md)）。
+断点续跑只认 run bundle 的文件事实：重跑 [run-driver](../../dev/run-driver.mjs)（内部调 boot-run）→ 新开 lead 会话 → "继续 <slug>"——lead 只凭 bundle 重建上下文，不依赖聊天记忆。session log 佐证执行事件，但不充当研究事实；观察面与任务板不参与恢复判定（操作步骤 = [Run 指南 §5](../guides/61-run-playbook.md)）。
 
 ## 交付判定
 

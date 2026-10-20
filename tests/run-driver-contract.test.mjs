@@ -79,3 +79,34 @@ test('驱动入口不绕过漂移门：boot 必须经 dev/boot-run.sh，禁止�
   assert.ok(!/--profile\s+['"]?research/.test(src.replace(/^.*boot-run\.sh.*$/gm, '')),
     'run-driver 直起 research profile——绕过漂移门（guides/61 §0.1）');
 });
+
+// 2026-10-20 审计 P0-1：README / 00-index / project-map / guides/61 各写第一条启动动作，
+// 其中三处仍指 boot-run（前台起、不验浏览器面、不打印呈交块），与 00-index 的 run-driver
+// 首动作分裂。这里钉"首动作一致"：不是禁止 boot-run（它是底层），而是禁止它出现在
+// "用户问怎么启动"的第一条动作位上。
+test('启动首动作一致：README / 00-index / project-map / 61 第一条动作都是 run-driver up', () => {
+  const lineOf = (rel, needle) => {
+    const line = read(rel).split('\n').find((l) => l.includes(needle));
+    assert.ok(line !== undefined, `${rel} 找不到含「${needle}」的行——首动作位缺席`);
+    return line;
+  };
+  const first = [
+    ['README.md', '跑一次研究'],
+    ['docs/00-index.md', '启动这个 DSH 插件'],
+    ['docs/project-map.md', '| 启动一次研究 |'],
+    ['docs/guides/61-run-playbook.md', '- 启动：'],
+  ];
+  for (const [rel, needle] of first) {
+    const line = lineOf(rel, needle);
+    assert.ok(
+      line.includes('run-driver.mjs up'),
+      `${rel} 的启动首动作不是 run-driver.mjs up：${line.slice(0, 120)}——boot-run 只作底层/前台备选`,
+    );
+  }
+  // guides/61 §0 的"启动"行不得再以 boot-run 打头（否则同一页先说 boot-run、后说 run-driver）
+  const guide = read('docs/guides/61-run-playbook.md');
+  const runStart = guide.indexOf('## 0. 开跑');
+  const section = guide.slice(runStart, guide.indexOf('\n## 1.', runStart));
+  assert.ok(!/\n- 启动：`bash dev\/boot-run\.sh`/.test(section),
+    'guides/61 §0 仍把 boot-run 写成启动首动作——应先 run-driver，boot-run 只作底层说明');
+});

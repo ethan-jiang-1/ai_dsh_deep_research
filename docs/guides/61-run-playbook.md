@@ -11,16 +11,17 @@
   `DEEPSEEK_API_KEY`（见 [AGENTS.md §密钥](../../AGENTS.md)；boot 本身 keyless）。
   启动横幅出来后自查一步：`grep -q DEEPSEEK runtime/harness-home/.credentials.yaml`——
   boot 不查凭据，缺了要到 lead 首次调模型才炸（启动成功 ≠ 能跑研究）；
-- 启动：`bash dev/boot-run.sh`（幂等：组合在位即直接 boot）→ 等横幅
-  `http://127.0.0.1:<port>/?token=…` 用浏览器打开。**端口 = `DSH_RUN_PORT`，缺省 3083**
+- 启动：`node dev/run-driver.mjs up`（起/复用通道 → 验浏览器面 → 打印呈交块；内部调
+  `bash dev/boot-run.sh` 做自检/组合/漂移门）→ 用浏览器打开呈交块里的
+  `http://127.0.0.1:<port>/?token=…`。**端口 = `DSH_RUN_PORT`，缺省 3083**
   （3080 = 本仓开发 GUI、3081 = 已让渡外部项目，均勿占；换端口：
-  `DSH_RUN_PORT=<空闲端口> bash dev/boot-run.sh`）。端口已被占时 boot-run 会 fail-loud 并给
+  `DSH_RUN_PORT=<空闲端口> node dev/run-driver.mjs up`）。端口已被占时 boot-run 会 fail-loud 并给
   补救，**先看占用者是谁**：若是本仓在飞的 run 通道 → **别另起**，用它（URL/token 见启动横幅或
   `runtime/smoke-workspace/web.log`）；不是 → 换端口，或确认后停掉它（**别盲杀**：在飞会话的
-  日志尾部可能丢失——BUG-007 卡）；
+  日志尾部可能丢失——BUG-007 卡）。想守在前台看日志 = `bash dev/boot-run.sh`（底层启动面）；
 - **启动请求的呈交纪律（2026-09-30 用户定调）**：用户让"启动/起 web" = 代理**先自己跑通再交 URL**——
-  这套序已固化成一条命令：**`node dev/run-driver.mjs up`**（起/复用通道 → 验浏览器面 → 打印呈交块；
-  exit 0 = 可呈交 / 1 = 红不得呈交 / 2 = 未跑）。三步序如下，红了按序修后重跑同一条：
+  run-driver 就是这条纪律的可复跑入口（exit 0 = 可呈交 / 1 = 红不得呈交 / 2 = 未跑）。三步序如下，
+  红了按序修后重跑同一条：
   ① boot-run 全序（自检 → 组合检查/必要补装 → 漂移检测）红了当场修——漂移 = 按脚本处方重建
   profile；vendor 产物缺失 = `bash dev/vendor-build.sh`；
   ② boot 出横幅后验浏览器面：探针断言无 "Failed to load plugins" / 零 console 错误
@@ -173,7 +174,7 @@ BUG-020）。
 
 四类运行状态（run bundle / session log / goal·任务板 / 观察面）的 canonical 合同与恢复优先级正本 = [design/50](../design/50-agent-loop-and-state.md)——本节只载人的操作步骤。
 
-- 任何时候可关页面/停机。恢复 = 重跑 `boot-run.sh` → 新开 lead 会话说
+- 任何时候可关页面/停机。恢复 = 重跑 `node dev/run-driver.mjs up` → 新开 lead 会话说
   "继续 <slug> 这个 run"——lead 只凭 `drt_<slug>/` 的文件事实重建上下文，
   不依赖聊天记忆；
 - **通道还活着、只是回合停摆**（模型空响应 / 厂商流错误打断，会话未终局化）→ **不必新开**：
@@ -183,7 +184,7 @@ BUG-020）。
   → 走上面"重跑 + 新会话"那条路），2 = 用法/前置错（续跑模式需先 `source dev/env.sh`）；
 - **通道跑久后 UI 可能"零会话行"**（实测约 5 小时后：侧栏组能展开成 `aria-expanded=true`，却渲染不出任何
   `session:` 行；代答于是报"侧栏没有目标会话行"）——**不是**归档、也不是回合终局化。处置 = 重跑
-  `boot-run.sh` + **新会话**；`hitl-answer` 自 2026-10-16 起在报错里给「错因判据 = aging」这一行
+  `node dev/run-driver.mjs up` + **新会话**；`hitl-answer` 自 2026-10-16 起在报错里给「错因判据 = aging」这一行
   （判据正本 = [BUG-031](../../_backlog/_archived/fixed_bugs/BUG-031-hitl-answer-sidebar-session-rows-unrendered.md)）；
 - **被通道重启终局化的 ask 会永久留在盘上算 pending**（UI 卡在场但点不动、答复永不落地，盘侧谓词会继续
   把它当"最新挂起"报出）→ 别去答它：重开新会话说"继续 <slug> 这个 run"，让 lead 原样重发问询；

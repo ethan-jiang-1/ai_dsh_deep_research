@@ -27,7 +27,7 @@
 
 | 任务 | 首选入口 | 写盘 | 档位 | 事实来源 | 失败后的下一站 |
 |---|---|---|---|---|---|
-| 启动一次研究 | `bash dev/boot-run.sh`（占前台） | 是（会话与 bundle） | boot keyless；run 需凭据 | [Run 指南](guides/61-run-playbook.md) | boot 终端报错 → 下文「调试先看哪份事实」 |
+| 启动一次研究 | `node dev/run-driver.mjs up`（内部调 `bash dev/boot-run.sh`；想守前台看日志才直接跑 boot-run） | 是（会话与 bundle） | boot keyless；run 需凭据 | [Run 指南](guides/61-run-playbook.md) | boot 终端报错 → 下文「调试先看哪份事实」 |
 | 继续在飞 run | 同上；起来后 lead 会话说「继续 \<slug\>」 | 是 | 同上 | bundle 文件 + [Run 指南](guides/61-run-playbook.md) | bundle 缺件 → NODES 判据定位 |
 | 观察在飞 run | boot 自带后台仪表盘 + Web 驾驶舱 | 只读投影 | 浏览器 | [驾驶舱设计](design/40-research-cockpit.md) | 页签坏 → client-load-smoke |
 | 回答 HITL | Web GUI 选项卡（产品面）；代理代答 = `dev/hitl-answer.mjs`（开发面） | 是 | 浏览器；代答需真挂起在场 | [Run 指南](guides/61-run-playbook.md) | 卡未弹 → watch-run 看挂起谓词 |
@@ -39,7 +39,7 @@
 
 ## 一次运行怎么串起来
 
-从仓根运行 `bash dev/boot-run.sh`，避免相对路径观察工具扫描错位。研究 run 通道默认是 3083；
+从仓根运行 `node dev/run-driver.mjs up`（内部调 `bash dev/boot-run.sh`），避免相对路径观察工具扫描错位。研究 run 通道默认是 3083；
 以当次启动横幅的 URL 为准，端口和生命周期说明在 [Run 指南](guides/61-run-playbook.md)。
 
 ```mermaid
