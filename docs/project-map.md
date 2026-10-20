@@ -90,7 +90,7 @@ boot 的镜像一致性检查只证明发布集与安装副本一致；overlay �
 
 ## 测试怎么选
 
-L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字塔；与 [guides/62 参与阶梯](guides/62-plugin-authoring.md) 的 L0–L3（扩展点层级）编号无关。
+L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字塔；参与阶梯用 S0–S3 前缀分离（[guides/62](guides/62-plugin-authoring.md)，D27），不与评估面互扰。
 本仓已经有确定性行为测试与多种集成证据；端到端位于最外层。命令、前置与必跑面查
 [开发环 §2](guides/60-dev-loop.md)，判据查 [evaluation](evaluation.md)。
 

@@ -75,7 +75,7 @@
 | [snapshots/](../snapshots/README.md) | 问题与证据 | 场景证据层：有持久消费者的整组录制回放资产与场景声明（消费 = snapshot-replay-smoke；证据边界与维护规则见该页） |
 | [guides/60-dev-loop.md](./guides/60-dev-loop.md) | 指南 | 开发环：六步闭环、面选择表、双 home、密钥 |
 | [guides/61-run-playbook.md](./guides/61-run-playbook.md) | 指南 | **run 操作指南**（研究发起人入口）：run-driver/boot-run、lead 会话、HITL 两点、观察面——run 通道（research profile：本包 + vendor agent-team-profile 层，P1 定案）的使用面 |
-| [guides/62-plugin-authoring.md](./guides/62-plugin-authoring.md) | 指南 | **插件作者入口**（改插件内容的人/agent 入口）：DSH 词汇对齐（plugin/bundle/profile/preset）、参与阶梯 L0–L3、新行为归属、范本与证据义务、**交付与部署形态**（bundle/profile 拓扑 + 工作区种子 + 部署 bin）、**改动影响面**（添/换/删要一起动什么）——上游 `docs/user/develop/**` 的本仓投影 |
+| [guides/62-plugin-authoring.md](./guides/62-plugin-authoring.md) | 指南 | **插件作者入口**（改插件内容的人/agent 入口）：DSH 词汇对齐（plugin/bundle/profile/preset）、参与阶梯 S0–S3、新行为归属、范本与证据义务、**交付与部署形态**（bundle/profile 拓扑 + 工作区种子 + 部署 bin）、**改动影响面**（添/换/删要一起动什么）——上游 `docs/user/develop/**` 的本仓投影 |
 
 > **编号消歧**：`design/60-intent-carriers.md` 与 `guides/60-dev-loop.md` 同号不同义——design/ 按设计层编号（10 架构 … 60 意图载体），guides/ 按操作手册编号（60 开发环 / 61 run / 62 作者入口）；引用写全路径。
 
@@ -97,7 +97,7 @@ D 号正文 = [decisions.md](./decisions.md)（按需查，不在本页通读；
 | 研究工作区 | 会话 cwd + `agent-instructions` 注入手册 | `packages/context/agent-instructions` |
 | **研究驾驶舱（Research Cockpit）** | —（本仓原生套件名，2026-09-28 用户拍板）：观察面 client 套件——页签 / 工具卡 / 活标题 / 挂起显性化 + 渲染装配；分层：观察面（伞）→ 驾驶舱（套件，最频改）+ 折算层（`src/lib` 谓词，共用）+ 仪表盘（`run-dashboard` 只读投影）；**当前事实正本 = [design/40](./design/40-research-cockpit.md)** | `packages/deep-research-pack/src/client/`（目录名守 DSH 双半约定 host/client——套件名钉入口头注）+ `src/lib/` |
 | 开发 harness / 运行 harness | development harness / runtime harness（同一仓库的两面：前者让 agent 看懂、修改、验证自己；后者是产品运行框架） | 本仓两面并存：`packages/deep-research-pack/` 是 runtime 面，`AGENTS.md` + `docs/` + `notes/` + `.agents/skills/` + 门禁是 development 面 |
-| 参与阶梯 | participation ladder（L0 组合 → L1 扩展点 → L2 capability seam → L3 core loop） | [guides/62 §参与阶梯](./guides/62-plugin-authoring.md)（本仓版本：L0 配置行 / L1 preset+skill+观察面 client 面 / L2 尚无 / L3 归上游）。**与评估五面 L0–L4（[evaluation](./evaluation.md)）编号无关，同名不同义**（对句详说 = guides/62 §参与阶梯） |
+| 参与阶梯 | participation ladder（S0 组合 → S1 扩展点 → S2 capability seam → S3 core loop；前缀 S 与评估五面 L 分离，D27） | [guides/62 §参与阶梯](./guides/62-plugin-authoring.md)（本仓版本：S0 配置行 / S1 preset+skill+观察面 client 面 / S2 尚无 / S3 归上游） |
 | 程序化工作记忆 | procedural memory（可复用工作流 + 专门判断标准） | `.agents/skills/`（开发技能：换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷——清单 = 盘上目录）——与产品内 runtime skills（`presets/*/skills/`）严格分家 |
 | plugin / bundle / profile | plugin = 导出 `apply(ctx)` 的模块；bundle = 你编写与分发的单位（`dsh.bundle`）；profile = 用户 `dsh --profile` 启动的环境（`dsh.profile`）——**Nothing is both** | bundle = `packages/deep-research-pack/cordis.patch.yml`；profile = `runtime/harness-home/profiles/research/`（镜像；源 = pack——`boot-run.sh` 从 pack 重建；overlay 只是源码域冒烟通道的生成物） |
 | 配置行（bundle 行 / preset 行 / 工具行） | patch/overlay 的条目：`- id:` 定向替换、`- insert:` 新增（cordis.patch.yml 与 presets/*.patch.yml 的每一行） | [guides/62 §词汇](./guides/62-plugin-authoring.md)——与 run bundle（一次调研的变量容器，见下行消歧行）无涉 |

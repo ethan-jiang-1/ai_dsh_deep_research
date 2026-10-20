@@ -27,27 +27,27 @@
 
 ## 参与阶梯（本仓版本；DSH 原表见仓外语料 `repo-harness/04`——登记处同上）
 
-> 消歧：本阶梯 L0–L3 与评估五面 L0–L4（[evaluation.md](../evaluation.md)）是两套互不相干的编号——阶梯回答"改动落在哪层扩展点"，评估面回答"验收要跑哪面证据"。
+> 编号 S0–S3（S = 阶梯层级）；DSH 原表用 L0–L3，本仓改 S 前缀与评估五面 L0–L4 分离（[D27](../decisions.md)）。
 
 | 层级 | 本仓首选入口 | 典型变化 | 何时升级 |
 |---|---|---|---|
-| **L0 组合** | cordis 行 config、bundle 行、preset 行、profile 层 | 换 provider、调超时、开关并行、改工具行参数 | 配置表达不了新行为 |
-| **L1 扩展点** | preset（persona / skills / 工具行）、`SKILL.md`、client 插件（`src/client/` 的槽与页签注册） | 新增研究角色、新增方法论 skill、调整工具面、新增观察面槽位 | 需要一项**可替换的完整能力** |
-| **L2 capability seam** | Service Definition + Provider + Consumer | 新的研究能力接缝（本仓尚无） | 现有扩展点表达不了循环驱动 |
-| **L3 core loop** | `agent-loop`（vendor 所有） | 改默认循环 | 本仓**不直接改**（vendor 只读铁律）；走上游 + 升 pin |
+| **S0 组合** | cordis 行 config、bundle 行、preset 行、profile 层 | 换 provider、调超时、开关并行、改工具行参数 | 配置表达不了新行为 |
+| **S1 扩展点** | preset（persona / skills / 工具行）、`SKILL.md`、client 插件（`src/client/` 的槽与页签注册） | 新增研究角色、新增方法论 skill、调整工具面、新增观察面槽位 | 需要一项**可替换的完整能力** |
+| **S2 capability seam** | Service Definition + Provider + Consumer | 新的研究能力接缝（本仓尚无） | 现有扩展点表达不了循环驱动 |
+| **S3 core loop** | `agent-loop`（vendor 所有） | 改默认循环 | 本仓**不直接改**（vendor 只读铁律）；走上游 + 升 pin |
 
-阶梯不是价值排序：L0 的部署替换是完整系统能力，L3 只是影响面最大。**横切义务**：任何层级
+阶梯不是价值排序：S0 的部署替换是完整系统能力，S3 只是影响面最大。**横切义务**：任何层级
 新增"模型可见"的事实时，必须同时扩展 `SessionEventMap` 并从日志可投影（model-visible ⟺
 logged）——pack 行只引入**现成**能力，这项义务落在 vendor 面；本仓自写 client 注册 Orca 品牌、研究配置/状态页签与观察面槽位。配置页将用户选择的偏好管理指令经标准 `session/prompt` 发送给 Lead，形成普通、可记录的用户消息；client 不直接写 bundle 文件，也不新增会话事件类型。
 
 ## 新行为落在哪：按顺序问归属
 
-1. 只是替换配置或组合？→ 阶梯 L0（改 cordis 行 / bundle 行；证据跑评估面 L1+L2 冒烟）；
-2. 能由现有 preset / skill / 工具行表达？→ L1（先看有没有可复制的范本）；
-3. 是需要可替换 Provider、由 Consumer 通过稳定 Service Definition 使用的完整能力？→ L2；
+1. 只是替换配置或组合？→ 阶梯 S0（改 cordis 行 / bundle 行；证据跑评估面 L1+L2 冒烟）；
+2. 能由现有 preset / skill / 工具行表达？→ S1（先看有没有可复制的范本）；
+3. 是需要可替换 Provider、由 Consumer 通过稳定 Service Definition 使用的完整能力？→ S2；
 4. 无论哪层，它是否新增模型可见、且必须在 reload / resume / fork 后重建的事实？→ 横切
    （SessionEventMap + 投影，vendor 面）；
-5. 现有扩展点与 seam 都表达不了循环驱动？→ 才论证 L3（含升 pin 与流程合同重校）。
+5. 现有扩展点与 seam 都表达不了循环驱动？→ 才论证 S3（含升 pin 与流程合同重校）。
 
 ## 范本（照着改，别从零发明）
 
