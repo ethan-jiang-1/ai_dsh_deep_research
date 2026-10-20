@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { foldLibrary, instructionOf, editInstruction, createInstruction, summaryOfEntry, SUMMARY_MAX_LENGTH, SECTION_LABELS, libraryReadStateOf } from '../../packages/deep-research-pack/src/lib/library-fold.ts';
 import { SELFTEST_LIBRARY } from '../../scripts/lib/selftest-library.mjs';
-import { locateSessionStrategy } from '../../scripts/lib/web-ui-nav.mjs';
+import { locateSessionStrategy, SHOW_MORE_SESSIONS_PATTERN } from '../../scripts/lib/web-ui-nav.mjs';
 import { METHOD_PRESETS_SKILL_PATH, methodPresetsFromSkillFile, patternMethodMappingFromSkill, baselineDisciplinesFromSkill } from '../../scripts/lib/method-presets.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -471,4 +471,16 @@ test('侧栏定位策略：扫不到且手上有标题 → 必须走搜索（BUG
   assert.equal(locateSessionStrategy({ title: '某会话', triedSearch: true }), 'give-up', '搜索也试过才可放弃');
   assert.equal(locateSessionStrategy({}), 'give-up', '无标题可搜 → 如实放弃');
   assert.equal(locateSessionStrategy({ title: '   ' }), 'give-up', '空标题不算可搜');
+});
+
+// 侧栏导航常量钉（2026-10-21 web-ui-nav 收拢）：「Show N more sessions」按钮文本模式是
+// lib 内部 getByText 与 cdp-probe CDP evaluate 字符串共用的唯一正本（纯常量——regex source
+// 字符串形态，JSON.stringify(RegExp) 会丢 source，故不是 RegExp 实例；策略不双写）。
+// 反证：把常量改成无数字形态（'Show more sessions'）或丢了 `\\d` 转义 → 本例如实红。
+test('侧栏导航常量：Show N more 文本模式唯一正本（regex source 字符串）', () => {
+  assert.equal(SHOW_MORE_SESSIONS_PATTERN, 'Show \\d+ more sessions');
+  const rx = new RegExp(SHOW_MORE_SESSIONS_PATTERN);
+  assert.match('Show 12 more sessions', rx);
+  assert.doesNotMatch('Show more sessions', rx, '无数字形态不是分页按钮');
+  assert.doesNotMatch('显示 12 more sessions', rx);
 });

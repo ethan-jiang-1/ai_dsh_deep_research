@@ -36,6 +36,7 @@ import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs'
 import { readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs'
 import { launchChromium, loadChromium } from '../lib/playwright.mjs'
+import { openSessionById } from '../lib/web-ui-nav.mjs'
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -167,24 +168,15 @@ try {
   await page.goto(`${base}/?token=${token}`, { waitUntil: 'domcontentloaded' })
   await settle()
 
-  // ③ reload（侧栏列表懒刷新：RPC 建的会话 reload 后才进列表）→ 按日志标题点行。
+  // ③ reload（侧栏列表懒刷新：RPC 建的会话 reload 后才进列表）→ 打开本块建的会话
+  //    （lib/web-ui-nav 唯一正本：session id 行键主锚——原 class 扫行 2026-10-21 收拢退役；
+  //    日志标题 autoTitle 降为搜索兜底。行为不变：行进列表才算 rowOk，点击由 lib 完成）。
   await page.reload({ waitUntil: 'domcontentloaded' })
   await settle()
-  const rows = page.locator('span[class*="_root_"]')
-  const n = await rows.count()
-  let sessionRow = null
-  for (let i = 0; i < n && i < 30; i++) {
-    const el = rows.nth(i)
-    if (!(await el.isVisible().catch(() => false))) continue
-    const box = await el.boundingBox().catch(() => null)
-    if (box === null || box.x >= 256) continue // 只认左侧栏（中央区也有同名 class，实测抓错）
-    const text = (await el.textContent() ?? '').trim()
-    if (autoTitle !== null && text.includes(autoTitle.slice(0, 10))) { sessionRow = el; break }
-  }
-  const rowOk = sessionRow !== null
-  step(rowOk, 'reload 后新会话行进列表（按日志标题匹配）', autoTitle ?? '')
+  const nav = await openSessionById(page, sessionId, autoTitle)
+  const rowOk = nav.found
+  step(rowOk, 'reload 后新会话行进列表（行键定位；标题=日志 autoTitle）', `${autoTitle ?? ''}（via=${nav.via}）`)
   if (rowOk) {
-    await sessionRow.click({ timeout: 10_000 }).catch(() => {})
     await sleep(4_000)
   }
 

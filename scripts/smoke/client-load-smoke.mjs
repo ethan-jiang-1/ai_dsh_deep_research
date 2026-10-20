@@ -26,8 +26,10 @@
 //   pass-5   终稿页签端到端 → pass5FinalDeliveryPhase（本件）
 //   pass-6   自测例库工作区 → pass6SelftestLibraryPhase（client-load-config.mjs）
 // 模块构成：本件 = boot/RPC/断言收集器 + 文件级共享 helper（awaitAppReady/openGuideCapsule/
-//   clickRowByText/openSessionByRowKey/openPane/paneTextOf/dialogTextOf——相位间共用，不再
-//   闭包在 try 内）+ pass-1/2/3/5；scripts/smoke/client-load-config.mjs = pass-4/pass-6
+//   openPane/paneTextOf/dialogTextOf——相位间共用，不再闭包在 try 内）+ pass-1/2/3/5；
+//   侧栏会话定位（clickRowByText / openSessionById）= scripts/lib/web-ui-nav.mjs **唯一正本**
+//   （data-row-key 主锚——2026-10-21 收拢，本件原私有 clickRowByText/openSessionByRowKey 退役）；
+//   scripts/smoke/client-load-config.mjs = pass-4/pass-6
 //   （「研究配置」页签面——验证的是不同页签，拆独立模块；boot 入口与端口 3109 不变，
 //   不新增 smoke 面、不动 route 表）；scripts/smoke/client-load-reference.mjs = 磁盘参考
 //   对象构建器（绑定/未绑定/交付候选选取合同）。
@@ -55,7 +57,7 @@ import { launchChromium, loadChromium } from '../lib/playwright.mjs'
 import { clientHistoryWindow, readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
 import { prepareClientLoadReference } from './client-load-reference.mjs'
 import { pass4ConfigTabPhase, pass6SelftestLibraryPhase } from './client-load-config.mjs'
-import { expandGroup, openSessionById, openSessionByTitle, SIDEBAR_GROUP_CANDIDATES } from '../lib/web-ui-nav.mjs'
+import { clickRowByText, expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES } from '../lib/web-ui-nav.mjs'
 import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { deriveBusinessBrief } from '../../packages/deep-research-pack/src/lib/brief-fold.ts'
 import { foldActivityRows } from '../../packages/deep-research-pack/src/lib/activity-fold.ts'
@@ -204,8 +206,10 @@ const saveArtifacts = async (reason, extra = {}) => {
 //    相位函数与 client-load-config.mjs 的 pass-4/pass-6 共用；page 按 Playwright 鸭子类型传参）══
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms))
-// expandGroup / 候选分组名 = lib/web-ui-nav.mjs 唯一正本（与 hitl-answer 共享——2026-10-13
-// 结构重构收敛，原本地双份句法已漂移）。
+// 侧栏会话定位全套（clickRowByText / openSessionById / expandGroup / 候选分组名）=
+// lib/web-ui-nav.mjs **唯一正本**（data-row-key 主锚，2026-10-21 收拢——本件原私有
+// clickRowByText / openSessionByRowKey 与 hitl-answer / e2e-021rc2 / cdp-probe /
+// client-hitl-smoke 的私有版全部退役改调 lib；收拢裁决与实红家谱见 lib 头注）。
 // 页面就绪序列（reload → New Session 首屏字样 → 稳定窗）——收口本文件六处同形重复；
 // settleMs 逐调用点保持原值（各处的稳定窗是实测调的，不统一）。
 async function awaitAppReady(page, settleMs) {
@@ -236,97 +240,6 @@ async function openGuideCapsule(page, probeMs, retryMs, afterClickMs) {
     await wait(afterClickMs)
   }
   return ok
-}
-const clickRowByText = async (page, text) => {
-  const scan = async () => {
-    const rows = page.locator('span[class*="_root_"]')
-    const n = await rows.count()
-    // 同名行择取（2026-10-19 实红：绑定标题「Claude 模型发布线追踪」是
-    // 「Anthropic Claude 模型发布线追踪」的子串，侧栏新→旧扫描先撞上后者——点开的是
-    // 另一场 run，摘要层/队员/活动流三条断言全按错会话判红，看着像 pin 回归实为选行缺陷）。
-    // 取法 = 全遍历后择一：完全等优先，否则取最长共同后缀里最短的那行（子串被前缀/
-    // 后缀包住的行比无关短行更可能是目标），仍并列才按侧栏顺序（新→旧）取首个。
-    let exact = null
-    const partial = []
-    for (let i = 0; i < Math.min(n, 300); i++) {
-      const el = rows.nth(i)
-      if (!(await el.isVisible().catch(() => false))) continue
-      const box = await el.boundingBox().catch(() => null)
-      if (box === null || box.x >= 256) continue // 只认左栏（中央区同名 class 会抢匹配）
-      const rowText = (await el.textContent() ?? '').trim()
-      if (rowText === text) { exact = el; break }
-      if (rowText.includes(text)) partial.push({ el, len: rowText.length })
-    }
-    const pick = exact ?? (partial.length === 0 ? null : partial.sort((a, b) => a.len - b.len)[0].el)
-    if (pick !== null) { await pick.click({ timeout: 10_000 }).catch(() => {}); return true }
-    return false
-  }
-  if (await scan()) return true
-  // 深列表循环展开（2026-10-10 实测：dev home 累积 250+ 会话，目标会话可埋 8 层
-  // "Show N more sessions"——单次展开够不着。逐层点开直到目标在场/按钮消失/轮上限；
-  // 每层揭示数个会话，1.8s 稳定窗）。探针会话污染的定期清理正本 = 录制器头注。
-  for (let round = 0; round < 60; round++) {
-    const more = page.getByText(/Show \d+ more sessions/).first()
-    if (!(await more.isVisible({ timeout: 1500 }).catch(() => false))) break
-    await more.click().catch(() => {})
-    await wait(1800)
-    if (await scan()) return true
-  }
-  // 仍不可见 → 走「Search sessions」按名字定位（深列表的权威路径；React 受控输入
-  // 用 native setter + input 事件——execCommand 不触发受控更新）
-  const searchOpened = await page.evaluate(() => { const b = document.querySelector('[aria-label="Search sessions"]'); if (b === null) return false; b.click(); return true })
-  if (searchOpened) {
-    await wait(1500)
-    await page.evaluate((t) => {
-      const i = Array.from(document.querySelectorAll('input')).find(x => x.getBoundingClientRect().width > 0)
-      if (i === undefined) return
-      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
-      setter.call(i, t)
-      i.dispatchEvent(new Event('input', { bubbles: true }))
-    }, text)
-    await wait(2500)
-    if (await scan()) return true
-  }
-  return false
-}
-/** 按 **session id 行键** 确定性打开会话：标题在 dev home 里会重名（「…发布线跟踪」多份），
- *  按标题点会打开另一条——期望侧绑的却是参考对象选的那条，五问对账因此假红（2026-10-20 实测）。
- *  序：行键在场 → 点；否则**展开** research-workspace 组（手风琴：已展开时点击会收起，需再点回来）
- *  → 再点；仍不在 → 逐层「Show more sessions」；最后才退回标题定位。 */
-const openSessionByRowKey = async (page, sessionId, title) => {
-  const key = `[data-row-key="session:${sessionId}"]`
-  const sessionRows = () => page.locator('[data-row-key^="session:"]').count()
-  const tryClick = async () => {
-    const row = page.locator(key)
-    if (await row.count() > 0 && await row.first().isVisible().catch(() => false)) {
-      await row.first().click({ timeout: 8_000 }).catch(() => {})
-      return true
-    }
-    return false
-  }
-  if (await tryClick()) return true
-  const wsRows = page.locator('[data-row-key^="workspace:"]')
-  const n = await wsRows.count()
-  for (let i = 0; i < n; i++) {
-    const el = wsRows.nth(i)
-    if (!((await el.textContent()) ?? '').includes('research-workspace')) continue
-    const before = await sessionRows()
-    await el.click({ timeout: 8_000 }).catch(() => {})
-    await wait(2_000)
-    const after = await sessionRows()
-    // 手风琴：本来展开着的组被点成收起（行数掉到 0）→ 再点一次展开回来
-    if (before > 0 && after < before) { await el.click({ timeout: 8_000 }).catch(() => {}); await wait(2_000) }
-    break
-  }
-  if (await tryClick()) return true
-  for (let round = 0; round < 40; round++) {
-    const more = page.getByText(/Show \d+ more sessions/).first()
-    if (!(await more.isVisible({ timeout: 1_500 }).catch(() => false))) break
-    await more.click({ timeout: 4_000 }).catch(() => {})
-    await wait(1_500)
-    if (await tryClick()) return true
-  }
-  return title !== null && await clickRowByText(page, title)
 }
 
 async function openPane(page) {
@@ -413,7 +326,7 @@ async function pass1BoundFacePhase() {
   const boundOk = boundSession !== null && expectedFace !== null
   step(boundOk, '磁盘侧找到绑定 run 的带历史会话（渐进面真数据源）', boundOk ? `「${boundSession.title}」→ drt_${boundSession.slug}` : '缺——先跑一场 run（run 通道现用 workspaceId 形态建会话）')
   if (boundOk) {
-    const opened = await openSessionByRowKey(page, boundSession.sessionId, boundSession.title)
+    const opened = (await openSessionById(page, boundSession.sessionId, boundSession.title)).found
     await wait(3_000)
     // marker 来自 journal 的**原始 Markdown**（可能含链接/反引号），页面上是渲染后的文本——
     // 两侧都剥掉记号再比（2026-10-20 实测：原文 `[final.md](drt_…)` 在 UI 里只剩 `final.md`）。
@@ -793,7 +706,7 @@ async function pass5FinalDeliveryPhase() {
   let deliveredTarget = null
   let doorFound = false
   for (const candidate of finalCandidates) {
-    const opened = await openSessionByRowKey(page, candidate.sessionId, candidate.title)
+    const opened = (await openSessionById(page, candidate.sessionId, candidate.title)).found
     if (!opened) { trials.push({ ...candidate, opened: false, statusTab: false, door: false }); continue }
     await wait(4_000)
     const statusTab = await openStatusTab()

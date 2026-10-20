@@ -22,7 +22,7 @@ import { once } from 'node:events'
 import { loadChromium, launchChromium } from '../scripts/lib/playwright.mjs'
 import { runStateOf, readSessionEvents, leadHitlCandidate } from '../scripts/lib/run-state.mjs'
 import { terminalReadiness } from '../packages/deep-research-pack/src/lib/review-readiness.ts'
-import { clickSearchResultByTitle, searchSessionByTitle } from '../scripts/lib/web-ui-nav.mjs'
+import { clickSearchResultByTitle, revealSessionRow, searchSessionByTitle, sessionRowById } from '../scripts/lib/web-ui-nav.mjs'
 import {deliveryAnswerGuard, isDeliveryReviewCard, answerBatchOf, customLandedInBatch, driveVerdict, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict} from '../scripts/lib/ask-drive.mjs'
 import { appendProvenance, attributionBundleOf, batchToAnswered } from '../scripts/lib/hitl-provenance.mjs'
 import { localDateStr } from '../scripts/lib/local-date.mjs'
@@ -402,39 +402,18 @@ try {
     }
     return n
   }
-  const findTargetRow = async () => {
-    const n = await sessionRows.count()
-    noteCap('session 行', n)
-    for (let i = 0; i < Math.min(n, ROW_SCAN_CAP); i++) {
-      const el = sessionRows.nth(i)
-      if (await el.getAttribute('data-row-key') === `session:${uiTargetSessionId}`) return el
-    }
-    return null
-  }
-  const expandOneSidebarSection = async () => {
-    for (const [items, attr] of [[workspaceRows, 'aria-expanded'], [overflowRows, 'aria-expanded']]) {
-      const n = await items.count()
-      noteCap('分组行', n)
-      for (let i = 0; i < Math.min(n, ROW_SCAN_CAP); i++) {
-        const el = items.nth(i)
-        if (!(await el.isVisible().catch(() => false)) || await el.getAttribute(attr) !== 'false') continue
-        const box = await el.boundingBox().catch(() => null)
-        if (box === null || box.x >= 256) continue
-        try { await el.click({ timeout: 10_000 }) } catch (e) { log(`hitl-answer: ⚠ 侧栏展开失败（${String(e).slice(0, 90)}）`); return false }
-        await page.waitForTimeout(120)
-        return true
-      }
-    }
-    return false
-  }
+  // 行键定位/折叠展开 = lib/web-ui-nav **唯一正本**（revealSessionRow：行键直达 → 具名组
+  // 展开(手风琴回正) → aria-expanded 通用扫展 → 「Show N more」逐层——原私有 findTargetRow /
+  // expandOneSidebarSection / revealTargetRow 扫展循环三件退役，2026-10-21 收拢；data-row-key
+  // 主锚的裁决依据见 lib 头注）。诊断面（capHits/rowTexts/collapsedGroupCount）留在本件——
+  // 它们喂 sidebarMissVerdict 的错因判据，不是导航策略。
   let searchTried = false
   let searchHit = false
   const revealTargetRow = async () => {
-    for (let attempt = 0; attempt < 300; attempt++) {
-      const row = await findTargetRow()
-      if (row !== null && await row.isVisible().catch(() => false)) return row
-      if (!(await expandOneSidebarSection())) break
-    }
+    noteCap('session 行', await sessionRows.count().catch(() => 0))
+    noteCap('分组行', await workspaceRows.count().catch(() => 0))
+    const reveal = await revealSessionRow(page, uiTargetSessionId)
+    if (reveal !== null) return reveal.row
     // 懒渲染兜底（BUG-035 正修，2026-10-18 实测）：侧栏列表可能**根本不含目标会话行**
     // （分组行在场、会话行不在 DOM），而 `Search sessions` 能搜到同一条——扫行/展开够不着时
     // 走搜索路径再扫一次；不再把"扫不到"判成"实例老化/需重启"（重启已被实测证伪）。
@@ -484,9 +463,9 @@ try {
   let opened = await openSession()
   if (opened !== null && !(await activated())) {
     log('目标行已点击，但主视图 session ID 尚未切到目标——按 session ID 重试一次')
-    const row = await findTargetRow()
-    if (row !== null) {
-      try { await row.click({ timeout: 8_000 }) } catch (error) { log(`hitl-answer: ⚠ 目标会话重试点击失败（${String(error).slice(0, 90)}）`) }
+    const retryRow = sessionRowById(page, uiTargetSessionId)
+    if (await retryRow.count().catch(() => 0) > 0) {
+      try { await retryRow.first().click({ timeout: 8_000 }) } catch (error) { log(`hitl-answer: ⚠ 目标会话重试点击失败（${String(error).slice(0, 90)}）`) }
     }
     await page.waitForTimeout(2500)
     if (!(await activated())) {

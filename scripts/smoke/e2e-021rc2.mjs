@@ -22,6 +22,11 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+// 侧栏会话定位 = lib/web-ui-nav **唯一正本**（2026-10-21 收拢：本件原私有 expandWorkspace /
+// enterSession 的 data-row-key 实现升为 lib 主体——expandGroup / sessionRowsByLabel /
+// searchSessionByTitle / typeIntoSessionSearch / clickSearchResultByTitle；当年分叉理由
+// 「类名锚随 vendor 版本漂移即静默失效」已吸收进 lib 的主锚裁决，见其头注）。
+import { clickSearchResultByTitle, expandGroup, searchSessionByTitle, sessionRowsByLabel, SIDEBAR_GROUP_CANDIDATES, typeIntoSessionSearch } from '../lib/web-ui-nav.mjs'
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)))
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null
@@ -94,32 +99,24 @@ async function bootInstance() {
   }
 }
 
-/** 展开侧栏工作区分组（0.2.1 通道：`data-row-key` 契约比 vendored 类名稳——lib 的
- *  expandGroup 依赖 `span[class*="_root_"]` 的 x<256 版面约束，类名随版本变即静默失效）。 */
-async function expandWorkspace(page, name) {
-  const row = page.locator('[data-row-key^="workspace:"]').filter({ hasText: name }).first()
-  if ((await row.count().catch(() => 0)) === 0) return false
-  if (!(await row.isVisible().catch(() => false))) return false
-  await row.click({ timeout: 8_000 }).catch(() => {})
-  await wait(3_000)
-  return true
-}
-
 /** 打开一个绑定了 drt_ 的会话（页面进入会话态——右栏页签只在会话上下文里渲染）。
- *  三级路径：① 已展开的会话行按文本点；② Search sessions 面板（懒渲染列表的权威路径）；
- *  ③ 放弃。定位用**剥掉 markdown 强调符**的标题（run 标题常带反引号，原文喂 getByText 会失效）。 */
+ *  三级路径：① 分组展开（lib expandGroup，data-row-key 主锚）后按行键会话行点；② Search
+ *  sessions 面板（懒渲染列表的权威路径；首个 frag 开面板、后续只打字——面板按钮疑似开关，
+ *  重复点可能收起）；③ 放弃。定位用**剥掉 markdown 强调符**的标题（run 标题常带反引号，
+ *  原文喂匹配会失效）。 */
 async function enterSession(page, title) {
   await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: 120_000 }).catch(() => {})
   await wait(5_000)
   const needle = title.replace(/[`*]/g, '')
   const frags = [needle, ...needle.split(/\s+/).filter((s) => s.length >= 3).sort((a, b) => b.length - a.length)]
 
-  // ① 分组展开后直接点会话行（research-workspace 是本仓 run 会话的家）。
-  for (const group of ['research-workspace', 'harness-home', 'Ungrouped']) {
-    if (await expandWorkspace(page, group)) break
+  // ① 分组展开后直接点会话行（research-workspace 是本仓 run 会话的家；首展即止——
+  //    候选组名正本 = lib SIDEBAR_GROUP_CANDIDATES）。
+  for (const group of SIDEBAR_GROUP_CANDIDATES) {
+    if (await expandGroup(page, group, { settleMs: 3_000 })) break
   }
   for (const frag of frags) {
-    const row = page.locator('[data-row-key^="session:"]').filter({ hasText: frag }).first()
+    const row = sessionRowsByLabel(page, frag).first()
     if ((await row.count().catch(() => 0)) > 0 && (await row.isVisible().catch(() => false))) {
       await row.click({ timeout: 8_000 }).catch(() => {})
       await wait(5_000)
@@ -127,35 +124,21 @@ async function enterSession(page, title) {
     }
   }
 
-  // ② Search sessions（列表懒渲染够不着时的权威路径）。
-  const opened = await page.evaluate(() => {
-    const b = document.querySelector('[aria-label="Search sessions"]')
-    if (b === null) return false
-    b.click()
-    return true
-  })
-  if (!opened) return false
-  await wait(1_500)
-  for (const frag of frags) {
-    await page.evaluate((t) => {
-      const i = Array.from(document.querySelectorAll('input')).find((x) => x.getBoundingClientRect().width > 0)
-      if (i === undefined) return
-      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
-      setter.call(i, t)
-      i.dispatchEvent(new Event('input', { bubbles: true }))
-    }, frag)
-    await wait(2_500)
-    const hit = page.locator('[data-row-key^="session:"]').filter({ hasText: frag }).first()
+  // ② Search sessions（列表懒渲染够不着时的权威路径；搜索结果可能不带 row-key——
+  //    行键重试失败后按文本点最具体的那一行，lib 唯一正本）。
+  for (const [i, frag] of frags.entries()) {
+    if (i === 0) {
+      if (!(await searchSessionByTitle(page, frag, { settleMs: 2_500 }))) return false
+    } else {
+      await typeIntoSessionSearch(page, frag, { settleMs: 2_500 })
+    }
+    const hit = sessionRowsByLabel(page, frag).first()
     if ((await hit.count().catch(() => 0)) > 0) {
       await hit.click({ timeout: 8_000 }).catch(() => {})
       await wait(5_000)
       return true
     }
-    // 搜索结果可能不带 row-key：退到按文本点最具体的那一行。
-    const byText = page.getByText(frag, { exact: false }).last()
-    if ((await byText.count().catch(() => 0)) > 0 && (await byText.isVisible().catch(() => false))) {
-      await byText.click({ timeout: 8_000 }).catch(() => {})
-      await wait(5_000)
+    if (await clickSearchResultByTitle(page, frag, { settleMs: 5_000 })) {
       return true
     }
   }

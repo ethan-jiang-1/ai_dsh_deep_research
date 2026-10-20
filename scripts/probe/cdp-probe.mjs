@@ -30,6 +30,7 @@ import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { launchCdpBrowser } from '../lib/cdp-driver.mjs';
 import { readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs';
+import { SHOW_MORE_SESSIONS_PATTERN } from '../lib/web-ui-nav.mjs';
 import { reconcileInjectedMessage } from '../lib/inject-reconcile.mjs';
 import { pickSendTarget } from '../lib/probe-send-target.mjs';
 import { pickStatusTab } from '../lib/probe-status-tab.mjs';
@@ -132,8 +133,10 @@ try {
       return true
     })()`) === true;
     if (dispatch) return true;
-    // 行不可见的最常见原因 = 「Show N more sessions」折叠（组内 65+ 会话）→ 点开重试
-    await evaluate(`(() => { const m = Array.from(document.querySelectorAll('button,span')).find(x => /Show \\d+ more sessions/.test(x.textContent ?? '')); if (m) { m.click(); return true } return false })()`);
+    // 行不可见的最常见原因 = 「Show N more sessions」折叠（组内 65+ 会话）→ 点开重试。
+    // 文本模式正本 = lib/web-ui-nav.SHOW_MORE_SESSIONS_PATTERN（纯常量——CDP evaluate
+    // 字符串形态无法共用 page 鸭子类型接口，保留薄 CDP 适配层，但选择器策略从 lib 取）。
+    await evaluate(`(() => { const m = Array.from(document.querySelectorAll('button,span')).find(x => new RegExp(${JSON.stringify(SHOW_MORE_SESSIONS_PATTERN)}).test(x.textContent ?? '')); if (m) { m.click(); return true } return false })()`);
     await new Promise((resolve) => { setTimeout(resolve, 2500) });
     return evaluate(`(() => {
       const t = ${JSON.stringify(text)};
