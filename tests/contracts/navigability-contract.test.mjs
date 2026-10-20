@@ -10,7 +10,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, resolve, relative, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -162,5 +162,59 @@ test('资产门：新检查落家序七步在场 + 成本一句原则 + 链接�
   for (const m of section.matchAll(/\]\(([^)#\s]+?)(#[^)]*)?\)/g)) {
     if (m[1].startsWith('http')) continue;
     assert.ok(existsSync(join(ROOT, 'docs', m[1])), `落家序链接目标缺席：docs/${m[1]}`);
+  }
+});
+
+// ── scripts/README lib 表消费列对账（2026-10-21 卫生轮）──
+// 索引此前只查「点名在场」不查「点名准确」，消费列静默漂移（六维卫生轮 维度2 M3 实证：
+// frontmatter 行漏 bundle-date-sanity、session-log 行 5↔20、web-harness 行「逐站点迁移中」已废、
+// probe-status-tab 行的 run-driver / run-dashboard-core 行的 run-fold.test / schema-scan-core 行的
+// node-gate-core 三处陈旧点名）。本门把消费列钉到 import 图：正本 = scripts/dev/tests 的 .mjs
+// 实际 import（含 lib 互引与动态 import），单元格 = 纯标识符清单（CJK 旁白不参与对账）。
+// 立红实录：2026-10-21 首跑即红（上述各行）；修正 README 后绿。此后新增消费方不同步登记 = 红。
+
+test('资产门：scripts/README lib 表「被谁消费」列 = 实际 import 对账（2026-10-21 卫生轮）', () => {
+  const idx = read('scripts/README.md');
+  const libDir = join(ROOT, 'scripts', 'lib');
+  const scanFiles = [];
+  const collect = (dir) => {
+    for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      if (ent.name === 'node_modules' || ent.name === '.git') continue;
+      const p = join(dir, ent.name);
+      if (ent.isDirectory()) { if (ent.name === 'fixtures' || ent.name === '_tmp') continue; collect(p); }
+      else if (ent.name.endsWith('.mjs')) scanFiles.push(p);
+    }
+  };
+  collect(join(ROOT, 'scripts')); collect(join(ROOT, 'dev')); collect(join(ROOT, 'tests'));
+  const importers = new Map();
+  for (const file of scanFiles) {
+    const text = readFileSync(file, 'utf8');
+    for (const m of text.matchAll(/(?:from\s+|import\s*\(?\s*)['"]([^'"]+)['"]/g)) {
+      const s = m[1];
+      if (!s.startsWith('./') && !s.startsWith('../')) continue;
+      const rel = relative(libDir, resolve(dirname(file), s));
+      if (rel.startsWith('..')) continue;
+      const key = rel.replace(/\.mjs$/, '');
+      if (!importers.has(key)) importers.set(key, new Set());
+      importers.get(key).add(basename(file).replace(/\.mjs$/, ''));
+    }
+  }
+  assert.ok(importers.size >= 20, `防空语料：import 图扫描到 ${importers.size} 个 lib 模块（过少 = 扫描面被收窄）`);
+  // 行形：盘上每个 lib 模块必须有自己的表行（行内提及不算——资产门的文件名点名可被行内提及绕过）
+  for (const f of readdirSync(libDir).filter((f) => f.endsWith('.mjs'))) {
+    assert.ok(idx.includes(`| lib/${f} |`), `lib 表缺行：lib/${f}——每个支撑模块一行，行内提及不算行`);
+  }
+  // 消费列 = 实际 import 集（双向精确对账）
+  const rows = [...idx.matchAll(/^\| lib\/([\w.-]+)\.mjs \| (.+?) \|/gm)];
+  assert.ok(rows.length > 0, '防空语料：README lib 表零行');
+  for (const [, lib, cell] of rows) {
+    const actual = [...(importers.get(lib) ?? [])].sort();
+    const declared = [...new Set([...cell.matchAll(/[A-Za-z0-9_./-]+/g)]
+      .map((m) => m[0].split('/').pop().replace(/\.mjs$/, '')))]
+      .sort();
+    const missing = actual.filter((c) => !declared.includes(c));
+    const extra = declared.filter((c) => !actual.includes(c));
+    assert.deepEqual(missing, [], `lib/${lib} 消费列漏报实际消费方：${missing.join(', ')}——漏报 = 按索引找消费方者漏改（正本 = import 图）`);
+    assert.deepEqual(extra, [], `lib/${lib} 消费列点名了非消费方：${extra.join(', ')}——失准点名 = 陈旧索引（正本 = import 图）`);
   }
 });
