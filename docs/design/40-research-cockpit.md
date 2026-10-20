@@ -112,7 +112,7 @@
 「改驾驶舱」行：`src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进
 `keys.ts` → `pnpm build` → `client-load-smoke`（改挂起显性化再跑 `client-hitl-smoke`）。
 
-## 6. 已知边界
+## 6. 已知限制与延后工作
 
 - **会话必须建在研究工作区里**才有渐进面（workspaceFiles 读的是会话工作区根）；建在
   别处的会话只显示活动流（详见 [pack README 已知限制](../../packages/deep-research-pack/README.md)）；

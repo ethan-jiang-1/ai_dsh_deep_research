@@ -104,7 +104,7 @@ DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`�
 （`dsh-deep-research-preflight` 检查、`dsh-deep-research-scaffold` 铺种子 + 补团队层——
 tarball 装法不生成 PATH bin，用安装副本内脚本全路径，见 pack README §部署）。
 
-本仓开发面的四个生成物各有生成器与新鲜度门禁（漂移即红）：`dev/research.overlay.yml`
+本仓开发面的生成物各有生成器与新鲜度门禁（漂移即红）：`dev/research.overlay.yml`
 （`dev/render-overlay.mjs` → `overlay-fresh`）、pack 的 `workspace/` 种子
 （`dev/sync-pack-workspace.mjs` → `pack-workspace-fresh`）、run 通道 profile 镜像
 （`dev/boot-run.sh` 幂等重建，逐文件漂移检测）、dist 导出手册（`scripts/dist/export-dist.mjs`

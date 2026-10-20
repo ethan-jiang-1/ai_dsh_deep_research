@@ -4,9 +4,9 @@
 > [`../_archived/fixed_bugs/`](../_archived/fixed_bugs/README.md)，文件名不变、内容不重写。
 > **调查过、修复未确认**的缺陷 `git mv` 到
 > [`../_archived/suspended_bugs/`](../_archived/suspended_bugs/README.md)（编号保留——暂停非
-> 完成，重启需用户新的优先级决定）。**编号权威在归档侧**：新号 =
-> [../_archived/fixed_bugs/README.md](../_archived/fixed_bugs/README.md) 的 Next BUG ID（已分配最大号 + 1，活跃 ∪
-> 归档一起算）。规矩手册 = [`../README.md`](../README.md)；本区子树指令 = [`../AGENTS.md`](../AGENTS.md)。
+> 完成，重启需用户新的优先级决定）。**编号规则唯一权威 = 本页**：新号 = 活跃 ∪ 全部归档池
+> （fixed + suspended）的已分配最大号 + 1（按盘上两区实算，不登记实值——登记 = 第二份手抄件必腐）。
+> 规矩手册 = [`../README.md`](../README.md)；本区子树指令 = [`../AGENTS.md`](../AGENTS.md)。
 
 ## 活跃列表
 

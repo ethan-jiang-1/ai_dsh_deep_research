@@ -81,7 +81,7 @@
 | 任务型 | 同 diff 必改 | 生成物与检查次序 | 必跑面 | 必写 | done |
 |---|---|---|---|---|---|
 | 改 preset 结构（角色/工具行/roster 接线；新增 skill 文件按下行） | pack 源 `presets/` | **`render-overlay` 先于 L1**（L1 挂的是 overlay，不是 pack 源） | L0 + L1 | 行为/发布集变才写 Note | 四角色真挂载绿 + 文档同步 |
-| 改 persona / skill / 手册文本（模型可见） | pack 源 + `research-workspace/` 正本 | `render-overlay` 先于 L1（L1 挂的是 overlay，不是 pack 源）→ L1 → **snapshot-replay B 层**（模型可见文本变化的 keyless 秒级信号；比对面 = persona 全文 + 全部 request/header + 三处 `user/message` 注入〔工作区手册全文 / skill 目录 description / 运行时上下文〕——**skill 正文不进组装请求**，其证据 = L1 可见面 + L4-lite 行为；有意变更 → 红 = 已捕获，走重录场景[真模型档，同 diff 更新 `snapshot.json` 的 source 身份]或 `--update-expected` 重写金标准 + 人审）→ **重启 run 通道**（web 缓存 boot 时文本）。金标准只许重写，不许放宽比对或归一化凑绿——fix fixtures, not normalizers | L0 + L1 + L4-lite | 同上 | 真模型档证据 + L1 绿 |
+| 改 persona / skill / 手册文本（模型可见） | pack 源 + `research-workspace/` 正本 | `render-overlay` 先于 L1 → L1 → **snapshot-replay B 层**（模型可见文本变化的 keyless 秒级信号；比对面 = persona 全文 + 全部 request/header + 三处 `user/message` 注入〔工作区手册全文 / skill 目录 description / 运行时上下文〕——**skill 正文不进组装请求**，其证据 = L1 可见面 + L4-lite 行为；有意变更 → 红 = 已捕获，走重录场景[真模型档，同 diff 更新 `snapshot.json` 的 source 身份]或 `--update-expected` 重写金标准 + 人审）→ **重启 run 通道**（web 缓存 boot 时文本）。金标准只许重写，不许放宽比对或归一化凑绿——fix fixtures, not normalizers | L0 + L1 + L4-lite | 同上 | 真模型档证据 + L1 绿 |
 | **改驾驶舱**（观察面 client 面——`src/client/` 套件，[构成正本](../design/40-research-cockpit.md)） | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `pnpm build` → `client-load-smoke`（改挂起显性化再跑 `client-hitl-smoke`） | L0 + client-load-smoke | 同上 | 真浏览器断言全绿 |
 | 改 `src/lib/` 纯函数 / 类型面（pack 两半的编译面） | 对应 `src/lib` / `src/client` 类型位 | `pnpm typecheck` → `pnpm test`（typecheck 前置 = vendor 构建产物在场） | L0 + typecheck | 同上 | typecheck + 对应测试绿 |
 | 加 / 改机械门禁 | `verify.mjs` gates 数组 + `evaluation.md` §L0 台账（案例表有增删再动 `gates-smoke.mjs`） | **注入回归红 → 还原 → 绿** → gates-smoke | L0 + gates-smoke | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 + gates-smoke 绿 |
@@ -150,7 +150,7 @@ node packages/deep-research-pack/scripts/scaffold.mjs --workspace <dir>    # 部
 `ai_dsh_assitant` 借入，2026-10-05，钉版见 [external-materials.md](../external-materials.md)）：
 
 - **先加载匹配的开发技能**：任务命中 `.agents/skills/` 某条 description（换 pin / 加角色 /
-  写门禁 / 跑 run / 改轨道 / 交付自审——清单 = 盘上 `.agents/skills/`）→ 先读该 `SKILL.md` 全文再动手，不从摘要猜流程；
+  写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷——清单 = 盘上 `.agents/skills/`）→ 先读该 `SKILL.md` 全文再动手，不从摘要猜流程；
 - **查询实际配置树，别从源码猜部署**：`pnpm dsh --profile research --dump-config` 是
   profile/bundle/patch 叠加后的官方查询（"会加载什么"）；`boot-run.sh` 的漂移检测管另一问
   ——"镜像是否等于 pack 源"；
