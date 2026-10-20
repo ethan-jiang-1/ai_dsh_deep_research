@@ -71,7 +71,7 @@ AGENTS.md §命令速查）：
 | 安装形状（pack → 干净 profile → plugin add） | `node scripts/smoke/release-smoke.mjs`（L2） |
 | persona / skill 文本（模型可见） | 追加 `node scripts/smoke/l4-lite-smoke.mjs`（真模型档） |
 | docs / AGENTS | 追加 `node scripts/probe/entry-chain-probe.mjs`（真模型档） |
-| 门禁本身 | 注入回归看红 → 还原 → 绿（反证记录进 `docs/evaluation.md`） |
+| 门禁本身 | 注入回归看红 → 还原 → 绿（流程正本 = [writing-a-gate 技能](../../.agents/skills/writing-a-gate/SKILL.md)；台账 = `docs/evaluation.md` §L0） |
 
 ### 自写代码的证据阶梯（驾驶舱与未来 `src/` 套件；test-strategy 语料五台阶移植）
 

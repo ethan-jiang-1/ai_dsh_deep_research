@@ -9,8 +9,8 @@
 ——**先想红，再写绿**。本文件只记必须在场的事实：
 
 - `verify/verify.mjs` 的 `gates` 数组与 [docs/evaluation.md](../docs/evaluation.md) §L0 登记表
-  **两处同步**（`gate-ledger-sync` 门禁对账）；每条新门禁带"注入回归 → 红 → 还原 → 绿"的
-  反证记录。
+  **两处同步**（`gate-ledger-sync` 门禁对账）；每条门禁的反证义务与记录方式 = 头行
+  [writing-a-gate 技能](../.agents/skills/writing-a-gate/SKILL.md)正本，此处不复制配方。
 - **门禁自测**：改 verify.mjs 门禁逻辑必跑 `node scripts/smoke/gates-smoke.mjs`（案例表 `CASES` 增删同 diff；`tests/contracts/verify-gates.test.mjs` 静态对账案例 ↔ gates 数组）。
 - 失败信息要给出**失败对象 + 违反的规则 + 修正入口**；不确定就 fail-loud，不静默跳过。
 

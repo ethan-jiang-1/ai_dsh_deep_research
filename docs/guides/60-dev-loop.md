@@ -216,12 +216,7 @@ source dev/env.sh        # DSH_HOME=runtime/harness-home（数据面）+ dsh 别
 - L1 真挂载无模型调用、无凭据可跑；L2 安装验收无模型调用并使用 `--install-only`，默认 preflight 仍检查凭据在场；
 - web 搜索无需独立 key（D9 实证）：与 chat 同一把 `DEEPSEEK_API_KEY`。
 
-## 6. 新门禁的规矩
-
-每条新机械门禁**带反证**：先注入违规看红 → 还原 → 绿（guard only guards if it fails
-the regression）。反证记录进对应 implemented Note。
-
-## 7. 中断恢复（开发通道：上个 Agent 干到一半死了，下一个怎么接）
+## 6. 中断恢复（开发通道：上个 Agent 干到一半死了，下一个怎么接）
 
 按本轮授权与真实工作痕迹恢复，不维护第二份控制状态：
 

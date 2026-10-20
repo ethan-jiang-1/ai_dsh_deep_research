@@ -222,7 +222,7 @@ BUG-020）。
 
 ## 6. 判定"研究完成"
 
-判定正本 = [design/50 §交付判定](../design/50-agent-loop-and-state.md) + [研究手册 §完成判据](../../research-workspace/AGENTS.md)——文件事实链（final.md 当前版 + review.md 终局 readiness PASS + question.md §Decisions 的 HITL2 拍板 + final/v1.md + present 声明 + 可解析且标题匹配当前 bundle 的 audit.md（摘要与 CRITICAL 节计数一致并显式 `CRITICAL=0`）），口头宣告与观察面显示都不算。
+判定正本 = [研究手册 §完成判据](../../research-workspace/AGENTS.md)（+ [NODES 交付行](../../research-workspace/NODES.md)；设计层视图 = [design/50 §交付判定](../design/50-agent-loop-and-state.md)）——文件事实链六件缺一不可，逐件细节住正本；口头宣告与观察面显示都不算。
 
 ## 7. 归档时收割判型模式（增长协议的收割步）
 
