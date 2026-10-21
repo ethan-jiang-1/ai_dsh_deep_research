@@ -5,7 +5,9 @@ opened: 2026-10-21
 
 # 推敲：动态研究 DAG 与多层 subagent 编排
 
-> 立卡：2026-10-21 ｜ 状态：推敲中 ｜ 类型：未定 ｜ 结论倾向：未定 ｜ 可关闭：否
+> 立卡：2026-10-21 ｜ 状态：推敲中 ｜ 类型：未定 ｜ 结论倾向：现在做（A0 组合；review 通过后拆卡） ｜ 可关闭：否
+>
+> 2026-10-21 用户拍板：按推荐组合走；实施前做决策 review（[review](../research/dynamic-research-dag/2026-10-21-combination-review.md)）。
 
 **问题与期望结果：** 现在四角色 + Agent Teams + 八节点文件契约能跑，但执行图是隐式、模板化的：
 `topics.md` 的 `depends_on` 与 Team task 的 `blocked_by` 只被局部使用，Lead 不会按问题形状现场
@@ -40,8 +42,9 @@ opened: 2026-10-21
    靠 critic/HITL？
 6. 是否向上游提 `workflow.agent()` 的 preset 选择能力，还是本仓只把它留给同质叶级 fan-out？
 
-**下一步：** 用户先读机制盘点，拍板第 1–3 个方向；方向定了再进 `notes/proposed/` RFC 或直接立
-实施卡。
+**下一步：** review 已出，三处实施前修正 = F1（Search-only 用配置覆盖，不靠 UI 开关）/ F2
+（`plan.md` 是过程件，不是 NODES 门）/ F3（图谱是依赖/worker/attention 视图，不是任务 CRUD）。
+默认按 review 拆三张实施卡；用户有异议在拆卡前提出。
 
 ## 已知与未决
 
@@ -74,7 +77,8 @@ acceptance / budget / depth），用 Team 任务板 `blocked_by` 物化；Lead �
 生态实践见[插件生态扫描](../research/dynamic-research-dag/2026-10-21-dsh-plugin-dag-practices.md)，
 宽搜/深搜的深度模型见[研究单元](../research/dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md)，
 搜索底座见[DeepSeek Search/Fetch API](../research/dynamic-research-dag/2026-10-21-deepseek-search-fetch-api.md)，
-观察面见[侧栏研究图谱](../research/dynamic-research-dag/2026-10-21-cockpit-plan-graph.md)。
+观察面见[侧栏研究图谱](../research/dynamic-research-dag/2026-10-21-cockpit-plan-graph.md)，
+组合评审见[决策 review](../research/dynamic-research-dag/2026-10-21-combination-review.md)。
 
 ## 调研收敛（2026-10-21）
 
@@ -94,9 +98,36 @@ acceptance / budget / depth），用 Team 任务板 `blocked_by` 物化；Lead �
   pack 默认（而非仅 profile/UI）；④ Fetch API 是否在 A/B 后替换本地 fetch；⑤ 图谱页签先做
   “任务板视图”还是等 `plan.md` 一起做。
 
+## 推荐组合（待你拍板）
+
+1. **编排**：A0 最小原生；`plan.md` 作为执行图（不扩 `topics.md`）；Team 板执行；Lead 调度；
+   `maxDepth: 2`；worker 必须带 `agent_preset`。
+2. **深度**：Scan/Dive/Check cell + L0–L3；默认 L1，决策关键题 L2；每 topic 最多 2 轮加深；
+   不新增门禁/数值 floor。
+3. **搜索**：先在 research profile/Web search 设置切 `searchProvider: deepseek-search-api`，
+   `fetchProvider: http` 保持；pack 默认等一场真实 run 后再定。Fetch API 先做 5–10 页 A/B，
+   通过“逐字/表格对照”才考虑替换。4. **观察面**：先做「研究图谱」的任务板视图（`agentTeam` 数据，不依赖 `plan.md`）；plan.md 落地
+   后再叠 `depth/kind/acceptance` 与 worker chips。
+5. **Issue 形态**：本卡作为伞卡；拆三张实施卡——① 编排/深度（plan + cell + preset），② 侧栏
+   图谱（纯函数 + 页签 + 调整消息），③ 搜索 provider（profile 切换 + A/B）。
+
 ## 验收标准
 
-（方向拍板后补。当前倾向未定，不写未来检查清单。）
+按 [review §5](../research/dynamic-research-dag/2026-10-21-combination-review.md) 拆三张实施卡：
+
+- **编排/深度**：L1 preset-smoke 真挂载（`maxDepth: 2` + `allowedAgentPresets` 生效、
+  `backgroundMode` 已删、critic 无 subagent）；一场 3 节点小 run 走通 plan → Team task → Lead
+  派发 → depth-2 worker（`agent_preset`）→ evidence/final 链；单源 claim 触发 cross-check；
+  缺 Depth Record → critic MAJOR；每 topic 加深 ≤2 轮；`node-gate` 不回归。
+- **侧栏图谱**：`plan-graph` keyless 单测（分层/缺 blocker/环/attention/worker chips）；
+  `client-load-smoke` 合成 `agentTeam` 3 节点 + 1 队员 + 1 worker 渲染/空态/attention 条；
+  无新 RPC、不直接改 Team 板；`client-keys` 对账。
+- **搜索 provider**：5–10 query A/B（Messages vs Search API）记录延迟/条数/URL 重叠/
+  snippet+date/失败率；profile `- id: web`（search API + http）生效、`web_search` 走新 provider、
+  key 不入日志、可回退；pack 默认只在 A/B 通过且用户点头后加。
+- **Fetch**：5–10 页（表格/中文/重定向）对照反斜杠/表格/逐字/title/最终 URL；未通过保持 `http`。
+- **全局**：`pnpm verify` + `pnpm test` 全绿；docs/design/40、pack README、NODES/handbook 同 diff
+  更新；issue 归档/拆卡。
 
 ## 关闭条件
 

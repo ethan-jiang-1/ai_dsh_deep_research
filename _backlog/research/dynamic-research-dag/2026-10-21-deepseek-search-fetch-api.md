@@ -79,6 +79,11 @@ intent: 为宽搜/深搜的搜索底座选型提供官方 API、DSH provider、�
   Markdown。**这不是原始页面文本**；直接拿它做“逐字摘录”会引入转义符。表格页 `|` 还在，但
   转义/空白已被 Markdown 序列化改写。→ 结论：**Search API 可用；Fetch API 先别替换
   `web-fetch-http`**，除非先做转义归一/对照原页面，并接受它不是原始文本。
+- **DSH provider 实测（不只是官方 API）**：直接实例化 `vendor/dsh/packages/web/web-deepseek-api/lib`
+  的 `DeepSeekSearchApiProvider`——`id=deepseek-search-api`、`available=true`、**1.7s / 3 条**，
+  返回字段 `url/title/snippet/publishedAt`（summary 被 provider 丢掉）；`DeepSeekFetchApiProvider`
+  对同一价格页 **0.9s / 3,250 字 / 226 个反斜杠**，`statusCode=200`、`url=请求 URL`。provider
+  映射与源码一致，Fetch 的保真问题在 provider 层同样存在。
 
 ## 2. DSH provider（本仓已可用）
 
@@ -162,8 +167,9 @@ intent: 为宽搜/深搜的搜索底座选型提供官方 API、DSH provider、�
 - DSH provider：`vendor/dsh/packages/web/web-deepseek-api/README.md`、`src/index.ts`；
   base bundle 行 `packages/bundle/base/cordis.patch.yml:467-481`；设置页
   `packages/client/ui-settings-web-search/README.md`、`src/client/web-search-card-controller.ts`。
-- **已实测（直接 API）**：Search 1.5s / Fetch 1.1s；`site:`/`lang:`/`after:`/`before:` 可用；
-  Fetch Markdown 有明显反斜杠转义（价格页 4,055 字 / 387 个）。**未做** DSH provider 集成测试与
-  Messages 搜索 A/B；429 行为、免费窗口的实际计费口径仍要在真实 run 里验证。
+- **已实测（直接 API + DSH provider）**：Search 1.5–1.7s / Fetch 0.9–1.1s；`site:`/`lang:`/
+  `after:`/`before:` 可用；Fetch Markdown 有明显反斜杠转义（价格页 226–387 个）。**未做**
+  Messages 搜索 A/B、5–10 页 Fetch 全量对照；429 行为、免费窗口的实际计费口径仍要在真实 run
+  里验证。
 - **成本提醒**：2026-11-01 起按成功请求计费；宽搜加深会增加请求数，但每次比 Messages 搜索便宜
   （无辅助模型 token）；仍要在 plan 的 budget 里记搜索/抓取次数。

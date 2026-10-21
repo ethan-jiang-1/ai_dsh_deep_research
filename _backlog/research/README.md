@@ -24,5 +24,6 @@
 - [dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md](dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md) — 宽搜/深搜的深度模型与研究单元（同一消费者）。
 - [dynamic-research-dag/2026-10-21-deepseek-search-fetch-api.md](dynamic-research-dag/2026-10-21-deepseek-search-fetch-api.md) — DeepSeek Search/Fetch API 与 DSH provider（同一消费者）。
 - [dynamic-research-dag/2026-10-21-cockpit-plan-graph.md](dynamic-research-dag/2026-10-21-cockpit-plan-graph.md) — 侧栏「研究图谱」页签的数据源、布局与交互设计（同一消费者）。
+- [dynamic-research-dag/2026-10-21-combination-review.md](dynamic-research-dag/2026-10-21-combination-review.md) — A0 组合的决策级 review：一致性矩阵、三处修正、改动面与验收（同一消费者）。
 
 （2026-10-18 方法配置两份材料已随消费者毕业迁入 [_archived/research/](../_archived/research/)：外部先例与真模型 A/B。）
