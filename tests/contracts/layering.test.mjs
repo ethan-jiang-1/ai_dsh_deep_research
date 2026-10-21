@@ -104,8 +104,8 @@ test('④ test 命令钉：node --test glob 即测试发现配置，改宽/改�
   const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
   assert.equal(
     pkg.scripts?.test,
-    "node --import tsx/esm --test 'tests/**/*.test.mjs'",
-    'pnpm test 的发现面被改动——test 命令形状由本守卫钉住（唯一登记的测试命令，docs/evaluation.md §L0；递归 glob，fixtures/ 与 _tmp/ 在发现面外）',
+    "node --import tsx/esm --test --test-reporter=spec 'tests/**/*.test.mjs'",
+    'pnpm test 的发现面被改动——test 命令形状由本守卫钉住（唯一登记的测试命令，docs/evaluation.md §L0；递归 glob，fixtures/ 与 _tmp/ 在发现面外；2026-10-21 加 --test-reporter=spec：非 TTY 默认 TAP 全量 3592 行，spec 605 行且失败行可读）',
   );
 });
 
