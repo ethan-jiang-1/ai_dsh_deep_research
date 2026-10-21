@@ -151,9 +151,9 @@ intent: 为宽搜/深搜的搜索底座选型提供官方 API、DSH provider、�
 
 1. **先只切 Search**：在 research profile 的 `cordis.patch.yml` 写 `- id: web` 覆盖
    （`searchProvider: deepseek-search-api` + `fetchProvider: http`）；**不要用 UI 开关**——它把
-   search+fetch 成对切。A/B 一 query（10 vs 10）：Messages 5.9s / 10 条 / 无 snippet+date；
-   Search API 1.55s / 10 条 / 有 snippet+date；URL 重叠 2 条。不是质量结论，pack 默认前跑
-   5–10 query。
+   search+fetch 成对切。5-query A/B：Messages 平均 6,004ms / 10 条 / snippet+date 0/50；Search
+   API 平均 986ms / 10 条 / snippet+date 50/50；URL 重叠平均 5.2/10。不是质量结论，pack 默认前
+   继续扩样；详情 = [搜索 A/B](./2026-10-21-search-provider-ab.md)。
 2. **再测 Fetch**：已做 1 个价格页探针（4,055 字里 387 个反斜杠）；还需 5–10 个页面（含表格/
    中文/重定向），比较 `deepseek-fetch-api` 的 Markdown 与 `web-fetch-http` 的文本，重点看逐字
    摘录与表格单元格。**在归一/对照通过前，不要替换 `web-fetch-http`。**
