@@ -15,6 +15,12 @@ export const RESEARCH_STATUS_TAB_KIND = 'research-status'
 /** 「研究配置」页签的 kind（openTab 用）。 */
 export const RESEARCH_CONFIG_TAB_KIND = 'research-config'
 
+/** 「研究图谱」页签（plan/依赖/worker/attention 观察面）：同槽第三 key。 */
+export const RESEARCH_GRAPH_TAB_KEY = 'dsh-deep-research-pack/research-graph'
+
+/** 「研究图谱」页签的 kind（openTab 用）。 */
+export const RESEARCH_GRAPH_TAB_KIND = 'research-graph'
+
 /** 「终稿」页签：接管 `drt_<slug>/final.md` 文件地址的页签类型 id（= 槽体 key）。 */
 export const RESEARCH_FINAL_TAB_KEY = 'dsh-deep-research-pack/research-final'
 

@@ -23,6 +23,7 @@
 - [dynamic-research-dag/2026-10-21-dsh-plugin-dag-practices.md](dynamic-research-dag/2026-10-21-dsh-plugin-dag-practices.md) — DSH 插件生态与外部的动态 DAG 实践（同一消费者）。
 - [dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md](dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md) — 宽搜/深搜的深度模型与研究单元（同一消费者）。
 - [dynamic-research-dag/2026-10-21-deepseek-search-fetch-api.md](dynamic-research-dag/2026-10-21-deepseek-search-fetch-api.md) — DeepSeek Search/Fetch API 与 DSH provider（同一消费者）。
+- [dynamic-research-dag/2026-10-21-search-provider-ab.md](dynamic-research-dag/2026-10-21-search-provider-ab.md) — Messages vs Search API 的 5-query A/B（同一消费者）。
 - [dynamic-research-dag/2026-10-21-cockpit-plan-graph.md](dynamic-research-dag/2026-10-21-cockpit-plan-graph.md) — 侧栏「研究图谱」页签的数据源、布局与交互设计（同一消费者）。
 - [dynamic-research-dag/2026-10-21-combination-review.md](dynamic-research-dag/2026-10-21-combination-review.md) — A0 组合的决策级 review：一致性矩阵、三处修正、改动面与验收（同一消费者）。
 

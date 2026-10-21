@@ -10,7 +10,7 @@ subagent 派活），角色分工天然对齐研究波的语义。
 
 | 角色 | codex 生命周期映射 | 一句话职责 | 产出（唯一 owner 面） |
 |---|---|---|---|
-| Lead（主编） | instantiation + hitl1 + wave2 + hitl2 + final | 唯一入口与出口：立项对齐、拆解组队、纯综合、审阅交付 | question.md / topics.md / findings.md / final.md |
+| Lead（主编） | instantiation + hitl1 + wave2 + hitl2 + final | 唯一入口与出口：立项对齐、拆解组队、纯综合、审阅交付 | question.md / topics.md / plan.md / findings.md / final.md |
 | Scout（侦察） | wave0（广度地基） | 画出"答案可能在哪儿"：query 多样化、来源发现与分级、排除显式化 | leads.md |
 | Analyst（分析） | wave1（深度挖掘） | 把方向变成可核查证据：question-list 驱动、交叉验证、反例搜索 | evidence/*.md |
 | Critic（核查） | wave1 深度审查 + readiness + hitl2 前置 | 对"看起来完成了"过敏：无来源结论狩猎、质量审计、readiness 判定 | review.md |
@@ -19,10 +19,11 @@ subagent 派活），角色分工天然对齐研究波的语义。
 L3 判据 2 的载体；任何两类事实不得双 owner 或无 owner。
 
 **teammate 的组合继承语义**（company presets.md 四形态矩阵，钉版复核 2026-10-09 登记）：
-scout/analyst/critic 作为 teammate 或 one-shot child 会话时，加载的是 **Lead 的组合**
-（composeFrom ⇒ lead preset），成员身份来自成员名 + 任务书 + 工作区手册注入，而**不是**
-成员角色自己的 preset——名册角色名 ≠ 该会话加载的 preset。各自 role preset 只在**根会话**
-（直接以该角色开新会话）时生效。
+teammate 会话加载的是 **Lead 的组合**（composeFrom ⇒ lead preset），成员身份来自成员名 + 任务书
++ 工作区手册注入，而**不是**成员角色自己的 preset——名册角色名 ≠ 该会话加载的 preset。各自 role
+preset 只在**根会话**（直接以该角色开新会话）时生效；**depth-2 worker 例外**：teammate 用
+`subagent(agent_preset=…)` 派出的 worker 可挂载独立角色 preset（spawn only），角色工具面因此是
+精确的。
 
 ## 1. persona 要素（每角色 prefix 必含）
 

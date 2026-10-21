@@ -56,7 +56,11 @@
             config:
               provider: spawn
               toolName: subagent
-              backgroundMode: one-shot
+              maxDepth: 2
+              allowedAgentPresets:
+                - scout
+                - analyst
+                - critic
 
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'

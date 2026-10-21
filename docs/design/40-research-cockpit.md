@@ -33,7 +33,10 @@
 | 流失败恢复指引 | [stream-failure.ts](../../packages/deep-research-pack/src/lib/stream-failure.ts) + ResearchStatusTab.tsx | 末位回合死于上游流失败（MALFORMED_RESPONSE 族）且无新回合接手 → 人话横幅「等一两分钟发『继续』」；折算纯函数，BUG-023 修复① |
 | 品牌（虎鲸 Orca） | [BrandMark.tsx](../../packages/deep-research-pack/src/client/BrandMark.tsx) | 宿主 `sidebar.brand.mark` + `sidebar.brand.name` 两槽的 single occupant（替换内置鱼形 logo 与本地构建标签）——用户定调 2026-10-13 |
 | 研究配置页签 | [ResearchConfigTab.tsx](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) + [library-fold.ts](../../packages/deep-research-pack/src/lib/library-fold.ts) + [method-of-question.ts](../../packages/deep-research-pack/src/lib/method-of-question.ts) + [receipt-fold.ts](../../packages/deep-research-pack/src/lib/receipt-fold.ts) + [text-fold.ts](../../packages/deep-research-pack/src/lib/text-fold.ts) | 右栏页签（D25 期 1 管理中继面 ＋ 2026-10-18 显式化期）：四区 = ① 本次研究（本次采用＋来源＋换一条，读 question.md 方法节五态）② 内置打法（只读卡：一句话 ＋ 什么时候用它 ＋ 标本位）③ 我的偏好库（`method-library.md` 投影）④ 底线条（六条共同底线 ＋ 两个定制入口）＋ 就地回执三态（已发送／Lead 已回话／已落盘对账）；管理指令经 `session/prompt` 交 Lead（steer→queue 降级）——**面板不直写文件**；显示面与 skill 四处同钉（内置表／推荐映射／共同底线／两入口逐字，tests/library-fold 把守） |
+| 研究图谱页签 | [ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) + `src/client/research-graph/types.ts` + [plan-graph.ts](../../packages/deep-research-pack/src/lib/plan-graph.ts) | 右栏页签：把 Lead 的 `agentTeam` 任务板画成**纵向 wave DAG**（节点卡 + 依赖 + 队员/worker 状态 + 「需要你注意」条）；`plan.md` 可选叠 depth/kind。**只读 + “让 Lead 调整”**（`session/prompt` 预填建议），不直接 `reassign`/`complete`/`delete`，不重复 `ui-agent-team` 的任务 CRUD |
 | 终稿页签 | [ResearchFinalTab.tsx](../../packages/deep-research-pack/src/client/ResearchFinalTab.tsx) + [final-target.ts](../../packages/deep-research-pack/src/lib/final-target.ts) | 右栏页签：**接管 `drt_<slug>/final.md` 的文件地址**（`extension` 带；交付卡片、结句内联引用、Files 树落到同一页签）——交付后整篇渲染 run 根 `final.md`。静音条只讲盘上事实（`vN` / `当前版` / `审查未过`；**不写"已交付"**——版本目录不是交付凭证，交付只由⑤ 的 `present` 见证说），`过程 →` 回研究状态。读面是一张定表（`final.md` / `review.md` / `final/`），路径按三位置回退（原位 → `archive/` → `_abandoned/`） |
+| 研究图谱页签体（待接线） | [ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) | 第三页签页体（W2/F3）：头部计数（进行/待派/可能卡住）+ 「需要你注意」条 + 纵向 Wave 分区 + 节点卡（展开 detail 与两条动作：打开负责人 / 让 Lead 调整=预填建议经 session/prompt 交 Lead，面板不直改 Team 任务）；**index.ts 注册尚未接线**（2026-10-21 随 types+plan-graph 落地，注册待续） |
+| 研究图谱注入面（在建） | [research-graph/types.ts](../../packages/deep-research-pack/src/client/research-graph/types.ts) | 「研究图谱」页签的注入面类型（readFile / sendInstruction / openOwner 三条闭包，数据面全部复用既有 remote，无新 RPC）；**页签组件与注册尚未接线**（2026-10-21 落地类型与折算，组件待续） |
 | 研究语义工具卡 | [ResearchToolCard.tsx](../../packages/deep-research-pack/src/client/ResearchToolCard.tsx) + [tool-card.ts](../../packages/deep-research-pack/src/lib/tool-card.ts) | 对话流卡片：`spawn_teammate` → 组队卡、`web_search` → 检索卡（2 张） |
 | 挂起显性化 | [index.ts](../../packages/deep-research-pack/src/client/index.ts)（`revealStatusTab`） | pending false→true 迁移时 `openTab` 右栏自动展开；页签 dock 折叠态保持挂载（观察者常在） |
 | keyed 常量 | [keys.ts](../../packages/deep-research-pack/src/client/keys.ts) | 字面量唯一正本（`client-keys` 门禁对账——拼错不报错、永不渲染） |
@@ -57,6 +60,7 @@
 | [hitl-fold](../../packages/deep-research-pack/src/lib/hitl-fold.ts) | journal 事件 → 挂起态 + 流程锚点三态 | 末位 ask 状态机保留 timed pending；匹配的非 pending result 或 user/message 关闭挂起；`deriveAnchors` 按问卡内容签名与文件事实定锚，中途确认如实显示 |
 | [journal-wire](../../packages/deep-research-pack/src/lib/journal-wire.ts) | wire 入参/正文 → 解析共享核 | 「JSON 字符串或对象 + 截断容错」的单一正本 + queries / content text 归一；各消费方保留自己的失败哨兵（null / undefined / false / 0 / 'unknown'），本件只供解析核 |
 | [run-fold](../../packages/deep-research-pack/src/lib/run-fold.ts) | bundle 文件在场性 → 步骤条 | 驾驶舱与 HTML 仪表盘共用七步三态折算与最高版本号解析（仪表盘经 `deriveStep` 适配内容模型后复用；矩阵折算归仪表盘 `run-dashboard-core.mjs` 自持） |
+| [plan-graph](../../packages/deep-research-pack/src/lib/plan-graph.ts) | Team 任务板 + 队员状态 + `plan.md` 节点表 → 分层/波次/attention/计数/worker chips/节点索引 | 最长路径分层；**不发明 failed**（Team 只有 pending/in_progress/completed/deleted，失败只以 owner 会话 failed 出现）；卡住是启发式（文案写「可能卡住」）；缺 since 不编造年龄；成环钳在节点数−1 |
 | [activity-fold](../../packages/deep-research-pack/src/lib/activity-fold.ts) | journal 事件 → 活动行 | 🔍 检索 / 👥 派出与队员作业中（wait_agent，连续折叠）/ 💬 成员 / 📦 交付；markdown 源标记与原始事件类型名不出正文（噪音过滤，尾部 30 行） |
 | [bundle-bind](../../packages/deep-research-pack/src/lib/bundle-bind.ts) | journal 事件 → 本会话绑定的 run slug + 绑定强度 | 只认 `tool/call` 参数路径里的 `drt_<slug>/`；**写强读弱**——write/edit 命中直接定绑，仅读命中兜底（立项预检读旧 bundle 的错绑防线，2026-09-28 首跑实证） |
 | [tool-card](../../packages/deep-research-pack/src/lib/tool-card.ts) | call/result 切片 → 卡片状态 | running / ok / error / stopped |
@@ -120,6 +124,10 @@
   一条**按 vendor 稳定钩子 `data-question-key` 限定**的规则（卡头允许换行 + 标题 14em 弹性基准），
   宽列不受影响；vendor 若删该钩子，规则只是不再命中（fail-soft，不波及其它组件）。
   **移除条件**：vendor 卡头自带换行/最小宽后，删该 effect 与本条目。
+
+- **研究图谱页签（2026-10-21）**：依赖/worker/attention 观察面，不是任务 CRUD；数据 =
+  `agentTeam` / `subagentCatalog` / session status / `plan.md`；调整只发 `session/prompt` 给 Lead。
+  side panel 宽度用纵向 wave，不做横向大画布；任务粒度仍归 `ui-agent-team`，本页签不重复任务列表。
 
 - **会话必须建在研究工作区里**才有渐进面（workspaceFiles 读的是会话工作区根）；建在
   别处的会话只显示活动流（详见 [pack README 已知限制](../../packages/deep-research-pack/README.md)）；

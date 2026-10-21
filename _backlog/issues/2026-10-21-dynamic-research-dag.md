@@ -85,10 +85,11 @@ acceptance / budget / depth），用 Team 任务板 `blocked_by` 物化；Lead �
 ## 调研收敛（2026-10-21）
 
 - **搜索底座**：官方 Search/Fetch API 已实测可用；DSH base 已挂 `web-deepseek-api`。建议
-  `searchProvider: deepseek-search-api` + `fetchProvider: http`（Search provider 实测 1.7s/次、
-  官方直连 1.5s；支持 `site:/lang:/after:/before:`；Fetch API 的 Markdown 有明显反斜杠转义，
-  未过“逐字摘录”保真，先不替换本地 fetch）。**Search-only 不能靠 UI 开关**（它成对切
-  search+fetch），用 profile `- id: web` 配置覆盖。
+  `searchProvider: deepseek-search-api` + `fetchProvider: http`（Search provider 实测 1.7s/次；
+  5-query A/B 平均 986ms vs Messages 6004ms，snippet/date 50/50 vs 0/50；支持
+  `site:/lang:/after:/before:`；Fetch API 的 Markdown 有明显反斜杠转义，未过“逐字摘录”保真，
+  先不替换本地 fetch）。**Search-only 不能靠 UI 开关**（它成对切 search+fetch），用 profile
+  `- id: web` 配置覆盖；A/B 详情 = [搜索 A/B](../research/dynamic-research-dag/2026-10-21-search-provider-ab.md)。
 - **编排**：A0 最小原生——`plan.md` + Team 任务板 + Lead 调度（`wait_agent` +
   `team_task_list({ready:true})` + `reassign`）+ 二层 worker（`maxDepth: 2` +
   `allowedAgentPresets`）；不引外部插件、workflow、第二套 store。

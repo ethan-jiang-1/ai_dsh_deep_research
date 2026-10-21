@@ -19,6 +19,9 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
   question.md          方向契约：问题定稿 + Purpose/RQ/Scope/Constraints + HITL1 对齐快照 +
                        Decisions（append-only，最新在上）——跨 rerun 持久，bundle 身份核心（lead）
   topics.md            topic 图：must_answer（问题列表 2–5 问）+ scope_role（owner: lead）
+  plan.md              执行图（owner: lead）：节点表 id/kind/question/owner_role/deps/output/
+                       acceptance/budget/depth/task_id + 重写记录；过程件，不是交付凭证；
+                       Team 任务板是当前会话的执行镜像；schema-scan/node-gate 不检查本文件
   leads.md             候选方向清单（owner: scout）
   evidence/            证据文件，一条一档（owner: analyst）
   findings.md          发现账本：结论 + 支撑 + gap 状态（owner: lead）
@@ -42,16 +45,18 @@ method-library.md      用户研究偏好库（工作区根；lead 维护；四�
                        偏好"**。点名条目不在库里 → 明说，不声称"已按该偏好执行"。管理动词仅显式触发
 ```
 
-模板六件 ↔ question/topics/leads/evidence-entry（= evidence/ 单条模板）/findings/final
+模板七件 ↔ question/topics/plan/leads/evidence-entry（= evidence/ 单条模板）/findings/final
 （= run 根**当前版报告**模板；final/ 的 vN 记账体**无模板**，按 NODES.md 回边版本语义自构）；
 review.md、drafts/、journal.md 无模板——review 格式住 critic 的 adversarial-review skill，
-drafts/journal 运行时自建。
+drafts/journal 运行时自建。plan.md 是过程件：不替代任何交付门，交付只认 final/review/decisions/
+present；Team 板是执行镜像，恢复时按 plan 的 `N` 节点重建任务。
 
 ## 事实的 owner（一处事实一个家）
 
 | 文件 | 唯一 owner | 其他人 |
 |---|---|---|
 | question.md / topics.md | lead | 只读 |
+| plan.md（执行图） | lead | 只读；执行时看 Team 板/研究图谱页签 |
 | leads.md | scout | 只读 |
 | evidence/*.md | analyst（创建者） | 只读 |
 | findings.md | lead | 只读 |

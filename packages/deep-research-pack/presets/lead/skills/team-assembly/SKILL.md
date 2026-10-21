@@ -5,7 +5,9 @@ description: 组队决策方法论：这次研究需要谁、不需要谁、走�
 
 # team-assembly — 组队
 
-topic 图定稿后、任何 spawn 之前加载。**名单定下来之前不 spawn 任何 teammate**；名单里没有的职能一个都不叫——超编与漏编都是你的失败。
+执行图（`plan.md`）定稿后、任何 spawn 之前加载。**本 skill 只决定“谁进队”，节点/依赖/深度归
+`research-planning`**；矩阵是默认先验，按问题形状偏离时在 plan/journal 记理由。**名单定下来之前
+不 spawn 任何 teammate**；名单里没有的职能一个都不叫——超编与漏编都是你的失败。
 
 ## 组队矩阵
 
