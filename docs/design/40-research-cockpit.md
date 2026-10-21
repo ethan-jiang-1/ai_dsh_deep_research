@@ -114,6 +114,13 @@
 
 ## 6. 已知限制与延后工作
 
+- **问卡窄列布局修复（本包注入，2026-10-21）**：右栏展开后聊天列变窄，vendor `ui-user-questions`
+  的卡头（`space-between` + 右侧动作区 nowrap/不收缩 + 左侧 `min-width: 0`）会把标题塌成一字一行
+  （1280 视口实测：卡片 353px、标题 24px 宽 × 946px 高）。本包 client 在 `src/client/index.ts` 注入
+  一条**按 vendor 稳定钩子 `data-question-key` 限定**的规则（卡头允许换行 + 标题 14em 弹性基准），
+  宽列不受影响；vendor 若删该钩子，规则只是不再命中（fail-soft，不波及其它组件）。
+  **移除条件**：vendor 卡头自带换行/最小宽后，删该 effect 与本条目。
+
 - **会话必须建在研究工作区里**才有渐进面（workspaceFiles 读的是会话工作区根）；建在
   别处的会话只显示活动流（详见 [pack README 已知限制](../../packages/deep-research-pack/README.md)）；
 - **队员动态折叠区（member-activity-stream，2026-10-10 落地）**：lead 活动流照旧只折 lead 会话；

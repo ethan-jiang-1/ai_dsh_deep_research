@@ -71,6 +71,24 @@ export function apply(ctx: ClientContext): void {
       guide: [{ id: RESEARCH_TAB_KEY, order: 1, title: () => '研究状态', description: () => '研究 run 的步骤、等待与证据状态', icon: IconGaugeOutlineRegular }],
     }), 'deep-research-pack: research-status tab type')
 
+    // ── 问卡窄列修复（2026-10-21 实测）──
+    // 右栏展开后聊天列变窄（1280 视口：右栏 576 → 卡片 353），vendor ui-user-questions 的卡头是
+    // `justify-content: space-between` + 右侧动作区 nowrap/不收缩 + 左侧 headingBlock `min-width: 0`,
+    // 于是标题塌到 min-content（实测宽 24px、高 946px = 一字一行）。稳定钩子 = 组件根的
+    // `data-question-key`（不是哈希类名）。规则只在窄列生效：卡头允许换行 + 标题给 14em 弹性基准，
+    // 宽列仍是一行。**fail-soft**：vendor 若删该钩子，规则只是不再命中，不会影响其它组件。
+    // 移除条件：vendor 卡头自带换行/最小宽后删除本 effect（登记在 design/40 §已知限制与延后工作）。
+    scoped.effect(() => {
+      const style = document.createElement('style')
+      style.setAttribute('data-dsh-deep-research', 'question-card-narrow')
+      style.textContent = [
+        '[data-question-key] header{flex-wrap:wrap;row-gap:6px}',
+        '[data-question-key] header>div:first-child{flex:1 1 14em}',
+      ].join('\n')
+      document.head.appendChild(style)
+      return () => style.remove()
+    }, 'deep-research-pack: question card narrow-column fix')
+
     // 研究通道品牌（用户定调 2026-10-13：虎鲸 Orca）——宿主侧栏 brand.mark / brand.name 两槽的
     // single occupant（fallback 内置鱼形 logo 与本地构建标签被本登记替换；槽契约 =
     // ui-sidebar contract/slots.ts——mark 收 {size}，name 空 owner share）。

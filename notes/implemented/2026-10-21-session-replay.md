@@ -33,5 +33,5 @@
 
 ## 环境状态
 
-- **实走中发现一处真实渲染症状（本轮不修，留证据）**：1280×720 下打开右栏研究状态后，会话列被压窄，HITL 卡呈**一字一行竖排**（截图 `runtime/scenes/replay-cockpit-demo/page.png`）。同一会话不展开右栏时卡片正常（`replay-2026-10-21T01-35-40-966Z`）。判断：属 vendor 右栏宽度与聊天列最小宽度的挤压，不是驾驶舱 tab 自身；是否建档 = 待用户定（涉及 vendor 面，本仓只读）。
+- **实走中发现并修掉一处真实渲染症状**：1280×720 下打开右栏研究状态后，聊天列被压窄，HITL 卡呈一字一行竖排（截图 `runtime/scenes/replay-cockpit-demo/page.png`；修后 `replay-narrow-fix/page.png`）。根因 = vendor `ui-user-questions` 卡头的 flex 行为（右栏 576 → 卡片 353 → 标题 24px 宽 / 946px 高），不是驾驶舱 tab 自身；修复 = 本包 client 按稳定钩子注入窄列规则，决定与移除条件见 [问卡窄列修复](2026-10-21-question-card-narrow-column.md)。
 - 端口 3117 自持有，用完释放；每次实走在 `runtime/scenes/replay-*` 留一个场景包（gitignored）。

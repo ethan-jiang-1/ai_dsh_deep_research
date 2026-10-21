@@ -1,13 +1,14 @@
 ---
-status: 推敲中
+status: 等人拍板
 opened: 2026-10-21
 ---
 
 # 推敲：动态研究 DAG 与多层 subagent 编排
 
-> 立卡：2026-10-21 ｜ 状态：推敲中 ｜ 类型：未定 ｜ 结论倾向：现在做（A0 组合；review 通过后拆卡） ｜ 可关闭：否
+> 立卡：2026-10-21 ｜ 状态：等人拍板 ｜ 类型：未定 ｜ 结论倾向：现在做（A0 组合；review 通过后拆卡） ｜ 可关闭：否
 >
 > 2026-10-21 用户拍板：按推荐组合走；实施前做决策 review（[review](../research/dynamic-research-dag/2026-10-21-combination-review.md)）。
+> 2026-10-21 总计划：[RFC](../../notes/proposed/2026-10-21-dynamic-research-dag-a0.md)（proposed；批准后拆三张实施卡）。
 
 **问题与期望结果：** 现在四角色 + Agent Teams + 八节点文件契约能跑，但执行图是隐式、模板化的：
 `topics.md` 的 `depends_on` 与 Team task 的 `blocked_by` 只被局部使用，Lead 不会按问题形状现场
@@ -42,9 +43,9 @@ opened: 2026-10-21
    靠 critic/HITL？
 6. 是否向上游提 `workflow.agent()` 的 preset 选择能力，还是本仓只把它留给同质叶级 fan-out？
 
-**下一步：** review 已出，三处实施前修正 = F1（Search-only 用配置覆盖，不靠 UI 开关）/ F2
-（`plan.md` 是过程件，不是 NODES 门）/ F3（图谱是依赖/worker/attention 视图，不是任务 CRUD）。
-默认按 review 拆三张实施卡；用户有异议在拆卡前提出。
+**下一步：** 总计划 [RFC](../../notes/proposed/2026-10-21-dynamic-research-dag-a0.md) 已出（proposed）。
+用户批准后按 RFC 拆三张实施卡（编排/深度、侧栏图谱、搜索 provider）并归档本卡；F1/F2/F3 有异议
+在拆卡前提出。
 
 ## 已知与未决
 
@@ -78,14 +79,16 @@ acceptance / budget / depth），用 Team 任务板 `blocked_by` 物化；Lead �
 宽搜/深搜的深度模型见[研究单元](../research/dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md)，
 搜索底座见[DeepSeek Search/Fetch API](../research/dynamic-research-dag/2026-10-21-deepseek-search-fetch-api.md)，
 观察面见[侧栏研究图谱](../research/dynamic-research-dag/2026-10-21-cockpit-plan-graph.md)，
-组合评审见[决策 review](../research/dynamic-research-dag/2026-10-21-combination-review.md)。
+组合评审见[决策 review](../research/dynamic-research-dag/2026-10-21-combination-review.md)，
+总计划见[RFC](../../notes/proposed/2026-10-21-dynamic-research-dag-a0.md)。
 
 ## 调研收敛（2026-10-21）
 
 - **搜索底座**：官方 Search/Fetch API 已实测可用；DSH base 已挂 `web-deepseek-api`。建议
-  `searchProvider: deepseek-search-api` + `fetchProvider: http`（Search 1.5s/次、支持
-  `site:/lang:/after:/before:`；Fetch API 的 Markdown 有明显反斜杠转义，未过“逐字摘录”保真，
-  先不替换本地 fetch）。
+  `searchProvider: deepseek-search-api` + `fetchProvider: http`（Search provider 实测 1.7s/次、
+  官方直连 1.5s；支持 `site:/lang:/after:/before:`；Fetch API 的 Markdown 有明显反斜杠转义，
+  未过“逐字摘录”保真，先不替换本地 fetch）。**Search-only 不能靠 UI 开关**（它成对切
+  search+fetch），用 profile `- id: web` 配置覆盖。
 - **编排**：A0 最小原生——`plan.md` + Team 任务板 + Lead 调度（`wait_agent` +
   `team_task_list({ready:true})` + `reassign`）+ 二层 worker（`maxDepth: 2` +
   `allowedAgentPresets`）；不引外部插件、workflow、第二套 store。
@@ -94,19 +97,20 @@ acceptance / budget / depth），用 Team 任务板 `blocked_by` 物化；Lead �
 - **观察面**：右栏新增「研究图谱」页签——纵向 wave DAG + 节点卡 + 队员/worker 实时状态 +
   “需要你注意”条；数据全走 `agentTeam`/`subagentCatalog`/session status/`workspaceFiles`；
   调整只发 `session.prompt` 给 Lead，不直接改 Team 板。
-- **待拍板**：① `plan.md` 还是扩 `topics.md`；② `maxDepth: 2` 还是 3；③ 搜索 API 是否作为
-  pack 默认（而非仅 profile/UI）；④ Fetch API 是否在 A/B 后替换本地 fetch；⑤ 图谱页签先做
-  “任务板视图”还是等 `plan.md` 一起做。
+- **已拍板（2026-10-21）**：用户按推荐组合走；plan.md / maxDepth 2 / 搜索 API 先 profile /
+  Fetch 先不切 / 图谱先任务板 MVP。**待批准**：总计划 RFC（proposed）。
 
-## 推荐组合（待你拍板）
+## 推荐组合（已拍板 2026-10-21）
 
 1. **编排**：A0 最小原生；`plan.md` 作为执行图（不扩 `topics.md`）；Team 板执行；Lead 调度；
    `maxDepth: 2`；worker 必须带 `agent_preset`。
 2. **深度**：Scan/Dive/Check cell + L0–L3；默认 L1，决策关键题 L2；每 topic 最多 2 轮加深；
    不新增门禁/数值 floor。
-3. **搜索**：先在 research profile/Web search 设置切 `searchProvider: deepseek-search-api`，
-   `fetchProvider: http` 保持；pack 默认等一场真实 run 后再定。Fetch API 先做 5–10 页 A/B，
-   通过“逐字/表格对照”才考虑替换。4. **观察面**：先做「研究图谱」的任务板视图（`agentTeam` 数据，不依赖 `plan.md`）；plan.md 落地
+3. **搜索**：在 research profile 的 `cordis.patch.yml` 加 `- id: web` 覆盖
+   （`searchProvider: deepseek-search-api` + `fetchProvider: http`）；**不要用 UI 开关**
+   （它会把 fetch 一起切到 API）；pack 默认等 5–10 query A/B 后再定。Fetch API 先做 5–10 页
+   A/B，通过“逐字/表格对照”才考虑替换。
+4. **观察面**：先做「研究图谱」的任务板视图（`agentTeam` 数据，不依赖 `plan.md`）；plan.md 落地
    后再叠 `depth/kind/acceptance` 与 worker chips。
 5. **Issue 形态**：本卡作为伞卡；拆三张实施卡——① 编排/深度（plan + cell + preset），② 侧栏
    图谱（纯函数 + 页签 + 调整消息），③ 搜索 provider（profile 切换 + A/B）。

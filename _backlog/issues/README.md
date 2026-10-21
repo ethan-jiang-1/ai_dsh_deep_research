@@ -4,7 +4,7 @@
 
 ## 活跃清单
 
-- [2026-10-21-dynamic-research-dag.md](2026-10-21-dynamic-research-dag.md) — 动态研究 DAG 与多层 subagent 编排（推敲中；机制盘点在 [research/dynamic-research-dag](../research/dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md)）。
+- [2026-10-21-dynamic-research-dag.md](2026-10-21-dynamic-research-dag.md) — 动态研究 DAG 与多层 subagent 编排（等人拍板；总计划 [RFC](../../notes/proposed/2026-10-21-dynamic-research-dag-a0.md)；机制盘点在 [research/dynamic-research-dag](../research/dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md)）。
 
 ## 最近归档
 

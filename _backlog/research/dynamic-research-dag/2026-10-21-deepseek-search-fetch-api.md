@@ -149,14 +149,16 @@ intent: 为宽搜/深搜的搜索底座选型提供官方 API、DSH provider、�
 
 ## 4. 建议路径（不引新依赖）
 
-1. **先只切 Search**：`searchProvider: deepseek-search-api` + `fetchProvider: http`；用同一组 query
-   做 A/B（Messages 搜索 vs Search API），比延迟、结果覆盖、snippet 质量、失败率。
+1. **先只切 Search**：在 research profile 的 `cordis.patch.yml` 写 `- id: web` 覆盖
+   （`searchProvider: deepseek-search-api` + `fetchProvider: http`）；**不要用 UI 开关**——它把
+   search+fetch 成对切。A/B 一 query（10 vs 10）：Messages 5.9s / 10 条 / 无 snippet+date；
+   Search API 1.55s / 10 条 / 有 snippet+date；URL 重叠 2 条。不是质量结论，pack 默认前跑
+   5–10 query。
 2. **再测 Fetch**：已做 1 个价格页探针（4,055 字里 387 个反斜杠）；还需 5–10 个页面（含表格/
    中文/重定向），比较 `deepseek-fetch-api` 的 Markdown 与 `web-fetch-http` 的文本，重点看逐字
    摘录与表格单元格。**在归一/对照通过前，不要替换 `web-fetch-http`。**
-3. **决定默认**：Search API 实测可直接用（延迟/字段/操作符都成立）；建议先把 profile 默认切成
-   `searchProvider: deepseek-search-api` + `fetchProvider: http`，Fetch 保持本地。等 Fetch 保真
-   测试通过，再决定是否两个都切。
+3. **决定默认**：Search API 实测可直接用（延迟/字段/操作符都成立）；先 profile 覆盖，pack 默认
+   等 5–10 query A/B 通过后再定。Fetch 保持本地，等保真测试通过再决定是否两个都切。
 4. **不急着扩展 provider**：官方 API 的 `summary`（实测 2,064 字）被 DSH provider 丢掉；
    `authority`/`rerank_score` 也没映射。这些是增强项；等真实 run 证明“snippet 不够用”再加，
    避免又造一层。
