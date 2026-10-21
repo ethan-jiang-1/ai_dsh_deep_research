@@ -162,6 +162,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 |---|---|---|
 | 无法启动/镜像漂移 | 本次 [boot-run](../dev/boot-run.sh) 终端报错；进入 web 启动后再看 `runtime/smoke-workspace/web.log` | 环境/构建/组合/镜像检查；修复入口见 [Run 指南](guides/61-run-playbook.md) |
 | 页面能开但页签或交互坏 | 浏览器加载/console 与 [client-load-smoke](../scripts/smoke/client-load-smoke.mjs)；随手抓现场 = [scene-capture](../scripts/run-ops/scene-capture.mjs) | [驾驶舱](design/40-research-cockpit.md) 装配与数据通道；HITL 行为另用真模型证据 |
+| 想复看**历史会话**当时/现在的页面 | [session-replay](../scripts/run-ops/session-replay.mjs) `<session-id\|标题子串>`（keyless：起通道 → 登记该会话 cwd 工作区 → 按 id 打开 → 抓场景包）；日志侧先看 [session-events](../scripts/run-ops/session-events.mjs) | 场景包读回 = [scene-capture](../scripts/run-ops/scene-capture.mjs) `--show <name>`；边界：现在的客户端代码 + 当年的数据，不是像素级复现 |
 | 研究卡住、工具报错、present 不明 | 先用 [session-events](../scripts/run-ops/session-events.mjs) 看该会话的事件尾部；原始日志仍在 `runtime/harness-home/sessions/<工作区组>/<会话>/` | [watch-run](../scripts/run-ops/watch-run.mjs) 看状态；[node-gate](../scripts/run-gates/node-gate.mjs) 查交付声明 |
 | HITL 卡没弹出来 / 挂起不明 | [watch-run](../scripts/run-ops/watch-run.mjs) 的挂起谓词（只认 lead 会话的 pending）+ [hitl-answer](../dev/hitl-answer.mjs) 的盘侧自拒信息（未匹配/歧义/非挂起均拒绝作答并说理由） | 挂起与代答语义 = [Run 指南 §3](guides/61-run-playbook.md)；「卡永久 pending」边界 = [Run 指南 §5](guides/61-run-playbook.md) |
 | 模型回合被流错误终结 / 重试风暴 | [stream-diagnostics](../scripts/run-ops/stream-diagnostics.mjs) `--session <id>` 或 `--recent N` | 模型尝试时间线/失败密度/provider 与重试策略实名；处置 = [Run 指南 §0.1](guides/61-run-playbook.md) |

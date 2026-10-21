@@ -132,6 +132,7 @@ node scripts/run-ops/provider-error-stats.mjs   # 上游流错误（回合被终
 node dev/run-kickoff.mjs --port 3083 --token <横幅 token> --prompt-file <file>        # run 会话驱动（建会话+发 kickoff）
 node --import tsx/esm scripts/run-ops/watch-run.mjs <session-id>   # run 盯场（谓词化状态判定：事件形状，非字符串 grep——HITL-PENDING/RUN-SETTLED 时退出自报；grep 会误报 request/header 工具 schema）
 node scripts/run-ops/scene-capture.mjs '<gui-url>' --out runtime/scenes/<name>   # 场景包：page.png/html/body/console/meta（看见当时页面；token 脱敏）；事后读取 = --list / --show <name>（agent 看历史现场，纯读盘）
+node scripts/run-ops/session-replay.mjs <session-id|标题子串> [--group <子串>] [--open-status]   # **任意历史会话**在真实 UI 里重开并抓场景包（keyless；起一次性通道 + 登记该会话 cwd 工作区 + 按 id 打开）；判读含日志/工作区/场景包路径；边界 = 现在的客户端代码 + 当年的数据（不是像素级复现）
 node --import tsx/esm scripts/run-ops/session-events.mjs <session-id|标题> --tail 30   # 会话事件尾部（agent 看"刚才发生了什么"：tool/call、tool/result、turn/end 摘要；--type/--grep/--json）
 node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <t>   # HITL 代答（代理模拟；默认逐题选推荐项——先盘侧谓词自拒：无真挂起不开浏览器；answerer 只在浏览器客户端，故用真浏览器）
 pnpm dsh <args…>                      # 机制基线 CLI（vendor/dsh 钉 tag 源码；等价 dev/env.sh 的 dsh 函数）

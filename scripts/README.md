@@ -53,6 +53,7 @@
 | stream-diagnostics.mjs | 流失败归因诊断（run-ops）：模型尝试时间线/失败密度/provider 与重试策略实名/工具调用与检索查询——出问题第一步跑它；`--recent N` 限制最近 N 个有模型活动的会话 | keyless（读会话日志） |
 | provider-error-stats.mjs | 上游流错误（回合被终结）的跨场分布投影（BUG-022 的"可数"面；判据与抽取 = lib/provider-errors.mjs） | keyless（须 source dev/env.sh） |
 | plan-card-stats.mjs | 计划确认卡字数的跨场分布投影（升硬门前置 = 连续多场达标；口径与识别 = lib/plan-card.mjs，与 node-gate 门① 同源） | keyless（须 source dev/env.sh） |
+| session-replay.mjs | **历史会话回放**：任意历史会话（id 全名/标题唯一子串，跨组）在真实 UI 里重开并抓场景包——检验/扩大症状还原面；判据纯函数 = lib/session-replay.mjs，浏览器编排在本壳（keyless：起一次性通道 + 登记 cwd 工作区 + 按 id 打开 + 五件套落盘；`--open-status` 展开右栏研究状态页签） | keyless（真实浏览器；须先 source） |
 | scene-capture.mjs | **场景包捕获与读取**：抓取（连已起 GUI → 截图(fullPage)+DOM+正文+console+meta，token 脱敏，落 `runtime/scenes/<name>/`）+ 读取（`--list` 列既有包 / `--show <name>` 看单包——事后看现场，消费闭环；判据 = lib/scene-pack.mjs） | 抓取 keyless（真实浏览器；须先起通道）；读取 keyless（纯读盘） |
 | run-accept.mjs | **交付验收原子动作**：node-gate（门 A/交付两门）+ evidence-audit（audit.md）+ 未来日期 sanity → 绿写 acceptance.md，`--archive` 才移入 archive/；日期判据 = lib/bundle-date-sanity.mjs | keyless（须先 source dev/env.sh） |
 | unconsumed-evidence.mjs | **B1 差集出题的操作侧投影**：bundle 的 evidence/ 未进 findings.md 清单（收尾核验入口——lib 头注承诺"操作侧核验"，此前无 CLI；判据 = lib/unconsumed-evidence.mjs） | keyless |
@@ -71,30 +72,31 @@
 | lib/roles.mjs | discipline-probe、l4-lite-smoke、preset-smoke、presets.test、release-smoke、replay-request.test、replay-scene.test、snapshot-replay-smoke、team-preflight-smoke | 角色清单访问器（事实源 = 盘上 presets/） |
 | lib/frontmatter.mjs | bundle-date-sanity、evidence-audit-core、run-dashboard-core | `---` frontmatter 拆分**唯一正本**（两 core 共用同一实现） |
 | lib/zstd-read.mjs | node-gate、evidence-audit（两壳） | zstd CLI 文本解压**唯一调用段**（多帧拼接靠 CLI；成功/失败结构化返回，**失败契约留各壳**：`''` 继续 vs `null` 跳过） |
-| lib/web-harness.mjs | client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、snapshot-replay-smoke、team-preflight-smoke | DSH web 冒烟族**启停与通道唯一正本**：`bootWeb`（等启动横幅拿 token）+ `authenticate` + `makeRpc`；**参数保形**——端口/超时/尾部字符/rpcId 前缀/失败文案与收割方式全留各站点 |
-| lib/session-log.mjs | cdp-ask-smoke、cdp-probe、client-hitl-smoke、client-load-reference、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、hitl-answer、l4-lite-smoke、method-library-probe、plan-card-stats、provider-error-stats、run-dashboard-core、run-kickoff、run-state、run-state.test、session-events、session-log.test、snapshot-replay-smoke、stream-diagnostics、team-preflight-smoke、watch-run | canonical 日志选择与读取 + 会话组发现（findGroup 子串参数化，缺省 research-workspace——BUG-010 三处同款一行收敛；冒烟/自测组逃生口 = 观察工具 --group） |
+| lib/web-harness.mjs | session-replay、client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、snapshot-replay-smoke、team-preflight-smoke | DSH web 冒烟族**启停与通道唯一正本**：`bootWeb`（等启动横幅拿 token）+ `authenticate` + `makeRpc`；**参数保形**——端口/超时/尾部字符/rpcId 前缀/失败文案与收割方式全留各站点 |
+| lib/session-log.mjs | cdp-ask-smoke、cdp-probe、session-replay、client-hitl-smoke、client-load-reference、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、hitl-answer、l4-lite-smoke、method-library-probe、plan-card-stats、provider-error-stats、run-dashboard-core、run-kickoff、run-state、run-state.test、session-events、session-log.test、snapshot-replay-smoke、stream-diagnostics、team-preflight-smoke、watch-run | canonical 日志选择与读取 + 会话组发现（findGroup 子串参数化，缺省 research-workspace——BUG-010 三处同款一行收敛；冒烟/自测组逃生口 = 观察工具 --group） |
 | lib/session-events-core.mjs | session-events、session-events.test | 会话事件摘要与筛选纯函数（CLI 壳 = run-ops/session-events 行） |
 | lib/llm-stream-tee-core.mjs | llm-stream-tee-core.test | LLM 流 tee 的捕获判定（主机子串，fail-closed）与凭据头脱敏（预载壳 = scripts/probe/llm-stream-tee.cjs——CJS require 面不在 .mjs 对账图内，壳本体是活进程仪器不设 keyless 自测） |
 | lib/provider-errors.mjs | provider-error-stats、provider-errors.test | 回合被上游流错误终结的结构化抽取（唯一语义源：只认 `turn/end` + `reason.kind=error`，不双算 `assistant/attempt`） |
 | lib/plan-card.mjs | node-gate-session-gates、plan-card-stats、plan-card.test | 计划确认卡识别与字数口径（唯一语义源：标签「按计划开跑」+ `question` 字段全长 + 阈值 200） |
 | lib/stream-diagnostics-core.mjs | stream-diagnostics、stream-diagnostics.test | 模型活动会话筛选（活动事件预筛后再按日志 mtime 取最近 N）+ 尝试时间线投影（assistant/message 计成功、assistant/attempt 计失败/无落面，终态三判 alive-or-idle/recovered/dead） |
-| lib/run-state.mjs | cdp-ask-smoke、hitl-answer、run-state.test、session-events、watch-run | run 操作面状态谓词 |
-| lib/env.mjs | cdp-ask-smoke、client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、record-role-fixture、release-smoke、snapshot-replay-smoke、team-preflight-smoke | 子进程环境清洗（scrubbedEnv/withModelKey——凭据卫生） |
-| lib/playwright.mjs | client-hitl-smoke、client-load-smoke、e2e-021rc2、hitl-answer、snapshot-replay-smoke | Playwright 启停支撑 |
+| lib/run-state.mjs | cdp-ask-smoke、hitl-answer、session-replay、run-state.test、session-events、watch-run | run 操作面状态谓词 |
+| lib/env.mjs | session-replay、cdp-ask-smoke、client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、record-role-fixture、release-smoke、snapshot-replay-smoke、team-preflight-smoke | 子进程环境清洗（scrubbedEnv/withModelKey——凭据卫生） |
+| lib/playwright.mjs | session-replay、client-hitl-smoke、client-load-smoke、e2e-021rc2、hitl-answer、snapshot-replay-smoke | Playwright 启停支撑 |
 | lib/cdp-driver.mjs | cdp-probe、scene-capture | 裸 CDP 驱动 |
+| lib/session-replay.mjs | session-replay、session-replay.test | 历史会话定位/元信息/判读整形纯函数（跨组枚举、id 优先、标题歧义如实报候选；会话→工作区靠首事件 cwd） |
 | lib/scene-pack.mjs | scene-capture、scene-pack.test | 场景包读取/列示纯函数（五件套概要如实——缺件与坏 meta 不静默；mtime 降序） |
 | lib/inject-reconcile.mjs | cdp-probe、inject-reconcile.test、run-kickoff | 注入消息「落盘对账」判据（BUG-021 正修：日志里出现本条 user/message 才算送达；时间下界防同文假阳） |
 | lib/probe-send-target.mjs | cdp-probe、probe-send-target.test | 提交按钮判定纯函数（BUG-021 正修：send 家族六标签状态机 + **stop 家族拒点** + composer 邻近窗；页面只读 DOM 与执行点击） |
-| lib/probe-status-tab.mjs | cdp-probe、probe-status-tab.test | 右栏「研究状态」页签判定纯函数：胶囊按**标题 span 逐字**匹配（拒绝描述串入 / 近似标题）、页签体只认 `[data-sidebar-right-tab]`（不拿会话正文当观察面） |
+| lib/probe-status-tab.mjs | session-replay、cdp-probe、probe-status-tab.test | 右栏「研究状态」页签判定纯函数：胶囊按**标题 span 逐字**匹配（拒绝描述串入 / 近似标题）、页签体只认 `[data-sidebar-right-tab]`（不拿会话正文当观察面） |
 | lib/run-channel.mjs | run-driver、run-driver-contract.test | run 通道驱动判据纯函数：web.log → 当前 GUI URL（取最后一条横幅）、浏览器面 verdict → 呈交判决（GREEN / RED / NOT-RUN） |
 | lib/ask-drive.mjs | ask-drive.test、hitl-answer、run-kickoff | 代答读窗与谓词 |
-| lib/web-ui-nav.mjs | cdp-probe、client-hitl-smoke、client-load-config、client-load-smoke、e2e-021rc2、hitl-answer、library-fold.test | 观察面侧栏会话定位**唯一正本**（2026-10-21 收拢，六处私有版退役）：data-row-key 主锚（session:\<id\>/workspace: 行键）+ 折叠组展开（expandGroup，data-row-key 主 + 类名兜底）+「Show N more」逐层 + 搜索兜底（结果无行键→按文本点）；类名扫描降级为兜底——两套选择器各有实红教训，裁决依据 = 模块头注；零依赖 page 鸭子类型；CDP 边界 = 纯常量 SHOW_MORE_SESSIONS_PATTERN 供 cdp-probe evaluate 字符串消费；真浏览器证据归消费方冒烟档（client-load-smoke / e2e-021rc2） |
+| lib/web-ui-nav.mjs | session-replay、cdp-probe、client-hitl-smoke、client-load-config、client-load-smoke、e2e-021rc2、hitl-answer、library-fold.test | 观察面侧栏会话定位**唯一正本**（2026-10-21 收拢，六处私有版退役）：data-row-key 主锚（session:\<id\>/workspace: 行键）+ 折叠组展开（expandGroup，data-row-key 主 + 类名兜底）+「Show N more」逐层 + 搜索兜底（结果无行键→按文本点）；类名扫描降级为兜底——两套选择器各有实红教训，裁决依据 = 模块头注；零依赖 page 鸭子类型；CDP 边界 = 纯常量 SHOW_MORE_SESSIONS_PATTERN 供 cdp-probe evaluate 字符串消费；真浏览器证据归消费方冒烟档（client-load-smoke / e2e-021rc2） |
 | lib/unconsumed-evidence.mjs | unconsumed-evidence.test、unconsumed-evidence | B1 机械基座：evidence/ 未进 findings.md 的差集投影（critic 差集出题的操作侧对账；CLI 壳 = run-ops/unconsumed-evidence 行） |
 | lib/acceptance-check.mjs | acceptance-check.test、acceptance-check | 收活判据机械求值：PASS/FAIL/UNVERIFIED 三态（DeerFlow acceptance_criteria keyless 移植，判不了永不静默放行；CLI 壳 = run-ops/acceptance-check 行） |
 | lib/hitl-provenance.mjs | ask-drive.test、hitl-answer、hitl-provenance.test、run-kickoff | 代答 provenance 写盘（BUG-014 正修——代理模拟显式记账；BUG-017 题面富集） |
 | lib/local-date.mjs | export-dist、hitl-answer、local-date.test | 人读日期行本地口径（与 bash date 同源；BUG-017 正修——UTC slice 凌晨窗口差一天） |
 | lib/bundle-date-sanity.mjs | bundle-date-sanity.test、run-accept | run bundle 未来日期检查（操作侧验收前哨——r1-license 29 处未来日期事故的机械面；消费语境 = run-accept 行） |
-| lib/vendor-artifacts.mjs | cdp-ask-smoke、client-hitl-smoke、client-load-smoke、discipline-probe、entry-chain-probe、l4-lite-smoke、preset-smoke、team-preflight-smoke、vendor-artifacts.test | vendor 构建产物自检 |
+| lib/vendor-artifacts.mjs | session-replay、cdp-ask-smoke、client-hitl-smoke、client-load-smoke、discipline-probe、entry-chain-probe、l4-lite-smoke、preset-smoke、team-preflight-smoke、vendor-artifacts.test | vendor 构建产物自检 |
 | lib/backlog-liveness.mjs | backlog-liveness.test、verify | 问题卡、缺陷、调研、方法与归档索引的结构合同；被 verify 入口与 keyless 回归消费 |
 | lib/direct-authorization-boundary.mjs | entry-chain-probe、entry-chain-probe.test | 按授权范围执行、无需重复请批的词面判定；由探针与 keyless 回归消费 |
 | lib/replay-scene.mjs | replay-scene.test、snapshot-replay-smoke | 场景声明消费者：roster/版本/来源形状/路径校验（缺件、串角色、垃圾锚点 fail-loud）+ 场景集发现（`replay/*/snapshot.json` 全集、防空语料、--face 全名定向） |
