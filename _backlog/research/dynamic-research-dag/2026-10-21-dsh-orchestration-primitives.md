@@ -350,24 +350,96 @@ evidence/。这两个 worker **不在 Team 板上**；如果 Lead 需要看见�
 这三张图说明：**动态 DAG 不是换一套角色，而是换节点、边、owner、深度与预算**；四角色的
 persona/skill 仍是节点的方法论内核。
 
-## 5. 如果走 A/D：最小落点（建议，未拍板）
+## 5. 最小原生版（A0，当前推荐先试）
 
-1. **`plan.md` 模板 + schema**：节点表 + 依赖 + owner + 输出 + 验收 + 预算；放在 run bundle；
-   `topics.md` 保留内容图，plan 只承接执行图，避免三处各说一套。
-2. **Lead 的 planning skill**：把 `team-assembly` / `question-patterns` 从"固定编制"改成
-   "图骨架先验 + 偏离理由"；明确节点类型（broad-scan / deep-dive / cross-check / synthesis /
-   review / gate）、何时加节点、何时合并、何时重写、预算上限。
-3. **物化纪律**：每个 plan 节点 → 一个 Team task；`deps` → `blocked_by`；owner_role → 派发对象；
-   重写图 = `set_dependencies` / `edit` / `reassign` / 新增 task，全部 journal 记账。
-4. **第二层**：在 lead/scout/analyst preset 设 `maxDepth: 2` + `allowedAgentPresets:
-   [scout, analyst, critic]`；团队派发写清"何时派 worker、必须带 agent_preset"；critic 保持无
-   subagent。
-5. **plan gate（只查结构）**：id 唯一、依赖存在、无环、每个 RQ 至少被一个节点覆盖、终局有
-   synthesis + review、输出路径在 bundle 内、owner 合法；不发明质量分数。
-6. **NODES 重述**：把八节点拆成"必须保留的生命周期不变量"（HITL1、证据链、综合、critic、
-   HITL2、交付）+ "可实例化的研究节点类型"；回边仍按版本化节点处理，不画环。
-7. **workflow**：暂不挂 Lead；如果将来要叶级批量，先做专用 worker preset + 显式 caps + 禁止
-   HITL 工具的护栏，或等上游 `agent()` 支持 preset。
+### 5.0 只加一层，不引任何外部依赖
+
+| 改动 | 内容 | 类型 |
+|---|---|---|
+| `plan.md` | run bundle 内一张节点表：`id / kind / question / owner_role / deps / output / acceptance / budget / depth / task_id`；图是 DAG，回边用版本化节点 | 新模板 + Lead 纪律 |
+| `team-assembly` skill | HITL1 后设计执行图：节点类型（broad-scan / deep-dive / cross-check / synthesis / review）、预算、重写规则、调度循环 | 文本 |
+| Lead persona | 一句话：HITL1 后写 plan；每次 `wait_agent` 返回后 `team_task_list({ready:true})` → `reassign`；不自己跑搜索 | 文本 |
+| preset config | lead/scout/analyst 的 `tool-subagent` 加 `maxDepth: 2` + `allowedAgentPresets: [scout, analyst, critic]` | 配置 |
+| NODES / 手册 | `topics.md` 保留内容图；plan 只承接执行图；"组队"节点多一个 plan 输出；plan 进 run bundle 目录约定 | 文档 |
+| 门禁 | **先不加**；现有 `schema-scan` / `node-gate` 不动 | — |
+
+**调度循环（Lead 的原生循环）：**
+
+1. HITL1 拍板后写 `plan.md`，按节点建 Team task（subject 带 `N1 ·` 前缀，`blocked_by` 映射 deps）。
+2. 把所有 ready 且无 owner 的 task `reassign` 给对应 owner；owner 不在线就 `send_message` 唤醒。
+3. `wait_agent`（60–120s）；返回后 `team_task_list({ready:true})`；有新的 ready 就回到 2。
+4. 没有 ready、但有 running 的 teammate → 回到 3；没有 ready、也没有 running → 做 Lead 自己的
+   synthesis / 收口。
+5. teammate 失败/卡住 → `interrupt_agent` + `reassign`（或 `reopen`），journal 记账。
+6. 交付仍走 NODES 的 HITL2 / present；plan 是辅助图，不是交付门。
+
+**`task_id` 是当前 Lead 会话的映射，不是 canonical。** 恢复/换会话时按 plan 的 `N` 节点重建 Team
+task，再更新 `task_id` 列；不要把旧的 `task-N` 当持久身份。
+
+**二层 worker：**
+
+- teammate 在节点内部需要另一角色时，调用 `subagent(prompt, agent_preset: "scout"|"analyst")`；
+  worker 是 depth 2，不能再派；结果以 completion notice 回 teammate，由 teammate 写 evidence。
+- 不把 worker 放到 Team 板上；它的产物是父节点的输入，不是独立交付。
+- 派 worker 必须带 `agent_preset`；不带 = 继承父组合（Lead 克隆），纪律禁止。
+
+**为什么这算"利用 DSH"：**
+
+- DAG / readiness / CAS / reassign / wait 全是 Team 原生；角色组合是 subagent 原生；durable 是
+  run bundle 原生。
+- 没有新 store、没有新引擎、没有 workflow、没有外部插件；只多了一张 Markdown 表和一段调度纪律。
+- 代价：Lead 是唯一调度者（无自动派发 daemon）；顶层 teammate 仍继承 Lead 组合（角色靠 prompt +
+  skill 文件）；worker 的角色是精确的。
+
+### 5.1 “图很深”指哪种深？
+
+| 维度 | 能多深 | 谁限制 | 建议预算 |
+|---|---|---|---|
+| **工作图依赖深度** | 可以很深：Team task DAG 只查无环，`maxTasks` 256；N1→N2→…→N20 都合法 | Task 数量、Lead 的调度注意力、成本 | 顶层节点 ≤12，关键路径 ≤6 层；超过就拆给 teammate 的子图 |
+| **agent 层级** | Lead(0) → teammate(1) → worker(2)；Team 是平面 roster，subagent `maxDepth: 2` | vendor：无 nested Team；subagent 深度上限；`maxActiveSubagents` 8 | 默认 2 层；不要为了“更深”把 maxDepth 加到 3+，协调成本会超过收益 |
+| **逻辑子图** | 一个 teammate 可以在**同一块 Team 板**上建子任务（任何成员都能 `team_task_create`），形成分支自己的子 DAG | 只有 Lead 能 reassign；子任务 owner 仍是该 teammate 或它指定的成员 | 需要更深分支时，用“teammate + 子任务”而不是“嵌套团队” |
+
+```text
+工作图（可以深；同一块 Team 板）：
+N1 侦察 → N2 深挖 → N2a 反例核查 → N2b 原始出处 → N3 交叉验证 → N4 综合 → N5 审查 → N6 交付
+                              ↘ N2c 第二来源（并行）
+
+agent 树（默认浅；DSH 原生）：
+Lead (depth 0)
+ ├─ teammate scout (depth 1)  ── 拥有 N1
+ ├─ teammate analyst (depth 1) ── 拥有 N2/N2a/N2b/N2c（子任务可建在同一块板）
+ │    └─ worker scout/analyst (depth 2，不在 Team 板上)
+ └─ teammate critic (depth 1)  ── 拥有 N5
+```
+
+**结论：** 你要的“深”如果是**研究链条深**（多轮侦察→深挖→反例→交叉→综合→审查），完全可行，
+而且不需要嵌套团队；如果是**agent 递归很深**（Lead→sub-lead→sub-sub-lead…），DSH 原生不支持
+nested Team，subagent 也只能到 `maxDepth`；默认 2 层是刻意选择，不是能力不足。深度优先放在
+**工作图**，不要放在 **agent 树**。
+
+### 5.2 动态编排具体“动态”在哪
+
+不是“HITL1 时画一张图然后照跑”，而是 Lead 在运行中按证据重写：
+
+- **加节点**：发现未知子域 → 加 scout 节点；发现单源/冲突 → 加 cross-check 节点；发现证据缺口
+  → 加定向补搜节点。
+- **拆节点**：一个 analyst 节点太大（多个独立问题）→ 拆成并行子任务。
+- **并节点**：两个节点锚点同源、会重复钻同一批来源 → 合并 owner。
+- **改边**：新证据让某节点必须先等另一节点 → `set_dependencies`；某依赖不再需要 → 重写依赖表。
+- **重派**：owner 卡住/失败 → `interrupt_agent` + `reassign`；节点完成 → 释放/关单。
+- **版本化回边**：critic FAIL → 新增 `repair-r1` / `review-r2` 节点，不画环。
+- **记账**：每次重写更新 `plan.md` 的节点表 + journal 一行；Team 板是当前执行镜像。
+
+动态的边界：**scope 变更**（HITL1 已批准的范围）仍回人；图内的重写是自主的，不新增交互点。
+
+### 5.3 如果 A0 不够，再加这些（按需，不是前置）
+
+1. **plan gate（只查结构）**：id 唯一、依赖存在、无环、每个 RQ 至少被一个节点覆盖、终局有
+   synthesis + review、owner 合法；不发明质量分数。
+2. **NODES 重述**：八节点拆成"生命周期不变量"（HITL1、证据链、综合、critic、HITL2、交付）+
+   "可实例化的研究节点类型"；回边仍按版本化节点处理。
+3. **cockpit DAG 视图**：从 `plan.md` 的节点表画图（company `dag.ts` 的分层算法可参考），纯观察面。
+4. **workflow 叶级批处理**：只在专用 worker preset 里挂，不挂 Lead；或等上游 `agent()` 支持 preset。
 
 ## 6. 风险、反证与未决
 

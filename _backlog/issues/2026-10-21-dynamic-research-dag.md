@@ -53,9 +53,16 @@ opened: 2026-10-21
 
 ## 方案与取舍
 
-候选 A（推荐方向）：Team 任务板 = 动态工作图，Lead 写 `plan.md`；子层用带 `agentPreset` 的
-subagent（`maxDepth: 2`）；workflow 暂不主编排。取舍 = 原生、durable、可观察；代价 = roster 平面、
-第二层不可见任务板、Lead 是唯一调度者。
+候选 A0（当前推荐，native-only）：**不新增插件、不引外部 store、不用 workflow**。Lead 在 HITL1 后把
+执行图写进 run bundle 的 `plan.md`（一张节点表：id / kind / question / owner_role / deps / output /
+acceptance / budget / depth），用 Team 任务板 `blocked_by` 物化；Lead 用 `wait_agent` +
+`team_task_list({ready:true})` + `reassign` 做调度；二层 worker 用 `subagent(agent_preset=...)`
+（preset 加 `maxDepth: 2` / `allowedAgentPresets`）。取舍 = 全部 DSH 原生、零安装负担、durable
+（plan 在 bundle）；代价 = Lead 是唯一调度者、无自动派发、顶层 teammate 角色仍靠 prompt。
+
+候选 A（A0 不够时再加）：在 A0 上补 plan-gate（结构校验：无环 / RQ 覆盖 / owner 合法）、NODES 从固定
+流水线重述为"生命周期不变量 + 节点类型库"、cockpit 的 DAG 视图。取舍 = 更可审计；代价 = 多一个门禁与
+文档面。
 
 候选 B：`workflow` 当主编排器。取舍 = 任意控制流、并发强；代价 = 子代继承 Lead 组合、无 Team 板、
 无 durable 图、HITL 与恢复语义要另造——与本仓角色隔离和文件事实链冲突。
@@ -63,7 +70,29 @@ subagent（`maxDepth: 2`）；workflow 暂不主编排。取舍 = 原生、durab
 候选 C：纯 subagent 递归树。取舍 = 角色保真、深度灵活；代价 = 无共享任务板、跨分支依赖只能靠
 父级编排与文件。
 
-完整对照与源码证据见[机制盘点](../research/dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md)。
+完整对照与源码证据见[机制盘点](../research/dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md)，
+生态实践见[插件生态扫描](../research/dynamic-research-dag/2026-10-21-dsh-plugin-dag-practices.md)，
+宽搜/深搜的深度模型见[研究单元](../research/dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md)，
+搜索底座见[DeepSeek Search/Fetch API](../research/dynamic-research-dag/2026-10-21-deepseek-search-fetch-api.md)，
+观察面见[侧栏研究图谱](../research/dynamic-research-dag/2026-10-21-cockpit-plan-graph.md)。
+
+## 调研收敛（2026-10-21）
+
+- **搜索底座**：官方 Search/Fetch API 已实测可用；DSH base 已挂 `web-deepseek-api`。建议
+  `searchProvider: deepseek-search-api` + `fetchProvider: http`（Search 1.5s/次、支持
+  `site:/lang:/after:/before:`；Fetch API 的 Markdown 有明显反斜杠转义，未过“逐字摘录”保真，
+  先不替换本地 fetch）。
+- **编排**：A0 最小原生——`plan.md` + Team 任务板 + Lead 调度（`wait_agent` +
+  `team_task_list({ready:true})` + `reassign`）+ 二层 worker（`maxDepth: 2` +
+  `allowedAgentPresets`）；不引外部插件、workflow、第二套 store。
+- **深度**：宽搜加深 = 覆盖谱系（query 家族/检索器/tier/子域/负结果）；深搜加深 = 证据链
+  （一手/独立/反例/口径/清单闭合）。用 Scan/Dive/Check cell + L0–L3；每 topic 最多 2 轮加深。
+- **观察面**：右栏新增「研究图谱」页签——纵向 wave DAG + 节点卡 + 队员/worker 实时状态 +
+  “需要你注意”条；数据全走 `agentTeam`/`subagentCatalog`/session status/`workspaceFiles`；
+  调整只发 `session.prompt` 给 Lead，不直接改 Team 板。
+- **待拍板**：① `plan.md` 还是扩 `topics.md`；② `maxDepth: 2` 还是 3；③ 搜索 API 是否作为
+  pack 默认（而非仅 profile/UI）；④ Fetch API 是否在 A/B 后替换本地 fetch；⑤ 图谱页签先做
+  “任务板视图”还是等 `plan.md` 一起做。
 
 ## 验收标准
 
