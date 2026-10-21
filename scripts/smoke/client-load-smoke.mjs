@@ -729,6 +729,14 @@ async function pass3cMethodLibraryPhase() {
   const body = text.includes('本工作区共享') && text.includes('我的库') && text.includes('内置参考') && text.includes('新建')
   step(body, '方法库 tab 渲染（我的库 / 内置参考 / 新建）', body ? '' : text.slice(0, 220).replace(/\s+/g, ' '))
   if (!body) return
+  // 列表行点击必须到 detail（2026-10-21 实测：左侧栏透明拖拽柄在 x=406 覆盖方法库左列，
+  // 行中心命中拖拽柄；修复 = aside 提升 stacking context。该断言先于编辑，防止回归）。
+  const libRow = page.getByRole('button', { name: /格局调研/ }).first()
+  const rowVisible = await libRow.isVisible({ timeout: 5_000 }).catch(() => false)
+  if (rowVisible) await libRow.click({ timeout: 5_000 }).catch(() => {})
+  await wait(800)
+  const rowDetail = rowVisible && (await paneTextOf(page)).includes('怎么核实')
+  step(rowDetail, '方法库列表行可点击（拖拽柄不拦截）', rowVisible ? '' : '格局调研行不可见')
   // 编辑/新建表单只验证结构与取消（keyless 零发送）；保存路径由 library-fold 单测与人工走查。
   const edit = page.getByRole('button', { name: '编辑' }).first()
   if (await edit.isVisible({ timeout: 5_000 }).catch(() => false)) {

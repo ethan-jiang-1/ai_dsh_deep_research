@@ -112,7 +112,9 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     const q = query.trim().toLowerCase()
     return entry.name.toLowerCase().includes(q) || (summaryOfEntry(entry) ?? '').toLowerCase().includes(q)
   })
-  const selected = entries.find((entry) => entry.name === selectedName) ?? null
+  const selected = (segment === 'mine' && query.trim() !== ''
+    ? filtered.find((entry) => entry.name === selectedName)
+    : entries.find((entry) => entry.name === selectedName)) ?? null
   const builtin = segment === 'builtin'
     ? BUILTIN_PREFERENCES.find((entry) => entry.name === selectedName) ?? null
     : null
@@ -392,7 +394,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
         }}>{receipt.ok ? '✓' : '✕'} {receipt.detail}</div>
       )}
       <div style={{ display: 'flex', flex: 1, minHeight: 0, flexWrap: 'wrap' }}>
-        <aside style={{ flex: '0 0 270px', minWidth: 220, borderRight: '1px solid #00000010', padding: 10, overflowY: 'auto', boxSizing: 'border-box' }}>
+        <aside style={{ flex: '0 0 270px', minWidth: 220, borderRight: '1px solid #00000010', padding: 10, overflowY: 'auto', boxSizing: 'border-box', position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
             <button type="button" style={{ ...BUTTON_STYLE, ...(segment === 'mine' ? { borderColor: '#2563eb', color: '#2563eb' } : {}) }} onClick={() => { if (segment !== 'mine') { setSegment('mine'); setSelectedName(entries[0]?.name ?? null); setMode('read') } }}>我的库</button>
             <button type="button" style={{ ...BUTTON_STYLE, ...(segment === 'builtin' ? { borderColor: '#2563eb', color: '#2563eb' } : {}) }} onClick={() => { if (segment !== 'builtin') { setSegment('builtin'); setSelectedName(BUILTIN_PREFERENCES[0]?.name ?? null); setMode('read') } }}>内置参考</button>
@@ -441,7 +443,9 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
           {mode === 'read' && segment === 'mine' && selected !== null && renderReadMine(selected)}
           {mode === 'read' && segment === 'mine' && selected === null && (
             <div style={{ ...MUTED_STYLE, paddingTop: 20 }}>
-              {loadState === 'absent' ? '还没有方法。点「新建」写第一条；或让 Lead 从一次 run 里沉淀。' : '从左边选一条方法。'}
+              {loadState === 'absent'
+                ? '还没有方法。点「新建」写第一条；或让 Lead 从一次 run 里沉淀。'
+                : query.trim() !== '' ? '没有匹配的方法。' : '从左边选一条方法。'}
             </div>
           )}
           {(mode === 'edit' || mode === 'new') && renderEditor()}
