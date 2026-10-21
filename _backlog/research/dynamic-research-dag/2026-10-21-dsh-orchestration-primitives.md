@@ -5,7 +5,7 @@ intent: 为动态研究 DAG 设计卡提供同 pin 的 DSH 原生机制盘点、
 
 # 动态研究 DAG：DSH 原生机制盘点与本仓落点（2026-10-21）
 
-> 服务 = [_backlog/issues/2026-10-21-dynamic-research-dag.md](../../issues/2026-10-21-dynamic-research-dag.md)。
+> 服务 = [_backlog/issues/2026-10-21-dynamic-research-dag.md](../../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)。
 > 方法 = `vendor/dsh` 钉版 `dsh-v0.2.1-rc.2` 只读源码 + 本仓 preset / run 资产对照；行号 = 该 pin
 > 现状，升 pin 后按 [discipline-map](../../../docs/discipline-map.md) 的重审路径复核。
 > 分层：**事实**（有源码/文件锚点）/ **推断**（标明）/ **建议**（待拍板）。本材料不做选型决定。

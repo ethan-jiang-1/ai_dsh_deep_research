@@ -20,18 +20,23 @@ import type {} from '@deepseek-ai/dsh-api-remotes/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
+// `conversation.view`（Chat/Trajectory 同排的主界面 tab）声明在 ui-conversation。
+import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 // 品牌槽（`sidebar.brand.mark` / `sidebar.brand.name`）声明在 ui-sidebar 的 SlotMap——类型增强导入即登记槽名。
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 import {
   RESEARCH_TAB_KEY, RESEARCH_CONFIG_TAB_KEY, RESEARCH_STATUS_TAB_KIND, RESEARCH_CONFIG_TAB_KIND,
+  RESEARCH_GRAPH_TAB_KEY, RESEARCH_GRAPH_TAB_KIND,
   RESEARCH_FINAL_TAB_KEY, RESEARCH_FINAL_KIND, RESEARCH_FINAL_PATTERN, RESEARCH_FINAL_PATTERN_ROOT,
   RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT, RESEARCH_TOOL_KEYS,
-  RESEARCH_BRAND_MARK_SLOT, RESEARCH_BRAND_NAME_SLOT,
+  RESEARCH_BRAND_MARK_SLOT, RESEARCH_BRAND_NAME_SLOT, METHOD_LIBRARY_VIEW,
 } from './keys.ts'
-import { IconGaugeOutlineRegular, IconSettingsOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
+import { IconBranchOutlineRegular, IconGaugeOutlineRegular, IconSettingsOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import { ResearchToolCard } from './ResearchToolCard.tsx'
 import { ResearchStatusTab, ResearchStatusTitle, type JournalFrame, type FollowTarget } from './ResearchStatusTab.tsx'
 import { ResearchConfigTab } from './ResearchConfigTab.tsx'
+import { MethodLibraryView } from './MethodLibraryView.tsx'
+import { ResearchGraphTab } from './ResearchGraphTab.tsx'
 import { ResearchFinalTab } from './ResearchFinalTab.tsx'
 import { OrcaMark, OrcaName } from './BrandMark.tsx'
 import { draftInProgress, finalAddressOf, isFinalAddress, latestFinalDelivery, shouldOpenFinal } from '../lib/final-target.ts'
@@ -110,6 +115,16 @@ export function apply(ctx: ClientContext): void {
       guide: [{ id: RESEARCH_CONFIG_TAB_KEY, order: 2, title: () => '研究配置', description: () => '内置偏好与我的偏好库——一键把管理指令交给 Lead', icon: IconSettingsOutlineRegular }],
     }), 'deep-research-pack: research-config tab type')
 
+    // 「研究图谱」页签（2026-10-21 A0）：依赖形状 + worker 层 + 异常注意力；只读 + 让 Lead 调整。
+    // 不是第二个任务板——任务 CRUD 仍归 ui-agent-team（design/40 §6 边界）。
+    scoped.effect(() => scoped.sidebarRightTabs.register({
+      id: RESEARCH_GRAPH_TAB_KEY,
+      kind: RESEARCH_GRAPH_TAB_KIND,
+      priority: 'extension',
+      title: () => '研究图谱',
+      guide: [{ id: RESEARCH_GRAPH_TAB_KEY, order: 3, title: () => '研究图谱', description: () => '依赖波次、worker 与需要你注意的卡点', icon: IconBranchOutlineRegular }],
+    }), 'deep-research-pack: research-graph tab type')
+
     // 「终稿」页签（issue 2026-10-19-final-tab-in-sidebar）：**接管 `drt_<slug>/final.md` 的文件地址**
     // 而不是新造一个页签种类——交付卡片、结句内联引用、Files 树点到同一份文件，落的都是这一个
     // 页签（同地址幂等）。extension 带压过 vendor 兜底预览（`ui-sidebar-documentpreview` 是
@@ -167,10 +182,12 @@ export function apply(ctx: ClientContext): void {
     // limit 参数化（BUG-026）：默认 40 行 = bundle 渐进面小读取的历史选择（question.md 首行
     // 等）；「研究配置」页签的库读传大限（多条目库 >40 行，写死会静默截断——vendor 契约
     // limit 上限 = 配置 maxLines，默认 5000）。
-    const readFile = async (sessionId: SessionId, path: string, signal: AbortSignal, limit = 40) => {
+    const readFile = async (sessionId: SessionId, path: string, signal: AbortSignal, limit = 40, missingOk = false) => {
       try {
         const result = await scoped.remote.workspaceFiles.read(sessionId, path, { limit }, signal)
         if (!result.ok) {
+          const code = (result.error as { code?: string } | undefined)?.code
+          if (missingOk && code === 'workspace-file/not-found') return null
           console.error('[research-status] workspaceFiles.read 失败', JSON.stringify({ path, error: result.error }))
           return null
         }
@@ -228,12 +245,37 @@ export function apply(ctx: ClientContext): void {
         { name: RESEARCH_PANE_SLOT, key: RESEARCH_CONFIG_TAB_KEY, inject: () => ({ readFile, listDir, follow, sendInstruction }) },
         ResearchConfigTab,
       ),
+      // 「研究图谱」页签体：只读观察（DAG 图 + plan 原文 + 映射），不提供调整动作；
+      // plan.md 缺文件合法（readFile missingOk=true 不打 console.error）；follow 只用于
+      // sessionBindingOf 定位 `drt_<slug>/`，不对图折活动流。
+      scoped.slots.register(
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_GRAPH_TAB_KEY, inject: () => ({
+          readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) =>
+            readFile(sessionId, path, signal, limit, true),
+          follow,
+        }) },
+        ResearchGraphTab,
+      ),
       // 「终稿」页签体：读面 = 分页读 + 审查判定 + 版本目录（三处定表，见 lib/final-target）。
       scoped.slots.register(
         { name: RESEARCH_PANE_SLOT, key: RESEARCH_FINAL_TAB_KEY, inject: () => ({ readPage, readFile, listDir, statVersion }) },
         ResearchFinalTab,
       ),
     ]), 'deep-research-pack: research-pane tabs')
+
+    // 主界面「方法库」tab（2026-10-21 管理迁移）：Chat/Trajectory 同排，workspace 级库管理。
+    // 只读 workspaceFiles + W1 session/prompt（Lead 写文件）；不新增写权限、不直改 Team/文件。
+    scoped.effect(() => scoped.slots.inject(METHOD_LIBRARY_VIEW, () => scoped.slots.register({
+      name: METHOD_LIBRARY_VIEW,
+      id: 'method-library',
+      order: 20,
+      label: () => '方法库',
+      inject: () => ({
+        readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) =>
+          readFile(sessionId, path, signal, limit, true),
+        sendInstruction,
+      }),
+    }, MethodLibraryView)), 'deep-research-pack: method-library conversation view')
 
     // 活标题（HITL 挂起时"研究状态 · ⏳ 等你拍板"——用户点名的观察需求）：同一 fold 谓词
     //（末位事件 = 未答的 ask_user_question），标题组件自己开一条 follow 流（两条流都吃

@@ -1,24 +1,29 @@
 /**
- * 「研究图谱」页签体（W2 / F3）：依赖形状 + worker 层 + 异常注意力，**不是第二个任务板**。
+ * 「研究图谱」页签体（2026-10-21 UX 重做）：**只读观察面**，不是任务板、也不是操作台。
  *
- * 自上而下：
- *   ① 头部计数（进行 / 待派 / 可能卡住）+ 「让 Lead 调整」全局入口；
- *   ② 「需要你注意」条（attentionOf 的条目，点击展开对应节点）；
- *   ③ 纵向 Wave 分区（最长路径分层；节点卡竖排——side panel 宽度有限，不做横向大画布）；
- *   ④ 节点卡：id / subject / owner / 状态 / deps / plan 的 kind·depth；点击展开 detail
- *      （description、owner、deps、revision、plan 的 acceptance/output）+ 两条动作：
- *      「打开负责人」（注入 openOwner 才出现）与「让 Lead 调整」（预填建议发给 Lead，显示回执）。
+ * 布局：
+ *   ① 头部：plan/task 计数 + 「只读观察」标记；
+ *   ② 真正的 DAG 小图（SVG：**顶层** plan 节点或 Team 任务，边 = plan deps / blocked_by；
+ *      按最长路径分层，同层并行节点横排；复合节点标 `+N`，状态用颜色/圆点，点节点选中）；
+ *   ③ 诚实降级：plan 缺席 / Team 板无 blocked_by 时**不画假图**，明确说「没有依赖边可画」，
+ *      只给任务快照；旧 run 因此不会被伪装成 Wave 0；
+ *   ④ 顶层节点列表 + 选中详情（description 高度上限；复合子节点 N3.1… 在父节点详情展开；
+ *      `复制引用` 只复制 `drt_<slug>/N3`，不发送）；
+ *   ⑤ plan.md 原文（只读折叠）+ plan↔task 映射计数 + 未进 plan 的 Team 任务；
+ *      重号/悬空 parent/deps 显示只读结构提示。
+ *
+ * 交互边界（用户 2026-10-21 定调）：**这里只观察**。不提供「让 Lead 调整」这类动作——
+ * 用户要调整时应回到对话/rerun，而不是在一个观察面里发一条不知道调整什么的指令。
+ * 唯一动作是「打开负责人」（跳转观察队员会话）与「复制引用」，都不修改 Team 板。
  *
  * 数据面（全部既有投影，零新 RPC）：
  *   - 当前会话若是 teammate → `useSession(subagent.address.parentSessionId)` 找 Lead，读 **Lead**
  *     的 `agentTeam` 投影（`useSessions`；vendor `TeamAction` 同款）；
- *   - 队员忙闲 = `useSessionStatus`（整张状态快照；按 member id 取 running）；
- *   - worker chips = 每个队员会话的 `subagentCatalog` 投影（独立子组件按 member id 取，hooks 定数）；
- *   - plan.md = 注入的 `readFile(lead, 'plan.md', signal, 200)`，30s 重读；缺文件合法、不阻塞渲染。
+ *   - 队员忙闲 = `useSessionStatus`；worker chips = 每个队员会话的 `subagentCatalog`；
+ *   - plan.md = 先 follow journal 做 `sessionBindingOf` 找 `drt_<slug>/`，再按根/archive/_abandoned
+ *     三位置读 `plan.md`，30s 重读；缺文件合法；不按 workspace 根读。
  *
- * 权限边界（有意，不是未完成）：面板**不直接** reassign / complete / delete Team 任务——Team 的
- * 权威在 Lead；这里只发预填建议，Lead 执行并留痕（避免「UI 改了但 journal 没记」的第二条控制路径）。
- * 折算全住 `src/lib/plan-graph.ts`（keyless 单测）；本组件只画。fail-soft：空投影/空任务/缺 plan
+ * 折算仍住 `src/lib/plan-graph.ts`（keyless 单测）；本组件只画。fail-soft：空投影/空任务/缺 plan
  * 都退化为如实空态，不 throw。
  */
 import { useEffect, useState } from 'react'
@@ -31,6 +36,7 @@ import {
   attentionOf,
   countsOf,
   planIndex,
+  planIssuesOf,
   planNodeOf,
   wavesOf,
   workerChipsOf,
@@ -40,20 +46,28 @@ import {
   type PlanNode,
   type WorkerChip,
 } from '../lib/plan-graph.ts'
+import { sessionBindingOf } from '../lib/bundle-bind.ts'
 import type { ResearchGraphTabProps } from './research-graph/types.ts'
-export type { InstructionReceipt, ResearchGraphInjected, ResearchGraphTabProps } from './research-graph/types.ts'
+export type { ResearchGraphInjected, ResearchGraphTabProps } from './research-graph/types.ts'
 
-/** plan.md 重读间隔（任务靠投影推送；只有文件需要低频重扫——设计 §7 同款 30s）。 */
+/** plan.md 重读间隔（任务靠投影推送；只有文件需要低频重扫）。 */
 const PLAN_REFRESH_MS = 30_000
 /** plan.md 只读表头附近（节点表在文首；缺文件合法）。 */
-const PLAN_READ_LIMIT = 200
-/** 头部「让 Lead 调整」回执的 key（节点回执按 task id 区分）。 */
-const HEADER_RECEIPT_KEY = '*'
-/** 全局入口的预填建议（设计 §4「重写」话术）。 */
-const REWRITE_MESSAGE = '请按当前证据重写 plan.md 并同步 Team 板；说明加了/拆了哪些节点。'
+const PLAN_READ_LIMIT = 240
+
+/** DAG 小图的固定几何（SVG 坐标；side panel 窄，节点只放 id + 短标签）。 */
+const NODE_W = 108
+const NODE_H = 32
+const NODE_GAP_X = 12
+const LEVEL_GAP_Y = 28
+const MAP_PAD = 8
 
 const HEADER_STYLE: CSSProperties = { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8 }
-const MUTED_STYLE: CSSProperties = { fontSize: 11, opacity: 0.6, lineHeight: 1.5 }
+const MUTED_STYLE: CSSProperties = { fontSize: 11, opacity: 0.62, lineHeight: 1.5 }
+const BADGE_STYLE: CSSProperties = {
+  fontSize: 10, padding: '1px 6px', borderRadius: 999, background: '#00000008',
+  border: '1px solid #00000014', opacity: 0.8,
+}
 const BUTTON_STYLE: CSSProperties = {
   fontSize: 12, padding: '2px 8px', borderRadius: 4, border: '1px solid #00000026',
   background: '#00000008', cursor: 'pointer', color: 'inherit',
@@ -66,19 +80,32 @@ const EMPTY_STYLE: CSSProperties = { fontSize: 12, opacity: 0.6, lineHeight: 1.6
 const CARD_STYLE: CSSProperties = {
   border: '1px solid #00000014', borderRadius: 6, padding: '6px 8px', marginBottom: 6, background: '#00000005',
 }
-
-/** 一次发送的回执（key = task id 或 {@link HEADER_RECEIPT_KEY}）。 */
-interface SendReceipt {
-  readonly key: string
-  readonly state: 'sending' | 'sent' | 'failed'
-  readonly detail: string
+const BANNER_STYLE: CSSProperties = {
+  marginBottom: 8, padding: '6px 10px', borderRadius: 6,
+  background: '#f59e0b12', border: '1px solid #f59e0b38',
 }
 
-/** 节点卡的视觉状态（dot 图标 + 文案 + 左侧色条）。 */
+/** 节点视觉状态。 */
 interface NodeState {
   readonly text: string
   readonly icon: string
   readonly color: string
+}
+
+/** 图上的一个节点：plan 节点（优先）或 Team 任务；边 = blockedBy / plan deps。 */
+interface GraphNodeView {
+  readonly id: string
+  readonly label: string
+  readonly subject: string
+  readonly ownerName?: string
+  readonly status: string
+  readonly blockedBy: readonly string[]
+  readonly task?: TeamTaskView
+  readonly planNode?: PlanNode
+  readonly member?: TeamMemberProjection
+  readonly running?: boolean
+  readonly attention?: AttentionItem
+  readonly state: NodeState
 }
 
 /** worker chips 子组件的 props（hooks 从父级透传；每个成员实例化一次，hooks 数量恒定）。 */
@@ -88,13 +115,16 @@ interface WorkerChipsProps {
   readonly useSessionStatus: UseSessionStatus
 }
 
+interface DagMapProps {
+  readonly nodes: readonly GraphNodeView[]
+  readonly selectedId: string | null
+  readonly childCounts: ReadonlyMap<string, number>
+  readonly onSelect: (id: string) => void
+}
+
 /**
  * 节点状态：Team 任务状态 + owner 忙闲 + attention 事实三源合成。
  * 失败只从 attention 的 `owner-failed` 来（Team 任务没有 failed），卡住措辞带「可能」。
- * @param task - Team 任务视图。
- * @param running - owner 会话是否在跑（undefined = 未观测）。
- * @param attention - 该任务的注意力条目（可选）。
- * @returns 节点视觉状态。
  */
 function nodeStateOf(task: TeamTaskView, running: boolean | undefined, attention: AttentionItem | undefined): NodeState {
   if (task.status === 'completed') return { text: '完成', icon: '✓', color: '#16a34a' }
@@ -115,31 +145,6 @@ function severityIcon(severity: AttentionItem['severity']): string {
   return severity === 'critical' ? '✕' : severity === 'warning' ? '⚠' : '·'
 }
 
-/** 预填调整建议（按 attention 原因给结构化一句话；无原因给通用检查句）。 */
-function adjustmentMessage(task: TeamTaskView, attention: AttentionItem | undefined): string {
-  switch (attention?.reason) {
-    case 'unassigned':
-      return `${task.id}（${task.subject}）已 ready 但无人领取；请指派 owner，或说明为什么等。`
-    case 'stalled':
-      return `${task.id}（${task.subject}）的 owner 当前不在运行，可能卡住；请检查是否 interrupt / reassign / reopen，并在 journal 说明原因。`
-    case 'owner-failed':
-      return `${task.id}（${task.subject}）的 owner 会话失败；请重派或重开该节点，并在 journal 说明原因。`
-    case 'blocked-too-long':
-      return `${task.id}（${task.subject}）被 ${task.blockedBy.length > 0 ? task.blockedBy.join(', ') : '前置任务'} 阻塞过久；请检查前置是否卡住，或把 ${task.id} 拆小 / 改依赖。`
-    default:
-      return `${task.id}（${task.subject}）当前状态需要调整；请检查 plan.md 与 Team 板，并给出下一步。`
-  }
-}
-
-/** 回执行（已发送 / 失败；发送中给进度）。 */
-function receiptLine(receipt: SendReceipt): ReactNode {
-  if (receipt.state === 'sending') return <div style={MUTED_STYLE}>发送中…</div>
-  if (receipt.state === 'sent') {
-    return <div style={{ fontSize: 11, color: '#16a34a' }}>✓ 已发送给 Lead{receipt.detail !== '' ? `（${receipt.detail}）` : ''}</div>
-  }
-  return <div style={{ fontSize: 11, color: '#dc2626' }}>✕ 发送失败：{receipt.detail}</div>
-}
-
 /** plan.md 节点在 detail 里的只读摘要（只显示真实读到的列）。 */
 function planLines(node: PlanNode): ReactNode {
   return (
@@ -150,6 +155,7 @@ function planLines(node: PlanNode): ReactNode {
         {node.depth !== undefined ? ` · depth ${node.depth}` : ''}
         {node.ownerRole !== undefined ? ` · plan owner ${node.ownerRole}` : ''}
       </div>
+      {node.question !== undefined && <div style={{ opacity: 0.8 }}>question：{node.question}</div>}
       {node.deps.length > 0 && <div style={{ opacity: 0.8 }}>plan deps：{node.deps.join(', ')}</div>}
       {node.output !== undefined && <div style={{ opacity: 0.8 }}>output：{node.output}</div>}
       {node.acceptance !== undefined && <div style={{ opacity: 0.8 }}>acceptance：{node.acceptance}</div>}
@@ -157,11 +163,130 @@ function planLines(node: PlanNode): ReactNode {
   )
 }
 
+/** 短标签（SVG 内不换行，避免撑爆侧栏）。 */
+function shortLabel(text: string, max = 15): string {
+  const clean = text.replace(/\s+/g, ' ').trim()
+  return clean.length > max ? `${clean.slice(0, max - 1)}…` : clean
+}
+
+/** 节点填充/描边（状态色只做左侧条 + 小圆点；卡片背景保持中性，避免整屏花）。 */
+function fillOf(node: GraphNodeView): string {
+  if (node.status === 'completed') return '#f0fdf4'
+  if (node.status === 'in_progress') return '#eff6ff'
+  if (node.status === 'unplanned') return '#f8fafc'
+  return '#f8fafc'
+}
+
+/**
+ * 顶部 DAG 小图：按 `wavesOf` 分层；同层节点横排；边从 blocker 底边到 dependent 顶边。
+ * 没有边时不渲染（父级明确说“没有可画的 DAG”，不画假图）。
+ */
+function DagMap({ nodes, selectedId, childCounts, onSelect }: DagMapProps): ReactNode {
+  const waves = wavesOf(nodes)
+  if (waves.length === 0) return null
+  const pos = new Map<string, { x: number; y: number }>()
+  let maxRow = 1
+  waves.forEach((wave, row) => {
+    maxRow = Math.max(maxRow, wave.tasks.length)
+    wave.tasks.forEach((node, index) => {
+      pos.set(node.id, {
+        x: MAP_PAD + index * (NODE_W + NODE_GAP_X),
+        y: MAP_PAD + row * (NODE_H + LEVEL_GAP_Y),
+      })
+    })
+  })
+  const width = MAP_PAD * 2 + maxRow * NODE_W + Math.max(0, maxRow - 1) * NODE_GAP_X
+  const height = MAP_PAD * 2 + waves.length * NODE_H + Math.max(0, waves.length - 1) * LEVEL_GAP_Y
+  const known = new Set(nodes.map((node) => node.id))
+  return (
+    <div style={{
+      overflowX: 'auto', marginBottom: 6, border: '1px solid #00000012', borderRadius: 8,
+      padding: '6px 8px', background: '#fafbfc',
+    }}>
+      <svg
+        width={Math.max(300, width)}
+        height={height}
+        viewBox={`0 0 ${String(width)} ${String(height)}`}
+        role="img"
+        aria-label="研究依赖图：节点与依赖边"
+        style={{ display: 'block', margin: '0 auto' }}
+      >
+        <defs>
+          <marker id="research-graph-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <path d="M0,0 L7,3.5 L0,7 Z" fill="#94a3b8" />
+          </marker>
+        </defs>
+        {nodes.flatMap((node) => node.blockedBy
+          .filter((dep) => dep !== node.id && known.has(dep))
+          .map((dep) => {
+            const from = pos.get(dep)
+            const to = pos.get(node.id)
+            if (from === undefined || to === undefined) return null
+            const x1 = from.x + NODE_W / 2
+            const y1 = from.y + NODE_H
+            const x2 = to.x + NODE_W / 2
+            const y2 = to.y
+            const mid = (y1 + y2) / 2
+            return (
+              <path
+                key={`${dep}->${node.id}`}
+                d={`M ${String(x1)} ${String(y1)} C ${String(x1)} ${String(mid)}, ${String(x2)} ${String(mid)}, ${String(x2)} ${String(y2)}`}
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth={1.2}
+                markerEnd="url(#research-graph-arrow)"
+              />
+            )
+          }))}
+        {nodes.map((node) => {
+          const point = pos.get(node.id)
+          if (point === undefined) return null
+          const selected = node.id === selectedId
+          return (
+            <g
+              key={node.id}
+              transform={`translate(${String(point.x)},${String(point.y)})`}
+              role="button"
+              tabIndex={0}
+              aria-label={`${node.id} ${node.label} ${node.state.text}`}
+              style={{ cursor: 'pointer' }}
+              onClick={() => { onSelect(node.id) }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  onSelect(node.id)
+                }
+              }}
+            >
+              <title>{`${node.id} · ${node.label} · ${node.ownerName ?? '未指派'} · ${node.state.text}`}</title>
+              <rect
+                width={NODE_W}
+                height={NODE_H}
+                rx={6}
+                fill={fillOf(node)}
+                stroke={selected ? '#6366f1' : '#cbd5e1'}
+                strokeWidth={selected ? 2 : 1}
+                opacity={node.status === 'unplanned' ? 0.75 : 1}
+              />
+              <text x={8} y={13} fontSize={10} fontWeight={600} fill="#0f172a">{node.id}</text>
+              <text x={8} y={25} fontSize={9} fill="#475569">{shortLabel(node.label)}</text>
+              <circle cx={NODE_W - 10} cy={10} r={3} fill={node.state.color} />
+              {(childCounts.get(node.id) ?? 0) > 0 && (
+                <text x={NODE_W - 8} y={28} textAnchor="end" fontSize={8} fill="#6366f1">
+                  +{String(childCounts.get(node.id))}
+                </text>
+              )}
+            </g>
+          )
+        })}
+      </svg>
+    </div>
+  )
+}
+
 /**
  * 一个队员的 worker chips（`subagentCatalog` 投影 → 二层 worker 的 label/mode/忙闲）。
  * 独立子组件：每个成员实例化一次，hooks 数量恒定（不随 roster 变化在父级循环调 hook）。
- * @param props - 成员 id + 透传的两个会话 hooks。
- * @returns chip 行；无 worker 时 null。
  */
 function WorkerChips({ memberId, useSessions, useSessionStatus }: WorkerChipsProps): ReactNode {
   const catalog = useSessions((state) => state.projectionsBySession[memberId]?.values.subagentCatalog)
@@ -181,49 +306,89 @@ function WorkerChips({ memberId, useSessions, useSessionStatus }: WorkerChipsPro
 }
 
 /**
- * 「研究图谱」页签体。
- * @param props - 槽标准 props（sessionId / useSession / useSessions / useSessionStatus）+ 注入面。
- * @returns 竖向 wave 图谱面板。
+ * 「研究图谱」页签体（只读观察）。
+ * @param props - 槽标准 props + 注入面（readFile / openOwner）。
  */
 export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   // 当前会话若是 teammate，读 Lead 的团队投影（TeamAction 同款；队员自己的投影没有整队视图）。
   const leadSessionId = props.useSession((snapshot) => snapshot.subagent?.address.parentSessionId) ?? props.sessionId
   const team: TeamProjection | undefined = props.useSessions((state) => state.projectionsBySession[leadSessionId]?.values.agentTeam)
-  // 整张 UI 状态快照（成员忙闲按 id 取；选择器返回稳定 Map 引用，不在选择器里建对象）。
   const statuses = props.useSessionStatus((state) => state)
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [receipt, setReceipt] = useState<SendReceipt | null>(null)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [boundSlug, setBoundSlug] = useState<string | null>(null)
   const [plan, setPlan] = useState<PlanIndex | null>(null)
-  const [planState, setPlanState] = useState<'loading' | 'missing' | 'ready'>('loading')
+  const [planText, setPlanText] = useState<string | null>(null)
+  const [planState, setPlanState] = useState<'loading' | 'missing' | 'unbound' | 'ready'>('loading')
 
-  // plan.md 可选读：缺文件/读失败都降级 missing（不阻塞图；任务真相仍来自投影）。
+  // journal → 本会话绑定的 run bundle（只用于 plan 基址；不折活动流）。
+  // read 弱绑定 + kickoffSeen = 立项预检读旧 bundle，不能当本 run；write 命中后才显示 plan。
   useEffect(() => {
     const controller = new AbortController()
     let stopped = false
+    let events: unknown[] = []
+    let lastSlug: string | null = null
+    setBoundSlug(null)
+    void (async () => {
+      try {
+        for await (const frame of props.follow(leadSessionId, controller.signal)) {
+          if (frame.kind === 'history') events = [...frame.events]
+          else events = [...events, frame.event]
+          const binding = sessionBindingOf(events)
+          const trusted = binding.slug !== undefined && !(binding.boundBy === 'read' && binding.kickoffSeen)
+          const nextSlug = trusted ? binding.slug ?? null : null
+          if (nextSlug !== lastSlug) {
+            lastSlug = nextSlug
+            if (!stopped) setBoundSlug(nextSlug)
+          }
+        }
+      } catch (cause) {
+        if (!controller.signal.aborted) console.error('[research-graph] journal follow 失败', String(cause))
+      }
+    })()
+    return () => { stopped = true; controller.abort() }
+  }, [leadSessionId])
+
+  // plan.md 可选读：缺文件/读失败都降级 missing（不阻塞图；任务真相仍来自投影）。
+  // 基址必须带 `drt_<slug>/`（三位置回退）——workspace 根没有 plan.md。
+  useEffect(() => {
+    const controller = new AbortController()
+    let stopped = false
+    let timer: ReturnType<typeof setInterval> | undefined
     setPlan(null)
+    setPlanText(null)
+    if (boundSlug === null) {
+      setPlanState('unbound')
+      return () => { stopped = true; controller.abort() }
+    }
     setPlanState('loading')
     const load = async (): Promise<void> => {
       try {
-        const text = await props.readFile(leadSessionId, 'plan.md', controller.signal, PLAN_READ_LIMIT)
-        if (stopped) return
-        if (text === null) {
-          setPlan(null)
-          setPlanState('missing')
-          return
+        for (const base of [`drt_${boundSlug}`, `archive/drt_${boundSlug}`, `_abandoned/drt_${boundSlug}`]) {
+          const text = await props.readFile(leadSessionId, `${base}/plan.md`, controller.signal, PLAN_READ_LIMIT)
+          if (stopped) return
+          if (text !== null) {
+            setPlan(planIndex(text))
+            setPlanText(text)
+            setPlanState('ready')
+            return
+          }
         }
-        setPlan(planIndex(text))
-        setPlanState('ready')
+        setPlan(null)
+        setPlanText(null)
+        setPlanState('missing')
       } catch (cause) {
         if (stopped) return
         setPlan(null)
+        setPlanText(null)
         setPlanState('missing')
         console.error('[research-graph] plan.md 读取失败', String(cause))
       }
     }
     void load()
-    const timer = setInterval(() => { void load() }, PLAN_REFRESH_MS)
-    return () => { stopped = true; controller.abort(); clearInterval(timer) }
-  }, [leadSessionId])
+    timer = setInterval(() => { void load() }, PLAN_REFRESH_MS)
+    return () => { stopped = true; controller.abort(); if (timer !== undefined) clearInterval(timer) }
+  }, [leadSessionId, boundSlug])
 
   const tasks: readonly TeamTaskView[] = team?.tasks ?? []
   const members: readonly TeamMemberProjection[] = team?.members ?? []
@@ -238,26 +403,89 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   }
   const attention = attentionOf(tasks, memberStatus, Date.now(), DEFAULT_ATTENTION_THRESHOLDS)
   const counts = countsOf(tasks, memberStatus)
-  const waves = wavesOf(tasks)
+  const planNodes: readonly PlanNode[] = plan?.nodes ?? []
+  const topPlanNodes: readonly PlanNode[] = (plan?.topLevel ?? planNodes)
+    .filter((node, index, all) => all.findIndex((candidate) => candidate.id === node.id) === index)
+  const childrenByParent = plan?.childrenByParent ?? new Map<string, readonly PlanNode[]>()
+  const planIssues = planIssuesOf(plan)
+  const childCounts = new Map<string, number>()
+  for (const [parentId, children] of childrenByParent) childCounts.set(parentId, children.length)
 
-  const send = (key: string, text: string): void => {
-    const sendInstruction = props.sendInstruction
-    if (typeof sendInstruction !== 'function') {
-      setReceipt({ key, state: 'failed', detail: '未接上发送通道' })
-      return
-    }
-    setReceipt({ key, state: 'sending', detail: '' })
-    void (async () => {
-      try {
-        const result = await sendInstruction(leadSessionId, text)
-        if (result.ok) setReceipt({ key, state: 'sent', detail: result.detail ?? '已发送给 Lead' })
-        else setReceipt({ key, state: 'failed', detail: result.detail ?? '发送失败' })
-      } catch (cause) {
-        setReceipt({ key, state: 'failed', detail: String(cause) })
-      }
-    })()
+  // plan ↔ Team 任务映射（task_id / id 精确；不按数字后缀猜）。plan 优先作为图节点。
+  const taskByPlanId = new Map<string, TeamTaskView>()
+  for (const task of tasks) {
+    const planNode = planNodeOf(plan, task.id)
+    if (planNode !== undefined) taskByPlanId.set(planNode.id, task)
   }
+  const mappedTaskIds = new Set([...taskByPlanId.values()].map((task) => task.id))
+  const unmappedTasks = planNodes.length > 0 ? tasks.filter((task) => !mappedTaskIds.has(task.id)) : []
 
+  // 顶层图只画 parent 缺省的节点；N3.1… 默认收在 N3 详情里（复合节点折叠）。
+  const graphNodes: readonly GraphNodeView[] = planNodes.length > 0
+    ? topPlanNodes.map((planNode) => {
+      const task = taskByPlanId.get(planNode.id)
+      const owner = task?.ownerName ?? planNode.ownerRole
+      const member = owner !== undefined ? memberByName.get(owner) : undefined
+      const running = member !== undefined ? statuses.get(member.id)?.running : undefined
+      const attentionItem = task !== undefined ? attention.find((entry) => entry.taskId === task.id) : undefined
+      const state = task !== undefined
+        ? nodeStateOf(task, running, attentionItem)
+        : { text: '未执行', icon: '○', color: '#94a3b8' }
+      return {
+        id: planNode.id,
+        label: planNode.kind ?? planNode.id,
+        subject: planNode.question ?? planNode.output ?? '',
+        ...(owner !== undefined ? { ownerName: owner } : {}),
+        status: task?.status ?? 'unplanned',
+        blockedBy: planNode.deps,
+        ...(task !== undefined ? { task } : {}),
+        planNode,
+        ...(member !== undefined ? { member } : {}),
+        ...(running !== undefined ? { running } : {}),
+        ...(attentionItem !== undefined ? { attention: attentionItem } : {}),
+        state,
+      }
+    })
+    : tasks.map((task) => {
+      const owner = task.ownerName
+      const member = owner !== undefined ? memberByName.get(owner) : undefined
+      const running = member !== undefined ? statuses.get(member.id)?.running : undefined
+      const attentionItem = attention.find((entry) => entry.taskId === task.id)
+      return {
+        id: task.id,
+        label: task.subject ?? task.id,
+        subject: task.subject ?? '',
+        ...(owner !== undefined ? { ownerName: owner } : {}),
+        status: task.status,
+        blockedBy: task.blockedBy,
+        task,
+        ...(member !== undefined ? { member } : {}),
+        ...(running !== undefined ? { running } : {}),
+        ...(attentionItem !== undefined ? { attention: attentionItem } : {}),
+        state: nodeStateOf(task, running, attentionItem),
+      }
+    })
+
+  const knownIds = new Set(graphNodes.map((node) => node.id))
+  const hasEdges = graphNodes.some((node) => node.blockedBy.some((dep) => dep !== node.id && knownIds.has(dep)))
+  const hasPlan = planNodes.length > 0
+  const hasTopLevel = topPlanNodes.length > 0
+  const waves = wavesOf(graphNodes)
+  const nodeByTaskId = new Map<string, GraphNodeView>()
+  for (const node of graphNodes) {
+    if (node.task !== undefined) nodeByTaskId.set(node.task.id, node)
+  }
+  const mappedCount = taskByPlanId.size
+
+  const focusNode = (nodeId: string): void => {
+    setExpandedId(nodeId)
+    if (typeof document === 'undefined') return
+    document.getElementById(`research-graph-${nodeId}`)?.scrollIntoView({ block: 'nearest' })
+  }
+  const focusTask = (taskId: string): void => {
+    const node = nodeByTaskId.get(taskId)
+    focusNode(node?.id ?? taskId)
+  }
   const openOwner = (member: TeamMemberProjection): void => {
     const opener = props.openOwner
     if (typeof opener !== 'function') return
@@ -268,32 +496,70 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     }
   }
 
-  const renderNode = (task: TeamTaskView): ReactNode => {
-    const owner = task.ownerName
-    const member = owner !== undefined ? memberByName.get(owner) : undefined
-    const running = member !== undefined ? statuses.get(member.id)?.running : undefined
-    const item = attention.find((entry) => entry.taskId === task.id)
-    const planNode = planNodeOf(plan, task.id)
-    const expanded = expandedId === task.id
-    const state = nodeStateOf(task, running, item)
+  // 只复制引用，不发任何指令；用户把 `drt_<slug>/N3` 贴回对话即可。
+  const copyReference = (node: GraphNodeView): void => {
+    const text = boundSlug !== null ? `drt_${boundSlug}/${node.id}` : node.id
+    const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard
+    if (clipboard === undefined) return
+    void clipboard.writeText(text).then(() => {
+      setCopiedId(node.id)
+      setTimeout(() => { setCopiedId((current) => current === node.id ? null : current) }, 1800)
+    }).catch((cause: unknown) => {
+      console.error('[research-graph] 复制引用失败', String(cause))
+    })
+  }
+
+  const stateNote = (() => {
+    if (planState === 'loading') return null
+    if (boundSlug === null) {
+      return {
+        title: '本会话尚未绑定 run',
+        body: 'journal 里还没有可信的 `drt_<slug>/` 写入（立项/预检读旧 bundle 不算）。Team 任务仍显示；Lead 写 plan.md 后这里会自动出现 DAG。',
+      }
+    }
+    if (hasPlan && !hasTopLevel) {
+      return {
+        title: 'plan 只有子节点，顶层图为空',
+        body: '子节点必须挂在真实父节点上；看下方「plan 结构提示」修正 parent，或补回顶层节点。',
+      }
+    }
+    if (hasPlan && hasEdges) return null
+    if (hasPlan && !hasEdges) return { title: 'plan 有节点，但 Team 板没有 blocked_by', body: '图按 plan deps 画；执行镜像没有记录依赖边。' }
+    if (!hasPlan && hasEdges) return { title: 'plan.md 缺席；图来自 Team blocked_by', body: '旧 run 常见。图是任务板的依赖，不是 plan.md 的执行图。' }
+    return {
+      title: '没有可画的 DAG',
+      body: planState === 'missing'
+        ? '此 run 没有 plan.md（旧 run / 未落盘），Team 板也没有 blocked_by。下面是任务快照，不是 DAG；rerun 会按 plan.md 生成执行图。'
+        : 'plan.md 没有可读节点表，Team 板也没有 blocked_by。下面是任务快照，不是 DAG。',
+    }
+  })()
+
+  const renderNode = (node: GraphNodeView): ReactNode => {
+    const task = node.task
+    const planNode = node.planNode
+    const member = node.member
+    const expanded = expandedId === node.id
+    const childNodes = planNode !== undefined ? childrenByParent.get(planNode.id) ?? [] : []
     return (
-      <article key={task.id} style={{ ...CARD_STYLE, borderLeft: `3px solid ${state.color}` }}>
+      <article key={node.id} id={`research-graph-${node.id}`} style={{ ...CARD_STYLE, borderLeft: `3px solid ${node.state.color}` }}>
         <button
           type="button"
           aria-expanded={expanded}
-          onClick={() => { setExpandedId(expanded ? null : task.id) }}
+          onClick={() => { setExpandedId(expanded ? null : node.id) }}
           style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'inherit', font: 'inherit' }}
         >
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
-            <strong style={{ fontSize: 13 }}>{task.id}</strong>
-            <span style={{ fontSize: 13, flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>{task.subject}</span>
-            <span style={{ fontSize: 11, color: state.color, whiteSpace: 'nowrap' }}>{state.icon} {state.text}</span>
+            <strong style={{ fontSize: 13 }}>{node.id}</strong>
+            {planNode?.kind !== undefined && <span style={{ fontSize: 11, opacity: 0.65 }}>{planNode.kind}</span>}
+            {childNodes.length > 0 && <span style={{ fontSize: 10, color: '#6366f1' }}>内部 {String(childNodes.length)}</span>}
+            <span style={{ fontSize: 12, flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>{shortLabel(node.subject, 72)}</span>
+            <span style={{ fontSize: 11, color: node.state.color, whiteSpace: 'nowrap' }}>{node.state.icon} {node.state.text}</span>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 11, opacity: 0.65, marginTop: 2 }}>
-            <span>owner：{owner ?? '未指派'}</span>
-            {task.blockedBy.length > 0 && <span>deps：{task.blockedBy.join(', ')}</span>}
+            <span>owner：{node.ownerName ?? '未指派'}</span>
+            {node.blockedBy.length > 0 && <span>deps：{node.blockedBy.join(', ')}</span>}
             {planNode?.depth !== undefined && <span>depth：{planNode.depth}</span>}
-            {planNode?.kind !== undefined && <span>{planNode.kind}</span>}
+            {task !== undefined && <span>task：{task.id}</span>}
             {member !== undefined && (
               <WorkerChips memberId={member.id} useSessions={props.useSessions} useSessionStatus={props.useSessionStatus} />
             )}
@@ -301,13 +567,34 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         </button>
         {expanded && (
           <div style={{ marginTop: 6, paddingTop: 6, borderTop: '1px solid #00000010', fontSize: 12, lineHeight: 1.6 }}>
-            {task.description !== '' && <div style={{ whiteSpace: 'pre-wrap', opacity: 0.85 }}>{task.description}</div>}
-            <div style={{ opacity: 0.8 }}>owner：{owner ?? '未指派'}{member !== undefined ? `（${member.phase}）` : ''}</div>
-            {task.blockedBy.length > 0 && <div style={{ opacity: 0.8 }}>依赖：{task.blockedBy.join(', ')}</div>}
-            <div style={{ opacity: 0.8 }}>revision：{task.revision}{task.ready ? ' · ready' : ''}</div>
-            {planNode !== undefined ? planLines(planNode) : <div style={{ opacity: 0.5 }}>plan.md 未记录本任务（或 task_id 尚未回填）</div>}
-            {item !== undefined && <div style={{ color: '#b45309', marginTop: 2 }}>{severityIcon(item.severity)} {item.message}</div>}
-            <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
+            {task?.description !== undefined && task.description !== '' && (
+              <div style={{ whiteSpace: 'pre-wrap', opacity: 0.85, maxHeight: 120, overflowY: 'auto', paddingRight: 4 }}>{task.description}</div>
+            )}
+            <div style={{ opacity: 0.8 }}>owner：{node.ownerName ?? '未指派'}{member !== undefined ? `（${member.phase}）` : ''}</div>
+            {node.blockedBy.length > 0 && <div style={{ opacity: 0.8 }}>依赖：{node.blockedBy.join(', ')}</div>}
+            {task !== undefined && <div style={{ opacity: 0.8 }}>revision：{task.revision}{task.ready ? ' · ready' : ''}</div>}
+            {planNode !== undefined
+              ? planLines(planNode)
+              : <div style={{ opacity: 0.5 }}>plan.md 未记录此节点（旧 run；rerun 时会生成 plan）</div>}
+            {childNodes.length > 0 && (
+              <div style={{ marginTop: 4, padding: '4px 6px', border: '1px solid #6366f126', borderRadius: 4, background: '#6366f108' }}>
+                <div style={{ fontSize: 11, color: '#6366f1', marginBottom: 2 }}>内部节点（复合展开，只读）</div>
+                {childNodes.map((child) => {
+                  const childTask = taskByPlanId.get(child.id)
+                  return (
+                    <div key={child.id} style={{ fontSize: 11, opacity: 0.85 }}>
+                      <strong>{child.id}</strong>
+                      {child.kind !== undefined ? ` · ${child.kind}` : ''}
+                      {` · ${childTask?.status ?? '未执行'}`}
+                      {child.ownerRole !== undefined ? ` · ${child.ownerRole}` : ''}
+                      {child.deps.length > 0 ? ` · deps ${child.deps.join(', ')}` : ''}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            {node.attention !== undefined && <div style={{ color: '#b45309', marginTop: 2 }}>{severityIcon(node.attention.severity)} {node.attention.message}</div>}
+            <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap', alignItems: 'center' }}>
               {props.openOwner !== undefined && member !== undefined && member.id !== leadSessionId
                 && member.phase !== 'failed' && member.phase !== 'provisioning' && (
                 <button type="button" style={BUTTON_STYLE} onClick={() => { openOwner(member) }}>打开负责人</button>
@@ -315,11 +602,11 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
               <button
                 type="button"
                 style={BUTTON_STYLE}
-                disabled={receipt?.key === task.id && receipt.state === 'sending'}
-                onClick={() => { send(task.id, adjustmentMessage(task, item)) }}
-              >让 Lead 调整</button>
+                title={boundSlug !== null ? `复制 drt_${boundSlug}/${node.id}，粘贴到对话引用这个节点` : `复制 ${node.id}`}
+                onClick={() => { copyReference(node) }}
+              >{copiedId === node.id ? '已复制' : '复制引用'}</button>
+              <span style={MUTED_STYLE}>只读观察；调整请在对话里进行或 rerun。</span>
             </div>
-            {receipt?.key === task.id && receiptLine(receipt)}
           </div>
         )}
       </article>
@@ -331,39 +618,53 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     <div style={{ padding: 12, flex: 1, minHeight: 0, overflowY: 'auto' }}>
       <div style={HEADER_STYLE}>
         <strong style={{ fontSize: 14 }}>研究图谱</strong>
-        {team !== undefined && (
-          <span style={MUTED_STYLE}>{counts.running} 进行 · {counts.ready} 待派 · {counts.stalled} 可能卡住</span>
-        )}
-        <span style={{ flex: 1 }} />
-        <button
-          type="button"
-          style={BUTTON_STYLE}
-          disabled={receipt?.key === HEADER_RECEIPT_KEY && receipt.state === 'sending'}
-          onClick={() => { send(HEADER_RECEIPT_KEY, REWRITE_MESSAGE) }}
-        >让 Lead 调整</button>
+        <span style={BADGE_STYLE}>只读观察</span>
+        {boundSlug !== null && <span style={{ ...MUTED_STYLE, opacity: 0.5 }}>run drt_{shortLabel(boundSlug, 32)}</span>}
+        <span style={MUTED_STYLE}>
+          {hasPlan ? `plan ${String(topPlanNodes.length)} 顶层${planNodes.length !== topPlanNodes.length ? ` / ${String(planNodes.length)} 节点` : ''} · ` : ''}Team {String(counts.total)} 任务 · 完成 {String(counts.done)}
+        </span>
+        {counts.running > 0 && <span style={{ ...MUTED_STYLE, color: '#2563eb' }}>● {String(counts.running)} 进行</span>}
+        {counts.ready > 0 && <span style={{ ...MUTED_STYLE, color: '#b45309' }}>○ {String(counts.ready)} 待派</span>}
+        {counts.stalled > 0 && <span style={{ ...MUTED_STYLE, color: '#b45309' }}>⚠ {String(counts.stalled)} 可能卡住</span>}
       </div>
-      {receipt?.key === HEADER_RECEIPT_KEY && receiptLine(receipt)}
+
+      {stateNote !== null && (
+        <div style={BANNER_STYLE}>
+          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>{stateNote.title}</div>
+          <div style={MUTED_STYLE}>{stateNote.body}</div>
+        </div>
+      )}
+
+      {planIssues.length > 0 && (
+        <div style={{ ...BANNER_STYLE, background: '#dc262610', borderColor: '#dc262640' }}>
+          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2, color: '#b91c1c' }}>plan 结构提示（只读）</div>
+          {planIssues.slice(0, 6).map((issue) => (
+            <div key={`${issue.kind}:${issue.nodeId}:${issue.message}`} style={{ ...MUTED_STYLE, color: '#b91c1c' }}>{issue.message}</div>
+          ))}
+          {planIssues.length > 6 && <div style={MUTED_STYLE}>…另有 {String(planIssues.length - 6)} 条</div>}
+        </div>
+      )}
+
+      {hasPlan && (
+        <div style={{ ...MUTED_STYLE, marginBottom: 6 }}>
+          plan{plan?.version !== undefined ? ` ${plan.version}` : ''} · {String(topPlanNodes.length)} 顶层 / {String(planNodes.length)} 节点 · Team {String(tasks.length)} 任务 · 已映射 {String(mappedCount)}
+          {unmappedTasks.length > 0 ? ` · 未进 plan 的 Team 任务 ${String(unmappedTasks.length)}` : ''}
+        </div>
+      )}
 
       {attention.length > 0 && (
         <div style={{ marginBottom: 10, padding: '6px 10px', borderRadius: 6, background: '#f59e0b14', border: '1px solid #f59e0b40' }}>
-          <div style={{ fontWeight: 600, fontSize: 12, marginBottom: 2 }}>需要你注意</div>
+          <div style={{ fontWeight: 600, fontSize: 12, marginBottom: 2 }}>需要你注意（只读）</div>
           {attention.slice(0, 8).map((item) => (
             <button
               key={`${item.taskId}:${item.reason}`}
               type="button"
               style={ATTENTION_ROW_STYLE}
-              onClick={() => { setExpandedId(item.taskId) }}
+              onClick={() => { focusTask(item.taskId) }}
             >{severityIcon(item.severity)} {item.taskId} · {item.message}</button>
           ))}
-          {attention.length > 8 && <div style={MUTED_STYLE}>…另有 {attention.length - 8} 条</div>}
+          {attention.length > 8 && <div style={MUTED_STYLE}>…另有 {String(attention.length - 8)} 条</div>}
         </div>
-      )}
-
-      {planState === 'missing' && (
-        <div style={MUTED_STYLE}>未发现 plan.md——只显示 Team 任务；kind / depth / acceptance 待 Lead 排计划后出现。</div>
-      )}
-      {planState === 'ready' && plan !== null && plan.nodes.length === 0 && (
-        <div style={MUTED_STYLE}>plan.md 里没有可读的节点表（或表头缺 id 列）——只显示 Team 任务。</div>
       )}
 
       {team === undefined && (
@@ -371,21 +672,57 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
           还没有团队投影——研究图谱在 Lead 组队后出现（当前是队员会话时，这里会读 Lead 的团队）。
         </div>
       )}
-      {team !== undefined && tasks.length === 0 && (
+      {team !== undefined && tasks.length === 0 && planNodes.length === 0 && (
         <div style={EMPTY_STYLE}>
-          任务板还没有任务——Lead 排好计划、建 Team 任务后，这里按依赖波次显示节点。
-          {plan !== null && plan.nodes.length > 0
-            ? `plan.md 已有 ${String(plan.nodes.length)} 个节点（${plan.nodes.map((node) => node.id).join(', ')}）。`
-            : ''}
+          任务板还没有任务——Lead 排好计划、建 Team 任务后，这里画出依赖图。
         </div>
       )}
 
-      {waves.map((wave) => (
-        <section key={wave.level} style={{ marginBottom: 10 }}>
-          <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>WAVE {wave.level}</div>
-          {wave.tasks.map((task) => renderNode(task))}
+      {hasEdges && (
+        <>
+          <DagMap nodes={graphNodes} selectedId={expandedId} childCounts={childCounts} onSelect={setExpandedId} />
+          <div style={{ ...MUTED_STYLE, marginBottom: 8 }}>
+            → 依赖边（plan deps / Team blocked_by） · 点节点选中详情 · 圆点 = 状态
+          </div>
+        </>
+      )}
+
+      {hasEdges
+        ? waves.map((wave) => (
+          <section key={wave.level} style={{ marginBottom: 10 }}>
+            <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>
+              WAVE {wave.level + 1}{wave.tasks.length > 1 ? ` · ${String(wave.tasks.length)} 个并行` : ''}
+            </div>
+            {wave.tasks.map((node) => renderNode(node))}
+          </section>
+        ))
+        : graphNodes.length > 0 && (
+          <section style={{ marginBottom: 10 }}>
+            <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>任务快照（无依赖边）</div>
+            {graphNodes.map((node) => renderNode(node))}
+          </section>
+        )}
+
+      {unmappedTasks.length > 0 && (
+        <section style={{ marginBottom: 10 }}>
+          <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>未进 plan 的 Team 任务</div>
+          {unmappedTasks.map((task) => (
+            <div key={task.id} style={{ ...CARD_STYLE, fontSize: 12 }}>
+              <strong>{task.id}</strong> · {shortLabel(task.subject ?? task.id, 60)} · owner {task.ownerName ?? '未指派'} · {task.status}
+            </div>
+          ))}
         </section>
-      ))}
+      )}
+
+      {planState === 'ready' && planText !== null && (
+        <details style={{ marginTop: 8 }}>
+          <summary style={{ ...MUTED_STYLE, cursor: 'pointer' }}>查看 plan.md 原文（只读，含重写记录）</summary>
+          <pre style={{
+            maxHeight: 180, overflow: 'auto', whiteSpace: 'pre-wrap', fontSize: 11, lineHeight: 1.5,
+            background: '#00000005', padding: 6, borderRadius: 4, marginTop: 4,
+          }}>{planText}</pre>
+        </details>
+      )}
     </div>
   )
 }

@@ -6,7 +6,9 @@
  * - `attentionOf` / `countsOf`：任务 + 队员状态（roster phase + `useSessionStatus.running`）→
  *   「需要你注意」条与头部计数；
  * - `workerChipsOf`：队员会话的 `subagentCatalog` 投影 → 二层 worker chip；
- * - `planIndex` / `planNodeOf`：`plan.md` 节点表（N-id / kind / depth / acceptance / task_id）→ 查询面。
+ * - `planIndex` / `planNodeOf`：`plan.md` 节点表（id / parent / kind / depth / acceptance /
+ *   task_id）→ 查询面；`topLevel` 只含 parent 缺省的节点（复合子节点 N3.1… 默认不进图）。
+ * - `planIssuesOf`：重号 / 悬空 parent / 悬空 dep / 自依赖 → 只读稳定性提示（不是 node-gate）。
  *
  * 诚实纪律（页签定位 = 依赖形状 + worker 层 + 异常注意力，不是第二个任务板）：
  * - Team 任务状态只有 `pending | in_progress | completed | deleted`——**没有 failed**。本模块
@@ -122,9 +124,11 @@ export interface WorkerChip {
   readonly createdAt?: number
 }
 
-/** `plan.md` 节点表的一行（canonical N 节点）。 */
+/** `plan.md` 节点表的一行（canonical N 节点；N 是 ID 不是序号）。 */
 export interface PlanNode {
   readonly id: string
+  /** 复合节点的父节点 id；顶层缺省。子号 `N3.1` 的 parent = `N3`，父节点仍在表里。 */
+  readonly parent?: string
   /** `task_id` 列：Team 任务与会话映射（缺省时只有 `byId` 精确命中）。 */
   readonly taskId?: string
   readonly kind?: string
@@ -141,6 +145,21 @@ export interface PlanIndex {
   readonly nodes: readonly PlanNode[]
   readonly byId: ReadonlyMap<string, PlanNode>
   readonly byTaskId: ReadonlyMap<string, PlanNode>
+  /** 图版本（`图版本：v1` / `plan_version: v1`）；缺省 undefined。 */
+  readonly version?: string
+  /** 顶层节点（parent 缺省）；复合子节点不在顶层图里。 */
+  readonly topLevel: readonly PlanNode[]
+  /** parent id → 直接子节点；父节点不存在时仍按 parent 字符串归组（供稳定性提示）。 */
+  readonly childrenByParent: ReadonlyMap<string, readonly PlanNode[]>
+}
+
+/** plan 结构稳定性问题（只读提示；不阻断 run，不是 node-gate）。 */
+export type PlanIssueKind = 'duplicate-id' | 'missing-parent' | 'dangling-dep' | 'self-dependency'
+
+export interface PlanIssue {
+  readonly kind: PlanIssueKind
+  readonly nodeId: string
+  readonly message: string
 }
 
 const SEVERITY_RANK: Record<AttentionSeverity, number> = { critical: 0, warning: 1, info: 2 }
@@ -459,8 +478,15 @@ export function workerChipsOf(
 }
 
 /** 空 plan 索引（节点表缺席的合法形态）。 */
-function emptyPlanIndex(): PlanIndex {
-  return { nodes: [], byId: new Map(), byTaskId: new Map() }
+function emptyPlanIndex(version?: string): PlanIndex {
+  return {
+    nodes: [],
+    byId: new Map(),
+    byTaskId: new Map(),
+    ...(version !== undefined ? { version } : {}),
+    topLevel: [],
+    childrenByParent: new Map(),
+  }
 }
 
 /** 一行 markdown 表格 → 单元格（非表格行 → 空数组）。 */
@@ -490,14 +516,16 @@ function isSeparator(cells: readonly string[]): boolean {
 }
 
 /**
- * 解析 `plan.md` 的节点表（N-id / kind / question / owner_role / deps / output / acceptance /
- * depth / task_id）。表头缺失、表格畸形、文本缺席 → 空索引（合法退化，不是错误）。
+ * 解析 `plan.md` 的节点表（id / parent / kind / question / owner_role / deps / output /
+ * acceptance / depth / task_id）。表头缺失、表格畸形、文本缺席 → 空索引（合法退化，不是错误）。
  * `task_id` 列是 Team 任务 ↔ N 节点的唯一权威映射（F8）；不按数字后缀猜映射。
+ * `parent` 是复合节点的层级；顶层图只取 parent 缺省的节点。
  * @param text - `plan.md` 文本（可为 null/undefined）。
  * @returns 节点查询面。
  */
 export function planIndex(text: string | null | undefined): PlanIndex {
   if (typeof text !== 'string' || text.trim() === '') return emptyPlanIndex()
+  const version = /(?:图版本|plan_version)\s*[：:]\s*([A-Za-z0-9._-]+)/.exec(text)?.[1]
   const lines = text.split(/\r?\n/)
   const nodes: PlanNode[] = []
   const byId = new Map<string, PlanNode>()
@@ -526,6 +554,7 @@ export function planIndex(text: string | null | undefined): PlanIndex {
     const id = read('id')
     if (id === undefined) continue
     const deps = (read('deps') ?? '').split(/[,，;；]/).map((dep) => dep.trim()).filter((dep) => dep !== '')
+    const parent = read('parent')
     const taskId = read('taskid')
     const kind = read('kind')
     const question = read('question')
@@ -536,6 +565,7 @@ export function planIndex(text: string | null | undefined): PlanIndex {
     const node: PlanNode = {
       id,
       deps,
+      ...(parent !== undefined ? { parent } : {}),
       ...(taskId !== undefined ? { taskId } : {}),
       ...(kind !== undefined ? { kind } : {}),
       ...(question !== undefined ? { question } : {}),
@@ -549,7 +579,59 @@ export function planIndex(text: string | null | undefined): PlanIndex {
     if (node.taskId !== undefined && !byTaskId.has(node.taskId)) byTaskId.set(node.taskId, node)
   }
 
-  return { nodes, byId, byTaskId }
+  if (nodes.length === 0) return emptyPlanIndex(version)
+  const topLevel = nodes.filter((node) => node.parent === undefined)
+  const childrenByParent = new Map<string, PlanNode[]>()
+  for (const node of nodes) {
+    if (node.parent === undefined) continue
+    const bucket = childrenByParent.get(node.parent)
+    if (bucket === undefined) childrenByParent.set(node.parent, [node])
+    else bucket.push(node)
+  }
+  return {
+    nodes,
+    byId,
+    byTaskId,
+    ...(version !== undefined ? { version } : {}),
+    topLevel,
+    childrenByParent,
+  }
+}
+
+/**
+ * plan 结构稳定性提示（只读；不是 node-gate、不阻断 run）：
+ * - `duplicate-id`：同一 id 出现多次（编号纪律 = 只分配一次）；
+ * - `missing-parent`：子节点的 parent 不在表里（复合节点必须挂在真实父节点）；
+ * - `dangling-dep` / `self-dependency`：deps 指向不存在的节点 / 自己。
+ * 这些提示让用户看到“计划重排/编号复用”的迹象，而不是静默画错图。
+ * @param index - {@link planIndex} 的结果（可为 null）。
+ * @returns 稳定性问题列表（空 = 未发现）。
+ */
+export function planIssuesOf(index: PlanIndex | null | undefined): readonly PlanIssue[] {
+  if (index === null || index === undefined) return []
+  const issues: PlanIssue[] = []
+  const seen = new Set<string>()
+  const duplicated = new Set<string>()
+  for (const node of index.nodes) {
+    if (seen.has(node.id)) duplicated.add(node.id)
+    else seen.add(node.id)
+  }
+  for (const id of duplicated) {
+    issues.push({ kind: 'duplicate-id', nodeId: id, message: `${id} 出现了多次——编号只能分配一次` })
+  }
+  for (const node of index.nodes) {
+    if (node.parent !== undefined && !index.byId.has(node.parent)) {
+      issues.push({ kind: 'missing-parent', nodeId: node.id, message: `${node.id} 的 parent ${node.parent} 不在节点表里` })
+    }
+    for (const dep of node.deps) {
+      if (dep === node.id) {
+        issues.push({ kind: 'self-dependency', nodeId: node.id, message: `${node.id} 依赖自己` })
+      } else if (!index.byId.has(dep)) {
+        issues.push({ kind: 'dangling-dep', nodeId: node.id, message: `${node.id} 的 dep ${dep} 不在节点表里` })
+      }
+    }
+  }
+  return issues
 }
 
 /**

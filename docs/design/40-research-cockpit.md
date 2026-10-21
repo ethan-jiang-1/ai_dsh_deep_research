@@ -32,11 +32,12 @@
 | 活标题 | 同上（`ResearchStatusTitle`） | 挂起时页签名变「研究状态 · ⏳ 等你拍板」 |
 | 流失败恢复指引 | [stream-failure.ts](../../packages/deep-research-pack/src/lib/stream-failure.ts) + ResearchStatusTab.tsx | 末位回合死于上游流失败（MALFORMED_RESPONSE 族）且无新回合接手 → 人话横幅「等一两分钟发『继续』」；折算纯函数，BUG-023 修复① |
 | 品牌（虎鲸 Orca） | [BrandMark.tsx](../../packages/deep-research-pack/src/client/BrandMark.tsx) | 宿主 `sidebar.brand.mark` + `sidebar.brand.name` 两槽的 single occupant（替换内置鱼形 logo 与本地构建标签）——用户定调 2026-10-13 |
-| 研究配置页签 | [ResearchConfigTab.tsx](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) + [library-fold.ts](../../packages/deep-research-pack/src/lib/library-fold.ts) + [method-of-question.ts](../../packages/deep-research-pack/src/lib/method-of-question.ts) + [receipt-fold.ts](../../packages/deep-research-pack/src/lib/receipt-fold.ts) + [text-fold.ts](../../packages/deep-research-pack/src/lib/text-fold.ts) | 右栏页签（D25 期 1 管理中继面 ＋ 2026-10-18 显式化期）：四区 = ① 本次研究（本次采用＋来源＋换一条，读 question.md 方法节五态）② 内置打法（只读卡：一句话 ＋ 什么时候用它 ＋ 标本位）③ 我的偏好库（`method-library.md` 投影）④ 底线条（六条共同底线 ＋ 两个定制入口）＋ 就地回执三态（已发送／Lead 已回话／已落盘对账）；管理指令经 `session/prompt` 交 Lead（steer→queue 降级）——**面板不直写文件**；显示面与 skill 四处同钉（内置表／推荐映射／共同底线／两入口逐字，tests/library-fold 把守） |
-| 研究图谱页签 | [ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) + `src/client/research-graph/types.ts` + [plan-graph.ts](../../packages/deep-research-pack/src/lib/plan-graph.ts) | 右栏页签：把 Lead 的 `agentTeam` 任务板画成**纵向 wave DAG**（节点卡 + 依赖 + 队员/worker 状态 + 「需要你注意」条）；`plan.md` 可选叠 depth/kind。**只读 + “让 Lead 调整”**（`session/prompt` 预填建议），不直接 `reassign`/`complete`/`delete`，不重复 `ui-agent-team` 的任务 CRUD |
+| 研究配置页签 | [ResearchConfigTab.tsx](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) + [method-of-question.ts](../../packages/deep-research-pack/src/lib/method-of-question.ts) | 右栏**摘要页签**（2026-10-21 管理迁移后）：只留 ① 本次研究（采用＋来源＋「换一条」，读 question.md 方法节五态）与「方法库（本工作区）→ 顶部 tab」入口；库列表/内置卡/领域示范/术语/管理回执移入主界面「方法库」tab。指令仍经 `session/prompt` 交 Lead（面板不直写文件） |
+| 方法库主 tab | [MethodLibraryView.tsx](../../packages/deep-research-pack/src/client/MethodLibraryView.tsx) + [library-fold.ts](../../packages/deep-research-pack/src/lib/library-fold.ts) | 主界面 `conversation.view` 第三 tab（Chat/Trajectory 同排）：我的库搜索/列表、内置参考只读、四字段编辑/新建/删除；保存走 W1 `session/prompt` 交 Lead 写 `method-library.md`，面板不直写文件；无写权限、无新 RPC |
+| 研究图谱页签 | [ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) + `src/client/research-graph/types.ts` + [plan-graph.ts](../../packages/deep-research-pack/src/lib/plan-graph.ts) | 右栏**只读观察面**：顶层 plan 节点 / `agentTeam` 任务画成 SVG DAG（节点 + 依赖边 + 同层并行 + 状态色）；复合节点 N3.1… 默认收在父节点详情，图上标 `+N`；`plan.md` 提供 parent/kind/depth/acceptance、版本与重写记录；节点详情可复制 `drt_<slug>/N3` 引用；重号/悬空 parent/deps 显示只读结构提示；无 plan/无 blocked_by 时明确「没有可画的 DAG」，不画假 Wave；不提供调整动作 |
 | 终稿页签 | [ResearchFinalTab.tsx](../../packages/deep-research-pack/src/client/ResearchFinalTab.tsx) + [final-target.ts](../../packages/deep-research-pack/src/lib/final-target.ts) | 右栏页签：**接管 `drt_<slug>/final.md` 的文件地址**（`extension` 带；交付卡片、结句内联引用、Files 树落到同一页签）——交付后整篇渲染 run 根 `final.md`。静音条只讲盘上事实（`vN` / `当前版` / `审查未过`；**不写"已交付"**——版本目录不是交付凭证，交付只由⑤ 的 `present` 见证说），`过程 →` 回研究状态。读面是一张定表（`final.md` / `review.md` / `final/`），路径按三位置回退（原位 → `archive/` → `_abandoned/`） |
-| 研究图谱页签体（待接线） | [ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) | 第三页签页体（W2/F3）：头部计数（进行/待派/可能卡住）+ 「需要你注意」条 + 纵向 Wave 分区 + 节点卡（展开 detail 与两条动作：打开负责人 / 让 Lead 调整=预填建议经 session/prompt 交 Lead，面板不直改 Team 任务）；**index.ts 注册尚未接线**（2026-10-21 随 types+plan-graph 落地，注册待续） |
-| 研究图谱注入面（在建） | [research-graph/types.ts](../../packages/deep-research-pack/src/client/research-graph/types.ts) | 「研究图谱」页签的注入面类型（readFile / sendInstruction / openOwner 三条闭包，数据面全部复用既有 remote，无新 RPC）；**页签组件与注册尚未接线**（2026-10-21 落地类型与折算，组件待续） |
+| 研究图谱页签体 | [ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) | 页签体：头部 plan/task 计数 +「只读观察」标记；SVG DAG 小图（`wavesOf` 分层、同层横排、边 = plan deps / Team `blocked_by`）+ 顶层节点列表 + 选中详情（description 高度上限、复合子节点展开、复制引用）+「需要你注意（只读）」+ plan 结构提示；底部 `plan.md` 原文折叠与 plan↔task 映射计数；无依赖边时只显示任务快照并说明原因 |
+| 研究图谱注入面 | [research-graph/types.ts](../../packages/deep-research-pack/src/client/research-graph/types.ts) | 「研究图谱」页签的注入面类型（`readFile` / `follow` / 可选 `openOwner` 三条闭包，数据面全部复用既有 remote，无新 RPC）；`follow` 只用于 journal 绑定 `drt_<slug>/`，页签只读，不注入发送通道 |
 | 研究语义工具卡 | [ResearchToolCard.tsx](../../packages/deep-research-pack/src/client/ResearchToolCard.tsx) + [tool-card.ts](../../packages/deep-research-pack/src/lib/tool-card.ts) | 对话流卡片：`spawn_teammate` → 组队卡、`web_search` → 检索卡（2 张） |
 | 挂起显性化 | [index.ts](../../packages/deep-research-pack/src/client/index.ts)（`revealStatusTab`） | pending false→true 迁移时 `openTab` 右栏自动展开；页签 dock 折叠态保持挂载（观察者常在） |
 | keyed 常量 | [keys.ts](../../packages/deep-research-pack/src/client/keys.ts) | 字面量唯一正本（`client-keys` 门禁对账——拼错不报错、永不渲染） |
@@ -125,9 +126,21 @@
   宽列不受影响；vendor 若删该钩子，规则只是不再命中（fail-soft，不波及其它组件）。
   **移除条件**：vendor 卡头自带换行/最小宽后，删该 effect 与本条目。
 
-- **研究图谱页签（2026-10-21）**：依赖/worker/attention 观察面，不是任务 CRUD；数据 =
-  `agentTeam` / `subagentCatalog` / session status / `plan.md`；调整只发 `session/prompt` 给 Lead。
-  side panel 宽度用纵向 wave，不做横向大画布；任务粒度仍归 `ui-agent-team`，本页签不重复任务列表。
+- **研究图谱页签（2026-10-21）**：只读观察面，不是任务 CRUD、也不是操作台；数据 =
+  `agentTeam` / `subagentCatalog` / session status / `plan.md`。顶部 SVG DAG（顶层 plan 节点优先，
+  边 = plan deps / Team `blocked_by`；同层并行横排），下方节点详情与 `plan.md` 原文；复合节点
+  N3.1… 默认收在父节点详情（图上标 `+N`），节点可复制 `drt_<slug>/N3` 引用；重号/悬空 parent/deps
+  显示只读结构提示。无 plan/无依赖边时明确说「没有可画的 DAG」，只显示任务快照。调整回对话或
+  rerun，侧栏不发“让 Lead 调整”这类不知道调什么的指令。任务粒度仍归 `ui-agent-team`。
+
+- **方法库主 tab 只在 active conversation 出现**：DSH 的空白 New Session hero 不渲染
+  `conversation.view` tabs（Chat/Trajectory 也没有）；管理库需打开一个有历史的会话。后续若要让
+  新会话也能进库，应在 hero/左栏补入口，不改 `conversation.view` 本身。
+
+- **右栏 pane 仍可能钉在上一会话（vendor 面板会话绑定，2026-10-21 实测）**：主视图切到绑定会话 A
+  后，右栏仍显示会话 B 的页签内容（client-load-smoke 实测：active row = d47b…，面板仍是
+  1392… 的 Rerun8 团队/2 subagents）。收起/重开右栏可重绑；状态/图谱页签以 **pane 的 session**
+  为准，不把 pane 内容当主视图真值。修复归 vendor 的 pane 会话绑定，不归本页签。
 
 - **会话必须建在研究工作区里**才有渐进面（workspaceFiles 读的是会话工作区根）；建在
   别处的会话只显示活动流（详见 [pack README 已知限制](../../packages/deep-research-pack/README.md)）；

@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { foldLibrary, instructionOf, editInstruction, createInstruction, summaryOfEntry, SUMMARY_MAX_LENGTH, SECTION_LABELS, libraryReadStateOf } from '../../packages/deep-research-pack/src/lib/library-fold.ts';
+import { foldLibrary, instructionOf, editInstruction, createInstruction, saveInstruction, renderLibraryEntry, summaryOfEntry, SUMMARY_MAX_LENGTH, SECTION_LABELS, libraryReadStateOf } from '../../packages/deep-research-pack/src/lib/library-fold.ts';
 import { SELFTEST_LIBRARY } from '../../scripts/lib/selftest-library.mjs';
 import { locateSessionStrategy, SHOW_MORE_SESSIONS_PATTERN } from '../../scripts/lib/web-ui-nav.mjs';
 import { METHOD_PRESETS_SKILL_PATH, methodPresetsFromSkillFile, patternMethodMappingFromSkill, baselineDisciplinesFromSkill } from '../../scripts/lib/method-presets.mjs';
@@ -483,4 +483,31 @@ test('侧栏导航常量：Show N more 文本模式唯一正本（regex source �
   assert.match('Show 12 more sessions', rx);
   assert.doesNotMatch('Show more sessions', rx, '无数字形态不是分页按钮');
   assert.doesNotMatch('显示 12 more sessions', rx);
+});
+
+test('saveInstruction：新建/更新用同一四字段载荷，编辑改名带原名称', () => {
+  const sections = { source: '官方域优先', verify: '逐字 + 独立重抓', report: '先结论再口径', limit: '不承诺投资建议' };
+  const create = saveInstruction('投研尽调', sections);
+  assert.match(create, /^新建研究偏好「投研尽调」——/);
+  assert.match(create, /找来源：官方域优先/);
+  assert.match(create, /不承诺：不承诺投资建议/);
+  const update = saveInstruction('投研尽调 v2', sections, '投研尽调');
+  assert.match(update, /^更新研究偏好「投研尽调 v2」（原「投研尽调」）——/);
+});
+
+test('renderLibraryEntry：四字段/来源/默认标注可 round-trip 回 foldLibrary', () => {
+  const entry = {
+    name: '投研尽调',
+    provenance: '2026-10-21，用户',
+    isDefault: true,
+    sections: { source: '官方域优先', verify: '逐字 + 独立重抓', report: '先结论再口径', limit: '不承诺投资建议' },
+  };
+  const rendered = renderLibraryEntry(entry);
+  assert.match(rendered, /^## 投研尽调（2026-10-21，用户）〔默认偏好〕/);
+  assert.match(rendered, /- 找来源: 官方域优先/);
+  const [folded] = foldLibrary(rendered);
+  assert.equal(folded.name, '投研尽调');
+  assert.equal(folded.provenance, '2026-10-21，用户');
+  assert.equal(folded.isDefault, true);
+  assert.deepEqual(folded.sections, entry.sections);
 });

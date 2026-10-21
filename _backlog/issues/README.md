@@ -4,7 +4,8 @@
 
 ## 活跃清单
 
-- [2026-10-21-dynamic-research-dag.md](2026-10-21-dynamic-research-dag.md) — 动态研究 DAG 与多层 subagent 编排（等人拍板；总计划 [RFC](../../notes/proposed/2026-10-21-dynamic-research-dag-a0.md)；机制盘点在 [research/dynamic-research-dag](../research/dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md)）。
+（当前无在办问题卡；动态 DAG 稳定节点身份、方法库主界面迁移均已结并归档到 [settled 池](../_archived/settled_issues/README.md)。）
+（动态 DAG 稳定节点身份已结并归档到 [settled 池](../_archived/settled_issues/README.md)。）
 
 ## 最近归档
 

@@ -95,6 +95,27 @@ test('每角色 preset 的 tool-web 行带 base config（fetch + 60s 超时）',
   }
 });
 
+test('delegating preset subagent = maxDepth 2 + allowedAgentPresets；无 stale backgroundMode', () => {
+  const ymlOf = (r) => readFileSync(join(PRESETS, `${r}.patch.yml`), 'utf8');
+  const rootRole = /^\s+default:\s*([a-z0-9-]+)\s*$/m.exec(readFileSync(join(PACK, 'cordis.patch.yml'), 'utf8'))?.[1];
+  assert.ok(rootRole !== undefined, 'bundle 未声明 preset registry default');
+  const allowedRoles = ROLES.filter((role) => role !== rootRole);
+  const delegating = ROLES.filter((r) => ymlOf(r).includes('- id: tool-subagent'));
+  assert.ok(delegating.length > 0, '至少一个角色声明 tool-subagent');
+  for (const r of delegating) {
+    const yml = ymlOf(r);
+    assert.match(yml, /- id: tool-subagent[\s\S]*?maxDepth: 2/, `${r}: tool-subagent 缺 maxDepth: 2`);
+    const allowed = yml.slice(yml.indexOf('allowedAgentPresets:'));
+    for (const role of allowedRoles) {
+      assert.match(allowed, new RegExp(`(?:^|\\n)\\s*- ${role}\\s*(?:\\n|$)`), `${r}: allowedAgentPresets 缺 ${role}`);
+    }
+    assert.doesNotMatch(yml, /backgroundMode/, `${r}: stale backgroundMode 仍在（当前 pin 不支持，静默无效）`);
+  }
+  for (const r of ROLES.filter((role) => !delegating.includes(role))) {
+    assert.doesNotMatch(ymlOf(r), /- id: tool-subagent/, `${r} 不应有 subagent（聚焦独行）`);
+  }
+});
+
 test('compatibility 矩阵钉住当前 tag', () => {
   const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
   assert.deepEqual(pkg.dsh.compatibility.dshReleases, ['dsh-v0.2.1-rc.2']);

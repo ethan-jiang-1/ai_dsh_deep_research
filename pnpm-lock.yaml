@@ -167,6 +167,9 @@ importers:
       '@deepseek-ai/dsh-api-remotes':
         specifier: workspace:*
         version: link:../../vendor/dsh/packages/api/remotes
+      '@deepseek-ai/dsh-client-ui-conversation':
+        specifier: workspace:*
+        version: link:../../vendor/dsh/packages/client/ui-conversation
       '@deepseek-ai/dsh-client-ui-renderer':
         specifier: workspace:*
         version: link:../../vendor/dsh/packages/client/ui-renderer

@@ -5,7 +5,7 @@ intent: 为宽搜/深搜的搜索底座选型提供官方 API、DSH provider、�
 
 # DeepSeek Search / Fetch API + DSH provider（2026-10-21）
 
-> 服务 = [_backlog/issues/2026-10-21-dynamic-research-dag.md](../../issues/2026-10-21-dynamic-research-dag.md)。
+> 服务 = [_backlog/issues/2026-10-21-dynamic-research-dag.md](../../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)。
 > 方法 = 读 DeepSeek 官方 API 文档 + 本仓 `vendor/dsh` 的 `web-deepseek-api` provider 源码/README +
 > base bundle 行；**未发真实请求**，成本/限流以官方文档为准，行为以 provider README 为准。
 
@@ -84,6 +84,11 @@ intent: 为宽搜/深搜的搜索底座选型提供官方 API、DSH provider、�
   返回字段 `url/title/snippet/publishedAt`（summary 被 provider 丢掉）；`DeepSeekFetchApiProvider`
   对同一价格页 **0.9s / 3,250 字 / 226 个反斜杠**，`statusCode=200`、`url=请求 URL`。provider
   映射与源码一致，Fetch 的保真问题在 provider 层同样存在。
+- **Fetch 5 页抽样（DS provider）**：guides 10,282 字 / 884 个反斜杠；pricing 4,055 / 387；
+  deepseek.com 252 / 4；GitHub README 19,397 / 2,160；zh.wikipedia 10,851 / 1,043。**5/5 页都是
+  带反斜杠转义的 Markdown**（密度约 1.6%–11.1%），不是原始页面文本；`http` provider 对这些 HTML
+  页返回 `kind:'html'`（原始 HTML，不是抽好的正文），工具级文本 A/B 仍需另测——但“不切 fetch”
+  的结论不变。
 
 ## 2. DSH provider（本仓已可用）
 

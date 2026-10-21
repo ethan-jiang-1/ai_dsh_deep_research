@@ -1,4 +1,4 @@
-// tests/run/plan-graph.test.mjs —— 「研究图谱」纯折算的 keyless 契约（W2 / F3）。
+// tests/cockpit/plan-graph.test.mjs —— 「研究图谱」纯折算的 keyless 契约（W2 / F3）。
 // 家 = packages/deep-research-pack/src/lib/plan-graph.ts；设计 = docs/design/40-research-cockpit.md §2 +
 // _backlog/research/dynamic-research-dag/2026-10-21-cockpit-plan-graph.md §3–§5。
 // 钉住五件事：最长路径分层（缺 blocker/环/自环 fail-soft）、wave 稳定序、attention 的
@@ -12,6 +12,7 @@ import {
   countsOf,
   levelsOf,
   planIndex,
+  planIssuesOf,
   planNodeOf,
   wavesOf,
   workerChipsOf,
@@ -223,4 +224,48 @@ test('planIndex：缺文件 / 无表 / 畸形文本 = 空索引（合法退化�
   assert.deepEqual(planIndex('| nope | nope |\n|---|---|').nodes, []);
   assert.equal(planNodeOf(null, 'x'), undefined);
   assert.equal(planNodeOf(planIndex(''), ''), undefined);
+});
+
+test('planIndex：parent 复合节点 / 图版本 / 顶层过滤', () => {
+  const text = [
+    '# Plan — demo',
+    '',
+    '> 图版本：v3',
+    '',
+    '| id | parent | kind | deps | task_id |',
+    '|---|---|---|---|---|',
+    '| N3 | — | deep-dive | — | task-3 |',
+    '| N3.1 | N3 | search | — | |',
+    '| N3.1.1 | N3.1 | fetch | N3.1 | |',
+    '| N4 | — | synthesis | N3 | task-4 |',
+    '',
+    '## 重写记录',
+    '- 2026-10-21 / v3 / 扩复合子图 / N3 / 原因 / journal',
+  ].join('\n');
+  const index = planIndex(text);
+  assert.equal(index.version, 'v3');
+  assert.deepEqual(index.topLevel.map((node) => node.id), ['N3', 'N4']);
+  assert.equal(index.byId.get('N3.1')?.parent, 'N3');
+  assert.equal(index.byId.get('N3.1.1')?.parent, 'N3.1');
+  assert.deepEqual(index.childrenByParent.get('N3')?.map((node) => node.id), ['N3.1']);
+  assert.deepEqual(index.childrenByParent.get('N3.1')?.map((node) => node.id), ['N3.1.1']);
+  assert.equal(planNodeOf(index, 'task-3')?.id, 'N3');
+  assert.equal(planNodeOf(index, 'task-4')?.id, 'N4');
+  assert.deepEqual(planIssuesOf(index), []);
+});
+
+test('planIssuesOf：重号 / 悬空 parent / 悬空 dep / 自依赖（只读提示，不 throw）', () => {
+  const text = [
+    '| id | parent | deps |',
+    '|---|---|---|',
+    '| N3 | — | — |',
+    '| N3 | — | — |',
+    '| N9.1 | N9 | — |',
+    '| N4 | — | N2 |',
+    '| N5 | — | N5 |',
+  ].join('\n');
+  const kinds = planIssuesOf(planIndex(text)).map((issue) => issue.kind).sort();
+  assert.deepEqual(kinds, ['dangling-dep', 'duplicate-id', 'missing-parent', 'self-dependency']);
+  assert.deepEqual(planIssuesOf(null), []);
+  assert.deepEqual(planIssuesOf(undefined), []);
 });

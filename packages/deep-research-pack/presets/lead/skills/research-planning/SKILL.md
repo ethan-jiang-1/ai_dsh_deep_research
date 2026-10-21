@@ -5,17 +5,35 @@ description: HITL1 后设计研究执行图：plan.md 节点表、Scan/Dive/Chec
 
 # research-planning — 执行图与调度
 
-适用：HITL1 拍板后、组队/侦察前。目标 = 把 topic 图落成**可执行、可重写**的 DAG；不是固定八节点。
-执行图写 `drt_<slug>/plan.md`（lead owner，过程件）；Team 任务板是当前会话的执行镜像。
+适用：HITL1 拍板后、组队/侦察前。目标 = 把 topic 图落成**可执行、可重写**的 DAG；主干 =
+NODES 的研究流程（立项 → … → 交付），不因动态展开改写。执行图写 `drt_<slug>/plan.md`（lead
+owner，过程件）；Team 任务板是当前会话的执行镜像。
+
+## 0. 节点身份：N 是 ID，不是序号
+
+- **只分配、不重排、不回收**：已有 N 号永不改号；新增节点取下一个空号（N1–N10 之后是 N11），
+  即使它在图上排在 N2 后面。排序按 `deps`/wave，不按编号大小。
+- 顶层节点 = `N<k>`；**复合节点**在内部展开为 `N3.1 / N3.2`（再深 `N3.1.1`）。父节点 `N3`
+  保留：外部依赖、`output`、`acceptance`、用户反馈都挂 `N3`；子节点只是内部执行/观察细节。
+- 复合节点的子节点**默认不单独建 Team task**（不建 nested Team）：父节点一个任务，内部由该
+  owner 自己做、或派 depth-2 worker；确实要拆成多个并行执行单元时，由 Lead 追加**新的顶层节点**
+  （新号 + 新任务），不改旧号、不嵌套 Team。
+- 拆分/合并/删除只做**墓碑**：`retired` / `merged_into: N4` / `derived_from: N3` /
+  `superseded_by: [N11, N12]`；旧号不复用。用户仍能用旧号查到它变成了什么。
+- `task_id` 只是当前会话执行映射，不是用户引用。反馈引用 = `run_slug/N3`（内部 `run_slug/N3.2`）。
+- 重写时 `plan_version` 递增，重写记录写 `vN: 加了/拆了/并了哪个号`；用户点名 Nx 时先读
+  plan 的 id 行，不按列表顺序猜；Nx 是复合节点时先问“指整体还是哪个子节点”，并在
+  journal/question.md §Decisions 记 `node_id + plan_version`。
 
 ## 1. 写 plan.md
 
-节点表每行至少：`id / kind / question / owner_role / deps / output / acceptance / budget / depth / task_id`。
+节点表每行至少：`id / parent / kind / question / owner_role / deps / output / acceptance / budget / depth / task_id`。
 
+- `parent`：顶层留空（`—`）；复合节点的子节点写父节点 id（`N3`），父节点本身仍在表里。
 - `kind`：`broad-scan`（宽搜）/ `deep-dive`（深搜）/ `cross-check`（交叉/反例）/ `synthesis` /
   `review` / `gate`（条件决策）。
 - `owner_role`：`lead` / `scout` / `analyst` / `critic`；一个节点一个 owner。
-- `deps` 用节点 id（`N1`），不是 topic id；图必须无环。
+- `deps` 用节点 id（`N1` / `N3.1`），不是 topic id；图必须无环。
 - `output` 写 run bundle 相对路径；`acceptance` 写可判条件；`budget` 写最多 worker/搜索轮次。
 - `depth` 写 L0–L3（见 §2）。
 - 先覆盖 `question.md` 的每个 RQ：每个 RQ 至少一个证据生产节点 + 终局 synthesis/review。
@@ -49,8 +67,9 @@ L2 触发（任一）：关键 claim 单源/只有二手、口径缺失、矛盾
 
 ## 4. 物化到 Team
 
-1. 每个节点 `team_task_create`：subject `N1 · kind · 标题`；description 写读哪些文件/产出/验收/
-   方法装载；`blocked_by` = deps 映射；`write_scopes` = output 路径。
+1. **顶层节点 / 复合父节点**才建 Team task：subject `N1 · kind · 标题`；description 写读哪些文件/
+   产出/验收/方法装载；`blocked_by` = 顶层 deps 映射；`write_scopes` = output 路径。子节点
+   `N3.1…` 默认不建独立 Team task（内部由 owner 执行/派 depth-2 worker）。
 2. 把返回的 `task-N` 回填 plan 的 `task_id`。**task_id 只是当前会话映射**；恢复时按 `N` 重建。
 3. 把所有 ready 且无 owner 的 task `team_task_update action=reassign` 给 owner；owner 不在线就
    `send_message` 唤醒。
@@ -66,13 +85,17 @@ L2 触发（任一）：关键 claim 单源/只有二手、口径缺失、矛盾
 
 ## 6. 重写图（动态编排）
 
-- 加节点：未知子域 → scout；单源/冲突 → cross-check；证据缺口 → 定向补搜。
-- 拆节点：一个 owner 的节点包含多个独立问题 → 拆并行子任务。
-- 并节点：两个节点锚点同源、会重复钻同一批来源 → 合并 owner。
+- 加节点：未知子域 → scout；单源/冲突 → cross-check；证据缺口 → 定向补搜。**取下一个空号**
+  （N11），或作为复合父节点的子号（N3.3）；不改已有 N 号。
+- 拆节点：节点内部有多个独立问题时，优先扩成**复合节点子图**（N3.1/N3.2，父节点 N3 保留，
+  外部 output/acceptance 不变）；确实要拆成多个**对外结果**时，新增 N11/N12 并写
+  `derived_from: N3`、`superseded_by: [N11, N12]`，N3 做墓碑。
+- 并节点：保留一个主号，另一个写 `merged_into: N4` 后墓碑；不复用旧号。
 - 改边：`set_dependencies`；重派：`reassign`；完成：owner `complete`。
-- 回边用**版本化节点**（`repair-r1` / `review-r2`），不画环；复审 ≤3 轮。
-- 每次重写更新 plan 的节点表 + journal 一行；**scope 变更**（超出 question.md §Scope）回 HITL2，
-  图内重写自主。
+- 回边用**版本化节点**（`repair-r1` / `review-r2`）——这是 id 后缀而非序号；不画环；复审 ≤3 轮。
+- 每次重写更新 plan 的节点表 + `plan_version` + journal 一行；**scope 变更**（超出 question.md
+  §Scope）回 HITL2，图内重写自主。用户点名 Nx 时，先读 plan 的 id 行；复合节点先确认整体/子节点，
+  反馈记 `node_id + plan_version`。
 
 ## 7. 深度验收
 

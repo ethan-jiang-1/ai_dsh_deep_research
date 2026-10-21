@@ -125,6 +125,38 @@ export function createInstruction(name: string, sections: LibrarySections, sourc
   return `新建研究偏好「${name}」——${payload}（基于内置「${sourceName}」调整）`
 }
 
+/** 新建/更新一条库条目的 W1 指令（面板不直写文件；Lead 执行后回执）。 */
+export function saveInstruction(name: string, sections: LibrarySections, currentName?: string): string {
+  const payload = SECTION_LABELS
+    .map(({ key, label }) => ({ label, value: sections[key] }))
+    .filter(({ value }) => value !== null && value.trim() !== '')
+    .map(({ label, value }) => `${label}：${value}`)
+    .join('；')
+  const action = currentName === undefined ? '新建' : '更新'
+  const target = currentName !== undefined && currentName !== name ? `（原「${currentName}」）` : ''
+  return `${action}研究偏好「${name}」${target}——${payload}`
+}
+
+/** 一条库条目的 Markdown 预览（编辑器/round-trip；不是写盘路径）。 */
+export function renderLibraryEntry(entry: Pick<LibraryEntry, 'name' | 'sections'> & {
+  readonly provenance?: string | null
+  readonly isDefault?: boolean
+}): string {
+  const provenance = entry.provenance !== null && entry.provenance !== undefined ? `（${entry.provenance}）` : ''
+  const defaultMark = entry.isDefault === true ? '〔默认偏好〕' : ''
+  const lines = [`## ${entry.name}${provenance}${defaultMark}`]
+  for (const { key, label } of SECTION_LABELS) {
+    const value = entry.sections[key]
+    if (value !== null && value.trim() !== '') lines.push(`- ${label}: ${value.trim()}`)
+  }
+  return lines.join('\n')
+}
+
+/** 多条库条目的 Markdown 预览（顺序 = 输入序）。 */
+export function renderLibrary(entries: readonly LibraryEntry[]): string {
+  return entries.map((entry) => renderLibraryEntry(entry)).join('\n\n')
+}
+
 /** 期 1 简单动词（面板 ⋯ 菜单其余项）。 */
 export type SimpleAction = 'use-now' | 'set-default' | 'remove'
 

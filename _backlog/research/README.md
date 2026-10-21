@@ -19,7 +19,9 @@
 
 （三条已随消费者毕业迁入 [_archived/research/](../_archived/research/)：notes-stocktake 体检 + strategy-benchmark 两份。）
 
-- [dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md](dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md) — 动态研究 DAG 与多层 subagent 编排（消费者：[issues/2026-10-21-dynamic-research-dag.md](../issues/2026-10-21-dynamic-research-dag.md)）。
+- [2026-10-21-method-library-main-surface.md](2026-10-21-method-library-main-surface.md) — 方法库管理迁到主界面：conversation.view seam、UX 分工、W1 保存（消费者：[issue](../_archived/settled_issues/2026-10-21-method-library-main-surface.md)）。
+
+- [dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md](dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md) — 动态研究 DAG 与多层 subagent 编排（消费者：[_archived/settled_issues/2026-10-21-dynamic-research-dag.md](../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)）。
 - [dynamic-research-dag/2026-10-21-dsh-plugin-dag-practices.md](dynamic-research-dag/2026-10-21-dsh-plugin-dag-practices.md) — DSH 插件生态与外部的动态 DAG 实践（同一消费者）。
 - [dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md](dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md) — 宽搜/深搜的深度模型与研究单元（同一消费者）。
 - [dynamic-research-dag/2026-10-21-deepseek-search-fetch-api.md](dynamic-research-dag/2026-10-21-deepseek-search-fetch-api.md) — DeepSeek Search/Fetch API 与 DSH provider（同一消费者）。

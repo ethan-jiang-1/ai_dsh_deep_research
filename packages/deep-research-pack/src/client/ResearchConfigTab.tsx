@@ -1,16 +1,10 @@
 /**
- * 「研究配置」页签体（D25 期 1 + detail-ux 期 1.5 + 显式化期 2026-10-18）。
+ * 「研究配置」页签体（2026-10-21 管理迁移后）。
  *
- * 四区：① 本次研究（本次采用 ＋ 来源 ＋ 换一条——读 question.md 研究方法节，五态如实）；
- * ② 内置研究偏好（只读卡：一句话 ＋ 什么时候用它 ＋ 标本位）；③ 我的偏好库（本工作区）；
- * ④ 底线条（六条底线 ＋ 两个定制入口 ＋ 刷新）＋ 就地回执（已发送／Lead 已回话／已落盘）。
- * 交互全部走 ui-primitives：条目操作 = `Menu`/`MenuItemButton`（⋯触发）；详情 = `Modal`
- * （读/编辑/新建三态，分阶段草稿——保存未落地保留草稿）；默认徽标 = `Tag`；删除 = 确认
- * `Modal`；回执 = 就地紧凑行（失败不丢内容，文案 ≤2 句）。面板不直写文件——写路径唯一 =
- * Lead 经 `session/prompt`（D25 边界）；指令文本正本 = research-brief skill 管理动词。
- * 折算住 `src/lib/`（library-fold / method-of-question / receipt-fold——纯函数，keyless 单测）；
- * 组件薄渲染。显式化文案里的**同钉面**（内置表、推荐映射、六条底线、两个入口逐字）由
- * tests/library-fold.test.mjs 与 skill 对钉。
+ * 当前只渲染：① 本次研究（本次采用 ＋ 来源 ＋ 换一条——读 question.md 研究方法节，五态如实）
+ * 与「方法库（本工作区）→ 顶部 tab」入口；库列表/内置卡/领域示范/术语/管理回执移到主界面
+ * `conversation.view` 的「方法库」tab。旧管理块保留在 COMPACT=false 分支（回滚/对照），默认不渲染。
+ * 指令仍经 `session/prompt` 交 Lead（面板不直写文件）；折算住 `src/lib/`（纯函数，keyless 单测）。
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
@@ -46,13 +40,13 @@ export type ResearchConfigTabProps = PropsRuntime<'sidebar.right.pane.tab'> & Re
  *  `summary` = 该表第 2 列「给用户的一句话」——**卡面显示的就是它**（2026-10-16 用户拍板：
  *  面板是用户面，就显示专门为用户写的那句话；四分区详情仍在详情弹窗，不丢信息）。
  *  三处同钉（客户端 ↔ skill 表 ↔ 测试期望），漂移即红：tests/library-fold.test.mjs。 */
-interface BuiltinPreference {
+export interface BuiltinPreference {
   readonly name: string
   readonly summary: string
   readonly sections: LibrarySections
 }
 
-const BUILTIN_PREFERENCES: readonly BuiltinPreference[] = [
+export const BUILTIN_PREFERENCES: readonly BuiltinPreference[] = [
   {
     name: '事实核查',
     summary: '核准具体事实/数字/状态的对象、时点与口径',
@@ -176,7 +170,7 @@ const DISTILL_INSTRUCTION = '把本次研究实际采用的做法存成研究偏
  *  冲突怎么裁／工件与免责）该写到什么颗粒度。正本 = research-brief skill「领域示范」节，
  *  逐字同钉（tests/library-fold）；它不是按判型推荐的方法，故不进「内置打法」清单。
  *  内容来自外部逐条核实（`_backlog/research/2026-10-18-method-config-ux-external.md`）。 */
-const DEMO_ENTRY: { readonly name: string; readonly sections: LibrarySections } = {
+export const DEMO_ENTRY: { readonly name: string; readonly sections: LibrarySections } = {
   name: '投研尽调（示范）',
   sections: {
     source: '一手件按渠道点名——A 股招股书看证监会《格式准则第57号》与交易所网站；港股看港交所《Guide for New Listing Applicants》（2023-11）与披露文件；美股看 SEC EDGAR 的 10-K／10-Q／8-K；主体与股东信息看国家企业信用信息公示系统（《企业信息公示暂行条例》第六条）。注意：工商年报里资产总额、营业收入等由企业选择是否公示，不能当财务底稿。',
@@ -222,6 +216,8 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
   const [events, setEvents] = useState<readonly unknown[]>([])
   /** 库读四态：loading（首读中）／ok／absent（文件不在＝新工作区正常空态）／unreadable（在而读不回）。 */
   const [libraryRead, setLibraryRead] = useState<'loading' | 'ok' | 'absent' | 'unreadable'>('loading')
+  // 2026-10-21 方法库迁移：侧栏只留本次研究摘要 + 入口；管理/编辑在主界面 conversation.view。
+  const COMPACT = true
 
   const sessionId = props.sessionId
   const repliedMarker = useRef(0)
@@ -572,11 +568,11 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
   return (
     <div style={{ padding: 12, flex: 1, minHeight: 0, overflowY: 'auto', fontSize: 13, lineHeight: 1.7 }}>
       <div style={{ fontWeight: 700, marginBottom: 2 }}>研究偏好</div>
-      <div style={{ opacity: 0.65, marginBottom: 6, fontSize: 11, lineHeight: 1.6 }}>
-        一条「研究偏好」＝一条打法＝一份四字段配方（找来源／怎么核实／报告怎么写／不承诺）。
-        「用于本次研究」「换一条」都是给 Lead 发一条指令，结果看下面的回执；「本次研究」= 本会话正在跑的那一场（run）。
+      <div style={{ opacity: 0.65, marginBottom: 8, fontSize: 11, lineHeight: 1.6 }}>
+        {COMPACT
+          ? '本次研究采用哪条打法；「换一条」都是给 Lead 发一条指令。编辑/新建/删除在**有对话的会话**顶部「方法库」tab（空白 New Session 不显示 view tabs）。'
+          : '一条「研究偏好」＝一条打法＝一份四字段配方（找来源／怎么核实／报告怎么写／不承诺）。'}
       </div>
-      <div style={{ opacity: 0.6, marginBottom: 8, fontSize: 12 }}>点名称看这条怎么干活；内置打法在立项时按题面自动推荐，我的偏好库只作推荐参考（你当场指定的优先）。</div>
 
       {/* ① 本次研究（置顶）：本次采用 ＋ 来源 ＋ 换一条；五态如实，判不了就说判不了。 */}
       <div style={{ padding: '7px 10px', marginBottom: 8, borderRadius: 6, background: '#3b82f60f', border: '1px solid #3b82f633' }}>
@@ -620,6 +616,20 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
         )}
       </div>
 
+      {COMPACT && (
+        <div style={{ padding: '7px 10px', marginBottom: 8, borderRadius: 6, background: '#00000005', border: '1px solid #00000012' }}>
+          <div style={{ fontWeight: 700, fontSize: 12 }}>方法库（本工作区）</div>
+          <div style={{ opacity: 0.7, fontSize: 12, marginTop: 2 }}>
+            编辑、新建、删除、内置参考都在顶部「方法库」tab；这里只保留本次研究采用与「换一条」。
+          </div>
+        </div>
+      )}
+      {COMPACT && receipt !== null && (
+        <div style={{ marginBottom: 8, padding: '6px 10px', borderRadius: 6, fontSize: 12, background: receipt.state === 'failed' ? '#ef444414' : '#22c55e14', color: receipt.state === 'failed' ? '#b91c1c' : '#166534' }}>
+          {receipt.text}
+        </div>
+      )}
+      {!COMPACT && (<>
       {/* ② 内置研究偏好（只读）＋ 推荐规则说明位（①-4 呈现位，始终在场）。 */}
       <div style={{ fontWeight: 700, margin: '4px 0 2px' }}>内置打法（只读）</div>
       <div style={{ opacity: 0.6, marginBottom: 6, fontSize: 11 }}>
@@ -687,6 +697,7 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
           <br />改动影响的是**之后**的研究；要让正在跑的这场改用某条，用「用于本次研究」把指令发给 Lead（它记进 question.md §Decisions，不算重跑）。
         </div>
       </div>
+      </>)}
       {detailModal}
       {deleteModal}
     </div>

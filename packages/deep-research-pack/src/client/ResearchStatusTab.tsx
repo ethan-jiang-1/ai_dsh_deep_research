@@ -83,11 +83,16 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const prevSidRef = useRef<string | undefined>(undefined)
   const wasObservingRef = useRef(false)
   const [memberSummaries, setMemberSummaries] = useState<Readonly<Record<string, MemberActivitySummary>>>({})
-  // ⑦ 队员 roster（agentTeam 投影——标准 props 注入的会话投影钩子；队员会话 id 的唯一发现源，
-  //    通道探明材料实证：spawn_teammate 返回不带 id）。prop 存在性由宿主决定且稳定，
-  //    与 vendor client-ui-agent-team 的 prop-hook 同款调用形态。
-  const useProjection = props.useProjection
-  const team: TeamProjection | undefined = useProjection !== undefined ? useProjection('agentTeam') : undefined
+  // ⑦ 队员 roster（agentTeam 投影——**按当前 sessionId 显式取**；队员会话 id 的唯一发现源，
+  //    通道探明材料实证：spawn_teammate 返回不带 id）。2026-10-21 复跑实红：`useProjection`
+  //    在切到没有 agentTeam 的会话时会保留上一条投影（活动流已切、队员区仍是别家的 roster）；
+  //    改用 `useSessions` 按 sessionId 取，缺席即 undefined，不冒充。
+  const useSessions = props.useSessions
+  const team: TeamProjection | undefined = useSessions !== undefined
+    ? useSessions((state) => props.sessionId === undefined
+      ? undefined
+      : state.projectionsBySession[props.sessionId]?.values.agentTeam)
+    : undefined
   const members = team?.members.filter((m) => m.role === 'teammate') ?? []
   const memberIds = members.map((m) => m.id).sort().join(',')
 

@@ -16,7 +16,7 @@
 |---|---|---|
 | preset-smoke.mjs | L1 真挂载：boot 页模块表行（client 半 served）、roster、逐角色建会话、skills 隔离 | keyless（`DSH_SMOKE_REAL=1` 起真 DSH，无模型） |
 | release-smoke.mjs | L2 安装形状：pack → 干净 profile → plugin add → manifest/安装域 client 半断言 → 安装域冒烟 → 端口释放验证（进程卫生：超时预算 + 并发锁 + 退出确认） | keyless（`--install-only` 跳凭据） |
-| client-load-smoke.mjs | 观察面真浏览器装配、页签与渐进面对账（磁盘参考选择 = client-load-reference.mjs；「研究配置」+ 自测例库两相位 = client-load-config.mjs）；失败留现场（png/html/console/meta），无窗口内交付目标 = exit 2 SKIP | keyless（浏览器） |
+| client-load-smoke.mjs | 观察面真浏览器装配、页签与渐进面对账（磁盘参考选择 = client-load-reference.mjs；「研究配置」摘要相位 + 主界面「方法库」tab = client-load-config.mjs 与主件 pass-3c）；失败留现场（png/html/console/meta），无窗口内交付目标 = exit 2 SKIP | keyless（浏览器） |
 | e2e-021rc2.mjs | **升级端到端验收**（0.2.1-rc.2 起）：① 四个研究角色在角色列表里连续成组（内置 standard/ptc/minimal/creator 与 pack order 撞车的回归锁）② 右栏「研究状态」胶囊可点 + 页签体真数据 ③「研究配置」同上 ④ 本插件面零故障；真实实例走完用户路径，不靠人眼 | keyless（浏览器；须先 source dev/env.sh；失败留现场） |
 | snapshot-replay-smoke.mjs | 场景 manifest 驱动的四角色组装面回放（persona/header 全序列/三处注入）+ 声明的渲染金标准；场景集 = `snapshots/replay/` 下含 snapshot.json 的全部目录（发现式，`--face <name>` 定向单集） | keyless（RPC/解压子进程，无模型；须先 source dev/env.sh） |
 | gates-smoke.mjs | 门禁自测：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组 | keyless（git/node 子进程，无模型） |
@@ -102,8 +102,8 @@
 | lib/replay-scene.mjs | replay-scene.test、snapshot-replay-smoke | 场景声明消费者：roster/版本/来源形状/路径校验（缺件、串角色、垃圾锚点 fail-loud）+ 场景集发现（`replay/*/snapshot.json` 全集、防空语料、--face 全名定向） |
 | lib/replay-request.mjs | record-role-fixture、replay-request.test、snapshot-replay-smoke | 组装请求面逐条比较：persona、header 全序列、三处 user/message 注入（定向归一化） |
 | lib/port-reclaim.mjs | preset-smoke、release-smoke | 端口收割执行器（按端口杀 + 三轮验证释放；实测依据 = web 孙进程不在子进程组里） |
-| lib/selftest-library.mjs | client-load-config、library-fold.test | 「研究配置」面板/library-fold 自测例库单一正本：12 形态条目（四字段/部分/空值/旧格式/混居/重名/空条目/杂项行/续行/缩进），两处共用防形态漂移 |
-| lib/method-presets.mjs | client-load-config、library-fold.test、method-presets.test | research-brief skill「方法预设」表的唯一解析入口（表头/行列数/防空集 fail-loud）——内置名单不再各写一份手写副本 |
+| lib/selftest-library.mjs | library-fold.test | 「研究配置」面板/library-fold 自测例库单一正本：12 形态条目（四字段/部分/空值/旧格式/混居/重名/空条目/杂项行/续行/缩进），两处共用防形态漂移 |
+| lib/method-presets.mjs | library-fold.test、method-presets.test | research-brief skill「方法预设」表的唯一解析入口（表头/行列数/防空集 fail-loud）——内置名单不再各写一份手写副本 |
 | lib/keyless-imports.mjs | layering.test | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
 | lib/gates-cases.mjs | gates-smoke、verify-gates.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
 | lib/node-gate-core.mjs | node-gate、node-gate.test | 兼容门面与 bundle 判据聚合（保留 `gateBundle` 与原有导出） |

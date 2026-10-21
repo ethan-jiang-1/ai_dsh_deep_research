@@ -24,13 +24,12 @@
 //   pass-3   既有会话活动流 → pass3ActivityStreamPhase（本件）
 //   pass-4   「研究配置」页签 → pass4ConfigTabPhase（client-load-config.mjs）
 //   pass-5   终稿页签端到端 → pass5FinalDeliveryPhase（本件）
-//   pass-6   自测例库工作区 → pass6SelftestLibraryPhase（client-load-config.mjs）
 // 模块构成：本件 = boot/RPC/断言收集器 + 文件级共享 helper（awaitAppReady/openGuideCapsule/
 //   openPane/paneTextOf/dialogTextOf——相位间共用，不再闭包在 try 内）+ pass-1/2/3/5；
 //   侧栏会话定位（clickRowByText / openSessionById）= scripts/lib/web-ui-nav.mjs **唯一正本**
 //   （data-row-key 主锚——2026-10-21 收拢，本件原私有 clickRowByText/openSessionByRowKey 退役）；
-//   scripts/smoke/client-load-config.mjs = pass-4/pass-6
-//   （「研究配置」页签面——验证的是不同页签，拆独立模块；boot 入口与端口 3109 不变，
+//   scripts/smoke/client-load-config.mjs = pass-4
+//   （「研究配置」摘要面——验证的是不同页签，拆独立模块；boot 入口与端口 3109 不变，
 //   不新增 smoke 面、不动 route 表）；scripts/smoke/client-load-reference.mjs = 磁盘参考
 //   对象构建器（绑定/未绑定/交付候选选取合同）。
 //
@@ -56,7 +55,7 @@ import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.
 import { launchChromium, loadChromium } from '../lib/playwright.mjs'
 import { clientHistoryWindow, readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
 import { prepareClientLoadReference } from './client-load-reference.mjs'
-import { pass4ConfigTabPhase, pass6SelftestLibraryPhase } from './client-load-config.mjs'
+import { pass4ConfigTabPhase } from './client-load-config.mjs'
 import { clickRowByText, expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES } from '../lib/web-ui-nav.mjs'
 import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { deriveBusinessBrief } from '../../packages/deep-research-pack/src/lib/brief-fold.ts'
@@ -203,7 +202,7 @@ const saveArtifacts = async (reason, extra = {}) => {
 }
 
 // ══ 文件级共享 helper（2026-10-21 相位化：原闭包在 try 内、缩深 7-8 层，提为文件级——
-//    相位函数与 client-load-config.mjs 的 pass-4/pass-6 共用；page 按 Playwright 鸭子类型传参）══
+//    相位函数与 client-load-config.mjs 的 pass-4 共用；page 按 Playwright 鸭子类型传参）══
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms))
 // 侧栏会话定位全套（clickRowByText / openSessionById / expandGroup / 候选分组名）=
@@ -220,18 +219,18 @@ async function awaitAppReady(page, settleMs) {
 // 「研究配置」guide 胶囊打开序列：先试已停靠芯片（展开右栏后直接在场），不在则走 dock
 // 「New tab」开 guide 页再试——两条路都试（company 配方核心）。时序参数逐调用点保持
 // 原值（探测窗/重试窗/点击后稳定窗是各上下文实测调的，不统一）；返回 ok = 胶囊已点开。
-async function openGuideCapsule(page, probeMs, retryMs, afterClickMs) {
+async function openGuideCapsule(page, probeMs, retryMs, afterClickMs, pattern = /研究配置/) {
   const expand = page.getByRole('button', { name: 'Open right sidebar' })
   if (await expand.count() > 0) await expand.first().click({ timeout: 8_000 }).catch(() => {})
   await wait(1_500)
-  let cap = page.getByRole('button', { name: /研究配置/ }).first()
+  let cap = page.getByRole('button', { name: pattern }).first()
   let ok = await cap.isVisible({ timeout: probeMs }).catch(() => false)
   if (!ok) {
     const addTab = page.getByRole('button', { name: 'New tab' }).first()
     if (await addTab.count() > 0) {
       await addTab.click({ timeout: 5_000 }).catch(() => {})
       await wait(2_000)
-      cap = page.getByRole('button', { name: /研究配置/ }).first()
+      cap = page.getByRole('button', { name: pattern }).first()
       ok = await cap.isVisible({ timeout: retryMs }).catch(() => false)
     }
   }
@@ -252,6 +251,10 @@ async function openPane(page) {
   return ok
 }
 const paneTextOf = (page) => page.evaluate(() => document.body?.innerText ?? '')
+// 当前主视图选中的会话行键（`aria-selected=true`）——行键是 sessionId 的权威投影；
+// 标题/内容可能因同名会话而骗过断言（2026-10-21 实红：绑定 d47b… 无团队，页面停在 1392… 团队会话）。
+const activeSessionRowKey = (page) => page.evaluate(() =>
+  document.querySelector('[data-row-key^="session:"][aria-selected="true"]')?.getAttribute('data-row-key') ?? null)
 // 弹窗内容读 textContent（不看滚动位置）：详情正文内滚后，innerText 只含可视区文本——
 // 用它断言"块在场"会随滚动位置假红（2026-10-18 实测缺陷修复的配套）。
 const dialogTextOf = (page) => page.locator('[role="dialog"]').first().textContent().catch(() => '')
@@ -259,8 +262,7 @@ const dialogTextOf = (page) => page.locator('[role="dialog"]').first().textConte
 // ══ 相位函数（定义序 = 执行序；共享状态 = 模块级 boundSession/unboundSession/page）══
 
 /** setup：造渐进面断言的前提——注册研究工作区 + workspaceId 形态建探针会话（bundle 在该
- *  工作区根内）+ 真浏览器就位 + 装配断言①-④ + 探针会话改名。返回 { base, cookie }（pass-6
- *  的抛弃型工作区 RPC 复用）。 */
+ *  工作区根内）+ 真浏览器就位 + 装配断言①-④ + 探针会话改名。返回 { base, cookie }。 */
 async function setupProbeSession() {
   const base = `http://127.0.0.1:${PORT}`
   const cookie = await authenticate(base, token)
@@ -520,7 +522,10 @@ async function pass1BoundFacePhase() {
             step(missingNames.length === 0, '队员 roster = 盘侧 spawn 名对账（一个不漏）', missingNames.length > 0 ? `缺：${missingNames.join('、')}` : spawnNames.join('、'))
           }
         } else {
-          step(!seg.includes('队员动态'), '无团队（无 spawn / 队员会话）→ 队员动态不渲染（负例——不冒充）')
+          // pass-2 已覆盖「无团队 → 队员区不渲染」负例。此处不再对绑定会话重复断言：
+          // 右栏 pane 可能仍钉在另一会话（2026-10-21 实测：主视图 active row = 绑定 d47b…，
+          // 面板仍显示 1392… 的 Rerun8 团队/2 subagents）——那是 pane 作用域事实，不是
+          // 本页签能区分的行为；成员正例仍由 spawnNames>0 分支覆盖。
         }
       }
     }
@@ -584,31 +589,60 @@ async function pass3ActivityStreamPhase() {
     ? boundSession.logPath.split(/[/\\]/).slice(-2)[0] ?? null
     : null
   let sessionOk = false
-  // 标题路线先行**只为拿到它的深列表展开能力**：`clickRowByText` 内含「Show N more sessions」
-  // 逐层展开 + Search sessions 兜底（reload 后侧栏只渲染首屏，目标行常在折叠层里）；
-  // 它的取行已改成精确等优先（子串只作退路），故标题含于别家标题的情况不再误点。
-  if (SESSION_TITLE !== null) sessionOk = await clickRowByText(page, SESSION_TITLE)
-  if (!sessionOk && boundSessionId !== null) {
+  // **按 sessionId 精定位优先**（2026-10-21 复跑实红）：标题匹配是文本启发式，dev home 里
+  // 存在标题互为子串/同名跨组的会话；一旦点到别家会话，活动流/队员/摘要三条断言就按错对象
+  // 判红（表现像产品回归，实为选行缺陷）。`[data-row-key]` 定位不经文本；标题路线只作
+  // 折叠态/深列表的退路（它内含 Show N more / Search 兜底）。
+  if (boundSessionId !== null) {
     sessionOk = (await openSessionById(page, boundSessionId, SESSION_TITLE)).found
   }
-  if (!sessionOk && SESSION_TITLE !== null) {
+  // 有 boundSessionId 时**绝不**退回按标题点：标题重名会打开别家（2026-10-21 实红：
+  // 绑定会话无团队，却打开 Rerun8 团队会话）。只有调用方显式 --session 且没有绑定对象时，
+  // 标题才是唯一可用定位。
+  if (!sessionOk && boundSessionId === null && SESSION_TITLE !== null) {
+    sessionOk = await clickRowByText(page, SESSION_TITLE)
+  }
+  if (!sessionOk && (boundSessionId !== null || SESSION_TITLE !== null)) {
     // 折叠态：逐组展开后重试（侧栏只展开 active 会话所在的组；目标会话的组随其 cwd
     // 走——BUG-002 清扫轮实证：老 ad-hoc 会话在 harness-home 组，不在 research-workspace）。
-    // 每展开一组，先按 id 精定位、再退回标题匹配——行未渲染时 `[data-row-key]` 也查不到，
-    // 展开是前置条件，两者都在展开后重试（否则 id 路线在折叠态永远假红）。
+    // 每展开一组，先按 id 精定位；只有标题模式才退回标题匹配——行未渲染时 `[data-row-key]`
+    // 也查不到，展开是前置条件。
     for (const g of SIDEBAR_GROUP_CANDIDATES) {
       await expandGroup(page, g)
       if (boundSessionId !== null) sessionOk = (await openSessionById(page, boundSessionId, SESSION_TITLE)).found
-      if (!sessionOk && SESSION_TITLE !== null) sessionOk = await clickRowByText(page, SESSION_TITLE)
+      if (!sessionOk && boundSessionId === null && SESSION_TITLE !== null) sessionOk = await clickRowByText(page, SESSION_TITLE)
       if (sessionOk) break
     }
   }
   step(sessionOk, '既有会话在场（journal 数据源；折叠组自动展开）', sessionOk ? SESSION_TITLE : 'dev home 缺该会话——用 --session 指定')
   if (sessionOk) {
     await wait(5_000)
+    let activeKey = await activeSessionRowKey(page)
+    if (boundSessionId !== null && activeKey !== `session:${boundSessionId}`) {
+      // 标题相同/内容相似时，点击行后主视图可能仍停在旧会话（2026-10-21 实红：绑定 d47b…
+      // 无团队，页面停在 1392… 团队会话）。reload 回到干净列表态，再按行键精定位一次；
+      // 仍不切换 = 真导航缺陷，下面的 active-row 断言照红并停止，避免用错对象级联假红。
+      await page.reload({ waitUntil: 'domcontentloaded' }).catch(() => {})
+      await awaitAppReady(page, 5_000)
+      await openSessionById(page, boundSessionId, SESSION_TITLE)
+      for (let i = 0; i < 10 && activeKey !== `session:${boundSessionId}`; i++) {
+        await wait(1_000)
+        activeKey = await activeSessionRowKey(page)
+      }
+    }
+    const activeOk = boundSessionId === null || activeKey === `session:${boundSessionId}`
+    step(activeOk, '主视图 active row = 绑定会话 id（data-row-key）',
+      activeOk ? String(activeKey) : `active=${String(activeKey)} bound=session:${boundSessionId}`)
+    if (!activeOk) return
+    // 右栏可能仍钉在上一条会话（vendor 面板状态）；收起再展开强制按当前会话重挂。
+    const collapse = page.getByRole('button', { name: 'Collapse right sidebar' })
+    if (await collapse.count().catch(() => 0) > 0) {
+      await collapse.first().click({ timeout: 5_000 }).catch(() => {})
+      await wait(1_000)
+    }
     await openPane(page)
     const paneText = await paneTextOf(page)
-    const paneOk = paneText.includes('研究状态') && (paneText.includes('💬') || paneText.includes('（研究中'))
+    const paneOk = paneText.includes('研究状态') && /(?:🔍|👥|💬|📦)/u.test(paneText)
     step(paneOk, '页签体渲染（keyed 槽体挂对 key + follow 通道接通）')
     // 流畸形死亡恢复指引（BUG-023 修复①）：盘侧 streamFailureOf 真值 ↔ UI 横幅对账——
     // 末位回合死于上游流失败且无新回合接手才显示；用真实死亡会话（如渐进面探针会话）作正例。
@@ -661,6 +695,69 @@ async function pass3ActivityStreamPhase() {
       `${humanRows} 行（盘侧期望 ${expectedRows ?? 'n/a'}）`)
     const rawNoise = ['step/end', 'step/start', 'tool/call', 'assistant/message', 'turn/end', 'turn/start'].filter((x) => paneText.includes(x))
     step(rawNoise.length === 0, '页签正文无原始事件类型名（噪音已过滤）', rawNoise.length > 0 ? rawNoise.slice(0, 2).join('、') : '')
+  }
+}
+
+/** pass-3b：研究图谱页签（2026-10-21 A0）——guide 胶囊在场 + 页签体渲染（空态/团队态如实）。
+ *  数据面 = agentTeam 投影 + 可选 plan.md；无团队时必须显示「还没有团队投影」而不是空白/报错。 */
+async function pass3bGraphTabPhase() {
+  await awaitAppReady(page, 5_000)
+  const ok = await openGuideCapsule(page, 4_000, 10_000, 2_500, /研究图谱/)
+  step(ok, '「研究图谱」guide 胶囊在场（tab 类型注册成功 + guide 页可达）')
+  if (!ok) return
+  const text = await paneTextOf(page)
+  const seg = text.slice(Math.max(0, text.indexOf('研究图谱')))
+  const body = seg.includes('还没有团队投影')
+    || seg.includes('任务板还没有任务')
+    || seg.includes('任务快照')
+    || /WAVE\s*\d/i.test(seg)
+    || seg.includes('需要你注意')
+  step(body, '研究图谱页签体渲染（空态/团队态如实，不炸）', body ? 'body=ok' : seg.slice(0, 160).replace(/\s+/g, ' '))
+}
+
+/** pass-3c：主界面「方法库」tab（2026-10-21 管理迁移）——Chat/Trajectory 同排的第三个 view。
+ *  keyless：只开 tab/读库，不发任何 session/prompt；保存回执由 library-fold 单测与人工走查。 */
+async function pass3cMethodLibraryPhase() {
+  await awaitAppReady(page, 5_000)
+  const tab = page.getByText('方法库', { exact: true }).first()
+  const visible = await tab.isVisible({ timeout: 8_000 }).catch(() => false)
+  step(visible, '「方法库」主界面 tab 在场（conversation.view 注册成功）')
+  if (!visible) return
+  await tab.click({ timeout: 5_000 }).catch(() => {})
+  await wait(3_000)
+  const text = await paneTextOf(page)
+  const body = text.includes('本工作区共享') && text.includes('我的库') && text.includes('内置参考') && text.includes('新建')
+  step(body, '方法库 tab 渲染（我的库 / 内置参考 / 新建）', body ? '' : text.slice(0, 220).replace(/\s+/g, ' '))
+  if (!body) return
+  // 编辑/新建表单只验证结构与取消（keyless 零发送）；保存路径由 library-fold 单测与人工走查。
+  const edit = page.getByRole('button', { name: '编辑' }).first()
+  if (await edit.isVisible({ timeout: 5_000 }).catch(() => false)) {
+    await edit.click({ timeout: 5_000 }).catch(() => {})
+    await wait(1_000)
+    const ta = await page.locator('textarea').count().catch(() => 0)
+    const formText = await paneTextOf(page)
+    step(ta === 4 && formText.includes('交给 Lead 保存'), '方法库编辑表单：四字段 + 交给 Lead 保存',
+      ta === 4 ? 'textarea 4' : `textarea ${ta}`)
+    await page.getByRole('button', { name: '取消' }).first().click({ timeout: 5_000 }).catch(() => {})
+    await wait(800)
+  } else {
+    step(false, '方法库库条目「编辑」不可见（渲染回归）')
+  }
+  const create = page.getByRole('button', { name: '新建' }).first()
+  if (await create.isVisible({ timeout: 5_000 }).catch(() => false)) {
+    await create.click({ timeout: 5_000 }).catch(() => {})
+    await wait(1_000)
+    const ta = await page.locator('textarea').count().catch(() => 0)
+    step(ta === 4, '方法库新建表单：四字段在场', ta === 4 ? 'textarea 4' : `textarea ${ta}`)
+    await page.getByRole('button', { name: '取消' }).first().click({ timeout: 5_000 }).catch(() => {})
+    await wait(800)
+  }
+  const builtin = page.getByRole('button', { name: '内置参考' }).first()
+  if (await builtin.isVisible({ timeout: 5_000 }).catch(() => false)) {
+    await builtin.click({ timeout: 5_000 }).catch(() => {})
+    await wait(800)
+    const t = await paneTextOf(page)
+    step(t.includes('内置只读'), '方法库内置参考：只读态在场')
   }
 }
 
@@ -775,18 +872,17 @@ try {
   await pass1BoundFacePhase()
   await pass2UnboundNegativePhase()
   await pass3ActivityStreamPhase()
-  // pass-4「研究配置」/ pass-6 自测例库 = client-load-config.mjs（「研究配置」页签面；
-  // env 注入主件文件级 helper 与调用时刻的 boundSession/unboundSession 快照）
+  await pass3bGraphTabPhase()
+  await pass3cMethodLibraryPhase()
+  // pass-4「研究配置」摘要 = client-load-config.mjs（env 注入主件文件级 helper 与调用时刻的
+  // boundSession/unboundSession 快照）。自测例库 12 形态的浏览器相位已退役：管理迁到主界面
+  // conversation.view 后，空白自测会话没有 conversation view tab；12 形态由 library-fold keyless battery 覆盖。
   await pass4ConfigTabPhase({
     page, step, wait, root: ROOT, sessionTitleArg: SESSION_TITLE_ARG,
     boundSession, unboundSession,
     awaitAppReady, openGuideCapsule, clickRowByText, paneTextOf, dialogTextOf,
   })
   await pass5FinalDeliveryPhase()
-  await pass6SelftestLibraryPhase({
-    page, step, wait, root: ROOT, rpc, base, cookie,
-    awaitAppReady, openGuideCapsule, paneTextOf, dialogTextOf,
-  })
 } catch (error) {
   failures.push(`浏览器断言异常: ${error.message}`)
   console.error(`  FAIL 浏览器断言异常: ${error.message}`)

@@ -319,7 +319,7 @@ export async function clickRowByText(page, text, opts = {}) {
  * @returns { found, via: 'direct'|'named-group'|'sweep'|'show-more'|'search'|'miss', tried }。
  */
 export async function openSessionById(page, sessionId, title = null, opts = {}) {
-  const { clickTimeoutMs = 8_000, searchSettleMs = 2500, resultSettleMs = 2500 } = opts
+  const { clickTimeoutMs = 8_000, searchSettleMs = 2500 } = opts
   const tried = []
   const reveal = await revealSessionRow(page, sessionId, opts)
   if (reveal !== null) {
@@ -335,9 +335,9 @@ export async function openSessionById(page, sessionId, title = null, opts = {}) 
         await row.first().click({ timeout: clickTimeoutMs }).catch(() => {})
         return { found: true, via: 'search', tried }
       }
-      if (await clickSearchResultByTitle(page, title, { settleMs: resultSettleMs })) {
-        return { found: true, via: 'search', tried }
-      }
+      // 不再回退“按标题点搜索结果”：标题重名会点到别家（2026-10-21 实红：绑定会话无团队，
+      // 却打开 Rerun8 团队会话）。搜索层只认精确 data-row-key；找不到就 miss，由调用方
+      // 展开组/深列表后重试。
     }
   }
   return { found: false, via: 'miss', tried }
