@@ -94,7 +94,10 @@ function main() {
       const controlPass = gateVerdict(control.out, 'PASS', gate);
       if (!controlPass && !expect) {
         // 副本基线非 PASS 且未给 expect → 案例组只查 `FAIL <gate>` 会被既有报因蒙混过关
-        failures.push(`对照组：${gate} 在零注入副本非 PASS（${id}）——该门禁属"副本基线非 PASS"类，案例必须给 expect 指名注入报因，否则断言空转`);
+        failures.push(`对照组：${gate} 在零注入副本非 PASS（${id}）——两种成因须分辨：`
+          + `①该门禁属"副本基线非 PASS"类（断言对象含 submodule / 本机 git config 等副本不可造面）→ 案例必须给 expect 指名注入报因；`
+          + `②工作树/索引中间态（典型 = 未 staged 的链接目标、未完成的 git 操作）→ 此时真仓 pnpm verify 同样会红，先 git add/commit 或还原再跑。`
+          + `分辨法：先跑 pnpm verify——真仓绿 = 情形①。`);
       } else if (controlPass && expect) {
         failures.push(`对照组：${gate} 在零注入副本已 PASS 却给了 expect（${id}）——expect 多余，或案例基线判断有误`);
       }
@@ -118,7 +121,7 @@ function main() {
       git(dir, ['add', '-A']); // 同上：mutate 的新文件统一入 tracked 集（案例 mutate 本身是纯 fs）
       const { status, out } = runVerify(dir);
       if (!/verify: 全绿|处失败/.test(out)) failures.push(`${id}：verify 未跑完（status=${status}）`);
-      else if (!gateVerdict(out, 'FAIL', gate)) failures.push(`${id}：注入回归未被点名报红——门禁钝化或案例失效`);
+      else if (!gateVerdict(out, 'FAIL', gate)) failures.push(`${id}：注入回归未被点名报红——对照组合格而此处不红 = 门禁钝化或注入未生效（案例侧；先确认 mutate 真的改了文件、且该文件在被扫面内）`);
       else if (expect && !out.includes(expect)) failures.push(`${id}：${gate} 报了红但**非本案例的报因**（期望含 ${JSON.stringify(expect)}）——注入未生效或断言被旁路`);
     }
 

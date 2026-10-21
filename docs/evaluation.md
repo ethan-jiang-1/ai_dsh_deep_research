@@ -25,6 +25,8 @@
 - **最小真检查**：`node scripts/verify/verify.mjs`（或 `pnpm verify`）+ `pnpm test`（命令正本 = `package.json` 的 test 脚本；本仓唯一登记的测试命令）——均 keyless、秒级。改驾驶舱（client 面，D18）时加跑 `node scripts/smoke/client-load-smoke.mjs`（headless 真浏览器断言：插件零失败横幅 / 无 loader entry 失败 / 本包 client bundle 进 /plugins/ 批次 / 页签渐进面与活动流，清单以脚本为准；失败自动留 `runtime/smoke-workspace/client-load-*` 的 png/html/console/meta 现场；无窗口内交付目标 = exit 2 SKIP，未跑 ≠ 通过）——路由正本 = [guides/60 §2 改驾驶舱行](./guides/60-dev-loop.md)。
 - **门禁登记表**（正本在此；与 `scripts/verify/verify.mjs` 的 gates 数组经门禁 `gate-ledger-sync` 机械对账——加门禁须两处同步，漏一处即红）。**列形纪律**：断言列只写现在为真的合同；反证列只留一行指针——注入红/还原绿全程与案例正文住对应 Note 与 [gates-smoke](../scripts/smoke/gates-smoke.mjs) 案例表，本表不复述叙事；判定细节与已知边界住 verify.mjs 对应门禁块头注：
 
+> **反证口径（两态）**：常驻 = [gates-smoke 案例表](../scripts/lib/gates-cases.mjs) 的 `CASES` 注入案例（零注入对照组绿 + 注入后点名红；覆盖 39/43，逐门禁查法 = `grep -n "gate: '<名>'" scripts/lib/gates-cases.mjs`）；结构性不适 = 本列已登记理由的 4 道（vendor-pin / vendor-clean / pin-agreement / hooks-active——断言对象是 submodule 或本机 git config 的真实状态，副本不可造），其反证 = 一次性 Note 红录。
+
 | 门禁 | 断言什么 | 反证指针 |
 |---|---|---|
 | `md-utf8-newline` | 所有 tracked .md 严格 UTF-8、恰一个结尾换行（git ls-files 驱动——运行区不扫） | [noise-sweep Note](../notes/implemented/2026-09-24-noise-sweep.md) |
@@ -54,7 +56,7 @@
 | `align-ledger` | `docs/alignment-ledger.json` 机读对账：source 在 vendor/dsh 存在、adopted/adapted 落点存在；na 须给理由 + 活性依据（liveness 或 reReviewOn，**两者皆无即红**） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) + na 活性二轮复核 = [推敲卡](../_backlog/_archived/settled_issues/2026-10-08-sdlc-reference-absorption.md)；gates-smoke 案例常驻 |
 | `discipline-state-vocab` | [discipline-map.md](discipline-map.md) 状态列首词属三态闭集（照搬/带证据适配/不适用），按表头定位状态列，越界即红 | 反证 = 2026-10-19 首次运行即红，抓出 2 行 `已具备`（`证据匹配面`/`六误区清单`）→ 改 `照搬`/`带证据适配` 后绿；来历 = [语义漂移卡](../_backlog/_archived/settled_issues/2026-10-19-discipline-map-semantic-drift.md)（「已具备」暗示免于重校，「带证据适配」要求每次换 pin 重验，混用 = 悄悄签免检）；gates-smoke 案例常驻 |
 | `discipline-na-trigger` | [discipline-map.md](discipline-map.md) 状态列以「不适用」开头的每行必须含可判定的重估触发词 | 反证 = 2026-10-19 注入回归：把一行状态列还原成裸 `不适用` → 该门禁红、还原后绿；来历 = [vendor-pin-bump-021rc2](../notes/implemented/2026-10-19-vendor-pin-bump-021rc2.md)（§维护规则 承诺的"由门禁复核"原未兑现——`align-ledger` 只读 JSON，从不读人读表）；gates-smoke 案例常驻 |
-| `repo-conventions` | 与 vendor 机械约定对齐：.editorconfig/.gitattributes 形态、engines.node = vendor 值、pre-commit 含 `git diff --cached --check` | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) |
+| `repo-conventions` | 与 vendor 机械约定对齐：.editorconfig/.gitattributes 形态、engines.node = vendor 值、pre-commit 含 `git diff --cached --check`、**子进程凭据卫生**（`scripts/lib/env.mjs` 在场 + scripts 入口零 `env: {...process.env}` 整体透传） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)；gates-smoke `repo-conventions-editorconfig-root-missing` 常驻案例 |
 | `vendor-links` | 根 package.json 的 `@deepseek-ai/*` devDependencies 在 lockfile 解析为 `link:vendor/dsh/...`；overrides 三件套无 registry 条目 | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) |
 | `overlay-fresh` | `dev/research.overlay.yml` = `dev/render-overlay.mjs` 从 pack 的渲染结果（tracked 生成物，勿手改） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) |
 | `pack-workspace-fresh` | pack 的工作区种子 = `research-workspace/` 正本（手册/NODES/判型模式库/模板）的同步结果，`dev/sync-pack-workspace.mjs --check` 对账 | [部署工程化 Note](../notes/implemented/2026-09-26-deployment-engineering.md) |

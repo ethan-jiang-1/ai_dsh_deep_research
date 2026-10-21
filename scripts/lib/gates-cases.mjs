@@ -3,7 +3,7 @@
 // 静态对账消费本表——驱动面（smoke 道，起子进程）不得被 tests import，案例表因此住 lib；
 // 每 mutate 只做纯 fs 操作，git add 由驱动壳在 mutate 后统一执行，本模块零子进程）。
 // 消费方：scripts/smoke/gates-smoke.mjs（真执行体）+ tests/contracts/verify-gates.test.mjs（静态对账）。
-import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 
 // ── 注入手法（每条 = 该门禁负责拦的真实回归；静态契约测试对账 gate 名 ↔ verify gates 数组）──
@@ -269,6 +269,71 @@ export const CASES = [
     writeFileSync(p, t.replace(/\n$/, ''));
   } },
   { id: 'md-anchors-nonascii-path', gate: 'md-anchors', mutate: appendTo(join('_dist', '安装手册.md'), '\n[坏锚探针](../README.md#这个锚点肯定不存在xyz)\n') },
+  // ── 2026-10-21 卫生轮后续：补齐结构性可注入、此前只有一次性 Note 红证的门禁
+  //    （常驻案例覆盖 27/43 → 39/43）。剩余 4 道（vendor-pin / vendor-clean / pin-agreement /
+  //    hooks-active）断言对象 = submodule 或本机 git config 的真实状态，副本不可造——
+  //    理由已登记在 docs/evaluation.md §L0 反证列（两态口径）。
+  //    本组全部为"注入后目标门禁必须点名报红"；对照组证明零注入时这些门禁在副本内 PASS。──
+  { id: 'pack-contract-sync-runs-path', gate: 'pack-contract-sync', mutate: appendTo(join('packages', 'deep-research-pack', 'README.md'), '\n旧契约探针：runs/<slug>/\n') },
+  { id: 'client-effect-wrap-bare-register', gate: 'client-effect-wrap', mutate: appendTo(join('packages', 'deep-research-pack', 'src', 'client', 'index.ts'), '\nsidebarRightTabs.register(\'probe-tab\', {})\n') },
+  { id: 'note-status-readme-missing', gate: 'note-status', mutate: (dir) => rmSync(join(dir, 'notes', 'implemented', 'README.md')) },
+  { id: 'note-graduation-plan-heading', gate: 'note-graduation-rewrite', mutate: (dir) => {
+    const d = join(dir, 'notes', 'implemented');
+    const target = readdirSync(d).filter((f) => f.endsWith('.md') && f !== 'README.md').sort()
+      .find((f) => !readFileSync(join(d, f), 'utf8').includes('<!-- grandfather:'));
+    if (!target) throw new Error('找不到非 grandfather 的 implemented Note——案例失效');
+    appendFileSync(join(d, target), '\n## 验收\n');
+  } },
+  { id: 'dev-skill-format-name-mismatch', gate: 'dev-skill-format', mutate: (dir) => {
+    const p = join(dir, '.agents', 'skills', 'writing-a-gate', 'SKILL.md');
+    const t = readFileSync(p, 'utf8');
+    if (!/^name:\s*writing-a-gate\s*$/m.test(t)) throw new Error('夹具 SKILL.md frontmatter 形态变了——案例失效');
+    writeFileSync(p, t.replace(/^name:\s*writing-a-gate\s*$/m, 'name: writing-a-gate-probe'));
+  } },
+  // 自咬防护（本文件自身在 live 扫描面内）：连续字面量会让本门禁在真仓/对照组就红——
+  // 路径段运行时拼接，源码里不出现门禁正则要匹配的完整形态。
+  { id: 'proposed-pointer-dangling', gate: 'proposed-pointer-live', mutate: (() => {
+    const probe = ['notes', 'proposed', '2099-01-01-probe.md'].join('/');
+    return (dir) => appendFileSync(join(dir, 'README.md'), `\n指向 \`${probe}\` 的探针\n`);
+  })() },
+  { id: 'vendor-links-registry-version', gate: 'vendor-links', mutate: (dir) => {
+    const lockPath = join(dir, 'pnpm-lock.yaml');
+    const pkg = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'));
+    const dep = Object.keys(pkg.devDependencies ?? {}).find((d) => d.startsWith('@deepseek-ai/'));
+    if (!dep) throw new Error('夹具 package.json 无 @deepseek-ai devDependency——案例失效');
+    const lines = readFileSync(lockPath, 'utf8').split('\n');
+    const i = lines.findIndex((l) => l.trim() === `'${dep}':`);
+    if (i === -1) throw new Error('夹具 lockfile 无该依赖条目——案例失效');
+    const j = lines.findIndex((l, k) => k >= i && k < i + 5 && /version:\s*link:vendor\/dsh\//.test(l));
+    if (j === -1) throw new Error('夹具该依赖未解析为 link:vendor/dsh/——案例失效');
+    lines[j] = lines[j].replace(/version:\s*link:vendor\/dsh\/\S+/, 'version: 1999.0.0');
+    writeFileSync(lockPath, lines.join('\n'));
+  } },
+  { id: 'workspace-contract-template-missing', gate: 'workspace-contract', mutate: (dir) => rmSync(join(dir, 'research-workspace', 'templates', 'run', 'question.md')) },
+  { id: 'dist-manual-version-drift', gate: 'dist-manual-version', mutate: (dir) => {
+    const p = join(dir, '_dist', '安装手册.md');
+    const t = readFileSync(p, 'utf8');
+    if (!/\|\s*版本\s*\|\s*\S+\s*\|/.test(t)) throw new Error('夹具手册无版本行——案例失效');
+    writeFileSync(p, t.replace(/(\|\s*版本\s*\|\s*)\S+(\s*\|)/, (m, a, b) => `${a}9.9.9${b}`));
+  } },
+  { id: 'claude-symlink-regular-file', gate: 'claude-symlink', mutate: (dir) => {
+    const p = join(dir, 'CLAUDE.md');
+    if (!lstatSync(p).isSymbolicLink()) throw new Error('夹具 CLAUDE.md 非 symlink——案例失效');
+    rmSync(p);
+    writeFileSync(p, '# probe\n');
+  } },
+  { id: 'secrets-untracked-log-leak', gate: 'secrets-untracked', mutate: (dir) => {
+    // 敏感后缀全部被 .gitignore 接管——先解除忽略再落盘，否则驱动壳的 git add -A 收不进 index
+    appendFileSync(join(dir, '.gitignore'), '\n!probe-leak.log\n');
+    writeFileSync(join(dir, 'probe-leak.log'), 'probe\n');
+  } },
+  // 自咬防护：端口号从被撞文件现取（本文件处于 port-exclusive 扫描面，且不得写 'port = 数字' 形态）
+  { id: 'port-exclusive-double-claim', gate: 'port-exclusive', mutate: (dir) => {
+    const src = readFileSync(join(dir, 'scripts', 'smoke', 'l4-lite-smoke.mjs'), 'utf8');
+    const m = /'port',\s*'(\d{4,5})'/.exec(src);
+    if (!m) throw new Error('夹具 l4-lite-smoke 的端口声明形态变了——案例失效');
+    appendFileSync(join(dir, 'scripts', 'lib', 'roles.mjs'), `\nconst PORT = ${m[1]};\n`);
+  } },
   // archived-note-pointer（归档判定复核面）双形态：①活面加未登记的→archived 链接（归档
   // 前必须解除引用或登记）；②登记条目目标改不存在路径（失存——Note 移位/复活须同步登记簿）。
   { id: 'archived-pointer-unregistered', gate: 'archived-note-pointer', mutate: appendTo('README.md', '\n[归档指针探针](notes/archived/2026-09-24-ui-observability-surfaces.md)\n') },
