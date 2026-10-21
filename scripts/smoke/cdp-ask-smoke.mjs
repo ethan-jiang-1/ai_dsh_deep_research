@@ -25,11 +25,13 @@
 // 用法：source dev/env.sh && node scripts/smoke/cdp-ask-smoke.mjs [--port 3115]
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { scrubbedEnv } from '../lib/env.mjs';
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
+import { runStateOf } from '../lib/run-state.mjs';
+import { resolveSessionLog } from '../lib/session-log.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {
@@ -68,8 +70,13 @@ const TITLE = 'cdp-ask-smoke 临时会话';
 // （2026-10-11 实测教训：同名会话撞车会让消息进旧会话而对账盯新会话 → 假红）。
 const WORKSPACE = join(ROOT, 'runtime', 'smoke-workspace', `cdp-ask-${Date.now()}`);
 mkdirSync(WORKSPACE, { recursive: true });
-// team 行（镜像 client-load-smoke）：不加载 agent-team host 行则 spawn_teammate 不在场，而
-// "running 且非挂起"的长时 turn 正是 Queue 标签的触发条件（挂起态的 primary 是 Stop，不是 send）。
+// team 行（镜像 vendor agent-team-profile 层）：**host 行 + 工具行缺一不可**——D16 把团队
+// 组合下沉到 profile 层后，只注入 agent-team host 不会暴露 spawn_teammate，模型会退回
+// `subagent`（立即返回、turn 随即闭合），而"running 且非挂起"的长时 turn 才是 Queue 标签的
+// 触发条件（挂起态的 primary 是 Stop，不是 send）。
+// 2026-10-21 实证：本 smoke 长期未跑，阶段③ 因缺 tool-agent-team 行而前置不成立——lead 在
+// 会话里如实报告「我的工具箱里没有 spawn_teammate」，改用 subagent 后 turn 3 立即 completed，
+// 探针看到的是空闲态 Send message（红的是前置，不是探针）。补工具行 = 恢复 D16 前的组合语义。
 const TEAM_ROW = `
     - id: agent-team
       name: '@deepseek-ai/dsh-experimental-agent-team'
@@ -79,12 +86,19 @@ const TEAM_ROW = `
         maxPendingMessagesPerMember: 64
         maxMessageBytes: 65536
         disposalTimeoutMs: 5000
+
+    - id: tool-agent-team
+      name: '@deepseek-ai/dsh-experimental-tool-agent-team'
+      config:
+        freshProvider: spawn
+        forkProvider: fork
 `;
 const PATCH = join(ROOT, 'runtime', 'smoke-workspace', 'cdp-ask.overlay.yml');
 writeFileSync(PATCH, readFileSync(join(ROOT, 'dev', 'research.overlay.yml'), 'utf8') + TEAM_ROW, 'utf8');
 
 const checks = [];
 const check = (name, ok) => checks.push([name, ok === true]);
+let phase3NotRun = false; // 阶段③前置缺席：整轮记 exit 2（未跑 ≠ 通过）
 let child;
 try {
   child = spawn(process.execPath, ['--import', 'tsx/esm', BIN, '--profile', 'web', '--patch', PATCH, '--', '--port', String(PORT), '--no-open'], { cwd: ROOT, env: scrubbedEnv({ DSH_HOME: HOME }), stdio: ['ignore', 'pipe', 'pipe'] });
@@ -157,17 +171,35 @@ try {
   // ── 阶段③：在飞态 → Queue message（生产现场形态）──
   await rpc('session/prompt', { request: { requestId: randomUUID(), sessionId, mode: 'queue', content: [{ type: 'text', text: '请立刻 spawn 一个名为 cdp-ask-holder 的 teammate，让它写一份 600 字以上的中文《文件命名规范》说明（越详细越好），然后你等它返回并汇报要点。不要问我任何问题。' }] } });
   await sleep(12_000); // 等子代理真起来（turn 保持 running 且非挂起 → primary 按钮 = queue/steer）
-  const B = await runProbe('第二条（排队注入）：请只回复「探针收到」四个字，不要做任何其他事。');
-  console.log('=== 阶段③（在飞态）verdict 节选 ===');
-  console.log(JSON.stringify({ sent: B.verdict?.sent, sentBy: B.verdict?.sentBy, landed: B.verdict?.landed, answered: B.verdict?.answered, reconcile: B.verdict?.reconcile, failed: B.verdict?.failed }, null, 1));
-  check('③ sentBy ∈ 在飞态 send 家族（Queue message / Steer message）——旧探针在此构造性零命中',
+  // 前置显式检查（2026-10-21 教训）：Queue 标签的前提是 turn 仍 open。若模型没组队 / 提前收尾，
+  // 前置就不成立——那必须记「未跑」（exit 2），不能把前置漂移伪装成探针红（D16 后本 smoke 曾
+  // 因缺 tool-agent-team 行静默失准：lead 退回 subagent、turn 3 立即闭合，而冒烟报的是标签红）。
+  const findLog = () => {
+    for (const g of readdirSync(sessionsRoot, { withFileTypes: true })) {
+      if (!g.isDirectory()) continue;
+      const d = join(sessionsRoot, g.name, sessionId);
+      if (existsSync(d)) return resolveSessionLog(d);
+    }
+    return null;
+  };
+  const logPath3 = findLog();
+  const pre3 = logPath3 === null ? { readable: false, turnOpen: null } : runStateOf({ logPath: logPath3, wsRoot: WORKSPACE });
+  if (pre3.turnOpen !== true) {
+    phase3NotRun = true;
+    console.log(`（未跑）阶段③前置不成立：turn 未保持 open（readable=${String(pre3.readable)}，turnOpen=${String(pre3.turnOpen)}）——`
+      + 'Queue 标签的前提不在场，不判探针；按 verdict 契约计「未跑 ≠ 通过」。');
+  }
+  const B = phase3NotRun ? null : await runProbe('第二条（排队注入）：请只回复「探针收到」四个字，不要做任何其他事。');
+  if (!phase3NotRun) console.log('=== 阶段③（在飞态）verdict 节选 ===');
+  if (!phase3NotRun) console.log(JSON.stringify({ sent: B.verdict?.sent, sentBy: B.verdict?.sentBy, landed: B.verdict?.landed, answered: B.verdict?.answered, reconcile: B.verdict?.reconcile, failed: B.verdict?.failed }, null, 1));
+  if (!phase3NotRun) check('③ sentBy ∈ 在飞态 send 家族（Queue message / Steer message）——旧探针在此构造性零命中',
     typeof B.verdict?.sentBy === 'string' && ['Queue message', 'Steer message'].includes(B.verdict.sentBy));
-  check('③ 对账目标 = 本会话（自动探测拿到的是本会话 id）', B.verdict?.reconcile?.sessionId === sessionId);
+  if (!phase3NotRun) check('③ 对账目标 = 本会话（自动探测拿到的是本会话 id）', B.verdict?.reconcile?.sessionId === sessionId);
   // ③ 的落盘**不作硬判据**：排队消息由服务端在 turn 取用时才写日志，时机可能远超探针的 18s 轮询窗
   // （实测同代码两次跑一次 landed 一次 not-landed）。"发出并落盘"这条链已由阶段①（空闲态）硬证；
   // 本阶段证的是**在飞态标签被命中**——那正是生产现场旧探针构造性零命中的那一层。
-  console.log(`（信息）阶段③ landed=${String(B.verdict?.landed)}（reconcile=${B.verdict?.reconcile?.status ?? 'null'}）——排队落盘时机由服务端定，不作为判据。`);
-  if (B.verdict?.answered !== true) console.log('（信息）阶段③ answered=false 与判据无关：本阶段判"标签是否被命中"，不是等模型回复。');
+  if (!phase3NotRun) console.log(`（信息）阶段③ landed=${String(B.verdict?.landed)}（reconcile=${B.verdict?.reconcile?.status ?? 'null'}）——排队落盘时机由服务端定，不作为判据。`);
+  if (!phase3NotRun && B.verdict?.answered !== true) console.log('（信息）阶段③ answered=false 与判据无关：本阶段判"标签是否被命中"，不是等模型回复。');
 } catch (error) {
   console.error(`cdp-ask-smoke: 运行期失败——${error.message}`);
   checks.push(['运行期无异常', false]);
@@ -187,7 +219,12 @@ for (const [name, ok] of checks) {
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`);
   if (!ok) allOk = false;
 }
-console.log(allOk
-  ? 'cdp-ask-smoke: ALL PASS（空闲态发出并落盘 + 续跑唤醒落盘 + 在飞态 Queue message 标签命中；在飞态落盘时机不作判据）'
-  : 'cdp-ask-smoke: FAILURE(S)——见上（真 UI 上发出/落盘未全绿）');
+console.log(!allOk
+  ? 'cdp-ask-smoke: FAILURE(S)——见上（真 UI 上发出/落盘未全绿）'
+  : phase3NotRun
+    ? 'cdp-ask-smoke: 未跑（阶段③前置缺席：turn 未保持 open）——①② 已绿，③ 未判，未跑 ≠ 通过'
+    : 'cdp-ask-smoke: ALL PASS（空闲态发出并落盘 + 续跑唤醒落盘 + 在飞态 Queue message 标签命中；在飞态落盘时机不作判据）');
+// verdict 契约：前置缺席 = 2（未跑，优先于全绿）；断言红 = 1；全绿 = 0。
+// 形状由 tests/contracts/smoke-contract.test.mjs 钉住（真实字面 = 下一行）。
+if (allOk && phase3NotRun) process.exit(2);
 process.exit(allOk ? 0 : 1);

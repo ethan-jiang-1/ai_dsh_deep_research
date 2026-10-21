@@ -35,7 +35,7 @@
 - 先红后绿实录（新契约/新守卫全带反证）：根布局契约与消费列对账（首跑即红 = 当前真实漂移为自然反证）；appendDecisionsRow 三态（尾随节/缺节首跑红 + journal 双写 sabotage 红）；scene-pack（模块缺席红 + sabotage ×2）；text-fold sabotage；金标准加伪「检索：」行红；events.mjs sabotage（toolCall type 错值 → hitl-fold 11 例红）；SHOW_MORE_SESSIONS_PATTERN sabotage；findGroup / readableTitle / isArchivedScene 缺席红；quotepath 盲区双案例（非 ASCII 路径注入在旧实现下"未被点名报红"两轮实证）。
 - 行为保持证据：client-load-smoke 基线↔复跑逐断言标签全同（61/61 × 3 时点）、e2e-021rc2 全同（7/7 × 2）、trackedFiles 收口前后 gates-smoke 62 案例同判、events 工厂迁移 8 文件 113 例测试数不变、D27 改名后契约测试 13/13。
 - 实走（keyless 只读/本地）：scene-capture --list/--show/缺席 exit 2；session-events --group 读 564 场冒烟会话 + 无命中组 fail-loud 列组；watch-run 盯已归档 teammate 会话（teammate:true + 提示 + 归档 TIMEOUT 文案）；run-dashboard --latest 归档标注；llm-stream-tee 本地假端点（原始凭据到达服务端、抄写副本脱敏、调用方逐字流、四件套落盘）；unconsumed-evidence/acceptance-check 壳五形态 + exit 2 路径；snapshot-replay 发现式 ALL PASS（端口 3103）。
-- 未跑项（如实登记）：client-hitl-smoke 与 cdp-ask-smoke（真模型档，需凭据）——hitl-answer 导航收敛的证据缺口由 ask-drive keyless 回归 + client-load/e2e 基线冒烟间接覆盖；pack src/client 两文件注释级改动未跑 client-load-smoke（无行为面变化，判断写入当次 commit message）。
+- 未跑项（如实登记）：client-hitl-smoke 与 cdp-ask-smoke（真模型档，需凭据）——hitl-answer 导航收敛的证据缺口由 ask-drive keyless 回归 + client-load/e2e 基线冒烟间接覆盖；pack src/client 两文件注释级改动未跑 client-load-smoke（无行为面变化，判断写入当次 commit message）。**2026-10-21 后续：三档真模型档（含 l4-lite）已补跑全绿，并以 cdp-ask 为线索修掉一处 D16 后遗症——见 [真模型档补跑与 cdp-ask 前置修复](2026-10-21-real-model-tier-evidence.md)**。
 
 ## 环境状态
 
