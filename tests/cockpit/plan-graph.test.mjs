@@ -4,7 +4,8 @@
 // 钉住五件事：最长路径分层（缺 blocker/环/自环 fail-soft）、wave 稳定序、attention 的
 // 四条判据（不发明 failed 任务状态、不猜年龄）、worker chips 的降级面、plan.md 节点表解析。
 
-import { test } from 'node:test';
+import { test } from 'node:test'
+import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import {
   DEFAULT_ATTENTION_THRESHOLDS,
@@ -328,4 +329,15 @@ test('Wave 重编号：W3.1 依赖 W1.1 时 wave-prefix 必须红，而不是静
   const issue = planIssuesOf(index).find((item) => item.kind === 'wave-prefix');
   assert.ok(issue);
   assert.match(issue.message, /实际在 Wave 2/);
+});
+
+test('Wave 固定测试资产：W1.1/W2.1/W2.2 并行、W3.1 汇合、无 legacy flat W', () => {
+  const fixture = readFileSync(new URL('../fixtures/plan-wave/plan.md', import.meta.url), 'utf8');
+  const index = planIndex(fixture);
+  assert.deepEqual(index.topLevel.map((node) => node.id), ['W1.1', 'W2.1', 'W2.2', 'W3.1', 'W4.1']);
+  assert.equal(index.byId.get('W1.1')?.stage, 'scan');
+  assert.equal(index.byId.get('W2.1')?.stage, 'dive');
+  assert.equal(index.byId.get('W2.2')?.stage, 'dive');
+  assert.equal(index.byId.get('W3.1')?.stage, 'synthesis');
+  assert.deepEqual(planIssuesOf(index), [], '固定 Wave 资产不得有结构提示');
 });

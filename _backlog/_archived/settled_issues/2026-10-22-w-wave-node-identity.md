@@ -37,10 +37,13 @@ WAVE 4：W4.1
 ## 落地结果（2026-10-22）
 
 - Note：[2026-10-22-w-wave-node-identity.md](../../../notes/implemented/2026-10-22-w-wave-node-identity.md)
-- `pnpm test` 通过；`pnpm verify` 全绿；`preset-smoke` / `client-load-smoke` ALL PASS。
+- `pnpm test` **628 pass / 0 fail**；固定资产 `tests/fixtures/plan-wave/plan.md` 由 `plan-graph` 消费；
+  `pnpm verify` 全绿；`preset-smoke` / `client-load-smoke` ALL PASS。
+- **真实 Wave run**：`drt_node24-lts-status` 使用 `W1.1 → W2.1/W2.2（WAVE 2 · 2 个并行）→ W3.1...`，
+  graph 无 legacy-flat-w；验证新语义已进入真实 Lead 输出。
 - 临时 Wave plan 走查：`WAVE 2 · 2 个并行`、`W2.1/W2.2` 并排、无 LAYER；恢复 plan。
 - 旧 flat W run（`drt_cn-us-ai-models-hardware` v2）只读标 legacy，不自动重编号。
-- **未跑**：新格式 Wave 的真实完整 run；真实多 Wave B rollup 执行。两项不冒充通过。
+- **未跑**：`drt_node24-lts-status` 的完整交付；真实多 Wave B rollup 的端到端执行。不冒充通过。
 
 ## 去向
 

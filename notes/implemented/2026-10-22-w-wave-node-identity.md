@@ -44,17 +44,22 @@
 ## 实际跑过的验证
 
 - `pnpm typecheck`：通过；pack client/host 构建通过。
-- `pnpm test`：通过；`tests/cockpit/plan-graph.test.mjs` 覆盖 `W1.1/W2.1/W2.2/W2.1.1`、
+- `pnpm test`：**628 pass / 0 fail**；`tests/cockpit/plan-graph.test.mjs` 覆盖 `W1.1/W2.1/W2.2/W2.1.1`、
   `wave-prefix`、legacy flat W、stage、lifecycle。
+- **固定测试资产**：`tests/fixtures/plan-wave/plan.md`（W1.1 → W2.1/W2.2 并行 → W3.1 汇合）；
+  `plan-graph` 直接读该文件，断言 topLevel/stage 且 `planIssuesOf` 为空。
 - `pnpm verify`：全绿（含 `pack-workspace-fresh`、`backlog-liveness`、`md-links`）。
 - `preset-smoke`：ALL PASS。
 - `client-load-smoke`：ALL PASS（WAVE 文案断言）。
 - 临时 Wave plan 浏览器走查：`WAVE 2 · 2 个并行`、`W2.1/W2.2` 并排、无 LAYER；随后恢复 plan。
-- **真实 run 现状**：`drt_gha-ubuntu-latest` / `drt_cn-us-ai-models-hardware` 的 plan 是旧 flat W
-  （W1/W2…）或旧 N；按本 Note 标 legacy，不冒充 Wave 新格式。新 Wave plan 的完整真实 run 是下一步
-  观察项。
+- **真实 Wave run（已跑）**：`drt_node24-lts-status`（Node.js 24 生命周期，quick_factual）由修正后的
+  profile 生成：`W1.1 → W2.1/W2.2（WAVE 2 · 2 个并行）→ W3.1 → W4.1 → W5.1`；graph 显示
+  `WAVE 2 · 2 个并行` 且无 `legacy-flat-w`。截屏 `runtime/research-tmp/wave-real-run.png`。
+- **旧 run**：`drt_gha-ubuntu-latest` / `drt_cn-us-ai-models-hardware` 的 plan 是旧 flat W 或旧 N；
+  按本 Note 标 legacy，不自动改写。
 
-**未跑项**：真实新格式 Wave run、真实 B rollup 在多 Wave 下的执行；不得说成已通过。
+**未跑项**：`drt_node24-lts-status` 的完整交付（当前已验证到 Wave plan/graph）；真实多 Wave B rollup 的
+端到端执行。不得说成已通过。
 
 ## 环境状态与已知限制
 
