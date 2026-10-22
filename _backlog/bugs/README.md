@@ -10,7 +10,7 @@
 
 ## 活跃列表
 
-（当前无活跃缺陷卡。）
+- [BUG-043](BUG-043-graph-unmapped-task-shows-unexecuted.md) — 图谱把“未映射 task_id”误报成“未执行”（P1，等人拍板；先修状态语义+覆盖率提示）。
 
 ## 最近归档
 
