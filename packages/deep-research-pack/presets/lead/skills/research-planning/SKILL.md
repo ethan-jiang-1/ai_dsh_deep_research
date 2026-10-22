@@ -85,7 +85,10 @@ L2 触发（任一）：关键 claim 单源/只有二手、口径缺失、矛盾
    `W2` 不建 task。
 2. **复合节点 W2.1**（有 W2.1.1 等内部拆解）用 rollup task，owner Lead；`blocked_by` = 外部
    依赖 task + 已建子任务；子任务废弃先 `set_dependencies` 清依赖再 delete。
-3. 把返回的 `task-N` 回填 plan 的 `task_id`。**task_id 只是当前会话映射**；恢复时按 W 节点重建。
+3. 把返回的 `task-N` 回填 plan 的 `task_id`，**回填后逐行核对**：每个节点要么有真实
+   `task-N`，要么显式写 `plan-only`（内部拆解等不挂任务的节点）——**不留空白**。留空的节点在
+   研究图谱上是「状态未知（未映射 task_id）」，既不是未执行也不是完成；恢复会话重建任务后旧
+   `task_id` 会失效，按同一规则重绑。**task_id 只是当前会话映射**；canonical 引用始终是 `W2.1`。
 4. 把所有 ready 且无 owner 的 task `team_task_update action=reassign` 给 owner；owner 不在线就
    `send_message` 唤醒。
 

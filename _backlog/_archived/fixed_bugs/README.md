@@ -48,3 +48,4 @@
 | [BUG-040](BUG-040-terminal-readiness-two-copies-drift.md) | 终局 readiness 收归单一正本：pack 导出 `terminalVerdictLine`、门的 `readinessOf` 委托（只留附条件语义）、三份副本删除；跨实现一致契约测试先红后绿 | 2026-10-18 |
 | [BUG-042](BUG-042-method-library-seed-absent-no-pointer.md) | 偏好库 `method-library.md` 从不播种、手册不指路：加空架子种子（`scaffold` 自动收集，10→11）+ 手册三态指路 + skill/preset 同钉 + `sync-pack-workspace` 独立种子守卫（反证两条）；新真模型档探针 ALL PASS 3/3 | 2026-10-19 |
 | [BUG-041](BUG-041-recovery-path-leaves-no-hitl-provenance.md) | 官方恢复路径（`run-kickoff --session` 自由文本关挂起）不落 HITL 记账：补 `closingProvenanceRow`+双写，接线到续跑分支，交付卡识别加文本级兜底；判据#3 端到端达成（行/备注/`isHitl2Row` 三真） | 2026-10-19 |
+| [BUG-043](BUG-043-graph-unmapped-task-shows-unexecuted.md) | 图谱把「未映射 task_id」误报成「未执行」：映射折算抽 `graph-model`（五态含 stale/duplicate/plan-only）+ 覆盖率行 + 投影未就绪门；判据修正（client-load 负例不可达 → 覆盖率行 + 盘侧节点数对账） | 2026-10-23 |

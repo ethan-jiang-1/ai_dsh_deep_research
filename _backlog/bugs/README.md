@@ -10,11 +10,12 @@
 
 ## 活跃列表
 
-- [BUG-043](BUG-043-graph-unmapped-task-shows-unexecuted.md) — 图谱把“未映射 task_id”误报成“未执行”（P1，等人拍板；先修状态语义+覆盖率提示）。
+（当前无活跃缺陷卡；BUG-043 已修归档。）
 
 ## 最近归档
 
-（BUG-042 已于 2026-10-19 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-042-method-library-seed-absent-no-pointer.md)；
+（BUG-043 已于 2026-10-23 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-043-graph-unmapped-task-shows-unexecuted.md)——图谱映射五态 + 覆盖率，证据 = `graph-model` 单测 + client-load 覆盖率行断言；
+BUG-042 已于 2026-10-19 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-042-method-library-seed-absent-no-pointer.md)；
 BUG-034 / BUG-035 同批修复归档。近况看两池索引：[暂停](../_archived/suspended_bugs/README.md) · [已修](../_archived/fixed_bugs/README.md)；
 新卡编号 = 活跃 ∪ 全部归档池取最大号 + 1，规则唯一权威 = 本页。）
 

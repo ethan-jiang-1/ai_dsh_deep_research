@@ -19,7 +19,8 @@
 // 用法：
 //   source dev/env.sh && node scripts/run-ops/session-replay.mjs <session-id|标题子串> [--group <子串>] [--port 3117]
 //     [--url <已起 GUI 的带 token URL>] [--out runtime/scenes/replay-<name>] [--wait-ms 2500]
-//     [--open-status]（展开右栏并打开「研究状态」页签——驾驶舱观察面入镜） [--json]
+//     [--open-status]（展开右栏并打开「研究状态」页签——驾驶舱观察面入镜）
+//     [--open-graph]（同上，打开「研究图谱」页签——plan↔Team 映射/覆盖率症状的现场） [--json]
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -140,9 +141,11 @@ try {
     await page.waitForSelector('[data-row-key^="workspace:"], [data-row-key^="session:"]', { timeout: 30_000 }).catch(() => {});
     opened = await openSessionById(page, target.sessionId, meta.title);
   }
-  // ── ⑤b 可选：展开右栏并打开「研究状态」页签（驾驶舱观察面——"页签显示错了"类症状的现场）──
+  // ── ⑤b 可选：展开右栏并打开驾驶舱页签（观察面——"页签显示错了"类症状的现场）──
+  // 打开方式与判据 = scripts/lib/probe-status-tab.mjs（标题精确匹配，描述串不参与）。
   let statusPaneOpened = null;
-  if (flag('open-status')) {
+  let graphPaneOpened = null;
+  const openCockpitPane = async (title) => {
     const collect = () => page.evaluate(() => {
       const titleOf = (b) => {
         const leaves = Array.from(b.querySelectorAll('span,div')).filter((e) => e.children.length === 0 && (e.textContent ?? '').length > 0);
@@ -166,16 +169,18 @@ try {
       await page.waitForTimeout(1000);
     }
     for (let i = 0; i < 12; i++) {
-      const pick = pickStatusTab({ buttons: await collect(), title: '研究状态' });
+      const pick = pickStatusTab({ buttons: await collect(), title });
       if (pick.pickedIndex !== null) {
         await page.locator('button').nth(pick.pickedIndex).click({ timeout: 5000 }).catch(() => {});
-        statusPaneOpened = pick.reason;
-        break;
+        await page.waitForTimeout(1200);
+        return pick.reason;
       }
       await page.waitForTimeout(1000);
     }
-    await page.waitForTimeout(1200);
-  }
+    return null;
+  };
+  if (flag('open-status')) statusPaneOpened = await openCockpitPane('研究状态');
+  if (flag('open-graph')) graphPaneOpened = await openCockpitPane('研究图谱');
   await page.waitForTimeout(Number.isFinite(WAIT_MS) ? WAIT_MS : 2500);
 
   // ── ⑥ 抓五件套（与 scene-capture 同形，可被 scene-capture --list/--show 读回）──
@@ -196,6 +201,7 @@ try {
     openedVia: opened.via,
     found: opened.found,
     statusPaneOpened,
+    graphPaneOpened,
     consoleProblems,
     exceptions,
   }, null, 2));
@@ -211,6 +217,7 @@ try {
     openedVia: opened.found ? opened.via : 'MISS（侧栏未定位到该会话）',
     statusPane: statusPaneOpened,
   });
+  if (flag('open-graph')) summary.push(`  研究图谱页签: ${graphPaneOpened ?? 'MISS（胶囊未找到）'}`);
   if (!opened.found) {
     exitCode = 1;
     summary.push('  结果: 失败——会话未能在侧栏定位（工作区已登记但仍不可见？页面仍已抓取，见场景包）');

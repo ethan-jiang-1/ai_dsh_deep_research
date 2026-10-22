@@ -10,6 +10,7 @@
 | run-dashboard/ | [run-dashboard.test.mjs](../run/run-dashboard.test.mjs) | 仪表盘折算投影（日志选择、HITL 折算、步骤投影） | 同上 | 是 |
 | vendor-artifacts/ | [vendor-artifacts.test.mjs](../run/vendor-artifacts.test.mjs)（夹具路径经参数喂给 [scripts/lib/vendor-artifacts.mjs](../../scripts/lib/vendor-artifacts.mjs)） | vendor 构建产物自检判据（齐全/缺失两形态） | 纯 fs 静态夹具 | 是 |
 | plan-wave/ | [plan-graph.test.mjs](../cockpit/plan-graph.test.mjs) | 固定 Wave plan：W1.1/W2.1/W2.2 并行、W3.1 汇合、legacy flat W 反例 | 语义由消费测试钉住 | 是 |
+| plan-mapping/ | [graph-model.test.mjs](../cockpit/graph-model.test.mjs) | BUG-043 五态负例：3 节点 / Team 1 任务（未映射），以及 stale / plan-only / 墓碑 / id 命中 / task_id 重复的混合样本 | 语义由消费测试钉住——四态断言即反证，改夹具应预期变红 | 是 |
 | review-aids/ | [unconsumed-evidence.test.mjs](../run/unconsumed-evidence.test.mjs) + [acceptance-check.test.mjs](../run/acceptance-check.test.mjs) | 散文纪律的机械基座用例：B1 差集投影 + 收活判据三态求值（先红后绿反证） | 契约日用例即反证——改夹具应预期变红 | 是 |
 | [events.mjs](events.mjs)（文件级支援件——工厂非语料组；孤儿检查只扫目录组，本行 = 导航登记） | [hitl-fold](../run/hitl-fold.test.mjs) / [hitl-provenance](../run/hitl-provenance.test.mjs) / [bundle-bind](../run/bundle-bind.test.mjs) / [activity-fold](../run/activity-fold.test.mjs) / [member-activity-fold](../run/member-activity-fold.test.mjs) / [evidence-audit](../run/evidence-audit.test.mjs) / [run-dashboard](../run/run-dashboard.test.mjs) / [run-state](../run/run-state.test.mjs) | 会话事件 wire-shape 构造工厂：tool call/result 配对（arguments 为 JSON 字符串的真日志形态）+ zstd 多帧日志文件——这两个形态的单一构造正本 | 支援件非冻结语料——语义由消费测试钉住（改工厂应预期变红） | 否（glob 外，import 不注册测试） |
 

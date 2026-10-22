@@ -37,7 +37,6 @@ import {
   countsOf,
   planIndex,
   planIssuesOf,
-  planNodeOf,
   wavesOf,
   workerChipsOf,
   type AttentionItem,
@@ -46,6 +45,17 @@ import {
   type PlanNode,
   type WorkerChip,
 } from '../lib/plan-graph.ts'
+import {
+  coverageLineOf,
+  coverageOf,
+  coverageWarningOf,
+  planMappingOf,
+  planNodeStateOf,
+  nodeStateOf,
+  PROJECTION_PENDING_STATE,
+  type GraphCoverage,
+  type GraphNodeState,
+} from '../lib/graph-model.ts'
 import { sessionBindingOf } from '../lib/bundle-bind.ts'
 import type { ResearchGraphTabProps } from './research-graph/types.ts'
 export type { ResearchGraphInjected, ResearchGraphTabProps } from './research-graph/types.ts'
@@ -85,13 +95,6 @@ const BANNER_STYLE: CSSProperties = {
   background: '#f59e0b12', border: '1px solid #f59e0b38',
 }
 
-/** 节点视觉状态。 */
-interface NodeState {
-  readonly text: string
-  readonly icon: string
-  readonly color: string
-}
-
 /** 图上的一个节点：plan 节点（优先）或 Team 任务；边 = blockedBy / plan deps。 */
 interface GraphNodeView {
   readonly id: string
@@ -105,7 +108,7 @@ interface GraphNodeView {
   readonly member?: TeamMemberProjection
   readonly running?: boolean
   readonly attention?: AttentionItem
-  readonly state: NodeState
+  readonly state: GraphNodeState
 }
 
 /** worker chips 子组件的 props（hooks 从父级透传；每个成员实例化一次，hooks 数量恒定）。 */
@@ -120,24 +123,6 @@ interface DagMapProps {
   readonly selectedId: string | null
   readonly childCounts: ReadonlyMap<string, number>
   readonly onSelect: (id: string) => void
-}
-
-/**
- * 节点状态：Team 任务状态 + owner 忙闲 + attention 事实三源合成。
- * 失败只从 attention 的 `owner-failed` 来（Team 任务没有 failed），卡住措辞带「可能」。
- */
-function nodeStateOf(task: TeamTaskView, running: boolean | undefined, attention: AttentionItem | undefined): NodeState {
-  if (task.status === 'completed') return { text: '完成', icon: '✓', color: '#16a34a' }
-  if (task.status === 'deleted') return { text: '已删除', icon: '·', color: '#9ca3af' }
-  if (attention?.reason === 'owner-failed') return { text: 'owner 失败', icon: '✕', color: '#dc2626' }
-  if (task.status === 'in_progress') {
-    if (attention?.reason === 'stalled') return { text: '可能卡住', icon: '⚠', color: '#b45309' }
-    return { text: running === true ? '进行中' : '进行中（owner 未知）', icon: '●', color: '#2563eb' }
-  }
-  if (attention?.reason === 'unassigned') return { text: '待派', icon: '⚠', color: '#b45309' }
-  if (attention?.reason === 'blocked-too-long') return { text: '阻塞偏久', icon: '⏳', color: '#b45309' }
-  if (task.ready === true) return { text: '就绪', icon: '○', color: '#6b7280' }
-  return { text: `等 ${task.blockedBy.join(', ')}`, icon: '○', color: '#6b7280' }
 }
 
 /** 注意力条目的严重度图标。 */
@@ -162,6 +147,13 @@ function planLines(node: PlanNode): ReactNode {
       {node.acceptance !== undefined && <div style={{ opacity: 0.8 }}>acceptance：{node.acceptance}</div>}
     </>
   )
+}
+
+/** 本地时钟 `HH:MM:SS`（“最后刷新”用；不引入日期库）。 */
+function formatClock(ms: number): string {
+  const date = new Date(ms)
+  const pad = (value: number): string => String(value).padStart(2, '0')
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
 }
 
 /** 短标签（SVG 内不换行，避免撑爆侧栏）。 */
@@ -321,6 +313,8 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   const [plan, setPlan] = useState<PlanIndex | null>(null)
   const [planText, setPlanText] = useState<string | null>(null)
   const [planState, setPlanState] = useState<'loading' | 'missing' | 'unbound' | 'ready'>('loading')
+  // 最后成功读取 plan.md 的时刻：把“数据可能过期”显性化（BUG-043 §刷新），不把缺失当状态。
+  const [planLoadedAt, setPlanLoadedAt] = useState<number | null>(null)
 
   // journal → 本会话绑定的 run bundle（只用于 plan 基址；不折活动流）。
   // read 弱绑定 + kickoffSeen = 立项预检读旧 bundle，不能当本 run；write 命中后才显示 plan。
@@ -359,6 +353,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     setPlan(null)
     setPlanText(null)
     if (boundSlug === null) {
+      setPlanLoadedAt(null)
       setPlanState('unbound')
       return () => { stopped = true; controller.abort() }
     }
@@ -372,17 +367,20 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
             setPlan(planIndex(text))
             setPlanText(text)
             setPlanState('ready')
+            setPlanLoadedAt(Date.now())
             return
           }
         }
         setPlan(null)
         setPlanText(null)
         setPlanState('missing')
+        setPlanLoadedAt(null)
       } catch (cause) {
         if (stopped) return
         setPlan(null)
         setPlanText(null)
         setPlanState('missing')
+        setPlanLoadedAt(null)
         console.error('[research-graph] plan.md 读取失败', String(cause))
       }
     }
@@ -391,6 +389,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     return () => { stopped = true; controller.abort(); if (timer !== undefined) clearInterval(timer) }
   }, [leadSessionId, boundSlug])
 
+  const teamReady = team !== undefined
   const tasks: readonly TeamTaskView[] = team?.tasks ?? []
   const members: readonly TeamMemberProjection[] = team?.members ?? []
   const memberByName = new Map<string, TeamMemberProjection>()
@@ -412,14 +411,13 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   const childCounts = new Map<string, number>()
   for (const [parentId, children] of childrenByParent) childCounts.set(parentId, children.length)
 
-  // plan ↔ Team 任务映射（task_id / id 精确；不按数字后缀猜）。plan 优先作为图节点。
-  const taskByPlanId = new Map<string, TeamTaskView>()
-  for (const task of tasks) {
-    const planNode = planNodeOf(plan, task.id)
-    if (planNode !== undefined) taskByPlanId.set(planNode.id, task)
-  }
-  const mappedTaskIds = new Set([...taskByPlanId.values()].map((task) => task.id))
-  const unmappedTasks = planNodes.length > 0 ? tasks.filter((task) => !mappedTaskIds.has(task.id)) : []
+  // plan ↔ Team 任务映射（task_id / id 精确；不按数字后缀猜）。折算住 `src/lib/graph-model.ts`：
+  // 没有映射的节点是**状态未知**，不是“未执行”（BUG-043）。
+  const mappingIndex = planMappingOf(plan, tasks)
+  const taskByPlanId = mappingIndex.taskByPlanId
+  const coverage: GraphCoverage = coverageOf(plan, tasks, mappingIndex)
+  const coverageWarning = coverageWarningOf(coverage)
+  const unmappedTasks = planNodes.length > 0 ? mappingIndex.tasksOutsidePlan : []
 
   // 顶层图只画 parent 缺省的 active 节点；W3.1… 默认收在 W3 详情里（复合节点折叠；墓碑不进图）。
   const graphNodes: readonly GraphNodeView[] = planNodes.length > 0
@@ -429,9 +427,12 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
       const member = owner !== undefined ? memberByName.get(owner) : undefined
       const running = member !== undefined ? statuses.get(member.id)?.running : undefined
       const attentionItem = task !== undefined ? attention.find((entry) => entry.taskId === task.id) : undefined
-      const state = task !== undefined
-        ? nodeStateOf(task, running, attentionItem)
-        : { text: '未执行', icon: '○', color: '#94a3b8' }
+      // 状态词表归 graph-model：未映射 / 失效 / plan-only 都显示“状态未知/无任务”，
+      // 绝不在没有映射时落回“未执行”。
+      // 投影未就绪时不给映射结论：这是“还没收到数据”，不是“映射缺口”。
+      const state = teamReady
+        ? planNodeStateOf(mappingIndex.mapping.get(planNode.id), running, attentionItem)
+        : PROJECTION_PENDING_STATE
       return {
         id: planNode.id,
         label: planNode.kind ?? planNode.id,
@@ -476,7 +477,6 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   for (const node of graphNodes) {
     if (node.task !== undefined) nodeByTaskId.set(node.task.id, node)
   }
-  const mappedCount = taskByPlanId.size
 
   const focusNode = (nodeId: string): void => {
     setExpandedId(nodeId)
@@ -582,12 +582,15 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
               <div style={{ marginTop: 4, padding: '4px 6px', border: '1px solid #6366f126', borderRadius: 4, background: '#6366f108' }}>
                 <div style={{ fontSize: 11, color: '#6366f1', marginBottom: 2 }}>内部节点（复合展开，只读）</div>
                 {childNodes.map((child) => {
-                  const childTask = taskByPlanId.get(child.id)
+                  // 子节点同样走四态词表：没有映射 = 状态未知，不是未执行。
+                  const childState = teamReady
+                    ? planNodeStateOf(mappingIndex.mapping.get(child.id))
+                    : PROJECTION_PENDING_STATE
                   return (
                     <div key={child.id} style={{ fontSize: 11, opacity: 0.85 }}>
                       <strong>{child.id}</strong>
                       {child.kind !== undefined ? ` · ${child.kind}` : ''}
-                      {` · ${childTask?.status ?? '未执行'}`}
+                      {` · ${childState.icon} ${childState.text}`}
                       {child.ownerRole !== undefined ? ` · ${child.ownerRole}` : ''}
                       {child.deps.length > 0 ? ` · deps ${child.deps.join(', ')}` : ''}
                     </div>
@@ -630,6 +633,14 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         {counts.stalled > 0 && <span style={{ ...MUTED_STYLE, color: '#b45309' }}>⚠ {String(counts.stalled)} 可能卡住</span>}
       </div>
 
+      {/* 映射缺口：说“图谱无法判断”，不说“未执行”——这是 BUG-043 的产品层修复点。 */}
+      {hasPlan && teamReady && coverageWarning !== null && (
+        <div style={{ ...BANNER_STYLE, background: '#f59e0b12', borderColor: '#f59e0b48' }}>
+          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2, color: '#b45309' }}>映射缺口（只读）</div>
+          <div style={MUTED_STYLE}>{coverageWarning}</div>
+        </div>
+      )}
+
       {stateNote !== null && (
         <div style={BANNER_STYLE}>
           <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>{stateNote.title}</div>
@@ -649,8 +660,8 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
 
       {hasPlan && (
         <div style={{ ...MUTED_STYLE, marginBottom: 6 }}>
-          plan{plan?.version !== undefined ? ` ${plan.version}` : ''} · {String(topPlanNodes.length)} 顶层 / {String(planNodes.length)} 节点 · Team {String(tasks.length)} 任务 · 已映射 {String(mappedCount)}
-          {unmappedTasks.length > 0 ? ` · 未进 plan 的 Team 任务 ${String(unmappedTasks.length)}` : ''}
+          plan{plan?.version !== undefined ? ` ${plan.version}` : ''} · {String(coverage.topNodes)} 顶层 / {String(coverage.planNodes)} 节点 · {teamReady ? coverageLineOf(coverage) : '等待团队投影'}
+          {planLoadedAt !== null ? ` · 刷新 ${formatClock(planLoadedAt)}` : ''}
         </div>
       )}
 

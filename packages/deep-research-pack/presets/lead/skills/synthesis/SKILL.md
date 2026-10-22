@@ -22,6 +22,8 @@ description: 综合写作（wave2 语义）方法论：纯综合先行、finding
    答案 + 口径 + 依据 + 限制，不强行填满业务选项表。
 4. **来源链格式**：每条关键结论后附 `[来源: evidence/<file>.md]`；来源清单节列出全部 evidence 文件（路径 + 一句话说明 + retrieved_at）。
 5. **交 critic**：review.md 拿到 readiness: PASS 后，才向用户提交审阅建议（HITL2）。
+   呈卡前核对 plan 的 `task_id` 列：每个 active 节点已有真实 `task-N` 或显式 `plan-only`——
+   空行会让研究图谱只显示「状态未知（未映射 task_id）」，别留给用户看图才发现（BUG-043）。
    HITL2 卡片的**审阅摘要 ≤ 200 字**（约 4 行）——完整分析进 report 正文或 journal，卡片题干只留
    判决所需（结论一句话 + readiness 状态 + 最大残留）。实测依据（八场 77 张卡）：HITL1 卡全部
    ≤ 400 字无事故；6 张超长卡全是 HITL2（最长 1280 字），把选项挤出视口、人要滚动才能答题。

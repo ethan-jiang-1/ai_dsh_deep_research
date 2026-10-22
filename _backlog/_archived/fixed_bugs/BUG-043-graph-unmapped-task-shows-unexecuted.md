@@ -1,12 +1,12 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P1
 opened: 2026-10-23
 ---
 
 # BUG-043：图谱把“未映射 task_id”误报成“未执行”
 
-> 严重级别：P1 ｜ 发现：2026-10-23 ｜ 状态：等人拍板
+> 严重级别：P1 ｜ 发现：2026-10-23 ｜ 状态：已修（2026-10-23 落地，证据见文末「落地记录」）
 >
 > 用户原话（2026-10-23 00:26，session-5b5f6d1f）：“你都做完了吗？你去完了研究图谱，
 > 好像里头啥啥都是未执行啊”。同场 Lead 已定位 `plan.md` 的 `task_id` 列全空，并在交付后
@@ -68,14 +68,31 @@ fallback 仍会画成“未执行”。刷新只会让错误状态更稳定。
 - 不改变 D17 rerun / 交付门 / Team 权限；
 - 不在图谱里加“补派任务/调整”动作；
 - 不自动迁移旧 plan；已有 `drt_eu` 的 task_id 回填作为现场修复证据保留；
-- 与 [rerun 版本面 issue](../issues/2026-10-23-rerun-versioned-graph.md) 分开：本条是
+- 与 [rerun 版本面 issue](../../issues/2026-10-23-rerun-versioned-graph.md) 分开：本条是
   **plan↔task 映射误报**，不是版本轨问题。
 
 ## 证据
 
 - 用户原话与 Lead 修复过程：session-5b5f6d1f（2026-10-23 00:26–00:27）；
 - 现场 bundle：`research-workspace/drt_eu-us-cn-ai-stack/plan.md`（现回填 task-1/task-10/… 等 16 个）；
-- 代码：[ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx)
+- 代码：[ResearchGraphTab.tsx](../../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx)
   的 `taskByPlanId` / fallback `未执行` / `unmappedTasks`；
-- 相关契约：[research-planning skill](../../packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md)
-  §4 “回填 task_id”；[设计 40](../../docs/design/40-research-cockpit.md) 图谱观察面。
+- 相关契约：[research-planning skill](../../../packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md)
+  §4 “回填 task_id”；[设计 40](../../../docs/design/40-research-cockpit.md) 图谱观察面。
+
+## 落地记录（2026-10-23）
+
+**修复已进树。** 折算抽件 `src/lib/graph-model.ts`（五态：mapped / unmapped / stale / plan-only /
+duplicate），组件只画；「未执行」不再由映射缺失产生。头部覆盖率行
+`plan N 节点 · Team M 任务 · 已映射 K · 未映射 N-K` + 最后刷新时刻；缺口横幅说「图谱无法判断
+这些节点的进度」。投影未就绪显示「等待团队投影」，不出缺口横幅；子节点行同样走词表。
+
+- **判据修正**：原「`client-load` 覆盖 plan 有节点、Team 无任务负例」在 keyless 档造不出来
+  （绑定只来自 journal 的 `drt_<slug>/` 写入；Team 任务无磁盘来源）。改为 `client-load` 断言
+  「覆盖率行在场 + 盘侧 active 节点数对账」；五态语义由 keyless 夹具钉住。
+- **新增判据**：同一 `task_id` 被多节点声明 → `task_id 重复`，不得报「失效」（对抗评审实测）。
+- **现场样本**：空 `task_id` 没有真实样本（`drt_gha` 的两个非 task 行是 `plan-only`）；空分支
+  证据 = 夹具 `tests/fixtures/plan-mapping/` + `tests/cockpit/graph-model.test.mjs`。
+- **证据**：`pnpm test` 639 pass / 0 fail（净增 11）；`pnpm typecheck`、`pnpm build`、
+  `client-load-smoke` ALL PASS（覆盖率行断言在 `drt_cn-us` 命中）、`pnpm verify` 全绿；
+  决定记忆 = [Note](../../../notes/implemented/2026-10-23-graph-mapping-honesty.md)。

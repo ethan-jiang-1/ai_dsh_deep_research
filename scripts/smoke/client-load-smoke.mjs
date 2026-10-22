@@ -58,6 +58,7 @@ import { prepareClientLoadReference } from './client-load-reference.mjs'
 import { pass4ConfigTabPhase } from './client-load-config.mjs'
 import { clickRowByText, expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES } from '../lib/web-ui-nav.mjs'
 import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
+import { isActivePlanNode, planIndex } from '../../packages/deep-research-pack/src/lib/plan-graph.ts'
 import { deriveBusinessBrief } from '../../packages/deep-research-pack/src/lib/brief-fold.ts'
 import { foldActivityRows } from '../../packages/deep-research-pack/src/lib/activity-fold.ts'
 import { streamFailureOf } from '../../packages/deep-research-pack/src/lib/stream-failure.ts'
@@ -717,6 +718,17 @@ async function pass3bGraphTabPhase() {
     || /WAVE\s*\d/i.test(seg)
     || seg.includes('需要你注意')
   step(body, '研究图谱页签体渲染（空态/团队态如实，不炸）', body ? 'body=ok' : seg.slice(0, 160).replace(/\s+/g, ' '))
+  // 覆盖率行 = 产品面合同（BUG-043）：绑定 run 的 plan 有 active 节点时，头部必须同时给
+  // 「已映射 K」与「未映射 N-K」——只报 Team 任务数时，用户会把“没映射”读成“没执行”。
+  const boundBase = boundSession !== null ? (fileFaceOf(boundSession.slug)?.base ?? null) : null
+  const boundPlanText = typeof boundBase === 'string' && existsSync(join(boundBase, 'plan.md'))
+    ? readFileSync(join(boundBase, 'plan.md'), 'utf8')
+    : null
+  const activePlanNodes = boundPlanText === null ? 0 : planIndex(boundPlanText).nodes.filter((node) => isActivePlanNode(node)).length
+  if (activePlanNodes > 0) {
+    const coverage = /已映射\s*\d+/.test(seg) && /未映射\s*\d+/.test(seg)
+    step(coverage, '研究图谱覆盖率行在场（已映射 K / 未映射 N-K）', coverage ? `${activePlanNodes} 个 active 节点` : seg.slice(0, 160).replace(/\s+/g, ' '))
+  }
 }
 
 /** pass-3c：主界面「方法库」tab（2026-10-21 管理迁移）——Chat/Trajectory 同排的第三个 view。
