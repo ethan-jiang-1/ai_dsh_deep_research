@@ -580,6 +580,10 @@ async function pass2UnboundNegativePhase() {
  *  直接找行会 miss（实测）——reload 回到干净列表态。 */
 async function pass3ActivityStreamPhase() {
   await awaitAppReady(page, 5_000)
+  // 侧栏会话列表是渐进加载；源 web 冷启动时骨架可能比 5s 久（2026-10-22 实测 5 个 session
+  // 全 open=false，页面仍是 skeleton）。多等一轮再按 data-row-key 精定位，避免把加载慢误判成
+  // 选行缺陷；仍 miss 时照旧报红。
+  await wait(6_000)
   const SESSION_TITLE = SESSION_TITLE_ARG ?? boundSession?.title ?? null
   // 打开方式 = **按 sessionId 精定位优先**（2026-10-19 换 pin 实红）：标题匹配是文本启发式，
   // dev home 里存在标题互为子串的会话（「Claude 模型发布线追踪」⊂「Anthropic Claude 模型发布线
@@ -710,7 +714,7 @@ async function pass3bGraphTabPhase() {
   const body = seg.includes('还没有团队投影')
     || seg.includes('任务板还没有任务')
     || seg.includes('任务快照')
-    || /WAVE\s*\d/i.test(seg)
+    || /LAYER\s*\d/i.test(seg)
     || seg.includes('需要你注意')
   step(body, '研究图谱页签体渲染（空态/团队态如实，不炸）', body ? 'body=ok' : seg.slice(0, 160).replace(/\s+/g, ' '))
 }

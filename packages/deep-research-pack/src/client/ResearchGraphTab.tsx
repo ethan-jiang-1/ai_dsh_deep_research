@@ -7,8 +7,8 @@
  *      按最长路径分层，同层并行节点横排；复合节点标 `+N`，状态用颜色/圆点，点节点选中）；
  *   ③ 诚实降级：plan 缺席 / Team 板无 blocked_by 时**不画假图**，明确说「没有依赖边可画」，
  *      只给任务快照；旧 run 因此不会被伪装成 Wave 0；
- *   ④ 顶层节点列表 + 选中详情（description 高度上限；复合子节点 N3.1… 在父节点详情展开；
- *      `复制引用` 只复制 `drt_<slug>/N3`，不发送）；
+ *   ④ 顶层节点列表 + 选中详情（description 高度上限；复合子节点 W3.1… 在父节点详情展开；
+ *      `复制引用` 只复制 `drt_<slug>/W3.1`，不发送）；
  *   ⑤ plan.md 原文（只读折叠）+ plan↔task 映射计数 + 未进 plan 的 Team 任务；
  *      重号/悬空 parent/deps 显示只读结构提示。
  *
@@ -152,6 +152,7 @@ function planLines(node: PlanNode): ReactNode {
       <div style={{ opacity: 0.8 }}>
         plan：{node.id}
         {node.kind !== undefined ? ` · ${node.kind}` : ''}
+        {node.stage !== undefined ? ` · stage ${node.stage}` : ''}
         {node.depth !== undefined ? ` · depth ${node.depth}` : ''}
         {node.ownerRole !== undefined ? ` · plan owner ${node.ownerRole}` : ''}
       </div>
@@ -420,7 +421,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   const mappedTaskIds = new Set([...taskByPlanId.values()].map((task) => task.id))
   const unmappedTasks = planNodes.length > 0 ? tasks.filter((task) => !mappedTaskIds.has(task.id)) : []
 
-  // 顶层图只画 parent 缺省的节点；N3.1… 默认收在 N3 详情里（复合节点折叠）。
+  // 顶层图只画 parent 缺省的 active 节点；W3.1… 默认收在 W3 详情里（复合节点折叠；墓碑不进图）。
   const graphNodes: readonly GraphNodeView[] = planNodes.length > 0
     ? topPlanNodes.map((planNode) => {
       const task = taskByPlanId.get(planNode.id)
@@ -496,7 +497,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     }
   }
 
-  // 只复制引用，不发任何指令；用户把 `drt_<slug>/N3` 贴回对话即可。
+  // 只复制引用，不发任何指令；用户把 `drt_<slug>/W3.1` 贴回对话即可。
   const copyReference = (node: GraphNodeView): void => {
     const text = boundSlug !== null ? `drt_${boundSlug}/${node.id}` : node.id
     const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard
@@ -551,6 +552,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
             <strong style={{ fontSize: 13 }}>{node.id}</strong>
             {planNode?.kind !== undefined && <span style={{ fontSize: 11, opacity: 0.65 }}>{planNode.kind}</span>}
+            {planNode?.stage !== undefined && <span style={{ fontSize: 10, opacity: 0.55 }}>stage {planNode.stage}</span>}
             {childNodes.length > 0 && <span style={{ fontSize: 10, color: '#6366f1' }}>内部 {String(childNodes.length)}</span>}
             <span style={{ fontSize: 12, flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>{shortLabel(node.subject, 72)}</span>
             <span style={{ fontSize: 11, color: node.state.color, whiteSpace: 'nowrap' }}>{node.state.icon} {node.state.text}</span>
@@ -691,7 +693,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         ? waves.map((wave) => (
           <section key={wave.level} style={{ marginBottom: 10 }}>
             <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>
-              WAVE {wave.level + 1}{wave.tasks.length > 1 ? ` · ${String(wave.tasks.length)} 个并行` : ''}
+              LAYER {wave.level + 1}{wave.tasks.length > 1 ? ` · ${String(wave.tasks.length)} 个并行` : ''}
             </div>
             {wave.tasks.map((node) => renderNode(node))}
           </section>

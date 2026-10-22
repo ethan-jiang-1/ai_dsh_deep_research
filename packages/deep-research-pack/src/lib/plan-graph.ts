@@ -7,7 +7,7 @@
  *   「需要你注意」条与头部计数；
  * - `workerChipsOf`：队员会话的 `subagentCatalog` 投影 → 二层 worker chip；
  * - `planIndex` / `planNodeOf`：`plan.md` 节点表（id / parent / kind / depth / acceptance /
- *   task_id）→ 查询面；`topLevel` 只含 parent 缺省的节点（复合子节点 N3.1… 默认不进图）。
+ *   task_id）→ 查询面；`topLevel` 只含 parent 缺省的 active 节点（复合子节点 W3.1… 默认不进图；墓碑不进图）。
  * - `planIssuesOf`：重号 / 悬空 parent / 悬空 dep / 自依赖 → 只读稳定性提示（不是 node-gate）。
  *
  * 诚实纪律（页签定位 = 依赖形状 + worker 层 + 异常注意力，不是第二个任务板）：
@@ -124,11 +124,18 @@ export interface WorkerChip {
   readonly createdAt?: number
 }
 
-/** `plan.md` 节点表的一行（canonical N 节点；N 是 ID 不是序号）。 */
+/** 研究流程 stage（由根 W 的 kind 派生；不是独立列）。 */
+export type PlanStage = 'scan' | 'dive' | 'check' | 'synthesis' | 'review' | 'gate' | 'unknown'
+
+/** `plan.md` 节点表的一行（canonical W/N 节点；ID 不是序号）。 */
 export interface PlanNode {
   readonly id: string
-  /** 复合节点的父节点 id；顶层缺省。子号 `N3.1` 的 parent = `N3`，父节点仍在表里。 */
+  /** 复合节点的父节点 id；顶层缺省。子号 `W3.1` 的 parent = `W3`，父节点仍在表里。 */
   readonly parent?: string
+  /** 生命周期：active（默认）/ retired / merged_into:… / superseded_by:…；墓碑留在表里供 byId。 */
+  readonly lifecycle?: string
+  /** 由根 W 的 kind 派生的流程标签（不落表）。 */
+  readonly stage?: PlanStage
   /** `task_id` 列：Team 任务与会话映射（缺省时只有 `byId` 精确命中）。 */
   readonly taskId?: string
   readonly kind?: string
@@ -140,6 +147,26 @@ export interface PlanNode {
   readonly depth?: string
 }
 
+const STAGE_BY_KIND: Readonly<Record<string, PlanStage>> = {
+  'broad-scan': 'scan',
+  'deep-dive': 'dive',
+  'cross-check': 'check',
+  synthesis: 'synthesis',
+  review: 'review',
+  gate: 'gate',
+}
+
+/** 根 W 的 kind → stage；未知回落 unknown。子 W 继承父 stage（见 planIndex）。 */
+export function stageOfKind(kind: string | undefined): PlanStage {
+  return kind !== undefined ? STAGE_BY_KIND[kind] ?? 'unknown' : 'unknown'
+}
+
+/** 节点是否 active（缺省 = active）；墓碑不画图但保留 byId。 */
+export function isActivePlanNode(node: PlanNode): boolean {
+  const lifecycle = (node.lifecycle ?? 'active').trim().toLowerCase()
+  return lifecycle === '' || lifecycle === 'active'
+}
+
 /** `plan.md` 的查询面（节点表缺席时为空索引，不是错误）。 */
 export interface PlanIndex {
   readonly nodes: readonly PlanNode[]
@@ -147,14 +174,24 @@ export interface PlanIndex {
   readonly byTaskId: ReadonlyMap<string, PlanNode>
   /** 图版本（`图版本：v1` / `plan_version: v1`）；缺省 undefined。 */
   readonly version?: string
-  /** 顶层节点（parent 缺省）；复合子节点不在顶层图里。 */
+  /** 顶层 active 节点（parent 缺省）；墓碑/复合子节点不在顶层图里。 */
   readonly topLevel: readonly PlanNode[]
-  /** parent id → 直接子节点；父节点不存在时仍按 parent 字符串归组（供稳定性提示）。 */
+  /** parent id → 直接 active 子节点；父节点不存在时仍按 parent 字符串归组（供稳定性提示）。 */
   readonly childrenByParent: ReadonlyMap<string, readonly PlanNode[]>
 }
 
 /** plan 结构稳定性问题（只读提示；不阻断 run，不是 node-gate）。 */
-export type PlanIssueKind = 'duplicate-id' | 'missing-parent' | 'dangling-dep' | 'self-dependency'
+export type PlanIssueKind =
+  | 'duplicate-id'
+  | 'missing-parent'
+  | 'dangling-dep'
+  | 'self-dependency'
+  | 'mixed-family'
+  | 'child-prefix'
+  | 'too-deep'
+  | 'cross-group-child-dep'
+  | 'retired-dep'
+  | 'tombstone-without-successor'
 
 export interface PlanIssue {
   readonly kind: PlanIssueKind
@@ -518,7 +555,7 @@ function isSeparator(cells: readonly string[]): boolean {
 /**
  * 解析 `plan.md` 的节点表（id / parent / kind / question / owner_role / deps / output /
  * acceptance / depth / task_id）。表头缺失、表格畸形、文本缺席 → 空索引（合法退化，不是错误）。
- * `task_id` 列是 Team 任务 ↔ N 节点的唯一权威映射（F8）；不按数字后缀猜映射。
+ * `task_id` 列是 Team 任务 ↔ W/N 节点的唯一权威映射（F8）；不按数字后缀猜映射。
  * `parent` 是复合节点的层级；顶层图只取 parent 缺省的节点。
  * @param text - `plan.md` 文本（可为 null/undefined）。
  * @returns 节点查询面。
@@ -528,8 +565,6 @@ export function planIndex(text: string | null | undefined): PlanIndex {
   const version = /(?:图版本|plan_version)\s*[：:]\s*([A-Za-z0-9._-]+)/.exec(text)?.[1]
   const lines = text.split(/\r?\n/)
   const nodes: PlanNode[] = []
-  const byId = new Map<string, PlanNode>()
-  const byTaskId = new Map<string, PlanNode>()
   let columns: Map<string, number> | undefined
   let started = false
 
@@ -555,6 +590,7 @@ export function planIndex(text: string | null | undefined): PlanIndex {
     if (id === undefined) continue
     const deps = (read('deps') ?? '').split(/[,，;；]/).map((dep) => dep.trim()).filter((dep) => dep !== '')
     const parent = read('parent')
+    const lifecycle = read('lifecycle')
     const taskId = read('taskid')
     const kind = read('kind')
     const question = read('question')
@@ -566,6 +602,7 @@ export function planIndex(text: string | null | undefined): PlanIndex {
       id,
       deps,
       ...(parent !== undefined ? { parent } : {}),
+      ...(lifecycle !== undefined ? { lifecycle } : {}),
       ...(taskId !== undefined ? { taskId } : {}),
       ...(kind !== undefined ? { kind } : {}),
       ...(question !== undefined ? { question } : {}),
@@ -575,21 +612,40 @@ export function planIndex(text: string | null | undefined): PlanIndex {
       ...(depth !== undefined ? { depth } : {}),
     }
     nodes.push(node)
-    if (!byId.has(node.id)) byId.set(node.id, node)
-    if (node.taskId !== undefined && !byTaskId.has(node.taskId)) byTaskId.set(node.taskId, node)
   }
 
   if (nodes.length === 0) return emptyPlanIndex(version)
-  const topLevel = nodes.filter((node) => node.parent === undefined)
+  const rawById = new Map<string, PlanNode>()
+  for (const node of nodes) if (!rawById.has(node.id)) rawById.set(node.id, node)
+  const rootOf = (node: PlanNode): PlanNode => {
+    let current = node
+    const seen = new Set<string>()
+    while (current.parent !== undefined && rawById.has(current.parent) && !seen.has(current.parent)) {
+      seen.add(current.parent)
+      current = rawById.get(current.parent)!
+    }
+    return current
+  }
+  const staged: PlanNode[] = nodes.map((node) => ({
+    ...node,
+    stage: stageOfKind(rootOf(node).kind),
+  }))
+  const byId = new Map<string, PlanNode>()
+  const byTaskId = new Map<string, PlanNode>()
+  for (const node of staged) {
+    if (!byId.has(node.id)) byId.set(node.id, node)
+    if (node.taskId !== undefined && !byTaskId.has(node.taskId)) byTaskId.set(node.taskId, node)
+  }
+  const topLevel = staged.filter((node) => node.parent === undefined && isActivePlanNode(node))
   const childrenByParent = new Map<string, PlanNode[]>()
-  for (const node of nodes) {
-    if (node.parent === undefined) continue
+  for (const node of staged) {
+    if (node.parent === undefined || !isActivePlanNode(node)) continue
     const bucket = childrenByParent.get(node.parent)
     if (bucket === undefined) childrenByParent.set(node.parent, [node])
     else bucket.push(node)
   }
   return {
-    nodes,
+    nodes: staged,
     byId,
     byTaskId,
     ...(version !== undefined ? { version } : {}),
@@ -619,15 +675,48 @@ export function planIssuesOf(index: PlanIndex | null | undefined): readonly Plan
   for (const id of duplicated) {
     issues.push({ kind: 'duplicate-id', nodeId: id, message: `${id} 出现了多次——编号只能分配一次` })
   }
+  const hasW = index.nodes.some((node) => /^W(?:[0-9]|$)/.test(node.id))
+  const hasN = index.nodes.some((node) => /^N(?:[0-9]|$)/.test(node.id))
+  if (hasW && hasN) {
+    issues.push({ kind: 'mixed-family', nodeId: '*', message: '同一 plan 混用 W/N 家族——新 plan 用 W，旧 N 只读兼容' })
+  }
+  const rootOf = (node: PlanNode): PlanNode => {
+    let current = node
+    const visited = new Set<string>()
+    while (current.parent !== undefined && index.byId.has(current.parent) && !visited.has(current.parent)) {
+      visited.add(current.parent)
+      current = index.byId.get(current.parent)!
+    }
+    return current
+  }
   for (const node of index.nodes) {
     if (node.parent !== undefined && !index.byId.has(node.parent)) {
       issues.push({ kind: 'missing-parent', nodeId: node.id, message: `${node.id} 的 parent ${node.parent} 不在节点表里` })
     }
+    if (node.parent !== undefined && !node.id.startsWith(`${node.parent}.`)) {
+      issues.push({ kind: 'child-prefix', nodeId: node.id, message: `${node.id} 的 id 必须以父号 ${node.parent}. 开头` })
+    }
+    if (node.id.split('.').length > 3) {
+      issues.push({ kind: 'too-deep', nodeId: node.id, message: `${node.id} 超过 3 层——更深请折叠/摘要` })
+    }
+    if (!isActivePlanNode(node) && !/(?:merged_into|superseded_by|derived_from)/i.test(node.lifecycle ?? '')) {
+      issues.push({ kind: 'tombstone-without-successor', nodeId: node.id, message: `${node.id} 是墓碑但没有 merged_into/superseded_by` })
+    }
     for (const dep of node.deps) {
       if (dep === node.id) {
         issues.push({ kind: 'self-dependency', nodeId: node.id, message: `${node.id} 依赖自己` })
-      } else if (!index.byId.has(dep)) {
+        continue
+      }
+      const depNode = index.byId.get(dep)
+      if (depNode === undefined) {
         issues.push({ kind: 'dangling-dep', nodeId: node.id, message: `${node.id} 的 dep ${dep} 不在节点表里` })
+        continue
+      }
+      if (isActivePlanNode(node) && !isActivePlanNode(depNode)) {
+        issues.push({ kind: 'retired-dep', nodeId: node.id, message: `${node.id} 依赖了已退役的 ${dep}；改指 successor 或提升到父级` })
+      }
+      if (node.parent !== undefined && rootOf(node).id !== rootOf(depNode).id) {
+        issues.push({ kind: 'cross-group-child-dep', nodeId: node.id, message: `${node.id} 跨组依赖 ${dep}——提升到父 W 依赖` })
       }
     }
   }

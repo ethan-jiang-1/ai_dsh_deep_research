@@ -19,12 +19,13 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
   question.md          方向契约：问题定稿 + Purpose/RQ/Scope/Constraints + HITL1 对齐快照 +
                        Decisions（append-only，最新在上）——跨 rerun 持久，bundle 身份核心（lead）
   topics.md            topic 图：must_answer（问题列表 2–5 问）+ scope_role（owner: lead）
-  plan.md              执行图（owner: lead）：节点表 id/parent/kind/question/owner_role/deps/
-                       output/acceptance/budget/depth/task_id + plan_version/重写记录；过程件，
+  plan.md              执行图（owner: lead）：节点表 id/parent/lifecycle/kind/question/owner_role/
+                       deps/output/acceptance/budget/depth/task_id + plan_version/重写记录；过程件，
                        不是交付凭证；Team 任务板是当前会话的执行镜像；schema-scan/node-gate
-                       不检查本文件。**N 是 ID 不是序号**：只分配、不重排、不回收；复合节点用
-                       N3.1/N3.1.1，父节点 N3 的 output/acceptance/反馈不变；拆分/合并只做墓碑，
-                       旧号不复用；排序按 deps/wave
+                       不检查本文件。**W 是工作包 ID 不是序号**：W1/W1.1/W1.1.1 只分配、不重排、
+                       不回收；stage 由根 W 的 kind 派生；LAYER 是计算层（不是 W）；lifecycle
+                       墓碑留在表里但不画图；拆分/合并用 derived_from/superseded_by/merged_into；
+                       Team 平铺、不建 nested Team
   leads.md             候选方向清单（owner: scout）
   evidence/            证据文件，一条一档（owner: analyst）
   findings.md          发现账本：结论 + 支撑 + gap 状态（owner: lead）
@@ -52,7 +53,7 @@ method-library.md      用户研究偏好库（工作区根；lead 维护；四�
 （= run 根**当前版报告**模板；final/ 的 vN 记账体**无模板**，按 NODES.md 回边版本语义自构）；
 review.md、drafts/、journal.md 无模板——review 格式住 critic 的 adversarial-review skill，
 drafts/journal 运行时自建。plan.md 是过程件：不替代任何交付门，交付只认 final/review/decisions/
-present；Team 板是执行镜像，恢复时按 plan 的 `N` 节点重建任务。
+present；Team 板是执行镜像，恢复时按 plan 的 **W**（legacy N）节点重建任务。
 
 ## 事实的 owner（一处事实一个家）
 

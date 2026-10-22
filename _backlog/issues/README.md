@@ -4,8 +4,7 @@
 
 ## 活跃清单
 
-- [2026-10-22-w-work-package-identity.md](2026-10-22-w-work-package-identity.md) — 研究图谱 W 工作包命名与 LAYER 拓扑层（等人拍板；第二 reviewer 意见已吸收，W/LAYER/stage 待用户确认）。
-（动态 DAG 稳定节点身份、方法库主界面迁移均已结并归档到 [settled 池](../_archived/settled_issues/README.md)。）
+（当前无在办问题卡；动态 DAG、稳定节点身份、方法库主界面迁移、W 工作包/LAYER 均已结并归档到 [settled 池](../_archived/settled_issues/README.md)。）
 
 ## 最近归档
 

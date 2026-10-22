@@ -1,14 +1,15 @@
 ---
-status: 等人拍板
+status: 已结
 opened: 2026-10-22
 ---
 
 # 推敲：研究图谱的 W 工作包与 LAYER 拓扑层
 
-> 立卡：2026-10-22 ｜ 状态：等人拍板 ｜ 类型：设计 ｜ 结论倾向：现在做（W=工作包、LAYER=计算层、执行 B 案；待你确认） ｜ 可关闭：否
+> 立卡：2026-10-22 ｜ 状态：已结 ｜ 类型：设计 ｜ 结论倾向：现在做（W=工作包、LAYER=计算层、执行 B 案；已落地）
 >
 > 用户 2026-10-22 定调：Nx 不够好；希望用 `W1 / W1.1 / W1.1.1`，动态编排更灵活、反馈更好指。
-> 第二 reviewer 已评审：[review](../research/dynamic-research-dag/2026-10-22-w-work-package-identity-review.md)。
+> 第二 reviewer 已评审：[review](../../research/dynamic-research-dag/2026-10-22-w-work-package-identity-review.md)。
+> 落地 Note：[W 工作包与 LAYER 层](../../../notes/implemented/2026-10-22-w-work-package-identity.md)。
 > 本卡已吸收 B1–B4 / S1–S5 / S7；带“review 结论”的条目仍待用户最终拍板。
 
 ## 1. 背景：现在已经有什么
@@ -225,15 +226,25 @@ LAYER 必须分开的原因。
 - 文档链：00-index 术语映射、design/40、NODES/研究手册的行内 N 字样与列描述、pack 种子/overlay
   三轮同步（S4/B4）。
 
-## 14. 去向
+## 14. 落地结果（2026-10-22）
 
-- 本卡先承载设计与待拍板项；用户拍板后按“模板/skill → parser/结构提示 → 图谱层级/复制引用 →
-  真实 run 走查”落。
-- 实现完成后，按 [notes/AGENTS.md](../../notes/AGENTS.md) 的 implemented 骨架（决定 / 输掉的
-  方案 / 实际跑过的验证）沉淀为 Note，而不只是把本卡改路径。
-- 相关证据：[第二个 reviewer 的评审](../research/dynamic-research-dag/2026-10-22-w-work-package-identity-review.md)
-  （事实核对 + B1–B4 + S1–S7 + 八问）、[plan 模板](../../research-workspace/templates/run/plan.md)、
-  [research-planning skill](../../packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md)、
-  [研究图谱设计](../../docs/design/40-research-cockpit.md)、
-  [DSH 编排机制盘点](../research/dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md)、
-  [A0 实施 Note](../../notes/implemented/2026-10-21-dynamic-research-dag-a0.md)。
+- Note：[2026-10-22-w-work-package-identity.md](../../../notes/implemented/2026-10-22-w-work-package-identity.md)
+  （决定/输掉的方案/验证）。
+- `pnpm test` 627 pass、`pnpm verify` 全绿、`preset-smoke` ALL PASS、`client-load-smoke` ALL PASS。
+- W 图谱浏览器走查：临时 A0 W 树（4 顶层/7 节点，W5 墓碑，W3 两个子节点）确认 LAYER/stage/
+  子节点；`cmp` 恢复 A0 N plan。
+- **未跑**：真实 W 研究 run；真实 Team rollup（preset-smoke 只证 skill 挂载）。这两项进 Note
+  的未跑项，不冒充通过。
+
+## 15. 去向与后续
+
+- 本卡已落地：模板/skill → parser/结构提示 → 图谱 LAYER/复制引用 → 测试；实现事实见
+  [Note](../../../notes/implemented/2026-10-22-w-work-package-identity.md)。
+- 后续只保留观察项：真实 W run 的 Lead 解析、真实 Team rollup 执行；未跑项不得写成已通过。
+- Note 已按 [notes/AGENTS.md](../../../notes/AGENTS.md) 的 implemented 骨架沉淀，不只改本卡路径。
+- 相关证据：[第二个 reviewer 的评审](../../research/dynamic-research-dag/2026-10-22-w-work-package-identity-review.md)
+  （事实核对 + B1–B4 + S1–S7 + 八问）、[plan 模板](../../../research-workspace/templates/run/plan.md)、
+  [research-planning skill](../../../packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md)、
+  [研究图谱设计](../../../docs/design/40-research-cockpit.md)、
+  [DSH 编排机制盘点](../../research/dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md)、
+  [A0 实施 Note](../../../notes/implemented/2026-10-21-dynamic-research-dag-a0.md)。

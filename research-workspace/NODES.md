@@ -24,7 +24,7 @@
 | 节点 | 输入（读） | 输出（写） | 下游可开工判据 |
 |---|---|---|---|
 | 立项（HITL1，两段卡） | 用户三问答案 + 计划确认拍板（quick_factual 豁免第二段） | question.md（问题定稿 + Purpose + RQ 分解 + Scope/Constraints + 研究方法节〔本次实际采用〕+ HITL1 Snapshot 含研究方法与计划确认行 + §Decisions 第 1 条含计划确认拍板）+ topics.md（T# + must_answer 2–5 问 + scope_role + depends_on） | 两文件在场 |
-| 组队 | topics.md | spawn 的队员 + plan.md（lead 过程件：节点 id/kind/owner_role/deps/output/acceptance/budget/depth/task_id + 重写记录） | 在场性随立项；lead 按 plan.md 的图派工 |
+| 组队 | topics.md | spawn 的队员 + plan.md（lead 过程件：节点 id/parent/lifecycle/kind/owner_role/deps/output/acceptance/budget/depth/task_id + 重写记录（stage 派生；LAYER 计算）） | 在场性随立项；lead 按 plan.md 的图派工 |
 | 侦察 wave0（scout） | topics.md | leads.md（每条：方向 + 状态〔建议挖深/已排除+原因〕+ 支持来源分级 + 检索器〔单一达标「单检索器——待破」〕+ 关键线索 + 建议 owner 对应 topic） | leads.md 在场 |
 | 挖掘 wave1（analyst） | leads.md（建议挖深条）+ topics.md | evidence/*.md（frontmatter 七字段 + 原文摘录 + 解读 + Question List） | 卡片在场 + 硬字段齐（evidence-audit 机械把守） |
 | 综合 wave2（synthesis） | evidence/ 全部 + topics.md | findings.md（F# 结论 + 支撑证据 + gap 四态）+ final.md 当前版（run 根；版本记账归 final/） | findings + final 当前版在场 |
@@ -35,7 +35,7 @@
 **输入侧规矩**：硬输入清单 = 上表"输入（读）"列；缺件 = 本节点亮红灯而非开工，下游对缺失
 输入只有两个动作——上报 lead 或等，**没有"瞎猜补全"这个选项**。清单检查由脚本做，不加记账仪式。
 **plan.md 边界**：`plan.md` 是组队节点的 lead 过程件（执行图 + 重写记录），**不是交付门**——
-`schema-scan`/`node-gate` 不检查它；Team 任务板是当前会话的执行镜像，恢复时按 plan 的 `N` 节点
+`schema-scan`/`node-gate` 不检查它；Team 任务板是当前会话的执行镜像，恢复时按 plan 的 W（legacy N）节点
 重建任务（`task_id` 只是会话映射）。
 **委派-收活同构**（2026-10-06 起，oss-dr 借鉴）：lead 派工的验收判据（team-assembly 派发
 五件③④）在收活时逐条机械核验；判不了的判据显式标 **UNVERIFIED**（固定标记词，逐字使用——

@@ -14,7 +14,7 @@
 |---|---|---|---|
 | instantiation（建 run bundle） | `instantiate-run-bundle.mjs` CLI + rb_* 控制文件脚手架 | lead 收到请求 → 建 `drt_<slug>/`（从 templates/run/ 起步）+ question.md（定稿 + Purpose/RQ 分解/Scope/Constraints 四节 + Decisions append-only） | 照搬语义，载体 = 目录约定 + 研究手册 |
 | **HITL1（立项对齐）** | hitl1 phase（stop:yes）+ rb_profile 写入 | lead preset 的 `tool-ask-user` + `research-brief` skill（研究类型三分 + 澄清三问带推荐 + **计划确认卡**〔两段卡第二段：定稿先呈再开工，quick_factual 豁免——超出 codex 源面的本仓扩展〕） | **原生**（ask_user_question 即 DSH 的 stop 面） |
-| setup / seed-topics | enter-phase + operate-topic-state（UID/ordinal 物化） | lead 写 topics.md（must_answer 问题列表 2–5 问 + scope_role + depends_on）+ plan.md 执行图（research-planning skill：节点/依赖/owner/depth/预算） | 简化：topic 身份 = markdown 锚点；plan 是过程件，不建 registry/新门禁 |
+| setup / seed-topics | enter-phase + operate-topic-state（UID/ordinal 物化） | lead 写 topics.md（must_answer 问题列表 2–5 问 + scope_role + depends_on）+ plan.md 执行图（research-planning skill：W 工作包/LAYER/stage 派生/依赖/owner/depth/预算） | 简化：topic 身份 = markdown 锚点；plan 是过程件，不建 registry/新门禁 |
 | **wave0（广度地基）** | dpt-source-intake 工作单元 + source.yaml + floor 门禁 | **scout 角色**（lead-mapping skill：query 多样化 + A–D 分级 + leads.md） | **角色化**（floor 数值门禁弃用，分级与排除显式化承担质量下限） |
 | **wave1（深度挖掘）** | question-list 契约 + depth-review + 反例/交叉验证参数 | **analyst 角色**（evidence-extraction skill：question-list + 交叉验证 ≥2 + 反例必记） | **角色化**（深度参数不进 profile，进 skill 纪律） |
 | **wave2（综合）** | 纯综合禁新搜 → finding gap 定向补搜 + finding-index | **lead 的 synthesis skill**（findings.md 的 gap 四态：supported/needs_search/contradicted/insufficient） | **skill 化**（只补一轮 = 参数纪律进 skill 文本） |

@@ -34,7 +34,7 @@
 | 品牌（虎鲸 Orca） | [BrandMark.tsx](../../packages/deep-research-pack/src/client/BrandMark.tsx) | 宿主 `sidebar.brand.mark` + `sidebar.brand.name` 两槽的 single occupant（替换内置鱼形 logo 与本地构建标签）——用户定调 2026-10-13 |
 | 研究配置页签 | [ResearchConfigTab.tsx](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) + [method-of-question.ts](../../packages/deep-research-pack/src/lib/method-of-question.ts) | 右栏**摘要页签**（2026-10-21 管理迁移后）：只留 ① 本次研究（采用＋来源＋「换一条」，读 question.md 方法节五态）与「方法库（本工作区）→ 顶部 tab」入口；库列表/内置卡/领域示范/术语/管理回执移入主界面「方法库」tab。指令仍经 `session/prompt` 交 Lead（面板不直写文件） |
 | 方法库主 tab | [MethodLibraryView.tsx](../../packages/deep-research-pack/src/client/MethodLibraryView.tsx) + [library-fold.ts](../../packages/deep-research-pack/src/lib/library-fold.ts) | 主界面 `conversation.view` 第三 tab（Chat/Trajectory 同排）：我的库搜索/列表、内置参考只读、四字段编辑/新建/删除；保存走 W1 `session/prompt` 交 Lead 写 `method-library.md`，面板不直写文件；无写权限、无新 RPC |
-| 研究图谱页签 | [ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) + `src/client/research-graph/types.ts` + [plan-graph.ts](../../packages/deep-research-pack/src/lib/plan-graph.ts) | 右栏**只读观察面**：顶层 plan 节点 / `agentTeam` 任务画成 SVG DAG（节点 + 依赖边 + 同层并行 + 状态色）；复合节点 N3.1… 默认收在父节点详情，图上标 `+N`；`plan.md` 提供 parent/kind/depth/acceptance、版本与重写记录；节点详情可复制 `drt_<slug>/N3` 引用；重号/悬空 parent/deps 显示只读结构提示；无 plan/无 blocked_by 时明确「没有可画的 DAG」，不画假 Wave；不提供调整动作 |
+| 研究图谱页签 | [ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) + `src/client/research-graph/types.ts` + [plan-graph.ts](../../packages/deep-research-pack/src/lib/plan-graph.ts) | 右栏**只读观察面**：顶层 plan 节点 / `agentTeam` 任务画成 SVG DAG（节点 + 依赖边 + 同层并行 + 状态色）；复合节点 W3.1… 默认收在父节点详情，图上标 `+n`（内部节点数）；`plan.md` 提供 parent/lifecycle/kind/stage（派生）/depth/acceptance、版本与重写记录；节点详情可复制 `drt_<slug>/W3.1` 引用；重号/悬空 parent/deps/墓碑/跨组显示只读结构提示；无 plan/无 blocked_by 时明确「没有可画的 DAG」，不画假图；不提供调整动作 |
 | 终稿页签 | [ResearchFinalTab.tsx](../../packages/deep-research-pack/src/client/ResearchFinalTab.tsx) + [final-target.ts](../../packages/deep-research-pack/src/lib/final-target.ts) | 右栏页签：**接管 `drt_<slug>/final.md` 的文件地址**（`extension` 带；交付卡片、结句内联引用、Files 树落到同一页签）——交付后整篇渲染 run 根 `final.md`。静音条只讲盘上事实（`vN` / `当前版` / `审查未过`；**不写"已交付"**——版本目录不是交付凭证，交付只由⑤ 的 `present` 见证说），`过程 →` 回研究状态。读面是一张定表（`final.md` / `review.md` / `final/`），路径按三位置回退（原位 → `archive/` → `_abandoned/`） |
 | 研究图谱页签体 | [ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) | 页签体：头部 plan/task 计数 +「只读观察」标记；SVG DAG 小图（`wavesOf` 分层、同层横排、边 = plan deps / Team `blocked_by`）+ 顶层节点列表 + 选中详情（description 高度上限、复合子节点展开、复制引用）+「需要你注意（只读）」+ plan 结构提示；底部 `plan.md` 原文折叠与 plan↔task 映射计数；无依赖边时只显示任务快照并说明原因 |
 | 研究图谱注入面 | [research-graph/types.ts](../../packages/deep-research-pack/src/client/research-graph/types.ts) | 「研究图谱」页签的注入面类型（`readFile` / `follow` / 可选 `openOwner` 三条闭包，数据面全部复用既有 remote，无新 RPC）；`follow` 只用于 journal 绑定 `drt_<slug>/`，页签只读，不注入发送通道 |
@@ -129,7 +129,7 @@
 - **研究图谱页签（2026-10-21）**：只读观察面，不是任务 CRUD、也不是操作台；数据 =
   `agentTeam` / `subagentCatalog` / session status / `plan.md`。顶部 SVG DAG（顶层 plan 节点优先，
   边 = plan deps / Team `blocked_by`；同层并行横排），下方节点详情与 `plan.md` 原文；复合节点
-  N3.1… 默认收在父节点详情（图上标 `+N`），节点可复制 `drt_<slug>/N3` 引用；重号/悬空 parent/deps
+  W3.1… 默认收在父节点详情（图上标 `+n`），节点可复制 `drt_<slug>/W3.1` 引用；重号/悬空 parent/deps/墓碑/跨组
   显示只读结构提示。无 plan/无依赖边时明确说「没有可画的 DAG」，只显示任务快照。调整回对话或
   rerun，侧栏不发“让 Lead 调整”这类不知道调什么的指令。任务粒度仍归 `ui-agent-team`。
 
