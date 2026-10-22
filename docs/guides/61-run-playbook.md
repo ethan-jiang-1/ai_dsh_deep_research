@@ -212,6 +212,11 @@ BUG-020）。
   v(n+1)（交付后操作侧重新归档）、结构性另起新 bundle（正本 =
   [NODES 回边版本语义](../../research-workspace/NODES.md)）；候选不止一个时全部报出问用户，
   不自己挑（同 §0 纪律）；
+- **rerun 版本面**：同 bundle rerun 开工时 lead 在 `question.md` 标题下写
+  `> rerun: v2 · evidence-expansion · 日期 · 触发：…`；plan 每次重写前把旧版落 `plan/vN.md`
+  （头部 `图版本：vN` 与重写记录同号；快照编号必须小于当前版本）。观察面按这些盘上声明显示
+  「v1 已交付 · v2 证据扩张 rerun · HITL2 待审」；`final.md` 是工作稿、`final/vN` 才是版本账，
+  `present` 才是交付见证（终稿页签因此默认看版本账、只标「版本账/当前工作稿」）。
 - 方向修订：直接告诉 lead——**载体 = steer**（GUI 里打字即 steer；RPC 用 `session/prompt`
   的 `mode: 'steer'`，running 中的 agent 在下一步边界消费）；lead 记账（§Decisions 追加）
   后原地补搜（不算 rerun）。**queue 模式的消息（代驱脚本缺省形态）在 run 的单超长 turn

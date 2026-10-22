@@ -11,7 +11,8 @@
 > **重编号 + 重写记录旧号别名**（`W2.1 → W3.2`），不静默保留旧前缀。
 > `stage` 由根节点 kind 派生（scan/dive/check/synthesis/review/gate；未知=unknown），不单独建列。
 > 拆分/合并/删除只做墓碑（`lifecycle` = retired / merged_into / superseded_by），墓碑留在表里
-> 供 byId 解析但不画图；旧号不复用。图版本：v1（每次重写递增）。
+> 供 byId 解析但不画图；旧号不复用。图版本：v1（每次重写递增）——**重写前先把当前
+> `plan.md` 复制到 `plan/v<被取代的版本>.md`**（只读旧图快照）；`plan.md` 始终是唯一当前版。
 
 ## 节点表
 
@@ -41,7 +42,7 @@
 ## 重写记录
 
 <!-- append-only，最新在上；每次加/扩/拆/并/改边/重派一行：
-- 日期 / 图版本 vN / 动作 / 节点 id / 原因 / journal 指针
+- 日期 / 图版本 vN / 动作 / 节点 id / 原因 / journal 指针（版本号与头部 `图版本：vN` 必须一致）
 - 跨 Wave 重编号必须写旧号 → 新号别名（例：`W2.1 → W3.2`）；旧号不复用
 - 生命周期：lifecycle = active|retired|merged_into:W4.1|superseded_by:W6.1,W6.2；derived_from/moved_from 写在重写记录
 -->

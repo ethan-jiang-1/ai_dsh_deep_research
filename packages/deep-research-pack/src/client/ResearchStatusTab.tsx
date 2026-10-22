@@ -41,6 +41,7 @@ import type { ResearchStatusTabProps, ResearchStatusTitleInjected } from './rese
 import { sessionBindingOf, type SessionBinding } from '../lib/bundle-bind.ts'
 import { streamFailureOf } from '../lib/stream-failure.ts'
 import { latestFinalDelivery } from '../lib/final-target.ts'
+import { runVersionFaceOf, type RunVersionFace } from '../lib/run-version.ts'
 import type { TeamProjection } from '@deepseek-ai/dsh-experimental-agent-team/client'
 export type { FollowTarget, JournalFrame, ResearchStatusTabInjected, ResearchStatusTabProps, ResearchStatusTitleInjected } from './research-status/types.ts'
 
@@ -56,6 +57,12 @@ interface BundleFace {
   readonly versions: number
   /** review.md 终局 readiness（多轮取末位：true=FAIL / false=PASS / null=未观测）。 */
   readonly reviewFail: boolean | null
+  /** 版本面事实（rerun 版本轨的输入；交付见证由 journal 单独折）。 */
+  readonly planText: string | null
+  readonly planSnapshotNames: readonly string[]
+  readonly questionText: string | null
+  readonly finalFileNames: readonly string[]
+  readonly hasFinal: boolean
 }
 
 /** 30s 重扫间隔（bundle 文件变化不高频；团队面板同款节奏）。 */
@@ -191,7 +198,16 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           // final/ 版本记账（D17：证据扩张 rerun 落 v2.md+）——读目录内最高真实版本号作为回路表达的数据源
           const finalDir = names.has('final') ? await props.listDir(sessionId, `${base}/final`, new AbortController().signal) : null
           if (stopped) return
-          const versions = latestRunVersion(finalDir?.filter((e) => e.type === 'file').map((e) => e.name) ?? [])
+          const finalFileNames = (finalDir ?? []).filter((e) => e.type === 'file').map((e) => e.name)
+          const versions = latestRunVersion(finalFileNames)
+          // 版本面事实：plan 头/重写记录 + plan/ 快照清单（rerun 版本轨的数据源，折算住 run-version）。
+          const planText = names.has('plan.md')
+            ? await props.readFile(sessionId, `${base}/plan.md`, new AbortController().signal, 800)
+            : null
+          if (stopped) return
+          const planDir = names.has('plan') ? await props.listDir(sessionId, `${base}/plan`, new AbortController().signal) : null
+          if (stopped) return
+          const planSnapshotNames = (planDir ?? []).filter((e) => e.type === 'file').map((e) => e.name)
           // review 终局 readiness（业务摘要审查态的数据源）：判定规则收在 pack lib
           // `review-readiness.terminalReadiness`——只认**行首**判定行、取最后一条。2026-10-11
           // 实测：旧的未锚行首末位匹配会把文末附录里保留的首轮 `readiness: FAIL`（血统记录）
@@ -239,6 +255,11 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
             delivered: names.has('final.md'),
             versions,
             reviewFail,
+            planText,
+            planSnapshotNames,
+            questionText,
+            finalFileNames,
+            hasFinal: names.has('final.md'),
           })
           return
         }
@@ -261,6 +282,24 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const anchors = useMemo(
     () => deriveAnchors(journalEvents, face !== null ? { question: face.hasQuestion, delivered: face.delivered } : undefined),
     [journalEvents, face],
+  )
+
+  // rerun 版本面（只读投影）：交付版本由 present 见证 + `final/vN` 版本账推定；
+  // `final.md` 是工作稿，不再冒充已交付（D17 同 bundle rerun 的表达缺口）。
+  const hitl2Pending = anchors.find((a) => a.key === 'anchor-2')?.state === 'pending'
+  const versionFace: RunVersionFace | null = useMemo(
+    () => face === null
+      ? null
+      : runVersionFaceOf({
+        planText: face.planText,
+        planSnapshotNames: face.planSnapshotNames,
+        finalFileNames: face.finalFileNames,
+        questionText: face.questionText,
+        delivered: delivery !== null,
+        hitlPending: hitl2Pending,
+        draftPresent: face.hasFinal,
+      }),
+    [face, delivery, hitl2Pending],
   )
 
   // 流程轨道件（锚点入轨，RFC cockpit-flow-face）：锚点段从 journal+文件折算（挂起期也在场），
@@ -396,7 +435,11 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
             >读终稿 →</button>
           )}
           {delivery === null && <span style={{ opacity: 0.6 }}>终稿将在交付后自动出现在右栏</span>}
-          {face.versions >= 2 && <span style={{ fontWeight: 600 }}>v{face.versions}</span>}
+          {versionFace !== null && (face.hasFinal || versionFace.ledgerFinalVersion >= 1) && (
+            <span style={{ fontSize: 12, opacity: 0.8 }} title="版本面只读投影：final/vN 是版本账，final.md 是工作稿">
+              {versionFace.label}
+            </span>
+          )}
         </div>
       )}
       {/* 未绑定 / 绑定待确认提示（RFC right-pane-ux-debt + cockpit-flow-face G4） */}

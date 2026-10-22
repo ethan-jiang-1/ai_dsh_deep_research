@@ -45,6 +45,7 @@ import {
   type PlanNode,
   type WorkerChip,
 } from '../lib/plan-graph.ts'
+import { planDiffOf, type PlanDiff } from '../lib/plan-diff.ts'
 import {
   coverageLineOf,
   coverageOf,
@@ -313,6 +314,14 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   const [plan, setPlan] = useState<PlanIndex | null>(null)
   const [planText, setPlanText] = useState<string | null>(null)
   const [planState, setPlanState] = useState<'loading' | 'missing' | 'unbound' | 'ready'>('loading')
+  // 版本轨（rerun 版本面）：plan 基址 + `plan/` 快照 + 当前图版本；view 只切只看，不改图。
+  const [planBase, setPlanBase] = useState<string | null>(null)
+  const [planVersion, setPlanVersion] = useState<number | null>(null)
+  const [snapshots, setSnapshots] = useState<readonly number[]>([])
+  const [graphView, setGraphView] = useState<'current' | 'diff'>('current')
+  const [snapshotPlan, setSnapshotPlan] = useState<PlanIndex | null>(null)
+  const [snapshotState, setSnapshotState] = useState<'idle' | 'loading' | 'ready' | 'missing'>('idle')
+  const [showSnapshotPlan, setShowSnapshotPlan] = useState(false)
   // 最后成功读取 plan.md 的时刻：把“数据可能过期”显性化（BUG-043 §刷新），不把缺失当状态。
   const [planLoadedAt, setPlanLoadedAt] = useState<number | null>(null)
 
@@ -354,6 +363,13 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     setPlanText(null)
     if (boundSlug === null) {
       setPlanLoadedAt(null)
+      setPlanBase(null)
+      setPlanVersion(null)
+      setSnapshots([])
+      setGraphView('current')
+      setSnapshotPlan(null)
+      setSnapshotState('idle')
+      setShowSnapshotPlan(false)
       setPlanState('unbound')
       return () => { stopped = true; controller.abort() }
     }
@@ -368,6 +384,16 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
             setPlanText(text)
             setPlanState('ready')
             setPlanLoadedAt(Date.now())
+            setPlanBase(base)
+            setPlanVersion(Number(/图版本\s*[：:]\s*v?(\d+)/.exec(text)?.[1]) || null)
+            const planDir = await props.listDir(leadSessionId, `${base}/plan`, controller.signal).catch(() => null)
+            if (stopped) return
+            const found = (planDir ?? [])
+              .map((entry) => /^v([1-9]\d*)\.md$/.exec(entry.name)?.[1])
+              .filter((raw): raw is string => raw !== undefined)
+              .map(Number)
+              .sort((a, b) => a - b)
+            setSnapshots(found)
             return
           }
         }
@@ -388,6 +414,26 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     timer = setInterval(() => { void load() }, PLAN_REFRESH_MS)
     return () => { stopped = true; controller.abort(); if (timer !== undefined) clearInterval(timer) }
   }, [leadSessionId, boundSlug])
+
+  // 旧图快照按需读（没有快照就不读；`plan/vN.md` 不在场就如实 missing）。
+  const latestSnapshot = snapshots.length > 0 ? snapshots[snapshots.length - 1] : null
+  useEffect(() => {
+    if (graphView !== 'diff' && !showSnapshotPlan) { setSnapshotState('idle'); return }
+    if (planBase === null || latestSnapshot === null) { setSnapshotState('missing'); return }
+    let stopped = false
+    const controller = new AbortController()
+    setSnapshotState('loading')
+    setSnapshotPlan(null)
+    void (async () => {
+      for (const base of [planBase, `archive/${planBase}`, `_abandoned/${planBase}`]) {
+        const text = await props.readFile(leadSessionId, `${base}/plan/v${String(latestSnapshot)}.md`, controller.signal, PLAN_READ_LIMIT)
+        if (stopped) return
+        if (text !== null) { setSnapshotPlan(planIndex(text)); setSnapshotState('ready'); return }
+      }
+      setSnapshotState('missing')
+    })()
+    return () => { stopped = true; controller.abort() }
+  }, [graphView, showSnapshotPlan, planBase, latestSnapshot, leadSessionId])
 
   const teamReady = team !== undefined
   const tasks: readonly TeamTaskView[] = team?.tasks ?? []
@@ -467,6 +513,8 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         state: nodeStateOf(task, running, attentionItem),
       }
     })
+
+  const planDiff: PlanDiff | null = snapshotPlan !== null && plan !== null ? planDiffOf(snapshotPlan, plan) : null
 
   const knownIds = new Set(graphNodes.map((node) => node.id))
   const hasEdges = graphNodes.some((node) => node.blockedBy.some((dep) => dep !== node.id && knownIds.has(dep)))
@@ -633,6 +681,59 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         {counts.stalled > 0 && <span style={{ ...MUTED_STYLE, color: '#b45309' }}>⚠ {String(counts.stalled)} 可能卡住</span>}
       </div>
 
+      {/* 版本轨（rerun 版本面，只读）：只切观察，不改图/不派工。 */}
+      {hasPlan && (
+        <div style={{ ...MUTED_STYLE, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 6 }}>
+          <span>版本轨（只读）：当前 plan {planVersion !== null ? `v${String(planVersion)}` : '版本未声明'}</span>
+          {snapshots.length > 0 ? (
+            <>
+              <button type="button" style={BUTTON_STYLE} onClick={() => { setGraphView('current'); setShowSnapshotPlan(false) }}>当前图</button>
+              <button type="button" style={BUTTON_STYLE} onClick={() => { setShowSnapshotPlan((current) => !current) }}>
+                {showSnapshotPlan ? '收起旧图' : `看 v${String(latestSnapshot)} 旧图`}
+              </button>
+              <button type="button" style={BUTTON_STYLE} onClick={() => { setGraphView((current) => current === 'diff' ? 'current' : 'diff') }}>
+                {graphView === 'diff' ? '收起差异' : '看差异'}
+              </button>
+            </>
+          ) : (
+            <span>· 无旧图快照，不能 diff</span>
+          )}
+        </div>
+      )}
+
+      {/* 旧图快照：只列节点结构（id/kind/deps），不与当前 Team 板对板。 */}
+      {showSnapshotPlan && (
+        <div style={BANNER_STYLE}>
+          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>旧图快照 v{String(latestSnapshot)}（只读）</div>
+          {snapshotState === 'missing' && <div style={MUTED_STYLE}>读不到 plan/v{String(latestSnapshot)}.md——快照可能已移走</div>}
+          {snapshotState === 'loading' && <div style={MUTED_STYLE}>读取中…</div>}
+          {snapshotPlan !== null && snapshotPlan.topLevel.map((node) => (
+            <div key={node.id} style={{ fontSize: 11, opacity: 0.85 }}>
+              <strong>{node.id}</strong>{node.kind !== undefined ? ` · ${node.kind}` : ''}{node.deps.length > 0 ? ` · deps ${node.deps.join(', ')}` : ''}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 结构差异：只比 id/lifecycle/deps（重编号靠 superseded_by，不解析散文）。 */}
+      {graphView === 'diff' && (
+        <div style={CARD_STYLE}>
+          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>结构差异（v{String(latestSnapshot)} → 当前）</div>
+          {planDiff === null ? (
+            <div style={MUTED_STYLE}>{snapshotState === 'missing' ? '旧图快照读不到，不能 diff' : '旧图快照读取中…'}</div>
+          ) : (
+            <>
+              <div style={{ fontSize: 12, marginBottom: 2 }}>{planDiff.summary}</div>
+              {planDiff.added.length > 0 && <div style={{ fontSize: 11, color: '#16a34a' }}>+ 新增：{planDiff.added.join(', ')}</div>}
+              {planDiff.removed.length > 0 && <div style={{ fontSize: 11, color: '#b45309' }}>− 退役：{planDiff.removed.join(', ')}</div>}
+              {planDiff.aliases.length > 0 && <div style={{ fontSize: 11, color: '#6366f1' }}>↔ 重编号：{planDiff.aliases.map((alias) => `${alias.from} → ${alias.to}`).join('、')}</div>}
+              {planDiff.dependencyChanges.length > 0 && <div style={{ fontSize: 11, color: '#b45309' }}>~ 依赖变化：{planDiff.dependencyChanges.map((change) => `${change.id}（${change.from.join(',') || '—'} → ${change.to.join(',') || '—'}）`).join('；')}</div>}
+              {planDiff.kept.length > 0 && <div style={MUTED_STYLE}>保留 {String(planDiff.kept.length)} 个节点</div>}
+            </>
+          )}
+        </div>
+      )}
+
       {/* 映射缺口：说“图谱无法判断”，不说“未执行”——这是 BUG-043 的产品层修复点。 */}
       {hasPlan && teamReady && coverageWarning !== null && (
         <div style={{ ...BANNER_STYLE, background: '#f59e0b12', borderColor: '#f59e0b48' }}>
@@ -691,7 +792,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         </div>
       )}
 
-      {hasEdges && (
+      {hasEdges && graphView === 'current' && (
         <>
           <DagMap nodes={graphNodes} selectedId={expandedId} childCounts={childCounts} onSelect={setExpandedId} />
           <div style={{ ...MUTED_STYLE, marginBottom: 8 }}>
@@ -700,7 +801,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         </>
       )}
 
-      {hasEdges
+      {graphView === 'current' && (hasEdges
         ? waves.map((wave) => (
           <section key={wave.level} style={{ marginBottom: 10 }}>
             <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>
@@ -714,7 +815,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
             <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>任务快照（无依赖边）</div>
             {graphNodes.map((node) => renderNode(node))}
           </section>
-        )}
+        ))}
 
       {unmappedTasks.length > 0 && (
         <section style={{ marginBottom: 10 }}>

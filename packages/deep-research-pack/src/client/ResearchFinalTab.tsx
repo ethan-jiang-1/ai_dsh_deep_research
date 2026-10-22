@@ -25,7 +25,7 @@ import type { ReactNode } from 'react'
 import { MarkdownText } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { finalCandidates, finalReadPlan, sessionFileOf } from '../lib/final-target.ts'
+import { finalCandidates, finalReadPlan, sessionFileOf, type FinalReadPlan } from '../lib/final-target.ts'
 import { latestRunVersion } from '../lib/run-fold.ts'
 import { terminalReadiness } from '../lib/review-readiness.ts'
 import { RESEARCH_STATUS_TAB_KIND } from './keys.ts'
@@ -76,6 +76,17 @@ const BAR: React.CSSProperties = {
   background: '#b4530914', color: '#b45309', display: 'flex', alignItems: 'center', gap: 8,
 }
 
+/** 版本账文件的候选位置（与 `final.md` 的三位置同构；`final/vN.md` 不是终稿地址，故不走
+ *  `finalCandidates`——那条判据只认 `final.md`，别为它放宽）。 */
+function ledgerCandidates(path: string): readonly string[] {
+  const bare = path.replace(/^(?:archive\/|_abandoned\/)/, '')
+  const out: string[] = []
+  for (const candidate of [path, bare, `archive/${bare}`, `_abandoned/${bare}`]) {
+    if (!out.includes(candidate)) out.push(candidate)
+  }
+  return out
+}
+
 /**
  * 终稿页签体。
  * @param props 槽 props + 注入面。
@@ -108,19 +119,27 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   const [pass, setPass] = useState<boolean | null>(null)
   const [stale, setStale] = useState(false)
   const [resolved, setResolved] = useState<string | null>(null)
+  // 版本视图（rerun 版本面）：默认看 `final/` 版本账的最高版；`final.md` 是工作稿。
+  // 交付与否不在这页判——只由状态页 ⑤ 的 present 见证说（见头注）。
+  const [versionsDir, setVersionsDir] = useState<string | null>(null)
+  const [showDraft, setShowDraft] = useState(false)
+  const planRef = useRef<FinalReadPlan | null>(null)
+  const ledgerPath = versionsDir !== null && versions >= 1 ? `${versionsDir}/v${versions}.md` : null
+  const activePath = showDraft || ledgerPath === null ? finalPath : ledgerPath
 
   /** 只读定表里的三处；正文按页续读（`prefix` = 已显示的前文，"继续加载"用）。
    *  路径先按三位置回退解析（`finalCandidates`：原位 → archive/ → _abandoned/）——`present`
    *  记录的是交付当时的位置，bundle 之后被归档就会失效；找不到才报"读不到"。 */
   const load = useCallback(async (signal: AbortSignal, fromOffset = 1, prefix = ''): Promise<void> => {
-    if (sessionId === undefined || finalPath === null) return
+    if (sessionId === undefined || activePath === null) return
     const io = ioRef.current
     setLoading(true)
     setFailure(null)
     // 解析可读的那一处（第一页即探针：三个候选共用同一分页语义）
     let resolvedPath: string | null = null
     let firstPage: { text: string; lines: number; eof: boolean } | null = null
-    for (const candidate of finalCandidates(finalPath)) {
+    const candidates = activePath === finalPath ? finalCandidates(finalPath) : ledgerCandidates(activePath)
+    for (const candidate of candidates) {
       const page = await io.readPage(sessionId, candidate, signal, fromOffset, PAGE_LINES)
       if (signal.aborted || !aliveRef.current) return
       if (page !== null) { resolvedPath = candidate; firstPage = page; break }
@@ -133,8 +152,13 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     resolvedRef.current = resolvedPath
     setResolved(resolvedPath)
     const resolvedPlan = finalReadPlan(resolvedPath)
-    const reviewPath = resolvedPlan?.review
-    const versionsPath = resolvedPlan?.versions
+    if (resolvedPlan !== null) {
+      planRef.current = resolvedPlan
+      setVersionsDir(resolvedPlan.versions)
+    }
+    // review / versions 两处读面跟着**终稿地址**走（版本账文件不是终稿地址，finalReadPlan 不认它）。
+    const reviewPath = planRef.current?.review
+    const versionsPath = planRef.current?.versions
     let offset = fromOffset + Math.max(firstPage.lines, 1)
     let joined = prefix === '' ? firstPage.text : `${prefix}\n${firstPage.text}`
     let atEnd = firstPage.eof || firstPage.lines === 0
@@ -161,7 +185,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     if (versionToken !== null) versionRef.current = versionToken
     setLoading(false)
     setStale(false)
-  }, [sessionId, finalPath])
+  }, [sessionId, finalPath, activePath])
 
   // 首读 + 地址/会话变化重读
   useEffect(() => {
@@ -178,11 +202,11 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
 
   // 文件改写：在看 → 提示重读；没在看 → 静默重读
   useEffect(() => {
-    if (sessionId === undefined || finalPath === null) return
+    if (sessionId === undefined || activePath === null) return
     const controller = new AbortController()
     const timer = setInterval(() => {
       void (async () => {
-        const token = await ioRef.current.statVersion(sessionId, resolvedRef.current ?? finalPath, controller.signal)
+        const token = await ioRef.current.statVersion(sessionId, resolvedRef.current ?? activePath, controller.signal)
         if (controller.signal.aborted) return
         if (token === null) return
         if (versionRef.current === null) { versionRef.current = token; return }
@@ -193,7 +217,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
       })()
     }, REFRESH_MS)
     return () => { clearInterval(timer); controller.abort() }
-  }, [sessionId, finalPath, load])
+  }, [sessionId, finalPath, activePath, load])
 
   if (file === null || plan === null) return <div style={MESSAGE}>（这不是研究终稿文件）</div>
   if (loading && text === null) return <div style={MESSAGE}>正在读取终稿…</div>
@@ -209,7 +233,11 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   }
   if (text === null) return <div style={MESSAGE}>（终稿未能读取）</div>
 
-  const state = pass === false ? '审查未过' : versions >= 1 ? `v${versions}` : '当前版'
+  const state = pass === false
+    ? '审查未过'
+    : activePath !== finalPath && versions >= 1
+      ? `v${versions}（版本账）`
+      : versions >= 1 ? '当前工作稿' : '当前版'
   const stateStyle = pass === false
     ? { color: '#b45309', fontWeight: 600 }
     : undefined
@@ -228,6 +256,14 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
       <div style={{ ...STRIP, padding: '3px 12px 7px', flexShrink: 0 }} title={resolved ?? plan.final}>
         <span style={stateStyle}>{state}</span>
         <span style={{ flex: 1 }} />
+        {versions >= 1 && (
+          <button
+            type="button"
+            style={LINK_BUTTON}
+            title="版本账 = final/vN；交付与否以「研究状态」的 ✅ present 为准"
+            onClick={() => { setShowDraft((current) => !current) }}
+          >{showDraft ? `看 v${versions}（版本账）` : '看当前工作稿'}</button>
+        )}
         <button type="button" style={LINK_BUTTON} onClick={() => { tab.tab.actions.openTab(RESEARCH_STATUS_TAB_KIND) }}>过程 →</button>
       </div>
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', padding: '0 12px 40px', fontSize: 13.5, lineHeight: 1.75, overflowWrap: 'anywhere' }}>

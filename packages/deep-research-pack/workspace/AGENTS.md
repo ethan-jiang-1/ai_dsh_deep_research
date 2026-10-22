@@ -17,10 +17,12 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
                        slug 由主编立项时定，kebab-case；立项 sibling 预检：同名/前缀相关
                        bundle 已在（**含 archive/ 归档**）→ 问用户，不擅自另起）
   question.md          方向契约：问题定稿 + Purpose/RQ/Scope/Constraints + HITL1 对齐快照 +
-                       Decisions（append-only，最新在上）——跨 rerun 持久，bundle 身份核心（lead）
+                       Decisions（append-only，最新在上）+ 同 bundle rerun 的 `> rerun: v2 ·
+                       evidence-expansion · 日期` 行——跨 rerun 持久，bundle 身份核心（lead）
   topics.md            topic 图：must_answer（问题列表 2–5 问）+ scope_role（owner: lead）
   plan.md              执行图（owner: lead）：节点表 id/parent/lifecycle/kind/question/owner_role/
-                       deps/output/acceptance/budget/depth/task_id + plan_version/重写记录；过程件，
+                       deps/output/acceptance/budget/depth/task_id + 图版本 vN/重写记录；
+                       重写前落 `plan/v<旧版本>.md` 快照（plan.md 唯一当前版）；过程件，
                        不是交付凭证；Team 任务板是当前会话的执行镜像；schema-scan/node-gate
                        不检查本文件。**W<wave>.<index>**：W2 是 Wave 2 分组（不是任务），
                        W2.1/W2.2 是层内并行节点，W2.1.1 是内部拆解；Wave 由 deps 计算，ID

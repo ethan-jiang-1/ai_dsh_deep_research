@@ -1,7 +1,8 @@
 // research-graph/types.ts — 「研究图谱」client 半的注入面类型（槽标准 props 在入口处合成）。
 // 被谁消费：src/client/ResearchGraphTab.tsx 与 src/client/index.ts（注册处按本类型接线）。
 // 注入两条闭包（数据面全部复用既有 remote，无新 RPC；**只读观察，不发指令**）：
-//   · readFile  = remote.workspaceFiles.read 的会话级闭包（只读 `plan.md`，缺文件合法）；
+//   · readFile  = remote.workspaceFiles.read 的会话级闭包（只读 `plan.md` / `plan/vN.md`，缺文件合法）；
+//   · listDir   = remote.workspaceFiles.list 的会话级闭包（列 `plan/` 快照；不可达 → null）；
 //   · openOwner = 可选：打开队员会话（vendor `ui-agent-team` 的 openTeammate 同款接线；
 //                 本页签只在提供时渲染「打开负责人」）。
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
@@ -19,6 +20,8 @@ export type GraphJournalFrame =
 export interface ResearchGraphInjected {
   /** 读工作区文本文件；不可达/缺文件 → null（`plan.md` 缺席是合法形态）。 */
   readonly readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) => Promise<string | null>
+  /** 列工作区目录（只用于发现 `plan/vN.md` 快照）；不可达 → null。 */
+  readonly listDir: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<readonly { type: string; name: string }[] | null>
   /** 跟本会话 journal，仅用于 `sessionBindingOf` 找 `drt_<slug>/`（plan 读取需要 bundle 基址）。 */
   readonly follow: (sessionId: SessionId, signal: AbortSignal) => AsyncIterable<GraphJournalFrame>
   /** 打开队员会话的观察面（可选；缺省时不渲染「打开负责人」）。 */

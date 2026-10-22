@@ -10,5 +10,6 @@
 
 ## 研究状态页签 · 人性化活动行（icon + 文本）
 
+💬 I'll run the probe exactly as specified — no files
 🔍 检索：DSH harness
-💬 探针完成：web_search 搜了「DSH harness」并拿到 2 条结果（阿里云开发者社区文
+💬 探针完成：web_search 搜了「DSH harness」拿到 8 条结果（[极客公园](htt

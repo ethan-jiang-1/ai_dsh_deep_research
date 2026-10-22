@@ -1,5 +1,9 @@
 # Question — <run slug>
 
+<!-- 同 bundle rerun 时在标题下加一行（无 rerun 不加；结构性 rerun 另起 bundle）：
+> rerun: v2 · evidence-expansion · YYYY-MM-DD · 触发：<一句话>
+     kind ∈ evidence-expansion | polish | structural -->
+
 ## 研究问题（定稿）
 
 <一句话，不含糊措辞；一个不了解上下文的读者能复述>

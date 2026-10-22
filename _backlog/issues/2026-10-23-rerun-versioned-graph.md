@@ -1,11 +1,11 @@
 ---
-status: 等人拍板
+status: 推敲中
 opened: 2026-10-23
 ---
 
 # 推敲：rerun 的版本面与图谱表达
 
-> 立卡：2026-10-23 ｜ 状态：等人拍板 ｜ 类型：设计 ｜ 结论倾向：现在做（先拍板 plan 快照契约与终稿默认版本） ｜ 可关闭：否
+> 立卡：2026-10-23 ｜ 状态：推敲中（2026-10-23 用户授权自主拍板；§7 已决议） ｜ 类型：设计 ｜ 结论倾向：现在做（契约 + 版本面 + 终稿页已落地；Phase 3 图谱版本轨 / Phase 4 E2E 未完） ｜ 可关闭：否
 >
 > 用户 2026-10-23 定调：rerun 是真实需求——跑到尾、出了 final 后，因问题理解加深/方向修正/A 不对要
 > 重跑；通路必须还在，视觉（研究图谱）也要表达清楚。用户与第二 reviewer 先审本卡。
@@ -195,3 +195,29 @@ run v1 已交付  →  run v2 证据扩张 rerun  ·  HITL2 待审
   [研究手册 AGENTS](../../research-workspace/AGENTS.md)、[question 模板](../../research-workspace/templates/run/question.md)、
   [run 指南](../../docs/guides/61-run-playbook.md)、[状态页签](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx)、
   [图谱页签](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx)。
+
+## 7 决议（2026-10-23，用户授权自主拍板；证据 = [Note](../../notes/implemented/2026-10-23-rerun-version-face.md)）
+
+1. **`plan/vN.md` 快照契约：接受，但挂在「plan 重写」上**（不只在 rerun）：重写前把当前
+   `plan.md` 复制到 `plan/v{被取代的版本}.md`；`plan.md` 仍是唯一当前版。快照版本 ≥ 当前图版本
+   = 编号异常，不拿去 diff。polish 不产生快照；结构性 rerun 另起 bundle。
+2. **终稿页签默认「版本账最高版」，不是「已交付 v1」**：该页签的注入面没有 journal（`present`
+   读不到），且 `present` 事件本身不带版本号；design/40 §2 已明文禁止该页签写「已交付」。
+   所以默认看 `final/vN`（版本账），可切「当前工作稿」（`final.md`，未交付）；交付事实留在
+   状态页 ⑤ 的 `present` 见证。给该页签加 `follow` 的替代方案输掉（重复订阅，且窗口外旧交付仍看不到）。
+3. **无快照旧 run：如实「无旧图快照」**，不重建、不猜。
+4. **结构性 rerun 血缘条：暂缓**——需要 question.md 新字段，且当前零真实实例；先做版本轨 +
+   诚实缺省。出现第一例或用户点名再上。
+5. **图谱保持只读**：不放「补研究」按钮；调整走对话/HITL2。
+6. **旧 flat W / N 与版本面分开显示**：命名徽标 + 版本徽标并列，不自动迁移。
+7. **`rerunKind` 只从显式声明来**：question.md 标题下 `> rerun: vN · evidence-expansion|polish|structural ·
+   日期 · 触发：…`；不解析 §Decisions 散文。polish 没有盘上版本痕迹，只有声明能表达。
+8. **版本号来源交叉校验**：`plan.md` 头部 `图版本：vN` 为主、重写记录最高号为证；不一致两个都报
+   （真实样本：`drt_eu` 头 v6 / 记录 v7；`drt_cn-us` 无机器可读版本行）。
+9. **已交付版本按版本账推定**，版本账 >1 时文案标「推定」；present 不在 journal 窗口时只说
+   「版本账 · 交付未见证」，不说「未交付」。
+10. **不加 node-gate 门**：Team 任务不在盘上、归档 bundle 无会话；覆盖率与版本面住观察面，
+    门④ 现有 v1 不误伤回归照跑。
+
+**未改**：D17 三形态、`final-target` 的地址判据（只认 `final.md`）、anchor-2/步态的
+`final.md` 在场语义（2026-10-20 既有决定：⑤ 只认 present，步态/锚点用文件在场）。

@@ -59,6 +59,7 @@ import { pass4ConfigTabPhase } from './client-load-config.mjs'
 import { clickRowByText, expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES } from '../lib/web-ui-nav.mjs'
 import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { isActivePlanNode, planIndex } from '../../packages/deep-research-pack/src/lib/plan-graph.ts'
+import { latestRunVersion } from '../../packages/deep-research-pack/src/lib/run-fold.ts'
 import { deriveBusinessBrief } from '../../packages/deep-research-pack/src/lib/brief-fold.ts'
 import { foldActivityRows } from '../../packages/deep-research-pack/src/lib/activity-fold.ts'
 import { streamFailureOf } from '../../packages/deep-research-pack/src/lib/stream-failure.ts'
@@ -857,7 +858,16 @@ async function pass5FinalDeliveryPhase() {
     await wait(4_000)
     const finalText = await paneTextOf(page)
     const base = fileFaceOf(deliveredTarget.slug)?.base ?? null
-    const finalBody = typeof base === 'string' ? readFileSync(join(base, 'final.md'), 'utf8') : ''
+    // 终稿页签默认看**版本账最高版**（final/vN）；没有版本账才回落到 final.md 工作稿。
+    // 首标题对账必须跟着默认视图走，不能拿 final.md 硬比（rerun 后它是更新的工作稿）。
+    const ledgerNames = typeof base === 'string' && existsSync(join(base, 'final'))
+      ? readdirSync(join(base, 'final')).filter((name) => name.endsWith('.md'))
+      : []
+    const ledgerLatest = latestRunVersion(ledgerNames)
+    const defaultViewPath = typeof base === 'string'
+      ? (ledgerLatest >= 1 ? join(base, 'final', `v${String(ledgerLatest)}.md`) : join(base, 'final.md'))
+      : null
+    const finalBody = defaultViewPath !== null && existsSync(defaultViewPath) ? readFileSync(defaultViewPath, 'utf8') : ''
     // 首标题对账：两侧都剥掉 markdown 记号再比（H1 里的 `code` / **强调** 渲染后不留记号，
     // 拿原文直比会把"渲染正确"判成红——2026-10-20 实测）。
     const normalize = (text) => text.replace(/[\s*`#>_[\]()|\-—–:：]/g, '')
@@ -873,6 +883,11 @@ async function pass5FinalDeliveryPhase() {
       return btn === undefined ? '' : (btn.parentElement?.innerText ?? '').replace(/\s+/g, ' ').trim()
     })
     const stripState = /审查未过|当前版|\bv\d+\b/.test(stripText)
+    if (ledgerLatest >= 1) {
+      const toggle = page.getByRole('button', { name: /看当前工作稿|看 v\d+（版本账）/ }).first()
+      const toggleVisible = await toggle.isVisible().catch(() => false)
+      step(toggleVisible, '终稿页签版本切换在场（版本账 / 当前工作稿）', toggleVisible ? `v${ledgerLatest}` : '缺切换按钮')
+    }
     step(stripState, '终稿静音条三态之一在场（盘上事实，不编造）',
       stripState ? stripText.slice(0, 40) : `静音条=${JSON.stringify(stripText)}`)
     step(!/drt_[^\s]+\/(question|topics|evidence|drafts)/.test(finalText), '终稿页签不泄漏中间过程路径（负例）')

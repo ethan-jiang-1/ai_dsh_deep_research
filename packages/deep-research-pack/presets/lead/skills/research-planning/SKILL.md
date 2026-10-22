@@ -38,7 +38,8 @@ owner，过程件）；Team 任务板是当前会话的执行镜像。
 ## 1. 写 plan.md
 
 节点表每行至少：`id / parent / lifecycle / kind / question / owner_role / deps / output /
-acceptance / budget / depth / task_id`。
+acceptance / budget / depth / task_id`。头部必须有机器可读版本行 `图版本：v1`（每次重写递增），
+重写记录每行写同一版本号——两处必须一致，观察面的版本轨按它对齐。
 
 - `id`：`W<wave>.<index>`（如 `W2.1`）；Wave 由 deps 算，ID 前缀必须一致。
 - `parent`：Wave 内顶层留空（`—`）；只有内部拆解写父节点 id（`W2.1.1` 的 parent = `W2.1`）。
@@ -113,7 +114,9 @@ L2 触发（任一）：关键 claim 单源/只有二手、口径缺失、矛盾
 - 改边：`set_dependencies`；重派：`reassign`；完成：owner `complete`。
 - 回边用**版本化节点**（`repair-r1` / `review-r2`）——这是 id 后缀而非 Wave 序号；不画环；
   复审 ≤3 轮。
-- 每次重写更新 plan 的节点表 + `plan_version` + journal 一行；**scope 变更**（超出 question.md
+- 每次重写先落快照再改：把当前 `plan.md` 复制到 `plan/v<被取代的版本>.md`（只读旧图），再改
+  头部 `图版本`、节点表与重写记录，journal 记一行。`plan.md` 始终是唯一当前版；旧图只用于
+  diff/追溯，不参与派工。**scope 变更**（超出 question.md
   §Scope）回 HITL2，图内重写自主。用户点名 W 时，先读 plan 的 id 行；`W2` 是整层，
   `W2.1` 是节点；反馈记 `node_id + plan_version`。
 

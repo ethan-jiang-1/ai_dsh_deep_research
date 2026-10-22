@@ -31,6 +31,9 @@ description: 综合写作（wave2 语义）方法论：纯综合先行、finding
    用户拍板后（无论定稿/补研究/修订哪支）**第一动作 = 回写记账**：把拍板行追加进 question.md 的
    Decisions 节（append-only、最新在上，写明拍板内容与版本走向）——这是交付门③的机械判据
    （G8 #③ 实证：缺席会被操作侧代补，救场计数因此下不去）。先记账，再落 run 根 final.md 与 present。
+   **同 bundle 证据扩张 rerun**：拍「补研究」后在 question.md 标题下加一行
+   `> rerun: v<N+1> · evidence-expansion · 日期 · 触发：<一句话>`，交付时落 `final/v<N+1>.md`
+   版本账再写 run 根 `final.md` 当前版 + present；`final.md` 是工作稿，`final/vN` 才是版本账。
 6. **交付前溯源自审（2026-09-27 定稿）**：出处链审查交给 critic 的**独立重抓**——对关键
    `source_url` 逐个 `web_fetch` 重新取回、逐格核对内容真实支撑（第六/八场实测这是比脚本更强的
    判据：验证的是内容，不只是"URL 出现过"；第八场 critic 重抓 23 URL、比对 340 格，0 误差）。

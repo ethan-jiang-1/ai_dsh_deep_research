@@ -252,6 +252,7 @@ export function apply(ctx: ClientContext): void {
         { name: RESEARCH_PANE_SLOT, key: RESEARCH_GRAPH_TAB_KEY, inject: () => ({
           readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) =>
             readFile(sessionId, path, signal, limit, true),
+          listDir,
           follow,
         }) },
         ResearchGraphTab,
