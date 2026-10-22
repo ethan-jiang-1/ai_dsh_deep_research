@@ -28,5 +28,6 @@
 - [dynamic-research-dag/2026-10-21-search-provider-ab.md](dynamic-research-dag/2026-10-21-search-provider-ab.md) — Messages vs Search API 的 5-query A/B（同一消费者）。
 - [dynamic-research-dag/2026-10-21-cockpit-plan-graph.md](dynamic-research-dag/2026-10-21-cockpit-plan-graph.md) — 侧栏「研究图谱」页签的数据源、布局与交互设计（同一消费者）。
 - [dynamic-research-dag/2026-10-21-combination-review.md](dynamic-research-dag/2026-10-21-combination-review.md) — A0 组合的决策级 review：一致性矩阵、三处修正、改动面与验收（同一消费者）。
+- [dynamic-research-dag/2026-10-22-w-work-package-identity-review.md](dynamic-research-dag/2026-10-22-w-work-package-identity-review.md) — W 工作包身份卡的第二个 reviewer 评审：§1 事实核对全属实 + B1–B4 定稿前修正 + S1–S7 建议 + 八问结论（消费者：[issue](../issues/2026-10-22-w-work-package-identity.md)）。
 
 （2026-10-18 方法配置两份材料已随消费者毕业迁入 [_archived/research/](../_archived/research/)：外部先例与真模型 A/B。）
