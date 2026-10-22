@@ -57,18 +57,25 @@
   `merged_into:W4` 墓碑），真浏览器确认 `LAYER 1` 在场、无 `WAVE`、W3 展开 W3.1/W3.2、
   W5 不进图、stage 显示；随后 `cmp` 恢复 A0 plan 原文件，未改证据。
 - `plan-graph` 旧 N 测试仍全绿，验证 legacy 兼容（A0 plan 无 parent 列也可读）。
+- **真实 W run（受控）**：`research-workspace/drt_gha-ubuntu-latest`（quick_factual，GitHub Actions
+  `ubuntu-latest` → Ubuntu LTS）。Lead 用 W1 复合 + W1.1/W1.2 子节点（5 顶层/7 节点）；Team 板
+  task-1（W1 rollup）…task-5 全部 complete；证据 3 卡 + findings/final；critic 首轮 FAIL（M1 记账）
+  → 修复后第二轮 PASS；HITL2 代理模拟按现稿定稿。图谱实测 `W1 +2`、`LAYER 1`、W1.1/W1.2 详情；
+  截屏 `runtime/research-tmp/w-run-final.png`。这证明真实 run 的 W 命名/复合展示/rollup 任务链成立。
+- `client-load` 的会话列表冷启动等待从 5s 提到 11s（测试健壮性，不是产品行为）。
 
 **未跑项（不得说成已通过）**：
 
-- 尚未跑一场**真实 W 研究 run**（当前真实 A0 仍是 N legacy；W UI 是临时 plan 走查）。
-- 尚未在真实 Team 板上执行 **B rollup**（preset-smoke 只证 skill 挂载；client-load 不建真实 W
-  任务图）。
-- `client-load` 的会话列表冷启动等待从 5s 提到 11s（测试健壮性，不是产品行为）。
+- 真实 W run 目前只有一场 quick_factual；多 topic/多层 W1.1.1 的真实 run 未跑。
+- 该 run 的 subagent 首派无产出，Lead 改走 teammate 通道；不是 W 命名的问题，但说明执行通道
+  仍需观察。
 
 ## 环境状态与已知限制
 
 - 新 plan 默认 W；旧 N 原样保留，不迁移、不混写（混写由 `mixed-family` 提示）。
 - 墓碑留在表里；`derived_from`/`moved_from` 仍写重写记录，不新造 lifecycle 值。
-- LAYER 只在图上显示；plan 表没有 LAYER 列（避免又一个会漂的列）。
+- LAYER 只在图上显示；plan 表没有 LAYER 列（避免又一个会漂的列）。skill 现明确：不手写 LAYER
+  表，若写只作“示意/非权威”；本次真实 run 的 Lead 仍手写了一张 LAYER 表，且 W1 的 LAYER 3 与
+  图的顶层 LAYER 1 不一致——这是 plan 文本与图的口径差，图/`levelsOf` 才是计算权威。
 - `stage` 是派生标签，不是新的门禁/枚举文件；未知 kind 显示 `unknown`。
-- 真实 W run / rollup 执行是下一步观察项，不改本 Note 已落地的解析/UI 事实。
+- 真实 W run / rollup 已跑过一场 quick_factual；真实多 topic W run 是下一步观察项。

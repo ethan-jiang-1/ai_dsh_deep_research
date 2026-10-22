@@ -233,8 +233,9 @@ LAYER 必须分开的原因。
 - `pnpm test` 627 pass、`pnpm verify` 全绿、`preset-smoke` ALL PASS、`client-load-smoke` ALL PASS。
 - W 图谱浏览器走查：临时 A0 W 树（4 顶层/7 节点，W5 墓碑，W3 两个子节点）确认 LAYER/stage/
   子节点；`cmp` 恢复 A0 N plan。
-- **未跑**：真实 W 研究 run；真实 Team rollup（preset-smoke 只证 skill 挂载）。这两项进 Note
-  的未跑项，不冒充通过。
+- **真实 W run（已跑）**：`drt_gha-ubuntu-latest` quick_factual；W1 复合 + W1.1/W1.2；Team 板 5 任务
+  全 complete；critic 首轮 FAIL→修复后 PASS；HITL2 代理模拟定稿。图 `W1 +2`/`LAYER 1` 实测。
+- **未跑**：多 topic/三层 W 的真实 run；执行通道 subagent 首派空产出（Lead 改 teammate）只作观察项。
 
 ## 15. 去向与后续
 

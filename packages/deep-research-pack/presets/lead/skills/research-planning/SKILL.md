@@ -18,6 +18,8 @@ owner，过程件）；Team 任务板是当前会话的执行镜像。
 - **stage 派生**：由根 W 的 kind 派生（broad-scan→scan、deep-dive→dive、cross-check→check、
   synthesis→synthesis、review→review、gate→gate；未知=unknown）；子 W 继承父 stage，
   不建独立 stage 列。
+- **LAYER 不手写进 plan**：层由图按 deps 计算；plan 只写 W/deps。若为说明写层，必须标“示意/非权威”，
+  不得让手写层与图争同一事实。
 - **父 W 是外部契约**：W3 的 deps/output/acceptance/用户反馈固定；W3.1/W3.2 只是内部拆解。
 - **lifecycle**：`active`（默认）/ `retired` / `merged_into:W4` / `superseded_by:W7,W8`；
   墓碑留在表里供 `byId` 解析，但不进图；旧号不复用。`derived_from`/`moved_from` 写重写记录。
