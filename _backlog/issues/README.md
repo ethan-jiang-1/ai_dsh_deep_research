@@ -4,8 +4,8 @@
 
 ## 活跃清单
 
-（当前无在办问题卡；动态 DAG 稳定节点身份、方法库主界面迁移均已结并归档到 [settled 池](../_archived/settled_issues/README.md)。）
-（动态 DAG 稳定节点身份已结并归档到 [settled 池](../_archived/settled_issues/README.md)。）
+- [2026-10-22-w-work-package-identity.md](2026-10-22-w-work-package-identity.md) — 研究图谱 W 工作包命名与 L 拓扑层（推敲中；W 稳定、L 计算、待拍板）。
+（动态 DAG 稳定节点身份、方法库主界面迁移均已结并归档到 [settled 池](../_archived/settled_issues/README.md)。）
 
 ## 最近归档
 
