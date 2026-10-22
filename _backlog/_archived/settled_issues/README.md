@@ -4,6 +4,7 @@
 
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-10-23-rerun-versioned-graph](2026-10-23-rerun-versioned-graph.md) | rerun 版本面：`plan/vN` 快照 + `图版本` 交叉校验 + `> rerun:` 声明 + `RunVersionFace` + 终稿页默认版本账 + 图谱版本轨/最小 diff；受控 v1→v2 E2E 全绿；[Note](../../../notes/implemented/2026-10-23-rerun-version-face.md) | 2026-10-23 |
 | [2026-10-19-final-tab-in-sidebar](2026-10-19-final-tab-in-sidebar.md) | 右栏「终稿」：接管 `drt_<slug>/final.md` 的文件地址（`extension` 带）——交付那一刻自动打开一次，⑤ 交付门做回程；`present` 成为交付判据（`final.md` 在场只算"可审"）；三位置回退读；构成正本同 diff 更新；自动打开接线的端到端留待下一场真实 run | 2026-10-20 |
 | [2026-10-19-discipline-map-semantic-drift](2026-10-19-discipline-map-semantic-drift.md) | 9 行失真逐条裁决（2 条补门禁被否、改归类/改措辞）+ 新增门禁 `discipline-state-vocab`；两笔遗留：`owns` 截断改存引用锚点、语料基线漂移登记待更新；[Note](../../../notes/implemented/2026-10-19-discipline-map-semantic-drift.md) | 2026-10-19 |
 | [2026-09-28-retire-roadmap](2026-09-28-retire-roadmap.md) | 退役 roadmap；[backlog deliberation Note](../../../notes/implemented/2026-09-28-backlog-deliberation-space.md) | 2026-09-28 |

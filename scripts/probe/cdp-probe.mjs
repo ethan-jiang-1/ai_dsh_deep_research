@@ -15,6 +15,7 @@
 //   '<gui-url>'  boot 好的 GUI URL（含 ?token=，boot-run 横幅给出的那条）
 //   --open-session '<标题>'  按标题点开侧栏会话行（最深层元素 JS 派发——行内嵌按钮不抢）
 //   --open-status            展开右栏并点「研究状态」胶囊（JS 派发，绕过遮挡）
+//   --open-graph             同上，点「研究图谱」胶囊（图谱版本轨/覆盖率症状的现场）
 //   --expect-face '<文本>'   断言页面文本含该串（如本场 bundle 的问题行片段）
 //   --expect-no-leak '<文本>' 断言页面文本**不含**该串（如旧 run 的问题行——BUG-001 回归哨）
 //   --ask '<消息>'           向当前会话的输入框输入并发送；**判据 = 会话日志落盘对账**（BUG-021
@@ -45,7 +46,9 @@ const opt = (name) => {
   return i >= 0 ? (args[i + 1] ?? undefined) : undefined;
 };
 const openSessionTitle = opt('--open-session');
-const openStatus = flag('--open-status');
+const openStatus = flag('--open-status') || flag('--open-graph');
+// 打开哪一页：默认研究状态；--open-graph 切到研究图谱（同一套展开/选取/判据）。
+const paneTitle = flag('--open-graph') ? '研究图谱' : '研究状态';
 const expectFace = opt('--expect-face');
 const expectNoLeak = opt('--expect-no-leak');
 const ask = opt('--ask');
@@ -194,7 +197,7 @@ try {
     for (let i = 0; i < 12 && !opened; i++) {
       await new Promise((resolve) => { setTimeout(resolve, 1000) });
       const dom = await readStatusDom();
-      const pick = pickStatusTab({ buttons: dom?.buttons ?? [], title: '研究状态' });
+      const pick = pickStatusTab({ buttons: dom?.buttons ?? [], title: paneTitle });
       if (!clicked && pick.pickedIndex !== null) {
         // 只点一次：点开后面板就位，下一次读到的已是页签体（重复点会把同一页签再切一次，
         // 实测无害但徒增噪声）——选中判据见下：`clicked` 计数进 --debug-pane。
@@ -205,7 +208,7 @@ try {
       // 判据 = 页签体在场且**标题已切到目标**（页签体首轮可能只渲染标题 span——实测时序）：
       // 认标题或正文任一处，不要求正文里出现目标词（未绑定 run 的正常面也该算"页签开了"）。
       const bodies = after?.tabBodies ?? [];
-      opened = bodies.some((t) => typeof t === 'string' && t.indexOf('研究状态') !== -1);
+      opened = bodies.some((t) => typeof t === 'string' && t.indexOf(paneTitle) !== -1);
     }
     return opened;
   };
@@ -213,7 +216,7 @@ try {
     // 页签体优先（不拿会话正文当观察面——那会把对话里提到的词读成页签内容）。多条命中时取
     // **最长**的一条：页签标题 span 与面板 body 共享同一 data 钩子，标题那条只有四个字。
     const bodies = [...document.querySelectorAll('[data-sidebar-right-tab]')].map(e => e.textContent ?? '');
-    const hit = bodies.filter(t => t.includes('研究状态')).sort((a, b) => b.length - a.length)[0];
+    const hit = bodies.filter(t => t.includes(${JSON.stringify(paneTitle)})).sort((a, b) => b.length - a.length)[0];
     if (hit !== undefined) return hit.slice(0, 4000);
     return (document.body?.innerText ?? '').slice(0, 300)
   })()`);
@@ -233,7 +236,12 @@ try {
 
   // 断言面：开了状态页签 → 判 **pane 域**（泄漏哨兵不能拿对话区文本当误报源——会话正文
   // 天然会提到研究主题）；没开页签 → 退化为全文判。
-  const scopeText = async () => verdict.statusPaneOpen ? (verdict.statusPaneText ?? '') : ((await evaluate(`document.body?.innerText ?? ''`)) ?? '');
+  const scopeText = async () => {
+    if (verdict.statusPaneOpen) return verdict.statusPaneText ?? '';
+    // evaluate 在页面异常时返回 {error} 对象——别把非字符串塞进 includes（探针自身崩溃）。
+    const body = await evaluate(`document.body?.innerText ?? ''`);
+    return typeof body === 'string' ? body : '';
+  };
   if (expectFace !== undefined) {
     verdict.expectFaceHeld = (await scopeText()).includes(expectFace);
   }

@@ -380,12 +380,15 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
           const text = await props.readFile(leadSessionId, `${base}/plan.md`, controller.signal, PLAN_READ_LIMIT)
           if (stopped) return
           if (text !== null) {
-            setPlan(planIndex(text))
+            const parsed = planIndex(text)
+            const rawVersion = parsed.version?.replace(/^v/i, '') ?? ''
+            setPlan(parsed)
             setPlanText(text)
             setPlanState('ready')
             setPlanLoadedAt(Date.now())
             setPlanBase(base)
-            setPlanVersion(Number(/图版本\s*[：:]\s*v?(\d+)/.exec(text)?.[1]) || null)
+            // 版本号取 plan 解析器（已按“最后一条声明”）的结论，不另写一份正则。
+            setPlanVersion(/^\d+$/.test(rawVersion) ? Number(rawVersion) : null)
             const planDir = await props.listDir(leadSessionId, `${base}/plan`, controller.signal).catch(() => null)
             if (stopped) return
             const found = (planDir ?? [])

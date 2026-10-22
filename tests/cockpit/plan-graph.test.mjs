@@ -218,6 +218,23 @@ test('planIndex：解析 plan.md 节点表（N-id / kind / depth / acceptance / 
   assert.equal(planNodeOf(index, 'task-2'), undefined, '不按数字后缀猜映射');
 });
 
+test('planIndex：版本声明取最后一条（模板样板不夺权）', () => {
+  const text = [
+    '# Plan — x',
+    '',
+    '> 供 byId 解析但不画图；图版本：v1（每次重写递增）。',
+    '',
+    '**图版本：v2**（2026-10-23 重写）',
+    '',
+    '<!-- 模板示例：图版本：v9 / 不该被读到 -->',
+    '',
+    '| id | deps |',
+    '|---|---|',
+    '| W1.1 | — |',
+  ].join('\n')
+  assert.equal(planIndex(text).version, 'v2')
+});
+
 test('planIndex：缺文件 / 无表 / 畸形文本 = 空索引（合法退化，不 throw）', () => {
   assert.deepEqual(planIndex(null).nodes, []);
   assert.deepEqual(planIndex(undefined).nodes, []);

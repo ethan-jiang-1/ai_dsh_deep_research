@@ -33,7 +33,7 @@ test('v1 已交付 + v2 证据扩张 rerun 在飞 → 三态一行说清，不�
   assert.deepEqual(face.planSnapshots, [1])
   assert.deepEqual(face.snapshotAnomaly, [])
   assert.equal(face.deliveredFinalVersion, 1)
-  assert.equal(face.deliveredVersionInferred, false)
+  assert.equal(face.deliveryVersionAmbiguous, false)
   assert.equal(face.rerun?.version, 2)
   assert.equal(face.rerun?.kind, 'evidence-expansion')
   assert.equal(face.state, 'pending-hitl2')
@@ -70,6 +70,26 @@ test('plan 头与重写记录版本不一致 → 两个都报，不静默取一�
   assert.match(face.label, /版本声明不一致（头 v6 \/ 记录 v7）/)
 });
 
+test('模板样板里的 `图版本：v1` 不夺权：头部取真正的声明（最后一条），记录接收斜杠形态', () => {
+  const planText = [
+    '# Plan',
+    '',
+    '> 供 byId 解析但不画图；图版本：v1（每次重写递增）——重写前先落快照。',
+    '',
+    '**图版本：v2**（2026-10-23 重写）',
+    '',
+    '## 重写记录',
+    '',
+    '- 2026-10-23 / v2 / 加 W2.1 / 原因=补证',
+    '- 2026-10-22 / v1 / 立项建图 / 无重写',
+  ].join('\n')
+  const face = runVersionFaceOf({ ...baseFacts(), planText, questionText: '# Q\n', planSnapshotNames: ['v1.md'] })
+  assert.equal(face.currentPlanVersion, 2)
+  assert.equal(face.recordedPlanVersion, 2)
+  assert.equal(face.versionConflicted, false)
+  assert.deepEqual(face.planSnapshots, [1])
+});
+
 test('没有机器可读版本行 → 说未声明，不从标题或快照反推', () => {
   const planText = '# Plan — 只有 H1 的 plan v2\n\n| id | deps |\n|---|---|\n| W1.1 | — |\n'
   const face = runVersionFaceOf({ ...baseFacts(), planText, questionText: '# Q\n', planSnapshotNames: [] })
@@ -87,11 +107,25 @@ test('快照编号 ≥ 当前版本 → 异常，不当旧图用', () => {
   assert.match(face.label, /plan\/v3 快照编号异常/)
 });
 
-test('版本账 v2 且已交付 → 交付版本按版本账推定，并标明推定', () => {
+test('版本账 v2 但 present 只点名 final.md → 交付的是哪版未记载，不拿版本账冒充', () => {
   const face = runVersionFaceOf({ ...baseFacts(), finalFileNames: ['v1.md', 'v2.md'], questionText: '# Q\n', hitlPending: false })
-  assert.equal(face.deliveredFinalVersion, 2)
-  assert.equal(face.deliveredVersionInferred, true)
-  assert.equal(face.label, 'v2 已交付（按版本账推定） · 当前工作稿')
+  assert.equal(face.deliveredFinalVersion, null)
+  assert.equal(face.deliveryVersionAmbiguous, true)
+  assert.equal(face.label, '已交付（版本未记载；版本账 v2） · 当前工作稿')
+  assert.doesNotMatch(face.label, /v2 已交付/)
+});
+
+test('present 点名 final/v3.md → 交付版本说准（不需要推定）', () => {
+  const face = runVersionFaceOf({
+    ...baseFacts(),
+    finalFileNames: ['v1.md', 'v2.md', 'v3.md'],
+    deliveredVersion: 3,
+    questionText: '# Q\n',
+    hitlPending: false,
+  })
+  assert.equal(face.deliveredFinalVersion, 3)
+  assert.equal(face.deliveryVersionAmbiguous, false)
+  assert.equal(face.label, 'v3 已交付 · 当前工作稿')
 });
 
 test('表述修订声明：版本号不冒充证据扩张', () => {
@@ -113,6 +147,15 @@ test('版本账在但 present 不在 journal 窗口 → 说“交付未见证”
   assert.equal(face.deliveredFinalVersion, null)
   assert.equal(face.label, 'v1 版本账 · 交付未见证')
   assert.doesNotMatch(face.label, /已交付|未交付/)
+});
+
+test('模板里的 rerun 示例行不是声明：无真实日期/带占位符一律不算', () => {
+  const template = '# Q\n\n<!-- 示例：\n> rerun: v2 · evidence-expansion · YYYY-MM-DD · 触发：<一句话>\n-->\n'
+  assert.equal(runVersionFaceOf({ ...baseFacts(), questionText: template, finalFileNames: [] }).rerun, null)
+  const placeholder = '# Q\n\n> rerun: v2 · evidence-expansion · 2026-10-23 · 触发：<一句话>\n'
+  assert.equal(runVersionFaceOf({ ...baseFacts(), questionText: placeholder }).rerun, null)
+  const real = '# Q\n\n> rerun: v2 · evidence-expansion · 2026-10-23 · 触发：补证\n'
+  assert.equal(runVersionFaceOf({ ...baseFacts(), questionText: real }).rerun?.version, 2)
 });
 
 test('fail-soft：全空输入不 throw，如实未交付且无版本', () => {

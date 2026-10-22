@@ -122,6 +122,36 @@ export function latestFinalDelivery(events: readonly unknown[]): FinalDelivery |
 }
 
 /**
+ * 最后一条 present 声明里点名的**版本化终稿**（`final/vN.md`）；没有 → null。
+ *
+ * 为什么单独折：`present` 事件不带版本号，只能从它点名的文件反推。交付时若点名
+ * `final/v2.md`，版本面就能说准；只点名可变的 `final.md` 时版本未知（调用方据此
+ * 说「版本未记载」，而不是按版本账猜一个）。
+ * @param events - 会话事件流。
+ * @returns 最高版本号或 null。
+ */
+export function latestPresentedFinalVersion(events: readonly unknown[]): number | null {
+  let latest: number | null = null
+  for (const event of events) {
+    if (typeof event !== 'object' || event === null) continue
+    const record = event as { type?: unknown; data?: unknown }
+    if (record.type !== 'deliverables/presented') continue
+    const data = record.data as { files?: unknown } | null | undefined
+    if (typeof data !== 'object' || data === null || !Array.isArray(data.files)) continue
+    for (const file of data.files) {
+      const raw = (file as { path?: unknown } | null | undefined)?.path
+      if (typeof raw !== 'string') continue
+      const normalized = raw.replace(/\\/g, '/').replace(/\/{2,}/g, '/')
+      const version = /(?:^|\/)final\/v([1-9]\d{0,5})\.md$/.exec(normalized)?.[1]
+      if (version === undefined) continue
+      const value = Number(version)
+      if (Number.isSafeInteger(value) && (latest === null || value > latest)) latest = value
+    }
+  }
+  return latest
+}
+
+/**
  * 终稿路径 → 页签体的读面定表；非法路径 → null。
  * @param path - 规范相对路径（`finalPathOf` 的产物）。
  * @returns 三个固定读路径，或 null。

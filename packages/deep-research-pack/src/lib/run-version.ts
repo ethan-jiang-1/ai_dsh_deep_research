@@ -42,6 +42,8 @@ export interface RunVersionFacts {
   readonly questionText?: string | null
   /** journal 里有指向终稿的 present（调用方折好传入）。 */
   readonly delivered?: boolean
+  /** present 点名的版本化终稿（`final/vN.md`）——没有就 null（版本未知）。 */
+  readonly deliveredVersion?: number | null
   /** HITL2 挂起（hitl-fold 的 pending + 锚点判型结果）。 */
   readonly hitlPending?: boolean
   /** run 根 `final.md` 在场（工作稿）。 */
@@ -65,10 +67,10 @@ export interface RunVersionFace {
   readonly snapshotAnomaly: readonly number[]
   /** `final/` 版本账最高版本（0 = 无）。 */
   readonly ledgerFinalVersion: number
-  /** 已交付版本（按版本账推定；无 present → null）。 */
+  /** 已交付版本（present 点名了 `final/vN`，或版本账只有 v1；否则 null = 未记载）。 */
   readonly deliveredFinalVersion: number | null
-  /** 已交付版本是推定的（版本账 >1，present 自身不带版本号）。 */
-  readonly deliveredVersionInferred: boolean
+  /** present 只点名 `final.md` 且版本账 >1：交付过，但交付的是哪版没记。 */
+  readonly deliveryVersionAmbiguous: boolean
   /** run 根 `final.md` 在场（工作稿）。 */
   readonly draftPresent: boolean
   /** question.md 的 rerun 声明；无 → null。 */
@@ -102,10 +104,20 @@ export function planVersionsOf(planText: string | null | undefined): {
   readonly conflicted: boolean
 } {
   if (typeof planText !== 'string' || planText === '') return { header: null, recorded: null, conflicted: false }
-  const header = INT(/图版本\s*[：:]\s*v?(\d+)/.exec(planText)?.[1])
-  let recorded: number | null = null
-  for (const match of planText.matchAll(/^[ \t]*[-*][^\n]*?图版本\s*v?(\d+)/gm)) {
+  // 先剥 HTML 注释（模板示例行也长这样），再取**最后**一条 `图版本：vN`：模板块里带一句样板
+  // `图版本：v1（每次重写递增）`，真正声明在它下面；取第一条会把重写后的 plan 读成 v1
+  // （受控 E2E 实测：v2 被读成 v1 / vN）。
+  const withoutComments = planText.replace(/<!--[\s\S]*?-->/g, '')
+  let header: number | null = null
+  for (const match of withoutComments.matchAll(/图版本\s*[：:]\s*v?(\d+)/g)) {
     const version = INT(match[1])
+    if (version !== null) header = version
+  }
+  // 重写记录的行形态会有漂移：模板写 `图版本 vN`，模型常写成 `日期 / vN / 动作`。
+  // 两种都认（后者只认斜杠分隔的独立字段，不把正文里的 v24 当版本）。
+  let recorded: number | null = null
+  for (const match of withoutComments.matchAll(/^[ \t]*[-*][^\n]*?(?:图版本\s*v?(\d+)|[/｜|]\s*v(\d+)\s*[/｜|])/gm)) {
+    const version = INT(match[1] ?? match[2])
     if (version !== null && (recorded === null || version > recorded)) recorded = version
   }
   return { header, recorded, conflicted: header !== null && recorded !== null && header !== recorded }
@@ -122,9 +134,11 @@ export function rerunDeclarationOf(questionText: string | null | undefined): Rer
   if (match === null) return null
   const version = INT(match[1])
   const kind = match[2] as RerunKind | undefined
-  if (version === null || kind === undefined) return null
-  const date = /(\d{4}-\d{2}-\d{2})/.exec(match[3] ?? '')?.[1]
-  return { version, kind, ...(date !== undefined ? { date } : {}) }
+  const rest = match[3] ?? ''
+  // 模板里的示例行也长这样（且常被写成注释/占位符）——**必须有真实日期、不能带占位符**才算声明。
+  const date = /(\d{4}-\d{2}-\d{2})/.exec(rest)?.[1]
+  if (version === null || kind === undefined || date === undefined || rest.includes('<')) return null
+  return { version, kind, date }
 }
 
 /** 目录文件名 → vN 版本号（升序去重）。 */
@@ -151,15 +165,22 @@ export function runVersionFaceOf(facts: RunVersionFacts): RunVersionFace {
     : planSnapshots.filter((version) => version >= effectivePlanVersion)
   const ledgerFinalVersion = latestRunVersion(Array.isArray(facts.finalFileNames) ? facts.finalFileNames : [])
   const delivered = facts.delivered === true
-  const deliveredFinalVersion = delivered && ledgerFinalVersion > 0 ? ledgerFinalVersion : null
-  const deliveredVersionInferred = deliveredFinalVersion !== null && deliveredFinalVersion > 1
+  const explicitDelivered = INT(String(facts.deliveredVersion ?? ''))
+  // 版本账只有 v1 时「已交付 = v1」是可靠的（首版交付只有一个版本）；版本账 >1 且 present
+  // 只点名 final.md 时，交付的是哪版**盘上不可知**——说「未记载」，不拿版本账最高号冒充。
+  const deliveredFinalVersion = explicitDelivered !== null
+    ? explicitDelivered
+    : delivered && ledgerFinalVersion === 1
+      ? 1
+      : null
+  const deliveryVersionAmbiguous = delivered && deliveredFinalVersion === null && ledgerFinalVersion > 1
   const draftPresent = facts.draftPresent === true
   const rerun = rerunDeclarationOf(facts.questionText)
   const hitlPending = facts.hitlPending === true
 
   const state: RunVersionState = hitlPending
     ? 'pending-hitl2'
-    : delivered && (rerun === null || deliveredFinalVersion === null || rerun.version <= deliveredFinalVersion)
+    : delivered && (rerun === null || (deliveredFinalVersion !== null && rerun.version <= deliveredFinalVersion))
       ? 'delivered'
       : rerun !== null
         ? 'rerun-in-progress'
@@ -173,18 +194,23 @@ export function runVersionFaceOf(facts: RunVersionFacts): RunVersionFace {
     parts.push('plan 版本未声明')
   }
   if (snapshotAnomaly.length > 0) parts.push(`plan/${snapshotAnomaly.map((v) => `v${String(v)}`).join('、')} 快照编号异常`)
+  const deliveredThisRerun = rerun !== null && deliveredFinalVersion !== null && rerun.version <= deliveredFinalVersion
   parts.push(
-    deliveredFinalVersion !== null
-      ? `v${String(deliveredFinalVersion)} 已交付${deliveredVersionInferred ? '（按版本账推定）' : ''}`
-      : delivered
-        ? '已交付（版本未记账）'
-        : ledgerFinalVersion > 0
-          // 版本账在、但 present 不在本会话的 journal 窗口里：只说“没见证”，不说“没交付”。
-          ? `v${String(ledgerFinalVersion)} 版本账 · 交付未见证`
-          : '未交付',
+    deliveredThisRerun && rerun !== null
+      ? `v${String(deliveredFinalVersion)} ${KIND_LABEL[rerun.kind]} rerun 已交付`
+      : deliveredFinalVersion !== null
+        ? `v${String(deliveredFinalVersion)} 已交付`
+        : delivered && deliveryVersionAmbiguous
+          ? `已交付（版本未记载；版本账 v${String(ledgerFinalVersion)}）`
+          : delivered
+            ? '已交付（版本未记账）'
+            : ledgerFinalVersion > 0
+            // 版本账在、但 present 不在本会话的 journal 窗口里：只说“没见证”，不说“没交付”。
+              ? `v${String(ledgerFinalVersion)} 版本账 · 交付未见证`
+              : '未交付',
   )
-  if (rerun !== null) parts.push(`v${String(rerun.version)} ${KIND_LABEL[rerun.kind]} rerun`)
-  if (draftPresent && (deliveredFinalVersion !== null || rerun !== null)) parts.push('当前工作稿')
+  if (rerun !== null && !deliveredThisRerun) parts.push(`v${String(rerun.version)} ${KIND_LABEL[rerun.kind]} rerun`)
+  if (draftPresent && (deliveredFinalVersion !== null || deliveryVersionAmbiguous || rerun !== null)) parts.push('当前工作稿')
   if (hitlPending) parts.push('HITL2 待审')
 
   return {
@@ -195,7 +221,7 @@ export function runVersionFaceOf(facts: RunVersionFacts): RunVersionFace {
     snapshotAnomaly,
     ledgerFinalVersion,
     deliveredFinalVersion,
-    deliveredVersionInferred,
+    deliveryVersionAmbiguous,
     draftPresent,
     rerun,
     state,

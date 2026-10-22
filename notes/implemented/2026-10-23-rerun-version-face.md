@@ -2,7 +2,7 @@
 
 > 状态：implemented
 >
-> 首提 2026-10-23 ｜ 设计卡 [_backlog/issues/2026-10-23-rerun-versioned-graph.md](../../_backlog/issues/2026-10-23-rerun-versioned-graph.md)（§7 决议）
+> 首提 2026-10-23 ｜ 设计卡 [_backlog/issues/2026-10-23-rerun-versioned-graph.md](../../_backlog/_archived/settled_issues/2026-10-23-rerun-versioned-graph.md)（§7 决议）
 > ｜ 合同 [design/40 §2](../../docs/design/40-research-cockpit.md) · [guides/61 §5](../../docs/guides/61-run-playbook.md)
 > ｜ 折算 [run-version](../../packages/deep-research-pack/src/lib/run-version.ts) ｜ 测试 [run-version.test.mjs](../../tests/cockpit/run-version.test.mjs)
 
@@ -67,8 +67,26 @@ HITL2 待审 = hitl-fold 的 anchor-2 pending）；终稿页签默认看版本�
 - 图谱版本轨：没有带 `plan/vN` 快照的**绑定会话**可做浏览器断言（dev home 的 run 都没有快照，
   绑定只来自 journal，keyless 造不出）——UI 证据 = `pnpm build` + `client-load-smoke` 零回归；
   切换/差异逻辑由 `plan-diff` 单测与 `run-rerun` 夹具钉住。
-- **未跑**：真实 v1→v2 受控 E2E（Phase 4）；旧 run 的实例化视图（`drt_cn-us` 无 `plan/vN` 快照，
-  只按诚实缺省显示）。
+- **受控 v1→v2 E2E（真模型）**：`drt_e2e-rerun-2026-10-23`（已归档 `research-workspace/archive/`）。
+  v1：HITL1 代理代答 → 1 证据节点 / 2 抓取 → `final/v1.md` + present → node-gate 门②③ PASS（门A
+  待审计，补跑后 PASS）。rerun：`> rerun: v2 …` 行 + `plan/v1.md` 快照 + `图版本：v2` + W2.2 补证 →
+  `final/v2.md` + present → node-gate 七门全 PASS（门④ 扩张版本记账 PASS）；evidence-audit
+  CRITICAL=0；`run-accept --archive` PASS 并落 `acceptance.md`。
+- **浏览器现场**（run 通道真渲染）：状态页 ⑤ 显示 `v2 证据扩张 rerun 已交付 · 当前工作稿`
+  （`runtime/scenes/e2e-v2-status.png`）；图谱顶部显示 `版本轨（只读）：当前 plan v2` +
+  「当前图 / 看 v1 旧图 / 看差异」，且该 run 的 `task_id` 整列空白 → 现场显示「映射缺口：图谱
+  无法判断 5 个 plan 节点的进度」与逐节点「状态未知（未映射 task_id）」
+  （`runtime/scenes/e2e-v2-graph-live.png`）。
+- E2E 过程中抓到并修掉的三处解析缺陷（都有测试）：
+  1. plan 版本声明被**模板样板**（`图版本：v1（每次重写递增）`）和**HTML 注释里的示例**
+     （`图版本：vN`）夺权 → `plan-graph` 与 `run-version` 改为先剥注释、取最后一条；
+  2. 模板里的 `> rerun: v2 · … · YYYY-MM-DD · 触发：<一句话>` 示例行被当成真实声明 →
+     声明必须带真实日期且不含占位符，模板同步改成 `v<N>`；
+  3. `present` 事件**不带版本号**：改为读 present 点名的 `final/vN.md`
+     （`latestPresentedFinalVersion`）；只点名 `final.md` 且版本账 >1 时说「已交付（版本未记载；
+     版本账 vN）」，不拿版本账最高号冒充。
+- **未跑**：结构性 rerun / 表述修订的真实样本（polish 无盘上版本痕迹，只有 `> rerun:` 声明能表达）；
+  旧 run 的实例化视图（`drt_cn-us` 无 `plan/vN` 快照，只按诚实缺省显示）。
 
 ## 环境状态
 

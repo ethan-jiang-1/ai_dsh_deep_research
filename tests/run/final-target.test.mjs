@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  draftInProgress, finalAddressOf, finalCandidates, finalPathOf, finalReadPlan, isFinalAddress, latestFinalDelivery,
+  draftInProgress, finalAddressOf, finalCandidates, finalPathOf, finalReadPlan, isFinalAddress, latestFinalDelivery, latestPresentedFinalVersion,
   sessionFileOf, shouldOpenFinal,
 } from '../../packages/deep-research-pack/src/lib/final-target.ts';
 
@@ -41,6 +41,15 @@ test('latestFinalDelivery：取最后一条终稿交付；同一声明里的非�
     presented([{ path: 'drt_b/final.md' }], { callId: 'call-b', turn: 5 }),
   ];
   assert.deepEqual(latestFinalDelivery(events), { path: 'drt_b/final.md', turn: 5, callId: 'call-b' });
+});
+
+test('latestPresentedFinalVersion：认 present 点名里的 final/vN.md，最高版；普通 final.md → null', () => {
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_a/final.md' }])]), null)
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_a/final/v2.md' }, { path: 'drt_a/audit.md' }])]), 2)
+  assert.equal(
+    latestPresentedFinalVersion([presented([{ path: 'drt_a/final/v1.md' }]), presented([{ path: 'archive/drt_a/final/v3.md' }])]),
+    3,
+  )
 });
 
 test('latestFinalDelivery：只有非终稿 present → null（别的交付不点亮终稿）', () => {

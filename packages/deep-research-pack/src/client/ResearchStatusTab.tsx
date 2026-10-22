@@ -40,7 +40,7 @@ import type { MemberActivitySummary } from '../lib/member-activity.ts'
 import type { ResearchStatusTabProps, ResearchStatusTitleInjected } from './research-status/types.ts'
 import { sessionBindingOf, type SessionBinding } from '../lib/bundle-bind.ts'
 import { streamFailureOf } from '../lib/stream-failure.ts'
-import { latestFinalDelivery } from '../lib/final-target.ts'
+import { latestFinalDelivery, latestPresentedFinalVersion } from '../lib/final-target.ts'
 import { runVersionFaceOf, type RunVersionFace } from '../lib/run-version.ts'
 import type { TeamProjection } from '@deepseek-ai/dsh-experimental-agent-team/client'
 export type { FollowTarget, JournalFrame, ResearchStatusTabInjected, ResearchStatusTabProps, ResearchStatusTitleInjected } from './research-status/types.ts'
@@ -296,10 +296,11 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
         finalFileNames: face.finalFileNames,
         questionText: face.questionText,
         delivered: delivery !== null,
+        deliveredVersion: latestPresentedFinalVersion(journalEvents),
         hitlPending: hitl2Pending,
         draftPresent: face.hasFinal,
       }),
-    [face, delivery, hitl2Pending],
+    [face, delivery, hitl2Pending, journalEvents],
   )
 
   // 流程轨道件（锚点入轨，RFC cockpit-flow-face）：锚点段从 journal+文件折算（挂起期也在场），

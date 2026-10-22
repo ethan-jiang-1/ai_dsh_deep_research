@@ -1,11 +1,11 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-10-23
 ---
 
 # 推敲：rerun 的版本面与图谱表达
 
-> 立卡：2026-10-23 ｜ 状态：推敲中（2026-10-23 用户授权自主拍板；§7 已决议） ｜ 类型：设计 ｜ 结论倾向：现在做（契约 + 版本面 + 终稿页已落地；Phase 3 图谱版本轨 / Phase 4 E2E 未完） ｜ 可关闭：否
+> 立卡：2026-10-23 ｜ 状态：已结（全部落地：契约 + 版本面 + 终稿页 + 图谱版本轨 + 受控 v1→v2 E2E） ｜ 类型：设计 ｜ 结论倾向：现在做 ｜ 可关闭：是
 >
 > 用户 2026-10-23 定调：rerun 是真实需求——跑到尾、出了 final 后，因问题理解加深/方向修正/A 不对要
 > 重跑；通路必须还在，视觉（研究图谱）也要表达清楚。用户与第二 reviewer 先审本卡。
@@ -188,15 +188,15 @@ run v1 已交付  →  run v2 证据扩张 rerun  ·  HITL2 待审
 
 - 本卡先承载设计与待拍板项；用户 + 第二 reviewer 审后，按“契约 → 状态面 → 图谱 → 测试 → E2E”
   落。
-- 实现后按 [notes/AGENTS.md](../../notes/AGENTS.md) 的 implemented 骨架沉淀 Note（决定 / 输掉的
+- 实现后按 [notes/AGENTS.md](../../../notes/AGENTS.md) 的 implemented 骨架沉淀 Note（决定 / 输掉的
   方案 / 实际验证）。
-- 相关证据：[design/10 §1](../../docs/design/10-architecture.md)、[design/30 rerun 行](../../docs/design/30-methodology-mapping.md)、
-  [design/40 图谱](../../docs/design/40-research-cockpit.md)、[research-planning skill](../../packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md)、
-  [研究手册 AGENTS](../../research-workspace/AGENTS.md)、[question 模板](../../research-workspace/templates/run/question.md)、
-  [run 指南](../../docs/guides/61-run-playbook.md)、[状态页签](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx)、
-  [图谱页签](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx)。
+- 相关证据：[design/10 §1](../../../docs/design/10-architecture.md)、[design/30 rerun 行](../../../docs/design/30-methodology-mapping.md)、
+  [design/40 图谱](../../../docs/design/40-research-cockpit.md)、[research-planning skill](../../../packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md)、
+  [研究手册 AGENTS](../../../research-workspace/AGENTS.md)、[question 模板](../../../research-workspace/templates/run/question.md)、
+  [run 指南](../../../docs/guides/61-run-playbook.md)、[状态页签](../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx)、
+  [图谱页签](../../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx)。
 
-## 7 决议（2026-10-23，用户授权自主拍板；证据 = [Note](../../notes/implemented/2026-10-23-rerun-version-face.md)）
+## 7 决议（2026-10-23，用户授权自主拍板；证据 = [Note](../../../notes/implemented/2026-10-23-rerun-version-face.md)）
 
 1. **`plan/vN.md` 快照契约：接受，但挂在「plan 重写」上**（不只在 rerun）：重写前把当前
    `plan.md` 复制到 `plan/v{被取代的版本}.md`；`plan.md` 仍是唯一当前版。快照版本 ≥ 当前图版本
@@ -221,3 +221,14 @@ run v1 已交付  →  run v2 证据扩张 rerun  ·  HITL2 待审
 
 **未改**：D17 三形态、`final-target` 的地址判据（只认 `final.md`）、anchor-2/步态的
 `final.md` 在场语义（2026-10-20 既有决定：⑤ 只认 present，步态/锚点用文件在场）。
+
+## 8 落地证据（2026-10-23，全部已交付）
+
+- 契约与观察面：`notes/implemented/2026-10-23-rerun-version-face.md`（决定 / 输掉方案 / 验证）；
+  代码 = `src/lib/run-version.ts` + `src/lib/plan-diff.ts` + 状态页 ⑤ / 终稿页签 / 图谱版本轨。
+- 受控 E2E：`research-workspace/archive/drt_e2e-rerun-2026-10-23`（v1 交付 → 同 bundle 证据扩张
+  rerun → `final/v2.md` + present；node-gate 七门 PASS、evidence-audit CRITICAL=0、`run-accept`
+  已归档并落 `acceptance.md`）。
+- 现场截图：`runtime/scenes/e2e-v2-status.png`（`v2 证据扩张 rerun 已交付 · 当前工作稿`）、
+  `runtime/scenes/e2e-v2-graph-live.png`（版本轨 + 映射缺口「状态未知」，无「未执行」）。
+- 未覆盖：结构性 rerun / 表述修订的真实样本；旧 run 无 `plan/vN` 快照只显示诚实缺省。

@@ -51,13 +51,14 @@
   （已映射 K / 未映射 N-K）」在绑定会话（`drt_cn-us`，11 个 active 节点）上命中。
 - `pnpm verify` 全绿：`cockpit-doc-registry`（本件已登记 design/40）、fixtures taxonomy
   （`plan-mapping/` 组 + 消费者）、`md-links` 均过。
-- 浏览器负例（空 `task_id` 的绑定会话）**未跑**：dev home 没有这种现场——真实 run 的 `task_id`
-  全是 `task-N`，`drt_gha-ubuntu-latest` 的两个非 task 行是 `plan-only`；绑定只能来自 journal，
-  keyless 冒烟造不出。空分支证据 = 夹具 + 单测，**不声称**已在真实 run 上验过。
+- 浏览器负例：**已有真实现场**——受控 E2E run `drt_e2e-rerun-2026-10-23`（已归档）的 plan
+  `task_id` 整列空白；run 通道真渲染显示「映射缺口：图谱无法判断 5 个 plan 节点的进度」、
+  逐节点「状态未知（未映射 task_id）」、覆盖率「已映射 0 · 未映射 5」，全程无「未执行」
+  （`runtime/scenes/e2e-v2-graph-live.png`）。此前 dev home 确无此现场，空分支才先靠夹具。
 
 ## 环境状态
 
-- 旧 bundle 不迁移：`task_id` 空的 plan 显示状态未知（当前只出现在夹具里）。
+- 旧 bundle 不迁移：`task_id` 空的 plan 显示状态未知（夹具 + 受控 E2E run 两类现场）。
 - `drt_gha-ubuntu-latest` 是 `plan-only` 的真实样本；它的 plan 同时是 flat W 旧命名（另案）。
 - BUG-043 卡上原「client-load 覆盖 plan 有节点、Team 无任务负例」判据不成立，已改为
   「覆盖率行 + 盘侧节点数对账」；负例归夹具与单测。

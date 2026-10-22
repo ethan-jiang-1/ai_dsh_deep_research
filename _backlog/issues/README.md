@@ -4,7 +4,7 @@
 
 ## 活跃清单
 
-- [2026-10-23-rerun-versioned-graph.md](2026-10-23-rerun-versioned-graph.md) — rerun 的版本面与图谱表达（推敲中：§7 已决议；契约 + 版本面 + 终稿页已落地，图谱版本轨与 E2E 未完）。
+（当前无在办问题卡；rerun 版本面与图谱表达已结并归档——见 [settled 池](../_archived/settled_issues/README.md)。）
 （当前无在办问题卡；动态 DAG、稳定节点身份、方法库主界面迁移、W<wave>.<index> 节点/WAVE 层均已结并归档到 [settled 池](../_archived/settled_issues/README.md)。）
 
 ## 最近归档

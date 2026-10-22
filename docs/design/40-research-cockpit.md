@@ -134,9 +134,10 @@
   旧 run 没有 `plan/vN` 快照时，图谱如实显示「无旧图快照」，不重建旧图。
 
 - **`task_id` 空白的 plan 节点**：图谱显示「状态未知（未映射 task_id）」并计入覆盖率缺口——
-  不把缺口读成「未执行」（证据 = 夹具 `tests/fixtures/plan-mapping/`；真实 run 目前都写了
-  `task-N` 或 `plan-only`）。Lead 回填后 5s 内与 Team 板对齐；不自动建 task、不改历史 plan。
-  投影未就绪时显示「等待团队投影」，不预设缺口。
+  不把缺口读成「未执行」。凭证 = 夹具 `tests/fixtures/plan-mapping/` + 受控 E2E run
+  `archive/drt_e2e-rerun-2026-10-23`（整列 `task_id` 空白时现场显示「状态未知」与覆盖率缺口）。
+  Lead 回填后 5s 内与 Team 板对齐；不自动建 task、不改历史 plan。投影未就绪时显示
+  「等待团队投影」，不预设缺口。
 
 - **研究图谱页签（2026-10-21）**：只读观察面，不是任务 CRUD、也不是操作台；数据 =
   `agentTeam` / `subagentCatalog` / session status / `plan.md`。顶部 SVG DAG（顶层 plan 节点优先，

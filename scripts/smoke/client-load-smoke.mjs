@@ -768,7 +768,9 @@ async function pass3cMethodLibraryPhase() {
   if (await edit.isVisible({ timeout: 5_000 }).catch(() => false)) {
     await edit.click({ timeout: 5_000 }).catch(() => {})
     await wait(1_000)
-    const ta = await page.locator('textarea').count().catch(() => 0)
+    // 只数**表单里带 label 的**四字段：同屏可能有别的 textarea（HITL 答题框——2026-10-23 实测
+    // 研究状态页挂着用户待答卡时页面上多一个，全局计数变成 5 的假红）。断言的是表单结构，不是整页。
+    const ta = await page.locator('label textarea').count().catch(() => 0)
     const formText = await paneTextOf(page)
     step(ta === 4 && formText.includes('交给 Lead 保存'), '方法库编辑表单：四字段 + 交给 Lead 保存',
       ta === 4 ? 'textarea 4' : `textarea ${ta}`)
@@ -781,7 +783,7 @@ async function pass3cMethodLibraryPhase() {
   if (await create.isVisible({ timeout: 5_000 }).catch(() => false)) {
     await create.click({ timeout: 5_000 }).catch(() => {})
     await wait(1_000)
-    const ta = await page.locator('textarea').count().catch(() => 0)
+    const ta = await page.locator('label textarea').count().catch(() => 0)
     step(ta === 4, '方法库新建表单：四字段在场', ta === 4 ? 'textarea 4' : `textarea ${ta}`)
     await page.getByRole('button', { name: '取消' }).first().click({ timeout: 5_000 }).catch(() => {})
     await wait(800)

@@ -68,7 +68,7 @@ fallback 仍会画成“未执行”。刷新只会让错误状态更稳定。
 - 不改变 D17 rerun / 交付门 / Team 权限；
 - 不在图谱里加“补派任务/调整”动作；
 - 不自动迁移旧 plan；已有 `drt_eu` 的 task_id 回填作为现场修复证据保留；
-- 与 [rerun 版本面 issue](../../issues/2026-10-23-rerun-versioned-graph.md) 分开：本条是
+- 与 [rerun 版本面 issue](../settled_issues/2026-10-23-rerun-versioned-graph.md) 分开：本条是
   **plan↔task 映射误报**，不是版本轨问题。
 
 ## 证据
