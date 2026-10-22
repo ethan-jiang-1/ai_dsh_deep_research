@@ -271,60 +271,61 @@ test('planIssuesOf：重号 / 悬空 parent / 悬空 dep / 自依赖（只读提
   assert.deepEqual(planIssuesOf(undefined), []);
 });
 
-test('planIndex：W 家族 / parent / stage 派生 / lifecycle 过滤', () => {
+test('planIndex：Wave 分组 / W2.1 节点 / stage 派生 / lifecycle 过滤', () => {
   const text = [
     '| id | parent | lifecycle | kind | deps |',
     '|---|---|---|---|---|',
-    '| W1 | — | active | broad-scan | — |',
-    '| W1.1 | W1 | active | search | — |',
-    '| W2 | — | active | deep-dive | W1 |',
-    '| W2.1 | W2 | merged_into:W9 | fetch | — |',
-    '| W2.2 | W2 | active | fetch | — |',
+    '| W1.1 | — | active | broad-scan | — |',
+    '| W2.1 | — | active | deep-dive | W1.1 |',
+    '| W2.1.1 | W2.1 | active | fetch | — |',
+    '| W2.2 | — | active | deep-dive | W1.1 |',
+    '| W2.3 | — | merged_into:W3.1 | review | — |',
+    '| W3.1 | — | active | synthesis | W2.1,W2.2 |',
   ].join('\n');
   const index = planIndex(text);
-  assert.deepEqual(index.topLevel.map((node) => node.id), ['W1', 'W2']);
-  assert.deepEqual(index.childrenByParent.get('W2')?.map((node) => node.id), ['W2.2']);
-  assert.equal(index.byId.get('W2.1')?.lifecycle, 'merged_into:W9');
-  assert.equal(index.byId.get('W1')?.stage, 'scan');
+  assert.deepEqual(index.topLevel.map((node) => node.id), ['W1.1', 'W2.1', 'W2.2', 'W3.1']);
+  assert.deepEqual(index.childrenByParent.get('W2.1')?.map((node) => node.id), ['W2.1.1']);
+  assert.equal(index.byId.get('W2.3')?.lifecycle, 'merged_into:W3.1');
   assert.equal(index.byId.get('W1.1')?.stage, 'scan');
-  assert.equal(index.byId.get('W2')?.stage, 'dive');
   assert.equal(index.byId.get('W2.1')?.stage, 'dive');
+  assert.equal(index.byId.get('W2.1.1')?.stage, 'dive');
+  assert.equal(index.byId.get('W3.1')?.stage, 'synthesis');
   assert.equal(stageOfKind('gate'), 'gate');
   assert.equal(stageOfKind('nope'), 'unknown');
   assert.deepEqual(planIssuesOf(index), []);
 });
 
-test('planIssuesOf：W 家族/前缀/深度/跨组/墓碑/retired dep', () => {
+test('planIssuesOf：wave-prefix / 领域错误 / 前缀/深度/跨组/墓碑/retired dep/legacy flat W', () => {
   const text = [
     '| id | parent | lifecycle | deps |',
     '|---|---|---|---|',
-    '| W1 | — | active | — |',
-    '| W1.1 | W1 | active | — |',
-    '| W2 | — | active | — |',
-    '| W2.1 | W2 | retired | — |',
+    '| W1.1 | — | active | — |',
+    '| W2.1 | — | merged_into:W9 | — |',
     '| W2.1.1 | W2.1 | active | W1.1 |',
     '| W2.1.1.1 | W2.1.1 | active | — |',
-    '| W2.2 | W2 | active | W2.1 |',
-    '| W9 | W2 | active | — |',
-    '| W3.1 | W3 | active | — |',
+    '| W2.3 | — | retired | — |',
+    '| W2.4 | — | active | W2.1 |',
+    '| W3.1 | — | active | W1.1 |',
+    '| W3.2 | W3.9 | active | — |',
+    '| W9.1 | W2.1 | active | — |',
+    '| W8 | — | active | — |',
     '| N1 | — | active | — |',
   ].join('\n');
   const kinds = planIssuesOf(planIndex(text)).map((issue) => issue.kind).sort();
-  for (const expected of ['child-prefix', 'cross-group-child-dep', 'missing-parent', 'mixed-family', 'retired-dep', 'tombstone-without-successor', 'too-deep']) {
+  for (const expected of ['child-prefix', 'cross-group-child-dep', 'legacy-flat-w', 'missing-parent', 'mixed-family', 'retired-dep', 'tombstone-without-successor', 'too-deep', 'wave-prefix']) {
     assert.ok(kinds.includes(expected), `缺 ${expected}: ${kinds.join(',')}`);
   }
   assert.deepEqual(planIssuesOf(null), []);
 });
 
-test('levelsOf：W 节点加依赖只改变 LAYER，不改 W id（身份稳定性）', () => {
-  const base = [
-    { id: 'W1', blockedBy: [] },
-    { id: 'W1.1', blockedBy: [] },
-    { id: 'W2', blockedBy: ['W1'] },
-  ];
-  const before = levelsOf(base);
-  const after = levelsOf(base.map((node) => node.id === 'W1.1' ? { ...node, blockedBy: ['W2'] } : node));
-  assert.equal(before.get('W1.1'), 0);
-  assert.equal(after.get('W1.1'), 2);
-  assert.deepEqual(base.map((node) => node.id), ['W1', 'W1.1', 'W2'], 'ID 列表不因层变化而重写');
+test('Wave 重编号：W3.1 依赖 W1.1 时 wave-prefix 必须红，而不是静默画在 Wave 2', () => {
+  const index = planIndex([
+    '| id | parent | lifecycle | deps |',
+    '|---|---|---|---|',
+    '| W1.1 | — | active | — |',
+    '| W3.1 | — | active | W1.1 |',
+  ].join('\n'));
+  const issue = planIssuesOf(index).find((item) => item.kind === 'wave-prefix');
+  assert.ok(issue);
+  assert.match(issue.message, /实际在 Wave 2/);
 });

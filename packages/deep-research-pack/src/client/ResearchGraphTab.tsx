@@ -51,7 +51,7 @@ import type { ResearchGraphTabProps } from './research-graph/types.ts'
 export type { ResearchGraphInjected, ResearchGraphTabProps } from './research-graph/types.ts'
 
 /** plan.md 重读间隔（任务靠投影推送；只有文件需要低频重扫）。 */
-const PLAN_REFRESH_MS = 30_000
+const PLAN_REFRESH_MS = 5_000
 /** plan.md 只读表头附近（节点表在文首；缺文件合法）。 */
 const PLAN_READ_LIMIT = 240
 
@@ -693,7 +693,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         ? waves.map((wave) => (
           <section key={wave.level} style={{ marginBottom: 10 }}>
             <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>
-              LAYER {wave.level + 1}{wave.tasks.length > 1 ? ` · ${String(wave.tasks.length)} 个并行` : ''}
+              WAVE {wave.level + 1}{wave.tasks.length > 1 ? ` · ${String(wave.tasks.length)} 个并行` : ''}
             </div>
             {wave.tasks.map((node) => renderNode(node))}
           </section>

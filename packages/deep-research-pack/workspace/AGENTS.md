@@ -22,10 +22,10 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
   plan.md              执行图（owner: lead）：节点表 id/parent/lifecycle/kind/question/owner_role/
                        deps/output/acceptance/budget/depth/task_id + plan_version/重写记录；过程件，
                        不是交付凭证；Team 任务板是当前会话的执行镜像；schema-scan/node-gate
-                       不检查本文件。**W 是工作包 ID 不是序号**：W1/W1.1/W1.1.1 只分配、不重排、
-                       不回收；stage 由根 W 的 kind 派生；LAYER 是计算层（不是 W）；lifecycle
-                       墓碑留在表里但不画图；拆分/合并用 derived_from/superseded_by/merged_into；
-                       Team 平铺、不建 nested Team
+                       不检查本文件。**W<wave>.<index>**：W2 是 Wave 2 分组（不是任务），
+                       W2.1/W2.2 是层内并行节点，W2.1.1 是内部拆解；Wave 由 deps 计算，ID
+                       前缀必须一致；跨 Wave 重编号 + 旧号别名；lifecycle 墓碑留在表里但不画图；
+                       stage 由节点 kind 派生；Team 平铺、不建 nested Team
   leads.md             候选方向清单（owner: scout）
   evidence/            证据文件，一条一档（owner: analyst）
   findings.md          发现账本：结论 + 支撑 + gap 状态（owner: lead）
@@ -53,7 +53,7 @@ method-library.md      用户研究偏好库（工作区根；lead 维护；四�
 （= run 根**当前版报告**模板；final/ 的 vN 记账体**无模板**，按 NODES.md 回边版本语义自构）；
 review.md、drafts/、journal.md 无模板——review 格式住 critic 的 adversarial-review skill，
 drafts/journal 运行时自建。plan.md 是过程件：不替代任何交付门，交付只认 final/review/decisions/
-present；Team 板是执行镜像，恢复时按 plan 的 **W**（legacy N）节点重建任务。
+present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat W 只读）重建任务。
 
 ## 事实的 owner（一处事实一个家）
 

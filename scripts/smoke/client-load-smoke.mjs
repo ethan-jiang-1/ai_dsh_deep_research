@@ -714,7 +714,7 @@ async function pass3bGraphTabPhase() {
   const body = seg.includes('还没有团队投影')
     || seg.includes('任务板还没有任务')
     || seg.includes('任务快照')
-    || /LAYER\s*\d/i.test(seg)
+    || /WAVE\s*\d/i.test(seg)
     || seg.includes('需要你注意')
   step(body, '研究图谱页签体渲染（空态/团队态如实，不炸）', body ? 'body=ok' : seg.slice(0, 160).replace(/\s+/g, ' '))
 }
@@ -723,8 +723,17 @@ async function pass3bGraphTabPhase() {
  *  keyless：只开 tab/读库，不发任何 session/prompt；保存回执由 library-fold 单测与人工走查。 */
 async function pass3cMethodLibraryPhase() {
   await awaitAppReady(page, 5_000)
-  const tab = page.getByText('方法库', { exact: true }).first()
-  const visible = await tab.isVisible({ timeout: 8_000 }).catch(() => false)
+  let tab = page.getByText('方法库', { exact: true }).first()
+  let visible = await tab.isVisible({ timeout: 8_000 }).catch(() => false)
+  // 2026-10-22 实测偶发：会话刚切换完，Chat/Trajectory 已在但第三 tab 的 conversation.view
+  // 还没挂载；同一轮后段 tabs 列表里方法库已出现。reload 一次再等，避免把挂载时序当注册回归。
+  if (!visible) {
+    await page.reload({ waitUntil: 'domcontentloaded' }).catch(() => {})
+    await awaitAppReady(page, 5_000)
+    await wait(2_000)
+    tab = page.getByText('方法库', { exact: true }).first()
+    visible = await tab.isVisible({ timeout: 8_000 }).catch(() => false)
+  }
   step(visible, '「方法库」主界面 tab 在场（conversation.view 注册成功）')
   if (!visible) return
   await tab.click({ timeout: 5_000 }).catch(() => {})

@@ -127,10 +127,10 @@ export interface WorkerChip {
 /** 研究流程 stage（由根 W 的 kind 派生；不是独立列）。 */
 export type PlanStage = 'scan' | 'dive' | 'check' | 'synthesis' | 'review' | 'gate' | 'unknown'
 
-/** `plan.md` 节点表的一行（canonical W/N 节点；ID 不是序号）。 */
+/** `plan.md` 节点表的一行：W<wave>.<index> 节点（W2 是 Wave 2，W2.1 是其节点）。 */
 export interface PlanNode {
   readonly id: string
-  /** 复合节点的父节点 id；顶层缺省。子号 `W3.1` 的 parent = `W3`，父节点仍在表里。 */
+  /** 内部拆解父节点 id；Wave 内的顶层节点 parent 缺省。`W2.1.1` 的 parent = `W2.1`。 */
   readonly parent?: string
   /** 生命周期：active（默认）/ retired / merged_into:… / superseded_by:…；墓碑留在表里供 byId。 */
   readonly lifecycle?: string
@@ -174,7 +174,7 @@ export interface PlanIndex {
   readonly byTaskId: ReadonlyMap<string, PlanNode>
   /** 图版本（`图版本：v1` / `plan_version: v1`）；缺省 undefined。 */
   readonly version?: string
-  /** 顶层 active 节点（parent 缺省）；墓碑/复合子节点不在顶层图里。 */
+  /** 顶层 active 节点（parent 缺省）；Wave 由 deps 计算，节点 id 的 Wave 前缀须与之一致。 */
   readonly topLevel: readonly PlanNode[]
   /** parent id → 直接 active 子节点；父节点不存在时仍按 parent 字符串归组（供稳定性提示）。 */
   readonly childrenByParent: ReadonlyMap<string, readonly PlanNode[]>
@@ -192,6 +192,8 @@ export type PlanIssueKind =
   | 'cross-group-child-dep'
   | 'retired-dep'
   | 'tombstone-without-successor'
+  | 'wave-prefix'
+  | 'legacy-flat-w'
 
 export interface PlanIssue {
   readonly kind: PlanIssueKind
@@ -688,6 +690,37 @@ export function planIssuesOf(index: PlanIndex | null | undefined): readonly Plan
       current = index.byId.get(current.parent)!
     }
     return current
+  }
+  // Wave 身份：顶层 W 节点 id 必须是 W<wave>.<index>；wave = deps 最长路径 + 1。
+  // 旧 flat W（W1/W2，无 .index）是 2026-10-22 之前的 working-package 形态，只读兼容并显式提示。
+  const flatW = index.topLevel.filter((node) => /^W\d+$/.test(node.id))
+  if (flatW.length > 0) {
+    issues.push({ kind: 'legacy-flat-w', nodeId: flatW[0]!.id, message: '旧 flat W（W1/W2…）只读；新 plan 用 W<wave>.<index>（如 W2.1）' })
+  }
+  const waveLevel = new Map<string, number>()
+  const waveOf = (node: PlanNode, visiting = new Set<string>()): number => {
+    const known = waveLevel.get(node.id)
+    if (known !== undefined) return known
+    if (visiting.has(node.id)) return 1
+    visiting.add(node.id)
+    let max = 0
+    for (const dep of node.deps) {
+      const depNode = index.byId.get(dep)
+      if (depNode !== undefined && depNode.parent === undefined && isActivePlanNode(depNode)) {
+        max = Math.max(max, waveOf(depNode, visiting))
+      }
+    }
+    const level = max + 1
+    waveLevel.set(node.id, level)
+    return level
+  }
+  for (const node of index.topLevel) {
+    if (!/^W\d+\./.test(node.id)) continue
+    const prefix = Number(/^W(\d+)\./.exec(node.id)?.[1])
+    const expected = waveOf(node)
+    if (Number.isFinite(prefix) && prefix !== expected) {
+      issues.push({ kind: 'wave-prefix', nodeId: node.id, message: `${node.id} 实际在 Wave ${expected}——按 deps 重编号并写旧号别名` })
+    }
   }
   for (const node of index.nodes) {
     if (node.parent !== undefined && !index.byId.has(node.parent)) {

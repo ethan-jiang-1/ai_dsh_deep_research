@@ -4,7 +4,7 @@
 
 ## 活跃清单
 
-（当前无在办问题卡；动态 DAG、稳定节点身份、方法库主界面迁移、W 工作包/LAYER 均已结并归档到 [settled 池](../_archived/settled_issues/README.md)。）
+（当前无在办问题卡；动态 DAG、稳定节点身份、方法库主界面迁移、W<wave>.<index> 节点/WAVE 层均已结并归档到 [settled 池](../_archived/settled_issues/README.md)。）
 
 ## 最近归档
 

@@ -92,7 +92,7 @@ D 号正文 = [decisions.md](./decisions.md)（按需查，不在本页通读；
 | 研究团队 / 组队 | Agent Teams（`spawn_teammate` / 任务板，experimental；**组合层 = vendor agent-team-profile**，D16） | `packages/experimental/agent-team` + `tool-agent-team` + `agent-team-profile` + `docs/subsystems/agent-team.md` |
 | 研究工人（一次性查证） | one-shot/continuable subagent（`dsh-tool-subagent`, spawn provider） | `packages/subagent/tool-subagent/README.md` |
 | 研究方法论的载体 | skill（`presets/<role>/skills/<n>/SKILL.md`，硬隔离） | `packages/skill/skill-filesystem` |
-| 研究执行图 / 工作包 | plan.md 的 W 树（W1/W1.1；**W 是稳定工作包，不是拓扑层**）；LAYER 是按 deps 算的层；stage 由根 W 的 kind 派生；旧 N 只读兼容 | `research-workspace/templates/run/plan.md` + `src/lib/plan-graph.ts`；[Note](../notes/implemented/2026-10-22-w-work-package-identity.md) |
+| 研究执行图 / Wave | plan.md 的 **W<wave>.<index>**（W2 = Wave 2 分组，W2.1 = 层内节点，W2.1.1 = 内部拆解）；Wave 按 deps 计算；stage 由节点 kind 派生；旧 N/旧 flat W 只读 | `research-workspace/templates/run/plan.md` + `src/lib/plan-graph.ts`；[Note](../notes/implemented/2026-10-22-w-wave-node-identity.md) |
 
 | web 搜索/抓取 | `dsh-tool-web` + search/fetch provider | `packages/web/tool-web` + `web-search-deepseek` + `web-fetch-http` |
 | 成品交付 | `present` 工具 explicit deliveries | `packages/fs/tool-present` + `client/ui-deliverables` |

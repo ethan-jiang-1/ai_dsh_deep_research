@@ -5,7 +5,10 @@ intent: 作为第二个 reviewer 对活跃卡 2026-10-22-w-work-package-identity
 
 # W 工作包身份卡 review（2026-10-22）
 
-> 对象：[W 工作包命名与 L 拓扑层卡](../../_archived/settled_issues/2026-10-22-w-work-package-identity.md)（设计评审稿，`推敲中`；卡头明写"用户与第二个 reviewer 先审"）。
+> **历史评审（已被取代）**：本文件评审的是 2026-10-22 旧版“W=工作包/LAYER”；
+> 用户同日纠正为“W<wave>.<index> / WAVE”。结论不再作当前合同，仅保留旧方案记录。
+
+> 对象：[W 工作包命名与 L 拓扑层卡](../../_archived/settled_issues/2026-10-22-w-wave-node-identity.md)（设计评审稿，`推敲中`；卡头明写"用户与第二个 reviewer 先审"）。
 > 方法：只读评审——卡 §1 的实现声称逐条对本仓源码/模板/skill/手册核对；DSH 机制面按 vendor `dsh-v0.2.1-rc.2` 正本与[机制盘点](./2026-10-21-dsh-orchestration-primitives.md)；评审期间未改卡。
 > 结论：**方向成立**（W 稳定身份 + 层为计算值 + stage 承载流程不变量；DSH 映射未发明机制，与 A0 决定一致）；**四条定稿前修正（B1–B4）**、七条建议（S1–S7）、八问逐条结论（§4）。
 
@@ -88,7 +91,7 @@ design/40 全文；cockpit keyless 测试对 `WAVE` 文案的断言点（若测�
 
 ## 6. 证据
 
-- 卡：[2026-10-22-w-work-package-identity.md](../../_archived/settled_issues/2026-10-22-w-work-package-identity.md)
+- 卡：[2026-10-22-w-work-package-identity.md](../../_archived/settled_issues/2026-10-22-w-wave-node-identity.md)
 - 机制正本：`vendor/dsh/docs/subsystems/agent-team.md`；[机制盘点](./2026-10-21-dsh-orchestration-primitives.md)
 - 本仓实现：`plan-graph.ts` / `ResearchGraphTab.tsx` / plan 模板 / research-planning skill / NODES.md / 研究手册 / A0 run plan（§1 表内逐条锚点）
 - A0 决定：[2026-10-21-dynamic-research-dag-a0.md](../../../notes/implemented/2026-10-21-dynamic-research-dag-a0.md)
