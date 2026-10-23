@@ -20,7 +20,7 @@
  *   - 当前会话若是 teammate → `useSession(subagent.address.parentSessionId)` 找 Lead，读 **Lead**
  *     的 `agentTeam` 投影（`useSessions`；vendor `TeamAction` 同款）；
  *   - 队员忙闲 = `useSessionStatus`；worker chips = 每个队员会话的 `subagentCatalog`；
- *   - plan.md = 先 follow journal 做 `sessionBindingOf` 找 `drt_<slug>/`，再按根/archive/_abandoned
+ *   - plan.md = 先 follow journal 做 `bindingTrust` 找可信的 `drt_<slug>/`，再按根/archive/_abandoned
  *     三位置读 `plan.md`，30s 重读；缺文件合法；不按 workspace 根读。
  *
  * 折算仍住 `src/lib/plan-graph.ts`（keyless 单测）；本组件只画。fail-soft：空投影/空任务/缺 plan
@@ -57,7 +57,7 @@ import {
   type GraphCoverage,
   type GraphNodeState,
 } from '../lib/graph-model.ts'
-import { sessionBindingOf } from '../lib/bundle-bind.ts'
+import { bindingTrust } from '../lib/binding-trust.ts'
 import type { ResearchGraphTabProps } from './research-graph/types.ts'
 export type { ResearchGraphInjected, ResearchGraphTabProps } from './research-graph/types.ts'
 
@@ -325,8 +325,8 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   // 最后成功读取 plan.md 的时刻：把“数据可能过期”显性化（BUG-043 §刷新），不把缺失当状态。
   const [planLoadedAt, setPlanLoadedAt] = useState<number | null>(null)
 
-  // journal → 本会话绑定的 run bundle（只用于 plan 基址；不折活动流）。
-  // read 弱绑定 + kickoffSeen = 立项预检读旧 bundle，不能当本 run；write 命中后才显示 plan。
+  // journal → 本会话可信绑定的 run bundle（只用于 plan 基址；不折活动流）。
+  // read 弱绑定在立项/挂起期不可信（binding-trust 单一政策）；write 命中后才显示 plan。
   useEffect(() => {
     const controller = new AbortController()
     let stopped = false
@@ -338,9 +338,8 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         for await (const frame of props.follow(leadSessionId, controller.signal)) {
           if (frame.kind === 'history') events = [...frame.events]
           else events = [...events, frame.event]
-          const binding = sessionBindingOf(events)
-          const trusted = binding.slug !== undefined && !(binding.boundBy === 'read' && binding.kickoffSeen)
-          const nextSlug = trusted ? binding.slug ?? null : null
+          const trust = bindingTrust(events)
+          const nextSlug = trust.kind === 'bound' ? trust.slug : null
           if (nextSlug !== lastSlug) {
             lastSlug = nextSlug
             if (!stopped) setBoundSlug(nextSlug)

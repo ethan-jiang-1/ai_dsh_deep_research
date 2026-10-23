@@ -15,7 +15,7 @@ import {
   createInstruction, editInstruction, foldLibrary, instructionOf, legacyLinesOf, libraryReadStateOf, summaryOfEntry,
   type LibraryEntry, type LibrarySections,
 } from '../lib/library-fold.ts'
-import { sessionBindingOf } from '../lib/bundle-bind.ts'
+import { bindingTrust } from '../lib/binding-trust.ts'
 import { foldMethodAdoption, type MethodAdoption } from '../lib/method-of-question.ts'
 import { assistantReplyAfter, libraryDiff, receiptOf, type LibraryDiff } from '../lib/receipt-fold.ts'
 import type { FollowTarget, JournalFrame } from './ResearchStatusTab.tsx'
@@ -268,13 +268,13 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
     if (assistantReplyAfter(events, repliedMarker.current)) setReplied(true)
   }, [events, receiptBase])
 
-  // 本次研究区：绑定 slug → 三位置查找（根／archive／_abandoned）→ 读 question.md 方法节。
-  const binding = useMemo(() => sessionBindingOf(events), [events])
+  // 本次研究区：可信绑定 slug → 三位置查找（根／archive／_abandoned）→ 读 question.md 方法节。
+  const trust = useMemo(() => bindingTrust(events), [events])
   const [adoption, setAdoption] = useState<MethodAdoption>({ kind: 'no-run', adopted: null, origin: null, requirements: null })
   useEffect(() => {
     const sid = sessionId
     if (sid === undefined) { setAdoption({ kind: 'no-run', adopted: null, origin: null, requirements: null }); return }
-    const slug = binding.slug
+    const slug = trust.kind === 'bound' ? trust.slug : undefined
     if (slug === undefined) { setAdoption({ kind: 'no-run', adopted: null, origin: null, requirements: null }); return }
     let stopped = false
     const scan = async () => {
@@ -298,7 +298,7 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
     }
     void scan()
     return () => { stopped = true }
-  }, [sessionId, binding.slug])
+  }, [sessionId, trust])
 
   /** 回执文案（三态优先级 = 失败 > 已落盘 > 已回话 > 已发送）。 */
   const receipt = receiptBase === null

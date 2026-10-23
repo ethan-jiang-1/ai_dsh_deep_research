@@ -40,7 +40,7 @@ import { foldActivityRows, type ActivityRow } from '../lib/activity-fold.ts'
 import { useMemberActivity } from './research-status/useMemberActivity.ts'
 import type { MemberActivitySummary } from '../lib/member-activity.ts'
 import type { ResearchStatusTabProps, ResearchStatusTitleInjected } from './research-status/types.ts'
-import { sessionBindingOf, type SessionBinding } from '../lib/bundle-bind.ts'
+import { bindingTrust, type BindingTrust } from '../lib/binding-trust.ts'
 import { streamFailureOf } from '../lib/stream-failure.ts'
 import { latestFinalDelivery, latestPresentedFinalVersion } from '../lib/final-target.ts'
 import { runVersionFaceOf, type RunVersionFace } from '../lib/run-version.ts'
@@ -75,17 +75,24 @@ const REFRESH_MS = 30_000
  * @param props 槽 props + 注入面。
  * @returns 研究状态面板。
  */
+/** 绑定可信性的值键（状态页全值比对重扫用：kind/slug/reason 任一变化都要重扫）。 */
+function trustKey(trust: BindingTrust): string {
+  if (trust.kind === 'bound') return `bound:${trust.slug}:${trust.boundBy}`
+  if (trust.kind === 'suppressed') return `suppressed:${trust.slug}:${trust.reason}`
+  return 'unbound'
+}
+
 export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const [rows, setRows] = useState<readonly ActivityRow[]>([])
   const [hitl, setHitl] = useState<HitlState>({ pending: false, since: undefined })
   const [journalEvents, setJournalEvents] = useState<readonly unknown[]>([])
   const [face, setFace] = useState<BundleFace | null>(null)
   const [unbound, setUnbound] = useState(false)
-  const [binding, setBinding] = useState<SessionBinding>({ slug: undefined, boundBy: undefined, kickoffSeen: false })
+  const [trust, setTrust] = useState<BindingTrust>({ kind: 'unbound' })
   const [journalSeen, setJournalSeen] = useState(false)
   const [kickoffHold, setKickoffHold] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const boundRef = useRef<SessionBinding>({ slug: undefined, boundBy: undefined, kickoffSeen: false })
+  const trustRef = useRef<BindingTrust>({ kind: 'unbound' })
   const prevPending = useRef(false)
   // 观察连续性（UX 清扫 F1，2026-09-30）：vendor 在切换会话时收起右栏——观察面板每次
   // 切换丢失。旧会话正被观察（绑定/挂起）时，切换后重开状态页签（revealStatusTab）。
@@ -110,7 +117,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     const sessionId = props.sessionId
     if (sessionId === undefined) return
     const controller = new AbortController()
-    boundRef.current = { slug: undefined, boundBy: undefined, kickoffSeen: false }
+    trustRef.current = { kind: 'unbound' }
     prevPending.current = false
     void (async () => {
       try {
@@ -127,16 +134,15 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           // openTab 落定时右栏同步骤展开；页签体折叠态保持挂载，观察者常在。
           if (next.pending && !prevPending.current) props.revealStatusTab()
           prevPending.current = next.pending
-          const bound = sessionBindingOf(events)
+          const nextTrust = bindingTrust(events)
           // 全值比对（BUG-001 附带修复）：只比 slug 会漏 boundBy 翻转（同 slug 的 read→write，
-          // rerun 场景）与 kickoffSeen 翻转（立项动作出现）——两者都改变渐进面判定。
-          if (bound.slug !== boundRef.current.slug || bound.boundBy !== boundRef.current.boundBy
-            || bound.kickoffSeen !== boundRef.current.kickoffSeen) {
-            boundRef.current = bound
-            setBinding(bound)
+          // rerun 场景）与抑制原因翻转（pending ↔ kickoff）——两者都改变渐进面判定。
+          if (trustKey(nextTrust) !== trustKey(trustRef.current)) {
+            trustRef.current = nextTrust
+            setTrust(nextTrust)
           }
-          // 观察连续性的采样点：旧会话的末态（绑定/挂起）在切换那一刻经此 ref 供切换效应读。
-          wasObservingRef.current = boundRef.current.slug !== undefined || prevPending.current
+          // 观察连续性的采样点：旧会话的末态（绑定/抑制）在切换那一刻经此 ref 供切换效应读。
+          wasObservingRef.current = nextTrust.kind !== 'unbound' || prevPending.current
         }
       } catch (cause) {
         if (!controller.signal.aborted) setError(String(cause))
@@ -172,17 +178,15 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   // research-brief skill 加载 = 本会话在开新 run）把整个立项轨道的仅读绑定都抑制。
   useEffect(() => {
     const sessionId = props.sessionId
-    const kickoff = binding.boundBy === 'read' && binding.kickoffSeen
-    const suppressed = binding.boundBy === 'read' && (hitl.pending || binding.kickoffSeen)
-    if (sessionId === undefined || binding.slug === undefined || suppressed) {
+    if (sessionId === undefined || trust.kind !== 'bound') {
       setFace(null)
-      setUnbound(journalSeen && binding.slug === undefined)
-      setKickoffHold(kickoff && !hitl.pending)
+      setUnbound(trust.kind === 'unbound' && journalSeen)
+      setKickoffHold(trust.kind === 'suppressed' && trust.reason === 'kickoff')
       return
     }
     setUnbound(false)
     setKickoffHold(false)
-    const boundSlug = binding.slug
+    const boundSlug = trust.slug
     let stopped = false
     const scan = async () => {
       try {
@@ -271,7 +275,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     void scan()
     const timer = setInterval(() => { void scan() }, REFRESH_MS)
     return () => { stopped = true; clearInterval(timer) }
-  }, [props.sessionId, binding, hitl.pending, journalSeen])
+  }, [props.sessionId, trust, journalSeen])
 
   // 锚点 = 混合折算（尾窗约束的实测产物，RFC cockpit-flow-face）：passed 态由文件事实承载
   // （question.md/final.md 在场），pending 态由 journal 尾窗承载——face 缺席时退化为纯尾窗判定。
@@ -317,7 +321,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   // 内部函数；§Decisions 末位拍板当前数据面未读——lastDecisionKind 如实 null。
   const brief: BusinessBrief = useMemo(
     () => deriveBusinessBrief({
-      bundleBound: !unbound && binding.slug !== undefined,
+      bundleBound: trust.kind === 'bound',
       kickoffHold,
       hitlPending: hitl.pending,
       pendingKind: pendingAnchor !== undefined ? (pendingAnchor.key === 'anchor-1' ? 'hitl1' : pendingAnchor.key === 'anchor-2' ? 'hitl2' : 'unknown') : null,
@@ -332,7 +336,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       lastDecisionKind: null,
       openItems: [],
     }),
-    [unbound, binding.slug, kickoffHold, hitl.pending, pendingAnchor, face, steps, delivery],
+    [unbound, trust, kickoffHold, hitl.pending, pendingAnchor, face, steps, delivery],
   )
   const anchorChip = (a: RunAnchor) => (
     <span key={a.key} style={{ padding: '2px 8px', borderRadius: 4, fontWeight: a.state === 'pending' ? 700 : 400, background: a.state === 'pending' ? '#f59e0b33' : a.state === 'passed' ? '#22c55e22' : '#0000000d', color: a.state === 'pending' ? '#b45309' : a.state === 'passed' ? '#16a34a' : '#888' }}>
@@ -468,10 +472,10 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       )}
       {kickoffHold && (
         <div style={{ marginBottom: 10, fontSize: 12, padding: '6px 10px', borderRadius: 6, background: '#0000000d' }}>
-          🌱 这场研究还没开始——立项对齐中，读到的是上一场 run（drt_{binding.slug}）的上下文；落笔开跑后这里显示本场状态。
+          🌱 这场研究还没开始——立项对齐中，读到的是上一场 run（drt_{trust.kind === 'suppressed' ? trust.slug : ''}）的上下文；落笔开跑后这里显示本场状态。
         </div>
       )}
-      {!unbound && !kickoffHold && face === null && binding.boundBy === 'read' && hitl.pending && (
+      {!unbound && !kickoffHold && face === null && trust.kind === 'suppressed' && trust.reason === 'pending' && (
         <div style={{ marginBottom: 10, fontSize: 12, opacity: 0.55 }}>
           （挂起期间不显示 bundle 渐进面——当前绑定仅由读取推断，落笔后确认）
         </div>
