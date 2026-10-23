@@ -5,8 +5,8 @@ intent: 记录门③跨 run 污染的复现、见证绑定/契约纪元/事件�
 
 # D28 落地缺口 · P0 见证绑定与回执校验
 
-> 消费者：[D28 缺口收口卡](../../issues/2026-10-23-d28-witness-binding-and-receipts.md)
-> ｜ 2026-10-23 ｜ 前身 = [已结宪章卡](../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)（归档不复开）
+> 消费者：[D28 缺口收口卡](../../settled_issues/2026-10-23-d28-witness-binding-and-receipts.md)
+> ｜ 2026-10-23 ｜ 前身 = [已结宪章卡](../../settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)（归档不复开）
 
 ## 1. 复现（修复前）
 

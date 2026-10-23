@@ -85,7 +85,9 @@ function boundSlugsOf(events) {
   const slugs = new Set()
   for (const e of events) {
     if (e?.type !== 'tool/call' || !WRITE_TOOLS.has(e?.data?.name)) continue
-    for (const m of String(e?.data?.arguments ?? '').matchAll(BIND_PATH_RE)) slugs.add(m[1])
+    // `arguments` 是 JSON 字符串（未解析）；同一日志族里出现过 `\/` 编码形态——统一按 `/` 判。
+    const args = String(e?.data?.arguments ?? '').replace(/\\\//g, '/')
+    for (const m of args.matchAll(BIND_PATH_RE)) slugs.add(m[1])
   }
   return slugs
 }

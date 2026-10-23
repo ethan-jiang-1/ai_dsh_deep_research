@@ -4,6 +4,7 @@
 
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-10-23-d28-witness-binding-and-receipts](2026-10-23-d28-witness-binding-and-receipts.md) | D28 落地缺口收口：门③见证绑定 run（写强绑定 + 契约纪元 + present≥HITL2）、回执哈希由门A 复算、run-accept 与 hygiene 分域、手册 final/vN = 交付副本、门④ 不再要 v1 活索引；P0–P3 + 四角色重录，708 测试绿；[RFC 修订](../../../notes/implemented/2026-10-23-run-bundle-charter.md) | 2026-10-23 |
 | [2026-10-23-run-bundle-agent-state-and-read-chain](2026-10-23-run-bundle-agent-state-and-read-chain.md) | run bundle 宪章：D28 位置=操作桶、run.md/epoch、presented/user-question-reply 交付链、provenance/manifest、观察只读；P0–P7 落地、P8 收口（正式 lead 盲测 UNATTESTED）；[implemented RFC](../../../notes/implemented/2026-10-23-run-bundle-charter.md) | 2026-10-23 |
 | [2026-10-23-rerun-versioned-graph](2026-10-23-rerun-versioned-graph.md) | rerun 版本面：`plan/vN` 快照 + `图版本` 交叉校验 + `> rerun:` 声明 + `RunVersionFace` + 终稿页默认版本账 + 图谱版本轨/最小 diff；受控 v1→v2 E2E 全绿；[Note](../../../notes/implemented/2026-10-23-rerun-version-face.md) | 2026-10-23 |
 | [2026-10-19-final-tab-in-sidebar](2026-10-19-final-tab-in-sidebar.md) | 右栏「终稿」：接管 `drt_<slug>/final.md` 的文件地址（`extension` 带）——交付那一刻自动打开一次，⑤ 交付门做回程；`present` 成为交付判据（`final.md` 在场只算"可审"）；三位置回退读；构成正本同 diff 更新；自动打开接线的端到端留待下一场真实 run | 2026-10-20 |

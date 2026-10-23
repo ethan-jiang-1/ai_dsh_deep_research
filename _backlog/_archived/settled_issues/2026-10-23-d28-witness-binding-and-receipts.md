@@ -1,13 +1,13 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-10-23
 ---
 
 # 推敲：D28 落地缺口收口——见证绑定 run、回执可校验、手册与门禁自洽
 
-> 立卡：2026-10-23 ｜ 状态：推敲中 ｜ 类型：实施缺陷收口 ｜ 结论倾向：现在做（用户 2026-10-23 15:13「当然都需要做」） ｜ 可关闭：否（收口验收通过后翻是并归档）
-> 前身：[已结宪章卡](../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)（归档卡不复开；本卡是引用它的新卡）
-> ｜ 规范正本：[D28 RFC](../../notes/implemented/2026-10-23-run-bundle-charter.md)
+> 立卡：2026-10-23 ｜ 状态：已结 — P0–P3 落地（2026-10-23） ｜ 类型：实施缺陷收口 ｜ 结论倾向：现在做（用户 2026-10-23 15:13「当然都需要做」） ｜ 可关闭：是
+> 前身：[已结宪章卡](./2026-10-23-run-bundle-agent-state-and-read-chain.md)（归档卡不复开；本卡是引用它的新卡）
+> ｜ 规范正本：[D28 RFC](../../../notes/implemented/2026-10-23-run-bundle-charter.md)
 
 ## 0. 立项来历（用户原话）
 
@@ -169,8 +169,20 @@ run-accept 把绝对语料根写进 `acceptance.md`（`sessions` 恒为绝对路
 - 不承诺回执进入观察面状态派生（本卡只把它接入门禁校验；观察面仍从文件+事件派生）。
 - 手册批的代价 = 一次真模型重录；未重录不得声称 B 层绿。
 
-## 7. 证据落点
+## 7. 实施记录（2026-10-23）
+
+| 期 | 结果 | 证据 |
+|---|---|---|
+| P0 止血 | 完成：见证绑定 run（写强绑定 + 契约纪元 + present≥HITL2 顺序）、回执纯函数 + 门A 哈希复算、run-accept 旧 bundle guard、hygiene 族补齐、门④ D28 | commit `72f392a`；[P0 证据](../research/d28-witness-binding/2026-10-23-p0-witness-receipts.md) |
+| P1 合同自洽 | 完成：手册/NODES/guides/lead skill 的 `final/vN` = 交付副本；见证绑定句进手册；四角色真模型重录 | commit `70a68e4`；`snapshot-replay-smoke` 4 场景 ALL PASS |
+| P2 测试资产 | 完成：witness 13 / run-receipt 7 / schema-scan +7 / charter 契约 7 / node-gate +1 / run-state+dashboard+audit 各 +1 | `pnpm test` **708 pass** |
+| P3 非回归 | 完成：`pnpm verify` 全绿、`gates-smoke` 77 例全绿、`snapshot-replay` ALL PASS；旧 bundle 零改写 | 本卡 §7 |
+
+**未跑**：L2 安装验收（非发布轮）· 正式 lead 盲测（沿用宪章卡 §16 的仪器缺口）· `preset-smoke`
+全挂载（预检绿，`DSH_SMOKE_REAL=1` 档本轮未跑）。
+
+## 8. 证据落点
 
 - 本卡 §1/§2 = 审查实测；逐期结果回写本卡 §8（实施记录）与
-  [`_backlog/research/d28-witness-binding/`](../research/d28-witness-binding/)（命令 + 结果 + 红证）。
-- 规范正文更新 = [D28 RFC](../../notes/implemented/2026-10-23-run-bundle-charter.md)。
+  [`_backlog/_archived/research/d28-witness-binding/`](../research/d28-witness-binding/)（命令 + 结果 + 红证）。
+- 规范正文更新 = [D28 RFC](../../../notes/implemented/2026-10-23-run-bundle-charter.md)。
