@@ -928,12 +928,19 @@ async function pass5FinalDeliveryPhase() {
     const statusChip = page.getByRole('tab', { name: /研究状态/ }).first()
     if (await statusChip.isVisible().catch(() => false)) {
       await statusChip.click({ timeout: 5_000 }).catch(() => {})
-      const statusFold = page.getByText('还不满意？三种改法').first()
-      const statusFoldVisible = await statusFold.isVisible().catch(() => false)
-      if (statusFoldVisible) await statusFold.click({ timeout: 3_000 }).catch(() => {})
-      const statusText = statusFoldVisible ? await paneTextOf(page) : ''
-      step(statusFoldVisible && statusText.includes('补研究') && statusText.includes('这份太浅'),
-        '状态页 ⑤：已交付后的三种改法折叠块（与终稿页脚同源文案）', statusFoldVisible ? 'fold expanded' : '缺折叠块')
+      const statusPane = await paneTextOf(page)
+      // ⑤ 的折叠块只在「本会话 present 见证在窗内」时渲染（交付态=事件，不是 final 在场）。
+      // 冷会话的 present 可能已滑出尾窗 → 如实 SKIP，不把"这窗口没交付态"记成渲染缺陷。
+      if (!statusPane.includes('已交付')) {
+        skipped.push('状态页 ⑤ 折叠块：交付目标会话的 present 不在尾窗（⑤ 无「已交付」）')
+      } else {
+        const statusFold = page.getByText('还不满意？三种改法').first()
+        const statusFoldVisible = await statusFold.isVisible().catch(() => false)
+        if (statusFoldVisible) await statusFold.click({ timeout: 3_000 }).catch(() => {})
+        const statusText = statusFoldVisible ? await paneTextOf(page) : ''
+        step(statusFoldVisible && statusText.includes('补研究') && statusText.includes('这份太浅'),
+          '状态页 ⑤：已交付后的三种改法折叠块（与终稿页脚同源文案）', statusFoldVisible ? 'fold expanded' : '缺折叠块')
+      }
     } else {
       skipped.push('状态页 ⑤ 折叠块：交付目标会话无研究状态 tab')
     }
