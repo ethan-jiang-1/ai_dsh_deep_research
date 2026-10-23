@@ -6,7 +6,7 @@
 
 - [2026-10-23-rerun-dissatisfaction-triage.md](2026-10-23-rerun-dissatisfaction-triage.md) — rerun 的不满转接：用户说法 ↔ 我们的手段（推敲中：七类不满 → 四种手段的分诊词表、HITL2 措辞、报告末节与交付后出口）。
 （rerun 版本面与图谱表达已结并归档——见 [settled 池](../_archived/settled_issues/README.md)。）
-（当前无在办问题卡；动态 DAG、稳定节点身份、方法库主界面迁移、W<wave>.<index> 节点/WAVE 层均已结并归档到 [settled 池](../_archived/settled_issues/README.md)。）
+（动态 DAG、稳定节点身份、方法库主界面迁移、W<wave>.<index> 节点/WAVE 层均已结并归档到 [settled 池](../_archived/settled_issues/README.md)。）
 
 ## 最近归档
 

@@ -1349,12 +1349,12 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
 
 // ══ 域 E · 工作区与生成物（运行场合同/手册预算/种子新鲜度/分发导出） ══
 
-// ── workspace-contract（研究手册 + 六件 run bundle 模板在位；bundle 目录
+// ── workspace-contract（研究手册 + templates/run/ 全表在位；bundle 目录
 //    drt_<slug>/ 运行时由 lead 创建，无静态目录可查——D17 目录契约）──
 {
   const gate = 'workspace-contract';
   if (!existsSync(join(ROOT, 'research-workspace', 'AGENTS.md'))) fail(gate, 'research-workspace/AGENTS.md 不存在');
-  for (const t of ['question.md', 'topics.md', 'leads.md', 'evidence-entry.md', 'findings.md', 'final.md']) {
+  for (const t of ['run.md', 'question.md', 'topics.md', 'plan.md', 'leads.md', 'evidence-entry.md', 'findings.md', 'final.md']) {
     if (!existsSync(join(ROOT, 'research-workspace', 'templates', 'run', t)))
       fail(gate, `templates/run/ 缺模板 ${t}`);
   }

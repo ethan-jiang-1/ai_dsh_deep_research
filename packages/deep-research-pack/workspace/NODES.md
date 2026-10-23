@@ -2,7 +2,8 @@
 
 > 正本地位：本表由推敲卡 2026-09-28-node-io-schema 定稿（2026-09-29 用户逐节点过目）。
 > 状态合同（run bundle / session log / goal·任务板 / 观察面的 canonical 与恢复优先级）正本 =
-> 仓库 docs/design/50-agent-loop-and-state.md——本表只持节点 I/O；随包部署的种子不带仓内链接，故此处纯文本指路。
+> 仓库 docs/design/50-agent-loop-and-state.md；D28 后位置=操作桶、状态从内容读，读序/状态头 =
+> 研究手册 §状态头、读序与恢复——本表只持节点 I/O；随包部署的种子不带仓内链接，故此处纯文本指路。
 > 三要领 = **文件即接口**（节点之间只传 bundle 文件）/ **在场即完成**（输出在场且必备件齐
 > = 节点完成）/ **模板即 schema 实例**（字段级契约住 templates/run/，不另造格式清单）。
 > 加节点/调节点 = 改本表 + 同步 cockpit 渲染与步序正本（程序 = 开发仓
@@ -24,19 +25,19 @@
 | 节点 | 输入（读） | 输出（写） | 下游可开工判据 |
 |---|---|---|---|
 | 立项（HITL1，两段卡） | 用户三问答案 + 计划确认拍板（quick_factual 豁免第二段） | question.md（问题定稿 + Purpose + RQ 分解 + Scope/Constraints + 研究方法节〔本次实际采用〕+ HITL1 Snapshot 含研究方法与计划确认行 + §Decisions 第 1 条含计划确认拍板）+ topics.md（T# + must_answer 2–5 问 + scope_role + depends_on） | 两文件在场 |
-| 组队 | topics.md | spawn 的队员 + plan.md（lead 过程件：节点 id/parent/lifecycle/kind/owner_role/deps/output/acceptance/budget/depth/task_id + 图版本 + 重写记录（W<wave>.<index>；Wave 计算；stage 派生）；每次重写前把旧版落 `plan/vN.md` 快照，plan.md 唯一当前版） | 在场性随立项；lead 按 plan.md 的图派工 |
+| 组队 | topics.md | spawn 的队员 + plan.md（lead 可选加速器：节点 id/parent/lifecycle/kind/owner_role/deps/output/acceptance/budget/depth/task_id + 图版本 + 重写记录（W<wave>.<index>；Wave 计算；stage 派生）；在场时必须有 `## 剩余工作`（未完成节点+owner+next，全图可选）；每次重写前把旧版落 `plan/vN.md` 快照） | 在场性随立项；lead 按 plan.md 的图派工 |
 | 侦察 wave0（scout） | topics.md | leads.md（每条：方向 + 状态〔建议挖深/已排除+原因〕+ 支持来源分级 + 检索器〔单一达标「单检索器——待破」〕+ 关键线索 + 建议 owner 对应 topic） | leads.md 在场 |
 | 挖掘 wave1（analyst） | leads.md（建议挖深条）+ topics.md | evidence/*.md（frontmatter 七字段 + 原文摘录 + 解读 + Question List） | 卡片在场 + 硬字段齐（evidence-audit 机械把守） |
 | 综合 wave2（synthesis） | evidence/ 全部 + topics.md | findings.md（F# 结论 + 支撑证据 + gap 四态）+ final.md 当前版（run 根；版本记账归 final/） | findings + final 当前版在场 |
-| 审查（critic） | findings.md + final 当前版 + evidence/ | review.md（readiness: PASS/FAIL + CRITICAL/MAJOR 清单） | review 在场且 readiness 判完；PASS = HITL2 前置 |
+| 审查（critic） | findings.md + final 当前版 + evidence/ | review.md（末尾固定 `## readiness（终局）: PASS|FAIL` + CRITICAL/MAJOR 清单；历史轮不夺权） | review 在场且终局块判完；PASS = HITL2 前置 |
 | 交付审阅（HITL2） | review.md + final 当前版 | question.md §Decisions 追加拍板行 | **§Decisions 行在场**（node-gate 门③） |
-| 交付 | 拍板分支后果 | final/ 版本记账（vN.md）+ present 声明 + 当前 bundle 对应的可解析操作侧 audit.md；同 bundle rerun 另加 question.md 的 `> rerun: vN · kind · 日期` 行 | **版本记账 + present + 报告摘要与 CRITICAL 节一致且 `CRITICAL=0`**（present = node-gate 门②）；`final.md` 是工作稿、`final/vN` 才是版本账 |
+| 交付 | 拍板分支后果 | final/ 版本记账（vN.md）+ `deliverables/presented`（指 final/vN）+ 当前 bundle 对应的可解析操作侧 audit.md；ops `run-accept` 绿后写 delivered.json/manifest.json/acceptance.md；同 bundle rerun 另加 question.md 的 `> rerun: vN · kind · 日期` 行 | **版本记账 + presented（指 final/vN）+ 报告摘要与 CRITICAL 节一致且 `CRITICAL=0`**（present = node-gate 门②）；`final.md` 是工作稿、`final/vN` 才是版本账 |
 
 **输入侧规矩**：硬输入清单 = 上表"输入（读）"列；缺件 = 本节点亮红灯而非开工，下游对缺失
 输入只有两个动作——上报 lead 或等，**没有"瞎猜补全"这个选项**。清单检查由脚本做，不加记账仪式。
-**plan.md 边界**：`plan.md` 是组队节点的 lead 过程件（执行图 + 重写记录），**不是交付门**——
-`schema-scan`/`node-gate` 不检查它；Team 任务板是当前会话的执行镜像，恢复时按 plan 的 W（legacy N）节点
-重建任务（`task_id` 只是会话映射）。
+**plan.md 边界**：`plan.md` 是可选加速器（执行图 + 重写记录），**不是交付门**——`schema-scan`/
+`node-gate` 不检查全图；在场时 `## 剩余工作` 必须能推出“未完成节点+owner+next”（D28/Q3-A）。
+Team 任务板是当前会话的执行镜像，恢复时按该节重建（`task_id` 只是会话映射）。
 **委派-收活同构**（2026-10-06 起，oss-dr 借鉴）：lead 派工的验收判据（team-assembly 派发
 五件③④）在收活时逐条机械核验；判不了的判据显式标 **UNVERIFIED**（固定标记词，逐字使用——
 机械可检索，与"单源——待破"同款；第三态：不是 PASS 也不是 FAIL，交 critic 狩猎或人工核），

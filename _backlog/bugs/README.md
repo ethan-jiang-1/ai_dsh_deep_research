@@ -10,7 +10,7 @@
 
 ## 活跃列表
 
-（当前无活跃缺陷卡；BUG-043 已修归档。）
+（当前无活跃缺陷卡。2026-10-23 宪章复核发现的历史偏差按 **grandfather** 处理：只读证据、不建卡、不修、不追改；它们只用于约束新 run 的契约，记录 = [复核证据](../research/run-bundle-charter/2026-10-23-issue-review-verification.md)。）
 
 ## 最近归档
 

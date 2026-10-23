@@ -79,7 +79,7 @@ export function sessionTitleOf(events) {
 }
 
 /**
- * 工作区 run bundle 清单（位置=状态：工作区根 drt_* = 在飞；已交付归 archive/ 不在此列）。
+ * 工作区根的 run bundle 清单（**发现用**；D28 位置=操作桶，不代表在飞/已交付）。
  * **只列清单，不猜 active**：会话 → bundle 的归属必须走 `sessionBindingOf`（bundle-bind，
  * 写强读弱）。旧版按字典序取最后一个当 activeBundle，在多 run 并存时把会话绑到别的 bundle
  * （2026-10-20 审计 P0-5 实测：r1 会话被报成 semver）；同款启发式 2026-10-11 已在
@@ -90,6 +90,21 @@ export function bundleStateOf(wsRoot) {
   return {
     bundles: existsSync(wsRoot) ? readdirSync(wsRoot).filter((d) => d.startsWith('drt_')) : [],
   }
+}
+
+/**
+ * 会话绑定的 bundle 目录（D28 三操作桶；根优先，其次 archive/、_abandoned/）。
+ * 位置只用于发现，不参与状态判定；同名多处并存时根优先，不猜“哪个才对”。
+ * @param wsRoot 研究工作区根。@param bundleName `drt_<slug>` 目录名。
+ * @returns 绝对/相对路径 | null。
+ */
+export function bundleDirOf(wsRoot, bundleName) {
+  if (!wsRoot || !bundleName) return null
+  for (const base of [wsRoot, join(wsRoot, 'archive'), join(wsRoot, '_abandoned')]) {
+    const p = join(base, bundleName)
+    if (existsSync(p)) return p
+  }
+  return null
 }
 
 /**
@@ -112,8 +127,13 @@ export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false }) 
     : {}
   const binding = readable ? sessionBindingOf(events) : { slug: undefined, boundBy: undefined, kickoffSeen: false }
   const activeBundle = typeof binding.slug === 'string' ? `drt_${binding.slug}` : null
+  const bundleDir = activeBundle === null ? null : bundleDirOf(wsRoot, activeBundle)
   // null = 无绑定/不可读，不能判；false = 绑定的 bundle 无 final；true = 有。
-  const finalWritten = activeBundle === null ? null : existsSync(join(wsRoot, activeBundle, 'final.md'))
+  // D28：final 判定跨三操作桶，不因归档/停放把已落 final 误报成未落。
+  const finalWritten = bundleDir === null ? null : existsSync(join(bundleDir, 'final.md'))
+  const bundleLocation = bundleDir === null ? null
+    : bundleDir === join(wsRoot, 'archive', activeBundle) ? 'archive'
+      : bundleDir === join(wsRoot, '_abandoned', activeBundle) ? 'abandoned' : 'root'
   return {
     readable,
     events: events.length,
@@ -130,6 +150,7 @@ export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false }) 
     turnOpen,
     ...bundle,
     activeBundle,
+    bundleLocation,
     bundleBinding: binding.boundBy ?? null,
     finalWritten,
     // runSettled = 回合已终 + **本会话绑定 bundle** 的 final 在场。无绑定 → false（未知不是落定）；

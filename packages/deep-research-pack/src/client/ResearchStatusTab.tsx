@@ -7,15 +7,16 @@
  *      在场性折算——两段数据源分开，HITL1 等待时 bundle 未建而锚点仍在场）；
  *   ③ 研究问题行（question.md 首行，剥 markdown 强调符）；
  *   ④ 团队动态 = 人性化活动流（activity-fold：🔍/👥/💬/📦，噪音过滤——**原始事件类型名不出正文**）；
- *   ⑤ 证据概览 + 交付状态（evidence/ 计数 + final 在场 → ✅ 已交付 + rerun 三分图例）；
+ *   ⑤ 证据概览 + 交付状态（evidence/ 计数 + `deliverables/presented` 见证 → ✅ 已交付 + rerun 三分图例）；
  *   ⑥ 决策诚实线（停靠点已过 → 指路 question.md §Decisions——谁答的不复制进 UI，家在文件）；
  *   ⑦ 队员动态折叠区（member-activity-stream，2026-10-10 定夺：agentTeam 投影取 roster（队员
  *      会话 id 的唯一发现源——spawn 返回不带 id，通道探明实证）→ 多路 follow 队员会话 →
  *      member-activity 折算检索/抓取/出错行，每人一节默认折叠；任务粒度归 ui-agent-team 任务板）。
  *
  * 会话绑定（RFC right-pane-ux-debt，2026-09-28）：渐进面只显示**本会话自己的** run bundle
- * （bundle-bind：journal 工具调用路径识别 `drt_<slug>/`），位置=状态两个位置都认——根（在飞）
- * 与 archive/（已交付）；未绑定（journal 已到但无 bundle 动作）时如实显示提示行，不显示别家数据。
+ * （bundle-bind：journal 工具调用路径识别 `drt_<slug>/`），三个操作桶都认（根 / archive/ /
+ * _abandoned/）——位置只用于发现，状态从内容读（D28）；未绑定（journal 已到但无 bundle 动作）
+ * 时如实显示提示行，不显示别家数据。
  *
  * 挂起信号显性化（同 RFC）：pending 迁移（false→true）时调用注入的 `revealStatusTab`（=
  * `sidebarRight.openTab('research-status')`——vendor 契约：落定时右栏同步骤展开）；页签体
@@ -184,8 +185,8 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     let stopped = false
     const scan = async () => {
       try {
-        // 位置=状态**三位置**：根（在飞）优先，archive/（已交付）次之，_abandoned/（未交付停放，
-        // 2026-10-16 立）末之——会话绑定的 run 三处都认：停放的 bundle 照样是这场会话的工作产物，
+        // D28 三操作桶：根 / archive/ / _abandoned/ 只用于发现，先拼出候选路径；
+        // 状态从文件内容 + presented 事件读——停放的 bundle 照样是本会话的工作产物，
         // 显示其渐进面比显示"缺"更如实（不认第三处 = 移出活动区的 run 在驾驶舱里凭空消失）。
         // slug 不含 drt_ 前缀（bundle-bind 谓词剥掉），目录名带前缀——拼回。
         for (const base of [`drt_${boundSlug}`, `archive/drt_${boundSlug}`, `_abandoned/drt_${boundSlug}`]) {
@@ -285,7 +286,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   )
 
   // rerun 版本面（只读投影）：交付版本由 present 见证 + `final/vN` 版本账推定；
-  // `final.md` 是工作稿，不再冒充已交付（D17 同 bundle rerun 的表达缺口）。
+  // `final.md` 是工作稿，不冒充已交付；交付由 `deliverables/presented` + final/vN 见证（D28）。
   const hitl2Pending = anchors.find((a) => a.key === 'anchor-2')?.state === 'pending'
   const versionFace: RunVersionFace | null = useMemo(
     () => face === null

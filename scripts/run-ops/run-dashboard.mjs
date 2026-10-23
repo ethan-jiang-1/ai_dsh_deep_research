@@ -11,7 +11,7 @@
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { listScenes, sceneState, buildModel, deriveStep, detectHitlWait, readGuiBase, renderHtml, isArchivedScene } from '../lib/run-dashboard-core.mjs';
+import { listScenes, sceneState, buildModel, deriveStep, detectHitlWait, readGuiBase, renderHtml, isArchivedScene, isParkedScene } from '../lib/run-dashboard-core.mjs';
 
 // ── CLI ─────────────────────────────────────────────────────────────────────
 
@@ -39,10 +39,11 @@ function main() {
   const generate = () => {
     const scenes = listScenes();
     const dir = latest ? (scenes[0]?.dir ?? null) : runDir;
-    // 归档标注（判据正本 = core isArchivedScene）：全归档态下 --latest 会把最新归档场当
-    // 「当前 run」报——stdout 行加标记，防只看一行误以为在飞（HTML 内早有归档标注）。
+    // 桶标注（判据正本 = core isArchivedScene/isParkedScene）：全归档/停放态下 --latest 会把
+    // 最新桶场当「当前 run」报——stdout 行加标记，防只看一行误读（D28）。
     const sceneMeta = dir !== null ? scenes.find((s) => resolve(s.dir) === resolve(dir)) : undefined;
     const archived = sceneMeta !== undefined && isArchivedScene(sceneMeta);
+    const parked = sceneMeta !== undefined && isParkedScene(sceneMeta);
     const model = dir
       ? buildModel(dir)
       : { runDir: '(无 run)', slug: '未开始', generatedAt: new Date().toISOString(), missing: ['drt_<slug>/'], question: null, topics: [], evidence: [], leads: [], findings: [], review: null, final: null, journal: [], stats: { evidence: 0, drafts: 0, lastModified: null } };
@@ -54,7 +55,7 @@ function main() {
     const html = renderHtml(model);
     if (out) {
       writeFileSync(out, html);
-      console.error(`run-dashboard: 写 ${out}（run: ${model.slug}${archived ? '（已归档——不在飞，交付后住 research-workspace/archive/）' : ''}${dir ? '' : '，等待 lead 建 drt_<slug>/'}${model.hitlWait.length ? '，HITL 等待 ×' + model.hitlWait.length : ''}）`);
+      console.error(`run-dashboard: 写 ${out}（run: ${model.slug}${archived ? '（已归档——操作桶，不证明交付）' : parked ? '（停放——操作桶，不证明未交付/已交付）' : ''}${dir ? '' : '，等待 lead 建 drt_<slug>/'}${model.hitlWait.length ? '，HITL 等待 ×' + model.hitlWait.length : ''}）`);
     } else {
       process.stdout.write(html);
     }

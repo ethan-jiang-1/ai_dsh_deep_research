@@ -278,7 +278,7 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
     if (slug === undefined) { setAdoption({ kind: 'no-run', adopted: null, origin: null, requirements: null }); return }
     let stopped = false
     const scan = async () => {
-      // 三位置：根（在飞）优先 → archive/（已交付）→ _abandoned/（未交付停放）——与状态页签同款
+      // D28 三操作桶：根 → archive/ → _abandoned/ 只用于发现，不把位置当交付状态（与状态页签同款）
       // 口径（会话绑定的 run 三处都认，移出活动区不在驾驶舱里凭空消失）。
       for (const candidate of [`drt_${slug}`, `archive/drt_${slug}`, `_abandoned/drt_${slug}`]) {
         if (stopped) return

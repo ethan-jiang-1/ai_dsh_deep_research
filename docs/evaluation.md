@@ -39,7 +39,7 @@
 | `client-half` | pack client 半声明闭环：`exports ./client` ⟺ `dsh.client` 双向一致（声明面归本门禁，安装形状归 L2 release-smoke） | [release-smoke-hardening Note](../notes/implemented/2026-10-09-release-smoke-hardening.md)；gates-smoke `client-half-no-export` / `client-half-no-decl` 常驻案例 |
 | `guard-red-record` | `test/it` 标题串带 BUG-nnn = 守卫声明：事故卡双址可解析 + 同文件逐编号留证块（负例/夹具二形态），零声明被扫到即红 | [guard-red-record Note](../notes/implemented/2026-10-09-guard-red-record.md)；gates-smoke 两案例常驻 |
 | `row-deps` | preset 与 bundle 行引用的 `@deepseek-ai/*` 全在 peerDependencies | [m2-p1-run-channel Note](../notes/implemented/2026-09-24-m2-p1-run-channel.md) |
-| `workspace-contract` | 研究手册 + 六件 run bundle 模板在位；`$DSH_HOME/AGENTS.md` 化石镜像不在场（手册唯一定居点 = 会话 cwd 注入） | [noise-sweep Note](../notes/implemented/2026-09-24-noise-sweep.md) |
+| `workspace-contract` | 研究手册 + `templates/run/` 全表在位；`$DSH_HOME/AGENTS.md` 化石镜像不在场（手册唯一定居点 = 会话 cwd 注入） | [noise-sweep Note](../notes/implemented/2026-09-24-noise-sweep.md) |
 | `handbook-budget` | 手册注入字节预算：逐 preset maxBytes 声明齐且同值，手册字节数 + 1024B render 余量 ≤ maxBytes | [company 钉版复核 Note](../notes/implemented/2026-10-09-company-repin-review.md)；gates-smoke 三形态常驻案例 |
 | `pack-contract-sync` | pack 的 tracked yml/md 文本零 `runs/` 旧契约路径（D17） | 反证 = D17 事故 2 真实红实录（verify 逐文件点名残留 → 同 commit 修复） |
 | `note-format` | 活动 Note 裸状态行（值域与目录互验）；proposed/ 另需输掉的方案；implemented/ 需「决定/输掉的方案/实际跑过的验证」三节或 grandfather；rejected/ 保留提案体 | [note-lifecycle-absorption](../notes/implemented/2026-09-24-note-lifecycle-absorption.md) + [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) + 证据节断言二轮复核 = [推敲卡](../_backlog/_archived/settled_issues/2026-10-08-sdlc-reference-absorption.md) |

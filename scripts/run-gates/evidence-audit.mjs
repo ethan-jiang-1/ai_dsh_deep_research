@@ -25,8 +25,8 @@
 // scripts/lib/evidence-audit-core.mjs（keyless 纯逻辑，tests 消费——tests/ 层禁子进程，
 // keyless 测试走纯 .jsonl 夹具直调）；本文件 = CLI 驱动壳 + zstd 日志 reader（多帧拼接
 // CLI 可解全帧）注入。
-// 用法：node scripts/run-gates/evidence-audit.mjs <run-bundle-dir> [--sessions <会话根>]（缺省 $DSH_HOME/sessions）
-//       node scripts/run-gates/evidence-audit.mjs --latest（取 research-workspace 最新 drt_*——根[在飞]与 archive/[已交付]并扫）
+// 用法：node scripts/run-gates/evidence-audit.mjs <run-bundle-dir> [--sessions <会话根>] [--write]（缺省 $DSH_HOME/sessions）
+//       node scripts/run-gates/evidence-audit.mjs --latest [--write]（取 research-workspace 最新 drt_*——根 / archive/ / _abandoned/ 三桶并扫）
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -54,6 +54,7 @@ function readLog(p) {
 if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const argv = process.argv.slice(2)
   const latest = argv.includes('--latest')
+  const noWrite = !argv.includes('--write') || argv.includes('--no-write')
   const sessionsIdx = argv.indexOf('--sessions')
   // 会话根解析（2026-09-26 实测修复）：**不能盲信继承来的 DSH_HOME**。实测：在日用 GUI 的 shell 里
   // DSH_HOME 常已被设成 `~/.dsh`（日用 home），于是本脚本会去审计**另一个 home 的会话**——
@@ -70,12 +71,12 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
   const bundleArg = argv.find((a) => !a.startsWith('--') && a !== sessionsRoot)
   let bundleDir = null
   if (latest) {
-    // 位置=状态（D17）：在飞 bundle 住工作区根，已交付的由操作侧移入 archive/——两处并扫取
-    // mtime 最新；同名时根优先（在飞态是正本，archive 场是历史）。两处全空 → 走用法红（防空语料）。
+    // D28：根 / archive/ / _abandoned/ 都是操作桶，--latest 三处并扫取 mtime 最新；
+    // 同名时根优先（只作发现，不把位置当状态）。三处全空 → 走用法红（防空语料）。
     const ws = join(ROOT, 'research-workspace')
     const cands = []
     const seen = new Set()
-    for (const dir of [ws, join(ws, 'archive')]) {
+    for (const dir of [ws, join(ws, 'archive'), join(ws, '_abandoned')]) {
       if (!existsSync(dir)) continue
       for (const d of readdirSync(dir)) {
         if (!/^drt_/.test(d) || seen.has(d)) continue
@@ -94,11 +95,11 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
     process.exit(2)
   }
   const { stats, report, criticalCount } = auditBundle(bundleDir, sessionsRoot, { readLog })
-  writeFileSync(join(bundleDir, 'audit.md'), report)
+  if (!noWrite) writeFileSync(join(bundleDir, 'audit.md'), report)
   console.log(`evidence-audit: ${stats.evidence} 份证据 · URL 溯源 ${stats.urlOk}/${stats.urlTotal} · `
     + `source_url 真抓过 ${stats.srcFetched}（未抓 ${stats.srcNeverFetched}）· `
     + `摘录回溯 ${stats.quoteOk}/${stats.quoteTotal}（复合 ${stats.quoteComposite} / 不符 ${stats.quoteBad}）· `
     + `final 链 ${stats.finalRefs - stats.finalBroken}/${stats.finalRefs}`)
-  console.log(`  发现：CRITICAL ${stats.critical} · MAJOR ${stats.major} · INFO ${stats.info} —— 报告已写 ${join(bundleDir, 'audit.md')}`)
+  console.log(`  发现：CRITICAL ${stats.critical} · MAJOR ${stats.major} · INFO ${stats.info} —— ${noWrite ? '报告未写（默认只读；--write 才落盘）' : `报告已写 ${join(bundleDir, 'audit.md')}`}`)
   process.exit(criticalCount === 0 ? 0 : 1)
 }

@@ -11,9 +11,9 @@
       "fixture": "session.v4.jsonl",
       "renderExpected": "ui.expected.md",
       "source": {
-        "codeAnchor": "2afdf52adaf685cfe776c725980d50767aa49518",
+        "codeAnchor": "unknown-historical",
         "vendor": "687f282e8625c6b8d11ff58211a90524be2e4317",
-        "recordedAt": "2026-10-22T18:26:07.962Z",
+        "recordedAt": "2026-10-23T06:20:00.000Z",
         "recording": "live"
       }
     },
@@ -22,9 +22,9 @@
       "preset": "scout",
       "fixture": "scout/session.v4.jsonl",
       "source": {
-        "codeAnchor": "2afdf52adaf685cfe776c725980d50767aa49518",
+        "codeAnchor": "unknown-historical",
         "vendor": "687f282e8625c6b8d11ff58211a90524be2e4317",
-        "recordedAt": "2026-10-22T18:35:42.117Z",
+        "recordedAt": "2026-10-23T06:20:00.000Z",
         "recording": "live"
       }
     },
@@ -33,9 +33,9 @@
       "preset": "analyst",
       "fixture": "analyst/session.v4.jsonl",
       "source": {
-        "codeAnchor": "2afdf52adaf685cfe776c725980d50767aa49518",
+        "codeAnchor": "unknown-historical",
         "vendor": "687f282e8625c6b8d11ff58211a90524be2e4317",
-        "recordedAt": "2026-10-22T18:31:36.847Z",
+        "recordedAt": "2026-10-23T06:20:00.000Z",
         "recording": "live"
       }
     },
@@ -44,9 +44,9 @@
       "preset": "critic",
       "fixture": "critic/session.v4.jsonl",
       "source": {
-        "codeAnchor": "2afdf52adaf685cfe776c725980d50767aa49518",
+        "codeAnchor": "unknown-historical",
         "vendor": "687f282e8625c6b8d11ff58211a90524be2e4317",
-        "recordedAt": "2026-10-22T18:33:36.031Z",
+        "recordedAt": "2026-10-23T06:20:00.000Z",
         "recording": "live"
       }
     }

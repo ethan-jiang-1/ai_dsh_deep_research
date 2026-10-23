@@ -79,7 +79,7 @@ while (Date.now() < deadline) {
     process.exit(0)
   }
 }
-// 超时不是"没跑完"的同义词：交付归档后 bundleStateOf 只扫工作区根 drt_*（位置=状态），
-// finalWritten 恒 false → 盯旧会话永不落定。头注提示归档去向，防把归档读成未完成。
-console.log('STATE: TIMEOUT（bundle 已归档？→ research-workspace/archive/ 下找——归档后工作区根无 drt_*，finalWritten 恒 false，盯旧会话不会落定）')
+// 超时不是"没跑完"的同义词：D28 下 runStateOf 跨三操作桶找绑定 bundle 的 final；
+// 若仍超时，先查日志回退/绑定（不再把 archive 当成“final 恒 false”）。
+console.log('STATE: TIMEOUT（先查日志回退与会话绑定；归档/停放不再是“final 恒 false”的原因——D28）')
 process.exit(1)

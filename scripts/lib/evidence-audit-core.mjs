@@ -10,6 +10,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { splitFrontmatter } from './frontmatter.mjs'
+import { provenanceOf, sha256OfFile } from './provenance.mjs'
 
 /** 纯日志 reader：.jsonl 直读；.zstd 报线索后返回 null（跳过文件，语料缺失偏红方向）。
  *  zstd CLI 解压由驱动壳注入，本模块零子进程。 */
@@ -218,9 +219,22 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = plainLogReader 
       evidence.push(rec)
     }
   }
+  const prov = provenanceOf(bundleDir)
+  findings.push(...prov.findings)
+  const newRun = existsSync(join(bundleDir, 'run.md'))
+  const validLocal = new Map([...prov.records].filter(([, r]) =>
+    r.kind === 'local-file' && typeof r.sha256 === 'string'
+      && sha256OfFile(join(bundleDir, r.path)) === r.sha256))
   const corpus = buildCorpus(sessionsRoot, basename(bundleDir), readLog)
   if (basename(bundleDir) && corpus.windowFiles === 0) {
-    findings.push({ level: 'MAJOR', file: '—', kind: '语料窗零命中', detail: `没有会话日志提及 ${basename(bundleDir)}——审计对象与语料不匹配（核对 --sessions 根或 run 是否在本机跑过）；窗内 0 文件 = 三条溯源断言全部失据` })
+    findings.push({
+      level: prov.records.size > 0 ? 'INFO' : 'MAJOR',
+      file: '—',
+      kind: prov.records.size > 0 ? '语料缺席，provenance 离线' : '语料窗零命中',
+      detail: `没有会话日志提及 ${basename(bundleDir)}——` + (prov.records.size > 0
+        ? `以 provenance/ 的 ${prov.records.size} 条离线证明为准（不冒充会话审计）`
+        : '审计对象与语料不匹配（核对 --sessions 根或 run 是否在本机跑过）；窗内 0 文件 = 三条溯源断言全部失据'),
+    })
   }
   const corpusUrlSet = new Set([...corpus.webUrls].map(stripTrailing))
 
@@ -250,7 +264,13 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = plainLogReader 
     //    source_url 是"**真实抓取过**的 URL"，而原审计只要求它出现在**任何**工具事件里——
     //    搜索结果列表里出现过就算过。实测两场 run 共 13 张卡的 source_url **从未被抓取**。
     const src = rec.fm?.source_url
-    if (typeof src === 'string' && src.length > 0) {
+    const id = rec.file.replace(/\.md$/, '')
+    const local = validLocal.get(id)
+    const srcIsLocal = typeof src === 'string' && src.startsWith('file://')
+    if (srcIsLocal) {
+      if (local) srcFetched += 1
+      else findings.push({ level: newRun ? 'MAJOR' : 'INFO', file: rec.file, kind: '本地源缺 provenance', detail: `${src.slice(0, 100)}——新 run 用 provenance/<id>.json（kind=local-file）离线证明；旧场只提示` })
+    } else if (typeof src === 'string' && src.length > 0) {
       const su = stripTrailing(src)
       if (fetchedOkSet.has(su)) srcFetched += 1
       else {
@@ -265,6 +285,14 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = plainLogReader 
     }
     for (const u of rec.claimedUrls) {
       urlTotal += 1
+      if (u.startsWith('file://')) {
+        if (local) { urlOk += 1; continue }
+        if (newRun) {
+          findings.push({ level: 'MAJOR', file: rec.file, kind: '本地源缺 provenance', detail: `新 run 的 file:// 源需要 provenance/<id>.json：${u.slice(0, 100)}` })
+          continue
+        }
+        // 旧场保留原判（历史只读，不追改）——继续走下面的 CRITICAL 分支。
+      }
       if (corpusUrlSet.has(stripTrailing(u))) { urlOk += 1; continue }
       const host = hostOf(u)
       if (host !== null && hosts.has(host)) {

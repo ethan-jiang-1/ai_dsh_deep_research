@@ -19,9 +19,10 @@ import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/rev
 /** 多 run 场根（debug-dashboard-plus）：drt 正规场 + ad-hoc 场（无契约，标注呈现不隐藏） */
 const SCENE_ROOTS = [
   { dir: 'research-workspace', kind: 'drt', label: 'drt' },
-  // 归档场（2026-09-27）：已交付 run 移入 archive/ 后仍进多 run 总表（历史不丢）；
-  // label 区分归档，避免与活跃场混淆。
+  // 归档/停放场（D28：位置=操作桶，不是状态）：仍进多 run 总表（历史不丢）；
+  // label 区分桶，避免与根场混淆。
   { dir: 'research-workspace/archive', kind: 'drt', label: 'drt·归档' },
+  { dir: 'research-workspace/_abandoned', kind: 'drt', label: 'drt·停放' },
   { dir: 'runtime/harness-home/runs', kind: 'ad-hoc', label: 'ad-hoc·无契约' },
 ];
 /** lead 会话日志根（HITL 等待检测；选择器按 v4/v3 canonical 代际挑选一个物理日志）。 */
@@ -270,6 +271,11 @@ export function listScenes(roots = SCENE_ROOTS) {
  *  只问本函数不重复持知识）。label 缺席/无场 → false（不标注，不猜）。 */
 export function isArchivedScene(scene) {
   return typeof scene?.label === 'string' && scene.label.includes('归档');
+}
+
+/** 场是否停放场（D28：_abandoned = 操作桶，不是“未交付”状态证明）。 */
+export function isParkedScene(scene) {
+  return typeof scene?.label === 'string' && scene.label.includes('停放');
 }
 
 /** 场内进度速览（stat-only，不解析内容）：走到哪一步 / 完成几件。

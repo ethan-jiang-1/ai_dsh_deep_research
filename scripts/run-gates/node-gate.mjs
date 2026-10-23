@@ -34,7 +34,7 @@
 // scripts/lib/node-gate-core.mjs（keyless 纯逻辑，tests 消费）；本文件 = CLI 驱动壳 +
 // zstd 日志 reader（多帧拼接 CLI 可解全帧）注入。tests/ 层禁子进程，keyless 测试走纯
 // .jsonl 夹具直调（fixtures/node-gate/，先红后绿的永久反证记录）。
-// 用法：node scripts/run-gates/node-gate.mjs <run-bundle-dir> [--sessions <会话根>]
+// 用法：node scripts/run-gates/node-gate.mjs <run-bundle-dir> [--sessions <会话根>] [--write]
 //       node scripts/run-gates/node-gate.mjs --latest
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
@@ -97,7 +97,8 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
     console.error('node-gate: 用法 node scripts/run-gates/node-gate.mjs <run-bundle-dir> | --latest（bundle 不存在）')
     process.exit(2)
   }
-  const { gates, red } = gateBundle(bundleDir, sessionsRoot, { readLog })
+  const noWrite = !argv.includes('--write') || argv.includes('--no-write')
+  const { gates, red, unattested } = gateBundle(bundleDir, sessionsRoot, { readLog })
   // Markdown 报告渲染（2026-10-13 从 node-gate-core.gateBundle 移入——呈现归壳、判据归核；
   // tests 只断言 gates/red，渲染的唯一消费方就是本壳，格式逐字不变）。
   const report = `# Node Gate — ${basename(bundleDir)}（${new Date().toISOString()}）
@@ -124,11 +125,12 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
   console.log(`  A ${gates.delivery.detail}`)
   // 报告写入防护：tests/ 夹具区是 tracked 区——写报告=污染 git（2026-09-29 实测 6 个未跟踪文件，
   // 红证记录见 notes/implemented/2026-09-29-quality-evidence-loop.md）。夹具判定走上面的 stdout。
-  if (resolve(bundleDir).startsWith(join(ROOT, 'tests') + '/')) {
-    console.log('  报告写入跳过（tests/ 夹具区——防 tracked 区污染；判定如上）')
+  if (noWrite || resolve(bundleDir).startsWith(join(ROOT, 'tests') + '/')) {
+    console.log(`  报告写入跳过（${argv.includes('--write') ? 'tests/ 夹具区——防 tracked 区污染' : '默认只读；--write 才落盘'}；判定如上）`)
   } else {
     writeFileSync(join(bundleDir, 'node-gate.md'), report)
     console.log(`  报告已写 ${join(bundleDir, 'node-gate.md')}`)
   }
-  process.exit(red ? 1 : 0)
+  // exit 2 = UNATTESTED（证据缺席，不是通过也不是红）——verdict 契约同 scripts/AGENTS。
+  process.exit(red ? 1 : unattested ? 2 : 0)
 }

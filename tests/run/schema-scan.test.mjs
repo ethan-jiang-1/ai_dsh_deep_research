@@ -2,9 +2,11 @@
 // 纯 fs 直调（layering：无子进程）；夹具 mtime 随检出时间漂——断代用 dates 注入，不碰盘上时间。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { join, dirname } from 'node:path'
+import { cpSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { basename, join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { scanAll, journalFutureDate } from '../../scripts/lib/schema-scan-core.mjs'
+import { scanAll, scanBundle, hygieneOf, journalFutureDate } from '../../scripts/lib/schema-scan-core.mjs'
 
 const F = join(dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'schema-scan')
 const DATES = {
@@ -88,3 +90,42 @@ test('无类型标记而条件件缺席 → 维持违约（豁免依据必须是
   assert.equal(rows[0].exempt.length, 0)
   assert.equal(red, true)
 })
+
+test('run.md 在场但 contract/phase/next 非法：核心违约（D28）', () => {
+  const base = realpathSync(tmpdir())
+  const dir = mkdtempSync(join(base, 'dsh-schema-'))
+  try {
+    cpSync(join(F, 'drt-clean-post'), dir, { recursive: true })
+    writeFileSync(join(dir, 'run.md'), '# Run\n- contract: 2026/10/23\n- phase: nope\n- next:\n')
+    const row = scanBundle(dir)
+    assert.ok(row.core.some((c) => c.includes('run.md 的 contract')))
+    assert.ok(row.core.some((c) => c.includes('run.md 的 phase')))
+    assert.ok(row.core.some((c) => c.includes('run.md 缺 next')))
+  } finally {
+    if (dirname(dir) !== base || !basename(dir).startsWith('dsh-schema-')) throw new Error(`refusing cleanup: ${dir}`)
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('D28 新 run 卫生：绝对路径 / ../drt_ / 跨 bundle [来源:] → 核心违约；旧场不扫', () => {
+  const base = realpathSync(tmpdir())
+  const dir = mkdtempSync(join(base, 'dsh-hygiene-'))
+  try {
+    cpSync(join(F, 'drt-clean-post'), dir, { recursive: true })
+    writeFileSync(join(dir, 'run.md'), '# Run\n- contract: 2026-10-23\n- phase: research\n- next: W1\n')
+    writeFileSync(join(dir, 'final.md'), '# F\n/Users/me/secret\n../drt_other/evidence/x.md\n[来源: ../drt_other/evidence/x.md]\n')
+    const core = hygieneOf(dir)
+    assert.ok(core.some((c) => c.includes('绝对路径')))
+    assert.ok(core.some((c) => c.includes('../drt_')))
+    assert.ok(core.some((c) => c.includes('跨 bundle [来源:]')))
+    // 旧场（无 run.md）不扫
+    const old = mkdtempSync(join(base, 'dsh-hygiene-old-'))
+    try {
+      cpSync(join(F, 'drt-violating-pre'), old, { recursive: true })
+      assert.deepEqual(hygieneOf(old), [])
+    } finally { rmSync(old, { recursive: true, force: true }) }
+  } finally {
+    if (dirname(dir) !== base || !basename(dir).startsWith('dsh-hygiene-')) throw new Error(`refusing cleanup: ${dir}`)
+    rmSync(dir, { recursive: true, force: true })
+  }
+});

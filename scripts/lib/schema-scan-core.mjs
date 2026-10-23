@@ -39,6 +39,15 @@ export function deliveryDate(bundleDir) {
   )
 }
 
+/** 契约纪元（run.md 的 `contract:`，D28）：无 run.md → null（旧场走 mtime）；run.md 在场但
+ *  无合法日期 → ''（视为新契约、交给门禁判红，不静默回退 mtime）。 */
+export function contractEpochOf(bundleDir) {
+  const p = join(bundleDir, 'run.md')
+  if (!existsSync(p)) return null
+  const m = /^\s*[-*]?\s*contract\s*[:：]\s*(\d{4}-\d{2}-\d{2})\b/m.exec(readFileSync(p, 'utf8'))
+  return m?.[1] ?? ''
+}
+
 /** journal 未来日期异常（INFO 级，不计违约——日期契约违例线索，显性化不无视）。 */
 export function journalFutureDate(bundleDir, today) {
   const j = read(join(bundleDir, 'journal.md'))
@@ -68,6 +77,27 @@ const CONDITIONAL = [
  * 一个 bundle 的核心 schema 断言（在场级；括号内 = NODES.md 对应节点行）。
  * 返回 { slug, core, exempt, warn, tail }：core = 违约；exempt = 编制豁免注记；warn = 记账缺失提示。
  */
+/** D28 新 run 的 bundle 卫生：绝对路径 / `../drt_` / 跨 bundle `[来源:]` 一律核心违约。
+ *  旧场（无 run.md）不扫——历史只读、不追改。 */
+export function hygieneOf(bundleDir) {
+  const core = []
+  const walk = (dir) => {
+    for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, ent.name)
+      if (ent.isDirectory()) { walk(p); continue }
+      if (!ent.name.endsWith('.md')) continue
+      const text = readFileSync(p, 'utf8')
+      const rel = p.slice(bundleDir.length + 1)
+      if (text.includes('/Users/')) core.push(`${rel} 含绝对路径 /Users/（D28 新 run 禁）`)
+      if (text.includes('../drt_')) core.push(`${rel} 含跨 bundle 路径 ../drt_（D28 新 run 禁）`)
+      const cross = text.split('\n').find((l) => /\[来源:[^\]]*drt_/.test(l))
+      if (cross !== undefined) core.push(`${rel} 含跨 bundle [来源:]（D28 新 run 禁）`)
+    }
+  }
+  if (existsSync(join(bundleDir, 'run.md'))) walk(bundleDir)
+  return core
+}
+
 export function scanBundle(bundleDir) {
   const slug = basename(bundleDir)
   const core = []
@@ -95,6 +125,14 @@ export function scanBundle(bundleDir) {
   if (rv !== null && !/readiness[^\n]{0,40}(PASS|FAIL)/i.test(rv)) core.push('review.md 无 readiness 判定（节点6）')
   if (!has('final.md')) core.push('final.md 缺席于 run 根（节点5 当前版）')
   if (!has('final.md') && has('final/final.md')) core.push('final.md 位置漂移（在 final/ 里——2026-09-26 实测缺陷形态）')
+  const run = read(join(bundleDir, 'run.md'))
+  if (run !== null) {
+    core.push(...hygieneOf(bundleDir))
+    if (contractEpochOf(bundleDir) === '') core.push('run.md 的 contract 缺失或非法（D28）')
+    if (!/^\s*[-*]?\s*phase\s*[:：]\s*(briefing|research|synthesis|review|delivery|accepted|parked)\b/m.test(run))
+      core.push('run.md 的 phase 缺失或不在闭集（D28）')
+    if (!/^\s*[-*]?\s*next\s*[:：]\s*\S/m.test(run)) core.push('run.md 缺 next（D28）')
+  }
   const evDir = join(bundleDir, 'evidence')
   if (!existsSync(evDir)) core.push('evidence/ 缺席（节点4）')
   else if (!readdirSync(evDir).some((f) => f.endsWith('.md'))) core.push('evidence/ 空（节点4）')
@@ -107,7 +145,8 @@ export function scanAll(bundleDirs, { contractDate = CONTRACT_DATE, today, dates
   const now = today ?? toDateStr(new Date())
   const rows = bundleDirs.map((d) => {
     const b = scanBundle(d)
-    const date = dates[b.slug] ?? deliveryDate(d)
+    const epoch = contractEpochOf(d)
+    const date = dates[b.slug] ?? (epoch === null ? deliveryDate(d) : epoch === '' ? '9999-12-31' : epoch)
     const era = date === null ? 'undated' : date >= contractDate ? 'contract' : 'pre-contract'
     const future = journalFutureDate(d, now)
     return { ...b, date, era, future, red: b.core.length > 0 && era !== 'pre-contract' }

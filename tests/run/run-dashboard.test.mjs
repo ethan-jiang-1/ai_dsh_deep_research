@@ -113,7 +113,7 @@ test('渲染壳：关键区块与 meta refresh 在场', () => {
 // 测试内生成——node:zlib 原生，无子进程，layering 纪律不破）。
 import { mkdirSync, rmSync, writeFileSync, utimesSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { listScenes, sceneState, detectHitlWait, isArchivedScene } from '../../scripts/lib/run-dashboard-core.mjs';
+import { listScenes, sceneState, detectHitlWait, isArchivedScene, isParkedScene } from '../../scripts/lib/run-dashboard-core.mjs';
 import { toolCall, writeZstdLog } from '../fixtures/events.mjs';
 
 const mktmp = () => mkdirSync(join(tmpdir(), `dash-${Math.random().toString(36).slice(2)}`), { recursive: true });
@@ -289,4 +289,11 @@ test('deriveStep 保留 dashboard 内容解析语义，sceneState.done 保留文
     writeFileSync(join(root, 'question.md'), '# Question\n');
     assert.deepEqual(sceneState(root), { lastStep: 'team', done: 2 }, '组队在场性随立项计数');
   } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test('D28 桶标签：archive 是归档桶、_abandoned 是停放桶，都不当状态证明', () => {
+  assert.equal(isArchivedScene({ label: 'drt·归档' }), true);
+  assert.equal(isArchivedScene({ label: 'drt·停放' }), false);
+  assert.equal(isParkedScene({ label: 'drt·停放' }), true);
+  assert.equal(isParkedScene({ label: 'drt' }), false);
 });

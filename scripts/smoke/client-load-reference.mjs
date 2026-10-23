@@ -109,7 +109,7 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
   })()
 
   // 绑定 bundle 的磁盘真值（evidence 计数 / 交付态 / 问题行首行——与页签折算同口径；
-  // slug 无 drt_ 前缀、目录名有——拼回）。位置=状态**三位置**：工作区根（在飞）/ archive/
+  // slug 无 drt_ 前缀、目录名有——拼回）。D28 三操作桶：工作区根 / archive/
   // （已交付）/ _abandoned/（未交付停放，2026-10-16 立）——观测面按绑定会话找盘上真值，
   // 停在哪一处都是同一份 bundle（停放场照样有渐进面；不认第三处 = 会话绑定的 run 被判"缺"）。
   const bundleBaseOf = (slug) => {

@@ -310,6 +310,7 @@ export const CASES = [
     writeFileSync(lockPath, lines.join('\n'));
   } },
   { id: 'workspace-contract-template-missing', gate: 'workspace-contract', mutate: (dir) => rmSync(join(dir, 'research-workspace', 'templates', 'run', 'question.md')) },
+  { id: 'workspace-contract-run-template-missing', gate: 'workspace-contract', mutate: (dir) => rmSync(join(dir, 'research-workspace', 'templates', 'run', 'run.md')) },
   { id: 'dist-manual-version-drift', gate: 'dist-manual-version', mutate: (dir) => {
     const p = join(dir, '_dist', '安装手册.md');
     const t = readFileSync(p, 'utf8');

@@ -43,8 +43,8 @@
 //
 // bundle 渐进面断言（2026-09-26 接通，根因链见 notes/archived/2026-09-26-bundle-face-wiring.md；
 // 2026-09-28 起会话绑定——RFC right-pane-ux-debt：渐进面只跟本会话自己的 run）：
-// 渐进面读**会话 journal 工具调用路径绑定的 bundle**（bundle-bind 谓词），位置=状态两个位置
-// 都认（根=在飞 / archive/=已交付）。断言的磁盘认证源 = 磁盘侧扫出的最新绑定会话（跑过 run
+// 渐进面读**会话 journal 工具调用路径绑定的 bundle**（bundle-bind 谓词），D28 三操作桶
+// 都认（位置只用于发现，状态从内容读）。断言的磁盘认证源 = 磁盘侧扫出的最新绑定会话（跑过 run
 // 即有），其 bundle 的 evidence 计数/交付态/问题行以盘上真值对账——不再自造探针 bundle。
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -400,7 +400,7 @@ async function pass1BoundFacePhase() {
           uiFace = parseUiFace(seg, await faceRowText())
           diskSide = diskSideNow()
         }
-        // 渐进面硬断言（会话绑定 + 位置=状态两位置：证据计数/交付态/问题行与磁盘真值对账）
+        // 渐进面硬断言（会话绑定 + D28 三操作桶：证据计数/交付态/问题行与磁盘真值对账）
         // 摘要块就绪谓词（BUG-033，2026-10-17）：芯片（✅ 已交付 / 证据计数）与业务摘要块**不在同一帧**可用——
         // 摘要块滞后时落读会假红（合成水化延迟实测：读点命中 0/3、+1.5s 仍 0/3、+3.0s 才 3/3，而芯片
         // UI-✅/UI-face.delivered 一开始就在场）。处置 = **等显式状态**：有界轮询到摘要块（🎯 行）在场再判，

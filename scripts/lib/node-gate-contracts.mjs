@@ -1,5 +1,5 @@
 // node-gate-contracts.mjs — cross-gate contract dates and report parsers (keyless pure logic).
-import { deliveryDate } from './schema-scan-core.mjs'
+import { contractEpochOf, deliveryDate } from './schema-scan-core.mjs'
 import { terminalVerdictLine } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
 
 /** 门 L 契约日（2026-10-03 = RFC wave0-leads-polish 落地日；此前交付的 bundle 不追溯）。 */
@@ -18,10 +18,12 @@ export const HEADING_CONTRACT_DATE = '2026-10-06'
  *  存量缺口由该 RFC 对账步逐 bundle 处置，不机械翻旧账）。 */
 export const AUDIT_CONTRACT_DATE = '2026-10-08'
 
-/** 断代判定（各门共用形状）：asOf 注入日期优先、缺席回退交付日（deliveryDate = final.md
- *  mtime 族）；无日期可断 = 从严（false——可定日期而不定 = 逃逸口，schema-scan 成例）。 */
+/** 断代判定（各门共用形状）：asOf 注入日期优先；否则 run.md 的 contract epoch（D28）；
+ *  旧场无 run.md 才回退交付日（deliveryDate = final.md mtime 族）。无日期可断 = 从严
+ *  （false——可定日期而不定 = 逃逸口，schema-scan 成例）。 */
 export function isPreContract(bundleDir, asOf, contractDate) {
-  const date = asOf ?? deliveryDate(bundleDir)
+  const epoch = contractEpochOf(bundleDir)
+  const date = asOf ?? (epoch === null ? deliveryDate(bundleDir) : epoch === '' ? '9999-12-31' : epoch)
   return date !== null && date < contractDate
 }
 

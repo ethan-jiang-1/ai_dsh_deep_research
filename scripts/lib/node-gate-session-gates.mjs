@@ -3,6 +3,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { planCardsOf } from './plan-card.mjs'
 import { HITL_CONTRACT_DATE, PRE_CONTRACT_NOTE, decisionsLines, isPreContract, readinessOf } from './node-gate-contracts.mjs'
+import { contractEpochOf } from './schema-scan-core.mjs'
 
 /** 纯日志 reader：.jsonl 直读；.zstd 报线索后按空语料继续（语料缺失偏假红方向——红必须带线索）。
  *  zstd CLI 解压由驱动壳注入，本模块零子进程。 */
@@ -39,6 +40,130 @@ export function presentInLogs(sessionsRoot, slug, readLog = plainLogReader) {
   return walk(sessionsRoot)
 }
 
+const isLeadLog = (text) => {
+  const first = text.split('\n')[0]
+  try {
+    const h = JSON.parse(first)
+    return h?.type === 'session' && (h.delegationDepth ?? 0) === 0 && h.agentPreset === 'lead'
+  } catch { return false }
+}
+
+const hasLogFiles = (root) => {
+  if (!root || !existsSync(root)) return false
+  const walk = (dir) => {
+    for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, ent.name)
+      if (ent.isDirectory()) { if (walk(p)) return true; continue }
+      if (/\.jsonl(\.zstd)?$/.test(ent.name)) return true
+    }
+    return false
+  }
+  return walk(root)
+}
+
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+/**
+ * 门② 的结构化见证：`deliverables/presented` 事件的 files[].path（D28 新 run 用）。
+ * 只读 lead 顶层日志；路径按 `drt_<slug>/final[/vN].md` 精确匹配（前缀 slug 不算）。
+ * @returns {{status:'FOUND'|'NONE'|'UNATTESTED', detail:string, events:Array, logs:number}}
+ */
+export function presentedInLogs(sessionsRoot, slug, readLog = plainLogReader) {
+  const out = { status: 'UNATTESTED', detail: '会话语料缺席——present 无证据', events: [], logs: 0 }
+  const bare = String(slug ?? '').replace(/^drt_/, '')
+  if (!sessionsRoot || !bare || !existsSync(sessionsRoot)) return out
+  const re = new RegExp(`(?:^|/)(?:archive/|_abandoned/)?drt_${escapeRe(bare)}/(final(?:/v(\\d+))?\\.md)$`)
+  const walk = (dir) => {
+    for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, ent.name)
+      if (ent.isDirectory()) { walk(p); continue }
+      if (!/\.jsonl(\.zstd)?$/.test(ent.name)) continue
+      const text = readLog(p)
+      if (!text) continue
+      out.logs++
+      if (!isLeadLog(text)) continue
+      for (const line of text.split('\n')) {
+        if (!line.includes('"deliverables/presented"')) continue
+        let e
+        try { e = JSON.parse(line) } catch { continue }
+        if (e?.type !== 'deliverables/presented') continue
+        for (const f of Array.isArray(e.data?.files) ? e.data.files : []) {
+          const path = String(f?.path ?? '').replace(/\\/g, '/')
+          const m = re.exec(path)
+          if (m) out.events.push({ path, version: m[2] === undefined ? null : Number(m[2]), callId: e.data?.callId, turn: e.data?.turn })
+        }
+      }
+    }
+  }
+  walk(sessionsRoot)
+  if (out.logs === 0) return { ...out, detail: '会话语料无可用日志——present 无证据' }
+  if (out.events.length === 0) return { ...out, status: 'NONE', detail: '会话语料在场，但无指向本 bundle 的 deliverables/presented 事件' }
+  return { ...out, status: 'FOUND', detail: `deliverables/presented ${out.events.length} 条` }
+}
+
+/**
+ * 门③ 的结构化见证：`user-question-reply`（callId 绑定 ask 的 §Decisions 拍板行）。
+ * 只读 lead 顶层日志；要求 outcome=answered 且选定标签含「定稿」；代理标记随行。
+ * @returns {{status:'FOUND'|'NONE'|'UNATTESTED', detail:string, replies:Array, logs:number}}
+ */
+export function hitl2ReplyInLogs(sessionsRoot, slug, readLog = plainLogReader) {
+  const out = { status: 'UNATTESTED', detail: '会话语料缺席——HITL2 答复无证据', replies: [], logs: 0 }
+  if (!sessionsRoot || !slug || !existsSync(sessionsRoot)) return out
+  const collectLabels = (o, labels) => {
+    if (o === null || typeof o !== 'object') return
+    if (Array.isArray(o.selected)) labels.push(...o.selected.map(String))
+    else if (typeof o.selected === 'string') labels.push(o.selected)
+    if (typeof o.custom === 'string' && o.custom.trim() !== '') labels.push(o.custom)
+    for (const v of Object.values(o)) if (v !== null && typeof v === 'object') collectLabels(v, labels)
+  }
+  const walk = (dir) => {
+    for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, ent.name)
+      if (ent.isDirectory()) { walk(p); continue }
+      if (!/\.jsonl(\.zstd)?$/.test(ent.name)) continue
+      const text = readLog(p)
+      if (!text) continue
+      out.logs++
+      if (!isLeadLog(text)) continue
+      const asks = new Map()
+      for (const line of text.split('\n')) {
+        if (!line.includes('"tool/call"') || !line.includes('ask_user_question')) continue
+        let e
+        try { e = JSON.parse(line) } catch { continue }
+        if (e?.type !== 'tool/call' || e?.data?.name !== 'ask_user_question') continue
+        const args = String(e.data?.arguments ?? '')
+        if (/交付审阅|HITL2/.test(args)) asks.set(e.data?.callId, args)
+      }
+      if (asks.size === 0) continue
+      for (const line of text.split('\n')) {
+        if (!line.includes('user-question-reply')) continue
+        let e
+        try { e = JSON.parse(line) } catch { continue }
+        const items = Array.isArray(e?.data?.inserted) ? e.data.inserted : (e?.data?.source !== undefined ? [e.data] : [])
+        for (const item of items) {
+          const src = item?.source
+          if (src?.kind !== 'user-question-reply') continue
+          if (!asks.has(src.callId)) continue
+          if (src.outcome !== undefined && src.outcome !== 'answered') continue
+          const content = (Array.isArray(item.content) ? item.content : []).map((c) => c?.text ?? '').join('\n')
+          let parsed = null
+          try { parsed = JSON.parse(content) } catch { /* text reply */ }
+          const labels = []
+          collectLabels(parsed, labels)
+          if (labels.length === 0 && content.trim() !== '') labels.push(content.trim())
+          const label = labels.find((l) => /定稿/.test(l))
+          if (label === undefined) continue
+          out.replies.push({ callId: src.callId, label, proxy: /代理模拟|hitl-answer|代理代答/.test(content + asks.get(src.callId)) })
+        }
+      }
+    }
+  }
+  walk(sessionsRoot)
+  if (out.logs === 0) return { ...out, detail: '会话语料无可用日志——HITL2 答复无证据' }
+  if (out.replies.length === 0) return { ...out, status: 'NONE', detail: '会话语料在场，但无 callId 绑定的 user-question-reply（选定定稿）' }
+  return { ...out, status: 'FOUND', detail: `user-question-reply ${out.replies.length} 条` }
+}
+
 /**
  * 门①（HITL 锚点门，可导入；keyless；BUG-006 实证反证）。
  * 判据 = **写过本 bundle 方向契约文件**（会话日志含指向 `drt_<slug>/question.md` 的
@@ -54,6 +179,9 @@ export function hitlAskGate(bundleDir, sessionsRoot, hitlDate, readLog = plainLo
   const qPath = join(bundleDir, 'question.md')
   if (!existsSync(qPath)) {
     return { status: 'N/A', detail: 'question.md 不在场——门①无对象（方向契约未立，不越界判交互面）' }
+  }
+  if (!hasLogFiles(sessionsRoot)) {
+    return { status: 'UNATTESTED', detail: '会话语料缺席——门①无法核对 HITL1 锚点（无证据 ≠ PASS）' }
   }
   const bindMark = `${basename(bundleDir)}/question.md`
   let asks = 0
@@ -137,7 +265,7 @@ export function isHitl2Row(line) {
   return /交付审阅/.test(line) && /代理模拟|hitl-answer/.test(line)
 }
 
-export function hitl2RowGate(bundleDir) {
+export function hitl2RowGate(bundleDir, sessionsRoot, readLog = plainLogReader) {
   const finalDir = join(bundleDir, 'final')
   const versionFiles = existsSync(finalDir) ? readdirSync(finalDir).filter((f) => f.endsWith('.md')) : []
   const qPath = join(bundleDir, 'question.md')
@@ -145,6 +273,7 @@ export function hitl2RowGate(bundleDir) {
   const dec = qText ? decisionsLines(qText) : []
   const hitl2Rows = dec.filter((l) => isHitl2Row(l))
   const proxyRows = hitl2Rows.filter((l) => !/HITL2/.test(l))
+  const newContract = contractEpochOf(bundleDir) !== null
   let gate
   if (versionFiles.length === 0) {
     gate = { status: 'N/A', detail: 'final/ 版本记账不在场——门③无对象（bundle 未到交付段；显式标注，不静默跳过）' }
@@ -152,11 +281,21 @@ export function hitl2RowGate(bundleDir) {
     gate = { status: 'RED', detail: 'final/ 记账在场但 question.md 缺席——方向契约文件失踪，fail-loud（不静默跳过）' }
   } else if (hitl2Rows.length === 0) {
     gate = { status: 'RED', detail: `final/ 记账在场（${versionFiles.join(', ')}）但 §Decisions 无任何 HITL2 拍板行——版本落盘先于用户裁决（G8 形态）` }
+  } else if (newContract) {
+    const reply = hitl2ReplyInLogs(sessionsRoot, basename(bundleDir), readLog)
+    if (reply.status === 'UNATTESTED') {
+      gate = { status: 'UNATTESTED', detail: `§Decisions 有 ${hitl2Rows.length} 条 HITL2 行，但会话语料缺席——事件链无证据（无证据 ≠ PASS）` }
+    } else if (reply.status !== 'FOUND') {
+      gate = { status: 'RED', detail: `§Decisions 有 ${hitl2Rows.length} 条 HITL2 行，但会话语料无 callId 绑定的 user-question-reply（选定定稿）——文本行不能自证` }
+    } else {
+      const r = reply.replies[0]
+      gate = { status: 'PASS', detail: `HITL2 事件链在场：callId ${r.callId} 选定「${r.label}」${r.proxy ? '（代理模拟，已显式标记）' : ''}` }
+    }
   } else {
     gate = {
       status: 'PASS',
       detail: `§Decisions 含 ${hitl2Rows.length} 条 HITL2 拍板行`
-        + (proxyRows.length > 0 ? `（其中 ${proxyRows.length} 条为**代理代答 provenance**——已按显式记账纪律落行）` : ''),
+        + (proxyRows.length > 0 ? `（其中 ${proxyRows.length} 条为**代理代答 provenance**——已按显式记账纪律落行；旧场无 run.md，按 epoch 豁免事件链）` : '旧场无 run.md，按 epoch 豁免事件链'),
     }
   }
   return { gate, rows: hitl2Rows }
@@ -178,9 +317,21 @@ export function presentGate(bundleDir, sessionsRoot, hitl2Rows, readLog) {
   if (!reviewPass) {
     return { status: 'N/A', detail: 'review.md readiness 非 PASS——HITL2 前置未达成，交付门②无对象' }
   }
+  const newContract = contractEpochOf(bundleDir) !== null
+  if (newContract) {
+    const found = presentedInLogs(sessionsRoot, slug, readLog)
+    if (found.status === 'UNATTESTED') return { status: 'UNATTESTED', detail: found.detail }
+    if (found.status !== 'FOUND') return { status: 'RED', detail: found.detail }
+    const versioned = found.events.filter((e) => e.version !== null && existsSync(join(bundleDir, 'final', `v${e.version}.md`)))
+    if (versioned.length === 0) {
+      return { status: 'RED', detail: 'deliverables/presented 在场，但未指向在场的 final/vN（present 指 final.md 或版本账缺席——不可变快照不成立）' }
+    }
+    const hit = versioned[0]
+    return { status: 'PASS', detail: `deliverables/presented 指向 ${hit.path}（callId ${hit.callId ?? '—'}）——不可变快照` }
+  }
   const inLog = presentInLogs(sessionsRoot, slug, readLog)
   const relayRow = hitl2Rows.find((l) => /操作侧/.test(l))
-  if (inLog) return { status: 'PASS', detail: '会话日志含指向本 bundle 的 present 声明' }
-  if (relayRow) return { status: 'PASS-RELAY', detail: '日志无 present 调用，但 §Decisions 拍板行显式标注操作侧补齐（通道死亡恢复路径，如实记账）——放行带注' }
+  if (inLog) return { status: 'PASS', detail: '会话日志含指向本 bundle 的 present 声明（旧场无 run.md，按 epoch 豁免结构化事件）' }
+  if (relayRow) return { status: 'PASS-RELAY', detail: '日志无 present 调用，但 §Decisions 拍板行显式标注操作侧补齐（旧场 epoch 豁免）——放行带注' }
   return { status: 'RED', detail: 'final.md + readiness PASS 在场，但日志无 present 调用、拍板行也无操作侧补齐标注——静默缺席（G8 形态）' }
 }

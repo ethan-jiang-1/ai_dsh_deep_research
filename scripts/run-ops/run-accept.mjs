@@ -7,12 +7,17 @@
 // 绿才写 acceptance.md，--archive 才移入 archive/drt_<slug>/。
 //
 // 用法：source dev/env.sh && node scripts/run-ops/run-accept.mjs <bundle> [--sessions <dir>] [--archive]
+//       预检用 --no-write（默认只读）；绿后本工具显式给两个门 --write 落盘，再写 delivered.json/manifest.json/acceptance.md。
 // 退出码：0 = 验收绿（已写 acceptance.md）；1 = 验收红；2 = 用法/前置。
 import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { basename, dirname, join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { futureDateFindings } from '../lib/bundle-date-sanity.mjs'
+import { presentedInLogs } from '../lib/node-gate-session-gates.mjs'
+import { contractEpochOf } from '../lib/schema-scan-core.mjs'
+import { readZstdText } from '../lib/zstd-read.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2)
@@ -53,12 +58,23 @@ const run = (label, script, args) => {
 }
 
 console.log(`run-accept: ${slug}`)
-const gate = run('node-gate（门 A/交付两门）', 'scripts/run-gates/node-gate.mjs', [bundle])
-const audit = run('evidence-audit（溯源 + audit.md）', 'scripts/run-gates/evidence-audit.mjs', [bundle, '--sessions', sessions])
+
+const sha256File = (path) => {
+  if (!existsSync(path)) return null
+  return createHash('sha256').update(readFileSync(path)).digest('hex')
+}
+const readLog = (p) => {
+  if (!p.endsWith('.zstd')) {
+    try { return readFileSync(p, 'utf8') } catch { return '' }
+  }
+  const r = readZstdText(p)
+  return r.ok ? r.text : ''
+}
+
+// 预检：门禁/审计都 --no-write；红跑不写 bundle（observation 只读）。
+const preGate = run('node-gate 预检（--no-write）', 'scripts/run-gates/node-gate.mjs', [bundle, '--sessions', sessions, '--no-write'])
+const preAudit = run('evidence-audit 预检（--no-write）', 'scripts/run-gates/evidence-audit.mjs', [bundle, '--sessions', sessions, '--no-write'])
 const dates = futureDateFindings(bundle)
-const auditPath = join(bundle, 'audit.md')
-const auditText = existsSync(auditPath) ? readFileSync(auditPath, 'utf8') : ''
-const critical = /CRITICAL\s+(\d+)/.exec(auditText)?.[1] ?? null
 const datesOk = dates.length === 0
 if (!datesOk) {
   console.log(`  FAIL 日期 sanity：${dates.length} 处未来日期`)
@@ -67,24 +83,90 @@ if (!datesOk) {
 } else {
   console.log('  PASS 日期 sanity（evidence retrieved_at + journal/question 行首日期）')
 }
-const green = gate.status === 0 && audit.status === 0 && datesOk
-if (!green) {
-  console.error(`run-accept: RED（${slug}）——未写 acceptance.md/未归档；先修红项再跑同一条`)
+const preGreen = preGate.status === 0 && preAudit.status === 0 && datesOk
+if (!preGreen) {
+  console.error(`run-accept: RED（${slug}）——预检未过；未写 acceptance.md/audit.md/node-gate.md/delivered.json，未归档。先修红项再跑同一条`)
   process.exit(1)
 }
 
+// 绿后才落盘：真实门禁/审计 + 回执。
+const gate = run('node-gate（门 A/交付两门）', 'scripts/run-gates/node-gate.mjs', [bundle, '--sessions', sessions, '--write'])
+const audit = run('evidence-audit（溯源 + audit.md）', 'scripts/run-gates/evidence-audit.mjs', [bundle, '--sessions', sessions, '--write'])
+const auditPath = join(bundle, 'audit.md')
+const auditText = existsSync(auditPath) ? readFileSync(auditPath, 'utf8') : ''
+const critical = /CRITICAL\s+(\d+)/.exec(auditText)?.[1] ?? null
+const green = gate.status === 0 && audit.status === 0
+if (!green) {
+  console.error(`run-accept: RED（${slug}）——预检绿但落盘门禁/审计失败；未写 acceptance.md/delivered.json`)
+  process.exit(1)
+}
+
+const finalDir = join(bundle, 'final')
+const versions = existsSync(finalDir)
+  ? readdirSync(finalDir).filter((f) => /^v\d+\.md$/.test(f)).map((f) => Number(/^v(\d+)/.exec(f)[1])).sort((a, b) => a - b)
+  : []
+const finalVersion = versions.at(-1) ?? null
+const finalPath = finalVersion === null ? null : join(finalDir, `v${finalVersion}.md`)
+const presented = presentedInLogs(sessions, slug, readLog)
+const present = presented.status === 'FOUND'
+  ? (presented.events.find((e) => e.version !== null) ?? presented.events[0] ?? null)
+  : null
 const stamp = new Date().toISOString()
+const delivered = {
+  version: 1,
+  slug,
+  acceptedAt: stamp,
+  sessions,
+  gate: { status: 'PASS', exit: 0 },
+  audit: { critical: critical === null ? null : Number(critical), sha256: sha256File(auditPath) },
+  final: { version: finalVersion, sha256: finalPath === null ? null : sha256File(finalPath) },
+  present: present === null ? null : { path: present.path, callId: present.callId ?? null, version: present.version ?? null },
+}
+writeFileSync(join(bundle, 'delivered.json'), JSON.stringify(delivered, null, 2) + '\n')
+console.log(`  PASS delivered.json 已写：${join(bundle, 'delivered.json')}`)
+
+const roleOf = {
+  'run.md': 'state-head', 'question.md': 'direction-contract', 'topics.md': 'topics',
+  'plan.md': 'execution-graph', 'leads.md': 'leads-index', 'findings.md': 'findings',
+  'review.md': 'review', 'final.md': 'current-final', 'journal.md': 'journal',
+  'audit.md': 'audit-snapshot', 'node-gate.md': 'gate-snapshot',
+  'acceptance.md': 'acceptance-receipt', 'delivered.json': 'delivery-receipt',
+}
+const manifestFiles = []
+for (const ent of readdirSync(bundle, { withFileTypes: true })) {
+  if (!ent.isFile() || ent.name === 'manifest.json') continue
+  manifestFiles.push({ path: ent.name, role: roleOf[ent.name] ?? 'unknown', sha256: sha256File(join(bundle, ent.name)) })
+}
+const versionFiles = existsSync(finalDir) ? readdirSync(finalDir).filter((f) => /^v\d+\.md$/.test(f)).sort() : []
+for (const f of versionFiles) {
+  manifestFiles.push({ path: `final/${f}`, role: 'version-ledger', sha256: sha256File(join(finalDir, f)) })
+}
+const manifest = {
+  version: 1,
+  slug,
+  contract: contractEpochOf(bundle) ?? null,
+  generatedAt: stamp,
+  readOrder: ['run.md', 'question.md', 'topics.md', 'plan.md', 'journal.md（顶部 3–5 条）', 'findings.md', 'final.md', 'review.md', 'evidence/ + provenance/（按需）', 'delivered.json', 'manifest.json'],
+  files: manifestFiles,
+  counts: {
+    evidence: existsSync(join(bundle, 'evidence')) ? readdirSync(join(bundle, 'evidence')).filter((f) => f.endsWith('.md')).length : 0,
+    provenance: existsSync(join(bundle, 'provenance')) ? readdirSync(join(bundle, 'provenance')).filter((f) => f.endsWith('.json')).length : 0,
+  },
+}
+writeFileSync(join(bundle, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
+console.log(`  PASS manifest.json 已写：${join(bundle, 'manifest.json')}`)
+
 const acceptance = `# Acceptance — ${slug}（${stamp}）
 
 > 由 scripts/run-ops/run-accept.mjs 生成（操作侧验收回执；不是研究内容）。
-> 三件同次通过才写本文件：node-gate（门 A/交付两门）、evidence-audit（audit.md，CRITICAL ${critical ?? '—'}）、
-> 日期 sanity（evidence retrieved_at + journal/question 行首；零未来日期）。
+> 预检（--no-write）先过，才落盘 node-gate/audit 并写本回执；红跑不写 bundle。
 
 | 检查 | 结果 |
 |---|---|
 | node-gate | PASS（exit 0） |
 | evidence-audit | PASS（exit 0；audit.md 在场，CRITICAL ${critical ?? '—'}） |
 | 日期 sanity | PASS（零未来日期） |
+| 回执 | delivered.json（final ${finalVersion === null ? '—' : `v${finalVersion}`} / present ${present === null ? '—' : present.path}） |\n| 清单 | manifest.json（文件角色/读序/契约/哈希） |
 | 会话语料根 | \`${sessions}\` |
 `
 writeFileSync(join(bundle, 'acceptance.md'), acceptance)

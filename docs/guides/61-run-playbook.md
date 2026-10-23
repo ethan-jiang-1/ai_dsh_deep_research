@@ -28,15 +28,15 @@
   （boot 横幅只证宿主侧，观察面可能坏着——0.2.0 轮教训）；
   ③ 全绿才把 URL 交出去（人话判据：GUI 里 preset 选单含四个 Deep Research 角色、会话右栏有
   「研究状态」页签——任一缺席 = 插件没挂上）。不呈交"可能能用的东西"；红了不自修就上报 = 失职；
-- **启动前先判"接续还是新开"**：`ls -dt research-workspace/drt_*/`（`archive/` 除外）——**根目录下
-  每个未归档 bundle 都要报出来**，分两类：(a) 无 `final/` 或 `review.md` 不是 `readiness: PASS`
-  = **在飞**（含停在 HITL2 等拍板的形态——`final/` 记账随交付动作〔拍板行 → run 根 final.md +
-  记账 → present → goal complete〕落地，交付前不在场；扩张版 vN
-  随 rerun）→ 问"接续它还是新开"（接续做法 = §5）；(b) 有 `final/` 且 PASS = **交付线已在盘、
-  未归档**——按 [NODES](../../research-workspace/NODES.md) 交付行，交付判别 = §6（run 根
-  `final.md` + `present` 声明）→ 问"先归档再新开，还是补研究（rerun）"。两类都带上 slug +
-  mtime，**都不自己挑**；present 声明不在 bundle 文件里（node-gate 门② 查 lead 会话日志），
-  (b) 类归档前请用户确认。
+- **启动前先判"接续还是新开"**：`find research-workspace -maxdepth 2 -type d -name 'drt_*'`
+  ——根 / `archive/` / `_abandoned/` 三类操作桶都扫（位置只用于发现，D28）；**每个候选都要
+  报出来**，按内容分两类：(a) 无 `final/` 或 `review.md` 不是 `readiness: PASS` = **在飞**
+  （含停在 HITL2 等拍板的形态——`final/` 记账随交付动作〔拍板行 → run 根 final.md + 记账 →
+  present → goal complete〕落地，交付前不在场；扩张版 vN 随 rerun）→ 问"接续它还是新开"
+  （接续做法 = §5）；(b) 有 `final/` 且 PASS = **交付线已在盘**——按 [NODES](../../research-workspace/NODES.md)
+  交付行，交付判别 = §6（`final/vN` + `deliverables/presented` + 回执）→ 问"先归档再新开，
+  还是补研究（rerun）"。两类都带上 slug + 操作桶 + 最新 journal 日期，**都不自己挑**；
+  present 原始事件不在 bundle 文件里（`deliverables/presented`），(b) 类归档前请用户确认。
 
 ### 0.1 特殊形态与排障（按需读，首跑不需要）
 
@@ -154,13 +154,13 @@ BUG-020）。
   在拍板前必然缺席——拍板前跑门看到 ②/A 红（静默缺席形态）= 预期态而非缺陷，拍板交付后
   复跑转绿（门清单正本 = NODES.md 头部图例）；
 - **拍板前操作侧跑证据审计**（须先 `source dev/env.sh`）：`node scripts/run-gates/evidence-audit.mjs
-  research-workspace/drt_<slug>`——报告落 bundle 的 audit.md，**CRITICAL=0 才带审阅建议
+  research-workspace/drt_<slug> --write`——默认只读，`--write` 才落 bundle 的 audit.md，**CRITICAL=0 才带审阅建议
   进 HITL2**（审计判据正本 = 研究手册「机械强度诚实记账」节）；CRITICAL>0 = 证据链有
   伪造/断链，先让 lead 修证据再回来；review 的 readiness 若为**附条件 PASS**，node-gate
   门A 会带 ⚠ 注记显性化——拍板时先核条件（裁决归你，机械门不替你拦）；
 - **拍板后操作侧跑一次验收（原子动作）**：`source dev/env.sh && node scripts/run-ops/run-accept.mjs
-  research-workspace/drt_<slug>`——node-gate + evidence-audit + 未来日期 sanity 三件同次跑；绿写
-  `acceptance.md`；复核后加 `--archive` 才移入 `archive/drt_<slug>/`。门 A/审计/日期红时不要手工归档。
+  research-workspace/drt_<slug>`——node-gate + evidence-audit + 未来日期 sanity 三件同次跑；预检红不写，绿写
+  `delivered.json` + `manifest.json` + `acceptance.md`；复核后加 `--archive` 才移入 `archive/drt_<slug>/`。门 A/审计/日期红时不要手工归档。
 - lead 带审阅建议来找你：证据充分性判断 + 交付/补研究推荐 + composition 确认
   （读者是谁 / 用来做什么 / 前景化重点）——拍板后 run 根 `final.md` 当前版落盘 + present 声明交付
   + `final/v1.md` 版本记账（门A 交付件齐的最后一环）；
@@ -201,11 +201,12 @@ BUG-020）。
   [BUG-009 卡](../../_backlog/_archived/fixed_bugs/BUG-009-no-finalization-on-restart.md) 同款教训）；
   lead 在任何 ask 挂起前 pause goal、答后 resume（防空转），
   goal 与 drt_ bundle 互为镜像、冲突以 bundle 文件事实为准；
-- **在飞与归档的位置**：在飞 run 住工作区根，交付后由操作侧移入
-  `research-workspace/archive/drt_<slug>/`（归档不消失——
-  仪表盘多 run 总表与 evidence-audit `--latest` 均并扫 archive/）。`runtime/harness-home/runs/`
-  下的 bundle 是契约前的 ad-hoc 历史（仪表盘标 "ad-hoc·无契约"）——不是这次要恢复的 run，
-  也不要删（gitignored 运行数据，是那次研究留下的证据）；
+- **位置 = 操作桶（D28）**：根 / `archive/` / `_abandoned/` 只用于发现与展示，不证明交付；
+  交付由 `final/vN` + `deliverables/presented` + `delivered.json`/`acceptance.md` 判定。归档 =
+  操作侧 `run-accept --archive` 的桶移动（归档不消失——仪表盘多 run 总表与 evidence-audit
+  `--latest` 均并扫 archive/）。`runtime/harness-home/runs/` 下的 bundle 是契约前的 ad-hoc 历史
+  （仪表盘标 "ad-hoc·无契约"）——不是这次要恢复的 run，也不要删（gitignored 运行数据，是那次
+  研究留下的证据）；
 - **续跑已交付（已归档）run**：同在飞形态——新开 lead 会话说「继续 `archive/drt_<slug>` 这个 run」；
   lead 依赖的是 bundle 文件事实而非位置（归档位在其 cwd 之下可读；仪表盘与 evidence-audit
   `--latest` 均并扫 archive/）。续跑语义 = rerun 三分：表述修订原位改、证据扩张落 `final/`

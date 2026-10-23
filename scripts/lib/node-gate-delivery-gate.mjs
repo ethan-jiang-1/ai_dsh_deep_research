@@ -65,7 +65,7 @@ export function deliveryGate(bundleDir, auditDate) {
     }
     const auditPath = join(bundleDir, 'audit.md')
     if (!existsSync(auditPath)) {
-      problems.push('交付前置达成但 audit.md 缺席——操作侧审计未做（NODES 第 8 行交付判据含审计 CRITICAL=0；修正 = 跑 node scripts/run-gates/evidence-audit.mjs <bundle> 落盘审计报告）')
+      problems.push('交付前置达成但 audit.md 缺席——操作侧审计未做（NODES 第 8 行交付判据含审计 CRITICAL=0；修正 = 跑 node scripts/run-gates/evidence-audit.mjs <bundle> --write 落盘审计报告，或直接 run-accept）')
     } else {
       let auditText
       try {

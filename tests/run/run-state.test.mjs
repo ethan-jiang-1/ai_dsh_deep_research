@@ -167,7 +167,7 @@ test('turnOpenOf：无回合事件 → false；仅 turn/start → true', () => {
   assert.equal(turnOpenOf([{ type: 'turn/start' }, { type: 'turn/end' }]), false);
 });
 
-test('bundleStateOf：位置=状态——工作区根 drt_* 才是在飞；只列清单，不猜 active', () => {
+test('bundleStateOf：只列工作区根清单（发现用，不代表状态）；不猜 active', () => {
   const tmp = mkdtempSync(join(tmpdir(), 'run-state-'));
   try {
     let s = bundleStateOf(tmp);
@@ -177,9 +177,9 @@ test('bundleStateOf：位置=状态——工作区根 drt_* 才是在飞；只�
     mkdirSync(join(tmp, 'drt_probe'));
     s = bundleStateOf(tmp);
     assert.deepEqual(s.bundles, ['drt_probe']);
-    // archive/ 不计在飞（位置=状态：已交付归档不在根）
+    // D28：archive/ 不是“已交付”状态，只是操作桶；根清单只做发现，不把 archive 误报成在飞。
     mkdirSync(join(tmp, 'archive', 'drt_old'), { recursive: true });
-    assert.equal(bundleStateOf(tmp).bundles.length, 1, 'archive/ 下的 drt_* 不算在飞');
+    assert.equal(bundleStateOf(tmp).bundles.length, 1, '根清单只列根；archive 只用于发现');
   } finally { rmSync(tmp, { recursive: true, force: true }) }
 });
 
@@ -350,4 +350,24 @@ test('选卡面收窄：runStateOf 暴露会话头 agentPreset，lead 挂起 = �
     const none = runStateOf({ logPath: FIX('no-card'), wsRoot: tmp });
     assert.equal(leadHitlCandidate(none), false, '无挂起 = 非候选');
   } finally { rmSync(tmp, { recursive: true, force: true }); }
+});
+
+test('runStateOf：D28 绑定 bundle 在 archive/ 时 final 仍可判、runSettled 不因位置失真', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'run-state-archive-'));
+  try {
+    mkdirSync(join(tmp, 'archive', 'drt_x'), { recursive: true });
+    writeFileSync(join(tmp, 'archive', 'drt_x', 'final.md'), '# 交付');
+    const log = join(tmp, 's.jsonl');
+    writeFileSync(log, [
+      { type: 'session', id: 's', agentPreset: 'lead' },
+      { type: 'tool/call', data: { name: 'write', arguments: JSON.stringify({ path: 'drt_x/question.md' }) } },
+      { type: 'turn/start' },
+      { type: 'turn/end' },
+    ].map((e) => JSON.stringify(e)).join('\n') + '\n');
+    const s = runStateOf({ logPath: log, wsRoot: tmp });
+    assert.equal(s.activeBundle, 'drt_x');
+    assert.equal(s.bundleLocation, 'archive');
+    assert.equal(s.finalWritten, true);
+    assert.equal(s.runSettled, true);
+  } finally { rmSync(tmp, { recursive: true, force: true }) }
 });

@@ -39,9 +39,9 @@
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
-| node-gate.mjs | 判据级：门①②③④ + 门L + 门R（标题重复退化，2026-10-06 起）+ 门A（交付完整性，2026-10-08 起；图例正本 = research-workspace/NODES.md 头部），报告落 bundle——判据核心住 lib/node-gate-core.mjs 门面及领域模块（本件 = CLI 壳 + zstd reader 注入） | keyless |
+| node-gate.mjs | 判据级：门①②③④ + 门L + 门R（标题重复退化，2026-10-06 起）+ 门A（交付完整性，2026-10-08 起；图例正本 = research-workspace/NODES.md 头部），默认只读，`--write` 才落 bundle 报告——判据核心住 lib/node-gate-core.mjs 门面及领域模块（本件 = CLI 壳 + zstd reader 注入） | keyless |
 | schema-scan.mjs | 在场级：八节点输出件在场断言（断代定红；判据核住 lib/schema-scan-core.mjs，本件 = CLI 壳） | keyless |
-| evidence-audit.mjs | URL/摘录/final 链溯源对账 → audit.md——判据核心住 lib/evidence-audit-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless（须 source dev/env.sh） |
+| evidence-audit.mjs | URL/摘录/final 链溯源对账；默认只读，`--write` 才落 audit.md——判据核心住 lib/evidence-audit-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless（须 source dev/env.sh） |
 
 ## run-ops/（run 观察与运维）
 
@@ -55,7 +55,7 @@
 | plan-card-stats.mjs | 计划确认卡字数的跨场分布投影（升硬门前置 = 连续多场达标；口径与识别 = lib/plan-card.mjs，与 node-gate 门① 同源） | keyless（须 source dev/env.sh） |
 | session-replay.mjs | **历史会话回放**：任意历史会话（id 全名/标题唯一子串，跨组）在真实 UI 里重开并抓场景包——检验/扩大症状还原面；判据纯函数 = lib/session-replay.mjs，浏览器编排在本壳（keyless：起一次性通道 + 登记 cwd 工作区 + 按 id 打开 + 五件套落盘；`--open-status` 展开右栏研究状态页签） | keyless（真实浏览器；须先 source） |
 | scene-capture.mjs | **场景包捕获与读取**：抓取（连已起 GUI → 截图(fullPage)+DOM+正文+console+meta，token 脱敏，落 `runtime/scenes/<name>/`）+ 读取（`--list` 列既有包 / `--show <name>` 看单包——事后看现场，消费闭环；判据 = lib/scene-pack.mjs） | 抓取 keyless（真实浏览器；须先起通道）；读取 keyless（纯读盘） |
-| run-accept.mjs | **交付验收原子动作**：node-gate（门 A/交付两门）+ evidence-audit（audit.md）+ 未来日期 sanity → 绿写 acceptance.md，`--archive` 才移入 archive/；日期判据 = lib/bundle-date-sanity.mjs | keyless（须先 source dev/env.sh） |
+| run-accept.mjs | **交付验收原子动作**：node-gate（门 A/交付两门）+ evidence-audit（audit.md）+ 未来日期 sanity；预检 `--no-write` 红不写，绿才落盘 node-gate/audit + `delivered.json` + `manifest.json` + `acceptance.md`；`--archive` 才移入 archive/；日期判据 = lib/bundle-date-sanity.mjs | keyless（须先 source dev/env.sh） |
 | unconsumed-evidence.mjs | **B1 差集出题的操作侧投影**：bundle 的 evidence/ 未进 findings.md 清单（收尾核验入口——lib 头注承诺"操作侧核验"，此前无 CLI；判据 = lib/unconsumed-evidence.mjs） | keyless |
 | acceptance-check.mjs | **收活判据三态求值**：`<bundleDir> + <criteria.json>`（判据 = 委派方显式清单，仓内无落盘约定）→ 逐条 PASS/FAIL/UNVERIFIED 与汇总（"收活结论"对账成机械事实；判据 = lib/acceptance-check.mjs） | keyless |
 
@@ -71,7 +71,7 @@
 |---|---|---|
 | lib/roles.mjs | discipline-probe、l4-lite-smoke、preset-smoke、presets.test、release-smoke、replay-request.test、replay-scene.test、snapshot-replay-smoke、team-preflight-smoke | 角色清单访问器（事实源 = 盘上 presets/） |
 | lib/frontmatter.mjs | bundle-date-sanity、evidence-audit-core、run-dashboard-core | `---` frontmatter 拆分**唯一正本**（两 core 共用同一实现） |
-| lib/zstd-read.mjs | node-gate、evidence-audit（两壳） | zstd CLI 文本解压**唯一调用段**（多帧拼接靠 CLI；成功/失败结构化返回，**失败契约留各壳**：`''` 继续 vs `null` 跳过） |
+| lib/zstd-read.mjs | node-gate、evidence-audit、run-accept（三壳） | zstd CLI 文本解压**唯一调用段**（多帧拼接靠 CLI；成功/失败结构化返回，**失败契约留各壳**：`''` 继续 vs `null` 跳过） |
 | lib/web-harness.mjs | session-replay、client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、snapshot-replay-smoke、team-preflight-smoke | DSH web 冒烟族**启停与通道唯一正本**：`bootWeb`（等启动横幅拿 token）+ `authenticate` + `makeRpc`；**参数保形**——端口/超时/尾部字符/rpcId 前缀/失败文案与收割方式全留各站点 |
 | lib/session-log.mjs | cdp-ask-smoke、cdp-probe、session-replay、client-hitl-smoke、client-load-reference、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、hitl-answer、l4-lite-smoke、method-library-probe、plan-card-stats、provider-error-stats、run-dashboard-core、run-kickoff、run-state、run-state.test、session-events、session-log.test、snapshot-replay-smoke、stream-diagnostics、team-preflight-smoke、watch-run | canonical 日志选择与读取 + 会话组发现（findGroup 子串参数化，缺省 research-workspace——BUG-010 三处同款一行收敛；冒烟/自测组逃生口 = 观察工具 --group） |
 | lib/session-events-core.mjs | session-events、session-events.test | 会话事件摘要与筛选纯函数（CLI 壳 = run-ops/session-events 行） |
@@ -107,10 +107,11 @@
 | lib/keyless-imports.mjs | layering.test | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
 | lib/gates-cases.mjs | gates-smoke、verify-gates.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
 | lib/node-gate-core.mjs | node-gate、node-gate.test | 兼容门面与 bundle 判据聚合（保留 `gateBundle` 与原有导出） |
-| lib/node-gate-contracts.mjs | node-gate-core、node-gate-delivery-gate、node-gate-run-gates、node-gate-session-gates、review-readiness.test | 交付日期合同、readiness 与 decisions 行解析 |
-| lib/node-gate-session-gates.mjs | ask-drive.test、node-gate-core、node-gate-delivery-gate、node-gate.test | HITL、present 与 §Decisions 会话门 |
+| lib/node-gate-contracts.mjs | node-gate-core、node-gate-delivery-gate、node-gate-run-gates、node-gate-session-gates、review-readiness.test、node-gate-contracts.test | 交付日期合同、readiness 与 decisions 行解析 |
+| lib/node-gate-session-gates.mjs | ask-drive.test、node-gate-core、node-gate-delivery-gate、node-gate.test、node-gate-witness.test、run-accept | HITL、present 与 §Decisions 会话门 |
 | lib/node-gate-run-gates.mjs | node-gate-core、node-gate.test | leads、版本与标题退化门 |
 | lib/node-gate-delivery-gate.mjs | node-gate-core | 门A 交付完整性判据 |
-| lib/schema-scan-core.mjs | schema-scan、schema-scan.test、node-gate-contracts、node-gate-delivery-gate、node-gate-run-gates | 节点 I/O 契约在场级断言判据核（交付日/研究类型/条件件豁免/断代定红——从 run-gates 下沉修 lib→入口层反向依赖） |
+| lib/schema-scan-core.mjs | schema-scan、schema-scan.test、node-gate-contracts、node-gate-contracts.test、node-gate-delivery-gate、node-gate-run-gates、node-gate-session-gates、run-accept | 节点 I/O 契约在场级断言判据核（交付日/研究类型/条件件豁免/断代定红——从 run-gates 下沉修 lib→入口层反向依赖） |
 | lib/run-dashboard-core.mjs | evaluation-contract.test、run-dashboard、run-dashboard.test | M2 run 观察面纯管线：解析 → 场景 → 模型 → HTML 渲染（全 fail-soft；CLI/watch/写盘归壳） |
-| lib/evidence-audit-core.mjs | evidence-audit、evidence-audit.test | 证据溯源审计判据核心（readLog 注入同上） |
+| lib/evidence-audit-core.mjs | evidence-audit、evidence-audit.test、provenance.test | 证据溯源审计判据核心（readLog 注入同上） |
+| lib/provenance.mjs | evidence-audit-core、provenance.test | 离线来源证明：kind/URL/路径 + sha256 + 时间 + 通道 + 切片；local-file 哈希核对 |
