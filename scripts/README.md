@@ -40,7 +40,7 @@
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
-| node-gate.mjs | 判据级：门①②③④ + 门L + 门R（标题重复退化，2026-10-06 起）+ 门A（交付完整性，2026-10-08 起；图例正本 = research-workspace/NODES.md 头部），默认只读，`--write` 才落 bundle 报告——判据核心住 lib/node-gate-core.mjs 门面及领域模块（本件 = CLI 壳 + zstd reader 注入） | keyless |
+| node-gate.mjs | 判据级：门①②③④ + 门L + 门R（标题重复退化，2026-10-06 起）+ 门A（交付完整性，2026-10-08 起；图例正本 = research-workspace/NODES.md 头部），默认只读，`--write` 才落 bundle 报告——判据核心住 lib/node-gate-core.mjs 聚合及领域模块（本件 = CLI 壳 + zstd reader 注入） | keyless |
 | schema-scan.mjs | 在场级：八节点输出件在场断言（断代定红；判据核住 lib/schema-scan-core.mjs，本件 = CLI 壳） | keyless |
 | evidence-audit.mjs | URL/摘录/final 链溯源对账；默认只读，`--write` 才落 audit.md——判据核心住 lib/evidence-audit-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless（须 source dev/env.sh） |
 
@@ -108,8 +108,8 @@
 | lib/method-presets.mjs | library-fold.test、method-presets.test | research-brief skill「方法预设」表的唯一解析入口（表头/行列数/防空集 fail-loud）——内置名单不再各写一份手写副本 |
 | lib/keyless-imports.mjs | layering.test | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
 | lib/gates-cases.mjs | gates-smoke、verify-gates.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
-| lib/node-gate-core.mjs | node-gate、node-gate.test | 兼容门面与 bundle 判据聚合（保留 `gateBundle` 与原有导出） |
-| lib/node-gate-contracts.mjs | node-gate-core、node-gate-delivery-gate、node-gate-run-gates、node-gate-session-gates、review-readiness.test、node-gate-contracts.test | 交付日期合同、readiness 与 decisions 行解析 |
+| lib/node-gate-core.mjs | node-gate、node-gate.test | bundle 判据聚合；唯一导出 = `gateBundle`，领域门直接 import 各自模块 |
+| lib/node-gate-contracts.mjs | node-gate-delivery-gate、node-gate-run-gates、node-gate-session-gates、node-gate.test、review-readiness.test、node-gate-contracts.test | 交付日期合同、readiness 与 decisions 行解析 |
 | lib/node-gate-session-gates.mjs | ask-drive.test、node-gate-core、node-gate-delivery-gate、node-gate.test、node-gate-witness.test、run-accept | HITL、present 与 §Decisions 会话门 |
 | lib/node-gate-run-gates.mjs | node-gate-core、node-gate.test | leads、版本与标题退化门 |
 | lib/node-gate-delivery-gate.mjs | node-gate-core、run-receipt.test | 门A 交付完整性判据 |

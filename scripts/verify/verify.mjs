@@ -65,7 +65,11 @@ function walk(dir, out = []) {
   }
   return out;
 }
-const allFiles = walk(ROOT);
+let allFilesCache = null;
+/** 全树懒扫描（只有 align-ledger 的 globAbsent 需要；role-list-sync 走 walkMany 的定向扫描）。 */
+function allFiles() { return allFilesCache ??= walk(ROOT); }
+/** 定向扫描多个根（只走该根，不下潜到全仓运行区）。 */
+function walkMany(dirs) { const out = []; for (const dir of dirs) { if (existsSync(dir)) walk(dir, out); } return out; }
 
 /** git 子进程缓存（gitOnce）：同参数只起一个进程——本脚本多处 git spawn 是五组完全相同的
  *  参数（ls-files 族 + submodule status），逐门禁各起一个纯属重复。**精确保形**：参数与
@@ -585,9 +589,8 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
   if (roleNames.length === 0) fail(gate, 'presets/ 下没有任何 <role>.patch.yml（单一事实源为空）');
   else {
     const tokenOf = (n) => new RegExp(`(^|[^a-z0-9-])${n}([^a-z0-9-]|$)`);
-    const codeFiles = allFiles.filter((f) => /\.(mjs|sh)$/.test(f)
-      && (f.startsWith(join(ROOT, 'scripts') + '/') || f.startsWith(join(ROOT, 'tests') + '/') || f.startsWith(join(ROOT, 'dev') + '/'))
-      && !f.includes('smoke-workspace') && !f.includes('node_modules'));
+    const codeFiles = walkMany([join(ROOT, 'scripts'), join(ROOT, 'tests'), join(ROOT, 'dev')])
+      .filter((f) => /\.(mjs|sh)$/.test(f) && !f.includes('smoke-workspace') && !f.includes('node_modules'));
     for (const f of codeFiles) {
       const text = readFileSync(f, 'utf8');
       for (const line of text.split('\n')) {
@@ -1094,7 +1097,7 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
                 }
               } else if (typeof item?.globAbsent === 'string' && item.globAbsent.length > 0) {
                 const pat = item.globAbsent;
-                const hit = allFiles.find((f) => matchSimpleGlob(relative(ROOT, f), pat));
+                const hit = allFiles().find((f) => matchSimpleGlob(relative(ROOT, f), pat));
                 if (hit) {
                   fail(gate, `${src}: na 理由已失效——glob "${pat}" 命中 ${relative(ROOT, hit)}（当初登记"本仓无此面"）→ 重估该行 verdict，见 discipline-map §维护规则`);
                 }

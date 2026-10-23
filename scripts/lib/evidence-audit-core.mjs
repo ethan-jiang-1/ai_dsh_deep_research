@@ -12,9 +12,9 @@ import { basename, join } from 'node:path'
 import { splitFrontmatter } from './frontmatter.mjs'
 import { provenanceOf, sha256OfFile } from './provenance.mjs'
 
-/** 纯日志 reader：.jsonl 直读；.zstd 报线索后返回 null（跳过文件，语料缺失偏红方向）。
+/** 纯日志 reader：.jsonl 直读；.zstd 报线索后返回 null（跳过该文件，语料缺失偏红方向）。
  *  zstd CLI 解压由驱动壳注入，本模块零子进程。 */
-export const plainLogReader = (p) => {
+export const skipUnreadableLogReader = (p) => {
   if (p.endsWith('.zstd')) {
     console.error(`evidence-audit-core: ${p} 是压缩日志——纯 reader 不解压，跳过该文件（语料缺失偏红方向）；zstd 读取由驱动壳注入（scripts/run-gates/evidence-audit.mjs）`)
     return null
@@ -98,7 +98,7 @@ const hostOf = (u) => { try { return new URL(u).host } catch { return null } }
  * 成败，按 call 的 url 与 result 的 `Fetched …` vs `Error:` 判定——**MCP 不计入**：浏览器内容里
  * 出现某 URL 不等于"单独抓取过该 URL"，档位不许因此升级）/ webChunks（取回结果正文分片）。
  */
-export function buildCorpus(root, slug = null, readLog = plainLogReader) {
+export function buildCorpus(root, slug = null, readLog = skipUnreadableLogReader) {
   const webUrls = new Set()
   const bareHosts = new Set()
   const fetchedOk = new Set()
@@ -185,7 +185,7 @@ export function buildCorpus(root, slug = null, readLog = plainLogReader) {
 //   · ② 摘录回溯对**表格行**逐格判定；但**翻译或改写过的摘录永远对不上**（本仓 run 的卡片是
 //     中文交付、来源多为英文，卡内译文属正常实践）。故 ② 的未命中数**不等于**伪造数，
 //     读报告时看 kind 分档，别只看总数。
-export function auditBundle(bundleDir, sessionsRoot, { readLog = plainLogReader } = {}) {
+export function auditBundle(bundleDir, sessionsRoot, { readLog = skipUnreadableLogReader } = {}) {
   const evDir = join(bundleDir, 'evidence')
   const findings = []
   const evidence = []

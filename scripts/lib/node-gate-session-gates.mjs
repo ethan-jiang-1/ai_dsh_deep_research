@@ -5,9 +5,9 @@ import { planCardsOf } from './plan-card.mjs'
 import { HITL_CONTRACT_DATE, PRE_CONTRACT_NOTE, decisionsLines, isPreContract, readinessOf } from './node-gate-contracts.mjs'
 import { contractEpochOf, toDateStr } from './schema-scan-core.mjs'
 
-/** 纯日志 reader：.jsonl 直读；.zstd 报线索后按空语料继续（语料缺失偏假红方向——红必须带线索）。
+/** 纯日志 reader：.jsonl 直读；.zstd 报线索后按空语料继续（''，判据偏红方向——红必须带线索）。
  *  zstd CLI 解压由驱动壳注入，本模块零子进程。 */
-export const plainLogReader = (p) => {
+export const emptyOnUnreadableLogReader = (p) => {
   if (p.endsWith('.zstd')) {
     console.error(`node-gate-core: ${p} 是压缩日志——纯 reader 不解压，按空语料继续（判据偏红方向）；zstd 读取由驱动壳注入（scripts/run-gates/node-gate.mjs）`)
     return ''
@@ -16,7 +16,7 @@ export const plainLogReader = (p) => {
 }
 
 /** 扫会话根：本 bundle 的 slug 是否出现在任一 present 工具调用的载荷里。 */
-export function presentInLogs(sessionsRoot, slug, readLog = plainLogReader) {
+export function presentInLogs(sessionsRoot, slug, readLog = emptyOnUnreadableLogReader) {
   if (!sessionsRoot || !existsSync(sessionsRoot) || !slug) return false
   const walk = (dir) => {
     for (const ent of readdirSync(dir, { withFileTypes: true })) {
@@ -108,7 +108,7 @@ const collectLabels = (o, labels) => {
  * （YYYY-MM-DD）：早于它的事件不计（删后重开同名 slug 不继承旧见证）。
  * @returns {{logs:number, boundLogs:number, presented:Array, replies:Array, stalePresented:number, staleReplies:number}}
  */
-export function scanWitnessLogs(sessionsRoot, slug, { readLog = plainLogReader, contract = null } = {}) {
+export function scanWitnessLogs(sessionsRoot, slug, { readLog = emptyOnUnreadableLogReader, contract = null } = {}) {
   const out = { logs: 0, boundLogs: 0, presented: [], replies: [], stalePresented: 0, staleReplies: 0 }
   const bare = String(slug ?? '').replace(/^drt_/, '')
   if (!sessionsRoot || !bare || !existsSync(sessionsRoot)) return out
@@ -211,7 +211,7 @@ function repliesStatusOf(scan) {
  * 早于契约纪元的 present 不计（不继承旧 run 的见证）。
  * @returns {{status:'FOUND'|'NONE'|'UNATTESTED', detail:string, events:Array, logs:number}}
  */
-export function presentedInLogs(sessionsRoot, slug, readLog = plainLogReader, opts = {}) {
+export function presentedInLogs(sessionsRoot, slug, readLog = emptyOnUnreadableLogReader, opts = {}) {
   return presentedStatusOf(scanWitnessLogs(sessionsRoot, slug, { readLog, contract: opts.contract ?? null }))
 }
 
@@ -220,7 +220,7 @@ export function presentedInLogs(sessionsRoot, slug, readLog = plainLogReader, op
  * 只认**绑定本 bundle 的 lead 顶层会话**；要求 outcome=answered 且选定标签含「定稿」；代理标记随行。
  * @returns {{status:'FOUND'|'NONE'|'UNATTESTED', detail:string, replies:Array, logs:number}}
  */
-export function hitl2ReplyInLogs(sessionsRoot, slug, readLog = plainLogReader, opts = {}) {
+export function hitl2ReplyInLogs(sessionsRoot, slug, readLog = emptyOnUnreadableLogReader, opts = {}) {
   return repliesStatusOf(scanWitnessLogs(sessionsRoot, slug, { readLog, contract: opts.contract ?? null }))
 }
 
@@ -235,7 +235,7 @@ export function hitl2ReplyInLogs(sessionsRoot, slug, readLog = plainLogReader, o
  * 断代：交付日 < HITL_CONTRACT_DATE → PRE-CONTRACT 不计红（run bundle 是交付记录）。
  * @returns { status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT', detail }
  */
-export function hitlAskGate(bundleDir, sessionsRoot, hitlDate, readLog = plainLogReader) {
+export function hitlAskGate(bundleDir, sessionsRoot, hitlDate, readLog = emptyOnUnreadableLogReader) {
   const qPath = join(bundleDir, 'question.md')
   if (!existsSync(qPath)) {
     return { status: 'N/A', detail: 'question.md 不在场——门①无对象（方向契约未立，不越界判交互面）' }
@@ -325,7 +325,7 @@ export function isHitl2Row(line) {
   return /交付审阅/.test(line) && /代理模拟|hitl-answer/.test(line)
 }
 
-export function hitl2RowGate(bundleDir, sessionsRoot, readLog = plainLogReader, witness = null) {
+export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadableLogReader, witness = null) {
   const finalDir = join(bundleDir, 'final')
   const versionFiles = existsSync(finalDir) ? readdirSync(finalDir).filter((f) => f.endsWith('.md')) : []
   const qPath = join(bundleDir, 'question.md')
@@ -371,7 +371,7 @@ export function hitl2RowGate(bundleDir, sessionsRoot, readLog = plainLogReader, 
  * 门②：final.md 当前版 + review readiness PASS → present 声明在日志（或显式操作侧补齐记账）。
  * 从 gateBundle 内联提函数（与其余各门同构）；hitl2Rows 由门③ 供给（操作侧补齐行的唯一来源）。
  */
-export function presentGate(bundleDir, sessionsRoot, hitl2Rows, readLog = plainLogReader, witness = null) {
+export function presentGate(bundleDir, sessionsRoot, hitl2Rows, readLog = emptyOnUnreadableLogReader, witness = null) {
   const slug = basename(bundleDir)
   const finalPath = join(bundleDir, 'final.md')
   const reviewPath = join(bundleDir, 'review.md')

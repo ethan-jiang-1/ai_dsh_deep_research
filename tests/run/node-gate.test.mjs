@@ -6,7 +6,9 @@ import { cpSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:f
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { gateBundle, decisionsLines, headingGate } from '../../scripts/lib/node-gate-core.mjs'
+import { gateBundle } from '../../scripts/lib/node-gate-core.mjs'
+import { decisionsLines } from '../../scripts/lib/node-gate-contracts.mjs'
+import { headingGate } from '../../scripts/lib/node-gate-run-gates.mjs'
 import { isHitl2Row } from '../../scripts/lib/node-gate-session-gates.mjs'
 import { leadsGate } from '../../scripts/lib/node-gate-run-gates.mjs'
 
