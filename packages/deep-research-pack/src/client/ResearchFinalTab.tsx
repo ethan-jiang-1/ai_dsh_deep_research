@@ -20,6 +20,7 @@
  * 更新语义：文件被改写时，正在看（`tab.visible`）→ 顶部提示条"重新读取"，不换掉你正在读的
  * 字；没在看 → 静默重读。轮询节奏与驾驶舱其余面同款（30s）。
  */
+import { RERUN_TRIAGE_HINT, RERUN_TRIAGE_ROWS, RERUN_TRIAGE_TITLE } from '../lib/rerun-triage.ts'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { MarkdownText } from '@deepseek-ai/dsh-client-ui-primitives'
@@ -274,6 +275,19 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
           </div>
         )}
         {failure !== null && <div style={{ marginTop: 12, fontSize: 11.5, color: '#b00' }}>{failure}</div>}
+        {/* 交付后只读出口（同状态页 ⑤，共用 src/lib 文案；D18 只读） */}
+        <details style={{ marginTop: 18, fontSize: 12, opacity: 0.9 }}>
+          <summary style={{ cursor: 'pointer' }}>{RERUN_TRIAGE_TITLE}</summary>
+          <div style={{ marginTop: 6, lineHeight: 1.6 }}>
+            {RERUN_TRIAGE_ROWS.map((row) => (
+              <div key={row.label} style={{ marginBottom: 4 }}>
+                <strong>{row.label}</strong>：{row.consequence}
+                <div style={{ opacity: 0.75 }}>「{row.copy}」</div>
+              </div>
+            ))}
+            <div style={{ opacity: 0.6 }}>{RERUN_TRIAGE_HINT}</div>
+          </div>
+        </details>
       </div>
     </div>
   )

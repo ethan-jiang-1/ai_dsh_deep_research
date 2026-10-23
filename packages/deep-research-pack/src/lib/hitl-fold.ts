@@ -182,7 +182,10 @@ function askKindOf(args: unknown): AskKind {
   const obj = argsObjectOf(args)
   if (obj === null) return 'unknown'
   const text = JSON.stringify(obj)
-  if (text.includes('按现稿定稿')) return 'hitl2'
+  // 当前 HITL2 措辞（rerun 不满转接卡：`定稿（按现稿交付）`）；旧措辞 `按现稿定稿` 只作历史别名——
+  // 历史会话的尾窗仍要判成交付审阅，否则旧 run 的锚点如实退化成「中途确认」。
+  if (text.includes('定稿（按现稿交付）')) return 'hitl2'
+  if (['按现稿定稿'].some((legacy) => text.includes(legacy))) return 'hitl2'
   if (text.includes('研究类型')) return 'hitl1'
   return 'unknown'
 }

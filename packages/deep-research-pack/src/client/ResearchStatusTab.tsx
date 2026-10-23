@@ -34,6 +34,7 @@ import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { deriveAnchors, foldHitlPending, type HitlState, type RunAnchor } from '../lib/hitl-fold.ts'
 import { deriveSteps, latestRunVersion, type RunStep } from '../lib/run-fold.ts'
 import { deriveBusinessBrief, type BusinessBrief } from '../lib/brief-fold.ts'
+import { RERUN_TRIAGE_HINT, RERUN_TRIAGE_ROWS, RERUN_TRIAGE_TITLE } from '../lib/rerun-triage.ts'
 import { terminalReadiness } from '../lib/review-readiness.ts'
 import { foldActivityRows, type ActivityRow } from '../lib/activity-fold.ts'
 import { useMemberActivity } from './research-status/useMemberActivity.ts'
@@ -443,6 +444,21 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
             </span>
           )}
         </div>
+      )}
+      {/* 交付后只读出口（rerun 不满转接：三种改法 + 可复制话术；D18 只读——不按钮化 rerun） */}
+      {face !== null && delivery !== null && (
+        <details style={{ marginBottom: 10, fontSize: 12, opacity: 0.9 }}>
+          <summary style={{ cursor: 'pointer' }}>{RERUN_TRIAGE_TITLE}</summary>
+          <div style={{ marginTop: 6, lineHeight: 1.6 }}>
+            {RERUN_TRIAGE_ROWS.map((row) => (
+              <div key={row.label} style={{ marginBottom: 4 }}>
+                <strong>{row.label}</strong>：{row.consequence}
+                <div style={{ opacity: 0.75 }}>「{row.copy}」</div>
+              </div>
+            ))}
+            <div style={{ opacity: 0.6 }}>{RERUN_TRIAGE_HINT}</div>
+          </div>
+        </details>
       )}
       {/* 未绑定 / 绑定待确认提示（RFC right-pane-ux-debt + cockpit-flow-face G4） */}
       {unbound && (

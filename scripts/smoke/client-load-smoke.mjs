@@ -449,6 +449,17 @@ async function pass1BoundFacePhase() {
         step(delivOk, '交付态 = present 见证（门②）而非 final.md 在场',
           diskSide.delivered ? `present → ✅ 已交付 · 读终稿（${diskSide.delivery.path}）`
             : `无 present → 只显示承诺行（final.md 在场=${diskSide.deliveredFile}）`)
+        // 交付后只读出口（rerun 不满转接卡）：已交付才渲染折叠块；展开后三行用户语言 + 后果 + 话术
+        // 必须与 src/lib/rerun-triage 同源（文案常量 = 单一正本，组件只画）。
+        if (diskSide.delivered) {
+          const triageSummary = page.getByText('还不满意？三种改法').first()
+          const triageVisible = await triageSummary.isVisible().catch(() => false)
+          if (triageVisible) await triageSummary.click({ timeout: 3_000 }).catch(() => {})
+          const bodyText = triageVisible ? await paneTextOf(page) : ''
+          step(triageVisible && bodyText.includes('补研究') && bodyText.includes('这份太浅') && bodyText.includes('版本不变'),
+            '交付后只读出口：三种改法折叠块（用户语言 + 版本后果 + 可复制话术；D18 只读）',
+            triageVisible ? 'fold expanded' : '缺折叠块')
+        }
         // 锚点入轨断言（RFC cockpit-flow-face）：轨道渲染 + 诚实线计数与盘侧文件事实对账
         const railOk = seg.includes('◆立项确认') && seg.includes('◆交付审阅')
         step(railOk, '流程轨道渲染（◆立项确认 + ◆交付审阅在场）')
@@ -877,6 +888,13 @@ async function pass5FinalDeliveryPhase() {
     const tabTitles = await page.evaluate(() => [...document.querySelectorAll('[role="tab"]')].map((n) => (n.textContent ?? '').trim()))
     const onFinalTab = tabTitles.some((t) => t.includes('终稿'))
     step(onFinalTab, '交付门点开 → 页签标题「终稿」（extension 带接管了文件地址）', `tabs=${JSON.stringify(tabTitles)}`)
+    // 终稿页脚同款只读折叠块（与状态页 ⑤ 共用 src/lib/rerun-triage 文案）
+    const triageFooter = page.getByText('还不满意？三种改法').first()
+    const footerVisible = await triageFooter.isVisible().catch(() => false)
+    if (footerVisible) await triageFooter.click({ timeout: 3_000 }).catch(() => {})
+    const footerText = footerVisible ? await paneTextOf(page) : ''
+    step(footerVisible && footerText.includes('补研究') && footerText.includes('这份太浅'),
+      '终稿页脚：三种改法折叠块在场（与状态页同源文案）', footerVisible ? 'fold expanded' : '缺折叠块')
     step(heading !== '' && normalize(finalText).includes(heading), '终稿页签渲染 final.md 正文（与盘侧首标题对账）', heading)
     // 静音条断言必须读**静音条元素**：整页 innerText 会被聊天里的「当前版报告」误命中
     // （2026-10-20 实测：扫全页把"当前版"当成了静音条命中，产品其实显示 v1）。
@@ -906,6 +924,19 @@ async function pass5FinalDeliveryPhase() {
       return { ok: overflows && scroller.scrollTop > 0, why: `sh=${scroller.scrollHeight} ch=${scroller.clientHeight} top=${scroller.scrollTop}` }
     })
     step(scrollProbe.ok, '终稿页签自带滚动口（长正文可滚、不被裁）', scrollProbe.why)
+    // 状态页 ⑤ 同款折叠块（同一交付目标会话；与终稿页脚共用 src/lib/rerun-triage 文案）
+    const statusChip = page.getByRole('tab', { name: /研究状态/ }).first()
+    if (await statusChip.isVisible().catch(() => false)) {
+      await statusChip.click({ timeout: 5_000 }).catch(() => {})
+      const statusFold = page.getByText('还不满意？三种改法').first()
+      const statusFoldVisible = await statusFold.isVisible().catch(() => false)
+      if (statusFoldVisible) await statusFold.click({ timeout: 3_000 }).catch(() => {})
+      const statusText = statusFoldVisible ? await paneTextOf(page) : ''
+      step(statusFoldVisible && statusText.includes('补研究') && statusText.includes('这份太浅'),
+        '状态页 ⑤：已交付后的三种改法折叠块（与终稿页脚同源文案）', statusFoldVisible ? 'fold expanded' : '缺折叠块')
+    } else {
+      skipped.push('状态页 ⑤ 折叠块：交付目标会话无研究状态 tab')
+    }
   } else {
     // 前置未建立 ≠ 断言红：候选窗/时序不保证 UI 这一窗里有交付门。显式 SKIP 并让脚本
     // exit 2（未跑），不制造假红；trials 给下一跳排查面。

@@ -207,6 +207,9 @@ BUG-020）。
   `--latest` 均并扫 archive/）。`runtime/harness-home/runs/` 下的 bundle 是契约前的 ad-hoc 历史
   （仪表盘标 "ad-hoc·无契约"）——不是这次要恢复的 run，也不要删（gitignored 运行数据，是那次
   研究留下的证据）；
+- **交付后想改**：三种改法 + 各自代价（补研究出新版本 / 改说法版本不变 / 方向变了另起 bundle）——
+  状态页 ⑤ 与终稿页脚有只读折叠块「还不满意？三种改法」，照抄一句发给 Lead 即可；Lead 按
+  `rerun-triage` skill 分诊（先复述再分类、至多两个手段、不擅自 rerun）。观察面只给话术，不按钮化。
 - **续跑已交付（已归档）run**：同在飞形态——新开 lead 会话说「继续 `archive/drt_<slug>` 这个 run」；
   lead 依赖的是 bundle 文件事实而非位置（归档位在其 cwd 之下可读；仪表盘与 evidence-audit
   `--latest` 均并扫 archive/）。续跑语义 = rerun 三分：表述修订原位改、证据扩张落 `final/`

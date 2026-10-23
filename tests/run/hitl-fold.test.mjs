@@ -126,6 +126,13 @@ test('HITL2 定稿卡签名（按现稿定稿）→ 交付审阅 pending', () =>
   assert.deepEqual(anchors.map((a) => [a.label, a.state]), [['立项确认', 'passed'], ['交付审阅', 'pending']]);
 });
 
+test('HITL2 新措辞（定稿（按现稿交付））→ 交付审阅 pending；旧措辞仍判交付审阅（历史别名）', () => {
+  const askNew = { type: 'tool/call', data: { name: 'ask_user_question', arguments: JSON.stringify({ questions: [{ id: 'finalize', options: [{ label: '定稿（按现稿交付）(Recommended)' }, { label: '补研究（补哪块看报告末节；会出新版本）' }, { label: '改说法（只改措辞，版本不变）' }] }] }) } };
+  assert.deepEqual(deriveAnchors([askNew], { question: true, delivered: false }).map((a) => [a.label, a.state]), [['立项确认', 'passed'], ['交付审阅', 'pending']]);
+  const askOld = { type: 'tool/call', data: { name: 'ask_user_question', arguments: JSON.stringify({ questions: [{ id: 'finalize', options: [{ label: '按现稿定稿（Recommended）' }] }] }) } };
+  assert.deepEqual(deriveAnchors([askOld], { question: true, delivered: false }).map((a) => [a.label, a.state]), [['立项确认', 'passed'], ['交付审阅', 'pending']]);
+});
+
 test('交付后再来的挂起 ask（契约外）→ 如实缀第三锚 中途确认', () => {
   const anchors = deriveAnchors([askWithQs(2, 't')], { question: true, delivered: true });
   assert.equal(anchors.length, 3);

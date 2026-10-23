@@ -34,6 +34,7 @@
 | entry-chain-probe.mjs | 授权范围、RFC 条件与开发环路径三问，词面断言 + 留档人工复核 | 真模型档 |
 | method-library-probe.mjs | 偏好库可发现性三问（文件名/位置、当前条目数、点名条目缺席时是否如实说），cwd = 临时研究工作区。修复判据 #4 的机器化证明（BUG-042） | 真模型档 |
 | discipline-probe.mjs | 散文纪律行为面五场景标记断言（A2 超界 / B1 差集 / 收活缺件 / 收活 UNVERIFIED / 计划确认卡·quick_factual 免发互补对）+ 留档人工复核；`--scenario <id>` 定向跑 | 真模型档 |
+| rerun-triage-probe.mjs | 不满转接的模型行为五条（复述不满 / ≤2 手段 / 代价与版本后果 / 未确认前不动手 / 范围来自报告末节）：给一句「太浅」跑真 lead 会话；五条全中才 PASS（探针不证明长尾说法不误判——人读） | 真模型档 |
 
 ## run-gates/（run bundle 机械门与审计）
 
@@ -72,15 +73,15 @@
 | lib/roles.mjs | discipline-probe、l4-lite-smoke、preset-smoke、presets.test、release-smoke、replay-request.test、replay-scene.test、snapshot-replay-smoke、team-preflight-smoke | 角色清单访问器（事实源 = 盘上 presets/） |
 | lib/frontmatter.mjs | bundle-date-sanity、evidence-audit-core、run-dashboard-core | `---` frontmatter 拆分**唯一正本**（两 core 共用同一实现） |
 | lib/zstd-read.mjs | node-gate、evidence-audit、run-accept（三壳） | zstd CLI 文本解压**唯一调用段**（多帧拼接靠 CLI；成功/失败结构化返回，**失败契约留各壳**：`''` 继续 vs `null` 跳过） |
-| lib/web-harness.mjs | session-replay、client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、snapshot-replay-smoke、team-preflight-smoke | DSH web 冒烟族**启停与通道唯一正本**：`bootWeb`（等启动横幅拿 token）+ `authenticate` + `makeRpc`；**参数保形**——端口/超时/尾部字符/rpcId 前缀/失败文案与收割方式全留各站点 |
-| lib/session-log.mjs | cdp-ask-smoke、cdp-probe、session-replay、client-hitl-smoke、client-load-reference、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、hitl-answer、l4-lite-smoke、method-library-probe、plan-card-stats、provider-error-stats、run-dashboard-core、run-kickoff、run-state、run-state.test、session-events、session-log.test、snapshot-replay-smoke、stream-diagnostics、team-preflight-smoke、watch-run | canonical 日志选择与读取 + 会话组发现（findGroup 子串参数化，缺省 research-workspace——BUG-010 三处同款一行收敛；冒烟/自测组逃生口 = 观察工具 --group） |
+| lib/web-harness.mjs | session-replay、client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、rerun-triage-probe、snapshot-replay-smoke、team-preflight-smoke | DSH web 冒烟族**启停与通道唯一正本**：`bootWeb`（等启动横幅拿 token）+ `authenticate` + `makeRpc`；**参数保形**——端口/超时/尾部字符/rpcId 前缀/失败文案与收割方式全留各站点 |
+| lib/session-log.mjs | cdp-ask-smoke、cdp-probe、session-replay、client-hitl-smoke、client-load-reference、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、hitl-answer、l4-lite-smoke、method-library-probe、plan-card-stats、provider-error-stats、run-dashboard-core、run-kickoff、run-state、run-state.test、session-events、session-log.test、snapshot-replay-smoke、stream-diagnostics、team-preflight-smoke、watch-run、rerun-triage-probe | canonical 日志选择与读取 + 会话组发现（findGroup 子串参数化，缺省 research-workspace——BUG-010 三处同款一行收敛；冒烟/自测组逃生口 = 观察工具 --group） |
 | lib/session-events-core.mjs | session-events、session-events.test | 会话事件摘要与筛选纯函数（CLI 壳 = run-ops/session-events 行） |
 | lib/llm-stream-tee-core.mjs | llm-stream-tee-core.test | LLM 流 tee 的捕获判定（主机子串，fail-closed）与凭据头脱敏（预载壳 = scripts/probe/llm-stream-tee.cjs——CJS require 面不在 .mjs 对账图内，壳本体是活进程仪器不设 keyless 自测） |
 | lib/provider-errors.mjs | provider-error-stats、provider-errors.test | 回合被上游流错误终结的结构化抽取（唯一语义源：只认 `turn/end` + `reason.kind=error`，不双算 `assistant/attempt`） |
 | lib/plan-card.mjs | node-gate-session-gates、plan-card-stats、plan-card.test | 计划确认卡识别与字数口径（唯一语义源：标签「按计划开跑」+ `question` 字段全长 + 阈值 200） |
 | lib/stream-diagnostics-core.mjs | stream-diagnostics、stream-diagnostics.test | 模型活动会话筛选（活动事件预筛后再按日志 mtime 取最近 N）+ 尝试时间线投影（assistant/message 计成功、assistant/attempt 计失败/无落面，终态三判 alive-or-idle/recovered/dead） |
 | lib/run-state.mjs | cdp-ask-smoke、hitl-answer、session-replay、run-state.test、session-events、watch-run | run 操作面状态谓词 |
-| lib/env.mjs | session-replay、cdp-ask-smoke、client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、record-role-fixture、release-smoke、snapshot-replay-smoke、team-preflight-smoke | 子进程环境清洗（scrubbedEnv/withModelKey——凭据卫生） |
+| lib/env.mjs | session-replay、cdp-ask-smoke、client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、record-role-fixture、release-smoke、snapshot-replay-smoke、team-preflight-smoke、rerun-triage-probe | 子进程环境清洗（scrubbedEnv/withModelKey——凭据卫生） |
 | lib/playwright.mjs | session-replay、client-hitl-smoke、client-load-smoke、e2e-021rc2、hitl-answer、snapshot-replay-smoke | Playwright 启停支撑 |
 | lib/cdp-driver.mjs | cdp-probe、scene-capture | 裸 CDP 驱动 |
 | lib/session-replay.mjs | session-replay、session-replay.test | 历史会话定位/元信息/判读整形纯函数（跨组枚举、id 优先、标题歧义如实报候选；会话→工作区靠首事件 cwd） |

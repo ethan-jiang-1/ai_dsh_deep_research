@@ -5,7 +5,7 @@ opened: 2026-10-23
 
 # 推敲：rerun 的不满转接——用户说法 ↔ 我们的手段
 
-> 立卡：2026-10-23 ｜ 状态：推敲中 ｜ 类型：设计 ｜ 结论倾向：现在做（先落词表与 HITL2 措辞，观察面出口随后） ｜ 可关闭：否
+> 立卡：2026-10-23 ｜ 状态：推敲中 ｜ 类型：设计 ｜ 结论倾向：现在做（先落词表与 HITL2 措辞，观察面出口随后） ｜ 实施授权：2026-10-23 15:58 用户「开始考虑…落地…静默自主推进」 ｜ 可关闭：否
 
 ## 0. 立项来历（用户原话）
 
@@ -160,16 +160,44 @@ opened: 2026-10-23
 4. **证据**：L0（verify/test）+ L1 preset-smoke + snapshot-replay B（skill catalog 变化）+
    client-load（折叠块渲染）+ 真模型探针（§8 最后一条）；同 diff 写 Note。
 
-## 8. 验收标准
+## 8. 验收标准（验收矩阵；方法正本 = [_backlog/methods/validation-design](../methods/validation-design.md)）
 
-- 4.1 词表落成单一正本（Lead skill），七类说法各有落点、每行有产出/代价/不变项；
-- HITL2 选项带后果且卡仍 ≤200 字；`final.md` 模板含「下一版优先项 + 什么会改变建议」，
-  synthesis 判据引用；quick_factual 有缩略形态；
-- 状态页/终稿页折叠块渲染三种改法与可复制话术（client-load 断言；文案住 `src/lib` 可单测）；
-- 真模型探针：给一句"太浅"，Lead 能满足 §9 未决 5 的五条，且**不擅自 rerun**；
-- 不新增交互点、不在观察面加动作按钮、不改 D17 三形态、不改版本记账。
+> 2026-10-23 获实施授权后按 validation-design 重写：每行 = 行为 / 类别 / 输入态 / 通过信号 /
+> 反例·互补态 / 证据 owner / 人为判断。旧稿的散文验收保留在 §12（历史）。
 
-## 9. 未决（请 reviewer 拍板，附我的建议）
+| # | 行为（可观察） | 类别 | 输入 / 状态 | 通过信号 | 反例 / 互补态 | 证据 owner（能证明什么） | 人为判断 |
+|---|---|---|---|---|---|---|---|
+| 1 | **L1 词表正本**：lead 有一个可被按需加载的 `rerun-triage` skill，七类用户说法各有落点，每行含手段 / 产出代价 / 不变项；五条对话纪律在场 | 确定性（文件契约）+ 模型行为（加载后遵守） | 新会话或交付后会话，用户说任一不满说法 | skill 文件存在、frontmatter `name/description` 合法、七类说法关键词与四种手段逐行可检；preset skill 目录可发现 | 删任一类别或任一"不变项"列 → keyless 契约测试红；skill 目录缺席 → `role-list-sync` / preset 测试红 | `tests/pack/rerun-triage-skill.test.mjs`（文件契约）+ `pnpm verify` 的 `preset-structure`/`role-list-sync`（装配）+ 快照 B·skill-catalog（模型可见目录）；**不能**证明模型真的按词表回话 | 措辞是否像人话（reviewer 读一遍） |
+| 2 | **L2 HITL2 选项带后果且守 ≤200 字**：三选项（定稿 / 补研究 / 改说法）各带一句后果；题干给"太浅 / 方向不对 / 太长"三个词，不新增问题 | 模型行为 + 装配（persona 文本） | 交付审阅时刻 | persona、synthesis §5、手册 HITL2 行三处逐字同源；选项标签 ≤ 24 字、指导句 ≤ 200 字 | 三处任一漂移 → 契约测试红；选项不带后果 → 契约测试红 | `tests/contracts/rerun-triage-contract.test.mjs`（三处同源 + 长度）+ snapshot-replay B（persona 组装面）；**不能**证明真实用户觉得措辞清楚 | 真实用户体感（本卡 §9 未决 2 观察几场后再定） |
+| 3 | **L2 报告末节**：`final.md` 模板含「下一版优先项 / 什么会改变建议」两节；quick_factual 有缩略形态；synthesis 把它写成完成判据 | 确定性（模板 + 判据文本） | 任何新交付报告 | 模板两节在场；synthesis 判据引用；quick_factual 注记在场 | 删节 → 模板契约红；synthesis 不引用 → 契约红 | `tests/contracts/rerun-triage-contract.test.mjs` + `workspace-contract`（模板在位）；**不能**证明模型每次都填得实 | 填得是否有信息量（review 抽样） |
+| 4 | **L3 只读出口**：状态页 ⑤ 与终稿页脚各一个折叠块「还不满意？三种改法」，三行 = 用户语言 + 后果 + 可复制的一句话；两处共用 `src/lib` 文案常量；观察面不加动作按钮 | 确定性（纯函数）+ 渲染（client） | 已交付 bundle、绑定会话 | 常量模块导出三行且含复制话术；两组件引用同一常量；client 渲染出现该文案 | 文案只改一处 → 纯函数测试红；渲染缺席 → client-load-smoke 红；出现 `<button>`/动作调用 → 静态守卫红 | `tests/cockpit/rerun-triage.test.mjs`（纯函数）+ `client-load-smoke`（真浏览器渲染）+ 静态守卫（无按钮）；**不能**证明用户会照做 | 折叠块位置与文案密度（人读） |
+| 5 | **不触碰既有合同**：不新增交互点、不改 HITL1/HITL2 数量与时机、不加 rerun 动作按钮、不改 D17 三形态与版本记账 | 确定性（静态约束） | 全 diff | 交互点仍两处；无新增 tool/按钮；版本语义文件未改 | 新增第三颗 ◆ 或按钮 → 设计审查否决 | 静态守卫（`rerun-triage.test` 断言无动作 API）+ diff 人审；**不能**证明长期不腐（靠 code review） | 设计取舍（reviewer） |
+| 6 | **模型行为**：给一句"太浅"，Lead（a）复述不满；（b）≤2 个手段；（c）说清代价与版本后果；（d）未确认前不动手；（e）指出范围来自报告末节 | 模型行为 | 真实 lead 会话 + 已交付/待交付 bundle | 探针五条断言全中（文本判据逐条） | 任一条缺 → 探针红；擅自开跑 → 探针红 | `scripts/probe/rerun-triage-probe.mjs`（真模型档，登记 `REAL_MODEL`）；**不能**证明其它说法长尾不误判 | 语气/是否像人话 → 人工读一次 |
+| 7 | **persona 交付语义与 D28 一致**（实施中发现）：persona 的交付四步写 `final/ 版本记账` + `present 当前版 final.md`，与门②要求的 `final/vN` 冲突 | 确定性（模型可见文本） | 任何新 run 交付 | persona 写 `present` 指 `final/vN`、`final/` 为交付副本；snapshot B·persona 绿 | 仍写 final.md → 契约测试红；快照 B 红 | `tests/contracts/rerun-triage-contract.test.mjs` + snapshot-replay B；**不能**证明模型不旧习复发（靠门②） | 无 |
+| 8 | **非回归**：verify / test / snapshot / preset / client-load 全绿；旧 bundle 零改写 | 确定性（回归） | 全仓 | 五条命令绿 | 任一红 | `pnpm verify`、`pnpm test`、`snapshot-replay-smoke`、`preset-smoke`、`client-load-smoke` | 无 |
+
+**关闭条件**：第 1–5、7、8 行全绿；第 6 行要么五条全中，要么如实记 UNATTESTED（不冒充）；第 2/4 行的人读项记录结论。
+
+## 9. 裁定记录（2026-10-23；实施授权 = 用户「开始考虑…落地…静默自主推进」）
+
+> 用户授权自主推进、不逐项请批；六问均按**卡内建议档**采纳，理由与代价如下。若后续用户否决，
+> 按 §10 回退，不在细节上打补丁。
+>
+> 1. **词表住新 skill**（`presets/lead/skills/rerun-triage`）——不满可能发生在交付前/后，独立
+>    description 才能按需加载；synthesis 里只留"何时加载"一句。
+> 2. **HITL2 不加第一问**——只在题干给三个词；观察真实体感后再议（保持两点交互）。
+> 3. **结构性重跑不进 HITL2 选项**——由 Lead 在用户说"方向不对"时提出（sibling 预检 + 同意）；
+>    卡上第三项用"改说法"，与"另起 bundle"分开，避免第四项超字数。
+> 4. **L3 住状态页 ⑤ + 终稿页脚**，共用 `src/lib/rerun-triage.ts` 常量（单一文案源）。
+> 5. **探针五条判据**照抄（a–e），PASS = 全中；未跑 = UNATTESTED。
+> 6. **报告末节按硬约束**写进 synthesis 完成判据（没有该节 = 未完成）；quick_factual 缩略为一行。
+>
+> 实施中新增第 7 条验收：persona 的交付四步仍写 `present final.md`（与门②/D28 冲突）——同批修正，
+> 属本卡 L2 文本面的既有偏差，不另开卡。
+
+### 原问题（历史；已按上述裁定）
+
+
 
 1. **词表住哪**：新开 `rerun-triage` skill（HITL1 与 HITL2 都可能触发，独立可见）vs 并入
    `synthesis §5.1`（少一个技能，但只有交付后才读得到）。**建议新开**：用户说"太浅"可能发生在

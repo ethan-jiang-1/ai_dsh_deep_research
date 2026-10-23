@@ -9,15 +9,15 @@
 harness 只读：presets、skills、本手册、templates/ 对任何一次研究都是同一份，run 期间零
 写入，不持任何 per-run 状态。**一切变量只写进本 run 的 bundle（本目录下 `drt_<slug>/`）**
 ——不写回手册/模板，不把 run 状态记到任何框架文档。`研究报告 = harness(bundle)`。
-**位置 = 操作桶（D28）**：根 / `archive/` / `_abandoned/` 只用于发现与展示，不证明在飞/已交付；
-状态从内容读（`run.md` + 文件事实 + 会话事件）。
+**位置 = 操作桶（D28）**：根 / `archive/` / `_abandoned/` 只用于发现，不证明在飞/已交付；
+状态从内容读（`run.md` + 文件事实 + 事件）。
 
 ## 目录约定
 
 ```
 drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research Topic，目录名即方向；
                        slug 由主编立项时定，kebab-case；立项 sibling 预检：同名/前缀相关
-                       bundle 已在（**含 archive/ 归档**）→ 问用户，不擅自另起）
+                       bundle 已在（**含 archive/ 归档**）→ 问用户）
   run.md               状态头（owner: lead；ops 可写交付/停放回执）：contract / phase / next /
                        delivered / parked；3–5 行 + 机器可读键；状态是声明，事实是正本；
                        旧 bundle 无本文件按 epoch 解释（不补文件）
@@ -63,14 +63,14 @@ method-library.md      用户研究偏好库（工作区根；lead 维护；四�
 ```
 
 模板八件 ↔ run（状态头）/question/topics/plan/leads/evidence-entry（= evidence/ 单条模板）/findings/final
-（= run 根**当前版报告**模板；final/ 的 vN 交付副本**无模板**，交付时从当前版忠实复制）；
+（= 当前版报告模板；final/ 的 vN 交付副本**无模板**，交付时忠实复制）；
 review.md、drafts/、journal.md 无模板——review 格式住 critic 的 adversarial-review skill，
 drafts/journal 运行时自建。plan.md 是过程件：不替代任何交付门，交付只认 final/review/decisions/
 present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat W 只读）重建任务。
 
 ## 状态头、读序与恢复（D28）
 
-每个新 run 在根落 `run.md`（模板 `templates/run/run.md`），3–5 行 + 机器可读键：
+每个新 run 在根落 `run.md`（模板 `templates/run/run.md`），3–5 行机器可读键：
 
 | 键 | 值 |
 |---|---|
@@ -80,26 +80,26 @@ present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat 
 | `delivered` | 交付回执指针 `vN @ 时间 · present callId`（非交付期 `none`） |
 | `parked` | 停放原因 + 复活条件（非停放期 `none`） |
 
-**状态是声明，事实是正本**：与文件事实冲突时以事实为准，门禁判红；`run.md` 不自证批准/交付。
+**状态是声明，事实是正本**：冲突以事实为准，门禁判红；`run.md` 不自证批准/交付。
 
-**读序**（新 run；旧 run 无 `run.md` 时按状态推导表）：`run.md` → `question.md`（含 §Decisions）→
+**读序**（新 run；旧 run 无 `run.md` 按推导表）：`run.md` → `question.md`（含 §Decisions）→
 `topics.md` → `plan.md`（若在场）→ `journal.md` 顶部 3–5 条（方向按文件头声明；无声明默认最新在上，
 旧场按日期判前后）→ `findings.md` / `final.md` → `review.md`（只认终局块）→
 `evidence/<id>.md` + `provenance/<id>.json`（按需）→ `delivered.json` / `manifest.json`（若在场）。
 
-**旧 run 状态推导表**（无 `run.md`；不要求补文件）：
+**旧 run 推导表**（无 `run.md`；不补文件）：
 
 | 事实 | phase | 下一步 |
 |---|---|---|
 | 无 `question.md` | 立项前 | 问用户是否立项 |
-| `review.md` 无 PASS 或 `final/` 不在场 | research/review | 继续研究/审查 |
+| `review.md` 无 PASS 或 `final/` 不在场 | research/review | 继续研究 |
 | review 终局 PASS、无 HITL2 行 | delivery | 呈 HITL2 |
 | HITL2 行 + `final/vN` + present 指针 | accepted | 可 `run-accept` |
 | `_abandoned/` + 停放原因 | parked | 按复活条件 |
 
 **恢复程序**：读最小集 → 答五问（阶段 / 最近拍板 / 最大未闭合 / 下一步 / 交付态）→ **先定范围**
-（`run.md` 的 `next`/`phase`；范围不明只问一个带范围的澄清问，不重跑全流程）→ 重问 pending HITL
-（只重发一次，不把沉默当拍板）→ 从 `plan.md` 的 `## 剩余工作` 重建 Team 任务板 → 继续，不重做已完成。
+（`run.md` 的 `next`/`phase`；不明只问一个带范围的澄清问）→ 重问 pending HITL
+（只重发一次）→ 从 `plan.md` 的 `## 剩余工作` 重建 Team 任务板 → 继续，不重做已完成。
 
 ## 交付与审查终局（D28）
 
@@ -113,8 +113,8 @@ present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat 
 
 ## 来源证明（C-lite）
 
-- 每条证据卡可在 `provenance/<id>.json` 带来源证明：`kind` = `web|local-file|command`；
-  `url`/`path`；`sha256`；`retrieved_at`；`channel`；`slice`。
+- 每条证据卡可在 `provenance/<id>.json` 带来源证明：kind（web|local-file|command）+ url/path +
+  sha256 + retrieved_at + channel + slice。
 - `file://` 只作 local-file（不再按网页验）；`path` 必须相对、`sha256` 必须匹配；新 run 的
   `file://` 无 provenance = MAJOR。
 - 语料缺席时 audit 以 provenance 离线复算；无 provenance 才 UNATTESTED/MAJOR，不判“伪造”。
@@ -138,8 +138,7 @@ present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat 
 frontmatter 必须有（七字段）：`source_url`（真实抓取过的 URL）/ `retrieved_at` / `quality`
 （A–D）/ `found_by` / `supports` / `source_tier`（信源分级，见下表）/ `publisher`（注册域）。
 正文"原文摘录"与"解读"两节分开。以上即最小契约，**所有角色按此判**；analyst 会话内另有
-全文模板（`evidence-extraction` skill——skills 按角色硬隔离，其他角色加载不到，判据以
-本手册为准）。**没有 frontmatter 的文件不算证据**（critic 按此判）。
+全文模板（`evidence-extraction` skill；按角色硬隔离，其他角色加载不到，判据以本手册为准）。**没有 frontmatter 的文件不算证据**（critic 按此判）。
 **口径最小契约**（与 frontmatter 同级）：数字/规格类摘录须带测量条件口径（版本/配置/
 时间/原文限定语至少两项；口径不明写"口径不明"）——所有角色按此判。
 **日期最小契约**（与 frontmatter 同级）：任何"当前 / 截至 / 查询时间"类日期（含 `retrieved_at`、
@@ -178,9 +177,9 @@ review 审查时间、口径截至）**不得凭时间感直写**（角色会话
 
 整个 run 只有两个人机交互点，都由 lead 执行：**立项对齐（HITL1）**与**交付审阅（HITL2）**——都以 `ask_user_question` 的**结构化选项卡**呈现（一次多问 + options + 推荐项置首带(Recommended)）。
 
-**HITL1 = 两段卡**：第一段固定三问（研究类型/深度篇幅/时间口径与语言），第二段**计划确认卡**——question/topics 定稿后、开工前呈计划要点瘦卡（按计划开跑(Recommended)/ 修订计划（意见附加不替换、一轮制不再二次呈卡）/ 放弃；**quick_factual 豁免**），拍板落 question.md §Decisions 第 1 条，形态细则 = lead 的 research-brief skill；**HITL2 选项** = 定稿(Recommended)/补研究/修订表述。
+**HITL1 = 两段卡**：第一段固定三问（研究类型/深度篇幅/时间口径与语言），第二段**计划确认卡**——question/topics 定稿后、开工前呈计划要点瘦卡（按计划开跑(Recommended)/ 修订计划（意见附加不替换、一轮制不再二次呈卡）/ 放弃；**quick_factual 豁免**），拍板落 question.md §Decisions 第 1 条，形态细则 = lead 的 research-brief skill；**HITL2 选项** = 定稿（按现稿交付）(Recommended)/补研究（补哪块看报告末节；会出新版本）/改说法（只改措辞，版本不变）；题干给「太浅/方向不对/太长」；分诊 = lead 的 rerun-triage skill。
 
-两点之间所有角色静默自主推进——不问"要不要继续"、不汇报中间进度、不等确认。
+两点之间所有角色静默自主推进——不问"要不要继续"、不汇报进度、不等确认。
 用户主动发消息时直接回答，但回答不改变既定研究方向与分派。
 
 ## 完成判据（verify the world）

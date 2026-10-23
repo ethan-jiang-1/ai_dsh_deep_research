@@ -90,12 +90,17 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 2. **静默自主区**：Lead 拆 topic、派 Scout/Analyst/Critic（Agent Teams 通道），证据落
    `drt_<slug>/evidence/`（七字段 frontmatter：source_url / retrieved_at / quality / found_by /
    supports / source_tier / publisher）；Critic 对抗核查出 `review.md`（readiness PASS 是交付前置）；
-3. **HITL2 审阅**：结构化选项卡（按现稿定稿(Recommended)/ 补研究 / 修订表述）→ 拍板后交付
-   `final.md`（每条关键结论附 `[来源: evidence/xx.md]`；报告首屏 = 决策摘要：建议与适用条件 /
-   备选取舍 / 关键依据 / 最强反证 / 目前不能判断 / 下一步——快速事实型缩略为答案+口径+依据+限制）；
+3. **HITL2 审阅**：结构化选项卡（定稿（按现稿交付）(Recommended) / 补研究（看报告末节；出新版本）/
+   改说法（版本不变）；题干给「太浅 / 方向不对 / 太长」三个词）→ 拍板后交付 `final/vN` 副本
+   （每条关键结论附 `[来源: evidence/xx.md]`；报告首屏 = 决策摘要：建议与适用条件 /
+   备选取舍 / 关键依据 / 最强反证 / 目前不能判断 / 下一步，末节 = 下一版优先项 / 什么会改变建议——
+   快速事实型缩略为答案+口径+依据+限制）；交付后想改 = 状态页 ⑤ 与终稿页脚的只读折叠块
+   「还不满意？三种改法」给话术，Lead 按 `rerun-triage` skill 分诊（不自动 rerun）；
 4. **观察面**：DSH Web GUI 右栏「研究状态」页签看实时动态（流程轨道 = ◆立项确认 + 立项→
    组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付，↻ rerun 回路自交付审阅可见，人性化活动流，
    HITL 挂起横幅点名锚点与参与方式，活标题「研究状态 · ⏳ 等你拍板」，交付节点显示 `final/` 中的最高有效版本号（vN）；仅 v2+ 文件是证据扩张版本记录。）；
+   交付后同一页签 ⑤ 与终稿页脚各有只读折叠块「还不满意？三种改法」（补研究 / 改说法 / 另起一个
+   bundle，各写版本后果与一句可复制的话；观察面不按钮化 rerun）；
    右栏「研究配置」页签（D25 管理中继面）四区——**本次研究**（这次用的是哪条打法 ＋ 一键换，读
    question.md 研究方法节）／**内置打法**（一句话 ＋ 什么时候用它 ＋ 标本位）／**我的偏好库**／
    **底线条**（六条共同底线 ＋ 两个定制入口：让 Lead 帮我起草、从本次 run 沉淀）；操作按钮生成
