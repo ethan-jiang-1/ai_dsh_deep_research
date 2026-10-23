@@ -9,7 +9,7 @@
 // 用法：source dev/env.sh && node scripts/smoke/l4-lite-smoke.mjs [--port 3101]
 
 import { spawnSync } from 'node:child_process';
-import { withModelKey } from '../lib/env.mjs';
+import { requireCredentials, withModelKey } from '../lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
 import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
@@ -32,10 +32,7 @@ const POLL_MS = 3_000;
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
 if (!home) { console.error('l4-lite: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2); }
-if (!existsSync(join(home, '.credentials.yaml'))) {
-  console.error('l4-lite: dev home 无凭据文件（.credentials.yaml）——先配置 DEEPSEEK_API_KEY');
-  process.exit(2);
-}
+requireCredentials('l4-lite', { home });
 if (spawnSync('zstd', ['--version']).status !== 0) {
   console.error('l4-lite: 需要 zstd 且须在 PATH 上（会话日志为 zstd 压缩，readSessionLog 直接调 zstd）');
   process.exit(2);

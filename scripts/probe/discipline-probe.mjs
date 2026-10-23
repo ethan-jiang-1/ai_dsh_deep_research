@@ -26,7 +26,7 @@
 // 用法：source dev/env.sh && node scripts/probe/discipline-probe.mjs [--port 3104] [--scenario <id>]
 // verdict：exit 0=全绿 / 1=断言红 / 2=前置缺席（冒烟可靠性纪律，未跑 ≠ 通过）。
 import { spawnSync } from 'node:child_process';
-import { withModelKey } from '../lib/env.mjs';
+import { requireCredentials, withModelKey } from '../lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
 import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
@@ -49,10 +49,7 @@ const POLL_MS = 3_000;
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
 if (!home) { console.error('discipline-probe: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2); }
-if (!existsSync(join(home, '.credentials.yaml'))) {
-  console.error('discipline-probe: dev home 无凭据文件（.credentials.yaml）——先配置 DEEPSEEK_API_KEY');
-  process.exit(2);
-}
+requireCredentials('discipline-probe', { home });
 if (spawnSync('zstd', ['--version']).status !== 0) {
   console.error('discipline-probe: 需要 zstd 且须在 PATH 上（会话日志 zstd 压缩）');
   process.exit(2);

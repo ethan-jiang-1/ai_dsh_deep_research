@@ -31,7 +31,7 @@ import { existsSync, readdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
-import { withModelKey } from '../lib/env.mjs'
+import { requireCredentials, withModelKey } from '../lib/env.mjs'
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs'
 import { readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs'
@@ -53,10 +53,7 @@ if (home === null) {
   console.error('client-hitl-smoke: 未 source dev/env.sh（DSH_HOME 缺席）——先 source 再跑')
   process.exit(2)
 }
-if (!existsSync(join(home, '.credentials.yaml'))) {
-  console.error('client-hitl-smoke: 真模型档需要凭据（runtime/harness-home/.credentials.yaml 缺席）')
-  process.exit(2)
-}
+requireCredentials('client-hitl-smoke', { home });
 if (spawnSync('zstd', ['--version']).status !== 0) {
   console.error('client-hitl-smoke: 需要 zstd CLI（多帧会话日志全帧解——node:zlib 只解第一帧）')
   process.exit(2)

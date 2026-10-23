@@ -2,7 +2,7 @@
 // 防假绿机制采纳）。契约：exit 0 = 全绿 / 1 = 断言红 / 2 = 未跑（前置缺席）——未跑 ≠ 通过。
 // 登记的真模型档脚本行为由形状断言钉住，防将来漂移；实际成员以 REAL_MODEL 闭集为准。
 // 登记制 closed set（命名即层）：真模型档 = 要凭据的档位，名单就是本文件的 REAL_MODEL——
-// 任何顶层脚本引用 `.credentials.yaml`（凭据要求标记）而未登记 = 档位词表漂移即红；
+// 任何顶层脚本引用 `requireCredentials(`（凭据要求标记；旧形态 `.credentials.yaml` 仍认）而未登记 = 档位词表漂移即红；
 // 反向（登记脚本摘掉凭据要求）同样红。语料事实：`withModelKey` 是条件透传（key 在才传），
 // keyless 冒烟也合法调用，故判据用凭据**要求**而非透传。
 // 反证：①给 keyless 脚本注入 .credentials.yaml 引用 → closed set 红；②删登记脚本的
@@ -43,8 +43,11 @@ function listScriptRels() {
   return rels.sort();
 }
 
-test('真模型档 closed set：要求凭据（.credentials.yaml）的脚本恰为登记名单', () => {
-  const requiring = listScriptRels().filter((f) => readFileSync(join(SCRIPTS, f), 'utf8').includes('.credentials.yaml'));
+test('真模型档 closed set：要求凭据（requireCredentials / .credentials.yaml）的脚本恰为登记名单', () => {
+  const requiring = listScriptRels().filter((f) => {
+    const src = readFileSync(join(SCRIPTS, f), 'utf8');
+    return src.includes('requireCredentials(') || src.includes('.credentials.yaml');
+  });
   assert.deepEqual(
     requiring,
     [...REAL_MODEL].sort(),

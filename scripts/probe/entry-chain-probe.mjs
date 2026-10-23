@@ -10,7 +10,7 @@
 //
 // 前置：source dev/env.sh（DSH_HOME + 凭据）；DSH_SRC 默认本仓根（vendor/dsh）。
 // 用法：source dev/env.sh && node scripts/probe/entry-chain-probe.mjs [--port 3114]
-import { withModelKey } from '../lib/env.mjs';
+import { requireCredentials, withModelKey } from '../lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
 import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
@@ -35,10 +35,7 @@ const OUT = join(ROOT, 'runtime', 'smoke-workspace');
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
 if (!home) { console.error('probe: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2); }
-if (!existsSync(join(home, '.credentials.yaml'))) {
-  console.error('probe: dev home 无凭据文件——先配置 DEEPREEK/DEEPSEEK_API_KEY（.credentials.yaml）');
-  process.exit(2);
-}
+requireCredentials('probe', { home });
 const dshSrc = process.env.DSH_SRC ?? ROOT; // 本仓根 = 安装锚（vendor/dsh submodule）
 const bin = join(dshSrc, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
 if (!existsSync(bin)) { console.error(`probe: 机制基线不在位（${bin}）——git submodule update --init`); process.exit(2); }

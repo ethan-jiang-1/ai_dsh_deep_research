@@ -10,7 +10,7 @@
 // 前置：source dev/env.sh（DSH_HOME + 凭据 + vendor 树）。用法：
 //   node scripts/probe/rerun-triage-probe.mjs [--port 3118]
 // 退出码：0 = 五条全中；1 = 有断言未中；2 = 前置缺席（未跑 ≠ 通过）。
-import { withModelKey } from '../lib/env.mjs';
+import { requireCredentials, withModelKey } from '../lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
 import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
@@ -30,9 +30,7 @@ const POLL_MS = 3_000;
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
 if (!home) { console.error('probe: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2); }
-if (!existsSync(join(home, '.credentials.yaml'))) {
-  console.error('probe: dev home 无凭据文件——先配置 DEEPSEEK_API_KEY（.credentials.yaml）'); process.exit(2);
-}
+requireCredentials('probe', { home });
 const bin = join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
 const overlay = join(ROOT, 'dev', 'research.overlay.yml');
 if (!existsSync(bin)) { console.error(`probe: 机制基线不在位（${bin}）——git submodule update --init`); process.exit(2); }

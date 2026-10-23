@@ -24,7 +24,7 @@ import { join, resolve, dirname } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
-import { scrubbedEnv, withModelKey } from '../scripts/lib/env.mjs'
+import { requireCredentials, scrubbedEnv, withModelKey } from '../scripts/lib/env.mjs'
 import { sentinelInAssistantText } from '../scripts/lib/replay-request.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -55,7 +55,7 @@ const fail = (msg) => { console.error(`record-role-fixture: ${msg}`); process.ex
 if (!ROLE || !ROLE_PROMPTS[ROLE]) fail(`需要 --role <角色 id>（可录集 = ROLE_PROMPTS 键，含 lead——重录 = 先删旧 session.v4.jsonl，录制品人审后入库）`)
 if (!process.env.DSH_HOME) fail('未 source dev/env.sh（DSH_HOME 缺席）——与 L1/L2 同档自拒')
 const DSH_HOME = resolve(process.env.DSH_HOME)
-if (!existsSync(join(DSH_HOME, '.credentials.yaml'))) fail('dev home 无凭据文件（.credentials.yaml）——先配置 DEEPSEEK_API_KEY')
+requireCredentials('record-role-fixture', { home: DSH_HOME })
 // 角色 fixture 住场景目录根（lead 的历史落点，ui.expected.md 同目录），其余角色住 <role>/ 子目录
 const OUT_DIR = join(ROOT, 'snapshots', 'replay', 'research-face', ...(ROLE === 'lead' ? [] : [ROLE]))
 if (existsSync(join(OUT_DIR, 'session.v4.jsonl'))) fail(`${OUT_DIR}/session.v4.jsonl 已在——重录请先删除（录制品人审后入库，不静默覆盖）`)

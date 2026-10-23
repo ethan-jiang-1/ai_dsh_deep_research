@@ -13,7 +13,7 @@
 // 用法：source dev/env.sh && node scripts/smoke/team-preflight-smoke.mjs [--port 3102]
 
 import { spawnSync } from 'node:child_process';
-import { withModelKey } from '../lib/env.mjs';
+import { requireCredentials, withModelKey } from '../lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
 import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
@@ -39,10 +39,7 @@ const QUIET_POLLS = 4;
 // ── 前置校验 ──
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
 if (!home) { console.error('team-preflight: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2); }
-if (!existsSync(join(home, '.credentials.yaml'))) {
-  console.error('team-preflight: dev home 无凭据文件（.credentials.yaml）——先配置 DEEPSEEK_API_KEY');
-  process.exit(2);
-}
+requireCredentials('team-preflight', { home });
 if (spawnSync('zstd', ['--version']).status !== 0) {
   console.error('team-preflight: 需要 zstd 且须在 PATH 上（会话日志为 zstd 压缩）');
   process.exit(2);

@@ -49,6 +49,6 @@
 - **命名即层**（DSH 后缀选层的本仓形态；新增检查先命名）：后缀申报证据类型；凭据/调用模式另申报——
   `tests/**/*.test.mjs` = 唯一 regression 成员（递归 glob 即选中，`fixtures/`/`_tmp/` 除外；layering 钉 keyless）；`*-smoke` =
   分级冒烟、`*-probe` = 探针、`*-gate`/`*-audit`/`*-scan` = run bundle 机械门；`scripts/lib/`、
-  `tests/fixtures/` 在执行 glob 外、由 consumer 消费。独立真模型档 = 登记制 closed set：要求凭据（引用
-  `.credentials.yaml`）的 `scripts/` 各入口脚本必须恰为名单（机械对账 = `tests/contracts/smoke-contract.test.mjs`——
+  `tests/fixtures/` 在执行 glob 外、由 consumer 消费。独立真模型档 = 登记制 closed set：要求凭据（调用 `scripts/lib/env.mjs` 的
+  `requireCredentials`）的 `scripts/` 各入口脚本必须恰为名单（机械对账 = `tests/contracts/smoke-contract.test.mjs`——
   `withModelKey` 是条件透传不作判据）；该检查不发现经现有会话触发模型的路径，新模式须另审查/登记。

@@ -28,7 +28,7 @@ import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { scrubbedEnv } from '../lib/env.mjs';
+import { requireCredentials, scrubbedEnv } from '../lib/env.mjs';
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
 import { runStateOf } from '../lib/run-state.mjs';
 import { resolveSessionLog } from '../lib/session-log.mjs';
@@ -47,10 +47,7 @@ if (HOME === null) {
   console.error('cdp-ask-smoke: 未 source dev/env.sh（DSH_HOME 缺席）——先 source 再跑（未跑 ≠ 通过）');
   process.exit(2);
 }
-if (!existsSync(join(HOME, '.credentials.yaml'))) {
-  console.error(`cdp-ask-smoke: 缺凭据 ${join(HOME, '.credentials.yaml')}——真模型档前置缺席，未跑 ≠ 通过`);
-  process.exit(2);
-}
+requireCredentials('cdp-ask-smoke', { home: HOME });
 const BIN = join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
 if (!existsSync(BIN)) {
   console.error(`cdp-ask-smoke: 机制基线源码不在位（${BIN}）`);

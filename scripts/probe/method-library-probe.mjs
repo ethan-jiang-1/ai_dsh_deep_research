@@ -10,7 +10,7 @@
 //   Q3 必须说出题面点名的偏好**不在库里**（不得声称"已按该偏好执行"）。
 //
 // 前置：source dev/env.sh。用法：node scripts/probe/method-library-probe.mjs [--port 3116]
-import { withModelKey } from '../lib/env.mjs';
+import { requireCredentials, withModelKey } from '../lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
 import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
 import { execFileSync } from 'node:child_process'
@@ -31,10 +31,7 @@ const POLL_MS = 3_000;
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
 if (!home) { console.error('probe: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2); }
-if (!existsSync(join(home, '.credentials.yaml'))) {
-  console.error('probe: dev home 无凭据文件——先配置 DEEPSEEK_API_KEY（.credentials.yaml）');
-  process.exit(2);
-}
+requireCredentials('probe', { home });
 const bin = join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
 if (!existsSync(bin)) { console.error(`probe: 机制基线不在位（${bin}）——git submodule update --init`); process.exit(2); }
 
