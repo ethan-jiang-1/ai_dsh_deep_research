@@ -72,7 +72,7 @@
 | [bundle-bind](../../packages/deep-research-pack/src/lib/bundle-bind.ts) | journal 事件 → 本会话绑定的 run slug + 绑定强度 | 只认 `tool/call` 参数路径里的 `drt_<slug>/`；**写强读弱**——write/edit 命中直接定绑，仅读命中兜底（立项预检读旧 bundle 的错绑防线，2026-09-28 首跑实证）；可信性政策 = binding-trust |
 | [binding-trust](../../packages/deep-research-pack/src/lib/binding-trust.ts) | journal 事件 → 可信绑定三态（bound / unbound / suppressed） | write 永远可信；read 在 HITL 挂起 / 立项信号下抑制并带 reason（pending / kickoff）；其余 read 可信。三页签只消费结论，不再各自解释 raw binding |
 | [tool-card](../../packages/deep-research-pack/src/lib/tool-card.ts) | call/result 切片 → 卡片状态 | running / ok / error / stopped |
-| [final-target](../../packages/deep-research-pack/src/lib/final-target.ts) | journal 交付事件 / 文件地址 / 终稿路径 → 本次交付 + 会话文件 + 读面定表 + 自动打开判据 | `present`（`deliverables/presented`）是交付的机械判据（node-gate 门②）；`final.md` 在场只说明"有终稿可审"（综合步就落盘），不是交付。地址认领只收三个位置（根 / `archive/` / `_abandoned/`），`drafts/final.md` 与绝对域全拒；交付记录的位置失效时按三位置回退（`finalCandidates`）；自动打开 = `shouldOpenFinal`（有交付 / `callId` 未开过 / 焦点不在可编辑元素） |
+| [final-target](../../packages/deep-research-pack/src/lib/final-target.ts) | journal 交付事件 / 文件地址 / 终稿路径 → 本次交付 + 会话文件 + 读面定表 + 自动打开判据 | `present`（`deliverables/presented`）是交付的机械判据（node-gate 门②）；`final.md` 在场只说明"有终稿可审"（综合步就落盘），不是交付。地址认领只收三个位置（根 / `archive/` / `_abandoned/`），`drafts/final.md` 与绝对域全拒；交付记录的位置失效时由 run-context 的 `openRun` 按三位置回退；自动打开 = `shouldOpenFinal`（有交付 / `callId` 未开过 / 焦点不在可编辑元素） |
 | [member-activity](../../packages/deep-research-pack/src/lib/member-activity.ts) | 队员 journal 事件 → 检索/抓取/出错动作行 + 全量计数 | 粒度定夺 = [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)（2026-10-10 用户三问：文件读写不入流）；失败行剥 "Error: " 工程前缀；行截尾窗与 activity-fold 同款 |
 | [brief-fold](../../packages/deep-research-pack/src/lib/brief-fold.ts) | 既有事实源投影 → 业务摘要五问 | 输入面**不含**证据计数与工具调用数（计数在类型层面进不了完成态文案，keyless 禁词单测钉）；九态优先级 = 挂起 > 立项预检窗 > 未绑定 > 审查 FAIL > 已交付 > 推进中；派生不出的状态显式缺省，不虚构 |
 | [review-readiness](../../packages/deep-research-pack/src/lib/review-readiness.ts) | review.md 全文 → 终局 readiness 三态 | 只认**行首**判定行、取最后一条：文末附录保留的轮次血统（如首轮 `readiness: FAIL`）是行内引用，不得夺权；空模板 `PASS \| FAIL`、无判定行或输入畸形 → `null`（不猜）。驾驶舱、仪表盘与 client-load-smoke 直接消费；node-gate 在纯 `.mjs` 边界镜像同一规则并由 `gateBundle` 回归覆盖 |
@@ -111,6 +111,8 @@
 - **会话绑定**：渐进面只显示**本会话自己的** run bundle（不显示别家数据）；位置只用于发现，
   三个位置都认（根 / `archive/` / `_abandoned/`），状态从内容读（D28）；未绑定如实提示；写强读弱 +
   挂起期抑制仅读绑定的渐进面（预检读取不算"本会话的 run"）。
+- **页签内区块归属**：每个页签的头部/正文/底部以 §2 的页签行为准；新增块先在该行写归属区
+  （图谱头部 = 只读标记 + plan/task 计数 + 版本轨 + 覆盖率 + 刷新时刻），不另立第二套布局说明。
 
 ## 5. 验证面与改动路由
 

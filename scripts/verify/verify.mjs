@@ -40,7 +40,7 @@ const PRESETS = join(PACK, 'presets');
 // 新增门禁两处同步）。数组与文件块同按域分组（A–F）排序，域横幅见各节。
 const gates = [
   'md-utf8-newline', 'md-links', 'md-anchors', 'archived-note-pointer', 'count-free', 'doc-now-only', 'doc-budgets',
-  'preset-structure', 'pack-bundle-compat', 'client-half', 'row-deps', 'pack-contract-sync', 'role-list-sync', 'client-keys', 'client-effect-wrap', 'cockpit-doc-registry',
+  'preset-structure', 'pack-bundle-compat', 'client-half', 'row-deps', 'pack-contract-sync', 'role-list-sync', 'client-keys', 'client-effect-wrap', 'cockpit-doc-registry', 'run-context-single-source',
   'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'proposed-pointer-live',
   'vendor-pin', 'vendor-clean', 'pin-agreement', 'align-ledger', 'discipline-na-trigger', 'discipline-state-vocab', 'repo-conventions', 'vendor-links',
   'workspace-contract', 'handbook-budget', 'workspace-versioning', 'overlay-fresh', 'pack-workspace-fresh', 'dist-manual-version',
@@ -722,6 +722,32 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
       const modulePath = relative(PACK, abs).split(sep).join('/');
       if (!registeredModulePath(modulePath))
         fail(gate, `${relative(ROOT, abs)} 未在构成正本登记（修正 = 在 docs/design/40-research-cockpit.md §2 的件表或折算层表加一行：pack-root-relative 路径 + 职责）`);
+    }
+  }
+}
+
+// ── run-context-single-source（三操作桶的发现实现只有 run-context 一份）──
+// 客户端源码不得再出现 `_abandoned` 候选链（注释除外）：D28 的发现规则归
+// `src/lib/run-context.ts`，页签只消费 openRun / bundleCandidates。词法是窄代理；
+// 宽语义仍由模块测试与 review 把守。
+{
+  const gate = 'run-context-single-source';
+  const files = trackedFiles({ gate, glob: 'packages/deep-research-pack/src/client' });
+  if (files !== null) {
+    const tsFiles = files.filter(({ rel }) => /\.(ts|tsx)$/.test(rel));
+    if (tsFiles.length === 0) fail(gate, 'src/client 下 0 个 tracked .ts/.tsx（防空集：驾驶舱 client 面常在）');
+    else {
+      const offenders = [];
+      for (const { rel, text } of tsFiles) {
+        for (const [index, line] of text.split('\n').entries()) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) continue;
+          if (trimmed.includes('_abandoned')) offenders.push(`${rel}:${index + 1}`);
+        }
+      }
+      if (offenders.length > 0) {
+        fail(gate, `客户端出现三位置回退候选链（发现实现归 src/lib/run-context.ts）——${offenders.join('、')}（修正 = 用 openRun / bundleCandidates，不在页签里拼 archive/_abandoned）`);
+      }
     }
   }
 }

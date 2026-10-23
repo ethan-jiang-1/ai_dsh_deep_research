@@ -162,24 +162,6 @@ export function finalReadPlan(path: string): FinalReadPlan | null {
   return { final: path, review: `${dir}review.md`, versions: `${dir}final` }
 }
 
-/**
- * 终稿的三位置候选（按序：原位 → archive/ → _abandoned/）。
- * `present` 记录的是交付**当时**的位置；bundle 之后被归档/停放时，记录路径会失效——读面按
- * 三位置依次尝试，页签地址不变（地址 = 交付记录，内容 = 当前位置）。
- * @param path - 规范相对路径（`finalPathOf` 的产物）。
- * @returns 去重后的候选路径；非法输入 → 空数组。
- */
-export function finalCandidates(path: string): readonly string[] {
-  if (!FINAL_RELATIVE.test(path)) return []
-  const bare = path.replace(/^(?:archive\/|_abandoned\/)/, '')
-  if (!FINAL_RELATIVE.test(bare)) return []
-  const out: string[] = []
-  for (const candidate of [path, bare, `archive/${bare}`, `_abandoned/${bare}`]) {
-    if (!out.includes(candidate) && FINAL_RELATIVE.test(candidate)) out.push(candidate)
-  }
-  return out
-}
-
 /** 会话域文件地址的解析结果。 */
 export interface SessionFile {
   readonly sessionId: string

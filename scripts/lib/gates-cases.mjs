@@ -551,6 +551,12 @@ export const CASES = [
   { id: 'workspace-versioning-drafts-whitelist-missing', gate: 'workspace-versioning', mutate: (dir) => {
     rmSync(join(dir, 'research-workspace', 'drafts', '.gitignore'));
   } },
+  // 客户端三位置候选链（run-context-single-source）：页签重新手拼 archive/_abandoned
+  // 发现规则 → 门禁点名红。正解 = openRun / bundleCandidates。
+  { id: 'run-context-single-source-client-chain', gate: 'run-context-single-source', mutate: (dir) => {
+    appendFileSync(join(dir, 'packages', 'deep-research-pack', 'src', 'client', 'ResearchStatusTab.tsx'),
+      "\nconst __probe = ['drt_x', 'archive/drt_x', '_abandoned/drt_x'];\n");
+  } },
 ];
 
 export const CONTROLS = [

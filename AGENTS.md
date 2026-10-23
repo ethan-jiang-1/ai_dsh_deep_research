@@ -77,12 +77,13 @@ Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。
 `vendor/dsh/.agents/notes/implemented/AGENTS.md`（维护规则）。本仓落地与差异见
 [notes/README.md](notes/README.md)。
 
-## 命令速查（全档正本 = [guides/60 §2](docs/guides/60-dev-loop.md)）
+## 命令速查（全档正本 = [guides/60 §2](docs/guides/60-dev-loop.md)；run 通道 = [guides/61](docs/guides/61-run-playbook.md)）
 
 ```sh
 source dev/env.sh    # ⚠ 前置：双 home + 裸 dsh 拦截（DSH_HOME=runtime/harness-home）；L1/L2 与须先 source 的脚本必须先 source（清单正本 = scripts/README 档位列），未 source 自拒 exit 2（run 通道 dev/boot-run.sh 自 source，勿重复）
 pnpm verify          # L0 结构门禁（keyless，收尾必跑）
 pnpm test            # L0 keyless 回归（唯一登记的测试命令）
+node dev/run-driver.mjs up   # 研究 run 通道（起/复用 + 验浏览器面 + 呈交 URL；操作 = guides/61 §0）
 ```
 
 其余全档（L1 挂载 / L2 安装 / L4-lite / run 通道 / 观察面 / 部署 bin）与逐命令说明 = [guides/60 §2](docs/guides/60-dev-loop.md)；档位与密钥 = 下节。

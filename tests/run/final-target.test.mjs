@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  draftInProgress, finalAddressOf, finalCandidates, finalPathOf, finalReadPlan, isFinalAddress, latestFinalDelivery, latestPresentedFinalVersion,
+  draftInProgress, finalAddressOf, finalPathOf, finalReadPlan, isFinalAddress, latestFinalDelivery, latestPresentedFinalVersion,
   sessionFileOf, shouldOpenFinal,
 } from '../../packages/deep-research-pack/src/lib/final-target.ts';
 
@@ -98,14 +98,6 @@ test('地址：编码段往返 + 查询串忽略 + 畸形编码 fail-soft', () =
   assert.equal(sessionFileOf('dsh-resource://file/session/sess-1/%E0%A4%A'), null);
   assert.equal(sessionFileOf('dsh-resource://file/session/sess-1'), null);
   assert.equal(sessionFileOf('https://example.com/x.md'), null);
-});
-
-test('finalCandidates：交付记录的位置失效后按三位置回退（原位 → archive → _abandoned）', () => {
-  assert.deepEqual(finalCandidates('drt_x/final.md'), ['drt_x/final.md', 'archive/drt_x/final.md', '_abandoned/drt_x/final.md']);
-  assert.deepEqual(finalCandidates('archive/drt_x/final.md'), ['archive/drt_x/final.md', 'drt_x/final.md', '_abandoned/drt_x/final.md']);
-  assert.deepEqual(finalCandidates('_abandoned/drt_x/final.md'), ['_abandoned/drt_x/final.md', 'drt_x/final.md', 'archive/drt_x/final.md']);
-  assert.deepEqual(finalCandidates('drt_x/question.md'), []);
-  assert.deepEqual(finalCandidates(''), []);
 });
 
 test('shouldOpenFinal：有交付 + 未开过 + 焦点不在输入框 → 才开（三条缺一不开）', () => {

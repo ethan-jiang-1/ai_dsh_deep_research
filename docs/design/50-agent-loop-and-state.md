@@ -27,6 +27,10 @@
 | goal / 任务板 | 执行辅助——与 bundle 互为镜像，冲突以 bundle 文件事实为准 | DSH 宿主（goal 由 lead 钉住/暂停） | 人、仪表盘 |
 | 仪表盘 / 研究驾驶舱（观察面） | **派生观察**——fail-soft 只读投影，不是交付绿灯 | run-dashboard 脚本投影 / 驾驶舱 client 套件渲染 | 人 |
 
+**观察通道的时间事实**：`remote.workspaceFiles` 只暴露目录项与文本页，不暴露文件 mtime；观察面
+任何"最近一条证据的时间"只能取 journal 工具调用事件时间，并显式标注"未知（观察窗口内无写入）"，
+不得用盘上 mtime 冒充。需要真 mtime 时必须先扩 vendor `WorkspaceFileStat` 并升 pin，属上游改动。
+
 ## 恢复优先级
 
 断点续跑只认 run bundle 的文件事实：重跑 [run-driver](../../dev/run-driver.mjs)（内部调 boot-run）→ 新开 lead 会话 → "继续 <slug>"——lead 只凭 bundle 重建上下文，不依赖聊天记忆。session log 佐证执行事件，但不充当研究事实；观察面与任务板不参与恢复判定（操作步骤 = [Run 指南 §5](../guides/61-run-playbook.md)）。

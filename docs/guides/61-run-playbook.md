@@ -19,6 +19,8 @@
   补救，**先看占用者是谁**：若是本仓在飞的 run 通道 → **别另起**，用它（URL/token 见启动横幅或
   `runtime/smoke-workspace/web.log`）；不是 → 换端口，或确认后停掉它（**别盲杀**：在飞会话的
   日志尾部可能丢失——BUG-007 卡）。想守在前台看日志 = `bash dev/boot-run.sh`（底层启动面）；
+- **已有通道时**：取当前 URL = `node dev/run-driver.mjs url`；只验浏览器面（不启动、不换 token）=
+  `node dev/run-driver.mjs probe`。URL/token 的唯一来源仍是最后一条启动横幅；旧横幅 = 旧 token；
 - **启动请求的呈交纪律（2026-09-30 用户定调）**：用户让"启动/起 web" = 代理**先自己跑通再交 URL**——
   run-driver 就是这条纪律的可复跑入口（exit 0 = 可呈交 / 1 = 红不得呈交 / 2 = 未跑）。三步序如下，
   红了按序修后重跑同一条：
@@ -128,6 +130,10 @@ CLI/host 侧没有 answerer，也没有提交答案的 RPC）——所以代答�
 ```sh
 source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <横幅 token>   # 默认逐题选带(Recommended)的那一项
 ```
+
+**HITL1 是两段卡**（三问卡 → 计划确认卡）：同一条命令**跑两次**，每次只答当前挂起的一张卡
+（计划确认卡在 quick_factual 编制下豁免）。**HITL2** 先按 §4 跑 `node-gate` / `evidence-audit`，
+再跑同一条 `hitl-answer`——交付审阅卡在 review readiness 非 PASS 时自拒（exit 4）。
 
 > **交付代答闸**（2026-10-18）：交付审阅卡在场而 review readiness 非 PASS 时，`hitl-answer` 的**默认推荐档会自拒**（exit 4）——请人工裁决，或显式 `--pick <非定稿项>`/`--custom` 表明有意为之（依据 = [hitl-proxy-delivery-guard](../../notes/implemented/2026-10-18-hitl-proxy-delivery-guard.md)）。
 
