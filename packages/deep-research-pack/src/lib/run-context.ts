@@ -30,6 +30,7 @@ export type Outcome<T> =
 export interface Entry {
   readonly name: string
   readonly type: 'file' | 'directory' | 'other'
+  /** Node list 适配器提供；浏览器 workspaceFiles 不暴露文件 mtime。 */
   readonly mtimeMs?: number
 }
 
@@ -76,6 +77,7 @@ export interface RunRef {
   readonly slug: string
   readonly dir: string
   readonly bucket: Bucket
+  /** 仅 Node 适配器提供；浏览器源没有 mtime（排序退回桶序 + slug）。 */
   readonly mtimeMs?: number
 }
 
@@ -254,6 +256,7 @@ export async function openRun(source: RunSource, ref: string, opts?: { readonly 
 /**
  * 枚举 run bundle：按桶序扫描，同 slug 根优先（不合并），mtime 全在场时按 mtime 降序，
  * 否则按桶序 + slug（确定性；没有 mtime 的源不静默声称"最近"）。
+ * mtime 仅 Node 适配器提供；浏览器 workspaceFiles 不暴露文件 mtime → 桶序 + slug。
  */
 export async function listRuns(source: RunSource, opts?: { readonly buckets?: readonly Bucket[]; readonly signal?: AbortSignal }): Promise<Outcome<readonly RunRef[]>> {
   const requested = opts?.buckets ?? BUCKETS

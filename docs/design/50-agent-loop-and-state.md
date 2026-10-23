@@ -29,7 +29,9 @@
 
 **观察通道的时间事实**：`remote.workspaceFiles` 只暴露目录项与文本页，不暴露文件 mtime；观察面
 任何"最近一条证据的时间"只能取 journal 工具调用事件时间，并显式标注"未知（观察窗口内无写入）"，
-不得用盘上 mtime 冒充。需要真 mtime 时必须先扩 vendor `WorkspaceFileStat` 并升 pin，属上游改动。
+不得用盘上 mtime 冒充。证据时间可折自 journal 的 write/edit 调用（不进入活动流——活动流仍只显示
+检索/抓取/成员/交付）；写者通常是队员会话，页签需合并 lead + member 流。需要真 mtime 时必须先扩
+vendor `WorkspaceFileStat` 并升 pin，属上游改动。
 
 ## 恢复优先级
 

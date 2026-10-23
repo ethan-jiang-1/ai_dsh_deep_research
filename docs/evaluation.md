@@ -72,7 +72,7 @@
 | `dist-manual-version` | dist 导出合同：`_dist/安装手册.md` 在库且表头版本 = pack 版本、指名 `dsh-deep-research-pack-<version>.tgz` | [dist-export Note](../notes/implemented/2026-09-28-dist-export.md) |
 | `workspace-versioning` | 工作区版本控制边界：`research-workspace/.gitignore.example` 与 `drafts/.gitignore` 在库、正本与 pack 种子逐字节相等、拒收行逐项在场；**出现裸 `*` 整目录拒收即红** | 反证 = `gates-smoke` 注入案例（删 `drt_*/` 行 / 加裸 `*` / 删 drafts 白名单）；形态依据 = [工作区版本控制边界 Note](../notes/implemented/2026-10-13-workspace-versioning-boundary.md) |
 | `cockpit-doc-registry` | 驾驶舱 src/client 与 src/lib 每个模块的路径必须出现在[构成正本](design/40-research-cockpit.md)里（同名模块不互相遮盖） | 反证 = gates-smoke 注入案例（嵌套/同名模块/空格路径/符号链接/忽略目录）；规则来源 = [③驾驶舱卡 ③-b 行](../_backlog/_archived/settled_issues/2026-10-11-executive-research-ux-delivery.md) |
-| `run-context-single-source` | 客户端源码（注释除外）不得出现 `_abandoned` 三位置候选链——发现实现唯一正本 = `src/lib/run-context.ts` | 反证 = gates-smoke 注入案例（客户端文件追加候选链 → 点名红）；规则来源 = [run-context Note](../notes/implemented/2026-10-23-run-context.md) |
+| `run-context-single-source` | `src/client` 的 tracked `.ts/.tsx`（注释除外）不得出现 `_abandoned` 三位置候选链——发现实现唯一正本 = `src/lib/run-context.ts`；`src/lib/final-target.ts` 的终稿地址校验是另一件事，不在本词法门禁范围 | 反证 = gates-smoke 注入案例（客户端文件追加候选链 → 点名红）；规则来源 = [run-context Note](../notes/implemented/2026-10-23-run-context.md) |
 
 - **契约回归**（`pnpm test` 守卫族的面对应登记）：可驾驭性契约 = [tests/contracts/navigability-contract.test.mjs](../tests/contracts/navigability-contract.test.mjs)（design/50 与状态合同唯一正本、任务入口矩阵九任务与链接目标、scripts/dev/fixtures 资产索引全覆盖、fixture 每组真实 consumer 零孤儿——D23 立红与反证记录 = [项目可驾驭性 Phase 1 Note](../notes/implemented/2026-10-05-project-navigability-phase1.md)）；fixture 分类 = [tests/fixtures/README.md](../tests/fixtures/README.md)；其余守卫的归属见各自文件头注。
 - **通过判据**：全绿；`verify` 的门禁清单与 `tests/` 守卫一一登记在案，每条带反证记录（上表）。

@@ -36,6 +36,9 @@ D28 的三操作桶（根 / `archive/` / `_abandoned/`）此前在四个页签�
   读面需要的地方，不让 63 个门禁测试为它改签名。
 - 终稿页签改为整文件读取（到 eof / 触顶 `truncated`），不再有“继续加载”分页；这是有意的取舍：
   一个 1448 行 review 约 50KB，整读正确性优先；触顶时如实显示截断。
+- 机械侧 = verify 门禁 `run-context-single-source`：`src/client` 的 tracked `.ts/.tsx` 非注释行
+  出现 `_abandoned` 候选链即红（`src/lib/final-target.ts` 的终稿地址校验是另一件事，不在词法
+  门禁范围）；`finalCandidates` 已删除，三位置发现只剩 run-context 一份。
 
 ## 输掉的方案
 
@@ -61,9 +64,11 @@ D28 的三操作桶（根 / `archive/` / `_abandoned/`）此前在四个页签�
   - 把 `review.md` 从 EOF 策略移除 → 1448 行用例读成 40 行、`terminalReadiness` 判红；
   - 删掉 Node 适配器的空文件 `[]` 行切分 → 空文件用例读成 1 行红；
   - 浏览器适配器把 not-found 与其它错误都映射成 missing → 错误分类用例红；
-  - 删掉 `bindingTrust` 的 pending 分支 → 挂起真值表用例红。
-- `pnpm test` **744 pass / 0 fail**；`pnpm verify` 43 门禁全绿；`pnpm typecheck` 通过；pack 双半
-  `pnpm build` 通过。
+  - 删掉 `bindingTrust` 的 pending 分支 → 挂起真值表用例红；
+  - 向 `ResearchStatusTab.tsx` 注入 `['drt_x', 'archive/drt_x', '_abandoned/drt_x']` →
+    `run-context-single-source` 点名红；还原绿。
+- `pnpm test` **745 pass / 0 fail**；`pnpm verify` 44 门禁全绿；`gates-smoke` 78 案例全绿；
+  `pnpm typecheck` 通过；pack 双半 `pnpm build` 通过。
 - `client-load-smoke` 真浏览器 **ALL PASS**：状态页证据计数 160/160、业务摘要、HITL 锚点；
   图谱覆盖率；配置页本次研究摘要；终稿页 v2 版本账、首标题、版本切换、静音条、滚动口。
 - Node 工具实跑：`schema-scan` 扫 46 份归档（0 契约期违约）；`node-gate --latest` 落到

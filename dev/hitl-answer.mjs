@@ -12,6 +12,8 @@
 //   node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <横幅 token> [--session <标题子串>]
 //                            [--pick recommended|first|<1-based index>] [--custom <文本>]
 //                            [--max-steps 8] [--dry-run]
+// HITL1 = 两段卡（三问 → 计划确认），同一条命令**跑两次**；HITL2 先跑 node-gate / evidence-audit，
+// 再跑本命令（交付门在 readiness 非 PASS 时自拒 exit 4）。先 `source dev/env.sh`；多挂起用 --session。
 // 行为：**先盘侧谓词自拒**（无真挂起会话即退出，不开浏览器）→ 精确按 session ID 打开同一会话
 //       → 逐题作答（默认选带 Recommended 的那一项）→ 提交 → 打印每题的选择。
 // 注意：**必须**在 question.md §Decisions 与 journal.md 标注"代理模拟"——它替的是人，不是人。

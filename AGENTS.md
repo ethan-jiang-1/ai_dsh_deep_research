@@ -86,6 +86,8 @@ pnpm test            # L0 keyless 回归（唯一登记的测试命令）
 node dev/run-driver.mjs up   # 研究 run 通道（起/复用 + 验浏览器面 + 呈交 URL；操作 = guides/61 §0）
 ```
 
+搜索先限定 `packages/`、`tests/`、`scripts/`、`docs/`；`vendor/`、`runtime/`、`packages/*/lib/` 是生成物/运行区，别全仓 grep。
+
 其余全档（L1 挂载 / L2 安装 / L4-lite / run 通道 / 观察面 / 部署 bin）与逐命令说明 = [guides/60 §2](docs/guides/60-dev-loop.md)；档位与密钥 = 下节。
 
 ## 密钥
