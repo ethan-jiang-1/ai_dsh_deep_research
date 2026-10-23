@@ -4,6 +4,9 @@
 
 ## 活跃清单
 
+- [run 终稿缺面向人的可读层](2026-10-23-run-final-human-readable.md)（2026-10-23，推敲中）
+- [可读终稿没有流程位](2026-10-23-readable-final-process.md)（2026-10-23，推敲中）
+
 （rerun 版本面与图谱表达已结并归档——见 [settled 池](../_archived/settled_issues/README.md)。）
 （动态 DAG、稳定节点身份、方法库主界面迁移、W<wave>.<index> 节点/WAVE 层均已结并归档到 [settled 池](../_archived/settled_issues/README.md)。）
 
