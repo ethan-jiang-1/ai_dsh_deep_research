@@ -34,10 +34,10 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
                        前缀必须一致；跨 Wave 重编号 + 旧号别名；lifecycle 墓碑留在表里但不画图；
                        stage 由节点 kind 派生；Team 平铺、不建 nested Team
   leads.md             候选方向清单（owner: scout）
-  evidence/            证据文件，一条一档（owner: analyst）
+  evidence/            证据文件，一条一档（owner: analyst；含工作底稿/失败登记，非承重）
   findings.md          发现账本：结论 + 支撑 + gap 状态（owner: lead）
-  review.md            对抗核查报告（owner: critic）：末尾固定 `## readiness（终局）: PASS|FAIL`；
-                       历史轮/附录保留但不算当前（旧场按 epoch 豁免）
+  review.md            对抗核查报告（owner: critic）：当前终局块（文件头声明最新在上；
+                       `readiness: PASS|FAIL` + CRITICAL/MAJOR 清单；历史轮不夺权）
   drafts/              过程稿（owner: 各角色，按需）
   final/               **交付副本**：交付时把 run 根 final.md 忠实复制为 v1.md；扩张 rerun 落 v2.md——
                        vN = 交付物全文；索引/回溯放 findings 或 vN 首节
@@ -47,6 +47,10 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
                        URL/路径 + sha256 + 时间 + 通道 + 切片；与 evidence/<id>.md 同名
   delivered.json       交付回执（ops）：门结果/audit 哈希/present 指针/final 哈希
   manifest.json        目录说明书（ops）：文件角色/读序/契约版本/哈希；不是指令
+  audit.md             证据审计快照（ops/派生；不是研究内容）
+  node-gate.md         门禁快照（ops/派生）
+  acceptance.md        验收回执（ops；旧场交付只有它，不是 delivered.json）
+  plan/                旧图快照 plan/v<N>.md（owner: lead；重写前落；只读）
   journal.md           运行纪要（追加式；文件头声明方向，默认最新在上；所有角色可写；跨 rerun 累积血统）
 archive/drt_<slug>/    操作桶（交付后操作侧移入；位置不证明交付；仍可被审计投影）
 _abandoned/drt_<slug>/ 停放桶（未投入但保留；原因/复活条件写 run.md `parked`；不是状态证明）
@@ -70,36 +74,37 @@ present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat 
 
 ## 状态头、读序与恢复（D28）
 
-每个新 run 在根落 `run.md`（模板 `templates/run/run.md`），3–5 行机器可读键：
+新 run 在根落 `run.md`（`contract` / `phase` / `next` / `delivered` / `parked`；键义 = `templates/run/run.md`）。**声明不是事实**；冲突以文件为准；`run.md` 不自证批准/交付。
 
-| 键 | 值 |
-|---|---|
-| `contract` | 契约纪元（创建日 `YYYY-MM-DD`；旧 run 无本文件按 epoch 解释） |
-| `phase` | `briefing` / `research` / `synthesis` / `review` / `delivery` / `accepted` / `parked` 之一 |
-| `next` | 一个可执行动作（文件/owner/范围）；终态写 `none` |
-| `delivered` | 交付回执指针 `vN @ 时间 · present callId`（非交付期 `none`） |
-| `parked` | 停放原因 + 复活条件（非停放期 `none`） |
+**五问**：阶段 / 最近拍板 / 最大未闭合 / 下一步 / 交付态。
 
-**状态是声明，事实是正本**：冲突以事实为准，门禁判红；`run.md` 不自证批准/交付。
+**按意图读**（读完即停；五问答齐即停）：
 
-**读序**（新 run；旧 run 无 `run.md` 按推导表）：`run.md` → `question.md`（含 §Decisions）→
-`topics.md` → `plan.md`（若在场）→ `journal.md` 顶部 3–5 条（方向按文件头声明；无声明默认最新在上，
-旧场按日期判前后）→ `findings.md` / `final.md` → `review.md`（只认终局块）→
-`evidence/<id>.md` + `provenance/<id>.json`（按需）→ `delivered.json` / `manifest.json`（若在场）。
+| 意图 | 先读 | 停在哪 | 不读 |
+|---|---|---|---|
+| 继续 | `run.md`（无 → 旧场行；旧场行替代本行，不叠加）→ `question.md §Decisions` → `journal.md` 顶部 3–5 条 → `plan.md §剩余工作` | 五问答齐 | 全部 evidence、历史 review |
+| 交付 | `run.md`（旧场跳过）→ `final/` 最高 `vN` + `final.md §0` → `question.md §Decisions` → `review.md` 当前终局块 → `delivered.json`（新）/`acceptance.md`（旧） | 版本副本 + 拍板 + readiness + 回执齐 | 研究过程、evidence |
+| 查证 | `final.md` 的 claim 句（多卡逐卡）→ `findings.md` 的 F# → 该 `evidence/<id>.md` + `provenance/<id>.json`（若在场；旧场常缺） | 来源与口径（数字/等级/as-of/单源；丢限定语 = 不符） | question/plan/journal、其他 evidence |
+| 旧场 | 旧表（下方）→ `question.md §Decisions` → `journal.md` 顶部 → `final.md` + 最高 `final/vN` → `review.md` 当前终局块 → `acceptance.md`（旧） | 五问答齐 + 回执 | 不补 `run.md`、不读 evidence（查证行除外） |
 
-**旧 run 推导表**（无 `run.md`；不补文件）：
+**交付口径**：`final/` 取最高 `vN`；`final/vN` = 不可变交付副本，`final.md` = 当前稿，不是副本；`final/v1-ledger.md` 不是副本。新契约看 `delivered.json`；旧场只有 `acceptance.md`（二选一，不是都要）。旧场 `final/v1.md` 兼作版本索引：修复回填可在文末加索引行、正文不改；新契约 `final/vN` 不可变。`acceptance.md` 只记硬门（CRITICAL 0）；MAJOR 数看 `audit.md`，不因它重判交付。旧场 receipt 无哈希；交付后改 review/plan 要重跑 `run-accept`；accepted 后只归档。旧场 `present` 可能指 `final.md`/v1，且不是文件（session log 事件）；有 `acceptance.md` + HITL2 行 + 最高 `final/vN` = accepted，present 不指 v2 时注明“操作侧验收”，不伪造模型 present。
+
+**终局块**：`review.md` 只认当前终局块（文件头声明方向；当前实现最新在上）；`readiness: PASS|FAIL` 是判据，末尾/历史轮的 PASS 不算。
+
+**旧 run 推导表**（无 `run.md`；不补）：
 
 | 事实 | phase | 下一步 |
 |---|---|---|
 | 无 `question.md` | 立项前 | 问用户是否立项 |
 | `review.md` 无 PASS 或 `final/` 不在场 | research/review | 继续研究 |
 | review 终局 PASS、无 HITL2 行 | delivery | 呈 HITL2 |
-| HITL2 行 + `final/vN` + present 指针 | accepted | 可 `run-accept` |
+| HITL2 行 + 最高 `final/vN` +（present 指同一 `vN` 或 `acceptance.md` 在场） | accepted | 可 `run-accept` |
+| 最高 `final/vN` 无对应拍板，或 present 指旧 `vN` 且无 acceptance | delivery | 先补拍板/present |
 | `_abandoned/` + 停放原因 | parked | 按复活条件 |
 
-**恢复程序**：读最小集 → 答五问（阶段 / 最近拍板 / 最大未闭合 / 下一步 / 交付态）→ **先定范围**
-（`run.md` 的 `next`/`phase`；不明只问一个带范围的澄清问）→ 重问 pending HITL
-（只重发一次）→ 从 `plan.md` 的 `## 剩余工作` 重建 Team 任务板 → 继续，不重做已完成。
+**冲突 / 过期**：`plan.md` 的剩余工作、`review.md` 历史轮、journal 旧条都可能过期；以**最新 journal + §Decisions + final 事实**为准，不按 stale plan 继续。`> rerun:` 标记不是必需；rerun 以 §Decisions 的 `vN` 行 + `final/vN` 为准。**查证优先于旧场恢复**：先 claim → findings/evidence，不先读 question/plan/journal。
+
+**恢复**：读最小集 → 答五问 → 先定范围（`run.md.next`/`phase`；不明只问一个带范围的澄清问）→ 重问 pending HITL（一次）→ 按 `plan.md §剩余工作` 重建 Team（若已过期以 journal/§Decisions 为准）→ 继续，不重做已完成。
 
 ## 交付与审查终局（D28）
 

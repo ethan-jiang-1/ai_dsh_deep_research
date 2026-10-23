@@ -29,7 +29,7 @@
 | 侦察 wave0（scout） | topics.md | leads.md（每条：方向 + 状态〔建议挖深/已排除+原因〕+ 支持来源分级 + 检索器〔单一达标「单检索器——待破」〕+ 关键线索 + 建议 owner 对应 topic） | leads.md 在场 |
 | 挖掘 wave1（analyst） | leads.md（建议挖深条）+ topics.md | evidence/*.md（frontmatter 七字段 + 原文摘录 + 解读 + Question List） | 卡片在场 + 硬字段齐（evidence-audit 机械把守） |
 | 综合 wave2（synthesis） | evidence/ 全部 + topics.md | findings.md（F# 结论 + 支撑证据 + gap 四态）+ final.md 当前版（run 根；交付副本归 final/） | findings + final 当前版在场 |
-| 审查（critic） | findings.md + final 当前版 + evidence/ | review.md（末尾固定 `## readiness（终局）: PASS|FAIL` + CRITICAL/MAJOR 清单；历史轮不夺权） | review 在场且终局块判完；PASS = HITL2 前置 |
+| 审查（critic） | findings.md + final 当前版 + evidence/ | review.md（当前终局块：文件头声明最新在上；`readiness: PASS|FAIL` + CRITICAL/MAJOR 清单；历史轮不夺权） | review 在场且终局块判完；PASS = HITL2 前置 |
 | 交付审阅（HITL2） | review.md + final 当前版 | question.md §Decisions 追加拍板行 | **§Decisions 行在场**（node-gate 门③） |
 | 交付 | 拍板分支后果 | final/ 交付副本（vN.md）+ `deliverables/presented`（指 final/vN）+ 当前 bundle 对应的可解析操作侧 audit.md；ops `run-accept` 绿后写 delivered.json/manifest.json/acceptance.md；同 bundle rerun 另加 question.md 的 `> rerun: vN · kind · 日期` 行 | **交付副本 + presented（指 final/vN）+ 报告摘要与 CRITICAL 节一致且 `CRITICAL=0`**（present = node-gate 门②）；`final.md` 是工作稿、`final/vN` 才是交付物 |
 

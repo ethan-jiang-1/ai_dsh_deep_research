@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { contractEpochOf, RUN_PHASES } from '../../scripts/lib/schema-scan-core.mjs'
-import { READ_ORDER } from '../../scripts/lib/run-receipt.mjs'
+import { READ_INTENTS, READ_ORDER } from '../../scripts/lib/run-receipt.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
@@ -75,3 +75,12 @@ test('RFC 现在时描述见证绑定与回执校验（docs = 当前合同）', 
   assert.ok(rfc.includes('见证必须归属本 run'), 'RFC 缺见证绑定句')
   assert.match(rfc, /delivered\.json.*sha256|sha256.*delivered\.json/s, 'RFC 缺回执哈希校验句')
 })
+
+test('手册「按意图读」表 = run-receipt.READ_INTENTS（读完即停的合同）', () => {
+  const h = read(HANDBOOK)
+  for (const intent of READ_INTENTS) {
+    assert.ok(h.includes(`| ${intent.label} |`), `手册缺意图行：${intent.label}`)
+    for (const file of intent.files) assert.ok(h.includes(file), `手册意图「${intent.label}」缺文件：${file}`)
+    assert.ok(h.includes(intent.stop), `手册意图「${intent.label}」缺停止句：${intent.stop}`)
+  }
+});

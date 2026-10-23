@@ -93,7 +93,7 @@
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:
-              maxBytes: 16384
+              maxBytes: 18944
               projectRootMarkers: []
 
     # ── critic.patch.yml（由 dev/render-overlay.mjs 从 pack 渲染）──
@@ -153,7 +153,7 @@
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:
-              maxBytes: 16384
+              maxBytes: 18944
               projectRootMarkers: []
 
     # ── lead.patch.yml（由 dev/render-overlay.mjs 从 pack 渲染）──
@@ -249,7 +249,7 @@
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:
-              maxBytes: 16384
+              maxBytes: 18944
               projectRootMarkers: []
 
     # ── scout.patch.yml（由 dev/render-overlay.mjs 从 pack 渲染）──
@@ -315,7 +315,7 @@
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:
-              maxBytes: 16384
+              maxBytes: 18944
               projectRootMarkers: []
 
     # ── cordis.patch.yml 的 bundle 级 insert 行（由 dev/render-overlay.mjs 直读，镜像同源）──

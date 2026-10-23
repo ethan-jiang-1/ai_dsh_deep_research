@@ -16,6 +16,14 @@ export const READ_ORDER = [
   'findings.md', 'final.md', 'review.md', 'evidence/ + provenance/（按需）', 'delivered.json', 'manifest.json',
 ]
 
+/** 按意图读（与手册「按意图读」表逐项一致；test 锁，不是第二套指令）。 */
+export const READ_INTENTS = [
+  { label: '继续', files: ['run.md', 'question.md', 'journal.md', 'plan.md'], stop: '五问答齐', avoid: ['全部 evidence'] },
+  { label: '交付', files: ['run.md', 'final/', 'final.md', 'question.md', 'review.md', 'delivered.json', 'acceptance.md'], stop: '版本副本 + 拍板 + readiness + 回执齐', avoid: ['研究过程', 'evidence'] },
+  { label: '查证', files: ['final.md', 'findings.md', 'evidence/<id>.md', 'provenance/<id>.json'], stop: '来源与口径', avoid: ['question', 'plan', 'journal'] },
+  { label: '旧场', files: ['旧表', 'question.md', 'journal.md', 'final.md', 'review.md', 'acceptance.md'], stop: '五问答齐 + 回执', avoid: ['run.md', 'evidence'] },
+]
+
 /** 顶层文件角色（manifest 用；未知文件记 unknown，不猜）。 */
 export const FILE_ROLES = {
   'run.md': 'state-head',
