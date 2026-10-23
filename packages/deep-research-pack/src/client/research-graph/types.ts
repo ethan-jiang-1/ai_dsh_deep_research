@@ -7,6 +7,7 @@
 //                 本页签只在提供时渲染「打开负责人」）。
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { RunSource } from '../../lib/run-context.ts'
 // 标准 props 的类型增强（useSession / sessionId / useSessions / useSessionStatus）。
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
@@ -18,11 +19,9 @@ export type GraphJournalFrame =
 
 /** 「研究图谱」页签的注入面（三条闭包；openOwner 可选）。 */
 export interface ResearchGraphInjected {
-  /** 读工作区文本文件；不可达/缺文件 → null（`plan.md` 缺席是合法形态）。 */
-  readonly readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) => Promise<string | null>
-  /** 列工作区目录（只用于发现 `plan/vN.md` 快照）；不可达 → null。 */
-  readonly listDir: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<readonly { type: string; name: string }[] | null>
-  /** 跟本会话 journal，仅用于 `sessionBindingOf` 找 `drt_<slug>/`（plan 读取需要 bundle 基址）。 */
+  /** 以当前会话打开的 run bundle 读面（位置/读策略/翻页归 lib）；plan.md 缺席是合法形态。 */
+  readonly runSource: (sessionId: SessionId) => RunSource
+  /** 跟本会话 journal，仅用于 `bindingTrust` 找可信的 `drt_<slug>/`（plan 读取需要 bundle 基址）。 */
   readonly follow: (sessionId: SessionId, signal: AbortSignal) => AsyncIterable<GraphJournalFrame>
   /** 打开队员会话的观察面（可选；缺省时不渲染「打开负责人」）。 */
   readonly openOwner?: (sessionId: SessionId, childSessionId: SessionId) => void

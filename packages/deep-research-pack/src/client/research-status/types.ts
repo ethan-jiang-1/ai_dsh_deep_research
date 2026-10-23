@@ -4,6 +4,7 @@
 // 实测），改形状须连 follow 调用方与 vendor sessionAddress() 语义一起重校。
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { RunSource } from '../../lib/run-context.ts'
 
 /** journal 帧的最小投影（wire 形状 → 领域形状）。 */
 export type JournalFrame =
@@ -23,19 +24,10 @@ export type FollowTarget =
 /** 页签体注入面：journal 流 + 文件读取闭包（绑定 remote.workspaceFiles）+ 挂起显性化入口。 */
 export interface ResearchStatusTabInjected {
   readonly follow: (target: FollowTarget, signal: AbortSignal) => AsyncGenerator<JournalFrame>
-  /** 列工作区目录；不可达 → null。 */
-  readonly listDir: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<readonly { type: string; name: string }[] | null>
-  /** 读工作区文本文件（首窗）；不可达 → null。 */
-  /** limit = 行上限（缺省 40——bundle 渐进面小读取的历史选择；读 review.md / question.md 这类
-   *  判据落在全文里的文件时须显式给足，见 BUG-036）。 */
-  readonly readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) => Promise<string | null>
+  /** 以当前会话打开的 run bundle 读面（位置/在场/读策略/翻页归 lib）。 */
+  readonly runSource: (sessionId: SessionId) => RunSource
   /** 挂起显性化：pending 迁移时由页签体调用（openTab——右栏同步骤展开）。 */
   readonly revealStatusTab: () => void
-  /** 读一页（offset 从 1 起；返回本页行数与是否到文末）；不可达 → null。
-   *  review.md 这类"终局判定在文末"的长文件必须翻到 eof——固定行窗会读到中间轮次的旧判定
-   *  （2026-10-20 实测：1448 行的 review.md，630 行窗内读到第 571 行的 `readiness: FAIL`，
-   *  把已交付 run 报成"审查修复中"；BUG-036 同族）。 */
-  readonly readPage: (sessionId: SessionId, path: string, signal: AbortSignal, offset: number, limit: number) => Promise<{ text: string; lines: number; eof: boolean } | null>
   /** 终稿门：按会话 + 终稿相对路径打开「终稿」页签（文件地址；同地址幂等，已开则聚焦）。 */
   readonly openFinal: (sessionId: SessionId, path: string) => void
 }

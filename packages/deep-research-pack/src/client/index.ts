@@ -200,22 +200,6 @@ export function apply(ctx: ClientContext): void {
       }
     }
 
-    // 研究状态页签的 review 翻页读（终局判定在文末；正文按 500 行/页续读，不赌 maxLines 配置）。
-    const readPage = async (sessionId: SessionId, path: string, signal: AbortSignal, offset: number, limit: number) => {
-      try {
-        const result = await scoped.remote.workspaceFiles.read(sessionId, path, { offset, limit }, signal)
-        if (!result.ok) {
-          console.error('[research-final] workspaceFiles.read 失败', JSON.stringify({ path, error: result.error }))
-          return null
-        }
-        const value = result.value as { text?: unknown; lines?: unknown; eof?: unknown }
-        if (typeof value.text !== 'string') return null
-        return { text: value.text, lines: typeof value.lines === 'number' ? value.lines : 0, eof: value.eof === true }
-      } catch (cause) {
-        console.error('[research-final] workspaceFiles.read 抛错', String(cause))
-        return null
-      }
-    }
     // 终稿页签的读面：run-context 的浏览器适配器（三位置/读策略/翻页归 lib；页签只拿 view）。
     const runSource = (sessionId: SessionId) => browserRunSource(scoped.remote.workspaceFiles, sessionId)
 
@@ -231,25 +215,20 @@ export function apply(ctx: ClientContext): void {
 
     scoped.effect(() => scoped.slots.inject(RESEARCH_PANE_SLOT, () => [
       scoped.slots.register(
-        { name: RESEARCH_PANE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow, listDir, readFile, readPage, revealStatusTab, openFinal }) },
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow, runSource, revealStatusTab, openFinal }) },
         ResearchStatusTab,
       ),
       scoped.slots.register(
         // 「研究配置」注入面 2026-10-18 扩：+ listDir/follow（「本次研究」区要按会话绑定定位
         // bundle 并读 question.md 方法节；回执的「Lead 已回话」信号也走 journal 流）。
-        { name: RESEARCH_PANE_SLOT, key: RESEARCH_CONFIG_TAB_KEY, inject: () => ({ readFile, listDir, follow, sendInstruction }) },
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_CONFIG_TAB_KEY, inject: () => ({ readFile, listDir, follow, runSource, sendInstruction }) },
         ResearchConfigTab,
       ),
       // 「研究图谱」页签体：只读观察（DAG 图 + plan 原文 + 映射），不提供调整动作；
       // plan.md 缺文件合法（readFile missingOk=true 不打 console.error）；follow 只用于
       // sessionBindingOf 定位 `drt_<slug>/`，不对图折活动流。
       scoped.slots.register(
-        { name: RESEARCH_PANE_SLOT, key: RESEARCH_GRAPH_TAB_KEY, inject: () => ({
-          readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) =>
-            readFile(sessionId, path, signal, limit, true),
-          listDir,
-          follow,
-        }) },
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_GRAPH_TAB_KEY, inject: () => ({ runSource, follow }) },
         ResearchGraphTab,
       ),
       // 「终稿」页签体：读面 = run-context（三位置/readPolicy/翻页），审查判定与版本目录在此之上。

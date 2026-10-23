@@ -41,6 +41,7 @@ import { useMemberActivity } from './research-status/useMemberActivity.ts'
 import type { MemberActivitySummary } from '../lib/member-activity.ts'
 import type { ResearchStatusTabProps, ResearchStatusTitleInjected } from './research-status/types.ts'
 import { bindingTrust, type BindingTrust } from '../lib/binding-trust.ts'
+import { openRun } from '../lib/run-context.ts'
 import { streamFailureOf } from '../lib/stream-failure.ts'
 import { latestFinalDelivery, latestPresentedFinalVersion } from '../lib/final-target.ts'
 import { runVersionFaceOf, type RunVersionFace } from '../lib/run-version.ts'
@@ -188,94 +189,78 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     setKickoffHold(false)
     const boundSlug = trust.slug
     let stopped = false
-    const scan = async () => {
+    const scan = async (): Promise<void> => {
       try {
-        // D28 三操作桶：根 / archive/ / _abandoned/ 只用于发现，先拼出候选路径；
-        // 状态从文件内容 + presented 事件读——停放的 bundle 照样是本会话的工作产物，
-        // 显示其渐进面比显示"缺"更如实（不认第三处 = 移出活动区的 run 在驾驶舱里凭空消失）。
-        // slug 不含 drt_ 前缀（bundle-bind 谓词剥掉），目录名带前缀——拼回。
-        for (const base of [`drt_${boundSlug}`, `archive/drt_${boundSlug}`, `_abandoned/drt_${boundSlug}`]) {
-          const files = await props.listDir(sessionId, base, new AbortController().signal)
-          if (files === null || stopped || files.length === 0) continue
-          const names = new Set(files.map((f) => f.name))
-          const evidenceDir = await props.listDir(sessionId, `${base}/evidence`, new AbortController().signal)
-          if (stopped) return
-          const evidenceCount = evidenceDir?.filter((e) => e.type === 'file' && e.name.endsWith('.md')).length ?? 0
-          // final/ 版本记账（D17：证据扩张 rerun 落 v2.md+）——读目录内最高真实版本号作为回路表达的数据源
-          const finalDir = names.has('final') ? await props.listDir(sessionId, `${base}/final`, new AbortController().signal) : null
-          if (stopped) return
-          const finalFileNames = (finalDir ?? []).filter((e) => e.type === 'file').map((e) => e.name)
-          const versions = latestRunVersion(finalFileNames)
-          // 版本面事实：plan 头/重写记录 + plan/ 快照清单（rerun 版本轨的数据源，折算住 run-version）。
-          const planText = names.has('plan.md')
-            ? await props.readFile(sessionId, `${base}/plan.md`, new AbortController().signal, 800)
-            : null
-          if (stopped) return
-          const planDir = names.has('plan') ? await props.listDir(sessionId, `${base}/plan`, new AbortController().signal) : null
-          if (stopped) return
-          const planSnapshotNames = (planDir ?? []).filter((e) => e.type === 'file').map((e) => e.name)
-          // review 终局 readiness（业务摘要审查态的数据源）：判定规则收在 pack lib
-          // `review-readiness.terminalReadiness`——只认**行首**判定行、取最后一条。2026-10-11
-          // 实测：旧的未锚行首末位匹配会把文末附录里保留的首轮 `readiness: FAIL`（血统记录）
-          // 读成终局，把已交付 run 报成「审查修复中」。
-          // review.md 读上限显式给足（BUG-036：默认 40 行会把终局判定行截在窗口外，UI 与盘侧期望对不上）
-          // review.md 翻页读到 eof：终局判定在文末，固定行窗会读到中间轮次的旧 FAIL
-          //（2026-10-20 实测：1448 行文件、判据行在 1442，600 行窗读到 571 行的 FAIL）。
-          const readAllPages = async (path: string): Promise<string | null> => {
-            const signal = new AbortController().signal
-            const chunks: string[] = []
-            let offset = 1
-            for (let page = 0; page < 40; page += 1) {
-              const result = await props.readPage(sessionId, path, signal, offset, 500)
-              if (result === null) return page === 0 ? null : chunks.join('\n')
-              chunks.push(result.text)
-              offset += Math.max(result.lines, 1)
-              if (result.eof || result.lines === 0) break
-            }
-            return chunks.join('\n')
-          }
-          const reviewText = names.has('review.md') ? await readAllPages(`${base}/review.md`) : null
-          if (stopped) return
-          const readiness = terminalReadiness(reviewText)
-          const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : null
-          const questionText = names.has('question.md') ? await props.readFile(sessionId, `${base}/question.md`, new AbortController().signal) : null
-          if (stopped) return
-          // G3（RFC cockpit-flow-face）：剥 markdown 强调符再截断——`**` 与反引号是源文件
-          // 标记不是内容；截断补省略号，不在字中间装作完整句。
-          const raw = questionText?.split('\n').find((l) => l.trim() !== '' && !l.startsWith('#')) ?? null
-          const flat = raw !== null ? raw.replace(/\*\*/g, '').replace(/`/g, '').trim() : null
-          const firstLine = flat === null || flat === '' ? null : flat.length > 72 ? `${flat.slice(0, 72)}…` : flat
-          setFace({
-            questionLine: firstLine,
-            hasQuestion: names.has('question.md'),
-            steps: deriveSteps({
-              question: names.has('question.md'),
-              team: names.has('question.md'),
-              leads: names.has('leads.md'),
-              evidence: evidenceCount,
-              findings: names.has('findings.md'),
-              review: names.has('review.md'),
-              final: names.has('final.md'),
-            }),
-            evidenceCount,
-            delivered: names.has('final.md'),
-            versions,
-            reviewFail,
-            planText,
-            planSnapshotNames,
-            questionText,
-            finalFileNames,
-            hasFinal: names.has('final.md'),
-          })
-          return
-        }
-        if (!stopped) setFace(null) // 绑定的 slug 在两个位置都没有文件（已删/未建）——如实无面
+        const signal = new AbortController().signal
+        const opened = await openRun(props.runSource(sessionId), `drt_${boundSlug}`, { signal })
+        if (stopped) return
+        if (!opened.ok) { setFace(null); return }
+        const view = opened.value
+        const names = view.names
+        const evidenceDir = names.has('evidence') ? await view.list('evidence', { signal }) : null
+        if (stopped) return
+        const evidenceCount = evidenceDir !== null && evidenceDir.ok
+          ? evidenceDir.value.filter((entry) => entry.type === 'file' && entry.name.endsWith('.md')).length
+          : 0
+        const finalDir = names.has('final') ? await view.list('final', { signal }) : null
+        if (stopped) return
+        const finalFileNames = finalDir !== null && finalDir.ok
+          ? finalDir.value.filter((entry) => entry.type === 'file').map((entry) => entry.name)
+          : []
+        const versions = latestRunVersion(finalFileNames)
+        // 版本面事实：plan 头/重写记录 + plan/ 快照清单（rerun 版本轨的数据源，折算住 run-version）。
+        const planRead = names.has('plan.md') ? await view.read('plan.md', { signal }) : null
+        if (stopped) return
+        const planText = planRead !== null && planRead.ok ? planRead.value.text : null
+        const planDir = names.has('plan') ? await view.list('plan', { signal }) : null
+        if (stopped) return
+        const planSnapshotNames = planDir !== null && planDir.ok
+          ? planDir.value.filter((entry) => entry.type === 'file').map((entry) => entry.name)
+          : []
+        // review 终局 readiness（业务摘要审查态的数据源）：判定规则收在 pack lib
+        // `review-readiness.terminalReadiness`——只认**行首**判定行、取最后一条。run-context
+        // 的 review 策略是读到 eof：终局判定在文末，固定行窗会读到中段旧 FAIL（BUG-036 同族）。
+        const reviewRead = names.has('review.md') ? await view.read('review.md', { signal }) : null
+        if (stopped) return
+        const reviewText = reviewRead !== null && reviewRead.ok ? reviewRead.value.text : null
+        const readiness = terminalReadiness(reviewText)
+        const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : null
+        const questionRead = names.has('question.md') ? await view.read('question.md', { signal }) : null
+        if (stopped) return
+        const questionText = questionRead !== null && questionRead.ok ? questionRead.value.text : null
+        // G3（RFC cockpit-flow-face）：剥 markdown 强调符再截断——`**` 与反引号是源文件
+        // 标记不是内容；截断补省略号，不在字中间装作完整句。
+        const raw = questionText?.split('\n').find((l) => l.trim() !== '' && !l.startsWith('#')) ?? null
+        const flat = raw !== null ? raw.replace(/\*\*/g, '').replace(/`/g, '').trim() : null
+        const firstLine = flat === null || flat === '' ? null : flat.length > 72 ? `${flat.slice(0, 72)}…` : flat
+        setFace({
+          questionLine: firstLine,
+          hasQuestion: names.has('question.md'),
+          steps: deriveSteps({
+            question: names.has('question.md'),
+            team: names.has('question.md'),
+            leads: names.has('leads.md'),
+            evidence: evidenceCount,
+            findings: names.has('findings.md'),
+            review: names.has('review.md'),
+            final: names.has('final.md'),
+          }),
+          evidenceCount,
+          delivered: names.has('final.md'),
+          versions,
+          reviewFail,
+          planText,
+          planSnapshotNames,
+          questionText,
+          finalFileNames,
+          hasFinal: names.has('final.md'),
+        })
       } catch (cause) { console.error('[research-status] scan 异常', String(cause)) }
     }
     void scan()
     const timer = setInterval(() => { void scan() }, REFRESH_MS)
     return () => { stopped = true; clearInterval(timer) }
-  }, [props.sessionId, trust, journalSeen])
+  }, [props.sessionId, trust, journalSeen, props.runSource])
 
   // 锚点 = 混合折算（尾窗约束的实测产物，RFC cockpit-flow-face）：passed 态由文件事实承载
   // （question.md/final.md 在场），pending 态由 journal 尾窗承载——face 缺席时退化为纯尾窗判定。

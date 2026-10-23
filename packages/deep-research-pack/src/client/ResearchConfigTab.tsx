@@ -16,6 +16,7 @@ import {
   type LibraryEntry, type LibrarySections,
 } from '../lib/library-fold.ts'
 import { bindingTrust } from '../lib/binding-trust.ts'
+import { openRun, type RunSource } from '../lib/run-context.ts'
 import { foldMethodAdoption, type MethodAdoption } from '../lib/method-of-question.ts'
 import { assistantReplyAfter, libraryDiff, receiptOf, type LibraryDiff } from '../lib/receipt-fold.ts'
 import type { FollowTarget, JournalFrame } from './ResearchStatusTab.tsx'
@@ -25,6 +26,8 @@ import type { FollowTarget, JournalFrame } from './ResearchStatusTab.tsx'
 export interface ResearchConfigTabInjected {
   /** 读工作区文本文件（limit = 行上限，缺省 40——库读传大限防截断，见 BUG-026）；不可达 → null。 */
   readonly readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) => Promise<string | null>
+  /** 以当前会话打开的 run bundle 读面（位置/读策略归 lib）。 */
+  readonly runSource: (sessionId: SessionId) => RunSource
   /** 列工作区目录（本次研究区三位置查找：根／archive／_abandoned）；不可达 → null。 */
   readonly listDir: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<readonly { type: string; name: string }[] | null>
   /** journal 流（绑定判定 + 「Lead 已回话」信号；与状态页签同一条通道，各自开流）。 */
@@ -104,7 +107,6 @@ const LIBRARY_PATH = 'method-library.md'
 
 /** question.md 读行上限：方法节在模板第 32–40 行，默认 40 行恰好卡边界（BUG-026 同族）——
  *  读方法节必须显式传足额 limit；question.md 之后还有 §Decisions，留足量。 */
-const QUESTION_READ_LIMIT = 200
 
 /** 判型 → 打法映射（**推荐规则正本 = research-brief skill §方法预设 的同名表**；此处是它的
  *  投影——卡面「什么时候用它」与「推荐规则说明位」都由它派生；同钉 = tests/library-fold）。 */
@@ -277,28 +279,22 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
     const slug = trust.kind === 'bound' ? trust.slug : undefined
     if (slug === undefined) { setAdoption({ kind: 'no-run', adopted: null, origin: null, requirements: null }); return }
     let stopped = false
-    const scan = async () => {
-      // D28 三操作桶：根 → archive/ → _abandoned/ 只用于发现，不把位置当交付状态（与状态页签同款）
-      // 口径（会话绑定的 run 三处都认，移出活动区不在驾驶舱里凭空消失）。
-      for (const candidate of [`drt_${slug}`, `archive/drt_${slug}`, `_abandoned/drt_${slug}`]) {
-        if (stopped) return
-        const files = await props.listDir(sid, candidate, new AbortController().signal)
-        if (stopped) return
-        if (files === null || files.length === 0) continue
-        const hasQuestion = files.some((f) => f.type === 'file' && f.name === 'question.md')
-        // 方法节在模板第 32–40 行 → 显式足额 limit（默认 40 会静默截断，BUG-026 同族）。
-        const text = hasQuestion
-          ? await props.readFile(sid, `${candidate}/question.md`, new AbortController().signal, QUESTION_READ_LIMIT)
-          : null
-        if (stopped) return
-        setAdoption(foldMethodAdoption(text, { bundle: true, question: hasQuestion }))
+    const controller = new AbortController()
+    void (async () => {
+      const opened = await openRun(props.runSource(sid), `drt_${slug}`, { signal: controller.signal })
+      if (stopped) return
+      if (!opened.ok) {
+        setAdoption(foldMethodAdoption(null, { bundle: opened.reason !== 'missing', question: false }))
         return
       }
-      if (!stopped) setAdoption(foldMethodAdoption(null, { bundle: true, question: false }))
-    }
-    void scan()
-    return () => { stopped = true }
-  }, [sessionId, trust])
+      const view = opened.value
+      const hasQuestion = view.names.has('question.md')
+      const text = hasQuestion ? await view.read('question.md', { signal: controller.signal }) : null
+      if (stopped) return
+      setAdoption(foldMethodAdoption(text?.ok === true ? text.value.text : null, { bundle: true, question: hasQuestion }))
+    })()
+    return () => { stopped = true; controller.abort() }
+  }, [sessionId, trust, props.runSource])
 
   /** 回执文案（三态优先级 = 失败 > 已落盘 > 已回话 > 已发送）。 */
   const receipt = receiptBase === null

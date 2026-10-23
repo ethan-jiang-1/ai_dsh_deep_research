@@ -26,7 +26,7 @@
  * 折算仍住 `src/lib/plan-graph.ts`（keyless 单测）；本组件只画。fail-soft：空投影/空任务/缺 plan
  * 都退化为如实空态，不 throw。
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { UseSessions, UseSessionStatus } from '@deepseek-ai/dsh-client-ui-session/client'
@@ -58,13 +58,13 @@ import {
   type GraphNodeState,
 } from '../lib/graph-model.ts'
 import { bindingTrust } from '../lib/binding-trust.ts'
+import { openRun, type RunView } from '../lib/run-context.ts'
 import type { ResearchGraphTabProps } from './research-graph/types.ts'
 export type { ResearchGraphInjected, ResearchGraphTabProps } from './research-graph/types.ts'
 
 /** plan.md 重读间隔（任务靠投影推送；只有文件需要低频重扫）。 */
 const PLAN_REFRESH_MS = 5_000
 /** plan.md 只读表头附近（节点表在文首；缺文件合法）。 */
-const PLAN_READ_LIMIT = 240
 
 /** DAG 小图的固定几何（SVG 坐标；side panel 窄，节点只放 id + 短标签）。 */
 const NODE_W = 108
@@ -311,11 +311,11 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [boundSlug, setBoundSlug] = useState<string | null>(null)
+  const viewRef = useRef<RunView | null>(null)
   const [plan, setPlan] = useState<PlanIndex | null>(null)
   const [planText, setPlanText] = useState<string | null>(null)
   const [planState, setPlanState] = useState<'loading' | 'missing' | 'unbound' | 'ready'>('loading')
   // 版本轨（rerun 版本面）：plan 基址 + `plan/` 快照 + 当前图版本；view 只切只看，不改图。
-  const [planBase, setPlanBase] = useState<string | null>(null)
   const [planVersion, setPlanVersion] = useState<number | null>(null)
   const [snapshots, setSnapshots] = useState<readonly number[]>([])
   const [graphView, setGraphView] = useState<'current' | 'diff'>('current')
@@ -362,7 +362,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     setPlanText(null)
     if (boundSlug === null) {
       setPlanLoadedAt(null)
-      setPlanBase(null)
+      viewRef.current = null
       setPlanVersion(null)
       setSnapshots([])
       setGraphView('current')
@@ -375,36 +375,50 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     setPlanState('loading')
     const load = async (): Promise<void> => {
       try {
-        for (const base of [`drt_${boundSlug}`, `archive/drt_${boundSlug}`, `_abandoned/drt_${boundSlug}`]) {
-          const text = await props.readFile(leadSessionId, `${base}/plan.md`, controller.signal, PLAN_READ_LIMIT)
-          if (stopped) return
-          if (text !== null) {
-            const parsed = planIndex(text)
-            const rawVersion = parsed.version?.replace(/^v/i, '') ?? ''
-            setPlan(parsed)
-            setPlanText(text)
-            setPlanState('ready')
-            setPlanLoadedAt(Date.now())
-            setPlanBase(base)
-            // 版本号取 plan 解析器（已按“最后一条声明”）的结论，不另写一份正则。
-            setPlanVersion(/^\d+$/.test(rawVersion) ? Number(rawVersion) : null)
-            const planDir = await props.listDir(leadSessionId, `${base}/plan`, controller.signal).catch(() => null)
-            if (stopped) return
-            const found = (planDir ?? [])
-              .map((entry) => /^v([1-9]\d*)\.md$/.exec(entry.name)?.[1])
-              .filter((raw): raw is string => raw !== undefined)
-              .map(Number)
-              .sort((a, b) => a - b)
-            setSnapshots(found)
-            return
-          }
+        const opened = await openRun(props.runSource(leadSessionId), `drt_${boundSlug}`, { signal: controller.signal })
+        if (stopped) return
+        if (!opened.ok) {
+          viewRef.current = null
+          setPlan(null)
+          setPlanText(null)
+          setPlanState('missing')
+          setPlanLoadedAt(null)
+          return
         }
-        setPlan(null)
-        setPlanText(null)
-        setPlanState('missing')
-        setPlanLoadedAt(null)
+        const view = opened.value
+        const read = await view.read('plan.md', { signal: controller.signal })
+        if (stopped) return
+        if (!read.ok) {
+          viewRef.current = view
+          setPlan(null)
+          setPlanText(null)
+          setPlanState('missing')
+          setPlanLoadedAt(null)
+          return
+        }
+        viewRef.current = view
+        const text = read.value.text
+        const parsed = planIndex(text)
+        const rawVersion = parsed.version?.replace(/^v/i, '') ?? ''
+        setPlan(parsed)
+        setPlanText(text)
+        setPlanState('ready')
+        setPlanLoadedAt(Date.now())
+        // 版本号取 plan 解析器（已按“最后一条声明”）的结论，不另写一份正则。
+        setPlanVersion(/^\d+$/.test(rawVersion) ? Number(rawVersion) : null)
+        const planList = view.names.has('plan')
+          ? await view.list('plan', { signal: controller.signal }).catch(() => null)
+          : null
+        if (stopped) return
+        const found = (planList?.ok === true ? planList.value : [])
+          .map((entry) => /^v([1-9]\d*)\.md$/.exec(entry.name)?.[1])
+          .filter((raw): raw is string => raw !== undefined)
+          .map(Number)
+          .sort((a, b) => a - b)
+        setSnapshots(found)
       } catch (cause) {
         if (stopped) return
+        viewRef.current = null
         setPlan(null)
         setPlanText(null)
         setPlanState('missing')
@@ -415,27 +429,27 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     void load()
     timer = setInterval(() => { void load() }, PLAN_REFRESH_MS)
     return () => { stopped = true; controller.abort(); if (timer !== undefined) clearInterval(timer) }
-  }, [leadSessionId, boundSlug])
+  }, [leadSessionId, boundSlug, props.runSource])
 
   // 旧图快照按需读（没有快照就不读；`plan/vN.md` 不在场就如实 missing）。
   const latestSnapshot = snapshots.length > 0 ? snapshots[snapshots.length - 1] : null
   useEffect(() => {
     if (graphView !== 'diff' && !showSnapshotPlan) { setSnapshotState('idle'); return }
-    if (planBase === null || latestSnapshot === null) { setSnapshotState('missing'); return }
+    const view = viewRef.current
+    if (view === null || latestSnapshot === null) { setSnapshotState('missing'); return }
     let stopped = false
     const controller = new AbortController()
     setSnapshotState('loading')
     setSnapshotPlan(null)
     void (async () => {
-      for (const base of [planBase, `archive/${planBase}`, `_abandoned/${planBase}`]) {
-        const text = await props.readFile(leadSessionId, `${base}/plan/v${String(latestSnapshot)}.md`, controller.signal, PLAN_READ_LIMIT)
-        if (stopped) return
-        if (text !== null) { setSnapshotPlan(planIndex(text)); setSnapshotState('ready'); return }
-      }
-      setSnapshotState('missing')
+      const text = await view.read(`plan/v${String(latestSnapshot)}.md`, { signal: controller.signal })
+      if (stopped) return
+      if (!text.ok) { setSnapshotState('missing'); return }
+      setSnapshotPlan(planIndex(text.value.text))
+      setSnapshotState('ready')
     })()
     return () => { stopped = true; controller.abort() }
-  }, [graphView, showSnapshotPlan, planBase, latestSnapshot, leadSessionId])
+  }, [graphView, showSnapshotPlan, latestSnapshot, leadSessionId])
 
   const teamReady = team !== undefined
   const tasks: readonly TeamTaskView[] = team?.tasks ?? []
