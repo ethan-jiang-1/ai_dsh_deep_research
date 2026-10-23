@@ -88,7 +88,9 @@ const RANK: Readonly<Record<Bucket, number>> = { root: 0, archive: 1, abandoned:
 const PAGE_LINES = 500
 const MAX_PAGES = 64
 const DEFAULT_LINES = 40
-const FIXED_LINES: Readonly<Record<string, number>> = { 'question.md': 80, 'plan.md': 800 }
+const FIXED_LINES: Readonly<Record<string, number>> = { 'question.md': 80 }
+/** plan.md 与其版本快照 plan/vN.md 共用 800 行上限（旧实现分别 800/240）。 */
+const PLAN_NAME = /^(?:plan\.md|plan\/v[1-9]\d*\.md)$/
 /** 这些文件必须读到 eof：终局判定在文末，固定行窗会读到中段的旧判定。 */
 const EOF_NAME = /^(?:review\.md|final\.md|final\/v[1-9]\d*\.md)$/
 /** run bundle slug 形态（与 bundle-bind 的 `drt_<slug>/` 词法一致）。 */
@@ -99,6 +101,7 @@ type Failure = { readonly ok: false; readonly reason: 'missing' | 'unreadable'; 
 /** 文件 → 读策略（eof 或行数上限）。 */
 export function readPolicyOf(name: string): 'eof' | number {
   if (EOF_NAME.test(name)) return 'eof'
+  if (PLAN_NAME.test(name)) return 800
   return FIXED_LINES[name] ?? DEFAULT_LINES
 }
 

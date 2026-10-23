@@ -211,7 +211,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
         // 版本面事实：plan 头/重写记录 + plan/ 快照清单（rerun 版本轨的数据源，折算住 run-version）。
         const planRead = names.has('plan.md') ? await view.read('plan.md', { signal }) : null
         if (stopped) return
-        const planText = planRead !== null && planRead.ok ? planRead.value.text : null
+        const planText = planRead !== null && planRead.ok && !planRead.value.truncated ? planRead.value.text : null
         const planDir = names.has('plan') ? await view.list('plan', { signal }) : null
         if (stopped) return
         const planSnapshotNames = planDir !== null && planDir.ok
@@ -222,7 +222,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
         // 的 review 策略是读到 eof：终局判定在文末，固定行窗会读到中段旧 FAIL（BUG-036 同族）。
         const reviewRead = names.has('review.md') ? await view.read('review.md', { signal }) : null
         if (stopped) return
-        const reviewText = reviewRead !== null && reviewRead.ok ? reviewRead.value.text : null
+        const reviewText = reviewRead !== null && reviewRead.ok && !reviewRead.value.truncated ? reviewRead.value.text : null
         const readiness = terminalReadiness(reviewText)
         const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : null
         const questionRead = names.has('question.md') ? await view.read('question.md', { signal }) : null

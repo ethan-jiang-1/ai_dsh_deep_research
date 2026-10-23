@@ -62,17 +62,19 @@ function entryOf(raw: unknown): Entry | null {
 export function browserRunSource(files: WorkspaceFilesLike, sessionId: SessionId): RunSource {
   return {
     async list(dir, opts) {
+      // workspaceFiles.list 拒绝空路径（gateway/bad-request）；`''` = 工作区根，映射成 `.`。
+      const target = dir === '' ? '.' : dir
       let result: RemoteResult
       try {
-        result = await files.list(sessionId, dir, opts?.signal ?? NEVER_ABORTED)
+        result = await files.list(sessionId, target, opts?.signal ?? NEVER_ABORTED)
       } catch (cause) {
-        return unreadable(`list ${dir}: ${String(cause)}`)
+        return unreadable(`list ${target}: ${String(cause)}`)
       }
-      if (!result.ok) return failureOf(result, `list ${dir}`)
+      if (!result.ok) return failureOf(result, `list ${target}`)
       const value = result.value
-      if (typeof value !== 'object' || value === null) return unreadable(`list ${dir}: malformed value`)
+      if (typeof value !== 'object' || value === null) return unreadable(`list ${target}: malformed value`)
       const rawEntries = (value as { readonly entries?: unknown }).entries
-      if (!Array.isArray(rawEntries)) return unreadable(`list ${dir}: missing entries`)
+      if (!Array.isArray(rawEntries)) return unreadable(`list ${target}: missing entries`)
       const entries: Entry[] = []
       for (const raw of rawEntries) {
         const entry = entryOf(raw)

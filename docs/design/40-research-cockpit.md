@@ -113,7 +113,7 @@
   挂起期抑制仅读绑定的渐进面（预检读取不算"本会话的 run"）。
 - **页签内区块归属**：每个页签的头部/正文/底部以 §2 的页签行为准；新增块先在该行写归属区
   （图谱：头部 = 只读标记 + plan/task 计数；正文首行 = 版本轨；其下 = 覆盖率 + 刷新时刻），不另立第二套布局说明。
-- **发现规则单源**：三位置发现实现 = `src/lib/run-context.ts`；机械侧 = `run-context-single-source`（`src/client` 非注释 `_abandoned` 即红；`src/lib` 的终稿地址校验不在词法门禁范围）。
+- **发现规则单源**：驾驶舱 client 的三位置发现实现 = `src/lib/run-context.ts`；机械侧 = `run-context-single-source`（`src/client` 非注释 `_abandoned` 即红；`src/lib` 的终稿地址校验不在词法门禁范围）。`dev/hitl-answer` 与 `dev/run-kickoff` 的盘侧路径枚举、`run-dashboard` 投影与 `client-load-reference` oracle 各自保留，不在此行。
 
 ## 5. 验证面与改动路由
 
@@ -128,6 +128,8 @@
 `keys.ts` → `pnpm build` → `client-load-smoke`（改挂起显性化再跑 `client-hitl-smoke`）。
 
 ## 6. 已知限制与延后工作
+
+- **run-dashboard / client-load-reference oracle 保留独立**：dashboard 是同步 HTML 投影，oracle 的价值在独立（复用生产实现会掩盖漂移）；两者不复用 run-context，边界见 [run-context Note](../../notes/implemented/2026-10-23-run-context.md)。
 
 - **问卡窄列布局修复（本包注入，2026-10-21）**：右栏展开后聊天列变窄，vendor `ui-user-questions`
   的卡头（`space-between` + 右侧动作区 nowrap/不收缩 + 左侧 `min-width: 0`）会把标题塌成一字一行

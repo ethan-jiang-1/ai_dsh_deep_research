@@ -5,8 +5,7 @@
 // 纪律：**先洗，再显式加白**。唯一允许出现在子进程 env 里的密钥，是调用点写明的那一把
 // （例如真模型档的 DEEPSEEK_API_KEY）——整体透传 `{...process.env}` 是本仓禁止的写法
 // （repo-conventions 门禁机械检查）。
-import { existsSync } from 'node:fs'
-import { homedir } from 'node:os'
+import { statSync } from 'node:fs'
 import { join } from 'node:path'
 
 const SECRET = /(KEY|SECRET|TOKEN|PASSWORD)/i;
@@ -30,24 +29,20 @@ export function withModelKey(explicit = {}, env = process.env) {
   return out;
 }
 
-/** dev home：DSH_HOME 优先，未设置退回 ~/.dsh（与各脚本既有约定一致）。 */
-export function devHome(env = process.env) {
-  return env.DSH_HOME ?? join(homedir(), '.dsh');
-}
-
-/** 凭据文件是否在场（纯判定；测试用）。 */
+/** 凭据文件是否为常规文件（纯判定；测试用）。 */
 export function credentialsPresent(home) {
-  return typeof home === 'string' && home !== '' && existsSync(join(home, '.credentials.yaml'));
+  if (typeof home !== 'string' || home === '') return false;
+  try { return statSync(join(home, '.credentials.yaml')).isFile(); } catch { return false; }
 }
 
 /**
  * 真模型档前置：凭据文件缺席 → exit 2（未跑 ≠ 通过）。
  * 这是 8 个真模型档脚本唯一的前置检查实现；档位闭集检测器认本 helper 的调用。
  * @param label - 脚本名（错误消息前缀）。
- * @param opts.home - 已解析的 dev home；缺省用 devHome()。
+ * @param opts.home - 已解析的 dev home（调用方必须先 source dev/env.sh 或显式传入）。
  * @returns home。
  */
-export function requireCredentials(label, { home = devHome() } = {}) {
+export function requireCredentials(label, { home } = {}) {
   const path = typeof home === 'string' && home !== '' ? join(home, '.credentials.yaml') : '(DSH_HOME 未设置)';
   if (!credentialsPresent(home)) {
     console.error(`${label}: 真模型档前置缺席——${path} 不在（先配置 DEEPSEEK_API_KEY）；未跑 ≠ 通过`);

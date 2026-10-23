@@ -7,7 +7,7 @@
 //   - offset 从 1 起；limit 是行数；
 //   - 页 text 以 \n 连接，最后一行后不带终止符；文件末尾的 \n 是终止符，不额外算一行；
 //   - eof = 本页含文件最后一行。
-// 失败映射：ENOENT / ENOTDIR → missing；其它（EISDIR、EACCES、ENOTREADABLE…）→ unreadable。
+// 失败映射：ENOENT → missing；其它（ENOTDIR、EISDIR、EACCES…）→ unreadable。
 
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve } from 'node:path'

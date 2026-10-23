@@ -314,7 +314,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   const viewRef = useRef<RunView | null>(null)
   const [plan, setPlan] = useState<PlanIndex | null>(null)
   const [planText, setPlanText] = useState<string | null>(null)
-  const [planState, setPlanState] = useState<'loading' | 'missing' | 'unbound' | 'ready'>('loading')
+  const [planState, setPlanState] = useState<'loading' | 'missing' | 'unbound' | 'ready' | 'truncated'>('loading')
   // 版本轨（rerun 版本面）：plan 基址 + `plan/` 快照 + 当前图版本；view 只切只看，不改图。
   const [planVersion, setPlanVersion] = useState<number | null>(null)
   const [snapshots, setSnapshots] = useState<readonly number[]>([])
@@ -398,6 +398,15 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         }
         viewRef.current = view
         const text = read.value.text
+        if (read.value.truncated) {
+          setPlan(null)
+          setPlanText(text)
+          setPlanVersion(null)
+          setSnapshots([])
+          setPlanState('truncated')
+          setPlanLoadedAt(Date.now())
+          return
+        }
         const parsed = planIndex(text)
         const rawVersion = parsed.version?.replace(/^v/i, '') ?? ''
         setPlan(parsed)
@@ -576,6 +585,12 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
 
   const stateNote = (() => {
     if (planState === 'loading') return null
+    if (planState === 'truncated') {
+      return {
+        title: 'plan.md 过长，已截断',
+        body: '只读了前 800 行；图谱可能不完整。修正 = 拆分 plan 或提高读策略（run-context 的 plan 上限）。',
+      }
+    }
     if (boundSlug === null) {
       return {
         title: '本会话尚未绑定 run',

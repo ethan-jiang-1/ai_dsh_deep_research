@@ -28,7 +28,7 @@ export interface ResearchConfigTabInjected {
   readonly readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) => Promise<string | null>
   /** 以当前会话打开的 run bundle 读面（位置/读策略归 lib）。 */
   readonly runSource: (sessionId: SessionId) => RunSource
-  /** 列工作区目录（本次研究区三位置查找：根／archive／_abandoned）；不可达 → null。 */
+  /** 列工作区目录（方法库 `.` 等）；run bundle 的三位置发现归 run-context。 */
   readonly listDir: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<readonly { type: string; name: string }[] | null>
   /** journal 流（绑定判定 + 「Lead 已回话」信号；与状态页签同一条通道，各自开流）。 */
   readonly follow: (target: FollowTarget, signal: AbortSignal) => AsyncGenerator<JournalFrame>
@@ -270,13 +270,14 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
     if (assistantReplyAfter(events, repliedMarker.current)) setReplied(true)
   }, [events, receiptBase])
 
-  // 本次研究区：可信绑定 slug → 三位置查找（根／archive／_abandoned）→ 读 question.md 方法节。
+  // 本次研究区：可信绑定 slug → openRun（三位置归 run-context）→ 读 question.md 方法节。
   const trust = useMemo(() => bindingTrust(events), [events])
+  const boundSlug = trust.kind === 'bound' ? trust.slug : undefined
   const [adoption, setAdoption] = useState<MethodAdoption>({ kind: 'no-run', adopted: null, origin: null, requirements: null })
   useEffect(() => {
     const sid = sessionId
     if (sid === undefined) { setAdoption({ kind: 'no-run', adopted: null, origin: null, requirements: null }); return }
-    const slug = trust.kind === 'bound' ? trust.slug : undefined
+    const slug = boundSlug
     if (slug === undefined) { setAdoption({ kind: 'no-run', adopted: null, origin: null, requirements: null }); return }
     let stopped = false
     const controller = new AbortController()
@@ -294,7 +295,7 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
       setAdoption(foldMethodAdoption(text?.ok === true ? text.value.text : null, { bundle: true, question: hasQuestion }))
     })()
     return () => { stopped = true; controller.abort() }
-  }, [sessionId, trust, props.runSource])
+  }, [sessionId, boundSlug, props.runSource])
 
   /** 回执文案（三态优先级 = 失败 > 已落盘 > 已回话 > 已发送）。 */
   const receipt = receiptBase === null

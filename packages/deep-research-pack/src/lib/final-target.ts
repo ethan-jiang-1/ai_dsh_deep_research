@@ -74,6 +74,11 @@ export interface FinalReadPlan {
   readonly versions: string
 }
 
+/** 读面定表的三件文件名（finalReadPlan 与页签共用，避免两处硬编码）。 */
+export const FINAL_NAME = 'final.md'
+export const FINAL_REVIEW_NAME = 'review.md'
+export const FINAL_LEDGER_DIR = 'final'
+
 /** run bundle 终稿的规范相对路径（三位置；`drt_` 后允许字母数字下划线与 .-）。 */
 const FINAL_RELATIVE = /^(?:archive\/|_abandoned\/)?drt_[\w.-]+\/final\.md$/
 /** 从任意书写形态里抠出终稿后缀（绝对路径、`./` 前缀、反斜杠都收）。 */
@@ -158,8 +163,8 @@ export function latestPresentedFinalVersion(events: readonly unknown[]): number 
  */
 export function finalReadPlan(path: string): FinalReadPlan | null {
   if (!FINAL_RELATIVE.test(path)) return null
-  const dir = path.slice(0, path.length - 'final.md'.length)
-  return { final: path, review: `${dir}review.md`, versions: `${dir}final` }
+  const dir = path.slice(0, path.length - FINAL_NAME.length)
+  return { final: path, review: `${dir}${FINAL_REVIEW_NAME}`, versions: `${dir}${FINAL_LEDGER_DIR}` }
 }
 
 /** 会话域文件地址的解析结果。 */

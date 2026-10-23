@@ -168,6 +168,7 @@ test('读策略：plan.md 800、question.md 80、其它 40；截断如实标记'
   const source = fakeSource({
     drt_a: {
       'plan.md': long(1000),
+      plan: { 'v1.md': long(1000) },
       'question.md': long(120),
       evidence: { 'e.md': long(100) },
       final: { 'v2.md': long(1200) },
@@ -181,6 +182,11 @@ test('读策略：plan.md 800、question.md 80、其它 40；截断如实标记'
   assert.equal(plan.ok, true);
   assert.equal(plan.value.lines, 800);
   assert.equal(plan.value.truncated, true);
+
+  const snapshot = await view.read('plan/v1.md');
+  assert.equal(snapshot.ok, true);
+  assert.equal(snapshot.value.lines, 800);
+  assert.equal(snapshot.value.truncated, true);
 
   const question = await view.read('question.md');
   assert.equal(question.ok, true);
@@ -301,6 +307,7 @@ test('bundleCandidates / readPolicyOf：候选顺序与读策略表是纯函数'
   assert.equal(readPolicyOf('review.md'), 'eof');
   assert.equal(readPolicyOf('final/v3.md'), 'eof');
   assert.equal(readPolicyOf('plan.md'), 800);
+  assert.equal(readPolicyOf('plan/v1.md'), 800);
   assert.equal(readPolicyOf('question.md'), 80);
   assert.equal(readPolicyOf('evidence/e.md'), 40);
 });

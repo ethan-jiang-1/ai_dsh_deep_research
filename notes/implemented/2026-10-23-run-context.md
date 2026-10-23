@@ -67,7 +67,7 @@ D28 的三操作桶（根 / `archive/` / `_abandoned/`）此前在四个页签�
   - 删掉 `bindingTrust` 的 pending 分支 → 挂起真值表用例红；
   - 向 `ResearchStatusTab.tsx` 注入 `['drt_x', 'archive/drt_x', '_abandoned/drt_x']` →
     `run-context-single-source` 点名红；还原绿。
-- `pnpm test` **745 pass / 0 fail**；`pnpm verify` 44 门禁全绿；`gates-smoke` 78 案例全绿；
+- `pnpm test` **746 pass / 0 fail**；`pnpm verify` 44 门禁全绿；`gates-smoke` 78 案例全绿；
   `pnpm typecheck` 通过；pack 双半 `pnpm build` 通过。
 - `client-load-smoke` 真浏览器 **ALL PASS**：状态页证据计数 160/160、业务摘要、HITL 锚点；
   图谱覆盖率；配置页本次研究摘要；终稿页 v2 版本账、首标题、版本切换、静音条、滚动口。
@@ -75,3 +75,6 @@ D28 的三操作桶（根 / `archive/` / `_abandoned/`）此前在四个页签�
   `drt_e2e-rerun-2026-10-23` 全绿；`evidence-audit --latest` 4 份证据、URL 8/8、CRITICAL 0。
 - 浏览器适配器与 Node 适配器都有 keyless 用例；长 review 的 eof 行为由纯核用例钉住，不依赖
   某个 dev home 的绑定会话。
+- 对抗自审修复：终稿 30s 轮询用完整 `dir/name`（不再 stat 工作区根）；`plan/vN.md` 快照与
+  `plan.md` 共用 800 行策略（此前漏成默认 40）；配置页只在 bound slug 变化时重读；
+  review/plan 的 `truncated` 不再当完整文折叠。

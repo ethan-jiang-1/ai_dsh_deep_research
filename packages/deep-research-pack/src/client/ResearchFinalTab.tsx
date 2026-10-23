@@ -26,7 +26,7 @@ import type { ReactNode } from 'react'
 import { MarkdownText } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { finalReadPlan, sessionFileOf } from '../lib/final-target.ts'
+import { FINAL_LEDGER_DIR, FINAL_NAME, FINAL_REVIEW_NAME, finalReadPlan, sessionFileOf } from '../lib/final-target.ts'
 import { openRun, type RunSource } from '../lib/run-context.ts'
 import { latestRunVersion } from '../lib/run-fold.ts'
 import { terminalReadiness } from '../lib/review-readiness.ts'
@@ -115,16 +115,16 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
       return
     }
     const view = opened.value
-    const listed = await view.list('final', { signal })
+    const listed = await view.list(FINAL_LEDGER_DIR, { signal })
     if (signal.aborted || !aliveRef.current) return
     const versionNames = listed.ok
       ? listed.value.filter((entry) => entry.type === 'file').map((entry) => entry.name)
       : []
     const nextVersions = latestRunVersion(versionNames)
-    const name = showDraft || nextVersions === 0 ? 'final.md' : `final/v${String(nextVersions)}.md`
+    const name = showDraft || nextVersions === 0 ? FINAL_NAME : `${FINAL_LEDGER_DIR}/v${String(nextVersions)}.md`
     const [body, review] = await Promise.all([
       view.read(name, { signal }),
-      view.read('review.md', { signal }),
+      view.read(FINAL_REVIEW_NAME, { signal }),
     ])
     if (signal.aborted || !aliveRef.current) return
     if (!body.ok) {
@@ -138,7 +138,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     setTruncated(body.value.truncated)
     setVersions(nextVersions)
     if (body.value.version !== undefined) versionRef.current = body.value.version
-    const readiness = review.ok ? terminalReadiness(review.value.text) : null
+    const readiness = review.ok && !review.value.truncated ? terminalReadiness(review.value.text) : null
     setPass(readiness === null ? null : readiness === 'PASS')
     setLoading(false)
     setStale(false)
@@ -165,7 +165,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
       void (async () => {
         const target = targetRef.current
         if (target === null) return
-        const token = await ioRef.current.runSource(sessionId).version(target.name, { signal: controller.signal })
+        const token = await ioRef.current.runSource(sessionId).version(`${target.dir}/${target.name}`, { signal: controller.signal })
         if (controller.signal.aborted) return
         if (!token.ok) return
         if (versionRef.current === null) { versionRef.current = token.value; return }

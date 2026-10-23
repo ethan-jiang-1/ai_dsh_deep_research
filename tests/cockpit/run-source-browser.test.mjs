@@ -3,7 +3,7 @@
 // malformed wire → unreadable；位置/读策略本身由 tests/run/run-context.test.mjs 钉。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { openRun } from '../../packages/deep-research-pack/src/lib/run-context.ts';
+import { listRuns, openRun } from '../../packages/deep-research-pack/src/lib/run-context.ts';
 import { browserRunSource } from '../../packages/deep-research-pack/src/client/run-source-browser.ts';
 
 const ok = (value) => ({ ok: true, value });
@@ -14,7 +14,7 @@ const failure = (code = 'workspace-file/not-a-directory') => ({ ok: false, error
 function wire(tree, { errors = {}, version = 'v-1', malformed = null } = {}) {
   const calls = [];
   const nodeAt = (path) => {
-    if (path === '') return tree;
+    if (path === '' || path === '.') return tree;
     let node = tree;
     for (const part of path.split('/').filter(Boolean)) {
       if (node === null || typeof node !== 'object') return undefined;
@@ -126,4 +126,13 @@ test('browserRunSource：malformed wire 一律 unreadable（不猜）', async ()
   const version = await statView.value.version('x.md');
   assert.equal(version.ok, false);
   assert.equal(version.reason, 'unreadable');
+});
+
+test('browserRunSource：listRuns 把根空路径映射成 .，无 mtime 时按桶序 + slug', async () => {
+  const tree = { drt_a: {}, archive: { drt_b: {} } };
+  const source = browserRunSource(wire(tree), 'sess-1');
+  const runs = await listRuns(source);
+  assert.equal(runs.ok, true);
+  assert.deepEqual(runs.value.map((run) => run.slug), ['a', 'b']);
+  assert.deepEqual(runs.value.map((run) => run.bucket), ['root', 'archive']);
 });
