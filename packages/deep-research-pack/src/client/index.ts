@@ -38,6 +38,7 @@ import { ResearchConfigTab } from './ResearchConfigTab.tsx'
 import { MethodLibraryView } from './MethodLibraryView.tsx'
 import { ResearchGraphTab } from './ResearchGraphTab.tsx'
 import { ResearchFinalTab } from './ResearchFinalTab.tsx'
+import { browserRunSource } from './run-source-browser.ts'
 import { OrcaMark, OrcaName } from './BrandMark.tsx'
 import { draftInProgress, finalAddressOf, isFinalAddress, latestFinalDelivery, shouldOpenFinal } from '../lib/final-target.ts'
 
@@ -199,8 +200,7 @@ export function apply(ctx: ClientContext): void {
       }
     }
 
-    // 终稿页签的读面（issue 2026-10-19）：分页读（正文按 500 行/页续读，不赌 maxLines 配置）
-    // + 版本令牌（文件改写巡检）。读面本身是一张定表——路径由 lib/final-target.finalReadPlan 给。
+    // 研究状态页签的 review 翻页读（终局判定在文末；正文按 500 行/页续读，不赌 maxLines 配置）。
     const readPage = async (sessionId: SessionId, path: string, signal: AbortSignal, offset: number, limit: number) => {
       try {
         const result = await scoped.remote.workspaceFiles.read(sessionId, path, { offset, limit }, signal)
@@ -216,14 +216,9 @@ export function apply(ctx: ClientContext): void {
         return null
       }
     }
-    const statVersion = async (sessionId: SessionId, path: string, signal: AbortSignal) => {
-      try {
-        const result = await scoped.remote.workspaceFiles.stat(sessionId, path, signal)
-        if (!result.ok) return null
-        const version = (result.value as { version?: unknown }).version
-        return typeof version === 'string' ? version : null
-      } catch { return null }
-    }
+    // 终稿页签的读面：run-context 的浏览器适配器（三位置/读策略/翻页归 lib；页签只拿 view）。
+    const runSource = (sessionId: SessionId) => browserRunSource(scoped.remote.workspaceFiles, sessionId)
+
     // 终稿的唯一打开入口：文件地址 → 页签（同地址幂等——交付卡片与自动打开落同一页签）。
     const openFinal = (sessionId: SessionId, path: string) => {
       try { scoped.sidebarRight.openResource(finalAddressOf(sessionId, path)) }
@@ -257,9 +252,9 @@ export function apply(ctx: ClientContext): void {
         }) },
         ResearchGraphTab,
       ),
-      // 「终稿」页签体：读面 = 分页读 + 审查判定 + 版本目录（三处定表，见 lib/final-target）。
+      // 「终稿」页签体：读面 = run-context（三位置/readPolicy/翻页），审查判定与版本目录在此之上。
       scoped.slots.register(
-        { name: RESEARCH_PANE_SLOT, key: RESEARCH_FINAL_TAB_KEY, inject: () => ({ readPage, readFile, listDir, statVersion }) },
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_FINAL_TAB_KEY, inject: () => ({ runSource }) },
         ResearchFinalTab,
       ),
     ]), 'deep-research-pack: research-pane tabs')
