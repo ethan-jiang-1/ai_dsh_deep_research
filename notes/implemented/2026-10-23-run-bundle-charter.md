@@ -382,6 +382,10 @@ manifest 时机）= 锚点卡 [§7.2](../../_backlog/_archived/settled_issues/20
   `tests/run/schema-scan.test.mjs` 18 例（绝对路径族/指令文件/脚本/symlink/顶层白名单/分片登记/
   delivery 相位）；`tests/run/node-gate.test.mjs` 增门④ D28 例。`pnpm verify` 全绿、`pnpm test`
   697 pass、`gates-smoke` 77 例全绿。
+- **P7 二批（2026-10-23 复核轮）**：手册 `final/` 语义与见证绑定句改动 → 四角色真模型重录
+  （`codeAnchor` = `72f392a`、vendor `687f282e…`、手册 digest
+  `32108b85…`）→ `snapshot-replay-smoke` 4 场景 ALL PASS（lead C5 金标准按新措辞重写并人审：
+  仅活动行一句话变化）；`preset-smoke` 预检绿。
 - **未跑**：L2 安装验收（本轮不是发布轮）。正式 lead 盲测的仪器缺口保留在锚点卡 §16。
 
 

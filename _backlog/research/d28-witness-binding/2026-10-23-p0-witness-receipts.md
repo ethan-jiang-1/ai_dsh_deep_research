@@ -90,4 +90,19 @@ drt_nvidia-dc-gpu-share（合成 contract=2026-10-23）=> gate③ RED（其真�
 
 - 见证绑定停在「会话写过 bundle」这一既有语义（本地单用户信任模型），不引入签名/哈希链。
 - `manifest.json` 仍不自我引用、不含后写的 acceptance（P5 已记录）。
-- 正式 lead 盲测与 L2 安装验收未跑（非发布轮）；快照重录另见 P7 批次记录。
+- 正式 lead 盲测与 L2 安装验收未跑（非发布轮）。
+
+## 7. 快照重录（P7 二批，同一合同批）
+
+手册改了两处模型可见文本（`final/vN` 语义、见证绑定句）→ 四角色真模型重录：
+
+```
+node --import tsx/esm dev/record-role-fixture.mjs --role lead|scout|analyst|critic --port 3105
+```
+
+- 录制身份：`codeAnchor = 72f392a`（录制时 HEAD，工作树干净）、
+  `vendor = 687f282e8625c6b8d11ff58211a90524be2e4317`、`recordedAt` = 各 fixture mtime。
+- 注入手册 digest = `32108b85` = 当前 `AGENTS.md` sha1（四份一致）。
+- `snapshot-replay-smoke`：A/B 全绿；lead C5 金标准按新措辞重写（仅活动行一句：
+  「用 web_search 搜索了…」→「搜了 1 次…」），结构未变——人审接受。
+- `preset-smoke`：预检绿（真挂载档需 `DSH_SMOKE_REAL=1`，本轮未跑全挂载）。
