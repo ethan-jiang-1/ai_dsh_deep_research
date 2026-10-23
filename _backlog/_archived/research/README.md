@@ -4,6 +4,7 @@
 
 | 文件 | 历史消费者 | 日期 |
 |---|---|---|
+| [rerun-triage/2026-10-23-acceptance-evidence.md](rerun-triage/2026-10-23-acceptance-evidence.md) | [2026-10-23-rerun-dissatisfaction-triage](../settled_issues/2026-10-23-rerun-dissatisfaction-triage.md) | 2026-10-23 |
 | [d28-witness-binding/2026-10-23-p0-witness-receipts.md](d28-witness-binding/2026-10-23-p0-witness-receipts.md) | [2026-10-23-d28-witness-binding-and-receipts](../settled_issues/2026-10-23-d28-witness-binding-and-receipts.md) | 2026-10-23 |
 | [oss-dr-mining/2026-10-06-oss-dr-bundle-digest.md](oss-dr-mining/2026-10-06-oss-dr-bundle-digest.md) | [2026-10-06-oss-dr-lessons](../settled_issues/2026-10-06-oss-dr-lessons.md) | 2026-10-06 |
 | [oss-dr-mining/2026-10-06-oss-dr-arch-mining.md](oss-dr-mining/2026-10-06-oss-dr-arch-mining.md) | [2026-10-06-oss-dr-lessons](../settled_issues/2026-10-06-oss-dr-lessons.md) | 2026-10-06 |

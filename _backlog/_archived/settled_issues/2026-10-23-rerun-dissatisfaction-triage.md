@@ -1,11 +1,11 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-10-23
 ---
 
 # 推敲：rerun 的不满转接——用户说法 ↔ 我们的手段
 
-> 立卡：2026-10-23 ｜ 状态：推敲中 ｜ 类型：设计 ｜ 结论倾向：现在做（先落词表与 HITL2 措辞，观察面出口随后） ｜ 实施授权：2026-10-23 15:58 用户「开始考虑…落地…静默自主推进」 ｜ 可关闭：否
+> 立卡：2026-10-23 ｜ 状态：已结 — 2026-10-23 落地（commit 77ae9fa / d961e33） ｜ 类型：设计 ｜ 结论倾向：现在做（先落词表与 HITL2 措辞，观察面出口随后） ｜ 实施授权：2026-10-23 15:58 用户「开始考虑…落地…静默自主推进」 ｜ 可关闭：是
 
 ## 0. 立项来历（用户原话）
 
@@ -18,7 +18,7 @@ opened: 2026-10-23
 三个要点：① 用户会**用生活语言说不满**；② 我们的技术落地只有**自己的三种词**；③ 中间缺一层
 **转接**，让用户知道"我们有什么手段、各自代价是什么"。随后用户要求把上下文留足备 REVIEW。
 
-**为什么现在做**：同日刚落地的 [rerun 版本面](../_archived/settled_issues/2026-10-23-rerun-versioned-graph.md)
+**为什么现在做**：同日刚落地的 [rerun 版本面](./2026-10-23-rerun-versioned-graph.md)
 把"有几版 / 交的是哪版 / HITL2 待审"说清了（`plan/vN` 快照、`final/vN` 版本账、`> rerun:` 声明、
 图谱版本轨都在）。**版本面是"状态"，本卡补的是"手段"**——同一批文件、同一批用户时刻，现在补
 转接层成本最低。
@@ -45,25 +45,25 @@ opened: 2026-10-23
 
 | 词 | 指什么 | 正本 |
 |---|---|---|
-| 补研究（证据扩张 rerun） | 同 bundle 重入挖掘、补证据，产出 `final/vN+1` | [NODES](../../research-workspace/NODES.md) 第 55–56 行、D17 |
+| 补研究（证据扩张 rerun） | 同 bundle 重入挖掘、补证据，产出 `final/vN+1` | [NODES](../../../research-workspace/NODES.md) 第 55–56 行、D17 |
 | 表述修订（polish） | 原位改 `final.md`，不回节点、版本号不变 | 同上 |
 | 结构性重跑 | 方向变了，另起 `drt_<slug>/`（sibling 预检 + 用户同意），旧 bundle 原样保留 | 同上 |
-| steer | 运行中改方向（不是 rerun）：`session/prompt` 的 steer 模式，Lead 记账后原地补搜 | [guides/61 §5](../../docs/guides/61-run-playbook.md) |
-| HITL1 / HITL2 | 立项对齐 / 交付审阅两个停靠点；HITL2 选项 = 定稿 / 补研究 / 修订表述 | [手册 HITL2](../../research-workspace/AGENTS.md) |
-| 版本账 | `final/vN.md` 文件记账；`final.md` 是当前工作稿；`present` 才是交付见证 | [版本面 Note](../../notes/implemented/2026-10-23-rerun-version-face.md) |
+| steer | 运行中改方向（不是 rerun）：`session/prompt` 的 steer 模式，Lead 记账后原地补搜 | [guides/61 §5](../../../docs/guides/61-run-playbook.md) |
+| HITL1 / HITL2 | 立项对齐 / 交付审阅两个停靠点；HITL2 选项 = 定稿 / 补研究 / 修订表述 | [手册 HITL2](../../../research-workspace/AGENTS.md) |
+| 版本账 | `final/vN.md` 文件记账；`final.md` 是当前工作稿；`present` 才是交付见证 | [版本面 Note](../../../notes/implemented/2026-10-23-rerun-version-face.md) |
 
 ## 2. 现状：七块半成品，各覆盖一角
 
 | 已有 | 在哪 | 覆盖了什么 | 停在哪 |
 |---|---|---|---|
-| D17 三形态 | [decisions.md](../../docs/decisions.md)、[NODES](../../research-workspace/NODES.md) 第 55–56 行 | 三种 rerun 的语义与版本后果已定 | 词是我们的（补研究/表述修订/结构性重构） |
-| 轨道回边 + 静线图例 | [ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) | 一句话讲清三种后果（回挖掘、vN+1；原位改、版本不变；另起 bundle） | 静态图例；随回边一起出现（交付审阅锚点到达后才渲染）；不回答"你这句不满算哪类" |
-| HITL2 三选一 + ≤200 字 | [synthesis §5](../../packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md)、[手册 HITL2](../../research-workspace/AGENTS.md) | 唯一的结构化出口 | 没有"你为什么不满意"的入口；**结构性重跑不在卡上**；选项文本是 Lead 现场拟的——受控 E2E 实测原文是「按现稿定稿」，见 `research-workspace/archive/drt_e2e-rerun-2026-10-23/question.md` §Decisions |
-| [HITL2 范围轮卡](../_archived/settled_issues/2026-09-28-hitl2-scope-round.md)（已毕业未实施） | backlog 归档 | 两条洞见：HITL2 是用户信息最全的时刻；补研究范围只能来自 findings gap / review 残留 / final 末节，**不许 Lead 发明** | 复活条件未触发；只覆盖"补研究"一种 |
-| [高管 UX 调研](../_archived/research/2026-10-11-executive-research-ux/index.md) | backlog 归档 | 命题就是"把机制翻译成决策者能消费的信息"；P0 决策简报；"交付/继续"行点出"用户能否无需技术协助找到关键依据"未验证 | 没有做"抱怨 → 手段"的映射表 |
-| [rerun-loop-live](../../notes/implemented/2026-09-28-rerun-loop-live.md) | notes | 真实证据扩张 rerun 靠 final 末节"v2 优先项四条"零额外交互跑通（D 形态 de facto） | 那是那一场的产物，不是合同；当前 [final 模板](../../research-workspace/templates/run/final.md) 六段里没有这一节 |
-| [版本面（2026-10-23）](../../notes/implemented/2026-10-23-rerun-version-face.md) | 状态页 ⑤ / 图谱 / Note | 有几版、交的是哪版、HITL2 待审 | 是"状态"，不是"手段" |
-| brief-fold 的 actionLine | [brief-fold.ts](../../packages/deep-research-pack/src/lib/brief-fold.ts) | 已经在说补研究/修订表述 | 只是复述我们的词，没有代价与"可以不重跑" |
+| D17 三形态 | [decisions.md](../../../docs/decisions.md)、[NODES](../../../research-workspace/NODES.md) 第 55–56 行 | 三种 rerun 的语义与版本后果已定 | 词是我们的（补研究/表述修订/结构性重构） |
+| 轨道回边 + 静线图例 | [ResearchStatusTab.tsx](../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) | 一句话讲清三种后果（回挖掘、vN+1；原位改、版本不变；另起 bundle） | 静态图例；随回边一起出现（交付审阅锚点到达后才渲染）；不回答"你这句不满算哪类" |
+| HITL2 三选一 + ≤200 字 | [synthesis §5](../../../packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md)、[手册 HITL2](../../../research-workspace/AGENTS.md) | 唯一的结构化出口 | 没有"你为什么不满意"的入口；**结构性重跑不在卡上**；选项文本是 Lead 现场拟的——受控 E2E 实测原文是「按现稿定稿」，见 `research-workspace/archive/drt_e2e-rerun-2026-10-23/question.md` §Decisions |
+| [HITL2 范围轮卡](./2026-09-28-hitl2-scope-round.md)（已毕业未实施） | backlog 归档 | 两条洞见：HITL2 是用户信息最全的时刻；补研究范围只能来自 findings gap / review 残留 / final 末节，**不许 Lead 发明** | 复活条件未触发；只覆盖"补研究"一种 |
+| [高管 UX 调研](../research/2026-10-11-executive-research-ux/index.md) | backlog 归档 | 命题就是"把机制翻译成决策者能消费的信息"；P0 决策简报；"交付/继续"行点出"用户能否无需技术协助找到关键依据"未验证 | 没有做"抱怨 → 手段"的映射表 |
+| [rerun-loop-live](../../../notes/implemented/2026-09-28-rerun-loop-live.md) | notes | 真实证据扩张 rerun 靠 final 末节"v2 优先项四条"零额外交互跑通（D 形态 de facto） | 那是那一场的产物，不是合同；当前 [final 模板](../../../research-workspace/templates/run/final.md) 六段里没有这一节 |
+| [版本面（2026-10-23）](../../../notes/implemented/2026-10-23-rerun-version-face.md) | 状态页 ⑤ / 图谱 / Note | 有几版、交的是哪版、HITL2 待审 | 是"状态"，不是"手段" |
+| brief-fold 的 actionLine | [brief-fold.ts](../../../packages/deep-research-pack/src/lib/brief-fold.ts) | 已经在说补研究/修订表述 | 只是复述我们的词，没有代价与"可以不重跑" |
 
 ### 2.1 一次交付之后，现在的完整路径（reviewer 对照用）
 
@@ -148,7 +148,7 @@ opened: 2026-10-23
 - **重开 HITL1**：方向变化走结构性重跑，不重开立项。
 - **另建"不满意工单"或第二套状态**：报告末节 + §Decisions 已是事实源。
 
-## 7. 影响面与实施次序（若批准）
+## 7. 影响面与实施记录（2026-10-23 已落地）
 
 1. **文本面（模型可见）**：`presets/lead/skills/synthesis/SKILL.md`（HITL2 措辞 + 报告末节判据）、
    `research-workspace/templates/run/final.md`（新增末节骨架）、`research-workspace/AGENTS.md`
@@ -160,7 +160,19 @@ opened: 2026-10-23
 4. **证据**：L0（verify/test）+ L1 preset-smoke + snapshot-replay B（skill catalog 变化）+
    client-load（折叠块渲染）+ 真模型探针（§8 最后一条）；同 diff 写 Note。
 
-## 8. 验收标准（验收矩阵；方法正本 = [_backlog/methods/validation-design](../methods/validation-design.md)）
+**实施结果**（commit `77ae9fa` 实现 / `d961e33` 快照重录）：
+
+| 面 | 落地 |
+|---|---|
+| L1 词表 | `presets/lead/skills/rerun-triage/SKILL.md`（七类说法 / 四种手段 / 五纪律）；persona 两处指向（HITL2 + 用户表达不满） |
+| L2 选项 | persona / 手册 / synthesis 三处逐字同源：`定稿（按现稿交付）(Recommended)` / `补研究（补哪块看报告末节；会出新版本）` / `改说法（只改措辞，版本不变）`；题干给「太浅 / 方向不对 / 太长」；摘要 + 后果 ≤200 字 |
+| L2 末节 | `final.md` 模板新增 `## 下一版优先项` + `## 什么会改变建议`；synthesis 写成完成判据；quick_factual 缩略一行 |
+| L3 出口 | `src/lib/rerun-triage.ts` 单一文案；状态页 ⑤（present 在窗内）+ 终稿页脚只读折叠块 |
+| 同批修正 | persona 交付四步改 `final/vN` 交付副本 + present 指 vN（D28 门②）；HITL2 判型签名新增新措辞、旧措辞留历史别名 |
+| 证据 | 契约测试 7 / cockpit 3 / hitl-fold 1；`pnpm test` **719**、`verify` 全绿；`snapshot-replay` 4 场景 ALL PASS（`codeAnchor=77ae9fa`、手册 digest `553a02a5`）；`client-load` 终稿页脚折叠块 PASS（状态页 ⑤ 按 present 窗条件断言）；真模型探针 `rerun-triage-probe` **五条全中** |
+| 未跑/边界 | 正式 lead 盲测与 L2 安装验收不在本卡；探针只证一次行为，长尾说法交人读；`preset-smoke` 真挂载结果见 §7 补记 |
+
+## 8. 验收标准（验收矩阵；方法正本 = [_backlog/methods/validation-design](../../methods/validation-design.md)）
 
 > 2026-10-23 获实施授权后按 validation-design 重写：每行 = 行为 / 类别 / 输入态 / 通过信号 /
 > 反例·互补态 / 证据 owner / 人为判断。旧稿的散文验收保留在 §12（历史）。
@@ -177,6 +189,22 @@ opened: 2026-10-23
 | 8 | **非回归**：verify / test / snapshot / preset / client-load 全绿；旧 bundle 零改写 | 确定性（回归） | 全仓 | 五条命令绿 | 任一红 | `pnpm verify`、`pnpm test`、`snapshot-replay-smoke`、`preset-smoke`、`client-load-smoke` | 无 |
 
 **关闭条件**：第 1–5、7、8 行全绿；第 6 行要么五条全中，要么如实记 UNATTESTED（不冒充）；第 2/4 行的人读项记录结论。
+
+### 8.1 判定结果（2026-10-23，方法 = validation-judgment）
+
+| # | 行 | 判定 | 命令/证据 | 未覆盖 |
+|---|---|---|---|---|
+| 1 | L1 词表 | pass | 契约测试 7 例 + `preset-smoke` 真挂载（四角色技能隔离） | 模型是否按词表回话 = #6 |
+| 2 | HITL2 选项 | pass | 契约测试三处同源 + 后果 + ≤200 字 | 真实体感 = 人判（未决 2 保留） |
+| 3 | 报告末节 | pass | 契约测试（模板两节 / quick_factual 缩略 / synthesis 判据） | 填得实不实 = review 抽样 |
+| 4 | L3 出口 | pass | `client-load`：终稿页脚 + 状态页 ⑤ 两处折叠块均真浏览器 PASS（同一文案常量；切页签按显式内容等待后展开断言） | 文案密度 = 人读 |
+| 5 | 不碰既有合同 | pass | 契约测试（两点交互 / 无动作面）+ diff | 长期不腐 = review |
+| 6 | 模型行为 | pass（1 次真模型） | `rerun-triage-probe` 五条全中（原答留档见证据文件 §2） | 长尾说法 |
+| 7 | persona = D28 | pass | 契约测试 + snapshot B·persona | 旧习复发由门②兜底 |
+| 8 | 非回归 | pass | verify 全绿 / test **719** / snapshot 4 场景 ALL PASS / preset-smoke 4 角色挂载绿 | L2 安装（非发布轮） |
+
+证据全文 = [_backlog/research/rerun-triage/2026-10-23-acceptance-evidence.md](../research/rerun-triage/2026-10-23-acceptance-evidence.md)。
+
 
 ## 9. 裁定记录（2026-10-23；实施授权 = 用户「开始考虑…落地…静默自主推进」）
 

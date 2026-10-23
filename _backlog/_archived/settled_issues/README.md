@@ -4,6 +4,7 @@
 
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-10-23-rerun-dissatisfaction-triage](2026-10-23-rerun-dissatisfaction-triage.md) | rerun 不满转接层：L1 `rerun-triage` skill（七类说法→四手段+代价+不变项+五纪律）、L2 HITL2 三选项带后果 + 报告末节两节、L3 状态页⑤/终稿页脚只读折叠块（共用 src/lib 文案）；同批修 persona 交付语义回 final/vN；719 测试 + 四角色重录 + 真模型探针五条全中；[Note](../../../notes/implemented/2026-10-23-rerun-triage-layer.md) | 2026-10-23 |
 | [2026-10-23-d28-witness-binding-and-receipts](2026-10-23-d28-witness-binding-and-receipts.md) | D28 落地缺口收口：门③见证绑定 run（写强绑定 + 契约纪元 + present≥HITL2）、回执哈希由门A 复算、run-accept 与 hygiene 分域、手册 final/vN = 交付副本、门④ 不再要 v1 活索引；P0–P3 + 四角色重录，708 测试绿；[RFC 修订](../../../notes/implemented/2026-10-23-run-bundle-charter.md) | 2026-10-23 |
 | [2026-10-23-run-bundle-agent-state-and-read-chain](2026-10-23-run-bundle-agent-state-and-read-chain.md) | run bundle 宪章：D28 位置=操作桶、run.md/epoch、presented/user-question-reply 交付链、provenance/manifest、观察只读；P0–P7 落地、P8 收口（正式 lead 盲测 UNATTESTED）；[implemented RFC](../../../notes/implemented/2026-10-23-run-bundle-charter.md) | 2026-10-23 |
 | [2026-10-23-rerun-versioned-graph](2026-10-23-rerun-versioned-graph.md) | rerun 版本面：`plan/vN` 快照 + `图版本` 交叉校验 + `> rerun:` 声明 + `RunVersionFace` + 终稿页默认版本账 + 图谱版本轨/最小 diff；受控 v1→v2 E2E 全绿；[Note](../../../notes/implemented/2026-10-23-rerun-version-face.md) | 2026-10-23 |

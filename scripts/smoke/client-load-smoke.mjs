@@ -928,7 +928,13 @@ async function pass5FinalDeliveryPhase() {
     const statusChip = page.getByRole('tab', { name: /研究状态/ }).first()
     if (await statusChip.isVisible().catch(() => false)) {
       await statusChip.click({ timeout: 5_000 }).catch(() => {})
-      const statusPane = await paneTextOf(page)
+      // 切页签后等**显式内容**（状态页的停靠点/交付态）再判——固定读一次会读到终稿页旧 DOM。
+      let statusPane = ''
+      for (let i = 0; i < 8; i++) {
+        statusPane = await paneTextOf(page)
+        if (statusPane.includes('停靠点已过') || statusPane.includes('已交付')) break
+        await wait(800)
+      }
       // ⑤ 的折叠块只在「本会话 present 见证在窗内」时渲染（交付态=事件，不是 final 在场）。
       // 冷会话的 present 可能已滑出尾窗 → 如实 SKIP，不把"这窗口没交付态"记成渲染缺陷。
       if (!statusPane.includes('已交付')) {

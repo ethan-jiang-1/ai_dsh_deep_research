@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-> 落地 2026-10-23 ｜ 锚点卡 = [_backlog/issues/2026-10-23-rerun-dissatisfaction-triage.md](../../_backlog/issues/2026-10-23-rerun-dissatisfaction-triage.md)
+> 落地 2026-10-23 ｜ 锚点卡 = [_backlog/issues/2026-10-23-rerun-dissatisfaction-triage.md](../../_backlog/_archived/settled_issues/2026-10-23-rerun-dissatisfaction-triage.md)
 > ｜ 前身：[rerun 版本面](2026-10-23-rerun-version-face.md)（说清"有几版/交的是哪版"）· [D17 三形态](../../docs/decisions.md)
 > ｜ 影响面：lead persona、synthesis skill、新 rerun-triage skill、final 模板、研究手册、驾驶舱两处渲染
 
@@ -52,11 +52,15 @@ HITL2 卡没有"你为什么不满意"的入口、结构性重跑不在卡上、
 - `pnpm test`：**719 pass / 0 fail**（新增 rerun-triage 契约 7 + cockpit 3 + hitl-fold 1）。
 - `snapshot-replay-smoke`：四角色真模型重录后 **4 场景 ALL PASS**（persona + 手册 + skill catalog
   三处模型可见面同批；`codeAnchor` = 录制时 HEAD）。
-- `client-load-smoke`：真浏览器断言状态页 ⑤ 与终稿页脚的三种改法折叠块（含可复制话术）——
-  结果见锚点卡 §7。
-- `preset-smoke`：预检绿 / 真挂载见卡内记录。
-- **真模型探针**：`scripts/probe/rerun-triage-probe.mjs`（给一句"太浅"，五条判据 a–e）——
-  结果与 UNATTESTED 边界见锚点卡 §7，不冒充。
+- `client-load-smoke`：终稿页脚与状态页 ⑤ 两处「还不满意？三种改法」折叠块均真浏览器 **PASS**
+  （展开后可复制话术在场；切页签按显式内容有界等待，不读旧 DOM）——两处共用同一文案常量，
+  契约测试钉 import。
+- `preset-smoke`（`DSH_SMOKE_REAL=1`）：**4 个 preset 全部真挂载绿**；lead/scout/analyst/critic
+  各自只看见自己的 skills（技能隔离随新 skill 一起成立）。
+- **真模型探针**：`scripts/probe/rerun-triage-probe.mjs` **五条全中**——(a) 复述为"证据不足、
+  不是方向错"；(b) 两个手段（补研究 / 改说法）；(c) 各自写出版本后果与代价；(d) 未确认前零
+  写/派工/rerun 调用；(e) 范围引 `final.md` 末节两条 + findings gap。单次行为证据，不冒充长尾
+  说法不误判。
 
 ## 边界
 

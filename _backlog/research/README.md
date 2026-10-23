@@ -48,3 +48,5 @@
 （2026-10-18 方法配置两份材料已随消费者毕业迁入 [_archived/research/](../_archived/research/)：外部先例与真模型 A/B。）
 
 （2026-10-23 D28 缺口收口卡已结：其 P0 证据 `d28-witness-binding/` 随卡迁入 [_archived/research/](../_archived/research/d28-witness-binding/2026-10-23-p0-witness-receipts.md)。）
+
+（2026-10-23 rerun 不满转接卡已结：其验收证据 `rerun-triage/` 随卡迁入 [_archived/research/](../_archived/research/rerun-triage/2026-10-23-acceptance-evidence.md)。）
