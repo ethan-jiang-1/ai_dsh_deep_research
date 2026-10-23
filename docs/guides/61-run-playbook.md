@@ -150,7 +150,7 @@ BUG-020）。
 - **拍板前操作侧先跑机械门**：`source dev/env.sh && node scripts/run-gates/node-gate.mjs
   research-workspace/drt_<slug>`——门①/③/L/R 红在场 = 先让 lead 原位修再拍板（红门会
   穿过 HITL2 落地，lead 自己跑不了门：无 bash）。**门②/④/A 属拍板后判据**：门②查 present
-  声明、门④查版本记账、门A 查交付完整性（v1 记账 + audit.md + 记账×readiness 交叉），
+  声明、门④查版本副本、门A 查交付完整性（v1 副本 + audit.md + 副本×readiness 交叉），
   在拍板前必然缺席——拍板前跑门看到 ②/A 红（静默缺席形态）= 预期态而非缺陷，拍板交付后
   复跑转绿（门清单正本 = NODES.md 头部图例）；
 - **拍板前操作侧跑证据审计**（须先 `source dev/env.sh`）：`node scripts/run-gates/evidence-audit.mjs
@@ -162,8 +162,8 @@ BUG-020）。
   research-workspace/drt_<slug>`——node-gate + evidence-audit + 未来日期 sanity 三件同次跑；预检红不写，绿写
   `delivered.json` + `manifest.json` + `acceptance.md`；复核后加 `--archive` 才移入 `archive/drt_<slug>/`。门 A/审计/日期红时不要手工归档。
 - lead 带审阅建议来找你：证据充分性判断 + 交付/补研究推荐 + composition 确认
-  （读者是谁 / 用来做什么 / 前景化重点）——拍板后 run 根 `final.md` 当前版落盘 + present 声明交付
-  + `final/v1.md` 版本记账（门A 交付件齐的最后一环）；
+  （读者是谁 / 用来做什么 / 前景化重点）——拍板后落 `final/vN` 交付副本 + present 声明交付
+  （门A 交付件齐的最后一环）；`final.md` 是工作稿，不冒充交付；
 - 每条关键结论带 `[来源: evidence/xx.md]`，critic 的 review.md readiness: PASS
   是交付前置（无 CRITICAL 未修复才许交付）；
 - **HITL 超时语义（0.2.0 timed ask-user，600s）**：两点挂起 600s 未答 → 工具返回
@@ -216,7 +216,7 @@ BUG-020）。
 - **rerun 版本面**：同 bundle rerun 开工时 lead 在 `question.md` 标题下写
   `> rerun: v2 · evidence-expansion · 日期 · 触发：…`；plan 每次重写前把旧版落 `plan/vN.md`
   （头部 `图版本：vN` 与重写记录同号；快照编号必须小于当前版本）。观察面按这些盘上声明显示
-  「v1 已交付 · v2 证据扩张 rerun · HITL2 待审」；`final.md` 是工作稿、`final/vN` 才是版本账，
+  「v1 已交付 · v2 证据扩张 rerun · HITL2 待审」；`final.md` 是工作稿、`final/vN` 才是交付副本，
   `present` 才是交付见证（终稿页签因此默认看版本账、只标「版本账/当前工作稿」）。
 - 方向修订：直接告诉 lead——**载体 = steer**（GUI 里打字即 steer；RPC 用 `session/prompt`
   的 `mode: 'steer'`，running 中的 agent 在下一步边界消费）；lead 记账（§Decisions 追加）

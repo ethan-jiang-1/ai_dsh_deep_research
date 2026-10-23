@@ -12,11 +12,11 @@
 > 〔第 3 行：方向节字段齐 + primary/comparison topic 覆盖，quick_factual 编制豁免，断代
 > 2026-10-03〕；其余行按证据逐个升格，防假牙齿——只门机械可查事实，不发明数值打分）。
 > 门编号图例：门① = HITL 锚点门（HITL1 选项卡真实在场——BUG-006 落地，契约日 2026-10-05）·
-> 门② = present 声明 · 门③ = §Decisions 拍板行 · 门④ = 版本记账（见回边版本
+> 门② = present 声明 · 门③ = §Decisions 拍板行 · 门④ = 版本交付副本（见回边版本
 > 语义节）· 门L = leads 交接门（L = leads）· 门R = 标题重复退化门（final.md 同一标题 ≥4 次
 > = 生成退化，2026-10-06 起，出处 = oss-dr 借鉴 A1 / LDR #6452）· 门A = 交付完整性门（readiness 非 PASS 时：review.md 有升级/未决项记账 **且** §Decisions 有 HITL2 拍板行——含代理代答 provenance——即按"升级到用户裁决"路径，不判越过前置；见 notes/implemented/2026-10-18-node-gate-judgment-widening.md）
 > （第 8 行交付判据下沉：final/ 记账在场 × readiness 非 PASS 交叉断言 + 交付前置达成时
-> final/v1.md 记账与**当前 bundle 对应的可解析 audit.md** 在场；摘要与 CRITICAL 节条目数须一致且显式 `CRITICAL=0`；附条件 PASS 显性化为 WARN 注记不机械红——
+> final/ 交付副本与**当前 bundle 对应的可解析 audit.md** 在场；摘要与 CRITICAL 节条目数须一致且显式 `CRITICAL=0`；附条件 PASS 显性化为 WARN 注记不机械红——
 > 裁决权威在 HITL2 用户；契约日 2026-10-08，出处 = delivery-criteria-mechanization RFC）——
 > 编号 = node-gate 实装序，与表行序无关。
 
@@ -28,10 +28,10 @@
 | 组队 | topics.md | spawn 的队员 + plan.md（lead 可选加速器：节点 id/parent/lifecycle/kind/owner_role/deps/output/acceptance/budget/depth/task_id + 图版本 + 重写记录（W<wave>.<index>；Wave 计算；stage 派生）；在场时必须有 `## 剩余工作`（未完成节点+owner+next，全图可选）；每次重写前把旧版落 `plan/vN.md` 快照） | 在场性随立项；lead 按 plan.md 的图派工 |
 | 侦察 wave0（scout） | topics.md | leads.md（每条：方向 + 状态〔建议挖深/已排除+原因〕+ 支持来源分级 + 检索器〔单一达标「单检索器——待破」〕+ 关键线索 + 建议 owner 对应 topic） | leads.md 在场 |
 | 挖掘 wave1（analyst） | leads.md（建议挖深条）+ topics.md | evidence/*.md（frontmatter 七字段 + 原文摘录 + 解读 + Question List） | 卡片在场 + 硬字段齐（evidence-audit 机械把守） |
-| 综合 wave2（synthesis） | evidence/ 全部 + topics.md | findings.md（F# 结论 + 支撑证据 + gap 四态）+ final.md 当前版（run 根；版本记账归 final/） | findings + final 当前版在场 |
+| 综合 wave2（synthesis） | evidence/ 全部 + topics.md | findings.md（F# 结论 + 支撑证据 + gap 四态）+ final.md 当前版（run 根；交付副本归 final/） | findings + final 当前版在场 |
 | 审查（critic） | findings.md + final 当前版 + evidence/ | review.md（末尾固定 `## readiness（终局）: PASS|FAIL` + CRITICAL/MAJOR 清单；历史轮不夺权） | review 在场且终局块判完；PASS = HITL2 前置 |
 | 交付审阅（HITL2） | review.md + final 当前版 | question.md §Decisions 追加拍板行 | **§Decisions 行在场**（node-gate 门③） |
-| 交付 | 拍板分支后果 | final/ 版本记账（vN.md）+ `deliverables/presented`（指 final/vN）+ 当前 bundle 对应的可解析操作侧 audit.md；ops `run-accept` 绿后写 delivered.json/manifest.json/acceptance.md；同 bundle rerun 另加 question.md 的 `> rerun: vN · kind · 日期` 行 | **版本记账 + presented（指 final/vN）+ 报告摘要与 CRITICAL 节一致且 `CRITICAL=0`**（present = node-gate 门②）；`final.md` 是工作稿、`final/vN` 才是版本账 |
+| 交付 | 拍板分支后果 | final/ 交付副本（vN.md）+ `deliverables/presented`（指 final/vN）+ 当前 bundle 对应的可解析操作侧 audit.md；ops `run-accept` 绿后写 delivered.json/manifest.json/acceptance.md；同 bundle rerun 另加 question.md 的 `> rerun: vN · kind · 日期` 行 | **交付副本 + presented（指 final/vN）+ 报告摘要与 CRITICAL 节一致且 `CRITICAL=0`**（present = node-gate 门②）；`final.md` 是工作稿、`final/vN` 才是交付物 |
 
 **输入侧规矩**：硬输入清单 = 上表"输入（读）"列；缺件 = 本节点亮红灯而非开工，下游对缺失
 输入只有两个动作——上报 lead 或等，**没有"瞎猜补全"这个选项**。清单检查由脚本做，不加记账仪式。
@@ -55,9 +55,9 @@ team-assembly 矩阵；原「critic 可轻量或不配」分支已撤销——�
 
 补研究 = 重入挖掘（最深重入点），输入追加"范围锁定"（§Decisions 行），输出 final/ v(n+1)
 ——**扩张 +1**；修订表述 = 原位改 final.md 当前版，**不回节点、版本号不变**；结构性重构 =
-另起新 bundle。HITL1 永不重开。机械把守 = node-gate 门④（版本记账门，2026-10-03 起）：
-final/vN（n≥2）在场 → §Decisions 须含 vN 行 + final/v1.md 索引须登记该版本（断代同门 L，
-契约前 PRE-CONTRACT 不计红）。
+另起新 bundle。HITL1 永不重开。机械把守 = node-gate 门④（版本门，2026-10-03 起）：final/vN（n≥2）在场 → §Decisions 须含
+vN 行（旧 epoch 另需 final/v1.md 索引登记该版本；D28 新 run 的 vN 是不可变交付副本，不当活索引；
+断代同门 L，契约前 PRE-CONTRACT 不计红）。
 
 ## 回边超界处置（2026-10-06 起，oss-dr 借鉴 A2）
 

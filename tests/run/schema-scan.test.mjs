@@ -2,7 +2,7 @@
 // 纯 fs 直调（layering：无子进程）；夹具 mtime 随检出时间漂——断代用 dates 注入，不碰盘上时间。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { cpSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -129,3 +129,75 @@ test('D28 新 run 卫生：绝对路径 / ../drt_ / 跨 bundle [来源:] → 核
     rmSync(dir, { recursive: true, force: true })
   }
 });
+
+// ── D28 卫生族：契约声明的「机械禁止」必须有红案例（RFC §7/§11；宪章卡 §10 B1）──
+const mkNewRun = (tag) => {
+  const base = realpathSync(tmpdir())
+  const dir = mkdtempSync(join(base, `dsh-${tag}-`))
+  cpSync(join(F, 'drt-clean-post'), dir, { recursive: true })
+  writeFileSync(join(dir, 'run.md'), '# Run\n- contract: 2026-10-23\n- phase: research\n- next: W1\n')
+  return { base, dir, cleanup: () => {
+    if (dirname(dir) !== base || !basename(dir).startsWith(`dsh-${tag}-`)) throw new Error(`refusing cleanup: ${dir}`)
+    rmSync(dir, { recursive: true, force: true })
+  } }
+}
+
+test('D28 卫生：绝对路径族（/home、盘符、~/）都算违约，不只 /Users/', () => {
+  const { dir, cleanup } = mkNewRun('hyg-path')
+  try {
+    writeFileSync(join(dir, 'journal.md'), '# J\n/home/me/x\nC:\\Users\\me\\y\n~/z\n')
+    const core = hygieneOf(dir)
+    assert.ok(core.some((c) => c.includes('绝对路径')), core.join(' | '))
+  } finally { cleanup() }
+})
+
+test('D28 卫生：bundle 内指令文件 / 可执行脚本 / symlink → 核心违约', () => {
+  const { dir, cleanup } = mkNewRun('hyg-entry')
+  try {
+    writeFileSync(join(dir, 'AGENTS.md'), '# 第二指令通道\n')
+    writeFileSync(join(dir, 'helper.sh'), 'echo hi\n')
+    symlinkSync(join(dir, 'question.md'), join(dir, 'link.md'))
+    const core = hygieneOf(dir)
+    assert.ok(core.some((c) => c.includes('指令文件')), core.join(' | '))
+    assert.ok(core.some((c) => c.includes('脚本')), core.join(' | '))
+    assert.ok(core.some((c) => c.includes('symlink')), core.join(' | '))
+  } finally { cleanup() }
+})
+
+test('D28 卫生：未登记顶层条目 → 核心违约（RFC §11 顶层白名单）', () => {
+  const { dir, cleanup } = mkNewRun('hyg-top')
+  try {
+    writeFileSync(join(dir, 'notes.txt'), 'x\n')
+    assert.ok(hygieneOf(dir).some((c) => c.includes('未登记顶层')), hygieneOf(dir).join(' | '))
+  } finally { cleanup() }
+})
+
+test('D28 卫生：leads/ 分片必须在 leads.md 登记', () => {
+  const { dir, cleanup } = mkNewRun('hyg-leads')
+  try {
+    mkdirSync(join(dir, 'leads'), { recursive: true })
+    writeFileSync(join(dir, 'leads', 'axis-a.md'), '# 分片\n')
+    assert.ok(hygieneOf(dir).some((c) => c.includes('未登记分片')), hygieneOf(dir).join(' | '))
+    writeFileSync(join(dir, 'leads.md'), '# Leads\n\n- leads/axis-a.md\n')
+    assert.equal(hygieneOf(dir).some((c) => c.includes('未登记分片')), false)
+  } finally { cleanup() }
+})
+
+test('D28 卫生：ops 生成物（audit/node-gate/acceptance）不回踩绝对路径门', () => {
+  const { dir, cleanup } = mkNewRun('hyg-ops')
+  try {
+    writeFileSync(join(dir, 'acceptance.md'), '# Acceptance\n\n| 会话语料根 | `/Users/me/sessions` |\n')
+    writeFileSync(join(dir, 'audit.md'), '# Audit\n\n语料根：/Users/me/sessions\n')
+    assert.deepEqual(hygieneOf(dir).filter((c) => c.includes('绝对路径')), [])
+  } finally { cleanup() }
+})
+
+test('D28 phase=delivery 必须落 final/vN 与 review 终局（卡 §10 B1）', () => {
+  const { dir, cleanup } = mkNewRun('hyg-delivery')
+  try {
+    rmSync(join(dir, 'final'), { recursive: true, force: true })
+    writeFileSync(join(dir, 'run.md'), '# Run\n- contract: 2026-10-23\n- phase: delivery\n- next: present\n')
+    const core = scanBundle(dir).core
+    assert.ok(core.some((c) => c.includes('phase=delivery')), core.join(' | '))
+  } finally { cleanup() }
+})

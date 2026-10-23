@@ -7,7 +7,8 @@
 //   各自还原 → 16/16 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, rmSync, rmdirSync, writeFileSync, readFileSync, renameSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, rmdirSync, writeFileSync, readFileSync, renameSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { auditBundle } from '../../scripts/lib/evidence-audit-core.mjs';
@@ -274,3 +275,29 @@ test('语料窗：跨 run 会话的 URL 不得为本 run 作证（slug 窗过滤
   assert.equal(forged.length, 1, `窗外会话的 URL 不得作证（跨 run 污染面）：${JSON.stringify(r.findings)}`);
   assert.ok(r.stats.windowFiles >= 1 && !r.stats.windowFiles.toString().includes('2'), `窗内文件数应只含本 run 会话：${r.stats.windowFiles}`);
 }));
+
+// D28 provenance：新 run 的 file:// 源必须有 provenance/local-file；旧场只提示（历史不追改）。
+test('file:// 源：新 run 无 provenance → MAJOR；旧场（无 run.md）→ INFO', () => {
+  const base = mkdtempSync(join(tmpdir(), 'dsh-audit-prov-'));
+  try {
+    const makeBundle = (name, legacy) => {
+      const b = join(base, name);
+      mkdirSync(join(b, 'evidence'), { recursive: true });
+      mkdirSync(join(b, 'final'), { recursive: true });
+      if (!legacy) writeFileSync(join(b, 'run.md'), '- contract: 2026-10-23\n- phase: research\n- next: W1\n');
+      writeFileSync(join(b, 'final.md'), '# Final\n');
+      writeFileSync(join(b, 'evidence', 'e1.md'), '---\nsource_url: file:///tmp/local.txt\nretrieved_at: 2026-10-23\nquality: A\nfound_by: analyst\nsupports: T1\nsource_tier: primary\npublisher: local\n---\n\n## 原文摘录\n\n> 本地来源原文，足够长的一行。\n\n## 解读\n\n测试用。\n');
+      return b;
+    };
+    const sessions = join(base, 'sessions');
+    mkdirSync(sessions, { recursive: true });
+    const fresh = auditBundle(makeBundle('drt_fresh', false), sessions);
+    const freshHit = fresh.findings.filter((f) => f.kind === '本地源缺 provenance');
+    assert.ok(freshHit.length > 0, '新 run 的 file:// 无 provenance 必须报');
+    assert.equal(freshHit[0].level, 'MAJOR');
+    const old = auditBundle(makeBundle('drt_old', true), sessions);
+    const oldHit = old.findings.filter((f) => f.kind === '本地源缺 provenance');
+    assert.ok(oldHit.length > 0);
+    assert.equal(oldHit[0].level, 'INFO', '旧场只提示，不追溯判红');
+  } finally { rmSync(base, { recursive: true, force: true }); }
+});

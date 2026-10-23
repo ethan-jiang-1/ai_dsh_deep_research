@@ -11,7 +11,7 @@ description: 综合写作（wave2 语义）方法论：纯综合先行、finding
 
 1. **纯综合（禁止新搜索）**：通读本 run bundle（drt_<slug>/）的 evidence/ 全部文件与 topics.md，写 findings.md——每个 finding 一行：结论 + 支撑证据文件 + gap 状态（`supported` / `needs_search` / `contradicted`）。
 2. **gap 定向补搜**：只对 `needs_search` 的 finding 派一次定向任务（给 analyst 或 subagent，说清找什么、什么算找到）。补完更新 findings.md，**只补一轮**——补了还缺就把该 finding 标 `insufficient` 并在报告里如实呈现。**未取得 ≠ 没有**：拿不到的项，报告里只能落「未取得/无法判定」（写明试过的渠道），**禁止转写成「没有/不提供」**——取证可达性不对称是常态（cn-dr-products 实证：洋厂商一手定价页全域 403，"查不到"进无法判定类），查不到 ≠ 官方没有。
-3. **写 run 根 final.md 当前版**（首版另落 final/v1.md 记账）：**决策摘要首屏先行**——六段：
+3. **写 run 根 final.md 当前版**（交付时忠实复制为 final/vN 副本，present 指它）：**决策摘要首屏先行**——六段：
    答案/建议及适用条件（成立条件、口径、有效期；证据不足以支撑建议时如实写
    「目前不能判断」及原因，**不硬给唯一推荐**）→ 备选与取舍（比较依据不足不排序、
    不说服）→ 关键依据（2–4 条最强依据，每条附 `[来源: evidence/<file>.md]`，标来源
@@ -30,10 +30,10 @@ description: 综合写作（wave2 语义）方法论：纯综合先行、finding
    **发出前自检**：摘要超 200 字 = 违纪，删到 4 行以内再发（执行方差实证：第八场 576 字部分遵守）。
    用户拍板后（无论定稿/补研究/修订哪支）**第一动作 = 回写记账**：把拍板行追加进 question.md 的
    Decisions 节（append-only、最新在上，写明拍板内容与版本走向）——这是交付门③的机械判据
-   （G8 #③ 实证：缺席会被操作侧代补，救场计数因此下不去）。先记账，再落 run 根 final.md 与 present。
+   （G8 #③ 实证：缺席会被操作侧代补，救场计数因此下不去）。先记账，再落 final/vN 交付副本与 present（present 指 vN，不指工作稿 final.md）。
    **同 bundle 证据扩张 rerun**：拍「补研究」后在 question.md 标题下加一行
-   `> rerun: v<N+1> · evidence-expansion · 日期 · 触发：<一句话>`，交付时落 `final/v<N+1>.md`
-   版本账再写 run 根 `final.md` 当前版 + present；`final.md` 是工作稿，`final/vN` 才是版本账。
+   `> rerun: v<N+1> · evidence-expansion · 日期 · 触发：<一句话>`，交付时把当前版忠实复制为 `final/v<N+1>.md`
+   再 present；`final.md` 是工作稿，`final/vN` 才是交付物。
 6. **交付前溯源自审（2026-09-27 定稿）**：出处链审查交给 critic 的**独立重抓**——对关键
    `source_url` 逐个 `web_fetch` 重新取回、逐格核对内容真实支撑（第六/八场实测这是比脚本更强的
    判据：验证的是内容，不只是"URL 出现过"；第八场 critic 重抓 23 URL、比对 340 格，0 误差）。

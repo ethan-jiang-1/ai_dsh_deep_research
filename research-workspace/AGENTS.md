@@ -39,9 +39,9 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
   review.md            对抗核查报告（owner: critic）：末尾固定 `## readiness（终局）: PASS|FAIL`；
                        历史轮/附录保留但不算当前（旧场按 epoch 豁免）
   drafts/              过程稿（owner: 各角色，按需）
-  final/               版本记账：v1.md = 索引与关键事实回溯；证据扩张 rerun 才落 v2.md（lead）——
-                       **只放版本记账，不放当前版全文**
-  final.md             当前工作稿（run 根）；交付时以 `final/vN` 为不可变版本账；[来源:] 相对 run 根解析；
+  final/               **交付副本**：交付时把 run 根 final.md 忠实复制为 v1.md；扩张 rerun 落 v2.md——
+                       vN = 交付物全文；索引/回溯放 findings 或 vN 首节
+  final.md             当前工作稿（run 根）；交付先落 `final/vN` 副本再 present；[来源:] 相对 run 根解析；
                        **不放 final/ 里**（位置漂移会让审计静默跳过——正本钉死在 run 根）
   provenance/<id>.json 来源证明（C-lite；owner: analyst/ops）：kind web|local-file|command +
                        URL/路径 + sha256 + 时间 + 通道 + 切片；与 evidence/<id>.md 同名
@@ -63,7 +63,7 @@ method-library.md      用户研究偏好库（工作区根；lead 维护；四�
 ```
 
 模板八件 ↔ run（状态头）/question/topics/plan/leads/evidence-entry（= evidence/ 单条模板）/findings/final
-（= run 根**当前版报告**模板；final/ 的 vN 记账体**无模板**，按 NODES.md 回边版本语义自构）；
+（= run 根**当前版报告**模板；final/ 的 vN 交付副本**无模板**，交付时从当前版忠实复制）；
 review.md、drafts/、journal.md 无模板——review 格式住 critic 的 adversarial-review skill，
 drafts/journal 运行时自建。plan.md 是过程件：不替代任何交付门，交付只认 final/review/decisions/
 present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat W 只读）重建任务。
@@ -103,13 +103,13 @@ present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat 
 
 ## 交付与审查终局（D28）
 
-- `review.md` 末尾固定 `## readiness（终局）: PASS|FAIL`；**只有 critic 能写**。历史轮/附录保留但
-  不夺权；lead 升级必须引用 critic 的授权行并落**新的**终局块；旧场按 epoch 豁免。
-- 交付 = `final/vN`（不可变副本）+ `deliverables/presented`（lead 顶层；`files[].path` 精确
-  `final/vN`）+ `delivered.json`/`acceptance.md` 回执。`final.md` 是工作稿，不冒充交付；新 run 的
-  present 指 `final.md` 不算。
+- `review.md` 末尾固定 `## readiness（终局）: PASS|FAIL`；**只有 critic 能写**。历史轮/附录不夺权；
+  lead 升级须引用 critic 授权并落**新的**终局块；旧场按 epoch 豁免。
+- 交付 = `final/vN`（不可变副本）+ `presented`（lead 顶层；`files[].path` 精确 `final/vN`）+
+  `delivered.json`/`acceptance.md` 回执；`final.md` 是工作稿，present 指它不算。
+- 见证只认**本 run 的 lead 顶层会话**（写过 `drt_<slug>/`）：跨 run/子 agent 不作证，present 须晚于 HITL2 答复。
 - `audit.md` / `node-gate.md` / `acceptance.md` 是 ops 派生/回执：默认只读，`--write`/`run-accept`
-  才落；观察动作不写 bundle。
+  才落；观察不写 bundle。
 
 ## 来源证明（C-lite）
 

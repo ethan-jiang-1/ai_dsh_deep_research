@@ -22,6 +22,8 @@ import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs'
 import { basename, join } from 'node:path'
 
 export const CONTRACT_DATE = '2026-09-29'
+/** run.md 的 phase 闭集（D28；模板/手册/门禁同源，防三处各写一份）。 */
+export const RUN_PHASES = ['briefing', 'research', 'synthesis', 'review', 'delivery', 'accepted', 'parked']
 
 const read = (p) => (existsSync(p) ? readFileSync(p, 'utf8') : null)
 
@@ -77,24 +79,59 @@ const CONDITIONAL = [
  * 一个 bundle 的核心 schema 断言（在场级；括号内 = NODES.md 对应节点行）。
  * 返回 { slug, core, exempt, warn, tail }：core = 违约；exempt = 编制豁免注记；warn = 记账缺失提示。
  */
-/** D28 新 run 的 bundle 卫生：绝对路径 / `../drt_` / 跨 bundle `[来源:]` 一律核心违约。
- *  旧场（无 run.md）不扫——历史只读、不追改。 */
+/** ops 生成物：记录环境事实（语料根等），不参与研究内容卫生扫描（D28 分层：回执 ≠ 研究状态）。 */
+const OPS_ARTIFACTS = new Set(['audit.md', 'node-gate.md', 'acceptance.md', 'delivered.json', 'manifest.json'])
+/** bundle 内禁止的指令文件（RFC §7：数据区不开第二指令通道）。 */
+const INSTRUCTION_FILES = new Set(['AGENTS.md', 'CLAUDE.md', 'AGENTS.local.md', 'CLAUDE.local.md'])
+/** 可执行脚本后缀（RFC §7：bundle 是数据区，不放程序）。 */
+const SCRIPT_FILE_RE = /\.(?:sh|bash|zsh|py|rb|pl|mjs|cjs|js|ts)(?:~)?$/i
+/** 绝对路径族（不只 /Users/：换机/换 home 即断源）。 */
+const ABS_PATH_RE = /(?:^|[\s(`"'\[])(?:\/(?:Users|home|tmp|private|var|Volumes|opt|mnt|media|root)\/|[A-Za-z]:\\|~\/)/
+/** D28 顶层白名单（RFC §11；新 run 只许这些条目，未登记 = 核心违约）。 */
+const TOP_LEVEL_ALLOWED = new Set([
+  'run.md', 'question.md', 'topics.md', 'plan.md', 'leads.md', 'findings.md', 'review.md', 'final.md', 'journal.md',
+  'audit.md', 'node-gate.md', 'acceptance.md', 'delivered.json', 'manifest.json',
+  'plan', 'leads', 'evidence', 'provenance', 'final', 'journal', 'drafts',
+])
+
+/**
+ * D28 新 run 的 bundle 卫生（RFC §7/§11）：绝对路径 / `../drt_` / 跨 bundle `[来源:]` /
+ * 指令文件 / 可执行脚本 / symlink / 未登记顶层条目 / leads 分片未登记 → 核心违约。
+ * ops 生成物不扫内容（它们记录语料根等环境事实，由 run-accept 写可复算形式）。
+ * 旧场（无 run.md）不扫——历史只读、不追改。
+ */
 export function hygieneOf(bundleDir) {
   const core = []
+  if (!existsSync(join(bundleDir, 'run.md'))) return core
+  const top = readdirSync(bundleDir, { withFileTypes: true })
+  const leadsText = existsSync(join(bundleDir, 'leads.md')) ? readFileSync(join(bundleDir, 'leads.md'), 'utf8') : ''
   const walk = (dir) => {
     for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      if (ent.name === '.git' || ent.name === 'node_modules') continue
       const p = join(dir, ent.name)
-      if (ent.isDirectory()) { walk(p); continue }
-      if (!ent.name.endsWith('.md')) continue
-      const text = readFileSync(p, 'utf8')
       const rel = p.slice(bundleDir.length + 1)
-      if (text.includes('/Users/')) core.push(`${rel} 含绝对路径 /Users/（D28 新 run 禁）`)
+      if (ent.isSymbolicLink()) { core.push(`${rel} 是 symlink（D28 新 run 禁：bundle 是可搬运数据）`); continue }
+      if (ent.isDirectory()) { walk(p); continue }
+      if (INSTRUCTION_FILES.has(ent.name)) { core.push(`${rel} 是指令文件（D28 新 run 禁：数据区不开第二指令通道）`); continue }
+      if (SCRIPT_FILE_RE.test(ent.name)) { core.push(`${rel} 是脚本（D28 新 run 禁：bundle 只放研究数据）`); continue }
+      if (!ent.name.endsWith('.md') || OPS_ARTIFACTS.has(ent.name)) continue
+      const text = readFileSync(p, 'utf8')
+      if (ABS_PATH_RE.test(text)) core.push(`${rel} 含绝对路径（D28 新 run 禁）`)
       if (text.includes('../drt_')) core.push(`${rel} 含跨 bundle 路径 ../drt_（D28 新 run 禁）`)
       const cross = text.split('\n').find((l) => /\[来源:[^\]]*drt_/.test(l))
       if (cross !== undefined) core.push(`${rel} 含跨 bundle [来源:]（D28 新 run 禁）`)
     }
   }
-  if (existsSync(join(bundleDir, 'run.md'))) walk(bundleDir)
+  walk(bundleDir)
+  for (const ent of top) {
+    if (!TOP_LEVEL_ALLOWED.has(ent.name)) core.push(`未登记顶层条目 ${ent.name}（D28 顶层白名单，RFC §11）`)
+  }
+  const leadsDir = join(bundleDir, 'leads')
+  if (existsSync(leadsDir)) {
+    for (const f of readdirSync(leadsDir).filter((x) => x.endsWith('.md'))) {
+      if (!leadsText.includes(`leads/${f}`) && !leadsText.includes(f)) core.push(`leads/${f} 未登记分片（RFC §11：分片必须在 leads.md 登记）`)
+    }
+  }
   return core
 }
 
@@ -129,9 +166,19 @@ export function scanBundle(bundleDir) {
   if (run !== null) {
     core.push(...hygieneOf(bundleDir))
     if (contractEpochOf(bundleDir) === '') core.push('run.md 的 contract 缺失或非法（D28）')
-    if (!/^\s*[-*]?\s*phase\s*[:：]\s*(briefing|research|synthesis|review|delivery|accepted|parked)\b/m.test(run))
-      core.push('run.md 的 phase 缺失或不在闭集（D28）')
+    const phaseMatch = /^\s*[-*]?\s*phase\s*[:：]\s*([a-z][a-z-]*)\b/m.exec(run)
+    if (phaseMatch === null || !RUN_PHASES.includes(phaseMatch[1])) core.push('run.md 的 phase 缺失或不在闭集（D28）')
     if (!/^\s*[-*]?\s*next\s*[:：]\s*\S/m.test(run)) core.push('run.md 缺 next（D28）')
+    // 交付段一致性（卡 §10 B1）：phase 声明交付/已验收 ⇒ 事实侧必须齐（版本账 + 终局块）。
+    const phase = phaseMatch?.[1]
+    if (phase === 'delivery' || phase === 'accepted') {
+      const finalDirNow = join(bundleDir, 'final')
+      const hasVersion = existsSync(finalDirNow) && readdirSync(finalDirNow).some((f) => /^v\d+\.md$/.test(f))
+      if (!hasVersion) core.push(`run.md phase=${phase} 但 final/vN 版本账缺席（D28 交付段）`)
+      if (rv === null || !/readiness[^\n]{0,40}(PASS|FAIL)/i.test(rv)) core.push(`run.md phase=${phase} 但 review.md 终局 readiness 不可解析（D28 交付段）`)
+      const deliveredValue = /^\s*[-*]?\s*delivered\s*[:：]\s*(.+)$/m.exec(run)?.[1]?.trim() ?? ''
+      if (phase === 'accepted' && (deliveredValue === '' || /^none$/i.test(deliveredValue))) core.push('run.md phase=accepted 但 delivered 仍为 none（D28）')
+    }
   }
   const evDir = join(bundleDir, 'evidence')
   if (!existsSync(evDir)) core.push('evidence/ 缺席（节点4）')

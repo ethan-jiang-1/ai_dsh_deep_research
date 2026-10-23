@@ -569,3 +569,10 @@ test('门A升级路径：readiness FAIL + 未决项升级记账 + HITL2 拍板�
   assert.notEqual(g.status, 'RED', '按既定处置（未决项升级到用户裁决）走的交付不该被判越过前置');
   assert.doesNotMatch(String(g.detail), /越过审查前置/);
 });
+
+// ── 门④ × D28：新 run 的 final/vN 是**不可变交付副本**，跨版本登记不再写进 v1（写进去 = 交付后
+// 改交付物）。跨版本事实住 question.md §Decisions；v1 索引判据只对旧 epoch 保留。──
+test('门④ D28：新 run 的 v1 是忠实副本（未登记 v2）→ 不因缺索引红；§Decisions 登记即 PASS', () => {
+  const g = V('fixture-version-fresh-copy', '2026-10-24')
+  assert.equal(g.status, 'PASS', JSON.stringify(g.detail))
+})

@@ -10,13 +10,13 @@
 //       预检用 --no-write（默认只读）；绿后本工具显式给两个门 --write 落盘，再写 delivered.json/manifest.json/acceptance.md。
 // 退出码：0 = 验收绿（已写 acceptance.md）；1 = 验收红；2 = 用法/前置。
 import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
-import { createHash } from 'node:crypto'
 import { basename, dirname, join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { futureDateFindings } from '../lib/bundle-date-sanity.mjs'
 import { presentedInLogs } from '../lib/node-gate-session-gates.mjs'
 import { contractEpochOf } from '../lib/schema-scan-core.mjs'
+import { buildDelivered, buildManifest, corpusRootLabel, renderAcceptance, shouldWriteReceipts } from '../lib/run-receipt.mjs'
 import { readZstdText } from '../lib/zstd-read.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -59,10 +59,6 @@ const run = (label, script, args) => {
 
 console.log(`run-accept: ${slug}`)
 
-const sha256File = (path) => {
-  if (!existsSync(path)) return null
-  return createHash('sha256').update(readFileSync(path)).digest('hex')
-}
 const readLog = (p) => {
   if (!p.endsWith('.zstd')) {
     try { return readFileSync(p, 'utf8') } catch { return '' }
@@ -101,76 +97,47 @@ if (!green) {
   process.exit(1)
 }
 
+const stamp = new Date().toISOString()
+// 回执的语料根写可复算标签（$DSH_HOME 相对形式），绝对路径只留控制台——回执不得自带换机即断的路径，
+// 也不得踩 D28 卫生门（acceptance.md 是 ops 生成物，但内容仍要干净）。
+const corpusRoot = corpusRootLabel(sessions, { home })
+const legacy = !shouldWriteReceipts(bundle)
 const finalDir = join(bundle, 'final')
 const versions = existsSync(finalDir)
   ? readdirSync(finalDir).filter((f) => /^v\d+\.md$/.test(f)).map((f) => Number(/^v(\d+)/.exec(f)[1])).sort((a, b) => a - b)
   : []
 const finalVersion = versions.at(-1) ?? null
-const finalPath = finalVersion === null ? null : join(finalDir, `v${finalVersion}.md`)
-const presented = presentedInLogs(sessions, slug, readLog)
-const present = presented.status === 'FOUND'
-  ? (presented.events.find((e) => e.version !== null) ?? presented.events[0] ?? null)
-  : null
-const stamp = new Date().toISOString()
-const delivered = {
-  version: 1,
+const presented = presentedInLogs(sessions, slug, readLog, { contract: contractEpochOf(bundle) || null })
+let delivered = null
+if (legacy) {
+  console.log('  note 旧契约 bundle（无 run.md）：只写 acceptance.md，不补 delivered.json/manifest.json（D28 epoch 豁免）')
+} else {
+  delivered = buildDelivered({
+    slug,
+    bundleDir: bundle,
+    corpusRoot,
+    acceptedAt: stamp,
+    presented: presented.status === 'FOUND' ? presented.events : [],
+  })
+  writeFileSync(join(bundle, 'delivered.json'), JSON.stringify(delivered, null, 2) + '\n')
+  console.log(`  PASS delivered.json 已写（final ${delivered.final.version === null ? '—' : `v${delivered.final.version}`} / present ${delivered.present?.path ?? '—'}）：${join(bundle, 'delivered.json')}`)
+  const manifest = buildManifest({ slug, bundleDir: bundle, contract: contractEpochOf(bundle) ?? null, generatedAt: stamp })
+  writeFileSync(join(bundle, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
+  console.log(`  PASS manifest.json 已写（${manifest.files.length} 条文件角色/哈希）：${join(bundle, 'manifest.json')}`)
+}
+
+const acceptance = renderAcceptance({
   slug,
-  acceptedAt: stamp,
-  sessions,
-  gate: { status: 'PASS', exit: 0 },
-  audit: { critical: critical === null ? null : Number(critical), sha256: sha256File(auditPath) },
-  final: { version: finalVersion, sha256: finalPath === null ? null : sha256File(finalPath) },
-  present: present === null ? null : { path: present.path, callId: present.callId ?? null, version: present.version ?? null },
-}
-writeFileSync(join(bundle, 'delivered.json'), JSON.stringify(delivered, null, 2) + '\n')
-console.log(`  PASS delivered.json 已写：${join(bundle, 'delivered.json')}`)
-
-const roleOf = {
-  'run.md': 'state-head', 'question.md': 'direction-contract', 'topics.md': 'topics',
-  'plan.md': 'execution-graph', 'leads.md': 'leads-index', 'findings.md': 'findings',
-  'review.md': 'review', 'final.md': 'current-final', 'journal.md': 'journal',
-  'audit.md': 'audit-snapshot', 'node-gate.md': 'gate-snapshot',
-  'acceptance.md': 'acceptance-receipt', 'delivered.json': 'delivery-receipt',
-}
-const manifestFiles = []
-for (const ent of readdirSync(bundle, { withFileTypes: true })) {
-  if (!ent.isFile() || ent.name === 'manifest.json') continue
-  manifestFiles.push({ path: ent.name, role: roleOf[ent.name] ?? 'unknown', sha256: sha256File(join(bundle, ent.name)) })
-}
-const versionFiles = existsSync(finalDir) ? readdirSync(finalDir).filter((f) => /^v\d+\.md$/.test(f)).sort() : []
-for (const f of versionFiles) {
-  manifestFiles.push({ path: `final/${f}`, role: 'version-ledger', sha256: sha256File(join(finalDir, f)) })
-}
-const manifest = {
-  version: 1,
-  slug,
-  contract: contractEpochOf(bundle) ?? null,
-  generatedAt: stamp,
-  readOrder: ['run.md', 'question.md', 'topics.md', 'plan.md', 'journal.md（顶部 3–5 条）', 'findings.md', 'final.md', 'review.md', 'evidence/ + provenance/（按需）', 'delivered.json', 'manifest.json'],
-  files: manifestFiles,
-  counts: {
-    evidence: existsSync(join(bundle, 'evidence')) ? readdirSync(join(bundle, 'evidence')).filter((f) => f.endsWith('.md')).length : 0,
-    provenance: existsSync(join(bundle, 'provenance')) ? readdirSync(join(bundle, 'provenance')).filter((f) => f.endsWith('.json')).length : 0,
-  },
-}
-writeFileSync(join(bundle, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
-console.log(`  PASS manifest.json 已写：${join(bundle, 'manifest.json')}`)
-
-const acceptance = `# Acceptance — ${slug}（${stamp}）
-
-> 由 scripts/run-ops/run-accept.mjs 生成（操作侧验收回执；不是研究内容）。
-> 预检（--no-write）先过，才落盘 node-gate/audit 并写本回执；红跑不写 bundle。
-
-| 检查 | 结果 |
-|---|---|
-| node-gate | PASS（exit 0） |
-| evidence-audit | PASS（exit 0；audit.md 在场，CRITICAL ${critical ?? '—'}） |
-| 日期 sanity | PASS（零未来日期） |
-| 回执 | delivered.json（final ${finalVersion === null ? '—' : `v${finalVersion}`} / present ${present === null ? '—' : present.path}） |\n| 清单 | manifest.json（文件角色/读序/契约/哈希） |
-| 会话语料根 | \`${sessions}\` |
-`
+  stamp,
+  critical,
+  finalVersion,
+  present: delivered?.present ?? null,
+  corpusRoot,
+  legacy,
+})
 writeFileSync(join(bundle, 'acceptance.md'), acceptance)
-console.log(`  PASS acceptance.md 已写：${join(bundle, 'acceptance.md')}`)
+console.log(`  PASS acceptance.md 已写：${join(bundle, 'acceptance.md')}（语料根标签 ${corpusRoot}；绝对根 ${sessions}）`)
+if (presented.status !== 'FOUND') console.log(`  note present 见证未取到：${presented.detail}（回执 present 记 null，不猜）`)
 
 if (flag('--archive')) {
   const archiveRoot = join(wsRoot, 'archive')

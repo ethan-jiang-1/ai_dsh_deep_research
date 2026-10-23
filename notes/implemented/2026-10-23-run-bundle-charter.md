@@ -117,12 +117,15 @@ NODES.md 与角色 skills）。
   `present` 只认 lead 且只指向不可变快照（`final/vN` 或哈希），不指当前工作稿；bundle 文本永不
   作批准证据；无日志 = UNATTESTED，不是 PASS。
 - **不承诺 bundle 自证批准/交付**；用户批准是外部行为，bundle 只能携带回执与指针。
-- **实现面（2026-10-23 复核补充，读事件不读文本）**：门② 读 `deliverables/presented` 的
-  `files[].path`（精确相对路径）与 `callId`，不扫任意日志 payload；present 指向 `final/vN`
-  （不可变快照）才作数，指向 `final.md` 而版本账 >1 → UNATTESTED；门③ 读
-  `user-question-reply` 的 `callId` / `outcome` 与选定标签，§Decisions 行只作回执镜像；
-  前缀 slug、单行文本、失败调用都不算。事件字段正本 = vendor `deliverables` 与
-  `user-questions` 包 README。
+- **实现面（2026-10-23 落地 + 复核修订）**：门② 读 `deliverables/presented` 的
+  `files[].path`（精确相对路径）与 `callId`；present 指向在场的 `final/vN`（不可变快照）才
+  作数，指 `final.md` → **RED**（有事件但对不上 = 红；无语料才是 UNATTESTED）；门③ 读
+  `user-question-reply` 的 `callId` / `outcome` 与选定标签，§Decisions 行只作回执镜像。
+  **见证必须归属本 run**：只认**绑定本 bundle 的 lead 顶层会话**（写过 `drt_<slug>/`）——
+  跨 run / 子 agent 会话不作证；事件日期早于 `contract` 纪元不计（同名 slug 重开不继承旧见证）；
+  present 时间早于 HITL2 答复 → RED（事件链顺序）。`delivered.json` 的 final/audit sha256 由
+  门A 复算——交付后被改即红（回执不是自证，是校验点）。前缀 slug、单行文本、失败调用都不算。
+  事件字段正本 = vendor `deliverables` 与 `user-questions` 包 README。
 
 ### 7. 写入与并发（I7）
 
@@ -130,8 +133,9 @@ NODES.md 与角色 skills）。
   （final/vN、plan/vN）；
 - 并发：一个写作用域一个写者；并行写必须分片并在 owner 文件登记；journal 条目必须块级完整；
 - **bundle 内禁止**：`AGENTS.md`/`CLAUDE.md`/local 变体等指令文件（含 symlink 目标）；可执行脚本；
-  symlink；绝对路径；`file://` 本地源作 `source_url`；把别的 bundle 的路径当证据。指令禁止是
-  机械的：bundle 内容是不可信数据，handoff 前扫描；
+  symlink；绝对路径（`/Users/`、`/home/`、`/tmp/`、盘符、`~/` 族）；`file://` 本地源作
+  `source_url`；把别的 bundle 的路径当证据。机械面 = `schema-scan.hygieneOf`（新 run 才扫）：
+  指令文件/脚本/symlink/绝对路径族/未登记顶层条目/`leads/` 分片未登记 → 核心违约；
 - **观察只读**：状态探针、驾驶舱、门禁检查不得写 bundle；只有显式 ops 动作可写
   `acceptance.md`/`audit.md`/`node-gate.md`，并在回执里标明；`node-gate` 每次运行都写盘 = 违约；
 - `drafts/` 是无主草稿区，不得承载恢复必需的状态；协调状态住状态头/journal/plan；
@@ -191,7 +195,9 @@ NODES.md 与角色 skills）。
   驾驶舱与 `run-dashboard` 都从内容判态（现状：dashboard 只扫根+archive，不认 `_abandoned`）。
 - **R2 状态头 + 契约戳**：模板与新建 run 落 `run.md`（或 question frontmatter）；门禁读 epoch；
   **删除 mtime 断代**；复制/移动不改语义；旧 bundle 无状态头 → 走 frozen 旧规则，不追溯判红。
-- **R3 交付回执 + readiness 单一当前判定**：`run-accept` 写 `acceptance.md`；`review.md` 要求
+- **R3 交付回执 + readiness 单一当前判定**：`run-accept` 写 `acceptance.md`（+ 新契约的
+  `delivered.json`/`manifest.json`）；门②/③ 见证绑定本 run（写过 `drt_<slug>/` 的 lead 顶层会话）
+  + 契约纪元 + 事件链顺序；`review.md` 要求
   单一终局判定（修 `terminalVerdictLine` 对文末附录/历史轮的误判）；状态头镜像；门②/门A 交叉核验；
   门禁/审计默认只读，`--write` 或 `run-accept` 才落 `node-gate.md`/`audit.md`（避免观察污染 bundle）；
   门②/门③ **精确 slug + 事件链**（前缀匹配、单行文本判 PASS = 红）；空语料/丢失 → **UNATTESTED**；
@@ -241,7 +247,9 @@ drt_<slug>/
 - 目录按**产物类型 + 生命周期**，不按步骤；步骤在 `plan.md`/`journal.md` 里，不进文件系统；
 - `run.md` 是状态唯一家；`manifest.json` 是生成物、不是指令、不承担权威；`delivered.json` 是回执聚合；
 - `provenance/<id>.json` 与 `evidence/<id>.md` 同名，保证一条证据可离线复核；
-- `leads/` 分片必须在 `leads.md` 登记；未登记顶层文件 = RED；
+- `final/v<N>.md` 是**交付时从当前版忠实复制**的不可变副本（不是活索引；跨版本事实住
+  §Decisions，门④ 对新 run 不再要求 v1 登记 vN）；
+- `leads/` 分片必须在 `leads.md` 登记；未登记顶层文件 = RED（机械面 = hygieneOf 顶层白名单）；
 - `audit.md` / `node-gate.md` / `acceptance.md` 是 ops 快照/回执，默认只读，`--write` 才落盘；
 - 旧 bundle 无 `run.md`/`provenance`/`manifest`/`delivered`：走 §8 状态推导表与 epoch 豁免，不补文件、
   不追溯改写；显式重开时可加 `run.md` 记录当前态，不改历史。
@@ -366,6 +374,14 @@ manifest 时机）= 锚点卡 [§7.2](../../_backlog/_archived/settled_issues/20
 - **P8 收口**：手册后 4 样本 post **4/4**（subagent；正式 lead 会话两次因通道 max-tokens 在 5 个
   工具调用后结束、无 assistant 文本 → 记 UNATTESTED，不冒充 lead PASS）；`client-load-smoke` ALL PASS；
   `snapshot-replay-smoke` 4 场景 ALL PASS；RFC 毕业、锚点卡归档。
+- **2026-10-23 复核轮（D28 落地缺口收口）**：门③ 曾接受**别的 run 的** HITL2 答复（真实语料复现：
+  全新 bundle 借 2026-10 旧答复 PASS）；`delivered.json` 无消费者；run-accept 回执写绝对语料根
+  与 hygiene 门互斥；手册 `final/` 行与 `final/vN` 交付语义互斥。修复 + 反证测试：
+  `tests/run/node-gate-witness.test.mjs` 13 例（跨 run/未绑定/epoch/顺序）、
+  `tests/run/run-receipt.test.mjs` 7 例（回执无绝对路径/哈希/最新 present）、
+  `tests/run/schema-scan.test.mjs` 18 例（绝对路径族/指令文件/脚本/symlink/顶层白名单/分片登记/
+  delivery 相位）；`tests/run/node-gate.test.mjs` 增门④ D28 例。`pnpm verify` 全绿、`pnpm test`
+  697 pass、`gates-smoke` 77 例全绿。
 - **未跑**：L2 安装验收（本轮不是发布轮）。正式 lead 盲测的仪器缺口保留在锚点卡 §16。
 
 
@@ -378,6 +394,7 @@ manifest 时机）= 锚点卡 [§7.2](../../_backlog/_archived/settled_issues/20
    2026-10-23 用户拍板。
 2. **状态头载体（已定 `run.md`）**：单一职责；`question.md` frontmatter 作为备选不再采用。
 3. **契约纪元格式**：日期（`contract: 2026-10-23`）还是 `pack@x + date`；后者更精确，前者更便宜。
+   现状 = 日期（`contractEpochOf` 只解析 `YYYY-MM-DD`）。
 4. **readiness 终局形态**：单一终局行/块；旧 review 的 5 种形态如何 grandfather。
 5. **archive 是否仍需要**：若位置只是桶，归档可以退化为可选操作；保留与否是运维选择，不是状态。
 6. **UNATTESTED 的门禁语义**：三态如何呈现（CLI/驾驶舱/交付门），哪些场景必须人工裁决。

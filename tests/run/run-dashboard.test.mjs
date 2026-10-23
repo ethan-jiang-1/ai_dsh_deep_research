@@ -297,3 +297,20 @@ test('D28 桶标签：archive 是归档桶、_abandoned 是停放桶，都不当
   assert.equal(isParkedScene({ label: 'drt·停放' }), true);
   assert.equal(isParkedScene({ label: 'drt' }), false);
 });
+
+test('D28 总表：_abandoned/ 作为停放场被 listScenes 列出（不再从总表消失）', () => {
+  const root = mktmp();
+  try {
+    const rw = join(root, 'rw');
+    const ab = join(root, '_abandoned');
+    mkdirSync(join(rw, 'drt_a'), { recursive: true });
+    mkdirSync(join(ab, 'drt_p'), { recursive: true });
+    const scenes = listScenes([
+      { dir: rw, kind: 'drt', label: 'drt' },
+      { dir: ab, kind: 'drt', label: 'drt·停放' },
+    ]);
+    assert.deepEqual(scenes.map((s) => s.slug).sort(), ['drt_a', 'drt_p']);
+    assert.equal(isParkedScene(scenes.find((s) => s.slug === 'drt_p')), true);
+    assert.equal(isArchivedScene(scenes.find((s) => s.slug === 'drt_p')), false);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});

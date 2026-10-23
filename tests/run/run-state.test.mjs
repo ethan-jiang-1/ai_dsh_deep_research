@@ -371,3 +371,23 @@ test('runStateOf：D28 绑定 bundle 在 archive/ 时 final 仍可判、runSettl
     assert.equal(s.runSettled, true);
   } finally { rmSync(tmp, { recursive: true, force: true }) }
 });
+
+test('runStateOf：D28 绑定 bundle 在 _abandoned/ 时 final 仍可判、bundleLocation=abandoned', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'run-state-abandoned-'));
+  try {
+    mkdirSync(join(tmp, '_abandoned', 'drt_p'), { recursive: true });
+    writeFileSync(join(tmp, '_abandoned', 'drt_p', 'final.md'), '# 停放但已有终稿');
+    const log = join(tmp, 's.jsonl');
+    writeFileSync(log, [
+      { type: 'session', id: 's', agentPreset: 'lead' },
+      { type: 'tool/call', data: { name: 'write', arguments: JSON.stringify({ path: 'drt_p/question.md' }) } },
+      { type: 'turn/start' },
+      { type: 'turn/end' },
+    ].map((e) => JSON.stringify(e)).join('\n') + '\n');
+    const s = runStateOf({ logPath: log, wsRoot: tmp });
+    assert.equal(s.activeBundle, 'drt_p');
+    assert.equal(s.bundleLocation, 'abandoned');
+    assert.equal(s.finalWritten, true);
+    assert.equal(s.runSettled, true);
+  } finally { rmSync(tmp, { recursive: true, force: true }) }
+});

@@ -44,5 +44,6 @@
 - [run-bundle-charter/2026-10-23-p7-blind-baseline.md](run-bundle-charter/2026-10-23-p7-blind-baseline.md) — P7 盲测 baseline：4 样本在手册改动前 4/4 命中 ground truth；记录 lead 通道 max-tokens 偏差与 P8 的验收调整依据（同一消费者：已结宪章卡 + implemented RFC）。
 - [run-bundle-charter/2026-10-23-p7-manual-batch.md](run-bundle-charter/2026-10-23-p7-manual-batch.md) — P7 手册文本批：D28 读序/交付终局/来源证明、行预算升顶、四角色快照重录与 snapshot/preset 验收（同一消费者：已结宪章卡 + implemented RFC）。
 - [run-bundle-charter/2026-10-23-p8-final.md](run-bundle-charter/2026-10-23-p8-final.md) — P8 盲续跑收口：手册后 4/4、非回归矩阵、P6 延后、RFC 毕业与卡归档（同一消费者：已结宪章卡 + implemented RFC）。
+- [d28-witness-binding/2026-10-23-p0-witness-receipts.md](d28-witness-binding/2026-10-23-p0-witness-receipts.md) — D28 落地缺口 P0：门③跨 run 污染的复现、见证绑定/契约纪元/事件链顺序、回执生成与哈希校验、卫生族与红先测试清单（消费者：[D28 缺口收口卡](../issues/2026-10-23-d28-witness-binding-and-receipts.md)）。
 
 （2026-10-18 方法配置两份材料已随消费者毕业迁入 [_archived/research/](../_archived/research/)：外部先例与真模型 A/B。）

@@ -1,7 +1,7 @@
 // node-gate-run-gates.mjs — bundle artifact and research-history gates (keyless pure logic).
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { deliveryDate, runType } from './schema-scan-core.mjs'
+import { contractEpochOf, deliveryDate, runType } from './schema-scan-core.mjs'
 import { HEADING_CONTRACT_DATE, LEADS_CONTRACT_DATE, PRE_CONTRACT_NOTE, VERSION_CONTRACT_DATE, decisionsLines, isPreContract } from './node-gate-contracts.mjs'
 
 /**
@@ -156,6 +156,7 @@ export function leadsGate(bundleDir, leadsDate) {
  */
 export function versionGate(bundleDir, versionDate) {
   const finalDir = join(bundleDir, 'final')
+  const newContract = contractEpochOf(bundleDir) !== null
   if (!existsSync(finalDir)) {
     return { status: 'N/A', detail: 'final/ 不在场——门④ 无对象（bundle 未到版本记账段）' }
   }
@@ -173,12 +174,14 @@ export function versionGate(bundleDir, versionDate) {
   const qText = existsSync(qPath) ? readFileSync(qPath, 'utf8') : null
   const dec = qText ? decisionsLines(qText) : []
   const idxPath = join(finalDir, 'v1.md')
-  const idxText = existsSync(idxPath) ? readFileSync(idxPath, 'utf8') : null
+  // D28：新 run 的 v{N} 是**不可变交付副本**——跨版本登记写进 v1 等于交付后改交付物。跨版本事实
+  // 住 question.md §Decisions（下面的 vN 行判据）；「v1 当活索引」只对旧 epoch 保留。
+  const idxText = newContract ? null : (existsSync(idxPath) ? readFileSync(idxPath, 'utf8') : null)
   const problems = []
   if (!qText) {
     problems.push('question.md 缺席——版本记账无法核对（方向契约文件失踪，fail-loud）')
   }
-  if (idxText === null) {
+  if (idxText === null && !newContract) {
     problems.push('final/v1.md 版本索引缺席而扩张版本在场（修正 = 按 templates/run/final 补版本索引，手册 final/ 节契约）')
   }
   for (const n of versions) {

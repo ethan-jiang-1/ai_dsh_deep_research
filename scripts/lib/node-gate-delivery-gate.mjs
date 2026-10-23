@@ -4,6 +4,7 @@ import { basename, join } from 'node:path'
 import { runType } from './schema-scan-core.mjs'
 import { AUDIT_CONTRACT_DATE, isPreContract, readinessOf, auditCriticalCount } from './node-gate-contracts.mjs'
 import { isHitl2Row } from './node-gate-session-gates.mjs'
+import { receiptProblems } from './run-receipt.mjs'
 
 /**
  * 门A（交付完整性门，可导入；keyless；RFC 2026-10-07-delivery-criteria-mechanization）。
@@ -82,6 +83,11 @@ export function deliveryGate(bundleDir, auditDate) {
         }
       }
     }
+  }
+  // 回执消费（D28 / 卡 §10 B2）：delivered.json 的 final/audit 哈希必须与盘上一致——交付后被改
+  // 或回执损坏 → 红。旧场无 run.md 不查（不补回执、不追溯）；回执缺席不拦（未验收 ≠ 退回）。
+  if (existsSync(join(bundleDir, 'run.md'))) {
+    for (const issue of receiptProblems(bundleDir).problems) problems.push(`回执不一致：${issue}`)
   }
   const pre = isPreContract(bundleDir, auditDate, AUDIT_CONTRACT_DATE)
   if (problems.length === 0) {
