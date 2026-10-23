@@ -17,6 +17,7 @@ import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { sessionBindingOf } from '../../packages/deep-research-pack/src/lib/bundle-bind.ts'
+import { bundleCandidates } from '../../packages/deep-research-pack/src/lib/run-context.ts'
 import { readSessionEvents } from './session-log.mjs'
 
 export { readSessionEvents }
@@ -100,8 +101,8 @@ export function bundleStateOf(wsRoot) {
  */
 export function bundleDirOf(wsRoot, bundleName) {
   if (!wsRoot || !bundleName) return null
-  for (const base of [wsRoot, join(wsRoot, 'archive'), join(wsRoot, '_abandoned')]) {
-    const p = join(base, bundleName)
+  for (const rel of bundleCandidates(bundleName)) {
+    const p = join(wsRoot, rel)
     if (existsSync(p)) return p
   }
   return null

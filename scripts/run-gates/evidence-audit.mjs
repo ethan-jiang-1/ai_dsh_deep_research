@@ -27,10 +27,12 @@
 // CLI 可解全帧）注入。
 // 用法：node scripts/run-gates/evidence-audit.mjs <run-bundle-dir> [--sessions <会话根>] [--write]（缺省 $DSH_HOME/sessions）
 //       node scripts/run-gates/evidence-audit.mjs --latest [--write]（取 research-workspace 最新 drt_*——根 / archive/ / _abandoned/ 三桶并扫）
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { listRuns } from '../../packages/deep-research-pack/src/lib/run-context.ts'
 import { auditBundle } from '../lib/evidence-audit-core.mjs'
+import { nodeRunSource } from '../lib/run-source-node.mjs'
 import { readZstdText } from '../lib/zstd-read.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -72,23 +74,15 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
   let bundleDir = null
   if (latest) {
     // D28：根 / archive/ / _abandoned/ 都是操作桶，--latest 三处并扫取 mtime 最新；
-    // 同名时根优先（只作发现，不把位置当状态）。三处全空 → 走用法红（防空语料）。
+    // 同名时根优先（只作发现，不把位置当状态）。枚举规则归 run-context。
     const ws = join(ROOT, 'research-workspace')
-    const cands = []
-    const seen = new Set()
-    for (const dir of [ws, join(ws, 'archive'), join(ws, '_abandoned')]) {
-      if (!existsSync(dir)) continue
-      for (const d of readdirSync(dir)) {
-        if (!/^drt_/.test(d) || seen.has(d)) continue
-        let st = null
-        try { st = statSync(join(dir, d)) } catch { continue }
-        if (!st.isDirectory()) continue
-        seen.add(d)
-        cands.push({ p: join(dir, d), m: st.mtimeMs })
-      }
+    const runs = await listRuns(nodeRunSource(ws), { buckets: ['root', 'archive', 'abandoned'] })
+    if (!runs.ok) {
+      console.error(`evidence-audit: 无法枚举 run bundle（${runs.reason}${runs.detail === undefined ? '' : `：${runs.detail}`}）`)
+      process.exit(2)
     }
-    cands.sort((a, b) => b.m - a.m)
-    bundleDir = cands.length > 0 ? cands[0].p : null
+    const newest = runs.value[0]
+    bundleDir = newest === undefined ? null : join(ws, newest.dir)
   } else if (bundleArg) bundleDir = resolve(bundleArg)
   if (bundleDir === null || !existsSync(bundleDir)) {
     console.error('evidence-audit: 用法 node scripts/run-gates/evidence-audit.mjs <run-bundle-dir> | --latest（bundle 不存在）')

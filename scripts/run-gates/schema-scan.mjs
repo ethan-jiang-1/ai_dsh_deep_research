@@ -7,10 +7,12 @@
 // （scripts/AGENTS.md 范围纪律：pre-commit 不得被 run 产物拦红）。
 // keyless 纯 fs。
 // 用法：node scripts/run-gates/schema-scan.mjs [bundle-dir …]（缺省 = research-workspace/archive/drt_* 全量）
-import { readdirSync, existsSync, statSync } from 'node:fs'
+import { existsSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { listRuns } from '../../packages/deep-research-pack/src/lib/run-context.ts'
 import { scanAll } from '../lib/schema-scan-core.mjs'
+import { nodeRunSource } from '../lib/run-source-node.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -27,10 +29,14 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
       process.exit(2)
     }
   } else {
-    dirs = readdirSync(archive)
-      .filter((d) => /^drt_/.test(d) && statSync(join(archive, d)).isDirectory())
-      .map((d) => join(archive, d))
-      .sort()
+    // 缺省只扫 archive（交付件的最终停靠处）；要扫在飞/停放请显式点名。范围是显式参数。
+    const ws = join(ROOT, 'research-workspace')
+    const runs = await listRuns(nodeRunSource(ws), { buckets: ['archive'] })
+    if (!runs.ok) {
+      console.error(`schema-scan: 无法枚举 archive run（${runs.reason}${runs.detail === undefined ? '' : `：${runs.detail}`}）`)
+      process.exit(2)
+    }
+    dirs = runs.value.map((run) => join(ws, run.dir)).sort()
   }
   if (dirs.length === 0) {
     console.error('schema-scan: 无扫描对象（默认扫 research-workspace/archive/drt_*；或点名 bundle 目录）')

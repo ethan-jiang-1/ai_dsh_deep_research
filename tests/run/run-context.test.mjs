@@ -6,7 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts';
-import { openRun, listRuns } from '../../packages/deep-research-pack/src/lib/run-context.ts';
+import { bundleCandidates, openRun, listRuns, readPolicyOf } from '../../packages/deep-research-pack/src/lib/run-context.ts';
 
 const OUT = (value) => ({ ok: true, value });
 const MISSING = { ok: false, reason: 'missing' };
@@ -292,4 +292,15 @@ test('version：按 view 基址解析，委托 source.version', async () => {
   assert.equal(v.ok, true);
   assert.equal(v.value, 'v-test');
   assert.deepEqual(source.calls.at(-1), ['version', 'archive/drt_a/final.md']);
+});
+
+test('bundleCandidates / readPolicyOf：候选顺序与读策略表是纯函数', () => {
+  assert.deepEqual(bundleCandidates('drt_x'), ['drt_x', 'archive/drt_x', '_abandoned/drt_x']);
+  assert.deepEqual(bundleCandidates('archive/drt_x/final.md'), ['archive/drt_x', 'drt_x', '_abandoned/drt_x']);
+  assert.deepEqual(bundleCandidates('../evil'), []);
+  assert.equal(readPolicyOf('review.md'), 'eof');
+  assert.equal(readPolicyOf('final/v3.md'), 'eof');
+  assert.equal(readPolicyOf('plan.md'), 800);
+  assert.equal(readPolicyOf('question.md'), 80);
+  assert.equal(readPolicyOf('evidence/e.md'), 40);
 });

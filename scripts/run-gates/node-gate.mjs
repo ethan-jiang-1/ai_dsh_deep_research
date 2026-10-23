@@ -36,10 +36,12 @@
 // .jsonl 夹具直调（fixtures/node-gate/，先红后绿的永久反证记录）。
 // 用法：node scripts/run-gates/node-gate.mjs <run-bundle-dir> [--sessions <会话根>] [--write]
 //       node scripts/run-gates/node-gate.mjs --latest
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { listRuns } from '../../packages/deep-research-pack/src/lib/run-context.ts'
 import { gateBundle } from '../lib/node-gate-core.mjs'
+import { nodeRunSource } from '../lib/run-source-node.mjs'
 import { readZstdText } from '../lib/zstd-read.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -76,22 +78,16 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
   const bundleArg = argv.find((a) => !a.startsWith('--') && a !== sessionsRoot)
   let bundleDir = null
   if (latest) {
+    // 自动审计只在根 + archive 里选最新；_abandoned 是停放桶，要审请显式点名 bundle。
+    // 范围是显式参数（不再各写一份目录循环）；枚举规则归 run-context。
     const ws = join(ROOT, 'research-workspace')
-    const cands = []
-    const seen = new Set()
-    for (const dir of [ws, join(ws, 'archive')]) {
-      if (!existsSync(dir)) continue
-      for (const d of readdirSync(dir)) {
-        if (!/^drt_/.test(d) || seen.has(d)) continue
-        let st = null
-        try { st = statSync(join(dir, d)) } catch { continue }
-        if (!st.isDirectory()) continue
-        seen.add(d)
-        cands.push({ p: join(dir, d), m: st.mtimeMs })
-      }
+    const runs = await listRuns(nodeRunSource(ws), { buckets: ['root', 'archive'] })
+    if (!runs.ok) {
+      console.error(`node-gate: 无法枚举 run bundle（${runs.reason}${runs.detail === undefined ? '' : `：${runs.detail}`}）`)
+      process.exit(2)
     }
-    cands.sort((a, b) => b.m - a.m)
-    bundleDir = cands.length > 0 ? cands[0].p : null
+    const newest = runs.value[0]
+    bundleDir = newest === undefined ? null : join(ws, newest.dir)
   } else if (bundleArg) bundleDir = resolve(bundleArg)
   if (bundleDir === null || !existsSync(bundleDir)) {
     console.error('node-gate: 用法 node scripts/run-gates/node-gate.mjs <run-bundle-dir> | --latest（bundle 不存在）')

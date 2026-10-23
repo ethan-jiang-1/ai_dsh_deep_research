@@ -140,6 +140,21 @@ function bundleDir(bucket: Bucket, slug: string): string {
 }
 
 /**
+ * 一个 ref 的三位置候选目录（纯函数；同步消费者用：run-state 的盘侧定位）。
+ * 显式桶路径先给该桶，再回退其余桶；非法 ref → 空数组。
+ * @param ref - `drt_x` / `x` / `archive/drt_x` / `archive/drt_x/final.md` 等写法。
+ * @returns 候选相对目录（按发现序）。
+ */
+export function bundleCandidates(ref: string): readonly string[] {
+  const parsed = parseRef(ref)
+  if (parsed === null) return []
+  const order: readonly Bucket[] = parsed.preferred === undefined
+    ? BUCKETS
+    : [parsed.preferred, ...BUCKETS.filter((bucket) => bucket !== parsed.preferred)]
+  return order.map((bucket) => bundleDir(bucket, parsed.slug))
+}
+
+/**
  * 打开一个 run bundle：按根 → archive → _abandoned 找第一个存在的目录。
  * 显式桶路径（archive/… / _abandoned/…）先查该桶，再回退其余桶（present 记录的旧位置）。
  * 空目录是合法 run（不让位给 archive 同名副本）；三处皆无 → missing；有 unreadable 且无命中 → unreadable。
