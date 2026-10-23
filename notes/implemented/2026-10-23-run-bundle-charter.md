@@ -140,7 +140,8 @@ NODES.md 与角色 skills）。
   `acceptance.md`/`audit.md`/`node-gate.md`，并在回执里标明；`node-gate` 每次运行都写盘 = 违约；
 - `drafts/` 是无主草稿区，不得承载恢复必需的状态；协调状态住状态头/journal/plan；
 - **分片与白名单**：journal 分片（`journal/<role>.md`）或单写者追加协议；leads 目录 + 索引
-  （或禁分片）；drafts 有 canonical 指针；未登记顶层文件 = RED；
+  （**已机械**：未登记分片/未登记顶层条目 = RED）；drafts 的 canonical 指针 = **P6 延后未实施**
+  （当前靠状态头/journal 协调，不冒充已把守）；
 - 共享可变库：append-only/版本化；run 记录本次读到的条目与摘要；库的变化不改变已交付 run 的
   可解释性。
 
