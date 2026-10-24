@@ -74,19 +74,40 @@ export interface FinalReadPlan {
   readonly versions: string
 }
 
-/** 读面定表的三件文件名（finalReadPlan 与页签共用，避免两处硬编码）。 */
+/** 读面定表的文件名（finalReadPlan 与页签共用，避免两处硬编码）。 */
 export const FINAL_NAME = 'final.md'
 export const FINAL_REVIEW_NAME = 'review.md'
 export const FINAL_LEDGER_DIR = 'final'
+/** 读者版工作件（HITL2 前）与同版交付件（`readable-vN.md`；N 与 final/vN 同号）。 */
+export const FINAL_READER_NAME = 'readable.md'
+export const FINAL_READABLE_VERSION_RE = /^readable-v[1-9]\d{0,5}\.md$/
+export const FINAL_VERSION_RE = /^v[1-9]\d{0,5}\.md$/
 
-/** run bundle 终稿的规范相对路径（三位置；`drt_` 后允许字母数字下划线与 .-）。 */
-const FINAL_RELATIVE = /^(?:archive\/|_abandoned\/)?drt_[\w.-]+\/final\.md$/
-/** 从任意书写形态里抠出终稿后缀（绝对路径、`./` 前缀、反斜杠都收）。 */
-const FINAL_SUFFIX = /((?:archive\/|_abandoned\/)?drt_[\w.-]+\/final\.md)$/
+/**
+ * run bundle 终稿**地址族**：`final.md` / `final/vN.md` / `final/readable.md` /
+ * `final/readable-vN.md`（三位置）。同族地址落到同一「终稿」页签，避免交付卡片点 reader
+ * 落普通预览；`drafts/final.md`、`evidence/final.md`、任意别处 final.md 仍全拒。
+ */
+const FINAL_FAMILY_RELATIVE = /^(?:archive\/|_abandoned\/)?drt_[\w.-]+\/(?:final\.md|final\/(?:v[1-9]\d{0,5}\.md|readable(?:-v[1-9]\d{0,5})?\.md))$/
+/** 从任意书写形态里抠出终稿族后缀（绝对路径、`./` 前缀、反斜杠都收）。 */
+const FINAL_FAMILY_SUFFIX = /((?:archive\/|_abandoned\/)?drt_[\w.-]+\/(?:final\.md|final\/(?:v[1-9]\d{0,5}\.md|readable(?:-v[1-9]\d{0,5})?\.md)))$/
 const FILE_ADDRESS_PREFIX = 'dsh-resource://file/'
 const SESSION_ADDRESS_PREFIX = `${FILE_ADDRESS_PREFIX}session/`
 /** vendor 同款：逐段 component-encode，`:` 留字面（盘符可读）。 */
 const encodeSegment = (segment: string): string => encodeURIComponent(segment).replace(/%3A/gi, ':')
+
+/**
+ * 终稿族路径 → run bundle 目录（带尾 `/`）；非族路径 → null。
+ * `drt_x/final.md` → `drt_x/`；`drt_x/final/v1.md` / `drt_x/final/readable-v1.md` → `drt_x/`。
+ * @param path - 规范相对路径。
+ * @returns bundle 目录或 null。
+ */
+export function bundleDirOf(path: string): string | null {
+  if (!FINAL_FAMILY_RELATIVE.test(path)) return null
+  return path.endsWith(`/${FINAL_NAME}`)
+    ? path.slice(0, path.length - FINAL_NAME.length)
+    : path.slice(0, path.lastIndexOf(`/${FINAL_LEDGER_DIR}/`) + 1)
+}
 
 /**
  * 把 `present` 声明的原始路径折成终稿的规范相对路径；不是终稿 → null。
@@ -98,12 +119,19 @@ export function finalPathOf(raw: unknown): string | null {
   if (typeof raw !== 'string') return null
   const normalized = raw.replace(/\\/g, '/').replace(/^(?:\.\/)+/, '').replace(/\/+$/, '')
   if (normalized === '') return null
-  const match = FINAL_SUFFIX.exec(normalized)
+  const match = FINAL_FAMILY_SUFFIX.exec(normalized)
   if (match?.[1] === undefined) return null
-  return FINAL_RELATIVE.test(match[1]) ? match[1] : null
+  return FINAL_FAMILY_RELATIVE.test(match[1]) ? match[1] : null
 }
 
-/** 事件流 → 最后一条指向终稿的交付；无 / 畸形 → null。 */
+/** 终稿族内的显示优先级：读者版 > 版本副本 > 工作稿（自动打开先开人读的那份）。 */
+function familyRank(path: string): number {
+  if (path.includes('/final/readable')) return 3
+  if (/\/final\/v[1-9]\d{0,5}\.md$/.test(path)) return 2
+  return 1
+}
+
+/** 事件流 → 最后一条指向终稿族的交付；同一声明多份时取读者版优先。无 / 畸形 → null。 */
 export function latestFinalDelivery(events: readonly unknown[]): FinalDelivery | null {
   let latest: FinalDelivery | null = null
   for (const event of events) {
@@ -112,15 +140,18 @@ export function latestFinalDelivery(events: readonly unknown[]): FinalDelivery |
     if (record.type !== 'deliverables/presented') continue
     const data = record.data as { turn?: unknown; callId?: unknown; files?: unknown } | null | undefined
     if (typeof data !== 'object' || data === null || !Array.isArray(data.files)) continue
+    let best: { path: string; rank: number } | null = null
     for (const file of data.files) {
       const path = finalPathOf((file as { path?: unknown } | null | undefined)?.path)
       if (path === null) continue
-      latest = {
-        path,
-        turn: typeof data.turn === 'number' && Number.isSafeInteger(data.turn) ? data.turn : 0,
-        callId: typeof data.callId === 'string' ? data.callId : '',
-      }
-      break
+      const rank = familyRank(path)
+      if (best === null || rank > best.rank) best = { path, rank }
+    }
+    if (best === null) continue
+    latest = {
+      path: best.path,
+      turn: typeof data.turn === 'number' && Number.isSafeInteger(data.turn) ? data.turn : 0,
+      callId: typeof data.callId === 'string' ? data.callId : '',
     }
   }
   return latest
@@ -147,7 +178,7 @@ export function latestPresentedFinalVersion(events: readonly unknown[]): number 
       const raw = (file as { path?: unknown } | null | undefined)?.path
       if (typeof raw !== 'string') continue
       const normalized = raw.replace(/\\/g, '/').replace(/\/{2,}/g, '/')
-      const version = /(?:^|\/)final\/v([1-9]\d{0,5})\.md$/.exec(normalized)?.[1]
+      const version = /(?:^|\/)final\/(?:v|readable-v)([1-9]\d{0,5})\.md$/.exec(normalized)?.[1]
       if (version === undefined) continue
       const value = Number(version)
       if (Number.isSafeInteger(value) && (latest === null || value > latest)) latest = value
@@ -157,14 +188,16 @@ export function latestPresentedFinalVersion(events: readonly unknown[]): number 
 }
 
 /**
- * 终稿路径 → 页签体的读面定表；非法路径 → null。
+ * 终稿族路径 → 页签体的读面定表；非法路径 → null。
+ * 不论地址是 final.md、final/vN.md 还是 readable(-vN).md，页签都从同一 bundle 读
+ * final.md / review.md / final/；地址只决定「打开哪个页签」，不决定读哪份正文。
  * @param path - 规范相对路径（`finalPathOf` 的产物）。
  * @returns 三个固定读路径，或 null。
  */
 export function finalReadPlan(path: string): FinalReadPlan | null {
-  if (!FINAL_RELATIVE.test(path)) return null
-  const dir = path.slice(0, path.length - FINAL_NAME.length)
-  return { final: path, review: `${dir}${FINAL_REVIEW_NAME}`, versions: `${dir}${FINAL_LEDGER_DIR}` }
+  const dir = bundleDirOf(path)
+  if (dir === null) return null
+  return { final: `${dir}${FINAL_NAME}`, review: `${dir}${FINAL_REVIEW_NAME}`, versions: `${dir}${FINAL_LEDGER_DIR}` }
 }
 
 /** 会话域文件地址的解析结果。 */
@@ -201,7 +234,7 @@ export function sessionFileOf(address: string): SessionFile | null {
  */
 export function isFinalAddress(address: string): boolean {
   const file = sessionFileOf(address)
-  return file !== null && FINAL_RELATIVE.test(file.path)
+  return file !== null && FINAL_FAMILY_RELATIVE.test(file.path)
 }
 
 /**

@@ -16,7 +16,7 @@ export function leadsGate(bundleDir, leadsDate) {
   const qText = existsSync(join(bundleDir, 'question.md'))
     ? readFileSync(join(bundleDir, 'question.md'), 'utf8')
     : ''
-  if (/quick_factual|快速事实核查/.test(qText)) {
+  if (runType(bundleDir) === 'quick_factual') {
     return { status: 'N/A', detail: 'quick_factual 编制豁免——不设侦察编制，门 L 无对象（条件件，与 schema-scan 同语义）' }
   }
   const text = readFileSync(leadsPath, 'utf8')

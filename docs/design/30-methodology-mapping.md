@@ -18,9 +18,9 @@
 | **wave0（广度地基）** | dpt-source-intake 工作单元 + source.yaml + floor 门禁 | **scout 角色**（lead-mapping skill：query 多样化 + A–D 分级 + leads.md） | **角色化**（floor 数值门禁弃用，分级与排除显式化承担质量下限） |
 | **wave1（深度挖掘）** | question-list 契约 + depth-review + 反例/交叉验证参数 | **analyst 角色**（evidence-extraction skill：question-list + 交叉验证 ≥2 + 反例必记） | **角色化**（深度参数不进 profile，进 skill 纪律） |
 | **wave2（综合）** | 纯综合禁新搜 → finding gap 定向补搜 + finding-index | **lead 的 synthesis skill**（findings.md 的 gap 四态：supported/needs_search/contradicted/insufficient） | **skill 化**（只补一轮 = 参数纪律进 skill 文本） |
-| **hitl2（审阅）** | hitl2 phase（stop:yes）+ composition_handoff | lead 的 `tool-ask-user`（审阅建议 = 证据充分性判断 + 交付/补研究推荐） | **原生** |
+| **hitl2（审阅）** | hitl2 phase（stop:yes）+ composition_handoff | lead 的 `reader-final` skill（review PASS 后派生 `final/readable.md`，六节读者版合同）+ `tool-ask-user`（审阅建议 = 证据充分性判断 + 交付/补研究推荐） | **原生 + skill 化**（composition 从 HITL2 提前到 PASS 后成稿，用户先读人话、审计源可切） |
 | readiness（确定性预检） | readiness phase + 10 gate definition JSON | **critic 角色**（adversarial-review skill：readiness 判据清单 + review.md 的 PASS/FAIL） | **角色化**（确定性 schema 检查降格为 skill 清单——诚实取舍，见 §4 之 3） |
-| final（交付） | final/final.md + presentation 反馈 | final.md + `tool-present`（lead preset 独有声明权） | **原生** |
+| final（交付） | final/final.md + presentation 反馈 | final.md + `final/vN` + `final/readable-vN` + `tool-present` 两份（lead preset 独有声明权；门C 读者版合同） | **原生 + 机械门** |
 | rerun（重跑） | ReopenResearchPass + rerun_count 血统 | 同 bundle 版本演进（D17）：证据扩张 → `final/` 下一版（表述修订 polish 原位改、版本号不变；结构性另起才开新 bundle，sibling 预检）+ question.md `## Decisions` append-only 修订记录（delta 类型/受影响 topics/agent interpretation/用户原话 verbatim，最新在上） | 简化：不做血统机制，final/ 版本化 + Decisions/journal 记录承担 |
 | **rerun 不满分诊** | （codex 无对应：用户抱怨的自由文本） | **lead 的 `rerun-triage` skill**（七类说法 → 补研究 / 表述修订 / 结构性重跑 / steer 四种手段 + 产出代价 + 不变项；五条对话纪律：先复述、≤2 手段、范围只从报告来、不动手、不自动分类）＋ HITL2 选项带后果 ＋ 报告末节「下一版优先项 / 什么会改变建议」＋ 观察面只读折叠块 | **本仓扩展**（设计卡 = 2026-10-23-rerun-dissatisfaction-triage；不加交互点、不做机械分类） |
 

@@ -96,6 +96,7 @@ D 号正文 = [decisions.md](./decisions.md)（按需查，不在本页通读；
 
 | web 搜索/抓取 | `dsh-tool-web` + search/fetch provider | `packages/web/tool-web` + `web-search-deepseek` + `web-fetch-http` |
 | 成品交付 | `present` 工具 explicit deliveries | `packages/fs/tool-present` + `client/ui-deliverables` |
+| 读者版终稿 | reader-facing final（本仓原生；canonical 的派生压缩，不是第二份事实） | `final/readable.md` → `final/readable-vN.md`（同版交付件）+ lead 的 `reader-final` skill + node-gate 门C + [design/40](./design/40-research-cockpit.md) 终稿页签双视图 |
 | 研究工作区 | 会话 cwd + `agent-instructions` 注入手册 | `packages/context/agent-instructions` |
 | **研究驾驶舱（Research Cockpit）** | —（本仓原生套件名）：观察面 client 套件（观察面伞下最频改的一件） | `packages/deep-research-pack/src/client/` + `src/lib/`；分层与构成正本 = [design/40](./design/40-research-cockpit.md) |
 | 开发 harness / 运行 harness | development harness / runtime harness（同一仓库的两面：前者让 agent 看懂、修改、验证自己；后者是产品运行框架） | 本仓两面并存：`packages/deep-research-pack/` 是 runtime 面，`AGENTS.md` + `docs/` + `notes/` + `.agents/skills/` + 门禁是 development 面 |

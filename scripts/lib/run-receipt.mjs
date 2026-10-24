@@ -41,6 +41,12 @@ export const FILE_ROLES = {
   'delivered.json': 'delivery-receipt',
 }
 
+/** final/ 下的角色（buildManifest 显式赋；不在顶层 FILE_ROLES 里）。 */
+export const FINAL_ROLES = {
+  ledger: 'version-ledger',
+  reader: 'reader-final',
+}
+
 /** 文件 sha256（缺席/不可读 → null，不抛）。 */
 export function sha256Of(path) {
   try { return createHash('sha256').update(readFileSync(path)).digest('hex') } catch { return null }
@@ -111,6 +117,18 @@ export function receiptProblems(bundleDir) {
       problems.push(`final/v${finalVersion}.md 的 sha256 与回执不符——present 后当前版被改（回执哈希不匹配）`)
     }
   }
+  if (typeof receipt?.readable?.sha256 === 'string') {
+    const rel = typeof receipt.readable.path === 'string' ? receipt.readable.path : ''
+    if (!/^final\/readable-v[1-9]\d*\.md$/.test(rel)) {
+      problems.push('delivered.json 的 readable.path 形态非法（应为 final/readable-vN.md）')
+    } else {
+      const readerPath = join(bundleDir, rel)
+      if (!existsSync(readerPath)) problems.push(`delivered.json 记录 ${rel}，但该读者版不在场`)
+      else if (sha256Of(readerPath) !== receipt.readable.sha256) {
+        problems.push(`${rel} 的 sha256 与回执不符——交付后读者版被改（回执哈希不匹配）`)
+      }
+    }
+  }
   if (typeof receipt?.audit?.sha256 === 'string') {
     const auditPath = join(bundleDir, 'audit.md')
     if (!existsSync(auditPath)) {
@@ -130,6 +148,7 @@ export function buildDelivered({ slug, bundleDir, corpusRoot, acceptedAt, presen
     : []
   const finalVersion = versions.at(-1) ?? null
   const finalPath = finalVersion === null ? null : join(finalDir, `v${finalVersion}.md`)
+  const readerPath = finalVersion === null ? null : join(finalDir, `readable-v${finalVersion}.md`)
   const auditPath = join(bundleDir, 'audit.md')
   const auditText = existsSync(auditPath) ? readFileSync(auditPath, 'utf8') : ''
   const critical = /CRITICAL\s+(\d+)/.exec(auditText)?.[1] ?? null
@@ -142,6 +161,9 @@ export function buildDelivered({ slug, bundleDir, corpusRoot, acceptedAt, presen
     gate: { status: 'PASS', exit: 0 },
     audit: { critical: critical === null ? null : Number(critical), sha256: sha256Of(auditPath) },
     final: { version: finalVersion, sha256: finalPath === null ? null : sha256Of(finalPath) },
+    readable: readerPath === null || !existsSync(readerPath)
+      ? null
+      : { path: `final/readable-v${finalVersion}.md`, sha256: sha256Of(readerPath) },
     present: present === null ? null : { path: present.path, callId: present.callId, version: present.version },
   }
 }
@@ -156,7 +178,10 @@ export function buildManifest({ slug, bundleDir, contract, generatedAt }) {
   const finalDir = join(bundleDir, 'final')
   if (existsSync(finalDir)) {
     for (const f of readdirSync(finalDir).filter((x) => /^v\d+\.md$/.test(x)).sort()) {
-      files.push({ path: `final/${f}`, role: 'version-ledger', sha256: sha256Of(join(finalDir, f)) })
+      files.push({ path: `final/${f}`, role: FINAL_ROLES.ledger, sha256: sha256Of(join(finalDir, f)) })
+    }
+    for (const f of readdirSync(finalDir).filter((x) => /^readable-v\d+\.md$/.test(x)).sort()) {
+      files.push({ path: `final/${f}`, role: FINAL_ROLES.reader, sha256: sha256Of(join(finalDir, f)) })
     }
   }
   return {
@@ -174,7 +199,7 @@ export function buildManifest({ slug, bundleDir, contract, generatedAt }) {
 }
 
 /** 渲染 acceptance.md（ops 回执；语料根只写可复算标签，不写绝对路径）。 */
-export function renderAcceptance({ slug, stamp, critical, finalVersion, present, corpusRoot, legacy = false }) {
+export function renderAcceptance({ slug, stamp, critical, finalVersion, readableVersion = null, present, corpusRoot, legacy = false }) {
   const presentLabel = present === null || present === undefined ? '—' : present.path
   return `# Acceptance — ${slug}（${stamp}）
 
@@ -186,6 +211,6 @@ ${legacy ? '> 旧契约 bundle（无 run.md）：只留本回执，不补新契�
 | node-gate | PASS（exit 0） |
 | evidence-audit | PASS（exit 0；audit.md 在场，CRITICAL ${critical ?? '—'}） |
 | 日期 sanity | PASS（零未来日期） |
-${legacy ? '' : `| 回执 | delivered.json（final ${finalVersion === null ? '—' : `v${finalVersion}`} / present ${presentLabel}） |\n| 清单 | manifest.json（文件角色/读序/契约/哈希） |\n`}| 会话语料根 | \`${corpusRoot}\`（$DSH_HOME 相对形式；绝对根只在控制台） |
+${legacy ? '' : `| 回执 | delivered.json（final ${finalVersion === null ? '—' : `v${finalVersion}`} / present ${presentLabel}） |\n| 清单 | manifest.json（文件角色/读序/契约/哈希） |\n| 读者版 | ${readableVersion === null ? '—（无 / quick_factual）' : `final/readable-v${readableVersion}.md`} |\n`}| 会话语料根 | \`${corpusRoot}\`（$DSH_HOME 相对形式；绝对根只在控制台） |
 `
 }

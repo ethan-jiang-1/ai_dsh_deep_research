@@ -96,11 +96,15 @@
 
 - **定义**：从 codex Deep Research harness（`/Users/bowhead/ai_tool_deepresearch`）提炼的方法论在本插件上有完整落点，且**用 DSH 原生载体**实现。
 - **最小真检查**：`docs/design/30-methodology-mapping.md`（映射表）审查 + `tests/contracts/evaluation-contract.test.mjs` 的 keyless 断言。
-- **通过判据**（四条全要）：
+- **通过判据**（五条全要）：
   1. **生命周期映射完整**：研究生命周期每一环节（立项对齐 / 广度侦察 / 深度挖掘 / 综合写作 / 质量把关 / 审阅交付）在映射表有 DSH 落点（preset persona / skill / agent-team / todo / present…），或带证据的显式弃用理由；
   2. **角色分工单一职责**：每角色一个 owner 列（职责、产出物、验收判据）；任何两类事实不得双 owner 或无 owner；
   3. **证据可追溯载体存在**：最终报告的关键结论 → 来源的追溯链有明确文件载体与格式约定（verify the world 的领域版：结论抽查必须能落到来源文件）；
-  4. **信噪比策略显式**：对"搜索结果信噪比差"的处置有显式机制（来源质量分级 / 多源交叉 / 弃用判据），写进角色方法论，不能只靠模型自觉。
+  4. **信噪比策略显式**：对"搜索结果信噪比差"的处置有显式机制（来源质量分级 / 多源交叉 / 弃用判据），写进角色方法论，不能只靠模型自觉；
+  5. **读者版合同**：Lead 在 review 终局 PASS 后、HITL2 前按 `reader-final` skill 派生
+     `final/readable.md`，定稿后复制为 `final/readable-vN.md`；模型可见文本由
+     `tests/pack/presets.test.mjs` 的「读者版终稿」断言钉，交付机械把守 = node-gate 门C
+     （同版/六节/长度/无 `[来源:]`/`evidence/` 路径），真实 run 的 5 分钟三问是人工可读性判据。
 - **何时跑**：方法论/preset 内容改动时；框架里程碑必跑。
 
 ### 证据谓词与机械强度（开发仓观察面，非模型可见）

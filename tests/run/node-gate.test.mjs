@@ -2,14 +2,14 @@
 //（用例即永久反证记录——改夹具应预期变红）。
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { cpSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { gateBundle } from '../../scripts/lib/node-gate-core.mjs'
 import { decisionsLines } from '../../scripts/lib/node-gate-contracts.mjs'
 import { headingGate } from '../../scripts/lib/node-gate-run-gates.mjs'
-import { isHitl2Row } from '../../scripts/lib/node-gate-session-gates.mjs'
+import { hitl2RowGate, isHitl2Row } from '../../scripts/lib/node-gate-session-gates.mjs'
 import { leadsGate } from '../../scripts/lib/node-gate-run-gates.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
@@ -577,4 +577,21 @@ test('门A升级路径：readiness FAIL + 未决项升级记账 + HITL2 拍板�
 test('门④ D28：新 run 的 v1 是忠实副本（未登记 v2）→ 不因缺索引红；§Decisions 登记即 PASS', () => {
   const g = V('fixture-version-fresh-copy', '2026-10-24')
   assert.equal(g.status, 'PASS', JSON.stringify(g.detail))
+})
+
+test('门③ 不把 final/readable.md 当版本记账（读者版工作件不触发交付段）', () => {
+  const tempBase = realpathSync(tmpdir())
+  const tempRoot = mkdtempSync(join(tempBase, 'node-gate-reader-only-'))
+  try {
+    const b = join(tempRoot, 'bundle')
+    mkdirSync(join(b, 'final'), { recursive: true })
+    writeFileSync(join(b, 'run.md'), '# Run\n- contract: 2026-10-23\n- phase: review\n- next: none\n')
+    writeFileSync(join(b, 'question.md'), '# Q\n\n## Decisions\n- 2026-10-23 代答声明：后续 HITL2 由代理模拟作答\n')
+    writeFileSync(join(b, 'final', 'readable.md'), '# Reader\n')
+    const r = hitl2RowGate(b, join(tempRoot, 'sessions'))
+    assert.equal(r.gate.status, 'N/A', '只有 readable.md 时门③无对象，不得把读者版当版本记账')
+  } finally {
+    if (dirname(tempRoot) !== tempBase || !basename(tempRoot).startsWith('node-gate-reader-only-')) throw new Error(`refusing cleanup: ${tempRoot}`)
+    rmSync(tempRoot, { recursive: true, force: true })
+  }
 })

@@ -18,6 +18,10 @@ export const HEADING_CONTRACT_DATE = '2026-10-06'
  *  存量缺口由该 RFC 对账步逐 bundle 处置，不机械翻旧账）。 */
 export const AUDIT_CONTRACT_DATE = '2026-10-08'
 
+/** 门C 契约日（2026-10-23 = 可读终稿层落地日；新契约 run 非 quick_factual 才要求读者版，
+ *  旧场按无 run.md 豁免，quick_factual 编制豁免——与其余门同语义）。 */
+export const READABLE_CONTRACT_DATE = '2026-10-23'
+
 /** 断代判定（各门共用形状）：asOf 注入日期优先；否则 run.md 的 contract epoch（D28）；
  *  旧场无 run.md 才回退交付日（deliveryDate = final.md mtime 族）。无日期可断 = 从严
  *  （false——可定日期而不定 = 逃逸口，schema-scan 成例）。 */

@@ -33,6 +33,15 @@ export const RESEARCH_FINAL_PATTERN = '**/final.md'
 /** 「终稿」认领的地址 glob（无分隔符 → 按 basename 任意深度匹配，与上一行互补）。 */
 export const RESEARCH_FINAL_PATTERN_ROOT = 'final.md'
 
+/** 「终稿」族：交付副本 `final/vN.md`（含分隔符 → 整路径匹配；canOpen 再收窄）。 */
+export const RESEARCH_FINAL_PATTERN_LEDGER = '**/final/v*.md'
+export const RESEARCH_FINAL_PATTERN_LEDGER_ROOT = 'final/v*.md'
+
+/** 「终稿」族：读者版 `final/readable.md` / `final/readable-vN.md`（canOpen 再收窄）。
+ *  第二条是无分隔符 basename 匹配——交付卡片的文件地址常带 session 前缀，宽匹配后再由 canOpen 收窄。 */
+export const RESEARCH_FINAL_PATTERN_READER = '**/final/readable*.md'
+export const RESEARCH_FINAL_PATTERN_READER_ROOT = 'readable*.md'
+
 /** 「研究状态」页签的 keyed 槽名（sidebar.right.pane.tab）。 */
 export const RESEARCH_PANE_SLOT = 'sidebar.right.pane.tab'
 

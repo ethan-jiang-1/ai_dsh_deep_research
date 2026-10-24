@@ -154,3 +154,27 @@ test('deliveryGate 消费回执：哈希匹配不红；present 后改 final/vN �
     assert.match(red.detail, /回执|哈希/)
   } finally { cleanup() }
 })
+
+test('reader 绑定：manifest 记 reader-final 角色，delivered 记 readable 哈希，篡改 → 红', () => {
+  const { dir, cleanup } = makeRoot()
+  try {
+    const b = writeBundle(dir)
+    writeFileSync(join(b, 'final', 'readable-v2.md'), '# Reader v2\n')
+    const stamp = '2026-10-23T10:00:00.000Z'
+    const delivered = buildDelivered({
+      slug: 'drt_x', bundleDir: b, corpusRoot: '$DSH_HOME/sessions', acceptedAt: stamp,
+      presented: [{ path: 'drt_x/final/v2.md', version: 2, callId: 'p3', time: 3 }],
+    })
+    assert.deepEqual(delivered.readable, {
+      path: 'final/readable-v2.md',
+      sha256: sha256Of(join(b, 'final', 'readable-v2.md')),
+    })
+    writeFileSync(join(b, 'delivered.json'), JSON.stringify(delivered, null, 2))
+    const manifest = buildManifest({ slug: 'drt_x', bundleDir: b, contract: '2026-10-23', generatedAt: stamp })
+    assert.ok(manifest.files.some((f) => f.path === 'final/readable-v2.md' && f.role === 'reader-final'))
+    assert.deepEqual(receiptProblems(b).problems, [])
+
+    writeFileSync(join(b, 'final', 'readable-v2.md'), '# Reader changed\n')
+    assert.ok(receiptProblems(b).problems.some((p) => /readable-v2\.md.*哈希|读者版被改/.test(p)))
+  } finally { cleanup() }
+})

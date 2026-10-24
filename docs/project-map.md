@@ -172,8 +172,8 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 `web.log` 是宿主启动输出；DSH 会话日志记录模型/工具/HITL/present 事件；bundle 的 journal 是角色纪要。
 三者用途不同。日志文件版本由实际宿主决定，按会话定位，不凭固定版本文件名猜测。
 
-`final.md` 是 run 根的当前报告，`final/` 是版本记账；文件出现、watcher 停下、仪表盘显示交付，
-都需要结合拍板行、版本记账、present 和审计来判断。完整判据查 [NODES](../research-workspace/NODES.md)。
+`final.md` 是 run 根的当前报告，`final/vN` 是交付副本，`final/readable-vN` 是同版读者版（新 run）；文件出现、watcher 停下、仪表盘显示交付，
+都需要结合拍板行、版本记账、present、门C 和审计来判断。完整判据查 [NODES](../research-workspace/NODES.md)。
 
 ## 已知限制与延后工作
 

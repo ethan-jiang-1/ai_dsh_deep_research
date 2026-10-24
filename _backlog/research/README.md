@@ -44,6 +44,8 @@
 - [run-bundle-charter/2026-10-23-p7-blind-baseline.md](run-bundle-charter/2026-10-23-p7-blind-baseline.md) — P7 盲测 baseline：4 样本在手册改动前 4/4 命中 ground truth；记录 lead 通道 max-tokens 偏差与 P8 的验收调整依据（同一消费者：已结宪章卡 + implemented RFC）。
 - [run-bundle-charter/2026-10-23-p7-manual-batch.md](run-bundle-charter/2026-10-23-p7-manual-batch.md) — P7 手册文本批：D28 读序/交付终局/来源证明、行预算升顶、四角色快照重录与 snapshot/preset 验收（同一消费者：已结宪章卡 + implemented RFC）。
 - [run-bundle-charter/2026-10-23-p8-final.md](run-bundle-charter/2026-10-23-p8-final.md) — P8 盲续跑收口：手册后 4/4、非回归矩阵、P6 延后、RFC 毕业与卡归档（同一消费者：已结宪章卡 + implemented RFC）。
+- [reader-final/2026-10-23-reader-final-design.md](reader-final/2026-10-23-reader-final-design.md) — 可读终稿流程位与读者版合同：7 条机制约束逐条核验、A/B/C/D 取舍、门C 判据、页签双视图、回执绑定与证据路线（消费者：[流程位卡](../_archived/settled_issues/2026-10-23-readable-final-process.md) + [可读层卡](../_archived/settled_issues/2026-10-23-run-final-human-readable.md)）。
+- [reader-final/2026-10-23-sample-readable-cn-us-hardware.md](reader-final/2026-10-23-sample-readable-cn-us-hardware.md) — 读者版样张：从 `drt_cn-us-ai-models-hardware` v2 派生的 1–3 页原型，供用户判断结构/长度/语气（同一消费者；样张不是交付物）。
 
 （2026-10-18 方法配置两份材料已随消费者毕业迁入 [_archived/research/](../_archived/research/)：外部先例与真模型 A/B。）
 

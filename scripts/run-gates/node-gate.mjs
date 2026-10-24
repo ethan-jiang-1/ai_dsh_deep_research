@@ -110,8 +110,9 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
 | ④ 版本记账 | ${gates.version.status} | ${gates.version.detail} |
 | R 标题重复 | ${gates.degeneration.status} | ${gates.degeneration.detail} |
 | A 交付完整性 | ${gates.delivery.status} | ${gates.delivery.detail} |
+| C 读者版合同 | ${gates.reader.status} | ${gates.reader.detail} |
 `
-  console.log(`node-gate: ${basename(bundleDir)} ｜ 门① HITL 锚点 = ${gates.hitlAsk.status} ｜ 门③ §Decisions 拍板行 = ${gates.hitl2Row.status} ｜ 门② present 声明 = ${gates.present.status} ｜ 门L leads 交接 = ${gates.leads.status} ｜ 门④ 版本记账 = ${gates.version.status} ｜ 门R 标题重复 = ${gates.degeneration.status} ｜ 门A 交付完整性 = ${gates.delivery.status}`)
+  console.log(`node-gate: ${basename(bundleDir)} ｜ 门① HITL 锚点 = ${gates.hitlAsk.status} ｜ 门③ §Decisions 拍板行 = ${gates.hitl2Row.status} ｜ 门② present 声明 = ${gates.present.status} ｜ 门L leads 交接 = ${gates.leads.status} ｜ 门④ 版本记账 = ${gates.version.status} ｜ 门R 标题重复 = ${gates.degeneration.status} ｜ 门A 交付完整性 = ${gates.delivery.status} ｜ 门C 读者版合同 = ${gates.reader.status}`)
   console.log(`  ① ${gates.hitlAsk.detail}`)
   console.log(`  ③ ${gates.hitl2Row.detail}`)
   console.log(`  ② ${gates.present.detail}`)
@@ -119,6 +120,7 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
   console.log(`  ④ ${gates.version.detail}`)
   console.log(`  R ${gates.degeneration.detail}`)
   console.log(`  A ${gates.delivery.detail}`)
+  console.log(`  C ${gates.reader.detail}`)
   // 报告写入防护：tests/ 夹具区是 tracked 区——写报告=污染 git（2026-09-29 实测 6 个未跟踪文件，
   // 红证记录见 notes/implemented/2026-09-29-quality-evidence-loop.md）。夹具判定走上面的 stdout。
   if (noWrite || resolve(bundleDir).startsWith(join(ROOT, 'tests') + '/')) {

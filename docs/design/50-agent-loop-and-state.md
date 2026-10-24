@@ -16,7 +16,7 @@
 | Agent Teams（spawn + 任务板，D3/D16） | 协作主通道 | vendor `agent-team` 层 |
 | 研究工作区文件契约 | 节点 I/O、证据格式、owner 表 | [NODES.md](../../research-workspace/NODES.md) + [研究手册](../../research-workspace/AGENTS.md) |
 
-驱动链（节点细节以 NODES.md 为准）：立项/HITL1 → 组队派工 → 侦察 → 挖掘 → 综合 → 审查 → HITL2 → 拍板记账 + present。GUI 与 [run-kickoff](../../dev/run-kickoff.mjs) 是两个可选的建会话入口；[hitl-answer](../../dev/hitl-answer.mjs) 与 [cdp-probe](../../scripts/probe/cdp-probe.mjs) 是开发/运维驱动或探针，不与产品交互面混称。
+驱动链（节点细节以 NODES.md 为准）：立项/HITL1 → 组队派工 → 侦察 → 挖掘 → 综合 → 审查 → 读者版派生（review PASS 后、HITL2 前）→ HITL2 → 拍板记账 + 复制 vN/readable-vN + present。GUI 与 [run-kickoff](../../dev/run-kickoff.mjs) 是两个可选的建会话入口；[hitl-answer](../../dev/hitl-answer.mjs) 与 [cdp-probe](../../scripts/probe/cdp-probe.mjs) 是开发/运维驱动或探针，不与产品交互面混称。
 
 ## 四类运行状态（canonical 合同）
 
@@ -39,4 +39,4 @@ vendor `WorkspaceFileStat` 并升 pin，属上游改动。
 
 ## 交付判定
 
-"研究完成"的唯一依据 = 文件事实链，**判据逐字正本 = [研究手册 §完成判据](../../research-workspace/AGENTS.md) 与 [NODES 交付行](../../research-workspace/NODES.md)**（链上六件——final.md 当前版、review.md 终局 readiness PASS、§Decisions 的 HITL2 拍板行、final/ 版本记账、Lead 的 present 声明、audit.md 显式 `CRITICAL=0`——缺一不可，逐件细节不住本页）；机械把守 = node-gate（门②③④ + 门A 交付完整性）。口头宣告、观察面显示、任务板状态都不是交付依据。
+"研究完成"的唯一依据 = 文件事实链，**判据逐字正本 = [研究手册 §完成判据](../../research-workspace/AGENTS.md) 与 [NODES 交付行](../../research-workspace/NODES.md)**（链上七件——final.md 当前版、review.md 终局 readiness PASS、§Decisions 的 HITL2 拍板行、final/ 版本记账、`final/readable-vN`（新 run 非 quick_factual）、Lead 的 present 声明（含 reader 与 vN）、audit.md 显式 `CRITICAL=0`——缺一不可，逐件细节不住本页）；机械把守 = node-gate（门②③④ + 门A 交付完整性 + 门C 读者版合同）。口头宣告、观察面显示、任务板状态都不是交付依据。

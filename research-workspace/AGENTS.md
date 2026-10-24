@@ -40,12 +40,13 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
                        `readiness: PASS|FAIL` + CRITICAL/MAJOR 清单；历史轮不夺权）
   drafts/              过程稿（owner: 各角色，按需）
   final/               **交付副本**：交付时把 run 根 final.md 忠实复制为 v1.md；扩张 rerun 落 v2.md——
-                       vN = 交付物全文；索引/回溯放 findings 或 vN 首节
+                       vN = 交付物全文；索引/回溯放 findings 或 vN 首节。读者版：review PASS 后写
+                       final/readable.md，定稿后复制为 final/readable-vN.md（同版）
   final.md             当前工作稿（run 根）；交付先落 `final/vN` 副本再 present；[来源:] 相对 run 根解析；
                        **不放 final/ 里**（位置漂移会让审计静默跳过——正本钉死在 run 根）
   provenance/<id>.json 来源证明（C-lite；owner: analyst/ops）：kind web|local-file|command +
                        URL/路径 + sha256 + 时间 + 通道 + 切片；与 evidence/<id>.md 同名
-  delivered.json       交付回执（ops）：门结果/audit 哈希/present 指针/final 哈希
+  delivered.json       交付回执（ops）：门结果/audit 哈希/present 指针/final+reader 哈希
   manifest.json        目录说明书（ops）：文件角色/读序/契约版本/哈希；不是指令
   audit.md             证据审计快照（ops/派生；不是研究内容）
   node-gate.md         门禁快照（ops/派生）
@@ -57,7 +58,7 @@ _abandoned/drt_<slug>/ 停放桶（未投入但保留；原因/复活条件写 r
 templates/run/         新 run bundle 的起点模板（只读，不直接写）
 drafts/（工作区根）    开发侧跨 run 草稿（仅开发仓在场，角色不写不读——run 内过程稿见上）
 NODES.md               节点 I/O 契约全表（八节点 I/O + 下游可开工判据 + 回边版本语义）；机械把守 =
-                       schema-scan（在场级）+ node-gate（判据级门①②③④+L+R+A，图例 = NODES.md 头部）
+                       schema-scan（在场级）+ node-gate（判据级门①②③④+L+R+A+C，图例 = NODES.md 头部）
 question-patterns.md   判型模式库（HITL1 第一对照面；命中走条目、未命中兜底 + journal 标记行；增长协议 = 库尾节）
 method-library.md      用户研究偏好库（工作区根；lead 维护；四字段 = 找来源/怎么核实/报告怎么写/不承诺）。
                        立项先读：题面点名的偏好名 → 按该条目执行并在 §Decisions 记"采用库条目 X"；未点名
@@ -110,8 +111,9 @@ present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat 
 
 - `review.md` 末尾固定 `## readiness（终局）: PASS|FAIL`；**只有 critic 能写**。历史轮/附录不夺权；
   lead 升级须引用 critic 授权并落**新的**终局块；旧场按 epoch 豁免。
-- 交付 = `final/vN`（不可变副本）+ `presented`（lead 顶层；`files[].path` 精确 `final/vN`）+
-  `delivered.json`/`acceptance.md` 回执；`final.md` 是工作稿，present 指它不算。
+- 交付 = `final/vN`（不可变副本）+ `final/readable-vN`（新 run 非 quick_factual；同版读者版）+
+  `presented`（lead 顶层；`files[].path` 含两者，reader 第一）+ `delivered.json`/`acceptance.md`
+  回执；`final.md` 是工作稿，present 指它不算。
 - 见证只认**本 run 的 lead 顶层会话**（写过 `drt_<slug>/`）：跨 run/子 agent 不作证，present 须晚于 HITL2 答复。
 - `audit.md` / `node-gate.md` / `acceptance.md` 是 ops 派生/回执：默认只读，`--write`/`run-accept`
   才落；观察不写 bundle。
@@ -134,7 +136,7 @@ present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat 
 | evidence/*.md | analyst（创建者） | 只读 |
 | findings.md | lead | 只读 |
 | review.md | critic | 只读 |
-| final.md（当前版）+ final/（版本记账） | lead | 只读 |
+| final.md（当前版）+ final/（版本记账 + 读者版） | lead | 只读 |
 
 要改别人 owner 的文件：通过团队通道向 owner 提请求，不直接动手。
 
@@ -174,7 +176,8 @@ review 审查时间、口径截至）**不得凭时间感直写**（角色会话
 ## 交付物三态
 
 - **过程稿**：drafts/ 与各 owner 文件——团队内部工作面，不是成品；
-- **成品**：lead 会话中 `present` 声明的 `final/vN`（不可变副本）+ 回执——唯一对外交付物；
+- **成品**：lead 会话中 `present` 声明的 `final/vN`（不可变副本）+ `final/readable-vN`
+  + 回执——唯一对外交付物；
   `final.md` 是交付前的工作稿，不是交付凭证；
 - **非成品声明**：非 lead 角色的 present 声明一律视为过程稿展示。
 
@@ -190,5 +193,6 @@ review 审查时间、口径截至）**不得凭时间感直写**（角色会话
 ## 完成判据（verify the world）
 
 - `final/vN` 的关键结论有真实存在且内容支撑的 `[来源: evidence/xx.md]`；`review.md` 的**终局块**为 PASS 后才进入 HITL2。
-- 交付回执：`final/vN` + `question.md` §Decisions 的 HITL2 拍板行 + Lead 的 `deliverables/presented`（指 `final/vN`）+ 操作侧 `audit.md`（标题匹配、`CRITICAL=0`）+ `delivered.json`/`acceptance.md`。
+- 新 run 非 quick_factual：review PASS 后、HITL2 前写 `final/readable.md`；交付时 `final/readable-vN.md` 与 `final/vN` 同版在场（门C）。
+- 交付回执：`final/vN` + `final/readable-vN` + `question.md` §Decisions 的 HITL2 拍板行 + Lead 的 `deliverables/presented`（含 `final/vN` 与 reader）+ 操作侧 `audit.md`（标题匹配、`CRITICAL=0`）+ `delivered.json`/`acceptance.md`。
 - "研究完成"的唯一依据是以上文件事实链，不是任何人的口头宣告。

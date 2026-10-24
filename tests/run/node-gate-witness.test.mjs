@@ -48,6 +48,11 @@ const reply = (label = '按现稿定稿（Recommended）', time = T + 60_000) =>
   }] },
 }, time)
 const present = (path = 'drt_x/final/v1.md', time = T + 120_000) => at({ type: 'deliverables/presented', data: { turn: 1, callId: 'p1', files: [{ path }] } }, time)
+// timed ask 的真实答复形态：tool/result 的 message.content 是 `{answers:[…]}`，没有 inbox splice。
+const askResult = (label = '定稿（按现稿交付）(Recommended)', time = T + 60_000) => at({
+  type: 'tool/result',
+  data: { turn: 1, step: 1, message: { role: 'tool', source: { kind: 'tool', callId: 'ask1' }, toolCallId: 'ask1', content: [{ type: 'text', text: JSON.stringify({ answers: [{ id: 'hitl2_delivery', selected: [label] }] }) }], isError: false, id: 'r1' } },
+}, time)
 
 const writeSession = (root, lines, name = 'session.v4.jsonl') => {
   const dir = join(root, 'sessions', 'sess')
@@ -195,5 +200,16 @@ test('旧场（无 run.md）保持文本兼容：有 HITL2 行即 PASS，不要�
     const r = hitl2RowGate(b, join(dir, 'nope'))
     assert.equal(r.gate.status, 'PASS')
     assert.match(r.gate.detail, /epoch/)
+  } finally { cleanup() }
+})
+
+test('hitl2RowGate：timed ask 的 tool/result 答复也算 callId 绑定见证（无 inbox splice 的真实形态）', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  try {
+    const b = writeBundle(dir)
+    const sessions = writeSession(dir, [bind(), ask(), askResult()])
+    const r = hitl2RowGate(b, sessions)
+    assert.equal(r.gate.status, 'PASS', r.gate.detail)
+    assert.match(r.gate.detail, /ask1/)
   } finally { cleanup() }
 })

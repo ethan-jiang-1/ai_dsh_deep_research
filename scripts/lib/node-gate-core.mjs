@@ -4,6 +4,7 @@ import { basename } from 'node:path'
 import { deliveryGate } from './node-gate-delivery-gate.mjs'
 import { emptyOnUnreadableLogReader, hitlAskGate, hitl2RowGate, presentGate, scanWitnessLogs } from './node-gate-session-gates.mjs'
 import { headingGate, leadsGate, versionGate } from './node-gate-run-gates.mjs'
+import { readerGate } from './node-gate-reader-gate.mjs'
 import { contractEpochOf } from './schema-scan-core.mjs'
 
 /** Evaluate every gate for one bundle; preserve the existing result shape and red aggregation. */
@@ -23,8 +24,9 @@ export function gateBundle(bundleDir, sessionsRoot, opts = {}) {
     version: versionGate(bundleDir, opts.versionDate),
     degeneration: headingGate(bundleDir, opts.headingDate),
     delivery: deliveryGate(bundleDir, opts.auditDate),
+    reader: readerGate(bundleDir, { asOf: opts.readerDate }),
   }
-  const all = [gates.hitlAsk, hitl2Row, present, gates.leads, gates.version, gates.degeneration, gates.delivery]
+  const all = [gates.hitlAsk, hitl2Row, present, gates.leads, gates.version, gates.degeneration, gates.delivery, gates.reader]
   const red = all.some((gate) => gate.status === 'RED')
   const unattested = all.some((gate) => gate.status === 'UNATTESTED')
   return { gates, red, unattested }

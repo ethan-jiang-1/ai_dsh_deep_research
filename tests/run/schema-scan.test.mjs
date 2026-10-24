@@ -6,7 +6,7 @@ import { cpSync, mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writ
 import { tmpdir } from 'node:os'
 import { basename, join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { scanAll, scanBundle, hygieneOf, journalFutureDate } from '../../scripts/lib/schema-scan-core.mjs'
+import { scanAll, scanBundle, hygieneOf, journalFutureDate, runType } from '../../scripts/lib/schema-scan-core.mjs'
 
 const F = join(dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'schema-scan')
 const DATES = {
@@ -200,4 +200,47 @@ test('D28 phase=delivery 必须落 final/vN 与 review 终局（卡 §10 B1）',
     const core = scanBundle(dir).core
     assert.ok(core.some((c) => c.includes('phase=delivery')), core.join(' | '))
   } finally { cleanup() }
+})
+
+// ── 读者版落点（门C / 可读终稿）──
+
+test('D28 顶层白名单：final/readable-v1.md 合法；run 根 readable-final.md 违约', (t) => {
+  const base = realpathSync(tmpdir())
+  const dir = mkdtempSync(join(base, 'schema-reader-'))
+  t.after(() => {
+    if (dirname(dir) !== base || !basename(dir).startsWith('schema-reader-')) throw new Error(`refusing cleanup: ${dir}`)
+    rmSync(dir, { recursive: true, force: true })
+  })
+  writeFileSync(join(dir, 'run.md'), '# Run\n- contract: 2026-10-23\n- phase: delivery\n- next: none\n')
+  mkdirSync(join(dir, 'final'), { recursive: true })
+  writeFileSync(join(dir, 'final', 'readable-v1.md'), '# 读者版\n\n> 对应 canonical: final/v1.md\n')
+  assert.deepEqual(hygieneOf(dir), [], 'final/ 下的读者版不是顶层白名单对象')
+
+  writeFileSync(join(dir, 'readable-final.md'), '# 读者版（错误落点）\n')
+  assert.ok(hygieneOf(dir).some((c) => c.includes('未登记顶层条目 readable-final.md')),
+    'run 根放 readable-final.md 必须核心违约（落点是 final/，不是根）')
+})
+
+// ── 研究类型解析（门C/编制豁免的共同依据）──
+
+test('runType：优先读 HITL1 字段/节，不被用户原话里的「不是快速事实核查」误判', (t) => {
+  const base = realpathSync(tmpdir())
+  const dir = mkdtempSync(join(base, 'schema-runtype-'))
+  t.after(() => {
+    if (dirname(dir) !== base || !basename(dir).startsWith('schema-runtype-')) throw new Error(`refusing cleanup: ${dir}`)
+    rmSync(dir, { recursive: true, force: true })
+  })
+  const write = (text) => writeFileSync(join(dir, 'question.md'), text)
+
+  write('# Q\n- 研究类型: claim_verification（判型命中 P4）\n- 用户原话: "请按主张验证处理，不是快速事实核查"\n')
+  assert.equal(runType(dir), 'other', '字段优先：claim_verification 不被引用句误判')
+
+  write('# Q\n## 研究类型\n\nquick_factual（快速事实核查）\n')
+  assert.equal(runType(dir), 'quick_factual', '节形态仍认 quick_factual')
+
+  write('# Q\n- 研究类型: **quick_factual**\n')
+  assert.equal(runType(dir), 'quick_factual', '强调符不影响字段值')
+
+  write('# Q\n用户原话: "不是快速事实核查"\n')
+  assert.equal(runType(dir), 'other', '无字段时否定引用不触发 quick_factual')
 })

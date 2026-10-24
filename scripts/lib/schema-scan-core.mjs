@@ -59,11 +59,33 @@ export function journalFutureDate(bundleDir, today) {
   return last && last > today ? last : null
 }
 
-/** 研究类型（编制条件性依据）：quick_factual 标记以 question.md 自带事实为准。 */
+/** 研究类型（编制条件性依据）：quick_factual 标记以 question.md 自带事实为准。
+ *  优先读 HITL1 Snapshot 的 `- 研究类型:` 字段或 `## 研究类型` 节；都缺才回退全文子串，
+ *  且回退时排除「不是/非快速事实核查」这类否定引用——真实 run 的用户原话可能整句引用题面，
+ *  全文子串会把 prompt 里的「不是快速事实核查」误判成 quick_factual 豁免（2026-10-23
+ *  真实 run 实测：drt_cn-open-vs-us-closed-agentic 被门C 误豁免）。 */
 export function runType(bundleDir) {
   const q = read(join(bundleDir, 'question.md'))
   if (!q) return null
-  return /quick_factual|快速事实核查/.test(q) ? 'quick_factual' : 'other'
+  const quickValue = (value) => /^(?:quick_factual|快速事实核查)/.test(
+    value.replace(/\*\*|__|`/g, '').trim(),
+  )
+  const lines = q.split('\n')
+  for (const line of lines) {
+    const field = /^\s*[-*]?\s*研究类型\s*[:：]\s*(.+)$/.exec(line)
+    if (field !== null) return quickValue(field[1]) ? 'quick_factual' : 'other'
+  }
+  for (let i = 0; i < lines.length; i++) {
+    if (!/^#{1,6}\s*研究类型\s*$/.test(lines[i])) continue
+    for (let j = i + 1; j < lines.length; j++) {
+      const value = lines[j].trim()
+      if (value === '' || value.startsWith('#')) break
+      return quickValue(value) ? 'quick_factual' : 'other'
+    }
+  }
+  return /quick_factual|快速事实核查/.test(q.replace(/不是\s*快速事实核查|非\s*快速事实核查/g, ''))
+    ? 'quick_factual'
+    : 'other'
 }
 
 /** journal 补偿把关记账（条件件缺席时谁承担核查——宽松匹配，缺 = WARN 提示人工核）。 */

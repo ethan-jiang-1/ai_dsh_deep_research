@@ -4,6 +4,8 @@
 
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-10-23-readable-final-process](2026-10-23-readable-final-process.md) | 可读终稿流程位：Lead 在 review PASS 后、HITL2 前写 `final/readable.md` → `readable-vN.md`；门C 同版/六节/长度/链接；回执 reader 哈希；终稿页签地址族/双视图；真实 run 全链绿、769 测试；[Note](../../../notes/implemented/2026-10-23-reader-final.md) · [D29](../../../docs/decisions.md) | 2026-10-24 |
+| [2026-10-23-run-final-human-readable](2026-10-23-run-final-human-readable.md) | 读者版内容合同：六节、1–3 页、不新增事实/来源、正文无 `[来源:]`/`evidence/`；真实 reader 2,664 字/57 行；用户选择 A 收口；[Note](../../../notes/implemented/2026-10-23-reader-final.md) | 2026-10-24 |
 | [2026-10-23-rerun-dissatisfaction-triage](2026-10-23-rerun-dissatisfaction-triage.md) | rerun 不满转接层：L1 `rerun-triage` skill（七类说法→四手段+代价+不变项+五纪律）、L2 HITL2 三选项带后果 + 报告末节两节、L3 状态页⑤/终稿页脚只读折叠块（共用 src/lib 文案）；同批修 persona 交付语义回 final/vN；719 测试 + 四角色重录 + 真模型探针五条全中；[Note](../../../notes/implemented/2026-10-23-rerun-triage-layer.md) | 2026-10-23 |
 | [2026-10-23-d28-witness-binding-and-receipts](2026-10-23-d28-witness-binding-and-receipts.md) | D28 落地缺口收口：门③见证绑定 run（写强绑定 + 契约纪元 + present≥HITL2）、回执哈希由门A 复算、run-accept 与 hygiene 分域、手册 final/vN = 交付副本、门④ 不再要 v1 活索引；P0–P3 + 四角色重录，708 测试绿；[RFC 修订](../../../notes/implemented/2026-10-23-run-bundle-charter.md) | 2026-10-23 |
 | [2026-10-23-run-bundle-agent-state-and-read-chain](2026-10-23-run-bundle-agent-state-and-read-chain.md) | run bundle 宪章：D28 位置=操作桶、run.md/epoch、presented/user-question-reply 交付链、provenance/manifest、观察只读；P0–P7 落地、P8 收口（正式 lead 盲测 UNATTESTED）；[implemented RFC](../../../notes/implemented/2026-10-23-run-bundle-charter.md) | 2026-10-23 |

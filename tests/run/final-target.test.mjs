@@ -120,3 +120,51 @@ test('draftInProgress：空输入框不算在写（会话打开即聚焦 compose
   assert.equal(draftInProgress({ tagName: 'DIV', isContentEditable: true, textContent: '草稿' }), true);
   assert.equal(draftInProgress(null), false);
 });
+
+// ── 终稿地址族（读者版；2026-10-23）──
+
+test('终稿地址族：final.md / final/vN / final/readable(-vN) 都折成族路径；非族文件仍拒', () => {
+  assert.equal(finalPathOf('drt_x/final/v2.md'), 'drt_x/final/v2.md');
+  assert.equal(finalPathOf('archive/drt_x/final/readable.md'), 'archive/drt_x/final/readable.md');
+  assert.equal(finalPathOf('drt_x/final/readable-v2.md'), 'drt_x/final/readable-v2.md');
+  assert.equal(finalPathOf('drt_x/final/v0.md'), null);
+  assert.equal(finalPathOf('drt_x/final/readable-final.md'), null);
+  assert.equal(finalPathOf('drt_x/final/other.md'), null);
+  assert.equal(finalPathOf('drt_x/drafts/readable-v1.md'), null);
+});
+
+test('终稿族读面：不论地址是 vN 还是 reader，都回到同一个 bundle 的 final.md/review.md/final/', () => {
+  for (const path of ['drt_x/final.md', 'drt_x/final/v2.md', 'drt_x/final/readable.md', 'drt_x/final/readable-v2.md']) {
+    assert.deepEqual(finalReadPlan(path), {
+      final: 'drt_x/final.md', review: 'drt_x/review.md', versions: 'drt_x/final',
+    }, path);
+  }
+  assert.deepEqual(finalReadPlan('archive/drt_x/final/readable-v2.md'), {
+    final: 'archive/drt_x/final.md', review: 'archive/drt_x/review.md', versions: 'archive/drt_x/final',
+  });
+});
+
+test('交付监听：present 同时带 reader 与 vN → 优先 open reader；只带 vN → open vN', () => {
+  assert.deepEqual(
+    latestFinalDelivery([presented([{ path: 'drt_x/final/v2.md' }, { path: 'drt_x/final/readable-v2.md' }], { callId: 'c2' })]),
+    { path: 'drt_x/final/readable-v2.md', turn: 7, callId: 'c2' },
+  );
+  assert.deepEqual(
+    latestFinalDelivery([presented([{ path: 'drt_x/final/v2.md' }])]),
+    { path: 'drt_x/final/v2.md', turn: 7, callId: 'call-1' },
+  );
+});
+
+test('present 版本：从 reader 的 readable-vN 也能读出 N；readable.md（工作件）不算版本', () => {
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_x/final/readable-v2.md' }])]), 2);
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_x/final/readable.md' }])]), null);
+});
+
+test('地址认领：终稿族三位置 + final/ 下 vN/readable 都认；drafts 与别的 final 仍拒', () => {
+  for (const path of ['drt_x/final.md', 'drt_x/final/v1.md', 'drt_x/final/readable.md', 'drt_x/final/readable-v1.md']) {
+    assert.equal(isFinalAddress(finalAddressOf('sess-1', path)), true, path);
+  }
+  assert.equal(isFinalAddress(finalAddressOf('sess-1', 'drt_x/drafts/readable-v1.md')), false);
+  assert.equal(isFinalAddress(finalAddressOf('sess-1', 'notes/final/v1.md')), false);
+  assert.equal(isFinalAddress(finalAddressOf('sess-1', 'drt_x/final/readable-final.md')), false);
+});

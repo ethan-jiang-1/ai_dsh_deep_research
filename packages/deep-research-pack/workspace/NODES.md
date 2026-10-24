@@ -17,7 +17,9 @@
 > = 生成退化，2026-10-06 起，出处 = oss-dr 借鉴 A1 / LDR #6452）· 门A = 交付完整性门（readiness 非 PASS 时：review.md 有升级/未决项记账 **且** §Decisions 有 HITL2 拍板行——含代理代答 provenance——即按"升级到用户裁决"路径，不判越过前置；见 notes/implemented/2026-10-18-node-gate-judgment-widening.md）
 > （第 8 行交付判据下沉：final/ 记账在场 × readiness 非 PASS 交叉断言 + 交付前置达成时
 > final/ 交付副本与**当前 bundle 对应的可解析 audit.md** 在场；摘要与 CRITICAL 节条目数须一致且显式 `CRITICAL=0`；附条件 PASS 显性化为 WARN 注记不机械红——
-> 裁决权威在 HITL2 用户；契约日 2026-10-08，出处 = delivery-criteria-mechanization RFC）——
+> 裁决权威在 HITL2 用户；契约日 2026-10-08，出处 = delivery-criteria-mechanization RFC）·
+> 门C = 读者版合同门（新 run 非 quick_factual：`final/readable-vN.md` 与 `final/vN` 同版、
+> 六节结构、长度上限、无 `[来源:]`/`evidence/` 路径；旧场按 epoch 豁免，quick_factual 编制豁免）——
 > 编号 = node-gate 实装序，与表行序无关。
 
 ## 八节点 I/O 契约表
@@ -30,8 +32,12 @@
 | 挖掘 wave1（analyst） | leads.md（建议挖深条）+ topics.md | evidence/*.md（frontmatter 七字段 + 原文摘录 + 解读 + Question List） | 卡片在场 + 硬字段齐（evidence-audit 机械把守） |
 | 综合 wave2（synthesis） | evidence/ 全部 + topics.md | findings.md（F# 结论 + 支撑证据 + gap 四态）+ final.md 当前版（run 根；交付副本归 final/） | findings + final 当前版在场 |
 | 审查（critic） | findings.md + final 当前版 + evidence/ | review.md（当前终局块：文件头声明最新在上；`readiness: PASS|FAIL` + CRITICAL/MAJOR 清单；历史轮不夺权） | review 在场且终局块判完；PASS = HITL2 前置 |
-| 交付审阅（HITL2） | review.md + final 当前版 | question.md §Decisions 追加拍板行 | **§Decisions 行在场**（node-gate 门③） |
-| 交付 | 拍板分支后果 | final/ 交付副本（vN.md）+ `deliverables/presented`（指 final/vN）+ 当前 bundle 对应的可解析操作侧 audit.md；ops `run-accept` 绿后写 delivered.json/manifest.json/acceptance.md；同 bundle rerun 另加 question.md 的 `> rerun: vN · kind · 日期` 行 | **交付副本 + presented（指 final/vN）+ 报告摘要与 CRITICAL 节一致且 `CRITICAL=0`**（present = node-gate 门②）；`final.md` 是工作稿、`final/vN` 才是交付物 |
+| 交付审阅（HITL2） | review.md + final 当前版 + final/readable.md（新 run 非 quick_factual） | question.md §Decisions 追加拍板行 | **§Decisions 行在场**（node-gate 门③） |
+| 交付 | 拍板分支后果 | final/ 交付副本（vN.md + readable-vN.md，同版）+ `deliverables/presented`（reader 第一、final/vN 第二）+ 当前 bundle 对应的可解析操作侧 audit.md；ops `run-accept` 绿后写 delivered.json/manifest.json/acceptance.md；同 bundle rerun 另加 question.md 的 `> rerun: vN · kind · 日期` 行 | **交付副本 + presented（含 reader 与 final/vN）+ 报告摘要与 CRITICAL 节一致且 `CRITICAL=0`**（present = node-gate 门②；reader = 门C）；`final.md` 是工作稿、`final/vN` 才是交付物 |
+
+**读者版步骤（不是新节点/phase）**：Lead 在 review 终局 PASS 后、HITL2 前加载 reader-final
+skill，写 `final/readable.md`；用户定稿后复制为 `final/readable-vN.md`（与 `final/vN.md` 同版），
+present 两份。quick_factual 与旧场（无 `run.md`）豁免；门C 把守，缺 reader 交付红。
 
 **输入侧规矩**：硬输入清单 = 上表"输入（读）"列；缺件 = 本节点亮红灯而非开工，下游对缺失
 输入只有两个动作——上报 lead 或等，**没有"瞎猜补全"这个选项**。清单检查由脚本做，不加记账仪式。

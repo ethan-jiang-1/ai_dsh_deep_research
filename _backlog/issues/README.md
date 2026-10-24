@@ -4,13 +4,14 @@
 
 ## 活跃清单
 
-- [run 终稿缺面向人的可读层](2026-10-23-run-final-human-readable.md)（2026-10-23，推敲中）
-- [可读终稿没有流程位](2026-10-23-readable-final-process.md)（2026-10-23，推敲中）
+（当前无在办问题；读者版两张卡 2026-10-24 已结归档——见 [settled 池](../_archived/settled_issues/README.md)。）
 
 （rerun 版本面与图谱表达已结并归档——见 [settled 池](../_archived/settled_issues/README.md)。）
 （动态 DAG、稳定节点身份、方法库主界面迁移、W<wave>.<index> 节点/WAVE 层均已结并归档到 [settled 池](../_archived/settled_issues/README.md)。）
 
 ## 最近归档
+
+（[可读终稿流程位](../_archived/settled_issues/2026-10-23-readable-final-process.md) + [可读层](../_archived/settled_issues/2026-10-23-run-final-human-readable.md) 2026-10-24 已结：reader-final 层落地——`reader-final` skill + `final/readable-vN` + 门C + 回执 reader 哈希 + 终稿页签双视图；真实 run `drt_cn-open-vs-us-closed-agentic` 全链绿、769 测试；[Note](../../notes/implemented/2026-10-23-reader-final.md)。）
 
 （[rerun 不满转接](../_archived/settled_issues/2026-10-23-rerun-dissatisfaction-triage.md) 2026-10-23 已结：L1 词表 skill + L2 三选项/报告末节 + L3 两处只读折叠块；719 测试、四角色重录、真模型探针五条全中。）
 

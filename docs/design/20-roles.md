@@ -10,7 +10,7 @@ subagent 派活），角色分工天然对齐研究波的语义。
 
 | 角色 | codex 生命周期映射 | 一句话职责 | 产出（唯一 owner 面） |
 |---|---|---|---|
-| Lead（主编） | instantiation + hitl1 + wave2 + hitl2 + final | 唯一入口与出口：立项对齐、拆解组队、纯综合、审阅交付 | question.md / topics.md / plan.md / findings.md / final.md |
+| Lead（主编） | instantiation + hitl1 + wave2 + hitl2 + final | 唯一入口与出口：立项对齐、拆解组队、纯综合、审阅交付 | question.md / topics.md / plan.md / findings.md / final.md / final/readable(-vN) |
 | Scout（侦察） | wave0（广度地基） | 画出"答案可能在哪儿"：query 多样化、来源发现与分级、排除显式化 | leads.md |
 | Analyst（分析） | wave1（深度挖掘） | 把方向变成可核查证据：question-list 驱动、交叉验证、反例搜索 | evidence/*.md |
 | Critic（核查） | wave1 深度审查 + readiness + hitl2 前置 | 对"看起来完成了"过敏：无来源结论狩猎、质量审计、readiness 判定 | review.md |

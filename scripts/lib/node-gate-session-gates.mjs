@@ -74,7 +74,7 @@ const eventDateOf = (e) => (typeof e?.time === 'number' && Number.isFinite(e.tim
 function witnessEventsOf(text) {
   const out = []
   for (const line of text.split('\n')) {
-    if (!line.includes('"tool/call"') && !line.includes('deliverables/presented') && !line.includes('user-question-reply')) continue
+    if (!line.includes('"tool/call"') && !line.includes('"tool/result"') && !line.includes('deliverables/presented') && !line.includes('user-question-reply')) continue
     try { out.push(JSON.parse(line)) } catch { /* 坏行跳过 */ }
   }
   return out
@@ -150,6 +150,32 @@ export function scanWitnessLogs(sessionsRoot, slug, { readLog = emptyOnUnreadabl
           continue
         }
         if (asks.size === 0) continue
+        // timed ask 的真实答复形态（2026-10-23 实测）：UI 提交后，答案落在
+        // `tool/result` 的 message.content JSON 里，不生成 user-question-reply 的 inbox splice。
+        // 这也是 callId 绑定的用户答复；只认同一 ask callId + `answers[].selected`。
+        if (e?.type === 'tool/result') {
+          const message = e.data?.message
+          const callId = message?.toolCallId
+          if (callId !== undefined && asks.has(callId)) {
+            const content = (Array.isArray(message?.content) ? message.content : []).map((c) => c?.text ?? '').join('\n')
+            let parsed = null
+            try { parsed = JSON.parse(content) } catch { /* 文本答复 */ }
+            const labels = []
+            collectLabels(parsed, labels)
+            const label = labels.find((l) => /定稿/.test(l))
+            if (label !== undefined) {
+              const date = eventDateOf(e)
+              if (contract !== null && date !== null && date < contract) out.staleReplies++
+              else out.replies.push({
+                callId,
+                label,
+                proxy: /代理模拟|hitl-answer|代理代答/.test(content + asks.get(callId).args),
+                time: typeof e.time === 'number' ? e.time : null,
+                askTime: asks.get(callId).time,
+              })
+            }
+          }
+        }
         const items = Array.isArray(e?.data?.inserted) ? e.data.inserted : (e?.data?.source !== undefined ? [e.data] : [])
         for (const item of items) {
           const src = item?.source
@@ -327,7 +353,8 @@ export function isHitl2Row(line) {
 
 export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadableLogReader, witness = null) {
   const finalDir = join(bundleDir, 'final')
-  const versionFiles = existsSync(finalDir) ? readdirSync(finalDir).filter((f) => f.endsWith('.md')) : []
+  // 只认版本副本 `vN.md`；`readable.md`/`readable-vN.md` 是读者版，不是版本记账。
+  const versionFiles = existsSync(finalDir) ? readdirSync(finalDir).filter((f) => /^v\d+\.md$/.test(f)) : []
   const qPath = join(bundleDir, 'question.md')
   const qText = existsSync(qPath) ? readFileSync(qPath, 'utf8') : null
   const dec = qText ? decisionsLines(qText) : []

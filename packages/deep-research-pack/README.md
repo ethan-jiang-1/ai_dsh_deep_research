@@ -21,7 +21,7 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 | `presets/<role>/skills/<n>/SKILL.md` | 研究方法论技能（各角色清单正本 = 盘上 `presets/<role>/skills/` 目录，bundle 自动发现——新增免改本行） | ✓ |
 | `cordis.patch.yml` | bundle 行：preset roster（default: lead）+ 会话全文检索开关（`session-query-sqlite` `openAt: first-search`——FTS 惰性开，`:memory:` 每进程重建；检索工具行在 lead/critic preset）+ `tool-present` + 团队可视面 `ui-agent-team` + 本包 client 面 | ✓ |
 | `workspace/` | **研究工作区种子**：研究手册（`AGENTS.md`：证据契约/目录约定/完成判据）+ `NODES.md`（节点 I/O 契约）+ `question-patterns.md`（判型库）+ `templates/run/` 七件模板（含 `plan.md` 执行图）+ `method-library.md`（独立空架子种子，不从正本同步）+ `.gitignore`（包内名 `.gitignore.example`——npm 不打包 `.gitignore` 文件，安装时由 scaffold 落地成本名；工作区纳入版本控制时拒收 run bundle/归档/方法库，留档加 `!路径`） | ✓ |
-| `src/client/` → `lib/client.js` | **研究驾驶舱**（Research Cockpit——观察面 client 面，D18 单点例外；构成正本 = [design/40](../../docs/design/40-research-cockpit.md)）：右栏「研究状态」页签（流程轨道锚点/人性化活动流/活标题/HITL 横幅/参与指引/决策诚实线）+ 「研究配置」页签 + 「研究图谱」页签（只读 SVG DAG：顶层 plan 节点 / Team 任务 / 依赖边；复合子节点 W2.1.1… 在节点详情展开，节点可复制 `drt_<slug>/W2.1` 引用；Wave 前缀/重号/悬空 parent/deps/墓碑/跨组只读提示；无 plan 或 blocked_by 时明确无图，不提供调整动作）+ 「终稿」页签（接管 `drt_<slug>/final.md` 的文件地址，交付时自动开一次）+ **主界面「方法库」tab**（`conversation.view`；我的库/内置参考/四字段编辑，保存交给 Lead）+ 研究语义工具卡 + 挂起显性化 | ✓ 构建产物 |
+| `src/client/` → `lib/client.js` | **研究驾驶舱**（Research Cockpit——观察面 client 面，D18 单点例外；构成正本 = [design/40](../../docs/design/40-research-cockpit.md)）：右栏「研究状态」页签（流程轨道锚点/人性化活动流/活标题/HITL 横幅/参与指引/决策诚实线）+ 「研究配置」页签 + 「研究图谱」页签（只读 SVG DAG：顶层 plan 节点 / Team 任务 / 依赖边；复合子节点 W2.1.1… 在节点详情展开，节点可复制 `drt_<slug>/W2.1` 引用；Wave 前缀/重号/悬空 parent/deps/墓碑/跨组只读提示；无 plan 或 blocked_by 时明确无图，不提供调整动作）+ 「终稿」页签（认领 `drt_<slug>/` 终稿地址族：`final.md` / `final/vN.md` / `final/readable.md` / `final/readable-vN.md`；有读者版默认看读者版，可切审计版；交付时自动开一次）+ **主界面「方法库」tab**（`conversation.view`；我的库/内置参考/四字段编辑，保存交给 Lead）+ 研究语义工具卡 + 挂起显性化 | ✓ 构建产物 |
 | `src/lib/` → `lib/types/lib/` | 纯函数折算（清单正本 = [design/40](../../docs/design/40-research-cockpit.md)）——keyless 单测直接断言 | ✓ 构建产物 |
 | `scripts/preflight.mjs` · `scripts/scaffold.mjs` | 部署前置检查 + 一键准备（见下） | ✓ |
 
@@ -90,12 +90,15 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 2. **静默自主区**：Lead 拆 topic、派 Scout/Analyst/Critic（Agent Teams 通道），证据落
    `drt_<slug>/evidence/`（七字段 frontmatter：source_url / retrieved_at / quality / found_by /
    supports / source_tier / publisher）；Critic 对抗核查出 `review.md`（readiness PASS 是交付前置）；
-3. **HITL2 审阅**：结构化选项卡（定稿（按现稿交付）(Recommended) / 补研究（看报告末节；出新版本）/
+3. **HITL2 审阅**：Critic readiness PASS 后，Lead 按 `reader-final` skill 写 `final/readable.md`
+   （1–3 页、六节、不新增事实）；「终稿」页签默认显示读者版，可切审计版（`final/vN` 或
+   `final.md`）。结构化选项卡（定稿（按现稿交付）(Recommended) / 补研究（看报告末节；出新版本）/
    改说法（版本不变）；题干给「太浅 / 方向不对 / 太长」三个词）→ 拍板后交付 `final/vN` 副本
-   （每条关键结论附 `[来源: evidence/xx.md]`；报告首屏 = 决策摘要：建议与适用条件 /
+   + `final/readable-vN.md`（同版），present 两份（reader 第一、canonical 第二）；
+   canonical 每条关键结论附 `[来源: evidence/xx.md]`；报告首屏 = 决策摘要：建议与适用条件 /
    备选取舍 / 关键依据 / 最强反证 / 目前不能判断 / 下一步，末节 = 下一版优先项 / 什么会改变建议——
-   快速事实型缩略为答案+口径+依据+限制）；交付后想改 = 状态页 ⑤ 与终稿页脚的只读折叠块
-   「还不满意？三种改法」给话术，Lead 按 `rerun-triage` skill 分诊（不自动 rerun）；
+   快速事实型缩略为答案+口径+依据+限制（quick_factual 可跳过读者版）；交付后想改 = 状态页 ⑤ 与
+   终稿页脚的只读折叠块「还不满意？三种改法」给话术，Lead 按 `rerun-triage` skill 分诊（不自动 rerun）；
 4. **观察面**：DSH Web GUI 右栏「研究状态」页签看实时动态（流程轨道 = ◆立项确认 + 立项→
    组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付，↻ rerun 回路自交付审阅可见，人性化活动流，
    HITL 挂起横幅点名锚点与参与方式，活标题「研究状态 · ⏳ 等你拍板」，交付节点显示 `final/` 中的最高有效版本号（vN）；仅 v2+ 文件是证据扩张版本记录。）；

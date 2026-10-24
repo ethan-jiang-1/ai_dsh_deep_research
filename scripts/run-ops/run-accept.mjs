@@ -107,6 +107,7 @@ const versions = existsSync(finalDir)
   ? readdirSync(finalDir).filter((f) => /^v\d+\.md$/.test(f)).map((f) => Number(/^v(\d+)/.exec(f)[1])).sort((a, b) => a - b)
   : []
 const finalVersion = versions.at(-1) ?? null
+const readerVersion = finalVersion !== null && existsSync(join(finalDir, `readable-v${finalVersion}.md`)) ? finalVersion : null
 const presented = presentedInLogs(sessions, slug, readLog, { contract: contractEpochOf(bundle) || null })
 let delivered = null
 if (legacy) {
@@ -120,7 +121,7 @@ if (legacy) {
     presented: presented.status === 'FOUND' ? presented.events : [],
   })
   writeFileSync(join(bundle, 'delivered.json'), JSON.stringify(delivered, null, 2) + '\n')
-  console.log(`  PASS delivered.json 已写（final ${delivered.final.version === null ? '—' : `v${delivered.final.version}`} / present ${delivered.present?.path ?? '—'}）：${join(bundle, 'delivered.json')}`)
+  console.log(`  PASS delivered.json 已写（final ${delivered.final.version === null ? '—' : `v${delivered.final.version}`} / reader ${readerVersion === null ? '—' : `v${readerVersion}`} / present ${delivered.present?.path ?? '—'}）：${join(bundle, 'delivered.json')}`)
   const manifest = buildManifest({ slug, bundleDir: bundle, contract: contractEpochOf(bundle) ?? null, generatedAt: stamp })
   writeFileSync(join(bundle, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
   console.log(`  PASS manifest.json 已写（${manifest.files.length} 条文件角色/哈希）：${join(bundle, 'manifest.json')}`)
@@ -131,6 +132,7 @@ const acceptance = renderAcceptance({
   stamp,
   critical,
   finalVersion,
+  readableVersion: readerVersion,
   present: delivered?.present ?? null,
   corpusRoot,
   legacy,

@@ -877,8 +877,15 @@ async function pass5FinalDeliveryPhase() {
       ? readdirSync(join(base, 'final')).filter((name) => name.endsWith('.md'))
       : []
     const ledgerLatest = latestRunVersion(ledgerNames)
+    // 默认视图：有读者版先看读者版（`readable-vN.md` 同版，或 HITL2 前的 `readable.md`）；
+    // 否则看最高 `final/vN`；再否则回落 `final.md`。首标题对账跟着默认视图走。
+    const readerName = ledgerLatest >= 1 && ledgerNames.includes(`readable-v${String(ledgerLatest)}.md`)
+      ? `readable-v${String(ledgerLatest)}.md`
+      : ledgerNames.includes('readable.md') ? 'readable.md' : null
     const defaultViewPath = typeof base === 'string'
-      ? (ledgerLatest >= 1 ? join(base, 'final', `v${String(ledgerLatest)}.md`) : join(base, 'final.md'))
+      ? (readerName !== null
+        ? join(base, 'final', readerName)
+        : ledgerLatest >= 1 ? join(base, 'final', `v${String(ledgerLatest)}.md`) : join(base, 'final.md'))
       : null
     const finalBody = defaultViewPath !== null && existsSync(defaultViewPath) ? readFileSync(defaultViewPath, 'utf8') : ''
     // 首标题对账：两侧都剥掉 markdown 记号再比（H1 里的 `code` / **强调** 渲染后不留记号，
@@ -895,15 +902,19 @@ async function pass5FinalDeliveryPhase() {
     const footerText = footerVisible ? await paneTextOf(page) : ''
     step(footerVisible && footerText.includes('补研究') && footerText.includes('这份太浅'),
       '终稿页脚：三种改法折叠块在场（与状态页同源文案）', footerVisible ? 'fold expanded' : '缺折叠块')
-    step(heading !== '' && normalize(finalText).includes(heading), '终稿页签渲染 final.md 正文（与盘侧首标题对账）', heading)
+    step(heading !== '' && normalize(finalText).includes(heading), '终稿页签渲染默认正文（读者版优先；与盘侧首标题对账）', heading)
     // 静音条断言必须读**静音条元素**：整页 innerText 会被聊天里的「当前版报告」误命中
     // （2026-10-20 实测：扫全页把"当前版"当成了静音条命中，产品其实显示 v1）。
     const stripText = await page.evaluate(() => {
       const btn = [...document.querySelectorAll('button')].find((b) => (b.textContent ?? '').trim().startsWith('过程'))
       return btn === undefined ? '' : (btn.parentElement?.innerText ?? '').replace(/\s+/g, ' ').trim()
     })
-    const stripState = /审查未过|当前版|\bv\d+\b/.test(stripText)
-    if (ledgerLatest >= 1) {
+    const stripState = /审查未过|当前版|读者版|审计版|\bv\d+\b/.test(stripText)
+    if (readerName !== null) {
+      const toggle = page.getByRole('button', { name: /看审计版|看读者版/ }).first()
+      const toggleVisible = await toggle.isVisible().catch(() => false)
+      step(toggleVisible, '终稿页签读者版/审计版切换在场', readerName)
+    } else if (ledgerLatest >= 1) {
       const toggle = page.getByRole('button', { name: /看当前工作稿|看 v\d+（版本账）/ }).first()
       const toggleVisible = await toggle.isVisible().catch(() => false)
       step(toggleVisible, '终稿页签版本切换在场（版本账 / 当前工作稿）', toggleVisible ? `v${ledgerLatest}` : '缺切换按钮')

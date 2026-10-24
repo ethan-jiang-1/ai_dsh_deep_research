@@ -219,3 +219,28 @@ test('报告首屏决策摘要：模板节名与生成/审查合同钉（模板 
   // 合同不扩张：自由文本协议禁词（hitl-feedback-protocol 否决同款）
   assert.doesNotMatch(template + synthesis + review, /\[ACCEPTED\]/, '报告合同面出现自由文本协议禁词');
 });
+
+test('读者版终稿：reader-final skill + persona + 手册钉面（review PASS 后、HITL2 前）', () => {
+  const skill = readFileSync(join(PRESETS, 'lead/skills/reader-final/SKILL.md'), 'utf8');
+  const yml = readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8');
+  const manual = readFileSync(join(ROOT, 'research-workspace/AGENTS.md'), 'utf8');
+  // skill（生成正本）：触发 + 两产物 + 六节 + 自检 + 交付顺序
+  assert.match(skill, /review\.md.*PASS|readiness: PASS/, 'reader-final 缺 PASS 后触发的显性条件');
+  assert.match(skill, /final\/readable\.md/, 'reader-final 缺工作件路径');
+  assert.match(skill, /final\/readable-vN\.md/, 'reader-final 缺交付件路径');
+  for (const section of ['结论', '为什么', '这对你意味着什么', '什么会改变这个结论', '目前不能判断', '依据与延伸']) {
+    assert.match(skill, new RegExp(`## ${section}`), `reader-final 缺六节：${section}`);
+  }
+  assert.match(skill, /不新增.*事实|不新增搜索/, 'reader-final 缺「不新增事实/搜索」约束');
+  assert.match(skill, /reader 第一|读者版第一/, 'reader-final 缺 present 顺序（reader 第一）');
+  assert.match(skill, /5 分钟|五分钟/, 'reader-final 缺 5 分钟读者自检');
+  // persona（行为最强钉）：PASS 后加载 + 交付五步 + present 两份
+  assert.match(yml, /reader-final/, 'persona 未点名 reader-final skill');
+  assert.match(yml, /final\/readable\.md/, 'persona 缺工作件路径');
+  assert.match(yml, /final\/readable-vN\.md/, 'persona 缺交付件路径');
+  assert.match(yml, /present 两份/, 'persona 缺 present 两份');
+  // 手册（跨角色/恢复合同）：writer/交付/完成判据
+  assert.match(manual, /final\/readable\.md/, '手册缺读者版工作件');
+  assert.match(manual, /final\/readable-vN\.md/, '手册缺读者版交付件');
+  assert.match(manual, /门C/, '手册缺门C 读者版合同');
+});

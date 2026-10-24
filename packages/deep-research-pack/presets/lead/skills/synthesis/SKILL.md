@@ -60,3 +60,4 @@ description: 综合写作（wave2 语义）方法论：纯综合先行、finding
 - 把 C/D 级来源当关键支撑；
 - 用首屏格式齐全冒充证据充分（六段写满 ≠ 建议成立——每段仍按 [来源:] 链判）；
 - 把预测假设写成事实（预测必须标假设与口径；证据不足就写「目前不能判断」）。
+- **review 终局 PASS 后、HITL2 前**：加载 reader-final skill 派生 `final/readable.md`；用户定稿后复制为 `final/readable-vN.md`，与 canonical 一起 present 两份。读者版合同住 reader-final skill，不在这里复述。
