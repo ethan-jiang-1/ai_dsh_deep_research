@@ -2,6 +2,8 @@
 
 > 状态：implemented
 
+> 后续：[结论去向与质量责任重写](2026-10-24-backlog-notes-seam.md)（部分取代“下游处理申请/接收方”段；入口两张票、缺陷通道、状态生命周期维持）。
+
 来源 = `ai_dsh_loop_advisor/_backlog/`（外部材料参考仓快照，非 vendor pin；钉版 `b43be87`，登记 = [00-index §外部研究材料](../../docs/00-index.md)），源卡 = 该仓 `issues/2026-10-12-backlog-process-made-explicit.md`（owner 已批准并落地的铁本：手册 + `_backlog/AGENTS.md` 门牌 + 两轨翻转表）。借鉴卡 = [_backlog settled issue](../../_backlog/_archived/settled_issues/2026-10-12-backlog-process-borrow.md)（含本仓缺口实测审计与验收对账）；决定登记 = [D24](../../docs/00-index.md)。
 
 ## 决定

@@ -1,8 +1,8 @@
 # methods/ · 按当前问题选择方法
 
-这里的方法辅助 [backlog 流程](../README.md)：澄清需求、补事实、比较方案、准备验收标准、交接结论。先用下表选一篇，再读它的步骤；每张卡不必跑完整套。执行到需要外部技能的步骤时，才加载完整本体及点名资源；技能未注册或本地缺失时，按 [来源与读取](#外部技能的来源与读取) 查固定版本。读取失败只阻断依赖该技能的步骤，其余工作继续。
+这里的方法辅助 [backlog 流程](../README.md)：澄清需求、补事实、比较方案、准备验收标准、选择结论去向。先用下表选一篇，再读它的步骤；每张卡不必跑完整套。执行到需要外部技能的步骤时，才加载完整本体及点名资源；技能未注册或本地缺失时，按 [来源与读取](#外部技能的来源与读取) 查固定版本。读取失败只阻断依赖该技能的步骤，其余工作继续。
 
-Backlog 准备问题、依据、结论和可能的交接；[notes](../../notes/README.md) 决定是否形成 Note 或 RFC、以什么方式处理。申请提交不等于 Note 已生成，也不等于下游完成。卡片关闭与 RFC 不强制绑定。
+Backlog 准备问题、依据与结论；结论的持久载体按 [结论去向](issue-to-note.md) 选择，[notes](../../notes/README.md) 按收件规则落地。`去向` 行记录去向，不等于验收完成；卡片关闭与 RFC 不强制绑定。
 
 ## 现在需要哪篇
 
@@ -12,7 +12,7 @@ Backlog 准备问题、依据、结论和可能的交接；[notes](../../notes/R
 | 缺事实，需要调研、询问或试原型；收到的报告还未经核实 | [补充证据](requirements-probes.md) | 短结论回原卡，长依据进 [research](../research/README.md) 并链接 |
 | 需求已清楚，但不知道怎样算完成 | [设计验收标准](validation-design.md) | 原卡的验收标准，必要时用表格列明 |
 | 信息已齐，需要整理需求、比较方案或决定是否关闭 | [整理方案与结论](requirements-synthesis.md) | 原卡的方案、取舍、结论和关闭条件 |
-| 结论已确定，需要申请后续处理或指向已有决定 | [申请下游处理](issue-to-note.md) | 原卡的结论与申请去向；是否成为 note 由下游决定 |
+| 结论已确定，需要选择持久载体（无 / 否决 / 待评审 / 已交付 / 延后） | [结论去向](issue-to-note.md) | 原卡的 `去向：` 行与目标；载体是否成立按 notes 收件规则 |
 
 通常先澄清需求、补齐事实，再整理方案。决定做的事项，整理方案时先补齐验收标准，再确定方案和必要的分步安排。决定延后、不做或指向已有结论的，不必设计尚未要做的实现验收。
 
@@ -53,6 +53,6 @@ Backlog 准备问题、依据、结论和可能的交接；[notes](../../notes/R
 | [设计验收标准](validation-design.md) | `skills/engineering/tdd/SKILL.md`、`skills/engineering/codebase-design/SKILL.md` |
 | [选择证据](validation-evidence.md) | 无外部技能依赖；按本仓实际 owner |
 | [判断验收结果](validation-judgment.md) | 需要相应步骤时读 `skills/engineering/code-review/SKILL.md`、`skills/engineering/diagnosing-bugs/SKILL.md`、`skills/engineering/retro/SKILL.md` |
-| [申请下游处理](issue-to-note.md) | 无外部技能依赖；向 [notes 入口](../../notes/README.md) 申请处理 |
+| [结论去向](issue-to-note.md) | 无外部技能依赖；按 [notes 收件规则](../../notes/AGENTS.md) 落地 |
 
 来源更新时，重新核对实际使用的技能本体和分支资源，再调整本仓方法。技能的 tracker、模板和发布默认行为不替代本仓卡片位置或用户授权。

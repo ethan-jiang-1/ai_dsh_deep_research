@@ -57,5 +57,5 @@ Choose an existing local owner and command from [the development guide](../../do
 **Done:** every load-bearing requirement has a behavior class, observable pass/fail signal, negative or
 complementary case, evidence owner, and an explicitly named human judgment or an explicit “none”.
 These criteria describe how downstream work will be judged; designing them does not require the work to
-have been implemented. Include them in the [handoff materials](issue-to-note.md); the receiving notes
-process owns how they are used there.
+have been implemented. They travel with [issue-to-note](issue-to-note.md): an
+`implemented` note's verification section cites or lists them.

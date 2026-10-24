@@ -1,70 +1,81 @@
 ---
 name: issue-to-note
-description: Prepare a confirmed issue conclusion and submit it to the downstream notes process for handling; record the request destination and close the issue when its backlog conditions are met.
-whenToUse: A confirmed issue conclusion needs downstream handling. The receiving process decides whether it becomes a note; this method only prepares and submits the request.
+description: Decide the durable carrier for a confirmed issue or bug conclusion (none, rejected, proposed, implemented, deferred), record one 去向 line with the quality sign-off owner, and close it when its backlog conditions are met.
+whenToUse: An issue or bug has a confirmed conclusion and needs a durable home, or is ready to close. Not for unresolved deliberation; not a mandate that every issue becomes a note.
 ---
 
-# Request downstream handling
+# Issue or bug conclusion: choose the durable carrier
 
-**Input:** the scoped issue, its confirmed conclusion and supporting evidence. For work that will be done,
-include its scope, alternatives and acceptance criteria. Resolve uncertain choices through
-[requirements confirmation](requirements-elicitation.md) before treating them as decisions.
+**Input:** a confirmed conclusion on a scoped issue, or a bug at `修复落地` / `已修`, with its evidence and, for `proposed` / `implemented`, its quality contract (`## 验收标准` for issues, `## 修复判据` for bugs) and the quality sign-off.
+**Output:** one `去向：<value> — <target>` line on the card, the target artifact (or an explicit no-note reason), and the quality sign-off owner recorded.
 
-**Output:** a submitted processing request with a traceable destination, or an explicit gap preventing submission.
+The card is the package; do not duplicate its problem, evidence or alternatives here. This method only decides where the conclusion's rationale lives and records that decision.
 
-Backlog and the downstream notes process are two successive parts. Backlog clarifies the problem and
-prepares the conclusion; this method requests the next part to handle it. The receiving process decides
-whether a note is needed and what form the result takes. Submitting the request does not mean a note
-exists, the request is approved, or downstream work is complete.
+## 1. Which mode?
 
-## 1. Prepare the materials
+- **Decision-only:** the conclusion itself is the deliverable (a choice, a rejection, a deferral, a review result). Close at conclusion.
+- **Implementation-bound:** the conclusion authorizes a change. Keep the issue active until the change lands; at delivery, write the note in the same change and close.
 
-Use the [backlog closure criteria](../README.md). State the applicable conclusion:
+A final decision whose implementation is not authorized yet stays active; it is not `implemented` until the change lands.
 
-- **Do it:** the observable problem, intended result, scope and exclusions, chosen approach, actual
-  alternatives and their costs, and executable acceptance criteria. If completion cannot be judged,
-  return to [acceptance design](validation-design.md).
-- **Do it later:** why it is deferred, the condition for reconsidering it, and where that condition can
-  be observed. Leave future design unresolved when it is unnecessary for this decision.
-- **Do not do it:** why, and the scope in which that reason applies.
-- **An existing conclusion already answers it:** link the existing decision or current contract and
-  explain which question it settles. If no further processing is needed, the card can close under the
-  backlog rules without a downstream request.
+Before choosing `proposed` or `implemented`, the card must carry a testable quality contract: `## 验收标准` for issues ([acceptance design](validation-design.md)) or `## 修复判据` for bugs. If it is missing or untestable, fix that first; `implemented` is not available.
 
-Separate confirmed facts from recommendations. A human choice that is still pending keeps the dependent
-conclusion open; record the exact question and next step.
+## 2. What crosses, and who owns the quality bar
 
-## 2. Submit a processing request
+Only the durable decision and its evidence cross into notes. The card keeps the problem, discussion, options and the quality contract; the note gets the chosen decision, the alternatives actually rejected, the verification actually run, and residual risk. Link the card; do not copy it.
 
-Keep the complete request on the issue. Present it in the current reply with the card link, confirmed
-conclusion, and what downstream handling is requested. If the user has already named a receiving session
-or destination, submit there instead within the authorized scope. The receiver follows the
-[notes entry](../../notes/README.md); that README is a rules entry, not a request inbox.
+Quality ownership does not move with the disposition:
 
-Record the submission date, recipient or destination, and requested handling on the card. This makes the
-handoff reconstructable without relying on the conversation alone. Source links support the problem,
-conclusion and reasons; they do not replace those statements. Moving the card later must preserve the request.
+- **Issue business quality** — intended result, scope, acceptance criteria, taste/value/risk — belongs to the user. The agent drafts and evidences; it does not self-accept.
+- **Bug business quality** — priority/product acceptability and P0/public-behavior sign-off belong to the user; severity triage, root cause, fix selection and fix evidence belong to the agent (P0 never self-authorized, D24).
+- **Note quality** — decision rationale, rejected alternatives, verification against the bar — belongs to the note author (agent), reviewed by the user at the stage boundary.
+- `none` / `deferred` / `rejected`: the business disposition is the user's; the card records it. `proposed`: the reviewer/user approves the RFC. `implemented`: the user accepts the business result; the note carries the technical evidence.
 
-Backlog does not create a note as proof of submission, decide whether one is needed, or prescribe downstream
-format and lifecycle. Merely drafting the request on the card is preparation, not submission. If delivery
-could not happen, report the gap and do not claim it was submitted.
+### Issue → note
 
-**Done:** the request has been presented to the user or submitted to the designated receiver, and its
-submission is recorded. Waiting for downstream processing is separate from an unresolved backlog question.
-Submission itself grants no implementation authority.
+The note's `决定` is the issue's conclusion; `输掉的方案` comes from the card's actual alternatives; `实际跑过的验证` is the evidence against `## 验收标准`. The card remains the problem/discussion record.
 
-## 3. Close the issue when its conditions are met
+### Bug → note
 
-Apply the [backlog closure rules](../README.md): preserve the discussion, add the conclusion and request
-destination (or the existing conclusion that already answers the issue), move the card into the appropriate
-archive, repair relative links, and update the active and archive lists. Research follows its
-[consumer-linked lifecycle](../research/README.md). A submitted request need not have produced a note before
-the backlog card can close.
+The note's `决定` is the fix approach, only when the fix carries a persistent decision; `实际跑过的验证` is the evidence against `## 修复判据`. Mechanical/local fixes are `none`; the bug card remains the defect record.
 
-Existing cards that already carry implementation and pending acceptance stay active until their stated
-requirements are resolved. Keep the remaining evidence gaps and human decisions explicit; do not treat
-implementation alone as acceptance. This exception does not create a second implementation process here.
+## 3. Choose the disposition
 
-**Finish:** another reader can tell what backlog concluded, why, where downstream handling was requested,
-and whether the card is closed or exactly what still prevents closure. The receiving process owns all
-subsequent decisions about notes and delivery.
+| Disposition | Use when | Write now | Close when |
+|---|---|---|---|
+| `none` | An existing doc, code path, test or decision already owns the rationale. | Nothing; link the carrier. | The link is on the card; the carrier's owner owns the quality bar. |
+| `rejected` | The conclusion is "do not do" and the negative knowledge can prevent a tempting recurrence. | `notes/rejected/<date>-<topic>.md` | The note exists and is linked; the user owns the decision. |
+| `proposed` | The conclusion needs explicit review before implementation. | `notes/proposed/<date>-<topic>.md` RFC | The RFC exists and is linked; the reviewer/user owns approval. |
+| `implemented` | The conclusion is final and its rationale should persist, delivered as a code/doc change or as the decision itself. | `notes/implemented/<date>-<topic>.md` in the same change | The note exists, links the card, its verification cites or lists the quality contract, and the quality owner in §2 has accepted. |
+| `deferred` | The conclusion is "do later"; no note now. | Only the trigger owner. | The trigger owner is recorded; the user owns the deferral. |
+
+Mapping from the card's `结论倾向`: `现在做` → `proposed` when review is needed, otherwise `implemented` at delivery; `以后做` → `deferred`; `不做` → `rejected` when the reason has future value, otherwise `none`; `并入已有` → `none`; `未定` is not closeable.
+
+`deferred` trigger owner, in order: `triggers.md` when the condition is observable in normal work; the owning note when the deferral is part of a delivered decision; otherwise write `none` on the card, keep the reason there, and do not claim the condition is tracked.
+
+## 4. Record it
+
+Add one line under the status line when the card closes:
+
+```
+> 去向：implemented — `notes/implemented/<date>-<topic>.md`；业务验收：用户
+> 去向：none — `docs/guides/60-dev-loop.md`
+> 去向：deferred — `_backlog/triggers.md`
+```
+
+The value is the closed set above; the target is a relative Markdown link or an explicit `none`. The line records the quality sign-off owner when it is not the default. For bugs, add `技术验收：agent`; for issues, the business acceptance owner is enough. The `去向` line is the handoff record; no separate request, inbox or acknowledgment is needed.
+
+## 5. Close
+
+Follow the [backlog closure rules](../README.md) and the issue/bug card rules. A `proposed` card closes with the RFC link; the RFC owns the next stage. An `implemented` card closes only when the note, the delivered decision/change and the business acceptance exist; the note and the card link each other. A `none` or `deferred` card closes with the existing carrier or trigger owner recorded.
+
+When a target moves later (`proposed` → `implemented`, `implemented` → `archived`), the move updates inbound `去向` links in the same change; `md-links` is the guard.
+
+## 6. Boundaries
+
+- This is not an inbox, a queue, or an approval step.
+- Unresolved deliberation stays on the issue; do not open a note to park it.
+- Not every issue becomes a note; `none` is a legitimate and common outcome.
+- Quality ownership does not transfer: `none` / `deferred` / `rejected` still need the user's business disposition; the note carries technical evidence, not business acceptance.
+- Bugs: apply the table at `修复落地` / `已修` and record the disposition in `修复关联`; mechanical or local fixes are `none`.
+- Carrier admission rules are owned by [notes/AGENTS](../../notes/AGENTS.md); this method does not restate them.

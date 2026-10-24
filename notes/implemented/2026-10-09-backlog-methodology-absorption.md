@@ -2,6 +2,8 @@
 
 > 状态：implemented
 
+> 后续：[结论去向与质量责任重写](2026-10-24-backlog-notes-seam.md)（部分取代“下游处理申请/接收方”段；其余决定维持）。
+
 来源 = `ai_dsh_assitant/_backlog/` reference repository snapshot，commit `ce649dbcdb4c908f7fc3de0d564554b5aa8880ab`；版本作为外部参考，不是 DSH vendor pin。当前合同见 [D19/D20](../../docs/00-index.md) 与 [_backlog 意图载体总图](../../docs/design/60-intent-carriers.md)。
 
 ## 决定
