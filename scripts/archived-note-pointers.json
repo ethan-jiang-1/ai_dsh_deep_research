@@ -195,6 +195,11 @@
       "source": "docs/design/40-research-cockpit.md",
       "target": "notes/archived/2026-09-28-cockpit-flow-face.md",
       "reason": "§6 已知限制 G6（vendor UI 待查）的历史根因链出处"
+    },
+    {
+      "source": "notes/implemented/2026-10-09-snapshots-adoption.md",
+      "target": "notes/archived/2026-09-24-keyless-snapshot-lane.md",
+      "reason": "部分取代的历史出处：回放通道选型/三层判据现由 snapshots/README + snapshot-replay-smoke 头注承接"
     }
   ]
 }

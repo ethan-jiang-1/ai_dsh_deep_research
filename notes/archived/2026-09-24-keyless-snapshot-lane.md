@@ -1,10 +1,11 @@
 # keyless 录制快照面（输出快照级回归）——已交付
 
 > 状态：implemented
+> 归档：2026-10-24
 
 > 部分取代（2026-10-09）：本文拥有回放通道选型（keyless、禁真 LLM、插 llm-replay）与三层判据的
 > 立项理由；"场景声明住 `snapshot.yml`、夹具落 `tests/fixtures/`"的部分已由
-> [snapshots 采纳 Note](2026-10-09-snapshots-adoption.md) 取代（声明正本迁 `snapshots/replay/research-face/snapshot.json`，
+> [snapshots 采纳 Note](../implemented/2026-10-09-snapshots-adoption.md) 取代（声明正本迁 `snapshots/replay/research-face/snapshot.json`，
 > B 层比对面扩大）。
 
 2026-09-24 立项（当日搁置）、2026-09-27 复活（频率条件实质到达：单日 6+ 次模型可见文本变更

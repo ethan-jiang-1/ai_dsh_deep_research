@@ -6,8 +6,9 @@
 与来源分析 [_backlog/research/2026-10-09-company-snapshots-analysis.md](../../_backlog/_archived/research/2026-10-09-company-snapshots-analysis.md)。
 缺陷判决与实测 = [BUG-018](../../_backlog/_archived/fixed_bugs/BUG-018-snapshot-replay-advertised-coverage.md) +
 [recorded-session 义务标定](2026-10-08-recorded-session-obligation.md)。
-部分取代 [keyless-snapshot-lane](2026-09-24-keyless-snapshot-lane.md)（该篇仍拥有回放通道选型；本文取代其
-"声明住 `snapshot.yml`、`tests/fixtures/` 落点"的部分）。
+部分取代 [keyless-snapshot-lane](../archived/2026-09-24-keyless-snapshot-lane.md)（回放通道选型与三层判据现由
+[snapshots/README](../../snapshots/README.md) 与 [snapshot-replay-smoke 头注](../../scripts/smoke/snapshot-replay-smoke.mjs)
+承接；本文取代其 "声明住 `snapshot.yml`、`tests/fixtures/` 落点" 的部分；历史出处见归档快照）。
 
 ## 决定
 
