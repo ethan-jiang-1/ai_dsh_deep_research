@@ -19,8 +19,6 @@
 
 （三条已随消费者毕业迁入 [_archived/research/](../_archived/research/)：notes-stocktake 体检 + strategy-benchmark 两份。）
 
-- [2026-10-21-method-library-main-surface.md](2026-10-21-method-library-main-surface.md) — 方法库管理迁到主界面：conversation.view seam、UX 分工、W1 保存（消费者：[issue](../_archived/settled_issues/2026-10-21-method-library-main-surface.md)）。
-
 - [dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md](dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md) — 动态研究 DAG 与多层 subagent 编排（消费者：[_archived/settled_issues/2026-10-21-dynamic-research-dag.md](../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)）。
 - [dynamic-research-dag/2026-10-21-dsh-plugin-dag-practices.md](dynamic-research-dag/2026-10-21-dsh-plugin-dag-practices.md) — DSH 插件生态与外部的动态 DAG 实践（同一消费者：已结宪章卡 + implemented RFC）。
 - [dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md](dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md) — 宽搜/深搜的深度模型与研究单元（同一消费者：已结宪章卡 + implemented RFC）。
@@ -45,7 +43,7 @@
 - [run-bundle-charter/2026-10-23-p7-manual-batch.md](run-bundle-charter/2026-10-23-p7-manual-batch.md) — P7 手册文本批：D28 读序/交付终局/来源证明、行预算升顶、四角色快照重录与 snapshot/preset 验收（同一消费者：已结宪章卡 + implemented RFC）。
 - [run-bundle-charter/2026-10-23-p8-final.md](run-bundle-charter/2026-10-23-p8-final.md) — P8 盲续跑收口：手册后 4/4、非回归矩阵、P6 延后、RFC 毕业与卡归档（同一消费者：已结宪章卡 + implemented RFC）。
 
-（2026-10-24 可读终稿两张卡已结：其 `reader-final/` 设计材料与样张随消费者迁入 [_archived/research/reader-final/](../_archived/research/reader-final/2026-10-23-reader-final-design.md)。）
+（2026-10-24 用户判断落地材料不再服务活跃卡：`reader-final/` 两份随可读终稿两卡迁入 [_archived/research/reader-final/](../_archived/research/reader-final/2026-10-23-reader-final-design.md)；`2026-10-21-method-library-main-surface.md` 随已结卡迁入 [_archived/research/](../_archived/research/2026-10-21-method-library-main-surface.md)。）
 
 （2026-10-18 方法配置两份材料已随消费者毕业迁入 [_archived/research/](../_archived/research/)：外部先例与真模型 A/B。）
 
