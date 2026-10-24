@@ -1,6 +1,7 @@
 # _backlog 治理二轮借鉴（loop_advisor 2026-10-03 版：主干框架 / reference 区 / 暂停池 / 索引对账）
 
 > 状态：implemented
+> 归档：2026-10-24
 
 归宿：用户直派（2026-10-03：「治理规矩还是要从 ai_dsh_loop_advisor/_backlog 学习来整理整理
 我们的 _backlog/……尽量借鉴吧，因为整个结构多少都是一样的」）。借鉴源 = `ai_dsh_loop_advisor/
