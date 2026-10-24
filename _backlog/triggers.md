@@ -24,3 +24,5 @@
 | slop 清单的机检覆盖 | **不补新审计**（2026-10-19 裁决：`count-free` / `doc-now-only` 已是门禁，台账原写「未机械化」是事实错误，已改准；再造 slop 审计 = 换名重造） | 出现某类 slop 反复逃过现有两道门禁的实际案例，且能写出固定判据（而非「读起来像 slop」）时，扩现有门禁而不是新立一个 | [discipline-map 源 3 #4](../docs/discipline-map.md) |
 | 终稿页签的同名（同会话两场研究） | 页签标题固定「终稿」，靠静音条路径 hover 与正文 H1 区分（2026-10-20 接受） | 同一会话里先后交付两场研究、用户在两枚「终稿」间认错或找不到目标；此时升级活标题（`sidebar.right.pane.tab.title` 已可用，带 slug） | [归档卡](./_archived/settled_issues/2026-10-19-final-tab-in-sidebar.md) + [40 §6](../docs/design/40-research-cockpit.md) |
 | 终稿里的相对图片 | 不解析（`MarkdownText` 未接 `pathImages`；研究终稿模板不含图） | 出现一份终稿含本地相对图片、且 alt 文本不够用的真实阅读场景；此时按 `final.md` 所在目录接 `pathImages` | [归档卡](./_archived/settled_issues/2026-10-19-final-tab-in-sidebar.md) |
+| 双层安装类型可命名性偏差 | 暂不根治；`dev/vendor-build.sh` ④ 步金丝雀守门容忍 TS2883 | 下次升 pin 或 vendor-build 痛点再现（④ 步需改容错 / TS2883 变红）时立项 | [bumping-vendor-pin](../.agents/skills/bumping-vendor-pin/SKILL.md) |
+| vendor 根构建 tsc 目标 | 本仓走 tsx 源码；vendor 产物由 `dev/vendor-build.sh` 产出 | 再遇 vendor `pnpm run build` 缺根包 `lib/types` / tsdown 入口顺序问题 | [bumping-vendor-pin](../.agents/skills/bumping-vendor-pin/SKILL.md) |

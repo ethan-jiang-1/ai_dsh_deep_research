@@ -62,11 +62,6 @@
       "reason": "六处缺陷清单的历史出处指针（run 环硬化记录的冻结家）"
     },
     {
-      "source": "notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md",
-      "target": "notes/archived/2026-09-24-dsh-discipline.md",
-      "reason": "'原文只在 git'的下放决定历史指针（dsh-discipline 毕业快照）"
-    },
-    {
       "source": "notes/implemented/2026-09-26-signal-to-noise-remediation.md",
       "target": "notes/archived/2026-09-26-bundle-face-wiring.md",
       "reason": "workspaceFiles 接通状态的证据指针（'= 已接通'的历史判定记录）"
@@ -200,6 +195,21 @@
       "source": "notes/implemented/2026-10-09-snapshots-adoption.md",
       "target": "notes/archived/2026-09-24-keyless-snapshot-lane.md",
       "reason": "部分取代的历史出处：回放通道选型/三层判据现由 snapshots/README + snapshot-replay-smoke 头注承接"
+    },
+    {
+      "source": "notes/implemented/2026-09-26-signal-to-noise-remediation.md",
+      "target": "notes/archived/2026-09-25-vendor-pin-bump-017rc2.md",
+      "reason": "升 pin 历史轮次出处（现行流程 owner = bumping-vendor-pin 技能）"
+    },
+    {
+      "source": ".agents/skills/bumping-vendor-pin/SKILL.md",
+      "target": "notes/archived/2026-09-25-vendor-pin-bump-017rc2.md",
+      "reason": "两次实操历史轮次/017 待查项出处（现行流程 owner = 本技能）"
+    },
+    {
+      "source": ".agents/skills/bumping-vendor-pin/SKILL.md",
+      "target": "notes/archived/2026-09-30-vendor-pin-bump-020rc2.md",
+      "reason": "两次实操历史轮次出处（现行流程 owner = 本技能）"
     }
   ]
 }

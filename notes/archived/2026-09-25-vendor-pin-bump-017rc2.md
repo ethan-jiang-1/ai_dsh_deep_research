@@ -1,6 +1,7 @@
 # RFC：vendor 升 pin 重校（`dsh-v0.1.5-rc.2` → `dsh-v0.1.7-rc.2`）
 
 > 状态：implemented
+> 归档：2026-10-24
 
 > 本轮（0.1.5→0.1.7）建立的升 pin 固定动作与复核结论由后续轮次增量修订：0.2.0 轮见
 > [020rc2 升 pin Note](2026-09-30-vendor-pin-bump-020rc2.md)（新增 vendor 内部 node_modules
@@ -264,7 +265,7 @@ vendor + 0.1.7-rc.2 装的 research profile）。
 `snapshots/AGENTS.md`（命中④）· `vendor/README.md`（命中②）· `.github/AGENTS.md`（无命中，CI 细节）。
 
 **前身（首版枚举子集表的来历）**：本表首版是三个来源、11 行的子集，已被全量枚举**完整覆盖并扩展**；
-原文只在 git（[dsh-discipline 毕业 Note](../archived/2026-09-24-dsh-discipline.md) 记了那次下放的决定）。
+原文只在 git（[dsh-discipline 毕业 Note](2026-09-24-dsh-discipline.md) 记了那次下放的决定）。
 
 **实际跑过的验证（全部在新 pin 上实跑）**：
 

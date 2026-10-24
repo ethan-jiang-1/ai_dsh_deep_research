@@ -126,7 +126,7 @@ tarball 装法不生成 PATH bin，用安装副本内脚本全路径，见 pack 
 | 加部署脚本 / bin | `package.json` 的 `files` + `bin` | `release-smoke`（L2：真装一次，装完能跑） |
 | 加观察面 client 面能力 | `src/client/` + `tsconfig.client.json` 的 include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `client-load-smoke`（真浏览器）+ `client-keys` 门禁 |
 | 改 persona / skill / 手册文本（模型可见） | 同 diff 跑真模型档；运行中的 web 缓存 boot 文本，须重启通道 | `l4-lite-smoke`（真模型档） |
-| 换 vendor pin | `dev/vendor-build.sh` 全链重建 + 逐条重审 | 升 pin 毕业记录（[0.1.7 轮](../../notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md) · [0.2.0 轮](../../notes/implemented/2026-09-30-vendor-pin-bump-020rc2.md)） |
+| 换 vendor pin | `dev/vendor-build.sh` 全链重建 + 逐条重审 | [bumping-vendor-pin 技能](../../.agents/skills/bumping-vendor-pin/SKILL.md)（流程正本；历次轮次见归档） |
 | 改 profile 镜像 | 不手改——改 pack 源后跑 `bash dev/boot-run.sh`：组合不完整/缺席时它重建，漂移时它 **exit 1** 并打印 `rm -rf <profile>` 补救（直接 `dsh --profile research` 会静默用旧镜像） | boot-run 漂移检测（fail-loud） |
 
 **一句话规则**：源改一处（pack），生成物跑生成器，证据按面选档（keyless 证管道 / 真模型档

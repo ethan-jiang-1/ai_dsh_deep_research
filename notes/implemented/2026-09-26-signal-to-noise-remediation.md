@@ -200,7 +200,7 @@ research/README 行 3 格对 4 列表头）；**门禁盲区同类**（fixture �
 与跨文件收口）。处置手法三类：**改成现在时的事实**（D7/D9/D10 行、形态表两行、guides/62 三处）、
 **去数字化**（门禁数/tests 数/断言数/note 数/行数一律不再写进散文，改指正本）、**下沉历史**
 （roadmap 的"已毕业离队"块删除；discipline-map 的 0.1.7 重审表整体迁进
-[升 pin 毕业 Note](../implemented/2026-09-25-vendor-pin-bump-017rc2.md)，原地只留维护规则与指针）。
+[升 pin 毕业 Note](../archived/2026-09-25-vendor-pin-bump-017rc2.md)，原地只留维护规则与指针）。
 
 **S1 追加发现（本轮最重的一条，性质 = 假称的防复发）**：commit `e152961` 的 message 声称
 "vendor-build.sh 固化 ⑦ host 半补建 ⑧ 前端壳重建 两步（防下次升 pin 重蹈）"，但

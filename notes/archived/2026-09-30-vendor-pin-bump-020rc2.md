@@ -1,6 +1,7 @@
 # vendor 升 pin 重校（`dsh-v0.1.7-rc.2` → `dsh-v0.2.0-rc.2`）
 
 > 状态：implemented
+> 归档：2026-10-24
 
 归宿：用户直派（2026-09-30：「我们本身也要升级到 dsh-v0.2.0-rc.2 的依赖，vendor/dsh 这里」）；
 程序与影响面判据 = [guides/60 §2 任务型路由表「换 vendor pin」行](../../docs/guides/60-dev-loop.md)；

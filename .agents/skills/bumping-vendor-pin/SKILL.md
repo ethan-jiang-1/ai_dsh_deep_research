@@ -8,8 +8,9 @@ description: Use when upgrading the vendored DSH pin (vendor/dsh submodule tag/c
 本技能是 **guidance，不是 checklist**：按实际 diff 与风险选择动作，完成判据在各步末。相关：
 [guides/60 §2 换 vendor pin 路由行](../../../docs/guides/60-dev-loop.md)（必跑面正本）、
 [discipline-map §重审触发路径](../../../docs/discipline-map.md)（逐源重审清单正本）。
-两次实操的教训已固化进本流程（[017rc2](../../../notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md) /
-[020rc2](../../../notes/implemented/2026-09-30-vendor-pin-bump-020rc2.md)）；流程缺口按"缺什么再加"补进本页。
+两次实操的教训已固化进本流程；历史轮次见归档
+[017rc2](../../../notes/archived/2026-09-25-vendor-pin-bump-017rc2.md) /
+[020rc2](../../../notes/archived/2026-09-30-vendor-pin-bump-020rc2.md)（历史出处，不是现行流程）；流程缺口按"缺什么再加"补进本页。
 
 ## 1. 钉身份（四处同 diff）
 
@@ -63,3 +64,10 @@ L4-lite 需凭据（真模型档）；未跑项如实分列，不算通过。
   （锁条目千级）——install 时长预期要给够。
 - `--clean` 会清 vendored cordis 全家（vendor/cordis、cosmokit、schemastery）——重装走
   workspace 解析，不需要手工补救。
+- **017 轮的 vendor 根构建待查**：`pnpm run build` 的 `tsc -b tsconfig.host.json` 缺根包
+  `lib/types`；本仓启动走 tsx 源码，vendor 产物由 `dev/vendor-build.sh` 产出。再遇 vendor
+  根构建红时按 [归档 017](../../../notes/archived/2026-09-25-vendor-pin-bump-017rc2.md) 的待查项复查。
+- **双层安装类型可命名性偏差（020 轮登记，未立项）**：root workspace 与 vendor 内部安装并存，
+  聚合 client typecheck 的 tests 夹具 TS2883；`dev/vendor-build.sh` ④ 步金丝雀守门容忍。
+  根治 = 合并单层安装（动作大）；触发 = 下次升 pin 或 vendor-build 痛点再现（见
+  `_backlog/triggers.md`）。
