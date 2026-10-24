@@ -12,8 +12,8 @@
 > [final-target.ts](../../packages/deep-research-pack/src/lib/final-target.ts) ｜
 > 卡 [流程位](../../_backlog/_archived/settled_issues/2026-10-23-readable-final-process.md) +
 > [可读层](../../_backlog/_archived/settled_issues/2026-10-23-run-final-human-readable.md) ｜
-> 证据 [研究材料](../../_backlog/research/reader-final/2026-10-23-reader-final-design.md) ·
-> [样张](../../_backlog/research/reader-final/2026-10-23-sample-readable-cn-us-hardware.md)
+> 证据 [研究材料](../../_backlog/_archived/research/reader-final/2026-10-23-reader-final-design.md) ·
+> [样张](../../_backlog/_archived/research/reader-final/2026-10-23-sample-readable-cn-us-hardware.md)
 
 ## 决定
 

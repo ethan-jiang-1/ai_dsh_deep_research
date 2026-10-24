@@ -5,8 +5,8 @@ intent: 为两张活跃 issue 卡提供机制核验、DSH 载体选择、交付/
 
 # 可读终稿（reader-final）设计证据
 
-> 消费者：[流程位卡](../../_archived/settled_issues/2026-10-23-readable-final-process.md) ·
-> [可读层卡](../../_archived/settled_issues/2026-10-23-run-final-human-readable.md)。
+> 消费者：[流程位卡](../../settled_issues/2026-10-23-readable-final-process.md) ·
+> [可读层卡](../../settled_issues/2026-10-23-run-final-human-readable.md)。
 > 本页只放较长机制依据与设计；结论、验收标准与执行计划住卡，不在这里维护进度。
 > 事实核验基线：工作树 `3f934f0`（2026-10-23），`pnpm verify` 全绿、`pnpm test` 747 通过。
 

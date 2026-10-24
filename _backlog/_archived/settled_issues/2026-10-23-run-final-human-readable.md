@@ -76,9 +76,9 @@ opened: 2026-10-23
 
 **为什么不是第二份事实**：读者版只允许压缩 canonical；门C 检查同版/结构/长度/来源面；
 数字子集以 WARN 呈现供人工复核；HITL2 用户随时切审计版；任何不一致以 canonical 为准并重派生。
-完整控制面 = [研究材料 §5/§10](../../research/reader-final/2026-10-23-reader-final-design.md)。
+完整控制面 = [研究材料 §5/§10](../research/reader-final/2026-10-23-reader-final-design.md)。
 
-**样张**：[cn-us v2 读者版样张](../../research/reader-final/2026-10-23-sample-readable-cn-us-hardware.md)
+**样张**：[cn-us v2 读者版样张](../research/reader-final/2026-10-23-sample-readable-cn-us-hardware.md)
 （原型，不是交付物；用于判断结构/长度/语气）。
 
 ## 方案与取舍
@@ -146,6 +146,6 @@ opened: 2026-10-23
   `manifest` `reader-final` 角色、`acceptance` 读者版行在场；`client-load-smoke` 读者版默认 +
   审计版切换 PASS。
 - 内容合同与样张：`final/readable-v1.md` 按六节合同产出；样张见
-  [cn-us 样张](../../research/reader-final/2026-10-23-sample-readable-cn-us-hardware.md)。
+  [cn-us 样张](../research/reader-final/2026-10-23-sample-readable-cn-us-hardware.md)。
 - 仍缺：用户本人读真实 reader 的 5 分钟三问；若结构/长度/语气不合，回改 `reader-final`
   skill 与门C 上限，再重派生，不把「机械绿」当「可读性已验收」。

@@ -18,8 +18,7 @@ opened: 2026-10-23
 - **可读性**：用户 2026-10-24 选择 A「收口归档」；ops 按 5 分钟三问复核（结论 / 为什么 /
   什么会改变结论）均可在 reader 内直接答出，未逐题记录用户原话。
 - **去向**：[Note](../../../notes/implemented/2026-10-23-reader-final.md) · [D29](../../../docs/decisions.md) ·
-  [研究材料](../../research/reader-final/2026-10-23-reader-final-design.md) 留活跃索引
-  （消费者改为本已结卡 + Note/D29）。
+  [研究材料](../research/reader-final/2026-10-23-reader-final-design.md) 已随卡迁入 `_archived/research/reader-final/`。
 
 ## 审阅上下文（先看这一节）
 
@@ -29,7 +28,7 @@ opened: 2026-10-23
   [guides/61](../../../docs/guides/61-run-playbook.md) 的交付路径是 review PASS → HITL2 →
   `run-accept`；`node-gate` 门②/④/门A 不检查 reader-facing 产物；`ResearchFinalTab` 只承接
   `final.md` 地址并按 `final/vN` 读正文；`schema-scan` 的新 run 顶层白名单会拦 run 根的
-  `readable-final.md`。逐条代码位置与复算 = [研究材料 §2](../../research/reader-final/2026-10-23-reader-final-design.md)。
+  `readable-final.md`。逐条代码位置与复算 = [研究材料 §2](../research/reader-final/2026-10-23-reader-final-design.md)。
 - **机制约束（逐条核验后的结论）**：
   1. **落点**：`final/` 内新增 `.md` 不触发 D28 顶层白名单；run 根新增 `readable-final.md`
      会核心违约。选 `final/`，不改白名单（`scripts/lib/schema-scan-core.mjs:90-136`）。
@@ -55,7 +54,7 @@ opened: 2026-10-23
 
 **当前情况：** 上面 7 条机制约束已逐条核验；内容面的受众与结构问题见
 [可读终稿缺面向人的可读层](2026-10-23-run-final-human-readable.md)。读者版样张 =
-[cn-us v2 样张](../../research/reader-final/2026-10-23-sample-readable-cn-us-hardware.md)（原型，
+[cn-us v2 样张](../research/reader-final/2026-10-23-sample-readable-cn-us-hardware.md)（原型，
 不是交付物）。
 
 ## 结论（建议：现在做）
@@ -83,7 +82,7 @@ HITL2 前派生；交付时与 `final/vN.md` 同版复制并一起 present；机
 2. **输入**：当前 `final.md`（canonical 当前版）、`question.md` 的 Purpose/业务决策简报、
    `findings.md`、`review.md` 终局块；不新增搜索、不新增证据。
 3. **输出工作件**：`final/readable.md`，按六节结构写（见
-   [研究材料 §5](../../research/reader-final/2026-10-23-reader-final-design.md)）。
+   [研究材料 §5](../research/reader-final/2026-10-23-reader-final-design.md)）。
 4. **自检**：5 分钟三问（结论/为什么/什么会改变结论）、数字逐字回查 canonical、反证与
    「目前不能判断」未删、无 `[来源:]`/`evidence/`、canonical 链接可解析。
 5. **HITL2**：审阅摘要写明「读者版在终稿页签；审计源 = `final.md`」；不新增 ask 点。
@@ -115,7 +114,7 @@ HITL2 前派生；交付时与 `final/vN.md` 同版复制并一起 present；机
   角色，牵动 critic/gate/receipt/页签；不做。
 - **C. 只改 `final.md` 的写法**：把正文写浅，审计信息被压缩，critic 无法复核；不做。
 - **D. 只做读者探针，不设产物**：探针不是交付件，无法 present/复用/审计；不做。
-- 完整取舍账与风险反证 = [研究材料 §3/§10](../../research/reader-final/2026-10-23-reader-final-design.md)。
+- 完整取舍账与风险反证 = [研究材料 §3/§10](../research/reader-final/2026-10-23-reader-final-design.md)。
 
 ## 已知与未决
 
