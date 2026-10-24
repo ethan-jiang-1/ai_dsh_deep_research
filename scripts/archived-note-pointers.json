@@ -180,6 +180,21 @@
       "source": "notes/rejected/2026-09-24-frontmatter-caliber-gate.md",
       "target": "notes/archived/2026-09-24-m2-data-caliber.md",
       "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "notes/implemented/2026-09-28-rerun-loop-live.md",
+      "target": "notes/archived/2026-09-28-cockpit-flow-face.md",
+      "reason": "rerun 执行环的流程轨道/回边表达前身；G4/G7 根因链历史出处（现行 owner = design/40）"
+    },
+    {
+      "source": "notes/implemented/2026-10-12-research-config-tab.md",
+      "target": "notes/archived/2026-09-28-cockpit-home.md",
+      "reason": "研究配置页签的“同族先例”历史指针（现行 owner = design/40）"
+    },
+    {
+      "source": "docs/design/40-research-cockpit.md",
+      "target": "notes/archived/2026-09-28-cockpit-flow-face.md",
+      "reason": "§6 已知限制 G6（vendor UI 待查）的历史根因链出处"
     }
   ]
 }

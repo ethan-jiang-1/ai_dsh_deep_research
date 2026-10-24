@@ -1,6 +1,7 @@
 # cockpit-home：驾驶舱当前事实单一正本（design/40）+ 入口重定向 + 历史清场——已交付
 
 > 状态：implemented
+> 归档：2026-10-24
 
 归宿：roadmap §队列「cockpit-home」（2026-09-28 用户取题并当日交付，已离队）。
 

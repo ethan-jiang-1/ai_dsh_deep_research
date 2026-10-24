@@ -131,6 +131,9 @@
 
 - **run-dashboard / client-load-reference oracle 保留独立**：dashboard 是同步 HTML 投影，oracle 的价值在独立（复用生产实现会掩盖漂移）；两者不复用 run-context，边界见 [run-context Note](../../notes/implemented/2026-10-23-run-context.md)。
 
+- **G6 编辑卡片跨会话串联（vendor UI，待查）**：操作侧改动曾混进 run 会话视图；lead journal
+  核实无 harness 写入，归 vendor UI 归属问题；历史根因链 = [归档中国 cockpit-flow-face](../../notes/archived/2026-09-28-cockpit-flow-face.md)。
+
 - **问卡窄列布局修复（本包注入，2026-10-21）**：右栏展开后聊天列变窄，vendor `ui-user-questions`
   的卡头（`space-between` + 右侧动作区 nowrap/不收缩 + 左侧 `min-width: 0`）会把标题塌成一字一行
   （1280 视口实测：卡片 353px、标题 24px 宽 × 946px 高）。本包 client 在 `src/client/index.ts` 注入

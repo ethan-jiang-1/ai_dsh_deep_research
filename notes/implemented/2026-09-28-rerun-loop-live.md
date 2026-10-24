@@ -3,7 +3,7 @@
 > 状态：implemented
 
 归宿：roadmap §队列「rerun-loop-live」（2026-09-28 用户直派并当日交付，已离队）。
-取代检查：[cockpit-flow-face](2026-09-28-cockpit-flow-face.md)（implemented，同日）拥有轨道/
+取代检查：[cockpit-flow-face](../archived/2026-09-28-cockpit-flow-face.md)（implemented，同日）拥有轨道/
 回边的构成决定——本条不改构成，只做活体验证与走查续篇，未取代。
 
 ## 决定

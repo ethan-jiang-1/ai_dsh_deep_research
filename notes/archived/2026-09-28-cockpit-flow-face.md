@@ -1,9 +1,10 @@
 # cockpit-flow-face：研究流程与参与点在驾驶舱的显性化 + 自跑探索环——已交付
 
 > 状态：implemented
+> 归档：2026-10-24
 
 归宿：roadmap §队列「cockpit-flow-face」（2026-09-28 用户直派并当日交付，已离队）。
-取代检查：[observability-gui](2026-09-24-observability-gui.md)（留活跃）拥有挂起显性化
+取代检查：[observability-gui](../implemented/2026-09-24-observability-gui.md)（留活跃）拥有挂起显性化
 机制——本条未改其机制，只扩表达面，不取代。
 
 ## 决定
