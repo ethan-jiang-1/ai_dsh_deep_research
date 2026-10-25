@@ -20,7 +20,7 @@
 - **随包文档自包含**：pack README 指向仓库 `docs/`、`notes/`、`_backlog/` 的相对链接改 GitHub
   绝对 URL；workspace `NODES.md` 与 lead skills 里的仓库内部脚本/笔记路径改“开发仓（不随包）”
   表述；preset 注释同步。模型可见文本变更按 [snapshots/README](../../snapshots/README.md) 重录
-  四角色（`codeAnchor = 55b59e5`、`vendor = 687f282e86`），并刷新 lead 渲染金标准。
+  四角色（`codeAnchor = 7eb5d25`、`vendor = 687f282e86`），并刷新 lead 渲染金标准。
 - **开源门面**：根 README 增用户/贡献者/License 指针；新增 [CONTRIBUTING](../../CONTRIBUTING.md)、
   [SECURITY](../../SECURITY.md)、[.github/workflows/ci.yml](../../.github/workflows/ci.yml)（keyless
   verify + test）；[external-materials](../../docs/external-materials.md) 的作者本地路径去掉主机前缀；

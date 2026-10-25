@@ -11,7 +11,7 @@
       "fixture": "session.v4.jsonl",
       "renderExpected": "ui.expected.md",
       "source": {
-        "codeAnchor": "55b59e5a5aef3c40a903c57f0898a0a76a9283f7",
+        "codeAnchor": "7eb5d252b186aeec9f39386a53104cf314792918",
         "vendor": "687f282e8625c6b8d11ff58211a90524be2e4317",
         "recordedAt": "2026-10-25T02:39:54.434Z",
         "recording": "live"
@@ -22,7 +22,7 @@
       "preset": "scout",
       "fixture": "scout/session.v4.jsonl",
       "source": {
-        "codeAnchor": "55b59e5a5aef3c40a903c57f0898a0a76a9283f7",
+        "codeAnchor": "7eb5d252b186aeec9f39386a53104cf314792918",
         "vendor": "687f282e8625c6b8d11ff58211a90524be2e4317",
         "recordedAt": "2026-10-25T02:32:48.488Z",
         "recording": "live"
@@ -33,7 +33,7 @@
       "preset": "analyst",
       "fixture": "analyst/session.v4.jsonl",
       "source": {
-        "codeAnchor": "55b59e5a5aef3c40a903c57f0898a0a76a9283f7",
+        "codeAnchor": "7eb5d252b186aeec9f39386a53104cf314792918",
         "vendor": "687f282e8625c6b8d11ff58211a90524be2e4317",
         "recordedAt": "2026-10-25T02:35:22.518Z",
         "recording": "live"
@@ -44,7 +44,7 @@
       "preset": "critic",
       "fixture": "critic/session.v4.jsonl",
       "source": {
-        "codeAnchor": "55b59e5a5aef3c40a903c57f0898a0a76a9283f7",
+        "codeAnchor": "7eb5d252b186aeec9f39386a53104cf314792918",
         "vendor": "687f282e8625c6b8d11ff58211a90524be2e4317",
         "recordedAt": "2026-10-25T02:37:36.012Z",
         "recording": "live"
