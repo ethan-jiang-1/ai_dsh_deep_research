@@ -22,11 +22,15 @@
 
 ## 实际跑过的验证
 
-- `pnpm verify` 全绿；`pnpm test` 785 pass / 0 fail（rc.2 vendor pin）。
-- `release-smoke` ALL PASS；`cold-start-smoke` GREEN。
-- rc.3 实测：全局 `dsh 0.2.1-rc.3` 在独立 home 安装 tarball、`--dump-config` 见本包行、`scaffold --install-only` preflight 通过、web 启动出横幅、`plugin remove` 后 profile 无插件痕迹。
-- rc.3 vendor 构建尝试：`tsc host` 在 `llm-pi-ai` 类型与 apps/web vitest 双层版本处红；作为 defer 证据，不宣称 rc.3 开发基线可用。
-- FAQ 对照：`engines.dsh` 范围、只读定义、数据不进包、干净安装/卸载、T0/T1/T3 主路径有资产；T5 六条、T6 可复跑矩阵、T8 供应链仍是后续（不冒充已证）。
+- `pnpm verify` 全绿；`pnpm test` 789 pass / 0 fail（rc.2 vendor pin）。
+- `release-smoke` ALL PASS；`cold-start-smoke` GREEN；`client-load-smoke` ALL PASS。
+- `pack-smoke` ALL PASS（T0 tarball 形状/入口/无安装脚本）；`data-smoke` ALL PASS（包目录零写入/假 token 不泄漏/卸载保留）；`compat-smoke` ALL PASS（全局 rc.3 install → dump → scaffold → remove）。
+- rc.3 vendor 构建尝试：`tsc host` 在 `llm-pi-ai` 类型与 apps/web vitest 双层版本处红；后经 root/vendor 依赖对齐修复 rc.2 构建，rc.3 重试仍未做（不宣称 rc.3 开发基线可用）。
+- FAQ 对照（T0–T8）：
+  - T0 `pack-smoke` + `package-contract.test`；T1 `pnpm test`；T2 `release-smoke` preset-smoke；T3 `release-smoke`/`cold-start-smoke`；T6 `compat-smoke` + `release-smoke`；T7 `client-load-smoke`——本机实跑绿。
+  - T4 未跑（本轮无模型可见文本变更；存量 snapshot 资产不冒充新证据）。
+  - T5 `data-smoke` 覆盖 ①包目录零写入 / ⑤假 token / ⑥卸载保留；②双会话、③storage 重启、④模型可见重建标 N/A（本包无 storage domain、无新 event、client 只读）。
+  - T8 `package-contract.test` 证无 install/prepare、peers-only；`data-smoke` 证假 token 不进日志；npm provenance/签名未做（未发布，明确 N/A）。
 
 ## 补记：rc.3 构建阻塞的根因与处置
 

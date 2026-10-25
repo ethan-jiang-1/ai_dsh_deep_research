@@ -93,6 +93,8 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 - `export-handoff` 自检：只含 tracked 源，不含运行态/凭据/run 数据/依赖；
 - `dev-runtime-clean` 门禁：`dev/` 下无运行态。
 - `compat-smoke`：全局 rc.3 宿主上的 install / dump / scaffold / remove（本机无 rc.3 时 exit 2）。
+- `data-smoke`：包目录零写入 / 假 token 不泄漏 / 卸载后 workspace 用户文件保留；双会话/storage 标 N/A。
+- `pack-smoke`：T0 tarball 形状、exports 可解析、无安装期脚本/凭据。
 
 ## 7. 已知限制与延后工作
 
