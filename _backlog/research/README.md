@@ -19,6 +19,8 @@
 
 （三条已随消费者毕业迁入 [_archived/research/](../_archived/research/)：notes-stocktake 体检 + strategy-benchmark 两份。）
 
+- [2026-10-25-dsh-plugin-conventions.md](2026-10-25-dsh-plugin-conventions.md) — DSH 官方 bundle/profile/workspace/兼容声明惯例（消费者：[运行形态合同](../issues/2026-10-25-run-form-contract.md)、[分发合同](../issues/2026-10-25-distribution-contract.md)）。
+
 - [dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md](dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md) — 动态研究 DAG 与多层 subagent 编排（消费者：[_archived/settled_issues/2026-10-21-dynamic-research-dag.md](../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)）。
 - [dynamic-research-dag/2026-10-21-dsh-plugin-dag-practices.md](dynamic-research-dag/2026-10-21-dsh-plugin-dag-practices.md) — DSH 插件生态与外部的动态 DAG 实践（同一消费者：已结宪章卡 + implemented RFC）。
 - [dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md](dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md) — 宽搜/深搜的深度模型与研究单元（同一消费者：已结宪章卡 + implemented RFC）。

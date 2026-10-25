@@ -523,6 +523,13 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
     // L2 安装冒烟才现形——提前到 L0 秒级红（判据同 release-smoke ④，事实源前移到 verify）。
     else if (!rel.includes(VENDOR_TAG))
       fail(gate, `compatibility.dshReleases 不含当前 vendor tag ${VENDOR_TAG}——升 pin 忘加列（补 packages/deep-research-pack/package.json 的 dsh.compatibility.dshReleases）`);
+    // 宿主只认 engines.dsh；兼容矩阵是镜像。两处不同源 = 声明面与安装门各说一套（静默失效）。
+    const engine = pkg?.engines?.dsh;
+    const first = Array.isArray(rel) && typeof rel[0] === 'string' ? rel[0].replace(/^dsh-v/, '') : null;
+    if (typeof engine !== 'string' || engine.trim() === '')
+      fail(gate, 'engines.dsh 未声明——宿主兼容检查会退回 peer 范围（补 packages/deep-research-pack/package.json 的 engines.dsh）');
+    else if (first !== null && engine !== first)
+      fail(gate, `engines.dsh ${engine} 与兼容矩阵首项 ${first} 不同源——宿主只认 engines.dsh（改 package.json 两处同 diff）`);
   }
 }
 

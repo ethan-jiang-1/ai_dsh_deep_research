@@ -31,7 +31,7 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 
 ## 部署（四步）
 
-**前置**：DSH 版本必须是 `dsh-v0.2.1-rc.2`（`dsh.compatibility.dshReleases` 钉死）。
+**前置**：DSH 版本必须满足 `engines.dsh`（当前 `0.2.1-rc.2`；宿主安装/启动会拒绝不匹配版本），Node 满足 `^22.19.0 || >=24.0.0`。`dsh.compatibility.dshReleases` 是兼容矩阵镜像，不是宿主字段。
 
 ```sh
 # ① 建 profile——自定义名默认只带 dsh-base（起不了 web，也就没有 GUI）；须先取 web 模板。
@@ -55,7 +55,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffo
 #    也可用安装后的 bin：dsh-deep-research-scaffold --workspace ~/research-workspace --profile research
 #    它用 PATH 上的 `dsh`；写哪个 home 由 `DSH_HOME` 决定（未设时默认 ~/.dsh）——日用安装别先 source dev/env.sh；
 #    手工等价 = 三件全做（scaffold 内部就是这三件）：cp -r <pack>/workspace/. ~/research-workspace/
-#             + dsh plugin --profile research add @deepseek-ai/dsh-experimental-agent-team-profile
+#             + dsh plugin --profile research add @deepseek-ai/dsh-experimental-agent-team-profile@0.2.1-rc.2
 #             + 全路径 preflight.mjs --workspace ~/research-workspace
 
 # ④ 起研究会话（cwd = 工作区，手册从这里注入；本步拉起该 profile 的 web 并打印带 token 的 URL）

@@ -7,7 +7,7 @@
 //   ② 干净 profile（先删后建，从 web 模板）+ .npmrc（pnpm store/cache 钉 repo 内）
 //   ③ dsh plugin --profile release-check add file:<tarball>（⚠ --profile 挂在 plugin 子命令上）
 //   ④ manifest 断言：bundles reconcile / 安装副本带 presets + lib/client.js / peers 在 manifest
-//      且 dependencies 缺席（peers-only 发布形状）/ 兼容矩阵含当前 tag
+//      且 dependencies 缺席（peers-only 发布形状）/ engines.dsh 与兼容矩阵同源
 //   ④b 部署链（安装副本 scaffold 铺种子 + preflight 复检）
 //   ⑤ preset-smoke 断言（安装域通道：--profile release-check --no-patch，含 boot 页模块表行断言）
 //      → 端口释放验证（释放到静默）
@@ -222,8 +222,11 @@ try {
   step(Object.keys(installedManifest.peerDependencies ?? {}).length > 0 && installedManifest.dependencies === undefined,
     'manifest peers-only（peers 在场、dependencies 缺席）',
     installedManifest.dependencies ? `dependencies=${Object.keys(installedManifest.dependencies).join(',')}` : undefined);
-  step(Array.isArray(installedManifest?.dsh?.compatibility?.dshReleases) && installedManifest.dsh.compatibility.dshReleases.includes('dsh-v0.2.1-rc.2'),
-    '兼容矩阵钉住当前 tag');
+  step(installedManifest?.engines?.dsh === '0.2.1-rc.2'
+    && Array.isArray(installedManifest?.dsh?.compatibility?.dshReleases)
+    && installedManifest.dsh.compatibility.dshReleases.includes('dsh-v0.2.1-rc.2'),
+    '兼容矩阵钉住当前 tag（engines.dsh + dshReleases 同源）',
+    `engines.dsh=${installedManifest?.engines?.dsh ?? '（缺）'}；dshReleases=${JSON.stringify(installedManifest?.dsh?.compatibility?.dshReleases ?? null)}`);
 
   // ④b 安装形状证据（pack 自带 bin：真铺一个工作区 → 安装验收 preflight 验它）
   console.log('④b 部署链（安装副本：scaffold 铺种子 + preflight 复检）…');

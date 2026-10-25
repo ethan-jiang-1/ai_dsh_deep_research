@@ -4,10 +4,13 @@
 
 ## 活跃清单
 
-（当前无在办问题；读者版两张卡 2026-10-24 已结归档——见 [settled 池](../_archived/settled_issues/README.md)。）
-
-（rerun 版本面与图谱表达已结并归档——见 [settled 池](../_archived/settled_issues/README.md)。）
-（动态 DAG、稳定节点身份、方法库主界面迁移、W<wave>.<index> 节点/WAVE 层均已结并归档到 [settled 池](../_archived/settled_issues/README.md)。）
+| 卡 | 当前缺口 |
+|---|---|
+| [运行形态合同](2026-10-25-run-form-contract.md) | 已定 A+B / per-user / 两阶段；按切片推进，合同页随实现落盘 |
+| [分发的可执行合同](2026-10-25-distribution-contract.md) | `engines.dsh`/团队层/Node 已落地；升级/离线/冷 home 待做 |
+| [工作区所有权与升级](2026-10-25-workspace-ownership-and-upgrade.md) | 手册/NODES 是插件行为还是用户数据；种子无版本；`--force` 可覆盖方法库 |
+| [运行态数据边界与移交](2026-10-25-runtime-data-boundary.md) | 状态在源码树内；`dev/harness-home` 误落位；复制目录会带走数据；bundle 含绝对路径 |
+| [独立环境冷启动与多实例](2026-10-25-standalone-cold-start.md) | 干净 clone 无 bootstrap；固定 home/profile/端口；无冷启动证据；平台/离线未声明 |
 
 ## 最近归档
 

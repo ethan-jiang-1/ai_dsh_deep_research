@@ -15,15 +15,25 @@ const scaffold = readFileSync(join(PACK, 'scripts', 'scaffold.mjs'), 'utf8');
 const releaseSmoke = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'scripts', 'smoke', 'release-smoke.mjs'), 'utf8');
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
 
-test('preflight：六面检查清单在位（版本/peer/团队层/手册+节点+判型+模板/构建产物/密钥）', () => {
+test('preflight：检查清单在位（Node/版本/peer/团队层/手册+节点+判型+模板/构建产物/密钥）', () => {
   // record( 调用点级断言：钉运行时检查名，注释里的字样不算数（反证实测：只改 record 名、
   // 留注释 → 必须红——includes() 子串断言会被注释满足而假绿）。
-  for (const name of ['DSH 版本兼容', '平台 peer 包', '团队机制层', '研究工作区手册', '节点契约', '判型模式库', '工作区 .gitignore', 'run 模板', '构建产物', '模型密钥']) {
+  for (const name of ['Node 版本兼容', 'DSH 版本兼容', '平台 peer 包', '团队机制层', '研究工作区手册', '节点契约', '判型模式库', '工作区 .gitignore', 'run 模板', '构建产物', '模型密钥']) {
     assert.match(preflight, new RegExp(`record\\([^)]*${name}`), `preflight 缺 record 检查项「${name}」——检查清单漂移`);
   }
-  assert.match(preflight, /dshReleases/, 'preflight 版本判据须读 dsh.compatibility.dshReleases（版本钉死正本）');
+  assert.match(preflight, /engines\?\.dsh/, 'preflight 版本判据须读 engines.dsh（宿主字段；兼容矩阵只是镜像）');
+  assert.match(preflight, /engines\?\.node/, 'preflight 缺 Node engines.node 判据');
   assert.ok(preflight.includes('.credentials.yaml') && preflight.includes('DEEPSEEK_API_KEY'),
     'preflight 密钥检查须双源（环境变量 或 DSH 凭据文件）');
+});
+
+test('preflight：Node 范围检查覆盖 engines.node 的 ^/>= 形态', () => {
+  assert.match(preflight, /function nodeSatisfies\(version, range\)/,
+    'preflight 缺可测试的 nodeSatisfies——Node 检查会退化成硬编码');
+  assert.ok(preflight.includes('\\^(\\d+)'), 'nodeSatisfies 未处理 ^ 范围');
+  assert.ok(preflight.includes('>=(\\d+)'), 'nodeSatisfies 未处理 >= 范围');
+  assert.ok(preflight.includes("split('||')"), 'nodeSatisfies 未处理 || 备选');
+  assert.equal(pkg.engines?.node, '^22.19.0 || >=24.0.0', 'engines.node 变了——同步扩 nodeSatisfies 与测试');
 });
 
 test('preflight：fail-loud verdict + 失败给补救命令（缺什么说什么、怎么补也说什么）', () => {
@@ -63,6 +73,15 @@ test('scaffold：幂等形状 + 收尾 preflight + workspace 必填 fail-loud', 
   assert.match(scaffold, /process\.exit\(2\)/, 'scaffold 缺 --workspace 必填的 exit(2) 前置拦截');
   assert.ok(scaffold.includes('preflight.mjs'), 'scaffold 收尾必须复核 preflight（准备完成 ≠ 检查通过）');
   assert.ok(scaffold.includes('agent-team-profile'), 'scaffold 团队层组合缺失——四角色协作主通道不可用');
+});
+
+test('scaffold：团队层版本从 engines.dsh 派生，不装未钉版最新层', () => {
+  assert.match(scaffold, /const TEAM_VERSION = pkg\.engines\?\.dsh/,
+    'scaffold 未从 engines.dsh 派生团队层版本——会装到与 DSH pin 不匹配的最新层');
+  assert.match(scaffold, /const TEAM_SPEC = .*TEAM_VERSION/,
+    'scaffold 未把团队层版本拼进安装 spec');
+  assert.ok(scaffold.includes("'add', TEAM_SPEC"),
+    'scaffold 的 plugin add 未使用带版本的 TEAM_SPEC');
 });
 
 test('scaffold：收尾 preflight 使用 --profile 对应的 profile 解析锚', () => {
@@ -129,6 +148,7 @@ test('release-smoke：破坏性清理仅允许固定路径', () => {
 test('release-smoke：安装域 client 半与 peers-only 断言在位（检查清单漂移是静默失效面）', () => {
   assert.match(releaseSmoke, /join\(installed, 'lib', 'client\.js'\)/, 'release-smoke 缺安装副本 lib/client.js 在场断言');
   assert.match(releaseSmoke, /dependencies === undefined/, 'release-smoke 缺 dependencies 缺席断言（peers-only 发布形状）');
+  assert.match(releaseSmoke, /engines\?\.dsh === '0\.2\.1-rc\.2'/, 'release-smoke 缺安装副本 engines.dsh 断言（宿主字段必须随包）');
   assert.match(releaseSmoke, /boot 页模块表含本包 client 行|module-table|模块表/, 'preset-smoke 委托的模块表行断言未登记进 release-smoke 面');
 });
 

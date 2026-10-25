@@ -69,18 +69,22 @@ if (workspace === null) {
   note(true, `研究工作区种子（${workspace}）`, `${dryRun ? '[dry-run] ' : ''}写入 ${written} 个、跳过已存在 ${skipped} 个（--force 覆盖）`)
 }
 
-// ② profile 组合（团队层）
+// ② profile 组合（团队层；版本与 engines.dsh 同源——不再装未钉版的最新层）
 {
   const TEAM = '@deepseek-ai/dsh-experimental-agent-team-profile'
+  const TEAM_VERSION = pkg.engines?.dsh ?? pkg.dsh?.compatibility?.dshReleases?.[0]?.replace(/^dsh-v/, '') ?? null
+  const TEAM_SPEC = TEAM_VERSION === null ? TEAM : `${TEAM}@${TEAM_VERSION}`
   const hasDsh = spawnSync('dsh', ['--version'], { encoding: 'utf8' }).status === 0
-  if (!hasDsh) {
+  if (TEAM_VERSION === null) {
+    note(false, `团队层加入 profile「${profile}」`, '无法派生团队层版本——package.json 的 engines.dsh 与 dsh.compatibility.dshReleases 都不可用')
+  } else if (!hasDsh) {
     note(false, `团队层加入 profile「${profile}」`, 'dsh CLI 不可用——装 DSH 后重跑，或手工在 profile 的 dsh.profile.bundles 加该层')
   } else if (dryRun) {
-    note(true, `团队层加入 profile「${profile}」`, `[dry-run] 将执行：dsh plugin --profile ${profile} add ${TEAM}`)
+    note(true, `团队层加入 profile「${profile}」`, `[dry-run] 将执行：dsh plugin --profile ${profile} add ${TEAM_SPEC}`)
   } else {
-    const r = spawnSync('dsh', ['plugin', '--profile', profile, 'add', TEAM], { encoding: 'utf8' })
+    const r = spawnSync('dsh', ['plugin', '--profile', profile, 'add', TEAM_SPEC], { encoding: 'utf8' })
     const ok = r.status === 0
-    note(ok, `团队层加入 profile「${profile}」`, ok ? `已确保 ${TEAM} 在场（幂等）` : `失败：${String(r.stderr ?? r.stdout).trim().split('\n').slice(-2).join(' ')}`)
+    note(ok, `团队层加入 profile「${profile}」`, ok ? `已确保 ${TEAM_SPEC} 在场（幂等）` : `失败：${String(r.stderr ?? r.stdout).trim().split('\n').slice(-2).join(' ')}`)
   }
 }
 

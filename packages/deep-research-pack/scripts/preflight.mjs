@@ -3,7 +3,7 @@
 //
 // 为什么需要：本 pack 装了 ≠ 能跑。研究纪律靠**会话 cwd 的 AGENTS.md**（DSH agent-instructions
 // 向上发现注入）、团队机制靠 **vendor agent-team-profile 层**、角色靠 **平台 peer 包**、
-// 版本靠 **dsh.compatibility.dshReleases** 钉死。本命令把这些前提逐项机检，缺什么说什么、
+// 版本靠 **engines.dsh**（`dsh.compatibility.dshReleases` 是兼容矩阵镜像，不是宿主字段）。本命令把这些前提逐项机检，缺什么说什么、
 // 怎么补也说什么——部署方的第一条命令（配 scaffold.mjs 自动补齐）。
 //
 // 用法：
@@ -45,17 +45,66 @@ const resolveFrom = (name) => {
   if (requireFrom === null) return false
   try { requireFrom.resolve(name); return true } catch { return false }
 }
+const resolveVersion = (name) => {
+  if (requireFrom === null) return null
+  try {
+    const manifest = JSON.parse(readFileSync(requireFrom.resolve(`${name}/package.json`), 'utf8'))
+    return typeof manifest.version === 'string' ? manifest.version : null
+  } catch { return null }
+}
 
 const results = []
 const record = (ok, name, detail, remedy) => { results.push({ ok, name, detail, remedy }) }
 
-// ① DSH 版本（dsh --version；读不到则按"无法判定"不误红）
+/** `engines.node` 的当前声明是 `^22.19.0 || >=24.0.0`；本实现覆盖该形态的 ^/>= 比较。
+ *  变更 engines.node 时同步扩这里（tests/pack/deploy-bin.test.mjs 钉住本函数与声明同源）。 */
+function nodeSatisfies(version, range) {
+  const v = String(version).split('.').map((n) => Number.parseInt(n, 10))
+  if (v.length < 3 || v.some((n) => Number.isNaN(n))) return false
+  const cmp = (a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2]
+  for (const raw of String(range).split('||')) {
+    const alt = raw.trim()
+    let m = /^\^(\d+)\.(\d+)\.(\d+)$/.exec(alt)
+    if (m) {
+      const base = [Number(m[1]), Number(m[2]), Number(m[3])]
+      if (v[0] === base[0] && cmp(v, base) >= 0) return true
+      continue
+    }
+    m = /^>=(\d+)\.(\d+)\.(\d+)$/.exec(alt)
+    if (m) {
+      if (cmp(v, [Number(m[1]), Number(m[2]), Number(m[3])]) >= 0) return true
+      continue
+    }
+    m = /^(\d+)\.(\d+)\.(\d+)$/.exec(alt)
+    if (m) {
+      if (cmp(v, [Number(m[1]), Number(m[2]), Number(m[3])]) === 0) return true
+    }
+  }
+  return false
+}
+
+// ① Node 版本（pack 的运行前置；不满足时 DSH 本身也可能起不来）
 {
-  const want = pkg.dsh?.compatibility?.dshReleases ?? []
+  const range = pkg.engines?.node
+  const node = process.versions.node
+  const ok = range === undefined ? null : nodeSatisfies(node, range)
+  record(ok, 'Node 版本兼容', range === undefined ? `未声明（当前 ${node}）` : `当前 ${node}；本包要求 ${range}`, `升级 Node 到 ${range ?? '包声明的范围'}（根 package.json engines.node 同源）`)
+}
+
+// ② DSH 版本（engines.dsh 是宿主字段；兼容矩阵是镜像。优先读 profile 的 app-boot 运行时，PATH CLI 只作后备）
+{
+  const want = pkg.engines?.dsh ?? pkg.dsh?.compatibility?.dshReleases?.[0]?.replace(/^dsh-v/, '') ?? null
+  const runtimeVersion = resolveVersion('@deepseek-ai/dsh-app-boot')
   const r = spawnSync('dsh', ['--version'], { encoding: 'utf8' })
-  const found = r.status === 0 ? String(r.stdout).trim() : null
-  const ok = found === null ? null : want.some((tag) => found.includes(String(tag).replace(/^dsh-v/, '')))
-  record(ok, 'DSH 版本兼容', found === null ? `无法判定（dsh --version 不可用；本包要求 ${want.join('、')}）` : `宿主 ${found}；本包要求 ${want.join('、')}`, `装匹配版本：npm i -g @deepseek-ai/dsh@${String(want[0] ?? '').replace(/^dsh-v/, '')}`)
+  const cliVersion = r.status === 0 ? (String(r.stdout).trim().match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/)?.[0] ?? null) : null
+  const hostVersion = runtimeVersion ?? cliVersion
+  const ok = want === null || hostVersion === null ? null : hostVersion === want
+  const detail = runtimeVersion !== null
+    ? `宿主运行时 ${runtimeVersion}${cliVersion !== null && cliVersion !== runtimeVersion ? `（PATH CLI ${cliVersion}，不作判据）` : ''}；本包要求 ${want ?? '未声明'}`
+    : cliVersion === null
+      ? `无法判定（未解析到 profile 的 app-boot，dsh --version 也不可用；本包要求 ${want ?? '未声明'}）`
+      : `PATH CLI ${cliVersion}（未解析到 profile 的 app-boot）；本包要求 ${want ?? '未声明'}`
+  record(ok, 'DSH 版本兼容', detail, `装匹配版本：npm i -g @deepseek-ai/dsh@${want ?? '<版本>'}（或让 profile 解析到该版本）`)
 }
 
 // ② 平台 peer 包（解析锚 = 宿主 profile）
@@ -65,11 +114,19 @@ const record = (ok, name, detail, remedy) => { results.push({ ok, name, detail, 
   record(missing.length === 0, `平台 peer 包（${peers.length} 个）`, missing.length === 0 ? `全部可解析（锚：${host ?? '本包位置'}）` : `缺 ${missing.length} 个：${missing.slice(0, 3).join('、')}${missing.length > 3 ? '…' : ''}`, '这些是 DSH 平台包：装匹配版本的 DSH，或把它们装进同一 profile')
 }
 
-// ③ 团队机制层（本包不声明团队行——归 vendor agent-team-profile 层）
+// ④ 团队机制层（本包不声明团队行——归 vendor agent-team-profile 层；版本与 engines.dsh 对齐）
 {
-  const candidates = ['@deepseek-ai/dsh-experimental-agent-team-profile', '@deepseek-ai/dsh-experimental-tool-agent-team']
-  const found = candidates.filter(resolveFrom)
-  record(found.length > 0, '团队机制层（spawn_teammate 等）', found.length > 0 ? `在场：${found.join('、')}` : '缺席——四角色协作主通道不可用', 'dsh plugin --profile <p> add @deepseek-ai/dsh-experimental-agent-team-profile（本包故意不声明团队行：组合与实战 config 归该层）')
+  const TEAM = '@deepseek-ai/dsh-experimental-agent-team-profile'
+  const expected = pkg.engines?.dsh ?? pkg.dsh?.compatibility?.dshReleases?.[0]?.replace(/^dsh-v/, '') ?? null
+  const installed = resolveFrom(TEAM)
+  const version = installed ? resolveVersion(TEAM) : null
+  const ok = installed ? (version === null || expected === null ? null : version === expected) : false
+  const detail = !installed
+    ? '缺席——四角色协作主通道不可用'
+    : version === null
+      ? '在场，但读不到版本（无法确认与 engines.dsh 对齐）'
+      : `在场：${TEAM}@${version}${expected === null ? '' : version === expected ? '（与 engines.dsh 一致）' : `；期望 ${expected}`}`
+  record(ok, '团队机制层（spawn_teammate 等）', detail, `dsh plugin --profile <p> add ${TEAM}${expected === null ? '' : `@${expected}`}（本包故意不声明团队行：组合与实战 config 归该层）`)
 }
 
 // ④ 研究工作区（手册 = 会话 cwd 的 AGENTS.md；模板 = run bundle 起点；.gitignore = 运行区拒收）

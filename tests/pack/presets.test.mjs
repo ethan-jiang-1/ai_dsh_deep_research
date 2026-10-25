@@ -121,6 +121,14 @@ test('compatibility 矩阵钉住当前 tag', () => {
   assert.deepEqual(pkg.dsh.compatibility.dshReleases, ['dsh-v0.2.1-rc.2']);
 });
 
+test('兼容声明单源：engines.dsh = dsh.compatibility.dshReleases[0] 去 dsh-v 前缀', () => {
+  const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
+  const matrix = pkg.dsh?.compatibility?.dshReleases ?? [];
+  assert.equal(matrix.length, 1, '兼容矩阵当前只声明一个 DSH 版本；多版本时同步扩本断言');
+  assert.equal(pkg.engines?.dsh, matrix[0].replace(/^dsh-v/, ''),
+    'engines.dsh 与兼容矩阵不同源——宿主只认 engines.dsh，矩阵只是镜像');
+});
+
 test('critic adversarial-review 钉 leads 交接狩猎（BUG-008 契约：状态词漂移不可穿透交付）', () => {
   const yml = readFileSync(join(PRESETS, 'critic', 'skills', 'adversarial-review', 'SKILL.md'), 'utf8');
   // 契约文本三个必备面：狩猎节在场 + 白名单词逐字 + 近形漂移点名（建议深挖 = 必抓形态）
