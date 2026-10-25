@@ -27,7 +27,8 @@ opened: 2026-10-25
 - `dev/env.sh` 支持 `DSH_DEV_HOME`（隔离根可在仓外）；`dev/boot-run.sh` 支持 `DSH_RUN_PROFILE`、`DSH_RUN_STATE_DIR`（web.log/dashboard/run-pack/npm-cache 独立），`sed -i.bak` 兼容 BSD/GNU；`dev/run-driver.mjs` 支持 `--profile` 与 `DSH_RUN_STATE_DIR`。
 - 新增 `scripts/dist/export-handoff.mjs`：`git archive HEAD` 只打 tracked 源，产物断言无运行态/凭据/run 数据/依赖/导出包；实测 1102 条目、2.4 MiB，含 `.gitmodules` 与 `seed.json`。
 - 证据：`pnpm verify`/`pnpm test`/gates-smoke/export-handoff 实跑；run bundle 绝对路径尚未做归一化/移交工具。
-- 未落地：run bundle 路径规则（新产出/移交归一化）；真实多实例通道并行验证；移交包的 submodule/凭据后续步骤写进文档。
+- 追加：两实例并行实测（独立 home/profile/port/state 同时起）；`export-handoff` 实跑 1102 条目 / 2.4 MiB，含 `.gitmodules`/`seed.json`，无运行态/凭据/run 数据/依赖；`dev-runtime-clean` 门禁 + gates-smoke 注入案例；指南 65 写“新 run 不写 home 绝对路径、旧 bundle 按 epoch 豁免”。
+- 残余：run bundle 绝对路径只有文档规则，没有机械校验/移交归一化工具；旧 bundle 历史路径不追改；Linux 未跑。
 
 ## 范围与依赖
 

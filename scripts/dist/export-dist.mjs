@@ -13,6 +13,7 @@
 // 用法：node scripts/dist/export-dist.mjs
 
 import { spawnSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
@@ -56,6 +57,7 @@ try {
   // 2. inventory——发布边界在导出的产物本体上重申：必备条目在场、四角色 preset 随包、
   //    工作区种子与部署 bin 随包、tarball 里没有 package/ 之外的东西
   const tarball = join(DIST, tarballName)
+  const tarballSha = createHash('sha256').update(readFileSync(tarball)).digest('hex')
   const listed = spawnSync('tar', ['-tzf', tarball], { encoding: 'utf8' })
   const entries = (listed.stdout ?? '').split('\n').filter(Boolean)
   const must = [
@@ -101,6 +103,7 @@ try {
 | 版本 | ${version} |
 | 安装包 | \`${tarballName}\`（与本手册同目录） |
 | 打包日期 | ${date} |
+| sha256 | \`${tarballSha}\` |
 | 验证基线 | DSH \`engines.dsh\`（当前 \`0.2.1-rc.2\`；不匹配时宿主拒绝加载）+ Node \`^22.19.0 || >=24.0.0\` |
 
 这个安装包携带本包运行所需的文件：bundle 行（cordis.patch.yml）、角色 preset 与方法论技能（presets/）、
@@ -190,6 +193,37 @@ dsh plugin --profile research remove dsh-deep-research-pack
 
 卸载后 \`--dump-config\` 不再提及插件，profile 的 package.json 也不留痕迹 —— 这同样是冒烟
 每轮验证过的。
+
+## 六、升级 / 回滚
+
+升级插件（npm 或同目录的新 tarball，任选其一）：
+
+\`\`\`sh
+dsh plugin --profile research add dsh-deep-research-pack@<新版>
+dsh plugin --profile research add file:/path/to/dsh-deep-research-pack-<新版>.tgz
+\`\`\`
+
+升级后 \`dsh --profile research --dump-config\` 应仍见四角色与本包行；随后用 scaffold 检查并安全升级工作区种子：
+
+\`\`\`sh
+node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffold.mjs \\
+  --workspace ~/research-workspace --check
+node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffold.mjs \\
+  --workspace ~/research-workspace --upgrade
+\`\`\`
+
+回滚 = 装回旧版 tarball；工作区种子不回滚（用户数据与方法库不随插件降级），旧版可能把新种子判成“未来版本”，
+\`--check\` 会如实报告。DSH 本体版本必须满足旧包的 \`engines.dsh\`，否则宿主拒绝加载。
+
+## 七、离线 / 受限网络
+
+| 依赖 | 是否离线可用 | 说明 |
+|---|---|---|
+| DSH 本体 | 需预装 | 本包不装 DSH |
+| 本包 tarball | 是 | 本手册同目录的文件，不需要 registry |
+| 团队机制层 | 需预置或缓存 | \`@deepseek-ai/dsh-experimental-agent-team-profile@0.2.1-rc.2\`；scaffold 会按包内版本安装 |
+| Playwright MCP | 可关闭或预缓存 | 默认 npx 首次拉取；离线时设 \`MCP_PLAYWRIGHT=0\`（通道启动脚本）或预置 npm 缓存 |
+| 模型 API | 需网络 | 研究 run 需要 DeepSeek API 可达 |
 
 ## 常见问题
 

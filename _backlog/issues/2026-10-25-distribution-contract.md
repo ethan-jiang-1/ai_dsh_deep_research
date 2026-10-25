@@ -26,7 +26,8 @@ opened: 2026-10-25
 - `packages/deep-research-pack/package.json` 增 `engines.dsh: 0.2.1-rc.2`；`dsh.compatibility.dshReleases` 保留为镜像；`tests/pack/presets.test.mjs` 与 `pack-bundle-compat` 门禁断言两者同源（gates-smoke 注入案例 `pack-bundle-compat-engines-drift`）。
 - `scaffold.mjs` 从 `engines.dsh` 派生团队层版本，`plugin add` 不再装未钉版最新层；`preflight.mjs` 读 profile 的 `@deepseek-ai/dsh-app-boot` 运行时（不按 PATH 上另一个 CLI 误判），并检查 Node 与团队层版本。
 - 证据：`pnpm verify` 全绿；`pnpm test` 全绿；`node scripts/smoke/gates-smoke.mjs` 全绿；`node scripts/smoke/release-smoke.mjs` ALL PASS（含安装副本 `engines.dsh` 断言、scaffold 钉版、preflight 安装验收）。
-- 未落地：升级/回滚步骤与证据；离线矩阵与 tarball 校验和；L2 的独立 home/workspace（冷启动）证据。
+- 追加：安装手册导出时计算 tarball sha256，并补升级/回滚与离线矩阵；`cold-start-smoke` 用独立 home/profile/端口/state 从 tarball 安装到浏览器面 GREEN；pack 目录安装（`file:<目录>`）在 `pnpm build` 后实测可装、`--dump-config` 可见本包行（profile 记绝对路径，移动即断链）。
+- 残余：Linux 未在同轮跑（macOS 实测；脚本已用 BSD/GNU 兼容 `sed -i.bak`，`lsof/pgrep` 缺失有告警）；npm publish 未执行；宿主拒绝不匹配 `engines.dsh` 的行为依据 = vendor 代码 + 安装形状，不由本仓测试替代；升级/回滚为手册步骤 + 工作区升级测试，未做真实版本 bump 的安装回滚演练。
 
 ## 范围与依赖
 

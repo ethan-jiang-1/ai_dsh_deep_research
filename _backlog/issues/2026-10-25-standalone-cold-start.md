@@ -22,7 +22,8 @@ opened: 2026-10-25
 - `dev/boot-run.sh`：`DSH_RUN_PROFILE`/`DSH_RUN_STATE_DIR` 参数化；`sed -i.bak` 兼容 BSD/GNU；boot 横幅点名实际 profile。
 - `scripts/smoke/cold-start-smoke.mjs`：独立 `DSH_DEV_HOME` + `cold-start-smoke` profile + 3129 + 独立 state；`run-driver up --bootstrap` → 浏览器面 GREEN，实测 exit 0；MCP 显式关闭。
 - 证据：`bash dev/bootstrap.sh --check`（默认/外部 home 两形态）、`node scripts/smoke/cold-start-smoke.mjs` GREEN、`pnpm verify`/`pnpm test` 待本轮收尾复跑。
-- 未落地：平台承诺文字（当前实测 macOS；Linux 未跑）；离线矩阵/团队层预置；两个实例同时启动的并行证据；pack 目录 + 构建后的 `dsh plugin add file:<目录>` 门槛。
+- 追加：两个实例并行实测（不同 home/profile/port/state，3131/3132 同时出横幅；不同 state 允许并行，同 state 默认拦重复启动）；pack 目录 + 构建后 `dsh plugin add file:<目录>` 实测成功；平台/离线矩阵写进指南 65 与安装手册。
+- 残余：Linux/Windows 未跑（当前 macOS 实测；Linux 走 bash/Node 标准路径）；团队层离线需预置/缓存、MCP 首次需 npx（或 `MCP_PLAYWRIGHT=0`）；`cold-start-smoke` 关闭 MCP，不证明 MCP 冷启动。
 
 ## 范围与依赖
 

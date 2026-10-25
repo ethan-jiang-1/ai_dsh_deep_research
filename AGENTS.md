@@ -36,7 +36,7 @@ research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手�
                          全表）、question-patterns.md（判型模式库）、method-library.md（用户研究
                          偏好库）、drt_<slug>/（run bundle）、archive/（已交付归档）、_abandoned/
                          （停放位）、drafts/（开发侧草稿，非 run 产物）、templates/run/
-docs/                    00-index（地图+术语映射；D 号台账 = decisions.md）→ design/10-60 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ evaluation.md（验收合同）
+docs/                    00-index（地图+术语映射；D 号台账 = decisions.md）→ design/10-60 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ guides/65（运行形态合同）+ evaluation.md（验收合同）
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）；目录名自带时态，
                          总图 = notes/README.md（将来 proposed/ · 过去 implemented/archived/rejected/
                          postmortem/；立项来历 = 该页 §立项来历——用户定调只进 decisions.md D 号依据列）：

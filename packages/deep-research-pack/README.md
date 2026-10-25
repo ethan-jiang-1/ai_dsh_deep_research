@@ -31,6 +31,8 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 
 ## 部署（四步）
 
+运行形态、数据归属、升级/回滚与多实例的完整合同 = [guides/65](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/guides/65-run-forms.md)。
+
 **前置**：DSH 版本必须满足 `engines.dsh`（当前 `0.2.1-rc.2`；宿主安装/启动会拒绝不匹配版本），Node 满足 `^22.19.0 || >=24.0.0`。`dsh.compatibility.dshReleases` 是兼容矩阵镜像，不是宿主字段。
 
 ```sh
@@ -67,6 +69,16 @@ cd ~/research-workspace && dsh --profile research
 再跑 `scaffold --upgrade`。升级只覆盖“用户未改过且种子已更新”的文件；用户改过的文件保留原样，
 新种子写成 `<文件>.seed-new` 供手动合并。`method-library.md` 是用户数据，任何模式都不覆盖已存在文件；
 状态记录在工作区根 `.dsh-research-seed.json`（版本 + 哈希 + 跳过清单）。
+
+**升级/回滚**：升级 = 装新版 npm/tarball（`dsh plugin --profile research add ...@<新版>` 或 `file:<新版>.tgz`），
+再按上面的 `--check`/`--upgrade` 升级工作区种子；回滚 = 装回旧版 tarball，种子不随插件降级。
+宿主版本必须满足包内 `engines.dsh`，否则安装/启动被拒。
+
+**目录安装（开发/离线）**：`pnpm build` 后可直接 `dsh plugin --profile research add file:/abs/path/to/packages/deep-research-pack`；
+profile 记录的是绝对目录依赖，移动/删除该目录会让 profile 断链，正式分发仍用 tarball/npm。
+
+**离线**：tarball 本身不需要 registry；团队层需预装/缓存，Playwright MCP 首次需 npx（或 `MCP_PLAYWRIGHT=0`），
+模型 API 需网络。完整矩阵见 [安装手册](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_dist/安装手册.md)。
 
 **为什么需要 ③**：研究纪律靠**会话 cwd 的 `AGENTS.md`**（DSH 的 agent-instructions 从 cwd
 向上发现并注入每个角色）；团队机制（`spawn_teammate` / `team_task_*`）**不在本包声明**

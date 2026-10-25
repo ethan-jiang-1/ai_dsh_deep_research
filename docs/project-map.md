@@ -11,7 +11,7 @@
 
 | 面 | 负责什么 | 查哪里 |
 |---|---|---|
-| 产品包 | bundle、preset、产品 runtime skills、驾驶舱 client、部署 bin、发布种子 | [pack README](../packages/deep-research-pack/README.md)、[插件作者指南](guides/62-plugin-authoring.md) |
+| 产品包 | bundle、preset、产品 runtime skills、驾驶舱 client、部署 bin、发布种子、运行形态合同 | [pack README](../packages/deep-research-pack/README.md)、[插件作者指南](guides/62-plugin-authoring.md)、[运行形态合同](guides/65-run-forms.md) |
 | 启动与开发驱动 | vendor 构建、环境隔离、生成物同步、安装组合、web 启动、会话驱动 | [开发环](guides/60-dev-loop.md)、[boot-run](../dev/boot-run.sh) |
 | 研究运行数据 | 角色会话 cwd、共享手册、节点契约、模板、每次研究 bundle | [研究手册](../research-workspace/AGENTS.md)、[NODES](../research-workspace/NODES.md)、[状态与循环](design/50-agent-loop-and-state.md) |
 | 验证与调试 | 静态门禁、确定性回归、挂载/安装/浏览器 smoke、回放、run 审计和观察 | [验收合同](evaluation.md)、[脚本指令](../scripts/AGENTS.md)、[测试指令](../tests/AGENTS.md) |

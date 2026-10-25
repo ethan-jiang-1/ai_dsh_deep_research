@@ -21,7 +21,8 @@ opened: 2026-10-25
 - `scaffold.mjs` 改为按清单三态处理：`--check` 只读、`--upgrade` 只更新未改文件（改过的写 `.seed-new`）、`--force` 全量覆盖；`method-library.md` 任何模式都不覆盖已存在文件；状态写 `.dsh-research-seed.json`。`--seed-only` 可只处理工作区。
 - `preflight.mjs` 增“工作区种子版本”检查（旧/缺失标未验证，不硬红）。
 - 证据：`tests/pack/seed-core.test.mjs`（五态 + 清单一致性）；临时工作区实测装/查/force/upgrade（方法库保留、用户改过的 AGENTS 不覆盖且写 sidecar、旧 NODES 被安全升级）；`pnpm verify`/`pnpm test` 待本轮收尾复跑。
-- 未落地：真实 pack 版本 bump 下的跨版本升级证据；安装手册的升级段与 FAQ；`--force` 对 `.gitignore` 用户追加的说明。
+- 追加：安装手册已写 `--check/--upgrade`、`.seed-new`、方法库保护与回滚语义；`--seed-only` 支持只处理工作区；临时副本模拟 seed v0.1.2→0.1.3 的 stale/modified 升级，用户改过的 AGENTS 不覆盖、旧 NODES 安全升级。
+- 残余：未做真实 pack 版本 bump 的端到端升级（临时副本模拟等价）；`--force` 覆盖版本化 `.gitignore` 时用户追加会丢（显式 force 语义，文档已写）；Linux 未跑。
 
 ## 范围与依赖
 

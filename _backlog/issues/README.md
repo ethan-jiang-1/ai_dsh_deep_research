@@ -6,7 +6,7 @@
 
 | 卡 | 当前缺口 |
 |---|---|
-| [运行形态合同](2026-10-25-run-form-contract.md) | 已定 A+B / per-user / 两阶段；按切片推进，合同页随实现落盘 |
+| [运行形态合同](2026-10-25-run-form-contract.md) | 合同 guides/65 + Note 已交付；保留活跃跟踪子卡残余 |
 | [分发的可执行合同](2026-10-25-distribution-contract.md) | `engines.dsh`/团队层/Node 已落地；升级/离线/冷 home 待做 |
 | [工作区所有权与升级](2026-10-25-workspace-ownership-and-upgrade.md) | A 已落地（seed.json + `--check/--upgrade` + 方法库保护）；跨版本证据/文档待收尾 |
 | [运行态数据边界与移交](2026-10-25-runtime-data-boundary.md) | `dev/` 清洁门禁、可配置数据根、clean handoff 已落地；bundle 路径/多实例证据待收尾 |

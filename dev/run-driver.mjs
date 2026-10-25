@@ -31,7 +31,8 @@ export { guiUrlFromWebLog, runDriverVerdict };
 
 const ROOT = resolvePath(dirname(fileURLToPath(import.meta.url)), '..');
 // 实例状态根：默认 runtime/smoke-workspace；多实例用 DSH_RUN_STATE_DIR 指向各自目录。
-const STATE_DIR = resolvePath(process.env.DSH_RUN_STATE_DIR ?? join(ROOT, 'runtime/smoke-workspace'));
+const DEFAULT_STATE_DIR = join(ROOT, 'runtime/smoke-workspace');
+const STATE_DIR = resolvePath(process.env.DSH_RUN_STATE_DIR ?? DEFAULT_STATE_DIR);
 mkdirSync(STATE_DIR, { recursive: true });
 const WEB_LOG = join(STATE_DIR, 'web.log');
 const BOOT_LOG = join(STATE_DIR, 'run-driver-boot.log');
@@ -159,8 +160,9 @@ if (state.alive) {
       process.exit(1);
     }
   }
-  if (isBootDriving()) {
-    console.error('run-driver: 已有一个 boot-run.sh 在起通道（勿并发另起）——等它出横幅后跑 `node dev/run-driver.mjs probe`');
+  // 并发检查只守默认 state：不同 state dir 的实例允许并行（多实例）；同端口仍由下方端口检查拦。
+  if (STATE_DIR === DEFAULT_STATE_DIR && isBootDriving()) {
+    console.error('run-driver: 默认 state 下已有一个 boot-run.sh 在起通道（勿并发另起）——等它出横幅后跑 `node dev/run-driver.mjs probe`');
     process.exit(2);
   }
   const port = wantPort;

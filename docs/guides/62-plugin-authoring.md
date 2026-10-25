@@ -88,6 +88,9 @@ AGENTS.md §命令速查）：
 
 ## 交付与部署形态（本包怎么送到用户手里）
 
+完整运行形态合同（M1 安装 / M2 独立开发 / M3 移交、P/H/W 归属、升级/回滚、冷启动证据）=
+[guides/65](65-run-forms.md)；本节只保留作者面的拓扑。
+
 DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`）：**bundle 是你编写与
 分发的单位，profile 是用户启动的环境，二者互斥**。本仓据此的交付拓扑：
 
