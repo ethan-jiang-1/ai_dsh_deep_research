@@ -60,8 +60,12 @@
   9 skills、8 templates；产物约 340 KB。
 - `source dev/env.sh && node scripts/smoke/release-smoke.mjs --install-only`：ALL PASS
   （pack → 干净 profile → plugin add → scaffold → preflight → 安装域 preset-smoke；端口释放验证）。
-- `node scripts/smoke/gates-smoke.mjs`：新增 `secrets-untracked` 的 `.tmp*` 与 pack `lib/`
-  注入案例先红后绿（见本次驱动输出）。
+- `node scripts/smoke/gates-smoke.mjs`：81 个注入案例均被点名报红，对照组零注入全 PASS。
+- 干净 worktree（无 node_modules）：`git worktree` + submodule + `pnpm install --frozen-lockfile`
+  + `source dev/env.sh && pnpm verify && pnpm test` 全绿（769 pass）。这一步抓到并修掉了
+  `tests/run/node-gate.test.mjs` 两个夹具的 mtime 断代依赖——fresh clone 的 mtime = checkout
+  时间会让“契约前不计红”假红；现在显式注入契约日前一天。CI workflow 同时加
+  `git -C vendor/dsh fetch --tags --force`，避免 submodule 克隆缺 tag 让 `pin-agreement` 假红。
 - `node scripts/smoke/snapshot-replay-smoke.mjs --face research-face --update-expected`：
   4 场景 A 回放通路 + B 组装请求 diff + lead C 渲染金标准 ALL PASS；金标准重写已人审
   （唯一变化 = lead 活动行随新录制文本 `搜了 1 次…抓了 1 个页面…`）。
@@ -69,6 +73,6 @@
   结果 = 上述 7 个路径；`git rev-list --objects --all` 全对象密钥格式扫描仅命中测试假 key
   `sk-abcdefghijklmnop1234`。
 
-未跑项：GitHub Actions 未在 GitHub runner 实跑（本地等价命令 = 上述 verify/test 全绿）；
-`npm publish` 未执行（需要维护者账号与 2FA）；`snapshot-replay-smoke` 为 keyless 回放，
+未跑项：GitHub Actions 未在 GitHub runner 实跑（本地等价命令 = 干净 worktree 的 verify/test
+全绿）；`npm publish` 未执行（需要维护者账号与 2FA）；`snapshot-replay-smoke` 为 keyless 回放，
 不证明新录制的真实模型回复本身符合 persona。
