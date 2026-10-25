@@ -76,8 +76,9 @@
 | [guides/60-dev-loop.md](./guides/60-dev-loop.md) | 指南 | 开发环：六步闭环、面选择表、双 home、密钥 |
 | [guides/61-run-playbook.md](./guides/61-run-playbook.md) | 指南 | **run 操作指南**（研究发起人入口）：run-driver/boot-run、lead 会话、HITL 两点、观察面——run 通道（research profile：本包 + vendor agent-team-profile 层，P1 定案）的使用面 |
 | [guides/62-plugin-authoring.md](./guides/62-plugin-authoring.md) | 指南 | **插件作者入口**（改插件内容的人/agent 入口）：DSH 词汇对齐（plugin/bundle/profile/preset）、参与阶梯 S0–S3、新行为归属、范本与证据义务、**交付与部署形态**（bundle/profile 拓扑 + 工作区种子 + 部署 bin）、**改动影响面**（添/换/删要一起动什么）——上游 `docs/user/develop/**` 的本仓投影 |
+| [guides/63-git-boundary.md](./guides/63-git-boundary.md) | 指南 | **Git 入库边界与跨环境纪律**：源/合同/种子/证据 vs 生成物/运行态/本机态；三问判据、tracked 生成物条件、跨环境规则与门禁 |
 
-> **编号消歧**：`design/60-intent-carriers.md` 与 `guides/60-dev-loop.md` 同号不同义——design/ 按设计层编号（10 架构 … 60 意图载体），guides/ 按操作手册编号（60 开发环 / 61 run / 62 作者入口）；引用写全路径。
+> **编号消歧**：`design/60-intent-carriers.md` 与 `guides/60-dev-loop.md` 同号不同义——design/ 按设计层编号（10 架构 … 60 意图载体），guides/ 按操作手册编号（60 开发环 / 61 run / 62 作者入口 / 63 git 边界）；引用写全路径。
 
 ## 决策台账
 

@@ -44,7 +44,7 @@ const gates = [
   'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'proposed-pointer-live',
   'vendor-pin', 'vendor-clean', 'pin-agreement', 'align-ledger', 'discipline-na-trigger', 'discipline-state-vocab', 'repo-conventions', 'vendor-links',
   'workspace-contract', 'handbook-budget', 'workspace-versioning', 'overlay-fresh', 'pack-workspace-fresh', 'dist-manual-version',
-  'claude-symlink', 'secrets-untracked', 'guard-red-record', 'gate-ledger-sync', 'entry-chain', 'backlog-liveness', 'port-exclusive', 'hooks-active',
+  'claude-symlink', 'secrets-untracked', 'host-paths', 'guard-red-record', 'gate-ledger-sync', 'entry-chain', 'backlog-liveness', 'port-exclusive', 'hooks-active',
 ];
 
 // vendor/dsh 钉身份的 tag 面（commit 面 = vendor-pin 门禁的 PIN；pack-bundle-compat 消费它
@@ -1562,13 +1562,50 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
       || /\.key$/i.test(f)
       || /(^|\/)node_modules\//.test(f)
       || /(^|\/)\.pnpm-store\//.test(f)
+      || /(^|\/)\.(vscode|idea|cursor)\//.test(f)
+      || /(^|\/)\.claude\/settings\.local\.json$/.test(f)
       || /(^|\/)\.tmp[^/]*\//.test(f)
       || /(^|\/)_tmp\//.test(f)
+      || /(^|\/)coverage\//.test(f)
+      || /(^|\/)\.cache\//.test(f)
+      || /(^|\/)(Thumbs\.db|Desktop\.ini)$/.test(f)
+      || /\.(swp|swo)$/.test(f)
+      || /\.local$/.test(f)
       || /^packages\/deep-research-pack\/lib\//.test(f)
       || /\.tgz$/.test(f)
       || /\.log$/i.test(f)
       || /\.DS_Store$/.test(f));
     for (const f of bad) fail(gate, `敏感/残留物已被 tracked：${f}（gitignore 管不住已跟踪文件，须 git rm --cached）`);
+  }
+}
+
+// ── host-paths（live 面零本机绝对 home 路径——跨环境纪律）──
+// 病根：公开仓库里出现 /Users/<name>/... 这类路径，换机器/换用户就不可解析；历史 notes、
+// _backlog、snapshots、tests/fixtures 是冻结证据，允许保留旧路径。live 面 = 随包内容、当前
+// 文档、脚本、CI、工作区种子——新内容必须环境无关（相对路径 / 环境变量 / 占位符）。
+{
+  const gate = 'host-paths';
+  const LIVE_PREFIXES = ['packages/deep-research-pack/', 'docs/', 'scripts/', 'dev/', '.github/', '_dist/'];
+  const LIVE_ROOT = new Set(['README.md', 'AGENTS.md', 'CONTRIBUTING.md', 'SECURITY.md', 'LICENSE', 'runtime/README.md']);
+  const LIVE_WORKSPACE = new Set(['research-workspace/AGENTS.md', 'research-workspace/NODES.md', 'research-workspace/question-patterns.md', 'research-workspace/.gitignore.example']);
+  const isLive = (f) => LIVE_ROOT.has(f) || LIVE_PREFIXES.some((p) => f.startsWith(p))
+    || LIVE_WORKSPACE.has(f) || f.startsWith('research-workspace/templates/');
+  const files = trackedFiles({
+    gate,
+    exclude: (f) => !isLive(f),
+    emptyMsg: '防空语料：live 面零文件被扫到——范围被收窄，fail-loud',
+  });
+  // 只认“真实用户名形态”的绝对 home 路径；本页自己的示例用 <name>/...，不会命中。
+  const HOST = /(?:^|[^A-Za-z0-9_])\/(?:Users|home)\/[A-Za-z0-9._-]+\/|[A-Za-z]:[\\/]Users[\\/][A-Za-z0-9._-]+|\/private\/var\/folders\//;
+  if (files) for (const { rel, text } of files) {
+    const lines = text.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const m = HOST.exec(lines[i]);
+      if (m) {
+        fail(gate, `${rel}:${i + 1} 出现本机绝对路径「${m[0]}」——live 内容必须环境无关（改相对路径/环境变量/占位符；历史证据留 notes/_backlog/snapshots/tests/fixtures）`);
+        break;
+      }
+    }
   }
 }
 

@@ -71,6 +71,9 @@ outputs; the ignored paths are documented in [`.gitignore`](.gitignore).
   [`.agents/skills/writing-a-gate`](.agents/skills/writing-a-gate/SKILL.md).
 - Keep the shipped package self-contained. Do not add repo-only links, local absolute
   paths, test fixtures, or build intermediates to `packages/deep-research-pack`.
+- Follow the git boundary and cross-environment rules in
+  [`docs/guides/63-git-boundary.md`](docs/guides/63-git-boundary.md): source/contracts/seeds
+  are tracked; runtime state, caches, generated outputs, and machine-specific files are not.
 - The pre-commit hook runs `pnpm verify` and `pnpm test`; enable it with
   `source dev/env.sh` (or set `core.hooksPath=dev/hooks`).
 

@@ -346,6 +346,18 @@ export const CASES = [
     appendFileSync(join(dir, '.gitignore'), '\n!packages/deep-research-pack/lib/\n!packages/deep-research-pack/lib/probe.js\n');
     writeFileSync(join(dir, 'packages', 'deep-research-pack', 'lib', 'probe.js'), 'module.exports = {}\n');
   } },
+  { id: 'secrets-untracked-editor-state-leak', gate: 'secrets-untracked', mutate: (dir) => {
+    // 编辑器/本机态强制入库（.cursor/ 是代表形态；其余同族模式由 .gitignore + 门禁共同覆盖）
+    mkdirSync(join(dir, '.cursor'), { recursive: true });
+    appendFileSync(join(dir, '.gitignore'), '\n!.cursor/\n!.cursor/probe\n');
+    writeFileSync(join(dir, '.cursor', 'probe'), 'probe\n');
+  } },
+  { id: 'host-paths-home-leak', gate: 'host-paths', mutate: (dir) => {
+    // live 文档注入本机绝对 home 路径——跨环境不可解析，必须红。
+    // 路径拼接而非字面量：本文件也在 host-paths 的 live 扫描面内，字面量会让门禁自咬。
+    const hostPath = ['', 'Users', 'probe', 'private'].join('/');
+    writeFileSync(join(dir, 'docs', 'probe-host-path.md'), `# probe\n\n本机路径：${hostPath}\n`);
+  } },
   // 自咬防护：端口号从被撞文件现取（本文件处于 port-exclusive 扫描面，且不得写 'port = 数字' 形态）
   { id: 'port-exclusive-double-claim', gate: 'port-exclusive', mutate: (dir) => {
     const src = readFileSync(join(dir, 'scripts', 'smoke', 'l4-lite-smoke.mjs'), 'utf8');

@@ -48,7 +48,8 @@
 | `dev-skill-format` | `.agents/skills/*/SKILL.md` 在场 + frontmatter name = 目录名 + description 以 "Use " 开头 | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) |
 | `vendor-pin` | vendor/dsh submodule 在位：.gitmodules 正源 URL + 钉 commit `687f282e86`（tag dsh-v0.2.1-rc.2） | [vendor-submodule Note](../notes/implemented/2026-09-24-vendor-submodule.md)；副本注入不适（理由：断言对象 = submodule 真实状态——fixture 副本不拷 submodule 内容，基线即红），反证 = 一次性 Note 红录 |
 | `vendor-clean` | vendor/dsh `git status --porcelain` 零未提交改动（机制权威不许就地改） | [vendor-submodule Note](../notes/implemented/2026-09-24-vendor-submodule.md)；副本注入不适（理由：断言对象 = submodule 的 git 状态——fixture 副本无此仓库，基线即红），反证 = 一次性 Note 红录 |
-| `secrets-untracked` | tracked 清单零敏感/残留物（credentials/.env/.pem/.tgz/.log/node_modules/.tmp*/_tmp/、pack 构建产物 lib/…） | [入口链审计 Note](../notes/implemented/2026-09-24-entry-chain-fresh-agent-audit.md) |
+| `secrets-untracked` | tracked 清单零敏感/残留物（credentials/.env/.pem/.tgz/.log/node_modules/.tmp*/_tmp/、pack 构建产物 lib/、编辑器/OS/缓存残留…） | [入口链审计 Note](../notes/implemented/2026-09-24-entry-chain-fresh-agent-audit.md) |
+| `host-paths` | live 面（随包内容/当前文档/脚本/CI/工作区种子）零本机绝对 home 路径；历史 notes/_backlog/snapshots/tests fixtures 豁免 | [git 边界指南](./guides/63-git-boundary.md)；反证 = gates-smoke 注入 `/Users/<name>/...` 红 |
 | `role-list-sync` | 角色清单单一事实源 = 盘上 presets/；scripts/tests/dev 代码里的清单字面量（≥3 角色名）即红 | [基础整治 Note](../notes/archived/2026-09-24-foundation-remediation.md) |
 | `gate-ledger-sync` | 本表门禁名集合 = verify 脚本 gates 数组（登记与实现不漂移） | [基础整治 Note](../notes/archived/2026-09-24-foundation-remediation.md) |
 | `entry-chain` | 根入口链与子树指令门牌成员在场（六份子树 AGENTS.md 在成员清单内），AGENTS 的入口链标题存在；链接解析归 md-links | gates-smoke `entry-chain-no-title` 注入案例 + [review-driven-hardening Note](../notes/implemented/2026-09-24-review-driven-hardening.md)；成员扩围反证（移除 `tests/AGENTS.md`/`_backlog/AGENTS.md` 看红→还原绿）= 2026-10-12 卫生轮实录 |
@@ -94,7 +95,7 @@
 
 ### L3 领域面（Deep Research 方法论完整性 — 本项目独有）
 
-- **定义**：从 codex Deep Research harness（`/Users/bowhead/ai_tool_deepresearch`）提炼的方法论在本插件上有完整落点，且**用 DSH 原生载体**实现。
+- **定义**：从 codex Deep Research harness（作者本地 `ai_tool_deepresearch`，不随仓）提炼的方法论在本插件上有完整落点，且**用 DSH 原生载体**实现。
 - **最小真检查**：`docs/design/30-methodology-mapping.md`（映射表）审查 + `tests/contracts/evaluation-contract.test.mjs` 的 keyless 断言。
 - **通过判据**（五条全要）：
   1. **生命周期映射完整**：研究生命周期每一环节（立项对齐 / 广度侦察 / 深度挖掘 / 综合写作 / 质量把关 / 审阅交付）在映射表有 DSH 落点（preset persona / skill / agent-team / todo / present…），或带证据的显式弃用理由；

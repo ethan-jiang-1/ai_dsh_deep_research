@@ -46,9 +46,18 @@ _cache/
 # dist-manual-version 钉它与 pack 版本一致，版本动 → 同 diff 重导出）
 _dist/*
 !_dist/安装手册.md
-# 编辑器杂物
+# 编辑器/OS/本机配置（跨环境噪声——不假定每台机器都有同名目录；tracked 断言 = secrets-untracked）
 .vscode/
 .idea/
+.cursor/
+.claude/settings.local.json
+*.local
+*.swp
+*.swo
+Thumbs.db
+Desktop.ini
+coverage/
+.cache/
 
 # ── ② 绝不进库（置底段，勿移动勿后补）──
 # 机密：宁可重复，不可漏——任何位置的凭据/环境文件都不进库
