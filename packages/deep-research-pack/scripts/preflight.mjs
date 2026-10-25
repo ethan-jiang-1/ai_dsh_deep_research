@@ -97,13 +97,11 @@ function nodeSatisfies(version, range) {
   const runtimeVersion = resolveVersion('@deepseek-ai/dsh-app-boot')
   const r = spawnSync('dsh', ['--version'], { encoding: 'utf8' })
   const cliVersion = r.status === 0 ? (String(r.stdout).trim().match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/)?.[0] ?? null) : null
-  const hostVersion = runtimeVersion ?? cliVersion
-  const ok = want === null || hostVersion === null ? null : hostVersion === want
+  // 只在解析到 profile 的 app-boot 时判真；PATH CLI 可能是另一个安装，只作参考，不据此误红。
+  const ok = want === null || runtimeVersion === null ? null : runtimeVersion === want
   const detail = runtimeVersion !== null
     ? `宿主运行时 ${runtimeVersion}${cliVersion !== null && cliVersion !== runtimeVersion ? `（PATH CLI ${cliVersion}，不作判据）` : ''}；本包要求 ${want ?? '未声明'}`
-    : cliVersion === null
-      ? `无法判定（未解析到 profile 的 app-boot，dsh --version 也不可用；本包要求 ${want ?? '未声明'}）`
-      : `PATH CLI ${cliVersion}（未解析到 profile 的 app-boot）；本包要求 ${want ?? '未声明'}`
+    : `未解析到 profile 的 app-boot（PATH CLI ${cliVersion ?? '不可用'} 仅参考）；本包要求 ${want ?? '未声明'}`
   record(ok, 'DSH 版本兼容', detail, `装匹配版本：npm i -g @deepseek-ai/dsh@${want ?? '<版本>'}（或让 profile 解析到该版本）`)
 }
 
@@ -158,8 +156,9 @@ function nodeSatisfies(version, range) {
       try {
         const state = JSON.parse(readFileSync(statePath, 'utf8'))
         seedVersionOk = state.version === pkg.version ? true : null
+        const skipped = Array.isArray(state.skipped) ? state.skipped : []
         seedVersionDetail = state.version === pkg.version
-          ? `记录 v${state.version}（与 pack 一致）`
+          ? `记录 v${state.version}（与 pack 一致）${skipped.length > 0 ? `；${skipped.length} 个未合并 .seed-new` : ''}`
           : `记录 v${state.version}；pack v${pkg.version}——运行 --upgrade`
       } catch {
         seedVersionDetail = '状态文件不可解析——运行 scaffold --check 重建'

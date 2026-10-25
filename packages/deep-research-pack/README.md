@@ -33,7 +33,7 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 
 运行形态、数据归属、升级/回滚与多实例的完整合同 = [guides/65](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/guides/65-run-forms.md)。
 
-**前置**：DSH 版本必须满足 `engines.dsh`（当前 `0.2.1-rc.2`；宿主安装/启动会拒绝不匹配版本），Node 满足 `^22.19.0 || >=24.0.0`。`dsh.compatibility.dshReleases` 是兼容矩阵镜像，不是宿主字段。
+**前置**：DSH 版本必须满足 `engines.dsh`（值以 `package.json` 的 `engines.dsh` 为准；宿主安装/启动会拒绝不匹配版本），Node 满足 `^22.19.0 || >=24.0.0`。`dsh.compatibility.dshReleases` 是兼容矩阵镜像，不是宿主字段。
 
 ```sh
 # ① 建 profile——自定义名默认只带 dsh-base（起不了 web，也就没有 GUI）；须先取 web 模板。
@@ -57,7 +57,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffo
 #    也可用安装后的 bin：dsh-deep-research-scaffold --workspace ~/research-workspace --profile research
 #    它用 PATH 上的 `dsh`；写哪个 home 由 `DSH_HOME` 决定（未设时默认 ~/.dsh）——日用安装别先 source dev/env.sh；
 #    手工等价 = 铺 <pack>/workspace/ 种子 + dsh plugin --profile research add
-#             @deepseek-ai/dsh-experimental-agent-team-profile@0.2.1-rc.2
+#             @deepseek-ai/dsh-experimental-agent-team-profile@<包内 engines.dsh 版本>
 #             + 全路径 preflight.mjs --workspace ~/research-workspace
 #    只处理工作区（不碰 profile）：--seed-only；只读检查：--check；安全升级：--upgrade
 
@@ -186,7 +186,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 - **工具卡 = 2 张**（spawn_teammate / web_search）；`team_task_*` 与其他协调类工具
   （wait_agent / list_agents / send_message）**不进对话流**（实测：harness 把协调类工具排除在对话渲染外）——团队任务的观察由 ui-agent-team 任务板与 To-dos
   折叠承担，无需卡片（4 卡方案的回退理由 = [marathon2 复盘](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/notes/archived/2026-09-25-marathon2-retrospective.md)，冻结层）；
-- **版本兼容面窄**：只声明 `dsh-v0.2.1-rc.2`（pre-stable API，peer 版本号不精确钉死）。
+- **版本兼容面窄**：只声明单一 DSH 版本（`engines.dsh` 精确值；pre-stable API，peer 版本号不精确钉死）。
 
 ## 发布（维护者）
 

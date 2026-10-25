@@ -160,7 +160,8 @@ test('release-smoke：破坏性清理仅允许固定路径', () => {
 test('release-smoke：安装域 client 半与 peers-only 断言在位（检查清单漂移是静默失效面）', () => {
   assert.match(releaseSmoke, /join\(installed, 'lib', 'client\.js'\)/, 'release-smoke 缺安装副本 lib/client.js 在场断言');
   assert.match(releaseSmoke, /dependencies === undefined/, 'release-smoke 缺 dependencies 缺席断言（peers-only 发布形状）');
-  assert.match(releaseSmoke, /engines\?\.dsh === '0\.2\.1-rc\.2'/, 'release-smoke 缺安装副本 engines.dsh 断言（宿主字段必须随包）');
+  assert.match(releaseSmoke, /installedManifest\?\.engines\?\.dsh/, 'release-smoke 缺安装副本 engines.dsh 断言（宿主字段必须随包）');
+  assert.match(releaseSmoke, /matrixVersion === installedEngine/, 'release-smoke 未把 engines.dsh 与 dshReleases 同源对账');
   assert.match(releaseSmoke, /boot 页模块表含本包 client 行|module-table|模块表/, 'preset-smoke 委托的模块表行断言未登记进 release-smoke 面');
 });
 

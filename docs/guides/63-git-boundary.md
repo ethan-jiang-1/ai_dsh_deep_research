@@ -54,10 +54,9 @@
 
 - **路径**：仓库内只用相对路径；脚本用 `ROOT` / `import.meta.url` 定位，不写 home、用户名、
   OS 盘符。需要展示路径时用环境变量或 `<workspace>` 占位。
-- **DSH home / 凭据**：`DSH_HOME` 默认由 `dev/env.sh` 指向 `runtime/harness-home`；设
-  `DSH_DEV_HOME` 可把隔离根指到仓外（独立实例）。同机多实例再配 `DSH_RUN_PROFILE`、
-  `DSH_RUN_PORT`、`DSH_RUN_STATE_DIR`（web.log/仪表盘/run-pack 各自独立）。凭据由使用者
-  自己提供，不入库。不要假定 `~/.dsh`、全局 `dsh` 或某个已安装 profile 在场。
+- **DSH home / 凭据**：`DSH_HOME` 默认由 `dev/env.sh` 指向 `runtime/harness-home`；多实例的
+  隔离根/profile/端口/state 变量与默认值 = [guides/65 §4](65-run-forms.md)（单一 owner）。
+  凭据由使用者自己提供，不入库。不要假定 `~/.dsh`、全局 `dsh` 或某个已安装 profile 在场。
 - **运行时**：Node 区间与 pnpm 版本由 `package.json` 钉住；LF 由 `.gitattributes` 强制；
   macOS/Linux 差异走运行时判断（如 `process.platform`），不提交平台二进制或 `.cmd` 脚本。
 - **夹具/录制**：新录制/新 fixture 不得嵌入本机绝对路径、端口、时间戳或机器名；需要确定性时

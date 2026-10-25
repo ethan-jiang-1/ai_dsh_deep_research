@@ -3,7 +3,7 @@
 //
 // 做四件事（幂等，可重复跑）：
 //   ① 研究工作区种子：按 `workspace/seed.json` 铺开（手册 + NODES + 判型库 + 模板 + .gitignore）；
-//      `--check` 只读报告三态，`--upgrade` 只更新未被用户改过的文件，`--force` 才全量覆盖；
+//      `--check` 只读报告分类，`--upgrade` 只更新未被用户改过的文件，`--force` 才全量覆盖；
 //      `method-library.md` 是用户数据，任何模式都不覆盖已存在的文件；
 //   ② 写/更新工作区种子状态（`.dsh-research-seed.json`，版本 + 哈希 + 跳过清单）；
 //   ③ profile 组合：确保 agent-team-profile 层在目标 profile 里（版本从 `engines.dsh` 派生）；
@@ -82,17 +82,17 @@ const plan = seedRels.map((rel) => {
 
 if (checkMode) {
   const count = (status) => plan.filter((p) => p.status === status).length
-  const blocking = plan.filter((p) => ['missing', 'stale', 'untracked'].includes(p.status))
+  const blocking = plan.filter((p) => ['missing', 'stale', 'untracked', 'deleted'].includes(p.status))
   const versionStale = state?.version !== seed.version
-  const mark = { current: '✓', missing: '✗', stale: '!', modified: '~', untracked: '?' }
+  const mark = { current: '✓', missing: '✗', stale: '!', modified: '~', untracked: '?', deleted: '✕' }
   console.log(`scaffold --check（工作区 = ${workspace}；pack 种子 v${seed.version}${state?.version === undefined ? '；无状态文件' : `；工作区记录 v${state.version}`}）`)
   for (const p of plan) console.log(`  ${mark[p.status]} ${p.rel} — ${p.status}`)
-  console.log(`\nscaffold --check: ${blocking.length === 0 && !versionStale ? '工作区种子当前' : '工作区种子需要 --upgrade'}（missing ${count('missing')} / stale ${count('stale')} / untracked ${count('untracked')} / modified ${count('modified')}；版本${versionStale ? '落后' : '一致'}）`)
+  console.log(`\nscaffold --check: ${blocking.length === 0 && !versionStale ? '工作区种子当前' : '工作区种子需要 --upgrade'}（missing ${count('missing')} / deleted ${count('deleted')} / stale ${count('stale')} / untracked ${count('untracked')} / modified ${count('modified')}；版本${versionStale ? '落后' : '一致'}）`)
   if (blocking.length > 0 || versionStale) console.log(`  修复：node ${join(PACK, 'scripts', 'scaffold.mjs')} --workspace ${workspace} --upgrade`)
   process.exit(blocking.length === 0 && !versionStale ? 0 : 1)
 }
 
-// ① 工作区种子（三态写入；method-library 永不覆盖）
+// ① 工作区种子（按分类写入；method-library 永不覆盖）
 {
   let written = 0
   let skipped = 0
@@ -108,6 +108,7 @@ if (checkMode) {
       written += 1
       continue
     }
+    if (p.status === 'deleted') { skippedRels.push(p.rel); skipped += 1; continue }
     if (p.status !== 'current' && upgrade && (p.status === 'modified' || p.status === 'untracked')) {
       if (!dryRun) {
         const sidecar = `${p.destPath}.seed-new`

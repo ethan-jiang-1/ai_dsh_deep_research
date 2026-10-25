@@ -222,11 +222,14 @@ try {
   step(Object.keys(installedManifest.peerDependencies ?? {}).length > 0 && installedManifest.dependencies === undefined,
     'manifest peers-only（peers 在场、dependencies 缺席）',
     installedManifest.dependencies ? `dependencies=${Object.keys(installedManifest.dependencies).join(',')}` : undefined);
-  step(installedManifest?.engines?.dsh === '0.2.1-rc.2'
-    && Array.isArray(installedManifest?.dsh?.compatibility?.dshReleases)
-    && installedManifest.dsh.compatibility.dshReleases.includes('dsh-v0.2.1-rc.2'),
+  const installedEngine = installedManifest?.engines?.dsh;
+  const installedMatrix = installedManifest?.dsh?.compatibility?.dshReleases;
+  const matrixVersion = Array.isArray(installedMatrix) && typeof installedMatrix[0] === 'string'
+    ? installedMatrix[0].replace(/^dsh-v/, '')
+    : null;
+  step(installedEngine !== undefined && matrixVersion === installedEngine,
     '兼容矩阵钉住当前 tag（engines.dsh + dshReleases 同源）',
-    `engines.dsh=${installedManifest?.engines?.dsh ?? '（缺）'}；dshReleases=${JSON.stringify(installedManifest?.dsh?.compatibility?.dshReleases ?? null)}`);
+    `engines.dsh=${installedEngine ?? '（缺）'}；dshReleases=${JSON.stringify(installedMatrix ?? null)}`);
 
   // ④b 安装形状证据（pack 自带 bin：真铺一个工作区 → 安装验收 preflight 验它）
   console.log('④b 部署链（安装副本：scaffold 铺种子 + preflight 复检）…');
@@ -264,6 +267,17 @@ try {
     [ ...(smoke.stdout || '').split('\n').filter((l) => l.includes('FAIL')),
       ...(smoke.timedOut ? ['⏱ preset-smoke 外层预算耗尽被杀（T_SMOKE）'] : []),
       ...(smoke.status !== 0 && !(smoke.stdout || '').trim() ? [`stderr: ${(smoke.stderr || '').slice(-400)}`] : []) ].join(' | '));
+  // ⑤b 卸载形状：remove 后 profile 的 bundles 与 dependencies 都不再提本包（手册“干净卸载”的证据）。
+  console.log('⑤b dsh plugin remove …');
+  const remove = await run(process.execPath, ['--import', 'tsx/esm', bin, 'plugin', '--profile', PROFILE, 'remove', 'dsh-deep-research-pack'],
+    { cwd: dshSrc, env: scrubbedEnv({ DSH_HOME: home }) });
+  let afterRemove = null;
+  try { afterRemove = JSON.parse(readFileSync(join(profileDir, 'package.json'), 'utf8')) } catch {}
+  step(remove.status === 0 && afterRemove !== null
+    && !(afterRemove?.dsh?.profile?.bundles ?? []).includes('dsh-deep-research-pack')
+    && afterRemove?.dependencies?.['dsh-deep-research-pack'] === undefined,
+    'dsh plugin remove 后 profile 无插件痕迹', tail(remove));
+
   // 释放到静默（scripts/AGENTS.md）：preset-smoke 正常路径自收割；若它被外层超时击杀（finally
   // 不及跑），web 孙进程（独立进程组）会漏占端口——按端口收割兜底并验证释放。
   const leak = await reclaimPort(Number(PORT));

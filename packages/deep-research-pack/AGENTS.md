@@ -6,7 +6,7 @@
 config.plugins 内声明 persona/skills/工具行）+ `presets/<role>/skills/` + 驾驶舱
 （`src/client/`，构建产物 `lib/client.js`）+ 工作区种子 `workspace/`（手册与模板快照 +
 `seed.json` 版本/哈希清单，`dev/sync-pack-workspace.mjs` 同步，门禁 `pack-workspace-fresh` 防漂移；
-`scaffold --check/--upgrade` 三态升级，方法库不覆盖）+ 部署脚本
+`scaffold --check/--upgrade` 分类升级（missing/current/stale/modified/untracked/deleted），方法库不覆盖）+ 部署脚本
 `scripts/{preflight,scaffold}.mjs`（bin 两条命令）。包级当前合同在 [README.md](README.md)；
 本文件只放该子树的**指令**。上游对应物 = DSH `packages/AGENTS.md`。
 

@@ -30,7 +30,8 @@ const flag = (name, dflt) => {
 };
 const port = flag('--port', process.env.DSH_RUN_PORT || '3083');
 const token = flag('--token', null);
-const cwd = flag('--cwd', resolve(ROOT, 'research-workspace'));
+const defaultWorkspace = process.env.DSH_RUN_WORKSPACE ? resolve(process.env.DSH_RUN_WORKSPACE) : resolve(ROOT, 'research-workspace');
+const cwd = flag('--cwd', defaultWorkspace);
 const preset = flag('--preset', 'lead');
 const promptFile = flag('--prompt-file', null);
 const resumeSessionId = flag('--session', null);
@@ -123,7 +124,7 @@ if (resumeSessionId !== null) {
   process.exit(1);
 }
 
-const workspacePath = resolve(ROOT, 'research-workspace');
+const workspacePath = defaultWorkspace;
 let created;
 if (cwd === workspacePath) {
   const ws = await rpc('workspace/create', { request: { path: workspacePath } });

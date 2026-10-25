@@ -12,9 +12,10 @@ test('sha256：内容哈希稳定且区分换行', () => {
   assert.notEqual(sha256('a\n'), sha256('a'))
 })
 
-test('classifySeedEntry：missing/current/stale/modified/untracked 五态', () => {
+test('classifySeedEntry：missing/deleted/current/stale/modified/untracked 各态', () => {
   const seed = 's'
   assert.equal(classifySeedEntry({ destExists: false, destHash: null, stateHash: null, seedHash: seed }), 'missing')
+  assert.equal(classifySeedEntry({ destExists: false, destHash: null, stateHash: 'old', seedHash: seed }), 'deleted')
   assert.equal(classifySeedEntry({ destExists: true, destHash: seed, stateHash: 'old', seedHash: seed }), 'current')
   assert.equal(classifySeedEntry({ destExists: true, destHash: 'old', stateHash: 'old', seedHash: seed }), 'stale')
   assert.equal(classifySeedEntry({ destExists: true, destHash: 'user', stateHash: 'old', seedHash: seed }), 'modified')

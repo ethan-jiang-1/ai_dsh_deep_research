@@ -3,6 +3,8 @@
 > 层：指南（当前合同）。本页回答“这个插件以什么形态运行、数据归谁、怎么升级/移交、用什么证据证明”。
 > 安装步骤与用户视角细节 = [pack README](../../packages/deep-research-pack/README.md)；开发操作 = [guides/60](60-dev-loop.md)；
 > 入库/跨环境 = [guides/63](63-git-boundary.md)；版本与发布 = [guides/64](64-release-versioning.md)。
+>
+> **编号消歧**：本文 M1/M2/M3 = 运行形态（mode：安装 / 独立开发 / 移交），不是 [evaluation §3](../evaluation.md) 的里程碑 M1/M2/M3+；跨文档引用写「运行形态 M1」。
 
 ## 1. 三种运行形态
 
@@ -29,7 +31,7 @@
 
 ## 3. 安装、升级、卸载
 
-- **前置**：DSH 满足包内 `engines.dsh`（当前 `0.2.1-rc.2`）；Node 满足 `engines.node`；团队机制层
+- **前置**：DSH 满足包内 `engines.dsh`（值以 `package.json` 为准）；Node 满足 `engines.node`；团队机制层
   `@deepseek-ai/dsh-experimental-agent-team-profile` 与同一 `engines.dsh` 版本在场（scaffold 自动补）。
 - **安装**：`dsh --profile <p> --from-default-profile web --dump-config` → `dsh plugin --profile <p> add <npm|tarball|目录>`；
   `scaffold --workspace <w> --profile <p>` 铺种子 + 补团队层 + preflight。
@@ -55,6 +57,7 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 | `DSH_RUN_PROFILE` | `research` | profile 名 |
 | `DSH_RUN_PORT` | `3083` | web 端口 |
 | `DSH_RUN_STATE_DIR` | `runtime/smoke-workspace` | web.log/仪表盘/run-pack/npm-cache 的实例状态根 |
+| `DSH_RUN_WORKSPACE` | `research-workspace` | 研究会话 cwd（角色手册从这里注入；多实例请各自指定） |
 
 不同 `DSH_RUN_STATE_DIR` 的实例允许并行；默认 state 的重复启动检查仍生效，自定义 state 由端口检查兜底（两个实例请用不同端口）。冷启动证据 =
 `node scripts/smoke/cold-start-smoke.mjs`（独立 home/profile/端口/state，MCP 关闭，浏览器面 GREEN）。
@@ -64,24 +67,21 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 - **源码移交**：`node scripts/dist/export-handoff.mjs` → `_dist/ai_dsh_deep_research-src-<version>-<head>.tar.gz`；
   只含 tracked 源与 `.gitmodules`，对方 `tar xzf` → `git submodule update --init` → `pnpm install`。
 - **插件移交**：`node scripts/dist/export-dist.mjs` → tarball + 安装手册（含 sha256、升级/回滚、离线矩阵）。
-- **研究数据移交**：run bundle 单独拷贝/归档；新 run 不写本机 home 绝对路径，旧 bundle 的历史路径按 epoch 豁免。
+- **研究数据移交**：run bundle 单独拷贝/归档；新 run 不写本机 home 绝对路径，旧 bundle 的历史路径按 epoch 豁免。移交前跑 `node scripts/run-gates/path-hygiene.mjs <bundle>`（旧场加 `--allow-legacy`）。
 - **不做**：`cp -r` 工作树、把 `runtime/` 或 `research-workspace/drt_*` 打进源码包、把凭据/会话随包发送。
 
 ## 6. 证据
 
-| 改动面 | 最小证据 |
-|---|---|
-| 结构/文档/种子/门禁 | `pnpm verify` + `pnpm test` |
-| 安装形状（pack → 干净 profile → plugin add → scaffold/preflight） | `source dev/env.sh && node scripts/smoke/release-smoke.mjs` |
-| 独立环境/冷启动 | `source dev/env.sh && node scripts/smoke/cold-start-smoke.mjs` |
-| preset / skill 内容 | L1 `preset-smoke`（真挂载） |
-| persona / 手册 / 模型可见文本 | `snapshot-replay` B 层 + L4-lite（真模型档） |
-| 门禁本身 | 注入回归先红 → 还原 → 绿（`gates-smoke` / 对应契约测试） |
+证据档位、命令与选择规则 = [guides/60 §2](60-dev-loop.md)（唯一 owner，本页不复述）。本合同的增量证据：
 
-## 7. 非目标与已知边界
+- `cold-start-smoke`：独立 `DSH_DEV_HOME` + profile + 端口 + state，到浏览器面 GREEN；
+- `export-handoff` 自检：只含 tracked 源，不含运行态/凭据/run 数据/依赖；
+- `dev-runtime-clean` 门禁：`dev/` 下无运行态。
+
+## 7. 已知限制与延后工作
 
 - 不把“多人共享一个 checkout / 一个 `DSH_HOME`”作为支持面；协作单位 = 包版本 + 工作区/run bundle 移交。
-- 不承诺 Windows；当前实测 macOS，Linux 走 bash/Node 标准路径但未在同轮跑。`sed` 已改为 BSD/GNU 兼容形态。
+- 不承诺 Windows；当前实测 macOS，Linux 走 bash/Node 标准路径但未在同轮跑。`sed` 使用 BSD/GNU 兼容形态。
 - 离线不是零前置：tarball 不需要 registry，但团队层需预装/缓存、Playwright MCP 首次需 npx、模型 API 需网络。
 - 包目录安装的 profile 依赖是绝对路径；正式分发用 tarball/npm。
 - 研究方法论本身不在本页：角色/preset/skill 见 [guides/62](62-plugin-authoring.md) 与 pack 内容；run 操作见 [guides/61](61-run-playbook.md)。

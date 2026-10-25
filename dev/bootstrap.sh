@@ -84,7 +84,7 @@ fi
 if command -v lsof >/dev/null 2>&1; then ok "lsof 在场（端口检查）"; else warn "lsof 缺席——run-driver 的端口占用检查不可用"; fi
 if command -v pgrep >/dev/null 2>&1; then ok "pgrep 在场（boot 并发检查）"; else warn "pgrep 缺席——run-driver 的 boot 并发检查不可用"; fi
 
-echo "ok   本次实例：profile=${DSH_RUN_PROFILE:-research} port=${DSH_RUN_PORT:-3083} state=${DSH_RUN_STATE_DIR:-$ROOT/runtime/smoke-workspace}"
+echo "ok   本次实例：profile=${DSH_RUN_PROFILE:-research} port=${DSH_RUN_PORT:-3083} state=${DSH_RUN_STATE_DIR:-$ROOT/runtime/smoke-workspace} workspace=${DSH_RUN_WORKSPACE:-$ROOT/research-workspace}"
 echo "note 团队层需 registry（或预装）；Playwright MCP 首次需 npx 拉取——离线环境先预置"
 if [ "$missing" -gt 0 ]; then
   echo "bootstrap: $missing 项未就绪（见上）" >&2

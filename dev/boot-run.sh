@@ -23,6 +23,7 @@ PORT="${DSH_RUN_PORT:-3083}"
 STATE_DIR="${DSH_RUN_STATE_DIR:-$ROOT/runtime/smoke-workspace}"
 mkdir -p "$STATE_DIR"
 STATE_DIR="$(cd "$STATE_DIR" && pwd)"
+WORKSPACE="${DSH_RUN_WORKSPACE:-$ROOT/research-workspace}"
 
 # BSD/GNU 都可用的 in-place sed：`sed -i.bak` 两派都接受，备份随即删除。
 sed_inplace() { sed -i.bak "$1" "$2" && rm -f "$2.bak"; }
@@ -191,6 +192,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 echo "boot-run: run 仪表盘已起（只读投影，5s 再生成）：$DASH_OUT"
+echo "boot-run: 研究工作区 = ${WORKSPACE}（DSH_RUN_WORKSPACE 可覆写）"
 cat <<'STEPS'
 ──────────────────────────── 怎么开 run ────────────────────────────
 1. 等 web 横幅出现（含本次端口与 token）→ 用浏览器打开该 URL

@@ -19,7 +19,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PORT = process.env.COLD_START_PORT ?? '3129'
 const PROFILE = 'cold-start-smoke'
 const TEMP = join(ROOT, 'runtime', 'smoke-workspace', `cold-start-smoke-${process.pid}`)
-const HOME = join(TEMP, 'home')
+const DEV_HOME = join(TEMP, 'home')
 const STATE = join(TEMP, 'state')
 const TIMEOUT_MS = 300_000
 
@@ -37,7 +37,7 @@ mkdirSync(STATE, { recursive: true })
 
 const env = {
   ...process.env,
-  DSH_DEV_HOME: HOME,
+  DSH_DEV_HOME: DEV_HOME,
   DSH_RUN_PROFILE: PROFILE,
   DSH_RUN_PORT: PORT,
   DSH_RUN_STATE_DIR: STATE,

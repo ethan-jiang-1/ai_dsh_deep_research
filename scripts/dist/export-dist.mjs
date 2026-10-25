@@ -33,6 +33,7 @@ const report = (name, ok, detail) => {
 
 try {
   const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
+  const dshEngine = pkg.engines?.dsh ?? pkg.dsh?.compatibility?.dshReleases?.[0]?.replace(/^dsh-v/, '') ?? '（缺）'
   const version = pkg.version
   const tarballName = `dsh-deep-research-pack-${version}.tgz`
 
@@ -104,7 +105,7 @@ try {
 | 安装包 | \`${tarballName}\`（与本手册同目录） |
 | 打包日期 | ${date} |
 | sha256 | \`${tarballSha}\` |
-| 验证基线 | DSH \`engines.dsh\`（当前 \`0.2.1-rc.2\`；不匹配时宿主拒绝加载）+ Node \`^22.19.0 || >=24.0.0\` |
+| 验证基线 | DSH \`engines.dsh\`（当前 \`${dshEngine}\`；不匹配时宿主拒绝加载）+ Node \`^22.19.0 || >=24.0.0\` |
 
 这个安装包携带本包运行所需的文件：bundle 行（cordis.patch.yml）、角色 preset 与方法论技能（presets/）、
 研究驾驶舱浏览器端（lib/）、工作区种子（workspace/）、部署 bin（scripts/）、README 与 LICENSE，共
@@ -221,7 +222,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffo
 |---|---|---|
 | DSH 本体 | 需预装 | 本包不装 DSH |
 | 本包 tarball | 是 | 本手册同目录的文件，不需要 registry |
-| 团队机制层 | 需预置或缓存 | \`@deepseek-ai/dsh-experimental-agent-team-profile@0.2.1-rc.2\`；scaffold 会按包内版本安装 |
+| 团队机制层 | 需预置或缓存 | \`@deepseek-ai/dsh-experimental-agent-team-profile@${dshEngine}\`；scaffold 会按包内版本安装 |
 | Playwright MCP | 可关闭或预缓存 | 默认 npx 首次拉取；离线时设 \`MCP_PLAYWRIGHT=0\`（通道启动脚本）或预置 npm 缓存 |
 | 模型 API | 需网络 | 研究 run 需要 DeepSeek API 可达 |
 
@@ -231,7 +232,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffo
 |---|---|
 | 「研究状态」页签没出现 | 浏览器刷新不加载新模块：重启 \`dsh web\`，再硬刷新页面 |
 | 角色不守证据纪律 | 会话必须建在 scaffold 铺过的工作区里（手册从 cwd 注入），见第三节 |
-| preflight 报团队机制层缺席 | 重跑 scaffold（按包内 \`engines.dsh\` 自动补钉版层）；或手工 \`dsh plugin --profile research add @deepseek-ai/dsh-experimental-agent-team-profile@0.2.1-rc.2\` |
+| preflight 报团队机制层缺席 | 重跑 scaffold（按包内 \`engines.dsh\` 自动补钉版层）；或手工 \`dsh plugin --profile research add @deepseek-ai/dsh-experimental-agent-team-profile@${dshEngine}\` |
 | 想确认装了什么版本 | \`dsh plugin --profile research list\`，或看本手册表头的版本号 |
 `
   writeFileSync(join(DIST, MANUAL), manual)

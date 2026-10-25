@@ -14,14 +14,15 @@ export function sha256(text) {
 
 /**
  * 单个种子文件相对“上次安装状态”的分类。
- * - missing：目标不存在；
+ * - missing：目标不存在且没有安装记录；
+ * - deleted：有安装记录但目标被删（用户删除，升级不自动重铺）；
  * - current：目标已等于当前种子；
  * - stale：目标仍是上次安装的原样，但种子已更新（可安全升级）；
  * - modified：目标与上次安装不同（用户改过，升级不得覆盖）；
  * - untracked：没有上次安装记录，且目标与当前种子不同（旧工作区/外部创建，保守处理）。
  */
 export function classifySeedEntry({ destExists, destHash, stateHash, seedHash }) {
-  if (!destExists) return 'missing'
+  if (!destExists) return stateHash === undefined || stateHash === null ? 'missing' : 'deleted'
   if (destHash === seedHash) return 'current'
   if (stateHash === undefined || stateHash === null) return 'untracked'
   if (destHash === stateHash) return 'stale'
