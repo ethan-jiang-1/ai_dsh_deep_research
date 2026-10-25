@@ -4,6 +4,16 @@
   "private": true,
   "type": "module",
   "description": "DSH Deep Research 插件项目：多角色研究团队 preset pack（Lead/Scout/Analyst/Critic）+ Agent Team 协作。方法论内核源自 codex Deep Research harness 考古。",
+  "license": "MIT",
+  "author": "The ai_dsh_deep_research authors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ethan-jiang-1/ai_dsh_deep_research.git"
+  },
+  "homepage": "https://github.com/ethan-jiang-1/ai_dsh_deep_research#readme",
+  "bugs": {
+    "url": "https://github.com/ethan-jiang-1/ai_dsh_deep_research/issues"
+  },
   "packageManager": "pnpm@11.7.0",
   "engines": {
     "node": "^22.19.0 || >=24.0.0"

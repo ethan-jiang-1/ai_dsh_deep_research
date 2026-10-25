@@ -59,6 +59,7 @@ try {
   const listed = spawnSync('tar', ['-tzf', tarball], { encoding: 'utf8' })
   const entries = (listed.stdout ?? '').split('\n').filter(Boolean)
   const must = [
+    'package/LICENSE',
     'package/cordis.patch.yml',
     'package/README.md',
     'package/package.json',
@@ -70,13 +71,16 @@ try {
     'package/scripts/scaffold.mjs',
   ]
   const missing = must.filter((entry) => !entries.includes(entry))
+  // 发布边界：lib/types 下的 JS 与 sourcemap 是构建中间产物，不是运行时；进包即用户装垃圾。
+  const forbidden = entries.filter((entry) => /^package\/lib\/types\/.*\.(?:js|map)$/.test(entry))
   const presetRows = entries.filter((e) => /^package\/presets\/[a-z]+\.patch\.yml$/.test(e)).length
   const skills = entries.filter((e) => e.endsWith('/SKILL.md')).length
   const templates = entries.filter((e) => e.startsWith('package/workspace/templates/')).length
   const outside = entries.filter((e) => !e.startsWith('package/'))
   report('inventory',
-    listed.status === 0 && missing.length === 0 && outside.length === 0 && presetRows >= 4 && skills > 0 && templates > 0,
+    listed.status === 0 && missing.length === 0 && forbidden.length === 0 && outside.length === 0 && presetRows >= 4 && skills > 0 && templates > 0,
     missing.length > 0 ? `缺：${missing.join(', ')}`
+      : forbidden.length > 0 ? `构建中间产物进包：${forbidden.slice(0, 5).join(', ')}${forbidden.length > 5 ? '…' : ''}（改 package.json files 排除）`
       : outside.length > 0 ? `package/ 之外的条目：${outside.join(', ')}`
         : `${entries.length} 条目，preset 行 ${presetRows}，skill ${skills}，模板 ${templates}`)
 
@@ -93,9 +97,9 @@ try {
 | 验证基线 | DSH \`dsh-v0.2.1-rc.2\`（Node ≥ 22.19） |
 
 这个安装包是自包含的：bundle 行（cordis.patch.yml）、四角色 preset 与六个方法论技能（presets/）、
-研究驾驶舱浏览器端（lib/）、工作区种子（workspace/）、部署 bin（scripts/）、README，共
-${entries.length} 个条目 —— 不需要 npm registry，不需要克隆仓库，拿到这一个文件就能装。下面每一步
-都与仓库的发布冒烟（release-smoke）每轮自动验证的路径一致，是被证明过的顺序，不是设想。
+研究驾驶舱浏览器端（lib/）、工作区种子（workspace/）、部署 bin（scripts/）、README 与 LICENSE，共
+${entries.length} 个条目 —— tarball 形态不需要 npm registry，不需要克隆仓库，拿到这一个文件就能装。
+下面每一步都与仓库的发布冒烟（release-smoke）每轮自动验证的路径一致，是被证明过的顺序，不是设想。
 
 ## 一、安装
 
@@ -104,8 +108,10 @@ ${entries.length} 个条目 —— 不需要 npm registry，不需要克隆仓�
 #    这一步只需第一次；profile 已存在就跳过。\`web\` = DSH 出厂模板，不读你本地同名 profile。
 dsh --profile research --from-default-profile web --dump-config
 
-# ② 装本包（本包 private，未发布 registry——必须给 tarball 的 file: 形态，且必须**绝对路径**：
-#    \`file:\` 的相对路径按 profile 目录解析，不是你的 cwd）
+# ② 装包（两种形态，任选其一）：
+#    npm（推荐；包发布后可用）：dsh plugin --profile research add dsh-deep-research-pack
+#    离线 / 未发布时：tarball 必须给 file: 形态，且必须**绝对路径**
+#    （\`file:\` 的相对路径按 profile 目录解析，不是你的 cwd）
 dsh plugin --profile research add file:/path/to/${tarballName}
 \`\`\`
 

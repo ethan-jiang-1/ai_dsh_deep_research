@@ -67,11 +67,6 @@
       "reason": "workspaceFiles 接通状态的证据指针（'= 已接通'的历史判定记录）"
     },
     {
-      "source": "packages/deep-research-pack/README.md",
-      "target": "notes/archived/2026-09-25-marathon2-retrospective.md",
-      "reason": "4 卡方案回退理由的复盘指针（行内标注'冻结层'）"
-    },
-    {
       "source": "notes/implemented/2026-10-08-notes-stocktake.md",
       "target": "notes/archived/2026-09-28-hitl-docking-polish.md",
       "reason": "体检报告历史引用（记录该归档候选当时的承接核实状态；2026-10-10 已裁定归档）"

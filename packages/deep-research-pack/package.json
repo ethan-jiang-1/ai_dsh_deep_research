@@ -1,14 +1,42 @@
 {
   "name": "dsh-deep-research-pack",
   "version": "0.1.1",
-  "private": true,
+  "private": false,
   "type": "module",
-  "description": "Deep Research multi-role plugin pack: 4 research role presets (Lead / Scout / Analyst / Critic) + host bundle rows (preset roster, deliverables, team UI). Team mechanics come from the dsh-experimental-agent-team-profile layer installed per profile. Methodology kernel from codex Deep Research harness. Design docs: docs/00-index.md",
+  "description": "Deep Research multi-role plugin pack: 4 research role presets (Lead / Scout / Analyst / Critic) + host bundle rows (preset roster, deliverables, team UI). Team mechanics come from the dsh-experimental-agent-team-profile layer installed per profile. Methodology kernel from codex Deep Research harness. Repository docs: https://github.com/ethan-jiang-1/ai_dsh_deep_research",
+  "license": "MIT",
+  "author": "The ai_dsh_deep_research authors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ethan-jiang-1/ai_dsh_deep_research.git",
+    "directory": "packages/deep-research-pack"
+  },
+  "homepage": "https://github.com/ethan-jiang-1/ai_dsh_deep_research/tree/master/packages/deep-research-pack#readme",
+  "bugs": {
+    "url": "https://github.com/ethan-jiang-1/ai_dsh_deep_research/issues"
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "deep-research",
+    "agent-team",
+    "plugin",
+    "research"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
   "files": [
+    "LICENSE",
     "presets/**",
     "cordis.patch.yml",
     "lib/**",
     "!lib/*.tsbuildinfo",
+    "!lib/types/**/*.js",
+    "!lib/types/**/*.map",
     "workspace/**",
     "scripts/**"
   ],

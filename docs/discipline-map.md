@@ -234,7 +234,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | 门禁自测模式（语料 verify.test.mjs：完整副本 + 真实 verifier 入口 + invalid case 真被拒才算数） | [gates-smoke](../scripts/smoke/gates-smoke.mjs)（临时副本 + 注入回归经真实 verify 入口点名报红 + 零注入对照组防断言空转）+ [tests/contracts/verify-gates.test.mjs](../tests/contracts/verify-gates.test.mjs)（案例表 ↔ gates 数组静态对账） | 带证据适配（子进程归 smoke 道——layering 禁默认回归 spawn；副本 = tracked 全量，等价 fresh clone——曾有的「运行区链接目标补拷」对冲已随 BUG-016 修复移除） |
 | 验证词汇：oracle 独立预期 / real composition / semantic review | [00-index §术语映射](00-index.md) 验证词汇行 | 照搬 |
 | 六误区清单（goal≠验收 / mock-only / 刷新≠接受 / 空 invariant / agent-loop / 不抄主仓治理） | 逐条散落既有登记（D6 / L1 真挂载 / tests·AGENTS fix fixtures / 本表源 1 与 alignment-ledger / 不适用登记）——不另立第二份清单（理由 = [毕业 Note](../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md) 输掉的方案） | 带证据适配（散落形态：六条各自有登记载体，本条不另立第二份清单——理由见毕业 Note 输掉的方案；散落 = 需按条检索，不是免检） |
-| 主仓治理全套（Issue/PR policy、weighted approval、stacked PR、release lane、`.github/` 执行层） | 等价物 = pre-commit + 窄切片 + 收尾对账（既有登记）；语料适用边界明文反证该立场 | 不适用（维持——**重估触发**：引入外部贡献者或多包发布需治理流程时） |
+| 主仓治理全套（Issue/PR policy、weighted approval、stacked PR、release lane、`.github/` 执行层） | 最小开源治理 = keyless CI（[ci.yml](../.github/workflows/ci.yml)）+ 本地 pre-commit + 窄切片 + 收尾对账；Issue/PR policy、weighted approval、stacked PR、release lane 未采纳 | 带证据适配（2026-10-25 开源发布：CI 骨架落地；其余治理面的重估 = 需要外部贡献者分级审批、堆叠 PR 或自动化发布时） |
 
 ## 重审触发路径
 

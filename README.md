@@ -2,7 +2,7 @@
 
 DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`packages/deep-research-pack`）提供四个研究角色 preset（`Deep Research Lead / Scout / Analyst / Critic`），协作走 DSH 现成 Agent Team 通道。
 
-设计来源：方法论内核出自 codex 下的 Deep Research harness 考古（[考古报告](notes/implemented/2026-09-24-deep-research-harness-analysis.md)），插件工程范式照搬 `ai_dsh_company`（[解剖报告](notes/implemented/2026-09-24-dsh-plugin-repo-anatomy.md)）。
+设计来源：方法论内核出自 codex 下的 Deep Research harness 考古（[考古报告](notes/implemented/2026-09-24-deep-research-harness-analysis.md)），插件工程范式参考作者本地 `ai_dsh_company`（不随仓；[解剖报告](notes/implemented/2026-09-24-dsh-plugin-repo-anatomy.md)）。
 
 ## Start Here
 
@@ -13,10 +13,14 @@ DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`pac
 - 想**用它**（跑一次研究 / 装到自己的 DSH）而不是改它：意图分流表 = [`docs/00-index.md`](docs/00-index.md) §先分流（每种说法的第一条命令）。
 - 想**看懂**项目怎么运转、怎么调试、状态放哪：[`docs/project-map.md`](docs/project-map.md)（任务入口矩阵 + 失败定位）与 [`docs/design/50-agent-loop-and-state.md`](docs/design/50-agent-loop-and-state.md)（Agent Loop 与四类状态合同）。
 
+## 使用与贡献
+
+用户安装与使用 → [pack 部署说明](packages/deep-research-pack/README.md) · [手动安装手册](_dist/安装手册.md)；贡献者环境与工作流 → [CONTRIBUTING.md](CONTRIBUTING.md)；License = [MIT](LICENSE)。
+
 ## 研发宪章（2026-09-27 用户定调）
 
 1. **循 DSH 而不发明**：机制权威 = `vendor/dsh`（钉 tag），纪律全表 = `docs/discipline-map.md`（逐源三态）；优先用 DSH 现成载体，自建机制须有"载体不可用"证据。
-2. **自主优先，借鉴成熟**：问题先探成熟 DSH 插件的解法（采纳度 = 下载量 / 影响力为信号；参考仓 `ai_dsh_company`），能自主解决的静默解决、不外抛。
+2. **自主优先，借鉴成熟**：问题先探成熟 DSH 插件的解法（采纳度 = 下载量 / 影响力为信号；参考作者本地 `ai_dsh_company`，不随仓），能自主解决的静默解决、不外抛。
 3. **审阅分层**：机械门禁 / 溯源审计 / 判据探针 / 对抗自审（critic 式）全部自主做；只有不可代理的判断（真人体验、方向取舍）才在阶段边界请人——不设额外打断点。
 
 ## Rules In One Screen

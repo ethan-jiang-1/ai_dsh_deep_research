@@ -433,12 +433,8 @@
       "source": ".github/AGENTS.md",
       "owns": "Windows 任务跑在 Windows runner（`windows-*` 标签）下并使用原生 `pwsh`",
       "verdict": "na",
-      "reason": "本仓无远端 CI/PR 面（.github 不存在）；等价面 = dev/hooks/pre-commit + scripts/verify/verify.mjs 的本地门禁",
-      "liveness": [
-        {
-          "absent": ".github"
-        }
-      ]
+      "reason": "本仓 CI 仅 Linux keyless（.github/workflows/ci.yml），无 Windows runner / PowerShell 任务面",
+      "reReviewOn": "引入 Windows runner 任务，或需要 PR/Issue 治理流程（weighted approval / stacked PR / release lane）时"
     },
     {
       "source": "AGENTS.md",
