@@ -1,11 +1,13 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-10-25
 ---
 
 # 推敲：工作区所有权与种子升级
 
-> 立卡：2026-10-25 ｜ 状态：推敲中 ｜ 类型：Feature ｜ 结论倾向：现在做——A 已落地；跨版本证据与文档收尾 ｜ 可关闭：否
+> 立卡：2026-10-25 ｜ 状态：已结（2026-10-25） ｜ 类型：Feature ｜ 结论倾向：现在做——A 已落地；残余见卡 ｜ 可关闭：是
+
+**关闭结论（2026-10-25）：** `workspace/seed.json` + `--check/--upgrade/--force` + 方法库保护 + `.dsh-research-seed.json` 落地；残余真实 pack 版本 bump 与 Linux 见卡。 去向：implemented — [运行形态合同 Note](../../../notes/implemented/2026-10-25-run-form-contract.md)。
 
 **问题与期望结果：** 研究工作区里的 `AGENTS.md`、`NODES.md`、`question-patterns.md` 与 `templates/run/` 既是研究纪律的载体，也是 agent 行为的一部分；它们由 pack 的 `workspace/` 种子铺到用户工作区，但之后不再随插件升级。`method-library.md` 则是明确的用户数据，却在 `scaffold --force` 下会被空架子覆盖。期望明确“哪些是插件行为、哪些是用户数据、升级时谁变”，并给出一条不丢用户编辑的升级路径。
 
@@ -32,7 +34,7 @@ opened: 2026-10-25
 
 - D17：harness 只读、run 变量只进 `drt_<slug>/`；手册与模板属于 harness 侧，但当前住在用户工作区。
 - `dev/sync-pack-workspace.mjs` 与 `pack-workspace-fresh` 是种子的正本/生成物关系。
-- 模型可见文本变更的证据义务：手册/NODES 文本变化会进 snapshot B 层，需按 [guides/62](../../docs/guides/62-plugin-authoring.md) 与 [evaluation](../../docs/evaluation.md) 选证据。
+- 模型可见文本变更的证据义务：手册/NODES 文本变化会进 snapshot B 层，需按 [guides/62](../../../docs/guides/62-plugin-authoring.md) 与 [evaluation](../../../docs/evaluation.md) 选证据。
 
 ## 已知事实
 

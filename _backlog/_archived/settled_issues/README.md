@@ -4,6 +4,11 @@
 
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-10-25-run-form-contract](2026-10-25-run-form-contract.md) | 运行形态合同：M1/M2/M3、P/H/W、A+B、per-user、升级/移交/证据矩阵；[guides/65](../../../docs/guides/65-run-forms.md) + [Note](../../../notes/implemented/2026-10-25-run-form-contract.md) | 2026-10-25 |
+| [2026-10-25-distribution-contract](2026-10-25-distribution-contract.md) | `engines.dsh` + 团队层钉版 + Node/preflight + 升级/离线/校验和 + 冷启动安装证据；残余见卡 | 2026-10-25 |
+| [2026-10-25-workspace-ownership-and-upgrade](2026-10-25-workspace-ownership-and-upgrade.md) | seed.json + `--check/--upgrade` + 方法库保护；残余见卡 | 2026-10-25 |
+| [2026-10-25-runtime-data-boundary](2026-10-25-runtime-data-boundary.md) | `dev-runtime-clean` + 可配置数据根 + clean handoff + 两实例；残余见卡 | 2026-10-25 |
+| [2026-10-25-standalone-cold-start](2026-10-25-standalone-cold-start.md) | bootstrap + 冷启动 smoke + 两实例 + pack 目录 + 平台/离线；残余见卡 | 2026-10-25 |
 | [2026-10-23-readable-final-process](2026-10-23-readable-final-process.md) | 可读终稿流程位：Lead 在 review PASS 后、HITL2 前写 `final/readable.md` → `readable-vN.md`；门C 同版/六节/长度/链接；回执 reader 哈希；终稿页签地址族/双视图；真实 run 全链绿、769 测试；[Note](../../../notes/implemented/2026-10-23-reader-final.md) · [D29](../../../docs/decisions.md) | 2026-10-24 |
 | [2026-10-23-run-final-human-readable](2026-10-23-run-final-human-readable.md) | 读者版内容合同：六节、1–3 页、不新增事实/来源、正文无 `[来源:]`/`evidence/`；真实 reader 2,664 字/57 行；用户选择 A 收口；[Note](../../../notes/implemented/2026-10-23-reader-final.md) | 2026-10-24 |
 | [2026-10-23-rerun-dissatisfaction-triage](2026-10-23-rerun-dissatisfaction-triage.md) | rerun 不满转接层：L1 `rerun-triage` skill（七类说法→四手段+代价+不变项+五纪律）、L2 HITL2 三选项带后果 + 报告末节两节、L3 状态页⑤/终稿页脚只读折叠块（共用 src/lib 文案）；同批修 persona 交付语义回 final/vN；719 测试 + 四角色重录 + 真模型探针五条全中；[Note](../../../notes/implemented/2026-10-23-rerun-triage-layer.md) | 2026-10-23 |

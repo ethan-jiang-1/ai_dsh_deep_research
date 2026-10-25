@@ -5,7 +5,7 @@ intent: 为运行形态合同与分发合同提供 DSH 官方 bundle/profile/wor
 
 # DSH 插件惯例：bundle、profile、workspace 与兼容声明
 
-> 消费者：[运行形态合同](../issues/2026-10-25-run-form-contract.md)（Q1 独立启动读法）、[分发合同](../issues/2026-10-25-distribution-contract.md)（兼容/安装/升级）。
+> 消费者：[运行形态合同](../settled_issues/2026-10-25-run-form-contract.md)（Q1 独立启动读法）、[分发合同](../settled_issues/2026-10-25-distribution-contract.md)（兼容/安装/升级）。
 > 材料性质：只读事实与推断；不构成产品决定。盘上依据以 `vendor/dsh` 当前 pin 为准。
 
 ## 问题
@@ -52,11 +52,11 @@ intent: 为运行形态合同与分发合同提供 DSH 官方 bundle/profile/wor
 
 ## 4. workspace 与数据：DSH 不替插件管用户工作区
 
-- agent-instructions 从会话 cwd 向上发现 `AGENTS.md` 并注入（本仓 [guides/62](../../docs/guides/62-plugin-authoring.md) 与 [research-workspace/AGENTS.md](../../research-workspace/AGENTS.md) 已按此设计）。
+- agent-instructions 从会话 cwd 向上发现 `AGENTS.md` 并注入（本仓 [guides/62](../../../docs/guides/62-plugin-authoring.md) 与 [research-workspace/AGENTS.md](../../../research-workspace/AGENTS.md) 已按此设计）。
 - sessions、credentials、profiles 在 `$DSH_HOME` 下；workspace 文件由用户/会话 cwd 决定。
 - 官方 bundle 不携带 workspace 种子；它们把行为放在 presets/skills/配置里。需要“会话 cwd 的纪律”时，由部署面铺种子（本仓的 `workspace/` + `scaffold`）。
 
-**对本仓的含义：** 种子是合理的部署选择，但它把“agent 行为的一部分”复制进了用户数据目录；插件升级不会自动更新它。这不是 DSH 提供的机制，必须由本仓定义所有权、版本与迁移（见 [工作区所有权与升级](../issues/2026-10-25-workspace-ownership-and-upgrade.md)）。
+**对本仓的含义：** 种子是合理的部署选择，但它把“agent 行为的一部分”复制进了用户数据目录；插件升级不会自动更新它。这不是 DSH 提供的机制，必须由本仓定义所有权、版本与迁移（见 [工作区所有权与升级](../settled_issues/2026-10-25-workspace-ownership-and-upgrade.md)）。
 
 ## 5. 对本仓三条读法的结论
 
@@ -71,7 +71,7 @@ intent: 为运行形态合同与分发合同提供 DSH 官方 bundle/profile/wor
 - 本材料只证明 DSH 的声明与代码路径，不证明本仓的 pack 在目标机器上真的满足这些范围；后者由 L2/冷启动 smoke 证明。
 - 官方 bundle 抽样不代表所有第三方插件；但“bundle 不含 workspace/state”与“profile 是环境”是文档级合同。
 - `dsh.compatibility` 在 vendor 树中未出现，不等于未来不会出现；当前 pin 下它不是宿主字段。
-- 目录安装的构建行为来自文档与 pnpm 语义；真实 `file:<目录>` 安装仍需一条 smoke 证明（见 [独立环境冷启动与多实例](../issues/2026-10-25-standalone-cold-start.md)）。
+- 目录安装的构建行为来自文档与 pnpm 语义；真实 `file:<目录>` 安装仍需一条 smoke 证明（见 [独立环境冷启动与多实例](../settled_issues/2026-10-25-standalone-cold-start.md)）。
 
 ## 复核命令
 

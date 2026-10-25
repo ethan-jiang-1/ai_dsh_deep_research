@@ -1,11 +1,13 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-10-25
 ---
 
 # 推敲：独立环境冷启动与多实例
 
-> 立卡：2026-10-25 ｜ 状态：推敲中 ｜ 类型：Feature ｜ 结论倾向：现在做——bootstrap + 冷启动 smoke 已落地；平台/离线/多实例收尾 ｜ 可关闭：否
+> 立卡：2026-10-25 ｜ 状态：已结（2026-10-25） ｜ 类型：Feature ｜ 结论倾向：现在做——bootstrap + 冷启动 smoke 已落地；残余见卡 ｜ 可关闭：是
+
+**关闭结论（2026-10-25）：** `bootstrap`、`--profile`/state 隔离、冷启动 smoke、两实例、pack 目录安装、平台/离线矩阵落地；残余 Linux/Windows 与 MCP 冷启动见卡。 去向：implemented — [运行形态合同 Note](../../../notes/implemented/2026-10-25-run-form-contract.md)。
 
 **问题与期望结果：** 本仓的 M2 独立开发通道能跑，但它默认作者的机器状态：仓内固定的 `DSH_HOME`、固定的 `research` profile、仓内的 `research-workspace`、固定的 3083 端口；干净 clone 到可启动之间还缺 submodule、依赖、vendor 构建、凭据与 profile 初始化的串联。期望把“在独立目录/独立环境里从零启动”做成可复跑的一条路径，并用冷启动证据证明它不依赖作者残留。
 

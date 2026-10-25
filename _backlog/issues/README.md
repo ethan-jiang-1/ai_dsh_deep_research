@@ -4,15 +4,11 @@
 
 ## 活跃清单
 
-| 卡 | 当前缺口 |
-|---|---|
-| [运行形态合同](2026-10-25-run-form-contract.md) | 合同 guides/65 + Note 已交付；保留活跃跟踪子卡残余 |
-| [分发的可执行合同](2026-10-25-distribution-contract.md) | `engines.dsh`/团队层/Node 已落地；升级/离线/冷 home 待做 |
-| [工作区所有权与升级](2026-10-25-workspace-ownership-and-upgrade.md) | A 已落地（seed.json + `--check/--upgrade` + 方法库保护）；跨版本证据/文档待收尾 |
-| [运行态数据边界与移交](2026-10-25-runtime-data-boundary.md) | `dev/` 清洁门禁、可配置数据根、clean handoff 已落地；bundle 路径/多实例证据待收尾 |
-| [独立环境冷启动与多实例](2026-10-25-standalone-cold-start.md) | bootstrap/`--profile`/state 隔离/冷启动 smoke 已落地；平台/离线/双实例/pack 目录安装待收尾 |
+（当前无在办问题；2026-10-25 运行形态合同组 5 张卡已结归档——见 [settled 池](../_archived/settled_issues/README.md)。）
 
 ## 最近归档
+
+（2026-10-25 运行形态合同组已结归档：[合同](../_archived/settled_issues/2026-10-25-run-form-contract.md)、[分发](../_archived/settled_issues/2026-10-25-distribution-contract.md)、[工作区](../_archived/settled_issues/2026-10-25-workspace-ownership-and-upgrade.md)、[数据边界](../_archived/settled_issues/2026-10-25-runtime-data-boundary.md)、[独立启动](../_archived/settled_issues/2026-10-25-standalone-cold-start.md)；残余逐卡记录。）
 
 （[可读终稿流程位](../_archived/settled_issues/2026-10-23-readable-final-process.md) + [可读层](../_archived/settled_issues/2026-10-23-run-final-human-readable.md) 2026-10-24 已结：reader-final 层落地——`reader-final` skill + `final/readable-vN` + 门C + 回执 reader 哈希 + 终稿页签双视图；真实 run `drt_cn-open-vs-us-closed-agentic` 全链绿、769 测试；[Note](../../notes/implemented/2026-10-23-reader-final.md)。）
 

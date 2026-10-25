@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-> 来源：[运行形态合同](../../_backlog/issues/2026-10-25-run-form-contract.md)、[分发合同](../../_backlog/issues/2026-10-25-distribution-contract.md)、[数据边界](../../_backlog/issues/2026-10-25-runtime-data-boundary.md)、[冷启动](../../_backlog/issues/2026-10-25-standalone-cold-start.md)。
+> 来源：[运行形态合同](../../_backlog/_archived/settled_issues/2026-10-25-run-form-contract.md)、[分发合同](../../_backlog/_archived/settled_issues/2026-10-25-distribution-contract.md)、[数据边界](../../_backlog/_archived/settled_issues/2026-10-25-runtime-data-boundary.md)、[冷启动](../../_backlog/_archived/settled_issues/2026-10-25-standalone-cold-start.md)。
 > 当前合同 = [guides/65](../../docs/guides/65-run-forms.md)。
 
 ## 决定
