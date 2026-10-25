@@ -69,10 +69,11 @@
 - `node scripts/smoke/snapshot-replay-smoke.mjs --face research-face --update-expected`：
   4 场景 A 回放通路 + B 组装请求 diff + lead C 渲染金标准 ALL PASS；金标准重写已人审
   （唯一变化 = lead 活动行随新录制文本 `搜了 1 次…抓了 1 个页面…`）。
+- GitHub Actions run [40157534955](https://github.com/ethan-jiang-1/ai_dsh_deep_research/actions/runs/40157534955)：
+  keyless job 1m6s 全绿（checkout + submodule tags → pnpm install → verify → test）。
 - 历史审计：`git log --all --no-renames --diff-filter=A --name-only` + 垃圾路径过滤，
   结果 = 上述 7 个路径；`git rev-list --objects --all` 全对象密钥格式扫描仅命中测试假 key
   `sk-abcdefghijklmnop1234`。
 
-未跑项：GitHub Actions 未在 GitHub runner 实跑（本地等价命令 = 干净 worktree 的 verify/test
-全绿）；`npm publish` 未执行（需要维护者账号与 2FA）；`snapshot-replay-smoke` 为 keyless 回放，
+未跑项：`npm publish` 未执行（需要维护者账号与 2FA）；`snapshot-replay-smoke` 为 keyless 回放，
 不证明新录制的真实模型回复本身符合 persona。
