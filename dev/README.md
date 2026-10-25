@@ -6,7 +6,7 @@
 
 | 件 | 职责 |
 |---|---|
-| bootstrap.sh | 独立环境冷启动前置（幂等）：Node/pnpm/git → submodule → install → vendor 构建 → env → 凭据/端口工具；`--check` 只读 |
+| bootstrap.sh | 独立环境冷启动前置（幂等）：Node/pnpm/git → submodule → install → vendor 构建 → env → 凭据/端口工具；`--check` 预检（不安装/不构建，仍会确保隔离 home 与 hooks 配置） |
 | env.sh | 双 home（默认 DSH_HOME=runtime/harness-home；`DSH_DEV_HOME` 可指仓外）+ 裸 dsh 拦截 + pre-commit 挂载——L1/L2 脚本的前置 |
 | vendor-build.sh | vendor 树构建：tsc host/client + typert 产物 + client bundle + host 半补建 + 前端壳 |
 | vendor-host-bundle.config.ts | host 半补建配置（逐包 tsdown，给缺 lib/index.js 的包补产物） |

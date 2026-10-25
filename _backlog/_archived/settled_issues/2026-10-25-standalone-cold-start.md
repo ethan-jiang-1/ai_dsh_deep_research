@@ -19,12 +19,12 @@ opened: 2026-10-25
 
 ## 实施进度（2026-10-25）
 
-- `dev/bootstrap.sh`：Node/pnpm/git → submodule → pnpm install → vendor 构建 → env.sh → 凭据/lsof/pgrep；`--check` 只读，缺件给补救；实测当前环境 exit 0。
+- `dev/bootstrap.sh`：Node/pnpm/git → submodule → pnpm install → vendor 构建 → env.sh → 凭据/lsof/pgrep；`--check` 预检（不安装/不构建，仍会确保隔离 home 与 hooks 配置），缺件给补救；实测当前环境 exit 0。
 - `dev/run-driver.mjs up --bootstrap`：先跑 bootstrap，再起通道；新增 `--profile`，`DSH_RUN_STATE_DIR` 隔离 web.log/仪表盘/run-pack；修掉“漂移检测绿”被误判为失败而提前杀 boot 的等待 bug。
 - `dev/boot-run.sh`：`DSH_RUN_PROFILE`/`DSH_RUN_STATE_DIR` 参数化；`sed -i.bak` 兼容 BSD/GNU；boot 横幅点名实际 profile。
 - `scripts/smoke/cold-start-smoke.mjs`：独立 `DSH_DEV_HOME` + `cold-start-smoke` profile + 3129 + 独立 state；`run-driver up --bootstrap` → 浏览器面 GREEN，实测 exit 0；MCP 显式关闭。
 - 证据：`bash dev/bootstrap.sh --check`（默认/外部 home 两形态）、`node scripts/smoke/cold-start-smoke.mjs` GREEN、`pnpm verify`/`pnpm test` 待本轮收尾复跑。
-- 追加：两个实例并行实测（不同 home/profile/port/state，3131/3132 同时出横幅；不同 state 允许并行，同 state 默认拦重复启动）；pack 目录 + 构建后 `dsh plugin add file:<目录>` 实测成功；平台/离线矩阵写进指南 65 与安装手册。
+- 追加：两个实例并行实测（不同 home/profile/port/state，3131/3132 同时出横幅；不同 state 允许并行；默认 state 的重复启动检查仍生效，自定义 state 由端口检查兜底）；pack 目录 + 构建后 `dsh plugin add file:<目录>` 实测成功；平台/离线矩阵写进指南 65 与安装手册。
 - 残余：Linux/Windows 未跑（当前 macOS 实测；Linux 走 bash/Node 标准路径）；团队层离线需预置/缓存、MCP 首次需 npx（或 `MCP_PLAYWRIGHT=0`）；`cold-start-smoke` 关闭 MCP，不证明 MCP 冷启动。
 
 ## 范围与依赖

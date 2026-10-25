@@ -107,7 +107,7 @@
 ### 全档命令正本（含前置与档位）
 
 ```sh
-bash dev/bootstrap.sh --check          # 独立环境前置只读检查（Node/pnpm/git → submodule → install → vendor 构建 → env → 凭据/端口工具）
+bash dev/bootstrap.sh --check          # 独立环境前置预检（不安装/不构建；Node/pnpm/git → submodule → install → vendor 构建 → env → 凭据/端口工具）
 bash dev/bootstrap.sh                  # 同上，缺件时执行 submodule/install/vendor 构建（幂等）
 bash dev/vendor-build.sh              # vendor 树构建（换 pin 后必做：--clean 清陈旧产物；tsc host/client + typert 产物 + client bundle + host 半补建 + 前端壳重建——0.1.7 起启动依赖构建产物）
 pnpm verify                           # L0 结构门禁（keyless，收尾必跑）

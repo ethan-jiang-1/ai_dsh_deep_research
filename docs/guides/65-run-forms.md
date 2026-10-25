@@ -8,7 +8,7 @@
 
 | 形态 | 谁在用 | 入口 | 边界 |
 |---|---|---|---|
-| **M1 安装形态** | 外部用户 | npm / tarball → `dsh plugin add` → profile | 用户自己的 `DSH_HOME` + 自选研究工作区 |
+| **M1 安装形态** | 外部用户 | npm（发布后）/ tarball → `dsh plugin add` → profile | 用户自己的 `DSH_HOME` + 自选研究工作区 |
 | **M2 独立开发形态** | 贡献者 / 本地验证 | 本仓 + `bash dev/bootstrap.sh` + `node dev/run-driver.mjs up --bootstrap` | 默认仓内 `runtime/harness-home`；可用 `DSH_DEV_HOME` 指到仓外 |
 | **M3 移交形态** | 交给另一人或另一台机器 | `scripts/dist/export-handoff.mjs`（源码）或 `export-dist.mjs`（插件） | 不是复制工作树；运行态/凭据/run 数据不随包 |
 
@@ -42,7 +42,7 @@
 ## 4. 独立环境与多实例
 
 ```sh
-bash dev/bootstrap.sh --check          # 只读：Node/pnpm/git/submodule/install/vendor 产物/env/凭据/端口工具
+bash dev/bootstrap.sh --check          # 预检（不安装/不构建；仍会确保隔离 home 与 hooks 配置）：Node/pnpm/git/submodule/install/vendor 产物/env/凭据/端口工具
 bash dev/bootstrap.sh                  # 缺件时执行 submodule/install/vendor 构建（幂等）
 node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 ```
@@ -56,7 +56,7 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 | `DSH_RUN_PORT` | `3083` | web 端口 |
 | `DSH_RUN_STATE_DIR` | `runtime/smoke-workspace` | web.log/仪表盘/run-pack/npm-cache 的实例状态根 |
 
-不同 `DSH_RUN_STATE_DIR` 的实例允许并行；同 state 的默认并发检查仍拦重复启动。冷启动证据 =
+不同 `DSH_RUN_STATE_DIR` 的实例允许并行；默认 state 的重复启动检查仍生效，自定义 state 由端口检查兜底（两个实例请用不同端口）。冷启动证据 =
 `node scripts/smoke/cold-start-smoke.mjs`（独立 home/profile/端口/state，MCP 关闭，浏览器面 GREEN）。
 
 ## 5. 移交

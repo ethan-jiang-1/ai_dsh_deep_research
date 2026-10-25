@@ -9,6 +9,7 @@
 # 离线：团队层需 registry（或预装）、Playwright MCP 需 npx 首次拉取；本脚本不伪装离线可用。
 #
 # 用法：bash dev/bootstrap.sh [--check]
+# --check 只预检、不安装/不构建（仍会确保隔离 home 与 hooks 配置）。
 # 退出码：0 就绪 / 1 缺件（--check 时列出）/ 2 用法错误
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

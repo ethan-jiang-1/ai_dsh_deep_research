@@ -31,7 +31,7 @@
 - `node scripts/smoke/gates-smoke.mjs` 全绿（含 `pack-bundle-compat-engines-drift`、`dev-runtime-clean-stray`、`workspace-versioning-seed-gitignore-missing` 注入案例）；`seed-core` 测试做过 branch-swap 红/还原绿的反证。
 - `node scripts/smoke/release-smoke.mjs` ALL PASS：安装副本 `engines.dsh`/矩阵、团队层钉版、scaffold/preflight、安装域四角色真挂载。
 - `node scripts/smoke/cold-start-smoke.mjs` GREEN：独立 `DSH_DEV_HOME` + `cold-start-smoke` profile + 3129 + 独立 state，浏览器面可呈交；MCP 关闭。
-- 两个实例并行：不同 home/profile/port/state（3131/3132）同时出横幅；不同 state 允许并行，同 state 默认仍拦重复启动。
+- 两个实例并行：不同 home/profile/port/state（3131/3132）同时出横幅；不同 state 允许并行；默认 state 的重复启动检查仍生效，自定义 state 由端口检查兜底。
 - pack 目录安装：`pnpm build` 后 `dsh plugin add file:<pack>` 成功，`--dump-config` 见本包行；profile 记录绝对路径，作为 B 门槛而非分发形态。
 - `export-handoff` 实跑：`git archive HEAD` 1102 条目、2.4 MiB，含 `.gitmodules`/`seed.json`，无运行态/凭据/run 数据/依赖/导出包。
 - 种子三态实跑：临时工作区装/查/force/upgrade；用户改过的 `AGENTS.md` 不覆盖且写 `.seed-new`，旧 `NODES.md` 被安全升级，`method-library.md` 保留。
