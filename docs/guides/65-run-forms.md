@@ -92,6 +92,7 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 - `cold-start-smoke`：独立 `DSH_DEV_HOME` + profile + 端口 + state，到浏览器面 GREEN；
 - `export-handoff` 自检：只含 tracked 源，不含运行态/凭据/run 数据/依赖；
 - `dev-runtime-clean` 门禁：`dev/` 下无运行态。
+- `compat-smoke`：全局 rc.3 宿主上的 install / dump / scaffold / remove（本机无 rc.3 时 exit 2）。
 
 ## 7. 已知限制与延后工作
 

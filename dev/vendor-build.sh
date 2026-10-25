@@ -27,13 +27,13 @@ if [[ "${1:-}" == "--clean" ]]; then
 fi
 
 echo "② tsc host 遍（逐包 lib/types）…"
-node --max-old-space-size=4096 ./node_modules/typescript/bin/tsc -b tsconfig.host.json
+node --max-old-space-size=8192 ./node_modules/typescript/bin/tsc -b tsconfig.host.json
 
 echo "③ typert host 产物（本仓驱动：按 manifest 过滤后逐包生成）…"
 node "$ROOT/dev/vendor-typert-emit.mjs" host
 
 echo "④ tsc client 遍（叶项目 lib/types 发射；聚合自身 = noEmit 纯 typecheck）…"
-if ! node --max-old-space-size=4096 ./node_modules/typescript/bin/tsc -b tsconfig.client.json; then
+if ! node --max-old-space-size=8192 ./node_modules/typescript/bin/tsc -b tsconfig.client.json; then
   # 0.2.0 实测（升 pin Note 记档）：聚合程序的 tests 夹具红 TS2883（@vitest/spy Procedure
   # 不可命名——tests 靠上游单层安装的 hoist 解析 vitest，本仓双层安装下不可命名），而本步
   # 真正需要的叶项目 lib/types 发射先于聚合程序完成。fail-loud：金丝雀叶产物缺失 = 真失败。
