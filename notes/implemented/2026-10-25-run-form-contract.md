@@ -28,7 +28,7 @@
 ## 实际跑过的验证
 
 - `pnpm verify` 全绿；`pnpm test` 779 pass / 0 fail。
-- `node scripts/smoke/gates-smoke.mjs` 全绿（含 `pack-bundle-compat-engines-drift`、`dev-runtime-clean-stray` 注入案例）。
+- `node scripts/smoke/gates-smoke.mjs` 全绿（含 `pack-bundle-compat-engines-drift`、`dev-runtime-clean-stray`、`workspace-versioning-seed-gitignore-missing` 注入案例）；`seed-core` 测试做过 branch-swap 红/还原绿的反证。
 - `node scripts/smoke/release-smoke.mjs` ALL PASS：安装副本 `engines.dsh`/矩阵、团队层钉版、scaffold/preflight、安装域四角色真挂载。
 - `node scripts/smoke/cold-start-smoke.mjs` GREEN：独立 `DSH_DEV_HOME` + `cold-start-smoke` profile + 3129 + 独立 state，浏览器面可呈交；MCP 关闭。
 - 两个实例并行：不同 home/profile/port/state（3131/3132）同时出横幅；不同 state 允许并行，同 state 默认仍拦重复启动。

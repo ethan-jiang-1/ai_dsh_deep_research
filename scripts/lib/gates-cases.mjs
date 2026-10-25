@@ -587,6 +587,14 @@ export const CASES = [
       writeFileSync(p, `*\n${readFileSync(p, 'utf8')}`);
     }
   } },
+  // 种子清单缺 .gitignore 条目（workspace-versioning）：安装方的忽略规则不在清单里——
+  // scaffold 不会铺，工作区一次 git add -A 会把 run 历史提交进用户库。
+  { id: 'workspace-versioning-seed-gitignore-missing', gate: 'workspace-versioning', mutate: (dir) => {
+    const p = join(dir, 'packages/deep-research-pack/workspace/seed.json');
+    const j = JSON.parse(readFileSync(p, 'utf8'));
+    delete j.files['.gitignore'];
+    writeFileSync(p, JSON.stringify(j, null, 2) + '\n');
+  } },
   // 开发证据白名单缺席（workspace-versioning）：删 drafts/.gitignore——drafts/ 重新变成
   // "探针稿与 dry-run 输出默认可被 git add"。
   { id: 'workspace-versioning-drafts-whitelist-missing', gate: 'workspace-versioning', mutate: (dir) => {
