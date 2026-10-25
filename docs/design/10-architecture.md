@@ -62,7 +62,7 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 | subagent（工人） | `tool-subagent`（preset 行，spawn；**maxDepth: 2** + **allowedAgentPresets: [scout, analyst, critic]**——teammate 可派 depth-2 worker，worker 不能再派 grandchild；[m2-p1-run-channel](../../notes/implemented/2026-09-24-m2-p1-run-channel.md)） | 单点快捷查证、并行铺方向/深挖；teammate 可派角色化 worker（`agent_preset`） | 每次 delegation 是 activation，完成通知回父；Team profile 禁全局 continuable 控制工具。**机制边界**：worker 的工具目录里看得到 Team 工具但调不通（vendor `packages/experimental/tool-agent-team/README.md` known limitation，同 pin 适用）——派工方应让 worker 明确别调 `spawn_teammate` / `team_task_*` / `wait_agent` |
 | present（交付） | `tool-present`（bundle + lead preset） | 成品声明：final.md 是唯一成品 | 非 lead 的 present = 过程稿展示（研究手册三态） |
 
-团队层版本派生：profile 装 `@…-agent-team-profile@<pin 派生>`——版本由 `dev/boot-run.sh` 从 pack 兼容矩阵同源派生（pack `package.json` 的 `dsh.compatibility.dshReleases[0]` 去 `dsh-v` 前缀）。
+团队层版本派生：profile 装 `@…-agent-team-profile@<运行中的 DSH 版本>`——安装侧 `scaffold` 从 profile 的 `@deepseek-ai/dsh-app-boot` 解析，dev run 通道 `dev/boot-run.sh` 从 pack 兼容矩阵首项派生（两者都必须与运行版本一致，不能用 `engines.dsh` 范围当版本号）。
 
 ## 4. 工具面（四角色共同基座 + 差异）
 

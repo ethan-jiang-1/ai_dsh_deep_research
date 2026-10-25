@@ -72,6 +72,7 @@ try {
     'package/workspace/.gitignore.example',
     'package/workspace/seed.json',
     'package/scripts/lib/seed-core.mjs',
+    'package/scripts/lib/version-range.mjs',
     'package/scripts/preflight.mjs',
     'package/scripts/scaffold.mjs',
   ]
@@ -222,7 +223,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffo
 |---|---|---|
 | DSH 本体 | 需预装 | 本包不装 DSH |
 | 本包 tarball | 是 | 本手册同目录的文件，不需要 registry |
-| 团队机制层 | 需预置或缓存 | \`@deepseek-ai/dsh-experimental-agent-team-profile@${dshEngine}\`；scaffold 会按包内版本安装 |
+| 团队机制层 | 需预置或缓存 | \`@deepseek-ai/dsh-experimental-agent-team-profile@<运行中的 DSH 版本>\`；scaffold 会按 profile 的 app-boot 解析 |
 | Playwright MCP | 可关闭或预缓存 | 默认 npx 首次拉取；离线时设 \`MCP_PLAYWRIGHT=0\`（通道启动脚本）或预置 npm 缓存 |
 | 模型 API | 需网络 | 研究 run 需要 DeepSeek API 可达 |
 
@@ -232,7 +233,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffo
 |---|---|
 | 「研究状态」页签没出现 | 浏览器刷新不加载新模块：重启 \`dsh web\`，再硬刷新页面 |
 | 角色不守证据纪律 | 会话必须建在 scaffold 铺过的工作区里（手册从 cwd 注入），见第三节 |
-| preflight 报团队机制层缺席 | 重跑 scaffold（按包内 \`engines.dsh\` 自动补钉版层）；或手工 \`dsh plugin --profile research add @deepseek-ai/dsh-experimental-agent-team-profile@${dshEngine}\` |
+| preflight 报团队机制层缺席 | 重跑 scaffold（按包内 \`engines.dsh\` 自动补钉版层）；或手工 \`dsh plugin --profile research add @deepseek-ai/dsh-experimental-agent-team-profile@<运行中的 DSH 版本>\` |
 | 想确认装了什么版本 | \`dsh plugin --profile research list\`，或看本手册表头的版本号 |
 `
   writeFileSync(join(DIST, MANUAL), manual)

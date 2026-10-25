@@ -78,8 +78,10 @@ test('scaffold：三态形状 + 收尾 preflight + workspace 必填 fail-loud', 
 });
 
 test('scaffold：团队层版本从 engines.dsh 派生，不装未钉版最新层', () => {
-  assert.match(scaffold, /const TEAM_VERSION = pkg\.engines\?\.dsh/,
-    'scaffold 未从 engines.dsh 派生团队层版本——会装到与 DSH pin 不匹配的最新层');
+  assert.match(scaffold, /hostForTeam/,
+    'scaffold 未从 profile app-boot 解析团队层版本');
+  assert.match(scaffold, /let TEAM_VERSION = null/,
+    'scaffold 未声明团队层版本');
   assert.match(scaffold, /const TEAM_SPEC = .*TEAM_VERSION/,
     'scaffold 未把团队层版本拼进安装 spec');
   assert.ok(scaffold.includes("'add', TEAM_SPEC"),
@@ -161,7 +163,8 @@ test('release-smoke：安装域 client 半与 peers-only 断言在位（检查�
   assert.match(releaseSmoke, /join\(installed, 'lib', 'client\.js'\)/, 'release-smoke 缺安装副本 lib/client.js 在场断言');
   assert.match(releaseSmoke, /dependencies === undefined/, 'release-smoke 缺 dependencies 缺席断言（peers-only 发布形状）');
   assert.match(releaseSmoke, /installedManifest\?\.engines\?\.dsh/, 'release-smoke 缺安装副本 engines.dsh 断言（宿主字段必须随包）');
-  assert.match(releaseSmoke, /matrixVersion === installedEngine/, 'release-smoke 未把 engines.dsh 与 dshReleases 同源对账');
+  assert.match(releaseSmoke, /matrixSatisfies/, 'release-smoke 未把 engines.dsh 范围与 dshReleases 基线对账');
+  assert.match(releaseSmoke, /satisfiesVersion/, 'release-smoke 未用范围判定 dshReleases 是否落在 engines.dsh 内');
   assert.match(releaseSmoke, /boot 页模块表含本包 client 行|module-table|模块表/, 'preset-smoke 委托的模块表行断言未登记进 release-smoke 面');
 });
 

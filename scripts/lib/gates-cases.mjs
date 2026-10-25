@@ -460,12 +460,14 @@ export const CASES = [
   // 字面量当钉复述对账——探针不是钉声明）。
   { id: 'pack-bundle-compat-tag-missing', gate: 'pack-bundle-compat', mutate: (dir) => {
     const p = join(dir, 'packages/deep-research-pack/package.json');
-    writeFileSync(p, readFileSync(p, 'utf8').replace('"dsh-v0.2.1-rc.2"', '"dsh-wrongtag"'));
+    writeFileSync(p, readFileSync(p, 'utf8').replace('"0.2.1-rc.2"', '"0.9.9"'));
   } },
-  // 宿主只认 engines.dsh；矩阵是镜像。把 engines.dsh 改到另一个版本 = 声明面与安装门各说一套。
+  // 宿主只认 engines.dsh；范围必须覆盖当前 vendor tag。删掉 engines.dsh = 退回 peer 语义。
   { id: 'pack-bundle-compat-engines-drift', gate: 'pack-bundle-compat', mutate: (dir) => {
     const p = join(dir, 'packages/deep-research-pack/package.json');
-    writeFileSync(p, readFileSync(p, 'utf8').replace('"dsh": "0.2.1-rc.2"', '"dsh": "0.2.1-rc.3"'));
+    const j = JSON.parse(readFileSync(p, 'utf8'));
+    delete j.engines.dsh;
+    writeFileSync(p, JSON.stringify(j, null, 2) + '\n');
   } },
   // guard-red-record（tests 面反证义务机械化）：标题声明无留证 / 悬空编号双形态。
   { id: 'guard-red-record-no-record', gate: 'guard-red-record', mutate: (dir) => {

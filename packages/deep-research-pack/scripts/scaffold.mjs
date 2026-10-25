@@ -6,7 +6,7 @@
 //      `--check` 只读报告分类，`--upgrade` 只更新未被用户改过的文件，`--force` 才全量覆盖；
 //      `method-library.md` 是用户数据，任何模式都不覆盖已存在的文件；
 //   ② 写/更新工作区种子状态（`.dsh-research-seed.json`，版本 + 哈希 + 跳过清单）；
-//   ③ profile 组合：确保 agent-team-profile 层在目标 profile 里（版本从 `engines.dsh` 派生）；
+//   ③ profile 组合：确保 agent-team-profile 层在目标 profile 里（版本从 profile 的 app-boot 解析）；
 //   ④ 收尾跑 preflight 报告状态。
 //
 // 用法：
@@ -18,6 +18,7 @@
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createRequire } from 'node:module'
 import { spawnSync } from 'node:child_process'
 import { sha256, classifySeedEntry, seedSourceRel } from './lib/seed-core.mjs'
 
@@ -154,7 +155,21 @@ if (seedOnly) {
 // ② profile 组合（团队层；版本与 engines.dsh 同源——不再装未钉版的最新层）
 {
   const TEAM = '@deepseek-ai/dsh-experimental-agent-team-profile'
-  const TEAM_VERSION = pkg.engines?.dsh ?? pkg.dsh?.compatibility?.dshReleases?.[0]?.replace(/^dsh-v/, '') ?? null
+  // 团队层必须匹配“实际运行中的 DSH”，不是 engines.dsh 范围：先读 profile 的 app-boot，
+  // 再回退到 PATH dsh，最后才用兼容矩阵的已测基线。
+  const hostForTeam = explicitHost ?? (process.env.DSH_HOME ? join(process.env.DSH_HOME, 'profiles', profile) : null)
+  let TEAM_VERSION = null
+  if (hostForTeam !== null && existsSync(join(hostForTeam, 'package.json'))) {
+    try {
+      const requireFromHost = createRequire(join(hostForTeam, 'package.json'))
+      TEAM_VERSION = JSON.parse(readFileSync(requireFromHost.resolve('@deepseek-ai/dsh-app-boot/package.json'), 'utf8')).version ?? null
+    } catch { TEAM_VERSION = null }
+  }
+  if (TEAM_VERSION === null) {
+    const r = spawnSync('dsh', ['--version'], { encoding: 'utf8' })
+    if (r.status === 0) TEAM_VERSION = String(r.stdout).match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/)?.[0] ?? null
+  }
+  if (TEAM_VERSION === null) TEAM_VERSION = pkg.dsh?.compatibility?.dshReleases?.[0]?.replace(/^dsh-v/, '') ?? null
   const TEAM_SPEC = TEAM_VERSION === null ? TEAM : `${TEAM}@${TEAM_VERSION}`
   const hasDsh = spawnSync('dsh', ['--version'], { encoding: 'utf8' }).status === 0
   if (TEAM_VERSION === null) {

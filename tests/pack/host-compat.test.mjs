@@ -12,15 +12,19 @@ import { evaluatePluginCompatibility } from '../../vendor/dsh/packages/boot/app-
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const pkg = JSON.parse(readFileSync(join(ROOT, 'packages', 'deep-research-pack', 'package.json'), 'utf8'))
 
-test('宿主兼容：engines.dsh 声明的版本放行', () => {
-  assert.equal(evaluatePluginCompatibility(pkg, {}, '0.2.1-rc.2'), undefined)
+test('宿主兼容：engines.dsh 范围内的 rc.2 / rc.3 / 0.2.1 放行', () => {
+  for (const version of ['0.2.1-rc.2', '0.2.1-rc.3', '0.2.1']) {
+    assert.equal(evaluatePluginCompatibility(pkg, {}, version), undefined, `${version} 应被范围放行`)
+  }
 })
 
-test('宿主兼容：不满足 engines.dsh 的版本被拒绝，且要求里点名 engines.dsh', () => {
-  const denied = evaluatePluginCompatibility(pkg, {}, '0.2.1-rc.3')
-  assert.ok(denied, '宿主未拒绝不兼容版本——engines.dsh 没有生效')
-  assert.deepEqual(denied.requirements, { 'engines.dsh': '0.2.1-rc.2' })
-  assert.equal(denied.exempted, false)
-  assert.equal(denied.name, pkg.name)
-  assert.equal(denied.version, pkg.version)
+test('宿主兼容：范围外版本被拒绝，且要求里点名 engines.dsh', () => {
+  for (const version of ['0.2.0-rc.2', '0.3.0']) {
+    const denied = evaluatePluginCompatibility(pkg, {}, version)
+    assert.ok(denied, `${version} 应被拒绝——engines.dsh 范围没有生效`)
+    assert.deepEqual(denied.requirements, { 'engines.dsh': '>=0.2.1-rc.2 <0.3.0' })
+    assert.equal(denied.exempted, false)
+    assert.equal(denied.name, pkg.name)
+    assert.equal(denied.version, pkg.version)
+  }
 })

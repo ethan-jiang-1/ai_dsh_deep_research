@@ -32,6 +32,7 @@ import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { presetRoles } from '../lib/roles.mjs';
 import { reclaimPort } from '../lib/port-reclaim.mjs';
+import { satisfiesVersion } from '../../packages/deep-research-pack/scripts/lib/version-range.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
@@ -224,11 +225,13 @@ try {
     installedManifest.dependencies ? `dependencies=${Object.keys(installedManifest.dependencies).join(',')}` : undefined);
   const installedEngine = installedManifest?.engines?.dsh;
   const installedMatrix = installedManifest?.dsh?.compatibility?.dshReleases;
-  const matrixVersion = Array.isArray(installedMatrix) && typeof installedMatrix[0] === 'string'
-    ? installedMatrix[0].replace(/^dsh-v/, '')
-    : null;
-  step(installedEngine !== undefined && matrixVersion === installedEngine,
-    '兼容矩阵钉住当前 tag（engines.dsh + dshReleases 同源）',
+  const matrixSatisfies = typeof installedEngine === 'string'
+    && Array.isArray(installedMatrix)
+    && installedMatrix.length > 0
+    && installedMatrix.every((tag) => typeof tag === 'string'
+      && satisfiesVersion(tag, installedEngine));
+  step(matrixSatisfies,
+    '兼容范围覆盖测试基线（engines.dsh range + dshReleases）',
     `engines.dsh=${installedEngine ?? '（缺）'}；dshReleases=${JSON.stringify(installedMatrix ?? null)}`);
 
   // ④b 安装形状证据（pack 自带 bin：真铺一个工作区 → 安装验收 preflight 验它）

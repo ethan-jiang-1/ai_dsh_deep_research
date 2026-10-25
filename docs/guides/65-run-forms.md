@@ -26,13 +26,28 @@
 | **H DSH 状态** | sessions、credentials、profiles、settings | 用户 / 实例；`$DSH_HOME` | 按 home 隔离；不随源/包移交 |
 | **W 研究数据** | `drt_<slug>/`、`archive/`、`_abandoned/`、`method-library.md` | 用户工作区；角色按手册 owner 表写 | 用户所有；方法库不随插件升级覆盖；run bundle 单独移交 |
 
+P 里的 `workspace/` 是**只读种子**：落地后归 W，由用户工作区拥有；它不是运行时智能体定义的第四份副本。
+
 `research-workspace/` 是 M2 的工作区，不是包的一部分；`dev/` 只住源码驱动，运行态住 `runtime/` 或工作区
 （门禁 `dev-runtime-clean` 直接看盘）。pack 的 `files` 白名单只发运行所需，发布物不含状态。
+
+**与 DSH 6+2 数据平面的映射**（FAQ 24 的切法；P/H/W 是导航粗分，不是排他分区）：
+
+| DSH 平面 | 本仓落点 | 本插件怎么碰 |
+|---|---|---|
+| D 定义 | `presets/`、`skills/`、`cordis.patch.yml` | 只读；包版本绑定 |
+| C 代码 | `lib/`、`src/` | 只读；安装副本不改 |
+| W workspace | `research-workspace/`（`AGENTS.md`/`NODES.md`/`drt_*`/`method-library.md`） | 角色读写；client 只读 |
+| U home | `$DSH_HOME/`（AGENTS.md、skills、storages、sessions、profiles、cache、credentials）与 `~/.agents` | 本包只经 DSH 服务；不手写 |
+| S session | `$DSH_HOME/sessions/`（物理在 home，逻辑独立） | 经会话服务/日志；不新增 event 类型 |
+| H host state | `$DSH_HOME/storages/` | 本包不声明 storage domain |
+| K cache | `$DSH_HOME/cache/` | 不使用 |
+| X credentials | `$DSH_HOME/.credentials.yaml` / 环境变量 | 经凭据服务；不打包、不进日志 |
 
 ## 3. 安装、升级、卸载
 
 - **前置**：DSH 满足包内 `engines.dsh`（值以 `package.json` 为准）；Node 满足 `engines.node`；团队机制层
-  `@deepseek-ai/dsh-experimental-agent-team-profile` 与同一 `engines.dsh` 版本在场（scaffold 自动补）。
+  `@deepseek-ai/dsh-experimental-agent-team-profile` 与运行中的 DSH 版本一致（scaffold 自动补）。
 - **安装**：`dsh --profile <p> --from-default-profile web --dump-config` → `dsh plugin --profile <p> add <npm|tarball|目录>`；
   `scaffold --workspace <w> --profile <p>` 铺种子 + 补团队层 + preflight。
 - **升级**：装新版包 → 重启 profile → `scaffold --check` → `scaffold --upgrade`。升级只覆盖“用户未改过且种子已更新”的文件；

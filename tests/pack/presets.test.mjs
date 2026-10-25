@@ -15,6 +15,7 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { presetRoles } from '../../scripts/lib/roles.mjs';
+import { satisfiesVersion } from '../../packages/deep-research-pack/scripts/lib/version-range.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
@@ -116,17 +117,19 @@ test('delegating preset subagent = maxDepth 2 + allowedAgentPresets；无 stale 
   }
 });
 
-test('compatibility 矩阵钉住当前 tag', () => {
+test('compatibility 矩阵钉住已测基线', () => {
   const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
-  assert.deepEqual(pkg.dsh.compatibility.dshReleases, ['dsh-v0.2.1-rc.2']);
+  assert.deepEqual(pkg.dsh.compatibility.dshReleases, ['0.2.1-rc.2', '0.2.1-rc.3']);
 });
 
-test('兼容声明单源：engines.dsh = dsh.compatibility.dshReleases[0] 去 dsh-v 前缀', () => {
+test('兼容范围覆盖测试基线：engines.dsh 是范围，矩阵是已测基线', () => {
   const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
   const matrix = pkg.dsh?.compatibility?.dshReleases ?? [];
-  assert.equal(matrix.length, 1, '兼容矩阵当前只声明一个 DSH 版本；多版本时同步扩本断言');
-  assert.equal(pkg.engines?.dsh, matrix[0].replace(/^dsh-v/, ''),
-    'engines.dsh 与兼容矩阵不同源——宿主只认 engines.dsh，矩阵只是镜像');
+  assert.equal(matrix.length, 2, '测试基线当前声明 rc.2 + rc.3；增删时同步扩本断言');
+  assert.match(pkg.engines?.dsh ?? '', /^>=0\.2\.1-rc\.2 <0\.3\.0$/,
+    'engines.dsh 应为 0.2.x 范围（避免把未来安装钉死在单一 rc）');
+  assert.ok(satisfiesVersion(matrix[0].replace(/^dsh-v/, ''), pkg.engines.dsh),
+    '兼容矩阵的已测基线必须落在 engines.dsh 范围内');
 });
 
 test('critic adversarial-review 钉 leads 交接狩猎（BUG-008 契约：状态词漂移不可穿透交付）', () => {

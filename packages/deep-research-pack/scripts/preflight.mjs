@@ -18,6 +18,7 @@ import { createRequire } from 'node:module'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
+import { satisfiesVersion } from './lib/version-range.mjs'
 
 const PACK = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
@@ -52,6 +53,12 @@ const resolveVersion = (name) => {
     return typeof manifest.version === 'string' ? manifest.version : null
   } catch { return null }
 }
+// 实际运行版本：profile 解析到的 app-boot 优先；它是团队层要匹配的版本（engines.dsh 是范围）。
+const runtimeVersion = resolveVersion('@deepseek-ai/dsh-app-boot')
+const cliVersion = (() => {
+  const r = spawnSync('dsh', ['--version'], { encoding: 'utf8' })
+  return r.status === 0 ? (String(r.stdout).trim().match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/)?.[0] ?? null) : null
+})()
 
 const results = []
 const record = (ok, name, detail, remedy) => { results.push({ ok, name, detail, remedy }) }
@@ -94,14 +101,14 @@ function nodeSatisfies(version, range) {
 // ② DSH 版本（engines.dsh 是宿主字段；兼容矩阵是镜像。优先读 profile 的 app-boot 运行时，PATH CLI 只作后备）
 {
   const want = pkg.engines?.dsh ?? pkg.dsh?.compatibility?.dshReleases?.[0]?.replace(/^dsh-v/, '') ?? null
-  const runtimeVersion = resolveVersion('@deepseek-ai/dsh-app-boot')
-  const r = spawnSync('dsh', ['--version'], { encoding: 'utf8' })
-  const cliVersion = r.status === 0 ? (String(r.stdout).trim().match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/)?.[0] ?? null) : null
-  // 只在解析到 profile 的 app-boot 时判真；PATH CLI 可能是另一个安装，只作参考，不据此误红。
-  const ok = want === null || runtimeVersion === null ? null : runtimeVersion === want
+  // profile 的 app-boot 优先；解析不到时才用 PATH CLI 兜底（同一安装的常见情形），不冒充运行时。
+  const judgeVersion = runtimeVersion ?? cliVersion
+  const ok = want === null || judgeVersion === null ? null : satisfiesVersion(judgeVersion, want)
   const detail = runtimeVersion !== null
     ? `宿主运行时 ${runtimeVersion}${cliVersion !== null && cliVersion !== runtimeVersion ? `（PATH CLI ${cliVersion}，不作判据）` : ''}；本包要求 ${want ?? '未声明'}`
-    : `未解析到 profile 的 app-boot（PATH CLI ${cliVersion ?? '不可用'} 仅参考）；本包要求 ${want ?? '未声明'}`
+    : cliVersion !== null
+      ? `未解析到 profile 的 app-boot；按 PATH CLI ${cliVersion} 判定；本包要求 ${want ?? '未声明'}`
+      : `无法判定（未解析到 profile 的 app-boot，dsh --version 也不可用；本包要求 ${want ?? '未声明'}）`
   record(ok, 'DSH 版本兼容', detail, `装匹配版本：npm i -g @deepseek-ai/dsh@${want ?? '<版本>'}（或让 profile 解析到该版本）`)
 }
 
@@ -115,7 +122,7 @@ function nodeSatisfies(version, range) {
 // ④ 团队机制层（本包不声明团队行——归 vendor agent-team-profile 层；版本与 engines.dsh 对齐）
 {
   const TEAM = '@deepseek-ai/dsh-experimental-agent-team-profile'
-  const expected = pkg.engines?.dsh ?? pkg.dsh?.compatibility?.dshReleases?.[0]?.replace(/^dsh-v/, '') ?? null
+  const expected = runtimeVersion ?? cliVersion ?? pkg.dsh?.compatibility?.dshReleases?.[0]?.replace(/^dsh-v/, '') ?? null
   const installed = resolveFrom(TEAM)
   const version = installed ? resolveVersion(TEAM) : null
   const ok = installed ? (version === null || expected === null ? null : version === expected) : false
@@ -123,7 +130,7 @@ function nodeSatisfies(version, range) {
     ? '缺席——四角色协作主通道不可用'
     : version === null
       ? '在场，但读不到版本（无法确认与 engines.dsh 对齐）'
-      : `在场：${TEAM}@${version}${expected === null ? '' : version === expected ? '（与 engines.dsh 一致）' : `；期望 ${expected}`}`
+      : `在场：${TEAM}@${version}${expected === null ? '' : version === expected ? '（与运行版本一致）' : `；期望 ${expected}`}`
   record(ok, '团队机制层（spawn_teammate 等）', detail, `dsh plugin --profile <p> add ${TEAM}${expected === null ? '' : `@${expected}`}（本包故意不声明团队行：组合与实战 config 归该层）`)
 }
 

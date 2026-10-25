@@ -12,6 +12,7 @@ import { readFileSync, readdirSync, existsSync, lstatSync, readlinkSync, statSyn
 import { join, dirname, resolve, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { backlogLivenessProblems } from '../lib/backlog-liveness.mjs';
+import { satisfiesVersion } from '../../packages/deep-research-pack/scripts/lib/version-range.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -521,15 +522,14 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
     if (!Array.isArray(rel) || rel.length === 0) fail(gate, 'dsh.compatibility.dshReleases 为空');
     // 含当前 tag（release-smoke-hardening 件⑤b）：升 pin 忘把新 tag 加进兼容矩阵，原本要到
     // L2 安装冒烟才现形——提前到 L0 秒级红（判据同 release-smoke ④，事实源前移到 verify）。
-    else if (!rel.includes(VENDOR_TAG))
-      fail(gate, `compatibility.dshReleases 不含当前 vendor tag ${VENDOR_TAG}——升 pin 忘加列（补 packages/deep-research-pack/package.json 的 dsh.compatibility.dshReleases）`);
-    // 宿主只认 engines.dsh；兼容矩阵是镜像。两处不同源 = 声明面与安装门各说一套（静默失效）。
+    else if (!rel.includes(VENDOR_TAG.replace(/^dsh-v/, '')))
+      fail(gate, `compatibility.dshReleases 不含当前 vendor 版本 ${VENDOR_TAG.replace(/^dsh-v/, '')}——升 pin 忘加列（补 packages/deep-research-pack/package.json 的 dsh.compatibility.dshReleases）`);
+    // 宿主只认 engines.dsh；兼容矩阵是“已测基线”，不要求等于精确值，但必须是范围覆盖的版本。
     const engine = pkg?.engines?.dsh;
-    const first = Array.isArray(rel) && typeof rel[0] === 'string' ? rel[0].replace(/^dsh-v/, '') : null;
     if (typeof engine !== 'string' || engine.trim() === '')
       fail(gate, 'engines.dsh 未声明——宿主兼容检查会退回 peer 范围（补 packages/deep-research-pack/package.json 的 engines.dsh）');
-    else if (first !== null && engine !== first)
-      fail(gate, `engines.dsh ${engine} 与兼容矩阵首项 ${first} 不同源——宿主只认 engines.dsh（改 package.json 两处同 diff）`);
+    else if (!satisfiesVersion(VENDOR_TAG.replace(/^dsh-v/, ''), engine))
+      fail(gate, `engines.dsh ${engine} 不覆盖当前 vendor tag ${VENDOR_TAG}——范围写窄或写错`);
   }
 }
 
