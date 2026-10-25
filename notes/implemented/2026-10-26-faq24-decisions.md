@@ -24,12 +24,12 @@
 
 - `pnpm verify` 全绿；`pnpm test` 789 pass / 0 fail（rc.2 vendor pin）。
 - `release-smoke` ALL PASS；`cold-start-smoke` GREEN；`client-load-smoke` ALL PASS。
-- `pack-smoke` ALL PASS（T0 tarball 形状/入口/无安装脚本）；`data-smoke` ALL PASS（包目录零写入/假 token 不泄漏/卸载保留）；`compat-smoke` ALL PASS（全局 rc.3 install → dump → scaffold → remove）。
+- `pack-smoke` ALL PASS（T0 tarball 形状/入口/无安装脚本）；`data-smoke` ALL PASS（包目录零写入/假 token 不泄漏/卸载保留）；`workspace-isolation-smoke` ALL PASS（两套 home/profile/port/state/workspace，会话组绑定各自 W）；`compat-smoke` ALL PASS（全局 rc.3 install → dump → scaffold → remove）。
 - rc.3 vendor 构建尝试：`tsc host` 在 `llm-pi-ai` 类型与 apps/web vitest 双层版本处红；后经 root/vendor 依赖对齐修复 rc.2 构建，rc.3 重试仍未做（不宣称 rc.3 开发基线可用）。
 - FAQ 对照（T0–T8）：
   - T0 `pack-smoke` + `package-contract.test`；T1 `pnpm test`；T2 `release-smoke` preset-smoke；T3 `release-smoke`/`cold-start-smoke`；T6 `compat-smoke` + `release-smoke`；T7 `client-load-smoke`——本机实跑绿。
   - T4 未跑（本轮无模型可见文本变更；存量 snapshot 资产不冒充新证据）。
-  - T5 `data-smoke` 覆盖 ①包目录零写入 / ⑤假 token / ⑥卸载保留；②双会话、③storage 重启、④模型可见重建标 N/A（本包无 storage domain、无新 event、client 只读）。
+  - T5 `data-smoke` 覆盖 ①包目录零写入 / ⑤假 token / ⑥卸载保留；`workspace-isolation-smoke` 覆盖跨实例 workspace/home/session 绑定；同实例双会话共享状态（②）仍 N/A（本包无宿主状态），③storage 重启、④模型可见重建 N/A（无 storage domain、无新 event、client 只读）。
   - T8 `package-contract.test` 证无 install/prepare、peers-only；`data-smoke` 证假 token 不进日志；npm provenance/签名未做（未发布，明确 N/A）。
 
 ## 补记：rc.3 构建阻塞的根因与处置
