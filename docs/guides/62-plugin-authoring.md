@@ -102,11 +102,13 @@ DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`�
 角色——手册不在工作区，四个角色就没有证据契约与完成判据。安装步骤（用户视角）与前置
 检查 = [pack README](../../packages/deep-research-pack/README.md)；部署工具 = 包内两条 bin
 （`dsh-deep-research-preflight` 检查、`dsh-deep-research-scaffold` 铺种子 + 补团队层——
-tarball 装法不生成 PATH bin，用安装副本内脚本全路径，见 pack README §部署）。
+tarball 装法不生成 PATH bin，用安装副本内脚本全路径，见 pack README §部署）。种子带
+`workspace/seed.json`（版本 + 哈希）；`scaffold --check` 只读报告三态，`--upgrade` 只更新未改文件，
+`--force` 覆盖版本化种子但**不覆盖**用户方法库。
 
 本仓开发面的生成物各有生成器与新鲜度门禁（漂移即红）：`dev/research.overlay.yml`
 （`dev/render-overlay.mjs` → `overlay-fresh`）、pack 的 `workspace/` 种子
-（`dev/sync-pack-workspace.mjs` → `pack-workspace-fresh`）、run 通道 profile 镜像
+（`dev/sync-pack-workspace.mjs` → `pack-workspace-fresh`，含 `seed.json`）、run 通道 profile 镜像
 （`dev/boot-run.sh` 幂等重建，逐文件漂移检测）、dist 导出手册（`scripts/dist/export-dist.mjs`
 → `dist-manual-version`——一条命令出 tarball + 安装手册到 `_dist/`，tarball 不进库，
 手册 tracked；版本动必须重导出，导出不是发布）。

@@ -1009,6 +1009,8 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
 // 规则：① live 文件里每个 40 位 hex 串必须等于 submodule HEAD；② 每个 `dsh-v*` tag 串必须等于
 // submodule 的 tag——**唯一例外**：同一行带外部归属标记（语料/参考仓/company/外部材料）的，
 // 那是别的仓的 pin，不是本仓的（现仅 00-index 的"语料自身钉 dsh-v0.1.7-rc.1"一处）。
+// 40 位 hex 必须是**独立**的 40 位串：sha256（种子清单/测试向量）是 64 位，取前 40 位当 commit
+// 是误报；前后再接 hex 的串不参与 commit 对账（2026-10-25 workspace seed 清单实证）。
 // 防空语料：0 个 hex、或 0 个 tag 被检查 → 红。
 {
   const gate = 'pin-agreement';
@@ -1040,7 +1042,7 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
     let hexes = 0, tags = 0, skipped = 0;
     if (files) for (const { rel, text } of files) {
       const lines = text.split('\n');
-      for (const h of text.matchAll(/[0-9a-f]{40}/g)) {
+      for (const h of text.matchAll(/(?<![0-9a-f])[0-9a-f]{40}(?![0-9a-f])/g)) {
         hexes++;
         if (h[0] !== PIN) {
           const line = text.slice(0, h.index).split('\n').length;
@@ -1464,10 +1466,19 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
     if (existsSync(join(PACK, 'workspace', '.gitignore')))
       fail(gate, 'packages/deep-research-pack/workspace/.gitignore 在场——npm pack 永不打包该文件名，种子会从 tarball 里静默消失（修正 = 用 .gitignore.example 形态）');
     const scaffoldSrc = existsSync(scaffoldPath) ? readFileSync(scaffoldPath, 'utf8') : '';
-    if (!/ent\.name === '\.gitignore\.example'/.test(scaffoldSrc))
-      fail(gate, 'scaffold.mjs 的种子收集器不认 .gitignore.example——规则不会铺到安装方工作区');
-    if (!/'\.gitignore\.example'\s*\?\s*'\.gitignore'/.test(scaffoldSrc))
-      fail(gate, 'scaffold.mjs 未把 .gitignore.example 落地成工作区根 .gitignore——铺开的是个不会生效的名字');
+    const seedCorePath = join(PACK, 'scripts', 'lib', 'seed-core.mjs');
+    const seedCoreSrc = existsSync(seedCorePath) ? readFileSync(seedCorePath, 'utf8') : '';
+    const seedManifestPath = join(PACK, 'workspace', 'seed.json');
+    let seedManifest = null;
+    try { seedManifest = JSON.parse(readFileSync(seedManifestPath, 'utf8')); } catch { seedManifest = null; }
+    if (!scaffoldSrc.includes('seed.json'))
+      fail(gate, 'scaffold.mjs 未读 workspace/seed.json——种子安装/升级失去版本与哈希依据');
+    if (!scaffoldSrc.includes('seedSourceRel'))
+      fail(gate, 'scaffold.mjs 未用 seedSourceRel 处理包内名 → 落地名');
+    if (!/destRel === '\.gitignore'\s*\?\s*'\.gitignore\.example'/.test(seedCoreSrc))
+      fail(gate, 'seed-core.mjs 未把 .gitignore 映射到 .gitignore.example——规则不会铺到安装方工作区');
+    if (!seedManifest || !Object.hasOwn(seedManifest.files ?? {}, '.gitignore'))
+      fail(gate, 'workspace/seed.json 缺 .gitignore 条目——安装方的忽略规则不在种子清单里');
     if (!existsSync(rootRules)) fail(gate, 'research-workspace/.gitignore.example 不在位——工作区跟踪面的规则正本（修正 = 重建后跑 `node dev/sync-pack-workspace.mjs`）');
     else if (readFileSync(rootRules, 'utf8') !== seedText) fail(gate, 'research-workspace/.gitignore.example 与 pack 种子 workspace/.gitignore.example 不一致——正本与分发件漂移（修正 = `node dev/sync-pack-workspace.mjs`）');
     if (!existsSync(draftsRules)) fail(gate, 'research-workspace/drafts/.gitignore 不在位——开发证据白名单（新探针稿会默认可被 git add）');

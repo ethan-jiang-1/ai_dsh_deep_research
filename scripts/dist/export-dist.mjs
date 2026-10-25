@@ -67,10 +67,16 @@ try {
     'package/lib/client.js',
     'package/workspace/AGENTS.md',
     'package/workspace/.gitignore.example',
+    'package/workspace/seed.json',
+    'package/scripts/lib/seed-core.mjs',
     'package/scripts/preflight.mjs',
     'package/scripts/scaffold.mjs',
   ]
   const missing = must.filter((entry) => !entries.includes(entry))
+  // 种子清单在导出时再核一次：版本 = pack 版本，文件映射非空。清单随包但内容错 = 安装方
+  // 拿到无法升级的种子（scaffold 会 fail-loud，但发布面应在导出时就红）。
+  const seedManifest = JSON.parse(readFileSync(join(PACK, 'workspace', 'seed.json'), 'utf8'))
+  const seedOk = seedManifest.version === version && Object.keys(seedManifest.files ?? {}).length > 0
   // 发布边界：lib/types 下的 JS 与 sourcemap 是构建中间产物，不是运行时；进包即用户装垃圾。
   const forbidden = entries.filter((entry) => /^package\/lib\/types\/.*\.(?:js|map)$/.test(entry))
   const presetRows = entries.filter((e) => /^package\/presets\/[a-z]+\.patch\.yml$/.test(e)).length
@@ -78,11 +84,12 @@ try {
   const templates = entries.filter((e) => e.startsWith('package/workspace/templates/')).length
   const outside = entries.filter((e) => !e.startsWith('package/'))
   report('inventory',
-    listed.status === 0 && missing.length === 0 && forbidden.length === 0 && outside.length === 0 && presetRows >= 4 && skills > 0 && templates > 0,
+    listed.status === 0 && missing.length === 0 && forbidden.length === 0 && outside.length === 0 && presetRows >= 4 && skills > 0 && templates > 0 && seedOk,
     missing.length > 0 ? `缺：${missing.join(', ')}`
       : forbidden.length > 0 ? `构建中间产物进包：${forbidden.slice(0, 5).join(', ')}${forbidden.length > 5 ? '…' : ''}（改 package.json files 排除）`
       : outside.length > 0 ? `package/ 之外的条目：${outside.join(', ')}`
-        : `${entries.length} 条目，preset 行 ${presetRows}，skill ${skills}，模板 ${templates}`)
+        : !seedOk ? `seed.json 版本/映射不合法（version=${seedManifest.version}）`
+          : `${entries.length} 条目，preset 行 ${presetRows}，skill ${skills}，模板 ${templates}，seed v${seedManifest.version}`)
 
   // 3. 手册——版本/日期/条目数注入，让它指名它旁边这份产物；步骤 = release-smoke 的路径
   //    日期 = 本地口径（人读日期行；UTC slice 在 00:00–08:00 窗口差一天——BUG-017 同款口径纪律）
@@ -140,14 +147,29 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffo
   --workspace ~/research-workspace --profile research
 \`\`\`
 
-它会铺工作区种子（研究手册 AGENTS.md + run 模板）、确保团队机制层在场，并跑前置检查。
-脚本用 PATH 上的 \`dsh\`，写哪个 home 由 \`DSH_HOME\` 决定——装日用 DSH 时**别先** source 开发
-环境的 env.sh。随时可单独复检：
+它会铺工作区种子（研究手册 AGENTS.md + run 模板）、写种子状态（\`.dsh-research-seed.json\`）、
+确保团队机制层在场，并跑前置检查。脚本用 PATH 上的 \`dsh\`，写哪个 home 由 \`DSH_HOME\` 决定——
+装日用 DSH 时**别先** source 开发环境的 env.sh。随时可单独复检：
 
 \`\`\`sh
 node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/preflight.mjs \\
   --workspace ~/research-workspace
 \`\`\`
+
+### 升级工作区种子
+
+pack 升级后，先只读检查再安全升级：
+
+\`\`\`sh
+node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffold.mjs \\
+  --workspace ~/research-workspace --check
+node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffold.mjs \\
+  --workspace ~/research-workspace --upgrade
+\`\`\`
+
+\`--upgrade\` 只覆盖“用户未改过且种子已更新”的文件；改过的文件保留原样，新种子写成
+\`<文件>.seed-new\` 供手动合并。\`method-library.md\` 是用户数据，任何模式都不覆盖已存在文件。
+只处理工作区、不碰 profile：加 \`--seed-only\`。
 
 ## 四、跑一场研究
 

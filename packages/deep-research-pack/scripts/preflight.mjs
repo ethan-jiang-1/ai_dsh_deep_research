@@ -150,6 +150,22 @@ function nodeSatisfies(version, range) {
     record(hasPatterns, `判型模式库（${patternsDoc}）`, hasPatterns ? '在场' : '缺席——HITL1 判型失去第一对照面', seedRemedy)
     record(hasIgnore, `工作区 .gitignore（${ignore}）`, hasIgnore ? '在场（run 产物默认拒收）' : '缺席——工作区若进 git，一次 git add -A 会把 run bundle/归档/用户方法库一起提交', seedRemedy)
     record(tplCount >= 6, `run 模板（${templates}）`, `${tplCount} 个（期望 ≥6）`, seedRemedy)
+    // 种子版本：状态文件由 scaffold 写入；缺失/落后不硬红（旧工作区仍可用），但必须显式列为未验证。
+    const statePath = join(workspace, '.dsh-research-seed.json')
+    let seedVersionOk = null
+    let seedVersionDetail = '未记录（旧工作区或未用 scaffold 铺过）'
+    if (existsSync(statePath)) {
+      try {
+        const state = JSON.parse(readFileSync(statePath, 'utf8'))
+        seedVersionOk = state.version === pkg.version ? true : null
+        seedVersionDetail = state.version === pkg.version
+          ? `记录 v${state.version}（与 pack 一致）`
+          : `记录 v${state.version}；pack v${pkg.version}——运行 --upgrade`
+      } catch {
+        seedVersionDetail = '状态文件不可解析——运行 scaffold --check 重建'
+      }
+    }
+    record(seedVersionOk, '工作区种子版本', seedVersionDetail, `node ${join(PACK, 'scripts', 'scaffold.mjs')} --workspace ${workspace} --check`)
   }
 }
 

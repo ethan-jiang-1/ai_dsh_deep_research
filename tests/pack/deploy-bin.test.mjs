@@ -12,13 +12,14 @@ import { fileURLToPath } from 'node:url';
 const PACK = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'packages', 'deep-research-pack');
 const preflight = readFileSync(join(PACK, 'scripts', 'preflight.mjs'), 'utf8');
 const scaffold = readFileSync(join(PACK, 'scripts', 'scaffold.mjs'), 'utf8');
+const seedCore = readFileSync(join(PACK, 'scripts', 'lib', 'seed-core.mjs'), 'utf8');
 const releaseSmoke = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'scripts', 'smoke', 'release-smoke.mjs'), 'utf8');
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
 
 test('preflight：检查清单在位（Node/版本/peer/团队层/手册+节点+判型+模板/构建产物/密钥）', () => {
   // record( 调用点级断言：钉运行时检查名，注释里的字样不算数（反证实测：只改 record 名、
   // 留注释 → 必须红——includes() 子串断言会被注释满足而假绿）。
-  for (const name of ['Node 版本兼容', 'DSH 版本兼容', '平台 peer 包', '团队机制层', '研究工作区手册', '节点契约', '判型模式库', '工作区 .gitignore', 'run 模板', '构建产物', '模型密钥']) {
+  for (const name of ['Node 版本兼容', 'DSH 版本兼容', '平台 peer 包', '团队机制层', '研究工作区手册', '节点契约', '判型模式库', '工作区 .gitignore', 'run 模板', '工作区种子版本', '构建产物', '模型密钥']) {
     assert.match(preflight, new RegExp(`record\\([^)]*${name}`), `preflight 缺 record 检查项「${name}」——检查清单漂移`);
   }
   assert.match(preflight, /engines\?\.dsh/, 'preflight 版本判据须读 engines.dsh（宿主字段；兼容矩阵只是镜像）');
@@ -57,19 +58,20 @@ test('preflight：未知 DSH 版本保留退出码 0，但总结必须显式标�
     '未知项不得改变原 fail-loud 退出码合同（L2 无全局 dsh 时仍 exit 0）');
 });
 
-test('scaffold：工作区忽略规则随安装下发（包内 .gitignore.example → 落地 .gitignore）', () => {
-  // 为什么钉：种子是"装到就有"的唯一形态，收集器只认 .md 时规则静默不发——安装方工作区
-  // 没有本仓根 .gitignore 兜底，一次 git add -A 就把 run bundle 历史提交进他自己的库。
-  // 为什么是两个名字：npm pack **永不打包名为 .gitignore 的文件**（files: ["workspace/**"]
-  // 也照删），种子的包内名因此是 .gitignore.example，落地时才改回 .gitignore。
-  assert.match(scaffold, /ent\.name === '\.gitignore\.example'/,
-    'scaffold 种子收集器不认 .gitignore.example——工作区忽略规则不会随 scaffold 铺开');
-  assert.match(scaffold, /'\.gitignore\.example'\s*\?\s*'\.gitignore'/,
-    'scaffold 未把种子改名落地为 .gitignore——铺开的是个永不生效的文件名');
+test('scaffold：工作区忽略规则随安装下发（seed.json 的 .gitignore 条目 → 落地 .gitignore）', () => {
+  // 为什么钉：种子是"装到就有"的唯一形态；npm pack **永不打包名为 .gitignore 的文件**
+  // （files: ["workspace/**"] 也照删），所以包内名是 .gitignore.example，清单键是落地名 .gitignore。
+  // 收集器从“只认 .md”改为“按 seed.json 清单”，映射归 seed-core（一处事实）。
+  assert.match(seedCore, /destRel === '\.gitignore'\s*\?\s*'\.gitignore\.example'/,
+    'seed-core 未把 .gitignore 映射到 .gitignore.example——工作区忽略规则不会随 scaffold 铺开');
+  assert.ok(scaffold.includes('seed.json'), 'scaffold 未读取 seed.json 清单');
+  assert.ok(scaffold.includes('seedSourceRel'), 'scaffold 未消费 seed-core 的源名映射');
 });
 
-test('scaffold：幂等形状 + 收尾 preflight + workspace 必填 fail-loud', () => {
-  assert.ok(scaffold.includes('--force') && scaffold.includes('跳过已存在'), 'scaffold 缺幂等语义（已存在不覆盖，--force 才写）');
+test('scaffold：三态形状 + 收尾 preflight + workspace 必填 fail-loud', () => {
+  assert.ok(scaffold.includes('--force') && scaffold.includes('--check') && scaffold.includes('--upgrade'),
+    'scaffold 缺三态入口（--check / --upgrade / --force）');
+  assert.ok(scaffold.includes('跳过'), 'scaffold 缺“跳过已存在”语义');
   assert.match(scaffold, /process\.exit\(2\)/, 'scaffold 缺 --workspace 必填的 exit(2) 前置拦截');
   assert.ok(scaffold.includes('preflight.mjs'), 'scaffold 收尾必须复核 preflight（准备完成 ≠ 检查通过）');
   assert.ok(scaffold.includes('agent-team-profile'), 'scaffold 团队层组合缺失——四角色协作主通道不可用');
@@ -82,6 +84,16 @@ test('scaffold：团队层版本从 engines.dsh 派生，不装未钉版最新�
     'scaffold 未把团队层版本拼进安装 spec');
   assert.ok(scaffold.includes("'add', TEAM_SPEC"),
     'scaffold 的 plugin add 未使用带版本的 TEAM_SPEC');
+});
+
+test('scaffold：种子三态 + 状态文件 + 方法库保护形状在位', () => {
+  assert.match(scaffold, /--check/, 'scaffold 缺只读 --check');
+  assert.match(scaffold, /--upgrade/, 'scaffold 缺安全升级 --upgrade');
+  assert.match(scaffold, /classifySeedEntry/, 'scaffold 未消费共享三态判据（seed-core）');
+  assert.match(scaffold, /\.dsh-research-seed\.json/, 'scaffold 未写工作区种子状态文件');
+  assert.ok(scaffold.includes('existsSync(methodSrc) && !existsSync(methodDst)'),
+    'scaffold 方法库保护形态漂移——只应在缺失时铺种子');
+  assert.ok(scaffold.includes('method-library.md'), 'scaffold 未点名方法库');
 });
 
 test('scaffold：收尾 preflight 使用 --profile 对应的 profile 解析锚', () => {

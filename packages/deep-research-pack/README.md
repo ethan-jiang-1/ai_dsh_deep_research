@@ -54,13 +54,19 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffo
   --workspace ~/research-workspace --profile research
 #    也可用安装后的 bin：dsh-deep-research-scaffold --workspace ~/research-workspace --profile research
 #    它用 PATH 上的 `dsh`；写哪个 home 由 `DSH_HOME` 决定（未设时默认 ~/.dsh）——日用安装别先 source dev/env.sh；
-#    手工等价 = 三件全做（scaffold 内部就是这三件）：cp -r <pack>/workspace/. ~/research-workspace/
-#             + dsh plugin --profile research add @deepseek-ai/dsh-experimental-agent-team-profile@0.2.1-rc.2
+#    手工等价 = 铺 <pack>/workspace/ 种子 + dsh plugin --profile research add
+#             @deepseek-ai/dsh-experimental-agent-team-profile@0.2.1-rc.2
 #             + 全路径 preflight.mjs --workspace ~/research-workspace
+#    只处理工作区（不碰 profile）：--seed-only；只读检查：--check；安全升级：--upgrade
 
 # ④ 起研究会话（cwd = 工作区，手册从这里注入；本步拉起该 profile 的 web 并打印带 token 的 URL）
 cd ~/research-workspace && dsh --profile research
 ```
+
+**升级工作区种子**：pack 升级后先跑 `scaffold --check`（只读；报告 missing/stale/untracked/modified），
+再跑 `scaffold --upgrade`。升级只覆盖“用户未改过且种子已更新”的文件；用户改过的文件保留原样，
+新种子写成 `<文件>.seed-new` 供手动合并。`method-library.md` 是用户数据，任何模式都不覆盖已存在文件；
+状态记录在工作区根 `.dsh-research-seed.json`（版本 + 哈希 + 跳过清单）。
 
 **为什么需要 ③**：研究纪律靠**会话 cwd 的 `AGENTS.md`**（DSH 的 agent-instructions 从 cwd
 向上发现并注入每个角色）；团队机制（`spawn_teammate` / `team_task_*`）**不在本包声明**

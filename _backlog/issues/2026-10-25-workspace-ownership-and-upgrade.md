@@ -5,7 +5,7 @@ opened: 2026-10-25
 
 # 推敲：工作区所有权与种子升级
 
-> 立卡：2026-10-25 ｜ 状态：推敲中 ｜ 类型：Feature ｜ 结论倾向：未定 ｜ 可关闭：否
+> 立卡：2026-10-25 ｜ 状态：推敲中 ｜ 类型：Feature ｜ 结论倾向：现在做——A 已落地；跨版本证据与文档收尾 ｜ 可关闭：否
 
 **问题与期望结果：** 研究工作区里的 `AGENTS.md`、`NODES.md`、`question-patterns.md` 与 `templates/run/` 既是研究纪律的载体，也是 agent 行为的一部分；它们由 pack 的 `workspace/` 种子铺到用户工作区，但之后不再随插件升级。`method-library.md` 则是明确的用户数据，却在 `scaffold --force` 下会被空架子覆盖。期望明确“哪些是插件行为、哪些是用户数据、升级时谁变”，并给出一条不丢用户编辑的升级路径。
 
@@ -13,7 +13,15 @@ opened: 2026-10-25
 
 **未决问题：** 手册/NODES/判型库/模板的 owner 是“插件行为”还是“用户可定制数据”；插件升级后旧工作区如何知道种子过期；用户改过的文件如何合并；`method-library.md` 如何保证永不被 `--force` 覆盖；种子版本标记放在哪里、由谁生成；`preflight` 对过期种子是警告还是失败。
 
-**下一步：** 在 [运行形态合同](2026-10-25-run-form-contract.md) 定 Q1/Q2 后，选择下面的 A/B/C；当前先确认“`--force` 覆盖方法库”是必须修的缺陷，并把种子版本与升级语义写成候选验收。若选择 B（手册收归 pack），需要先评估 D17 的边界与模型可见文本的录制影响。
+**下一步：** 按 A（用户所有 + 版本化升级）落地；`--check/--upgrade/--force` 与状态文件已进树，继续补跨真实版本升级的证据与文档收尾。B 仅在需要把手册收归 pack 时重开评估（D17 边界 + 模型可见文本重录）。
+
+## 实施进度（2026-10-25）
+
+- `dev/sync-pack-workspace.mjs` 生成 `packages/deep-research-pack/workspace/seed.json`（版本 + 每个落地文件的 sha256），并入 `pack-workspace-fresh` 对账；`export-dist` 把 `seed.json` 与 `scripts/lib/seed-core.mjs` 列为必备条目。
+- `scaffold.mjs` 改为按清单三态处理：`--check` 只读、`--upgrade` 只更新未改文件（改过的写 `.seed-new`）、`--force` 全量覆盖；`method-library.md` 任何模式都不覆盖已存在文件；状态写 `.dsh-research-seed.json`。`--seed-only` 可只处理工作区。
+- `preflight.mjs` 增“工作区种子版本”检查（旧/缺失标未验证，不硬红）。
+- 证据：`tests/pack/seed-core.test.mjs`（五态 + 清单一致性）；临时工作区实测装/查/force/upgrade（方法库保留、用户改过的 AGENTS 不覆盖且写 sidecar、旧 NODES 被安全升级）；`pnpm verify`/`pnpm test` 待本轮收尾复跑。
+- 未落地：真实 pack 版本 bump 下的跨版本升级证据；安装手册的升级段与 FAQ；`--force` 对 `.gitignore` 用户追加的说明。
 
 ## 范围与依赖
 
@@ -43,7 +51,7 @@ opened: 2026-10-25
 
 推荐 A：它承认手册/NODES 既是插件行为又是用户可定制资产，用“版本 + 三态合并”处理升级，而不是二选一。B 只在用户明确要求“手册必须由插件单一拥有”时再评估；当前证据不足以承担 D17 变更与重录成本。
 
-## 候选验收标准
+## 验收标准
 
 翻「现在做」时，至少覆盖：
 

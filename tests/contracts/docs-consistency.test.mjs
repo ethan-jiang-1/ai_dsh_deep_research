@@ -51,7 +51,7 @@ test('根 AGENTS 布局块覆盖工作区根实体与 pack 种子（2026-10-21 �
     }
   }
   // pack 工作区种子：每个种子文件映射布局行的类别词（新种子无映射 = 红，先补映射再核对布局行）
-  const seedMap = { 'AGENTS.md': '手册', 'NODES.md': 'NODES', 'question-patterns.md': '判型库', 'method-library.md': '偏好库', 'templates': '模板' }
+  const seedMap = { 'AGENTS.md': '手册', 'NODES.md': 'NODES', 'question-patterns.md': '判型库', 'method-library.md': '偏好库', 'templates': '模板', 'seed.json': '清单' }
   const seeds = readdirSync(join(ROOT, 'packages', 'deep-research-pack', 'workspace')).filter((n) => !n.startsWith('.'))
   assert.ok(seeds.length > 0, '防空语料：pack workspace 零种子')
   const wsLine = layout.split('\n').find((l) => l.includes('workspace/（工作区种子'))

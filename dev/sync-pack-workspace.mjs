@@ -14,10 +14,13 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { sha256, serializeSeedManifest } from '../packages/deep-research-pack/scripts/lib/seed-core.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const SRC = join(ROOT, 'research-workspace')
-const DST = join(ROOT, 'packages', 'deep-research-pack', 'workspace')
+const PACK = join(ROOT, 'packages', 'deep-research-pack')
+const DST = join(PACK, 'workspace')
+const PACK_VERSION = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8')).version
 const check = process.argv.includes('--check')
 
 /** 独立种子：随包走但**不从正本同步**（见下方守卫段注释）。 */
@@ -39,6 +42,18 @@ const FILES = [
     .map((f) => [`templates/run/${f}`, `templates/run/${f}`]),
 ]
 
+// 种子清单 = 版本 + 每个落地文件的 sha256。scaffold 用它做三态升级（current/stale/modified），
+// preflight 用它判断工作区是否落后于当前 pack。生成物 tracked；内容随包装版本/种子文本变化，
+// 由 pack-workspace-fresh 与 dist-manual-version 同款新鲜度门禁把守。
+const SEED_MANIFEST = 'seed.json'
+const seedManifestText = serializeSeedManifest({
+  version: PACK_VERSION,
+  files: Object.fromEntries(FILES.map(([rel]) => [
+    rel === '.gitignore.example' ? '.gitignore' : rel,
+    sha256(readFileSync(join(SRC, rel), 'utf8')),
+  ])),
+})
+
 const drift = []
 for (const [rel] of FILES) {
   const src = join(SRC, rel)
@@ -53,10 +68,19 @@ for (const [rel] of FILES) {
   writeFileSync(dst, srcText)
 }
 
+// 清单本身也是生成物：与源文件同一次变化里重算；只比源文件不比清单 = 版本/哈希漂移的盲区。
+if (check) {
+  const dstText = existsSync(join(DST, SEED_MANIFEST)) ? readFileSync(join(DST, SEED_MANIFEST), 'utf8') : null
+  if (dstText !== seedManifestText) drift.push(SEED_MANIFEST)
+} else {
+  writeFileSync(join(DST, SEED_MANIFEST), seedManifestText)
+}
+
 // 孤儿种子对账（双向 freshness）：只对"源有的"文件比对不算 freshness——源删了文件、种子残留
 // 旧件同样是漂移（部署方会装到已删的旧模板；对照 overlay-fresh 的整文件全量 diff 无此盲区）。
 // check 报红；sync 侧真镜像（删孤儿），让 --check 能保证两侧相等。
 const fileSet = new Set(FILES.map(([rel]) => rel))
+fileSet.add(SEED_MANIFEST)
 const walkDst = (dir) => {
   for (const ent of readdirSync(dir, { withFileTypes: true })) {
     const p = join(dir, ent.name)

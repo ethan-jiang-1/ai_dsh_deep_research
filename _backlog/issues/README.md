@@ -8,7 +8,7 @@
 |---|---|
 | [运行形态合同](2026-10-25-run-form-contract.md) | 已定 A+B / per-user / 两阶段；按切片推进，合同页随实现落盘 |
 | [分发的可执行合同](2026-10-25-distribution-contract.md) | `engines.dsh`/团队层/Node 已落地；升级/离线/冷 home 待做 |
-| [工作区所有权与升级](2026-10-25-workspace-ownership-and-upgrade.md) | 手册/NODES 是插件行为还是用户数据；种子无版本；`--force` 可覆盖方法库 |
+| [工作区所有权与升级](2026-10-25-workspace-ownership-and-upgrade.md) | A 已落地（seed.json + `--check/--upgrade` + 方法库保护）；跨版本证据/文档待收尾 |
 | [运行态数据边界与移交](2026-10-25-runtime-data-boundary.md) | 状态在源码树内；`dev/harness-home` 误落位；复制目录会带走数据；bundle 含绝对路径 |
 | [独立环境冷启动与多实例](2026-10-25-standalone-cold-start.md) | 干净 clone 无 bootstrap；固定 home/profile/端口；无冷启动证据；平台/离线未声明 |
 

@@ -1,0 +1,17 @@
+{
+  "version": "0.1.2",
+  "files": {
+    ".gitignore": "89ccfe4d51a5290025ec237c9ff0cb965614683a77528dbcecb1feaeba01cc86",
+    "AGENTS.md": "830fb1e364327b8f031a1e7addf0223e3659cb89e4e2ab588ac300ca3f1b60e7",
+    "NODES.md": "1400e444e77f9bee2a3a503fad07787aedb7211a472478e8e19cf7643310acb1",
+    "question-patterns.md": "9428cac6f47c48b8f26ebefc9a9c4371022fbb3ce93eab49b4fec285a4d4a7ae",
+    "templates/run/evidence-entry.md": "2937b4b62b81fc8f27da7b99afd15c457cf72090cecf871e76a566144c0717cc",
+    "templates/run/final.md": "722ab847714c89ab7b04ff5ba0eba2703b145a501d94a651419e83a1584a1ed7",
+    "templates/run/findings.md": "62468dd751fc8651b381af12c87b2abdad63b0b9387598ad47791dda3ba55477",
+    "templates/run/leads.md": "14fa17c3f11dc2c7987a4a5dce3c5bd4f056897ac2d15b7f3b16bb5097d94c56",
+    "templates/run/plan.md": "3ba8daee6bffeb7ca735880e9292a557e5e2f3df79c74cd95c5059d5f72b0934",
+    "templates/run/question.md": "ef481c6600c803afca2859507c32335fbc3b74b599dafbd66696285974405afb",
+    "templates/run/run.md": "534c9e593db4d514cb1919d0078c0ca08fc0ca5e104d337f7f61caff63528497",
+    "templates/run/topics.md": "b52addf81680e9e435e9310b726050277f07e3ed1a8702eb82884332c4880bc8"
+  }
+}
