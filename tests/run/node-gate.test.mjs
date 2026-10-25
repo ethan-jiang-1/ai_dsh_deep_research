@@ -16,6 +16,17 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 const FX = join(HERE, '..', 'fixtures', 'node-gate')
 const bundle = (name) => join(FX, 'bundles', name)
 const sessions = (name) => join(FX, 'sessions', name)
+// 这两个夹具没有 run.md，契约断代只能回退 final.md mtime；fresh clone 的 mtime = checkout 时间，
+// 会让“契约前不计红”的断言在 CI/新 clone 上假红（2026-10-25 clean-worktree 实证）。
+// 显式注入各门契约日之前一天，让断代与宿主 mtime 解耦。
+const PRE_CONTRACT_DATES = {
+  hitlDate: '2026-10-04',
+  leadsDate: '2026-10-02',
+  versionDate: '2026-10-02',
+  headingDate: '2026-10-05',
+  auditDate: '2026-10-07',
+  readerDate: '2026-10-22',
+}
 const structuredAudit = (slug, criticalCount = 0, criticalBody = '（无）') => `# Evidence Audit — ${slug}（2026-10-08T00:00:00.000Z）
 
 ## 概要
@@ -71,14 +82,14 @@ test('合规形态：拍板行 + present 日志 → 双绿', () => {
 })
 
 test('通道死恢复路径：操作侧补齐显式记账 → PASS-RELAY 放行带注（显性化不静默）', () => {
-  const r = gateBundle(bundle('fixture-relay'), sessions('s-relay'))
+  const r = gateBundle(bundle('fixture-relay'), sessions('s-relay'), PRE_CONTRACT_DATES)
   assert.equal(r.gates.present.status, 'PASS-RELAY', '显式记账的操作侧补齐不是违规')
   assert.equal(r.gates.hitl2Row.status, 'PASS')
   assert.equal(r.red, false)
 })
 
 test('未到交付段：无 final.md、无 final/ → 双 N/A（无对象显式标注，不静默跳过）', () => {
-  const r = gateBundle(bundle('fixture-early'), sessions('s-relay'))
+  const r = gateBundle(bundle('fixture-early'), sessions('s-relay'), PRE_CONTRACT_DATES)
   assert.equal(r.gates.hitl2Row.status, 'N/A')
   assert.equal(r.gates.present.status, 'N/A')
   assert.equal(r.red, false)

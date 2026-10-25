@@ -25,6 +25,9 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Fetch submodule tags (pin-agreement reads dsh-v* tags)
+        run: git -C vendor/dsh fetch --tags --force
+
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:

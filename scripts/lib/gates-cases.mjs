@@ -334,6 +334,12 @@ export const CASES = [
     appendFileSync(join(dir, '.gitignore'), '\n!tests/.tmp-probe/\n!tests/.tmp-probe/probe.txt\n');
     writeFileSync(join(dir, 'tests', '.tmp-probe', 'probe.txt'), 'probe\n');
   } },
+  { id: 'secrets-untracked-underscore-tmp-leak', gate: 'secrets-untracked', mutate: (dir) => {
+    // 测试临时区 `_tmp/` 的已跟踪形态（与 .tmp* 同族，门禁两个模式各一案例）
+    mkdirSync(join(dir, 'tests', '_tmp'), { recursive: true });
+    appendFileSync(join(dir, '.gitignore'), '\n!tests/_tmp/\n!tests/_tmp/probe.txt\n');
+    writeFileSync(join(dir, 'tests', '_tmp', 'probe.txt'), 'probe\n');
+  } },
   { id: 'secrets-untracked-pack-lib-leak', gate: 'secrets-untracked', mutate: (dir) => {
     // 构建中间产物强制入库（git add -f 的等价注入）：先解除 packages/deep-research-pack/lib/ 忽略。
     mkdirSync(join(dir, 'packages', 'deep-research-pack', 'lib'), { recursive: true });
