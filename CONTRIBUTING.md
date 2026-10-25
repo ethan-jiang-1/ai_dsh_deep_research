@@ -74,6 +74,9 @@ outputs; the ignored paths are documented in [`.gitignore`](.gitignore).
 - Follow the git boundary and cross-environment rules in
   [`docs/guides/63-git-boundary.md`](docs/guides/63-git-boundary.md): source/contracts/seeds
   are tracked; runtime state, caches, generated outputs, and machine-specific files are not.
+- Release version/tag/npm order is owned by
+  [`docs/guides/64-release-versioning.md`](docs/guides/64-release-versioning.md); run
+  `pnpm release:check` before tagging or publishing.
 - The pre-commit hook runs `pnpm verify` and `pnpm test`; enable it with
   `source dev/env.sh` (or set `core.hooksPath=dev/hooks`).
 

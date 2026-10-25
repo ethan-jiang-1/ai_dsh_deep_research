@@ -58,7 +58,7 @@ _dist/                   对外交付件：安装手册.md（tracked 生成物�
   _backlog 细构[问题、方法、调研与归档] = _backlog/README.md）
 ```
 
-入库边界（哪些进 git / 跨环境）= [guides/63](docs/guides/63-git-boundary.md)；新文件先按该页三问分类。
+入库边界（哪些进 git / 跨环境）= [guides/63](docs/guides/63-git-boundary.md)；新文件先按该页三问分类；发布版本/tag 顺序 = [guides/64](docs/guides/64-release-versioning.md)。
 
 本轮工作以用户请求和已有授权为准；开工/收尾程序 = 第 4 步。
 

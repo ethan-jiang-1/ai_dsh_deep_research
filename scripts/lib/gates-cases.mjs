@@ -311,6 +311,12 @@ export const CASES = [
   } },
   { id: 'workspace-contract-template-missing', gate: 'workspace-contract', mutate: (dir) => rmSync(join(dir, 'research-workspace', 'templates', 'run', 'question.md')) },
   { id: 'workspace-contract-run-template-missing', gate: 'workspace-contract', mutate: (dir) => rmSync(join(dir, 'research-workspace', 'templates', 'run', 'run.md')) },
+  { id: 'release-version-drift', gate: 'release-version', mutate: (dir) => {
+    const p = join(dir, 'packages', 'deep-research-pack', 'package.json');
+    const pkg = JSON.parse(readFileSync(p, 'utf8'));
+    pkg.version = '9.9.9';
+    writeFileSync(p, JSON.stringify(pkg, null, 2) + '\n');
+  } },
   { id: 'dist-manual-version-drift', gate: 'dist-manual-version', mutate: (dir) => {
     const p = join(dir, '_dist', '安装手册.md');
     const t = readFileSync(p, 'utf8');

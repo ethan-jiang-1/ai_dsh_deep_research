@@ -65,6 +65,7 @@
 | 件 | 证明什么 | 档位 |
 |---|---|---|
 | export-dist.mjs | pack → `_dist/` 安装包与安装手册 | keyless |
+| release-check.mjs | 发布前版本/tag 一致性（root = pack、HEAD tag = version、tag 为 annotated）；只读 | keyless |
 
 ## lib/（支撑库）
 

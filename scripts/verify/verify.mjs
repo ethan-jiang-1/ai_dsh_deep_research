@@ -43,7 +43,7 @@ const gates = [
   'preset-structure', 'pack-bundle-compat', 'client-half', 'row-deps', 'pack-contract-sync', 'role-list-sync', 'client-keys', 'client-effect-wrap', 'cockpit-doc-registry', 'run-context-single-source',
   'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'proposed-pointer-live',
   'vendor-pin', 'vendor-clean', 'pin-agreement', 'align-ledger', 'discipline-na-trigger', 'discipline-state-vocab', 'repo-conventions', 'vendor-links',
-  'workspace-contract', 'handbook-budget', 'workspace-versioning', 'overlay-fresh', 'pack-workspace-fresh', 'dist-manual-version',
+  'workspace-contract', 'handbook-budget', 'workspace-versioning', 'overlay-fresh', 'pack-workspace-fresh', 'release-version', 'dist-manual-version',
   'claude-symlink', 'secrets-untracked', 'host-paths', 'guard-red-record', 'gate-ledger-sync', 'entry-chain', 'backlog-liveness', 'port-exclusive', 'hooks-active',
 ];
 
@@ -1501,6 +1501,29 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
   if (r.status !== 0) {
     const first = `${r.stderr ?? ''}${r.stdout ?? ''}`.trim().split('\n').filter(Boolean)[0];
     fail(gate, first ?? 'pack workspace/ 种子与 research-workspace/ 正本漂移——跑 `node dev/sync-pack-workspace.mjs` 重同步');
+  }
+}
+
+// ── release-version（发布版本单一源：root 镜像 pack；tag 一致性由 release-check 在发布前查）──
+// 病根：仓库出现过 root 0.1.0 / pack 0.1.1 / tag 0.1.2 三套版本，发布时无法判断 tag 该对谁。
+// 规则正本 = docs/guides/64-release-versioning.md：发布版本 = pack version；root 必须镜像；
+// tag = 同版本 annotated。CI 不假定 tag 在场，故 tag 检查归 scripts/dist/release-check.mjs。
+{
+  const gate = 'release-version';
+  const readVersion = (rel) => {
+    try { return JSON.parse(readFileSync(join(ROOT, rel), 'utf8')).version; }
+    catch (e) { fail(gate, `${rel} 不可读/不是合法 JSON（${e.code || e.message}）——发布版本源不可判`); return null; }
+  };
+  const rootVersion = readVersion('package.json');
+  const packVersion = readVersion('packages/deep-research-pack/package.json');
+  const semver = /^\d+\.\d+\.\d+$/;
+  for (const [label, version] of [['root package.json', rootVersion], ['pack package.json', packVersion]]) {
+    if (version !== null && (typeof version !== 'string' || !semver.test(version))) {
+      fail(gate, `${label} version = ${JSON.stringify(version)}——必须是三段 semver（X.Y.Z）`);
+    }
+  }
+  if (rootVersion !== null && packVersion !== null && rootVersion !== packVersion) {
+    fail(gate, `版本漂移：root ${rootVersion} ≠ pack ${packVersion}——发布版本以 pack 为准，root 必须镜像（规则 = docs/guides/64-release-versioning.md）`);
   }
 }
 

@@ -170,6 +170,10 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
   折叠承担，无需卡片（4 卡方案的回退理由 = [marathon2 复盘](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/notes/archived/2026-09-25-marathon2-retrospective.md)，冻结层）；
 - **版本兼容面窄**：只声明 `dsh-v0.2.1-rc.2`（pre-stable API，peer 版本号不精确钉死）。
 
+## 发布（维护者）
+
+版本、tag 与 npm 发布顺序 = [guides/64 发布规则](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/guides/64-release-versioning.md)。发布前跑 `pnpm release:check`；tag 必须等于本包 `version` 且为 annotated tag。
+
 ## License
 
 MIT — 见本包内 [LICENSE](LICENSE)。

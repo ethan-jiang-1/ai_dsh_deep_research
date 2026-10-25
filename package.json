@@ -22,6 +22,7 @@
     "verify": "node scripts/verify/verify.mjs",
     "test": "node --import tsx/esm --test --test-reporter=spec 'tests/**/*.test.mjs'",
     "typecheck": "tsc -b packages/deep-research-pack --pretty false",
+    "release:check": "node scripts/dist/release-check.mjs",
     "dsh": "node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts"
   },
   "devDependencies": {
