@@ -5,7 +5,7 @@ opened: 2026-10-25
 
 # 推敲：独立环境冷启动与多实例
 
-> 立卡：2026-10-25 ｜ 状态：推敲中 ｜ 类型：Feature ｜ 结论倾向：未定 ｜ 可关闭：否
+> 立卡：2026-10-25 ｜ 状态：推敲中 ｜ 类型：Feature ｜ 结论倾向：现在做——bootstrap + 冷启动 smoke 已落地；平台/离线/多实例收尾 ｜ 可关闭：否
 
 **问题与期望结果：** 本仓的 M2 独立开发通道能跑，但它默认作者的机器状态：仓内固定的 `DSH_HOME`、固定的 `research` profile、仓内的 `research-workspace`、固定的 3083 端口；干净 clone 到可启动之间还缺 submodule、依赖、vendor 构建、凭据与 profile 初始化的串联。期望把“在独立目录/独立环境里从零启动”做成可复跑的一条路径，并用冷启动证据证明它不依赖作者残留。
 
@@ -13,7 +13,16 @@ opened: 2026-10-25
 
 **未决问题：** 冷启动的入口是一条 `bootstrap` 还是 `run-driver up --bootstrap`；数据根/端口/profile 名如何参数化；是否承诺 Linux（以及 Windows）；团队层与 MCP 的离线策略；pack 目录是否要作为“目录安装”正式支持（Q1 的 B）；冷启动 smoke 的边界（keyless boot 算不算、是否建会话）；已有 `runtime/` 数据的迁移/兼容。
 
-**下一步：** 等 [运行形态合同](2026-10-25-run-form-contract.md) 定 Q1 后选择 A/B/C。当前推荐 A：bootstrap + 显式数据根/端口/profile + 冷启动 smoke；B 作为“目录也能装”的门槛，不单独做第二套运行时。先确认 Node/凭据前置检查与平台承诺，再写正式验收。
+**下一步：** 按 A 落地：bootstrap + 显式数据根/端口/profile + 冷启动 smoke 已进树；继续补平台/离线声明、两实例并行证据与 pack 目录安装门槛。B 仅作“目录也能装”的门槛，不单独做第二套运行时。
+
+## 实施进度（2026-10-25）
+
+- `dev/bootstrap.sh`：Node/pnpm/git → submodule → pnpm install → vendor 构建 → env.sh → 凭据/lsof/pgrep；`--check` 只读，缺件给补救；实测当前环境 exit 0。
+- `dev/run-driver.mjs up --bootstrap`：先跑 bootstrap，再起通道；新增 `--profile`，`DSH_RUN_STATE_DIR` 隔离 web.log/仪表盘/run-pack；修掉“漂移检测绿”被误判为失败而提前杀 boot 的等待 bug。
+- `dev/boot-run.sh`：`DSH_RUN_PROFILE`/`DSH_RUN_STATE_DIR` 参数化；`sed -i.bak` 兼容 BSD/GNU；boot 横幅点名实际 profile。
+- `scripts/smoke/cold-start-smoke.mjs`：独立 `DSH_DEV_HOME` + `cold-start-smoke` profile + 3129 + 独立 state；`run-driver up --bootstrap` → 浏览器面 GREEN，实测 exit 0；MCP 显式关闭。
+- 证据：`bash dev/bootstrap.sh --check`（默认/外部 home 两形态）、`node scripts/smoke/cold-start-smoke.mjs` GREEN、`pnpm verify`/`pnpm test` 待本轮收尾复跑。
+- 未落地：平台承诺文字（当前实测 macOS；Linux 未跑）；离线矩阵/团队层预置；两个实例同时启动的并行证据；pack 目录 + 构建后的 `dsh plugin add file:<目录>` 门槛。
 
 ## 范围与依赖
 
@@ -44,7 +53,7 @@ opened: 2026-10-25
 
 推荐 A：DSH 的独立环境就是 `DSH_HOME` + profile + workspace；把这三样参数化并串成 bootstrap，比让 pack 目录变成 app 更贴合宿主。B 值得保留为“目录安装”的门槛：pack 目录 + 构建后能 `dsh plugin add`，并有一个 smoke；但不把它当主运行形态。
 
-## 候选验收标准
+## 验收标准
 
 翻「现在做」时，至少覆盖：
 

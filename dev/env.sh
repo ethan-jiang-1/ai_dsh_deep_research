@@ -12,21 +12,29 @@
 #   把守）；不借用任何外部 checkout。原「vendor submodule 延后」的偏离（D10）已随
 #   队列「vendor-submodule-and-pnpm-dsh」落地而终结。
 
-# ① 数据面（⚠ 无条件覆盖，不用 ${DSH_HOME:-…} 预设优先）
+_repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# ① 数据面（默认覆盖平台 DSH_HOME；显式 DSH_DEV_HOME 可把隔离根指到仓外）
 #   实证（2026-09-24 l4-lite 复跑首跑栽坑）：DSH 会话内（agent shell / GUI 环境）自带
 #   平台级 DSH_HOME=~/.dsh——预设优先会让 source 后静默指向日用 home，boot 在日用
 #   home 找不到 profile 时回退写 ~/.dsh/profiles/web/cordis.yml（被会话沙箱 EPERM 拒，
-#   fail-loud 正确行为）。数据面隔离合同（guides/60 §2 命令正本：source 本文件 ⇒
-#   DSH_HOME=runtime/harness-home）要求无条件生效。
-if [ -n "${DSH_HOME:-}" ] && [ "$DSH_HOME" != "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/runtime/harness-home" ]; then
-  echo "dev/env.sh: 覆盖预设 DSH_HOME（$DSH_HOME → 本仓 runtime/harness-home）" >&2
+#   fail-loud 正确行为）。因此平台 DSH_HOME 一律被覆盖；需要另一隔离实例时用 DSH_DEV_HOME
+#   （独立 home；配合 DSH_RUN_PROFILE / DSH_RUN_PORT / DSH_RUN_STATE_DIR 做多实例）。
+_default_home="${_repo_root}/runtime/harness-home"
+if [ -n "${DSH_DEV_HOME:-}" ]; then
+  mkdir -p "$DSH_DEV_HOME"
+  _dev_home="$(cd "$DSH_DEV_HOME" && pwd)"
+else
+  _dev_home="$_default_home"
 fi
-export DSH_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/runtime/harness-home"
+if [ -n "${DSH_HOME:-}" ] && [ "$DSH_HOME" != "$_dev_home" ]; then
+  echo "dev/env.sh: 覆盖平台 DSH_HOME（$DSH_HOME → ${_dev_home}）" >&2
+fi
+export DSH_HOME="$_dev_home"
 mkdir -p "$DSH_HOME"
 
 # ② 代码面：dsh = 本仓 vendor 钉 tag 源码基线（vendor/dsh submodule，只读）；确要日用全局版：command dsh
 #    前置：根 pnpm install 已跑（tsx + vendor workspace 依赖在 node_modules）。
-_repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 _dsh_src="${_repo_root}/vendor/dsh/apps/cli/src/bin.ts"
 dsh() {
   if [ -f "$_dsh_src" ]; then

@@ -22,7 +22,7 @@
 // research`——那会跳过 pack 漂移检测、静默用旧镜像。boot 是前台进程（脚本退出即 web 停），
 // 故 `up` 以**托管后台 job** 形态起 boot-run，本驱动的 probe 阶段独立取证。
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, openSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { guiUrlFromWebLog, runDriverVerdict } from '../scripts/lib/run-channel.mjs';
@@ -30,9 +30,13 @@ import { guiUrlFromWebLog, runDriverVerdict } from '../scripts/lib/run-channel.m
 export { guiUrlFromWebLog, runDriverVerdict };
 
 const ROOT = resolvePath(dirname(fileURLToPath(import.meta.url)), '..');
-const WEB_LOG = join(ROOT, 'runtime/smoke-workspace/web.log');
-const BOOT_LOG = join(ROOT, 'runtime/smoke-workspace/run-driver-boot.log');
+// 实例状态根：默认 runtime/smoke-workspace；多实例用 DSH_RUN_STATE_DIR 指向各自目录。
+const STATE_DIR = resolvePath(process.env.DSH_RUN_STATE_DIR ?? join(ROOT, 'runtime/smoke-workspace'));
+mkdirSync(STATE_DIR, { recursive: true });
+const WEB_LOG = join(STATE_DIR, 'web.log');
+const BOOT_LOG = join(STATE_DIR, 'run-driver-boot.log');
 const DEFAULT_PORT = process.env.DSH_RUN_PORT || '3083';
+const DEFAULT_PROFILE = process.env.DSH_RUN_PROFILE || 'research';
 const DEFAULT_FACE = '研究状态';
 
 const portOf = (url) => Number(new URL(url).port);
@@ -94,6 +98,7 @@ const has = (name) => process.argv.includes(name);
 // 跑子命令（否则 `pnpm test` 里一 import 就 exit 2）。与 scripts/run-ops/run-dashboard.mjs 同款。
 const isCli = process.argv[1] !== undefined && import.meta.url === pathToFileURL(resolvePath(process.argv[1])).href;
 const sub = isCli ? process.argv[2] : undefined;
+const wantBootstrap = isCli && process.argv.includes('--bootstrap');
 
 if (sub === 'url') {
   const s = channelState();
@@ -114,7 +119,7 @@ if (sub === 'probe') {
     console.error(`run-driver probe: 找不到 ${given !== null ? `端口 ${given}` : '任何'}通道的横幅 URL（web.log = ${WEB_LOG}）——先 up`);
     process.exit(2);
   }
-  const shot = join(ROOT, 'runtime', 'smoke-workspace', 'run-driver-probe.png');
+  const shot = join(STATE_DIR, 'run-driver-probe.png');
   const { verdict, error } = probeFace(url, expectFace, shot);
   if (verdict === null) {
     console.error(`run-driver probe: ${error}`);
@@ -122,7 +127,7 @@ if (sub === 'probe') {
   }
   const v = runDriverVerdict({ probe: verdict, expectFace, composing: false });
   const payload = { url, ...v, statusPaneText: verdict.statusPaneText?.slice(0, 600), screenshot: verdict.screenshot ?? null };
-  const out = join(ROOT, 'runtime', 'smoke-workspace', 'run-driver-probe-verdict.json');
+  const out = join(STATE_DIR, 'run-driver-probe-verdict.json');
   writeFileSync(out, JSON.stringify(payload, null, 2));
   console.log(JSON.stringify(payload, null, 2));
   console.error(`run-driver probe: 截图 ${verdict.screenshot ?? '（无）'}；verdict ${out}`);
@@ -130,7 +135,7 @@ if (sub === 'probe') {
 }
 
 if (isCli && sub !== 'up') {
-  console.error('run-driver: 用法 node dev/run-driver.mjs up [--port <p>] [--no-probe] | probe [--port <p>] [--expect-face <文本>] | url');
+  console.error('run-driver: 用法 node dev/run-driver.mjs up [--port <p>] [--profile <p>] [--bootstrap] [--no-probe] | probe [--port <p>] [--expect-face <文本>] | url');
   process.exit(2);
 }
 
@@ -138,6 +143,7 @@ if (isCli && sub !== 'up') {
 // 被 import（非 CLI）= 纯函数面：到此为止，不跑主流程（顶层 await 下 return 不合法，用 if 包）。
 if (isCli && sub === 'up') {
 const wantPort = String(arg('--port', DEFAULT_PORT));
+const wantProfile = arg('--profile', DEFAULT_PROFILE);
 const noProbe = has('--no-probe');
 const expectFace = arg('--expect-face', DEFAULT_FACE);
 
@@ -145,6 +151,14 @@ let state = channelState();
 if (state.alive) {
   console.log(`run-driver: 通道已存活，复用（端口 ${state.port}，pid ${state.pids.join(',')}）——不另起（guides/61 §0：在飞通道别另起）`);
 } else {
+  if (wantBootstrap) {
+    console.log('run-driver: --bootstrap 检查独立环境前置…');
+    const b = spawnSync('bash', [join(ROOT, 'dev', 'bootstrap.sh')], { cwd: ROOT, stdio: 'inherit', env: process.env });
+    if (b.status !== 0) {
+      console.error('run-driver: bootstrap 未就绪——按上方 FAIL/todo 修复后重试（未跑 ≠ 通过）');
+      process.exit(1);
+    }
+  }
   if (isBootDriving()) {
     console.error('run-driver: 已有一个 boot-run.sh 在起通道（勿并发另起）——等它出横幅后跑 `node dev/run-driver.mjs probe`');
     process.exit(2);
@@ -163,10 +177,10 @@ if (state.alive) {
     cwd: ROOT,
     detached: true,
     stdio: ['ignore', out, out],
-    env: { ...process.env, DSH_RUN_PORT: port },
+    env: { ...process.env, DSH_RUN_PORT: port, DSH_RUN_PROFILE: wantProfile, DSH_RUN_STATE_DIR: STATE_DIR },
   });
   child.unref();
-  writeFileSync(join(ROOT, 'runtime/smoke-workspace/run-driver.pid'), String(child.pid));
+  writeFileSync(join(STATE_DIR, 'run-driver.pid'), String(child.pid));
 
   // 等横幅（boot-run 的自检/漂移门在前，正常 5–30s；红了就 fail-loud 回显尾部）
   let waited = 0;
@@ -176,7 +190,7 @@ if (state.alive) {
     waited += 1000;
     tail = existsSync(BOOT_LOG) ? readFileSync(BOOT_LOG, 'utf8') : '';
     if (guiUrlFromWebLog(tail) !== null) break;
-    if (/boot-run: .*fail-loud|漂移|已退出/.test(tail) && waited > 5000) break;
+    if (/boot-run: .*(?:fail-loud|已退出|失败)|pack 漂移检测红|漂移——/.test(tail) && waited > 5000) break;
   }
   state = channelState();
   if (!state.alive) {
@@ -196,7 +210,7 @@ if (noProbe) {
   process.exit(2);
 }
 
-const shot = join(ROOT, 'runtime', 'smoke-workspace', 'run-driver-status.png');
+const shot = join(STATE_DIR, 'run-driver-status.png');
 const { verdict, error } = probeFace(state.url, expectFace, shot);
 if (verdict === null) {
   console.error(`run-driver: ${error}`);
@@ -205,7 +219,7 @@ if (verdict === null) {
 const v = runDriverVerdict({ probe: verdict, expectFace, composing: false });
 const submitted = v.exit === 0;
 const payload = { url: state.url, port: state.port, ...v, statusPaneText: verdict.statusPaneText?.slice(0, 600), screenshot: verdict.screenshot ?? null };
-const out = join(ROOT, 'runtime', 'smoke-workspace', 'run-driver-verdict.json');
+const out = join(STATE_DIR, 'run-driver-verdict.json');
 writeFileSync(out, JSON.stringify(payload, null, 2));
 console.log('──────────────────────────── 呈交块 ────────────────────────────');
 console.log(`通道 URL：${state.url}`);

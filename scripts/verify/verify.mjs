@@ -43,7 +43,7 @@ const gates = [
   'preset-structure', 'pack-bundle-compat', 'client-half', 'row-deps', 'pack-contract-sync', 'role-list-sync', 'client-keys', 'client-effect-wrap', 'cockpit-doc-registry', 'run-context-single-source',
   'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'proposed-pointer-live',
   'vendor-pin', 'vendor-clean', 'pin-agreement', 'align-ledger', 'discipline-na-trigger', 'discipline-state-vocab', 'repo-conventions', 'vendor-links',
-  'workspace-contract', 'handbook-budget', 'workspace-versioning', 'overlay-fresh', 'pack-workspace-fresh', 'release-version', 'dist-manual-version',
+  'workspace-contract', 'handbook-budget', 'workspace-versioning', 'dev-runtime-clean', 'overlay-fresh', 'pack-workspace-fresh', 'release-version', 'dist-manual-version',
   'claude-symlink', 'secrets-untracked', 'host-paths', 'guard-red-record', 'gate-ledger-sync', 'entry-chain', 'backlog-liveness', 'port-exclusive', 'hooks-active',
 ];
 
@@ -1495,6 +1495,32 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
     if (/^\s*\*\s*$/m.test(seedText))
       fail(gate, '种子 workspace/.gitignore.example 出现裸 `*` 整目录拒收——它会连工作区里被跨目录引用的材料（如 drafts/ 开发证据）一起拒收，全新 clone 后链接与测试同时失效（修正 = 改回显式列名单）');
   }
+}
+
+// ── dev-runtime-clean（dev/ 只住源码驱动；运行态必须住 runtime/ 或研究工作区）──
+// 为什么：dev/ 是源码驱动目录，运行态住 runtime/（harness-home / smoke-workspace）或研究工作区。
+// 2026-10-25 数据边界审计实测 dev/harness-home/ 里躺着 run bundle；.gitignore 能挡 git，挡不住
+// cp -r/打包目录。本门禁把“dev/ 无运行态”变成机械事实（不扫 tracked，直接看盘）。
+{
+  const gate = 'dev-runtime-clean';
+  const dev = join(ROOT, 'dev');
+  const forbidden = [];
+  const walk = (dir, rel = '') => {
+    for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      if (ent.name === 'node_modules' || ent.name === '.git') continue;
+      const p = join(dir, ent.name);
+      const r = rel === '' ? ent.name : `${rel}/${ent.name}`;
+      if (ent.isDirectory()) {
+        if (ent.name === 'harness-home' || ent.name === 'sessions' || /^drt_/.test(ent.name)) forbidden.push(`dev/${r}`);
+        walk(p, r);
+      } else if (ent.name === '.credentials' + '.yaml') forbidden.push(`dev/${r}`);
+    }
+  };
+  if (!existsSync(dev)) fail(gate, 'dev/ 缺席——源码驱动目录不在位');
+  else walk(dev);
+  if (forbidden.length > 0)
+    fail(gate, `dev/ 下出现运行态：${forbidden.slice(0, 5).join('、')}${forbidden.length > 5 ? '…' : ''}——运行态住 runtime/ 或研究工作区（迁移/清理后再提交；见 guides/63）`);
+  else note(gate, 'dev/ 无运行态（harness-home / drt_* / sessions / 凭据）');
 }
 
 // ── overlay-fresh（源码域 overlay 是**生成物**——由 dev/render-overlay.mjs 从 pack

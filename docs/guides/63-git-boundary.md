@@ -54,7 +54,9 @@
 
 - **路径**：仓库内只用相对路径；脚本用 `ROOT` / `import.meta.url` 定位，不写 home、用户名、
   OS 盘符。需要展示路径时用环境变量或 `<workspace>` 占位。
-- **DSH home / 凭据**：`DSH_HOME` 由 `dev/env.sh` 指向 `runtime/harness-home`；凭据由使用者
+- **DSH home / 凭据**：`DSH_HOME` 默认由 `dev/env.sh` 指向 `runtime/harness-home`；设
+  `DSH_DEV_HOME` 可把隔离根指到仓外（独立实例）。同机多实例再配 `DSH_RUN_PROFILE`、
+  `DSH_RUN_PORT`、`DSH_RUN_STATE_DIR`（web.log/仪表盘/run-pack 各自独立）。凭据由使用者
   自己提供，不入库。不要假定 `~/.dsh`、全局 `dsh` 或某个已安装 profile 在场。
 - **运行时**：Node 区间与 pnpm 版本由 `package.json` 钉住；LF 由 `.gitattributes` 强制；
   macOS/Linux 差异走运行时判断（如 `process.platform`），不提交平台二进制或 `.cmd` 脚本。
@@ -65,6 +67,7 @@
   改源后跑生成器与新鲜度门禁。
 - **干净 clone 是底线**：`git worktree`/fresh clone + `pnpm install --frozen-lockfile` +
   `source dev/env.sh && pnpm verify && pnpm test` 必须绿。只在作者机器上绿不算绿。
+- **移交不是复制工作树**：源码移交 = `node scripts/dist/export-handoff.mjs`（只含 tracked 源，不含运行态/凭据/run 数据/依赖）；插件移交 = `export-dist.mjs` 的 tarball；run bundle 单独按研究数据移交。`dev/` 只住源码驱动，门禁 `dev-runtime-clean` 直接看盘。
 
 ## 新文件怎么判
 

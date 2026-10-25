@@ -6,7 +6,8 @@
 
 | 件 | 职责 |
 |---|---|
-| env.sh | 双 home（DSH_HOME=runtime/harness-home）+ 裸 dsh 拦截 + pre-commit 挂载——L1/L2 脚本的前置 |
+| bootstrap.sh | 独立环境冷启动前置（幂等）：Node/pnpm/git → submodule → install → vendor 构建 → env → 凭据/端口工具；`--check` 只读 |
+| env.sh | 双 home（默认 DSH_HOME=runtime/harness-home；`DSH_DEV_HOME` 可指仓外）+ 裸 dsh 拦截 + pre-commit 挂载——L1/L2 脚本的前置 |
 | vendor-build.sh | vendor 树构建：tsc host/client + typert 产物 + client bundle + host 半补建 + 前端壳 |
 | vendor-host-bundle.config.ts | host 半补建配置（逐包 tsdown，给缺 lib/index.js 的包补产物） |
 | vendor-host-typert.config.ts | host 半补建备选配置（留档） |
@@ -19,8 +20,8 @@
 
 | 件 | 职责 |
 |---|---|
-| run-driver.mjs | **驱动入口（启动/验证/呈交一条命令）**：`up` 起通道（经 boot-run，不绕漂移门）或复用已在飞的 → 用 cdp-probe 验浏览器面 + 截图 → 打印呈交块；`probe` 对已起通道只验面；`url` 打印当前通道 URL。verdict = exit 0 可呈交 / 1 红（不得呈交）/ 2 未跑；verdict JSON + `run-driver-status.png` 落 `runtime/smoke-workspace/`。通道事实唯一来源 = `web.log` 最后一条横幅 |
-| boot-run.sh | run 通道正式启动面：自检 → 组合检查/补装 → 漂移门 → boot web 3083 → 后台仪表盘（自 source env.sh） |
+| run-driver.mjs | **驱动入口（启动/验证/呈交一条命令）**：`up` 起通道（经 boot-run，不绕漂移门）或复用已在飞的 → 用 cdp-probe 验浏览器面 + 截图 → 打印呈交块；`--bootstrap` 先跑冷启动前置，`--profile`/`DSH_RUN_STATE_DIR` 支持多实例；`probe` 只验面、`url` 打印 URL。verdict = exit 0 可呈交 / 1 红 / 2 未跑。通道事实唯一来源 = 本次 state 的 `web.log` 最后一条横幅 |
+| boot-run.sh | run 通道正式启动面：自检 → 组合检查/补装 → 漂移门 → boot web（默认 3083）→ 后台仪表盘；`DSH_RUN_PROFILE`/`DSH_RUN_PORT`/`DSH_RUN_STATE_DIR` 支持多实例（自 source env.sh） |
 | llm-socket-isolation.cjs | api.deepseek.com socket 隔离预载（NODE_OPTIONS）：LLM 流与 web_search 两类请求均每请求一次性连接、永不复用；上游边缘对长命复用连接有相位性故障（[postmortem](../notes/postmortem/2026-10-13-llm-stream-malformed-storm.md)），移除 = 摘 boot-run 一行 |
 | run-kickoff.mjs | run 会话驱动：建 lead 会话 + 发 kickoff（GUI 的 RPC 替代入口） |
 

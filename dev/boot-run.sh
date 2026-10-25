@@ -15,23 +15,30 @@ set -euo pipefail
 #    这是 boot 面护栏；L0 门禁刻意不依赖构建产物（新 clone 未构建时 verify 仍应秒级绿）。
 node "$ROOT/scripts/lib/vendor-artifacts.mjs"
 
-PROFILE=research
+PROFILE="${DSH_RUN_PROFILE:-research}"
 # 端口：缺省 3083（2026-09-28 用户指令——3081 让给别的项目；3080 = 本仓开发 GUI）；覆写：
 #   DSH_RUN_PORT=<空闲端口> bash dev/boot-run.sh
 PORT="${DSH_RUN_PORT:-3083}"
+# 实例状态根：多实例用不同 DSH_RUN_STATE_DIR（web.log/dashboard/run-pack/npm-cache 各自独立）。
+STATE_DIR="${DSH_RUN_STATE_DIR:-$ROOT/runtime/smoke-workspace}"
+mkdir -p "$STATE_DIR"
+STATE_DIR="$(cd "$STATE_DIR" && pwd)"
+
+# BSD/GNU 都可用的 in-place sed：`sed -i.bak` 两派都接受，备份随即删除。
+sed_inplace() { sed -i.bak "$1" "$2" && rm -f "$2.bak"; }
 
 # 端口自检（fail-loud + 补救）：端口已 LISTEN = 另起通道必失败，且可能打断在飞 run 的通道
 # （bundle 文件不受损，但挂起的 HITL 回合会被终局化）——先说清再让人决定。
 if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
   echo "boot-run: 端口 $PORT 已被占用：pid = $(lsof -nP -iTCP:"$PORT" -sTCP:LISTEN -t 2>/dev/null | tr '\n' ' ')" >&2
-  echo "          若是本仓在飞的 run 通道 → 别另起：用它（URL/token 见启动横幅或 runtime/smoke-workspace/web.log）" >&2
+  echo "          若是本仓在飞的 run 通道 → 别另起：用它（URL/token 见启动横幅或 $STATE_DIR/web.log）" >&2
   echo "          确要重启或换端口：先停占用者，或 DSH_RUN_PORT=<空闲端口> bash dev/boot-run.sh" >&2
   exit 1
 fi
 
 PACKDIR="$ROOT/packages/deep-research-pack"
 PROFDIR="$DSH_HOME/profiles/$PROFILE"
-RUNTMP="$ROOT/runtime/smoke-workspace/run-pack"
+RUNTMP="$STATE_DIR/run-pack"
 
 # 层版本钉住：与 pack 兼容矩阵同源（dsh-v0.2.1-rc.2 → 0.2.1-rc.2）——升 pin 只改 pack
 # package.json 的 dsh.compatibility.dshReleases，本脚本随之走（vendor 各包版本锁步发布）。
@@ -78,8 +85,8 @@ else
   [ -f "$PROFDIR/cordis.yml" ] || { echo "boot-run: profile 初始化失败（fail-loud）" >&2; exit 1; }
   # 工具态纪律：pnpm store / npm cache 钉进本仓 gitignored 区
   printf 'store-dir=%s\ncache-dir=%s\n' \
-    "$ROOT/runtime/smoke-workspace/pnpm-store" "$ROOT/runtime/smoke-workspace/npm-cache" > "$PROFDIR/.npmrc"
-  (cd "$PACKDIR" && npm pack --cache "$ROOT/runtime/smoke-workspace/npm-cache" --pack-destination "$RUNTMP" >/dev/null)
+    "$STATE_DIR/pnpm-store" "$STATE_DIR/npm-cache" > "$PROFDIR/.npmrc"
+  (cd "$PACKDIR" && npm pack --cache "$STATE_DIR/npm-cache" --pack-destination "$RUNTMP" >/dev/null)
   TGZ="$RUNTMP/$(ls "$RUNTMP")"
   dsh plugin --profile "$PROFILE" add "file:$TGZ"
   dsh plugin --profile "$PROFILE" add "$LAYER"
@@ -97,7 +104,7 @@ if [ "${MCP_PLAYWRIGHT:-1}" = "1" ]; then
   if ! grep -qF "$MCP_MARK_BEGIN" "$PROFDIR/cordis.patch.yml" 2>/dev/null; then
     # 新建 profile 的 patch 以 `[]` 闭数组占位——其后再追加条目即非法 YAML（pilot 首跑红证），
     # 先摘掉占位行再追加块。
-    sed -i '' '/^\[\]$/d' "$PROFDIR/cordis.patch.yml"
+    sed_inplace '/^\[\]$/d' "$PROFDIR/cordis.patch.yml"
     cat >> "$PROFDIR/cordis.patch.yml" <<MCPROW
 
 $MCP_MARK_BEGIN
@@ -110,14 +117,14 @@ $MCP_MARK_BEGIN
         command: npx
         args: ['-y', '@playwright/mcp@0.0.83', '--headless']
         env:
-          npm_config_cache: '$ROOT/runtime/smoke-workspace/npm-cache'
+          npm_config_cache: '$STATE_DIR/npm-cache'
         failOnStartupError: true
 $MCP_MARK_END
 MCPROW
     echo "boot-run: MCP Playwright 通道已写入 profile patch（默认挂载；拆 = MCP_PLAYWRIGHT=0 重跑本脚本）"
   fi
 elif grep -qF "$MCP_MARK_BEGIN" "$PROFDIR/cordis.patch.yml" 2>/dev/null; then
-  sed -i '' "/^${MCP_MARK_BEGIN}/,/^${MCP_MARK_END}/d" "$PROFDIR/cordis.patch.yml"
+  sed_inplace "/^${MCP_MARK_BEGIN}/,/^${MCP_MARK_END}/d" "$PROFDIR/cordis.patch.yml"
   # 摘除后若无任何非注释内容，补回 `[]` 占位（注释-only 的 patch 文件解析非数组即抛）。
   if ! grep -qvE '^[[:space:]]*(#.*)?$' "$PROFDIR/cordis.patch.yml"; then
     printf '[]\n' >> "$PROFDIR/cordis.patch.yml"
@@ -140,7 +147,7 @@ drift_check() {
   #   钩子会跑 `pnpm build`，tsdown 的横幅（`ℹ tsdown v…`）混进 stdout 把 `--json` 载荷污染，
   #   下游 `JSON.parse` 抛 SyntaxError → **漂移检测整条崩掉**（而它正是"镜像是否等于 pack 源"的
   #   唯一机械证明）。本处只要**发布清单**、不要构建，故显式跳过生命周期脚本。
-  shipped="$(cd "$PACKDIR" && npm pack --dry-run --json --ignore-scripts --cache "$ROOT/runtime/smoke-workspace/npm-cache" 2>/dev/null | node -e '
+  shipped="$(cd "$PACKDIR" && npm pack --dry-run --json --ignore-scripts --cache "$STATE_DIR/npm-cache" 2>/dev/null | node -e '
     let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => {
       const j = JSON.parse(s);
       for (const f of j[0]?.files ?? []) console.log(f.path);
@@ -170,7 +177,7 @@ drift_check
 # ③ 仪表盘（RFC m2-run-dashboard + debug-dashboard-plus）：--latest 多场扫描
 # （research-workspace/drt_* + runtime/harness-home/runs ad-hoc 场）、流程步骤条、
 # HITL 等待横幅（⏳ 等你拍板）、web GUI deep-link（token 读自下方 tee 的 web.log）。
-DASH_OUT="$ROOT/runtime/smoke-workspace/dashboard.html"
+DASH_OUT="$STATE_DIR/dashboard.html"
 mkdir -p "$(dirname "$DASH_OUT")"
 node --import tsx/esm "$ROOT/scripts/run-ops/run-dashboard.mjs" --latest \
   --out "$DASH_OUT" --watch --interval 5 &
@@ -192,7 +199,7 @@ cat <<'STEPS'
 4. 静默自主区（角色不问不报）：进度两层看——
    在场主面 = Web 里的研究驾驶舱「研究状态」页签（流程轨道/活动流/活标题/HITL 挂起横幅），
    辅以 ② 各角色会话实时流 ③ ui-agent-team 任务板 ④ deliverables 面板（成品出现处）；
-   离机投影 = run 仪表盘（runtime/smoke-workspace/dashboard.html：多 run 场清单/流程步骤条/
+   离机投影 = run 仪表盘（本次 STATE_DIR 的 dashboard.html：多 run 场清单/流程步骤条/
    HITL 等待横幅/矩阵/leads/findings/review/journal，5s 刷新——只读 fail-soft，不是交付判据）
 5. 仪表盘出现"⏳ 等你拍板（HITL）"横幅 = lead 在等你（HITL1/HITL2）——去 web GUI 答题
 6. HITL2 审阅（证据充分性 + 交付/补研究推荐）→ 拍板 → final/ 版本化交付 + present 声明
@@ -201,7 +208,7 @@ cat <<'STEPS'
 ───────────────────────────────────────────────────────────────────
 STEPS
 
-echo "boot-run: boot web（research profile，端口 ${PORT}；Ctrl-C 停止）…"
+echo "boot-run: boot web（profile=${PROFILE}，端口 ${PORT}；Ctrl-C 停止）…"
 # LLM 流 socket 隔离（用户指令 2026-10-13：LLM 流式请求走一次性连接不复用——上游边缘对
 # 长命复用连接有相位性故障，postmortem 2026-10-13；移除 = 删本行）
 ISOLATION_GUARD="$ROOT/dev/llm-socket-isolation.cjs"
@@ -214,4 +221,4 @@ fi
 export NODE_OPTIONS="--require $ISOLATION_GUARD${NODE_OPTIONS:+ $NODE_OPTIONS}"
 export DSH_ISOLATION_ANNOUNCE=1
 # web 输出 tee 进运行区日志：仪表盘 deep-link 从这里抓 token URL（缺席 → 页面不链，fail-soft）
-dsh --profile "$PROFILE" -- --port "$PORT" --no-open 2>&1 | tee "$ROOT/runtime/smoke-workspace/web.log"
+dsh --profile "$PROFILE" -- --port "$PORT" --no-open 2>&1 | tee "$STATE_DIR/web.log"

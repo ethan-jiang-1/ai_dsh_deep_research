@@ -5,7 +5,7 @@ opened: 2026-10-25
 
 # 推敲：运行态数据边界与移交
 
-> 立卡：2026-10-25 ｜ 状态：推敲中 ｜ 类型：Feature ｜ 结论倾向：未定 ｜ 可关闭：否
+> 立卡：2026-10-25 ｜ 状态：推敲中 ｜ 类型：Feature ｜ 结论倾向：现在做——A 基础已落地；路径/移交证据待收尾 ｜ 可关闭：否
 
 **问题与期望结果：** 插件的智能体定义（P）已经和 DSH 状态（H）、研究产物（W）在概念上分开；但物理边界仍靠 `.gitignore` 与路径约定，运行态可以落在源码树里，目录一旦被 `cp -r`/压缩/交给别人，凭据、会话与 run 数据会一起走。期望把“包只读、状态按人/实例、产物按研究”变成可检查的边界，并给出一条干净的移交路径。
 
@@ -18,7 +18,16 @@ opened: 2026-10-25
 
 **未决问题：** 数据根是否要移出源码树，还是保留仓内默认但提供 `DSH_HOME`/workspace 显式参数；`dev/harness-home` 是删除、迁走还是保留为历史；“移交”的产物是什么（tarball + 种子 + run bundle）；run bundle 的绝对路径是归一化、脱敏还是只在移交时重写；多实例的最小支持面是什么。
 
-**下一步：** 等 [运行形态合同](2026-10-25-run-form-contract.md) 定 Q2（给不同人使用的范围）后选择 A/B/C。当前先把“`--force` 覆盖方法库”与 `dev/harness-home` 误落位作为确定缺陷处理；数据根与移交产物写成候选验收。若选择 A，优先做“可配置数据根 + 干净 handoff”，不强行搬迁现有开发数据。
+**下一步：** 按 A 落地：可配置数据根 + 干净 handoff 已进树；继续补 bundle 路径规则与一次真实多实例/移交证据。B（全部运行态移出源码树）不采用；C（只写文档）不采用。
+
+## 实施进度（2026-10-25）
+
+- `dev/harness-home/drt_civil-gpu-flash-llm` 已迁入 `research-workspace/_abandoned/`（保留全部文件；原因/复活条件记本地 `_abandoned/README.md`），`dev/harness-home` 已删除。
+- 新门禁 `dev-runtime-clean` 直接看盘：`dev/` 下不得出现 `harness-home`/`drt_*`/`sessions`/`.credentials.yaml`；gates-smoke 注入案例 `dev-runtime-clean-stray`。
+- `dev/env.sh` 支持 `DSH_DEV_HOME`（隔离根可在仓外）；`dev/boot-run.sh` 支持 `DSH_RUN_PROFILE`、`DSH_RUN_STATE_DIR`（web.log/dashboard/run-pack/npm-cache 独立），`sed -i.bak` 兼容 BSD/GNU；`dev/run-driver.mjs` 支持 `--profile` 与 `DSH_RUN_STATE_DIR`。
+- 新增 `scripts/dist/export-handoff.mjs`：`git archive HEAD` 只打 tracked 源，产物断言无运行态/凭据/run 数据/依赖/导出包；实测 1102 条目、2.4 MiB，含 `.gitmodules` 与 `seed.json`。
+- 证据：`pnpm verify`/`pnpm test`/gates-smoke/export-handoff 实跑；run bundle 绝对路径尚未做归一化/移交工具。
+- 未落地：run bundle 路径规则（新产出/移交归一化）；真实多实例通道并行验证；移交包的 submodule/凭据后续步骤写进文档。
 
 ## 范围与依赖
 
@@ -49,7 +58,7 @@ opened: 2026-10-25
 
 推荐 A：它把“包/状态/产物”的边界做成可执行参数与移交脚本，而不是要求所有人改变日常路径。B 只有在用户明确要求“源码树绝不允许运行态”时再评估；当前证据不足以承担迁移成本。无论 A/B，`dev/harness-home` 的误落位与 `--force` 覆盖方法库都应先修。
 
-## 候选验收标准
+## 验收标准
 
 翻「现在做」时，至少覆盖：
 

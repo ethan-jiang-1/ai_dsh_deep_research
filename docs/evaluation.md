@@ -73,6 +73,7 @@
 | `release-version` | 发布版本单一源：root/pack `package.json` 都是三段 semver 且相等（tag 一致性由 `release-check` 在发布前查） | [发布规则](./guides/64-release-versioning.md)；反证 = gates-smoke 改 pack 版本为 9.9.9 红 |
 | `dist-manual-version` | dist 导出合同：`_dist/安装手册.md` 在库且表头版本 = pack 版本、指名 `dsh-deep-research-pack-<version>.tgz` | [dist-export Note](../notes/implemented/2026-09-28-dist-export.md) |
 | `workspace-versioning` | 工作区版本控制边界：`research-workspace/.gitignore.example` 与 `drafts/.gitignore` 在库、正本与 pack 种子逐字节相等、拒收行逐项在场；**出现裸 `*` 整目录拒收即红** | 反证 = `gates-smoke` 注入案例（删 `drt_*/` 行 / 加裸 `*` / 删 drafts 白名单）；形态依据 = [工作区版本控制边界 Note](../notes/implemented/2026-10-13-workspace-versioning-boundary.md) |
+| `dev-runtime-clean` | `dev/` 只住源码驱动：盘上无 `harness-home` / `drt_*` / `sessions` / `.credentials.yaml`；运行态必须住 `runtime/` 或研究工作区 | 反证 = `gates-smoke` 注入案例（在 `dev/harness-home` 造 `drt_probe`）；规则依据 = [guides/63](guides/63-git-boundary.md) 的跨环境与运行态边界 |
 | `cockpit-doc-registry` | 驾驶舱 src/client 与 src/lib 每个模块的路径必须出现在[构成正本](design/40-research-cockpit.md)里（同名模块不互相遮盖） | 反证 = gates-smoke 注入案例（嵌套/同名模块/空格路径/符号链接/忽略目录）；规则来源 = [③驾驶舱卡 ③-b 行](../_backlog/_archived/settled_issues/2026-10-11-executive-research-ux-delivery.md) |
 | `run-context-single-source` | `src/client` 的 tracked `.ts/.tsx`（注释除外）不得出现 `_abandoned` 三位置候选链——发现实现唯一正本 = `src/lib/run-context.ts`；`src/lib/final-target.ts` 的终稿地址校验是另一件事，不在本词法门禁范围 | 反证 = gates-smoke 注入案例（客户端文件追加候选链 → 点名红）；规则来源 = [run-context Note](../notes/implemented/2026-10-23-run-context.md) |
 
@@ -91,6 +92,7 @@
 
 - **定义**：插件以用户实际获得的方式可用——`npm pack` 产物完整，装进**干净 profile** 成功，起会话可用；client 半（观察面）在安装形状里在场。
 - **最小真检查**：`release-smoke`：`npm pack` → 在选定 `DSH_HOME` 重建测试 profile → `dsh plugin add` → scaffold/preflight（`--install-only`，跳过模型就绪检查）→ 安装域会话断言；无模型调用。独立默认 preflight 仍检查凭据在场。进程卫生全程有界：run() 超时预算（install 180s / 默认 120s / preset-smoke 外层 300s——company 实证值）+ mkdir 原子并发锁 + 子进程组退出确认回收。
+- **冷启动补充**：`cold-start-smoke` 用独立 `DSH_DEV_HOME` + 独立 profile/端口/state，从 tarball 安装并经 `run-driver up --bootstrap` 到浏览器面 GREEN；证明不依赖仓内既有 home/profile。MCP 关闭，团队层需 registry 或缓存。
 - **通过判据**：pack 清单与 `files` 声明一致、安装零缺失警告、干净 profile 会话能列出研究角色；安装副本带 `lib/client.js`、manifest peers-only（`dependencies` 缺席）、boot 页模块表含本包 client 行（preset-smoke 真会话档断言，安装域经 release-smoke ⑤ 委托覆盖）、端口用后无监听残留。
 - **何时跑**：包结构/release 相关改动时；框架里程碑必跑。
 

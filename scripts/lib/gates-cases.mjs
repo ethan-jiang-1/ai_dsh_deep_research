@@ -592,6 +592,12 @@ export const CASES = [
   { id: 'workspace-versioning-drafts-whitelist-missing', gate: 'workspace-versioning', mutate: (dir) => {
     rmSync(join(dir, 'research-workspace', 'drafts', '.gitignore'));
   } },
+  // dev/ 运行态回流（dev-runtime-clean）：在源码驱动目录造一个误落位 run bundle——
+  // .gitignore 能挡 git，挡不住 cp -r/打包；门禁直接看盘。
+  { id: 'dev-runtime-clean-stray', gate: 'dev-runtime-clean', mutate: (dir) => {
+    mkdirSync(join(dir, 'dev', 'harness-home', 'drt_probe'), { recursive: true });
+    writeFileSync(join(dir, 'dev', 'harness-home', 'drt_probe', 'final.md'), '# probe\n');
+  } },
   // 客户端三位置候选链（run-context-single-source）：页签重新手拼 archive/_abandoned
   // 发现规则 → 门禁点名红。正解 = openRun / bundleCandidates。
   { id: 'run-context-single-source-client-chain', gate: 'run-context-single-source', mutate: (dir) => {
