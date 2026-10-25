@@ -96,7 +96,10 @@ README 与 AGENTS 零矛盾、60 §5 与 AGENTS §密钥零矛盾、模板对应
 - check-ignore 全套：真实敏感/残留路径 13/13 被接住（凭据/会话日志/profiles/
   node_modules/tgz 双位置/runs 内容/.env*/.pem/.key/.log/.envrc）；
 - tracked 清单 60 文件零敏感物；dev/ 与 runs/ 下只有资产 + .gitkeep；
-- 历史：唯一一次事故 = tarball 误提交（166d94e 进、efcf56d 出），凭据从未进过库；
+- 历史：截至本审计唯一一次事故 = tarball 误提交（166d94e 进、efcf56d 出），凭据从未进过库；
+  2026-10-25 追补：另有 `tests/.tmp-evidence-audit` 误提交（fdc1421 进、c488959 出），两次均非
+  敏感、均已从 HEAD 移除；完整审计与“保留历史、不改写”的决定 =
+  [开源发布面 Note](2026-10-25-open-source-launch.md)。
 - 盘上零"未跟踪且未忽略"残留。
 
 **发现的洞与修正**：

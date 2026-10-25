@@ -38,6 +38,9 @@ runtime/smoke-workspace/*
 # 运行时临时区（codex harness 教训：临时区随 run 走，不是版本控制对象）
 _tmp/
 _cache/
+# 测试/探针临时目录（历史事故形态 = tests/.tmp-evidence-audit 曾被误提交；
+# verify secrets-untracked 对已 tracked 的同形态文件另有一道断言）
+.tmp*/
 # dist 导出目的地（ai_dsh_architect 同款导出合同）：tarball 是导出产物不进库；安装手册是
 # 唯一 tracked 例外——tracked 生成物（生成器 = scripts/dist/export-dist.mjs；verify 门禁
 # dist-manual-version 钉它与 pack 版本一致，版本动 → 同 diff 重导出）

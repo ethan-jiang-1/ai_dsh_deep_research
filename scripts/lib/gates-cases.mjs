@@ -328,6 +328,18 @@ export const CASES = [
     appendFileSync(join(dir, '.gitignore'), '\n!probe-leak.log\n');
     writeFileSync(join(dir, 'probe-leak.log'), 'probe\n');
   } },
+  { id: 'secrets-untracked-tmp-dir-leak', gate: 'secrets-untracked', mutate: (dir) => {
+    // 历史事故形态：tests/.tmp-evidence-audit 曾被 git add -A 收进 index。先解除新加的 .tmp*/ 忽略。
+    mkdirSync(join(dir, 'tests', '.tmp-probe'), { recursive: true });
+    appendFileSync(join(dir, '.gitignore'), '\n!tests/.tmp-probe/\n!tests/.tmp-probe/probe.txt\n');
+    writeFileSync(join(dir, 'tests', '.tmp-probe', 'probe.txt'), 'probe\n');
+  } },
+  { id: 'secrets-untracked-pack-lib-leak', gate: 'secrets-untracked', mutate: (dir) => {
+    // 构建中间产物强制入库（git add -f 的等价注入）：先解除 packages/deep-research-pack/lib/ 忽略。
+    mkdirSync(join(dir, 'packages', 'deep-research-pack', 'lib'), { recursive: true });
+    appendFileSync(join(dir, '.gitignore'), '\n!packages/deep-research-pack/lib/\n!packages/deep-research-pack/lib/probe.js\n');
+    writeFileSync(join(dir, 'packages', 'deep-research-pack', 'lib', 'probe.js'), 'module.exports = {}\n');
+  } },
   // 自咬防护：端口号从被撞文件现取（本文件处于 port-exclusive 扫描面，且不得写 'port = 数字' 形态）
   { id: 'port-exclusive-double-claim', gate: 'port-exclusive', mutate: (dir) => {
     const src = readFileSync(join(dir, 'scripts', 'smoke', 'l4-lite-smoke.mjs'), 'utf8');

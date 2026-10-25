@@ -1562,6 +1562,9 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
       || /\.key$/i.test(f)
       || /(^|\/)node_modules\//.test(f)
       || /(^|\/)\.pnpm-store\//.test(f)
+      || /(^|\/)\.tmp[^/]*\//.test(f)
+      || /(^|\/)_tmp\//.test(f)
+      || /^packages\/deep-research-pack\/lib\//.test(f)
       || /\.tgz$/.test(f)
       || /\.log$/i.test(f)
       || /\.DS_Store$/.test(f));
