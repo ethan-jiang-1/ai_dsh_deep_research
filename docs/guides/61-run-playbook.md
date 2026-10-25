@@ -166,7 +166,7 @@ BUG-020）。
   伪造/断链，先让 lead 修证据再回来；review 的 readiness 若为**附条件 PASS**，node-gate
   门A 会带 ⚠ 注记显性化——拍板时先核条件（裁决归你，机械门不替你拦）；
 - **拍板后操作侧跑一次验收（原子动作）**：`source dev/env.sh && node scripts/run-ops/run-accept.mjs
-  research-workspace/drt_<slug>`——node-gate + evidence-audit + 未来日期 sanity 三件同次跑；预检红不写，绿写
+  research-workspace/drt_<slug>`——node-gate + evidence-audit + path-hygiene（本机 home 路径）+ 未来日期 sanity 同次跑；预检红不写，绿写
   `delivered.json` + `manifest.json` + `acceptance.md`（新 run 非 quick_factual 的 reader 角色/哈希一并绑定）；复核后加 `--archive` 才移入 `archive/drt_<slug>/`。门 A/C、审计或日期红时不要手工归档。
 - **拍板前先读读者版**：review 终局 PASS 后、HITL2 前，Lead 已按 `reader-final` skill 写
   `final/readable.md`；「终稿」页签默认显示读者版，`看审计版` 可切回 `final/vN`（未交付时

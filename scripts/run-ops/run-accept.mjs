@@ -49,6 +49,7 @@ if (!/^drt_[a-z0-9][a-z0-9-]*$/.test(slug)) {
 }
 const wsRoot = dirname(bundle)
 const sessions = opt('--sessions', join(home, 'sessions'))
+const legacy = !shouldWriteReceipts(bundle)
 
 const run = (label, script, args) => {
   const r = spawnSync(process.execPath, [join(ROOT, script), ...args], { cwd: ROOT, encoding: 'utf8', timeout: 300_000 })
@@ -70,6 +71,8 @@ const readLog = (p) => {
 // 预检：门禁/审计都 --no-write；红跑不写 bundle（observation 只读）。
 const preGate = run('node-gate 预检（--no-write）', 'scripts/run-gates/node-gate.mjs', [bundle, '--sessions', sessions, '--no-write'])
 const preAudit = run('evidence-audit 预检（--no-write）', 'scripts/run-gates/evidence-audit.mjs', [bundle, '--sessions', sessions, '--no-write'])
+// 交付门：新 bundle 的本机 home 路径必须为零；旧契约 bundle 按 D28 epoch 豁免只报告。
+const preHygiene = run('path-hygiene 预检（交付门）', 'scripts/run-gates/path-hygiene.mjs', [bundle, ...(legacy ? ['--allow-legacy'] : [])])
 const dates = futureDateFindings(bundle)
 const datesOk = dates.length === 0
 if (!datesOk) {
@@ -79,7 +82,7 @@ if (!datesOk) {
 } else {
   console.log('  PASS 日期 sanity（evidence retrieved_at + journal/question 行首日期）')
 }
-const preGreen = preGate.status === 0 && preAudit.status === 0 && datesOk
+const preGreen = preGate.status === 0 && preAudit.status === 0 && preHygiene.status === 0 && datesOk
 if (!preGreen) {
   console.error(`run-accept: RED（${slug}）——预检未过；未写 acceptance.md/audit.md/node-gate.md/delivered.json，未归档。先修红项再跑同一条`)
   process.exit(1)
@@ -101,7 +104,6 @@ const stamp = new Date().toISOString()
 // 回执的语料根写可复算标签（$DSH_HOME 相对形式），绝对路径只留控制台——回执不得自带换机即断的路径，
 // 也不得踩 D28 卫生门（acceptance.md 是 ops 生成物，但内容仍要干净）。
 const corpusRoot = corpusRootLabel(sessions, { home })
-const legacy = !shouldWriteReceipts(bundle)
 const finalDir = join(bundle, 'final')
 const versions = existsSync(finalDir)
   ? readdirSync(finalDir).filter((f) => /^v\d+\.md$/.test(f)).map((f) => Number(/^v(\d+)/.exec(f)[1])).sort((a, b) => a - b)
