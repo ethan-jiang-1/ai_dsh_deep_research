@@ -74,7 +74,7 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 | `DSH_RUN_STATE_DIR` | `runtime/smoke-workspace` | web.log/仪表盘/run-pack/npm-cache 的实例状态根 |
 | `DSH_RUN_WORKSPACE` | `research-workspace` | 研究会话 cwd（角色手册从这里注入；多实例请各自指定） |
 
-不同 `DSH_RUN_STATE_DIR` 的实例允许并行；默认 state 的重复启动检查仍生效，自定义 state 由端口检查兜底（两个实例请用不同端口）。冷启动证据 =
+不同 `DSH_RUN_STATE_DIR` 的实例允许并行；默认 state 的重复启动检查仍生效，自定义 state 由端口检查兜底（两个实例请用不同端口）。**同一 workspace 不支持两个实例共用**：插件没有对 run/method 文件加跨进程锁，写会交叉；多实例必须各自指定 `DSH_RUN_WORKSPACE`。冷启动证据 =
 `node scripts/smoke/cold-start-smoke.mjs`（独立 home/profile/端口/state，MCP 关闭，浏览器面 GREEN）。
 
 ## 5. 移交

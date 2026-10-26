@@ -8,7 +8,7 @@
 // 用法：node scripts/smoke/upgrade-smoke.mjs
 // 退出码：0 全绿 / 断言红 / 2 前置缺席（未跑 ≠ 通过）
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, lstatSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { sha256 } from '../../packages/deep-research-pack/scripts/lib/seed-core.mjs'
@@ -49,6 +49,11 @@ try {
   check(spawnSync(process.execPath, [P, '--seed-only', '--workspace', WS], { encoding: 'utf8', env: scrubbedEnv({ DSH_HOME: HOME }) }).status === 0, '当前版本铺工作区')
   writeFileSync(join(WS, 'AGENTS.md'), '# user AGENTS upgrade\n')
   writeFileSync(join(WS, 'method-library.md'), '# user library upgrade\n')
+  mkdirSync(join(WS, 'drt_keep'), { recursive: true })
+  writeFileSync(join(WS, 'drt_keep', 'keep.md'), '# run bundle keep\n')
+  const keepSession = join(HOME, 'sessions', '--user--', 'session-keep', 'session.v4.jsonl')
+  mkdirSync(join(HOME, 'sessions', '--user--', 'session-keep'), { recursive: true })
+  writeFileSync(keepSession, '{"type":"session/header","cwd":"/tmp/user"}\n')
 
   // 生成模拟下一版：复制 pack → bump version → 改 NODES → 更新 seed
   // 从**安装副本**复制下一版，验证 tarball 形状而不是源码工作树
@@ -82,6 +87,8 @@ try {
   check(readFileSync(join(WS, 'NODES.md'), 'utf8').includes(`upgrade-smoke ${NEXT_VERSION}`), '新种子 NODES 已升级')
   check(readFileSync(join(WS, 'AGENTS.md'), 'utf8') === '# user AGENTS upgrade\n' && existsSync(join(WS, 'AGENTS.md.seed-new')), '用户 AGENTS 保留 + sidecar')
   check(readFileSync(join(WS, 'method-library.md'), 'utf8') === '# user library upgrade\n', '方法库保留')
+  check(readFileSync(join(WS, 'drt_keep', 'keep.md'), 'utf8') === '# run bundle keep\n', '升级不触碰已有 run bundle')
+  check(readFileSync(keepSession, 'utf8').includes('session/header'), '升级不触碰 home session')
   check(readJson(join(WS, '.dsh-research-seed.json')).version === NEXT_VERSION, '种子状态升到下一版')
 
   check(dsh(['plugin', '--profile', PROFILE, 'add', `file:${CURRENT}`]).status === 0, '回滚安装当前版本')

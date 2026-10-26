@@ -175,6 +175,9 @@ try {
     && readFileSync(join(WS, 'method-library.md'), 'utf8') === '# data-smoke user library\n',
     '卸载后 workspace 用户文件保留')
   check(sessionDir !== null && existsSync(sessionDir), '卸载后 session 日志保留')
+  check(dsh(['plugin', '--profile', PROFILE, 'add', `file:${TARBALL}`]).status === 0, '卸载后重装 pack')
+  check(sessionDir !== null && existsSync(sessionDir), '重装后 session 日志仍保留')
+  check(dsh(['plugin', '--profile', PROFILE, 'remove', 'dsh-deep-research-pack']).status === 0, '重装后再次卸载')
 } catch (error) {
   check(false, 'smoke 未抛异常', String(error))
 } finally {

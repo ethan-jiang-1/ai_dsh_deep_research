@@ -43,6 +43,11 @@ try {
   check(!(manifest('matrix-a')?.dsh?.profile?.bundles ?? []).includes('dsh-deep-research-pack'), 'matrix-a 卸载后无本包')
   check((manifest('matrix-b')?.dsh?.profile?.bundles ?? []).includes('dsh-deep-research-pack')
     && existsSync(installed('matrix-b')), 'matrix-b 不受 matrix-a 卸载影响')
+  const wsB = join(TEMP, 'ws-b')
+  const scaffoldB = join(installed('matrix-b'), 'scripts', 'scaffold.mjs')
+  check(spawnSync(process.execPath, [scaffoldB, '--seed-only', '--workspace', wsB], { encoding: 'utf8', env: scrubbedEnv({ DSH_HOME: HOME }) }).status === 0, 'matrix-b 独立工作区铺种')
+  writeFileSync(join(wsB, 'method-library.md'), '# B library\n')
+  check(readFileSync(join(wsB, 'method-library.md'), 'utf8') === '# B library\n', '同 home 两 profile 的 workspace 数据互不影响')
 
   // 损坏 tarball：在第三个干净 profile 上安装，pnpm 必须失败且不出现半装本包
   check(dsh(['--profile', 'matrix-c', '--from-default-profile', 'web', '--dump-config']).status === 0, 'matrix-c 初始化')
