@@ -15,7 +15,7 @@
 | **M3 移交形态** | 交给另一人或另一台机器 | `scripts/dist/export-handoff.mjs`（源码）或 `export-dist.mjs`（插件） | 不是复制工作树；运行态/凭据/run 数据不随包 |
 
 **决定：A 为主，B 作为可安装门槛，C 不做。** A = 独立 `DSH_HOME` + profile + workspace；B = pack 目录在
-`pnpm build` 后可 `dsh plugin add file:<目录>`（profile 记录绝对路径，移动目录会断链）；C = `cp -r` 整个工作树，
+`pnpm build` 后可 `dsh plugin add file:<目录>`（安装时复制进 profile；移动源目录后旧路径不能重装/升级，需 remove 后从新路径 add；`link:` 才是移动即断链）；C = `cp -r` 整个工作树，
 会带走凭据/会话/run 数据，不提供。移交改用 M3。
 
 ## 2. 三块存储
@@ -93,18 +93,19 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 - `export-handoff` 自检：只含 tracked 源，不含运行态/凭据/run 数据/依赖；
 - `dev-runtime-clean` 门禁：`dev/` 下无运行态。
 - `compat-smoke`：全局 rc.3 宿主上的 install / dump / scaffold / remove（本机无 rc.3 时 exit 2）。
-- `data-smoke`：包目录零写入 / 假 token 不泄漏 / 卸载后 workspace 用户文件保留；双会话/storage 标 N/A。
+- `data-smoke`：包目录零写入 / 假 token 不泄漏 / 卸载后 workspace 用户文件 + session 日志保留；双会话/storage 标 N/A。
 - `pack-smoke`：T0 tarball 形状、exports 可解析、无安装期脚本/凭据。
 - `workspace-isolation-smoke`：两套 home/profile/port/state/workspace，会话组绑定各自 W；只证接线/绑定，不证模型沙箱。
+- `scaffold-smoke`：种子 symlink/目录目标、锁、atomic state、orphan、哈希篡改与回滚保护。
 - `upgrade-smoke`：安装当前版 → 模拟下一版 → 种子升级 → 回滚拒绝降级 → 卸载（profile + W 双面）。
-- `profile-matrix-smoke`：多 profile 独立安装/卸载、损坏 tarball 拒绝、卸载重装后 workspace 数据保留。
+- `profile-matrix-smoke`：多 profile 独立安装/卸载、损坏 tarball 无半装、用户 overlay 不改写、卸载重装后 workspace 数据保留。
 
 ## 7. 已知限制与延后工作
 
 - 不把“多人共享一个 checkout / 一个 `DSH_HOME`”作为支持面；协作单位 = 包版本 + 工作区/run bundle 移交。
 - 不承诺 Windows；当前实测 macOS，Linux 走 bash/Node 标准路径但未在同轮跑。`sed` 使用 BSD/GNU 兼容形态。
 - 离线不是零前置：tarball 不需要 registry，但团队层需预装/缓存（含 pnpm registry metadata；只装 node_modules 不够）、Playwright MCP 首次需 npx、模型 API 需网络。
-- 包目录安装的 profile 依赖是绝对路径；正式分发用 tarball/npm。
+- 包目录安装的 profile 依赖记录绝对路径，但安装副本已复制；移动源目录后旧路径不能重装/升级（需 remove 后从新路径 add），`link:` 移动即断链；正式分发用 tarball/npm。
 - 研究方法论本身不在本页：角色/preset/skill 见 [guides/62](62-plugin-authoring.md) 与 pack 内容；run 操作见 [guides/61](61-run-playbook.md)。
 
 > 决定理由、输掉的方案与实际证据 = [运行形态合同 Note](../../notes/implemented/2026-10-25-run-form-contract.md)。

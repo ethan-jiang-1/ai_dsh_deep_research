@@ -8,7 +8,7 @@
 // 用法：node scripts/smoke/scaffold-smoke.mjs
 // 退出码：0 全绿 / 断言红 / 2 前置缺席（未跑 ≠ 通过）
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, lstatSync, mkdirSync, readFileSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { sha256 } from '../../packages/deep-research-pack/scripts/lib/seed-core.mjs'
@@ -46,6 +46,20 @@ try {
   writeFileSync(join(BAD, 'workspace', 'NODES.md'), `${read(join(BAD, 'workspace', 'NODES.md'))}\n<!-- tampered -->\n`)
   const badRun = spawnSync(process.execPath, [join(BAD, 'scripts', 'scaffold.mjs'), '--seed-only', '--workspace', join(TEMP, 'ws-bad')], { encoding: 'utf8' })
   check(badRun.status === 2 && /哈希不匹配/.test(badRun.stderr), '种子哈希不匹配时拒绝铺种', (badRun.stderr || '').slice(-300))
+
+  // 种子改名：旧名 orphan + 新名 missing 同时可见，不自动删旧文件
+  const RENAME = join(TEMP, 'pack-rename')
+  cpSync(PACKCOPY, RENAME, { recursive: true })
+  renameSync(join(RENAME, 'workspace', 'NODES.md'), join(RENAME, 'workspace', 'NOTES.md'))
+  const rnSeed = JSON.parse(read(join(RENAME, 'workspace', 'seed.json')))
+  rnSeed.version = '9.9.9'
+  delete rnSeed.files['NODES.md']
+  rnSeed.files['NOTES.md'] = sha256(read(join(RENAME, 'workspace', 'NOTES.md')))
+  writeFileSync(join(RENAME, 'workspace', 'seed.json'), `${JSON.stringify(rnSeed, null, 2)}\n`)
+  const rnWs = join(TEMP, 'ws-rename')
+  check(run(['--workspace', rnWs]).status === 0, '改名场景：旧版工作区铺种')
+  const rnCheck = spawnSync(process.execPath, [join(RENAME, 'scripts', 'scaffold.mjs'), '--check', '--workspace', rnWs], { encoding: 'utf8' })
+  check(rnCheck.status === 1 && /NODES\.md — orphan/.test(rnCheck.stdout) && /NOTES\.md — missing/.test(rnCheck.stdout), 'seed 改名同时报 orphan + missing', rnCheck.stdout.split('\n').slice(-4).join(' | '))
 
   // ① 首次铺种 + 状态文件
   const ws = join(TEMP, 'ws')
@@ -142,6 +156,20 @@ try {
   rmSync(join(ws6, 'AGENTS.md'))
   mkdirSync(join(ws6, 'AGENTS.md'))
   check(run(['--force', '--workspace', ws6]).status === 2 && lstatSync(join(ws6, 'AGENTS.md')).isDirectory(), '种子目标是目录时拒绝写入')
+
+  // ③g 工作区锁：活跃 pid 拒绝；陈旧 pid 接管；成功后锁与 state 临时件都不残留
+  const ws7 = join(TEMP, 'ws7')
+  check(run(['--workspace', ws7]).status === 0, '第七工作区铺种')
+  const lock = join(ws7, '.dsh-research-scaffold.lock')
+  writeFileSync(lock, String(process.pid))
+  const locked = run(['--seed-only', '--workspace', ws7])
+  check(locked.status === 2 && /锁定/.test(locked.stderr), '活跃锁拒绝并发 scaffold', (locked.stderr || '').slice(-200))
+  check(existsSync(lock), '拒绝后不误删他人锁')
+  unlinkSync(lock)
+  writeFileSync(lock, '9999999')
+  const stale = run(['--seed-only', '--workspace', ws7])
+  check(stale.status === 0 && !existsSync(lock), '陈旧锁被接管并释放')
+  check(readdirSync(ws7).every((n) => !n.startsWith('.dsh-research-seed.json.tmp-')), 'state 原子写无临时件残留')
 
   // ④ --check 区分 deleted：用户删掉的种子不被 --upgrade 静默重铺，--force 才恢复
   const deletedRel = 'templates/run/topics.md'

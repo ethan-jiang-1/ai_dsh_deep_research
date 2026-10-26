@@ -75,7 +75,7 @@ cd ~/research-workspace && dsh --profile research
 宿主版本必须满足包内 `engines.dsh`，否则安装/启动被拒。
 
 **目录安装（开发/离线）**：`pnpm build` 后可直接 `dsh plugin --profile research add file:/abs/path/to/packages/deep-research-pack`；
-profile 记录的是绝对目录依赖，移动/删除该目录会让 profile 断链，正式分发仍用 tarball/npm。
+安装时会把目录内容复制进 profile：移动源目录后已装副本仍可运行，但 profile 记录的旧绝对路径无法再重装/升级；先 `plugin remove` 再从新路径 `add`。`link:` 才是直接链接、移动即断链。正式分发仍用 tarball/npm。
 
 **离线**：tarball 本身不需要 registry；团队层需预装/缓存，且 pnpm 的 registry metadata 缓存要保留——只预装 `node_modules` 不够（冷 store 实测 `ERR_PNPM_NO_OFFLINE_META`）；Playwright MCP 首次需 npx（或 `MCP_PLAYWRIGHT=0`），模型 API 需网络。完整矩阵见 [安装手册](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_dist/安装手册.md)。
 

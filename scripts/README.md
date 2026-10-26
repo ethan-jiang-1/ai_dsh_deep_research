@@ -20,9 +20,9 @@
 | scaffold-smoke.mjs | scaffold CLI 行为：首次铺种 / `--force` 保方法库 / `--check` deleted / `--upgrade` 只升级未改文件 + `.seed-new` | keyless（临时 pack 副本 + 临时工作区；无 dsh/模型/网络） |
 | handoff-smoke.mjs | `export-handoff` 产物边界：必备源在场、无运行态/凭据/run 数据/依赖/导出包 | keyless（git archive HEAD；临时 out） |
 | compat-smoke.mjs | T6 rc.3 安装面：全局 rc.3 在干净 home 做 install → dump-config → scaffold/preflight → remove | 需全局 dsh rc.3；缺失 exit 2（未跑 ≠ 通过） |
-| data-smoke.mjs | T5 数据面切片：包目录零写入、假 token 不泄漏、卸载后 workspace 用户文件保留 | keyless（真 web 启动、无模型调用；tarball 需先 export-dist） |
+| data-smoke.mjs | T5 数据面切片：包目录零写入、假 token 不泄漏、卸载后 workspace 用户文件 + session 日志保留 | keyless（真 web 启动、无模型调用；tarball 需先 export-dist） |
 | pack-smoke.mjs | T0 tarball 形状：入口/patch/preset/种子在场、exports 可解析、无安装脚本/凭据 | keyless（`npm pack --dry-run --json`；需 lib 已构建） |
-| profile-matrix-smoke.mjs | 多 profile 并存/独立卸载、损坏 tarball 拒绝、卸载重装后 workspace 数据保留 | keyless（全局 dsh + 本地 tarball） |
+| profile-matrix-smoke.mjs | 多 profile 并存/独立卸载、损坏 tarball 无半装、用户 overlay 不改写、directory file: 移动/重装、卸载重装后 workspace 数据保留 | keyless（全局 dsh + 本地 tarball） |
 | upgrade-smoke.mjs | 安装 → 模拟下一版覆盖安装 → 种子升级 → 回滚拒绝降级 → 卸载；profile + 工作区双面 | keyless（全局 dsh + npm pack；不调模型） |
 | workspace-isolation-smoke.mjs | B4 双实例：两套 home/profile/port/state/workspace 各起通道、各建会话；会话组绑定自己的 W、home/session 互斥、marker 互不可见 | keyless（真 web，不调模型；更慢，约两套 cold start） |
 | client-load-smoke.mjs | 观察面真浏览器装配、页签与渐进面对账（磁盘参考选择 = client-load-reference.mjs；「研究配置」摘要相位 + 主界面「方法库」tab = client-load-config.mjs 与主件 pass-3c）；失败留现场（png/html/console/meta），无窗口内交付目标 = exit 2 SKIP | keyless（浏览器） |

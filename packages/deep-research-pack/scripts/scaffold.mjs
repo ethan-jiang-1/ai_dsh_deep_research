@@ -15,7 +15,7 @@
 //   或经 bin：dsh-deep-research-scaffold --workspace <dir> [--profile research]（registry 安装形态；tarball 装法无 PATH bin，用本文件全路径）
 //
 // 不做的事（有意）：不装 DSH 本体、不写密钥（安全边界：密钥永不落仓库/脚本）。
-import { accessSync, constants as fsConstants, copyFileSync, existsSync, lstatSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
+import { accessSync, closeSync, constants as fsConstants, copyFileSync, existsSync, lstatSync, mkdirSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
@@ -52,6 +52,42 @@ if (existsSync(workspace) && !statSync(workspace).isDirectory()) {
 if (!checkMode && existsSync(workspace)) {
   try { accessSync(workspace, fsConstants.W_OK) } catch {
     console.error(`scaffold: --workspace 不可写：${workspace}（--check 可只读；写入请先修权限）`)
+    process.exit(2)
+  }
+}
+
+// 写模式互斥：两个 scaffold 同时写同一工作区会把 state/sidecar 交叉覆盖。--check/--dry-run 不持锁。
+if (!checkMode && !dryRun && !existsSync(workspace)) mkdirSync(workspace, { recursive: true })
+const lockPath = join(workspace, '.dsh-research-scaffold.lock')
+let lockHeld = false
+const releaseLock = () => { if (lockHeld) { try { unlinkSync(lockPath) } catch {} lockHeld = false } }
+if (!checkMode && !dryRun) {
+  if (existsSync(lockPath)) {
+    let holder = null
+    try { holder = Number(readFileSync(lockPath, 'utf8').trim()) } catch {}
+    if (Number.isInteger(holder) && holder > 0) {
+      try {
+        process.kill(holder, 0)
+        console.error(`scaffold: 工作区被 pid ${holder} 的 scaffold 锁定：${lockPath}（等它结束或确认陈旧后删锁）`)
+        process.exit(2)
+      } catch (error) {
+        if (error.code === 'EPERM') {
+          console.error(`scaffold: 工作区锁属于活跃 pid ${holder}（EPERM）：${lockPath}`)
+          process.exit(2)
+        }
+        // ESRCH = 陈旧锁，继续接管
+      }
+    }
+    try { unlinkSync(lockPath) } catch {}
+  }
+  try {
+    const fd = openSync(lockPath, 'wx')
+    writeFileSync(fd, String(process.pid))
+    closeSync(fd)
+    lockHeld = true
+    process.on('exit', releaseLock)
+  } catch {
+    console.error(`scaffold: 无法获取工作区锁：${lockPath}（另一个 scaffold 正在写？）`)
     process.exit(2)
   }
 }
@@ -199,7 +235,9 @@ if (versionAhead && upgrade && !force) {
       files: Object.fromEntries(seedRels.map((rel) => [rel, seed.files[rel]])),
       skipped: [...new Set(skippedRels)].sort(),
     }
-    writeFileSync(statePath, `${JSON.stringify(next, null, 2)}\n`)
+    const tmpState = `${statePath}.tmp-${process.pid}`
+    writeFileSync(tmpState, `${JSON.stringify(next, null, 2)}\n`)
+    renameSync(tmpState, statePath)
   }
 
   note(true, `研究工作区种子（${workspace}）`, `${dryRun ? '[dry-run] ' : ''}写入 ${written} 个、跳过 ${skipped} 个（--force 覆盖；--upgrade 安全升级；method-library 不覆盖）${sidecars > 0 ? `；${sidecars} 个用户改过的文件写成 .seed-new` : ''}${orphanRels.length > 0 ? `；${orphanRels.length} 个孤儿种子未删` : ''}`)

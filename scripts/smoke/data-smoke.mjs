@@ -75,6 +75,16 @@ function textFiles(dir) {
   return out
 }
 
+const findSessionDir = (home, sessionId) => {
+  const root = join(home, 'sessions')
+  if (!existsSync(root)) return null
+  for (const group of readdirSync(root)) {
+    const dir = join(root, group, sessionId)
+    if (existsSync(dir)) return dir
+  }
+  return null
+}
+
 const waitFor = (child, pattern, timeoutMs) => new Promise((resolveWait) => {
   let output = ''
   const timer = setTimeout(() => { resolveWait({ ok: false, output, why: 'timeout' }) }, timeoutMs)
@@ -113,6 +123,22 @@ try {
   })
   const boot = await waitFor(child, /dsh web: http:\/\/127\.0\.0\.1:\d+/, 90_000)
   check(boot.ok, 'web 启动出横幅', boot.why ?? '')
+  const token = /token=([^&\s]+)/.exec(boot.output)?.[1] ?? null
+  let sessionDir = null
+  if (token !== null) {
+    const kick = spawnSync(process.execPath, [join(ROOT, 'dev', 'run-kickoff.mjs'), '--port', PORT, '--token', token], {
+      cwd: ROOT, encoding: 'utf8', env: scrubbedEnv({ DSH_HOME: HOME, DSH_RUN_WORKSPACE: WS }), timeout: 120_000,
+    })
+    const sessionId = (kick.stdout ?? '').trim().split('\n').filter(Boolean).at(-1) ?? ''
+    check(kick.status === 0 && sessionId.length > 0, '建真实会话（卸载前）', (kick.stderr || '').slice(-300))
+    for (let i = 0; i < 20 && sessionDir === null; i++) {
+      sessionDir = findSessionDir(HOME, sessionId)
+      if (sessionDir === null) await new Promise((r) => setTimeout(r, 250))
+    }
+    check(sessionDir !== null, '会话日志落在 home', sessionId)
+  } else {
+    check(false, '从启动横幅取 token')
+  }
   try { process.kill(-child.pid, 'SIGTERM') } catch { try { child.kill('SIGTERM') } catch {} }
   const leak = await reclaimPort(Number(PORT))
   check(leak === null, '端口释放', leak ?? '')
@@ -131,6 +157,7 @@ try {
   check(readFileSync(join(WS, 'AGENTS.md'), 'utf8') === '# data-smoke user marker\n'
     && readFileSync(join(WS, 'method-library.md'), 'utf8') === '# data-smoke user library\n',
     '卸载后 workspace 用户文件保留')
+  check(sessionDir !== null && existsSync(sessionDir), '卸载后 session 日志保留')
 } catch (error) {
   check(false, 'smoke 未抛异常', String(error))
 } finally {
