@@ -150,8 +150,8 @@ node scripts/run-gates/node-gate.mjs <bundle>|--latest [--sessions <dir>] [--wri
 node scripts/run-gates/schema-scan.mjs [<bundle-dir>…]     # schema 保真度扫描（keyless：八节点输出件在场断言；断代定红——契约日 2026-09-29 后交付且违约 = exit 1，契约前期如实报告不计红；默认扫 archive 全量）
 node scripts/probe/entry-chain-probe.mjs    # 入口链探针（真模型档：授权范围、RFC 条件、开发环路径三问；词面断言与原文留档人工复核）
 node scripts/probe/discipline-probe.mjs     # 纪律行为探针（真模型档：A2 超界 / B1 差集 / 收活缺件·UNVERIFIED / 计划确认卡·quick_factual 免发互补对五场景标记断言——先读技能正本再作答；--scenario <id> 定向；留档人工复核）
-node packages/deep-research-pack/scripts/preflight.mjs --workspace <dir>   # 部署前置检查（pack 自带 bin：DSH 版本/peer 包/团队层/工作区手册/构建产物/密钥；fail-loud 带补救命令）
-node packages/deep-research-pack/scripts/scaffold.mjs --workspace <dir>    # 部署准备（pack 自带 bin：铺工作区种子 + 补团队层 + 复跑 preflight；幂等）
+node packages/deep-research-pack/scripts/preflight.mjs --workspace <dir>   # 部署前置检查（pack 自带 bin：DSH 版本/运行时行依赖/团队层/profile 组成/工作区种子/构建产物/密钥；fail-loud 带补救命令）
+node packages/deep-research-pack/scripts/scaffold.mjs --workspace <dir>    # 部署准备（pack 自带 bin：种子 + 团队层 + preflight；参数严格/根与 symlink 守卫/已有手册拒绝覆盖）
 ```
 
 档位词汇（keyless / 真模型档）与密钥定义 = [AGENTS.md §密钥](../../AGENTS.md)；脚本头注各带设计依据

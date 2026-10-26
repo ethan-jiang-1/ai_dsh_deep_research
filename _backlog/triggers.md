@@ -26,3 +26,6 @@
 | 终稿里的相对图片 | 不解析（`MarkdownText` 未接 `pathImages`；研究终稿模板不含图） | 出现一份终稿含本地相对图片、且 alt 文本不够用的真实阅读场景；此时按 `final.md` 所在目录接 `pathImages` | [归档卡](./_archived/settled_issues/2026-10-19-final-tab-in-sidebar.md) |
 | 双层安装类型可命名性偏差 | 暂不根治；`dev/vendor-build.sh` ④ 步金丝雀守门容忍 TS2883 | 下次升 pin 或 vendor-build 痛点再现（④ 步需改容错 / TS2883 变红）时立项 | [bumping-vendor-pin](../.agents/skills/bumping-vendor-pin/SKILL.md) |
 | vendor 根构建 tsc 目标 | 本仓走 tsx 源码；vendor 产物由 `dev/vendor-build.sh` 产出 | 再遇 vendor `pnpm run build` 缺根包 `lib/types` / tsdown 入口顺序问题 | [bumping-vendor-pin](../.agents/skills/bumping-vendor-pin/SKILL.md) |
+| DSH Desktop 安装面 | 当前支持面 = CLI（npm/tarball）；Desktop 未实测 | 用户报告在 Desktop 安装本包或装载 client 失败；或本机可实测 Desktop 时 | [guides/65 §7](../docs/guides/65-run-forms.md) + [部署加固 Note](../notes/implemented/2026-10-26-deploy-truth-and-isolation.md) |
+| 活升级/卸载 | 文档要求先停 profile；运行中替换 `node_modules` 的演练未做 | 真实用户在 web 运行中升级/卸载后出现模块错配、会话异常或端口残留 | [guides/65 §3](../docs/guides/65-run-forms.md) |
+| 共享 home / 同 workspace 双实例 | 不支持；无跨进程锁 | 用户要求多人共享 home 或同 workspace 并行两个实例 | [guides/65 §4](../docs/guides/65-run-forms.md) |

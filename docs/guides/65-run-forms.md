@@ -46,15 +46,22 @@ P 里的 `workspace/` 是**只读种子**：落地后归 W，由用户工作区�
 
 ## 3. 安装、升级、卸载
 
-- **前置**：DSH 满足包内 `engines.dsh`（值以 `package.json` 为准）；Node 满足 `engines.node`；团队机制层
-  `@deepseek-ai/dsh-experimental-agent-team-profile` 与运行中的 DSH 版本一致（scaffold 自动补）。
+- **前置**：DSH 满足包内 `engines.dsh`（值以 `package.json` 为准）；Node 满足 `engines.node`；`dsh` 在 PATH，
+  首次补团队层需要 pnpm。团队机制层 `@deepseek-ai/dsh-experimental-agent-team-profile` 与运行中的 DSH 版本一致
+  （scaffold 自动补；已在场且版本一致时**不改写来源**，要刷新用 `--refresh-team`）。`dsh` 不在 PATH 时用
+  `--install-anchor <@deepseek-ai/dsh 安装目录或 package.json>` / `DSH_INSTALL_ANCHOR`。
 - **安装**：`dsh --profile <p> --from-default-profile web --dump-config` → `dsh plugin --profile <p> add <npm|tarball|目录>`；
-  `scaffold --workspace <w> --profile <p>` 铺种子 + 补团队层 + preflight。
-- **升级**：装新版包 → 重启 profile → `scaffold --check` → `scaffold --upgrade`。升级只覆盖“用户未改过且种子已更新”的文件；
-  改过的文件保留原样并写 `<文件>.seed-new`；`method-library.md` 任何模式都不覆盖。
+  `scaffold --workspace <w> --profile <p>` 铺种子 + 补团队层 + preflight。首装发现工作区已有别人的
+  AGENTS/NODES/模板会拒绝（`--force` 覆盖，或 `--upgrade` 生成 sidecar 合并，合并/确认后用 `--adopt`
+  显式接受当前工作区）；工作区不能是 HOME/DSH_HOME/pack/profile 的本身、祖先或内部；种子父目录经
+  symlink 指向工作区外也拒绝。
+- **升级**：先停正在跑的 profile（避免运行中替换 `node_modules`）→ 装新版包 → 重启 profile → `scaffold --check` →
+  `scaffold --upgrade`。升级只覆盖“用户未改过且种子已更新”的文件；改过的文件保留原样并写 `<文件>.seed-new`
+  （已有 sidecar 不覆盖，新种子写 `<文件>.seed-new-<版本>`）；`--adopt` 过的文件按 modified 处理，
+  `--upgrade` 也不覆盖；`method-library.md` 任何模式都不覆盖。
 - **回滚**：装回旧版包；工作区种子不回滚（用户数据不随插件降级），`--check` 如实报告版本关系；DSH 必须满足旧包
   `engines.dsh`，否则宿主拒绝加载。
-- **卸载**：`dsh plugin --profile <p> remove dsh-deep-research-pack`；工作区保留，数据清理是用户显式动作。
+- **卸载**：先停 profile；`dsh plugin --profile <p> remove dsh-deep-research-pack`；工作区保留，数据清理是用户显式动作。
 
 ## 4. 独立环境与多实例
 
@@ -98,7 +105,9 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 - `workspace-isolation-smoke`：两套 home/profile/port/state/workspace，会话组绑定各自 W；只证接线/绑定，不证模型沙箱。
 - `interrupt-smoke`：SIGKILL 中断 scaffold → stale lock 接管 → 重跑补齐种子；真双进程锁竞争第二个 exit 2。
 - `profile-concurrency-smoke`：两个 `plugin add` / 两个 `remove` 同 profile 并发后 profile 仍可解析/最终无本包。
-- `scaffold-smoke`：种子 symlink/目录目标、锁、atomic state、orphan、哈希篡改与回滚保护。
+- `scaffold-smoke`：参数严格性（未知 flag/缺值/吞 flag）、HOME/DSH_HOME 根守卫、父目录 symlink 越界、种子 symlink/目录目标、锁、atomic state、orphan、哈希篡改、sidecar 保护与回滚保护。
+- `preflight-smoke`：fake anchor 的行依赖齐全/缺件、无锚未验证、base-only profile、untracked AGENTS、空凭据、workspace `.env`；home/profile/anchor 全在仓库外。
+- `real-home-smoke`：仓库外 home + 全局 dsh + tarball 的 init → install → scaffold/preflight → 真 web 页面；同时证团队层 `link:` 不被改写与重跑幂等（缺全局 dsh/tarball exit 2）。
 - `upgrade-smoke`：安装当前版 → 模拟下一版 → 种子升级 → 回滚拒绝降级 → 卸载（profile + W 双面）。
 - `profile-matrix-smoke`：多 profile 独立安装/卸载、损坏 tarball 无半装、用户 overlay 不改写、卸载重装后 workspace 数据保留。
 - `user-env-smoke`：已有别的 bundle + 用户 overlay + session/凭据/workspace 时，安装/卸载不改写用户数据，别的 bundle 仍在。
@@ -106,8 +115,9 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 ## 7. 已知限制与延后工作
 
 - 不把“多人共享一个 checkout / 一个 `DSH_HOME`”作为支持面；协作单位 = 包版本 + 工作区/run bundle 移交。
-- 不承诺 Windows；当前实测 macOS，Linux 走 bash/Node 标准路径但未在同轮跑。`sed` 使用 BSD/GNU 兼容形态。
+- 不承诺 Windows；macOS 实测；Linux 的 keyless deploy smokes（scaffold / preflight / pack）进 CI，但 Linux 上的真安装 + web 页面仍未在 CI 跑。`sed` 使用 BSD/GNU 兼容形态。
 - 离线不是零前置：tarball 不需要 registry，但团队层需预装/缓存（含 pnpm registry metadata；只装 node_modules 不够）、Playwright MCP 首次需 npx、模型 API 需网络。
+- DSH Desktop、真实 npm registry 发布、活升级/卸载、多人共享 home 仍无证据；自定义 AGENTS 合并后用 `--adopt` 显式接受（记 baseline，`--upgrade` 不覆盖），不采用 `--adopt` 时 preflight 会继续保持 untracked 红。
 - 包目录安装的 profile 依赖记录绝对路径，但安装副本已复制；移动源目录后旧路径不能重装/升级（需 remove 后从新路径 add），`link:` 移动即断链；正式分发用 tarball/npm。
 - 研究方法论本身不在本页：角色/preset/skill 见 [guides/62](62-plugin-authoring.md) 与 pack 内容；run 操作见 [guides/61](61-run-playbook.md)。
 

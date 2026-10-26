@@ -27,6 +27,17 @@ test('T0 exports：入口与 client 都有声明，且不依赖未发布源码',
   assert.equal(pkg.main, undefined, 'main 与 exports 双写会制造第二份入口')
 })
 
+test('client 模块表：构建产物里的 @deepseek-ai require 都在 dsh.client.inject 声明', () => {
+  const client = readFileSync(join(PACK, 'lib/client.js'), 'utf8')
+  const required = [...new Set([...client.matchAll(/require\("(@deepseek-ai\/[^"]+)"\)/g)].map((match) => match[1]))]
+  const inject = new Set(pkg.dsh?.client?.inject ?? [])
+  assert.ok(required.length > 0, '构建产物没有可检查的 @deepseek-ai require（检查 lib/client.js 是否已构建）')
+  for (const name of required) {
+    assert.ok(inject.has(name), `client 运行时 require ${name} 未进 dsh.client.inject——模块表可能先于它注册`)
+    assert.ok(Object.hasOwn(pkg.peerDependencies ?? {}, name), `client inject ${name} 未进 peerDependencies`)
+  }
+})
+
 test('T8 生命周期：只允许 publish 时 prepack，不允许 install/prepare 在宿主执行', () => {
   assert.match(pkg.scripts?.prepack ?? '', /build/, 'prepack 必须构建发布入口')
   for (const name of ['preinstall', 'install', 'postinstall', 'prepare']) {

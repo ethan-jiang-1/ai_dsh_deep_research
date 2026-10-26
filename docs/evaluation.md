@@ -93,7 +93,8 @@
 - **定义**：插件以用户实际获得的方式可用——`npm pack` 产物完整，装进**干净 profile** 成功，起会话可用；client 半（观察面）在安装形状里在场。
 - **最小真检查**：`release-smoke`：`npm pack` → 在选定 `DSH_HOME` 重建测试 profile → `dsh plugin add` → scaffold/preflight（`--install-only`，跳过模型就绪检查）→ 安装域会话断言；无模型调用。独立默认 preflight 仍检查凭据在场。进程卫生全程有界：run() 超时预算（install 180s / 默认 120s / preset-smoke 外层 300s——company 实证值）+ mkdir 原子并发锁 + 子进程组退出确认回收。
 - **冷启动补充**：`cold-start-smoke` 用独立 `DSH_DEV_HOME` + 独立 profile/端口/state，从 tarball 安装并经 `run-driver up --bootstrap` 到浏览器面 GREEN；证明不依赖仓内既有 home/profile。MCP 关闭，团队层需 registry 或缓存。
-- **通过判据**：pack 清单与 `files` 声明一致、安装零缺失警告、干净 profile 会话能列出研究角色；安装副本带 `lib/client.js`、manifest peers-only（`dependencies` 缺席）、boot 页模块表含本包 client 行（preset-smoke 真会话档断言，安装域经 release-smoke ⑤ 委托覆盖）、端口用后无监听残留。
+- **真用户 home 补充**：`real-home-smoke` 把 home 放到系统临时目录（仓库外），用全局 `dsh` 完成 init → install → scaffold/preflight（`--install-only`）→ 真 web 页面，断言 preflight 不再从 profile 误报 peer、boot graph 含本包、已在场团队层 `link:` 不被改写；缺全局 dsh/tarball = exit 2。`preflight-smoke` 用 fake anchor 覆盖“行依赖缺件必须红 / 无锚标未验证 / base-only profile 红 / untracked AGENTS 红 / 空凭据红”。
+- **通过判据**：pack 清单与 `files` 声明一致、安装零缺失警告、干净 profile 会话能列出研究角色；安装副本带 `lib/client.js`、manifest peers-only（`dependencies` 缺席）、boot 页模块表含本包 client 行（preset-smoke 真会话档断言，安装域经 release-smoke ⑤ 委托覆盖）、端口用后无监听残留；preflight 的运行时行依赖只从安装锚解析，不把 client/构建期 peer 混进 Node 解析。
 - **何时跑**：包结构/release 相关改动时；框架里程碑必跑。
 
 ### L3 领域面（Deep Research 方法论完整性 — 本项目独有）

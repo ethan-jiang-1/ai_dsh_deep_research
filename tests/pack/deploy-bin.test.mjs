@@ -19,8 +19,10 @@ const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
 test('preflight：检查清单在位（Node/版本/peer/团队层/手册+节点+判型+模板/构建产物/密钥）', () => {
   // record( 调用点级断言：钉运行时检查名，注释里的字样不算数（反证实测：只改 record 名、
   // 留注释 → 必须红——includes() 子串断言会被注释满足而假绿）。
-  for (const name of ['Node 版本兼容', 'DSH 版本兼容', '平台 peer 包', '团队机制层', '研究工作区手册', '节点契约', '判型模式库', '工作区 .gitignore', 'run 模板', '工作区种子版本', '构建产物', '模型密钥']) {
-    assert.match(preflight, new RegExp(`record\\([^)]*${name}`), `preflight 缺 record 检查项「${name}」——检查清单漂移`);
+  // 只在 record( 调用行上找标签：注释里的字样不算数（反证实测：只改 record 名、留注释 → 必须红）。
+  const recordLines = preflight.split('\n').filter((line) => line.includes('record('));
+  for (const name of ['Node 版本兼容', 'DSH 版本兼容', '平台行依赖', '团队机制层', 'profile 组成', '研究工作区手册', '节点契约', '判型模式库', '工作区 .gitignore', 'run 模板', '工作区种子版本', '构建产物', '模型密钥']) {
+    assert.ok(recordLines.some((line) => line.includes(name)), `preflight 缺 record 检查项「${name}」——检查清单漂移`);
   }
   assert.match(preflight, /engines\?\.dsh/, 'preflight 版本判据须读 engines.dsh（宿主字段；兼容矩阵只是镜像）');
   assert.match(preflight, /engines\?\.node/, 'preflight 缺 Node engines.node 判据');
@@ -77,11 +79,15 @@ test('scaffold：三态形状 + 收尾 preflight + workspace 必填 fail-loud', 
   assert.ok(scaffold.includes('agent-team-profile'), 'scaffold 团队层组合缺失——四角色协作主通道不可用');
 });
 
-test('scaffold：团队层版本从 engines.dsh 派生，不装未钉版最新层', () => {
-  assert.match(scaffold, /hostForTeam/,
-    'scaffold 未从 profile app-boot 解析团队层版本');
-  assert.match(scaffold, /let TEAM_VERSION = null/,
-    'scaffold 未声明团队层版本');
+test('scaffold：团队层版本从安装锚派生，不装未钉版最新层', () => {
+  assert.match(scaffold, /const hostForTeam/,
+    'scaffold 未从 profile/DSH home 推导团队层目标');
+  assert.match(scaffold, /let TEAM_VERSION = installAnchor\?\.version \?\? null/,
+    'scaffold 未优先从安装锚取团队层版本');
+  assert.match(scaffold, /const installedTeamVersion/,
+    'scaffold 未检查团队层已安装版本（幂等/不静默改 pin）');
+  assert.match(scaffold, /--refresh-team/,
+    'scaffold 缺显式刷新团队层的入口');
   assert.match(scaffold, /const TEAM_SPEC = .*TEAM_VERSION/,
     'scaffold 未把团队层版本拼进安装 spec');
   assert.ok(scaffold.includes("'add', TEAM_SPEC"),
@@ -99,10 +105,10 @@ test('scaffold：种子三态 + 状态文件 + 方法库保护形状在位', () 
 });
 
 test('scaffold：收尾 preflight 使用 --profile 对应的 profile 解析锚', () => {
-  assert.match(scaffold, /const explicitHost = argOf\('host'\)/,
+  assert.match(scaffold, /const explicitHost = values\.host === null \? null : resolvePathInput\(values\.host\)/,
     'scaffold 未单独保留显式 --host 参数');
-  assert.match(scaffold, /const dshHome = resolve\(process\.env\.DSH_HOME \?\? join\(process\.env\.HOME \?\? '', '\.dsh'\)\)/,
-    'scaffold 未从 DSH_HOME 或 $HOME/.dsh 确定 profile 根');
+  assert.match(scaffold, /const dshHome = resolveDshHome\(process\.env\)/,
+    'scaffold 未用与 DSH 一致的 DSH_HOME 解析');
   assert.match(scaffold, /const targetHost = join\(dshHome, 'profiles', profile\)/,
     'scaffold 未从 --profile 推导目标 profile 目录');
   assert.match(scaffold, /const preflightHost = explicitHost \?\? \(existsSync\(join\(targetHost, 'package\.json'\)\) \? targetHost : null\)/,
@@ -111,9 +117,13 @@ test('scaffold：收尾 preflight 使用 --profile 对应的 profile 解析锚',
     '目标 profile 尚未初始化时未禁止 preflight 回退到 research 等其他 profile');
   assert.match(scaffold, /\.\.\.preflightHostArgs/,
     'scaffold 未将显式或推导出的目标 host 参数转发给 preflight');
+  assert.match(scaffold, /const preflightAnchorArgs = installAnchor === null \? \[\] : \['--install-anchor', installAnchor\.path\]/,
+    'scaffold 未把安装锚转发给 preflight（preflight 会退回到推断/仓库泄漏）');
+  assert.match(scaffold, /\.\.\.preflightAnchorArgs/,
+    'scaffold 未将安装锚参数转发给 preflight');
   assert.match(preflight, /const noHostInference = argv\.includes\('--no-host-inference'\)/,
     'preflight 未识别 scaffold 禁止错误 profile 推断的参数');
-  assert.match(preflight, /if \(host === null && !noHostInference && process\.env\.DSH_HOME !== undefined\)/,
+  assert.match(preflight, /if \(host === null && !noHostInference\)/,
     'preflight 仍会在 scaffold 禁止推断时选择其他 profile');
   assert.match(preflight, /const requireFrom = host === null\s*\? noHostInference \? null : createRequire\(import\.meta\.url\)/,
     '目标 profile 不存在时，preflight 仍可能从 pack 位置解析 peer 包');
@@ -133,8 +143,8 @@ test('preflight：--install-only 跳过凭据门但保留默认研究就绪门',
   assert.match(preflight, /withModelKey|process\.exit\(hardFail\.length === 0 \? 0 : 1\)/, '默认模式 verdict 约束缺失');
 });
 
-test('scaffold：--install-only 转发给 preflight', () => {
-  assert.match(scaffold, /argv\.includes\(['"]--install-only['"]\)/, 'scaffold 未声明 --install-only CLI 模式');
+test('scaffold：--install-only 由严格解析器声明并转发给 preflight', () => {
+  assert.match(scaffold, /const installOnly = flags\.installOnly/, 'scaffold 未从严格解析器读取 --install-only');
   assert.match(scaffold, /--install-only/, 'scaffold 未把安装模式转发给 preflight');
 });
 

@@ -16,5 +16,10 @@ archive/
 # 的 B 层录制基线（须真模型重录），而研究角色不接触停放区——约定住本规则文件即可。
 _abandoned/
 method-library.md
+# scaffold 的本机安装状态/锁/合并副本：不是研究资产，不进库
+.dsh-research-seed.json
+.dsh-research-scaffold.lock
+*.seed-new
+*.seed-new-*
 # 资产不需要放行行（未被上面拒收）；要留档某次交付时加 `!` 行即可：
 # !drt_<slug>/final.md

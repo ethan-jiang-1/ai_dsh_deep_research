@@ -5,7 +5,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { classifySeedEntry, seedSourceRel, serializeSeedManifest, sha256 } from '../../packages/deep-research-pack/scripts/lib/seed-core.mjs'
+import { classifySeedEntry, nextSeedState, seedSourceRel, serializeSeedManifest, sha256 } from '../../packages/deep-research-pack/scripts/lib/seed-core.mjs'
 
 test('sha256：内容哈希稳定且区分换行', () => {
   assert.equal(sha256('abc'), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad')
@@ -32,11 +32,59 @@ test('seedSourceRel：.gitignore 从 .gitignore.example 落地，其余同名', 
   assert.equal(seedSourceRel('templates/run/final.md'), 'templates/run/final.md')
 })
 
+test('nextSeedState：首装只记录真正落地的种子，untracked 不冒充 baseline', () => {
+  const seed = { version: '1.0.0', files: { 'AGENTS.md': 'a', 'NODES.md': 'n', 'templates/run/plan.md': 'p' } }
+  const state = nextSeedState({
+    seed,
+    previousFiles: {},
+    classifications: { 'AGENTS.md': 'untracked', 'NODES.md': 'missing', 'templates/run/plan.md': 'current' },
+    written: ['NODES.md'],
+    force: false,
+  })
+  assert.deepEqual(state.files, { 'NODES.md': 'n', 'templates/run/plan.md': 'p' })
+  assert.deepEqual(state.skipped, ['AGENTS.md'])
+})
+
+test('nextSeedState：--upgrade 保留 modified/deleted 的旧基线，写入 stale/missing，untracked 不留假基线', () => {
+  const seed = { version: '2.0.0', files: { a: 'a2', b: 'b2', c: 'c2', d: 'd2', e: 'e2' } }
+  const state = nextSeedState({
+    seed,
+    previousFiles: { a: 'a1', b: 'b1', c: 'c1', orphan: 'o1' },
+    classifications: { a: 'stale', b: 'modified', c: 'deleted', d: 'untracked', e: 'missing' },
+    written: ['a', 'e'],
+    force: false,
+  })
+  assert.deepEqual(state.files, { a: 'a2', b: 'b1', c: 'c1', e: 'e2', orphan: 'o1' })
+  assert.deepEqual(state.skipped, ['b', 'c', 'd'])
+})
+
+test('nextSeedState：--force 全量写 baseline，并保留 seed 之外的孤儿记录', () => {
+  const seed = { version: '2.0.0', files: { a: 'a2', b: 'b2' } }
+  const state = nextSeedState({
+    seed,
+    previousFiles: { a: 'a1', old: 'old' },
+    classifications: { a: 'modified', b: 'untracked' },
+    written: [],
+    force: true,
+  })
+  assert.deepEqual(state.files, { a: 'a2', b: 'b2', old: 'old' })
+  assert.deepEqual(state.skipped, [])
+})
+
 test('serializeSeedManifest：版本 + 按路径排序的哈希 + 结尾换行', () => {
   const text = serializeSeedManifest({ version: '1.2.3', files: { 'b.md': 'bb', 'a.md': 'aa' } })
   assert.equal(text, '{\n  "version": "1.2.3",\n  "files": {\n    "a.md": "aa",\n    "b.md": "bb"\n  }\n}\n')
 })
 
+
+test('workspace 种子 .gitignore 拒收 scaffold 本机状态/锁/sidecar', () => {
+  const PACK = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'packages', 'deep-research-pack')
+  const text = readFileSync(join(PACK, 'workspace', '.gitignore.example'), 'utf8')
+  for (const pattern of ['.dsh-research-seed.json', '.dsh-research-scaffold.lock', '*.seed-new']) {
+    const escaped = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    assert.ok(new RegExp(`^${escaped}\\s*$`, 'm').test(text), `.gitignore 缺 ${pattern}`)
+  }
+})
 
 test('pack workspace/seed.json：版本 = pack 版本，哈希与盘上种子逐字一致', () => {
   const PACK = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'packages', 'deep-research-pack')

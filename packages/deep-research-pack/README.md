@@ -33,7 +33,7 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 
 运行形态、数据归属、升级/回滚与多实例的完整合同 = [guides/65](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/guides/65-run-forms.md)。
 
-**前置**：DSH 版本必须满足 `engines.dsh`（值以 `package.json` 的 `engines.dsh` 为准；宿主安装/启动会拒绝不匹配版本），Node 满足 `^22.19.0 || >=24.0.0`。`dsh.compatibility.dshReleases` 是兼容矩阵镜像，不是宿主字段。
+**前置**：DSH 版本必须满足 `engines.dsh`（值以 `package.json` 的 `engines.dsh` 为准；宿主安装/启动会拒绝不匹配版本），Node 满足 `^22.19.0 || >=24.0.0`。`dsh.compatibility.dshReleases` 是兼容矩阵镜像，不是宿主字段。`dsh` 要在 PATH 上；**首次补团队层还需要 pnpm**（`dsh plugin` 用 pnpm，缺失会 127）。若 `dsh` 不在 PATH，用 `--install-anchor <@deepseek-ai/dsh 安装目录或 package.json>`（或 `DSH_INSTALL_ANCHOR`）给 scaffold/preflight 指安装锚。
 
 ```sh
 # ① 建 profile——自定义名默认只带 dsh-base（起不了 web，也就没有 GUI）；须先取 web 模板。
@@ -43,7 +43,8 @@ dsh --profile research --from-default-profile web --dump-config
 
 # ② 装包（两种形态，任选其一）：
 #    npm（推荐；包发布后可用）：dsh plugin --profile research add dsh-deep-research-pack
-#    离线 / 未发布时：用本仓导出的 tarball（必须绝对路径——file: 相对路径按 profile 目录解析，不是你的 cwd）
+#    离线 / 未发布时：用本仓导出的 tarball（推荐绝对路径；`file:./x.tgz` 按 cwd 解析，
+#    而 `file:x.tgz` 按 profile 目录解析——两种相对形态语义不同，绝对路径最稳）
 #    出包 = `node scripts/dist/export-dist.mjs`（仓根执行）→ `_dist/` 的 tarball + 安装手册.md（用户视角正本）
 dsh plugin --profile research add file:/abs/path/to/dsh-deep-research-pack-<版本>.tgz
 
@@ -54,12 +55,17 @@ dsh --profile research --dump-config   # 应见 preset-lead/scout/analyst/critic
 #    ⚠ tarball 装法**不生成 PATH bin**——用安装副本里的脚本全路径（npm 装法有 bin）：
 node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffold.mjs \
   --workspace ~/research-workspace --profile research
-#    也可用安装后的 bin：dsh-deep-research-scaffold --workspace ~/research-workspace --profile research
+#    也可用安装后的 bin（通常在 <profile>/node_modules/.bin/，不在全局 PATH）；
 #    它用 PATH 上的 `dsh`；写哪个 home 由 `DSH_HOME` 决定（未设时默认 ~/.dsh）——日用安装别先 source dev/env.sh；
 #    手工等价 = 铺 <pack>/workspace/ 种子 + dsh plugin --profile research add
 #             @deepseek-ai/dsh-experimental-agent-team-profile@<运行中的 DSH 版本>
 #             + 全路径 preflight.mjs --workspace ~/research-workspace
 #    只处理工作区（不碰 profile）：--seed-only；只读检查：--check；安全升级：--upgrade
+#    首装若发现工作区已有别人的 AGENTS/NODES/模板，会拒绝（避免角色拿错手册）：
+#      换空目录，或 --force 显式覆盖，或 --upgrade 生成 .seed-new 后手动合并；
+#      合并/确认后用 --adopt 显式接受当前工作区（记 baseline；之后 --upgrade 仍不覆盖）。
+#    工作区不能是 HOME / DSH_HOME / pack 安装目录 / profile 目录（或其祖先）；父目录 symlink
+#    指向工作区外也会拒绝。团队层已存在时不改写来源（要更新用 --refresh-team）。
 
 # ④ 起研究会话（cwd = 工作区，手册从这里注入；本步拉起该 profile 的 web 并打印带 token 的 URL）
 cd ~/research-workspace && dsh --profile research
@@ -67,8 +73,14 @@ cd ~/research-workspace && dsh --profile research
 
 **升级工作区种子**：pack 升级后先跑 `scaffold --check`（只读；报告 missing/deleted/stale/untracked/modified），
 再跑 `scaffold --upgrade`。升级只覆盖“用户未改过且种子已更新”的文件；用户改过的文件保留原样，
-新种子写成 `<文件>.seed-new` 供手动合并。`method-library.md` 是用户数据，任何模式都不覆盖已存在文件；
-状态记录在工作区根 `.dsh-research-seed.json`（版本 + 哈希 + 跳过清单）。
+新种子写成 `<文件>.seed-new` 供手动合并；已有 `.seed-new` 不会被覆盖，新种子改写成
+`<文件>.seed-new-<seed 版本>`。`method-library.md` 是用户数据，任何模式都不覆盖已存在文件；
+状态记录在工作区根 `.dsh-research-seed.json`（版本 + 哈希 + 跳过清单 + adopted）。首装只把真正落地的
+文件记入基线——工作区里原本就有的 AGENTS/NODES/模板不会被冒充成“已安装的种子”；
+用户显式 `--adopt` 后它们记为 modified（不阻断 `--check`，`--upgrade` 只写 sidecar）。
+
+**升级/卸载前先停掉正在跑的 profile**：`dsh plugin add/remove` 会替换 `node_modules` 里的
+安装副本；运行中的 web 可能在下次加载页面时拿到半新半旧的模块。停 web → 升级/卸载 → 重启。
 
 **升级/回滚**：升级 = 装新版 npm/tarball（`dsh plugin --profile research add ...@<新版>` 或 `file:<新版>.tgz`），
 再按上面的 `--check`/`--upgrade` 升级工作区种子；回滚 = 装回旧版 tarball，种子不随插件降级。旧版 `--check` 会报“工作区记录比 pack 新”并拒绝 `--upgrade`；确需降级种子用 `--force`（显式覆盖，新种子会丢）。 种子目标若是 symlink / hardlink / FIFO，`--force` 只替换入口本身，不写穿目标、不阻塞；状态文件是 symlink 时拒绝写入。
@@ -91,8 +103,12 @@ cd ~/research-workspace && dsh --profile research
 node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/preflight.mjs \
   --workspace ~/research-workspace
 # 若 DSH_HOME 有 research profile，preflight 优先用它；无 research 时仅在唯一 profile 可用时推断，
-# 多个 profile 则不任意挑选，按本包位置解析，或用 --host <profile 目录> 明确指定。
-# 研究就绪检查：DSH 版本 / 全部平台 peer 包 / 团队机制层 / 工作区手册+模板 / 构建产物 / 模型密钥
+# 多个 profile 则不任意挑选，或用 --host <profile 目录> 明确指定。
+# 安装锚：--install-anchor <@deepseek-ai/dsh 目录或 package.json>，缺省从 PATH 的 dsh 推断。
+# 研究就绪检查：DSH 版本 / 运行时行依赖 / 团队机制层 / profile 组成(web) / 工作区种子与
+# method-library / 构建产物 / 模型密钥（环境变量、凭据 refs、项目或 home .env）。
+# 运行时行依赖只从安装锚解析，不把 client/构建期 peer 混进 Node 检查；找不到锚时标“未验证”。
+# 工作区里不是 scaffold 铺的 AGENTS/NODES/模板 = 红（角色会拿错手册）；空凭据文件不再算已配置。
 # 若 dsh --version 不可用，版本项标记为未验证并写入摘要，不阻断安装验收或冒充全绿。
 # 仅验安装形状（无模型调用、无凭据也可验）：追加 --install-only；它不代表研究就绪。
 ```
@@ -103,10 +119,13 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 - **写**：`scaffold` 只写 `--workspace` 指定的工作区（种子 + `.dsh-research-seed.json`）；包安装副本只读。
 - **用户数据**：`method-library.md`、`drt_*`、`archive/`、`_abandoned/` 都在工作区；方法库任何模式不覆盖。
 - **Home 状态**：sessions/credentials/profiles 在 `$DSH_HOME`，不随包或源码移交；本包不声明 storage domain。
+- **本机安装元数据**：`.dsh-research-seed.json` / `.dsh-research-scaffold.lock` / `*.seed-new*` 是 scaffold 的
+  本机状态与合并副本；工作区种子 `.gitignore` 已拒收。工作区不能指到 `$HOME` / `$DSH_HOME` / pack / profile
+  （或其祖先）——否则 AGENTS.md 会变成全局指令或写进安装树。
 
 ## Compatibility
 
-- `engines.dsh`: `>=0.2.1-rc.2 <0.3.0`（0.2.x 范围；宿主只认它，不读 `dsh.compatibility`）。
+- `engines.dsh`: `>=0.2.1-rc.2 <0.3.0-0`（0.2.x 范围，显式排除 `0.3.0-*` 预发布；宿主只认它，不读 `dsh.compatibility`）。
 - 测试基线：`0.2.1-rc.2` + `0.2.1-rc.3`（`dsh.compatibility.dshReleases` 只作已测基线镜像）。
 - 不匹配时：安装预检/启动拒绝；本包不使用版本豁免。
 
@@ -203,7 +222,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 - **工具卡 = 2 张**（spawn_teammate / web_search）；`team_task_*` 与其他协调类工具
   （wait_agent / list_agents / send_message）**不进对话流**（实测：harness 把协调类工具排除在对话渲染外）——团队任务的观察由 ui-agent-team 任务板与 To-dos
   折叠承担，无需卡片（4 卡方案的回退理由 = [marathon2 复盘](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/notes/archived/2026-09-25-marathon2-retrospective.md)，冻结层）；
-- **兼容范围**：`engines.dsh` = `>=0.2.1-rc.2 <0.3.0`；测试基线 = `0.2.1-rc.2` + `0.2.1-rc.3`；pre-stable API，peer 版本号不精确钉死。
+- **兼容范围**：`engines.dsh` = `>=0.2.1-rc.2 <0.3.0-0`（`-0` 排除 0.3 预发布）；测试基线 = `0.2.1-rc.2` + `0.2.1-rc.3`；pre-stable API，peer 版本号不精确钉死。
 
 ## 发布（维护者）
 

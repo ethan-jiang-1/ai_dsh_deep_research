@@ -17,29 +17,74 @@
 // 不做的事（有意）：不装 DSH 本体、不写密钥（安全边界：密钥永不落仓库/脚本）。
 import { accessSync, closeSync, constants as fsConstants, copyFileSync, existsSync, lstatSync, mkdirSync, openSync, readdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path'
+import { homedir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 import { spawnSync } from 'node:child_process'
-import { sha256, classifySeedEntry, seedSourceRel } from './lib/seed-core.mjs'
+import { sha256, classifySeedEntry, nextSeedState, seedSourceRel } from './lib/seed-core.mjs'
 import { satisfiesVersion } from './lib/version-range.mjs'
+import { parseScaffoldArgs } from './lib/deploy-args.mjs'
+import { resolveDshHome, resolvePathInput } from './lib/dsh-home.mjs'
+import { inferInstallAnchor } from './lib/install-anchor.mjs'
+import { assertSafeWorkspace, assertSeedTargetInsideWorkspace } from './lib/workspace-guard.mjs'
 
 const PACK = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const SEED = join(PACK, 'workspace')
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
-const argv = process.argv.slice(2)
-const argOf = (name) => { const i = argv.indexOf(`--${name}`); return i === -1 ? null : argv[i + 1] }
-const workspace = argOf('workspace') === null ? null : resolve(argOf('workspace'))
-const profile = argOf('profile') ?? 'research'
-const explicitHost = argOf('host')
-const force = argv.includes('--force')
-const dryRun = argv.includes('--dry-run')
-const installOnly = argv.includes('--install-only')
-const seedOnly = argv.includes('--seed-only')
-const checkMode = argv.includes('--check')
-const upgrade = argv.includes('--upgrade')
+const USAGE = `用法：node <pack>/scripts/scaffold.mjs --workspace <研究工作区> [options]
+
+  --profile <名>        目标 profile（默认 research）
+  --host <目录>         profile 目录（默认 $DSH_HOME/profiles/<profile>）
+  --install-anchor <路径> @deepseek-ai/dsh 安装目录或 package.json（默认从 PATH 的 dsh 推断）
+  --check               只读分类，不写盘
+  --upgrade             只更新未被用户改过的旧种子；改过的写 .seed-new
+  --force               覆盖版本化种子（method-library 仍不覆盖）
+  --adopt               显式接受当前工作区的 AGENTS/NODES/模板（写 baseline；--upgrade 仍不覆盖）
+  --dry-run             预演写模式（不落盘、不跑 preflight）
+  --install-only        安装验收（跳模型密钥检查；不代表研究就绪）
+  --seed-only           只处理工作区种子（不碰 profile、不跑 preflight）
+  --refresh-team        显式更新已存在但版本不符的团队层（默认不静默改用户 pin）
+  --help                打印本帮助
+
+例：node scaffold.mjs --workspace ~/research-workspace --profile research
+`
+const parsed = parseScaffoldArgs(process.argv.slice(2))
+if (parsed.flags.help) {
+  console.log(USAGE)
+  process.exit(0)
+}
+if (!parsed.ok) {
+  console.error('scaffold: 参数错误')
+  for (const line of parsed.errors) console.error(`  - ${line}`)
+  console.error(`\n${USAGE}`)
+  process.exit(2)
+}
+const { flags, values } = parsed
+const workspace = resolvePathInput(values.workspace)
+const profile = values.profile
+const explicitHost = values.host === null ? null : resolvePathInput(values.host)
+const explicitAnchor = values.installAnchor === null ? null : resolvePathInput(values.installAnchor)
+const force = flags.force
+const adopt = flags.adopt
+const dryRun = flags.dryRun
+const installOnly = flags.installOnly
+const seedOnly = flags.seedOnly
+const checkMode = flags.check
+const upgrade = flags.upgrade
+const refreshTeam = flags.refreshTeam
+let installAnchor = null
+try {
+  installAnchor = inferInstallAnchor({ explicit: explicitAnchor })
+} catch (error) {
+  console.error(`scaffold: 安装锚不可用：${error instanceof Error ? error.message : String(error)}`)
+  process.exit(2)
+}
 
 const steps = []
 const note = (ok, name, detail) => { steps.push({ ok, name, detail }); console.log(`  ${ok ? '✓' : '✗'} ${name}\n      ${detail}`) }
+
+const dshHome = resolveDshHome(process.env)
+const targetHost = join(dshHome, 'profiles', profile)
 
 if (workspace === null) {
   console.error('scaffold: 需要 --workspace <研究工作区目录>（角色会话的 cwd；手册从这里注入）')
@@ -54,6 +99,30 @@ if (!checkMode && existsSync(workspace)) {
     console.error(`scaffold: --workspace 不可写：${workspace}（--check 可只读；写入请先修权限）`)
     process.exit(2)
   }
+}
+
+// 根守卫：工作区不能是 HOME/DSH_HOME/pack/profile 的本身、祖先或内部（写模式）。
+if (!checkMode) {
+  try {
+    const guard = assertSafeWorkspace({
+      workspace,
+      home: homedir(),
+      dshHome,
+      packDir: PACK,
+      profileDir: explicitHost ?? targetHost,
+    })
+    for (const warning of guard.warnings) console.warn(`scaffold: ⚠ ${warning}`)
+  } catch (error) {
+    console.error(`scaffold: 工作区不安全：${error instanceof Error ? error.message : String(error)}`)
+    process.exit(2)
+  }
+}
+
+// dsh plugin 只能按 $DSH_HOME/profiles/<name> 定位：--host 指向别的目录时，团队层会加到
+// 另一个 profile。要么把 DSH_HOME 指对，要么不要传 --host。
+if (!seedOnly && explicitHost !== null && resolve(explicitHost) !== resolve(targetHost)) {
+  console.error(`scaffold: --host ${explicitHost} 与 --profile ${profile} 的默认目录不一致（${targetHost}）；dsh plugin 只能写 $DSH_HOME/profiles/<name>，请改 DSH_HOME 或删掉 --host`)
+  process.exit(2)
 }
 
 // 写模式互斥：两个 scaffold 同时写同一工作区会把 state/sidecar 交叉覆盖。--check/--dry-run 不持锁。
@@ -155,6 +224,7 @@ if (existsSync(statePath)) {
   try { state = JSON.parse(readFileSync(statePath, 'utf8')) } catch { state = null }
 }
 const stateFiles = state?.files ?? {}
+const stateAdopted = new Set(Array.isArray(state?.adopted) ? state.adopted : [])
 const seedRels = Object.keys(seed.files).sort()
 // 回滚保护：工作区记录比 pack 种子新时，--upgrade 不得把新种子降级覆盖（真实迁移的反向路径）。
 const versionAhead = state?.version !== undefined && state.version !== seed.version && satisfiesVersion(state.version, `>${seed.version}`)
@@ -189,6 +259,10 @@ const plan = seedRels.map((rel) => {
     status: classifySeedEntry({ destExists: destStat !== null, destHash, stateHash, seedHash: seed.files[rel] }),
   }
 })
+// 已显式 adopt 的文件：即使 seed 后来变了，也按 modified 处理（--upgrade 写 sidecar，绝不覆盖）。
+for (const p of plan) {
+  if (stateAdopted.has(p.rel) && p.destHash !== null && p.status !== 'current') p.status = 'modified'
+}
 
 if (checkMode) {
   const count = (status) => plan.filter((p) => p.status === status).length
@@ -208,16 +282,49 @@ if (checkMode) {
   process.exit(needsAttention ? 1 : 0)
 }
 
+// --adopt：把当前已存在的、与种子不同的文件显式记成用户基线；不改文件内容。
+// 之后 --check 显示 modified（不阻断）、--upgrade 只写 sidecar，绝不覆盖。
+const adoptedNow = []
+if (adopt) {
+  for (const p of plan) {
+    if (p.destHash !== null && p.status !== 'current') {
+      adoptedNow.push(p.rel)
+      p.status = 'modified'
+    }
+  }
+}
+
 // ① 工作区种子（按分类写入；method-library 永不覆盖）
 if (versionAhead && upgrade && !force) {
   note(false, '研究工作区种子（拒绝降级）', `工作区记录 v${state.version} 比 pack 种子 v${seed.version} 新；--upgrade 不覆盖新种子（确需回滚用 --force）`)
   process.exit(1)
 }
 {
+  // 首装发现“工作区里已有、又不是我们铺的”关键种子：先拒绝，不写任何种子/状态。
+  // 研究手册/节点契约/模板是角色实际读到的纪律；静默跳过会让角色拿别的项目的指令。
+  const untrackedCritical = plan.filter((p) => p.status === 'untracked' && p.rel !== '.gitignore')
+  if (!force && !upgrade && !adopt && untrackedCritical.length > 0) {
+    console.error('scaffold: 工作区里已有不是本包铺的关键种子，拒绝首装（避免角色拿错手册）：')
+    for (const p of untrackedCritical) console.error(`  - ${p.rel}（与种子不同，且没有安装记录）`)
+    console.error('  处理：换一个空目录；或 --force 显式覆盖；或 --upgrade 生成 .seed-new 后手动合并（合并后需显式接受，preflight 会保持未跟踪提示）')
+    process.exit(1)
+  }
   let written = 0
   let skipped = 0
   let sidecars = 0
-  const skippedRels = []
+  const writtenRels = new Set()
+  // 先验证所有会写的父目录，再落盘：避免 templates 父 symlink 越界时前几个种子已经写了一半。
+  for (const p of plan) {
+    const willWrite = force || p.status === 'missing' || (upgrade && p.status === 'stale')
+    const willSidecar = !willWrite && p.status !== 'current' && upgrade && (p.status === 'modified' || p.status === 'untracked')
+    if (!willWrite && !willSidecar) continue
+    try {
+      assertSeedTargetInsideWorkspace({ workspace, rel: p.rel })
+    } catch (error) {
+      console.error(`scaffold: 研究工作区种子父目录越界：${p.rel}（${error instanceof Error ? error.message : String(error)}）`)
+      process.exit(2)
+    }
+  }
   for (const p of plan) {
     const shouldWrite = force || p.status === 'missing' || (upgrade && p.status === 'stale')
     if (shouldWrite) {
@@ -225,17 +332,26 @@ if (versionAhead && upgrade && !force) {
         mkdirSync(dirname(p.destPath), { recursive: true })
         writeSeedFile(sourceOf(p.rel), p.destPath)
       }
+      writtenRels.add(p.rel)
       written += 1
       continue
     }
-    if (p.status === 'deleted') { skippedRels.push(p.rel); skipped += 1; continue }
+    if (p.status === 'deleted') { skipped += 1; continue }
     if (p.status !== 'current' && upgrade && (p.status === 'modified' || p.status === 'untracked')) {
       if (!dryRun) {
         const sidecar = `${p.destPath}.seed-new`
-        writeSeedFile(sourceOf(p.rel), sidecar)
+        if (existsSync(sidecar)) {
+          const existing = (() => { try { return readFileSync(sidecar, 'utf8') } catch { return null } })()
+          const nextSeed = readFileSync(sourceOf(p.rel), 'utf8')
+          if (existing !== nextSeed) {
+            const versioned = `${sidecar}-${seed.version}`
+            if (!existsSync(versioned)) writeSeedFile(sourceOf(p.rel), versioned)
+          }
+        } else {
+          writeSeedFile(sourceOf(p.rel), sidecar)
+        }
         sidecars += 1
       }
-      skippedRels.push(p.rel)
     }
     skipped += 1
   }
@@ -244,6 +360,12 @@ if (versionAhead && upgrade && !force) {
   const methodSrc = join(SEED, methodRel)
   const methodDst = join(workspace, methodRel)
   if (existsSync(methodSrc) && !existsSync(methodDst)) {
+    try {
+      assertSeedTargetInsideWorkspace({ workspace, rel: methodRel })
+    } catch (error) {
+      console.error(`scaffold: 方法库父目录越界：${methodRel}（${error instanceof Error ? error.message : String(error)}）`)
+      process.exit(2)
+    }
     if (!dryRun) {
       mkdirSync(workspace, { recursive: true })
       writeSeedFile(methodSrc, methodDst)
@@ -253,8 +375,9 @@ if (versionAhead && upgrade && !force) {
     skipped += 1
   }
 
-  // 状态文件：force/upgrade 总是刷新；首次安装写基线；默认模式在已有状态时不动（让 --check 如实报旧版本）。
-  if (!dryRun && (force || upgrade || state === null)) {
+  // 状态文件：只记录真正落地/已 current 的种子；untracked 不冒充 baseline。
+  // 默认模式保留旧版本号（让 --check 继续报旧种子），但把本轮补写的缺失文件记进基线。
+  if (!dryRun) {
     if (lstatOf(statePath)?.isSymbolicLink()) {
       note(false, '研究工作区种子（状态文件是 symlink）', `${statePath} 是符号链接；拒绝写穿（先删链接再跑）`)
       process.exit(2)
@@ -263,17 +386,41 @@ if (versionAhead && upgrade && !force) {
       note(false, '研究工作区种子（状态文件是目录）', `${statePath} 是目录；先移走再重跑`)
       process.exit(2)
     }
-    const next = {
-      version: seed.version,
-      files: Object.fromEntries(seedRels.map((rel) => [rel, seed.files[rel]])),
-      skipped: [...new Set(skippedRels)].sort(),
+    const stateFiles = state?.files ?? {}
+    const seedHashByName = seed.files
+    const next = nextSeedState({
+      seed: { version: seed.version, files: seedHashByName },
+      previousFiles: stateFiles,
+      classifications: Object.fromEntries(plan.map((p) => [p.rel, p.status])),
+      written: writtenRels,
+      force,
+    })
+    const nextFiles = { ...next.files }
+    for (const rel of adoptedNow) {
+      const entry = plan.find((p) => p.rel === rel)
+      if (entry !== undefined && entry.destHash !== null) nextFiles[rel] = entry.destHash
     }
-    const tmpState = `${statePath}.tmp-${process.pid}`
-    writeFileSync(tmpState, `${JSON.stringify(next, null, 2)}\n`)
-    renameSync(tmpState, statePath)
+    const adoptedSet = new Set(stateAdopted)
+    for (const rel of adoptedNow) adoptedSet.add(rel)
+    if (force) for (const rel of writtenRels) adoptedSet.delete(rel)
+    const adopted = [...adoptedSet].filter((rel) => existsSync(destOf(rel))).sort()
+    const version = (adopt || force || upgrade || state === null) ? seed.version : state.version
+    const nextState = { version, files: nextFiles, skipped: next.skipped, adopted }
+    const previousState = state === null ? null : { version: state.version, files: stateFiles, skipped: state.skipped ?? [], adopted: Array.isArray(state.adopted) ? state.adopted : [] }
+    if (force || upgrade || state === null || JSON.stringify(nextState) !== JSON.stringify(previousState)) {
+      const tmpState = `${statePath}.tmp-${process.pid}`
+      try {
+        writeFileSync(tmpState, `${JSON.stringify(nextState, null, 2)}\n`)
+        renameSync(tmpState, statePath)
+      } catch (error) {
+        try { unlinkSync(tmpState) } catch {}
+        note(false, '研究工作区种子（状态文件写入失败）', `${statePath}（${error.code ?? error.message}；检查工作区权限后重跑）`)
+        process.exit(2)
+      }
+    }
   }
 
-  note(true, `研究工作区种子（${workspace}）`, `${dryRun ? '[dry-run] ' : ''}写入 ${written} 个、跳过 ${skipped} 个（--force 覆盖；--upgrade 安全升级；method-library 不覆盖）${sidecars > 0 ? `；${sidecars} 个用户改过的文件写成 .seed-new` : ''}${orphanRels.length > 0 ? `；${orphanRels.length} 个孤儿种子未删` : ''}`)
+  note(true, `研究工作区种子（${workspace}）`, `${dryRun ? '[dry-run] ' : ''}写入 ${written} 个、跳过 ${skipped} 个（--force 覆盖；--upgrade 安全升级；--adopt 显式接受当前；method-library 不覆盖）${sidecars > 0 ? `；${sidecars} 个用户改过的文件写成 .seed-new` : ''}${adoptedNow.length > 0 ? `；${adoptedNow.length} 个文件记为 adopt` : ''}${orphanRels.length > 0 ? `；${orphanRels.length} 个孤儿种子未删` : ''}`)
 }
 
 if (seedOnly) {
@@ -284,33 +431,43 @@ if (seedOnly) {
 // ② profile 组合（团队层；版本与 engines.dsh 同源——不再装未钉版的最新层）
 {
   const TEAM = '@deepseek-ai/dsh-experimental-agent-team-profile'
-  // 团队层必须匹配“实际运行中的 DSH”，不是 engines.dsh 范围：先读 profile 的 app-boot，
-  // 再回退到 PATH dsh，最后才用兼容矩阵的已测基线。
-  const hostForTeam = explicitHost ?? (process.env.DSH_HOME ? join(process.env.DSH_HOME, 'profiles', profile) : null)
-  let TEAM_VERSION = null
-  if (hostForTeam !== null && existsSync(join(hostForTeam, 'package.json'))) {
+  // 团队层必须匹配“实际运行中的 DSH”，不是 engines.dsh 范围：安装锚优先，其次 profile 的
+  // app-boot，最后才是 PATH dsh；兼容矩阵只作诊断线索，不冒充运行版本。
+  const hostForTeam = explicitHost ?? join(resolveDshHome(process.env), 'profiles', profile)
+  const teamLabel = `团队层 profile「${profile}」`
+  let TEAM_VERSION = installAnchor?.version ?? null
+  if (TEAM_VERSION === null && existsSync(join(hostForTeam, 'package.json'))) {
     try {
       const requireFromHost = createRequire(join(hostForTeam, 'package.json'))
       TEAM_VERSION = JSON.parse(readFileSync(requireFromHost.resolve('@deepseek-ai/dsh-app-boot/package.json'), 'utf8')).version ?? null
     } catch { TEAM_VERSION = null }
   }
-  if (TEAM_VERSION === null) {
-    const r = spawnSync('dsh', ['--version'], { encoding: 'utf8' })
-    if (r.status === 0) TEAM_VERSION = String(r.stdout).match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/)?.[0] ?? null
+  const dshVersionRun = spawnSync('dsh', ['--version'], { encoding: 'utf8' })
+  if (TEAM_VERSION === null && dshVersionRun.status === 0) {
+    TEAM_VERSION = String(dshVersionRun.stdout).match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/)?.[0] ?? null
   }
-  if (TEAM_VERSION === null) TEAM_VERSION = pkg.dsh?.compatibility?.dshReleases?.[0]?.replace(/^dsh-v/, '') ?? null
+  const installedTeamVersion = (() => {
+    try {
+      return JSON.parse(readFileSync(join(hostForTeam, 'node_modules', ...TEAM.split('/'), 'package.json'), 'utf8')).version ?? null
+    } catch { return null }
+  })()
   const TEAM_SPEC = TEAM_VERSION === null ? TEAM : `${TEAM}@${TEAM_VERSION}`
-  const hasDsh = spawnSync('dsh', ['--version'], { encoding: 'utf8' }).status === 0
+  const hasDsh = dshVersionRun.status === 0
   if (TEAM_VERSION === null) {
-    note(false, `团队层加入 profile「${profile}」`, '无法派生团队层版本——package.json 的 engines.dsh 与 dsh.compatibility.dshReleases 都不可用')
+    note(false, teamLabel, '无法派生团队层版本——安装锚、profile app-boot、PATH dsh 都不可用')
+  } else if (installedTeamVersion === TEAM_VERSION && !refreshTeam) {
+    note(true, teamLabel, `已在场：${TEAM}@${installedTeamVersion}（不改写依赖来源；需要刷新用 --refresh-team）`)
+  } else if (installedTeamVersion !== null && !refreshTeam) {
+    note(false, teamLabel, `已在场但版本是 ${installedTeamVersion}，运行版本期望 ${TEAM_VERSION}；确认后用 --refresh-team 更新（默认不改用户 pin）`)
   } else if (!hasDsh) {
-    note(false, `团队层加入 profile「${profile}」`, 'dsh CLI 不可用——装 DSH 后重跑，或手工在 profile 的 dsh.profile.bundles 加该层')
+    note(false, teamLabel, 'dsh CLI 不可用——装 DSH 后重跑，或手工在 profile 的 dsh.profile.bundles 加该层')
   } else if (dryRun) {
-    note(true, `团队层加入 profile「${profile}」`, `[dry-run] 将执行：dsh plugin --profile ${profile} add ${TEAM_SPEC}`)
+    note(true, teamLabel, `[dry-run] 将执行：dsh plugin --profile ${profile} add ${TEAM_SPEC}`)
   } else {
     const r = spawnSync('dsh', ['plugin', '--profile', profile, 'add', TEAM_SPEC], { encoding: 'utf8' })
     const ok = r.status === 0
-    note(ok, `团队层加入 profile「${profile}」`, ok ? `已确保 ${TEAM_SPEC} 在场（幂等）` : `失败：${String(r.stderr ?? r.stdout).trim().split('\n').slice(-2).join(' ')}`)
+    const reason = r.error?.code === 'ENOENT' ? 'dsh CLI 不在 PATH' : String(r.stderr ?? r.stdout).trim().split('\n').slice(-2).join(' ')
+    note(ok, teamLabel, ok ? `已确保 ${TEAM_SPEC} 在场` : `失败：${reason || '未知错误'}`)
   }
 }
 
@@ -322,11 +479,10 @@ if (dryRun) {
   process.exit(failed === 0 ? 0 : 1)
 }
 console.log('\nscaffold: 跑 preflight 复核…\n')
-const dshHome = resolve(process.env.DSH_HOME ?? join(process.env.HOME ?? '', '.dsh'))
-const targetHost = join(dshHome, 'profiles', profile)
 const preflightHost = explicitHost ?? (existsSync(join(targetHost, 'package.json')) ? targetHost : null)
 const preflightHostArgs = preflightHost === null ? ['--no-host-inference'] : ['--host', preflightHost]
-const pf = spawnSync(process.execPath, [join(PACK, 'scripts', 'preflight.mjs'), '--workspace', workspace, ...preflightHostArgs, ...(installOnly ? ['--install-only'] : [])], { stdio: 'inherit' })
+const preflightAnchorArgs = installAnchor === null ? [] : ['--install-anchor', installAnchor.path]
+const pf = spawnSync(process.execPath, [join(PACK, 'scripts', 'preflight.mjs'), '--workspace', workspace, ...preflightHostArgs, ...preflightAnchorArgs, ...(installOnly ? ['--install-only'] : [])], { stdio: 'inherit' })
 const ok = failed === 0 && pf.status === 0
 console.log(`\nscaffold: ${ok ? installOnly ? '安装准备完成（不代表研究就绪）' : '准备完成' : '准备未完成（检查失败）'}（工作区 = ${workspace}，profile = ${profile}）`)
 if (ok && !installOnly) {

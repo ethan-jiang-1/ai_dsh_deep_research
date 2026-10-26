@@ -2,6 +2,8 @@
 
 > 状态：implemented
 
+> 部分取代：[部署真伪与工作区隔离](2026-10-26-deploy-truth-and-isolation.md)（preflight 的 peer 解析锚改为 DSH 安装本体、scaffold 增加参数/工作区/sidecar 守卫；本页其余决定仍有效）。
+
 ## 决定
 
 插件"做完"不等于"能装"。本变更把交付面补齐，并把部署知识按三层分家写进各自的 home：

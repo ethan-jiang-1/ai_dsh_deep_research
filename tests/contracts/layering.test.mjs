@@ -46,6 +46,7 @@ const files = walkTests(TESTS);
 const MENTION_EXEMPT = {
   'deploy-bin.test.mjs': '密钥名文本契约——钉部署脚本安全边界，判据本身含密钥名',
   'smoke-contract.test.mjs': '真模型档 closed set 契约——.credentials.yaml 是判据本身',
+  'credentials-status.test.mjs': '凭据分层契约——判据本身含密钥名/文件名；用临时目录，不读真实凭据',
 };
 
 test('① 回归层禁物：任意提及级（子进程 import / 浏览器 / 密钥名）', () => {

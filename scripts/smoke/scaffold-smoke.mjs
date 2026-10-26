@@ -25,6 +25,7 @@ const check = (ok, label, detail = '') => {
   if (!ok) failures.push(label)
 }
 const run = (args) => spawnSync(process.execPath, [SCAFFOLD, '--seed-only', ...args], { encoding: 'utf8' })
+const rawRun = (args, options = {}) => spawnSync(process.execPath, [SCAFFOLD, ...args], { encoding: 'utf8', ...options })
 const read = (p) => readFileSync(p, 'utf8')
 
 if (!existsSync(join(PACK, 'workspace', 'seed.json'))) {
@@ -39,6 +40,47 @@ try {
   cpSync(join(PACK, 'scripts', 'lib'), join(PACKCOPY, 'scripts', 'lib'), { recursive: true })
   cpSync(join(PACK, 'workspace'), join(PACKCOPY, 'workspace'), { recursive: true })
   const seed = JSON.parse(read(join(PACKCOPY, 'workspace', 'seed.json')))
+
+  // 参数严格性：未知 flag / 缺值 / 吞下一个 flag / 非法 profile 都不能静默写盘
+  const argsCwd = join(TEMP, 'args-cwd')
+  mkdirSync(argsCwd, { recursive: true })
+  const unknown = rawRun(['--workspace', join(TEMP, 'ws-arg-unknown'), '--chek'], { cwd: argsCwd })
+  check(unknown.status === 2 && /--chek/.test(unknown.stderr), '未知 flag 被拒绝（exit 2）', unknown.stderr)
+  check(!existsSync(join(TEMP, 'ws-arg-unknown')), '未知 flag 不创建 workspace')
+  const missingValue = rawRun(['--workspace', '--force'], { cwd: argsCwd })
+  check(missingValue.status === 2 && /--workspace/.test(missingValue.stderr), '缺值被拒绝（exit 2）', missingValue.stderr)
+  check(!existsSync(join(argsCwd, '--force')), '缺值不把下一个 flag 当路径')
+  const help = rawRun(['--help'], { cwd: argsCwd })
+  check(help.status === 0 && /用法/.test(help.stdout), '--help 打印用法并 exit 0')
+  const badProfile = rawRun(['--workspace', join(TEMP, 'ws-profile-bad'), '--profile', '../escape', '--seed-only'], { cwd: argsCwd })
+  check(badProfile.status === 2 && /profile/.test(badProfile.stderr), '非法 profile 名被拒绝（exit 2）', badProfile.stderr)
+  check(!existsSync(join(TEMP, 'ws-profile-bad')), '非法 profile 不创建 workspace')
+
+  // 根守卫：HOME / DSH_HOME 本身拒绝；父目录 symlink 不写穿到工作区外。
+  const fakeHome = join(TEMP, 'fake-home')
+  const fakeDsh = join(fakeHome, '.dsh')
+  mkdirSync(fakeDsh, { recursive: true })
+  const guardEnv = { ...process.env, HOME: fakeHome, DSH_HOME: fakeDsh }
+  const homeAsWs = rawRun(['--workspace', fakeHome, '--seed-only'], { cwd: argsCwd, env: guardEnv })
+  check(homeAsWs.status === 2 && /HOME/.test(homeAsWs.stderr), 'workspace=HOME 被拒绝（exit 2）', homeAsWs.stderr)
+  check(!existsSync(join(fakeHome, 'AGENTS.md')), 'workspace=HOME 不写 AGENTS')
+  const dshAsWs = rawRun(['--workspace', fakeDsh, '--seed-only'], { cwd: argsCwd, env: guardEnv })
+  check(dshAsWs.status === 2 && /DSH_HOME/.test(dshAsWs.stderr), 'workspace=DSH_HOME 被拒绝（exit 2）', dshAsWs.stderr)
+  check(!existsSync(join(fakeDsh, 'AGENTS.md')), 'workspace=DSH_HOME 不写 AGENTS')
+
+  const outsideVictim = join(TEMP, 'victim-outside')
+  const hostMismatch = rawRun(['--workspace', join(TEMP, 'ws-host-mismatch'), '--host', join(TEMP, 'other-profile')], { cwd: argsCwd })
+  check(hostMismatch.status === 2 && /--host/.test(hostMismatch.stderr), '--host 与 --profile 目录不一致被拒绝', hostMismatch.stderr)
+  check(!existsSync(join(TEMP, 'ws-host-mismatch')), '--host 不一致不创建 workspace')
+
+  const wsSymlinkParent = join(TEMP, 'ws-symlink-parent')
+  mkdirSync(outsideVictim, { recursive: true })
+  mkdirSync(wsSymlinkParent, { recursive: true })
+  symlinkSync(outsideVictim, join(wsSymlinkParent, 'templates'))
+  const symlinkRun = rawRun(['--workspace', wsSymlinkParent, '--seed-only'], { cwd: argsCwd })
+  check(symlinkRun.status === 2 && /symlink|工作区外/.test(symlinkRun.stderr), '父目录 symlink 越界被拒绝（exit 2）', symlinkRun.stderr)
+  check(readdirSync(outsideVictim).length === 0, '父目录 symlink 越界不写受害者目录')
+  check(!existsSync(join(wsSymlinkParent, 'AGENTS.md')), '父目录 symlink 越界不半写工作区')
 
   // 发布物完整性：篡改包内种子源但不改 seed.json → scaffold 必须先红，不铺错内容
   const BAD = join(TEMP, 'pack-bad')
@@ -178,14 +220,55 @@ try {
   writeFileSync(join(ws5, '.gitignore'), '# existing ignore\n')
   writeFileSync(join(ws5, 'method-library.md'), '# existing library\n')
   writeFileSync(join(ws5, 'drt_keep', 'keep.md'), '# existing run bundle\n')
-  check(run(['--workspace', ws5]).status === 0, '已有用户数据的工作区首装')
-  check(read(join(ws5, 'AGENTS.md')) === '# existing project instructions\n', '首装不覆盖已有 AGENTS')
-  check(read(join(ws5, '.gitignore')) === '# existing ignore\n', '首装不覆盖已有 .gitignore')
-  check(read(join(ws5, 'method-library.md')) === '# existing library\n', '首装不覆盖已有方法库')
-  check(read(join(ws5, 'drt_keep', 'keep.md')) === '# existing run bundle\n', '首装不触碰已有 run bundle')
+  const firstExisting = run(['--workspace', ws5])
+  check(firstExisting.status === 1, '已有关键种子 untracked 时首装拒绝（exit 1）', firstExisting.stderr)
+  check(/AGENTS\.md/.test(firstExisting.stderr) && /--force|空目录|--upgrade/.test(firstExisting.stderr), '拒绝信息点名文件与补救方式')
+  check(!existsSync(join(ws5, '.dsh-research-seed.json')), '拒绝首装不写 state（不把 untracked 冒充 baseline）')
+  check(read(join(ws5, 'AGENTS.md')) === '# existing project instructions\n', '拒绝首装不覆盖已有 AGENTS')
+  check(read(join(ws5, '.gitignore')) === '# existing ignore\n', '拒绝首装不覆盖已有 .gitignore')
+  check(read(join(ws5, 'method-library.md')) === '# existing library\n', '拒绝首装不覆盖已有方法库')
+  check(read(join(ws5, 'drt_keep', 'keep.md')) === '# existing run bundle\n', '拒绝首装不触碰已有 run bundle')
   check(run(['--upgrade', '--workspace', ws5]).status === 0, '已有用户数据 --upgrade')
   check(read(join(ws5, 'AGENTS.md')) === '# existing project instructions\n', '--upgrade 不覆盖已有 AGENTS')
   check(existsSync(join(ws5, 'AGENTS.md.seed-new')) && existsSync(join(ws5, '.gitignore.seed-new')), '--upgrade 为用户改过的种子写 sidecar')
+  const stateExisting = JSON.parse(read(join(ws5, '.dsh-research-seed.json')))
+  check(!Object.hasOwn(stateExisting.files, 'AGENTS.md') && !Object.hasOwn(stateExisting.files, '.gitignore'),
+    '--upgrade 不把 untracked AGENTS/.gitignore 记成 baseline', JSON.stringify(stateExisting.files))
+  check(Array.isArray(stateExisting.skipped) && stateExisting.skipped.includes('AGENTS.md'), '--upgrade 的 skipped 记录 AGENTS（preflight 可据此提示）')
+
+  // 重复 --upgrade 不得覆盖用户已编辑的 .seed-new：保留原 sidecar，新种子写带版本后缀的副本。
+  writeFileSync(join(ws5, 'AGENTS.md.seed-new'), '# my merged version — keep me\n')
+  const rerun = run(['--upgrade', '--workspace', ws5])
+  check(rerun.status === 0, '重复 --upgrade 可运行', rerun.stderr)
+  check(read(join(ws5, 'AGENTS.md.seed-new')) === '# my merged version — keep me\n', '重复 --upgrade 保留用户编辑的 sidecar')
+  const currentSeedVersion = JSON.parse(read(join(PACKCOPY, 'workspace', 'seed.json'))).version
+  check(existsSync(join(ws5, `AGENTS.md.seed-new-${currentSeedVersion}`)), '重复 --upgrade 把新种子写成带版本 sidecar',
+    `seed=${currentSeedVersion} files=${readdirSync(ws5).filter((n) => n.includes('seed-new')).join(',')}`)
+
+  // --adopt：在用户合并/确认自定义手册后显式接受当前工作区；之后 --upgrade 只写 sidecar，不覆盖。
+  const wsAdopt = join(TEMP, 'ws-adopt')
+  mkdirSync(wsAdopt, { recursive: true })
+  writeFileSync(join(wsAdopt, 'AGENTS.md'), '# my accepted manual\n')
+  const adoptRun = run(['--workspace', wsAdopt, '--adopt'])
+  check(adoptRun.status === 0, '--adopt 接受自定义 AGENTS', adoptRun.stderr)
+  check(read(join(wsAdopt, 'AGENTS.md')) === '# my accepted manual\n', '--adopt 不修改文件内容')
+  const adoptState = JSON.parse(read(join(wsAdopt, '.dsh-research-seed.json')))
+  check(Array.isArray(adoptState.adopted) && adoptState.adopted.includes('AGENTS.md'), '--adopt 把 AGENTS 记入 adopted')
+  check(adoptState.files['AGENTS.md'] === sha256('# my accepted manual\n'), '--adopt 记录当前内容哈希为 baseline')
+  const adoptCheck = run(['--workspace', wsAdopt, '--check'])
+  check(adoptCheck.status === 0 && /AGENTS\.md — modified/.test(adoptCheck.stdout), '--adopt 后 --check 只报 modified（不阻断）', adoptCheck.stdout.split('\n').slice(-2).join(' | '))
+  const adoptUpgrade = run(['--workspace', wsAdopt, '--upgrade'])
+  check(adoptUpgrade.status === 0 && read(join(wsAdopt, 'AGENTS.md')) === '# my accepted manual\n', '--adopt 后 --upgrade 不覆盖用户手册')
+  check(run(['--workspace', wsAdopt, '--adopt', '--check']).status === 2, '--adopt 与 --check 互斥（exit 2）')
+
+  // 只有 .gitignore 是用户自带的：不阻断（非研究契约），但也不能记成本包种子。
+  const wsIgnore = join(TEMP, 'ws-gitignore-only')
+  mkdirSync(wsIgnore, { recursive: true })
+  writeFileSync(join(wsIgnore, '.gitignore'), '# my ignore\n')
+  check(run(['--workspace', wsIgnore]).status === 0, '仅 .gitignore 已存在时不阻断首装')
+  const stateIgnore = JSON.parse(read(join(wsIgnore, '.dsh-research-seed.json')))
+  check(!Object.hasOwn(stateIgnore.files, '.gitignore'), '用户自带 .gitignore 不记成本包 baseline')
+  check(read(join(wsIgnore, '.gitignore')) === '# my ignore\n', '用户自带 .gitignore 不被覆盖')
 
   // ③f 种子目标是目录：--force 不能把目录当文件写，exit 2 并保留目录
   const ws6 = join(TEMP, 'ws6')

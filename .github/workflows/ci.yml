@@ -48,3 +48,41 @@ jobs:
 
       - name: Test (keyless regression)
         run: source dev/env.sh && pnpm test
+
+  deploy:
+    name: keyless deploy smokes
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout (with pinned DSH submodule)
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.7.0
+          run_install: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build pack (pack-smoke needs lib/)
+        run: pnpm --filter dsh-deep-research-pack build
+
+      - name: Scaffold CLI + guards
+        run: node scripts/smoke/scaffold-smoke.mjs
+
+      - name: Preflight anchor/profile/workspace/credentials
+        run: node scripts/smoke/preflight-smoke.mjs
+
+      - name: Tarball shape
+        run: node scripts/smoke/pack-smoke.mjs

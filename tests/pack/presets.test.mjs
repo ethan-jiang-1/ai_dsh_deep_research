@@ -126,7 +126,7 @@ test('兼容范围覆盖测试基线：engines.dsh 是范围，矩阵是已测�
   const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
   const matrix = pkg.dsh?.compatibility?.dshReleases ?? [];
   assert.equal(matrix.length, 2, '测试基线当前声明 rc.2 + rc.3；增删时同步扩本断言');
-  assert.match(pkg.engines?.dsh ?? '', /^>=0\.2\.1-rc\.2 <0\.3\.0$/,
+  assert.match(pkg.engines?.dsh ?? '', /^>=0\.2\.1-rc\.2 <0\.3\.0-0$/,
     'engines.dsh 应为 0.2.x 范围（避免把未来安装钉死在单一 rc）');
   assert.ok(satisfiesVersion(matrix[0].replace(/^dsh-v/, ''), pkg.engines.dsh),
     '兼容矩阵的已测基线必须落在 engines.dsh 范围内');

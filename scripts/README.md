@@ -17,7 +17,9 @@
 | preset-smoke.mjs | L1 真挂载：boot 页模块表行（client 半 served）、roster、逐角色建会话、skills 隔离 | keyless（`DSH_SMOKE_REAL=1` 起真 DSH，无模型） |
 | release-smoke.mjs | L2 安装形状：pack → 干净 profile → plugin add → manifest/安装域 client 半断言 → 安装域冒烟 → 端口释放验证（进程卫生：超时预算 + 并发锁 + 退出确认） | keyless（`--install-only` 跳凭据） |
 | cold-start-smoke.mjs | L2 冷启动：独立 `DSH_DEV_HOME` + profile + 端口 + state，`run-driver up --bootstrap` 到浏览器 GREEN；MCP 关闭 | keyless（须先 `source dev/env.sh`；vendor/依赖在位；团队层需 registry/缓存） |
-| scaffold-smoke.mjs | scaffold CLI 行为：首次铺种 / `--force` 保方法库 / `--check` deleted / `--upgrade` 只升级未改文件 + `.seed-new` | keyless（临时 pack 副本 + 临时工作区；无 dsh/模型/网络） |
+| scaffold-smoke.mjs | scaffold CLI 行为：参数严格性 / 根守卫 / 父 symlink 越界 / 首次铺种 / sidecar 保护 / `--check` deleted / `--upgrade` 只升级未改文件 | keyless（临时 pack 副本 + 临时工作区；无 dsh/模型/网络） |
+| preflight-smoke.mjs | preflight 解析锚与验收真伪：fake anchor 齐全绿 / 缺行依赖红（不从仓库泄漏）/ base-only profile 红 / untracked AGENTS 红 / 空凭据红 / workspace `.env` 绿 | keyless（仓库外临时 home + fake anchor/profile；无 dsh/网络） |
+| real-home-smoke.mjs | 真用户环境安装：仓库外 home + 全局 dsh + tarball → scaffold/preflight 绿 → 真 web 页面 boot graph 含本包；团队层 link 不被改写 | keyless（需全局 dsh + `_dist` tarball；缺前置 exit 2） |
 | handoff-smoke.mjs | `export-handoff` 产物边界：必备源在场、无运行态/凭据/run 数据/依赖/导出包 | keyless（git archive HEAD；临时 out） |
 | compat-smoke.mjs | T6 rc.3 安装面：全局 rc.3 在干净 home 做 install → dump-config → scaffold/preflight → remove | 需全局 dsh rc.3；缺失 exit 2（未跑 ≠ 通过） |
 | data-smoke.mjs | T5 数据面切片：包目录零写入、假 token 不泄漏、卸载后 workspace 用户文件 + session 日志保留 | keyless（真 web 启动、无模型调用；tarball 需先 export-dist） |
@@ -111,7 +113,7 @@
 | lib/stream-diagnostics-core.mjs | stream-diagnostics、stream-diagnostics.test | 模型活动会话筛选（活动事件预筛后再按日志 mtime 取最近 N）+ 尝试时间线投影（assistant/message 计成功、assistant/attempt 计失败/无落面，终态三判 alive-or-idle/recovered/dead） |
 | lib/run-state.mjs | cdp-ask-smoke、hitl-answer、session-replay、run-state.test、session-events、watch-run | run 操作面状态谓词 |
 | lib/run-source-node.mjs | evidence-audit、node-gate、run-context-node.test、schema-scan | node:fs 的 RunSource 适配器：list/read/version；ENOENT → missing，其余 → unreadable；行窗口与 eof 语义对齐 vendor workspaceFiles |
-| lib/env.mjs | env-credentials.test、compat-smoke、data-smoke、pack-smoke、profile-concurrency-smoke、profile-matrix-smoke、upgrade-smoke、user-env-smoke、workspace-isolation-smoke、session-replay、cdp-ask-smoke、client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、record-role-fixture、release-smoke、snapshot-replay-smoke、team-preflight-smoke、rerun-triage-probe | 子进程环境清洗（scrubbedEnv/withModelKey）与真模型档前置（requireCredentials/credentialsPresent——凭据卫生） |
+| lib/env.mjs | env-credentials.test、compat-smoke、data-smoke、pack-smoke、profile-concurrency-smoke、profile-matrix-smoke、upgrade-smoke、user-env-smoke、workspace-isolation-smoke、session-replay、cdp-ask-smoke、client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、record-role-fixture、release-smoke、snapshot-replay-smoke、team-preflight-smoke、rerun-triage-probe、preflight-smoke、real-home-smoke | 子进程环境清洗（scrubbedEnv/withModelKey）与真模型档前置（requireCredentials/credentialsPresent——凭据卫生） |
 | lib/playwright.mjs | session-replay、client-hitl-smoke、client-load-smoke、e2e-021rc2、hitl-answer、snapshot-replay-smoke | Playwright 启停支撑 |
 | lib/cdp-driver.mjs | cdp-probe、scene-capture | 裸 CDP 驱动 |
 | lib/session-replay.mjs | session-replay、session-replay.test | 历史会话定位/元信息/判读整形纯函数（跨组枚举、id 优先、标题歧义如实报候选；会话→工作区靠首事件 cwd） |
@@ -132,7 +134,7 @@
 | lib/direct-authorization-boundary.mjs | entry-chain-probe、entry-chain-probe.test | 按授权范围执行、无需重复请批的词面判定；由探针与 keyless 回归消费 |
 | lib/replay-scene.mjs | replay-scene.test、snapshot-replay-smoke | 场景声明消费者：roster/版本/来源形状/路径校验（缺件、串角色、垃圾锚点 fail-loud）+ 场景集发现（`replay/*/snapshot.json` 全集、防空语料、--face 全名定向） |
 | lib/replay-request.mjs | record-role-fixture、replay-request.test、snapshot-replay-smoke | 组装请求面逐条比较：persona、header 全序列、三处 user/message 注入（定向归一化） |
-| lib/port-reclaim.mjs | preset-smoke、release-smoke、cold-start-smoke、data-smoke、workspace-isolation-smoke | 端口收割执行器（按端口杀 + 三轮验证释放；实测依据 = web 孙进程不在子进程组里） |
+| lib/port-reclaim.mjs | preset-smoke、release-smoke、cold-start-smoke、data-smoke、workspace-isolation-smoke、real-home-smoke | 端口收割执行器（按端口杀 + 三轮验证释放；实测依据 = web 孙进程不在子进程组里） |
 | lib/path-hygiene.mjs | run-gates/path-hygiene、path-hygiene.test | 本机 home 路径纯文本检测（Unix/macOS/Windows 前缀；行号） |
 | lib/selftest-library.mjs | library-fold.test | 「研究配置」面板/library-fold 自测例库单一正本：12 形态条目（四字段/部分/空值/旧格式/混居/重名/空条目/杂项行/续行/缩进），两处共用防形态漂移 |
 | lib/method-presets.mjs | library-fold.test、method-presets.test | research-brief skill「方法预设」表的唯一解析入口（表头/行列数/防空集 fail-loud）——内置名单不再各写一份手写副本 |
