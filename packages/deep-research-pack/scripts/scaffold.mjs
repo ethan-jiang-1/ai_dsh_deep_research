@@ -15,7 +15,7 @@
 //   或经 bin：dsh-deep-research-scaffold --workspace <dir> [--profile research]（registry 安装形态；tarball 装法无 PATH bin，用本文件全路径）
 //
 // 不做的事（有意）：不装 DSH 本体、不写密钥（安全边界：密钥永不落仓库/脚本）。
-import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { accessSync, constants as fsConstants, copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
@@ -48,6 +48,12 @@ if (workspace === null) {
 if (existsSync(workspace) && !statSync(workspace).isDirectory()) {
   console.error(`scaffold: --workspace 必须是目录，当前是文件：${workspace}`)
   process.exit(2)
+}
+if (!checkMode && existsSync(workspace)) {
+  try { accessSync(workspace, fsConstants.W_OK) } catch {
+    console.error(`scaffold: --workspace 不可写：${workspace}（--check 可只读；写入请先修权限）`)
+    process.exit(2)
+  }
 }
 if (checkMode && (upgrade || force)) {
   console.error('scaffold: --check 只读，不能与 --upgrade/--force 同用')

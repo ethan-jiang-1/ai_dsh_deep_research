@@ -46,6 +46,7 @@
 - 无状态文件：`--check` 报“无记录”而非“版本一致”；`--upgrade` 建基线。
 - `--workspace` 指向文件：exit 2 并给“必须是目录”，不再抛栈。
 - 同版本重装：`plugin add` + `--check` 幂等，无 sidecar/状态漂移。
+- 只读 workspace：写模式 exit 2 并提示修权限；`--check` 仍可只读（不再抛栈）。
 - 损坏的状态 JSON：按无状态处理，`--upgrade` 不覆盖用户文件。
 
 ## 边界
