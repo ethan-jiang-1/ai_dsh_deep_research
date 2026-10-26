@@ -47,6 +47,20 @@
 | discipline-probe.mjs | 散文纪律行为面五场景标记断言（A2 超界 / B1 差集 / 收活缺件 / 收活 UNVERIFIED / 计划确认卡·quick_factual 免发互补对）+ 留档人工复核；`--scenario <id>` 定向跑 | 真模型档 |
 | rerun-triage-probe.mjs | 不满转接的模型行为五条（复述不满 / ≤2 手段 / 代价与版本后果 / 未确认前不动手 / 范围来自报告末节）：给一句「太浅」跑真 lead 会话；五条全中才 PASS（探针不证明长尾说法不误判——人读） | 真模型档 |
 
+## 分发/安装失败面 → 资产
+
+| 失败面 | 资产 | 前置 |
+|---|---|---|
+| 包内容/导出/安装脚本/手册 sha | `pack-smoke`、`package-contract.test`、`export-dist` | 需 lib；手册/tarball 在场 |
+| 干净 profile 安装/卸载/client | `release-smoke`、`compat-smoke` | 全局/源码 DSH；rc.3 缺失 exit 2 |
+| 已有用户环境（别的 bundle + overlay + session/凭据/workspace） | `user-env-smoke` | 全局 dsh + tarball |
+| 多 profile、损坏 tarball、目录 file:、卸载重装 | `profile-matrix-smoke` | 全局 dsh + tarball |
+| 下一版/回滚/活数据 | `upgrade-smoke` | 全局 dsh + npm pack |
+| 初始化种子/锁/原子 state/特殊文件/路径穿越 | `scaffold-smoke` | 临时 pack；无 dsh |
+| SIGKILL/stale lock/崩溃恢复 | `interrupt-smoke` | 本地临时 pack；失败保留现场 |
+| 双实例 W/H 隔离 | `workspace-isolation-smoke` | 真 web；约两套 cold start |
+| 数据面零写入/secret/session 保留 | `data-smoke` | 真 web + tarball |
+
 ## run-gates/（run bundle 机械门与审计）
 
 | 件 | 证明什么 | 档位 |

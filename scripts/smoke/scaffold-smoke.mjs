@@ -58,6 +58,14 @@ try {
   const travRun = spawnSync(process.execPath, [join(TRAV, 'scripts', 'scaffold.mjs'), '--seed-only', '--workspace', join(TEMP, 'ws-trav')], { encoding: 'utf8' })
   check(travRun.status === 2 && /非法种子路径/.test(travRun.stderr) && !existsSync(join(TEMP, 'escaped.txt')), 'seed 路径穿越被拒绝且未写出工作区', (travRun.stderr || '').slice(-300))
 
+  const CASE = join(TEMP, 'pack-case')
+  cpSync(PACKCOPY, CASE, { recursive: true })
+  const caseSeed = JSON.parse(read(join(CASE, 'workspace', 'seed.json')))
+  caseSeed.files['AGENTS.MD'] = caseSeed.files['AGENTS.md']
+  writeFileSync(join(CASE, 'workspace', 'seed.json'), `${JSON.stringify(caseSeed, null, 2)}\n`)
+  const caseRun = spawnSync(process.execPath, [join(CASE, 'scripts', 'scaffold.mjs'), '--seed-only', '--workspace', join(TEMP, 'ws-case')], { encoding: 'utf8' })
+  check(caseRun.status === 2 && /大小写\/Unicode 冲突/.test(caseRun.stderr), 'seed 键大小写冲突被拒绝', (caseRun.stderr || '').slice(-300))
+
   // 种子改名：旧名 orphan + 新名 missing 同时可见，不自动删旧文件
   const RENAME = join(TEMP, 'pack-rename')
   cpSync(PACKCOPY, RENAME, { recursive: true })
@@ -218,6 +226,11 @@ try {
   check(!existsSync(join(ws2, deletedRel)), '--upgrade 不静默重铺用户删除的种子')
   check(run(['--force', '--workspace', ws2]).status === 0, '--force 显式恢复')
   check(existsSync(join(ws2, deletedRel)), '--force 恢复用户删除的种子')
+
+  // ④b 路径含空格/中文：argv 数组直传，不经过 shell
+  const wsPath = join(TEMP, 'space 工作区')
+  check(run(['--workspace', wsPath]).status === 0 && existsSync(join(wsPath, 'AGENTS.md')), '空格/中文 workspace 铺种')
+  check(run(['--check', '--workspace', wsPath]).status === 0, '空格/中文 workspace --check')
 
   // ⑤ 新版移除种子：旧文件保留但 --check 必须报 orphan，不静默假装 current
   const orphanSeed = JSON.parse(read(join(PACKCOPY, 'workspace', 'seed.json')))
