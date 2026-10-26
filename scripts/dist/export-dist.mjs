@@ -177,6 +177,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffo
 只处理工作区、不碰 profile：加 \`--seed-only\`。
 没有模型 key 时加 \`--install-only\`：只验安装形状，不把“无 key”当安装失败。
 若设置了 \`DSH_HOME\`，把本节的 \`~/.dsh\` 换成 \`$DSH_HOME\`；本手册默认写 \`~/.dsh\`。
+种子目标若是 symlink，--force 只替换链接本身，不写穿目标；状态文件是 symlink 时拒绝写入。
 
 ## 四、跑一场研究
 

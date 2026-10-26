@@ -8,7 +8,7 @@
 // 用法：node scripts/smoke/scaffold-smoke.mjs
 // 退出码：0 全绿 / 断言红 / 2 前置缺席（未跑 ≠ 通过）
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, lstatSync, mkdirSync, readFileSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { sha256 } from '../../packages/deep-research-pack/scripts/lib/seed-core.mjs'
@@ -95,6 +95,39 @@ try {
   const noState = run(['--check', '--workspace', ws3])
   check(noState.status === 1 && /无记录/.test(noState.stdout), '--check 报无状态记录', noState.stdout.split('\n').slice(-2).join(' | '))
   check(run(['--upgrade', '--workspace', ws3]).status === 0 && existsSync(join(ws3, '.dsh-research-seed.json')), '--upgrade 为无状态工作区建基线')
+
+  // ③d symlink：--force 替换链接本身，绝不写穿到目标；state 链接直接拒绝
+  const ws4 = join(TEMP, 'ws4')
+  check(run(['--workspace', ws4]).status === 0, '第四工作区铺种')
+  const victim = join(TEMP, 'victim.txt')
+  writeFileSync(victim, 'ORIGINAL VICTIM\n')
+  unlinkSync(join(ws4, 'AGENTS.md'))
+  symlinkSync(victim, join(ws4, 'AGENTS.md'))
+  check(run(['--force', '--workspace', ws4]).status === 0, '--force 处理种子 symlink')
+  check(read(victim) === 'ORIGINAL VICTIM\n', '--force 不写穿 symlink 目标')
+  check(!lstatSync(join(ws4, 'AGENTS.md')).isSymbolicLink(), '--force 把 symlink 替换为常规种子文件')
+  const stateVictim = join(TEMP, 'state-victim.json')
+  writeFileSync(stateVictim, '{"keep":"me"}\n')
+  unlinkSync(join(ws4, '.dsh-research-seed.json'))
+  symlinkSync(stateVictim, join(ws4, '.dsh-research-seed.json'))
+  const stateLink = run(['--force', '--workspace', ws4])
+  check(stateLink.status === 2 && read(stateVictim) === '{"keep":"me"}\n', 'state symlink 被拒绝且不写穿', stateLink.stdout)
+
+  // ③e 初始化已有用户数据：AGENTS/.gitignore/方法库/run bundle 不被首装覆盖
+  const ws5 = join(TEMP, 'ws5')
+  mkdirSync(join(ws5, 'drt_keep'), { recursive: true })
+  writeFileSync(join(ws5, 'AGENTS.md'), '# existing project instructions\n')
+  writeFileSync(join(ws5, '.gitignore'), '# existing ignore\n')
+  writeFileSync(join(ws5, 'method-library.md'), '# existing library\n')
+  writeFileSync(join(ws5, 'drt_keep', 'keep.md'), '# existing run bundle\n')
+  check(run(['--workspace', ws5]).status === 0, '已有用户数据的工作区首装')
+  check(read(join(ws5, 'AGENTS.md')) === '# existing project instructions\n', '首装不覆盖已有 AGENTS')
+  check(read(join(ws5, '.gitignore')) === '# existing ignore\n', '首装不覆盖已有 .gitignore')
+  check(read(join(ws5, 'method-library.md')) === '# existing library\n', '首装不覆盖已有方法库')
+  check(read(join(ws5, 'drt_keep', 'keep.md')) === '# existing run bundle\n', '首装不触碰已有 run bundle')
+  check(run(['--upgrade', '--workspace', ws5]).status === 0, '已有用户数据 --upgrade')
+  check(read(join(ws5, 'AGENTS.md')) === '# existing project instructions\n', '--upgrade 不覆盖已有 AGENTS')
+  check(existsSync(join(ws5, 'AGENTS.md.seed-new')) && existsSync(join(ws5, '.gitignore.seed-new')), '--upgrade 为用户改过的种子写 sidecar')
 
   // ④ --check 区分 deleted：用户删掉的种子不被 --upgrade 静默重铺，--force 才恢复
   const deletedRel = 'templates/run/topics.md'

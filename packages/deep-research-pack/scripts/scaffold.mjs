@@ -15,7 +15,7 @@
 //   或经 bin：dsh-deep-research-scaffold --workspace <dir> [--profile research]（registry 安装形态；tarball 装法无 PATH bin，用本文件全路径）
 //
 // 不做的事（有意）：不装 DSH 本体、不写密钥（安全边界：密钥永不落仓库/脚本）。
-import { accessSync, constants as fsConstants, copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { accessSync, constants as fsConstants, copyFileSync, existsSync, lstatSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
@@ -82,15 +82,24 @@ const seedRels = Object.keys(seed.files).sort()
 const versionAhead = state?.version !== undefined && state.version !== seed.version && satisfiesVersion(state.version, `>${seed.version}`)
 const sourceOf = (rel) => join(SEED, seedSourceRel(rel))
 const destOf = (rel) => join(workspace, rel)
-const hashOf = (path) => (existsSync(path) ? sha256(readFileSync(path, 'utf8')) : null)
+const lstatOf = (path) => { try { return lstatSync(path) } catch { return null } }
+// 不跟随 symlink 读哈希：工作区里的链接可能指向用户/系统敏感文件。
+const hashOf = (path, st = lstatOf(path)) => (st?.isFile() ? sha256(readFileSync(path, 'utf8')) : null)
+const writeSeedFile = (src, dst) => {
+  const st = lstatOf(dst)
+  if (st?.isSymbolicLink()) unlinkSync(dst) // 替换链接本身，绝不写穿到目标
+  else if (st?.isDirectory()) throw new Error(`目标不是普通文件：${dst}`)
+  copyFileSync(src, dst)
+}
 
 const plan = seedRels.map((rel) => {
   const destPath = destOf(rel)
-  const destHash = hashOf(destPath)
+  const destStat = lstatOf(destPath)
+  const destHash = hashOf(destPath, destStat)
   const stateHash = stateFiles[rel] ?? null
   return {
     rel, destPath, destHash, stateHash, seedHash: seed.files[rel],
-    status: classifySeedEntry({ destExists: destHash !== null, destHash, stateHash, seedHash: seed.files[rel] }),
+    status: classifySeedEntry({ destExists: destStat !== null, destHash, stateHash, seedHash: seed.files[rel] }),
   }
 })
 
@@ -125,7 +134,7 @@ if (versionAhead && upgrade && !force) {
     if (shouldWrite) {
       if (!dryRun) {
         mkdirSync(dirname(p.destPath), { recursive: true })
-        copyFileSync(sourceOf(p.rel), p.destPath)
+        writeSeedFile(sourceOf(p.rel), p.destPath)
       }
       written += 1
       continue
@@ -134,7 +143,7 @@ if (versionAhead && upgrade && !force) {
     if (p.status !== 'current' && upgrade && (p.status === 'modified' || p.status === 'untracked')) {
       if (!dryRun) {
         const sidecar = `${p.destPath}.seed-new`
-        copyFileSync(sourceOf(p.rel), sidecar)
+        writeSeedFile(sourceOf(p.rel), sidecar)
         sidecars += 1
       }
       skippedRels.push(p.rel)
@@ -148,7 +157,7 @@ if (versionAhead && upgrade && !force) {
   if (existsSync(methodSrc) && !existsSync(methodDst)) {
     if (!dryRun) {
       mkdirSync(workspace, { recursive: true })
-      copyFileSync(methodSrc, methodDst)
+      writeSeedFile(methodSrc, methodDst)
     }
     written += 1
   } else if (existsSync(methodDst)) {
@@ -157,6 +166,10 @@ if (versionAhead && upgrade && !force) {
 
   // 状态文件：force/upgrade 总是刷新；首次安装写基线；默认模式在已有状态时不动（让 --check 如实报旧版本）。
   if (!dryRun && (force || upgrade || state === null)) {
+    if (lstatOf(statePath)?.isSymbolicLink()) {
+      note(false, '研究工作区种子（状态文件是 symlink）', `${statePath} 是符号链接；拒绝写穿（先删链接再跑）`)
+      process.exit(2)
+    }
     const next = {
       version: seed.version,
       files: Object.fromEntries(seedRels.map((rel) => [rel, seed.files[rel]])),

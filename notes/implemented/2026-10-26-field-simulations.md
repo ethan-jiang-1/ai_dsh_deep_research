@@ -38,6 +38,7 @@
 - `--check` 正确报：`AGENTS.md modified`、`NODES stale`、新模板 `missing`、版本落后；`--upgrade` 写入 2 个、保留 AGENTS + `.seed-new`、方法库原样、状态 0.1.3；复查 `--check` 绿（仅 modified）。
 - **修复真实缺陷**：回滚到 0.1.2 后，旧版 `--upgrade` 把 0.1.3 的 `NODES.md` 当 stale 覆盖，丢失新种子。现在 `--check` 报“工作区记录比 pack 新——拒绝自动降级”退出 1；`--upgrade` 拒绝退出 1 并保留新种子；`--force` 才降级。
 - 回归资产：[scaffold-smoke](../../scripts/smoke/scaffold-smoke.mjs) 增加“记录 99.9.9 > pack 9.9.9”的反证段；手跑红证显示修复前会覆盖，修复后保留。
+- 新增 [upgrade-smoke](../../scripts/smoke/upgrade-smoke.mjs)：profile 安装当前版 → 模拟下一版覆盖 → 种子升级 → 回滚拒绝降级 → 卸载，PROFILE 与 W 双面一次跑绿。
 
 ### 4. 其他边界矩阵
 
@@ -47,6 +48,7 @@
 - `--workspace` 指向文件：exit 2 并给“必须是目录”，不再抛栈。
 - 同版本重装：`plugin add` + `--check` 幂等，无 sidecar/状态漂移。
 - 只读 workspace：写模式 exit 2 并提示修权限；`--check` 仍可只读（不再抛栈）。
+- 种子目标为 symlink：`--force` 只替换链接本身，不写穿目标；`--upgrade` 写 sidecar；state 文件是 symlink 时 exit 2 拒绝。
 - 损坏的状态 JSON：按无状态处理，`--upgrade` 不覆盖用户文件。
 
 ## 边界
