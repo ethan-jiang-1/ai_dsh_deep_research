@@ -116,11 +116,18 @@ const safeSeedRel = (rel) => {
   const relToWorkspace = relative(workspace, resolve(workspace, rel))
   return relToWorkspace !== '' && !relToWorkspace.startsWith('..') && !isAbsolute(relToWorkspace)
 }
+const foldedSeedKeys = new Map()
 for (const rel of Object.keys(seed.files)) {
   if (!safeSeedRel(rel)) {
     console.error(`scaffold: 非法种子路径：${rel}（必须是工作区内相对路径；拒绝 .. / 绝对路径 / 反斜杠）`)
     process.exit(2)
   }
+  const folded = rel.normalize('NFC').toLowerCase()
+  if (foldedSeedKeys.has(folded)) {
+    console.error(`scaffold: 种子键大小写/Unicode 冲突：${foldedSeedKeys.get(folded)} vs ${rel}（跨 FS 不可移植）`)
+    process.exit(2)
+  }
+  foldedSeedKeys.set(folded, rel)
   const sourceRel = seedSourceRel(rel)
   const relToSeed = relative(SEED, resolve(SEED, sourceRel))
   if (relToSeed === '' || relToSeed.startsWith('..') || isAbsolute(relToSeed)) {

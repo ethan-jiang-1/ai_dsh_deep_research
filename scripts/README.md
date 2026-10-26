@@ -25,7 +25,7 @@
 | user-env-smoke.mjs | 已有 bundle + 用户 overlay + session/凭据/workspace 的安装/卸载共存 | keyless（全局 dsh + 本地 tarball） |
 | profile-matrix-smoke.mjs | 多 profile 并存/独立卸载、损坏 tarball 无半装、用户 overlay 不改写、directory file: 移动/重装、卸载重装后 workspace 数据保留 | keyless（全局 dsh + 本地 tarball） |
 | upgrade-smoke.mjs | 安装 → 模拟下一版覆盖安装 → 种子升级 → 回滚拒绝降级 → 卸载；profile + 工作区双面 | keyless（全局 dsh + npm pack；不调模型） |
-| interrupt-smoke.mjs | SIGKILL 中断 scaffold：stale lock、state 临时件清理、重跑补齐全部种子（失败保留现场） | keyless（本地临时 pack，无 dsh） |
+| interrupt-smoke.mjs | SIGKILL 中断 scaffold + 真双进程锁竞争：stale lock、state 临时件清理、重跑补齐全部种子（失败保留现场） | keyless（本地临时 pack，无 dsh） |
 | workspace-isolation-smoke.mjs | B4 双实例：两套 home/profile/port/state/workspace 各起通道、各建会话；会话组绑定自己的 W、home/session 互斥、marker 互不可见 | keyless（真 web，不调模型；更慢，约两套 cold start） |
 | client-load-smoke.mjs | 观察面真浏览器装配、页签与渐进面对账（磁盘参考选择 = client-load-reference.mjs；「研究配置」摘要相位 + 主界面「方法库」tab = client-load-config.mjs 与主件 pass-3c）；失败留现场（png/html/console/meta），无窗口内交付目标 = exit 2 SKIP | keyless（浏览器） |
 | e2e-021rc2.mjs | **升级端到端验收**（0.2.1-rc.2 起）：① 四个研究角色在角色列表里连续成组（内置 standard/ptc/minimal/creator 与 pack order 撞车的回归锁）② 右栏「研究状态」胶囊可点 + 页签体真数据 ③「研究配置」同上 ④ 本插件面零故障；真实实例走完用户路径，不靠人眼 | keyless（浏览器；须先 source dev/env.sh；失败留现场） |
