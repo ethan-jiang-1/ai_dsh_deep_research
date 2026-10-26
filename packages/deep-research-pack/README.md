@@ -65,20 +65,19 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffo
 cd ~/research-workspace && dsh --profile research
 ```
 
-**升级工作区种子**：pack 升级后先跑 `scaffold --check`（只读；报告 missing/stale/untracked/modified），
+**升级工作区种子**：pack 升级后先跑 `scaffold --check`（只读；报告 missing/deleted/stale/untracked/modified），
 再跑 `scaffold --upgrade`。升级只覆盖“用户未改过且种子已更新”的文件；用户改过的文件保留原样，
 新种子写成 `<文件>.seed-new` 供手动合并。`method-library.md` 是用户数据，任何模式都不覆盖已存在文件；
 状态记录在工作区根 `.dsh-research-seed.json`（版本 + 哈希 + 跳过清单）。
 
 **升级/回滚**：升级 = 装新版 npm/tarball（`dsh plugin --profile research add ...@<新版>` 或 `file:<新版>.tgz`），
-再按上面的 `--check`/`--upgrade` 升级工作区种子；回滚 = 装回旧版 tarball，种子不随插件降级。
+再按上面的 `--check`/`--upgrade` 升级工作区种子；回滚 = 装回旧版 tarball，种子不随插件降级。旧版 `--check` 会报“工作区记录比 pack 新”并拒绝 `--upgrade`；确需降级种子用 `--force`（显式覆盖，新种子会丢）。
 宿主版本必须满足包内 `engines.dsh`，否则安装/启动被拒。
 
 **目录安装（开发/离线）**：`pnpm build` 后可直接 `dsh plugin --profile research add file:/abs/path/to/packages/deep-research-pack`；
 profile 记录的是绝对目录依赖，移动/删除该目录会让 profile 断链，正式分发仍用 tarball/npm。
 
-**离线**：tarball 本身不需要 registry；团队层需预装/缓存，Playwright MCP 首次需 npx（或 `MCP_PLAYWRIGHT=0`），
-模型 API 需网络。完整矩阵见 [安装手册](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_dist/安装手册.md)。
+**离线**：tarball 本身不需要 registry；团队层需预装/缓存，且 pnpm 的 registry metadata 缓存要保留——只预装 `node_modules` 不够（冷 store 实测 `ERR_PNPM_NO_OFFLINE_META`）；Playwright MCP 首次需 npx（或 `MCP_PLAYWRIGHT=0`），模型 API 需网络。完整矩阵见 [安装手册](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_dist/安装手册.md)。
 
 **为什么需要 ③**：研究纪律靠**会话 cwd 的 `AGENTS.md`**（DSH 的 agent-instructions 从 cwd
 向上发现并注入每个角色）；团队机制（`spawn_teammate` / `team_task_*`）**不在本包声明**

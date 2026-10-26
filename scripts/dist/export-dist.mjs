@@ -175,6 +175,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffo
 \`--upgrade\` 只覆盖“用户未改过且种子已更新”的文件；改过的文件保留原样，新种子写成
 \`<文件>.seed-new\` 供手动合并。\`method-library.md\` 是用户数据，任何模式都不覆盖已存在文件。
 只处理工作区、不碰 profile：加 \`--seed-only\`。
+没有模型 key 时加 \`--install-only\`：只验安装形状，不把“无 key”当安装失败。
 
 ## 四、跑一场研究
 
@@ -214,8 +215,8 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffo
   --workspace ~/research-workspace --upgrade
 \`\`\`
 
-回滚 = 装回旧版 tarball；工作区种子不回滚（用户数据与方法库不随插件降级），旧版可能把新种子判成“未来版本”，
-\`--check\` 会如实报告。DSH 本体版本必须满足旧包的 \`engines.dsh\`，否则宿主拒绝加载。
+回滚 = 装回旧版 tarball；工作区种子不回滚（用户数据与方法库不随插件降级）。旧版检查会报“工作区记录比 pack 新”并拒绝 --upgrade；确需降级工作区种子用 --force（显式覆盖，新种子会丢）。
+DSH 本体版本必须满足旧包的 \`engines.dsh\`，否则宿主拒绝加载。
 
 ## 七、离线 / 受限网络
 
@@ -223,7 +224,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffo
 |---|---|---|
 | DSH 本体 | 需预装 | 本包不装 DSH |
 | 本包 tarball | 是 | 本手册同目录的文件，不需要 registry |
-| 团队机制层 | 需预置或缓存 | \`@deepseek-ai/dsh-experimental-agent-team-profile@<运行中的 DSH 版本>\`；scaffold 会按 profile 的 app-boot 解析 |
+| 团队机制层 | 需预置或缓存 | \`@deepseek-ai/dsh-experimental-agent-team-profile@<运行中的 DSH 版本>\`；scaffold 会按 profile 的 app-boot 解析。只预装 node_modules 不够：pnpm registry metadata/cache 也要在，否则冷 store 会报 \`ERR_PNPM_NO_OFFLINE_META\` |
 | Playwright MCP | 可关闭或预缓存 | 默认 npx 首次拉取；离线时设 \`MCP_PLAYWRIGHT=0\`（通道启动脚本）或预置 npm 缓存 |
 | 模型 API | 需网络 | 研究 run 需要 DeepSeek API 可达 |
 
@@ -233,7 +234,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffo
 |---|---|
 | 「研究状态」页签没出现 | 浏览器刷新不加载新模块：重启 \`dsh web\`，再硬刷新页面 |
 | 角色不守证据纪律 | 会话必须建在 scaffold 铺过的工作区里（手册从 cwd 注入），见第三节 |
-| preflight 报团队机制层缺席 | 重跑 scaffold（按包内 \`engines.dsh\` 自动补钉版层）；或手工 \`dsh plugin --profile research add @deepseek-ai/dsh-experimental-agent-team-profile@<运行中的 DSH 版本>\` |
+| preflight 报团队机制层缺席 | 重跑 scaffold（按 profile 的 app-boot 解析运行版本）；或手工 \`dsh plugin --profile research add @deepseek-ai/dsh-experimental-agent-team-profile@<运行中的 DSH 版本>\` |
 | 想确认装了什么版本 | \`dsh plugin --profile research list\`，或看本手册表头的版本号 |
 `
   writeFileSync(join(DIST, MANUAL), manual)

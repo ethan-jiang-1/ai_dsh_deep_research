@@ -21,6 +21,7 @@ import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 import { spawnSync } from 'node:child_process'
 import { sha256, classifySeedEntry, seedSourceRel } from './lib/seed-core.mjs'
+import { satisfiesVersion } from './lib/version-range.mjs'
 
 const PACK = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const SEED = join(PACK, 'workspace')
@@ -67,6 +68,8 @@ if (existsSync(statePath)) {
 }
 const stateFiles = state?.files ?? {}
 const seedRels = Object.keys(seed.files).sort()
+// 回滚保护：工作区记录比 pack 种子新时，--upgrade 不得把新种子降级覆盖（真实迁移的反向路径）。
+const versionAhead = state?.version !== undefined && state.version !== seed.version && satisfiesVersion(state.version, `>${seed.version}`)
 const sourceOf = (rel) => join(SEED, seedSourceRel(rel))
 const destOf = (rel) => join(workspace, rel)
 const hashOf = (path) => (existsSync(path) ? sha256(readFileSync(path, 'utf8')) : null)
@@ -84,16 +87,23 @@ const plan = seedRels.map((rel) => {
 if (checkMode) {
   const count = (status) => plan.filter((p) => p.status === status).length
   const blocking = plan.filter((p) => ['missing', 'stale', 'untracked', 'deleted'].includes(p.status))
-  const versionStale = state?.version !== seed.version
+  const versionStale = state?.version !== undefined && !versionAhead && state.version !== seed.version
+  const needsAttention = blocking.length > 0 || versionAhead || versionStale
   const mark = { current: '✓', missing: '✗', stale: '!', modified: '~', untracked: '?', deleted: '✕' }
   console.log(`scaffold --check（工作区 = ${workspace}；pack 种子 v${seed.version}${state?.version === undefined ? '；无状态文件' : `；工作区记录 v${state.version}`}）`)
   for (const p of plan) console.log(`  ${mark[p.status]} ${p.rel} — ${p.status}`)
-  console.log(`\nscaffold --check: ${blocking.length === 0 && !versionStale ? '工作区种子当前' : '工作区种子需要 --upgrade'}（missing ${count('missing')} / deleted ${count('deleted')} / stale ${count('stale')} / untracked ${count('untracked')} / modified ${count('modified')}；版本${versionStale ? '落后' : '一致'}）`)
-  if (blocking.length > 0 || versionStale) console.log(`  修复：node ${join(PACK, 'scripts', 'scaffold.mjs')} --workspace ${workspace} --upgrade`)
-  process.exit(blocking.length === 0 && !versionStale ? 0 : 1)
+  const versionLabel = versionAhead ? `较新（记录 v${state.version} > pack v${seed.version}）` : versionStale ? '落后' : '一致'
+  console.log(`\nscaffold --check: ${needsAttention ? (versionAhead ? '工作区记录比 pack 新——拒绝自动降级' : '工作区种子需要 --upgrade') : '工作区种子当前'}（missing ${count('missing')} / deleted ${count('deleted')} / stale ${count('stale')} / untracked ${count('untracked')} / modified ${count('modified')}；版本${versionLabel}）`)
+  if (versionAhead) console.log(`  不要用 --upgrade 降级；确需回滚工作区种子用 --force（显式覆盖，新种子会丢失）`)
+  else if (needsAttention) console.log(`  修复：node ${join(PACK, 'scripts', 'scaffold.mjs')} --workspace ${workspace} --upgrade`)
+  process.exit(needsAttention ? 1 : 0)
 }
 
 // ① 工作区种子（按分类写入；method-library 永不覆盖）
+if (versionAhead && upgrade && !force) {
+  note(false, '研究工作区种子（拒绝降级）', `工作区记录 v${state.version} 比 pack 种子 v${seed.version} 新；--upgrade 不覆盖新种子（确需回滚用 --force）`)
+  process.exit(1)
+}
 {
   let written = 0
   let skipped = 0

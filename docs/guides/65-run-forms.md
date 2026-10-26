@@ -101,7 +101,7 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 
 - 不把“多人共享一个 checkout / 一个 `DSH_HOME`”作为支持面；协作单位 = 包版本 + 工作区/run bundle 移交。
 - 不承诺 Windows；当前实测 macOS，Linux 走 bash/Node 标准路径但未在同轮跑。`sed` 使用 BSD/GNU 兼容形态。
-- 离线不是零前置：tarball 不需要 registry，但团队层需预装/缓存、Playwright MCP 首次需 npx、模型 API 需网络。
+- 离线不是零前置：tarball 不需要 registry，但团队层需预装/缓存（含 pnpm registry metadata；只装 node_modules 不够）、Playwright MCP 首次需 npx、模型 API 需网络。
 - 包目录安装的 profile 依赖是绝对路径；正式分发用 tarball/npm。
 - 研究方法论本身不在本页：角色/preset/skill 见 [guides/62](62-plugin-authoring.md) 与 pack 内容；run 操作见 [guides/61](61-run-playbook.md)。
 

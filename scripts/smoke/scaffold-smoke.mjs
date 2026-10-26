@@ -75,6 +75,19 @@ try {
   check(existsSync(join(ws2, 'AGENTS.md.seed-new')), '用户改过的文件写 .seed-new')
   check(read(join(ws2, 'method-library.md')) === '# user library 2\n', '--upgrade 不覆盖方法库')
 
+  // ③b 回滚保护：工作区记录比 pack 种子新时，--upgrade 拒绝降级覆盖新种子
+  const aheadState = JSON.parse(read(join(ws2, '.dsh-research-seed.json')))
+  aheadState.version = '99.9.9'
+  writeFileSync(join(ws2, '.dsh-research-seed.json'), `${JSON.stringify(aheadState, null, 2)}\n`)
+  const aheadCheck = run(['--check', '--workspace', ws2])
+  check(aheadCheck.status === 1 && /拒绝自动降级/.test(aheadCheck.stdout), '--check 报工作区记录较新', aheadCheck.stdout.split('\n').slice(-3).join(' | '))
+  const aheadUpgrade = run(['--upgrade', '--workspace', ws2])
+  check(aheadUpgrade.status === 1 && /拒绝降级/.test(aheadUpgrade.stdout), '--upgrade 拒绝降级')
+  check(read(join(ws2, 'NODES.md')).includes('seed v2 marker'), '拒绝降级后新种子 NODES 保留')
+  const resetState = JSON.parse(read(join(ws2, '.dsh-research-seed.json')))
+  resetState.version = nextSeed.version
+  writeFileSync(join(ws2, '.dsh-research-seed.json'), `${JSON.stringify(resetState, null, 2)}\n`)
+
   // ④ --check 区分 deleted：用户删掉的种子不被 --upgrade 静默重铺，--force 才恢复
   const deletedRel = 'templates/run/topics.md'
   rmSync(join(ws2, deletedRel))
