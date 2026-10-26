@@ -47,6 +47,17 @@ try {
   const badRun = spawnSync(process.execPath, [join(BAD, 'scripts', 'scaffold.mjs'), '--seed-only', '--workspace', join(TEMP, 'ws-bad')], { encoding: 'utf8' })
   check(badRun.status === 2 && /哈希不匹配/.test(badRun.stderr), '种子哈希不匹配时拒绝铺种', (badRun.stderr || '').slice(-300))
 
+  // 种子清单路径穿越：key `../escaped` 不能写出工作区
+  const TRAV = join(TEMP, 'pack-trav')
+  cpSync(PACKCOPY, TRAV, { recursive: true })
+  const escaped = join(TRAV, 'escaped.txt')
+  writeFileSync(escaped, 'ESCAPED CONTENT\n')
+  const travSeed = JSON.parse(read(join(TRAV, 'workspace', 'seed.json')))
+  travSeed.files['../escaped.txt'] = sha256(read(escaped))
+  writeFileSync(join(TRAV, 'workspace', 'seed.json'), `${JSON.stringify(travSeed, null, 2)}\n`)
+  const travRun = spawnSync(process.execPath, [join(TRAV, 'scripts', 'scaffold.mjs'), '--seed-only', '--workspace', join(TEMP, 'ws-trav')], { encoding: 'utf8' })
+  check(travRun.status === 2 && /非法种子路径/.test(travRun.stderr) && !existsSync(join(TEMP, 'escaped.txt')), 'seed 路径穿越被拒绝且未写出工作区', (travRun.stderr || '').slice(-300))
+
   // 种子改名：旧名 orphan + 新名 missing 同时可见，不自动删旧文件
   const RENAME = join(TEMP, 'pack-rename')
   cpSync(PACKCOPY, RENAME, { recursive: true })

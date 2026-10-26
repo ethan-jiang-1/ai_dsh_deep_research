@@ -16,7 +16,7 @@
 //
 // 不做的事（有意）：不装 DSH 本体、不写密钥（安全边界：密钥永不落仓库/脚本）。
 import { accessSync, closeSync, constants as fsConstants, copyFileSync, existsSync, lstatSync, mkdirSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 import { spawnSync } from 'node:child_process'
@@ -106,6 +106,24 @@ if (typeof seed.version !== 'string' || typeof seed.files !== 'object' || seed.f
   console.error('scaffold: 种子清单形态非法（需要 version + files 映射）')
   process.exit(2)
 }
+// 种子键必须是工作区内相对路径；拒绝 `..`、绝对路径、反斜杠，防止篡改 seed.json 写出工作区。
+const safeSeedRel = (rel) => {
+  if (typeof rel !== 'string' || rel === '' || rel.includes('\\') || isAbsolute(rel)) return false
+  const relToWorkspace = relative(workspace, resolve(workspace, rel))
+  return relToWorkspace !== '' && !relToWorkspace.startsWith('..') && !isAbsolute(relToWorkspace)
+}
+for (const rel of Object.keys(seed.files)) {
+  if (!safeSeedRel(rel)) {
+    console.error(`scaffold: 非法种子路径：${rel}（必须是工作区内相对路径；拒绝 .. / 绝对路径 / 反斜杠）`)
+    process.exit(2)
+  }
+  const sourceRel = seedSourceRel(rel)
+  const relToSeed = relative(SEED, resolve(SEED, sourceRel))
+  if (relToSeed === '' || relToSeed.startsWith('..') || isAbsolute(relToSeed)) {
+    console.error(`scaffold: 非法种子源路径：${rel}（源必须留在包内 workspace/）`)
+    process.exit(2)
+  }
+}
 // 发布物完整性：seed.json 的哈希必须匹配包内源文件；tarball 被截断/篡改时先红，不静默铺错内容。
 for (const rel of Object.keys(seed.files)) {
   const src = join(SEED, seedSourceRel(rel))
@@ -132,7 +150,7 @@ const versionAhead = state?.version !== undefined && state.version !== seed.vers
 const sourceOf = (rel) => join(SEED, seedSourceRel(rel))
 const destOf = (rel) => join(workspace, rel)
 // 新版本删掉/改名种子：旧文件不自动删（用户数据优先），但必须让 --check 看见。
-const orphanRels = state === null ? [] : Object.keys(stateFiles).filter((rel) => seed.files[rel] === undefined && existsSync(destOf(rel))).sort()
+const orphanRels = state === null ? [] : Object.keys(stateFiles).filter((rel) => safeSeedRel(rel) && seed.files[rel] === undefined && existsSync(destOf(rel))).sort()
 const lstatOf = (path) => { try { return lstatSync(path) } catch { return null } }
 // 不跟随 symlink 读哈希：工作区里的链接可能指向用户/系统敏感文件。
 const hashOf = (path, st = lstatOf(path)) => (st?.isFile() ? sha256(readFileSync(path, 'utf8')) : null)
