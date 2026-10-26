@@ -15,7 +15,7 @@
 //   或经 bin：dsh-deep-research-scaffold --workspace <dir> [--profile research]（registry 安装形态；tarball 装法无 PATH bin，用本文件全路径）
 //
 // 不做的事（有意）：不装 DSH 本体、不写密钥（安全边界：密钥永不落仓库/脚本）。
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
@@ -43,6 +43,10 @@ const note = (ok, name, detail) => { steps.push({ ok, name, detail }); console.l
 
 if (workspace === null) {
   console.error('scaffold: 需要 --workspace <研究工作区目录>（角色会话的 cwd；手册从这里注入）')
+  process.exit(2)
+}
+if (existsSync(workspace) && !statSync(workspace).isDirectory()) {
+  console.error(`scaffold: --workspace 必须是目录，当前是文件：${workspace}`)
   process.exit(2)
 }
 if (checkMode && (upgrade || force)) {
@@ -87,12 +91,13 @@ const plan = seedRels.map((rel) => {
 if (checkMode) {
   const count = (status) => plan.filter((p) => p.status === status).length
   const blocking = plan.filter((p) => ['missing', 'stale', 'untracked', 'deleted'].includes(p.status))
-  const versionStale = state?.version !== undefined && !versionAhead && state.version !== seed.version
-  const needsAttention = blocking.length > 0 || versionAhead || versionStale
+  const versionUnknown = state?.version === undefined
+  const versionStale = !versionUnknown && !versionAhead && state.version !== seed.version
+  const needsAttention = blocking.length > 0 || versionUnknown || versionAhead || versionStale
   const mark = { current: '✓', missing: '✗', stale: '!', modified: '~', untracked: '?', deleted: '✕' }
   console.log(`scaffold --check（工作区 = ${workspace}；pack 种子 v${seed.version}${state?.version === undefined ? '；无状态文件' : `；工作区记录 v${state.version}`}）`)
   for (const p of plan) console.log(`  ${mark[p.status]} ${p.rel} — ${p.status}`)
-  const versionLabel = versionAhead ? `较新（记录 v${state.version} > pack v${seed.version}）` : versionStale ? '落后' : '一致'
+  const versionLabel = versionUnknown ? '无记录' : versionAhead ? `较新（记录 v${state.version} > pack v${seed.version}）` : versionStale ? '落后' : '一致'
   console.log(`\nscaffold --check: ${needsAttention ? (versionAhead ? '工作区记录比 pack 新——拒绝自动降级' : '工作区种子需要 --upgrade') : '工作区种子当前'}（missing ${count('missing')} / deleted ${count('deleted')} / stale ${count('stale')} / untracked ${count('untracked')} / modified ${count('modified')}；版本${versionLabel}）`)
   if (versionAhead) console.log(`  不要用 --upgrade 降级；确需回滚工作区种子用 --force（显式覆盖，新种子会丢失）`)
   else if (needsAttention) console.log(`  修复：node ${join(PACK, 'scripts', 'scaffold.mjs')} --workspace ${workspace} --upgrade`)

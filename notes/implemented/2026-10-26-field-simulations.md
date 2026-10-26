@@ -39,6 +39,15 @@
 - **修复真实缺陷**：回滚到 0.1.2 后，旧版 `--upgrade` 把 0.1.3 的 `NODES.md` 当 stale 覆盖，丢失新种子。现在 `--check` 报“工作区记录比 pack 新——拒绝自动降级”退出 1；`--upgrade` 拒绝退出 1 并保留新种子；`--force` 才降级。
 - 回归资产：[scaffold-smoke](../../scripts/smoke/scaffold-smoke.mjs) 增加“记录 99.9.9 > pack 9.9.9”的反证段；手跑红证显示修复前会覆盖，修复后保留。
 
+### 4. 其他边界矩阵
+
+- 路径含空格/中文：`scaffold --seed-only` / `--check` 均通过。
+- 用户先在新种子路径放了文件：升级写 `.seed-new`，用户文件原样保留。
+- 无状态文件：`--check` 报“无记录”而非“版本一致”；`--upgrade` 建基线。
+- `--workspace` 指向文件：exit 2 并给“必须是目录”，不再抛栈。
+- 同版本重装：`plugin add` + `--check` 幂等，无 sidecar/状态漂移。
+- 损坏的状态 JSON：按无状态处理，`--upgrade` 不覆盖用户文件。
+
 ## 边界
 
 - “第二机”是同一台 macOS 上的隔离 `DSH_HOME` + 全局 rc.3，不是另一台物理机/另一 OS；Linux/Windows 仍未实测。

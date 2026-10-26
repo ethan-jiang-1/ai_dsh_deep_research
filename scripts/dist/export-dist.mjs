@@ -176,6 +176,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffo
 \`<文件>.seed-new\` 供手动合并。\`method-library.md\` 是用户数据，任何模式都不覆盖已存在文件。
 只处理工作区、不碰 profile：加 \`--seed-only\`。
 没有模型 key 时加 \`--install-only\`：只验安装形状，不把“无 key”当安装失败。
+若设置了 \`DSH_HOME\`，把本节的 \`~/.dsh\` 换成 \`$DSH_HOME\`；本手册默认写 \`~/.dsh\`。
 
 ## 四、跑一场研究
 

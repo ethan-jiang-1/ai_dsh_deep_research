@@ -88,6 +88,14 @@ try {
   resetState.version = nextSeed.version
   writeFileSync(join(ws2, '.dsh-research-seed.json'), `${JSON.stringify(resetState, null, 2)}\n`)
 
+  // ③c 无状态文件：--check 报“无记录”而不是假装版本一致；--upgrade 建基线
+  const ws3 = join(TEMP, 'ws3')
+  check(run(['--workspace', ws3]).status === 0, '第三工作区铺种')
+  rmSync(join(ws3, '.dsh-research-seed.json'))
+  const noState = run(['--check', '--workspace', ws3])
+  check(noState.status === 1 && /无记录/.test(noState.stdout), '--check 报无状态记录', noState.stdout.split('\n').slice(-2).join(' | '))
+  check(run(['--upgrade', '--workspace', ws3]).status === 0 && existsSync(join(ws3, '.dsh-research-seed.json')), '--upgrade 为无状态工作区建基线')
+
   // ④ --check 区分 deleted：用户删掉的种子不被 --upgrade 静默重铺，--force 才恢复
   const deletedRel = 'templates/run/topics.md'
   rmSync(join(ws2, deletedRel))
