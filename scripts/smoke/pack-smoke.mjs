@@ -47,8 +47,13 @@ if (existsSync(manual) && existsSync(tgz)) {
   const declared = /sha256\s*\|\s*`([0-9a-f]{64})`/.exec(readFileSync(manual, 'utf8'))?.[1] ?? null
   const actual = createHash('sha256').update(readFileSync(tgz)).digest('hex')
   check(declared !== null && declared === actual, '手册 sha256 = 实际 tarball', `${declared?.slice(0, 12) ?? '（缺）'} vs ${actual.slice(0, 12)}`)
+  const listing = spawnSync('tar', ['-tvzf', tgz], { encoding: 'utf8' })
+  const entries = (listing.stdout ?? '').split('\n').filter(Boolean)
+  check(listing.status === 0 && entries.length > 0, 'tarball 可列出', (listing.stderr || '').slice(-200))
+  check(entries.every((line) => !/^l/.test(line)), 'tarball 无 symlink 条目')
+  check(entries.every((line) => !/^[^\s]+\s+[^\s]*s[^\s]*\s/.test(line)), 'tarball 无 setuid 条目')
 } else {
-  console.log('SKIP  手册/ tarball 不在场：本次不验 sha256（export-dist 后应重跑）')
+  console.log('SKIP  手册/ tarball 不在场：本次不验 sha256/条目（export-dist 后应重跑）')
 }
 
 // 可复现性：同一源码两次 npm pack 必须字节相同（tarball sha 相同）

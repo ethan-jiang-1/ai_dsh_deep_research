@@ -55,7 +55,8 @@ try {
   copyFileSync(TARBALL, corrupt)
   truncateSync(corrupt, 1024)
   const corruptAdd = dsh(['plugin', '--profile', 'matrix-c', 'add', `file:${corrupt}`])
-  check(corruptAdd.status !== 0, '损坏 tarball 安装失败', (corruptAdd.stderr || '').slice(-300))
+  const corruptText = `${corruptAdd.stdout ?? ''}${corruptAdd.stderr ?? ''}`
+  check(corruptAdd.status !== 0 && /(Corrupt data|gzip|decode|unexpected end|tarball)/i.test(corruptText), '损坏 tarball 安装失败且原因可读', corruptText.slice(-500))
   const cManifest = manifest('matrix-c')
   const cLock = existsSync(join(profile('matrix-c'), 'pnpm-lock.yaml')) ? readFileSync(join(profile('matrix-c'), 'pnpm-lock.yaml'), 'utf8') : ''
   check(!(cManifest?.dsh?.profile?.bundles ?? []).includes('dsh-deep-research-pack')

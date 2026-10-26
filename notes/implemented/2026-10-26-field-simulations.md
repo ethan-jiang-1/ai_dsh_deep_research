@@ -68,6 +68,7 @@
 - SIGKILL 中断 scaffold：stale lock 保留、重跑接管并补齐全部种子，state 临时件不残留。
 - 真双进程并发：第一个持锁时第二个 exit 2；第一个完成释放锁。
 - 两个 `dsh plugin add` / 两个 `remove` 同 profile 并发：至少一个成功，profile 仍可 dump/最终无本包，无坏双 bundle。
+- 损坏 tarball 失败原因可读（gzip/truncated/tarball），且无 dependencies/bundles/node_modules 半装；tarball 无 symlink/setuid 条目。
 - 种子清单路径穿越：恶意 `../escaped.txt` 键曾可写出工作区；现在拒绝 `..`/绝对路径/反斜杠，源也必须留在 `workspace/`，并有回归。
 - 目录 `file:` 安装：移动源目录后已装副本仍可 dump-config，但旧路径重装失败；必须 `plugin remove` 后从新路径 add。文档已从“移动即断链”改正为“旧路径不能重装/升级；link: 才断链”。
 - 用户 `cordis.patch.yml`：安装/卸载前后字节相同，`dump-config` 仍见用户 overlay。
