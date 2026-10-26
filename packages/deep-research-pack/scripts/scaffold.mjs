@@ -156,11 +156,12 @@ const lstatOf = (path) => { try { return lstatSync(path) } catch { return null }
 const hashOf = (path, st = lstatOf(path)) => (st?.isFile() ? sha256(readFileSync(path, 'utf8')) : null)
 const writeSeedFile = (src, dst) => {
   const st = lstatOf(dst)
-  if (st?.isSymbolicLink()) unlinkSync(dst) // 替换链接本身，绝不写穿到目标
-  else if (st?.isDirectory()) {
+  // symlink / hardlink / FIFO / device：先替换入口本身，绝不写穿到另一个 inode。
+  if (st?.isDirectory()) {
     console.error(`scaffold: 种子目标不是普通文件：${dst}（先移走目录再重跑）`)
     process.exit(2)
   }
+  if (st !== null && (!st.isFile() || st.nlink > 1 || st.isSymbolicLink())) unlinkSync(dst)
   copyFileSync(src, dst)
 }
 

@@ -8,7 +8,7 @@
 // 用法：node scripts/smoke/scaffold-smoke.mjs
 // 退出码：0 全绿 / 断言红 / 2 前置缺席（未跑 ≠ 通过）
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, linkSync, lstatSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { sha256 } from '../../packages/deep-research-pack/scripts/lib/seed-core.mjs'
@@ -144,6 +144,24 @@ try {
   symlinkSync(stateVictim, join(ws4, '.dsh-research-seed.json'))
   const stateLink = run(['--force', '--workspace', ws4])
   check(stateLink.status === 2 && read(stateVictim) === '{"keep":"me"}\n', 'state symlink 被拒绝且不写穿', stateLink.stdout)
+
+  // 硬链接 / FIFO 也不能写穿到另一个 inode
+  const hardVictim = join(TEMP, 'hard-victim.txt')
+  writeFileSync(hardVictim, 'ORIGINAL HARD VICTIM\n')
+  const wsHard = join(TEMP, 'ws-hard')
+  check(run(['--workspace', wsHard]).status === 0, '硬链接场景铺种')
+  unlinkSync(join(wsHard, 'AGENTS.md'))
+  linkSync(hardVictim, join(wsHard, 'AGENTS.md'))
+  check(run(['--force', '--workspace', wsHard]).status === 0, '--force 处理硬链接')
+  check(read(hardVictim) === 'ORIGINAL HARD VICTIM\n', '--force 不写穿硬链接目标')
+  const wsFifo = join(TEMP, 'ws-fifo')
+  check(run(['--workspace', wsFifo]).status === 0, 'FIFO 场景铺种')
+  unlinkSync(join(wsFifo, 'AGENTS.md'))
+  const fifo = spawnSync('mkfifo', [join(wsFifo, 'AGENTS.md')])
+  if (fifo.status === 0) {
+    const fifoRun = run(['--force', '--workspace', wsFifo])
+    check(fifoRun.status === 0 && lstatSync(join(wsFifo, 'AGENTS.md')).isFile(), '--force 不阻塞在 FIFO，替换为常规文件')
+  }
 
   // ③e 初始化已有用户数据：AGENTS/.gitignore/方法库/run bundle 不被首装覆盖
   const ws5 = join(TEMP, 'ws5')

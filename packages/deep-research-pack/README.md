@@ -71,7 +71,7 @@ cd ~/research-workspace && dsh --profile research
 状态记录在工作区根 `.dsh-research-seed.json`（版本 + 哈希 + 跳过清单）。
 
 **升级/回滚**：升级 = 装新版 npm/tarball（`dsh plugin --profile research add ...@<新版>` 或 `file:<新版>.tgz`），
-再按上面的 `--check`/`--upgrade` 升级工作区种子；回滚 = 装回旧版 tarball，种子不随插件降级。旧版 `--check` 会报“工作区记录比 pack 新”并拒绝 `--upgrade`；确需降级种子用 `--force`（显式覆盖，新种子会丢）。 种子目标若是 symlink，`--force` 只替换链接本身，不写穿目标；状态文件是 symlink 时拒绝写入。
+再按上面的 `--check`/`--upgrade` 升级工作区种子；回滚 = 装回旧版 tarball，种子不随插件降级。旧版 `--check` 会报“工作区记录比 pack 新”并拒绝 `--upgrade`；确需降级种子用 `--force`（显式覆盖，新种子会丢）。 种子目标若是 symlink / hardlink / FIFO，`--force` 只替换入口本身，不写穿目标、不阻塞；状态文件是 symlink 时拒绝写入。
 宿主版本必须满足包内 `engines.dsh`，否则安装/启动被拒。
 
 **目录安装（开发/离线）**：`pnpm build` 后可直接 `dsh plugin --profile research add file:/abs/path/to/packages/deep-research-pack`；
