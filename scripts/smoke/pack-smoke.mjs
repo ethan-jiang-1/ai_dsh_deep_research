@@ -5,7 +5,8 @@
 // 用法：node scripts/smoke/pack-smoke.mjs
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { existsSync, readFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { scrubbedEnv } from '../lib/env.mjs'
@@ -48,6 +49,31 @@ if (existsSync(manual) && existsSync(tgz)) {
   check(declared !== null && declared === actual, '手册 sha256 = 实际 tarball', `${declared?.slice(0, 12) ?? '（缺）'} vs ${actual.slice(0, 12)}`)
 } else {
   console.log('SKIP  手册/ tarball 不在场：本次不验 sha256（export-dist 后应重跑）')
+}
+
+// 可复现性：同一源码两次 npm pack 必须字节相同（tarball sha 相同）
+const repro = mkdtempSync(join(tmpdir(), 'pack-repro-'))
+try {
+  const copy = join(repro, 'pack')
+  cpSync(PACK, copy, { recursive: true })
+  const outs = [join(repro, 'out1'), join(repro, 'out2')]
+  for (const out of outs) {
+    spawnSync('mkdir', ['-p', out])
+    const r = spawnSync('npm', ['pack', '--ignore-scripts', '--pack-destination', out], {
+      cwd: copy, encoding: 'utf8', env: scrubbedEnv({ npm_config_cache: join(repro, 'cache') }),
+    })
+    if (r.status !== 0) { check(false, 'npm pack 可复现性预跑', (r.stderr || '').slice(-300)); break }
+  }
+  const tgzs = outs.map((out) => {
+    const files = readdirSync(out).filter((n) => n.endsWith('.tgz'))
+    return files.length === 1 ? join(out, files[0]) : null
+  })
+  if (tgzs.every((p) => p !== null && existsSync(p))) {
+    const hashes = tgzs.map((p) => createHash('sha256').update(readFileSync(p)).digest('hex'))
+    check(hashes[0] === hashes[1], 'npm pack 两次同 sha（可复现）', `${hashes[0].slice(0, 12)} vs ${hashes[1].slice(0, 12)}`)
+  }
+} finally {
+  rmSync(repro, { recursive: true, force: true })
 }
 check(pkg.scripts?.install === undefined && pkg.scripts?.postinstall === undefined && pkg.scripts?.prepare === undefined,
   '无安装期生命周期脚本（tarball 不需要 allowBuilds）')

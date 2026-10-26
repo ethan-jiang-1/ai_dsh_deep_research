@@ -21,10 +21,11 @@
 | handoff-smoke.mjs | `export-handoff` 产物边界：必备源在场、无运行态/凭据/run 数据/依赖/导出包 | keyless（git archive HEAD；临时 out） |
 | compat-smoke.mjs | T6 rc.3 安装面：全局 rc.3 在干净 home 做 install → dump-config → scaffold/preflight → remove | 需全局 dsh rc.3；缺失 exit 2（未跑 ≠ 通过） |
 | data-smoke.mjs | T5 数据面切片：包目录零写入、假 token 不泄漏、卸载后 workspace 用户文件 + session 日志保留 | keyless（真 web 启动、无模型调用；tarball 需先 export-dist） |
-| pack-smoke.mjs | T0 tarball 形状：入口/patch/preset/种子在场、exports 可解析、无安装脚本/凭据；手册 sha256 对账（在场时） | keyless（`npm pack --dry-run --json`；需 lib 已构建） |
+| pack-smoke.mjs | T0 tarball 形状：入口/patch/preset/种子在场、exports 可解析、无安装脚本/凭据；手册 sha256 与两次 npm pack 同 sha（在场时） | keyless（`npm pack --dry-run --json`；需 lib 已构建） |
 | user-env-smoke.mjs | 已有 bundle + 用户 overlay + session/凭据/workspace 的安装/卸载共存 | keyless（全局 dsh + 本地 tarball） |
 | profile-matrix-smoke.mjs | 多 profile 并存/独立卸载、损坏 tarball 无半装、用户 overlay 不改写、directory file: 移动/重装、卸载重装后 workspace 数据保留 | keyless（全局 dsh + 本地 tarball） |
 | upgrade-smoke.mjs | 安装 → 模拟下一版覆盖安装 → 种子升级 → 回滚拒绝降级 → 卸载；profile + 工作区双面 | keyless（全局 dsh + npm pack；不调模型） |
+| profile-concurrency-smoke.mjs | 两个 `dsh plugin add` 同 profile 并发：至少一个成功、dump 可解析、可卸载；不留双 bundle/坏 profile | keyless（全局 dsh + tarball） |
 | interrupt-smoke.mjs | SIGKILL 中断 scaffold + 真双进程锁竞争：stale lock、state 临时件清理、重跑补齐全部种子（失败保留现场） | keyless（本地临时 pack，无 dsh） |
 | workspace-isolation-smoke.mjs | B4 双实例：两套 home/profile/port/state/workspace 各起通道、各建会话；会话组绑定自己的 W、home/session 互斥、marker 互不可见 | keyless（真 web，不调模型；更慢，约两套 cold start） |
 | client-load-smoke.mjs | 观察面真浏览器装配、页签与渐进面对账（磁盘参考选择 = client-load-reference.mjs；「研究配置」摘要相位 + 主界面「方法库」tab = client-load-config.mjs 与主件 pass-3c）；失败留现场（png/html/console/meta），无窗口内交付目标 = exit 2 SKIP | keyless（浏览器） |
@@ -110,7 +111,7 @@
 | lib/stream-diagnostics-core.mjs | stream-diagnostics、stream-diagnostics.test | 模型活动会话筛选（活动事件预筛后再按日志 mtime 取最近 N）+ 尝试时间线投影（assistant/message 计成功、assistant/attempt 计失败/无落面，终态三判 alive-or-idle/recovered/dead） |
 | lib/run-state.mjs | cdp-ask-smoke、hitl-answer、session-replay、run-state.test、session-events、watch-run | run 操作面状态谓词 |
 | lib/run-source-node.mjs | evidence-audit、node-gate、run-context-node.test、schema-scan | node:fs 的 RunSource 适配器：list/read/version；ENOENT → missing，其余 → unreadable；行窗口与 eof 语义对齐 vendor workspaceFiles |
-| lib/env.mjs | env-credentials.test、compat-smoke、data-smoke、pack-smoke、profile-matrix-smoke、upgrade-smoke、user-env-smoke、workspace-isolation-smoke、session-replay、cdp-ask-smoke、client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、record-role-fixture、release-smoke、snapshot-replay-smoke、team-preflight-smoke、rerun-triage-probe | 子进程环境清洗（scrubbedEnv/withModelKey）与真模型档前置（requireCredentials/credentialsPresent——凭据卫生） |
+| lib/env.mjs | env-credentials.test、compat-smoke、data-smoke、pack-smoke、profile-concurrency-smoke、profile-matrix-smoke、upgrade-smoke、user-env-smoke、workspace-isolation-smoke、session-replay、cdp-ask-smoke、client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、record-role-fixture、release-smoke、snapshot-replay-smoke、team-preflight-smoke、rerun-triage-probe | 子进程环境清洗（scrubbedEnv/withModelKey）与真模型档前置（requireCredentials/credentialsPresent——凭据卫生） |
 | lib/playwright.mjs | session-replay、client-hitl-smoke、client-load-smoke、e2e-021rc2、hitl-answer、snapshot-replay-smoke | Playwright 启停支撑 |
 | lib/cdp-driver.mjs | cdp-probe、scene-capture | 裸 CDP 驱动 |
 | lib/session-replay.mjs | session-replay、session-replay.test | 历史会话定位/元信息/判读整形纯函数（跨组枚举、id 优先、标题歧义如实报候选；会话→工作区靠首事件 cwd） |
