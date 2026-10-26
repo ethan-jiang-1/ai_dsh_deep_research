@@ -39,6 +39,7 @@
 - **修复真实缺陷**：回滚到 0.1.2 后，旧版 `--upgrade` 把 0.1.3 的 `NODES.md` 当 stale 覆盖，丢失新种子。现在 `--check` 报“工作区记录比 pack 新——拒绝自动降级”退出 1；`--upgrade` 拒绝退出 1 并保留新种子；`--force` 才降级。
 - 回归资产：[scaffold-smoke](../../scripts/smoke/scaffold-smoke.mjs) 增加“记录 99.9.9 > pack 9.9.9”的反证段；手跑红证显示修复前会覆盖，修复后保留。
 - 新增 [upgrade-smoke](../../scripts/smoke/upgrade-smoke.mjs)：profile 安装当前版 → 模拟下一版覆盖 → 种子升级 → 回滚拒绝降级 → 卸载，PROFILE 与 W 双面一次跑绿。
+- 新增 [profile-matrix-smoke](../../scripts/smoke/profile-matrix-smoke.mjs)：多 profile 独立安装/卸载、损坏 tarball 不半装、卸载重装后 workspace 数据保留。
 
 ### 4. 其他边界矩阵
 

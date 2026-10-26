@@ -145,6 +145,15 @@ try {
   check(!existsSync(join(ws2, deletedRel)), '--upgrade 不静默重铺用户删除的种子')
   check(run(['--force', '--workspace', ws2]).status === 0, '--force 显式恢复')
   check(existsSync(join(ws2, deletedRel)), '--force 恢复用户删除的种子')
+
+  // ⑤ 新版移除种子：旧文件保留但 --check 必须报 orphan，不静默假装 current
+  const orphanSeed = JSON.parse(read(join(PACKCOPY, 'workspace', 'seed.json')))
+  delete orphanSeed.files['NODES.md']
+  writeFileSync(join(PACKCOPY, 'workspace', 'seed.json'), `${JSON.stringify(orphanSeed, null, 2)}\n`)
+  rmSync(join(PACKCOPY, 'workspace', 'NODES.md'))
+  const orphanCheck = run(['--check', '--workspace', ws2])
+  check(orphanCheck.status === 1 && /orphan/.test(orphanCheck.stdout), '--check 报新种子移除后的 orphan', orphanCheck.stdout.split('\n').slice(-3).join(' | '))
+  check(existsSync(join(ws2, 'NODES.md')), 'orphan 文件不被自动删')
 } catch (error) {
   check(false, 'smoke 未抛异常', String(error))
 } finally {

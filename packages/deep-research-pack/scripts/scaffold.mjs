@@ -82,6 +82,8 @@ const seedRels = Object.keys(seed.files).sort()
 const versionAhead = state?.version !== undefined && state.version !== seed.version && satisfiesVersion(state.version, `>${seed.version}`)
 const sourceOf = (rel) => join(SEED, seedSourceRel(rel))
 const destOf = (rel) => join(workspace, rel)
+// 新版本删掉/改名种子：旧文件不自动删（用户数据优先），但必须让 --check 看见。
+const orphanRels = state === null ? [] : Object.keys(stateFiles).filter((rel) => seed.files[rel] === undefined && existsSync(destOf(rel))).sort()
 const lstatOf = (path) => { try { return lstatSync(path) } catch { return null } }
 // 不跟随 symlink 读哈希：工作区里的链接可能指向用户/系统敏感文件。
 const hashOf = (path, st = lstatOf(path)) => (st?.isFile() ? sha256(readFileSync(path, 'utf8')) : null)
@@ -111,13 +113,15 @@ if (checkMode) {
   const blocking = plan.filter((p) => ['missing', 'stale', 'untracked', 'deleted'].includes(p.status))
   const versionUnknown = state?.version === undefined
   const versionStale = !versionUnknown && !versionAhead && state.version !== seed.version
-  const needsAttention = blocking.length > 0 || versionUnknown || versionAhead || versionStale
+  const needsAttention = blocking.length > 0 || versionUnknown || versionAhead || versionStale || orphanRels.length > 0
   const mark = { current: '✓', missing: '✗', stale: '!', modified: '~', untracked: '?', deleted: '✕' }
   console.log(`scaffold --check（工作区 = ${workspace}；pack 种子 v${seed.version}${state?.version === undefined ? '；无状态文件' : `；工作区记录 v${state.version}`}）`)
   for (const p of plan) console.log(`  ${mark[p.status]} ${p.rel} — ${p.status}`)
+  for (const rel of orphanRels) console.log(`  ? ${rel} — orphan（新种子已移除；不会自动删）`)
   const versionLabel = versionUnknown ? '无记录' : versionAhead ? `较新（记录 v${state.version} > pack v${seed.version}）` : versionStale ? '落后' : '一致'
-  console.log(`\nscaffold --check: ${needsAttention ? (versionAhead ? '工作区记录比 pack 新——拒绝自动降级' : '工作区种子需要 --upgrade') : '工作区种子当前'}（missing ${count('missing')} / deleted ${count('deleted')} / stale ${count('stale')} / untracked ${count('untracked')} / modified ${count('modified')}；版本${versionLabel}）`)
+  console.log(`\nscaffold --check: ${needsAttention ? (versionAhead ? '工作区记录比 pack 新——拒绝自动降级' : '工作区种子需要 --upgrade') : '工作区种子当前'}（missing ${count('missing')} / deleted ${count('deleted')} / stale ${count('stale')} / untracked ${count('untracked')} / modified ${count('modified')} / orphan ${orphanRels.length}；版本${versionLabel}）`)
   if (versionAhead) console.log(`  不要用 --upgrade 降级；确需回滚工作区种子用 --force（显式覆盖，新种子会丢失）`)
+  else if (orphanRels.length > 0) console.log(`  orphan 需手动决定删除/迁移；--upgrade 不会自动删`)
   else if (needsAttention) console.log(`  修复：node ${join(PACK, 'scripts', 'scaffold.mjs')} --workspace ${workspace} --upgrade`)
   process.exit(needsAttention ? 1 : 0)
 }
@@ -185,7 +189,7 @@ if (versionAhead && upgrade && !force) {
     writeFileSync(statePath, `${JSON.stringify(next, null, 2)}\n`)
   }
 
-  note(true, `研究工作区种子（${workspace}）`, `${dryRun ? '[dry-run] ' : ''}写入 ${written} 个、跳过 ${skipped} 个（--force 覆盖；--upgrade 安全升级；method-library 不覆盖）${sidecars > 0 ? `；${sidecars} 个用户改过的文件写成 .seed-new` : ''}`)
+  note(true, `研究工作区种子（${workspace}）`, `${dryRun ? '[dry-run] ' : ''}写入 ${written} 个、跳过 ${skipped} 个（--force 覆盖；--upgrade 安全升级；method-library 不覆盖）${sidecars > 0 ? `；${sidecars} 个用户改过的文件写成 .seed-new` : ''}${orphanRels.length > 0 ? `；${orphanRels.length} 个孤儿种子未删` : ''}`)
 }
 
 if (seedOnly) {
