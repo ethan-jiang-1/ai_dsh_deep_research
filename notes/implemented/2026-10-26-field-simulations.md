@@ -51,6 +51,7 @@
 - 只读 workspace：写模式 exit 2 并提示修权限；`--check` 仍可只读（不再抛栈）。
 - 种子目标为 symlink / hardlink / FIFO：`--force` 只替换入口 inode，不写穿目标、不阻塞；`--upgrade` 写 sidecar；state 文件是 symlink 时 exit 2 拒绝。
 - 种子目标被替换为目录：`--force` exit 2 并保留目录，不再抛 Node 栈。
+- 只读种子文件：`--force` exit 2 并给“写入种子失败”，不再抛 Node 栈；上次 SIGKILL 的 state 临时件在持锁后清理。
 - 包内种子源被篡改但 `seed.json` 未更新：`scaffold` 现在先校验哈希，exit 2 拒绝铺错内容。
 - 损坏的状态 JSON：按无状态处理，`--upgrade` 不覆盖用户文件。
 

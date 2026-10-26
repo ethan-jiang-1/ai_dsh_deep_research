@@ -4,6 +4,7 @@
 //（bootstrap/prepack 的职责），缺席 exit 2——未跑 ≠ 通过。
 // 用法：node scripts/smoke/pack-smoke.mjs
 import { spawnSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -39,6 +40,15 @@ for (const forbidden of ['.env', '.credentials' + '.yaml', 'node_modules', '_dis
   check(!listed.some((rel) => rel === forbidden || rel.startsWith(`${forbidden}/`)), `tarball 不含 ${forbidden}`)
 }
 check(pkg.exports?.['./client']?.default === './lib/client.js', 'exports["./client"] 指向已存在的 lib/client.js')
+const manual = join(ROOT, '_dist', '安装手册.md')
+const tgz = join(ROOT, '_dist', `dsh-deep-research-pack-${pkg.version}.tgz`)
+if (existsSync(manual) && existsSync(tgz)) {
+  const declared = /sha256\s*\|\s*`([0-9a-f]{64})`/.exec(readFileSync(manual, 'utf8'))?.[1] ?? null
+  const actual = createHash('sha256').update(readFileSync(tgz)).digest('hex')
+  check(declared !== null && declared === actual, '手册 sha256 = 实际 tarball', `${declared?.slice(0, 12) ?? '（缺）'} vs ${actual.slice(0, 12)}`)
+} else {
+  console.log('SKIP  手册/ tarball 不在场：本次不验 sha256（export-dist 后应重跑）')
+}
 check(pkg.scripts?.install === undefined && pkg.scripts?.postinstall === undefined && pkg.scripts?.prepare === undefined,
   '无安装期生命周期脚本（tarball 不需要 allowBuilds）')
 

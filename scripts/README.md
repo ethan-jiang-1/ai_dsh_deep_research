@@ -21,7 +21,7 @@
 | handoff-smoke.mjs | `export-handoff` 产物边界：必备源在场、无运行态/凭据/run 数据/依赖/导出包 | keyless（git archive HEAD；临时 out） |
 | compat-smoke.mjs | T6 rc.3 安装面：全局 rc.3 在干净 home 做 install → dump-config → scaffold/preflight → remove | 需全局 dsh rc.3；缺失 exit 2（未跑 ≠ 通过） |
 | data-smoke.mjs | T5 数据面切片：包目录零写入、假 token 不泄漏、卸载后 workspace 用户文件 + session 日志保留 | keyless（真 web 启动、无模型调用；tarball 需先 export-dist） |
-| pack-smoke.mjs | T0 tarball 形状：入口/patch/preset/种子在场、exports 可解析、无安装脚本/凭据 | keyless（`npm pack --dry-run --json`；需 lib 已构建） |
+| pack-smoke.mjs | T0 tarball 形状：入口/patch/preset/种子在场、exports 可解析、无安装脚本/凭据；手册 sha256 对账（在场时） | keyless（`npm pack --dry-run --json`；需 lib 已构建） |
 | user-env-smoke.mjs | 已有 bundle + 用户 overlay + session/凭据/workspace 的安装/卸载共存 | keyless（全局 dsh + 本地 tarball） |
 | profile-matrix-smoke.mjs | 多 profile 并存/独立卸载、损坏 tarball 无半装、用户 overlay 不改写、directory file: 移动/重装、卸载重装后 workspace 数据保留 | keyless（全局 dsh + 本地 tarball） |
 | upgrade-smoke.mjs | 安装 → 模拟下一版覆盖安装 → 种子升级 → 回滚拒绝降级 → 卸载；profile + 工作区双面 | keyless（全局 dsh + npm pack；不调模型） |

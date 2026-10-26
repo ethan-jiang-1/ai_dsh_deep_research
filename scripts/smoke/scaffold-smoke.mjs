@@ -8,7 +8,7 @@
 // 用法：node scripts/smoke/scaffold-smoke.mjs
 // 退出码：0 全绿 / 断言红 / 2 前置缺席（未跑 ≠ 通过）
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, linkSync, lstatSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
+import { chmodSync, cpSync, existsSync, linkSync, lstatSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { sha256 } from '../../packages/deep-research-pack/scripts/lib/seed-core.mjs'
@@ -199,6 +199,15 @@ try {
   const stale = run(['--seed-only', '--workspace', ws7])
   check(stale.status === 0 && !existsSync(lock), '陈旧锁被接管并释放')
   check(readdirSync(ws7).every((n) => !n.startsWith('.dsh-research-seed.json.tmp-')), 'state 原子写无临时件残留')
+  const wsRo = join(TEMP, 'ws-ro')
+  check(run(['--workspace', wsRo]).status === 0, '只读文件场景铺种')
+  const roFile = join(wsRo, 'AGENTS.md')
+  chmodSync(roFile, 0o444)
+  const roRun = run(['--force', '--workspace', wsRo])
+  check(roRun.status === 2 && /写入种子失败/.test(roRun.stderr), '只读种子文件写入失败给明确错误', (roRun.stderr || '').slice(-200))
+  chmodSync(roFile, 0o644)
+  writeFileSync(join(ws7, '.dsh-research-seed.json.tmp-99999'), 'stale temp\n')
+  check(run(['--seed-only', '--workspace', ws7]).status === 0 && readdirSync(ws7).every((n) => !n.startsWith('.dsh-research-seed.json.tmp-')), '上次 SIGKILL 的 state 临时件被清理')
 
   // ④ --check 区分 deleted：用户删掉的种子不被 --upgrade 静默重铺，--force 才恢复
   const deletedRel = 'templates/run/topics.md'

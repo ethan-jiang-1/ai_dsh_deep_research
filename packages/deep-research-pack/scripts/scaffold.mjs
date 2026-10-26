@@ -15,7 +15,7 @@
 //   或经 bin：dsh-deep-research-scaffold --workspace <dir> [--profile research]（registry 安装形态；tarball 装法无 PATH bin，用本文件全路径）
 //
 // 不做的事（有意）：不装 DSH 本体、不写密钥（安全边界：密钥永不落仓库/脚本）。
-import { accessSync, closeSync, constants as fsConstants, copyFileSync, existsSync, lstatSync, mkdirSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
+import { accessSync, closeSync, constants as fsConstants, copyFileSync, existsSync, lstatSync, mkdirSync, openSync, readdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
@@ -86,6 +86,10 @@ if (!checkMode && !dryRun) {
     closeSync(fd)
     lockHeld = true
     process.on('exit', releaseLock)
+    // 上次 SIGKILL 可能留下 state 临时件；持锁后清理，避免无界堆积。
+    for (const name of readdirSync(workspace)) {
+      if (name.startsWith('.dsh-research-seed.json.tmp-')) { try { unlinkSync(join(workspace, name)) } catch {} }
+    }
   } catch {
     console.error(`scaffold: 无法获取工作区锁：${lockPath}（另一个 scaffold 正在写？）`)
     process.exit(2)
@@ -162,7 +166,10 @@ const writeSeedFile = (src, dst) => {
     process.exit(2)
   }
   if (st !== null && (!st.isFile() || st.nlink > 1 || st.isSymbolicLink())) unlinkSync(dst)
-  copyFileSync(src, dst)
+  try { copyFileSync(src, dst) } catch (error) {
+    console.error(`scaffold: 写入种子失败：${dst}（${error.code ?? error.message}；先修权限/移走只读文件）`)
+    process.exit(2)
+  }
 }
 
 const plan = seedRels.map((rel) => {
