@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url'
 import { sha256 } from '../../packages/deep-research-pack/scripts/lib/seed-core.mjs'
 import { scrubbedEnv } from '../lib/env.mjs'
 import { reclaimPort } from '../lib/port-reclaim.mjs'
+import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const BIN = join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts')
@@ -54,6 +55,22 @@ function treeHash(dir) {
   }
   walk(dir)
   return sha256(rows.join('\n'))
+}
+
+function sessionTexts(home) {
+  const root = join(home, 'sessions')
+  if (!existsSync(root)) return []
+  const out = []
+  for (const group of readdirSync(root)) {
+    const groupDir = join(root, group)
+    for (const sessionId of readdirSync(groupDir)) {
+      const dir = join(groupDir, sessionId)
+      const log = resolveSessionLog(dir)
+      const text = log === null ? null : readSessionText(log)
+      if (typeof text === 'string') out.push({ path: join(dir, 'session'), text })
+    }
+  }
+  return out
 }
 
 function textFiles(dir) {
@@ -145,7 +162,7 @@ try {
   const after = treeHash(INSTALLED)
   check(before === after, '包目录启动前后零写入（文件树 hash 相同）', `${before.slice(0, 8)} → ${after.slice(0, 8)}`)
 
-  const leaks = [...textFiles(HOME), ...textFiles(TEMP)].filter(({ text }) => text.includes(FAKE_KEY))
+  const leaks = [...textFiles(TEMP), ...sessionTexts(HOME), { path: 'stdout/stderr', text: boot.output }].filter(({ text }) => text.includes(FAKE_KEY))
   check(leaks.length === 0, '假 token 不在 stdout/stderr/home 文本/凭据文件', leaks.map((l) => l.path).slice(0, 3).join('、'))
   check(!existsSync(CREDENTIALS) || !readFileSync(CREDENTIALS, 'utf8').includes(FAKE_KEY),
     '凭据文件不含假 token')

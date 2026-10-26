@@ -3,6 +3,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { findHomePaths, scanHomePaths } from '../../scripts/lib/path-hygiene.mjs'
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 test('findHomePaths：Unix / macOS / Windows home 前缀都命中，并给行号', () => {
   const text = [
@@ -27,4 +30,11 @@ test('scanHomePaths：逐文件带路径汇总；相对路径与普通 URL 零 f
   assert.equal(findings.length, 1)
   assert.equal(findings[0].path, 'provenance/x.json')
   assert.equal(findings[0].line, 1)
+})
+
+test('交付门覆盖面：run/question/plan/findings/review/journal/evidence 都在扫描入口', () => {
+  const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'scripts', 'run-gates', 'path-hygiene.mjs'), 'utf8')
+  for (const name of ['run.md', 'question.md', 'topics.md', 'plan.md', 'findings.md', 'review.md', 'journal.md', 'leads.md', 'evidence']) {
+    assert.ok(src.includes(name), `path-hygiene 未覆盖 ${name}`)
+  }
 })

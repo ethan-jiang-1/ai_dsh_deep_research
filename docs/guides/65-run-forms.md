@@ -99,6 +99,7 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 - `scaffold-smoke`：种子 symlink/目录目标、锁、atomic state、orphan、哈希篡改与回滚保护。
 - `upgrade-smoke`：安装当前版 → 模拟下一版 → 种子升级 → 回滚拒绝降级 → 卸载（profile + W 双面）。
 - `profile-matrix-smoke`：多 profile 独立安装/卸载、损坏 tarball 无半装、用户 overlay 不改写、卸载重装后 workspace 数据保留。
+- `user-env-smoke`：已有别的 bundle + 用户 overlay + session/凭据/workspace 时，安装/卸载不改写用户数据，别的 bundle 仍在。
 
 ## 7. 已知限制与延后工作
 

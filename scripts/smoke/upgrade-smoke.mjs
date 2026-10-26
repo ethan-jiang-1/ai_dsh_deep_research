@@ -51,7 +51,8 @@ try {
   writeFileSync(join(WS, 'method-library.md'), '# user library upgrade\n')
 
   // 生成模拟下一版：复制 pack → bump version → 改 NODES → 更新 seed
-  cpSync(PACK, NEXT_PACK, { recursive: true })
+  // 从**安装副本**复制下一版，验证 tarball 形状而不是源码工作树
+  cpSync(installed, NEXT_PACK, { recursive: true })
   const nextPkgPath = join(NEXT_PACK, 'package.json')
   const nextPkg = readJson(nextPkgPath)
   nextPkg.version = NEXT_VERSION

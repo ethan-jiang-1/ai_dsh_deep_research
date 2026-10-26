@@ -25,9 +25,10 @@ if (!existsSync(root)) {
 
 const files = []
 const add = (rel) => { if (existsSync(join(root, rel))) files.push(rel) }
-for (const rel of ['final.md', 'acceptance.md', 'delivered.json', 'manifest.json', 'audit.md', 'node-gate.md']) add(rel)
-if (existsSync(join(root, 'final'))) {
-  for (const name of readdirSync(join(root, 'final')).filter((n) => n.endsWith('.md'))) files.push(`final/${name}`)
+for (const rel of ['final.md', 'run.md', 'question.md', 'topics.md', 'plan.md', 'findings.md', 'review.md', 'journal.md', 'leads.md', 'acceptance.md', 'delivered.json', 'manifest.json', 'audit.md', 'node-gate.md']) add(rel)
+for (const sub of ['final', 'plan', 'evidence']) {
+  if (!existsSync(join(root, sub))) continue
+  for (const name of readdirSync(join(root, sub)).filter((n) => n.endsWith('.md'))) files.push(`${sub}/${name}`)
 }
 if (existsSync(join(root, 'provenance'))) {
   for (const name of readdirSync(join(root, 'provenance')).filter((n) => n.endsWith('.json'))) files.push(`provenance/${name}`)
