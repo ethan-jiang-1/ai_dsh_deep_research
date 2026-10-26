@@ -45,9 +45,18 @@ try {
   check(dump.status === 0 && dump.stdout.includes('preset-lead'), '并发安装后 dump-config 可解析且见 preset-lead')
   const manifest = JSON.parse(readFileSync(join(HOME, 'profiles', PROFILE, 'package.json'), 'utf8'))
   check((manifest?.dsh?.profile?.bundles ?? []).includes('dsh-deep-research-pack'), '并发安装后 profile 只有一个本包 bundle')
-  check(dsh(['plugin', '--profile', PROFILE, 'remove', 'dsh-deep-research-pack']).status === 0, '并发安装后可卸载')
+  const remove = () => new Promise((resolveRemove) => {
+    const child = spawn('dsh', ['plugin', '--profile', PROFILE, 'remove', 'dsh-deep-research-pack'], { env, stdio: ['ignore', 'pipe', 'pipe'] })
+    let out = ''
+    child.stdout.on('data', (d) => { out = (out + d).slice(-4000) })
+    child.stderr.on('data', (d) => { out = (out + d).slice(-4000) })
+    child.once('close', (code) => resolveRemove({ code, out }))
+  })
+  const [ra, rb] = await Promise.all([remove(), remove()])
+  check(ra.code === 0 || rb.code === 0, '至少一个并发卸载成功', `codes=${ra.code},${rb.code}`)
   const after = JSON.parse(readFileSync(join(HOME, 'profiles', PROFILE, 'package.json'), 'utf8'))
-  check(!(after?.dsh?.profile?.bundles ?? []).includes('dsh-deep-research-pack'), '卸载后本包消失')
+  check(!(after?.dsh?.profile?.bundles ?? []).includes('dsh-deep-research-pack'), '并发卸载后本包消失')
+  check(dsh(['--profile', PROFILE, '--dump-config']).status === 0, '并发卸载后 dump-config 可解析')
 } catch (error) {
   check(false, 'smoke 未抛异常', String(error))
 } finally {

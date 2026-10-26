@@ -97,7 +97,7 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 - `pack-smoke`：T0 tarball 形状、exports 可解析、无安装期脚本/凭据。
 - `workspace-isolation-smoke`：两套 home/profile/port/state/workspace，会话组绑定各自 W；只证接线/绑定，不证模型沙箱。
 - `interrupt-smoke`：SIGKILL 中断 scaffold → stale lock 接管 → 重跑补齐种子；真双进程锁竞争第二个 exit 2。
-- `profile-concurrency-smoke`：两个 `plugin add` 同 profile 并发后 profile 仍可解析/可卸载。
+- `profile-concurrency-smoke`：两个 `plugin add` / 两个 `remove` 同 profile 并发后 profile 仍可解析/最终无本包。
 - `scaffold-smoke`：种子 symlink/目录目标、锁、atomic state、orphan、哈希篡改与回滚保护。
 - `upgrade-smoke`：安装当前版 → 模拟下一版 → 种子升级 → 回滚拒绝降级 → 卸载（profile + W 双面）。
 - `profile-matrix-smoke`：多 profile 独立安装/卸载、损坏 tarball 无半装、用户 overlay 不改写、卸载重装后 workspace 数据保留。
