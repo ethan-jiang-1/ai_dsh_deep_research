@@ -129,6 +129,13 @@ try {
   check(read(join(ws5, 'AGENTS.md')) === '# existing project instructions\n', '--upgrade 不覆盖已有 AGENTS')
   check(existsSync(join(ws5, 'AGENTS.md.seed-new')) && existsSync(join(ws5, '.gitignore.seed-new')), '--upgrade 为用户改过的种子写 sidecar')
 
+  // ③f 种子目标是目录：--force 不能把目录当文件写，exit 2 并保留目录
+  const ws6 = join(TEMP, 'ws6')
+  check(run(['--workspace', ws6]).status === 0, '第六工作区铺种')
+  rmSync(join(ws6, 'AGENTS.md'))
+  mkdirSync(join(ws6, 'AGENTS.md'))
+  check(run(['--force', '--workspace', ws6]).status === 2 && lstatSync(join(ws6, 'AGENTS.md')).isDirectory(), '种子目标是目录时拒绝写入')
+
   // ④ --check 区分 deleted：用户删掉的种子不被 --upgrade 静默重铺，--force 才恢复
   const deletedRel = 'templates/run/topics.md'
   rmSync(join(ws2, deletedRel))

@@ -88,7 +88,10 @@ const hashOf = (path, st = lstatOf(path)) => (st?.isFile() ? sha256(readFileSync
 const writeSeedFile = (src, dst) => {
   const st = lstatOf(dst)
   if (st?.isSymbolicLink()) unlinkSync(dst) // 替换链接本身，绝不写穿到目标
-  else if (st?.isDirectory()) throw new Error(`目标不是普通文件：${dst}`)
+  else if (st?.isDirectory()) {
+    console.error(`scaffold: 种子目标不是普通文件：${dst}（先移走目录再重跑）`)
+    process.exit(2)
+  }
   copyFileSync(src, dst)
 }
 
@@ -168,6 +171,10 @@ if (versionAhead && upgrade && !force) {
   if (!dryRun && (force || upgrade || state === null)) {
     if (lstatOf(statePath)?.isSymbolicLink()) {
       note(false, '研究工作区种子（状态文件是 symlink）', `${statePath} 是符号链接；拒绝写穿（先删链接再跑）`)
+      process.exit(2)
+    }
+    if (lstatOf(statePath)?.isDirectory()) {
+      note(false, '研究工作区种子（状态文件是目录）', `${statePath} 是目录；先移走再重跑`)
       process.exit(2)
     }
     const next = {
