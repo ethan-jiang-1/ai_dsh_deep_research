@@ -40,6 +40,13 @@ try {
   cpSync(join(PACK, 'workspace'), join(PACKCOPY, 'workspace'), { recursive: true })
   const seed = JSON.parse(read(join(PACKCOPY, 'workspace', 'seed.json')))
 
+  // 发布物完整性：篡改包内种子源但不改 seed.json → scaffold 必须先红，不铺错内容
+  const BAD = join(TEMP, 'pack-bad')
+  cpSync(PACKCOPY, BAD, { recursive: true })
+  writeFileSync(join(BAD, 'workspace', 'NODES.md'), `${read(join(BAD, 'workspace', 'NODES.md'))}\n<!-- tampered -->\n`)
+  const badRun = spawnSync(process.execPath, [join(BAD, 'scripts', 'scaffold.mjs'), '--seed-only', '--workspace', join(TEMP, 'ws-bad')], { encoding: 'utf8' })
+  check(badRun.status === 2 && /哈希不匹配/.test(badRun.stderr), '种子哈希不匹配时拒绝铺种', (badRun.stderr || '').slice(-300))
+
   // ① 首次铺种 + 状态文件
   const ws = join(TEMP, 'ws')
   const install = run(['--workspace', ws])

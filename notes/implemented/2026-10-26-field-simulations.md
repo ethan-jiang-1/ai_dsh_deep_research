@@ -51,6 +51,7 @@
 - 只读 workspace：写模式 exit 2 并提示修权限；`--check` 仍可只读（不再抛栈）。
 - 种子目标为 symlink：`--force` 只替换链接本身，不写穿目标；`--upgrade` 写 sidecar；state 文件是 symlink 时 exit 2 拒绝。
 - 种子目标被替换为目录：`--force` exit 2 并保留目录，不再抛 Node 栈。
+- 包内种子源被篡改但 `seed.json` 未更新：`scaffold` 现在先校验哈希，exit 2 拒绝铺错内容。
 - 损坏的状态 JSON：按无状态处理，`--upgrade` 不覆盖用户文件。
 
 ## 边界

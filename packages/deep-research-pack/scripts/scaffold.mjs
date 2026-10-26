@@ -70,6 +70,19 @@ if (typeof seed.version !== 'string' || typeof seed.files !== 'object' || seed.f
   console.error('scaffold: 种子清单形态非法（需要 version + files 映射）')
   process.exit(2)
 }
+// 发布物完整性：seed.json 的哈希必须匹配包内源文件；tarball 被截断/篡改时先红，不静默铺错内容。
+for (const rel of Object.keys(seed.files)) {
+  const src = join(SEED, seedSourceRel(rel))
+  if (!existsSync(src)) {
+    console.error(`scaffold: 种子源缺席：${rel}（重装 pack 或更新 seed.json）`)
+    process.exit(2)
+  }
+  const actual = sha256(readFileSync(src, 'utf8'))
+  if (actual !== seed.files[rel]) {
+    console.error(`scaffold: 种子哈希不匹配：${rel}（seed.json=${String(seed.files[rel]).slice(0, 12)}… actual=${actual.slice(0, 12)}…；tarball/种子清单损坏）`)
+    process.exit(2)
+  }
+}
 
 const statePath = join(workspace, '.dsh-research-seed.json')
 let state = null
