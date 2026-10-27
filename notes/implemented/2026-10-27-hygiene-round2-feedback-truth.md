@@ -39,6 +39,16 @@
 - **`verify --only=<gate[,gate]>`**：47 道门禁一格到底，改一道要么全跑、要么盲改。只判指定门禁，
   输出与退出码都只看它们，末尾自报"仅判 N 道"；未登记门禁名 exit 2。判据零变化——省的是噪声与
   注意力，不是时间；收尾仍须全量。
+- **面板数据面搬出视图**：`ResearchConfigTab.tsx` 里 7 张纯数据表（内置偏好 / 判型映射 /
+  六条底线 / 四分区标签 / 领域示范 / 两个入口指令）进 `src/lib/config-tables.ts`。理由不只是
+  "文件太长"：这些表是 skill 的**投影**，与视图生命周期无关；放在 700 行 TSX 里时 lib 侧拿不到
+  （`MethodLibraryView` 曾反向 import 视图文件取常量），而 keyless 测试只能 `ts.createSourceFile`
+  扒源码、并被迫断言"必须保持为可静态对账的数组字面量"——视图一重构就红，且红得与业务无关。
+  处置后测试直接 import，整套 AST 取数助手（约 140 行）删除。
+- **门禁自测进 CI**：`gates-smoke`（87 注入案例 + 4 对照，经真实 verify 入口判红）与
+  `run-accept-smoke` 都声明 keyless，却只活在"改 verify 必跑"的散文里——CI 上永不执行。
+  实测全量 1m44s + 2.6s，进 keyless job 的预算无压力；同时加 `--case=<id>` 供改单道门禁时
+  迭代（单案例 2.5s，末尾自报"仅跑 N 个"，未登记 id exit 2）。
 - **D 号台账加 `<a id="dN">` 锚点**：31 行单表零锚点，而 live 文档有 138 处裸 D 引用，读一个
   D 号 = 读整页 20KB，"按需跳"物理上不成立。锚点落地后 `md-anchors` 能校验 D 号链接，页头写死
   引用写法 `[D18](../../docs/decisions.md#d18)`；历史层（notes/_backlog）不追改。
@@ -61,6 +71,8 @@
   README → 绿；② 反向覆盖断言：删 `count-free` 唯一案例 → `# fail 1`（未覆盖名单不符）→ 还原
   绿；③ 遮罩判据：把关闭文案收窄成只认 `Continue` → 第 4 例红 → 还原绿；④ `bundle-sessions`：
   把 slug 写死成空串 → 第 1 例红 → 还原绿；⑤ `--only=nope-xyz` → exit 2 并点名未登记门禁。
+- **重构未改行为**：`tsc -b` 绿、`pnpm build` 重建 `lib/client.js`、`client-load-smoke` ALL PASS
+  （29 例 library-fold + 全量 909 例通过；测试数不变 = 没有用删断言换绿）。
 - **真环境实测**：同一通道连跑三次 `run-driver probe`——旧实现下 21:14 RED / 21:22 GREEN，
   且 GREEN 同刻截图仍被 Preview Notice 遮罩；新实现新增 `overlay-clear` 检查后同一通道 GREEN，
   `overlayPresent=false overlayCleared=true`。`client-load-smoke` 改用共享 helper 后 ALL PASS
@@ -79,8 +91,8 @@
 
 ## 环境状态
 
-- 本轮覆盖 P0（发布物/台账纠正）与 P1（遮罩自证、现场保留、bundle 反查、覆盖账本为正）及三项 P2
-  （`--only`、D 锚点、guides/62 补"改现有页签 → design/40 §2"路由行）。结构性改动（verify 按 A–F
-  分域、client 四页签拆件、design/40 §2 拆节）不在本轮范围。
+- 本轮覆盖 P0（发布物/台账纠正）、P1（遮罩自证、现场保留、bundle 反查、覆盖账本为正）、
+  P2（`--only`、`--case`、D 锚点、guides/62 路由行、门禁自测进 CI）与一项 P3（面板数据面搬出视图）。
+  仍属结构面的三项（verify 按 A–F 分域、client 四页签拆件、design/40 §2 拆节）不在本轮范围。
 - 运行区新增两类产物（gitignored）：`runtime/smoke-workspace/run-verdicts/<ts>-<kind>/` 与
   `cold-start-fail-<ts>/`——前者每次 up/probe 一份，后者只在冷启动红时出现。
