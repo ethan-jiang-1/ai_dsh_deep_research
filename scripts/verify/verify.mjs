@@ -57,9 +57,10 @@ const VENDOR_TAG = 'dsh-v0.2.1-rc.2';
 // --only=<名>`，不必读 1800 行也不必等无关门禁的输出（2026-10-27 卫生轮）。**不改变判据**：
 // 其余门禁照常执行（读文件、无副作用），只是失败不计入、汇总不打印——所以它省的是噪声与
 // 注意力，不是时间；想跑全量就省略该参数。
-const onlyArg = process.argv.find((a) => a.startsWith('--only='));
-const onlyRaw = onlyArg === undefined ? null : onlyArg.slice('--only='.length).trim();
-const only = onlyRaw === null || onlyRaw === '' ? null : new Set(onlyRaw.split(',').map((s) => s.trim()).filter(Boolean));
+const onlyArgs = process.argv.filter((a) => a.startsWith('--only='));
+const onlyNames = onlyArgs.flatMap((a) => a.slice('--only='.length).split(','))
+  .map((s) => s.trim()).filter(Boolean);
+const only = onlyNames.length === 0 ? null : new Set(onlyNames);
 const failures = [];
 const notes = [];
 const fail = (gate, msg) => { if (only === null || only.has(gate)) failures.push(`[${gate}] ${msg}`); };
