@@ -7,7 +7,7 @@ opened: 2026-10-27
 
 > 立卡：2026-10-27 ｜ 状态：已结（2026-10-27） ｜ 类型：Task ｜ 结论倾向：现在做——D1–D4 全采纳推荐，P1/P2 已落地 ｜ 可关闭：是
 
-**关闭结论（2026-10-27）：** D1 = 补 rc.3 客户端挂载证据（`compat-client-smoke`，ALL PASS）；D2 = N2 披露 + 触发器 + 可行动失败，不做降级单人模式；D3 = `state.schemaVersion` + `scaffold --clean`（sidecar 需 `--discard-sidecars`）+ `.gitignore` owner 统一；D4 = 移除字面量 `apiKey`。P1/P2 全部落地或按可观察条件延后；证据 = `pnpm verify` 全绿、`pnpm test` 891、scaffold/release/data/compat/compat-client smoke 全 PASS、现网 bundle `--repair` 后两次 `run-accept` 绿；包版本 `0.1.2 → 0.1.3`。去向：implemented — [发布前数据契约 Note](../../../notes/implemented/2026-10-27-release-data-contract.md)。
+**关闭结论（2026-10-27）：** D1 = 补 rc.3 客户端挂载证据（`compat-client-smoke`，ALL PASS）；D2 = N2 披露 + 触发器 + 可行动失败，不做降级单人模式；D3 = `state.schemaVersion` + `scaffold --clean`（sidecar 需 `--discard-sidecars`）+ `.gitignore` owner 统一；D4 = 移除字面量 `apiKey`。P1/P2 全部落地或按可观察条件延后；证据 = `pnpm verify` 全绿、`pnpm test` 896、scaffold/release/data/compat/compat-client smoke 全 PASS、现网 bundle `--repair` 后两次 `run-accept` 绿；包版本 `0.1.2 → 0.1.3`。去向：implemented — [发布前数据契约 Note](../../../notes/implemented/2026-10-27-release-data-contract.md)。
 
 **问题与期望结果：** 用户要求按 DSH 数据面 FAQ（26）判断本包是否需要参考，并给出 Gap 与计划。
 期望结果：发布后用户升级/卸载/换机器/移交 run bundle 时，数据不丢、不错、不泄漏；维护者能用一张卡
@@ -106,7 +106,7 @@ opened: 2026-10-27
 |---|---|---|
 | G1 | 已修（BUG-044） | present 归一化 + 写前/写后校验 + `--repair`；现网 bundle 两次 `run-accept` 绿、`path-hygiene` 干净 |
 | G2 | 已补 rc.3 客户端证据 | `compat-client-smoke` ALL PASS（真安装 → 真 web → chromium：零 apply 失败、client bundle 在、两页签可见可开） |
-| G3 | 已落地 | pack README §Data 数据卡（13 类事实）+ 备份/恢复/保留/权限/版本线 |
+| G3 | 已落地 | pack README §Data 数据卡（事实表）+ 备份/恢复/保留/权限/版本线 |
 | G4 | 已披露 | README §Compatibility N0/N1/N2 表 + `triggers.md` 两行 + scaffold/preflight 可行动文案 |
 | G5 | 已落地 | README §Uninstall 列团队层显式移除 + `scaffold --clean` |
 | G6 | 已落地 | `schemaVersion`（旧态前移/新版拒绝）+ `--clean`（报告/执行/幂等）+ `.gitignore` 不被 `--force` 覆盖；scaffold-smoke 新用例 |
@@ -120,6 +120,10 @@ opened: 2026-10-27
 | G14 | 已修 | `portableBundlePath` 双方 realpath；symlink 单测 |
 | G15–G18 | 已写清 | README 版本线/方法库并发/单用户权限/无自动 GC |
 | G19 | 已登记 | `docs/design/50` 安装侧指针 + `project-map` + `scripts/README` + `guides/62/65` |
+
+**复核轮（2026-10-27）：** 数据卡补「谁看得见/秘密」列与 `run.md` 声明行；凭据从会话行拆出；
+写明 E2 出网、不使用 attachments/spill/RAG、一通道一工作区、N2 peer 精度；新增静态数据面不变量
+（注入红证）、secret CLI scope smoke、坏 state/clean 数据面/活跃锁用例；`pnpm test` 896。
 
 ## 方案与取舍
 
@@ -161,7 +165,7 @@ opened: 2026-10-27
 1. G1：先写红测（新 bundle 回执里出现绝对路径即红）→ 修 `run-accept` 的回执写入顺序/校验 → 复跑，
    证明新回执零绝对路径、旧 bundle 仍按 epoch 豁免。
 2. G2：按 D1 落地；若选 A，补 rc.3 的 `client-load-smoke`（真浏览器挂载断言）。数据面机制不需要再补。
-3. G3/G5/G7：README 增一张 `## Data` 卡（13 行级别）+ `## Uninstall leaves` + 版本兼容矩阵；
+3. G3/G5/G7：README 增一张 `## Data` 卡（事实表）+ `## Uninstall leaves` + 版本兼容矩阵；
    guides/65 只留链接（一个事实一个家）。
 4. G4：按 D2-A 披露 N2 + `triggers.md` 一行；`scaffold`/`preflight` 的缺层文案改成可行动。
 5. G10：同批校正模板数/种子计数。
@@ -187,7 +191,7 @@ opened: 2026-10-27
   绝对路径；红测在修前红、修后绿；旧 bundle 行为不变（D28 epoch）。
 - G2：`engines.dsh` 声明的每个版本至少有一条客户端挂载证据（`client-load-smoke` 或等价），或声明
   收窄到已验证集合；两者不并存。
-- G3：README 一张表覆盖 13 类事实的「承诺/位置/作用域/删除/卸载后」；用户能按表删干净自己的数据；
+- G3：README 一张表覆盖数据卡事实的「承诺/位置/作用域/删除/卸载后」；用户能按表删干净自己的数据；
   文档门禁（md-links/anchors/doc-budgets）绿。
 - G4：README/guides 明示 N2；`triggers.md` 有上游重议条件；缺团队层时错误文案给出具体命令。
 - G5：Uninstall 节列出「留下什么」与逐项清理命令（含团队层）。

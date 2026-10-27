@@ -117,6 +117,20 @@ test('parseSeedState：缺省→null；旧态（无 schemaVersion）按 0 读并
   assert.equal(corrupt.reason, 'corrupt')
 })
 
+test('parseSeedState：形状非法（files 数组/值非字符串/skipped 非数组/version 非字符串）一律 corrupt', () => {
+  for (const text of [
+    '{"schemaVersion":1,"files":[]}',
+    '{"schemaVersion":1,"files":{"a":1}}',
+    '{"schemaVersion":1,"skipped":"x"}',
+    '{"schemaVersion":1,"adopted":[1]}',
+    '{"schemaVersion":1,"version":1}',
+  ]) {
+    const parsed = parseSeedState(text)
+    assert.equal(parsed.ok, false, text)
+    assert.equal(parsed.reason, 'corrupt', text)
+  }
+})
+
 test('nextSeedState：状态带 schemaVersion（旧态升级后写新口径）', () => {
   const state = nextSeedState({ seed: { version: '1.0.0', files: { a: 'a' } }, classifications: { a: 'missing' }, written: ['a'] })
   assert.equal(state.schemaVersion, SEED_STATE_SCHEMA)

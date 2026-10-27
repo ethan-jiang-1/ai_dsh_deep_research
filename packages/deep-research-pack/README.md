@@ -152,29 +152,44 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 ## Data
 
 一张表回答「装完数据在哪、谁删、卸载留什么」。承诺用 DSH 数据面的 P0–P4 记号（纯引用 / 会话派生 /
-用户可见文件 / 宿主账本 / 账号配置）；本包**没有 P3 home 账本**。
+用户可见文件 / 宿主账本 / 账号配置）；本包**没有 P3 home 账本**。读数：**P2** = 用户可见工作区文件；
+**派生** = 可从日志+文件重建；**只读层** = 随包发布、升级替换；**插件账本** = 插件自己写的工作区元数据。
 
-| 事实 | 承诺 | 权威 | 位置 | 作用域 | 寿命 / 删除 | 卸载后 |
-|---|---|---|---|---|---|---|
-| 角色 / preset / skill | 只读层 | 包 | 安装副本 `node_modules/dsh-deep-research-pack/` | 安装 | 随包版本；`dsh plugin remove` | 删 |
-| 工作区种子（手册 / NODES / 判型库 / 模板） | P2 | 落地后用户 | `<workspace>/{AGENTS.md,NODES.md,question-patterns.md,.gitignore,templates/run/}` | workspace | 用户手删；`--upgrade` 只写 sidecar | **保留** |
-| 用户方法库 | P2 | 用户 | `<workspace>/method-library.md` | workspace | 任何模式不覆盖；用户手删 | **保留** |
-| run bundle（研究事实） | P2 | 用户 | `<workspace>/drt_<slug>/`、`archive/`、`_abandoned/` | workspace + slug | 用户手删；无自动 GC | **保留** |
-| 交付 / 审计回执 | 派生 | 无（可重建） | bundle 内 `delivered.json` / `manifest.json` / `acceptance.md` / `audit.md` / `node-gate.md` | run | ops 重新验收即重建；present 只记相对标签 | **保留** |
-| 种子状态账本 | 插件账本（寄居 P2） | 插件 | `<workspace>/.dsh-research-seed.json`（含 `schemaVersion`） | workspace | `scaffold --clean`；不自动删 | **保留** |
-| scaffold 临时件 | 插件临时 | 插件 | `<workspace>/.dsh-research-scaffold.lock`、`*.seed-new*`、`*.tmp-*` | workspace | 正常退出删锁；`--clean --write` 清 sidecar/陈旧锁 | 可能保留 |
-| 会话 / 凭据 / 搜索索引 | DSH | DSH | `$DSH_HOME/sessions`、`.credentials.yaml`、`profiles/` | session / home | DSH 管理（会话无删除 API）；`session-query-sqlite` 显式 `:memory:` | 保留（DSH 语义） |
-| 团队机制层 | N2 依赖 | vendor experimental | `$DSH_HOME/profiles/<p>/`（依赖 + bundle 行） | profile | 用户显式删；本包卸载不删 | **保留** |
-| 浏览器侧栏布局 | 客户端 | 浏览器 | `localStorage['dsh.sidebar-right.v1.<sessionId>']` | device | vendor 管；清站点数据 | 保留（vendor 键） |
+| 事实 | 承诺 | 权威 | 位置 | 作用域 | 寿命 / 删除 | 谁看得见 | 秘密 | 卸载后 |
+|---|---|---|---|---|---|---|---|---|
+| 角色 / preset / skill | 只读层 | 包 | 安装副本 `node_modules/dsh-deep-research-pack/` | 安装 | 随包版本；`dsh plugin remove` | 模型（注入）/用户 | 否 | 删 |
+| 工作区种子（手册 / NODES / 判型库 / 模板） | P2 | 落地后用户 | `<workspace>/{AGENTS.md,NODES.md,question-patterns.md,.gitignore,templates/run/}` | workspace | 用户手删；`--upgrade` 只写 sidecar | 模型（AGENTS 注入）/用户 | 否 | **保留** |
+| 用户方法库 | P2 | 用户 | `<workspace>/method-library.md` | workspace | 任何模式不覆盖；用户手删 | 用户/Lead | 否 | **保留** |
+| run bundle（研究事实） | P2 | 用户 | `<workspace>/drt_<slug>/`、`archive/`、`_abandoned/` | workspace + slug | 用户手删；无自动 GC | 模型/用户 | 否（内容可能含敏感材料） | **保留** |
+| run.md 状态头 | 声明（非权威） | 事实（bundle 文件 + journal；contract 只作纪元） | `<bundle>/run.md` | run | 角色/ops 随阶段写；门禁只信事实 | 模型/用户 | 否 | **保留** |
+| 交付 / 审计回执 | 派生 | 无（需日志+文件重建） | bundle 内 `delivered.json` / `manifest.json` / `acceptance.md` / `audit.md` / `node-gate.md` | run | ops 重新验收即重建；present 只记相对标签 | 用户/ops | 否 | **保留** |
+| 种子状态账本 | 插件账本（寄居 P2） | 插件 | `<workspace>/.dsh-research-seed.json`（含 `schemaVersion`） | workspace | `scaffold --clean`；不自动删 | 用户（gitignored）/插件 | 否 | **保留** |
+| scaffold 临时件 | 插件临时 | 插件 | `<workspace>/.dsh-research-scaffold.lock`、`*.seed-new*`、`*.tmp-*` | workspace | 正常退出删锁；`--clean --write` 清陈旧锁/临时件，sidecar 需 `--discard-sidecars` | 用户 | 否 | 可能保留 |
+| 会话日志 | DSH | DSH | `$DSH_HOME/sessions/` | session | DSH 管理（无删除 API）；本包不删 | 模型（surface）/用户 | 否（可能含用户数据） | 保留（DSH 语义） |
+| 凭据 | DSH | provider | `$DSH_HOME/.credentials.yaml` / env / `.env` | home | DSH 管理；本包只按 ref 读 | 用户 / 插件（仅引用） | 是（值只在 provider） | 保留 |
+| 团队机制层 | N2 依赖 | vendor experimental | `$DSH_HOME/profiles/<p>/`（依赖 + bundle 行） | profile | 用户显式删；本包卸载不删 | 用户/插件 | 否 | **保留** |
+| 浏览器侧栏布局 | 客户端 | 浏览器 | `localStorage['dsh.sidebar-right.v1.<sessionId>']` | device | vendor 管；清站点数据 | 用户/浏览器 | 否 | 保留（vendor 键） |
 
-- **本包对 `$DSH_HOME` 零写入**（不声明 storage domain、不新增 session event、不写 localStorage）；
-  home 里的会话/凭据/profile 都是 DSH 自己的。驾驶舱只读 `remote.workspaceFiles` 与 `session.follow`。
+- **插件代码对 `$DSH_HOME` 零写入**（不声明 storage domain、不新增 session event、不写浏览器存储）；
+  home 里的会话/凭据/profile 是 DSH 的。安装/升级由 DSH CLI 写 profile；scaffold 只**触发**团队层安装（N2）。
+  驾驶舱只读 `remote.workspaceFiles`（根 = 会话 `header.cwd`，不是可变 working directory）与 `session.follow`。
 - **present 可移植**：回执里的 `present.path` 写成 `drt_<slug>/final/vN.md`，不写本机绝对路径。
   历史回执若已被旧版本写进绝对路径，用 `run-accept --repair` 修（只动可再生产物）。
-- **清理自己的残留**：`scaffold --clean` 只报告；`--clean --write` 删除未改过的孤儿种子、sidecar、
-  陈旧锁与临时状态。**改过的孤儿、种子文件、`drt_*`、`method-library.md` 永不删**。
+- **清理自己的残留**：`scaffold --clean` 只报告；`--clean --write` 删除未改过的孤儿种子、陈旧锁与
+  临时状态；**sidecar 默认只报告**（它可能是未合并的种子更新），加 `--discard-sidecars` 才丢弃。
+  **改过的孤儿、种子文件、`drt_*`、`method-library.md` 永不删**。
 - **工作区边界**：不能指到 `$HOME` / `$DSH_HOME` / pack / profile（或其祖先或内部）——否则
   `AGENTS.md` 会变成全局指令或写进安装树。
+- **一个通道一个工作区**：运行通道/实例是宿主级的，但一次研究锚定一个 cwd；多项目请各起通道
+  （不要在同一会话里切项目根）。`header.cwd` 不可变，`working_directory` 改了也不改观察面的读取根。
+- **E2 出网**：搜索 query 与回退时的目标 URL 会发给 DeepSeek；本地抓取成功时页面不出本机。
+  证据卡可能引用第三方页面内容，run bundle 移交前请自审。
+- **秘密扫描边界**：交付物（final/receipts/audit）跑高置信凭据扫描；evidence/ 默认不扫（安全题材的
+  示例密钥会误伤），需要时 `node scripts/run-gates/secret-scan.mjs <bundle> --all`。
+- **不使用** attachments / spill / KB-RAG / storage domain；本包也不提供会话删除或附件 GC（DSH 边界）。
+  `session-query-sqlite` 显式 `path: ':memory:'`，不落持久索引。
+- **run bundle 改名/移动**：只走根 ↔ `archive/` ↔ `_abandoned/`（位置=操作桶）；不要手工改
+  `drt_<slug>` 目录名——会话绑定按 slug 折，改名即失联。
 
 **备份 / 恢复 / 跨机器移交**
 
@@ -209,7 +224,8 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 | `tool-present`（交付声明） | **N1 原生插件** | base 无此行，由本包 insert |
 | `session-query-sqlite`（会话搜索） | **N1 原生插件** | 本包显式 `path: ':memory:'`，不落持久索引 |
 | `ctx.credentials`（凭据引用） | **N1 原生插件** | 每次调用解析；值不进本包 |
-| `@deepseek-ai/dsh-experimental-agent-team{,-profile}` / `client-ui-agent-team` | **N2 实验** | **不是产品稳定性承诺**：上游可能改 API 或撤掉能力。本包不写进 `dependencies`；`scaffold` 按运行中的 DSH 版本装团队层，版本不符默认不改写（`--refresh-team` 显式刷新）。上游若移除/改名，安装或客户端面会失败——先看 `$DSH_HOME/profiles/<p>/package.json` 与 scaffold 输出 |
+| `@deepseek-ai/dsh-experimental-agent-team{,-profile}` | **N2 实验** | **不是产品稳定性承诺**：上游可能改 API 或撤掉能力。本包不写进 `dependencies`；`scaffold` 按运行中的 DSH 版本装团队层，版本不符默认不改写（`--refresh-team` 显式刷新） |
+| `@deepseek-ai/dsh-experimental-client-ui-agent-team` | **N2 实验（peer）** | 客户端团队可视面，随宿主提供；不是本包安装的层。上游移除/改名时 client 挂载会失败，`compat-client-smoke` 能抓到 |
 | 社区插件（E1）/ 外部服务（E2） | — | 本包零 E1 依赖；外部只有模型/搜索/抓取 HTTP（隐私边界见上节） |
 
 **三条版本轴**（升级前先 `scaffold --check`）：

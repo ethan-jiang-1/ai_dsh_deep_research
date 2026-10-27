@@ -86,6 +86,21 @@ export function parseSeedState(text) {
   if (declared !== undefined && (!Number.isSafeInteger(declared) || declared < 0)) return { ok: false, reason: 'corrupt' }
   const schemaVersion = declared ?? 0
   if (schemaVersion > SEED_STATE_SCHEMA) return { ok: false, reason: 'newer-schema', schemaVersion }
+  // 形状校验：可解析但形状错的 state 比坏 JSON 更危险（下游会把它当空的/半可信的基线）。
+  if (raw.files !== undefined && (raw.files === null || typeof raw.files !== 'object' || Array.isArray(raw.files))) {
+    return { ok: false, reason: 'corrupt' }
+  }
+  if (raw.files !== undefined) {
+    for (const [rel, hash] of Object.entries(raw.files)) {
+      if (typeof rel !== 'string' || typeof hash !== 'string') return { ok: false, reason: 'corrupt' }
+    }
+  }
+  for (const field of ['skipped', 'adopted']) {
+    if (raw[field] !== undefined && (!Array.isArray(raw[field]) || raw[field].some((value) => typeof value !== 'string'))) {
+      return { ok: false, reason: 'corrupt' }
+    }
+  }
+  if (raw.version !== undefined && typeof raw.version !== 'string') return { ok: false, reason: 'corrupt' }
   const state = { ...raw, schemaVersion: SEED_STATE_SCHEMA }
   return { ok: true, state, schemaVersion, upgraded: schemaVersion < SEED_STATE_SCHEMA }
 }

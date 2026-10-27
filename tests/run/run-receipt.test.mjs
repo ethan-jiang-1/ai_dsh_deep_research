@@ -184,6 +184,22 @@ test('repairReceiptPaths：bundle 外绝对 present → path null + unportable�
   } finally { cleanup() }
 })
 
+test('repairReceiptPaths：坏 delivered.json 不删任何文件（fail-loud、零修改）', () => {
+  const { dir, cleanup } = makeRoot()
+  try {
+    const b = writeBundle(dir)
+    writeFileSync(join(b, 'delivered.json'), '{broken')
+    writeFileSync(join(b, 'acceptance.md'), '# Acceptance\n')
+    writeFileSync(join(b, 'node-gate.md'), '# Gate\n')
+    const r = repairReceiptPaths(b)
+    assert.equal(r.ok, false)
+    assert.match(r.reason, /JSON|解析/)
+    assert.equal(readFileSync(join(b, 'delivered.json'), 'utf8'), '{broken')
+    assert.equal(existsSync(join(b, 'acceptance.md')), true, '坏回执时不得顺手删可再生产物')
+    assert.equal(existsSync(join(b, 'node-gate.md')), true)
+  } finally { cleanup() }
+})
+
 test('buildManifest：extra 在落盘前登记 delivered.json（先文本哈希、后写盘的时序形态）', () => {
   const { dir, cleanup } = makeRoot()
   try {

@@ -43,7 +43,7 @@
 
 ## 实际跑过的验证
 
-- `pnpm verify` 全绿；`pnpm test` 891 通过（新增 secret-scan / portable path / seed schema /
+- `pnpm verify` 全绿；`pnpm test` 896 通过（新增 secret-scan / portable path / seed schema /
   deploy-args / repair 用例；含先红后绿的负例留证）。
 - 版本 `0.1.2 → 0.1.3`（行为变更）；`export-dist` 产出 0.1.3 tarball + 安装手册；`release-smoke` /
   `data-smoke` / `compat-smoke` / `compat-client-smoke` 全 PASS。
@@ -55,6 +55,10 @@
 - 现网 `drt_cn-open-vs-us-closed-agentic`：`run-accept --repair` 后绿、`path-hygiene` 干净（69 文件）、
   同一 bundle 第二次 `run-accept` 仍绿（幂等）；`delivered.json present.path` =
   `drt_cn-open-vs-us-closed-agentic/final/v1.md`。
+- 复核轮（2026-10-27）：数据卡补「谁看得见/秘密」列与 `run.md` 声明行；凭据从会话行拆出；
+  写明 E2 出网、不使用 attachments/spill/RAG、一通道一工作区、N2 peer 精度。新增
+  `data-plane-invariants`（注入 `storageDomain` 红→还原绿）、`secret-scan-smoke`、坏 state
+  fail-loud、clean 不碰 `drt_*`/方法库、活跃锁拒绝 clean 等证据；`pnpm test` 896。
 - `node scripts/run-gates/path-hygiene.mjs` 对现网 bundle exit 0；`pnpm test` 的
   `node-gate-witness` 绝对/外部 present 两例先红后绿。
 

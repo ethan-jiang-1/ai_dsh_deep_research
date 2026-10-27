@@ -64,8 +64,9 @@ P 里的 `workspace/` 是**只读种子**：落地后归 W，由用户工作区�
   `engines.dsh`，否则宿主拒绝加载。
 - **卸载**：先停 profile；`dsh plugin --profile <p> remove dsh-deep-research-pack`；工作区保留，数据清理是用户显式动作。
   团队层不在本包内、卸载不删——不需要时显式 `dsh plugin --profile <p> remove @deepseek-ai/dsh-experimental-agent-team-profile`。
-  scaffold 自己的残留（未改孤儿 / `.seed-new` / 陈旧锁 / 临时状态）用 `scaffold --clean` 报告、`--clean --write` 清理；
-  改过的孤儿、种子、`drt_*`、方法库永不删。
+  scaffold 自己的残留（未改孤儿 / `.seed-new` / 陈旧锁 / 临时状态）用 `scaffold --clean` 报告；
+  `--clean --write` 清未改孤儿/陈旧锁/临时件，**sidecar 默认保留**（可能是未合并的种子更新），
+  加 `--discard-sidecars` 才丢弃；改过的孤儿、种子、`drt_*`、方法库永不删。
 
 ## 4. 独立环境与多实例
 

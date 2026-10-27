@@ -272,6 +272,10 @@ try {
       ...(smoke.status !== 0 && !(smoke.stdout || '').trim() ? [`stderr: ${(smoke.stderr || '').slice(-400)}`] : []) ].join(' | '));
   // ⑤b 卸载形状：remove 后 profile 的 bundles 与 dependencies 都不再提本包（手册“干净卸载”的证据）。
   console.log('⑤b dsh plugin remove …');
+  const TEAM_PKG = '@deepseek-ai/dsh-experimental-agent-team-profile';
+  let beforeRemove = null;
+  try { beforeRemove = JSON.parse(readFileSync(join(profileDir, 'package.json'), 'utf8')) } catch {}
+  const teamBefore = beforeRemove?.dependencies?.[TEAM_PKG];
   const remove = await run(process.execPath, ['--import', 'tsx/esm', bin, 'plugin', '--profile', PROFILE, 'remove', 'dsh-deep-research-pack'],
     { cwd: dshSrc, env: scrubbedEnv({ DSH_HOME: home }) });
   let afterRemove = null;
@@ -280,6 +284,8 @@ try {
     && !(afterRemove?.dsh?.profile?.bundles ?? []).includes('dsh-deep-research-pack')
     && afterRemove?.dependencies?.['dsh-deep-research-pack'] === undefined,
     'dsh plugin remove 后 profile 无插件痕迹', tail(remove));
+  step(teamBefore === undefined || afterRemove?.dependencies?.[TEAM_PKG] !== undefined,
+    '团队层按文档保留（卸载不删 N2 层）', `before=${String(teamBefore)} after=${String(afterRemove?.dependencies?.[TEAM_PKG])}`);
 
   // 释放到静默（scripts/AGENTS.md）：preset-smoke 正常路径自收割；若它被外层超时击杀（finally
   // 不及跑），web 孙进程（独立进程组）会漏占端口——按端口收割兜底并验证释放。
