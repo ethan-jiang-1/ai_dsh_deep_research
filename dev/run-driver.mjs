@@ -22,7 +22,7 @@
 // research`——那会跳过 pack 漂移检测、静默用旧镜像。boot 是前台进程（脚本退出即 web 停），
 // 故 `up` 以**托管后台 job** 形态起 boot-run，本驱动的 probe 阶段独立取证。
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { guiUrlFromWebLog, runDriverVerdict } from '../scripts/lib/run-channel.mjs';
@@ -88,6 +88,28 @@ function probeFace(url, expectFace, screenshotPath = undefined) {
   return { verdict, exit: r.status };
 }
 
+// ── 判定落盘：每次 up/probe 各留一份现场 ──────────────────────────────────────
+// 旧实现只写固定名 run-driver-verdict.json / -probe-verdict.json：下一次 up/probe 直接覆盖，
+// **红的现场会被后来的绿抹掉**——agent 复跑一次就再也看不到当时哪条检查红、页面长什么样
+// （2026-10-27 卫生轮实证：同一通道 21:14 RED、21:22 GREEN，RED 的截图只剩内存里那份）。
+// 现在：run-verdicts/<ts>-<kind>/ 每次一份（verdict.json + page.png），latest-verdict.json
+// 指向最近一次；固定名副本继续写（cold-start-smoke 与既有消费方按固定名读，不动契约）。
+function persistVerdict(kind, payload, screenshotPath) {
+  const at = new Date();
+  const dir = join(STATE_DIR, 'run-verdicts', `${at.toISOString().replace(/[:.]/g, '-')}-${kind}`);
+  mkdirSync(dir, { recursive: true });
+  let shot = null;
+  if (screenshotPath !== undefined && existsSync(screenshotPath)) {
+    try { copyFileSync(screenshotPath, join(dir, 'page.png')); shot = join(dir, 'page.png'); } catch {}
+  }
+  const file = join(dir, 'verdict.json');
+  writeFileSync(file, JSON.stringify({ ...payload, at: at.toISOString(), kind, screenshotCopy: shot }, null, 2));
+  writeFileSync(join(STATE_DIR, 'latest-verdict.json'), JSON.stringify({ kind, dir, verdict: file, at: at.toISOString() }, null, 2));
+  const legacy = join(STATE_DIR, kind === 'up' ? 'run-driver-verdict.json' : 'run-driver-probe-verdict.json');
+  writeFileSync(legacy, JSON.stringify(payload, null, 2));
+  return { dir, file, legacy };
+}
+
 // ── 子命令 ─────────────────────────────────────────────────────────────────
 
 const arg = (name, dflt) => {
@@ -128,10 +150,9 @@ if (sub === 'probe') {
   }
   const v = runDriverVerdict({ probe: verdict, expectFace, composing: false });
   const payload = { url, ...v, statusPaneText: verdict.statusPaneText?.slice(0, 600), screenshot: verdict.screenshot ?? null };
-  const out = join(STATE_DIR, 'run-driver-probe-verdict.json');
-  writeFileSync(out, JSON.stringify(payload, null, 2));
+  const saved = persistVerdict('probe', payload, verdict.screenshot);
   console.log(JSON.stringify(payload, null, 2));
-  console.error(`run-driver probe: 截图 ${verdict.screenshot ?? '（无）'}；verdict ${out}`);
+  console.error(`run-driver probe: 现场 ${saved.dir}（page.png + verdict.json）；固定名副本 ${saved.legacy}`);
   process.exit(v.exit);
 }
 
@@ -221,12 +242,11 @@ if (verdict === null) {
 const v = runDriverVerdict({ probe: verdict, expectFace, composing: false });
 const submitted = v.exit === 0;
 const payload = { url: state.url, port: state.port, ...v, statusPaneText: verdict.statusPaneText?.slice(0, 600), screenshot: verdict.screenshot ?? null };
-const out = join(STATE_DIR, 'run-driver-verdict.json');
-writeFileSync(out, JSON.stringify(payload, null, 2));
+const saved = persistVerdict('up', payload, verdict.screenshot);
 console.log('──────────────────────────── 呈交块 ────────────────────────────');
 console.log(`通道 URL：${state.url}`);
 console.log(`浏览器面：${v.level}${submitted ? '' : `（${v.reason}）`}`);
-console.log(`可见证据：${verdict.screenshot ?? '（截图失败，见 verdict）'} ｜ 判定：${out}`);
+console.log(`可见证据：${saved.dir}/page.png ｜ 判定：${saved.dir}/verdict.json（固定名副本 ${saved.legacy}；latest = ${join(STATE_DIR, 'latest-verdict.json')}）`);
 console.log('自检判据：GUI 里 preset 选单含四个 Deep Research 角色、会话右栏有「研究状态」页签');
 console.log('───────────────────────────────────────────────────────────────');
 console.log(JSON.stringify(payload, null, 2));

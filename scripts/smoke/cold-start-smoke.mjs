@@ -10,7 +10,7 @@
 // 用法：source dev/env.sh && node scripts/smoke/cold-start-smoke.mjs
 // 退出码：0 冷启动 GREEN / 1 红 / 2 未跑（前置缺席）
 import { spawn } from 'node:child_process'
-import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { reclaimPort } from '../lib/port-reclaim.mjs'
@@ -74,14 +74,28 @@ let verdict = null
 if (result.code === 0 && existsSync(verdictPath)) {
   try { verdict = JSON.parse(readFileSync(verdictPath, 'utf8')) } catch {}
 }
-rmSync(TEMP, { recursive: true, force: true })
 const ok = result.code === 0 && verdict?.level === 'GREEN' && leak === null
 if (!ok) {
+  // 判红前先把现场搬出临时根再删（旧实现先 rm 再判红：红时盘上零证据，只剩 25 行 stdout 尾巴，
+  // agent 无从知道哪条检查红、页面长什么样，只能复跑——而冷启动失败往往不复现）。保留 =
+  // state/（run-driver-verdict.json / 截图 / web.log / boot.log）+ 完整输出。
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-')
+  const keep = join(ROOT, 'runtime', 'smoke-workspace', `cold-start-fail-${stamp}`)
+  try {
+    mkdirSync(keep, { recursive: true })
+    if (existsSync(STATE)) cpSync(STATE, join(keep, 'state'), { recursive: true, force: true })
+    writeFileSync(join(keep, 'output.log'), output)
+    console.error(`  现场已留：${keep}（state/verdict+截图+web.log；output.log 完整输出）`)
+  } catch (error) {
+    console.error(`  现场保留失败（继续判红）：${String(error?.message ?? error).slice(0, 200)}`)
+  }
+  rmSync(TEMP, { recursive: true, force: true })
   console.error('cold-start-smoke: 红')
   console.error(`  exit=${result.code} signal=${result.signal ?? '-'} verdict=${verdict?.level ?? '（无）'} port=${leak ?? '已释放'}`)
   console.error(output.split('\n').slice(-25).join('\n'))
   process.exit(1)
 }
+rmSync(TEMP, { recursive: true, force: true })
 console.log('cold-start-smoke: GREEN（独立 home/profile/port/state；浏览器面可呈交）')
 console.log(`  URL=${verdict.url} port=${PORT} profile=${PROFILE}`)
 console.log('  边界：MCP 关闭；团队层来自 registry 或缓存；node_modules/vendor 构建由 bootstrap --check 证明在位')
