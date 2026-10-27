@@ -7,3 +7,8 @@ export function shortLabel(text: string, max = 15): string {
   const clean = text.replace(/\s+/g, ' ').trim()
   return clean.length > max ? `${clean.slice(0, max - 1)}…` : clean
 }
+
+/** 注意力条目的严重度图标（卡片与「需要你注意」列表共用）。 */
+export function severityIcon(severity: 'critical' | 'warning' | 'info'): string {
+  return severity === 'critical' ? '✕' : severity === 'warning' ? '⚠' : '·'
+}

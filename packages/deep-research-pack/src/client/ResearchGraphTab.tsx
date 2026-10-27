@@ -53,8 +53,9 @@ import {
 import { useGraphFeed } from './research-graph/useGraphFeed.ts'
 import type { GraphNodeView, ResearchGraphTabProps } from './research-graph/types.ts'
 import { shortLabel } from './research-graph/format.ts'
+import { graphStateNote } from './research-graph/state-note.ts'
+import { NodeCard } from './research-graph/NodeCard.tsx'
 import { DagMap } from './research-graph/DagMap.tsx'
-import { WorkerChips } from './research-graph/WorkerChips.tsx'
 export type { ResearchGraphInjected, ResearchGraphTabProps } from './research-graph/types.ts'
 
 /** plan.md 只读表头附近（节点表在文首；缺文件合法）。 */
@@ -91,24 +92,6 @@ function severityIcon(severity: AttentionItem['severity']): string {
   return severity === 'critical' ? '✕' : severity === 'warning' ? '⚠' : '·'
 }
 
-/** plan.md 节点在 detail 里的只读摘要（只显示真实读到的列）。 */
-function planLines(node: PlanNode): ReactNode {
-  return (
-    <>
-      <div style={{ opacity: 0.8 }}>
-        plan：{node.id}
-        {node.kind !== undefined ? ` · ${node.kind}` : ''}
-        {node.stage !== undefined ? ` · stage ${node.stage}` : ''}
-        {node.depth !== undefined ? ` · depth ${node.depth}` : ''}
-        {node.ownerRole !== undefined ? ` · plan owner ${node.ownerRole}` : ''}
-      </div>
-      {node.question !== undefined && <div style={{ opacity: 0.8 }}>question：{node.question}</div>}
-      {node.deps.length > 0 && <div style={{ opacity: 0.8 }}>plan deps：{node.deps.join(', ')}</div>}
-      {node.output !== undefined && <div style={{ opacity: 0.8 }}>output：{node.output}</div>}
-      {node.acceptance !== undefined && <div style={{ opacity: 0.8 }}>acceptance：{node.acceptance}</div>}
-    </>
-  )
-}
 
 /** 本地时钟 `HH:MM:SS`（“最后刷新”用；不引入日期库）。 */
 function formatClock(ms: number): string {
@@ -223,6 +206,9 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   const hasEdges = graphNodes.some((node) => node.blockedBy.some((dep) => dep !== node.id && knownIds.has(dep)))
   const hasPlan = planNodes.length > 0
   const hasTopLevel = topPlanNodes.length > 0
+
+  // 降级说明（纯映射，住 research-graph/state-note.ts）
+  const stateNote = graphStateNote({ planState, boundSlug, followError, hasPlan, hasEdges, hasTopLevel })
   const waves = wavesOf(graphNodes)
   const nodeByTaskId = new Map<string, GraphNodeView>()
   for (const node of graphNodes) {
@@ -261,127 +247,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     })
   }
 
-  const stateNote = (() => {
-    if (planState === 'loading') return null
-    if (planState === 'truncated') {
-      return {
-        title: 'plan.md 过长，已截断',
-        body: '只读了前 800 行；图谱可能不完整。修正 = 拆分 plan 或提高读策略（run-context 的 plan 上限）。',
-      }
-    }
-    if (boundSlug === null && followError !== null) {
-      // 读失败 ≠ 没有 run（BUG-045）：把流故障与"未绑定"分开，否则用户/agent 会把
-      // 瞬时的 journal 断连读成"这个会话还没开始研究"。
-      return {
-        title: '绑定状态读取失败',
-        body: `journal 流断开（${followError}）——"读不到"不等于"本会话没有 run"；已自动重试，连接恢复后这里会自动补上。`,
-      }
-    }
-    if (boundSlug === null) {
-      return {
-        title: '本会话尚未绑定 run',
-        body: 'journal 里还没有可信的 `drt_<slug>/` 写入（立项/预检读旧 bundle 不算）。Team 任务仍显示；Lead 写 plan.md 后这里会自动出现 DAG。',
-      }
-    }
-    if (hasPlan && !hasTopLevel) {
-      return {
-        title: 'plan 只有子节点，顶层图为空',
-        body: '子节点必须挂在真实父节点上；看下方「plan 结构提示」修正 parent，或补回顶层节点。',
-      }
-    }
-    if (hasPlan && hasEdges) return null
-    if (hasPlan && !hasEdges) return { title: 'plan 有节点，但 Team 板没有 blocked_by', body: '图按 plan deps 画；执行镜像没有记录依赖边。' }
-    if (!hasPlan && hasEdges) return { title: 'plan.md 缺席；图来自 Team blocked_by', body: '旧 run 常见。图是任务板的依赖，不是 plan.md 的执行图。' }
-    return {
-      title: '没有可画的 DAG',
-      body: planState === 'missing'
-        ? '此 run 没有 plan.md（旧 run / 未落盘），Team 板也没有 blocked_by。下面是任务快照，不是 DAG；rerun 会按 plan.md 生成执行图。'
-        : 'plan.md 没有可读节点表，Team 板也没有 blocked_by。下面是任务快照，不是 DAG。',
-    }
-  })()
 
-  const renderNode = (node: GraphNodeView): ReactNode => {
-    const task = node.task
-    const planNode = node.planNode
-    const member = node.member
-    const expanded = expandedId === node.id
-    const childNodes = planNode !== undefined ? childrenByParent.get(planNode.id) ?? [] : []
-    return (
-      <article key={node.id} id={`research-graph-${node.id}`} style={{ ...CARD_STYLE, borderLeft: `3px solid ${node.state.color}` }}>
-        <button
-          type="button"
-          aria-expanded={expanded}
-          onClick={() => { setExpandedId(expanded ? null : node.id) }}
-          style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'inherit', font: 'inherit' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
-            <strong style={{ fontSize: 13 }}>{node.id}</strong>
-            {planNode?.kind !== undefined && <span style={{ fontSize: 11, opacity: 0.65 }}>{planNode.kind}</span>}
-            {planNode?.stage !== undefined && <span style={{ fontSize: 10, opacity: 0.55 }}>stage {planNode.stage}</span>}
-            {childNodes.length > 0 && <span style={{ fontSize: 10, color: '#6366f1' }}>内部 {String(childNodes.length)}</span>}
-            <span style={{ fontSize: 12, flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>{shortLabel(node.subject, 72)}</span>
-            <span style={{ fontSize: 11, color: node.state.color, whiteSpace: 'nowrap' }}>{node.state.icon} {node.state.text}</span>
-          </div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 11, opacity: 0.65, marginTop: 2 }}>
-            <span>owner：{node.ownerName ?? '未指派'}</span>
-            {node.blockedBy.length > 0 && <span>deps：{node.blockedBy.join(', ')}</span>}
-            {planNode?.depth !== undefined && <span>depth：{planNode.depth}</span>}
-            {task !== undefined && <span>task：{task.id}</span>}
-            {member !== undefined && (
-              <WorkerChips memberId={member.id} useSessions={props.useSessions} useSessionStatus={props.useSessionStatus} />
-            )}
-          </div>
-        </button>
-        {expanded && (
-          <div style={{ marginTop: 6, paddingTop: 6, borderTop: '1px solid #00000010', fontSize: 12, lineHeight: 1.6 }}>
-            {task?.description !== undefined && task.description !== '' && (
-              <div style={{ whiteSpace: 'pre-wrap', opacity: 0.85, maxHeight: 120, overflowY: 'auto', paddingRight: 4 }}>{task.description}</div>
-            )}
-            <div style={{ opacity: 0.8 }}>owner：{node.ownerName ?? '未指派'}{member !== undefined ? `（${member.phase}）` : ''}</div>
-            {node.blockedBy.length > 0 && <div style={{ opacity: 0.8 }}>依赖：{node.blockedBy.join(', ')}</div>}
-            {task !== undefined && <div style={{ opacity: 0.8 }}>revision：{task.revision}{task.ready ? ' · ready' : ''}</div>}
-            {planNode !== undefined
-              ? planLines(planNode)
-              : <div style={{ opacity: 0.5 }}>plan.md 未记录此节点（旧 run；rerun 时会生成 plan）</div>}
-            {childNodes.length > 0 && (
-              <div style={{ marginTop: 4, padding: '4px 6px', border: '1px solid #6366f126', borderRadius: 4, background: '#6366f108' }}>
-                <div style={{ fontSize: 11, color: '#6366f1', marginBottom: 2 }}>内部节点（复合展开，只读）</div>
-                {childNodes.map((child) => {
-                  // 子节点同样走四态词表：没有映射 = 状态未知，不是未执行。
-                  const childState = teamReady
-                    ? planNodeStateOf(mappingIndex.mapping.get(child.id))
-                    : PROJECTION_PENDING_STATE
-                  return (
-                    <div key={child.id} style={{ fontSize: 11, opacity: 0.85 }}>
-                      <strong>{child.id}</strong>
-                      {child.kind !== undefined ? ` · ${child.kind}` : ''}
-                      {` · ${childState.icon} ${childState.text}`}
-                      {child.ownerRole !== undefined ? ` · ${child.ownerRole}` : ''}
-                      {child.deps.length > 0 ? ` · deps ${child.deps.join(', ')}` : ''}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-            {node.attention !== undefined && <div style={{ color: '#b45309', marginTop: 2 }}>{severityIcon(node.attention.severity)} {node.attention.message}</div>}
-            <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-              {props.openOwner !== undefined && member !== undefined && member.id !== leadSessionId
-                && member.phase !== 'failed' && member.phase !== 'provisioning' && (
-                <button type="button" style={BUTTON_STYLE} onClick={() => { openOwner(member) }}>打开负责人</button>
-              )}
-              <button
-                type="button"
-                style={BUTTON_STYLE}
-                title={boundSlug !== null ? `复制 drt_${boundSlug}/${node.id}，粘贴到对话引用这个节点` : `复制 ${node.id}`}
-                onClick={() => { copyReference(node) }}
-              >{copiedId === node.id ? '已复制' : '复制引用'}</button>
-              <span style={MUTED_STYLE}>只读观察；调整请在对话里进行或 rerun。</span>
-            </div>
-          </div>
-        )}
-      </article>
-    )
-  }
 
   return (
     // 滚动义务在页签体自己（vendor .tabBody = overflow:hidden 的定高 flex 列——同状态页/终稿页）。
@@ -524,13 +390,45 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
             <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>
               WAVE {wave.level + 1}{wave.tasks.length > 1 ? ` · ${String(wave.tasks.length)} 个并行` : ''}
             </div>
-            {wave.tasks.map((node) => renderNode(node))}
+            {wave.tasks.map((node) => (
+        <NodeCard
+          key={node.id}
+          node={node}
+          expanded={expandedId === node.id}
+          onToggle={() => { setExpandedId(expandedId === node.id ? null : node.id) }}
+          copied={copiedId === node.id}
+          onCopy={() => { copyReference(node) }}
+          {...(node.member !== undefined ? { onOpenOwner: () => { openOwner(node.member as TeamMemberProjection) } } : {})}
+          children={node.planNode !== undefined ? childrenByParent.get(node.planNode.id) ?? [] : []}
+          childStateOf={(childId) => (teamReady ? planNodeStateOf(mappingIndex.mapping.get(childId)) : PROJECTION_PENDING_STATE)}
+          leadSessionId={leadSessionId}
+          useSessions={props.useSessions}
+          useSessionStatus={props.useSessionStatus}
+          boundSlug={boundSlug}
+        />
+      ))}
           </section>
         ))
         : graphNodes.length > 0 && (
           <section style={{ marginBottom: 10 }}>
             <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>任务快照（无依赖边）</div>
-            {graphNodes.map((node) => renderNode(node))}
+            {graphNodes.map((node) => (
+        <NodeCard
+          key={node.id}
+          node={node}
+          expanded={expandedId === node.id}
+          onToggle={() => { setExpandedId(expandedId === node.id ? null : node.id) }}
+          copied={copiedId === node.id}
+          onCopy={() => { copyReference(node) }}
+          {...(node.member !== undefined ? { onOpenOwner: () => { openOwner(node.member as TeamMemberProjection) } } : {})}
+          children={node.planNode !== undefined ? childrenByParent.get(node.planNode.id) ?? [] : []}
+          childStateOf={(childId) => (teamReady ? planNodeStateOf(mappingIndex.mapping.get(childId)) : PROJECTION_PENDING_STATE)}
+          leadSessionId={leadSessionId}
+          useSessions={props.useSessions}
+          useSessionStatus={props.useSessionStatus}
+          boundSlug={boundSlug}
+        />
+      ))}
           </section>
         ))}
 
