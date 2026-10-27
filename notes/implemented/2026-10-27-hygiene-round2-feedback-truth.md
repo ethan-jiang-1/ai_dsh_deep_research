@@ -39,6 +39,11 @@
 - **`verify --only=<gate[,gate]>`**：47 道门禁一格到底，改一道要么全跑、要么盲改。只判指定门禁，
   输出与退出码都只看它们，末尾自报"仅判 N 道"；未登记门禁名 exit 2。判据零变化——省的是噪声与
   注意力，不是时间；收尾仍须全量。
+- **驾驶舱子件按职责切出**：`ResearchGraphTab.tsx` 873 行里的 DAG 小图与队员 worker chips 是
+  自包含展示件，而 `research-graph/` 子目录此前只装 `types.ts`。切出 `DagMap.tsx`（几何 + 状态色 +
+  SVG + 选中）、`WorkerChips.tsx`（每成员一次实例化，hooks 数恒定）、`format.ts`（短标签，图与列表
+  共用——放任一组件里都会让另一个反向依赖组件）、`GraphNodeView` 进 `types.ts`；页签体降到 699 行。
+  四个新路径同 diff 进 design/40 §2（`cockpit-doc-registry` 要求每个 client 模块登记）。
 - **门禁按域拆文件（verify.mjs 1848 行 → 入口 61 行 + 6 个域模块）**。47 道门禁单文件一格到底，
   改一道要读全文件或盲改；而改门禁本来就是 `--only=<名>` 的窄面。拆法：`context.mjs`（路径常量 /
   gates 名单 / gitOnce / trackedFiles / fail-note 收集器）+ `gates/{a-docs,b-pack,c-notes,d-vendor,
@@ -100,6 +105,6 @@
 
 - 本轮覆盖 P0（发布物/台账纠正）、P1（遮罩自证、现场保留、bundle 反查、覆盖账本为正）、
   P2（`--only`、`--case`、D 锚点、guides/62 路由行、门禁自测进 CI）与一项 P3（面板数据面搬出视图）。
-  仍属结构面的两项（client 四页签拆件、design/40 §2 拆节）不在本轮范围。
+  仍属结构面的两项（其余三个页签按区拆件、design/40 §2 拆节）不在本轮范围。
 - 运行区新增两类产物（gitignored）：`runtime/smoke-workspace/run-verdicts/<ts>-<kind>/` 与
   `cold-start-fail-<ts>/`——前者每次 up/probe 一份，后者只在冷启动红时出现。
