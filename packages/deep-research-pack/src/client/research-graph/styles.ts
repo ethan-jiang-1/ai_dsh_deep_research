@@ -12,3 +12,8 @@ export const BUTTON_STYLE: CSSProperties = {
 export const CARD_STYLE: CSSProperties = {
   border: '1px solid #00000014', borderRadius: 6, padding: '6px 8px', marginBottom: 6, background: '#00000005',
 }
+
+export const BANNER_STYLE: CSSProperties = {
+  marginBottom: 8, padding: '6px 10px', borderRadius: 6,
+  background: '#f59e0b12', border: '1px solid #f59e0b38',
+}
