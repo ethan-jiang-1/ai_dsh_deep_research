@@ -66,7 +66,7 @@ test('行依赖全部声明进 peerDependencies', () => {
   }
 });
 
-test('bundle patch：registry 替换行 + present/ui-agent-team insert 行在位；团队与 web 行不进本包', () => {
+test('bundle patch：registry 替换行 + present/ui-agent-team insert 行在位；团队与 web insert 行不进本包', () => {
   const yml = readFileSync(join(PACK, 'cordis.patch.yml'), 'utf8');
   // 替换行（0.1.7）：registry 的默认 preset 指研究主编（旧 agent-presets roots 形态已随重设计删除）
   assert.match(yml, /^- id: agent-preset-registry$/m);
@@ -77,9 +77,10 @@ test('bundle patch：registry 替换行 + present/ui-agent-team insert 行在位
   for (const row of ['tool-present', 'ui-agent-team']) {
     assert.match(insertBlock, new RegExp(`^\\s*- id: ${row}$`, 'm'), `insert 行缺失: ${row}`);
   }
-  // 回归守卫：web 四行不得出现在本包 bundle（insert 会与 web-app surface 的 preset-scoping 打架）
+  // 回归守卫：web 四行的 **insert** 形态不得出现在本包 bundle（insert 会与 web-app surface 的
+  // preset-scoping 打架；provider 选择走下面的 `- id: web` 替换行——D30）
   for (const row of ['tool-web', 'web-search', 'web-fetch', 'web']) {
-    assert.doesNotMatch(insertBlock, new RegExp(`^\\s*- id: ${row}$`, 'm'), `web 行 ${row} 不应进 bundle（base 出厂行）`);
+    assert.doesNotMatch(insertBlock, new RegExp(`^\\s*- id: ${row}$`, 'm'), `web 行 ${row} 不应以 insert 形态进 bundle（base 出厂行）`);
   }
   // 回归守卫：团队机制行不得出现在本包 bundle（与 vendor agent-team-profile 层同行 id
   // 双 insert = 重复行，实证见 RFC m2-p1-run-channel Phase 0；团队组合的家 = vendor 层）
@@ -88,11 +89,32 @@ test('bundle patch：registry 替换行 + present/ui-agent-team insert 行在位
   }
 });
 
-test('每角色 preset 的 tool-web 行带 base config（fetch + 60s 超时）', () => {
+test('bundle patch 固定检索底座：web 替换行 = deepseek-search-api 搜索 + 回退 fetch（D30/D31）', () => {
+  const yml = readFileSync(join(PACK, 'cordis.patch.yml'), 'utf8');
+  const replaceBlock = yml.split(/^- insert:$/m)[0];
+  const insertBlock = yml.split(/^- insert:$/m).slice(1).join('\n');
+  // 两个字段必须同时在场：Loader 的 replace 行 config 整体替换；只写 searchProvider 会让
+  // fetch 面对 http + deepseek-fetch-api 两个可用 provider → WEB_PROVIDER_AMBIGUOUS。
+  assert.match(
+    replaceBlock,
+    /^- id: web\n\s*config:\n\s*searchProvider: deepseek-search-api\n\s*fetchProvider: deepseek-fallback-fetch$/m,
+    'web 替换行缺失或未同时重述 searchProvider/fetchProvider（D30/D31：搜索 = Search API，fetch = 回退 provider）',
+  );
+  // 行不带 name：按 id 定向替换，避免新增 peerDependency（同 llm-deepseek 行形态；row-deps 门禁）
+  const row = (replaceBlock.split(/^- id: web$/m)[1] ?? '').split(/^- id: /m)[0];
+  assert.doesNotMatch(row, /^\s*name:/m, 'web 替换行不应带 name（按 id 定向，避免新增 peerDependency）');
+  // 回退 provider 行必须注册（selection 钉它的 id；行缺失 = CONFIGURED_MISSING，fetch 全断）。
+  assert.match(insertBlock, /^\s*- id: research-fetch-fallback$/m, 'insert 行缺失: research-fetch-fallback（D31 回退 provider）');
+  assert.match(insertBlock, /name:\s*['"]?dsh-deep-research-pack\/fetch-fallback['"]?/, '回退 provider 行的入口必须指向本包 ./fetch-fallback 子导出');
+  // 负例留证 2026-10-27：加替换行前跑本测 → RED「web 替换行缺失…」；加行后 → GREEN。
+  //   删 fetchProvider 行 / 改回 deepseek-official → 同一断言红（判别力，不是恒真）。
+});
+
+test('每角色 preset 的 tool-web 行带 base config（fetch + 60s 搜索 / 45s 抓取预算）', () => {
   for (const r of ROLES) {
     const yml = readFileSync(join(PRESETS, `${r}.patch.yml`), 'utf8');
-    const m = yml.match(/- id: tool-web\n\s*name: '@deepseek-ai\/dsh-tool-web'\n\s*config:\n\s*fetch: true\n\s*searchTimeoutMs: 60000/);
-    assert.ok(m, `${r}: tool-web 行缺 base config（fetch: true / searchTimeoutMs: 60000）`);
+    const m = yml.match(/- id: tool-web\n\s*name: '@deepseek-ai\/dsh-tool-web'\n\s*config:\n\s*fetch: true\n\s*searchTimeoutMs: 60000\n\s*fetchTimeoutMs: 45000/);
+    assert.ok(m, `${r}: tool-web 行缺 base config（fetch: true / searchTimeoutMs: 60000 / fetchTimeoutMs: 45000——回退两腿预算 28s 必须落在工具预算内）`);
   }
 });
 

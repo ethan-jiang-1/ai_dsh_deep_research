@@ -45,10 +45,36 @@
         - TRANSPORT
         - MALFORMED_RESPONSE
 
+# ── 检索底座（D30/D31，2026-10-27）：搜索 = DeepSeek 官方 Search API（`deepseek-search-api`；
+#    DeepSeek 自建引擎，每条结果带 snippet + RFC3339 发布日期）；fetch = 本包回退 provider
+#    （`deepseek-fallback-fetch`：先本地 `web-fetch-http`——真实状态码、markdown 无转义、
+#    0.5–2.2s；本地取不到时才打 DeepSeek Fetch API，正文带来源标记）。
+#    provider 行本身仍全部是 base 出厂行（D9 不变），本行只替换 web seam 的两项选择。
+#    **两个字段必须同时重述**：Loader 的 replace 行 config 整体替换、不深合并；只写
+#    searchProvider 会让 fetch 面对 http + deepseek-fetch-api 两个可用 provider →
+#    WEB_PROVIDER_AMBIGUOUS。不含 name（同 llm-deepseek 行：按 id 定向，避免新增 peerDependency）。
+#    回退 provider 由下方 `research-fetch-fallback` 行注册（本包 host 半第二处代码面；边界 =
+#    D31）。实测 = _backlog/research/retrieval-backend/2026-10-27-provider-audit.md；理由与
+#    输掉的方案 = notes/implemented/2026-10-27-{deepseek-search-api-retrieval,fetch-fallback-provider}.md。
+- id: web
+  config:
+    searchProvider: deepseek-search-api
+    fetchProvider: deepseek-fallback-fetch
+
 - insert:
-    # ── web 工具：不在此声明。实证结论（RFC web-tool-rows）：web seam / web-search-deepseek /
-    #    web-fetch-http / tool-web 四行全部是 dsh-base 出厂行——providers 与 seam 留在 host 面，
-    #    模型面 tool-web 行随各 preset 声明。此处 insert 反而会与 surface 的 preset-scoping 设计打架。──
+    # ── 抓取回退 provider（D31）：本地 web-fetch-http → DeepSeek Fetch API。注册 id =
+    #    deepseek-fallback-fetch（上方 web 行钉它）；无 DEEPSEEK_API_KEY 时只走本地、
+    #    错误里如实标 fallback unavailable。config.enabled: false = 只走本地（无需改 selection）。──
+    - id: research-fetch-fallback
+      name: dsh-deep-research-pack/fetch-fallback
+      config:
+        apiKeyEnv: DEEPSEEK_API_KEY
+        localTimeoutMs: 10000
+        totalBudgetMs: 28000
+    # ── web 工具：**insert** 不在此声明。实证结论（RFC web-tool-rows）：web seam /
+    #    web-search-deepseek / web-deepseek-api / web-fetch-http / tool-web 全部是 dsh-base 出厂行——
+    #    providers 与 seam 留在 host 面，模型面 tool-web 行随各 preset 声明。此处 insert 反而
+    #    会与 surface 的 preset-scoping 设计打架。选择面 = 上方 `- id: web` 替换行（D30/D31）。──
     # ── 交付物声明工具（base 无此行；host 面注册。lead 的工具授权另在 lead.patch.yml
     #    plugins 自包含声明——preset 层与 bundle 层分工，非 D16 同层重复行）──
     - id: tool-present

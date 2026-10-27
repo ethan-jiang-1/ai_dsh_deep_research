@@ -17,7 +17,7 @@
 
 | 术语 | DSH 定义 | 本仓落点 |
 |---|---|---|
-| plugin | 导出 `apply(ctx)` 的 TS 模块；注册即 `apply(ctx)`，配置经 cordis schema 校验 | 本仓自写两个插件（D18 单点例外，构成正本 = [design/40](../design/40-research-cockpit.md)）：`src/index.ts`（host 半空壳 = 观察面宿主位）与 `src/client/index.ts`（client 半：注册右栏「研究状态」/「研究配置」/「终稿」页签、活标题与研究语义工具卡）；新插件从 `vendor/dsh/docs/user/develop/basic/` 起步 |
+| plugin | 导出 `apply(ctx)` 的 TS 模块；注册即 `apply(ctx)`，配置经 cordis schema 校验 | 本仓自写三个插件（两处有界例外：D18 观察面 client、D31 抓取回退）：`src/index.ts`（host 半空壳 = 观察面宿主位）、`src/client/index.ts`（client 半：注册右栏「研究状态」/「研究配置」/「终稿」页签、活标题与研究语义工具卡）、`src/fetch-fallback/index.ts`（抓取回退 provider：本地 `web-fetch-http` → DeepSeek Fetch API；纯判据在 `policy.ts`）；新插件从 `vendor/dsh/docs/user/develop/basic/` 起步 |
 | bundle | 你编写与分发的单位（`dsh.bundle`）——回答"这个包贡献什么"，是插入/覆盖 plugin rows 的 patch 层 | `packages/deep-research-pack/cordis.patch.yml` + 包内 `presets/`、`skills/` |
 | profile | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）——回答"哪些 bundle 按什么顺序组成" | `runtime/harness-home/profiles/research/`（镜像；源 = pack——`boot-run.sh` 从 pack 重建；overlay 只是源码域冒烟通道的生成物） |
 | preset | 一个 agent 形态：persona 行 + skills + 工具行 | `presets/<role>.patch.yml`（preset 行）+ `presets/<role>/skills/`（角色清单 = 盘上 presets/） |
@@ -32,7 +32,7 @@
 | 层级 | 本仓首选入口 | 典型变化 | 何时升级 |
 |---|---|---|---|
 | **S0 组合** | cordis 行 config、bundle 行、preset 行、profile 层 | 换 provider、调超时、开关并行、改工具行参数 | 配置表达不了新行为 |
-| **S1 扩展点** | preset（persona / skills / 工具行）、`SKILL.md`、client 插件（`src/client/` 的槽与页签注册） | 新增研究角色、新增方法论 skill、调整工具面、新增观察面槽位 | 需要一项**可替换的完整能力** |
+| **S1 扩展点** | preset（persona / skills / 工具行）、`SKILL.md`、插件代码（`src/client/` 槽与页签；`src/fetch-fallback/` 注册 provider） | 新增研究角色、新增方法论 skill、调整工具面、新增观察面槽位 | 需要一项**可替换的完整能力** |
 | **S2 capability seam** | Service Definition + Provider + Consumer | 新的研究能力接缝（本仓尚无） | 现有扩展点表达不了循环驱动 |
 | **S3 core loop** | `agent-loop`（vendor 所有） | 改默认循环 | 本仓**不直接改**（vendor 只读铁律）；走上游 + 升 pin |
 
@@ -75,7 +75,7 @@ AGENTS.md §命令速查）：
 
 ### 自写代码的证据阶梯（驾驶舱与未来 `src/` 套件；test-strategy 语料五台阶移植）
 
-本仓自写的插件代码（当前 = 驾驶舱，D18 单点例外；未来任何 `src/` 套件同表对号）按五个台阶
+本仓自写的插件代码（当前 = 驾驶舱 D18 + 抓取回退 D31；未来任何 `src/` 套件同表对号）按五个台阶
 逐级抬高入口真实性——跳过任何一级都有对应的静默失效形态：
 
 | 台阶 | 本仓证据 | 载体 |

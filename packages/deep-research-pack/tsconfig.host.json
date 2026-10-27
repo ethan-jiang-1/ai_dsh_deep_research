@@ -1,4 +1,4 @@
-// Host 编译面：只编 src/index.ts（当前是空壳——D18：构建产物只此一件，host 侧零行为）。
+// Host 编译面：src/index.ts（观察面宿主位空壳，D18）+ src/fetch-fallback/（抓取回退 provider，D31）。
 // 与 client 面分叶的原因：两面各自拉不同的 Context 类型增强，单程序两者不可兼得
 // （company 2026-09-25 实证；vendor「双编译面」形态，范本 = experimental/inspector）。
 {
@@ -11,5 +11,5 @@
     // 改用 node_modules 里已构建的 lib/types 声明。
     "paths": {}
   },
-  "include": ["src/index.ts"]
+  "include": ["src/index.ts", "src/fetch-fallback"]
 }

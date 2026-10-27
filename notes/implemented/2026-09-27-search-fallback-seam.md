@@ -2,6 +2,10 @@
 
 > 状态：implemented
 
+> 2026-10-27 更新：**fetch** 侧已由本包自己的 provider 实现（本地失败 → DeepSeek Fetch API；
+> [D31 Note](./2026-10-27-fetch-fallback-provider.md)）。本文对 **search** 的结论不变：seam 仍是
+> 单 provider 语义、无隐藏优先级链；搜索不做降级链。
+
 来源：两场 run（第五/七）命中 web_search 上游间歇故障（scout 4 调 0 成、lead 3 调 1 成），agent
 降级为直接 `web_fetch` 打已知域名并显式披露盲区——run 仍完成。用户宪章第 2 条"借鉴成熟 DSH 插件"
 的第一个实战对象即生态里做多引擎路由的 `dsh-web-search-pro`（70★）。本 Note 记录 seam 探查结论：

@@ -30,8 +30,9 @@
   构成正本 `docs/design/40` 已登记，任务粒度仍归 `ui-agent-team`。
 - **搜索底座**：research profile 的 `cordis.patch.yml` 用 `- id: web` 覆盖为
   `searchProvider: deepseek-search-api` + `fetchProvider: http`；pack 默认仍保持
-  `deepseek-official` + `http`，等更广 A/B 后再定。Fetch API 暂不用于证据（Markdown 转义未过
-  “逐字/表格”保真）。
+  `deepseek-official` + `http`，等更广 A/B 后再定（**2026-10-27 已翻默认**，search →
+  `deepseek-search-api`、fetch 仍本地——见 [后续 Note](./2026-10-27-deepseek-search-api-retrieval.md)）。
+  Fetch API 暂不用于证据（Markdown 转义未过“逐字/表格”保真）。
 - **不引**：workflow 主编排、外部 DAG runtime/任务板插件、第二套 store/queue/ledger、nested Team、
   自动派发 daemon、MVP 阶段的 plan-gate。
 
@@ -70,7 +71,7 @@
 
 ## 已知限制与延后工作
 
-- **pack 默认搜索**：仍是 `deepseek-official` + `http`；等 5–10 query 更广 A/B 与用户点头后再切。
+- **pack 默认搜索**：本条已由 2026-10-27 的工作翻默认（search → `deepseek-search-api`，fetch 仍本地 `http`），见上；证据与残余 = [后续 Note](./2026-10-27-deepseek-search-api-retrieval.md)。
 - **Fetch API**：不用于证据；工具级文本 A/B（含表格/重定向）待做。
 - **plan gate**：MVP 不加；出现 plan/task 漂移再加只读结构检查或 company 式 dependencyDrift。
 - **右栏 pane 会话绑定**：vendor pane 可能仍钉在上一会话（`docs/design/40 §6` 已登记）；

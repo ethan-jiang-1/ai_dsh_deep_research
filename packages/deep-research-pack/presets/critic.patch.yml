@@ -51,6 +51,7 @@
             config:
               fetch: true
               searchTimeoutMs: 60000
+              fetchTimeoutMs: 45000
           # 会话检索（0.2.0 插件货架采纳）：交叉核查时检索历史 run 会话的取证原文——
           # 工具面与索引开关说明同 lead 行。
           - id: tool-session-query

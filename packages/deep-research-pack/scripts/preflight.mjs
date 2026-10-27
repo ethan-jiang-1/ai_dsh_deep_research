@@ -304,7 +304,7 @@ function nodeSatisfies(version, range) {
       cwd: process.cwd(),
     })
     record(status.ok, '模型密钥 DEEPSEEK_API_KEY', status.detail,
-      'export DEEPSEEK_API_KEY=<key>，或用 dsh 的凭据配置写入 $DSH_HOME/.credentials.yaml / home .env（web 搜索同一把钥匙）')
+      'export DEEPSEEK_API_KEY=<key>，或用 dsh 的凭据配置写入 $DSH_HOME/.credentials.yaml / home .env（chat / 搜索 / 抓取回退同一把钥匙）')
   }
 }
 

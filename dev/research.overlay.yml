@@ -28,6 +28,10 @@
         - TIMEOUT
         - TRANSPORT
         - MALFORMED_RESPONSE
+- id: web
+  config:
+    searchProvider: deepseek-search-api
+    fetchProvider: deepseek-fallback-fetch
 
 - insert:
     # ── analyst.patch.yml（由 dev/render-overlay.mjs 从 pack 渲染）──
@@ -78,6 +82,7 @@
             config:
               fetch: true
               searchTimeoutMs: 60000
+              fetchTimeoutMs: 45000
 
           - id: tool-subagent
             name: '@deepseek-ai/dsh-tool-subagent'
@@ -145,6 +150,7 @@
             config:
               fetch: true
               searchTimeoutMs: 60000
+              fetchTimeoutMs: 45000
           # 会话检索（0.2.0 插件货架采纳）：交叉核查时检索历史 run 会话的取证原文——
           # 工具面与索引开关说明同 lead 行。
           - id: tool-session-query
@@ -229,6 +235,7 @@
             config:
               fetch: true
               searchTimeoutMs: 60000
+              fetchTimeoutMs: 45000
           # 会话检索（0.2.0 插件货架采纳）：跨 run 找历史证据、回溯组员会话取证原文——
           # 五工具 session_search / session_event_search / session_trace / session_event_trace
           # / session_event_read；FTS 索引由 bundle 层 openAt: first-search 惰性开。
@@ -300,6 +307,7 @@
             config:
               fetch: true
               searchTimeoutMs: 60000
+              fetchTimeoutMs: 45000
 
           - id: tool-subagent
             name: '@deepseek-ai/dsh-tool-subagent'
@@ -319,9 +327,19 @@
               projectRootMarkers: []
 
     # ── cordis.patch.yml 的 bundle 级 insert 行（由 dev/render-overlay.mjs 直读，镜像同源）──
-    # ── web 工具：不在此声明。实证结论（RFC web-tool-rows）：web seam / web-search-deepseek /
-    #    web-fetch-http / tool-web 四行全部是 dsh-base 出厂行——providers 与 seam 留在 host 面，
-    #    模型面 tool-web 行随各 preset 声明。此处 insert 反而会与 surface 的 preset-scoping 设计打架。──
+    # ── 抓取回退 provider（D31）：本地 web-fetch-http → DeepSeek Fetch API。注册 id =
+    #    deepseek-fallback-fetch（上方 web 行钉它）；无 DEEPSEEK_API_KEY 时只走本地、
+    #    错误里如实标 fallback unavailable。config.enabled: false = 只走本地（无需改 selection）。──
+    - id: research-fetch-fallback
+      name: dsh-deep-research-pack/fetch-fallback
+      config:
+        apiKeyEnv: DEEPSEEK_API_KEY
+        localTimeoutMs: 10000
+        totalBudgetMs: 28000
+    # ── web 工具：**insert** 不在此声明。实证结论（RFC web-tool-rows）：web seam /
+    #    web-search-deepseek / web-deepseek-api / web-fetch-http / tool-web 全部是 dsh-base 出厂行——
+    #    providers 与 seam 留在 host 面，模型面 tool-web 行随各 preset 声明。此处 insert 反而
+    #    会与 surface 的 preset-scoping 设计打架。选择面 = 上方 `- id: web` 替换行（D30/D31）。──
     # ── 交付物声明工具（base 无此行；host 面注册。lead 的工具授权另在 lead.patch.yml
     #    plugins 自包含声明——preset 层与 bundle 层分工，非 D16 同层重复行）──
     - id: tool-present

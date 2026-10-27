@@ -3,7 +3,7 @@
 > 说明：本 README 随 npm 包发布；指向仓库 `docs/`、`notes/`、`_backlog/` 的链接使用 GitHub 绝对地址。安装包不含这些开发文档，点开即离仓。
 
 Deep Research 插件包：**四角色 preset + 研究方法论技能 + 研究驾驶舱（Research Cockpit，
-观察面 client 套件）+ 工作区种子**。
+观察面 client 套件）+ 抓取回退 provider + 工作区种子**。
 
 一次调研 = 一支四人研究团队（Lead 主编 / Scout 侦察 / Analyst 分析 / Critic 核查）在 DSH 的
 Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bundle 落 `drt_<slug>/`）。
@@ -21,13 +21,49 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 |---|---|---|
 | `presets/<role>.patch.yml` | 四角色 preset（DSH 0.1.7 起的形态：一条 `@deepseek-ai/dsh-agent-preset` 行，config.plugins 内声明 persona/skills/工具行） | ✓ |
 | `presets/<role>/skills/<n>/SKILL.md` | 研究方法论技能（各角色清单正本 = 盘上 `presets/<role>/skills/` 目录，bundle 自动发现——新增免改本行） | ✓ |
-| `cordis.patch.yml` | bundle 行：preset roster（default: lead）+ 会话全文检索开关（`session-query-sqlite` `openAt: first-search`——FTS 惰性开，`:memory:` 每进程重建；检索工具行在 lead/critic preset）+ `tool-present` + 团队可视面 `ui-agent-team` + 本包 client 面 | ✓ |
+| `cordis.patch.yml` | bundle 行：preset roster（default: lead）+ **检索底座**（`- id: web` 替换行：搜索 = DeepSeek Search API、fetch = 回退 provider；`research-fetch-fallback` 行注册它——见下节）+ 会话全文检索开关（`session-query-sqlite` `openAt: first-search`——FTS 惰性开，`:memory:` 每进程重建；检索工具行在 lead/critic preset）+ `tool-present` + 团队可视面 `ui-agent-team` + 本包 client 面 | ✓ |
 | `workspace/` | **研究工作区种子**：研究手册（`AGENTS.md`：证据契约/目录约定/完成判据）+ `NODES.md`（节点 I/O 契约）+ `question-patterns.md`（判型库）+ `templates/run/` 七件模板（含 `plan.md` 执行图）+ `method-library.md`（独立空架子种子，不从正本同步）+ `.gitignore`（包内名 `.gitignore.example`——npm 不打包 `.gitignore` 文件，安装时由 scaffold 落地成本名；工作区纳入版本控制时拒收 run bundle/归档/方法库，留档加 `!路径`） | ✓ |
-| `src/client/` → `lib/client.js` | **研究驾驶舱**（Research Cockpit——观察面 client 面，D18 单点例外；构成正本 = [design/40](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/design/40-research-cockpit.md)）：右栏「研究状态」页签（流程轨道锚点/人性化活动流/活标题/HITL 横幅/参与指引/决策诚实线）+ 「研究配置」页签 + 「研究图谱」页签（只读 SVG DAG：顶层 plan 节点 / Team 任务 / 依赖边；复合子节点 W2.1.1… 在节点详情展开，节点可复制 `drt_<slug>/W2.1` 引用；Wave 前缀/重号/悬空 parent/deps/墓碑/跨组只读提示；无 plan 或 blocked_by 时明确无图，不提供调整动作）+ 「终稿」页签（认领 `drt_<slug>/` 终稿地址族：`final.md` / `final/vN.md` / `final/readable.md` / `final/readable-vN.md`；有读者版默认看读者版，可切审计版；交付时自动开一次）+ **主界面「方法库」tab**（`conversation.view`；我的库/内置参考/四字段编辑，保存交给 Lead）+ 研究语义工具卡 + 挂起显性化 | ✓ 构建产物 |
+| `src/client/` → `lib/client.js` | **研究驾驶舱**（Research Cockpit——观察面 client 面，D18 有界例外；构成正本 = [design/40](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/design/40-research-cockpit.md)）：右栏「研究状态」页签（流程轨道锚点/人性化活动流/活标题/HITL 横幅/参与指引/决策诚实线）+ 「研究配置」页签 + 「研究图谱」页签（只读 SVG DAG：顶层 plan 节点 / Team 任务 / 依赖边；复合子节点 W2.1.1… 在节点详情展开，节点可复制 `drt_<slug>/W2.1` 引用；Wave 前缀/重号/悬空 parent/deps/墓碑/跨组只读提示；无 plan 或 blocked_by 时明确无图，不提供调整动作）+ 「终稿」页签（认领 `drt_<slug>/` 终稿地址族：`final.md` / `final/vN.md` / `final/readable.md` / `final/readable-vN.md`；有读者版默认看读者版，可切审计版；交付时自动开一次）+ **主界面「方法库」tab**（`conversation.view`；我的库/内置参考/四字段编辑，保存交给 Lead）+ 研究语义工具卡 + 挂起显性化 | ✓ 构建产物 |
+| `src/fetch-fallback/` → `lib/fetch-fallback.js` | **抓取回退 provider（D31）**：先本地匿名抓取，取不到页面时才打 DeepSeek Fetch API；正文带来源标记。纯判据在 `src/fetch-fallback/policy.ts`（keyless 单测），凭据解析与两腿预算在 `index.ts` | ✓ 构建产物 |
 | `src/lib/` → `lib/types/lib/` | 纯函数折算（清单正本 = [design/40](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/design/40-research-cockpit.md)）——keyless 单测直接断言 | ✓ 构建产物 |
 | `scripts/preflight.mjs` · `scripts/scaffold.mjs` | 部署前置检查 + 一键准备（见下） | ✓ |
 
 角色职责与方法论：见各 `presets/<role>.patch.yml`（persona）与 `presets/<role>/skills/<n>/SKILL.md`（方法论正文）——都随本包发布。
+
+## 检索底座（DeepSeek Search API + 抓取回退）
+
+搜索与抓取由本包 bundle 的两条行固定：`- id: web`（provider 选择）+ `research-fetch-fallback`
+（注册回退 provider）。
+
+| 能力 | provider | 行为 |
+|---|---|---|
+| 搜索 `web_search` | `deepseek-search-api` | 每条结果带 **snippet + 发布日期（RFC 3339）**，支持 `site:` / `-site:` / `"短语"` / `lang:` / `after:` / `before:` 算子，一次请求完成、不烧模型 token。对比 Messages 搜索：一个完整模型回合（2–10k input tokens），本仓 9,270 条历史结果只有 **1.7% 带摘要、0.4% 带日期** |
+| 抓取 `web_fetch` | `deepseek-fallback-fetch`（本包 host 半） | 先本地匿名抓取：真实 HTTP 状态码、markdown 无转义、0.5–2.2s；**本地取不到页面时**（超时 / 跨源重定向 / 不支持的类型 / 传输错误 / 5xx）再用 DeepSeek Fetch API 补一次，正文首行带来源标记。安全策略拒绝（内网地址 / 非法 URL）与用户取消**绝不**回退。对比"只用 Fetch API"：同类页面 5–15s、反斜杠转义、对 wikipedia / BBC / NYTimes / Medium / X / 知乎 / GitHub Pages 返回 404 |
+
+- **两个 `web` 字段必须同时写**：Loader 的 replace 行整体替换 config；只写 `searchProvider` 会让
+  fetch 面对多个可用 provider，报 `WEB_PROVIDER_AMBIGUOUS`。
+- **回退的开关与预算**：`research-fetch-fallback` 行的 `enabled: false` = 只走本地（不用改
+  selection）；`localTimeoutMs`（默认 10s）/ `totalBudgetMs`（默认 28s）控制两腿预算，preset 的
+  `fetchTimeoutMs: 45000` 兜住工具预算。API 回退计入 Search/Fetch 计费（$0.75 / 1,000 次成功请求，
+  2026-11-01 起）。
+- **已知未用**（vendor provider 丢弃）：Search API 的 `summary` / `need_content` 与
+  `authority` / `rerank_score`。换 DSH 版本时复核。
+- 实测与取舍：[_backlog/research/retrieval-backend/2026-10-27-provider-audit.md](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_backlog/research/retrieval-backend/2026-10-27-provider-audit.md)。
+
+## 账号与凭据（分发）
+
+本包**不内置、不转发任何凭据**；所有 DeepSeek 调用复用 DSH 的凭据面。
+
+| 你的情况 | 搜索 | 抓取 | 需要做什么 |
+|---|---|---|---|
+| 有 `DEEPSEEK_API_KEY`（推荐） | ✓ Search API | 本地优先 + API 回退 | 在 Models 页面写入，或 `export DEEPSEEK_API_KEY=…`，或 `$DSH_HOME/.credentials.yaml` |
+| 只有 DeepSeek 账号登录（Web GUI） | ✓ 账号 token | 本地优先；**回退不可用**（本包只解析 API key） | 无需额外配置；缺失时错误里如实标 `fallback unavailable` |
+| 无 DeepSeek 访问 | ✗（搜索需要凭据） | ✓ 本地抓取 | 研究 run 前先配 key |
+
+- 凭据面优先级：Models 页 / credentials 服务 → 启动环境变量 → `.credentials.yaml`（用户本机，
+  永不进仓库）；换 ref 名改 `research-fetch-fallback.config.apiKeyEnv`。
+- 回退只把**目标 URL**发给 DeepSeek（不带 cookie / header）；本地能取到的页面不出本机。
+- 团队 / 多用户：每个用户在自己的 DSH home 配自己的 key；run bundle 与方法库不含凭据。
 
 ## 部署（四步）
 
@@ -222,6 +258,8 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 - **工具卡 = 2 张**（spawn_teammate / web_search）；`team_task_*` 与其他协调类工具
   （wait_agent / list_agents / send_message）**不进对话流**（实测：harness 把协调类工具排除在对话渲染外）——团队任务的观察由 ui-agent-team 任务板与 To-dos
   折叠承担，无需卡片（4 卡方案的回退理由 = [marathon2 复盘](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/notes/archived/2026-09-25-marathon2-retrospective.md)，冻结层）；
+- **抓取回退的边界**：只救"本地取不到页面"的失败（超时 / 跨源重定向 / 不支持的类型 / 传输错误 / 5xx）；4xx 不救；安全策略拒绝（内网地址 / 非法 URL）与用户取消**绝不**回退。API 回退的正文带来源标记、状态码恒为 200、最终 URL 不可见——引用时按"内容来自 DeepSeek Fetch API"处理。
+- **回退凭据只认 API key**：DeepSeek 账号登录可驱动 chat 与搜索，但本包的回退 provider 只解析 `apiKeyEnv`（默认 `DEEPSEEK_API_KEY`）；缺失时只走本地并在错误里标 `fallback unavailable`。
 - **兼容范围**：`engines.dsh` = `>=0.2.1-rc.2 <0.3.0-0`（`-0` 排除 0.3 预发布）；测试基线 = `0.2.1-rc.2` + `0.2.1-rc.3`；pre-stable API，peer 版本号不精确钉死。
 
 ## 发布（维护者）

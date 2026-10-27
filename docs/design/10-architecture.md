@@ -11,7 +11,7 @@
 独立 repo + 单自写包 + 运行时工作区：
 
 ```
-packages/deep-research-pack/   唯一自写包：presets/<role>/ + cordis.patch.yml + 研究驾驶舱（Research Cockpit——观察面 client 套件，src/client/ + lib/client.js；D18 单点例外，用途限定观察/调试；[构成正本](./40-research-cockpit.md)）
+packages/deep-research-pack/   唯一自写包：presets/<role>/ + cordis.patch.yml + 研究驾驶舱（Research Cockpit——观察面 client 套件，src/client/ + lib/client.js；D18 有界例外，用途限定观察/调试；[构成正本](./40-research-cockpit.md)）+ 抓取回退 provider（src/fetch-fallback/ + lib/fetch-fallback.js；D31 有界代码面）
 research-workspace/            运行场：角色会话 cwd（研究手册 + drt_<slug>/（run bundle）+ templates/）
 docs/ notes/ scripts/ tests/ dev/   文档/决策/门禁/回归/环境（分层原则见 00-index）
 vendor/dsh/                    pinned submodule（只读铁律——verify vendor-pin/vendor-clean 把守；
@@ -48,7 +48,7 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 
 | 层 | 载体 | 放什么 | 教义 |
 |---|---|---|---|
-| bundle 层 | `cordis.patch.yml` | host 共享行：preset roster（default: lead）、present、ui-agent-team 观察行（团队机制行归 vendor agent-team-profile 层——[m2-p1-run-channel](../../notes/implemented/2026-09-24-m2-p1-run-channel.md) A 定案；web 行不进 bundle——D9：base 出厂行，回归守卫在 tests/pack/presets.test.mjs） | `- id:` 只替换已有行；**新增必须 `- insert:`**；baseUrl = profile 目录（路径写 profile 相对 `node_modules/…`，写错 = ENOENT 静默空，UI 无角色） |
+| bundle 层 | `cordis.patch.yml` | host 共享行：preset roster（default: lead）、检索底座（D30/D31：`- id: web` 选 Search API + 回退 provider；`research-fetch-fallback` 行注册回退 provider）、present、ui-agent-team 观察行（团队机制行归 vendor agent-team-profile 层——[m2-p1-run-channel](../../notes/implemented/2026-09-24-m2-p1-run-channel.md) A 定案；provider 行本身是 base 出厂行——D9，回归守卫在 tests/pack/presets.test.mjs） | `- id:` 只替换已有行；**新增必须 `- insert:`**；baseUrl = profile 目录（路径写 profile 相对 `node_modules/…`，写错 = ENOENT 静默空，UI 无角色） |
 | preset 层 | `presets/<role>.patch.yml`（单行形态：一条 `@deepseek-ai/dsh-agent-preset` 行，DSH 0.1.7 起同形态，`config.plugins` 内声明 persona/skills/工具行；`presets/<role>/` 只放 `skills/`） | 角色组合：persona + 硬隔离 skills + 工具面 + agent-instructions | **preset 自包含**（DSH 无 patch 继承）：角色要用的行必须自己声明，否则会话只拿到 bundle 少数行（company R1 血泪：工具行不声明 = CEO 读不了文件） |
 
 `tool-todo` 行若显式声明，`allowParallelInProgress` 是**必填 config**（抄行不抄 config =
@@ -68,12 +68,15 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 
 - **共同基座**：tool-fs / tool-fs-search / tool-skill / tool-todo / **tool-web**（模型面行随
   preset，行 config 照抄 base：`fetch: true` 是启用开关、`searchTimeoutMs` 是搜索预算、
-  `fetchTimeoutMs` 不设走 vendor 默认——字段语义与值以 preset 源 + [D9](../00-index.md) 为正本）；
-  web 的 providers
-  （`web` seam / `web-search-deepseek` / `web-fetch-http`）是 dsh-base 的 **host 面出厂行**、
-  不随 preset 也不进本包 bundle——实证依据 vendor base bundle `packages/bundle/base/cordis.patch.yml`
-  436–454 行 + web-app surface 对 `tool-web` 的 preset-scoping 注释；DeepSeek 搜索 provider
-  的 `apiKeyEnv: DEEPSEEK_API_KEY` 与 chat 同一把钥匙（无需独立搜索 key）；
+  `fetchTimeoutMs` 不设走 vendor 默认——字段语义与值以 preset 源 + [D9](../decisions.md) 为正本）；
+  web 的 providers（`web` seam / `web-search-deepseek` / `web-deepseek-api` / `web-fetch-http`）
+  是 dsh-base 的 **host 面出厂行**、不随 preset——provider 行本身不进本包 bundle；**provider
+  选择**由 bundle 的 `- id: web` 替换行固定：搜索 = `deepseek-search-api`（结果带 snippet +
+  RFC3339 发布日期，一次请求、不烧模型回合），fetch = 本包回退 provider
+  `deepseek-fallback-fetch`（先本地 `http`：真实状态码、markdown 无转义、0.5–2.2s；取不到
+  才打 Fetch API，正文带来源标记）——[D30](../decisions.md) / [D31](../decisions.md)；实证依据 vendor base bundle
+  `packages/bundle/base/cordis.patch.yml` + web-app surface 对 `tool-web` 的 preset-scoping
+  注释；Search/Fetch API 的 `apiKeyEnv: DEEPSEEK_API_KEY` 与 chat 同一把钥匙（无需独立 key）；
 - **lead 独有**：tool-ask-user（HITL 两点交互的唯一持有人）+ tool-present（成品声明权）；
 - **lead/scout/analyst**：tool-subagent（工人；`maxDepth: 2` + `allowedAgentPresets` 见 §3）；
 - **critic 刻意无**：ask-user（静默审查）、subagent（聚焦独行）——工具面即职责边界的机器表达。

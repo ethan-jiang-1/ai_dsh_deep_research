@@ -24,6 +24,7 @@
 - [dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md](dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md) — 宽搜/深搜的深度模型与研究单元（同一消费者：已结宪章卡 + implemented RFC）。
 - [dynamic-research-dag/2026-10-21-deepseek-search-fetch-api.md](dynamic-research-dag/2026-10-21-deepseek-search-fetch-api.md) — DeepSeek Search/Fetch API 与 DSH provider（同一消费者：已结宪章卡 + implemented RFC）。
 - [dynamic-research-dag/2026-10-21-search-provider-ab.md](dynamic-research-dag/2026-10-21-search-provider-ab.md) — Messages vs Search API 的 5-query A/B（同一消费者：已结宪章卡 + implemented RFC）。
+- [retrieval-backend/2026-10-27-provider-audit.md](retrieval-backend/2026-10-27-provider-audit.md) — 检索底座落地证据（D30/D31）：工具级真模型 A/B、1,995 会话自然实验、5 非品牌 query 盲评、Fetch 抽样与回退价值（§9）；续写上面两份 2026-10-21 材料（消费者：D30 + pack 默认）。
 - [dynamic-research-dag/2026-10-21-cockpit-plan-graph.md](dynamic-research-dag/2026-10-21-cockpit-plan-graph.md) — 侧栏「研究图谱」页签的数据源、布局与交互设计（同一消费者：已结宪章卡 + implemented RFC）。
 - [dynamic-research-dag/2026-10-21-combination-review.md](dynamic-research-dag/2026-10-21-combination-review.md) — A0 组合的决策级 review：一致性矩阵、三处修正、改动面与验收（同一消费者：已结宪章卡 + implemented RFC）。
 - [dynamic-research-dag/2026-10-22-w-work-package-identity-review.md](dynamic-research-dag/2026-10-22-w-work-package-identity-review.md) — 旧版 W=工作包身份卡的历史评审（已被 Wave 语义取代）：§1 事实核对全属实 + B1–B4 定稿前修正 + S1–S7 建议 + 八问结论（消费者：[issue](../_archived/settled_issues/2026-10-22-w-wave-node-identity.md)）。
