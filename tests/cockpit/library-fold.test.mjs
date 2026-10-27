@@ -6,11 +6,13 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import ts from 'typescript';
 import { foldLibrary, instructionOf, editInstruction, createInstruction, saveInstruction, renderLibraryEntry, summaryOfEntry, SUMMARY_MAX_LENGTH, SECTION_LABELS, libraryReadStateOf } from '../../packages/deep-research-pack/src/lib/library-fold.ts';
 import { SELFTEST_LIBRARY } from '../../scripts/lib/selftest-library.mjs';
 import { locateSessionStrategy, SHOW_MORE_SESSIONS_PATTERN } from '../../scripts/lib/web-ui-nav.mjs';
 import { METHOD_PRESETS_SKILL_PATH, methodPresetsFromSkillFile, patternMethodMappingFromSkill, baselineDisciplinesFromSkill } from '../../scripts/lib/method-presets.mjs';
+// 数据面正本 = lib/config-tables.ts（2026-10-27 卫生轮：常量从 700 行视图里搬出，测试直接 import，
+// 不再用 ts.createSourceFile 扒 TSX 源码——旧做法会为"视图重构"造出与业务无关的红）
+import { BASELINE_DISCIPLINES, BUILTIN_PREFERENCES, DEMO_ENTRY, DISTILL_INSTRUCTION, DRAFT_INSTRUCTION, PATTERN_METHOD_RULES, SECTIONS } from '../../packages/deep-research-pack/src/lib/config-tables.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 // 解析器 = scripts/lib/method-presets.mjs（与 client-load-smoke 共用的唯一解析入口；防第四份
@@ -75,179 +77,46 @@ const EXPECTED_BUILTIN_PREFERENCES = [
 // canonical 解析 = scripts/lib/method-presets.mjs（表头/行列数/防空集 fail-loud；与
 // client-load-smoke 共用同一入口）——本文件不再自带第二份 Markdown 表解析器。
 
-function clientSourceFile() {
-  const source = readFileSync(CLIENT_PREFERENCES_SOURCE, 'utf8');
-  const file = ts.createSourceFile(CLIENT_PREFERENCES_SOURCE, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-  assert.deepEqual(file.parseDiagnostics, [], 'ResearchConfigTab.tsx 无法由 TypeScript AST 解析');
-  return file;
-}
 
-/** 取客户端顶层字面量数组（可静态对账性 = 同钉前提；改成动态构造即红）。 */
-function clientArrayLiteral(file, name) {
-  let initializer;
-  const findDeclaration = (node) => {
-    if (ts.isVariableDeclaration(node) && node.name.getText(file) === name) initializer = node.initializer;
-    ts.forEachChild(node, findDeclaration);
-  };
-  findDeclaration(file);
-  assert.ok(initializer !== undefined && ts.isArrayLiteralExpression(initializer), `${name} 必须保持为可静态对账的数组字面量`);
-  return initializer;
-}
 
-function builtinPreferencesFromClient() {
-  const file = clientSourceFile();
-  const initializer = clientArrayLiteral(file, 'BUILTIN_PREFERENCES');
-
-  const objectProperties = (expression, label) => {
-    assert.ok(ts.isObjectLiteralExpression(expression), `${label} 必须保持为对象字面量`);
-    const properties = new Map();
-    for (const property of expression.properties) {
-      assert.ok(ts.isPropertyAssignment(property) && (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)), `${label} 含无法静态对账的成员`);
-      const key = property.name.text;
-      assert.ok(!properties.has(key), `${label} 存在重复字段 ${key}`);
-      properties.set(key, property.initializer);
-    }
-    return properties;
-  };
-
-  const stringValue = (expression, label) => {
-    assert.ok(ts.isStringLiteral(expression), `${label} 必须是字符串字面量`);
-    return expression.text;
-  };
-
-  return initializer.elements.map((element, index) => {
-    const label = `BUILTIN_PREFERENCES[${index}]`;
-    const fields = objectProperties(element, label);
-    assert.deepEqual([...fields.keys()].sort(), ['name', 'sections', 'summary'], `${label} 字段形状变化（summary = 「给用户的一句话」列，2026-10-16 起面板卡面显示它）`);
-    return {
-      name: stringValue(fields.get('name'), `${label}.name`),
-      summary: stringValue(fields.get('summary'), `${label}.summary`),
-      sections: Object.fromEntries([...objectProperties(fields.get('sections'), `${label}.sections`)].map(([key, value]) => [
-        key,
-        stringValue(value, `${label}.sections.${key}`),
-      ])),
-    };
-  });
-}
 
 test('内置研究偏好与 research-brief 方法预设表逐字段一致', () => {
   const canonical = methodPresetsFromSkillFile(METHOD_PRESETS_SKILL);
-  assert.deepEqual(builtinPreferencesFromClient(), canonical, '客户端内置偏好必须逐字段投影 canonical skill 表');
+  assert.deepEqual(BUILTIN_PREFERENCES, canonical, '客户端内置偏好必须逐字段投影 canonical skill 表');
   assert.deepEqual(canonical, EXPECTED_BUILTIN_PREFERENCES, 'canonical skill 方法预设表发生了需显式审视的内容变化');
 
 });
 
-// ── 显示名一致性（发现 13 修复，2026-10-18）：面板曾显示「找什么资料／明确不承诺」而指令载荷
-// 写「找来源／不承诺」——用户按 A 改、指令说 B。正本 = lib SECTION_LABELS（库格式与指令同源），
-// 客户端 SECTIONS 只是呈现副本；两处逐字逐序不一致即红（此前无人把守这一面）。
-function sectionsFromClient() {
-  const file = clientSourceFile();
-  const initializer = clientArrayLiteral(file, 'SECTIONS');
-  return initializer.elements.map((element, index) => {
-    const label = `SECTIONS[${index}]`;
-    assert.ok(ts.isObjectLiteralExpression(element), `${label} 必须保持为对象字面量`);
-    const fields = new Map();
-    for (const property of element.properties) {
-      assert.ok(ts.isPropertyAssignment(property) && (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)), `${label} 含无法静态对账的成员`);
-      fields.set(property.name.text, property.initializer);
-    }
-    assert.deepEqual([...fields.keys()].sort(), ['key', 'label'], `${label} 字段形状变化`);
-    assert.ok(ts.isStringLiteral(fields.get('key')), `${label}.key 必须是字符串字面量`);
-    assert.ok(ts.isStringLiteral(fields.get('label')), `${label}.label 必须是字符串字面量`);
-    return { key: fields.get('key').text, label: fields.get('label').text };
-  });
-}
 
 test('显示名一致性：客户端 SECTIONS 标签 ↔ lib SECTION_LABELS 逐字逐序一致', () => {
-  assert.deepEqual(sectionsFromClient(), SECTION_LABELS.map(({ key, label }) => ({ key, label })),
+  assert.deepEqual(SECTIONS, SECTION_LABELS.map(({ key, label }) => ({ key, label })),
     '面板显示标签必须与库格式/指令载荷同名（发现 13：曾漂移为「找什么资料／明确不承诺」）');
 });
 
-// ── 显式化面的同钉（2026-10-18）：推荐映射表、六条底线、两个定制入口的指令逐字——正本都在
-// research-brief skill（模型面）；面板是投影。此前这三面**无人把守**（发现 13 同族：显示面与
-// 正本漂移没人管）。
-function clientStringArray(file, name) {
-  return clientArrayLiteral(file, name).elements.map((element, index) => {
-    assert.ok(ts.isStringLiteral(element), `${name}[${index}] 必须是字符串字面量`);
-    return element.text;
-  });
-}
 
-function clientStringLiteral(file, name) {
-  let initializer;
-  const findDeclaration = (node) => {
-    if (ts.isVariableDeclaration(node) && node.name.getText(file) === name) initializer = node.initializer;
-    ts.forEachChild(node, findDeclaration);
-  };
-  findDeclaration(file);
-  assert.ok(initializer !== undefined && ts.isStringLiteral(initializer), `${name} 必须保持为字符串字面量`);
-  return initializer.text;
-}
 
-function patternRulesFromClient() {
-  const file = clientSourceFile();
-  return clientArrayLiteral(file, 'PATTERN_METHOD_RULES').elements.map((element, index) => {
-    const label = `PATTERN_METHOD_RULES[${index}]`;
-    assert.ok(ts.isObjectLiteralExpression(element), `${label} 必须保持为对象字面量`);
-    const fields = new Map();
-    for (const property of element.properties) {
-      assert.ok(ts.isPropertyAssignment(property) && (ts.isIdentifier(property.name) || ts.isStringLiteral(property.name)), `${label} 含无法静态对账的成员`);
-      fields.set(property.name.text, property.initializer);
-    }
-    assert.deepEqual([...fields.keys()].sort(), ['method', 'patterns'], `${label} 字段形状变化`);
-    return { patterns: fields.get('patterns').text, method: fields.get('method').text };
-  });
-}
 
 test('推荐映射 / 六条底线 / 两个入口指令逐字 = skill 投影（同钉）', () => {
   const skillText = readFileSync(METHOD_PRESETS_SKILL, 'utf8');
-  const file = clientSourceFile();
-  assert.deepEqual(patternRulesFromClient(), patternMethodMappingFromSkill(skillText),
+  assert.deepEqual(PATTERN_METHOD_RULES, patternMethodMappingFromSkill(skillText),
     '面板「什么时候用它」与推荐规则说明位的取值必须逐字投影 skill 的判型→打法映射表');
-  assert.deepEqual(clientStringArray(file, 'BASELINE_DISCIPLINES'), baselineDisciplinesFromSkill(skillText),
+  assert.deepEqual(BASELINE_DISCIPLINES, baselineDisciplinesFromSkill(skillText),
     '面板「任何打法都改不掉」一行必须逐字投影 skill 的共同底线句（防第二份手抄清单）');
-  for (const name of ['DRAFT_INSTRUCTION', 'DISTILL_INSTRUCTION']) {
-    assert.ok(skillText.includes(clientStringLiteral(file, name)),
+  for (const [name, value] of [['DRAFT_INSTRUCTION', DRAFT_INSTRUCTION], ['DISTILL_INSTRUCTION', DISTILL_INSTRUCTION]]) {
+    assert.ok(skillText.includes(value),
       `${name} 必须逐字出现在 research-brief skill 的管理动词节（会进模型面——面板与 Lead 行为不许两套话）`);
   }
 });
 
-// 领域示范（子卡② ②-5）：厚条目 = 只读示范，不进「内置打法」清单（判型映射表里没有它）——
-// 它的四字段逐字同钉 skill 的「领域示范」节（面板是投影）。
-function demoEntryFromClient() {
-  const file = clientSourceFile();
-  let initializer;
-  const findDeclaration = (node) => {
-    if (ts.isVariableDeclaration(node) && node.name.getText(file) === 'DEMO_ENTRY') initializer = node.initializer;
-    ts.forEachChild(node, findDeclaration);
-  };
-  findDeclaration(file);
-  assert.ok(initializer !== undefined && ts.isObjectLiteralExpression(initializer), 'DEMO_ENTRY 必须保持为可静态对账的对象字面量');
-  const fields = new Map();
-  for (const property of initializer.properties) {
-    assert.ok(ts.isPropertyAssignment(property) && ts.isIdentifier(property.name), 'DEMO_ENTRY 含无法静态对账的成员');
-    fields.set(property.name.text, property.initializer);
-  }
-  assert.deepEqual([...fields.keys()].sort(), ['name', 'sections'], 'DEMO_ENTRY 字段形状变化');
-  assert.ok(ts.isStringLiteral(fields.get('name')), 'DEMO_ENTRY.name 必须是字符串字面量');
-  const sections = new Map();
-  assert.ok(ts.isObjectLiteralExpression(fields.get('sections')), 'DEMO_ENTRY.sections 必须保持为对象字面量');
-  for (const property of fields.get('sections').properties) {
-    assert.ok(ts.isPropertyAssignment(property) && ts.isIdentifier(property.name), 'DEMO_ENTRY.sections 含无法静态对账的成员');
-    assert.ok(ts.isStringLiteral(property.initializer), `DEMO_ENTRY.sections.${property.name.text} 必须是字符串字面量`);
-    sections.set(property.name.text, property.initializer.text);
-  }
-  return { name: fields.get('name').text, sections };
-}
 
 test('领域示范：四字段逐字 = skill「领域示范」节（厚条目体例投影）', () => {
   const skillText = readFileSync(METHOD_PRESETS_SKILL, 'utf8');
-  const demo = demoEntryFromClient();
+  const demo = DEMO_ENTRY;
   assert.ok(skillText.includes(`## ${demo.name}（`), `skill 里必须有「## ${demo.name}（…）」条目`);
   for (const key of ['source', 'verify', 'report', 'limit']) {
-    assert.ok(skillText.includes(demo.sections.get(key)), `领域示范的 ${key} 必须逐字出现在 skill 的领域示范节`);
+    assert.ok(skillText.includes(demo.sections[key]), `领域示范的 ${key} 必须逐字出现在 skill 的领域示范节`);
   }
-  assert.ok(demo.sections.get('limit').includes('不构成投资建议'), '不承诺字段必须写明不构成投资建议（核实结论要求）');
+  assert.ok(demo.sections.limit.includes('不构成投资建议'), '不承诺字段必须写明不构成投资建议（核实结论要求）');
 });
 
 test('libraryReadStateOf：「无结果」与「失败」分家（文件不在 / 在而读不回 / 目录不可达 / 正常）', () => {

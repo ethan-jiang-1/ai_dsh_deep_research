@@ -27,7 +27,7 @@ import {
   type LibraryEntry,
   type LibrarySections,
 } from '../lib/library-fold.ts'
-import { BUILTIN_PREFERENCES } from './ResearchConfigTab.tsx'
+import { BUILTIN_PREFERENCES } from '../lib/config-tables.ts'
 
 const LIBRARY_PATH = 'method-library.md'
 const LIBRARY_READ_LIMIT = 1000
