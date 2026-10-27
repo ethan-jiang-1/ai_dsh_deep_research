@@ -20,6 +20,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import { readSessionText, resolveSessionLog } from '../scripts/lib/session-log.mjs';
+import { bundleDirOf } from '../scripts/lib/run-state.mjs';
 import { reconcileInjectedMessage } from '../scripts/lib/inject-reconcile.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -178,10 +179,10 @@ async function closingRowForPending(sid) {
     const cardKey = isDeliveryReviewCard(questions, JSON.stringify(lastAsk?.data?.arguments ?? {})) ? 'anchor-2' : 'anchor-1'
     const slug = attributionBundleOf(events)
     if (slug === null) { console.error('run-kickoff: 记账跳过——归属未定（attributionBundleOf=null：该会话尚无 write/edit 命中任何 bundle，按纪律延迟补记）'); return null }
-    for (const base of ['research-workspace', join('research-workspace', 'archive'), join('research-workspace', '_abandoned')]) {
-      const dir = join(ROOT, base, `drt_${String(slug).replace(/^drt_/, '')}`)
-      if (existsSync(join(dir, 'question.md'))) return { cardKey, bundleDir: dir, slug: `drt_${String(slug).replace(/^drt_/, '')}` }
-    }
+    // 三操作桶发现正本 = run-state.bundleDirOf（与本件原先手抄的桶循环等价；D28 根优先）。
+    const name = `drt_${String(slug).replace(/^drt_/, '')}`
+    const dir = bundleDirOf(join(ROOT, 'research-workspace'), name)
+    if (dir !== null && existsSync(join(dir, 'question.md'))) return { cardKey, bundleDir: dir, slug: name }
     console.error('run-kickoff: 记账跳过——三位置找不到 drt_' + String(slug).replace(/^drt_/, '') + ' 的 question.md')
     return null
   } catch (error) {

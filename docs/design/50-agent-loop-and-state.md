@@ -43,4 +43,4 @@ vendor `WorkspaceFileStat` 并升 pin，属上游改动。
 
 ## 交付判定
 
-"研究完成"的唯一依据 = 文件事实链，**判据逐字正本 = [研究手册 §完成判据](../../research-workspace/AGENTS.md) 与 [NODES 交付行](../../research-workspace/NODES.md)**（链上七件——final.md 当前版、review.md 终局 readiness PASS、§Decisions 的 HITL2 拍板行、final/ 版本记账、`final/readable-vN`（新 run 非 quick_factual）、Lead 的 present 声明（含 reader 与 vN）、audit.md 显式 `CRITICAL=0`——缺一不可，逐件细节不住本页）；机械把守 = node-gate（门②③④ + 门A 交付完整性 + 门C 读者版合同）。口头宣告、观察面显示、任务板状态都不是交付依据。
+"研究完成"的唯一依据 = 文件事实链，**判据逐字正本 = [研究手册 §完成判据](../../research-workspace/AGENTS.md) 与 [NODES 交付行](../../research-workspace/NODES.md)**——本页不复述件数与清单（缺件以那两处为准）。机械把守 = node-gate（门②③④ + 门A 交付完整性 + 门C 读者版合同）+ `run-accept` 回执。口头宣告、观察面显示、任务板状态都不是交付依据。

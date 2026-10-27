@@ -10,7 +10,7 @@ import { satisfiesVersion } from '../../../packages/deep-research-pack/scripts/l
 import { ROOT, PACK, PRESETS, VENDOR_TAG, fail, walk, walkMany, trackedFiles } from '../context.mjs';
 
 export function runB() {
-// ── preset 结构（0.1.7 形态：presets/<role>.patch.yml 一条 @deepseek-ai/dsh-agent-preset
+// ── preset-structure（0.1.7 形态：presets/<role>.patch.yml 一条 @deepseek-ai/dsh-agent-preset
 //    行，行内 config 带 id/name/description/order/plugins；角色技能仍在 presets/<role>/skills/，
 //    ≥1 个且 frontmatter name = 目录名）──
 {
@@ -46,7 +46,7 @@ export function runB() {
   }
 }
 
-// ── pack-bundle / compat（dsh.bundle.patch 指向真实文件；dshReleases 非空）──
+// ── pack-bundle-compat（dsh.bundle.patch 指向真实文件；dshReleases 非空）──
 {
   const gate = 'pack-bundle-compat';
   const pkgPath = join(PACK, 'package.json');

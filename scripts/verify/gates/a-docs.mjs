@@ -9,7 +9,7 @@ import { spawnSync } from 'node:child_process';
 import { ROOT, gates, fail, note, walk, gitOnce, trackedFiles } from '../context.mjs';
 
 export function runA() {
-// ── md-utf8 / newline（所有 tracked .md 严格 UTF-8、恰一个结尾换行；git
+// ── md-utf8-newline（所有 tracked .md 严格 UTF-8、恰一个结尾换行；git
 //    ls-files 驱动——运行区（gitignored bundle/profile 镜像）不扫，研究手册合同既有；
 //    旧版全树 walk 曾被 live run 的 leads.md 双尾换行咬红，2026-09-24 修正范围）──
 {

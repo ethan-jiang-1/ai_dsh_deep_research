@@ -158,7 +158,7 @@ export function runE() {
   }
 }
 
-// ── pack 工作区种子新鲜度（sync-pack-workspace --check）：手册/模板是会话 cwd 的内容，
+// ── pack-workspace-fresh（sync-pack-workspace --check）：手册/模板是会话 cwd 的内容，
 // pack 必须自带（否则部署方装了包也没有研究纪律）。正本 = research-workspace/，
 // 种子 = pack workspace/（生成物，勿手改；漂移即红——与 overlay-fresh 同形态）。
 {

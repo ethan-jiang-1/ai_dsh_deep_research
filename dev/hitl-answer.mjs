@@ -22,7 +22,7 @@ import { resolve, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { once } from 'node:events'
 import { loadChromium, launchChromium } from '../scripts/lib/playwright.mjs'
-import { runStateOf, readSessionEvents, leadHitlCandidate } from '../scripts/lib/run-state.mjs'
+import { bundleDirOf, runStateOf, readSessionEvents, leadHitlCandidate } from '../scripts/lib/run-state.mjs'
 import { terminalReadiness } from '../packages/deep-research-pack/src/lib/review-readiness.ts'
 import { clickSearchResultByTitle, revealSessionRow, searchSessionByTitle, sessionRowById } from '../scripts/lib/web-ui-nav.mjs'
 import {deliveryAnswerGuard, isDeliveryReviewCard, answerBatchOf, customLandedInBatch, driveVerdict, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict} from '../scripts/lib/ask-drive.mjs'
@@ -321,14 +321,13 @@ if (expectedCardKey === null) {
     const slug = pendingBundle
     let readiness = null
     if (slug !== null) {
-      for (const base of ['research-workspace', join('research-workspace', 'archive'), join('research-workspace', '_abandoned')]) {
-        const reviewPath = join(ROOT, base, slug, 'review.md')
-        if (existsSync(reviewPath)) {
-          // 用**pack 的终局判据**（与 UI 同源；BUG-036 已把轮次仲裁修在它那里）。
-          // ⚠ 门的副本 readinessOf 尚未跟随 → 同一 bundle 两处判不同的漂移，见 BUG-040 卡。
-          readiness = terminalReadiness(readFileSync(reviewPath, 'utf8'))
-          break
-        }
+      // 三操作桶发现正本 = run-state.bundleDirOf（根优先；位置只用于发现，D28）——本处
+      // 曾手抄同一份桶循环，新增第四桶时两边会静默分叉（2026-10-27 卫生轮 维度2）。
+      const dir = bundleDirOf(join(ROOT, 'research-workspace'), slug)
+      // 用**pack 的终局判据**（与 UI 同源；BUG-036 已把轮次仲裁修在它那里；门侧早已委托，
+      // 此处不再有第二份 readiness）。
+      if (dir !== null && existsSync(join(dir, 'review.md'))) {
+        readiness = terminalReadiness(readFileSync(join(dir, 'review.md'), 'utf8'))
       }
     }
     const verdict = deliveryAnswerGuard({ isDeliveryCard: true, readiness, pick: PICK })

@@ -39,13 +39,16 @@
 | queue.json P0–P6 手工调度 | 无队列原语 | agent-team 任务板 + topics.md 单 owner 纪律 |
 | 五反馈面（attempt_disposition/recovery_action）| 工作单元恢复需要结构化反馈 | DSH 会话原生错误反馈 + steer；不重建恢复词汇表 |
 
-## 3. 自建残留（唯一保留：证据身份链）
+## 3. 自建残留（方法论层唯一：证据身份链）
 
 **为什么唯一**：DSH 没有任何载体承载"研究报告的结论 → 来源文件"的可核查链——web_search
 的返回不落盘、会话日志可读但不是角色间契约面。研究手册的证据 frontmatter 契约
 （`source_url / retrieved_at / quality / found_by / supports / source_tier / publisher`——七字段）+ **口径最小契约**（数字/
 规格类摘录带测量条件 ≥2 项；单源关键数字显式标"待破"）+ final.md 的
 `[来源: evidence/xx.md]` 引用格式 + critic 的逐条狩猎 = 轻量等价物：
+
+代码层另有 D7 登记的两处有界例外——观察面 client 面（D18）、抓取回退 provider（D31）；
+本节"唯一"只指**方法论载体**清单，不是包内自写代码清单。
 
 - codex 教训 1（"LLM 会伪造看起来完成的产物"）→ 我们的等价防线：完成判定锚定**文件事实**
   （final.md 存在 + 引用链真实），critic 按文件对照不采信口头保证；

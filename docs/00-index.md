@@ -97,6 +97,7 @@ D 号正文 = [decisions.md](./decisions.md)（按需查，不在本页通读；
 | 研究方法论的载体 | skill（`presets/<role>/skills/<n>/SKILL.md`，硬隔离） | `packages/skill/skill-filesystem` |
 | 研究执行图 / Wave | plan.md 的 **W<wave>.<index>**（W2 = Wave 2 分组，W2.1 = 层内节点，W2.1.1 = 内部拆解）；Wave 按 deps 计算；stage 由节点 kind 派生；旧 N/旧 flat W 只读 | `research-workspace/templates/run/plan.md` + `src/lib/plan-graph.ts`；[Note](../notes/implemented/2026-10-22-w-wave-node-identity.md) |
 
+| HITL1 / HITL2（两次人工停靠） | `ask_user_question` 的停靠面（工具行 = `@deepseek-ai/dsh-tool-ask-user`） | HITL1 = 三问卡 + 计划确认卡两段（`quick_factual` 豁免）；HITL2 = 终局审阅；操作 = [guides/61 §3/§4](./guides/61-run-playbook.md) |
 | web 搜索/抓取 | `dsh-tool-web` + search/fetch provider（本仓：DeepSeek Search API + 抓取回退 provider） | `packages/web/tool-web` + `web-deepseek-api`（`deepseek-search-api`）+ 本包 `deepseek-fallback-fetch`（本地 `web-fetch-http` → Fetch API）；选择 = [D30](./decisions.md) / [D31](./decisions.md) |
 | 成品交付 | `present` 工具 explicit deliveries | `packages/fs/tool-present` + `client/ui-deliverables` |
 | 读者版终稿 | reader-facing final（本仓原生；canonical 的派生压缩，不是第二份事实） | `final/readable.md` → `final/readable-vN.md`（同版交付件）+ lead 的 `reader-final` skill + node-gate 门C + [design/40](./design/40-research-cockpit.md) 终稿页签双视图 |
