@@ -3,7 +3,7 @@
 本目录是"DSH Deep Research 插件"项目的文档层。性质：**当前合同 + 设计依据**——实现开始后，
 随代码同 diff 维护"现在为真"的部分；单次决策与时间线归 `notes/`。
 
-> **读法（省上下文）**：入口链第 2 步只读本页 §先分流 + §文档地图 + §术语映射；
+> **读法（省上下文）**：入口链第 2 步只读本页 §先分流 + §文档地图；术语对照 = [terms.md](./terms.md)、
 > D 号台账 = [decisions.md](./decisions.md)、外部材料 = [external-materials.md](./external-materials.md)，按需跳。
 
 ## 先分流：用户要"用它"还是"改它"

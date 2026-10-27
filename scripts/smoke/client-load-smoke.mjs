@@ -768,17 +768,24 @@ async function pass3bGraphTabPhase() {
  *  keyless：只开 tab/读库，不发任何 session/prompt；保存回执由 library-fold 单测与人工走查。 */
 async function pass3cMethodLibraryPhase() {
   await awaitAppReady(page, 5_000)
-  let tab = page.getByText('方法库', { exact: true }).first()
-  let visible = await tab.isVisible({ timeout: 8_000 }).catch(() => false)
-  // 2026-10-22 实测偶发：会话刚切换完，Chat/Trajectory 已在但第三 tab 的 conversation.view
-  // 还没挂载；同一轮后段 tabs 列表里方法库已出现。reload 一次再等，避免把挂载时序当注册回归。
-  if (!visible) {
+  // 等显式状态，不拿"读一次没看见"当结论（2026-10-28 归因：失败现场保存时 tab 已在 DOM
+  // 里（role=tab），说明断言时刻只是还没挂载完——单次 isVisible 把挂载时序当成了注册回归）。
+  const tabVisibleSoon = async (windowMs) => {
+    for (let waited = 0; waited < windowMs; waited += 500) {
+      const t = page.getByText('方法库', { exact: true }).first()
+      if (await t.isVisible().catch(() => false)) return t
+      await wait(500)
+    }
+    return null
+  }
+  let tab = await tabVisibleSoon(10_000)
+  if (tab === null) {
+    // 兜底一次 reload：会话切换后第三 tab 的 conversation.view 偶发未随首屏挂载。
     await page.reload({ waitUntil: 'domcontentloaded' }).catch(() => {})
     await awaitAppReady(page, 5_000)
-    await wait(2_000)
-    tab = page.getByText('方法库', { exact: true }).first()
-    visible = await tab.isVisible({ timeout: 8_000 }).catch(() => false)
+    tab = await tabVisibleSoon(10_000)
   }
+  const visible = tab !== null
   step(visible, '「方法库」主界面 tab 在场（conversation.view 注册成功）')
   if (!visible) return
   await tab.click({ timeout: 5_000 }).catch(() => {})

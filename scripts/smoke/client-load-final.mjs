@@ -152,12 +152,18 @@ export async function pass5FinalDeliveryPhase(env) {
       if (!statusPane.includes('已交付')) {
         skipped.push('状态页 ⑤ 折叠块：交付目标会话的 present 不在尾窗（⑤ 无「已交付」）')
       } else {
-        const statusFold = page.getByText('还不满意？三种改法').first()
-        const statusFoldVisible = await statusFold.isVisible().catch(() => false)
-        if (statusFoldVisible) await statusFold.click({ timeout: 3_000 }).catch(() => {})
-        const statusText = statusFoldVisible ? await paneTextOf(page) : ''
-        step(statusFoldVisible && statusText.includes('补研究') && statusText.includes('这份太浅'),
-          '状态页 ⑤：已交付后的三种改法折叠块（与终稿页脚同源文案）', statusFoldVisible ? 'fold expanded' : '缺折叠块')
+        // 等显式状态（2026-10-28 归因）：⑤ 的折叠块在「已交付」之后一拍才渲染，单次 isVisible
+        // 会把这一拍读成"缺折叠块"。轮询上限 10s，再判。
+        let statusFold = null
+        for (let waited = 0; waited < 10_000; waited += 500) {
+          const candidate = page.getByText('还不满意？三种改法').first()
+          if (await candidate.isVisible().catch(() => false)) { statusFold = candidate; break }
+          await wait(500)
+        }
+        if (statusFold !== null) await statusFold.click({ timeout: 3_000 }).catch(() => {})
+        const statusText = statusFold !== null ? await paneTextOf(page) : ''
+        step(statusFold !== null && statusText.includes('补研究') && statusText.includes('这份太浅'),
+          '状态页 ⑤：已交付后的三种改法折叠块（与终稿页脚同源文案）', statusFold !== null ? 'fold expanded' : '缺折叠块')
       }
     } else {
       skipped.push('状态页 ⑤ 折叠块：交付目标会话无研究状态 tab')

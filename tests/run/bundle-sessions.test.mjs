@@ -10,7 +10,7 @@
 // 还原 → 绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { appendFileSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs'
+import { appendFileSync, existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { sessionsOfBundle, sessionsOfBundleCached } from '../../scripts/lib/bundle-sessions.mjs'
@@ -88,5 +88,34 @@ test('缓存：第二次调用命中缓存，结果与直扫一致；日志变�
     const third = sessionsOfBundleCached(root, 'drt_demo', { readLog, cachePath })
     assert.equal(third.cacheMisses, 1, '只有被改动的日志重扫')
     assert.equal(third.sessions.find((x) => x.sessionId === 'session-b')?.presented, 1, '新 present 计入 session-b')
+  })
+})
+
+// 缓存的坏形态（2026-10-28 覆盖补测）：缓存是"加速件"，任何坏状态都不许让反查失败——
+// 坏 JSON / 版本不符一律按空缓存处理；`useCache:false` 既不读也不写。
+test('缓存坏形态：坏 JSON 与版本不符都退回全量扫描，不抛', () => {
+  withSessions((root) => {
+    const cachePath = join(root, '..', `bs-cache-bad-${process.pid}.json`)
+    const readLog = (p) => readFileSync(p, 'utf8')
+    writeFileSync(cachePath, '{not json')
+    const first = sessionsOfBundleCached(root, 'drt_demo', { readLog, cachePath })
+    assert.deepEqual(first.sessions.map((x) => x.sessionId), ['session-a', 'session-b'], '坏缓存不影响结果')
+    assert.ok(first.cacheMisses >= 4, '坏缓存 → 全量重扫')
+    // 版本不符同样整体失效
+    writeFileSync(cachePath, JSON.stringify({ version: 999, logs: { '/nope': { mtimeMs: 1, size: 1, facts: null } } }))
+    const second = sessionsOfBundleCached(root, 'drt_demo', { readLog, cachePath })
+    assert.ok(second.cacheMisses >= 4, '版本不符 → 全量重扫')
+    assert.deepEqual(second.sessions.map((x) => x.sessionId), ['session-a', 'session-b'])
+  })
+})
+
+test('缓存关掉：useCache=false 不读不写缓存文件', () => {
+  withSessions((root) => {
+    const cachePath = join(root, '..', `bs-cache-off-${process.pid}.json`)
+    const readLog = (p) => readFileSync(p, 'utf8')
+    const out = sessionsOfBundleCached(root, 'drt_demo', { readLog, cachePath, useCache: false })
+    assert.equal(out.cacheHits, 0)
+    assert.ok(out.cacheMisses >= 4)
+    assert.equal(existsSync(cachePath), false, 'useCache=false 不应落盘')
   })
 })
