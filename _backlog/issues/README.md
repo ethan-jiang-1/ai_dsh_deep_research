@@ -4,10 +4,11 @@
 
 ## 活跃清单
 
-- [2026-10-27 复核后硬化计划](2026-10-27-post-review-hardening.md) — P1：run-accept 集成 smoke + 数据卡形状测试；P2/P3 见卡。
 （2026-10-25 运行形态合同组 5 张卡已结归档——见 [settled 池](../_archived/settled_issues/README.md)。）
 
 ## 最近归档
+
+（[2026-10-27 复核后硬化](../_archived/settled_issues/2026-10-27-post-review-hardening.md) 已结：run-accept 全链 smoke + 数据卡形状 + 秘密模式扩展；P2.4/P2.5/P3 转触发器。）
 
 （[2026-10-27 发布前数据契约](../_archived/settled_issues/2026-10-27-release-data-contract.md) 已结：FAQ 26 对账 → 数据卡/回执路径/种子 schema/N2 披露/秘密扫描；D1–D4 全采纳；[Note](../../notes/implemented/2026-10-27-release-data-contract.md)。）
 

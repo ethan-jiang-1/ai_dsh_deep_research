@@ -12,12 +12,14 @@ test('findSecrets：sk-/ghp_/AKIA/PRIVATE KEY/Bearer 命中，prose 与短串不
     'github ' + 'ghp_' + 'abcdefghijklmnopqrstuvwxyz0123456789',
     'AWS ' + 'AKIA' + 'IOSFODNN7EXAMPLE',
     '-----BEGIN ' + 'OPENSSH PRIVATE KEY-----',
+    'Google AIza' + 'A'.repeat(35),
+    'Slack ' + 'xoxb-' + '123456789012-abcdefghijklmnop',
     'Authorization: Bearer ' + 'eyJhbGciOiJIUzI1NiJ9' + '.payload.sig',
-    '短串 sk-short 不算',
+    '短串 sk-short / AIza-short / xoxo 不算',
   ].join('\n')
   const found = findSecrets(text)
-  assert.deepEqual(found.map((f) => f.kind).sort(), ['aws-access-key', 'bearer-token', 'github-token', 'private-key', 'provider-key'].sort())
-  assert.deepEqual(found.map((f) => f.line), [2, 3, 4, 5, 6])
+  assert.deepEqual(found.map((f) => f.kind).sort(), ['aws-access-key', 'bearer-token', 'github-token', 'google-api-key', 'private-key', 'provider-key', 'slack-token'].sort())
+  assert.deepEqual(found.map((f) => f.line), [2, 3, 4, 5, 6, 7, 8])
 })
 
 test('findSecrets：报告只有 kind/line，不回显命中原文', () => {

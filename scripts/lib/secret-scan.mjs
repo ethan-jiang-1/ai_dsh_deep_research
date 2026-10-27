@@ -11,6 +11,8 @@ const PATTERNS = [
   { kind: 'provider-key', re: /\bsk-[A-Za-z0-9]{20,}\b/ },
   { kind: 'github-token', re: /\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{30,}\b/ },
   { kind: 'aws-access-key', re: /\bAKIA[0-9A-Z]{16}\b/ },
+  { kind: 'google-api-key', re: /\bAIza[0-9A-Za-z_-]{35}\b/ },
+  { kind: 'slack-token', re: /\bxox[baprs]-[0-9A-Za-z-]{10,}\b/ },
   { kind: 'private-key', re: /-----BEGIN (?:[A-Z0-9]+ )?PRIVATE KEY-----/ },
   { kind: 'bearer-token', re: /\bBearer\s+[A-Za-z0-9._~+/=-]{20,}/ },
 ]

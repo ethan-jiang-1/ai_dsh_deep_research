@@ -4,6 +4,7 @@
 
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-10-27-post-review-hardening](2026-10-27-post-review-hardening.md) | 复核后硬化：run-accept 全链 smoke、数据卡形状、秘密模式扩展；P2.4/P2.5/P3 转触发器 | 2026-10-27 |
 | [2026-10-27-release-data-contract](2026-10-27-release-data-contract.md) | 发布前数据契约：FAQ 26 对账 → 数据卡 + 回执相对路径 + 种子 schema/`--clean` + N2 披露 + secret-scan；D1–D4 全采纳；[Note](../../../notes/implemented/2026-10-27-release-data-contract.md) | 2026-10-27 |
 | [2026-10-25-run-form-contract](2026-10-25-run-form-contract.md) | 运行形态合同：M1/M2/M3、P/H/W、A+B、per-user、升级/移交/证据矩阵；[guides/65](../../../docs/guides/65-run-forms.md) + [Note](../../../notes/implemented/2026-10-25-run-form-contract.md) | 2026-10-25 |
 | [2026-10-25-distribution-contract](2026-10-25-distribution-contract.md) | `engines.dsh` + 团队层钉版 + Node/preflight + 升级/离线/校验和 + 冷启动安装证据；残余见卡 | 2026-10-25 |

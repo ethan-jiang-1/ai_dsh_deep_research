@@ -37,6 +37,28 @@ test('bundle patch 不声明 storage domain（状态只走工作区文件/DSH �
   assert.equal(/storage-domain|storageDomain/.test(patch), false, 'cordis.patch.yml 不应声明 storage domain')
 })
 
+test('README 数据卡形状：9 列、P2 行带保留、凭据标秘密、run.md 标声明', () => {
+  const lines = readFileSync(join(PACK, 'README.md'), 'utf8').split('\n')
+  const start = lines.findIndex((line) => line.startsWith('| 事实 |'))
+  assert.ok(start >= 0, 'README 缺 Data 数据卡表头')
+  const header = lines[start].split('|').slice(1, -1).map((cell) => cell.trim())
+  assert.deepEqual(header, ['事实', '承诺', '权威', '位置', '作用域', '寿命 / 删除', '谁看得见', '秘密', '卸载后'])
+  let rows = 0
+  for (let i = start + 2; i < lines.length; i++) {
+    const line = lines[i]
+    if (!line.startsWith('|')) break
+    const cells = line.split('|').slice(1, -1).map((cell) => cell.trim())
+    assert.equal(cells.length, 9, `数据卡行不是 9 列：${line.slice(0, 80)}`)
+    rows += 1
+    const [fact, promise, , , , , visibility, secret, uninstall] = cells
+    assert.ok(visibility.length > 0 && secret.length > 0, `${fact} 缺可见性/秘密`)
+    if (promise === 'P2') assert.match(uninstall, /保留/, `${fact} 是 P2 但卸载后未写保留`)
+    if (fact === '凭据') assert.match(secret, /^是/, '凭据行必须标秘密=是')
+    if (fact === 'run.md 状态头') assert.match(cells[1], /声明（非权威）/, 'run.md 必须标声明非权威')
+  }
+  assert.ok(rows >= 10, `数据卡行数过少（${rows}）——表被截断？`)
+})
+
 test('README 数据卡含「谁看得见 / 秘密」列，且 N2 承重依赖已披露', () => {
   const readme = readFileSync(join(PACK, 'README.md'), 'utf8')
   assert.match(readme, /\| 谁看得见 \| 秘密 \|/, '数据卡缺可见性/秘密列')

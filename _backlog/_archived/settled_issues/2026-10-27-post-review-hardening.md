@@ -1,11 +1,13 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-10-27
 ---
 
 # 推敲：数据契约复核后的硬化计划
 
-> 立卡：2026-10-27 ｜ 状态：推敲中 ｜ 类型：Task ｜ 结论倾向：现在做（P1）/ 以后做（P2/P3） ｜ 可关闭：否
+> 立卡：2026-10-27 ｜ 状态：已结（2026-10-27） ｜ 类型：Task ｜ 结论倾向：现在做——P1/P2.3 已落地；P2.4/P2.5/P3 转触发器 ｜ 可关闭：是
+
+**关闭结论（2026-10-27）：** P1.1 `run-accept-smoke` ALL PASS（绝对 present 归一/二次绿/bundle 外红不写/秘密红不写/`--repair` 绿）；P1.2 数据卡形状测试（9 列、P2 保留、凭据秘密、run.md 声明）带注入红证；P2.3 加 `AIza`/`xox[baprs]-` 两类高置信模式 + 负例。P2.4/P2.5 与 P3 转 `triggers.md` 可观察条件。`pnpm verify` 全绿、`pnpm test` 897。去向：implemented — [数据契约 Note](../../../notes/implemented/2026-10-27-release-data-contract.md)。
 
 **问题与期望结果：** 复核 `6b0b16d..9d78641`（数据契约落地 + 两轮 review 修正）后，架构判断没有漂移，
 但证据面有强弱差：有的结论只有静态断言或一次性 live 证据，缺少可复跑的回归。期望把「已落地」变成
@@ -53,6 +55,17 @@ opened: 2026-10-27
 7. 多工作区需求出现时：各起通道；不引入 per-workspace domain/home 账本。
 8. 方法库增长纪律需要计数时：用 storage domain，不往 `method-library.md` 塞机器状态。
 9. 上游 agent-team 毕业/改名/移除：按 `triggers.md` 重议。
+
+## 落地结果（2026-10-27）
+
+| 项 | 结果 | 证据 |
+|---|---|---|
+| P1.1 `run-accept` 集成 smoke | 已落地 | [run-accept-smoke](../../../scripts/smoke/run-accept-smoke.mjs) ALL PASS（5 条路径） |
+| P1.2 数据卡形状测试 | 已落地 | `tests/pack/data-plane-invariants` 4 例；删「谁看得见」列 → 红（已录） |
+| P2.3 秘密模式扩展 | 已落地 | `AIza` / `xox[baprs]-` + 正反例；`pnpm test` 897 |
+| P2.4 保留期只读报告 | 以后做 | 触发器「run bundle 保留期视图」 |
+| P2.5 Windows | 以后做 | 触发器「Windows 支持」 |
+| P3 | 触发器 | `triggers.md`（CI rc.3 / 多工作区 / 方法库计数 / 团队层毕业） |
 
 ## 验收标准
 

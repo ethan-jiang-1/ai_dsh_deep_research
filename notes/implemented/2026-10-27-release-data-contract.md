@@ -43,10 +43,12 @@
 
 ## 实际跑过的验证
 
-- `pnpm verify` 全绿；`pnpm test` 896 通过（新增 secret-scan / portable path / seed schema /
+- `pnpm verify` 全绿；`pnpm test` 897 通过（新增 secret-scan / portable path / seed schema /
   deploy-args / repair 用例；含先红后绿的负例留证）。
 - 版本 `0.1.2 → 0.1.3`（行为变更）；`export-dist` 产出 0.1.3 tarball + 安装手册；`release-smoke` /
   `data-smoke` / `compat-smoke` / `compat-client-smoke` 全 PASS。
+- 复核后硬化：`run-accept-smoke` ALL PASS（绝对 present 归一/二次幂等/bundle 外与秘密红不写/`--repair` 绿）；
+  数据卡形状测试（9 列/P2 保留/凭据秘密/run.md 声明，删列即红）；`secret-scan` 增 `AIza`/`xox[baprs]-` 正反例。
 - `node scripts/smoke/scaffold-smoke.mjs` ALL PASS：`--clean` 报告/执行、dry-run 拒绝、
   versionAhead 拒绝、sidecar 默认保留、`.gitignore` 不被 `--force` 覆盖、schema 新版拒绝。
 - `node scripts/smoke/compat-client-smoke.mjs` ALL PASS（rc.3）：真安装 → 真 web → headless chromium

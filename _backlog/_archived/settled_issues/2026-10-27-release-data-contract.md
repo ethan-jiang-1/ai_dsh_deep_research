@@ -7,7 +7,7 @@ opened: 2026-10-27
 
 > 立卡：2026-10-27 ｜ 状态：已结（2026-10-27） ｜ 类型：Task ｜ 结论倾向：现在做——D1–D4 全采纳推荐，P1/P2 已落地 ｜ 可关闭：是
 
-**关闭结论（2026-10-27）：** D1 = 补 rc.3 客户端挂载证据（`compat-client-smoke`，ALL PASS）；D2 = N2 披露 + 触发器 + 可行动失败，不做降级单人模式；D3 = `state.schemaVersion` + `scaffold --clean`（sidecar 需 `--discard-sidecars`）+ `.gitignore` owner 统一；D4 = 移除字面量 `apiKey`。P1/P2 全部落地或按可观察条件延后；证据 = `pnpm verify` 全绿、`pnpm test` 896、scaffold/release/data/compat/compat-client smoke 全 PASS、现网 bundle `--repair` 后两次 `run-accept` 绿；包版本 `0.1.2 → 0.1.3`。去向：implemented — [发布前数据契约 Note](../../../notes/implemented/2026-10-27-release-data-contract.md)。
+**关闭结论（2026-10-27）：** D1 = 补 rc.3 客户端挂载证据（`compat-client-smoke`，ALL PASS）；D2 = N2 披露 + 触发器 + 可行动失败，不做降级单人模式；D3 = `state.schemaVersion` + `scaffold --clean`（sidecar 需 `--discard-sidecars`）+ `.gitignore` owner 统一；D4 = 移除字面量 `apiKey`。P1/P2 全部落地或按可观察条件延后；证据 = `pnpm verify` 全绿、`pnpm test` 897、scaffold/release/data/compat/compat-client smoke 全 PASS、现网 bundle `--repair` 后两次 `run-accept` 绿；包版本 `0.1.2 → 0.1.3`。去向：implemented — [发布前数据契约 Note](../../../notes/implemented/2026-10-27-release-data-contract.md)。
 
 **问题与期望结果：** 用户要求按 DSH 数据面 FAQ（26）判断本包是否需要参考，并给出 Gap 与计划。
 期望结果：发布后用户升级/卸载/换机器/移交 run bundle 时，数据不丢、不错、不泄漏；维护者能用一张卡
@@ -123,7 +123,7 @@ opened: 2026-10-27
 
 **复核轮（2026-10-27）：** 数据卡补「谁看得见/秘密」列与 `run.md` 声明行；凭据从会话行拆出；
 写明 E2 出网、不使用 attachments/spill/RAG、一通道一工作区、N2 peer 精度；新增静态数据面不变量
-（注入红证）、secret CLI scope smoke、坏 state/clean 数据面/活跃锁用例；`pnpm test` 896。
+（注入红证）、secret CLI scope smoke、坏 state/clean 数据面/活跃锁用例；`pnpm test` 897。
 
 ## 方案与取舍
 
