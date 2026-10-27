@@ -26,24 +26,24 @@
 
 ## 2. 构成（件 → 文件 → 职责）
 
-| 件 | 文件 | 职责 |
-|---|---|---|
-| 研究状态页签 | [ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) + `src/client/research-status/useMemberActivity.ts` + `src/client/research-status/types.ts` + [run-version.ts](../../packages/deep-research-pack/src/lib/run-version.ts) | 右栏页签，自上而下八区（逐区职责见下表）；⑤ 另带 rerun 版本面一行（`v1 已交付 · v2 证据扩张 rerun · HITL2 待审`）+ 已交付后的只读折叠块「还不满意？三种改法」（`rerun-triage` 文案）；队员多路 journal 订阅生命周期在页签私有 hook，注入类型在同目录定义 |
-| 活标题 | 同上（`ResearchStatusTitle`） | 挂起时页签名变「研究状态 · ⏳ 等你拍板」 |
-| 流失败恢复指引 | [stream-failure.ts](../../packages/deep-research-pack/src/lib/stream-failure.ts) + ResearchStatusTab.tsx | 末位回合死于上游流失败（MALFORMED_RESPONSE 族）且无新回合接手 → 人话横幅「等一两分钟发『继续』」；折算纯函数，BUG-023 修复① |
-| 品牌（虎鲸 Orca） | [BrandMark.tsx](../../packages/deep-research-pack/src/client/BrandMark.tsx) | 宿主 `sidebar.brand.mark` + `sidebar.brand.name` 两槽的 single occupant（替换内置鱼形 logo 与本地构建标签）——用户定调 2026-10-13 |
-| 面板数据面 | [config-tables.ts](../../packages/deep-research-pack/src/lib/config-tables.ts) | 两个页签共用的**纯常量**：内置偏好（skill 方法预设的投影）、判型→打法映射、六条底线、四分区标签、领域示范、两个定制入口指令逐字。住在 lib 而非视图（数据/展示分层；keyless 测试直接 import，不再 AST 扒 TSX） |
-| 研究配置页签 | [ResearchConfigTab.tsx](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) + [method-of-question.ts](../../packages/deep-research-pack/src/lib/method-of-question.ts) | 右栏**摘要页签**（2026-10-21 管理迁移后）：只留 ① 本次研究（采用＋来源＋「换一条」，读 question.md 方法节五态）与「方法库（本工作区）→ 顶部 tab」入口；库列表/内置卡/领域示范/术语/管理回执移入主界面「方法库」tab。指令仍经 `session/prompt` 交 Lead（面板不直写文件） |
-| 方法库主 tab | [MethodLibraryView.tsx](../../packages/deep-research-pack/src/client/MethodLibraryView.tsx) + [library-fold.ts](../../packages/deep-research-pack/src/lib/library-fold.ts) | 主界面 `conversation.view` 第三 tab（Chat/Trajectory 同排）：我的库搜索/列表、内置参考只读、四字段编辑/新建/删除；保存走 W1 `session/prompt` 交 Lead 写 `method-library.md`，面板不直写文件；无写权限、无新 RPC |
-| 研究图谱页签 | [ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) + [DagMap.tsx](../../packages/deep-research-pack/src/client/research-graph/DagMap.tsx)（DAG 小图，几何/交互只读它）+ [WorkerChips.tsx](../../packages/deep-research-pack/src/client/research-graph/WorkerChips.tsx) + [format.ts](../../packages/deep-research-pack/src/client/research-graph/format.ts) + `src/client/research-graph/types.ts` + [plan-graph.ts](../../packages/deep-research-pack/src/lib/plan-graph.ts) + [graph-model.ts](../../packages/deep-research-pack/src/lib/graph-model.ts) | 右栏**只读观察面**：顶层 plan 节点 / `agentTeam` 任务画成 SVG DAG（节点 + 依赖边 + 同层并行 + 状态色）；复合节点 W3.1… 默认收在父节点详情，图上标 `+n`（内部节点数）；`plan.md` 提供 parent/lifecycle/kind/stage（派生）/depth/acceptance、版本与重写记录；节点详情可复制 `drt_<slug>/W3.1` 引用；重号/悬空 parent/deps/墓碑/跨组显示只读结构提示；无 plan/无 blocked_by 时明确「没有可画的 DAG」，不画假图；不提供调整动作 |
-| 终稿页签 | [ResearchFinalTab.tsx](../../packages/deep-research-pack/src/client/ResearchFinalTab.tsx) + [final-target.ts](../../packages/deep-research-pack/src/lib/final-target.ts) | 右栏页签：**认领 `drt_<slug>/` 的终稿地址族**（`final.md` / `final/vN.md` / `final/readable.md` / `final/readable-vN.md`；`extension` 带；交付卡片、结句内联引用、Files 树落到同一页签）——正文**有读者版默认看读者版**，否则看 `final/` 版本账最高版（`审计版 vN`）；可切「看审计版 / 看读者版」，没有版本账才直接读 `final.md`。静音条只讲盘上事实（`读者版 vN` / `审计版 vN` / `当前工作稿` / `审查未过`；**不写"已交付"**——版本目录不是交付凭证，交付只由⑤ 的 `present` 见证说），`过程 →` 回研究状态；正文末尾同款只读折叠块「还不满意？三种改法」。读面是一张定表（`final.md` / `final/vN` / `final/readable*` / `review.md` / `final/`），经 run-context 按三位置解析；review.md 读到 eof（终局判定在文末） |
-| 浏览器 RunSource 适配器 | [run-source-browser.ts](../../packages/deep-research-pack/src/client/run-source-browser.ts) | `remote.workspaceFiles` → run-context 的 `Entry` / `Page` / `version` 映射；`workspace-file/not-found` → missing，其它错误 → unreadable；位置/读策略/翻页归 lib，本件不重复 |
-| 研究图谱页签体 | [ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) | 页签体：头部（「只读观察」标记 + plan/task 计数）+ 正文首行版本轨（`plan/vN` 快照 → 「当前图 / 看 vN 旧图 / 看差异」，结构 diff 折算住 [plan-diff](../../packages/deep-research-pack/src/lib/plan-diff.ts)；无快照如实「无旧图快照，不能 diff」）+ 覆盖率（`已映射 K / 未映射 N-K`，另有失效与 plan-only 才追加）+ 最后刷新时刻；映射缺口横幅说「图谱无法判断」，不说「未执行」；SVG DAG 小图（`wavesOf` 分层、同层横排、边 = plan deps / Team `blocked_by`）+ 顶层节点列表 + 选中详情（description 高度上限、复合子节点展开、复制引用）+「需要你注意（只读）」+ plan 结构提示；底部 `plan.md` 原文折叠与 plan↔task 映射计数；无依赖边时只显示任务快照并说明原因 |
-| 研究图谱注入面 | [research-graph/types.ts](../../packages/deep-research-pack/src/client/research-graph/types.ts) | 「研究图谱」页签的注入面类型（`runSource` / `follow` / 可选 `openOwner` 三条闭包，数据面全部复用既有 remote，无新 RPC）；`follow` 只用于 `bindingTrust` 找可信的 `drt_<slug>/`，页签只读，不注入发送通道 |
-| 研究语义工具卡 | [ResearchToolCard.tsx](../../packages/deep-research-pack/src/client/ResearchToolCard.tsx) + [tool-card.ts](../../packages/deep-research-pack/src/lib/tool-card.ts) | 对话流卡片：`spawn_teammate` → 组队卡、`web_search` → 检索卡（2 张） |
-| 挂起显性化 | [index.ts](../../packages/deep-research-pack/src/client/index.ts)（`revealStatusTab`） | pending false→true 迁移时 `openTab` 右栏自动展开；页签 dock 折叠态保持挂载（观察者常在） |
-| keyed 常量 | [keys.ts](../../packages/deep-research-pack/src/client/keys.ts) | 字面量唯一正本（`client-keys` 门禁对账——拼错不报错、永不渲染） |
-| host 半 | [src/index.ts](../../packages/deep-research-pack/src/index.ts) | 空壳宿主位（bundle 行 name = 包名；浏览器半经 `exports["./client"]` 装配） |
+| 件 | 文件 | 一句话 | 详情 |
+|---|---|---|---|
+| 研究状态页签 | ResearchStatusTab.tsx（+3） | 右栏页签，自上而下八区（逐区职责见下表） | [§2.1](#cockpit-1) |
+| 活标题 | ResearchStatusTitle | 挂起时页签名变「研究状态 · ⏳ 等你拍板」 | [§2.2](#cockpit-2) |
+| 流失败恢复指引 | stream-failure.ts | 末位回合死于上游流失败（MALFORMED_RESPONSE 族）且无新回合接手 → 人话横幅「等一两分钟发『继续』」 | [§2.3](#cockpit-3) |
+| 品牌（虎鲸 Orca） | BrandMark.tsx | 宿主 `sidebar.brand.mark` + `sidebar.brand.name` 两槽的 single occup… | [§2.4](#cockpit-4) |
+| 面板数据面 | config-tables.ts | 两个页签共用的**纯常量**：内置偏好（skill 方法预设的投影）、判型→打法映射、六条底线、四分区标签、领域示范、两个定制… | [§2.5](#cockpit-5) |
+| 研究配置页签 | ResearchConfigTab.tsx（+1） | 右栏**摘要页签**（2026-10-21 管理迁移后）：只留 ① 本次研究（采用＋来源＋「换一条」，读 question.m… | [§2.6](#cockpit-6) |
+| 方法库主 tab | MethodLibraryView.tsx（+1） | 主界面 `conversation.view` 第三 tab（Chat/Trajectory 同排）：我的库搜索/列表、内置参… | [§2.7](#cockpit-7) |
+| 研究图谱页签 | ResearchGraphTab.tsx（+6） | 右栏**只读观察面**：顶层 plan 节点 / `agentTeam` 任务画成 SVG DAG（节点 + 依赖边 + 同层… | [§2.8](#cockpit-8) |
+| 终稿页签 | ResearchFinalTab.tsx（+1） | 右栏页签：**认领 `drt_<slug>/` 的终稿地址族**（`final.md` / `final/vN.md` / `… | [§2.9](#cockpit-9) |
+| 浏览器 RunSource 适配器 | run-source-browser.ts | `remote.workspaceFiles` → run-context 的 `Entry` / `Page` / `ver… | [§2.10](#cockpit-10) |
+| 研究图谱页签体 | ResearchGraphTab.tsx | 页签体：头部（「只读观察」标记 + plan/task 计数）+ 正文首行版本轨（`plan/vN` 快照 → 「当前图 / … | [§2.11](#cockpit-11) |
+| 研究图谱注入面 | research-graph/types.ts | 「研究图谱」页签的注入面类型（`runSource` / `follow` / 可选 `openOwner` 三条闭包，数据面… | [§2.12](#cockpit-12) |
+| 研究语义工具卡 | ResearchToolCard.tsx（+1） | 对话流卡片：`spawn_teammate` → 组队卡、`web_search` → 检索卡（2 张） | [§2.13](#cockpit-13) |
+| 挂起显性化 | index.ts（+1） | pending false→true 迁移时 `openTab` 右栏自动展开 | [§2.14](#cockpit-14) |
+| keyed 常量 | keys.ts | 字面量唯一正本（`client-keys` 门禁对账——拼错不报错、永不渲染） | [§2.15](#cockpit-15) |
+| host 半 | src/index.ts | 空壳宿主位（bundle 行 name = 包名；浏览器半经 `exports["./client"]` 装配） | [§2.16](#cockpit-16) |
 
 页签八区（自上而下）：
 
@@ -80,6 +80,121 @@
 | [text-fold](../../packages/deep-research-pack/src/lib/text-fold.ts) | markdown 行内文本 → 可进纯文本节点的文本 | 剥 `**` 与反引号 ＋ 压空白 ＋ 截断补省略号；状态页签与配置页签共用本件（`**` 字面星号上卡面、长摘要拉爆列表——唯一正本在本件） |
 | [method-of-question](../../packages/deep-research-pack/src/lib/method-of-question.ts) | question.md 文本 ＋ bundle 在场性 → 「本次研究」区五态 | 无 run／文件缺／未记录／无法判定／已记录；**判不了就说判不了**——绝不回落成默认打法名（旧 run 未记录 = 合法形态，不回填）；读方法节须显式足额 limit（模板第 32–40 行卡默认 40 行，BUG-026 同族） |
 | [receipt-fold](../../packages/deep-research-pack/src/lib/receipt-fold.ts) | 发送结果 ＋ 回话信号 ＋ 库前后快照 → 回执三态与 diff | 已发送（prompt ok）／Lead 已回话（发送**之后**的 assistant 事件）／已落盘（回读对账出 diff：`把「找来源」从 A 改成 B`）；对账读不出变化就退到已回话，不冒充落地 |
+
+---
+
+<a id="cockpit-1"></a>
+### 2.1 研究状态页签
+
+**文件**：[ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) + `src/client/research-status/useMemberActivity.ts` + `src/client/research-status/types.ts` + [run-version.ts](../../packages/deep-research-pack/src/lib/run-version.ts)
+
+右栏页签，自上而下八区（逐区职责见 §2 开头的「页签八区」表）；⑤ 另带 rerun 版本面一行（`v1 已交付 · v2 证据扩张 rerun · HITL2 待审`）+ 已交付后的只读折叠块「还不满意？三种改法」（`rerun-triage` 文案）；队员多路 journal 订阅生命周期在页签私有 hook，注入类型在同目录定义
+
+<a id="cockpit-2"></a>
+### 2.2 活标题
+
+**文件**：同上（`ResearchStatusTitle`）
+
+挂起时页签名变「研究状态 · ⏳ 等你拍板」
+
+<a id="cockpit-3"></a>
+### 2.3 流失败恢复指引
+
+**文件**：[stream-failure.ts](../../packages/deep-research-pack/src/lib/stream-failure.ts) + ResearchStatusTab.tsx
+
+末位回合死于上游流失败（MALFORMED_RESPONSE 族）且无新回合接手 → 人话横幅「等一两分钟发『继续』」；折算纯函数，BUG-023 修复①
+
+<a id="cockpit-4"></a>
+### 2.4 品牌（虎鲸 Orca）
+
+**文件**：[BrandMark.tsx](../../packages/deep-research-pack/src/client/BrandMark.tsx)
+
+宿主 `sidebar.brand.mark` + `sidebar.brand.name` 两槽的 single occupant（替换内置鱼形 logo 与本地构建标签）——用户定调 2026-10-13
+
+<a id="cockpit-5"></a>
+### 2.5 面板数据面
+
+**文件**：[config-tables.ts](../../packages/deep-research-pack/src/lib/config-tables.ts)
+
+两个页签共用的**纯常量**：内置偏好（skill 方法预设的投影）、判型→打法映射、六条底线、四分区标签、领域示范、两个定制入口指令逐字。住在 lib 而非视图（数据/展示分层；keyless 测试直接 import，不再 AST 扒 TSX）
+
+<a id="cockpit-6"></a>
+### 2.6 研究配置页签
+
+**文件**：[ResearchConfigTab.tsx](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) + [method-of-question.ts](../../packages/deep-research-pack/src/lib/method-of-question.ts)
+
+右栏**摘要页签**（2026-10-21 管理迁移后）：只留 ① 本次研究（采用＋来源＋「换一条」，读 question.md 方法节五态）与「方法库（本工作区）→ 顶部 tab」入口；库列表/内置卡/领域示范/术语/管理回执移入主界面「方法库」tab。指令仍经 `session/prompt` 交 Lead（面板不直写文件）
+
+<a id="cockpit-7"></a>
+### 2.7 方法库主 tab
+
+**文件**：[MethodLibraryView.tsx](../../packages/deep-research-pack/src/client/MethodLibraryView.tsx) + [library-fold.ts](../../packages/deep-research-pack/src/lib/library-fold.ts)
+
+主界面 `conversation.view` 第三 tab（Chat/Trajectory 同排）：我的库搜索/列表、内置参考只读、四字段编辑/新建/删除；保存走 W1 `session/prompt` 交 Lead 写 `method-library.md`，面板不直写文件；无写权限、无新 RPC
+
+<a id="cockpit-8"></a>
+### 2.8 研究图谱页签
+
+**文件**：[ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) + [DagMap.tsx](../../packages/deep-research-pack/src/client/research-graph/DagMap.tsx)（DAG 小图，几何/交互只读它）+ [WorkerChips.tsx](../../packages/deep-research-pack/src/client/research-graph/WorkerChips.tsx) + [format.ts](../../packages/deep-research-pack/src/client/research-graph/format.ts) + `src/client/research-graph/types.ts` + [plan-graph.ts](../../packages/deep-research-pack/src/lib/plan-graph.ts) + [graph-model.ts](../../packages/deep-research-pack/src/lib/graph-model.ts)
+
+右栏**只读观察面**：顶层 plan 节点 / `agentTeam` 任务画成 SVG DAG（节点 + 依赖边 + 同层并行 + 状态色）；复合节点 W3.1… 默认收在父节点详情，图上标 `+n`（内部节点数）；`plan.md` 提供 parent/lifecycle/kind/stage（派生）/depth/acceptance、版本与重写记录；节点详情可复制 `drt_<slug>/W3.1` 引用；重号/悬空 parent/deps/墓碑/跨组显示只读结构提示；无 plan/无 blocked_by 时明确「没有可画的 DAG」，不画假图；不提供调整动作
+
+<a id="cockpit-9"></a>
+### 2.9 终稿页签
+
+**文件**：[ResearchFinalTab.tsx](../../packages/deep-research-pack/src/client/ResearchFinalTab.tsx) + [final-target.ts](../../packages/deep-research-pack/src/lib/final-target.ts)
+
+右栏页签：**认领 `drt_<slug>/` 的终稿地址族**（`final.md` / `final/vN.md` / `final/readable.md` / `final/readable-vN.md`；`extension` 带；交付卡片、结句内联引用、Files 树落到同一页签）——正文**有读者版默认看读者版**，否则看 `final/` 版本账最高版（`审计版 vN`）；可切「看审计版 / 看读者版」，没有版本账才直接读 `final.md`。静音条只讲盘上事实（`读者版 vN` / `审计版 vN` / `当前工作稿` / `审查未过`；**不写"已交付"**——版本目录不是交付凭证，交付只由⑤ 的 `present` 见证说），`过程 →` 回研究状态；正文末尾同款只读折叠块「还不满意？三种改法」。读面是一张定表（`final.md` / `final/vN` / `final/readable*` / `review.md` / `final/`），经 run-context 按三位置解析；review.md 读到 eof（终局判定在文末）
+
+<a id="cockpit-10"></a>
+### 2.10 浏览器 RunSource 适配器
+
+**文件**：[run-source-browser.ts](../../packages/deep-research-pack/src/client/run-source-browser.ts)
+
+`remote.workspaceFiles` → run-context 的 `Entry` / `Page` / `version` 映射；`workspace-file/not-found` → missing，其它错误 → unreadable；位置/读策略/翻页归 lib，本件不重复
+
+<a id="cockpit-11"></a>
+### 2.11 研究图谱页签体
+
+**文件**：[ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx)
+
+页签体：头部（「只读观察」标记 + plan/task 计数）+ 正文首行版本轨（`plan/vN` 快照 → 「当前图 / 看 vN 旧图 / 看差异」，结构 diff 折算住 [plan-diff](../../packages/deep-research-pack/src/lib/plan-diff.ts)；无快照如实「无旧图快照，不能 diff」）+ 覆盖率（`已映射 K / 未映射 N-K`，另有失效与 plan-only 才追加）+ 最后刷新时刻；映射缺口横幅说「图谱无法判断」，不说「未执行」；SVG DAG 小图（`wavesOf` 分层、同层横排、边 = plan deps / Team `blocked_by`）+ 顶层节点列表 + 选中详情（description 高度上限、复合子节点展开、复制引用）+「需要你注意（只读）」+ plan 结构提示；底部 `plan.md` 原文折叠与 plan↔task 映射计数；无依赖边时只显示任务快照并说明原因
+
+<a id="cockpit-12"></a>
+### 2.12 研究图谱注入面
+
+**文件**：[research-graph/types.ts](../../packages/deep-research-pack/src/client/research-graph/types.ts)
+
+「研究图谱」页签的注入面类型（`runSource` / `follow` / 可选 `openOwner` 三条闭包，数据面全部复用既有 remote，无新 RPC）；`follow` 只用于 `bindingTrust` 找可信的 `drt_<slug>/`，页签只读，不注入发送通道
+
+<a id="cockpit-13"></a>
+### 2.13 研究语义工具卡
+
+**文件**：[ResearchToolCard.tsx](../../packages/deep-research-pack/src/client/ResearchToolCard.tsx) + [tool-card.ts](../../packages/deep-research-pack/src/lib/tool-card.ts)
+
+对话流卡片：`spawn_teammate` → 组队卡、`web_search` → 检索卡（2 张）
+
+<a id="cockpit-14"></a>
+### 2.14 挂起显性化
+
+**文件**：[index.ts](../../packages/deep-research-pack/src/client/index.ts)（`revealStatusTab`）
+
+pending false→true 迁移时 `openTab` 右栏自动展开；页签 dock 折叠态保持挂载（观察者常在）
+
+<a id="cockpit-15"></a>
+### 2.15 keyed 常量
+
+**文件**：[keys.ts](../../packages/deep-research-pack/src/client/keys.ts)
+
+字面量唯一正本（`client-keys` 门禁对账——拼错不报错、永不渲染）
+
+<a id="cockpit-16"></a>
+### 2.16 host 半
+
+**文件**：[src/index.ts](../../packages/deep-research-pack/src/index.ts)
+
+空壳宿主位（bundle 行 name = 包名；浏览器半经 `exports["./client"]` 装配）
+
 
 ## 3. 数据通道与接线
 
