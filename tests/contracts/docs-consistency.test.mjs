@@ -115,6 +115,25 @@ test('文档地图：docs/ 下每个 tracked .md 都被 00-index 文档地图点
     + '只放在目录里 = fresh agent 找不到')
 })
 
+// Fresh-agent 入口探针（2026-10-28，只读）：00-index 的"开跑前置"漏了 vendor 构建与工作区注册，
+// guides/60 的"纯文档"行漏了 entry-chain-probe 条件，AGENTS 的"最小集 1–3"没指向第 4 步。
+// 这三处是 fresh agent 会照做的导航事实；措辞可改，但关键义务不能丢。
+test('入口链导航合同：开跑前置含 vendor 构建/工作区注册；纯文档行指向入口链探针；最小集指向第 4 步', () => {
+  const index = read('docs/00-index.md')
+  const preStart = index.indexOf('**开跑前置**')
+  const preEnd = index.indexOf('**歧义裁定**')
+  assert.ok(preStart >= 0 && preEnd > preStart, '00-index 缺「开跑前置」/「歧义裁定」边界')
+  const pre = index.slice(preStart, preEnd)
+  assert.ok(pre.includes('vendor-build.sh'), '开跑前置漏 vendor 构建——fresh clone 会在 boot 自检红')
+  assert.ok(pre.includes('research-workspace') && pre.includes('已注册'), '开跑前置漏工作区注册——研究手册不会注入')
+  const guide = read('docs/guides/60-dev-loop.md')
+  const row = guide.split('\n').find((l) => l.includes('| 纯文档 / 卫生 |'))
+  assert.ok(row !== undefined, 'guides/60 缺「纯文档 / 卫生」行')
+  assert.ok(row.includes('entry-chain-probe'), '纯文档行漏 AGENTS/入口链改动时的探针条件（§4 有、路由表没有 = 两套说法）')
+  const agents = read('AGENTS.md')
+  assert.ok(agents.includes('改仓任务的验收/收尾按第 4 步'), 'AGENTS 最小集未指向第 4 步——fresh agent 会停在 1–3')
+})
+
 test('研究配置面板形态：COMPACT 默认态下 README 不描述已迁走的管理四区（2026-10-27 卫生轮）', () => {
   const tab = read('packages/deep-research-pack/src/client/ResearchConfigTab.tsx')
   const compact = /const COMPACT = true/.test(tab)

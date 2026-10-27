@@ -16,7 +16,7 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 3. 按本轮授权进入工作：用户直派按请求范围执行；需澄清、查证或记录的问题按 [意图载体总图](docs/design/60-intent-carriers.md) 路由到 `_backlog/issues/`、`bugs/`、`research/`、`methods/` 或 `triggers.md`（可观察重议条件）。Backlog 不是实施前置门；
 4. **[docs/guides/60-dev-loop.md](docs/guides/60-dev-loop.md)**——按改动面选择验收与收尾。仅当持久决定需要显式评审时，才为该项建立 [notes/proposed/](notes/proposed/) RFC。
 
-开工就绪最小集 = 上列 1–3，后续按任务需要读取。仓库全局如何运行、调试、交互和分层验收 → [docs/project-map.md](docs/project-map.md)；验收怎么判 → [docs/evaluation.md](docs/evaluation.md)；意图载体边界 → [docs/design/60-intent-carriers.md](docs/design/60-intent-carriers.md)；run 怎么操作 → [guides/61](docs/guides/61-run-playbook.md)。
+开工就绪最小集 = 上列 1–3；改仓任务的验收/收尾按第 4 步。仓库全局如何运行、调试、交互和分层验收 → [docs/project-map.md](docs/project-map.md)；验收怎么判 → [docs/evaluation.md](docs/evaluation.md)；意图载体边界 → [docs/design/60-intent-carriers.md](docs/design/60-intent-carriers.md)；run 怎么操作 → [guides/61](docs/guides/61-run-playbook.md)。
 
 ## 布局
 
@@ -30,7 +30,7 @@ _backlog/                 问题澄清与证据区：issues/、bugs/、research/
                           _done/ 改名兼容指针，见 _backlog/README 载体导航）；
                           手册 = _backlog/README.md、子树门牌 = _backlog/AGENTS.md（修复授权/状态生命周期速览）
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 按实际构建需求——见 pnpm-workspace.yaml 头注）
-packages/deep-research-pack/   唯一自写包（配置为主 + 研究驾驶舱[Research Cockpit，观察面 client 套件，[D18](docs/decisions.md#d18)，构成正本 = docs/design/40-research-cockpit.md]）：presets/<role>.patch.yml（单行形态=一条 @deepseek-ai/dsh-agent-preset 行，DSH 0.1.7 起同形态，config.plugins 内声明 persona/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、cordis.patch.yml（bundle 行）、workspace/（工作区种子：手册+NODES+判型库+偏好库+模板+种子清单，生成物）、scripts/{preflight,scaffold}.mjs（部署 bin）、src/client/ 与 src/lib/（驾驶舱 client 半与折算纯函数，构建产物 lib/）；交付与部署形态 = guides/62，合同 = 包 README
+packages/deep-research-pack/   唯一自写包（配置为主 + 研究驾驶舱[Research Cockpit，观察面 client 套件，[D18](docs/decisions.md#d18)，构成正本 = docs/design/40-research-cockpit.md]）：presets/<role>.patch.yml（单行形态=一条 @deepseek-ai/dsh-agent-preset 行，config.plugins 内声明 persona/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、cordis.patch.yml（bundle 行）、workspace/（工作区种子：手册+NODES+判型库+偏好库+模板+种子清单，生成物）、scripts/{preflight,scaffold}.mjs（部署 bin）、src/client/ 与 src/lib/（驾驶舱 client 半与折算纯函数，构建产物 lib/）；交付与部署形态 = guides/62，合同 = 包 README
 vendor/dsh/               pinned submodule（只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，tag/commit 见 §DSH 源码表）
 research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手册、NODES.md（节点 I/O 契约
                          全表）、question-patterns.md（判型模式库）、method-library.md（用户研究
@@ -82,7 +82,7 @@ Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。
 ## 命令速查（全档正本 = [guides/60 §2](docs/guides/60-dev-loop.md)；run 通道 = [guides/61](docs/guides/61-run-playbook.md)）
 
 ```sh
-source dev/env.sh    # ⚠ 前置：双 home + 裸 dsh 拦截（DSH_HOME=runtime/harness-home）；L1/L2 与须先 source 的脚本必须先 source（清单正本 = scripts/README 档位列），未 source 自拒 exit 2（run 通道 dev/boot-run.sh 自 source，勿重复）
+source dev/env.sh    # ⚠ 仅 L1/L2 与档位列标注的脚本需要（清单正本 = scripts/README）；run 通道 dev/boot-run.sh 自 source，勿重复。作用：双 home（DSH_HOME=runtime/harness-home）+ 裸 dsh 拦截；未 source 自拒 exit 2
 pnpm verify          # L0 结构门禁（keyless，收尾必跑）
 pnpm test            # L0 keyless 回归（唯一登记的测试命令）
 node dev/run-driver.mjs up   # 研究 run 通道（起/复用 + 验浏览器面 + 呈交 URL；操作 = guides/61 §0）

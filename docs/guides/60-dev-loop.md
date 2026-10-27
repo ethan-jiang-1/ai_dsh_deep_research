@@ -91,7 +91,7 @@
 | 改工作区手册 / 模板（结构性调整：模板增删 / 路径与格式修正；**手册正文文本 = 模型可见，走上行〔改 persona / skill / 手册文本〕**） | `research-workspace/` 正本 → `sync-pack-workspace` | sync → verify | L0 | — | `pack-workspace-fresh` 绿 |
 | 改部署面（preflight / scaffold / 发布集） | pack `scripts/` + `package.json` 的 files/bin | — | L0 + L2 | 部署 Note | `release-smoke` ALL PASS |
 | 换 vendor pin | `.gitmodules` + pack 兼容矩阵 | `vendor-build.sh`（含 host 半补建 + 前端壳重建）→ 逐条重审（含 agent-team 合同 diff 与货架增量对账——正本 = [discipline-map §重审触发路径](../discipline-map.md)） | L0 + L1 + L2 + client-load-smoke + L4-lite（0.2.0 轮实证：漏跑观察面 = client bundle 的 build-time externals 漂移漏网） | 升 pin 毕业 Note（重审结论正本） | 全档绿 + 重审入 Note |
-| 纯文档 / 卫生 | 文档自身 | — | L0 | 仅持久决定理由才写 | 门禁绿 |
+| 纯文档 / 卫生 | 文档自身 | — | L0；改动面含 AGENTS/入口链时加跑 `entry-chain-probe`（真模型档；无凭据退化为语义版人工） | 仅持久决定理由才写 | 门禁绿 |
 | **用户直派** | 按本轮授权直接执行；如需跨步排序使用会话内 todo；仅需显式评审的持久决定才建立 RFC；交付后按 notes 规则决定是否记录决定理由 | 同对应任务型 | 同对应任务型 | 同对应任务型 | 同对应任务型 |
 
 > ① snapshot-replay B 层（模型可见文本变化的 keyless 秒级信号）：比对面 = persona 全文 + 全部

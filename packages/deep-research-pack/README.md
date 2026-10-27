@@ -19,7 +19,7 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 
 | 位置 | 内容 | 随包发布 |
 |---|---|---|
-| `presets/<role>.patch.yml` | 四角色 preset（DSH 0.1.7 起的形态：一条 `@deepseek-ai/dsh-agent-preset` 行，config.plugins 内声明 persona/skills/工具行） | ✓ |
+| `presets/<role>.patch.yml` | 四角色 preset（单行形态：一条 `@deepseek-ai/dsh-agent-preset` 行，config.plugins 内声明 persona/skills/工具行） | ✓ |
 | `presets/<role>/skills/<n>/SKILL.md` | 研究方法论技能（各角色清单正本 = 盘上 `presets/<role>/skills/` 目录，bundle 自动发现——新增免改本行） | ✓ |
 | `cordis.patch.yml` | bundle 行：preset roster（default: lead）+ **检索底座**（`- id: web` 替换行：搜索 = DeepSeek Search API、fetch = 回退 provider；`research-fetch-fallback` 行注册它——见下节）+ 会话全文检索开关（`session-query-sqlite` `openAt: first-search`——FTS 惰性开，`:memory:` 每进程重建；检索工具行在 lead/critic preset）+ `tool-present` + 团队可视面 `ui-agent-team` + 本包 client 面 | ✓ |
 | `workspace/` | **研究工作区种子**：研究手册（`AGENTS.md`：证据契约/目录约定/完成判据）+ `NODES.md`（节点 I/O 契约）+ `question-patterns.md`（判型库）+ `templates/run/` 八件模板（含 `plan.md` 执行图）+ `method-library.md`（独立空架子种子，不从正本同步）+ `.gitignore`（包内名 `.gitignore.example`——npm 不打包 `.gitignore` 文件，安装时由 scaffold 落地成本名；工作区纳入版本控制时拒收 run bundle/归档/方法库，留档加 `!路径`） | ✓ |

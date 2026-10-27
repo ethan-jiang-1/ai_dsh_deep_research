@@ -22,6 +22,8 @@
 | "改本仓开发流程或仓库文档"（门禁 / docs / notes / 入口链 / 各 README；`packages/deep-research-pack/` 内随包分发的文档走上行"改插件内容"） | [guides/60 §1](./guides/60-dev-loop.md) | 按工作类型分支（入口链第 3–4 步在此展开） |
 
 **开跑前置**（只对第 1/2 行）：仓根 `pnpm install` 已跑 + `vendor/dsh` submodule 已 init +
+vendor 构建产物在场（`bash dev/vendor-build.sh`；boot 自检会拦）+
+`research-workspace` 已注册进 DSH（[61 §1](./guides/61-run-playbook.md)；run-kickoff 幂等补登）+
 `runtime/harness-home/.credentials.yaml` 有 `DEEPSEEK_API_KEY`（boot 本身 keyless）。
 `bash dev/boot-run.sh` **自己 source `dev/env.sh`**——先 source 不是前置（`AGENTS.md §命令速查`
 那条 ⚠ 只约束须先 source 的脚本——清单以 [scripts/README](../scripts/README.md) 档位列为准）。要它在你离开后继续服务 = [61 §0](./guides/61-run-playbook.md)

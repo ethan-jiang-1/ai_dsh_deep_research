@@ -30,6 +30,11 @@
 - **`run-dashboard-core` 拆成"折模型"与"画 HTML"**：626 行里解析/场景/模型与渲染薄壳同住；
   渲染只依赖模型、矩阵与 gap 统计，拆分后 core 481 行、`run-dashboard-html` 151 行。CLI 与测试
   按家 import；scripts/README 的消费列按 import 图同步（navigability 门禁对账）。
+- **fresh-agent 入口探针找到的六处摩擦按合同修**：00-index「开跑前置」补 vendor 构建 +
+  `research-workspace` 注册（原清单会让 fresh clone 在 boot 自检/手册注入处失败）；guides/60
+  「纯文档」行补 `entry-chain-probe` 条件（原 §4 有、路由表没有）；AGENTS 最小集指向第 4 步；
+  evaluation 统一 `pnpm verify` 正本；两处 `0.1.7 起` 历史标记改为形态描述。
+  `docs-consistency` 增导航合同（三处关键义务；措辞可改，义务不可丢）。
 - **体量账按事实重写**：原 Note 的">600 只剩 3 个 / 最大 lib 200"漏算了 `plan-graph` 与
   `scripts/lib` 的两件；更正落在 [评分整改 Note](2026-10-28-scoring-remediation.md) §Phase C。
 - **`tests/run` 的 56 文件重估：维持单域**。触发条件（某域 >20 文件）早已满足，但拆分要改
@@ -61,7 +66,13 @@
   `run-driver-contract` 五文件 44 例全绿；`run-dashboard` + `evaluation-contract` + `test-surface`
   + `navigability-contract` 四文件 35 例全绿。用例体未删改。
 - **新契约先红后绿**：临时新增 `packages/deep-research-pack/src/lib/__probe-untested.ts` →
-  test-surface 红并点名该件，删除后绿；临时 `docs/__probe.md` → 文档地图契约红，删除后绿。
+  test-surface 红并点名该件，删除后绿；临时 `docs/__probe.md` → 文档地图契约红，删除后绿；
+  删掉 00-index 的 `vendor-build.sh` 与 guides/60 的 `entry-chain-probe` → 导航合同红，还原后绿。
+- **fresh-agent 只读探针**：七个问题全答对（repo 形态 / 启动命令与前置 / 文档改动的验收 /
+  run-state 测试位置 / 决定记录载体 / 读了哪些文件 / 摩擦点）；实际读约 1,300 行，首个正确动作
+  ~2 分钟。它报的 6 处摩擦里 2 高（前置缺口、纯文档探针矛盾）、2 中（最小集/命令拼写）、
+  2 低（0.1.7 历史标记、env source 语义）——本轮按合同修了前五处与版本标记，env 语义已在
+  AGENTS 命令行改为"仅 L1/L2 与档位列需要，boot-run 自 source"。
 - **全量**：`pnpm verify` 全绿、`pnpm test` 全绿（例数见当次输出，不写进本页）；
   `pnpm --filter dsh-deep-research-pack build` 后 client-load 复跑 ALL PASS。
 
