@@ -27,7 +27,9 @@
 2. 同 diff 改两处 `package.json` 的 `version`；若有 lockfile 影响，跑
    `pnpm install --lockfile-only`。
 3. `node scripts/dist/export-dist.mjs` 重导出 `_dist/安装手册.md` 与 tarball。
-4. `pnpm verify && pnpm test && pnpm typecheck` 全绿。
+4. `pnpm verify && pnpm test && pnpm typecheck` 全绿；若本次发布**宣告新的 DSH 版本支持**，
+   先在该版本的全局宿主上跑 `node scripts/smoke/compat-smoke.mjs` 与
+   `node scripts/smoke/compat-client-smoke.mjs`（两者缺环境均 exit 2，未跑 ≠ 通过）。
 5. `node scripts/dist/release-check.mjs`：确认 root = pack；HEAD 未打 tag 时它只提示
    “未打 tag”，打完后重跑必须 `tag = version` 且 tag 类型为 annotated。
 6. commit 版本变更（`release: X.Y.Z ...`）。
@@ -49,6 +51,8 @@
 
 - `release-version`（L0）：root/pack `version` 相等且为三段 semver。
 - `dist-manual-version`：`_dist/安装手册.md` 版本 = pack 版本。
+- `compat-smoke` / `compat-client-smoke`：宣告新 DSH 版本支持时的安装面与客户端挂载证据
+  （`engines.dsh` 的每个新版本都要有；本机无该版本全局 dsh 时 exit 2）。
 - `node scripts/dist/release-check.mjs`：发布前检查 root=pack、HEAD tag 与版本一致、tag 为
   annotated；不联网、不写盘。
 - keyless CI（[ci.yml](../../.github/workflows/ci.yml)）跑 verify/test；tag 检查是发布前的
