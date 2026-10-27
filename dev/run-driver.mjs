@@ -11,9 +11,10 @@
 //   probe [--port <p>] [--expect-face <文本>]   对**已在飞**的通道只做浏览器面验证
 //   url                               打印当前通道 URL（不启动、不验面）
 //
-// 判据（= guides/61 §0 呈交纪律的机械化）：exit 0 = 可呈交（宿主侧 + 浏览器面全绿）、
-// 1 = 红了（不得呈交，按 verdict.failed 修）、2 = 未跑（前置缺席，如组合在写 / 无通道）。
-// **未跑 ≠ 通过**。
+// 判据（= guides/61 §0 呈交纪律的机械化）：exit 0 = 可呈交（镜像一致 + 宿主侧 + 浏览器面全绿）、
+// 1 = 红了（不得呈交，按 verdict.failed 修）、2 = 未跑（前置缺席，如镜像漂移/未取证 / 无通道）。
+// **未跑 ≠ 通过**。复用已在飞的通道时先跑 boot-run --drift-only：通道加载的镜像 ≠ 当前 pack 源
+// 时，probe 验的是旧页面——2026-10-28 实测通道 18:47 起、pack client 02:50 重建，旧实现仍报 GREEN。
 //
 // 通道事实的唯一来源 = runtime/smoke-workspace/web.log 的**最后一条** `dsh web: <url>` 横幅
 // （boot-run 每次 boot 以 tee 截断写该文件；旧横幅 = 旧 token，用旧的必 401）。
@@ -88,6 +89,29 @@ function probeFace(url, expectFace, screenshotPath = undefined) {
   return { verdict, exit: r.status };
 }
 
+/** 镜像一致性取证 = boot-run 的只读模式（不碰端口/不安装/不起 web）。红 = 当前通道加载的
+ *  不是当前 pack 源；此时浏览器面再绿也只是旧页面的绿。 */
+function mirrorDrift() {
+  const r = spawnSync('bash', [join(ROOT, 'dev', 'boot-run.sh'), '--drift-only'], { encoding: 'utf8', cwd: ROOT, timeout: 180_000 });
+  // env.sh 的启动提示与自检绿行不是判据；只留 boot-run 的漂移/修复行，避免把 600 字预算
+  // 花在每次都会出现的前缀上（实测 detail 曾从半行 "ile 镜像不一致" 开始）。
+  const lines = `${r.stderr ?? ''}\n${r.stdout ?? ''}`.split('\n')
+    .map((line) => line.trimEnd())
+    .filter((line) => line !== '' && !line.startsWith('dev/env.sh:') && !line.startsWith('boot 前自检绿'));
+  const driftLines = lines.filter((line) => line.includes('漂移——'));
+  const remedy = lines.filter((line) => line.includes('修复：') || line.includes('检测红')).slice(-2);
+  // 摘要把 client.js 这类关键漂移放在前面（npm pack 清单顺序里它在 README 之后）；只取
+  // 前三条 + 总数，避免 600 字预算被 20 多个 .d.ts 行吃光。
+  const detail = driftLines.length > 0
+    ? [`漂移 ${driftLines.length} 个文件：`, ...driftLines.slice(0, 3), ...(driftLines.length > 3 ? ['…'] : []), ...remedy].join('\n')
+    : lines.slice(-4).join('\n');
+  return {
+    clean: r.status === 0,
+    status: r.status,
+    detail: detail || (r.error === undefined ? `--drift-only exit=${String(r.status)}` : `--drift-only 执行失败：${r.error.message}`),
+  };
+}
+
 // ── 判定落盘：每次 up/probe 各留一份现场 ──────────────────────────────────────
 // 旧实现只写固定名 run-driver-verdict.json / -probe-verdict.json：下一次 up/probe 直接覆盖，
 // **红的现场会被后来的绿抹掉**——agent 复跑一次就再也看不到当时哪条检查红、页面长什么样
@@ -142,13 +166,22 @@ if (sub === 'probe') {
     console.error(`run-driver probe: 找不到 ${given !== null ? `端口 ${given}` : '任何'}通道的横幅 URL（web.log = ${WEB_LOG}）——先 up`);
     process.exit(2);
   }
+  const drift = mirrorDrift();
+  if (!drift.clean) {
+    const v = runDriverVerdict({ probe: {}, expectFace, drift });
+    const payload = { url, ...v, driftDetail: drift.detail };
+    const saved = persistVerdict('probe', payload);
+    console.log(JSON.stringify(payload, null, 2));
+    console.error(`run-driver probe: NOT-RUN——通道镜像漂移/未取证（${saved.dir}）；先按 boot-run 处方重建并重启通道，再验`);
+    process.exit(2);
+  }
   const shot = join(STATE_DIR, 'run-driver-probe.png');
   const { verdict, error } = probeFace(url, expectFace, shot);
   if (verdict === null) {
     console.error(`run-driver probe: ${error}`);
     process.exit(1);
   }
-  const v = runDriverVerdict({ probe: verdict, expectFace, composing: false });
+  const v = runDriverVerdict({ probe: verdict, expectFace, drift });
   const payload = { url, ...v, statusPaneText: verdict.statusPaneText?.slice(0, 600), screenshot: verdict.screenshot ?? null };
   const saved = persistVerdict('probe', payload, verdict.screenshot);
   console.log(JSON.stringify(payload, null, 2));
@@ -170,8 +203,20 @@ const noProbe = has('--no-probe');
 const expectFace = arg('--expect-face', DEFAULT_FACE);
 
 let state = channelState();
+let drift = null;
 if (state.alive) {
   console.log(`run-driver: 通道已存活，复用（端口 ${state.port}，pid ${state.pids.join(',')}）——不另起（guides/61 §0：在飞通道别另起）`);
+  // 复用不是免检：先证明通道加载的镜像 = 当前 pack 源。旧实现直接 probe，把旧页面判成当前绿。
+  drift = mirrorDrift();
+  if (!drift.clean) {
+    const v = runDriverVerdict({ probe: {}, expectFace, drift });
+    const payload = { url: state.url, port: state.port, ...v, driftDetail: drift.detail };
+    const saved = persistVerdict('up', payload);
+    console.error(`run-driver: NOT-RUN——通道镜像漂移/未取证（${saved.dir}）；当前页面不是当前代码。`);
+    console.error('           先确认没有在飞 run 需要保活，再停通道并重建镜像（bash dev/boot-run.sh），然后重跑 up。');
+    console.log(JSON.stringify(payload, null, 2));
+    process.exit(2);
+  }
 } else {
   if (wantBootstrap) {
     console.log('run-driver: --bootstrap 检查独立环境前置…');
@@ -226,6 +271,8 @@ if (state.alive) {
     process.exit(1);
   }
   console.log(`run-driver: 横幅已出（端口 ${state.port}）`);
+  // 刚起的通道已经过 boot-run 的漂移门（红则起不来）——此处只记录取证结果。
+  drift = { clean: true, detail: 'boot-run 漂移门绿（起通道时已验）' };
 }
 
 if (noProbe) {
@@ -239,7 +286,7 @@ if (verdict === null) {
   console.error(`run-driver: ${error}`);
   process.exit(1);
 }
-const v = runDriverVerdict({ probe: verdict, expectFace, composing: false });
+const v = runDriverVerdict({ probe: verdict, expectFace, drift });
 const submitted = v.exit === 0;
 const payload = { url: state.url, port: state.port, ...v, statusPaneText: verdict.statusPaneText?.slice(0, 600), screenshot: verdict.screenshot ?? null };
 const saved = persistVerdict('up', payload, verdict.screenshot);

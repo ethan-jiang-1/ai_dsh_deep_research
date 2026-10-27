@@ -46,10 +46,12 @@
 // 渐进面读**会话 journal 工具调用路径绑定的 bundle**（bundle-bind 谓词），D28 三操作桶
 // 都认（位置只用于发现，状态从内容读）。断言的磁盘认证源 = 磁盘侧扫出的最新绑定会话（跑过 run
 // 即有），其 bundle 的 evidence 计数/交付态/问题行以盘上真值对账——不再自造探针 bundle。
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { freemem, loadavg } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { scrubbedEnv } from '../lib/env.mjs'
+import { reclaimPort } from '../lib/port-reclaim.mjs'
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs'
 import { launchChromium, loadChromium } from '../lib/playwright.mjs'
@@ -102,6 +104,48 @@ if (!existsSync(bin)) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
+// ── 运行锁：同一时刻只允许一个 client-load ────────────────────────────────────
+// 为什么需要（2026-10-28 实测）：两路验证同时跑 client-load，双方 boot 前都 reclaim 3109，
+// 互相把对方的 web 杀掉（症状 = 一侧 `page.reload: ERR_CONNECTION_REFUSED`、disconnects 上升），
+// 看起来像产品红。锁只防**本脚本的两个实例**；陈旧锁（pid 已死）自动接管，不阻塞。
+// 不锁整个 31xx 面：每个脚本独占自己的端口是 port-exclusive 门禁的职责。
+const LOCK_DIR = join(ROOT, 'runtime', 'smoke-workspace', 'client-load.lock')
+function releaseRunLock() {
+  rmSync(LOCK_DIR, { recursive: true, force: true })
+}
+function lockOwnerPid() {
+  try {
+    const owner = JSON.parse(readFileSync(join(LOCK_DIR, 'owner.json'), 'utf8'))
+    const pid = Number(owner?.pid)
+    if (!Number.isInteger(pid) || pid <= 0) return null
+    process.kill(pid, 0) // 只探测存在；EPERM 也算活着（不要误接管）
+    return pid
+  } catch {
+    return null
+  }
+}
+function acquireRunLock(retry = true) {
+  try {
+    mkdirSync(LOCK_DIR)
+    writeFileSync(join(LOCK_DIR, 'owner.json'), JSON.stringify({ pid: process.pid, at: new Date().toISOString() }), 'utf8')
+    return
+  } catch (error) {
+    if (error.code !== 'EEXIST') throw error
+    const pid = lockOwnerPid()
+    if (pid !== null) {
+      console.error(`client-load-smoke: 另一个实例在跑（pid ${pid}；锁 ${LOCK_DIR}）——共享 3109，等它结束再跑（未跑 ≠ 通过）`)
+      process.exit(2)
+    }
+    // 锁在、属主已死 = 上次异常退出的残留：接管（只重试一次，避免两路同时接管死锁）。
+    if (!retry) {
+      console.error(`client-load-smoke: 无法接管陈旧锁 ${LOCK_DIR}——人工确认后删除再跑`)
+      process.exit(2)
+    }
+    rmSync(LOCK_DIR, { recursive: true, force: true })
+    acquireRunLock(false)
+  }
+}
+
 // ── RPC（造"会话建在 research-workspace"的条件——渐进面断言的前提）──
 // RPC 正本 = lib/web-harness.makeRpc（原值逐字参数化：前缀 `cls-`、**无** AbortSignal 预算、
 // 失败文案（全角冒号）与 200 字符截断）
@@ -133,14 +177,31 @@ writeFileSync(teamPatchPath, readFileSync(join(ROOT, 'dev', 'research.overlay.ym
 
 /** boot web（源码域 overlay 通道 + agent-team host 行），等到启动横幅打印带 token 的 URL。
  *  启停与横幅等待正本 = lib/web-harness.bootWeb；本件的原值：非组长（detached: false）、`scrubbedEnv`、
- *  超时 BOOT_TIMEOUT_MS、尾部 800 字符（**无**失败收割包装——本站点原样即无）。 */
+ *  超时 BOOT_TIMEOUT_MS、尾部 800 字符。
+ *
+ *  端口生命周期（2026-10-28 修复）：非组长模式下 `child.kill()` 够不着 web 孙进程；此前 3109
+ *  被上一次异常退出的监听者占住，下一次直接 EADDRINUSE（现场 = 01:49 的 `readdirSync is not
+ *  defined` 异常跑完后端口仍监听）。本站点因此显式消费 port-reclaim：boot 前清陈旧监听
+ *  （本脚本独占该端口，port-exclusive 门禁把守）、boot 失败兜底、收尾验证到静默。 */
 async function boot() {
-  const booted = await bootWeb({
-    bin, cwd: ROOT, profile: 'web', patchPath: teamPatchPath, port: PORT,
-    env: scrubbedEnv({ DSH_HOME: home }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 800,
-    detached: false, // 原值：本站点非组长（不整组收割；收尾用 child.kill('SIGTERM')）
-  })
-  return { child: booted.child, token: booted.token }
+  const stale = await reclaimPort(PORT)
+  if (stale !== null) {
+    releaseRunLock()
+    console.error(`client-load-smoke: 端口 ${PORT} 预收割失败：${stale}`)
+    process.exit(2)
+  }
+  try {
+    const booted = await bootWeb({
+      bin, cwd: ROOT, profile: 'web', patchPath: teamPatchPath, port: PORT,
+      env: scrubbedEnv({ DSH_HOME: home }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 800,
+      detached: false, // 原值：本站点非组长（不整组收割；收尾用 child.kill + reclaimPort）
+    })
+    return { child: booted.child, token: booted.token }
+  } catch (error) {
+    const leak = await reclaimPort(PORT)
+    if (leak !== null) console.error(`client-load-smoke: ${leak}`)
+    throw error
+  }
 }
 
 const failures = []
@@ -176,7 +237,15 @@ const expectedFace = boundSession !== null ? fileFaceOf(boundSession.slug) : nul
 // 渲染观察 = 页面 DOM——四类源各归各，不再有任何手抄镜像。
 const anchorBound = boundSession !== null && expectedFace !== null
 
-const { child, token } = await boot()
+acquireRunLock()
+let child
+let token
+try {
+  ({ child, token } = await boot())
+} catch (error) {
+  releaseRunLock()
+  throw error
+}
 let page
 let browser = null
 let consoleErrors = []
@@ -195,11 +264,15 @@ const saveArtifacts = async (reason, extra = {}) => {
     // 断连计数（2026-10-28 Phase B）：一次红的归因常常卡在"这是产品红还是流抖动的红"。
     // 把浏览器侧的断连信号单独计数，agent 打开现场就能先分流（不改变任何判据）。
     const disconnects = consoleErrors.filter((t) => /WebSocket closed|Remote stream|net::ERR_NETWORK_IO_SUSPENDED/.test(t)).length
+    // 主机快照（2026-10-28 归因）：一条红是"产品缺陷"还是"这台机器此刻不健康"，看现场就知道——
+    // 实测过一次 load 32 / swap 99% 时 web 进程被 OOM 掉，报出来却是断言红。
+    const host = { load1: Number(loadavg()[0].toFixed(2)), freeMB: Math.round(freemem() / 1024 / 1024) }
     writeFileSync(join(dir, 'meta.json'), JSON.stringify({
-      reason, at: new Date().toISOString(), failures, skipped, extra, consoleErrors, disconnects,
+      reason, at: new Date().toISOString(), failures, skipped, extra, consoleErrors, disconnects, host,
     }, null, 2))
     artifactsSaved = dir
-    console.error(`client-load-smoke: 失败现场 ${dir}（page.png / page.html / console.txt / meta.json；浏览器断连 ${disconnects} 次——先分流"流抖动"与"产品红"）`)
+    console.error(`client-load-smoke: 失败现场 ${dir}（page.png / page.html / console.txt / meta.json；`
+      + `浏览器断连 ${disconnects} 次、主机 load ${host.load1} / free ${host.freeMB}MB——先分流"流抖动/主机不健康"与"产品红"）`)
     return dir
   } catch (error) {
     console.error(`client-load-smoke: 现场保存失败：${error.message}`)
@@ -874,6 +947,14 @@ try {
   if (browser !== null) await browser.close().catch(() => {})
   child.kill('SIGTERM')
   await sleep(300)
+  // 收尾判据 = 端口真的静默（不是"发了 SIGTERM"）：非组长模式的孙进程可能活过 child.kill，
+  // 遗留监听会让下一次跑直接 EADDRINUSE——把释放验证做成失败项，而不是留给下一次现场。
+  const leak = await reclaimPort(PORT)
+  if (leak !== null) {
+    failures.push(leak)
+    console.error(`  FAIL ${leak}`)
+  }
+  releaseRunLock()
 }
 
 if (failures.length === 0) {

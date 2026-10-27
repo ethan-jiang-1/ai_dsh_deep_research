@@ -24,26 +24,35 @@ export function guiUrlFromWebLog(text) {
 /**
  * 浏览器面 probe verdict → 呈交判决。
  *
- * 五条硬检查全绿才 exit 0（= 可呈交）：宿主就位（booted + frameMounted）/ 首屏无遮挡
- * （Preview Notice 已清场）/ 右栏页签可开 / expect-face 命中 / 零 console 错误与异常。
- * 任何一条不绿 → 1（不得呈交）。首屏遮罩是**人看得见**的判据：探针的 JS 派发绕过 hit-testing，
- * 没有这条时 DOM 在位就能判绿，而人打开 URL 正对着一屏 Continue（2026-10-27 实测）。
- * 组合在写（pack 改动未重建镜像）→ 2（**未跑**，不是通过——未跑 ≠ 通过）。
+ * 六条硬检查全绿才 exit 0（= 可呈交）：**通道镜像（pack 发布集 ↔ 安装镜像）一致** / 宿主就位
+ * （booted + frameMounted）/ 首屏无遮挡（Preview Notice 已清场）/ 右栏页签可开 / expect-face
+ * 命中 / 零 console 错误与异常。任何一条不绿 → 1（不得呈交）。首屏遮罩是**人看得见**的判据：
+ * 探针的 JS 派发绕过 hit-testing，没有这条时 DOM 在位就能判绿，而人打开 URL 正对着一屏
+ * Continue（2026-10-27 实测）。
  *
- * @param {{probe: object, expectFace: string, composing: boolean}} input
+ * `drift` 是镜像一致性的取证（应跑 = `bash dev/boot-run.sh --drift-only`）。未取证（null /
+ * 缺 clean:true）或取证为脏 → 2（**未跑**，不是通过——旧页面验不出当前代码）。2026-10-28
+ * 实测：通道 18:47 起、pack `lib/client.js` 02:50 重建，probe 仍报 GREEN——通道加载的是
+ * 五天前的镜像。复用通道必须先过镜像门，否则"绿"只是旧页面的绿。
+ *
+ * @param {{probe: object, expectFace: string, drift: {clean: boolean, detail?: string} | null}} input
  * @returns {{exit: 0|1|2, level: 'GREEN'|'RED'|'NOT-RUN', checks: Array<{id: string, ok: boolean, detail: string}>, reason: string}}
  */
-export function runDriverVerdict({ probe, expectFace, composing }) {
-  if (composing) {
+export function runDriverVerdict({ probe, expectFace, drift }) {
+  if (drift === null || drift === undefined || drift.clean !== true) {
+    const detail = drift?.detail === undefined
+      ? '镜像一致性未取证'
+      : String(drift.detail).split('\n').slice(-8).join('\n');
     return {
       exit: 2,
       level: 'NOT-RUN',
-      checks: [],
-      reason: 'pack 组合在写（render-overlay / sync-pack-workspace 正在跑或刚改未重建）——未跑，不是通过',
+      checks: [{ id: 'channel-mirror', ok: false, detail }],
+      reason: '通道镜像未取证或与当前 pack 源漂移——当前页面不是当前代码；先重建/重启通道再验（未跑，不是通过）',
     };
   }
   const p = probe ?? {};
   const checks = [
+    { id: 'channel-mirror', ok: true, detail: 'pack 发布集 ↔ 安装镜像一致' },
     { id: 'host-mounted', ok: p.booted === true && p.frameMounted === true, detail: `booted=${p.booted} frameMounted=${p.frameMounted}` },
     // overlayCleared 为 null（probe 没取证）**不许**当绿——未跑 ≠ 通过
     { id: 'overlay-clear', ok: p.overlayCleared === true, detail: `overlayPresent=${p.overlayPresent} overlayCleared=${p.overlayCleared}` },

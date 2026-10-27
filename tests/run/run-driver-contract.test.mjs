@@ -41,16 +41,17 @@ test('URL 抽取：只认最后一条横幅（web.log 每次 boot 截断写，�
 test('verdict 契约：exit 0=全绿 / 1=断言红 / 2=未跑；消息面出现即不绿', () => {
   const green = runDriverVerdict({
     probe: { booted: true, frameMounted: true, overlayCleared: true, statusPaneOpen: true, expectFaceHeld: true, consoleProblems: [], exceptions: [] },
-    expectFace: '研究状态', composing: false,
+    expectFace: '研究状态', drift: { clean: true },
   });
   assert.equal(green.exit, 0);
-  assert.equal(green.checks.length, 5);
+  assert.equal(green.checks.length, 6);
+  assert.equal(green.checks[0].id, 'channel-mirror', '镜像一致性是第一条硬检查（旧页面不能当当前代码的绿）');
 
   // 首屏遮罩没清场 → 红。"DOM 在位"不等于"人看得见"：探针的 JS 派发绕过 hit-testing，
   // 2026-10-27 实测 GREEN 同刻截图仍被 Preview Notice 盖住（见 cdp-probe 同名注释）。
   const overlayStuck = runDriverVerdict({
     probe: { booted: true, frameMounted: true, overlayPresent: true, overlayCleared: false, statusPaneOpen: true, expectFaceHeld: true, consoleProblems: [], exceptions: [] },
-    expectFace: '研究状态', composing: false,
+    expectFace: '研究状态', drift: { clean: true },
   });
   assert.equal(overlayStuck.exit, 1);
   assert.ok(overlayStuck.reason.includes('overlay-clear'), '红因要点名 overlay-clear');
@@ -58,34 +59,49 @@ test('verdict 契约：exit 0=全绿 / 1=断言红 / 2=未跑；消息面出现�
   // 老 probe 不报 overlayCleared（null）→ 不许当绿：未跑 ≠ 通过
   const overlayUnknown = runDriverVerdict({
     probe: { booted: true, frameMounted: true, statusPaneOpen: true, expectFaceHeld: true, consoleProblems: [], exceptions: [] },
-    expectFace: '研究状态', composing: false,
+    expectFace: '研究状态', drift: { clean: true },
   });
   assert.equal(overlayUnknown.exit, 1);
 
   // expect-face 未命中 → 红（观察面页签缺席 = 插件没挂上）
   const noFace = runDriverVerdict({
     probe: { booted: true, frameMounted: true, statusPaneOpen: true, expectFaceHeld: false, consoleProblems: [], exceptions: [] },
-    expectFace: '研究状态', composing: false,
+    expectFace: '研究状态', drift: { clean: true },
   });
   assert.equal(noFace.exit, 1);
 
   // 页签打不开 → 红（statusPaneOpen=false 时 expectFaceHeld 可能为 null——不许当绿）
   const noPane = runDriverVerdict({
     probe: { booted: true, frameMounted: true, statusPaneOpen: false, expectFaceHeld: null, consoleProblems: [], exceptions: [] },
-    expectFace: '研究状态', composing: false,
+    expectFace: '研究状态', drift: { clean: true },
   });
   assert.equal(noPane.exit, 1);
 
   // console 错误 → 红（"boot 横幅只证宿主侧，观察面可能坏着"）
   const noisy = runDriverVerdict({
     probe: { booted: true, frameMounted: true, statusPaneOpen: true, expectFaceHeld: true, consoleProblems: ['x'], exceptions: [] },
-    expectFace: '研究状态', composing: false,
+    expectFace: '研究状态', drift: { clean: true },
   });
   assert.equal(noisy.exit, 1);
 
-  // 组合在写（pack 改动未重建）→ 未跑，不是红也不是绿
-  const composing = runDriverVerdict({ probe: {}, expectFace: '研究状态', composing: true });
-  assert.equal(composing.exit, 2);
+  // 镜像漂移 / 未取证 → 未跑，不是红也不是绿（2026-10-28 实测：通道 18:47 起、pack
+  // client.js 02:50 重建，旧实现仍把旧页面判 GREEN——这是本条断言的具体事故形状）
+  const drifted = runDriverVerdict({ probe: {}, expectFace: '研究状态', drift: { clean: false, detail: '漂移——lib/client.js 与镜像不一致' } });
+  assert.equal(drifted.exit, 2);
+  assert.equal(drifted.level, 'NOT-RUN');
+  assert.ok(drifted.reason.includes('镜像'), '未跑原因要点名镜像');
+  const unproven = runDriverVerdict({ probe: {}, expectFace: '研究状态' });
+  assert.equal(unproven.exit, 2, '没取证镜像就不许给绿');
+});
+
+test('复用通道也过镜像门：run-driver 调 boot-run --drift-only，未取证不许绿', () => {
+  const src = read('dev/run-driver.mjs');
+  assert.ok(src.includes("'--drift-only'"), 'run-driver 复用通道时未调 boot-run --drift-only——旧页面会被判成当前绿');
+  assert.ok(src.includes('mirrorDrift()'), 'run-driver 缺镜像取证函数');
+  const boot = read('dev/boot-run.sh');
+  assert.ok(boot.includes('--drift-only'), 'boot-run 缺只读镜像检查模式（--drift-only）');
+  // 旧实现的两个空转点：composing 永远是 false；复用分支没有任何新鲜度取证
+  assert.ok(!src.includes('composing'), 'verdict 仍有无人计算的 composing 参数（幻影检查）');
 });
 
 test('驱动入口不绕过漂移门：boot 必须经 dev/boot-run.sh，禁止直起 dsh --profile research', () => {

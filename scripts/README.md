@@ -142,7 +142,7 @@
 | lib/direct-authorization-boundary.mjs | entry-chain-probe、entry-chain-probe.test | 按授权范围执行、无需重复请批的词面判定；由探针与 keyless 回归消费 |
 | lib/replay-scene.mjs | replay-scene.test、snapshot-replay-smoke | 场景声明消费者：roster/版本/来源形状/路径校验（缺件、串角色、垃圾锚点 fail-loud）+ 场景集发现（`replay/*/snapshot.json` 全集、防空语料、--face 全名定向） |
 | lib/replay-request.mjs | record-role-fixture、replay-request.test、snapshot-replay-smoke | 组装请求面逐条比较：persona、header 全序列、三处 user/message 注入（定向归一化） |
-| lib/port-reclaim.mjs | preset-smoke、release-smoke、cold-start-smoke、data-smoke、workspace-isolation-smoke、real-home-smoke、compat-client-smoke | 端口收割执行器（按端口杀 + 三轮验证释放；实测依据 = web 孙进程不在子进程组里） |
+| lib/port-reclaim.mjs | client-load-smoke、preset-smoke、release-smoke、cold-start-smoke、data-smoke、workspace-isolation-smoke、real-home-smoke、compat-client-smoke | 端口收割执行器（按端口杀 + 三轮验证释放；实测依据 = web 孙进程不在子进程组里） |
 | lib/path-hygiene.mjs | run-gates/path-hygiene、path-hygiene.test、node-gate-session-gates、run-accept、run-receipt | 本机 home 路径纯文本检测（Unix/macOS/Windows 前缀；行号）+ `portableBundlePath`（bundle 内绝对路径 → `drt_<slug>/…` 可移植标签；bundle 外 → null） |
 | lib/secret-scan.mjs | run-gates/secret-scan、secret-scan.test、run-accept | 高置信凭据形态检测（sk-/ghp_/AKIA/PRIVATE KEY/Bearer）；只报 path/line/kind，不回显原文 |
 | lib/selftest-library.mjs | library-fold.test | 「研究配置」面板/library-fold 自测例库单一正本：12 形态条目（四字段/部分/空值/旧格式/混居/重名/空条目/杂项行/续行/缩进），两处共用防形态漂移 |

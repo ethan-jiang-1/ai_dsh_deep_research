@@ -28,6 +28,56 @@ WORKSPACE="${DSH_RUN_WORKSPACE:-$ROOT/research-workspace}"
 # BSD/GNU 都可用的 in-place sed：`sed -i.bak` 两派都接受，备份随即删除。
 sed_inplace() { sed -i.bak "$1" "$2" && rm -f "$2.bak"; }
 
+PACKDIR="$ROOT/packages/deep-research-pack"
+PROFDIR="$DSH_HOME/profiles/$PROFILE"
+RUNTMP="$STATE_DIR/run-pack"
+
+# ② pack 漂移检测（RFC debug-dashboard-plus）：pack 源 ↔ profile 安装镜像逐文件比对。
+# 2026-09-24 三次注入面事故里两次是镜像类（$DSH_HOME/AGENTS.md 化石、pack persona/skill
+# 旧文本进了镜像）——机制化补丁：不符即 fail-loud，不带着旧 harness 开 run。
+# 比对集合 = **实际随包发布的文件**（`npm pack --dry-run --json` 为准），不是源目录全量：
+# pack 的 `files` 字段决定镜像里有什么（例如 AGENTS.md 是子树开发指令、不随包发布），
+# 按源目录全量比对会把"没发布"误报成"镜像缺席"（0.1.7 升 pin 时实测）。
+# 单跑模式：--drift-only（只读、不碰端口/不安装/不起 web；run-driver 复用通道时调用）
+#           --drift-check（可初始化 profile/MCP patch，旧语义保留）。
+drift_check() {
+  local bad=0 rel mirror
+  local shipped
+  # 工具态重定向（本仓纪律）：npm 缓存钉在仓库内，避全局 cache 权限/污染（release-smoke 同款）。
+  # ⚠ `--ignore-scripts` 是必需的（2026-09-26 跑 run 时实测的环路缺陷）：pack 的 `prepack`
+  #   钩子会跑 `pnpm build`，tsdown 的横幅（`ℹ tsdown v…`）混进 stdout 把 `--json` 载荷污染，
+  #   下游 `JSON.parse` 抛 SyntaxError → **漂移检测整条崩掉**（而它正是"镜像是否等于 pack 源"的
+  #   唯一机械证明）。本处只要**发布清单**、不要构建，故显式跳过生命周期脚本。
+  shipped="$(cd "$PACKDIR" && npm pack --dry-run --json --ignore-scripts --cache "$STATE_DIR/npm-cache" 2>/dev/null | node -e '
+    let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => {
+      const j = JSON.parse(s);
+      for (const f of j[0]?.files ?? []) console.log(f.path);
+    });
+  ')"
+  [ -n "$shipped" ] || { echo "boot-run: 漂移检测拿不到 pack 发布清单（npm pack --dry-run 失败）" >&2; exit 1; }
+  while IFS= read -r rel; do
+    mirror="$PROFDIR/node_modules/dsh-deep-research-pack/$rel"
+    if [ ! -f "$PACKDIR/$rel" ] || [ ! -f "$mirror" ] || ! diff -q "$PACKDIR/$rel" "$mirror" >/dev/null 2>&1; then
+      echo "boot-run: 漂移——$rel 与 profile 镜像不一致（或镜像缺席）" >&2
+      bad=1
+    fi
+  done <<< "$shipped"
+  if [ "$bad" -ne 0 ]; then
+    echo "boot-run: pack 漂移检测红——修复：rm -rf '$PROFDIR' 后重跑本脚本重建（或逐文件 cp 同步）" >&2
+    exit 1
+  fi
+  echo "boot-run: pack 漂移检测绿（pack 发布集 ↔ profile 镜像一致）"
+}
+
+# 只读镜像检查（2026-10-28 反馈真值修复）：run-driver 复用已在飞的通道时必须先回答
+# "这个通道加载的镜像是否等于当前 pack 源"——否则 probe 会把旧页面判成当前代码的绿。
+# 本模式在端口检查/组合安装/MCP patch/web 启动之前退出：只读，不碰活通道。
+if [ "${1:-}" = "--drift-only" ]; then
+  [ -d "$PROFDIR" ] || { echo "boot-run: profile 不存在（先跑一次完整 boot 生成）" >&2; exit 1; }
+  drift_check
+  exit 0
+fi
+
 # 端口自检（fail-loud + 补救）：端口已 LISTEN = 另起通道必失败，且可能打断在飞 run 的通道
 # （bundle 文件不受损，但挂起的 HITL 回合会被终局化）——先说清再让人决定。
 if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
@@ -36,10 +86,6 @@ if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/
   echo "          确要重启或换端口：先停占用者，或 DSH_RUN_PORT=<空闲端口> bash dev/boot-run.sh" >&2
   exit 1
 fi
-
-PACKDIR="$ROOT/packages/deep-research-pack"
-PROFDIR="$DSH_HOME/profiles/$PROFILE"
-RUNTMP="$STATE_DIR/run-pack"
 
 # 层版本钉住：与 pack 兼容矩阵同源（dsh-v0.2.1-rc.2 → 0.2.1-rc.2）——升 pin 只改 pack
 # package.json 的 dsh.compatibility.dshReleases，本脚本随之走（vendor 各包版本锁步发布）。
@@ -133,41 +179,7 @@ elif grep -qF "$MCP_MARK_BEGIN" "$PROFDIR/cordis.patch.yml" 2>/dev/null; then
   echo "boot-run: MCP Playwright 通道已移除（MCP_PLAYWRIGHT=0——显式拆）"
 fi
 
-# ② pack 漂移检测（RFC debug-dashboard-plus）：pack 源 ↔ profile 安装镜像逐文件比对。
-# 2026-09-24 三次注入面事故里两次是镜像类（$DSH_HOME/AGENTS.md 化石、pack persona/skill
-# 旧文本进了镜像）——机制化补丁：不符即 fail-loud，不带着旧 harness 开 run。
-# 比对集合 = **实际随包发布的文件**（`npm pack --dry-run --json` 为准），不是源目录全量：
-# pack 的 `files` 字段决定镜像里有什么（例如 AGENTS.md 是子树开发指令、不随包发布），
-# 按源目录全量比对会把"没发布"误报成"镜像缺席"（0.1.7 升 pin 时实测）。
-# 单跑模式：bash dev/boot-run.sh --drift-check（测试/CI 用，不起 web）。
-drift_check() {
-  local bad=0 rel mirror
-  local shipped
-  # 工具态重定向（本仓纪律）：npm 缓存钉在仓库内，避全局 cache 权限/污染（release-smoke 同款）。
-  # ⚠ `--ignore-scripts` 是必需的（2026-09-26 跑 run 时实测的环路缺陷）：pack 的 `prepack`
-  #   钩子会跑 `pnpm build`，tsdown 的横幅（`ℹ tsdown v…`）混进 stdout 把 `--json` 载荷污染，
-  #   下游 `JSON.parse` 抛 SyntaxError → **漂移检测整条崩掉**（而它正是"镜像是否等于 pack 源"的
-  #   唯一机械证明）。本处只要**发布清单**、不要构建，故显式跳过生命周期脚本。
-  shipped="$(cd "$PACKDIR" && npm pack --dry-run --json --ignore-scripts --cache "$STATE_DIR/npm-cache" 2>/dev/null | node -e '
-    let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => {
-      const j = JSON.parse(s);
-      for (const f of j[0]?.files ?? []) console.log(f.path);
-    });
-  ')"
-  [ -n "$shipped" ] || { echo "boot-run: 漂移检测拿不到 pack 发布清单（npm pack --dry-run 失败）" >&2; exit 1; }
-  while IFS= read -r rel; do
-    mirror="$PROFDIR/node_modules/dsh-deep-research-pack/$rel"
-    if [ ! -f "$PACKDIR/$rel" ] || [ ! -f "$mirror" ] || ! diff -q "$PACKDIR/$rel" "$mirror" >/dev/null 2>&1; then
-      echo "boot-run: 漂移——$rel 与 profile 镜像不一致（或镜像缺席）" >&2
-      bad=1
-    fi
-  done <<< "$shipped"
-  if [ "$bad" -ne 0 ]; then
-    echo "boot-run: pack 漂移检测红——修复：rm -rf '$PROFDIR' 后重跑本脚本重建（或逐文件 cp 同步）" >&2
-    exit 1
-  fi
-  echo "boot-run: pack 漂移检测绿（pack 发布集 ↔ profile 镜像一致）"
-}
+# 旧模式保留（可初始化 profile/MCP patch；测试/CI 用，不起 web）。新的只读检查走 --drift-only。
 if [ "${1:-}" = "--drift-check" ]; then
   [ -d "$PROFDIR" ] || { echo "boot-run: profile 不存在（先跑一次完整 boot 生成）" >&2; exit 1; }
   drift_check
