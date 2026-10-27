@@ -62,3 +62,22 @@ test('根 AGENTS 布局块覆盖工作区根实体与 pack 种子（2026-10-21 �
     assert.ok(wsLine.includes(category), `布局行未点名种子类别「${category}」（${seed}）`)
   }
 })
+
+// 研究配置面板形态：源码渲染什么，发布物就读到什么。
+// 2026-10-21 管理迁移（commit 9456199）把库列表/内置卡/领域示范/管理回执迁到主界面「方法库」tab，
+// 页签默认 `COMPACT = true` 只留摘要面；pack README（随 npm 发布）与 D25 台账没跟上，继续描述四区
+// ——发布物与源码**同向不同事**，读者据此会认定"功能缺失"，而旧实现完整躺在 COMPACT=false 分支里，
+// 「翻开关」看起来既便宜又正确。结构与墓碑在门禁射程内（md-links/gate-ledger），
+// 「描述 vs 渲染」没有守门，故在此钉住：COMPACT 默认态 ⇒ README 不得出现已迁走的四区词。
+// 负例留证 2026-10-27：本测试首跑即红（README:286-288 命中 四区/内置打法/我的偏好库/底线条 四词）；
+// 改 README 为摘要面 → 绿。反向：把 COMPACT 改 false 则该断言自失效（回滚态由设计文档另行描述）。
+test('研究配置面板形态：COMPACT 默认态下 README 不描述已迁走的管理四区（2026-10-27 卫生轮）', () => {
+  const tab = read('packages/deep-research-pack/src/client/ResearchConfigTab.tsx')
+  const compact = /const COMPACT = true/.test(tab)
+  assert.ok(/const COMPACT = (true|false)/.test(tab), 'ResearchConfigTab.tsx 缺 COMPACT 开关——本断言的判据源消失')
+  if (!compact) return // 回滚态：管理块渲染中，README 的四区描述与之一致，不再断言
+  const readme = read('packages/deep-research-pack/README.md')
+  for (const term of ['四区', '内置打法', '我的偏好库', '底线条']) {
+    assert.ok(!readme.includes(term), `COMPACT=true（四区不渲染）但 pack README 仍写「${term}」——发布物与源码不同事；同步为摘要面或改 COMPACT 前先改 README`)
+  }
+})
