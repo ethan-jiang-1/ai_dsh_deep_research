@@ -5,6 +5,7 @@
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { RunSource } from '../../lib/run-context.ts'
+import type { RunStep } from '../../lib/run-fold.ts'
 
 /** journal 帧的最小投影（wire 形状 → 领域形状）。 */
 export type JournalFrame =
@@ -39,3 +40,23 @@ export interface ResearchStatusTitleInjected {
 
 /** 槽标准 props + 注入面。 */
 export type ResearchStatusTabProps = PropsRuntime<'sidebar.right.pane.tab'> & ResearchStatusTabInjected
+
+/** bundle 渐进面模型（问题行 + 步骤 + 证据 + 交付）。 */
+export interface BundleFace {
+  readonly questionLine: string | null
+  /** question.md 在场（锚点 passed 态的文件事实——与 questionLine 区分：首行可能缺席）。 */
+  readonly hasQuestion: boolean
+  readonly steps: readonly RunStep[]
+  readonly evidenceCount: number
+  readonly delivered: boolean
+  /** final/ 中最高 vN.md 编号——≥2 即有证据扩张 rerun 记账。 */
+  readonly versions: number
+  /** review.md 终局 readiness（多轮取末位：true=FAIL / false=PASS / null=未观测）。 */
+  readonly reviewFail: boolean | null
+  /** 版本面事实（rerun 版本轨的输入；交付见证由 journal 单独折）。 */
+  readonly planText: string | null
+  readonly planSnapshotNames: readonly string[]
+  readonly questionText: string | null
+  readonly finalFileNames: readonly string[]
+  readonly hasFinal: boolean
+}

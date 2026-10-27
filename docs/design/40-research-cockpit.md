@@ -86,7 +86,7 @@
 <a id="cockpit-1"></a>
 ### 2.1 研究状态页签
 
-**文件**：[ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) + [TrackRail.tsx](../../packages/deep-research-pack/src/client/research-status/TrackRail.tsx)（流程轨道：取色/步态符号/回边几何）+ `src/client/research-status/useMemberActivity.ts` + `src/client/research-status/types.ts` + [run-version.ts](../../packages/deep-research-pack/src/lib/run-version.ts)
+**文件**：[ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) + [TrackRail.tsx](../../packages/deep-research-pack/src/client/research-status/TrackRail.tsx)（流程轨道：取色/步态符号/回边几何）+ [useStatusFeed.ts](../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts)（数据装配：journal follow / bundle 扫描 / 绑定可信性 / 锚点与版本面）+ `src/client/research-status/useMemberActivity.ts` + `src/client/research-status/types.ts` + [run-version.ts](../../packages/deep-research-pack/src/lib/run-version.ts)
 
 右栏页签，自上而下八区（逐区职责见 §2 开头的「页签八区」表）；⑤ 另带 rerun 版本面一行（`v1 已交付 · v2 证据扩张 rerun · HITL2 待审`）+ 已交付后的只读折叠块「还不满意？三种改法」（`rerun-triage` 文案）；队员多路 journal 订阅生命周期在页签私有 hook，注入类型在同目录定义
 

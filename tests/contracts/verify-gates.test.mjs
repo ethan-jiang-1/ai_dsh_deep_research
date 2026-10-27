@@ -3,7 +3,7 @@
 // 真执行体 = scripts/smoke/gates-smoke.mjs（语料 verify.test.mjs 模式：临时副本 + 注入回归 +
 // 真实 verify 入口判红；子进程归 smoke 道——layering 禁默认回归 spawn）。案例表住
 // scripts/lib/gates-cases.mjs（纯 fs——layering 二代后 tests 只消费 lib，不 import 驱动壳）。
-// 本测试钉住它俩的接口不漂移：gates-smoke 的案例门禁名必须真实存在于 verify.mjs 的 gates
+// 本测试钉住它俩的接口不漂移：gates-smoke 的案例门禁名必须真实存在于 context.mjs 的 gates
 // 数组——门禁改名或退役而案例表没跟 = 本测试红（此时 smoke 的案例会在对照组就红，这里更早、
 // keyless 秒级报因）。依据 = RFC「DSH 插件开发语料（二代）吸收审计」缺口 2（2026-10-07）。
 // 负例留证 2026-10-28：删掉 gates-cases 里 count-free 的唯一案例 → 反向覆盖断言红
@@ -49,7 +49,7 @@ test('每个案例门禁都真实存在于 verify.mjs gates 数组（改名/退�
   for (const c of CASES) {
     assert.ok(
       gatesArray.includes(c.gate),
-      `案例门禁 ${c.gate} 不在 verify.mjs gates 数组——门禁已改名或退役，gates-smoke 案例表须同 diff 更新`,
+      `案例门禁 ${c.gate} 不在 context.mjs gates 数组——门禁已改名或退役，gates-smoke 案例表须同 diff 更新`,
     );
   }
 });
