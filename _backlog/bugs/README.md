@@ -10,6 +10,8 @@
 
 ## 活跃列表
 
+- [BUG-045：client-load 图谱断言在流断连时红（首跑红、重跑即绿）](BUG-045-client-load-graph-assert-flakes-on-stream-drop.md)——排查中（P2）；现场已留 `runtime/smoke-workspace/client-load-2026-10-27T15-56-30-540Z/`
+
 （2026-10-23 宪章复核发现的历史偏差按 **grandfather** 处理：只读证据、不建卡、不修、不追改；它们只用于约束新 run 的契约，记录 = [复核证据](../research/run-bundle-charter/2026-10-23-issue-review-verification.md)。）
 
 ## 最近归档
