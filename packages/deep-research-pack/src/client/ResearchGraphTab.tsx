@@ -35,7 +35,6 @@ import {
   countsOf,
   planIssuesOf,
   wavesOf,
-  type AttentionItem,
   type MemberStatus,
   type PlanNode,
 } from '../lib/plan-graph.ts'
@@ -56,6 +55,7 @@ import { shortLabel } from './research-graph/format.ts'
 import { graphStateNote } from './research-graph/state-note.ts'
 import { NodeCard } from './research-graph/NodeCard.tsx'
 import { GraphVersionRail } from './research-graph/GraphVersionRail.tsx'
+import { GraphNotices } from './research-graph/GraphNotices.tsx'
 import { DagMap } from './research-graph/DagMap.tsx'
 export type { ResearchGraphInjected, ResearchGraphTabProps } from './research-graph/types.ts'
 
@@ -67,10 +67,6 @@ const MUTED_STYLE: CSSProperties = { fontSize: 11, opacity: 0.62, lineHeight: 1.
 const BADGE_STYLE: CSSProperties = {
   fontSize: 10, padding: '1px 6px', borderRadius: 999, background: '#00000008',
   border: '1px solid #00000014', opacity: 0.8,
-}
-const ATTENTION_ROW_STYLE: CSSProperties = {
-  display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none',
-  padding: 0, cursor: 'pointer', color: 'inherit', fontSize: 12, lineHeight: 1.5,
 }
 const EMPTY_STYLE: CSSProperties = { fontSize: 12, opacity: 0.6, lineHeight: 1.6, padding: '6px 0' }
 const CARD_STYLE: CSSProperties = {
@@ -84,10 +80,6 @@ const BANNER_STYLE: CSSProperties = {
 
 
 
-/** 注意力条目的严重度图标。 */
-function severityIcon(severity: AttentionItem['severity']): string {
-  return severity === 'critical' ? '✕' : severity === 'warning' ? '⚠' : '·'
-}
 
 
 /** 本地时钟 `HH:MM:SS`（“最后刷新”用；不引入日期库）。 */
@@ -308,16 +300,6 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         </div>
       )}
 
-      {planIssues.length > 0 && (
-        <div style={{ ...BANNER_STYLE, background: '#dc262610', borderColor: '#dc262640' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2, color: '#b91c1c' }}>plan 结构提示（只读）</div>
-          {planIssues.slice(0, 6).map((issue) => (
-            <div key={`${issue.kind}:${issue.nodeId}:${issue.message}`} style={{ ...MUTED_STYLE, color: '#b91c1c' }}>{issue.message}</div>
-          ))}
-          {planIssues.length > 6 && <div style={MUTED_STYLE}>…另有 {String(planIssues.length - 6)} 条</div>}
-        </div>
-      )}
-
       {hasPlan && (
         <div style={{ ...MUTED_STYLE, marginBottom: 6 }}>
           plan{plan?.version !== undefined ? ` ${plan.version}` : ''} · {String(coverage.topNodes)} 顶层 / {String(coverage.planNodes)} 节点 · {teamReady ? coverageLineOf(coverage) : '等待团队投影'}
@@ -325,20 +307,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         </div>
       )}
 
-      {attention.length > 0 && (
-        <div style={{ marginBottom: 10, padding: '6px 10px', borderRadius: 6, background: '#f59e0b14', border: '1px solid #f59e0b40' }}>
-          <div style={{ fontWeight: 600, fontSize: 12, marginBottom: 2 }}>需要你注意（只读）</div>
-          {attention.slice(0, 8).map((item) => (
-            <button
-              key={`${item.taskId}:${item.reason}`}
-              type="button"
-              style={ATTENTION_ROW_STYLE}
-              onClick={() => { focusTask(item.taskId) }}
-            >{severityIcon(item.severity)} {item.taskId} · {item.message}</button>
-          ))}
-          {attention.length > 8 && <div style={MUTED_STYLE}>…另有 {String(attention.length - 8)} 条</div>}
-        </div>
-      )}
+      <GraphNotices planIssues={planIssues} attention={attention} onFocusTask={focusTask} />
 
       {team === undefined && (
         <div style={EMPTY_STYLE}>
