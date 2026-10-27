@@ -4,6 +4,7 @@
 
 ## 活跃清单
 
+- [2026-10-27 复核后硬化计划](2026-10-27-post-review-hardening.md) — P1：run-accept 集成 smoke + 数据卡形状测试；P2/P3 见卡。
 （2026-10-25 运行形态合同组 5 张卡已结归档——见 [settled 池](../_archived/settled_issues/README.md)。）
 
 ## 最近归档
