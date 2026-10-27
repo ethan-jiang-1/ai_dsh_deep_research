@@ -56,7 +56,7 @@ import { launchChromium, loadChromium } from '../lib/playwright.mjs'
 import { clientHistoryWindow, readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
 import { prepareClientLoadReference } from './client-load-reference.mjs'
 import { pass4ConfigTabPhase } from './client-load-config.mjs'
-import { clickRowByText, expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES } from '../lib/web-ui-nav.mjs'
+import { clickRowByText, dismissPreviewNotice, expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES } from '../lib/web-ui-nav.mjs'
 import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { isActivePlanNode, planIndex } from '../../packages/deep-research-pack/src/lib/plan-graph.ts'
 import { latestRunVersion } from '../../packages/deep-research-pack/src/lib/run-fold.ts'
@@ -313,8 +313,10 @@ async function setupProbeSession() {
   //    d) 点「研究状态」guide 胶囊（展开后直接在场，无需 New tab——company 配方核心；
   //       0.1.7 的 New tab 控件在折叠列内永远 visibility:hidden，不走它）；
   //    e) 页签体渲染 journal 流且 snapshot 历史 ≥1 事件。
-  const cont = page.getByRole('button', { name: /continue/i }).first()
-  if (await cont.isVisible().catch(() => false)) await cont.click({ timeout: 6_000 }).catch(() => {})
+  // 遮罩关闭正本 = web-ui-nav.dismissPreviewNotice（选择器策略与 cdp-probe 共用同一份常量）；
+  // 'stuck' 只记一行提示——后续点击超时会把红暴露在具体断言上，不在这里抢判。
+  const overlay = await dismissPreviewNotice(page)
+  if (overlay === 'stuck') console.error('client-load: 首屏 Preview Notice 遮罩关不掉——后续点击可能被挡')
   await wait(1_500)
 
   // ── 探针会话改名（两遍断言的前置：探针会话=research-workspace，验渐进面真数据；

@@ -31,7 +31,7 @@ import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 import { launchCdpBrowser } from '../lib/cdp-driver.mjs';
 import { readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs';
-import { SHOW_MORE_SESSIONS_PATTERN } from '../lib/web-ui-nav.mjs';
+import { PREVIEW_NOTICE_PROBE_JS, SHOW_MORE_SESSIONS_PATTERN } from '../lib/web-ui-nav.mjs';
 import { reconcileInjectedMessage } from '../lib/inject-reconcile.mjs';
 import { pickSendTarget } from '../lib/probe-send-target.mjs';
 import { pickStatusTab } from '../lib/probe-status-tab.mjs';
@@ -80,6 +80,8 @@ if (guiUrl === undefined || !/^https?:\/\//.test(guiUrl) || !guiUrl.includes('to
 const verdict = {
   booted: false,
   frameMounted: false,
+  overlayPresent: false,
+  overlayCleared: null,
   sessionOpened: false,
   statusPaneOpen: false,
   statusPaneText: '',
@@ -120,6 +122,31 @@ try {
     if (!frameMounted) await new Promise((resolve) => { setTimeout(resolve, 500) });
   }
   verdict.frameMounted = frameMounted;
+
+  // 首屏遮罩（Preview Notice）：DSH 版本升级后首次访问必现，全屏 _mask_ 盖住侧栏与输入框。
+  // 不关它，本探针的 JS 派发**照常成功**（绕过 hit-testing），于是 verdict 可以全绿而人打开
+  // URL 正对着一屏 Continue——"绿"证的是 DOM 在，不是人看得见（2026-10-27 卫生轮实测：
+  // run-driver GREEN 同刻截图仍被遮罩盖住）。故：先关，关不掉即红，结果写进 verdict。
+  //
+  // 两条实测约束：① **遮罩晚于侧栏挂载**（frameMounted 之后才渲染），不能"一次没看到"就当清场；
+  // ② 关闭是异步持久化（DSH 的 WelcomeNotice 走 durable acknowledgment RPC，ack 后同一 host
+  // 不再出现），故点击后要给足收敛时间并允许重试，否则把"正在 ack"误判成"关不掉"。
+  {
+    let absentStreak = 0;
+    for (let i = 0; i < 30 && absentStreak < 4; i++) {
+      const notice = await evaluate(PREVIEW_NOTICE_PROBE_JS).catch(() => null);
+      if (notice === null) break;
+      verdict.overlayPresent = verdict.overlayPresent === true || notice.present === true;
+      if (notice.present === false) absentStreak += 1;
+      else if (notice.clicked === false) break; // 标题在但按钮找不到：留给下方判红，不空转
+      else absentStreak = 0;
+      await new Promise((resolve) => { setTimeout(resolve, 700) });
+    }
+    const after = await evaluate(PREVIEW_NOTICE_PROBE_JS).catch(() => null);
+    verdict.overlayPresent = verdict.overlayPresent === true || after?.present === true;
+    // 遮罩从未出现也算清场成功；出现且已消失同理。判红在下面统一给出（failed 点名）。
+    verdict.overlayCleared = after?.present === false;
+  }
 
   // 场景助手（全部走 JS 派发——本工具存在的理由）
   const clickRowByText = async (text) => {
@@ -364,6 +391,11 @@ try {
     }
   }
 
+  if (verdict.overlayCleared !== true) {
+    verdict.failed = verdict.overlayPresent === true
+      ? '首屏 Preview Notice 遮罩关不掉（Continue 未命中或未消失）——人打开 URL 会撞上全屏遮罩，DOM 在位不等于页面可用'
+      : '首屏遮罩状态未取证（overlayCleared 非 true）——未跑 ≠ 通过';
+  }
   if (expectFace !== undefined && verdict.expectFaceHeld !== true) verdict.failed = `expect-face 未命中: ${expectFace}`;
   if (expectNoLeak !== undefined && verdict.expectNoLeakHeld !== true) verdict.failed = `expect-no-leak 失守: ${expectNoLeak}`;
   if (ask !== undefined && verdict.answered !== true) {

@@ -24,8 +24,10 @@ export function guiUrlFromWebLog(text) {
 /**
  * 浏览器面 probe verdict → 呈交判决。
  *
- * 四条硬检查全绿才 exit 0（= 可呈交）：宿主就位（booted + frameMounted）/ 右栏页签可开 /
- * expect-face 命中 / 零 console 错误与异常。任何一条不绿 → 1（不得呈交）。
+ * 五条硬检查全绿才 exit 0（= 可呈交）：宿主就位（booted + frameMounted）/ 首屏无遮挡
+ * （Preview Notice 已清场）/ 右栏页签可开 / expect-face 命中 / 零 console 错误与异常。
+ * 任何一条不绿 → 1（不得呈交）。首屏遮罩是**人看得见**的判据：探针的 JS 派发绕过 hit-testing，
+ * 没有这条时 DOM 在位就能判绿，而人打开 URL 正对着一屏 Continue（2026-10-27 实测）。
  * 组合在写（pack 改动未重建镜像）→ 2（**未跑**，不是通过——未跑 ≠ 通过）。
  *
  * @param {{probe: object, expectFace: string, composing: boolean}} input
@@ -43,6 +45,8 @@ export function runDriverVerdict({ probe, expectFace, composing }) {
   const p = probe ?? {};
   const checks = [
     { id: 'host-mounted', ok: p.booted === true && p.frameMounted === true, detail: `booted=${p.booted} frameMounted=${p.frameMounted}` },
+    // overlayCleared 为 null（probe 没取证）**不许**当绿——未跑 ≠ 通过
+    { id: 'overlay-clear', ok: p.overlayCleared === true, detail: `overlayPresent=${p.overlayPresent} overlayCleared=${p.overlayCleared}` },
     { id: 'status-pane-open', ok: p.statusPaneOpen === true, detail: `statusPaneOpen=${p.statusPaneOpen}` },
     // expectFaceHeld 为 null（页签没开、断言根本没执行）**不许**当绿
     { id: 'expect-face', ok: p.expectFaceHeld === true, detail: `${expectFace}=${p.expectFaceHeld}` },

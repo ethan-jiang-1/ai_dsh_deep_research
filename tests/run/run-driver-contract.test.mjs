@@ -40,11 +40,27 @@ test('URL 抽取：只认最后一条横幅（web.log 每次 boot 截断写，�
 
 test('verdict 契约：exit 0=全绿 / 1=断言红 / 2=未跑；消息面出现即不绿', () => {
   const green = runDriverVerdict({
-    probe: { booted: true, frameMounted: true, statusPaneOpen: true, expectFaceHeld: true, consoleProblems: [], exceptions: [] },
+    probe: { booted: true, frameMounted: true, overlayCleared: true, statusPaneOpen: true, expectFaceHeld: true, consoleProblems: [], exceptions: [] },
     expectFace: '研究状态', composing: false,
   });
   assert.equal(green.exit, 0);
-  assert.equal(green.checks.length, 4);
+  assert.equal(green.checks.length, 5);
+
+  // 首屏遮罩没清场 → 红。"DOM 在位"不等于"人看得见"：探针的 JS 派发绕过 hit-testing，
+  // 2026-10-27 实测 GREEN 同刻截图仍被 Preview Notice 盖住（见 cdp-probe 同名注释）。
+  const overlayStuck = runDriverVerdict({
+    probe: { booted: true, frameMounted: true, overlayPresent: true, overlayCleared: false, statusPaneOpen: true, expectFaceHeld: true, consoleProblems: [], exceptions: [] },
+    expectFace: '研究状态', composing: false,
+  });
+  assert.equal(overlayStuck.exit, 1);
+  assert.ok(overlayStuck.reason.includes('overlay-clear'), '红因要点名 overlay-clear');
+
+  // 老 probe 不报 overlayCleared（null）→ 不许当绿：未跑 ≠ 通过
+  const overlayUnknown = runDriverVerdict({
+    probe: { booted: true, frameMounted: true, statusPaneOpen: true, expectFaceHeld: true, consoleProblems: [], exceptions: [] },
+    expectFace: '研究状态', composing: false,
+  });
+  assert.equal(overlayUnknown.exit, 1);
 
   // expect-face 未命中 → 红（观察面页签缺席 = 插件没挂上）
   const noFace = runDriverVerdict({

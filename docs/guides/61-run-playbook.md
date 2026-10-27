@@ -26,8 +26,9 @@
   红了按序修后重跑同一条：
   ① boot-run 全序（自检 → 组合检查/必要补装 → 漂移检测）红了当场修——漂移 = 按脚本处方重建
   profile；vendor 产物缺失 = `bash dev/vendor-build.sh`；
-  ② boot 出横幅后验浏览器面：探针断言无 "Failed to load plugins" / 零 console 错误
-  （boot 横幅只证宿主侧，观察面可能坏着——0.2.0 轮教训）；
+  ② boot 出横幅后验浏览器面：探针断言宿主就位 / **首屏无遮挡**（DSH 版本升级后的 Preview Notice
+  全屏遮罩必须关掉——探针的 JS 派发绕过可点性检查，不关则绿的是 DOM、不是人看得见的页面）/
+  零 console 错误（boot 横幅只证宿主侧，观察面可能坏着——0.2.0 轮教训）；
   ③ 全绿才把 URL 交出去（人话判据：GUI 里 preset 选单含四个 Deep Research 角色、会话右栏有
   「研究状态」页签——任一缺席 = 插件没挂上）。不呈交"可能能用的东西"；红了不自修就上报 = 失职；
 - **启动前先判"接续还是新开"**：`find research-workspace -maxdepth 2 -type d -name 'drt_*'`
