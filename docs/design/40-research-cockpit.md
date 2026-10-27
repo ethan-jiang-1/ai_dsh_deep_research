@@ -121,7 +121,7 @@
 <a id="cockpit-6"></a>
 ### 2.6 研究配置页签
 
-**文件**：[ResearchConfigTab.tsx](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) + [method-of-question.ts](../../packages/deep-research-pack/src/lib/method-of-question.ts)
+**文件**：[ResearchConfigTab.tsx](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) + [LegacyManagementPane.tsx](../../packages/deep-research-pack/src/client/research-config/LegacyManagementPane.tsx)（`COMPACT=false` 的四区回滚面，D25）+ [method-of-question.ts](../../packages/deep-research-pack/src/lib/method-of-question.ts)
 
 右栏**摘要页签**（2026-10-21 管理迁移后）：只留 ① 本次研究（采用＋来源＋「换一条」，读 question.md 方法节五态）与「方法库（本工作区）→ 顶部 tab」入口；库列表/内置卡/领域示范/术语/管理回执移入主界面「方法库」tab。指令仍经 `session/prompt` 交 Lead（面板不直写文件）
 

@@ -323,7 +323,11 @@ const COPY_PINS = [
 ];
 
 test('面板关键文案静态钉：术语表/影响范围/底线区别/按钮语义在场（探针三处高风险错读）', () => {
-  const source = readFileSync(CLIENT_PREFERENCES_SOURCE, 'utf8');
+  // 面板文案现在跨两个模块：摘要页签（ResearchConfigTab）与 COMPACT=false 的四区回滚面
+  // （LegacyManagementPane，2026-10-28 搬出）——钉的是"面板上还看得到这些防错读句"，
+  // 不关心它住哪个文件。
+  const source = readFileSync(CLIENT_PREFERENCES_SOURCE, 'utf8')
+    + readFileSync(join(ROOT, 'packages/deep-research-pack/src/client/research-config/LegacyManagementPane.tsx'), 'utf8');
   const missing = COPY_PINS.filter((pin) => !source.includes(pin));
   assert.deepEqual(missing, [], `以下关键文案不在场（删改即红——它们是零上下文探针点出的防错读句）：${missing.join('、')}`);
 });
