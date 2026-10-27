@@ -16,12 +16,12 @@
 //
 // 不做的事（有意）：不装 DSH 本体、不写密钥（安全边界：密钥永不落仓库/脚本）。
 import { accessSync, closeSync, constants as fsConstants, copyFileSync, existsSync, lstatSync, mkdirSync, openSync, readdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
-import { dirname, isAbsolute, join, relative, resolve } from 'node:path'
+import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path'
 import { homedir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 import { spawnSync } from 'node:child_process'
-import { sha256, classifySeedEntry, nextSeedState, seedSourceRel } from './lib/seed-core.mjs'
+import { SEED_STATE_SCHEMA, sha256, classifySeedEntry, nextSeedState, parseSeedState, planSeedCleanup, seedSourceRel } from './lib/seed-core.mjs'
 import { satisfiesVersion } from './lib/version-range.mjs'
 import { parseScaffoldArgs } from './lib/deploy-args.mjs'
 import { resolveDshHome, resolvePathInput } from './lib/dsh-home.mjs'
@@ -40,6 +40,9 @@ const USAGE = `用法：node <pack>/scripts/scaffold.mjs --workspace <研究工�
   --upgrade             只更新未被用户改过的旧种子；改过的写 .seed-new
   --force               覆盖版本化种子（method-library 仍不覆盖）
   --adopt               显式接受当前工作区的 AGENTS/NODES/模板（写 baseline；--upgrade 仍不覆盖）
+  --clean               只报告 scaffold 自己的残留（state/lock/sidecar/孤儿），不删任何东西
+  --clean --write       执行清理：删未改过的孤儿种子、陈旧锁、临时状态；改过的一律保留
+  --discard-sidecars    配合 --clean --write 才丢弃未合并的 .seed-new（默认只报告、不删）
   --dry-run             预演写模式（不落盘、不跑 preflight）
   --install-only        安装验收（跳模型密钥检查；不代表研究就绪）
   --seed-only           只处理工作区种子（不碰 profile、不跑 preflight）
@@ -70,7 +73,12 @@ const dryRun = flags.dryRun
 const installOnly = flags.installOnly
 const seedOnly = flags.seedOnly
 const checkMode = flags.check
+const cleanMode = flags.clean
+const cleanWrite = flags.write
+const discardSidecars = flags.discardSidecars
 const upgrade = flags.upgrade
+// 写模式 = 会落盘的模式。--check 与 --clean（不带 --write）都只读，不建目录、不持锁。
+const writeMode = !checkMode && !(cleanMode && !cleanWrite)
 const refreshTeam = flags.refreshTeam
 let installAnchor = null
 try {
@@ -94,7 +102,11 @@ if (existsSync(workspace) && !statSync(workspace).isDirectory()) {
   console.error(`scaffold: --workspace 必须是目录，当前是文件：${workspace}`)
   process.exit(2)
 }
-if (!checkMode && existsSync(workspace)) {
+if (cleanMode && !existsSync(workspace)) {
+  console.error(`scaffold: --clean 需要一个已存在的 workspace：${workspace}`)
+  process.exit(2)
+}
+if (writeMode && existsSync(workspace)) {
   try { accessSync(workspace, fsConstants.W_OK) } catch {
     console.error(`scaffold: --workspace 不可写：${workspace}（--check 可只读；写入请先修权限）`)
     process.exit(2)
@@ -102,7 +114,7 @@ if (!checkMode && existsSync(workspace)) {
 }
 
 // 根守卫：工作区不能是 HOME/DSH_HOME/pack/profile 的本身、祖先或内部（写模式）。
-if (!checkMode) {
+if (writeMode) {
   try {
     const guard = assertSafeWorkspace({
       workspace,
@@ -126,11 +138,11 @@ if (!seedOnly && explicitHost !== null && resolve(explicitHost) !== resolve(targ
 }
 
 // 写模式互斥：两个 scaffold 同时写同一工作区会把 state/sidecar 交叉覆盖。--check/--dry-run 不持锁。
-if (!checkMode && !dryRun && !existsSync(workspace)) mkdirSync(workspace, { recursive: true })
+if (writeMode && !cleanMode && !dryRun && !existsSync(workspace)) mkdirSync(workspace, { recursive: true })
 const lockPath = join(workspace, '.dsh-research-scaffold.lock')
 let lockHeld = false
 const releaseLock = () => { if (lockHeld) { try { unlinkSync(lockPath) } catch {} lockHeld = false } }
-if (!checkMode && !dryRun) {
+if (writeMode && !dryRun) {
   if (existsSync(lockPath)) {
     let holder = null
     try { holder = Number(readFileSync(lockPath, 'utf8').trim()) } catch {}
@@ -220,8 +232,20 @@ for (const rel of Object.keys(seed.files)) {
 
 const statePath = join(workspace, '.dsh-research-seed.json')
 let state = null
+let stateSchemaVersion = 0
 if (existsSync(statePath)) {
-  try { state = JSON.parse(readFileSync(statePath, 'utf8')) } catch { state = null }
+  const parsedState = parseSeedState(readFileSync(statePath, 'utf8'))
+  if (!parsedState.ok) {
+    if (parsedState.reason === 'newer-schema') {
+      console.error(`scaffold: 工作区种子状态由更新的 scaffold 写（schema v${parsedState.schemaVersion} > v${SEED_STATE_SCHEMA}）——先升级本工具，不覆盖、不猜`)
+    } else {
+      console.error(`scaffold: 工作区种子状态损坏：${statePath}——人工确认后删除该文件再跑（不会静默当无状态）`)
+    }
+    process.exit(checkMode || cleanMode ? 1 : 2)
+  }
+  state = parsedState.state
+  stateSchemaVersion = parsedState.schemaVersion
+  if (parsedState.upgraded) console.log(`  note 工作区种子状态 schema v${parsedState.schemaVersion} → v${SEED_STATE_SCHEMA}（同形前移，下次写入落新口径）`)
 }
 const stateFiles = state?.files ?? {}
 const stateAdopted = new Set(Array.isArray(state?.adopted) ? state.adopted : [])
@@ -249,6 +273,98 @@ const writeSeedFile = (src, dst) => {
   }
 }
 
+// --clean：只处理 scaffold 自己产生的东西。默认报告；--write 才删。
+// 删除判据（长生命周期）：孤儿种子只在「盘上哈希 = 我们记录的基线」时删；改过的一律保留。
+// sidecar = 未合并的种子更新，--write 视为显式丢弃；种子文件、run bundle、方法库永不在此删除。
+if (cleanMode) {
+  if (versionAhead) {
+    console.error(`scaffold: --clean 拒绝：工作区记录 v${state.version} 比 pack v${seed.version} 新——当前工具不认识这些"孤儿"，删除可能是删新版本种子。先升级本工具。`)
+    process.exit(1)
+  }
+  const tracked = new Set([...Object.keys(stateFiles), ...(Array.isArray(state?.adopted) ? state.adopted : [])])
+  const entries = {}
+  for (const rel of tracked) {
+    if (!safeSeedRel(rel)) continue
+    const st = lstatOf(destOf(rel))
+    entries[rel] = { exists: st !== null, hash: hashOf(destOf(rel), st) }
+  }
+  const cleanup = planSeedCleanup({ seed, state, entries })
+  const sidecars = new Set()
+  for (const rel of new Set([...seedRels, ...tracked])) {
+    if (!safeSeedRel(rel)) continue
+    const dir = dirname(destOf(rel))
+    if (!existsSync(dir)) continue
+    const base = basename(rel)
+    for (const name of readdirSync(dir)) {
+      if (name === `${base}.seed-new` || name.startsWith(`${base}.seed-new-`)) sidecars.add(join(dir, name))
+    }
+  }
+  const tmps = existsSync(workspace)
+    ? readdirSync(workspace).filter((name) => name.startsWith('.dsh-research-seed.json.tmp-')).map((name) => join(workspace, name))
+    : []
+  let staleLock = null
+  let liveLock = null
+  if (!lockHeld && existsSync(lockPath)) {
+    let holder = null
+    try { holder = Number(readFileSync(lockPath, 'utf8').trim()) } catch {}
+    let alive = false
+    if (Number.isInteger(holder) && holder > 0) {
+      try { process.kill(holder, 0); alive = true } catch (error) { if (error.code === 'EPERM') alive = true }
+    }
+    if (alive) liveLock = { holder }
+    else staleLock = { holder }
+  }
+  console.log(`scaffold --clean（工作区 = ${workspace}；模式 = ${cleanWrite ? '执行' : '报告'}）`)
+  for (const item of cleanup.remove) console.log(`  - 删除孤儿：${item.rel}（未改过，新种子已移除）`)
+  for (const item of cleanup.keep) console.log(`  ~ 保留孤儿：${item.rel}（被改过——用户资产，不删）`)
+  for (const rel of cleanup.dropFromState) console.log(`  · 清账：${rel}（文件已不在，状态记录失效）`)
+  for (const file of [...sidecars].sort()) {
+    console.log(discardSidecars
+      ? `  - 丢弃 sidecar：${relative(workspace, file)}（未合并的种子更新）`
+      : `  ~ 保留 sidecar：${relative(workspace, file)}（未合并；要丢弃加 --discard-sidecars）`)
+  }
+  for (const file of tmps) console.log(`  - 删除临时状态：${relative(workspace, file)}`)
+  if (staleLock !== null) console.log(`  - 删除陈旧锁：${relative(workspace, lockPath)}（pid ${staleLock.holder ?? '未知'} 已不在）`)
+  if (liveLock !== null) console.log(`  ~ 保留锁：${relative(workspace, lockPath)}（pid ${liveLock.holder} 仍活跃）`)
+  const removable = cleanup.remove.length + cleanup.dropFromState.length + (discardSidecars ? sidecars.size : 0) + tmps.length + (staleLock === null ? 0 : 1)
+  if (!cleanWrite) {
+    console.log(`\nscaffold --clean: ${removable === 0 ? '无可清理项' : `发现 ${removable} 项可清理（未删；加 --write 执行）`}${cleanup.keep.length > 0 ? `；${cleanup.keep.length} 个改过的孤儿保留` : ''}`)
+    process.exit(removable === 0 ? 0 : 1)
+  }
+  let failed = 0
+  const removeFile = (target) => {
+    try { unlinkSync(target) } catch (error) {
+      console.error(`scaffold: 删除失败：${target}（${error.code ?? error.message}）`)
+      failed += 1
+    }
+  }
+  for (const item of cleanup.remove) removeFile(destOf(item.rel))
+  if (discardSidecars) for (const file of sidecars) removeFile(file)
+  for (const file of tmps) removeFile(file)
+  if (staleLock !== null) removeFile(lockPath)
+  if (state !== null && cleanup.remove.length + cleanup.dropFromState.length > 0) {
+    const files = { ...stateFiles }
+    for (const item of cleanup.remove) delete files[item.rel]
+    for (const rel of cleanup.dropFromState) delete files[rel]
+    const adopted = (Array.isArray(state.adopted) ? state.adopted : []).filter((rel) => existsSync(destOf(rel)))
+    const skipped = (Array.isArray(state.skipped) ? state.skipped : []).filter((rel) => Object.hasOwn(files, rel) || existsSync(destOf(rel)))
+    const nextState = { schemaVersion: SEED_STATE_SCHEMA, version: state.version, files, skipped, adopted }
+    if (JSON.stringify(nextState) !== JSON.stringify({ schemaVersion: stateSchemaVersion, version: state.version, files: stateFiles, skipped: state.skipped ?? [], adopted: Array.isArray(state.adopted) ? state.adopted : [] })) {
+      const tmpState = `${statePath}.tmp-${process.pid}`
+      try {
+        writeFileSync(tmpState, `${JSON.stringify(nextState, null, 2)}\n`)
+        renameSync(tmpState, statePath)
+      } catch (error) {
+        try { unlinkSync(tmpState) } catch {}
+        console.error(`scaffold: 状态文件写入失败：${statePath}（${error.code ?? error.message}）`)
+        failed += 1
+      }
+    }
+  }
+  console.log(`\nscaffold --clean: ${failed === 0 ? '完成' : `${failed} 项失败`}（删除 ${cleanup.remove.length} 个孤儿 / ${discardSidecars ? sidecars.size : 0} 个 sidecar / ${tmps.length} 个临时件${staleLock === null ? '' : ' / 1 个陈旧锁'}；保留 ${cleanup.keep.length} 个改过的孤儿${discardSidecars ? '' : ` + ${sidecars.size} 个未合并 sidecar`}）`)
+  process.exit(failed === 0 ? 0 : 1)
+}
+
 const plan = seedRels.map((rel) => {
   const destPath = destOf(rel)
   const destStat = lstatOf(destPath)
@@ -263,6 +379,11 @@ const plan = seedRels.map((rel) => {
 for (const p of plan) {
   if (stateAdopted.has(p.rel) && p.destHash !== null && p.status !== 'current') p.status = 'modified'
 }
+// `.gitignore` 的 owner 是用户：preflight 对 untracked 的措辞就是「保留用户规则」。因此 --force
+// 也不覆盖用户改过的 .gitignore，只写 sidecar 供合并（同文件的 owner 说法必须一致）。
+const gitignoreEntry = plan.find((p) => p.rel === '.gitignore')
+const gitignoreProtected = force && gitignoreEntry !== undefined && gitignoreEntry.destHash !== null
+  && (gitignoreEntry.status === 'modified' || gitignoreEntry.status === 'untracked')
 
 if (checkMode) {
   const count = (status) => plan.filter((p) => p.status === status).length
@@ -315,8 +436,11 @@ if (versionAhead && upgrade && !force) {
   const writtenRels = new Set()
   // 先验证所有会写的父目录，再落盘：避免 templates 父 symlink 越界时前几个种子已经写了一半。
   for (const p of plan) {
-    const willWrite = force || p.status === 'missing' || (upgrade && p.status === 'stale')
-    const willSidecar = !willWrite && p.status !== 'current' && upgrade && (p.status === 'modified' || p.status === 'untracked')
+    const forceWrites = force && !(p.rel === '.gitignore' && gitignoreProtected)
+    const willWrite = forceWrites || p.status === 'missing' || (upgrade && p.status === 'stale')
+    const willSidecar = !willWrite && p.status !== 'current'
+      && ((upgrade && (p.status === 'modified' || p.status === 'untracked'))
+        || (force && p.rel === '.gitignore' && gitignoreProtected))
     if (!willWrite && !willSidecar) continue
     try {
       assertSeedTargetInsideWorkspace({ workspace, rel: p.rel })
@@ -326,7 +450,7 @@ if (versionAhead && upgrade && !force) {
     }
   }
   for (const p of plan) {
-    const shouldWrite = force || p.status === 'missing' || (upgrade && p.status === 'stale')
+    const shouldWrite = (force && !(p.rel === '.gitignore' && gitignoreProtected)) || p.status === 'missing' || (upgrade && p.status === 'stale')
     if (shouldWrite) {
       if (!dryRun) {
         mkdirSync(dirname(p.destPath), { recursive: true })
@@ -337,7 +461,7 @@ if (versionAhead && upgrade && !force) {
       continue
     }
     if (p.status === 'deleted') { skipped += 1; continue }
-    if (p.status !== 'current' && upgrade && (p.status === 'modified' || p.status === 'untracked')) {
+    if (p.status !== 'current' && ((upgrade && (p.status === 'modified' || p.status === 'untracked')) || (force && p.rel === '.gitignore' && gitignoreProtected))) {
       if (!dryRun) {
         const sidecar = `${p.destPath}.seed-new`
         if (existsSync(sidecar)) {
@@ -396,6 +520,15 @@ if (versionAhead && upgrade && !force) {
       force,
     })
     const nextFiles = { ...next.files }
+    // --force 不覆盖用户 .gitignore：基线保持用户改前的记录（或干脆不记 untracked），
+    // 让 --check/preflight 继续看见「用户规则未被接管」。
+    if (gitignoreProtected && gitignoreEntry !== undefined) {
+      if (gitignoreEntry.stateHash !== null) nextFiles['.gitignore'] = gitignoreEntry.stateHash
+      else {
+        delete nextFiles['.gitignore']
+        if (!next.skipped.includes('.gitignore')) { next.skipped.push('.gitignore'); next.skipped.sort() }
+      }
+    }
     for (const rel of adoptedNow) {
       const entry = plan.find((p) => p.rel === rel)
       if (entry !== undefined && entry.destHash !== null) nextFiles[rel] = entry.destHash
@@ -405,8 +538,8 @@ if (versionAhead && upgrade && !force) {
     if (force) for (const rel of writtenRels) adoptedSet.delete(rel)
     const adopted = [...adoptedSet].filter((rel) => existsSync(destOf(rel))).sort()
     const version = (adopt || force || upgrade || state === null) ? seed.version : state.version
-    const nextState = { version, files: nextFiles, skipped: next.skipped, adopted }
-    const previousState = state === null ? null : { version: state.version, files: stateFiles, skipped: state.skipped ?? [], adopted: Array.isArray(state.adopted) ? state.adopted : [] }
+    const nextState = { schemaVersion: SEED_STATE_SCHEMA, version, files: nextFiles, skipped: next.skipped, adopted }
+    const previousState = state === null ? null : { schemaVersion: stateSchemaVersion, version: state.version, files: stateFiles, skipped: state.skipped ?? [], adopted: Array.isArray(state.adopted) ? state.adopted : [] }
     if (force || upgrade || state === null || JSON.stringify(nextState) !== JSON.stringify(previousState)) {
       const tmpState = `${statePath}.tmp-${process.pid}`
       try {
@@ -454,13 +587,13 @@ if (seedOnly) {
   const TEAM_SPEC = TEAM_VERSION === null ? TEAM : `${TEAM}@${TEAM_VERSION}`
   const hasDsh = dshVersionRun.status === 0
   if (TEAM_VERSION === null) {
-    note(false, teamLabel, '无法派生团队层版本——安装锚、profile app-boot、PATH dsh 都不可用')
+    note(false, teamLabel, '无法派生团队层版本——安装锚、profile app-boot、PATH dsh 都不可用（团队层是 N2 experimental；先确认 dsh 在 PATH 或给 --install-anchor）')
   } else if (installedTeamVersion === TEAM_VERSION && !refreshTeam) {
     note(true, teamLabel, `已在场：${TEAM}@${installedTeamVersion}（不改写依赖来源；需要刷新用 --refresh-team）`)
   } else if (installedTeamVersion !== null && !refreshTeam) {
-    note(false, teamLabel, `已在场但版本是 ${installedTeamVersion}，运行版本期望 ${TEAM_VERSION}；确认后用 --refresh-team 更新（默认不改用户 pin）`)
+    note(false, teamLabel, `已在场但版本是 ${installedTeamVersion}，运行版本期望 ${TEAM_VERSION}；确认后用 --refresh-team 更新（默认不改用户 pin；N2 experimental 随 DSH 版本走）`)
   } else if (!hasDsh) {
-    note(false, teamLabel, 'dsh CLI 不可用——装 DSH 后重跑，或手工在 profile 的 dsh.profile.bundles 加该层')
+    note(false, teamLabel, 'dsh CLI 不可用——装 DSH 后重跑，或手工在 profile 的 dsh.profile.bundles 加该层（N2 experimental：缺层时四角色协作主通道不可用）')
   } else if (dryRun) {
     note(true, teamLabel, `[dry-run] 将执行：dsh plugin --profile ${profile} add ${TEAM_SPEC}`)
   } else {

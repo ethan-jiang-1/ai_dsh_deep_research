@@ -29,3 +29,5 @@
 | DSH Desktop 安装面 | 当前支持面 = CLI（npm/tarball）；Desktop 未实测 | 用户报告在 Desktop 安装本包或装载 client 失败；或本机可实测 Desktop 时 | [guides/65 §7](../docs/guides/65-run-forms.md) + [部署加固 Note](../notes/implemented/2026-10-26-deploy-truth-and-isolation.md) |
 | 活升级/卸载 | 文档要求先停 profile；运行中替换 `node_modules` 的演练未做 | 真实用户在 web 运行中升级/卸载后出现模块错配、会话异常或端口残留 | [guides/65 §3](../docs/guides/65-run-forms.md) |
 | 共享 home / 同 workspace 双实例 | 不支持；无跨进程锁 | 用户要求多人共享 home 或同 workspace 并行两个实例 | [guides/65 §4](../docs/guides/65-run-forms.md) |
+| agent-team 实验层状态 | 本包承重依赖 N2（`packages/experimental/agent-team*`），按运行中 DSH 版本装层；不写 `dependencies` | 上游把 agent-team 移出 experimental、改名或删除（升 pin 时 `vendor/dsh/packages/experimental/` 不再有该包），或运行中 DSH 不再随带 team profile 行 | [发布前数据契约卡](_archived/settled_issues/2026-10-27-release-data-contract.md) + [guides/65 §3](../docs/guides/65-run-forms.md) |
+| 声明支持的 DSH 版本 | `engines.dsh` 覆盖 rc.2–0.2.x；运行时数据面只验过 rc.2（安装形状验过 rc.3） | 要在 README/兼容矩阵宣告新的 DSH 版本，却没有该版本上的驾驶舱读取烟测（`client-load-smoke` 或等价）时，先补证据再宣告 | [发布前数据契约卡](_archived/settled_issues/2026-10-27-release-data-contract.md) §G2 |

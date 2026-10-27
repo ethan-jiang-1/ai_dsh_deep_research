@@ -3,12 +3,12 @@
 // 只写 acceptance 不补新契约文件。
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import {
   READ_ORDER, buildDelivered, buildManifest, corpusRootLabel, pickPresented, receiptProblems,
-  renderAcceptance, shouldWriteReceipts, sha256Of,
+  renderAcceptance, repairReceiptPaths, shouldWriteReceipts, sha256Of, sha256Text,
 } from '../../scripts/lib/run-receipt.mjs'
 import { hygieneOf } from '../../scripts/lib/schema-scan-core.mjs'
 
@@ -114,6 +114,88 @@ test('buildDelivered/buildManifest/renderAcceptance：回执无绝对路径，ma
     const raw = ['delivered.json', 'manifest.json', 'acceptance.md']
       .map((f) => readFileSync(join(b, f), 'utf8')).join('\n')
     assert.equal(raw.includes(dir), false, '回执不得写入临时根绝对路径')
+  } finally { cleanup() }
+})
+
+test('buildDelivered：present 是绝对路径（vendor 真实语义）→ 归一化为 drt_<slug>/ 相对标签', () => {
+  const { dir, cleanup } = makeRoot()
+  try {
+    const b = writeBundle(dir)
+    const delivered = buildDelivered({
+      slug: 'drt_x', bundleDir: b, corpusRoot: '$DSH_HOME/sessions', acceptedAt: '2026-10-23T10:00:00.000Z',
+      presented: [
+        { path: join(b, 'final', 'v1.md'), version: 1, callId: 'p1', time: 1 },
+        { path: join(b, 'final', 'v2.md'), version: 2, callId: 'p3', time: 3 },
+      ],
+    })
+    assert.equal(delivered.present.path, 'drt_x/final/v2.md', '绝对 present 必须归一化为工作区相对标签')
+    assert.equal(delivered.present.unportable, undefined, 'bundle 内 present 不得标 unportable')
+    assert.equal(JSON.stringify(delivered).includes(b), false, '回执不得自带临时根绝对路径')
+  } finally { cleanup() }
+})
+
+test('buildDelivered：present 在 bundle 外 → path null + unportable（交付侧必须拒收）', () => {
+  const { dir, cleanup } = makeRoot()
+  try {
+    const b = writeBundle(dir)
+    const delivered = buildDelivered({
+      slug: 'drt_x', bundleDir: b, corpusRoot: '$DSH_HOME/sessions', acceptedAt: '2026-10-23T10:00:00.000Z',
+      presented: [{ path: join(dir, 'elsewhere', 'report.md'), version: 1, callId: 'p1', time: 1 }],
+    })
+    assert.equal(delivered.present.path, null, 'bundle 外路径不得进回执')
+    assert.equal(delivered.present.unportable, true, '必须显式标 unportable，交给调用方拒收')
+  } finally { cleanup() }
+})
+
+test('repairReceiptPaths：旧回执的 bundle 内绝对 present → 相对标签，并清掉可再生的 acceptance/node-gate', () => {
+  const { dir, cleanup } = makeRoot()
+  try {
+    const b = writeBundle(dir)
+    writeFileSync(join(b, 'delivered.json'), JSON.stringify({
+      version: 1, slug: 'drt_x', present: { path: join(b, 'final', 'v2.md'), callId: 'p1', version: 2 },
+    }, null, 2) + '\n')
+    writeFileSync(join(b, 'acceptance.md'), '# Acceptance\n\n/Users/alice/...\n')
+    writeFileSync(join(b, 'node-gate.md'), '# Gate\n\n/Users/alice/...\n')
+    const r = repairReceiptPaths(b)
+    assert.equal(r.ok, true)
+    const receipt = JSON.parse(readFileSync(join(b, 'delivered.json'), 'utf8'))
+    assert.equal(receipt.present.path, 'drt_x/final/v2.md')
+    assert.equal(existsSync(join(b, 'acceptance.md')), false)
+    assert.equal(existsSync(join(b, 'node-gate.md')), false)
+    assert.equal(readFileSync(join(b, 'delivered.json'), 'utf8').includes(dir), false)
+    const again = repairReceiptPaths(b)
+    assert.equal(again.ok, true)
+    assert.deepEqual(again.actions, [])
+  } finally { cleanup() }
+})
+
+test('repairReceiptPaths：bundle 外绝对 present → path null + unportable（不伪造可移植性）', () => {
+  const { dir, cleanup } = makeRoot()
+  try {
+    const b = writeBundle(dir)
+    writeFileSync(join(b, 'delivered.json'), JSON.stringify({
+      version: 1, slug: 'drt_x', present: { path: join(dir, 'elsewhere', 'drt_x', 'final', 'v2.md'), callId: 'p1', version: 2 },
+    }, null, 2) + '\n')
+    const r = repairReceiptPaths(b)
+    assert.equal(r.ok, true)
+    const receipt = JSON.parse(readFileSync(join(b, 'delivered.json'), 'utf8'))
+    assert.equal(receipt.present.path, null)
+    assert.equal(receipt.present.unportable, true)
+  } finally { cleanup() }
+})
+
+test('buildManifest：extra 在落盘前登记 delivered.json（先文本哈希、后写盘的时序形态）', () => {
+  const { dir, cleanup } = makeRoot()
+  try {
+    const b = writeBundle(dir)
+    const deliveredText = JSON.stringify({ version: 1, slug: 'drt_x' }, null, 2) + '\n'
+    const manifest = buildManifest({
+      slug: 'drt_x', bundleDir: b, contract: '2026-10-23', generatedAt: '2026-10-23T10:00:00.000Z',
+      extra: [{ path: 'delivered.json', role: 'delivery-receipt', sha256: sha256Text(deliveredText) }],
+    })
+    const entry = manifest.files.find((f) => f.path === 'delivered.json')
+    assert.equal(entry?.role, 'delivery-receipt')
+    assert.equal(entry?.sha256, sha256Text(deliveredText))
   } finally { cleanup() }
 })
 

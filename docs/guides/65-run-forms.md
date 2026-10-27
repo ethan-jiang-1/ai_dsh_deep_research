@@ -47,7 +47,8 @@ P 里的 `workspace/` 是**只读种子**：落地后归 W，由用户工作区�
 ## 3. 安装、升级、卸载
 
 - **前置**：DSH 满足包内 `engines.dsh`（值以 `package.json` 为准）；Node 满足 `engines.node`；`dsh` 在 PATH，
-  首次补团队层需要 pnpm。团队机制层 `@deepseek-ai/dsh-experimental-agent-team-profile` 与运行中的 DSH 版本一致
+  首次补团队层需要 pnpm。团队机制层 `@deepseek-ai/dsh-experimental-agent-team-profile` 是 **N2 experimental**
+  （上游可改/撤，不是产品稳定性承诺；层级表与风险见 pack README §Compatibility），须与运行中的 DSH 版本一致
   （scaffold 自动补；已在场且版本一致时**不改写来源**，要刷新用 `--refresh-team`）。`dsh` 不在 PATH 时用
   `--install-anchor <@deepseek-ai/dsh 安装目录或 package.json>` / `DSH_INSTALL_ANCHOR`。
 - **安装**：`dsh --profile <p> --from-default-profile web --dump-config` → `dsh plugin --profile <p> add <npm|tarball|目录>`；
@@ -62,6 +63,9 @@ P 里的 `workspace/` 是**只读种子**：落地后归 W，由用户工作区�
 - **回滚**：装回旧版包；工作区种子不回滚（用户数据不随插件降级），`--check` 如实报告版本关系；DSH 必须满足旧包
   `engines.dsh`，否则宿主拒绝加载。
 - **卸载**：先停 profile；`dsh plugin --profile <p> remove dsh-deep-research-pack`；工作区保留，数据清理是用户显式动作。
+  团队层不在本包内、卸载不删——不需要时显式 `dsh plugin --profile <p> remove @deepseek-ai/dsh-experimental-agent-team-profile`。
+  scaffold 自己的残留（未改孤儿 / `.seed-new` / 陈旧锁 / 临时状态）用 `scaffold --clean` 报告、`--clean --write` 清理；
+  改过的孤儿、种子、`drt_*`、方法库永不删。
 
 ## 4. 独立环境与多实例
 
@@ -100,6 +104,8 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 - `export-handoff` 自检：只含 tracked 源，不含运行态/凭据/run 数据/依赖；
 - `dev-runtime-clean` 门禁：`dev/` 下无运行态。
 - `compat-smoke`：全局 rc.3 宿主上的 install / dump / scaffold / remove（本机无 rc.3 时 exit 2）。
+- `compat-client-smoke`：全局 rc.3 宿主上真起 web + headless 浏览器，断言本包 client 挂载零失败、
+  三个研究页签可见（数据面机制已由 rc.2↔rc.3 diff 确认一致；本烟测证客户端面）。
 - `data-smoke`：包目录零写入 / 假 token 不泄漏 / 卸载后 workspace 用户文件 + session 日志保留；双会话/storage 标 N/A。
 - `pack-smoke`：T0 tarball 形状、exports 可解析、无安装期脚本/凭据。
 - `workspace-isolation-smoke`：两套 home/profile/port/state/workspace，会话组绑定各自 W；只证接线/绑定，不证模型沙箱。
@@ -119,6 +125,8 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 - 离线不是零前置：tarball 不需要 registry，但团队层需预装/缓存（含 pnpm registry metadata；只装 node_modules 不够）、Playwright MCP 首次需 npx、模型 API 需网络。
 - DSH Desktop、真实 npm registry 发布、活升级/卸载、多人共享 home 仍无证据；自定义 AGENTS 合并后用 `--adopt` 显式接受（记 baseline，`--upgrade` 不覆盖），不采用 `--adopt` 时 preflight 会继续保持 untracked 红。
 - 包目录安装的 profile 依赖记录绝对路径，但安装副本已复制；移动源目录后旧路径不能重装/升级（需 remove 后从新路径 add），`link:` 移动即断链；正式分发用 tarball/npm。
+- **数据保留/权限/版本线**：run bundle 无自动 GC；一 Host 一用户、bundle 继承工作区权限；一个工作区
+  只跟一条 pack 版本线；`method-library.md` 无锁无版本史，run 活跃时不手改。用户视角细节 = pack README §Data。
 - 研究方法论本身不在本页：角色/preset/skill 见 [guides/62](62-plugin-authoring.md) 与 pack 内容；run 操作见 [guides/61](61-run-playbook.md)。
 
 > 决定理由、输掉的方案与实际证据 = [运行形态合同 Note](../../notes/implemented/2026-10-25-run-form-contract.md)。

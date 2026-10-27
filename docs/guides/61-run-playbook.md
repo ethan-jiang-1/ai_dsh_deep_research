@@ -167,7 +167,10 @@ BUG-020）。
   门A 会带 ⚠ 注记显性化——拍板时先核条件（裁决归你，机械门不替你拦）；
 - **拍板后操作侧跑一次验收（原子动作）**：`source dev/env.sh && node scripts/run-ops/run-accept.mjs
   research-workspace/drt_<slug>`——node-gate + evidence-audit + path-hygiene（本机 home 路径）+ 未来日期 sanity 同次跑；预检红不写，绿写
-  `delivered.json` + `manifest.json` + `acceptance.md`（新 run 非 quick_factual 的 reader 角色/哈希一并绑定）；复核后加 `--archive` 才移入 `archive/drt_<slug>/`。门 A/C、审计或日期红时不要手工归档。
+  `delivered.json` + `manifest.json` + `acceptance.md`（新 run 非 quick_factual 的 reader 角色/哈希一并绑定）；回执里 present 只记
+  `drt_<slug>/final/vN` 相对标签，不写本机绝对路径；落盘后还会复检一次门禁/审计生成物。复核后加 `--archive` 才移入
+  `archive/drt_<slug>/`。门 A/C、审计或日期红时不要手工归档。历史 bundle 的旧回执若已带绝对路径，用 `--repair` 显式修
+  （只归一化 delivered.json 并删除可再生的 acceptance/node-gate，再走同一套预检）。
 - **拍板前先读读者版**：review 终局 PASS 后、HITL2 前，Lead 已按 `reader-final` skill 写
   `final/readable.md`；「终稿」页签默认显示读者版，`看审计版` 可切回 `final/vN`（未交付时
   `final.md`）。读者版是决策面，canonical 是审计源；两份不一致以 canonical 为准。

@@ -7,8 +7,9 @@
 //   · 校验：receiptProblems 复算 final/audit 哈希——门禁消费，回执不再只写不读。
 // 权威边界：回执不是指令、不自证批准；它只把「验收时的事实」固定成可复算的记录。
 import { createHash } from 'node:crypto'
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
 import { basename, join, resolve, sep } from 'node:path'
+import { portableBundlePath } from './path-hygiene.mjs'
 
 /** Agent 读序（与手册 §状态头、读序与恢复 / RFC §11.2 逐字一致的单点）。 */
 export const READ_ORDER = [
@@ -50,6 +51,11 @@ export const FINAL_ROLES = {
 /** 文件 sha256（缺席/不可读 → null，不抛）。 */
 export function sha256Of(path) {
   try { return createHash('sha256').update(readFileSync(path)).digest('hex') } catch { return null }
+}
+
+/** 文本的 sha256（回执先算文本哈希再落盘时用；与 sha256Of 同口径 = 文件字节）。 */
+export function sha256Text(text) {
+  return createHash('sha256').update(String(text)).digest('hex')
 }
 
 /**
@@ -153,6 +159,9 @@ export function buildDelivered({ slug, bundleDir, corpusRoot, acceptedAt, presen
   const auditText = existsSync(auditPath) ? readFileSync(auditPath, 'utf8') : ''
   const critical = /CRITICAL\s+(\d+)/.exec(auditText)?.[1] ?? null
   const present = pickPresented(presented)
+  // vendor 的 `deliverables/presented` 记录的是绝对路径；回执不得自带本机路径（D28 卫生门）。
+  // bundle 内 → `drt_<slug>/...` 标签；bundle 外 → null + unportable，由交付侧拒收。
+  const presentLabel = present === null ? null : portableBundlePath(present.path, bundleDir)
   return {
     version: 1,
     slug,
@@ -164,17 +173,85 @@ export function buildDelivered({ slug, bundleDir, corpusRoot, acceptedAt, presen
     readable: readerPath === null || !existsSync(readerPath)
       ? null
       : { path: `final/readable-v${finalVersion}.md`, sha256: sha256Of(readerPath) },
-    present: present === null ? null : { path: present.path, callId: present.callId, version: present.version },
+    present: present === null
+      ? null
+      : {
+        path: presentLabel,
+        callId: present.callId,
+        version: present.version,
+        ...(presentLabel === null ? { unportable: true } : {}),
+      },
   }
 }
 
+/**
+ * 修复历史回执的本机路径（BUG-044 之前写出的 bundle）。
+ * 只动**可再生产物**：`delivered.json` 的 present 归一化为可移植标签；`acceptance.md` /
+ * `node-gate.md` 删除（run-accept 绿后会重新生成）。不动研究内容、不动 audit.md。
+ * @param {string} bundleDir run bundle 根。
+ * @returns {{ok:boolean, actions:string[], reason?:string}} ok=false 时未做任何修改。
+ */
+export function repairReceiptPaths(bundleDir) {
+  const path = join(bundleDir, 'delivered.json')
+  let original = null
+  if (existsSync(path)) {
+    try { original = readFileSync(path, 'utf8') } catch (error) {
+      return { ok: false, actions: [], reason: `delivered.json 不可读：${String(error)}` }
+    }
+  }
+  let next = original
+  if (original !== null) {
+    let receipt
+    try { receipt = JSON.parse(original) } catch {
+      return { ok: false, actions: [], reason: 'delivered.json 不可解析（JSON）——先人工确认，不自动改' }
+    }
+    if (receipt?.present !== null && typeof receipt?.present === 'object') {
+      const raw = receipt.present.path
+      const label = typeof raw === 'string' ? portableBundlePath(raw, bundleDir) : raw
+      const nextPresent = label === null
+        ? { ...receipt.present, path: null, unportable: true }
+        : { ...receipt.present, path: label }
+      if (nextPresent.path !== raw || (label === null && receipt.present.unportable !== true)) {
+        receipt.present = nextPresent
+        next = `${JSON.stringify(receipt, null, 2)}\n`
+      }
+    }
+  }
+  const actions = []
+  if (next !== null && next !== original) {
+    const tmp = `${path}.tmp-${process.pid}`
+    try {
+      writeFileSync(tmp, next)
+      renameSync(tmp, path)
+      actions.push('delivered.json: present 路径归一化')
+    } catch (error) {
+      try { unlinkSync(tmp) } catch {}
+      return { ok: false, actions: [], reason: `delivered.json 写入失败：${String(error)}` }
+    }
+  }
+  for (const name of ['acceptance.md', 'node-gate.md']) {
+    const target = join(bundleDir, name)
+    if (!existsSync(target)) continue
+    try {
+      unlinkSync(target)
+      actions.push(`${name}: 删除（可再生产物，验收时重建）`)
+    } catch (error) {
+      return { ok: false, actions, reason: `${name} 删除失败：${String(error)}` }
+    }
+  }
+  return { ok: true, actions }
+}
+
 /** 生成 manifest.json 的主体（目录说明书，不是指令；不自我引用、不含后写的 acceptance）。 */
-export function buildManifest({ slug, bundleDir, contract, generatedAt }) {
+export function buildManifest({ slug, bundleDir, contract, generatedAt, extra = [] }) {
   const files = []
   for (const ent of readdirSync(bundleDir, { withFileTypes: true })) {
     if (!ent.isFile() || ent.name === 'manifest.json' || ent.name === 'acceptance.md') continue
     files.push({ path: ent.name, role: FILE_ROLES[ent.name] ?? 'unknown', sha256: sha256Of(join(bundleDir, ent.name)) })
   }
+  // extra = 与 manifest 同时生成、尚未落盘的件（delivered.json 先算文本哈希再写，避免
+  // 「先写 delivered 才能被 manifest 看见」的时序依赖）。
+  files.push(...extra)
   const finalDir = join(bundleDir, 'final')
   if (existsSync(finalDir)) {
     for (const f of readdirSync(finalDir).filter((x) => /^v\d+\.md$/.test(x)).sort()) {
@@ -200,7 +277,9 @@ export function buildManifest({ slug, bundleDir, contract, generatedAt }) {
 
 /** 渲染 acceptance.md（ops 回执；语料根只写可复算标签，不写绝对路径）。 */
 export function renderAcceptance({ slug, stamp, critical, finalVersion, readableVersion = null, present, corpusRoot, legacy = false }) {
-  const presentLabel = present === null || present === undefined ? '—' : present.path
+  const presentLabel = present === null || present === undefined || present.path === null
+    ? '—'
+    : present.path
   return `# Acceptance — ${slug}（${stamp}）
 
 > 由 scripts/run-ops/run-accept.mjs 生成（操作侧验收回执；不是研究内容）。

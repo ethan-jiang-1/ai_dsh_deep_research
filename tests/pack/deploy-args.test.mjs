@@ -65,3 +65,19 @@ test('parseScaffoldArgs：install-anchor 是值参数，不会被当成 flag', (
   assert.equal(parsed.ok, true)
   assert.equal(parsed.values.installAnchor, '/opt/dsh/package.json')
 })
+
+test('parseScaffoldArgs：--clean 独立模式；--write 必须随 --clean；与 check/upgrade/force/adopt 互斥', () => {
+  const clean = parseScaffoldArgs(['--workspace', '/tmp/ws', '--clean'])
+  assert.equal(clean.ok, true)
+  assert.equal(clean.flags.clean, true)
+  const write = parseScaffoldArgs(['--workspace', '/tmp/ws', '--clean', '--write'])
+  assert.equal(write.ok, true)
+  assert.equal(write.flags.write, true)
+  assert.equal(parseScaffoldArgs(['--workspace', '/tmp/ws', '--write']).ok, false, '--write 缺 --clean 应拒绝')
+  for (const other of ['--check', '--upgrade', '--force', '--adopt']) {
+    assert.equal(parseScaffoldArgs(['--workspace', '/tmp/ws', '--clean', other]).ok, false, `--clean 与 ${other} 应互斥`)
+  }
+  assert.equal(parseScaffoldArgs(['--workspace', '/tmp/ws', '--clean', '--write', '--dry-run']).ok, false, '--dry-run 与 --clean --write 应拒绝')
+  assert.equal(parseScaffoldArgs(['--workspace', '/tmp/ws', '--discard-sidecars']).ok, false, '--discard-sidecars 缺 --clean 应拒绝')
+  assert.equal(parseScaffoldArgs(['--workspace', '/tmp/ws', '--clean', '--discard-sidecars']).ok, true)
+})

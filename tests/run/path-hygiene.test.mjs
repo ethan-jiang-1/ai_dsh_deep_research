@@ -2,10 +2,13 @@
 // 反证：删 `/home/` 分支或把行号/上下文判断改坏 → 本文件红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { findHomePaths, scanHomePaths } from '../../scripts/lib/path-hygiene.mjs'
-import { readFileSync } from 'node:fs'
+import { findHomePaths, portableBundlePath, scanHomePaths } from '../../scripts/lib/path-hygiene.mjs'
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+const BUNDLE = join('/ws', 'research-workspace', 'drt_x')
 
 test('findHomePaths：Unix / macOS / Windows home 前缀都命中，并给行号', () => {
   const text = [
@@ -36,5 +39,35 @@ test('交付门覆盖面：run/question/plan/findings/review/journal/evidence �
   const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'scripts', 'run-gates', 'path-hygiene.mjs'), 'utf8')
   for (const name of ['run.md', 'question.md', 'topics.md', 'plan.md', 'findings.md', 'review.md', 'journal.md', 'leads.md', 'evidence']) {
     assert.ok(src.includes(name), `path-hygiene 未覆盖 ${name}`)
+  }
+})
+
+test('portableBundlePath：bundle 内绝对路径 → drt_<slug>/ 相对标签（回执/门禁的可移植形态）', () => {
+  assert.equal(portableBundlePath(join(BUNDLE, 'final', 'v1.md'), BUNDLE), 'drt_x/final/v1.md')
+  assert.equal(portableBundlePath(join(BUNDLE, 'final', 'readable-v1.md'), BUNDLE), 'drt_x/final/readable-v1.md')
+})
+
+test('portableBundlePath：已是相对路径 → 原样保留（旧样本/手写回执）', () => {
+  assert.equal(portableBundlePath('drt_x/final/v1.md', BUNDLE), 'drt_x/final/v1.md')
+  assert.equal(portableBundlePath('final/v1.md', BUNDLE), 'final/v1.md')
+})
+
+test('portableBundlePath：bundle 外绝对路径 → null（不得把本机路径写进回执）', () => {
+  assert.equal(portableBundlePath('/tmp/report.md', BUNDLE), null)
+  assert.equal(portableBundlePath(join(BUNDLE, '..', 'drt_y', 'final', 'v1.md'), BUNDLE), null)
+  assert.equal(portableBundlePath(join(BUNDLE, '..', 'drt_x-extra', 'final', 'v1.md'), BUNDLE), null)
+})
+
+test('portableBundlePath：bundleDir 经 symlink、present 是 realpath → 仍归一化（不假红）', () => {
+  const base = realpathSync(mkdtempSync(`${tmpdir()}/dsh-link-`))
+  const real = `${base}/drt_x`
+  mkdirSync(`${real}/final`, { recursive: true })
+  writeFileSync(`${real}/final/v1.md`, '# v1\n')
+  const link = `${base}/link-x`
+  symlinkSync(real, link)
+  try {
+    assert.equal(portableBundlePath(`${real}/final/v1.md`, link), 'drt_x/final/v1.md')
+  } finally {
+    rmSync(base, { recursive: true, force: true })
   }
 })

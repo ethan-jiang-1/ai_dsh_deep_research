@@ -315,6 +315,64 @@ try {
   check(run(['--workspace', wsPath]).status === 0 && existsSync(join(wsPath, 'AGENTS.md')), '空格/中文 workspace 铺种')
   check(run(['--check', '--workspace', wsPath]).status === 0, '空格/中文 workspace --check')
 
+  // ④c --clean：只报告（exit 1、零删除）→ --write 删未改孤儿/sidecar/陈旧锁，保留改过的孤儿
+  const wsClean = join(TEMP, 'ws-clean')
+  check(run(['--workspace', wsClean]).status === 0, 'clean 场景铺种')
+  writeFileSync(join(wsClean, 'orphan.md'), 'orphan\n')
+  writeFileSync(join(wsClean, 'user-orphan.md'), 'user changed\n')
+  const cleanStatePath = join(wsClean, '.dsh-research-seed.json')
+  const cleanState = JSON.parse(read(cleanStatePath))
+  cleanState.files['orphan.md'] = sha256('orphan\n')
+  cleanState.files['user-orphan.md'] = sha256('what we wrote\n')
+  writeFileSync(cleanStatePath, `${JSON.stringify(cleanState, null, 2)}\n`)
+  writeFileSync(join(wsClean, 'templates', 'run', 'plan.md.seed-new'), 'sidecar\n')
+  writeFileSync(join(wsClean, '.dsh-research-scaffold.lock'), '9999999')
+  const cleanReport = run(['--clean', '--workspace', wsClean])
+  check(cleanReport.status === 1 && /删除孤儿：orphan\.md/.test(cleanReport.stdout), '--clean 报告可清理项（exit 1）', cleanReport.stdout.split('\n').slice(-2).join(' | '))
+  check(existsSync(join(wsClean, 'orphan.md')) && existsSync(join(wsClean, 'templates', 'run', 'plan.md.seed-new')), '--clean 报告模式零删除')
+  check(run(['--clean', '--write', '--dry-run', '--workspace', wsClean]).status === 2, '--clean --write --dry-run 被拒绝（不是删除许可）')
+  const cleanWrite = run(['--clean', '--write', '--workspace', wsClean])
+  check(cleanWrite.status === 0, '--clean --write 成功', cleanWrite.stderr)
+  check(!existsSync(join(wsClean, 'orphan.md')), '--clean --write 删除未改孤儿')
+  check(existsSync(join(wsClean, 'templates', 'run', 'plan.md.seed-new')), '--clean --write 默认保留未合并 sidecar')
+  check(existsSync(join(wsClean, 'user-orphan.md')), '--clean --write 保留改过的孤儿')
+  const cleanSidecars = run(['--clean', '--write', '--discard-sidecars', '--workspace', wsClean])
+  check(cleanSidecars.status === 0 && !existsSync(join(wsClean, 'templates', 'run', 'plan.md.seed-new')), '--discard-sidecars 才丢弃 sidecar')
+  const cleanStateAfter = JSON.parse(read(cleanStatePath))
+  check(!Object.hasOwn(cleanStateAfter.files, 'orphan.md'), 'clean 后状态账本清掉已删孤儿')
+  check(Object.hasOwn(cleanStateAfter.files, 'user-orphan.md'), 'clean 后状态账本保留改过的孤儿')
+  check(existsSync(join(wsClean, 'AGENTS.md')), 'clean 不删种子文件')
+  check(run(['--clean', '--workspace', wsClean]).status === 0, 'clean 幂等（第二次无可清理项）')
+
+  // ④c2 工作区记录比 pack 新：--clean 拒绝（不能把新版本的种子当孤儿删）
+  const wsCleanAhead = join(TEMP, 'ws-clean-ahead')
+  mkdirSync(wsCleanAhead, { recursive: true })
+  writeFileSync(join(wsCleanAhead, 'newer.md'), 'newer\n')
+  writeFileSync(join(wsCleanAhead, '.dsh-research-seed.json'), `${JSON.stringify({
+    schemaVersion: 1, version: '99.9.9',
+    files: { 'newer.md': sha256('newer\n') }, skipped: [], adopted: [],
+  }, null, 2)}\n`)
+  const aheadClean = run(['--clean', '--write', '--workspace', wsCleanAhead])
+  check(aheadClean.status === 1 && /比 pack .* 新/.test(aheadClean.stderr), 'clean 拒绝删除新版本状态的孤儿', (aheadClean.stderr || '').slice(-200))
+  check(existsSync(join(wsCleanAhead, 'newer.md')), 'clean 拒绝后不删文件')
+
+  // ④d --force 不覆盖用户 .gitignore（与 preflight「保留用户规则」同一 owner 口径）
+  const wsIgnoreForce = join(TEMP, 'ws-gitignore-force')
+  mkdirSync(wsIgnoreForce, { recursive: true })
+  writeFileSync(join(wsIgnoreForce, '.gitignore'), '# my rules\n')
+  check(run(['--force', '--workspace', wsIgnoreForce]).status === 0, '--force 遇到用户 .gitignore 仍成功')
+  check(read(join(wsIgnoreForce, '.gitignore')) === '# my rules\n', '--force 不覆盖用户 .gitignore')
+  check(existsSync(join(wsIgnoreForce, '.gitignore.seed-new')), '--force 写 .gitignore.seed-new 供合并')
+  const ignoreForceState = JSON.parse(read(join(wsIgnoreForce, '.dsh-research-seed.json')))
+  check((ignoreForceState.skipped ?? []).includes('.gitignore'), '用户 .gitignore 记为 skipped（不冒充 baseline）')
+
+  // ④e 状态 schema：更新的 scaffold 写的状态 fail loud，不静默当无状态
+  const wsSchema = join(TEMP, 'ws-schema')
+  check(run(['--workspace', wsSchema]).status === 0, 'schema 场景铺种')
+  writeFileSync(join(wsSchema, '.dsh-research-seed.json'), '{"schemaVersion":2,"version":"9.0.0","files":{}}\n')
+  const schemaAhead = run(['--check', '--workspace', wsSchema])
+  check(schemaAhead.status === 1 && /更新的 scaffold/.test(schemaAhead.stderr), '新 schema 状态被拒绝（不猜、不覆盖）', (schemaAhead.stderr || '').slice(-200))
+
   // ⑤ 新版移除种子：旧文件保留但 --check 必须报 orphan，不静默假装 current
   const orphanSeed = JSON.parse(read(join(PACKCOPY, 'workspace', 'seed.json')))
   delete orphanSeed.files['NODES.md']

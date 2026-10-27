@@ -42,9 +42,8 @@ function withDeadline(signal: AbortSignal | undefined, ms: number): AbortSignal 
 export interface Config {
   /** Turn the fallback off without unwiring the provider (local-only mode). */
   enabled: boolean
-  /** Literal DeepSeek API key; prefer {@link apiKeyEnv} so no secret enters configuration files. */
-  apiKey?: string
-  /** Credential reference resolved per fallback attempt; defaults to `DEEPSEEK_API_KEY`. */
+  /** Credential reference resolved per fallback attempt; defaults to `DEEPSEEK_API_KEY`.
+   *  Secrets never live in plugin config (profile patch is user-visible/backed up). */
   apiKeyEnv: string
   /** Search / Fetch API base including its path prefix; `/fetch` is appended. */
   baseURL: string
@@ -58,7 +57,6 @@ export interface Config {
 
 export const Config = z.object({
   enabled: z.boolean().default(true),
-  apiKey: z.string().role('secret'),
   apiKeyEnv: z.string().role('credential-ref').default('DEEPSEEK_API_KEY'),
   baseURL: z.string().default(DEEPSEEK_WEB_API_BASE_URL),
   localTimeoutMs: z.number().step(1).min(1_000).default(10_000),
@@ -91,7 +89,6 @@ export function apply(ctx: Context, config: Config): void {
   }
 
   const api = new DeepSeekFetchApiProvider((): DeepSeekFetchApiOptions => ({
-    ...(config.apiKey !== undefined && config.apiKey.length > 0 ? { apiKey: config.apiKey } : {}),
     apiKeyEnv: config.apiKeyEnv as unknown as NonNullable<DeepSeekFetchApiOptions['apiKeyEnv']>,
     baseURL: config.baseURL,
     resolveApiKey,

@@ -4,6 +4,7 @@
 
 | 文件 | 历史消费者 | 日期 |
 |---|---|---|
+| [data-contract/2026-10-27-dsh-data-plane-digest.md](data-contract/2026-10-27-dsh-data-plane-digest.md) | [发布前数据契约](../settled_issues/2026-10-27-release-data-contract.md) + [Note](../../../notes/implemented/2026-10-27-release-data-contract.md) + [BUG-044](../fixed_bugs/BUG-044-delivery-receipts-leak-absolute-paths.md) | 2026-10-27 |
 | [2026-10-25-dsh-plugin-conventions.md](2026-10-25-dsh-plugin-conventions.md) | [运行形态合同](../settled_issues/2026-10-25-run-form-contract.md) + [分发合同](../settled_issues/2026-10-25-distribution-contract.md) + [Note](../../../notes/implemented/2026-10-25-run-form-contract.md) | 2026-10-25 |
 | [2026-10-21-method-library-main-surface.md](2026-10-21-method-library-main-surface.md) | [2026-10-21-method-library-main-surface](../settled_issues/2026-10-21-method-library-main-surface.md)（已结卡） | 2026-10-21 |
 | [reader-final/2026-10-23-reader-final-design.md](reader-final/2026-10-23-reader-final-design.md) | [流程位卡](../settled_issues/2026-10-23-readable-final-process.md) + [可读层卡](../settled_issues/2026-10-23-run-final-human-readable.md) + [Note](../../../notes/implemented/2026-10-23-reader-final.md) + [D29](../../../docs/decisions.md) | 2026-10-24 |

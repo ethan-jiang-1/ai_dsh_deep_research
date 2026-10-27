@@ -33,6 +33,10 @@
 检索/抓取/成员/交付）；写者通常是队员会话，页签需合并 lead + member 流。需要真 mtime 时必须先扩
 vendor `WorkspaceFileStat` 并升 pin，属上游改动。
 
+**安装侧状态不在四类内**：工作区种子账本（`.dsh-research-seed.json`）、scaffold 锁/sidecar、team 层依赖
+属于安装/升级面，不是研究状态；合同 = pack README §Data/§Compatibility + [guides/65 §3](../guides/65-run-forms.md)。
+角色与审计不得把它们当研究事实读写。
+
 ## 恢复优先级
 
 断点续跑只认 run bundle 的文件事实：重跑 [run-driver](../../dev/run-driver.mjs)（内部调 boot-run）→ 新开 lead 会话 → "继续 <slug>"——lead 只凭 bundle 重建上下文，不依赖聊天记忆。session log 佐证执行事件，但不充当研究事实；观察面与任务板不参与恢复判定（操作步骤 = [Run 指南 §5](../guides/61-run-playbook.md)）。

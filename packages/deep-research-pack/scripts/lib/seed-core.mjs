@@ -7,6 +7,9 @@
  */
 import { createHash } from 'node:crypto'
 
+/** 工作区种子状态文件的 schema 版本（不是种子内容版本；内容版本 = pack 版本）。 */
+export const SEED_STATE_SCHEMA = 1
+
 /** 种子文件的内容哈希（sha256 hex；换行差异也是差异，与 git/发行物口径一致）。 */
 export function sha256(text) {
   return createHash('sha256').update(String(text), 'utf8').digest('hex')
@@ -60,7 +63,61 @@ export function nextSeedState({ seed, previousFiles = {}, classifications = {}, 
     if (!baseline && ['stale', 'modified', 'untracked', 'deleted'].includes(status)) skipped.push(rel)
   }
   const sortedFiles = Object.fromEntries(Object.entries(files).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
-  return { files: sortedFiles, skipped: [...new Set(skipped)].sort() }
+  return { schemaVersion: SEED_STATE_SCHEMA, files: sortedFiles, skipped: [...new Set(skipped)].sort() }
+}
+
+/**
+ * 解析工作区种子状态（`.dsh-research-seed.json`）。
+ * - 缺省 → state:null（旧工作区合法）；
+ * - 旧态无 `schemaVersion` → 按 0 读、同形前移（upgraded:true），下次写入即新口径；
+ * - 比当前新 → ok:false/newer-schema（不猜、不覆盖，交用户升级 scaffold）；
+ * - 坏 JSON/形状 → ok:false/corrupt（fail loud，不静默当无状态）。
+ * @param {string|null|undefined} text 状态文件原文。
+ * @returns {{ok:boolean, state?:object|null, schemaVersion?:number, upgraded?:boolean, reason?:string}}
+ */
+export function parseSeedState(text) {
+  if (text === null || text === undefined || text === '') {
+    return { ok: true, state: null, schemaVersion: 0, upgraded: false }
+  }
+  let raw
+  try { raw = JSON.parse(text) } catch { return { ok: false, reason: 'corrupt' } }
+  if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) return { ok: false, reason: 'corrupt' }
+  const declared = raw.schemaVersion
+  if (declared !== undefined && (!Number.isSafeInteger(declared) || declared < 0)) return { ok: false, reason: 'corrupt' }
+  const schemaVersion = declared ?? 0
+  if (schemaVersion > SEED_STATE_SCHEMA) return { ok: false, reason: 'newer-schema', schemaVersion }
+  const state = { ...raw, schemaVersion: SEED_STATE_SCHEMA }
+  return { ok: true, state, schemaVersion, upgraded: schemaVersion < SEED_STATE_SCHEMA }
+}
+
+/**
+ * 清理计划（纯函数）：只处理状态账本里的**孤儿**与失效记录，不碰当前种子。
+ * - 孤儿且盘上哈希 = 基线 → 删（未改过）；
+ * - 孤儿但被改过 → 保留（用户资产）；
+ * - 记录存在而文件已不在 → 清账；
+ * - 种子文件本身（含用户删掉的 deleted 态）永不删除、永不清账。
+ * @param {{seed:{files:Record<string,string>}, state:object|null, entries:Record<string,{exists:boolean,hash:string|null}>}} options
+ * @returns {{remove:Array<{rel:string,reason:string}>, keep:Array<{rel:string,reason:string}>, dropFromState:string[]}}
+ */
+export function planSeedCleanup({ seed, state, entries }) {
+  const seedFiles = seed?.files ?? {}
+  const stateFiles = state?.files ?? {}
+  const remove = []
+  const keep = []
+  const drop = new Set()
+  for (const [rel, stateHash] of Object.entries(stateFiles)) {
+    if (Object.hasOwn(seedFiles, rel)) continue
+    const entry = entries?.[rel] ?? { exists: false, hash: null }
+    if (!entry.exists) { drop.add(rel); continue }
+    if (entry.hash === stateHash) remove.push({ rel, reason: 'orphan-unmodified' })
+    else keep.push({ rel, reason: 'orphan-modified' })
+  }
+  for (const rel of Array.isArray(state?.adopted) ? state.adopted : []) {
+    if (Object.hasOwn(seedFiles, rel)) continue
+    const entry = entries?.[rel] ?? { exists: false, hash: null }
+    if (!entry.exists) drop.add(rel)
+  }
+  return { remove, keep, dropFromState: [...drop].sort() }
 }
 
 /** 包内名 → 工作区落地名：npm 不打包 `.gitignore`，种子以 `.gitignore.example` 随包。 */

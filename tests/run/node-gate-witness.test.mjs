@@ -213,3 +213,27 @@ test('hitl2RowGate：timed ask 的 tool/result 答复也算 callId 绑定见证�
     assert.match(r.gate.detail, /ask1/)
   } finally { cleanup() }
 })
+
+test('presentGate：present 是 bundle 内绝对路径（vendor 真实语义）→ PASS 且 detail 只含可移植标签', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  try {
+    const b = writeBundle(dir)
+    const sessions = writeSession(dir, [bind(), present(join(b, 'final', 'v1.md'))])
+    const r = presentGate(b, sessions, [])
+    assert.equal(r.status, 'PASS')
+    assert.ok(r.detail.includes('drt_x/final/v1.md'), `detail 未归一化：${r.detail}`)
+    assert.equal(r.detail.includes(dir), false, 'detail 不得回显本机绝对路径')
+  } finally { cleanup() }
+})
+
+test('presentGate：present 指向 bundle 外 → RED（不可移交），且 detail 不回显绝对路径', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  try {
+    const b = writeBundle(dir)
+    const sessions = writeSession(dir, [bind(), present(join(dir, 'elsewhere', 'drt_x', 'final', 'v1.md'))])
+    const r = presentGate(b, sessions, [])
+    assert.equal(r.status, 'RED')
+    assert.match(r.detail, /bundle 外/)
+    assert.equal(r.detail.includes(dir), false, 'detail 不得回显本机绝对路径')
+  } finally { cleanup() }
+})

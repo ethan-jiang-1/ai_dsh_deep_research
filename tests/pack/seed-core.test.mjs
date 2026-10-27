@@ -5,7 +5,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { classifySeedEntry, nextSeedState, seedSourceRel, serializeSeedManifest, sha256 } from '../../packages/deep-research-pack/scripts/lib/seed-core.mjs'
+import { SEED_STATE_SCHEMA, classifySeedEntry, nextSeedState, parseSeedState, planSeedCleanup, seedSourceRel, serializeSeedManifest, sha256 } from '../../packages/deep-research-pack/scripts/lib/seed-core.mjs'
 
 test('sha256：内容哈希稳定且区分换行', () => {
   assert.equal(sha256('abc'), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad')
@@ -95,4 +95,54 @@ test('pack workspace/seed.json：版本 = pack 版本，哈希与盘上种子逐
     const src = seedSourceRel(rel)
     assert.equal(sha256(readFileSync(join(PACK, 'workspace', src), 'utf8')), hash, `${rel} 的种子哈希与盘上文件不一致`)
   }
+})
+
+test('parseSeedState：缺省→null；旧态（无 schemaVersion）按 0 读并可升级；新态拒绝；坏 JSON fail loud', () => {
+  assert.deepEqual(parseSeedState(null), { ok: true, state: null, schemaVersion: 0, upgraded: false })
+  const legacy = JSON.stringify({ version: '0.1.1', files: { 'AGENTS.md': 'a' } })
+  const old = parseSeedState(legacy)
+  assert.equal(old.ok, true)
+  assert.equal(old.schemaVersion, 0)
+  assert.equal(old.upgraded, true)
+  assert.deepEqual(old.state.files, { 'AGENTS.md': 'a' })
+  const current = parseSeedState(JSON.stringify({ schemaVersion: SEED_STATE_SCHEMA, version: '1.0.0', files: {} }))
+  assert.equal(current.ok, true)
+  assert.equal(current.schemaVersion, SEED_STATE_SCHEMA)
+  assert.equal(current.upgraded, false)
+  const newer = parseSeedState(JSON.stringify({ schemaVersion: SEED_STATE_SCHEMA + 1, version: '9.0.0', files: {} }))
+  assert.equal(newer.ok, false)
+  assert.equal(newer.reason, 'newer-schema')
+  const corrupt = parseSeedState('{oops')
+  assert.equal(corrupt.ok, false)
+  assert.equal(corrupt.reason, 'corrupt')
+})
+
+test('nextSeedState：状态带 schemaVersion（旧态升级后写新口径）', () => {
+  const state = nextSeedState({ seed: { version: '1.0.0', files: { a: 'a' } }, classifications: { a: 'missing' }, written: ['a'] })
+  assert.equal(state.schemaVersion, SEED_STATE_SCHEMA)
+})
+
+test('planSeedCleanup：未改孤儿删除、改过的孤儿保留、缺失记录清账、种子删除不重铺', () => {
+  const seed = { version: '2.0.0', files: { 'AGENTS.md': 'a2', 'NODES.md': 'n2' } }
+  const state = {
+    schemaVersion: SEED_STATE_SCHEMA,
+    version: '1.0.0',
+    files: { 'AGENTS.md': 'a1', 'NODES.md': 'n1', 'old.md': 'o1', 'user.md': 'u1', 'gone.md': 'g1' },
+    skipped: ['AGENTS.md', 'user.md'],
+    adopted: ['AGENTS.md', 'gone-adopted.md'],
+  }
+  const plan = planSeedCleanup({
+    seed,
+    state,
+    entries: {
+      'old.md': { exists: true, hash: 'o1' },
+      'user.md': { exists: true, hash: 'u2' },
+      'gone.md': { exists: false, hash: null },
+      'gone-adopted.md': { exists: false, hash: null },
+    },
+  })
+  assert.deepEqual(plan.remove.map((x) => x.rel), ['old.md'])
+  assert.deepEqual(plan.keep.map((x) => x.rel), ['user.md'])
+  assert.deepEqual(plan.dropFromState.sort(), ['gone-adopted.md', 'gone.md'])
+  assert.equal(plan.remove.some((x) => x.rel === 'AGENTS.md' || x.rel === 'NODES.md'), false, '种子文件永不被 clean 删除')
 })

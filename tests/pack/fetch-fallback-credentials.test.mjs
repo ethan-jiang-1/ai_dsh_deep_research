@@ -5,6 +5,9 @@
 //   把 env 兜底删掉 → 「服务空值回落环境」测红。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { resolveCredential } from '../../packages/deep-research-pack/src/fetch-fallback/credentials.ts';
 
 const service = (value) => ({ resolve: async () => value === undefined ? undefined : { value } });
@@ -26,4 +29,11 @@ test('两处都没有 / 空串 → undefined（调用方据此不回退并如实
   assert.equal(await resolveCredential(undefined, {}, 'REF'), undefined);
   assert.equal(await resolveCredential(service(''), { REF: '' }, 'REF'), undefined);
   assert.equal(await resolveCredential(undefined, { OTHER: 'x' }, 'REF'), undefined);
+});
+
+test('Config 不提供字面量 apiKey（秘密只走 apiKeyEnv 引用，不进 profile patch）', () => {
+  const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'packages', 'deep-research-pack', 'src', 'fetch-fallback', 'index.ts'), 'utf8');
+  assert.equal(/\bapiKey\s*\?:/.test(src), false, 'Config 仍暴露 apiKey 字面量字段');
+  assert.equal(/apiKey:\s*z\.string\(\)/.test(src), false, 'Config schema 仍接受 apiKey 字面量');
+  assert.ok(src.includes("apiKeyEnv: z.string().role('credential-ref')"), 'apiKeyEnv 引用字段必须在场');
 });

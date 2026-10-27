@@ -98,7 +98,7 @@ DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`�
 |---|---|---|
 | DSH 本体 | 平台（`@deepseek-ai/dsh-base` + `dsh-web-app` 两个 bundle） | 用户装 DSH |
 | 本包 | 一个 bundle（`dsh-deep-research-pack`） | 本仓 |
-| 团队机制层 | 另一个 bundle（`@deepseek-ai/dsh-experimental-agent-team-profile`） | vendor（本包**故意不声明**团队行——组合与实战 config 归该层，RFC m2-p1-run-channel A 定案） |
+| 团队机制层 | 另一个 bundle（`@deepseek-ai/dsh-experimental-agent-team-profile`，**N2 experimental**：上游可改/撤，风险与层级表见 pack README §Compatibility） | vendor（本包**故意不声明**团队行——组合与实战 config 归该层，RFC m2-p1-run-channel A 定案） |
 | 研究工作区 | 会话 cwd 的目录（手册 `AGENTS.md` + `NODES.md` + `question-patterns.md` + `templates/run/` + 版本控制规则 `.gitignore`） | 本包 `workspace/` 种子（`dev/sync-pack-workspace.mjs` 同步） |
 
 工作区是**纪律的载体**：DSH 的 agent-instructions 从会话 cwd 向上发现 `AGENTS.md` 并注入每个

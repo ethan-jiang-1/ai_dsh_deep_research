@@ -11,7 +11,7 @@
 - **按 per-user 分发 + bundle 移交设计。** 同机多实例用 `DSH_DEV_HOME`、`DSH_RUN_PROFILE`、`DSH_RUN_PORT`、`DSH_RUN_STATE_DIR` 区分；不把共享 checkout/共享 home 作为支持面。
 - **P/H/W 三分。** P = pack（只读，发布集白名单）；H = `$DSH_HOME`（会话/凭据/profile，不随源或包移交）；W = 研究工作区（run bundle/方法库/归档，用户所有）。`dev/` 只住源码驱动，运行态住 `runtime/` 或工作区（门禁 `dev-runtime-clean`）。
 - **兼容性以宿主字段 `engines.dsh` 为单一权威**；`dsh.compatibility.dshReleases` 只作人读矩阵镜像，由门禁与契约测试对账。团队层版本从同一字段派生，`scaffold` 不再装未钉版最新层；`preflight` 优先读 profile 的 `@deepseek-ai/dsh-app-boot` 运行时，PATH CLI 只作后备。
-- **工作区种子版本化。** `workspace/seed.json` 记录版本 + 文件 sha256；`scaffold --check` 只读报告 missing/stale/untracked/modified，`--upgrade` 只覆盖未改文件（改过的写 `.seed-new`），`--force` 覆盖版本化种子但**不覆盖** `method-library.md`；状态写 `.dsh-research-seed.json`。
+- **工作区种子版本化。** `workspace/seed.json` 记录版本 + 文件 sha256；`scaffold --check` 只读报告 missing/stale/untracked/modified，`--upgrade` 只覆盖未改文件（改过的写 `.seed-new`），`--force` 覆盖版本化种子但**不覆盖** `method-library.md`；状态写 `.dsh-research-seed.json`。状态 schema、`--clean` 与 `.gitignore` owner 的后续收口见 [发布前数据契约](2026-10-27-release-data-contract.md)。
 - **独立启动 = bootstrap + 参数化。** `dev/bootstrap.sh` 串起 submodule/install/vendor 构建/env/凭据检查；`run-driver up --bootstrap` 起通道；`cold-start-smoke` 用独立 home/profile/端口/state 到浏览器面 GREEN。
 - **不新增 D 号。** 本决定未改变 D17（harness/run bundle）、D18（驾驶舱例外）、D21（启动分流）的边界；若后续改变这些边界，另立 D。
 

@@ -6,7 +6,7 @@
 // 三件事绑在一起：node-gate（交付两门/门A）+ evidence-audit（溯源 + audit.md）+ 日期 sanity；
 // 绿才写 acceptance.md，--archive 才移入 archive/drt_<slug>/。
 //
-// 用法：source dev/env.sh && node scripts/run-ops/run-accept.mjs <bundle> [--sessions <dir>] [--archive]
+// 用法：source dev/env.sh && node scripts/run-ops/run-accept.mjs <bundle> [--sessions <dir>] [--archive] [--repair]
 //       预检用 --no-write（默认只读）；绿后本工具显式给两个门 --write 落盘，再写 delivered.json/manifest.json/acceptance.md。
 // 退出码：0 = 验收绿（已写 acceptance.md）；1 = 验收红；2 = 用法/前置。
 import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
@@ -14,9 +14,11 @@ import { basename, dirname, join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { futureDateFindings } from '../lib/bundle-date-sanity.mjs'
+import { scanHomePaths } from '../lib/path-hygiene.mjs'
+import { formatSecretFinding, scanSecrets } from '../lib/secret-scan.mjs'
 import { presentedInLogs } from '../lib/node-gate-session-gates.mjs'
 import { contractEpochOf } from '../lib/schema-scan-core.mjs'
-import { buildDelivered, buildManifest, corpusRootLabel, renderAcceptance, shouldWriteReceipts } from '../lib/run-receipt.mjs'
+import { buildDelivered, buildManifest, corpusRootLabel, renderAcceptance, repairReceiptPaths, sha256Text, shouldWriteReceipts } from '../lib/run-receipt.mjs'
 import { readZstdText } from '../lib/zstd-read.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -29,7 +31,7 @@ const flag = (name) => argv.includes(name)
 const positional = argv.filter((a) => !a.startsWith('--') && argv[argv.indexOf(a) - 1] !== '--sessions')
 const bundleArg = positional[0]
 if (bundleArg === undefined || flag('--help')) {
-  console.error('run-accept: 用法 node scripts/run-ops/run-accept.mjs <bundle> [--sessions <dir>] [--archive]')
+  console.error('run-accept: 用法 node scripts/run-ops/run-accept.mjs <bundle> [--sessions <dir>] [--archive] [--repair]')
   process.exit(2)
 }
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null
@@ -50,6 +52,17 @@ if (!/^drt_[a-z0-9][a-z0-9-]*$/.test(slug)) {
 const wsRoot = dirname(bundle)
 const sessions = opt('--sessions', join(home, 'sessions'))
 const legacy = !shouldWriteReceipts(bundle)
+// 历史回执修复（BUG-044）：旧 run-accept 把 present 绝对路径写进了 delivered/acceptance/node-gate。
+// 显式 --repair 才动，且只动可再生产物；修完照常走预检，红项仍需操作者修。
+if (flag('--repair')) {
+  const repaired = repairReceiptPaths(bundle)
+  if (!repaired.ok) {
+    console.error(`run-accept: repair 失败——${repaired.reason}（未做部分修改）`)
+    process.exit(1)
+  }
+  for (const action of repaired.actions) console.log(`  REPAIR ${action}`)
+  if (repaired.actions.length === 0) console.log('  note 回执无需修复（已是可移植形态）')
+}
 
 const run = (label, script, args) => {
   const r = spawnSync(process.execPath, [join(ROOT, script), ...args], { cwd: ROOT, encoding: 'utf8', timeout: 300_000 })
@@ -73,6 +86,7 @@ const preGate = run('node-gate 预检（--no-write）', 'scripts/run-gates/node-
 const preAudit = run('evidence-audit 预检（--no-write）', 'scripts/run-gates/evidence-audit.mjs', [bundle, '--sessions', sessions, '--no-write'])
 // 交付门：新 bundle 的本机 home 路径必须为零；旧契约 bundle 按 D28 epoch 豁免只报告。
 const preHygiene = run('path-hygiene 预检（交付门）', 'scripts/run-gates/path-hygiene.mjs', [bundle, ...(legacy ? ['--allow-legacy'] : [])])
+const preSecret = run('secret-scan 预检（交付物）', 'scripts/run-gates/secret-scan.mjs', [bundle, ...(legacy ? ['--allow-legacy'] : [])])
 const dates = futureDateFindings(bundle)
 const datesOk = dates.length === 0
 if (!datesOk) {
@@ -82,7 +96,7 @@ if (!datesOk) {
 } else {
   console.log('  PASS 日期 sanity（evidence retrieved_at + journal/question 行首日期）')
 }
-const preGreen = preGate.status === 0 && preAudit.status === 0 && preHygiene.status === 0 && datesOk
+const preGreen = preGate.status === 0 && preAudit.status === 0 && preHygiene.status === 0 && preSecret.status === 0 && datesOk
 if (!preGreen) {
   console.error(`run-accept: RED（${slug}）——预检未过；未写 acceptance.md/audit.md/node-gate.md/delivered.json，未归档。先修红项再跑同一条`)
   process.exit(1)
@@ -99,6 +113,14 @@ if (!green) {
   console.error(`run-accept: RED（${slug}）——预检绿但落盘门禁/审计失败；未写 acceptance.md/delivered.json`)
   process.exit(1)
 }
+// 落盘后复检：node-gate.md / audit.md 是刚写的派生件，预检看不到它们。红了不写回执，
+// 让操作者先修源文件——避免「回执干净、门禁文件带本机路径」的半绿态。
+const postHygiene = run('path-hygiene 落盘后复检（门禁/审计生成物）', 'scripts/run-gates/path-hygiene.mjs', [bundle, ...(legacy ? ['--allow-legacy'] : [])])
+const postSecret = run('secret-scan 落盘后复检（audit/node-gate）', 'scripts/run-gates/secret-scan.mjs', [bundle, ...(legacy ? ['--allow-legacy'] : [])])
+if (postHygiene.status !== 0 || postSecret.status !== 0) {
+  console.error(`run-accept: RED（${slug}）——落盘后发现本机绝对路径或高置信凭据；未写 acceptance.md/delivered.json`)
+  process.exit(1)
+}
 
 const stamp = new Date().toISOString()
 // 回执的语料根写可复算标签（$DSH_HOME 相对形式），绝对路径只留控制台——回执不得自带换机即断的路径，
@@ -112,6 +134,8 @@ const finalVersion = versions.at(-1) ?? null
 const readerVersion = finalVersion !== null && existsSync(join(finalDir, `readable-v${finalVersion}.md`)) ? finalVersion : null
 const presented = presentedInLogs(sessions, slug, readLog, { contract: contractEpochOf(bundle) || null })
 let delivered = null
+let deliveredText = null
+let manifestText = null
 if (legacy) {
   console.log('  note 旧契约 bundle（无 run.md）：只写 acceptance.md，不补 delivered.json/manifest.json（D28 epoch 豁免）')
 } else {
@@ -122,14 +146,23 @@ if (legacy) {
     acceptedAt: stamp,
     presented: presented.status === 'FOUND' ? presented.events : [],
   })
-  writeFileSync(join(bundle, 'delivered.json'), JSON.stringify(delivered, null, 2) + '\n')
-  console.log(`  PASS delivered.json 已写（final ${delivered.final.version === null ? '—' : `v${delivered.final.version}`} / reader ${readerVersion === null ? '—' : `v${readerVersion}`} / present ${delivered.present?.path ?? '—'}）：${join(bundle, 'delivered.json')}`)
-  const manifest = buildManifest({ slug, bundleDir: bundle, contract: contractEpochOf(bundle) ?? null, generatedAt: stamp })
-  writeFileSync(join(bundle, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
-  console.log(`  PASS manifest.json 已写（${manifest.files.length} 条文件角色/哈希）：${join(bundle, 'manifest.json')}`)
+  if (delivered.present?.unportable === true) {
+    console.error('run-accept: RED——deliverables/presented 指向 bundle 外，交付副本必须在 bundle 内（先把文件放进 final/ 再 present）；未写回执')
+    process.exit(1)
+  }
+  deliveredText = JSON.stringify(delivered, null, 2) + '\n'
+  const manifest = buildManifest({
+    slug,
+    bundleDir: bundle,
+    contract: contractEpochOf(bundle) ?? null,
+    generatedAt: stamp,
+    extra: [{ path: 'delivered.json', role: 'delivery-receipt', sha256: sha256Text(deliveredText) }],
+  })
+  manifestText = JSON.stringify(manifest, null, 2) + '\n'
+  console.log(`  PASS 回执已生成（final ${delivered.final.version === null ? '—' : `v${delivered.final.version}`} / reader ${readerVersion === null ? '—' : `v${readerVersion}`} / present ${delivered.present?.path ?? '—'} / manifest ${manifest.files.length} 条）`)
 }
 
-const acceptance = renderAcceptance({
+const acceptanceText = renderAcceptance({
   slug,
   stamp,
   critical,
@@ -139,7 +172,30 @@ const acceptance = renderAcceptance({
   corpusRoot,
   legacy,
 })
-writeFileSync(join(bundle, 'acceptance.md'), acceptance)
+// 写盘前校验**待写文本**（不是历史文件）：回执是最容易带进本机路径的地方。
+const leaks = scanHomePaths([
+  ...(deliveredText === null ? [] : [{ path: 'delivered.json', text: deliveredText }]),
+  ...(manifestText === null ? [] : [{ path: 'manifest.json', text: manifestText }]),
+  { path: 'acceptance.md', text: acceptanceText },
+])
+if (leaks.length > 0) {
+  for (const leak of leaks) console.error(`  FAIL ${leak.path}:${leak.line}  ${leak.text}`)
+  console.error('run-accept: RED——待写回执含本机绝对路径；未写盘（present 需指向 bundle 内文件）')
+  process.exit(1)
+}
+const receiptSecrets = scanSecrets([
+  ...(deliveredText === null ? [] : [{ path: 'delivered.json', text: deliveredText }]),
+  ...(manifestText === null ? [] : [{ path: 'manifest.json', text: manifestText }]),
+  { path: 'acceptance.md', text: acceptanceText },
+])
+if (receiptSecrets.length > 0) {
+  for (const finding of receiptSecrets) console.error(`  FAIL ${formatSecretFinding(finding)}`)
+  console.error('run-accept: RED——待写回执含高置信凭据；未写盘（值已隐去）')
+  process.exit(1)
+}
+if (deliveredText !== null) writeFileSync(join(bundle, 'delivered.json'), deliveredText)
+if (manifestText !== null) writeFileSync(join(bundle, 'manifest.json'), manifestText)
+writeFileSync(join(bundle, 'acceptance.md'), acceptanceText)
 console.log(`  PASS acceptance.md 已写：${join(bundle, 'acceptance.md')}（语料根标签 ${corpusRoot}；绝对根 ${sessions}）`)
 if (presented.status !== 'FOUND') console.log(`  note present 见证未取到：${presented.detail}（回执 present 记 null，不猜）`)
 

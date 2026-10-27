@@ -109,8 +109,8 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 真模型档 | [smoke-contract](../tests/contracts/smoke-contract.test.mjs) 登记的 REAL_MODEL 闭集（成员以测试为准） | 需要模型凭据；调用模型，部分调用 web 工具 | 角色响应/工具调用、团队机制、导航软断言、纪律行为标记断言、真实 HITL UI 迁移、交互探针端到端；不能替代完整研究质量验收。`dev/record-role-fixture` 是独立录制工具，不属于该闭集；完整研究 run 属 L4。 |
 | 浏览器交互探针 | [cdp-probe](../scripts/probe/cdp-probe.mjs) | 连接已起 GUI；`--ask` 会发送消息并可能触发模型/工具调用 | 指定场景的显示、点击、会话回复；是否调用模型取决于模式与会话 |
 | 偏好库可发现性 | [method-library-probe](../scripts/probe/method-library-probe.mjs) | 真模型档；cwd = 临时研究工作区 | 偏好库文件名/位置、条目数、点名条目缺席时如实说（BUG-042 修复判据的机器化证明） |
-| run 文件审计 | [node-gate](../scripts/run-gates/node-gate.mjs)、[schema-scan](../scripts/run-gates/schema-scan.mjs)、[evidence-audit](../scripts/run-gates/evidence-audit.mjs) | 无主动外网请求；压缩日志读取可能用 zstd 子进程 | 节点在场、部分交接判据、URL/摘录/引用链；默认只读，`--write` 才写审计/门报告 |
-| 交付验收 | [run-accept](../scripts/run-ops/run-accept.mjs) | 无模型；须先 source；会跑 node-gate/evidence-audit | 门 A + 审计（CRITICAL=0）+ 未来日期 sanity；预检红不写，绿写 delivered.json + manifest.json + acceptance.md，`--archive` 才归档 |
+| run 文件审计 | [node-gate](../scripts/run-gates/node-gate.mjs)、[schema-scan](../scripts/run-gates/schema-scan.mjs)、[evidence-audit](../scripts/run-gates/evidence-audit.mjs)、[path-hygiene](../scripts/run-gates/path-hygiene.mjs)、[secret-scan](../scripts/run-gates/secret-scan.mjs) | 无主动外网请求；压缩日志读取可能用 zstd 子进程 | 节点在场、部分交接判据、URL/摘录/引用链、本机路径、交付物高置信凭据；默认只读，`--write` 才写审计/门报告 |
+| 交付验收 | [run-accept](../scripts/run-ops/run-accept.mjs) | 无模型；须先 source；会跑 node-gate/evidence-audit/path-hygiene/secret-scan | 门 A + 审计（CRITICAL=0）+ 未来日期 + 本机路径 + 高置信凭据；预检红不写，绿写 delivered.json + manifest.json + acceptance.md（present 归一化为相对标签），`--archive` 才归档；`--repair` 修历史回执 |
 | 完整 L4 | 真实问题的完整研究 run | 模型与真实信息检索、真人 HITL | 报告质量、可追溯结论与整体研究体验 |
 
 回放夹具不能证明模型服从变化后的方法论；真挂载也不能证明研究质量。

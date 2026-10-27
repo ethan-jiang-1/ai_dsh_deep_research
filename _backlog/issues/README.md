@@ -4,9 +4,11 @@
 
 ## 活跃清单
 
-（当前无在办问题；2026-10-25 运行形态合同组 5 张卡已结归档——见 [settled 池](../_archived/settled_issues/README.md)。）
+（2026-10-25 运行形态合同组 5 张卡已结归档——见 [settled 池](../_archived/settled_issues/README.md)。）
 
 ## 最近归档
+
+（[2026-10-27 发布前数据契约](../_archived/settled_issues/2026-10-27-release-data-contract.md) 已结：FAQ 26 对账 → 数据卡/回执路径/种子 schema/N2 披露/秘密扫描；D1–D4 全采纳；[Note](../../notes/implemented/2026-10-27-release-data-contract.md)。）
 
 （2026-10-25 运行形态合同组已结归档：[合同](../_archived/settled_issues/2026-10-25-run-form-contract.md)、[分发](../_archived/settled_issues/2026-10-25-distribution-contract.md)、[工作区](../_archived/settled_issues/2026-10-25-workspace-ownership-and-upgrade.md)、[数据边界](../_archived/settled_issues/2026-10-25-runtime-data-boundary.md)、[独立启动](../_archived/settled_issues/2026-10-25-standalone-cold-start.md)；残余逐卡记录。）
 

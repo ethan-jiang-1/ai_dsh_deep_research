@@ -163,11 +163,11 @@ function nodeSatisfies(version, range) {
   const version = installed ? resolveVersion(TEAM) : null
   const ok = installed ? (version === null || expected === null ? null : version === expected) : false
   const detail = !installed
-    ? '缺席——四角色协作主通道不可用'
+    ? '缺席——四角色协作主通道不可用（团队层是 N2 experimental，上游可改/撤）'
     : version === null
       ? '在场，但读不到版本（无法确认与 engines.dsh 对齐）'
       : `在场：${TEAM}@${version}${expected === null ? '' : version === expected ? '（与运行版本一致）' : `；期望 ${expected}`}`
-  record(ok, '团队机制层（spawn_teammate 等）', detail, `dsh plugin --profile <p> add ${TEAM}${expected === null ? '' : `@${expected}`}（本包故意不声明团队行：组合与实战 config 归该层）`)
+  record(ok, '团队机制层（spawn_teammate 等）', detail, `dsh plugin --profile <p> add ${TEAM}${expected === null ? '' : `@${expected}`}（本包故意不声明团队行：组合与实战 config 归该层；N2 experimental 不是产品稳定性承诺）`)
 }
 
 // ④ profile 组成（缺 web app 的 profile 起不了 GUI；bundle 装成普通依赖不会启用层）

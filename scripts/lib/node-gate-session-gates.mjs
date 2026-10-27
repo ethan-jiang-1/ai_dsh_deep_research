@@ -1,6 +1,7 @@
 // node-gate-session-gates.mjs — session-bound HITL and present gates (keyless pure logic).
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
+import { portableBundlePath } from './path-hygiene.mjs'
 import { planCardsOf } from './plan-card.mjs'
 import { HITL_CONTRACT_DATE, PRE_CONTRACT_NOTE, decisionsLines, isPreContract, readinessOf } from './node-gate-contracts.mjs'
 import { contractEpochOf, toDateStr } from './schema-scan-core.mjs'
@@ -428,7 +429,12 @@ export function presentGate(bundleDir, sessionsRoot, hitl2Rows, readLog = emptyO
     if (reply !== null && Number.isFinite(timeOf(reply)) && Number.isFinite(timeOf(hit)) && timeOf(hit) < timeOf(reply)) {
       return { status: 'RED', detail: `present（${new Date(timeOf(hit)).toISOString()}）早于 HITL2 答复（${new Date(timeOf(reply)).toISOString()}）——交付事件链顺序不成立（ask → answer → present）` }
     }
-    return { status: 'PASS', detail: `deliverables/presented 指向 ${hit.path}（callId ${hit.callId ?? '—'}）——绑定会话 + 不可变快照` }
+    // present 的原始路径是绝对路径（vendor 语义）；bundle 外 = 不可移交，拒收且不回显本机路径。
+    const label = portableBundlePath(hit.path, bundleDir)
+    if (label === null) {
+      return { status: 'RED', detail: 'deliverables/presented 指向 bundle 外——交付副本必须在 bundle 内（不可移交；先把文件放进 final/ 再 present）' }
+    }
+    return { status: 'PASS', detail: `deliverables/presented 指向 ${label}（callId ${hit.callId ?? '—'}）——绑定会话 + 不可变快照` }
   }
   const inLog = presentInLogs(sessionsRoot, slug, readLog)
   const relayRow = hitl2Rows.find((l) => /操作侧/.test(l))

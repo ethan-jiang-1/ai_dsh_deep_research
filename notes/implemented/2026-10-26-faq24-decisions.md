@@ -8,7 +8,7 @@
 
 - **开发基线继续 pin `dsh-v0.2.1-rc.2`，但插件声明并验证 rc.2/rc.3 两个安装面。** `engines.dsh` = `>=0.2.1-rc.2 <0.3.0-0`（`-0` 显式排除 0.3 预发布）；`dsh.compatibility.dshReleases` = `0.2.1-rc.2` + `0.2.1-rc.3`，只作已测基线镜像，宿主权威仍是 `engines.dsh`。
 - **不立即升 vendor pin 到 rc.3。** rc.3 的 vendor 干净构建在本仓双层安装下未通过：`packages/llm/llm-pi-ai/src/catalog.ts` TS1360（`supportsMidConvoEffort` 缺失）与 `apps/web/tests` 的 vitest 4.1.12/4.1.11 TS2345；强行升 pin 会把插件交付和 vendor 构建债混在一起。重议触发 = 根/vendor 双层安装合并为单层安装，或 rc.3 构建在同环境干净通过。
-- **数据平面以 DSH 6+2 为正本**：定义 / 代码 / workspace / home / session / host state / cache / credentials；P/H/W 只作产品导航。`workspace/` 种子是只读部署资产，落地后归 W；`method-library.md` 是 workspace 用户数据；本包不声明 storage domain（N/A）。
+- **数据平面以 DSH 6+2 为正本**：定义 / 代码 / workspace / home / session / host state / cache / credentials；P/H/W 只作产品导航。`workspace/` 种子是只读部署资产，落地后归 W；`method-library.md` 是 workspace 用户数据；本包不声明 storage domain（N/A）。FAQ 26 的契约细化（数据卡/回执路径/种子 schema/N2 披露）见 [发布前数据契约](2026-10-27-release-data-contract.md)。
 - **分发渠道明确为 npm（发布后）/ tarball / 本地目录。** Git 安装需要自包含 `prepare`，本包未提供；market index 不在范围。二者不在本交付里假装支持。
 - **`dsh.compatibility` 不作为权威**：它是已测基线镜像，preflight / release-smoke / gate 都以 `engines.dsh` 判定；移除该字段留到下一次元数据清理，不作为短期“兼容门”。
 
