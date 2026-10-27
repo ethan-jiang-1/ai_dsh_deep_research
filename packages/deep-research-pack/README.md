@@ -174,6 +174,7 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
   home 里的会话/凭据/profile 是 DSH 的。安装/升级由 DSH CLI 写 profile；scaffold 只**触发**团队层安装（N2）。
   驾驶舱只读 `remote.workspaceFiles`（根 = 会话 `header.cwd`，不是可变 working directory）与 `session.follow`。
 - **present 可移植**：回执里的 `present.path` 写成 `drt_<slug>/final/vN.md`，不写本机绝对路径。
+  present 必须指向 **bundle 内**的文件；指向 bundle 外时 `run-accept` 判红（交付副本不能依赖本机路径）。
   历史回执若已被旧版本写进绝对路径，用 `run-accept --repair` 修（只动可再生产物）。
 - **清理自己的残留**：`scaffold --clean` 只报告；`--clean --write` 删除未改过的孤儿种子、陈旧锁与
   临时状态；**sidecar 默认只报告**（它可能是未合并的种子更新），加 `--discard-sidecars` 才丢弃。
