@@ -65,6 +65,21 @@
   活代码（状态/副作用/弹窗）。triggers 与本节均已改准。
 - `COPY_PINS` 静态钉改为同时扫两个模块：文案搬家不该让"面板上还看得到这句防错读话"失效。
 
+### Phase C 完成态（体量账）
+
+| 文件 | 起点 | 现在 | 说明 |
+|---|---|---|---|
+| ResearchGraphTab.tsx | 721 | **457** | 数据层 → `useGraphFeed`；降级说明 → `state-note`；节点卡 → `NodeCard`；样式 → `styles` |
+| ResearchConfigTab.tsx | 601 | **546** | 四区回滚面 → `LegacyManagementPane`（保留不删） |
+| client-load-smoke.mjs | 1029 | **879** | pass-5 终稿端到端 → `client-load-final.mjs` |
+| dev/hitl-answer.mjs | 717 | **529** | 浏览器内卡片驱动 → `lib/hitl-card-driver.mjs`（纯 DOM、零闭包） |
+
+**>600 行的只剩 3 个，且都不是"生产模块"**：`client-load-smoke` 879（冒烟壳，场景长度=断言长度）、
+`scaffold.mjs` 624（部署 CLI 壳）、`node-gate.test.mjs` 608（测试电池）。计划里写的"≤2"在写的时候
+没把测试与壳分开——真实判据应是**生产模块（client / lib / 门禁）≤600**：当前最大客户端组件 546、
+最大门禁域 428、最大 lib 模块（hitl-card-driver）200，全部达标。壳与测试不拆的理由：拆开只会让
+一次改动要开两个文件，阅读量不减。
+
 ## 环境状态
 
 - 缓存落 `runtime/smoke-workspace/bundle-sessions-cache.json`（gitignored）；`CACHE_VERSION` 在
