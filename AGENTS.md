@@ -82,7 +82,7 @@ Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。
 ## 命令速查（全档正本 = [guides/60 §2](docs/guides/60-dev-loop.md)；run 通道 = [guides/61](docs/guides/61-run-playbook.md)）
 
 ```sh
-source dev/env.sh    # ⚠ 仅 L1/L2 与档位列标注的脚本需要（清单正本 = scripts/README）；run 通道 dev/boot-run.sh 自 source，勿重复。作用：双 home（DSH_HOME=runtime/harness-home）+ 裸 dsh 拦截；未 source 自拒 exit 2
+source dev/env.sh    # ⚠ 仅 L1/L2 与 guides/60 §2 命令列标注须先 source 的脚本需要（scripts/README 档位列只申报凭据/调用模式）；run 通道 dev/boot-run.sh 自 source，勿重复。作用：双 home（DSH_HOME=runtime/harness-home）+ 裸 dsh 拦截；未 source 自拒 exit 2
 pnpm verify          # L0 结构门禁（keyless，收尾必跑）
 pnpm test            # L0 keyless 回归（唯一登记的测试命令）
 node dev/run-driver.mjs up   # 研究 run 通道（起/复用 + 验浏览器面 + 呈交 URL；操作 = guides/61 §0）

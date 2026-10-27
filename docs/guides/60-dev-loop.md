@@ -214,7 +214,7 @@ source dev/env.sh        # DSH_HOME=runtime/harness-home（数据面）+ dsh 别
 1. docs 只写 now：改过的语义面同步对应文档（合同随代码同 diff）；
 2. 若有 proposed RFC 且决定理由需长期保留，将正文改写为已交付事实后迁 `notes/implemented/`。该 Note 含状态行/决定/输掉的方案/实际跑过的验证/环境状态；正文改写与状态格式见 [notes/AGENTS](../../notes/AGENTS.md)，并非每项交付都要求 Note；
 3. `pnpm verify` + `pnpm test` 全绿（涉及面按 §2 加跑）；
-4. 入口链探针（条目改动面含 docs/AGENTS 时必跑，否则按节奏）——机械版：`source dev/env.sh && node scripts/probe/entry-chain-probe.mjs`（真模型档；真值机械抽取 + 软断言；无凭据时退化为语义版人工）；
+4. 入口链探针（条目改动面含根/子树 AGENTS 或入口链时必跑，否则按节奏）——机械版：`source dev/env.sh && node scripts/probe/entry-chain-probe.mjs`（真模型档；真值机械抽取 + 软断言；无凭据时退化为语义版人工）；
 5. commit（窄证据切片：只提交本条目相关改动；pre-commit 钩子自动复跑 verify+tests 拦红灯——§3）。
 
 ## 5. 密钥

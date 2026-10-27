@@ -39,6 +39,10 @@
   236 行是主要成本，但 §2 命令表与任务路由同页才让"改什么 → 跑什么"一眼成立，拆开要改大量
   引用。维持单页，触发条件收窄为"首动作 >5 分钟 / guides/60 >300 行 / 机制名检索失败"
   （登记 = [_backlog/triggers.md](../../_backlog/triggers.md)）。
+- **复查残留按合同收口**：fresh-agent 二次只读探针确认 (a)–(e) 已解决，但抓到四条残留——00-index
+  开跑前置漏端口、§4 探针触发词（docs/AGENTS vs 根/子树 AGENTS/入口链）与路由表不一致、
+  AGENTS/scripts/README 对"须先 source 清单"的 owner 互相指、evaluation 的 client-load 命令
+  漏 `--import tsx/esm`（照抄会在 `.ts` import 处失败）。四条同 diff 修正，并进导航合同断言。
 - **体量账按事实重写**：原 Note 的">600 只剩 3 个 / 最大 lib 200"漏算了 `plan-graph` 与
   `scripts/lib` 的两件；更正落在 [评分整改 Note](2026-10-28-scoring-remediation.md) §Phase C。
 - **`tests/run` 的 56 文件重估：维持单域**。触发条件（某域 >20 文件）早已满足，但拆分要改
@@ -77,6 +81,9 @@
   ~2 分钟。它报的 6 处摩擦里 2 高（前置缺口、纯文档探针矛盾）、2 中（最小集/命令拼写）、
   2 低（0.1.7 历史标记、env source 语义）——本轮按合同修了前五处与版本标记，env 语义已在
   AGENTS 命令行改为"仅 L1/L2 与档位列需要，boot-run 自 source"。
+- **二次只读探针（修后复查）**：~1,400 行、首动作 1–2 分钟；(a)–(e) 全部判 resolved；
+  新抓的四条残留（端口/触发词/source owner/client-load tsx）同日修完，导航合同现覆盖
+  vendor-build、workspace 注册、端口、entry-chain-probe、第 4 步、source owner 与 tsx 命令。
 - **全量**：`pnpm verify` 全绿、`pnpm test` 全绿（例数见当次输出，不写进本页）；
   `pnpm --filter dsh-deep-research-pack build` 后 client-load 复跑 ALL PASS。
 

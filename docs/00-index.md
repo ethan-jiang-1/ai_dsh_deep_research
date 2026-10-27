@@ -24,9 +24,10 @@
 **开跑前置**（只对第 1/2 行）：仓根 `pnpm install` 已跑 + `vendor/dsh` submodule 已 init +
 vendor 构建产物在场（`bash dev/vendor-build.sh`；boot 自检会拦）+
 `research-workspace` 已注册进 DSH（[61 §1](./guides/61-run-playbook.md)；run-kickoff 幂等补登）+
-`runtime/harness-home/.credentials.yaml` 有 `DEEPSEEK_API_KEY`（boot 本身 keyless）。
+`runtime/harness-home/.credentials.yaml` 有 `DEEPSEEK_API_KEY`（boot 本身 keyless）+
+运行端口空闲（缺省 3083；`DSH_RUN_PORT` 可换）。
 `bash dev/boot-run.sh` **自己 source `dev/env.sh`**——先 source 不是前置（`AGENTS.md §命令速查`
-那条 ⚠ 只约束须先 source 的脚本——清单以 [scripts/README](../scripts/README.md) 档位列为准）。要它在你离开后继续服务 = [61 §0](./guides/61-run-playbook.md)
+那条 ⚠ 只约束须先 source 的脚本——清单以 [guides/60 §2](./guides/60-dev-loop.md) 命令列为准）。要它在你离开后继续服务 = [61 §0](./guides/61-run-playbook.md)
 的无人值守形态（§0.1 两路）。
 
 **歧义裁定**（两条规则谁管谁）：用户**未指定别的 DSH home** → 直接走第 1 行，不停下来发问

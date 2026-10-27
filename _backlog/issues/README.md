@@ -4,7 +4,7 @@
 
 ## 活跃清单
 
-（2026-10-25 运行形态合同组 5 张卡已结归档——见 [settled 池](../_archived/settled_issues/README.md)。）
+（空。完整归档 = [settled 池索引](../_archived/settled_issues/README.md)；最近三条见下。）
 
 ## 最近归档
 
