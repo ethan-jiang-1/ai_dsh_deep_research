@@ -31,7 +31,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import { deriveAnchors, foldHitlPending, type HitlState, type RunAnchor } from '../lib/hitl-fold.ts'
+import { deriveAnchors, foldHitlPending, type HitlState } from '../lib/hitl-fold.ts'
 import { deriveSteps, latestRunVersion, type RunStep } from '../lib/run-fold.ts'
 import { deriveBusinessBrief, type BusinessBrief } from '../lib/brief-fold.ts'
 import { RERUN_TRIAGE_HINT, RERUN_TRIAGE_ROWS, RERUN_TRIAGE_TITLE } from '../lib/rerun-triage.ts'
@@ -43,6 +43,7 @@ import type { ResearchStatusTabProps, ResearchStatusTitleInjected } from './rese
 import { bindingTrust, type BindingTrust } from '../lib/binding-trust.ts'
 import { openRun } from '../lib/run-context.ts'
 import { streamFailureOf } from '../lib/stream-failure.ts'
+import { TrackRail } from './research-status/TrackRail.tsx'
 import { latestFinalDelivery, latestPresentedFinalVersion } from '../lib/final-target.ts'
 import { runVersionFaceOf, type RunVersionFace } from '../lib/run-version.ts'
 import type { TeamProjection } from '@deepseek-ai/dsh-experimental-agent-team/client'
@@ -296,7 +297,6 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
 
   // 流程轨道件（锚点入轨，RFC cockpit-flow-face）：锚点段从 journal+文件折算（挂起期也在场），
   // 步骤段从文件在场性折算——face 缺席时以占位态渲染（不冒充进度）。
-  const railVisible = face !== null || hitl.pending || anchors.some((a) => a.state !== 'upcoming')
   const passedCount = anchors.filter((a) => a.state === 'passed').length
   const pendingAnchor = anchors.find((a) => a.state === 'pending')
   const steps = face !== null ? face.steps : deriveSteps({ question: false, team: false, leads: false, evidence: 0, findings: false, review: false, final: false })
@@ -323,38 +323,6 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     }),
     [unbound, trust, kickoffHold, hitl.pending, pendingAnchor, face, steps, delivery],
   )
-  const anchorChip = (a: RunAnchor) => (
-    <span key={a.key} style={{ padding: '2px 8px', borderRadius: 4, fontWeight: a.state === 'pending' ? 700 : 400, background: a.state === 'pending' ? '#f59e0b33' : a.state === 'passed' ? '#22c55e22' : '#0000000d', color: a.state === 'pending' ? '#b45309' : a.state === 'passed' ? '#16a34a' : '#888' }}>
-      ◆{a.label}{a.state === 'pending' && a.questions > 0 ? `（${a.questions} 问）` : ''} {a.state === 'pending' ? '⏳' : a.state === 'passed' ? '✓' : '·'}
-    </span>
-  )
-  // 步态符号语法 = 仪表盘同款（✓ 已过 / ● 进行中 / ○ 未到）：done 绿字（与锚点 passed 同
-  // 色相）、current 琥珀唯一——2026-09-28 trial 实测反馈：done 与 pending 都读成"没走过"，
-  // 轨道丢掉 v1 已走完的历史；回边 ▲ 紧贴芯片左下角还造成"挖掘被点亮"的误读。
-  // 重入点描边（虚线琥珀）= 回边落点显性化，与 current 实底可分——rerun 期间 current 按设计
-  // 钉在交付，重入点在挖掘，两颗"亮"芯片语义不同，视觉必须可分。
-  const loopOn = anchors[1] !== undefined && anchors[1].state !== 'upcoming'
-  const stepChip = (s: RunStep) => {
-    const reentry = face !== null && loopOn && s.key === 'evidence'
-    return (
-      <span key={s.key} style={{ padding: '2px 8px', borderRadius: 4, opacity: face === null ? 0.35 : s.state === 'pending' ? 0.4 : 1, fontWeight: face !== null && s.state === 'current' ? 700 : 400, background: face !== null && s.state === 'current' ? '#f59e0b33' : face !== null && s.state === 'done' ? '#22c55e22' : '#0000000d', color: face !== null && s.state === 'done' ? '#16a34a' : undefined, outline: reentry ? '1.5px dashed #c08a2e' : undefined, outlineOffset: reentry ? 1 : undefined }}>{s.state === 'done' ? '✓ ' : s.state === 'current' ? '● ' : '○ '}{s.label}</span>
-    )
-  }
-
-  // 流程轨道 = grid 两行：第一行主轨 chips，第二行 ↻ 回路边（HITL2 到达后出现）——
-  // 回路从 ◆交付审阅 下探、横行、上翘回【挖掘】（U 形连线跨列绘制，箭头指重入点）。
-  // 列位（1 起）：a1=1，steps[0..5]=2..7，a2=8，final=9；回边跨"挖掘列 → a2 列"。
-  const railNodes: { key: string; chip: ReactNode }[] = [
-    { key: 'anchor-1', chip: anchorChip(anchors[0] ?? { key: 'anchor-1', label: '立项确认', state: 'upcoming', questions: 0 }) },
-    ...steps.slice(0, 6).map((s) => ({ key: s.key, chip: stepChip(s) })),
-    { key: 'anchor-2', chip: anchorChip(anchors[1] ?? { key: 'anchor-2', label: '交付审阅', state: 'upcoming', questions: 0 }) },
-    ...steps.slice(6).map((s) => ({ key: s.key, chip: stepChip(s) })),
-    ...anchors.slice(2).map((a) => ({ key: a.key, chip: anchorChip(a) })),
-  ]
-  const loopVisible = loopOn
-  const EV_COL = 5
-  const A2_COL = 8
-
   return (
     // 滚动义务在页签体自己（vendor .tabBody = overflow:hidden 的定高 flex 列——BUG 2026-10-12
     // 用户报告：活动流超长即被裁且不可滚）：根容器 flex:1 + minHeight:0 吃满宿主高，
@@ -384,24 +352,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
         <div style={{ fontWeight: brief.userActionNeeded ? 700 : 400, color: brief.userActionNeeded ? '#b45309' : undefined }}>{brief.actionLine}</div>
       </div>
       {/* ② 流程轨道：◆立项确认 + 主轨 + ◆交付审阅 + 交付；↻ 回边 = 拍板的分支后果画进流程 */}
-      {railVisible && (
-        <>
-        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${railNodes.length}, auto)`, alignItems: 'start', marginBottom: 8, fontSize: 12 }}>
-          {railNodes.map((n, i) => (
-            <div key={n.key} style={{ gridRow: 1, gridColumn: i + 1 }}>{n.chip}</div>
-          ))}
-          {loopVisible && (
-            <div style={{ gridRow: 2, gridColumn: `${EV_COL} / ${A2_COL + 1}`, position: 'relative', margin: '4px 6px 0', border: '1px dashed #c08a2e', borderTop: 'none', borderRadius: '0 0 8px 8px', padding: '2px 6px 3px', color: '#b45309', textAlign: 'center', minWidth: 0, lineHeight: 1.4, whiteSpace: 'normal' }}>
-              <span style={{ position: 'absolute', top: -9, left: 3, fontSize: 10, color: '#b45309' }}>▲</span>
-              ↻ rerun 图例（非执行记录）：补研究 = 同 bundle 回挖掘、final/ vN+1；表述修订 = 原位改、版本不变；结构性重构 = 另起新 bundle{face !== null && face.versions >= 2 ? ` · 本 bundle 已有 v${face.versions}（证据扩张）` : ''}
-            </div>
-          )}
-        </div>
-        {face !== null && (
-          <div style={{ fontSize: 11, opacity: 0.55, marginBottom: 8 }}>✓ 已过 · ● 进行中 · ○ 未到 · 虚线描边 = ↻ 回边落点（重入点）</div>
-        )}
-        </>
-      )}
+      <TrackRail anchors={anchors} steps={steps} faceVersions={face?.versions ?? null} hitlPending={hitl.pending} />
       {/* ⑥ 决策诚实线（指路不复制——谁答的家在 question.md §Decisions） */}
       {passedCount > 0 && (
         <div style={{ marginBottom: 8, fontSize: 12, opacity: 0.55 }}>
