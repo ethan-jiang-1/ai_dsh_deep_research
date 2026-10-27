@@ -20,7 +20,9 @@
   `runtime/smoke-workspace/web.log`）；不是 → 换端口，或确认后停掉它（**别盲杀**：在飞会话的
   日志尾部可能丢失——BUG-007 卡）。想守在前台看日志 = `bash dev/boot-run.sh`（底层启动面）；
 - **已有通道时**：取当前 URL = `node dev/run-driver.mjs url`；只验浏览器面（不启动、不换 token）=
-  `node dev/run-driver.mjs probe`。URL/token 的唯一来源仍是最后一条启动横幅；旧横幅 = 旧 token；
+  `node dev/run-driver.mjs probe`。probe/up 复用通道时先跑只读镜像门（`boot-run --drift-only`）：
+  通道镜像 ≠ 当前 pack 源 → **exit 2 未跑**（不是绿）——旧页面验不出当前代码，先重建/重启再验。
+  URL/token 的唯一来源仍是最后一条启动横幅；旧横幅 = 旧 token；
 - **启动请求的呈交纪律（2026-09-30 用户定调）**：用户让"启动/起 web" = 代理**先自己跑通再交 URL**——
   run-driver 就是这条纪律的可复跑入口（exit 0 = 可呈交 / 1 = 红不得呈交 / 2 = 未跑）。三步序如下，
   红了按序修后重跑同一条：
@@ -67,7 +69,9 @@
       -- --port <端口，缺省 3083> --no-open`。**这条绕过 boot-run 的漂移门**（
       [00-index §先分流](../00-index.md) 首行"别直接 `dsh --profile research`"正为此——
       同理：绕过漂移检测、静默用旧镜像）：先 `bash dev/boot-run.sh --drift-check` 过门再用它；
-  `--drift-check` 模式会检查端口且可初始化环境/补装 profile/写 MCP patch，不是只读探针。报漂移就按
+  `--drift-check` 模式会检查端口且可初始化环境/补装 profile/写 MCP patch，不是只读探针。要只读地
+  回答"当前安装镜像是否等于 pack 源"（不碰活通道）= `bash dev/boot-run.sh --drift-only`——run-driver
+  复用通道时用的就是它。报漂移就按
       [guides/62 §改动影响面](./62-plugin-authoring.md) 重建镜像；
 - **刷新白屏的判别序**：① `lsof -nP -iTCP:<端口> -sTCP:LISTEN` 有没有监听 → 无 = 进程已停
   （重跑上面任一形态）；② 有监听但仍白屏/401 = token 过期（**每次启动都是新 token**，

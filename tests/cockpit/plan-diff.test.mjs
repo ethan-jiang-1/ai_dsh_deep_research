@@ -6,7 +6,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { planIndex } from '../../packages/deep-research-pack/src/lib/plan-graph.ts'
+import { planIndex } from '../../packages/deep-research-pack/src/lib/plan-index.ts'
 import { planDiffOf } from '../../packages/deep-research-pack/src/lib/plan-diff.ts'
 
 const fixture = (name) => readFileSync(new URL(`../fixtures/run-rerun/${name}`, import.meta.url), 'utf8')

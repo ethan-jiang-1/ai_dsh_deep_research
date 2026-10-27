@@ -71,14 +71,17 @@
 |---|---|---|---|
 | ResearchGraphTab.tsx | 721 | **403** | 数据层 → `useGraphFeed`；降级说明 → `state-note`；节点卡 → `NodeCard`；版本轨 → `GraphVersionRail`；提示带 → `GraphNotices`；样式 → `styles`（主函数 ~550 → **304**） |
 | ResearchConfigTab.tsx | 601 | **546** | 四区回滚面 → `LegacyManagementPane`（保留不删） |
-| client-load-smoke.mjs | 1029 | **879** | pass-5 终稿端到端 → `client-load-final.mjs` |
+| client-load-smoke.mjs | 1029 | **967** | pass-5 终稿端到端 → `client-load-final.mjs`；同日补端口生命周期/并发锁/主机快照（另见卫生轮三 Note） |
 | dev/hitl-answer.mjs | 717 | **529** | 浏览器内卡片驱动 → `lib/hitl-card-driver.mjs`（纯 DOM、零闭包） |
 
-**>600 行的只剩 3 个，且都不是"生产模块"**：`client-load-smoke` 879（冒烟壳，场景长度=断言长度）、
-`scaffold.mjs` 624（部署 CLI 壳）、`node-gate.test.mjs` 608（测试电池）。计划里写的"≤2"在写的时候
-没把测试与壳分开——真实判据应是**生产模块（client / lib / 门禁）≤600**：当前最大客户端组件 546、
-最大门禁域 428、最大 lib 模块（hitl-card-driver）200，全部达标。壳与测试不拆的理由：拆开只会让
-一次改动要开两个文件，阅读量不减。
+**体量账更正（2026-10-28 卫生轮）**：本段原写">600 行只剩 3 个、最大 lib 模块 200"是错的——
+它漏了 pack `src/lib/plan-graph.ts`（775）与 `scripts/lib/{gates-cases,run-dashboard-core}.mjs`。
+按变更面重新分列：**pack 生产面** = 客户端最大 546、`plan-graph` 439 + `plan-index` 347（同日拆分；
+拆分理由 = Team 任务图与 plan.md 文件解析是两个变更面，混在 775 行里改解析要在图的上下文里翻）、
+最大门禁域 428，均在 600 内。**>600 的支撑/壳/测试** = `gates-cases` 645（注入案例数据表）、
+`run-dashboard-core` 626（只读投影管线）、`client-load-smoke` 967（冒烟壳）、`scaffold` 624（部署 CLI 壳）、
+`node-gate.test` 608（测试电池）——壳与测试不拆的理由不变：拆开只会让一次改动要开两个文件，
+阅读量不减。上一版把"计划里的 ≤2"与"生产模块 ≤600"混着写、又只扫了部分目录，才得出"只剩 3 个"。
 
 ### Phase D（测试资产）
 

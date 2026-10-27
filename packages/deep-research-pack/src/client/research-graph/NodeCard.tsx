@@ -5,7 +5,7 @@
 // 只读本件；父级只负责图数据与选中态。
 import type { ReactNode } from 'react'
 import type { UseSessions, UseSessionStatus } from '@deepseek-ai/dsh-client-ui-session/client'
-import type { PlanNode } from '../../lib/plan-graph.ts'
+import type { PlanNode } from '../../lib/plan-index.ts'
 import type { GraphNodeState } from '../../lib/graph-model.ts'
 import type { GraphNodeView } from './types.ts'
 import { WorkerChips } from './WorkerChips.tsx'

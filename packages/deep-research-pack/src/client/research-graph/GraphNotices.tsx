@@ -3,7 +3,7 @@
 // 从 ResearchGraphTab.tsx 切出（2026-10-28 Phase C）：两条都是"把折叠里的问题捞到面上"的展示，
 // 数据由父级算好（planIssues / attention），本件只管排序、截断与点击定位。
 import type { ReactNode } from 'react'
-import type { PlanIssue } from '../../lib/plan-graph.ts'
+import type { PlanIssue } from '../../lib/plan-index.ts'
 import type { AttentionItem } from '../../lib/plan-graph.ts'
 import { ATTENTION_ROW_STYLE, BANNER_STYLE, MUTED_STYLE } from './styles.ts'
 import { severityIcon } from './format.ts'

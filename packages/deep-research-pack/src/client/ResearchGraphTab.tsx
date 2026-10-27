@@ -23,7 +23,7 @@
  *   - plan.md = 先 follow journal 做 `bindingTrust` 找可信的 `drt_<slug>/`，再按根/archive/_abandoned
  *     三位置读 `plan.md`，30s 重读；缺文件合法；不按 workspace 根读。
  *
- * 折算仍住 `src/lib/plan-graph.ts`（keyless 单测）；本组件只画。fail-soft：空投影/空任务/缺 plan
+ * 折算住 `src/lib/plan-graph.ts`（Team 图）与 `src/lib/plan-index.ts`（plan.md 解析）；本组件只画。fail-soft：空投影/空任务/缺 plan
  * 都退化为如实空态，不 throw。
  */
 import { useState } from 'react'
@@ -33,11 +33,10 @@ import {
   DEFAULT_ATTENTION_THRESHOLDS,
   attentionOf,
   countsOf,
-  planIssuesOf,
   wavesOf,
   type MemberStatus,
-  type PlanNode,
 } from '../lib/plan-graph.ts'
+import { planIssuesOf, type PlanNode } from '../lib/plan-index.ts'
 import { planDiffOf, type PlanDiff } from '../lib/plan-diff.ts'
 import {
   coverageLineOf,

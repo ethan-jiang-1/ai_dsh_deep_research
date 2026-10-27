@@ -14,8 +14,8 @@
  * 边界：只比 active 节点（墓碑不作为图节点）；alias 目标不算 added；没有快照时不调用本文件
  * （调用方如实显示「无旧图快照」）。
  */
-import { isActivePlanNode } from './plan-graph.ts'
-import type { PlanIndex } from './plan-graph.ts'
+import { isActivePlanNode } from './plan-index.ts'
+import type { PlanIndex } from './plan-index.ts'
 
 /** 重编号/并号的一条别名。 */
 export interface PlanDiffAlias {

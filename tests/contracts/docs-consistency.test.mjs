@@ -98,6 +98,23 @@ test('构成索引：design/40 §2 索引行点名的主文件名在盘上存在
   assert.deepEqual(missing, [], `构成索引点名了盘上不存在的文件（改名/删除后没更新索引）：${missing.join('、')}`)
 })
 
+test('文档地图：docs/ 下每个 tracked .md 都被 00-index 文档地图点名（新增不登记 = 红）', () => {
+  const index = read('docs/00-index.md')
+  const start = index.indexOf('## 文档地图')
+  const end = index.indexOf('## 决策台账')
+  assert.ok(start >= 0 && end > start, '00-index 缺「## 文档地图」节——本断言的判据源消失')
+  const map = index.slice(start, end)
+  const docs = readdirSync(join(ROOT, 'docs'), { recursive: true })
+    .filter((f) => typeof f === 'string' && f.endsWith('.md'))
+    .map((f) => f.replaceAll('\\', '/'))
+    .filter((f) => f !== '00-index.md')
+  assert.ok(docs.length >= 15, `防空语料：docs/ 下 .md 过少（${docs.length}）`)
+  const missing = docs.filter((rel) => !map.includes(rel)).sort()
+  assert.deepEqual(missing, [],
+    `文档地图漏登记：${missing.join('、')}——新文档要在 00-index §文档地图 有一行（按需加载的入口）；`
+    + '只放在目录里 = fresh agent 找不到')
+})
+
 test('研究配置面板形态：COMPACT 默认态下 README 不描述已迁走的管理四区（2026-10-27 卫生轮）', () => {
   const tab = read('packages/deep-research-pack/src/client/ResearchConfigTab.tsx')
   const compact = /const COMPACT = true/.test(tab)

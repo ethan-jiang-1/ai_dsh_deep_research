@@ -3,7 +3,7 @@
 // 从 ResearchGraphTab.tsx 切出（2026-10-28 Phase C/E）：只切观察、不改图不派工，是一块
 // 自包含的展示（当前 plan 版本 / 看旧图 / 看差异 / 旧图节点结构）。父级持有状态与读数。
 import type { ReactNode } from 'react'
-import type { PlanIndex } from '../../lib/plan-graph.ts'
+import type { PlanIndex } from '../../lib/plan-index.ts'
 import { BUTTON_STYLE, MUTED_STYLE, BANNER_STYLE } from './styles.ts'
 
 export function GraphVersionRail(props: {

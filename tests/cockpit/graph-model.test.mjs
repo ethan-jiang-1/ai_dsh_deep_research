@@ -11,7 +11,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { planIndex } from '../../packages/deep-research-pack/src/lib/plan-graph.ts'
+import { planIndex } from '../../packages/deep-research-pack/src/lib/plan-index.ts'
 import {
   coverageLineOf,
   coverageOf,

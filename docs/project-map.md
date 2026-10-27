@@ -34,7 +34,7 @@
 | 查看 run 状态与交付 | `research-workspace/drt_<slug>/` 文件事实（仪表盘只是投影） | 只读 | keyless | [NODES](../research-workspace/NODES.md) | 交付不明 → node-gate 门②③ |
 | 验证挂载（插件真挂载） | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs` | 否 | keyless 真挂载 | [开发环 §2](guides/60-dev-loop.md) | 红 → preset 源 + render-overlay 后复跑 |
 | 验证安装 | `source dev/env.sh && node scripts/smoke/release-smoke.mjs` | 是（测试 profile） | keyless（`--install-only` 跳凭据） | [开发环 §2](guides/60-dev-loop.md) | 红 → pack 发布集对账 |
-| 查漂移（镜像一致性） | boot-run 漂移门（启动即查，不静默用旧镜像） | 否 | keyless | boot-run 输出 | 红 → 按失败消息重装镜像 |
+| 查漂移（镜像一致性） | boot-run 漂移门（启动即查，不静默用旧镜像）；复用已在飞通道时 `run-driver up/probe` 先跑 `boot-run --drift-only`（漂移 = NOT-RUN，不是绿） | 否 | keyless | boot-run 输出 + run-driver verdict | 红 → 按失败消息重装镜像、重启通道 |
 | 定位故障 | 下文「调试先看哪份事实」表 | 只读 | keyless | 现象 → 事实源映射 | 事实源看完仍不明 → watch-run / node-gate |
 
 ## 一次运行怎么串起来

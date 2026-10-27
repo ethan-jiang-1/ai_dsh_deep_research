@@ -19,8 +19,8 @@
  *
  * fail-soft：plan 缺席、任务表为空、畸形行都退化为空映射/零覆盖率，不 throw（观察面不许炸）。
  */
-import { isActivePlanNode, planNodeOf } from './plan-graph.ts'
-import type { PlanIndex } from './plan-graph.ts'
+import { isActivePlanNode, planNodeOf } from './plan-index.ts'
+import type { PlanIndex } from './plan-index.ts'
 
 /** 节点视觉状态（组件只消费，不重新判定）。 */
 export interface GraphNodeState {
