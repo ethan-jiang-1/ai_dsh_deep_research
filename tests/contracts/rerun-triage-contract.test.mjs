@@ -1,6 +1,8 @@
 // rerun 不满转接层 · 跨面契约 — 词表/选项/报告末节/只读出口在三处文本与两个组件里必须同源。
 // 为什么存在：这层的主体是**模型可见文本 + 用户可见文案**，机械面只能钉"三处说的是同一件事"，
 // 钉不住"模型真的按它回话"（后者 = 真模型探针 + 人读）。本测试的失败面 = 任一处措辞漂回旧词。
+// 负例留证 2026-10-28：把 synthesis SKILL 里的「定稿（按现稿交付）」改成「定稿（sabotage）」→
+//   第 1 例「三选项三处逐字同源」红；还原 → 绿。
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, existsSync } from 'node:fs'

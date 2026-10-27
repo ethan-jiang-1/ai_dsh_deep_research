@@ -2,6 +2,8 @@
 // 为什么存在：手册是注入载荷，语义漂移只能靠真模型快照（贵、要重录）才能发现；本测试把「同一事实
 // 的几处文本」钉到门禁解析器的单点（RUN_PHASES / contractEpochOf / READ_ORDER），并咬住已知的
 // 互斥句（final/ 的「只放版本记账，不放当前版全文」曾与 final/vN 交付副本语义打架）。
+// 负例留证 2026-10-28：把研究手册的「## 来源证明」改成「## 来源（改名探针）」→ 两例红
+//   （`手册缺 D28 节：## 来源证明` + 下游同源断言）；还原 → 绿。
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'

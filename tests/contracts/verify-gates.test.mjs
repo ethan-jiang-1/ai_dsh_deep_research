@@ -6,6 +6,8 @@
 // 本测试钉住它俩的接口不漂移：gates-smoke 的案例门禁名必须真实存在于 verify.mjs 的 gates
 // 数组——门禁改名或退役而案例表没跟 = 本测试红（此时 smoke 的案例会在对照组就红，这里更早、
 // keyless 秒级报因）。依据 = RFC「DSH 插件开发语料（二代）吸收审计」缺口 2（2026-10-07）。
+// 负例留证 2026-10-28：删掉 gates-cases 里 count-free 的唯一案例 → 反向覆盖断言红
+//   （`覆盖缺口与 NO_CASE_GATES 不一致`，`# fail 1`）；还原 → 绿。
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

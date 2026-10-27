@@ -1,5 +1,8 @@
 // 评估合同在位性 — docs/evaluation.md 是本仓验收合同（先于框架定案），
 // 回归层断言它存在且五个评估面齐全，防止评估标准被静默删改。
+// 负例留证 2026-10-28：把 evaluation.md 的「L4 交付面」标题改成「L4 面（改名探针）」→
+//   `评估面缺失: L4 交付面` 红；还原 → 绿。（首次尝试只改标题后缀，断言用 includes 照旧命中，
+//   说明"探针必须打到判据本身"——改名整体替换才真的红。）
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
