@@ -34,13 +34,13 @@
 
 ## 写测试时
 
+- **覆盖边界有契约**：`scripts/lib` 每个模块要么有直测、要么在 [test-surface](contracts/test-surface.test.mjs) 的 `SMOKE_ONLY` 登记"为什么只能 smoke"；覆盖率 = `pnpm test:coverage`（观察面，不设百分比门禁）；
 - **命名即申报**：`*.test.mjs` 命名即进 regression（递归 glob 选中，`layering` 钉 keyless）——
   新检查先想清它是不是 keyless 契约证据再命名；支援件住 `lib/`、`fixtures/`（glob 之外，
   import 不注册测试）；
 - **verify the world**：断言重读文件或观察持久状态，不信"代码里已经设好了"；
-- **新契约测试带反证**：同 diff 注入回归看红（改夹具 / 松判据 / 删断言皆是回归手法）再还原——
-  只交付绿 = 不知道测试会不会咬人。声称守卫具体事故（标题带 BUG-nnn）须留「负例留证/夹具留证」
-  块——机械面 = verify 门禁 `guard-red-record`；
+- **新契约测试带反证**：同 diff 注入回归看红（改夹具 / 松判据 / 删断言）再还原——只交付绿 = 不知道测试会不会咬人；
+  声称守卫具体事故（标题带 BUG-nnn）须留「负例留证/夹具留证」块（机械面 = `guard-red-record`）；
 - **改夹具先想红**：夹具语义由消费它的契约测试钉住（node-gate / schema-scan 的用例即永久反证
   记录）——改夹具应预期变红，绿了说明钉歪了；
 - 新契约（手册谓词、门禁登记、模板形状）→ 同 diff 加测试，并在

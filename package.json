@@ -23,7 +23,8 @@
     "test": "node --import tsx/esm --test --test-reporter=spec 'tests/**/*.test.mjs'",
     "typecheck": "tsc -b packages/deep-research-pack --pretty false",
     "release:check": "node scripts/dist/release-check.mjs",
-    "dsh": "node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts"
+    "dsh": "node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts",
+    "test:coverage": "node --import tsx/esm --test --experimental-test-coverage 'tests/**/*.test.mjs'"
   },
   "devDependencies": {
     "@deepseek-ai/dsh-agent-instructions": "workspace:*",
