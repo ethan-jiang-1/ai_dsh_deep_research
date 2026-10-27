@@ -80,17 +80,26 @@
   run-state 测试位置 / 决定记录载体 / 读了哪些文件 / 摩擦点）；实际读约 1,300 行，首个正确动作
   ~2 分钟。它报的 6 处摩擦里 2 高（前置缺口、纯文档探针矛盾）、2 中（最小集/命令拼写）、
   2 低（0.1.7 历史标记、env source 语义）——本轮按合同修了前五处与版本标记，env 语义已在
-  AGENTS 命令行改为"仅 L1/L2 与档位列需要，boot-run 自 source"。
+  AGENTS 命令行改为"仅 L1/L2 与 guides/60 命令/前置标注需要，boot-run 自 source"。
 - **二次只读探针（修后复查）**：~1,400 行、首动作 1–2 分钟；(a)–(e) 全部判 resolved；
   新抓的四条残留（端口/触发词/source owner/client-load tsx）同日修完，导航合同现覆盖
   vendor-build、workspace 注册、端口、entry-chain-probe、第 4 步、source owner 与 tsx 命令。
 - **全量**：`pnpm verify` 全绿、`pnpm test` 全绿（例数见当次输出，不写进本页）；
   `pnpm --filter dsh-deep-research-pack build` 后 client-load 复跑 ALL PASS。
+- **3083 镜像收口实跑**：停旧通道 → 按 npm pack 发布清单把 104 个文件同步进 research profile
+  镜像 → `bash dev/boot-run.sh --drift-only` 绿 → 重启 boot-run（新 web pid）。`run-driver probe`
+  与 `run-driver up` 都 exit 0 / GREEN，六条检查全绿（channel-mirror / host-mounted /
+  overlay-clear / status-pane-open / expect-face / console-clean）；截图与 verdict 落
+  `runtime/smoke-workspace/run-verdicts/<ts>-*/`，token 只在当次横幅，不写进本页。
+- **重启后终验**：client-load 全量 ALL PASS（exit 0；3109 收尾无监听、锁释放）；
+  `pnpm verify` / `pnpm test`（929 例）/ `pnpm typecheck` 绿；`run-dashboard --latest` 正常出 HTML。
 
 ## 环境状态
 
-- 3083 的活动通道仍是旧镜像（`client.js` 为 2026-10-23 的构建）。本轮**没有**停它：在飞 run
-  可能持有会话；修复入口 = 确认无在飞 run 后按 boot-run 处方重建并重启。新 probe 在重启前
-  会持续给 NOT-RUN，这是有意的 fail-closed。
+- 3083 已于 2026-10-28 03:58 更新到当前 pack 镜像并重启；URL = `http://127.0.0.1:3083/`
+  （token 见 `web.log` 当次横幅）。镜像同步只覆盖 pack 发布集，不动 sessions/credentials/
+  workspace；旧通道停止前按盘面确认根 bundle 均有 `final/`、最近会话是探针会话。
+  画面仍是同一个未绑定会话视图（表现为像素级相同），但新 web pid + `channel-mirror` 绿证明
+  加载的是新镜像；`run-driver up` 复用通道时同一道门为绿。
 - `runtime/smoke-workspace/` 新增的 client-load 失败现场与锁都是 gitignored；锁在当前进程正常
   退出时已删。两路并发的失败现场保留（2026-10-27T19-18/19-20），作为"看起来像产品红"的样本。
