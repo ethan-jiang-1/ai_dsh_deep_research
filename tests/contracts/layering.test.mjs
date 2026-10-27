@@ -47,6 +47,7 @@ const MENTION_EXEMPT = {
   'deploy-bin.test.mjs': '密钥名文本契约——钉部署脚本安全边界，判据本身含密钥名',
   'smoke-contract.test.mjs': '真模型档 closed set 契约——.credentials.yaml 是判据本身',
   'credentials-status.test.mjs': '凭据分层契约——判据本身含密钥名/文件名；用临时目录，不读真实凭据',
+  'test-surface.test.mjs': '覆盖边界登记——SMOKE_ONLY 的键就是 lib 模块名（playwright/zstd-read 等），判据必须写出这些名字；本文件不 import 它们',
 };
 
 test('① 回归层禁物：任意提及级（子进程 import / 浏览器 / 密钥名）', () => {
