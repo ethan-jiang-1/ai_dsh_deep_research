@@ -49,6 +49,15 @@ jobs:
       - name: Test (keyless regression)
         run: source dev/env.sh && pnpm test
 
+      # 门禁自测：87 个注入案例 + 4 个对照，经真实 verify 入口判红/判绿。此前只住在
+      # "改 verify 必跑"的散文里——CI 上永不执行，门禁钝化只能在本地被发现。
+      - name: Gate self-tests (injected regressions must be named red)
+        run: source dev/env.sh && node scripts/smoke/gates-smoke.mjs
+
+      # 交付回执链（合成 bundle + 合成会话日志，真 CLI）：归一/幂等/外部 present/秘密/repair
+      - name: Receipt chain (run-accept end-to-end)
+        run: source dev/env.sh && node scripts/smoke/run-accept-smoke.mjs
+
   deploy:
     name: keyless deploy smokes
     runs-on: ubuntu-latest

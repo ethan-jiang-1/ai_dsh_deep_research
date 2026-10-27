@@ -25,6 +25,12 @@ import { CASES, CONTROLS } from '../lib/gates-cases.mjs';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const VERIFY_REL = join('scripts', 'verify', 'verify.mjs');
 
+// `--case=<id[,id]>`：只跑指定案例（改一道门禁时不必等 90 多个案例）。
+// 对照组与门禁名集合都按选中案例收窄——被过滤掉的案例既不计红也不计绿（末尾自报"仅跑 N 个"）。
+const caseArgs = process.argv.filter((a) => a.startsWith('--case='));
+const caseNames = caseArgs.flatMap((a) => a.slice('--case='.length).split(',')).map((s) => s.trim()).filter(Boolean);
+const caseFilter = caseNames.length === 0 ? null : new Set(caseNames);
+
 // ── fixture：tracked 文件副本 + git init/add（git ls-files 驱动的门禁在副本内可用）──
 
 function git(dir, args) {
@@ -77,6 +83,16 @@ function gateVerdict(out, verdict, gate) {
 function main() {
   const keep = [];
   try {
+    if (caseFilter !== null) {
+      const known = new Set([...CASES, ...CONTROLS].map((c) => c.id));
+      const unknown = [...caseFilter].filter((id) => !known.has(id));
+      if (unknown.length > 0) {
+        console.error(`gates-smoke: --case 里有未登记的案例 id：${unknown.join(', ')}（正本 = scripts/lib/gates-cases.mjs）`);
+        process.exit(2);
+      }
+    }
+    const cases = caseFilter === null ? CASES : CASES.filter((c) => caseFilter.has(c.id));
+    const controls = caseFilter === null ? CONTROLS : CONTROLS.filter((c) => caseFilter.has(c.id));
     const base = buildFixture();
     keep.push(base);
     const failures = [];
@@ -86,7 +102,7 @@ function main() {
     keep.push(controlDir);
     const control = runVerify(controlDir);
     if (!/verify: 全绿|处失败/.test(control.out)) failures.push(`对照组：verify 未跑完（status=${control.status}）`);
-    for (const { id, gate, expect } of CASES) {
+    for (const { id, gate, expect } of cases) {
       // 判据行锚定（gateVerdict 助手）：verify 每个门禁恰打一行 `${verdict}  ${gate}`（实测），
       // 行首行尾锚定防后缀门禁名误配；旧 `\n…\n` includes 形态对输出首行（md-utf8-newline——
       // 域 A 首个门禁）失明：首行无前置换行，2026-10-21 卫生轮首条靶向它的案例暴露此缺陷
@@ -103,7 +119,7 @@ function main() {
       }
     }
 
-    for (const { id, gate, mutate } of CONTROLS) {
+    for (const { id, gate, mutate } of controls) {
       const dir = cloneFixture(base, `control-${id}`);
       keep.push(dir);
       mutate(dir);
@@ -114,7 +130,7 @@ function main() {
     }
 
     // 案例组：注入 → 目标门禁点名红（带 expect 时须命中该报因）
-    for (const { id, gate, mutate, expect } of CASES) {
+    for (const { id, gate, mutate, expect } of cases) {
       const dir = cloneFixture(base, `case-${id}`);
       keep.push(dir);
       mutate(dir);
@@ -131,7 +147,9 @@ function main() {
       console.error(`\n临时目录保留复查：${keep.join('\n')}`);
       process.exit(1);
     }
-    console.log(`gates-smoke: 全绿（对照组零注入全 PASS + ${CASES.length} 个注入案例均被点名报红）`);
+    console.log(caseFilter === null
+      ? `gates-smoke: 全绿（对照组零注入全 PASS + ${CASES.length} 个注入案例均被点名报红）`
+      : `gates-smoke: 全绿（--case 仅跑 ${cases.length} 个注入案例 + ${controls.length} 个对照；其余未计）`);
     for (const d of keep) rmSync(d, { recursive: true, force: true });
     process.exit(0);
   } catch (e) {
