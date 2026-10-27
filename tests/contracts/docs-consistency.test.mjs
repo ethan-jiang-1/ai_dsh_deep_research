@@ -135,7 +135,7 @@ test('入口链导航合同：开跑前置含 vendor 构建/工作区注册；�
   assert.ok(guide.includes('根/子树 AGENTS 或入口链'), '§4 的探针触发词与路由表不一致（docs/AGENTS vs AGENTS/入口链）')
   const agents = read('AGENTS.md')
   assert.ok(agents.includes('改仓任务的验收/收尾按第 4 步'), 'AGENTS 最小集未指向第 4 步——fresh agent 会停在 1–3')
-  assert.ok(agents.includes('guides/60 §2 命令列'), 'AGENTS 的 source 清单 owner 应指向 guides/60 §2（scripts/README 只申报凭据/调用模式）')
+  assert.ok(agents.includes('guides/60 命令/前置'), 'AGENTS 的 source 清单 owner 应指向 guides/60 命令/前置（scripts/README 只申报凭据/调用模式）')
   const evalText = read('docs/evaluation.md')
   assert.ok(evalText.includes('node --import tsx/esm scripts/smoke/client-load-smoke.mjs'), 'evaluation 的 client-load 命令缺 tsx（直接 node 会在 .ts import 处失败）')
   assert.ok(!evalText.includes('`node scripts/smoke/client-load-smoke.mjs`'), 'evaluation 仍有不带 --import tsx/esm 的 client-load 命令')
