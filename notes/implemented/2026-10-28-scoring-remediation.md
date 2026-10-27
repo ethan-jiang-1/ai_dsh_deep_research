@@ -69,7 +69,7 @@
 
 | 文件 | 起点 | 现在 | 说明 |
 |---|---|---|---|
-| ResearchGraphTab.tsx | 721 | **457** | 数据层 → `useGraphFeed`；降级说明 → `state-note`；节点卡 → `NodeCard`；样式 → `styles` |
+| ResearchGraphTab.tsx | 721 | **403** | 数据层 → `useGraphFeed`；降级说明 → `state-note`；节点卡 → `NodeCard`；版本轨 → `GraphVersionRail`；提示带 → `GraphNotices`；样式 → `styles`（主函数 ~550 → **304**） |
 | ResearchConfigTab.tsx | 601 | **546** | 四区回滚面 → `LegacyManagementPane`（保留不删） |
 | client-load-smoke.mjs | 1029 | **879** | pass-5 终稿端到端 → `client-load-final.mjs` |
 | dev/hitl-answer.mjs | 717 | **529** | 浏览器内卡片驱动 → `lib/hitl-card-driver.mjs`（纯 DOM、零闭包） |
@@ -79,6 +79,23 @@
 没把测试与壳分开——真实判据应是**生产模块（client / lib / 门禁）≤600**：当前最大客户端组件 546、
 最大门禁域 428、最大 lib 模块（hitl-card-driver）200，全部达标。壳与测试不拆的理由：拆开只会让
 一次改动要开两个文件，阅读量不减。
+
+### Phase D（测试资产）
+
+- **覆盖边界契约**（`tests/contracts/test-surface.test.mjs`）：`scripts/lib` 54 个模块要么被至少
+  一个 `*.test.mjs` 直接 import，要么在 `SMOKE_ONLY` 登记"为什么只能 smoke"（真浏览器 / zstd 子进程 /
+  端口）。首跑抓到的唯一缺口是刚搬出的 `hitl-card-driver`；负例留证 = 删登记 → 红并逐项列出。
+- **客户端纯件**：`packages/deep-research-pack/src/lib` 23/23 已被测试引用，无缺口。
+- **覆盖率观察面**：`pnpm test:coverage`（Node 内置 `--experimental-test-coverage`），**不进门槛**
+  ——百分比门禁会逼出"为覆盖率而覆盖率"的断言。实测 96.56% 行 / 89.12% 分支。
+
+### Phase E（守住 A-）
+
+- **术语映射拆出 00-index** → `docs/terms.md`：入口链第 2 步读集 16.6KB → **11.0KB（-33%）**，
+  8 处引用同步改指。
+- **「描述即存在」断言族第二条**：design/40 §2 的窄索引表只写主文件名，`cockpit-doc-registry`
+  只查完整路径在正本出现过——索引漂了没人发现。新契约逐行核对索引点名的文件名在盘上存在；
+  负例留证 = 把 `ResearchStatusTab.tsx` 改成 `ResearchStatusPane.tsx` → 红。
 
 ## 环境状态
 
