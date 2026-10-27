@@ -11,7 +11,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { CASES, CONTROLS } from '../../scripts/lib/gates-cases.mjs';
+import { CASES, CONTROLS, NO_CASE_GATES } from '../../scripts/lib/gates-cases.mjs';
 
 const here = (p) => new URL(p, import.meta.url);
 const verifySrc = readFileSync(here('../../scripts/verify/verify.mjs'), 'utf8');
@@ -48,4 +48,22 @@ test('每个案例门禁都真实存在于 verify.mjs gates 数组（改名/退�
       `案例门禁 ${c.gate} 不在 verify.mjs gates 数组——门禁已改名或退役，gates-smoke 案例表须同 diff 更新`,
     );
   }
+});
+
+// 反向覆盖：gates 数组里没有常驻案例的门禁，必须恰为 NO_CASE_GATES 登记的名单。
+// 2026-10-27 卫生轮立红：此前只做单向对账（案例 → gates），新增门禁不带案例、案例退役后
+// 遗留缺口都不会红，账本因此漂到 39/43（真值 43/47）。分子分母改由代码维护，散文只指这里。
+test('覆盖缺口恰为登记的 4 道结构性例外（新增门禁不带案例 = 红）', () => {
+  const covered = new Set(CASES.map((c) => c.gate));
+  const uncovered = gatesArray.filter((g) => !covered.has(g)).sort();
+  const registered = NO_CASE_GATES.map((e) => e.gate).sort();
+  assert.deepEqual(uncovered, registered,
+    `覆盖缺口与 NO_CASE_GATES 不一致——未覆盖：${uncovered.join(', ')}；登记：${registered.join(', ')}`);
+  // 登记项必须仍存在于 gates 数组（门禁退役而登记遗留 = 红）
+  for (const entry of NO_CASE_GATES) {
+    assert.ok(gatesArray.includes(entry.gate), `NO_CASE_GATES 里的 ${entry.gate} 已不在 gates 数组——退役时删登记`);
+    assert.ok(entry.reason.length >= 10, `${entry.gate} 缺结构性例外理由`);
+  }
+  // 防空语料：两侧都非空，避免"全对上但都是空集"
+  assert.ok(gatesArray.length > 0 && CASES.length > 0, '防空语料：gates 数组或案例表为空');
 });

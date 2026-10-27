@@ -269,10 +269,10 @@ export const CASES = [
     writeFileSync(p, t.replace(/\n$/, ''));
   } },
   { id: 'md-anchors-nonascii-path', gate: 'md-anchors', mutate: appendTo(join('_dist', '安装手册.md'), '\n[坏锚探针](../README.md#这个锚点肯定不存在xyz)\n') },
-  // ── 2026-10-21 卫生轮后续：补齐结构性可注入、此前只有一次性 Note 红证的门禁
-  //    （常驻案例覆盖 27/43 → 39/43）。剩余 4 道（vendor-pin / vendor-clean / pin-agreement /
-  //    hooks-active）断言对象 = submodule 或本机 git config 的真实状态，副本不可造——
-  //    理由已登记在 docs/evaluation.md §L0 反证列（两态口径）。
+  // ── 2026-10-21 卫生轮后续：补齐结构性可注入、此前只有一次性 Note 红证的门禁。
+  //    不在本表收录的 4 道（vendor-pin / vendor-clean / pin-agreement / hooks-active）
+  //    断言对象 = submodule 或本机 git config 的真实状态，副本不可造——名单与理由正本 =
+  //    本文件 NO_CASE_GATES；覆盖率不在此记数（反向对账 = verify-gates.test）。
   //    本组全部为"注入后目标门禁必须点名报红"；对照组证明零注入时这些门禁在副本内 PASS。──
   { id: 'pack-contract-sync-runs-path', gate: 'pack-contract-sync', mutate: appendTo(join('packages', 'deep-research-pack', 'README.md'), '\n旧契约探针：runs/<slug>/\n') },
   { id: 'client-effect-wrap-bare-register', gate: 'client-effect-wrap', mutate: appendTo(join('packages', 'deep-research-pack', 'src', 'client', 'index.ts'), '\nsidebarRightTabs.register(\'probe-tab\', {})\n') },
@@ -614,6 +614,18 @@ export const CASES = [
     appendFileSync(join(dir, 'packages', 'deep-research-pack', 'src', 'client', 'ResearchStatusTab.tsx'),
       "\nconst __probe = ['drt_x', 'archive/drt_x', '_abandoned/drt_x'];\n");
   } },
+];
+
+// 无常驻注入案例的门禁（结构性不适）：断言对象 = submodule 或本机 git config 的真实状态，
+// 副本里造不出来（副本没有该 submodule / 本就未设 hooksPath）。**正本在此**——覆盖率由代码
+// 维护，散文只指这里；verify-gates.test 反向断言「gates 数组 − 案例覆盖 = 本清单」，
+// 新增门禁不带案例、或案例退役后遗留覆盖缺口都会红（2026-10-27 卫生轮：此前账本写 39/43，
+// 盘上实为 43/47，两个分母都不对，而只做单向对账无人拦）。
+export const NO_CASE_GATES = [
+  { gate: 'vendor-pin', reason: '断言对象 = submodule 钉身份（副本不含 submodule 内容，基线即红）' },
+  { gate: 'vendor-clean', reason: '断言对象 = submodule 的 git status（副本无此仓库）' },
+  { gate: 'pin-agreement', reason: '真串读取在 submodule 一步 fail-loud，注入的伪串永不到达扫描步' },
+  { gate: 'hooks-active', reason: '断言对象 = 本机 git config core.hooksPath（副本 git init 后本就未设）' },
 ];
 
 export const CONTROLS = [
