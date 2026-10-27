@@ -191,11 +191,14 @@ const saveArtifacts = async (reason, extra = {}) => {
     await page.screenshot({ path: join(dir, 'page.png'), fullPage: true }).catch(() => {})
     writeFileSync(join(dir, 'page.html'), await page.content().catch(() => ''))
     writeFileSync(join(dir, 'console.txt'), consoleErrors.join('\n'))
+    // 断连计数（2026-10-28 Phase B）：一次红的归因常常卡在"这是产品红还是流抖动的红"。
+    // 把浏览器侧的断连信号单独计数，agent 打开现场就能先分流（不改变任何判据）。
+    const disconnects = consoleErrors.filter((t) => /WebSocket closed|Remote stream|net::ERR_NETWORK_IO_SUSPENDED/.test(t)).length
     writeFileSync(join(dir, 'meta.json'), JSON.stringify({
-      reason, at: new Date().toISOString(), failures, skipped, extra, consoleErrors,
+      reason, at: new Date().toISOString(), failures, skipped, extra, consoleErrors, disconnects,
     }, null, 2))
     artifactsSaved = dir
-    console.error(`client-load-smoke: 失败现场 ${dir}（page.png / page.html / console.txt / meta.json）`)
+    console.error(`client-load-smoke: 失败现场 ${dir}（page.png / page.html / console.txt / meta.json；浏览器断连 ${disconnects} 次——先分流"流抖动"与"产品红"）`)
     return dir
   } catch (error) {
     console.error(`client-load-smoke: 现场保存失败：${error.message}`)
