@@ -128,7 +128,7 @@
 <a id="cockpit-7"></a>
 ### 2.7 方法库主 tab
 
-**文件**：[MethodLibraryView.tsx](../../packages/deep-research-pack/src/client/MethodLibraryView.tsx) + [library-fold.ts](../../packages/deep-research-pack/src/lib/library-fold.ts)
+**文件**：[MethodLibraryView.tsx](../../packages/deep-research-pack/src/client/MethodLibraryView.tsx) + [views.tsx](../../packages/deep-research-pack/src/client/method-library/views.tsx)（三种视图，纯展示）+ [styles.ts](../../packages/deep-research-pack/src/client/method-library/styles.ts) + [library-fold.ts](../../packages/deep-research-pack/src/lib/library-fold.ts)
 
 主界面 `conversation.view` 第三 tab（Chat/Trajectory 同排）：我的库搜索/列表、内置参考只读、四字段编辑/新建/删除；保存走 W1 `session/prompt` 交 Lead 写 `method-library.md`，面板不直写文件；无写权限、无新 RPC
 

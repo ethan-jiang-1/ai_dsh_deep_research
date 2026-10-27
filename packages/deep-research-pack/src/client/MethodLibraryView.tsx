@@ -12,7 +12,7 @@
  * steer→queue）。纯折算/序列化住 `src/lib/library-fold.ts`；本组件只画。
  */
 import { useEffect, useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
@@ -21,13 +21,14 @@ import {
   SECTION_LABELS,
   foldLibrary,
   instructionOf,
-  renderLibraryEntry,
   saveInstruction,
   summaryOfEntry,
   type LibraryEntry,
   type LibrarySections,
 } from '../lib/library-fold.ts'
 import { BUILTIN_PREFERENCES } from '../lib/config-tables.ts'
+import { BUTTON_STYLE, HEADER_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE, ROW_STYLE } from './method-library/styles.ts'
+import { BuiltinView, EditorView, ReadMineView, type Draft } from './method-library/views.tsx'
 
 const LIBRARY_PATH = 'method-library.md'
 const LIBRARY_READ_LIMIT = 1000
@@ -43,32 +44,9 @@ type Mode = 'read' | 'edit' | 'new'
 type Segment = 'mine' | 'builtin'
 type LoadState = 'loading' | 'ok' | 'absent' | 'error'
 
-interface Draft {
-  readonly name: string
-  readonly sections: LibrarySections
-  readonly currentName?: string
-  readonly provenance: string | null
-  readonly isDefault: boolean
-  readonly legacyText: string | null
-}
-
 interface Receipt {
   readonly ok: boolean
   readonly detail: string
-}
-
-const HEADER_STYLE: CSSProperties = { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', padding: '10px 14px', borderBottom: '1px solid #00000012' }
-const MUTED_STYLE: CSSProperties = { fontSize: 11, opacity: 0.62, lineHeight: 1.5 }
-const BUTTON_STYLE: CSSProperties = {
-  fontSize: 12, padding: '3px 9px', borderRadius: 4, border: '1px solid #00000026',
-  background: '#00000008', cursor: 'pointer', color: 'inherit',
-}
-const PRIMARY_STYLE: CSSProperties = { ...BUTTON_STYLE, background: '#2563eb', borderColor: '#2563eb', color: '#fff' }
-const INPUT_STYLE: CSSProperties = { width: '100%', boxSizing: 'border-box', fontSize: 13, padding: '5px 7px', borderRadius: 4, border: '1px solid #00000024', background: 'transparent', color: 'inherit' }
-const TEXTAREA_STYLE: CSSProperties = { ...INPUT_STYLE, minHeight: 54, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 }
-const ROW_STYLE: CSSProperties = {
-  display: 'block', width: '100%', textAlign: 'left', padding: '6px 8px', borderRadius: 5,
-  border: '1px solid transparent', background: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit',
 }
 
 /** 空四字段草稿。 */
@@ -282,99 +260,6 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     void load(controller.signal)
   }
 
-  const renderReadMine = (entry: LibraryEntry): ReactNode => (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
-        <strong style={{ fontSize: 16 }}>{entry.name}</strong>
-        {entry.isDefault && <span style={{ fontSize: 10, color: '#2563eb' }}>默认偏好</span>}
-        {entry.provenance !== null && <span style={MUTED_STYLE}>{entry.provenance}</span>}
-        <span style={{ flex: 1 }} />
-        <button type="button" style={BUTTON_STYLE} onClick={() => { beginEdit(entry) }}>编辑</button>
-        <button type="button" style={BUTTON_STYLE} onClick={() => { setPendingDelete(entry.name) }}>删除…</button>
-      </div>
-      {pendingDelete === entry.name && (
-        <div style={{ ...MUTED_STYLE, padding: '6px 8px', border: '1px solid #dc262640', borderRadius: 4, marginBottom: 8 }}>
-          删除「{entry.name}」？这会把删除指令交给 Lead。
-          <button type="button" style={{ ...BUTTON_STYLE, marginLeft: 8 }} disabled={sending} onClick={() => { void remove(entry) }}>确认删除</button>
-          <button type="button" style={{ ...BUTTON_STYLE, marginLeft: 6 }} onClick={() => { setPendingDelete(null) }}>取消</button>
-        </div>
-      )}
-      <div style={{ lineHeight: 1.65, fontSize: 13 }}>
-        {SECTION_LABELS.map(({ key, label }) => {
-          const value = entry.sections[key]
-          return (
-            <div key={key} style={{ marginBottom: 6 }}>
-              <div style={{ fontSize: 11, opacity: 0.55 }}>{label}</div>
-              <div style={{ whiteSpace: 'pre-wrap' }}>{value ?? <span style={{ opacity: 0.5 }}>未填写</span>}</div>
-            </div>
-          )
-        })}
-        {entry.legacyText !== null && <div style={{ ...MUTED_STYLE, marginTop: 6 }}>旧格式正文：{entry.legacyText}</div>}
-      </div>
-    </div>
-  )
-
-  const renderBuiltin = (entry: (typeof BUILTIN_PREFERENCES)[number]): ReactNode => (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
-        <strong style={{ fontSize: 16 }}>{entry.name}</strong>
-        <span style={MUTED_STYLE}>内置只读</span>
-      </div>
-      <div style={{ ...MUTED_STYLE, marginBottom: 8 }}>{entry.summary}</div>
-      <div style={{ lineHeight: 1.65, fontSize: 13 }}>
-        {SECTION_LABELS.map(({ key, label }) => (
-          <div key={key} style={{ marginBottom: 6 }}>
-            <div style={{ fontSize: 11, opacity: 0.55 }}>{label}</div>
-            <div style={{ whiteSpace: 'pre-wrap' }}>{entry.sections[key] ?? '—'}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-
-  const renderEditor = (): ReactNode => {
-    if (draft === null) return null
-    return (
-      <div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10 }}>
-          <strong style={{ fontSize: 16 }}>{mode === 'new' ? '新建方法' : '编辑方法'}</strong>
-          <span style={MUTED_STYLE}>保存会生成一条指令交给 Lead 写入库；本页不直接改文件。</span>
-        </div>
-        {draft.legacyText !== null && (
-          <div style={{ ...MUTED_STYLE, marginBottom: 8, padding: '4px 6px', border: '1px solid #f59e0b40', borderRadius: 4 }}>
-            旧格式正文会保留（只读）：{draft.legacyText}
-          </div>
-        )}
-        <label style={{ display: 'block', marginBottom: 10 }}>
-          <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 3 }}>名称</div>
-          <input
-            style={INPUT_STYLE}
-            value={draft.name}
-            placeholder="例如：投研尽调（我的口径）"
-            onChange={(event) => { setDraft({ ...draft, name: event.target.value }) }}
-          />
-        </label>
-        {SECTION_LABELS.map(({ key, label }) => (
-          <label key={key} style={{ display: 'block', marginBottom: 10 }}>
-            <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 3 }}>{label}</div>
-            <textarea
-              style={TEXTAREA_STYLE}
-              value={draft.sections[key] ?? ''}
-              onChange={(event) => { updateSection(key, event.target.value) }}
-            />
-          </label>
-        ))}
-        <details style={{ marginBottom: 10 }}>
-          <summary style={{ ...MUTED_STYLE, cursor: 'pointer' }}>Markdown 预览（只读）</summary>
-          <pre style={{ maxHeight: 140, overflow: 'auto', whiteSpace: 'pre-wrap', fontSize: 11, lineHeight: 1.5, background: '#00000005', padding: 6, borderRadius: 4 }}>{renderLibraryEntry({ name: draft.name.trim() === '' ? '（未命名）' : draft.name.trim(), sections: draft.sections, provenance: draft.provenance, isDefault: draft.isDefault })}</pre>
-        </details>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button type="button" style={PRIMARY_STYLE} disabled={sending} onClick={() => { void save() }}>{sending ? '发送中…' : '交给 Lead 保存'}</button>
-          <button type="button" style={BUTTON_STYLE} disabled={sending} onClick={cancel}>取消</button>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
@@ -439,8 +324,8 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
           )}
         </aside>
         <main style={{ flex: '1 1 420px', minWidth: 280, padding: 14, overflowY: 'auto', boxSizing: 'border-box' }}>
-          {mode === 'read' && segment === 'builtin' && builtin !== null && renderBuiltin(builtin)}
-          {mode === 'read' && segment === 'mine' && selected !== null && renderReadMine(selected)}
+          {mode === 'read' && segment === 'builtin' && builtin !== null && <BuiltinView entry={builtin} />}
+          {mode === 'read' && segment === 'mine' && selected !== null && <ReadMineView entry={selected} pendingDelete={pendingDelete} sending={sending} onEdit={beginEdit} onPendingDelete={setPendingDelete} onRemove={(entry) => { void remove(entry) }} />}
           {mode === 'read' && segment === 'mine' && selected === null && (
             <div style={{ ...MUTED_STYLE, paddingTop: 20 }}>
               {loadState === 'absent'
@@ -448,7 +333,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
                 : query.trim() !== '' ? '没有匹配的方法。' : '从左边选一条方法。'}
             </div>
           )}
-          {(mode === 'edit' || mode === 'new') && renderEditor()}
+          {(mode === 'edit' || mode === 'new') && <EditorView draft={draft} mode={mode} sending={sending} onNameChange={(name) => { setDraft((current) => current === null ? null : { ...current, name }) }} onSectionChange={updateSection} onSave={() => { void save() }} onCancel={cancel} />}
         </main>
       </div>
     </div>
