@@ -44,6 +44,13 @@
   SVG + 选中）、`WorkerChips.tsx`（每成员一次实例化，hooks 数恒定）、`format.ts`（短标签，图与列表
   共用——放任一组件里都会让另一个反向依赖组件）、`GraphNodeView` 进 `types.ts`；页签体降到 699 行。
   四个新路径同 diff 进 design/40 §2（`cockpit-doc-registry` 要求每个 client 模块登记）。
+- **驾驶舱其余页签按"视图 / 数据"分层**：方法库的三种视图（内置只读 / 我的库只读 / 编辑表单）
+  从 456 行页签体里切成 `method-library/views.tsx`（纯展示，动作走 props，父级仍独占发送态与
+  回执）+ `styles.ts`（样式常量单列，否则视图件要反向依赖页签体）；状态页的流程轨道（取色 /
+  步态符号 / 列位 / 回边几何）切成 `research-status/TrackRail.tsx`，输入收窄成
+  anchors / steps / faceVersions 三样。两处都是**纯搬家**：判据、文案、交互逐字未改，验证 =
+  client-load-smoke 对应断言全绿。配置页签仍是单件——它的 `COMPACT=false` 回滚分支（约 350 行
+  不可达 JSX）属 D25 决定，删分支才谈得上拆，已登记为可观察触发条件。
 - **门禁按域拆文件（verify.mjs 1848 行 → 入口 61 行 + 6 个域模块）**。47 道门禁单文件一格到底，
   改一道要读全文件或盲改；而改门禁本来就是 `--only=<名>` 的窄面。拆法：`context.mjs`（路径常量 /
   gates 名单 / gitOnce / trackedFiles / fail-note 收集器）+ `gates/{a-docs,b-pack,c-notes,d-vendor,
@@ -105,6 +112,7 @@
 
 - 本轮覆盖 P0（发布物/台账纠正）、P1（遮罩自证、现场保留、bundle 反查、覆盖账本为正）、
   P2（`--only`、`--case`、D 锚点、guides/62 路由行、门禁自测进 CI）与一项 P3（面板数据面搬出视图）。
-  仍属结构面的两项（其余三个页签按区拆件、design/40 §2 拆节）不在本轮范围。
+  仍属结构面的一项（研究配置页签按区拆件）受 D25 回滚分支约束，已进 `_backlog/triggers.md`
+  作可观察触发条件；其余结构面（verify 拆域、驾驶舱三页签分层、design/40 §2 拆节）已落地。
 - 运行区新增两类产物（gitignored）：`runtime/smoke-workspace/run-verdicts/<ts>-<kind>/` 与
   `cold-start-fail-<ts>/`——前者每次 up/probe 一份，后者只在冷启动红时出现。
