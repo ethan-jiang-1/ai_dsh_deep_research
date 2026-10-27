@@ -5,6 +5,9 @@
 
 ## 新增或改门禁
 
+门禁落点（2026-10-27 拆域）：入口 `verify/verify.mjs`（配参+调用+汇总）· 本体 `verify/gates/<域>.mjs`（六域）·
+共享助手 `verify/context.mjs`（路径常量 / gates 名单 / gitOnce / trackedFiles / fail-note）。
+
 流程与判据住在 [`.agents/skills/writing-a-gate`](../.agents/skills/writing-a-gate/SKILL.md)
 ——**先想红，再写绿**。本文件只记必须在场的事实：
 
