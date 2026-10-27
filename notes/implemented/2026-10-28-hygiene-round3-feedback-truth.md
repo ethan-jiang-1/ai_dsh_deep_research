@@ -27,6 +27,9 @@
   worker chips）与 `plan.md` 节点表解析/结构提示是两个变更面，改解析规则要在图的上下文里翻。
   拆后 `plan-graph.ts` 439 行（图）、`plan-index.ts` 347 行（解析）；消费者与测试按家 import，
   design/40 构成索引补 `plan-index` 行。用例体逐字保留，只改 import 家与文件头。
+- **`run-dashboard-core` 拆成"折模型"与"画 HTML"**：626 行里解析/场景/模型与渲染薄壳同住；
+  渲染只依赖模型、矩阵与 gap 统计，拆分后 core 481 行、`run-dashboard-html` 151 行。CLI 与测试
+  按家 import；scripts/README 的消费列按 import 图同步（navigability 门禁对账）。
 - **体量账按事实重写**：原 Note 的">600 只剩 3 个 / 最大 lib 200"漏算了 `plan-graph` 与
   `scripts/lib` 的两件；更正落在 [评分整改 Note](2026-10-28-scoring-remediation.md) §Phase C。
 - **`tests/run` 的 56 文件重估：维持单域**。触发条件（某域 >20 文件）早已满足，但拆分要改
@@ -54,7 +57,8 @@
 - **client-load 端口/并发**：A 全量 ALL PASS、exit 0，收尾 `listenersOn(3109) = []`、锁目录已释放；
   B 在 A 运行中启动，exit 2 并打印属主 pid。此前同一命令因遗留监听直接 EADDRINUSE。
 - **拆分**：`pnpm typecheck` 绿；`plan-graph` / `plan-index` / `graph-model` / `plan-diff` /
-  `run-driver-contract` 五文件 44 例全绿；用例体未删改。
+  `run-driver-contract` 五文件 44 例全绿；`run-dashboard` + `evaluation-contract` + `test-surface`
+  + `navigability-contract` 四文件 35 例全绿。用例体未删改。
 - **新契约先红后绿**：临时新增 `packages/deep-research-pack/src/lib/__probe-untested.ts` →
   test-surface 红并点名该件，删除后绿；临时 `docs/__probe.md` → 文档地图契约红，删除后绿。
 - **全量**：`pnpm verify` 全绿、`pnpm test` 全绿（例数见当次输出，不写进本页）；

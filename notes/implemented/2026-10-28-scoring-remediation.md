@@ -78,10 +78,11 @@
 它漏了 pack `src/lib/plan-graph.ts`（775）与 `scripts/lib/{gates-cases,run-dashboard-core}.mjs`。
 按变更面重新分列：**pack 生产面** = 客户端最大 546、`plan-graph` 439 + `plan-index` 347（同日拆分；
 拆分理由 = Team 任务图与 plan.md 文件解析是两个变更面，混在 775 行里改解析要在图的上下文里翻）、
-最大门禁域 428，均在 600 内。**>600 的支撑/壳/测试** = `gates-cases` 645（注入案例数据表）、
-`run-dashboard-core` 626（只读投影管线）、`client-load-smoke` 967（冒烟壳）、`scaffold` 624（部署 CLI 壳）、
-`node-gate.test` 608（测试电池）——壳与测试不拆的理由不变：拆开只会让一次改动要开两个文件，
-阅读量不减。上一版把"计划里的 ≤2"与"生产模块 ≤600"混着写、又只扫了部分目录，才得出"只剩 3 个"。
+最大门禁域 428，均在 600 内。**>600 的支撑/壳/测试** = `gates-cases` 645（注入案例数据表）、`client-load-smoke` 967（冒烟壳）、
+`scaffold` 624（部署 CLI 壳）、`node-gate.test` 608（测试电池）——壳与测试不拆的理由不变：拆开只会让
+一次改动要开两个文件，阅读量不减。`run-dashboard-core`（626）同日再拆为 core 481 + `run-dashboard-html`
+151（解析/模型 vs 渲染薄壳），也不再 >600。上一版把"计划里的 ≤2"与"生产模块 ≤600"混着写、又只扫了
+部分目录，才得出"只剩 3 个"。
 
 ### Phase D（测试资产）
 

@@ -8,11 +8,11 @@ import { fileURLToPath } from 'node:url';
 import {
   buildModel,
   deriveStep,
-  renderHtml,
   topicEvidenceMatrix,
   gapStats,
   parseReview,
 } from '../../scripts/lib/run-dashboard-core.mjs';
+import { renderHtml } from '../../scripts/lib/run-dashboard-html.mjs';
 
 const RUN = join(dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'run-dashboard', 'run');
 

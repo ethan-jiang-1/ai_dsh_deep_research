@@ -156,7 +156,8 @@
 | lib/node-gate-delivery-gate.mjs | node-gate-core、run-receipt.test | 门A 交付完整性判据 |
 | lib/node-gate-reader-gate.mjs | node-gate-core、node-gate-reader.test | 门C 读者版合同：同版/六节/长度/无来源路径；数字子集只 WARN；旧场/quick_factual 豁免 |
 | lib/schema-scan-core.mjs | schema-scan、schema-scan.test、node-gate-contracts、node-gate-contracts.test、node-gate-core、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、run-accept、run-bundle-charter.test、run-receipt.test | 节点 I/O 契约在场级断言判据核（交付日/研究类型/条件件豁免/断代定红——从 run-gates 下沉修 lib→入口层反向依赖） |
-| lib/run-dashboard-core.mjs | evaluation-contract.test、run-dashboard、run-dashboard.test | M2 run 观察面纯管线：解析 → 场景 → 模型 → HTML 渲染（全 fail-soft；CLI/watch/写盘归壳） |
+| lib/run-dashboard-core.mjs | evaluation-contract.test、run-dashboard、run-dashboard-html、run-dashboard.test | M2 run 观察面解析/场景/模型纯管线（全 fail-soft；HTML 渲染 = run-dashboard-html，CLI/watch/写盘归壳） |
+| lib/run-dashboard-html.mjs | run-dashboard、run-dashboard.test | M2 run 观察面 HTML 渲染薄壳（纯字符串拼接；矩阵/统计来自 core，不读盘） |
 | lib/evidence-audit-core.mjs | evidence-audit、evidence-audit.test、provenance.test | 证据溯源审计判据核心（readLog 注入同上） |
 | lib/provenance.mjs | evidence-audit-core、provenance.test | 离线来源证明：kind/URL/路径 + sha256 + 时间 + 通道 + 切片；local-file 哈希核对 |
 | lib/run-inventory-core.mjs | run-inventory、run-inventory.test | 只读保留期折算（逐场文件数/字节/最老；合计；1024 进制格式化） |
