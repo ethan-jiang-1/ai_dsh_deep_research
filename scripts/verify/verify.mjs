@@ -52,10 +52,18 @@ const gates = [
 // 断言 pack 兼容矩阵含当前 tag——升 pin 时两处同 diff 改；本文件里的 tag 复述受 pin-agreement 对账）
 const VENDOR_TAG = 'dsh-v0.2.1-rc.2';
 
+// `--only=<gate[,gate]>`：只判指定门禁（输出与退出码都只看它们）。为什么需要——门禁 47 道
+// 一格到底，改一道要么全跑、要么盲改；有了它，改门禁的循环 = `node scripts/verify/verify.mjs
+// --only=<名>`，不必读 1800 行也不必等无关门禁的输出（2026-10-27 卫生轮）。**不改变判据**：
+// 其余门禁照常执行（读文件、无副作用），只是失败不计入、汇总不打印——所以它省的是噪声与
+// 注意力，不是时间；想跑全量就省略该参数。
+const onlyArg = process.argv.find((a) => a.startsWith('--only='));
+const onlyRaw = onlyArg === undefined ? null : onlyArg.slice('--only='.length).trim();
+const only = onlyRaw === null || onlyRaw === '' ? null : new Set(onlyRaw.split(',').map((s) => s.trim()).filter(Boolean));
 const failures = [];
 const notes = [];
-const fail = (gate, msg) => failures.push(`[${gate}] ${msg}`);
-const note = (gate, msg) => notes.push(`[${gate}] ${msg}`);
+const fail = (gate, msg) => { if (only === null || only.has(gate)) failures.push(`[${gate}] ${msg}`); };
+const note = (gate, msg) => { if (only === null || only.has(gate)) notes.push(`[${gate}] ${msg}`); };
 
 function walk(dir, out = []) {
   for (const ent of readdirSync(dir, { withFileTypes: true })) {
@@ -1838,11 +1846,18 @@ function trackedFiles({ gate, glob, exclude, emptyMsg }) {
 // 归因正则钉 [^\]]+（到首个 ] 为止）：贪婪 (.+)\] 会被消息内嵌的 ]（如队列行的 [RFC] 链接）
 // 污染，抓到最后一个 ] ——失败详情在场、门禁行却打 PASS（2026-10-07 gates-smoke 实证抓获）。
 const failed = new Set(failures.map((f) => f.match(/^\[([^\]]+)\]/)[1]));
-for (const g of gates) console.log(`${failed.has(g) ? 'FAIL' : 'PASS'}  ${g}`);
+if (only !== null) {
+  const unknown = [...only].filter((g) => !gates.includes(g));
+  if (unknown.length > 0) {
+    console.error(`verify: --only 里有未登记的门禁：${unknown.join(', ')}（门禁名单正本 = 本文件 gates 数组 + docs/evaluation.md §L0）`);
+    process.exit(2);
+  }
+}
+for (const g of gates) { if (only === null || only.has(g)) console.log(`${failed.has(g) ? 'FAIL' : 'PASS'}  ${g}`); }
 for (const n of notes) console.log(`note  ${n}`);
 if (failures.length > 0) {
   console.log(`\n${failures.length} 处失败：`);
   for (const f of failures) console.log(`  ${f}`);
   process.exit(1);
 }
-console.log('\nverify: 全绿');
+console.log(only === null ? '\nverify: 全绿' : `\nverify: 仅判 ${[...only].length} 道（--only）——其余门禁未计；收尾仍须全量跑`);

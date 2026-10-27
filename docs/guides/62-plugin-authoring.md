@@ -130,6 +130,7 @@ tarball 装法不生成 PATH bin，用安装副本内脚本全路径，见 pack 
 | 改研究手册 / 模板 / 工作区 `.gitignore` | 改 `research-workspace/` 正本 → `node dev/sync-pack-workspace.mjs` 同步进 pack | `pack-workspace-fresh` + `workspace-versioning` 门禁 |
 | 加部署脚本 / bin | `package.json` 的 `files` + `bin` | `release-smoke`（L2：真装一次，装完能跑） |
 | 加观察面 client 面能力 | `src/client/` + `tsconfig.client.json` 的 include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `client-load-smoke`（真浏览器）+ `client-keys` 门禁 |
+| 改**现有**观察面页签（最频改动） | 页签 → 文件 → 职责的构成正本 = [design/40 §2](../design/40-research-cockpit.md)；折算住 `src/lib/`（纯函数，别在组件里堆逻辑）；新路径进 design/40 登记 | `client-load-smoke`（页签可点可读；失败留 png/html/console/meta）+ `cockpit-doc-registry` / `client-keys` 门禁 |
 | 改 persona / skill / 手册文本（模型可见） | 同 diff 跑真模型档；运行中的 web 缓存 boot 文本，须重启通道 | `l4-lite-smoke`（真模型档） |
 | 换 vendor pin | `dev/vendor-build.sh` 全链重建 + 逐条重审 | [bumping-vendor-pin 技能](../../.agents/skills/bumping-vendor-pin/SKILL.md)（流程正本；历次轮次见归档） |
 | 改 profile 镜像 | 不手改——改 pack 源后跑 `bash dev/boot-run.sh`：组合不完整/缺席时它重建，漂移时它 **exit 1** 并打印 `rm -rf <profile>` 补救（直接 `dsh --profile research` 会静默用旧镜像） | boot-run 漂移检测（fail-loud） |
