@@ -35,6 +35,10 @@
   「纯文档」行补 `entry-chain-probe` 条件（原 §4 有、路由表没有）；AGENTS 最小集指向第 4 步；
   evaluation 统一 `pnpm verify` 正本；两处 `0.1.7 起` 历史标记改为形态描述。
   `docs-consistency` 增导航合同（三处关键义务；措辞可改，义务不可丢）。
+- **入口链不拆（有证据的维持）**：探针首动作约 2 分钟、7 问全答约 10–12 分钟；`guides/60`
+  236 行是主要成本，但 §2 命令表与任务路由同页才让"改什么 → 跑什么"一眼成立，拆开要改大量
+  引用。维持单页，触发条件收窄为"首动作 >5 分钟 / guides/60 >300 行 / 机制名检索失败"
+  （登记 = [_backlog/triggers.md](../../_backlog/triggers.md)）。
 - **体量账按事实重写**：原 Note 的">600 只剩 3 个 / 最大 lib 200"漏算了 `plan-graph` 与
   `scripts/lib` 的两件；更正落在 [评分整改 Note](2026-10-28-scoring-remediation.md) §Phase C。
 - **`tests/run` 的 56 文件重估：维持单域**。触发条件（某域 >20 文件）早已满足，但拆分要改

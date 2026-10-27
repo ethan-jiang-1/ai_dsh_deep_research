@@ -8,25 +8,13 @@
 
 ## 最近归档
 
+最近三条（更早 = [settled 池索引](../_archived/settled_issues/README.md)，逐卡一行；本区不重复维护）：
+
 （[2026-10-27 复核后硬化](../_archived/settled_issues/2026-10-27-post-review-hardening.md) 已结：run-accept 全链 smoke + 数据卡形状 + 秘密模式扩展；P2.4/P2.5/P3 转触发器。）
 
 （[2026-10-27 发布前数据契约](../_archived/settled_issues/2026-10-27-release-data-contract.md) 已结：FAQ 26 对账 → 数据卡/回执路径/种子 schema/N2 披露/秘密扫描；D1–D4 全采纳；[Note](../../notes/implemented/2026-10-27-release-data-contract.md)。）
 
 （2026-10-25 运行形态合同组已结归档：[合同](../_archived/settled_issues/2026-10-25-run-form-contract.md)、[分发](../_archived/settled_issues/2026-10-25-distribution-contract.md)、[工作区](../_archived/settled_issues/2026-10-25-workspace-ownership-and-upgrade.md)、[数据边界](../_archived/settled_issues/2026-10-25-runtime-data-boundary.md)、[独立启动](../_archived/settled_issues/2026-10-25-standalone-cold-start.md)；残余逐卡记录。）
-
-（[可读终稿流程位](../_archived/settled_issues/2026-10-23-readable-final-process.md) + [可读层](../_archived/settled_issues/2026-10-23-run-final-human-readable.md) 2026-10-24 已结：reader-final 层落地——`reader-final` skill + `final/readable-vN` + 门C + 回执 reader 哈希 + 终稿页签双视图；真实 run `drt_cn-open-vs-us-closed-agentic` 全链绿、769 测试；[Note](../../notes/implemented/2026-10-23-reader-final.md)。）
-
-（[rerun 不满转接](../_archived/settled_issues/2026-10-23-rerun-dissatisfaction-triage.md) 2026-10-23 已结：L1 词表 skill + L2 三选项/报告末节 + L3 两处只读折叠块；719 测试、四角色重录、真模型探针五条全中。）
-
-（[D28 落地缺口收口](../_archived/settled_issues/2026-10-23-d28-witness-binding-and-receipts.md) 2026-10-23 已结：门③见证绑定 run + 回执哈希校验 + 手册 final/vN 语义统一；P0–P3 与 708 测试见卡内 §7。）
-
-（[右栏「终稿」](../_archived/settled_issues/2026-10-19-final-tab-in-sidebar.md) 2026-10-20 落地——接管 `drt_<slug>/final.md` 文件地址 + 交付时自动开一次 + ⑤ 交付门；设计论证与未验证项在卡内。）
-
-（2026-10-19 discipline-map 语义漂移已结并归档：9 行逐条裁决 + 新增门禁 `discipline-state-vocab` + 两笔遗留各有归宿，见 [settled 池](../_archived/settled_issues/2026-10-19-discipline-map-semantic-drift.md)。）
-
-（2026-10-15 hitl-answer 三条硬化已于 2026-10-16 全部落地并归档。历史清单见 [settled 池索引](../_archived/settled_issues/README.md)；卡模板与写法见下节。）
-
-（[未归档 bundle 处置](../_archived/settled_issues/2026-10-15-unclosed-bundles-disposition.md) 2026-10-16 执行完毕（14 场迁 `_abandoned/`，活动区清零）；[readiness 行形态容忍度](../_archived/settled_issues/2026-10-15-terminal-readiness-line-form-tolerance.md) 2026-10-16 窄放宽落地（A）；[research-preference-detail-ux](../_archived/settled_issues/2026-10-12-research-preference-detail-ux.md) 2026-10-13。）
 
 ## 写一张卡
 

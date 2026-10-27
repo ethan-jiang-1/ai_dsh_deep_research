@@ -16,10 +16,10 @@
 
 （BUG-045 已于 2026-10-28 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-045-client-load-graph-assert-flakes-on-stream-drop.md)——图面区分「读失败」与「未绑定」+ 有界重试，冒烟改轮询并自解释；
 BUG-044 已于 2026-10-27 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-044-delivery-receipts-leak-absolute-paths.md)——present 归一化 + 写前/写后校验 + `--repair`；
-BUG-043 已于 2026-10-23 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-043-graph-unmapped-task-shows-unexecuted.md)——图谱映射五态 + 覆盖率，证据 = `graph-model` 单测 + client-load 覆盖率行断言；
-BUG-042 已于 2026-10-19 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-042-method-library-seed-absent-no-pointer.md)；
-BUG-034 / BUG-035 同批修复归档。近况看两池索引：[暂停](../_archived/suspended_bugs/README.md) · [已修](../_archived/fixed_bugs/README.md)；
-新卡编号 = 活跃 ∪ 全部归档池取最大号 + 1，规则唯一权威 = 本页。）
+BUG-043 已于 2026-10-23 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-043-graph-unmapped-task-shows-unexecuted.md)——图谱映射五态 + 覆盖率，证据 = `graph-model` 单测 + client-load 覆盖率行断言。）
+
+更早归档与两池索引 = [暂停](../_archived/suspended_bugs/README.md) · [已修](../_archived/fixed_bugs/README.md)；
+新卡编号 = 活跃 ∪ 全部归档池取最大号 + 1，规则唯一权威 = 本页。
 
 ## 缺陷通道（卡怎么走到已修）
 
