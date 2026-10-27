@@ -10,7 +10,7 @@
 |---|---|---|
 | 根 [AGENTS.md](../AGENTS.md) | 每轮都要在场的常驻指令（每条 1–3 行，链到 home） | 教程、历史故事、情境化长流程 |
 | 子树 `AGENTS.md`（本文件、`scripts/`、`packages/*`、`notes/`、`tests/`、`_backlog`） | 只属于该子树的指令 | 根已承载的仓级规则 |
-| `docs/00-index.md`（+ `decisions.md` / `external-materials.md`） | 文档地图 + 术语映射；D 号台账与外部材料正文分页（按需查） | 教程正文、决策理由 |
+| `docs/00-index.md`（+ `terms.md` / `decisions.md` / `external-materials.md`） | 文档地图；术语对照、D 号台账与外部材料正文分页（按需查） | 教程正文、决策理由 |
 | `docs/design/` | 系统**现在**怎么组成、为什么这样组成（架构/角色/方法论映射/机制依据） | 当前 API 的唯一说明（→ 源码/README） |
 | `docs/guides/` | 按任务怎么操作（60 开发环 / 61 run / 62 插件作者） | 设计理由（→ notes/implemented） |
 | `docs/discipline-map.md` · [evaluation.md](evaluation.md) | 纪律三态表 · 验收合同与门禁台账 | 变更史 |
@@ -27,7 +27,7 @@
   门禁）——不用裸文件名或编号。
 - **编号词汇引入前先消歧**：同一前缀被两套词汇使用时，每处使用须能分辨所指，或改前缀根除
   撞车（先例处置 = [D27](decisions.md)：参与阶梯改 S0–S3，与评估五面 L0–L4 前缀分离）；新编号
-  词汇进 [00-index §术语映射](00-index.md) 登记所指。
+  词汇进 [terms.md](terms.md) 登记所指。
 - **每段只承载一条规则**：一段里塞多条规则或长括号旁白 → 拆开或把细节降到它的 home。
 - **强调要省着用**：粗体/大写满篇 = 没有重点；只强调改变行为的那一句。
 - **已知限制与延后工作**用固定节名 `## 已知限制与延后工作`（上游

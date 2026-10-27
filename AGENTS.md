@@ -12,7 +12,7 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 按序读，不跳：
 
 1. **本文件**——布局 + 命令速查 + 纪律 + `notes/` 地位 + 本链的定义；
-2. **[docs/00-index.md](docs/00-index.md)**——文档地图 + 术语映射（D 号台账 = [decisions.md](docs/decisions.md)，按需跳）；
+2. **[docs/00-index.md](docs/00-index.md)**——文档地图（术语对照 = [terms.md](docs/terms.md)；D 号台账 = [decisions.md](docs/decisions.md)，按需跳）；
 3. 按本轮授权进入工作：用户直派按请求范围执行；需澄清、查证或记录的问题按 [意图载体总图](docs/design/60-intent-carriers.md) 路由到 `_backlog/issues/`、`bugs/`、`research/`、`methods/` 或 `triggers.md`（可观察重议条件）。Backlog 不是实施前置门；
 4. **[docs/guides/60-dev-loop.md](docs/guides/60-dev-loop.md)**——按改动面选择验收与收尾。仅当持久决定需要显式评审时，才为该项建立 [notes/proposed/](notes/proposed/) RFC。
 
@@ -36,7 +36,7 @@ research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手�
                          全表）、question-patterns.md（判型模式库）、method-library.md（用户研究
                          偏好库）、drt_<slug>/（run bundle）、archive/（已交付归档）、_abandoned/
                          （停放位）、drafts/（开发侧草稿，非 run 产物）、templates/run/
-docs/                    00-index（地图+术语映射；D 号台账 = decisions.md）→ design/10-60 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ guides/65（运行形态合同）+ evaluation.md（验收合同）
+docs/                    00-index（地图；术语 = terms.md；D 号台账 = decisions.md）→ design/10-60 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ guides/65（运行形态合同）+ evaluation.md（验收合同）
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）；目录名自带时态，
                          总图 = notes/README.md（将来 proposed/ · 过去 implemented/archived/rejected/
                          postmortem/；立项来历 = 该页 §立项来历——用户定调只进 decisions.md D 号依据列）：
@@ -135,5 +135,5 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 
 ## 术语速查
 
-概念 → 官方载体 → 源码路径 = [00-index §术语映射](docs/00-index.md)；探索路由（vendor 树）=
+概念 → 官方载体 → 源码路径 = [terms.md](docs/terms.md)；探索路由（vendor 树）=
 `vendor/dsh/docs/architecture.md` → `vendor/dsh/docs/capability-seams.md` → 具体 package README。

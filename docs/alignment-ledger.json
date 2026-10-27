@@ -480,7 +480,7 @@
       "source": "docs/agent-lifecycle.md",
       "owns": "vendor 运行时/子系统/生成目录参考",
       "verdict": "na",
-      "reason": "本仓无 agent 生命周期实现面（消费 base 能力）；生命周期术语在 00-index §术语映射",
+      "reason": "本仓无 agent 生命周期实现面（消费 base 能力）；生命周期术语在 terms.md",
       "reReviewOn": "本仓出现自写的 agent 生命周期实现面（如 src/lib/ 下的状态机/生命周期折叠模块）时重估"
     },
     {

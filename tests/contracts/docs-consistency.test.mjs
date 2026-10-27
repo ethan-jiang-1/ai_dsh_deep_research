@@ -3,7 +3,7 @@
 // 只钉可以稳定判真假的几条；语义质量仍归交付自审。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -71,6 +71,33 @@ test('根 AGENTS 布局块覆盖工作区根实体与 pack 种子（2026-10-21 �
 // 「描述 vs 渲染」没有守门，故在此钉住：COMPACT 默认态 ⇒ README 不得出现已迁走的四区词。
 // 负例留证 2026-10-27：本测试首跑即红（README:286-288 命中 四区/内置打法/我的偏好库/底线条 四词）；
 // 改 README 为摘要面 → 绿。反向：把 COMPACT 改 false 则该断言自失效（回滚态由设计文档另行描述）。
+// 构成索引的"描述即存在"（2026-10-28 Phase E）：design/40 §2 的窄索引表只写**主文件名**
+// （完整路径在各件小节的「**文件**：」行）。索引是最常被扫的一行，主文件名漂了（改名/删除）
+// 就没有任何门禁发现——cockpit-doc-registry 只查完整路径在正本里出现过。
+// 负例留证 2026-10-28：把某行的 ResearchStatusTab.tsx 改成 ResearchStatusPane.tsx → 红。
+test('构成索引：design/40 §2 索引行点名的主文件名在盘上存在', () => {
+  const text = read('docs/design/40-research-cockpit.md')
+  const lines = text.split('\n')
+  const hdr = lines.findIndex((l) => l.trim().startsWith('| 件 | 文件 | 一句话 | 详情 |'))
+  assert.ok(hdr >= 0, 'design/40 §2 缺构成索引表头')
+  const rows = []
+  for (let i = hdr + 2; i < lines.length && lines[i].startsWith('|'); i += 1) rows.push(lines[i])
+  assert.ok(rows.length >= 10, `构成索引行数异常少（${rows.length}）——防空语料`)
+  const dirs = ['packages/deep-research-pack/src/client', 'packages/deep-research-pack/src/lib', 'packages/deep-research-pack/src']
+  const existsUnder = (name) => dirs.some((d) => existsSync(join(ROOT, d, name)))
+    || existsSync(join(ROOT, 'packages/deep-research-pack', name))
+    // 递归：子目录里的同名文件也算（research-graph/NodeCard.tsx 这类只写 basename）
+    || dirs.some((d) => readdirSync(join(ROOT, d), { recursive: true })
+      .some((f) => typeof f === 'string' && f.split('/').pop() === name))
+  const missing = []
+  for (const row of rows) {
+    const cell = (row.split('|')[2] ?? '').trim()
+    const names = [...cell.matchAll(/[A-Za-z][\w.-]*\.(?:tsx|ts|js)\b/g)].map((m) => m[0])
+    for (const name of new Set(names)) if (!existsUnder(name)) missing.push(`${row.split('|')[1].trim()} → ${name}`)
+  }
+  assert.deepEqual(missing, [], `构成索引点名了盘上不存在的文件（改名/删除后没更新索引）：${missing.join('、')}`)
+})
+
 test('研究配置面板形态：COMPACT 默认态下 README 不描述已迁走的管理四区（2026-10-27 卫生轮）', () => {
   const tab = read('packages/deep-research-pack/src/client/ResearchConfigTab.tsx')
   const compact = /const COMPACT = true/.test(tab)

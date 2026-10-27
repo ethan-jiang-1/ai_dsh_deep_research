@@ -192,7 +192,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | vendor 文件/目录 | 本仓处置 |
 |---|---|
 | `.claude/skills` symlink | **采纳**：`.claude/skills -> ../.agents/skills`（Claude 系 harness 发现同一批开发技能）；门禁 `claude-symlink` 覆盖两条 symlink |
-| `docs/glossary.md` | 已具备：`docs/00-index.md §术语映射`（一个概念一个 canonical term，含 DSH↔本仓对照） |
+| `docs/glossary.md` | 已具备：`docs/terms.md`（一个概念一个 canonical term，含 DSH↔本仓对照） |
 | `docs/development.md` · `docs/testing.md` · `docs/architecture.md` · `docs/cookbook/` · `docs/subsystems/` | 已具备（改名映射）：guides/60 · evaluation + guides/60 §2 · design/10 · guides/61/62 · design/ |
 | `docs/i18n/` · `docs/user/` · `website/` | 不适用：单语、无对外产品文档站与站点投影 |
 | `snapshots/`（session 回放 fixture） | **已具备**：[snapshots/](../snapshots/README.md) 场景证据层——四角色场景 [场景证据层 snapshots/](../snapshots/README.md) 的 `snapshot.json` 由 [replay-scene](../scripts/lib/replay-scene.mjs) 消费并驱动 [snapshot-replay-smoke](../scripts/smoke/snapshot-replay-smoke.mjs)（keyless，禁 llm-deepseek + 插 vendor `dsh-llm-replay`）；纯函数夹具仍住 `tests/fixtures/`；判据见本表源 2 "Snapshot tests" 行 | 带证据适配 |
@@ -232,7 +232,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | 交付判断四角色：机械检查 / 语义评审 / 批准 / 显式交互——各证明不同的东西，互不冒充 | [evaluation §完成判断四分离](evaluation.md) + [reviewing-a-delivery](../.agents/skills/reviewing-a-delivery/SKILL.md) 技能（语义自审层——agent 可自主完成的角色） | 照搬（判据固化 + 技能载体） |
 | 完成判断公理：能加载 ≠ 有行为证据 ≠ 能安装 ≠ 已获交付批准 | evaluation §完成判断四分离（四结果 ↔ L1 挂载 / L1 行为断言 / L2 / 收尾对账+用户批准） | 照搬 |
 | 门禁自测模式（语料 verify.test.mjs：完整副本 + 真实 verifier 入口 + invalid case 真被拒才算数） | [gates-smoke](../scripts/smoke/gates-smoke.mjs)（临时副本 + 注入回归经真实 verify 入口点名报红 + 零注入对照组防断言空转）+ [tests/contracts/verify-gates.test.mjs](../tests/contracts/verify-gates.test.mjs)（案例表 ↔ gates 数组静态对账） | 带证据适配（子进程归 smoke 道——layering 禁默认回归 spawn；副本 = tracked 全量，等价 fresh clone——曾有的「运行区链接目标补拷」对冲已随 BUG-016 修复移除） |
-| 验证词汇：oracle 独立预期 / real composition / semantic review | [00-index §术语映射](00-index.md) 验证词汇行 | 照搬 |
+| 验证词汇：oracle 独立预期 / real composition / semantic review | [terms.md](terms.md) 验证词汇行 | 照搬 |
 | 六误区清单（goal≠验收 / mock-only / 刷新≠接受 / 空 invariant / agent-loop / 不抄主仓治理） | 逐条散落既有登记（D6 / L1 真挂载 / tests·AGENTS fix fixtures / 本表源 1 与 alignment-ledger / 不适用登记）——不另立第二份清单（理由 = [毕业 Note](../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md) 输掉的方案） | 带证据适配（散落形态：六条各自有登记载体，本条不另立第二份清单——理由见毕业 Note 输掉的方案；散落 = 需按条检索，不是免检） |
 | 主仓治理全套（Issue/PR policy、weighted approval、stacked PR、release lane、`.github/` 执行层） | 最小开源治理 = keyless CI（[ci.yml](../.github/workflows/ci.yml)）+ 本地 pre-commit + 窄切片 + 收尾对账；Issue/PR policy、weighted approval、stacked PR、release lane 未采纳 | 带证据适配（2026-10-25 开源发布：CI 骨架落地；其余治理面的重估 = 需要外部贡献者分级审批、堆叠 PR 或自动化发布时） |
 
