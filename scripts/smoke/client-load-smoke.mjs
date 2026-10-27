@@ -114,15 +114,21 @@ function releaseRunLock() {
   rmSync(LOCK_DIR, { recursive: true, force: true })
 }
 function lockOwnerPid() {
+  let pid
   try {
     const owner = JSON.parse(readFileSync(join(LOCK_DIR, 'owner.json'), 'utf8'))
-    const pid = Number(owner?.pid)
-    if (!Number.isInteger(pid) || pid <= 0) return null
-    process.kill(pid, 0) // 只探测存在；EPERM 也算活着（不要误接管）
-    return pid
+    pid = Number(owner?.pid)
   } catch {
     return null
   }
+  if (!Number.isInteger(pid) || pid <= 0) return null
+  try {
+    process.kill(pid, 0)
+  } catch (error) {
+    // EPERM = 进程存在但不在我们的权限域（多用户机器）——仍算活着，绝不接管。
+    if (error.code !== 'EPERM') return null
+  }
+  return pid
 }
 function acquireRunLock(retry = true) {
   try {
