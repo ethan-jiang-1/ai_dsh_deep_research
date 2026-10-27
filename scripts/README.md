@@ -109,6 +109,7 @@
 |---|---|---|
 | lib/roles.mjs | discipline-probe、fetch-fallback-orchestration.test、l4-lite-smoke、preset-smoke、presets.test、release-smoke、replay-request.test、replay-scene.test、snapshot-replay-smoke、team-preflight-smoke | 角色清单访问器（事实源 = 盘上 presets/） |
 | lib/bundle-sessions.mjs | bundle-sessions、bundle-sessions.test | run bundle → 见证会话反查：聚合 scanWitnessLogs 的 boundSessions/presented（绑定谓词不另立——与 node-gate 门①②同源）；交付回执的 witness.sessions 亦由此面派生 |
+| lib/hitl-card-driver.mjs | hitl-answer | HITL 问询卡的浏览器内驱动片段（Playwright `page.evaluate` 入参）：问卡可见性、选项结构、提交/推进按钮可用性；纯 DOM 函数、零闭包，业务判定仍在 lib/ask-drive |
 | lib/frontmatter.mjs | bundle-date-sanity、evidence-audit-core、frontmatter.test、run-dashboard-core | `---` frontmatter 拆分**唯一正本**（两 core 共用同一实现） |
 | lib/zstd-read.mjs | node-gate、evidence-audit、run-accept、bundle-sessions（四壳） | zstd CLI 文本解压**唯一调用段**（多帧拼接靠 CLI；成功/失败结构化返回，**失败契约留各壳**：`''` 继续 vs `null` 跳过） |
 | lib/web-harness.mjs | session-replay、client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、rerun-triage-probe、snapshot-replay-smoke、team-preflight-smoke、compat-client-smoke | DSH web 冒烟族**启停与通道唯一正本**：`bootWeb`（等启动横幅拿 token）+ `authenticate` + `makeRpc`；**参数保形**——端口/超时/尾部字符/rpcId 前缀/失败文案与收割方式全留各站点 |
