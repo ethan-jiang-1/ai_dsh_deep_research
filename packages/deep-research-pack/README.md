@@ -204,6 +204,8 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 **保留、权限与版本线**
 
 - **无自动 GC**：`drt_*`/`archive/` 只增不减；删除是用户显式动作（`--clean` 不碰研究数据）。
+  先看规模再决定：`node scripts/run-ops/run-inventory.mjs --workspace <ws>`（只读：每场文件数/大小/最老；
+  `--json` 给脚本）。
 - **一 Host 一用户**：run bundle 继承工作区权限；共享机器请把工作区放在私有目录（如 `chmod 700`）。
   本包不做每用户分区。
 - **一工作区一条 pack 版本线**：种子状态只有一个 `version`；不同 profile 装不同 pack 版本时，先在

@@ -43,7 +43,7 @@
 
 ## 实际跑过的验证
 
-- `pnpm verify` 全绿；`pnpm test` 897 通过（新增 secret-scan / portable path / seed schema /
+- `pnpm verify` 全绿；`pnpm test` 900 通过（新增 secret-scan / portable path / seed schema /
   deploy-args / repair 用例；含先红后绿的负例留证）。
 - 版本 `0.1.2 → 0.1.3`（行为变更）；`export-dist` 产出 0.1.3 tarball + 安装手册；`release-smoke` /
   `data-smoke` / `compat-smoke` / `compat-client-smoke` 全 PASS。

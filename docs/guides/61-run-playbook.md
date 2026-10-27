@@ -165,6 +165,8 @@ BUG-020）。
   进 HITL2**（审计判据正本 = 研究手册「机械强度诚实记账」节）；CRITICAL>0 = 证据链有
   伪造/断链，先让 lead 修证据再回来；review 的 readiness 若为**附条件 PASS**，node-gate
   门A 会带 ⚠ 注记显性化——拍板时先核条件（裁决归你，机械门不替你拦）；
+- **保留期视图（只读）**：`node scripts/run-ops/run-inventory.mjs --workspace research-workspace` 列出每场
+  run 的文件数/大小/最老日期与合计（`--json` 给脚本）；它不删除任何文件，删/归档仍是显式动作。
 - **拍板后操作侧跑一次验收（原子动作）**：`source dev/env.sh && node scripts/run-ops/run-accept.mjs
   research-workspace/drt_<slug>`——node-gate + evidence-audit + path-hygiene（本机 home 路径）+ 未来日期 sanity 同次跑；预检红不写，绿写
   `delivered.json` + `manifest.json` + `acceptance.md`（新 run 非 quick_factual 的 reader 角色/哈希一并绑定）；回执里 present 只记
