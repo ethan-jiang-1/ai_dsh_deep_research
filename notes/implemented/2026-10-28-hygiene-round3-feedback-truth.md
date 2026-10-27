@@ -50,10 +50,11 @@
 
 ## 实际跑过的验证
 
-- **旧页面假绿 → 新判据真红**：同一通道 `node dev/run-driver.mjs probe` 旧实现 GREEN；
-  新实现 exit 2 / NOT-RUN，`channel-mirror` 点名"漂移 23 个文件"（含 `README.md`、
-  `lib/client.js`、`lib/client.js.map`），现场落 `run-verdicts/<ts>-probe/verdict.json`。
-  `bash dev/boot-run.sh --drift-only` 单跑 exit 1，且不报端口占用（证明只读模式在端口检查之前退出）。
+- **镜像门两态**：旧页面通道上 `run-driver probe` exit 2 / NOT-RUN，`channel-mirror` 点名
+  "漂移 23 个文件"（含 `README.md`、`lib/client.js`、`lib/client.js.map`），现场落
+  `run-verdicts/<ts>-probe/verdict.json`；另造 `DSH_DEV_HOME` 临时 home，按 npm pack 发布清单
+  复制镜像后 `bash dev/boot-run.sh --drift-only` exit 0 / "pack 漂移检测绿"——红绿两态都实跑。
+  `--drift-only` 在活跃 3083 上单跑也不报端口占用（只读模式在端口检查之前退出）。
 - **client-load 端口/并发**：A 全量 ALL PASS、exit 0，收尾 `listenersOn(3109) = []`、锁目录已释放；
   B 在 A 运行中启动，exit 2 并打印属主 pid。此前同一命令因遗留监听直接 EADDRINUSE。
 - **拆分**：`pnpm typecheck` 绿；`plan-graph` / `plan-index` / `graph-model` / `plan-diff` /
