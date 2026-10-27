@@ -28,20 +28,20 @@
 
 | 件 | 文件 | 一句话 | 详情 |
 |---|---|---|---|
-| 研究状态页签 | ResearchStatusTab.tsx（+3） | 右栏页签，自上而下八区（逐区职责见下表） | [§2.1](#cockpit-1) |
+| 研究状态页签 | ResearchStatusTab.tsx | 右栏页签，自上而下八区（逐区职责见下表） | [§2.1](#cockpit-1) |
 | 活标题 | ResearchStatusTitle | 挂起时页签名变「研究状态 · ⏳ 等你拍板」 | [§2.2](#cockpit-2) |
 | 流失败恢复指引 | stream-failure.ts | 末位回合死于上游流失败（MALFORMED_RESPONSE 族）且无新回合接手 → 人话横幅「等一两分钟发『继续』」 | [§2.3](#cockpit-3) |
 | 品牌（虎鲸 Orca） | BrandMark.tsx | 宿主 `sidebar.brand.mark` + `sidebar.brand.name` 两槽的 single occup… | [§2.4](#cockpit-4) |
 | 面板数据面 | config-tables.ts | 两个页签共用的**纯常量**：内置偏好（skill 方法预设的投影）、判型→打法映射、六条底线、四分区标签、领域示范、两个定制… | [§2.5](#cockpit-5) |
-| 研究配置页签 | ResearchConfigTab.tsx（+1） | 右栏**摘要页签**（2026-10-21 管理迁移后）：只留 ① 本次研究（采用＋来源＋「换一条」，读 question.m… | [§2.6](#cockpit-6) |
-| 方法库主 tab | MethodLibraryView.tsx（+1） | 主界面 `conversation.view` 第三 tab（Chat/Trajectory 同排）：我的库搜索/列表、内置参… | [§2.7](#cockpit-7) |
-| 研究图谱页签 | ResearchGraphTab.tsx（+6） | 右栏**只读观察面**：顶层 plan 节点 / `agentTeam` 任务画成 SVG DAG（节点 + 依赖边 + 同层… | [§2.8](#cockpit-8) |
-| 终稿页签 | ResearchFinalTab.tsx（+1） | 右栏页签：**认领 `drt_<slug>/` 的终稿地址族**（`final.md` / `final/vN.md` / `… | [§2.9](#cockpit-9) |
+| 研究配置页签 | ResearchConfigTab.tsx | 右栏**摘要页签**（2026-10-21 管理迁移后）：只留 ① 本次研究（采用＋来源＋「换一条」，读 question.m… | [§2.6](#cockpit-6) |
+| 方法库主 tab | MethodLibraryView.tsx | 主界面 `conversation.view` 第三 tab（Chat/Trajectory 同排）：我的库搜索/列表、内置参… | [§2.7](#cockpit-7) |
+| 研究图谱页签 | ResearchGraphTab.tsx | 右栏**只读观察面**：顶层 plan 节点 / `agentTeam` 任务画成 SVG DAG（节点 + 依赖边 + 同层… | [§2.8](#cockpit-8) |
+| 终稿页签 | ResearchFinalTab.tsx | 右栏页签：**认领 `drt_<slug>/` 的终稿地址族**（`final.md` / `final/vN.md` / `… | [§2.9](#cockpit-9) |
 | 浏览器 RunSource 适配器 | run-source-browser.ts | `remote.workspaceFiles` → run-context 的 `Entry` / `Page` / `ver… | [§2.10](#cockpit-10) |
 | 研究图谱页签体 | ResearchGraphTab.tsx | 页签体：头部（「只读观察」标记 + plan/task 计数）+ 正文首行版本轨（`plan/vN` 快照 → 「当前图 / … | [§2.11](#cockpit-11) |
 | 研究图谱注入面 | research-graph/types.ts | 「研究图谱」页签的注入面类型（`runSource` / `follow` / 可选 `openOwner` 三条闭包，数据面… | [§2.12](#cockpit-12) |
-| 研究语义工具卡 | ResearchToolCard.tsx（+1） | 对话流卡片：`spawn_teammate` → 组队卡、`web_search` → 检索卡（2 张） | [§2.13](#cockpit-13) |
-| 挂起显性化 | index.ts（+1） | pending false→true 迁移时 `openTab` 右栏自动展开 | [§2.14](#cockpit-14) |
+| 研究语义工具卡 | ResearchToolCard.tsx | 对话流卡片：`spawn_teammate` → 组队卡、`web_search` → 检索卡（2 张） | [§2.13](#cockpit-13) |
+| 挂起显性化 | index.ts | pending false→true 迁移时 `openTab` 右栏自动展开 | [§2.14](#cockpit-14) |
 | keyed 常量 | keys.ts | 字面量唯一正本（`client-keys` 门禁对账——拼错不报错、永不渲染） | [§2.15](#cockpit-15) |
 | host 半 | src/index.ts | 空壳宿主位（bundle 行 name = 包名；浏览器半经 `exports["./client"]` 装配） | [§2.16](#cockpit-16) |
 
