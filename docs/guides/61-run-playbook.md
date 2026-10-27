@@ -54,7 +54,7 @@
   用户自设代理 env 时 LLM SSE 流可能被撕裂（BUG-023 教训——遇「event precedes message_start」
   先查代理路径，不要先怀疑上游）。零干预的理由与拆掉的方案 =
   [网络零干预 Note](../../notes/rejected/2026-10-13-network-vanilla-restore.md)；
-  - **出问题第一步 = 诊断**：`node scripts/run-ops/stream-diagnostics.mjs --session <标题|id>`（或 `--recent N`）——输出模型尝试时间线、失败密度、provider/重试策略实名、该会话的工具调用与检索查询；`--recent N` 选择最近 N 个有模型活动的会话。判定行直接给"链路/上游态 vs 间歇性"。
+  - **出问题第一步 = 诊断**：先把「哪场 run」变成「哪个会话」——`node scripts/run-ops/bundle-sessions.mjs <bundle|slug>`（bundle 不记会话 id，这是唯一反查入口；判据 = 写过 `drt_<slug>/` 的 lead 会话，并直接打印下一步命令）；再 `node scripts/run-ops/stream-diagnostics.mjs --session <标题|id>`（或 `--recent N`）——输出模型尝试时间线、失败密度、provider/重试策略实名、该会话的工具调用与检索查询。判定行直接给"链路/上游态 vs 间歇性"。
 - **web 进程生命周期（实测约束）**：`boot-run.sh` 把 web 跑在**前台**并用 trap 管子进程——
   **脚本退出即 web 停**（这是特性：不留孤儿）。因此：
 

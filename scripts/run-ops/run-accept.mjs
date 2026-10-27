@@ -139,12 +139,16 @@ let manifestText = null
 if (legacy) {
   console.log('  note 旧契约 bundle（无 run.md）：只写 acceptance.md，不补 delivered.json/manifest.json（D28 epoch 豁免）')
 } else {
+  // 见证会话 = present 事件所在会话（bundle → 语料的反查键；诊断入口要会话 id/标题）。
+  const witness = [...new Set((presented.status === 'FOUND' ? presented.events : [])
+    .map((e) => e.sessionId).filter((id) => typeof id === 'string' && id.length > 0))]
   delivered = buildDelivered({
     slug,
     bundleDir: bundle,
     corpusRoot,
     acceptedAt: stamp,
     presented: presented.status === 'FOUND' ? presented.events : [],
+    witness,
   })
   if (delivered.present?.unportable === true) {
     console.error('run-accept: RED——deliverables/presented 指向 bundle 外，交付副本必须在 bundle 内（先把文件放进 final/ 再 present）；未写回执')

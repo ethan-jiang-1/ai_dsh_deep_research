@@ -1,6 +1,6 @@
 // node-gate-session-gates.mjs — session-bound HITL and present gates (keyless pure logic).
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { basename, join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import { portableBundlePath } from './path-hygiene.mjs'
 import { planCardsOf } from './plan-card.mjs'
 import { HITL_CONTRACT_DATE, PRE_CONTRACT_NOTE, decisionsLines, isPreContract, readinessOf } from './node-gate-contracts.mjs'
@@ -110,7 +110,7 @@ const collectLabels = (o, labels) => {
  * @returns {{logs:number, boundLogs:number, presented:Array, replies:Array, stalePresented:number, staleReplies:number}}
  */
 export function scanWitnessLogs(sessionsRoot, slug, { readLog = emptyOnUnreadableLogReader, contract = null } = {}) {
-  const out = { logs: 0, boundLogs: 0, presented: [], replies: [], stalePresented: 0, staleReplies: 0 }
+  const out = { logs: 0, boundLogs: 0, presented: [], replies: [], stalePresented: 0, staleReplies: 0, boundSessions: [] }
   const bare = String(slug ?? '').replace(/^drt_/, '')
   if (!sessionsRoot || !bare || !existsSync(sessionsRoot)) return out
   const pathRe = new RegExp(`(?:^|/)(?:archive/|_abandoned/)?drt_${escapeRe(bare)}/(final(?:/v(\\d+))?\\.md)$`)
@@ -126,6 +126,10 @@ export function scanWitnessLogs(sessionsRoot, slug, { readLog = emptyOnUnreadabl
       const events = witnessEventsOf(text)
       if (!boundSlugsOf(events).has(bare)) continue
       out.boundLogs++
+      // 会话身份：日志路径 = <sessionsRoot>/<组>/<会话 id>/<log>（组 = cwd 桶）。
+      // run bundle 不记会话 id（旧回执只有 corpusRoot），反查只能重扫本谓词——
+      // 故把 id 随扫描结果带出，供 run-accept 回执与 bundle-sessions CLI 消费。
+      out.boundSessions.push({ sessionId: basename(dirname(p)), group: basename(dirname(dirname(p))) })
       const asks = new Map()
       for (const e of events) {
         if (e?.type !== 'tool/call' || e?.data?.name !== 'ask_user_question') continue
@@ -143,6 +147,7 @@ export function scanWitnessLogs(sessionsRoot, slug, { readLog = emptyOnUnreadabl
             out.presented.push({
               path,
               version: m[2] === undefined ? null : Number(m[2]),
+              sessionId: basename(dirname(p)),
               callId: e.data?.callId,
               turn: e.data?.turn,
               time: typeof e.time === 'number' ? e.time : null,

@@ -147,7 +147,7 @@ export function receiptProblems(bundleDir) {
 }
 
 /** 生成 delivered.json 的主体（调用方负责写盘；值域与 RFC §11.1 一致）。 */
-export function buildDelivered({ slug, bundleDir, corpusRoot, acceptedAt, presented }) {
+export function buildDelivered({ slug, bundleDir, corpusRoot, acceptedAt, presented, witness = [] }) {
   const finalDir = join(bundleDir, 'final')
   const versions = existsSync(finalDir)
     ? readdirSync(finalDir).filter((f) => /^v\d+\.md$/.test(f)).map((f) => Number(/^v(\d+)/.exec(f)[1])).sort((a, b) => a - b)
@@ -181,6 +181,10 @@ export function buildDelivered({ slug, bundleDir, corpusRoot, acceptedAt, presen
         version: present.version,
         ...(presentLabel === null ? { unportable: true } : {}),
       },
+    // 见证会话：bundle → 会话语料的反查键。旧回执只有 corpusRoot（一个根），诊断入口
+    // （session-events / stream-diagnostics / watch-run）全要会话 id/标题——手上只有
+    // "哪场 run 坏了"时无从下手（2026-10-27 卫生轮实测）。有见证才写，空数组不落盘。
+    ...(witness.length === 0 ? {} : { witness: { sessions: witness } }),
   }
 }
 
