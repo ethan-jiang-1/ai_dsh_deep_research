@@ -10,13 +10,12 @@
 
 ## 活跃列表
 
-- [BUG-045：client-load 图谱断言在流断连时红（首跑红、重跑即绿）](BUG-045-client-load-graph-assert-flakes-on-stream-drop.md)——排查中（P2）；现场已留 `runtime/smoke-workspace/client-load-2026-10-27T15-56-30-540Z/`
-
 （2026-10-23 宪章复核发现的历史偏差按 **grandfather** 处理：只读证据、不建卡、不修、不追改；它们只用于约束新 run 的契约，记录 = [复核证据](../research/run-bundle-charter/2026-10-23-issue-review-verification.md)。）
 
 ## 最近归档
 
-（BUG-044 已于 2026-10-27 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-044-delivery-receipts-leak-absolute-paths.md)——present 归一化 + 写前/写后校验 + `--repair`；
+（BUG-045 已于 2026-10-28 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-045-client-load-graph-assert-flakes-on-stream-drop.md)——图面区分「读失败」与「未绑定」+ 有界重试，冒烟改轮询并自解释；
+BUG-044 已于 2026-10-27 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-044-delivery-receipts-leak-absolute-paths.md)——present 归一化 + 写前/写后校验 + `--repair`；
 BUG-043 已于 2026-10-23 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-043-graph-unmapped-task-shows-unexecuted.md)——图谱映射五态 + 覆盖率，证据 = `graph-model` 单测 + client-load 覆盖率行断言；
 BUG-042 已于 2026-10-19 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-042-method-library-seed-absent-no-pointer.md)；
 BUG-034 / BUG-035 同批修复归档。近况看两池索引：[暂停](../_archived/suspended_bugs/README.md) · [已修](../_archived/fixed_bugs/README.md)；

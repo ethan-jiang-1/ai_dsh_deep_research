@@ -49,4 +49,5 @@
 | [BUG-042](BUG-042-method-library-seed-absent-no-pointer.md) | 偏好库 `method-library.md` 从不播种、手册不指路：加空架子种子（`scaffold` 自动收集，10→11）+ 手册三态指路 + skill/preset 同钉 + `sync-pack-workspace` 独立种子守卫（反证两条）；新真模型档探针 ALL PASS 3/3 | 2026-10-19 |
 | [BUG-041](BUG-041-recovery-path-leaves-no-hitl-provenance.md) | 官方恢复路径（`run-kickoff --session` 自由文本关挂起）不落 HITL 记账：补 `closingProvenanceRow`+双写，接线到续跑分支，交付卡识别加文本级兜底；判据#3 端到端达成（行/备注/`isHitl2Row` 三真） | 2026-10-19 |
 | [BUG-043](BUG-043-graph-unmapped-task-shows-unexecuted.md) | 图谱把「未映射 task_id」误报成「未执行」：映射折算抽 `graph-model`（五态含 stale/duplicate/plan-only）+ 覆盖率行 + 投影未就绪门；判据修正（client-load 负例不可达 → 覆盖率行 + 盘侧节点数对账） | 2026-10-23 |
+| [BUG-045](BUG-045-client-load-graph-assert-flakes-on-stream-drop.md) | client-load 图谱断言在 journal 流瞬断时红（图面把读失败渲染成未绑定） | （`followError` 独立文案 + 有界重试 3×2s；冒烟覆盖率断言改 12s 轮询并带失败标记；design/40 §6 立「失败态与空态必须可分」） | 2026-10-28 |
 | [BUG-044](BUG-044-delivery-receipts-leak-absolute-paths.md) | 交付回执写入本机绝对路径（path-hygiene 在写回执之前跑） | （`portableBundlePath` 归一 present + 写前文本校验 + 落盘后复检 + `--repair`；现网真 bundle 两次 `run-accept` 绿、`path-hygiene` 干净） | 2026-10-27 |

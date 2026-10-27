@@ -731,6 +731,7 @@ async function pass3bGraphTabPhase() {
     || seg.includes('任务快照')
     || /WAVE\s*\d/i.test(seg)
     || seg.includes('需要你注意')
+    || seg.includes('绑定状态读取失败') // 流断连的诚实态（BUG-045）：也是"不炸"，但会在覆盖率断言里被点名
   step(body, '研究图谱页签体渲染（空态/团队态如实，不炸）', body ? 'body=ok' : seg.slice(0, 160).replace(/\s+/g, ' '))
   // 覆盖率行 = 产品面合同（BUG-043）：绑定 run 的 plan 有 active 节点时，头部必须同时给
   // 「已映射 K」与「未映射 N-K」——只报 Team 任务数时，用户会把“没映射”读成“没执行”。
@@ -740,8 +741,22 @@ async function pass3bGraphTabPhase() {
     : null
   const activePlanNodes = boundPlanText === null ? 0 : planIndex(boundPlanText).nodes.filter((node) => isActivePlanNode(node)).length
   if (activePlanNodes > 0) {
-    const coverage = /已映射\s*\d+/.test(seg) && /未映射\s*\d+/.test(seg)
-    step(coverage, '研究图谱覆盖率行在场（已映射 K / 未映射 N-K）', coverage ? `${activePlanNodes} 个 active 节点` : seg.slice(0, 160).replace(/\s+/g, ' '))
+    // 等显式状态，不拿"读一次没有"当结论（2026-10-27 BUG-045 实红）：图谱要先 follow journal
+    // 认绑定、再异步读 plan.md——流抖动时这一拍可能还没到，而页面当时与"本会话未绑定 run"同形。
+    // 现在图面会把读失败如实写成「绑定状态读取失败」，故：轮询上限 12s，并把这个标记带进判据说明。
+    let latest = seg
+    let coverage = /已映射\s*\d+/.test(latest) && /未映射\s*\d+/.test(latest)
+    for (let i = 0; i < 12 && !coverage; i++) {
+      await wait(1_000)
+      const text2 = await paneTextOf(page)
+      latest = text2.slice(Math.max(0, text2.indexOf('研究图谱')))
+      coverage = /已映射\s*\d+/.test(latest) && /未映射\s*\d+/.test(latest)
+    }
+    const disconnected = latest.includes('绑定状态读取失败')
+    step(coverage, '研究图谱覆盖率行在场（已映射 K / 未映射 N-K）',
+      coverage
+        ? `${activePlanNodes} 个 active 节点`
+        : `${disconnected ? '图面自报「绑定状态读取失败」(journal 流断开)｜' : ''}${latest.slice(0, 140).replace(/\s+/g, ' ')}`)
   }
 }
 

@@ -150,6 +150,9 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   const [showSnapshotPlan, setShowSnapshotPlan] = useState(false)
   // 最后成功读取 plan.md 的时刻：把“数据可能过期”显性化（BUG-043 §刷新），不把缺失当状态。
   const [planLoadedAt, setPlanLoadedAt] = useState<number | null>(null)
+  // 绑定读取失败的显性态 + 有界重试计数（BUG-045）：瞬时断连曾与"本会话未绑定 run"同形。
+  const [followError, setFollowError] = useState<string | null>(null)
+  const [followAttempt, setFollowAttempt] = useState(0)
 
   // journal → 本会话可信绑定的 run bundle（只用于 plan 基址；不折活动流）。
   // read 弱绑定在立项/挂起期不可信（binding-trust 单一政策）；write 命中后才显示 plan。
@@ -158,7 +161,9 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     let stopped = false
     let events: unknown[] = []
     let lastSlug: string | null = null
+    let retryTimer: ReturnType<typeof setTimeout> | undefined
     setBoundSlug(null)
+    setFollowError(null)
     void (async () => {
       try {
         for await (const frame of props.follow(leadSessionId, controller.signal)) {
@@ -172,11 +177,20 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
           }
         }
       } catch (cause) {
-        if (!controller.signal.aborted) console.error('[research-graph] journal follow 失败', String(cause))
+        if (controller.signal.aborted) return
+        const message = String((cause as { message?: unknown })?.message ?? cause)
+        console.error('[research-graph] journal follow 失败', message)
+        // 瞬时断连（Remote stream WebSocket closed 族）此前静默落成"本会话未绑定 run"——
+        // 与真实未绑定不可分辨（BUG-045）。有界重试 3 次（2s 间隔）；仍失败则保留错误态，
+        // 由图面如实说"读不到 ≠ 没有 run"。
+        if (!stopped) setFollowError(message.slice(0, 160))
+        if (followAttempt < 3) {
+          retryTimer = setTimeout(() => { if (!stopped) setFollowAttempt((n) => n + 1) }, 2_000)
+        }
       }
     })()
-    return () => { stopped = true; controller.abort() }
-  }, [leadSessionId])
+    return () => { stopped = true; controller.abort(); if (retryTimer !== undefined) clearTimeout(retryTimer) }
+  }, [leadSessionId, followAttempt])
 
   // plan.md 可选读：缺文件/读失败都降级 missing（不阻塞图；任务真相仍来自投影）。
   // 基址必须带 `drt_<slug>/`（三位置回退）——workspace 根没有 plan.md。
@@ -415,6 +429,14 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
       return {
         title: 'plan.md 过长，已截断',
         body: '只读了前 800 行；图谱可能不完整。修正 = 拆分 plan 或提高读策略（run-context 的 plan 上限）。',
+      }
+    }
+    if (boundSlug === null && followError !== null) {
+      // 读失败 ≠ 没有 run（BUG-045）：把流故障与"未绑定"分开，否则用户/agent 会把
+      // 瞬时的 journal 断连读成"这个会话还没开始研究"。
+      return {
+        title: '绑定状态读取失败',
+        body: `journal 流断开（${followError}）——"读不到"不等于"本会话没有 run"；已自动重试，连接恢复后这里会自动补上。`,
       }
     }
     if (boundSlug === null) {
