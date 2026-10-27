@@ -92,7 +92,7 @@
 | run-inventory.mjs | **只读保留期视图**：`--workspace <dir>` 扫 root/`archive/`/`_abandoned/` 的 `drt_*`，逐场文件数/大小/最老日期与合计；`--json` 给脚本；不删除任何文件（折算 = lib/run-inventory-core.mjs） | keyless |
 | run-accept.mjs | **交付验收原子动作**：node-gate（门 A/交付两门）+ evidence-audit（audit.md）+ path-hygiene（新 bundle 本机 home 路径零容忍；旧 bundle --allow-legacy）+ 未来日期 sanity；预检 `--no-write` 红不写，绿才落盘 node-gate/audit + `delivered.json` + `manifest.json` + `acceptance.md`（回执生成/校验 = lib/run-receipt.mjs，新 run 非 quick_factual 的 reader 角色/哈希一并绑定；present 归一化为 `drt_<slug>/final/vN` 相对标签，语料根写 `$DSH_HOME` 相对标签；待写回执先校验再落盘，门禁/审计生成物落盘后复检；旧 bundle 只写 acceptance）；`--repair` 修历史回执的绝对路径（只动可再生产物）；`--archive` 才移入 archive/ | keyless（须先 source dev/env.sh） |
 | unconsumed-evidence.mjs | **B1 差集出题的操作侧投影**：bundle 的 evidence/ 未进 findings.md 清单（收尾核验入口——lib 头注承诺"操作侧核验"，此前无 CLI；判据 = lib/unconsumed-evidence.mjs） | keyless |
-| bundle-sessions.mjs | **bundle → 见证会话反查**：给 bundle 或 slug，扫会话语料按绑定谓词（写过 `drt_<slug>/` 的 lead 会话）列出会话 id/组/present 条数，并打印下一步诊断命令——诊断入口都要会话 id，而 bundle 不记它（折算 = lib/bundle-sessions.mjs，绑定语义复用 node-gate 门①②同一条谓词） | keyless（须先 source dev/env.sh；扫全量会话约 10s） |
+| bundle-sessions.mjs | **bundle → 见证会话反查**：给 bundle 或 slug，按绑定谓词（写过 `drt_<slug>/` 的 lead 会话）列出会话 id/组/present 条数，并打印下一步诊断命令——诊断入口都要会话 id，而 bundle 不记它（折算 = lib/bundle-sessions.mjs，绑定语义复用 node-gate 门①②同一条谓词） | keyless（须先 source dev/env.sh；默认只扫 `research-workspace` 组、结果按日志 mtime+size 缓存——首次约 25s、重复调用 <0.1s；`--all` 扫整根、`--no-cache` 绕过） |
 | acceptance-check.mjs | **收活判据三态求值**：`<bundleDir> + <criteria.json>`（判据 = 委派方显式清单，仓内无落盘约定）→ 逐条 PASS/FAIL/UNVERIFIED 与汇总（"收活结论"对账成机械事实；判据 = lib/acceptance-check.mjs） | keyless |
 
 ## dist/（分发）

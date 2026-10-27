@@ -81,6 +81,31 @@ function witnessEventsOf(text) {
   return out
 }
 
+/**
+ * 单个日志的见证事实（给"按 slug 反查会话"的缓存面用；判据与 scanWitnessLogs 同源，不另立一套）：
+ * 绑定 slug 集 + 全部 `deliverables/presented` 的原始文件路径（按 slug 过滤留给调用方）。
+ * @param {string} text 日志全文。@returns {{slugs:string[], presented:Array<{path:string, callId?:string, turn?:unknown, time:number|null}>}|null}
+ *          null = 非 lead 顶层会话（子 agent 永不为本 run 作证）。
+ */
+export function witnessFactsOfLog(text) {
+  if (!isLeadLog(text)) return null
+  const events = witnessEventsOf(text)
+  const slugs = [...boundSlugsOf(events)]
+  const presented = []
+  for (const e of events) {
+    if (e?.type !== 'deliverables/presented') continue
+    for (const f of Array.isArray(e.data?.files) ? e.data.files : []) {
+      presented.push({
+        path: String(f?.path ?? '').replace(/\\/g, '/'),
+        callId: e.data?.callId,
+        turn: e.data?.turn,
+        time: typeof e.time === 'number' ? e.time : null,
+      })
+    }
+  }
+  return { slugs, presented }
+}
+
 /** 会话写过哪些 bundle（任一 write/edit 命中即绑；跨 run 会话不得为本 run 作证）。 */
 function boundSlugsOf(events) {
   const slugs = new Set()

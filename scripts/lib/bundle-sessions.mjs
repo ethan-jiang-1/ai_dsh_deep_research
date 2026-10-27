@@ -36,3 +36,86 @@ export function sessionsOfBundle(sessionsRoot, slug, opts = {}) {
     .sort((a, b) => (b.presented - a.presented) || a.sessionId.localeCompare(b.sessionId))
   return { slug: String(slug ?? '').replace(/^drt_/, ''), logs: scan.logs, sessions }
 }
+
+// ── 带缓存的反查（12s → 秒级；2026-10-28 Phase B）────────────────────────────────
+//
+// 为什么需要缓存：一次全量扫 = 逐个 `zstd -dc` 解压 2,058 个会话日志（实测 12s），而排障时
+// 往往要反复问同一个 bundle。缓存粒度选**单日志**（不是整次结果）：键 = 绝对路径，值 =
+// `{ mtimeMs, size, facts }`，facts = witnessFactsOfLog 的产物（绑定 slug 集 + presented 路径）。
+// 判据仍是同一个 helper——缓存只跳过解压，不另立语义。
+//
+// 失效：mtime/size 任一变化即重扫该日志；`CACHE_VERSION` 在判据形态变化时手动 +1。
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { basename, dirname, join } from 'node:path'
+import { witnessFactsOfLog } from './node-gate-session-gates.mjs'
+
+/** 缓存格式版本（facts 的结构或判据形态变化时 +1，旧缓存整体失效）。 */
+const CACHE_VERSION = 1
+
+/** 递归列会话日志（`*.jsonl` / `*.jsonl.zstd`）。 */
+function walkLogs(dir, out = []) {
+  if (!existsSync(dir)) return out
+  for (const ent of readdirSync(dir, { withFileTypes: true })) {
+    const p = join(dir, ent.name)
+    if (ent.isDirectory()) { walkLogs(p, out); continue }
+    if (/\.jsonl(\.zstd)?$/.test(ent.name)) out.push(p)
+  }
+  return out
+}
+
+/**
+ * 带缓存的反查。语义与 `sessionsOfBundle` 相同（绑定 + present 计数），只是跳过未变日志的解压。
+ * @param {string} sessionsRoot 会话根。
+ * @param {string} slug bundle 名（`drt_<slug>` 或裸 slug）。
+ * @param {{readLog?:(p:string)=>string, cachePath?:string, useCache?:boolean}} [opts]
+ * @returns {{slug:string, logs:number, sessions:Array, cacheHits:number, cacheMisses:number}}
+ */
+export function sessionsOfBundleCached(sessionsRoot, slug, opts = {}) {
+  const { readLog, cachePath, useCache = true, roots } = opts
+  if (typeof readLog !== 'function') throw new Error('sessionsOfBundleCached 需要 readLog（解压失败策略归调用方）')
+  const bare = String(slug ?? '').replace(/^drt_/, '')
+  // roots 可显式限定扫描面（CLI 默认只扫 research-workspace 组——run 会话必落该组，见 --group）；
+  // 不传 = 扫整根（语义与 sessionsOfBundle 一致）。
+  const logs = (Array.isArray(roots) && roots.length > 0 ? roots : [sessionsRoot]).flatMap((r) => walkLogs(r))
+  let cache = { version: CACHE_VERSION, logs: {} }
+  if (useCache && cachePath !== undefined && existsSync(cachePath)) {
+    try {
+      const parsed = JSON.parse(readFileSync(cachePath, 'utf8'))
+      if (parsed?.version === CACHE_VERSION && parsed.logs !== null && typeof parsed.logs === 'object') cache = parsed
+    } catch { /* 坏缓存按空处理（不阻塞反查） */ }
+  }
+  const pathRe = new RegExp(`(?:^|/)(?:archive/|_abandoned/)?drt_${bare.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/final(?:/v\\d+)?\\.md$`)
+  const byId = new Map()
+  let cacheHits = 0
+  let cacheMisses = 0
+  let dirty = false
+  for (const path of logs) {
+    let st
+    try { st = statSync(path) } catch { continue }
+    const prev = cache.logs[path]
+    let facts
+    if (useCache && prev !== undefined && prev.mtimeMs === st.mtimeMs && prev.size === st.size) {
+      facts = prev.facts
+      cacheHits += 1
+    } else {
+      const text = readLog(path)
+      facts = text ? witnessFactsOfLog(text) : null
+      cache.logs[path] = { mtimeMs: st.mtimeMs, size: st.size, facts: facts ?? null }
+      cacheMisses += 1
+      dirty = true
+    }
+    if (facts === null || facts === undefined) continue
+    if (!Array.isArray(facts.slugs) || !facts.slugs.includes(bare)) continue
+    const sessionId = basename(dirname(path))
+    const group = basename(dirname(dirname(path)))
+    const presented = (facts.presented ?? []).filter((p) => pathRe.test(String(p?.path ?? ''))).length
+    const cur = byId.get(sessionId) ?? { sessionId, group, presented: 0 }
+    cur.presented += presented
+    byId.set(sessionId, cur)
+  }
+  if (useCache && cachePath !== undefined && (dirty || !existsSync(cachePath))) {
+    try { writeFileSync(cachePath, JSON.stringify(cache)) } catch { /* 缓存写失败不影响反查 */ }
+  }
+  const sessions = [...byId.values()].sort((a, b) => (b.presented - a.presented) || a.sessionId.localeCompare(b.sessionId))
+  return { slug: bare, logs: logs.length, sessions, cacheHits, cacheMisses }
+}

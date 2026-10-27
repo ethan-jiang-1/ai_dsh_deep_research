@@ -10,10 +10,10 @@
 // 还原 → 绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
+import { appendFileSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { sessionsOfBundle } from '../../scripts/lib/bundle-sessions.mjs'
+import { sessionsOfBundle, sessionsOfBundleCached } from '../../scripts/lib/bundle-sessions.mjs'
 
 const HEADER = '{"type":"session","delegationDepth":0,"agentPreset":"lead"}'
 const writeCall = (path) => `{"type":"tool/call","data":{"name":"write","callId":"w1","arguments":${JSON.stringify(JSON.stringify({ path }))}}}`
@@ -67,5 +67,26 @@ test('反查：零绑定会话是空集（不是全量兜底）', () => {
     const out = sessionsOfBundle(root, 'drt_missing')
     assert.deepEqual(out.sessions, [], '不存在的 slug 不得返回任何会话')
     assert.equal(out.slug, 'missing')
+  })
+})
+
+// 缓存面（2026-10-28 Phase B）：反查要能在排障时反复跑——判据不变，只是跳过未变日志的解压。
+test('缓存：第二次调用命中缓存，结果与直扫一致；日志变化后失效重扫', () => {
+  withSessions((root) => {
+    const cachePath = join(root, '..', `bs-cache-${process.pid}.json`)
+    const readLog = (p) => readFileSync(p, 'utf8')
+    const first = sessionsOfBundleCached(root, 'drt_demo', { readLog, cachePath })
+    assert.deepEqual(first.sessions, sessionsOfBundle(root, 'drt_demo').sessions, '缓存路径与直扫必须同结果')
+    assert.ok(first.cacheMisses >= 4, `首次应全量解析（实际 ${first.cacheMisses}）`)
+    const second = sessionsOfBundleCached(root, 'drt_demo', { readLog, cachePath })
+    assert.equal(second.cacheMisses, 0, '第二次不应再解压任何日志')
+    assert.ok(second.cacheHits >= 4, '第二次应全部命中')
+    assert.deepEqual(second.sessions, first.sessions)
+    // 追加一行到某个日志 → 该文件失效，其余仍命中
+    const target = join(root, 'grp', 'session-b', 'log.jsonl')
+    appendFileSync(target, `{"type":"deliverables/presented","data":{"callId":"p2","files":[{"path":"drt_demo/final/v2.md"}]}}\n`)
+    const third = sessionsOfBundleCached(root, 'drt_demo', { readLog, cachePath })
+    assert.equal(third.cacheMisses, 1, '只有被改动的日志重扫')
+    assert.equal(third.sessions.find((x) => x.sessionId === 'session-b')?.presented, 1, '新 present 计入 session-b')
   })
 })
