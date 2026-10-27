@@ -8,6 +8,9 @@
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { RunSource } from '../../lib/run-context.ts'
+import type { TeamMemberProjection, TeamTaskView } from '@deepseek-ai/dsh-experimental-agent-team/client'
+import type { AttentionItem, PlanNode } from '../../lib/plan-graph.ts'
+import type { GraphNodeState } from '../../lib/graph-model.ts'
 // 标准 props 的类型增强（useSession / sessionId / useSessions / useSessionStatus）。
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
@@ -29,3 +32,19 @@ export interface ResearchGraphInjected {
 
 /** 槽标准 props + 注入面。 */
 export type ResearchGraphTabProps = PropsRuntime<'sidebar.right.pane.tab'> & ResearchGraphInjected
+
+/** 图上的一个节点：plan 节点（优先）或 Team 任务；边 = blockedBy / plan deps。 */
+export interface GraphNodeView {
+  readonly id: string
+  readonly label: string
+  readonly subject: string
+  readonly ownerName?: string
+  readonly status: string
+  readonly blockedBy: readonly string[]
+  readonly task?: TeamTaskView
+  readonly planNode?: PlanNode
+  readonly member?: TeamMemberProjection
+  readonly running?: boolean
+  readonly attention?: AttentionItem
+  readonly state: GraphNodeState
+}

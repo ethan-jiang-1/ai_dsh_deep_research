@@ -28,8 +28,6 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { UseSessions, UseSessionStatus } from '@deepseek-ai/dsh-client-ui-session/client'
 import type { TeamMemberProjection, TeamProjection, TeamTaskView } from '@deepseek-ai/dsh-experimental-agent-team/client'
 import {
   DEFAULT_ATTENTION_THRESHOLDS,
@@ -38,12 +36,10 @@ import {
   planIndex,
   planIssuesOf,
   wavesOf,
-  workerChipsOf,
   type AttentionItem,
   type MemberStatus,
   type PlanIndex,
   type PlanNode,
-  type WorkerChip,
 } from '../lib/plan-graph.ts'
 import { planDiffOf, type PlanDiff } from '../lib/plan-diff.ts'
 import {
@@ -55,23 +51,19 @@ import {
   nodeStateOf,
   PROJECTION_PENDING_STATE,
   type GraphCoverage,
-  type GraphNodeState,
 } from '../lib/graph-model.ts'
 import { bindingTrust } from '../lib/binding-trust.ts'
 import { openRun, type RunView } from '../lib/run-context.ts'
-import type { ResearchGraphTabProps } from './research-graph/types.ts'
+import type { GraphNodeView, ResearchGraphTabProps } from './research-graph/types.ts'
+import { shortLabel } from './research-graph/format.ts'
+import { DagMap } from './research-graph/DagMap.tsx'
+import { WorkerChips } from './research-graph/WorkerChips.tsx'
 export type { ResearchGraphInjected, ResearchGraphTabProps } from './research-graph/types.ts'
 
 /** plan.md 重读间隔（任务靠投影推送；只有文件需要低频重扫）。 */
 const PLAN_REFRESH_MS = 5_000
 /** plan.md 只读表头附近（节点表在文首；缺文件合法）。 */
 
-/** DAG 小图的固定几何（SVG 坐标；side panel 窄，节点只放 id + 短标签）。 */
-const NODE_W = 108
-const NODE_H = 32
-const NODE_GAP_X = 12
-const LEVEL_GAP_Y = 28
-const MAP_PAD = 8
 
 const HEADER_STYLE: CSSProperties = { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8 }
 const MUTED_STYLE: CSSProperties = { fontSize: 11, opacity: 0.62, lineHeight: 1.5 }
@@ -96,35 +88,8 @@ const BANNER_STYLE: CSSProperties = {
   background: '#f59e0b12', border: '1px solid #f59e0b38',
 }
 
-/** 图上的一个节点：plan 节点（优先）或 Team 任务；边 = blockedBy / plan deps。 */
-interface GraphNodeView {
-  readonly id: string
-  readonly label: string
-  readonly subject: string
-  readonly ownerName?: string
-  readonly status: string
-  readonly blockedBy: readonly string[]
-  readonly task?: TeamTaskView
-  readonly planNode?: PlanNode
-  readonly member?: TeamMemberProjection
-  readonly running?: boolean
-  readonly attention?: AttentionItem
-  readonly state: GraphNodeState
-}
 
-/** worker chips 子组件的 props（hooks 从父级透传；每个成员实例化一次，hooks 数量恒定）。 */
-interface WorkerChipsProps {
-  readonly memberId: SessionId
-  readonly useSessions: UseSessions
-  readonly useSessionStatus: UseSessionStatus
-}
 
-interface DagMapProps {
-  readonly nodes: readonly GraphNodeView[]
-  readonly selectedId: string | null
-  readonly childCounts: ReadonlyMap<string, number>
-  readonly onSelect: (id: string) => void
-}
 
 /** 注意力条目的严重度图标。 */
 function severityIcon(severity: AttentionItem['severity']): string {
@@ -157,147 +122,8 @@ function formatClock(ms: number): string {
   return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
 }
 
-/** 短标签（SVG 内不换行，避免撑爆侧栏）。 */
-function shortLabel(text: string, max = 15): string {
-  const clean = text.replace(/\s+/g, ' ').trim()
-  return clean.length > max ? `${clean.slice(0, max - 1)}…` : clean
-}
 
-/** 节点填充/描边（状态色只做左侧条 + 小圆点；卡片背景保持中性，避免整屏花）。 */
-function fillOf(node: GraphNodeView): string {
-  if (node.status === 'completed') return '#f0fdf4'
-  if (node.status === 'in_progress') return '#eff6ff'
-  if (node.status === 'unplanned') return '#f8fafc'
-  return '#f8fafc'
-}
 
-/**
- * 顶部 DAG 小图：按 `wavesOf` 分层；同层节点横排；边从 blocker 底边到 dependent 顶边。
- * 没有边时不渲染（父级明确说“没有可画的 DAG”，不画假图）。
- */
-function DagMap({ nodes, selectedId, childCounts, onSelect }: DagMapProps): ReactNode {
-  const waves = wavesOf(nodes)
-  if (waves.length === 0) return null
-  const pos = new Map<string, { x: number; y: number }>()
-  let maxRow = 1
-  waves.forEach((wave, row) => {
-    maxRow = Math.max(maxRow, wave.tasks.length)
-    wave.tasks.forEach((node, index) => {
-      pos.set(node.id, {
-        x: MAP_PAD + index * (NODE_W + NODE_GAP_X),
-        y: MAP_PAD + row * (NODE_H + LEVEL_GAP_Y),
-      })
-    })
-  })
-  const width = MAP_PAD * 2 + maxRow * NODE_W + Math.max(0, maxRow - 1) * NODE_GAP_X
-  const height = MAP_PAD * 2 + waves.length * NODE_H + Math.max(0, waves.length - 1) * LEVEL_GAP_Y
-  const known = new Set(nodes.map((node) => node.id))
-  return (
-    <div style={{
-      overflowX: 'auto', marginBottom: 6, border: '1px solid #00000012', borderRadius: 8,
-      padding: '6px 8px', background: '#fafbfc',
-    }}>
-      <svg
-        width={Math.max(300, width)}
-        height={height}
-        viewBox={`0 0 ${String(width)} ${String(height)}`}
-        role="img"
-        aria-label="研究依赖图：节点与依赖边"
-        style={{ display: 'block', margin: '0 auto' }}
-      >
-        <defs>
-          <marker id="research-graph-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-            <path d="M0,0 L7,3.5 L0,7 Z" fill="#94a3b8" />
-          </marker>
-        </defs>
-        {nodes.flatMap((node) => node.blockedBy
-          .filter((dep) => dep !== node.id && known.has(dep))
-          .map((dep) => {
-            const from = pos.get(dep)
-            const to = pos.get(node.id)
-            if (from === undefined || to === undefined) return null
-            const x1 = from.x + NODE_W / 2
-            const y1 = from.y + NODE_H
-            const x2 = to.x + NODE_W / 2
-            const y2 = to.y
-            const mid = (y1 + y2) / 2
-            return (
-              <path
-                key={`${dep}->${node.id}`}
-                d={`M ${String(x1)} ${String(y1)} C ${String(x1)} ${String(mid)}, ${String(x2)} ${String(mid)}, ${String(x2)} ${String(y2)}`}
-                fill="none"
-                stroke="#94a3b8"
-                strokeWidth={1.2}
-                markerEnd="url(#research-graph-arrow)"
-              />
-            )
-          }))}
-        {nodes.map((node) => {
-          const point = pos.get(node.id)
-          if (point === undefined) return null
-          const selected = node.id === selectedId
-          return (
-            <g
-              key={node.id}
-              transform={`translate(${String(point.x)},${String(point.y)})`}
-              role="button"
-              tabIndex={0}
-              aria-label={`${node.id} ${node.label} ${node.state.text}`}
-              style={{ cursor: 'pointer' }}
-              onClick={() => { onSelect(node.id) }}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault()
-                  onSelect(node.id)
-                }
-              }}
-            >
-              <title>{`${node.id} · ${node.label} · ${node.ownerName ?? '未指派'} · ${node.state.text}`}</title>
-              <rect
-                width={NODE_W}
-                height={NODE_H}
-                rx={6}
-                fill={fillOf(node)}
-                stroke={selected ? '#6366f1' : '#cbd5e1'}
-                strokeWidth={selected ? 2 : 1}
-                opacity={node.status === 'unplanned' ? 0.75 : 1}
-              />
-              <text x={8} y={13} fontSize={10} fontWeight={600} fill="#0f172a">{node.id}</text>
-              <text x={8} y={25} fontSize={9} fill="#475569">{shortLabel(node.label)}</text>
-              <circle cx={NODE_W - 10} cy={10} r={3} fill={node.state.color} />
-              {(childCounts.get(node.id) ?? 0) > 0 && (
-                <text x={NODE_W - 8} y={28} textAnchor="end" fontSize={8} fill="#6366f1">
-                  +{String(childCounts.get(node.id))}
-                </text>
-              )}
-            </g>
-          )
-        })}
-      </svg>
-    </div>
-  )
-}
-
-/**
- * 一个队员的 worker chips（`subagentCatalog` 投影 → 二层 worker 的 label/mode/忙闲）。
- * 独立子组件：每个成员实例化一次，hooks 数量恒定（不随 roster 变化在父级循环调 hook）。
- */
-function WorkerChips({ memberId, useSessions, useSessionStatus }: WorkerChipsProps): ReactNode {
-  const catalog = useSessions((state) => state.projectionsBySession[memberId]?.values.subagentCatalog)
-  const statuses = useSessionStatus((state) => state)
-  const chips: readonly WorkerChip[] = workerChipsOf(
-    { [memberId]: catalog },
-    (sessionId) => statuses.get(sessionId as SessionId)?.running,
-  )
-  if (chips.length === 0) return null
-  const shown = chips.slice(0, 3)
-  const suffix = chips.length > shown.length ? ` +${String(chips.length - shown.length)}` : ''
-  return (
-    <span style={{ fontSize: 11, opacity: 0.7 }}>
-      worker：{shown.map((chip) => `${chip.label}${chip.status === 'running' ? '●' : chip.status === 'inactive' ? '○' : '·'}`).join(' · ')}{suffix}
-    </span>
-  )
-}
 
 /**
  * 「研究图谱」页签体（只读观察）。
