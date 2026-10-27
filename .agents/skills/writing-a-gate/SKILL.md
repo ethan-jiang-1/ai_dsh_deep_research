@@ -1,6 +1,6 @@
 ---
 name: writing-a-gate
-description: Use when adding, widening, or retiring a mechanical check in scripts/verify/verify.mjs — proving it fails on a real regression before it lands, registering it in the evaluation ledger, and choosing a scope that does not sweep runtime areas.
+description: Use when adding, widening, or retiring a mechanical check in scripts/verify/gates/ — proving it fails on a real regression before it lands, registering it in the evaluation ledger, and choosing a scope that does not sweep runtime areas.
 ---
 
 # 新增一条机械门禁
@@ -14,7 +14,7 @@ description: Use when adding, widening, or retiring a mechanical check in script
 
 问：这条规则能不能由一个固定条件判真假？
 
-- 能 → 门禁（`scripts/verify/verify.mjs`）或契约测试（`tests/`）；
+- 能 → 门禁（`scripts/verify/gates/<域>.mjs`）或契约测试（`tests/`）；
 - 不能（需要读语境、权衡设计）→ 写进 owner 文档或 Skill，别造一条会漂移的假门禁。
 
 选择了门禁就用 `fail()` 报**失败对象 + 违反的规则 + 修正入口**——下一次行动由可读的
@@ -32,7 +32,7 @@ description: Use when adding, widening, or retiring a mechanical check in script
 
 ## 3. 写实现并登记（同一步，三处 + 自测两处）
 
-1. `scripts/verify/verify.mjs`：加 `gates` 数组项 + 实现块（块注释写设计依据与实证出处）；
+1. `scripts/verify/context.mjs` 的 `gates` 数组加项 + 在**所属域** `scripts/verify/gates/<a-docs|b-pack|c-notes|d-vendor|e-workspace|f-repo>.mjs` 加实现块（块注释写设计依据与实证出处）；
 2. `docs/evaluation.md` §L0 门禁登记表：加一行（断言什么 + 反证记录），
    与 `gate-ledger-sync` 门禁对账——**两处不同步即红**；
 3. 需要新契约断言时同步 `tests/`（keyless，零依赖）。

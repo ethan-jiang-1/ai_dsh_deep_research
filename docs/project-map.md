@@ -96,7 +96,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 
 | 证据 | 入口 | 凭据与外部调用 | 能证明什么 |
 |---|---|---|---|
-| L0 门禁 | `pnpm verify`；[verify](../scripts/verify/verify.mjs) | 无模型；本地 git 与生成器检查子进程 | 结构、链接、预算、同步等机械不变量 |
+| L0 门禁 | `pnpm verify`；[verify](../scripts/verify/verify.mjs)（入口）+ `verify/gates/`（各域本体） | 无模型；本地 git 与生成器检查子进程 | 结构、链接、预算、同步等机械不变量 |
 | 门禁自测 | [gates-smoke](../scripts/smoke/gates-smoke.mjs) | 无模型；git/node 子进程 | 门禁逻辑回归：注入违规经真实 verify 入口点名报红 + 零注入对照组 |
 | 确定性回归 | `pnpm test`；`tests/**/*.test.mjs` | 无模型/浏览器/网络/子进程；导入执行路径另核查，见下方限制 | 纯函数行为、解析、状态折算、渲染输出、审计判据与配置契约 |
 | 类型检查 | `pnpm typecheck`；pack 的 `tsconfig.*.json` | 需要 vendor 构建产物；不调模型 | pack 双半 TypeScript 类型面（`src/client` + `src/lib` + host 壳） |
@@ -134,7 +134,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 2. **一次性检查**——不复现的核对：跑完即弃（运行区临时脚本），证据（命令 + 输出）进条目实施记录；**复现第二次即升格契约测试**，不滞留临时态；
 3. **`*-smoke` 分级冒烟**——需要真子系统（挂载/安装/浏览器/回放）但无模型。义务：后缀申报档位（[scripts/AGENTS](../scripts/AGENTS.md)）；
 4. **真模型档脚本**——需要凭据与模型调用。义务：closed set 登记（`smoke-contract` 契约测试对账）；
-5. **verify 门禁**——断言跨条目恒真的仓结构不变量。义务：走 [writing-a-gate](../.agents/skills/writing-a-gate/SKILL.md) 全流程（先想红 + gates 数组与 evaluation 台账两处同步）；
+5. **verify 门禁**——断言跨条目恒真的仓结构不变量。义务：走 [writing-a-gate](../.agents/skills/writing-a-gate/SKILL.md) 全流程（先想红 + `context.gates` 与该域门禁模块 + evaluation 台账同步）；
 6. **run 门（`*-gate` / `*-audit` / `*-scan`）**——断言真实 run bundle 的文件事实，随 run 消费；
 7. **`tests/fixtures/` 支撑样本**——taxonomy 建行，consumer 必须真实（[taxonomy](../tests/fixtures/README.md) + 契约测试零孤儿断言）。
 

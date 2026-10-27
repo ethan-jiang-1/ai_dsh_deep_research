@@ -14,9 +14,11 @@ import { fileURLToPath } from 'node:url';
 import { CASES, CONTROLS, NO_CASE_GATES } from '../../scripts/lib/gates-cases.mjs';
 
 const here = (p) => new URL(p, import.meta.url);
-const verifySrc = readFileSync(here('../../scripts/verify/verify.mjs'), 'utf8');
+// 门禁名单正本 = context.mjs（2026-10-27 拆域：verify.mjs 只留入口，gates 数组搬进 context）；
+// 本测试是 keyless 纯 fs，不 import context（其闭包含 child_process）——按源码文本解析。
+const verifySrc = readFileSync(here('../../scripts/verify/context.mjs'), 'utf8');
 const gatesMatch = verifySrc.match(/const gates = \[([^\]]+)\]/);
-assert.ok(gatesMatch, 'verify.mjs 的 gates 数组不可解析——本契约测试的前提失效');
+assert.ok(gatesMatch, 'context.mjs 的 gates 数组不可解析——本契约测试的前提失效');
 const gatesArray = gatesMatch[1].split(',').map((s) => s.trim().replace(/^'|'$/g, '')).filter(Boolean);
 
 test('gates-smoke 案例表非空且形状完整（id 唯一 + gate 字符串 + mutate 函数）', () => {

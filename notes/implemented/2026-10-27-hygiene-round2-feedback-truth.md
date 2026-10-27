@@ -39,6 +39,13 @@
 - **`verify --only=<gate[,gate]>`**：47 道门禁一格到底，改一道要么全跑、要么盲改。只判指定门禁，
   输出与退出码都只看它们，末尾自报"仅判 N 道"；未登记门禁名 exit 2。判据零变化——省的是噪声与
   注意力，不是时间；收尾仍须全量。
+- **门禁按域拆文件（verify.mjs 1848 行 → 入口 61 行 + 6 个域模块）**。47 道门禁单文件一格到底，
+  改一道要读全文件或盲改；而改门禁本来就是 `--only=<名>` 的窄面。拆法：`context.mjs`（路径常量 /
+  gates 名单 / gitOnce / trackedFiles / fail-note 收集器）+ `gates/{a-docs,b-pack,c-notes,d-vendor,
+  e-workspace,f-repo}.mjs`（各域 219–428 行）+ 入口只做配参、按域调用、汇总。**判据与文案逐字未改**；
+  等价性证据 = gates-smoke 87 注入案例 + 4 对照在拆分前后同一判（两次全绿），`pnpm test` 916 例不变。
+  连带更新：门禁契约测试改从 `context.mjs` 读名单（仍是 keyless 文本解析，不 import 含子进程的模块）、
+  writing-a-gate 技能与 scripts/AGENTS/evaluation/guides 的门禁落点指向各域模块。
 - **面板数据面搬出视图**：`ResearchConfigTab.tsx` 里 7 张纯数据表（内置偏好 / 判型映射 /
   六条底线 / 四分区标签 / 领域示范 / 两个入口指令）进 `src/lib/config-tables.ts`。理由不只是
   "文件太长"：这些表是 skill 的**投影**，与视图生命周期无关；放在 700 行 TSX 里时 lib 侧拿不到
@@ -93,6 +100,6 @@
 
 - 本轮覆盖 P0（发布物/台账纠正）、P1（遮罩自证、现场保留、bundle 反查、覆盖账本为正）、
   P2（`--only`、`--case`、D 锚点、guides/62 路由行、门禁自测进 CI）与一项 P3（面板数据面搬出视图）。
-  仍属结构面的三项（verify 按 A–F 分域、client 四页签拆件、design/40 §2 拆节）不在本轮范围。
+  仍属结构面的两项（client 四页签拆件、design/40 §2 拆节）不在本轮范围。
 - 运行区新增两类产物（gitignored）：`runtime/smoke-workspace/run-verdicts/<ts>-<kind>/` 与
   `cold-start-fail-<ts>/`——前者每次 up/probe 一份，后者只在冷启动红时出现。

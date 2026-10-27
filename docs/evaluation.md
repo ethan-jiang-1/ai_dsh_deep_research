@@ -23,7 +23,7 @@
 
 - **定义**：仓库结构、文件卫生、preset 三件套完整性、vendor 铁律（如采用 submodule）等机械可查的不变量。
 - **最小真检查**：`node scripts/verify/verify.mjs`（或 `pnpm verify`）+ `pnpm test`（命令正本 = `package.json` 的 test 脚本；本仓唯一登记的测试命令）——均 keyless、秒级；改门禁时可 `--only=<gate[,gate]>` 只判该门（输出与退出码只计它，末尾自报"仅判 N 道"；收尾仍须全量）。改驾驶舱（client 面，D18）时加跑 `node scripts/smoke/client-load-smoke.mjs`（headless 真浏览器断言：插件零失败横幅 / 无 loader entry 失败 / 本包 client bundle 进 /plugins/ 批次 / 页签渐进面与活动流，清单以脚本为准；失败自动留 `runtime/smoke-workspace/client-load-*` 的 png/html/console/meta 现场；无窗口内交付目标 = exit 2 SKIP，未跑 ≠ 通过）——路由正本 = [guides/60 §2 改驾驶舱行](./guides/60-dev-loop.md)。
-- **门禁登记表**（正本在此；与 `scripts/verify/verify.mjs` 的 gates 数组经门禁 `gate-ledger-sync` 机械对账——加门禁须两处同步，漏一处即红）。**列形纪律**：断言列只写现在为真的合同；反证列只留一行指针——注入红/还原绿全程与案例正文住对应 Note 与 [gates-smoke](../scripts/smoke/gates-smoke.mjs) 案例表，本表不复述叙事；判定细节与已知边界住 verify.mjs 对应门禁块头注：
+- **门禁登记表**（正本在此；与 `scripts/verify/context.mjs` 的 `gates` 数组经门禁 `gate-ledger-sync` 机械对账——加门禁须两处同步，漏一处即红）。**列形纪律**：断言列只写现在为真的合同；反证列只留一行指针——注入红/还原绿全程与案例正文住对应 Note 与 [gates-smoke](../scripts/smoke/gates-smoke.mjs) 案例表，本表不复述叙事；判定细节与已知边界住对应门禁块头注（`scripts/verify/gates/<域>.mjs`）：
 
 > **反证口径（两态）**：常驻 = [gates-smoke 案例表](../scripts/lib/gates-cases.mjs) 的 `CASES` 注入案例（零注入对照组绿 + 注入后点名红；覆盖率与"无常驻案例的门禁"正本 = 同文件 `NO_CASE_GATES`，反向对账 = `tests/contracts/verify-gates.test.mjs`——本表不记数；逐门禁查法 = `grep -n "gate: '<名>'" scripts/lib/gates-cases.mjs`）；结构性不适的 4 道（vendor-pin / vendor-clean / pin-agreement / hooks-active——断言对象是 submodule 或本机 git config 的真实状态，副本不可造）理由与登记同住该常量，反证 = 一次性 Note 红录。
 
@@ -44,14 +44,14 @@
 | `pack-contract-sync` | pack 的 tracked yml/md 文本零 `runs/` 旧契约路径（D17） | 反证 = D17 事故 2 真实红实录（verify 逐文件点名残留 → 同 commit 修复） |
 | `note-format` | 活动 Note 裸状态行（值域与目录互验）；proposed/ 另需输掉的方案；implemented/ 需「决定/输掉的方案/实际跑过的验证」三节或 grandfather；rejected/ 保留提案体 | [note-lifecycle-absorption](../notes/implemented/2026-09-24-note-lifecycle-absorption.md) + [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) + 证据节断言二轮复核 = [推敲卡](../_backlog/_archived/settled_issues/2026-10-08-sdlc-reference-absorption.md) |
 | `note-status` | notes/ 每子目录有 README.md（含 archived/ 冻结层）；research/ 重现时状态行与索引对账断言复活 | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) |
-| `note-graduation-rewrite` | implemented/ 活跃 Note 零计划体残留（裸节名 `## 验收` 与未来时态标记，词表正本 = verify.mjs 本门禁 markers 数组） | [graduation-rewrite-gate Note](../notes/implemented/2026-09-27-graduation-rewrite-gate.md) |
+| `note-graduation-rewrite` | implemented/ 活跃 Note 零计划体残留（裸节名 `## 验收` 与未来时态标记，词表正本 = gates/c-notes.mjs 本门禁 markers 数组） | [graduation-rewrite-gate Note](../notes/implemented/2026-09-27-graduation-rewrite-gate.md) |
 | `dev-skill-format` | `.agents/skills/*/SKILL.md` 在场 + frontmatter name = 目录名 + description 以 "Use " 开头 | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) |
 | `vendor-pin` | vendor/dsh submodule 在位：.gitmodules 正源 URL + 钉 commit `687f282e86`（tag dsh-v0.2.1-rc.2） | [vendor-submodule Note](../notes/implemented/2026-09-24-vendor-submodule.md)；副本注入不适（理由：断言对象 = submodule 真实状态——fixture 副本不拷 submodule 内容，基线即红），反证 = 一次性 Note 红录 |
 | `vendor-clean` | vendor/dsh `git status --porcelain` 零未提交改动（机制权威不许就地改） | [vendor-submodule Note](../notes/implemented/2026-09-24-vendor-submodule.md)；副本注入不适（理由：断言对象 = submodule 的 git 状态——fixture 副本无此仓库，基线即红），反证 = 一次性 Note 红录 |
 | `secrets-untracked` | tracked 清单零敏感/残留物（credentials/.env/.pem/.tgz/.log/node_modules/.tmp*/_tmp/、pack 构建产物 lib/、编辑器/OS/缓存残留…） | [入口链审计 Note](../notes/implemented/2026-09-24-entry-chain-fresh-agent-audit.md) |
 | `host-paths` | live 面（随包内容/当前文档/脚本/CI/工作区种子）零本机绝对 home 路径；历史 notes/_backlog/snapshots/tests fixtures 豁免 | [git 边界指南](./guides/63-git-boundary.md)；反证 = gates-smoke 注入 `/Users/<name>/...` 红 |
 | `role-list-sync` | 角色清单单一事实源 = 盘上 presets/；scripts/tests/dev 代码里的清单字面量（≥3 角色名）即红 | [基础整治 Note](../notes/archived/2026-09-24-foundation-remediation.md) |
-| `gate-ledger-sync` | 本表门禁名集合 = verify 脚本 gates 数组（登记与实现不漂移） | [基础整治 Note](../notes/archived/2026-09-24-foundation-remediation.md) |
+| `gate-ledger-sync` | 本表门禁名集合 = `context.gates`（登记与实现不漂移） | [基础整治 Note](../notes/archived/2026-09-24-foundation-remediation.md) |
 | `entry-chain` | 根入口链与子树指令门牌成员在场（六份子树 AGENTS.md 在成员清单内），AGENTS 的入口链标题存在；链接解析归 md-links | gates-smoke `entry-chain-no-title` 注入案例 + [review-driven-hardening Note](../notes/implemented/2026-09-24-review-driven-hardening.md)；成员扩围反证（移除 `tests/AGENTS.md`/`_backlog/AGENTS.md` 看红→还原绿）= 2026-10-12 卫生轮实录 |
 | `doc-budgets` | 常驻文档预算：[scripts/doc-budgets.json](../scripts/doc-budgets.json) 拥有上限——登记项在场且不超限，仓内新增 AGENTS.md 必须登记 | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) + [审计 P3 收尾轮](../notes/implemented/2026-10-07-audit-p3-closure-round.md) |
 | `align-ledger` | `docs/alignment-ledger.json` 机读对账：source 在 vendor/dsh 存在、adopted/adapted 落点存在；na 须给理由 + 活性依据（liveness 或 reReviewOn，**两者皆无即红**） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) + na 活性二轮复核 = [推敲卡](../_backlog/_archived/settled_issues/2026-10-08-sdlc-reference-absorption.md)；gates-smoke 案例常驻 |
