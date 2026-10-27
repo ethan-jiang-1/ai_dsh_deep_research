@@ -115,7 +115,8 @@
 
 - 本轮覆盖 P0（发布物/台账纠正）、P1（遮罩自证、现场保留、bundle 反查、覆盖账本为正）、
   P2（`--only`、`--case`、D 锚点、guides/62 路由行、门禁自测进 CI）与一项 P3（面板数据面搬出视图）。
-  仍属结构面的一项（研究配置页签按区拆件）受 D25 回滚分支约束，已进 `_backlog/triggers.md`
-  作可观察触发条件；其余结构面（verify 拆域、驾驶舱三页签分层、design/40 §2 拆节）已落地。
+  用户裁定（2026-10-28）：`COMPACT=false` 的四区回滚分支**保留**，因此研究配置页签不做拆分——
+  该项以 `_backlog/triggers.md` 的可观察触发条件收口，不计未完成项。其余结构面（verify 拆域、
+  驾驶舱三页签分层、design/40 §2 拆节、面板数据面搬出）均已落地。
 - 运行区新增两类产物（gitignored）：`runtime/smoke-workspace/run-verdicts/<ts>-<kind>/` 与
   `cold-start-fail-<ts>/`——前者每次 up/probe 一份，后者只在冷启动红时出现。
