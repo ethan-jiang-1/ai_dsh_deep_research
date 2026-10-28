@@ -11,7 +11,7 @@
 | `version` / `sessionFormat` | 声明格式版本与回放的 session 事件版本；`sessionFormat` 钉住现有录制代，故意换代须新 `session.vN.jsonl` + 人审 |
 | `scenario` / `profile` / `workspace` | 场景名、启动档、回放工作区（仓内相对路径） |
 | `cases[]` | 逐个角色的 `id`/`preset`/`fixture`，可带 `renderExpected` 渲染金标准（只在录制流确实产生渲染面时声明——空渲染的转录声明它只会得到假红） |
-| `cases[].source` | 录制身份：`codeAnchor`（录制时本仓 HEAD——模型可见输入与该 commit 一致）、`vendor`（录制时的 vendor pin）、`recordedAt`、`recording`（`live` = 真模型录制）。前两者须为 40 位 commit 或如实标记 `unknown-historical`（历史缺失不许猜填） |
+| `cases[].source` | 录制身份：`codeAnchor`（录制时本仓 HEAD——**被装配进请求的**模型可见输入（比对面五面 + 时钟序列）与该 commit 一致；录制后若改了**未被加载进请求**的文本，B 层基线仍有效，但须在该场 Note 记录，不能默默改锚点）、`vendor`（录制时的 vendor pin）、`recordedAt`、`recording`（`live` = 真模型录制）。前两者须为 40 位 commit 或如实标记 `unknown-historical`（历史缺失不许猜填） |
 
 角色集的事实源 = 盘上 [presets/](../packages/deep-research-pack/presets/)。声明列的 case 集必须与它精确一致：漏登记、串角色、缺件、路径越界或 symlink 都在加载期 fail-loud，不会静默缩小场景。判据集由 consumer 固定为**已登记的比对面**（persona、全部 `request/header`、工作区指令、skill 目录、运行时上下文、时钟注入序列），声明不能削减它来凑绿；`system/message` 与 `user/message` 两侧的注入种类只要出现未登记者，回放即报红——新面必须先进比对面再重录基线，不存在静默吸收。
 
