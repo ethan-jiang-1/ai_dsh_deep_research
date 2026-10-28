@@ -89,14 +89,12 @@ export function createdDateOf(bundleDir) {
   return m?.[1] ?? null
 }
 
-/** 契约纪元日期（人读 / 见证扫描下界）：旧形态取 `contract:`；新形态（有 schema 无 contract）
- *  取 `created:`——否则 schema run 的回执与见证扫描会丢掉时间下界。无 run.md → null；
- *  run.md 在场但两者都非法 → ''（交门禁判红，不静默回退）。 */
+/** 契约纪元日期（人读 / 见证扫描下界）：**schema 在场就只认 `created`**——残留的旧 `contract`
+ * 不能被用来把下界往回拨（抄旧头 = 重新打开旧见证）；旧形态（无 schema）才取 `contract`。
+ *  无 run.md → null；run.md 在场但两者都非法 → ''（交门禁判红，不静默回退）。 */
 export function epochDateOf(bundleDir) {
-  const contract = contractEpochOf(bundleDir)
-  if (contract === null) return null
-  if (contract !== '') return contract
-  return createdDateOf(bundleDir) ?? ''
+  if (runSchemaOf(bundleDir) !== null) return createdDateOf(bundleDir) ?? ''
+  return contractEpochOf(bundleDir)
 }
 
 /** journal 未来日期异常（INFO 级，不计违约——日期契约违例线索，显性化不无视）。 */

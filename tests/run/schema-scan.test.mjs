@@ -310,9 +310,9 @@ test('见证下界：schema 形态取 created（不让新 run 丢掉时间下界
   try {
     assert.equal(epochDateOf(withContract.dir), '2026-10-23')
   } finally { withContract.cleanup() }
-  const both = mkSchemaRun('- schema: 2\n- created: 2026-10-28\n- contract: 2026-10-01')
+  const both = mkSchemaRun('- schema: 2\n- created: 2026-10-28\n- contract: 2020-01-01')
   try {
-    assert.equal(epochDateOf(both.dir), '2026-10-01', '旧形态存在时以 contract 为准（读兼容）')
+    assert.equal(epochDateOf(both.dir), '2026-10-28', 'schema 在场只认 created——残留 contract 不得把下界往回拨')
   } finally { both.cleanup() }
   const neither = mkSchemaRun('- phase: research')
   try {

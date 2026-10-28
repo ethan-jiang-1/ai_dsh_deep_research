@@ -84,7 +84,7 @@
 **自审第四轮（版本字段自身）：** 发现 `schema: 1` + `created` 会让 bundle 落进 `pre-contract` 得到
 **全量豁免**——把日期换成整数只是换了逃逸口。已收紧：写 schema 即按现行从严，低版本与高版本都判红，
 旧形态的唯一表达是**省略 schema**（`schema-scan` 与 `node-gate` 同一判据，带反证用例）。
-另复跑 `data-smoke` / `user-env-smoke` / `profile-matrix-smoke` 全 PASS（新 peer 与种子 schema 下的安装面）。
+另修同族第二处：schema 形态若残留一个旧 `contract`，`epochDateOf` 曾取更早日期把见证下界往回拨（抄旧头 = 重开旧见证）；现改为 schema 在场只认 `created`。复跑 `data-smoke` / `user-env-smoke` / `profile-matrix-smoke` 全 PASS（新 peer 与种子 schema 下的安装面）。
 
 **自审第三轮（端到端覆盖与残留字面量）：** 又抓到两处真回归——① `presentGate` / `hitl2RowGate`
 独立调用时仍读 `contractEpochOf`（schema run 丢失见下界），已统一改 `epochDateOf`，并补
