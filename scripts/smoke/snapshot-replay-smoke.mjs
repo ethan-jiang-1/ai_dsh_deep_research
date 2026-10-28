@@ -12,12 +12,12 @@
 //     **本次 boot 之后新写**的会话日志（mtime 过滤 + 新者先——否则第二跑起会命中上一跑的
 //     旧日志假绿）。
 //   B 组装请求 diff：回放会话持久化日志的 persona（`system/message`）与 `request/header`
-//     全序列（config provider/model + 工具 schema），以及三处 `user/message` 注入（工作区
-//     指令 / skill 目录 / 运行时上下文）逐条对录制基线比对——这些**模型可见文本**变化在此红
+//     全序列（config provider/model + 工具 schema），以及四处 `user/message` 注入（工作区
+//     指令 / skill 目录 / 运行时上下文 / 时钟序列）逐条对录制基线比对——这些**模型可见文本**变化在此红
 //     （机制边界：canned 响应本身不随 persona 变化，A 层抓不到——这正是本层存在的理由）。
 //     定向归一化只覆盖源机制确实挥发的身份（GUI 端口、构建戳、工作区路径），实现 =
 //     scripts/lib/replay-request.mjs（逐条判据：persona/headers/agent-instructions/
-//     skill-catalog/runtime-context）。
+//     skill-catalog/runtime-context/time-context）。
 //   C 渲染金标准（场景声明了 renderExpected 的场景，如 lead）：Playwright 读对话流研究语义卡
 //     （web_search 卡标题）与「研究状态」页签人性化活动行（🔍/💬），与场景声明的期望文件
 //     逐字比对。窄带：只钉录制流驱动的确定性面；不钉工具结果体/时间戳/bundle 渐进面（依赖
@@ -232,7 +232,7 @@ for (const { face, scene } of SCENES) {
     step(finalOk, `[${face}/${sc.id}] A 回放通路（零真模型调用完整回放；收尾文本逐字命中；只认本次新写日志）`,
       finalOk ? '' : `回放回合未在 ${TURN_TIMEOUT_MS / 1000}s 内以 completed 走完并让收尾文本（"${SENTINEL}"）落进 assistant 消息——canned 回放未走通`);
 
-    // ── B 层：组装请求 diff（persona + 全序列 request/header + 三处 user/message 注入，
+    // ── B 层：组装请求 diff（persona + 全序列 request/header + 四处 user/message 注入，
     //    双侧定向归一化后逐条比对；判据由 manifest 声明、consumer 固定为全集）──
     if (finalOk) {
       const liveLines = parseLines(replayLogText);

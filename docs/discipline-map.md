@@ -61,7 +61,7 @@
 | Prefer the real implementation over a mock | L1 真挂载档（真会话断言工具/skill 面——dump/roster 可见不算） | 照搬 |
 | The with-key policy: inference is cheap（语义面用真模型证） | 真模型档脚本（清单正本 = AGENTS §密钥）；入口链探针 = 语义漂移的真模型检测 | 照搬 |
 | Test resolution: source plane only | keyless 回归断言 tracked 源文件（md-utf8-newline 改 git ls-files 驱动即为此则——运行区不扫，live run 实证） | 带证据适配 |
-| Snapshot tests（关键用户可见变更更新录制快照） | 等价物 = snapshot-replay-smoke 三层判据（A 回放收尾逐字命中 / B 组装请求 diff = persona + 全部 request/header + 三处 user/message 注入〔工作区指令 / skill 目录 / 运行时上下文〕/ C 渲染金标准）+ 真模型档会话日志断言（zstd 逐事件）+ `client-load-smoke` 真浏览器断言；真录制通道不做——B 层 diff 已是模型可见变更的独立 keyless 信号（输掉的方案 = test-strategy 采纳 Note） | 带证据适配 |
+| Snapshot tests（关键用户可见变更更新录制快照） | 等价物 = snapshot-replay-smoke 三层判据（A 回放收尾逐字命中 / B 组装请求 diff = persona + 全部 request/header + 四处 user/message 注入（含时钟序列）〔工作区指令 / skill 目录 / 运行时上下文〕/ C 渲染金标准）+ 真模型档会话日志断言（zstd 逐事件）+ `client-load-smoke` 真浏览器断言；真录制通道不做——B 层 diff 已是模型可见变更的独立 keyless 信号（输掉的方案 = test-strategy 采纳 Note） | 带证据适配 |
 | Test subprocess launch modes（构建产物/源码启动模式分立） | 本仓不设双启动模式：冒烟子进程一律走 tsx 源码通道（`node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts`）；构建产物另有在场断言（`lib/client.js` 经 exports["./client"] 由 `client-load-smoke` 加载，缺件由 `vendor-artifacts` 自检拦） | 不适用（现无分立需求——**重估触发**：冒烟开始以构建产物（非 tsx 源码）启动 CLI，或引入第二种启动入口时） |
 
 ## 源 3：vendor docs/AGENTS.md（文档标准）

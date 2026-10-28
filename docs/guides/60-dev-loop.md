@@ -95,7 +95,7 @@
 | **用户直派** | 按本轮授权直接执行；如需跨步排序使用会话内 todo；仅需显式评审的持久决定才建立 RFC；交付后按 notes 规则决定是否记录决定理由 | 同对应任务型 | 同对应任务型 | 同对应任务型 | 同对应任务型 |
 
 > ① snapshot-replay B 层（模型可见文本变化的 keyless 秒级信号）：比对面 = persona 全文 + 全部
-> request/header + 三处 `user/message` 注入（工作区手册全文 / skill 目录 description / 运行时上下文）；
+> request/header + 四处 `user/message` 注入（工作区手册全文 / skill 目录 description / 运行时上下文 / 时钟序列）；
 > skill 正文不进组装请求，其证据 = L1 可见面 + L4-lite 行为。有意变更 → 红 = 已捕获：走重录场景
 > （真模型档，同 diff 更新 `snapshot.json` 的 source 身份）或 `--update-expected` 重写金标准 + 人审
 > ——金标准只许重写，不许放宽比对或归一化凑绿（fix fixtures, not normalizers）。
@@ -142,7 +142,7 @@ node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <t>   # HITL 代�
 pnpm dsh <args…>                      # 机制基线 CLI（vendor/dsh 钉 tag 源码；等价 dev/env.sh 的 dsh 函数）
 node --import tsx/esm scripts/smoke/client-hitl-smoke.mjs   # 观察面活标题触发验证（真模型档：RPC followup 造挂起态 + 盘侧谓词 + 浏览器观察点）
 node --import tsx/esm scripts/smoke/cdp-ask-smoke.mjs    # 交互探针端到端（真模型档：一次性通道跑 --ask，断言发出 + journal 落盘；空闲态与在飞态两阶段）
-node scripts/smoke/snapshot-replay-smoke.mjs    # keyless 回放冒烟（须先 source dev/env.sh，端口 3103）：场景集由 snapshots/replay/research-face/snapshot.json 声明（角色集仍与盘上 presets/ 对账）——逐场景 A 回放收尾逐字命中 + B 组装请求 diff（persona 全文 + 全部 request/header + 三处 user/message 注入）+ 声明了 renderExpected 的场景做 C 渲染金标准比对；`--scenario <id>` 单场景、`--update-expected` 重写金标准
+node scripts/smoke/snapshot-replay-smoke.mjs    # keyless 回放冒烟（须先 source dev/env.sh，端口 3103）：场景集由 snapshots/replay/research-face/snapshot.json 声明（角色集仍与盘上 presets/ 对账）——逐场景 A 回放收尾逐字命中 + B 组装请求 diff（persona 全文 + 全部 request/header + 四处 user/message 注入（含时钟序列））+ 声明了 renderExpected 的场景做 C 渲染金标准比对；`--scenario <id>` 单场景、`--update-expected` 重写金标准
 node --import tsx/esm dev/record-role-fixture.mjs --role <scout|analyst|critic|lead>   # 角色组装面 fixture 录制（真模型档一次性：research 档短会话 + 哨兵「探针完成」收尾 + 日志静默判定；录制品人审后入库 + 在场景声明登记 source 身份，此后 keyless 永久回放）
 node scripts/run-ops/run-accept.mjs <bundle>   # 交付验收原子动作：门 A + 证据审计 + 未来日期 sanity → acceptance.md；--archive 才归档
 node scripts/run-gates/evidence-audit.mjs <bundle>|--latest  # 证据溯源审计（**须先 source dev/env.sh**：它锚定本仓 dev home，DSH_HOME 指向别处即自拒）（keyless：URL/摘录/final 链对会话日志机械对账 → audit.md；CRITICAL 即 exit 1）

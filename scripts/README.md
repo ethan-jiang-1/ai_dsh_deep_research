@@ -35,7 +35,7 @@
 | workspace-isolation-smoke.mjs | B4 双实例：两套 home/profile/port/state/workspace 各起通道、各建会话；会话组绑定自己的 W、home/session 互斥、marker 互不可见 | keyless（真 web，不调模型；更慢，约两套 cold start） |
 | client-load-smoke.mjs | 观察面真浏览器装配、页签与渐进面对账（磁盘参考选择 = client-load-reference.mjs；「研究配置」摘要相位 = client-load-config.mjs；终稿端到端相位 = client-load-final.mjs；主界面「方法库」tab 与其余相位住主件；失败留现场（png/html/console/meta + `disconnects` 计数），无窗口内交付目标 = exit 2 SKIP | keyless（浏览器） |
 | e2e-021rc2.mjs | **升级端到端验收**（0.2.1-rc.2 起）：① 四个研究角色在角色列表里连续成组（内置 standard/ptc/minimal/creator 与 pack order 撞车的回归锁）② 右栏「研究状态」胶囊可点 + 页签体真数据 ③「研究配置」同上 ④ 本插件面零故障；真实实例走完用户路径，不靠人眼 | keyless（浏览器；须先 source dev/env.sh；失败留现场） |
-| snapshot-replay-smoke.mjs | 场景 manifest 驱动的四角色组装面回放（persona/header 全序列/三处注入）+ 声明的渲染金标准；场景集 = `snapshots/replay/` 下含 snapshot.json 的全部目录（发现式，`--face <name>` 定向单集） | keyless（RPC/解压子进程，无模型；须先 source dev/env.sh） |
+| snapshot-replay-smoke.mjs | 场景 manifest 驱动的四角色组装面回放（persona/header 全序列/四处注入，含时钟序列）+ 声明的渲染金标准；场景集 = `snapshots/replay/` 下含 snapshot.json 的全部目录（发现式，`--face <name>` 定向单集） | keyless（RPC/解压子进程，无模型；须先 source dev/env.sh） |
 | gates-smoke.mjs | 门禁自测：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组；`--case=<id[,id]>` 只跑指定案例（改一道门禁的迭代口，末尾自报仅跑几个）；CI keyless job 每次全量跑 | keyless（git/node 子进程，无模型） |
 | client-hitl-smoke.mjs | 活标题触发与挂起显性化 | 真模型档 |
 | l4-lite-smoke.mjs | 四角色真模型响应 + scout web_search 调用 | 真模型档 |
@@ -141,7 +141,7 @@
 | lib/backlog-liveness.mjs | backlog-liveness.test、context、f-repo | 问题卡、缺陷、调研、方法与归档索引的结构合同；被 verify 入口与 keyless 回归消费 |
 | lib/direct-authorization-boundary.mjs | entry-chain-probe、entry-chain-probe.test | 按授权范围执行、无需重复请批的词面判定；由探针与 keyless 回归消费 |
 | lib/replay-scene.mjs | replay-scene.test、snapshot-replay-smoke | 场景声明消费者：roster/版本/来源形状/路径校验（缺件、串角色、垃圾锚点 fail-loud）+ 场景集发现（`replay/*/snapshot.json` 全集、防空语料、--face 全名定向） |
-| lib/replay-request.mjs | record-role-fixture、replay-request.test、snapshot-replay-smoke | 组装请求面逐条比较：persona、header 全序列、三处 user/message 注入（定向归一化） |
+| lib/replay-request.mjs | record-role-fixture、replay-request.test、snapshot-replay-smoke | 组装请求面逐条比较：persona、header 全序列、四处 user/message 注入（含时钟序列）（定向归一化） |
 | lib/port-reclaim.mjs | client-load-smoke、preset-smoke、release-smoke、cold-start-smoke、data-smoke、workspace-isolation-smoke、real-home-smoke、compat-client-smoke | 端口收割执行器（按端口杀 + 三轮验证释放；实测依据 = web 孙进程不在子进程组里） |
 | lib/path-hygiene.mjs | run-gates/path-hygiene、path-hygiene.test、node-gate-session-gates、run-accept、run-receipt | 本机 home 路径纯文本检测（Unix/macOS/Windows 前缀；行号）+ `portableBundlePath`（bundle 内绝对路径 → `drt_<slug>/…` 可移植标签；bundle 外 → null） |
 | lib/secret-scan.mjs | run-gates/secret-scan、secret-scan.test、run-accept | 高置信凭据形态检测（sk-/ghp_/AKIA/PRIVATE KEY/Bearer）；只报 path/line/kind，不回显原文 |

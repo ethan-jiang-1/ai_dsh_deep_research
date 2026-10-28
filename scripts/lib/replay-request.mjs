@@ -1,4 +1,4 @@
-// 组装请求面逐条比较（persona 全文 / 全部 request/header / 三处 user/message 注入——定向归一化）。
+// 组装请求面逐条比较（persona 全文 / 全部 request/header / 四处 user/message 注入（含时钟序列；定向归一化）。
 // 消费 = snapshot-replay-smoke B 层；比对面与判据集正本 = snapshots/README（声明不能削减比对面凑绿）。
 // Pure comparison of durable model-visible request assembly, in event order.
 const stableStringify = (value) => JSON.stringify(value, (_key, item) => (
