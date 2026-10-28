@@ -215,7 +215,7 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
         ref={(element) => { setHost(element) }}
         data-method-coach-host=""
         style={{
-          flex: 1, minHeight: 0, display: started ? 'flex' : 'none', background: '#fff',
+          flex: 1, minHeight: 0, display: 'flex', background: '#fff',
         }}
       />
     </aside>

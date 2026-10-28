@@ -496,7 +496,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
           color: receipt.ok ? '#166534' : '#991b1b',
         }}>{receipt.ok ? '✓' : '✕'} {receipt.detail}</div>
       )}
-      <div style={{ display: 'flex', flex: 1, minHeight: 0, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', flex: 1, minHeight: 0, minWidth: 0 }}>
         <aside style={{ flex: '0 0 270px', minWidth: 220, borderRight: '1px solid #00000010', padding: 10, overflowY: 'auto', boxSizing: 'border-box', position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
             <button type="button" style={{ ...BUTTON_STYLE, ...(segment === 'mine' ? { borderColor: '#2563eb', color: '#2563eb' } : {}) }} onClick={() => { if (segment !== 'mine') { setSegment('mine'); setSelectedName(entries[0]?.name ?? null); setMode('read') } }}>我的库</button>
