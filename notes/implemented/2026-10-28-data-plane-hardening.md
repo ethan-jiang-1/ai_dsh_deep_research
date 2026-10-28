@@ -60,7 +60,7 @@
   修复前 `run-accept`/`node-gate` 拿到的下界是 `null`；新增 `epochDateOf` 后同一 bundle 返回
   `2026-10-28`（`contractEpochOf = ""` → `epochDateOf = "2026-10-28"`），并有单测锁三形态
   （schema→created；contract→contract；两者全缺→空串）。
-- `pnpm verify` 全绿；`pnpm test` **947 pass / 0 fail**（新增整数契约四例 + 缺 created 一例、模板↔解析器同源、
+- `pnpm verify` 全绿；`pnpm test` **948 pass / 0 fail**（新增整数契约四例 + 缺 created 一例、模板↔解析器同源、
   数据卡 10 列 + 可移植闭集、手册两处副本的回执三态句、seed policy 两例、审计 findings.policy）。
 - **时钟行门禁先红后绿（实录）**：删掉 `analyst.patch.yml` 的 `- id: time-context` 两行 →
   `verify` 报 `preset-structure: analyst.patch.yml: 须恰有一条 - id: time-context（D32 时钟行，当前 0 条）`

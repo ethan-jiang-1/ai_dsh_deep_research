@@ -179,6 +179,22 @@ test('presentGate：run.md 契约纪元非法 → RED（不无下界采信见证
   } finally { cleanup() }
 })
 
+test('hitl2RowGate：整数契约（created 为下界）下答复链 PASS；早于 created 的答复不算', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  const { dir: dirOld, cleanup: cleanupOld } = makeRoot('witness-old')
+  try {
+    const b = writeBundle(dir)
+    writeFileSync(join(b, 'run.md'), '# Run\n\n- schema: 2\n- created: 2026-10-23\n- phase: delivery\n- next: present\n')
+    const okSessions = writeSession(dir, [bind(), ask(), reply()])
+    const pass = hitl2RowGate(b, okSessions)
+    assert.equal(pass.gate.status, 'PASS', pass.gate.detail)
+    const oldSessions = writeSession(dirOld, [bind(), ask(), reply('按现稿定稿（Recommended）', Date.parse('2026-10-01T10:00:00+08:00'))])
+    const red = hitl2RowGate(b, oldSessions)
+    assert.equal(red.gate.status, 'RED')
+    assert.match(red.gate.detail, /HITL2|答复|见证/)
+  } finally { cleanup(); cleanupOld() }
+})
+
 test('hitl2ReplyInLogs：callId 绑定 ask + reply，标签含定稿才算；代理标记随行', () => {
   const { dir, cleanup } = makeRoot('witness')
   try {
