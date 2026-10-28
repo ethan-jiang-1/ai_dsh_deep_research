@@ -7,7 +7,7 @@ opened: 2026-10-21
 
 > 立卡：2026-10-21 ｜ 状态：已结 ｜ 类型：未定 ｜ 结论倾向：现在做（A0 组合；已实施）
 >
-> 2026-10-21 用户拍板：按推荐组合走；决策 review = [review](../../research/dynamic-research-dag/2026-10-21-combination-review.md)。
+> 2026-10-21 用户拍板：按推荐组合走；决策 review = [review](../research/dynamic-research-dag/2026-10-21-combination-review.md)。
 > 总计划 [RFC](../../../notes/implemented/2026-10-21-dynamic-research-dag-a0.md) 已毕业为 implemented；受控 4 节点 run + L0/L1/client-load 全绿，本卡归档。
 
 **问题与期望结果：** 现在四角色 + Agent Teams + 八节点文件契约能跑，但执行图是隐式、模板化的：
@@ -20,7 +20,7 @@ opened: 2026-10-21
 
 - DSH 没有通用动态 DAG 执行器；最接近的是 Agent Teams 的共享任务图（`blocked_by` + 环校验 +
   readiness），但 roster 是平面的（只有 Lead 能创建直属 teammate，无 nested Team），且 readiness
-  不会自动唤醒 owner。见 [机制盘点](../../research/dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md)。
+  不会自动唤醒 owner。见 [机制盘点](../research/dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md)。
 - subagent 支持 `maxDepth` 与 `agentPreset` / `allowedAgentPresets`，可以按角色组合派 one-shot
   worker 并递归；当前四 preset 未设 `maxDepth`（Host 默认 1），也未开 preset 选择，所以第二层
   现在走不通。
@@ -30,7 +30,7 @@ opened: 2026-10-21
   blocked_by task-2/3）；缺的是把这张图提升为一等 plan 工件并系统化重写，而不是从零发明 DAG。
 - 生态侧已有多种做法（声明式 DAG 工具、持久 DAG runtime、可视化编排器、任务板+调度器、递归
   planner/worker preset、固定研究循环），但没有一个同时满足本仓的 Team 板 + 角色 preset +
-  run bundle + 两点 HITL；可借鉴的工程护栏见[生态实践](../../research/dynamic-research-dag/2026-10-21-dsh-plugin-dag-practices.md)。
+  run bundle + 两点 HITL；可借鉴的工程护栏见[生态实践](../research/dynamic-research-dag/2026-10-21-dsh-plugin-dag-practices.md)。
 
 **未决问题：**
 
@@ -72,12 +72,12 @@ acceptance / budget / depth），用 Team 任务板 `blocked_by` 物化；Lead �
 候选 C：纯 subagent 递归树。取舍 = 角色保真、深度灵活；代价 = 无共享任务板、跨分支依赖只能靠
 父级编排与文件。
 
-完整对照与源码证据见[机制盘点](../../research/dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md)，
-生态实践见[插件生态扫描](../../research/dynamic-research-dag/2026-10-21-dsh-plugin-dag-practices.md)，
-宽搜/深搜的深度模型见[研究单元](../../research/dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md)，
-搜索底座见[DeepSeek Search/Fetch API](../../research/dynamic-research-dag/2026-10-21-deepseek-search-fetch-api.md)，
-观察面见[侧栏研究图谱](../../research/dynamic-research-dag/2026-10-21-cockpit-plan-graph.md)，
-组合评审见[决策 review](../../research/dynamic-research-dag/2026-10-21-combination-review.md)，
+完整对照与源码证据见[机制盘点](../research/dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md)，
+生态实践见[插件生态扫描](../research/dynamic-research-dag/2026-10-21-dsh-plugin-dag-practices.md)，
+宽搜/深搜的深度模型见[研究单元](../research/dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md)，
+搜索底座见[DeepSeek Search/Fetch API](../research/dynamic-research-dag/2026-10-21-deepseek-search-fetch-api.md)，
+观察面见[侧栏研究图谱](../research/dynamic-research-dag/2026-10-21-cockpit-plan-graph.md)，
+组合评审见[决策 review](../research/dynamic-research-dag/2026-10-21-combination-review.md)，
 总计划见[RFC](../../../notes/implemented/2026-10-21-dynamic-research-dag-a0.md)。
 
 ## 调研收敛（2026-10-21）
@@ -87,7 +87,7 @@ acceptance / budget / depth），用 Team 任务板 `blocked_by` 物化；Lead �
   5-query A/B 平均 986ms vs Messages 6004ms，snippet/date 50/50 vs 0/50；支持
   `site:/lang:/after:/before:`；Fetch API 的 Markdown 有明显反斜杠转义，未过“逐字摘录”保真，
   先不替换本地 fetch）。**Search-only 不能靠 UI 开关**（它成对切 search+fetch），用 profile
-  `- id: web` 配置覆盖；A/B 详情 = [搜索 A/B](../../research/dynamic-research-dag/2026-10-21-search-provider-ab.md)。
+  `- id: web` 配置覆盖；A/B 详情 = [搜索 A/B](../research/dynamic-research-dag/2026-10-21-search-provider-ab.md)。
 - **编排**：A0 最小原生——`plan.md` + Team 任务板 + Lead 调度（`wait_agent` +
   `team_task_list({ready:true})` + `reassign`）+ 二层 worker（`maxDepth: 2` +
   `allowedAgentPresets`）；不引外部插件、workflow、第二套 store。
@@ -116,7 +116,7 @@ acceptance / budget / depth），用 Team 任务板 `blocked_by` 物化；Lead �
 
 ## 验收标准
 
-按 [review §5](../../research/dynamic-research-dag/2026-10-21-combination-review.md) 拆三张实施卡：
+按 [review §5](../research/dynamic-research-dag/2026-10-21-combination-review.md) 拆三张实施卡：
 
 - **编排/深度**：L1 preset-smoke 真挂载（`maxDepth: 2` + `allowedAgentPresets` 生效、
   `backgroundMode` 已删、critic 无 subagent）；一场 3 节点小 run 走通 plan → Team task → Lead

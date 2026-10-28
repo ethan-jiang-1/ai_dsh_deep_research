@@ -3,7 +3,7 @@
 > 状态：implemented
 
 > 落地 2026-10-23 ｜ 锚点卡 = [_backlog/_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../_backlog/_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
-> ｜ 证据 = [_backlog/research/run-bundle-charter/](../../_backlog/research/run-bundle-charter/)（历史决定、实物偏差、续跑行为、红队）
+> ｜ 证据 = [_backlog/_archived/research/run-bundle-charter/](../../_backlog/_archived/research/run-bundle-charter/)（历史决定、实物偏差、续跑行为、红队）
 > ｜ 影响面 = D17 位置语义、研究手册、guides/61、run 门禁、驾驶舱、模板、`run-accept`
 >
 > 2026-10-23 用户拍板：**单位 A**（一任务一 bundle，rerun 版本在内；独立是 bundle 之间）；
@@ -413,8 +413,8 @@ manifest 时机）= 锚点卡 [§7.2](../../_backlog/_archived/settled_issues/20
 
 ## 历史证据
 
-- [历史决定时间线与七类判断](../../_backlog/research/run-bundle-charter/2026-10-23-history-decisions.md)
-- [53 个 bundle 的实物偏差与交付链断点](../../_backlog/research/run-bundle-charter/2026-10-23-practice-vs-contract.md)
-- [32 个恢复/状态探针的行为证据](../../_backlog/research/run-bundle-charter/2026-10-23-resume-behavior.md)
-- [红队：批准/present 可伪造、审计依赖语料、next 无字段](../../_backlog/research/run-bundle-charter/2026-10-23-red-team.md)
+- [历史决定时间线与七类判断](../../_backlog/_archived/research/run-bundle-charter/2026-10-23-history-decisions.md)
+- [53 个 bundle 的实物偏差与交付链断点](../../_backlog/_archived/research/run-bundle-charter/2026-10-23-practice-vs-contract.md)
+- [32 个恢复/状态探针的行为证据](../../_backlog/_archived/research/run-bundle-charter/2026-10-23-resume-behavior.md)
+- [红队：批准/present 可伪造、审计依赖语料、next 无字段](../../_backlog/_archived/research/run-bundle-charter/2026-10-23-red-team.md)
 - 锚点卡：[run bundle 宪章卡](../../_backlog/_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)

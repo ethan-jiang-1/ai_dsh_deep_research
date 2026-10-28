@@ -5,7 +5,7 @@ intent: 为动态研究 DAG 设计卡提供“宽搜/深搜各自怎么加深、
 
 # 宽搜 / 深搜的深度模型：两种“深”，不是一个 DAG 深度（2026-10-21）
 
-> 服务 = [_backlog/issues/2026-10-21-dynamic-research-dag.md](../../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)。
+> 服务 = [_backlog/issues/2026-10-21-dynamic-research-dag.md](../../../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)。
 > 方法 = 读本仓四角色 skill（Scout / Analyst / Critic / Synthesis）+ 真实 run 资产 + DSH 原语；
 > 只读，不改代码。结论是方法设计，不是已实现合同。
 

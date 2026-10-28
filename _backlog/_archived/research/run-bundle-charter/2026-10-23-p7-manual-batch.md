@@ -5,7 +5,7 @@ intent: 记录 D28 手册/NODES 文本批、行预算升顶、四角色快照重
 
 # P7：手册文本批 + 快照重录
 
-> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
+> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
 > ｜ 2026-10-23 ｜ **所有手册文本一次落**，只付一次 snapshot 重录；旧 bundle 不参与。
 
 ## 1. 手册 / NODES 文本批（D28）

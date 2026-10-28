@@ -5,7 +5,7 @@ intent: 用同 pin 的 provider 级实测判定 search-only 配置是否成立�
 
 # 搜索 provider A/B：Messages vs Search API（2026-10-21）
 
-> 服务 = [_backlog/issues/2026-10-21-dynamic-research-dag.md](../../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)
+> 服务 = [_backlog/issues/2026-10-21-dynamic-research-dag.md](../../../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)
 > （搜索 provider 卡的 F5 验证面）。
 > 方法 = **直接实例化 vendor 构建产物的两个 provider**（不经 `ctx.web`、不发 DSH 模型回合），
 > 5 条固定 query 各跑一遍；key 从开发 home 的 `.credentials.yaml` 经 Ruby 读入环境变量，**全程未打印**。

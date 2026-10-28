@@ -6,7 +6,7 @@ opened: 2026-10-23
 # 推敲：run bundle 宪章——独立、可删、可续（影响面、分阶段与盲续跑）
 
 > 立卡：2026-10-23 ｜ 状态：已结 — P0–P7 落地、P8 收口（RFC 毕业，2026-10-23） ｜ 类型：Task ｜ 结论倾向：现在做（已落地） ｜ 可关闭：是
-> 复核：2026-10-23，数字与口径校正见 [复核证据](../../research/run-bundle-charter/2026-10-23-issue-review-verification.md)；初稿三条错误结论已撤回（§15）。
+> 复核：2026-10-23，数字与口径校正见 [复核证据](../research/run-bundle-charter/2026-10-23-issue-review-verification.md)；初稿三条错误结论已撤回（§15）。
 
 **问题与期望结果：** run bundle 已经在承载研究，但「它装什么、不装什么、断电后靠什么恢复、交付态由谁证明」没有一组同时成立的不变量；位置、mtime、日志 present、review 散文 readiness 四个外部信号互相矛盾，每遇一次事故就加一条局部规则。期望结果 = 一组可验收的不变量（独立 / 可删 / 可续 / 自描述 / 双见证），以及一棵不把步骤和指令塞进数据区的目录树；旧 bundle 不追溯改写。
 
@@ -85,7 +85,7 @@ opened: 2026-10-23
 
 ## 4. 已复核的事实（2026-10-23）
 
-> 口径与命令 = [复核证据](../../research/run-bundle-charter/2026-10-23-issue-review-verification.md)。下表只留决策相关项；未复算项在复核文件 §3。
+> 口径与命令 = [复核证据](../research/run-bundle-charter/2026-10-23-issue-review-verification.md)。下表只留决策相关项；未复算项在复核文件 §3。
 > **2026-10-23 用户告知旧 run bundle 已清**：下表是清理前/历史快照，只作反例证据；不再作为当前盘面或盲测验收样本。
 
 | 事实 | 数据 | 证据 |
@@ -98,7 +98,7 @@ opened: 2026-10-23
 | 独立性的真实状态 | **7 条跨 bundle `[来源:]` 证据链接**（computer-use-benchmarks → cn-agentic-parity）；**14 处 `../drt_`**（4 文件）；**37/46** 归档 bundle 散文提到 45 个外部 slug；symlink 0 | 复核 §4.1 |
 | 注入机制 | cwd = `research-workspace/`；基线只注入手册（10,757 B / 16,384 B 预算，余量约 4.6 KB）；嵌套 `AGENTS.md` 在成功 read/write/edit **之后的下一个请求**才注入 | `vendor/dsh/packages/context/agent-instructions/README.md` |
 | 前车之鉴 | 2026-09-24 一份过期的全局 `AGENTS.md` 压过新手册，整个 lead 会话按不存在的 `runs/<slug>/` 开工，7 文件 13 处旧契约返工 | [D17 Note](../../../notes/implemented/2026-09-24-run-bundle-drt-separation.md) |
-| 接续是常态 | 34 次恢复/状态探针命中（32 个真探针）；5 个探针写盘；3 场无范围「继续」重做（最大 92 调用 / 23 处改写）；带「目标=交付闭合」的同类会话收敛；1 场 0 调用空转 | [续跑行为](../../research/run-bundle-charter/2026-10-23-resume-behavior.md) |
+| 接续是常态 | 34 次恢复/状态探针命中（32 个真探针）；5 个探针写盘；3 场无范围「继续」重做（最大 92 调用 / 23 处改写）；带「目标=交付闭合」的同类会话收敛；1 场 0 调用空转 | [续跑行为](../research/run-bundle-charter/2026-10-23-resume-behavior.md) |
 | 大文件 | `review.md` 最大 201,341 B（归档）；在飞 hardware 112,043 B；`leads.md` 最大 176,083 B；`final.md` 最大 61,088 B；单次 read 上限 51,200 B | 盘上 `wc -c` |
 | 图会重写 | eu-us 在飞 plan **v1→v6**，新增 W3.2–W3.6 **5 个节点**，文件零搬迁；但全库仅 1 个 `plan/vN` 快照 | plan 头「图版本：v6」 |
 | 交付见证 | 38/46 归档 journal 提到 present，但那是声明；present 原始事件只在日志；`deliverables/presented` 是结构化事件（`turn`/`callId`/`files[].path`，无版本/哈希） | vendor deliverables + 实测日志 |
@@ -106,7 +106,7 @@ opened: 2026-10-23
 | 契约断代 | `deliveryDate` 用 `final.md` mtime；门禁带五个契约日（LEADS/VERSION 10-03、HITL 10-05、R 10-06、AUDIT 10-08）；复制/搬动 bundle 会改「法律年代」 | [node-gate-contracts](../../../scripts/lib/node-gate-contracts.mjs) |
 | 停放语义分叉 | `_abandoned/` 被刻意排除在模型可见手册之外（`research-workspace/.gitignore.example:13-16`，为免触发 snapshot 重录）；`_abandoned/README` 写 2 个、盘上 3 个 | 手册 / 停放区 README |
 | 一条交付链断了 | `drt_eu-us-cn-ai-stack` 的 `final.md:34,127` 与 `findings.md:25` 引 `evidence/t4-eu-mistral-code-license-apache.md`，磁盘实为 `t1-eu-...`；该 bundle 无 audit/node-gate，从未被机械面扫到 | 盘上核对 |
-| 红队反例 | 门③ append 一行「HITL2 拍板」即 PASS；门② 任意日志含 slug 即 PASS（前缀 slug 也过）；空语料/复制改 mtime 使归档门①/② 各红 22；audit 的真相是 262MB 语料；16 个删除 bundle 仍在 `/tmp` tar 与共享库指针里；bundle 内 `AGENTS.md` 通道机制可跑（当前 0 实例） | [红队](../../research/run-bundle-charter/2026-10-23-red-team.md) |
+| 红队反例 | 门③ append 一行「HITL2 拍板」即 PASS；门② 任意日志含 slug 即 PASS（前缀 slug 也过）；空语料/复制改 mtime 使归档门①/② 各红 22；audit 的真相是 262MB 语料；16 个删除 bundle 仍在 `/tmp` tar 与共享库指针里；bundle 内 `AGENTS.md` 通道机制可跑（当前 0 实例） | [红队](../research/run-bundle-charter/2026-10-23-red-team.md) |
 
 **初稿勘误（要点）**：node-gate 47 → **46**；归档 node-gate 45/46 → **44/46**；plan v7/6 节点 → **v6/5 节点**；「无 `../drt_` 互引」→ **14 处 / 7 条证据链接**；「readiness 不可机械读」→ **46/3/2，缺终局块与升级权**；「430 处路径字面量」→ 不可复算，改用两条窄指标；「656 会话 / 21 次继续」→ **662 / 27**（口径见复核）。完整表 = 复核文件 §1。
 
@@ -136,7 +136,7 @@ opened: 2026-10-23
 |---|---|---|
 | 每步一个子目录 | 轴错了：现在是「产物身份/生命周期 × topic 键 × owner」；plan 会重写；打断跨节点读取；路径代价高；披露收益≈0 | evidence 3,610 次读 vs plan 35；eu-us plan v1→v6；41 文件/115 处 `drt_` 字面量 |
 | 每 run 一个 `AGENTS.md` / README | 权威冲突；嵌套指令晚一拍；静态图冗余；动态状态必腐；数据区开指令通道 | 2026-09-24 化石 `AGENTS.md` 事故；agent-instructions 注入时序 |
-| 全局注册表 / 跨 run 索引 | 违反独立与可删；删一个 run 要么清表、要么留悬空行 | [红队](../../research/run-bundle-charter/2026-10-23-red-team.md) |
+| 全局注册表 / 跨 run 索引 | 违反独立与可删；删一个 run 要么清表、要么留悬空行 | [红队](../research/run-bundle-charter/2026-10-23-red-team.md) |
 | 一次重写 53 个旧 bundle | run bundle 是交付记录；旧 epoch 按旧规则解释 | RFC §边界 |
 | 第二套状态机 / 队列 / task store | D4/D11/D20 已拒绝仓库任务队列；状态用声明 + 派生，不新增服务 | [decisions](../../../docs/decisions.md) |
 | 用 mtime 继续断代 | 复制/搬动改语义；每加一门加一个日期 | node-gate-contracts |
@@ -405,9 +405,9 @@ P2/P3 的门禁一律 **新 run 生效，旧场按 epoch 豁免**。不再开 S0
 | 层 | 载体 | 承载什么 | 何时产出 |
 |---|---|---|---|
 | 锚 | **本卡** | 宪章级问题、不变量、判断、影响面、分期、验收、用户裁定、缺陷分诊 | 现在（持续更新） |
-| 证据 | [run-bundle-charter/](../../research/run-bundle-charter/)（5 份，含复核） | 历史决定时间线、实物偏差、续跑行为、红队、数字复核 | 已收 |
+| 证据 | [run-bundle-charter/](../research/run-bundle-charter/)（5 份，含复核） | 历史决定时间线、实物偏差、续跑行为、红队、数字复核 | 已收 |
 | 规范 | [RFC](../../../notes/implemented/2026-10-23-run-bundle-charter.md) | 宪章正文：定义、不变量、生命周期、写入/恢复/变更程序、目录逐件职责、验收矩阵 | 已起草（proposed，待批准） |
-| 历史偏差 | 本卡 §13 + [复核证据](../../research/run-bundle-charter/2026-10-23-issue-review-verification.md) | 只读反例；grandfather，不修、不建卡 | 已记录 |
+| 历史偏差 | 本卡 §13 + [复核证据](../research/run-bundle-charter/2026-10-23-issue-review-verification.md) | 只读反例；grandfather，不修、不建卡 | 已记录 |
 | 实施 | 本卡 §9 + 各期验收记录 | 分期、证据、红绿 | 批准后 |
 
 **为什么不现在拆多张实施卡**：宪章的价值是**一组不变量同时成立**；先拆会把「为什么」分散到各卡，
@@ -434,14 +434,14 @@ P2/P3 的门禁一律 **新 run 生效，旧场按 epoch 豁免**。不再开 S0
 
 | 期 | 结果 | 证据 |
 |---|---|---|
-| P0 基线/grandfather | 完成；历史只读、不建卡 | [P0 基线](../../research/run-bundle-charter/2026-10-23-p0-baseline.md) |
-| P1 D28 | 完成；D17 位置子句改操作桶 | [P1](../../research/run-bundle-charter/2026-10-23-p1-position-neutral.md) |
-| P2 run.md/epoch | 完成；模板/门禁/反证 | [P2](../../research/run-bundle-charter/2026-10-23-p2-run-contract.md) |
-| P3 交付见证 | 完成；presented/reply/UNATTESTED/run-accept | [P3](../../research/run-bundle-charter/2026-10-23-p3-delivery-witness.md) |
-| P4 观察面/只读 | 完成；三桶/跨桶落定/默认只读 | [P4](../../research/run-bundle-charter/2026-10-23-p4-observer-neutrality.md) |
-| P5 溯源/可移植 | 完成；provenance/离线 audit/manifest/卫生 | [P5](../../research/run-bundle-charter/2026-10-23-p5-provenance-manifest.md) |
-| P6 并发/共享库 | 延后（触发 = 并发写 >2 或 leads 分片实证） | [P8 §3](../../research/run-bundle-charter/2026-10-23-p8-final.md) |
-| P7 手册/快照 | 完成；手册 15,274B/190 行、四角色重录 | [P7 baseline](../../research/run-bundle-charter/2026-10-23-p7-blind-baseline.md) · [P7 manual](../../research/run-bundle-charter/2026-10-23-p7-manual-batch.md) |
-| P8 盲测/收口 | baseline 4/4 + post 4/4（subagent 代理；正式 lead UNATTESTED）；verify/test/snapshot/preset/client-load 绿；RFC 毕业，本卡归档 | [P8](../../research/run-bundle-charter/2026-10-23-p8-final.md) |
+| P0 基线/grandfather | 完成；历史只读、不建卡 | [P0 基线](../research/run-bundle-charter/2026-10-23-p0-baseline.md) |
+| P1 D28 | 完成；D17 位置子句改操作桶 | [P1](../research/run-bundle-charter/2026-10-23-p1-position-neutral.md) |
+| P2 run.md/epoch | 完成；模板/门禁/反证 | [P2](../research/run-bundle-charter/2026-10-23-p2-run-contract.md) |
+| P3 交付见证 | 完成；presented/reply/UNATTESTED/run-accept | [P3](../research/run-bundle-charter/2026-10-23-p3-delivery-witness.md) |
+| P4 观察面/只读 | 完成；三桶/跨桶落定/默认只读 | [P4](../research/run-bundle-charter/2026-10-23-p4-observer-neutrality.md) |
+| P5 溯源/可移植 | 完成；provenance/离线 audit/manifest/卫生 | [P5](../research/run-bundle-charter/2026-10-23-p5-provenance-manifest.md) |
+| P6 并发/共享库 | 延后（触发 = 并发写 >2 或 leads 分片实证） | [P8 §3](../research/run-bundle-charter/2026-10-23-p8-final.md) |
+| P7 手册/快照 | 完成；手册 15,274B/190 行、四角色重录 | [P7 baseline](../research/run-bundle-charter/2026-10-23-p7-blind-baseline.md) · [P7 manual](../research/run-bundle-charter/2026-10-23-p7-manual-batch.md) |
+| P8 盲测/收口 | baseline 4/4 + post 4/4（subagent 代理；正式 lead UNATTESTED）；verify/test/snapshot/preset/client-load 绿；RFC 毕业，本卡归档 | [P8](../research/run-bundle-charter/2026-10-23-p8-final.md) |
 
 **未跑**：正式 lead 盲测（run 通道 max-tokens 无最终文本，subagent 代理并记录偏差）· L2 安装验收（非发布轮）。旧 bundle 零改写；历史偏差只作反例。

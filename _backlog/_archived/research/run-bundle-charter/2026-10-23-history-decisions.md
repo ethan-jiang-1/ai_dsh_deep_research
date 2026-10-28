@@ -5,7 +5,7 @@ intent: 为宪章 RFC 提供决定时间线与「可能做错」的七类判断�
 
 # run bundle 宪章：历史决定时间线与「可能做错」清单
 
-> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
+> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
 > ｜ 只读审计（2026-10-23），未改任何文件；日期 = 决定/事故日。
 > ｜ 缩写：issue = 上述宪章卡；delivery = `notes/implemented/2026-10-07-delivery-criteria-mechanization.md`；
 > rerun = `notes/implemented/2026-10-23-rerun-version-face.md`；graph = `notes/implemented/2026-10-23-graph-mapping-honesty.md`。

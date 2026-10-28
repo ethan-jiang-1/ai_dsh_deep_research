@@ -5,9 +5,9 @@ intent: 校正锚点卡中不可复算的数字与三条会改变方案的事实
 
 # 宪章卡复核：数字、口径与三条会改变判断的事实
 
-> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
+> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
 > ｜ 复核日 2026-10-23 ｜ 只读：所有脚本只写 `/tmp`，未改任何 bundle 文件。
-> ｜ 复核对象 = 该卡 12:55 初稿 + [RFC](../../../notes/implemented/2026-10-23-run-bundle-charter.md) +
+> ｜ 复核对象 = 该卡 12:55 初稿 + [RFC](../../../../notes/implemented/2026-10-23-run-bundle-charter.md) +
 > 同目录四份证据。初稿的数字若与本文不一致，以本文为准；本文未复算的项在 §3 显式列出。
 > ｜ **2026-10-23 用户裁定：历史偏差只作反例证据，不修、不建卡、不追改；本文件不是修复队列。**
 

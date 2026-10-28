@@ -5,7 +5,7 @@ intent: 记录 run.md 状态头、contract epoch 与模板/门禁/创建程序�
 
 # P2：新 run 契约（run.md + contract epoch）
 
-> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
+> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
 > ｜ 2026-10-23 ｜ **只对新 run 生效；旧 bundle 无 run.md = epoch 豁免**，不迁移、不补文件。
 
 ## 1. 落地

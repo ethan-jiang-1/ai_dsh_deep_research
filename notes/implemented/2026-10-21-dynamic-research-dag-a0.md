@@ -4,7 +4,7 @@
 >
 > 首提：2026-10-21 ｜ 用户 2026-10-21 批准“按 A0 组合走，全力推进” ｜
 > 伞卡（已结）：[_backlog/_archived/settled_issues/2026-10-21-dynamic-research-dag.md](../../_backlog/_archived/settled_issues/2026-10-21-dynamic-research-dag.md)
-> ｜ 决策 review：[_backlog/research/dynamic-research-dag/2026-10-21-combination-review.md](../../_backlog/research/dynamic-research-dag/2026-10-21-combination-review.md)
+> ｜ 决策 review：[_backlog/_archived/research/dynamic-research-dag/2026-10-21-combination-review.md](../../_backlog/_archived/research/dynamic-research-dag/2026-10-21-combination-review.md)
 
 ## 决定
 

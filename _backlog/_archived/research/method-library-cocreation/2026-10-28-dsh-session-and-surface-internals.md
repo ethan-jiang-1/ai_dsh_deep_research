@@ -24,7 +24,7 @@ rc.3 只用来确认「这些缝没有在下一版被堵掉」。
 | 8 | 加不加 RPC / host 插件 | 不加。全部走现成 `session/create|rename|prompt|follow`、`sessions.retain`、`workspaces.list`、`workspaceFiles.read` | §9 |
 | 9 | 版本风险 | rc.2 → rc.3 的 `commands.ts` 零 diff；`tool-ask-user`、`ui-subagent` sidebar chat、`list.ts` 逐字相同；`conversation.content` 契约只有 view 钉选增量 | §1 |
 | 10 | spike 实跑 | 直接嵌 **红**；固定浮层机制绿但 **UX 否**；右栏 tab **否**（用户要留在 tab 内）；页内三栏 portal **绿**；CSS 抑制 / coach 问卡 / 外层问卡让位 / 切 tab 重挂 **绿**；chain **红** | §14 |
-| 11 | 最终形态 | 方法库 tab 内三栏（库 / 表单 / 方法编辑）；一个可见 composer；主会话不动；用户看不到 portal/session 机制 | §14、[issue](../../_archived/settled_issues/2026-10-28-method-library-cocreation.md) |
+| 11 | 最终形态 | 方法库 tab 内三栏（库 / 表单 / 方法编辑）；一个可见 composer；主会话不动；用户看不到 portal/session 机制 | §14、[issue](../../../_archived/settled_issues/2026-10-28-method-library-cocreation.md) |
 
 **一句话**：这不是「在表单旁边放一个聊天框」，而是把**方法库 tab 本身**做成三栏工作台
 （我的库 / 表单 / 方法编辑对话）；方法编辑是 workspace 级的独立会话，但用户看到的只是这页右侧的对话面板——
@@ -259,16 +259,16 @@ chain 的 owner 带 `{ sessionId, session, pendingInteraction }`
 ### 6.2 新增 preset 的治理面（会推翻 D2 的字面）
 
 D2 = 「角色 = 4 个」+「增删角色 = 推翻本条，先登记新 D 号」
-（[decisions.md L15](../../../docs/decisions.md)）。方法编辑不是研究角色，但它仍是 `presets/*.patch.yml`
+（[decisions.md L15](../../../../docs/decisions.md)）。方法编辑不是研究角色，但它仍是 `presets/*.patch.yml`
 的一员，这些机械面会一起动：
 
 | 面 | 现状 | 新增后 |
 |---|---|---|
-| 数量哨兵 | `assert.equal(ROLES.length, 4)`（[presets.test.mjs L26-L33](../../../tests/pack/presets.test.mjs)） | 改为 5（或研究角色 4 + 工具 preset 1 的表述） |
-| `preset-structure` 时钟行 | 每个 preset 恰一条 `time-context`（[b-pack.mjs L33-L38](../../../scripts/verify/gates/b-pack.mjs)） | 新 preset 必须挂 `@deepseek-ai/dsh-time-context` |
+| 数量哨兵 | `assert.equal(ROLES.length, 4)`（[presets.test.mjs L26-L33](../../../../tests/pack/presets.test.mjs)） | 改为 5（或研究角色 4 + 工具 preset 1 的表述） |
+| `preset-structure` 时钟行 | 每个 preset 恰一条 `time-context`（[b-pack.mjs L33-L38](../../../../scripts/verify/gates/b-pack.mjs)） | 新 preset 必须挂 `@deepseek-ai/dsh-time-context` |
 | `bundle.patch` | 盘上每个 patch 必须登记（`pack-bundle-compat`） | 加 `./presets/method-editor.patch.yml` |
 | `role-list-sync` | 盘上 preset 名都算「角色」 | 新名字会被纳入检测；文档 roster 同步 |
-| `l4-lite` | 盘上每个角色必须有 `PROMPTS`（[l4-lite-smoke.mjs L108-L125](../../../scripts/smoke/l4-lite-smoke.mjs)） | 加 `method-editor` 标记 prompt |
+| `l4-lite` | 盘上每个角色必须有 `PROMPTS`（[l4-lite-smoke.mjs L108-L125](../../../../scripts/smoke/l4-lite-smoke.mjs)） | 加 `method-editor` 标记 prompt |
 | snapshot replay | 每个角色的 request 组装有 fixture | 新 preset 需录 fixture / 更新 expected |
 | 文档 | pack README 写「4 research roles」；`docs/design/20-roles.md` | 改成「4 研究角色 + 1 方法编辑（非研究）」 |
 
@@ -321,10 +321,10 @@ skill 的模型可见文本会进 snapshot；新增 preset 的 fixture 要录。
 ### 7.1 现状的问题
 
 方法库页的保存 = 给**当前会话的 Lead** 发一条 `session/prompt`，页面回执「已交给 Lead 保存；它写入后点「刷新」回读」
-（[MethodLibraryView.tsx L204-L234](../../../packages/deep-research-pack/src/client/MethodLibraryView.tsx)）。
+（[MethodLibraryView.tsx L204-L234](../../../../packages/deep-research-pack/src/client/MethodLibraryView.tsx)）。
 Lead 的回复在 Chat tab，用户在方法库页看不到；要切过去看回话，再切回来点刷新——这正是「跳来跳去」。
 文案也写死了「交给 Lead 写入库；本页不直接改文件」
-（[views.tsx L103](../../../packages/deep-research-pack/src/client/method-library/views.tsx)）。
+（[views.tsx L103](../../../../packages/deep-research-pack/src/client/method-library/views.tsx)）。
 
 ### 7.2 三个选项
 
@@ -369,7 +369,7 @@ A 的「面板永不直写」不变：页面只发 prompt，写的是模型可�
 - `src/client/index.ts` 的 `inject` 加 `sessions`、`workspaces`；`scoped.inject([...])` 同步。
 - `keys.ts` 加 `METHOD_COACH_SLOT`（私有子槽名）与 `METHOD_COACH_PRESET`（`method-editor`）；
   `client-keys` 门禁要求 key 字面量只住 keys.ts、`slots.inject`/`register` 用导出常量
-  （[b-pack.mjs L177+](../../../scripts/verify/gates/b-pack.mjs)）。
+  （[b-pack.mjs L177+](../../../../scripts/verify/gates/b-pack.mjs)）。
 - 所有注册包 `scoped.effect`（`client-effect-wrap`）。
 - `SessionReferenceSourceMap` 增 `methodCoach: unknown`（同 ui-subagent 的 `sidebarChat`）。
 - `dsh.client.inject`：`sessions`/`workspaces` 是 Cordis 服务，不是运行时模块 import；类型 import 走
@@ -415,12 +415,12 @@ A 的「面板永不直写」不变：页面只发 prompt，写的是模型可�
 | 16 | composer 始终渲染，view 只换正文 | `vendor/dsh/packages/client/ui-conversation/src/client/skeleton/ConversationContent.tsx` L138-L215 |
 | 17 | 问卡走 `conversation.composer` chain | `vendor/dsh/packages/client/ui-user-questions/src/client/index.ts` L382-L390 |
 | 18 | chain owner 带 pendingInteraction | `vendor/dsh/packages/client/ui-conversation/src/client/contract/slots.ts` L511-L520 |
-| 19 | 方法库页当前保存路径与回执 | [MethodLibraryView.tsx L204-L234](../../../packages/deep-research-pack/src/client/MethodLibraryView.tsx) |
-| 20 | 库格式与四标签 | [library-fold.ts L31-L95](../../../packages/deep-research-pack/src/lib/library-fold.ts) |
-| 21 | Lead 的方法库政策（格式/管理动词） | [research-brief SKILL.md L87-L105](../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md) |
-| 22 | D2 / D25 现文 | [decisions.md L15](../../../docs/decisions.md) / [L38](../../../docs/decisions.md) |
-| 23 | 新 preset 的机械面（数量哨兵/时钟/冒烟） | [presets.test.mjs L26-L33](../../../tests/pack/presets.test.mjs) · [b-pack.mjs L33-L38](../../../scripts/verify/gates/b-pack.mjs) · [l4-lite-smoke.mjs L108-L125](../../../scripts/smoke/l4-lite-smoke.mjs) |
-| 24 | client key/effect 门禁 | [b-pack.mjs L177+](../../../scripts/verify/gates/b-pack.mjs) |
+| 19 | 方法库页当前保存路径与回执 | [MethodLibraryView.tsx L204-L234](../../../../packages/deep-research-pack/src/client/MethodLibraryView.tsx) |
+| 20 | 库格式与四标签 | [library-fold.ts L31-L95](../../../../packages/deep-research-pack/src/lib/library-fold.ts) |
+| 21 | Lead 的方法库政策（格式/管理动词） | [research-brief SKILL.md L87-L105](../../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md) |
+| 22 | D2 / D25 现文 | [decisions.md L15](../../../../docs/decisions.md) / [L38](../../../../docs/decisions.md) |
+| 23 | 新 preset 的机械面（数量哨兵/时钟/冒烟） | [presets.test.mjs L26-L33](../../../../tests/pack/presets.test.mjs) · [b-pack.mjs L33-L38](../../../../scripts/verify/gates/b-pack.mjs) · [l4-lite-smoke.mjs L108-L125](../../../../scripts/smoke/l4-lite-smoke.mjs) |
+| 24 | client key/effect 门禁 | [b-pack.mjs L177+](../../../../scripts/verify/gates/b-pack.mjs) |
 
 ## 12. 验证计划（按顺序，先证伪再实现）
 

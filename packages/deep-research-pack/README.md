@@ -50,7 +50,7 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
   2026-11-01 起）。
 - **已知未用**（vendor provider 丢弃）：Search API 的 `summary` / `need_content` 与
   `authority` / `rerank_score`。换 DSH 版本时复核。
-- 实测与取舍：[_backlog/research/retrieval-backend/2026-10-27-provider-audit.md](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_backlog/research/retrieval-backend/2026-10-27-provider-audit.md)。
+- 实测与取舍：[_backlog/_archived/research/retrieval-backend/2026-10-27-provider-audit.md](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_backlog/_archived/research/retrieval-backend/2026-10-27-provider-audit.md)。
 
 ## 账号与凭据（分发）
 

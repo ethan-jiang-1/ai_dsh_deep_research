@@ -21,7 +21,7 @@
 
 **方法论连续性**：本仓方法论内核移植自 codex DR harness（docs/design/30-methodology-mapping.md），
 2026-10-03 已做过一轮专业 DR 三轴对标（源仓 + Anthropic 工程自述，材料 =
-[strategy-benchmark research](../../research/README.md)）。本轮是同一类挖掘的第三个对象
+[strategy-benchmark research](../research/README.md)）。本轮是同一类挖掘的第三个对象
 面：**开源框架生态**。前一轮的教训直接适用——借鉴候选必须带触发条件，不直接改机制；
 物种不同的路线（如 OpenAI 端到端 RL 单模型）记为"不构成可采纳面"。
 

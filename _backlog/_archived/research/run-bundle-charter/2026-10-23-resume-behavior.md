@@ -5,7 +5,7 @@ intent: 用真实会话证据回答「停了能续、删了没事、交付态可
 
 # 「停了能续 / 删了没事 / 交付态可判」实证
 
-> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
+> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
 > ｜ 只读分析（2026-10-23）；口径：`zstd -dc` 逐行解析 1,679 个会话（run 组 656 = 顶层 280 + subagent 376）；
 > bundle 53（active 4 / archive 46 / _abandoned 3）。「真探针」= 首条用户消息在问「继续/状态/接手」的会话。
 

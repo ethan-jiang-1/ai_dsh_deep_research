@@ -5,7 +5,7 @@ intent: 在手册改动前记录 4 个样本的盲续跑结果与 ground truth �
 
 # P7 盲测 baseline（手册改动前）
 
-> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
+> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
 > ｜ 2026-10-23 ｜ ground truth = `/tmp/run-bundle-blind/ground-truth.md`（operator-only）。
 > ｜ **样本状态**：用户 2026-10-23 告知旧 run bundle 已清；本 baseline 是清理前结果，只作“旧事实是否够用”的参照，P8 不再用旧样本做正式验收。
 > ｜ **口径偏差（如实）**：先用 run 通道 3083 的 lead 会话跑，两次都在 5 个工具调用后

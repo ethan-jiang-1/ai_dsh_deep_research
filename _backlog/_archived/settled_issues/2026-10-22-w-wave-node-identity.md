@@ -48,5 +48,5 @@ WAVE 4：W4.1
 ## 去向
 
 - 实现事实见 Note；新 run 用 Wave 格式，旧 plan 只读。
-- 历史评审（旧 W=工作包版）：[review](../../research/dynamic-research-dag/2026-10-22-w-work-package-identity-review.md)
+- 历史评审（旧 W=工作包版）：[review](../research/dynamic-research-dag/2026-10-22-w-work-package-identity-review.md)
   ——只作历史记录，不再指导当前语义。

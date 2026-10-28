@@ -8,7 +8,7 @@ intent: 作为第二个 reviewer 对活跃卡 2026-10-22-w-work-package-identity
 > **历史评审（已被取代）**：本文件评审的是 2026-10-22 旧版“W=工作包/LAYER”；
 > 用户同日纠正为“W<wave>.<index> / WAVE”。结论不再作当前合同，仅保留旧方案记录。
 
-> 对象：[W 工作包命名与 L 拓扑层卡](../../_archived/settled_issues/2026-10-22-w-wave-node-identity.md)（设计评审稿，`推敲中`；卡头明写"用户与第二个 reviewer 先审"）。
+> 对象：[W 工作包命名与 L 拓扑层卡](../../../_archived/settled_issues/2026-10-22-w-wave-node-identity.md)（设计评审稿，`推敲中`；卡头明写"用户与第二个 reviewer 先审"）。
 > 方法：只读评审——卡 §1 的实现声称逐条对本仓源码/模板/skill/手册核对；DSH 机制面按 vendor `dsh-v0.2.1-rc.2` 正本与[机制盘点](./2026-10-21-dsh-orchestration-primitives.md)；评审期间未改卡。
 > 结论：**方向成立**（W 稳定身份 + 层为计算值 + stage 承载流程不变量；DSH 映射未发明机制，与 A0 决定一致）；**四条定稿前修正（B1–B4）**、七条建议（S1–S7）、八问逐条结论（§4）。
 
@@ -27,12 +27,12 @@ intent: 作为第二个 reviewer 对活跃卡 2026-10-22-w-work-package-identity
 
 | 卡的声称 | 锚点 |
 |---|---|
-| 节点表已有 id/parent/kind/…/task_id；parent 已用于复合节点 | [plan 模板](../../../research-workspace/templates/run/plan.md)（表头 + N3.1 注释示例） |
+| 节点表已有 id/parent/kind/…/task_id；parent 已用于复合节点 | [plan 模板](../../../../research-workspace/templates/run/plan.md)（表头 + N3.1 注释示例） |
 | `planIndex` 解析节点表，`planIssuesOf` 报重号/悬空 parent/deps，`levelsOf` 按最长路径算层 | `packages/deep-research-pack/src/lib/plan-graph.ts:526` / `:610` / `:196` |
 | 图谱默认画顶层；复合子节点收在父详情（图上标 `+N` / `内部 N`） | `packages/deep-research-pack/src/client/ResearchGraphTab.tsx:274-276` / `:554` |
 | 节点可复制 `drt_<slug>/N3` | `packages/deep-research-pack/src/client/ResearchGraphTab.tsx:501` |
 | 图表行当前叫 `WAVE n` | `packages/deep-research-pack/src/client/ResearchGraphTab.tsx:694` |
-| skill/模板/手册已有"N 是 ID 不是序号"纪律 | [research-planning skill §0](../../../packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md)；模板头部；研究手册目录约定 |
+| skill/模板/手册已有"N 是 ID 不是序号"纪律 | [research-planning skill §0](../../../../packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md)；模板头部；研究手册目录约定 |
 | DSH Agent Teams 平铺 DAG、任务无 parent、无 nested Team、task_id 会话映射 | `vendor/dsh/docs/subsystems/agent-team.md:56-74`（TeamTaskSnapshot 无 parent 字段）；[机制盘点 §2.1](./2026-10-21-dsh-orchestration-primitives.md) |
 | A0 run plan 为 N1–N4 | `research-workspace/_abandoned/drt_deepseek-v4-status/plan.md` |
 
@@ -44,7 +44,7 @@ intent: 作为第二个 reviewer 对活跃卡 2026-10-22-w-work-package-identity
 
 - 已占用：深度档 **L0–L3**（plan 模板头部"深度档：L0 快答 / L1 标准 / L2 深挖 / L3 穷尽"、research-planning §2）+ 评估五面 **L0–L4**（docs；D27 已为 S/L 编号撞车做过一次分离先例）。
 - 卡 §2 术语表定义 L=Layer/拓扑层（卡:39）；§4 示例表 depth 列值就是 L1/L2（卡:92-95）；同节文字"图上的 L 可能从 L1 变 L2"（卡:85）。本 review 提出撞车后，卡在表下 caption 补了"`depth` 列 = 研究深度 L0–L3，不是拓扑层 L；拓扑层不落表"（卡:97）——**表格级消歧已做，符号级撞车仍在**：同一文档里 `L1`/`L2` 仍可能被读成深度档或拓扑层两义，且与 docs 评估五面 L0–L4 构成第三重。
-- 处置二选一：**推荐**弃用裸 `Ln` 符号——文档与 UI 一律「第 n 层 / `LAYER n`」，depth 列保持 L0–L3 不动；或保留 L 符号但进 [00-index §术语映射](../../../docs/00-index.md)登记三向消歧。§4 措辞随之改写。
+- 处置二选一：**推荐**弃用裸 `Ln` 符号——文档与 UI 一律「第 n 层 / `LAYER n`」，depth 列保持 L0–L3 不动；或保留 L 符号但进 [00-index §术语映射](../../../../docs/00-index.md)登记三向消歧。§4 措辞随之改写。
 
 ### B2 墓碑机制没有指定载体
 
@@ -67,7 +67,7 @@ intent: 作为第二个 reviewer 对活跃卡 2026-10-22-w-work-package-identity
 - **S1 rollup 定义补全**：§6-B 只写"rollup 的 `blocked_by` = 已建子任务"，漏了外部依赖——应写全 = **外部依赖的 task + 已建子任务**。子任务废弃要先 `set_dependencies` 清边再 delete（Team 对有依赖者的 delete 拒绝；`blockedBy` 必须指向非删除任务——`vendor/dsh/docs/subsystems/agent-team.md:58`）。
 - **S2 引用形式统一**：§8 同时出现 `@W2.1`（chat 反馈）与 `drt_<slug>/W2.1`（复制按钮）；现行 skill §0 的 canonical 是 `run_slug/N3`。定一个 canonical（建议 `drt_<slug>/W2.1`），`@W2.1` 写明为"当前 run 上下文简写"；UI 复制文案与 skill 同措辞。
 - **S3 "W 层级校验"清单化**：把 `planIssuesOf` 的新 issue kinds 点名，避免一句话过模糊——混用 W/N 家族、子号前缀不匹配父号（W2 的子必须 W2.x）、超深（>3 层）、跨组子 dep、stage 不一致（若 B3 选独立列）。验收 §12 直接引用这份清单。
-- **S4 落地面补两项**：① W/层/stage 进 [00-index §术语映射](../../../docs/00-index.md)登记；② 模板改动走生成物链——pack workspace 种子重同步（`pack-workspace-fresh` 把守）+ overlay/镜像三处一致（packages/deep-research-pack/AGENTS.md）+ design/40 图谱节同步。§13 顺序表补"文档/术语登记"与"种子同步"两项。
+- **S4 落地面补两项**：① W/层/stage 进 [00-index §术语映射](../../../../docs/00-index.md)登记；② 模板改动走生成物链——pack workspace 种子重同步（`pack-workspace-fresh` 把守）+ overlay/镜像三处一致（packages/deep-research-pack/AGENTS.md）+ design/40 图谱节同步。§13 顺序表补"文档/术语登记"与"种子同步"两项。
 - **S5 NODES wave0/1/2 消歧**：NODES 表行"侦察 wave0 / 挖掘 wave1"是生命周期固定段名，与本卡 stage/层是第三个易混词；卡内加一句"NODES wave = 生命周期段名，非 plan 的层/包"。
 - **S6 状态流转**：吸收本 review 修订后，卡按生命周期翻 `等人拍板`（下一步 = §11 八问），别停在推敲中隐性等待。
 - **S7 说清 B 是行为变更，不只是改前缀**：现行 skill §0/§4 明文"拆并行执行单元 = Lead 追加**新的顶层节点**"；B 允许子 W 直接上板，是卡内最大的语义 delta。实施 diff 点名替换 skill §0 复合节点段与 §4 规则 1，避免新旧纪律同页打架。
@@ -91,7 +91,7 @@ design/40 全文；cockpit keyless 测试对 `WAVE` 文案的断言点（若测�
 
 ## 6. 证据
 
-- 卡：[2026-10-22-w-work-package-identity.md](../../_archived/settled_issues/2026-10-22-w-wave-node-identity.md)
+- 卡：[2026-10-22-w-work-package-identity.md](../../../_archived/settled_issues/2026-10-22-w-wave-node-identity.md)
 - 机制正本：`vendor/dsh/docs/subsystems/agent-team.md`；[机制盘点](./2026-10-21-dsh-orchestration-primitives.md)
 - 本仓实现：`plan-graph.ts` / `ResearchGraphTab.tsx` / plan 模板 / research-planning skill / NODES.md / 研究手册 / A0 run plan（§1 表内逐条锚点）
-- A0 决定：[2026-10-21-dynamic-research-dag-a0.md](../../../notes/implemented/2026-10-21-dynamic-research-dag-a0.md)
+- A0 决定：[2026-10-21-dynamic-research-dag-a0.md](../../../../notes/implemented/2026-10-21-dynamic-research-dag-a0.md)

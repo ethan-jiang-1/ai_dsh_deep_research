@@ -4,7 +4,7 @@
 >
 > 首提：2026-10-22 ｜ 用户 2026-10-22 纠正语义：W2 是 Wave 2，W2.1/W2.2 是层内节点；
 > 设计卡（已结）：[_backlog/_archived/settled_issues/2026-10-22-w-wave-node-identity.md](../../_backlog/_archived/settled_issues/2026-10-22-w-wave-node-identity.md)
-> ｜ 历史评审（W=工作包旧版，已降为历史）：[review](../../_backlog/research/dynamic-research-dag/2026-10-22-w-work-package-identity-review.md)
+> ｜ 历史评审（W=工作包旧版，已降为历史）：[review](../../_backlog/_archived/research/dynamic-research-dag/2026-10-22-w-work-package-identity-review.md)
 
 ## 决定
 

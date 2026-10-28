@@ -5,7 +5,7 @@ intent: 记录门②/③ 改读 DSH 结构化事件（presented / user-question-
 
 # P3：交付见证（事件链，不读文本）
 
-> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
+> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
 > ｜ 2026-10-23 ｜ **只对新 run（有 `run.md`）严格**；旧场无 run.md 走 epoch 兼容，不追溯判红。
 
 ## 1. 落地

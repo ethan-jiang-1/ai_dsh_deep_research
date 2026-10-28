@@ -5,7 +5,7 @@ intent: 为宪章提供 53 个 bundle 的实际形态、位置矛盾、交付链
 
 # 53 个 run bundle：实际形态 vs 声明契约
 
-> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
+> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
 > ｜ 只读审计（2026-10-23），未改任何文件。口径：磁盘 53 个（工作区根 4 · `archive/` 46 · `_abandoned/` 3），
 > 2,078 张 evidence 卡，**symlink 0 个**。契约正本 = `research-workspace/NODES.md` + `research-workspace/AGENTS.md` §目录约定。
 > ｜ **2026-10-23 复核修正**：node-gate 现存 **46/53**（本文件原写 47，含一次审计误写后删除的 gate）；

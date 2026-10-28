@@ -5,7 +5,7 @@ intent: 记录三操作桶观察、run-state 跨桶落定、门禁默认只读�
 
 # P4：观察面 / 位置中立
 
-> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
+> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
 > ｜ 2026-10-23 ｜ D28 只约束未来 run；旧 bundle 只读、零改写。
 
 ## 1. 落地

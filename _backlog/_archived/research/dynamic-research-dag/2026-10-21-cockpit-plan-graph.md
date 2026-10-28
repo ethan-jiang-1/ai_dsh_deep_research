@@ -5,7 +5,7 @@ intent: 为 Research Cockpit 的 plan/DAG + 队员/worker 实时表达与“让 
 
 # 侧栏「研究图谱」页签：把 plan、队员、worker 和异常画出来（2026-10-21）
 
-> 服务 = [_backlog/issues/2026-10-21-dynamic-research-dag.md](../../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)。
+> 服务 = [_backlog/issues/2026-10-21-dynamic-research-dag.md](../../../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)。
 > 方法 = 读 `docs/design/40-research-cockpit.md`、`src/client/*`、DSH `agentTeam` / `subagentCatalog` /
 > session status 投影、`ui-agent-team` 的 TeamAction；只读设计，未写组件。目标 = **反馈强、出问题好调**，
 > 且不新造 RPC、不引图库。

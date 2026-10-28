@@ -5,7 +5,7 @@ intent: 记录 D17 位置子句修订为 D28（位置=操作桶、状态=内容�
 
 # P1：位置 = 操作桶（D28）
 
-> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
+> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
 > ｜ 2026-10-23 ｜ 只改人类文档；**不动手册/NODES/模板**（P7 批量，避免两次 snapshot 重录）。
 
 ## 1. 决定
@@ -19,10 +19,10 @@ intent: 记录 D17 位置子句修订为 D28（位置=操作桶、状态=内容�
 
 | 文件 | 改动 |
 |---|---|
-| [docs/decisions.md](../../../docs/decisions.md) | D17 位置子句 → 操作桶；新增 D28 行 |
-| [docs/design/40-research-cockpit.md](../../../docs/design/40-research-cockpit.md) | 会话绑定：位置只用于发现，三位置都认，状态从内容读（D28） |
-| [docs/design/50-agent-loop-and-state.md](../../../docs/design/50-agent-loop-and-state.md) | run bundle 行：D17/D28，位置=操作桶；保留 `archive/drt_<slug>/` 路径 |
-| [docs/guides/61-run-playbook.md](../../../docs/guides/61-run-playbook.md) | 启动发现扫三桶；位置=操作桶；交付判别 = `final/vN` + presented + 回执 |
+| [docs/decisions.md](../../../../docs/decisions.md) | D17 位置子句 → 操作桶；新增 D28 行 |
+| [docs/design/40-research-cockpit.md](../../../../docs/design/40-research-cockpit.md) | 会话绑定：位置只用于发现，三位置都认，状态从内容读（D28） |
+| [docs/design/50-agent-loop-and-state.md](../../../../docs/design/50-agent-loop-and-state.md) | run bundle 行：D17/D28，位置=操作桶；保留 `archive/drt_<slug>/` 路径 |
+| [docs/guides/61-run-playbook.md](../../../../docs/guides/61-run-playbook.md) | 启动发现扫三桶；位置=操作桶；交付判别 = `final/vN` + presented + 回执 |
 
 ## 3. 残留检查
 

@@ -5,7 +5,7 @@ intent: 为动态研究 DAG 设计卡提供生态扫描（DSH 插件与外部框
 
 # DSH 插件生态与外部的动态 DAG 实践（2026-10-21）
 
-> 服务 = [_backlog/issues/2026-10-21-dynamic-research-dag.md](../../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)。
+> 服务 = [_backlog/issues/2026-10-21-dynamic-research-dag.md](../../../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)。
 > 方法 = 读 DSH 社区插件目录（`dsh-plugin-catalog`，3112 条）→ 关键词筛出 447 条 → 精读 10 个最相关
 > README → 对照 4 个外部官方文档。**只读，不安装、不运行**；插件 README 的主张未实测，版本兼容性
 > 未逐件核验。DSH 机制事实以 [第一份笔记](./2026-10-21-dsh-orchestration-primitives.md) 的同 pin 源码为准。

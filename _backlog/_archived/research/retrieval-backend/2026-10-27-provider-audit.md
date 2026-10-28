@@ -5,7 +5,7 @@ intent: 为 D30（pack 默认翻到 deepseek-search-api + http）补齐工具级
 
 # 检索底座落地证据（2026-10-27）
 
-> 消费者：[D30](../../../docs/decisions.md) / [D31](../../../docs/decisions.md) + pack 默认（[cordis.patch.yml](../../../packages/deep-research-pack/cordis.patch.yml)）。
+> 消费者：[D30](../../../../docs/decisions.md) / [D31](../../../../docs/decisions.md) + pack 默认（[cordis.patch.yml](../../../../packages/deep-research-pack/cordis.patch.yml)）。
 > 前序（同 pin 的 API/provider 面与 5-query A/B）：[DeepSeek Search/Fetch API + DSH provider](../dynamic-research-dag/2026-10-21-deepseek-search-fetch-api.md)、
 > [搜索 provider A/B](../dynamic-research-dag/2026-10-21-search-provider-ab.md)。
 > 方法：开发 home 的 `DEEPSEEK_API_KEY` 直调官方端点（key 只进环境变量，不打印、不落盘）+ 真

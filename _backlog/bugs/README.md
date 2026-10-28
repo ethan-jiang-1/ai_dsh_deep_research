@@ -10,10 +10,11 @@
 
 ## 活跃列表
 
-（2026-10-23 宪章复核发现的历史偏差按 **grandfather** 处理：只读证据、不建卡、不修、不追改；它们只用于约束新 run 的契约，记录 = [复核证据](../research/run-bundle-charter/2026-10-23-issue-review-verification.md)。）
+（暂无活跃缺陷。）
 
 ## 最近归档
 
+（2026-10-23 宪章复核发现的历史偏差按 **grandfather** 处理：只读证据、不建卡、不修、不追改；它们只用于约束新 run 的契约，记录 = [复核证据](../_archived/research/run-bundle-charter/2026-10-23-issue-review-verification.md)。）
 （BUG-045 已于 2026-10-28 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-045-client-load-graph-assert-flakes-on-stream-drop.md)——图面区分「读失败」与「未绑定」+ 有界重试，冒烟改轮询并自解释；
 BUG-044 已于 2026-10-27 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-044-delivery-receipts-leak-absolute-paths.md)——present 归一化 + 写前/写后校验 + `--repair`；
 BUG-043 已于 2026-10-23 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-043-graph-unmapped-task-shows-unexecuted.md)——图谱映射五态 + 覆盖率，证据 = `graph-model` 单测 + client-load 覆盖率行断言。）

@@ -89,7 +89,7 @@ run-accept 把绝对语料根写进 `acceptance.md`（`sessions` 恒为绝对路
 
 ### Minor
 
-- P8 note 声称研究证据迁 `_archived/research/`，实际仍在 `_backlog/research/run-bundle-charter/`。
+- P8 note 声称研究证据迁 `_archived/research/`，实际仍在 `_backlog/_archived/research/run-bundle-charter/`。
 - `snapshot.json` 重录 `codeAnchor: unknown-historical`（P7 有理由，可记 HEAD+dirty 备注）。
 - `manifest` 不含 `acceptance.md`（P5 已如实记录）。
 - provenance `local-file.path` 允许 `../` 逃逸。

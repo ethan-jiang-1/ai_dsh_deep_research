@@ -3,7 +3,7 @@
 > 状态：implemented
 
 > 来源：用户 2026-10-27 指令（"本地 fetch 失败的话，就用 DeepSeek fetch……尽量内化固化到
-> 插件里"）+ [价值抽样](../../_backlog/research/retrieval-backend/2026-10-27-provider-audit.md) §9。
+> 插件里"）+ [价值抽样](../../_backlog/_archived/research/retrieval-backend/2026-10-27-provider-audit.md) §9。
 > **部分取代** [search-fallback 结论](./2026-09-27-search-fallback-seam.md)：该文"pack 层做不了
 > 回退"对 **search** 仍成立；fetch 侧改由本包自己的 provider 实现，不依赖 seam 的选择语义。
 

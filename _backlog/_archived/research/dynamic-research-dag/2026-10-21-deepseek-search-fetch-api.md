@@ -5,7 +5,7 @@ intent: 为宽搜/深搜的搜索底座选型提供官方 API、DSH provider、�
 
 # DeepSeek Search / Fetch API + DSH provider（2026-10-21）
 
-> 服务 = [_backlog/issues/2026-10-21-dynamic-research-dag.md](../../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)。
+> 服务 = [_backlog/issues/2026-10-21-dynamic-research-dag.md](../../../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)。
 > 方法 = 读 DeepSeek 官方 API 文档 + 本仓 `vendor/dsh` 的 `web-deepseek-api` provider 源码/README +
 > base bundle 行；**未发真实请求**，成本/限流以官方文档为准，行为以 provider README 为准。
 

@@ -1,6 +1,6 @@
 # 推敲：方法库页内对话共创（独立会话 + 方法编辑 preset）
 
-> 状态：已交付（2026-10-28 落地并验证：三栏/方法编辑 preset/草稿回填/保存闭环；真模型 probe + release-smoke + l4-lite 全绿）｜去向 = 本卡迁 settled_issues/；实施证据 = 本卡 + [调研 §14](../../research/method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md)
+> 状态：已交付（2026-10-28 落地并验证：三栏/方法编辑 preset/草稿回填/保存闭环；真模型 probe + release-smoke + l4-lite 全绿）｜去向 = 本卡迁 settled_issues/；实施证据 = 本卡 + [调研 §14](../research/method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md)
 
 **问题与期望结果：** 方法库「新建方法」是一张四字段空表（找来源 / 怎么核实 / 报告怎么写 / 不承诺），
 陌生用户不知道这四个词背后的质量标准，填不出来。期望：用户在这页里用对话把方法聊出来，
@@ -12,7 +12,7 @@ spike 已证明最终形态（2026-10-28，分支 `spike/method-coach-embed`）�
 （我的库 / 新建方法表单 / 方法编辑对话），coach 会话的 React 树放在根级 `shell.overlay`
 （在外层 `conversation.content` 之外，绕开递归门），用 `createPortal` 把 DOM teleport 到页面右栏；
 主 composer 用 CSS `:has` 抑制、外层 pending 问卡自动让位。26 条断言全绿，证据见
-[调研篇 §14](../../research/method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md)。
+[调研篇 §14](../research/method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md)。
 
 **拍板记录：** D2 → 第 5 个 preset「方法编辑」（非研究角色），登记 D37；D25 → 方法编辑写库（面板仍永不直写）；
 会话 → 一 workspace 一个「方法编辑」；载体 → **页内三栏（portal）**，不做固定浮层、不做右栏 chat tab。
@@ -210,7 +210,7 @@ method-editor 9 轮问答）**全部通过**：问卡 → 四字段回填 → �
 
 ## 证据
 
-- 调研篇：[2026-10-28-dsh-session-and-surface-internals.md](../../research/method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md)（§14 = spike 实跑）
+- 调研篇：[2026-10-28-dsh-session-and-surface-internals.md](../research/method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md)（§14 = spike 实跑）
 - spike 分支：`spike/method-coach-embed`（commit `09bba8a`，仅实验、不合并）；证据 =
   `runtime/spike-embed/artifacts/2026-10-28T05-58-46-583Z/`（01–04 截图；gitignored）
 - 现行页签与保存路径：[MethodLibraryView.tsx](../../../packages/deep-research-pack/src/client/MethodLibraryView.tsx)

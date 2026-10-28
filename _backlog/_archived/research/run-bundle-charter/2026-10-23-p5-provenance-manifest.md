@@ -5,7 +5,7 @@ intent: 记录 provenance 离线证明、local-file 哈希、manifest 生成与�
 
 # P5：溯源 / 可移植
 
-> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
+> 消费者：[_backlog/issues/2026-10-23-run-bundle-agent-state-and-read-chain.md](../../../_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md)
 > ｜ 2026-10-23 ｜ 新 run 才受约束；旧场 grandfather，不补 provenance/manifest。
 
 ## 1. 落地
