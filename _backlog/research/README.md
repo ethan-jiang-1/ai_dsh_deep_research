@@ -21,6 +21,7 @@
 （2026-10-25 运行形态合同材料已随消费者迁入 [_archived/research/](../_archived/research/)；三条旧材料同迁：notes-stocktake 体检 + strategy-benchmark 两份。）
 
 
+- [method-library-cocreation/2026-10-29-option-a-scroll-and-intelligence.md](method-library-cocreation/2026-10-29-option-a-scroll-and-intelligence.md) — 方案 A 的滚动规格（17+6 种情形）、对话智力体能力/协议、模式与方案切换的状态对齐矩阵（消费者：[issue](../issues/2026-10-29-method-library-workbench-redesign.md)）。
 - [method-library-cocreation/2026-10-29-ux-redesign.md](method-library-cocreation/2026-10-29-ux-redesign.md) — 方法库工作台交互重设计：A（草稿卡在上/对话在下）vs B（表单+抽屉）的 SVG 视觉稿与状态呈现（消费者：[issue](../issues/2026-10-29-method-library-workbench-redesign.md)）。
 - [method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md](method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md) — 方法库页内对话共创的会话选型（root vs subagent/fork）、workspace 归属、`conversation.view` 嵌入面、双 composer、preset/skill 与写入回执证据（消费者：[issue](../_archived/settled_issues/2026-10-28-method-library-cocreation.md)）。
 - [dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md](dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md) — 动态研究 DAG 与多层 subagent 编排（消费者：[_archived/settled_issues/2026-10-21-dynamic-research-dag.md](../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)）。
