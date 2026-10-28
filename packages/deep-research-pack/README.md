@@ -2,7 +2,7 @@
 
 > 说明：本 README 随 npm 包发布；指向仓库 `docs/`、`notes/`、`_backlog/` 的链接使用 GitHub 绝对地址。安装包不含这些开发文档，点开即离仓。
 
-Deep Research 插件包：**四角色 preset + 研究方法论技能 + 研究驾驶舱（Research Cockpit，
+Deep Research 插件包：**四研究角色 preset + 方法编辑 preset（D37）+ 研究方法论技能 + 研究驾驶舱（Research Cockpit，
 观察面 client 套件）+ 抓取回退 provider + 工作区种子**。
 
 一次调研 = 一支四人研究团队（Lead 主编 / Scout 侦察 / Analyst 分析 / Critic 核查）在 DSH 的
@@ -298,7 +298,7 @@ node <pack>/scripts/scaffold.mjs --workspace <ws> --clean --write
 
 ## 新增一个研究角色
 
-**第 0 步（先于一切代码）**：增删角色 = 推翻 D2（角色 = 4 个，见 [docs/00-index.md](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/00-index.md) 台账）——
+**第 0 步（先于一切代码）**：增删角色 = 推翻 D2（角色 = 5 个：4 研究 + 方法编辑，D37；见 [docs/00-index.md](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/00-index.md) 台账）——
 先在台账登记新 D 号，再动手。tests 的数量哨兵（[tests/pack/presets.test.mjs](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/tests/pack/presets.test.mjs)）会机械拦住没登记的增删。
 
 1. `presets/<role>.patch.yml`：一条 `@deepseek-ai/dsh-agent-preset` 行，`config` 带

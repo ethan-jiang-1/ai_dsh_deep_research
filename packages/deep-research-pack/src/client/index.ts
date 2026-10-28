@@ -204,7 +204,7 @@ export function apply(ctx: ClientContext): void {
         sessionId: deterministicId,
         ...(workspaceId === undefined ? {} : { workspaceId }),
         ...(workspaceId === undefined && cwd !== undefined ? { cwd } : {}),
-        agentPreset: 'lead',
+        agentPreset: 'method-editor',
       })
       coachSessionIds.set(scopeKey, created)
       try { await scoped.remote.session.rename({ sessionId: created, title: '方法编辑' }) } catch { /* non-fatal */ }

@@ -1,6 +1,6 @@
 # ai_dsh_deep_research
 
-DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`packages/deep-research-pack`）提供四个研究角色 preset（`Deep Research Lead / Scout / Analyst / Critic`），协作走 DSH 现成 Agent Team 通道。
+DSH 插件项目：**Deep Research 多角色研究团队**——一个包（`packages/deep-research-pack`）提供四个研究角色 preset（`Deep Research Lead / Scout / Analyst / Critic`）+ 一个方法编辑 preset（`Method Editor`，D37），协作走 DSH 现成 Agent Team 通道。
 
 设计来源：方法论内核出自 codex 下的 Deep Research harness 考古（[考古报告](notes/implemented/2026-09-24-deep-research-harness-analysis.md)），插件工程范式参考作者本地 `ai_dsh_company`（不随仓；[解剖报告](notes/implemented/2026-09-24-dsh-plugin-repo-anatomy.md)）。
 

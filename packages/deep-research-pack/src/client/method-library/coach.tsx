@@ -101,12 +101,13 @@ export function MethodCoachPortal(props: MethodCoachPortalProps): ReactNode {
 const STARTERS = [
   { label: '从零聊', prompt: '从零开始，先帮我从研究场景问起。' },
   { label: '照内置改', prompt: '我想照一条内置打法改，先问我想改哪一块。' },
-  { label: '从这次研究沉淀', prompt: '把这次研究实际采用的做法沉淀成一条方法。' },
 ] as const
 
 /** 方法编辑面板的 props（页面注入建会话/发 prompt）。 */
 export interface MethodCoachPanelProps {
   readonly sessionId: SessionId
+  /** 页面附带的库/草稿/内置快照；只随第一条消息发一次，后续原生 composer 直发。 */
+  readonly context: string
   readonly ensure: (currentSessionId: SessionId) => Promise<{
     readonly id: SessionId
     readonly reference: { release(): void }
@@ -119,7 +120,7 @@ export interface MethodCoachPanelProps {
  * @param props - 当前会话 + ensure/send 注入。
  */
 export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
-  const { sessionId, ensure, send } = props
+  const { sessionId, context, ensure, send } = props
   const [coach, setCoach] = useState<{ id: SessionId; reference: { release(): void } } | null>(null)
   const [host, setHost] = useState<HTMLElement | null>(null)
   const [started, setStarted] = useState(false)
@@ -158,9 +159,11 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
 
   const start = (prompt: string): void => {
     if (coach === null) return
+    const first = !started
     setStarted(true)
     setError(null)
-    void send(coach.id, prompt).catch((cause: unknown) => { setError(String(cause)) })
+    void send(coach.id, first ? `${context}\n\n用户：${prompt}` : prompt)
+      .catch((cause: unknown) => { setError(String(cause)) })
   }
 
   return (

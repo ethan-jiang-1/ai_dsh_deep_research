@@ -14,7 +14,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fetchWithFallback, markRescued, describeFailure } from '../../packages/deep-research-pack/src/fetch-fallback/orchestrate.ts';
 import { PROVIDER_ID } from '../../packages/deep-research-pack/src/fetch-fallback/policy.ts';
-import { presetRoles } from '../../scripts/lib/roles.mjs';
+import { researchRoles } from '../../scripts/lib/roles.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
@@ -197,7 +197,7 @@ test('单源对账：provider id / 行名 / 预算在 YAML 与代码间一致（
   assert.ok(Number.isFinite(total) && Number.isFinite(local), '回退行必须有可解析的两腿预算');
   assert.ok(local < total, '本地腿预算必须小于总预算');
 
-  for (const role of presetRoles(ROOT)) {
+  for (const role of researchRoles(ROOT)) {
     const preset = readFileSync(join(PACK, 'presets', `${role}.patch.yml`), 'utf8');
     const toolBudget = Number(/fetchTimeoutMs:\s*(\d+)/.exec(preset)?.[1]);
     assert.ok(Number.isFinite(toolBudget), `${role}: tool-web 缺 fetchTimeoutMs`);

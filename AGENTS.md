@@ -1,7 +1,7 @@
 # AGENTS.md — 本仓库的入口链
 
 DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四个研究角色 preset
-（`Deep Research Lead / Scout / Analyst / Critic`）；协作主通道 = DSH 现成 Agent Teams。
+（`Deep Research Lead / Scout / Analyst / Critic`）+ 一个方法编辑 preset（`Method Editor`，D37）；协作主通道 = DSH 现成 Agent Teams。
 方法论内核移植自 codex Deep Research harness（映射表 docs/design/30-methodology-mapping.md）。
 
 ## 入口链（唯一正本——其他文件一律指回本节，不再各自复述）

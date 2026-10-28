@@ -107,7 +107,7 @@
 
 | 模块 | 被谁消费 | 说明 |
 |---|---|---|
-| lib/roles.mjs | discipline-probe、fetch-fallback-orchestration.test、l4-lite-smoke、preset-smoke、presets.test、release-smoke、replay-request.test、replay-scene.test、snapshot-replay-smoke、team-preflight-smoke | 角色清单访问器（事实源 = 盘上 presets/） |
+| lib/roles.mjs | discipline-probe、fetch-fallback-orchestration.test、l4-lite-smoke、preset-smoke、presets.test、release-smoke、replay-scene.test、snapshot-replay-smoke、team-preflight-smoke | 角色清单访问器（presetRoles = 盘上全部；researchRoles = 研究面；事实源 = 盘上 presets/） |
 | lib/bundle-sessions.mjs | bundle-sessions、bundle-sessions.test | run bundle → 见证会话反查：聚合 scanWitnessLogs 的 boundSessions/presented（绑定谓词不另立——与 node-gate 门①②同源）；交付回执的 witness.sessions 亦由此面派生 |
 | lib/hitl-card-driver.mjs | hitl-answer | HITL 问询卡的浏览器内驱动片段（Playwright `page.evaluate` 入参）：问卡可见性、选项结构、提交/推进按钮可用性；纯 DOM 函数、零闭包，业务判定仍在 lib/ask-drive |
 | lib/frontmatter.mjs | bundle-date-sanity、evidence-audit-core、frontmatter.test、run-dashboard-core | `---` frontmatter 拆分**唯一正本**（两 core 共用同一实现） |

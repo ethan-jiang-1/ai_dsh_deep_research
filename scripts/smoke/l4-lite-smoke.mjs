@@ -110,6 +110,7 @@ const PROMPTS = {
   scout: { text: '这是一次连通性冒烟测试。请用 web_search 工具搜索 DeepSeek API，然后只回复：搜索完成-SCOUT', marker: '搜索完成-SCOUT' },
   analyst: { text: '这是一次连通性冒烟测试。请不要使用任何工具，只回复这几个字：就绪-ANALYST', marker: '就绪-ANALYST' },
   critic: { text: '这是一次连通性冒烟测试。请不要使用任何工具，只回复这几个字：就绪-CRITIC', marker: '就绪-CRITIC' },
+  'method-editor': { text: '这是一次连通性冒烟测试。请不要使用任何工具，只回复这几个字：就绪-METHOD-EDITOR', marker: '就绪-METHOD-EDITOR' },
 };
 for (const role of ROLES) {
   if (PROMPTS[role] === undefined) {

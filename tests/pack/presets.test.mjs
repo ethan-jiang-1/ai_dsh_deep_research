@@ -14,7 +14,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { presetRoles } from '../../scripts/lib/roles.mjs';
+import { presetRoles, researchRoles } from '../../scripts/lib/roles.mjs';
 import { satisfiesVersion } from '../../packages/deep-research-pack/scripts/lib/version-range.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -22,14 +22,15 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 // 角色清单事实源 = 盘上 presets/*.patch.yml（基础整治 §3.2）；本测试文件不再持有副本清单
 const ROLES = presetRoles(ROOT);
+const RESEARCH_ROLES = researchRoles(ROOT);
 
 test('角色清单 = 盘上 presets/*.patch.yml（单一事实源），数量哨兵咬 D2', () => {
   // 访问器输出与直接 readdir 对账（防访问器自身漂移：改读别处/过滤丢失）
   const files = readdirSync(PRESETS).filter((f) => f.endsWith('.patch.yml')).map((f) => f.replace(/\.patch\.yml$/, ''));
   assert.deepEqual(ROLES, [...files].sort(), 'presetRoles() 枚举 ≠ 盘上 patch 文件——访问器漂移');
   for (const id of files) assert.match(id, /^[a-z0-9][a-z0-9-]*$/);
-  // 数量哨兵：增删角色 = 推翻 D2（角色 = 4 个），先在 docs/00-index.md 台账登记新 D 号再动代码
-  assert.equal(ROLES.length, 4, `角色数量 ${ROLES.length} ≠ 4（D2）——增删角色即推翻 D2，先登记新 D 号（AGENTS.md §偏离登记簿）`);
+  // 数量哨兵：增删角色 = 推翻 D2（角色 = 5 个：4 研究 + 1 方法编辑，D37），先在 docs/decisions.md 登记 D 号再动代码
+  assert.equal(ROLES.length, 5, `角色数量 ${ROLES.length} ≠ 5（D2/D37：4 研究 + 1 方法编辑）——增删角色即推翻 D2，先登记新 D 号`);
 });
 
 test('每个角色 preset 行完整（0.1.7 形态：一条 dsh-agent-preset 行 + config.plugins）', () => {
@@ -110,8 +111,8 @@ test('bundle patch 固定检索底座：web 替换行 = deepseek-search-api 搜�
   //   删 fetchProvider 行 / 改回 deepseek-official → 同一断言红（判别力，不是恒真）。
 });
 
-test('每角色 preset 的 tool-web 行带 base config（fetch + 60s 搜索 / 45s 抓取预算）', () => {
-  for (const r of ROLES) {
+test('每个研究 preset 的 tool-web 行带 base config（fetch + 60s 搜索 / 45s 抓取预算）', () => {
+  for (const r of RESEARCH_ROLES) {
     const yml = readFileSync(join(PRESETS, `${r}.patch.yml`), 'utf8');
     const m = yml.match(/- id: tool-web\n\s*name: '@deepseek-ai\/dsh-tool-web'\n\s*config:\n\s*fetch: true\n\s*searchTimeoutMs: 60000\n\s*fetchTimeoutMs: 45000/);
     assert.ok(m, `${r}: tool-web 行缺 base config（fetch: true / searchTimeoutMs: 60000 / fetchTimeoutMs: 45000——回退两腿预算 28s 必须落在工具预算内）`);
@@ -122,7 +123,8 @@ test('delegating preset subagent = maxDepth 2 + allowedAgentPresets；无 stale 
   const ymlOf = (r) => readFileSync(join(PRESETS, `${r}.patch.yml`), 'utf8');
   const rootRole = /^\s+default:\s*([a-z0-9-]+)\s*$/m.exec(readFileSync(join(PACK, 'cordis.patch.yml'), 'utf8'))?.[1];
   assert.ok(rootRole !== undefined, 'bundle 未声明 preset registry default');
-  const allowedRoles = ROLES.filter((role) => role !== rootRole);
+  // 方法编辑是页内共创角色，不作 subagent 候选（child 不能弹原生问卡）。
+  const allowedRoles = RESEARCH_ROLES.filter((role) => role !== rootRole);
   const delegating = ROLES.filter((r) => ymlOf(r).includes('- id: tool-subagent'));
   assert.ok(delegating.length > 0, '至少一个角色声明 tool-subagent');
   for (const r of delegating) {

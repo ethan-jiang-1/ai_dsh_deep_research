@@ -5,8 +5,8 @@
 
 ## 0. 队形总览（D2）
 
-四角色 = codex harness 生命周期的职能化拆分。用户定案：多角色 + agent team（不用散装
-subagent 派活），角色分工天然对齐研究波的语义。
+四研究角色 = codex harness 生命周期的职能化拆分。用户定案：多角色 + agent team（不用散装
+subagent 派活），角色分工天然对齐研究波的语义。第 5 个 preset = 方法编辑（D37，非研究角色，见 §5）。
 
 | 角色 | codex 生命周期映射 | 一句话职责 | 产出（唯一 owner 面） |
 |---|---|---|---|
@@ -14,6 +14,7 @@ subagent 派活），角色分工天然对齐研究波的语义。
 | Scout（侦察） | wave0（广度地基） | 画出"答案可能在哪儿"：query 多样化、来源发现与分级、排除显式化 | leads.md |
 | Analyst（分析） | wave1（深度挖掘） | 把方向变成可核查证据：question-list 驱动、交叉验证、反例搜索 | evidence/*.md |
 | Critic（核查） | wave1 深度审查 + readiness + hitl2 前置 | 对"看起来完成了"过敏：无来源结论狩猎、质量审计、readiness 判定 | review.md |
+| Method Editor（方法编辑） | 方法库页共创（不属研究生命周期） | 把研究方法聊成四字段库条目；不做研究、不检索、不组队 | method-library.md（与用户确认后由页面保存） |
 
 **事实的 owner 全表**住[研究手册](../../research-workspace/AGENTS.md)——一处事实一个家，
 L3 判据 2 的载体；任何两类事实不得双 owner 或无 owner。
@@ -63,3 +64,14 @@ Deep Research 的本质困难 = 搜索结果信噪比极差 + 答案位置未知
 - **topic 无争用**：单 owner + 任务板纪律足够（某 topic 中途改派经 lead 调度干净落地）。
 
 证据 = [m2-run-mechanics §实施记录](../../notes/implemented/2026-09-24-m2-run-mechanics.md)。
+
+## 5. 方法编辑（非研究角色，D37）
+
+方法库页「新建/编辑」态右栏的共创者：把用户的研究方法聊成 `method-library.md` 的一条四字段条目。
+不属于 codex 研究生命周期，不参与 run、不组队、不写报告。
+
+- **工具面**：persona / 时钟 / skill（method-interview、method-from-run）/ `ask_user_question` / 工作区手册；
+  **无 web / fs / subagent / session-query**——不做研究，也不在右侧展示研究工具卡。
+- **形态**：一次一问 + 2–4 个具体选项；每轮字段有变化给完整 `method-draft` 围栏（页面回填表单）。
+- **保存**：页面按钮触发；写入仍走 D25 期 1（Lead）；方法编辑写库扩展属方案卡阶段 3。
+- **机械面**：preset 行、skills、bundle、哨兵 5、l4-lite PROMPTS、roster/README、D37。

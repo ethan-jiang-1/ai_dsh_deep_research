@@ -23,6 +23,7 @@
 | readiness（质量把关 / 确定性预检） | readiness phase + 10 gate definition JSON | **critic 角色**（adversarial-review skill：readiness 判据清单 + review.md 的 PASS/FAIL） | **角色化**（确定性 schema 检查降格为 skill 清单——诚实取舍，见 §4 之 3） |
 | final（交付） | final/final.md + presentation 反馈 | final.md + `final/vN` + `final/readable-vN` + `tool-present` 两份（lead preset 独有声明权；门C 读者版合同） | **原生 + 机械门** |
 | rerun（重跑） | ReopenResearchPass + rerun_count 血统 | 同 bundle 版本演进（D17）：证据扩张 → `final/` 下一版（表述修订 polish 原位改、版本号不变；结构性另起才开新 bundle，sibling 预检）+ question.md `## Decisions` append-only 修订记录（delta 类型/受影响 topics/agent interpretation/用户原话 verbatim，最新在上） | 简化：不做血统机制，final/ 版本化 + Decisions/journal 记录承担 |
+| **方法编辑（非研究生命周期，D37）** | codex 无对应（方法库页共创，不参与 run） | method-editor preset 的 `method-interview` / `method-from-run` skill（四字段访谈 + 从 run 沉淀；一次一问、不做研究） | **本仓扩展**（方法库页右栏；D37） |
 | **rerun 不满分诊** | （codex 无对应：用户抱怨的自由文本） | **lead 的 `rerun-triage` skill**（七类说法 → 补研究 / 表述修订 / 结构性重跑 / steer 四种手段 + 产出代价 + 不变项；五条对话纪律：先复述、≤2 手段、范围只从报告来、不动手、不自动分类）＋ HITL2 选项带后果 ＋ 报告末节「下一版优先项 / 什么会改变建议」＋ 观察面只读折叠块 | **本仓扩展**（设计卡 = 2026-10-23-rerun-dissatisfaction-triage；不加交互点、不做机械分类） |
 
 **两点交互纪律**（codex "静默自律" spec 的移植）：HITL1 与 HITL2 之间所有角色静默自主

@@ -268,6 +268,21 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     void load(controller.signal)
   }
 
+  // 方法编辑首问的上下文：库快照 + 当前草稿 + 内置参考（只读）。只随第一条消息发一次。
+  const librarySnapshot = text === null ? '（未加载）' : text.trim() === '' ? '（空）' : text.trim()
+  const draftSnapshot = draft === null
+    ? '（新建：四字段为空）'
+    : [
+        `名称：${draft.name.trim() === '' ? '（未命名）' : draft.name}`,
+        ...SECTION_LABELS.map((item) => `${item.label}：${draft.sections[item.key] ?? '（空）'}`),
+      ].join('\n')
+  const coachContext = [
+    '【页面自动附带的上下文，不是用户输入】',
+    `当前方法库（method-library.md）：\n${librarySnapshot}`,
+    `当前草稿：\n${draftSnapshot}`,
+    `内置参考（只读，仅对照，不要照抄）：${BUILTIN_PREFERENCES.map((entry) => entry.name).join('、')}`,
+  ].join('\n\n')
+
 
   return (
     <div
@@ -348,7 +363,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
           {(mode === 'edit' || mode === 'new') && <EditorView draft={draft} mode={mode} sending={sending} onNameChange={(name) => { setDraft((current) => current === null ? null : { ...current, name }) }} onSectionChange={updateSection} onSave={() => { void save() }} onCancel={cancel} />}
         </main>
         {(mode === 'edit' || mode === 'new') && sessionId !== undefined && (
-          <MethodCoachPanel sessionId={sessionId} ensure={props.ensureCoach} send={props.sendCoach} />
+          <MethodCoachPanel sessionId={sessionId} context={coachContext} ensure={props.ensureCoach} send={props.sendCoach} />
         )}
       </div>
     </div>

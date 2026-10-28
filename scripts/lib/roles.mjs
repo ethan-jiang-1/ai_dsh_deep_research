@@ -12,3 +12,10 @@ export const presetRoles = (root) => readdirSync(join(root, 'packages', 'deep-re
   .map((f) => f.replace(/\.patch\.yml$/, ''))
   .filter((n) => /^[a-z0-9][a-z0-9-]*$/.test(n))
   .sort();
+
+/** 非研究角色（方法库页共创；不进 run 生命周期，也不作 subagent 候选）。 */
+const NON_RESEARCH_ROLES = new Set(['method-editor'])
+
+/** 研究角色（D2 的四角色）——凡断言 run 生命周期/工具面（web/subagent/录制面）的消费点用它，
+ *  别把方法编辑算进研究面。presetRoles 仍是「盘上全部 preset」的唯一事实源。 */
+export const researchRoles = (root) => presetRoles(root).filter((role) => !NON_RESEARCH_ROLES.has(role))

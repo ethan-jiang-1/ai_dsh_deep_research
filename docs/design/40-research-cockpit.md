@@ -131,7 +131,7 @@
 
 **文件**：[MethodLibraryView.tsx](../../packages/deep-research-pack/src/client/MethodLibraryView.tsx) + [views.tsx](../../packages/deep-research-pack/src/client/method-library/views.tsx)（三种视图，纯展示）+ [coach.tsx](../../packages/deep-research-pack/src/client/method-library/coach.tsx)（新建/编辑态右栏「方法编辑」面板；根级 portal + store）+ [styles.ts](../../packages/deep-research-pack/src/client/method-library/styles.ts) + [library-fold.ts](../../packages/deep-research-pack/src/lib/library-fold.ts)
 
-主界面 `conversation.view` 第三 tab（Chat/Trajectory 同排）：我的库搜索/列表、内置参考只读、四字段编辑/新建/删除；新建/编辑态为页内三栏（我的库 / 表单 / 方法编辑）——方法编辑是独立 root session，React 树在根级 `shell.overlay`、`createPortal` 进页面右栏；页面激活时外层主 composer 由 CSS 隐藏（外层问卡让位）。保存走 W1 `session/prompt` 交 Lead 写 `method-library.md`，面板不直写文件；无写权限、无新 RPC
+主界面 `conversation.view` 第三 tab（Chat/Trajectory 同排）：我的库搜索/列表、内置参考只读、四字段编辑/新建/删除；新建/编辑态为页内三栏（我的库 / 表单 / 方法编辑）——方法编辑是 D37 的第 5 个 preset（非研究；工具面不含 web/fs）的独立 root session，React 树在根级 `shell.overlay`、`createPortal` 进页面右栏；页面激活时外层主 composer 由 CSS 隐藏（外层问卡让位）。保存走 W1 `session/prompt` 交 Lead 写 `method-library.md`，面板不直写文件；无写权限、无新 RPC
 
 <a id="cockpit-8"></a>
 ### 2.8 研究图谱页签

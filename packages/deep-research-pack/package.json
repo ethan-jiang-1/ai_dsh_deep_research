@@ -3,7 +3,7 @@
   "version": "0.1.3",
   "private": false,
   "type": "module",
-  "description": "Deep Research multi-role plugin pack: 4 research role presets (Lead / Scout / Analyst / Critic) + host bundle rows (preset roster, deliverables, team UI). Team mechanics come from the dsh-experimental-agent-team-profile layer installed per profile. Methodology kernel from codex Deep Research harness. Repository docs: https://github.com/ethan-jiang-1/ai_dsh_deep_research",
+  "description": "Deep Research multi-role plugin pack: 4 research role presets (Lead / Scout / Analyst / Critic) + 1 method-editor preset + host bundle rows (preset roster, deliverables, team UI). Team mechanics come from the dsh-experimental-agent-team-profile layer installed per profile. Methodology kernel from codex Deep Research harness. Repository docs: https://github.com/ethan-jiang-1/ai_dsh_deep_research",
   "license": "MIT",
   "author": "The ai_dsh_deep_research authors",
   "repository": {
@@ -74,7 +74,8 @@
         "./presets/analyst.patch.yml",
         "./presets/critic.patch.yml",
         "./presets/lead.patch.yml",
-        "./presets/scout.patch.yml"
+        "./presets/scout.patch.yml",
+        "./presets/method-editor.patch.yml"
       ]
     },
     "compatibility": {

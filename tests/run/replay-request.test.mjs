@@ -3,10 +3,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds, sentinelInAssistantText, turnCompleted } from '../../scripts/lib/replay-request.mjs';
-import { presetRoles } from '../../scripts/lib/roles.mjs';
 import { fileURLToPath } from 'node:url';
 
-const roles = presetRoles(fileURLToPath(new URL('../..', import.meta.url)));
+// 录制面 = 场景声明里的 cases（research-face 只录研究角色；方法编辑不是研究面，不应
+// 因为盘上多一个 preset 就要求一份不存在的 research-face 录制）。
+const MANIFEST = JSON.parse(readFileSync(new URL('../../snapshots/replay/research-face/snapshot.json', import.meta.url), 'utf8'));
+const roles = MANIFEST.cases.map((item) => item.preset);
 
 const fixture = (role = 'lead') => readFileSync(new URL(
   `../../snapshots/replay/research-face/${role === 'lead' ? '' : `${role}/`}session.v4.jsonl`, import.meta.url,
@@ -263,7 +265,7 @@ test('every recorded role injects only kinds the compared judges cover', () => {
   }
 });
 
-test('four recorded roles each expose six independent passing criteria', () => {
+test('recorded roles each expose six independent passing criteria', () => {
   for (const role of roles) {
     const events = fixture(role);
     const before = JSON.stringify(events);
