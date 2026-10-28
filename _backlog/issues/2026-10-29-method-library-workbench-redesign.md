@@ -20,6 +20,14 @@ opened: 2026-10-29
 - 对话 = 满宽、完整历史、起手式、输入、自动贴底；
 - 整页不滚；卡与对话各自滚；「展开表单」把卡变成全表单（对话收起），「回到对话」收回。
 
+## 设计依据（DSH 现成机制，供 reviewer）
+
+这套实现不自造 agent loop / 聊天 UI / 工具协议 / 主题；全部站在 DSH 既有机制上，只写两层业务胶水（布局 + method-editor persona/skill/窄工具）。逐项清单、为什么、否决了哪些备选、证据文件：
+
+→ [2026-10-29-dsh-plugin-borrowing-and-rationale.md](../research/method-library-cocreation/2026-10-29-dsh-plugin-borrowing-and-rationale.md)
+
+审阅建议顺序：本卡 → 上述依据 → [滚动/智力体/切换规格](../research/method-library-cocreation/2026-10-29-option-a-scroll-and-intelligence.md) → [A/B 视觉稿](../research/method-library-cocreation/2026-10-29-ux-redesign.md)。
+
 ## 目标
 
 1. 页内只有两列（库 240–360 可拖 + 工作台吃满）；
