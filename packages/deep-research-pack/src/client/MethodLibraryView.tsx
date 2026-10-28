@@ -525,7 +525,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     <div
       data-method-library=""
       data-method-library-edit={mode !== 'read' ? '' : undefined}
-      style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
+      style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, height: '100%', overflow: 'hidden' }}
     >
       <div style={HEADER_STYLE}>
         <strong style={{ fontSize: 15 }}>方法库</strong>
@@ -542,7 +542,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
           color: receipt.ok ? 'var(--dsw-alias-label-secondary)' : 'var(--dsw-alias-label-error)',
         }}>{receipt.ok ? '✓' : '✕'} {receipt.detail}</div>
       )}
-      <div style={{ display: 'flex', flex: 1, minHeight: 0, minWidth: 0 }}>
+      <div style={{ display: 'flex', flex: 1, minHeight: 0, minWidth: 0, overflow: 'hidden' }}>
         <aside style={{ flex: `0 0 ${leftWidth}px`, minWidth: 180, borderRight: '1px solid var(--dsw-alias-border-l1)', padding: 10, overflowY: 'auto', boxSizing: 'border-box', position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
             <button type="button" style={{ ...BUTTON_STYLE, ...(segment === 'mine' ? { borderColor: 'var(--dsw-alias-brand-primary)', color: 'var(--dsw-alias-brand-primary)' } : {}) }} onClick={() => { if (segment !== 'mine') { setSegment('mine'); setSelectedName(entries[0]?.name ?? null); setMode('read') } }}>我的库</button>

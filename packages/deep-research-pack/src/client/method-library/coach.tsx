@@ -197,7 +197,7 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
     <aside
       data-method-coach-panel=""
       style={{
-        flex: `0 0 ${width}px`, minWidth: 260, display: 'flex', flexDirection: 'column', minHeight: 0,
+        flex: `0 0 ${width}px`, minWidth: 260, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden',
         borderLeft: '1px solid var(--dsw-alias-border-l1)', background: 'var(--dsw-alias-bg-layer-1)',
       }}
     >
@@ -238,7 +238,7 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
         ref={(element) => { setHost(element) }}
         data-method-coach-host=""
         style={{
-          flex: 1, minHeight: 0, display: 'flex', background: 'var(--dsw-alias-bg-base)',
+          flex: 1, minHeight: 0, display: 'flex', overflow: 'hidden', background: 'var(--dsw-alias-bg-base)',
         }}
       />
     </aside>

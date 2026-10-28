@@ -370,6 +370,10 @@ export function apply(ctx: ClientContext): void {
         /* 方法编辑只露一问一答：不显示模型思考行与 skill 工具行（"用户不困惑" #3/#8）。 */
         '[data-method-coach-portal] [data-preview]{display:none !important}',
         '[data-method-coach-portal] [data-tool="skill"]{display:none !important}',
+        /* 三栏各自滚动：整页/view 不滚（page 填满 tab，列内滚动）。 */
+        '[data-method-library]{height:100%;overflow:hidden}',
+        '[data-method-library] > div{min-height:0}',
+        '[data-method-library] [data-method-coach-host]{min-height:0;overflow:hidden}',
       ].join('\n')
       document.head.appendChild(style)
       return () => style.remove()
