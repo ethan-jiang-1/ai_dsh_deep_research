@@ -85,6 +85,19 @@ spike 已证明最终形态（2026-10-28，分支 `spike/method-coach-embed`）�
   刷新左侧库。删除/设默认同路；研究时「换一条」仍走 Lead。
 - 研究 Lead 不再是方法库页的写入者；主会话不收到任何方法指令。
 
+## 「用户不困惑」8 条验收证据（2026-10-28）
+
+1. **只在方法库 tab 内**：三栏页 `data-method-library`；无浮层/右栏 tab；主会话 composer 被 CSS 抑制、transcript 不动 —— client-load `方法库` 断言 + probe 截图；
+2. **首开有第一问/起手式**：三路起手式 + 方法编辑首问（Ask question 卡）—— probe `PASS 方法编辑发出原生问卡`；
+3. **一次一问 + 选项，无 Think/Read/Glob**：method-editor persona/skill 一次一问；面板 CSS 隐藏 `[data-preview]` 与 `skill` 工具行（commit `417b8a3`）—— probe 截图；
+4. **表单回填/手改/撤销/进度**：`mergeCoachDraft` 手改优先、`n/4 已定`、`来自对话/手改/待定`、撤销对话更新、900ms 手改 diff —— keyless 3 条 + probe `PASS 四字段 + 名称`；
+5. **一个可见 composer**：主 composer 抑制 + 外层问卡让位 —— client-load 断言；
+6. **左栏「方法编辑」与右栏标题一致**：session 标题 + 面板标题 —— probe 侧栏截图；
+7. **方法编辑不可用时表单照常**：面板/保存降级文案 —— 代码 + 人工；
+8. **页面无技术词**：文案只出现「方法编辑 / 方法库 / 来自对话」；`method_library_upsert` 只在工具卡内部（卡显示「已写入库：name」）—— probe 截图。
+
+**待用户最终验收**：8 条 + `runtime/probe-save/artifacts/2026-10-28T14-47-08-504Z/`；验收通过后卡翻 `implemented`。
+
 ## 验收标准
 
 ### 用户面（不困惑）
