@@ -2,7 +2,7 @@
 // 纯 fs 直调（layering：无子进程）；夹具 mtime 随检出时间漂——断代用 dates 注入，不碰盘上时间。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { cpSync, mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -337,4 +337,33 @@ test('整数契约：schema 形态缺 created 判红（bundle 里唯一的人读
     const row = scanBundle(dir)
     assert.ok(row.core.some((c) => c.includes('缺 created')), row.core.join(' | '))
   } finally { cleanup() }
+})
+
+test('模板自洽：按 templates/run/run.md 造的新 run 零核心违约（契约期 = created）', () => {
+  const base = realpathSync(tmpdir())
+  const dir = mkdtempSync(join(base, 'dsh-template-'))
+  try {
+    const tpl = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'research-workspace', 'templates', 'run', 'run.md'), 'utf8')
+      .replaceAll('YYYY-MM-DD', '2026-10-28')
+    writeFileSync(join(dir, 'run.md'), tpl)
+    writeFileSync(join(dir, 'question.md'), '# Q\n\n## Decisions（append-only，最新在上）\n\n- 2026-10-28 HITL1 拍板\n')
+    writeFileSync(join(dir, 'topics.md'), '# T\n')
+    writeFileSync(join(dir, 'leads.md'), '# L\n')
+    writeFileSync(join(dir, 'findings.md'), '# F\n')
+    writeFileSync(join(dir, 'final.md'), '# Final\n')
+    mkdirSync(join(dir, 'final'), { recursive: true })
+    writeFileSync(join(dir, 'final', 'v1.md'), '# Final v1\n')
+    writeFileSync(join(dir, 'review.md'), '# Review\n\nreadiness: PASS\n')
+    mkdirSync(join(dir, 'evidence'), { recursive: true })
+    writeFileSync(join(dir, 'evidence', 'e1.md'), '---\nsource_url: https://example.com\n---\n\n> quote\n')
+    const row = scanBundle(dir)
+    assert.deepEqual(row.core, [], row.core.join(' | '))
+    const { rows } = scanAll([dir], { dates: {} })
+    assert.equal(rows[0].date, '2026-10-28', '展示日期取 created')
+    assert.equal(rows[0].era, 'contract')
+    assert.equal(rows[0].red, false)
+  } finally {
+    if (dirname(dir) !== base || !basename(dir).startsWith('dsh-template-')) throw new Error(`refusing cleanup: ${dir}`)
+    rmSync(dir, { recursive: true, force: true })
+  }
 })
