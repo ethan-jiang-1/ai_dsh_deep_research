@@ -93,8 +93,10 @@ export function EditorView(props: {
   readonly onSectionChange: (key: keyof LibrarySections, value: string) => void
   readonly onSave: () => void
   readonly onCancel: () => void
+  readonly coachUpdated?: boolean
+  readonly onUndoCoach?: () => void
 }): ReactNode {
-  const { draft, mode, sending, onNameChange, onSectionChange, onSave, onCancel } = props
+  const { draft, mode, sending, onNameChange, onSectionChange, onSave, onCancel, coachUpdated, onUndoCoach } = props
   if (draft === null) return null
   return (
     <div>
@@ -102,6 +104,12 @@ export function EditorView(props: {
         <strong style={{ fontSize: 16 }}>{mode === 'new' ? '新建方法' : '编辑方法'}</strong>
         <span style={MUTED_STYLE}>保存会生成一条指令交给 Lead 写入库；本页不直接改文件。</span>
       </div>
+      {coachUpdated === true && (
+        <div style={{ ...MUTED_STYLE, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <span>已按方法编辑的草稿更新。</span>
+          <button type="button" style={BUTTON_STYLE} onClick={onUndoCoach}>撤销对话更新</button>
+        </div>
+      )}
       {draft.legacyText !== null && (
         <div style={{ ...MUTED_STYLE, marginBottom: 8, padding: '4px 6px', border: '1px solid #f59e0b40', borderRadius: 4 }}>
           旧格式正文会保留（只读）：{draft.legacyText}

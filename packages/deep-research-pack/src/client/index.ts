@@ -71,6 +71,29 @@ export function apply(ctx: ClientContext): void {
       }
     }
 
+    // 方法编辑草稿流：页面用它把 coach 的 method-draft 回填表单（只认 live assistant/message；
+    // 开场快照是历史，重载时不拿旧草稿盖用户手改）。
+    const watchCoach = async (
+      sessionId: SessionId,
+      signal: AbortSignal,
+      onText: (text: string) => void,
+    ): Promise<void> => {
+      for await (const frame of follow(sessionId, signal)) {
+        if (frame.kind !== 'event') continue
+        const event = frame.event as {
+          type?: string
+          data?: { message?: { content?: readonly { type?: string; text?: string }[] } }
+        }
+        if (event.type !== 'assistant/message') continue
+        const message = event.data?.message
+        const text = (message?.content ?? [])
+          .filter((part) => part.type === 'text')
+          .map((part) => part.text ?? '')
+          .join('')
+        if (text !== '') onText(text)
+      }
+    }
+
     scoped.effect(() => scoped.sidebarRightTabs.register({
       id: RESEARCH_TAB_KEY,
       kind: RESEARCH_STATUS_TAB_KIND,
@@ -312,6 +335,7 @@ export function apply(ctx: ClientContext): void {
         sendInstruction,
         ensureCoach: ensureCoachSession,
         sendCoach,
+        watchCoach,
       }),
     }, MethodLibraryView)), 'deep-research-pack: method-library conversation view')
 

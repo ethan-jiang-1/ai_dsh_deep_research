@@ -11,7 +11,7 @@
  * 数据面：注入 `readFile`（workspaceFiles 会话级只读）+ `sendInstruction`（session/prompt
  * steer→queue）。纯折算/序列化住 `src/lib/library-fold.ts`；本组件只画。
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
@@ -27,6 +27,7 @@ import {
   type LibrarySections,
 } from '../lib/library-fold.ts'
 import { BUILTIN_PREFERENCES } from '../lib/config-tables.ts'
+import { parseMethodDraft } from '../lib/method-draft.ts'
 import { BUTTON_STYLE, HEADER_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE, ROW_STYLE } from './method-library/styles.ts'
 import { BuiltinView, EditorView, ReadMineView, type Draft } from './method-library/views.tsx'
 import { MethodCoachPanel } from './method-library/coach.tsx'
@@ -44,6 +45,8 @@ export interface MethodLibraryInjected {
   }>
   /** 给方法编辑发一条 prompt（起手式/后续对话由原生 composer 发）。 */
   readonly sendCoach: (sessionId: SessionId, text: string) => Promise<void>
+  /** 跟随方法编辑会话的 assistant 消息（草稿回填；live only）。 */
+  readonly watchCoach: (sessionId: SessionId, signal: AbortSignal, onText: (text: string) => void) => Promise<void>
 }
 
 export type MethodLibraryViewProps = PropsRuntime<'conversation.view'> & MethodLibraryInjected
@@ -88,6 +91,9 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const [selectedName, setSelectedName] = useState<string | null>(null)
   const [mode, setMode] = useState<Mode>('read')
   const [draft, setDraft] = useState<Draft | null>(null)
+  const [coachId, setCoachId] = useState<SessionId | null>(null)
+  const [coachFill, setCoachFill] = useState<LibraryEntry | null>(null)
+  const previousDraftRef = useRef<Draft | null>(null)
   const [receipt, setReceipt] = useState<Receipt | null>(null)
   const [sending, setSending] = useState(false)
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
@@ -165,6 +171,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setMode('new')
     setReceipt(null)
     setPendingDelete(null)
+    clearCoachFill()
   }
 
   const beginEdit = (entry: LibraryEntry): void => {
@@ -175,6 +182,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setMode('edit')
     setReceipt(null)
     setPendingDelete(null)
+    clearCoachFill()
   }
 
   const selectMine = (entry: LibraryEntry): void => {
@@ -185,6 +193,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setDraft(null)
     setReceipt(null)
     setPendingDelete(null)
+    clearCoachFill()
   }
 
   const selectBuiltin = (name: string): void => {
@@ -202,6 +211,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setMode('read')
     setDraft(null)
     setPendingDelete(null)
+    clearCoachFill()
   }
 
   const updateSection = (key: keyof LibrarySections, value: string): void => {
@@ -284,6 +294,40 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   ].join('\n\n')
 
 
+  const clearCoachFill = (): void => {
+    setCoachFill(null)
+    previousDraftRef.current = null
+  }
+
+  // 草稿回填：方法编辑每条 assistant 消息里若有 method-draft，就用它更新表单（可撤销）。
+  useEffect(() => {
+    if (coachId === null || (mode !== 'edit' && mode !== 'new')) return undefined
+    const controller = new AbortController()
+    void props.watchCoach(coachId, controller.signal, (text) => {
+      const entry = parseMethodDraft(text)
+      if (entry === null) return
+      setDraft((current) => {
+        if (current === null) return current
+        previousDraftRef.current = current
+        return {
+          ...current,
+          name: entry.name,
+          sections: entry.sections,
+          provenance: entry.provenance,
+          isDefault: entry.isDefault,
+        }
+      })
+      setCoachFill(entry)
+    }).catch(() => { /* fail-soft：流断不砸页面 */ })
+    return () => controller.abort()
+  }, [coachId, mode, props.watchCoach])
+
+  const undoCoach = (): void => {
+    if (previousDraftRef.current === null) return
+    setDraft(previousDraftRef.current)
+    clearCoachFill()
+  }
+
   return (
     <div
       data-method-library=""
@@ -360,10 +404,10 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
                 : query.trim() !== '' ? '没有匹配的方法。' : '从左边选一条方法。'}
             </div>
           )}
-          {(mode === 'edit' || mode === 'new') && <EditorView draft={draft} mode={mode} sending={sending} onNameChange={(name) => { setDraft((current) => current === null ? null : { ...current, name }) }} onSectionChange={updateSection} onSave={() => { void save() }} onCancel={cancel} />}
+          {(mode === 'edit' || mode === 'new') && <EditorView draft={draft} mode={mode} sending={sending} onNameChange={(name) => { setDraft((current) => current === null ? null : { ...current, name }) }} onSectionChange={updateSection} onSave={() => { void save() }} onCancel={cancel} coachUpdated={coachFill !== null} onUndoCoach={undoCoach} />}
         </main>
         {(mode === 'edit' || mode === 'new') && sessionId !== undefined && (
-          <MethodCoachPanel sessionId={sessionId} context={coachContext} ensure={props.ensureCoach} send={props.sendCoach} />
+          <MethodCoachPanel sessionId={sessionId} context={coachContext} ensure={props.ensureCoach} send={props.sendCoach} onCoach={setCoachId} />
         )}
       </div>
     </div>

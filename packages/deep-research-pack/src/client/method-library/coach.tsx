@@ -113,6 +113,8 @@ export interface MethodCoachPanelProps {
     readonly reference: { release(): void }
   }>
   readonly send: (sessionId: SessionId, text: string) => Promise<void>
+  /** 会话就绪后回报 id（页面据此跟随草稿流）。 */
+  readonly onCoach?: (id: SessionId) => void
 }
 
 /**
@@ -120,7 +122,7 @@ export interface MethodCoachPanelProps {
  * @param props - 当前会话 + ensure/send 注入。
  */
 export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
-  const { sessionId, context, ensure, send } = props
+  const { sessionId, context, ensure, send, onCoach } = props
   const [coach, setCoach] = useState<{ id: SessionId; reference: { release(): void } } | null>(null)
   const [host, setHost] = useState<HTMLElement | null>(null)
   const [started, setStarted] = useState(false)
@@ -138,6 +140,7 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
         }
         held = result.reference
         setCoach(result)
+        onCoach?.(result.id)
       } catch (cause) {
         if (!cancelled) setError(String(cause))
       }
@@ -149,7 +152,7 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
         setTimeout(() => { reference.release() }, 0)
       }
     }
-  }, [sessionId, ensure])
+  }, [sessionId, ensure, onCoach])
 
   useEffect(() => {
     if (coach === null || host === null) return undefined
