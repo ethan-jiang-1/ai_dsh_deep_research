@@ -20,6 +20,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const CLI = join(ROOT, 'scripts', 'run-ops', 'run-accept.mjs')
 const HYGIENE = join(ROOT, 'scripts', 'run-gates', 'path-hygiene.mjs')
 const SECRET = join(ROOT, 'scripts', 'run-gates', 'secret-scan.mjs')
+const SCHEMA_SCAN = join(ROOT, 'scripts', 'run-gates', 'schema-scan.mjs')
 const TEMP = join(ROOT, 'runtime', 'smoke-workspace', `run-accept-smoke-${String(process.pid)}`)
 const HOME = join(TEMP, 'home')
 const WS = join(TEMP, 'ws')
@@ -117,6 +118,14 @@ try {
     check(manifest.schema === 2, '⑥ manifest 记 schema=2', JSON.stringify(manifest.schema))
     check(manifest.contract === '2026-10-24', '⑥ manifest 日期取 created（不是空串）', JSON.stringify(manifest.contract))
     check(JSON.parse(readFileSync(join(bundle, 'delivered.json'), 'utf8')).present.path === 'drt_schema2/final/v1.md', '⑥ schema run 回执 present 相对化')
+    // schema-scan CLI 的绿面：在验收后补齐"完整 run"必备件（验收前的证据会触发 evidence-audit 对账，
+    // 与本断言无关），再让真 CLI 判一次新契约。
+    writeFileSync(join(bundle, 'topics.md'), '# Topics\n')
+    writeFileSync(join(bundle, 'findings.md'), '# Findings\n')
+    mkdirSync(join(bundle, 'evidence'), { recursive: true })
+    writeFileSync(join(bundle, 'evidence', 'e1.md'), '---\nsource_url: https://example.com\nretrieved_at: 2026-10-24\nquality: A\nfound_by: scout\nsupports: F1\nsource_tier: primary\npublisher: example.com\n---\n\n> quote\n\n解读\n')
+    const scan = runNode(SCHEMA_SCAN, [bundle], env())
+    check(scan.status === 0 && /契约期 2026-10-24/.test(scan.stdout), '⑥ schema-scan CLI 认新契约（契约期 = created）', (scan.stdout || '').split('\n').slice(-3).join(' | '))
   }
 
   // ⑤ --repair：旧回执绝对 present → 修后仍绿
@@ -145,5 +154,5 @@ if (failures.length > 0) {
   console.error(`\nrun-accept-smoke: ${String(failures.length)} 项失败`)
   process.exit(1)
 }
-console.log('\nrun-accept-smoke: ALL PASS（回执归一/幂等/外部 present/秘密/repair/整数契约）')
+console.log('\nrun-accept-smoke: ALL PASS（回执归一/幂等/外部 present/秘密/repair/整数契约 + schema-scan CLI）')
 process.exit(0)
