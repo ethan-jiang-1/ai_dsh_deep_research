@@ -17,16 +17,19 @@ rc.3 只用来确认「这些缝没有在下一版被堵掉」。
 | 1 | 共创对话用哪种 session | **root session，建在同一 workspace**；一个 workspace 一个「方法编辑」会话，懒创建、reuse | §2、§3 |
 | 2 | 为什么不用 subagent | 侧栏能藏，但 **live child agent 不能调 `ask_user_question`**——原生选项卡直接没了；而且它不是 Lead 的下属 | §2.3 |
 | 3 | 为什么不用当前研究会话 / fork | 当前会话会污染 run 上下文，保存指令变噪音；fork 继承研究历史，且仍可见 | §2.2、§2.4 |
-| 4 | 怎么在方法库页里渲染它 | `conversation.view` 声明一个私有 session 子槽 → `SessionProvider` 绑 coach → 渲染公开的 `conversation.content` factory（`variant:'embedded'`） | §4 |
-| 5 | 会不会和主会话 composer 打架 | **会**：`conversation.view` 只换正文，不换 composer；主 composer 仍在（截图里在折下）。用 `conversation.composer` chain 在方法库 view 激活且无 pending 时抑制它 | §5 |
+| 4 | 怎么在方法库页里渲染它 | **直接嵌 `conversation.content` 被 vendor 递归门拦死**（spike 实证）；可行解 = 根级 `shell.overlay` 里放私有 session 子槽 + `SessionProvider` + `conversation.content`，方法库 view 只建/留 coach 会话并开浮层 | §4、§14 |
+| 5 | 会不会和主会话 composer 打架 | **会**：`conversation.view` 只换正文，不换 composer。spike 实证 `conversation.composer` chain 的 selector 不随模块级 store 重跑；可行解 = CSS `:has([data-spike-root]):not(:has([data-question-key]))` 隐藏外层 composer seat（问卡出现时自动让位） | §5、§14 |
 | 6 | 方法编辑要不要新 preset | 要。persona 只能由 preset 给；第 5 个 preset 会推翻 D2 的字面，需要新 D 号 | §6、§8 |
 | 7 | 谁来写 `method-library.md` | 推荐 **方法编辑写**（闭环在这页）；D25 的「唯一路径 = Lead」需扩成「有库技能的 agent」；面板仍永不直写 | §7 |
 | 8 | 加不加 RPC / host 插件 | 不加。全部走现成 `session/create|rename|prompt|follow`、`sessions.retain`、`workspaces.list`、`workspaceFiles.read` | §9 |
 | 9 | 版本风险 | rc.2 → rc.3 的 `commands.ts` 零 diff；`tool-ask-user`、`ui-subagent` sidebar chat、`list.ts` 逐字相同；`conversation.content` 契约只有 view 钉选增量 | §1 |
+| 10 | spike 实跑 | 直接嵌 **红**（递归门）；根级浮层 **绿**；CSS 抑制 **绿**；coach 问卡 / 外层问卡让位 / 切 tab 重挂 **绿**；chain 抑制 **红**（不随 store 重跑） | §14 |
 
 **一句话**：这不是「在表单旁边放一个聊天框」，而是给方法库配一个**workspace 级的方法编辑会话**，
-把它以原生 conversation 的形式嵌进 `conversation.view`，再把「对话出稿 → 表单确认 → 方法编辑写库 → 页内回执」
-闭成一条链。会话必须建在 workspace 里（`workspaceId`），不是只给 `cwd`——否则会掉进 Ungrouped。
+把它以原生 conversation 的形式放进**根级底部浮层**（`shell.overlay`），方法库页只负责建会话/开浮层——
+直接把 `conversation.content` 嵌进方法库 view 会被 vendor 的递归门拦死（spike 实证）。
+再把「对话出稿 → 表单确认 → 方法编辑写库 → 页内回执」闭成一条链。会话必须建在 workspace 里（`workspaceId`），
+不是只给 `cwd`——否则会掉进 Ungrouped。
 
 ## 1. 版本与基线
 
@@ -164,6 +167,11 @@ root session 没有 hidden 标志；coach 第一次被发消息后就会在 work
 
 ### 4.2 私有 session 子槽是拿到 `SessionProvider` 的正规方式
 
+> **⚠ spike 实证（2026-10-28）**：私有子槽 + `SessionProvider` + `conversation.content` 的组合本身成立，
+> 但**座位不能在方法库 view 里**——view 本身就在外层 `conversation.content` 的 factory 树内，再渲染同一个
+> factory 会触发 `recursive render of factory 'conversation.content'`，子槽挂 `data-slot-error`。
+> 座位必须移到 factory 树外（根级 `shell.overlay`）；详见 §14。
+
 `SessionProvider` 只在「entry 声明了非 root 作用域的子槽」时注入：
 
 ```ts
@@ -218,13 +226,19 @@ chain 的 owner 带 `{ sessionId, session, pendingInteraction }`
 
 于是「页内再加一个 chat」会出现两个 composer：主会话的（研究 Lead）+ 页内 coach 的。必须显式处理：
 
-- **推荐：`conversation.composer` chain 抑制**。注册一个 chain entry，selector 读一个由方法库 view 维护的
+> **⚠ spike 实证（2026-10-28）**：chain 的 `select` 是 owner props 的纯函数，模块级激活标记变化不会让外层
+> composer 重跑；且 `overlay:true` 的 fallback 始终在 DOM（elected 时 `display:none`），DOM 里仍有 input。
+> 可行解 = CSS `:has` 规则（spike 绿）；chain 只在 owner props 变化时才有机会重选。详见 §14。
+
+- **第一版尝试（spike 推翻）：`conversation.composer` chain 抑制**。注册一个 chain entry，selector 读一个由方法库 view 维护的
   「当前 view 是方法库」标记（按 sessionId 记），条件 = 标记命中 **且** `owner.pendingInteraction === undefined`；
-  命中时组件返回 `null`。chain 语义是「首个非 null match 渲染、全 null 走 fallback」，返回 null 的 entry 会吞掉 fallback，
-  composer seat 变空 → 页内 chat 的 composer 成为唯一输入。
-- **pending 例外**：研究会话有待答问题时 selector 返回 null，`ui-user-questions` 的 entry 接住，原生问卡照常出现
+  命中时组件返回 `null`。chain 语义是「首个非 null match 渲染、全 null 走 fallback」——但 selector 不随模块级 store 重跑，
+  激活后外层 composer 不会重新选一次；且 `overlay:true` 的 fallback 仍以 `display:none` 留在 DOM。
+- **spike 可行解（推荐）**：CSS 结构规则
+  `[data-conversation-scroll]:has([data-spike-root]):not(:has([data-question-key])) > [data-composer-seat]{display:none}`——
+  方法库 view 在场且无外层问卡时隐藏；外层问卡出现时 `:not(:has(...))` 自动让位；`shell.overlay` 里的 coach composer 不受影响。
+- **pending 例外**：研究会话有待答问题时 CSS 规则自然不命中，`ui-user-questions` 的问卡照常出现
   （不能为了页面好看把 Lead 的 HITL 藏掉）。
-- 备选：`:has([data-method-library])` 的 CSS 隐藏；简单但对 pending 状态不敏感，容易把问卡一起藏掉，不推荐。
 - 备选：右栏 chat tab；没有双 composer，但不在「底下」，是 fallback（§4.1 的同款机制）。
 
 这个点必须先 spike，不能等页面写完才发现两个输入框。
@@ -406,10 +420,8 @@ A 的「面板永不直写」不变：页面只发 prompt，写的是模型可�
 
 ## 12. 验证计划（按顺序，先证伪再实现）
 
-1. **spike A（半天）**：临时 view 里声明私有 session 子槽 → `SessionProvider` 绑一个 root session →
-   渲染 `conversation.content` embedded；验证：chat 出现、composer 发消息、回包、问卡、300–400px 高度、
-   切 tab 卸载/重挂、主会话不受影响。
-2. **spike B（同批）**：`conversation.composer` chain 抑制主 composer；验证 pending 问卡时自动让位。
+1. **spike A（已跑，2026-10-28）**：直接嵌 `conversation.content` **红**（递归门）；根级 `shell.overlay` + 私有子槽 **绿**。证据 = §14。
+2. **spike B（已跑）**：`conversation.composer` chain 抑制 **红**（selector 不随模块级 store 重跑）；CSS `:has` 抑制 **绿**，pending 问卡让位 **绿**。证据 = §14。
 3. **原型（假回复/真表单）**：跑三个起手式（从零/照内置/从 run）+ 手改 + 保存回执，给人看 flow。
 4. **preset + skill**：接入真方法编辑；keyless 钉格式/标签；录 fixture；l4-lite；真模型 5 种人 probe
    （很模糊 / 过度指定 / 「不知道」 / 贴一段旧做法 / 从 run 沉淀）。
@@ -417,9 +429,35 @@ A 的「面板永不直写」不变：页面只发 prompt，写的是模型可�
 
 ## 13. 边界
 
-- 本轮只做静态源码核对 + 同构先例（ui-subagent 单测）；**没有跑真实 client spike**，§5 的双 composer 与 §4 的嵌套
-  仍是待验证假设。
+- spike 已跑（2026-10-28，源码域 web + Playwright + 真模型）：直接嵌红、根级浮层绿、CSS 抑制绿、问卡/重挂绿；证据 = §14 与 `runtime/spike-embed/artifacts/`（gitignored）。底部浮层的 composer 垂直锚定/高度仍是视觉待修。
 - 没有做真模型访谈质量评估；skill 的效果要等 probe。
 - FAQ 25 是 rc.3 口径的本机 digest；本仓机制以 vendor rc.2 为准，行号按 rc.2 树。
 - 没有做 GUI 像素级验证；「截图里 composer 在折下」是从 `ConversationContent` 结构与截图推断，spike 时以实际 DOM 为准。
 - 没有实测并发写 `method-library.md` 的覆盖行为。
+
+## 14. Spike 实跑结果（2026-10-28）
+
+分支 `spike/method-coach-embed`（commit `2e89d5a`，不合并 master；`--no-verify` 理由 = 临时实验件不登记 `docs/design/40`）。
+脚本 `runtime/spike-embed/spike.mjs`（gitignored）；最终绿证据 = `runtime/spike-embed/artifacts/2026-10-28T05-33-24-522Z/`
+（01–04 截图 + page.html + result.json）。通道 = 源码域 `--profile web --patch dev/research.overlay.yml` +
+Playwright + 真模型（外层 standard / coach lead）。
+
+| 断言 | 结果 | 说明 |
+|---|---|---|
+| view 内直接渲染 `conversation.content` | **红** | `recursive render of factory 'conversation.content'`；子槽挂 `data-slot-error`，嵌入区空；进程不崩 |
+| 根级 `shell.overlay` 渲染 `conversation.content` | **绿** | 独立 coach session；`data-conversation-content` 绑定正确；composer 可见 |
+| `conversation.composer` chain 抑制（第一版） | **红** | selector 是 owner props 的纯函数，模块级 store 变化不重跑；`overlay:true` 的 fallback 以 `display:none` 留在 DOM，input 仍可数到 |
+| CSS `:has` 抑制（第二版） | **绿** | `[data-conversation-scroll]:has([data-spike-root]):not(:has([data-question-key])) > [data-composer-seat]{display:none}`；外层可见输入 0 |
+| coach 问卡（浮层内） | **绿** | 原生 `ask_user_question` 卡：A/B 选项、Take time、Skip/Submit |
+| 外层 pending 问卡让位 | **绿** | CSS `:not(:has([data-question-key]))` 不命中，外层问卡出现；浮层不变 |
+| 切 Chat → 回 view | **绿** | 浮层收起 → 重挂；coach 问卡仍在（会话历史保留） |
+| 主 composer 恢复 | **绿** | 切到 Chat 后外层可见输入 1；回 view 后 0 |
+
+**关键结论**：方法库 view 的座位在外层 `conversation.content` 的 factory 树里，**不能再嵌套同一个 factory**；
+把 coach 会话放到 `shell.overlay`（`main` 的兄弟分支）就绕开了门，原生会话 / composer / 问卡 / 重挂全部成立。
+底部浮层是「页内底部对话」的可行载体；右栏 chat tab 仍是全高备选（§4.1 同款机制）。
+
+**视觉缺口**：浮层高度 400px 且会话为空/问卡态时，native factory 的 sticky composer 停在浮层上部（不在底部）；
+下一轮做高度/锚定 CSS（或改用右栏）。这不是机制问题，是浮层容器的布局收口。
+
+**未覆盖**：方法编辑 preset/skill 的真实访谈质量（spike 用 lead 代跑）；方法库写路径（spike 不碰库）。

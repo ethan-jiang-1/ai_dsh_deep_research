@@ -14,12 +14,14 @@ opened: 2026-10-28
 
 **当前情况：** 页面只有表单；保存 = 给当前会话的 Lead 发一条 `session/prompt`，回执在 Chat tab，
 页面只让用户「点刷新」——这正是要消掉的跳转（[MethodLibraryView.tsx L204-L234](../../packages/deep-research-pack/src/client/MethodLibraryView.tsx)）。
-DSH 侧的可行路径已查清：root session、workspace 归属、`conversation.view` 内嵌原生 conversation、
-问卡、双 composer、preset/skill 与写入回执，证据与取舍见
-[调研篇](../research/method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md)。
+DSH 侧的机制已查清，spike 已跑（2026-10-28）：**直接把 `conversation.content` 嵌进方法库 view 会被 vendor 的
+factory 递归门拦死；可行解 = 根级 `shell.overlay` 底部浮层 + 原生会话；主 composer 用 CSS `:has` 抑制，
+问卡自动让位。** 证据与截图见
+[调研篇 §14](../research/method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md) 与
+`runtime/spike-embed/artifacts/`（gitignored）。
 
-**未决问题：** 见 `## 需要拍板`——D2（第 5 个 preset）、D25（谁写库）、会话粒度、是否先做 spike。
-**下一步：** 用户回答四问；批准后先做半天嵌入 spike（不写生产功能），红了就退右栏 chat tab。
+**未决问题：** 见 `## 需要拍板`——D2（第 5 个 preset）、D25（谁写库）、会话粒度、界面载体（底部浮层/右栏）。
+**下一步：** 用户回答四问；同时做浮层高度/锚定视觉收口（当前空会话/问卡态 composer 停在浮层上部）。
 
 ## 已知与未决
 
@@ -34,21 +36,31 @@ DSH 侧的可行路径已查清：root session、workspace 归属、`conversatio
 - **嵌入有现成同构先例**：ui-subagent 用 `SessionProvider` + `renderFactorySlot('conversation.content', {variant:'embedded'})`
   渲染另一个会话（`vendor/dsh/packages/client/ui-subagent/src/client/sidebar-chat/index.tsx` L126-L165），
   单测已钉（`vendor/dsh/packages/client/ui-subagent/tests/sidebar-chat.client.spec.tsx` L207-L219）。
+- **直接把 `conversation.content` 嵌进方法库 view 被递归门拦死**（spike 实证）：view 本身就在外层
+  `conversation.content` 的 factory 树里，再渲染同一个 factory 触发
+  `recursive render of factory 'conversation.content'`；座位必须在 factory 树外（根级 `shell.overlay`）。
 - **双 composer 是真实坑**：`conversation.view` 只换正文，主会话 composer 仍在 view 之后
   （`vendor/dsh/packages/client/ui-conversation/src/client/skeleton/ConversationContent.tsx` L138-L215）；
-  截图里看不到只是因为它被挤到折下。必须用 `conversation.composer` chain 抑制（pending 问卡时让位）。
+  spike 实证 `conversation.composer` chain 的 selector 不随模块级 store 重跑；CSS `:has` 规则才可靠（pending 问卡时让位）。
 - **方法编辑 persona 只能靠 preset**；新增第 5 个 preset 会动 D2、数量哨兵、`preset-structure` 时钟行、
   `l4-lite` 覆盖、snapshot fixture 与文档 roster。
 - **当前写路径 = 当前会话 Lead**，D25 明写「唯一路径 = Lead」
   （[decisions.md L38](../../docs/decisions.md)）；方法编辑写库需要扩展这条的字面（理由不变）。
 
-### 假设 / 待验（未跑真实 spike）
+### Spike 已证（2026-10-28，分支 `spike/method-coach-embed`）
 
-- 私有 session 子槽 + `SessionProvider` + `conversation.content` 能在 `conversation.view` 里稳定渲染
-  （高度、滚动、composer、问卡、卸载/重挂）；
-- `conversation.composer` chain 的抑制项能在方法库 view 激活时吞掉主 composer、pending 时让位；
+- 直接嵌 `conversation.content`：**不可行**（`recursive render of factory 'conversation.content'`）；
+- 根级 `shell.overlay` + 私有 session 子槽 + `conversation.content`：**可行**（独立 coach session、composer、
+  原生问卡、切 tab 重挂全部绿）；
+- CSS `:has([data-spike-root]):not(:has([data-question-key]))` 抑制主 composer：**可行**（外层可见输入 0；
+  外层 pending 问卡出现时自动让位）；
+- `conversation.composer` chain 抑制：**不可行**（selector 不随模块级 store 重跑；`overlay:true` 的 fallback 留在 DOM）。
+
+### 仍待验 / 待收口
+
+- 底部浮层的高度/锚定：空会话或问卡态时 composer 停在浮层上部（native factory 的 sticky composer 在短滚动区不落底）；
 - 一 workspace 一个方法编辑会话，多草稿共用一个 transcript 是否可读；
-- 模型在 `method-interview` skill 下能稳定输出完整库条目块，而不是只聊天不落稿。
+- `method-interview` skill 的真实访谈质量（spike 用 lead 代跑，未接方法编辑 preset）。
 
 ## 方案与取舍
 
@@ -61,21 +73,27 @@ DSH 侧的可行路径已查清：root session、workspace 归属、`conversatio
 - 为什么不是一草稿一会话：侧栏行数会随新建次数增长；先一 workspace，实测 transcript 混读再改。
 - 代价：第一次发消息后侧栏多一行「方法编辑」。这是 root session 的产品事实；可归档，不接受则退右栏。
 
-### B. 嵌入：view 内私有 session 子槽
+### B. 嵌入：根级底部浮层（`shell.overlay`）
 
-- `conversation.view` 注册时声明 `children: { METHOD_COACH_SLOT: { kind:'single', scope:'session' } }`；
-  页面渲染 `<SessionProvider session={coachRef}>{renderSlot(METHOD_COACH_SLOT, {})}</SessionProvider>`；
-  子槽组件调 `renderFactorySlot('conversation.content', { variant:'embedded', phase:'active', hero:false }, { slots:{ views: FixedChat } })`。
-- 聊天标题、起手式 chips、空态由方法库页画；正文/流式/工具卡/问卡/停止/队列全用原生。
-- 不加 RPC、不加 host 插件；只加 client 服务注入 `sessions`/`workspaces` 与一个私有槽 key。
-- 失败退路：同一个 coach 会话放进右栏 chat tab（原生 `sidebar.chat.conversation` 模式），页面不动。
+- 方法库 view **不**声明会话子槽、**不**渲染 `conversation.content`——直接嵌会被递归门拦死（spike 实证）。
+  view 只做三件事：建/留独立 coach 会话、把 `{id, reference, visible}` 放进共享 store、渲染表单与「测试发送」类入口。
+- 根级 `shell.overlay` 注册一个浮动面板 entry（`children: { METHOD_COACH_CHAT: { kind:'single', scope:'session' } }`）；
+  面板从 store 取 reference，渲染 `<SessionProvider session={coachRef}>{renderSlot(METHOD_COACH_CHAT, {})}</SessionProvider>`；
+  子槽再渲染 `renderFactorySlot('conversation.content', { variant:'embedded', phase:'active', hero:false }, { slots:{ views: FixedChat } })`。
+  `shell.overlay` 是 `main` 的兄弟分支，不在外层 `conversation.content` 的 factory 树里。
+- 面板 = 固定底部 sheet（left 260 / right 24 / bottom 0 / height 400），标题「方法编辑」+ 原生会话；
+  方法库页给底部留 padding，保存按钮不被盖住；空会话/问卡态的 composer 锚定需要 CSS 收口（spike 的已知缺口）。
+- 不加 RPC、不加 host 插件；只加 client 服务注入 `sessions`/`workspaces` 与浮层/子槽 key。
+- 失败退路：同一个 coach 会话放进右栏 chat tab（原生 `sidebar.chat.conversation` 模式，全高、成熟），页面不动。
 
-### C. 双 composer：chain 抑制，pending 例外
+### C. 双 composer：CSS `:has` 抑制，pending 例外
 
-- 注册 `conversation.composer` chain entry：`viewActiveSession === owner.sessionId && owner.pendingInteraction === undefined`
-  时返回 `null`，吞掉主 composer 的 fallback；页内 chat 的 composer 成为唯一输入。
-- `pendingInteraction` 在场时不匹配 → `ui-user-questions` 的 entry 接住，研究 Lead 的问卡照常可答。
-- 备选 CSS `:has` 隐藏不推荐：会把问卡一起藏掉。
+- 规则：`[data-conversation-scroll]:has([data-spike-root]):not(:has([data-question-key])) > [data-composer-seat]{display:none}`。
+  方法库 view 在场且无外层问卡时隐藏主 composer seat；外层问卡出现时 `:not(:has(...))` 自动让位。
+- 为什么不是 chain：spike 实证 chain 的 `select` 只随 owner props 重跑，模块级「方法库 view 激活」标记变化不会触发重选；
+  且 `overlay:true` 的 fallback 以 `display:none` 留在 DOM，输入仍在。CSS 规则直接可观察 DOM，可靠。
+- 浮层里的 coach composer 不受影响（它在 `shell.overlay`，不是外层 `[data-composer-seat]`）。
+- 后续可把 CSS 规则换成「订阅 store 的 chain 组件」以回到纯 slot 机制；spike 阶段 CSS 足够。
 
 ### D. 方法编辑：第 5 个 preset（非研究角色）
 
@@ -112,8 +130,10 @@ DSH 侧的可行路径已查清：root session、workspace 归属、`conversatio
 
 ### 技术面（证据）
 
-1. 嵌入 spike 绿：`conversation.view` 内渲染另一会话的 `conversation.content`，composer/流式/问卡/卸载重挂可用；
-2. chain 抑制 spike 绿：方法库 view 激活时主 composer 消失，pending 问卡时让位；
+1. 嵌入 spike 已绿（分支 `spike/method-coach-embed`）：根级 `shell.overlay` + 私有子槽 + `conversation.content`，
+   composer/流式/问卡/切 tab 重挂可用；**直接嵌方法库 view 红**（`recursive render of factory 'conversation.content'`），已排除。
+2. composer 抑制 spike 已绿：CSS `:has` 规则隐藏外层主 composer，外层 pending 问卡出现时自动让位；chain 版已证伪
+   （selector 不随模块级 store 重跑）。待收口：浮层高度/锚定（空会话/问卡态 composer 停在上部）。
 3. 方法编辑 preset 真挂载（preset-smoke）+ 全角色 l4-lite 覆盖 + snapshot fixture 录制；
 4. keyless：`method-draft` 解析器（合围栏/漏块/坏块不覆盖）、四标签与 `library-fold.ts` 对钉、
    保存封套 round-trip；
@@ -128,7 +148,9 @@ DSH 侧的可行路径已查清：root session、workspace 归属、`conversatio
    还是坚持 4、把方法编辑拆成第二个包/第二个 bundle（部署面更大）？
 2. **D25**：保存由方法编辑写（推荐，闭环在这页），还是仍交研究 Lead、页面只把回执显示出来（保字面）？
 3. **会话粒度**：一 workspace 一个「方法编辑」（推荐，一行）还是一草稿一会话（transcript 干净，行数多）？
-4. **起步**：批准先做半天嵌入 spike（A+B）再排实现？spike 红了就退右栏 chat tab，不硬推。
+4. **界面载体**：底部浮层（spike 已证，需高度/锚定视觉收口）还是右栏 chat tab（全高、成熟，但不在「底下」）？
+   spike 已跑，证据 = [调研篇 §14](../research/method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md)；
+   分支 `spike/method-coach-embed` 仅实验，不合并。
 
 ## 关闭条件
 
@@ -141,8 +163,8 @@ DSH 侧的可行路径已查清：root session、workspace 归属、`conversatio
 
 - **pack**：`presets/method-editor.patch.yml`、`presets/method-editor/skills/{method-interview,method-from-run}/SKILL.md`、
   `package.json`（bundle patch、peer/dev deps、client inject）、`workspace/method-library.md` 头注（如需改「lead 维护」措辞）；
-- **client**：`src/client/index.ts`（inject/注册）、`src/client/keys.ts`（私有槽/preset key）、
-  `MethodLibraryView.tsx`（布局/草稿/保存/回执）、`method-library/{views,coach}.tsx`、`src/lib/method-draft.ts`（解析/应用）；
+- **client**：`src/client/index.ts`（inject/注册 + composer 抑制 `:has` 规则）、`src/client/keys.ts`（浮层/子槽/preset key）、
+  `MethodLibraryView.tsx`（布局/草稿/保存/回执）、`method-library/{views,coach,overlay}.tsx`、`src/lib/method-draft.ts`（解析/应用）；
 - **docs**：`docs/design/40-research-cockpit.md` §2.7、`docs/design/20-roles.md`、`docs/decisions.md`（D2/D25/D37）、
   pack README、`docs/00-index.md`（如需）；
 - **门禁/测试**：`tests/pack/presets.test.mjs`、`l4-lite-smoke`、`preset-smoke`、`snapshot-replay`、
@@ -151,7 +173,8 @@ DSH 侧的可行路径已查清：root session、workspace 归属、`conversatio
 
 ## 证据
 
-- 调研篇：[2026-10-28-dsh-session-and-surface-internals.md](../research/method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md)
+- 调研篇：[2026-10-28-dsh-session-and-surface-internals.md](../research/method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md)（§14 = spike 实跑结果）
+- spike 分支：`spike/method-coach-embed`（commit `2e89d5a`，仅实验、不合并）；证据 = `runtime/spike-embed/artifacts/2026-10-28T05-33-24-522Z/`（gitignored，01–04 截图）
 - 现行页签与保存路径：[MethodLibraryView.tsx](../../packages/deep-research-pack/src/client/MethodLibraryView.tsx)
 - 库格式与四标签：[library-fold.ts](../../packages/deep-research-pack/src/lib/library-fold.ts)
 - 现行方法库政策（Lead 侧）：[research-brief/SKILL.md L87-L105](../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md)
