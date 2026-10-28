@@ -82,6 +82,32 @@ function draftOf(entry: LibraryEntry): Draft {
  * 主界面「方法库」tab。
  * @param props - conversation.view 标准 props + readFile/sendInstruction。
  */
+function ColumnHandle({ onDrag }: { onDrag: (delta: number) => void }): ReactNode {
+  const lastX = useRef<number | null>(null)
+  return (
+    <div
+      role="separator"
+      aria-orientation="vertical"
+      style={{ flex: '0 0 5px', cursor: 'col-resize', background: 'transparent', position: 'relative', zIndex: 2, touchAction: 'none' }}
+      onPointerDown={(event) => {
+        event.preventDefault()
+        lastX.current = event.clientX
+        event.currentTarget.setPointerCapture(event.pointerId)
+      }}
+      onPointerMove={(event) => {
+        if (lastX.current === null) return
+        const delta = event.clientX - lastX.current
+        lastX.current = event.clientX
+        onDrag(delta)
+      }}
+      onPointerUp={() => { lastX.current = null }}
+      onPointerCancel={() => { lastX.current = null }}
+    >
+      <div style={{ position: 'absolute', left: 2, top: 0, bottom: 0, width: 1, background: 'var(--dsw-alias-border-l1)' }} />
+    </div>
+  )
+}
+
 export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const sessionId = props.sessionId
   const [text, setText] = useState<string | null>(null)
@@ -120,6 +146,8 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const [receipt, setReceipt] = useState<Receipt | null>(null)
   const [sending, setSending] = useState(false)
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
+  const [leftWidth, setLeftWidth] = useState(270)
+  const [coachWidth, setCoachWidth] = useState(380)
 
   const entries = foldLibrary(text)
   const filtered = entries.filter((entry) => {
@@ -509,34 +537,34 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
       {receipt !== null && (
         <div style={{
           padding: '6px 14px', fontSize: 12,
-          background: receipt.ok ? '#16a34a12' : '#dc262612',
-          borderBottom: `1px solid ${receipt.ok ? '#16a34a30' : '#dc262630'}`,
-          color: receipt.ok ? '#166534' : '#991b1b',
+          background: receipt.ok ? 'color-mix(in srgb, var(--dsw-alias-brand-primary) 10%, transparent)' : 'color-mix(in srgb, var(--dsw-alias-label-error) 10%, transparent)',
+          borderBottom: `1px solid ${receipt.ok ? 'var(--dsw-alias-border-l2)' : 'var(--dsw-alias-label-error)'}`,
+          color: receipt.ok ? 'var(--dsw-alias-label-secondary)' : 'var(--dsw-alias-label-error)',
         }}>{receipt.ok ? '✓' : '✕'} {receipt.detail}</div>
       )}
       <div style={{ display: 'flex', flex: 1, minHeight: 0, minWidth: 0 }}>
-        <aside style={{ flex: '0 0 270px', minWidth: 220, borderRight: '1px solid #00000010', padding: 10, overflowY: 'auto', boxSizing: 'border-box', position: 'relative', zIndex: 1 }}>
+        <aside style={{ flex: `0 0 ${leftWidth}px`, minWidth: 180, borderRight: '1px solid var(--dsw-alias-border-l1)', padding: 10, overflowY: 'auto', boxSizing: 'border-box', position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
-            <button type="button" style={{ ...BUTTON_STYLE, ...(segment === 'mine' ? { borderColor: '#2563eb', color: '#2563eb' } : {}) }} onClick={() => { if (segment !== 'mine') { setSegment('mine'); setSelectedName(entries[0]?.name ?? null); setMode('read') } }}>我的库</button>
-            <button type="button" style={{ ...BUTTON_STYLE, ...(segment === 'builtin' ? { borderColor: '#2563eb', color: '#2563eb' } : {}) }} onClick={() => { if (segment !== 'builtin') { setSegment('builtin'); setSelectedName(BUILTIN_PREFERENCES[0]?.name ?? null); setMode('read') } }}>内置参考</button>
+            <button type="button" style={{ ...BUTTON_STYLE, ...(segment === 'mine' ? { borderColor: 'var(--dsw-alias-brand-primary)', color: 'var(--dsw-alias-brand-primary)' } : {}) }} onClick={() => { if (segment !== 'mine') { setSegment('mine'); setSelectedName(entries[0]?.name ?? null); setMode('read') } }}>我的库</button>
+            <button type="button" style={{ ...BUTTON_STYLE, ...(segment === 'builtin' ? { borderColor: 'var(--dsw-alias-brand-primary)', color: 'var(--dsw-alias-brand-primary)' } : {}) }} onClick={() => { if (segment !== 'builtin') { setSegment('builtin'); setSelectedName(BUILTIN_PREFERENCES[0]?.name ?? null); setMode('read') } }}>内置参考</button>
           </div>
           {segment === 'mine' && (
             <>
               <input style={{ ...INPUT_STYLE, marginBottom: 8 }} placeholder="搜索方法…" value={query} onChange={(event) => { setQuery(event.target.value) }} />
               {loadState === 'loading' && <div style={MUTED_STYLE}>读取中…</div>}
-              {loadState === 'error' && <div style={{ ...MUTED_STYLE, color: '#b91c1c' }}>读不到 {LIBRARY_PATH}：{loadError}</div>}
+              {loadState === 'error' && <div style={{ ...MUTED_STYLE, color: 'var(--dsw-alias-label-error)' }}>读不到 {LIBRARY_PATH}：{loadError}</div>}
               {loadState === 'absent' && <div style={MUTED_STYLE}>本工作区还没有 {LIBRARY_PATH}。新建第一条，或让 Lead 在研究里记住一种做法。</div>}
               {loadState === 'ok' && filtered.length === 0 && <div style={MUTED_STYLE}>{entries.length === 0 ? '库还是空的。' : '没有匹配的方法。'}</div>}
               {filtered.map((entry) => (
                 <button
                   key={entry.name}
                   type="button"
-                  style={{ ...ROW_STYLE, ...(selectedName === entry.name && segment === 'mine' ? { background: '#2563eb0f', borderColor: '#2563eb30' } : {}) }}
+                  style={{ ...ROW_STYLE, ...(selectedName === entry.name && segment === 'mine' ? { background: 'var(--dsw-alias-brand-primary)0f', borderColor: 'var(--dsw-alias-brand-primary)30' } : {}) }}
                   onClick={() => { selectMine(entry) }}
                 >
                   <div style={{ fontSize: 13, display: 'flex', gap: 6, alignItems: 'baseline' }}>
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.name}</span>
-                    {entry.isDefault && <span style={{ fontSize: 10, color: '#2563eb' }}>默认</span>}
+                    {entry.isDefault && <span style={{ fontSize: 10, color: 'var(--dsw-alias-brand-primary)' }}>默认</span>}
                   </div>
                   <div style={{ ...MUTED_STYLE, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{summaryOfEntry(entry) ?? '（无摘要）'}</div>
                 </button>
@@ -549,7 +577,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
                 <button
                   key={entry.name}
                   type="button"
-                  style={{ ...ROW_STYLE, ...(selectedName === entry.name ? { background: '#2563eb0f', borderColor: '#2563eb30' } : {}) }}
+                  style={{ ...ROW_STYLE, ...(selectedName === entry.name ? { background: 'var(--dsw-alias-brand-primary)0f', borderColor: 'var(--dsw-alias-brand-primary)30' } : {}) }}
                   onClick={() => { selectBuiltin(entry.name) }}
                 >
                   <div style={{ fontSize: 13 }}>{entry.name}</div>
@@ -559,6 +587,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
             </>
           )}
         </aside>
+        <ColumnHandle onDrag={(delta) => { setLeftWidth((width) => Math.max(180, Math.min(420, width + delta))) }} />
         <main style={{ flex: '1 1 420px', minWidth: 280, padding: 14, overflowY: 'auto', boxSizing: 'border-box' }}>
           {mode === 'read' && segment === 'builtin' && builtin !== null && <BuiltinView entry={builtin} />}
           {mode === 'read' && segment === 'mine' && selected !== null && <ReadMineView entry={selected} pendingDelete={pendingDelete} sending={sending} onEdit={beginEdit} onPendingDelete={setPendingDelete} onRemove={(entry) => { void remove(entry) }} />}
@@ -572,7 +601,10 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
           {(mode === 'edit' || mode === 'new') && <EditorView draft={draft} mode={mode} sending={sending} onNameChange={onNameChange} onSectionChange={updateSection} onSave={() => { void save() }} onCancel={cancel} onDefaultChange={(value) => { setDraft((current) => current === null ? null : { ...current, isDefault: value }) }} coachFields={coachFields} manualFields={manual} activeField={activeField} coachUpdated={coachBase !== null} onUndoCoach={undoCoach} />}
         </main>
         {(mode === 'edit' || mode === 'new') && sessionId !== undefined && (
-          <MethodCoachPanel sessionId={sessionId} context={coachContext} ensure={props.ensureCoach} send={props.sendCoach} onCoach={setCoachId} />
+          <>
+            <ColumnHandle onDrag={(delta) => { setCoachWidth((width) => Math.max(260, Math.min(560, width - delta))) }} />
+            <MethodCoachPanel sessionId={sessionId} context={coachContext} ensure={props.ensureCoach} send={props.sendCoach} onCoach={setCoachId} width={coachWidth} onWidthChange={setCoachWidth} />
+          </>
         )}
       </div>
     </div>

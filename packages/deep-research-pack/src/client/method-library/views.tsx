@@ -57,14 +57,14 @@ export function ReadMineView(props: {
     <div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
         <strong style={{ fontSize: 16 }}>{entry.name}</strong>
-        {entry.isDefault && <span style={{ fontSize: 10, color: '#2563eb' }}>默认偏好</span>}
+        {entry.isDefault && <span style={{ fontSize: 10, color: 'var(--dsw-alias-brand-primary)' }}>默认偏好</span>}
         {entry.provenance !== null && <span style={MUTED_STYLE}>{entry.provenance}</span>}
         <span style={{ flex: 1 }} />
         <button type="button" style={BUTTON_STYLE} onClick={() => { onEdit(entry) }}>和编辑聊聊</button>
         <button type="button" style={BUTTON_STYLE} onClick={() => { onPendingDelete(entry.name) }}>删除…</button>
       </div>
       {pendingDelete === entry.name && (
-        <div style={{ ...MUTED_STYLE, padding: '6px 8px', border: '1px solid #dc262640', borderRadius: 4, marginBottom: 8 }}>
+        <div style={{ ...MUTED_STYLE, padding: '6px 8px', border: '1px solid var(--dsw-alias-label-error)40', borderRadius: 4, marginBottom: 8 }}>
           删除「{entry.name}」？方法编辑会从库里删掉它。
           <button type="button" style={{ ...BUTTON_STYLE, marginLeft: 8 }} disabled={sending} onClick={() => { onRemove(entry) }}>确认删除</button>
           <button type="button" style={{ ...BUTTON_STYLE, marginLeft: 6 }} onClick={() => { onPendingDelete(null) }}>取消</button>
@@ -87,7 +87,7 @@ export function ReadMineView(props: {
 }
 
 /** 编辑/新建表单：四字段 + Markdown 预览 + 保存/取消。 */
-const MARKER_STYLE = { fontSize: 10, padding: '1px 6px', borderRadius: 999, background: '#00000008', opacity: 0.65 } as const
+const MARKER_STYLE = { fontSize: 10, padding: '1px 6px', borderRadius: 999, background: 'var(--dsw-alias-bg-layer-2)', opacity: 0.65 } as const
 
 /** 每格的人话提示（用户不该先学 schema）。 */
 const SECTION_HINTS: Record<keyof LibrarySections, string> = {
@@ -130,7 +130,7 @@ export function EditorView(props: {
     return <span style={MARKER_STYLE}>待定</span>
   }
   const fieldStyle = (field: DraftField) => activeField === field
-    ? { borderColor: '#2563eb', boxShadow: '0 0 0 2px #2563eb18' }
+    ? { borderColor: 'var(--dsw-alias-brand-primary)', boxShadow: '0 0 0 2px var(--dsw-alias-brand-primary)18' }
     : undefined
   return (
     <div ref={rootRef}>
@@ -147,13 +147,13 @@ export function EditorView(props: {
         </div>
       )}
       {draft.legacyText !== null && (
-        <div style={{ ...MUTED_STYLE, marginBottom: 8, padding: '4px 6px', border: '1px solid #f59e0b40', borderRadius: 4 }}>
+        <div style={{ ...MUTED_STYLE, marginBottom: 8, padding: '4px 6px', border: '1px solid var(--dsw-alias-label-caption)40', borderRadius: 4 }}>
           旧格式正文会保留（只读）：{draft.legacyText}
         </div>
       )}
       <label
         data-field="name"
-        style={{ display: 'block', marginBottom: 10, borderRadius: 6, ...(activeField === 'name' ? { background: '#2563eb08', padding: 6, marginLeft: -6, marginRight: -6 } : {}) }}
+        style={{ display: 'block', marginBottom: 10, borderRadius: 6, ...(activeField === 'name' ? { background: 'var(--dsw-alias-brand-primary)08', padding: 6, marginLeft: -6, marginRight: -6 } : {}) }}
       >
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 3 }}>
           <span style={{ fontSize: 11, opacity: 0.6 }}>名称</span>
@@ -171,7 +171,7 @@ export function EditorView(props: {
         <label
           key={section.key}
           data-field={section.key}
-          style={{ display: 'block', marginBottom: 10, borderRadius: 6, ...(activeField === section.key ? { background: '#2563eb08', padding: 6, marginLeft: -6, marginRight: -6 } : {}) }}
+          style={{ display: 'block', marginBottom: 10, borderRadius: 6, ...(activeField === section.key ? { background: 'var(--dsw-alias-brand-primary)08', padding: 6, marginLeft: -6, marginRight: -6 } : {}) }}
         >
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 3 }}>
             <span style={{ fontSize: 11, opacity: 0.6 }}>{section.label}</span>
@@ -192,7 +192,7 @@ export function EditorView(props: {
       </label>
       <details style={{ marginBottom: 10 }}>
         <summary style={{ ...MUTED_STYLE, cursor: 'pointer' }}>Markdown 预览（只读）</summary>
-        <pre style={{ maxHeight: 140, overflow: 'auto', whiteSpace: 'pre-wrap', fontSize: 11, lineHeight: 1.5, background: '#00000005', padding: 6, borderRadius: 4 }}>{renderLibraryEntry({ name: draft.name.trim() === '' ? '（未命名）' : draft.name.trim(), sections: draft.sections, provenance: draft.provenance, isDefault: draft.isDefault })}</pre>
+        <pre style={{ maxHeight: 140, overflow: 'auto', whiteSpace: 'pre-wrap', fontSize: 11, lineHeight: 1.5, background: 'var(--dsw-alias-bg-layer-1)', padding: 6, borderRadius: 4 }}>{renderLibraryEntry({ name: draft.name.trim() === '' ? '（未命名）' : draft.name.trim(), sections: draft.sections, provenance: draft.provenance, isDefault: draft.isDefault })}</pre>
       </details>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <button type="button" style={PRIMARY_STYLE} disabled={sending} onClick={() => { onSave() }}>{sending ? '保存中…' : '保存到方法库'}</button>

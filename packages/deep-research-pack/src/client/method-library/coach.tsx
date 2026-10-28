@@ -116,6 +116,8 @@ export interface MethodCoachPanelProps {
   readonly send: (sessionId: SessionId, text: string) => Promise<void>
   /** 会话就绪后回报 id（页面据此跟随草稿流）。 */
   readonly onCoach?: (id: SessionId) => void
+  readonly width: number
+  readonly onWidthChange: (width: number) => void
 }
 
 /**
@@ -123,7 +125,7 @@ export interface MethodCoachPanelProps {
  * @param props - 当前会话 + ensure/send 注入。
  */
 export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
-  const { sessionId, context, ensure, send, onCoach } = props
+  const { sessionId, context, ensure, send, onCoach, width } = props
   const [coach, setCoach] = useState<{ id: SessionId; reference: { release(): void } } | null>(null)
   const [host, setHost] = useState<HTMLElement | null>(null)
   const [started, setStarted] = useState(false)
@@ -174,11 +176,11 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
     <aside
       data-method-coach-panel=""
       style={{
-        flex: '0 0 380px', minWidth: 320, display: 'flex', flexDirection: 'column', minHeight: 0,
-        borderLeft: '1px solid #00000012', background: '#fafafa',
+        flex: `0 0 ${width}px`, minWidth: 260, display: 'flex', flexDirection: 'column', minHeight: 0,
+        borderLeft: '1px solid var(--dsw-alias-border-l1)', background: 'var(--dsw-alias-bg-layer-1)',
       }}
     >
-      <div style={{ padding: '10px 12px', borderBottom: '1px solid #00000010' }}>
+      <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--dsw-alias-bg-layer-2)' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
           <strong style={{ fontSize: 13 }}>方法编辑</strong>
           <span style={{ fontSize: 11, opacity: 0.6 }}>把这条方法聊清楚</span>
@@ -193,7 +195,7 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
               onClick={() => { start(starter.prompt) }}
               style={{
                 fontSize: 11, padding: '3px 8px', borderRadius: 999,
-                border: '1px solid #00000020', background: '#fff',
+                border: '1px solid var(--dsw-alias-border-l2)', background: 'var(--dsw-alias-bg-base)',
                 cursor: coach === null ? 'default' : 'pointer',
                 opacity: coach === null ? 0.5 : 1,
               }}
@@ -209,13 +211,13 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
         </div>
       </div>
       {error !== null && (
-        <div style={{ fontSize: 12, color: '#b91c1c', padding: '6px 12px' }}>方法编辑暂不可用：{error}（表单可以继续填，稍后重试）</div>
+        <div style={{ fontSize: 12, color: 'var(--dsw-alias-label-error)', padding: '6px 12px' }}>方法编辑暂不可用：{error}（表单可以继续填，稍后重试）</div>
       )}
       <div
         ref={(element) => { setHost(element) }}
         data-method-coach-host=""
         style={{
-          flex: 1, minHeight: 0, display: 'flex', background: '#fff',
+          flex: 1, minHeight: 0, display: 'flex', background: 'var(--dsw-alias-bg-base)',
         }}
       />
     </aside>
