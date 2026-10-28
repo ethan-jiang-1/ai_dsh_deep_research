@@ -540,6 +540,11 @@ export const CASES = [
       const p = join(dir, 'packages', 'deep-research-pack', 'presets', 'lead.patch.yml');
       writeFileSync(p, readFileSync(p, 'utf8').replace(/\n\s*order: \d+/, ''));
     } },
+  // preset-structure：删整条 time-context 行——时钟是日期契约的原生来源（D32），缺席必须红。
+  { id: 'preset-structure-clock-missing', gate: 'preset-structure', mutate: (dir) => {
+      const p = join(dir, 'packages', 'deep-research-pack', 'presets', 'lead.patch.yml');
+      writeFileSync(p, readFileSync(p, 'utf8').replace(/\n\s*- id: time-context\n\s*name: '@deepseek-ai\/dsh-time-context'/, ''));
+    } },
   // row-deps：删一条 peerDependencies 行——preset 行引用的包失去声明（真实回归 = 新增行忘登记；
   // 挑 @deepseek-ai/dsh-agent-preset：四个 preset patch 行都引用它，一处删除即报）。
   { id: 'row-deps-peer-missing', gate: 'row-deps', mutate: (dir) => {

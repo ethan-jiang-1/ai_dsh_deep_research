@@ -247,7 +247,7 @@ export function repairReceiptPaths(bundleDir) {
 }
 
 /** 生成 manifest.json 的主体（目录说明书，不是指令；不自我引用、不含后写的 acceptance）。 */
-export function buildManifest({ slug, bundleDir, contract, generatedAt, extra = [] }) {
+export function buildManifest({ slug, bundleDir, contract, schema = null, generatedAt, extra = [] }) {
   const files = []
   for (const ent of readdirSync(bundleDir, { withFileTypes: true })) {
     if (!ent.isFile() || ent.name === 'manifest.json' || ent.name === 'acceptance.md') continue
@@ -269,6 +269,7 @@ export function buildManifest({ slug, bundleDir, contract, generatedAt, extra = 
     version: 1,
     slug,
     contract: contract ?? null,
+    schema: Number.isSafeInteger(schema) ? schema : null,
     generatedAt,
     readOrder: READ_ORDER,
     files,

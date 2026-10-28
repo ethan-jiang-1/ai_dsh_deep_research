@@ -13,7 +13,12 @@
 | `cases[]` | 逐个角色的 `id`/`preset`/`fixture`，可带 `renderExpected` 渲染金标准（只在录制流确实产生渲染面时声明——空渲染的转录声明它只会得到假红） |
 | `cases[].source` | 录制身份：`codeAnchor`（录制时本仓 HEAD——模型可见输入与该 commit 一致）、`vendor`（录制时的 vendor pin）、`recordedAt`、`recording`（`live` = 真模型录制）。前两者须为 40 位 commit 或如实标记 `unknown-historical`（历史缺失不许猜填） |
 
-角色集的事实源 = 盘上 [presets/](../packages/deep-research-pack/presets/)。声明列的 case 集必须与它精确一致：漏登记、串角色、缺件、路径越界或 symlink 都在加载期 fail-loud，不会静默缩小场景。判据集由 consumer 固定为**已登记的比对面**（persona、全部 `request/header`、工作区指令、skill 目录、运行时上下文），声明不能削减它来凑绿；`system/message` 与 `user/message` 两侧的注入种类只要出现未登记者，回放即报红——新面必须先进比对面再重录基线，不存在静默吸收。
+角色集的事实源 = 盘上 [presets/](../packages/deep-research-pack/presets/)。声明列的 case 集必须与它精确一致：漏登记、串角色、缺件、路径越界或 symlink 都在加载期 fail-loud，不会静默缩小场景。判据集由 consumer 固定为**已登记的比对面**（persona、全部 `request/header`、工作区指令、skill 目录、运行时上下文、时钟注入序列），声明不能削减它来凑绿；`system/message` 与 `user/message` 两侧的注入种类只要出现未登记者，回放即报红——新面必须先进比对面再重录基线，不存在静默吸收。
+
+**时钟面（`time-context`）比的是结构，不是正文。** 该注入的载荷是墙钟（ISO 时间 + 耗时 + 浏览器时区），
+回放时物理上不可能逐字复现；判据因此定义为"在哪个 turn/step 注入"（`time-context:turn=N;step=M`），
+正文差异不参与比较。这是把该面定义成**可复现的那一半**，不是给确定性面加归一化凑绿——persona、headers、
+工作区指令、skill 目录、运行时上下文仍按逐字全等判。
 
 ## 证据边界
 

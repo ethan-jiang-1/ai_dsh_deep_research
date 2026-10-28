@@ -152,3 +152,17 @@ test('auditWorkspace：state 里有、seed 里没有的孤儿 → 警告', (t) =
   assert.deepEqual(result.blocking, [])
   assert.ok(result.warnings.some((item) => item.kind === 'orphan' && item.rel === 'old-seed.md'))
 })
+
+test('审计 findings 带种子所有权：policy 透传，缺省 contract（供 preflight 点名契约漂移）', (t) => {
+  const root = fixture(t)
+  writeWorkspace(root)
+  const seed = seedOf()
+  seed.policy = { 'NODES.md': 'corpus', '.gitignore': 'user' }
+  const audit = auditWorkspace({ workspace: root, seed })
+  const byRel = Object.fromEntries(audit.findings.map((f) => [f.rel, f]))
+  assert.equal(byRel['NODES.md'].policy, 'corpus')
+  assert.equal(byRel['.gitignore'].policy, 'user')
+  assert.equal(byRel['AGENTS.md'].policy, 'contract', '缺省按 contract（保守）')
+  const legacy = auditWorkspace({ workspace: root, seed: seedOf() })
+  assert.ok(legacy.findings.every((f) => f.policy === 'contract'), '旧清单（无 policy）全部按 contract')
+})

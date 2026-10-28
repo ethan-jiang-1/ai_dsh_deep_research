@@ -1,5 +1,5 @@
 // node-gate-contracts.mjs — cross-gate contract dates and report parsers (keyless pure logic).
-import { contractEpochOf, deliveryDate } from './schema-scan-core.mjs'
+import { SCHEMA_VERSION, contractEpochOf, deliveryDate, runSchemaOf } from './schema-scan-core.mjs'
 import { terminalVerdictLine } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
 
 /** 门 L 契约日（2026-10-03 = RFC wave0-leads-polish 落地日；此前交付的 bundle 不追溯）。 */
@@ -22,10 +22,13 @@ export const AUDIT_CONTRACT_DATE = '2026-10-08'
  *  旧场按无 run.md 豁免，quick_factual 编制豁免——与其余门同语义）。 */
 export const READABLE_CONTRACT_DATE = '2026-10-23'
 
-/** 断代判定（各门共用形状）：asOf 注入日期优先；否则 run.md 的 contract epoch（D28）；
- *  旧场无 run.md 才回退交付日（deliveryDate = final.md mtime 族）。无日期可断 = 从严
- *  （false——可定日期而不定 = 逃逸口，schema-scan 成例）。 */
+/** 断代判定（各门共用形状）：整数契约（run.md 的 `schema:`）优先——schema ≥ 当前版本 = 现行契约，
+ *  与日期无关；更小的整数契约 = 旧形态。无 schema 的旧 bundle 才回退日期：asOf 注入优先，其次
+ *  run.md 的 contract epoch（D28），旧场无 run.md 才回退交付日（deliveryDate = final.md mtime 族）。
+ *  无日期可断 = 从严（false——可定日期而不定 = 逃逸口，schema-scan 成例）。 */
 export function isPreContract(bundleDir, asOf, contractDate) {
+  const schema = runSchemaOf(bundleDir)
+  if (schema !== null) return !(schema >= SCHEMA_VERSION)
   const epoch = contractEpochOf(bundleDir)
   const date = asOf ?? (epoch === null ? deliveryDate(bundleDir) : epoch === '' ? '9999-12-31' : epoch)
   return date !== null && date < contractDate

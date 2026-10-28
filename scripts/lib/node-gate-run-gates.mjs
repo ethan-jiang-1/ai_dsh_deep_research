@@ -1,7 +1,7 @@
 // node-gate-run-gates.mjs — bundle artifact and research-history gates (keyless pure logic).
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { contractEpochOf, deliveryDate, runType } from './schema-scan-core.mjs'
+import { contractEpochOf, deliveryDate, runSchemaOf, runType } from './schema-scan-core.mjs'
 import { HEADING_CONTRACT_DATE, LEADS_CONTRACT_DATE, PRE_CONTRACT_NOTE, VERSION_CONTRACT_DATE, decisionsLines, isPreContract } from './node-gate-contracts.mjs'
 
 /**
@@ -156,7 +156,7 @@ export function leadsGate(bundleDir, leadsDate) {
  */
 export function versionGate(bundleDir, versionDate) {
   const finalDir = join(bundleDir, 'final')
-  const newContract = contractEpochOf(bundleDir) !== null
+  const newContract = contractEpochOf(bundleDir) !== null || runSchemaOf(bundleDir) !== null
   if (!existsSync(finalDir)) {
     return { status: 'N/A', detail: 'final/ 不在场——门④ 无对象（bundle 未到版本记账段）' }
   }

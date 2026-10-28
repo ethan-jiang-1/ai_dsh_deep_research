@@ -34,6 +34,11 @@
                 研究手册（会话 cwd 根的 AGENTS.md）已自动注入本会话——目录约定、owner 表、两点交互纪律以它为准。
                 开工动作：先看现有 drt_* bundle 里最近交付的 run 根 final.md 当前版；收工向本 bundle 的 journal.md 追加纪要。
 
+          # 时钟（DSH 原生 time-context）：每步注入一条可追溯的当前时间读数，
+          # 日期不再靠网页校准。手册 §日期最小契约 依此改写。
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+
           - id: skill-filesystem
             name: '@deepseek-ai/dsh-skill-filesystem'
             config:
@@ -96,5 +101,5 @@
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:
-              maxBytes: 18944
+              maxBytes: 22528
               projectRootMarkers: []

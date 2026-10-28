@@ -17,7 +17,7 @@ import { futureDateFindings } from '../lib/bundle-date-sanity.mjs'
 import { scanHomePaths } from '../lib/path-hygiene.mjs'
 import { formatSecretFinding, scanSecrets } from '../lib/secret-scan.mjs'
 import { presentedInLogs } from '../lib/node-gate-session-gates.mjs'
-import { contractEpochOf } from '../lib/schema-scan-core.mjs'
+import { epochDateOf, runSchemaOf } from '../lib/schema-scan-core.mjs'
 import { buildDelivered, buildManifest, corpusRootLabel, renderAcceptance, repairReceiptPaths, sha256Text, shouldWriteReceipts } from '../lib/run-receipt.mjs'
 import { readZstdText } from '../lib/zstd-read.mjs'
 
@@ -132,7 +132,7 @@ const versions = existsSync(finalDir)
   : []
 const finalVersion = versions.at(-1) ?? null
 const readerVersion = finalVersion !== null && existsSync(join(finalDir, `readable-v${finalVersion}.md`)) ? finalVersion : null
-const presented = presentedInLogs(sessions, slug, readLog, { contract: contractEpochOf(bundle) || null })
+const presented = presentedInLogs(sessions, slug, readLog, { contract: epochDateOf(bundle) || null })
 let delivered = null
 let deliveredText = null
 let manifestText = null
@@ -158,7 +158,8 @@ if (legacy) {
   const manifest = buildManifest({
     slug,
     bundleDir: bundle,
-    contract: contractEpochOf(bundle) ?? null,
+    contract: epochDateOf(bundle) ?? null,
+    schema: runSchemaOf(bundle),
     generatedAt: stamp,
     extra: [{ path: 'delivered.json', role: 'delivery-receipt', sha256: sha256Text(deliveredText) }],
   })

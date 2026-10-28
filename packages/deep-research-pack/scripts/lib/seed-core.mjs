@@ -140,9 +140,27 @@ export function seedSourceRel(destRel) {
   return destRel === '.gitignore' ? '.gitignore.example' : destRel
 }
 
-/** 稳定序列化种子清单：版本 + 按路径排序的 sha256；生成物与 `--check` 逐字对账。 */
-export function serializeSeedManifest({ version, files }) {
-  const sorted = Object.fromEntries(Object.entries(files)
-    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
-  return `${JSON.stringify({ version, files: sorted }, null, 2)}\n`
+/** 种子所有权三态（FAQ 24 的「谁拥有」落到种子层）：
+ *  - `contract`：跟包版本的契约（手册 / 节点 I/O / 模板）——偏离包版本 = 契约漂移；
+ *  - `corpus`：可生长的语料底本（判型模式库）——包只给起点，允许并预期分叉；
+ *  - `user`：用户数据（`.gitignore`）——任何模式不覆盖。
+ *  缺省 = `contract`（旧 seed.json 无 policy 字段时读兼容）。 */
+export const SEED_POLICIES = ['contract', 'corpus', 'user']
+
+/** 取某个种子的所有权；未知/缺席按 `contract`（保守：宁可多报契约漂移，不静默当用户数据）。 */
+export function policyOf(seed, rel) {
+  const value = seed?.policy?.[rel]
+  return SEED_POLICIES.includes(value) ? value : 'contract'
+}
+
+/** 稳定序列化种子清单：版本 + 所有权 + 按路径排序的 sha256；生成物与 `--check` 逐字对账。 */
+export function serializeSeedManifest({ version, files, policy = {} }) {
+  const byPath = (a, b) => (a < b ? -1 : a > b ? 1 : 0)
+  for (const [rel, value] of Object.entries(policy)) {
+    if (!Object.hasOwn(files, rel)) throw new TypeError(`serializeSeedManifest: policy 指向未知种子 ${rel}`)
+    if (!SEED_POLICIES.includes(value)) throw new TypeError(`serializeSeedManifest: ${rel} 的 policy 非法（${value}）——闭集 = ${SEED_POLICIES.join('|')}`)
+  }
+  const sorted = Object.fromEntries(Object.entries(files).sort(([a], [b]) => byPath(a, b)))
+  const policies = Object.fromEntries(Object.entries(policy).sort(([a], [b]) => byPath(a, b)))
+  return `${JSON.stringify({ version, policy: policies, files: sorted }, null, 2)}\n`
 }

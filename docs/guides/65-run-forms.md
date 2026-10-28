@@ -44,6 +44,12 @@ P 里的 `workspace/` 是**只读种子**：落地后归 W，由用户工作区�
 | K cache | `$DSH_HOME/cache/` | 不使用 |
 | X credentials | `$DSH_HOME/.credentials.yaml` / 环境变量 | 经凭据服务；不打包、不进日志 |
 
+**可移植性不是平面，是每个事实的第四个问题**（归属、寿命、可见性之后）：换机器/移交后它还在不在。
+本仓的答案：研究事实、`run.md`、交付回执**随 bundle**走；方法库与种子**随工作区**走；审计快照
+（`audit.md` / `node-gate.md`）与 `present` 事件**只在本机**（要会话语料才能复算）——所以移交后的
+bundle 自证的是「交付了什么、谁拍的板」，不是「审计跑过没有」。逐行词表 = pack README §Data 的
+`可移植` 列；分布规则 = 一处事实一个家，不因移交复制第二份权威。
+
 ## 3. 安装、升级、卸载
 
 - **前置**：DSH 满足包内 `engines.dsh`（值以 `package.json` 为准）；Node 满足 `engines.node`；`dsh` 在 PATH，

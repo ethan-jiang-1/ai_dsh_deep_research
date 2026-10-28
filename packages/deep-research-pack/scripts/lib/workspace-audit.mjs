@@ -11,7 +11,7 @@
  */
 import { existsSync, lstatSync, readFileSync, readdirSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
-import { classifySeedEntry, sha256 } from './seed-core.mjs'
+import { classifySeedEntry, policyOf, sha256 } from './seed-core.mjs'
 
 /** 非关键种子：只影响 git 入库安全，不改变角色拿到的研究契约。 */
 export const NON_CRITICAL_SEEDS = new Set(['.gitignore'])
@@ -47,18 +47,19 @@ export function auditWorkspace({ workspace, seed, state } = {}) {
   const warnings = []
   for (const rel of Object.keys(seed.files).sort()) {
     const critical = !NON_CRITICAL_SEEDS.has(rel)
+    const policy = policyOf(seed, rel)
     const dest = join(workspace, rel)
     let stat = null
     try { stat = lstatSync(dest) } catch { stat = null }
     if (stat !== null && (stat.isSymbolicLink() || !stat.isFile())) {
-      findings.push({ rel, status: 'special', critical })
+      findings.push({ rel, status: 'special', critical, policy })
       ;(critical ? blocking : warnings).push({ rel, status: 'special', critical })
       continue
     }
     let destHash = null
     if (stat !== null) {
       try { destHash = sha256(readFileSync(dest, 'utf8')) } catch {
-        findings.push({ rel, status: 'unreadable', critical })
+        findings.push({ rel, status: 'unreadable', critical, policy })
         ;(critical ? blocking : warnings).push({ rel, status: 'unreadable', critical })
         continue
       }
@@ -67,7 +68,7 @@ export function auditWorkspace({ workspace, seed, state } = {}) {
     let status = classifySeedEntry({ destExists: stat !== null, destHash, stateHash, seedHash: seed.files[rel] })
     // 用户显式接受过的文件：seed 后来变了也按 modified（--upgrade 只写 sidecar，不覆盖）。
     if (status === 'stale' && adopted.has(rel) && destHash === stateHash) status = 'modified'
-    findings.push({ rel, status, critical })
+    findings.push({ rel, status, critical, policy })
     if (critical && ['missing', 'deleted', 'untracked'].includes(status)) blocking.push({ rel, status, critical })
     else if (status === 'untracked') warnings.push({ rel, status, critical })
     else if (status === 'stale' || status === 'modified') warnings.push({ rel, status, critical })

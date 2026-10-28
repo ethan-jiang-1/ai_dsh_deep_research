@@ -21,7 +21,7 @@ import { homedir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 import { spawnSync } from 'node:child_process'
-import { SEED_STATE_SCHEMA, sha256, classifySeedEntry, nextSeedState, parseSeedState, planSeedCleanup, seedSourceRel } from './lib/seed-core.mjs'
+import { SEED_STATE_SCHEMA, sha256, classifySeedEntry, nextSeedState, parseSeedState, planSeedCleanup, policyOf, seedSourceRel } from './lib/seed-core.mjs'
 import { satisfiesVersion } from './lib/version-range.mjs'
 import { parseScaffoldArgs } from './lib/deploy-args.mjs'
 import { resolveDshHome, resolvePathInput } from './lib/dsh-home.mjs'
@@ -371,7 +371,7 @@ const plan = seedRels.map((rel) => {
   const destHash = hashOf(destPath, destStat)
   const stateHash = stateFiles[rel] ?? null
   return {
-    rel, destPath, destHash, stateHash, seedHash: seed.files[rel],
+    rel, destPath, destHash, stateHash, seedHash: seed.files[rel], policy: policyOf(seed, rel),
     status: classifySeedEntry({ destExists: destStat !== null, destHash, stateHash, seedHash: seed.files[rel] }),
   }
 })
@@ -393,7 +393,7 @@ if (checkMode) {
   const needsAttention = blocking.length > 0 || versionUnknown || versionAhead || versionStale || orphanRels.length > 0
   const mark = { current: '✓', missing: '✗', stale: '!', modified: '~', untracked: '?', deleted: '✕' }
   console.log(`scaffold --check（工作区 = ${workspace}；pack 种子 v${seed.version}${state?.version === undefined ? '；无状态文件' : `；工作区记录 v${state.version}`}）`)
-  for (const p of plan) console.log(`  ${mark[p.status]} ${p.rel} — ${p.status}`)
+  for (const p of plan) console.log(`  ${mark[p.status]} ${p.rel} — ${p.status}${p.policy === 'contract' && p.status !== 'current' ? '（contract：与包版本不同源的契约）' : p.policy === 'corpus' && p.status !== 'current' ? '（corpus：底本已生长，正常）' : ''}`)
   for (const rel of orphanRels) console.log(`  ? ${rel} — orphan（新种子已移除；不会自动删）`)
   const versionLabel = versionUnknown ? '无记录' : versionAhead ? `较新（记录 v${state.version} > pack v${seed.version}）` : versionStale ? '落后' : '一致'
   console.log(`\nscaffold --check: ${needsAttention ? (versionAhead ? '工作区记录比 pack 新——拒绝自动降级' : '工作区种子需要 --upgrade') : '工作区种子当前'}（missing ${count('missing')} / deleted ${count('deleted')} / stale ${count('stale')} / untracked ${count('untracked')} / modified ${count('modified')} / orphan ${orphanRels.length}；版本${versionLabel}）`)

@@ -58,6 +58,10 @@
                 研究手册（会话 cwd 根的 AGENTS.md）已自动注入本会话，目录约定与 owner 表以它为准。
                 开工动作：先读本 bundle 的 topics.md 与 leads.md（侦察员已分级的方向）。
 
+          # 时钟（DSH 原生 time-context）：每步注入一条可追溯的当前时间读数。
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+
           - id: skill-filesystem
             name: '@deepseek-ai/dsh-skill-filesystem'
             config:
@@ -98,7 +102,7 @@
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:
-              maxBytes: 18944
+              maxBytes: 22528
               projectRootMarkers: []
 
     # ── critic.patch.yml（由 dev/render-overlay.mjs 从 pack 渲染）──
@@ -125,6 +129,10 @@
                 纪律：审查基于文件实际内容（evidence/ 与草稿逐条对照），不基于任何人（包括主编）的口头保证。
                 研究手册（会话 cwd 根的 AGENTS.md）已自动注入本会话，完成判据与 owner 表以它为准。
                 开工动作：先读本 bundle 的 question.md（研究问题是什么，判"答没答对题"）。
+
+          # 时钟（DSH 原生 time-context）：每步注入一条可追溯的当前时间读数。
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
 
           - id: skill-filesystem
             name: '@deepseek-ai/dsh-skill-filesystem'
@@ -159,7 +167,7 @@
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:
-              maxBytes: 18944
+              maxBytes: 22528
               projectRootMarkers: []
 
     # ── lead.patch.yml（由 dev/render-overlay.mjs 从 pack 渲染）──
@@ -193,6 +201,11 @@
                 run 目标态（0.2.0 采纳）：HITL1 拍板后 create_goal 钉住本次 run（objective = 定稿问题 + 交付判据；maxGoalRounds 按 run 规模给）；**进入任何 ask 挂起（等人拍板）前 update_goal action=pause，拿到答案后 resume**——防等拍板期间 goal 轮空转；补研究与交付节点 update_goal 推进；goal 与 drt_ bundle 互为镜像，冲突以 bundle 文件事实为准；真交付后 update_goal action=complete。
                 研究手册（会话 cwd 根的 AGENTS.md）已自动注入本会话——目录约定、owner 表、两点交互纪律以它为准。
                 开工动作：先看现有 drt_* bundle 里最近交付的 run 根 final.md 当前版；收工向本 bundle 的 journal.md 追加纪要。
+
+          # 时钟（DSH 原生 time-context）：每步注入一条可追溯的当前时间读数，
+          # 日期不再靠网页校准。手册 §日期最小契约 依此改写。
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
 
           - id: skill-filesystem
             name: '@deepseek-ai/dsh-skill-filesystem'
@@ -256,7 +269,7 @@
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:
-              maxBytes: 18944
+              maxBytes: 22528
               projectRootMarkers: []
 
     # ── scout.patch.yml（由 dev/render-overlay.mjs 从 pack 渲染）──
@@ -282,6 +295,10 @@
                 需要并行铺开多个方向时用 subagent 生 worker：给清晰 brief（方向 + 判去留标准 + 质量分级规则），汇总后署你自己的分级。
                 研究手册（会话 cwd 根的 AGENTS.md）已自动注入本会话，目录约定与 owner 表以它为准。
                 开工动作：先读本 bundle 的 question.md 与 topics.md。
+
+          # 时钟（DSH 原生 time-context）：每步注入一条可追溯的当前时间读数。
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
 
           - id: skill-filesystem
             name: '@deepseek-ai/dsh-skill-filesystem'
@@ -323,7 +340,7 @@
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:
-              maxBytes: 18944
+              maxBytes: 22528
               projectRootMarkers: []
 
     # ── cordis.patch.yml 的 bundle 级 insert 行（由 dev/render-overlay.mjs 直读，镜像同源）──

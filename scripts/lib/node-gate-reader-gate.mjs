@@ -9,7 +9,7 @@
 // run.md 按 epoch 豁免；quick_factual 编制豁免（与 node-gate 其余门同语义）。
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
-import { contractEpochOf, runType } from './schema-scan-core.mjs'
+import { contractEpochOf, runSchemaOf, runType } from './schema-scan-core.mjs'
 import { READABLE_CONTRACT_DATE, PRE_CONTRACT_NOTE, isPreContract } from './node-gate-contracts.mjs'
 
 /** 读者版六节（顺序即阅读顺序；机械判据只认这六个二级标题）。 */
@@ -47,7 +47,7 @@ function numericTokens(text) {
  */
 export function readerGate(bundleDir, opts = {}) {
   const epoch = contractEpochOf(bundleDir)
-  if (epoch === null) {
+  if (epoch === null && runSchemaOf(bundleDir) === null) {
     return { status: 'N/A', detail: '旧契约 bundle（无 run.md）——读者版按 epoch 豁免，页签回退 canonical' }
   }
   if (isPreContract(bundleDir, opts.asOf, READABLE_CONTRACT_DATE)) {

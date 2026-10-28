@@ -49,7 +49,7 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 | 层 | 载体 | 放什么 | 教义 |
 |---|---|---|---|
 | bundle 层 | `cordis.patch.yml` | host 共享行：preset roster（default: lead）、检索底座（D30/D31：`- id: web` 选 Search API + 回退 provider；`research-fetch-fallback` 行注册回退 provider）、present、ui-agent-team 观察行（团队机制行归 vendor agent-team-profile 层——[m2-p1-run-channel](../../notes/implemented/2026-09-24-m2-p1-run-channel.md) A 定案；provider 行本身是 base 出厂行——D9，回归守卫在 tests/pack/presets.test.mjs） | `- id:` 只替换已有行；**新增必须 `- insert:`**；baseUrl = profile 目录（路径写 profile 相对 `node_modules/…`，写错 = ENOENT 静默空，UI 无角色） |
-| preset 层 | `presets/<role>.patch.yml`（单行形态：一条 `@deepseek-ai/dsh-agent-preset` 行，DSH 0.1.7 起同形态，`config.plugins` 内声明 persona/skills/工具行；`presets/<role>/` 只放 `skills/`） | 角色组合：persona + 硬隔离 skills + 工具面 + agent-instructions | **preset 自包含**（DSH 无 patch 继承）：角色要用的行必须自己声明，否则会话只拿到 bundle 少数行（company R1 血泪：工具行不声明 = CEO 读不了文件） |
+| preset 层 | `presets/<role>.patch.yml`（单行形态：一条 `@deepseek-ai/dsh-agent-preset` 行，DSH 0.1.7 起同形态，`config.plugins` 内声明 persona/skills/工具行；`presets/<role>/` 只放 `skills/`） | 角色组合：persona + 时钟（time-context）+ 硬隔离 skills + 工具面 + agent-instructions | **preset 自包含**（DSH 无 patch 继承）：角色要用的行必须自己声明，否则会话只拿到 bundle 少数行（company R1 血泪：工具行不声明 = CEO 读不了文件） |
 
 `tool-todo` 行若显式声明，`allowParallelInProgress` 是**必填 config**（抄行不抄 config =
 挂载时炸且 UI 吞错——company R1 实证，四角色 preset 已全部带上）。

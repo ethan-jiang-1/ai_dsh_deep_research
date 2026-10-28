@@ -10,6 +10,8 @@
 
 最近三条（更早 = [settled 池索引](../_archived/settled_issues/README.md)，逐卡一行；本区不重复维护）：
 
+（[2026-10-28 数据面收口](../_archived/settled_issues/2026-10-28-data-plane-hardening.md) 已结：FAQ 24 对账 → D32–D36；回执三态 / 原生时钟 / 整数契约 + created / 可移植列 / 种子 policy；自审补见证下界回归；P2 与 W/D 同路径转触发器；[Note](../../notes/implemented/2026-10-28-data-plane-hardening.md)。）
+
 （[2026-10-27 复核后硬化](../_archived/settled_issues/2026-10-27-post-review-hardening.md) 已结：run-accept 全链 smoke + 数据卡形状 + 秘密模式扩展；P2.4/P2.5/P3 转触发器。）
 
 （[2026-10-27 发布前数据契约](../_archived/settled_issues/2026-10-27-release-data-contract.md) 已结：FAQ 26 对账 → 数据卡/回执路径/种子 schema/N2 披露/秘密扫描；D1–D4 全采纳；[Note](../../notes/implemented/2026-10-27-release-data-contract.md)。）

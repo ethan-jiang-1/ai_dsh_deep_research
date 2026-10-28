@@ -276,3 +276,17 @@ test('reader 绑定：manifest 记 reader-final 角色，delivered 记 readable 
     assert.ok(receiptProblems(b).problems.some((p) => /readable-v2\.md.*哈希|读者版被改/.test(p)))
   } finally { cleanup() }
 })
+
+test('manifest 带 schema 与有效契约日期：新形态取 created，不让快照丢版本/时间', () => {
+  const { dir, cleanup } = makeRoot()
+  try {
+    const b = join(dir, 'drt_s')
+    mkdirSync(b, { recursive: true })
+    writeFileSync(join(b, 'run.md'), '# Run\n- schema: 2\n- created: 2026-10-28\n- phase: delivery\n- next: none\n')
+    const manifest = buildManifest({ slug: 'drt_s', bundleDir: b, contract: '2026-10-28', schema: 2, generatedAt: '2026-10-28T00:00:00.000Z' })
+    assert.equal(manifest.schema, 2)
+    assert.equal(manifest.contract, '2026-10-28')
+    const legacy = buildManifest({ slug: 'drt_s', bundleDir: b, contract: '2026-10-23', generatedAt: '2026-10-23T00:00:00.000Z' })
+    assert.equal(legacy.schema, null, '未传 schema（旧形态）→ null，不冒充整数契约')
+  } finally { cleanup() }
+})

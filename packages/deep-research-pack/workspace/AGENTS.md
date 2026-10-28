@@ -18,9 +18,8 @@ harness 只读：presets、skills、本手册、templates/ 对任何一次研究
 drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research Topic，目录名即方向；
                        slug 由主编立项时定，kebab-case；立项 sibling 预检：同名/前缀相关
                        bundle 已在（**含 archive/ 归档**）→ 问用户）
-  run.md               状态头（owner: lead；ops 可写交付/停放回执）：contract / phase / next /
-                       delivered / parked；3–5 行 + 机器可读键；状态是声明，事实是正本；
-                       旧 bundle 无本文件按 epoch 解释（不补文件）
+  run.md               状态头（owner: lead）：schema / created / phase / next / delivered / parked；
+                       3–6 行 + 机器可读键；状态是声明，事实是正本；旧 bundle 无本文件按 epoch 解释
   question.md          方向契约：问题定稿 + Purpose/RQ/Scope/Constraints + HITL1 对齐快照 +
                        Decisions（append-only，最新在上）+ 同 bundle rerun 的 `> rerun: v2 ·
                        evidence-expansion · 日期` 行——跨 rerun 持久，bundle 身份核心（lead）
@@ -60,7 +59,7 @@ drafts/（工作区根）    开发侧跨 run 草稿（仅开发仓在场，角�
 NODES.md               节点 I/O 契约全表（八节点 I/O + 下游可开工判据 + 回边版本语义）；机械把守 =
                        schema-scan（在场级）+ node-gate（判据级门①②③④+L+R+A+C，图例 = NODES.md 头部）
 question-patterns.md   判型模式库（HITL1 第一对照面；命中走条目、未命中兜底 + journal 标记行；增长协议 = 库尾节）
-method-library.md      用户研究偏好库（工作区根；lead 维护；四字段 = 找来源/怎么核实/报告怎么写/不承诺）。
+method-library.md      本工作区方法库（用户所有；工作区根；lead 维护；四字段 = 找来源/怎么核实/报告怎么写/不承诺）。
                        立项先读：题面点名的偏好名 → 按该条目执行并在 §Decisions 记"采用库条目 X"；未点名
                        但库有条目 → HITL1 方法行给推荐参考。**三态**：在场→用；缺席→说"还没存过偏好、本次
                        用内置打法"（别静默）；读不回→如实说"文件在但读不到"及原因，**绝不降级成"没有
@@ -75,7 +74,7 @@ present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat 
 
 ## 状态头、读序与恢复（D28）
 
-新 run 在根落 `run.md`（`contract` / `phase` / `next` / `delivered` / `parked`；键义 = `templates/run/run.md`）。**声明不是事实**；冲突以文件为准；`run.md` 不自证批准/交付。
+新 run 在根落 `run.md`（`schema` / `created` / `phase` / `next` / `delivered` / `parked`；键义 = `templates/run/run.md`）。**声明不是事实**；冲突以文件为准；`run.md` 不自证批准/交付。`schema` 是整数契约版本（门禁按整数分档，与日期无关）；旧 bundle 只有 `contract:` 日期 = 旧形态，读兼容、不再新写。
 
 **五问**：阶段 / 最近拍板 / 最大未闭合 / 下一步 / 交付态。
 
@@ -117,6 +116,9 @@ present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat 
 - 见证只认**本 run 的 lead 顶层会话**（写过 `drt_<slug>/`）：跨 run/子 agent 不作证，present 须晚于 HITL2 答复。
 - `audit.md` / `node-gate.md` / `acceptance.md` 是 ops 派生/回执：默认只读，`--write`/`run-accept`
   才落；观察不写 bundle。
+- **回执三态**：有审计工具 → `audit.md` 绿 + `delivered.json`；无工具（只有安装包）→ `run.md` 的
+  `delivered:` 与 journal 显式写 `no machine audit (install-only)`，**绝不声称 `CRITICAL=0`**，`phase`
+  停在 `delivery`；`accepted` 只在验收工具跑绿后由操作侧写。
 
 ## 来源证明（C-lite）
 
@@ -149,9 +151,9 @@ frontmatter 必须有（七字段）：`source_url`（真实抓取过的 URL）/
 **口径最小契约**（与 frontmatter 同级）：数字/规格类摘录须带测量条件口径（版本/配置/
 时间/原文限定语至少两项；口径不明写"口径不明"）——所有角色按此判。
 **日期最小契约**（与 frontmatter 同级）：任何"当前 / 截至 / 查询时间"类日期（含 `retrieved_at`、
-review 审查时间、口径截至）**不得凭时间感直写**（角色会话无命令执行能力）——校准信号按序取：
-①web 工具响应与所抓页面自带日期；②用户消息与本 run 既有文件已落笔日期；都缺或冲突 → 写
-「日期不确定（依据：…）」，不静默编造。所有角色按此判。
+review 审查时间、口径截至）以 **time-context 读数**为准（每步注入 ISO 时间 + 时区 + 耗时）；
+无读数时按序取①web 响应与被抓页面日期②用户消息与本 run 已落笔日期；都缺或冲突 → 写
+「日期不确定（依据：…）」，不静默编造。**计划日期不得写成已发生日期**。所有角色按此判。
 **摘录最小契约**（与 frontmatter 同级）：引文行**只放原文**——卡片自己的标注（标签/URL/
 `（同上…）`/`旁证｜…`）不进 `>` 行，写在引文块外或解读节；**多段摘录逐段逐字**，段间省略标
 `[…]`，不拼接不连续句；**表格按单元格摘录**，不整行/跨行合并；`source_url` 必须由 `web_fetch` 成功取回，搜索结果里出现过不算。所有角色按此判。
@@ -194,5 +196,5 @@ review 审查时间、口径截至）**不得凭时间感直写**（角色会话
 
 - `final/vN` 的关键结论有真实存在且内容支撑的 `[来源: evidence/xx.md]`；`review.md` 的**终局块**为 PASS 后才进入 HITL2。
 - 新 run 非 quick_factual：review PASS 后、HITL2 前写 `final/readable.md`；交付时 `final/readable-vN.md` 与 `final/vN` 同版在场（门C）。
-- 交付回执：`final/vN` + `final/readable-vN` + `question.md` §Decisions 的 HITL2 拍板行 + Lead 的 `deliverables/presented`（含 `final/vN` 与 reader）+ 操作侧 `audit.md`（标题匹配、`CRITICAL=0`）+ `delivered.json`/`acceptance.md`。
+- 交付回执：`final/vN` + `final/readable-vN` + `question.md` §Decisions 的 HITL2 拍板行 + Lead 的 `deliverables/presented`（含 `final/vN` 与 reader）+ 操作侧 `audit.md`（标题匹配、`CRITICAL=0`）+ `delivered.json`/`acceptance.md`；**无审计工具时按上节三态降级**（写 `no machine audit (install-only)`，不假装绿）。
 - "研究完成"的唯一依据是以上文件事实链，不是任何人的口头宣告。

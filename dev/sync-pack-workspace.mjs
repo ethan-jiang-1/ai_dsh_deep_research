@@ -42,12 +42,25 @@ const FILES = [
     .map((f) => [`templates/run/${f}`, `templates/run/${f}`]),
 ]
 
+/** 种子所有权（落地名 → policy）：手册/节点契约/模板 = contract（跟包版本），判型库 = corpus
+ *  （可生长的底本），`.gitignore` = user（用户所有，任何模式不覆盖）。缺省 = contract。 */
+const POLICY = {
+  'AGENTS.md': 'contract',
+  'NODES.md': 'contract',
+  'question-patterns.md': 'corpus',
+  '.gitignore': 'user',
+}
+
 // 种子清单 = 版本 + 每个落地文件的 sha256。scaffold 用它做三态升级（current/stale/modified），
 // preflight 用它判断工作区是否落后于当前 pack。生成物 tracked；内容随包装版本/种子文本变化，
 // 由 pack-workspace-fresh 与 dist-manual-version 同款新鲜度门禁把守。
 const SEED_MANIFEST = 'seed.json'
 const seedManifestText = serializeSeedManifest({
   version: PACK_VERSION,
+  policy: Object.fromEntries(FILES.map(([rel]) => [
+    rel === '.gitignore.example' ? '.gitignore' : rel,
+    POLICY[rel === '.gitignore.example' ? '.gitignore' : rel] ?? 'contract',
+  ])),
   files: Object.fromEntries(FILES.map(([rel]) => [
     rel === '.gitignore.example' ? '.gitignore' : rel,
     sha256(readFileSync(join(SRC, rel), 'utf8')),

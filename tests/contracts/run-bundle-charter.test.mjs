@@ -10,7 +10,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { contractEpochOf, RUN_PHASES } from '../../scripts/lib/schema-scan-core.mjs'
+import { SCHEMA_VERSION, RUN_PHASES, createdDateOf, runSchemaOf, schemaIssueOf } from '../../scripts/lib/schema-scan-core.mjs'
 import { READ_INTENTS, READ_ORDER } from '../../scripts/lib/run-receipt.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
@@ -47,24 +47,26 @@ test('手册读序逐项 = run-receipt.READ_ORDER（一处事实一个家）', (
   }
 })
 
-test('run.md 模板键集 = contractEpochOf/phase/next/delivered/parked 的解析面', () => {
+test('run.md 模板键集 = runSchemaOf/created/phase/next/delivered/parked 的解析面', () => {
   const t = read(TEMPLATE)
   const keys = [...t.matchAll(/^-\s*([a-z]+)\s*:/gm)].map((m) => m[1]).sort()
-  assert.deepEqual(keys, ['contract', 'delivered', 'next', 'parked', 'phase'], `模板键漂移：${keys.join(',')}`)
-  for (const [key, value] of [['contract', 'YYYY-MM-DD'], ['phase', 'briefing'], ['next', 'HITL1'], ['delivered', 'none'], ['parked', 'none']]) {
+  assert.deepEqual(keys, ['created', 'delivered', 'next', 'parked', 'phase', 'schema'], `模板键漂移：${keys.join(',')}`)
+  for (const [key, value] of [['schema', '2'], ['created', 'YYYY-MM-DD'], ['phase', 'briefing'], ['next', 'HITL1'], ['delivered', 'none'], ['parked', 'none']]) {
     assert.ok(new RegExp(`^-\\s*${key}\\s*:\\s*${value}`, 'm').test(t), `模板缺默认 ${key}: ${value}`)
   }
 })
 
-test('模板 phase 注释 = RUN_PHASES 闭集；contract 示例可被解析器读出', () => {
+test('模板 phase 注释 = RUN_PHASES 闭集；schema 与 created 可被解析器读出', () => {
   const t = read(TEMPLATE)
   const phaseLine = t.split('\n').find((l) => /^-\s*phase\s*:/.test(l)) ?? ''
   for (const phase of RUN_PHASES) assert.ok(phaseLine.includes(phase), `模板 phase 注释缺 ${phase}`)
-  // 用模板实值造一个 run.md，契约纪元必须被解析器读成同一个日期（模板 ↔ 解析器同源）。
+  // 用模板实值造一个 run.md，整数契约与立项日必须被解析器读出来（模板 ↔ 解析器同源）。
   const dir = mkdtempSync(join(tmpdir(), 'dsh-charter-'))
   try {
-    writeFileSync(join(dir, 'run.md'), t.replaceAll('YYYY-MM-DD', '2026-10-23'))
-    assert.equal(contractEpochOf(dir), '2026-10-23')
+    writeFileSync(join(dir, 'run.md'), t.replaceAll('YYYY-MM-DD', '2026-10-28'))
+    assert.equal(runSchemaOf(dir), SCHEMA_VERSION)
+    assert.equal(createdDateOf(dir), '2026-10-28')
+    assert.equal(schemaIssueOf(dir), null)
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })
 

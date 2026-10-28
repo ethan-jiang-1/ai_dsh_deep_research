@@ -6,7 +6,7 @@ import { cpSync, mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writ
 import { tmpdir } from 'node:os'
 import { basename, join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { scanAll, scanBundle, hygieneOf, journalFutureDate, runType } from '../../scripts/lib/schema-scan-core.mjs'
+import { scanAll, scanBundle, epochDateOf, hygieneOf, journalFutureDate, runType } from '../../scripts/lib/schema-scan-core.mjs'
 
 const F = join(dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'schema-scan')
 const DATES = {
@@ -98,13 +98,69 @@ test('run.md 在场但 contract/phase/next 非法：核心违约（D28）', () =
     cpSync(join(F, 'drt-clean-post'), dir, { recursive: true })
     writeFileSync(join(dir, 'run.md'), '# Run\n- contract: 2026/10/23\n- phase: nope\n- next:\n')
     const row = scanBundle(dir)
-    assert.ok(row.core.some((c) => c.includes('run.md 的 contract')))
+    assert.ok(row.core.some((c) => c.includes('既无 schema 也无合法 contract')))
     assert.ok(row.core.some((c) => c.includes('run.md 的 phase')))
     assert.ok(row.core.some((c) => c.includes('run.md 缺 next')))
   } finally {
     if (dirname(dir) !== base || !basename(dir).startsWith('dsh-schema-')) throw new Error(`refusing cleanup: ${dir}`)
     rmSync(dir, { recursive: true, force: true })
   }
+})
+
+// ── 整数契约（schema）：新 run 的断代与日期无关；旧形态读兼容 ──
+const mkSchemaRun = (header) => {
+  const base = realpathSync(tmpdir())
+  const dir = mkdtempSync(join(base, 'dsh-schema-int-'))
+  cpSync(join(F, 'drt-clean-post'), dir, { recursive: true })
+  writeFileSync(join(dir, 'run.md'), `# Run\n${header}\n- phase: research\n- next: W1\n`)
+  return { base, dir, cleanup: () => {
+    if (dirname(dir) !== base || !basename(dir).startsWith('dsh-schema-int-')) throw new Error(`refusing cleanup: ${dir}`)
+    rmSync(dir, { recursive: true, force: true })
+  } }
+}
+
+test('整数契约：schema 在场即现行契约——不看日期，也不要求 contract', () => {
+  const { dir, cleanup } = mkSchemaRun('- schema: 2\n- created: 2026-10-28')
+  try {
+    const row = scanBundle(dir)
+    assert.deepEqual(row.core, [])
+    const { rows } = scanAll([dir], { dates: {} })
+    assert.equal(rows[0].era, 'contract')
+    assert.equal(rows[0].date, '2026-10-28', '显示日期取 created，不落回 mtime')
+    assert.equal(rows[0].red, false)
+  } finally { cleanup() }
+})
+
+test('整数契约：未来 schema 判红（不猜语义，逼升工具）', () => {
+  const { dir, cleanup } = mkSchemaRun('- schema: 99')
+  try {
+    const row = scanBundle(dir)
+    assert.ok(row.core.some((c) => c.includes('比本工具')), row.core.join(' | '))
+    const { rows } = scanAll([dir], { dates: {} })
+    assert.equal(rows[0].red, true)
+  } finally { cleanup() }
+})
+
+test('整数契约：schema 非法判红；schema 与 contract 全缺判红', () => {
+  const bad = mkSchemaRun('- schema: two')
+  try {
+    assert.ok(scanBundle(bad.dir).core.some((c) => c.includes('schema 非法')))
+  } finally { bad.cleanup() }
+  const neither = mkSchemaRun('- phase: research')
+  try {
+    assert.ok(scanBundle(neither.dir).core.some((c) => c.includes('既无 schema 也无合法 contract')))
+  } finally { neither.cleanup() }
+})
+
+test('整数契约：旧形态（contract 日期）读兼容——既有判定不变', () => {
+  const { dir, cleanup } = mkSchemaRun('- contract: 2026-10-23')
+  try {
+    const row = scanBundle(dir)
+    assert.equal(row.core.length, 0, row.core.join(' | '))
+    const { rows } = scanAll([dir], { dates: {} })
+    assert.equal(rows[0].era, 'contract')
+    assert.equal(rows[0].date, '2026-10-23')
+  } finally { cleanup() }
 })
 
 test('D28 新 run 卫生：绝对路径 / ../drt_ / 跨 bundle [来源:] → 核心违约；旧场不扫', () => {
@@ -243,4 +299,31 @@ test('runType：优先读 HITL1 字段/节，不被用户原话里的「不是�
 
   write('# Q\n用户原话: "不是快速事实核查"\n')
   assert.equal(runType(dir), 'other', '无字段时否定引用不触发 quick_factual')
+})
+
+test('见证下界：schema 形态取 created（不让新 run 丢掉时间下界）', () => {
+  const withSchema = mkSchemaRun('- schema: 2\n- created: 2026-10-28')
+  try {
+    assert.equal(epochDateOf(withSchema.dir), '2026-10-28')
+  } finally { withSchema.cleanup() }
+  const withContract = mkSchemaRun('- contract: 2026-10-23')
+  try {
+    assert.equal(epochDateOf(withContract.dir), '2026-10-23')
+  } finally { withContract.cleanup() }
+  const both = mkSchemaRun('- schema: 2\n- created: 2026-10-28\n- contract: 2026-10-01')
+  try {
+    assert.equal(epochDateOf(both.dir), '2026-10-01', '旧形态存在时以 contract 为准（读兼容）')
+  } finally { both.cleanup() }
+  const neither = mkSchemaRun('- phase: research')
+  try {
+    assert.equal(epochDateOf(neither.dir), '', '两者都没有 = 空串（交门禁判红，不静默给下界）')
+  } finally { neither.cleanup() }
+})
+
+test('整数契约：schema 形态缺 created 判红（bundle 里唯一的人读时间）', () => {
+  const { dir, cleanup } = mkSchemaRun('- schema: 2')
+  try {
+    const row = scanBundle(dir)
+    assert.ok(row.core.some((c) => c.includes('缺 created')), row.core.join(' | '))
+  } finally { cleanup() }
 })

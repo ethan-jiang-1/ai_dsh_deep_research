@@ -33,9 +33,20 @@ const normalizeRuntime = (text) => text
   .replace(/^(Current DSH file policy: workspace-write\. Any available operation enforced by the DSH file sandbox may modify files under the session workspace: )"(?:[^"\\\n]|\\.)*"(\. Some platform temporary areas may also be writable\.)$/gm,
     '$1"<replay:workspace-root>"$2');
 
+// time-context：载荷是墙钟（ISO 时间 / 耗时 / 浏览器时区），回放时物理上无法逐字复现——
+// 逐字比只会得到永远红。判据改为**结构**：注入发生在哪个 turn/step。其余确定性面仍逐字全等；
+// 这不是"放宽比对凑绿"（见 snapshots/README §判据面），而是把该面定义成可复现的那一半。
+const normalizeTimeContext = (text) => {
+  const m = /^Time sampled while preparing turn (\d+), step (\d+):/.exec(text);
+  return m === null ? text : `time-context:turn=${m[1]};step=${m[2]}`;
+};
+
 const normalizeContent = (content, kind) => Array.isArray(content) ? content.map((part) => {
   if (part?.type !== 'text' || typeof part.text !== 'string') return part;
-  const normalize = kind === 'system-prompt' ? normalizePersona : kind === 'runtime-context' ? normalizeRuntime : (text) => text;
+  const normalize = kind === 'system-prompt' ? normalizePersona
+    : kind === 'runtime-context' ? normalizeRuntime
+      : kind === 'time-context' ? normalizeTimeContext
+        : (text) => text;
   return { ...part, text: normalize(part.text) };
 }) : content;
 
@@ -73,7 +84,7 @@ function compare(id, expected, actual) {
 
 // Kinds the compared judges own. A model-visible injection outside this set is uncovered:
 // it must be added to the compared set here (and the baseline re-recorded) rather than accepted.
-const JUDGED_KINDS = new Set(['system-prompt', 'agent-instructions', 'skill-catalog', 'runtime-context']);
+const JUDGED_KINDS = new Set(['system-prompt', 'agent-instructions', 'skill-catalog', 'runtime-context', 'time-context']);
 
 // Both message families carry source-attributed injections; watching only user/message left the
 // system/message half of the same blind spot open (review finding on BUG-018's failure class).
@@ -112,13 +123,13 @@ export function unexpectedInjectionKinds(expectedEvents, actualEvents) {
  * Headers compare provider/model and complete tool schemas; session tuning is excluded.
  * @param {Array<object>} expectedEvents Parsed session events from the reviewed baseline.
  * @param {Array<object>} actualEvents Parsed session events from the replay.
- * @returns {Array<{id: string, ok: boolean, detail: string}>} Five ordered verdicts.
+ * @returns {Array<{id: string, ok: boolean, detail: string}>} Six ordered verdicts.
  */
 export function compareReplayRequests(expectedEvents, actualEvents) {
   return [
     compare('persona', contentOf(expectedEvents, 'system/message', 'system-prompt'), contentOf(actualEvents, 'system/message', 'system-prompt')),
     compare('headers', headersOf(expectedEvents), headersOf(actualEvents)),
-    ...['agent-instructions', 'skill-catalog', 'runtime-context'].map((kind) => compare(
+    ...['agent-instructions', 'skill-catalog', 'runtime-context', 'time-context'].map((kind) => compare(
       kind, contentOf(expectedEvents, 'user/message', kind), contentOf(actualEvents, 'user/message', kind),
     )),
   ];

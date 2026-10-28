@@ -5,7 +5,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { SEED_STATE_SCHEMA, classifySeedEntry, nextSeedState, parseSeedState, planSeedCleanup, seedSourceRel, serializeSeedManifest, sha256 } from '../../packages/deep-research-pack/scripts/lib/seed-core.mjs'
+import { SEED_POLICIES, SEED_STATE_SCHEMA, classifySeedEntry, nextSeedState, parseSeedState, planSeedCleanup, policyOf, seedSourceRel, serializeSeedManifest, sha256 } from '../../packages/deep-research-pack/scripts/lib/seed-core.mjs'
 
 test('sha256：内容哈希稳定且区分换行', () => {
   assert.equal(sha256('abc'), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad')
@@ -73,7 +73,7 @@ test('nextSeedState：--force 全量写 baseline，并保留 seed 之外的孤�
 
 test('serializeSeedManifest：版本 + 按路径排序的哈希 + 结尾换行', () => {
   const text = serializeSeedManifest({ version: '1.2.3', files: { 'b.md': 'bb', 'a.md': 'aa' } })
-  assert.equal(text, '{\n  "version": "1.2.3",\n  "files": {\n    "a.md": "aa",\n    "b.md": "bb"\n  }\n}\n')
+  assert.equal(text, '{\n  "version": "1.2.3",\n  "policy": {},\n  "files": {\n    "a.md": "aa",\n    "b.md": "bb"\n  }\n}\n')
 })
 
 
@@ -159,4 +159,24 @@ test('planSeedCleanup：未改孤儿删除、改过的孤儿保留、缺失记�
   assert.deepEqual(plan.keep.map((x) => x.rel), ['user.md'])
   assert.deepEqual(plan.dropFromState.sort(), ['gone-adopted.md', 'gone.md'])
   assert.equal(plan.remove.some((x) => x.rel === 'AGENTS.md' || x.rel === 'NODES.md'), false, '种子文件永不被 clean 删除')
+})
+
+test('种子所有权：serialize 带 policy 且排序；未知 policy / 未知种子 fail loud', () => {
+  const text = serializeSeedManifest({
+    version: '1.0.0',
+    files: { 'b.md': 'b', 'a.md': 'a' },
+    policy: { 'b.md': 'corpus', 'a.md': 'user' },
+  })
+  const parsed = JSON.parse(text)
+  assert.deepEqual(parsed.policy, { 'a.md': 'user', 'b.md': 'corpus' })
+  assert.deepEqual(Object.keys(parsed.files), ['a.md', 'b.md'], '文件仍按路径排序')
+  assert.throws(() => serializeSeedManifest({ version: '1', files: { 'a.md': 'a' }, policy: { 'a.md': 'owner' } }), /policy 非法/)
+  assert.throws(() => serializeSeedManifest({ version: '1', files: { 'a.md': 'a' }, policy: { 'z.md': 'user' } }), /未知种子/)
+  assert.deepEqual(SEED_POLICIES, ['contract', 'corpus', 'user'])
+})
+
+test('policyOf：旧清单无 policy 字段 → 保守按 contract；未知值不静默当用户数据', () => {
+  assert.equal(policyOf({ files: {} }, 'AGENTS.md'), 'contract')
+  assert.equal(policyOf({ policy: { 'AGENTS.md': 'user' } }, 'AGENTS.md'), 'user')
+  assert.equal(policyOf({ policy: { 'AGENTS.md': 'whatever' } }, 'AGENTS.md'), 'contract')
 })

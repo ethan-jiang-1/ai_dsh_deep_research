@@ -154,21 +154,23 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 一张表回答「装完数据在哪、谁删、卸载留什么」。承诺用 DSH 数据面的 P0–P4 记号（纯引用 / 会话派生 /
 用户可见文件 / 宿主账本 / 账号配置）；本包**没有 P3 home 账本**。读数：**P2** = 用户可见工作区文件；
 **派生** = 可从日志+文件重建；**只读层** = 随包发布、升级替换；**插件账本** = 插件自己写的工作区元数据。
+**可移植** = 换机器/移交后还在不在：`随 bundle`（跟着 `drt_<slug>/` 走）/ `随工作区`（跟着工作区目录走）/
+`随包`、`随 profile`（重装重建）/ `仅本机`（依赖本机 home、日志或浏览器，移交不带）。
 
-| 事实 | 承诺 | 权威 | 位置 | 作用域 | 寿命 / 删除 | 谁看得见 | 秘密 | 卸载后 |
-|---|---|---|---|---|---|---|---|---|
-| 角色 / preset / skill | 只读层 | 包 | 安装副本 `node_modules/dsh-deep-research-pack/` | 安装 | 随包版本；`dsh plugin remove` | 模型（注入）/用户 | 否 | 删 |
-| 工作区种子（手册 / NODES / 判型库 / 模板） | P2 | 落地后用户 | `<workspace>/{AGENTS.md,NODES.md,question-patterns.md,.gitignore,templates/run/}` | workspace | 用户手删；`--upgrade` 只写 sidecar | 模型（AGENTS 注入）/用户 | 否 | **保留** |
-| 用户方法库 | P2 | 用户 | `<workspace>/method-library.md` | workspace | 任何模式不覆盖；用户手删 | 用户/Lead | 否 | **保留** |
-| run bundle（研究事实） | P2 | 用户 | `<workspace>/drt_<slug>/`、`archive/`、`_abandoned/` | workspace + slug | 用户手删；无自动 GC | 模型/用户 | 否（内容可能含敏感材料） | **保留** |
-| run.md 状态头 | 声明（非权威） | 事实（bundle 文件 + journal；contract 只作纪元） | `<bundle>/run.md` | run | 角色/ops 随阶段写；门禁只信事实 | 模型/用户 | 否 | **保留** |
-| 交付 / 审计回执 | 派生 | 无（需日志+文件重建） | bundle 内 `delivered.json` / `manifest.json` / `acceptance.md` / `audit.md` / `node-gate.md` | run | ops 重新验收即重建；present 只记相对标签 | 用户/ops | 否 | **保留** |
-| 种子状态账本 | 插件账本（寄居 P2） | 插件 | `<workspace>/.dsh-research-seed.json`（含 `schemaVersion`） | workspace | `scaffold --clean`；不自动删 | 用户（gitignored）/插件 | 否 | **保留** |
-| scaffold 临时件 | 插件临时 | 插件 | `<workspace>/.dsh-research-scaffold.lock`、`*.seed-new*`、`*.tmp-*` | workspace | 正常退出删锁；`--clean --write` 清陈旧锁/临时件，sidecar 需 `--discard-sidecars` | 用户 | 否 | 可能保留 |
-| 会话日志 | DSH | DSH | `$DSH_HOME/sessions/` | session | DSH 管理（无删除 API）；本包不删 | 模型（surface）/用户 | 否（可能含用户数据） | 保留（DSH 语义） |
-| 凭据 | DSH | provider | `$DSH_HOME/.credentials.yaml` / env / `.env` | home | DSH 管理；本包只按 ref 读 | 用户 / 插件（仅引用） | 是（值只在 provider） | 保留 |
-| 团队机制层 | N2 依赖 | vendor experimental | `$DSH_HOME/profiles/<p>/`（依赖 + bundle 行） | profile | 用户显式删；本包卸载不删 | 用户/插件 | 否 | **保留** |
-| 浏览器侧栏布局 | 客户端 | 浏览器 | `localStorage['dsh.sidebar-right.v1.<sessionId>']` | device | vendor 管；清站点数据 | 用户/浏览器 | 否 | 保留（vendor 键） |
+| 事实 | 承诺 | 权威 | 位置 | 作用域 | 寿命 / 删除 | 谁看得见 | 秘密 | 卸载后 | 可移植 |
+|---|---|---|---|---|---|---|---|---|---|
+| 角色 / preset / skill | 只读层 | 包 | 安装副本 `node_modules/dsh-deep-research-pack/` | 安装 | 随包版本；`dsh plugin remove` | 模型（注入）/用户 | 否 | 删 | 随包 |
+| 工作区种子（手册 / NODES / 判型库 / 模板） | P2 | 落地后用户 | `<workspace>/{AGENTS.md,NODES.md,question-patterns.md,.gitignore,templates/run/}` | workspace | 用户手删；`--upgrade` 只写 sidecar | 模型（AGENTS 注入）/用户 | 否 | **保留** | 随工作区 |
+| 本工作区方法库 | P2 | 用户 | `<workspace>/method-library.md` | workspace | 任何模式不覆盖；用户手删 | 用户/Lead | 否 | **保留** | 随工作区 |
+| run bundle（研究事实） | P2 | 用户 | `<workspace>/drt_<slug>/`、`archive/`、`_abandoned/` | workspace + slug | 用户手删；无自动 GC | 模型/用户 | 否（内容可能含敏感材料） | **保留** | 随 bundle |
+| run.md 状态头 | 声明（非权威） | 事实（bundle 文件 + journal；`schema` 是整数契约、`created` 是人读日期） | `<bundle>/run.md` | run | 角色/ops 随阶段写；门禁只信事实 | 模型/用户 | 否 | **保留** | 随 bundle |
+| 交付 / 审计回执 | 派生 | 无（需日志+文件重建） | bundle 内 `delivered.json` / `manifest.json` / `acceptance.md` / `audit.md` / `node-gate.md` | run | ops 重新验收即重建；present 只记相对标签；权威文件变化即 stale | 用户/ops | 否 | **保留** | 回执随 bundle；`audit.md`/`node-gate.md` 仅本机（需会话语料复算） |
+| 种子状态账本 | 插件账本（寄居 P2） | 插件 | `<workspace>/.dsh-research-seed.json`（含 `schemaVersion`） | workspace | `scaffold --clean`；不自动删 | 用户（gitignored）/插件 | 否 | **保留** | 随工作区（新机可缺，`--check` 报 untracked） |
+| scaffold 临时件 | 插件临时 | 插件 | `<workspace>/.dsh-research-scaffold.lock`、`*.seed-new*`、`*.tmp-*` | workspace | 正常退出删锁；`--clean --write` 清陈旧锁/临时件，sidecar 需 `--discard-sidecars` | 用户 | 否 | 可能保留 | 仅本机 |
+| 会话日志 | DSH | DSH | `$DSH_HOME/sessions/` | session | DSH 管理（无删除 API）；本包不删 | 模型（surface）/用户 | 否（可能含用户数据） | 保留（DSH 语义） | 仅本机 |
+| 凭据 | DSH | provider | `$DSH_HOME/.credentials.yaml` / env / `.env` | home | DSH 管理；本包只按 ref 读 | 用户 / 插件（仅引用） | 是（值只在 provider） | 保留 | 仅本机（不导出） |
+| 团队机制层 | N2 依赖 | vendor experimental | `$DSH_HOME/profiles/<p>/`（依赖 + bundle 行） | profile | 用户显式删；本包卸载不删 | 用户/插件 | 否 | **保留** | 随 profile |
+| 浏览器侧栏布局 | 客户端 | 浏览器 | `localStorage['dsh.sidebar-right.v1.<sessionId>']` | device | vendor 管；清站点数据 | 用户/浏览器 | 否 | 保留（vendor 键） | 仅本机 |
 
 - **插件代码对 `$DSH_HOME` 零写入**（不声明 storage domain、不新增 session event、不写浏览器存储）；
   home 里的会话/凭据/profile 是 DSH 的。安装/升级由 DSH CLI 写 profile；scaffold 只**触发**团队层安装（N2）。
@@ -197,6 +199,9 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 - 研究数据 = 工作区里的 `drt_<slug>/`、`archive/`、`_abandoned/`、`method-library.md` 与种子文件；
   复制这些目录即可（`.dsh-research-seed.json` 可带可不带——新机缺席时 scaffold 会按 `--check` 报
   untracked，再用 `--adopt`/`--upgrade` 明确接受）。`present` 回执只记 bundle 内相对标签，换机不断链。
+- **随 bundle 走 / 仅本机**：`final/vN`、`run.md`、`delivered.json`、`manifest.json` 随目录走；
+  `audit.md` / `node-gate.md` 需要本机 `$DSH_HOME/sessions` 才能复算，`present` 本身是会话事件——
+  这两样**不随移交**。所以移交后的 bundle 自证「交付了什么、谁拍的板」，复算审计要在原机或补齐语料。
 - **不要**把 `$DSH_HOME/sessions/`、`.credentials.yaml` 当研究备份；它们是 DSH 的，会话导出走
   `/export`（ZIP 只含日志与附件，不含工作区文件）。
 - 恢复顺序：复制工作区 → `scaffold --check` →（按报告）`--adopt` 或 `--upgrade` → 新会话「继续 <slug>」。
@@ -235,9 +240,9 @@ node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/prefli
 
 | 轴 | 当前 | 兼容规则 |
 |---|---|---|
-| 包 semver | `0.1.2` | 安装/升级走 `dsh plugin`；`engines.dsh` 不匹配即拒绝 |
+| 包 semver | 以 `package.json` 为准（本表不抄版本号） | 安装/升级走 `dsh plugin`；`engines.dsh` 不匹配即拒绝 |
 | 工作区种子 | `seed.json.version` = 包版本 | 记录在 `.dsh-research-seed.json`（`schemaVersion` 独立）；`--upgrade` 只覆盖未改文件，改过的写 `.seed-new`；`--force` 不覆盖用户 `.gitignore` |
-| run bundle 契约 | `run.md` 的 `contract: YYYY-MM-DD`（D28 纪元） | 旧 bundle 按 epoch 豁免、不追改；新回执字段向前兼容读 |
+| run bundle 契约 | `run.md` 的 `schema: 2`（D33 整数版本，门禁按整数分档）+ `created:`（人读日期） | 旧 bundle 只有 `contract: YYYY-MM-DD` = 旧形态：读兼容、按日期断代、不追改；未来 schema 由门禁判红，不猜语义 |
 
 ## Uninstall
 
@@ -297,8 +302,8 @@ node <pack>/scripts/scaffold.mjs --workspace <ws> --clean --write
 先在台账登记新 D 号，再动手。tests 的数量哨兵（[tests/pack/presets.test.mjs](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/tests/pack/presets.test.mjs)）会机械拦住没登记的增删。
 
 1. `presets/<role>.patch.yml`：一条 `@deepseek-ai/dsh-agent-preset` 行，`config` 带
-   id/name/description/order + plugins（自包含组合：persona 行 + skills roots + 工具行 +
-   agent-instructions 行）+ `skills/<n>/SKILL.md`（frontmatter `name` = 目录名）；
+   id/name/description/order + plugins（自包含组合：persona 行 + 时钟行 `time-context`（D32）+
+   skills roots + 工具行 + agent-instructions 行）+ `skills/<n>/SKILL.md`（frontmatter `name` = 目录名）；
 2. 结构门禁：verify 门禁 preset-structure + row-deps（行引用的 `@deepseek-ai/*` 全进 peerDependencies）；
 3. roster 装载：`package.json` 的 `dsh.bundle.patch` 数组列出 `cordis.patch.yml` 与每个
    `presets/*.patch.yml`；

@@ -26,6 +26,10 @@
                 研究手册（会话 cwd 根的 AGENTS.md）已自动注入本会话，目录约定与 owner 表以它为准。
                 开工动作：先读本 bundle 的 topics.md 与 leads.md（侦察员已分级的方向）。
 
+          # 时钟（DSH 原生 time-context）：每步注入一条可追溯的当前时间读数。
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+
           - id: skill-filesystem
             name: '@deepseek-ai/dsh-skill-filesystem'
             config:
@@ -66,5 +70,5 @@
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:
-              maxBytes: 18944
+              maxBytes: 22528
               projectRootMarkers: []

@@ -11,7 +11,7 @@ const roles = presetRoles(fileURLToPath(new URL('../..', import.meta.url)));
 const fixture = (role = 'lead') => readFileSync(new URL(
   `../../snapshots/replay/research-face/${role === 'lead' ? '' : `${role}/`}session.v4.jsonl`, import.meta.url,
 ), 'utf8').split('\n').filter(Boolean).map((line) => JSON.parse(line));
-const IDS = ['persona', 'headers', 'agent-instructions', 'skill-catalog', 'runtime-context'];
+const IDS = ['persona', 'headers', 'agent-instructions', 'skill-catalog', 'runtime-context', 'time-context'];
 const messageOf = (event) => event.type === 'system/message' ? event.data.message : event.data;
 const byKind = (events, kind) => events.find((event) => (
   ['system/message', 'user/message'].includes(event.type) && messageOf(event).source?.kind === kind
@@ -42,7 +42,9 @@ for (const id of IDS) {
 }
 
 test('empty logs never pass a required criterion', () => {
-  assert.deepEqual(compareReplayRequests([], []).map(({ ok }) => ok), [false, false, false, false, false]);
+  const verdicts = compareReplayRequests([], []).map(({ ok }) => ok);
+  assert.equal(verdicts.length, 6, '判据数 = persona + headers + 四个注入面（含 time-context）');
+  assert.deepEqual(verdicts, [false, false, false, false, false, false]);
 });
 
 for (const id of ['persona', 'agent-instructions', 'skill-catalog', 'runtime-context']) {
@@ -179,8 +181,11 @@ test('source identities, digests, event times and session cwd do not replace mod
   }
   byKind(actual, 'agent-instructions').data.source.changes[0].digest = 'f'.repeat(40);
   byKind(actual, 'runtime-context').data.source.sections[0].text = 'source bookkeeping changed';
-  actual.push({ type: 'user/message', time: 999, data: { source: { kind: 'time-context' },
-    content: [{ type: 'text', text: 'Time sampled while preparing turn 1, step 1: 2030-01-01' }] } });
+  // time-context 是已登记判据面：两侧都要有注入，且只比 turn/step（墙钟不可复现）。
+  const timeContext = (step, stamp) => ({ type: 'user/message', time: 1, data: { source: { kind: 'time-context' },
+    content: [{ type: 'text', text: `Time sampled while preparing turn 1, step ${step}: ${stamp}\nElapsed: 1s.` }] } });
+  expected.push(timeContext(1, '2026-10-28T00:00:00+08:00'));
+  actual.push(timeContext(1, '2030-01-01T00:00:00+08:00'));
   assert.ok(compareReplayRequests(expected, actual).every(({ ok }) => ok));
 });
 
@@ -258,7 +263,7 @@ test('every recorded role injects only kinds the compared judges cover', () => {
   }
 });
 
-test('four recorded roles each expose five independent passing criteria', () => {
+test('four recorded roles each expose six independent passing criteria', () => {
   for (const role of roles) {
     const events = fixture(role);
     const before = JSON.stringify(events);
@@ -309,4 +314,16 @@ test('回合结束显式态：turn/end 缺席或非 completed → 未结束（fa
   assert.equal(turnCompleted([assistant].join('\n')), false, '缺 turn/end 即未结束');
   assert.equal(turnCompleted([assistant, line({ type: 'turn/end', data: { turn: 1, reason: { kind: 'error' } } })].join('\n')), false, '非 completed 不算结束');
   assert.equal(turnCompleted([assistant, line({ type: 'turn/end', data: { turn: 1, reason: { kind: 'completed' } } })].join('\n')), true);
+});
+
+test('time-context 只比 turn/step：墙钟不同不红，步序不同红', () => {
+  const mk = (step, stamp) => ({ type: 'user/message', time: 1, data: { source: { kind: 'time-context' },
+    content: [{ type: 'text', text: `Time sampled while preparing turn 2, step ${step}: ${stamp}` }] } });
+  const base = fixture();
+  const expected = [...base, mk(1, '2026-10-28T00:00:00+08:00')];
+  const sameClockDiff = [...base, mk(1, '2031-05-05T11:11:11+08:00')];
+  const diffStep = [...base, mk(2, '2026-10-28T00:00:00+08:00')];
+  assert.ok(compareReplayRequests(expected, sameClockDiff).every(({ ok }) => ok), '墙钟差异不参与比较');
+  const verdict = compareReplayRequests(expected, diffStep).find(({ id }) => id === 'time-context');
+  assert.equal(verdict.ok, false, '注入步序变化必须红');
 });

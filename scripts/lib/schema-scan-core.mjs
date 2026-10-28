@@ -22,6 +22,9 @@ import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs'
 import { basename, join } from 'node:path'
 
 export const CONTRACT_DATE = '2026-09-29'
+/** 当前 run bundle 契约版本（run.md 的 `schema:`，整数；模板写、门禁按整数分档）。
+ *  读兼容：无 schema 的旧形态仍按 `contract:` 日期断代——日期断代只服务历史，不承接新 run。 */
+export const SCHEMA_VERSION = 2
 /** run.md 的 phase 闭集（D28；模板/手册/门禁同源，防三处各写一份）。 */
 export const RUN_PHASES = ['briefing', 'research', 'synthesis', 'review', 'delivery', 'accepted', 'parked']
 
@@ -48,6 +51,49 @@ export function contractEpochOf(bundleDir) {
   if (!existsSync(p)) return null
   const m = /^\s*[-*]?\s*contract\s*[:：]\s*(\d{4}-\d{2}-\d{2})\b/m.exec(readFileSync(p, 'utf8'))
   return m?.[1] ?? ''
+}
+
+/** 契约版本（run.md 的 `schema:`）：无 run.md 或无本行 → null（旧形态，走日期断代）；
+ *  非整数 → NaN（交 schemaIssueOf 判红）；整数 → 版本号。 */
+export function runSchemaOf(bundleDir) {
+  const p = join(bundleDir, 'run.md')
+  if (!existsSync(p)) return null
+  const m = /^\s*[-*]?\s*schema\s*[:：]\s*(\S+)(?:\s*#.*)?\s*$/m.exec(readFileSync(p, 'utf8'))
+  if (m === null) return null
+  return /^\d+$/.test(m[1]) ? Number(m[1]) : Number.NaN
+}
+
+/** run.md 契约版本问题（null = 无问题）：非法 / 比本工具新 / 既无 schema 也无合法 contract。
+ *  未来版本不猜语义——按现行从严判，同时核心违约，逼升门禁工具。 */
+export function schemaIssueOf(bundleDir) {
+  const p = join(bundleDir, 'run.md')
+  if (!existsSync(p)) return null
+  const schema = runSchemaOf(bundleDir)
+  if (Number.isNaN(schema)) return 'run.md 的 schema 非法（应为整数契约版本）'
+  if (schema !== null) {
+    if (schema > SCHEMA_VERSION) return `run.md schema=${schema} 比本工具（${SCHEMA_VERSION}）新——先升门禁工具，不猜`
+    // 整数契约形态下 created 是 bundle 里唯一的"人读时间"；缺了它，移交后无法回答"何时开始"。
+    return createdDateOf(bundleDir) === null ? 'run.md schema 形态缺 created（人读立项日）' : null
+  }
+  return contractEpochOf(bundleDir) === '' ? 'run.md 既无 schema 也无合法 contract（D28）' : null
+}
+
+/** 立项日（run.md 的 `created:`，人读；schema 模式下替代 contract 承担日期展示）。 */
+export function createdDateOf(bundleDir) {
+  const p = join(bundleDir, 'run.md')
+  if (!existsSync(p)) return null
+  const m = /^\s*[-*]?\s*created\s*[:：]\s*(\d{4}-\d{2}-\d{2})\b/m.exec(readFileSync(p, 'utf8'))
+  return m?.[1] ?? null
+}
+
+/** 契约纪元日期（人读 / 见证扫描下界）：旧形态取 `contract:`；新形态（有 schema 无 contract）
+ *  取 `created:`——否则 schema run 的回执与见证扫描会丢掉时间下界。无 run.md → null；
+ *  run.md 在场但两者都非法 → ''（交门禁判红，不静默回退）。 */
+export function epochDateOf(bundleDir) {
+  const contract = contractEpochOf(bundleDir)
+  if (contract === null) return null
+  if (contract !== '') return contract
+  return createdDateOf(bundleDir) ?? ''
 }
 
 /** journal 未来日期异常（INFO 级，不计违约——日期契约违例线索，显性化不无视）。 */
@@ -187,7 +233,8 @@ export function scanBundle(bundleDir) {
   const run = read(join(bundleDir, 'run.md'))
   if (run !== null) {
     core.push(...hygieneOf(bundleDir))
-    if (contractEpochOf(bundleDir) === '') core.push('run.md 的 contract 缺失或非法（D28）')
+    const schemaIssue = schemaIssueOf(bundleDir)
+    if (schemaIssue !== null) core.push(schemaIssue)
     const phaseMatch = /^\s*[-*]?\s*phase\s*[:：]\s*([a-z][a-z-]*)\b/m.exec(run)
     if (phaseMatch === null || !RUN_PHASES.includes(phaseMatch[1])) core.push('run.md 的 phase 缺失或不在闭集（D28）')
     if (!/^\s*[-*]?\s*next\s*[:：]\s*\S/m.test(run)) core.push('run.md 缺 next（D28）')
@@ -214,9 +261,15 @@ export function scanAll(bundleDirs, { contractDate = CONTRACT_DATE, today, dates
   const now = today ?? toDateStr(new Date())
   const rows = bundleDirs.map((d) => {
     const b = scanBundle(d)
+    const schema = runSchemaOf(d)
     const epoch = contractEpochOf(d)
-    const date = dates[b.slug] ?? (epoch === null ? deliveryDate(d) : epoch === '' ? '9999-12-31' : epoch)
-    const era = date === null ? 'undated' : date >= contractDate ? 'contract' : 'pre-contract'
+    // 整数契约（新 run）：与日期无关；旧形态（无 schema）才按 contract 日期断代。
+    const date = dates[b.slug] ?? (schema !== null
+      ? (createdDateOf(d) ?? deliveryDate(d))
+      : (epoch === null ? deliveryDate(d) : epoch === '' ? '9999-12-31' : epoch))
+    const era = schema !== null
+      ? (Number.isNaN(schema) || schema >= SCHEMA_VERSION ? 'contract' : 'pre-contract')
+      : (date === null ? 'undated' : date >= contractDate ? 'contract' : 'pre-contract')
     const future = journalFutureDate(d, now)
     return { ...b, date, era, future, red: b.core.length > 0 && era !== 'pre-contract' }
   })

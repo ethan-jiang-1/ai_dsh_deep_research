@@ -211,6 +211,14 @@ function nodeSatisfies(version, range) {
       record(false, '研究工作区种子清单', '读不到 pack 的 workspace/seed.json——先重装/重建 pack', '重装 pack，或运行 node dev/sync-pack-workspace.mjs 重建种子')
     } else {
       const audit = auditWorkspace({ workspace, seed })
+      // 契约类种子（policy=contract）偏离包版本 = 节点 I/O/手册契约可能不同源；只在详情里点名，
+      // 不改变阻塞判据（用户可能有意定制，preflight 不能替他决定）。
+      const contractDrift = (rel) => {
+        const finding = audit.findings.find((item) => item.rel === rel)
+        return finding !== undefined && finding.policy === 'contract' && finding.status !== 'current'
+          ? '；契约类种子（policy=contract）与包版本不同源——确认后 --adopt 建基线'
+          : ''
+      }
       const findingOf = new Map(audit.findings.map((item) => [item.rel, item]))
       const statusOf = (rel) => findingOf.get(rel)?.status ?? 'missing'
       const label = {
@@ -236,12 +244,12 @@ function nodeSatisfies(version, range) {
         try { manualLines = `（${readFileSync(manual, 'utf8').split('\n').length} 行）` } catch {}
       }
       record(statusOk(manualStatus), `研究工作区手册（${manual}）`,
-        `${label[manualStatus] ?? manualStatus}${manualLines}${manualStatus === 'untracked' ? '——角色会拿到别的项目的指令，不能宣称研究就绪' : ''}`,
+        `${label[manualStatus] ?? manualStatus}${manualLines}${manualStatus === 'untracked' ? '——角色会拿到别的项目的指令，不能宣称研究就绪' : ''}${contractDrift('AGENTS.md')}`,
         seedRemedy)
       const nodesStatus = statusOf('NODES.md')
-      record(statusOk(nodesStatus), `节点契约（${join(workspace, 'NODES.md')}）`, label[nodesStatus] ?? nodesStatus, seedRemedy)
+      record(statusOk(nodesStatus), `节点契约（${join(workspace, 'NODES.md')}）`, `${label[nodesStatus] ?? nodesStatus}${contractDrift('NODES.md')}`, seedRemedy)
       const patternsStatus = statusOf('question-patterns.md')
-      record(statusOk(patternsStatus), `判型模式库（${join(workspace, 'question-patterns.md')}）`, label[patternsStatus] ?? patternsStatus, seedRemedy)
+      record(statusOk(patternsStatus), `判型模式库（${join(workspace, 'question-patterns.md')}）`, `${label[patternsStatus] ?? patternsStatus}${contractDrift('question-patterns.md')}`, seedRemedy)
       const ignoreStatus = statusOf('.gitignore')
       record(statusOk(ignoreStatus, false), `工作区 .gitignore（${join(workspace, '.gitignore')}）`,
         `${label[ignoreStatus] ?? ignoreStatus}${ignoreStatus === 'untracked' ? '（保留用户规则，但 run 产物拒收未验证）' : ''}`, seedRemedy)
