@@ -2,7 +2,7 @@
 // 判据：只取最后一个完整围栏；标题/四标签/来源/默认标记都按 library-fold 折；坏块不猜。
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { parseMethodDraft } from '../../packages/deep-research-pack/src/lib/method-draft.ts'
+import { mergeCoachDraft, parseMethodDraft } from '../../packages/deep-research-pack/src/lib/method-draft.ts'
 
 const ENTRY = `## 机房选型尽调（2026-10-28，对话）
 - 找来源: 官方定价页与公告优先，厂商自述标“自述”
@@ -41,4 +41,35 @@ test('〔默认偏好〕与空字段按库格式折出', () => {
 test('围栏外解释不污染字段（只折围栏内）', () => {
   const entry = parseMethodDraft(`- 找来源: 这是围栏外的句子\n\`\`\`method-draft\n${ENTRY}\n\`\`\`\ntrailing`)
   assert.equal(entry?.sections.source, '官方定价页与公告优先，厂商自述标“自述”')
+})
+
+
+test('merge：手改字段永远以用户为准，其余取 coach 新值', () => {
+  const base = parseMethodDraft(`\`\`\`method-draft\n${ENTRY}\n\`\`\``)
+  const state = {
+    name: '用户改过的名字',
+    sections: { source: '用户手改的来源', verify: null, report: null, limit: null },
+    manual: new Set(['name', 'source']),
+    base,
+  }
+  const next = parseMethodDraft(`\`\`\`method-draft\n${ENTRY.replace('官方定价页与公告优先，厂商自述标“自述”', '官方定价页、公告、更新日志优先').replace('机房选型尽调', '机房选型尽调 v2')}\n\`\`\``)
+  const merged = mergeCoachDraft(state, next)
+  assert.equal(merged.name, '用户改过的名字')
+  assert.equal(merged.sections.source, '用户手改的来源')
+  assert.equal(merged.sections.verify, '冲突回原表复算；复算不了并列两个口径')
+  assert.ok(merged.coachFields.has('verify'))
+  assert.ok(merged.coachFields.has('name'))
+})
+
+test('merge：activeField = 相对上一轮 coach 草稿刚变化的第一格', () => {
+  const base = parseMethodDraft(`\`\`\`method-draft\n${ENTRY}\n\`\`\``)
+  const next = parseMethodDraft(`\`\`\`method-draft\n${ENTRY.replace('不做价格预测；不给厂商排名', '不做价格预测；不给厂商排名；不覆盖非公开信息')}\n\`\`\``)
+  const merged = mergeCoachDraft({ name: '', sections: { source: null, verify: null, report: null, limit: null }, manual: new Set(), base }, next)
+  assert.equal(merged.activeField, 'limit')
+})
+
+test('merge：base 为 null 时 activeField = 第一格非空字段（首轮定位）', () => {
+  const next = parseMethodDraft(`\`\`\`method-draft\n${ENTRY}\n\`\`\``)
+  const merged = mergeCoachDraft({ name: '', sections: { source: null, verify: null, report: null, limit: null }, manual: new Set(), base: null }, next)
+  assert.equal(merged.activeField, 'source')
 })

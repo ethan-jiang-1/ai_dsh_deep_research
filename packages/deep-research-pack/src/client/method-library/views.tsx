@@ -6,8 +6,10 @@
 //
 // 动作仍走 props 的理由：保存与删除都是"生成一条指令交给当前会话的 Lead"，发送态与回执归父级；
 // 本层只画与转发，不新增写权限、不直写文件。
+import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { SECTION_LABELS, renderLibraryEntry, type LibraryEntry, type LibrarySections } from '../../lib/library-fold.ts'
+import type { DraftField } from '../../lib/method-draft.ts'
 import { BUTTON_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE, TEXTAREA_STYLE } from './styles.ts'
 
 /** 编辑态草稿（父级持有；`currentName` = 编辑目标原名，新建时省略）。 */
@@ -85,6 +87,8 @@ export function ReadMineView(props: {
 }
 
 /** 编辑/新建表单：四字段 + Markdown 预览 + 保存/取消。 */
+const MARKER_STYLE = { fontSize: 10, padding: '1px 6px', borderRadius: 999, background: '#00000008', opacity: 0.65 } as const
+
 export function EditorView(props: {
   readonly draft: Draft | null
   readonly mode: 'edit' | 'new'
@@ -93,16 +97,39 @@ export function EditorView(props: {
   readonly onSectionChange: (key: keyof LibrarySections, value: string) => void
   readonly onSave: () => void
   readonly onCancel: () => void
+  readonly coachFields?: ReadonlySet<DraftField>
+  readonly manualFields?: ReadonlySet<DraftField>
+  readonly activeField?: DraftField | null
   readonly coachUpdated?: boolean
   readonly onUndoCoach?: () => void
 }): ReactNode {
-  const { draft, mode, sending, onNameChange, onSectionChange, onSave, onCancel, coachUpdated, onUndoCoach } = props
+  const {
+    draft, mode, sending, onNameChange, onSectionChange, onSave, onCancel,
+    coachFields, manualFields, activeField, coachUpdated, onUndoCoach,
+  } = props
+  const rootRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    if (activeField === null || activeField === undefined) return
+    const element = rootRef.current?.querySelector<HTMLElement>(`[data-field="${activeField}"]`)
+    element?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }, [activeField])
   if (draft === null) return null
+  const filled = SECTION_LABELS.filter((item) => draft.sections[item.key] !== null).length
+  const marker = (field: DraftField): ReactNode => {
+    if (manualFields?.has(field) === true) return <span style={MARKER_STYLE}>手改</span>
+    if (coachFields?.has(field) === true) return <span style={MARKER_STYLE}>来自对话</span>
+    return <span style={MARKER_STYLE}>待定</span>
+  }
+  const fieldStyle = (field: DraftField) => activeField === field
+    ? { borderColor: '#2563eb', boxShadow: '0 0 0 2px #2563eb18' }
+    : undefined
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10 }}>
+    <div ref={rootRef}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 }}>
         <strong style={{ fontSize: 16 }}>{mode === 'new' ? '新建方法' : '编辑方法'}</strong>
-        <span style={MUTED_STYLE}>保存会生成一条指令交给 Lead 写入库；本页不直接改文件。</span>
+        <span style={MUTED_STYLE}>字段会随右侧对话逐格成形；保存仍交给 Lead 写入库。</span>
+        <span style={{ flex: 1 }} />
+        <span style={MUTED_STYLE}>{filled}/4 已定</span>
       </div>
       {coachUpdated === true && (
         <div style={{ ...MUTED_STYLE, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
@@ -115,22 +142,36 @@ export function EditorView(props: {
           旧格式正文会保留（只读）：{draft.legacyText}
         </div>
       )}
-      <label style={{ display: 'block', marginBottom: 10 }}>
-        <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 3 }}>名称</div>
+      <label
+        data-field="name"
+        style={{ display: 'block', marginBottom: 10, borderRadius: 6, ...(activeField === 'name' ? { background: '#2563eb08', padding: 6, marginLeft: -6, marginRight: -6 } : {}) }}
+      >
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 3 }}>
+          <span style={{ fontSize: 11, opacity: 0.6 }}>名称</span>
+          {marker('name')}
+        </div>
         <input
-          style={INPUT_STYLE}
+          style={{ ...INPUT_STYLE, ...fieldStyle('name') }}
           value={draft.name}
           placeholder="例如：投研尽调（我的口径）"
           onChange={(event) => { onNameChange(event.target.value) }}
         />
       </label>
-      {SECTION_LABELS.map(({ key, label }) => (
-        <label key={key} style={{ display: 'block', marginBottom: 10 }}>
-          <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 3 }}>{label}</div>
+      {SECTION_LABELS.map((section) => (
+        <label
+          key={section.key}
+          data-field={section.key}
+          style={{ display: 'block', marginBottom: 10, borderRadius: 6, ...(activeField === section.key ? { background: '#2563eb08', padding: 6, marginLeft: -6, marginRight: -6 } : {}) }}
+        >
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 3 }}>
+            <span style={{ fontSize: 11, opacity: 0.6 }}>{section.label}</span>
+            {marker(section.key)}
+          </div>
           <textarea
-            style={TEXTAREA_STYLE}
-            value={draft.sections[key] ?? ''}
-            onChange={(event) => { onSectionChange(key, event.target.value) }}
+            style={{ ...TEXTAREA_STYLE, ...fieldStyle(section.key) }}
+            value={draft.sections[section.key] ?? ''}
+            placeholder="可以从右侧对话开始，也可以直接填…"
+            onChange={(event) => { onSectionChange(section.key, event.target.value) }}
           />
         </label>
       ))}

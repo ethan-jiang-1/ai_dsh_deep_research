@@ -27,7 +27,7 @@ import {
   type LibrarySections,
 } from '../lib/library-fold.ts'
 import { BUILTIN_PREFERENCES } from '../lib/config-tables.ts'
-import { parseMethodDraft } from '../lib/method-draft.ts'
+import { FIELD_LABELS, FIELD_ORDER, mergeCoachDraft, parseMethodDraft, type DraftField } from '../lib/method-draft.ts'
 import { BUTTON_STYLE, HEADER_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE, ROW_STYLE } from './method-library/styles.ts'
 import { BuiltinView, EditorView, ReadMineView, type Draft } from './method-library/views.tsx'
 import { MethodCoachPanel } from './method-library/coach.tsx'
@@ -92,8 +92,27 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const [mode, setMode] = useState<Mode>('read')
   const [draft, setDraft] = useState<Draft | null>(null)
   const [coachId, setCoachId] = useState<SessionId | null>(null)
-  const [coachFill, setCoachFill] = useState<LibraryEntry | null>(null)
-  const previousDraftRef = useRef<Draft | null>(null)
+  const [manual, setManual] = useState<ReadonlySet<DraftField>>(() => new Set())
+  const [coachFields, setCoachFields] = useState<ReadonlySet<DraftField>>(() => new Set())
+  const [activeField, setActiveField] = useState<DraftField | null>(null)
+  const [coachBase, setCoachBase] = useState<LibraryEntry | null>(null)
+  const previousRef = useRef<{
+    draft: Draft
+    manual: ReadonlySet<DraftField>
+    coachFields: ReadonlySet<DraftField>
+    active: DraftField | null
+    base: LibraryEntry | null
+  } | null>(null)
+  const draftRef = useRef<Draft | null>(null)
+  const manualRef = useRef<ReadonlySet<DraftField>>(manual)
+  const coachFieldsRef = useRef<ReadonlySet<DraftField>>(coachFields)
+  const activeRef = useRef<DraftField | null>(activeField)
+  const coachBaseRef = useRef<LibraryEntry | null>(coachBase)
+  draftRef.current = draft
+  manualRef.current = manual
+  coachFieldsRef.current = coachFields
+  activeRef.current = activeField
+  coachBaseRef.current = coachBase
   const [receipt, setReceipt] = useState<Receipt | null>(null)
   const [sending, setSending] = useState(false)
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
@@ -216,6 +235,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
 
   const updateSection = (key: keyof LibrarySections, value: string): void => {
     if (draft === null) return
+    markManual(key)
     setDraft({ ...draft, sections: { ...draft.sections, [key]: value === '' ? null : value } })
   }
 
@@ -295,37 +315,80 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
 
 
   const clearCoachFill = (): void => {
-    setCoachFill(null)
-    previousDraftRef.current = null
+    setManual(new Set())
+    setCoachFields(new Set())
+    setActiveField(null)
+    setCoachBase(null)
+    previousRef.current = null
   }
 
-  // 草稿回填：方法编辑每条 assistant 消息里若有 method-draft，就用它更新表单（可撤销）。
+  // 草稿回填（字段级）：手改字段永远以用户为准，其余字段取 coach 新值；
+  // 刚变化的字段记成 activeField，交给表单高亮/滚动；上一轮态保留给「撤销对话更新」。
   useEffect(() => {
     if (coachId === null || (mode !== 'edit' && mode !== 'new')) return undefined
     const controller = new AbortController()
     void props.watchCoach(coachId, controller.signal, (text) => {
       const entry = parseMethodDraft(text)
-      if (entry === null) return
-      setDraft((current) => {
-        if (current === null) return current
-        previousDraftRef.current = current
-        return {
-          ...current,
-          name: entry.name,
-          sections: entry.sections,
-          provenance: entry.provenance,
-          isDefault: entry.isDefault,
-        }
+      const current = draftRef.current
+      if (entry === null || current === null) return
+      const merged = mergeCoachDraft(
+        { name: current.name, sections: current.sections, manual: manualRef.current, base: coachBaseRef.current },
+        entry,
+      )
+      previousRef.current = {
+        draft: current,
+        manual: new Set(manualRef.current),
+        coachFields: new Set(coachFieldsRef.current),
+        active: activeRef.current,
+        base: coachBaseRef.current,
+      }
+      setDraft({
+        ...current,
+        name: merged.name,
+        sections: merged.sections,
+        provenance: entry.provenance ?? current.provenance,
+        isDefault: entry.isDefault,
+        legacyText: entry.legacyText ?? current.legacyText,
       })
-      setCoachFill(entry)
+      setCoachFields(new Set(merged.coachFields))
+      setActiveField(merged.activeField)
+      setCoachBase(entry)
     }).catch(() => { /* fail-soft：流断不砸页面 */ })
     return () => controller.abort()
   }, [coachId, mode, props.watchCoach])
 
+  // 手改 diff 回传：用户停下 900ms 后，把改动字段作为一条「以用户为准」的消息发给方法编辑。
+  useEffect(() => {
+    if (coachId === null || manual.size === 0 || draft === null) return undefined
+    const handle = setTimeout(() => {
+      const lines = FIELD_ORDER
+        .filter((field) => manual.has(field))
+        .map((field) => field === 'name'
+          ? `名称：${draft.name}`
+          : `${FIELD_LABELS[field]}：${draft.sections[field] ?? '（空）'}`)
+      void props.sendCoach(coachId, `【用户手改，以下值以用户为准，不要覆盖】\n${lines.join('\n')}`).catch(() => { /* fail-soft */ })
+    }, 900)
+    return () => clearTimeout(handle)
+  }, [coachId, draft, manual, props.sendCoach])
+
+  const markManual = (field: DraftField): void => {
+    setManual((current) => current.has(field) ? current : new Set(current).add(field))
+  }
+
+  const onNameChange = (name: string): void => {
+    markManual('name')
+    setDraft((current) => current === null ? null : { ...current, name })
+  }
+
   const undoCoach = (): void => {
-    if (previousDraftRef.current === null) return
-    setDraft(previousDraftRef.current)
-    clearCoachFill()
+    const previous = previousRef.current
+    if (previous === null) return
+    setDraft(previous.draft)
+    setManual(previous.manual)
+    setCoachFields(previous.coachFields)
+    setActiveField(previous.active)
+    setCoachBase(previous.base)
+    previousRef.current = null
   }
 
   return (
@@ -404,7 +467,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
                 : query.trim() !== '' ? '没有匹配的方法。' : '从左边选一条方法。'}
             </div>
           )}
-          {(mode === 'edit' || mode === 'new') && <EditorView draft={draft} mode={mode} sending={sending} onNameChange={(name) => { setDraft((current) => current === null ? null : { ...current, name }) }} onSectionChange={updateSection} onSave={() => { void save() }} onCancel={cancel} coachUpdated={coachFill !== null} onUndoCoach={undoCoach} />}
+          {(mode === 'edit' || mode === 'new') && <EditorView draft={draft} mode={mode} sending={sending} onNameChange={onNameChange} onSectionChange={updateSection} onSave={() => { void save() }} onCancel={cancel} coachFields={coachFields} manualFields={manual} activeField={activeField} coachUpdated={coachBase !== null} onUndoCoach={undoCoach} />}
         </main>
         {(mode === 'edit' || mode === 'new') && sessionId !== undefined && (
           <MethodCoachPanel sessionId={sessionId} context={coachContext} ensure={props.ensureCoach} send={props.sendCoach} onCoach={setCoachId} />
