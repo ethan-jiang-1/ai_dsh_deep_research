@@ -72,6 +72,9 @@ export function schemaIssueOf(bundleDir) {
   if (Number.isNaN(schema)) return 'run.md 的 schema 非法（应为整数契约版本）'
   if (schema !== null) {
     if (schema > SCHEMA_VERSION) return `run.md schema=${schema} 比本工具（${SCHEMA_VERSION}）新——先升门禁工具，不猜`
+    // 低版本不是"旧形态"：旧形态**直接省略 schema**（按 contract 日期断代）。写一个更小的数
+    // = 用版本字段给自己开豁免口——这正是把日期换成整数要消灭的那类逃逸，不能留。
+    if (schema < SCHEMA_VERSION) return `run.md schema=${schema} 低于本工具（${SCHEMA_VERSION}）——旧形态请直接省略 schema，不写更小值`
     // 整数契约形态下 created 是 bundle 里唯一的"人读时间"；缺了它，移交后无法回答"何时开始"。
     return createdDateOf(bundleDir) === null ? 'run.md schema 形态缺 created（人读立项日）' : null
   }
@@ -267,8 +270,9 @@ export function scanAll(bundleDirs, { contractDate = CONTRACT_DATE, today, dates
     const date = dates[b.slug] ?? (schema !== null
       ? (createdDateOf(d) ?? deliveryDate(d))
       : (epoch === null ? deliveryDate(d) : epoch === '' ? '9999-12-31' : epoch))
+    // 写了 schema 就按现行从严（非法/低版本由 schemaIssueOf 判红，不给"旧形态"豁免）。
     const era = schema !== null
-      ? (Number.isNaN(schema) || schema >= SCHEMA_VERSION ? 'contract' : 'pre-contract')
+      ? 'contract'
       : (date === null ? 'undated' : date >= contractDate ? 'contract' : 'pre-contract')
     const future = journalFutureDate(d, now)
     return { ...b, date, era, future, red: b.core.length > 0 && era !== 'pre-contract' }

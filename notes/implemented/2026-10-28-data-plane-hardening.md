@@ -81,6 +81,11 @@
   turn/step**（载荷是墙钟，逐字不可复现——理由与边界写进 [snapshots/README](../../snapshots/README.md)）；
   C 金标准 `--update-expected` 重写并人审：只差 lead 一句总结措辞（模型换了说法），无结构变化。
 
+**自审第四轮（版本字段自身）：** 发现 `schema: 1` + `created` 会让 bundle 落进 `pre-contract` 得到
+**全量豁免**——把日期换成整数只是换了逃逸口。已收紧：写 schema 即按现行从严，低版本与高版本都判红，
+旧形态的唯一表达是**省略 schema**（`schema-scan` 与 `node-gate` 同一判据，带反证用例）。
+另复跑 `data-smoke` / `user-env-smoke` / `profile-matrix-smoke` 全 PASS（新 peer 与种子 schema 下的安装面）。
+
 **自审第三轮（端到端覆盖与残留字面量）：** 又抓到两处真回归——① `presentGate` / `hitl2RowGate`
 独立调用时仍读 `contractEpochOf`（schema run 丢失见下界），已统一改 `epochDateOf`，并补
 「schema+created 的旧 present → RED」用例；② `upgrade-smoke` 的 `NEXT_VERSION` 写死 `0.1.3`，与

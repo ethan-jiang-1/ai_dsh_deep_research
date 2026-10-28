@@ -320,6 +320,17 @@ test('见证下界：schema 形态取 created（不让新 run 丢掉时间下界
   } finally { neither.cleanup() }
 })
 
+test('整数契约：低版本不是豁免口（schema: 1 + created 仍判红）', () => {
+  const { dir, cleanup } = mkSchemaRun('- schema: 1\n- created: 2026-10-28')
+  try {
+    const row = scanBundle(dir)
+    assert.ok(row.core.some((c) => c.includes('低于本工具')), row.core.join(' | '))
+    const { rows } = scanAll([dir], { dates: {} })
+    assert.equal(rows[0].era, 'contract', '写 schema 就按现行从严，不给契约前豁免')
+    assert.equal(rows[0].red, true)
+  } finally { cleanup() }
+})
+
 test('整数契约：schema 形态缺 created 判红（bundle 里唯一的人读时间）', () => {
   const { dir, cleanup } = mkSchemaRun('- schema: 2')
   try {

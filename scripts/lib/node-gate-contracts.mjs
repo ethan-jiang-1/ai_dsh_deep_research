@@ -28,7 +28,8 @@ export const READABLE_CONTRACT_DATE = '2026-10-23'
  *  无日期可断 = 从严（false——可定日期而不定 = 逃逸口，schema-scan 成例）。 */
 export function isPreContract(bundleDir, asOf, contractDate) {
   const schema = runSchemaOf(bundleDir)
-  if (schema !== null) return !(schema >= SCHEMA_VERSION)
+  // 写了 schema 即按现行契约判（低/高版本由 scanBundle 判红；这里不发放"契约前"豁免）。
+  if (schema !== null) return false
   const epoch = contractEpochOf(bundleDir)
   const date = asOf ?? (epoch === null ? deliveryDate(bundleDir) : epoch === '' ? '9999-12-31' : epoch)
   return date !== null && date < contractDate
