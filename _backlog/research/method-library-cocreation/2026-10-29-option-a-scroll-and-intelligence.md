@@ -7,6 +7,8 @@ intent: 为 2026-10-29-method-library-workbench-redesign 卡提供落地前的�
 
 调研日 2026-10-29。目标：不先写 UI，而先把**行为**定死——什么在滚、谁触发、切模式时保留什么。
 
+图：`ux/R1-scroll-anatomy.png`（滚动解剖）、`ux/R2-state-machine.png`（模式状态机）。
+
 ## 0. 结论先行
 
 1. **只有两个滚动容器**：草稿卡（展开时）、对话区。页面/工作台永不整滚。左库自滚。
