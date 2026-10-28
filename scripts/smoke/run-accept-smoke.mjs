@@ -85,7 +85,19 @@ try {
     check(second.status === 0, '② 同一 bundle 第二次 run-accept 仍绿（幂等）', second.stdout + second.stderr)
   }
 
-  // ③ present 指向 bundle 外 → 预检红、不写回执
+  // ②b --no-write = 真只读；未知参数必须红（此前 --no-write 被静默忽略，实际已写盘）
+  {
+    const { bundle, sessions } = writeBundle('dry', '')
+    writeSession(join(sessions, 'sess', 'session.v4.jsonl'), 'dry', WS, join(bundle, 'final', 'v1.md'))
+    const dry = accept(bundle, sessions, ['--no-write'])
+    check(dry.status === 0, '②b --no-write 预检绿', dry.stdout.slice(-300))
+    check(!existsSync(join(bundle, 'delivered.json')) && !existsSync(join(bundle, 'acceptance.md')) && !existsSync(join(bundle, 'node-gate.md')), '②b --no-write 不写 bundle')
+    const typo = accept(bundle, sessions, ['--no-writee'])
+    check(typo.status === 2 && /未知参数/.test(typo.stderr), '②b 未知参数 exit 2 并点名', typo.stderr.slice(-300))
+    check(!existsSync(join(bundle, 'delivered.json')), '②b 未知参数不写回执')
+  }
+
+  // ③ present 指向 bundle 外 → 预检红、不写回执  // ③ present 指向 bundle 外 → 预检红、不写回执
   {
     const { bundle, sessions } = writeBundle('outside', '')
     const outside = join(TEMP, 'elsewhere', 'drt_outside', 'final', 'v1.md')

@@ -7,8 +7,9 @@
 // 绿才写 acceptance.md，--archive 才移入 archive/drt_<slug>/。
 //
 // 用法：source dev/env.sh && node scripts/run-ops/run-accept.mjs <bundle> [--sessions <dir>] [--archive] [--repair]
-//       预检用 --no-write（默认只读）；绿后本工具显式给两个门 --write 落盘，再写 delivered.json/manifest.json/acceptance.md。
-// 退出码：0 = 验收绿（已写 acceptance.md）；1 = 验收红；2 = 用法/前置。
+//       `--no-write` = 只跑预检、不写 bundle（绿也退出 0）；不带它则绿后给两个门 --write 落盘，
+//       再写 delivered.json/manifest.json/acceptance.md；`--archive` 才移入 archive/。
+// 退出码：0 = 验收绿（或 --no-write 预检绿）；1 = 验收红；2 = 用法/前置/未知参数。
 import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -28,6 +29,17 @@ const opt = (name, fallback = undefined) => {
   return i >= 0 && argv[i + 1] !== undefined ? argv[i + 1] : fallback
 }
 const flag = (name) => argv.includes(name)
+// 未知参数必须红（曾静默忽略 --no-write/session 拼错：用户以为只读，实际已写盘）。
+const KNOWN_FLAGS = new Set(['--archive', '--repair', '--no-write', '--help'])
+const KNOWN_OPTS = new Set(['--sessions'])
+for (let i = 0; i < argv.length; i += 1) {
+  const a = argv[i]
+  if (!a.startsWith('--')) continue
+  if (KNOWN_FLAGS.has(a)) continue
+  if (KNOWN_OPTS.has(a)) { i += 1; continue }
+  console.error(`run-accept: 未知参数 ${a}（支持 --sessions <dir> / --archive / --repair / --no-write）`)
+  process.exit(2)
+}
 const positional = argv.filter((a) => !a.startsWith('--') && argv[argv.indexOf(a) - 1] !== '--sessions')
 const bundleArg = positional[0]
 if (bundleArg === undefined || flag('--help')) {
@@ -100,6 +112,12 @@ const preGreen = preGate.status === 0 && preAudit.status === 0 && preHygiene.sta
 if (!preGreen) {
   console.error(`run-accept: RED（${slug}）——预检未过；未写 acceptance.md/audit.md/node-gate.md/delivered.json，未归档。先修红项再跑同一条`)
   process.exit(1)
+}
+
+// --no-write：预检绿即停，不落任何 bundle 文件（只读模式要有真实语义，不能靠"未知参数被忽略"）。
+if (flag('--no-write')) {
+  console.log(`run-accept: 预检绿（${slug}）——--no-write：未写 acceptance.md/audit.md/node-gate.md/delivered.json，未归档`)
+  process.exit(0)
 }
 
 // 绿后才落盘：真实门禁/审计 + 回执。
