@@ -24,6 +24,7 @@ import { resolveDshHome, resolvePathInput } from './lib/dsh-home.mjs'
 import { inferInstallAnchor, resolveRowPeers } from './lib/install-anchor.mjs'
 import { rowPeerNames } from './lib/pack-rows.mjs'
 import { auditWorkspace } from './lib/workspace-audit.mjs'
+import { seedPolicyAdvice } from './lib/seed-core.mjs'
 import { credentialStatus } from './lib/credentials-status.mjs'
 
 const PACK = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -215,9 +216,13 @@ function nodeSatisfies(version, range) {
       // 不改变阻塞判据（用户可能有意定制，preflight 不能替他决定）。
       const contractDrift = (rel) => {
         const finding = audit.findings.find((item) => item.rel === rel)
-        return finding !== undefined && finding.policy === 'contract' && finding.status !== 'current'
-          ? '；契约类种子（policy=contract）与包版本不同源——确认后 --adopt 建基线'
-          : ''
+        if (finding === undefined) return ''
+        const advice = seedPolicyAdvice(finding.policy, finding.status)
+        if (advice === null) return ''
+        // stale = 用户没改、包里有新版：正确动作是 --upgrade，不是 --adopt。
+        return advice.kind === 'update'
+          ? '；契约类种子（policy=contract）包内已更新——运行 --upgrade'
+          : advice.kind === 'drift' ? '；契约类种子（policy=contract）与包版本不同源——确认后 --adopt 建基线' : ''
       }
       const findingOf = new Map(audit.findings.map((item) => [item.rel, item]))
       const statusOf = (rel) => findingOf.get(rel)?.status ?? 'missing'
@@ -256,8 +261,13 @@ function nodeSatisfies(version, range) {
       const templateFindings = audit.findings.filter((item) => item.rel.startsWith('templates/run/'))
       const badTemplates = templateFindings.filter((item) => ['missing', 'deleted', 'untracked', 'special', 'unreadable'].includes(item.status))
       const tplCount = templateFindings.filter((item) => !['missing', 'deleted'].includes(item.status)).length
+      // 模板与手册/NODES 同属契约类（D35）：被用户改过时也要点名，别让模板漂移静默。
+      const templateAdvices = templateFindings.map((item) => seedPolicyAdvice(item.policy, item.status)).filter((a) => a !== null)
+      const templateDrift = templateAdvices.some((a) => a.kind === 'update')
+        ? '；模板属契约类（policy=contract）包内已更新——运行 --upgrade'
+        : templateAdvices.some((a) => a.kind === 'drift') ? '；模板属契约类（policy=contract）且与包版本不同源——确认后 --adopt 建基线' : ''
       record(badTemplates.length === 0 && tplCount >= 6, `run 模板（${join(workspace, 'templates', 'run')}）`,
-        `${tplCount} 个（期望 ≥6）${badTemplates.length > 0 ? `；问题：${badTemplates.map((item) => `${item.rel}=${item.status}`).join('、')}` : ''}`, seedRemedy)
+        `${tplCount} 个（期望 ≥6）${badTemplates.length > 0 ? `；问题：${badTemplates.map((item) => `${item.rel}=${item.status}`).join('、')}` : ''}${templateDrift}`, seedRemedy)
 
       const state = audit.state
       let seedVersionOk = null

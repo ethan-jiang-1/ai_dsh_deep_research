@@ -153,6 +153,20 @@ export function policyOf(seed, rel) {
   return SEED_POLICIES.includes(value) ? value : 'contract'
 }
 
+/** 种子的处置建议（给 scaffold --check / preflight 的标签与动作）：**用户改动**与**包更新**
+ *  必须分开——`stale`（用户没动、包里有新版）该 `--upgrade`，`modified/untracked`（用户改过）
+ *  才该 `--adopt` 建基线。返回 null = 无需提示（current/missing/deleted 等）。 */
+export function seedPolicyAdvice(policy, status) {
+  if (policy === 'contract') {
+    if (status === 'modified' || status === 'untracked') return { kind: 'drift', text: '与包版本不同源的契约' }
+    if (status === 'stale') return { kind: 'update', text: '包版本更新，可 --upgrade' }
+  } else if (policy === 'corpus') {
+    if (status === 'modified' || status === 'untracked') return { kind: 'grown', text: '底本已生长，正常' }
+    if (status === 'stale') return { kind: 'update', text: '包内底本更新，可 --upgrade' }
+  }
+  return null
+}
+
 /** 稳定序列化种子清单：版本 + 所有权 + 按路径排序的 sha256；生成物与 `--check` 逐字对账。 */
 export function serializeSeedManifest({ version, files, policy = {} }) {
   const byPath = (a, b) => (a < b ? -1 : a > b ? 1 : 0)

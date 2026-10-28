@@ -137,9 +137,11 @@ try {
   const wsDrift = join(root, 'ws-contract-drift')
   check(seedInto(wsDrift).status === 0, 'fixture 工作区（contract drift）铺种')
   writeFileSync(join(wsDrift, 'NODES.md'), `${readFileSync(join(wsDrift, 'NODES.md'), 'utf8')}\n<!-- local node contract edit -->\n`)
+  writeFileSync(join(wsDrift, 'templates', 'run', 'plan.md'), `${readFileSync(join(wsDrift, 'templates', 'run', 'plan.md'), 'utf8')}\n<!-- local template edit -->\n`)
   const drift = run(['--install-anchor', anchor], { workspacePath: wsDrift })
   check(drift.status === 0, '契约类漂移只提示，不硬红', `exit=${drift.status}`)
   check(/契约类种子（policy=contract）与包版本不同源/.test(drift.stdout || ''), '契约类漂移在详情里点名', (drift.stdout || '').split('\n').filter((l) => l.includes('NODES.md')).join(' | '))
+  check(/模板属契约类（policy=contract）且与包版本不同源/.test(drift.stdout || ''), '模板漂移同样按契约类点名', (drift.stdout || '').split('\n').filter((l) => l.includes('run 模板')).join(' | '))
 
   // 空凭据文件不是“有 key”；workspace/.env 才是 DSH 支持的来源之一。
   writeFileSync(join(dshHome, CREDENTIALS_FILENAME), '')

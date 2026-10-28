@@ -60,7 +60,7 @@
   修复前 `run-accept`/`node-gate` 拿到的下界是 `null`；新增 `epochDateOf` 后同一 bundle 返回
   `2026-10-28`（`contractEpochOf = ""` → `epochDateOf = "2026-10-28"`），并有单测锁三形态
   （schema→created；contract→contract；两者全缺→空串）。
-- `pnpm verify` 全绿；`pnpm test` **948 pass / 0 fail**（新增整数契约四例 + 缺 created 一例、模板↔解析器同源、
+- `pnpm verify` 全绿；`pnpm test` **949 pass / 0 fail**（新增整数契约四例 + 缺 created 一例、模板↔解析器同源、
   数据卡 10 列 + 可移植闭集、手册两处副本的回执三态句、seed policy 两例、审计 findings.policy）。
 - **时钟行门禁先红后绿（实录）**：删掉 `analyst.patch.yml` 的 `- id: time-context` 两行 →
   `verify` 报 `preset-structure: analyst.patch.yml: 须恰有一条 - id: time-context（D32 时钟行，当前 0 条）`
@@ -80,6 +80,8 @@
   scout skill-catalog 存量漂移）转为 **ALL PASS**。`time-context` 进比对面后判据 = **注入的
   turn/step**（载荷是墙钟，逐字不可复现——理由与边界写进 [snapshots/README](../../snapshots/README.md)）；
   C 金标准 `--update-expected` 重写并人审：只差 lead 一句总结措辞（模型换了说法），无结构变化。
+
+**自审第五轮（标签语义）：** `stale`（用户没动、包里有新版）此前被标签说成"与包版本不同源"并建议 `--adopt`——动作是错的，正确动作是 `--upgrade`。处置建议收成 `seed-core.seedPolicyAdvice`（drift/update/grown 三态），scaffold 与 preflight 共用；模板漂移也按契约类点名（此前只有手册/NODES/判型库点名）。
 
 **自审第四轮（版本字段自身）：** 发现 `schema: 1` + `created` 会让 bundle 落进 `pre-contract` 得到
 **全量豁免**——把日期换成整数只是换了逃逸口。已收紧：写 schema 即按现行从严，低版本与高版本都判红，

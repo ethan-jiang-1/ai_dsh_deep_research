@@ -5,7 +5,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { SEED_POLICIES, SEED_STATE_SCHEMA, classifySeedEntry, nextSeedState, parseSeedState, planSeedCleanup, policyOf, seedSourceRel, serializeSeedManifest, sha256 } from '../../packages/deep-research-pack/scripts/lib/seed-core.mjs'
+import { SEED_POLICIES, SEED_STATE_SCHEMA, classifySeedEntry, nextSeedState, parseSeedState, planSeedCleanup, policyOf, seedPolicyAdvice, seedSourceRel, serializeSeedManifest, sha256 } from '../../packages/deep-research-pack/scripts/lib/seed-core.mjs'
 
 test('sha256：内容哈希稳定且区分换行', () => {
   assert.equal(sha256('abc'), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad')
@@ -179,4 +179,15 @@ test('policyOf：旧清单无 policy 字段 → 保守按 contract；未知值�
   assert.equal(policyOf({ files: {} }, 'AGENTS.md'), 'contract')
   assert.equal(policyOf({ policy: { 'AGENTS.md': 'user' } }, 'AGENTS.md'), 'user')
   assert.equal(policyOf({ policy: { 'AGENTS.md': 'whatever' } }, 'AGENTS.md'), 'contract')
+})
+
+test('种子处置建议：stale（包更新）指向 --upgrade，modified/untracked（用户改过）指向 --adopt', () => {
+  assert.deepEqual(seedPolicyAdvice('contract', 'stale'), { kind: 'update', text: '包版本更新，可 --upgrade' })
+  assert.deepEqual(seedPolicyAdvice('contract', 'modified'), { kind: 'drift', text: '与包版本不同源的契约' })
+  assert.deepEqual(seedPolicyAdvice('contract', 'untracked'), { kind: 'drift', text: '与包版本不同源的契约' })
+  assert.deepEqual(seedPolicyAdvice('corpus', 'stale'), { kind: 'update', text: '包内底本更新，可 --upgrade' })
+  assert.deepEqual(seedPolicyAdvice('corpus', 'modified'), { kind: 'grown', text: '底本已生长，正常' })
+  assert.equal(seedPolicyAdvice('user', 'modified'), null, '用户数据不给处置标签')
+  assert.equal(seedPolicyAdvice('contract', 'current'), null)
+  assert.equal(seedPolicyAdvice('contract', 'missing'), null)
 })
