@@ -23,7 +23,7 @@ export default defineConfig([
   {
     ...shared,
     name: PACKAGE_ID,
-    entry: { index: 'lib/types/index.js', 'fetch-fallback': 'lib/types/fetch-fallback/index.js' },
+    entry: { index: 'lib/types/index.js', 'fetch-fallback': 'lib/types/fetch-fallback/index.js', 'method-library-tool': 'lib/types/method-library-tool.js' },
     format: 'esm',
     platform: 'node',
     external: [/^@deepseek-ai\//],

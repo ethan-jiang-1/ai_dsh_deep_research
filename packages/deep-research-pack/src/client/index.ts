@@ -30,12 +30,13 @@ import {
   RESEARCH_FINAL_TAB_KEY, RESEARCH_FINAL_KIND, RESEARCH_FINAL_PATTERN, RESEARCH_FINAL_PATTERN_ROOT,
   RESEARCH_FINAL_PATTERN_LEDGER, RESEARCH_FINAL_PATTERN_LEDGER_ROOT,
   RESEARCH_FINAL_PATTERN_READER, RESEARCH_FINAL_PATTERN_READER_ROOT,
-  RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT, RESEARCH_TOOL_KEYS,
+  RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT, RESEARCH_TOOL_KEYS, METHOD_LIBRARY_TOOL,
   RESEARCH_BRAND_MARK_SLOT, RESEARCH_BRAND_NAME_SLOT, METHOD_LIBRARY_VIEW,
   METHOD_COACH_PORTAL, METHOD_COACH_PORTAL_ID, METHOD_COACH_CHAT,
 } from './keys.ts'
 import { IconBranchOutlineRegular, IconGaugeOutlineRegular, IconSettingsOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import { ResearchToolCard } from './ResearchToolCard.tsx'
+import { MethodLibraryToolCard } from './MethodLibraryToolCard.tsx'
 import { ResearchStatusTab, ResearchStatusTitle, type JournalFrame, type FollowTarget } from './ResearchStatusTab.tsx'
 import { ResearchConfigTab } from './ResearchConfigTab.tsx'
 import { MethodLibraryView } from './MethodLibraryView.tsx'
@@ -338,6 +339,11 @@ export function apply(ctx: ClientContext): void {
         watchCoach,
       }),
     }, MethodLibraryView)), 'deep-research-pack: method-library conversation view')
+
+    // 方法库写库工具卡：对话流里只显示「已写入库：name」，不暴露工具参数。
+    scoped.effect(() => scoped.slots.inject(RESEARCH_TOOLVIEW_SLOT, () =>
+      scoped.slots.register({ name: RESEARCH_TOOLVIEW_SLOT, key: METHOD_LIBRARY_TOOL, priority: -1 }, MethodLibraryToolCard)),
+    'deep-research-pack: method-library toolview')
 
     // 方法编辑：根级 portal（shell.overlay）+ 私有 session 子槽；会话树在 main 之外，DOM 进页面右栏。
     scoped.effect(() => scoped.slots.inject(METHOD_COACH_PORTAL, () => scoped.slots.register({

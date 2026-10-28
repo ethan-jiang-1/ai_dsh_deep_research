@@ -65,7 +65,9 @@
     "@deepseek-ai/dsh-web": "^0.2.1-rc.2",
     "@deepseek-ai/dsh-web-deepseek-api": "^0.2.1-rc.2",
     "@deepseek-ai/dsh-web-fetch-http": "^0.2.1-rc.2",
-    "@deepseek-ai/schemastery": "^3.18.5"
+    "@deepseek-ai/schemastery": "^3.18.5",
+    "@deepseek-ai/dsh-tools": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-agent": "^0.2.1-rc.2"
   },
   "dsh": {
     "bundle": {
@@ -110,7 +112,11 @@
       "types": "./lib/types/fetch-fallback/index.d.ts",
       "default": "./lib/fetch-fallback.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./method-library-tool": {
+      "types": "./lib/types/method-library-tool.d.ts",
+      "default": "./lib/method-library-tool.js"
+    }
   },
   "scripts": {
     "build": "tsc -b . && tsdown",

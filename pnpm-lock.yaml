@@ -115,6 +115,9 @@ importers:
       '@deepseek-ai/cordis':
         specifier: link:../../vendor/dsh/vendor/cordis
         version: link:../../vendor/dsh/vendor/cordis
+      '@deepseek-ai/dsh-agent':
+        specifier: ^0.2.1-rc.2
+        version: 0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis)(@deepseek-ai/dsh-llm@0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis))(@deepseek-ai/dsh-scope@0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis))(@deepseek-ai/dsh-session-projection@0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis)(@deepseek-ai/dsh-session@vendor+dsh+packages+core+session))(@deepseek-ai/dsh-session@vendor+dsh+packages+core+session)(@deepseek-ai/dsh-system-prompt@0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis)(@deepseek-ai/dsh-llm@0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis))(@deepseek-ai/dsh-scope@0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis)))(@deepseek-ai/dsh-typert-protocol@0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis))(@deepseek-ai/dsh-util-values@0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis))
       '@deepseek-ai/dsh-agent-instructions':
         specifier: ^0.2.1-rc.2
         version: 0.2.1-rc.3(b2569777be9b66e9eda653ce67c73c52)
@@ -172,6 +175,9 @@ importers:
       '@deepseek-ai/dsh-tool-web':
         specifier: ^0.2.1-rc.2
         version: 0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis)(@deepseek-ai/dsh-llm@0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis))(@deepseek-ai/dsh-system-prompt@0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis)(@deepseek-ai/dsh-llm@0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis))(@deepseek-ai/dsh-scope@0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis)))(@deepseek-ai/dsh-tools@0.2.1-rc.3(422a1c5340859d20f893ebf25978b254))(@deepseek-ai/dsh-web@0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis)(@deepseek-ai/dsh-llm@0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis)))
+      '@deepseek-ai/dsh-tools':
+        specifier: ^0.2.1-rc.2
+        version: 0.2.1-rc.3(422a1c5340859d20f893ebf25978b254)
       '@deepseek-ai/dsh-web':
         specifier: ^0.2.1-rc.2
         version: 0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis)(@deepseek-ai/dsh-llm@0.2.1-rc.3(@deepseek-ai/cordis@vendor+dsh+vendor+cordis))

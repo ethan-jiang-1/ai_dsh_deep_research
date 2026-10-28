@@ -20,8 +20,8 @@ import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import {
   SECTION_LABELS,
   foldLibrary,
+  renderLibraryEntry,
   instructionOf,
-  saveInstruction,
   summaryOfEntry,
   type LibraryEntry,
   type LibrarySections,
@@ -108,6 +108,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const coachFieldsRef = useRef<ReadonlySet<DraftField>>(coachFields)
   const activeRef = useRef<DraftField | null>(activeField)
   const coachBaseRef = useRef<LibraryEntry | null>(coachBase)
+  const savePendingRef = useRef<{ name: string; sections: LibrarySections; timeout: ReturnType<typeof setTimeout> } | null>(null)
   draftRef.current = draft
   manualRef.current = manual
   coachFieldsRef.current = coachFields
@@ -239,35 +240,49 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setDraft({ ...draft, sections: { ...draft.sections, [key]: value === '' ? null : value } })
   }
 
+  // 保存闭环（D25 2026-10-28 扩展）：页面发保存封套 → 方法编辑调 method_library_upsert 写库 →
+  // 页面回读对账 → 三态回执（已发送/已回写/已落盘）→ 刷新库。面板不直写；唯一写路径是 coach 的窄工具。
   const save = async (): Promise<void> => {
-    if (draft === null || sessionId === undefined) return
+    if (draft === null) return
     const name = draft.name.trim()
     if (name === '') {
       setReceipt({ ok: false, detail: '名称不能为空' })
       return
     }
-    const base = mode === 'new'
-      ? saveInstruction(name, draft.sections)
-      : saveInstruction(name, draft.sections, draft.currentName)
-    const text = draft.legacyText !== null && draft.legacyText.trim() !== ''
-      ? `${base}\n保留旧格式正文：${draft.legacyText}`
-      : base
-    const sendInstruction = props.sendInstruction
-    setSending(true)
-    try {
-      const result = await sendInstruction(sessionId, text)
-      setReceipt({ ok: result.ok, detail: result.ok ? '已交给 Lead 保存；它写入后点「刷新」回读。' : (result.detail ?? '发送失败') })
-      if (result.ok) {
-        setMode('read')
-        setSelectedName(name)
-        setDraft(null)
-        const controller = new AbortController()
-        setTimeout(() => { void load(controller.signal) }, 1500)
-      }
-    } catch (cause) {
-      setReceipt({ ok: false, detail: String(cause) })
-    } finally {
+    const missing = SECTION_LABELS.filter(({ key }) => {
+      const value = draft.sections[key]
+      return value === null || value.trim() === ''
+    })
+    if (missing.length > 0) {
+      setReceipt({ ok: false, detail: `还缺字段：${missing.map(({ label }) => label).join('、')}——填完再保存` })
+      return
+    }
+    if (coachId === null) {
+      setReceipt({ ok: false, detail: '方法编辑还没就绪；稍等或重开本页再保存' })
+      return
+    }
+    const block = [
+      renderLibraryEntry({ name, sections: draft.sections, provenance: draft.provenance, isDefault: draft.isDefault }),
+      ...(draft.legacyText !== null && draft.legacyText.trim() !== '' ? [draft.legacyText.trim()] : []),
+    ].join('\n')
+    const action = mode === 'new' ? '新建' : `更新（原「${draft.currentName ?? name}」）`
+    const envelope = `【保存封套】把下面这条方法条目写入工作区 method-library.md。\n- 动作：${action}\n- 用 method_library_upsert 工具写；写后只回复「已写入：${name}」，不要做其它事。\n\`\`\`method-draft\n${block}\n\`\`\``
+    const timeout = setTimeout(() => {
+      if (savePendingRef.current?.name !== name) return
+      savePendingRef.current = null
       setSending(false)
+      setReceipt({ ok: false, detail: '等方法编辑回话超时；可重试，库不会被写坏' })
+    }, 120000)
+    savePendingRef.current = { name, sections: draft.sections, timeout }
+    setSending(true)
+    setReceipt({ ok: true, detail: '已发送给方法编辑，等它写库…' })
+    try {
+      await props.sendCoach(coachId, envelope)
+    } catch (cause) {
+      clearTimeout(timeout)
+      savePendingRef.current = null
+      setSending(false)
+      setReceipt({ ok: false, detail: `发送失败：${String(cause)}` })
     }
   }
 
@@ -353,6 +368,33 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
       setCoachFields(new Set(merged.coachFields))
       setActiveField(merged.activeField)
       setCoachBase(entry)
+      // 保存封套的回执：方法编辑说「已写入」→ 回读对账 → 三态收口。
+      const pending = savePendingRef.current
+      if (pending !== null && text.includes('已写入')) {
+        void (async () => {
+          clearTimeout(pending.timeout)
+          savePendingRef.current = null
+          setReceipt({ ok: true, detail: '方法编辑已回写；正在回读核对…' })
+          try {
+            const latest = await props.readFile(sessionId, LIBRARY_PATH, new AbortController().signal, LIBRARY_READ_LIMIT)
+            const saved = foldLibrary(latest).find((item) => item.name === pending.name)
+            const match = saved !== undefined && SECTION_LABELS.every(({ key }) => (saved.sections[key] ?? '') === (pending.sections[key] ?? ''))
+            if (match) {
+              setReceipt({ ok: true, detail: `已落盘核对通过：${pending.name}` })
+              setMode('read')
+              setSelectedName(pending.name)
+              setDraft(null)
+              void load(new AbortController().signal)
+            } else {
+              setReceipt({ ok: false, detail: '方法编辑已回话，但库回读对不上——请点「刷新」复核' })
+            }
+          } catch (cause) {
+            setReceipt({ ok: false, detail: `已回写但回读失败：${String(cause)}` })
+          } finally {
+            setSending(false)
+          }
+        })()
+      }
     }).catch(() => { /* fail-soft：流断不砸页面 */ })
     return () => controller.abort()
   }, [coachId, mode, props.watchCoach])

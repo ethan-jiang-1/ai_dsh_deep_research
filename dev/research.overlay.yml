@@ -301,7 +301,7 @@
 
                 输出契约：每当字段有变化，在消息末尾给一个 ```method-draft 围栏，内容是**完整**库条目（不是 diff），
                 格式见 method-interview skill。没有变化就不发。页面会用它回填表单；用户手改后以用户为准。
-                保存由页面按钮触发；收到保存封套时按封套里的完整条目写库（写库接口接入后）。
+                保存由页面按钮触发；收到【保存封套】时调 method_library_upsert 写库，成功后只回复「已写入：<名称>」，不要做其它事。
 
           - id: time-context
             name: '@deepseek-ai/dsh-time-context'
@@ -319,6 +319,10 @@
           # blocking = 默认 legacy 模式：用户不答，回合不落定（方法库页在等这一问）。
           - id: tool-ask-user
             name: '@deepseek-ai/dsh-tool-ask-user'
+
+          # 写库唯一路径（D25）：方法编辑只通过这个窄工具碰 method-library.md；面板不直写。
+          - id: method-library-tool
+            name: 'dsh-deep-research-pack/method-library-tool'
 
           # 工作区手册注入（handbook-budget 门禁）：给方法与库格式的参考上下文，按预算截断。
           - id: agent-instructions
