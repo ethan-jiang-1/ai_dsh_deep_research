@@ -218,3 +218,10 @@ method-editor 9 轮问答）**全部通过**：问卡 → 四字段回填 → �
 - 现行方法库政策（Lead 侧）：[research-brief/SKILL.md L87-L105](../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md)
 - 驾驶舱构成正本：[design/40 §2.7](../../../docs/design/40-research-cockpit.md#cockpit-7)
 - 决定台账：[D2](../../../docs/decisions.md#d2)、[D25](../../../docs/decisions.md#d25)
+
+## 收尾追加（2026-10-28 晚）
+
+- **删除**：读态「删除…」改走方法编辑（删除封套 → `method_library_remove` 窄工具 → 页面回读确认 → 「已删除」），不再直发 Lead；`removeMethodEntry` 同名整段删除、保留库头与其它条目（keyless 测）；
+- **设默认**：编辑表单「设为默认偏好」勾选，保存封套带 `isDefault`，全库唯一；
+- **聊天历史**：右栏方法编辑面板常显历史与输入（`be41a96`），页面三栏不再 `flexWrap` 折到底部；
+- **client-load roster**：`analyst-market` 来自 dev home 命中 `drt_cn-us-cpu-gap` 归档 run 的 spawn 记录，页面「队员动态」roster 未投影该成员——是 dev home 历史 run 数据漂移，不是方法库代码；未改断言掩盖。
