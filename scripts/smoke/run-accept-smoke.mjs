@@ -118,6 +118,17 @@ try {
     check(manifest.schema === 2, '⑥ manifest 记 schema=2', JSON.stringify(manifest.schema))
     check(manifest.contract === '2026-10-24', '⑥ manifest 日期取 created（不是空串）', JSON.stringify(manifest.contract))
     check(JSON.parse(readFileSync(join(bundle, 'delivered.json'), 'utf8')).present.path === 'drt_schema2/final/v1.md', '⑥ schema run 回执 present 相对化')
+    // repair × 整数契约：把回执写坏成绝对路径后再修——repair 也走 evidence-audit，必须赶在补证据之前。
+    const deliveredPath = join(bundle, 'delivered.json')
+    const badReceipt = JSON.parse(readFileSync(deliveredPath, 'utf8'))
+    badReceipt.present = { ...badReceipt.present, path: join(bundle, 'final', 'v1.md') }
+    writeFileSync(deliveredPath, `${JSON.stringify(badReceipt, null, 2)}\n`)
+    writeFileSync(join(bundle, 'acceptance.md'), '# Acceptance\n')
+    const repaired = accept(bundle, sessions, ['--repair'])
+    check(repaired.status === 0, '⑥ repair × schema 仍绿', repaired.stdout.slice(-400))
+    check(JSON.parse(readFileSync(deliveredPath, 'utf8')).present.path === 'drt_schema2/final/v1.md', '⑥ repair 后 schema present 相对化')
+    check(JSON.parse(readFileSync(join(bundle, 'manifest.json'), 'utf8')).schema === 2, '⑥ repair 不动 manifest 的 schema 快照')
+
     // schema-scan CLI 的绿面：在验收后补齐"完整 run"必备件（验收前的证据会触发 evidence-audit 对账，
     // 与本断言无关），再让真 CLI 判一次新契约。
     writeFileSync(join(bundle, 'topics.md'), '# Topics\n')
