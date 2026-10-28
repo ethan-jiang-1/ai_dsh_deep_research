@@ -40,7 +40,7 @@ description: 立项对齐（HITL1）方法论：判型模式库对照、研究�
    归档预检问可并入第一段卡（第四问位）：sibling 预检发现同名/前缀相关 bundle 已在
    （含 archive/）须问用户安置时，作为第四问并卡执行，不单独再打断一次——安置拍板与
    其余各问同批记入 Snapshot 澄清记录。
-4. **建状态头**：新建 `drt_<slug>/run.md`（模板 `templates/run/run.md`）——`contract` = 当天日期、`phase: briefing`、`next: HITL1`、`delivered: none`、`parked: none`；阶段转换/交付/停放时更新（D28；状态是声明，事实与之冲突时以事实为准）。
+4. **建状态头**：新建 `drt_<slug>/run.md`（模板 `templates/run/run.md`）——`schema: 2`（整数契约版本，D33）、`created` = 立项日（以 time-context 读数为准；无读数如实写不确定）、`phase: briefing`、`next: HITL1`、`delivered: none`、`parked: none`；阶段转换/交付/停放时更新（D28；状态是声明，事实与之冲突时以事实为准）。
 5. **定稿 question.md**：模板 `templates/run/question.md`。
 6. **拆 topics.md**：模板 `templates/run/topics.md`。每个 topic 必须有：
    - `must_answer`：一句话，验收时能判"答了/没答"；

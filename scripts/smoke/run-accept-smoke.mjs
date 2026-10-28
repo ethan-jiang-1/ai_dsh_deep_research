@@ -4,7 +4,8 @@
 // 证明：run-accept 的「预检 → 门禁/审计落盘 → 回执」在四条路径上符合合同：
 //   ① 绝对 present（vendor 真实语义）→ 回执归一为 drt_<slug>/final/vN，path/secret 干净；
 //   ② 连续两次绿（幂等）；③ present 指向 bundle 外 → 预检红且不写回执；
-//   ④ final 含高置信凭据 → secret-scan 红且不写回执；⑤ --repair 修旧回执后仍绿。
+//   ④ final 含高置信凭据 → secret-scan 红且不写回执；⑤ --repair 修旧回执后仍绿；
+//   ⑥ 整数契约（`schema: 2` + `created`）→ 回执日期取 created、manifest 同时记 schema。
 // 不证明：真模型行为、rc.3 客户端（compat-client-smoke）、真实 run 内容。
 //
 // 用法：node scripts/smoke/run-accept-smoke.mjs
@@ -43,10 +44,10 @@ function writeSession(path, slug, cwd, presentPath) {
   writeFileSync(path, [head, ask1, write, ask2, reply, present].map((e) => JSON.stringify(e)).join('\n') + '\n')
 }
 
-function writeBundle(slug, presentPath, finalText = '# v1\n\nclean\n') {
+function writeBundle(slug, presentPath, finalText = '# v1\n\nclean\n', runHead = '- contract: 2026-10-23') {
   const bundle = join(WS, `drt_${slug}`)
   mkdirSync(join(bundle, 'final'), { recursive: true })
-  writeFileSync(join(bundle, 'run.md'), '# Run\n\n- contract: 2026-10-23\n- phase: delivery\n- next: none\n')
+  writeFileSync(join(bundle, 'run.md'), `# Run\n\n${runHead}\n- phase: delivery\n- next: none\n`)
   writeFileSync(join(bundle, 'question.md'), '# Q\n\n## 研究类型\n\nquick_factual\n\n## Decisions（append-only，最新在上）\n\n- 2026-10-24 HITL2 定稿（delta: 新增；agent interpretation: 按现稿交付）\n')
   writeFileSync(join(bundle, 'final.md'), finalText)
   writeFileSync(join(bundle, 'final', 'v1.md'), finalText)
@@ -106,6 +107,18 @@ try {
     check(!result.stdout.includes(key), '④ 扫描输出不回显凭据原文')
   }
 
+  // ⑥ 整数契约：run.md 无 contract，只有 schema + created → 日期取 created、manifest 记版本
+  {
+    const { bundle, sessions } = writeBundle('schema2', '', '# v1\n\nclean\n', '- schema: 2\n- created: 2026-10-24')
+    writeSession(join(sessions, 'sess', 'session.v4.jsonl'), 'schema2', WS, join(bundle, 'final', 'v1.md'))
+    const result = accept(bundle, sessions)
+    check(result.status === 0, '⑥ schema run：run-accept 绿', result.stdout.slice(-400))
+    const manifest = JSON.parse(readFileSync(join(bundle, 'manifest.json'), 'utf8'))
+    check(manifest.schema === 2, '⑥ manifest 记 schema=2', JSON.stringify(manifest.schema))
+    check(manifest.contract === '2026-10-24', '⑥ manifest 日期取 created（不是空串）', JSON.stringify(manifest.contract))
+    check(JSON.parse(readFileSync(join(bundle, 'delivered.json'), 'utf8')).present.path === 'drt_schema2/final/v1.md', '⑥ schema run 回执 present 相对化')
+  }
+
   // ⑤ --repair：旧回执绝对 present → 修后仍绿
   {
     const { bundle, sessions } = writeBundle('repair', '', '# v1\n\nclean\n')
@@ -132,5 +145,5 @@ if (failures.length > 0) {
   console.error(`\nrun-accept-smoke: ${String(failures.length)} 项失败`)
   process.exit(1)
 }
-console.log('\nrun-accept-smoke: ALL PASS（回执归一/幂等/外部 present/秘密/repair）')
+console.log('\nrun-accept-smoke: ALL PASS（回执归一/幂等/外部 present/秘密/repair/整数契约）')
 process.exit(0)
