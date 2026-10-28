@@ -72,7 +72,7 @@
 | 件 | 证明什么 | 档位 |
 |---|---|---|
 | node-gate.mjs | 判据级：门①②③④ + 门L + 门R（标题重复退化，2026-10-06 起）+ 门A（交付完整性，2026-10-08 起）+ 门C（读者版合同，2026-10-23 起；图例正本 = research-workspace/NODES.md 头部），默认只读，`--write` 才落 bundle 报告——判据核心住 lib/node-gate-core.mjs 聚合及领域模块（本件 = CLI 壳 + zstd reader 注入） | keyless |
-| schema-scan.mjs | 在场级：八节点输出件在场断言（断代定红；判据核住 lib/schema-scan-core.mjs，本件 = CLI 壳） | keyless |
+| schema-scan.mjs | 在场级：八节点输出件在场断言（整数契约/日期两态断代；判据核住 lib/schema-scan-core.mjs，本件 = CLI 壳） | keyless |
 | evidence-audit.mjs | URL/摘录/final 链溯源对账；默认只读，`--write` 才落 audit.md——判据核心住 lib/evidence-audit-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless（须 source dev/env.sh） |
 | path-hygiene.mjs | run bundle 的 `final/`/`acceptance.md`/`delivered.json`/`provenance/` 本机 home 路径；默认红，`--allow-legacy` 旧场只报告 | keyless |
 | secret-scan.mjs | 交付物面（final/、receipts、audit、node-gate）的高置信凭据形态（sk-/ghp_/AKIA/AIza/xox[baprs]-/PRIVATE KEY/Bearer）；默认红，`--allow-legacy` 旧场只报告，`--all` 加证据/过程件；输出只到 path/line/kind | keyless |

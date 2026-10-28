@@ -394,6 +394,8 @@ export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadabl
   const epoch = epochDateOf(bundleDir)
   const newContract = epoch !== null
   const contract = epoch === '' ? null : epoch
+  // fail-closed：run.md 在场但纪元非法 = 没有下界，不能把任意历史答复当本 run 见证。
+  if (newContract && contract === null) return { status: 'RED', detail: 'run.md 契约纪元缺失/非法（schema 需 created，旧形态需合法 contract）——见证不能无下界采信' }
   let gate
   if (versionFiles.length === 0) {
     gate = { status: 'N/A', detail: 'final/ 版本记账不在场——门③无对象（bundle 未到交付段；显式标注，不静默跳过）' }
@@ -444,6 +446,7 @@ export function presentGate(bundleDir, sessionsRoot, hitl2Rows, readLog = emptyO
   const epoch = epochDateOf(bundleDir)
   const newContract = epoch !== null
   const contract = epoch === '' ? null : epoch
+  if (newContract && contract === null) return { status: 'RED', detail: 'run.md 契约纪元缺失/非法（schema 需 created，旧形态需合法 contract）——见证不能无下界采信' }
   if (newContract) {
     const scan = witness ?? scanWitnessLogs(sessionsRoot, slug, { readLog, contract })
     const found = presentedStatusOf(scan)

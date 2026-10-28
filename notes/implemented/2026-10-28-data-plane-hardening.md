@@ -60,7 +60,7 @@
   修复前 `run-accept`/`node-gate` 拿到的下界是 `null`；新增 `epochDateOf` 后同一 bundle 返回
   `2026-10-28`（`contractEpochOf = ""` → `epochDateOf = "2026-10-28"`），并有单测锁三形态
   （schema→created；contract→contract；两者全缺→空串）。
-- `pnpm verify` 全绿；`pnpm test` **946 pass / 0 fail**（新增整数契约四例 + 缺 created 一例、模板↔解析器同源、
+- `pnpm verify` 全绿；`pnpm test` **947 pass / 0 fail**（新增整数契约四例 + 缺 created 一例、模板↔解析器同源、
   数据卡 10 列 + 可移植闭集、手册两处副本的回执三态句、seed policy 两例、审计 findings.policy）。
 - **时钟行门禁先红后绿（实录）**：删掉 `analyst.patch.yml` 的 `- id: time-context` 两行 →
   `verify` 报 `preset-structure: analyst.patch.yml: 须恰有一条 - id: time-context（D32 时钟行，当前 0 条）`
@@ -84,7 +84,7 @@
 **自审第四轮（版本字段自身）：** 发现 `schema: 1` + `created` 会让 bundle 落进 `pre-contract` 得到
 **全量豁免**——把日期换成整数只是换了逃逸口。已收紧：写 schema 即按现行从严，低版本与高版本都判红，
 旧形态的唯一表达是**省略 schema**（`schema-scan` 与 `node-gate` 同一判据，带反证用例）。
-另修同族第二处：schema 形态若残留一个旧 `contract`，`epochDateOf` 曾取更早日期把见证下界往回拨（抄旧头 = 重开旧见证）；现改为 schema 在场只认 `created`。复跑 `data-smoke` / `user-env-smoke` / `profile-matrix-smoke` 全 PASS（新 peer 与种子 schema 下的安装面）。另加**模板自洽**契约测试：直接拿 `templates/run/run.md` 造一个新 run，断言零核心违约、展示日期取 `created`——模板不再只是写着的形状，而是可被判据接受的一份实例。
+另修同族第二处：schema 形态若残留一个旧 `contract`，`epochDateOf` 曾取更早日期把见证下界往回拨（抄旧头 = 重开旧见证）；现改为 schema 在场只认 `created`。复跑 `data-smoke` / `user-env-smoke` / `profile-matrix-smoke` 全 PASS（新 peer 与种子 schema 下的安装面）。又补 fetch 面 fail-closed：`run.md` 在场但纪元非法时，门不再"无下界"采信见证（RED 并点名）。另加**模板自洽**契约测试：直接拿 `templates/run/run.md` 造一个新 run，断言零核心违约、展示日期取 `created`——模板不再只是写着的形状，而是可被判据接受的一份实例。
 
 **自审第三轮（端到端覆盖与残留字面量）：** 又抓到两处真回归——① `presentGate` / `hitl2RowGate`
 独立调用时仍读 `contractEpochOf`（schema run 丢失见下界），已统一改 `epochDateOf`，并补

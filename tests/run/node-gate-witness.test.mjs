@@ -167,6 +167,18 @@ test('presentGate：整数契约（schema+created，无 contract）同样以下�
   } finally { cleanup() }
 })
 
+test('presentGate：run.md 契约纪元非法 → RED（不无下界采信见证）', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  try {
+    const b = writeBundle(dir)
+    writeFileSync(join(b, 'run.md'), '# Run\n\n- schema: 2\n- phase: delivery\n- next: present\n')
+    const sessions = writeSession(dir, [at({ type: 'tool/call', data: { name: 'write', arguments: JSON.stringify({ file_path: 'drt_x/question.md' }) } })])
+    const r = presentGate(b, sessions, [])
+    assert.equal(r.status, 'RED')
+    assert.match(r.detail, /契约纪元/)
+  } finally { cleanup() }
+})
+
 test('hitl2ReplyInLogs：callId 绑定 ask + reply，标签含定稿才算；代理标记随行', () => {
   const { dir, cleanup } = makeRoot('witness')
   try {
