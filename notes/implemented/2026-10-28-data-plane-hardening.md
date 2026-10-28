@@ -81,6 +81,8 @@
   turn/step**（载荷是墙钟，逐字不可复现——理由与边界写进 [snapshots/README](../../snapshots/README.md)）；
   C 金标准 `--update-expected` 重写并人审：只差 lead 一句总结措辞（模型换了说法），无结构变化。
 
+**自审第六轮（冒烟自身的前提）：** `workspace-isolation-smoke` 的前置检查写死 `_dist/…0.1.2.tgz`，而脚本根本不用 tarball——0.1.3 之后它一直 `exit 2`（"未跑"被当成正常）。删掉该前置后双实例隔离 ALL PASS。另用**当前源码** `npm pack`（repo 内 cache）+ 全局 rc.3 临时 profile 做安装域真挂载：`add` / `dump-config` / `preset-smoke --profile rc3check --no-patch` / `remove` 全 PASS——补上"rc.3 上装的是旧 tarball"的证据缺口。
+
 **自审第五轮（标签语义）：** `stale`（用户没动、包里有新版）此前被标签说成"与包版本不同源"并建议 `--adopt`——动作是错的，正确动作是 `--upgrade`。处置建议收成 `seed-core.seedPolicyAdvice`（drift/update/grown 三态），scaffold 与 preflight 共用；模板漂移也按契约类点名（此前只有手册/NODES/判型库点名）。
 
 **自审第四轮（版本字段自身）：** 发现 `schema: 1` + `created` 会让 bundle 落进 `pre-contract` 得到

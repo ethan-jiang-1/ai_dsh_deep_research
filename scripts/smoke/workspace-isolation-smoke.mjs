@@ -26,7 +26,6 @@ const check = (ok, label, detail = '') => {
 
 if (!process.env.DSH_HOME) { console.error('workspace-isolation-smoke: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2) }
 if (!existsSync(join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts'))) { console.error('workspace-isolation-smoke: vendor/dsh 不在位——未跑 ≠ 通过'); process.exit(2) }
-if (!existsSync(join(ROOT, '_dist', 'dsh-deep-research-pack-0.1.2.tgz'))) { console.error('workspace-isolation-smoke: tarball 缺席——先 node scripts/dist/export-dist.mjs'); process.exit(2) }
 
 const instance = (id, port) => ({
   id, port,
