@@ -21,7 +21,6 @@ import {
   SECTION_LABELS,
   foldLibrary,
   renderLibraryEntry,
-  instructionOf,
   summaryOfEntry,
   type LibraryEntry,
   type LibrarySections,
@@ -112,6 +111,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const activeRef = useRef<DraftField | null>(activeField)
   const coachBaseRef = useRef<LibraryEntry | null>(coachBase)
   const savePendingRef = useRef<{ name: string; sections: LibrarySections; timeout: ReturnType<typeof setTimeout> } | null>(null)
+  const removePendingRef = useRef<string | null>(null)
   draftRef.current = draft
   manualRef.current = manual
   coachFieldsRef.current = coachFields
@@ -301,23 +301,19 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   }
 
   const remove = async (entry: LibraryEntry): Promise<void> => {
-    if (sessionId === undefined) return
-    const sendInstruction = props.sendInstruction
+    if (coachId === null) {
+      setReceipt({ ok: false, detail: '方法编辑暂不可用；稍后重试删除' })
+      return
+    }
+    removePendingRef.current = entry.name
+    const envelope = `【删除封套】从工作区 method-library.md 删除方法条目「${entry.name}」。\n- 用 method_library_remove 工具删；删后只回复「已删除：${entry.name}」，不要做其它事。`
     setSending(true)
+    setReceipt({ ok: true, detail: '已发送给方法编辑，等它删除…' })
     try {
-      const result = await sendInstruction(sessionId, instructionOf('remove', entry.name))
-      setReceipt({ ok: result.ok, detail: result.ok ? '已交给 Lead 删除；它写入后点「刷新」回读。' : (result.detail ?? '发送失败') })
-      if (result.ok) {
-        setPendingDelete(null)
-        setSelectedName(null)
-        setMode('read')
-        const controller = new AbortController()
-        setTimeout(() => { void load(controller.signal) }, 1500)
-      }
+      await props.sendCoach(coachId, envelope)
     } catch (cause) {
-      setReceipt({ ok: false, detail: String(cause) })
-    } finally {
       setSending(false)
+      setReceipt({ ok: false, detail: `发送失败：${String(cause)}` })
     }
   }
 
@@ -385,6 +381,28 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     if (coachId === null || (mode !== 'edit' && mode !== 'new')) return undefined
     const controller = new AbortController()
     void props.watchCoach(coachId, controller.signal, (text) => {
+      // 删除回执：coach 说「已删除」→ 回读确认条目不在 → 收口。
+      const removeName = removePendingRef.current
+      if (removeName !== null && text.includes('已删除')) {
+        removePendingRef.current = null
+        void (async () => {
+          try {
+            const latest = await props.readFile(sessionId, LIBRARY_PATH, new AbortController().signal, LIBRARY_READ_LIMIT)
+            const still = foldLibrary(latest).some((item) => item.name === removeName)
+            setReceipt({ ok: !still, detail: still ? '方法编辑已回话，但库里还在——请点「刷新」复核' : `已删除：${removeName}` })
+            if (!still) {
+              setPendingDelete(null)
+              setSelectedName(null)
+              setMode('read')
+              void load(new AbortController().signal)
+            }
+          } catch (cause) {
+            setReceipt({ ok: false, detail: `删除回读失败：${String(cause)}` })
+          } finally {
+            setSending(false)
+          }
+        })()
+      }
       // 保存回执先于草稿解析：coach 的「已写入」回复没有 method-draft，不能被 parser 提前 return 吞掉。
       const pendingNow = savePendingRef.current
       if (pendingNow !== null && text.includes('已写入')) {
@@ -551,7 +569,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
                 : query.trim() !== '' ? '没有匹配的方法。' : '从左边选一条方法。'}
             </div>
           )}
-          {(mode === 'edit' || mode === 'new') && <EditorView draft={draft} mode={mode} sending={sending} onNameChange={onNameChange} onSectionChange={updateSection} onSave={() => { void save() }} onCancel={cancel} coachFields={coachFields} manualFields={manual} activeField={activeField} coachUpdated={coachBase !== null} onUndoCoach={undoCoach} />}
+          {(mode === 'edit' || mode === 'new') && <EditorView draft={draft} mode={mode} sending={sending} onNameChange={onNameChange} onSectionChange={updateSection} onSave={() => { void save() }} onCancel={cancel} onDefaultChange={(value) => { setDraft((current) => current === null ? null : { ...current, isDefault: value }) }} coachFields={coachFields} manualFields={manual} activeField={activeField} coachUpdated={coachBase !== null} onUndoCoach={undoCoach} />}
         </main>
         {(mode === 'edit' || mode === 'new') && sessionId !== undefined && (
           <MethodCoachPanel sessionId={sessionId} context={coachContext} ensure={props.ensureCoach} send={props.sendCoach} onCoach={setCoachId} />

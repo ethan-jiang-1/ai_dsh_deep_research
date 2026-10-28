@@ -59,3 +59,14 @@ test('追加到有尾部空行/无换行的库也不粘连', () => {
   assert.match(result.text, /- 不承诺: d\n\n## 新条目/)
   assert.equal(foldLibrary(result.text).length, 2)
 })
+
+test('remove：同名整段删除，库头与其它条目保留', async () => {
+  const { removeMethodEntry } = await import('../../packages/deep-research-pack/src/lib/method-library-write.ts')
+  const library = `# 方法库\n\n## 旧条目\n- 找来源: a\n- 怎么核实: b\n- 报告怎么写: c\n- 不承诺: d\n\n## 要删的\n- 找来源: 1\n- 怎么核实: 2\n- 报告怎么写: 3\n- 不承诺: 4\n`
+  const result = removeMethodEntry(library, '要删的')
+  assert.equal(result.removed, true)
+  assert.match(result.text, /^# 方法库/)
+  assert.match(result.text, /## 旧条目/)
+  assert.equal(result.text.includes('要删的'), false)
+  assert.equal(removeMethodEntry(result.text, '不存在').removed, false)
+})

@@ -8,7 +8,7 @@ import { defineTool } from '@deepseek-ai/dsh-tools'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { foldLibrary } from './lib/library-fold.ts'
-import { upsertMethodEntry } from './lib/method-library-write.ts'
+import { removeMethodEntry, upsertMethodEntry } from './lib/method-library-write.ts'
 
 /** Cordis 插件名。 */
 export const name = 'method-library-tool'
@@ -59,5 +59,39 @@ export function apply(ctx: Context): void {
       return Promise.resolve({ name: result.name, action: result.action })
     },
     presentCall: () => ({ card: 'generic', title: '写入方法库', kind: 'other' }),
+  }))
+  ctx.tools.register(defineTool({
+    name: 'method_library_remove',
+    description: '从当前工作区的 method-library.md 删除一条同名方法条目。只在方法库页的删除动作里调用；删除后如实回复「已删除：<名称>」。',
+    parameters: {
+      name: { type: 'string', required: true, description: '要删除的条目名' },
+    },
+    output: {
+      schema: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          name: { type: 'string', required: true },
+          removed: { type: 'boolean', required: true },
+        },
+      },
+      render: (_args, value) => [{ type: 'text', text: `已删除库：${value.name}` }],
+    },
+    execute(args, exec) {
+      const cwd = exec.agent?.session.header.cwd
+      if (cwd === undefined) throw new Error('method_library_remove 需要 owning agent session（没有 cwd）')
+      const path = join(cwd, 'method-library.md')
+      let text = ''
+      try {
+        text = readFileSync(path, 'utf8')
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+      }
+      const result = removeMethodEntry(text, args.name)
+      if (!result.removed) throw new Error(`库里没有「${args.name}」`)
+      writeFileSync(path, result.text, 'utf8')
+      return Promise.resolve({ name: args.name, removed: true })
+    },
+    presentCall: () => ({ card: 'generic', title: '删除方法库条目', kind: 'other' }),
   }))
 }

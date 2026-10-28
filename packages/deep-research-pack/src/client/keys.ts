@@ -76,3 +76,6 @@ export const METHOD_COACH_CHAT = 'method.coach.chat'
 
 /** 方法库写库工具的 wire 名（toolview 卡 key 与 host 工具名逐字一致）。 */
 export const METHOD_LIBRARY_TOOL = 'method_library_upsert'
+
+/** 方法库删库工具的 wire 名（toolview 卡 key 与 host 工具名逐字一致）。 */
+export const METHOD_LIBRARY_REMOVE = 'method_library_remove'

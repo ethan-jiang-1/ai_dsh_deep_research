@@ -70,3 +70,24 @@ export function upsertMethodEntry(text: string, entry: LibraryEntry): UpsertMeth
   }
   return { action, name, text: next }
 }
+
+/**
+ * 从库文本里删除一条同名条目（保留库头与其它条目）。
+ * @param text - 当前 `method-library.md` 全文。
+ * @param name - 要删除的条目名。
+ * @returns 是否命中 + 删除后的全文。
+ */
+export function removeMethodEntry(text: string, name: string): { removed: boolean; text: string } {
+  const pattern = methodHeadingPattern(name.trim())
+  const found = pattern.exec(text)
+  if (found === null) return { removed: false, text }
+  const start = found.index
+  const afterHeading = start + found[0].length
+  const rest = text.slice(afterHeading)
+  const nextHeading = rest.search(/^##\s/m)
+  const end = nextHeading === -1 ? text.length : afterHeading + nextHeading
+  const next = `${text.slice(0, start)}${text.slice(end).replace(/^\n+/, '')}`
+    .replace(/\n{3,}/g, '\n\n')
+    .trimEnd()
+  return { removed: true, text: `${next}${next === '' ? '' : '\n'}` }
+}

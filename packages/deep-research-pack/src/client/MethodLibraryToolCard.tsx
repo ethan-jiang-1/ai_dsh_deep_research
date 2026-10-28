@@ -5,6 +5,7 @@
 import type { ReactNode } from 'react'
 import type { ToolCallViewProps } from '@deepseek-ai/dsh-client-ui-tool/client'
 import { cardStateOf, parseArgsObject } from '../lib/tool-card.ts'
+import { METHOD_LIBRARY_REMOVE } from './keys.ts'
 
 /**
  * 方法库写库卡。
@@ -19,9 +20,11 @@ export function MethodLibraryToolCard(props: ToolCallViewProps): ReactNode {
   const args = parseArgsObject(argsRaw) as { entry?: unknown } | null
   const entry = typeof args?.entry === 'string' ? args.entry : ''
   const name = /^##\s+(.+?)(?:（|〔|\n|$)/m.exec(entry)?.[1]?.trim() ?? ''
+  const removing = props.toolName === METHOD_LIBRARY_REMOVE
+  const target = name === '' ? '方法条目' : name
   const label = state === 'running'
-    ? '正在写入方法库…'
-    : state === 'ok' ? `已写入库：${name === '' ? '方法条目' : name}` : '写库失败'
+    ? (removing ? '正在删除…' : '正在写入方法库…')
+    : state === 'ok' ? (removing ? `已删除库：${target}` : `已写入库：${target}`) : (removing ? '删除失败' : '写库失败')
   return (
     <div
       data-method-library-tool=""

@@ -65,7 +65,7 @@ export function ReadMineView(props: {
       </div>
       {pendingDelete === entry.name && (
         <div style={{ ...MUTED_STYLE, padding: '6px 8px', border: '1px solid #dc262640', borderRadius: 4, marginBottom: 8 }}>
-          删除「{entry.name}」？这会把删除指令交给 Lead。
+          删除「{entry.name}」？方法编辑会从库里删掉它。
           <button type="button" style={{ ...BUTTON_STYLE, marginLeft: 8 }} disabled={sending} onClick={() => { onRemove(entry) }}>确认删除</button>
           <button type="button" style={{ ...BUTTON_STYLE, marginLeft: 6 }} onClick={() => { onPendingDelete(null) }}>取消</button>
         </div>
@@ -110,10 +110,11 @@ export function EditorView(props: {
   readonly activeField?: DraftField | null
   readonly coachUpdated?: boolean
   readonly onUndoCoach?: () => void
+  readonly onDefaultChange?: (value: boolean) => void
 }): ReactNode {
   const {
     draft, mode, sending, onNameChange, onSectionChange, onSave, onCancel,
-    coachFields, manualFields, activeField, coachUpdated, onUndoCoach,
+    coachFields, manualFields, activeField, coachUpdated, onUndoCoach, onDefaultChange,
   } = props
   const rootRef = useRef<HTMLDivElement | null>(null)
   useEffect(() => {
@@ -185,6 +186,10 @@ export function EditorView(props: {
           />
         </label>
       ))}
+      <label style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, fontSize: 12 }}>
+        <input type="checkbox" checked={draft.isDefault} onChange={(event) => { onDefaultChange?.(event.target.checked) }} />
+        设为默认偏好（全库只能有一条）
+      </label>
       <details style={{ marginBottom: 10 }}>
         <summary style={{ ...MUTED_STYLE, cursor: 'pointer' }}>Markdown 预览（只读）</summary>
         <pre style={{ maxHeight: 140, overflow: 'auto', whiteSpace: 'pre-wrap', fontSize: 11, lineHeight: 1.5, background: '#00000005', padding: 6, borderRadius: 4 }}>{renderLibraryEntry({ name: draft.name.trim() === '' ? '（未命名）' : draft.name.trim(), sections: draft.sections, provenance: draft.provenance, isDefault: draft.isDefault })}</pre>
