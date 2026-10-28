@@ -37,7 +37,7 @@ export default defineConfig([
     // 只外置"浏览器模块表能回答"的：react 运行时与 DSH 的 client/api 模块（baseline +
     // 动态行）。其余（如 zod）必须内联——留成 require 会在浏览器里抛错（tsdown 默认会把
     // package.json 的 dependencies 当 external，所以要显式拉回来）。
-    external: ['react', 'react/jsx-runtime', /^@deepseek-ai\/dsh-client-/, /^@deepseek-ai\/dsh-api-/],
+    external: ['react', 'react-dom', 'react/jsx-runtime', /^@deepseek-ai\/dsh-client-/, /^@deepseek-ai\/dsh-api-/],
     outputOptions: {
       entryFileNames: 'client.js',
       banner: `window.__ModuleLoader__.load({ id: ${JSON.stringify(PACKAGE_ID)}, factory: (require) => {`,

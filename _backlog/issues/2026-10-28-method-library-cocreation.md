@@ -61,7 +61,8 @@ spike 已证明最终形态（2026-10-28，分支 `spike/method-coach-embed`）�
 ### 会话：独立 root session，用户不需要知道
 
 - 一 workspace 一个 coach session：`workspaceId` + `agentPreset: 'method-editor'` + 标题「方法编辑」；
-  lazily 创建；localStorage 记 id；当前会话本身就是 coach 时复用。
+  确定性 session id（`method-coach-<workspaceKey hash>`）做锚——FAQ 26 零浏览器持久化；先 retain，失败才 create；
+  当前会话本身就是 coach 时复用。
 - 侧栏出现一行「方法编辑」；与右栏标题同名；点开是同一会话。
 - 聊天面板的 React 树在根级 `shell.overlay`（`createPortal` 进页面），主会话的 transcript/上下文/composer 不变。
 

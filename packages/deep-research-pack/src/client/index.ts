@@ -32,12 +32,14 @@ import {
   RESEARCH_FINAL_PATTERN_READER, RESEARCH_FINAL_PATTERN_READER_ROOT,
   RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT, RESEARCH_TOOL_KEYS,
   RESEARCH_BRAND_MARK_SLOT, RESEARCH_BRAND_NAME_SLOT, METHOD_LIBRARY_VIEW,
+  METHOD_COACH_PORTAL, METHOD_COACH_PORTAL_ID, METHOD_COACH_CHAT,
 } from './keys.ts'
 import { IconBranchOutlineRegular, IconGaugeOutlineRegular, IconSettingsOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import { ResearchToolCard } from './ResearchToolCard.tsx'
 import { ResearchStatusTab, ResearchStatusTitle, type JournalFrame, type FollowTarget } from './ResearchStatusTab.tsx'
 import { ResearchConfigTab } from './ResearchConfigTab.tsx'
 import { MethodLibraryView } from './MethodLibraryView.tsx'
+import { MethodCoachPortal, CoachChat } from './method-library/coach.tsx'
 import { ResearchGraphTab } from './ResearchGraphTab.tsx'
 import { ResearchFinalTab } from './ResearchFinalTab.tsx'
 import { browserRunSource } from './run-source-browser.ts'
@@ -46,7 +48,7 @@ import { draftInProgress, finalAddressOf, isFinalAddress, latestFinalDelivery, s
 
 /** Required services：槽注册表（renderer）+ 右栏页签注册器 + 右栏导航面（openTab——挂起显性化）+ remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
  *  父级则取 .session 炸 "without injecting it"，只声明子级则取父属性炸 "without inject"）。 */
-export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles']
+export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'sessions', 'workspaces']
 
 /**
  * Client plugin body：登记「研究状态」页签（类型 + keyed 槽体共享同一 key——拼错任一处
@@ -54,7 +56,7 @@ export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'r
  * @param ctx - client root context。
  */
 export function apply(ctx: ClientContext): void {
-  ctx.inject(['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles'], (scoped) => {
+  ctx.inject(['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'sessions', 'workspaces'], (scoped) => {
     // journal 流式源（company 同款最小投影）：snapshot 给历史、event 给实时；
     // wire 形状 → 领域形状的折算住这里（纯装配），展示住组件。目标两形态：普通会话 id /
     // subagent 持久父地址（队员会话——纯 id 被 host 守卫拒，见 FollowTarget 注释）。
@@ -164,6 +166,59 @@ export function apply(ctx: ClientContext): void {
       }
     }
 
+    // ── 方法编辑会话（阶段 1：独立 root session；页面右栏 portal）──────────────────
+    // 一 workspace 一个 coach；确定性 session id 做锚（无浏览器持久化）；retain 进页面面板。agentPreset 先用 lead 替身，
+    // 阶段 2 切成 method-editor。sessions/workspaces 用动态 get（不为 client 面新增类型依赖）。
+    interface CoachSessionService {
+      create(opts: { workspaceId?: string; cwd?: string; sessionId?: SessionId; agentPreset?: string }): Promise<SessionId>
+      retain(id: SessionId, opts: { source: string }): { release(): void }
+      list: { getSnapshot(): { byId: Record<string, { cwd?: string } | undefined> } }
+    }
+    interface CoachWorkspaceService {
+      list: { getSnapshot(): { items: readonly { workspaceId: string; sessionIds: readonly SessionId[] }[] } }
+    }
+    const coachSessionIds = new Map<string, SessionId>()
+    const ensureCoachSession = async (currentSessionId: SessionId): Promise<{
+      id: SessionId
+      reference: { release(): void }
+    }> => {
+      const sessions = (scoped as unknown as { get(name: string): unknown }).get('sessions') as CoachSessionService | undefined
+      if (sessions === undefined) throw new Error('sessions 服务不可用')
+      const workspaces = (scoped as unknown as { get(name: string): unknown }).get('workspaces') as CoachWorkspaceService | undefined
+      const workspaceId = workspaces?.list.getSnapshot().items
+        .find((item) => item.sessionIds.includes(currentSessionId))?.workspaceId
+      const cwd = sessions.list.getSnapshot().byId[currentSessionId]?.cwd
+      const scopeKey = workspaceId ?? cwd ?? 'default'
+      // FAQ 26：pack 不引入浏览器持久化。用**确定性 session id** 做 workspace ↔ coach 的锚，
+      // 先 retain 命中已有会话；没有才用同名 id 创建（命名 blank 的复用语义由 host 给）。
+      let seed = 0
+      for (const char of scopeKey) seed = (seed * 31 + (char.codePointAt(0) ?? 0)) >>> 0
+      const deterministicId = `method-coach-${seed.toString(36)}` as SessionId
+      const id = coachSessionIds.get(scopeKey) ?? deterministicId
+      try {
+        return { id, reference: sessions.retain(id, { source: 'methodCoach' }) }
+      } catch {
+        coachSessionIds.delete(scopeKey)
+      }
+      const created = await sessions.create({
+        sessionId: deterministicId,
+        ...(workspaceId === undefined ? {} : { workspaceId }),
+        ...(workspaceId === undefined && cwd !== undefined ? { cwd } : {}),
+        agentPreset: 'lead',
+      })
+      coachSessionIds.set(scopeKey, created)
+      try { await scoped.remote.session.rename({ sessionId: created, title: '方法编辑' }) } catch { /* non-fatal */ }
+      return { id: created, reference: sessions.retain(created, { source: 'methodCoach' }) }
+    }
+    const sendCoach = async (sessionId: SessionId, text: string): Promise<void> => {
+      const requestId = crypto.randomUUID() as import('@deepseek-ai/dsh-api-remotes/client').SessionRequestId
+      const result = await scoped.remote.session.prompt(
+        { requestId, sessionId, mode: 'queue', content: [{ type: 'text' as const, text }] },
+        new AbortController().signal,
+      )
+      if (!result.ok) throw new Error(String(result.error ?? 'prompt failed'))
+    }
+
     // workspaceFiles 闭包（bundle 渐进面数据通道；company cultivation 同款，失败降级 null）
     const listDir = async (sessionId: SessionId, path: string, signal: AbortSignal) => {
       try {
@@ -255,8 +310,31 @@ export function apply(ctx: ClientContext): void {
         readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) =>
           readFile(sessionId, path, signal, limit, true),
         sendInstruction,
+        ensureCoach: ensureCoachSession,
+        sendCoach,
       }),
     }, MethodLibraryView)), 'deep-research-pack: method-library conversation view')
+
+    // 方法编辑：根级 portal（shell.overlay）+ 私有 session 子槽；会话树在 main 之外，DOM 进页面右栏。
+    scoped.effect(() => scoped.slots.inject(METHOD_COACH_PORTAL, () => scoped.slots.register({
+      name: METHOD_COACH_PORTAL,
+      id: METHOD_COACH_PORTAL_ID,
+      order: 100,
+      children: { [METHOD_COACH_CHAT]: { kind: 'single', scope: 'session' } },
+    }, MethodCoachPortal)), 'deep-research-pack: method-coach portal')
+    scoped.effect(() => scoped.slots.inject(METHOD_COACH_CHAT, () => scoped.slots.register({
+      name: METHOD_COACH_CHAT,
+    }, CoachChat)), 'deep-research-pack: method-coach chat slot')
+
+    // 方法库新建/编辑态：隐藏外层主 composer，避免两个输入框；只对外层 seat 自己的问卡让位
+    // （coach 的问卡在页面里，不能误触发外层 composer）。
+    scoped.effect(() => {
+      const style = document.createElement('style')
+      style.setAttribute('data-dsh-deep-research', 'method-library-coach-composer')
+      style.textContent = '[data-conversation-scroll]:has([data-method-library-edit]):not(:has(> [data-composer-seat] [data-question-key])) > [data-composer-seat]{display:none}'
+      document.head.appendChild(style)
+      return () => style.remove()
+    }, 'deep-research-pack: method-library coach composer suppression')
 
     // 活标题（HITL 挂起时"研究状态 · ⏳ 等你拍板"——用户点名的观察需求）：同一 fold 谓词
     //（末位事件 = 未答的 ask_user_question），标题组件自己开一条 follow 流（两条流都吃

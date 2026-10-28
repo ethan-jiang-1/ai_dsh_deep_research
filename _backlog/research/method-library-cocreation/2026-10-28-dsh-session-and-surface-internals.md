@@ -141,9 +141,9 @@ FAQ 25 的记录模型：Workspace 是 Host 侧持久记录（uuid + realpath + 
   用户 rename 后自动生成被 supersede
   （`vendor/dsh/packages/session/session-title/src/index.ts` L401-L425、L509）。
   所以「建会话 → 立刻 rename 成『方法编辑』→ 再发第一条」能稳定拿到可辨识侧栏行，也省一次自动标题模型调用。
-- 复用：localStorage 存 `workspaceKey → coachSessionId`；页面先 `sessions.retain(id)`，失败（删除/不可达）
-  再 `session.create({ workspaceId, agentPreset: 'method-editor' })`。当前会话本身就是 coach 时直接复用当前 id，
-  不另建（见 §4.6）。
+- 复用：**确定性 session id**（`method-coach-<workspaceKey hash>`）做锚——FAQ 26 的零浏览器持久化约束下，
+  pack 不写 localStorage；页面先 `sessions.retain(id)`，失败（删除/不可达）再 `session.create({ sessionId, workspaceId, agentPreset })`。
+  当前会话本身就是 coach 时直接复用当前 id，不另建（见 §4.6）。
 - 一 workspace 一个会话，避免「每新建一次方法就多一行」；草稿是客户端状态，不是会话。若实测发现
   多草稿混在一个 transcript 里难读，再退到「一草稿一会话」（§10 的待拍板项）。
 

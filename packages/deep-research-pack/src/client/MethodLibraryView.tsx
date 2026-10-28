@@ -29,6 +29,7 @@ import {
 import { BUILTIN_PREFERENCES } from '../lib/config-tables.ts'
 import { BUTTON_STYLE, HEADER_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE, ROW_STYLE } from './method-library/styles.ts'
 import { BuiltinView, EditorView, ReadMineView, type Draft } from './method-library/views.tsx'
+import { MethodCoachPanel } from './method-library/coach.tsx'
 
 const LIBRARY_PATH = 'method-library.md'
 const LIBRARY_READ_LIMIT = 1000
@@ -36,6 +37,13 @@ const LIBRARY_READ_LIMIT = 1000
 export interface MethodLibraryInjected {
   readonly readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) => Promise<string | null>
   readonly sendInstruction: (sessionId: SessionId, text: string) => Promise<{ readonly ok: boolean; readonly detail?: string }>
+  /** 方法编辑会话的建/保留（独立 root session；页面右栏 portal）。 */
+  readonly ensureCoach: (sessionId: SessionId) => Promise<{
+    readonly id: SessionId
+    readonly reference: { release(): void }
+  }>
+  /** 给方法编辑发一条 prompt（起手式/后续对话由原生 composer 发）。 */
+  readonly sendCoach: (sessionId: SessionId, text: string) => Promise<void>
 }
 
 export type MethodLibraryViewProps = PropsRuntime<'conversation.view'> & MethodLibraryInjected
@@ -262,7 +270,11 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
 
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+    <div
+      data-method-library=""
+      data-method-library-edit={mode !== 'read' ? '' : undefined}
+      style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
+    >
       <div style={HEADER_STYLE}>
         <strong style={{ fontSize: 15 }}>方法库</strong>
         <span style={MUTED_STYLE}>本工作区共享 · 保存交给 Lead</span>
@@ -335,6 +347,9 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
           )}
           {(mode === 'edit' || mode === 'new') && <EditorView draft={draft} mode={mode} sending={sending} onNameChange={(name) => { setDraft((current) => current === null ? null : { ...current, name }) }} onSectionChange={updateSection} onSave={() => { void save() }} onCancel={cancel} />}
         </main>
+        {(mode === 'edit' || mode === 'new') && sessionId !== undefined && (
+          <MethodCoachPanel sessionId={sessionId} ensure={props.ensureCoach} send={props.sendCoach} />
+        )}
       </div>
     </div>
   )

@@ -64,3 +64,12 @@ export const RESEARCH_TOOL_KEYS = ['spawn_teammate', 'web_search'] as const
 
 /** 主界面「方法库」tab 的 conversation.view 槽名（Chat/Trajectory 同排）。 */
 export const METHOD_LIBRARY_VIEW = 'conversation.view' as const
+
+/** 方法编辑对话：根级 portal 宿主座位（shell.overlay；会话树在 main 之外，DOM teleport 进页内右栏）。 */
+export const METHOD_COACH_PORTAL = 'shell.overlay'
+
+/** 方法编辑 portal 的 entry id。 */
+export const METHOD_COACH_PORTAL_ID = 'deep-research-pack/method-coach-portal'
+
+/** 方法编辑 portal 目标格内的私有 session 子槽。 */
+export const METHOD_COACH_CHAT = 'method.coach.chat'
