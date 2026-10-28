@@ -30,7 +30,7 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 
 角色职责与方法论：见各 `presets/<role>.patch.yml`（persona）与 `presets/<role>/skills/<n>/SKILL.md`（方法论正文）——都随本包发布。
 
-方法库写库：方法编辑只通过 host 窄工具 `method_library_upsert`（`src/method-library-tool.ts`，preset 行 `dsh-deep-research-pack/method-library-tool`）写 `method-library.md`；同名 upsert、只碰该文件；面板永不直写（D25 2026-10-28 修订）。
+方法库写库：方法编辑只通过 host 窄工具 `method_library_upsert`（`src/method-library-tool.ts`，preset 行 `dsh-deep-research-pack/method-library-tool`）写 `method-library.md`；同名 upsert、只碰该文件；面板永不直写（D25 2026-10-28 修订）。页面侧起手式三路（从零 / 照内置 / 从最近 run 沉淀）、字段人话提示、撞名保存前确认、读态「和编辑聊聊」。
 
 ## 检索底座（DeepSeek Search API + 抓取回退）
 
