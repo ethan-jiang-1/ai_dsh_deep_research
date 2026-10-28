@@ -890,7 +890,7 @@ async function pass3cMethodLibraryPhase() {
     // 研究状态页挂着用户待答卡时页面上多一个，全局计数变成 5 的假红）。断言的是表单结构，不是整页。
     const ta = await page.locator('label textarea').count().catch(() => 0)
     const formText = await paneTextOf(page)
-    step(ta === 4 && formText.includes('交给 Lead 保存'), '方法库编辑表单：四字段 + 交给 Lead 保存',
+    step(ta === 4 && formText.includes('保存到方法库'), '方法库编辑表单：四字段 + 保存到方法库',
       ta === 4 ? 'textarea 4' : `textarea ${ta}`)
     await page.getByRole('button', { name: '取消' }).first().click({ timeout: 5_000 }).catch(() => {})
     await wait(800)

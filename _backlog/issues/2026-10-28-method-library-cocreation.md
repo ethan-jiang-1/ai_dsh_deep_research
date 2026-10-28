@@ -147,7 +147,13 @@ spike 已证明最终形态（2026-10-28，分支 `spike/method-coach-embed`）�
 - 页面：手改集合、active 高亮/滚动、n/4 进度、per-field「来自对话 / 手改 / 待定」、900ms 手改 diff
   回传（「以用户为准，不要覆盖」）、撤销对话更新；keyless merge 3 条 + parser 5 条；client-load 绿。
 
-**仍缺（下一刀）**：保存封套 → coach 写库（`method_library_upsert`）→ 回读对账 → 三态回执 → 刷新库；
+**2026-10-28 保存闭环真模型验收**：host 窄工具 `method_library_upsert` + 页面保存封套 + 三态回执已落地
+（commit `69dc257`；回执顺序/卡片修复 `5e3b099`）。真模型端到端 probe（源码 web + 临时 workspace +
+method-editor 9 轮问答）**全部通过**：问卡 → 四字段回填 → 保存 → coach 调工具 → 磁盘 `method-library.md`
+含标题+四字段 → 页面「已落盘核对通过」；证据 = `runtime/probe-save/artifacts/2026-10-28T14-04-52-928Z/`。
+
+**仍缺（下一刀）**：撞库提示/删除/设默认；从 run 沉淀的页面接线；内置参考入口；空态/降级/读态「和编辑聊聊」；
+
 撞库提示；删除/设默认；真模型访谈 probe（现在 l4 只测了 preset 挂载/标记，没测一问一答与落表）；
 空态/降级/读态「和编辑聊聊」；页面级 keyless/真模型测试。
 
