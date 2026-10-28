@@ -4,9 +4,11 @@
 
 ## 活跃清单
 
-- [2026-10-28 方法库页内对话共创](2026-10-28-method-library-cocreation.md) — 等人拍板：独立会话 + 方法编辑 preset；待 D2/D25/会话粒度/嵌入 spike 四问。（完整归档 = [settled 池索引](../_archived/settled_issues/README.md)；最近三条见下。）
+
 
 ## 最近归档
+
+- [2026-10-28 方法库页内对话共创](../_archived/settled_issues/2026-10-28-method-library-cocreation.md) — implemented：页内三栏 + 方法编辑 preset + 草稿回填 + 保存闭环；证据 = 调研 §14 + `runtime/probe-save/artifacts/2026-10-28T14-47-08-504Z/`。
 
 最近三条（更早 = [settled 池索引](../_archived/settled_issues/README.md)，逐卡一行；本区不重复维护）：
 

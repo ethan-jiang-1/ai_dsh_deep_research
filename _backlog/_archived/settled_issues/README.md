@@ -4,6 +4,7 @@
 
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-10-28-method-library-cocreation](2026-10-28-method-library-cocreation.md) | 方法库页内共创：三栏 + 方法编辑 preset/草稿回填/保存闭环；真模型 probe + release-smoke + l4-lite 全绿；[调研 §14](../../research/method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md) | 2026-10-28 |
 | [2026-10-28-data-plane-hardening](2026-10-28-data-plane-hardening.md) | FAQ 24 数据面收口：D32 原生时钟 + D33 整数契约/创建日 + D34 回执三态/可移植列 + D35 种子三态 + D36 见证边界；自审补 `epochDateOf` 见证下界回归；四角色真模型重录后 snapshot ALL PASS；P2 与 W/D 同路径转触发器；[Note](../../../notes/implemented/2026-10-28-data-plane-hardening.md) | 2026-10-28 |
 | [2026-10-27-post-review-hardening](2026-10-27-post-review-hardening.md) | 复核后硬化：run-accept 全链 smoke、数据卡形状、秘密模式扩展；P2.4/P2.5/P3 转触发器 | 2026-10-27 |
 | [2026-10-27-release-data-contract](2026-10-27-release-data-contract.md) | 发布前数据契约：FAQ 26 对账 → 数据卡 + 回执相对路径 + 种子 schema/`--clean` + N2 披露 + secret-scan；D1–D4 全采纳；[Note](../../../notes/implemented/2026-10-27-release-data-contract.md) | 2026-10-27 |

@@ -24,7 +24,7 @@ rc.3 只用来确认「这些缝没有在下一版被堵掉」。
 | 8 | 加不加 RPC / host 插件 | 不加。全部走现成 `session/create|rename|prompt|follow`、`sessions.retain`、`workspaces.list`、`workspaceFiles.read` | §9 |
 | 9 | 版本风险 | rc.2 → rc.3 的 `commands.ts` 零 diff；`tool-ask-user`、`ui-subagent` sidebar chat、`list.ts` 逐字相同；`conversation.content` 契约只有 view 钉选增量 | §1 |
 | 10 | spike 实跑 | 直接嵌 **红**；固定浮层机制绿但 **UX 否**；右栏 tab **否**（用户要留在 tab 内）；页内三栏 portal **绿**；CSS 抑制 / coach 问卡 / 外层问卡让位 / 切 tab 重挂 **绿**；chain **红** | §14 |
-| 11 | 最终形态 | 方法库 tab 内三栏（库 / 表单 / 方法编辑）；一个可见 composer；主会话不动；用户看不到 portal/session 机制 | §14、[issue](../../issues/2026-10-28-method-library-cocreation.md) |
+| 11 | 最终形态 | 方法库 tab 内三栏（库 / 表单 / 方法编辑）；一个可见 composer；主会话不动；用户看不到 portal/session 机制 | §14、[issue](../../_archived/settled_issues/2026-10-28-method-library-cocreation.md) |
 
 **一句话**：这不是「在表单旁边放一个聊天框」，而是把**方法库 tab 本身**做成三栏工作台
 （我的库 / 表单 / 方法编辑对话）；方法编辑是 workspace 级的独立会话，但用户看到的只是这页右侧的对话面板——
