@@ -131,6 +131,27 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
   const [started, setStarted] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // 标准聊天行为：对话区自身滚动、自动贴底跟随最新；用户上翻时暂停，回到底部恢复。
+  useEffect(() => {
+    if (host === null) return
+    const scroll = host.querySelector<HTMLElement>('[data-conversation-scroll]')
+    if (scroll === null) return
+    let stuck = true
+    const onScroll = (): void => {
+      stuck = scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight < 48
+    }
+    const observer = new MutationObserver(() => {
+      if (stuck) scroll.scrollTop = scroll.scrollHeight
+    })
+    observer.observe(scroll, { childList: true, subtree: true, characterData: true })
+    scroll.addEventListener('scroll', onScroll, { passive: true })
+    scroll.scrollTop = scroll.scrollHeight
+    return () => {
+      observer.disconnect()
+      scroll.removeEventListener('scroll', onScroll)
+    }
+  }, [host])
+
   useEffect(() => {
     let cancelled = false
     let held: { release(): void } | null = null
