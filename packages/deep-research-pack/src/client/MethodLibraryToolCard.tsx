@@ -16,8 +16,8 @@ export function MethodLibraryToolCard(props: ToolCallViewProps): ReactNode {
   const settled = 'kind' in props.block
   const source = settled ? props.block.call : props.block
   const argsRaw = (source !== undefined && source !== null && 'argsRaw' in source ? source.argsRaw : undefined) ?? ''
-  const args = parseArgsObject(argsRaw) as { entry?: unknown }
-  const entry = typeof args.entry === 'string' ? args.entry : ''
+  const args = parseArgsObject(argsRaw) as { entry?: unknown } | null
+  const entry = typeof args?.entry === 'string' ? args.entry : ''
   const name = /^##\s+(.+?)(?:（|〔|\n|$)/m.exec(entry)?.[1]?.trim() ?? ''
   const label = state === 'running'
     ? '正在写入方法库…'

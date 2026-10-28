@@ -343,6 +343,33 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     if (coachId === null || (mode !== 'edit' && mode !== 'new')) return undefined
     const controller = new AbortController()
     void props.watchCoach(coachId, controller.signal, (text) => {
+      // 保存回执先于草稿解析：coach 的「已写入」回复没有 method-draft，不能被 parser 提前 return 吞掉。
+      const pendingNow = savePendingRef.current
+      if (pendingNow !== null && text.includes('已写入')) {
+        void (async () => {
+          clearTimeout(pendingNow.timeout)
+          savePendingRef.current = null
+          setReceipt({ ok: true, detail: '方法编辑已回写；正在回读核对…' })
+          try {
+            const latest = await props.readFile(sessionId, LIBRARY_PATH, new AbortController().signal, LIBRARY_READ_LIMIT)
+            const saved = foldLibrary(latest).find((item) => item.name === pendingNow.name)
+            const match = saved !== undefined && SECTION_LABELS.every(({ key }) => (saved.sections[key] ?? '') === (pendingNow.sections[key] ?? ''))
+            if (match) {
+              setReceipt({ ok: true, detail: `已落盘核对通过：${pendingNow.name}` })
+              setMode('read')
+              setSelectedName(pendingNow.name)
+              setDraft(null)
+              void load(new AbortController().signal)
+            } else {
+              setReceipt({ ok: false, detail: '方法编辑已回话，但库回读对不上——请点「刷新」复核' })
+            }
+          } catch (cause) {
+            setReceipt({ ok: false, detail: `已回写但回读失败：${String(cause)}` })
+          } finally {
+            setSending(false)
+          }
+        })()
+      }
       const entry = parseMethodDraft(text)
       const current = draftRef.current
       if (entry === null || current === null) return
@@ -368,33 +395,6 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
       setCoachFields(new Set(merged.coachFields))
       setActiveField(merged.activeField)
       setCoachBase(entry)
-      // 保存封套的回执：方法编辑说「已写入」→ 回读对账 → 三态收口。
-      const pending = savePendingRef.current
-      if (pending !== null && text.includes('已写入')) {
-        void (async () => {
-          clearTimeout(pending.timeout)
-          savePendingRef.current = null
-          setReceipt({ ok: true, detail: '方法编辑已回写；正在回读核对…' })
-          try {
-            const latest = await props.readFile(sessionId, LIBRARY_PATH, new AbortController().signal, LIBRARY_READ_LIMIT)
-            const saved = foldLibrary(latest).find((item) => item.name === pending.name)
-            const match = saved !== undefined && SECTION_LABELS.every(({ key }) => (saved.sections[key] ?? '') === (pending.sections[key] ?? ''))
-            if (match) {
-              setReceipt({ ok: true, detail: `已落盘核对通过：${pending.name}` })
-              setMode('read')
-              setSelectedName(pending.name)
-              setDraft(null)
-              void load(new AbortController().signal)
-            } else {
-              setReceipt({ ok: false, detail: '方法编辑已回话，但库回读对不上——请点「刷新」复核' })
-            }
-          } catch (cause) {
-            setReceipt({ ok: false, detail: `已回写但回读失败：${String(cause)}` })
-          } finally {
-            setSending(false)
-          }
-        })()
-      }
     }).catch(() => { /* fail-soft：流断不砸页面 */ })
     return () => controller.abort()
   }, [coachId, mode, props.watchCoach])
@@ -441,7 +441,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     >
       <div style={HEADER_STYLE}>
         <strong style={{ fontSize: 15 }}>方法库</strong>
-        <span style={MUTED_STYLE}>本工作区共享 · 保存交给 Lead</span>
+        <span style={MUTED_STYLE}>本工作区共享 · 保存交方法编辑</span>
         <span style={{ flex: 1 }} />
         <button type="button" style={BUTTON_STYLE} onClick={refresh}>刷新</button>
         <button type="button" style={PRIMARY_STYLE} onClick={beginNew}>新建</button>

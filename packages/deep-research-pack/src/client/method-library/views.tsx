@@ -127,7 +127,7 @@ export function EditorView(props: {
     <div ref={rootRef}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 }}>
         <strong style={{ fontSize: 16 }}>{mode === 'new' ? '新建方法' : '编辑方法'}</strong>
-        <span style={MUTED_STYLE}>字段会随右侧对话逐格成形；保存仍交给 Lead 写入库。</span>
+        <span style={MUTED_STYLE}>字段会随右侧对话逐格成形；保存由方法编辑写入库。</span>
         <span style={{ flex: 1 }} />
         <span style={MUTED_STYLE}>{filled}/4 已定</span>
       </div>
@@ -180,7 +180,7 @@ export function EditorView(props: {
         <pre style={{ maxHeight: 140, overflow: 'auto', whiteSpace: 'pre-wrap', fontSize: 11, lineHeight: 1.5, background: '#00000005', padding: 6, borderRadius: 4 }}>{renderLibraryEntry({ name: draft.name.trim() === '' ? '（未命名）' : draft.name.trim(), sections: draft.sections, provenance: draft.provenance, isDefault: draft.isDefault })}</pre>
       </details>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <button type="button" style={PRIMARY_STYLE} disabled={sending} onClick={() => { onSave() }}>{sending ? '发送中…' : '交给 Lead 保存'}</button>
+        <button type="button" style={PRIMARY_STYLE} disabled={sending} onClick={() => { onSave() }}>{sending ? '保存中…' : '保存到方法库'}</button>
         <button type="button" style={BUTTON_STYLE} disabled={sending} onClick={onCancel}>取消</button>
       </div>
     </div>
