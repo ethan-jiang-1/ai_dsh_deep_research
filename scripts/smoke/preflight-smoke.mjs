@@ -9,7 +9,8 @@
 //   ① fake anchor 齐全 → preflight --install-only 绿；
 //   ② 从 fake anchor 删一个行依赖 → 必须红并点名该包（不能从 profile/仓库泄漏满足）；
 //   ③ 无 anchor 且 PATH 无 dsh → 行依赖/版本标“未验证”，不硬红；
-//   ④ base-only profile（缺 web app）→ 红（后续切片）。
+//   ④ base-only profile（缺 web app）→ 红（后续切片）；
+//   ⑤ 契约类种子被改 → 详情点名「与包版本不同源」，但不变硬红（D35）。
 // 不证明：真实 DSH 安装的包布局（real-home-smoke 负责），模型就绪（--install-only 明确不宣称）。
 //
 // 用法：node scripts/smoke/preflight-smoke.mjs
@@ -131,6 +132,14 @@ try {
   const noMethod = run(['--install-anchor', anchor], { workspacePath: wsNoMethod })
   check(noMethod.status === 0, '方法库缺席 → 不硬红', `exit=${noMethod.status}`)
   check(/方法库/.test(noMethod.stdout || ''), '方法库缺席在输出里显式列出')
+
+  // 契约类种子漂移（D35）：详情点名，但不改阻塞判据（用户可能有意定制）
+  const wsDrift = join(root, 'ws-contract-drift')
+  check(seedInto(wsDrift).status === 0, 'fixture 工作区（contract drift）铺种')
+  writeFileSync(join(wsDrift, 'NODES.md'), `${readFileSync(join(wsDrift, 'NODES.md'), 'utf8')}\n<!-- local node contract edit -->\n`)
+  const drift = run(['--install-anchor', anchor], { workspacePath: wsDrift })
+  check(drift.status === 0, '契约类漂移只提示，不硬红', `exit=${drift.status}`)
+  check(/契约类种子（policy=contract）与包版本不同源/.test(drift.stdout || ''), '契约类漂移在详情里点名', (drift.stdout || '').split('\n').filter((l) => l.includes('NODES.md')).join(' | '))
 
   // 空凭据文件不是“有 key”；workspace/.env 才是 DSH 支持的来源之一。
   writeFileSync(join(dshHome, CREDENTIALS_FILENAME), '')

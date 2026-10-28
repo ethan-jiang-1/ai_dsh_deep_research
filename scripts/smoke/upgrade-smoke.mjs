@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// upgrade-smoke.mjs — 分发/升级面：0.1.2 → 模拟 0.1.3 → 回滚 0.1.2（keyless，不调模型）。
+// upgrade-smoke.mjs — 分发/升级面：当前版 → 模拟下一版 → 回滚当前版（keyless，不调模型）。
 //
 // 证明什么：profile 安装/覆盖安装/卸载、dump-config 行仍在、工作区种子升级保留用户文件、
 // 旧版回滚不降级覆盖新种子。next pack 由当前 pack 复制并 bump version/seed 生成，不是 npm 发布物。
@@ -18,7 +18,13 @@ import { scrubbedEnv } from '../lib/env.mjs'
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
-const NEXT_VERSION = '0.1.3'
+// 下一版 = 当前版本 patch +1（写死版本号会在发版后与 pkg.version 撞车：0.1.3 时代
+// 写死 0.1.3 使“回滚”实际没降级，两例回滚断言静默失效——2026-10-28 自审实红）。
+const NEXT_VERSION = (() => {
+  const m = /^(\d+)\.(\d+)\.(\d+)$/.exec(pkg.version)
+  if (m === null) throw new Error(`upgrade-smoke: 无法从 ${pkg.version} 推导下一版`)
+  return `${m[1]}.${m[2]}.${Number(m[3]) + 1}`
+})()
 const CURRENT = join(ROOT, '_dist', `dsh-deep-research-pack-${pkg.version}.tgz`)
 const TEMP = join(ROOT, 'runtime', 'smoke-workspace', `upgrade-smoke-${process.pid}`)
 const HOME = join(TEMP, 'home')

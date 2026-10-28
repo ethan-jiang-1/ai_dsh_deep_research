@@ -154,6 +154,19 @@ test('presentGate：present 早于契约纪元（旧 epoch 同名 run）→ RED�
   } finally { cleanup() }
 })
 
+test('presentGate：整数契约（schema+created，无 contract）同样以下界过滤旧见证', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  try {
+    const b = writeBundle(dir)
+    writeFileSync(join(b, 'run.md'), '# Run\n\n- schema: 2\n- created: 2026-10-23\n- phase: delivery\n- next: present\n')
+    const old = Date.parse('2026-10-01T10:00:00+08:00')
+    const sessions = writeSession(dir, [at({ type: 'tool/call', data: { name: 'write', arguments: JSON.stringify({ file_path: 'drt_x/question.md' }) } }, old), present('drt_x/final/v1.md', old)])
+    const r = presentGate(b, sessions, [])
+    assert.equal(r.status, 'RED')
+    assert.match(r.detail, /契约纪元|epoch|旧/)
+  } finally { cleanup() }
+})
+
 test('hitl2ReplyInLogs：callId 绑定 ask + reply，标签含定稿才算；代理标记随行', () => {
   const { dir, cleanup } = makeRoot('witness')
   try {

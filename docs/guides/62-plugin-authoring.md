@@ -106,7 +106,7 @@ DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`�
 检查 = [pack README](../../packages/deep-research-pack/README.md)；部署工具 = 包内两条 bin
 （`dsh-deep-research-preflight` 检查、`dsh-deep-research-scaffold` 铺种子 + 补团队层——
 tarball 装法不生成 PATH bin，用安装副本内脚本全路径，见 pack README §部署）。种子带
-`workspace/seed.json`（版本 + 哈希）；`scaffold --check` 只读报告三态，`--upgrade` 只更新未改文件，
+`workspace/seed.json`（版本 + 哈希 + 每文件所有权 policy）；`scaffold --check` 只读报告三态，`--upgrade` 只更新未改文件，
 `--force` 覆盖版本化种子但**不覆盖**用户方法库。
 
 本仓开发面的生成物各有生成器与新鲜度门禁（漂移即红）：`dev/research.overlay.yml`

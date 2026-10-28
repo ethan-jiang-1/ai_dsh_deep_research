@@ -4,7 +4,7 @@ import { basename, dirname, join } from 'node:path'
 import { portableBundlePath } from './path-hygiene.mjs'
 import { planCardsOf } from './plan-card.mjs'
 import { HITL_CONTRACT_DATE, PRE_CONTRACT_NOTE, decisionsLines, isPreContract, readinessOf } from './node-gate-contracts.mjs'
-import { contractEpochOf, toDateStr } from './schema-scan-core.mjs'
+import { epochDateOf, toDateStr } from './schema-scan-core.mjs'
 
 /** 纯日志 reader：.jsonl 直读；.zstd 报线索后按空语料继续（''，判据偏红方向——红必须带线索）。
  *  zstd CLI 解压由驱动壳注入，本模块零子进程。 */
@@ -391,7 +391,7 @@ export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadabl
   const dec = qText ? decisionsLines(qText) : []
   const hitl2Rows = dec.filter((l) => isHitl2Row(l))
   const proxyRows = hitl2Rows.filter((l) => !/HITL2/.test(l))
-  const epoch = contractEpochOf(bundleDir)
+  const epoch = epochDateOf(bundleDir)
   const newContract = epoch !== null
   const contract = epoch === '' ? null : epoch
   let gate
@@ -441,7 +441,7 @@ export function presentGate(bundleDir, sessionsRoot, hitl2Rows, readLog = emptyO
   if (!reviewPass) {
     return { status: 'N/A', detail: 'review.md readiness 非 PASS——HITL2 前置未达成，交付门②无对象' }
   }
-  const epoch = contractEpochOf(bundleDir)
+  const epoch = epochDateOf(bundleDir)
   const newContract = epoch !== null
   const contract = epoch === '' ? null : epoch
   if (newContract) {

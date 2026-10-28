@@ -81,6 +81,13 @@
   turn/step**（载荷是墙钟，逐字不可复现——理由与边界写进 [snapshots/README](../../snapshots/README.md)）；
   C 金标准 `--update-expected` 重写并人审：只差 lead 一句总结措辞（模型换了说法），无结构变化。
 
+**自审第三轮（端到端覆盖与残留字面量）：** 又抓到两处真回归——① `presentGate` / `hitl2RowGate`
+独立调用时仍读 `contractEpochOf`（schema run 丢失见下界），已统一改 `epochDateOf`，并补
+「schema+created 的旧 present → RED」用例；② `upgrade-smoke` 的 `NEXT_VERSION` 写死 `0.1.3`，与
+当前包版本撞车后「回滚」实际没降级、两条回滚断言静默失效（此前无人跑该 smoke），改为由
+`pkg.version` 派生 patch+1，回滚两例恢复真断言并 ALL PASS。另补 D35 的端到端断言：
+`scaffold --check` 的 contract/corpus 分型标签、preflight 的契约漂移点名（此前只有纯函数级测试）。
+
 **卡 §验收标准逐条对账（1–8）：** ①回执三态 = 手册 + `data-plane-invariants` 两副本断言；②时间原生 =
 四 preset 时钟行 + `preset-structure` 先红后绿 + L1 真挂载；③整数契约 = 模板/解析器/门禁 + 四例 + 缺
 `created` 一例 + `epochDateOf` 三形态；④可移植列 = 数据卡 10 列形状锁 + 65 §2；⑤种子三类 =

@@ -3,7 +3,7 @@
 //
 // 为什么需要：seed-core 单测只证分类纯函数；源码字符串断言挡不住“字面量还在、分支写坏”。
 // 本 smoke 用临时 pack 副本 + 临时工作区真跑 CLI，覆盖：首次铺种、--force 保方法库、
-// --check 的 missing/deleted/modified、--upgrade 只升级未改文件并写 .seed-new。
+// --check 的 missing/deleted/modified 与所有权分型（contract/corpus）、--upgrade 只升级未改文件并写 .seed-new。
 //
 // 用法：node scripts/smoke/scaffold-smoke.mjs
 // 退出码：0 全绿 / 断言红 / 2 前置缺席（未跑 ≠ 通过）
@@ -121,6 +121,15 @@ try {
   check(run(['--workspace', rnWs]).status === 0, '改名场景：旧版工作区铺种')
   const rnCheck = spawnSync(process.execPath, [join(RENAME, 'scripts', 'scaffold.mjs'), '--check', '--workspace', rnWs], { encoding: 'utf8' })
   check(rnCheck.status === 1 && /NODES\.md — orphan/.test(rnCheck.stdout) && /NOTES\.md — missing/.test(rnCheck.stdout), 'seed 改名同时报 orphan + missing', rnCheck.stdout.split('\n').slice(-4).join(' | '))
+
+  // 种子所有权（D35）：--check 按 policy 分型——contract 漂移 vs corpus 生长
+  const wsPolicy = join(TEMP, 'ws-policy')
+  check(run(['--workspace', wsPolicy]).status === 0, '所有权场景：铺种')
+  writeFileSync(join(wsPolicy, 'NODES.md'), `${read(join(wsPolicy, 'NODES.md'))}\n<!-- local drift -->\n`)
+  writeFileSync(join(wsPolicy, 'question-patterns.md'), `${read(join(wsPolicy, 'question-patterns.md'))}\n<!-- grown -->\n`)
+  const policyCheck = spawnSync(process.execPath, [SCAFFOLD, '--check', '--workspace', wsPolicy], { encoding: 'utf8' })
+  check(/NODES\.md — modified（contract：与包版本不同源的契约）/.test(policyCheck.stdout), '--check 把 contract 漂移单列', policyCheck.stdout.split('\n').filter((l) => l.includes('NODES.md')).join(' | '))
+  check(/question-patterns\.md — modified（corpus：底本已生长，正常）/.test(policyCheck.stdout), '--check 把 corpus 生长单列', policyCheck.stdout.split('\n').filter((l) => l.includes('question-patterns')).join(' | '))
 
   // ① 首次铺种 + 状态文件
   const ws = join(TEMP, 'ws')
