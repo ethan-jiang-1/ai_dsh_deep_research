@@ -26,7 +26,7 @@ opened: 2026-10-29
 
 → [2026-10-29-dsh-plugin-borrowing-and-rationale.md](../research/method-library-cocreation/2026-10-29-dsh-plugin-borrowing-and-rationale.md)
 
-审阅建议顺序：本卡 → 上述依据 → [滚动/智力体/切换规格](../research/method-library-cocreation/2026-10-29-option-a-scroll-and-intelligence.md) → [A/B 视觉稿](../research/method-library-cocreation/2026-10-29-ux-redesign.md)。
+审阅建议顺序：**[方法库是什么（背景）](../research/method-library-cocreation/2026-10-29-method-library-background.md)** → 本卡 → [DSH 机制依据](../research/method-library-cocreation/2026-10-29-dsh-plugin-borrowing-and-rationale.md) → [滚动/智力体/切换规格](../research/method-library-cocreation/2026-10-29-option-a-scroll-and-intelligence.md) → [A/B 视觉稿](../research/method-library-cocreation/2026-10-29-ux-redesign.md)。
 
 ## 目标
 

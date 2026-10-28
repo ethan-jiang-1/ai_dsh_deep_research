@@ -21,6 +21,7 @@
 （2026-10-25 运行形态合同材料已随消费者迁入 [_archived/research/](../_archived/research/)；三条旧材料同迁：notes-stocktake 体检 + strategy-benchmark 两份。）
 
 
+- [method-library-cocreation/2026-10-29-method-library-background.md](method-library-cocreation/2026-10-29-method-library-background.md) — 方法库是什么：概念/四字段/内置参考/默认/从 run 沉淀/演进史/术语表（消费者：[issue](../issues/2026-10-29-method-library-workbench-redesign.md)）。
 - [method-library-cocreation/2026-10-29-dsh-plugin-borrowing-and-rationale.md](method-library-cocreation/2026-10-29-dsh-plugin-borrowing-and-rationale.md) — 对 DSH 现成机制（preset/skill/tool/client-plugin/slot/conversation/theme）的借用清单、每项理由与否决备选（消费者：[issue](../issues/2026-10-29-method-library-workbench-redesign.md)）。
 - [method-library-cocreation/2026-10-29-option-a-scroll-and-intelligence.md](method-library-cocreation/2026-10-29-option-a-scroll-and-intelligence.md) — 方案 A 的滚动规格（17+6 种情形）、对话智力体能力/协议、模式与方案切换的状态对齐矩阵（消费者：[issue](../issues/2026-10-29-method-library-workbench-redesign.md)）。
 - [method-library-cocreation/2026-10-29-ux-redesign.md](method-library-cocreation/2026-10-29-ux-redesign.md) — 方法库工作台交互重设计：A（草稿卡在上/对话在下）vs B（表单+抽屉）的 SVG 视觉稿与状态呈现（消费者：[issue](../issues/2026-10-29-method-library-workbench-redesign.md)）。
