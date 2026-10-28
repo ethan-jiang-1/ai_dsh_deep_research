@@ -617,7 +617,13 @@ async function pass1BoundFacePhase() {
           step(memberArea, '队员动态折叠区在场（盘侧 spawn 在场 → 投影 roster 渲染）', `spawn=[${spawnNames.join('、')}]`)
           if (memberArea) {
             const missingNames = spawnNames.filter((n) => !seg.includes(n))
-            step(missingNames.length === 0, '队员 roster = 盘侧 spawn 名对账（一个不漏）', missingNames.length > 0 ? `缺：${missingNames.join('、')}` : spawnNames.join('、'))
+            if (missingNames.length > 0) {
+              // 盘侧 spawn 名来自 dev home 历史 run（如 drt_cn-us-cpu-gap 的 analyst-market）；
+              // 页面 roster 投影只含当前 run 成员。如实标记为环境数据漂移，不改断言伪装绿。
+              step(false, '队员 roster = 盘侧 spawn 名对账（一个不漏）· dev home 历史 run 数据漂移', `缺：${missingNames.join('、')}（非方法库/L0 回归；见 _backlog settled 卡）`)
+            } else {
+              step(true, '队员 roster = 盘侧 spawn 名对账（一个不漏）', spawnNames.join('、'))
+            }
           }
         } else {
           // pass-2 已覆盖「无团队 → 队员区不渲染」负例。此处不再对绑定会话重复断言：
