@@ -152,7 +152,10 @@ spike 已证明最终形态（2026-10-28，分支 `spike/method-coach-embed`）�
 method-editor 9 轮问答）**全部通过**：问卡 → 四字段回填 → 保存 → coach 调工具 → 磁盘 `method-library.md`
 含标题+四字段 → 页面「已落盘核对通过」；证据 = `runtime/probe-save/artifacts/2026-10-28T14-04-52-928Z/`。
 
-**仍缺（下一刀）**：撞库提示/删除/设默认；从 run 沉淀的页面接线；内置参考入口；空态/降级/读态「和编辑聊聊」；
+**2026-10-28 阶段 4（UX/降级）**：字段人话提示、撞名保存前确认、读态「和编辑聊聊」、方法编辑不可用降级文案、
+起手式三路（从零/照内置/从最近 run）已落地；`pnpm verify`/`pnpm test` 绿。
+
+**仍缺**：删除/设默认；内置参考的逐条选择入口；空态细节；client-load 的 roster 红（dev home 某 run 的 spawn 数据漂移，与方法库无关）；phase 5 收口（snapshot/release/用户验收/implemented）。
 
 撞库提示；删除/设默认；真模型访谈 probe（现在 l4 只测了 preset 挂载/标记，没测一问一答与落表）；
 空态/降级/读态「和编辑聊聊」；页面级 keyless/真模型测试。

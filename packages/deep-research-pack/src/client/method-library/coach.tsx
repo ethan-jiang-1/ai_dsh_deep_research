@@ -101,6 +101,7 @@ export function MethodCoachPortal(props: MethodCoachPortalProps): ReactNode {
 const STARTERS = [
   { label: '从零聊', prompt: '从零开始，先帮我从研究场景问起。' },
   { label: '照内置改', prompt: '我想照一条内置打法改，先问我想改哪一块。' },
+  { label: '从这次研究沉淀', prompt: '把这次研究实际采用的做法沉淀成一条方法。' },
 ] as const
 
 /** 方法编辑面板的 props（页面注入建会话/发 prompt）。 */
@@ -208,7 +209,7 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
         </div>
       </div>
       {error !== null && (
-        <div style={{ fontSize: 12, color: '#b91c1c', padding: '6px 12px' }}>出错了：{error}</div>
+        <div style={{ fontSize: 12, color: '#b91c1c', padding: '6px 12px' }}>方法编辑暂不可用：{error}（表单可以继续填，稍后重试）</div>
       )}
       <div
         ref={(element) => { setHost(element) }}

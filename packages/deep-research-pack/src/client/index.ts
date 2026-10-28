@@ -337,6 +337,7 @@ export function apply(ctx: ClientContext): void {
         ensureCoach: ensureCoachSession,
         sendCoach,
         watchCoach,
+        listDir: (sessionId: SessionId, path: string, signal: AbortSignal) => listDir(sessionId, path, signal),
       }),
     }, MethodLibraryView)), 'deep-research-pack: method-library conversation view')
 

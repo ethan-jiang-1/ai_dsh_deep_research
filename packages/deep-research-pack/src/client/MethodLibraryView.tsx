@@ -47,6 +47,8 @@ export interface MethodLibraryInjected {
   readonly sendCoach: (sessionId: SessionId, text: string) => Promise<void>
   /** 跟随方法编辑会话的 assistant 消息（草稿回填；live only）。 */
   readonly watchCoach: (sessionId: SessionId, signal: AbortSignal, onText: (text: string) => void) => Promise<void>
+  /** 列工作区目录（找最近的 run，供「从这次研究沉淀」）。 */
+  readonly listDir: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<readonly { type: string; name: string }[] | null>
 }
 
 export type MethodLibraryViewProps = PropsRuntime<'conversation.view'> & MethodLibraryInjected
@@ -96,6 +98,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const [coachFields, setCoachFields] = useState<ReadonlySet<DraftField>>(() => new Set())
   const [activeField, setActiveField] = useState<DraftField | null>(null)
   const [coachBase, setCoachBase] = useState<LibraryEntry | null>(null)
+  const [runContext, setRunContext] = useState<string | null>(null)
   const previousRef = useRef<{
     draft: Draft
     manual: ReadonlySet<DraftField>
@@ -258,8 +261,19 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
       return
     }
     if (coachId === null) {
-      setReceipt({ ok: false, detail: '方法编辑还没就绪；稍等或重开本页再保存' })
+      setReceipt({ ok: false, detail: '方法编辑暂不可用；表单可以继续填，稍后重试保存' })
       return
+    }
+    const existing = foldLibrary(text).find((entry) => entry.name === name)
+    const renaming = mode === 'edit' && draft.currentName !== undefined && draft.currentName !== name
+    if (existing !== undefined && (mode === 'new' || renaming)) {
+      const confirmed = typeof window === 'undefined'
+        ? true
+        : window.confirm(`库里已有同名方法「${name}」，保存会覆盖它。继续？`)
+      if (!confirmed) {
+        setReceipt({ ok: false, detail: `未保存：库里已有「${name}」` })
+        return
+      }
     }
     const block = [
       renderLibraryEntry({ name, sections: draft.sections, provenance: draft.provenance, isDefault: draft.isDefault }),
@@ -313,6 +327,30 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     void load(controller.signal)
   }
 
+  // 最近一次 run 的上下文（「从这次研究沉淀」）：只读 question.md + final.md 摘要，不重跑研究。
+  useEffect(() => {
+    if (sessionId === undefined) return undefined
+    const controller = new AbortController()
+    void (async () => {
+      try {
+        const listing = await props.listDir(sessionId, '', controller.signal)
+        const runs = (listing ?? []).filter((item) => item.type === 'directory' && item.name.startsWith('drt_')).map((item) => item.name).sort()
+        const latest = runs.at(-1)
+        if (latest === undefined) return
+        const read = async (path: string): Promise<string> => {
+          try {
+            return (await props.readFile(sessionId, path, controller.signal, 60)) ?? ''
+          } catch { return '' }
+        }
+        const question = (await read(`${latest}/question.md`)).trim()
+        const final = (await read(`${latest}/final.md`)).trim()
+        if (question === '' && final === '') return
+        setRunContext(`- run：${latest}\n- question.md：${question.slice(0, 500)}\n- final.md：${final.slice(0, 1200)}`)
+      } catch { /* 读取失败不砸页面；没有 run 就不带 */ }
+    })()
+    return () => controller.abort()
+  }, [sessionId, props.listDir, props.readFile])
+
   // 方法编辑首问的上下文：库快照 + 当前草稿 + 内置参考（只读）。只随第一条消息发一次。
   const librarySnapshot = text === null ? '（未加载）' : text.trim() === '' ? '（空）' : text.trim()
   const draftSnapshot = draft === null
@@ -325,7 +363,8 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     '【页面自动附带的上下文，不是用户输入】',
     `当前方法库（method-library.md）：\n${librarySnapshot}`,
     `当前草稿：\n${draftSnapshot}`,
-    `内置参考（只读，仅对照，不要照抄）：${BUILTIN_PREFERENCES.map((entry) => entry.name).join('、')}`,
+    `内置参考（只读，仅对照，不要照抄）：${BUILTIN_PREFERENCES.map((entry) => `${entry.name}（${entry.summary}）`).join('；')}`,
+    ...(runContext === null ? [] : [`最近的 run（用户点「从这次研究沉淀」时用它的实际做法）：\n${runContext}`]),
   ].join('\n\n')
 
 

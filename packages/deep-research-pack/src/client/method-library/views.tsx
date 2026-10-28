@@ -60,7 +60,7 @@ export function ReadMineView(props: {
         {entry.isDefault && <span style={{ fontSize: 10, color: '#2563eb' }}>默认偏好</span>}
         {entry.provenance !== null && <span style={MUTED_STYLE}>{entry.provenance}</span>}
         <span style={{ flex: 1 }} />
-        <button type="button" style={BUTTON_STYLE} onClick={() => { onEdit(entry) }}>编辑</button>
+        <button type="button" style={BUTTON_STYLE} onClick={() => { onEdit(entry) }}>和编辑聊聊</button>
         <button type="button" style={BUTTON_STYLE} onClick={() => { onPendingDelete(entry.name) }}>删除…</button>
       </div>
       {pendingDelete === entry.name && (
@@ -88,6 +88,14 @@ export function ReadMineView(props: {
 
 /** 编辑/新建表单：四字段 + Markdown 预览 + 保存/取消。 */
 const MARKER_STYLE = { fontSize: 10, padding: '1px 6px', borderRadius: 999, background: '#00000008', opacity: 0.65 } as const
+
+/** 每格的人话提示（用户不该先学 schema）。 */
+const SECTION_HINTS: Record<keyof LibrarySections, string> = {
+  source: '先看哪里、信谁：官方文档 / 定价页 / 公告优先',
+  verify: '冲突时怎么裁、数字怎么回原表复算',
+  report: '第一屏给谁看、分几节、什么形态',
+  limit: '这条方法明确不做什么（至少一条）',
+}
 
 export function EditorView(props: {
   readonly draft: Draft | null
@@ -150,6 +158,7 @@ export function EditorView(props: {
           <span style={{ fontSize: 11, opacity: 0.6 }}>名称</span>
           {marker('name')}
         </div>
+        <div style={{ fontSize: 11, opacity: 0.45, marginBottom: 4 }}>用你的口径起名；新建时别和已有条目撞名</div>
         <input
           style={{ ...INPUT_STYLE, ...fieldStyle('name') }}
           value={draft.name}
@@ -167,6 +176,7 @@ export function EditorView(props: {
             <span style={{ fontSize: 11, opacity: 0.6 }}>{section.label}</span>
             {marker(section.key)}
           </div>
+          <div style={{ fontSize: 11, opacity: 0.45, marginBottom: 4 }}>{SECTION_HINTS[section.key]}</div>
           <textarea
             style={{ ...TEXTAREA_STYLE, ...fieldStyle(section.key) }}
             value={draft.sections[section.key] ?? ''}
