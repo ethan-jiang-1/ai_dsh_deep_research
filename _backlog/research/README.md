@@ -21,6 +21,7 @@
 （2026-10-25 运行形态合同材料已随消费者迁入 [_archived/research/](../_archived/research/)；三条旧材料同迁：notes-stocktake 体检 + strategy-benchmark 两份。）
 
 
+- [method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md](method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md) — 方法库页内对话共创的会话选型（root vs subagent/fork）、workspace 归属、`conversation.view` 嵌入面、双 composer、preset/skill 与写入回执证据（消费者：[issue](../issues/2026-10-28-method-library-cocreation.md)）。
 - [dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md](dynamic-research-dag/2026-10-21-dsh-orchestration-primitives.md) — 动态研究 DAG 与多层 subagent 编排（消费者：[_archived/settled_issues/2026-10-21-dynamic-research-dag.md](../_archived/settled_issues/2026-10-21-dynamic-research-dag.md)）。
 - [dynamic-research-dag/2026-10-21-dsh-plugin-dag-practices.md](dynamic-research-dag/2026-10-21-dsh-plugin-dag-practices.md) — DSH 插件生态与外部的动态 DAG 实践（同一消费者：已结宪章卡 + implemented RFC）。
 - [dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md](dynamic-research-dag/2026-10-21-breadth-depth-research-cells.md) — 宽搜/深搜的深度模型与研究单元（同一消费者：已结宪章卡 + implemented RFC）。

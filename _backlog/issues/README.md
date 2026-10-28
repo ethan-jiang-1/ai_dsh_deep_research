@@ -4,7 +4,7 @@
 
 ## 活跃清单
 
-（空。完整归档 = [settled 池索引](../_archived/settled_issues/README.md)；最近三条见下。）
+- [2026-10-28 方法库页内对话共创](2026-10-28-method-library-cocreation.md) — 等人拍板：独立会话 + 方法编辑 preset；待 D2/D25/会话粒度/嵌入 spike 四问。（完整归档 = [settled 池索引](../_archived/settled_issues/README.md)；最近三条见下。）
 
 ## 最近归档
 
