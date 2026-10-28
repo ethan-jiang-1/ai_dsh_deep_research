@@ -362,7 +362,12 @@ export function apply(ctx: ClientContext): void {
     scoped.effect(() => {
       const style = document.createElement('style')
       style.setAttribute('data-dsh-deep-research', 'method-library-coach-composer')
-      style.textContent = '[data-conversation-scroll]:has([data-method-library-edit]):not(:has(> [data-composer-seat] [data-question-key])) > [data-composer-seat]{display:none}'
+      style.textContent = [
+        '[data-conversation-scroll]:has([data-method-library-edit]):not(:has(> [data-composer-seat] [data-question-key])) > [data-composer-seat]{display:none}',
+        /* 方法编辑只露一问一答：不显示模型思考行与 skill 工具行（"用户不困惑" #3/#8）。 */
+        '[data-method-coach-portal] [data-preview]{display:none !important}',
+        '[data-method-coach-portal] [data-tool="skill"]{display:none !important}',
+      ].join('\n')
       document.head.appendChild(style)
       return () => style.remove()
     }, 'deep-research-pack: method-library coach composer suppression')
