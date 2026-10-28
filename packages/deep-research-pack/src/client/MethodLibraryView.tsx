@@ -334,18 +334,21 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     void (async () => {
       try {
         const listing = await props.listDir(sessionId, '', controller.signal)
-        const runs = (listing ?? []).filter((item) => item.type === 'directory' && item.name.startsWith('drt_')).map((item) => item.name).sort()
-        const latest = runs.at(-1)
-        if (latest === undefined) return
+        const runs = (listing ?? []).filter((item) => item.type === 'directory' && item.name.startsWith('drt_')).map((item) => item.name).sort().slice(-3)
+        if (runs.length === 0) return
         const read = async (path: string): Promise<string> => {
           try {
-            return (await props.readFile(sessionId, path, controller.signal, 60)) ?? ''
+            return (await props.readFile(sessionId, path, controller.signal, 40)) ?? ''
           } catch { return '' }
         }
-        const question = (await read(`${latest}/question.md`)).trim()
-        const final = (await read(`${latest}/final.md`)).trim()
-        if (question === '' && final === '') return
-        setRunContext(`- run：${latest}\n- question.md：${question.slice(0, 500)}\n- final.md：${final.slice(0, 1200)}`)
+        const blocks: string[] = []
+        for (const run of runs) {
+          const question = (await read(`${run}/question.md`)).trim()
+          const final = (await read(`${run}/final.md`)).trim()
+          if (question === '' && final === '') continue
+          blocks.push(`- run：${run}\n  question.md：${question.slice(0, 300)}\n  final.md：${final.slice(0, 600)}`)
+        }
+        if (blocks.length > 0) setRunContext(blocks.join('\n'))
       } catch { /* 读取失败不砸页面；没有 run 就不带 */ }
     })()
     return () => controller.abort()
