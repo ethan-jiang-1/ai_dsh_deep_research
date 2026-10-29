@@ -4,11 +4,10 @@
 
 ## 活跃清单
 
-
+- [2026-10-29 方法库工作台重排](2026-10-29-method-library-workbench-redesign.md) — 当前准据为已采纳 A′；默认切换与普通保存分离已裁定，待默认交互细节及写入授权路径，再收敛验收并分步实施。
 
 ## 最近归档
 
-- [2026-10-29 方法库工作台重排](2026-10-29-method-library-workbench-redesign.md) — 两视图（库 + 工作台）：草稿卡在上、对话在下；已选 A，待落地。
 - [2026-10-28 方法库页内对话共创](../_archived/settled_issues/2026-10-28-method-library-cocreation.md) — implemented：页内三栏 + 方法编辑 preset + 草稿回填 + 保存闭环；证据 = 调研 §14 + `runtime/probe-save/artifacts/2026-10-28T14-47-08-504Z/`。
 
 最近三条（更早 = [settled 池索引](../_archived/settled_issues/README.md)，逐卡一行；本区不重复维护）：

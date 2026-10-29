@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9Z" fill="#79b9a7"/></marker>
+    <style>
+      text{font-family:Arial,"PingFang SC","Hiragino Sans GB",sans-serif}.title{font-size:28px;font-weight:700;fill:#f2f4f5}.sub{font-size:15px;fill:#aeb8bc}.step{fill:#191e21;stroke:#394449;stroke-width:1.5}.head{font-size:17px;font-weight:700;fill:#edf2f3}.body{font-size:13px;fill:#c4cdd0}.small{font-size:11px;fill:#99a6aa}.num{font-size:13px;font-weight:700;fill:#101615}.line{stroke:#79b9a7;stroke-width:2;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1600" height="1000" fill="#101315"/>
+  <text x="52" y="64" class="title">方法库工作台 · 用户流程</text>
+  <text x="52" y="93" class="sub">A′ 保留“库 + 工作台”，把右侧重新定义为：选择来源、形成方法、检查、提交并核对。</text>
+  <g transform="translate(52 142)">
+    <rect class="step" width="216" height="320" rx="8"/><circle cx="27" cy="29" r="14" fill="#8ed0bd"/><text x="27" y="34" text-anchor="middle" class="num">1</text><text x="50" y="35" class="head">库 / 条目详情</text>
+    <rect x="16" y="56" width="82" height="25" rx="4" fill="#20282b" stroke="#465156"/><text x="57" y="73" text-anchor="middle" class="small">我的方法</text><rect x="105" y="56" width="95" height="25" rx="4" fill="#20282b" stroke="#465156"/><text x="152" y="73" text-anchor="middle" class="small">内置参考</text>
+    <rect x="16" y="94" width="184" height="42" rx="5" fill="#20282b" stroke="#6caa99"/><text x="28" y="120" class="body">选型评估方法</text>
+    <text x="16" y="167" class="body">查看完整四方面</text><text x="16" y="191" class="small">名称 · 来源 · 默认状态</text><text x="16" y="215" class="small">详情不挂空聊天</text>
+    <rect x="16" y="249" width="184" height="42" rx="5" fill="#326f62"/><text x="108" y="275" text-anchor="middle" class="body">新建 / 在工作台继续</text>
+  </g>
+  <path d="M274 302H306" class="line"/>
+  <g transform="translate(312 142)">
+    <rect class="step" width="216" height="320" rx="8"/><circle cx="27" cy="29" r="14" fill="#8ed0bd"/><text x="27" y="34" text-anchor="middle" class="num">2</text><text x="50" y="35" class="head">选工作来源</text>
+    <text x="16" y="79" class="body">从零开始</text><text x="16" y="100" class="small">直接从场景谈起</text><line x1="16" y1="113" x2="200" y2="113" stroke="#343e42"/>
+    <text x="16" y="146" class="body">参考内置方法</text><text x="16" y="167" class="small">先选一条并预览四方面</text><line x1="16" y1="181" x2="200" y2="181" stroke="#343e42"/>
+    <text x="16" y="214" class="body">从研究沉淀</text><text x="16" y="235" class="small">先选一条具体 run</text>
+    <rect x="16" y="258" width="184" height="42" rx="5" fill="#1e3030" stroke="#6caa99"/><text x="108" y="276" text-anchor="middle" class="small">选定后锁在当前草稿</text><text x="108" y="291" text-anchor="middle" class="small">不会把“最近三条”混在一起</text>
+  </g>
+  <path d="M534 302H566" class="line"/>
+  <g transform="translate(572 142)">
+    <rect class="step" width="216" height="320" rx="8"/><circle cx="27" cy="29" r="14" fill="#8ed0bd"/><text x="27" y="34" text-anchor="middle" class="num">3</text><text x="50" y="35" class="head">访谈形成</text>
+    <rect x="14" y="56" width="188" height="105" rx="5" fill="#202629" stroke="#394449"/><text x="27" y="79" class="small">当前方法摘要</text><text x="27" y="105" class="body">找来源 · 来自对话</text><text x="27" y="130" class="body">怎么核实 · 待定</text><text x="27" y="150" class="small">3/4 · 未保存</text>
+    <rect x="14" y="174" width="188" height="96" rx="5" fill="#171c1f" stroke="#394449"/><text x="27" y="198" class="small">方法编辑 · 一次一问</text><text x="27" y="224" class="body">回答逐格成为候选</text><text x="27" y="248" class="small">更新入草稿，不直接入库</text>
+    <text x="14" y="296" class="small">手改受保护；撤销按字段</text>
+  </g>
+  <path d="M794 302H826" class="line"/>
+  <g transform="translate(832 142)">
+    <rect class="step" width="216" height="320" rx="8"/><circle cx="27" cy="29" r="14" fill="#91bdf1"/><text x="27" y="34" text-anchor="middle" class="num">4</text><text x="50" y="35" class="head">表单检查</text>
+    <rect x="14" y="58" width="188" height="52" rx="4" fill="#202629" stroke="#394449"/><text x="26" y="79" class="small">找来源 · 来自对话</text><text x="26" y="99" class="body">官方 / 一手优先…</text>
+    <rect x="14" y="120" width="188" height="61" rx="4" fill="#27251f" stroke="#a2824c"/><text x="26" y="142" class="small">怎么核实 · 我改过</text><text x="26" y="164" class="body">数字回原表复算…</text>
+    <text x="14" y="210" class="small">完整内容在这里修订</text><text x="14" y="234" class="small">对话暂收起，但会话保留</text>
+    <rect x="14" y="258" width="188" height="42" rx="5" fill="#20282b" stroke="#465156"/><text x="108" y="284" text-anchor="middle" class="body">返回访谈 / 保存</text>
+  </g>
+  <path d="M1054 302H1086" class="line"/>
+  <g transform="translate(1092 142)">
+    <rect class="step" width="216" height="320" rx="8"/><circle cx="27" cy="29" r="14" fill="#f1cf88"/><text x="27" y="34" text-anchor="middle" class="num">5</text><text x="50" y="35" class="head">提交并核对</text>
+    <rect x="14" y="61" width="188" height="52" rx="5" fill="#302a20" stroke="#9c7c43"/><text x="27" y="84" fill="#f1cf88" class="body">保存中</text><text x="27" y="102" class="small">提交快照，草稿锁定</text>
+    <text x="14" y="151" class="body">方法编辑调用窄工具</text><text x="14" y="177" class="small">工具回话不等于保存完成</text><text x="14" y="212" class="body">页面重新读取方法库</text><text x="14" y="238" class="small">名称 / 四方面 / 默认逐项核对</text>
+    <rect x="14" y="258" width="188" height="42" rx="5" fill="#20282b" stroke="#465156"/><text x="108" y="284" text-anchor="middle" class="body">匹配后转详情</text>
+  </g>
+  <path d="M1314 302H1346" class="line"/>
+  <g transform="translate(1352 142)">
+    <rect class="step" width="196" height="320" rx="8"/><circle cx="27" cy="29" r="14" fill="#8ed0bd"/><text x="27" y="34" text-anchor="middle" class="num">6</text><text x="50" y="35" class="head">条目详情</text>
+    <text x="16" y="84" class="body">完整可读</text><text x="16" y="110" class="small">已保存并回读核对</text><line x1="16" y1="132" x2="180" y2="132" stroke="#394449"/><text x="16" y="168" class="small">在工作台继续</text><text x="16" y="198" class="small">设为默认</text><text x="16" y="228" class="small">删除…</text><text x="16" y="277" class="small">不显示无任务的聊天</text>
+  </g>
+  <text x="52" y="530" class="head">错误与离开路径：草稿或原条目始终留在用户手里</text>
+  <g transform="translate(52 560)"><rect width="465" height="150" rx="7" fill="#1b2022" stroke="#485156"/><circle cx="28" cy="31" r="6" fill="#e79b8d"/><text x="46" y="36" class="head">保存结果未核实</text><text x="22" y="72" class="body">显示“结果未核实”，保留活动草稿。</text><text x="22" y="99" class="body">刷新库并核对，不盲目重发未核实命令。</text><text x="22" y="128" class="small">UI 命令与模型 tool call 的身份需分别关联。</text></g>
+  <g transform="translate(567 560)"><rect width="465" height="150" rx="7" fill="#1b2022" stroke="#485156"/><circle cx="28" cy="31" r="6" fill="#f1cf88"/><text x="46" y="36" class="head">离开有未保存修改</text><text x="22" y="72" class="body">选条目、换来源、放弃前显示守卫。</text><text x="22" y="99" class="body">继续编辑 / 放弃草稿 / 取消切换。</text><text x="22" y="128" class="small">卡片与表单不产生第二份草稿。</text></g>
+  <g transform="translate(1082 560)"><rect width="466" height="150" rx="7" fill="#1b2022" stroke="#485156"/><circle cx="28" cy="31" r="6" fill="#91bdf1"/><text x="46" y="36" class="head">方法编辑暂不可用</text><text x="22" y="72" class="body">详情仍可看；草稿仍可编辑。</text><text x="22" y="99" class="body">写入/删除/设默认不显示假成功。</text><text x="22" y="128" class="small">明确说明受影响的动作和重试路径。</text></g>
+  <rect x="52" y="770" width="1496" height="142" rx="8" fill="#171b1d" stroke="#343d41"/><text x="76" y="808" class="head">UX 真相分层</text>
+  <text x="76" y="845" class="body">持久真相：工作区方法库</text><text x="358" y="845" class="body">编辑真相：唯一活动草稿</text><text x="651" y="845" class="body">候选来源：方法编辑 / 用户</text><text x="1030" y="845" class="body">成功：回读观察逐项匹配</text>
+  <text x="76" y="881" class="small">详情、摘要、表单是同一方法的三种工作表面。对话只在访谈中显示；收起它不卸载 DSH 原生会话。</text>
+</svg>

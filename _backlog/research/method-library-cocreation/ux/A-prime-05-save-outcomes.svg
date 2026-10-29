@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="920" viewBox="0 0 1600 920">
+  <defs><style>text{font-family:Arial,"PingFang SC","Hiragino Sans GB",sans-serif}.t{fill:#edf1f3}.m{fill:#a8b2b6}.s{font-size:12px}.b{font-size:14px}.h{font-size:22px;font-weight:700}.sh{font-size:16px;font-weight:700}</style></defs>
+  <rect width="1600" height="920" fill="#101214"/><text x="48" y="55" class="t h">保存之后：两种真实结果</text><text x="48" y="82" class="m b">只有重新读取方法库并逐项匹配提交快照，页面才显示“已保存并核对”。</text>
+  <g transform="translate(48 122)">
+    <rect width="735" height="740" rx="8" fill="#15191b" stroke="#3c4848"/><rect width="735" height="56" rx="8" fill="#1b2824"/><circle cx="28" cy="28" r="9" fill="#84c7ae"/><text x="50" y="34" fill="#9bd5c3" class="sh">已保存并核对</text>
+    <text x="28" y="94" class="m s">选型评估方法</text><text x="28" y="124" class="t h">写入与回读一致</text><rect x="28" y="148" width="679" height="74" rx="5" fill="#1d2925" stroke="#508776"/><text x="48" y="177" fill="#a3ddc8" class="b">✓ 方法已保存到本工作区</text><text x="48" y="200" class="m s">本次保存的名称、四个方面与来源注记均已核对。</text>
+    <text x="28" y="267" class="t sh">方法详情</text><text x="28" y="307" class="m s">找来源</text><text x="28" y="332" class="t b">官方定价页与文档优先；媒体只作线索。</text><line x1="28" y1="350" x2="707" y2="350" stroke="#303a3d"/>
+    <text x="28" y="385" class="m s">怎么核实</text><text x="28" y="410" class="t b">数字回原表复算；口径不一致时并列。</text><line x1="28" y1="428" x2="707" y2="428" stroke="#303a3d"/>
+    <text x="28" y="463" class="m s">报告怎么写</text><text x="28" y="488" class="t b">先给结论、适用条件与风险，再按方案拆分。</text><line x1="28" y1="506" x2="707" y2="506" stroke="#303a3d"/>
+    <text x="28" y="541" class="m s">不承诺</text><text x="28" y="566" class="t b">不提供绝对排名；数据缺口明确说明。</text>
+    <rect x="28" y="613" width="205" height="42" rx="5" fill="#347f6c"/><text x="130" y="639" text-anchor="middle" class="t b">在工作台继续</text><rect x="246" y="613" width="140" height="42" rx="5" fill="#22292b" stroke="#4a5559"/><text x="316" y="639" text-anchor="middle" class="t b">设为默认</text><rect x="399" y="613" width="114" height="42" rx="5" fill="#22292b" stroke="#4a5559"/><text x="456" y="639" text-anchor="middle" class="t b">删除…</text><text x="28" y="700" class="m s">对话收起；详情只承担阅读与管理。</text>
+  </g>
+  <g transform="translate(817 122)">
+    <rect width="735" height="740" rx="8" fill="#15191b" stroke="#554842"/><rect width="735" height="56" rx="8" fill="#30251f"/><circle cx="28" cy="28" r="9" fill="#e2aa75"/><text x="50" y="34" fill="#f0c394" class="sh">结果未核实</text>
+    <text x="28" y="94" class="m s">选型评估方法</text><text x="28" y="124" class="t h">先不要重复保存</text><rect x="28" y="148" width="679" height="96" rx="5" fill="#2a211d" stroke="#8a654a"/><text x="48" y="178" fill="#f0c394" class="b">写入结果暂时无法确认</text><text x="48" y="203" class="m s">可能已写入，也可能尚未完成。活动草稿仍保留。</text><text x="48" y="225" class="m s">不会把“已发送”或模型回复当作保存成功。</text>
+    <rect x="28" y="264" width="204" height="40" rx="5" fill="#347f6c"/><text x="130" y="289" text-anchor="middle" class="t b">刷新库并核对</text><rect x="244" y="264" width="142" height="40" rx="5" fill="#22292b" stroke="#4a5559"/><text x="315" y="289" text-anchor="middle" class="t b">回到草稿</text>
+    <text x="28" y="347" class="t sh">活动草稿仍在</text><rect x="28" y="367" width="679" height="54" rx="4" fill="#191f21" stroke="#394448"/><text x="48" y="390" class="m s">名称　<tspan fill="#edf1f3">选型评估方法</tspan></text><text x="48" y="409" class="m s">研究打法　<tspan fill="#edf1f3">4/4　·　来源与手改标记保留</tspan></text>
+    <text x="28" y="462" class="t sh">核对时可能发生</text><circle cx="36" cy="496" r="4" fill="#84c7ae"/><text x="52" y="501" class="t b">匹配：转到已保存详情</text><circle cx="36" cy="532" r="4" fill="#e2aa75"/><text x="52" y="537" class="t b">库读取失败：保留草稿，稍后重试</text><circle cx="36" cy="568" r="4" fill="#e2aa75"/><text x="52" y="573" class="t b">内容不一致：显示差异，不覆盖新内容</text>
+    <rect x="28" y="612" width="679" height="71" rx="5" fill="#1b2022" stroke="#3b4549"/><text x="48" y="640" class="m b">保存期间整份草稿锁定</text><text x="48" y="663" class="m s">待当前结果核对完毕，不发送重复写入。</text><text x="28" y="718" class="m s">工具路径还需 Host 验证 UI 命令绑定；Remote 响应由本次调用返回。</text>
+  </g>
+</svg>
