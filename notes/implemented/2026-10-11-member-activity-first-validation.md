@@ -10,7 +10,7 @@ origin = subagent，host 侧 `validateAddress`（vendor session-controller `hist
 sessionId 形态一律抛 `session/agent-busy "subagent Sessions require their durable parent
 address"`；父地址形态 = 官方 ui-session `sessionAddress()` 同款，`mode:'unknown'` 跳过
 one-shot/continuable 对账（观察者不断言队员形态）。通道探明材料（2026-10-10，
-[_backlog/_archived/research/2026-10-10-teammate-channel-probe.md](../../_backlog/_archived/research/2026-10-10-teammate-channel-probe.md)）
+[_backlog/_archived/research/teammate-channel-probe/2026-10-10-teammate-channel-probe.md](../../_backlog/_archived/research/teammate-channel-probe/2026-10-10-teammate-channel-probe.md)）
 的"任意会话可 follow"对 subagent 会话**不成立**——本 Note 即该论断的实证修正，材料按归档纪律不回改。
 
 client-load-smoke 的有团队正例环境：自起 web 必须补 agent-team **host 行**（roster 投影的计算点；

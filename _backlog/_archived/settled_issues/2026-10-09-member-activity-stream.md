@@ -9,7 +9,7 @@ opened: 2026-10-09
 
 **问题与期望结果：** 研究驾驶舱的渐进面只 follow lead 会话——scout/analyst/critic 作为 teammate 的检索与取证动作住在各自会话，不进 lead journal，run 期观察队员得逐个开会话或切 ui-agent-team 任务板。出处 = [pack README 已知限制](../../../packages/deep-research-pack/README.md)登记的后续候选 + [钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md)。期望：run 期在观察面一处看见队员在干什么，不用逐会话翻。
 
-**当前情况：** 现有缓解 = `wait_agent` 的"队员作业中"活动行（全静缓解）+ ui-agent-team 任务板（任务粒度）。缺的是队员**动作粒度**的流。company client-face 有先例可参照（8 页签里的 presence/board 从 sessions 座位的 agentTeam 投影读行数据——2026-10-09 复核确认的数据通道形态）。**通道供给侧已探明**（2026-10-10，vendor 同 pin 源码锚点）=[通道探明材料](../research/2026-10-10-teammate-channel-probe.md)：动作粒度唯一可达通道 = 多路 follow 队员会话（任意会话可 follow、journal 同词表、无已知并发上限）；agentTeam 投影天花板 = roster+任务板+turn 级 running（但它是**队员会话 id 的唯一发现源**——spawn_teammate 返回不带 id，源码实测）；新 @Remote = typert 生成步硬前置、仓外零先例、当前不采纳。**本卡刻意排在下一场研究 run 之后**：先拿真实 run 的观察素材定"多痛、要什么粒度"，再动工——不猜需求。
+**当前情况：** 现有缓解 = `wait_agent` 的"队员作业中"活动行（全静缓解）+ ui-agent-team 任务板（任务粒度）。缺的是队员**动作粒度**的流。company client-face 有先例可参照（8 页签里的 presence/board 从 sessions 座位的 agentTeam 投影读行数据——2026-10-09 复核确认的数据通道形态）。**通道供给侧已探明**（2026-10-10，vendor 同 pin 源码锚点）=[通道探明材料](../research/teammate-channel-probe/2026-10-10-teammate-channel-probe.md)：动作粒度唯一可达通道 = 多路 follow 队员会话（任意会话可 follow、journal 同词表、无已知并发上限）；agentTeam 投影天花板 = roster+任务板+turn 级 running（但它是**队员会话 id 的唯一发现源**——spawn_teammate 返回不带 id，源码实测）；新 @Remote = typert 生成步硬前置、仓外零先例、当前不采纳。**本卡刻意排在下一场研究 run 之后**：先拿真实 run 的观察素材定"多痛、要什么粒度"，再动工——不猜需求。
 
 **需求侧定夺（2026-10-10，用户三问直答；归档素材挖掘替代"等下一场 run"——用户即观察者，35+ 场 run 经验为基底）：**
 

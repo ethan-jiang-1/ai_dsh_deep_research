@@ -1,35 +1,69 @@
-# research/ · 问题卡的调研依据
+# research/ · 研究题（名头）与活跃材料
 
-为 [issues](../issues/README.md) 与 [bugs](../bugs/README.md) 收集较长的事实阅读、综述、实验和机制依据。短结论写回消费卡，卡链接材料；半成品允许保留在活跃区。总流程见 [_backlog 入口](../README.md)。
+研究按**研究题**组织：一个研究题 = 一个目录 + 一张题名页（`README.md`）。题名页是这轮研究的
+**名头**：它回答「研究什么、服务谁、长出了哪些卡、有哪些材料」。研究材料住在题名目录内；研究
+收结、委托它的消费者离开后，整个目录原样迁入 [`_archived/research/`](../_archived/research/README.md)。
 
-## 契约
+总流程见 [_backlog 入口](../README.md)；与 issue / bug 的边界见 [AGENTS.md](../AGENTS.md)。
 
-- **收什么**：服务活跃卡、值得保留的调研材料——推敲时攒的、被卡引用的、喂毕业判断的；
-  半成品合法。
-- **不收什么**：抛弃型草稿（按 [AGENTS.md](../../AGENTS.md) 留在树外）；价值越过所有卡
-  的留存型参考（留存语义归 docs 索引——[00-index §外部研究材料](../../docs/00-index.md)）。
-- **命名**：`YYYY-MM-DD-<slug>.md`（与卡同款日期编码），slug 指向它服务的卡或主题；卡链接它。
-  **按主题分子目录**：同主题的多份材料放入同一子目录；单份材料可留区根。索引记录含子目录路径。
-- **新研究的 frontmatter**：字段顺序为 `topic`、`intent`，不写 `status`。topic 使用简短主题名；intent 用一行说明材料存在的用途，不替代证据正文。既有材料迁移只在需要时补这两项元数据，正文保留。
-- 每份研究材料须由本 README 的索引点名，索引记录当前消费者；链接与索引结构按本仓 `pnpm verify` 实际检查范围维护。
-- **生命周期——随卡走**：卡毕业时 `git mv` 到
-  [`../_archived/research/`](../_archived/research/README.md)，文件名与证据正文保留，修复搬迁所需链接；最后一个活跃消费者离开后迁出。已有关联下游消费者的材料继续留在活跃 research，并登记全部消费者。
+## 一个研究题长什么样
+
+```
+research/
+  README.md              ← 本页：活跃题名索引
+  <slug>/                ← 研究题（目录名 = 稳定 slug）
+    README.md            ← 题名页（不是研究正文）
+    2026-..-<slug>.md    ← 研究正文
+    ux/...               ← 同题资产
+```
+
+题名页模板（`> 归档：` 行只在归档后填）：
+
+```markdown
+# <名头>：<一句话>
+
+> 问题：这轮研究要回答什么
+> 消费者：<发起 / 使用它的卡、bug、Note 或授权工作；写链接>
+> 产出的卡：<研究结论落地后新立的卡；没有写 —>
+> 归档：YYYY-MM-DD（归档后补）
+
+## 材料
+| 文件 | 作用 | 日期 |
+|---|---|---|
+| [YYYY-MM-DD-<slug>.md](YYYY-MM-DD-<slug>.md) | 一句话作用 | YYYY-MM-DD |
+```
+
+## 约定
+
+- **slug**：小写 kebab-case，不带日期；归档不改名。已有目录名保持原名，题名页给可读名头。
+- **研究正文**：`YYYY-MM-DD-<slug>.md`，frontmatter 首字段 `topic`、第二字段 `intent`，不写 `status`。
+  文件名日期 = 材料首写日期；`topic` / `intent` 说这份材料自己，不替代题名页。
+- **材料**：题名页必须逐份点名 `.md` 材料（`pnpm verify` 的 `backlog-liveness` 对账）；资产
+  （图片、原型）在题名页里按目录或文件点名即可。题名页的 `> 问题` / `> 消费者` / `> 产出的卡`
+  三行同样由门禁检查——缺一行就是名头没交代清楚。
+- **消费者与产出的卡**：消费者 = 谁委托 / 使用这轮研究；产出的卡 = 研究结束后由它长出来的
+  issue / bug 卡。两者都写相对链接，没有就写 `—`。「产出的卡」是研究 → 卡的反向线索；卡正文里
+  再链回题名页，形成双向可回溯。
+- **归档**：最后一个活跃消费者离开后，`git mv` 整个题名目录到 `_archived/research/<slug>/`；
+  题名页补 `> 归档：YYYY-MM-DD`，归档索引只加题名一行。材料正文不重写，只修搬迁所需的相对链接。
+  归档后仍可被活跃卡引用；引用不等于让研究「复活」。
 
 ## 索引
 
-（2026-10-27 数据契约材料已随卡迁入 [_archived/research/data-contract/](../_archived/research/data-contract/2026-10-27-dsh-data-plane-digest.md)。）
-（2026-10-25 运行形态合同材料已随消费者迁入 [_archived/research/](../_archived/research/)；三条旧材料同迁：notes-stocktake 体检 + strategy-benchmark 两份。）
+| 名头 | 问题 | 消费者 | 材料 |
+|---|---|---|---|
+| *（暂无活跃研究题）* | — | — | — |
 
+归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单。
 
-（2026-10-29 方法库工作台八份调研与 ux 线框已随已结卡迁入 [_archived/research/method-library-cocreation/](../_archived/research/method-library-cocreation/)；历史消费者 = [方法库工作台重排](../_archived/settled_issues/2026-10-29-method-library-workbench-redesign.md)。）
+## 收什么 / 不收什么
 
+- **收**：服务活跃卡、值得保留的调研材料——推敲时攒的、被卡引用的、喂毕业判断的；半成品合法。
+- **不收**：抛弃型草稿（按 [AGENTS.md](../../AGENTS.md) 留在树外）；价值越过所有卡的留存型参考
+  （留存语义归 docs 索引——[00-index §外部研究材料](../../docs/00-index.md)）。
 
-（2026-10-24 用户判断落地材料不再服务活跃卡：`reader-final/` 两份随可读终稿两卡迁入 [_archived/research/reader-final/](../_archived/research/reader-final/2026-10-23-reader-final-design.md)；`2026-10-21-method-library-main-surface.md` 随已结卡迁入 [_archived/research/](../_archived/research/2026-10-21-method-library-main-surface.md)。）
+## 维护
 
-（2026-10-18 方法配置两份材料已随消费者毕业迁入 [_archived/research/](../_archived/research/)：外部先例与真模型 A/B。）
-
-（2026-10-23 D28 缺口收口卡已结：其 P0 证据 `d28-witness-binding/` 随卡迁入 [_archived/research/](../_archived/research/d28-witness-binding/2026-10-23-p0-witness-receipts.md)。）
-
-（2026-10-23 rerun 不满转接卡已结：其验收证据 `rerun-triage/` 随卡迁入 [_archived/research/](../_archived/research/rerun-triage/2026-10-23-acceptance-evidence.md)。）
-
-（2026-10-29 归档：已结/已交付的调研已迁入 [_archived/research/](../_archived/research/README.md)——dynamic-research-dag、run-bundle-charter、retrieval-backend 与 method-library 的 2026-10-28 会话调研；活跃区只留服务当前 issue 的方法库 2026-10-29 两份与 `ux/` 视觉稿。）
+- 新研究先建题名目录与题名页，再写材料；不要先在 shelf 根落文件。
+- 题名页的「消费者 / 产出的卡」随卡的生命周期更新；卡片归档时，若研究已无活跃消费者，整目录迁走。
+- 本页只列活跃题名一行；归档索引一题一行。逐文件清单不在两个索引里重复。

@@ -13,6 +13,8 @@ const ISSUE = '2026-10-08-sample.md';
 const ISSUE_TEXT = '---\nstatus: 推敲中\nopened: 2026-10-08\n---\n\n# Sample\n> 状态：推敲中｜结论倾向：未定｜可关闭：否\n';
 const BUG = 'BUG-018-sample.md';
 const BUG_TEXT = '---\nstatus: 排查中\nseverity: P1\nopened: 2026-10-08\n---\n\n# Bug\n> 严重级别：P1（重要）｜发现：2026-10-08｜状态：排查中\n';
+const RESEARCH_BANNER = '# Example\n> 问题：Why?\n> 消费者：none\n> 产出的卡：—\n\n## 材料\n'
+  + '| [2026-10-08-evidence.md](2026-10-08-evidence.md) | evidence |\n';
 
 function fixture(t) {
   const repo = mkdtempSync(join(tmpdir(), 'backlog-shape-'));
@@ -51,8 +53,10 @@ test('empty shelves and indexed legacy archives remain valid', (t) => {
   const f = fixture(t);
   f.put('_archived/settled_issues/legacy.md', '# Frozen legacy decision\n');
   f.put('_archived/settled_issues/README.md', 'legacy.md\n');
+  f.put('_archived/research/topic/README.md',
+    '# Legacy\n> 问题：What?\n> 消费者：none\n> 产出的卡：—\n\n## 材料\n| [legacy.md](legacy.md) | evidence |\n');
   f.put('_archived/research/topic/legacy.md', '# Frozen evidence\n');
-  f.put('_archived/research/README.md', 'topic/legacy.md\n');
+  f.put('_archived/research/README.md', 'topic/\n');
   assert.deepEqual(f.check(), []);
 });
 
@@ -128,15 +132,52 @@ test('bug lifecycle enums and status-line mirror are enforced on active cards', 
   assert.deepEqual(f.check(), []);
 });
 
-test('research is recursive and requires one-line topic/intent, never status', (t) => {
+test('research lives in a thread with a banner; topic/intent stay one-line and status-free', (t) => {
   const f = fixture(t);
+  f.put('research/topic/README.md', RESEARCH_BANNER);
   f.put('research/topic/2026-10-08-evidence.md', '---\ntopic: Example\nintent: "Support decision"\n---\n\n# Evidence\n');
-  f.put('research/README.md', 'topic/2026-10-08-evidence.md\n');
+  f.put('research/README.md', 'topic/\n');
   assert.deepEqual(f.check(), []);
   f.put('research/topic/2026-10-08-evidence.md', '---\ntopic: Example\nintent: "Support decision"\nstatus: active\n---\n');
   assert.ok(f.check().some((p) => p.includes('must not contain status')));
   f.put('research/topic/2026-10-08-evidence.md', '---\ntopic: Example\nintent: |\n  multiple lines\n---\n');
   assert.ok(f.check().some((p) => p.includes('flat scalar mapping')));
+});
+
+test('research materials cannot sit flat at the shelf root', (t) => {
+  const f = fixture(t);
+  f.put('research/2026-10-08-flat.md', '---\ntopic: Example\nintent: "Support"\n---\n\n# Flat\n');
+  f.put('research/README.md', '2026-10-08-flat.md\n');
+  assert.ok(f.check().some((p) => p.includes('平铺在 shelf 根')));
+});
+
+test('research threads need a banner, an index row and a material list', (t) => {
+  const f = fixture(t);
+  f.put('research/topic/2026-10-08-evidence.md', '---\ntopic: Example\nintent: "Support"\n---\n\n# Evidence\n');
+  f.put('research/README.md', 'topic/\n');
+  assert.ok(f.check().some((p) => p.includes('README.md missing')), 'missing banner');
+  f.put('research/topic/README.md', '# Example\n> 问题：Why?\n> 消费者：none\n> 产出的卡：—\n');
+  assert.ok(f.check().some((p) => p.includes('未在题名页')), 'material not listed');
+  f.put('research/topic/README.md', RESEARCH_BANNER);
+  assert.deepEqual(f.check(), []);
+  f.put('research/README.md', '# Empty\n');
+  assert.ok(f.check().some((p) => p.includes('未登记研究题')), 'thread not indexed');
+});
+
+test('research banner must name the question, consumer and spawned cards', (t) => {
+  const f = fixture(t);
+  f.put('research/topic/README.md', '# Example\n\n## 材料\n| [a.md](a.md) |\n');
+  f.put('research/topic/a.md', '---\ntopic: Example\nintent: "Support"\n---\n\n# A\n');
+  f.put('research/README.md', 'topic/\n');
+  const problems = f.check();
+  for (const field of ['问题', '消费者', '产出的卡']) assert.ok(problems.some((p) => p.includes(field)), field);
+});
+
+test('archived research also lives in threads, not flat at the shelf root', (t) => {
+  const f = fixture(t);
+  f.put('_archived/research/2026-10-08-flat.md', '# Frozen\n');
+  f.put('_archived/research/README.md', '2026-10-08-flat.md\n');
+  assert.ok(f.check().some((p) => p.includes('平铺在 shelf 根')));
 });
 
 test('duplicate or malformed metadata and orphan indexes fail', (t) => {

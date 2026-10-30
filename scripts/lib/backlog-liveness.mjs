@@ -68,15 +68,52 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
     const indexPath = `${shelf}/README.md`;
     if (!existsSync(join(backlogRoot, indexPath))) continue;
     const index = read(indexPath);
+    const research = shelf.endsWith('research');
+    // ── 研究题（2026-10-30）──
+    // 研究按"题名目录 + 题名页 README.md"组织：shelf 根不再收平铺文件；题名页必须被 shelf
+    // 索引按目录点名，材料必须被题名页逐份点名（新鲜度从 shelf 索引下移一层）。规则正本 =
+    // _backlog/research/README.md 与 _backlog/_archived/research/README.md。
+    let threads = new Set();
+    if (research) {
+      const prefix = `_backlog/${shelf}/`;
+      const rels = trackedFiles.filter((p) => p.startsWith(prefix)).map((p) => p.slice(prefix.length));
+      threads = new Set(rels.filter((rel) => rel.includes('/')).map((rel) => rel.split('/')[0]));
+      for (const thread of threads) {
+        const bannerRel = `${shelf}/${thread}/README.md`;
+        if (!rels.includes(`${thread}/README.md`)) {
+          problems.push(`_backlog/${bannerRel} missing——研究题必须有题名页（问题 / 消费者 / 产出的卡 / 材料）`);
+          continue;
+        }
+        const banner = read(bannerRel);
+        for (const field of ['问题', '消费者', '产出的卡']) {
+          if (!new RegExp(`^>\\s*.*${field}[：:]`, 'm').test(banner))
+            problems.push(`_backlog/${bannerRel} 缺「> ${field}：」行——题名页要回答研究什么、服务谁、产出了什么`);
+        }
+        if (!index.includes(`${thread}/`))
+          problems.push(`_backlog/${indexPath} 未登记研究题 ${thread}/——索引按题名一行，不按文件`);
+      }
+      for (const rel of rels) {
+        if (rel === 'README.md' || rel.includes('/')) continue;
+        problems.push(`_backlog/${shelf}/${rel} 平铺在 shelf 根——研究材料必须住进题名目录（_backlog/${shelf}/<slug>/）`);
+      }
+    }
     for (const name of files(shelf)) {
       const rel = `${shelf}/${name}`;
       const loc = `_backlog/${rel}`;
       if (!usable(rel)) continue;
-      if (!index.includes(name)) problems.push(`${loc} missing from ${indexPath} index`);
+      if (!research && !index.includes(name)) problems.push(`${loc} missing from ${indexPath} index`);
       const text = read(rel);
       const archived = shelf.startsWith('_archived/');
-      const research = shelf.endsWith('research');
       if (!research && name.includes('/')) problems.push(`${loc} cards and methods must be flat files`);
+      if (research && name.includes('/')) {
+        const thread = name.split('/')[0];
+        const bannerRel = `${shelf}/${thread}/README.md`;
+        if (threads.has(thread) && existsSync(join(backlogRoot, bannerRel))) {
+          const material = name.slice(thread.length + 1);
+          if (!read(bannerRel).includes(material))
+            problems.push(`${loc} 未在题名页 ${thread}/README.md 中被点名——材料清单必须与盘上一致`);
+        }
+      }
       const parsed = metadata(text);
       if (archived && (research || parsed.error === 'missing frontmatter')) continue; // Legacy bodies stay untouched.
       if (parsed.error) { problems.push(`${loc} ${parsed.error}`); continue; }

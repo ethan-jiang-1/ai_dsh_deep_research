@@ -5,7 +5,7 @@ intent: 为 00-index 两行钉版的再次前进提供逐提交判定与逐吸�
 
 # 外部钉版债复核·第二轮：ai_dsh_company + ai_dsh_assitant（2026-10-10）
 
-> 服务 = [company 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md)
+> 服务 = [company 钉版复核 Note](../../../../notes/implemented/2026-10-09-company-repin-review.md)
 > 的下一轮（钉版纪律：不一致即"上游已前进、结论待复核"——00-index company 行 `b19e9ed`
 > 与 assitant 两行 `202a27b` 三笔钉版债本轮清偿；上一轮 = [外部钉版债复核](2026-10-10-external-repin-review.md)、
 > [company 漂移复核](2026-10-10-company-drift-review.md)，其为历史时点记录不追改）。

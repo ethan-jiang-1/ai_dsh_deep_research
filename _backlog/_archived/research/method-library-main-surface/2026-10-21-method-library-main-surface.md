@@ -6,7 +6,7 @@ intent: 记录 conversation.view seam、UX 分工与 W1 保存决定
 # 方法库管理迁到主界面：seam、UX 与 W1 保存
 
 > 主题：研究方法偏好库（`method-library.md`）的管理界面从右栏窄页签迁到主界面
-> `conversation.view` tab。消费者：[_backlog/_archived/settled_issues/2026-10-21-method-library-main-surface.md](../settled_issues/2026-10-21-method-library-main-surface.md)
+> `conversation.view` tab。消费者：[_backlog/_archived/settled_issues/2026-10-21-method-library-main-surface.md](../../settled_issues/2026-10-21-method-library-main-surface.md)
 > ｜ 构成正本：`docs/design/40-research-cockpit.md`
 
 ## 问题

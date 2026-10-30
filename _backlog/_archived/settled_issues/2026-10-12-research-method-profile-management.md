@@ -10,7 +10,7 @@ opened: 2026-10-12
 **关闭结论（2026-10-12）**：长期复用 = 对话式五动词 + 右栏面板（D25 期 1）+ 详情/分区编辑（期 1.5，[detail-ux 卡](2026-10-12-research-preference-detail-ux.md)）全部落地；库保存路径真实走查（Lead 写 `method-library.md` 四字段条目 + 库头约定 + 变更记录）。期 2 直写 = **不做（暂）**——重议条件 = 期 1/1.5 实际使用后仍嫌指令中继慢/不直观；Settings 图形化路径被面板取代；跨设备/共享/版本史 = 排除。
 
 **问题与期望结果：** 用户可能希望把当次调整保存为可复用方法、设定以后研究的默认，并能明确区分“改本次”和“改长期配置”。本卡判断长期管理是否纳入首版、应放哪里及作用于哪些研究；保存不能让旧 run 追随新配置变化。
-**当前情况：** 用户明确要求深入推敲 UI 与管理体验，但尚未选择长期保存范围或 Settings 方案。[总卡](2026-10-12-research-preference-templates.md) 拥有总体意图和语义；[单次卡](2026-10-12-research-method-run-lifecycle.md) 拥有当次快照与执行。当前 pack 无方法管理库，代码例外限观察/调试，DSH Settings 能力见 [研究依据](../research/2026-10-12-research-preferences.md#dsh-可借用能力及限制)。
+**当前情况：** 用户明确要求深入推敲 UI 与管理体验，但尚未选择长期保存范围或 Settings 方案。[总卡](2026-10-12-research-preference-templates.md) 拥有总体意图和语义；[单次卡](2026-10-12-research-method-run-lifecycle.md) 拥有当次快照与执行。当前 pack 无方法管理库，代码例外限观察/调试，DSH Settings 能力见 [研究依据](../research/research-preferences/2026-10-12-research-preferences.md#dsh-可借用能力及限制)。
 **未决问题：** 首版只做当次覆写还是包含保存/管理；工作区级或 DSH profile 级；配置式路径还是 Settings 页；默认与推荐谁优先；内置更新、自定义编辑、删除和失败怎样处理。
 **下一步：** 比较三个完整用户任务——首次选用、当次微调后显式保存、以后开跑/旧 run 恢复；核对各方案的读取/写入 owner、D7/D18 代价与部署形态，再提交范围选择。必要实验按 [总卡授权边界](2026-10-12-research-preference-templates.md#已确认意图与授权) 隔离开展，正式实施前先提交详细方案供用户 review；本卡不是 CRUD 实施任务。
 

@@ -5,7 +5,7 @@ intent: 为研究配置（方法库）UX 推敲卡提供外部产品做法与验
 
 # 研究方法配置：外部产品先例
 
-> 服务卡 = [研究配置（方法库）UX 推敲](../settled_issues/2026-10-18-research-method-config-ux.md)。
+> 服务卡 = [研究配置（方法库）UX 推敲](../../settled_issues/2026-10-18-research-method-config-ux.md)。
 > 抓取日 2026-10-18。**证据分级逐条标注**：**主会话亲读** = 本会话 `web_fetch` 成功并读过正文；
 > **代理回报** = 子代理亲读并回报原文，主会话**未复核原文**；**取不到** = 网络边界阻断，不用来
 > 支撑任何结论。未标注分级的段落一律视为推断，不是证据。
@@ -45,7 +45,7 @@ intent: 为研究配置（方法库）UX 推敲卡提供外部产品做法与验
 
 ### 1.4 OpenAI / Gemini / Perplexity / Grok / NotebookLM（取不到）
 
-`openai.com`·`help.openai.com` = Cloudflare 403；`support.google.com`·`perplexity.ai`·`x.ai` 连接失败（主会话与子代理两路同结果）；notebooklm / you.com / scite.ai 未取到。**这些产品的当前形态不用于支撑任何结论**——与仓内 [2026-10-11 高管 UX 调研](2026-10-11-executive-research-ux/index.md)的受阻记录一致（那轮三次请求均被网络策略阻断）。子代理另报 OpenAI 近期方向（source controls / live steering / editable deliverables）与 Grok 把深研方法写成可读 workflow 脚本（`deep_research.rhai`）均为二手标题/片段级，**不采信**。
+`openai.com`·`help.openai.com` = Cloudflare 403；`support.google.com`·`perplexity.ai`·`x.ai` 连接失败（主会话与子代理两路同结果）；notebooklm / you.com / scite.ai 未取到。**这些产品的当前形态不用于支撑任何结论**——与仓内 [2026-10-11 高管 UX 调研](../2026-10-11-executive-research-ux/index.md)的受阻记录一致（那轮三次请求均被网络策略阻断）。子代理另报 OpenAI 近期方向（source controls / live steering / editable deliverables）与 Grok 把深研方法写成可读 workflow 脚本（`deep_research.rhai`）均为二手标题/片段级，**不采信**。
 
 ## 2. 垂直产品：配置的单位是"可复用的作业"
 
@@ -101,20 +101,20 @@ Reddit 帖 `1kllqxq` 开头："I got kinda pissed that Deep Research would alway
 | 场景 | 一手源（具体） | 口径陷阱 | 检验与冲突裁决 | 工件 | 不承诺 | 依据 |
 |---|---|---|---|---|---|---|
 | 投研·尽调 | 招股书／年报／交易所公告／监管备案／工商登记（渠道点名与警示见 §7） | 财年 vs 自然年；GAAP vs non-GAAP；一次性项（SBC 单列须软化）；即期汇率与近似汇率 | **交叉印证**（三表勾稽＋第三方函证＋独立来源复核；"三方对账"无权威出处，已改名）＋客户与供应商集中度＋职业怀疑（"证伪优先"降级为本工具纪律） | IC memo（论点／关键假设／反证／敏感性——**本工具模板，无监管文本**） | 不构成投资建议、不给目标价 | **已核实**（2026-10-18 外部核实轮，逐格判决与一手 URL 见 §7） |
-| 医药·临床 | PubMed、Cochrane、临床指南、FDA/NMPA/EMA 批件、ClinicalTrials.gov 注册记录 | 适应症／剂量／终点／人群／线数；预印本 vs 已发表 | 研究设计分级；利益冲突；发表偏倚；**质量评价是否适用依研究目的** | PICO 证据表 ＋ 不确定度 | 不做诊疗建议、不替代说明书 | **仓内已复核**：Cochrane Ch.4 检索规划、JBI 问题框定与 critical appraisal（[2026-10-12 研究依据](2026-10-12-research-preferences.md)） |
+| 医药·临床 | PubMed、Cochrane、临床指南、FDA/NMPA/EMA 批件、ClinicalTrials.gov 注册记录 | 适应症／剂量／终点／人群／线数；预印本 vs 已发表 | 研究设计分级；利益冲突；发表偏倚；**质量评价是否适用依研究目的** | PICO 证据表 ＋ 不确定度 | 不做诊疗建议、不替代说明书 | **仓内已复核**：Cochrane Ch.4 检索规划、JBI 问题框定与 critical appraisal（[2026-10-12 研究依据](../research-preferences/2026-10-12-research-preferences.md)） |
 | 学术·文献综述 | Web of Science／Scopus／arXiv／PubMed ＋ 前后向引文追踪 | 纳入排除标准、时间窗、语言、研究类型 | 检索式留痕（可复现）、去重、筛选记录 | 文献矩阵 ＋ 研究空白 | 不宣称 systematic review | **仓内已复核**：PRISMA-S／PRISMA-ScR 是报告指引与可复核检索材料，不是质量认证（同上） |
 | 专利／IP | CNIPA／USPTO／EPO 公开文本、权利要求、同族、法律状态 | 申请日 vs 公开日 vs 优先权日；法律状态；权利要求范围 vs 说明书 | 权利要求逐条比对；FTO 属法律判断，我们只做事实梳理 | 权利要求对比表 ＋ 权利人地图 | 不出具侵权／FTO 法律意见 | 领域常识（待核） |
 | 法规·合规 | 法规原文、官方解读、生效日、征求意见稿 | 生效日／过渡期／适用范围（主体·地域·业务）／罚则 | 条款逐条引用；区分「征求意见稿」与「生效」 | 差距分析表（现状／要求／待办） | 不构成法律意见 | 领域常识（待核） |
 | 采购·选型 | 官方定价页、文档、状态页、SLA、SOC2／ISO 页 | 计费单位（credits／请求／token）、阶梯价、含税、汇率 | 同维度对照；厂商宣称与实测分开；未公开项显式列「未公开」 | 评分矩阵 ＋ 适用情境 | 不替用户定权重 | 领域常识（待核） |
 | 竞争格局 | 官方定价／文档／changelog、招聘、应用商店、财报、专利 | 版本／币种／用量单位、抓取日期 | 每实体一条可核源；同域口径不一致并列 | 分档地图 ＋ 竞争轴 ＋ 计费矩阵 | 不做绝对排名 | **本仓实证**：用户库条目「格局调研」（源自 `drt_cn-ai-coding-assistants`） |
-| 事态·时间线 | changelog／release notes／官方公告为骨，媒体为肉 | 起点事件；时间戳；「现状」的截止时刻 | **先列指标与信号，再判趋势**；趋势与事实分句 | 时间线 ＋ 现状截点 ＋ 指标读数 | 不做无时间窗预测 | **仓内已复核**：CIA Tradecraft Primer 的 Indicators or Signposts of Change（[HITL1 调研](../../../research-workspace/drafts/2026-09-29-hitl1-intake-routing-survey.md) §3） |
+| 事态·时间线 | changelog／release notes／官方公告为骨，媒体为肉 | 起点事件；时间戳；「现状」的截止时刻 | **先列指标与信号，再判趋势**；趋势与事实分句 | 时间线 ＋ 现状截点 ＋ 指标读数 | 不做无时间窗预测 | **仓内已复核**：CIA Tradecraft Primer 的 Indicators or Signposts of Change（[HITL1 调研](../../../../research-workspace/drafts/2026-09-29-hitl1-intake-routing-survey.md) §3） |
 
 **共同读出**：行业差异最吃紧的两处是 **时间窗规则**（追新：竞争情报／定价；反追新：专利／法规——早的反而更致命）与 **证据标准**（分级 vs 两源 vs 一手备案 vs 约束力区分）；而 **冲突裁决** 与 **"什么算完成"** 这两处一句话说不清，也最需要落进偏好条目。
 
 ## 6. 未复核与未决（不要越用）
 
 - 本文 §1.2、§2.3、§2.4、§3 为**代理回报**，主会话未复核原文；引用前须重新取回原文（产品页面漂移快，Microsoft 页自称 2026-08 更新，Claude 页自称本周更新）。
-- 子代理另交一份"分行业方法论表"（含 PRISMA 27 项 / GRADE / Admiralty A–F·1–6 / ICD 203 / FAR Part 15 / ATT&CK 等），其正文**自述全部未经核实**——本文与消费卡**均不采信**。分行业依据以仓内已复核材料为准：[2026-10-12-research-preferences](2026-10-12-research-preferences.md) §外部先例（Cochrane Ch.4 / JBI / PRISMA-S·ScR，前轮研究代理只读 HTTP 取得全文）与 [HITL1 接收·判型·澄清调研](../../../research-workspace/drafts/2026-09-29-hitl1-intake-routing-survey.md)（CIA Tradecraft / ClariQ / Rose & Levinson，亲读一手）。
+- 子代理另交一份"分行业方法论表"（含 PRISMA 27 项 / GRADE / Admiralty A–F·1–6 / ICD 203 / FAR Part 15 / ATT&CK 等），其正文**自述全部未经核实**——本文与消费卡**均不采信**。分行业依据以仓内已复核材料为准：[2026-10-12-research-preferences](../research-preferences/2026-10-12-research-preferences.md) §外部先例（Cochrane Ch.4 / JBI / PRISMA-S·ScR，前轮研究代理只读 HTTP 取得全文）与 [HITL1 接收·判型·澄清调研](../../../../research-workspace/drafts/2026-09-29-hitl1-intake-routing-survey.md)（CIA Tradecraft / ClariQ / Rose & Levinson，亲读一手）。
 - **未查**：各产品"保存的指令"之间的优先级语义（账号级 < 项目级 < 本次 < 用户当场明确要求）。这是本设计的核心未决问题之一，**当前零证据**。
 
 ## 7. 投研·尽调行的核实记录（2026-10-18 外部核实轮）

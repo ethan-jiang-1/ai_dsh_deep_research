@@ -8,7 +8,7 @@
 
 出处 = 推敲卡 [2026-10-08-sdlc-reference-absorption](../../_backlog/_archived/settled_issues/2026-10-08-sdlc-reference-absorption.md)
 （§候选与取舍 第二档 C11 + §毕业门"缺什么证据才能判"）。标定报告全文 =
-[_backlog/research/2026-10-08-model-visible-calibration.md](../../_backlog/_archived/research/2026-10-08-model-visible-calibration.md)。
+[_backlog/research/recorded-session-obligation/2026-10-08-model-visible-calibration.md](../../_backlog/_archived/research/recorded-session-obligation/2026-10-08-model-visible-calibration.md)。
 
 ## 决定
 
@@ -155,7 +155,7 @@ persona 正文、工具 schema、工作区手册。）
 - 队列条目毕业：RFC 迁入本目录并改写为事实体；`_backlog/queue.md` 该行删除。
 - **队列就此清空** → `queue.md` 回 parked 态（`（队列空——待用户取题）`），
   按根 `AGENTS.md` §入口链 第 3 步：**标 parked 时正确动作是向用户取题，不是找活凑数**。
-- 新增承载物：`_backlog/research/2026-10-08-model-visible-calibration.md`（标定报告）。
+- 新增承载物：`_backlog/research/recorded-session-obligation/2026-10-08-model-visible-calibration.md`（标定报告）。
 - 未改：`scripts/verify/verify.mjs`、`docs/evaluation.md`、`tests/`、pack 面。
 - 后续依赖（**不在本条**）：① 形状 B 独立卡（先标定 smoke 耗时与钩子预算，
   再走 `writing-a-gate`：先想红 + 反证 + `evaluation.md` 登记）；② C12 evidence-audit

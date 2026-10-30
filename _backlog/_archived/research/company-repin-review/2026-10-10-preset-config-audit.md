@@ -5,7 +5,7 @@ intent: 为 company 钉版复核 Note「盘点后定」候选 preset-required-co
 
 # preset-required-config 盘点：四角色 config 声明面 vs vendor config-catalog（2026-10-10）
 
-> 服务 = [company 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md)
+> 服务 = [company 钉版复核 Note](../../../../notes/implemented/2026-10-09-company-repin-review.md)
 > 「盘点后定」候选。方法 = 只读对照（vendor pin `639ed015` = 观察时 tag 已验（现 pin 687f282e8625c6b8d11ff58211a90524be2e4317 / dsh-v0.2.1-rc.2））；
 > vendor 路径行内代码标注，行号 = 该 pin 现状。
 

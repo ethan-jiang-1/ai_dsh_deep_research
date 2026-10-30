@@ -38,7 +38,7 @@ opened: 2026-10-25
 依赖：
 
 - [运行形态合同](2026-10-25-run-form-contract.md) 决定 A/B/C 读法与“给不同人使用”的范围。
-- [DSH 惯例 research](../research/2026-10-25-dsh-plugin-conventions.md) 提供官方 bundle/profile/兼容声明依据。
+- [DSH 惯例 research](../research/dsh-plugin-conventions/2026-10-25-dsh-plugin-conventions.md) 提供官方 bundle/profile/兼容声明依据。
 - D15（release-smoke 形状）、D16（团队层归 vendor）、D22（零外部账号依赖）是现行边界；本卡不改这些决定，除非另立 D 号。
 
 ## 已知事实

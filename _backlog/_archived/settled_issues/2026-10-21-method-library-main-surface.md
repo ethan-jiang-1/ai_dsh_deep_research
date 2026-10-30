@@ -29,7 +29,7 @@ opened: 2026-10-21
 ## 依据
 
 - DSH seam：`conversation.view` list slot（Chat/Trajectory 同款）；`workspaceFiles` 无 write。
-- 研究记录：[method-library-main-surface](../research/2026-10-21-method-library-main-surface.md)
+- 研究记录：[method-library-main-surface](../research/method-library-main-surface/2026-10-21-method-library-main-surface.md)
 - 构成正本：[docs/design/40](../../../docs/design/40-research-cockpit.md)
 
 ## 实现

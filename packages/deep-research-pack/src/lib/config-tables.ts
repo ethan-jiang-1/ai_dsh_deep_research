@@ -97,7 +97,7 @@ export const DISTILL_INSTRUCTION = '把本次研究实际采用的做法存成�
 /** 领域示范（只读）：一条**厚条目**长什么样——行业差异四处（一手源是谁／口径必带什么／
  *  冲突怎么裁／工件与免责）该写到什么颗粒度。正本 = research-brief skill「领域示范」节，
  *  逐字同钉（tests/library-fold）；它不是按判型推荐的方法，故不进「内置打法」清单。
- *  内容来自外部逐条核实（`_backlog/research/2026-10-18-method-config-ux-external.md`）。 */
+ *  内容来自外部逐条核实（`_backlog/_archived/research/method-config-ux/2026-10-18-method-config-ux-external.md`）。 */
 export const DEMO_ENTRY: { readonly name: string; readonly sections: LibrarySections } = {
   name: '投研尽调（示范）',
   sections: {

@@ -9,7 +9,7 @@ opened: 2026-10-09
 
 **问题与期望结果：** 已研究 company/DSH snapshots 机制，但本仓还没有确定要把哪些插件研发证据资产化、如何让场景声明由实际 consumer 验证，以及首批回放的验收范围。期望形成一个最小、可执行的落地切片，避免只增加目录或流程。
 
-**当前情况：** [来源分析与本仓建议](../research/2026-10-09-company-snapshots-analysis.md)已对照五类证据、场景完整保存、实际运行与独立期望、consumer 与 replay eligibility，并建议迁入现有四角色 research-face 回放资产及修 BUG-018。报告不是实施授权。立卡时 fixture 在 `tests/fixtures/snapshot-research-face/`，其 `snapshot.yml` 尚未被 replay smoke 消费；BUG-018 记录了 system/message 注入漏比较。
+**当前情况：** [来源分析与本仓建议](../research/company-snapshots/2026-10-09-company-snapshots-analysis.md)已对照五类证据、场景完整保存、实际运行与独立期望、consumer 与 replay eligibility，并建议迁入现有四角色 research-face 回放资产及修 BUG-018。报告不是实施授权。立卡时 fixture 在 `tests/fixtures/snapshot-research-face/`，其 `snapshot.yml` 尚未被 replay smoke 消费；BUG-018 记录了 system/message 注入漏比较。
 
 **未决问题：** 首批是否只限 replay 场景和四角色 fixture？是否把 BUG-018 修复纳入同一切片？场景 manifest 最小字段应有哪些，如何从声明直接驱动 replay？探针证据先不迁入是否符合预期？
 

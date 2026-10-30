@@ -77,12 +77,12 @@
       "reason": "体检报告历史引用（同上——SKILL 承接已核实、活面零引用，2026-10-10 裁定归档）"
     },
     {
-      "source": "_backlog/_archived/research/2026-10-08-notes-stocktake.md",
+      "source": "_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md",
       "target": "notes/archived/2026-09-28-hitl-docking-polish.md",
       "reason": "体检材料历史引用（边界个案小节分析对象；2026-10-10 已裁定归档，仅路径重定向）"
     },
     {
-      "source": "_backlog/_archived/research/2026-10-08-notes-stocktake.md",
+      "source": "_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md",
       "target": "notes/archived/2026-09-28-node-topology-procedure.md",
       "reason": "体检材料历史引用（同上）"
     },
@@ -117,7 +117,7 @@
       "reason": "外部材料表 DSH client/UI 扩展面行：琢磨稿历史指针（行内标注“已归档”）"
     },
     {
-      "source": "_backlog/_archived/research/2026-10-08-notes-stocktake.md",
+      "source": "_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md",
       "target": "notes/archived/2026-10-07-living-verification-hook.md",
       "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
     },
@@ -222,7 +222,7 @@
       "reason": "上游流畸形复现条件的历史根因与取证快照（postmortem 层退役迁入）"
     },
     {
-      "source": "_backlog/_archived/research/2026-10-18-method-config-ux-ab.md",
+      "source": "_backlog/_archived/research/method-config-ux/2026-10-18-method-config-ux-ab.md",
       "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
       "reason": "同族上游流环境事件的历史快照（postmortem 层退役迁入）"
     },

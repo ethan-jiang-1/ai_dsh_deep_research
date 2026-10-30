@@ -35,7 +35,7 @@ opened: 2026-10-25
 
 - D14（preset-smoke 双通道）、D15（release-smoke 形状）、D21（启动意图分流）是现行边界。
 - `dev/env.sh`、`dev/boot-run.sh`、`dev/run-driver.mjs`、`scripts/smoke/release-smoke.mjs` 是执行面。
-- DSH 原生 profile、home、workspace 模型见 [research](../research/2026-10-25-dsh-plugin-conventions.md)。
+- DSH 原生 profile、home、workspace 模型见 [research](../research/dsh-plugin-conventions/2026-10-25-dsh-plugin-conventions.md)。
 
 ## 已知事实
 

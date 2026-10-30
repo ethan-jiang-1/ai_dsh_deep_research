@@ -10,7 +10,7 @@
 |---|---|---|---|---|
 | [`_backlog/issues/`](../../_backlog/issues/README.md) 问题卡 | [_backlog/README](../../_backlog/README.md) | 问题、目标、已知与未决、结论和去向 | 需要跨轮澄清或留存问题判断；不是实施前置 | 按 [结论去向](../../_backlog/methods/issue-to-note.md) 选择载体后归档 |
 | [`_backlog/bugs/`](../../_backlog/bugs/README.md) 缺陷卡 | [_backlog/README](../../_backlog/README.md) | 已发现但本次不修的缺陷 | 确认暂不修（当场修的无需建卡）；翻「修复就绪」即自带 P1/P2 修理型修复授权（[D24](../00-index.md) 唯一例外——P0 与触面例外走等人拍板） | 修复或查明未修后归档；修复承载持久决定时按结论去向记 `去向` 与载体 |
-| [`_backlog/research/`](../../_backlog/research/README.md) 调研 | [_backlog/README](../../_backlog/README.md) | 被活跃问题引用的长篇证据与研究材料 | 需要保留并服务问题判断 | 最后一张活跃问题卡离开时归档 |
+| [`_backlog/research/`](../../_backlog/research/README.md) 调研 | [_backlog/README](../../_backlog/README.md) | 按研究题组织的长篇证据与研究材料；题名页记消费者与产出的卡 | 需要保留并服务问题判断 | 整个研究题目录在最后一张活跃卡离开时归档 |
 | [`_backlog/methods/`](../../_backlog/methods/README.md) 方法 | [_backlog/README](../../_backlog/README.md) | 需求澄清、查证、验收设计、结论去向、证据路由与判断的按需方法 | 只加载当前问题所需方法；不是实施授权 | 随实践维护，不载具体问题进度 |
 | [`_backlog/triggers.md`](../../_backlog/triggers.md) | [_backlog/README](../../_backlog/README.md) | 工作中可直接观察到的重议条件 | 仅当遗漏会导致重犯，且触发能在正常工作中遇到 | 条件到场后按新决定重进；否则由 owner 保留结论 |
 | [`notes/proposed/`](../../notes/proposed/) RFC | [notes/AGENTS](../../notes/AGENTS.md) | 需要显式评审的持久决定提案 | 该决定需在实现前持久化并评审；不是所有问题或工作都需要 | 经批准实施后正文改写并迁 `implemented/`；否决则按 notes 规则处理 |

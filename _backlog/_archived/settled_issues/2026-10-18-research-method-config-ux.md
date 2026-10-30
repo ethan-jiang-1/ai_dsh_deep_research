@@ -5,11 +5,11 @@ opened: 2026-10-18
 
 # 推敲：研究配置（方法库）UX 与行业定制（总卡）
 
-> 立卡：2026-10-18 ｜ 状态：**已结**（2026-10-18 两子卡均关闭并归档）— **T-1** 子卡① 关闭（①-1..①-6 全绿；文案过目走用户点名的实验路径）；**T-2** 子卡② 关闭（映射修正＋两条打法文案〔P6 结论 = 保持 run 级覆写〕＋两个入口走查＋厚领域示范＋同钉含 critic 行＋A/B 记录）；**T-3** 未决池五项各有去向（登记 [triggers.md](../../triggers.md)）。实施证据 = [A/B 记录](../research/2026-10-18-method-config-ux-ab.md) ＋ [显式化 Note](../../../notes/implemented/2026-10-18-research-config-explicitness.md)。 ｜ 类型：Feature ｜ 结论倾向：现在做（边界与共识已定；实施分派给[子卡①面板显式化](2026-10-18-research-config-panel-explicitness.md)与[子卡②打法清单与映射](2026-10-18-research-method-preset-mapping.md)；工件合同与领域包升格留未决） ｜ 可关闭：是
+> 立卡：2026-10-18 ｜ 状态：**已结**（2026-10-18 两子卡均关闭并归档）— **T-1** 子卡① 关闭（①-1..①-6 全绿；文案过目走用户点名的实验路径）；**T-2** 子卡② 关闭（映射修正＋两条打法文案〔P6 结论 = 保持 run 级覆写〕＋两个入口走查＋厚领域示范＋同钉含 critic 行＋A/B 记录）；**T-3** 未决池五项各有去向（登记 [triggers.md](../../triggers.md)）。实施证据 = [A/B 记录](../research/method-config-ux/2026-10-18-method-config-ux-ab.md) ＋ [显式化 Note](../../../notes/implemented/2026-10-18-research-config-explicitness.md)。 ｜ 类型：Feature ｜ 结论倾向：现在做（边界与共识已定；实施分派给[子卡①面板显式化](2026-10-18-research-config-panel-explicitness.md)与[子卡②打法清单与映射](2026-10-18-research-method-preset-mapping.md)；工件合同与领域包升格留未决） ｜ 可关闭：是
 
 **问题与期望结果：** 用户实测右栏「研究配置」页签后提出的质疑：不同用户/行业的深研方法与思路可能迥异，**预制配置必须是好示范**，后续定制才搞得更好；定制要简单，且要"显式化"。期望结果 = 这块面能回答四件事——"这条打法具体怎么干活""这次用的是哪条""我改了到底生效没有""我怎么写出自己行业的那一条"，并且**每一条可配项都指认得出它改谁的行为**。
 
-**当前情况：** 面板与折算实现已亲读；方法内容正本 = lead 的 [research-brief skill](../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md) 方法预设表；题面形态库 = [question-patterns.md](../../../research-workspace/question-patterns.md)（8 条）；节点契约 = [NODES.md](../../../research-workspace/NODES.md)。外部先例与验证边界 = [调研材料](../research/2026-10-18-method-config-ux-external.md)。**本卡已经过两轮无上下文审计（内容盲审＋拆卡结构审计）与一轮有上下文代码级复核**（回执见 §附录）。**2026-10-18 按用户拍板拆卡**：实施分派两张子卡，本卡只保留共用的边界、证据与共识。
+**当前情况：** 面板与折算实现已亲读；方法内容正本 = lead 的 [research-brief skill](../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md) 方法预设表；题面形态库 = [question-patterns.md](../../../research-workspace/question-patterns.md)（8 条）；节点契约 = [NODES.md](../../../research-workspace/NODES.md)。外部先例与验证边界 = [调研材料](../research/method-config-ux/2026-10-18-method-config-ux-external.md)。**本卡已经过两轮无上下文审计（内容盲审＋拆卡结构审计）与一轮有上下文代码级复核**（回执见 §附录）。**2026-10-18 按用户拍板拆卡**：实施分派两张子卡，本卡只保留共用的边界、证据与共识。
 
 **未决问题：** 交付工件合同的范围（盲审后缩小，见 U12）；领域包要不要升格为字段（U13）；方法库增长纪律（未决-3）；库规模（未决-4）；保存指令优先级。以上都**不属任何子卡**，见 §未决与重议条件。（"P→方法映射表住哪" = **U16，是子卡② 的前置**，不在此列。）
 
@@ -179,7 +179,7 @@ opened: 2026-10-18
 
 **边界提醒**：领域包只能写进**库（run 变量）**，不能改研究手册（harness 常量，D17）；它靠 Lead 派工传递，机械审计不检查它——这一条必须在界面上如实说明，否则就是假旋钮。
 
-逐行业的具体内容草案（8 个场景 × 一手源 / 口径陷阱 / 检验与冲突裁决 / 工件 / 不承诺，逐行标注依据等级）= [调研材料 §5](../research/2026-10-18-method-config-ux-external.md)。**该表是设计材料、非已核实事实**，逐行核实前不进任何模型面文件。
+逐行业的具体内容草案（8 个场景 × 一手源 / 口径陷阱 / 检验与冲突裁决 / 工件 / 不承诺，逐行标注依据等级）= [调研材料 §5](../research/method-config-ux/2026-10-18-method-config-ux-external.md)。**该表是设计材料、非已核实事实**，逐行核实前不进任何模型面文件。
 
 ## 显式化清单（隐含 → 显式）
 
@@ -210,7 +210,7 @@ opened: 2026-10-18
 - **把 ≥2 独立信源做成可调旋钮**：它已在底线里且不可降级（盲审订正）；
 - **拆成 1 总 + 3 子（本卡拆卡时的落选方案）**：把"交付工件合同 + 领域包字段"也独立成卡——它会让一张长期无证据支撑的卡挂很久；改为留本卡未决池，按实证疼痛升卡；
 - **不拆只分层（落选）**：把草案下放材料、卡瘦 1/4——只治长不治混，结论倾向仍会把"以后做"的未决项裹进"现在做"；
-- **把方法写进每个角色 preset**：把每次研究的变量变成框架组合变更（[2026-10-12 研究依据](../research/2026-10-12-research-preferences.md)已否决）。
+- **把方法写进每个角色 preset**：把每次研究的变量变成框架组合变更（[2026-10-12 研究依据](../research/research-preferences/2026-10-12-research-preferences.md)已否决）。
 
 ## 拟交付物：内置「领域打法示范」的体例与载体（f）
 
@@ -218,7 +218,7 @@ opened: 2026-10-18
 
 - **体例**：以用户已有的「格局调研」为准（408 字，点名来源与字段，含"不可通约"这类口径规则）——它是目前唯一达到示范水准的条目。**注意**：该条目源自 `drt_cn-ai-coding-assistants`，该 run 现在 `research-workspace/_abandoned/`（不在 `archive/`）；体例参照的是**库条目本身**，不依赖那个 run 可访问。
 - **载体（R6）**：建议做**厚内置条目**（内容按同体例重写为可发布形态，**不直接搬用户私有条目**），落地归子卡②。备选"工作区种子示例"有两道已知障碍（盲审指出）：`dev/sync-pack-workspace.mjs` 的种子清单与新门禁 `pack-workspace-fresh` 需同 diff 更新，且 `workspace/.gitignore.example` 明确把 `method-library.md` 划为运行区（不入种子）——即种子形态与该文件既有定位冲突。
-- **候选题材**：行业尽调（投研向）——四个内容区全拉满，最能教会用户"原来可以写到这个程度"。**前置（三轮复核补）**：该行在[材料 §5](../research/2026-10-18-method-config-ux-external.md) 标「领域常识（待核）」，而材料纪律 = 逐行核实前不进任何模型面文件（skill 表正是模型面）——②-5 开工前二选一：先核实该行（§需要的帮助 2），或改用材料中「仓内已复核」行（如 事态·时间线）作题材。
+- **候选题材**：行业尽调（投研向）——四个内容区全拉满，最能教会用户"原来可以写到这个程度"。**前置（三轮复核补）**：该行在[材料 §5](../research/method-config-ux/2026-10-18-method-config-ux-external.md) 标「领域常识（待核）」，而材料纪律 = 逐行核实前不进任何模型面文件（skill 表正是模型面）——②-5 开工前二选一：先核实该行（§需要的帮助 2），或改用材料中「仓内已复核」行（如 事态·时间线）作题材。
 
 ## 验收标准（总卡层面）
 
@@ -252,11 +252,11 @@ T-1..T-3 全部达成。本卡**不自动授予**未决池各项的实施权限�
 - 模型面：[research-brief](../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md) 全文、[team-assembly](../../../packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md) 组队矩阵与分派纪律、[synthesis](../../../packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md) 流程与判据、scout 的 `lead-mapping`（检索器对账）、analyst 的 `evidence-extraction`（证据契约）；
 - 工作区：[question-patterns.md](../../../research-workspace/question-patterns.md) 全文（8 条 ＋ 增长协议）、[NODES.md](../../../research-workspace/NODES.md) 全文、`templates/run/question.md` 的研究方法节、`method-library.md` 的用户条目全文；
 - 架构与决定：[design/40](../../../docs/design/40-research-cockpit.md)、[00-index D25](../../../docs/00-index.md)、[研究配置页签 Note](../../../notes/implemented/2026-10-12-research-config-tab.md)、[长期管理卡](2026-10-12-research-method-profile-management.md)、[详情 UX 卡](2026-10-12-research-preference-detail-ux.md)、[方法配置总卡](2026-10-12-research-preference-templates.md)、[单次闭环卡](2026-10-12-research-method-run-lifecycle.md)；
-- 历史研究：[2026-10-12 研究依据](../research/2026-10-12-research-preferences.md)、[2026-10-11 高管 UX 调研](../research/2026-10-11-executive-research-ux/index.md)、[HITL1 接收调研](../../../research-workspace/drafts/2026-09-29-hitl1-intake-routing-survey.md)、[自增长模式库调研](../../../research-workspace/drafts/self-growing-pattern-library-research.md)（后两份在开发侧 `drafts/`）；
+- 历史研究：[2026-10-12 研究依据](../research/research-preferences/2026-10-12-research-preferences.md)、[2026-10-11 高管 UX 调研](../research/2026-10-11-executive-research-ux/index.md)、[HITL1 接收调研](../../../research-workspace/drafts/2026-09-29-hitl1-intake-routing-survey.md)、[自增长模式库调研](../../../research-workspace/drafts/self-growing-pattern-library-research.md)（后两份在开发侧 `drafts/`）；
 - 部署面：pack README 的已知限制节、`scaffold.mjs`、`sync-pack-workspace.mjs` 种子清单、`workspace/.gitignore.example`；
 - 其他：`triggers.md`（确认本方向无既有触发条件）、`archive/` 43 场已交付 run 清单（挑标本）。
 
-**外部**：主会话亲读 4 家（Microsoft FAQ／Claude Help／Hebbia Projects／AlphaSense SuperAnalyst）；取不到 7 家（OpenAI·Gemini·Perplexity·xAI·NotebookLM·You.com·Scite）。分级与原文引语见[调研材料](../research/2026-10-18-method-config-ux-external.md)。
+**外部**：主会话亲读 4 家（Microsoft FAQ／Claude Help／Hebbia Projects／AlphaSense SuperAnalyst）；取不到 7 家（OpenAI·Gemini·Perplexity·xAI·NotebookLM·You.com·Scite）。分级与原文引语见[调研材料](../research/method-config-ux/2026-10-18-method-config-ux-external.md)。
 
 **量化**：内置四字段 72／68／74／72 字 vs 用户条目「格局调研」408 字（从 skill 表与库文件逐字段计数的脚本输出；比值 5.6×）。
 

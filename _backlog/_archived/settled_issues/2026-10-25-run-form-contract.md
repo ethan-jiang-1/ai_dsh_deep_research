@@ -13,7 +13,7 @@ opened: 2026-10-25
 
 > 事实以盘上文件为准；标「推荐」的是建议，不是已定结论；标「候选」的是待选方案。
 
-**当前情况：** 本仓已有 `packages/deep-research-pack/`（bundle + presets + workspace 种子 + 部署 bin）、`research-workspace/`（研究工作区）、`runtime/harness-home/`（开发 DSH home）与 `dev/`（环境/启动驱动）。设计上 D17 已区分 harness 与 run bundle；但形态边界、升级归属和独立启动的可重复性没有统一合同。分发的已知缺口见 [分发合同](2026-10-25-distribution-contract.md)，工作区所有权见 [工作区所有权与升级](2026-10-25-workspace-ownership-and-upgrade.md)，运行态边界见 [运行态数据边界与移交](2026-10-25-runtime-data-boundary.md)，独立启动见 [独立环境冷启动与多实例](2026-10-25-standalone-cold-start.md)。DSH 官方惯例的事实依据见 [research/2026-10-25-dsh-plugin-conventions.md](../research/2026-10-25-dsh-plugin-conventions.md)。
+**当前情况：** 本仓已有 `packages/deep-research-pack/`（bundle + presets + workspace 种子 + 部署 bin）、`research-workspace/`（研究工作区）、`runtime/harness-home/`（开发 DSH home）与 `dev/`（环境/启动驱动）。设计上 D17 已区分 harness 与 run bundle；但形态边界、升级归属和独立启动的可重复性没有统一合同。分发的已知缺口见 [分发合同](2026-10-25-distribution-contract.md)，工作区所有权见 [工作区所有权与升级](2026-10-25-workspace-ownership-and-upgrade.md)，运行态边界见 [运行态数据边界与移交](2026-10-25-runtime-data-boundary.md)，独立启动见 [独立环境冷启动与多实例](2026-10-25-standalone-cold-start.md)。DSH 官方惯例的事实依据见 [research/dsh-plugin-conventions/2026-10-25-dsh-plugin-conventions.md](../research/dsh-plugin-conventions/2026-10-25-dsh-plugin-conventions.md)。
 
 **未决问题：** 三个问题决定合同形状，当前都未定：
 
@@ -76,7 +76,7 @@ opened: 2026-10-25
 | B pack 目录自安装 | 只拿 pack 目录，`dsh plugin add file:<目录>`，再起 profile | 官方支持的目录安装；要求 `lib/` 已构建 | `lib/` 是 gitignored，`prepack` 依赖根 workspace；按 git 内容复制走不能直接装 |
 | C 整目录复制 | 复制整个仓库目录直接跑 | 不是 DSH 概念 | 会带走凭据、会话、run 数据与 `dev/harness-home`；gitignore 管不到 `cp -r` |
 
-**推荐：A 为主，B 作为“目录也能装”的门槛，C 不做（改为显式 handoff）。** 理由与 DSH 官方依据见 [research 材料](../research/2026-10-25-dsh-plugin-conventions.md)：DSH 的原生单位是 bundle + profile + workspace；没有“插件目录自己变成应用”的概念。独立环境应做成可重复的隔离实例，而不是发明第四种运行时。B 值得保留，因为它让“把 pack 目录给人”成立；但它要求先构建，属于打包属性，不是第二套架构。C 与“智能体/数据分离”直接冲突，应改成 handoff 产物。
+**推荐：A 为主，B 作为“目录也能装”的门槛，C 不做（改为显式 handoff）。** 理由与 DSH 官方依据见 [research 材料](../research/dsh-plugin-conventions/2026-10-25-dsh-plugin-conventions.md)：DSH 的原生单位是 bundle + profile + workspace；没有“插件目录自己变成应用”的概念。独立环境应做成可重复的隔离实例，而不是发明第四种运行时。B 值得保留，因为它让“把 pack 目录给人”成立；但它要求先构建，属于打包属性，不是第二套架构。C 与“智能体/数据分离”直接冲突，应改成 handoff 产物。
 
 ### Q2：给不同人使用的范围（待过）
 

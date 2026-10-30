@@ -5,8 +5,8 @@ intent: 为 recorded-session 义务标定与 BUG-018 保存被消费的判定证
 
 # recorded-session 义务标定：判据不可按路径立（且 smoke 广告了它不覆盖的面）
 
-> 服务 = [recorded-session-obligation 条目](../../../notes/implemented/2026-10-08-recorded-session-obligation.md)（已毕业）
-> ｜RFC（已毕业，正文即上方条目）= [`2026-10-08-recorded-session-obligation.md`](../../../notes/implemented/2026-10-08-recorded-session-obligation.md)
+> 服务 = [recorded-session-obligation 条目](../../../../notes/implemented/2026-10-08-recorded-session-obligation.md)（已毕业）
+> ｜RFC（已毕业，正文即上方条目）= [`2026-10-08-recorded-session-obligation.md`](../../../../notes/implemented/2026-10-08-recorded-session-obligation.md)
 > ｜参考卷条款 = `12 §2`「看见的请求」+「可回放的会话」。
 > **本报告只标定，不立门禁**（RFC 判据 6）。`git diff --stat scripts/verify/` 为空即证。
 
@@ -39,7 +39,7 @@ smoke 自己的盲区（循环论证）；本版修正，并如实记录首版�
 > recorded-session scenario in the same PR; package, e2e, mock-only, and rationale evidence
 > does not replace the assembled transcript.
 
-本仓等价物 = [snapshot-replay-smoke](../../../scripts/smoke/snapshot-replay-smoke.mjs) 的
+本仓等价物 = [snapshot-replay-smoke](../../../../scripts/smoke/snapshot-replay-smoke.mjs) 的
 夹具 `tests/fixtures/snapshot-research-face/`（`dsh-llm-replay` 驱动，keyless）。
 **它钉什么由 smoke 自己的 B 层定义**（`snapshot-replay-smoke.mjs:226-240`）：
 
@@ -181,7 +181,7 @@ commit 数（10 = 8 个不同 commit 的 10 次面命中）。
 两例都在近 40 次窗口内，也都**完整通过了 CI**——因为：
 
 - `snapshot-replay-smoke` **不在**默认 `pnpm test` glob 内
-  （[tests/fixtures/README.md](../../../tests/fixtures/README.md) 标"否（独立 smoke，keyless）"）；
+  （[tests/fixtures/README.md](../../../../tests/fixtures/README.md) 标"否（独立 smoke，keyless）"）；
 - 它**不在** pre-commit 钩子链里（钩子只跑 `verify` + `test`）；
 - **且即使跑了它，B 层也不比对注入面**——所以这 2 例**跑 smoke 也会绿**。
 

@@ -69,6 +69,16 @@ function fixtureFile(dir, rel, text, indexed = true) {
 const backlogIssue = (change = (text) => text, indexed = true) => (dir) =>
   fixtureFile(dir, `_backlog/issues/${ISSUE_NAME}`, change(ISSUE_TEXT), indexed);
 
+// 研究题（2026-10-30）：材料必须住在题名目录内，题名页逐份点名；索引按题名一行。
+const RESEARCH_TEXT = '---\ntopic: Probe\nintent: "Evidence"\n---\n\n# Probe\n';
+const RESEARCH_BANNER = '# Probe\n> 问题：Why?\n> 消费者：none\n> 产出的卡：—\n\n'
+  + '## 材料\n| [2099-01-01-evidence.md](2099-01-01-evidence.md) | probe |\n';
+const researchThread = (text, { banner = RESEARCH_BANNER, index = 'topic/' } = {}) => (dir) => {
+  fixtureFile(dir, '_backlog/research/topic/README.md', banner, false);
+  fixtureFile(dir, '_backlog/research/topic/2099-01-01-evidence.md', text, false);
+  if (index) appendFileSync(join(dir, '_backlog/research/README.md'), `\n${index}\n`);
+};
+
 const removeLedgerRow = (gateName) => (dir) => {
   const p = join(dir, 'docs', 'evaluation.md');
   writeFileSync(p, readFileSync(p, 'utf8').split('\n').filter((l) => !l.startsWith(`| \`${gateName}\``)).join('\n'));
@@ -420,7 +430,18 @@ export const CASES = [
     writeFileSync(p, text.replace('可关闭：是', '可关闭：否'));
   } },
   { id: 'backlog-bug-mirror-drift', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-997-probe.md', '---\nstatus: 排查中\nseverity: P1\nopened: 2099-01-01\n---\n\n# Probe\n> 严重级别：P1｜发现：2099-01-01｜状态：修复就绪\n') },
-  { id: 'backlog-research-status', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/research/2099-01-01-probe.md', '---\ntopic: Probe\nintent: "Evidence"\nstatus: 活跃\n---\n\n# Probe\n') },
+  { id: 'backlog-research-status', gate: 'backlog-liveness', mutate: researchThread('---\ntopic: Probe\nintent: "Evidence"\nstatus: 活跃\n---\n\n# Probe\n') },
+  { id: 'backlog-research-flat', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/research/2099-01-01-flat.md', RESEARCH_TEXT, true) },
+  { id: 'backlog-research-thread-no-banner', gate: 'backlog-liveness', mutate: (dir) => {
+    fixtureFile(dir, '_backlog/research/topic/2099-01-01-evidence.md', RESEARCH_TEXT, false);
+    appendFileSync(join(dir, '_backlog/research/README.md'), '\ntopic/\n');
+  } },
+  { id: 'backlog-research-thread-unindexed', gate: 'backlog-liveness', mutate: researchThread(RESEARCH_TEXT, { index: '' }) },
+  { id: 'backlog-research-material-unindexed', gate: 'backlog-liveness', mutate: researchThread(RESEARCH_TEXT,
+    { banner: '# Probe\n> 问题：Why?\n> 消费者：none\n> 产出的卡：—\n\n## 材料\n| [other.md](other.md) |\n' }) },
+  { id: 'backlog-research-banner-fields', gate: 'backlog-liveness', mutate: researchThread(RESEARCH_TEXT,
+    { banner: '# Probe\n> 问题：Why?\n> 消费者：none\n\n## 材料\n| [2099-01-01-evidence.md](2099-01-01-evidence.md) |\n' }) },
+  { id: 'backlog-research-archived-flat', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/_archived/research/2099-01-01-flat.md', '# Frozen\n', true) },
   { id: 'backlog-method-no-trigger', gate: 'backlog-liveness', mutate: (dir) => {
     const path = join(dir, '_backlog/methods/issue-to-note.md');
     writeFileSync(path, readFileSync(path, 'utf8').replace(/^whenToUse:.*\n/m, ''));

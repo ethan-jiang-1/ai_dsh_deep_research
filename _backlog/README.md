@@ -45,9 +45,9 @@ frontmatter `status` 是卡片当前阶段的**唯一家**——单值，只经�
 | 用户明确叫停但尚无结论 | 迁至 [_archived/suspended_issues](./_archived/suspended_issues/README.md)，重新讨论需新的明确决定 |
 | 缺陷已修 | 迁至 [_archived/fixed_bugs](./_archived/fixed_bugs/README.md) |
 | 缺陷确认但未修 | 迁至 [_archived/suspended_bugs](./_archived/suspended_bugs/README.md) |
-| 不再有活跃消费者的研究 | 迁至 [_archived/research](./_archived/research/README.md) |
+| 不再有活跃消费者的研究题 | 整目录迁至 [_archived/research](./_archived/research/README.md)（题名页补归档行） |
 
-搬迁用 `git mv`，保留历史正文，修复必要的相对链接并更新来源和目标索引。旧记录不为适配新模板而重写。研究仍被活跃 issue、bug 或已授权工作消费时，留在活跃 research 并登记消费者。
+搬迁用 `git mv`，保留历史正文，修复必要的相对链接并更新来源和目标索引。旧记录不为适配新模板而重写。研究题仍被活跃 issue、bug 或已授权工作消费时，留在活跃 research 并登记消费者；研究题整目录搬迁，不拆材料。
 
 ## 载体导航
 
@@ -55,7 +55,7 @@ frontmatter `status` 是卡片当前阶段的**唯一家**——单值，只经�
 |---|---|---|
 | [issues](./issues/README.md) | 未结束的问题及决定过程 | 新卡 `YYYY-MM-DD-<slug>.md`；活跃状态、结论倾向与可关闭边界见模板 |
 | [bugs](./bugs/README.md) | 已知但决定不当场修复的缺陷 | `BUG-<NNN>-<slug>.md`；保留编号与严重级 |
-| [research](./research/README.md) | 服务卡片的较长证据材料 | `topic`、一行 `intent`；不设 status |
+| [research](./research/README.md) | 服务卡片的较长证据材料 | 按研究题分目录；题名页记问题 / 消费者 / 产出的卡 / 材料；材料 `topic`、一行 `intent`，不设 status |
 | [methods](./methods/README.md) | 澄清、查证、综合、验收与结论去向方法 | 按当前缺口选择，不默认每卡走完整流程 |
 | [triggers](./triggers.md) | 会自然遇到、可能改变旧决定的具体观察 | 可选短索引，完整理由留 owner |
 | [_archived](./_archived/README.md) | 已离开活跃区的卡片与研究 | 按结果分池并维护各自索引 |

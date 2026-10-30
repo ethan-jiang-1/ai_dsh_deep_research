@@ -10,7 +10,7 @@ opened: 2026-10-12
 **关闭结论（2026-10-12）**：单次闭环全链有据——快答 run（方法自动采用→方法节落格→subagent/轻量 critic→readiness PASS→交付→归档→操作侧 audit CRITICAL 0）+ 普通 run（计划确认卡**方法行**经 session log 原文实证「方法：领域地图（官方域优先、每实体一条可核源、口径对齐）」、方法节按题面改编、七 topic 契约）；偏好库保存路径 = steer→Lead 新建四字段库条目（journal 记用户原话与建库动作）。pending/queue/恢复语义实测与 [运行指南](../../../docs/guides/61-run-playbook.md) 一致（timed 超时未答不当作同意——Lead 正确拒绝把沉默当拍板）。遗留：本普通 run 的计划确认卡留用户在 GUI 亲自拍板（真实卡片在场，正好体验方法行）。
 
 **问题与期望结果：** 用户选择或调整方法后，希望整次研究按该方法工作，并能在恢复、重派和交付回看时知道实际采用了什么。本卡推敲从 HITL1 输入到 run 快照、角色执行、恢复与只读展示的完整路径，避免只加一个选项却没有行为或恢复依据。
-**当前情况：** [总卡](2026-10-12-research-preference-templates.md) 已记录用户意图；问卡有原始约束，Lead 派工已有自包含要求，run bundle 是研究事实正本。当前没有独立的方法快照及其传递约定。机制和节点映射见 [综合研究](../research/2026-10-12-research-preferences.md)。
+**当前情况：** [总卡](2026-10-12-research-preference-templates.md) 已记录用户意图；问卡有原始约束，Lead 派工已有自包含要求，run bundle 是研究事实正本。当前没有独立的方法快照及其传递约定。机制和节点映射见 [综合研究](../research/research-preferences/2026-10-12-research-preferences.md)。
 **未决问题：** 如何融入 HITL1 两段卡与 quick 豁免；快照放问卡还是独立文件；默认/推荐和自定义怎样确认；坏配置、方法无法兑现与变更怎样处理；首版是否包含 Cockpit 摘要。
 **下一步：** 依总卡的候选方法写出普通研究、quick_factual、用户已给方法三个交互走读，比较存储与恢复方案；先准备预期行为和负例，需要时按 [总卡授权边界](2026-10-12-research-preference-templates.md#已确认意图与授权) 做隔离可逆实验，正式落地前提交详细方案供用户 review。
 
