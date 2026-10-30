@@ -5,7 +5,7 @@ opened: 2026-10-29
 
 # 方法库工作台重排：A′ 精化 A
 
-> 立卡：2026-10-29 ｜ 状态：推敲中（用户已采纳 A′；默认交互与写入授权已裁定；写入/默认/A′ 表面与来源、Session ready、草稿 revision 拒绝、窄屏与分隔条键盘的自动证据已通过；真实模型下的迟到/重复候选观察、最终视觉与用户业务验收仍未完成）｜ 类型：Feature ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-10-29 ｜ 状态：推敲中（用户已采纳 A′；默认交互与写入授权已裁定；写入/默认/A′ 表面与来源、Session ready、草稿 revision 拒绝、窄屏与分隔条键盘的自动证据已通过；真实模型 save 路径已由隔离探针观察；真实模型下的迟到/重复候选观察、最终视觉与用户业务验收仍未完成）｜ 类型：Feature ｜ 结论倾向：现在做 ｜ 可关闭：否
 
 ## 当前目标
 
@@ -23,7 +23,8 @@ opened: 2026-10-29
 
 1. Host/Client 写入切片已由真实 Loader 组合 smoke 覆盖：默认操作、owner command、摘要失配拒绝及 workspace 回读均有断言。
 2. `client-load-smoke` 已在最新 build 上全绿：两列、编辑访谈/表单切换、新建显式来源、内置四字段预览、已完成 run 预览、窄屏库/工作台切换与分隔条键盘均已断言，零模型 prompt；最终视觉与用户业务验收仍待完成。
-3. 用户完成业务验收后，再按 `issue-to-note` 记录去向与质量责任；issue 在此之前保持 active。
+3. 2026-10-30 真模型 save 探针（用户授权）：在隔离 `runtime/smoke-workspace` 中以 `deepseek-official/deepseek-flash` 运行 Method Editor，模型先读 `method-interview` skill，再调用 `method_library_upsert`；Host 返回结构化成功、条目写入临时方法库。Session 证据 = `runtime/harness-home/sessions/.../session-0b495adc-920a-4e50-846a-d918adfc5847`。只覆盖单次 save，不覆盖 UI 点击链、默认/删除或迟到/重复候选。
+4. 用户完成业务验收后，再按 `issue-to-note` 记录去向与质量责任；issue 在此之前保持 active。
 
 ## 验收标准
 
