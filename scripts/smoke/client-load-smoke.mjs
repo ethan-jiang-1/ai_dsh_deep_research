@@ -858,6 +858,13 @@ async function pass3bGraphTabPhase() {
 /** pass-3c：主界面「方法库」tab。keyless 浏览器断言 A′ 两列、摘要/访谈/表单切换与来源选择；不发送模型 prompt。 */
 async function pass3cMethodLibraryPhase() {
   await awaitAppReady(page, 5_000)
+  const initialViewport = page.viewportSize() ?? { width: 1280, height: 720 }
+  const rootFits = async () => page.evaluate(() => {
+    const root = document.querySelector('[data-method-library]')
+    if (root === null) return false
+    const box = root.getBoundingClientRect()
+    return root.scrollWidth <= root.clientWidth + 1 && box.right <= window.innerWidth + 1
+  })
   // 等显式状态，不拿"读一次没看见"当结论（2026-10-28 归因：失败现场保存时 tab 已在 DOM
   // 里（role=tab），说明断言时刻只是还没挂载完——单次 isVisible 把挂载时序当成了注册回归）。
   const tabVisibleSoon = async (windowMs) => {
@@ -943,6 +950,11 @@ async function pass3cMethodLibraryPhase() {
     } else {
       skipped.push('已完成 run 来源列表（dev home 无已知 archive run）')
     }
+    await page.setViewportSize({ width: 760, height: 800 })
+    await wait(300)
+    step(await rootFits(), '窄屏来源面不产生横向裁切')
+    await page.setViewportSize(initialViewport)
+    await wait(300)
     await page.getByRole('button', { name: /从零开始|Start from scratch/i }).first().click({ timeout: 5_000 }).catch(() => {})
     await wait(500)
     const newFormTab = page.locator('[data-method-summary] [role="tab"]').nth(1)
@@ -951,10 +963,22 @@ async function pass3cMethodLibraryPhase() {
     const revision = Number(await page.locator('[data-method-library]').getAttribute('data-method-draft-revision').catch(() => '0'))
     step(interviewOnly, '从零来源进入摘要与访谈态')
     step(revision > 0, '活动草稿持有单调 revision', `revision=${String(revision)}`)
+    const divider = page.locator('[data-method-library] [role="separator"]').first()
+    const widthBefore = Number(await divider.getAttribute('aria-valuenow').catch(() => '0'))
+    await divider.focus().catch(() => {})
+    await divider.press('ArrowRight').catch(() => {})
+    await wait(200)
+    const widthAfter = Number(await divider.getAttribute('aria-valuenow').catch(() => '0'))
+    step(widthAfter > widthBefore, '库列分隔条可聚焦并用方向键调宽', `${String(widthBefore)}→${String(widthAfter)}`)
     await newFormTab.click({ timeout: 5_000 }).catch(() => {})
     await wait(500)
     const newTa = await page.locator('label textarea').count().catch(() => 0)
     step(newTa === 4, '新建草稿可进入四字段检查', newTa === 4 ? 'textarea 4' : `textarea ${newTa}`)
+    await page.setViewportSize({ width: 760, height: 800 })
+    await wait(300)
+    step(await rootFits(), '窄屏表单检查不产生横向裁切')
+    await page.setViewportSize(initialViewport)
+    await wait(300)
     await page.getByRole('button', { name: '取消' }).first().click({ timeout: 5_000 }).catch(() => {})
     await wait(500)
   }
