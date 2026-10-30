@@ -33,7 +33,7 @@ import {
   type LibrarySections,
 } from '../lib/library-fold.ts'
 import { BUILTIN_PREFERENCES } from '../lib/config-tables.ts'
-import { FIELD_LABELS, FIELD_ORDER, mergeCoachDraft, parseMethodDraft, type DraftField } from '../lib/method-draft.ts'
+import { FIELD_LABELS, FIELD_ORDER, coachPatchAppliesToDraft, mergeCoachDraft, parseMethodDraft, type DraftField } from '../lib/method-draft.ts'
 import { BUTTON_STYLE, HEADER_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE, ROW_STYLE } from './method-library/styles.ts'
 import { BuiltinView, EditorView, MethodSummaryView, ReadMineView, SourceSelectionView, type Draft, type RunSourceCandidate, type WorkbenchStage } from './method-library/views.tsx'
 import { MethodCoachPanel } from './method-library/coach.tsx'
@@ -197,6 +197,11 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const modeRef = useRef<Mode>('read')
   const [workbenchStage, setWorkbenchStage] = useState<WorkbenchStage>('interview')
   const [draft, setDraft] = useState<Draft | null>(null)
+  const [draftRevision, setDraftRevision] = useState(0)
+  const draftRevisionRef = useRef(0)
+  const turnBaseRevisionRef = useRef<number | null>(null)
+  const turnAcceptedRevisionRef = useRef<number | null>(null)
+  const lastAssistantSeqRef = useRef(-1)
   const [activeDraftKey, setActiveDraftKey] = useState<string | null>(null)
   const activeDraftKeyRef = useRef<string | null>(null)
   const [coachId, setCoachId] = useState<SessionId | null>(null)
@@ -325,6 +330,11 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setSegment('mine')
     setSelectedName(null)
     setDraft(null)
+    draftRevisionRef.current = 0
+    setDraftRevision(0)
+    turnBaseRevisionRef.current = null
+    turnAcceptedRevisionRef.current = null
+    lastAssistantSeqRef.current = -1
     setSourceFields(new Set())
     setWorkbenchStage('interview')
     setActiveDraftKey(null)
@@ -370,6 +380,21 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
       setSelectedName(entries[0]?.name ?? null)
     }
   }, [text])
+
+  const bumpDraftRevision = (): number => {
+    const next = draftRevisionRef.current + 1
+    draftRevisionRef.current = next
+    setDraftRevision(next)
+    return next
+  }
+
+  const resetDraftRevision = (): void => {
+    draftRevisionRef.current = 0
+    setDraftRevision(0)
+    turnBaseRevisionRef.current = null
+    turnAcceptedRevisionRef.current = null
+    lastAssistantSeqRef.current = -1
+  }
 
   const dirty = (() => {
     if (draft === null || mode === 'read') return false
@@ -419,6 +444,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const beginNew = (): void => {
     if (operationLocked() || !confirmDiscard()) return
     releaseCoachIfIdle()
+    resetDraftRevision()
     setSegment('mine')
     setSelectedName(null)
     const draftKey = crypto.randomUUID()
@@ -439,6 +465,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const beginEdit = (entry: LibraryEntry): void => {
     if (operationLocked() || !confirmDiscard()) return
     releaseCoachIfIdle()
+    resetDraftRevision()
     setSegment('mine')
     setSelectedName(entry.name)
     const draftKey = crypto.randomUUID()
@@ -481,6 +508,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const restartSource = (): void => {
     if (operationLocked() || !confirmDiscard()) return
     sourceReadControllerRef.current?.abort()
+    resetDraftRevision()
     const draftKey = crypto.randomUUID()
     activeDraftKeyRef.current = draftKey
     setActiveDraftKey(draftKey)
@@ -499,6 +527,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setSelectedBuiltinSource(null)
     setSelectedRunSource(null)
     setDraft({ name: '', sections: emptySections(), provenance: null, legacyText: null })
+    bumpDraftRevision()
     setWorkbenchStage('interview')
     setSourceFields(new Set())
     clearCoachFill()
@@ -513,6 +542,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     })
     setSelectedBuiltinSource(entry)
     setSelectedRunSource(null)
+    bumpDraftRevision()
     setWorkbenchStage('interview')
     clearCoachFill()
     setSourceFields(new Set(SECTION_LABELS.filter(({ key }) => entry.sections[key] !== null).map(({ key }) => key)))
@@ -523,6 +553,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setDraft({ name: '', sections: emptySections(), provenance: `来自研究：${run.name}`, legacyText: null })
     setSelectedRunSource(run)
     setSelectedBuiltinSource(null)
+    bumpDraftRevision()
     setWorkbenchStage('interview')
     clearCoachFill()
     setSourceFields(new Set())
@@ -644,6 +675,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const updateSection = (key: keyof LibrarySections, value: string): void => {
     if (draft === null) return
     markManual(key)
+    bumpDraftRevision()
     setDraft({ ...draft, sections: { ...draft.sections, [key]: value === '' ? null : value } })
   }
 
@@ -957,7 +989,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const coachContext = [
     '【页面自动附带的上下文，不是用户输入】',
     `当前方法库（method-library.md）：\n${librarySnapshot}`,
-    `当前草稿：\n${draftSnapshot}`,
+    `当前草稿（版本 ${draftRevision}）：\n${draftSnapshot}`,
     `内置参考（只读，仅对照，不要照抄）：${BUILTIN_PREFERENCES.map((entry) => `${entry.name}（${entry.summary}）`).join('；')}`,
     ...(selectedBuiltinSource === null ? [] : [`用户选择的内置参考（只读）：${selectedBuiltinSource.name}\n${SECTION_LABELS.map(({ key, label }) => `${label}：${selectedBuiltinSource.sections[key] ?? '（待定）'}`).join('\n')}`]),
     ...(selectedRunSource === null ? [] : [`用户选择的已完成研究：${selectedRunSource.name}\n来源文件：question.md 与 ${selectedRunSource.finalPath}\n${previewForCoach('研究问题预览', selectedRunSource.question)}\n${previewForCoach('交付物预览', selectedRunSource.deliverable)}`]),
@@ -998,6 +1030,8 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
       }
       if (event.kind === 'turn-start') {
         activeTurnRef.current = event.turn
+        turnBaseRevisionRef.current = draftRevisionRef.current
+        turnAcceptedRevisionRef.current = null
         return
       }
       if (event.kind === 'tool-call') {
@@ -1014,11 +1048,21 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
         return
       }
       if (event.kind === 'turn-end') {
-        if (activeTurnRef.current === event.turn) activeTurnRef.current = null
+        if (activeTurnRef.current === event.turn) {
+          activeTurnRef.current = null
+          turnBaseRevisionRef.current = null
+          turnAcceptedRevisionRef.current = null
+        }
         if (pending !== null && pending.turn === event.turn) void settleOperation(pending, { kind: 'turn-end' })
         return
       }
       if (event.kind !== 'assistant-text' || (modeRef.current !== 'edit' && modeRef.current !== 'new')) return
+      if (event.turn !== activeTurnRef.current || event.seq <= lastAssistantSeqRef.current) return
+      if (!coachPatchAppliesToDraft({
+        currentRevision: draftRevisionRef.current,
+        baseRevision: turnBaseRevisionRef.current,
+        acceptedRevision: turnAcceptedRevisionRef.current,
+      })) return
       const entry = parseMethodDraft(event.text)
       const current = draftRef.current
       if (entry === null || current === null) return
@@ -1043,6 +1087,8 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
       setCoachFields(new Set(merged.coachFields))
       setActiveField(merged.activeField)
       setCoachBase(entry)
+      turnAcceptedRevisionRef.current = bumpDraftRevision()
+      lastAssistantSeqRef.current = event.seq
     }, () => {
       coachReadyRef.current = true
       setCoachReady(true)
@@ -1079,12 +1125,14 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
 
   const onNameChange = (name: string): void => {
     markManual('name')
+    bumpDraftRevision()
     setDraft((current) => current === null ? null : { ...current, name })
   }
 
   const undoCoach = (): void => {
     const previous = previousRef.current
     if (previous === null) return
+    bumpDraftRevision()
     setDraft(previous.draft)
     setManual(previous.manual)
     setCoachFields(previous.coachFields)
@@ -1097,6 +1145,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     <div
       data-method-library=""
       data-method-library-edit={mode !== 'read' ? '' : undefined}
+      data-method-draft-revision={draftRevision}
       style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, height: '100%', overflow: 'hidden' }}
     >
       <div style={HEADER_STYLE}>

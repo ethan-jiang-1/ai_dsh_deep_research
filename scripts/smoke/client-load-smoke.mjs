@@ -948,7 +948,9 @@ async function pass3cMethodLibraryPhase() {
     const newFormTab = page.locator('[data-method-summary] [role="tab"]').nth(1)
     const interviewOnly = (await page.locator('[data-method-summary]').count().catch(() => 0)) === 1
       && (await page.locator('label textarea').count().catch(() => 0)) === 0
+    const revision = Number(await page.locator('[data-method-library]').getAttribute('data-method-draft-revision').catch(() => '0'))
     step(interviewOnly, '从零来源进入摘要与访谈态')
+    step(revision > 0, '活动草稿持有单调 revision', `revision=${String(revision)}`)
     await newFormTab.click({ timeout: 5_000 }).catch(() => {})
     await wait(500)
     const newTa = await page.locator('label textarea').count().catch(() => 0)

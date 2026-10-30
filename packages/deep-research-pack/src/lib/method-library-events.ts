@@ -2,7 +2,7 @@ export type MethodLibraryCoachEvent =
   | { readonly kind: 'turn-start'; readonly turn: number }
   | { readonly kind: 'turn-end'; readonly turn: number }
   | { readonly kind: 'user-rpc'; readonly requestId: string }
-  | { readonly kind: 'assistant-text'; readonly text: string }
+  | { readonly kind: 'assistant-text'; readonly seq: number; readonly turn: number; readonly text: string }
   | { readonly kind: 'tool-call'; readonly callId: string; readonly turn: number; readonly name: string; readonly args: Record<string, unknown> | null }
   | { readonly kind: 'tool-result'; readonly callId: string; readonly failed: boolean; readonly result: unknown }
 
@@ -25,12 +25,13 @@ export function methodLibraryCoachEventOf(candidate: unknown): MethodLibraryCoac
   }
   if (candidate['type'] === 'assistant/message') {
     const message = data['message']
-    if (!isRecord(message) || !Array.isArray(message['content'])) return null
+    if (typeof candidate['seq'] !== 'number' || typeof data['turn'] !== 'number'
+      || !isRecord(message) || !Array.isArray(message['content'])) return null
     const text = message['content']
       .filter((part): part is Record<string, unknown> => isRecord(part) && part['type'] === 'text')
       .map((part) => typeof part['text'] === 'string' ? part['text'] : '')
       .join('')
-    return text === '' ? null : { kind: 'assistant-text', text }
+    return text === '' ? null : { kind: 'assistant-text', seq: candidate['seq'], turn: data['turn'], text }
   }
   if (candidate['type'] === 'tool/call') {
     if (typeof data['callId'] !== 'string' || typeof data['turn'] !== 'number' || typeof data['name'] !== 'string' || typeof data['arguments'] !== 'string') return null

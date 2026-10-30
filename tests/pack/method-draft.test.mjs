@@ -2,7 +2,7 @@
 // 判据：只取最后一个完整围栏；标题/四标签/来源/默认标记都按 library-fold 折；坏块不猜。
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mergeCoachDraft, parseMethodDraft } from '../../packages/deep-research-pack/src/lib/method-draft.ts'
+import { coachPatchAppliesToDraft, mergeCoachDraft, parseMethodDraft } from '../../packages/deep-research-pack/src/lib/method-draft.ts'
 
 const ENTRY = `## 机房选型尽调（2026-10-28，对话）
 - 找来源: 官方定价页与公告优先，厂商自述标“自述”
@@ -72,4 +72,13 @@ test('merge：base 为 null 时 activeField = 第一格非空字段（首轮定�
   const next = parseMethodDraft(`\`\`\`method-draft\n${ENTRY}\n\`\`\``)
   const merged = mergeCoachDraft({ name: '', sections: { source: null, verify: null, report: null, limit: null }, manual: new Set(), base: null }, next)
   assert.equal(merged.activeField, 'source')
+})
+
+test('coach patch applies only to its turn base or the last accepted patch revision', () => {
+  assert.equal(coachPatchAppliesToDraft({ currentRevision: 0, baseRevision: 0, acceptedRevision: null }), true)
+  assert.equal(coachPatchAppliesToDraft({ currentRevision: 2, baseRevision: 0, acceptedRevision: null }), false)
+  assert.equal(coachPatchAppliesToDraft({ currentRevision: 2, baseRevision: 0, acceptedRevision: 2 }), true)
+  assert.equal(coachPatchAppliesToDraft({ currentRevision: 3, baseRevision: 0, acceptedRevision: 2 }), false)
+  assert.equal(coachPatchAppliesToDraft({ currentRevision: 0, baseRevision: null, acceptedRevision: null }), false)
+  assert.equal(coachPatchAppliesToDraft({ currentRevision: 0, baseRevision: 0, acceptedRevision: 0 }), true)
 })

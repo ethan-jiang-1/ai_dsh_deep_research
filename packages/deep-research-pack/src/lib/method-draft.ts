@@ -50,6 +50,16 @@ export const FIELD_LABELS: Record<DraftField, string> = {
   name: '名称',
 }
 
+/** Whether an assistant patch belongs to the draft revision that produced its turn. */
+export function coachPatchAppliesToDraft(input: {
+  readonly currentRevision: number
+  readonly baseRevision: number | null
+  readonly acceptedRevision: number | null
+}): boolean {
+  return input.baseRevision !== null
+    && (input.currentRevision === input.baseRevision || input.currentRevision === input.acceptedRevision)
+}
+
 /** 合并前的页面态：当前草稿、手改集合、上一轮 coach 草稿。 */
 export interface CoachDraftState {
   readonly name: string

@@ -17,8 +17,13 @@ test('identifies owner prompt request IDs from durable user messages', () => {
 test('reads live assistant text for draft fill', () => {
   assert.deepEqual(methodLibraryCoachEventOf({
     type: 'assistant/message',
-    data: { message: { content: [{ type: 'text', text: '草稿' }, { type: 'reasoning', text: '隐藏' }] } },
-  }), { kind: 'assistant-text', text: '草稿' })
+    seq: 7,
+    data: { turn: 2, message: { content: [{ type: 'text', text: '草稿' }, { type: 'reasoning', text: '隐藏' }] } },
+  }), { kind: 'assistant-text', seq: 7, turn: 2, text: '草稿' })
+  assert.equal(methodLibraryCoachEventOf({
+    type: 'assistant/message',
+    data: { message: { content: [{ type: 'text', text: '草稿' }] } },
+  }), null)
 })
 
 test('decodes a method tool call and correlates its result by callId', () => {
@@ -34,8 +39,8 @@ test('decodes a method tool call and correlates its result by callId', () => {
 
 test('ignores prose confirmation as an operation result and safely rejects malformed events', () => {
   assert.deepEqual(methodLibraryCoachEventOf({
-    type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '已写入：方法' }] } },
-  }), { kind: 'assistant-text', text: '已写入：方法' })
+    type: 'assistant/message', seq: 9, data: { turn: 3, message: { content: [{ type: 'text', text: '已写入：方法' }] } },
+  }), { kind: 'assistant-text', seq: 9, turn: 3, text: '已写入：方法' })
   assert.equal(methodLibraryCoachEventOf({ type: 'tool/result', data: { message: { source: { callId: '' } } } }), null)
   assert.deepEqual(methodLibraryCoachEventOf({ type: 'tool/call', data: { turn: 2, callId: 'call', name: 'x', arguments: '{bad' } }), {
     kind: 'tool-call', callId: 'call', turn: 2, name: 'x', args: null,
