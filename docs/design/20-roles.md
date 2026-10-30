@@ -70,8 +70,9 @@ Deep Research 的本质困难 = 搜索结果信噪比极差 + 答案位置未知
 方法库页「新建/编辑」态右栏的共创者：把用户的研究方法聊成 `method-library.md` 的一条四字段条目。
 不属于 codex 研究生命周期，不参与 run、不组队、不写报告。
 
-- **工具面**：persona / 时钟 / skill（method-interview、method-from-run）/ `ask_user_question` / 工作区手册；
+- **工具面**：persona / 时钟 / skill（method-interview、method-from-run）/ `ask_user_question` / 工作区手册
+  + 窄 host 工具 `method_library_upsert` / `method_library_set_default` / `method_library_remove`；
   **无 web / fs / subagent / session-query**——不做研究，也不在右侧展示研究工具卡。
 - **形态**：一次一问 + 2–4 个具体选项；每轮字段有变化给完整 `method-draft` 围栏（页面回填表单）。
-- **保存**：页面按钮触发；写入仍走 D25 期 1（Lead）；方法编辑写库扩展属方案卡阶段 3。
+- **保存**：页面按钮触发，经上述 host 工具写库；Host 只接受 owning Session 的 claim，写后回读；面板永不直写（D25 2026-10-29 修订）。
 - **机械面**：preset 行、skills、bundle、哨兵 5、l4-lite PROMPTS、roster/README、D37。

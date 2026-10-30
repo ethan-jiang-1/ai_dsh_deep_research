@@ -74,7 +74,7 @@ description: Use when preparing delivery, when a cross-surface diff (pack, docs,
 5. **模型实际看到的 prompt / tool schema / result / diagnostic / transcript**：
    金标准只许重写不许放宽；run 通道缓存重启了吗。本仓实例：`presets/<role>.patch.yml` 的
    persona/skills/工具行、`src/lib/` 中进入 model 上下文的部分、`cordis.patch.yml` 声明行；
-   机械侧 = `snapshot-replay-smoke`（四角色组装面录制语料）。
+   机械侧 = `snapshot-replay-smoke`（研究角色组装面录制语料）。
 6. **denial 在直接与替代调用路径都到达最终 operation**：拒绝不能只堵一条路。
    本仓实例：工具权限/密钥检查若只在一条调用链上做，另一条（如 client 侧直调、
    mcp 通道）就绕过了。查：新增的拒绝/守卫是否有第二个入口未覆盖；

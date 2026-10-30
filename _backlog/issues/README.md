@@ -11,7 +11,7 @@
 - [2026-10-29 方法库工作台重排](../_archived/settled_issues/2026-10-29-method-library-workbench-redesign.md) — implemented：A′ 两列、显式来源、受控 Host 写入/默认、草稿 revision 与窄屏交互；真浏览器/真模型 save/default/clear/delete E2E 全绿；[Note](../../notes/implemented/2026-10-29-method-library-workbench.md)。
 - [2026-10-28 方法库页内对话共创](../_archived/settled_issues/2026-10-28-method-library-cocreation.md) — implemented：页内三栏 + 方法编辑 preset + 草稿回填 + 保存闭环；证据 = 调研 §14 + `runtime/probe-save/artifacts/2026-10-28T14-47-08-504Z/`。
 
-最近三条（更早 = [settled 池索引](../_archived/settled_issues/README.md)，逐卡一行；本区不重复维护）：
+其余最近归档（更早 = [settled 池索引](../_archived/settled_issues/README.md)，逐卡一行；本区不重复维护）：
 
 （[2026-10-28 数据面收口](../_archived/settled_issues/2026-10-28-data-plane-hardening.md) 已结：FAQ 24 对账 → D32–D36；回执三态 / 原生时钟 / 整数契约 + created / 可移植列 / 种子 policy；自审补见证下界回归；P2 与 W/D 同路径转触发器；[Note](../../notes/implemented/2026-10-28-data-plane-hardening.md)。）
 

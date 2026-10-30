@@ -156,7 +156,7 @@ try {
       throw new Error('模块表未枚举本包 client 半（served 缺席——host healthy, UI empty 的装配面形态）');
   });
 
-  // ① roster：四角色都在且零 broken
+  // ① roster：盘上全部角色都在且零 broken
   const roster = await rpc(base, cookie, 'agentPresets/list', {});
   const presets = roster.presets ?? [];
   for (const role of ROLES) {

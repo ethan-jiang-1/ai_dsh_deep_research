@@ -60,7 +60,7 @@ try {
   report('npm pack', packed.status === 0 && packedName === tarballName,
     `exit ${packed.status}, ${packedName ?? '无 tarball'}${(packed.stderr ?? '').trim() ? `：${packed.stderr.trim().split('\n')[0]}` : ''}`)
 
-  // 2. inventory——发布边界在导出的产物本体上重申：必备条目在场、四角色 preset 随包、
+  // 2. inventory——发布边界在导出的产物本体上重申：必备条目在场、全部 preset 随包、
   //    工作区种子与部署 bin 随包、tarball 里没有 package/ 之外的东西
   const tarball = join(DIST, tarballName)
   const tarballSha = createHash('sha256').update(readFileSync(tarball)).digest('hex')
@@ -88,17 +88,20 @@ try {
   const seedOk = seedManifest.version === version && Object.keys(seedManifest.files ?? {}).length > 0
   // 发布边界：lib/types 下的 JS 与 sourcemap 是构建中间产物，不是运行时；进包即用户装垃圾。
   const forbidden = entries.filter((entry) => /^package\/lib\/types\/.*\.(?:js|map)$/.test(entry))
-  const presetRows = entries.filter((e) => /^package\/presets\/[a-z]+\.patch\.yml$/.test(e)).length
+  // 角色 id 允许连字符（method-editor），不能只匹配 [a-z]+；同时与盘上 preset 数逐个对账，
+  // 少于应有数量即红（否则第 5 个 preset 缺席也能靠 >= 4 静默通过）。
+  const expectedPresetRows = readdirSync(join(PACK, 'presets')).filter((f) => f.endsWith('.patch.yml')).length
+  const presetRows = entries.filter((e) => /^package\/presets\/[a-z0-9][a-z0-9-]*\.patch\.yml$/.test(e)).length
   const skills = entries.filter((e) => e.endsWith('/SKILL.md')).length
   const templates = entries.filter((e) => e.startsWith('package/workspace/templates/')).length
   const outside = entries.filter((e) => !e.startsWith('package/'))
   report('inventory',
-    listed.status === 0 && missing.length === 0 && forbidden.length === 0 && outside.length === 0 && presetRows >= 4 && skills > 0 && templates > 0 && seedOk,
+    listed.status === 0 && missing.length === 0 && forbidden.length === 0 && outside.length === 0 && expectedPresetRows > 0 && presetRows === expectedPresetRows && skills > 0 && templates > 0 && seedOk,
     missing.length > 0 ? `缺：${missing.join(', ')}`
       : forbidden.length > 0 ? `构建中间产物进包：${forbidden.slice(0, 5).join(', ')}${forbidden.length > 5 ? '…' : ''}（改 package.json files 排除）`
       : outside.length > 0 ? `package/ 之外的条目：${outside.join(', ')}`
         : !seedOk ? `seed.json 版本/映射不合法（version=${seedManifest.version}）`
-          : `${entries.length} 条目，preset 行 ${presetRows}，skill ${skills}，模板 ${templates}，seed v${seedManifest.version}`)
+          : `${entries.length} 条目，preset 行 ${presetRows}/${expectedPresetRows}，skill ${skills}，模板 ${templates}，seed v${seedManifest.version}`)
 
   // 3. 手册——版本/日期/条目数注入，让它指名它旁边这份产物；步骤 = release-smoke 的路径
   //    日期 = 本地口径（人读日期行；UTC slice 在 00:00–08:00 窗口差一天——BUG-017 同款口径纪律）
@@ -145,7 +148,7 @@ dsh --profile research --dump-config
 
 输出里应能看到五样东西：
 
-- \`id: preset-lead\`（以及 preset-scout / preset-analyst / preset-critic）——四角色 preset；
+- \`id: preset-lead\`（以及 preset-scout / preset-analyst / preset-critic / preset-method-editor）——五个 preset（四研究角色 + 方法编辑）；
 - \`id: tool-present\` —— HITL 选项卡工具行；
 - \`id: ui-agent-team\` —— 团队协作通道的可视面；
 - \`id: research-client\` —— 研究驾驶舱（浏览器端）的挂载行；
@@ -232,7 +235,7 @@ dsh plugin --profile research add dsh-deep-research-pack@<新版>
 dsh plugin --profile research add file:/path/to/dsh-deep-research-pack-<新版>.tgz
 \`\`\`
 
-升级后 \`dsh --profile research --dump-config\` 应仍见四角色与本包行；随后用 scaffold 检查并安全升级工作区种子：
+升级后 \`dsh --profile research --dump-config\` 应仍见全部 preset（四研究角色 + 方法编辑）与本包行；随后用 scaffold 检查并安全升级工作区种子：
 
 \`\`\`sh
 node ~/.dsh/profiles/research/node_modules/dsh-deep-research-pack/scripts/scaffold.mjs \\

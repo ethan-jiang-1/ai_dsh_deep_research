@@ -177,6 +177,6 @@ try {
 }
 
 console.log(failures.length === 0
-  ? '\nl4-lite-smoke: ALL PASS（四角色 assistant 响应 + scout web_search 工具调用）'
+  ? '\nl4-lite-smoke: ALL PASS（全角色（含 method-editor）assistant 响应 + scout web_search 工具调用）'
   : `\nl4-lite-smoke: ${failures.length} FAILURE(S)\n${failures.join('\n')}`);
 process.exit(failures.length === 0 ? 0 : 1);

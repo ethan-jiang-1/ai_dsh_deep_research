@@ -32,11 +32,11 @@ description: Use when adding a research role preset, renaming one, or changing a
   `bash dev/boot-run.sh` 的漂移检测会逐文件比 pack 源 vs 镜像，不符即 fail-loud；
 - **roster**：`scripts/lib/roles.mjs` 是访问器，事实源 = 盘上 `presets/`；改完跑
   `role-list-sync` 门禁（角色清单与 pack 对账）；
-- **persona 引用对账**：四个 preset 的 persona 文本硬引用 skill 名（如 critic「先加载
+- **persona 引用对账**：每个 preset 的 persona 文本硬引用 skill 名（如 critic「先加载
   adversarial-review skill」）——增删/改名 skill 时同 diff 检查 persona 是否跟着改（模型可见面）；
 - **真模型档覆盖**：`scripts/smoke/l4-lite-smoke.mjs` 的 `PROMPTS` 加该角色的标记 prompt——它是
   全角色冒烟，盘上有角色而无覆盖即 exit 2；
-- **台账**：增删角色 = 推翻 D2（角色 = 4 个），先在 `docs/00-index.md` 台账登记新 D 号，
+- **台账**：增删角色 = 推翻 D2（角色 = 5 个：4 研究 + 方法编辑，D37），先在 `docs/decisions.md` 台账登记新 D 号，
   再动代码——`tests/pack/presets.test.mjs` 的数量哨兵会拦住没登记的增删。
 
 ## 3. 验证（完成判据，keyless 优先）

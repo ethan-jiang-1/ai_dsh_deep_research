@@ -30,7 +30,7 @@ export function runB() {
       for (const field of ['id:', 'name:', 'description:', 'order:', 'plugins:']) {
         if (!new RegExp(`^\\s+${field}`, 'm').test(yml)) fail(gate, `${f}: config 缺字段 ${field}`);
       }
-      // 时钟行（D32）：日期类事实必须有原生读数来源，四个角色统一挂 time-context。
+      // 时钟行（D32）：日期类事实必须有原生读数来源，每个角色统一挂 time-context。
       // 缺席不是风格问题——手册的日期契约会退回「用网页校准」，实测 4 处 journal 未来日期。
       const clocks = [...yml.matchAll(/^\s*- id: time-context\s*$/gm)].length;
       if (clocks !== 1) fail(gate, `${f}: 须恰有一条 \`- id: time-context\`（D32 时钟行，当前 ${clocks} 条）——补 \`- id: time-context\` + name: '@deepseek-ai/dsh-time-context'`);

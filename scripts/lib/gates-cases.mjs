@@ -546,7 +546,7 @@ export const CASES = [
       writeFileSync(p, readFileSync(p, 'utf8').replace(/\n\s*- id: time-context\n\s*name: '@deepseek-ai\/dsh-time-context'/, ''));
     } },
   // row-deps：删一条 peerDependencies 行——preset 行引用的包失去声明（真实回归 = 新增行忘登记；
-  // 挑 @deepseek-ai/dsh-agent-preset：四个 preset patch 行都引用它，一处删除即报）。
+  // 挑 @deepseek-ai/dsh-agent-preset：所有 preset patch 行都引用它，一处删除即报）。
   { id: 'row-deps-peer-missing', gate: 'row-deps', mutate: (dir) => {
       const p = join(dir, 'packages', 'deep-research-pack', 'package.json');
       writeFileSync(p, readFileSync(p, 'utf8').replace(/.*"@deepseek-ai\/dsh-agent-preset": "[^"]*",\n/, ''));
