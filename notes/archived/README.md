@@ -11,7 +11,7 @@
 
 1. 决定或事故复盘完整交付，无未兑现承诺；
 2. rationale / alternatives / 反保证 / 所有权边界**不再可能指导未来变更**——仍被 `docs/`、
-   门禁台账、负知识、复活条件引用者留活跃；
+   门禁台账、红证证据链（门禁/契约测试的反证出处）、负知识、复活条件引用者留活跃；
 3. 历史理由值得保留（纯机械 / 小 UI 记录直接删，不进此层）。
 
 事故复盘另需：新增防线已落 `evaluation.md` / `triggers.md`；五节骨架按
@@ -25,6 +25,10 @@
 - 搬移时唯一的机械编辑 = 在 `> 状态：implemented` 行下插一行 `> 归档：<日期>`。
 - **不检修档案的出链**；活跃文本指向此层的链接在搬移时重定向，或登记为历史指针
   （[scripts/archived-note-pointers.json](../../scripts/archived-note-pointers.json)）。
+  边界：搬移当时因路径变更产生的出链重定向（仅改相对路径、不动任何内容）属于归档变更
+  本身，不算检修；此后冻结。
+  已知限制：`md-links` 仍扫 archived 的 tracked `.md`；目标移位导致红时，按
+  [writing-a-gate](../../.agents/skills/writing-a-gate/SKILL.md) 走门禁侧处置，不回改档案。
 - 复活 = 写**新** Note 引用快照，档案本体不动。
 
 ## 阅读契约

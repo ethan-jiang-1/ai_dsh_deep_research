@@ -61,6 +61,9 @@
 根因 / 修复 / 新增防线；结案后作为**历史证据冻结进** [`archived/`](archived/README.md)，不再作为
 活跃层维护。
 
+**不收**：探针抓到的文档漂移（卫生整治，归 `implemented/`）；未到达“不该到达的地方”的普通
+bug（修在 `implemented/` 的验证节）。
+
 新增防线落 [evaluation](../docs/evaluation.md)（门禁）或 [_backlog/triggers](../_backlog/triggers.md)
 （复发观察）才算闭环。防复发的现行入口 = `reviewing-a-delivery` / `reproducing-a-failure` 技能与
 triggers；事故原文只作证据。
