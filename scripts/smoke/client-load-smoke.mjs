@@ -950,7 +950,7 @@ async function pass3cMethodLibraryPhase() {
     } else {
       skipped.push('已完成 run 来源列表（dev home 无已知 archive run）')
     }
-    await page.setViewportSize({ width: 760, height: 800 })
+    await page.setViewportSize({ width: 640, height: 800 })
     await wait(300)
     step(await rootFits(), '窄屏来源面不产生横向裁切')
     await page.setViewportSize(initialViewport)
@@ -974,9 +974,9 @@ async function pass3cMethodLibraryPhase() {
     await wait(500)
     const newTa = await page.locator('label textarea').count().catch(() => 0)
     step(newTa === 4, '新建草稿可进入四字段检查', newTa === 4 ? 'textarea 4' : `textarea ${newTa}`)
-    await page.setViewportSize({ width: 760, height: 800 })
+    await page.setViewportSize({ width: 480, height: 800 })
     await wait(300)
-    step(await rootFits(), '窄屏表单检查不产生横向裁切')
+    step(await rootFits(), '超窄屏表单检查不产生横向裁切')
     await page.setViewportSize(initialViewport)
     await wait(300)
     await page.getByRole('button', { name: '取消' }).first().click({ timeout: 5_000 }).catch(() => {})
