@@ -221,6 +221,8 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const [selectedRunSource, setSelectedRunSource] = useState<RunSourceCandidate | null>(null)
   const [selectedRunLoading, setSelectedRunLoading] = useState(false)
   const sourceReadControllerRef = useRef<AbortController | null>(null)
+  const [narrowPane, setNarrowPane] = useState(false)
+  const [libraryOpen, setLibraryOpen] = useState(false)
   const previousRef = useRef<{
     draft: Draft
     manual: ReadonlySet<DraftField>
@@ -328,6 +330,18 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
       return result
     }
   }
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return undefined
+    const query = window.matchMedia('(max-width: 640px)')
+    const sync = (): void => {
+      setNarrowPane(query.matches)
+      if (!query.matches) setLibraryOpen(false)
+    }
+    sync()
+    query.addEventListener('change', sync)
+    return () => { query.removeEventListener('change', sync) }
+  }, [])
 
   useEffect(() => {
     sourceReadControllerRef.current?.abort()
@@ -465,6 +479,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setReceipt(null)
     setPendingDelete(null)
     clearCoachFill()
+    setLibraryOpen(false)
   }
 
   const beginEdit = (entry: LibraryEntry): void => {
@@ -485,6 +500,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setReceipt(null)
     setPendingDelete(null)
     clearCoachFill()
+    setLibraryOpen(false)
   }
 
   const selectMine = (entry: LibraryEntry): void => {
@@ -497,6 +513,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setPendingDelete(null)
     clearCoachFill()
     releaseCoachIfIdle()
+    setLibraryOpen(false)
   }
 
   const selectBuiltin = (name: string): void => {
@@ -508,6 +525,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setReceipt(null)
     setPendingDelete(null)
     releaseCoachIfIdle()
+    setLibraryOpen(false)
   }
 
   const restartSource = (): void => {
@@ -526,6 +544,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setWorkbenchStage('source')
     setReceipt(null)
     clearCoachFill()
+    setLibraryOpen(false)
   }
 
   const useBuiltinReference = (source: (typeof BUILTIN_PREFERENCES)[number]): void => {
@@ -548,6 +567,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setReceipt(null)
     setPendingDelete(null)
     clearCoachFill()
+    setLibraryOpen(false)
   }
 
   const startBlank = (): void => {
@@ -1182,6 +1202,16 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
         <strong style={{ fontSize: 15 }}>方法库</strong>
         <span style={MUTED_STYLE}>本工作区共享 · 保存交方法编辑</span>
         <span style={{ flex: 1 }} />
+        {narrowPane && (
+          <button
+            type="button"
+            data-method-library-toggle=""
+            aria-expanded={libraryOpen}
+            aria-controls="method-library-library-pane"
+            style={BUTTON_STYLE}
+            onClick={() => { setLibraryOpen((open) => !open) }}
+          >{libraryOpen ? props.t('workbenchPane') : props.t('libraryPane')}</button>
+        )}
         <button type="button" style={BUTTON_STYLE} onClick={refresh}>刷新</button>
         <button type="button" style={PRIMARY_STYLE} disabled={sending || operationUnknown} onClick={beginNew}>新建</button>
       </div>
@@ -1194,7 +1224,18 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
         }}>{receipt.ok ? '✓' : '✕'} {receipt.detail}</div>
       )}
       <div style={{ display: 'flex', flex: 1, minHeight: 0, minWidth: 0, overflow: 'hidden' }}>
-        <aside style={{ flex: `0 0 min(${leftWidth}px, 38vw)`, minWidth: 120, borderRight: '1px solid var(--dsw-alias-border-l1)', padding: 10, overflowY: 'auto', boxSizing: 'border-box', position: 'relative', zIndex: 1 }}>
+        <aside
+          id="method-library-library-pane"
+          data-method-library-pane="library"
+          style={{
+            display: !narrowPane || libraryOpen ? 'block' : 'none',
+            flex: narrowPane ? '1 1 auto' : `0 0 min(${leftWidth}px, 38vw)`,
+            width: narrowPane ? '100%' : undefined,
+            minWidth: narrowPane ? 0 : 120,
+            borderRight: narrowPane ? 'none' : '1px solid var(--dsw-alias-border-l1)',
+            padding: 10, overflowY: 'auto', boxSizing: 'border-box', position: 'relative', zIndex: 1,
+          }}
+        >
           <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
             <button type="button" style={{ ...BUTTON_STYLE, ...(segment === 'mine' ? { borderColor: 'var(--dsw-alias-brand-primary)', color: 'var(--dsw-alias-brand-primary)' } : {}) }} onClick={() => { switchSegment('mine') }}>我的库</button>
             <button type="button" style={{ ...BUTTON_STYLE, ...(segment === 'builtin' ? { borderColor: 'var(--dsw-alias-brand-primary)', color: 'var(--dsw-alias-brand-primary)' } : {}) }} onClick={() => { switchSegment('builtin') }}>内置参考</button>
@@ -1238,8 +1279,15 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
             </>
           )}
         </aside>
-        <ColumnHandle onDrag={(delta) => { setLeftWidth((width) => Math.max(120, Math.min(420, width + delta))) }} value={leftWidth} min={120} max={420} />
-        <main style={{ flex: '1 1 420px', minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', boxSizing: 'border-box' }}>
+        {!narrowPane && <ColumnHandle onDrag={(delta) => { setLeftWidth((width) => Math.max(120, Math.min(420, width + delta))) }} value={leftWidth} min={120} max={420} />}
+        <main
+          id="method-library-workbench-pane"
+          data-method-library-pane="workbench"
+          style={{
+            flex: '1 1 420px', minWidth: 0, minHeight: 0, display: narrowPane && libraryOpen ? 'none' : 'flex',
+            flexDirection: 'column', overflow: 'hidden', boxSizing: 'border-box',
+          }}
+        >
           {(mode === 'edit' || mode === 'new') && workbenchStage !== 'source' && draft !== null && (
             <MethodSummaryView draft={draft} stage={workbenchStage} manualFields={manual} coachFields={coachFields} sourceFields={sourceFields} onStageChange={setWorkbenchStage} onFocusField={(field) => { setActiveField(field); setWorkbenchStage('form-check') }} onRestartSource={restartSource} canSave={canSaveDraft} sending={sending || operationUnknown} onSave={(setDefault) => { void save(setDefault) }} t={props.t} />
           )}

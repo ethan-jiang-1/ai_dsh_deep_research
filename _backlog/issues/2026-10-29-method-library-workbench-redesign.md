@@ -22,7 +22,7 @@ opened: 2026-10-29
 ## 下一步
 
 1. Host/Client 写入切片已由真实 Loader 组合 smoke 覆盖：默认操作、owner command、摘要失配拒绝及 workspace 回读均有断言。
-2. `client-load-smoke` 已在最新 build 上全绿：两列、编辑访谈/表单切换、新建显式来源、内置四字段预览、已完成 run 预览与完成判据均已断言，零模型 prompt；窄屏和键盘可访问性仍待用户业务验收。
+2. `client-load-smoke` 已在最新 build 上全绿：两列、编辑访谈/表单切换、新建显式来源、内置四字段预览、已完成 run 预览、窄屏库/工作台切换与分隔条键盘均已断言，零模型 prompt；最终视觉与用户业务验收仍待完成。
 3. 用户完成业务验收后，再按 `issue-to-note` 记录去向与质量责任；issue 在此之前保持 active。
 
 ## 验收标准

@@ -977,11 +977,47 @@ async function pass3cMethodLibraryPhase() {
     await wait(500)
     const newTa = await page.locator('label textarea').count().catch(() => 0)
     step(newTa === 4, '新建草稿可进入四字段检查', newTa === 4 ? 'textarea 4' : `textarea ${newTa}`)
+    const collapseRight = page.locator('button[aria-label="收起右侧边栏"], button[aria-label="Collapse right sidebar"]').first()
+    if (await collapseRight.isVisible({ timeout: 3_000 }).catch(() => false)) {
+      await collapseRight.click({ timeout: 5_000 }).catch(() => {})
+      await wait(800)
+    }
     await page.setViewportSize({ width: 480, height: 800 })
     await wait(300)
     step(await rootFits(), '超窄屏表单检查不产生横向裁切')
+    const narrowToggle = page.locator('[data-method-library-toggle]').first()
+    const toggleVisible = await narrowToggle.isVisible({ timeout: 5_000 }).catch(() => false)
+    step(toggleVisible, '超窄屏提供库/工作台切换入口')
+    if (toggleVisible) {
+      await narrowToggle.click({ timeout: 5_000 }).catch(() => {})
+      const libraryOpened = await page.waitForFunction(() => {
+        const toggle = document.querySelector('[data-method-library-toggle]')
+        const library = document.querySelector('[data-method-library-pane="library"]')
+        const workbench = document.querySelector('[data-method-library-pane="workbench"]')
+        return toggle?.getAttribute('aria-expanded') === 'true'
+          && library !== null && workbench !== null
+          && getComputedStyle(library).display !== 'none'
+          && getComputedStyle(workbench).display === 'none'
+      }, null, { timeout: 5_000 }).then(() => true).catch(() => false)
+      const workbenchMounted = (await page.locator('[data-method-library-pane="workbench"]').count().catch(() => 0)) === 1
+      step(libraryOpened && workbenchMounted, '超窄屏展开库列表时工作台隐藏但保留挂载')
+      await narrowToggle.click({ timeout: 5_000 }).catch(() => {})
+      const workbenchBack = await page.waitForFunction(() => {
+        const toggle = document.querySelector('[data-method-library-toggle]')
+        const workbench = document.querySelector('[data-method-library-pane="workbench"]')
+        return toggle?.getAttribute('aria-expanded') === 'false'
+          && workbench !== null && getComputedStyle(workbench).display !== 'none'
+      }, null, { timeout: 5_000 }).then(() => true).catch(() => false)
+      const draftKept = (await page.locator('label textarea').count().catch(() => 0)) === 4
+      step(workbenchBack && draftKept, '超窄屏切回工作台保留表单状态')
+    }
     await page.setViewportSize(initialViewport)
     await wait(300)
+    const expandRight = page.getByRole('button', { name: 'Open right sidebar' }).first()
+    if (await expandRight.isVisible({ timeout: 3_000 }).catch(() => false)) {
+      await expandRight.click({ timeout: 5_000 }).catch(() => {})
+      await wait(800)
+    }
     await page.getByRole('button', { name: '取消' }).first().click({ timeout: 5_000 }).catch(() => {})
     await wait(500)
   }

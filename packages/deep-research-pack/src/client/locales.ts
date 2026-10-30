@@ -2,6 +2,8 @@
 export const zh = {
   methodLibrary: '方法库',
   searchMethods: '搜索方法…',
+  libraryPane: '库列表',
+  workbenchPane: '工作台',
   methodEditorTitle: '方法编辑',
   currentMethod: '当前方法',
   interview: '访谈',
@@ -82,6 +84,8 @@ export type DeepResearchPackLocaleKey = keyof typeof zh
 export const en = {
   methodLibrary: 'Method library',
   searchMethods: 'Search methods…',
+  libraryPane: 'Library',
+  workbenchPane: 'Workbench',
   methodEditorTitle: 'Method Editor',
   currentMethod: 'Current method',
   interview: 'Interview',
