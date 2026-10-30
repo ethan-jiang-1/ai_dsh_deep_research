@@ -905,16 +905,16 @@ async function pass3cMethodLibraryPhase() {
   if (await edit.isVisible({ timeout: 5_000 }).catch(() => false)) {
     await edit.click({ timeout: 5_000 }).catch(() => {})
     await wait(500)
-    const formTab = page.locator('[data-method-summary] [role="tab"]').nth(1)
     const summaryOnly = (await page.locator('[data-method-summary]').count().catch(() => 0)) === 1
       && (await page.locator('[data-method-summary] [role="tab"]').count().catch(() => 0)) === 2
       && (await page.locator('label textarea').count().catch(() => 0)) === 0
     step(summaryOnly, '编辑访谈态：摘要在场，表单字段收起')
-    await formTab.click({ timeout: 5_000 }).catch(() => {})
+    await page.locator('[data-method-summary-field="source"]').first().click({ timeout: 5_000 }).catch(() => {})
     await wait(500)
     const ta = await page.locator('label textarea').count().catch(() => 0)
     const saveControl = await page.getByRole('button', { name: /保存到方法库|Save to method library/i }).count().catch(() => 0)
-    step(ta === 4 && saveControl > 0, '编辑表单态：四字段 + 保存控制', ta === 4 ? 'textarea 4' : `textarea ${ta}`)
+    const focusedTag = await page.evaluate(() => document.activeElement?.tagName ?? '').catch(() => '')
+    step(ta === 4 && saveControl > 0 && focusedTag === 'TEXTAREA', '摘要字段直达表单并聚焦', `${focusedTag}${ta === 4 ? ' / textarea 4' : ` / textarea ${ta}`}`)
     await page.getByRole('button', { name: '取消' }).first().click({ timeout: 5_000 }).catch(() => {})
     await wait(500)
   } else {
@@ -987,7 +987,16 @@ async function pass3cMethodLibraryPhase() {
     await builtin.click({ timeout: 5_000 }).catch(() => {})
     await wait(800)
     const t = await paneTextOf(page)
+    const useBuiltin = await page.locator('[data-method-builtin-use]').count().catch(() => 0)
     step(t.includes('内置只读'), '方法库内置参考：只读态在场')
+    step(useBuiltin === 1, '内置参考详情提供直接开始入口')
+    if (useBuiltin === 1) {
+      await page.locator('[data-method-builtin-use]').first().click({ timeout: 5_000 }).catch(() => {})
+      await wait(500)
+      const projected = (await page.locator('[data-method-source-selection]').count().catch(() => 0)) === 1
+        && (await page.locator('[data-method-source-use-builtin]').count().catch(() => 0)) === 1
+      step(projected, '内置详情开始动作带入选定来源')
+    }
   }
 }
 

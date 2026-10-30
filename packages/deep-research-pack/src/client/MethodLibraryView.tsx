@@ -130,6 +130,11 @@ function emptySections(): LibrarySections {
   return { source: null, verify: null, report: null, limit: null }
 }
 
+/** Built-in read-only preference projected as a user-library source. */
+function builtinLibraryEntry(entry: (typeof BUILTIN_PREFERENCES)[number]): LibraryEntry {
+  return { name: entry.name, provenance: '内置只读', sections: entry.sections, legacyText: null, isDefault: false }
+}
+
 /** 草稿是否与源条目一致（粗糙但够用的 dirty 判据：用于离开确认，不用于保存）。 */
 function draftOf(entry: LibraryEntry): Draft {
   return {
@@ -520,6 +525,28 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setSelectedRunSource(null)
     setWorkbenchStage('source')
     setReceipt(null)
+    clearCoachFill()
+  }
+
+  const useBuiltinReference = (source: (typeof BUILTIN_PREFERENCES)[number]): void => {
+    if (operationLocked() || !confirmDiscard()) return
+    const draftKey = crypto.randomUUID()
+    activeDraftKeyRef.current = draftKey
+    setActiveDraftKey(draftKey)
+    releaseCoachIfIdle()
+    sourceReadControllerRef.current?.abort()
+    resetDraftRevision()
+    setSegment('mine')
+    setSelectedName(null)
+    setDraft({ name: '', sections: emptySections(), provenance: null, legacyText: null })
+    setSourceFields(new Set())
+    setMode('new')
+    setWorkbenchStage('source')
+    setSelectedBuiltinSource(builtinLibraryEntry(source))
+    setSelectedRunSource(null)
+    setSelectedRunLoading(false)
+    setReceipt(null)
+    setPendingDelete(null)
     clearCoachFill()
   }
 
@@ -1211,10 +1238,10 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
         <ColumnHandle onDrag={(delta) => { setLeftWidth((width) => Math.max(120, Math.min(420, width + delta))) }} value={leftWidth} min={120} max={420} />
         <main style={{ flex: '1 1 420px', minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', boxSizing: 'border-box' }}>
           {(mode === 'edit' || mode === 'new') && workbenchStage !== 'source' && draft !== null && (
-            <MethodSummaryView draft={draft} stage={workbenchStage} manualFields={manual} coachFields={coachFields} sourceFields={sourceFields} onStageChange={setWorkbenchStage} onRestartSource={restartSource} canSave={canSaveDraft} sending={sending || operationUnknown} onSave={(setDefault) => { void save(setDefault) }} t={props.t} />
+            <MethodSummaryView draft={draft} stage={workbenchStage} manualFields={manual} coachFields={coachFields} sourceFields={sourceFields} onStageChange={setWorkbenchStage} onFocusField={(field) => { setActiveField(field); setWorkbenchStage('form-check') }} onRestartSource={restartSource} canSave={canSaveDraft} sending={sending || operationUnknown} onSave={(setDefault) => { void save(setDefault) }} t={props.t} />
           )}
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, minWidth: 0, padding: 14, overflowY: mode === 'read' || workbenchStage !== 'interview' ? 'auto' : 'hidden', boxSizing: 'border-box' }}>
-            {mode === 'read' && segment === 'builtin' && builtin !== null && <BuiltinView entry={builtin} />}
+            {mode === 'read' && segment === 'builtin' && builtin !== null && <BuiltinView entry={builtin} onUse={() => { useBuiltinReference(builtin) }} useLabel={props.t('useBuiltin')} />}
             {mode === 'read' && segment === 'mine' && selected !== null && <ReadMineView entry={selected} pendingDelete={pendingDelete} sending={sending || operationUnknown} onEdit={beginEdit} onPendingDelete={setPendingDelete} onRemove={(entry) => { void remove(entry) }} onSetDefault={(entry) => { void setDefault(entry) }} onClearDefault={() => { void clearDefault() }} t={props.t} />}
             {mode === 'read' && segment === 'mine' && selected === null && (
               <div style={{ ...MUTED_STYLE, paddingTop: 20 }}>
@@ -1224,7 +1251,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
               </div>
             )}
             {mode === 'new' && workbenchStage === 'source' && <SourceSelectionView
-              builtinChoices={BUILTIN_PREFERENCES.map((entry) => ({ name: entry.name, provenance: '内置只读', summary: entry.summary, sections: entry.sections, legacyText: null, isDefault: false }))}
+              builtinChoices={BUILTIN_PREFERENCES.map((entry) => ({ ...builtinLibraryEntry(entry), summary: entry.summary }))}
               runNames={runNames}
               runState={runState}
               selectedRunLoading={selectedRunLoading}

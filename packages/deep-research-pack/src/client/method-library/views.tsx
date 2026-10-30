@@ -109,13 +109,15 @@ export function MethodSummaryView(props: {
   readonly coachFields: ReadonlySet<DraftField>
   readonly sourceFields: ReadonlySet<DraftField>
   readonly onStageChange: (stage: WorkbenchStage) => void
+  readonly onFocusField: (field: DraftField) => void
   readonly onRestartSource: () => void
   readonly canSave: boolean
   readonly sending: boolean
   readonly onSave: (setDefault: boolean) => void
   readonly t: TranslateNS<'deepResearchPack'>
 }): ReactNode {
-  const { draft, stage, manualFields, coachFields, sourceFields, onStageChange, onRestartSource, canSave, sending, onSave, t } = props
+  const { draft, stage, manualFields, coachFields, sourceFields, onStageChange, onFocusField, onRestartSource, canSave, sending, onSave, t } = props
+  const fieldButtonStyle = { minWidth: 0, width: '100%', display: 'flex', gap: 6, fontSize: 12, textAlign: 'left', border: 'none', background: 'transparent', color: 'inherit', padding: 0, font: 'inherit', cursor: 'pointer' } as const
   const filled = SECTION_LABELS.filter(({ key }) => (draft.sections[key] ?? '').trim() !== '').length
   const missingFields = [
     ...(draft.name.trim() === '' ? [t('methodName')] : []),
@@ -124,7 +126,9 @@ export function MethodSummaryView(props: {
   return (
     <section data-method-summary="" style={{ flex: '0 0 auto', minWidth: 0, padding: '10px 14px', borderBottom: '1px solid var(--dsw-alias-border-l1)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <strong>{draft.name.trim() === '' ? t('currentMethod') : draft.name}</strong>
+        <button type="button" data-method-summary-field="name" onClick={() => { onFocusField('name') }} style={{ ...fieldButtonStyle, width: 'auto', fontWeight: 700 }}>
+          {draft.name.trim() === '' ? t('currentMethod') : draft.name}
+        </button>
         {draft.provenance !== null && <span style={MUTED_STYLE}>{draft.provenance}</span>}
         <span style={{ ...MUTED_STYLE, marginLeft: 'auto' }}>{t('fieldProgress', { count: String(filled) })}</span>
       </div>
@@ -133,13 +137,13 @@ export function MethodSummaryView(props: {
           const value = draft.sections[key]?.trim() ?? ''
           const source = manualFields.has(key) ? t('changedManually') : coachFields.has(key) ? t('changedInInterview') : sourceFields.has(key) ? t('fromSource') : t('fieldPending')
           return (
-            <div key={key} style={{ minWidth: 0, display: 'flex', gap: 6, fontSize: 12 }}>
+            <button key={key} type="button" data-method-summary-field={key} onClick={() => { onFocusField(key) }} style={fieldButtonStyle}>
               <span style={{ color: 'var(--dsw-alias-label-secondary)', flex: '0 0 auto' }}>{label}</span>
               <span title={value} style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
                 {value === '' ? '—' : value}
               </span>
               <span style={{ ...MUTED_STYLE, flex: '0 0 auto' }}>{source}</span>
-            </div>
+            </button>
           )
         })}
       </div>
@@ -157,13 +161,18 @@ export function MethodSummaryView(props: {
   )
 }
 
-/** 内置打法的只读视图（summary + 四字段；无编辑入口）。 */
-export function BuiltinView({ entry }: { readonly entry: { readonly name: string; readonly summary: string; readonly sections: LibrarySections } }): ReactNode {
+/** 内置打法的只读视图（summary + 四字段；可直接作为新方法来源）。 */
+export function BuiltinView({ entry, onUse, useLabel }: {
+  readonly entry: { readonly name: string; readonly summary: string; readonly sections: LibrarySections }
+  readonly onUse?: () => void
+  readonly useLabel?: string
+}): ReactNode {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
         <strong style={{ fontSize: 16 }}>{entry.name}</strong>
         <span style={MUTED_STYLE}>内置只读</span>
+        {onUse !== undefined && <button type="button" data-method-builtin-use="" style={{ ...PRIMARY_STYLE, marginLeft: 'auto' }} onClick={onUse}>{useLabel ?? '以此开始'}</button>}
       </div>
       <div style={{ ...MUTED_STYLE, marginBottom: 8 }}>{entry.summary}</div>
       <div style={{ lineHeight: 1.65, fontSize: 13 }}>
@@ -262,6 +271,7 @@ export function EditorView(props: {
     if (activeField === null || activeField === undefined) return
     const element = rootRef.current?.querySelector<HTMLElement>(`[data-field="${activeField}"]`)
     element?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    element?.querySelector<HTMLElement>('input, textarea')?.focus()
   }, [activeField])
   if (draft === null) return null
   const missingFields = [
