@@ -47,6 +47,6 @@ critic 后置）首验全绿：
   各自稳定、console 零错。
 
 修复过程中的中间红（证据计数时点竞态、● ×5 队员 phase 圆点与轨道 current 计数碰撞、停靠点
-被动侧滞后）均复现→修复→复绿。顺带缺陷登记 = BUG-020（hitl-answer 代答 provenance 误归给
-无关在飞 bundle，代码修复待做）。问题卡 =
+被动侧滞后）均复现→修复→复绿。顺带缺陷登记 = BUG-020：hitl-answer 代答 provenance 误归给
+无关在飞 bundle；同日已修（[BUG-020 卡](../../_backlog/_archived/fixed_bugs/BUG-020-hitl-answer-provenance-misattribution.md)）。问题卡 =
 [_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)。

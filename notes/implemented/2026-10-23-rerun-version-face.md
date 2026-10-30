@@ -1,6 +1,10 @@
 # rerun 版本面：plan 快照、`run-version` 与终稿版本账（已落地）
 
 > 状态：implemented
+
+> 历史注记（2026-10-30）：2026-10-23 [D29](../../docs/decisions.md#d29) 后终稿页签默认读者版，
+> 标签集扩为「读者版 vN / 审计版 vN / 当前工作稿 / 审查未过」；`present` 可点名 `final/vN`
+> 与 `readable*`。版本面、plan 快照与 rerun 声明仍现行。
 >
 > 首提 2026-10-23 ｜ 设计卡 [_backlog/issues/2026-10-23-rerun-versioned-graph.md](../../_backlog/_archived/settled_issues/2026-10-23-rerun-versioned-graph.md)（§7 决议）
 > ｜ 合同 [design/40 §2](../../docs/design/40-research-cockpit.md) · [guides/61 §5](../../docs/guides/61-run-playbook.md)

@@ -7,9 +7,11 @@
 用户委托的全仓代码体检（结构/臃肿/SOLID 三问）落地为八个阶段的结构重构，硬约束 =
 **零行为变化**（每阶段前后跑同一验证链，任何红即回滚）。形态：
 
-- **verify.mjs 保持单文件聚合**，门禁块按六域分组（A md 卫生 / B pack 驾驶舱 / C notes 技能 /
+- **verify.mjs 当时保持单文件聚合**，门禁块按六域分组（A md 卫生 / B pack 驾驶舱 / C notes 技能 /
   D vendor 对齐 / E 工作区生成物 / F 仓规环境），`gates` 数组同序；五组重复 git spawn 收口
   `gitOnce` 缓存（精确保形：参数原样、不注入 quotepath、不剥 env）。判据与台账合同不动。
+  **2026-10-27 已按域拆文件**（`verify.mjs` 入口 + `gates/<域>.mjs` + `context.mjs`）——
+  见 [hygiene-round2](2026-10-27-hygiene-round2-feedback-truth.md) 与 [scripts/AGENTS](../../scripts/AGENTS.md)。
 - **真·重复收敛为单一正本**：① UI 侧栏导航 `expandGroup`/候选组名 → `scripts/lib/web-ui-nav.mjs`
   （client-load-smoke 与 hitl-answer 的逐字双份）——该件的**定位判据**（搜索兜底 / 不得从单次扫描判
   "会话不在" / 按 id 显式定位）后由 [会话定位 Note](2026-10-18-sidebar-session-location.md) 扩展；② research-workspace 组发现一行 →
@@ -31,7 +33,8 @@
   fail-soft 日志集中在 `src/client/research-status/useMemberActivity.ts`。父组件保留 roster 投影、
   state slot 和 effect 调用位置；lead/HITL、会话连续性、bundle 刷新及 JSX 未移动。
 - **内部目录仍受结构门禁约束**：`client-keys` 与 `cockpit-doc-registry` 递归扫描 client 源码；
-  构成正本列出私有 hook 与类型模块。门禁聚合入口仍是单文件 `verify.mjs`。
+  构成正本列出私有 hook 与类型模块。门禁聚合入口当时仍是单文件 `verify.mjs`（2026-10-27 拆域后
+  = 入口 + `gates/<域>.mjs`）。
 - **smoke 参考模型与浏览器断言分开**：会话候选和 bundle 文件事实集中在 smoke 私有
   `client-load-reference.mjs`；缺组 exit 2、expectedFace 取值点、刷新读、全部浏览器断言顺序仍归
   `client-load-smoke.mjs`。

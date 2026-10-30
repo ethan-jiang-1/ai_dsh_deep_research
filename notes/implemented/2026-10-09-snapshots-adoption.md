@@ -16,14 +16,14 @@
 （分类、保存边界与证据边界正本 = [snapshots/README.md](../../snapshots/README.md)）。
 
 - **场景声明实际驱动回放**：`snapshot.json` 是声明正本，由 [replay-scene](../../scripts/lib/replay-scene.mjs)
-  读取校验后交给 [snapshot-replay-smoke](../../scripts/smoke/snapshot-replay-smoke.mjs)。case 集必须与盘上
-  `presets/` 精确一致；缺字段、串角色、缺件、路径越界、symlink、重复 fixture 都在加载期 fail-loud。
+  读取校验后交给 [snapshot-replay-smoke](../../scripts/smoke/snapshot-replay-smoke.mjs)。case 集必须与**该场景角色面**精确一致
+  （`research-face` = 研究角色子集；方法编辑不属 run 生命周期，D37）；缺字段、串角色、缺件、路径越界、symlink、重复 fixture 都在加载期 fail-loud。
   旧场景声明 `snapshot.yml` 退役（同一事实不留两份），其 `retired-tools` 钉法与 `sessionFormat` 版本语义
   并入 manifest 字段与 snapshots/README。
 - **组装请求比对面补齐**（修 BUG-018 的"声明的覆盖 > 实际的覆盖"）：B 层由单点 `systemTextOf` 改为
   [replay-request](../../scripts/lib/replay-request.mjs) 的逐条判据——persona、**全部** `request/header`
-  （provider/model + 完整工具 schema，数组顺序保留）、三处 `user/message` 注入（工作区指令全文 / skill 目录 /
-  运行时上下文）；每条独立报告、独立可红。
+  （provider/model + 完整工具 schema，数组顺序保留）、四处 `user/message` 注入（工作区指令全文 / skill 目录 /
+  运行时上下文 / 时钟序列）；每条独立报告、独立可红。
 - **定向归一化只覆盖源机制确实挥发的三处身份**：persona 里 boot 注入的 GUI 回环端口与 harness checkout 路径、
   runtime sandbox 固定句内嵌的 workspaceRoot。其余 SHA、URL、路径、日期与全部正文原样比较；来源
   `metadata`/`id`/`digest` 与事件时间不进正文比较。

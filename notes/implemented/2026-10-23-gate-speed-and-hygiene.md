@@ -18,9 +18,10 @@
 - **两个默认 `readLog` 不合并，改为显式命名**：`emptyOnUnreadableLogReader`（空语料继续）与
   `skipUnreadableLogReader`（跳过文件）保留各自失败契约；真实壳都注入 zstd reader，默认只服务
   测试。强行合一 = 改失败语义且无实害证据。
-- **凭据前置收成一个 helper**：`scripts/lib/env.mjs` 的 `devHome` / `credentialsPresent` /
+- **凭据前置收成一个 helper**：`scripts/lib/env.mjs` 的 `credentialsPresent` /
   `requireCredentials`；8 个真模型档脚本 + `dev/record-role-fixture` 共用，缺席统一 exit 2。
-  `smoke-contract` 的 closed set 检测器认 `requireCredentials(` 调用，名单不变。
+  home 由调用方从 `DSH_HOME` 解析（先 source dev/env.sh）；`smoke-contract` 的 closed set
+  检测器认 `requireCredentials(` 调用，名单不变。
 - **run-context 单源机械化**：verify 门禁 `run-context-single-source`——`src/client` 的 tracked
   `.ts/.tsx` 非注释行出现 `_abandoned` 候选链即红；`src/lib/final-target.ts` 的终稿地址校验是
   另一件事，不在词法门禁范围。`finalCandidates` 删除，三位置发现只剩 `run-context`。

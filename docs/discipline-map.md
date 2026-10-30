@@ -80,7 +80,7 @@
 
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
-| Agent Note 生命周期（proposed/implemented/rejected + archived 冻结） | notes/ 五目录全在场：proposed/ · implemented/ · **[archived/](../notes/archived/README.md)**（冻结快照，2026-09-27 用户指令启用）· rejected/ · postmortem/；冻结纪律 = archived/README | 照搬 |
+| Agent Note 生命周期（proposed/implemented/rejected + archived 冻结） | notes/ 四目录全在场：proposed/ · implemented/ · **[archived/](../notes/archived/README.md)**（冻结快照，2026-09-27 用户指令启用；含事故复盘）· rejected/；`postmortem/` 已于 2026-10-30 退役（事故复盘冻结进 archived/）；冻结纪律 = archived/README | 照搬 |
 | Every new Note triggers a supersession check（同决定搜树：更新/互链/吸收后删） | AGENTS §notes 取代检查 bullet + notes/README §决定覆盖与取代检查（SDLC reference 01 吸纳） | 照搬 |
 | Alternatives considered mandatory（没记击败了什么 = 会重开讼） | guides/60 §4 骨架 + note-format 门禁（## 输掉的方案在场断言） | 照搬 |
 | Implemented Note 保持 current（路径/默认值随实现同 diff；逆转写新 Note 互链） | [notes/implemented/README.md](../notes/implemented/README.md) 头注 + [notes/README.md](../notes/README.md) 时态表；毕业 = 正文改写（guides/60 §4）。（根 AGENTS §notes 已压成指针，具体条文在子树——2026-10-19 复核修正） | 照搬 |
@@ -96,8 +96,8 @@ vendor 的事故复盘住在 **`docs/postmortem/`**（编号条目 + `README.md`
 
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
-| 事故复盘的进门判据（到达不该到达的地方）+ 编号条目 + 必须链接由事故催生的 guardrails | [notes/postmortem/README.md](../notes/postmortem/README.md)：同一判据、五节骨架（症状/为什么没早发现/根因/修复/新增防线）；现存条目 = [2026-09-26-roadmap-graduation-drift.md](../notes/postmortem/2026-09-26-roadmap-graduation-drift.md)（日期-slug）；产物落 `evaluation.md` 才闭环 | 带证据适配 |
-| 层的位置：`docs/postmortem/`（与"当前合同"同层，属文档 tier 表一行） | `notes/postmortem/`（开发记忆层） | 带证据适配（登记偏离：我们的 docs 只写 now，事故叙事归 notes 时间层；差异理由 = notes 是"为什么/发生过什么"的唯一时间层） |
+| 事故复盘的进门判据（到达不该到达的地方）+ 编号条目 + 必须链接由事故催生的 guardrails | 本仓不设独立目录：判据与五节骨架（症状/为什么没早发现/根因/修复/新增防线）= [notes/README §事故复盘](../notes/README.md)；事故原文冻结在 [notes/archived/](../notes/archived/README.md)（2026-10-30 层退役迁入）；产物落 `evaluation.md` / `triggers.md` 才闭环 | 带证据适配 |
+| 层的位置：`docs/postmortem/`（与"当前合同"同层，属文档 tier 表一行） | 事故原文冻结在 `notes/archived/`（历史证据层；2026-10-30 由 `notes/postmortem/` 退役迁入）；活跃判据 = [notes/README §事故复盘](../notes/README.md) | 带证据适配（登记偏离：docs 只写 now，事故叙事归冻结证据层） |
 | 双子语三件套 | 单语 | 不适用（同全仓单语登记——**重估触发**：转双语交付时） |
 
 ## 源 6：vendor .agents/skills/（开发 Skill——2026-09-25 吸纳，`.agents/skills/` 落地）
@@ -186,7 +186,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 | 根 AGENTS 的 “Editing these instructions” 节 | 根新增 §编辑这些指令（预算 manifest / 子树归属 / 门禁把守） | 照搬 |
 | `.agents/skills/` 命名带产品前缀（`dsh-`），少数通用技能无前缀 | 开发技能一律无前缀（与 vendor 的 `agent-experience`、`record-browser-gif` 同风格）；本仓没有产品前缀面，因为技能是仓内开发技能而非随包发布的用户技能 | 不适用（本仓无随包发布用户技能面；引入条件 = 本仓开始对外发布技能集时） |
 | **一段一行**（`verify-md-wrap` 门禁） | 本仓用硬折行 ~90 列，是同一规则（控制行宽以利审阅）的不同实现；上游一条一行是为了收窄 diff 噪声，本仓折行同样收窄横向滚动。没有 `verify-md-wrap` 门禁，靠惯例 | 带证据适配（同规则不同实现：无门禁、靠惯例；引入条件 = 折行漂移成审阅负担时补 wrap 门禁） |
-| `docs/defensive-patterns/`（0.2.1 起为五卷目录：general / package-surface / client-components / conversation-and-session / remote-and-api，双语对 + i18n sidecar；高风险缺陷模式供 review 逐条扫） | 主体 = vendor 的 TypeScript 代码模式清单；本仓 TS 面（`src/client/` 观察面 + `src/lib/` 折算）不另立第二份清单——**可迁移的部分已分居**：门禁与子进程陷阱 → [scripts/AGENTS.md](../scripts/AGENTS.md)，事故与教训 → notes/postmortem/ 与各毕业 Note | 不适用（不另建第二份清单，避免与上述 home 漂移；**重估触发**：本仓 TS 面扩大到需独立缺陷模式清单时） |
+| `docs/defensive-patterns/`（0.2.1 起为五卷目录：general / package-surface / client-components / conversation-and-session / remote-and-api，双语对 + i18n sidecar；高风险缺陷模式供 review 逐条扫） | 主体 = vendor 的 TypeScript 代码模式清单；本仓 TS 面（`src/client/` 观察面 + `src/lib/` 折算）不另立第二份清单——**可迁移的部分已分居**：门禁与子进程陷阱 → [scripts/AGENTS.md](../scripts/AGENTS.md)，事故与教训 → notes/archived/ 的事故复盘与各毕业 Note | 不适用（不另建第二份清单，避免与上述 home 漂移；**重估触发**：本仓 TS 面扩大到需独立缺陷模式清单时） |
 vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗漏"的误读）：
 
 | vendor 文件/目录 | 本仓处置 |
@@ -197,12 +197,12 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | `docs/i18n/` · `docs/user/` · `website/` | 不适用：单语、无对外产品文档站与站点投影 |
 | `snapshots/`（session 回放 fixture） | **已具备**：[snapshots/](../snapshots/README.md) 场景证据层——四角色场景 [场景证据层 snapshots/](../snapshots/README.md) 的 `snapshot.json` 由 [replay-scene](../scripts/lib/replay-scene.mjs) 消费并驱动 [snapshot-replay-smoke](../scripts/smoke/snapshot-replay-smoke.mjs)（keyless，禁 llm-deepseek + 插 vendor `dsh-llm-replay`）；纯函数夹具仍住 `tests/fixtures/`；判据见本表源 2 "Snapshot tests" 行 | 带证据适配 |
 | `benchmarks/` · `native/` · `python/` · `patches/` · `apps/` | 不适用：本仓无这些发布 lane 与运行时面 |
-| `CONTRIBUTING.md` · `SAFETY.md` · `SECURITY` · `THIRD_PARTY_NOTICES.md` · `BRAND_GUIDELINES.md` | 不适用：无外部贡献流、无运行时安全授权面、无捆绑第三方代码、无品牌资产 |
+| `CONTRIBUTING.md` · `SAFETY.md` · `SECURITY` · `THIRD_PARTY_NOTICES.md` · `BRAND_GUIDELINES.md` | **已具备（2026-10-25 开源发布）**：`CONTRIBUTING.md` / `SECURITY.md` / `.github/workflows/ci.yml`；`SAFETY.md`、`THIRD_PARTY_NOTICES.md`、`BRAND_GUIDELINES.md` 仍不适用（无运行时安全授权面、无捆绑第三方代码、无独立品牌资产政策）；重估触发 = 出现外部贡献分级审批或捆绑第三方代码时 |
 | `.editorconfig` · `.gitattributes` · lint（oxlint）· 重复代码检测（jscpd）· vitest 系列配置 · `lefthook.yml` | 前两件已具备（`repo-conventions` 门禁强制与 vendor 对齐）；后四件未引入（TS 面 = 一个包的 `src/`，测试栈 = node:test）；Markdown 纪律由门禁（md-utf8-newline / md-links / md-anchors / doc-budgets）承担，git 钩子 = `dev/hooks/pre-commit` |
-| `LICENSE` | **未决（非遗漏）**：本仓 `private: true` 未分发；决定与重启条件见 [许可证裁决](../notes/rejected/2026-09-24-license.md)，复活条件 = 对外分发前定许可证 |
+| `LICENSE` | **已定：MIT**（2026-10-25 开源发布；根与 pack 各一份 [LICENSE](../LICENSE)，两处 `package.json` 均 `license: MIT`；pack `private: false` 可发布）——决定与输掉的方案 = [开源发布 Note](../notes/implemented/2026-10-25-open-source-launch.md) |
 
 <a id="source-10"></a>
-## 源 10：_digested/test-strategy 语料（测试策略消化 11 篇，基线 = 本仓 pin）
+## 源 10：_digested/test-strategy 语料（测试策略消化 11 篇，基线 = 采纳时本仓 pin；现 pin 已前进，语料未同步，见 [external-materials](./external-materials.md)）
 
 > 语料身份与吸收落点 = [external-materials.md](external-materials.md)；对照总账正本 = test-strategy 采纳
 > Note（[notes/implemented/2026-10-04-test-strategy-adoption.md](../notes/implemented/2026-10-04-test-strategy-adoption.md)）。

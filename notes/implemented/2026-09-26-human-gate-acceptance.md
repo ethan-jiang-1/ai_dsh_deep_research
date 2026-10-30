@@ -67,8 +67,8 @@
 
 ## 环境状态
 
-- 队列空（parked，`（队列空——待用户取题）`）——本仓全部条目毕业，待用户取题；
-- run 通道 3081 活着（token 在 `dev/smoke-workspace/web.log`）；第 12 场 bundle 归档于
+- 队列已退役（D20）；原 parked 语义随队列移除——本篇的“队列空”是 2026-09-27 当轮状态；
+- 当时 run 通道 3081 活着（token 在 `runtime/smoke-workspace/web.log`）；第 12 场 bundle 归档于
   `research-workspace/archive/drt_dsh-release-watch/`（位置=状态，工作区根零活跃 bundle）；
 - 复查口常开（2 分钟亲验流程 = 61-run-playbook §1–6 的用户视角子集：真人答两张卡 +
   三句体验结论）。

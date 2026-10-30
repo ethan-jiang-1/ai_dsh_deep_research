@@ -27,13 +27,14 @@
 3. **vendor 现成三个搜索 provider**：`web-search-deepseek`（现用）/ `web-search-exa` /
    `web-search-perplexity`（后两个 vendor 自带，`apiKeyEnv` 缺省回落 `$EXA_API_KEY` /
    `$PERPLEXITY_API_KEY`，空即 unavailable）。
-4. pack 是"配置为主"（D18 单点例外 = 观察面 client）：**写一个自定义 provider 插件（TS 代码）
-   会破坏 pack 形态**；改 vendor 选择语义不可能（只读铁律）。
+4. pack 是"配置为主"（当前例外 = D18 观察面 client + D31 抓取回退 provider；本文写于 D31 前，
+   当时只记 D18）：**写一个自定义 provider 插件（TS 代码）会破坏 pack 形态**——该形式论证已被
+   D31 的有界例外部分推翻；**search 侧结论不变**：不做多引擎回退，seam 仍是单 provider 语义。
 
 ## 输掉的方案
 
 - **pack 内实现多引擎回退 provider**：否决——需要 pack 携带可执行 TS 代码，破坏"配置为主 +
-  D18 单点例外"的包形态；且 vendor 明文拒绝隐藏优先级链，绕过它等于在别人体系里埋暗行为。
+  D18 例外（当时唯一；D31 后为两处）"的包形态；且 vendor 明文拒绝隐藏优先级链，绕过它等于在别人体系里埋暗行为。
 - **改 vendor 的选择语义加 fallback**：否决——只读铁律；且那是对 DSH 全局用户的语义变更，
   不是本仓该做的决定（应上游提）。
 - **直接把 `searchProvider` 换成 exa/perplexity**：**留给用户**的可选路径——vendor 自带插件 +

@@ -10,7 +10,8 @@
 `clientHistoryWindowOf` 下沉、`readLog` 换 canonical、内闭包 rpc 硬收敛）与
 [verify-domain-regroup](2026-10-13-verify-domain-regroup.md)（`verify.mjs` 拆分重启条件））。
 三点已拍板：① Phase B 做 B1+B2 全量、真模型档五站点逐件复跑取证；② `verify.mjs` 不拆（重议条件登记
-[triggers](../../_backlog/triggers.md)）；③ hitl-answer 长函数本轮不动。执行纪律 = 每阶段独立 diff →
+[triggers](../../_backlog/triggers.md)；2026-10-27 已触发并拆域，见
+[hygiene-round2](2026-10-27-hygiene-round2-feedback-truth.md)）；③ hitl-answer 长函数本轮不动。执行纪律 = 每阶段独立 diff →
 验收判据全绿 → 报告（实际跑过 / 未跑分列）→ 用户确认 → 才进下一阶段。
 
 **Phase A（本 Note 记录的已交付部分）**：两处**逐字重复**收敛为中立小件，**参数保形、零行为变化**：
@@ -60,8 +61,8 @@ Phase A 验收判据（计划卡 §验收标准 A-1…A-5）逐条：
 
 - 只动 `scripts/`（两 core 改 import、两壳改调用、README lib 表两行、两个新 lib 件）；无门禁逻辑改动、
   无 pack 行为改动、无凭据面；Phase A 全程 keyless。
-- 未跑：Phase B1（web-harness 单一正本 + keyless 三站点）与 B2（真模型档五站点）、Phase D（触发登记）
-  ——按计划等用户逐阶段发令；B2 与主线真模型段排开跑。
+- Phase B1（web-harness 单一正本 + keyless 三站点）、B2（真模型档五站点）与 Phase D（触发登记）
+  均已交付，见 §顺带修复与两条实测发现；本页环境状态 = Phase A 交付态。
 
 ## 顺带修复与两条实测发现（处置工作的副产物，2026-10-16）
 

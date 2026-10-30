@@ -12,7 +12,7 @@
 2. **manifest peers-only 断言**（`dependencies === undefined`，读安装副本 manifest——npm pack 原样带入）：防依赖面回潮成嵌套闭包。
 3. **boot 页模块表行断言**（形态 B，用户 2026-10-09 拍板）：落 `preset-smoke.mjs` 真会话档（company postmortem 0002 guardrail 的正本之家），fetch boot 页断言本包 client 行 served——源码域/安装域同跑，安装域经 release-smoke ⑤ 委托覆盖，零新 boot。served ≠ loadable：真装载仍归 client-load-smoke（真浏览器）。探查核正：company 的 html.includes 是 fetch 级非真浏览器；卡上"postmortem 0003"引用实为 0002（0002 含 2026-09-22 修正案：inject 闭包 ≠ 可装载）。
 4. **进程卫生**（company `release-process.mjs` 移植收窄）：release-smoke `run()` 改有界进程组驱动（超时 → SIGTERM → 宽限 → SIGKILL → 确认退出，退出不确认 = fail-loud 保留现场含锁）+ mkdir 原子并发锁（在场 = exit 2）+ ⑤ 后端口释放验证；超时预算沿用 company 实证值（install 180s / 默认 120s / preset-smoke 外层 300s 兜底）。preset-smoke 的 rpc/boot 页 fetch 补 `AbortSignal.timeout(15s)`（值级不可证——触发它需构造接受连接不响应的服务，证的是 Node 语义非本仓逻辑）。
-5. **两条 L0 加宽**（writing-a-gate 全流程，反证见下）：新门禁 `client-half`（`exports ./client` ⟺ `dsh.client` 声明双向一致——vendor `validateClientHalvesDeclared()` 只 glob 树内 `packages/client/*`，仓外 pack 在其射程外，本地镜像同款规则）；`pack-bundle-compat` 加宽（`dshReleases` 含当前 vendor tag——升 pin 忘加列从 L2 前置到 L0 秒级红；tag 正本 = verify.mjs 的 `VENDOR_TAG` 常量，升 pin 与 vendor-pin 的 PIN 同 diff 改）。
+5. **两条 L0 加宽**（writing-a-gate 全流程，反证见下）：新门禁 `client-half`（`exports ./client` ⟺ `dsh.client` 声明双向一致——vendor `validateClientHalvesDeclared()` 只 glob 树内 `packages/client/*`，仓外 pack 在其射程外，本地镜像同款规则）；`pack-bundle-compat` 加宽（`dshReleases` 含当前 vendor tag——升 pin 忘加列从 L2 前置到 L0 秒级红；tag 正本 = `scripts/verify/context.mjs` 的 `VENDOR_TAG` 常量，升 pin 与 vendor-pin 的 PIN 同 diff 改）。
 
 连带交付（L2 红跑首跑咬出的 HEAD 真债，当场修复）：`src/client/index.ts` 对 `RESEARCH_TOOL_KEYS` 的 import 停在旧家 `ResearchToolCard.tsx`（fdc1421 迁正本进 `keys.ts` 时漏改 import）——pack 在 HEAD 干净态 build 即红（`tsc -b` TS2305），L0 门禁全绿掩护（L0 不构建 pack）。修复 = import 改指 `keys.ts`。这个断链本身就是本卡的立场证据：安装/装配面无断言时，client 半坏到 build 不过都无人拦。按 bugs 入口"当场修掉的缺陷不建档"记于此，不立 BUG 卡。
 
@@ -24,7 +24,7 @@
 - **形态 C**（真浏览器安装域化，验收表原措辞）：抓 apply 抛错砖屏，但装载面源码域 client-load-smoke 已守，安装域特有风险（装配/槽位错）fetch 已抓——成本高边际收益低。验收表措辞同 diff 修正为 fetch 断言（依据 = 0002 修正案，非迁就实现）。
 - **真注入级红证**（对每条历史断言真注入一次）：留证块/gates-smoke 静态对账够用；真注入义务留给新门禁自身反证（同 guard-red-record 卡的取舍）。
 - **照搬 company 的 built-CLI 前置检查与 rm-lib 重建**：本仓 tsx 源码基线（D10）+ prepack 覆盖构建发生，有意裁剪不变。
-- **动态读 submodule tag 做兼容矩阵判据**：gates-smoke 副本不拷 submodule 内容（gitlink），动态读在副本内必 fail-loud、案例无法断言注入报因——改 verify.mjs 内 `VENDOR_TAG` 常量（vendor-pin 的 PIN 同款形态，pin-agreement 对该复述对账）。
+- **动态读 submodule tag 做兼容矩阵判据**：gates-smoke 副本不拷 submodule 内容（gitlink），动态读在副本内必 fail-loud、案例无法断言注入报因——改 `verify/context.mjs` 内 `VENDOR_TAG` 常量（vendor-pin 的 PIN 同款形态，pin-agreement 对该复述对账）。
 
 ## 实际跑过的验证
 

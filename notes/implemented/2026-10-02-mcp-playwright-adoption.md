@@ -10,10 +10,11 @@
 ## 决定
 
 **采纳 `@deepseek-ai/dsh-mcp-client` + 本地 `@playwright/mcp`（stdio）作为研究通道的 SPA 证据
-兜底通道，形态 = scoped pilot**：`MCP_PLAYWRIGHT=1 bash dev/boot-run.sh` 挂（标记块幂等写进
-research profile 的 cordis.patch.yml，见 [boot-run.sh](../../dev/boot-run.sh) ①½）；缺省不挂，
-拆 = 不带 env 重跑。**常驻与否按 pilot 实测定**（token 面：~23 工具进全部角色会话 prompt；覆盖
-力：残余硬缺口 = 无静态出口的消费端 SPA 定价页与 JS 榜单，15 场归档 run 中 13 场命中）。
+兜底通道，形态 = 常驻**（2026-10-03 用户拍板；pilot 终版结论见下）：`bash dev/boot-run.sh`
+默认挂载（标记块幂等写进 research profile 的 cordis.patch.yml，见 [boot-run.sh](../../dev/boot-run.sh) ①½）；
+`MCP_PLAYWRIGHT=0` = 显式拆。版本钉 `@playwright/mcp@0.0.83`、`--headless`。采纳理由仍成立
+（token 面：~23 工具进全部角色会话 prompt；覆盖力：残余硬缺口 = 无静态出口的消费端 SPA 定价页与
+JS 榜单，15 场归档 run 中 13 场命中）。
 
 **裁决理由 = D22 对外交付约束**（本 Note 同日入台账）：pack 要交出去给人用——用户侧外部账号 /
 API key / 付费订阅一律不过关。本地 Playwright MCP 的 setup 面 = "机器有 Node"（npx 自动拉起）；
@@ -97,8 +98,8 @@ trade-off：该参数曾**打断 playwright 服务器进程的 `page.request.get
 
 ## 已知限制与延后工作
 
-- `@playwright/mcp@latest` 未钉版本（pilot 可接受；常驻时钉版本进标记块）；
-- headless 未配（缺省 headed——pilot 实测桌面窗口影响后按需加参数）；
+- 版本已钉 `@playwright/mcp@0.0.83`、`--headless`（boot-run 标记块；升 pin 随重验流程走）；
 - 浏览器二进制依赖 ms-playwright 缓存版本匹配（本仓已有 chromium-1228/1243；npx 拉的最新版
   若不匹配，`npx playwright install chromium` 一次性补齐——仍零账号）；
-- 交付面（scaffold 面向最终用户挂该通道）等 pilot 证明价值后再议（D16 同构：组合归 profile 层）。
+- 交付面（scaffold 面向最终用户挂该通道）仍未决：价值已由 pilot 证明，但 scaffold 不写 MCP 行
+  ——装态无此通道（D16 同构：组合归 profile 层）。

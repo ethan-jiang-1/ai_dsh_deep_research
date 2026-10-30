@@ -2,6 +2,10 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：四区管理块已于 2026-10-21 迁入主界面「方法库」tab（右栏只留摘要）；
+> 五态、回执三态、同钉面仍是现行判据。现行构成见
+> [design/40 §2.6–2.7](../../docs/design/40-research-cockpit.md)。
+
 出处 = [研究配置总卡](../../_backlog/_archived/settled_issues/2026-10-18-research-method-config-ux.md) +
 [子卡① 面板显式化](../../_backlog/_archived/settled_issues/2026-10-18-research-config-panel-explicitness.md) +
 [子卡② 打法清单与判型映射](../../_backlog/_archived/settled_issues/2026-10-18-research-method-preset-mapping.md)（2026-10-18

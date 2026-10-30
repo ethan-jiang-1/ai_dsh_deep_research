@@ -1,5 +1,8 @@
 # LLM 流 MALFORMED 风暴三小时——错误字符串当语义、干预史污染嫌疑面
 
+> 状态：implemented
+> 归档：2026-10-30
+
 > 2026-10-13，run 通道 lead 会话 6 连 `MALFORMED_RESPONSE: event precedes message_start` 团灭（用户真实研究 run + 三次 fixture 重录全灭）。根因：api.deepseek.com 的 CDN/边缘层在复用连接上把 SSE 响应体 brotli 压缩后**丢失全部响应头**（含 `content-encoding`），undici 不解压、vendor 解析器从压缩字节捡出内容片段先于 `message_start`——服务端/链路侧故障，与本仓代码无关；但本仓花了约三小时才定位，本卡复盘的是**为什么这么慢**。缺陷工作项 = [BUG-024](../../_backlog/_archived/fixed_bugs/BUG-024-direct-path-malformed-storm-recurrence.md)（修复落地 = socket 隔离）。
 
 ## 1 症状

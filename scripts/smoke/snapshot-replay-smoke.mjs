@@ -39,7 +39,7 @@ import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import { scrubbedEnv } from '../lib/env.mjs'
 import { authenticate, bootWeb } from '../lib/web-harness.mjs';
-import { presetRoles } from '../lib/roles.mjs';
+import { researchRoles } from '../lib/roles.mjs';
 import { loadReplayScene, discoverReplayFaces } from '../lib/replay-scene.mjs';
 import { researchWorkspaceGroup } from '../lib/session-log.mjs';
 import { compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds, sentinelInAssistantText, turnCompleted } from '../lib/replay-request.mjs';
@@ -65,11 +65,13 @@ const DSH_HOME = process.env.DSH_HOME ?? join(ROOT, 'runtime', 'harness-home');
 const SESSIONS = join(DSH_HOME, 'sessions');
 
 // manifest 是实际驱动的输入；完整角色集、全部判据与文件引用由 consumer 校验。
+// 研究面场景的角色集 = 研究角色（D2 四角色；方法编辑不属 run 生命周期，D37）——
+// 不能拿盘上全部 preset 做对账面，否则第 5 个 preset 会让 research-face 场景在加载期假红。
 // 发现 + 全部场景集声明先校验后跑（坏声明 = 前置缺席 = exit 2，不在半路上才爆）。
 let SCENES;
 try {
   const faces = discoverReplayFaces(REPLAY_ROOT, { only: FACE_ONLY });
-  SCENES = faces.map((face) => ({ face, scene: loadReplayScene(join(REPLAY_ROOT, face), presetRoles(ROOT), { only: ONLY }) }));
+  SCENES = faces.map((face) => ({ face, scene: loadReplayScene(join(REPLAY_ROOT, face), researchRoles(ROOT), { only: ONLY }) }));
 }
 catch (error) { console.error(`snapshot-replay-smoke: ${error.message}`); process.exit(2); }
 if (!process.env.DSH_HOME) {

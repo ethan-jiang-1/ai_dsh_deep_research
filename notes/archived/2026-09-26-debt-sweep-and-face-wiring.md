@@ -15,7 +15,7 @@
 | # | 欠账 | 处置 | 证据 |
 |---|---|---|---|
 | 1 | ▶ 指针指向已完成条目（生态研究） | 补完毕业三件：RFC 迁 `implemented/`（改写为事实体）+ roadmap 行删 + 已毕业补记；▶ 移交「研究类型覆盖」 | `proposal-scheduled` / `note-status` 绿 |
-| 2 | commit message 声称的改动不在 diff（我的失误） | 事故复盘 [postmortem](../postmortem/2026-09-26-roadmap-graduation-drift.md) + 新门禁 `queue-pointer-live`（▶ 引用的 RFC 必须在 `proposed/`） | 红证成立（改指已迁走 RFC → 红 → 还原绿） |
+| 2 | commit message 声称的改动不在 diff（我的失误） | 事故复盘 [postmortem](2026-09-26-roadmap-graduation-drift.md) + 新门禁 `queue-pointer-live`（▶ 引用的 RFC 必须在 `proposed/`） | 红证成立（改指已迁走 RFC → 红 → 还原绿） |
 | 3 | 部署工程无 Note | [deployment-engineering](../implemented/2026-09-26-deployment-engineering.md)（五条决定 + 四条输掉的方案） | 门禁全绿 |
 | 4 | preflight/scaffold 零证据 | `release-smoke` 扩 ④b **真部署链**（dry-run 不落盘 / 真铺种子 / preflight 六项机检）；顺带修 scaffold dry-run 的假红 | L2 ALL PASS |
 | 5 | discipline-map 三行失真（"无 ctx 调用面"） | 逐行重审：`Plugins, not loop changes` → 带证据适配；`Registrations are effects` → **照搬**（client 面真在 `scoped.effect` + `slots.register`）；包级约定补部署义务 | `align-ledger` 绿 |

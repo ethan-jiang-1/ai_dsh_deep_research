@@ -6,7 +6,7 @@ opened: 2026-10-13
 
 # BUG-024：直连路径再现「event precedes message_start」畸形风暴——大会话重试全灭（BUG-023 判据②触发条件成立）
 
-> 状态：已修（2026-10-13 用户裁定「对方不可能解决这个问题，只有我们来解决」→ socket 隔离上线 → 2026-10-15 盘点判据未满足转 等人拍板 → **用户拍板走 A** → 通道预载核实后三场大会话探针零致命 MALFORMED → 判据满足 → 同日归档）｜发现：2026-10-13 01:49（session-36c68186 复醒后 8 连败）｜关联：[BUG-023](BUG-023-provider-malformed-storm-exhausts-retry.md)（已修——按规矩复发引新卡，不重开旧卡）；根因实测定案与全程证据 = [postmortem 2026-10-13](../../../notes/postmortem/2026-10-13-llm-stream-malformed-storm.md)
+> 状态：已修（2026-10-13 用户裁定「对方不可能解决这个问题，只有我们来解决」→ socket 隔离上线 → 2026-10-15 盘点判据未满足转 等人拍板 → **用户拍板走 A** → 通道预载核实后三场大会话探针零致命 MALFORMED → 判据满足 → 同日归档）｜发现：2026-10-13 01:49（session-36c68186 复醒后 8 连败）｜关联：[BUG-023](BUG-023-provider-malformed-storm-exhausts-retry.md)（已修——按规矩复发引新卡，不重开旧卡）；根因实测定案与全程证据 = [postmortem 2026-10-13](../../../notes/archived/2026-10-13-llm-stream-malformed-storm.md)
 
 ## 症状
 
@@ -26,7 +26,7 @@ opened: 2026-10-13
 | `session-e5304d78`（同通道小会话，短流） | ~5 turns | **零失败**（glob×4/read×3/skill×1/ask×1 全正常推进） |
 | 带钥匙小探针 ×3 面 | 小 payload | 全通（含 /anthropic 面 SSE 事件序规整） |
 
-## 根因（已实测定案，2026-10-13；全程 = [postmortem](../../../notes/postmortem/2026-10-13-llm-stream-malformed-storm.md)）
+## 根因（已实测定案，2026-10-13；全程 = [postmortem](../../../notes/archived/2026-10-13-llm-stream-malformed-storm.md)）
 
 **上游边缘对长命复用连接的相位性故障**：进程连接池会进入「垃圾相位」——实拍 64 个健康响应 → 2 秒 → 23 个「200 + 零响应头 + 未声明 brotli 体」的硬切换；客户端 undici 不解压、vendor SSE 解析器从压缩字节捡出内容片段先于 `message_start` 即抛。**本卡原「大会话形状触发」假设已被受控实验证伪**（失败请求逐字节回放、并发/空闲/弃读/搜索混合全谱系 ~215 次独立尝试零复现）；真实相关量 = **连接复用暴露**（大会话 = 长命池 = 复用多；小会话/新连接零失败）。上游报告与字节证据 = `runtime/smoke-workspace/llm-stream-forensics-2026-10-13/`（含 UPSTREAM-REPORT.md）。
 

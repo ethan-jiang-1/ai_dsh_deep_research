@@ -2,6 +2,9 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：2026-09 策略对标研究；现行预算/深度/终止条件见 run 模板与
+> [guides/61](../../docs/guides/61-run-playbook.md)；文中“下一场真 run”已发生。判断材料保留。
+
 出处：[pipeline-polish 卡](../../_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md) 面①（最后
 待立卡面；研究型——产出判断材料非机制）。对标材料 = [reference/
 2026-10-03-strategy-benchmark-sources](../../_backlog/_archived/research/strategy-benchmark/2026-10-03-strategy-benchmark-sources.md)。
@@ -16,7 +19,8 @@
    压缩等价）。双源支撑，不采纳改轮次。
 2. **预算分配：地板缺失**——源仓有 per-topic 数值地板（wave0 12 源 / wave1 10 源 + 全局
    共享总量 CLI 计算 + 新源比例 0.5）；Anthropic 用 prompt 扩缩区间（与本仓深度→topic
-   映射同构）；本仓只有 agent 数扩缩，"每 topic 至少几张卡"无数值。**候选 A 入搁置池**
+   映射同构）；本仓只有 agent 数扩缩，"每 topic 至少几张卡"无数值。**候选 A 留在本 Note**——
+   搁置池已由 D20 退役，重议条件随本条。
    （数量地板参数化：先存量 19 场标定分布 + run 记账字段，实证后立门——floor 教训防假
    牙齿）；**候选 B 同 diff**（参数单点计算权威：脚本从深度档算地板、门禁只读显式参数、
    缺参 fail-loud——源仓 `missing_profile_parameter` 不得 hidden default 的模式）。
@@ -52,7 +56,7 @@
 ## 环境状态（Consequences）
 
 - **pipeline-polish 卡七面全部收口**：⑤②③④⑦① 毕业 + ⑥ 滚动（不立卡，随 run 喂证据）
-  ——第二阶段结构性工作清零；真正的验收场 = 下一场真 run（新 persona + 门L④ 首场：健康
+  ——第二阶段结构性工作清零；当时的验收场 = 下一场真 run（后续 run 已发生；新 persona + 门L④ 首场：健康
   遥测计数起算 + 面⑥ 升格素材 + 全部新判据活体检验）。
-- 候选 A 触发链第一步（存量标定）零成本——随下一场 run 的 journal 记账字段先行（搁置池
-  行为唯一正本）。
+- 候选 A 触发链第一步（存量标定）零成本——随后续 run 的 journal 记账字段先行（本 Note = 该候选
+  的 owner；原搁置池已由 D20 退役）。

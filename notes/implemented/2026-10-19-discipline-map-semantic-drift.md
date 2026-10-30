@@ -3,7 +3,7 @@
 > 状态：implemented
 
 归宿：`docs/discipline-map.md` 全表语义重校（9 行）→ 新增 L0 门禁 `discipline-state-vocab`；
-两笔遗留（`owns` 截断、语料基线漂移）各有明确归宿。卡 = `_backlog/issues/2026-10-19-discipline-map-semantic-drift.md`。
+两笔遗留（`owns` 截断、语料基线漂移）各有明确归宿。卡 = [_backlog/_archived/settled_issues/2026-10-19-discipline-map-semantic-drift.md](../../_backlog/_archived/settled_issues/2026-10-19-discipline-map-semantic-drift.md)。
 
 ## 决定
 

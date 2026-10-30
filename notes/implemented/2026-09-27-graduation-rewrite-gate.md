@@ -2,13 +2,13 @@
 
 > 状态：implemented
 
-2026-09-27 立项并交付。定位：roadmap-graduation-drift 事故（postmortem 在案）的近亲防护——
-队列指针半边已有 `queue-pointer-live` 把守，**正文改写**这半边（"只改路径不改正文 = 未来计划
-伪装成当前事实"）由此门禁补上机械面。
+2026-09-27 立项并交付。定位：roadmap-graduation-drift 事故（复盘冻结在 `archived/`）的近亲防护——
+队列指针半边（queue-pointer-live）已随 D20 队列退役；**正文改写**这半边（"只改路径不改正文 = 未来计划
+伪装成当前事实"）由本门禁保留机械面。
 
 ## 决定
 
-L0 门禁 `note-graduation-rewrite`（`scripts/verify.mjs` gates 数组 + `docs/evaluation.md` §L0
+L0 门禁 `note-graduation-rewrite`（`scripts/verify/gates/c-notes.mjs` + `docs/evaluation.md` §L0
 登记，`gate-ledger-sync` 对账）：
 
 - **扫描范围**：`notes/implemented/*.md`——README.md 非毕业件不扫；grandfather 注释件豁免
@@ -16,9 +16,10 @@ L0 门禁 `note-graduation-rewrite`（`scripts/verify.mjs` gates 数组 + `docs/
   ——静默变空的门禁等于不存在）；
 - **判据（窄词表，探针后钉版）**：① RFC 专有**裸**节名 `^##\s*验收\s*$`（implemented 骨架 =
   决定/输掉的方案/实际跑过的验证/环境状态）；② 行内计划体标记——`TODO` / `TBD` / `待办` /
-  `待实施` 四个强标记 + 四个含「将」的未来时态短语（**词表正本 = `scripts/verify.mjs` 本门禁块
-  的 markers 数组**，此处与 evaluation.md 不复制第二份清单，防自命中与漂移）；
-- **失败信息**：文件 + 行号 + 命中标记 + 修正入口（graduating-a-queue-item skill）四件齐。
+  `待实施` 四个强标记 + 四个含「将」的未来时态短语（**词表正本 = `scripts/verify/gates/c-notes.mjs`
+  本门禁块的 markers 数组**，此处与 evaluation.md 不复制第二份清单，防自命中与漂移）；
+- **失败信息**：文件 + 行号 + 命中标记 + 修正入口（[notes/AGENTS §毕业与命名](../../notes/AGENTS.md) +
+  [guides/60 §4](../../docs/guides/60-dev-loop.md)）四件齐。
 
 ## 输掉的方案
 

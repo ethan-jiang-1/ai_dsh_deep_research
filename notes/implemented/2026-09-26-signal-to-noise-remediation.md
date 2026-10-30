@@ -205,7 +205,7 @@ research/README 行 3 格对 4 列表头）；**门禁盲区同类**（fixture �
 **S1 追加发现（本轮最重的一条，性质 = 假称的防复发）**：commit `e152961` 的 message 声称
 "vendor-build.sh 固化 ⑦ host 半补建 ⑧ 前端壳重建 两步（防下次升 pin 重蹈）"，但
 `git show --stat e152961` 显示该 commit **根本没碰 `dev/vendor-build.sh`**，HEAD 版脚本只有 ①–⑥——
-即**声称的防线从未落地**（与 [毕业漂移复盘](../postmortem/2026-09-26-roadmap-graduation-drift.md)
+即**声称的防线从未落地**（与 [毕业漂移复盘](../archived/2026-09-26-roadmap-graduation-drift.md)
 同一失效类：message 凭意图写、不凭 diff 写）。后果是真实的：升 pin 后 `apps/web/dist` 会留上一代
 平台壳，Web UI 静默报 `settingsNumberField is not a function`（该 message 自己记了这次事故）。
 **已补齐并实测**：⑦ 判据 = "有 `lib/types/index.js` 而无 `lib/index.js`"（实测**当场命中
@@ -284,7 +284,8 @@ research/README 行 3 格对 4 列表头）；**门禁盲区同类**（fixture �
 - **分类/归档触发条件均未命中**：`notes/README.md` 自定的引入条件是 `implemented/` 超约 50 篇
   （现 40 篇）与"出现未来指导价值低的存量"。逐项抽查候选（三篇 marathon 复盘、l1-l2-green、
   foundation-remediation、m2-closing）——各自带独立的决定与输掉的方案，**没有该删的**。
-  故不引入 class 子层、不设 `archived/`，触发条件留在原处待命中。
+  故不引入 class 子层、不设 `archived/`，触发条件留在原处待命中（2026-10-30 更新：`archived/`
+  已于 2026-09-27 激活；class 层 2026-10-10 重估维持——见 [notes/README](../README.md) 差异表）。
 - **机制名可检索性抽查（按内容 grep）**：readiness / workspaceFiles / overlay-fresh / doc-budgets /
   queue-pointer-live / role-list-sync 六项均在 `implemented/` 命中（1–6 篇，首篇即相关 Note）。
 - **一处如实记档的弱点**：本轮清扫的众多子决定住在**一篇以整治命名的 Note** 里（文件名 =

@@ -7,7 +7,7 @@
 pack 的对外交付通道 = 一条命令导出自包含 tarball + 中文安装手册：
 
 ```sh
-node scripts/export-dist.mjs
+node scripts/dist/export-dist.mjs
 ```
 
 精神移植自参考仓 `ai_dsh_architect`（外部材料，其正本 = 该仓 `docs/distribution.md` 与
@@ -24,8 +24,8 @@ node scripts/export-dist.mjs
    生成物先例 = pack 的 `workspace/` 种子）。
 4. **版本一致性机械化**：新 L0 门禁 `dist-manual-version` 断言手册表头版本 = pack
    `package.json` 版本且表头指名当前 tarball 文件名——版本 bump 不重导出即红，迫使两者同 diff。
-   导出不是发布：不动版本、不发 registry（pack `private: true`，与搁置池许可证条目的
-   复活条件一致——真对外分发时再议）。
+   导出不是发布：不动版本、不发 registry；pack 已 `private: false`（2026-10-25 开源发布，
+   见 [open-source-launch](2026-10-25-open-source-launch.md)），npm 发布动作归维护者账号。
 
 ## 输掉的方案
 

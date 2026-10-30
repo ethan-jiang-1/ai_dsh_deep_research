@@ -5,7 +5,7 @@ description: Use when a bug cannot be reproduced on demand, is intermittent or e
 
 # 复现找现场（间歇性/环境依赖缺陷的方法论）
 
-范本事故 = [LLM 流 MALFORMED 风暴 postmortem](../../../notes/postmortem/2026-10-13-llm-stream-malformed-storm.md)；
+范本事故 = [LLM 流 MALFORMED 风暴 postmortem](../../../notes/archived/2026-10-13-llm-stream-malformed-storm.md)；
 可复用工具 = [scripts/probe/llm-stream-tee.cjs](../../../scripts/probe/llm-stream-tee.cjs)——§2 透明 fetch tee
 的 tracked 实现（预载只抄写字节、零行为路径改动；四件套证据包 `req/meta/sse/err`，
 凭据头脱敏；单跑 `--port` 做接入预检）。一次性脚手架仍住 `runtime/`，不当长期资产。

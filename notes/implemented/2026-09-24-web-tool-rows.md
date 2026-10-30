@@ -2,6 +2,10 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：2026-10-27 起 bundle 已有 `web` 替换行（DeepSeek Search API）与抓取
+> 回退 provider（D30/D31）；研究 preset 另带 `fetchTimeoutMs: 45000`。本文的“providers 不进
+> bundle / 照抄 base”是 2026-09-24 形态。
+
 > 原 RFC：`notes/proposed/2026-09-24-web-tool-rows.md`（已离场）。条目"web-tool-rows 实证" +
 > "preset-smoke 真跑"已闭环，毕业归档；历史全貌见 git。
 

@@ -2,6 +2,10 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：本篇是 2026-09-25 队列 / roadmap 时代的语料吸纳记录；
+> `entry-budget` 现名 `doc-budgets`、LICENSE 已定 MIT（2026-10-25）、keyless 快照已交付、
+> `archived/` 已设（2026-09-27）。当时“未落地 / 未决”项均已有后续 owner；语料吸收结论仍有效。
+
 > 来源：`/Users/bowhead/deepseek-harness/_agent_ready_development/`（用户 2026-09-25 指令：
 > 我们是开发 DSH 插件的仓库，细节要与 DH 官方研发思路 align）。通读范围 = 语料 **37 篇 .md
 > 全部**（root/三个主题与图示 README、sdlc-tutorial 5 篇、sdlc-reference 11 篇、repo-harness
@@ -113,7 +117,7 @@
 - 改动文件：`AGENTS.md`（布局 + notes 节，仍在 entry-budget 内）、`docs/00-index.md`
   （文档地图 + 术语映射 + 外部研究材料登记）、`docs/discipline-map.md`（源 6–8 + 载体分工）、
   `docs/guides/60-dev-loop.md`（§2 三条纪律）、`notes/README.md`（时态地图重写）、
-  `notes/proposed/README.md`（空目录常态）、`notes/{rejected,postmortem}/README.md`（时态行）、
+  `notes/proposed/README.md`（空目录常态）、`notes/rejected/README.md` 与 `notes/README §事故复盘`（时态规则）、
   `notes/research/*`（四个状态行）、`scripts/verify.mjs`（三条门禁）。
 - 未落地（登记为后续触发）：`.agents/notes/` 路径对齐、`implemented/` class 分层、`archived/`
   冻结树——各自引入条件写在 notes/README 差异表。
@@ -138,9 +142,9 @@
 
 **二轮更正的事实错误**：一轮源 5 曾写"vendor 与本仓 postmortem 均为空目录"——错在只查了
 `.agents/notes/postmortem/`（不存在）。vendor 的事故复盘住在 **`docs/postmortem/`**（10 篇
-编号条目 + README 判据）。已更正为带**层差异**的三态行（vendor 放 docs 层 / 本仓放 notes
-时间层），并按 vendor 判据收紧 [notes/postmortem/README.md](../../notes/postmortem/README.md)
-的进门条件（"bug 到达了不该到达的地方"）。
+编号条目 + README 判据）。已更正为带**层差异**的三态行（vendor 放 docs 层 / 本仓事故复盘冻结在 `archived/`），
+并按 vendor 判据收紧 [notes/README §事故复盘](../../notes/README.md) 的进门条件
+（"bug 到达了不该到达的地方"）。
 
 **二轮明确不采纳（带理由）**：
 
@@ -236,5 +240,5 @@ gitignored 运行区，可重跑复现），聚合成 **80 个唯一源面**。
 | 门禁防空/收窄语料 | **已落地**：scripts/AGENTS.md 新增「语料面纪律」+ writing-a-gate 同步（防空集、测边界形态） | — |
 | 包 README 义务节 | **已落地**：pack README 新增「模型体验」（persona/skill/工具行/手册注入的可见面与代价）与「已知限制与延后工作」四节 | — |
 | 技能形式（guidance 声明/互链） | **已落地**：四个技能首段加「guidance 不是 checklist」+ 相关技能互链 | — |
-| 复盘三十秒摘要 | **已落地**：notes/postmortem/README 起手节（一至三句：什么坏了/影响谁/根因） | — |
-| keyless 录制快照面 | **未落地（进搁置池）**：模型/用户可见输出的 keyless 回归证据仍靠真挂载冒烟与真模型档；引入条件 = 需要"输出快照"级回归时 | 见 roadmap 搁置池 |
+| 复盘三十秒摘要 | **已落地**：notes/README §事故复盘 起手节（一至三句：什么坏了/影响谁/根因） | — |
+| keyless 录制快照面 | **已交付**（2026-09-27；快照见 `notes/archived/2026-09-24-keyless-snapshot-lane.md`） | — |

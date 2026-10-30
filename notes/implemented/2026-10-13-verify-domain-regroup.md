@@ -2,6 +2,11 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：本页的“单文件聚合”决定已于 2026-10-27 被按域拆文件取代
+> （`verify.mjs` 仅入口 + `gates/<域>.mjs` 六域 + `context.mjs`）；本页只作“当时为何不拆”的记录。
+> 现行形态见 [scripts/AGENTS](../../scripts/AGENTS.md) 与
+> [hygiene-round2](2026-10-27-hygiene-round2-feedback-truth.md)。
+
 ## 决定
 
 `scripts/verify/verify.mjs`（L0 唯一聚合入口，合同见 [scripts/AGENTS](../../scripts/AGENTS.md)）保持

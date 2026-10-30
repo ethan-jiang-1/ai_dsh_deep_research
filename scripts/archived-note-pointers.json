@@ -205,6 +205,61 @@
       "source": ".agents/skills/bumping-vendor-pin/SKILL.md",
       "target": "notes/archived/2026-09-30-vendor-pin-bump-020rc2.md",
       "reason": "两次实操历史轮次出处（现行流程 owner = 本技能）"
+    },
+    {
+      "source": "notes/implemented/2026-09-24-observability-gui.md",
+      "target": "notes/archived/2026-09-25-observability-completion.md",
+      "reason": "驾驶舱原初 RFC 指向余项交付快照：B-full/工具卡已由后续轮次交付（现行构成 = design/40）"
+    },
+    {
+      "source": ".agents/skills/reproducing-a-failure/SKILL.md",
+      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
+      "reason": "postmortem 层退役后的范本事故快照（判据与五节骨架 = notes/README §事故复盘）"
+    },
+    {
+      "source": "_backlog/triggers.md",
+      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
+      "reason": "上游流畸形复现条件的历史根因与取证快照（postmortem 层退役迁入）"
+    },
+    {
+      "source": "_backlog/_archived/research/2026-10-18-method-config-ux-ab.md",
+      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
+      "reason": "同族上游流环境事件的历史快照（postmortem 层退役迁入）"
+    },
+    {
+      "source": "_backlog/_archived/fixed_bugs/BUG-028-llm-socket-isolation-silent-fallback.md",
+      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
+      "reason": "socket 隔离缓解的依据与 soak 结论快照（postmortem 层退役迁入）"
+    },
+    {
+      "source": "_backlog/_archived/fixed_bugs/BUG-024-direct-path-malformed-storm-recurrence.md",
+      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
+      "reason": "根因实测定案与全程证据快照（postmortem 层退役迁入）"
+    },
+    {
+      "source": "_backlog/_archived/fixed_bugs/BUG-022-provider-stream-malformed-turn-kill.md",
+      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
+      "reason": "受控实验与字节取证快照（postmortem 层退役迁入）"
+    },
+    {
+      "source": "dev/README.md",
+      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
+      "reason": "socket 隔离预载的上游相位性故障出处（postmortem 层退役迁入）"
+    },
+    {
+      "source": "notes/implemented/2026-10-11-provider-malformed-response-retry.md",
+      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
+      "reason": "根因改判与 BUG-022 归档的历史出处（postmortem 层退役迁入）"
+    },
+    {
+      "source": "notes/implemented/2026-10-16-replay-turn-settled-predicate.md",
+      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
+      "reason": "录制器收紧的落地件①历史出处（postmortem 层退役迁入）"
+    },
+    {
+      "source": "notes/implemented/2026-09-26-signal-to-noise-remediation.md",
+      "target": "notes/archived/2026-09-26-roadmap-graduation-drift.md",
+      "reason": "毕业漂移复盘的历史出处（postmortem 层退役迁入）"
     }
   ]
 }

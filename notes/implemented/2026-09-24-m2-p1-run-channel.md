@@ -4,7 +4,7 @@
 >
 > 后继：2026-10-20 起 agent 启动首动作 = [run-driver 入口](2026-10-20-run-driver-entry.md)（本节端口/入口已同步为 3083 / run-driver）。
 
-归宿：roadmap 队列行已销账（▶ 移交「M2 铺垫 P2」）；定案登记 00-index **D16**。依据：market 粗扫 §2/§4（agent-team-profile 候选基础）+ release-smoke 实证配方（pack → web 模板 profile → `plugin add file:`）+ design/10 §3（通道选型）+ m2-run-dashboard RFC L0（观察面）+ m2-run-mechanics RFC（HITL 两点流程出处）。以下正文为 proposed 原貌（定案依据），毕业记录在文末。
+归宿：roadmap 队列行已销账（▶ 移交「M2 铺垫 P2」）；定案登记 00-index **D16**。依据：market 粗扫 §2/§4（agent-team-profile 候选基础）+ release-smoke 实证配方（pack → web 模板 profile → `plugin add file:`）+ design/10 §3（通道选型）+ m2-run-dashboard RFC L0（观察面）+ m2-run-mechanics RFC（HITL 两点流程出处）。以下正文除已同步的入口/端口外为 proposed 原貌（定案依据），毕业记录在文末。
 
 ## 问题
 
@@ -63,7 +63,7 @@ M2 的完成定义 = 一次完整 run（L4 全量四判据），但 **run 的启
 
 四件内容，全部有出处零发明：
 
-1. **开哪个会话**：web GUI（research profile，boot 脚本起的 3081）→ lead 会话
+1. **开哪个会话**：web GUI（research profile，boot 脚本起的 3083）→ lead 会话
    （roster default: lead，cwd = research-workspace/——run-mechanics §方案 1 约定；
    web 会话 cwd 设置面实施时核实，P2 真开会话时定稿）；
 2. **说什么**：提出研究问题——research-brief skill 接住走 HITL1 三问（研究类型 /

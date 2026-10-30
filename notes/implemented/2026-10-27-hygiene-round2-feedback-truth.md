@@ -52,8 +52,9 @@
   回执）+ `styles.ts`（样式常量单列，否则视图件要反向依赖页签体）；状态页的流程轨道（取色 /
   步态符号 / 列位 / 回边几何）切成 `research-status/TrackRail.tsx`，输入收窄成
   anchors / steps / faceVersions 三样。两处都是**纯搬家**：判据、文案、交互逐字未改，验证 =
-  client-load-smoke 对应断言全绿。配置页签仍是单件——它的 `COMPACT=false` 回滚分支（约 350 行
-  不可达 JSX）属 D25 决定，删分支才谈得上拆，已登记为可观察触发条件。
+  client-load-smoke 对应断言全绿。配置页签的回滚面已抽成 `research-config/LegacyManagementPane.tsx`
+  （块 69 行 / 文件 112 行）：页签体 601 → 546，保留不删（D25）；此前“约 350 行死分支”的描述已被
+  [scoring-remediation](2026-10-28-scoring-remediation.md) 的实测更正。
 - **门禁按域拆文件（verify.mjs 1848 行 → 入口 61 行 + 6 个域模块）**。47 道门禁单文件一格到底，
   改一道要读全文件或盲改；而改门禁本来就是 `--only=<名>` 的窄面。拆法：`context.mjs`（路径常量 /
   gates 名单 / gitOnce / trackedFiles / fail-note 收集器）+ `gates/{a-docs,b-pack,c-notes,d-vendor,

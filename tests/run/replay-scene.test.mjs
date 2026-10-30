@@ -9,7 +9,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, realpathSync, symlinkSyn
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { presetRoles } from '../../scripts/lib/roles.mjs';
+import { presetRoles, researchRoles } from '../../scripts/lib/roles.mjs';
 import { loadReplayScene, discoverReplayFaces } from '../../scripts/lib/replay-scene.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -60,6 +60,13 @@ test('loads the complete role scene as absolute files with all required judges',
     assert.deepEqual(c.judges, JUDGES);
     assert.deepEqual(c.source, SOURCE);
   }
+});
+
+test('research-face 场景覆盖研究角色面（方法编辑不属 run 生命周期）', () => {
+  const research = researchRoles(ROOT);
+  assert.ok(research.length > 0 && !research.includes('method-editor'));
+  const loaded = loadReplayScene(join(ROOT, 'snapshots', 'replay', 'research-face'), research);
+  assert.deepEqual(loaded.cases.map((c) => c.id).sort(), research);
 });
 
 test('validates the whole role roster before ONLY selects one case', (t) => {

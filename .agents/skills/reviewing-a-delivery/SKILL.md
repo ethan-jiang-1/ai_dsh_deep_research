@@ -110,10 +110,13 @@ description: Use when preparing delivery, when a cross-surface diff (pack, docs,
     `note-status` + `proposed-pointer-live`。查：本次实现的条目，其 RFC 是否同 diff 移动
     并改写（只改路径不改正文 = 未来计划伪装成当前事实）。
 
-**本仓特有的两条（参考卷无直接对应，保留）**
+**本仓特有的三条（参考卷无直接对应，保留）**
 
 - **生成物链**：pack 源 → overlay → 安装镜像 → 工作区种子，链条上每一环同步了吗
   （生成物是重生成而非手改；机械侧 = `overlay-fresh` / `pack-workspace-fresh`）；
+- **旧 Note 一致性**：本次决定是否让同机制旧 Note 的现在时结论变假？被取代者是否同 diff 加了
+  `> 历史注记` 与互链（规则 = [notes/README §主动清理](../../../notes/README.md)）？
+  只改新篇不改旧篇 = 旧结论继续打架。
 - **live 文档**：计数、时变状态、变更叙事有没有混进"只写 now"的层
   （机械侧 = `count-free` / `doc-now-only`；本轮实证：`discipline-map` 写错 fixtures
   组数、`evaluation.md` 声称未跑过的形态数——**计数是陈旧的高发处**）。

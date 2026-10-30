@@ -84,6 +84,9 @@
 151（解析/模型 vs 渲染薄壳），也不再 >600。上一版把"计划里的 ≤2"与"生产模块 ≤600"混着写、又只扫了
 部分目录，才得出"只剩 3 个"。
 
+> 2026-10-30 现状补记：`MethodLibraryView.tsx` 已增至 1282 行（方法库 A′ 工作台），上表“均在 600 内”
+> 不再成立；A- 代码层次基线失效，重议入口 = [_backlog/issues/2026-10-29-method-library-workbench-redesign.md](../../_backlog/issues/2026-10-29-method-library-workbench-redesign.md)。
+
 ### Phase D（测试资产）
 
 - **覆盖边界契约**（`tests/contracts/test-surface.test.mjs`）：`scripts/lib` 54 个模块要么被至少

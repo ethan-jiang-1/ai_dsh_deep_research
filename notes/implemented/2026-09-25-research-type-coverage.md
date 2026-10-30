@@ -27,6 +27,7 @@
 
 - **类型固化**：首场是 exploratory_map，本轮新增 **claim_verification** 实测（"类型 ≠ 首场"成立）；
   HITL1 三型里"快速事实核查"仍未实战（最薄路径，未单独跑，随真人档条目一并验）。
+  2026-10-03/05 起 quick_factual 已实战（`drt_cn-llm-pricing-2026-10`、`drt_claude-context-window`）。
 - **两点纪律与中断恢复**：两场各**恰好 2 次** `ask_user_question`（HITL1 + HITL2）、单 turn 静默
   98/80 步；另做**判据④ 实测**——新开 lead 会话只给"继续 `<slug>`"，纯凭 bundle 文件答出研究问题/
   类型/口径、当前状态、critic 结论、缺口与下一步（它还主动指出 `audit.md` 是过期快照）。

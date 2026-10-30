@@ -2,6 +2,9 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：断代口径已由 [D33](../../docs/decisions.md#d33) 改为 `schema` 整数契约；
+> mtime 只服务无 `run.md` 的旧场。工具现址 = `scripts/run-gates/schema-scan.mjs`。断代与门禁理由仍有效。
+
 ## 决定
 
 - **schema 保真度扫描工具化**：`scripts/schema-scan.mjs`（keyless 纯 fs，`scanBundle`/`scanAll` 可导入）。断言核心 schema = NODES.md 八节点表「输出（写）」列全行（question.md 含 §Decisions / topics / leads / findings / review 含 readiness / final.md 在 run 根 / evidence/ 非空 / final/final.md 位置漂移形态）；交付尾件（journal / final/v1.md / audit.md / node-gate.md）分档报告不计违约。**断代定红**：交付日（final.md mtime，回退 final/v1.md → question.md）≥ 契约日 2026-09-29（3236e22 NODES.md 落地）且违约 → exit 1；契约前期违约如实报告不计红（run bundle 是交付记录，不改历史）；无日期可断按契约期从严（可定日期而不定 = 逃逸口）。journal 未来日期 = INFO 异常旗（模型时间感不可信），不计违约只显性化。默认扫 archive 全量；点名目录扫指定 bundle（交付时刻用）。定位 = 验收档命令（同 node-gate / evidence-audit 通道），不进 L0。

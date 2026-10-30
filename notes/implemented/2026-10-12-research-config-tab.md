@@ -2,6 +2,11 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：2026-10-21 起管理块迁入主界面「方法库」tab，右栏只留摘要面
+> （本次研究 + 换一条 + 方法库入口）；2026-10-28/29 起方法库写入扩为 Method Editor 经窄 host 工具。
+> 本文的「四区面板 + 写路径唯一 = Lead」是 2026-10-12/10-18 快照；现行构成见
+> [design/40 §2.6–2.7](../../docs/design/40-research-cockpit.md)。
+
 出处 = [长期管理卡](../../_backlog/_archived/settled_issues/2026-10-12-research-method-profile-management.md) 期 1
 （用户 2026-10-12 拍板「做期 1：显示 + 一键指令」）；架构依据 = 00-index **D25**（D7/D18 有界
 扩展）；详细 UX 推敲（Modal 详情 / 分区编辑 / 四字段库格式）= [1.5 卡](../../_backlog/_archived/settled_issues/2026-10-12-research-preference-detail-ux.md)

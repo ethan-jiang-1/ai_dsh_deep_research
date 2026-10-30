@@ -6,7 +6,7 @@
 
 ## 决定
 
-- **第二机走查以安装手册为准，不要求先有模型 key。** 安装/启动可达即可用 `--install-only` 验安装形状；研究就绪另要求 key。手册补此说明，并把团队层说明改为按 profile 的 app-boot 解析。
+- **第二机走查以安装手册为准，不要求先有模型 key。** 安装/启动可达即可用 `--install-only` 验安装形状；研究就绪另要求 key。手册补此说明，并把团队层说明改为按安装锚（`--install-anchor` / PATH `dsh`）解析（[deploy-truth](2026-10-26-deploy-truth-and-isolation.md)）。
 - **冷 store 离线只承诺 pack tarball 可装，不承诺整条 scaffold 链零前置。** 团队层需预置或缓存，且 pnpm registry metadata/cache 必须保留；只预装 node_modules 不够。手册与 guides/65 写明 `ERR_PNPM_NO_OFFLINE_META` 边界。
 - **下一版迁移必须防降级覆盖。** 工作区记录版本高于 pack 种子时，`--check` 报“记录比 pack 新”，`--upgrade` 拒绝；只有显式 `--force` 才降级。`scaffold-smoke` 增反证段。
 

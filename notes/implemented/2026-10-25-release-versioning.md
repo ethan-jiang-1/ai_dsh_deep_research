@@ -19,8 +19,8 @@
   npm publish → 核对 `npm view`。
 - **`release-check` 只读检查**：root = pack；HEAD 的 tag 若存在必须 = version 且类型为 tag
   （annotated）；未打 tag 是合法的发布前态。它补上 CI 不能假定的 tag 面。
-- **当前对齐**：root/pack/manual 均为 `0.1.2`；tag `0.1.2` 指向发布 commit。历史 tag `0.0.1`、
-  `0.1.0` 是规则建立前的标记，不作为发布版本使用；不追改已公开历史。
+- **当前对齐**：root/pack/manual 均为 `0.1.3`；tag `0.1.2` 指向上一发布 commit，`0.1.3` 尚未打 tag
+  （发布前态；打 tag 属维护者发布动作）。历史 tag `0.0.1`、`0.1.0` 是规则建立前的标记，不作为发布版本使用；不追改已公开历史。
 - **发布后 tag 不可移动**；发布前发现打错可删/重打并记录。版本 bump 与 `_dist` 重导出必须
   同 diff；tag 不替代版本门禁。
 

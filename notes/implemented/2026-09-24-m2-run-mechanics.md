@@ -2,6 +2,9 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：2026-09-24 的四角色运行机制 RFC。现行节点契约 = [NODES](../../research-workspace/NODES.md)、
+> 操作 = [guides/61](../../docs/guides/61-run-playbook.md)；角色已扩为 5 preset（D37，方法编辑非研究角色）。
+
 2026-09-24 · 归宿：roadmap ▶「首个完整研究 run」 依据：codex harness 考古（notes/implemented/2026-09-24-deep-research-harness-analysis.md） + 本轮源头亲读（RUN.md / BUNDLE_ENTRY / rb_plan 实物）+ evaluation.md L4 全量判据。
 
 ## 依赖与落地次序

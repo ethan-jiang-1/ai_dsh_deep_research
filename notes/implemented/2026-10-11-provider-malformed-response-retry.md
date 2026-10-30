@@ -2,6 +2,10 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：2026-10-13 复盘把根因改判为上游 CDN/链路（Brotli 丢响应头），
+> BUG-022 已归档；本重试配置保留为第二道缓解。见
+> [事故复盘快照](../archived/2026-10-13-llm-stream-malformed-storm.md)。
+
 ## 决定
 
 在 pack 的 bundle 层（`packages/deep-research-pack/cordis.patch.yml`）**按 id 替换** base 的
@@ -14,8 +18,8 @@
 故一次畸形流事件即终结回合、**不重试**。姊妹错误 `TRANSPORT` 在集内，故选中它会有重试；实测
 3 天内 TRANSPORT 终局 2 次 vs MALFORMED_RESPONSE 终局 44 次，与机制一致。
 
-这是**本地缓解**，不是修复：上游事件顺序违约（`event precedes message_start`）发生在 vendor 只读层
-（BUG-022）。要缓解的"症状"不是单次失败、而是 **run 停摆**——一轮回合被终结 → lead 不动 → 一个 wave
+这是**本地缓解**，不是修复：上游事件顺序违约（`event precedes message_start`）当时归因于 vendor 只读层
+（BUG-022；2026-10-13 已改判上游链路，BUG-022 归档）。要缓解的"症状"不是单次失败、而是 **run 停摆**——一轮回合被终结 → lead 不动 → 一个 wave
 的产出可能全废（实测：队员集体失效、evidence 5 卡在盘而 findings 未写）。重试把"一次畸形 = 一次
 停摆"变成"一次畸形 = 最多六次尝试"。
 

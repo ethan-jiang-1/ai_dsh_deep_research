@@ -1,6 +1,6 @@
 {
   "_note": "对齐台账（机读正本）：vendor/dsh（钉 @ 687f282e8625c6b8d11ff58211a90524be2e4317（0.2.1-rc.2 轮））的 development-harness 源面逐项结论。门禁 align-ledger 强制三件事：① 每条 source 在 vendor/dsh 里真实存在（换 pin 后文件移位/删除即红——这就是重审触发器）；② verdict=adopted/adapted 的每处 landing 在仓内真实存在；③ verdict=na 必须给 reason。人读视图 = docs/discipline-map.md 源 1–9。 覆盖规则：结构面逐条登记——vendor 每个 AGENTS.md（不含 snapshots/session 夹具与 node_modules 第三方依赖文件——fresh clone 的 submodule 无依赖树，登记它 = 机器态依赖）、每个开发技能 SKILL.md、顶层 docs/*.md 与 docs/cookbook/*.md（非 .zh.md 副本）、以及根文件（package.json/.editorconfig/.gitattributes/lefthook.yml/vendor/README.md/snapshots/AGENTS.md/.github/AGENTS.md/packages/README.md/scripts/run-gates.ts/scripts/doc-budgets.manifest.json）；双语 .zh.md 副本按类登记（不携带独立约定，配对机制见 docs/i18n/README.md 一条）。门禁 align-ledger 强制该覆盖（缺登记即红）。 landing 粒度 = 该约定的本仓载体（可为类级：例如各 cookbook 篇 → guides/62 + docs/AGENTS.md；技能形式约定 → .agents/skills/ + dev-skill-format 门禁）。",
-  "_ownsTruncation": "ownsTruncated: true 标记 = 该条 owns 在早期建账时被硬截断在 139–140 字符，末尾常是半截词（如 \"thr\"、\"linkin\"）；完整原文仓内不存在第二份，无法补回。需要该约定的当前措辞时**读 vendor/dsh/<source> 原文**，不要把 owns 字符串当完整依据。（2026-10-19 处置：不放宽字段长度——放宽只保今后，救不回已丢的；改存引用锚点。裁决见 _backlog/issues/2026-10-19-discipline-map-semantic-drift.md §四项裁决 3。）",
+  "_ownsTruncation": "ownsTruncated: true 标记 = 该条 owns 在早期建账时被硬截断在 139–140 字符，末尾常是半截词（如 \"thr\"、\"linkin\"）；完整原文仓内不存在第二份，无法补回。需要该约定的当前措辞时**读 vendor/dsh/<source> 原文**，不要把 owns 字符串当完整依据。（2026-10-19 处置：不放宽字段长度——放宽只保今后，救不回已丢的；改存引用锚点。裁决见 _backlog/_archived/settled_issues/2026-10-19-discipline-map-semantic-drift.md §四项裁决 3。）",
   "_evidence": "逐条原始行（810 条）在 runtime/smoke-workspace/inventory/{root-packaging,subtree-agents,dev-skills,docs-standards,packages-evidence}.json（gitignored 运行区，可重跑 workflow vendor-inventory-to-files 复现）",
   "sources": [
     {
@@ -669,7 +669,7 @@
       "verdict": "adapted",
       "landing": [
         "scripts/AGENTS.md",
-        "notes/postmortem/README.md"
+        "notes/README.md"
       ]
     },
     {
@@ -739,7 +739,7 @@
       "owns": "事故复盘的对象是「bug 到达了它不该到达的地方」（真实用户、已合并的 PR、一次发布），有趣的不是那一行修复，而是为什么我们的流程放它过去。",
       "verdict": "adapted",
       "landing": [
-        "notes/postmortem/README.md"
+        "notes/README.md"
       ]
     },
     {

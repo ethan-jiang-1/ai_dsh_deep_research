@@ -2,12 +2,17 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：本页是驾驶舱 Stage 0–3 的 RFC 毕业记录；“未完成部分”（步骤条 /
+> 矩阵 / review 渐进 / 工具卡）已由 [observability-completion](../archived/2026-09-25-observability-completion.md)
+> 等后续交付。现行构成 = [design/40](../../docs/design/40-research-cockpit.md)；
+> 本页因 `client-keys` 门禁红证出处仍留活跃（见 design/40 §7）。
+
 归宿：roadmap §队列「观察面 GUI 化」（2026-09-25 马拉松条目 3，已毕业离队）；
 真人 HITL run 验收**延期给队列条目「研究类型覆盖」**（见文末互指）。
 
 ## 决定
 
-按 RFC 两段三步交付观察面 client 面（**D18 = D7 的单点例外**：pack 获准 `src/client/` 源 +
+按 RFC 两段三步交付观察面 client 面（**D18 = D7 的第一处有界例外**：pack 获准 `src/client/` 源 +
 双半 tsdown 产物 `lib/client.js`，构建产物只此一件，用途限定研究观察/调试）：
 右栏「研究状态」页签（journal 流 + HITL 挂起显形），构建链/接线/折算/冒烟全链落地。
 

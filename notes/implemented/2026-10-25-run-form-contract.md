@@ -10,7 +10,7 @@
 - **运行形态 = A 为主 + B 作为可安装门槛，C 不做。** A = 独立 `DSH_HOME` + profile + workspace；B = pack 目录在构建后可 `dsh plugin add file:<目录>`（profile 记绝对路径，移动即断链）；C = `cp -r` 工作树，会带凭据/会话/run 数据，改由 M3 移交（源码 `export-handoff` / 插件 `export-dist` / run bundle 单独）。
 - **按 per-user 分发 + bundle 移交设计。** 同机多实例用 `DSH_DEV_HOME`、`DSH_RUN_PROFILE`、`DSH_RUN_PORT`、`DSH_RUN_STATE_DIR` 区分；不把共享 checkout/共享 home 作为支持面。
 - **P/H/W 三分。** P = pack（只读，发布集白名单）；H = `$DSH_HOME`（会话/凭据/profile，不随源或包移交）；W = 研究工作区（run bundle/方法库/归档，用户所有）。`dev/` 只住源码驱动，运行态住 `runtime/` 或工作区（门禁 `dev-runtime-clean`）。
-- **兼容性以宿主字段 `engines.dsh` 为单一权威**；`dsh.compatibility.dshReleases` 只作人读矩阵镜像，由门禁与契约测试对账。团队层版本从同一字段派生，`scaffold` 不再装未钉版最新层；`preflight` 优先读 profile 的 `@deepseek-ai/dsh-app-boot` 运行时，PATH CLI 只作后备。
+- **兼容性以宿主字段 `engines.dsh` 为单一权威**；`dsh.compatibility.dshReleases` 只作人读矩阵镜像，由门禁与契约测试对账。团队层版本从同一字段派生，`scaffold` 不再装未钉版最新层；`preflight` 以 `--install-anchor` / PATH `dsh` 安装锚为准，profile 的 `@deepseek-ai/dsh-app-boot` 只作辅助（安装锚优先，见 [deploy-truth](2026-10-26-deploy-truth-and-isolation.md)）。
 - **工作区种子版本化。** `workspace/seed.json` 记录版本 + 文件 sha256；`scaffold --check` 只读报告 missing/stale/untracked/modified，`--upgrade` 只覆盖未改文件（改过的写 `.seed-new`），`--force` 覆盖版本化种子但**不覆盖** `method-library.md`；状态写 `.dsh-research-seed.json`。状态 schema、`--clean` 与 `.gitignore` owner 的后续收口见 [发布前数据契约](2026-10-27-release-data-contract.md)。
 - **独立启动 = bootstrap + 参数化。** `dev/bootstrap.sh` 串起 submodule/install/vendor 构建/env/凭据检查；`run-driver up --bootstrap` 起通道；`cold-start-smoke` 用独立 home/profile/端口/state 到浏览器面 GREEN。
 - **不新增 D 号。** 本决定未改变 D17（harness/run bundle）、D18（驾驶舱例外）、D21（启动分流）的边界；若后续改变这些边界，另立 D。
@@ -41,4 +41,4 @@
 
 - 团队层与 Playwright MCP 仍有网络前置（registry/npx 或预置）；手册已写离线矩阵。
 - 旧 run bundle（契约前）含本机绝对路径，不追改；新 run 的路径规则由研究手册与移交流程约束。
-- `engines.dsh` 当前为精确 `0.2.1-rc.2`；换 pin 时同 diff 改 `dsh.compatibility.dshReleases` 与 `engines.dsh`，门禁会拦漂移。
+- `engines.dsh` 当前为区间 `>=0.2.1-rc.2 <0.3.0-0`（2026-10-26 改区间，见 [FAQ24 决策](2026-10-26-faq24-decisions.md)）；换 pin 时同 diff 改 `dsh.compatibility.dshReleases` 与 `engines.dsh`，门禁会拦漂移。

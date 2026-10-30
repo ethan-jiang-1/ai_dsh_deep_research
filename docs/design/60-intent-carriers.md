@@ -15,7 +15,7 @@
 | [`_backlog/triggers.md`](../../_backlog/triggers.md) | [_backlog/README](../../_backlog/README.md) | 工作中可直接观察到的重议条件 | 仅当遗漏会导致重犯，且触发能在正常工作中遇到 | 条件到场后按新决定重进；否则由 owner 保留结论 |
 | [`notes/proposed/`](../../notes/proposed/) RFC | [notes/AGENTS](../../notes/AGENTS.md) | 需要显式评审的持久决定提案 | 该决定需在实现前持久化并评审；不是所有问题或工作都需要 | 经批准实施后正文改写并迁 `implemented/`；否决则按 notes 规则处理 |
 | [`notes/implemented/`](../../notes/implemented/) | [notes/README](../../notes/README.md) | 已交付决定理由及验证 | 持久决定理由不能由代码、测试或现有文档说明 | 不再指导未来变更时冻结归档 |
-| `notes/rejected/` · `notes/postmortem/` | [notes/README](../../notes/README.md) | 有防复犯价值的否决决定 · 事故复盘 | 需要保留的否决理由或事故事实 | 复活通过新 Note 引用旧篇；历史保持不变 |
+| `notes/rejected/` | [notes/README](../../notes/README.md) | 有防复犯价值的否决决定 | 需要保留的否决理由 | 复活通过新 Note 引用旧篇；历史保持不变 |
 | 代码 `TODO` / degraded 观察项 | 所属代码文件 | 局部实现缺口 | 具体、局部且不需要跨轮问题分析 | 修复后移除 |
 | 用户直派 | 当前请求 | 当轮授权范围 | 用户明确提出工作 | 按授权范围交付；持久决定按 notes 规则记录 |
 

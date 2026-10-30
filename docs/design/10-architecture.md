@@ -68,7 +68,7 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 
 - **共同基座**：tool-fs / tool-fs-search / tool-skill / tool-todo / **tool-web**（模型面行随
   preset，行 config 照抄 base：`fetch: true` 是启用开关、`searchTimeoutMs` 是搜索预算、
-  `fetchTimeoutMs` 不设走 vendor 默认——字段语义与值以 preset 源 + [D9](../decisions.md) 为正本）；
+  `fetchTimeoutMs: 45000` 是抓取回退两腿预算的兜底（D31）——字段语义与值以 preset 源 + [D9](../decisions.md) 为正本）；
   web 的 providers（`web` seam / `web-search-deepseek` / `web-deepseek-api` / `web-fetch-http`）
   是 dsh-base 的 **host 面出厂行**、不随 preset——provider 行本身不进本包 bundle；**provider
   选择**由 bundle 的 `- id: web` 替换行固定：搜索 = `deepseek-search-api`（结果带 snippet +

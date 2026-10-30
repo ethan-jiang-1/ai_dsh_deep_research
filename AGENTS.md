@@ -38,11 +38,11 @@ research-workspace/      运行场（角色会话 cwd）：AGENTS.md 研究手�
                          （停放位）、drafts/（开发侧草稿，非 run 产物）、templates/run/
 docs/                    00-index（地图；术语 = terms.md；D 号台账 = decisions.md）→ design/10-60 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ guides/65（运行形态合同）+ evaluation.md（验收合同）
 notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）；目录名自带时态，
-                         总图 = notes/README.md（将来 proposed/ · 过去 implemented/archived/rejected/
-                         postmortem/；立项来历 = 该页 §立项来历——用户定调只进 decisions.md D 号依据列）：
+                         总图 = notes/README.md（将来 proposed/ · 过去 implemented/archived/rejected/；
+                         立项来历 = 该页 §立项来历——用户定调只进 decisions.md D 号依据列）：
                          proposed/（需显式评审的持久决定 RFC）→ implemented/（活的决定记忆；不再指导
                          未来者迁 archived/ 冻结）；
-                         rejected/（否决——"决定不做"，带重启条件；非搁置池）；postmortem/（事故复盘）
+                         rejected/（否决——"决定不做"，带重启条件；非搁置池）；事故复盘冻结在 archived/（§事故复盘）
 .agents/skills/          开发技能（DSH 约定路径：project-agents 发现根）：任务匹配即加载的程序化工作记忆
                          （换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷）；与产品内 runtime skills（presets/*/skills/）分家
 scripts/                 职责分组六目录 + lib/ 支撑库：verify/（L0 门禁聚合）、smoke/（分级冒烟，keyless/真模型档逐件申报）、probe/（交互与行为探针）、run-gates/（run bundle 机械门与审计）、run-ops/（run 观察与运维投影）、dist/（出包→_dist/）、lib/（冒烟/门禁支撑模块）——逐件职责与档位 = scripts/README.md
@@ -69,7 +69,7 @@ _dist/                   对外交付件：安装手册.md（tracked 生成物�
 Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。细则是子树指令，不在这里复述：
 
 - **时态总图 = [notes/README.md](notes/README.md)**（`proposed/` = 需显式评审的持久决定提案；
-  `implemented/` `archived/`（冻结） `rejected/`（防复犯的否决理由） `postmortem/` = 决定与证据记忆）；
+  `implemented/` `archived/`（冻结；含事故复盘） `rejected/`（防复犯的否决理由） = 决定与证据记忆）；
 - **写入触发 / 取代检查 / 格式与毕业 = [notes/AGENTS.md](notes/AGENTS.md)**；
 - **任务流程**（换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷）= `.agents/skills/` 开发技能，按
   description 触发加载，不占常驻上下文。

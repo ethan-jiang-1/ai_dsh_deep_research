@@ -2,6 +2,10 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：D28 修订后，`bundleStateOf` / `runStateOf` 只把位置用于**发现**，
+> 状态从内容判；原文“位置=状态”是 2026-09-27 当时的语义。现行状态模型见
+> [design/50](../../docs/design/50-agent-loop-and-state.md)。
+
 2026-09-27 用户定调立项并当日交付：**提高代理的自我调试诊断能力——端到端的机器测试能力是
 基本要求，别拽着人**。立案证据 = 同日真人档收尾（第 12 场代理模拟 run）操作实录的三次真故障，
 全部由代理自诊断闭环、零拽人。
@@ -14,12 +18,12 @@
      ask_user_question；session/* 元数据跳过）——不写第二份（role-list-sync 同款教训）；
    - `toolCallCount`：形状化工具调用计数（只认 `tool/call` 事件的 `data.name`——request/header
      里的 schema 字符串天然不计入，即 grep 假阳性的反义）；
-   - `turnOpenOf` / `bundleStateOf` / `runStateOf`：回合开合、bundle 位置=状态（工作区根
-     drt_* = 在飞）、组合快照；
+   - `turnOpenOf` / `bundleStateOf` / `runStateOf`：回合开合、bundle 位置仅用于发现（D28；
+     工作区根 drt_* 不是“在飞”证明）、组合快照；
    - **两粒度完成判定**：`finalWritten`（final.md 在场）≠ `runSettled`（回合已终 + final 在场）
      ——第 12 场实录：final 落盘后回合仍在跑、present 未声明、HITL2 未发，旧 watcher 误报
      "已交付"；present 缺席由 `presentCalls` 单独显性暴露，不并入 settled（偏差不静默放行）；
-2. **`scripts/watch-run.mjs`——盯场件转正**（dev/smoke-workspace 原型 → scripts/）：谓词化轮询，
+2. **`scripts/run-ops/watch-run.mjs`——盯场件转正**（dev/smoke-workspace 原型 → scripts/）：谓词化轮询，
    `STATE: HITL-PENDING` / `STATE: RUN-SETTLED`（present 缺席时附 ⚠）退出自报，超时 exit 1；
 3. **hitl-answer 加固**：开浏览器前的盘侧前置谓词（research-workspace 组新者先扫最新 15 个
    会话，无真挂起即 exit 3 自拒——grep 误报的形态在无浏览器处拦截）；`--session` 空串/纯空白

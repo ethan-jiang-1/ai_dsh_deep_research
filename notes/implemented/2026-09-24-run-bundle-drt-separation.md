@@ -15,7 +15,8 @@
    方向；顶层无 runs/）：一调研一 bundle，持全部变量（判定式：**恢复这次研究所需 =
    bundle 变量**；会话/任务板/聊天记忆 = 执行基底，不是变量）；question.md（定稿/HITL1
    快照/Decisions append-only）跨 rerun 持久；final/ 版本化交付（v1 → 证据扩张 rerun 后
-   v2，当前版 = 最大号，present 指当前版）；交付后 bundle 冻结为只读证据。
+   v2，当前版 = 最大号，present 指当前版）；交付副本不可变，bundle 本身可显式 rerun/续跑——
+   交付不是冻结（D28）。
 3. **rerun 三分语义**（源头 DEEP_RESEARCH_HARNESS post-final-recovery 对齐，亲读
    instantiate/continue/post-final playbook + rb_templates 实物）：表述性修订 → 当前版
    原位改、版本号不变；证据扩张 → 同 bundle final/ 下一版 + Decisions/journal 追加血统；
@@ -67,8 +68,7 @@ git，暂无归档需求）。
   但其推理已显式"AGENTS.md supersedes"按 drt_ 行动（会话日志实证：glob drt_*/**）；
 - research profile 安装镜像已手术同步 D17 文本（7 文件；web 运行中不能重建，sanctioned
   刷新 = rm profile + boot-run 重建）；release-check 镜像为 L2 throwaway（release-smoke
-  每次先删后建，自愈，不动）；boot-run 不检测 pack 内容漂移 = 已知债（随 debug-dashboard-plus
-  条目处理）。
+  每次先删后建，自愈，不动）；boot-run 的 pack 内容漂移检测现已接线（当时为已知债，已销账）。
 - 手册 final/ 版本化契约生效：首个 run 的交付 = final/v1.md + present 声明。
 
 ## 事故与补丁（同日，用户实测抓到——"实实验了一下，好像不对"）

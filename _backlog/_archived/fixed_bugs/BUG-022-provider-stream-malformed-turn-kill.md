@@ -24,7 +24,7 @@ code: "MALFORMED_RESPONSE" } }`。**会话不被终局化**（无 `end-seed`）�
 ## 撤回与后继（2026-10-20 审计）
 
 **原根因假设撤回**：本卡 2026-10-11 的"上游流事件顺序违约"是当时未取证的解释。2026-10-13
-[postmortem](../../../notes/postmortem/2026-10-13-llm-stream-malformed-storm.md) 用受控实验与字节取证
+[postmortem](../../../notes/archived/2026-10-13-llm-stream-malformed-storm.md) 用受控实验与字节取证
 把根因定到**上游边缘对长命复用连接的相位性故障**（200 + 零响应头 + 未声明压缩体；同进程按会话分层），
 修复 = [BUG-024](BUG-024-direct-path-malformed-storm-recurrence.md) 的 socket 隔离
 （`dev/llm-socket-isolation.cjs`，boot-run 预载；LLM 流与 web_search 每请求一次性连接、永不复用）。

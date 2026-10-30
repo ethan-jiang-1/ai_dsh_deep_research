@@ -10,7 +10,7 @@
    `sentinelInAssistantText(logText, sentinel)`、`turnCompleted(logText)`。
 2. **哨兵只认 assistant 文本**：`探针完成` 这类收尾哨兵**写在录制 prompt 里**，用"整份日志 includes"判回合完成，
    会被 `user/message` / `agent/inbox/spliced` 的**回显**满足——判据必须在 `assistant/message` 的文本里找。
-   这是录制器 2026-10-13 已经踩过并收紧过的坑（[malformed 风暴复盘](../postmortem/2026-10-13-llm-stream-malformed-storm.md) 落地件①），
+   这是录制器 2026-10-13 已经踩过并收紧过的坑（[malformed 风暴复盘](../archived/2026-10-13-llm-stream-malformed-storm.md) 落地件①），
    但**消费侧（snapshot-replay-smoke A 层）没跟上**：同一个坑在冒烟里活了三天。
 3. **另加回合结束显式态**：A 层同时要求日志出现 `turn/end` 且 `reason.kind === 'completed'`——
    把"推断回合走完"换成"等显式状态"（scripts/AGENTS「等待显式状态」）；非 completed 即判回放未走通（fail-loud）。

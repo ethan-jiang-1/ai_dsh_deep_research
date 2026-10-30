@@ -25,7 +25,7 @@
 - **侧栏「研究图谱」**：新增 `ResearchGraphTab` + `src/lib/plan-graph.ts` + keys/index 注册；
   数据走 `agentTeam` / `subagentCatalog` / session status / `workspaceFiles`；顶部 SVG DAG
   （顶层 plan 节点优先，边 = plan deps / Team `blocked_by`，同层并行横排）+ 节点详情 + plan 原文；
-  复合子节点 N3.1… 在父节点详情折叠、可复制 `drt_<slug>/N3` 引用；重号/悬空 parent/deps 只读提示；
+  复合子节点 W2.1.1… 在父节点详情折叠、可复制 `drt_<slug>/W2.1` 引用；重号/悬空 parent/deps 只读提示；
   **只读观察**，不提供调整动作（调整回对话/rerun），无 plan/无依赖边时明确「没有可画的 DAG」。
   构成正本 `docs/design/40` 已登记，任务粒度仍归 `ui-agent-team`。
 - **搜索底座**：research profile 的 `cordis.patch.yml` 用 `- id: web` 覆盖为

@@ -4,7 +4,7 @@
 > 归档：2026-09-27
 
 归宿：roadmap §队列「DSH 插件生态认真研究」（2026-09-26 补完毕业手续——**毕业事故见
-[postmortem](../postmortem/2026-09-26-roadmap-graduation-drift.md)**：本 RFC 的报告早已交付，
+[postmortem](2026-09-26-roadmap-graduation-drift.md)**：本 RFC 的报告早已交付，
 但迁移与 roadmap 更新漏做，队列 ▶ 因此指了一件已完成的事）。
 
 ## 决定

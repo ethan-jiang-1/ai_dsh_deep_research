@@ -31,8 +31,10 @@
 | 三 | 对抗证伪（打开承接文件，专找假承接/未兑现承诺） | 严格轮的 archive **8/8 被打回** | — | — |
 
 **判据换个提问形状就得到几乎不相交的名单。**根因：进门条件 2（"不再可能指导未来变更"）
-是纯语义判断，而 `scripts/verify/verify.mjs` 里 `archived` **只出现 2 次、均为注释**
-（900 / 981 行）——**归档与否没有任何复核面**。
+是纯语义判断，而当时 `scripts/verify/verify.mjs` 里 `archived` **只出现 2 次、均为注释**
+（900 / 981 行）——**归档与否没有任何复核面**。该缺口已于 2026-10-10 由
+`archived-note-pointer` 门禁 + `scripts/archived-note-pointers.json` 登记簿补上
+（见 [archive-review-surface Note](2026-10-10-archive-review-surface.md)）。
 
 这与本轮另两个结论是**同一种病**：`discipline-map` 的 `na` 行会静默腐烂（已实证 10 处变假）、
 `design/30` 内容可被替换成 `| x | y |` 而 verify 仍全绿。**共同形态 = 文档声明了某个判断
@@ -40,8 +42,9 @@
 
 ### 结论二：**class 层暂不引入**——它的触发条件其实没满足
 
-`notes/README.md:91` 的条件是**析取**："超过约 50 篇 **或** 检索开始靠猜"。
-前半满足；**后半才是引入分层的真实理由**，实测不满足：72 篇分布 61 家族，"找一篇"不靠猜。
+`notes/README.md` 的 class 层引入条件是**析取**：机制名检索实测失败，**或**出现按类别批量
+审阅/浏览的常态工作流；“超过约 50 篇”的计数阈值在 2026-10-10/10-12 重估中已明确为**不构成触发**。
+**真正的引入理由**（机制名检索失败 / 批量按类浏览）实测不满足：72 篇分布 61 家族，"找一篇"不靠猜。
 ⚠️ 这是**判断，不是机械结论**（本报告无判据轴可执行面）——且按 RFC 判据 6，
 "是否落 class 层"的**决定权不在本条**，本条只给分布。
 
@@ -109,8 +112,8 @@
 
 - 队列条目毕业：RFC 迁入本目录并改写为事实体；`_backlog/queue.md` 该行删除，
   **▶ 移交"意图载体总图页"**。
-- 体检报告住 [_backlog/_archived/research/2026-10-08-notes-stocktake.md](../../_backlog/_archived/research/2026-10-08-notes-stocktake.md)
-  并在 [reference/README](../../_backlog/research/README.md) 索引建行（`plans-liveness` 把守）。
+- 体检报告住 [_backlog/_archived/research/2026-10-08-notes-stocktake.md](../../_backlog/_archived/research/2026-10-08-notes-stocktake.md)；
+  当时的 reference 索引与 `plans-liveness` 门禁已随 backlog 形态变更退役（D19/D20）。
 - 新增承载物：report 内的"严格口径问法"（"机制若消失，哪次具体未来变更会变差"）
   是本次唯一可复用的产出——后续若给归档判定补复核面，判据形状可直接取它。
 - 后续（2026-10-10）：本报告 §下一步候选 1 已落地（`archived-note-pointer` 门禁 +

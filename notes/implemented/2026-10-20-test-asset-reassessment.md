@@ -2,7 +2,10 @@
 
 > 状态：implemented
 >
-> 2026-10-20 同日用户指令改判：tests/ 按域分目录，现行 = [tests 分域 Note](2026-10-20-tests-domain-layout.md)；本页「维持平铺」决定已被取代，重估过程保留作历史。
+> 2026-10-20 同日用户指令改判：tests/ 按域分目录，现行 = [tests 分域 Note](2026-10-20-tests-domain-layout.md)；
+> 2026-10-27 门禁聚合也已按域拆文件（`verify.mjs` 入口 + `gates/<域>.mjs`，见
+> [hygiene-round2](2026-10-27-hygiene-round2-feedback-truth.md)）。本页两项「维持」决定均已被取代，
+> 重估过程保留作历史。
 
 ## 决定
 

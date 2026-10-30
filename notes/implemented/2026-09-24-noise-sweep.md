@@ -88,5 +88,5 @@ kickoff-chip.md（run-mechanics RFC 暂停点的活引用）、pre-commit-test.o
 - 纯 docs/门禁/残留物层，未动 preset 与包内容 → 不触发 L1/L2/L3 加跑；
 - 本轮改动面不含 AGENTS.md 与 guides/60 → 入口链探针按节奏未跑（guides/60 §4），
   下轮 docs 面改动时跑；
-- ▶ 条目「首个完整研究 run」仍挂起 HITL1（应用层，未动）；上轮遗留两项（活跃 RFC
-  题目矛盾 / 队列行规 ≤3 行）按本指令边界暂缓，仍开放。
+- 当轮快照：▶ 条目「首个完整研究 run」已闭环（第 12 场全流程）；队列已由 D20 退役；
+  上轮遗留两项均不再开放。

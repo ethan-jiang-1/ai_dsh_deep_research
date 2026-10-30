@@ -1,6 +1,7 @@
 # 64 · 发布版本、tag 与 npm 发布顺序
 
 > 层：指南。本页拥有版本号、git tag、npm 发布三者的唯一顺序。发布前逐条走，不凭记忆。
+> 决定理由与输掉的方案 = [release-versioning Note](../../notes/implemented/2026-10-25-release-versioning.md)。
 
 ## 单一版本源
 

@@ -2,6 +2,10 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：本篇标定的“三处注入未被 B 层覆盖”缺口已于 2026-10-09 由
+> [snapshots-adoption](2026-10-09-snapshots-adoption.md) 修复——B 层现比四处 `user/message` 注入
+> （含时钟序列）。义务本身仍是文档义务、未进 CI（见 [snapshots/README](../../snapshots/README.md)）。
+
 出处 = 推敲卡 [2026-10-08-sdlc-reference-absorption](../../_backlog/_archived/settled_issues/2026-10-08-sdlc-reference-absorption.md)
 （§候选与取舍 第二档 C11 + §毕业门"缺什么证据才能判"）。标定报告全文 =
 [_backlog/research/2026-10-08-model-visible-calibration.md](../../_backlog/_archived/research/2026-10-08-model-visible-calibration.md)。

@@ -4,8 +4,8 @@
 
 ## 决定
 
-`_digested/test-strategy/`（DSH 测试策略消化语料，基线 `639ed01539` = 本仓 vendor pin 同
-commit，对当前 pin 新鲜）全文消化并逐条对照本仓合同面后，采纳其增量并落为常驻资产；
+`_digested/test-strategy/`（DSH 测试策略消化语料，基线 `639ed01539` = 采纳时本仓 vendor pin 同
+commit；现 pin 已 `687f282e86`，两者已不同步——见 [external-materials](../../docs/external-materials.md)）全文消化并逐条对照本仓合同面后，采纳其增量并落为常驻资产；
 与既有落点重复的教义**不重复登记**（一个事实一个家）。对照总账的三态正本 =
 [discipline-map 源 10](../../docs/discipline-map.md)；语料身份钉在
 [00-index §外部研究材料](../../docs/00-index.md)。

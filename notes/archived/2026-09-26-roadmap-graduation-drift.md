@@ -1,6 +1,7 @@
 # 事故复盘：roadmap 毕业漂移（▶ 指向已完成条目 + commit message 与 diff 不符）
 
 > 状态：implemented
+> 归档：2026-10-30
 
 ## 现象
 

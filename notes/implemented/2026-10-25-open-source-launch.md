@@ -36,6 +36,8 @@
 
 ## 输掉的方案
 
+- **私有 / 内部保留**：插件只服务本团队、不对外分发，可回避许可证与发布义务；用户 2026-10-25
+  明确要开源给外部安装与继续开发，私有与目标冲突。MIT 与 vendor 同族，兼容性成本最低。
 - **`git filter-repo` 改写现有历史**：能让公开历史一尘不染，但 611 个 commit 全部换 SHA，
   `snapshots/replay/research-face/snapshot.json` 的 `codeAnchor`、notes/backlog 的 commit 引用、
   事故记录本身都会悬空；GitHub 侧旧对象也不保证立即彻底清除。对 14.5 KB 非敏感数据，收益

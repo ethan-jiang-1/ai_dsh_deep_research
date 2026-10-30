@@ -58,6 +58,7 @@
   逐一对照；实测目录 = `_backlog/{_done,bugs,plans,reference,_postponed_plans}` +
   `notes/{archived,implemented,postmortem,proposed,rejected}`，**10 类载体全部在场**，
   含 `_done/` 五池（`_closed_plans`/`_suspended_plans`/`_fixed_bugs`/`_suspended_bugs`/`_reference`）。
+  （2026-10-30：`postmortem/` 层退役，事故复盘并入 `archived/`；其余载体不变。）
 - **判据 2（差异显式声明）**：§三 五维差异表在场，含"无状态机"这一最关键差异。
 - **判据 3（不复制规则正文）**：抽查每条规则句的**正本仍在原文件**——
   三条硬规矩在 `_backlog/README` 命中 3 处、毕业四门命中 4 处、队列生命周期在

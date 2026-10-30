@@ -66,7 +66,8 @@ session-query 五件 + goal 三件；ask schema 含 timed `timeout` 参数；per
   （scout 无 ask-user、critic 无 subagent 皆然）；工具面膨胀稀释模型注意力，「充分利用」≠
   「全挂」。判据 = 每个工具行都要有方法论角色，不是"货架上有"。
 - **自写 provider / 胶水插件补缺口**：既有定案（search-fallback-seam：pack 层不可行且破坏
-  "配置为主 + D18 单点例外"形态）；session-query 用现成包不自写。
+  "配置为主 + 例外"形态）。**2026-10-27 更新**：D31 的抓取回退 provider 是第二处有界例外——
+  “不自写 provider”现仅对 **search** 成立；session-query 仍用现成包。
 - **timed ask-user 初版呈批方案（超时按推荐项自动落定）**：源码核实后撤回——0.2.0 的真实
   语义是 pending 不落定（问题保持可答 + "这不是许可"）；按错误描述落地会静默替用户拍板，
   违反 HITL 语义。修正语义重新呈批后采纳。

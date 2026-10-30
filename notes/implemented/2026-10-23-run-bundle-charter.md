@@ -8,6 +8,11 @@
 >
 > 2026-10-23 用户拍板：**单位 A**（一任务一 bundle，rerun 版本在内；独立是 bundle 之间）；
 > **C-lite**（`provenance/` + `manifest.json` + `delivered.json`；批准仍外部事件链）。第 3 件（删除边界）待定。
+>
+> 历史注记（2026-10-30）：契约纪元已由 [D33](../../docs/decisions.md#d33) 改为 `schema: 2` + `created`；
+> 现行读序 / 交付 / 终稿族见 [design/50](../../docs/design/50-agent-loop-and-state.md)、
+> [NODES](../../research-workspace/NODES.md)、[data-plane-hardening](2026-10-28-data-plane-hardening.md)。
+> 本页 §未决 #3 的“现状 = 日期”是 2026-10-23 快照。
 
 ## 问题
 
@@ -398,8 +403,8 @@ manifest 时机）= 锚点卡 [§7.2](../../_backlog/_archived/settled_issues/20
 1. **单位（已定 A）**：一任务一 bundle；rerun 是同一任务内的版本；独立是 bundle 之间。
    2026-10-23 用户拍板。
 2. **状态头载体（已定 `run.md`）**：单一职责；`question.md` frontmatter 作为备选不再采用。
-3. **契约纪元格式**：日期（`contract: 2026-10-23`）还是 `pack@x + date`；后者更精确，前者更便宜。
-   现状 = 日期（`contractEpochOf` 只解析 `YYYY-MM-DD`）。
+3. **契约纪元格式（已定 D33）**：`schema: 2` 整数 + `created` 日期；旧 `contract: YYYY-MM-DD` 只读兼容。
+   原文“现状 = 日期”是 2026-10-23 快照；现行实现 = [data-plane-hardening](2026-10-28-data-plane-hardening.md)。
 4. **readiness 终局形态**：单一终局行/块；旧 review 的 5 种形态如何 grandfather。
 5. **archive 是否仍需要**：若位置只是桶，归档可以退化为可选操作；保留与否是运维选择，不是状态。
 6. **UNATTESTED 的门禁语义**：三态如何呈现（CLI/驾驶舱/交付门），哪些场景必须人工裁决。

@@ -2,6 +2,10 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：plans/ + `queue.md` + `plans-liveness` / `queue-pointer-live` /
+> entry-chain 锚 = 2026-09-28 当轮形态，已由 D11/D19/D20 与 `_backlog/issues/` 形态取代；
+> D19 立层理由与「输掉的方案」仍取用。现行载体 = [_backlog/README](../../_backlog/README.md)。
+
 用户直派 2026-09-28（"company `_backlog` 的思想要借鉴过来"）；借鉴链 = `ai_deerflow_deep_research_v2`
 → company D31 → 本仓。当日四裁：根目录 / plans+bugs+_done 全三件 / 走正门 / plans 卡
 `YYMMDD-slug` 日期编码。同日追加裁决（D20）：roadmap.md 退役、痕迹彻底清理——规划面单
@@ -39,7 +43,8 @@
    notes/README 时态表、proposed/README 与 rejected/README 规则、guides/62、design/20+30、
    discipline-map、pack README、pnpm-workspace 头注、graduating-a-queue-item 技能、人类门面
    README；历史层（implemented/archived/rejected/postmortem 正文）不动——历史记录只修
-   链接死链（signal-to-noise Note 两处 URL 重定向），措辞不改。
+   链接死链（signal-to-noise Note 两处 URL 重定向），措辞不改。（2026-10-30：postmortem/ 层退役，
+   事故复盘并入 archived/。）
 9. **门禁改锚（D20 同 diff）**：verify.mjs 的 queueSection/parkedSection（原 roadmapQueue/
    roadmapParked 改名）读 `_backlog/queue.md`；`proposal-scheduled`（RFC ↔ 队列/搁置池配对）、
    `queue-pointer-live`（regex 容许 `../` 前缀链接）、`entry-chain`（成员清单 roadmap.md →
@@ -76,7 +81,7 @@
 - **L0**：`pnpm verify` 全绿（含新门禁与三门禁改锚后）+ `pnpm test` 全绿——计数不写进
   文档，查命令输出。
 - **roadmap 清扫面**：`git grep roadmap`（vendor 外）复核——live 面零残留（历史层正文措辞
-  与 postmortem 文件名除外，属不可篡改历史）；历史 Note 死链重定向后 md-links 全绿。
+  与事故复盘文件名除外，属不可篡改历史）；历史 Note 死链重定向后 md-links 全绿。
 - **未跑项**：`entry-chain-probe`（真模型档，无凭据）——真值抽取已改锚 queue.md 且 parked
   分支在位，语义版人工复核随下次真模型档窗口补。
 

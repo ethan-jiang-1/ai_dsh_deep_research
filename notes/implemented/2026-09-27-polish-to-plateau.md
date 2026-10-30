@@ -2,6 +2,10 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：2026-09-27 八场 run 平台期复盘；后续 run 形态与交付判据见
+> [guides/61](../../docs/guides/61-run-playbook.md)、[guides/65](../../docs/guides/65-run-forms.md)；
+> 文中端口/队列/parked 是当时快照。
+
 来源：用户 2026-09-27 指令——"发挥你的能力，自动化把这些都做了，反复打磨，直到调优到最优、
 再往下很难做，再借助我看一看"。本 Note 是那个"看一看"的包裹：八场 run 的总表、修掉了什么、
 平台期判定的依据与残余限制、只剩你能做的事。
@@ -42,8 +46,8 @@ final.md 缺席从静默跳过改 fail-loud（防空语料）+ 位置违约单�
 吞、Recommended 误命中推理文本、超长卡视口外 + DOM 原生点击兜底）；模式自报（dry-run 教训）。
 
 **契约**（判据正本 = 研究手册）：摘录最小契约四条（引文行只放原文 / 逐段逐字 `[…]` / 表格逐格 /
-source_url 必须真抓取）；**日期最小契约**（落笔前跑 `date`——模型时间感五场全错）；final.md
-钉死 run 根。
+source_url 必须真抓取）；**日期最小契约**（当时做法：落笔前跑 `date`；2026-10 起 D32 改为
+time-context 读数，无读数按序回退/如实说不确定）；final.md 钉死 run 根。
 
 **角色方法论**：critic 轻量模式（quick_factual 配轻量 critic，消除 lead 自检弱面）+ 全模式抓取
 底线 + 说明落点纪律（修复轮要求的注解不进引文行）+ **出处链 = 独立重抓**（验证内容真实支撑，
@@ -89,7 +93,7 @@ final 位置正确、链 201/201、CRITICAL 0，仅 source_url 残留 2 张（**
    选推荐项，真人会犹豫/自定义/嫌措辞含糊，这是代理覆盖不了的盲区；
 2. **读报告**（你说回来看的）：四份深度 + 四份价格表，都在 `research-workspace/archive/drt_*/final.md`，
    每条关键结论可点回 evidence；
-3. 想看过程：八个仪表盘在 `dev/smoke-workspace/dashboard-drt_*.html`。
+3. 想看过程：八个仪表盘在 `runtime/smoke-workspace/dashboard-drt_*.html`。
 
 ## 实际跑过的验证
 
@@ -100,6 +104,6 @@ final 位置正确、链 201/201、CRITICAL 0，仅 source_url 残留 2 张（**
 
 ## 环境状态
 
-- run 通道 3081（token 在 `dev/smoke-workspace/web.log`，8h 保险丝）；八场 bundle 全在盘上；
-- 「真人档验收」仍是队列条目（等人，居末位）——它的四项判据里，机械可断言部分已由八场间接覆盖，剩下的
+- run 通道 3081（当时端口；token 在 `runtime/smoke-workspace/web.log`，8h 保险丝）；八场 bundle 全在盘上；
+- 「真人档验收」当时是队列条目（队列已由 D20 退役）；它的四项判据里，机械可断言部分已由八场间接覆盖，剩下的
   是你的眼睛与手感。

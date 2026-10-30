@@ -2,6 +2,10 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：本篇是 2026-09-24 基石加固轮记录；`entry-budget` 现名 `doc-budgets`，
+> `research/` 已于 2026-09-27 清并，roadmap ▶ 队列已由 D20 退役。现行门禁与入口链见
+> [evaluation §L0](../../docs/evaluation.md) 与 [AGENTS](../../AGENTS.md)。
+
 > 来源：外部 review（用户委托的基石评估）指出 3 处语义漂移 + §四改进建议 P0–P2，用户
 > 指令"修补好 + 帮着调一调"。落库 = d5a9113（漂移修补）/ 593b97f（门禁三连）/ 1446e5c
 > （pre-commit 钩子）+ 本 commit（探针修正与收尾 Note）。本 Note = 全轮收尾记录。

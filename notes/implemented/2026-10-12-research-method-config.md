@@ -2,6 +2,9 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：长期复用写入在 2026-10-28 后扩为 Method Editor 经窄 host 工具写库
+> （D25 修订）；Lead 仍按手册维护同名库。方法预设 / 单次快照 / 判型映射的决定不变。
+
 出处 = 推敲卡三卡簇（用户 2026-10-12 授权实施）：
 [总卡](../../_backlog/_archived/settled_issues/2026-10-12-research-preference-templates.md)（总体边界与预设模型）·
 [单次卡](../../_backlog/_archived/settled_issues/2026-10-12-research-method-run-lifecycle.md)（单次选择/执行/恢复）·

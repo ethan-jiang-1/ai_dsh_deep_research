@@ -2,6 +2,7 @@
 
 > 层：指南。本页拥有“什么内容该进 git、什么不该进、跨环境怎么不互相污染”的判据。
 > 新增文件、调整 `.gitignore`、把生成物标成 tracked、或发现仓库里出现本机残留时，先按本页分类。
+> 决定理由与输掉的方案 = [git-boundary-policy Note](../../notes/implemented/2026-10-25-git-boundary-policy.md)。
 
 ## 一个前提：用户装的东西 ≠ 贡献者 clone 的东西
 

@@ -42,7 +42,7 @@ ask 在场。
 
 走查其余记录：G9 证据计数 30s 时滞（eventual-correct，非 cap——vendor maxEntries 默认
 2000，实时重探 86 ✓）；07 截图 cursor 落点误读被 DOM 探针证伪（走查结论以探针为准）。
-全部留档 `dev/smoke-workspace/observations/`（07/08 + gap-list.md）。
+全部留档 `runtime/smoke-workspace/observations/`（07/08 + gap-list.md）。
 
 ## 输掉的方案
 

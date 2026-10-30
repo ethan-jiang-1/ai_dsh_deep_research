@@ -2,6 +2,10 @@
 
 > 状态：implemented
 
+> 历史注记（2026-10-30）：`quick_factual` “不配 critic” 分支已撤销（现行 NODES = critic 轻量 ×1；
+> 2026-10-06 合同漂移卡）；“契约期”断代语义已由 [D33](../../docs/decisions.md#d33) 整数契约取代。
+> 编制条件性本身仍有效。
+
 ## 决定
 
 - **编制条件性入契约（NODES.md 新节）**：研究类型 = quick_factual（快速事实核查；HITL1 定、记 question.md）按 team-assembly 矩阵**不设 scout/analyst 常设编制，critic 可轻量或不配**——节点 2/3 输出与节点 6 `review.md` 为**条件件**：缺席合法当且仅当 ①question.md 研究类型字段在场 ②journal 显式记账补偿把关。节点 1/4/5/8 输出件全类型必备。pack 种子随 sync-pack-workspace 同步（编制条件性随部署面走）。

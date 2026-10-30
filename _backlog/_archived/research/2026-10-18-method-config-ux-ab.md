@@ -61,7 +61,7 @@ U4（新增「时间线与信号」）由此获得行为证据，支持它留在
 2. **单题单次**：各一条 run，非统计证据；措辞级差异不采信，只采信骨架/路径级差异；
 3. **代理模拟**：两组 HITL 均由 `hitl-answer` 取推荐档（provenance 已落 bundle）；真人手感
    （U6/U7/U9/U15）不在本记录范围；
-4. **环境事件**：a 组的停摆与唤醒是上游/环境现象（同族 = [provider 流错误 postmortem](../../../notes/postmortem/2026-10-13-llm-stream-malformed-storm.md)），
+4. **环境事件**：a 组的停摆与唤醒是上游/环境现象（同族 = [provider 流错误 postmortem](../../../notes/archived/2026-10-13-llm-stream-malformed-storm.md)），
    与本轮 pack 改动无关。
 
 ## 原始证据位置
