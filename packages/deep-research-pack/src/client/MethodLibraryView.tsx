@@ -872,7 +872,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
       ...(input.entryText === undefined ? {} : { entryText: input.entryText }),
     })
     if (expected === null) {
-      setReceipt({ ok: false, detail: props.t('duplicateNames') })
+      setReceipt({ ok: false, detail: props.t('operationTargetChanged') })
       return
     }
     const operationId = crypto.randomUUID()

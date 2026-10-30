@@ -231,7 +231,7 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
           <span style={{ fontSize: 11, opacity: 0.6 }}>{readyLabel}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-          {coach !== null && <button type="button" disabled={started || startBusy} onClick={startInterview} style={{ border: '1px solid var(--dsw-alias-border-l2)', borderRadius: 4, padding: '5px 10px', background: 'var(--dsw-alias-bg-base)' }}>{started ? startedLabel : startBusy ? pendingLabel : startLabel}</button>}
+          {coach !== null && <button type="button" data-method-coach-start="" disabled={started || startBusy} onClick={startInterview} style={{ border: '1px solid var(--dsw-alias-border-l2)', borderRadius: 4, padding: '5px 10px', background: 'var(--dsw-alias-bg-base)' }}>{started ? startedLabel : startBusy ? pendingLabel : startLabel}</button>}
         </div>
       </div>
       {error !== null && (
