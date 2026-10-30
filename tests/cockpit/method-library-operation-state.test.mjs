@@ -5,6 +5,7 @@ import {
   expectedMethodLibrarySnapshot,
   methodLibraryMatchesSnapshot,
   methodLibrarySettlement,
+  shouldStartFreshDraftContext,
 } from '../../packages/deep-research-pack/src/lib/method-library-operation-state.ts'
 
 const existing = '## Old〔默认偏好〕\n- 找来源: old source\n- 怎么核实: old verify\n- 报告怎么写: old report\n- 不承诺: old limit\n'
@@ -69,6 +70,14 @@ test('turn end rejects only when no tool call was observed and the file is uncha
 test('manual refresh preserves unknown lock regardless of current target state', () => {
   assert.equal(methodLibrarySettlement({ outcome: 'refresh', targetReached: true, unchanged: false, metadataMatches: true, callIdObserved: true }), 'unknown')
   assert.equal(methodLibrarySettlement({ outcome: 'refresh', targetReached: false, unchanged: true, metadataMatches: false, callIdObserved: false }), 'unknown')
+})
+
+test('a resumed queued operation reuses its read-mode context', () => {
+  assert.equal(shouldStartFreshDraftContext({ mode: 'read', draftKey: null, resume: false }), true)
+  assert.equal(shouldStartFreshDraftContext({ mode: 'read', draftKey: 'draft-1', resume: false }), true)
+  assert.equal(shouldStartFreshDraftContext({ mode: 'read', draftKey: 'draft-1', resume: true }), false)
+  assert.equal(shouldStartFreshDraftContext({ mode: 'edit', draftKey: 'draft-1', resume: false }), false)
+  assert.equal(shouldStartFreshDraftContext({ mode: 'new', draftKey: null, resume: false }), true)
 })
 
 test('ambiguous targets do not produce an expected success state', () => {

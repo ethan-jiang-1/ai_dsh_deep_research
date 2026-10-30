@@ -20,7 +20,7 @@ import type { MethodLibraryCoachEvent } from '../lib/method-library-events.ts'
 import { methodLibraryEntryHash } from '../lib/method-library-hash.ts'
 import { isCompletedMethodSourceRun, latestFinalVersion, type SourcePreview } from '../lib/method-library-source.ts'
 import type { MethodLibraryReadResult } from '../lib/method-library-read.ts'
-import { expectedMethodLibrarySnapshot, methodLibraryMatchesSnapshot, methodLibrarySettlement, methodLibrarySnapshot } from '../lib/method-library-operation-state.ts'
+import { expectedMethodLibrarySnapshot, methodLibraryMatchesSnapshot, methodLibrarySettlement, methodLibrarySnapshot, shouldStartFreshDraftContext } from '../lib/method-library-operation-state.ts'
 import type { MethodLibrarySnapshot } from '../lib/method-library-operation-state.ts'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
@@ -245,7 +245,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const [coachVisible, setCoachVisible] = useState(false)
   const [coachEpoch, setCoachEpoch] = useState(0)
   const coachRetryRef = useRef(false)
-  const runOperationRef = useRef<(input: MethodLibraryOperationRequest) => Promise<void>>(async () => {})
+  const runOperationRef = useRef<(input: MethodLibraryOperationRequest, resume?: boolean) => Promise<void>>(async () => {})
   const onCoachReady = useCallback((id: SessionId): void => {
     coachIdRef.current = id
     setCoachId(id)
@@ -823,13 +823,13 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     markOperationUnknown(operation)
   }
 
-  const runOperation = async (input: MethodLibraryOperationRequest): Promise<void> => {
+  const runOperation = async (input: MethodLibraryOperationRequest, resume = false): Promise<void> => {
     if (pendingOperationRef.current !== null || operationUnknownRef.current || queuedOperationRef.current !== null) {
       setReceipt({ ok: false, detail: props.t('operationUnknown') })
       return
     }
     let draftKey = activeDraftKeyRef.current
-    if (modeRef.current === 'read' || draftKey === null) {
+    if (shouldStartFreshDraftContext({ mode: modeRef.current, draftKey, resume })) {
       draftKey = crypto.randomUUID()
       activeDraftKeyRef.current = draftKey
       setActiveDraftKey(draftKey)
@@ -839,6 +839,11 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
       setCoachReady(false)
     }
     const activeCoachId = coachIdRef.current
+    if (resume && (activeCoachId === null || !coachReadyRef.current)) {
+      setSending(false)
+      setReceipt({ ok: false, detail: props.t('operationUnknown') })
+      return
+    }
     if (activeCoachId === null || !coachReadyRef.current) {
       queuedOperationRef.current = input
       if (coachRetryRef.current) {
@@ -1147,7 +1152,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
         if (queuedOperationTimeoutRef.current !== null) clearTimeout(queuedOperationTimeoutRef.current)
         queuedOperationTimeoutRef.current = null
         queuedOperationRef.current = null
-        void runOperationRef.current(queued)
+        void runOperationRef.current(queued, true)
       }
     }).catch((cause) => {
       if (!controller.signal.aborted) setReceipt({ ok: false, detail: props.t('operationFailed', { detail: String(cause) }) })
@@ -1286,6 +1291,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
           style={{
             flex: '1 1 420px', minWidth: 0, minHeight: 0, display: narrowPane && libraryOpen ? 'none' : 'flex',
             flexDirection: 'column', overflow: 'hidden', boxSizing: 'border-box',
+            paddingRight: narrowPane ? 0 : 12,
           }}
         >
           {(mode === 'edit' || mode === 'new') && workbenchStage !== 'source' && draft !== null && (

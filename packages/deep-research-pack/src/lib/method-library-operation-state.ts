@@ -2,6 +2,15 @@ import { foldLibrary } from './library-fold.ts'
 import type { LibraryEntry } from './library-fold.ts'
 import type { MethodLibraryAction } from './method-library-operation.ts'
 
+/** A resumed queued operation must reuse its read-mode context instead of creating another one. */
+export function shouldStartFreshDraftContext(input: {
+  readonly mode: 'read' | 'edit' | 'new'
+  readonly draftKey: string | null
+  readonly resume: boolean
+}): boolean {
+  return !input.resume && (input.mode === 'read' || input.draftKey === null)
+}
+
 /** Parsed library value with stable fields for operation verification. */
 export type MethodLibrarySnapshot = readonly Pick<LibraryEntry, 'name' | 'provenance' | 'isDefault' | 'sections' | 'legacyText'>[]
 
