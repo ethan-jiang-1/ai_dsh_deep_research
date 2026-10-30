@@ -5,7 +5,7 @@ intent: 给外部 reviewer 的上下文——用了 DSH 哪些既有机制、每
 
 # 方法库共创：DSH 现成机制借用清单与设计理由
 
-> 审阅入口：先读 [issue](../../issues/2026-10-29-method-library-workbench-redesign.md)，
+> 审阅入口：先读 [issue](../../settled_issues/2026-10-29-method-library-workbench-redesign.md)，
 > 再读 [A 方案滚动/智力体/切换规格](2026-10-29-option-a-scroll-and-intelligence.md)，
 > 本页回答“为什么是这些 DSH 组件，而不是我们自己造”。
 
@@ -83,7 +83,7 @@ intent: 给外部 reviewer 的上下文——用了 DSH 哪些既有机制、每
 
 ## 3. 外部 reviewer 的阅读路径
 
-1. `_backlog/issues/2026-10-29-method-library-workbench-redesign.md`（目标/流程/状态/验收）
+1. `_backlog/_archived/settled_issues/2026-10-29-method-library-workbench-redesign.md`（目标/流程/状态/验收）
 2. 本页（为什么这些机制）
 3. `2026-10-29-option-a-scroll-and-intelligence.md`（滚动/智力体/切换）
 4. `2026-10-29-ux-redesign.md` + `ux/*.svg`（视觉）

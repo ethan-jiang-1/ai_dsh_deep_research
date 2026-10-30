@@ -221,7 +221,7 @@ method-editor 9 轮问答）**全部通过**：问卡 → 四字段回填 → �
 
 ## 后续（2026-10-29）
 
-用户实测后认为页内三栏拥挤、对话不成聊天、整页滚、回填偏粗、主题不跟系统；布局重排另立 [2026-10-29-method-library-workbench-redesign](../../issues/2026-10-29-method-library-workbench-redesign.md)（A：两视图，草稿卡在上/对话在下）。本卡记录的 10-28 交付仍有效：preset/skill/窄工具/草稿字段级/保存回执；重排只换页面布局与滚动。
+用户实测后认为页内三栏拥挤、对话不成聊天、整页滚、回填偏粗、主题不跟系统；布局重排另立 [2026-10-29-method-library-workbench-redesign](2026-10-29-method-library-workbench-redesign.md)（A：两视图，草稿卡在上/对话在下）。本卡记录的 10-28 交付仍有效：preset/skill/窄工具/草稿字段级/保存回执；重排只换页面布局与滚动。
 
 ## 收尾追加（2026-10-28 晚）
 

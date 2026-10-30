@@ -4,6 +4,15 @@
 
 | 文件 | 历史消费者 | 日期 |
 |---|---|---|
+| [method-library-cocreation/2026-10-29-method-library-workbench-review.md](method-library-cocreation/2026-10-29-method-library-workbench-review.md) | [方法库工作台重排](../settled_issues/2026-10-29-method-library-workbench-redesign.md)（2026-10-29 已结；同目录另七份 + ux 随卡） + [Note](../../../notes/implemented/2026-10-29-method-library-workbench.md) | 2026-10-29 |
+| [method-library-cocreation/2026-10-29-method-library-background.md](method-library-cocreation/2026-10-29-method-library-background.md) | 同一卡与 Note（方法库概念与演进史） | 2026-10-29 |
+| [method-library-cocreation/2026-10-29-dsh-plugin-borrowing-and-rationale.md](method-library-cocreation/2026-10-29-dsh-plugin-borrowing-and-rationale.md) | 同一卡与 Note（DSH 机制借用理由） | 2026-10-29 |
+| [method-library-cocreation/2026-10-29-option-a-scroll-and-intelligence.md](method-library-cocreation/2026-10-29-option-a-scroll-and-intelligence.md) | 同一卡与 Note（滚动与状态对齐规格） | 2026-10-29 |
+| [method-library-cocreation/2026-10-29-ux-redesign.md](method-library-cocreation/2026-10-29-ux-redesign.md) | 同一卡与 Note（原 A 流程与视觉稿） | 2026-10-29 |
+| [method-library-cocreation/2026-10-29-method-library-dsh-data-contract.md](method-library-cocreation/2026-10-29-method-library-dsh-data-contract.md) | 同一卡与 Note（pinned DSH 数据合同） | 2026-10-29 |
+| [method-library-cocreation/2026-10-29-method-library-state-lifecycle-audit.md](method-library-cocreation/2026-10-29-method-library-state-lifecycle-audit.md) | 同一卡与 Note（Session 生命周期审计） | 2026-10-29 |
+| [method-library-cocreation/2026-10-29-method-library-write-path-policy-comparison.md](method-library-cocreation/2026-10-29-method-library-write-path-policy-comparison.md) | 同一卡与 Note（写入授权比较） | 2026-10-29 |
+| [method-library-cocreation/ux/](method-library-cocreation/ux/) | 同一卡与 Note（A′ 流程图与线框） | 2026-10-29 |
 | [data-contract/2026-10-27-dsh-data-plane-digest.md](data-contract/2026-10-27-dsh-data-plane-digest.md) | [发布前数据契约](../settled_issues/2026-10-27-release-data-contract.md) + [Note](../../../notes/implemented/2026-10-27-release-data-contract.md) + [BUG-044](../fixed_bugs/BUG-044-delivery-receipts-leak-absolute-paths.md) | 2026-10-27 |
 | [2026-10-25-dsh-plugin-conventions.md](2026-10-25-dsh-plugin-conventions.md) | [运行形态合同](../settled_issues/2026-10-25-run-form-contract.md) + [分发合同](../settled_issues/2026-10-25-distribution-contract.md) + [Note](../../../notes/implemented/2026-10-25-run-form-contract.md) | 2026-10-25 |
 | [2026-10-21-method-library-main-surface.md](2026-10-21-method-library-main-surface.md) | [2026-10-21-method-library-main-surface](../settled_issues/2026-10-21-method-library-main-surface.md)（已结卡） | 2026-10-21 |

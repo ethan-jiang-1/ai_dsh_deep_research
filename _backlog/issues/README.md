@@ -4,10 +4,11 @@
 
 ## 活跃清单
 
-- [2026-10-29 方法库工作台重排](2026-10-29-method-library-workbench-redesign.md) — A′ 两列、显式来源、Host 写入/默认/删除、草稿 revision 与窄屏交互已实现并有自动证据，真模型 save 探针已过；等待迟到/重复候选观察、最终视觉与用户业务验收。
+（暂无活跃 issue。）
 
 ## 最近归档
 
+- [2026-10-29 方法库工作台重排](../_archived/settled_issues/2026-10-29-method-library-workbench-redesign.md) — implemented：A′ 两列、显式来源、受控 Host 写入/默认、草稿 revision 与窄屏交互；真浏览器/真模型 save/default/clear/delete E2E 全绿；[Note](../../notes/implemented/2026-10-29-method-library-workbench.md)。
 - [2026-10-28 方法库页内对话共创](../_archived/settled_issues/2026-10-28-method-library-cocreation.md) — implemented：页内三栏 + 方法编辑 preset + 草稿回填 + 保存闭环；证据 = 调研 §14 + `runtime/probe-save/artifacts/2026-10-28T14-47-08-504Z/`。
 
 最近三条（更早 = [settled 池索引](../_archived/settled_issues/README.md)，逐卡一行；本区不重复维护）：

@@ -41,7 +41,7 @@ intent: 给 reviewer 的背景知识：不了解这个产品的人，先读这�
 3. **报告怎么写**：交付物的第一屏给谁看、分几节、什么形态。第三格钉“可读的交付”，而不是“堆证据”；
 4. **不承诺**：边界即诚实。第四格钉“这条方法明确不做什么”，防止把没覆盖说成不存在、把判断写成事实。
 
-这四格对应研究方法论的四条线：**来源纪律 / 验证纪律 / 交付纪律 / 边界纪律**（来源 = `research-workspace/method-library.md` 头部注释 + [docs/design/30](../../../docs/design/30-methodology-mapping.md) 的方法论映射）。
+这四格对应研究方法论的四条线：**来源纪律 / 验证纪律 / 交付纪律 / 边界纪律**（来源 = `research-workspace/method-library.md` 头部注释 + [docs/design/30](../../../../docs/design/30-methodology-mapping.md) 的方法论映射）。
 
 ## 4. 内置参考（只读）
 

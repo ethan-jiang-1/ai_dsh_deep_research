@@ -85,7 +85,7 @@
 部分目录，才得出"只剩 3 个"。
 
 > 2026-10-30 现状补记：`MethodLibraryView.tsx` 已显著超过 600 行（方法库 A′ 工作台），上表“均在 600 内”
-> 不再成立；A- 代码层次基线失效，重议入口 = [_backlog/issues/2026-10-29-method-library-workbench-redesign.md](../../_backlog/issues/2026-10-29-method-library-workbench-redesign.md)。
+> 不再成立；A- 代码层次基线失效，重议入口 = [_backlog/_archived/settled_issues/2026-10-29-method-library-workbench-redesign.md](../../_backlog/_archived/settled_issues/2026-10-29-method-library-workbench-redesign.md)。
 
 ### Phase D（测试资产）
 

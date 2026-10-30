@@ -21,14 +21,7 @@
 （2026-10-25 运行形态合同材料已随消费者迁入 [_archived/research/](../_archived/research/)；三条旧材料同迁：notes-stocktake 体检 + strategy-benchmark 两份。）
 
 
-- [method-library-cocreation/2026-10-29-method-library-background.md](method-library-cocreation/2026-10-29-method-library-background.md) — 方法库是什么：概念/四字段/内置参考/默认/从 run 沉淀/演进史/术语表（消费者：[issue](../issues/2026-10-29-method-library-workbench-redesign.md)）。
-- [method-library-cocreation/2026-10-29-dsh-plugin-borrowing-and-rationale.md](method-library-cocreation/2026-10-29-dsh-plugin-borrowing-and-rationale.md) — 对 DSH 现成机制（preset/skill/tool/client-plugin/slot/conversation/theme）的借用清单、每项理由与否决备选（消费者：[issue](../issues/2026-10-29-method-library-workbench-redesign.md)）。
-- [method-library-cocreation/2026-10-29-option-a-scroll-and-intelligence.md](method-library-cocreation/2026-10-29-option-a-scroll-and-intelligence.md) — 方案 A 的滚动规格（17+6 种情形）、对话智力体能力/协议、模式与方案切换的状态对齐矩阵（消费者：[issue](../issues/2026-10-29-method-library-workbench-redesign.md)）。
-- [method-library-cocreation/2026-10-29-ux-redesign.md](method-library-cocreation/2026-10-29-ux-redesign.md) — 原 A（草稿卡在上、对话在下）的流程、状态与四张视觉稿；当前精化见 A′ 重审（消费者：[issue](../issues/2026-10-29-method-library-workbench-redesign.md)）。
-- [method-library-cocreation/2026-10-29-method-library-workbench-review.md](method-library-cocreation/2026-10-29-method-library-workbench-review.md) — 对原 A 的独立重审：保留两列与摘要/对话上下关系，定义详情、来源选择、访谈、表单检查与保存核验；附五张 A′ 流程与状态线框（消费者：[issue](../issues/2026-10-29-method-library-workbench-redesign.md)）。
-- `method-library-cocreation/2026-10-29-method-library-dsh-data-contract.md` — 本地 pinned DSH 的 Session、storage-domain、Host `ctx.fs`、Client workspaceFiles 与 raw follow/Client journal 恢复机制证据；业务草稿仍需 pack owner 与恢复协议（消费者：[独立重审](method-library-cocreation/2026-10-29-method-library-workbench-review.md)）。
-- `method-library-cocreation/2026-10-29-method-library-state-lifecycle-audit.md` — pinned Session prompt/tool 身份、Client reference ready 与释放、raw follow 与 Client journal 的 cursor 恢复差异、工具崩溃恢复及 provider-specific persistence 的生命周期审计（消费者：[独立重审](method-library-cocreation/2026-10-29-method-library-workbench-review.md)）。
-- [method-library-cocreation/2026-10-29-method-library-write-path-policy-comparison.md](method-library-cocreation/2026-10-29-method-library-write-path-policy-comparison.md) — 模型可见 Host tool 与 Client Remote 直达 owner 的 pinned DSH/pack 证据比较：授权、操作回执、生命周期、失败边界与测试缺口；未替用户裁定写入授权（消费者：[方法库工作台 issue](../issues/2026-10-29-method-library-workbench-redesign.md)）。
+（2026-10-29 方法库工作台八份调研与 ux 线框已随已结卡迁入 [_archived/research/method-library-cocreation/](../_archived/research/method-library-cocreation/)；历史消费者 = [方法库工作台重排](../_archived/settled_issues/2026-10-29-method-library-workbench-redesign.md)。）
 
 
 （2026-10-24 用户判断落地材料不再服务活跃卡：`reader-final/` 两份随可读终稿两卡迁入 [_archived/research/reader-final/](../_archived/research/reader-final/2026-10-23-reader-final-design.md)；`2026-10-21-method-library-main-surface.md` 随已结卡迁入 [_archived/research/](../_archived/research/2026-10-21-method-library-main-surface.md)。）
