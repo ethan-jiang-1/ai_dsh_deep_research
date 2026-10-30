@@ -26,6 +26,7 @@ test('source version selection uses the highest numeric immutable final', () => 
 test('completed run source requires a readable question, final version, and accepted receipt', () => {
   const base = {
     hasFinalVersion: true,
+    hasDeliverableContent: true,
     runHeader: { kind: 'ok', text: 'phase: accepted', eof: true },
     hasDeliveredRecord: true,
     hasLegacyAcceptance: false,
@@ -33,7 +34,9 @@ test('completed run source requires a readable question, final version, and acce
   }
   assert.equal(isCompletedMethodSourceRun(base), true)
   assert.equal(isCompletedMethodSourceRun({ ...base, hasFinalVersion: false }), false)
+  assert.equal(isCompletedMethodSourceRun({ ...base, hasDeliverableContent: false }), false)
   assert.equal(isCompletedMethodSourceRun({ ...base, question: { kind: 'error', detail: 'read failed' } }), false)
+  assert.equal(isCompletedMethodSourceRun({ ...base, question: { kind: 'ok', text: '   ' } }), false)
   assert.equal(isCompletedMethodSourceRun({ ...base, hasDeliveredRecord: false }), false)
   assert.equal(isCompletedMethodSourceRun({ ...base, runHeader: { kind: 'absent' }, hasLegacyAcceptance: true }), true)
   assert.equal(isCompletedMethodSourceRun({ ...base, runHeader: { kind: 'absent' }, hasLegacyAcceptance: false }), false)

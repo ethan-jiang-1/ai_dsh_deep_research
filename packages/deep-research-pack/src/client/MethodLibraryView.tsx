@@ -576,7 +576,8 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   }
 
   const startRunSource = (run: RunSourceCandidate): void => {
-    if (!run.eligible || run.question.kind !== 'ok' || run.deliverable.kind !== 'ok') return
+    if (!run.eligible || run.question.kind !== 'ok' || run.question.text.trim() === ''
+      || run.deliverable.kind !== 'ok' || run.deliverable.text.trim() === '') return
     setDraft({ name: '', sections: emptySections(), provenance: `来自研究：${run.name}`, legacyText: null })
     setSelectedRunSource(run)
     setSelectedBuiltinSource(null)
@@ -670,8 +671,10 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
       const deliveredRecord = runFiles?.some((file) => file.name === 'delivered.json') === true
       const legacyReceipt = runFiles?.some((file) => file.name === 'acceptance.md') === true
       const hasFinal = version !== null
+      const hasDeliverableContent = deliverable.kind === 'ok' && deliverable.text.trim() !== ''
       const eligible = isCompletedMethodSourceRun({
         hasFinalVersion: hasFinal,
+        hasDeliverableContent,
         runHeader: header,
         hasDeliveredRecord: deliveredRecord,
         hasLegacyAcceptance: legacyReceipt,
@@ -679,7 +682,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
       })
       const status = questionComplete.kind !== 'ok'
         ? props.t('runNoQuestion')
-        : !hasFinal || deliverable.kind !== 'ok'
+        : !hasFinal || !hasDeliverableContent
           ? props.t('runNoFinal')
           : eligible ? props.t('eligibleRun') : props.t('runNotCompleted')
       setSelectedRunSource({ name, finalPath, question, deliverable, eligible, status })

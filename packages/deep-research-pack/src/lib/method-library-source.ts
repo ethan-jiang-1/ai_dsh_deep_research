@@ -8,6 +8,7 @@ export type SourcePreview =
 
 export interface RunCompletionEvidence {
   readonly hasFinalVersion: boolean
+  readonly hasDeliverableContent: boolean
   readonly runHeader: SourcePreview
   readonly hasDeliveredRecord: boolean
   readonly hasLegacyAcceptance: boolean
@@ -26,7 +27,8 @@ export function latestFinalVersion(files: readonly { readonly name: string }[]):
 
 /** A run is selectable only when its output and acceptance are both discoverable. */
 export function isCompletedMethodSourceRun(evidence: RunCompletionEvidence): boolean {
-  if (!evidence.hasFinalVersion || evidence.question.kind !== 'ok') return false
+  if (!evidence.hasFinalVersion || !evidence.hasDeliverableContent
+    || evidence.question.kind !== 'ok' || evidence.question.text.trim() === '') return false
   const acceptedHeader = evidence.runHeader.kind === 'ok' && /^phase:\s*accepted\s*$/m.test(evidence.runHeader.text)
   return (acceptedHeader && evidence.hasDeliveredRecord) || evidence.hasLegacyAcceptance
 }
