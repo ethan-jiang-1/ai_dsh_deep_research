@@ -15,7 +15,7 @@ export function runC() {
   const GRANDFATHER = /<!-- grandfather:/;
   const each = (sub, fn) => {
     const dir = join(ROOT, 'notes', sub);
-    if (!existsSync(dir)) return; // 空层不检（如 postmortem 尚无事故）
+    if (!existsSync(dir)) return; // 空层不检（如某时态层暂无条目）
     for (const ent of readdirSync(dir)) {
       if (ent === 'README.md' || !ent.endsWith('.md')) continue;
       fn(ent, readFileSync(join(dir, ent), 'utf8'));

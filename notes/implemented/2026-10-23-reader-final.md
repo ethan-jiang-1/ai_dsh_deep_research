@@ -22,7 +22,8 @@
 卡 1（流程位）与卡 2（可读层）据此合并成一个显性步骤：
 
 - **阶段 / owner**：Lead 在 critic `review.md` 终局 `readiness: PASS` 后、HITL2 之前，
-  加载 `reader-final` skill 写 `final/readable.md`；不新增 run phase、不新增角色（D2 四角色不变）。
+  加载 `reader-final` skill 写 `final/readable.md`；不新增 run phase、不新增角色（D2 研究角色不变；
+  D37 后另有方法编辑，非研究角色）。
 - **两件产物**：工作件 `final/readable.md`（HITL2 前用户先读）；用户定稿后忠实复制为
   `final/readable-vN.md`（与 `final/vN.md` 同 N），与 canonical 一起 `present`（reader 第一、
   canonical 第二）。

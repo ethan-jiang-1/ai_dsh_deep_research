@@ -71,11 +71,6 @@
 - 损坏 tarball 失败原因可读（gzip/truncated/tarball），且无 dependencies/bundles/node_modules 半装；tarball 无 symlink/setuid 条目。
 - 种子清单路径穿越：恶意 `../escaped.txt` 键曾可写出工作区；现在拒绝 `..`/绝对路径/反斜杠，源也必须留在 `workspace/`，并有回归。
 - 目录 `file:` 安装：移动源目录后已装副本仍可 dump-config，但旧路径重装失败；必须 `plugin remove` 后从新路径 add。文档已从“移动即断链”改正为“旧路径不能重装/升级；link: 才断链”。
-- 用户 `cordis.patch.yml`：安装/卸载前后字节相同，`dump-config` 仍见用户 overlay。
-- 已有用户环境：别的 bundle + 用户 overlay + session/credentials/workspace 在安装/卸载前后 hash 不变，别的 bundle 仍在。
-- session 日志跨卸载/重装保留（真实会话，不是假文件）；升级不触碰已有 run bundle。
-- 损坏 tarball：失败后 dependencies/bundles/node_modules 无半装，有效 tarball 可恢复。
-- 并发 scaffold：活跃 pid 锁 exit 2、陈旧锁接管、state 原子写无 `.tmp` 残留。
 
 ## 边界
 

@@ -19,7 +19,7 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 
 | 位置 | 内容 | 随包发布 |
 |---|---|---|
-| `presets/<role>.patch.yml` | 四角色 preset（单行形态：一条 `@deepseek-ai/dsh-agent-preset` 行，config.plugins 内声明 persona/时钟/skills/工具行） | ✓ |
+| `presets/<role>.patch.yml` | preset roster（四研究角色 + 方法编辑；单行形态：一条 `@deepseek-ai/dsh-agent-preset` 行，config.plugins 内声明 persona/时钟/skills/工具行） | ✓ |
 | `presets/<role>/skills/<n>/SKILL.md` | 研究方法论技能（各角色清单正本 = 盘上 `presets/<role>/skills/` 目录，bundle 自动发现——新增免改本行） | ✓ |
 | `cordis.patch.yml` | bundle 行：preset roster（default: lead）+ **检索底座**（`- id: web` 替换行：搜索 = DeepSeek Search API、fetch = 回退 provider；`research-fetch-fallback` 行注册它——见下节）+ 会话全文检索开关（`session-query-sqlite` `openAt: first-search`——FTS 惰性开，`:memory:` 每进程重建；检索工具行在 lead/critic preset）+ `tool-present` + 团队可视面 `ui-agent-team` + 本包 client 面 | ✓ |
 | `workspace/` | **研究工作区种子**：研究手册（`AGENTS.md`：证据契约/目录约定/完成判据）+ `NODES.md`（节点 I/O 契约）+ `question-patterns.md`（判型库）+ `templates/run/` 八件模板（含 `plan.md` 执行图）+ `method-library.md`（独立空架子种子，不从正本同步）+ `.gitignore`（包内名 `.gitignore.example`——npm 不打包 `.gitignore` 文件，安装时由 scaffold 落地成本名；工作区纳入版本控制时拒收 run bundle/归档/方法库，留档加 `!路径`） | ✓ |
@@ -30,7 +30,7 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 
 角色职责与方法论：见各 `presets/<role>.patch.yml`（persona）与 `presets/<role>/skills/<n>/SKILL.md`（方法论正文）——都随本包发布。
 
-方法库写入：保留模型可见 Host tools `method_library_upsert`、`method_library_set_default`、`method_library_remove`。Host projection 只允许 Method Editor owning Session 中由 owner `user/message.source.rpcId` 对应的操作命令；每次 claim 绑定动作、名称、turn 和单个 tool `callId`，保存命令还校验 entry 的 SHA-256 摘要。Host 从 owning Session header 的 cwd 定位 `method-library.md`，写后重新读取并核对条目、来源、旧正文和默认列表；结构化结果通过 `presentationMeta` 供 Client 按 callId 关联。Client 读取完整分页直到 `eof`，保存/默认/删除只有在匹配工具结果并读到完整目标状态后才报告已核对。超时、调用结果缺失或文件读取不完整时状态标为未知，禁止自动重试；手动刷新只核对当前内容，不声称恢复原命令身份。Client Remote 直接写入不授权。普通保存与编辑保留目标条目的默认状态；另存为保留旧条目且不更改默认；「保存并设为默认」「设为默认」「清除默认」均为独立明确操作；删除默认不自动提升另一条。方法库当前 UI 已采用两列和「详情 / 摘要+访谈 / 表单检查」状态；摘要字段可直达表单并聚焦，内置参考详情可直接作为新来源；新建必须先选择从零、某条内置参考或一条有完成记录的 run，并显示 question 与最高 final/vN 的有界预览。每个活动草稿使用独立 Method Editor Session，并以单调 draft revision 拒绝旧 turn、重复 seq 或用户修改后的迟到回填；模式切换保留同一草稿与历史，刷新恢复不承诺。真实浏览器入口 smoke 已覆盖两列、详情/访谈/表单切换、内置来源与已完成 run 预览，并断言窄屏无横向裁切与分隔条键盘调宽；最终视觉与用户业务流程仍待验收，issue 在此之前保持活跃。
+方法库写入：保留模型可见 Host tools `method_library_upsert`、`method_library_set_default`、`method_library_remove`。Host projection 只允许 Method Editor owning Session 中由 owner `user/message.source.rpcId` 对应的操作命令；每次 claim 绑定动作、名称、turn 和单个 tool `callId`，保存命令还校验 entry 的 SHA-256 摘要。Host 从 owning Session header 的 cwd 定位 `method-library.md`，写后重新读取并核对条目、来源、旧正文和默认列表；结构化结果通过 `presentationMeta` 供 Client 按 callId 关联。Client 读取完整分页直到 `eof`，保存/默认/删除只有在匹配工具结果并读到完整目标状态后才报告已核对。超时、调用结果缺失或文件读取不完整时状态标为未知，禁止自动重试；手动刷新只核对当前内容，不声称恢复原命令身份。Client Remote 直接写入不授权。普通保存与编辑保留目标条目的默认状态；另存为保留旧条目且不更改默认；「保存并设为默认」「设为默认」「清除默认」均为独立明确操作；删除默认不自动提升另一条。方法库当前 UI 已采用两列和「详情 / 摘要+访谈 / 表单检查」状态；摘要字段可直达表单并聚焦，内置参考详情可直接作为新来源；新建必须先选择从零、某条内置参考或一条有完成记录的 run，并显示 question 与最高 final/vN 的有界预览。每个活动草稿使用独立 Method Editor Session，并以单调 draft revision 拒绝旧 turn、重复 seq 或用户修改后的迟到回填；模式切换保留同一草稿与历史，刷新恢复不承诺。真实浏览器入口 smoke 已覆盖两列、详情/访谈/表单切换、内置来源与已完成 run 预览，并断言窄屏无横向裁切、库/工作台可切换且切换期间草稿保持挂载、分隔条键盘可调宽；最终视觉与用户业务流程仍待验收，issue 在此之前保持活跃。
 
 ## Model Experience
 

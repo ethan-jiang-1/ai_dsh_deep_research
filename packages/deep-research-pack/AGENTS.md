@@ -1,7 +1,7 @@
 # AGENTS.md — deep-research-pack（插件内容子树）
 
-本包是**配置为主 + 研究驾驶舱（Research Cockpit——观察面 client 套件，D18 单点例外；
-[构成正本](../../docs/design/40-research-cockpit.md)）**：贡献 = `cordis.patch.yml`
+本包是**配置为主 + 研究驾驶舱（Research Cockpit——观察面 client 套件，D18 有界例外；
+另一处 = D31 抓取回退 provider；[构成正本](../../docs/design/40-research-cockpit.md)）**：贡献 = `cordis.patch.yml`
 的 bundle 行 + `presets/<role>.patch.yml`（一条 `@deepseek-ai/dsh-agent-preset` 行，
 config.plugins 内声明 persona/skills/工具行）+ `presets/<role>/skills/` + 驾驶舱
 （`src/client/`，构建产物 `lib/client.js`）+ 工作区种子 `workspace/`（手册与模板快照 +

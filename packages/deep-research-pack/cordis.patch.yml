@@ -85,8 +85,9 @@
     # ── 团队 Web 可视面（观察与调试任务起止的最简途径；vendor 层无此行，仍归本包）──
     - id: ui-agent-team
       name: '@deepseek-ai/dsh-experimental-client-ui-agent-team'
-    # ── 本包自己的 client 面（D18 单点例外）：host 半是空壳，浏览器半注册右栏「研究状态」
-    #    页签。行的 name 就是本包名（company-pack 同款）——host 侧加载 lib/index.js（空壳），
+    # ── 本包自己的 client 面（D18 有界例外；另一处 = D31 抓取回退 provider）：
+    #    host 半是空壳，浏览器半注册研究驾驶舱页签（清单 = design/40 §2，不在此手抄）。
+    #    行的 name 就是本包名（company-pack 同款）——host 侧加载 lib/index.js（空壳），
     #    浏览器侧经 exports["./client"] 取 lib/client.js（ModuleLoader 外壳）。──
     - id: research-client
       name: 'dsh-deep-research-pack'

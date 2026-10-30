@@ -102,7 +102,7 @@ DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`�
 | 研究工作区 | 会话 cwd 的目录（手册 `AGENTS.md` + `NODES.md` + `question-patterns.md` + `templates/run/` + 版本控制规则 `.gitignore`） | 本包 `workspace/` 种子（`dev/sync-pack-workspace.mjs` 同步） |
 
 工作区是**纪律的载体**：DSH 的 agent-instructions 从会话 cwd 向上发现 `AGENTS.md` 并注入每个
-角色——手册不在工作区，四个角色就没有证据契约与完成判据。安装步骤（用户视角）与前置
+角色——手册不在工作区，四个研究角色就没有证据契约与完成判据。安装步骤（用户视角）与前置
 检查 = [pack README](../../packages/deep-research-pack/README.md)；部署工具 = 包内两条 bin
 （`dsh-deep-research-preflight` 检查、`dsh-deep-research-scaffold` 铺种子 + 补团队层——
 tarball 装法不生成 PATH bin，用安装副本内脚本全路径，见 pack README §部署）。种子带

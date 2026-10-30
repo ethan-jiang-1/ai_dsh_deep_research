@@ -52,7 +52,7 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 | preset 层 | `presets/<role>.patch.yml`（单行形态：一条 `@deepseek-ai/dsh-agent-preset` 行，DSH 0.1.7 起同形态，`config.plugins` 内声明 persona/skills/工具行；`presets/<role>/` 只放 `skills/`） | 角色组合：persona + 时钟（time-context）+ 硬隔离 skills + 工具面 + agent-instructions | **preset 自包含**（DSH 无 patch 继承）：角色要用的行必须自己声明，否则会话只拿到 bundle 少数行（company R1 血泪：工具行不声明 = CEO 读不了文件） |
 
 `tool-todo` 行若显式声明，`allowParallelInProgress` 是**必填 config**（抄行不抄 config =
-挂载时炸且 UI 吞错——company R1 实证，四角色 preset 已全部带上）。
+挂载时炸且 UI 吞错——company R1 实证，四研究角色 preset 已全部带上）。
 
 ## 3. 协作通道（用户定案：多角色 + agent team）
 
@@ -64,7 +64,7 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 
 团队层版本派生：profile 装 `@…-agent-team-profile@<运行中的 DSH 版本>`——安装侧 `scaffold` 优先从 DSH 安装锚（`--install-anchor` / `DSH_INSTALL_ANCHOR` / PATH 的 `dsh`）取版本，回退 profile 的 `@deepseek-ai/dsh-app-boot`；dev run 通道 `dev/boot-run.sh` 从 pack 兼容矩阵首项派生（两者都必须与运行版本一致，不能用 `engines.dsh` 范围当版本号）。
 
-## 4. 工具面（四角色共同基座 + 差异）
+## 4. 工具面（四研究角色共同基座 + 差异；方法编辑工具面见 D37）
 
 - **共同基座**：tool-fs / tool-fs-search / tool-skill / tool-todo / **tool-web**（模型面行随
   preset，行 config 照抄 base：`fetch: true` 是启用开关、`searchTimeoutMs` 是搜索预算、

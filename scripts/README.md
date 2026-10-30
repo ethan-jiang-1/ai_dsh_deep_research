@@ -39,7 +39,7 @@
 | snapshot-replay-smoke.mjs | 场景 manifest 驱动的四角色组装面回放（persona/header 全序列/四处注入，含时钟序列）+ 声明的渲染金标准；场景集 = `snapshots/replay/` 下含 snapshot.json 的全部目录（发现式，`--face <name>` 定向单集） | keyless（RPC/解压子进程，无模型；须先 source dev/env.sh） |
 | gates-smoke.mjs | 门禁自测：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组；`--case=<id[,id]>` 只跑指定案例（改一道门禁的迭代口，末尾自报仅跑几个）；CI keyless job 每次全量跑 | keyless（git/node 子进程，无模型） |
 | client-hitl-smoke.mjs | 活标题触发与挂起显性化 | 真模型档 |
-| l4-lite-smoke.mjs | 四角色真模型响应 + scout web_search 调用 | 真模型档 |
+| l4-lite-smoke.mjs | 全角色真模型响应（含 method-editor）+ scout web_search 调用 | 真模型档 |
 | team-preflight-smoke.mjs | spawn_teammate 组队与成员组合画像 | 真模型档 |
 | cdp-ask-smoke.mjs | cdp-probe `--ask` 端到端：空闲态 `Send message` 与在飞态 `Queue message` 双路径发出 + **journal 落盘对账**（BUG-021 正修；判定本体 keyless 钉在 `lib/probe-send-target.mjs`） | 真模型档 |
 

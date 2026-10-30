@@ -53,7 +53,7 @@
 - `gates-smoke` **78 案例全绿**（零注入对照 + 客户端候选链注入点名红）。
 - `client-load-smoke` 真浏览器 **ALL PASS**（状态/配置/图谱/终稿；证据计数 160/160、终稿 v2
   版本账与静默条）。
-- `release-smoke --install-only` **ALL PASS**（真实安装形状；安装域 preset-smoke 四角色真挂载
+- `release-smoke --install-only` **ALL PASS**（真实安装形状；安装域 preset-smoke 全角色真挂载
   绿、端口无残留）。
 - 红证：`review.md` EOF 策略移除 → 1448 行读成 40 行红；空文件切分红；浏览器错误分类红；
   `bindingTrust` pending 分支红；客户端候选链注入 → `run-context-single-source` 点名红；

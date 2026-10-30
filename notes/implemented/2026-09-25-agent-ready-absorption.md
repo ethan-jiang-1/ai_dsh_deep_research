@@ -179,8 +179,8 @@ symlink **不追平**（vendor 自身只在根 · `packages/` · `vendor/` · `.
 Claude 系 harness 发现与 DSH 同一批开发技能），门禁 `claude-symlink` 扩为覆盖两条 symlink；
 **已具备（改名映射）**：glossary → 00-index §术语映射，development/testing/architecture/
 cookbook/subsystems → guides/60 · evaluation · design/ · guides/61-62 · design/；
-**未决 1 项**：`LICENSE`（本仓 `private: true` 未分发，vendor 是 MIT——进 roadmap 搁置池，
-复活条件 = 对外分发前）；**不适用**：i18n/user/website、snapshots、benchmarks/native/python/
+**当时未决 1 项**：`LICENSE`（本仓 `private: true` 未分发，vendor 是 MIT——当时进 roadmap 搁置池，
+复活条件 = 对外分发前；2026-10-25 已定 MIT，见顶部历史注记）；**不适用**：i18n/user/website、snapshots、benchmarks/native/python/
 patches/apps、CONTRIBUTING/SAFETY/THIRD_PARTY/BRAND、lint/jscpd/vitest/lefthook 配置（无 TS
 源码面；Markdown 纪律由门禁承担）。逐项理由见 [discipline-map 源 9](../../docs/discipline-map.md)。
 

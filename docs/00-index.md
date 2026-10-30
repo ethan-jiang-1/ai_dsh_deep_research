@@ -66,8 +66,8 @@ vendor 构建产物在场（`bash dev/vendor-build.sh`；boot 自检会拦）+
 | [decisions.md](./decisions.md) | 导航/合同 | D 号台账正文（按需查；决策理由/输掉的方案归 notes/） |
 | [external-materials.md](./external-materials.md) | 导航/合同 | 外部材料钉版身份与吸收落点（按需查） |
 | [evaluation.md](./evaluation.md) | 合同 | 评估五面（L0 结构/L1 挂载/L2 安装/L3 领域/L4 交付）与里程碑矩阵——**先于框架定案** |
-| [design/10-architecture.md](./design/10-architecture.md) | 设计 | repo 形态与组合层（单包四角色）；通道选型（agent-team 主通道）；工具面；偏离登记 |
-| [design/20-roles.md](./design/20-roles.md) | 设计 | 四角色内容：职责 owner 表、persona 要素、skills 面（清单 = 盘上目录）、信噪比策略落点 |
+| [design/10-architecture.md](./design/10-architecture.md) | 设计 | repo 形态与组合层（单包 5 preset：四研究角色 + 方法编辑）；通道选型（agent-team 主通道）；工具面；偏离登记 |
+| [design/20-roles.md](./design/20-roles.md) | 设计 | 角色内容：四研究角色 + 方法编辑（D37）的职责 owner 表、persona 要素、skills 面（清单 = 盘上目录）、信噪比策略落点 |
 | [design/30-methodology-mapping.md](./design/30-methodology-mapping.md) | 设计 | **方法论映射**：codex Deep Research harness 内核 → DSH 载体（L3 领域面的核心载体） |
 | [design/40-research-cockpit.md](./design/40-research-cockpit.md) | 设计 | **研究驾驶舱**：观察面 client 套件的当前事实正本（定位/构成/通道/纪律/验证/边界——agent 一找就到的单一入口） |
 | [design/50-agent-loop-and-state.md](./design/50-agent-loop-and-state.md) | 设计 | **Agent Loop 与状态模型**：运行驱动链总览 + 四类运行状态（run bundle / session log / goal·任务板 / 观察面）的 canonical 合同、恢复优先级与交付判定——当前事实正本 |

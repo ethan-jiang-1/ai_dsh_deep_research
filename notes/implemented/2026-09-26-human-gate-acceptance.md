@@ -23,8 +23,8 @@
   （`dev/hitl-answer.mjs` 真浏览器 answerer，逐题选推荐项；bundle 的 question.md §Decisions
   与 journal.md 均有操作侧如实标注"代理模拟"——它替的是人，不是人）；卡片可用性与观察面
   目验无真人结论——代理侧替代数据在案但不冒充真人档（八场 77 卡全量审计、观察面走查三发现，
-  均为代理评估）；**复查口常开**：用户任何时候想亲验（开 3081、点两张卡、给三句结论，约
-  2 分钟），结论补记本 Note 或按需立新条目；
+  均为代理评估）；**复查口常开**：用户任何时候想亲验（开 run 通道、点两张卡、给三句结论，约
+  2 分钟；端口以 [guides/61](../../docs/guides/61-run-playbook.md) 为准），结论补记本 Note 或按需立新条目；
 - 操作侧全程事件形状谓词（同日交付的 run-ops-self-diagnosis：run-state 模块 + watch-run
   盯场 + hitl-answer 前置自拒）——本场立项前的 grep 假阳性（误报"卡已挂起"）与判定过急
   （final 落盘误报"已交付"）两个事故均被该交付闭环。
@@ -69,6 +69,6 @@
 
 - 队列已退役（D20）；原 parked 语义随队列移除——本篇的“队列空”是 2026-09-27 当轮状态；
 - 当时 run 通道 3081 活着（token 在 `runtime/smoke-workspace/web.log`）；第 12 场 bundle 归档于
-  `research-workspace/archive/drt_dsh-release-watch/`（位置=状态，工作区根零活跃 bundle）；
+  `research-workspace/archive/drt_dsh-release-watch/`（当时位置=状态；D28 后位置只作操作桶，工作区根零活跃 bundle）；
 - 复查口常开（2 分钟亲验流程 = 61-run-playbook §1–6 的用户视角子集：真人答两张卡 +
   三句体验结论）。

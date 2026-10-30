@@ -81,7 +81,7 @@
 
 | 任务型 | 同 diff 必改 | 生成物与检查次序 | 必跑面 | 必写 | done |
 |---|---|---|---|---|---|
-| 改 preset 结构（角色/工具行/roster 接线；新增 skill 文件按下行） | pack 源 `presets/` | **`render-overlay` 先于 L1**（L1 挂的是 overlay，不是 pack 源） | L0 + L1 | 行为/发布集变才写 Note | 四角色真挂载绿 + 文档同步 |
+| 改 preset 结构（角色/工具行/roster 接线；新增 skill 文件按下行） | pack 源 `presets/` | **`render-overlay` 先于 L1**（L1 挂的是 overlay，不是 pack 源） | L0 + L1 | 行为/发布集变才写 Note | 全部 preset 真挂载绿 + 文档同步 |
 | 改 persona / skill / 手册文本（模型可见） | pack 源 + `research-workspace/` 正本 | `render-overlay` 先于 L1 → L1 → snapshot-replay B 层（细则 = 表后脚注①）→ 重启 run 通道（web 缓存 boot 时文本） | L0 + L1 + L4-lite | 同上 | 真模型档证据 + L1 绿 |
 | **改驾驶舱**（观察面 client 面——`src/client/` 套件，[构成正本](../design/40-research-cockpit.md)） | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `pnpm build` → `client-load-smoke`（改挂起显性化再跑 `client-hitl-smoke`） | L0 + client-load-smoke | 同上 | 真浏览器断言全绿 |
 | 改 `src/lib/` 纯函数 / 类型面（pack 两半的编译面） | 对应 `src/lib` / `src/client` 类型位 | `pnpm typecheck` → `pnpm test`（typecheck 前置 = vendor 构建产物在场） | L0 + typecheck | 同上 | typecheck + 对应测试绿 |
@@ -125,7 +125,7 @@ node scripts/smoke/e2e-021rc2.mjs            # 升级端到端（keyless 浏览�
 node scripts/smoke/release-smoke.mjs        # L2 真实安装形状：pack→干净 profile→plugin add→安装域冒烟；无模型调用，安装模式跳过模型就绪检查
 node scripts/smoke/cold-start-smoke.mjs     # L2 冷启动：独立 DSH_DEV_HOME/profile/端口/state；MCP 关闭；到浏览器面 GREEN
 node scripts/probe/method-library-probe.mjs  # 偏好库可发现性三问（真模型档；BUG-042 修复判据）
-node scripts/smoke/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：四角色响应 + scout web_search 调用）
+node scripts/smoke/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：全角色响应 + scout web_search 调用）
 node scripts/smoke/team-preflight-smoke.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + company D18 one-shot worker 探针）
 node dev/run-driver.mjs up          # **run 通道驱动入口（常用）**：起/复用通道（复用先验安装镜像=当前 pack 源）+ 验浏览器面 + 呈交块（exit 0 可呈交/1 红/2 未跑；镜像漂移/未取证 = 2）；--bootstrap 先跑冷启动前置；--profile/DSH_RUN_STATE_DIR 支持多实例；probe = 只验已起通道（同样先验镜像）；url = 打印当前 URL
 bash dev/boot-run.sh                  # run 通道底层启动面：自检→组合检查/必要补装→漂移门；仪表盘后台观察、web 前台 3083；用法 = 61（驱动入口内部调它）

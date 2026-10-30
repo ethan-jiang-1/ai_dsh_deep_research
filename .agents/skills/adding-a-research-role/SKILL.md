@@ -50,9 +50,9 @@ source dev/env.sh && node scripts/smoke/release-smoke.mjs --install-only  # L2 �
 ```
 
 改了模型可见行（persona/skill 文本）→ keyless 先跑 `node scripts/smoke/snapshot-replay-smoke.mjs`
-（B 层组装请求 diff：persona 全文 + 全部 request/header + 三处 user/message 注入；有意变更的
+（B 层组装请求 diff：persona 全文 + 全部 request/header + 四处 user/message 注入（含时钟序列）；有意变更的
 红 = 已捕获，走重录场景或 `--update-expected` 重写金标准）→ 再跑真模型档
-`source dev/env.sh && node scripts/smoke/l4-lite-smoke.mjs`（四角色响应 + scout 工具调用）。
+`source dev/env.sh && node scripts/smoke/l4-lite-smoke.mjs`（全角色响应，含 method-editor；+ scout 工具调用）。
 **只跑 keyless 不算验过角色行为**——机制基线切换的
 教训（E1 回归）就是漏了 with-key 面。
 

@@ -133,7 +133,7 @@ research profile 转正；指南 = guides/61；暂无仪表盘开关。
 **Phase 2 通道与叠加判定**：
 
 - `dev/boot-run.sh`：删 profile 从头重建全绿（web 模板 → .npmrc 钉 repo → pack →
-  plugin add ×2 → 组合校验）；幂等复跑跳过安装 + web 横幅（3081 + token）确认；
+  plugin add ×2 → 组合校验）；幂等复跑跳过安装 + web 横幅（当时 3081 + token）确认；
 - **叠加判定（差分实验，keyless）**：scout preset 临时改 bogus backgroundMode →
   session/create 炸在 `expected "one-shot" | "continuable" but got "bogus-differential-probe"`
   ——报错持有 **preset 行的值** = preset 行覆盖 profile 行。处置 = 三 preset 改声明
