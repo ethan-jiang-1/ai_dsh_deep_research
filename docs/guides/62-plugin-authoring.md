@@ -126,7 +126,7 @@ tarball 装法不生成 PATH bin，用安装副本内脚本全路径，见 pack 
 |---|---|---|
 | 加/换一条 bundle 行（host 共享面） | `cordis.patch.yml` → `node dev/render-overlay.mjs` 重渲染；行引用的 `@deepseek-ai/*` 进 `peerDependencies` | `overlay-fresh` / `row-deps` 门禁 + L1 真挂载 + L2 安装形状 |
 | 加一个研究角色 | `presets/<role>.patch.yml` + `package.json` 的 `dsh.bundle.patch` 数组 + `l4-lite-smoke` 的 `PROMPTS` + 台账 D 号（D2 是角色数） | `preset-smoke` 真挂载（L1）+ `preset-structure` / `role-list-sync` |
-| 加一个方法论 skill | `presets/<role>/skills/<n>/SKILL.md`（frontmatter `name` 逐字等于目录名）；persona 若点名 skill 名须同 diff 对账（四个 preset 的 persona 均有硬引用） | `preset-structure` + L1 的 skills 隔离断言 |
+| 加一个方法论 skill | `presets/<role>/skills/<n>/SKILL.md`（frontmatter `name` 逐字等于目录名）；persona 若点名 skill 名须同 diff 对账（各 preset 的 persona 均有硬引用） | `preset-structure` + L1 的 skills 隔离断言 |
 | 改研究手册 / 模板 / 工作区 `.gitignore` | 改 `research-workspace/` 正本 → `node dev/sync-pack-workspace.mjs` 同步进 pack | `pack-workspace-fresh` + `workspace-versioning` 门禁 |
 | 加部署脚本 / bin | `package.json` 的 `files` + `bin` | `release-smoke`（L2：真装一次，装完能跑） |
 | 加观察面 client 面能力 | `src/client/` + `tsconfig.client.json` 的 include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `client-load-smoke`（真浏览器）+ `client-keys` 门禁 |
