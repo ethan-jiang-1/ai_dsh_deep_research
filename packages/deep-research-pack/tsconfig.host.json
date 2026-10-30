@@ -11,5 +11,5 @@
     // 改用 node_modules 里已构建的 lib/types 声明。
     "paths": {}
   },
-  "include": ["src/index.ts", "src/fetch-fallback", "src/method-library-tool.ts", "src/lib/library-fold.ts", "src/lib/text-fold.ts", "src/lib/method-library-write.ts"]
+  "include": ["src/index.ts", "src/fetch-fallback", "src/method-library-tool.ts", "src/lib/library-fold.ts", "src/lib/text-fold.ts", "src/lib/method-library-write.ts", "src/lib/method-library-commands.ts", "src/lib/method-library-operation.ts"]
 }

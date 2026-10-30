@@ -855,15 +855,15 @@ async function pass3bGraphTabPhase() {
   }
 }
 
-/** pass-3c：主界面「方法库」tab（2026-10-21 管理迁移）——Chat/Trajectory 同排的第三个 view。
- *  keyless：只开 tab/读库，不发任何 session/prompt；保存回执由 library-fold 单测与人工走查。 */
+/** pass-3c：主界面「方法库」tab。keyless 浏览器断言 A′ 两列、摘要/访谈/表单切换与来源选择；不发送模型 prompt。 */
 async function pass3cMethodLibraryPhase() {
   await awaitAppReady(page, 5_000)
   // 等显式状态，不拿"读一次没看见"当结论（2026-10-28 归因：失败现场保存时 tab 已在 DOM
   // 里（role=tab），说明断言时刻只是还没挂载完——单次 isVisible 把挂载时序当成了注册回归）。
   const tabVisibleSoon = async (windowMs) => {
     for (let waited = 0; waited < windowMs; waited += 500) {
-      const t = page.getByText('方法库', { exact: true }).first()
+      // Tab title is locale-owned; accept the English and Chinese locale labels.
+      const t = page.getByRole('tab', { name: /^(方法库|Method library)$/i }).first()
       if (await t.isVisible().catch(() => false)) return t
       await wait(500)
     }
@@ -893,30 +893,68 @@ async function pass3cMethodLibraryPhase() {
   await wait(800)
   const rowDetail = rowVisible && (await paneTextOf(page)).includes('怎么核实')
   step(rowDetail, '方法库列表行可点击（拖拽柄不拦截）', rowVisible ? '' : '格局调研行不可见')
-  // 编辑/新建表单只验证结构与取消（keyless 零发送）；保存路径由 library-fold 单测与人工走查。
-  const edit = page.getByRole('button', { name: '编辑' }).first()
+  // A′ 表面切换只验证渲染，不向 Coach 发送 prompt；写入效果由 real Loader smoke 覆盖。
+  const edit = page.getByRole('button', { name: /在工作台继续|Continue in workbench/i }).first()
   if (await edit.isVisible({ timeout: 5_000 }).catch(() => false)) {
     await edit.click({ timeout: 5_000 }).catch(() => {})
-    await wait(1_000)
-    // 只数**表单里带 label 的**四字段：同屏可能有别的 textarea（HITL 答题框——2026-10-23 实测
-    // 研究状态页挂着用户待答卡时页面上多一个，全局计数变成 5 的假红）。断言的是表单结构，不是整页。
+    await wait(500)
+    const formTab = page.locator('[data-method-summary] [role="tab"]').nth(1)
+    const summaryOnly = (await page.locator('[data-method-summary]').count().catch(() => 0)) === 1
+      && (await page.locator('[data-method-summary] [role="tab"]').count().catch(() => 0)) === 2
+      && (await page.locator('label textarea').count().catch(() => 0)) === 0
+    step(summaryOnly, '编辑访谈态：摘要在场，表单字段收起')
+    await formTab.click({ timeout: 5_000 }).catch(() => {})
+    await wait(500)
     const ta = await page.locator('label textarea').count().catch(() => 0)
-    const formText = await paneTextOf(page)
-    step(ta === 4 && formText.includes('保存到方法库'), '方法库编辑表单：四字段 + 保存到方法库',
-      ta === 4 ? 'textarea 4' : `textarea ${ta}`)
+    const saveControl = await page.getByRole('button', { name: /保存到方法库|Save to method library/i }).count().catch(() => 0)
+    step(ta === 4 && saveControl > 0, '编辑表单态：四字段 + 保存控制', ta === 4 ? 'textarea 4' : `textarea ${ta}`)
     await page.getByRole('button', { name: '取消' }).first().click({ timeout: 5_000 }).catch(() => {})
-    await wait(800)
+    await wait(500)
   } else {
-    step(false, '方法库库条目「编辑」不可见（渲染回归）')
+    step(false, '方法库库条目「在工作台继续」不可见')
   }
   const create = page.getByRole('button', { name: '新建' }).first()
   if (await create.isVisible({ timeout: 5_000 }).catch(() => false)) {
     await create.click({ timeout: 5_000 }).catch(() => {})
-    await wait(1_000)
-    const ta = await page.locator('label textarea').count().catch(() => 0)
-    step(ta === 4, '方法库新建表单：四字段在场', ta === 4 ? 'textarea 4' : `textarea ${ta}`)
+    await wait(500)
+    const sourceChoice = (await page.locator('[data-method-source-selection]').count().catch(() => 0)) === 1
+    step(sourceChoice, '新建流程先显示明确来源选择')
+    const builtinChoice = page.locator('[data-method-source-builtin]').first()
+    if (await builtinChoice.isVisible({ timeout: 5_000 }).catch(() => false)) {
+      await builtinChoice.click({ timeout: 5_000 }).catch(() => {})
+      await wait(300)
+      const builtinUse = await page.locator('[data-method-source-use-builtin]').count().catch(() => 0)
+      const preview = (await page.locator('[data-method-source-preview]').first().textContent().catch(() => '')) ?? ''
+      step(builtinUse === 1 && preview.includes('找来源'), '内置来源可预览四字段并提供开始入口')
+    } else {
+      step(false, '内置来源列表不可见')
+    }
+    const loadRuns = page.locator('[data-method-source-load-runs]').first()
+    await loadRuns.click({ timeout: 5_000 }).catch(() => {})
+    const knownRun = page.locator('[data-method-source-run]').filter({ hasText: 'archive/drt_cn-open-vs-us-closed-agentic' }).first()
+    const runListed = await knownRun.waitFor({ state: 'visible', timeout: 20_000 }).then(() => true).catch(() => false)
+    if (runListed) {
+      await knownRun.click({ timeout: 5_000 }).catch(() => {})
+      const runUse = page.locator('[data-method-source-use-run]').first()
+      const runReady = await runUse.waitFor({ state: 'visible', timeout: 30_000 }).then(() => true).catch(() => false)
+      const preview = (await page.locator('[data-method-source-preview]').last().textContent().catch(() => '')) ?? ''
+      step(runReady && preview.includes('question.md'), '具体已完成 run 可预览且按完成判据解锁')
+      if (!runReady) skipped.push('已完成 run 来源预览（先验完成判据未通过）')
+    } else {
+      skipped.push('已完成 run 来源列表（dev home 无已知 archive run）')
+    }
+    await page.getByRole('button', { name: /从零开始|Start from scratch/i }).first().click({ timeout: 5_000 }).catch(() => {})
+    await wait(500)
+    const newFormTab = page.locator('[data-method-summary] [role="tab"]').nth(1)
+    const interviewOnly = (await page.locator('[data-method-summary]').count().catch(() => 0)) === 1
+      && (await page.locator('label textarea').count().catch(() => 0)) === 0
+    step(interviewOnly, '从零来源进入摘要与访谈态')
+    await newFormTab.click({ timeout: 5_000 }).catch(() => {})
+    await wait(500)
+    const newTa = await page.locator('label textarea').count().catch(() => 0)
+    step(newTa === 4, '新建草稿可进入四字段检查', newTa === 4 ? 'textarea 4' : `textarea ${newTa}`)
     await page.getByRole('button', { name: '取消' }).first().click({ timeout: 5_000 }).catch(() => {})
-    await wait(800)
+    await wait(500)
   }
   const builtin = page.getByRole('button', { name: '内置参考' }).first()
   if (await builtin.isVisible({ timeout: 5_000 }).catch(() => false)) {

@@ -22,6 +22,8 @@ import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
 // `conversation.view`（Chat/Trajectory 同排的主界面 tab）声明在 ui-conversation。
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type {} from '@deepseek-ai/dsh-client-locale/client'
+import { en, zh, type DeepResearchPackLocaleKey } from './locales.ts'
 // 品牌槽（`sidebar.brand.mark` / `sidebar.brand.name`）声明在 ui-sidebar 的 SlotMap——类型增强导入即登记槽名。
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 import {
@@ -30,7 +32,7 @@ import {
   RESEARCH_FINAL_TAB_KEY, RESEARCH_FINAL_KIND, RESEARCH_FINAL_PATTERN, RESEARCH_FINAL_PATTERN_ROOT,
   RESEARCH_FINAL_PATTERN_LEDGER, RESEARCH_FINAL_PATTERN_LEDGER_ROOT,
   RESEARCH_FINAL_PATTERN_READER, RESEARCH_FINAL_PATTERN_READER_ROOT,
-  RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT, RESEARCH_TOOL_KEYS, METHOD_LIBRARY_TOOL, METHOD_LIBRARY_REMOVE,
+  RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT, RESEARCH_TOOL_KEYS, METHOD_LIBRARY_TOOL, METHOD_LIBRARY_REMOVE, METHOD_LIBRARY_DEFAULT,
   RESEARCH_BRAND_MARK_SLOT, RESEARCH_BRAND_NAME_SLOT, METHOD_LIBRARY_VIEW,
   METHOD_COACH_PORTAL, METHOD_COACH_PORTAL_ID, METHOD_COACH_CHAT,
 } from './keys.ts'
@@ -44,12 +46,21 @@ import { MethodCoachPortal, CoachChat } from './method-library/coach.tsx'
 import { ResearchGraphTab } from './ResearchGraphTab.tsx'
 import { ResearchFinalTab } from './ResearchFinalTab.tsx'
 import { browserRunSource } from './run-source-browser.ts'
+import { joinMethodLibraryPages, type MethodLibraryReadResult } from '../lib/method-library-read.ts'
+import { methodLibraryCoachEventOf } from '../lib/method-library-events.ts'
+import type { MethodLibraryCoachEvent } from '../lib/method-library-events.ts'
 import { OrcaMark, OrcaName } from './BrandMark.tsx'
 import { draftInProgress, finalAddressOf, isFinalAddress, latestFinalDelivery, shouldOpenFinal } from '../lib/final-target.ts'
 
 /** Required services：槽注册表（renderer）+ 右栏页签注册器 + 右栏导航面（openTab——挂起显性化）+ remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
  *  父级则取 .session 炸 "without injecting it"，只声明子级则取父属性炸 "without inject"）。 */
-export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'sessions', 'workspaces']
+declare module '@deepseek-ai/dsh-client-ui-slots' {
+  interface LocaleNamespaceMap {
+    deepResearchPack: DeepResearchPackLocaleKey
+  }
+}
+
+export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'sessions', 'workspaces', 'locale']
 
 /**
  * Client plugin body：登记「研究状态」页签（类型 + keyed 槽体共享同一 key——拼错任一处
@@ -57,7 +68,9 @@ export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'r
  * @param ctx - client root context。
  */
 export function apply(ctx: ClientContext): void {
-  ctx.inject(['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'sessions', 'workspaces'], (scoped) => {
+  ctx.inject(['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'sessions', 'workspaces', 'locale'], (scoped) => {
+    scoped.effect(() => scoped.locale.register('deepResearchPack', { zh, en }), 'deep-research-pack: dictionaries')
+    const t = scoped.locale.bind('deepResearchPack')
     // journal 流式源（company 同款最小投影）：snapshot 给历史、event 给实时；
     // wire 形状 → 领域形状的折算住这里（纯装配），展示住组件。目标两形态：普通会话 id /
     // subagent 持久父地址（队员会话——纯 id 被 host 守卫拒，见 FollowTarget 注释）。
@@ -72,26 +85,23 @@ export function apply(ctx: ClientContext): void {
       }
     }
 
-    // 方法编辑草稿流：页面用它把 coach 的 method-draft 回填表单（只认 live assistant/message；
-    // 开场快照是历史，重载时不拿旧草稿盖用户手改）。
     const watchCoach = async (
       sessionId: SessionId,
       signal: AbortSignal,
-      onText: (text: string) => void,
+      onEvent: (event: MethodLibraryCoachEvent) => void,
+      onReady: () => void,
     ): Promise<void> => {
+      let ready = false
       for await (const frame of follow(sessionId, signal)) {
-        if (frame.kind !== 'event') continue
-        const event = frame.event as {
-          type?: string
-          data?: { message?: { content?: readonly { type?: string; text?: string }[] } }
+        if (frame.kind === 'history') {
+          if (!ready) {
+            ready = true
+            onReady()
+          }
+          continue
         }
-        if (event.type !== 'assistant/message') continue
-        const message = event.data?.message
-        const text = (message?.content ?? [])
-          .filter((part) => part.type === 'text')
-          .map((part) => part.text ?? '')
-          .join('')
-        if (text !== '') onText(text)
+        const event = methodLibraryCoachEventOf(frame.event)
+        if (event !== null) onEvent(event)
       }
     }
 
@@ -190,21 +200,26 @@ export function apply(ctx: ClientContext): void {
       }
     }
 
-    // ── 方法编辑会话（阶段 1：独立 root session；页面右栏 portal）──────────────────
-    // 一 workspace 一个 coach；确定性 session id 做锚（无浏览器持久化）；retain 进页面面板。agentPreset 先用 lead 替身，
-    // 阶段 2 切成 method-editor。sessions/workspaces 用动态 get（不为 client 面新增类型依赖）。
+    // ── Method Editor sessions: one per in-memory draft key, with no browser persistence. ──
     interface CoachSessionService {
       create(opts: { workspaceId?: string; cwd?: string; sessionId?: SessionId; agentPreset?: string }): Promise<SessionId>
-      retain(id: SessionId, opts: { source: string }): { release(): void }
+      retain(id: SessionId, opts: { source: string }): {
+        release(): void
+        ready: Promise<unknown>
+        binding: { session: { getSnapshot(): { openState: string } } }
+      }
       list: { getSnapshot(): { byId: Record<string, { cwd?: string } | undefined> } }
     }
     interface CoachWorkspaceService {
       list: { getSnapshot(): { items: readonly { workspaceId: string; sessionIds: readonly SessionId[] }[] } }
     }
-    const coachSessionIds = new Map<string, SessionId>()
-    const ensureCoachSession = async (currentSessionId: SessionId): Promise<{
+    const ensureCoachSession = async (currentSessionId: SessionId, draftKey: string): Promise<{
       id: SessionId
-      reference: { release(): void }
+      reference: {
+        release(): void
+        ready: Promise<unknown>
+        binding: { session: { getSnapshot(): { openState: string } } }
+      }
     }> => {
       const sessions = (scoped as unknown as { get(name: string): unknown }).get('sessions') as CoachSessionService | undefined
       if (sessions === undefined) throw new Error('sessions 服务不可用')
@@ -212,17 +227,11 @@ export function apply(ctx: ClientContext): void {
       const workspaceId = workspaces?.list.getSnapshot().items
         .find((item) => item.sessionIds.includes(currentSessionId))?.workspaceId
       const cwd = sessions.list.getSnapshot().byId[currentSessionId]?.cwd
-      const scopeKey = workspaceId ?? cwd ?? 'default'
-      // FAQ 26：pack 不引入浏览器持久化。用**确定性 session id** 做 workspace ↔ coach 的锚，
-      // 先 retain 命中已有会话；没有才用同名 id 创建（命名 blank 的复用语义由 host 给）。
-      let seed = 0
-      for (const char of scopeKey) seed = (seed * 31 + (char.codePointAt(0) ?? 0)) >>> 0
-      const deterministicId = `method-coach-${seed.toString(36)}` as SessionId
-      const id = coachSessionIds.get(scopeKey) ?? deterministicId
+      const deterministicId = `method-coach-${draftKey}` as SessionId
       try {
-        return { id, reference: sessions.retain(id, { source: 'methodCoach' }) }
+        return { id: deterministicId, reference: sessions.retain(deterministicId, { source: 'methodCoach' }) }
       } catch {
-        coachSessionIds.delete(scopeKey)
+        // A missing Session is created below from the current page's selected workspace.
       }
       const created = await sessions.create({
         sessionId: deterministicId,
@@ -230,17 +239,24 @@ export function apply(ctx: ClientContext): void {
         ...(workspaceId === undefined && cwd !== undefined ? { cwd } : {}),
         agentPreset: 'method-editor',
       })
-      coachSessionIds.set(scopeKey, created)
       try { await scoped.remote.session.rename({ sessionId: created, title: '方法编辑' }) } catch { /* non-fatal */ }
       return { id: created, reference: sessions.retain(created, { source: 'methodCoach' }) }
     }
-    const sendCoach = async (sessionId: SessionId, text: string): Promise<void> => {
-      const requestId = crypto.randomUUID() as import('@deepseek-ai/dsh-api-remotes/client').SessionRequestId
-      const result = await scoped.remote.session.prompt(
-        { requestId, sessionId, mode: 'queue', content: [{ type: 'text' as const, text }] },
-        new AbortController().signal,
-      )
-      if (!result.ok) throw new Error(String(result.error ?? 'prompt failed'))
+    const sendCoach = async (
+      sessionId: SessionId,
+      text: string,
+      requestId: string = crypto.randomUUID(),
+    ): Promise<{ readonly ok: boolean; readonly detail?: string; readonly uncertain?: boolean }> => {
+      const typedRequestId = requestId as import('@deepseek-ai/dsh-api-remotes/client').SessionRequestId
+      try {
+        const result = await scoped.remote.session.prompt(
+          { requestId: typedRequestId, sessionId, mode: 'queue', content: [{ type: 'text' as const, text }] },
+          new AbortController().signal,
+        )
+        return result.ok ? { ok: true } : { ok: false, detail: String(result.error ?? 'prompt rejected') }
+      } catch (cause) {
+        return { ok: false, detail: String(cause), uncertain: true }
+      }
     }
 
     // workspaceFiles 闭包（bundle 渐进面数据通道；company cultivation 同款，失败降级 null）
@@ -268,6 +284,48 @@ export function apply(ctx: ClientContext): void {
     // limit 参数化（BUG-026）：默认 40 行 = bundle 渐进面小读取的历史选择（question.md 首行
     // 等）；「研究配置」页签的库读传大限（多条目库 >40 行，写死会静默截断——vendor 契约
     // limit 上限 = 配置 maxLines，默认 5000）。
+    const readLibrary = async (sessionId: SessionId, path: string, signal: AbortSignal): Promise<MethodLibraryReadResult> => {
+      const pages: { text: string; lines: number; eof: boolean }[] = []
+      let offset = 1
+      for (let pageIndex = 0; pageIndex < 20; pageIndex += 1) {
+        try {
+          const result = await scoped.remote.workspaceFiles.read(sessionId, path, { offset, limit: 1000 }, signal)
+          if (!result.ok) {
+            const code = (result.error as { code?: string } | undefined)?.code
+            if (code === 'workspace-file/not-found') return { kind: 'absent' }
+            return { kind: 'error', detail: String(result.error ?? 'workspace read failed') }
+          }
+          const page = result.value
+          pages.push({ text: page.text, lines: page.lines, eof: page.eof })
+          const text = joinMethodLibraryPages(pages)
+          if (text !== null) return { kind: 'ok', text }
+          if (page.lines === 0) return { kind: 'error', detail: 'workspace read returned an empty non-final page' }
+          offset += page.lines
+        } catch (cause) {
+          if (signal.aborted) return { kind: 'error', detail: 'read cancelled' }
+          return { kind: 'error', detail: String(cause) }
+        }
+      }
+      return { kind: 'error', detail: 'method-library.md exceeds 20000 lines' }
+    }
+    const readPreview = async (sessionId: SessionId, path: string, signal: AbortSignal, limit = 80) => {
+      try {
+        const result = await scoped.remote.workspaceFiles.read(sessionId, path, { offset: 1, limit }, signal)
+        if (!result.ok) {
+          const code = (result.error as { code?: string } | undefined)?.code
+          return code === 'workspace-file/not-found'
+            ? { kind: 'absent' as const }
+            : { kind: 'error' as const, detail: String(result.error ?? 'workspace read failed') }
+        }
+        const { text, eof } = result.value
+        if (typeof text !== 'string' || typeof eof !== 'boolean') return { kind: 'error' as const, detail: 'workspace preview response was malformed' }
+        return { kind: 'ok' as const, text, eof }
+      } catch (cause) {
+        return signal.aborted
+          ? { kind: 'cancelled' as const }
+          : { kind: 'error' as const, detail: String(cause) }
+      }
+    }
     const readFile = async (sessionId: SessionId, path: string, signal: AbortSignal, limit = 40, missingOk = false) => {
       try {
         const result = await scoped.remote.workspaceFiles.read(sessionId, path, { limit }, signal)
@@ -329,25 +387,28 @@ export function apply(ctx: ClientContext): void {
       name: METHOD_LIBRARY_VIEW,
       id: 'method-library',
       order: 20,
-      label: () => '方法库',
+      label: () => t('methodLibrary'),
+      locale: 'deepResearchPack',
       inject: () => ({
-        readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) =>
-          readFile(sessionId, path, signal, limit, true),
-        sendInstruction,
+        readLibrary,
         ensureCoach: ensureCoachSession,
         sendCoach,
         watchCoach,
         listDir: (sessionId: SessionId, path: string, signal: AbortSignal) => listDir(sessionId, path, signal),
+        readPreview: (sessionId: SessionId, path: string, signal: AbortSignal) => readPreview(sessionId, path, signal),
       }),
     }, MethodLibraryView)), 'deep-research-pack: method-library conversation view')
 
     // 方法库写库工具卡：对话流里只显示「已写入库：name」，不暴露工具参数。
     scoped.effect(() => scoped.slots.inject(RESEARCH_TOOLVIEW_SLOT, () =>
-      scoped.slots.register({ name: RESEARCH_TOOLVIEW_SLOT, key: METHOD_LIBRARY_TOOL, priority: -1 }, MethodLibraryToolCard)),
+      scoped.slots.register({ name: RESEARCH_TOOLVIEW_SLOT, key: METHOD_LIBRARY_TOOL, priority: -1, locale: 'deepResearchPack' }, MethodLibraryToolCard)),
     'deep-research-pack: method-library toolview')
     scoped.effect(() => scoped.slots.inject(RESEARCH_TOOLVIEW_SLOT, () =>
-      scoped.slots.register({ name: RESEARCH_TOOLVIEW_SLOT, key: METHOD_LIBRARY_REMOVE, priority: -1 }, MethodLibraryToolCard)),
+      scoped.slots.register({ name: RESEARCH_TOOLVIEW_SLOT, key: METHOD_LIBRARY_REMOVE, priority: -1, locale: 'deepResearchPack' }, MethodLibraryToolCard)),
     'deep-research-pack: method-library remove toolview')
+    scoped.effect(() => scoped.slots.inject(RESEARCH_TOOLVIEW_SLOT, () =>
+      scoped.slots.register({ name: RESEARCH_TOOLVIEW_SLOT, key: METHOD_LIBRARY_DEFAULT, priority: -1, locale: 'deepResearchPack' }, MethodLibraryToolCard)),
+    'deep-research-pack: method-library default toolview')
 
     // 方法编辑：根级 portal（shell.overlay）+ 私有 session 子槽；会话树在 main 之外，DOM 进页面右栏。
     scoped.effect(() => scoped.slots.inject(METHOD_COACH_PORTAL, () => scoped.slots.register({

@@ -97,39 +97,45 @@ export function MethodCoachPortal(props: MethodCoachPortalProps): ReactNode {
   )
 }
 
-/** 起手式：不让人面对空聊天框。 */
-const STARTERS = [
-  { label: '从零聊', prompt: '从零开始，先帮我从研究场景问起。' },
-  { label: '照内置改', prompt: '我想照一条内置打法改，先问我想改哪一块。' },
-  { label: '从这次研究沉淀', prompt: '把这次研究实际采用的做法沉淀成一条方法。' },
-] as const
+/** Owned Client reference plus its first-open readiness and snapshot binding. */
+interface CoachSessionReference {
+  release(): void
+  readonly ready?: Promise<unknown>
+  readonly binding?: { readonly session: { getSnapshot(): { readonly openState: string } } }
+}
 
 /** 方法编辑面板的 props（页面注入建会话/发 prompt）。 */
 export interface MethodCoachPanelProps {
   readonly sessionId: SessionId
-  /** 页面附带的库/草稿/内置快照；只随第一条消息发一次，后续原生 composer 直发。 */
-  readonly context: string
-  readonly ensure: (currentSessionId: SessionId) => Promise<{
+  readonly draftKey: string
+  readonly visible: boolean
+  /** 为当前活动草稿建立/保留独立的 Method Editor Session。 */
+  readonly ensure: (currentSessionId: SessionId, draftKey: string) => Promise<{
     readonly id: SessionId
-    readonly reference: { release(): void }
+    readonly reference: CoachSessionReference
   }>
-  readonly send: (sessionId: SessionId, text: string) => Promise<void>
   /** 会话就绪后回报 id（页面据此跟随草稿流）。 */
   readonly onCoach?: (id: SessionId) => void
-  readonly width: number
-  readonly onWidthChange: (width: number) => void
+  readonly onError?: (cause: unknown) => void
+  readonly onStartInterview: (coachId: SessionId) => Promise<{ readonly ok: boolean; readonly detail?: string; readonly uncertain?: boolean }>
+  readonly title: string
+  readonly startLabel: string
+  readonly readyLabel: string
+  readonly pendingLabel: string
+  readonly startedLabel: string
 }
 
 /**
- * 方法库页右栏的「方法编辑」面板：起手式 + 原生会话（portal 目标格）。
- * @param props - 当前会话 + ensure/send 注入。
+ * 方法库页访谈区的「方法编辑」面板：开始访谈 + 原生会话（portal 目标格）。
+ * @param props - 当前会话、draft key 与 ensure/start 注入。
  */
 export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
-  const { sessionId, context, ensure, send, onCoach, width } = props
-  const [coach, setCoach] = useState<{ id: SessionId; reference: { release(): void } } | null>(null)
+  const { sessionId, draftKey, ensure, onCoach, onError, onStartInterview, visible, title, startLabel, readyLabel, pendingLabel, startedLabel } = props
+  const [coach, setCoach] = useState<{ id: SessionId; reference: CoachSessionReference } | null>(null)
   const [host, setHost] = useState<HTMLElement | null>(null)
-  const [started, setStarted] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [started, setStarted] = useState(false)
+  const [startBusy, setStartBusy] = useState(false)
 
   // 标准聊天行为：对话区自身滚动、自动贴底跟随最新；用户上翻时暂停，回到底部恢复。
   useEffect(() => {
@@ -154,29 +160,43 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
 
   useEffect(() => {
     let cancelled = false
-    let held: { release(): void } | null = null
+    let held: CoachSessionReference | null = null
     void (async () => {
       try {
-        const result = await ensure(sessionId)
+        const result = await ensure(sessionId, draftKey)
         if (cancelled) {
           result.reference.release()
           return
         }
         held = result.reference
+        await held.ready
+        if (cancelled) return
+        const openState = held.binding?.session.getSnapshot().openState
+        if (openState !== undefined && openState !== 'open') throw new Error(`方法编辑历史未就绪：${openState}`)
+        if (cancelled) return
         setCoach(result)
         onCoach?.(result.id)
       } catch (cause) {
-        if (!cancelled) setError(String(cause))
+        if (held !== null) {
+          const reference = held
+          held = null
+          setTimeout(() => { reference.release() }, 0)
+        }
+        if (!cancelled) {
+          setError(String(cause))
+          onError?.(cause)
+        }
       }
     })()
     return () => {
       cancelled = true
       if (held !== null) {
         const reference = held
+        held = null
         setTimeout(() => { reference.release() }, 0)
       }
     }
-  }, [sessionId, ensure, onCoach])
+  }, [sessionId, draftKey, ensure, onCoach, onError])
 
   useEffect(() => {
     if (coach === null || host === null) return undefined
@@ -184,51 +204,34 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
     return () => { coachChat.close() }
   }, [coach, host])
 
-  const start = (prompt: string): void => {
-    if (coach === null) return
-    const first = !started
-    setStarted(true)
+  const startInterview = (): void => {
+    if (coach === null || started || startBusy) return
+    setStartBusy(true)
     setError(null)
-    void send(coach.id, first ? `${context}\n\n用户：${prompt}` : prompt)
-      .catch((cause: unknown) => { setError(String(cause)) })
+    void onStartInterview(coach.id).then((result) => {
+      setStarted(result.ok || result.uncertain === true)
+      if (!result.ok) setError(result.detail ?? 'prompt rejected')
+    }).catch((cause: unknown) => {
+      setStarted(true)
+      setError(String(cause))
+    }).finally(() => { setStartBusy(false) })
   }
 
   return (
     <aside
       data-method-coach-panel=""
       style={{
-        flex: `0 0 ${width}px`, minWidth: 260, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden',
-        borderLeft: '1px solid var(--dsw-alias-border-l1)', background: 'var(--dsw-alias-bg-layer-1)',
+        flex: '1 1 auto', width: '100%', minWidth: 0, minHeight: 0, display: visible ? 'flex' : 'none', flexDirection: 'column', overflow: 'hidden',
+        borderTop: '1px solid var(--dsw-alias-border-l1)', background: 'var(--dsw-alias-bg-layer-1)',
       }}
     >
       <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--dsw-alias-bg-layer-2)' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-          <strong style={{ fontSize: 13 }}>方法编辑</strong>
-          <span style={{ fontSize: 11, opacity: 0.6 }}>把这条方法聊清楚</span>
+          <strong style={{ fontSize: 13 }}>{title}</strong>
+          <span style={{ fontSize: 11, opacity: 0.6 }}>{readyLabel}</span>
         </div>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
-          {STARTERS.map((starter) => (
-            <button
-              key={starter.label}
-              data-method-coach-start=""
-              type="button"
-              disabled={coach === null}
-              onClick={() => { start(starter.prompt) }}
-              style={{
-                fontSize: 11, padding: '3px 8px', borderRadius: 999,
-                border: '1px solid var(--dsw-alias-border-l2)', background: 'var(--dsw-alias-bg-base)',
-                cursor: coach === null ? 'default' : 'pointer',
-                opacity: coach === null ? 0.5 : 1,
-              }}
-            >
-              {starter.label}
-            </button>
-          ))}
-          {!started && (
-            <span style={{ fontSize: 11, opacity: 0.4, alignSelf: 'center' }}>
-              点一个开始
-            </span>
-          )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+          {coach !== null && <button type="button" disabled={started || startBusy} onClick={startInterview} style={{ border: '1px solid var(--dsw-alias-border-l2)', borderRadius: 4, padding: '5px 10px', background: 'var(--dsw-alias-bg-base)' }}>{started ? startedLabel : startBusy ? pendingLabel : startLabel}</button>}
         </div>
       </div>
       {error !== null && (
@@ -238,7 +241,7 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
         ref={(element) => { setHost(element) }}
         data-method-coach-host=""
         style={{
-          flex: 1, minHeight: 0, display: 'flex', overflow: 'hidden', background: 'var(--dsw-alias-bg-base)',
+          flex: 1, minHeight: 0, display: started ? 'flex' : 'none', overflow: 'hidden', background: 'var(--dsw-alias-bg-base)',
         }}
       />
     </aside>

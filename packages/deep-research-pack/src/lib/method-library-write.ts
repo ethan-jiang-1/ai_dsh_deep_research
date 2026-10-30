@@ -20,7 +20,7 @@ export function escapeRegExp(value: string): string {
 
 /** 条目标题匹配（名称后可带 `（provenance）` 与 `〔默认偏好〕`）。 */
 export function methodHeadingPattern(name: string): RegExp {
-  return new RegExp(`^##\\s+${escapeRegExp(name)}(?:（[^）\\n]*）)?(?:〔[^〕\\n]*〕)?\\s*$`, 'm')
+  return new RegExp(`^##\\s+${escapeRegExp(name)}(?:（[^）\\n]*）)?(?:〔[^〕\\n]*〕)*\\s*$`, 'm')
 }
 
 /**
@@ -29,7 +29,11 @@ export function methodHeadingPattern(name: string): RegExp {
  * @param entry - 完整条目（名称 + 四字段；四字段必须都非空）。
  * @returns 动作（新建/更新）与写入后的全文。
  */
-export function upsertMethodEntry(text: string, entry: LibraryEntry): UpsertMethodEntryResult {
+export function upsertMethodEntry(
+  text: string,
+  entry: LibraryEntry,
+  options: { readonly defaultAction?: 'preserve' | 'set' } = {},
+): UpsertMethodEntryResult {
   const name = entry.name.trim()
   if (name === '') throw new Error('方法条目缺名称')
   const missing = SECTION_LABELS.filter(({ key }) => {
@@ -39,17 +43,20 @@ export function upsertMethodEntry(text: string, entry: LibraryEntry): UpsertMeth
   if (missing.length > 0) {
     throw new Error(`方法条目「${name}」缺字段：${missing.map(({ label }) => label).join('、')}`)
   }
+  const target = matchingHeadingLines(text, name)
+  if (target.length > 1) throw new Error(`库里有重名方法「${name}」，拒绝写入`)
+  if (options.defaultAction !== 'set' && defaultCount(text) > 1) throw new Error('库里存在多个默认偏好，拒绝普通保存')
+  const makeDefault = options.defaultAction !== 'set' && target[0]?.line.includes('〔默认偏好〕') === true
   const legacy = entry.legacyText !== null && entry.legacyText.trim() !== '' ? entry.legacyText.trim() : null
   const block = [
-    renderLibraryEntry({ name, sections: entry.sections, provenance: entry.provenance, isDefault: entry.isDefault }),
+    renderLibraryEntry({ name, sections: entry.sections, provenance: entry.provenance, isDefault: makeDefault }),
     ...(legacy === null ? [] : [legacy]),
   ].join('\n')
-  const found = methodHeadingPattern(name).exec(text)
   let next: string
   let action: 'created' | 'updated'
-  if (found !== null) {
-    const start = found.index
-    const afterHeading = start + found[0].length
+  if (target.length === 1) {
+    const start = target[0]?.offset ?? 0
+    const afterHeading = start + (target[0]?.line.length ?? 0)
     const rest = text.slice(afterHeading)
     const nextHeading = rest.search(/^##\s/m)
     const end = nextHeading === -1 ? text.length : afterHeading + nextHeading
@@ -61,14 +68,52 @@ export function upsertMethodEntry(text: string, entry: LibraryEntry): UpsertMeth
     next = `${trimmed === '' ? '' : `${trimmed}\n\n`}${block}\n`
     action = 'created'
   }
-  if (entry.isDefault) {
-    const pattern = methodHeadingPattern(name)
-    next = next.split('\n').map((line) => {
-      if (!line.startsWith('## ')) return line
-      return pattern.test(line) ? line : line.replace('〔默认偏好〕', '')
-    }).join('\n')
+  return { action, name, text: options.defaultAction === 'set' ? setDefaultText(next, name) : next }
+}
+
+/** Set one unique target as default; duplicate or absent names are rejected. */
+export function setDefaultMethodEntry(text: string, name: string): { readonly text: string } {
+  const target = name.trim()
+  if (target === '') throw new Error('方法条目缺名称')
+  const matches = matchingHeadingLines(text, target)
+  if (matches.length === 0) throw new Error(`库里没有「${target}」`)
+  if (matches.length > 1) throw new Error(`库里有重名方法「${target}」，拒绝设为默认`)
+  return { text: setDefaultText(text, target) }
+}
+
+/** Clear all default markers; zero-default libraries are valid. */
+export function clearDefaultMethodEntry(text: string): { readonly changed: boolean; readonly text: string } {
+  const next = text.split('\n').map((line) => line.startsWith('## ') ? line.replace(/〔默认偏好〕/g, '') : line).join('\n')
+  return { changed: next !== text, text: next }
+}
+
+function defaultCount(text: string): number {
+  return text.split('\n').filter((line) => line.startsWith('## ') && line.includes('〔默认偏好〕')).length
+}
+
+function setDefaultText(text: string, name: string): string {
+  const pattern = methodHeadingPattern(name)
+  let targetCount = 0
+  const lines = text.split('\n').map((line) => {
+    if (!line.startsWith('## ')) return line
+    const isTarget = pattern.test(line)
+    if (isTarget) targetCount += 1
+    const clean = line.replace(/〔默认偏好〕/g, '')
+    return isTarget ? `${clean}〔默认偏好〕` : clean
+  })
+  if (targetCount !== 1) throw new Error(`库里${targetCount === 0 ? '没有' : '有重名方法'}「${name}」，拒绝设为默认`)
+  return lines.join('\n')
+}
+
+function matchingHeadingLines(text: string, name: string): readonly { readonly line: string; readonly offset: number }[] {
+  const pattern = methodHeadingPattern(name)
+  const matches: { line: string; offset: number }[] = []
+  let offset = 0
+  for (const line of text.split('\n')) {
+    if (pattern.test(line)) matches.push({ line, offset })
+    offset += line.length + 1
   }
-  return { action, name, text: next }
+  return matches
 }
 
 /**
@@ -78,10 +123,14 @@ export function upsertMethodEntry(text: string, entry: LibraryEntry): UpsertMeth
  * @returns 是否命中 + 删除后的全文。
  */
 export function removeMethodEntry(text: string, name: string): { removed: boolean; text: string } {
-  const pattern = methodHeadingPattern(name.trim())
-  const found = pattern.exec(text)
+  const target = name.trim()
+  if (target === '') throw new Error('删除方法需要名称')
+  const matches = matchingHeadingLines(text, target)
+  if (matches.length === 0) return { removed: false, text }
+  if (matches.length > 1) throw new Error(`库里有重名方法「${target}」，拒绝删除`)
+  const start = matches[0]?.offset ?? 0
+  const found = methodHeadingPattern(target).exec(text)
   if (found === null) return { removed: false, text }
-  const start = found.index
   const afterHeading = start + found[0].length
   const rest = text.slice(afterHeading)
   const nextHeading = rest.search(/^##\s/m)

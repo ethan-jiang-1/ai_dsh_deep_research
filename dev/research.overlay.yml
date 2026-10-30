@@ -301,7 +301,7 @@
 
                 输出契约：每当字段有变化，在消息末尾给一个 ```method-draft 围栏，内容是**完整**库条目（不是 diff），
                 格式见 method-interview skill。没有变化就不发。页面会用它回填表单；用户手改后以用户为准。
-                保存由页面按钮触发；收到【保存封套】时调 method_library_upsert 写库，成功后只回复「已写入：<名称>」，不要做其它事。
+                库写入由页面明确操作触发。严格按 method-interview skill 处理 `【方法库操作】` 命令；传递当前 operationId/payloadHash，不得重造或复用。method-draft 不携带默认标记。工具返回后停止，不得追加写入或以聊天文字推断文件状态。
 
           - id: time-context
             name: '@deepseek-ai/dsh-time-context'

@@ -50,6 +50,9 @@
     "@deepseek-ai/dsh-experimental-client-ui-agent-team": "^0.2.1-rc.2",
     "@deepseek-ai/dsh-persona": "^0.2.1-rc.2",
     "@deepseek-ai/dsh-session-query-sqlite": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-api-session-controller": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-session": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-session-projection": "^0.2.1-rc.2",
     "@deepseek-ai/dsh-skill-filesystem": "^0.2.1-rc.2",
     "@deepseek-ai/dsh-time-context": "^0.2.1-rc.2",
     "@deepseek-ai/dsh-tool-ask-user": "^0.2.1-rc.2",
@@ -66,6 +69,7 @@
     "@deepseek-ai/dsh-web-deepseek-api": "^0.2.1-rc.2",
     "@deepseek-ai/dsh-web-fetch-http": "^0.2.1-rc.2",
     "@deepseek-ai/schemastery": "^3.18.5",
+    "zod": "^4.4.3",
     "@deepseek-ai/dsh-tools": "^0.2.1-rc.2",
     "@deepseek-ai/dsh-agent": "^0.2.1-rc.2"
   },
@@ -94,7 +98,8 @@
         "@deepseek-ai/dsh-client-ui-session",
         "@deepseek-ai/dsh-client-ui-conversation",
         "@deepseek-ai/dsh-client-ui-sidebar-right",
-        "@deepseek-ai/dsh-client-ui-tool"
+        "@deepseek-ai/dsh-client-ui-tool",
+        "@deepseek-ai/dsh-client-locale"
       ],
       "platform": "web"
     }
@@ -133,7 +138,11 @@
     "@deepseek-ai/dsh-client-ui-tool": "workspace:*",
     "@deepseek-ai/dsh-experimental-agent-team": "workspace:*",
     "@deepseek-ai/dsh-session": "workspace:*",
-    "@deepseek-ai/dsh-client-ui-conversation": "workspace:*"
+    "@deepseek-ai/dsh-session-projection": "workspace:*",
+    "@deepseek-ai/dsh-api-session-controller": "workspace:*",
+    "@deepseek-ai/dsh-client-ui-conversation": "workspace:*",
+    "@deepseek-ai/dsh-client-locale": "workspace:*",
+    "zod": "^4.4.3"
   },
   "bin": {
     "dsh-deep-research-preflight": "./scripts/preflight.mjs",

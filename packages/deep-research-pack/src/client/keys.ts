@@ -79,3 +79,6 @@ export const METHOD_LIBRARY_TOOL = 'method_library_upsert'
 
 /** 方法库删库工具的 wire 名（toolview 卡 key 与 host 工具名逐字一致）。 */
 export const METHOD_LIBRARY_REMOVE = 'method_library_remove'
+
+/** 方法库默认操作工具的 wire 名（toolview 卡 key 与 host 工具名逐字一致）。 */
+export const METHOD_LIBRARY_DEFAULT = 'method_library_set_default'

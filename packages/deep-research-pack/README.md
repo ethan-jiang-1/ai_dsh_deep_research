@@ -30,7 +30,23 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 
 角色职责与方法论：见各 `presets/<role>.patch.yml`（persona）与 `presets/<role>/skills/<n>/SKILL.md`（方法论正文）——都随本包发布。
 
-方法库写库：方法编辑只通过 host 窄工具 `method_library_upsert`（`src/method-library-tool.ts`，preset 行 `dsh-deep-research-pack/method-library-tool`）写 `method-library.md`；同名 upsert / 同名删除（`method_library_remove`）、只碰该文件；面板永不直写（D25 2026-10-28 修订）。页面侧起手式三路（从零 / 照内置 / 从这次研究沉淀（最近 run））、字段人话提示、撞名保存前确认、读态「和编辑聊聊」；三栏分隔条可拖拽调宽，颜色走 `--dsw-alias-*` 主题 token。 **2026-10-29 重排在案**（issue `2026-10-29-method-library-workbench-redesign`：A = 两视图，草稿卡在上/对话在下；落地后本段的“三栏”改述）。
+方法库写入：保留模型可见 Host tools `method_library_upsert`、`method_library_set_default`、`method_library_remove`。Host projection 只允许 Method Editor owning Session 中由 owner `user/message.source.rpcId` 对应的操作命令；每次 claim 绑定动作、名称、turn 和单个 tool `callId`，保存命令还校验 entry 的 SHA-256 摘要。Host 从 owning Session header 的 cwd 定位 `method-library.md`，写后重新读取并核对条目、来源、旧正文和默认列表；结构化结果通过 `presentationMeta` 供 Client 按 callId 关联。Client 读取完整分页直到 `eof`，保存/默认/删除只有在匹配工具结果并读到完整目标状态后才报告已核对。超时、调用结果缺失或文件读取不完整时状态标为未知，禁止自动重试；手动刷新只核对当前内容，不声称恢复原命令身份。Client Remote 直接写入不授权。普通保存与编辑保留目标条目的默认状态；另存为保留旧条目且不更改默认；「保存并设为默认」「设为默认」「清除默认」均为独立明确操作；删除默认不自动提升另一条。方法库当前 UI 已采用两列和「详情 / 摘要+访谈 / 表单检查」状态；新建必须先选择从零、某条内置参考或一条有完成记录的 run，并显示 question 与最高 final/vN 的有界预览。每个活动草稿使用独立 Method Editor Session，模式切换保留同一草稿与历史；刷新恢复不承诺。真实浏览器入口 smoke 已覆盖两列、详情/访谈/表单切换、内置来源与已完成 run 预览；窄屏、键盘、视觉与用户业务流程仍待验收，issue 在此之前保持活跃。
+
+## Model Experience
+
+### Method Editor library operations
+
+#### What the model sees
+
+Only the Method Editor Agent sees `method_library_upsert`, `method_library_set_default`, and `method_library_remove`. Each explicit page action is a durable user message beginning with `【方法库操作】`; it carries one `operationId`, action and target name, plus an entry SHA-256 for saves. The save tool also receives `operationHash` and `defaultAction`; the default and remove tools receive only the operation-specific action/name. Successful tool responses give a short textual result, while `presentationMeta` carries structured operation data for the Client. The default marker is not part of `method-draft`; only explicit page actions can change it.
+
+#### Token effect
+
+A deterministic Method Editor Loader scenario prices the actual first request as the sum of its model-visible messages and tool schemas with DSH's fixed-density estimator. It compares that request with the same messages and the earlier upsert/remove schemas; the current fixture measures 6,778 first-turn input tokens, of which the schema change is +246. This is a comparative estimate, not provider-specific tokenization or billing; each save request also includes its complete method entry and command marker.
+
+#### KV Cache effect
+
+Tool schemas are stable within a Method Editor request series; a newly selected Agent receives its composed schema in the request header. Per-operation command text and the method entry are appended as user content, so they do not replace the preceding conversation prefix.
 
 ## 检索底座（DeepSeek Search API + 抓取回退）
 
@@ -293,8 +309,7 @@ node <pack>/scripts/scaffold.mjs --workspace <ws> --clean --write
    右栏「研究配置」页签 = **摘要面**（2026-10-21 管理迁移后）：只留**本次研究**（这次用的是哪条打法
    ＋ 来源 ＋「换一条」，读 question.md 研究方法节、五态如实）与「方法库（本工作区）→ 顶部 tab」
    入口；库列表 / 内置参考 / 新建编辑删除 / 领域示范 / 管理回执都在主界面 `conversation.view` 的
-   「方法库」tab（有对话的会话才显示）。保存仍生成指令交当前会话 Lead 执行（`session/prompt`），
-   **面板不直写文件**；
+   「方法库」tab（有对话的会话才显示）。写操作交给专用 Method Editor Session 执行 Host 工具，Client 只读 workspace 文件并核对完整结果，不直接写文件；
 5. **审计（开发仓，不随包发布）**：仓库内 `node scripts/run-gates/evidence-audit.mjs <bundle>` 对会话日志机械对账——
    URL 是否真被抓取过、摘录是否可回溯、final 溯源链是否完整 → `audit.md`。
 
@@ -334,7 +349,7 @@ node <pack>/scripts/scaffold.mjs --workspace <ws> --clean --write
 
 ## 已知限制与延后工作
 
-- **研究方法配置首版边界**：方法 = 调查路径指导，不新增强制预算/来源数硬门，readiness 不自动验证方法承诺之外的新合同；用户方法库 `method-library.md` 是**工作区本地用户数据**（同工作区的会话都看得到，换工作区不带；Lead 显式维护，无版本史、无跨设备同步）；高承诺学术模式（系统综述类）不在预设；Settings 管理页不做（需显式重议 D7/D18 架构边界，见 [_backlog 长期管理卡](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_backlog/_archived/settled_issues/2026-10-12-research-method-profile-management.md)）；方法库的增长纪律（命中计数／休眠）与库规模能力（分组／搜索／导入导出／跨工作区）、交付工件的表格档、领域包升格为字段——四项延后，重议条件登记在 [_backlog/triggers.md](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_backlog/triggers.md)；
+- **研究方法配置首版边界**：方法 = 调查路径指导，不新增强制预算/来源数硬门，readiness 不自动验证方法承诺之外的新合同；用户方法库 `method-library.md` 是**工作区本地用户数据**（同工作区的会话都看得到，换工作区不带；由显式页面动作经 Method Editor Host 工具写入，无版本史、无跨设备同步）；高承诺学术模式（系统综述类）不在预设；Settings 管理页不做（需显式重议 D7/D18 架构边界，见 [_backlog 长期管理卡](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_backlog/_archived/settled_issues/2026-10-12-research-method-profile-management.md)）；方法库的增长纪律（命中计数／休眠）与库规模能力（分组／搜索／导入导出／跨工作区）、交付工件的表格档、领域包升格为字段——四项延后，重议条件登记在 [_backlog/triggers.md](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_backlog/triggers.md)；
 
 - **会话必须建在**研究工作区里**才能看到渐进面**：页签读的是会话工作区根（`workspaceFiles`），
   run bundle 在工作区内才可见——故需先把研究工作区注册进 DSH（`workspace/create`），再用

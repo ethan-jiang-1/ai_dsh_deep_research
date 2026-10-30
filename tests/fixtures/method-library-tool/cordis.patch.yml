@@ -1,0 +1,19 @@
+# Test-only headless composition for the real Method Library Host tool.
+- id: headless-runner
+  name: '@deepseek-ai/dsh-headless'
+  disabled: true
+
+- id: headless-startup
+  name: '@deepseek-ai/dsh-headless/startup'
+  disabled: true
+
+- insert:
+    - id: method-library-tool-package-resolution
+      name: 'dsh-deep-research-pack/method-library-tool'
+      disabled: true
+    - id: method-library-mock-llm
+      name: './method-library-mock-llm.ts'
+    - id: agent-preset-registry
+      name: '@deepseek-ai/dsh-agent-preset-registry'
+      config:
+        default: method-editor
