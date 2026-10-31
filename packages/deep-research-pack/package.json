@@ -71,7 +71,8 @@
     "@deepseek-ai/schemastery": "^3.18.5",
     "zod": "^4.4.3",
     "@deepseek-ai/dsh-tools": "^0.2.1-rc.2",
-    "@deepseek-ai/dsh-agent": "^0.2.1-rc.2"
+    "@deepseek-ai/dsh-agent": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-workspace": "^0.2.1-rc.2"
   },
   "dsh": {
     "bundle": {
@@ -121,6 +122,10 @@
     "./method-library-tool": {
       "types": "./lib/types/method-library-tool.d.ts",
       "default": "./lib/method-library-tool.js"
+    },
+    "./workspace-boot": {
+      "types": "./lib/types/workspace-boot/index.d.ts",
+      "default": "./lib/workspace-boot.js"
     }
   },
   "scripts": {
@@ -146,6 +151,102 @@
   },
   "bin": {
     "dsh-deep-research-preflight": "./scripts/preflight.mjs",
-    "dsh-deep-research-scaffold": "./scripts/scaffold.mjs"
+    "dsh-deep-research-scaffold": "./scripts/scaffold.mjs",
+    "dsh-deep-research": "./scripts/launch.mjs"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-agent": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-agent-instructions": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-agent-preset": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-agent-preset-registry": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-api-session-controller": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-ui-primitives": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-experimental-client-ui-agent-team": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-persona": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-session": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-session-projection": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-session-query-sqlite": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-skill-filesystem": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-time-context": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-tool-ask-user": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-tool-fs": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-tool-fs-search": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-tool-goal": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-tool-present": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-tool-session-query": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-tool-skill": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-tool-subagent": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-tool-todo": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-tool-web": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-tools": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-web": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-web-deepseek-api": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-web-fetch-http": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-workspace": {
+      "optional": true
+    },
+    "@deepseek-ai/schemastery": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
   }
 }

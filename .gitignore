@@ -82,6 +82,12 @@ packages/deep-research-pack/lib/
 # playwright MCP 的运行时产物（快照/截图，随浏览器工具调用重现）
 .playwright-mcp/
 
+# pi 代理会话的工具态（bg_run 输出、子代理任务日志）。与 .playwright-mcp 同类：每次调用重现，
+# 不入库。缺本条时 `git add -A` 会把运行日志一并暂存（2026-11-01 实证：两轮 verify 输出被扫进
+# 暂存区，靠尾随空白被 pre-commit 的 whitespace 门禁拦下才暴出——不只脏，还可能把整份命令输出
+# 连环境路径提进历史）。
+.pi/
+
 # dev/ 只住源码驱动（布局约定），run 产物住 research-workspace/ 或 runtime/。
 # 此处是误落位的活跃 run bundle（2026-10-19 曾在跑）：不跟踪，免得 git add -A 把整场
 # run 提交进库，也免得它的 evidence 内部链接把 pre-commit 的 md-links 拦红。
