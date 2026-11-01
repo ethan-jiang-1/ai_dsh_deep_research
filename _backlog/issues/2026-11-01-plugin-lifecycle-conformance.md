@@ -111,7 +111,7 @@ opened: 2026-11-01
 | 验证 | 统一给 `--dump-config` 要找的 entry id 清单（`preset-lead` / `research-*`），以及界面上可见的变化 |
 | 升级/回滚 | 补"bundle 成员变化要重启"与"没有命令级回滚，回退 = 重装旧版"的显式句子（现手册已接近，需对齐措辞） |
 | 卸载 | 已是合规范本，仅补"`$DSH_HOME/deep-research/` 随 profile 删"的因果 |
-| 插件 README | 加 frontmatter `description`/`kind`；首屏改成七问骨架（装什么/装到哪 → 安装 → 验证 → 配置 → 升级 → 卸载与数据 → 排障），架构大表下移 | G10 |
+| 插件 README | 加 frontmatter `description`/`kind`；首屏改成七问骨架（装什么/装到哪 → 安装 → 验证 → 配置 → 升级 → 卸载与数据 → 排障），架构大表下移（合规矩阵缺口 G10） |
 
 ### P3 · 配置与设置（补齐"设置页里没有本包"）
 
