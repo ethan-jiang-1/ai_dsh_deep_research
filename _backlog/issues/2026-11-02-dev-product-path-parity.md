@@ -1,11 +1,11 @@
 ---
-status: 推敲中
+status: 等人拍板
 opened: 2026-11-02
 ---
 
 # 推敲：dev 通道与产品安装路径对齐——同机制、有界差异
 
-> 立卡：2026-11-02 ｜ 状态：推敲中 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-02 ｜ 状态：等人拍板（技术面已落地，待你验收 dev 手感） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
 
 **意图（先说清为什么做）：**
 
@@ -94,3 +94,24 @@ dev 仍是 `dsh --profile deep-research`，run-driver 只是驱动（漂移门 +
 ## 关闭条件
 
 验收标准 1–6 有证据在场；parity 差异表落盘；结论去向 = implemented（Note 同 diff）。
+
+
+## 验证进展（2026-11-02）
+
+| 验收 | 证据 |
+|---|---|
+| AC1 同一身份 + 安装源 + 版本门 | `bash dev/boot-run.sh` 在 `runtime/harness-home` 重建出 `profiles/deep-research`：deps = `file:…/run-pack/dsh-deep-research-pack-0.3.0.tgz`、bundles 四项、团队层 `0.2.1-rc.2` = `dsh --version`（T） |
+| AC2 profile 用户层零写入 + MCP 走覆盖层 | `cordis.patch.yml` 保持 `[]`；`dev-overlay.yml` 生成；`--dump-config --patch` 能看到 `mcp-playwright`；web 在 3191 起（T） |
+| AC3 MCP 关闭形态 | `MCP_PLAYWRIGHT=0`：覆盖层文件不存在、profile patch 仍 `[]`、web 在 3192 起（T） |
+| AC4 driver 默认 profile | `node dev/run-driver.mjs up --no-probe --port 3193` 起通道打印 token URL，boot 日志 `profile=deep-research`；`--no-probe` 如实 NOT-RUN（T） |
+| AC5 门禁面 | `dev-parity` 绿；`gates-smoke` 案例 `dev-parity-driver-profile` 注入即点名红、还原绿（T） |
+| AC6 全量 | `pnpm verify` / `pnpm test` / `pnpm typecheck` 绿（见下一轮收尾读数）；parity 表在 [dev/README](../../dev/README.md) |
+
+附带修复：`LAYER_VER` 不再读已删除的 `dsh.compatibility.dshReleases`（该行此前会让 boot-run 直接抛错）。
+
+## 去向
+
+`implemented` → [dev/product parity Note](../../notes/implemented/2026-11-02-dev-product-path-parity.md)。
+
+**待你验收**：这次 dev 启动的手感是否够接近用户路径（Plugins 页安装 → 启动），以及 parity 表里
+"允许差异"的边界是否合适。

@@ -48,9 +48,16 @@
   `cat >> $PROFDIR/cordis.patch.yml`、parity 表在场且 ≥8 个机制点并含"允许差异"列。
 - **文档同步**：guides/61 · 62 · 65、terms、00-index 里 "research profile" 的指称全部改
   `deep-research`；00-index 的冒烟命令改指已存在的 `product-boot-smoke.mjs`。
-- **未跑**：`bash dev/boot-run.sh` 在干净 `runtime/harness-home` 上的端到端重建（验收标准 1–3
-  的实机面）与 `node dev/run-driver.mjs up` 真启动（验收标准 4）——下一场 run 时验证，
-  门禁已把同形点机械钉住，实机面确认后无需改代码。
+- **boot-run 端到端（T）**：在 `runtime/harness-home` 上重建出 `profiles/deep-research`——
+  deps = `file:…/run-pack/dsh-deep-research-pack-0.3.0.tgz`，bundles = base + web-app + pack + team，
+  team 版本 `0.2.1-rc.2` 与 `dsh --version` 一致；`cordis.patch.yml` 保持 `[]`；web 在 3191 起，
+  token URL 正常。
+- **dev-only 行走覆盖层（T）**：`dev-overlay.yml` 生成，`--dump-config --patch` 能看到
+  `mcp-playwright` 行；profile 用户层没有任何写入。
+- **关掉 MCP（T）**：`MCP_PLAYWRIGHT=0` 启动后覆盖层文件不存在、profile patch 仍为 `[]`、
+  web 在 3192 正常起。
+- **run-driver 真启动（T）**：`up --no-probe --port 3193` 起通道并打印 token URL；boot 日志含
+  `profile=deep-research`；`--no-probe` 如实返回 NOT-RUN（未跑 ≠ 通过）。实验后进程与端口均清空。
 
 ## 残余风险
 
