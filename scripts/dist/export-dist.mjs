@@ -73,21 +73,15 @@ try {
     'package/package.json',
     'package/lib/index.js',
     'package/lib/client.js',
-    'package/workspace/AGENTS.md',
-    'package/workspace/.gitignore.example',
-    'package/workspace/seed.json',
-    'package/scripts/lib/seed-core.mjs',
+    'package/content/manual.md',
+    'package/content/templates/run/run.md',
+    'package/lib/content.js',
+    'package/lib/workspace-boot.js',
     'package/scripts/lib/version-range.mjs',
     'package/scripts/preflight.mjs',
-    'package/scripts/scaffold.mjs',
     'package/scripts/launch.mjs',
-    'package/lib/workspace-boot.js',
   ]
   const missing = must.filter((entry) => !entries.includes(entry))
-  // 种子清单在导出时再核一次：版本 = pack 版本，文件映射非空。清单随包但内容错 = 安装方
-  // 拿到无法升级的种子（scaffold 会 fail-loud，但发布面应在导出时就红）。
-  const seedManifest = JSON.parse(readFileSync(join(PACK, 'workspace', 'seed.json'), 'utf8'))
-  const seedOk = seedManifest.version === version && Object.keys(seedManifest.files ?? {}).length > 0
   // 发布边界：lib/types 下的 JS 与 sourcemap 是构建中间产物，不是运行时；进包即用户装垃圾。
   const forbidden = entries.filter((entry) => /^package\/lib\/types\/.*\.(?:js|map)$/.test(entry))
   // 角色 id 允许连字符（method-editor），不能只匹配 [a-z]+；同时与盘上 preset 数逐个对账，
@@ -95,15 +89,14 @@ try {
   const expectedPresetRows = readdirSync(join(PACK, 'presets')).filter((f) => f.endsWith('.patch.yml')).length
   const presetRows = entries.filter((e) => /^package\/presets\/[a-z0-9][a-z0-9-]*\.patch\.yml$/.test(e)).length
   const skills = entries.filter((e) => e.endsWith('/SKILL.md')).length
-  const templates = entries.filter((e) => e.startsWith('package/workspace/templates/')).length
+  const templates = entries.filter((e) => e.startsWith('package/content/templates/')).length
   const outside = entries.filter((e) => !e.startsWith('package/'))
   report('inventory',
-    listed.status === 0 && missing.length === 0 && forbidden.length === 0 && outside.length === 0 && expectedPresetRows > 0 && presetRows === expectedPresetRows && skills > 0 && templates > 0 && seedOk,
+    listed.status === 0 && missing.length === 0 && forbidden.length === 0 && outside.length === 0 && expectedPresetRows > 0 && presetRows === expectedPresetRows && skills > 0 && templates > 0,
     missing.length > 0 ? `缺：${missing.join(', ')}`
       : forbidden.length > 0 ? `构建中间产物进包：${forbidden.slice(0, 5).join(', ')}${forbidden.length > 5 ? '…' : ''}（改 package.json files 排除）`
       : outside.length > 0 ? `package/ 之外的条目：${outside.join(', ')}`
-        : !seedOk ? `seed.json 版本/映射不合法（version=${seedManifest.version}）`
-          : `${entries.length} 条目，preset 行 ${presetRows}/${expectedPresetRows}，skill ${skills}，模板 ${templates}，seed v${seedManifest.version}`)
+        : `${entries.length} 条目，preset 行 ${presetRows}/${expectedPresetRows}，skill ${skills}，模板 ${templates}`)
 
   // 3. 手册——版本/日期/条目数注入，让它指名它旁边这份产物；步骤 = release-smoke 的路径
   //    日期 = 本地口径（人读日期行；UTC slice 在 00:00–08:00 窗口差一天——BUG-017 同款口径纪律）

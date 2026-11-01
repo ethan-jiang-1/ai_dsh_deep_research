@@ -89,6 +89,10 @@
     #    host 半是空壳，浏览器半注册研究驾驶舱页签（清单 = design/40 §2，不在此手抄）。
     #    行的 name 就是本包名（company-pack 同款）——host 侧加载 lib/index.js（空壳），
     #    浏览器侧经 exports["./client"] 取 lib/client.js（ModuleLoader 外壳）。──
+    # ── 产品内容注入行（D40）：把包内 content/manual.md 以 runtime context 注入每个 agent；
+    #    并注册 research_pack_root 变量供手册/模板路径插值。不落工作区、不写文件。──
+    - id: research-content
+      name: 'dsh-deep-research-pack/content'
     - id: research-client
       name: 'dsh-deep-research-pack'
     # ── 产品启动器的 Host 半（D38）：boot 时把 DEEP_RESEARCH_WORKSPACE 登记进 Workspace registry；

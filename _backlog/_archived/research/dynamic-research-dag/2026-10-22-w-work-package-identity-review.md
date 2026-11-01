@@ -27,7 +27,7 @@ intent: 作为第二个 reviewer 对活跃卡 2026-10-22-w-work-package-identity
 
 | 卡的声称 | 锚点 |
 |---|---|
-| 节点表已有 id/parent/kind/…/task_id；parent 已用于复合节点 | [plan 模板](../../../../research-workspace/templates/run/plan.md)（表头 + N3.1 注释示例） |
+| 节点表已有 id/parent/kind/…/task_id；parent 已用于复合节点 | [plan 模板](../../../../packages/deep-research-pack/content/templates/run/plan.md)（表头 + N3.1 注释示例） |
 | `planIndex` 解析节点表，`planIssuesOf` 报重号/悬空 parent/deps，`levelsOf` 按最长路径算层 | `packages/deep-research-pack/src/lib/plan-graph.ts:526` / `:610` / `:196` |
 | 图谱默认画顶层；复合子节点收在父详情（图上标 `+N` / `内部 N`） | `packages/deep-research-pack/src/client/ResearchGraphTab.tsx:274-276` / `:554` |
 | 节点可复制 `drt_<slug>/N3` | `packages/deep-research-pack/src/client/ResearchGraphTab.tsx:501` |

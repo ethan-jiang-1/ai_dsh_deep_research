@@ -27,7 +27,7 @@ opened: 2026-10-12
 
 [team-assembly](../../../packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md) 的编制矩阵和派发五件仍是底座。spawn、已有队员新 task/消息、重派以及一次性查证都需考虑方法送达；不能只验证初次 spawn 或假定队员历史已包含最新要求。
 
-[状态模型](../../../docs/design/50-agent-loop-and-state.md) 决定恢复仅依 run bundle；[NODES 回边](../../../research-workspace/NODES.md#回边版本语义d17) 决定补研究回挖掘、表述修订原位、结构性另起 bundle、HITL1 不重开。[运行指南](../../../docs/guides/61-run-playbook.md) 另有活跃 run 的 steer 方向修订，Lead 记 Decisions 后原地补搜，不算 rerun。冻结初始内容不能取消此能力；须区分明确修订与一般提问，记录变化并将新要求送给受影响队员。
+[状态模型](../../../docs/design/50-agent-loop-and-state.md) 决定恢复仅依 run bundle；[NODES 回边](../../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md#回边版本语义d17) 决定补研究回挖掘、表述修订原位、结构性另起 bundle、HITL1 不重开。[运行指南](../../../docs/guides/61-run-playbook.md) 另有活跃 run 的 steer 方向修订，Lead 记 Decisions 后原地补搜，不算 rerun。冻结初始内容不能取消此能力；须区分明确修订与一般提问，记录变化并将新要求送给受影响队员。
 
 呈现默认要兼容 [synthesis](../../../packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md) 的报告要求与 quick 缩略；核查要求要保留 [Critic 轻量豁免](../../../packages/deep-research-pack/presets/critic/skills/adversarial-review/SKILL.md)。方法增加的承诺如何判偏离、何时 UNVERIFIED/MAJOR/FAIL 仍需明确，原 readiness 不自动证明它们兑现。方法偏离由相关角色在其 owner 文件及 journal 记录，操作侧 audit 不由 Lead 或队员修改。
 

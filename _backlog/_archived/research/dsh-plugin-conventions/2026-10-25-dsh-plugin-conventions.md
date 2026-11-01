@@ -52,7 +52,7 @@ intent: 为运行形态合同与分发合同提供 DSH 官方 bundle/profile/wor
 
 ## 4. workspace 与数据：DSH 不替插件管用户工作区
 
-- agent-instructions 从会话 cwd 向上发现 `AGENTS.md` 并注入（本仓 [guides/62](../../../../docs/guides/62-plugin-authoring.md) 与 [research-workspace/AGENTS.md](../../../../research-workspace/AGENTS.md) 已按此设计）。
+- agent-instructions 从会话 cwd 向上发现 `AGENTS.md` 并注入（本仓 [guides/62](../../../../docs/guides/62-plugin-authoring.md) 与 [research-workspace/AGENTS.md](../../../../packages/deep-research-pack/content/manual.md) 已按此设计）。
 - sessions、credentials、profiles 在 `$DSH_HOME` 下；workspace 文件由用户/会话 cwd 决定。
 - 官方 bundle 不携带 workspace 种子；它们把行为放在 presets/skills/配置里。需要“会话 cwd 的纪律”时，由部署面铺种子（本仓的 `workspace/` + `scaffold`）。
 

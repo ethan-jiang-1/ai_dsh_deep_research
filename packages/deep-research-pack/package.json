@@ -33,12 +33,12 @@
   "files": [
     "LICENSE",
     "presets/**",
+    "content/**",
     "cordis.patch.yml",
     "lib/**",
     "!lib/*.tsbuildinfo",
     "!lib/types/**/*.js",
     "!lib/types/**/*.map",
-    "workspace/**",
     "scripts/**"
   ],
   "peerDependencies": {
@@ -126,6 +126,10 @@
     "./workspace-boot": {
       "types": "./lib/types/workspace-boot/index.d.ts",
       "default": "./lib/workspace-boot.js"
+    },
+    "./content": {
+      "types": "./lib/types/content/index.d.ts",
+      "default": "./lib/content.js"
     }
   },
   "scripts": {

@@ -2,7 +2,7 @@
 
 > 服务 = issue ② [2026-10-11-executive-research-decision-report](../../_backlog/_archived/settled_issues/2026-10-11-executive-research-decision-report.md)
 > 的人工判据行。**全部题面与数据虚构**，仅检验首屏表达与证据导航，不是真实业务结论。
-> 每组样例 = 按 [final.md 模板](../../research-workspace/templates/run/final.md) 新首屏写的
+> 每组样例 = 按 [final.md 模板](../../packages/deep-research-pack/content/templates/run/final.md) 新首屏写的
 > 决策摘要段；`[来源: evidence/…]` 为样例文件名占位，不指向真实文件。
 
 ## 样例 1 · 快速事实核查（缩略形态：答案 + 口径 + 依据 + 限制）

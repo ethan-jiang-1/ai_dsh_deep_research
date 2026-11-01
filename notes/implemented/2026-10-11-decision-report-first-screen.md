@@ -22,7 +22,7 @@ P0 候选③「结论可信度可判断」）。
 5. 审查面：adversarial-review 新增**审查线 5 首屏核查**（无依据建议 CRITICAL、未知写成
    确定 MAJOR、格式逼出的唯一推荐 MAJOR、编造负责人/期限 MINOR）+ readiness 判据清单
    两行；
-6. 落面：[final.md 模板](../../research-workspace/templates/run/final.md) · synthesis skill
+6. 落面：[final.md 模板](../../packages/deep-research-pack/content/templates/run/final.md) · synthesis skill
    第 3 步 + 判据 + 反模式 · adversarial-review skill 线 5 + 判据清单 · pack README
    「研究怎么跑」§3 · [样例集](../../research-workspace/drafts/2026-10-11-decision-report-samples.md)
    （四组虚构样例 + 刻意反例）；契约钉 = `tests/pack/presets.test.mjs`「报告首屏决策摘要」。

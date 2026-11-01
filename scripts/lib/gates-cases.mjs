@@ -319,8 +319,6 @@ export const CASES = [
     lines[j] = lines[j].replace(/version:\s*link:vendor\/dsh\/\S+/, 'version: 1999.0.0');
     writeFileSync(lockPath, lines.join('\n'));
   } },
-  { id: 'workspace-contract-template-missing', gate: 'workspace-contract', mutate: (dir) => rmSync(join(dir, 'research-workspace', 'templates', 'run', 'question.md')) },
-  { id: 'workspace-contract-run-template-missing', gate: 'workspace-contract', mutate: (dir) => rmSync(join(dir, 'research-workspace', 'templates', 'run', 'run.md')) },
   { id: 'release-version-drift', gate: 'release-version', mutate: (dir) => {
     const p = join(dir, 'packages', 'deep-research-pack', 'package.json');
     const pkg = JSON.parse(readFileSync(p, 'utf8'));
@@ -449,23 +447,7 @@ export const CASES = [
   { id: 'gate-ledger-sync-row', gate: 'gate-ledger-sync', mutate: removeLedgerRow('dist-manual-version') },
   // handbook-budget 事故形态：四 preset 同降过限（手册字节 + 余量 > maxBytes）——company
   // 同构面出过真实事故（手册 17.4KB 超预算后注入静默截断，2026-10-09 钉版复核吸收）。
-  { id: 'handbook-budget-truncated', gate: 'handbook-budget', mutate: (dir) => {
-    for (const f of readdirSync(join(dir, 'packages/deep-research-pack/presets'))) {
-      if (!f.endsWith('.patch.yml')) continue;
-      const p = join(dir, 'packages/deep-research-pack/presets', f);
-      // 不钉字面值：预算将来升到任何值，本注入都把四 preset 一致压到 8000（< 手册字节 + 余量）
-      writeFileSync(p, readFileSync(p, 'utf8').replace(/maxBytes: \d+/g, 'maxBytes: 8000'));
-    }
-  } },
-  { id: 'handbook-budget-mismatch', gate: 'handbook-budget', mutate: (dir) => {
-    const p = join(dir, 'packages/deep-research-pack/presets/lead.patch.yml');
-    writeFileSync(p, readFileSync(p, 'utf8').replace(/maxBytes: \d+/, 'maxBytes: 8192'));
-  } },
   // S1 事故形态（对抗自审抓获）：单个 preset 丢 maxBytes 行——摊平收集会静默放行，逐文件收集必须红
-  { id: 'handbook-budget-bare-preset', gate: 'handbook-budget', mutate: (dir) => {
-    const p = join(dir, 'packages/deep-research-pack/presets/lead.patch.yml');
-    writeFileSync(p, readFileSync(p, 'utf8').replace(/\n\s*maxBytes: \d+/, ''));
-  } },
   // client-half 双方向（release-smoke-hardening 件⑤a）：exports ./client 与 dsh.client 声明
   // 任一脱钩都是静默失效（company postmortem 0002：vendor 门禁只 glob 树内包，仓外 pack 射程外）。
   { id: 'client-half-no-export', gate: 'client-half', mutate: (dir) => {
@@ -578,9 +560,6 @@ export const CASES = [
       writeFileSync(p, readFileSync(p, 'utf8').replace('default: lead', 'default: probe'));
     } },
   // pack-workspace-fresh：删一件种子（节点契约）——正本仍在、种子缺席即漂移。
-  { id: 'pack-workspace-fresh-seed-missing', gate: 'pack-workspace-fresh', mutate: (dir) => {
-      rmSync(join(dir, 'packages', 'deep-research-pack', 'workspace', 'NODES.md'));
-    } },
   // repo-conventions：本门禁在副本基线**非 PASS**（fixture 无 vendor/dsh/package.json → engines
   // 对齐无证据源）——按驱动壳约定必须带 expect 指名注入报因（同 align-ledger 族），
   // 否则注入未生效也会被既有报因蒙混成绿。注入 = .editorconfig 丢 root 声明。
@@ -593,41 +572,14 @@ export const CASES = [
   // 工作区运行区拒收行被删（workspace-versioning）：种子丢掉 `drt_*/` 行——安装方一次
   // `git add -A` 就把整个 run 历史提交进他自己的库。正本同改保 pack-workspace-fresh 绿
   // （否则红的是新鲜度门禁，本案例会因别的报因假绿）。
-  { id: 'workspace-versioning-run-area-denial-missing', gate: 'workspace-versioning', mutate: (dir) => {
-    for (const rel of ['research-workspace/.gitignore.example', 'packages/deep-research-pack/workspace/.gitignore.example']) {
-      const p = join(dir, rel);
-      writeFileSync(p, readFileSync(p, 'utf8').replace(/^drt_\*\/\n/m, ''));
-    }
-  } },
   // 种子退化成裸 `*` 拒收全部（workspace-versioning）：它会把被跨目录引用的材料一起拒收——
   // 全新 clone 里 drafts 开发证据全丢，md-links 随之红（fixture 实测形态）。
   // 未交付停放位拒收行被删（workspace-versioning）：种子丢掉 `_abandoned/` 行——未交付
   // run 会被安装方一次 `git add -A` 提交进库；正本同改保 pack-workspace-fresh 绿。
-  { id: 'workspace-versioning-abandoned-denial-missing', gate: 'workspace-versioning', mutate: (dir) => {
-    for (const rel of ['research-workspace/.gitignore.example', 'packages/deep-research-pack/workspace/.gitignore.example']) {
-      const p = join(dir, rel);
-      writeFileSync(p, readFileSync(p, 'utf8').split('\n').filter((l) => l.trim() !== '_abandoned/').join('\n'));
-    }
-  } },
-  { id: 'workspace-versioning-blanket-star', gate: 'workspace-versioning', mutate: (dir) => {
-    for (const rel of ['research-workspace/.gitignore.example', 'packages/deep-research-pack/workspace/.gitignore.example']) {
-      const p = join(dir, rel);
-      writeFileSync(p, `*\n${readFileSync(p, 'utf8')}`);
-    }
-  } },
   // 种子清单缺 .gitignore 条目（workspace-versioning）：安装方的忽略规则不在清单里——
   // scaffold 不会铺，工作区一次 git add -A 会把 run 历史提交进用户库。
-  { id: 'workspace-versioning-seed-gitignore-missing', gate: 'workspace-versioning', mutate: (dir) => {
-    const p = join(dir, 'packages/deep-research-pack/workspace/seed.json');
-    const j = JSON.parse(readFileSync(p, 'utf8'));
-    delete j.files['.gitignore'];
-    writeFileSync(p, JSON.stringify(j, null, 2) + '\n');
-  } },
   // 开发证据白名单缺席（workspace-versioning）：删 drafts/.gitignore——drafts/ 重新变成
   // "探针稿与 dry-run 输出默认可被 git add"。
-  { id: 'workspace-versioning-drafts-whitelist-missing', gate: 'workspace-versioning', mutate: (dir) => {
-    rmSync(join(dir, 'research-workspace', 'drafts', '.gitignore'));
-  } },
   // dev/ 运行态回流（dev-runtime-clean）：在源码驱动目录造一个误落位 run bundle——
   // .gitignore 能挡 git，挡不住 cp -r/打包；门禁直接看盘。
   { id: 'dev-runtime-clean-stray', gate: 'dev-runtime-clean', mutate: (dir) => {
@@ -639,6 +591,11 @@ export const CASES = [
   { id: 'run-context-single-source-client-chain', gate: 'run-context-single-source', mutate: (dir) => {
     appendFileSync(join(dir, 'packages', 'deep-research-pack', 'src', 'client', 'ResearchStatusTab.tsx'),
       "\nconst __probe = ['drt_x', 'archive/drt_x', '_abandoned/drt_x'];\n");
+  } },
+  // content-shape（D40）：把工作区种子放回包内——内容重新落到工作区即红。
+  { id: 'content-shape-seed-return', gate: 'content-shape', mutate: (dir) => {
+    mkdirSync(join(dir, 'packages', 'deep-research-pack', 'workspace'), { recursive: true });
+    writeFileSync(join(dir, 'packages', 'deep-research-pack', 'workspace', 'seed.json'), '{}\n');
   } },
 ];
 

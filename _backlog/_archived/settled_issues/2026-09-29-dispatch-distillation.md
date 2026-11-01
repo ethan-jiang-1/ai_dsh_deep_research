@@ -23,7 +23,7 @@
 4. 通道选择（多轮往返 = spawn_teammate；单点查证 = one-shot subagent）→ 同上；
 5. 事中调度（任务板点名派活 / topic 单 owner / gap 改派走 lead）→ 同上 + 研究手册 owner 表。
 
-机械面已就位：[NODES.md](../../../research-workspace/NODES.md) 八节点 I/O 契约（2026-09-29
+机械面已就位：[NODES.md](../../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) 八节点 I/O 契约（2026-09-29
 用户逐节点过目定稿）+ schema-scan（在场级）/ node-gate（判据级，逐行按证据升格）。
 
 **蒸馏对象的候选清单**（强模型判断力未被文本化的残留点，按可蒸馏难度从易到难）：

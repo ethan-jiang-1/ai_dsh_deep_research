@@ -12,7 +12,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack')
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
 
 test('T0 files：入口/patch/preset/种子/脚本都在发布白名单', () => {
-  for (const required of ['cordis.patch.yml', 'presets/**', 'lib/**', 'workspace/**', 'scripts/**']) {
+  for (const required of ['cordis.patch.yml', 'presets/**', 'lib/**', 'content/**', 'scripts/**']) {
     assert.ok(pkg.files?.includes(required), `files 缺 ${required}——tarball 会装后坏`)
   }
   for (const patch of pkg.dsh?.bundle?.patch ?? []) {
@@ -68,9 +68,7 @@ test('T8 数据边界：包内不出现凭据/环境文件（模板空种子除�
   for (const rel of ['.env', '.credentials' + '.yaml', 'credentials' + '.yaml']) {
     assert.equal(existsSync(join(PACK, rel)), false, `包内出现凭据/环境文件：${rel}`)
   }
-  const workspaceRel = 'workspace/seed.json'
-  assert.ok(existsSync(join(PACK, workspaceRel)), '工作区种子清单缺席')
-  const seed = JSON.parse(readFileSync(join(PACK, workspaceRel), 'utf8'))
-  assert.ok(!Object.keys(seed.files ?? {}).some((rel) => /credential|secret|\.env/i.test(rel)),
-    '种子清单不得包含凭据/密钥文件')
+  assert.ok(existsSync(join(PACK, 'content', 'manual.md')), '研究手册缺席（content/manual.md）')
+  assert.ok(existsSync(join(PACK, 'content', 'templates', 'run', 'run.md')), 'run 模板缺席（content/templates/run/）')
+  assert.equal(existsSync(join(PACK, 'workspace')), false, 'workspace/ 种子已退役（D40）')
 })

@@ -192,7 +192,7 @@ run v1 已交付  →  run v2 证据扩张 rerun  ·  HITL2 待审
   方案 / 实际验证）。
 - 相关证据：[design/10 §1](../../../docs/design/10-architecture.md)、[design/30 rerun 行](../../../docs/design/30-methodology-mapping.md)、
   [design/40 图谱](../../../docs/design/40-research-cockpit.md)、[research-planning skill](../../../packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md)、
-  [研究手册 AGENTS](../../../research-workspace/AGENTS.md)、[question 模板](../../../research-workspace/templates/run/question.md)、
+  [研究手册 AGENTS](../../../packages/deep-research-pack/content/manual.md)、[question 模板](../../../packages/deep-research-pack/content/templates/run/question.md)、
   [run 指南](../../../docs/guides/61-run-playbook.md)、[状态页签](../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx)、
   [图谱页签](../../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx)。
 

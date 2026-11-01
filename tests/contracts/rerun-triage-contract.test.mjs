@@ -12,9 +12,9 @@ import { fileURLToPath } from 'node:url'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
 const PERSONA = 'packages/deep-research-pack/presets/lead.patch.yml'
-const HANDBOOK = 'packages/deep-research-pack/workspace/AGENTS.md'
+const HANDBOOK = 'packages/deep-research-pack/content/manual.md'
 const SYNTHESIS = 'packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md'
-const TEMPLATE = 'packages/deep-research-pack/workspace/templates/run/final.md'
+const TEMPLATE = 'packages/deep-research-pack/content/templates/run/final.md'
 const SKILL = 'packages/deep-research-pack/presets/lead/skills/rerun-triage/SKILL.md'
 
 // 三选项标签（实施约定：推荐项置首且以 (Recommended) 结尾；括号内 = 后果，用户看得懂的那句话）。

@@ -15,7 +15,7 @@ opened: 2026-10-21
 就失去稳定指代；`task_id` 又是当前会话映射，重派/rerun 会变。需要一个**用户可引用、跨改写不漂移**的
 节点身份，同时允许一个节点内部是复杂子图、对外仍是一个结果节点。
 
-## 决定（已写入 [plan 模板](../../../research-workspace/templates/run/plan.md) 与
+## 决定（已写入 [plan 模板](../../../packages/deep-research-pack/content/templates/run/plan.md) 与
 [research-planning skill](../../../packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md)）
 
 - **N 是 ID，不是序号**：只分配、不重排、不回收；新增节点取下一个空号（N11），不把 N4 改成 N5；

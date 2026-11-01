@@ -65,7 +65,7 @@ run 交付后，bundle 必须落到正式契约位并在原位补齐：
 1. 搬到 `research-workspace/drt_<slug>/`（撤掉任何桥接 symlink）；
 2. 补齐契约：`question.md` 追加 §Decisions（人工/代理交互各一条，含时间与选择）、
    critic 的对抗核查报告落 `review.md`、当前版正文与 `final/` 版本记账对齐（
-   [研究手册](../../../research-workspace/AGENTS.md) 的目录约定）；
+   [研究手册](../../../packages/deep-research-pack/content/manual.md) 的目录约定）；
 3. 判据④ 实测：**新开一个 lead 会话，只凭 bundle 文件续跑**（不给聊天记忆），
    验证它能说出研究状态与下一步——这是"文件即真相"的正面证据；
 4. 结论：bundle 内 `final` 当前版 + `present` 声明齐 → run 完成。

@@ -9,7 +9,7 @@ opened: 2026-10-18
 
 **问题与期望结果：** 两件事——① **推荐错位**：判型库 8 条题面形态对 4 条打法，映射是"按类型"推导的，P8（事态跟踪/时间线）按其兜底类型被推成「领域地图」（语义错位），P6（尽调/评估）被推成「方案比较」（丢掉"证伪优先"这条独立调查路径）；② **内置不成示范**：四条内置四字段只有 72／68／74／72 字，而用户自己沉淀的「格局调研」有 408 字——口号级指导教不会用户怎么写自己的。期望 = 映射不再错位、新增打法文案可用、两个定制入口可用、同钉面同步（实测四处＋总卡发现 15 两处）。
 
-**当前情况：** 本卡是[总卡](2026-10-18-research-method-config-ux.md)的实施分派之一。依据 = 总卡 §已核实发现 的 **1（映射错位）／2（HITL1 第二问零信息）／6（5.6 倍差距）／13（字段名漂移）／14（冒烟硬编码名单）／15（模板与 README 未钉枚举面）**；推荐规则正本 = [research-brief skill](../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md) §方法预设；判型条目 = [question-patterns.md](../../../research-workspace/question-patterns.md)。
+**当前情况：** 本卡是[总卡](2026-10-18-research-method-config-ux.md)的实施分派之一。依据 = 总卡 §已核实发现 的 **1（映射错位）／2（HITL1 第二问零信息）／6（5.6 倍差距）／13（字段名漂移）／14（冒烟硬编码名单）／15（模板与 README 未钉枚举面）**；推荐规则正本 = [research-brief skill](../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md) §方法预设；判型条目 = [question-patterns.md](../../../packages/deep-research-pack/presets/lead/skills/question-patterns/SKILL.md)。
 
 **未决问题：** U3／U4（两条新打法是未经模型验证的 prompt 文本）、U16（P→方法映射表住哪——**现在根本没有这张表**，见总卡发现 1）。**这三项是本卡的真实前置**。**相关但非阻塞**：U2（P8 修正本身是矛盾修正，不需证据）、U6／U7／U8／U14（示范与入口的价值需真人判，见总卡 §不确定与待核）。
 

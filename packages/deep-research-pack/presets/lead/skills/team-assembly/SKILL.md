@@ -38,7 +38,7 @@ spawn_teammate 子**一律 composeFrom lead**（vendor 机制）——队友的�
 - analyst → `presets/analyst/skills/evidence-extraction/SKILL.md`（question-list 工作流 / 证据文件格式 / 交叉验证与反例）
 - critic → `presets/critic/skills/adversarial-review/SKILL.md`（对抗核查判据与 readiness 格式）
 
-路径前缀 = 你自己技能的安装位同层（你的 skill 目录在 `presets/lead/skills/`，角色目录是它的兄弟）。路径找不到就用 glob 找 `presets/*/skills/*/SKILL.md` 枚举。队友读完按技能执行；读不到（路径漂移）→ 如实回报并按任务验收判据 + `templates/run/` 模板形态执行，**不得静默跳过**（2026-10-04 scout 的显式报偏即正确形态）。
+路径前缀 = 你自己技能的安装位同层（你的 skill 目录在 `presets/lead/skills/`，角色目录是它的兄弟）。路径找不到就用 glob 找 `presets/*/skills/*/SKILL.md` 枚举。队友读完按技能执行；读不到（路径漂移）→ 如实回报并按任务验收判据 + 包内 `content/templates/run/` 模板形态执行，**不得静默跳过**（2026-10-04 scout 的显式报偏即正确形态）。
 
 ## 事中调度（改派与加派）
 

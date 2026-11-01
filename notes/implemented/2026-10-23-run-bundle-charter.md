@@ -11,7 +11,7 @@
 >
 > 历史注记（2026-10-30）：契约纪元已由 [D33](../../docs/decisions.md#d33) 改为 `schema: 2` + `created`；
 > 现行读序 / 交付 / 终稿族见 [design/50](../../docs/design/50-agent-loop-and-state.md)、
-> [NODES](../../research-workspace/NODES.md)、[data-plane-hardening](2026-10-28-data-plane-hardening.md)。
+> [NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)、[data-plane-hardening](2026-10-28-data-plane-hardening.md)。
 > 本页 §未决 #3 的“现状 = 日期”是 2026-10-23 快照。
 
 ## 问题
@@ -196,7 +196,7 @@ NODES.md 与角色 skills）。
 ### 10. 落地记录（P0–P7；P8 验收见锚点卡）
 
 - **R1 文档与观察面收口**：D17、[design/40](../../docs/design/40-research-cockpit.md)、
-  [design/50](../../docs/design/50-agent-loop-and-state.md)、[研究手册](../../research-workspace/AGENTS.md)、
+  [design/50](../../docs/design/50-agent-loop-and-state.md)、[研究手册](../../packages/deep-research-pack/content/manual.md)、
   [guides/61](../../docs/guides/61-run-playbook.md) 的「位置=状态」统一改为「位置=操作桶，状态=内容」；
   驾驶舱与 `run-dashboard` 都从内容判态（现状：dashboard 只扫根+archive，不认 `_abandoned`）。
 - **R2 状态头 + 契约戳**：模板与新建 run 落 `run.md`（或 question frontmatter）；门禁读 epoch；

@@ -6,7 +6,7 @@
 > 同挂；本页「四个 preset」指 2026-10-28 落地时的研究角色范围。
 >
 > 来源：[数据面收口问题卡](../../_backlog/_archived/settled_issues/2026-10-28-data-plane-hardening.md)；决定 = [D32–D36](../../docs/decisions.md#d32)；合同 =
-> [guides/65 §2](../../docs/guides/65-run-forms.md) + [研究手册](../../research-workspace/AGENTS.md) + pack README §Data。
+> [guides/65 §2](../../docs/guides/65-run-forms.md) + [研究手册](../../packages/deep-research-pack/content/manual.md) + pack README §Data。
 
 ## 决定
 

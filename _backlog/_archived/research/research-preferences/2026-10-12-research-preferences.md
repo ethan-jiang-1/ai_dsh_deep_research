@@ -46,10 +46,10 @@ intent: 为研究方法配置总卡及单次研究、长期复用子卡提供统
 
 ## 本仓已核实事实
 
-- [问卡模板](../../../../research-workspace/templates/run/question.md) 的 Constraints 已含来源偏好和 User Research Controls，HITL1 Snapshot 已含类型、深度、口径；缺的是跨节点解析和传递，不是所有输入都要新造。
+- [问卡模板](../../../../packages/deep-research-pack/content/templates/run/question.md) 的 Constraints 已含来源偏好和 User Research Controls，HITL1 Snapshot 已含类型、深度、口径；缺的是跨节点解析和传递，不是所有输入都要新造。
 - [research-brief](../../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md) 先查判型模式库，未知标 open。HITL1 有三问与计划确认两段，quick_factual 豁免第二段；计划确认 question 字段总长 ≤200 字，修订附加且一轮制。skill 写“已给信息不重复问”，而 [Lead persona](../../../../packages/deep-research-pack/presets/lead.patch.yml) 明确即使已给答案仍发三问供确认；两处存在表述张力，不能用新方法规划悄悄选择一种解释。新增问法需核对实际合同与模型行为。
 - [team-assembly](../../../../packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md) 以研究类型组织编制，派发五件包含读文件、写文件、验收、验证和方法论装载。当前 teammate composeFrom Lead，不会因名为 Scout/Analyst/Critic 自动获得该角色技能；派工要显式读取对应技能文件。一次性查证通道也需同样得到本次方法要求。
-- [NODES](../../../../research-workspace/NODES.md) 以文件作为节点接口，缺输入不得猜；两点交互不新增日常停点。补研究回挖掘并增加报告版本，表述修订不变版本，结构性变更另起 run bundle，HITL1 永不重开。
+- [NODES](../../../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) 以文件作为节点接口，缺输入不得猜；两点交互不新增日常停点。补研究回挖掘并增加报告版本，表述修订不变版本，结构性变更另起 run bundle，HITL1 永不重开。
 - [状态模型](../../../../docs/design/50-agent-loop-and-state.md) 规定 run bundle 是研究事实正本，session log 是执行事件正本，goal/任务板是辅助，Cockpit 是只读派生观察。新会话只凭 bundle 应能恢复研究，不能重新从当前全局预设解析旧 run。
 - [D7/D17/D18](../../../../docs/00-index.md) 规定框架不持 per-run 状态，pack 的自写 JS 例外用途限定观察/调试。[Cockpit 设计](../../../../docs/design/40-research-cockpit.md) 不提供方法编辑或长期管理正本。新增配置管理代码不能因为已有 client 构建链就视为已获授权。
 - [策略 benchmark](../strategy-benchmark/2026-10-03-strategy-benchmark-sources.md) 是外部参数系统与本仓的对照研究，不是本仓已有参数计算器。本仓深度主要是 prompt/topic 规模指导，不代表已有强制 token、延迟或检索预算；新增方法不另起冲突的来源数、独立性或补搜上限合同。

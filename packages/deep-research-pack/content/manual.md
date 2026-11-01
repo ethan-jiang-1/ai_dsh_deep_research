@@ -1,12 +1,13 @@
-# 研究工作区 — 研究手册（角色会话的 cwd）
+# 研究工作区 — 研究手册
 
-这里是 Deep Research 团队的共享工作区。所有研究角色会话在此目录工作；本手册通过
-`agent-instructions` 注入每个角色会话。角色人格见各自 preset；这里只放**跨角色共享的
-工作纪律与文件契约**。
+这里是 Deep Research 团队的工作区（产品启动时选定/询问的那个目录）。本手册由产品以
+runtime context 注入每个角色会话，**不落在工作区**；角色人格见各自 preset，这里只放
+**跨角色共享的工作纪律与文件契约**。用户项目自己的 `AGENTS.md` 仍由 DSH 注入；与本手册
+冲突时，**项目指令优先**。
 
 ## 分层铁律（D17：harness / run bundle）
 
-harness 只读：presets、skills、本手册、templates/ 对任何一次研究都是同一份，run 期间零
+harness 只读：presets、skills、本手册、模板对任何一次研究都是同一份，run 期间零
 写入，不持任何 per-run 状态。**一切变量只写进本 run 的 bundle（本目录下 `drt_<slug>/`）**
 ——不写回手册/模板，不把 run 状态记到任何框架文档。`研究报告 = harness(bundle)`。
 **位置 = 操作桶（D28）**：根 / `archive/` / `_abandoned/` 只用于发现，不证明在飞/已交付；
@@ -54,11 +55,14 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
   journal.md           运行纪要（追加式；文件头声明方向，默认最新在上；所有角色可写；跨 rerun 累积血统）
 archive/drt_<slug>/    操作桶（交付后操作侧移入；位置不证明交付；仍可被审计投影）
 _abandoned/drt_<slug>/ 停放桶（未投入但保留；原因/复活条件写 run.md `parked`；不是状态证明）
-templates/run/         新 run bundle 的起点模板（只读，不直接写）
+{{research_pack_root}}/content/templates/run/
+                      新 run bundle 的起点模板（只读，不直接写；从包内读，复制进 bundle）
 drafts/（工作区根）    开发侧跨 run 草稿（可选；产品安装态没有预置，角色不写不读——run 内过程稿见上）
-NODES.md               节点 I/O 契约全表（八节点 I/O + 下游可开工判据 + 回边版本语义）；机械把守 =
-                       schema-scan（在场级）+ node-gate（判据级门①②③④+L+R+A+C，图例 = NODES.md 头部）；两者是开发仓工具、不随包，安装态按回执三态降级
-question-patterns.md   判型模式库（HITL1 第一对照面；命中走条目、未命中兜底 + journal 标记行；增长协议 = 库尾节）
+nodes-contract skill  节点 I/O 契约全表（八节点 I/O + 下游可开工判据 + 回边版本语义）；Lead 编制
+                       plan.md 时加载。机械把守 = schema-scan（在场级）+ node-gate（判据级门
+                       ①②③④+L+R+A+C）；两者是开发仓工具、不随包，安装态按回执三态降级
+question-patterns skill 判型模式库（HITL1 第一对照面；命中走条目、未命中兜底 + journal 标记行；
+                       增长协议 = 库尾节）；Lead 立项时加载
 method-library.md      本工作区方法库（用户所有；工作区根；lead 维护；四字段 = 找来源/怎么核实/报告怎么写/不承诺）。
                        立项先读：题面点名的偏好名 → 按该条目执行并在 §Decisions 记"采用库条目 X"；未点名
                        但库有条目 → HITL1 方法行给推荐参考。**三态**：在场→用；缺席→说"还没存过偏好、本次
@@ -74,7 +78,7 @@ present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat 
 
 ## 状态头、读序与恢复（D28）
 
-新 run 在根落 `run.md`（`schema` / `created` / `phase` / `next` / `delivered` / `parked`；键义 = `templates/run/run.md`）。**声明不是事实**；冲突以文件为准；`run.md` 不自证批准/交付。`schema` 是整数契约版本（门禁按整数分档，与日期无关）；旧 bundle 只有 `contract:` 日期 = 旧形态，读兼容、不再新写。
+新 run 在根落 `run.md`（`schema` / `created` / `phase` / `next` / `delivered` / `parked`；键义 = `{{research_pack_root}}/content/templates/run/run.md`）。**声明不是事实**；冲突以文件为准；`run.md` 不自证批准/交付。`schema` 是整数契约版本（门禁按整数分档，与日期无关）；旧 bundle 只有 `contract:` 日期 = 旧形态，读兼容、不再新写。
 
 **五问**：阶段 / 最近拍板 / 最大未闭合 / 下一步 / 交付态。
 

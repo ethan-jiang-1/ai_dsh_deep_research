@@ -4,7 +4,9 @@
 
 ## 活跃清单
 
-（暂无活跃 issue。新问题按本区流程立卡；已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。）
+- [2026-11-01 插件即产品 v2](2026-11-01-plugin-as-product-v2.md) — 等人拍板：产品 profile / 启动期工作区 / 内容与产物分家；研究 = [research/plugin-as-product-v2](../research/plugin-as-product-v2/README.md)。
+
+已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
 ## 最近归档
 

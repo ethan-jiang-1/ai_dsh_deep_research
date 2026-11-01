@@ -9,114 +9,27 @@ import { spawnSync } from 'node:child_process';
 import { ROOT, PACK, PRESETS, gates, fail, note, walk } from '../context.mjs';
 
 export function runE() {
-// ── workspace-contract（研究手册 + templates/run/ 全表在位；bundle 目录
-//    drt_<slug>/ 运行时由 lead 创建，无静态目录可查——D17 目录契约）──
+// ── content-shape（D40：研究内容在包内，不在工作区）──
+// 手册 = content/manual.md（src/content 以 runtime context 注入）；模板 = content/templates/run/ 八件；
+// 包内不再有 workspace/ 种子、seed.json 或 scaffold；files 白名单必须含 content/**。
 {
-  const gate = 'workspace-contract';
-  if (!existsSync(join(ROOT, 'research-workspace', 'AGENTS.md'))) fail(gate, 'research-workspace/AGENTS.md 不存在');
+  const gate = 'content-shape';
+  const manualPath = join(PACK, 'content', 'manual.md');
+  if (!existsSync(manualPath)) fail(gate, 'packages/deep-research-pack/content/manual.md 缺席——研究手册必须随包');
+  else {
+    const manual = readFileSync(manualPath, 'utf8');
+    if (manual.trim() === '') fail(gate, 'content/manual.md 为空');
+    const vars = [...manual.matchAll(/{{([^}]+)}}/g)].map((m) => m[1]);
+    const unexpected = vars.filter((v) => v !== 'research_pack_root');
+    if (unexpected.length > 0) fail(gate, `content/manual.md 出现未注册插值 {{${unexpected[0]}}}——只有 research_pack_root 由 src/content 注册`);
+  }
   for (const t of ['run.md', 'question.md', 'topics.md', 'plan.md', 'leads.md', 'evidence-entry.md', 'findings.md', 'final.md']) {
-    if (!existsSync(join(ROOT, 'research-workspace', 'templates', 'run', t)))
-      fail(gate, `templates/run/ 缺模板 ${t}`);
+    if (!existsSync(join(PACK, 'content', 'templates', 'run', t))) fail(gate, `content/templates/run/ 缺模板 ${t}`);
   }
-  // 手册唯一定居点 = research-workspace/AGENTS.md（agent-instructions 经会话 cwd projectRoot
-  // 注入）；$DSH_HOME/AGENTS.md 是 DSH 全局注入第二通道，一旦存在必与手册漂移（事故实证：
-  // 旧契约化石镜像让 lead 按 runs/<slug> 行动）——存在即红。
-  if (existsSync(join(ROOT, 'runtime', 'harness-home', 'AGENTS.md')))
-    fail(gate, 'runtime/harness-home/AGENTS.md 化石镜像在场（手册唯一注入通道 = cwd projectRoot）——删除它');
-}
-
-// ── handbook-budget（手册注入字节预算，2026-10-09 钉版复核吸收）──
-// 为什么：agent-instructions 的 maxBytes 超限时**静默截断**（vendor render 先丢更宽的指令文件、
-// 再截最具体的文件）——company 实测事故：preset 钉 16384 时手册 1.2KB，手册长到 17.4KB 后
-// 成员会话从某节中句起整段丢失、"工作纪律"节从未注入（company handbook-budget 门禁出生现场，
-// 2026-10-02；源 = company@59551f2 checks/run-gates.mjs:99–117）。本仓同构风险：手册是四角色
-// 会话的注入正本，doc-budgets 的**行数**栅栏管不到**字节**截断。正本 = research-workspace/AGENTS.md
-// （pack 种子由 pack-workspace-fresh 保证同步，不重复查）。
-{
-  const gate = 'handbook-budget';
-  const handbookPath = join(ROOT, 'research-workspace', 'AGENTS.md');
-  if (!existsSync(handbookPath)) fail(gate, 'research-workspace/AGENTS.md 不存在（workspace-contract 同报）');
-  else {
-    const handbookBytes = readFileSync(handbookPath).length;
-    // 逐文件收集（不摊平）：单个 preset 丢 maxBytes 行时，摊平数组只剩三个一致值会静默放行——
-    // 该角色手册失去截断防线而门禁绿（钉版复核对抗自审 S1；company 原版同款洞，此处收紧）。
-    const perPreset = readdirSync(PRESETS).filter((f) => f.endsWith('.patch.yml')).map((f) => ({
-      role: f.replace(/\.patch\.yml$/, ''),
-      budgets: [...readFileSync(join(PRESETS, f), 'utf8').matchAll(/maxBytes:\s*(\d+)/g)].map((m) => Number(m[1])),
-    }));
-    if (perPreset.length === 0) fail(gate, 'presets 下零个 *.patch.yml——防空语料');
-    const bare = perPreset.filter((e) => e.budgets.length === 0);
-    if (bare.length > 0)
-      fail(gate, `preset ${bare.map((e) => e.role).join(', ')} 缺 maxBytes 声明——该角色的 agent-instructions 无字节预算，手册超限即静默截断（补 packages/deep-research-pack/presets/<role>.patch.yml 的 maxBytes 行）`);
-    else {
-      const budgets = perPreset.flatMap((e) => e.budgets);
-      if (new Set(budgets).size !== 1)
-        fail(gate, `各 preset 的 maxBytes 不一致：${budgets.join(', ')}——预算应同值（改 packages/deep-research-pack/presets/<role>.patch.yml）`);
-      else {
-        const maxBytes = budgets[0];
-        const margin = 1024; // render 包装开销余量（intro/省略注记——company 同款）
-        if (handbookBytes + margin > maxBytes)
-          fail(gate, `手册 ${handbookBytes}B + ${margin}B 余量 > maxBytes ${maxBytes}——agent-instructions 正在静默截断手册尾部（升 preset maxBytes 或先瘦身 research-workspace/AGENTS.md）`);
-      }
-    }
-  }
-}
-
-// ── workspace-versioning（工作区版本控制边界）。规则：工作区跟踪面的规则住在
-//    两个**必须被跟踪**的规则文件里——`research-workspace/.gitignore.example`（运行区拒收名单，
-//    同时是随 pack 分发的种子正本；包内名带 `.example` 因为 npm pack 永不打包 `.gitignore`
-//    文件名，scaffold 落地时改回本名）与 `research-workspace/drafts/.gitignore`（开发证据
-//    白名单：探针稿与 dry-run 输出默认拒收）。为什么机械化：本仓根 .gitignore 对工作区不生效，
-//    `git add -A` 又只加已跟踪文件——**"规则文件在库"本身就是边界存在的唯一形式**：正本一丢，
-//    pack 照旧发布、本仓静默失去边界。覆盖面的重点在**内容与形态**：裸 `*` 拒收全部会把被
-//    跨目录引用的材料一起拒收（fixture 实测全新 clone 后 drafts 全丢、md-links 红），故门禁
-//    同时钉"显式列名单"（出现裸 `*` 即红）与四条运行区拒收行的在场。防空语料：正本/种子/
-//    drafts 任一缺席、正本与种子不逐字节相等、缺任一拒收行 → 红（拒收行丢了，安装方一次
-//    `git add -A` 就把整个 run 历史提交进他自己的库）。──
-{
-  const gate = 'workspace-versioning';
-  const seed = join(PACK, 'workspace', '.gitignore.example');
-  const scaffoldPath = join(PACK, 'scripts', 'scaffold.mjs');
-  const rootRules = join(ROOT, 'research-workspace', '.gitignore.example');
-  const draftsRules = join(ROOT, 'research-workspace', 'drafts', '.gitignore');
-  const seedText = existsSync(seed) ? readFileSync(seed, 'utf8') : null;
-  if (seedText === null) fail(gate, 'packages/deep-research-pack/workspace/.gitignore.example 缺席——安装方将拿不到工作区忽略规则（修正 = 补正本后跑 `node dev/sync-pack-workspace.mjs`）');
-  else {
-    // 种子名 = `.gitignore.example` 而非 `.gitignore`：npm pack 永不打包名为 .gitignore 的文件
-    // （`files: ["workspace/**"]` 也照删，实测）——种子若叫 .gitignore，安装方永远收不到它。
-    // 故这里同时钉"包内没有 .gitignore（那意味着选了随包会被丢的名字）"与"scaffold 会改名落地"。
-    if (existsSync(join(PACK, 'workspace', '.gitignore')))
-      fail(gate, 'packages/deep-research-pack/workspace/.gitignore 在场——npm pack 永不打包该文件名，种子会从 tarball 里静默消失（修正 = 用 .gitignore.example 形态）');
-    const scaffoldSrc = existsSync(scaffoldPath) ? readFileSync(scaffoldPath, 'utf8') : '';
-    const seedCorePath = join(PACK, 'scripts', 'lib', 'seed-core.mjs');
-    const seedCoreSrc = existsSync(seedCorePath) ? readFileSync(seedCorePath, 'utf8') : '';
-    const seedManifestPath = join(PACK, 'workspace', 'seed.json');
-    let seedManifest = null;
-    try { seedManifest = JSON.parse(readFileSync(seedManifestPath, 'utf8')); } catch { seedManifest = null; }
-    if (!scaffoldSrc.includes('seed.json'))
-      fail(gate, 'scaffold.mjs 未读 workspace/seed.json——种子安装/升级失去版本与哈希依据');
-    if (!scaffoldSrc.includes('seedSourceRel'))
-      fail(gate, 'scaffold.mjs 未用 seedSourceRel 处理包内名 → 落地名');
-    if (!/destRel === '\.gitignore'\s*\?\s*'\.gitignore\.example'/.test(seedCoreSrc))
-      fail(gate, 'seed-core.mjs 未把 .gitignore 映射到 .gitignore.example——规则不会铺到安装方工作区');
-    if (!seedManifest || !Object.hasOwn(seedManifest.files ?? {}, '.gitignore'))
-      fail(gate, 'workspace/seed.json 缺 .gitignore 条目——安装方的忽略规则不在种子清单里');
-    if (!existsSync(rootRules)) fail(gate, 'research-workspace/.gitignore.example 不在位——工作区跟踪面的规则正本（修正 = 重建后跑 `node dev/sync-pack-workspace.mjs`）');
-    else if (readFileSync(rootRules, 'utf8') !== seedText) fail(gate, 'research-workspace/.gitignore.example 与 pack 种子 workspace/.gitignore.example 不一致——正本与分发件漂移（修正 = `node dev/sync-pack-workspace.mjs`）');
-    if (!existsSync(draftsRules)) fail(gate, 'research-workspace/drafts/.gitignore 不在位——开发证据白名单（新探针稿会默认可被 git add）');
-    // 拒收清单 = 三个运行区名字。形态是**显式列名单**而非裸 `*` 拒收全部：工作区里还有被
-    // 文档与测试跨目录引用的材料（本仓 drafts/ 开发证据），裸 `*` 会连它们一起拒收——fixture
-    // 实测全新 clone 后 drafts 全丢、md-links 红（见 Note §实际跑过的验证）。名单少一项
-    // 就等于该类运行区重新可提交，故逐项钉。
-    const denies = ['drt_*/', 'archive/', '_abandoned/', 'method-library.md'];
-    for (const deny of denies) {
-      const escaped = deny.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      if (!new RegExp(`^\\s*${escaped}\\s*$`, 'm').test(seedText))
-        fail(gate, `种子 workspace/.gitignore.example 缺拒收行 \`${deny}\`——安装方该类运行区重新可被 git add（修正 = 改正本 research-workspace/.gitignore.example 后跑 \`node dev/sync-pack-workspace.mjs\`）`);
-    }
-    if (/^\s*\*\s*$/m.test(seedText))
-      fail(gate, '种子 workspace/.gitignore.example 出现裸 `*` 整目录拒收——它会连工作区里被跨目录引用的材料（如 drafts/ 开发证据）一起拒收，全新 clone 后链接与测试同时失效（修正 = 改回显式列名单）');
-  }
+  if (existsSync(join(PACK, 'workspace'))) fail(gate, 'packages/deep-research-pack/workspace/ 在场——D40 后内容只在 content/，不再有工作区种子');
+  const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
+  if ((pkg.files ?? []).some((f) => f.startsWith('workspace/'))) fail(gate, 'package.json files 仍含 workspace/**——种子已退役');
+  if (!(pkg.files ?? []).some((f) => f.startsWith('content/'))) fail(gate, 'package.json files 缺 content/**——手册/模板不会随包发布');
 }
 
 // ── dev-runtime-clean（dev/ 只住源码驱动；运行态必须住 runtime/ 或研究工作区）──
@@ -155,18 +68,6 @@ export function runE() {
   if (r.status !== 0) {
     const first = `${r.stderr ?? ''}${r.stdout ?? ''}`.trim().split('\n').filter(Boolean)[0];
     fail(gate, first ?? 'dev/research.overlay.yml 与 pack 渲染结果不一致——跑 `node dev/render-overlay.mjs` 重生成');
-  }
-}
-
-// ── pack-workspace-fresh（sync-pack-workspace --check）：手册/模板是会话 cwd 的内容，
-// pack 必须自带（否则部署方装了包也没有研究纪律）。正本 = research-workspace/，
-// 种子 = pack workspace/（生成物，勿手改；漂移即红——与 overlay-fresh 同形态）。
-{
-  const gate = 'pack-workspace-fresh';
-  const r = spawnSync(process.execPath, ['dev/sync-pack-workspace.mjs', '--check'], { cwd: ROOT, encoding: 'utf8' });
-  if (r.status !== 0) {
-    const first = `${r.stderr ?? ''}${r.stdout ?? ''}`.trim().split('\n').filter(Boolean)[0];
-    fail(gate, first ?? 'pack workspace/ 种子与 research-workspace/ 正本漂移——跑 `node dev/sync-pack-workspace.mjs` 重同步');
   }
 }
 

@@ -11,10 +11,10 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
 
 test('归档路径三处一致：archive/drt_<slug>/（2026-10-20 审计 P1-2 反证）', () => {
-  const handbook = read('packages/deep-research-pack/workspace/AGENTS.md')
+  const handbook = read('packages/deep-research-pack/content/manual.md')
   const design = read('docs/design/50-agent-loop-and-state.md')
   const guide = read('docs/guides/61-run-playbook.md')
-  for (const [rel, text] of [['packages/deep-research-pack/workspace/AGENTS.md', handbook], ['docs/design/50-agent-loop-and-state.md', design], ['docs/guides/61-run-playbook.md', guide]]) {
+  for (const [rel, text] of [['packages/deep-research-pack/content/manual.md', handbook], ['docs/design/50-agent-loop-and-state.md', design], ['docs/guides/61-run-playbook.md', guide]]) {
     assert.ok(text.includes('archive/drt_<slug>/'), `${rel} 未写 archive/drt_<slug>/——归档目录名以盘上为准`)
   }
   assert.ok(!/archive\/<slug>/.test(guide), 'guides/61 仍出现 archive/<slug>（盘上是 drt_<slug>）')
@@ -50,16 +50,15 @@ test('根 AGENTS 布局块覆盖工作区根实体与 pack 种子（2026-10-21 �
       assert.ok(layout.includes(name), `根布局未点名 research-workspace/${name}——盘上实体必须进布局枚举`)
     }
   }
-  // pack 工作区种子：每个种子文件映射布局行的类别词（新种子无映射 = 红，先补映射再核对布局行）
-  const seedMap = { 'AGENTS.md': '手册', 'NODES.md': 'NODES', 'question-patterns.md': '判型库', 'method-library.md': '偏好库', 'templates': '模板', 'seed.json': '清单' }
-  const seeds = readdirSync(join(ROOT, 'packages', 'deep-research-pack', 'workspace')).filter((n) => !n.startsWith('.'))
-  assert.ok(seeds.length > 0, '防空语料：pack workspace 零种子')
-  const wsLine = layout.split('\n').find((l) => l.includes('workspace/（工作区种子'))
-  assert.ok(wsLine, '布局块缺 workspace/（工作区种子…）行')
-  for (const seed of seeds) {
-    const category = seedMap[seed]
-    assert.ok(category, `pack workspace 种子 ${seed} 无类别映射——先在本测试补映射与布局行，再交付`)
-    assert.ok(wsLine.includes(category), `布局行未点名种子类别「${category}」（${seed}）`)
+  // pack 内容：content/ 是随包只读的研究手册与模板（D40；不再有 workspace/ 种子）
+  const contentRoot = join(ROOT, 'packages', 'deep-research-pack', 'content')
+  const entries = readdirSync(contentRoot).filter((n) => !n.startsWith('.'))
+  assert.ok(entries.includes('manual.md'), 'content/ 缺研究手册 manual.md')
+  assert.ok(entries.includes('templates'), 'content/ 缺 run 模板目录')
+  const packLine = layout.split('\n').find((l) => l.trimStart().startsWith('packages/deep-research-pack/'))
+  assert.ok(packLine, '布局块缺 packages/deep-research-pack/ 行')
+  for (const word of ['content/', '研究手册', '模板']) {
+    assert.ok(packLine.includes(word), `布局行未点名「${word}」（content/ 是随包只读内容）`)
   }
 })
 

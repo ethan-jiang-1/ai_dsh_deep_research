@@ -343,7 +343,7 @@ test('模板自洽：按 templates/run/run.md 造的新 run 零核心违约（�
   const base = realpathSync(tmpdir())
   const dir = mkdtempSync(join(base, 'dsh-template-'))
   try {
-    const tpl = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'research-workspace', 'templates', 'run', 'run.md'), 'utf8')
+    const tpl = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'packages', 'deep-research-pack', 'content', 'templates', 'run', 'run.md'), 'utf8')
       .replaceAll('YYYY-MM-DD', '2026-10-28')
     writeFileSync(join(dir, 'run.md'), tpl)
     writeFileSync(join(dir, 'question.md'), '# Q\n\n## Decisions（append-only，最新在上）\n\n- 2026-10-28 HITL1 拍板\n')

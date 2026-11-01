@@ -2,8 +2,8 @@
 
 > 状态：implemented
 >
-> 首提 2026-10-23 ｜ 合同 [研究手册 §状态头、读序与恢复](../../research-workspace/AGENTS.md) ·
-> [NODES §审查](../../research-workspace/NODES.md) ｜
+> 首提 2026-10-23 ｜ 合同 [研究手册 §状态头、读序与恢复](../../packages/deep-research-pack/content/manual.md) ·
+> [NODES §审查](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) ｜
 > 代码 [run-receipt](../../scripts/lib/run-receipt.mjs) · [run-bundle-charter.test](../../tests/contracts/run-bundle-charter.test.mjs) ｜
 > 相关 [run bundle 宪章](./2026-10-23-run-bundle-charter.md)
 

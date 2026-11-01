@@ -16,7 +16,7 @@ subagent 派活），角色分工天然对齐研究波的语义。第 5 个 pres
 | Critic（核查） | wave1 深度审查 + readiness + hitl2 前置 | 对"看起来完成了"过敏：无来源结论狩猎、质量审计、readiness 判定 | review.md |
 | Method Editor（方法编辑） | 方法库页共创（不属研究生命周期） | 把研究方法聊成四字段库条目；不做研究、不检索、不组队 | method-library.md（与用户确认后由页面保存） |
 
-**事实的 owner 全表**住[研究手册](../../research-workspace/AGENTS.md)——一处事实一个家，
+**事实的 owner 全表**住[研究手册](../../packages/deep-research-pack/content/manual.md)——一处事实一个家，
 L3 判据 2 的载体；任何两类事实不得双 owner 或无 owner。
 
 **teammate 的组合继承语义**（company presets.md 四形态矩阵，钉版复核 2026-10-09 登记）：
@@ -42,7 +42,7 @@ skill = 盘上目录本身**（单一事实源：`ls packages/deep-research-pack
 此处不复制清单：复制即缓存，加删 skill 会静默漏项。本节只说明技能面
 承载什么：**方法论条目 ↔ skill 的映射正本 = [30-methodology-mapping.md](./30-methodology-mapping.md)**
 （L3 载体，合同随代码同 diff）；每条方法论纪律写在承载它的 SKILL.md 正文里；
-跨角色硬契约（证据 frontmatter 等）住[研究手册](../../research-workspace/AGENTS.md)。
+跨角色硬契约（证据 frontmatter 等）住[研究手册](../../packages/deep-research-pack/content/manual.md)。
 
 ## 3. 信噪比策略落点（L3 判据 4：显式机制，不靠模型自觉）
 

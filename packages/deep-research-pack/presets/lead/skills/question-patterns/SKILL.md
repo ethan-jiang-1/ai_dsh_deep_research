@@ -1,3 +1,8 @@
+---
+name: question-patterns
+description: HITL1 判型模式库：识别特征 / 思考路径 / 分派结论 / 陷阱 / 困惑信号 / 澄清问法；Lead 立项时先加载它再判型。
+---
+
 # question-patterns — 判型模式库（HITL1 第一对照面）
 
 > 用途：lead 立项时的**第一对照面**——接到研究请求，先在本库找命中模式；命中 → 走该条

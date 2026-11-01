@@ -3,7 +3,7 @@
 > 状态：implemented
 >
 > 首提 2026-10-23 ｜ 决定 [D29](../../docs/decisions.md) ｜
-> 流程位 [NODES §读者版步骤](../../research-workspace/NODES.md) +
+> 流程位 [NODES §读者版步骤](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) +
 > [guides/61 §4](../../docs/guides/61-run-playbook.md) ｜
 > 模型面 [reader-final skill](../../packages/deep-research-pack/presets/lead/skills/reader-final/SKILL.md) ｜
 > 机械面 [node-gate-reader-gate.mjs](../../scripts/lib/node-gate-reader-gate.mjs) +

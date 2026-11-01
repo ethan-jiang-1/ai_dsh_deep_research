@@ -21,10 +21,10 @@ description: Use when adding, removing, or rewiring a research pipeline node —
 
 | # | 面 | 拥有什么 | 动作 |
 |---|---|---|---|
-| 1 | [research-workspace/NODES.md](../../../research-workspace/NODES.md) | 契约全表正本（行 + 回边节 + 编制条件性） | 改行/加行；判据级表述同步 |
+| 1 | [research-workspace/NODES.md](../../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) | 契约全表正本（行 + 回边节 + 编制条件性） | 改行/加行；判据级表述同步 |
 | 2 | `dev/sync-pack-workspace.mjs` | NODES/手册/模板/patterns 双副本 | 跑同步（`pack-workspace-fresh` 门禁对账）；profile 镜像随下次 boot-run 重建 |
 | 3 | `research-workspace/templates/run/` | 字段级契约实例（模板即 schema） | 新输出件 = 新模板；改必备件 = 改对应模板 |
-| 4 | [研究手册](../../../research-workspace/AGENTS.md) | 目录约定 + owner 表（一处事实一个家） | 新文件 = 补目录约定与 owner 行（手册有行数预算，挤一补一） |
+| 4 | [研究手册](../../../packages/deep-research-pack/content/manual.md) | 目录约定 + owner 表（一处事实一个家） | 新文件 = 补目录约定与 owner 行（手册有行数预算，挤一补一） |
 | 5 | `packages/deep-research-pack/src/lib/run-fold.ts` | `STEP_ORDER`（观察面轨道折算） | 节点序变才动；动了要 `pnpm build`（client 面）+ `client-load-smoke` |
 | 6 | `scripts/run-gates/schema-scan.mjs` + `scripts/run-gates/node-gate.mjs` | 在场级全行断言 + CONDITIONAL 条件件 / 判据级逐行 | 新输出件 = schema-scan 行；条件性节点登记 CONDITIONAL；判据级按证据升格（fixtures 先红后绿 + 契约日） |
 

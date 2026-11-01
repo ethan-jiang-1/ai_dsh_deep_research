@@ -18,7 +18,7 @@
 本仓对照面（缺口同形）：HITL1 现状 = 固定三问（研究类型 / 深度篇幅 / 口径语言——
 [research-brief](../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md)
 skill），问的全是**抽象参数**；三问答完 lead 即定稿 question.md + topics.md
-（[NODES](../../../research-workspace/NODES.md) 行 1）并直接开工。**这两份文件就是具体计划**
+（[NODES](../../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) 行 1）并直接开工。**这两份文件就是具体计划**
 （问题定稿 + Purpose + RQ 分解 + Scope/Constraints + topic 图）——但用户开工前从未见过
 它们，第一次见到具体化方向 = v1 交付（HITL2）。本仓已记账的有界风险
 （[hitl2 范围轮卡](2026-09-28-hitl2-scope-round.md)）："
@@ -42,7 +42,7 @@ skill），问的全是**抽象参数**；三问答完 lead 即定稿 question.m
   框架要求 `<research-plan>` 标记包裹，引擎仅标记在场时触发，无标记诚实降级。
 - **本仓载体差异——两处结构性不用搬**：① 源仓计划住在 chat 线程，需物化新文件；本仓
   计划**已有家**：question.md = 方向契约 = bundle 身份核心（跨 rerun 持久，模板自带
-  [HITL1 Alignment Snapshot](../../../research-workspace/templates/run/question.md) 节）+
+  [HITL1 Alignment Snapshot](../../../packages/deep-research-pack/content/templates/run/question.md) 节）+
   §Decisions append-only 拍板行——不新建文件。② 源仓闸门触发靠引擎检测 plain text 收尾
   （故需标记）；本仓 HITL 载体 = DSH `ask_user_question` 结构化卡，**工具调用即信号**
   （观察面 hitl-fold 既有分类、cockpit 挂起横幅与"等你拍板"活标题零改动）——
@@ -53,7 +53,7 @@ skill），问的全是**抽象参数**；三问答完 lead 即定稿 question.m
   （chat interrupt + 未识别输入打回）；本卡物种 = 多一个 ask_user_question 调用点——
   接受/修改语义内嵌选项。B3 的否决理由恰好论证了本卡为什么不需要搬他们的标记协议；
   但两者同属"跑前对齐"邻域，毕业门前须明辨（此处即辨析记录）。
-- **两点交互合同与先例**：[研究手册 §交互纪律](../../../research-workspace/AGENTS.md)
+- **两点交互合同与先例**：[研究手册 §交互纪律](../../../packages/deep-research-pack/content/manual.md)
   （"整个 run 只有两个人机交互点"）；两段卡在**同一个交互点内**、计数不变的裁定先例 =
   hitl2 范围轮卡 A 形态（"两点合同字面保持"）；D17"HITL1 永不重开"——计划卡在立项窗内
   （两文件落盘后、下游组队前），属扩窗不是 run 启动后重开；判型路径照旧（计划卡在

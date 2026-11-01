@@ -62,7 +62,7 @@ test('README 数据卡形状：10 列（含可移植）、P2 行带保留、凭�
 })
 
 test('回执三态：手册两处副本都写明 install-only 降级（不可履行不得写成已履行）', () => {
-  for (const rel of ['research-workspace/AGENTS.md', 'packages/deep-research-pack/workspace/AGENTS.md']) {
+  for (const rel of ['packages/deep-research-pack/content/manual.md']) {
     const text = readFileSync(join(ROOT, rel), 'utf8')
     assert.match(text, /回执三态/, `${rel} 缺回执三态节`)
     assert.match(text, /no machine audit \(install-only\)/, `${rel} 缺 install-only 降级标记`)

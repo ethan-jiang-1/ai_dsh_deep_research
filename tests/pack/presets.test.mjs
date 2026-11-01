@@ -183,8 +183,8 @@ test('lead persona 钉 ask 硬约束：禁 wait:-1（BUG-005——模型单参�
 test('HITL1 两段卡：计划确认卡钉在模型可见面与合同面（persona + research-brief + 手册 + 模板）', () => {
   const yml = readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8');
   const skill = readFileSync(join(PRESETS, 'lead/skills/research-brief/SKILL.md'), 'utf8');
-  const manual = readFileSync(join(ROOT, 'packages/deep-research-pack/workspace/AGENTS.md'), 'utf8');
-  const template = readFileSync(join(ROOT, 'packages/deep-research-pack/workspace/templates/run/question.md'), 'utf8');
+  const manual = readFileSync(join(ROOT, 'packages/deep-research-pack/content/manual.md'), 'utf8');
+  const template = readFileSync(join(ROOT, 'packages/deep-research-pack/content/templates/run/question.md'), 'utf8');
   // persona（行为最强钉）：第二段在场 + quick_factual 豁免 + 推荐项形态 + 拍板落 §Decisions
   assert.match(yml, /计划确认卡/, 'persona 缺计划确认卡——第二段可被静默跳过');
   assert.match(yml, /quick_factual 免发/, 'persona 未写 quick_factual 豁免——快答场景会被强塞第二段卡');
@@ -207,7 +207,7 @@ test('HITL1 两段卡：计划确认卡钉在模型可见面与合同面（perso
 test('HITL1 业务决策简报：字段钉在模板与采集规则（模板 + research-brief + persona 第四问触发）', () => {
   const yml = readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8');
   const skill = readFileSync(join(PRESETS, 'lead/skills/research-brief/SKILL.md'), 'utf8');
-  const template = readFileSync(join(ROOT, 'packages/deep-research-pack/workspace/templates/run/question.md'), 'utf8');
+  const template = readFileSync(join(ROOT, 'packages/deep-research-pack/content/templates/run/question.md'), 'utf8');
   // 模板（schema 实例）：Snapshot 业务决策简报行——五字段 + open 显式形态
   assert.match(template, /业务决策简报/, 'question.md 模板缺业务决策简报字段（HITL1 Alignment Snapshot）');
   for (const field of ['决策对象', '待决定事项', '比较选项', '期限', '成功标准与约束']) {
@@ -233,7 +233,7 @@ test('HITL1 归档预检问并入第一段卡：skill 钉面（2026-10-11 run �
 });
 
 test('报告首屏决策摘要：模板节名与生成/审查合同钉（模板 + synthesis + adversarial-review）', () => {
-  const template = readFileSync(join(ROOT, 'packages/deep-research-pack/workspace/templates/run/final.md'), 'utf8');
+  const template = readFileSync(join(ROOT, 'packages/deep-research-pack/content/templates/run/final.md'), 'utf8');
   const synthesis = readFileSync(join(PRESETS, 'lead/skills/synthesis/SKILL.md'), 'utf8');
   const review = readFileSync(join(PRESETS, 'critic/skills/adversarial-review/SKILL.md'), 'utf8');
   // 模板（schema 实例）：首屏六段 + 待定形态 + 快速事实缩略注记 + 来源链形态
@@ -258,7 +258,7 @@ test('报告首屏决策摘要：模板节名与生成/审查合同钉（模板 
 test('读者版终稿：reader-final skill + persona + 手册钉面（review PASS 后、HITL2 前）', () => {
   const skill = readFileSync(join(PRESETS, 'lead/skills/reader-final/SKILL.md'), 'utf8');
   const yml = readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8');
-  const manual = readFileSync(join(ROOT, 'packages/deep-research-pack/workspace/AGENTS.md'), 'utf8');
+  const manual = readFileSync(join(ROOT, 'packages/deep-research-pack/content/manual.md'), 'utf8');
   // skill（生成正本）：触发 + 两产物 + 六节 + 自检 + 交付顺序
   assert.match(skill, /review\.md.*PASS|readiness: PASS/, 'reader-final 缺 PASS 后触发的显性条件');
   assert.match(skill, /final\/readable\.md/, 'reader-final 缺工作件路径');

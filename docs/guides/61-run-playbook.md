@@ -3,7 +3,7 @@
 > 层：指南（怎么操作）。通道 = run 通道（安装域 research profile：本包 + vendor
 > agent-team-profile 层，P1 定案——[毕业 Note](../../notes/implemented/2026-09-24-m2-p1-run-channel.md)）；
 > **作用域**：本页只服务 M2 开发通道（仓内 `research` profile + `research-workspace/` + run-driver）。产品用户（`dsh-deep-research` + 任意工作区）看 [pack README](../../packages/deep-research-pack/README.md)、[`_dist/安装手册.md`](../../_dist/安装手册.md) 与 [guides/65](65-run-forms.md)；不要把本页的 3083/仓内路径套到产品。
-> 跨角色纪律与文件契约 = [研究手册](../../research-workspace/AGENTS.md)；节点 I/O 正本 = [NODES](../../research-workspace/NODES.md)；
+> 跨角色纪律与文件契约 = [研究手册](../../packages/deep-research-pack/content/manual.md)；节点 I/O 正本 = [NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)；
 > 2026-09-24 的四角色流程快照 = [m2-run-mechanics](../../notes/implemented/2026-09-24-m2-run-mechanics.md)（历史，非现行）。本页只答"你现在做什么"。
 
 ## 0. 开跑（一次性准备 + 每次启动）
@@ -39,7 +39,7 @@
   报出来**，按内容分两类：(a) 无 `final/` 或 `review.md` 不是 `readiness: PASS` = **在飞**
   （含停在 HITL2 等拍板的形态——`final/` 记账随交付动作〔拍板行 → run 根 final.md + 记账 →
   present → goal complete〕落地，交付前不在场；扩张版 vN 随 rerun）→ 问"接续它还是新开"
-  （接续做法 = §5）；(b) 有 `final/` 且 PASS = **交付线已在盘**——按 [NODES](../../research-workspace/NODES.md)
+  （接续做法 = §5）；(b) 有 `final/` 且 PASS = **交付线已在盘**——按 [NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)
   交付行，交付判别 = §6（`final/vN` + `deliverables/presented` + 回执）→ 问"先归档再新开，
   还是补研究（rerun）"。两类都带上 slug + 操作桶 + 最新 journal 日期，**都不自己挑**；
   present 原始事件不在 bundle 文件里（`deliverables/presented`），(b) 类归档前请用户确认。
@@ -236,7 +236,7 @@ BUG-020）。
   lead 依赖的是 bundle 文件事实而非位置（归档位在其 cwd 之下可读；仪表盘与 evidence-audit
   `--latest` 均并扫 archive/）。续跑语义 = rerun 三分：表述修订原位改、证据扩张落 `final/`
   v(n+1)（交付后操作侧重新归档）、结构性另起新 bundle（正本 =
-  [NODES 回边版本语义](../../research-workspace/NODES.md)）；候选不止一个时全部报出问用户，
+  [NODES 回边版本语义](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)）；候选不止一个时全部报出问用户，
   不自己挑（同 §0 纪律）；
 - **rerun 版本面**：同 bundle rerun 开工时 lead 在 `question.md` 标题下写
   `> rerun: v2 · evidence-expansion · 日期 · 触发：…`；plan 每次重写前把旧版落 `plan/vN.md`
@@ -253,12 +253,12 @@ BUG-020）。
 
 ## 6. 判定"研究完成"
 
-判定正本 = [研究手册 §完成判据](../../research-workspace/AGENTS.md)（+ [NODES 交付行](../../research-workspace/NODES.md)；设计层视图 = [design/50 §交付判定](../design/50-agent-loop-and-state.md)）——文件事实链六件缺一不可，逐件细节住正本；口头宣告与观察面显示都不算。
+判定正本 = [研究手册 §完成判据](../../packages/deep-research-pack/content/manual.md)（+ [NODES 交付行](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)；设计层视图 = [design/50 §交付判定](../design/50-agent-loop-and-state.md)）——文件事实链六件缺一不可，逐件细节住正本；口头宣告与观察面显示都不算。
 
 ## 7. 归档时收割判型模式（增长协议的收割步）
 
 归档一个 run 前，扫它的 journal 的判型标记（命中/未命中两类，协议正本 =
-[question-patterns.md 库尾](../../research-workspace/question-patterns.md)）：
+[question-patterns.md 库尾](../../packages/deep-research-pack/presets/lead/skills/question-patterns/SKILL.md)）：
 
 ```sh
 grep -rn "判型" research-workspace/ --include=journal.md

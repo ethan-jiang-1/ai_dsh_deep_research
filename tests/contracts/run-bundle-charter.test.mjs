@@ -15,9 +15,8 @@ import { READ_INTENTS, READ_ORDER } from '../../scripts/lib/run-receipt.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
-const HANDBOOK = 'packages/deep-research-pack/workspace/AGENTS.md'
-const SEED = 'packages/deep-research-pack/workspace/AGENTS.md'
-const TEMPLATE = 'packages/deep-research-pack/workspace/templates/run/run.md'
+const HANDBOOK = 'packages/deep-research-pack/content/manual.md'
+const TEMPLATE = 'packages/deep-research-pack/content/templates/run/run.md'
 
 test('手册承 D28 四节与位置语义（模型每轮都会读到的合同）', () => {
   const h = read(HANDBOOK)
@@ -68,10 +67,6 @@ test('模板 phase 注释 = RUN_PHASES 闭集；schema 与 created 可被解析�
     assert.equal(createdDateOf(dir), '2026-10-28')
     assert.equal(schemaIssueOf(dir), null)
   } finally { rmSync(dir, { recursive: true, force: true }) }
-})
-
-test('手册种子与工作区手册逐字一致（部署态读到同一份合同）', () => {
-  assert.equal(read(SEED), read(HANDBOOK))
 })
 
 test('RFC 现在时描述见证绑定与回执校验（docs = 当前合同）', () => {

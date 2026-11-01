@@ -52,7 +52,7 @@ research/
 
 | 名头 | 问题 | 消费者 | 材料 |
 |---|---|---|---|
-| （暂无活跃研究题） | — | — | — |
+| [插件即产品 v2](plugin-as-product-v2/README.md) | 产品 profile、启动期工作区、内容与产物分家 | [决策卡](../issues/2026-11-01-plugin-as-product-v2.md) | [五份材料](plugin-as-product-v2/README.md) |
 
 归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单。
 

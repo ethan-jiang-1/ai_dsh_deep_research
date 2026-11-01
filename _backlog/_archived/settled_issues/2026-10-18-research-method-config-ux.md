@@ -9,7 +9,7 @@ opened: 2026-10-18
 
 **问题与期望结果：** 用户实测右栏「研究配置」页签后提出的质疑：不同用户/行业的深研方法与思路可能迥异，**预制配置必须是好示范**，后续定制才搞得更好；定制要简单，且要"显式化"。期望结果 = 这块面能回答四件事——"这条打法具体怎么干活""这次用的是哪条""我改了到底生效没有""我怎么写出自己行业的那一条"，并且**每一条可配项都指认得出它改谁的行为**。
 
-**当前情况：** 面板与折算实现已亲读；方法内容正本 = lead 的 [research-brief skill](../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md) 方法预设表；题面形态库 = [question-patterns.md](../../../research-workspace/question-patterns.md)（8 条）；节点契约 = [NODES.md](../../../research-workspace/NODES.md)。外部先例与验证边界 = [调研材料](../research/method-config-ux/2026-10-18-method-config-ux-external.md)。**本卡已经过两轮无上下文审计（内容盲审＋拆卡结构审计）与一轮有上下文代码级复核**（回执见 §附录）。**2026-10-18 按用户拍板拆卡**：实施分派两张子卡，本卡只保留共用的边界、证据与共识。
+**当前情况：** 面板与折算实现已亲读；方法内容正本 = lead 的 [research-brief skill](../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md) 方法预设表；题面形态库 = [question-patterns.md](../../../packages/deep-research-pack/presets/lead/skills/question-patterns/SKILL.md)（8 条）；节点契约 = [NODES.md](../../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)。外部先例与验证边界 = [调研材料](../research/method-config-ux/2026-10-18-method-config-ux-external.md)。**本卡已经过两轮无上下文审计（内容盲审＋拆卡结构审计）与一轮有上下文代码级复核**（回执见 §附录）。**2026-10-18 按用户拍板拆卡**：实施分派两张子卡，本卡只保留共用的边界、证据与共识。
 
 **未决问题：** 交付工件合同的范围（盲审后缩小，见 U12）；领域包要不要升格为字段（U13）；方法库增长纪律（未决-3）；库规模（未决-4）；保存指令优先级。以上都**不属任何子卡**，见 §未决与重议条件。（"P→方法映射表住哪" = **U16，是子卡② 的前置**，不在此列。）
 
@@ -60,8 +60,8 @@ opened: 2026-10-18
 | 研究配置页签 | [ResearchConfigTab.tsx](../../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) | 右栏面板：内置只读 ＋ 我的偏好库投影 ＋ 生成指令交 Lead |
 | 折算层 | [library-fold.ts](../../../packages/deep-research-pack/src/lib/library-fold.ts) | `method-library.md` 文本 ⇄ 条目 ⇄ 指令文本；纯函数 + keyless 单测 |
 | 用户方法库 | 工作区根 `method-library.md` | **工作区级**用户数据，Lead 维护；不存在则跳过 |
-| 判型模式库 | [question-patterns.md](../../../research-workspace/question-patterns.md) | 8 条题面形态（P1–P8）＋ 增长协议（留察／休眠／晋升门槛）——发现 1、9 的对照面 |
-| 节点契约 | [NODES.md](../../../research-workspace/NODES.md) | 八节点 I/O；**「方法不改拓扑」**的依据 |
+| 判型模式库 | [question-patterns.md](../../../packages/deep-research-pack/presets/lead/skills/question-patterns/SKILL.md) | 8 条题面形态（P1–P8）＋ 增长协议（留察／休眠／晋升门槛）——发现 1、9 的对照面 |
+| 节点契约 | [NODES.md](../../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) | 八节点 I/O；**「方法不改拓扑」**的依据 |
 | 驾驶舱设计正本 | [design/40](../../../docs/design/40-research-cockpit.md) | 面板在架构里的位置与边界 |
 | 架构边界 | [00-index D25](../../../docs/00-index.md) | 「面板不直写文件、写路径唯一 = Lead」的裁决出处 |
 | D25 一期的决定理由 | [研究配置页签 Note](../../../notes/implemented/2026-10-12-research-config-tab.md) | 输掉的方案（直写库／Settings 页）与同钉约束 |
@@ -157,7 +157,7 @@ opened: 2026-10-18
 
 | 轴 | 回答什么 | owner |
 |---|---|---|
-| A 题面形态 | 研究什么形态的问题 → topic 骨架/编制/类型卡 | [question-patterns.md](../../../research-workspace/question-patterns.md)（8 条） |
+| A 题面形态 | 研究什么形态的问题 → topic 骨架/编制/类型卡 | [question-patterns.md](../../../packages/deep-research-pack/presets/lead/skills/question-patterns/SKILL.md)（8 条） |
 | B 打法 | 怎样调查、核验、综合 | research-brief 方法预设表 + 工作区库 |
 | **C 领域包** | **本行业的一手源 / 口径 / 工件 / 免责** | **今天没有这个轴**（以库条目形式隐约存在——「格局调研」就是一条） |
 | D 本次旋钮 | 时间窗/语言/地域/排除/深度篇幅 | question.md §Constraints（已有，**不复制**） |
@@ -250,7 +250,7 @@ T-1..T-3 全部达成。本卡**不自动授予**未决池各项的实施权限�
 
 - 面板与折算：[ResearchConfigTab.tsx](../../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) 与 [library-fold.ts](../../../packages/deep-research-pack/src/lib/library-fold.ts) 全文；
 - 模型面：[research-brief](../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md) 全文、[team-assembly](../../../packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md) 组队矩阵与分派纪律、[synthesis](../../../packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md) 流程与判据、scout 的 `lead-mapping`（检索器对账）、analyst 的 `evidence-extraction`（证据契约）；
-- 工作区：[question-patterns.md](../../../research-workspace/question-patterns.md) 全文（8 条 ＋ 增长协议）、[NODES.md](../../../research-workspace/NODES.md) 全文、`templates/run/question.md` 的研究方法节、`method-library.md` 的用户条目全文；
+- 工作区：[question-patterns.md](../../../packages/deep-research-pack/presets/lead/skills/question-patterns/SKILL.md) 全文（8 条 ＋ 增长协议）、[NODES.md](../../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) 全文、`templates/run/question.md` 的研究方法节、`method-library.md` 的用户条目全文；
 - 架构与决定：[design/40](../../../docs/design/40-research-cockpit.md)、[00-index D25](../../../docs/00-index.md)、[研究配置页签 Note](../../../notes/implemented/2026-10-12-research-config-tab.md)、[长期管理卡](2026-10-12-research-method-profile-management.md)、[详情 UX 卡](2026-10-12-research-preference-detail-ux.md)、[方法配置总卡](2026-10-12-research-preference-templates.md)、[单次闭环卡](2026-10-12-research-method-run-lifecycle.md)；
 - 历史研究：[2026-10-12 研究依据](../research/research-preferences/2026-10-12-research-preferences.md)、[2026-10-11 高管 UX 调研](../research/2026-10-11-executive-research-ux/index.md)、[HITL1 接收调研](../../../research-workspace/drafts/2026-09-29-hitl1-intake-routing-survey.md)、[自增长模式库调研](../../../research-workspace/drafts/self-growing-pattern-library-research.md)（后两份在开发侧 `drafts/`）；
 - 部署面：pack README 的已知限制节、`scaffold.mjs`、`sync-pack-workspace.mjs` 种子清单、`workspace/.gitignore.example`；

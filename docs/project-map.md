@@ -15,17 +15,17 @@
 |---|---|---|
 | 产品包 | bundle、preset、产品 launcher、产品 runtime skills、驾驶舱 client、部署 bin、发布种子、运行形态合同 | [pack README](../packages/deep-research-pack/README.md)、[插件作者指南](guides/62-plugin-authoring.md)、[运行形态合同](guides/65-run-forms.md) |
 | 启动与开发驱动 | 产品 launcher（用户路径）；vendor 构建、环境隔离、生成物同步、安装组合、web 启动、会话驱动（开发路径） | [开发环](guides/60-dev-loop.md)、[boot-run](../dev/boot-run.sh) |
-| 研究运行数据 | 用户工作区（dev 实例 = `research-workspace/`）：角色会话 cwd、共享手册、节点契约、模板、每次研究 bundle | [研究手册](../research-workspace/AGENTS.md)、[NODES](../research-workspace/NODES.md)、[状态与循环](design/50-agent-loop-and-state.md) |
+| 研究运行数据 | 用户工作区（dev 实例 = `research-workspace/`）：角色会话 cwd、共享手册、节点契约、模板、每次研究 bundle | [研究手册](../packages/deep-research-pack/content/manual.md)、[NODES](../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)、[状态与循环](design/50-agent-loop-and-state.md) |
 | 验证与调试 | 静态门禁、确定性回归、挂载/安装/浏览器 smoke、回放、run 审计和观察 | [验收合同](evaluation.md)、[脚本指令](../scripts/AGENTS.md)、[测试指令](../tests/AGENTS.md) |
 | 人机交互 | Web 中的问卡、会话流、任务板、驾驶舱与交付面板；独立 HTML 仪表盘提供观察投影 | [驾驶舱设计](design/40-research-cockpit.md)、[Run 指南](guides/61-run-playbook.md) |
 
 根与子树的开发 `AGENTS.md`、开发技能 `.agents/skills/` 指导 Coding Agent 改仓库；
-研究工作区的 [AGENTS.md](../research-workspace/AGENTS.md) 与包内角色技能指导研究团队执行研究。
+研究工作区的 [AGENTS.md](../packages/deep-research-pack/content/manual.md) 与包内角色技能指导研究团队执行研究。
 两套技能服务不同任务。团队职责分别是 Lead 立项/综合/交付、Scout 找方向、Analyst 取证、Critic 审查。
 
 ## 任务入口矩阵
 
-每个任务只有一个首选入口；Agent Loop 与四类运行状态的合同正本 = [design/50](design/50-agent-loop-and-state.md)，节点 I/O = [NODES](../research-workspace/NODES.md)，命令与前置正本 = [开发环 §2](guides/60-dev-loop.md)。
+每个任务只有一个首选入口；Agent Loop 与四类运行状态的合同正本 = [design/50](design/50-agent-loop-and-state.md)，节点 I/O = [NODES](../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)，命令与前置正本 = [开发环 §2](guides/60-dev-loop.md)。
 
 | 任务 | 首选入口 | 写盘 | 档位 | 事实来源 | 失败后的下一站 |
 |---|---|---|---|---|---|
@@ -34,7 +34,7 @@
 | 继续在飞 run | 同上；起来后 lead 会话说「继续 \<slug\>」 | 是 | 同上 | bundle 文件 + [Run 指南](guides/61-run-playbook.md) | bundle 缺件 → NODES 判据定位 |
 | 观察在飞 run | boot 自带后台仪表盘 + Web 驾驶舱 | 只读投影 | 浏览器 | [驾驶舱设计](design/40-research-cockpit.md) | 页签坏 → client-load-smoke |
 | 回答 HITL | Web GUI 选项卡（产品面）；代理代答 = `dev/hitl-answer.mjs`（开发面） | 是 | 浏览器；代答需真挂起在场 | [Run 指南](guides/61-run-playbook.md) | 卡未弹 → watch-run 看挂起谓词 |
-| 查看 run 状态与交付 | `<workspace>/drt_<slug>/` 文件事实（dev 实例 = `research-workspace/drt_<slug>/`；仪表盘只是投影） | 只读 | keyless | [NODES](../research-workspace/NODES.md) | 交付不明 → node-gate 门②③ |
+| 查看 run 状态与交付 | `<workspace>/drt_<slug>/` 文件事实（dev 实例 = `research-workspace/drt_<slug>/`；仪表盘只是投影） | 只读 | keyless | [NODES](../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) | 交付不明 → node-gate 门②③ |
 | 验证挂载（插件真挂载） | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs` | 否 | keyless 真挂载 | [开发环 §2](guides/60-dev-loop.md) | 红 → preset 源 + render-overlay 后复跑 |
 | 验证安装 | `source dev/env.sh && node scripts/smoke/product-smoke.mjs`（产品装配）/ `release-smoke`（安装域） | 是（测试 home/profile） | keyless（`--install-only` 跳凭据） | [开发环 §2](guides/60-dev-loop.md) | 红 → pack 发布集对账 |
 | 验证首启（产品面） | `node scripts/smoke/product-boot-smoke.mjs`（真 Web + 浏览器，无模型） | 是（测试 home/workspace） | keyless + 浏览器 | [开发环 §2](guides/60-dev-loop.md) | 红 → launcher/Host/StartCard |
@@ -74,7 +74,7 @@ run-kickoff 默认用研究工作区的 workspaceId 建 Lead 会话；没有 pro
 → [team-assembly](../packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md) 按研究类型派工
 → 侦察/取证 → [synthesis](../packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md)
 → critic 审查 → HITL2 → 拍板记账、版本记账、present 与目标完成。
-节点输入输出和补研究回边以 [NODES](../research-workspace/NODES.md) 为准。
+节点输入输出和补研究回边以 [NODES](../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) 为准。
 
 完整研究主要走 Agent Teams；快速事实查证使用单点 worker 与轻量核查。
 队友继承父会话组合，派发时须指路读取其方法论文件，不能假设 spawn 会自动切换为对应独立角色 preset。
@@ -85,7 +85,7 @@ run-kickoff 默认用研究工作区的 workspaceId 建 Lead 会话；没有 pro
 | 正本 → 派生物 | 用于什么 | 同步与检查 |
 |---|---|---|
 | pack 角色/bundle 配置 → 开发 overlay | L1 源码域冒烟；不是正式 run 的安装源 | [render-overlay](../dev/render-overlay.mjs)；L0 `overlay-fresh` |
-| 研究工作区手册、NODES、判型库、模板 → pack 工作区种子 | 对外部署铺工作区；run bundle 不进入种子 | [sync-pack-workspace](../dev/sync-pack-workspace.mjs)；L0 `pack-workspace-fresh` |
+| 研究工作区手册、NODES、判型库、模板 → pack 工作区种子 | 对外部署铺工作区；run bundle 不进入种子 | `../dev/sync-pack-workspace.mjs`；L0 `pack-workspace-fresh` |
 | pack 发布集 → research profile 的安装副本 | 正式研究 run 加载的包 | [boot-run](../dev/boot-run.sh) 组合检查与漂移门；修复次序见 [插件作者指南](guides/62-plugin-authoring.md) |
 | pack client 源码 → 浏览器构建产物 | Web 驾驶舱 | 构建与浏览器验收次序见 [开发环](guides/60-dev-loop.md) |
 
@@ -171,14 +171,14 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 研究卡住、工具报错、present 不明 | 先用 [session-events](../scripts/run-ops/session-events.mjs) 看该会话的事件尾部；原始日志仍在 `runtime/harness-home/sessions/<工作区组>/<会话>/` | [watch-run](../scripts/run-ops/watch-run.mjs) 看状态；[node-gate](../scripts/run-gates/node-gate.mjs) 查交付声明 |
 | HITL 卡没弹出来 / 挂起不明 | [watch-run](../scripts/run-ops/watch-run.mjs) 的挂起谓词（只认 lead 会话的 pending）+ [hitl-answer](../dev/hitl-answer.mjs) 的盘侧自拒信息（未匹配/歧义/非挂起均拒绝作答并说理由） | 挂起与代答语义 = [Run 指南 §3](guides/61-run-playbook.md)；「卡永久 pending」边界 = [Run 指南 §5](guides/61-run-playbook.md) |
 | 模型回合被流错误终结 / 重试风暴 | [stream-diagnostics](../scripts/run-ops/stream-diagnostics.mjs) `--session <id>` 或 `--recent N` | 模型尝试时间线/失败密度/provider 与重试策略实名；处置 = [Run 指南 §0.1](guides/61-run-playbook.md) |
-| 研究内容/交接缺件 | 该 bundle 的问题、证据、发现、审查与最终报告 | [NODES](../research-workspace/NODES.md) + run 机械审计；恢复查 [Run 指南](guides/61-run-playbook.md) |
+| 研究内容/交接缺件 | 该 bundle 的问题、证据、发现、审查与最终报告 | [NODES](../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) + run 机械审计；恢复查 [Run 指南](guides/61-run-playbook.md) |
 | 不知道改什么、怎么验 | 根 [AGENTS.md](../AGENTS.md) 入口链与本轮请求授权 | 对应 RFC 与 [开发环](guides/60-dev-loop.md) 任务型路由 |
 
 `web.log` 是宿主启动输出；DSH 会话日志记录模型/工具/HITL/present 事件；bundle 的 journal 是角色纪要。
 三者用途不同。日志文件版本由实际宿主决定，按会话定位，不凭固定版本文件名猜测。
 
 `final.md` 是 run 根的当前报告，`final/vN` 是交付副本，`final/readable-vN` 是同版读者版（新 run）；文件出现、watcher 停下、仪表盘显示交付，
-都需要结合拍板行、版本记账、present、门C 和审计来判断。完整判据查 [NODES](../research-workspace/NODES.md)。
+都需要结合拍板行、版本记账、present、门C 和审计来判断。完整判据查 [NODES](../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)。
 
 ## 已知限制与延后工作
 

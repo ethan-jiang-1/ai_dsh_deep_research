@@ -109,7 +109,7 @@ DSH 当前源码/文档可核验的构件包括：结构化多问/推荐选项�
 - 本仓 DSH 多查询决策：多查询搜索 Note = `vendor/dsh/.agents/notes/archived/feature/2026-08-17-web-search-multiple-queries.zh.md`（架构实现与预算取舍；历史决策，非社区采纳率资料）。
 - 本仓 DSH 问题/计划原语：`vendor/dsh/packages/interaction/tool-ask-user/README.zh.md`、`vendor/dsh/packages/interaction/user-questions/README.zh.md`、`vendor/dsh/packages/client/ui-user-questions/src/client/PlanReviewPanel.tsx`。
 - DSH 历史会话搜索实现先例：Web 会话搜索 Note = `vendor/dsh/.agents/notes/archived/feature/2026-07-27-web-session-search.zh.md`（描述可见性、取消、截断、故障回退及中文 token 召回边界；仅为归档实现记录，不证明当前发布或启用状态）。
-- 本仓研究驾驶舱当前事实：[研究驾驶舱设计](../../../../docs/design/40-research-cockpit.md)、[ResearchStatusTab](../../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx)；团队和证据工作流约定：[`research-workspace/AGENTS.md`](../../../../research-workspace/AGENTS.md)。
+- 本仓研究驾驶舱当前事实：[研究驾驶舱设计](../../../../docs/design/40-research-cockpit.md)、[ResearchStatusTab](../../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx)；团队和证据工作流约定：[`research-workspace/AGENTS.md`](../../../../packages/deep-research-pack/content/manual.md)。
 - 本仓立项实现：[research-brief skill](../../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md)；既有产品一手来源路由草稿：[2026-09-29-hitl1-intake-routing-survey.md](../../../../research-workspace/drafts/2026-09-29-hitl1-intake-routing-survey.md)。后者是仓库研究草稿，本文未重新抓取其中所有外链。
 - 外部直接研究先例：OpenAI Deep Research API guide <https://developers.openai.com/api/docs/guides/deep-research>；Gemini Deep Research API <https://ai.google.dev/gemini-api/docs/deep-research>；Anthropic Research help center <https://support.anthropic.com/en/articles/11088861-use-research-on-claude>；ClariQ paper <https://arxiv.org/abs/2009.11352>。本报告将其作为不同交互形态的例子，未据此宣称高管 UX 定论；需依赖具体行为时应重新核对页面当前内容。
 

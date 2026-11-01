@@ -10,7 +10,7 @@
 
 ### 问 A：quick_factual 是否必须配 Critic
 
-- **合同现值**：[NODES.md](../../../research-workspace/NODES.md) 编制条件性——quick_factual "不设 scout/analyst 常设编制，**critic 可轻量或不配**"；review.md 为条件件（缺席合法当且仅当类型字段在场 + journal 记账补偿把关）。
+- **合同现值**：[NODES.md](../../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) 编制条件性——quick_factual "不设 scout/analyst 常设编制，**critic 可轻量或不配**"；review.md 为条件件（缺席合法当且仅当类型字段在场 + journal 记账补偿把关）。
 - **实证材料**：
   - drt_mistral-api-model-list（2026-10-05，quick_factual 数据表档）：**实际配了 critic 且两轮审查有效**（rev1 FAIL 抓出 2 CRITICAL → 修复 → rev2 PASS；r1 推导错误亦被 critic 抓到）——"可轻量或不配"的宽松面未被实践采用；
   - 同场豁免机制全程正确：schema-scan 编制豁免注记不静默、门L N/A 显式——**机制无漂移，漂移在"配不配"的指引面**；
@@ -19,7 +19,7 @@
 
 ### 问 B：final.md 与 final/ 的当前版本语义
 
-- **合同现值**：[研究手册](../../../research-workspace/AGENTS.md)——run 根 `final.md` = 当前版权威副本（位置钉死，2026-09-26 实测教训）；`final/` 只放版本记账（v1.md 索引 + 扩张版全文），**不放当前版全文**；node-gate 门④ 机械把守（vN 在场 → §Decisions 记账行 + v1 索引登记）。
+- **合同现值**：[研究手册](../../../packages/deep-research-pack/content/manual.md)——run 根 `final.md` = 当前版权威副本（位置钉死，2026-09-26 实测教训）；`final/` 只放版本记账（v1.md 索引 + 扩张版全文），**不放当前版全文**；node-gate 门④ 机械把守（vN 在场 → §Decisions 记账行 + v1 索引登记）。
 - **漂移点（走查发现）**：各文档对"当前版在哪、版本怎么记"的表述存在代际不一致的残留（走查原话"final.md 与 final/ 的当前版本语义"）——需要逐文档对账：手册 / NODES / 61 / design/50 / 手册内模板脚注，确认五处口径一致或收敛到单一表述。
 - **实证材料**：mcp-hosts 与 mistral 两场均按现行合同走完（final.md run 根 + final/v1.md 记账 + 门④ N/A）——**实践无漂移，漂移在文档表述面**。
 

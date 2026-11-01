@@ -44,7 +44,7 @@ export const gates = [
   'preset-structure', 'pack-bundle-compat', 'client-half', 'row-deps', 'pack-contract-sync', 'role-list-sync', 'client-keys', 'client-effect-wrap', 'cockpit-doc-registry', 'run-context-single-source',
   'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'proposed-pointer-live',
   'vendor-pin', 'vendor-clean', 'pin-agreement', 'align-ledger', 'discipline-na-trigger', 'discipline-state-vocab', 'repo-conventions', 'vendor-links',
-  'workspace-contract', 'handbook-budget', 'workspace-versioning', 'dev-runtime-clean', 'overlay-fresh', 'pack-workspace-fresh', 'release-version', 'dist-manual-version',
+  'content-shape', 'dev-runtime-clean', 'overlay-fresh', 'release-version', 'dist-manual-version',
   'claude-symlink', 'secrets-untracked', 'host-paths', 'guard-red-record', 'gate-ledger-sync', 'entry-chain', 'backlog-liveness', 'port-exclusive', 'hooks-active',
 ];
 

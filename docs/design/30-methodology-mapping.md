@@ -13,9 +13,9 @@
 | codex 环节 | codex 载体 | 本插件 DSH 载体 | 状态 |
 |---|---|---|---|
 | instantiation（建 run bundle） | `instantiate-run-bundle.mjs` CLI + rb_* 控制文件脚手架 | lead 收到请求 → 建 `drt_<slug>/`（从 templates/run/ 起步）+ question.md（定稿 + Purpose/RQ 分解/Scope/Constraints 四节 + Decisions append-only） | 照搬语义，载体 = 目录约定 + 研究手册 |
-| **HITL1（立项对齐）** | hitl1 phase（stop:yes）+ rb_profile 写入 | lead preset 的 `tool-ask-user` + `research-brief` skill（研究类型三分 + 澄清三问带推荐 + **计划确认卡**〔两段卡第二段：定稿先呈再开工，quick_factual 豁免——超出 codex 源面的本仓扩展〕） | **原生**（ask_user_question 即 DSH 的 stop 面） |
+| **HITL1（立项对齐）** | hitl1 phase（stop:yes）+ rb_profile 写入 | lead preset 的 `tool-ask-user` + `research-brief` skill（研究类型三分 + 澄清三问带推荐 + **计划确认卡**〔两段卡第二段：定稿先呈再开工，quick_factual 豁免——超出 codex 源面的本仓扩展〕）+ `question-patterns` skill（判型模式库：命中走条目、未命中兜底） | **原生**（ask_user_question 即 DSH 的 stop 面） |
 | setup / seed-topics | enter-phase + operate-topic-state（UID/ordinal 物化） | lead 写 topics.md（must_answer 问题列表 2–5 问 + scope_role + depends_on）+ plan.md 执行图（research-planning skill：W<wave>.<index>、Wave 计算/stage 派生/依赖/owner/depth/预算） | 简化：topic 身份 = markdown 锚点；plan 是过程件，不建 registry/新门禁 |
-| 组队（本仓扩展） | codex 无对应（单 agent 串行跑完 11 阶段） | lead 的 `team-assembly` skill + agent-team 任务板（`spawn_teammate` 派活/收活；成员组合画像由 `run-kickoff` 预检）；轨道上位于立项之后、侦察之前（[NODES](../../research-workspace/NODES.md)） | **角色化 + 原生**（DSH agent-team 原生；队形与派活纪律住 skill） |
+| 组队（本仓扩展） | codex 无对应（单 agent 串行跑完 11 阶段） | lead 的 `team-assembly` skill + agent-team 任务板（`spawn_teammate` 派活/收活；成员组合画像由 `run-kickoff` 预检）；轨道上位于立项之后、侦察之前（[NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)） | **角色化 + 原生**（DSH agent-team 原生；队形与派活纪律住 skill） |
 | **wave0（广度侦察 / 广度地基）** | dpt-source-intake 工作单元 + source.yaml + floor 门禁 | **scout 角色**（lead-mapping skill：query 多样化 + A–D 分级 + leads.md） | **角色化**（floor 数值门禁弃用，分级与排除显式化承担质量下限） |
 | **wave1（深度挖掘）** | question-list 契约 + depth-review + 反例/交叉验证参数 | **analyst 角色**（evidence-extraction skill：question-list + 交叉验证 ≥2 + 反例必记） | **角色化**（深度参数不进 profile，进 skill 纪律） |
 | **wave2（综合写作 / 综合）** | 纯综合禁新搜 → finding gap 定向补搜 + finding-index | **lead 的 synthesis skill**（findings.md 的 gap 四态：supported/needs_search/contradicted/insufficient） | **skill 化**（只补一轮 = 参数纪律进 skill 文本） |
@@ -28,7 +28,7 @@
 
 **两点交互纪律**（codex "静默自律" spec 的移植）：HITL1 与 HITL2 之间所有角色静默自主
 推进，不问"要不要继续"、不汇报中间进度；用户主动发消息直接回答但不改变既定方向——
-写进[研究手册](../../research-workspace/AGENTS.md) §交互纪律。
+写进[研究手册](../../packages/deep-research-pack/content/manual.md) §交互纪律。
 
 ## 2. 弃用清单（codex 特定 → 为什么弃 + DSH 原生等价物）
 

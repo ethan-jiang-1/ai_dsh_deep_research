@@ -11,7 +11,7 @@
 **schema 的坯子已经存在三处**（定约 = 显式化，不是发明新格式）：
 
 - **模板 = 字段级契约实例**：`research-workspace/templates/run/` 六个模板（question/topics/leads/evidence-entry/findings/final），每个输出文件的必备件写在模板里。
-- **手册 = 文件级正本**：[研究手册](../../../research-workspace/AGENTS.md) §目录约定（哪个节点写哪些文件）+ §证据文件契约（硬五字段/口径最小契约）。
+- **手册 = 文件级正本**：[研究手册](../../../packages/deep-research-pack/content/manual.md) §目录约定（哪个节点写哪些文件）+ §证据文件契约（硬五字段/口径最小契约）。
 - **audit = 交接的机械把守**：evidence-audit 已机械对账 evidence→final 链；run-fold 的**在场性折算**（STEP_ORDER 由文件在场驱动）= "节点完成"判据的机器可读形态——观察面轨道就是消费它。
 
 **2026-09-29 活体验证（定稿同日）**：两场 run（model-ecosystem / cn-us-open-source，均 HITL2 定稿）把表第 7/8 行判据逐条演示——① **第 7 行判据（§Decisions 行在场）在两场上都红**：HITL2 拍板行缺席（cn-us-open-source 更是 present + HITL2 双缺席，G8 第二实例，会话日志全库取证）——交付节点因上游未给齐而无法开工，判据咬人实证；其自然机械化路径 = rerun-loop-live 候选后续③（审计层查版本交付前 ask 在场）。② **第 8 行三件**（final/v1.md + present 声明 + audit CRITICAL=0）在 model-ecosystem 当天全数落位、cn-us-open-source 由操作侧补齐——判据可执行性实测通过。
