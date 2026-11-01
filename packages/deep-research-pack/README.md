@@ -1,3 +1,8 @@
+---
+description: "Deep Research bundle for DSH: four research roles, a research cockpit, and traceable reports."
+kind: "bundle"
+---
+
 # deep-research-pack
 
 > 说明：本 README 随 npm 包发布；指向仓库 `docs/`、`notes/`、`_backlog/` 的链接使用 GitHub 绝对地址。安装包不含这些开发文档，点开即离仓。
@@ -8,6 +13,43 @@ Deep Research **产品**（D40）：一个包提供四研究角色 preset + 方�
 
 一次调研 = 一支四人研究团队（Lead 主编 / Scout 侦察 / Analyst 分析 / Critic 核查）在 DSH 的
 Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bundle 落 `drt_<slug>/`）。
+
+## 安装与验证（七问速查）
+
+**1. 装什么、装到哪？** 它是一个 **bundle**（`dsh.bundle.patch` 六文件），装进 DSH 的
+`deep-research` profile；装完在 `dsh.profile.bundles` 里出现 `dsh-deep-research-pack`，并向组合树插入
+`preset-{lead,scout,analyst,critic,method-editor}`、`research-content`、`research-client`、
+`research-startup`、`research-fetch-fallback`、`tool-present`、`ui-agent-team`。
+
+**2. 怎么装？** 默认在 DSH 的 **Plugins 页**装（`dsh web` 与 Desktop 同一句）；团队机制层是 DSH 随安装
+提供、默认关闭的可选 bundle，在同一个 Plugins 页打开。CLI 只用于 `dsh web` 的自动化（面绑定，
+不能管理 `desktop`）：
+
+```sh
+dsh --profile deep-research --from-default-profile web --dump-default-config   # 仅首次；破坏性
+dsh plugin --profile deep-research add dsh-deep-research-pack@<version>
+dsh plugin --profile deep-research add @deepseek-ai/dsh-experimental-agent-team-profile@<与 dsh --version 相同>
+```
+
+**3. 版本与前置？** `engines.dsh` 决定准入（不匹配时安装与启动都拒绝）；CLI 安装需要 `pnpm`；
+团队层需要 registry 或已缓存。**不要用 `@latest` 装团队层**（它的 latest 不是当前 DSH 版本线）。
+
+**4. 怎么确认生效？** `dsh --profile deep-research --dump-config` 看到上面那几个 entry id，且 stderr 无
+`patch: entry "…" not found`；真启动 `dsh --profile deep-research --no-open --port 0` 打印 token URL 且无
+`did not activate`。界面上：本包显示为「深度研究 / Deep Research」（带图标）、右栏多出研究状态/配置/
+图谱/终稿、主界面多出「方法库」。
+
+**5. 配置落在哪层？** 默认值在 bundle patch（随包版本）；工作区等产品设置住
+`$DSH_HOME/deep-research/settings.json`（自有 store，不是 DSH 全局设置）；`research-fetch-fallback` 的
+`Config` 字段当前未标 `.volatile()`，因此在 Settings 页不可改——改 profile patch 或 `--patch`。
+
+**6. 升级与回退？** Plugins 页 Update（或 CLI 重装新版本）后**重启 profile**；DSH 没有命令级回滚，
+回退 = 重新装旧版本；升级前记下当前版本，旧包必须满足旧 `engines.dsh`。
+
+**7. 卸载删什么、留什么？** `dsh plugin --profile deep-research remove dsh-deep-research-pack` 只回收
+包与 patch 层；工作区产物（`method-library.md`、`drt_*`、`archive/`、`_abandoned/`）保留；
+`$DSH_HOME/deep-research/` 需显式删。完整版 = [`_dist/安装手册.md`](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_dist/%E5%AE%89%E8%A3%85%E6%89%8B%E5%86%8C.md)。
+
 
 > **研究驾驶舱** = 观察面 client 套件的套件名（2026-09-28 定名）：右栏「研究状态」/「研究配置」
 > 页签 + 交付那一刻出现的「终稿」页签 + 研究语义工具卡 + 活标题 + 挂起显性化（pending 自动展开
@@ -92,19 +134,24 @@ Tool schemas are stable within a Method Editor request series; a newly selected 
 用户视角完整手册 = [`_dist/安装手册.md`](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_dist/%E5%AE%89%E8%A3%85%E6%89%8B%E5%86%8C.md)。
 
 **前置**：DSH 满足 `engines.dsh`（值以 `package.json` 的 `engines.dsh` 为准；宿主安装/启动会拒绝不匹配版本），
-Node 满足 `engines.node`；`dsh` 在 PATH；**首次装团队层需要 pnpm**；团队层需要 registry 或预装缓存。
+Node 满足 `engines.node`；`dsh` 在 PATH；**CLI 装团队层需要 pnpm**；团队层需要 registry 或预装缓存。
 诊断用安装副本的 `dsh-deep-research-doctor`（只读；`--install-anchor` / `DSH_INSTALL_ANCHOR` 可指定安装锚）。
+
+**默认入口 = Plugins 页**（`dsh web` 与 Desktop 同一句）：装本包，并在同页打开团队机制层
+（它是 DSH 随安装提供、默认关闭的可选 bundle）。下面是 CLI 形态，**仅 `dsh web` 的自动化**用：
 
 ```sh
 # ① 建产品 profile（仅首次；DSH 的 web 模板；破坏性，只对全新 profile 用）
 dsh --profile deep-research --from-default-profile web --dump-default-config
 
-# ② 装 bundle + 团队层（DSH 原生；版本 = 运行中的 DSH）
-dsh plugin --profile deep-research add dsh-deep-research-pack@<版本> \
-  @deepseek-ai/dsh-experimental-agent-team-profile@<与 dsh --version 同版本>
+# ② 装 bundle（exact 版本；不要用 latest 占位）
+dsh plugin --profile deep-research add dsh-deep-research-pack@<版本>
+
+# ③ 开团队机制层（exact 版本 = 运行中的 DSH；其 npm latest 不是当前版本线）
+dsh plugin --profile deep-research add @deepseek-ai/dsh-experimental-agent-team-profile@<与 dsh --version 同版本>
 # 或离线：dsh plugin --profile deep-research add file:/path/to/dsh-deep-research-pack-<版本>.tgz
 
-# ③ 启动
+# ④ 启动（bundle membership 变化后必须重启 profile）
 dsh --profile deep-research
 ```
 

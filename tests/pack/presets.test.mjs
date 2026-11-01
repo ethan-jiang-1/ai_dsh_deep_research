@@ -141,19 +141,19 @@ test('delegating preset subagent = maxDepth 2 + allowedAgentPresets；无 stale 
   }
 });
 
-test('compatibility 矩阵钉住已测基线', () => {
+test('清单只带 DSH 读的 dsh.* 键：bundle 与 client，无自造兼容矩阵', () => {
   const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
-  assert.deepEqual(pkg.dsh.compatibility.dshReleases, ['0.2.1-rc.2', '0.2.1-rc.3']);
+  assert.deepEqual(Object.keys(pkg.dsh ?? {}).sort(), ['bundle', 'client'],
+    'dsh.* 只允许 DSH 消费的 bundle 与 client；版本合同只在 engines.dsh');
 });
 
-test('兼容范围覆盖测试基线：engines.dsh 是范围，矩阵是已测基线', () => {
+test('engines.dsh 覆盖已测基线（rc.2 / rc.3 落在范围内）', () => {
   const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
-  const matrix = pkg.dsh?.compatibility?.dshReleases ?? [];
-  assert.equal(matrix.length, 2, '测试基线当前声明 rc.2 + rc.3；增删时同步扩本断言');
   assert.match(pkg.engines?.dsh ?? '', /^>=0\.2\.1-rc\.2 <0\.3\.0-0$/,
     'engines.dsh 应为 0.2.x 范围（避免把未来安装钉死在单一 rc）');
-  assert.ok(satisfiesVersion(matrix[0].replace(/^dsh-v/, ''), pkg.engines.dsh),
-    '兼容矩阵的已测基线必须落在 engines.dsh 范围内');
+  for (const baseline of ['0.2.1-rc.2', '0.2.1-rc.3']) {
+    assert.ok(satisfiesVersion(baseline, pkg.engines.dsh), `已测基线 ${baseline} 不在 engines.dsh 范围内`);
+  }
 });
 
 test('critic adversarial-review 钉 leads 交接狩猎（BUG-008 契约：状态词漂移不可穿透交付）', () => {

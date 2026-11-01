@@ -6,7 +6,7 @@
 #   presets/<role>.patch.yml，由 package.json 的 dsh.bundle.patch 数组随本文件一并装载；
 #   本文件只负责把 registry 的默认 preset 指到研究主编。
 # 依赖纪律：runtime 依赖声明为 peerDependencies（pre-stable API 不精确钉死），
-# 兼容矩阵在 package.json 的 dsh.compatibility.dshReleases。
+# 版本合同只有 engines.dsh（宿主读它；本文件不另设兼容矩阵字段）。
 
 # ── preset roster：替换 web-app 的出厂默认（shipped registry default: standard）──
 - id: agent-preset-registry

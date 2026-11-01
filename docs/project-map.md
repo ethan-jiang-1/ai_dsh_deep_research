@@ -30,7 +30,7 @@
 
 | 任务 | 首选入口 | 写盘 | 档位 | 事实来源 | 失败后的下一站 |
 |---|---|---|---|---|---|
-| **启动产品（产品用户）** | `dsh --profile deep-research --from-default-profile web` → `dsh plugin --profile deep-research add <pack> <team>` → `dsh --profile deep-research`；首屏选项目目录 | 是（profile/会话/产品设置） | boot keyless；run 需凭据 | [pack README](../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | 见 guides/65；诊断 = `dsh-deep-research-doctor` |
+| **启动产品（产品用户）** | 应用内 Plugins 页装本包并打开团队机制层（跨面）；CLI 仅 `dsh web` 自动化：`--from-default-profile web` → `dsh plugin add <pack>` → `dsh --profile deep-research`；首屏选项目目录 | 是（profile/会话/产品设置） | boot keyless；run 需凭据 | [pack README](../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | 见 guides/65；诊断 = `dsh-deep-research-doctor` |
 | 启动一次研究（开发通道） | `node dev/run-driver.mjs up`（内部调 `bash dev/boot-run.sh`；想守前台看日志才直接跑 boot-run） | 是（会话与 bundle） | boot keyless；run 需凭据 | [Run 指南](guides/61-run-playbook.md) | boot 终端报错 → 下文「调试先看哪份事实」 |
 | 继续在飞 run | 同上；起来后 lead 会话说「继续 \<slug\>」 | 是 | 同上 | bundle 文件 + [Run 指南](guides/61-run-playbook.md) | bundle 缺件 → NODES 判据定位 |
 | 观察在飞 run | boot 自带后台仪表盘 + Web 驾驶舱 | 只读投影 | 浏览器 | [驾驶舱设计](design/40-research-cockpit.md) | 页签坏 → client-load-smoke |

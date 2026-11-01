@@ -46,6 +46,7 @@ _cache/
 # dist-manual-version 钉它与 pack 版本一致，版本动 → 同 diff 重导出）
 _dist/*
 !_dist/安装手册.md
+!_dist/market.json
 # 编辑器/OS/本机配置（跨环境噪声——不假定每台机器都有同名目录；tracked 断言 = secrets-untracked）
 .vscode/
 .idea/

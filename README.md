@@ -7,16 +7,14 @@ preset（`Deep Research Lead / Scout / Analyst / Critic`）+ 方法编辑 preset
 
 ## 用它
 
+默认入口 = DSH 的 **Plugins 页**（`dsh web` 与 Desktop 同一句），团队机制层在同页打开（DSH 随安装
+提供、默认关闭的可选 bundle）。下面是 CLI 形态，**仅 `dsh web` 自动化**用：
+
 ```sh
-# ① 建产品 profile（仅首次；DSH 的 web 模板）
-dsh --profile deep-research --from-default-profile web --dump-default-config
-
-# ② 装 bundle + 团队层（DSH 原生；应用内 Plugins 页用于更新）
-dsh plugin --profile deep-research add dsh-deep-research-pack@0.3.0 \
-  @deepseek-ai/dsh-experimental-agent-team-profile@<与 dsh --version 同版本>
-
-# ③ 启动
-DEEP_RESEARCH_WORKSPACE="$HOME/projects/acme" dsh --profile deep-research
+dsh --profile deep-research --from-default-profile web --dump-default-config   # ① 仅首次
+dsh plugin --profile deep-research add dsh-deep-research-pack@0.3.0            # ② exact 版本
+dsh plugin --profile deep-research add @deepseek-ai/dsh-experimental-agent-team-profile@<与 dsh --version 同版本>
+DEEP_RESEARCH_WORKSPACE="$HOME/projects/acme" dsh --profile deep-research      # ③ 重启才生效
 ```
 
 首屏会问「项目目录」（也可以先用 `DEEP_RESEARCH_WORKSPACE` 指定）；选完后研究产物写到

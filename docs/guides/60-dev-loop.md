@@ -69,6 +69,7 @@
 | L1 挂载 | preset 内容/结构改动（其完成定义） | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs`（源码域，keyless；未 source 自拒）；安装域加 `--profile <p> --no-patch` |
 | L2 安装 | 包结构/release 相关改动 | `source dev/env.sh && node scripts/smoke/release-smoke.mjs`（pack→干净 profile→plugin add→安装域冒烟；无模型调用，安装验收使用 `--install-only`，默认 doctor 仍检查凭据；未 source 自拒） |
 | L2 冷启动 | 独立环境/bootstrap 改动 | `source dev/env.sh && node scripts/smoke/cold-start-smoke.mjs`（独立 home/profile/端口/state；MCP 关闭；团队层需 registry/缓存） |
+| L2 发布面/显示面 | 清单字段、locale/icon、市场索引、安装文档取向 | `node scripts/smoke/lifecycle-smoke.mjs`（market.json 过 DSH 校验器 → 装 tarball → 11 行 dump → 真启动 → `readPluginMeta` 四行显示面 → remove 回落；缺 `_dist` 产物 exit 2） |
 | L2 产品安装 | profile/安装形状/工作区相关改动 | `node scripts/smoke/install-shape-smoke.mjs`（原样执行手册三步：profile init → plugin add → 真启动；断言 roster 三状态、无 `did not activate`；缺前置 exit 2） |
 | L2 产品首启 | startup/client 恢复/首屏/StartCard 改动 | `node scripts/smoke/product-boot-smoke.mjs`（纯 `dsh --profile deep-research` + 真 Web + 浏览器；工作区会话、首屏、目录按钮；无模型；缺前置 exit 2） |
 | L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `node --import tsx/esm --test tests/contracts/evaluation-contract.test.mjs` |

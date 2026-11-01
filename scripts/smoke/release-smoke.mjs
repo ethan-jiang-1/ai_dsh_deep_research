@@ -231,15 +231,12 @@ try {
     'manifest peers-only（peers 在场、dependencies 缺席）',
     installedManifest.dependencies ? `dependencies=${Object.keys(installedManifest.dependencies).join(',')}` : undefined);
   const installedEngine = installedManifest?.engines?.dsh;
-  const installedMatrix = installedManifest?.dsh?.compatibility?.dshReleases;
-  const matrixSatisfies = typeof installedEngine === 'string'
-    && Array.isArray(installedMatrix)
-    && installedMatrix.length > 0
-    && installedMatrix.every((tag) => typeof tag === 'string'
-      && satisfiesVersion(tag, installedEngine));
-  step(matrixSatisfies,
-    '兼容范围覆盖测试基线（engines.dsh range + dshReleases）',
-    `engines.dsh=${installedEngine ?? '（缺）'}；dshReleases=${JSON.stringify(installedMatrix ?? null)}`);
+  const engineCoversAnchor = typeof installedEngine === 'string'
+    && installedEngine.trim() !== ''
+    && satisfiesVersion(anchorVersion, installedEngine);
+  step(engineCoversAnchor,
+    'engines.dsh 覆盖本次安装的 DSH 版本',
+    `engines.dsh=${installedEngine ?? '（缺）'}；dsh=${anchorVersion}`);
 
   // ④b 安装形状证据（pack 自带只读 doctor）
   console.log('④b doctor（安装副本）…');

@@ -32,8 +32,12 @@ test('两处都没有 / 空串 → undefined（调用方据此不回退并如实
 });
 
 test('Config 不提供字面量 apiKey（秘密只走 apiKeyEnv 引用，不进 profile patch）', () => {
-  const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'packages', 'deep-research-pack', 'src', 'fetch-fallback', 'index.ts'), 'utf8');
-  assert.equal(/\bapiKey\s*\?:/.test(src), false, 'Config 仍暴露 apiKey 字面量字段');
-  assert.equal(/apiKey:\s*z\.string\(\)/.test(src), false, 'Config schema 仍接受 apiKey 字面量');
-  assert.ok(src.includes("apiKeyEnv: z.string().role('credential-ref')"), 'apiKeyEnv 引用字段必须在场');
+  // schema 自 2026-11-01 起住 config.ts（拆出深模块：设置面合同要能被 keyless 测试直接消费，
+  // 而 index.ts 含网络调用进不了测试闭包）。接线文件仍不得出现字面量 apiKey。
+  const dir = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'packages', 'deep-research-pack', 'src', 'fetch-fallback');
+  const impl = readFileSync(join(dir, 'index.ts'), 'utf8');
+  const schema = readFileSync(join(dir, 'config.ts'), 'utf8');
+  assert.equal(/\bapiKey\s*\?:/.test(impl) || /\bapiKey\s*\?:/.test(schema), false, 'Config 仍暴露 apiKey 字面量字段');
+  assert.equal(/apiKey:\s*z\.string\(\)/.test(schema), false, 'Config schema 仍接受 apiKey 字面量');
+  assert.ok(schema.includes("apiKeyEnv: z.string().role('credential-ref')"), 'apiKeyEnv 引用字段必须在场');
 });

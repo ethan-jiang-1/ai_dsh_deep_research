@@ -52,7 +52,7 @@ export function runB() {
   }
 }
 
-// ── pack-bundle-compat（dsh.bundle.patch 指向真实文件；dshReleases 非空）──
+// ── pack-bundle-compat（dsh.bundle.patch 指向真实文件；engines.dsh 覆盖当前 vendor tag）──
 {
   const gate = 'pack-bundle-compat';
   const pkgPath = join(PACK, 'package.json');
@@ -80,13 +80,7 @@ export function runB() {
         }
       }
     }
-    const rel = pkg?.dsh?.compatibility?.dshReleases;
-    if (!Array.isArray(rel) || rel.length === 0) fail(gate, 'dsh.compatibility.dshReleases 为空');
-    // 含当前 tag（release-smoke-hardening 件⑤b）：升 pin 忘把新 tag 加进兼容矩阵，原本要到
-    // L2 安装冒烟才现形——提前到 L0 秒级红（判据同 release-smoke ④，事实源前移到 verify）。
-    else if (!rel.includes(VENDOR_TAG.replace(/^dsh-v/, '')))
-      fail(gate, `compatibility.dshReleases 不含当前 vendor 版本 ${VENDOR_TAG.replace(/^dsh-v/, '')}——升 pin 忘加列（补 packages/deep-research-pack/package.json 的 dsh.compatibility.dshReleases）`);
-    // 宿主只认 engines.dsh；兼容矩阵是“已测基线”，不要求等于精确值，但必须是范围覆盖的版本。
+    // 宿主只认 engines.dsh（没有第二个版本字段；`dsh.compatibility` 之类的自造键由 pack-manifest 拦）。
     const engine = pkg?.engines?.dsh;
     if (typeof engine !== 'string' || engine.trim() === '')
       fail(gate, 'engines.dsh 未声明——宿主兼容检查会退回 peer 范围（补 packages/deep-research-pack/package.json 的 engines.dsh）');
@@ -318,6 +312,143 @@ export function runB() {
         fail(gate, `客户端出现三位置回退候选链（发现实现归 src/lib/run-context.ts）——${offenders.join('、')}（修正 = 用 openRun / bundleCandidates，不在页签里拼 archive/_abandoned）`);
       }
     }
+  }
+}
+
+// ── pack-manifest（发布清单合同：DSH 读什么、我们只写什么）──
+// 依据：宿主只消费 `dsh.bundle` / `dsh.client` 与 `engines.dsh`（其余 `dsh.*` 键无消费者 = 自造
+// 字段）；Plugins 页与市场靠 locale + icon 显示（子路径插件读不到 package.json，只能在自己的
+// specifier 上导出）。反证：往 pkg.dsh 注入 compatibility → 红；删 locale/en.json → 红；
+// 给 files 加 lib/**/*.js.map → 红。
+{
+  const gate = 'pack-manifest';
+  const pkgPath = join(PACK, 'package.json');
+  if (!existsSync(pkgPath)) fail(gate, 'deep-research-pack/package.json 不存在');
+  else {
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+    const allKeys = Object.keys(pkg.dsh ?? {}).sort();
+    const unknown = allKeys.filter((k) => k !== 'bundle' && k !== 'client');
+    if (unknown.length > 0) fail(gate, `dsh.* 出现 DSH 不读的键：${unknown.join(', ')}——版本合同只在 engines.dsh，显示面只在 locale/icon`);
+    if (typeof pkg.engines?.dsh !== 'string' || pkg.engines.dsh.trim() === '')
+      fail(gate, 'engines.dsh 缺失——宿主安装/启动都会拒绝不兼容插件，没有它就等于不设准入');
+    if (typeof pkg.description !== 'string' || pkg.description.trim() === '')
+      fail(gate, 'package.json.description 缺失——Plugins 页卡片只剩包名');
+    const files = Array.isArray(pkg.files) ? pkg.files : [];
+    for (const required of ['icon.svg', 'locale/**', 'locale-content/**', 'locale-startup/**', 'locale-fetch-fallback/**']) {
+      if (!files.includes(required)) fail(gate, `files 缺 ${required}——显示元数据不会进 tarball（修正入口 = packages/deep-research-pack/package.json 的 files）`);
+    }
+    const forbidden = files.filter((f) => !f.startsWith('!') && (/\.map$/.test(f) || /^src\//.test(f)));
+    if (forbidden.length > 0) fail(gate, `files 放进构建中间产物：${forbidden.join(', ')}（DSH 包约定不发布 src 与 maps）`);
+    const iconPath = join(PACK, pkg.icon ?? 'icon.svg');
+    if (!existsSync(iconPath)) fail(gate, `icon 指向的文件不存在：${pkg.icon ?? '（缺 icon 字段）'}`);
+    else {
+      const bytes = readFileSync(iconPath);
+      if (bytes.length > 256 * 1024) fail(gate, `icon 超过 256 KiB（${bytes.length}）——宿主会判无效元数据`);
+      if (!/^\s*<svg[\s>]/u.test(bytes.toString('utf8'))) fail(gate, 'icon.svg 不是自包含 SVG');
+    }
+    // 显示面：四个 specifier 各自要有 en+zh 的 title/description（子路径不读 package.json）。
+    const locales = ['locale', 'locale-content', 'locale-startup', 'locale-fetch-fallback'];
+    for (const dir of locales) {
+      for (const lang of ['en', 'zh']) {
+        const file = join(PACK, dir, `${lang}.json`);
+        if (!existsSync(file)) { fail(gate, `locale 缺 ${dir}/${lang}.json`); continue; }
+        let meta;
+        try { meta = JSON.parse(readFileSync(file, 'utf8')).meta } catch (error) { fail(gate, `${dir}/${lang}.json 不是合法 JSON：${String(error)}`); continue; }
+        for (const field of ['title', 'description']) {
+          if (typeof meta?.[field] !== 'string' || meta[field].trim() === '')
+            fail(gate, `${dir}/${lang}.json 缺 meta.${field}——插件卡片会回退到包名/空描述`);
+        }
+      }
+    }
+    const exports = pkg.exports ?? {};
+    for (const key of ['./locale/*.json', './icon', './content/locale/*.json', './content/icon',
+      './startup/locale/*.json', './startup/icon', './fetch-fallback/locale/*.json', './fetch-fallback/icon']) {
+      if (!Object.hasOwn(exports, key)) fail(gate, `exports 缺 ${key}——显示资源无法被宿主按 specifier 解析`);
+    }
+  }
+}
+
+// ── market-index（发现面：_dist/market.json 是 format 1，且与包清单同源同版本）──
+// 依据：发现页/`plugin_market` 只读静态索引；格式 1 的硬字段 = name / versions[].version /
+// publishTimestamp / source / engines.dsh（规则源 = vendor 的 plugin-market index 格式文档）。
+// L0 是零依赖层，不 import workspace 里的校验器——真 `parseMarketIndex` 归 lifecycle-smoke
+// （那里有完整 node_modules）。本门禁判：结构合法 + 与包清单一致 + 图标在格式上限内。
+// 反证：索引版本改成 9.9.9 → 红；删 icon → 红；把 format 改成 2 → 红。
+{
+  const gate = 'market-index';
+  const indexPath = join(ROOT, '_dist', 'market.json');
+  const pkgPath = join(PACK, 'package.json');
+  if (!existsSync(indexPath)) fail(gate, '_dist/market.json 缺席——跑 node scripts/dist/market.mjs（或 export-dist）导出');
+  else if (!existsSync(pkgPath)) fail(gate, 'deep-research-pack/package.json 不存在');
+  else {
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+    let doc;
+    try { doc = JSON.parse(readFileSync(indexPath, 'utf8')) } catch (error) { fail(gate, `market.json 不是合法 JSON：${String(error)}`) }
+    if (doc !== undefined) {
+      if (doc.format !== 1) fail(gate, `format 必须是 1（当前 ${String(doc.format)}）`);
+      const localized = (value) => typeof value === 'string' || (typeof value === 'object' && value !== null && typeof value.en === 'string');
+      if (!localized(doc.title)) fail(gate, '索引缺 title（LocalizedText，必须含 en）');
+      if (!Array.isArray(doc.plugins) || doc.plugins.length === 0) fail(gate, '索引 plugins 为空（防空语料）');
+      else {
+        const plugin = doc.plugins.find((entry) => entry.name === pkg.name);
+        if (plugin === undefined) fail(gate, `索引里没有本包：${pkg.name}`);
+        else {
+          if (!localized(plugin.title)) fail(gate, '条目缺 title');
+          if (!localized(plugin.description)) fail(gate, '条目缺 description');
+          if (!Array.isArray(plugin.versions) || plugin.versions.length === 0) fail(gate, '条目 versions 为空');
+          else {
+            const version = plugin.versions.find((entry) => entry.version === pkg.version);
+            if (version === undefined) fail(gate, `索引缺版本 ${pkg.version} 的条目`);
+            else {
+              const ts = version.publishTimestamp;
+              if (!Number.isInteger(ts) || ts < 0 || ts >= 1e11) fail(gate, `publishTimestamp 必须是 [0,1e11) 的整数秒（当前 ${String(ts)}）`);
+              if (version.source?.type !== 'npm') fail(gate, 'source 必须是 npm（本包 lib/ 不入 git，git 源装不出构建产物）');
+              if (version.engines?.dsh !== pkg.engines?.dsh)
+                fail(gate, `engines.dsh=${String(version.engines?.dsh)} ≠ 包清单 ${String(pkg.engines?.dsh)}——市场展示的兼容性会与真实准入打架`);
+            }
+          }
+          const latest = plugin['dist-tags']?.latest;
+          if (latest !== pkg.version) fail(gate, `dist-tags.latest=${String(latest)} ≠ 包版本 ${pkg.version}`);
+          if (typeof plugin.icon === 'string' && plugin.icon.startsWith('data:')) {
+            const payload = plugin.icon.slice(plugin.icon.indexOf(',') + 1);
+            if (Buffer.from(payload, 'base64').length > 32 * 1024) fail(gate, '内联图标超过 32 KiB（格式上限）');
+          } else if (plugin.icon === undefined) fail(gate, '条目缺 icon——发现页会用默认图');
+        }
+      }
+    }
+  }
+}
+
+// ── readme-shape（文档合同：包 README 的两个读者 + 安装手册的入口取向）──
+// 依据：Plugins 页只读 package.json/locale；文档生成器读 README 前置字段；安装说明的默认入口是
+// 应用内 Plugins 页，CLI 只作 web 自动化。反证：删 README frontmatter → 红；把手册首段改回
+// CLI 优先（Plugins 页首次出现在 dsh plugin 之后）→ 红。
+{
+  const gate = 'readme-shape';
+  const readmePath = join(PACK, 'README.md');
+  const manualPath = join(ROOT, 'scripts', 'dist', 'product-manual.md');
+  if (!existsSync(readmePath)) fail(gate, 'pack README 缺席');
+  else {
+    const readme = readFileSync(readmePath, 'utf8');
+    if (!readme.startsWith('---\n')) fail(gate, 'README 缺前置字段块（description/kind 在首块）——文档生成器不认');
+    else {
+      const front = readme.slice(4, readme.indexOf('\n---', 3));
+      if (!/^description:\s*\S/m.test(front)) fail(gate, 'README 前置字段缺 description');
+      if (!/^kind:\s*"?bundle"?\s*$/m.test(front)) fail(gate, 'README 前置字段 kind 必须是 bundle');
+    }
+    const questions = [...readme.matchAll(/^\*\*([1-7])\. /gm)].map((m) => m[1]);
+    if (questions.join('') !== '1234567') fail(gate, `README 首屏七问不全（找到 ${questions.join(',') || '无'}）——装什么/怎么装/版本前置/怎么验证/配置在哪层/升级回退/卸载数据`);
+  }
+  if (!existsSync(manualPath)) fail(gate, '安装手册源 scripts/dist/product-manual.md 缺席');
+  else {
+    const manual = readFileSync(manualPath, 'utf8');
+    const sections = [...manual.matchAll(/^## [一二三四五六七八九十]、/gm)].length;
+    if (sections !== 10) fail(gate, `安装手册应有十个编号节（当前 ${sections}）`);
+    const plugins = manual.indexOf('Plugins 页');
+    const cli = manual.indexOf('dsh plugin');
+    if (plugins === -1) fail(gate, '安装手册没有把 Plugins 页写成安装入口');
+    else if (cli !== -1 && cli < plugins) fail(gate, '安装手册先讲 CLI 再讲 Plugins 页——DSH 的默认入口是应用内 Plugins 页，CLI 只作 web 自动化');
+    if (!/仅 `dsh web`/.test(manual)) fail(gate, '安装手册没有标注 CLI 只适用 `dsh web`');
   }
 }
 

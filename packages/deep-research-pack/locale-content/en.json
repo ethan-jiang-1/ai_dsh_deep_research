@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Research Manual",
+    "description": "Method notes and run templates, injected as runtime context instead of written to the workspace."
+  }
+}

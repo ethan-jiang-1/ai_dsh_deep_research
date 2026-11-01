@@ -130,3 +130,23 @@ test('设置文件来源：建会话并回写 sessionId', async () => {
     assert.equal(saved.sessionId, 'session-test')
   } finally { cleanup(home); cleanup(dir) }
 })
+
+test('优先级：env 压过设置文件，且不覆盖设置（三入口的顺序有机械判据）', async () => {
+  const home = temp()
+  const outside = temp()
+  const fromEnv = mkdirSync(join(outside, 'env-dir'), { recursive: true })
+  const fromSettings = mkdirSync(join(outside, 'settings-dir'), { recursive: true })
+  mkdirSync(join(home, 'deep-research'), { recursive: true })
+  const settingsFile = join(home, 'deep-research', 'settings.json')
+  const saved = `${JSON.stringify({ schemaVersion: 2, workspace: fromSettings }, null, 2)}\n`
+  writeFileSync(settingsFile, saved)
+  const { ctx, calls } = fakeContext()
+  try {
+    await withEnv({ DSH_HOME: home, DEEP_RESEARCH_WORKSPACE: fromEnv }, () => apply(ctx))
+    assert.deepEqual(calls.map((call) => call.path), [fromEnv], 'env 在场时必须用 env 的工作区')
+    assert.equal(readFileSync(settingsFile, 'utf8'), saved, 'env 来源不得回写设置文件')
+  } finally {
+    cleanup(home)
+    cleanup(outside)
+  }
+})

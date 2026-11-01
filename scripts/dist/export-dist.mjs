@@ -8,7 +8,8 @@
 //      是被证明过的顺序，不是设想；
 //   ④ _dist/ 是导出目的地，不是源——tarball gitignored，手册是唯一 tracked 例外
 //      （verify 门禁 dist-manual-version 钉版本一致：版本动 → 必须同 diff 重导出）。
-// 导出不是发布：不动版本、不跑自带门禁之外的面、不发布任何东西——打包的是当下工作树的 pack。
+// 导出不是发布：不动版本、不跑自带门禁之外的面、不发布任何东西——打包的是当下工作树的 pack；
+// 市场索引（_dist/market.json）与 tarball/手册同源同版本，供 Plugins → Discover 添加。
 //
 // 用法：node scripts/dist/export-dist.mjs
 
@@ -19,6 +20,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { localDateStr } from '../lib/local-date.mjs'
+import { writeMarketIndex } from './market.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
@@ -33,7 +35,7 @@ const report = (name, ok, detail) => {
 
 try {
   const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
-  const dshEngine = pkg.engines?.dsh ?? pkg.dsh?.compatibility?.dshReleases?.[0]?.replace(/^dsh-v/, '') ?? '（缺）'
+  const dshEngine = pkg.engines?.dsh ?? '（缺）'
   const version = pkg.version
   const tarballName = `dsh-deep-research-pack-${version}.tgz`
 
@@ -79,10 +81,17 @@ try {
     'package/lib/startup.js',
     'package/scripts/doctor.mjs',
     'package/scripts/lib/profile-read.mjs',
+    'package/icon.svg',
+    'package/locale/en.json',
+    'package/locale/zh.json',
+    'package/locale-content/en.json',
+    'package/locale-startup/en.json',
+    'package/locale-fetch-fallback/en.json',
   ]
   const missing = must.filter((entry) => !entries.includes(entry))
-  // 发布边界：lib/types 下的 JS 与 sourcemap 是构建中间产物，不是运行时；进包即用户装垃圾。
-  const forbidden = entries.filter((entry) => /^package\/lib\/types\/.*\.(?:js|map)$/.test(entry))
+  // 发布边界：sourcemap 与 lib/types 下的 JS 是构建中间产物，不是运行时；进包即用户装垃圾
+  // （DSH 自家包约定：不发布 src / JS maps / declaration maps）。
+  const forbidden = entries.filter((entry) => /^package\/lib\/.*\.(?:js\.map|map)$/.test(entry) || /^package\/lib\/types\/.*\.js$/.test(entry))
   // 角色 id 允许连字符（method-editor），不能只匹配 [a-z]+；同时与盘上 preset 数逐个对账，
   // 少于应有数量即红（否则第 5 个 preset 缺席也能靠 >= 4 静默通过）。
   const expectedPresetRows = readdirSync(join(PACK, 'presets')).filter((f) => f.endsWith('.patch.yml')).length
@@ -110,6 +119,11 @@ try {
 
   writeFileSync(join(DIST, MANUAL), manual)
   report('手册写入', true, `${MANUAL} — 版本 ${version}，${date}`)
+
+  // 4. 市场索引——发现面（Plugins → Discover）读的是它；文本来自包内 locale，版本/兼容范围
+  //    原样取自包清单，产物先过 DSH 的 parseMarketIndex 再落盘（不发明格式）。
+  const market = writeMarketIndex()
+  report('市场索引', true, `market.json — ${version}，${market.bytes}B，sha256 ${market.sha256.slice(0, 12)}…`)
 
   console.log('\n_dist/ 内容：')
   for (const name of readdirSync(DIST).sort()) console.log(`  ${name}`)

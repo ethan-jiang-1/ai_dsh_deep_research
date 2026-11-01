@@ -30,15 +30,22 @@
     "node": "^22.19.0 || >=24.0.0",
     "dsh": ">=0.2.1-rc.2 <0.3.0-0"
   },
+  "icon": "./icon.svg",
   "files": [
     "LICENSE",
     "presets/**",
     "content/**",
     "cordis.patch.yml",
     "lib/**",
+    "!lib/**/*.js.map",
     "!lib/*.tsbuildinfo",
     "!lib/types/**/*.js",
     "!lib/types/**/*.map",
+    "locale/**",
+    "locale-content/**",
+    "locale-startup/**",
+    "locale-fetch-fallback/**",
+    "icon.svg",
     "scripts/**"
   ],
   "peerDependencies": {
@@ -85,12 +92,6 @@
         "./presets/method-editor.patch.yml"
       ]
     },
-    "compatibility": {
-      "dshReleases": [
-        "0.2.1-rc.2",
-        "0.2.1-rc.3"
-      ]
-    },
     "client": {
       "inject": [
         "@deepseek-ai/dsh-api-remotes",
@@ -119,6 +120,14 @@
       "default": "./lib/fetch-fallback.js"
     },
     "./package.json": "./package.json",
+    "./icon": "./icon.svg",
+    "./locale/*.json": "./locale/*.json",
+    "./content/locale/*.json": "./locale-content/*.json",
+    "./content/icon": "./icon.svg",
+    "./startup/locale/*.json": "./locale-startup/*.json",
+    "./startup/icon": "./icon.svg",
+    "./fetch-fallback/locale/*.json": "./locale-fetch-fallback/*.json",
+    "./fetch-fallback/icon": "./icon.svg",
     "./method-library-tool": {
       "types": "./lib/types/method-library-tool.d.ts",
       "default": "./lib/method-library-tool.js"

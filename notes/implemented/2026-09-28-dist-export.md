@@ -1,5 +1,7 @@
 > 状态：implemented
 
+> 历史注记：导出物从两件扩到三件（tarball + 安装手册 + 市场索引）；市场条目与显示元数据的现行决定看 [插件生命周期合规](./2026-11-01-plugin-lifecycle-conformance.md)。
+
 # dist 导出（tarball + 安装手册 → `_dist/`）
 
 ## 决定

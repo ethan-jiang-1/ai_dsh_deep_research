@@ -49,6 +49,9 @@ importers:
       '@deepseek-ai/dsh-persona':
         specifier: workspace:*
         version: link:vendor/dsh/packages/preset/persona
+      '@deepseek-ai/dsh-plugin-market-index':
+        specifier: workspace:*
+        version: link:vendor/dsh/packages/util/plugin-market-index
       '@deepseek-ai/dsh-session-query-sqlite':
         specifier: workspace:*
         version: link:vendor/dsh/packages/session-query/session-query-sqlite

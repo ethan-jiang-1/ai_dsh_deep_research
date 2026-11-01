@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "研究手册",
+    "description": "方法论说明与 run 模板，以 runtime context 注入，不落工作区。"
+  }
+}

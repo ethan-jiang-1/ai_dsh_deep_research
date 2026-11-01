@@ -1,0 +1,90 @@
+{
+  "format": 1,
+  "title": {
+    "en": "Deep Research Pack",
+    "zh": "深度研究包"
+  },
+  "description": {
+    "en": "Community index for the Deep Research bundle. Add this URL in Plugins → Discover.",
+    "zh": "深度研究组合包的社区索引。在 Plugins → Discover 里添加本索引地址。"
+  },
+  "metadata": {
+    "categories": {
+      "research": {
+        "title": {
+          "en": "Research",
+          "zh": "研究"
+        }
+      }
+    },
+    "labels": {
+      "community": {
+        "title": {
+          "en": "Community",
+          "zh": "社区"
+        }
+      }
+    },
+    "sortKeys": {
+      "updated": {
+        "title": {
+          "en": "Updated",
+          "zh": "更新时间"
+        },
+        "order": "desc"
+      }
+    }
+  },
+  "plugins": [
+    {
+      "name": "dsh-deep-research-pack",
+      "title": {
+        "en": "Deep Research",
+        "zh": "深度研究"
+      },
+      "description": {
+        "en": "Four research roles, a research cockpit, and traceable reports for DSH.",
+        "zh": "四个研究角色 + 研究驾驶舱，产出可溯源的研究报告。"
+      },
+      "icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJEZWVwIFJlc2VhcmNoIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0idGlsZSIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMxZDRlZDgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMGYyYTY2Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNCIgZmlsbD0idXJsKCN0aWxlKSIvPgogIDxwYXRoIGQ9Ik0xOSAxMmgxN2wxMSAxMXYyOGEyIDIgMCAwIDEtMiAySDE5YTIgMiAwIDAgMS0yLTJWMTRhMiAyIDAgMCAxIDItMnoiIGZpbGw9IiNmZmZmZmYiIG9wYWNpdHk9IjAuOTYiLz4KICA8cGF0aCBkPSJNMzYgMTJ2OWEyIDIgMCAwIDAgMiAyaDkiIGZpbGw9IiNkYmVhZmUiLz4KICA8cGF0aCBkPSJNMjQgNDZoOSIgc3Ryb2tlPSIjOTNjNWZkIiBzdHJva2Utd2lkdGg9IjIuNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPGNpcmNsZSBjeD0iMzEiIGN5PSIzMyIgcj0iNy41IiBmaWxsPSJub25lIiBzdHJva2U9IiMxZDRlZDgiIHN0cm9rZS13aWR0aD0iMy4yIi8+CiAgPHBhdGggZD0iTTM2LjUgMzguNWw2IDYiIHN0cm9rZT0iIzFkNGVkOCIgc3Ryb2tlLXdpZHRoPSIzLjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K",
+      "author": "The ai_dsh_deep_research authors",
+      "homepage": "https://github.com/ethan-jiang-1/ai_dsh_deep_research/tree/master/packages/deep-research-pack#readme",
+      "repository": {
+        "url": "https://github.com/ethan-jiang-1/ai_dsh_deep_research",
+        "directory": "packages/deep-research-pack"
+      },
+      "metadata": {
+        "category": "research",
+        "labels": [
+          "community"
+        ],
+        "keywords": [
+          "dsh",
+          "deepseek-harness",
+          "deep-research",
+          "agent-team",
+          "plugin",
+          "research"
+        ],
+        "sortKeys": {
+          "updated": 1793537255
+        }
+      },
+      "dist-tags": {
+        "latest": "0.3.0"
+      },
+      "versions": [
+        {
+          "version": "0.3.0",
+          "publishTimestamp": 1793537255,
+          "source": {
+            "type": "npm"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.2 <0.3.0-0"
+          }
+        }
+      ]
+    }
+  ]
+}

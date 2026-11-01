@@ -458,12 +458,13 @@ export const CASES = [
     const p = join(dir, 'packages/deep-research-pack/package.json');
     writeFileSync(p, readFileSync(p, 'utf8').replace('"client": {', '"client-probe": {'));
   } },
-  // pack-bundle-compat 含当前 tag（件⑤b）：升 pin 忘把新 tag 加进兼容矩阵——判据前移到 L0，
-  // 别等 L2 安装冒烟才现形。探针值避开 `dsh-v<数字>` 形态（pin-agreement 会把形似 tag 的
-  // 字面量当钉复述对账——探针不是钉声明）。
-  { id: 'pack-bundle-compat-tag-missing', gate: 'pack-bundle-compat', mutate: (dir) => {
+  // pack-bundle-compat：盘上每个 presets/<role>.patch.yml 都必须进 dsh.bundle.patch——
+  // 新增角色漏登记 = 角色根本没随包声明（历史实证：原文案 ≥1 条即绿而坏）。
+  { id: 'pack-bundle-compat-preset-unlisted', gate: 'pack-bundle-compat', mutate: (dir) => {
     const p = join(dir, 'packages/deep-research-pack/package.json');
-    writeFileSync(p, readFileSync(p, 'utf8').replace('"0.2.1-rc.2"', '"0.9.9"'));
+    const pkg = JSON.parse(readFileSync(p, 'utf8'));
+    pkg.dsh.bundle.patch = pkg.dsh.bundle.patch.filter((rel) => !rel.includes('scout'));
+    writeFileSync(p, JSON.stringify(pkg, null, 2) + '\n');
   } },
   // 宿主只认 engines.dsh；范围必须覆盖当前 vendor tag。删掉 engines.dsh = 退回 peer 语义。
   { id: 'pack-bundle-compat-engines-drift', gate: 'pack-bundle-compat', mutate: (dir) => {
@@ -596,6 +597,28 @@ export const CASES = [
   { id: 'content-shape-seed-return', gate: 'content-shape', mutate: (dir) => {
     mkdirSync(join(dir, 'packages', 'deep-research-pack', 'workspace'), { recursive: true });
     writeFileSync(join(dir, 'packages', 'deep-research-pack', 'workspace', 'seed.json'), '{}\n');
+  } },
+  // pack-manifest：把已退役的自造兼容矩阵放回清单——DSH 不读的 dsh.* 键即红。
+  { id: 'pack-manifest-invented-key', gate: 'pack-manifest', mutate: (dir) => {
+    const p = join(dir, 'packages', 'deep-research-pack', 'package.json');
+    const pkg = JSON.parse(readFileSync(p, 'utf8'));
+    pkg.dsh.compatibility = { dshReleases: ['0.2.1-rc.2'] };
+    writeFileSync(p, JSON.stringify(pkg, null, 2) + '\n');
+  } },
+  // market-index：索引版本与包版本漂移——发现页会装到一个不存在/不匹配的版本。
+  { id: 'market-index-version-drift', gate: 'market-index', mutate: (dir) => {
+    const p = join(dir, '_dist', 'market.json');
+    const doc = JSON.parse(readFileSync(p, 'utf8'));
+    doc.plugins[0]['dist-tags'].latest = '9.9.9';
+    doc.plugins[0].versions[0].version = '9.9.9';
+    writeFileSync(p, JSON.stringify(doc, null, 2) + '\n');
+  } },
+  // readme-shape：删掉 README 前置字段——文档生成器不再把包认成 bundle。
+  { id: 'readme-shape-no-frontmatter', gate: 'readme-shape', mutate: (dir) => {
+    const p = join(dir, 'packages', 'deep-research-pack', 'README.md');
+    const text = readFileSync(p, 'utf8');
+    if (!text.startsWith('---\n')) throw new Error('夹具 README 无前置字段——案例失效');
+    writeFileSync(p, text.slice(text.indexOf('\n---', 3) + 4));
   } },
 ];
 

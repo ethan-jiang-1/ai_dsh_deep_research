@@ -56,21 +56,26 @@ pack README §Data 的 `可移植` 列。
 
 **首次安装（M1-product）**
 
+默认入口 = 应用内 **Plugins 页**（`dsh web` 与 Desktop 同一句）：装本包，并在同页打开团队机制层
+（它是 DSH 随安装提供、默认关闭的可选 bundle）。下面是 CLI 形态，**仅 `dsh web` 的自动化**用：
+
 ```sh
 # ① 建产品 profile（仅首次；web 模板；破坏性，只对全新 profile 用）
 dsh --profile deep-research --from-default-profile web --dump-default-config
 
-# ② 装 bundle + 团队层（版本 = 运行中的 DSH）
-dsh plugin --profile deep-research add dsh-deep-research-pack@<版本> \
-  @deepseek-ai/dsh-experimental-agent-team-profile@<与 dsh --version 同版本>
+# ② 装 bundle（exact 版本）
+dsh plugin --profile deep-research add dsh-deep-research-pack@<版本>
 
-# ③ 启动
+# ③ 开团队机制层（exact 版本 = 运行中的 DSH；别用 @latest，它不是当前版本线）
+dsh plugin --profile deep-research add @deepseek-ai/dsh-experimental-agent-team-profile@<与 dsh --version 同版本>
+
+# ④ 启动（重启 profile 才让 bundle membership 生效）
 dsh --profile deep-research
 ```
 
 - 首屏会问「项目目录」；也可以用 `DEEP_RESEARCH_WORKSPACE=<dir>` 或
   `$DSH_HOME/deep-research/settings.json` 预置。
-- **更新**：产品内 Plugins 页（跨面，默认）或 `dsh plugin --profile deep-research add <new>`；**重启 profile** 生效。
+- **更新**：产品内 Plugins 页（跨面，默认）或 `dsh plugin --profile deep-research add <new>`；**重启 profile** 生效；没有命令级回滚，回退 = 重装旧版本。
 - **诊断**：安装副本的 `dsh-deep-research-doctor`（只读；profile roster / 版本 / 团队层 / 工作区 / 凭据）。
 - **互操作**：把同一个 bundle 装进现有 `web` profile 也能用（首屏照样问工作区），但不是产品形态。
 - **不要**手写 profile manifest、不要把 bundle 写进 `desktop` profile、不要起第二个安装器/launcher。

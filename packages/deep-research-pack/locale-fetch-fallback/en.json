@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Fetch Fallback",
+    "description": "Fetches pages locally first and falls back to the DeepSeek Fetch API only when that fails."
+  }
+}

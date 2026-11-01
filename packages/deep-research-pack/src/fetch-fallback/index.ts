@@ -16,15 +16,15 @@
  */
 
 import type { Context } from '@deepseek-ai/cordis'
-import z from '@deepseek-ai/schemastery'
 import { WebError, type WebFetchProvider, type WebFetchRequest, type WebFetchResult } from '@deepseek-ai/dsh-web'
-import {
-  DEEPSEEK_WEB_API_BASE_URL, DeepSeekFetchApiProvider, type DeepSeekFetchApiOptions,
-} from '@deepseek-ai/dsh-web-deepseek-api'
+import { DeepSeekFetchApiProvider, type DeepSeekFetchApiOptions } from '@deepseek-ai/dsh-web-deepseek-api'
 import { HttpFetchProvider } from '@deepseek-ai/dsh-web-fetch-http'
+import type { Config as ConfigShape } from './config.ts'
 import { resolveCredential, type CredentialsSource } from './credentials.ts'
 import { fetchWithFallback, type FallbackSettings } from './orchestrate.ts'
 import { PROVIDER_ID } from './policy.ts'
+
+export { Config } from './config.ts'
 
 /** Cordis plugin name used by loader diagnostics. */
 export const name = 'fetch-fallback'
@@ -38,39 +38,13 @@ function withDeadline(signal: AbortSignal | undefined, ms: number): AbortSignal 
   return signal === undefined ? timeout : AbortSignal.any([signal, timeout])
 }
 
-/** Plugin config: budgets, credential reference, and which local statuses trigger a rescue. */
-export interface Config {
-  /** Turn the fallback off without unwiring the provider (local-only mode). */
-  enabled: boolean
-  /** Credential reference resolved per fallback attempt; defaults to `DEEPSEEK_API_KEY`.
-   *  Secrets never live in plugin config (profile patch is user-visible/backed up). */
-  apiKeyEnv: string
-  /** Search / Fetch API base including its path prefix; `/fetch` is appended. */
-  baseURL: string
-  /** Wall-clock budget for the local leg before the API leg starts. */
-  localTimeoutMs: number
-  /** Wall-clock budget for both legs together; keep below `tool-web.fetchTimeoutMs`. */
-  totalBudgetMs: number
-  /** Local HTTP statuses that also trigger a rescue (default: server errors only). */
-  fallbackOnStatus: number[]
-}
-
-export const Config = z.object({
-  enabled: z.boolean().default(true),
-  apiKeyEnv: z.string().role('credential-ref').default('DEEPSEEK_API_KEY'),
-  baseURL: z.string().default(DEEPSEEK_WEB_API_BASE_URL),
-  localTimeoutMs: z.number().step(1).min(1_000).default(10_000),
-  totalBudgetMs: z.number().step(1).min(1_000).default(28_000),
-  fallbackOnStatus: z.array(z.number()).default([500, 502, 503, 504]),
-})
-
 /**
  * Register the local-first fetch provider; the seam selects it through
  * `web.fetchProvider: deepseek-fallback-fetch`.
  * @param ctx - plugin context owning the web seam and credentials service.
  * @param config - resolved plugin config.
  */
-export function apply(ctx: Context, config: Config): void {
+export function apply(ctx: Context, config: ConfigShape): void {
   const local = new HttpFetchProvider({
     maxResponseBytes: 5_000_000,
     maxBodyChars: 100_000,
@@ -94,13 +68,15 @@ export function apply(ctx: Context, config: Config): void {
     resolveApiKey,
   }))
 
-  const settings: FallbackSettings = {
-    enabled: config.enabled,
+  // volatile 字段每次调用现取（Loader 把 volatile 修改提交到运行中的引用）；
+  // 其余字段是 apply 时的常量。
+  const settings = (): FallbackSettings => ({
+    enabled: config.enabled.get(),
     localTimeoutMs: config.localTimeoutMs,
     totalBudgetMs: config.totalBudgetMs,
     fallbackOnStatus: config.fallbackOnStatus,
     apiKeyEnv: config.apiKeyEnv,
-  }
+  })
 
   const provider: WebFetchProvider = {
     id: PROVIDER_ID,
@@ -118,7 +94,7 @@ export function apply(ctx: Context, config: Config): void {
           message, code, cause === undefined ? undefined : { cause },
         ),
         now: () => Date.now(),
-      }, settings, request, signal)
+      }, settings(), request, signal)
     },
   }
 

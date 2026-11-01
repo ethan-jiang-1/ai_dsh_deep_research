@@ -5,6 +5,7 @@
 ## 活跃清单
 
 - [2026-11-01 插件即产品 v2](2026-11-01-plugin-as-product-v2.md) — 等人拍板：产品 profile / 启动期工作区 / 内容与产物分家；研究 = [research/plugin-as-product-v2](../research/plugin-as-product-v2/README.md)。
+- [2026-11-01 插件生命周期合规](2026-11-01-plugin-lifecycle-conformance.md) — 推敲中：npm 从未发布（registry 404）、无 locale/icon 显示元数据、无市场索引、手册入口叙事与 DSH 相反；研究 = [research/plugin-lifecycle](../research/plugin-lifecycle/README.md)。
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
