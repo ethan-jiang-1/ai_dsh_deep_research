@@ -1,11 +1,13 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-11-01
 ---
 
 # 推敲：产品首屏体验——用户打开浏览器后知道从哪开始
 
-> 立卡：2026-11-01 ｜ 状态：推敲中（用户 2026-11-01 授权静默自主执行） ｜ 类型：Task ｜ 结论倾向：现在做——首屏目标已列，待父卡确认信息密度与实现边界 ｜ 可关闭：否
+> 立卡：2026-11-01 ｜ 状态：已结（2026-11-01，用户授权归档） ｜ 类型：Task ｜ 结论倾向：现在做——首屏目标已列，待父卡确认信息密度与实现边界 ｜ 可关闭：是
+
+**关闭结论（2026-11-01）：** `StartCard.tsx` + `start-card.ts` 判据 + `conversation.input.dock` 注册 + `product-boot-smoke` 首屏断言已交付；saved-session 自动切换按要求留 P1（triggers）。 去向：implemented — [插件即产品 Note](../../../notes/implemented/2026-11-01-plugin-as-product.md)。
 >
 > 落地位置：**S2（首屏产品可用）**；依赖 A1 的工作区/标题与 C2 的浏览器 harness，见[落地计划](../research/plugin-as-product/2026-11-01-landing-plan.md)。
 > 落地记录（2026-11-01）：`StartCard.tsx` + `start-card.ts` 判据 + `conversation.input.dock` 注册 + `product-boot-smoke` 首屏断言已交付；saved-session 自动切换仍是 P1。

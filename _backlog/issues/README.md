@@ -4,18 +4,13 @@
 
 ## 活跃清单
 
-| 卡 | 类型 | 结论倾向 | 下一步 |
-|---|---|---|---|
-| [2026-11-01 插件即产品](2026-11-01-plugin-as-product.md) | Task | 现在做（S0–S4 技术面已交付；P1 见卡） | 用户首启业务验收；P1 按需另开 |
-| [2026-11-01 产品启动运行时](2026-11-01-product-launch-runtime.md) | Task | 现在做（launcher + profile + 工作区注册；已交付） | 证据见父卡 §落地记录 |
-| [2026-11-01 产品首屏体验](2026-11-01-product-first-run-ux.md) | Task | 现在做（起步卡/工作区指示；已交付） | saved-session 自动切换 = P1 |
-| [2026-11-01 产品文档与分发](2026-11-01-product-docs-and-dist.md) | Task | 现在做（README/_dist/全仓叙事；已交付） | 发布前重导出 `_dist` |
-| [2026-11-01 仓库对齐与证据](2026-11-01-repo-alignment-and-evidence.md) | Task | 现在做（dev 根解析/projectKey/测试迁移/产品 smoke；已交付） | 残留见父卡 |
-
-研究证据 = [research/plugin-as-product](../research/plugin-as-product/README.md)；落地顺序 = [landing-plan](../research/plugin-as-product/2026-11-01-landing-plan.md)（S0 决定 → S1 骨架 → S2 首屏 → S3 文档 → S4 硬化）。
+（暂无活跃 issue。新问题按本区流程立卡；已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。）
 
 ## 最近归档
 
+研究证据（已归档）= [research/plugin-as-product](../_archived/research/plugin-as-product/README.md)；落地顺序 = [landing-plan](../_archived/research/plugin-as-product/2026-11-01-landing-plan.md)（S0 决定 → S1 骨架 → S2 首屏 → S3 文档 → S4 硬化）。
+
+- [2026-11-01 插件即产品](../_archived/settled_issues/2026-11-01-plugin-as-product.md) — implemented：D38 launcher + 产品 profile + 用户工作区 + 首屏 + 文档/`_dist` + 产品 smokes/release-smoke；[Note](../../notes/implemented/2026-11-01-plugin-as-product.md)；P1 见 triggers。
 - [2026-10-29 方法库工作台重排](../_archived/settled_issues/2026-10-29-method-library-workbench-redesign.md) — implemented：A′ 两列、显式来源、受控 Host 写入/默认、草稿 revision 与窄屏交互；真浏览器/真模型 save/default/clear/delete E2E 全绿；[Note](../../notes/implemented/2026-10-29-method-library-workbench.md)。
 - [2026-10-28 方法库页内对话共创](../_archived/settled_issues/2026-10-28-method-library-cocreation.md) — implemented：页内三栏 + 方法编辑 preset + 草稿回填 + 保存闭环；证据 = 调研 §14 + `runtime/probe-save/artifacts/2026-10-28T14-47-08-504Z/`。
 

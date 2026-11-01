@@ -5,7 +5,7 @@ intent: 把已想清楚的 issues 串成有依赖、有证据、可按序落地�
 
 # 落地计划：从审批到产品可用的顺序
 
-本文把[父卡](../../issues/2026-11-01-plugin-as-product.md)与四张子卡串成可执行顺序。原则：**每个切片结束都要有一个可运行的产品增量 + 证据**；不按"先写完所有代码再联调"推进。
+本文把[父卡](../../settled_issues/2026-11-01-plugin-as-product.md)与四张子卡串成可执行顺序。原则：**每个切片结束都要有一个可运行的产品增量 + 证据**；不按"先写完所有代码再联调"推进。
 
 ## 0. 现状：已经摸透的与还没摸透的
 
@@ -168,11 +168,11 @@ session header: {"cwd":"/private/tmp/.../ws","agentPreset":"lead"}
 
 | 卡片 | 切片 | 先做 | 后做 |
 |---|---|---|---|
-| [父卡](../../issues/2026-11-01-plugin-as-product.md) | S0 | D38/Note/拍板 | S4 验收汇总 |
-| [产品启动运行时](../../issues/2026-11-01-product-launch-runtime.md) | S1（A1） | launcher 骨架/ Host/打包/`--check` | S4 硬化 |
-| [仓库对齐与证据](../../issues/2026-11-01-repo-alignment-and-evidence.md) | S1（C1）+ S2（C2） | 根解析/projectKey/测试迁移 | product-boot-smoke/首屏断言/S4 |
-| [产品首屏体验](../../issues/2026-11-01-product-first-run-ux.md) | S2（D） | 起步卡/工作区指示/凭据提示 | saved-session 提示/文案打磨 |
-| [产品文档与分发](../../issues/2026-11-01-product-docs-and-dist.md) | S3（B） | README/pack README/生成器 | 全仓叙事/D38/重导出 |
+| [父卡](../../settled_issues/2026-11-01-plugin-as-product.md) | S0 | D38/Note/拍板 | S4 验收汇总 |
+| [产品启动运行时](../../settled_issues/2026-11-01-product-launch-runtime.md) | S1（A1） | launcher 骨架/ Host/打包/`--check` | S4 硬化 |
+| [仓库对齐与证据](../../settled_issues/2026-11-01-repo-alignment-and-evidence.md) | S1（C1）+ S2（C2） | 根解析/projectKey/测试迁移 | product-boot-smoke/首屏断言/S4 |
+| [产品首屏体验](../../settled_issues/2026-11-01-product-first-run-ux.md) | S2（D） | 起步卡/工作区指示/凭据提示 | saved-session 提示/文案打磨 |
+| [产品文档与分发](../../settled_issues/2026-11-01-product-docs-and-dist.md) | S3（B） | README/pack README/生成器 | 全仓叙事/D38/重导出 |
 
 ## 5. 第一刀（拍板后立刻做）
 

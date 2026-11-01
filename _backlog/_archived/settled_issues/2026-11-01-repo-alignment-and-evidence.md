@@ -1,11 +1,13 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-11-01
 ---
 
 # 推敲：仓库对齐与证据——dev 工具根解析、会话组、测试迁移与产品 smoke
 
-> 立卡：2026-11-01 ｜ 状态：推敲中（用户 2026-11-01 授权静默自主执行） ｜ 类型：Task ｜ 结论倾向：现在做——对齐面已列，待父卡确认实施顺序 ｜ 可关闭：否
+> 立卡：2026-11-01 ｜ 状态：已结（2026-11-01，用户授权归档） ｜ 类型：Task ｜ 结论倾向：现在做——对齐面已列，待父卡确认实施顺序 ｜ 可关闭：是
+
+**关闭结论（2026-11-01）：** `workspace-root`（projectKey/默认组）+ run-ops/run-gates/hitl-answer/watch-run/boot-run/run-dashboard 迁移 + 测试迁移 + 产品 smokes 已交付；残留见父卡/Note。 去向：implemented — [插件即产品 Note](../../../notes/implemented/2026-11-01-plugin-as-product.md)。
 >
 > 落地位置：**S1（C1 dev 根解析/projectKey）+ S2（C2 product-boot-smoke）+ S4（硬化）**；见[落地计划](../research/plugin-as-product/2026-11-01-landing-plan.md)。
 > 落地记录（2026-11-01）：`scripts/lib/workspace-root.mjs`（projectKey/默认组）+ run-ops/run-gates/hitl-answer/watch-run/boot-run 迁移 + 测试迁移 + `product-smoke`/`product-boot-smoke` 已交付；残留见父卡。

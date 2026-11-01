@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-> 来源：[插件即产品决策卡](../../_backlog/issues/2026-11-01-plugin-as-product.md)、[落地计划](../../_backlog/research/plugin-as-product/2026-11-01-landing-plan.md)。
+> 来源：[插件即产品决策卡](../../_backlog/_archived/settled_issues/2026-11-01-plugin-as-product.md)、[落地计划](../../_backlog/_archived/research/plugin-as-product/2026-11-01-landing-plan.md)。
 > 当前合同 = [guides/65](../../docs/guides/65-run-forms.md)、[pack README](../../packages/deep-research-pack/README.md)、[`_dist/安装手册.md`](../../_dist/安装手册.md)；决策 = [D38](../../docs/decisions.md#d38)。
 
 ## 决定

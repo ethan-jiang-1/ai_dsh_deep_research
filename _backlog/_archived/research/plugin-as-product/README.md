@@ -1,8 +1,9 @@
 # 插件即产品：独立启动 profile、用户工作区与 run bundle 归属
 
 > 问题：怎样把本插件从"装进用户已有 profile 的 bundle"变成"带自己启动入口的产品"——插件自带一个启动 profile，启动时知道或询问用户工作区，全部插件内容留在插件内，run bundle 等生产产物落到用户工作区？
-> 消费者：[插件即产品决策卡](../../issues/2026-11-01-plugin-as-product.md)、[产品启动运行时](../../issues/2026-11-01-product-launch-runtime.md)、[产品文档与分发](../../issues/2026-11-01-product-docs-and-dist.md)、[仓库对齐与证据](../../issues/2026-11-01-repo-alignment-and-evidence.md)、[产品首屏体验](../../issues/2026-11-01-product-first-run-ux.md)。
-> 产出的卡：[插件即产品决策卡](../../issues/2026-11-01-plugin-as-product.md)（父卡）、[产品启动运行时](../../issues/2026-11-01-product-launch-runtime.md)、[产品文档与分发](../../issues/2026-11-01-product-docs-and-dist.md)、[仓库对齐与证据](../../issues/2026-11-01-repo-alignment-and-evidence.md)、[产品首屏体验](../../issues/2026-11-01-product-first-run-ux.md)。
+> 消费者：[插件即产品决策卡](../../settled_issues/2026-11-01-plugin-as-product.md)、[产品启动运行时](../../settled_issues/2026-11-01-product-launch-runtime.md)、[产品文档与分发](../../settled_issues/2026-11-01-product-docs-and-dist.md)、[仓库对齐与证据](../../settled_issues/2026-11-01-repo-alignment-and-evidence.md)、[产品首屏体验](../../settled_issues/2026-11-01-product-first-run-ux.md)。
+> 产出的卡：[插件即产品决策卡](../../settled_issues/2026-11-01-plugin-as-product.md)（父卡）、[产品启动运行时](../../settled_issues/2026-11-01-product-launch-runtime.md)、[产品文档与分发](../../settled_issues/2026-11-01-product-docs-and-dist.md)、[仓库对齐与证据](../../settled_issues/2026-11-01-repo-alignment-and-evidence.md)、[产品首屏体验](../../settled_issues/2026-11-01-product-first-run-ux.md)。
+> 归档：2026-11-01。
 
 ## 材料
 

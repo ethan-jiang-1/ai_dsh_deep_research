@@ -1,11 +1,13 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-11-01
 ---
 
 # 推敲：产品文档与分发——README、_dist 安装手册与仓库叙事对齐
 
-> 立卡：2026-11-01 ｜ 状态：推敲中（用户 2026-11-01 授权静默自主执行） ｜ 类型：Task ｜ 结论倾向：现在做——文档目标已列，待父卡确认产品门面措辞、首屏文案与版本策略 ｜ 可关闭：否
+> 立卡：2026-11-01 ｜ 状态：已结（2026-11-01，用户授权归档） ｜ 类型：Task ｜ 结论倾向：现在做——文档目标已列，待父卡确认产品门面措辞、首屏文案与版本策略 ｜ 可关闭：是
+
+**关闭结论（2026-11-01）：** README/pack README/00-index/61/62/65/project-map/design/terms/AGENTS/CONTRIBUTING + `product-manual.md` → `_dist/安装手册.md`；版本 0.2.0；`pnpm verify` 绿。 去向：implemented — [插件即产品 Note](../../../notes/implemented/2026-11-01-plugin-as-product.md)。
 >
 > 落地位置：**S3（文档与分发）**；可先起草，最终依赖 A/D 的 flag/文案，见[落地计划](../research/plugin-as-product/2026-11-01-landing-plan.md)。
 > 落地记录（2026-11-01）：README/pack README/00-index/61/62/65/project-map/design/terms/AGENTS/CONTRIBUTING + `product-manual.md` → `_dist/安装手册.md`；版本 0.2.0；`pnpm verify` 绿。

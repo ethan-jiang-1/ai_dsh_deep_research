@@ -12,6 +12,7 @@
 
 ## 题名索引
 
+| [plugin-as-product/](plugin-as-product/README.md) · 插件即产品：独立启动 profile、用户工作区与 run bundle 归属 | 11 份 | [插件即产品决策卡](../settled_issues/2026-11-01-plugin-as-product.md) 及四张子卡 | [父卡](../settled_issues/2026-11-01-plugin-as-product.md)、[D38](../../../docs/decisions.md#d38)、[Note](../../../notes/implemented/2026-11-01-plugin-as-product.md) | 2026-11-01 |
 | 名头 | 材料 | 历史消费者 | 产出的卡 | 归档 |
 |---|---|---|---|---|
 | [method-library-cocreation/](method-library-cocreation/README.md) · 方法库页内共创与工作台重排 | 9 篇 + `ux/` | [2026-10-28 共创](../settled_issues/2026-10-28-method-library-cocreation.md) | [2026-10-29 工作台重排](../settled_issues/2026-10-29-method-library-workbench-redesign.md)、[Note](../../../notes/implemented/2026-10-29-method-library-workbench.md) | 2026-10-30 |

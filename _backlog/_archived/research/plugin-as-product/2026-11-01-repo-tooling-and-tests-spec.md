@@ -5,7 +5,7 @@ intent: 把 dev 工作区根解析、会话组编码、测试迁移与产品 smo
 
 # 仓库工具与测试实现规格：根解析、会话组、产品 smoke
 
-本文是[仓库对齐与证据](../../issues/2026-11-01-repo-alignment-and-evidence.md)的技术支撑。核心发现：会话组目录不是任意的 substring，而是 vendor 的确定性 `projectKey(cwd)` 编码；可以直接算出来，不必扫描会话。
+本文是[仓库对齐与证据](../../settled_issues/2026-11-01-repo-alignment-and-evidence.md)的技术支撑。核心发现：会话组目录不是任意的 substring，而是 vendor 的确定性 `projectKey(cwd)` 编码；可以直接算出来，不必扫描会话。
 
 ## 1. `scripts/lib/workspace-root.mjs`
 

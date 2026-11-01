@@ -5,7 +5,7 @@ intent: 设计产品形态的验收矩阵、证据档位与现有测试迁移，
 
 # 验证计划：产品启动、首启工作区与仓库对齐怎么证
 
-证据档位与命令正本 = [guides/60 §2](../../../docs/guides/60-dev-loop.md)；验收合同 = [evaluation.md](../../../docs/evaluation.md)。本文只给本产品形态的增量证据设计。
+证据档位与命令正本 = [guides/60 §2](../../../../docs/guides/60-dev-loop.md)；验收合同 = [evaluation.md](../../../../docs/evaluation.md)。本文只给本产品形态的增量证据设计。
 
 ## 1. 要证明的六件事
 

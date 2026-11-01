@@ -7,7 +7,7 @@ intent: 给出产品形态的候选架构、取舍与推荐落地形状，供父
 
 ## 0. 一句话方案
 
-> 当前计划的正本 = [父卡](../../issues/2026-11-01-plugin-as-product.md)；本文记录方案取舍与理由，父卡拍板后以父卡为准，本文不单独演进。
+> 当前计划的正本 = [父卡](../../settled_issues/2026-11-01-plugin-as-product.md)；本文记录方案取舍与理由，父卡拍板后以父卡为准，本文不单独演进。
 
 包仍然是一个 bundle；包内新增一个**启动器**（安装/装配包装器）和一个**工作区注册 Host 插件**。启动器负责把产品 profile 装配出来（web 模板 → 本包 → 团队层），把用户选定的工作区铺好种子，然后调用 `dsh --profile`；Host 插件在 boot 时把工作区登记进 `workspaceRegistry`，Web Client 首屏在该工作区创建 blank Lead Session。运行时仍是 DSH，run bundle 落在用户工作区。
 

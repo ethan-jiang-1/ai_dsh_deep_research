@@ -4,6 +4,11 @@
 
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-11-01-plugin-as-product](2026-11-01-plugin-as-product.md) | 插件即产品：D38 包/bundle + `dsh-deep-research` launcher + 产品 profile + 用户工作区 + 首屏起步卡 + 文档/`_dist` + 产品 smokes；P1 见 triggers；[Note](../../../notes/implemented/2026-11-01-plugin-as-product.md) | 2026-11-01 |
+| [2026-11-01-product-launch-runtime](2026-11-01-product-launch-runtime.md) | 产品启动运行时：launcher/profile 装配/Host 工作区注册/设置/optional peers + product-smoke；[Note](../../../notes/implemented/2026-11-01-plugin-as-product.md) | 2026-11-01 |
+| [2026-11-01-product-first-run-ux](2026-11-01-product-first-run-ux.md) | 产品首屏：StartCard + 显隐判据 + product-boot-smoke；saved-session 自动切换 = P1 | 2026-11-01 |
+| [2026-11-01-product-docs-and-dist](2026-11-01-product-docs-and-dist.md) | 产品文档与分发：README/pack README/全仓叙事 + product-manual → `_dist/安装手册.md`；版本 0.2.0 | 2026-11-01 |
+| [2026-11-01-repo-alignment-and-evidence](2026-11-01-repo-alignment-and-evidence.md) | 仓库对齐：workspace-root/projectKey + run-ops/run-gates 迁移 + 测试迁移 + 产品 smokes | 2026-11-01 |
 | [2026-10-29-method-library-workbench-redesign](2026-10-29-method-library-workbench-redesign.md) | A′ 两列工作台、显式来源、受控 Host 写入/默认、草稿 revision 与窄屏折叠；真浏览器 + 真模型 save/default/clear/delete E2E 全绿；[Note](../../../notes/implemented/2026-10-29-method-library-workbench.md) | 2026-10-30 |
 | [2026-10-28-method-library-cocreation](2026-10-28-method-library-cocreation.md) | 方法库页内共创：三栏 + 方法编辑 preset/草稿回填/保存闭环；真模型 probe + release-smoke + l4-lite 全绿；[调研 §14](../research/method-library-cocreation/2026-10-28-dsh-session-and-surface-internals.md) | 2026-10-28 |
 | [2026-10-28-data-plane-hardening](2026-10-28-data-plane-hardening.md) | FAQ 24 数据面收口：D32 原生时钟 + D33 整数契约/创建日 + D34 回执三态/可移植列 + D35 种子三态 + D36 见证边界；自审补 `epochDateOf` 见证下界回归；四角色真模型重录后 snapshot ALL PASS；P2 与 W/D 同路径转触发器；[Note](../../../notes/implemented/2026-10-28-data-plane-hardening.md) | 2026-10-28 |

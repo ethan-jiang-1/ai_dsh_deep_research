@@ -5,7 +5,7 @@ intent: 把 launcher / 产品 profile / Host 工作区注册 / 打包写成可�
 
 # 运行时实现规格：launcher、Host 注册与打包
 
-本文是[产品启动运行时](../../issues/2026-11-01-product-launch-runtime.md)的技术支撑；不是新合同，父卡拍板后以实现与 D38 为准。所有路径以 pack 根为基准。
+本文是[产品启动运行时](../../settled_issues/2026-11-01-product-launch-runtime.md)的技术支撑；不是新合同，父卡拍板后以实现与 D38 为准。所有路径以 pack 根为基准。
 
 ## 1. 文件与构建落点
 

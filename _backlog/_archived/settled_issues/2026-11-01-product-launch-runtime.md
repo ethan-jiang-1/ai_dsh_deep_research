@@ -1,14 +1,16 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-11-01
 ---
 
 # 推敲：产品启动运行时——launcher、产品 profile 与工作区注册
 
-> 立卡：2026-11-01 ｜ 状态：推敲中（用户 2026-11-01 授权静默自主执行） ｜ 类型：Task ｜ 结论倾向：现在做——运行时 MVP 方案已选定，待父卡确认 profile 名/工作区 UX/home ｜ 可关闭：否
+> 立卡：2026-11-01 ｜ 状态：已结（2026-11-01，用户授权归档） ｜ 类型：Task ｜ 结论倾向：现在做——运行时 MVP 方案已选定，待父卡确认 profile 名/工作区 UX/home ｜ 可关闭：是
+
+**关闭结论（2026-11-01）：** launcher（`scripts/launch.mjs` + `scripts/lib/launcher/*`）、Host `workspace-boot`、产品设置、optional peers/打包、fake-dsh 单测与 `product-smoke` 已交付；证据 = 父卡 §落地记录 + Note。 去向：implemented — [插件即产品 Note](../../../notes/implemented/2026-11-01-plugin-as-product.md)。
 >
 > 落地位置：**S1（A1 骨架）+ S4（硬化）**；依赖/顺序见[落地计划](../research/plugin-as-product/2026-11-01-landing-plan.md)。
-> 落地记录（2026-11-01）：launcher/`scripts/lib/launcher/*`/`src/workspace-boot/`/设置/optional peers/打包 + fake-dsh 单测 + `product-smoke` 已交付；证据 = 父卡 §落地记录 + [Note](../../notes/implemented/2026-11-01-plugin-as-product.md)。
+> 落地记录（2026-11-01）：launcher/`scripts/lib/launcher/*`/`src/workspace-boot/`/设置/optional peers/打包 + fake-dsh 单测 + `product-smoke` 已交付；证据 = 父卡 §落地记录 + [Note](../../../notes/implemented/2026-11-01-plugin-as-product.md)。
 
 **问题与期望结果：** 本包今天只有 `preflight` 与 `scaffold` 两个部署 bin；用户必须自己建 profile、装包、铺工作区，再手动 `cd` 起 `dsh`。期望：包内新增一个产品启动器与一个 Host 工作区注册插件，使用户用一条命令进入产品 profile，并让 Web 首屏的 Lead Session 建在用户指定工作区；启动器自身要能处理首次安装的耗时、失败与版本前置，而不是把 pnpm/host 错误直接甩给用户。
 

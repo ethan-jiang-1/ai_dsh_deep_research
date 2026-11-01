@@ -52,7 +52,7 @@ research/
 
 | 名头 | 问题 | 消费者 | 材料 |
 |---|---|---|---|
-| [plugin-as-product](plugin-as-product/README.md) | 插件怎样以独立启动 profile 运行、在用户指定工作区产出 run bundle，并让文档/分发对齐 | [插件即产品决策卡](../issues/2026-11-01-plugin-as-product.md)、[产品启动运行时](../issues/2026-11-01-product-launch-runtime.md)、[产品文档与分发](../issues/2026-11-01-product-docs-and-dist.md)、[仓库对齐与证据](../issues/2026-11-01-repo-alignment-and-evidence.md)、[产品首屏体验](../issues/2026-11-01-product-first-run-ux.md) | 11 份（题名页内列） |
+| （暂无活跃研究题） | — | — | — |
 
 归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单。
 

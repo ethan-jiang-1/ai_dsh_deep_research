@@ -5,7 +5,7 @@ intent: 把 README / _dist 安装手册 / 全仓文档的产品化改写写成�
 
 # 文档与分发实现规格：README、_dist 与全仓叙事
 
-本文是[产品文档与分发](../../issues/2026-11-01-product-docs-and-dist.md)的技术支撑。原则：**当前合同只写现在**；`_dist/安装手册.md` 是生成物，只改 `scripts/dist/export-dist.mjs`；产品与开发两个作用域在每页首段可辨。
+本文是[产品文档与分发](../../settled_issues/2026-11-01-product-docs-and-dist.md)的技术支撑。原则：**当前合同只写现在**；`_dist/安装手册.md` 是生成物，只改 `scripts/dist/export-dist.mjs`；产品与开发两个作用域在每页首段可辨。
 
 ## 1. 根 `README.md`（预算 31 行）
 
