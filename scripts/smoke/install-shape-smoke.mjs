@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// install-shape-smoke — L2：原样执行用户手册的三步（D40），证 DSH 原生安装形状。
+// install-shape-smoke — L2：原样执行手册的 CLI 装包分支（§四-B；D40），证 DSH 原生安装形状。
 //
+// 产品默认首装 = CLI 建 profile（§三）+ 应用内 Plugins 页装包（§四-A）；本 smoke 验同一机制的 CLI 分支：
 //   ① dsh --profile deep-research --from-default-profile web
 //   ② dsh plugin --profile deep-research add <tarball> <team>
 //   ③ dsh --profile deep-research（真启动，无 `did not activate`）

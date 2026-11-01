@@ -419,10 +419,11 @@ export function runB() {
   }
 }
 
-// ── readme-shape（文档合同：包 README 的两个读者 + 安装手册的入口取向）──
-// 依据：Plugins 页只读 package.json/locale；文档生成器读 README 前置字段；安装说明的默认入口是
-// 应用内 Plugins 页，CLI 只作 web 自动化。反证：删 README frontmatter → 红；把手册首段改回
-// CLI 优先（Plugins 页首次出现在 dsh plugin 之后）→ 红。
+// ── readme-shape（文档合同：包 README 的两个读者 + 安装手册的默认路径）──
+// 依据：Plugins 页只读 package.json/locale；文档生成器读 README 前置字段；产品的默认首装 =
+// CLI 建自定义 profile（DSH 没有 UI 建 profile）+ 应用内 Plugins 页装包，CLI 装包只作 web 自动化。
+// 反证：删 README frontmatter → 红；删手册的 profile 引导 / 把它挪到 Plugins 页之后 → 红；
+// 把手册首段改回 CLI 装包优先（Plugins 页首次出现在 dsh plugin 之后）→ 红。
 {
   const gate = 'readme-shape';
   const readmePath = join(PACK, 'README.md');
@@ -444,10 +445,14 @@ export function runB() {
     const manual = readFileSync(manualPath, 'utf8');
     const sections = [...manual.matchAll(/^## [一二三四五六七八九十]、/gm)].length;
     if (sections !== 10) fail(gate, `安装手册应有十个编号节（当前 ${sections}）`);
+    const bootstrap = manual.indexOf('--from-default-profile web');
     const plugins = manual.indexOf('Plugins 页');
     const cli = manual.indexOf('dsh plugin');
-    if (plugins === -1) fail(gate, '安装手册没有把 Plugins 页写成安装入口');
-    else if (cli !== -1 && cli < plugins) fail(gate, '安装手册先讲 CLI 再讲 Plugins 页——DSH 的默认入口是应用内 Plugins 页，CLI 只作 web 自动化');
+    if (bootstrap === -1) fail(gate, '安装手册没有写产品 profile 的 CLI 引导（--from-default-profile web）——DSH 没有 UI 建自定义 profile，缺这一步默认路径到不了 deep-research');
+    else if (plugins !== -1 && bootstrap > plugins) fail(gate, '安装手册把 profile 引导放在 Plugins 页之后——默认路径必须先有产品 profile');
+    if (!manual.includes('dsh --profile deep-research')) fail(gate, '安装手册没有写 dsh --profile deep-research 启动');
+    if (plugins === -1) fail(gate, '安装手册没有把 Plugins 页写成装包入口');
+    else if (cli !== -1 && cli < plugins) fail(gate, '安装手册先讲 CLI 装包再讲 Plugins 页——装包入口是应用内 Plugins 页，CLI 只作 web 自动化');
     if (!/仅 `dsh web`/.test(manual)) fail(gate, '安装手册没有标注 CLI 只适用 `dsh web`');
   }
 }

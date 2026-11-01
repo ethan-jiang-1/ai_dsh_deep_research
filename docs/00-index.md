@@ -9,14 +9,16 @@
 ## 先分流：用户要"用它"还是"改它"
 
 **先记住这条模型**：本包是 DSH 插件（bundle），产品形态 = 自有 `deep-research` profile（D40）。
-安装/启动全走 DSH 原生：`dsh --profile deep-research --from-default-profile web` → `dsh plugin
---profile deep-research add <pack> <team>` → `dsh --profile deep-research`；首屏询问项目目录。
-没有 launcher、没有 scaffold、没有自定义安装器；只保留只读 doctor。开发者在本仓走 `research`
-profile + `research-workspace/` + run-driver。两条路径的命令与数据根不同，不要互相套用。
+自定义 profile 只能用 CLI 引导：`dsh --profile deep-research --from-default-profile web` → 启动
+`dsh --profile deep-research` → 应用内 Plugins 页装包；CLI 装包（仅 `dsh web` 自动化）=
+`dsh plugin --profile deep-research add <pack> <team>`；首屏询问项目目录。
+没有 launcher、没有 scaffold、没有自定义安装器；只保留只读 doctor。开发者在本仓走同名
+`deep-research` profile（隔离 home）+ `research-workspace/` + run-driver。两条路径的命令与数据根不同，
+不要互相套用。
 
 | 用户的说法 | 走哪（该事的唯一 owner） | 首个动作 |
 |---|---|---|
-| "用它""启动这个插件""跑研究""装到我的 DSH"（产品用户） | [pack README](../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) + [guides/65](./guides/65-run-forms.md) | 默认 Plugins 页；CLI（仅 `dsh web`）：`--from-default-profile web` → `dsh plugin add dsh-deep-research-pack` → `dsh --profile deep-research` |
+| "用它""启动这个插件""跑研究""装到我的 DSH"（产品用户） | [pack README](../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) + [guides/65](./guides/65-run-forms.md) | CLI 建 profile（仅首次 `--from-default-profile web`）→ 启动 → 默认 Plugins 页装包；CLI 装包（仅 `dsh web`）：`dsh plugin add dsh-deep-research-pack` |
 | "在本仓启动/开跑/接着上次跑"（开发通道，默认 `runtime/harness-home`） | [guides/61](./guides/61-run-playbook.md) | `node dev/run-driver.mjs up`（起/复用通道 + 验浏览器面 + 呈交 URL） |
 | "换 profile/home""装进现有 web profile""诊断装得对不对" | [guides/65](./guides/65-run-forms.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | `dsh --profile <p> --from-default-profile web --dump-config`；诊断 = 安装副本的 `dsh-deep-research-doctor` |
 | "只验证插件还能挂载/安装"（证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `source dev/env.sh && node scripts/smoke/product-smoke.mjs`（或 preset/release-smoke） |
@@ -34,7 +36,7 @@ profile + `research-workspace/` + run-driver。两条路径的命令与数据根
 **歧义裁定**：用户未指定 home 时——产品用户默认 `$DSH_HOME`；开发通道默认
 `runtime/harness-home`（source env.sh）。"启动这个插件"没有额外上下文时默认指本仓开发通道；
 要给外部用户装产品走产品行。**开发通道**别绕过 run-driver 的漂移门（直接 `dsh --profile deep-research`
-会用旧镜像）；**产品用户**用 DSH 两步安装 + `dsh --profile deep-research`；首屏问项目目录。
+会用旧镜像）；**产品用户**用 DSH 原生安装（CLI 建 profile + Plugins 页装包）+ `dsh --profile deep-research`；首屏问项目目录。
 
 **裸动词也指开发通道**："启动一下""起一下"未点名对象时，默认指本仓 DSH 环境，首个动作 = `node dev/run-driver.mjs up`；仅当对话正围着另一个可启动物（某条冒烟/探针）时才跟随该物。
 
@@ -79,7 +81,7 @@ profile + `research-workspace/` + run-driver。两条路径的命令与数据根
 | [guides/62-plugin-authoring.md](./guides/62-plugin-authoring.md) | 指南 | **插件作者入口**（改插件内容的人/agent 入口）：DSH 词汇对齐（plugin/bundle/profile/preset）、参与阶梯 S0–S3、新行为归属、范本与证据义务、**交付与部署形态**（bundle/profile 拓扑 + 工作区种子 + 部署 bin）、**改动影响面**（添/换/删要一起动什么）——上游 `docs/user/develop/**` 的本仓投影 |
 | [guides/63-git-boundary.md](./guides/63-git-boundary.md) | 指南 | **Git 入库边界与跨环境纪律**：源/合同/种子/证据 vs 生成物/运行态/本机态；三问判据、tracked 生成物条件、跨环境规则与门禁 |
 | [guides/64-release-versioning.md](./guides/64-release-versioning.md) | 指南 | **发布版本、tag 与 npm 发布顺序**：pack 版本 = 唯一发布源、root 镜像、annotated tag、发布前 `release-check` 与 `release-version` 门禁 |
-| [guides/65-run-forms.md](./guides/65-run-forms.md) | 指南 | **运行形态合同**：M1 DSH 两步安装 / M2 独立开发 / M3 移交；P/H/W 归属；`engines.dsh` + 团队层钉版；产品设置与首屏工作区；`DSH_DEV_HOME`/多实例；干净 handoff 与证据矩阵 |
+| [guides/65-run-forms.md](./guides/65-run-forms.md) | 指南 | **运行形态合同**：M1 DSH 原生安装 / M2 独立开发 / M3 移交；P/H/W 归属；`engines.dsh` + 团队层钉版；产品设置与首屏工作区；`DSH_DEV_HOME`/多实例；干净 handoff 与证据矩阵 |
 
 > **编号消歧**：`design/60-intent-carriers.md` 与 `guides/60-dev-loop.md` 同号不同义——design/ 按设计层编号（10 架构 … 60 意图载体），guides/ 按操作手册编号（60 开发环 / 61 run / 62 作者入口 / 63 git 边界 / 64 发布 / 65 运行形态）；引用写全路径。
 

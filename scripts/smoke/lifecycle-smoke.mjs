@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // lifecycle-smoke — L2：发布物 → 安装 → 组合 → 显示面 → 卸载 的整条生命周期。
 //
-// 与 install-shape-smoke 的分工：那条证"手册三步 + 团队层"的用户路径；本条证**发布面与显示面**：
+// 与 install-shape-smoke 的分工：那条证"CLI 装包分支 + 团队层"的用户路径；本条证**发布面与显示面**：
 //   ① `_dist/market.json` 过 DSH 自己的 `parseMarketIndex`，且版本/兼容范围与包清单一致
 //   ② tarball 带 locale/icon、不带 sourcemap（DSH 包约定）
 //   ③ 干净 profile 装 tarball → dump 出本包 11 个 entry id、无 `entry "…" not found`

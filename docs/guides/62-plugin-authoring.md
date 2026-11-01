@@ -19,7 +19,7 @@
 |---|---|---|
 | plugin | 导出 `apply(ctx)` 的 TS 模块；注册即 `apply(ctx)`，配置经 cordis schema 校验 | 本仓自写插件（三处有界例外：D18 观察面 client、D31 抓取回退、D40 启动行/内容注入）：`src/index.ts`（host 半空壳 = 观察面宿主位）、`src/client/index.ts`（client 半：驾驶舱 + 首屏工作区恢复）、`src/client/startup.ts`（纯谓词）、`src/content/index.ts`（手册 runtime context）、`src/startup/index.ts`（工作区登记/会话）、`src/fetch-fallback/index.ts`（抓取回退 provider）；新插件从 `vendor/dsh/docs/user/develop/basic/` 起步 |
 | bundle | 你编写与分发的单位（`dsh.bundle`）——回答"这个包贡献什么"，是插入/覆盖 plugin rows 的 patch 层 | `packages/deep-research-pack/cordis.patch.yml` + 包内 `presets/`、`skills/` |
-| profile | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）——回答"哪些 bundle 按什么顺序组成" | 产品：用户 `$DSH_HOME/profiles/deep-research/`（DSH 两步安装创建）；开发镜像：`runtime/harness-home/profiles/deep-research/`（同名 profile；`boot-run.sh` 用 tarball + `dsh plugin add` 安装） |
+| profile | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）——回答"哪些 bundle 按什么顺序组成" | 产品：用户 `$DSH_HOME/profiles/deep-research/`（DSH：CLI 引导建 profile + Plugins 页装包）；开发镜像：`runtime/harness-home/profiles/deep-research/`（同名 profile；`boot-run.sh` 用 tarball + `dsh plugin add` 安装） |
 | preset | 一个 agent 形态：persona 行 + 时钟行 + skills + 工具行 | `presets/<role>.patch.yml`（preset 行）+ `presets/<role>/skills/`（角色清单 = 盘上 presets/） |
 | patch / overlay | 层叠覆盖条目（id 定向的 config 覆盖、禁用、插入） | `dev/research.overlay.yml`（源码域通道的镜像源） |
 

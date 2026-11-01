@@ -52,8 +52,6 @@ research/
 
 | 名头 | 问题 | 消费者 | 材料 |
 |---|---|---|---|
-| [插件即产品 v2](plugin-as-product-v2/README.md) | 产品 profile、启动期工作区、内容与产物分家 | [决策卡](../issues/2026-11-01-plugin-as-product-v2.md) | [五份材料](plugin-as-product-v2/README.md) |
-| [插件生命周期合规](plugin-lifecycle/README.md) | 打包/发布/安装/初始化/卸载与市场发布对账 | [决策卡](../issues/2026-11-01-plugin-lifecycle-conformance.md) | [三份材料](plugin-lifecycle/README.md) |
 
 归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单。
 

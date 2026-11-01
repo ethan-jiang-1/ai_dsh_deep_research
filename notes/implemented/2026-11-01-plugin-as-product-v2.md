@@ -2,16 +2,16 @@
 
 > 状态：implemented
 
-> 来源：[插件即产品 v2 决策卡](../../_backlog/issues/2026-11-01-plugin-as-product-v2.md)（D40）、[实施计划](../../_backlog/research/plugin-as-product-v2/2026-11-01-implementation-plan.md)、[复盘](../../_backlog/research/plugin-as-product-v2/2026-11-01-postmortem-why-crooked.md)。
+> 来源：[插件即产品 v2 决策卡](../../_backlog/_archived/settled_issues/2026-11-01-plugin-as-product-v2.md)（D40）、[实施计划](../../_backlog/_archived/research/plugin-as-product-v2/2026-11-01-implementation-plan.md)、[复盘](../../_backlog/_archived/research/plugin-as-product-v2/2026-11-01-postmortem-why-crooked.md)。
 > 当前合同 = [pack README](../../packages/deep-research-pack/README.md)、[guides/65](../../docs/guides/65-run-forms.md)、[README](../../README.md)。
 
 ## 决定
 
-- **产品 = 一个 bundle + 自有 `deep-research` profile**。安装/启动全走 DSH：`dsh --profile deep-research --from-default-profile web` → `dsh plugin --profile deep-research add <pack> <team>` → `dsh --profile deep-research`。删除 launcher 与 scaffold，只保留只读 `dsh-deep-research-doctor`。版本 0.3.0，无兼容、不迁移旧种子。
+- **产品 = 一个 bundle + 自有 `deep-research` profile**。安装/启动全走 DSH：`dsh --profile deep-research --from-default-profile web`（CLI 引导）→ 启动 → 应用内 Plugins 页装包（CLI `dsh plugin --profile deep-research add <pack> <team>` 仅自动化/离线）。删除 launcher 与 scaffold，只保留只读 `dsh-deep-research-doctor`。版本 0.3.0，无兼容、不迁移旧种子。
 - **工作区在启动时解决**：`DEEP_RESEARCH_WORKSPACE` → `$DSH_HOME/deep-research/settings.json` → 首屏「选择项目目录」。Host 启动行登记 Workspace + best-effort 建 Lead 会话；client 用 `dsh.sessions.current` 与 `localStorage['dsh.deep-research.workspaceId.v1']` 恢复。没有 CLI 询问、没有 launcher。
 - **内容全部在包内**：手册 `content/manual.md` 经 `ctx.systemPrompt.context()` 注入（`research_pack_root` 变量供模板路径）；NODES/判型库 = Lead skills；模板 `content/templates/run/`。删除 `workspace/` 种子、`seed.json`、scaffold 升级账本、`.gitignore` 写入、`pack-workspace-fresh`。工作区只剩 `drt_*`/`archive/`/`_abandoned/`/`method-library.md`。
 - **新产品面 = 启动行 + client 启动控制器**（D7 第三处有界例外；不新增 Remote——用 DSH 既有 `workspaces`/`sessions`/`uiWorkspace`/`pickDirectory`）。
-- **安装尊重 DSH**：不手写 profile、不发布 profile、不起第二个安装器；应用内 Plugins 页是更新路径；`web` profile 只作互操作。
+- **安装尊重 DSH**：不手写 profile、不发布 profile、不起第二个安装器；自定义 profile 只能用 CLI 引导（DSH 无 UI），装包入口 = 应用内 Plugins 页，CLI 装包只作自动化/离线；`web` profile 只作互操作。
 
 ## 输掉的方案
 
@@ -25,7 +25,7 @@
 ## 实际跑过的验证
 
 - `pnpm verify` 全绿；`pnpm test` **963 pass / 0 fail**（含 `tests/contracts/product-invariants.test.mjs` 的 I1–I4）。
-- `install-shape-smoke`：全局 dsh 0.2.1-rc.3 上原样执行手册三步；roster 三状态、dump 有 `research-content`/`research-startup`、无旧 `research-workspace-boot`、真启动无 `did not activate` —— **ALL PASS**。
+- `install-shape-smoke`：全局 dsh 0.2.1-rc.3 上原样执行手册的 CLI 装包分支；roster 三状态、dump 有 `research-content`/`research-startup`、无旧 `research-workspace-boot`、真启动无 `did not activate` —— **ALL PASS**。
 - `product-boot-smoke`：真 Web + 浏览器；**用产品设置文件（不带 env）** 起 `dsh --profile deep-research`；Host 注册工作区、blank Lead Session、`cwd` = 工作区、`preset=lead`、首屏元素与「选择项目目录」、工作区无产品内容文件 —— **GREEN**。
 - `release-smoke`：tarball → 干净 profile → plugin add pack + 团队层 → 安装副本 client/peers/矩阵 → doctor → 安装域 preset-smoke 5 角色全绿 → remove → 团队层保留 → 端口释放 —— **ALL PASS**。
 - `data-smoke`：包目录零写入、假 token 不泄漏、卸载后 workspace 用户文件与 session 日志保留 —— **ALL PASS**。

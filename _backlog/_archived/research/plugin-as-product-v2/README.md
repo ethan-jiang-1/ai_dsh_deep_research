@@ -1,8 +1,10 @@
 # 插件即产品 v2：产品 profile、启动期工作区、内容与产物分家
 
+> 归档：2026-11-02
+
 > 问题：怎样把 Deep Research 从"装进用户已有 DSH profile 的 bundle"改回"有自己启动 profile 的产品"——启动时解析或询问用户工作区，插件内容全部留在包内，只有 run bundle 等产物落在工作区？
-> 消费者：[插件即产品 v2 决策卡](../../issues/2026-11-01-plugin-as-product-v2.md)
-> 产出的卡：[插件即产品 v2 决策卡](../../issues/2026-11-01-plugin-as-product-v2.md)
+> 消费者：[插件即产品 v2 决策卡](../../settled_issues/2026-11-01-plugin-as-product-v2.md)
+> 产出的卡：[插件即产品 v2 决策卡](../../settled_issues/2026-11-01-plugin-as-product-v2.md)
 
 ## 材料
 

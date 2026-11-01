@@ -12,7 +12,8 @@
 ## 一、这是什么
 
 一个 **DSH 插件包（bundle）**，不是一个独立应用：它给宿主贡献一层配置（5 个角色 preset、研究驾驶舱、
-抓取回退 provider、研究手册/模板注入、启动行），并注册自己的 `deep-research` profile 作为**产品形态**。
+抓取回退 provider、研究手册/模板注入、启动行）；产品形态 = 自有 `deep-research` profile（由 DSH 创建，
+包不预置 profile）。
 
 - **它装什么**：一条 bundle（`dsh.bundle.patch` 六文件）+ 一套 preset/skill/内容资源；不含 launcher、
   不含 scaffold、不含自定义安装器。
@@ -34,43 +35,50 @@
 
 ## 三、选择安装方式
 
-**默认：应用内 Plugins 页（`dsh web` 与 Desktop 通用）。** 打开 DSH 的 Plugins 页，安装
-`dsh-deep-research-pack`；团队机制层是 DSH **随安装提供、默认关闭**的可选 bundle，在同一个
-Plugins 页里打开即可（不要用 CLI 去装它，见下）。
+**产品 profile 先建一次（CLI，仅首次）。** 产品形态要求自有 `deep-research` profile，这一步只能用 CLI：
 
-**CLI：仅 `dsh web` 的自动化场景。** CLI 是面绑定的：它能管理 web/headless/sdk 等显式 profile，
-**不能管理 `desktop`**。Desktop 用户请走上面的 Plugins 页，否则会装进 `profiles/deep-research`
-而桌面端用的是 `profiles/desktop`——报告"装成功"，界面里却没有。
+```sh
+dsh --profile deep-research --from-default-profile web
+```
+
+DSH 的 Plugins 页只管理当前运行 profile，也没有 UI 建自定义 profile；profile 建好后，装包入口 =
+应用内 Plugins 页：启动 `dsh --profile deep-research`，在 Plugins 页安装 `dsh-deep-research-pack`；
+团队机制层是 DSH **随安装提供、默认关闭**的可选 bundle，在同一个 Plugins 页里打开即可。
+
+**CLI 装包：仅 `dsh web` 的自动化 / 离线场景。** CLI 是面绑定的：它能管理 web/headless/sdk 等显式
+profile，**不能管理 `desktop`**。Desktop 的 Plugins 页把包装进 `desktop` profile——那是互操作形态，
+不是产品形态；产品形态只在 `deep-research` profile。
 
 **离线 / 预发布：tarball。** 拿到 `{{tarballName}}` 时用 `file:` spec 安装（下文 §四-C），
 不需要 registry。
 
 ## 四、安装
 
-### A. Plugins 页（默认，跨面）
+### A. Plugins 页（默认）
 
-1. 打开 Plugins 页，安装 `dsh-deep-research-pack@{{version}}`（来自市场索引或包名）。
-2. 同页找到 `agent-team-profile`（标记为 official/optional），打开它。
-3. 重启 profile，让 bundle membership 生效。
+1. 建产品 profile（仅首次；见 §三；已有 profile 不要重复）。
+2. `dsh --profile deep-research` 启动。
+3. 打开 Plugins 页，安装 `dsh-deep-research-pack@{{version}}`（来自市场索引或包名）。
+4. 同页找到 `agent-team-profile`（标记为 official/optional），打开它。
+5. 重启 profile，让 bundle membership 生效。
 
 > 市场发现：若要在不认识包名的情况下找它，在 Plugins → **Discover** 里添加本手册同目录
 > `market.json` 的地址（托管地址随发布物给出），再搜索 "Deep Research"。
 
-### B. CLI（仅 `dsh web` 自动化）
+### B. CLI 装包（仅 `dsh web` 自动化 / 离线）
+
+前置 = §三 的产品 profile（`--from-default-profile web`，仅首次）。
 
 ```sh
-# ① 建产品 profile（仅首次；DSH 的 web 模板；破坏性，只对全新 profile 用）
-dsh --profile deep-research --from-default-profile web --dump-default-config
-
-# ② 装 bundle（版本 = 你要装的那个版本，不是 latest 占位）
+# 装 bundle（版本 = 你要装的那个版本，不是 latest 占位）
 dsh plugin --profile deep-research add dsh-deep-research-pack@{{version}}
 
-# ③ 开团队机制层：它是随 DSH 提供的可选 bundle，exact 版本与运行中的 dsh 相同
+# 开团队机制层：它是随 DSH 提供的可选 bundle，exact 版本与运行中的 dsh 相同
 dsh plugin --profile deep-research add @deepseek-ai/dsh-experimental-agent-team-profile@<与 dsh --version 相同的版本>
 ```
 
 **不要用 `@latest` 装团队层**：它在 registry 上的 `latest` 标签不指向当前 DSH 版本线；CLI 侧只认
-exact 版本。Desktop 与 web 的 Plugins 页都替你处理了这一点。
+exact 版本。Plugins 页把团队层当开关处理，不涉及版本选择。
 
 ### C. 离线 tarball
 
@@ -121,9 +129,8 @@ dsh --profile deep-research --no-open --port 0   # 真启动：应打印 dsh web
 - **浏览器提示键**：`localStorage['dsh.deep-research.workspaceId.v1']`，设备/源级。
 - **工作区产物**：`drt_<slug>/`、`archive/`、`_abandoned/`、`method-library.md`——都是你的文件。
 - **会话 / 凭据 / Workspace 登记**：`$DSH_HOME/`，DSH 管理；本包不删。
-- **抓取回退的开关键**：`research-fetch-fallback` 的 `enabled` / 超时是本包 `Config` 的字段，
-  能否在 Settings 页改取决于该字段是否 `volatile`（当前版本：不可在设置页改，改 profile patch 或用
-  `--patch`；这是已知限制，见 §十）。
+- **抓取回退的开关键**：`research-fetch-fallback.enabled` 标了 `.volatile()`，在 Settings 页可改、改后
+  即时生效；超时等其余字段不是 volatile，改 profile patch 或用 `--patch`。
 
 默认共享 `$DSH_HOME`，Web UI 会显示该 home 下其他 Workspace/Session；要干净环境：
 `DSH_HOME=<dir> dsh --profile deep-research`。
@@ -176,7 +183,7 @@ rm -rf "$DSH_HOME/profiles/deep-research" "$DSH_HOME/deep-research"             
 
 ## 十、已知限制
 
-- 产品设置是自有文件（不是 DSH 全局设置）；设置页当前没有本包的可编辑项（`Config` 未标 `.volatile`）。
+- 产品设置是自有文件（不是 DSH 全局设置）；设置页可改本包的可变量（当前 = `research-fetch-fallback.enabled`）。
 - 浏览器提示键是设备/源级的；换浏览器或清站点数据后要重选项目目录（Workspace registration 仍在）。
 - 首屏「选择项目目录」走 native chooser；browse-only 部署没有专门的目录浏览 UI（报错可见，不假装成功）。
 - Host 建会话是 best-effort（webserver 无 readiness gate）；client 用首选 blank / onboarding 兜底。

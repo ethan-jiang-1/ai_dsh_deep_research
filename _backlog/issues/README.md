@@ -4,17 +4,16 @@
 
 ## 活跃清单
 
-- [2026-11-01 插件即产品 v2](2026-11-01-plugin-as-product-v2.md) — 等人拍板：产品 profile / 启动期工作区 / 内容与产物分家；研究 = [research/plugin-as-product-v2](../research/plugin-as-product-v2/README.md)。
 - [2026-11-02 dev 通道与产品路径对齐](2026-11-02-dev-product-path-parity.md) — 等人拍板：dev 与产品同 profile 名/同安装源/同版本门/零写 profile 用户层；差异登记在 parity 表并有门禁。
-- [2026-11-01 插件生命周期合规](2026-11-01-plugin-lifecycle-conformance.md) — 推敲中：npm 从未发布（registry 404）、无 locale/icon 显示元数据、无市场索引、手册入口叙事与 DSH 相反；研究 = [research/plugin-lifecycle](../research/plugin-lifecycle/README.md)。
-- [2026-11-02 dev 通道与产品路径对齐](2026-11-02-dev-product-path-parity.md) — 推敲中：dev 已走 tarball + `dsh plugin add`（同形），但 profile 身份、团队层版本、profile 用户层写入者、重建语义未登记——「dev 绿」推不出「用户装上也绿」；P0 换身份 → P3 差异表 + `dev-parity` 门禁。
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
 ## 最近归档
 
-研究证据（已归档）= [research/plugin-as-product](../_archived/research/plugin-as-product/README.md)；落地顺序 = [landing-plan](../_archived/research/plugin-as-product/2026-11-01-landing-plan.md)（S0 决定 → S1 骨架 → S2 首屏 → S3 文档 → S4 硬化）。
+研究证据（已归档）= [research/plugin-as-product](../_archived/research/plugin-as-product/README.md)；本轮新增 = [plugin-as-product-v2](../_archived/research/plugin-as-product-v2/README.md)、[plugin-lifecycle](../_archived/research/plugin-lifecycle/README.md)；落地顺序 = [landing-plan](../_archived/research/plugin-as-product/2026-11-01-landing-plan.md)（S0 决定 → S1 骨架 → S2 首屏 → S3 文档 → S4 硬化）。
 
+- [2026-11-01 插件即产品 v2](../_archived/settled_issues/2026-11-01-plugin-as-product-v2.md) — implemented：自有 `deep-research` profile + CLI 引导 + Plugins 页装包 + 启动期工作区/内容进包；`product-boot-smoke` 2026-11-02 GREEN；残余 = 公网 npm 发布；[Note](../../notes/implemented/2026-11-01-plugin-as-product-v2.md)。
+- [2026-11-01 插件生命周期合规](../_archived/settled_issues/2026-11-01-plugin-lifecycle-conformance.md) — implemented：`engines.dsh`/locale/icon/市场索引/四门禁/文档取向；本地 registry 端到端 + `lifecycle-smoke`；残余 = 公网 npm 发布；[Note](../../notes/implemented/2026-11-01-plugin-lifecycle-conformance.md)。
 - [2026-11-01 插件即产品](../_archived/settled_issues/2026-11-01-plugin-as-product.md) — implemented：D38 launcher + 产品 profile + 用户工作区 + 首屏 + 文档/`_dist` + 产品 smokes/release-smoke；[Note](../../notes/implemented/2026-11-01-plugin-as-product.md)；P1 见 triggers。
 - [2026-10-29 方法库工作台重排](../_archived/settled_issues/2026-10-29-method-library-workbench-redesign.md) — implemented：A′ 两列、显式来源、受控 Host 写入/默认、草稿 revision 与窄屏交互；真浏览器/真模型 save/default/clear/delete E2E 全绿；[Note](../../notes/implemented/2026-10-29-method-library-workbench.md)。
 - [2026-10-28 方法库页内对话共创](../_archived/settled_issues/2026-10-28-method-library-cocreation.md) — implemented：页内三栏 + 方法编辑 preset + 草稿回填 + 保存闭环；证据 = 调研 §14 + `runtime/probe-save/artifacts/2026-10-28T14-47-08-504Z/`。

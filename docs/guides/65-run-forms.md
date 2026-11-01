@@ -1,4 +1,4 @@
-# 65 · 运行形态合同：DSH 两步安装、产品 profile、工作区与移交
+# 65 · 运行形态合同：DSH 原生安装、产品 profile、工作区与移交
 
 > 层：指南（当前合同）。回答"这个插件以什么形态运行、数据归谁、怎么装/升级/移交、用什么证据证明"。
 > 用户视角安装步骤 = [`_dist/安装手册.md`](../../_dist/安装手册.md)；包合同 = [pack README](../../packages/deep-research-pack/README.md)；
@@ -10,14 +10,15 @@
 
 | 形态 | 谁在用 | 入口 | 边界 |
 |---|---|---|---|
-| **M1-product 产品形态** | 外部用户 | ① `dsh --profile deep-research --from-default-profile web` ② `dsh plugin --profile deep-research add <pack> <team>` ③ `dsh --profile deep-research`；首屏选项目目录 | 用户自己的 `DSH_HOME` + 自选工作区；插件内容在包内，产物在工作区；**没有 launcher / scaffold / 自定义安装器** |
+| **M1-product 产品形态** | 外部用户 | ① `dsh --profile deep-research --from-default-profile web`（CLI 引导，仅首次）② `dsh --profile deep-research` ③ 应用内 Plugins 页装包 + 团队层开关；CLI `dsh plugin add` 仅自动化 / 离线；首屏选项目目录 | 用户自己的 `DSH_HOME` + 自选工作区；插件内容在包内，产物在工作区；**没有 launcher / scaffold / 自定义安装器** |
 | **M1-coexist 互操作** | 已有 DSH Web 的用户 | 把同一个 bundle 装进现有 `web` profile（应用内 Plugins 页或 CLI） | bundle 自足，首屏照样问工作区；但没有自己的 profile 身份；不是产品形态 |
 | **M2 独立开发形态** | 贡献者 / 本地验证 | 本仓 + `bash dev/bootstrap.sh` + `node dev/run-driver.mjs up --bootstrap` | 默认仓内 `runtime/harness-home` + `research-workspace/`；可用 `DSH_DEV_HOME` 指到仓外 |
 | **M3 移交形态** | 交给另一人或另一台机器 | `scripts/dist/export-handoff.mjs`（源码）或 `export-dist.mjs`（插件） | 不是复制工作树；运行态/凭据/run 数据不随包 |
 
-**决定：M1-product 为主。** 安装与启动全部是 DSH 命令；产品只多一个 profile 名。首次安装是两步，因为
-`dsh plugin` 给未知名 profile 只初始化 `dsh-base`（没有 web-app），DSH 没有"一步建 web-backed custom
-profile"的命令——`--from-default-profile web` 就是它给的路径。产品不发明安装器。
+**决定：M1-product 为主。** 安装与启动全部是 DSH 命令；产品只多一个 profile 名。自定义 profile 的建立
+只能用 CLI（DSH 没有 UI 建自定义 profile；`dsh plugin` 给未知名 profile 只初始化 `dsh-base`——
+`--from-default-profile web` 就是它给的路径）；装包入口 = DSH 的应用内 Plugins 页，CLI 装包只作
+自动化 / 离线。产品不发明安装器。
 
 ## 2. 三块存储
 
@@ -56,21 +57,23 @@ pack README §Data 的 `可移植` 列。
 
 **首次安装（M1-product）**
 
-默认入口 = 应用内 **Plugins 页**（`dsh web` 与 Desktop 同一句）：装本包，并在同页打开团队机制层
-（它是 DSH 随安装提供、默认关闭的可选 bundle）。下面是 CLI 形态，**仅 `dsh web` 的自动化**用：
+产品 profile 先用 CLI 引导建一次（DSH 没有 UI 建自定义 profile；仅首次、破坏性）；启动后在应用内
+**Plugins 页**装本包，并在同页打开团队机制层（DSH 随安装提供、默认关闭的可选 bundle），然后重启
+profile：
 
 ```sh
 # ① 建产品 profile（仅首次；web 模板；破坏性，只对全新 profile 用）
 dsh --profile deep-research --from-default-profile web --dump-default-config
 
-# ② 装 bundle（exact 版本）
-dsh plugin --profile deep-research add dsh-deep-research-pack@<版本>
-
-# ③ 开团队机制层（exact 版本 = 运行中的 DSH；别用 @latest，它不是当前版本线）
-dsh plugin --profile deep-research add @deepseek-ai/dsh-experimental-agent-team-profile@<与 dsh --version 同版本>
-
-# ④ 启动（重启 profile 才让 bundle membership 生效）
+# ② 启动（装包前先让 profile 起来）
 dsh --profile deep-research
+```
+
+CLI 装包（仅 `dsh web` 自动化 / 离线）：
+
+```sh
+dsh plugin --profile deep-research add dsh-deep-research-pack@<版本>
+dsh plugin --profile deep-research add @deepseek-ai/dsh-experimental-agent-team-profile@<与 dsh --version 同版本>
 ```
 
 - 首屏会问「项目目录」；也可以用 `DEEP_RESEARCH_WORKSPACE=<dir>` 或
@@ -132,7 +135,7 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 
 证据档位、命令与选择规则 = [guides/60 §2](60-dev-loop.md)（唯一 owner，本页不复述）。本合同的增量证据：
 
-- `install-shape-smoke`：原样执行手册三步（profile init → plugin add → 真启动）；断言 roster 三状态、无
+- `install-shape-smoke`：原样执行手册的 CLI 装包分支（profile init → plugin add → 真启动）；断言 roster 三状态、无
   `did not activate`、首屏可达。
 - `product-boot-smoke`：纯 `dsh --profile deep-research` + 真 Web + 浏览器；工作区会话、首屏、目录按钮。
 - `release-smoke`：tarball → 干净 profile → 真启动。
@@ -149,4 +152,4 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 - 不承诺 Desktop / Windows；正式 npm 发布前 tarball 是主分发形态。
 - 共享 `$DSH_HOME` 时 Web UI 会显示该 home 下其他 Workspace/Session；需要干净环境用 `DSH_HOME=<dir>`。
 
-> 决定理由、输掉的方案与实际证据 = [插件即产品 v2 决策卡](../../_backlog/issues/2026-11-01-plugin-as-product-v2.md) 与 [D40](../decisions.md#d40)。
+> 决定理由、输掉的方案与实际证据 = [插件即产品 v2 决策卡](../../_backlog/_archived/settled_issues/2026-11-01-plugin-as-product-v2.md) 与 [D40](../decisions.md#d40)。

@@ -1,11 +1,13 @@
 ---
-status: 等人拍板
+status: 已结
 opened: 2026-11-01
 ---
 
 # 推敲：插件生命周期合规——让交付件真正走通 DSH 的打包/发布/安装/初始化/卸载
 
-> 立卡：2026-11-01 ｜ 状态：等人拍板（技术面已交付，待公网发布凭据与业务验收） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-01 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
+> 去向：implemented — [插件生命周期合规 Note](../../../notes/implemented/2026-11-01-plugin-lifecycle-conformance.md)；业务验收：用户（2026-11-02 指示归档）。
+> 残余：公网 npm 发布未执行（`npm view` 404；发布顺序 = [guides/64](../../../docs/guides/64-release-versioning.md)）；Plugins 页像素层截图未取（AC2 由 `readPluginMeta` 返回体满足）。
 
 **问题与期望结果：** 前一轮（D38–D40）把产品形态改回了"自有 `deep-research` profile + 一个 bundle"，
 安装面已经真跑通；但 `_dist/` 看着仍不像一件能交出去的 DSH 插件产品。逐段对账后确认：**差距不在代码，
@@ -59,14 +61,18 @@ opened: 2026-11-01
   所以 30 条 peer 是文档而非门禁。
 - README 生成器 `scripts/dist/export-dist.mjs` 已把版本/日期/sha256/条目数注入手册，手册与 tarball
   不会漂移（门禁 `dist-manual-version`）。
+- 团队层开关的写入形态（C：`vendor/dsh/packages/boot/plugin-manager/src/index.ts:808-829`）：
+  `setBundleEnabled` → `selectBundle` 只改 `dsh.profile.bundles`（启用追加、停用移除，保留顺序与
+  已装依赖），经 `saveManifest` 原子写；CLI 侧没有等价开关命令，所以文档把开关写成 Plugins 页动作。
+- `publishTimestamp` 口径（C：`scripts/dist/market.mjs:13-14`）：取该包目录最后一次提交时间（秒），
+  `SOURCE_DATE_EPOCH` 可覆盖；只用于展示排序，不参与安装判定。
 
 **未决（技术，不是方向）**
 
-- 浏览器侧 `listBundles.meta` 的真实渲染未截图（本机无 Playwright 可用）；补 icon/locale 后必须真
-  Web 复核一次，不能只靠源码判读。
-- 市场索引的 `publishTimestamp` 取值口径（npm packument 的 time 字段 vs 本地打包时间）需定一条。
-- 团队层以"可选 bundle 开关"开启时，`dsh.profile.bundles` 的写入形态（CLI 无原生开关命令）需查
-  Plugins 页实际写什么——CLI 侧只有 `dsh plugin add`。
+- 浏览器像素层截图仍未取（Playwright 在 `.pnpm` 可用）；AC2 以运行期 `readPluginMeta` 返回体满足，
+  像素层复核留残余风险。
+- 公网 npm 发布未发生（`npm view dsh-deep-research-pack` 404；本机 `npm whoami` 无 auth），AC1 的
+  registry 解析仍不成立。
 
 ## 方案与取舍
 
@@ -105,7 +111,7 @@ opened: 2026-11-01
 
 | 项 | 动作 |
 |---|---|
-| 入口叙事 | 手册与包 README 的首选安装句改成 **Plugins 页**（web 与 Desktop 同一句）；CLI 明确标"仅 `dsh web` 的自动化" |
+| 入口叙事 | 装包入口 = **Plugins 页**；profile 的 CLI 引导作为前置步骤写在安装入口之前；CLI 装包明确标"仅 `dsh web` 的自动化" |
 | 团队层 | 首选写 **Plugins 页开关**（它是 shipped optional bundle）；CLI 备选给 exact 版本，并警告不要用 `@latest` |
 | 首启 | 保留"建 profile 只用 `--from-default-profile web`"的破坏性提示；补一句"已有 profile 不要重复" |
 | 验证 | 统一给 `--dump-config` 要找的 entry id 清单（`preset-lead` / `research-*`），以及界面上可见的变化 |
@@ -148,7 +154,7 @@ opened: 2026-11-01
    证据 = 浏览器截图或 `listBundles` 返回体（二者之一在场）。
 3. **市场面**：`_dist/market.json` 通过 `parseMarketIndex`；在本地 http 起一个静态服务，把该 URL 加进
    Discover 后能看到条目、语言切换正确；`marketInstallTarget` 产出的 spec 与实际发布版本一致。
-4. **文档面**：手册与包 README 的安装首句都是 Plugins 页；CLI 一节显式标注"仅 `dsh web`"；团队层
+4. **文档面**：手册与包 README 的装包入口都是 Plugins 页，`deep-research` profile 的 CLI 引导作为前置步骤显式在场；CLI 装包一节显式标注"仅 `dsh web`"；团队层
    给出 Plugins 页开关路径；七问骨架在包 README 首屏；`_dist/安装手册.md` 由生成器重导出。
 5. **配置面**：至少一个产品设置在 Settings 页可改（`.volatile()` 生效），且与自有设置/环境变量的
    优先级有机械判据（单测）。
@@ -168,10 +174,11 @@ opened: 2026-11-01
 ①—⑤ 五个拍板项按"做对最重要、不做兼容"的原则定下；可逆项标了重议条件。
 
 1. **包名**：保持无 scope 的 `dsh-deep-research-pack`（npm 现为空位；改名会牵动全仓引用与已导出产物）。重议条件 = 公网发布前发现被占。
-2. **npm 发布**：人工一步（[guides/64](../../docs/guides/64-release-versioning.md) 的顺序），不接 CI trusted publishing（仓里没有发布工作流；引入是另一项决定）。机制已用本地 registry 端到端证透。
-3. **市场索引托管**：`_dist/market.json` 随 tag 提交，索引 URL = GitHub raw（单一来源在 [market.mjs](../../scripts/dist/market.mjs) 的 `INDEX_URL`）。
+2. **npm 发布**：人工一步（[guides/64](../../../docs/guides/64-release-versioning.md) 的顺序），不接 CI trusted publishing（仓里没有发布工作流；引入是另一项决定）。机制已用本地 registry 端到端证透。
+3. **市场索引托管**：`_dist/market.json` 随 tag 提交，索引 URL = GitHub raw（单一来源在 [market.mjs](../../../scripts/dist/market.mjs) 的 `INDEX_URL`）。
 4. **产品设置真值层**：保留自有 `$DSH_HOME/deep-research/settings.json`（补优先级判据），不迁 profile patch；设置页的可编辑项 = `research-fetch-fallback.enabled`（`.volatile()`）。重议条件 = 需要跨 profile 共享同一工作区时。
 5. **doctor bin**：保留 `dsh-deep-research-doctor`，安装后落在 profile 的 `node_modules/.bin`；手册写明这是有意副作用。
+6. **与产品卡收口（2026-11-02，用户定调）**：自有 `deep-research` profile 保留；默认首装 = CLI 建 profile（一次性；DSH 无 UI 建自定义 profile）+ Plugins 页装包；`dsh plugin` 只作自动化/离线；Desktop 安装 = 互操作形态。
 
 ## 验证进展（2026-11-01）
 
@@ -188,8 +195,16 @@ opened: 2026-11-01
 
 附带绿：`pnpm verify`、`pnpm test`（965）、`pnpm typecheck`、`pack-smoke`、`doctor-smoke`、`data-smoke`、`install-shape-smoke`（真团队层）、`release-smoke --install-only`。
 
+## 验证进展（2026-11-02）
+
+- **安装入口收口（用户 2026-11-02 定调）**：自有 `deep-research` profile 保留；默认首装 = CLI 建 profile + 应用内 Plugins 页装包；`dsh plugin` 只作自动化/离线。手册 / 根 README / pack README / guides/65 / 00-index / project-map 已同一叙事。
+- **门禁**：`readme-shape` 扩为判完整默认路径（profile 引导在场且先于 Plugins 页、Plugins 页先于 CLI 装包）；新增 `readme-shape-no-profile-bootstrap` / `readme-shape-profile-after-plugins` 注入案例，红→绿；`gates-smoke` 90 案例全绿。
+- **契约测试**：`run-driver-contract` 增加产品行含 Plugins 页断言；去掉 00-index 的 Plugins 页 → 红，还原 → 绿。
+- **全量**：`pnpm verify` 48 门全绿、`pnpm test` 965/0、`pnpm typecheck` 绿。
+- **未达**：公网 npm 仍 404（本机 `npm whoami` 无 auth）→ AC1 不成立；Plugins 页像素层截图未取（AC2 由 `readPluginMeta` 返回体满足）。
+
 ## 去向
 
-`implemented` → [插件生命周期合规 Note](../../notes/implemented/2026-11-01-plugin-lifecycle-conformance.md)。
+`implemented` → [插件生命周期合规 Note](../../../notes/implemented/2026-11-01-plugin-lifecycle-conformance.md)；2026-11-02 按用户指示归档。
 
-**待人拍板的两件**：① 公网 npm 发布（账号/2FA；命令与顺序已在 guides/64）；② 业务验收（真机首启手感、Plugins/Discover 页观感）。
+**残余（不阻塞本卡结论）**：① 公网 npm 发布（账号/2FA；命令与顺序已在 guides/64）；② 业务验收（真机首启手感、Plugins/Discover 页观感）按用户 2026-11-02 指示随归档，后续反馈另开卡。

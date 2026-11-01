@@ -1,8 +1,10 @@
 # 插件生命周期合规：我们的包在 DSH 的打包/发布/安装/初始化/卸载各段还差什么
 
+> 归档：2026-11-02
+
 > 问题：按 DSH 插件生命周期的十段（打包/发布/安装/初始化/特殊初始化/配置/启动/更新/卸载/文档），我们的 `dsh-deep-research-pack` 与 `_dist/` 交付件还差什么？哪些是我们自造的、DSH 根本不读的东西？借助 DSH 原生通道（npm + 应用内 Plugins 页 + 插件市场索引）发布还需要补哪些件？
-> 消费者：[插件生命周期合规卡](../../issues/2026-11-01-plugin-lifecycle-conformance.md)
-> 产出的卡：[插件生命周期合规卡](../../issues/2026-11-01-plugin-lifecycle-conformance.md)
+> 消费者：[插件生命周期合规卡](../../settled_issues/2026-11-01-plugin-lifecycle-conformance.md)
+> 产出的卡：[插件生命周期合规卡](../../settled_issues/2026-11-01-plugin-lifecycle-conformance.md)
 
 ## 材料
 
@@ -25,6 +27,6 @@
 ## 边界
 
 - 只对 DSH 约定内的路径做对账；不设计自建 launcher、安装器、第二套更新或私有市场协议。
-- 本课题不裁定产品方向（那属 [插件即产品 v2](../../issues/2026-11-01-plugin-as-product-v2.md)）；只回答
+- 本课题不裁定产品方向（那属 [插件即产品 v2](../../settled_issues/2026-11-01-plugin-as-product-v2.md)）；只回答
   "交付件与 DSH 生命周期合同的差距"。
 - 浏览器侧显示元数据按源码判读（C）；本机无 Playwright/browser 实测，未标 T 的部分不当作已验证。

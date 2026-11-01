@@ -41,7 +41,7 @@ opened: 2026-11-02
   4. **重建语义**：dev 缺件即 `rm -rf` 整个 profile；产品是 `plugin add/remove` 增量 + 重启。
   5. **runtime**：dev 走 vendor 源码，产品走 npm 全局——这条属必然差异，只需登记，不需要消除。
 - 另有一处**当前已坏**：`LAYER_VER` 仍读 `dsh.compatibility.dshReleases[0]`，而该字段在
-  [插件生命周期合规](../issues/2026-11-01-plugin-lifecycle-conformance.md) 里已删——boot-run 现在会在
+  [插件生命周期合规](../_archived/settled_issues/2026-11-01-plugin-lifecycle-conformance.md) 里已删——boot-run 现在会在
   这一行抛 TypeError。本卡顺手修复。
 
 **未决问题：** 无（两项已由用户口头定：dev profile 就叫 `deep-research`；团队层跟运行中 dsh 同版本）。

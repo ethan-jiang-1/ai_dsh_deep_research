@@ -1,11 +1,13 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-11-01
 ---
 
 # 推敲：插件即产品 v2——产品 profile、启动期工作区、内容/产物分家
 
-> 状态：推敲中｜结论倾向：现在做｜可关闭：否
+> 状态：已结｜结论倾向：现在做｜可关闭：是
+> 去向：implemented — [插件即产品 v2 Note](../../../notes/implemented/2026-11-01-plugin-as-product-v2.md)；业务验收：用户（2026-11-02 指示推进并归档；真机首启由 `product-boot-smoke` 覆盖）。
+> 残余：默认 Plugins 页装包依赖公网 npm（[生命周期卡](2026-11-01-plugin-lifecycle-conformance.md) AC1）；像素层手感后续反馈。
 
 **问题与期望结果：** D38/D39 把产品做成了"装进用户已有 `web` profile 的 bundle + 一条前置 scaffold + 一个 env"。用户期望的是：插件有自己的启动 profile；启动时知道或询问用户工作区；插件内容全部留在包内；只有 run bundle 等产物落在用户工作区。完成 = 用 DSH 自身的安装/启动命令进入产品，原生 `dsh --profile deep-research` 即可；空工作区里没有产品内容文件；文档（根 README、pack README、`_dist/安装手册.md`、guides）同一叙事。
 
@@ -24,7 +26,7 @@ opened: 2026-11-01
 2. **项目目录 = 询问 + 推荐**：用户选 `<dir>` 就是 `<dir>`；若像项目，询问时把 `<dir>/research` 作为推荐项，不静默改写。
 3. **互操作 = 保留一行**：同一个 bundle 装进现有 `web` profile 也能用（首屏照样问工作区），但不是产品形态。
 4. **新产品面 = 接受（S2 落成时收窄）**：Host 启动行（工作区登记 + best-effort 会话）+ client 启动控制器/首屏按钮，作为 D7 第三处有界例外（与 D18 驾驶舱、D31 抓取回退并列）。**不新增 Remote**：Typert 生成物不在本包构建链里；改用 DSH 既有 `workspaces.create` / `sessions.create` / `uiWorkspace.startSession` / `pickDirectory`，GUI 只写一个 localStorage 提示键。
-5. **安装 = 只用 DSH**：删除 `dsh-deep-research`（launcher）与 `dsh-deep-research-scaffold`；首次安装 = `dsh --profile deep-research --from-default-profile web` + `dsh plugin --profile deep-research add <pack> <team>`；启动 = `dsh --profile deep-research`；只保留只读 doctor。版本 0.3.0，无兼容、不迁移旧种子。
+5. **安装 = 只用 DSH**：删除 `dsh-deep-research`（launcher）与 `dsh-deep-research-scaffold`；首次安装 = `dsh --profile deep-research --from-default-profile web`（CLI 引导）+ 应用内 Plugins 页装包；启动 = `dsh --profile deep-research`；只保留只读 doctor。版本 0.3.0，无兼容、不迁移旧种子。**2026-11-02 与生命周期卡收口（用户定调）**：profile 引导只能用 CLI（DSH 无 UI 建自定义 profile），装包入口 = Plugins 页，`dsh plugin add` 降为自动化/离线。
 
 **下一步：** 按 [实施计划](../research/plugin-as-product-v2/2026-11-01-implementation-plan.md) 从 S0 红基线开始，S0 → S1 → S2 → S3 → S4；每片按 [验收计划](../research/plugin-as-product-v2/2026-11-01-verification-plan.md) 退出。
 
@@ -61,7 +63,7 @@ RED   I4 src/content 注册 systemPrompt.context
 
 ## 验收标准
 
-1. 按手册三步（profile init → `dsh plugin add` → `dsh --profile deep-research`）装成并起产品；roster = base + web-app + pack + team。
+1. 按手册装成并起产品：CLI 建 `deep-research` profile → 启动 → 应用内 Plugins 页装包 + 团队层（CLI 装包分支等价）；roster = base + web-app + pack + team。
 2. 不设 env、无 launcher，`dsh --profile deep-research` 在已保存工作区时页面加载后落到该工作区（session `header.cwd` = 工作区、`agentPreset` = `lead`、被选中）；无保存时首屏给出目录选择入口。
 3. 空工作区启动后没有产品内容文件；只有 run 产物（`drt_*` / `archive` / `_abandoned`）与方法库。
 4. 手册、NODES、判型库、模板全部从包内进入模型上下文；真模型档（`l4-lite-smoke`）证明 Lead 仍按手册产出 HITL1 三问与 run bundle。
@@ -81,8 +83,14 @@ RED   I4 src/content 注册 systemPrompt.context
 7. ✅ `data-smoke`：卸载后 workspace 用户文件与 session 日志保留；`$DSH_HOME` 只多产品设置。
 8. ✅ `product-invariants` I1–I4 常驻测试；红基线（9/9）在卡上留证。
 
-**业务验收**：真人首启手感仍由用户在实际使用中拍板；本轮只交付机械/真模型证据。
+**业务验收**：2026-11-02 用户指示推进并归档；真机首启由 `product-boot-smoke`（2026-11-02 GREEN）覆盖，手感反馈后续另开卡。
+
+## 验证进展（2026-11-02）
+
+- 安装入口与生命周期卡收口（用户定调）：保留自有 `deep-research` profile；默认首装 = CLI 建 profile + 应用内 Plugins 页装包；CLI `dsh plugin` 只作自动化/离线。手册/README/guides/00-index/project-map 同 diff。
+- `readme-shape` 扩为判完整默认路径（两个新注入案例红→绿）；`run-driver-contract` 产品行断言加 `Plugins 页`；`pnpm verify` 48 门 / `pnpm test` 965 / `pnpm typecheck` 绿（`gates-smoke` 90 案例全绿）。
+- 未达：默认路径的 Plugins 页装包依赖公网 npm（当前 404）；真人首启手感仍待用户。
 
 ## 关闭条件
 
-验收标准 1–8 有证据在场，且 D40 与 `notes/implemented/` Note 互链；业务验收（真人首启手感）由用户拍板。
+验收标准 1–8 有证据在场，且 D40 与 `notes/implemented/` Note 互链；业务验收（真人首启手感）由用户拍板。**2026-11-02 已按用户指示归档**；公网 npm 发布残余见生命周期卡。

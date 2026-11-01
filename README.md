@@ -7,14 +7,16 @@ preset（`Deep Research Lead / Scout / Analyst / Critic`）+ 方法编辑 preset
 
 ## 用它
 
-默认入口 = DSH 的 **Plugins 页**（`dsh web` 与 Desktop 同一句），团队机制层在同页打开（DSH 随安装
-提供、默认关闭的可选 bundle）。下面是 CLI 形态，**仅 `dsh web` 自动化**用：
+产品 profile 先用 DSH 模板命令建一次（DSH 没有 UI 建自定义 profile；仅首次、破坏性）；启动后在
+**Plugins 页**装包，团队机制层同页打开（DSH 随安装提供、默认关闭的可选 bundle）。CLI 装包仅
+`dsh web` 自动化 / 离线用：
 
 ```sh
 dsh --profile deep-research --from-default-profile web --dump-default-config   # ① 仅首次
-dsh plugin --profile deep-research add dsh-deep-research-pack@0.3.0            # ② exact 版本
+dsh --profile deep-research                                                   # ② 启动后到 Plugins 页装包
+dsh plugin --profile deep-research add dsh-deep-research-pack@0.3.0            # ③ 或 CLI 自动化装包
 dsh plugin --profile deep-research add @deepseek-ai/dsh-experimental-agent-team-profile@<与 dsh --version 同版本>
-DEEP_RESEARCH_WORKSPACE="$HOME/projects/acme" dsh --profile deep-research      # ③ 重启才生效
+DEEP_RESEARCH_WORKSPACE="$HOME/projects/acme" dsh --profile deep-research      # ④ 重启才生效
 ```
 
 首屏会问「项目目录」（也可以先用 `DEEP_RESEARCH_WORKSPACE` 指定）；选完后研究产物写到
@@ -31,7 +33,7 @@ Lead 先确认类型/深度/口径并给计划 → 右栏「研究状态」看�
 ## 改它
 
 - 开工入口链（唯一正本，4 步）=[`AGENTS.md`](AGENTS.md) §入口链；文档地图 = [`docs/00-index.md`](docs/00-index.md)。
-- 开发通道：`source dev/env.sh` + `node dev/run-driver.mjs up`（仓内 `research` profile +
+- 开发通道：`source dev/env.sh` + `node dev/run-driver.mjs up`（仓内 `deep-research` profile +
   `research-workspace/`，不是产品用户路径；操作 = [`docs/guides/61-run-playbook.md`](docs/guides/61-run-playbook.md)）。
 - 改完怎么验：选层地图 = [`docs/project-map.md`](docs/project-map.md)；命令正本 =
   [`docs/guides/60-dev-loop.md`](docs/guides/60-dev-loop.md) §2；判据 = [`docs/evaluation.md`](docs/evaluation.md)。

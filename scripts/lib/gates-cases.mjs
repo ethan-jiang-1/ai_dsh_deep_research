@@ -627,6 +627,21 @@ export const CASES = [
     if (!text.startsWith('---\n')) throw new Error('夹具 README 无前置字段——案例失效');
     writeFileSync(p, text.slice(text.indexOf('\n---', 3) + 4));
   } },
+  // readme-shape：删掉 profile 引导——默认路径到不了 deep-research profile。
+  { id: 'readme-shape-no-profile-bootstrap', gate: 'readme-shape', mutate: (dir) => {
+    const p = join(dir, 'scripts', 'dist', 'product-manual.md');
+    const text = readFileSync(p, 'utf8');
+    if (!text.includes('--from-default-profile web')) throw new Error('夹具手册无 profile 引导——案例失效');
+    writeFileSync(p, text.replaceAll('--from-default-profile web', '--from-default-profile __missing__'));
+  } },
+  // readme-shape：profile 引导挪到 Plugins 页之后——默认路径顺序反了（装包入口先于产品 profile）。
+  { id: 'readme-shape-profile-after-plugins', gate: 'readme-shape', mutate: (dir) => {
+    const p = join(dir, 'scripts', 'dist', 'product-manual.md');
+    const text = readFileSync(p, 'utf8');
+    if (!text.includes('--from-default-profile web')) throw new Error('夹具手册无 profile 引导——案例失效');
+    writeFileSync(p, `${text.replaceAll('--from-default-profile web', '__PROFILE_BOOTSTRAP__')}\n\n` +
+      '`dsh --profile deep-research --from-default-profile web`\n');
+  } },
 ];
 
 // 无常驻注入案例的门禁（结构性不适）：断言对象 = submodule 或本机 git config 的真实状态，

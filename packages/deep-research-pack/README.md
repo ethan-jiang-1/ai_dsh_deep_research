@@ -21,12 +21,18 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 `preset-{lead,scout,analyst,critic,method-editor}`、`research-content`、`research-client`、
 `research-startup`、`research-fetch-fallback`、`tool-present`、`ui-agent-team`。
 
-**2. 怎么装？** 默认在 DSH 的 **Plugins 页**装（`dsh web` 与 Desktop 同一句）；团队机制层是 DSH 随安装
-提供、默认关闭的可选 bundle，在同一个 Plugins 页打开。CLI 只用于 `dsh web` 的自动化（面绑定，
-不能管理 `desktop`）：
+**2. 怎么装？** 产品 profile 是 DSH 的自定义 profile，只能用一条 CLI 引导创建（DSH 没有 UI 建自定义
+profile）；之后在 DSH 的 **Plugins 页**装包。产品形态在 `dsh web` 的 `deep-research` profile；
+Desktop 的 Plugins 页把包装进 `desktop` profile，是互操作形态：
 
 ```sh
-dsh --profile deep-research --from-default-profile web --dump-default-config   # 仅首次；破坏性
+dsh --profile deep-research --from-default-profile web   # 仅首次；破坏性
+dsh --profile deep-research                              # 启动后到 Plugins 页装包
+```
+
+CLI 装包（仅 `dsh web` 自动化 / 离线；面绑定，不能管理 `desktop`）：
+
+```sh
 dsh plugin --profile deep-research add dsh-deep-research-pack@<version>
 dsh plugin --profile deep-research add @deepseek-ai/dsh-experimental-agent-team-profile@<与 dsh --version 相同>
 ```
@@ -40,8 +46,9 @@ dsh plugin --profile deep-research add @deepseek-ai/dsh-experimental-agent-team-
 图谱/终稿、主界面多出「方法库」。
 
 **5. 配置落在哪层？** 默认值在 bundle patch（随包版本）；工作区等产品设置住
-`$DSH_HOME/deep-research/settings.json`（自有 store，不是 DSH 全局设置）；`research-fetch-fallback` 的
-`Config` 字段当前未标 `.volatile()`，因此在 Settings 页不可改——改 profile patch 或 `--patch`。
+`$DSH_HOME/deep-research/settings.json`（自有 store，不是 DSH 全局设置）；`research-fetch-fallback.enabled`
+标了 `.volatile()`，在 Settings 页可改、改后即时生效；超时等其余字段不在设置页——改 profile patch 或
+`--patch`。
 
 **6. 升级与回退？** Plugins 页 Update（或 CLI 重装新版本）后**重启 profile**；DSH 没有命令级回滚，
 回退 = 重新装旧版本；升级前记下当前版本，旧包必须满足旧 `engines.dsh`。
@@ -251,7 +258,7 @@ dsh --profile deep-research
 | `tool-present`（交付声明） | **N1 原生插件** | base 无此行，由本包 insert |
 | `session-query-sqlite`（会话搜索） | **N1 原生插件** | 本包显式 `path: ':memory:'`，不落持久索引 |
 | `ctx.credentials`（凭据引用） | **N1 原生插件** | 每次调用解析；值不进本包 |
-| `@deepseek-ai/dsh-experimental-agent-team{,-profile}` | **N2 实验** | **不是产品稳定性承诺**：上游可能改 API 或撤掉能力。本包不写进 `dependencies`；团队层由 DSH 两步安装显式装（版本 = 运行中的 DSH），doctor 只报告不刷新 |
+| `@deepseek-ai/dsh-experimental-agent-team{,-profile}` | **N2 实验** | **不是产品稳定性承诺**：上游可能改 API 或撤掉能力。本包不写进 `dependencies`；团队层由 DSH 的 Plugins 页开关（或 CLI exact 版本）开启（版本 = 运行中的 DSH），doctor 只报告不刷新 |
 | `@deepseek-ai/dsh-experimental-client-ui-agent-team` | **N2 实验（peer）** | 客户端团队可视面，随宿主提供；不是本包安装的层。上游移除/改名时 client 挂载会失败，`compat-client-smoke` 能抓到 |
 | 社区插件（E1）/ 外部服务（E2） | — | 本包零 E1 依赖；外部只有模型/搜索/抓取 HTTP（隐私边界见上节） |
 

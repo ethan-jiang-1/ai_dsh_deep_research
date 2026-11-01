@@ -116,19 +116,22 @@ test('驱动入口不绕过漂移门：boot 必须经 dev/boot-run.sh，禁止�
 // 其中三处仍指 boot-run（前台起、不验浏览器面、不打印呈交块），与 00-index 的 run-driver
 // 首动作分裂。这里钉"首动作一致"：不是禁止 boot-run（它是底层），而是禁止它出现在
 // "用户问怎么启动"的第一条动作位上。
-test('启动首动作一致：产品行 = DSH 两步安装；开发行 = run-driver', () => {
+test('启动首动作一致：产品行 = DSH 原生安装（CLI 建 profile + Plugins 页装包）；开发行 = run-driver', () => {
   const lineOf = (rel, needle) => {
     const line = read(rel).split('\n').find((l) => l.includes(needle));
     assert.ok(line !== undefined, `${rel} 找不到含「${needle}」的行——首动作位缺席`);
     return line;
   };
-  // 产品用户：启动首动作 = DSH 两步安装 + 自有 profile（D40）；开发通道：run-driver。
+  // 产品用户：启动首动作 = DSH 原生安装（CLI 建 profile + Plugins 页装包）+ 自有 profile（D40）；开发通道：run-driver。
   assert.ok(lineOf('README.md', '--from-default-profile web').includes('dsh --profile deep-research'), 'README 产品首动作不是 DSH profile 初始化');
   assert.ok(lineOf('README.md', 'dev/run-driver.mjs up').includes('run-driver.mjs up'), 'README 开发入口缺席');
   const productRow = lineOf('docs/00-index.md', '（产品用户）');
   assert.ok(productRow.includes('dsh plugin'), '00-index 产品行首动作不是原生插件安装');
+  assert.ok(productRow.includes('Plugins 页'), '00-index 产品行没有把 Plugins 页写成装包入口');
   assert.ok(lineOf('docs/00-index.md', '启动一下').includes('run-driver.mjs up'), '00-index 开发行首动作不是 run-driver');
-  assert.ok(lineOf('docs/project-map.md', '| **启动产品（产品用户）** |').includes('dsh plugin'), 'project-map 产品行首动作不是原生插件安装');
+  const productMap = lineOf('docs/project-map.md', '| **启动产品（产品用户）** |');
+  assert.ok(productMap.includes('dsh plugin'), 'project-map 产品行首动作不是原生插件安装');
+  assert.ok(productMap.includes('Plugins 页'), 'project-map 产品行没有把 Plugins 页写成装包入口');
   assert.ok(lineOf('docs/project-map.md', '| 启动一次研究（开发通道） |').includes('run-driver.mjs up'), 'project-map 开发行首动作不是 run-driver');
   assert.ok(lineOf('docs/guides/61-run-playbook.md', '- 启动：').includes('run-driver.mjs up'), 'guides/61 开发首动作不是 run-driver');
   // guides/61 §0 的"启动"行不得再以 boot-run 打头（否则同一页先说 boot-run、后说 run-driver）
