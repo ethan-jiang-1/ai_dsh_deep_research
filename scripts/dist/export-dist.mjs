@@ -76,7 +76,7 @@ try {
     'package/content/manual.md',
     'package/content/templates/run/run.md',
     'package/lib/content.js',
-    'package/lib/workspace-boot.js',
+    'package/lib/startup.js',
     'package/scripts/lib/version-range.mjs',
     'package/scripts/preflight.mjs',
     'package/scripts/launch.mjs',

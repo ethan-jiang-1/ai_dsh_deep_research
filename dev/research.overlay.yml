@@ -436,8 +436,8 @@
       name: 'dsh-deep-research-pack/content'
     - id: research-client
       name: 'dsh-deep-research-pack'
-    # ── 产品启动器的 Host 半（D38）：boot 时把 DEEP_RESEARCH_WORKSPACE 登记进 Workspace registry；
-    #    env 缺席零行为（手动 dsh 旧用法不受影响）。不建 Session；Web Client 首屏负责 blank Session。
-    #    async apply 让 app-boot 等到登记完成再 commit ready，避开 webserver 已监听的窗口。──
-    - id: research-workspace-boot
-      name: 'dsh-deep-research-pack/workspace-boot'
+    # ── 产品启动行（D40）：读 DEEP_RESEARCH_WORKSPACE / 产品设置 → 登记 Workspace → best-effort
+    #    建 Lead 会话（Host 不保证早于首个请求；client 用首选 blank / onboarding 兜底）。
+    #    未配置工作区时不登记、不建会话，询问归首屏。不写 patch/storage domain/浏览器存储。──
+    - id: research-startup
+      name: 'dsh-deep-research-pack/startup'

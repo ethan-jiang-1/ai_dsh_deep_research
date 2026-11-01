@@ -20,14 +20,21 @@ function walk(dir) {
   return out
 }
 
-test('pack 代码不引入 home 账本/自定义会话事件/浏览器持久化（FAQ 26 的核心承诺）', () => {
+test('pack 代码不引入 home 账本/自定义会话事件；浏览器只允许一个产品提示键', () => {
   const files = walk(join(PACK, 'src'))
   assert.ok(files.length > 0, '防空语料：src 下没有可检查的源码')
-  const forbidden = ['storageDomain', 'appendPluginRecord', 'SessionEventMap', 'localStorage', 'sessionStorage', 'indexedDB']
+  const forbidden = ['storageDomain', 'appendPluginRecord', 'SessionEventMap', 'sessionStorage', 'indexedDB']
   for (const file of files) {
     const text = readFileSync(file, 'utf8')
     for (const term of forbidden) {
       assert.equal(text.includes(term), false, `${file.replace(ROOT + '/', '')} 出现 ${term}`)
+    }
+    if (text.includes('localStorage.')) {
+      assert.ok(file.endsWith('/client/index.ts'), `${file.replace(ROOT + '/', '')} 直接调用 localStorage——只允许 client/index.ts 读产品提示键`)
+      for (const m of text.matchAll(/localStorage\.(?:get|set|remove)Item\(\s*([A-Za-z_][A-Za-z0-9_]*)/g)) {
+        assert.ok(['PRODUCT_WORKSPACE_KEY', 'CURRENT_SESSION_KEY'].includes(m[1]),
+          `localStorage 键 ${m[1]} 未登记——产品只允许 PRODUCT_WORKSPACE_KEY / CURRENT_SESSION_KEY 两个提示键`)
+      }
     }
   }
 })

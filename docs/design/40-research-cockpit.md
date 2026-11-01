@@ -44,7 +44,8 @@
 | 挂起显性化 | index.ts | pending false→true 迁移时 `openTab` 右栏自动展开 | [§2.14](#cockpit-14) |
 | keyed 常量 | keys.ts | 字面量唯一正本（`client-keys` 门禁对账——拼错不报错、永不渲染） | [§2.15](#cockpit-15) |
 | host 半 | src/index.ts | 空壳宿主位（bundle 行 name = 包名；浏览器半经 `exports["./client"]` 装配） | [§2.16](#cockpit-16) |
-| 产品首屏起步卡 | StartCard.tsx | blank Session + 工作区无 `drt_*` + 无用户消息时显示的产品起步指引（D38；`conversation.input.dock`；不写浏览器持久化/不新增模型可见文本） | [§2.17](#cockpit-17) |
+| 产品首屏起步卡 | StartCard.tsx | blank Session + 工作区无 `drt_*` + 无用户消息时显示的产品起步指引 + 「选择项目目录」按钮（D38/D40；`conversation.input.dock`；不新增模型可见文本） | [§2.17](#cockpit-17) |
+| 启动工作区恢复 | startup.ts | 纯谓词：读 `dsh.sessions.current`、按保存 id / 唯一产品标题选工作区、判是否需要切回；只被 index.ts 调用 | [§2.18](#cockpit-18) |
 
 页签八区（自上而下）：
 
@@ -206,8 +207,19 @@ pending false→true 迁移时 `openTab` 右栏自动展开；页签 dock 折叠
 `conversation.input.dock` 的全宽起步卡：首屏告诉用户产品是什么、当前工作区、三步起步
 （问一个问题 → Lead 先问三问/计划确认 → 右栏研究状态与终稿）、凭据提示与换工作区入口。
 只在 blank Session、工作区根没有 `drt_*`、且会话还没有用户消息时显示；工作区文件读失败仍显示
-（不阻塞 composer）。它是 Client 渲染，不进模型请求；不写 localStorage/storage domain/
-session event（`data-plane-invariants` 把守）。
+（不阻塞 composer）。「选择项目目录」按钮走 `uiWorkspace.pickDirectory` → `workspaces.create` →
+写 `dsh.deep-research.workspaceId.v1`（设备级提示）→ 开 Lead 会话；不写 session event / storage
+domain。它是 Client 渲染，不进模型请求。
+
+<a id="cockpit-18"></a>
+### 2.18 启动工作区恢复
+
+**文件**：[startup.ts](../../packages/deep-research-pack/src/client/startup.ts)（D40）
+
+`index.ts` 在挂载后调用一次：列表 ready 后按「保存的 workspaceId → 唯一 `Deep Research — ` 标题」
+选产品工作区；读 `dsh.sessions.current` 判断当前会话是否已在该目录，不在则
+`uiWorkspace.startSession`。谓词纯函数（`readCurrentSessionId` / `pickProductWorkspace` /
+`needsProductSwitch`）由 keyless 测试钉住；浏览器只写两个提示键，不做产品账本。
 
 ## 3. 数据通道与接线
 

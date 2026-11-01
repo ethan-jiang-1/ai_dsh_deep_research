@@ -51,6 +51,7 @@ import { methodLibraryCoachEventOf } from '../lib/method-library-events.ts'
 import type { MethodLibraryCoachEvent } from '../lib/method-library-events.ts'
 import { OrcaMark, OrcaName } from './BrandMark.tsx'
 import { StartCard, type StartCardInjected } from './StartCard.tsx'
+import { PRODUCT_WORKSPACE_KEY, CURRENT_SESSION_KEY, needsProductSwitch, pickProductWorkspace, readCurrentSessionId } from './startup.ts'
 import { draftInProgress, finalAddressOf, isFinalAddress, latestFinalDelivery, shouldOpenFinal } from '../lib/final-target.ts'
 
 /** Required services：槽注册表（renderer）+ 右栏页签注册器 + 右栏导航面（openTab——挂起显性化）+ remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
@@ -61,7 +62,7 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
   }
 }
 
-export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'sessions', 'workspaces', 'locale']
+export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'sessions', 'workspaces', 'uiWorkspace', 'locale']
 
 /**
  * Client plugin body：登记「研究状态」页签（类型 + keyed 槽体共享同一 key——拼错任一处
@@ -69,7 +70,7 @@ export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'r
  * @param ctx - client root context。
  */
 export function apply(ctx: ClientContext): void {
-  ctx.inject(['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'sessions', 'workspaces', 'locale'], (scoped) => {
+  ctx.inject(['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'sessions', 'workspaces', 'uiWorkspace', 'locale'], (scoped) => {
     scoped.effect(() => scoped.locale.register('deepResearchPack', { zh, en }), 'deep-research-pack: dictionaries')
     const t = scoped.locale.bind('deepResearchPack')
     // journal 流式源（company 同款最小投影）：snapshot 给历史、event 给实时；
@@ -113,6 +114,55 @@ export function apply(ctx: ClientContext): void {
         return item === undefined ? null : { title: item.title, path: item.path }
       } catch {
         return null
+      }
+    }
+
+    /** uiWorkspace 的导航面；类型由 vendor 提供，本包不新增 peer。 */
+    interface UiWorkspaceLike {
+      openSession(target: SessionId): void
+      startSession(workspaceId: string, options?: { agentPreset?: string }): void
+      pickDirectory(): Promise<string | null>
+    }
+    const nav = scoped as unknown as { uiWorkspace: UiWorkspaceLike }
+
+    /** 等列表就绪（pending → ready）；超时返回当前快照。 */
+    const waitReady = async <T extends { phase: 'pending' | 'ready' }>(
+      list: { getSnapshot(): T }, timeoutMs = 2500,
+    ): Promise<T> => {
+      const deadline = Date.now() + timeoutMs
+      let snapshot = list.getSnapshot()
+      while (snapshot.phase === 'pending' && Date.now() < deadline) {
+        await new Promise((resolve) => setTimeout(resolve, 100))
+        snapshot = list.getSnapshot()
+      }
+      return snapshot
+    }
+
+    /** 首屏 onboarding：选目录 → 登记 Workspace → 记住 id → 开 Lead 会话。 */
+    const chooseWorkspace = async (): Promise<void> => {
+      const path = await nav.uiWorkspace.pickDirectory()
+      if (path === null) return
+      const workspace = await scoped.workspaces.create({ path })
+      localStorage.setItem(PRODUCT_WORKSPACE_KEY, workspace.workspaceId)
+      nav.uiWorkspace.startSession(workspace.workspaceId, { agentPreset: 'lead' })
+    }
+
+    /** 启动时把选择恢复到产品工作区；失败只记日志，不阻断 composer。 */
+    const ensureProductWorkspace = async (): Promise<void> => {
+      try {
+        const workspaces = await waitReady(scoped.workspaces.list)
+        await waitReady(scoped.sessions.list)
+        const saved = localStorage.getItem(PRODUCT_WORKSPACE_KEY)
+        const workspace = pickProductWorkspace(workspaces.items, saved)
+        if (workspace === null) return
+        if (saved !== workspace.workspaceId) localStorage.setItem(PRODUCT_WORKSPACE_KEY, workspace.workspaceId)
+        const current = readCurrentSessionId(localStorage.getItem(CURRENT_SESSION_KEY))
+        const sessions = scoped.sessions.list.getSnapshot()
+        const row = current === null ? undefined : sessions.byId[current as SessionId]
+        if (!needsProductSwitch(row?.cwd, workspace.path)) return
+        nav.uiWorkspace.startSession(workspace.workspaceId, { agentPreset: 'lead' })
+      } catch (error) {
+        console.error('[research-startup] 工作区记忆恢复失败', String(error))
       }
     }
 
@@ -402,6 +452,7 @@ export function apply(ctx: ClientContext): void {
           workspacePath: workspace?.path ?? null,
           listDir: async (sessionId, path, signal) => (await listDir(sessionId, path, signal)) ?? [],
           hasUserMessage,
+          chooseWorkspace,
         }
       },
     }, StartCard)), 'deep-research-pack: start card')
@@ -555,5 +606,7 @@ export function apply(ctx: ClientContext): void {
       sync()
       return () => { unsubscribe(); stop() }
     }, 'deep-research-pack: final delivery watcher')
+
+    void ensureProductWorkspace()
   })
 }

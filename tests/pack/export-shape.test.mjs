@@ -13,7 +13,8 @@ const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'packages'
 const HALVES = [
   ['host 半（宿主位）', 'index.ts'],
   ['client 半（驾驶舱）', 'client/index.ts'],
-  ['workspace-boot（产品工作区注册）', 'workspace-boot/index.ts'],
+  ['startup（产品启动行）', 'startup/index.ts'],
+  ['content（研究手册注入）', 'content/index.ts'],
 ];
 
 test('插件两半：named exports 在场（inject/apply）且零 export default', () => {

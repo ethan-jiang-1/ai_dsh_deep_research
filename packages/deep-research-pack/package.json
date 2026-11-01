@@ -123,13 +123,13 @@
       "types": "./lib/types/method-library-tool.d.ts",
       "default": "./lib/method-library-tool.js"
     },
-    "./workspace-boot": {
-      "types": "./lib/types/workspace-boot/index.d.ts",
-      "default": "./lib/workspace-boot.js"
-    },
     "./content": {
       "types": "./lib/types/content/index.d.ts",
       "default": "./lib/content.js"
+    },
+    "./startup": {
+      "types": "./lib/types/startup/index.d.ts",
+      "default": "./lib/startup.js"
     }
   },
   "scripts": {

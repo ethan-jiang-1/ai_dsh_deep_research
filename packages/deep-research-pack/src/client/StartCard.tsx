@@ -17,6 +17,7 @@ export interface StartCardInjected {
   workspacePath: string | null
   listDir: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<readonly { name: string }[]>
   hasUserMessage: (sessionId: SessionId) => Promise<boolean>
+  chooseWorkspace: () => Promise<void>
 }
 
 /** Dock 组件的完整 props。 */
@@ -43,9 +44,11 @@ const styles = {
  * @param props - dock props + 注入面。
  */
 export function StartCard({
-  sessionId, workspaceTitle, workspacePath, listDir, hasUserMessage, t,
+  sessionId, workspaceTitle, workspacePath, listDir, hasUserMessage, chooseWorkspace, t,
 }: StartCardProps): ReactElement | null {
   const [visible, setVisible] = useState<'loading' | 'show' | 'hide'>('loading')
+  const [choosing, setChoosing] = useState(false)
+  const [chooseError, setChooseError] = useState<string | null>(null)
   useEffect(() => {
     const controller = new AbortController()
     let cancelled = false
@@ -79,7 +82,25 @@ export function StartCard({
       <div>{t('startStep2')}</div>
       <div>{t('startStep3')}</div>
       <div style={styles.muted}>{t('startCredentials')}</div>
-      <div style={styles.muted}>{t('startSwitchWorkspace')}</div>
+      <div style={styles.muted}>{t('startChooseWorkspaceHint')}</div>
+      <div>
+        <button
+          type="button"
+          data-testid="deep-research-choose-workspace"
+          disabled={choosing}
+          onClick={() => {
+            if (choosing) return
+            setChoosing(true)
+            setChooseError(null)
+            void chooseWorkspace()
+              .catch((error: unknown) => setChooseError(t('startChooseWorkspaceFailed', { detail: (error as Error).message })))
+              .finally(() => setChoosing(false))
+          }}
+        >
+          {choosing ? t('startChoosingWorkspace') : t('startChooseWorkspace')}
+        </button>
+      </div>
+      {chooseError === null ? null : <div style={styles.muted} role="alert">{chooseError}</div>}
     </section>
   )
 }
