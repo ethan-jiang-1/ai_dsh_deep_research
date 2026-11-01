@@ -153,13 +153,11 @@ $DSH_HOME/deep-research/settings.json
 
 **不建会话**：`webserver` 在挂载期 listen，Host 建会话不能保证早于首个请求（机制事实 §13–14）。会话归 client。
 
-### 4.3 `researchSetup` remote（D7 第三处有界例外）
+### 4.3 新产品面：不新增 Remote（S2 spike 结论，D7 第三处有界例外）
 
-- `get()` → `{schemaVersion, workspace, sessionId, ready, reason?}`
-- `set({workspace?, sessionId?})` → 绝对路径/存在/目录/非危险目录校验 → 原子写
-- 只读写设置文件；不写 DSH patch、不声明 storage domain、不新增 session event。
-- **S2.0 spike 闸**：临时 profile 里最小第三方服务 + `@Remote('ping')`，client 用 `ctx.remote.researchSetup.ping()` 调到；验证 owner 访问策略。失败 → fallback：Host best-effort 建会话 + client 听 `api-session/added`；GUI 选择不持久化（文档写清）。
-- 通过后补 `tests/pack/setup-remote.test.mjs`。
+- **S2 spike 结论**：Typert 生成物（`@Remote` + `./typert`/`./remote` artifacts）不在本包构建链里；新增 remote 的代价大于收益。
+- 采用 fallback：Host 启动行 best-effort 建会话；client 用 DSH 既有 `workspaces` / `sessions` / `uiWorkspace` 服务；GUI 记忆只写一个 localStorage 提示键。
+- 测试 = `tests/pack/startup.test.mjs` + `tests/pack/product-startup.test.mjs`（无 setup-remote 测试）。
 
 ### 4.4 Client 启动控制器（`src/client/startup/`）
 
@@ -281,7 +279,7 @@ $DSH_HOME/deep-research/settings.json
 | 风险 | 触发 | 处置 |
 |---|---|---|
 | 18.5 KB context 被截断/模型不按手册 | l4-lite 或真实 run | 降级 B（隐藏目录），不退回 D39 |
-| `researchSetup` remote 不可行 | S2.0 spike | fallback：Host best-effort 会话 + `api-session/added`；GUI 不持久化 |
+| 新产品面过重 | S2 spike | 已收窄：不新增 Remote；用 DSH 既有客户端服务 + 一个 localStorage 提示键 |
 | client 目录选择器不可用 | onboarding 冒烟 | 手动路径输入 + `workspace.create` |
 | 安装两步对用户太长 | 文档评审 | 接受：DSH 没有"一步建 web-backed custom profile"；不发明安装器 |
 | 文档预算/一致性 | 门禁红 | 先压缩；README 升顶登记；AGENTS 同 diff |
@@ -297,6 +295,6 @@ $DSH_HOME/deep-research/settings.json
 1. **内容边界 = A**：无种子；手册 runtime context、NODES/判型库 skills、模板包内。B（隐藏目录）只作被真模型证据证伪时的降级。
 2. **项目目录 = 询问 + 推荐**：像项目时默认建议 `<dir>/research`，可一键改；不静默改写。
 3. **互操作 = 保留一行**：装进 `web` profile 可用，但不是产品形态。
-4. **新产品面 = 接受**：Host 启动行 + `researchSetup` remote + client 启动控制器，作为 D7 第三处有界例外。
+4. **新产品面 = 接受（收窄）**：Host 启动行 + client 启动控制器，不新增 Remote，作为 D7 第三处有界例外。
 
 **外加（由"安装尊重 DSH"推出）**：不保留 launcher/scaffold；安装只用 DSH 命令；只保留只读 doctor。

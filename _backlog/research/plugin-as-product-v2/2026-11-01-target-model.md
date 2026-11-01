@@ -69,7 +69,7 @@ intent: 给出目标产品形态的完整合同——入口、profile、工作�
 ```
 
 - **home 级而不是 profile 级**：Host 行拿不到当前 profile 名（CLI 没有把它暴露成 env 或服务）；home 级是 FAQ 26 允许的"产品自建 `$DSH_HOME/<plugin>/` 路径约定"。一个 home 一份产品状态；`--home` 天然隔离；删目录即重置。多 profile 共享同一设置——文档写明。
-- 一个 owner（产品）；写者 = client 经 `researchSetup.set`（`workspace` 与 `sessionId` 都可写）；原子写、last-wins、无秘密。
+- 一个 owner（产品）；文件写者 = Host 启动行（`sessionId`）与 doctor 之外的显式设置；GUI 不写文件，只写一个 localStorage 提示键（设备级）。原子写、last-wins、无秘密。
 - 不是 DSH Settings（避免"两套真值"：Settings UI 不暴露工作区）。
 - 列入备份/卸载说明。
 
@@ -169,7 +169,7 @@ intent: 给出目标产品形态的完整合同——入口、profile、工作�
 ## 8. 与既有决定的关系
 
 - **D1**（自写包 = 1 个）不变：仍是一个包。
-- **D7**（配置为主）边界：新增代码面 = 启动行（工作区登记）+ 内容注入行 + `researchSetup` remote + 首屏 client 启动控制器；与 D18 驾驶舱、D31 抓取回退并列，需新 D 号明确边界与用途限定。
+- **D7**（配置为主）边界：新增代码面 = 启动行（工作区登记/会话）+ 内容注入行 + 首屏 client 启动控制器；不新增 Remote。与 D18 驾驶舱、D31 抓取回退并列，需新 D 号明确边界与用途限定。
 - **D17 / D28**（harness / run 分离）：harness 从"工作区里的种子"改为"包内内容"；run bundle 位置与状态判定不变。
 - **D18**（驾驶舱）不变；首屏/onboarding 是产品启动面，不是第二处观察面套件。
 - **D21**（意图分流）：产品入口从 `dsh plugin --profile web` 改为 `dsh-deep-research` / `dsh --profile deep-research`。

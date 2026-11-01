@@ -31,7 +31,7 @@ intent: 盘点目标形态的全仓改动面（代码、开发仓、测试、文
 |---|---|
 | `scripts/preflight.mjs` → `scripts/doctor.mjs` | 只读 doctor：profile roster 三状态、团队层版本、凭据、工作区可写、产品设置可读；不安装、不启动、不写 profile；bin 改 `dsh-deep-research-doctor` |
 | `src/lib/product-settings.ts`（新） | 设置 schema 2、路径解析（`$DSH_HOME` 或 `~/.dsh`）、原子写、坏文件备份、目录校验；Host 服务与 doctor、测试共用（构建后 `lib/product-settings.js`） |
-| `src/workspace-boot/index.ts` → `src/startup/index.ts` | 读设置（env 覆盖）→ `stat` → `workspaceRegistry.create`；**不建会话**（webserver 无 readiness gate）；提供产品 remote `researchSetup.get/set`；失败只 log |
+| `src/workspace-boot/index.ts` → `src/startup/index.ts` | 读设置（env 覆盖）→ 校验 → `workspaceRegistry.create` → best-effort Lead 会话；不新增 Remote；失败只 log |
 | `src/client/startup/`（新） | client 启动控制器：`get` → `session.create` → `uiWorkspace.openSession`；无工作区 `shell.overlay` onboarding（`directoryPicker` + 手动路径）；`set` 持久化；错工作区横幅 |
 | `src/content/index.ts`（新） | Host 行：`content/manual.md` → `ctx.systemPrompt.context()`；注册 `research_pack_root` 变量；固定 order 205；`interpolate: true` |
 | `package.json` | bins 只留 `dsh-deep-research-doctor`；删 `dsh-deep-research` / `dsh-deep-research-scaffold`；files `content/**` 替代 `workspace/**`；exports `./startup`、`./content`、`./doctor`；peers 按实际 import |

@@ -54,7 +54,7 @@ intent: 给出目标形态的验收矩阵——每片退出判据、证据档位
 
 - `tests/pack/startup-settings.test.mjs`：schema 2、原子写、坏文件回退、`workspace` + `sessionId` last-wins。
 - `tests/pack/startup.test.mjs`：无设置零行为；有设置 → 只 `workspaceRegistry.create`（不建会话）；env 覆盖只作用于本次；目录缺失不创建；registry 缺席只 warn。
-- `tests/pack/setup-remote.test.mjs`（新）：`researchSetup.get` 只读、`set` 只写设置文件；坏路径拒绝；无秘密字段。
+- `tests/pack/product-startup.test.mjs`（新）：`readCurrentSessionId` / `pickProductWorkspace` / `needsProductSwitch` 纯谓词。
 - `scripts/smoke/product-boot-smoke.mjs`：
   - 断言产品 profile = `deep-research`，bundle roster 含 base/web-app/pack/team；
   - 断言设置文件在场且 `workspace` = 沙箱工作区；
