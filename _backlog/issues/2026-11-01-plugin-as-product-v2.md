@@ -70,6 +70,17 @@ RED   I4 src/content 注册 systemPrompt.context
 7. 卸载后工作区产物保留；插件代码对 `$DSH_HOME` 的写入只剩 `deep-research/settings.json`（无 secret）。
 8. 反歪基线：`tests/contracts/product-invariants.test.mjs` 在改动前的 HEAD 上红、在交付树上绿；四条不变量各有一条机械断言。
 
+## 验证进展（2026-11-01）
+
+1. ✅ `install-shape-smoke` ALL PASS：全局 dsh rc.3 上原样执行手册三步；roster 三状态、无旧 row、真启动无 `did not activate`。
+2. ✅ `product-boot-smoke` GREEN：用产品设置文件（不带 env）起 `dsh --profile deep-research`；Host 注册工作区、blank Lead Session、`cwd`/`preset` 正确。
+3. ✅ 同冒烟断言工作区无产品内容文件（`AGENTS.md`/`NODES.md`/`templates`/`seed.json` 等）。
+4. ◐ `snapshot-replay` B 层 ALL PASS（手册以 runtime context 进入；4 角色 fixture 重录）；`l4-lite` 5 角色真模型 PASS；`client-hitl-smoke` 真模型 HITL1 + 挂起显性化 PASS。**完整 L4 真实 run（run bundle 交付）未跑**。
+5. ✅ `pnpm verify` + `pnpm test`（963）全绿；`release-smoke` / `data-smoke` / `doctor-smoke` / `pack-smoke` ALL PASS；真启动无 `did not activate`。
+6. ✅ README / AGENTS / 00-index / guides / pack README / `_dist` 同一叙事；`_dist` 0.3.0 重导出（131 条目）。
+7. ✅ `data-smoke`：卸载后 workspace 用户文件与 session 日志保留；`$DSH_HOME` 只多产品设置。
+8. ✅ `product-invariants` I1–I4 常驻测试；红基线（9/9）在卡上留证。
+
 ## 关闭条件
 
 验收标准 1–8 有证据在场，且 D40 与 `notes/implemented/` Note 互链；业务验收（真人首启手感）由用户拍板。
