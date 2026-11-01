@@ -66,9 +66,9 @@
     - **托管后台 job 直接跑 `bash dev/boot-run.sh`（首选）**——自检/补装/漂移门全走，
       实测一场 run 全程存活（2026-10-11：web 未因 stdin 退出）；
     - **裸命令 + 睡眠管道（备用）**：宿主会关后台 job 的 stdin 时用（症状 = web 自行退出）：
-      `sleep <秒> | node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts --profile research
+      `sleep <秒> | node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts --profile deep-research
       -- --port <端口，缺省 3083> --no-open`。**这条绕过 boot-run 的漂移门**（
-      [00-index §先分流](../00-index.md) 首行"别直接 `dsh --profile research`"正为此——
+      [00-index §先分流](../00-index.md) 首行"别直接 `dsh --profile deep-research`"正为此——
       同理：绕过漂移检测、静默用旧镜像）：先 `bash dev/boot-run.sh --drift-check` 过门再用它；
   `--drift-check` 模式会检查端口且可初始化环境/补装 profile/写 MCP patch，不是只读探针。要只读地
   回答"当前安装镜像是否等于 pack 源"（不碰活通道）= `bash dev/boot-run.sh --drift-only`——run-driver

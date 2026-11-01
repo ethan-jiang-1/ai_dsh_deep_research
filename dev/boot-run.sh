@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# dev/boot-run.sh — 开跑就绪命令（幂等，keyless）：research profile 组合校验/补装 → boot web
+# dev/boot-run.sh — 开跑就绪命令（幂等，keyless）：deep-research profile（= 产品 profile 名）组合校验/补装 → boot web
 # → 打印入口步骤。RFC：notes/implemented/2026-09-24-m2-p1-run-channel.md（A 定案：团队机制归
 # vendor agent-team-profile 层）。操作指南全文 = docs/guides/61-run-playbook.md。
 # 用法：bash dev/boot-run.sh（Ctrl-C 停 web）。重复执行不重复安装（组合在位即跳过）。
+# 同机制纪律：dev 与产品走同一条载入路径（tarball → dsh plugin add → roster），差异只看 dev/README
+# 的 parity 表；profile 用户层（cordis.patch.yml）dev 不写——MCP 行走 --patch 覆盖层。
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 # 先 source 再进 strict mode：被 source 的脚本不该继承调用方的 nounset（env.sh 已加花括号
@@ -15,7 +17,7 @@ set -euo pipefail
 #    这是 boot 面护栏；L0 门禁刻意不依赖构建产物（新 clone 未构建时 verify 仍应秒级绿）。
 node "$ROOT/scripts/lib/vendor-artifacts.mjs"
 
-PROFILE="${DSH_RUN_PROFILE:-research}"
+PROFILE="${DSH_RUN_PROFILE:-deep-research}"
 # 端口：缺省 3083（2026-09-28 用户指令——3081 让给别的项目；3080 = 本仓开发 GUI）；覆写：
 #   DSH_RUN_PORT=<空闲端口> bash dev/boot-run.sh
 PORT="${DSH_RUN_PORT:-3083}"
@@ -88,9 +90,11 @@ if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/
   exit 1
 fi
 
-# 层版本钉住：与 pack 兼容矩阵同源（dsh-v0.2.1-rc.2 → 0.2.1-rc.2）——升 pin 只改 pack
-# package.json 的 dsh.compatibility.dshReleases，本脚本随之走（vendor 各包版本锁步发布）。
-LAYER_VER="$(node -e "console.log(require('$PACKDIR/package.json').dsh.compatibility.dshReleases[0].replace(/^dsh-v/,''))")"
+# 层版本钉住：与**运行中的 dsh** 同版本（= 产品手册里"与 dsh --version 同版本"那一句）。
+# vendor 源码只是机制基线；用户拿到的是 npm 全局 runtime——从包清单派生会让 dev 测到用户不会有的组合
+# （历史上还读到已删除的 dsh.compatibility 字段，直接抛错）。读不到版本就 fail-loud，不猜。
+LAYER_VER="$(dsh --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?' | head -1)"
+[ -n "$LAYER_VER" ] || { echo "boot-run: 读不到运行中 dsh 的版本（dsh --version）——拒绝用猜的版本门" >&2; exit 1; }
 LAYER="@deepseek-ai/dsh-experimental-agent-team-profile@$LAYER_VER"
 
 # 组合在位 = bundles 含本包与 vendor 层 + 安装副本每个盘上角色 preset 在位。
@@ -142,19 +146,26 @@ else
 fi
 
 # ①½ SPA 抓取通道（mcp-playwright，**默认挂载**——2026-10-03 用户拍板常驻，pilot 终版结论 =
-#     采纳 Note；D22 交付约束：零账号零凭据零订阅，npx 自动拉起）。MCP_PLAYWRIGHT=0 = 显式拆；
-#     缺省挂。决定/淘汰方案/环境踩坑全记录正本 =
-#     notes/implemented/2026-10-02-mcp-playwright-adoption.md。版本钉 0.0.83（与缓存一致，
-#     升 pin 时随重验流程走）。
+#     采纳 Note；D22 交付约束：零账号零凭据零订阅，npx 自动拉起）。MCP_PLAYWRIGHT=0 = 显式拆。
+#     **不写 profile 用户层**（与产品路径对齐：用户的 cordis.patch.yml 只由用户/设置页写）——
+#     生成本次启动的 dev 覆盖层，经 launcher `--patch` 传入。决定/淘汰方案/环境踩坑正本 =
+#     notes/implemented/2026-10-02-mcp-playwright-adoption.md。版本钉 0.0.83。
 MCP_MARK_BEGIN='# BEGIN mcp-playwright-block'
 MCP_MARK_END='# END mcp-playwright-block'
-if [ "${MCP_PLAYWRIGHT:-1}" = "1" ]; then
-  if ! grep -qF "$MCP_MARK_BEGIN" "$PROFDIR/cordis.patch.yml" 2>/dev/null; then
-    # 新建 profile 的 patch 以 `[]` 闭数组占位——其后再追加条目即非法 YAML（pilot 首跑红证），
-    # 先摘掉占位行再追加块。
-    sed_inplace '/^\[\]$/d' "$PROFDIR/cordis.patch.yml"
-    cat >> "$PROFDIR/cordis.patch.yml" <<MCPROW
+DEV_OVERLAY="$STATE_DIR/dev-overlay.yml"
 
+# 迁移（一次性）：旧版把 MCP 行直接写进 profile patch；见到旧 marker 就摘掉，让 profile 回到用户态。
+if grep -qF "$MCP_MARK_BEGIN" "$PROFDIR/cordis.patch.yml" 2>/dev/null; then
+  sed_inplace "/^${MCP_MARK_BEGIN}/,/^${MCP_MARK_END}/d" "$PROFDIR/cordis.patch.yml"
+  if ! grep -qvE '^[[:space:]]*(#.*)?$' "$PROFDIR/cordis.patch.yml"; then
+    printf '[]\n' >> "$PROFDIR/cordis.patch.yml"
+  fi
+  echo "boot-run: 旧的 MCP 行已从 profile patch 摘出（迁移到 dev 覆盖层）"
+fi
+
+PATCH_ARGS=()
+if [ "${MCP_PLAYWRIGHT:-1}" = "1" ]; then
+  cat > "$DEV_OVERLAY" <<MCPROW
 $MCP_MARK_BEGIN
 - insert:
     - id: mcp-playwright
@@ -169,15 +180,11 @@ $MCP_MARK_BEGIN
         failOnStartupError: true
 $MCP_MARK_END
 MCPROW
-    echo "boot-run: MCP Playwright 通道已写入 profile patch（默认挂载；拆 = MCP_PLAYWRIGHT=0 重跑本脚本）"
-  fi
-elif grep -qF "$MCP_MARK_BEGIN" "$PROFDIR/cordis.patch.yml" 2>/dev/null; then
-  sed_inplace "/^${MCP_MARK_BEGIN}/,/^${MCP_MARK_END}/d" "$PROFDIR/cordis.patch.yml"
-  # 摘除后若无任何非注释内容，补回 `[]` 占位（注释-only 的 patch 文件解析非数组即抛）。
-  if ! grep -qvE '^[[:space:]]*(#.*)?$' "$PROFDIR/cordis.patch.yml"; then
-    printf '[]\n' >> "$PROFDIR/cordis.patch.yml"
-  fi
-  echo "boot-run: MCP Playwright 通道已移除（MCP_PLAYWRIGHT=0——显式拆）"
+  PATCH_ARGS=(--patch "$DEV_OVERLAY")
+  echo "boot-run: MCP Playwright 通道 → dev 覆盖层（${DEV_OVERLAY}；拆 = MCP_PLAYWRIGHT=0 重跑本脚本）"
+else
+  rm -f "$DEV_OVERLAY"
+  echo "boot-run: MCP Playwright 通道已关（MCP_PLAYWRIGHT=0）"
 fi
 
 # 旧模式保留（可初始化 profile/MCP patch；测试/CI 用，不起 web）。新的只读检查走 --drift-only。
@@ -238,4 +245,4 @@ export DSH_ISOLATION_ANNOUNCE=1
 # web 输出 tee 进运行区日志：仪表盘 deep-link 从这里抓 token URL（缺席 → 页面不链，fail-soft）
 # 会话 cwd = 工作区（D38：产品 Host 也认 DEEP_RESEARCH_WORKSPACE；dev 通道同样真正生效）
 cd "$WORKSPACE"
-dsh --profile "$PROFILE" -- --port "$PORT" --no-open 2>&1 | tee "$STATE_DIR/web.log"
+dsh --profile "$PROFILE" ${PATCH_ARGS[@]+"${PATCH_ARGS[@]}"} -- --port "$PORT" --no-open 2>&1 | tee "$STATE_DIR/web.log"

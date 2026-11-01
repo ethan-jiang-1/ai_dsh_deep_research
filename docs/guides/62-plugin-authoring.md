@@ -19,7 +19,7 @@
 |---|---|---|
 | plugin | 导出 `apply(ctx)` 的 TS 模块；注册即 `apply(ctx)`，配置经 cordis schema 校验 | 本仓自写插件（三处有界例外：D18 观察面 client、D31 抓取回退、D40 启动行/内容注入）：`src/index.ts`（host 半空壳 = 观察面宿主位）、`src/client/index.ts`（client 半：驾驶舱 + 首屏工作区恢复）、`src/client/startup.ts`（纯谓词）、`src/content/index.ts`（手册 runtime context）、`src/startup/index.ts`（工作区登记/会话）、`src/fetch-fallback/index.ts`（抓取回退 provider）；新插件从 `vendor/dsh/docs/user/develop/basic/` 起步 |
 | bundle | 你编写与分发的单位（`dsh.bundle`）——回答"这个包贡献什么"，是插入/覆盖 plugin rows 的 patch 层 | `packages/deep-research-pack/cordis.patch.yml` + 包内 `presets/`、`skills/` |
-| profile | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）——回答"哪些 bundle 按什么顺序组成" | 产品：用户 `$DSH_HOME/profiles/deep-research/`（DSH 两步安装创建）；开发镜像：`runtime/harness-home/profiles/research/`（`boot-run.sh` 从 pack 重建） |
+| profile | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）——回答"哪些 bundle 按什么顺序组成" | 产品：用户 `$DSH_HOME/profiles/deep-research/`（DSH 两步安装创建）；开发镜像：`runtime/harness-home/profiles/deep-research/`（同名 profile；`boot-run.sh` 用 tarball + `dsh plugin add` 安装） |
 | preset | 一个 agent 形态：persona 行 + 时钟行 + skills + 工具行 | `presets/<role>.patch.yml`（preset 行）+ `presets/<role>/skills/`（角色清单 = 盘上 presets/） |
 | patch / overlay | 层叠覆盖条目（id 定向的 config 覆盖、禁用、插入） | `dev/research.overlay.yml`（源码域通道的镜像源） |
 
@@ -131,7 +131,7 @@ agent-instructions 注入，冲突时项目优先。安装步骤（用户视角�
 | 改**现有**观察面页签（最频改动） | 页签 → 文件 → 职责的构成正本 = [design/40 §2](../design/40-research-cockpit.md)；折算住 `src/lib/`（纯函数，别在组件里堆逻辑）；新路径进 design/40 登记 | `client-load-smoke`（页签可点可读；失败留 png/html/console/meta）+ `cockpit-doc-registry` / `client-keys` 门禁 |
 | 改 persona / skill / 手册文本（模型可见） | 同 diff 跑真模型档；运行中的 web 缓存 boot 文本，须重启通道 | `l4-lite-smoke`（真模型档） |
 | 换 vendor pin | `dev/vendor-build.sh` 全链重建 + 逐条重审 | [bumping-vendor-pin 技能](../../.agents/skills/bumping-vendor-pin/SKILL.md)（流程正本；历次轮次见归档） |
-| 改 profile 镜像 | 不手改——改 pack 源后跑 `bash dev/boot-run.sh`：组合不完整/缺席时它重建，漂移时它 **exit 1** 并打印 `rm -rf <profile>` 补救（直接 `dsh --profile research` 会静默用旧镜像） | boot-run 漂移检测（fail-loud） |
+| 改 profile 镜像 | 不手改——改 pack 源后跑 `bash dev/boot-run.sh`：组合不完整/缺席时它重建，漂移时它 **exit 1** 并打印 `rm -rf <profile>` 补救（直接 `dsh --profile deep-research` 会静默用旧镜像） | boot-run 漂移检测（fail-loud） |
 
 **一句话规则**：源改一处（pack），生成物跑生成器，证据按面选档（keyless 证管道 / 真模型档
 证 agent 行为），部署形状变更追加 L2。

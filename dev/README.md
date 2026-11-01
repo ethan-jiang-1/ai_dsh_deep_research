@@ -24,6 +24,30 @@
 | llm-socket-isolation.cjs | api.deepseek.com socket 隔离预载（NODE_OPTIONS）：LLM 流与 web_search 两类请求均每请求一次性连接、永不复用；上游边缘对长命复用连接有相位性故障（[postmortem](../notes/archived/2026-10-13-llm-stream-malformed-storm.md)），移除 = 摘 boot-run 一行 |
 | run-kickoff.mjs | run 会话驱动：建 lead 会话 + 发 kickoff（GUI 的 RPC 替代入口） |
 
+## 与产品路径的 parity（dev 不是另一条载入路）
+
+判据 = **同机制 + 有界差异**：用户安装会经过的机制点，dev 也真走；差异只允许落在调试必需项，且必须
+登记在这里。**表外新增差异 = L0 门禁 `dev-parity` 红**；用户路径将来多一个机制，dev 同 diff 跟上。
+
+| 机制点 | 产品路径 | dev 通道 | 判定 |
+|---|---|---|---|
+| profile 名 | `deep-research` | `deep-research`（`DSH_RUN_PROFILE` 可覆写；多实例靠 `DSH_RUN_STATE_DIR`，不改名） | 同形 |
+| profile 初始化 | `--from-default-profile web` | 同一条命令 | 同形 |
+| 安装源 | registry / tarball | `npm pack` 出的 tarball（`dsh plugin add file:`） | 同形 |
+| roster 写入者 | `dsh plugin add/remove` | 同一个命令（脚本不手写 `dsh.profile.bundles`） | 同形 |
+| 团队层版本 | 与 `dsh --version` 同 exact 版本 | 同（`LAYER_VER` 从运行中 dsh 派生） | 同形 |
+| profile 用户层 | 用户/设置页写 `cordis.patch.yml` | dev 不写；dev-only 行走 `--patch` 覆盖层 | 同形 |
+| 启动命令 | `dsh --profile deep-research` | 同一条（run-driver 只是驱动：漂移门 + probe + 呈交） | 同形 |
+| runtime | npm 全局 `dsh` | vendor 源码（`dev/env.sh` 拦截裸 dsh） | 允许差异（调试必需） |
+| 工作区 | 用户自选目录 | `research-workspace/`（`DSH_RUN_WORKSPACE` 可覆写） | 允许差异（调试必需） |
+| 凭据 | 用户 home | `runtime/harness-home/.credentials.yaml` | 允许差异（隔离） |
+| 重建 | `plugin add/remove` 增量 + 重启 | 缺件时 `rm -rf` 重建（幂等加速） | 允许差异（可重复） |
+| 观测 | 无 | probe / 仪表盘 / 日志 / LLM socket 隔离预载 | 允许差异（调试必需） |
+| dev-only 工具行 | 无 | MCP Playwright（`--patch` 覆盖层，`MCP_PLAYWRIGHT=0` 可拆） | 允许差异（dev 工具） |
+
+`dev/research.overlay.yml` 是**源码域冒烟 harness**（`--profile web --patch`，preset-smoke 用），
+不是产品载入路径，也不进上面的同形列——它不经过 bundle/tarball，判据只对 L1 挂载面有效。
+
 ## 开发驱动
 
 | 件 | 职责 |

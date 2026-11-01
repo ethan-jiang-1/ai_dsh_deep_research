@@ -244,4 +244,48 @@ export function runF() {
   if (r.status !== 0 || !v || !/dev\/hooks$/.test(v.replace(/\\/g, '/')))
     fail(gate, `pre-commit 门禁未激活（core.hooksPath = ${v || '未设置'}）——本仓提交纪律 = 红灯拦 commit，未激活 = 裸奔；修正 = source dev/env.sh（幂等 git config core.hooksPath dev/hooks）`);
 }
+// ── dev-parity（dev 通道 = 用户路径的同机制子集，差异有界且登记）──
+// 依据（用户意图 2026-11-02）：dev 只为调试而与产品路径不同，不能是"另一条载入路"。可机械判的
+// 同形点 = profile 名、安装源、roster 写入者、版本门、profile 用户层零写入；差异清单的载体 =
+// dev/README 的 parity 表。反证：把 run-driver 默认 profile 改回 research → 红；把 MCP 行写回
+// profile patch（cat >> … cordis.patch.yml）→ 红；把团队层版本改回读包清单 → 红。
+{
+  const gate = 'dev-parity';
+  const bootPath = join(ROOT, 'dev', 'boot-run.sh');
+  const driverPath = join(ROOT, 'dev', 'run-driver.mjs');
+  const readmePath = join(ROOT, 'dev', 'README.md');
+  for (const [file, path] of [['dev/boot-run.sh', bootPath], ['dev/run-driver.mjs', driverPath], ['dev/README.md', readmePath]]) {
+    if (!existsSync(path)) fail(gate, `${file} 缺席——dev 通道的 parity 判据失去对象`);
+  }
+  if (existsSync(bootPath) && existsSync(driverPath)) {
+    const boot = readFileSync(bootPath, 'utf8');
+    const driver = readFileSync(driverPath, 'utf8');
+    if (!/PROFILE="\$\{DSH_RUN_PROFILE:-deep-research\}"/.test(boot))
+      fail(gate, 'boot-run 默认 profile 不是产品名 deep-research——dev 与用户路径身份不一致（改 PROFILE 默认值）');
+    if (!/DSH_RUN_PROFILE \|\| 'deep-research'/.test(driver))
+      fail(gate, "run-driver 默认 profile 不是 'deep-research'——驱动与安装面身份不一致");
+    if (!/LAYER_VER="\$\(dsh --version/.test(boot))
+      fail(gate, '团队层版本未从运行中 dsh 派生——dev 会测到用户不会有的组合（改 LAYER_VER 派生）');
+    if (/compatibility\.dshReleases/.test(boot))
+      fail(gate, 'boot-run 仍在读 dsh.compatibility.dshReleases（已删除的字段）——版本门只能来自 dsh --version');
+    if (!/DEV_OVERLAY="\$STATE_DIR\/dev-overlay\.yml"/.test(boot) || !/PATCH_ARGS=\(--patch "\$DEV_OVERLAY"\)/.test(boot))
+      fail(gate, 'dev-only 行未走 --patch 覆盖层（DEV_OVERLAY/PATCH_ARGS 缺席）——用户路径没有这一层');
+    if (/cat >> "\$PROFDIR\/cordis\.patch\.yml"/.test(boot))
+      fail(gate, 'boot-run 仍在写 profile 用户层（cordis.patch.yml）——与"roster 只由 dsh plugin 写"的用户合同相反');
+  }
+  if (existsSync(readmePath)) {
+    const readme = readFileSync(readmePath, 'utf8');
+    const section = readme.indexOf('## 与产品路径的 parity');
+    if (section === -1) fail(gate, 'dev/README 缺 parity 表（差异必须显性化，不能只活在代码注释里）');
+    else {
+      const table = readme.slice(section).split('\n## ')[0];
+      // 行数 = 表格行 − 表头 − 分隔行（不按首列文字猜，中文/代码各异）。
+      const rows = table.split('\n').filter((line) => line.startsWith('|')).length - 2;
+      if (rows < 8) fail(gate, `parity 表只有 ${rows} 行机制点——同形点与允许差异都要在场（防空语料）`);
+      if (!table.includes('允许差异')) fail(gate, 'parity 表没有"允许差异"列——差异与同形点不可区分');
+      if (!table.includes('dev-parity')) fail(gate, 'parity 表没指向守它的门禁 dev-parity');
+    }
+  }
+}
+
 }

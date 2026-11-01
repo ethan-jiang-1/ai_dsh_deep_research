@@ -6,6 +6,7 @@
 
 - [2026-11-01 插件即产品 v2](2026-11-01-plugin-as-product-v2.md) — 等人拍板：产品 profile / 启动期工作区 / 内容与产物分家；研究 = [research/plugin-as-product-v2](../research/plugin-as-product-v2/README.md)。
 - [2026-11-01 插件生命周期合规](2026-11-01-plugin-lifecycle-conformance.md) — 推敲中：npm 从未发布（registry 404）、无 locale/icon 显示元数据、无市场索引、手册入口叙事与 DSH 相反；研究 = [research/plugin-lifecycle](../research/plugin-lifecycle/README.md)。
+- [2026-11-02 dev 通道与产品路径对齐](2026-11-02-dev-product-path-parity.md) — 推敲中：dev 已走 tarball + `dsh plugin add`（同形），但 profile 身份、团队层版本、profile 用户层写入者、重建语义未登记——「dev 绿」推不出「用户装上也绿」；P0 换身份 → P3 差异表 + `dev-parity` 门禁。
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

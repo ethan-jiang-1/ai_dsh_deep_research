@@ -38,7 +38,7 @@ mkdirSync(STATE_DIR, { recursive: true });
 const WEB_LOG = join(STATE_DIR, 'web.log');
 const BOOT_LOG = join(STATE_DIR, 'run-driver-boot.log');
 const DEFAULT_PORT = process.env.DSH_RUN_PORT || '3083';
-const DEFAULT_PROFILE = process.env.DSH_RUN_PROFILE || 'research';
+const DEFAULT_PROFILE = process.env.DSH_RUN_PROFILE || 'deep-research';
 const DEFAULT_FACE = '研究状态';
 
 const portOf = (url) => Number(new URL(url).port);
