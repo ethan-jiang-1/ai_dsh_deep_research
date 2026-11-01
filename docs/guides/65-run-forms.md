@@ -113,7 +113,7 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 | 变量 | 默认 | 作用 |
 |---|---|---|
 | `DSH_DEV_HOME` | `runtime/harness-home` | 隔离 DSH home（可指仓外） |
-| `DSH_RUN_PROFILE` | `research` | profile 名 |
+| `DSH_RUN_PROFILE` | `deep-research` | profile 名（= 产品 profile 名；多实例用 `DSH_RUN_STATE_DIR` 隔离） |
 | `DSH_RUN_PORT` | `3083` | web 端口 |
 | `DSH_RUN_STATE_DIR` | `runtime/smoke-workspace` | web.log/仪表盘/run-pack/npm-cache 的实例状态根 |
 | `DSH_RUN_WORKSPACE` | `research-workspace` | 研究会话 cwd（角色手册从这里注入；多实例请各自指定） |

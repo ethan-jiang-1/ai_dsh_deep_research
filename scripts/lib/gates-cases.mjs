@@ -613,6 +613,13 @@ export const CASES = [
     doc.plugins[0].versions[0].version = '9.9.9';
     writeFileSync(p, JSON.stringify(doc, null, 2) + '\n');
   } },
+  // dev-parity：dev 通道退回另一个 profile 名——dev 与用户路径身份分叉。
+  { id: 'dev-parity-driver-profile', gate: 'dev-parity', mutate: (dir) => {
+    const p = join(dir, 'dev', 'run-driver.mjs');
+    const text = readFileSync(p, 'utf8');
+    if (!text.includes("|| 'deep-research'")) throw new Error('夹具 run-driver 默认 profile 不是 deep-research——案例失效');
+    writeFileSync(p, text.replace("|| 'deep-research'", "|| 'research'"));
+  } },
   // readme-shape：删掉 README 前置字段——文档生成器不再把包认成 bundle。
   { id: 'readme-shape-no-frontmatter', gate: 'readme-shape', mutate: (dir) => {
     const p = join(dir, 'packages', 'deep-research-pack', 'README.md');

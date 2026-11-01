@@ -33,7 +33,7 @@ profile + `research-workspace/` + run-driver。两条路径的命令与数据根
 
 **歧义裁定**：用户未指定 home 时——产品用户默认 `$DSH_HOME`；开发通道默认
 `runtime/harness-home`（source env.sh）。"启动这个插件"没有额外上下文时默认指本仓开发通道；
-要给外部用户装产品走产品行。**开发通道**别绕过 run-driver 的漂移门（直接 `dsh --profile research`
+要给外部用户装产品走产品行。**开发通道**别绕过 run-driver 的漂移门（直接 `dsh --profile deep-research`
 会用旧镜像）；**产品用户**用 DSH 两步安装 + `dsh --profile deep-research`；首屏问项目目录。
 
 **裸动词也指开发通道**："启动一下""起一下"未点名对象时，默认指本仓 DSH 环境，首个动作 = `node dev/run-driver.mjs up`；仅当对话正围着另一个可启动物（某条冒烟/探针）时才跟随该物。

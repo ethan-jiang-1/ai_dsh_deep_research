@@ -163,7 +163,7 @@ node packages/deep-research-pack/scripts/doctor.mjs --workspace <dir>   # 只读
 
 - **先加载匹配的开发技能**：任务命中 `.agents/skills/` 某条 description（换 pin / 加角色 /
   写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷——清单 = 盘上 `.agents/skills/`）→ 先读该 `SKILL.md` 全文再动手，不从摘要猜流程；
-- **查询实际配置树，别从源码猜部署**：`pnpm dsh --profile research --dump-config` 是
+- **查询实际配置树，别从源码猜部署**：`pnpm dsh --profile deep-research --dump-config` 是
   profile/bundle/patch 叠加后的官方查询（"会加载什么"）；`boot-run.sh` 的漂移检测管另一问
   ——"镜像是否等于 pack 源"；
 - **未运行项如实分开**：交付报告里"未跑"与"通过"分列（例：无凭据自动跳过的 e2e 不算验过
