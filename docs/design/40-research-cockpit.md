@@ -44,6 +44,7 @@
 | 挂起显性化 | index.ts | pending false→true 迁移时 `openTab` 右栏自动展开 | [§2.14](#cockpit-14) |
 | keyed 常量 | keys.ts | 字面量唯一正本（`client-keys` 门禁对账——拼错不报错、永不渲染） | [§2.15](#cockpit-15) |
 | host 半 | src/index.ts | 空壳宿主位（bundle 行 name = 包名；浏览器半经 `exports["./client"]` 装配） | [§2.16](#cockpit-16) |
+| 产品首屏起步卡 | StartCard.tsx | blank Session + 工作区无 `drt_*` + 无用户消息时显示的产品起步指引（D38；`conversation.input.dock`；不写浏览器持久化/不新增模型可见文本） | [§2.17](#cockpit-17) |
 
 页签八区（自上而下）：
 
@@ -74,6 +75,7 @@
 | [bundle-bind](../../packages/deep-research-pack/src/lib/bundle-bind.ts) | journal 事件 → 本会话绑定的 run slug + 绑定强度 | 只认 `tool/call` 参数路径里的 `drt_<slug>/`；**写强读弱**——write/edit 命中直接定绑，仅读命中兜底（立项预检读旧 bundle 的错绑防线，2026-09-28 首跑实证）；可信性政策 = binding-trust |
 | [binding-trust](../../packages/deep-research-pack/src/lib/binding-trust.ts) | journal 事件 → 可信绑定三态（bound / unbound / suppressed） | write 永远可信；read 在 HITL 挂起 / 立项信号下抑制并带 reason（pending / kickoff）；其余 read 可信。三页签只消费结论，不再各自解释 raw binding |
 | [tool-card](../../packages/deep-research-pack/src/lib/tool-card.ts) | call/result 切片 → 卡片状态 | running / ok / error / stopped |
+| [start-card](../../packages/deep-research-pack/src/lib/start-card.ts) | blank Session 事实（用户消息 + 工作区根条目）→ 首屏起步卡显隐 | 有用户消息或 `drt_*` 就收起；纯函数，keyless 钉 |
 | [final-target](../../packages/deep-research-pack/src/lib/final-target.ts) | journal 交付事件 / 文件地址 / 终稿路径 → 本次交付 + 会话文件 + 读面定表 + 自动打开判据 | `present`（`deliverables/presented`）是交付的机械判据（node-gate 门②）；`final.md` 在场只说明"有终稿可审"（综合步就落盘），不是交付。地址认领终稿族（根 / `archive/` / `_abandoned/` 三位置 + `final/` 下 `vN.md`、`readable.md`、`readable-vN.md`），`drafts/final.md` 与绝对域全拒；交付记录的位置失效时由 run-context 的 `openRun` 按三位置回退；自动打开 = `shouldOpenFinal`（有交付 / `callId` 未开过 / 焦点不在可编辑元素），present 同时带 reader 与 vN 时优先打开 reader |
 | [member-activity](../../packages/deep-research-pack/src/lib/member-activity.ts) | 队员 journal 事件 → 检索/抓取/出错动作行 + 全量计数 | 粒度定夺 = [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)（2026-10-10 用户三问：文件读写不入流）；失败行剥 "Error: " 工程前缀；行截尾窗与 activity-fold 同款 |
 | [brief-fold](../../packages/deep-research-pack/src/lib/brief-fold.ts) | 既有事实源投影 → 业务摘要五问 | 输入面**不含**证据计数与工具调用数（计数在类型层面进不了完成态文案，keyless 禁词单测钉）；九态优先级 = 挂起 > 立项预检窗 > 未绑定 > 审查 FAIL > 已交付 > 推进中；派生不出的状态显式缺省，不虚构 |
@@ -196,6 +198,16 @@ pending false→true 迁移时 `openTab` 右栏自动展开；页签 dock 折叠
 
 空壳宿主位（bundle 行 name = 包名；浏览器半经 `exports["./client"]` 装配）
 
+<a id="cockpit-17"></a>
+### 2.17 产品首屏起步卡
+
+**文件**：[StartCard.tsx](../../packages/deep-research-pack/src/client/StartCard.tsx)（D38 产品启动面的首屏件）
+
+`conversation.input.dock` 的全宽起步卡：首屏告诉用户产品是什么、当前工作区、三步起步
+（问一个问题 → Lead 先问三问/计划确认 → 右栏研究状态与终稿）、凭据提示与换工作区入口。
+只在 blank Session、工作区根没有 `drt_*`、且会话还没有用户消息时显示；工作区文件读失败仍显示
+（不阻塞 composer）。它是 Client 渲染，不进模型请求；不写 localStorage/storage domain/
+session event（`data-plane-invariants` 把守）。
 
 ## 3. 数据通道与接线
 

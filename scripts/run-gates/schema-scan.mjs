@@ -13,13 +13,15 @@ import { fileURLToPath } from 'node:url'
 import { listRuns } from '../../packages/deep-research-pack/src/lib/run-context.ts'
 import { scanAll } from '../lib/schema-scan-core.mjs'
 import { nodeRunSource } from '../lib/run-source-node.mjs'
+import { workspaceRoot } from '../lib/workspace-root.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
 // ── CLI ──
 if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const args = process.argv.slice(2).filter((a) => !a.startsWith('--'))
-  const archive = join(ROOT, 'research-workspace', 'archive')
+  const wsRoot = workspaceRoot({ argv: process.argv.slice(2), env: process.env, defaultRoot: join(ROOT, 'research-workspace') }).root
+  const archive = join(wsRoot, 'archive')
   let dirs
   if (args.length > 0) {
     dirs = args.map((a) => resolve(a))
@@ -30,7 +32,7 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
     }
   } else {
     // 缺省只扫 archive（交付件的最终停靠处）；要扫在飞/停放请显式点名。范围是显式参数。
-    const ws = join(ROOT, 'research-workspace')
+    const ws = wsRoot
     const runs = await listRuns(nodeRunSource(ws), { buckets: ['archive'] })
     if (!runs.ok) {
       console.error(`schema-scan: 无法枚举 archive run（${runs.reason}${runs.detail === undefined ? '' : `：${runs.detail}`}）`)

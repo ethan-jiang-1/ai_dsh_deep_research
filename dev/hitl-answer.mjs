@@ -29,9 +29,11 @@ import {deliveryAnswerGuard, isDeliveryReviewCard, answerBatchOf, customLandedIn
 import { appendProvenance, attributionBundleOf, batchToAnswered } from '../scripts/lib/hitl-provenance.mjs'
 import { localDateStr } from '../scripts/lib/local-date.mjs'
 import { researchWorkspaceGroup, sessionLogsInGroup } from '../scripts/lib/session-log.mjs'
+import { workspaceRoot } from '../scripts/lib/workspace-root.mjs'
 import { operateOnTargetCard } from '../scripts/lib/hitl-card-driver.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const DEV_WORKSPACE = workspaceRoot({ argv: process.argv.slice(2), env: process.env, defaultRoot: join(ROOT, 'research-workspace') }).root
 // 与 dev/run-kickoff.mjs 同形：name 自带 `--`（本仓约定，别在 helper 里再加一次）
 const flag = (name, fallback) => {
   const i = process.argv.indexOf(name)
@@ -80,14 +82,14 @@ let pendingBundle = null
 {
   const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'runtime', 'harness-home')
   const sessionsRoot = join(home, 'sessions')
-  const group = researchWorkspaceGroup(sessionsRoot)
+  const group = researchWorkspaceGroup(sessionsRoot, DEV_WORKSPACE)
   if (group === undefined) {
-    console.error('hitl-answer: 找不到 research-workspace 会话组——先 source dev/env.sh')
+    console.error('hitl-answer: 找不到工作区会话组——先 source dev/env.sh，或用 DSH_RUN_WORKSPACE/DEEP_RESEARCH_WORKSPACE 指定工作区')
     process.exit(2)
   }
   const gdir = join(sessionsRoot, group)
   const candidates = sessionLogsInGroup(gdir).slice(0, 15).map((session) => {
-    const state = runStateOf({ logPath: session.logPath, wsRoot: join(ROOT, 'research-workspace'), includeSessionIdentity: true })
+    const state = runStateOf({ logPath: session.logPath, wsRoot: DEV_WORKSPACE, includeSessionIdentity: true })
     // 字段名 = `activeBundle`（runStateOf 的返回契约）。曾写成 `state.active`（不存在的字段）→
     // bundle 恒 null → 交付代答闸读不到 review.md 的 readiness，只能报「无判定行」自拒
     // （2026-10-19 端到端实测：HITL2 推荐档被误挡，review 明明已 PASS）。
@@ -135,7 +137,7 @@ if (expectedCardKey === null) {
     if (slug !== null) {
       // 三操作桶发现正本 = run-state.bundleDirOf（根优先；位置只用于发现，D28）——本处
       // 曾手抄同一份桶循环，新增第四桶时两边会静默分叉（2026-10-27 卫生轮 维度2）。
-      const dir = bundleDirOf(join(ROOT, 'research-workspace'), slug)
+      const dir = bundleDirOf(DEV_WORKSPACE, slug)
       // 用**pack 的终局判据**（与 UI 同源；BUG-036 已把轮次仲裁修在它那里；门侧早已委托，
       // 此处不再有第二份 readiness）。
       if (dir !== null && existsSync(join(dir, 'review.md'))) {
@@ -426,7 +428,7 @@ try {
       for (let attempt = 0; attempt < 4; attempt++) {
         if (attempt > 0) await page.waitForTimeout(3000)
         const s2 = pendingLogPath !== null
-          ? runStateOf({ logPath: pendingLogPath, wsRoot: join(ROOT, 'research-workspace') })
+          ? runStateOf({ logPath: pendingLogPath, wsRoot: DEV_WORKSPACE })
           : { hitlPending: null }
         const batch = plan.callId !== null && pendingLogPath !== null
           ? answerBatchOf(readSessionEvents(pendingLogPath).events, plan.callId)
@@ -472,7 +474,7 @@ try {
   // = ReferenceError，裁决通过后必崩（答案已落地但 provenance 永远丢失，且 node --check 查不出）。
   const provAnswered = batchToAnswered(landedBatch, plan.questions).length > 0 ? batchToAnswered(landedBatch, plan.questions) : answered
   if (!DRY && provAnswered.length > 0 && (process.exitCode === 0 || intentFailed || customMissing)) {
-    const wsRoot = join(ROOT, 'research-workspace')
+    const wsRoot = DEV_WORKSPACE
     // 归属 = 被答会话自己的 bundle-bind（BUG-020 正修）：仅写命中归属，仅读/无绑定走延迟
     // 分支——旧字典序 activeBundle 在无关在飞 bundle 在场时误归（两次实测）。journal **现读**
     // （答案落地后 lead 可能已追加事件；绑定只增不减，现读信号面最全）。

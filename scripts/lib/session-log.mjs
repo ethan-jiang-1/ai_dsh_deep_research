@@ -4,7 +4,8 @@
 // selected session), while this module chooses one physical log and decodes it
 // without a shell or external subprocess.
 import { existsSync, lstatSync, readdirSync, readFileSync, statSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
+import { projectKey } from './workspace-root.mjs'
 import * as zlib from 'node:zlib'
 
 const LOG_CANDIDATES = [
@@ -44,7 +45,11 @@ export function findGroup(sessionsRoot, substring) {
  *  组不在场（未 source env.sh / 无 run 历史）→ undefined。三消费方（client-load-smoke /
  *  hitl-answer / watch-run）原各写一份同款一行——收敛为唯一正本（2026-10-13 结构重构）；
  *  判据本体复用 findGroup（子串可参数化的那一份），缺省子串 = research-workspace。 */
-export function researchWorkspaceGroup(sessionsRoot) {
+export function researchWorkspaceGroup(sessionsRoot, workspace = null) {
+  if (typeof workspace === 'string' && workspace !== '') {
+    const key = projectKey(resolve(workspace))
+    if (existsSync(join(sessionsRoot, key))) return key
+  }
   return findGroup(sessionsRoot, 'research-workspace')
 }
 

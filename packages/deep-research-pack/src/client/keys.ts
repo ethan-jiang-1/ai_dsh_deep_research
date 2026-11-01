@@ -54,6 +54,9 @@ export const RESEARCH_BRAND_MARK_SLOT = 'sidebar.brand.mark'
 /** 品牌名槽（宿主 ui-sidebar 声明；Orca 名的落点——与 mark 槽并列的 single slot）。 */
 export const RESEARCH_BRAND_NAME_SLOT = 'sidebar.brand.name'
 
+/** 产品首屏起步卡的 dock 槽名（conversation.input.dock；D38）。 */
+export const RESEARCH_START_DOCK_SLOT = 'conversation.input.dock'
+
 /** 研究语义工具卡的 keyed 槽名（tool.call.toolview；key = wire 工具名，见 ResearchToolCard）。 */
 export const RESEARCH_TOOLVIEW_SLOT = 'tool.call.toolview'
 

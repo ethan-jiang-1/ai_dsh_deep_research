@@ -13,6 +13,7 @@
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readSessionText, sessionLogsSince } from '../lib/session-log.mjs';
+import { defaultGroupSubstring } from '../lib/workspace-root.mjs';
 import { turnEndErrorsOf, tallyTurnEndErrors, retryEventsOf } from '../lib/provider-errors.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -21,7 +22,7 @@ const arg = (name, fallback) => {
   return i === -1 ? fallback : process.argv[i + 1];
 };
 const DAYS = Number(arg('days', '30'));
-const GROUP = arg('group', 'research-workspace');
+const GROUP = arg('group', defaultGroupSubstring() ?? 'research-workspace');
 const JSON_OUT = process.argv.includes('--json');
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;

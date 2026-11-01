@@ -12,6 +12,7 @@ import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { sessionsOfBundleCached } from '../lib/bundle-sessions.mjs'
 import { readZstdText } from '../lib/zstd-read.mjs'
+import { defaultGroupSubstring } from '../lib/workspace-root.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2)
@@ -46,7 +47,7 @@ if (!existsSync(sessionsRoot)) {
 const cachePath = resolve(opt('--cache', join(process.env.DSH_RUN_STATE_DIR ?? join(ROOT, 'runtime', 'smoke-workspace'), 'bundle-sessions-cache.json')))
 // 扫描面：run 会话的 cwd = research-workspace，会话按 cwd 分组成目录（组名 = 转义后的绝对路径）。
 // 默认只扫匹配组（实测全量 2,069 个日志冷启 ~1 分钟；组内 767 个 ≈ 1/3）；`--all` 扫整根。
-const group = opt('--group', 'research-workspace')
+const group = opt('--group', defaultGroupSubstring() ?? 'research-workspace')
 const groupRoots = existsSync(sessionsRoot)
   ? readdirSync(sessionsRoot, { withFileTypes: true })
     .filter((d) => d.isDirectory() && d.name.includes(group))

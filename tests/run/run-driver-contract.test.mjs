@@ -116,25 +116,21 @@ test('驱动入口不绕过漂移门：boot 必须经 dev/boot-run.sh，禁止�
 // 其中三处仍指 boot-run（前台起、不验浏览器面、不打印呈交块），与 00-index 的 run-driver
 // 首动作分裂。这里钉"首动作一致"：不是禁止 boot-run（它是底层），而是禁止它出现在
 // "用户问怎么启动"的第一条动作位上。
-test('启动首动作一致：README / 00-index / project-map / 61 第一条动作都是 run-driver up', () => {
+test('启动首动作一致：产品行 = launcher；开发行 = run-driver', () => {
   const lineOf = (rel, needle) => {
     const line = read(rel).split('\n').find((l) => l.includes(needle));
     assert.ok(line !== undefined, `${rel} 找不到含「${needle}」的行——首动作位缺席`);
     return line;
   };
-  const first = [
-    ['README.md', '跑一次研究'],
-    ['docs/00-index.md', '启动这个 DSH 插件'],
-    ['docs/project-map.md', '| 启动一次研究 |'],
-    ['docs/guides/61-run-playbook.md', '- 启动：'],
-  ];
-  for (const [rel, needle] of first) {
-    const line = lineOf(rel, needle);
-    assert.ok(
-      line.includes('run-driver.mjs up'),
-      `${rel} 的启动首动作不是 run-driver.mjs up：${line.slice(0, 120)}——boot-run 只作底层/前台备选`,
-    );
-  }
+  // 产品用户：启动首动作 = dsh-deep-research（D38）；开发通道：run-driver。
+  assert.ok(lineOf('README.md', 'dsh-deep-research').includes('dsh-deep-research'), 'README 产品首动作缺席');
+  assert.ok(lineOf('README.md', 'dev/run-driver.mjs up').includes('run-driver.mjs up'), 'README 开发入口缺席');
+  const productRow = lineOf('docs/00-index.md', '（产品用户）');
+  assert.ok(productRow.includes('dsh-deep-research'), '00-index 产品行首动作不是 launcher');
+  assert.ok(lineOf('docs/00-index.md', '启动一下').includes('run-driver.mjs up'), '00-index 开发行首动作不是 run-driver');
+  assert.ok(lineOf('docs/project-map.md', '| **启动产品（产品用户）** |').includes('dsh-deep-research'), 'project-map 产品行首动作不是 launcher');
+  assert.ok(lineOf('docs/project-map.md', '| 启动一次研究（开发通道） |').includes('run-driver.mjs up'), 'project-map 开发行首动作不是 run-driver');
+  assert.ok(lineOf('docs/guides/61-run-playbook.md', '- 启动：').includes('run-driver.mjs up'), 'guides/61 开发首动作不是 run-driver');
   // guides/61 §0 的"启动"行不得再以 boot-run 打头（否则同一页先说 boot-run、后说 run-driver）
   const guide = read('docs/guides/61-run-playbook.md');
   const runStart = guide.indexOf('## 0. 开跑');

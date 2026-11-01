@@ -11,10 +11,10 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
 
 test('归档路径三处一致：archive/drt_<slug>/（2026-10-20 审计 P1-2 反证）', () => {
-  const handbook = read('research-workspace/AGENTS.md')
+  const handbook = read('packages/deep-research-pack/workspace/AGENTS.md')
   const design = read('docs/design/50-agent-loop-and-state.md')
   const guide = read('docs/guides/61-run-playbook.md')
-  for (const [rel, text] of [['research-workspace/AGENTS.md', handbook], ['docs/design/50-agent-loop-and-state.md', design], ['docs/guides/61-run-playbook.md', guide]]) {
+  for (const [rel, text] of [['packages/deep-research-pack/workspace/AGENTS.md', handbook], ['docs/design/50-agent-loop-and-state.md', design], ['docs/guides/61-run-playbook.md', guide]]) {
     assert.ok(text.includes('archive/drt_<slug>/'), `${rel} 未写 archive/drt_<slug>/——归档目录名以盘上为准`)
   }
   assert.ok(!/archive\/<slug>/.test(guide), 'guides/61 仍出现 archive/<slug>（盘上是 drt_<slug>）')

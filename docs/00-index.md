@@ -8,41 +8,37 @@
 
 ## 先分流：用户要"用它"还是"改它"
 
-**先记住这条模型**：本包是 bundle + preset 的集合，**自身没有进程**——"启动它"始终等于"装进
-某个 profile + 起该 profile"（本仓 = `research` profile）。带着这个模型读下表：每行只给**一个
-首个动作**（会占住前台的已标出；本表覆盖用户对"启动 / 跑 / 装 / 改"的全部常见说法）：
+**先记住这条模型**：本包提供 bundle + preset + **产品 launcher**（D38）；运行时始终是 `dsh`。
+产品用户走 `dsh-deep-research`：launcher 装配自己的 `deep-research` profile、把用户工作区登记进
+DSH，run bundle/方法库留在工作区。开发者在本仓走 `research` profile + `research-workspace/` +
+run-driver。两条路径的命令与数据根不同，不要互相套用。
 
 | 用户的说法 | 走哪（该事的唯一 owner） | 首个动作 |
 |---|---|---|
-| "启动这个 DSH 插件""在单独的 DSH 环境（隔离 home）里跑/启动""跑起来看看""开跑"——**未指定别的 home 时就是本行，直接做、不要停下来问** | [guides/61](./guides/61-run-playbook.md) | `node dev/run-driver.mjs up`（起/复用通道 + 验浏览器面 + 给呈交 URL；**别**直接 `dsh --profile research`——那会绕过漂移检测、静默用旧镜像） |
-| "接着上次跑""继续那个研究" | [guides/61 §5](./guides/61-run-playbook.md) | 同一条 `node dev/run-driver.mjs up`；起来后新开 lead 会话说"继续 `<slug>` 这个 run" |
-| "装到我的 DSH""部署给别人 / 别的机器" | [pack README §部署](../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../_dist/安装手册.md)（出包 = `node scripts/dist/export-dist.mjs`） | `dsh --profile <p> --from-default-profile web --dump-config`（一次性；写的是 `DSH_HOME` 那个 home） |
-| "只验证插件还能挂载"（开发证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs` |
+| "用它""启动这个插件""跑研究""装到我的 DSH"（产品用户） | [pack README](../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) + [guides/65](./guides/65-run-forms.md) | `npm install -g dsh-deep-research-pack` → `dsh-deep-research --workspace <dir>` |
+| "在本仓启动/开跑/接着上次跑"（开发通道，默认 `runtime/harness-home`） | [guides/61](./guides/61-run-playbook.md) | `node dev/run-driver.mjs up`（起/复用通道 + 验浏览器面 + 呈交 URL） |
+| "装成产品 profile""换 profile/home""只装配不起 Web" | [guides/65](./guides/65-run-forms.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | `dsh-deep-research --profile <p> --home <h> --setup-only` |
+| "只验证插件还能挂载/安装"（证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `source dev/env.sh && node scripts/smoke/product-smoke.mjs`（或 preset/release-smoke） |
 | "改插件内容"（角色 / skill / 驾驶舱 / 部署面） | [guides/62](./guides/62-plugin-authoring.md) | 该页 §参与阶梯 + §改动影响面 |
-| "改本仓开发流程或仓库文档"（门禁 / docs / notes / 入口链 / 各 README；`packages/deep-research-pack/` 内随包分发的文档走上行"改插件内容"） | [guides/60 §1](./guides/60-dev-loop.md) | 按工作类型分支（入口链第 3–4 步在此展开） |
+| "改本仓开发流程或仓库文档"（门禁 / docs / notes / 入口链 / 各 README） | [guides/60 §1](./guides/60-dev-loop.md) | 按工作类型分支（入口链第 3–4 步在此展开） |
 
-**开跑前置**（只对第 1/2 行）：仓根 `pnpm install` 已跑 + `vendor/dsh` submodule 已 init +
-vendor 构建产物在场（`bash dev/vendor-build.sh`；boot 自检会拦）+
-`research-workspace` 已注册进 DSH（[61 §1](./guides/61-run-playbook.md)；run-kickoff 幂等补登）+
-`runtime/harness-home/.credentials.yaml` 有 `DEEPSEEK_API_KEY`（boot 本身 keyless）+
-运行端口空闲（缺省 3083；`DSH_RUN_PORT` 可换）。
-`bash dev/boot-run.sh` **自己 source `dev/env.sh`**——先 source 不是前置（`AGENTS.md §命令速查`
-那条 ⚠ 只约束须先 source 的脚本——清单以 [guides/60 §2](./guides/60-dev-loop.md) 命令列为准）。要它在你离开后继续服务 = [61 §0](./guides/61-run-playbook.md)
-的无人值守形态（§0.1 两路）。
+**开跑前置**（产品 / 开发两套）
 
-**歧义裁定**（两条规则谁管谁）：用户**未指定别的 DSH home** → 直接走第 1 行，不停下来发问
-（第 1 行的"不要问"只指"别问装哪个 home"；**在飞 run 的接续/新开照下面那条办，该问就问**）；
-只有他明说"装到我日用 / 别人的 DSH"、或目标 home 不是 `runtime/harness-home` 时才问一句
-"装到哪个 DSH home？"（本仓开发通道 = `runtime/harness-home`，先 `source dev/env.sh`；日用 =
-`~/.dsh`，**不要** source——两者装的东西不同）。
+- **产品**：DSH 满足 `engines.dsh` + Node 满足 `engines.node`；`dsh` 在 PATH；首次团队层需要 pnpm；
+  工作区可写；研究 run 需要模型凭据（首启/安装不需要）。
+- **开发**：仓根 `pnpm install` + vendor submodule + vendor 构建（`bash dev/vendor-build.sh`）；
+  `runtime/harness-home` 凭据；端口空闲（缺省 3083）；`research-workspace` 已注册（run-kickoff 幂等补登）。
+  `bash dev/boot-run.sh` 自己 source `dev/env.sh`；命令/前置唯一 owner = [guides/60 §2](./guides/60-dev-loop.md)。
 
-**裸动词也指第 1 行**："启动一下""启动一下这个""起一下"这类不点名对象的说法，指称由语境
-唯一消解——本仓里能被"启动"的就是插件的 DSH 环境，没有第二物。照第 1 行直接做，**不反问
-"启动什么"**；仅当当下对话正围着另一个明确可启动物（某条冒烟 / 探针 / 脚本）时才跟随该物。
+**歧义裁定**：用户未指定 home 时——产品用户默认 `$DSH_HOME`；开发通道默认
+`runtime/harness-home`（source env.sh）。"启动这个插件"没有额外上下文时默认指本仓开发通道；
+要给外部用户装产品走产品行。**开发通道**别绕过 run-driver 的漂移门（直接 `dsh --profile research`
+会用旧镜像）；**产品用户**直接用 launcher，不要手写 profile。
 
-**每次"启动"前先扫一眼在飞 run**：根目录下每个未归档 bundle（`archive/` 除外）都要报出来，
-接续 / 归档 / 新开问用户、带上 slug + mtime、**都不自己挑**——分类判据与问询全文 =
-[61 §0](./guides/61-run-playbook.md)。
+**裸动词也指开发通道**："启动一下""起一下"未点名对象时，默认指本仓 DSH 环境，首个动作 = `node dev/run-driver.mjs up`；仅当对话正围着另一个可启动物（某条冒烟/探针）时才跟随该物。
+
+**每次开发通道"启动"前先扫一眼在飞 run**：根目录下每个未归档 bundle（`archive/` 除外）都要报出来，
+接续/归档/新开问用户、带 slug + mtime；分类判据与问询全文 = [61 §0](./guides/61-run-playbook.md)。
 
 ## 文档组织原则
 

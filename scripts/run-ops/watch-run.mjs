@@ -12,7 +12,8 @@ import { existsSync, readdirSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { runStateOf, eventsRegressed, leadHitlCandidate } from '../lib/run-state.mjs'
-import { findGroup, resolveSessionLog } from '../lib/session-log.mjs'
+import { findGroup, researchWorkspaceGroup, resolveSessionLog } from '../lib/session-log.mjs'
+import { workspaceRoot } from '../lib/workspace-root.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const SID = process.argv[2]
@@ -22,10 +23,11 @@ const num = (name, dflt) => {
 }
 const INTERVAL_S = num('interval', 20)
 const TIMEOUT_MIN = num('timeout-min', 90)
-const GROUP_SUBSTR = (() => {
+const GROUP_ARG = (() => {
   const i = process.argv.indexOf('--group')
-  return i !== -1 && process.argv[i + 1] !== undefined ? process.argv[i + 1] : 'research-workspace'
+  return i !== -1 && process.argv[i + 1] !== undefined ? process.argv[i + 1] : null
 })()
+const WORKSPACE = workspaceRoot({ argv: process.argv.slice(2), env: process.env, defaultRoot: join(ROOT, 'research-workspace') })
 
 if (!SID || !/^[\w-]+$/.test(SID)) {
   console.error('watch-run: 用法 node --import tsx/esm scripts/run-ops/watch-run.mjs <session-id> [--interval 20] [--timeout-min 90] [--group <组名子串>]')
@@ -33,10 +35,10 @@ if (!SID || !/^[\w-]+$/.test(SID)) {
 }
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'runtime', 'harness-home')
 const sessionsRoot = join(home, 'sessions')
-const group = findGroup(sessionsRoot, GROUP_SUBSTR)
+const group = GROUP_ARG === null ? researchWorkspaceGroup(sessionsRoot, WORKSPACE.root) : findGroup(sessionsRoot, GROUP_ARG)
 if (group === undefined) {
   const groups = existsSync(sessionsRoot) ? readdirSync(sessionsRoot) : []
-  console.error(`watch-run: --group ${GROUP_SUBSTR} 无命中会话组（根 ${sessionsRoot}；在场组：${groups.join('、') || '（空）'}）——换子串（如 dev-smoke-workspace / runtime-smoke-workspace），或先 source dev/env.sh`)
+  console.error(`watch-run: 无命中会话组（workspace=${WORKSPACE.root}，--group=${GROUP_ARG ?? '(auto)'}；根 ${sessionsRoot}；在场组：${groups.join('、') || '（空）'}）——用 --group 指定子串（如 dev-smoke-workspace / runtime-smoke-workspace），或先 source dev/env.sh`)
   process.exit(2)
 }
 const logPath = resolveSessionLog(join(sessionsRoot, group, SID))
@@ -44,7 +46,7 @@ if (logPath === null) {
   console.error(`watch-run: 找不到会话日志（组 ${group} 下无 ${SID} 的 canonical 日志）——先 source dev/env.sh 并核对 session id`)
   process.exit(2)
 }
-const wsRoot = join(ROOT, 'research-workspace')
+const wsRoot = WORKSPACE.root
 
 const deadline = Date.now() + TIMEOUT_MIN * 60 * 1000
 let last = ''

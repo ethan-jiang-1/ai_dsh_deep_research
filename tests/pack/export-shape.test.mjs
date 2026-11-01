@@ -13,6 +13,7 @@ const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'packages'
 const HALVES = [
   ['host 半（宿主位）', 'index.ts'],
   ['client 半（驾驶舱）', 'client/index.ts'],
+  ['workspace-boot（产品工作区注册）', 'workspace-boot/index.ts'],
 ];
 
 test('插件两半：named exports 在场（inject/apply）且零 export default', () => {
@@ -20,7 +21,7 @@ test('插件两半：named exports 在场（inject/apply）且零 export default
     const src = readFileSync(join(SRC, ...rel.split('/')), 'utf8');
     assert.doesNotMatch(src, /export\s+default\b/, `${label} 出现 export default——unwrapExports 会解析到裸函数丢命名空间`);
     assert.match(src, /export\s+const\s+inject\b/, `${label} 缺 named export: inject`);
-    assert.match(src, /export\s+function\s+apply\b/, `${label} 缺 named export: apply`);
+    assert.match(src, /export\s+(?:async\s+)?function\s+apply\b/, `${label} 缺 named export: apply`);
   }
 });
 

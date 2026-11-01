@@ -10,7 +10,7 @@
   `package.json` 的 `files` 白名单决定，`tests/`、`docs/`、`notes/`、`_backlog/`、`runtime/`
   都不随包。
 - **贡献者** clone 的是整个开发仓库；`vendor/dsh` 是 pinned submodule，`runtime/` 是本地运行态，
-  `research-workspace/` 是运行场。
+  `research-workspace/` 是开发通道的运行场实例；产品工作区 = 任意目录（`dsh-deep-research --workspace`）。
 - 因此“用户不装垃圾”靠 pack `files` + 发布冒烟；“仓库不反复打扫”靠 `.gitignore` +
   入库判据 + 门禁。两者不是同一件事。
 
@@ -42,7 +42,7 @@
 
 - 凭据：`.credentials.yaml`、`.env*`（`.env.example` 除外）、`.envrc`、`*.pem`、`*.key`
 - 运行态：`runtime/harness-home/` 的 sessions/profiles/logs、`runtime/smoke-workspace/` 产物
-- 研究数据：`research-workspace/drt_*`、`archive/`、`_abandoned/`、`method-library.md`
+- 研究数据：`<workspace>/drt_*`、`archive/`、`_abandoned/`、`method-library.md`（dev 实例 = `research-workspace/`）
   （用户数据，无版本史；pack 侧只有格式正本）
 - 依赖/构建：`node_modules/`、`.pnpm-store/`、`packages/deep-research-pack/lib/`、`*.tgz`
 - 临时/缓存/日志：`*.log`、`*.tmp`、`.tmp*/`、`_tmp/`、`_cache/`、`coverage/`

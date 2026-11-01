@@ -22,7 +22,7 @@
 
 | 状态 | canonical 性质 | writer | reader |
 |---|---|---|---|
-| run bundle（`research-workspace/drt_<slug>/`） | **研究事实正本**——恢复本次研究所需的全部变量（D17/D28；位置=操作桶，状态从内容读；根 / `archive/drt_<slug>/` / `_abandoned/` 只用于发现）；`plan.md` 是 Lead 的执行图过程件（不是交付门），Team 板是当前会话的执行镜像 | 各角色按手册 owner 表写自己的文件 | 全角色、审计、仪表盘 |
+| run bundle（`<workspace>/drt_<slug>/`；dev 实例 = `research-workspace/drt_<slug>/`） | **研究事实正本**——恢复本次研究所需的全部变量（D17/D28；位置=操作桶，状态从内容读；根 / `archive/drt_<slug>/` / `_abandoned/` 只用于发现）；`plan.md` 是 Lead 的执行图过程件（不是交付门），Team 板是当前会话的执行镜像 | 各角色按手册 owner 表写自己的文件 | 全角色、审计、仪表盘 |
 | DSH session log（`runtime/harness-home/sessions/…`） | **执行事件正本**——模型/工具/HITL/present 事件流 | DSH 宿主 | watch-run、仪表盘、evidence-audit |
 | goal / 任务板 | 执行辅助——与 bundle 互为镜像，冲突以 bundle 文件事实为准 | DSH 宿主（goal 由 lead 钉住/暂停） | 人、仪表盘 |
 | 仪表盘 / 研究驾驶舱（观察面） | **派生观察**——fail-soft 只读投影，不是交付绿灯 | run-dashboard 脚本投影 / 驾驶舱 client 套件渲染 | 人 |
@@ -33,8 +33,9 @@
 检索/抓取/成员/交付）；写者通常是队员会话，页签需合并 lead + member 流。需要真 mtime 时必须先扩
 vendor `WorkspaceFileStat` 并升 pin，属上游改动。
 
-**安装侧状态不在四类内**：工作区种子账本（`.dsh-research-seed.json`）、scaffold 锁/sidecar、team 层依赖
-属于安装/升级面，不是研究状态；合同 = pack README §Data/§Compatibility + [guides/65 §3](../guides/65-run-forms.md)。
+**安装侧状态不在四类内**：工作区种子账本（`.dsh-research-seed.json`）、scaffold 锁/sidecar、team 层依赖、
+启动器设置（`deep-research.launcher.json`）属于安装/升级面，不是研究状态；合同 = pack README §Data/§Compatibility + [guides/65 §3](../guides/65-run-forms.md)。
+产品工作区 = 任意目录（`dsh-deep-research --workspace`）；dev 实例 = `research-workspace/`。
 角色与审计不得把它们当研究事实读写。
 
 ## 恢复优先级

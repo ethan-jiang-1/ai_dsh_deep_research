@@ -15,9 +15,9 @@ import { READ_INTENTS, READ_ORDER } from '../../scripts/lib/run-receipt.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
-const HANDBOOK = 'research-workspace/AGENTS.md'
+const HANDBOOK = 'packages/deep-research-pack/workspace/AGENTS.md'
 const SEED = 'packages/deep-research-pack/workspace/AGENTS.md'
-const TEMPLATE = 'research-workspace/templates/run/run.md'
+const TEMPLATE = 'packages/deep-research-pack/workspace/templates/run/run.md'
 
 test('手册承 D28 四节与位置语义（模型每轮都会读到的合同）', () => {
   const h = read(HANDBOOK)

@@ -42,6 +42,7 @@ import { fileURLToPath } from 'node:url'
 import { listRuns } from '../../packages/deep-research-pack/src/lib/run-context.ts'
 import { gateBundle } from '../lib/node-gate-core.mjs'
 import { nodeRunSource } from '../lib/run-source-node.mjs'
+import { workspaceRoot } from '../lib/workspace-root.mjs'
 import { readZstdText } from '../lib/zstd-read.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -80,7 +81,7 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
   if (latest) {
     // 自动审计只在根 + archive 里选最新；_abandoned 是停放桶，要审请显式点名 bundle。
     // 范围是显式参数（不再各写一份目录循环）；枚举规则归 run-context。
-    const ws = join(ROOT, 'research-workspace')
+    const ws = workspaceRoot({ argv: process.argv.slice(2), env: process.env, defaultRoot: join(ROOT, 'research-workspace') }).root
     const runs = await listRuns(nodeRunSource(ws), { buckets: ['root', 'archive'] })
     if (!runs.ok) {
       console.error(`node-gate: 无法枚举 run bundle（${runs.reason}${runs.detail === undefined ? '' : `：${runs.detail}`}）`)

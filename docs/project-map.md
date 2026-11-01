@@ -6,14 +6,16 @@
 
 ## 先建立模型
 
-本项目交付一个 DSH 插件包，自身没有独立研究进程。DSH 提供会话、工具、模型调用与团队机制；
-插件提供角色配置、方法论技能和研究驾驶舱；研究工作区承载问题、证据和报告。
+本项目交付一个产品化 DSH 插件包（bundle + 产品 launcher，D38），运行时没有独立研究进程。产品用户
+走 `dsh-deep-research`：launcher 装配 `deep-research` profile、登记用户工作区；本页的开发驱动
+（run-driver / `research` profile / `research-workspace/`）只描述 M2。DSH 提供会话、工具、模型调用与
+团队机制；插件提供角色配置、方法论技能和研究驾驶舱；用户工作区承载问题、证据和报告。
 
 | 面 | 负责什么 | 查哪里 |
 |---|---|---|
-| 产品包 | bundle、preset、产品 runtime skills、驾驶舱 client、部署 bin、发布种子、运行形态合同 | [pack README](../packages/deep-research-pack/README.md)、[插件作者指南](guides/62-plugin-authoring.md)、[运行形态合同](guides/65-run-forms.md) |
-| 启动与开发驱动 | vendor 构建、环境隔离、生成物同步、安装组合、web 启动、会话驱动 | [开发环](guides/60-dev-loop.md)、[boot-run](../dev/boot-run.sh) |
-| 研究运行数据 | 角色会话 cwd、共享手册、节点契约、模板、每次研究 bundle | [研究手册](../research-workspace/AGENTS.md)、[NODES](../research-workspace/NODES.md)、[状态与循环](design/50-agent-loop-and-state.md) |
+| 产品包 | bundle、preset、产品 launcher、产品 runtime skills、驾驶舱 client、部署 bin、发布种子、运行形态合同 | [pack README](../packages/deep-research-pack/README.md)、[插件作者指南](guides/62-plugin-authoring.md)、[运行形态合同](guides/65-run-forms.md) |
+| 启动与开发驱动 | 产品 launcher（用户路径）；vendor 构建、环境隔离、生成物同步、安装组合、web 启动、会话驱动（开发路径） | [开发环](guides/60-dev-loop.md)、[boot-run](../dev/boot-run.sh) |
+| 研究运行数据 | 用户工作区（dev 实例 = `research-workspace/`）：角色会话 cwd、共享手册、节点契约、模板、每次研究 bundle | [研究手册](../research-workspace/AGENTS.md)、[NODES](../research-workspace/NODES.md)、[状态与循环](design/50-agent-loop-and-state.md) |
 | 验证与调试 | 静态门禁、确定性回归、挂载/安装/浏览器 smoke、回放、run 审计和观察 | [验收合同](evaluation.md)、[脚本指令](../scripts/AGENTS.md)、[测试指令](../tests/AGENTS.md) |
 | 人机交互 | Web 中的问卡、会话流、任务板、驾驶舱与交付面板；独立 HTML 仪表盘提供观察投影 | [驾驶舱设计](design/40-research-cockpit.md)、[Run 指南](guides/61-run-playbook.md) |
 
@@ -27,13 +29,15 @@
 
 | 任务 | 首选入口 | 写盘 | 档位 | 事实来源 | 失败后的下一站 |
 |---|---|---|---|---|---|
-| 启动一次研究 | `node dev/run-driver.mjs up`（内部调 `bash dev/boot-run.sh`；想守前台看日志才直接跑 boot-run） | 是（会话与 bundle） | boot keyless；run 需凭据 | [Run 指南](guides/61-run-playbook.md) | boot 终端报错 → 下文「调试先看哪份事实」 |
+| **启动产品（产品用户）** | `dsh-deep-research --workspace <dir>`（首启装配 profile + 铺种子 + 登记工作区） | 是（profile/设置/种子/会话） | boot keyless；run 需凭据 | [pack README](../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | `--check` 看 profile/种子；见 guides/65 |
+| 启动一次研究（开发通道） | `node dev/run-driver.mjs up`（内部调 `bash dev/boot-run.sh`；想守前台看日志才直接跑 boot-run） | 是（会话与 bundle） | boot keyless；run 需凭据 | [Run 指南](guides/61-run-playbook.md) | boot 终端报错 → 下文「调试先看哪份事实」 |
 | 继续在飞 run | 同上；起来后 lead 会话说「继续 \<slug\>」 | 是 | 同上 | bundle 文件 + [Run 指南](guides/61-run-playbook.md) | bundle 缺件 → NODES 判据定位 |
 | 观察在飞 run | boot 自带后台仪表盘 + Web 驾驶舱 | 只读投影 | 浏览器 | [驾驶舱设计](design/40-research-cockpit.md) | 页签坏 → client-load-smoke |
 | 回答 HITL | Web GUI 选项卡（产品面）；代理代答 = `dev/hitl-answer.mjs`（开发面） | 是 | 浏览器；代答需真挂起在场 | [Run 指南](guides/61-run-playbook.md) | 卡未弹 → watch-run 看挂起谓词 |
-| 查看 run 状态与交付 | `research-workspace/drt_<slug>/` 文件事实（仪表盘只是投影） | 只读 | keyless | [NODES](../research-workspace/NODES.md) | 交付不明 → node-gate 门②③ |
+| 查看 run 状态与交付 | `<workspace>/drt_<slug>/` 文件事实（dev 实例 = `research-workspace/drt_<slug>/`；仪表盘只是投影） | 只读 | keyless | [NODES](../research-workspace/NODES.md) | 交付不明 → node-gate 门②③ |
 | 验证挂载（插件真挂载） | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs` | 否 | keyless 真挂载 | [开发环 §2](guides/60-dev-loop.md) | 红 → preset 源 + render-overlay 后复跑 |
-| 验证安装 | `source dev/env.sh && node scripts/smoke/release-smoke.mjs` | 是（测试 profile） | keyless（`--install-only` 跳凭据） | [开发环 §2](guides/60-dev-loop.md) | 红 → pack 发布集对账 |
+| 验证安装 | `source dev/env.sh && node scripts/smoke/product-smoke.mjs`（产品装配）/ `release-smoke`（安装域） | 是（测试 home/profile） | keyless（`--install-only` 跳凭据） | [开发环 §2](guides/60-dev-loop.md) | 红 → pack 发布集对账 |
+| 验证首启（产品面） | `node scripts/smoke/product-boot-smoke.mjs`（真 Web + 浏览器，无模型） | 是（测试 home/workspace） | keyless + 浏览器 | [开发环 §2](guides/60-dev-loop.md) | 红 → launcher/Host/StartCard |
 | 查漂移（镜像一致性） | boot-run 漂移门（启动即查，不静默用旧镜像）；复用已在飞通道时 `run-driver up/probe` 先跑 `boot-run --drift-only`（漂移 = NOT-RUN，不是绿） | 否 | keyless | boot-run 输出 + run-driver verdict | 红 → 按失败消息重装镜像、重启通道 |
 | 定位故障 | 下文「调试先看哪份事实」表 | 只读 | keyless | 现象 → 事实源映射 | 事实源看完仍不明 → watch-run / node-gate |
 

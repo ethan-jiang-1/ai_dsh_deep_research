@@ -8,6 +8,7 @@ opened: 2026-11-01
 > 立卡：2026-11-01 ｜ 状态：推敲中（用户 2026-11-01 授权静默自主执行） ｜ 类型：Task ｜ 结论倾向：现在做——首屏目标已列，待父卡确认信息密度与实现边界 ｜ 可关闭：否
 >
 > 落地位置：**S2（首屏产品可用）**；依赖 A1 的工作区/标题与 C2 的浏览器 harness，见[落地计划](../research/plugin-as-product/2026-11-01-landing-plan.md)。
+> 落地记录（2026-11-01）：`StartCard.tsx` + `start-card.ts` 判据 + `conversation.input.dock` 注册 + `product-boot-smoke` 首屏断言已交付；saved-session 自动切换仍是 P1。
 
 **问题与期望结果：** 产品启动器把 Web 起起来后，用户看到的是一个 blank Lead Session + 标准 DSH 聊天框 + 空的研究状态页签。用户不知道这是 Deep Research、该直接问研究问题、Lead 会先问三问、右栏是观察面、交付在终稿页签、当前工作区是哪个、没有 API key 能不能用。期望：首屏就是一个产品入口——品牌、当前工作区、起步指引、凭据提示、观察/交付入口说明；用户不需要读 README 才能开始第一场研究。
 

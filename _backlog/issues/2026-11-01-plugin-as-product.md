@@ -57,7 +57,7 @@ opened: 2026-11-01
 7. **种子副本**：推荐工作区里的手册/模板是"部署副本、落地归用户"（DSH agent-instructions 只能从 cwd 链注入；包内 `workspace/` 是只读源）。若要求手册也只读、不落工作区，需要另做 instruction loader/persona 注入，属另一方案。
 8. **实施范围/顺序**：推荐四张子卡按"运行时 → 首屏 → 文档分发 → 仓库对齐证据"推进；也可先做运行时 + 首屏 + 文档，dev 对齐延后。
 
-**下一步：** 已获用户授权，按[落地计划](../research/plugin-as-product/2026-11-01-landing-plan.md) S0–S4 执行；不再等待。S1 先做 launcher/Host/装配 + dev 根解析/projectKey，`product-smoke` 红→绿；每切片以 `pnpm verify`/`pnpm test`/product smokes 收口。
+**下一步：** S0–S4 技术面已交付（证据见 §落地记录）；剩用户首启业务验收与 P1（saved-session 自动切换、项目模式深化、产品内 onboarding）。技术证据归 agent，业务验收归用户；P1 按需另开卡/触发器。
 
 ## 已知与未决
 
@@ -158,6 +158,15 @@ opened: 2026-11-01
 | **S2 产品可用** | 首屏起步卡 + 工作区指示 + 凭据提示；浏览器 smoke | D + C2 | 首屏 Orca/工作区/三步/Lead/composer；saved-session 有指示 |
 | **S3 文档分发** | README/pack README/_dist/00-index/61/62/65/terms/D38 | B | `pnpm verify` 绿；`_dist` 一致；产品/开发作用域可辨 |
 | **S4 硬化验收** | 升级/半装/`.gitignore`/`--home`/项目模式；版本 bump；用户首启 | A/C/D/B | `release-smoke`/`product-smoke`/`product-boot-smoke` 绿；用户首启通过 |
+
+## 落地记录（2026-11-01，S0–S4 技术面）
+
+- **D38 + Note 已落**：[decisions D38](../../docs/decisions.md#d38)、[Note](../../notes/implemented/2026-11-01-plugin-as-product.md)。
+- **S1 骨架**：`scripts/launch.mjs` + `scripts/lib/launcher/*` + `src/workspace-boot/` + profile 装配/设置/种子/守卫；fake-dsh 单测与 `product-smoke` 绿。
+- **S2 首屏**：`StartCard.tsx` + `start-card.ts` 判据 + dock 注册；`product-boot-smoke` 绿（Orca/工作区标题/起步卡/Lead/cwd = 工作区）。
+- **S3 文档/分发**：README/pack README/00-index/61/62/65/project-map/design/terms/AGENTS/CONTRIBUTING；`_dist/安装手册.md` 由 `product-manual.md` 生成；版本 0.2.0。
+- **S4 硬化/证据**：`pnpm verify` 全绿、`pnpm test` 1046 pass、`pnpm typecheck` 绿、`release-smoke` ALL PASS、真实 `npm i -g` launcher bin 正常。
+- **残留（不在本次技术面关闭）**：saved-session 自动切回启动工作区（P1）、项目子目录 sandbox 的用户接受度、共享 home 可见性、团队层离线、Windows/Desktop/正式 npm 发布。首启手感/文案由用户业务验收；技术证据归 agent。
 
 ## 验收标准
 

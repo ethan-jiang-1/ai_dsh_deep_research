@@ -23,7 +23,8 @@ PORT="${DSH_RUN_PORT:-3083}"
 STATE_DIR="${DSH_RUN_STATE_DIR:-$ROOT/runtime/smoke-workspace}"
 mkdir -p "$STATE_DIR"
 STATE_DIR="$(cd "$STATE_DIR" && pwd)"
-WORKSPACE="${DSH_RUN_WORKSPACE:-$ROOT/research-workspace}"
+WORKSPACE="${DSH_RUN_WORKSPACE:-${DEEP_RESEARCH_WORKSPACE:-$ROOT/research-workspace}}"
+export DEEP_RESEARCH_WORKSPACE="$WORKSPACE"
 
 # BSD/GNU 都可用的 in-place sed：`sed -i.bak` 两派都接受，备份随即删除。
 sed_inplace() { sed -i.bak "$1" "$2" && rm -f "$2.bak"; }
@@ -235,4 +236,6 @@ fi
 export NODE_OPTIONS="--require $ISOLATION_GUARD${NODE_OPTIONS:+ $NODE_OPTIONS}"
 export DSH_ISOLATION_ANNOUNCE=1
 # web 输出 tee 进运行区日志：仪表盘 deep-link 从这里抓 token URL（缺席 → 页面不链，fail-soft）
+# 会话 cwd = 工作区（D38：产品 Host 也认 DEEP_RESEARCH_WORKSPACE；dev 通道同样真正生效）
+cd "$WORKSPACE"
 dsh --profile "$PROFILE" -- --port "$PORT" --no-open 2>&1 | tee "$STATE_DIR/web.log"

@@ -16,6 +16,7 @@ import { existsSync, readdirSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { findGroup, sessionLogsInGroup, readSessionEvents } from '../lib/session-log.mjs'
+import { defaultGroupSubstring } from '../lib/workspace-root.mjs'
 import { sessionTitleOf } from '../lib/run-state.mjs'
 import { filterEvents, tailEvents, formatEventLine, readableTitle } from '../lib/session-events-core.mjs'
 
@@ -36,7 +37,7 @@ if (target === undefined || flag('--help')) {
 }
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'runtime', 'harness-home')
 const sessionsRoot = resolve(opt('--sessions', join(home, 'sessions')))
-const groupSub = opt('--group', 'research-workspace')
+const groupSub = opt('--group', defaultGroupSubstring() ?? 'research-workspace')
 const group = findGroup(sessionsRoot, groupSub)
 if (group === undefined) {
   const groups = existsSync(sessionsRoot) ? readdirSync(sessionsRoot) : []

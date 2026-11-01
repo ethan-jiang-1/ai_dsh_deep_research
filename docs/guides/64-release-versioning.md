@@ -27,7 +27,7 @@
 1. 决定 semver 版本 `X.Y.Z`。
 2. 同 diff 改两处 `package.json` 的 `version`；若有 lockfile 影响，跑
    `pnpm install --lockfile-only`。
-3. `node scripts/dist/export-dist.mjs` 重导出 `_dist/安装手册.md` 与 tarball。
+3. `node scripts/dist/export-dist.mjs` 重导出 `_dist/安装手册.md` 与 tarball；产品面发布前跑 `node scripts/smoke/product-smoke.mjs` + `node scripts/smoke/product-boot-smoke.mjs`（缺前置 exit 2）。
 4. `pnpm verify && pnpm test && pnpm typecheck` 全绿；若本次发布**宣告新的 DSH 版本支持**，
    先在该版本的全局宿主上跑 `node scripts/smoke/compat-smoke.mjs` 与
    `node scripts/smoke/compat-client-smoke.mjs`（两者缺环境均 exit 2，未跑 ≠ 通过）。

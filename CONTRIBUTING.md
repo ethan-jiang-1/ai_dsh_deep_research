@@ -4,6 +4,13 @@ Thanks for helping improve the DSH Deep Research pack. This repository is both t
 plugin source and the development environment used to verify it; the shipped package
 is `packages/deep-research-pack`.
 
+## Product vs development
+
+The package ships a product entry (`dsh-deep-research`, D38). Product users install it and run it against
+their own workspace; the launcher assembles the `deep-research` profile, seeds the workspace and starts the
+Web UI. Development in this repository uses the isolated `research` profile, `research-workspace/` and
+`dev/run-driver.mjs` — do not mix the two command sets or data roots.
+
 ## Prerequisites
 
 - Node.js `^22.19.0 || >=24.0.0` (the range is pinned in `package.json`)
@@ -37,6 +44,16 @@ pnpm verify
 pnpm test
 pnpm typecheck
 ```
+
+Product-surface checks (real install / browser; no model calls):
+
+```sh
+node scripts/smoke/product-smoke.mjs
+node scripts/smoke/product-boot-smoke.mjs
+```
+
+They need pnpm, the team-layer registry/cache, and Playwright chromium (the repo's `.pnpm` store);
+missing prerequisites exit 2, not green.
 
 `pnpm verify` is the structural gate suite; `pnpm test` is the keyless regression
 suite. When you change a gate, also run:

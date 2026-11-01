@@ -6,16 +6,17 @@
 >
 > **编号消歧**：本文 M1/M2/M3 = 运行形态（mode：安装 / 独立开发 / 移交），不是 [evaluation §3](../evaluation.md) 的里程碑 M1/M2/M3+；跨文档引用写「运行形态 M1」。
 
-## 1. 三种运行形态
+## 1. 四种运行形态（M1 = 产品/手动两种入口）
 
 | 形态 | 谁在用 | 入口 | 边界 |
 |---|---|---|---|
-| **M1 安装形态** | 外部用户 | npm（发布后）/ tarball → `dsh plugin add` → profile | 用户自己的 `DSH_HOME` + 自选研究工作区 |
-| **M2 独立开发形态** | 贡献者 / 本地验证 | 本仓 + `bash dev/bootstrap.sh` + `node dev/run-driver.mjs up --bootstrap` | 默认仓内 `runtime/harness-home`；可用 `DSH_DEV_HOME` 指到仓外 |
+| **M1-product 产品形态** | 外部用户 | `dsh-deep-research`（launcher）→ 装配 `deep-research` profile → 用户工作区 | 用户自己的 `DSH_HOME`（默认共享；`--home` 可隔离）+ 自选工作区；插件内容在包内，产物在工作区 |
+| **M1-manual 手动安装** | 高级用户 / 已有 profile | npm/tarball → `dsh plugin add` → `scaffold --workspace` | 不自动写启动器设置；工作区需手动指定/登记 |
+| **M2 独立开发形态** | 贡献者 / 本地验证 | 本仓 + `bash dev/bootstrap.sh` + `node dev/run-driver.mjs up --bootstrap` | 默认仓内 `runtime/harness-home` + `research-workspace/`；可用 `DSH_DEV_HOME` 指到仓外 |
 | **M3 移交形态** | 交给另一人或另一台机器 | `scripts/dist/export-handoff.mjs`（源码）或 `export-dist.mjs`（插件） | 不是复制工作树；运行态/凭据/run 数据不随包 |
 
-**决定：A 为主，B 作为可安装门槛，C 不做。** A = 独立 `DSH_HOME` + profile + workspace；B = pack 目录在
-`pnpm build` 后可 `dsh plugin add file:<目录>`（安装时复制进 profile；移动源目录后旧路径不能重装/升级，需 remove 后从新路径 add；`link:` 才是移动即断链）；C = `cp -r` 整个工作树，
+**决定：A 为主，B 作为可安装门槛，C 不做。** A = 产品 launcher（装配 profile + 登记工作区 + 起 Web）+ 用户工作区；
+B = pack 目录在 `pnpm build` 后可 `dsh plugin add file:<目录>`（安装时复制进 profile；移动源目录后旧路径不能重装/升级，需 remove 后从新路径 add；`link:` 才是移动即断链）；C = `cp -r` 整个工作树，
 会带走凭据/会话/run 数据，不提供。移交改用 M3。
 
 ## 2. 三块存储
@@ -23,13 +24,13 @@
 | 存储 | 内容 | owner / 可写方 | 升级与移交 |
 |---|---|---|---|
 | **P 插件 / 智能体定义** | pack 的 `presets/`、`skills/`、`cordis.patch.yml`、`workspace/` 种子、`lib/` | 包 = 只读；安装副本不改 | 换包版本；`workspace/seed.json` 记录种子版本/哈希 |
-| **H DSH 状态** | sessions、credentials、profiles、settings | 用户 / 实例；`$DSH_HOME` | 按 home 隔离；不随源/包移交 |
-| **W 研究数据** | `drt_<slug>/`、`archive/`、`_abandoned/`、`method-library.md` | 用户工作区；角色按手册 owner 表写 | 用户所有；方法库不随插件升级覆盖；run bundle 单独移交 |
+| **H DSH 状态** | sessions、credentials、profiles、settings；产品 profile + 启动器设置（`deep-research.launcher.json`） | 用户 / 实例；`$DSH_HOME` | 按 home 隔离；不随源/包移交 |
+| **W 研究数据** | `<workspace>` 的 `drt_<slug>/`、`archive/`、`_abandoned/`、`method-library.md`、种子 | 用户工作区；角色按手册 owner 表写 | 用户所有；方法库不随插件升级覆盖；run bundle 单独移交 |
 
 P 里的 `workspace/` 是**只读种子**：落地后归 W，由用户工作区拥有；它不是运行时智能体定义的第四份副本。
 
-`research-workspace/` 是 M2 的工作区，不是包的一部分；`dev/` 只住源码驱动，运行态住 `runtime/` 或工作区
-（门禁 `dev-runtime-clean` 直接看盘）。pack 的 `files` 白名单只发运行所需，发布物不含状态。
+`research-workspace/` 是 M2 的仓内工作区实例，不是包的一部分；产品用户的工作区是任意目录（`--workspace`）。
+`dev/` 只住源码驱动，运行态住 `runtime/` 或工作区（门禁 `dev-runtime-clean` 直接看盘）。pack 的 `files` 白名单只发运行所需，发布物不含状态。
 
 **与 DSH 6+2 数据平面的映射**（FAQ 24 的切法；P/H/W 是导航粗分，不是排他分区）：
 
@@ -37,7 +38,7 @@ P 里的 `workspace/` 是**只读种子**：落地后归 W，由用户工作区�
 |---|---|---|
 | D 定义 | `presets/`、`skills/`、`cordis.patch.yml` | 只读；包版本绑定 |
 | C 代码 | `lib/`、`src/` | 只读；安装副本不改 |
-| W workspace | `research-workspace/`（`AGENTS.md`/`NODES.md`/`drt_*`/`method-library.md`） | 角色读写；client 只读 |
+| W workspace | 用户工作区（`AGENTS.md`/`NODES.md`/`drt_*`/`method-library.md`）；dev 实例 = `research-workspace/` | 角色读写；client 只读 |
 | U home | `$DSH_HOME/`（AGENTS.md、skills、storages、sessions、profiles、cache、credentials）与 `~/.agents` | 本包只经 DSH 服务；不手写 |
 | S session | `$DSH_HOME/sessions/`（物理在 home，逻辑独立） | 经会话服务/日志；不新增 event 类型 |
 | H host state | `$DSH_HOME/storages/` | 本包不声明 storage domain |
@@ -51,6 +52,23 @@ bundle 自证的是「交付了什么、谁拍的板」，不是「审计跑过�
 `可移植` 列；分布规则 = 一处事实一个家，不因移交复制第二份权威。
 
 ## 3. 安装、升级、卸载
+
+**产品路径（M1-product，推荐）**
+
+```sh
+npm install -g dsh-deep-research-pack        # 或 tarball
+dsh-deep-research --workspace <ws>           # 首启装配 profile + 铺种子 + 登记工作区
+dsh-deep-research --check --workspace <ws>   # 只读检查
+dsh-deep-research --setup-only --workspace <ws>
+```
+
+launcher 只在 profile 不存在时从 Web 模板初始化；已有 profile 只补缺，不重置、不触碰用户 patch。
+安装/升级由 `dsh plugin` 写 profile；启动器只写一个 profile-local 设置文件。升级 = 换启动器包后
+重启产品命令；种子升级用 `dsh-deep-research-scaffold --check/--upgrade`。卸载 = 停 profile →
+`dsh plugin --profile deep-research remove dsh-deep-research-pack`；团队层可单删；profile 可显式删；
+工作区保留。
+
+**手动路径（M1-manual）**
 
 - **前置**：DSH 满足包内 `engines.dsh`（值以 `package.json` 为准）；Node 满足 `engines.node`；`dsh` 在 PATH，
   首次补团队层需要 pnpm。团队机制层 `@deepseek-ai/dsh-experimental-agent-team-profile` 是 **N2 experimental**

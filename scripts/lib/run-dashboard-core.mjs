@@ -17,12 +17,13 @@ import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-
 import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts';
 
 /** 多 run 场根（debug-dashboard-plus）：drt 正规场 + ad-hoc 场（无契约，标注呈现不隐藏） */
+const WORKSPACE = process.env.DSH_RUN_WORKSPACE || process.env.DEEP_RESEARCH_WORKSPACE || 'research-workspace';
 const SCENE_ROOTS = [
-  { dir: 'research-workspace', kind: 'drt', label: 'drt' },
+  { dir: WORKSPACE, kind: 'drt', label: 'drt' },
   // 归档/停放场（D28：位置=操作桶，不是状态）：仍进多 run 总表（历史不丢）；
   // label 区分桶，避免与根场混淆。
-  { dir: 'research-workspace/archive', kind: 'drt', label: 'drt·归档' },
-  { dir: 'research-workspace/_abandoned', kind: 'drt', label: 'drt·停放' },
+  { dir: `${WORKSPACE}/archive`, kind: 'drt', label: 'drt·归档' },
+  { dir: `${WORKSPACE}/_abandoned`, kind: 'drt', label: 'drt·停放' },
   { dir: 'runtime/harness-home/runs', kind: 'ad-hoc', label: 'ad-hoc·无契约' },
 ];
 /** lead 会话日志根（HITL 等待检测；选择器按 v4/v3 canonical 代际挑选一个物理日志）。 */

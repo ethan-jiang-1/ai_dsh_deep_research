@@ -1,5 +1,14 @@
 /** Method Library view action and operation-status copy. */
 export const zh = {
+  startTitle: 'Deep Research · 一支多角色研究团队',
+  startAria: 'Deep Research 起步指引',
+  startWorkspace: '当前工作区',
+  startWorkspaceUnknown: '工作区信息暂不可用',
+  startStep1: '① 直接问一个研究问题——Lead 会先确认研究类型 / 深度与篇幅 / 时间口径与语言。',
+  startStep2: '② 确认计划后，团队在后台工作；右栏「研究状态」看进度与等你拍板的问询。',
+  startStep3: '③ 交付后，右栏「终稿」读读者版；需要审计源时切换。',
+  startCredentials: '有 DEEPSEEK_API_KEY 时搜索/抓取回退完整；只有 DeepSeek 账号登录也能开始（搜索可用、抓取回退降级为本地）。',
+  startSwitchWorkspace: '换工作区：用上方的 Workspace 选择器。',
   methodLibrary: '方法库',
   searchMethods: '搜索方法…',
   libraryPane: '库列表',
@@ -82,6 +91,15 @@ export const zh = {
 export type DeepResearchPackLocaleKey = keyof typeof zh
 
 export const en = {
+  startTitle: 'Deep Research · a multi-role research team',
+  startAria: 'Deep Research getting-started guide',
+  startWorkspace: 'Current workspace',
+  startWorkspaceUnknown: 'Workspace information is not available yet',
+  startStep1: '① Ask a research question — the Lead first confirms research type, depth/length, and time scope/language.',
+  startStep2: '② After the plan is confirmed, the team works in the background; follow progress and pending questions in the “Research Status” tab.',
+  startStep3: '③ After delivery, read the reader edition in the “Final” tab; switch to the audit source when needed.',
+  startCredentials: 'A DEEPSEEK_API_KEY gives full search/fetch fallback; a DeepSeek account login also works (search available, fetch fallback degrades to local).',
+  startSwitchWorkspace: 'Switch workspace: use the Workspace picker above.',
   methodLibrary: 'Method library',
   searchMethods: 'Search methods…',
   libraryPane: 'Library',

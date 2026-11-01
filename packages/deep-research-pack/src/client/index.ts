@@ -33,7 +33,7 @@ import {
   RESEARCH_FINAL_PATTERN_LEDGER, RESEARCH_FINAL_PATTERN_LEDGER_ROOT,
   RESEARCH_FINAL_PATTERN_READER, RESEARCH_FINAL_PATTERN_READER_ROOT,
   RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT, RESEARCH_TOOL_KEYS, METHOD_LIBRARY_TOOL, METHOD_LIBRARY_REMOVE, METHOD_LIBRARY_DEFAULT,
-  RESEARCH_BRAND_MARK_SLOT, RESEARCH_BRAND_NAME_SLOT, METHOD_LIBRARY_VIEW,
+  RESEARCH_BRAND_MARK_SLOT, RESEARCH_BRAND_NAME_SLOT, RESEARCH_START_DOCK_SLOT, METHOD_LIBRARY_VIEW,
   METHOD_COACH_PORTAL, METHOD_COACH_PORTAL_ID, METHOD_COACH_CHAT,
 } from './keys.ts'
 import { IconBranchOutlineRegular, IconGaugeOutlineRegular, IconSettingsOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
@@ -50,6 +50,7 @@ import { joinMethodLibraryPages, type MethodLibraryReadResult } from '../lib/met
 import { methodLibraryCoachEventOf } from '../lib/method-library-events.ts'
 import type { MethodLibraryCoachEvent } from '../lib/method-library-events.ts'
 import { OrcaMark, OrcaName } from './BrandMark.tsx'
+import { StartCard, type StartCardInjected } from './StartCard.tsx'
 import { draftInProgress, finalAddressOf, isFinalAddress, latestFinalDelivery, shouldOpenFinal } from '../lib/final-target.ts'
 
 /** Required services：槽注册表（renderer）+ 右栏页签注册器 + 右栏导航面（openTab——挂起显性化）+ remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
@@ -82,6 +83,36 @@ export function apply(ctx: ClientContext): void {
         } else if (frame.type === 'event') {
           yield { kind: 'event', event: frame.event }
         }
+      }
+    }
+
+    // 首屏起步卡的一次性探测：follow 的首帧 snapshot 里有没有用户消息；拿到就 abort，
+    // 不订阅后续事件。失败按"没有消息"处理（卡片仍显示，不红错）。
+    const hasUserMessage = async (sessionId: SessionId): Promise<boolean> => {
+      const controller = new AbortController()
+      try {
+        for await (const frame of follow(sessionId, controller.signal)) {
+          if (frame.kind === 'history') return frame.events.some((event) => (event as { type?: string } | null)?.type === 'user/message')
+          return false
+        }
+      } catch {
+        return false
+      } finally {
+        controller.abort()
+      }
+      return false
+    }
+
+    // 当前 Session 所属 Workspace 的显示信息（vendor picker 已显示标题；卡片再给路径）。
+    const workspaceOf = (sessionId: SessionId): { title: string; path: string } | null => {
+      try {
+        const snapshot = (scoped.workspaces as unknown as {
+          list: { getSnapshot(): { items: readonly { title: string; path: string; sessionIds: readonly SessionId[] }[] } }
+        }).list.getSnapshot()
+        const item = snapshot.items.find((workspace) => workspace.sessionIds.includes(sessionId))
+        return item === undefined ? null : { title: item.title, path: item.path }
+      } catch {
+        return null
       }
     }
 
@@ -355,6 +386,25 @@ export function apply(ctx: ClientContext): void {
     // 挂起显性化入口（RFC right-pane-ux-debt）：pending 迁移时页签体调用——openTab 落定时
     // 右栏同步骤展开（vendor sidebar-right 契约）；页签体在折叠态保持挂载（dock 不卸载）。
     const revealStatusTab = () => { scoped.sidebarRight.openTab(RESEARCH_STATUS_TAB_KIND) }
+
+    // 产品首屏起步卡（D38 / S2）：blank Session + 工作区无 drt_* + 无用户消息时显示。
+    // 用现有 dock slot，不新增模型可见文本；工作区读失败仍显示，不阻塞 composer。
+    scoped.effect(() => scoped.slots.inject(RESEARCH_START_DOCK_SLOT, () => scoped.slots.register({
+      name: RESEARCH_START_DOCK_SLOT,
+      id: 'deep-research-start',
+      order: 5,
+      locale: 'deepResearchPack',
+      inject: (sessionId: SessionId): StartCardInjected => {
+        const workspace = workspaceOf(sessionId)
+        return {
+          sessionId,
+          workspaceTitle: workspace?.title ?? null,
+          workspacePath: workspace?.path ?? null,
+          listDir: async (sessionId, path, signal) => (await listDir(sessionId, path, signal)) ?? [],
+          hasUserMessage,
+        }
+      },
+    }, StartCard)), 'deep-research-pack: start card')
 
     scoped.effect(() => scoped.slots.inject(RESEARCH_PANE_SLOT, () => [
       scoped.slots.register(

@@ -33,6 +33,7 @@ import { fileURLToPath } from 'node:url'
 import { listRuns } from '../../packages/deep-research-pack/src/lib/run-context.ts'
 import { auditBundle } from '../lib/evidence-audit-core.mjs'
 import { nodeRunSource } from '../lib/run-source-node.mjs'
+import { workspaceRoot } from '../lib/workspace-root.mjs'
 import { readZstdText } from '../lib/zstd-read.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -75,7 +76,7 @@ if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(
   if (latest) {
     // D28：根 / archive/ / _abandoned/ 都是操作桶，--latest 三处并扫取 mtime 最新；
     // 同名时根优先（只作发现，不把位置当状态）。枚举规则归 run-context。
-    const ws = join(ROOT, 'research-workspace')
+    const ws = workspaceRoot({ argv: process.argv.slice(2), env: process.env, defaultRoot: join(ROOT, 'research-workspace') }).root
     const runs = await listRuns(nodeRunSource(ws), { buckets: ['root', 'archive', 'abandoned'] })
     if (!runs.ok) {
       console.error(`evidence-audit: 无法枚举 run bundle（${runs.reason}${runs.detail === undefined ? '' : `：${runs.detail}`}）`)

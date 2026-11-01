@@ -8,6 +8,7 @@ opened: 2026-11-01
 > 立卡：2026-11-01 ｜ 状态：推敲中（用户 2026-11-01 授权静默自主执行） ｜ 类型：Task ｜ 结论倾向：现在做——文档目标已列，待父卡确认产品门面措辞、首屏文案与版本策略 ｜ 可关闭：否
 >
 > 落地位置：**S3（文档与分发）**；可先起草，最终依赖 A/D 的 flag/文案，见[落地计划](../research/plugin-as-product/2026-11-01-landing-plan.md)。
+> 落地记录（2026-11-01）：README/pack README/00-index/61/62/65/project-map/design/terms/AGENTS/CONTRIBUTING + `product-manual.md` → `_dist/安装手册.md`；版本 0.2.0；`pnpm verify` 绿。
 
 **问题与期望结果：** 产品运行时改完后，文档仍会在四处把用户带回旧路径：根 README 的首个动作是 `run-driver`，`_dist/安装手册.md` 是五步手动安装，`docs/00-index.md` 说"别直接 `dsh --profile`"，`docs/guides/62` 说"别把本包写成 profile"；首屏也没有告诉用户"这是什么、从哪开始、当前工作区"。期望：README、pack README、`_dist` 安装手册与全仓文档统一讲"一条产品命令 → 选工作区 → 首屏起步 → 产物在用户工作区"，开发通道单独成面，不再互相污染。
 

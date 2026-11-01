@@ -18,13 +18,21 @@
 // Page 鸭子类型接口）——保留薄 CDP 适配层，但选择器策略从本 lib 取：纯常量
 // SHOW_MORE_SESSIONS_PATTERN（regex source 字符串）供其 evaluate 字符串插值消费。
 //
+import { basename } from 'node:path'
+
 // 零依赖：page 按 Playwright Page 鸭子类型使用，不 import playwright——lib 面保持
 // keyless-闭包友好（tests/layering 闭包图不因本模块引入浏览器依赖）；真浏览器证据
 // 仍归消费方冒烟档（client-load-smoke / e2e-021rc2）。
 
 /** 侧栏候选分组名（折叠态逐组展开的目标序；组随会话 cwd 走——BUG-002 清扫轮实证：
  *  老 ad-hoc 会话在 harness-home 组，不在 research-workspace）。两消费方共用同一份。 */
-export const SIDEBAR_GROUP_CANDIDATES = ['research-workspace', 'harness-home', 'Ungrouped', 'rehearsal-workspace']
+const productWorkspace = process.env.DEEP_RESEARCH_WORKSPACE
+const productGroupTitle = typeof productWorkspace === 'string' && productWorkspace !== '' ? `Deep Research — ${basename(productWorkspace)}` : null
+const DEFAULT_GROUP_TITLE = productGroupTitle ?? 'research-workspace'
+export const SIDEBAR_GROUP_CANDIDATES = [
+  ...(productGroupTitle === null ? [] : [productGroupTitle]),
+  'research-workspace', 'harness-home', 'Ungrouped', 'rehearsal-workspace',
+]
 
 /** 「Show N more sessions」按钮文本模式（regex source 字符串，**不是 RegExp 实例**：
  *  CDP 消费方要把这个模式插进 evaluate 字符串，JSON.stringify(RegExp) 会丢 source；
@@ -207,7 +215,7 @@ export function locateSessionStrategy(obs) {
  * @returns `{ row, via }`（via = 'direct'|'named-group'|'sweep'|'show-more'）或 null。
  */
 export async function revealSessionRow(page, sessionId, opts = {}) {
-  const { groupTitle = 'research-workspace', sweepAttempts = 300, showMoreRounds = 40 } = opts
+  const { groupTitle = DEFAULT_GROUP_TITLE, sweepAttempts = 300, showMoreRounds = 40 } = opts
   const row = page.locator(`[data-row-key="session:${sessionId}"]`)
   const visible = async () => (await row.count().catch(() => 0)) > 0
     && await row.first().isVisible().catch(() => false)

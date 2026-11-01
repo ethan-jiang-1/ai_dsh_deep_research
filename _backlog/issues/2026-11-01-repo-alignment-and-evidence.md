@@ -8,6 +8,7 @@ opened: 2026-11-01
 > 立卡：2026-11-01 ｜ 状态：推敲中（用户 2026-11-01 授权静默自主执行） ｜ 类型：Task ｜ 结论倾向：现在做——对齐面已列，待父卡确认实施顺序 ｜ 可关闭：否
 >
 > 落地位置：**S1（C1 dev 根解析/projectKey）+ S2（C2 product-boot-smoke）+ S4（硬化）**；见[落地计划](../research/plugin-as-product/2026-11-01-landing-plan.md)。
+> 落地记录（2026-11-01）：`scripts/lib/workspace-root.mjs`（projectKey/默认组）+ run-ops/run-gates/hitl-answer/watch-run/boot-run 迁移 + 测试迁移 + `product-smoke`/`product-boot-smoke` 已交付；残留见父卡。
 
 **问题与期望结果：** 产品启动器让任意目录成为工作区后，仓库调试工具仍会断：`dev/boot-run.sh` 的 `DSH_RUN_WORKSPACE` 只 echo 不使用，`dev/run-kickoff.mjs:184` 与 `dev/hitl-answer.mjs` 写死 `research-workspace`，`scripts/lib/session-log.mjs:38-49` 用 `research-workspace` substring 找会话组。大量测试又把仓内 `research-workspace/` 当随包权威。期望：dev 工具能对任意工作区工作；测试以 pack 种子为随包权威；新增产品 smoke 证明装配 + 首启绑定 + 首屏可用；门禁台账同步。
 

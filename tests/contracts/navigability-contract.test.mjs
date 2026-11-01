@@ -35,7 +35,7 @@ test('正本门：project-map / 61 链接 design/50，NODES 持纯文本指针',
   }
   // NODES.md 随 pack workspace 种子部署到用户侧，不能携带仓内相对链接（种子副本会被
   // md-links 扫描）——断言纯文本指针在场即可
-  assert.ok(read('research-workspace/NODES.md').includes('design/50-agent-loop-and-state.md'), 'NODES.md 未指向 design/50');
+  assert.ok(read('packages/deep-research-pack/workspace/NODES.md').includes('design/50-agent-loop-and-state.md'), 'NODES.md 未指向 design/50');
 });
 
 test('导航门：任务入口矩阵九任务全覆盖，链接目标全部在场', () => {
@@ -117,7 +117,7 @@ test('正本门 spot-grep：状态合同词不在非 owner 文档重述', () => 
   }
   const nonOwners = ['docs/project-map.md', 'docs/guides/61-run-playbook.md', 'docs/guides/60-dev-loop.md',
     'docs/00-index.md', 'README.md', 'AGENTS.md', 'packages/deep-research-pack/README.md',
-    'research-workspace/AGENTS.md', 'research-workspace/NODES.md', ...skills];
+    'packages/deep-research-pack/workspace/AGENTS.md', 'packages/deep-research-pack/workspace/NODES.md', ...skills];
   for (const doc of nonOwners) {
     if (!existsSync(join(ROOT, doc))) continue;
     const text = read(doc);

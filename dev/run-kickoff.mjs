@@ -181,7 +181,7 @@ async function closingRowForPending(sid) {
     if (slug === null) { console.error('run-kickoff: 记账跳过——归属未定（attributionBundleOf=null：该会话尚无 write/edit 命中任何 bundle，按纪律延迟补记）'); return null }
     // 三操作桶发现正本 = run-state.bundleDirOf（与本件原先手抄的桶循环等价；D28 根优先）。
     const name = `drt_${String(slug).replace(/^drt_/, '')}`
-    const dir = bundleDirOf(join(ROOT, 'research-workspace'), name)
+    const dir = bundleDirOf(defaultWorkspace, name)
     if (dir !== null && existsSync(join(dir, 'question.md'))) return { cardKey, bundleDir: dir, slug: name }
     console.error('run-kickoff: 记账跳过——三位置找不到 drt_' + String(slug).replace(/^drt_/, '') + ' 的 question.md')
     return null

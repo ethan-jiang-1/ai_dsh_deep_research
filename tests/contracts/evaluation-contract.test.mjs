@@ -74,8 +74,8 @@ test('证据身份链契约存在（L3 判据 3 的载体）', () => {
 //    副本允许存在，但副本与正本漂移必须变红——不是只在手册里出现过就算数）──
 const FIELDS = ['source_url', 'retrieved_at', 'quality', 'found_by', 'supports', 'source_tier', 'publisher'];
 const CONTRACT_COPIES = [
-  ['研究手册（语义正本）', 'research-workspace/AGENTS.md'],
-  ['run 模板副本', 'research-workspace/templates/run/evidence-entry.md'],
+  ['研究手册（语义正本）', 'packages/deep-research-pack/workspace/AGENTS.md'],
+  ['run 模板副本', 'packages/deep-research-pack/workspace/templates/run/evidence-entry.md'],
   ['analyst skill 副本（执行者实际看的）', 'packages/deep-research-pack/presets/analyst/skills/evidence-extraction/SKILL.md'],
   ['analyst persona 内联副本（0.1.7 preset 行）', 'packages/deep-research-pack/presets/analyst.patch.yml'],
   ['方法论映射（L3 载体）', 'docs/design/30-methodology-mapping.md'],

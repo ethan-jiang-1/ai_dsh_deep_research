@@ -24,7 +24,24 @@ test('T0 exports：入口与 client 都有声明，且不依赖未发布源码',
   assert.equal(pkg.exports?.['.']?.default, './lib/index.js')
   assert.equal(pkg.exports?.['./client']?.default, './lib/client.js')
   assert.equal(pkg.exports?.['./client']?.types, './lib/types/client/index.d.ts')
+  assert.equal(pkg.exports?.['./workspace-boot']?.default, './lib/workspace-boot.js')
+  assert.equal(pkg.exports?.['./workspace-boot']?.types, './lib/types/workspace-boot/index.d.ts')
   assert.equal(pkg.main, undefined, 'main 与 exports 双写会制造第二份入口')
+})
+
+test('D38 launcher：bin 指向 scripts/launch.mjs；workspace-boot 构建产物在场', () => {
+  assert.equal(pkg.bin?.['dsh-deep-research'], './scripts/launch.mjs')
+  assert.ok(existsSync(join(PACK, 'scripts', 'launch.mjs')), 'launcher 脚本缺席')
+  assert.ok(existsSync(join(PACK, 'lib', 'workspace-boot.js')), 'workspace-boot 构建产物缺席（先 pnpm build）')
+})
+
+test('D38 分发：所有 peer 都是 optional（全局 launcher 安装不拉 DSH peers）', () => {
+  const peers = Object.keys(pkg.peerDependencies ?? {})
+  assert.ok(peers.length > 0)
+  assert.ok(Object.hasOwn(pkg.peerDependencies ?? {}, '@deepseek-ai/dsh-workspace'), 'workspace-boot 服务依赖未声明')
+  for (const name of peers) {
+    assert.equal(pkg.peerDependenciesMeta?.[name]?.optional, true, `${name} 必须是 optional peer（否则 npm i -g ERESOLVE）`)
+  }
 })
 
 test('client 模块表：构建产物里的 @deepseek-ai require 都在 dsh.client.inject 声明', () => {

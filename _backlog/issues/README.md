@@ -6,11 +6,11 @@
 
 | 卡 | 类型 | 结论倾向 | 下一步 |
 |---|---|---|---|
-| [2026-11-01 插件即产品](2026-11-01-plugin-as-product.md) | Task | 现在做（产品形态、首屏与实施顺序待拍板） | 用户对 profile 名 / 首启工作区 UX / home / 首屏 / 种子副本 / 顺序给出选择 |
-| [2026-11-01 产品启动运行时](2026-11-01-product-launch-runtime.md) | Task | 现在做（launcher + 产品 profile + 工作区注册） | 等父卡拍板；先跑 Host/Web 与 `npm i -g` 两个 spike |
-| [2026-11-01 产品首屏体验](2026-11-01-product-first-run-ux.md) | Task | 现在做（起步卡/工作区指示/凭据提示） | 等父卡拍板；与 A/C 并行开发卡片 |
-| [2026-11-01 产品文档与分发](2026-11-01-product-docs-and-dist.md) | Task | 现在做（README/_dist/全仓叙事） | 等父卡拍板；按清单逐页落，`_dist` 只改生成器 |
-| [2026-11-01 仓库对齐与证据](2026-11-01-repo-alignment-and-evidence.md) | Task | 现在做（dev 根解析/会话组/测试迁移/产品 smoke） | 等父卡拍板；smoke 接口可与运行时并行 |
+| [2026-11-01 插件即产品](2026-11-01-plugin-as-product.md) | Task | 现在做（S0–S4 技术面已交付；P1 见卡） | 用户首启业务验收；P1 按需另开 |
+| [2026-11-01 产品启动运行时](2026-11-01-product-launch-runtime.md) | Task | 现在做（launcher + profile + 工作区注册；已交付） | 证据见父卡 §落地记录 |
+| [2026-11-01 产品首屏体验](2026-11-01-product-first-run-ux.md) | Task | 现在做（起步卡/工作区指示；已交付） | saved-session 自动切换 = P1 |
+| [2026-11-01 产品文档与分发](2026-11-01-product-docs-and-dist.md) | Task | 现在做（README/_dist/全仓叙事；已交付） | 发布前重导出 `_dist` |
+| [2026-11-01 仓库对齐与证据](2026-11-01-repo-alignment-and-evidence.md) | Task | 现在做（dev 根解析/projectKey/测试迁移/产品 smoke；已交付） | 残留见父卡 |
 
 研究证据 = [research/plugin-as-product](../research/plugin-as-product/README.md)；落地顺序 = [landing-plan](../research/plugin-as-product/2026-11-01-landing-plan.md)（S0 决定 → S1 骨架 → S2 首屏 → S3 文档 → S4 硬化）。
 

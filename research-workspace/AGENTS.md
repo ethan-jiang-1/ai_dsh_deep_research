@@ -1,4 +1,4 @@
-# research-workspace — 研究手册（角色会话的 cwd）
+# 研究工作区 — 研究手册（角色会话的 cwd）
 
 这里是 Deep Research 团队的共享工作区。所有研究角色会话在此目录工作；本手册通过
 `agent-instructions` 注入每个角色会话。角色人格见各自 preset；这里只放**跨角色共享的
@@ -55,9 +55,9 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
 archive/drt_<slug>/    操作桶（交付后操作侧移入；位置不证明交付；仍可被审计投影）
 _abandoned/drt_<slug>/ 停放桶（未投入但保留；原因/复活条件写 run.md `parked`；不是状态证明）
 templates/run/         新 run bundle 的起点模板（只读，不直接写）
-drafts/（工作区根）    开发侧跨 run 草稿（仅开发仓在场，角色不写不读——run 内过程稿见上）
+drafts/（工作区根）    开发侧跨 run 草稿（可选；产品安装态没有预置，角色不写不读——run 内过程稿见上）
 NODES.md               节点 I/O 契约全表（八节点 I/O + 下游可开工判据 + 回边版本语义）；机械把守 =
-                       schema-scan（在场级）+ node-gate（判据级门①②③④+L+R+A+C，图例 = NODES.md 头部）
+                       schema-scan（在场级）+ node-gate（判据级门①②③④+L+R+A+C，图例 = NODES.md 头部）；两者是开发仓工具、不随包，安装态按回执三态降级
 question-patterns.md   判型模式库（HITL1 第一对照面；命中走条目、未命中兜底 + journal 标记行；增长协议 = 库尾节）
 method-library.md      本工作区方法库（用户所有；工作区根；lead 维护；四字段 = 找来源/怎么核实/报告怎么写/不承诺）。
                        立项先读：题面点名的偏好名 → 按该条目执行并在 §Decisions 记"采用库条目 X"；未点名

@@ -8,7 +8,7 @@
  *   4. 已有 .gitignore 不静默改；--gitignore-append 才追加带标记块。
  */
 import { existsSync, mkdirSync, readFileSync, realpathSync, statSync, writeFileSync, appendFileSync, readdirSync } from 'node:fs'
-import { basename, isAbsolute, join, relative, resolve } from 'node:path'
+import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path'
 import { createInterface } from 'node:readline/promises'
 import { homedir } from 'node:os'
 import { assertSafeWorkspace } from '../workspace-guard.mjs'
@@ -27,9 +27,24 @@ export const GITIGNORE_RULES = ['drt_*/', 'archive/', '_abandoned/', 'method-lib
 
 const canonical = (path) => {
   const abs = resolve(path)
-  if (!existsSync(abs)) return abs
+  if (existsSync(abs)) {
+    try {
+      return realpathSync(abs)
+    } catch {
+      return abs
+    }
+  }
+  // 不存在：解析最深已存在祖先的 realpath 再拼回后缀（macOS /var → /private/var 等）。
+  const suffix = []
+  let current = abs
+  while (!existsSync(current)) {
+    const parent = dirname(current)
+    if (parent === current) break
+    suffix.unshift(basename(current))
+    current = parent
+  }
   try {
-    return realpathSync(abs)
+    return join(realpathSync(current), ...suffix)
   } catch {
     return abs
   }

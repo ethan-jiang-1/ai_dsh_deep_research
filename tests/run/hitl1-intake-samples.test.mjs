@@ -1,7 +1,7 @@
 // tests/hitl1-intake-samples.test.mjs —— HITL1 四类输入样例集的**形状契约**（keyless）。
 //
 // 为什么存在：①-a 的判据是「四类齐 + 每类问/不问清单齐」，材料住
-// `research-workspace/drafts/2026-10-11-hitl1-intake-samples.md`。人工走查（①-b）照单核对的
+// `tests/fixtures/hitl1-intake-samples.md`。人工走查（①-b）照单核对的
 // 前提是清单本身不烂——缺一类、某类少了「期望不问」块、块下空无一物（防空语料），走查就会
 // 静默空转。本测试只钉形状，不判断内容对错（那是人工判据 ①-b 与本卡的事）。
 //
@@ -13,7 +13,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const MATERIAL = fileURLToPath(new URL('../../research-workspace/drafts/2026-10-11-hitl1-intake-samples.md', import.meta.url));
+const MATERIAL = fileURLToPath(new URL('../fixtures/hitl1-intake-samples.md', import.meta.url));
 const CLASS_NAMES = ['信息充分', '缺项但不改变研究范围', '缺项会改变研究范围', '命中困惑信号', '快速事实豁免态'];
 
 assert.ok(existsSync(MATERIAL), `材料不在：${MATERIAL}（①-a：四类输入样例材料是人工走查的前置）`);

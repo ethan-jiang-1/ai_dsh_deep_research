@@ -12,7 +12,8 @@
 
 ```
 packages/deep-research-pack/   唯一自写包：presets/<role>/ + cordis.patch.yml + 研究驾驶舱（Research Cockpit——观察面 client 套件，src/client/ + lib/client.js；D18 有界例外，用途限定观察/调试；[构成正本](./40-research-cockpit.md)）+ 抓取回退 provider（src/fetch-fallback/ + lib/fetch-fallback.js；D31 有界代码面）
-research-workspace/            运行场：角色会话 cwd（研究手册 + drt_<slug>/（run bundle）+ templates/）
+research-workspace/            dev 工作区实例：角色会话 cwd（研究手册 + drt_<slug>/（run bundle）+ templates/）；
+                               产品用户的工作区 = 任意目录（launcher --workspace）
 docs/ notes/ scripts/ tests/ dev/   文档/决策/门禁/回归/环境（分层原则见 00-index）
 vendor/dsh/                    pinned submodule（只读铁律——verify vendor-pin/vendor-clean 把守；
                                tag 与钉 commit 正本 = AGENTS.md §DSH 源码表；workspace 五件套吸收其包，pnpm dsh 从此起）
@@ -23,11 +24,11 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 **`研究报告 = harness(bundle)`**——全仓最高分层不变量：
 
 - **harness（框架）= 只读函数**：`packages/deep-research-pack/**`（preset+skills+bundle 行）、
-  `research-workspace/AGENTS.md`（手册）+ `templates/run/**`、docs/notes（设计与决策记忆）。
+  工作区种子（`workspace/` 包内只读源：手册 + `templates/run/**`；产品部署到用户工作区，dev 实例 = `research-workspace/`）、docs/notes（设计与决策记忆）。
   对任何一次研究是同一份；不持任何 per-run 状态；run 期间零写入；演进只走开发环，且只由
   run 复盘的证据驱动。harness 内的可变值都是 per-version 常量（工具行 config/超时/纪律
   文本），随版本走、不随 run 走。
-- **run bundle = 一次调研的全部变量**：`research-workspace/drt_<slug>/`（drt = Deep
+- **run bundle = 一次调研的全部变量**：`<workspace>/drt_<slug>/`（dev 实例 = `research-workspace/drt_<slug>/`；drt = Deep
   Research Topic，目录名即方向）——question.md（方向契约：定稿/HITL1 快照/Decisions
   append-only，跨 rerun 持久）+ topics/leads/evidence/findings/review/drafts + final/
   （版本化交付）+ journal.md。一次新调研 = 实例化一个新 bundle；**判定式：恢复这次研究

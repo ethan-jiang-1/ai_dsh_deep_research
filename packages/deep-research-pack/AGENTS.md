@@ -6,8 +6,8 @@
 config.plugins 内声明 persona/skills/工具行）+ `presets/<role>/skills/` + 驾驶舱
 （`src/client/`，构建产物 `lib/client.js`）+ 工作区种子 `workspace/`（手册与模板快照 +
 `seed.json` 版本/哈希/所有权（policy）清单，`dev/sync-pack-workspace.mjs` 同步，门禁 `pack-workspace-fresh` 防漂移；
-`scaffold --check/--upgrade` 分类升级（missing/current/stale/modified/untracked/deleted），方法库不覆盖）+ 部署脚本
-`scripts/{preflight,scaffold}.mjs`（bin 两条命令）。包级当前合同在 [README.md](README.md)；
+`scaffold --check/--upgrade` 分类升级（missing/current/stale/modified/untracked/deleted），方法库不覆盖）+ 启动/部署脚本
+`scripts/{launch,preflight,scaffold}.mjs`（三条 bin；launcher = D38）与 `src/workspace-boot/`（Host 工作区注册）。包级当前合同在 [README.md](README.md)；
 本文件只放该子树的**指令**。上游对应物 = DSH `packages/AGENTS.md`。
 
 ## 改这个包时
@@ -30,5 +30,5 @@ config.plugins 内声明 persona/skills/工具行）+ `presets/<role>/skills/` +
 ## 文档义务
 
 - 包 README 拥有配置、行为、**部署前置**、限制与扩展点（当前合同）；行为或发布集改变同 diff 更新；
-- 部署面（preflight/scaffold/workspace 种子）改动要跑 `release-smoke`（L2 安装形状）；
+- 启动/部署面（launcher/workspace-boot/preflight/scaffold/workspace 种子）改动要跑 `product-smoke` + `product-boot-smoke` + `release-smoke`（L2 安装/首启形状）；
 - 已知限制与延后工作放固定节 `## 已知限制与延后工作`（上游 Known Limitations 节同构）。

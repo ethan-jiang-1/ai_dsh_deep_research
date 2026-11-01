@@ -69,6 +69,8 @@
 | L1 挂载 | preset 内容/结构改动（其完成定义） | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs`（源码域，keyless；未 source 自拒）；安装域加 `--profile <p> --no-patch` |
 | L2 安装 | 包结构/release 相关改动 | `source dev/env.sh && node scripts/smoke/release-smoke.mjs`（pack→干净 profile→plugin add→安装域冒烟；无模型调用，安装验收使用 `--install-only`，默认 preflight 仍检查凭据；未 source 自拒） |
 | L2 冷启动 | 独立环境/bootstrap 改动 | `source dev/env.sh && node scripts/smoke/cold-start-smoke.mjs`（独立 home/profile/端口/state；MCP 关闭；团队层需 registry/缓存） |
+| L2 产品装配 | launcher/profile/种子/工作区相关改动 | `node scripts/smoke/product-smoke.mjs`（真 dsh/pnpm + 干净 home/workspace；`--setup-only` 装配/种子/设置/幂等/守卫/项目模式；缺前置 exit 2） |
+| L2 产品首启 | launcher/Host/首屏/StartCard 改动 | `node scripts/smoke/product-boot-smoke.mjs`（真 Web + 浏览器；Host 注册工作区、blank Lead Session `cwd` = 工作区、首屏元素；无模型；缺前置 exit 2） |
 | L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `node --import tsx/esm --test tests/contracts/evaluation-contract.test.mjs` |
 | L4 交付 | 里程碑级 | `source dev/env.sh && node scripts/smoke/l4-lite-smoke.mjs`（真模型档：需 `DEEPSEEK_API_KEY`，未 source 自拒）/ 完整 run（授权范围） |
 
