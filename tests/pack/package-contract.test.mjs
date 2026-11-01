@@ -30,9 +30,14 @@ test('T0 exports：入口与 client 都有声明，且不依赖未发布源码',
   assert.equal(pkg.main, undefined, 'main 与 exports 双写会制造第二份入口')
 })
 
-test('D40 startup/content 构建产物在场；launcher 仍在（S3 删除）', () => {
-  assert.equal(pkg.bin?.['dsh-deep-research'], './scripts/launch.mjs')
-  assert.ok(existsSync(join(PACK, 'scripts', 'launch.mjs')), 'launcher 脚本缺席')
+test('D40 分发：只有只读 doctor；无 launcher/scaffold；startup/content 产物在场', () => {
+  assert.deepEqual(Object.keys(pkg.bin ?? {}), ['dsh-deep-research-doctor'])
+  assert.equal(pkg.bin?.['dsh-deep-research-doctor'], './scripts/doctor.mjs')
+  assert.equal(pkg.bin?.['dsh-deep-research'], undefined)
+  assert.equal(pkg.bin?.['dsh-deep-research-scaffold'], undefined)
+  assert.ok(existsSync(join(PACK, 'scripts', 'doctor.mjs')), 'doctor 脚本缺席')
+  assert.equal(existsSync(join(PACK, 'scripts', 'launch.mjs')), false, 'launcher 应已删除')
+  assert.equal(existsSync(join(PACK, 'scripts', 'scaffold.mjs')), false, 'scaffold 应已删除')
   assert.ok(existsSync(join(PACK, 'lib', 'startup.js')), 'startup 构建产物缺席（先 pnpm build）')
   assert.ok(existsSync(join(PACK, 'lib', 'content.js')), 'content 构建产物缺席（先 pnpm build）')
 })

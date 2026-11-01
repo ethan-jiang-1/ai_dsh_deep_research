@@ -48,7 +48,7 @@
 | `vendor-pin` | vendor/dsh submodule 在位：.gitmodules 正源 URL + 钉 commit `687f282e86`（tag dsh-v0.2.1-rc.2） | [vendor-submodule Note](../notes/implemented/2026-09-24-vendor-submodule.md)；副本注入不适（理由：断言对象 = submodule 真实状态——fixture 副本不拷 submodule 内容，基线即红），反证 = 一次性 Note 红录 |
 | `vendor-clean` | vendor/dsh `git status --porcelain` 零未提交改动（机制权威不许就地改） | [vendor-submodule Note](../notes/implemented/2026-09-24-vendor-submodule.md)；副本注入不适（理由：断言对象 = submodule 的 git 状态——fixture 副本无此仓库，基线即红），反证 = 一次性 Note 红录 |
 | `secrets-untracked` | tracked 清单零敏感/残留物（credentials/.env/.pem/.tgz/.log/node_modules/.tmp*/_tmp/、pack 构建产物 lib/、编辑器/OS/缓存残留…） | [入口链审计 Note](../notes/implemented/2026-09-24-entry-chain-fresh-agent-audit.md) |
-| `host-paths` | live 面（随包内容/当前文档/脚本/CI/工作区种子）零本机绝对 home 路径；历史 notes/_backlog/snapshots/tests fixtures 豁免 | [git 边界指南](./guides/63-git-boundary.md)；反证 = gates-smoke 注入 `/Users/<name>/...` 红 |
+| `host-paths` | live 面（随包内容/当前文档/脚本/CI）零本机绝对 home 路径；历史 notes/_backlog/snapshots/tests fixtures 豁免 | [git 边界指南](./guides/63-git-boundary.md)；反证 = gates-smoke 注入 `/Users/<name>/...` 红 |
 | `role-list-sync` | 角色清单单一事实源 = 盘上 presets/；scripts/tests/dev 代码里的清单字面量（≥3 角色名）即红 | [基础整治 Note](../notes/archived/2026-09-24-foundation-remediation.md) |
 | `gate-ledger-sync` | 本表门禁名集合 = `context.gates`（登记与实现不漂移） | [基础整治 Note](../notes/archived/2026-09-24-foundation-remediation.md) |
 | `entry-chain` | 根入口链与子树指令门牌成员在场（六份子树 AGENTS.md 在成员清单内），AGENTS 的入口链标题存在；链接解析归 md-links | gates-smoke `entry-chain-no-title` 注入案例 + [review-driven-hardening Note](../notes/implemented/2026-09-24-review-driven-hardening.md)；成员扩围反证（移除 `tests/AGENTS.md`/`_backlog/AGENTS.md` 看红→还原绿）= 2026-10-12 卫生轮实录 |
@@ -88,11 +88,11 @@
 ### L2 安装面（真实安装形状）
 
 - **定义**：插件以用户实际获得的方式可用——`npm pack` 产物完整，装进**干净 profile** 成功，起会话可用；client 半（观察面）在安装形状里在场。
-- **产品面最小真检查（D38）**：`node scripts/smoke/product-smoke.mjs`——真 `dsh`/pnpm + 干净 home/workspace，先走原生 `dsh plugin --profile web add` + 安装副本 scaffold，再走 launcher `--setup-only` 装配 profile（web 模板 → pack → 团队层）、铺种子/写设置，断言幂等/危险目录/项目模式/`.gitignore`/包目录零写入；缺 pnpm/registry/缓存 = exit 2（未跑 ≠ 绿）。`node scripts/smoke/product-boot-smoke.mjs`——真 Web + 浏览器，断言 Host 注册工作区、首屏 blank Lead Session（`cwd` = 工作区）、Orca/工作区标题/起步卡/Lead preset/composer；无模型调用。
-- **最小真检查**：`release-smoke`：`npm pack` → 在选定 `DSH_HOME` 重建测试 profile → `dsh plugin add` → scaffold/preflight（`--install-only`，跳过模型就绪检查）→ 安装域会话断言；无模型调用。独立默认 preflight 仍检查凭据在场。进程卫生全程有界：run() 超时预算（install 180s / 默认 120s / preset-smoke 外层 300s——company 实证值）+ mkdir 原子并发锁 + 子进程组退出确认回收。
+- **产品面最小真检查（D40）**：`node scripts/smoke/install-shape-smoke.mjs`——原样执行手册三步（profile init → `dsh plugin add` pack+team → 真启动），断言 roster 三状态、无 `did not activate`、首屏可达；缺 pnpm/registry/缓存 = exit 2（未跑 ≠ 绿）。`node scripts/smoke/product-boot-smoke.mjs`——真 Web + 浏览器，断言 Host 注册工作区、首屏 blank Lead Session（`cwd` = 工作区）、Orca/工作区标题/起步卡/Lead preset/composer；无模型调用。
+- **最小真检查**：`release-smoke`：`npm pack` → 在选定 `DSH_HOME` 重建测试 profile → `dsh plugin add` → doctor（`--install-only`，跳过模型就绪检查）→ 安装域会话断言；无模型调用。独立默认 doctor 仍检查凭据在场。进程卫生全程有界：run() 超时预算（install 180s / 默认 120s / preset-smoke 外层 300s——company 实证值）+ mkdir 原子并发锁 + 子进程组退出确认回收。
 - **冷启动补充**：`cold-start-smoke` 用独立 `DSH_DEV_HOME` + 独立 profile/端口/state，从 tarball 安装并经 `run-driver up --bootstrap` 到浏览器面 GREEN；证明不依赖仓内既有 home/profile。MCP 关闭，团队层需 registry 或缓存。
-- **真用户 home 补充**：`real-home-smoke` 把 home 放到系统临时目录（仓库外），用全局 `dsh` 完成 init → install → scaffold/preflight（`--install-only`）→ 真 web 页面，断言 preflight 不再从 profile 误报 peer、boot graph 含本包、已在场团队层 `link:` 不被改写；缺全局 dsh/tarball = exit 2。`preflight-smoke` 用 fake anchor 覆盖“行依赖缺件必须红 / 无锚标未验证 / base-only profile 红 / untracked AGENTS 红 / 空凭据红”。
-- **通过判据**：pack 清单与 `files` 声明一致、安装零缺失警告、干净 profile 会话能列出研究角色；产品面 = `product-smoke`/`product-boot-smoke` 绿（profile 顺序、种子、设置、首屏 Lead Session、cwd = 工作区）；安装副本带 `lib/client.js`、manifest peers-only（`dependencies` 缺席）、boot 页模块表含本包 client 行（preset-smoke 真会话档断言，安装域经 release-smoke ⑤ 委托覆盖）、端口用后无监听残留；preflight 的运行时行依赖只从安装锚解析，不把 client/构建期 peer 混进 Node 解析。
+- **真用户 home 补充**：`real-home-smoke` 把 home 放到系统临时目录（仓库外），用全局 `dsh` 完成 init → install → doctor（`--install-only`）→ 真 web 页面，断言 doctor 不再从 profile 误报 peer、boot graph 含本包、已在场团队层 `link:` 不被改写；缺全局 dsh/tarball = exit 2。`doctor-smoke` 用 fake anchor 覆盖“行依赖缺件必须红 / 无锚标未验证 / base-only profile 红 / 缺 pack 红 / 空凭据 warn”。
+- **通过判据**：pack 清单与 `files` 声明一致、安装零缺失警告、干净 profile 会话能列出研究角色；产品面 = `install-shape-smoke`/`product-boot-smoke` 绿（roster 三状态、首屏 Lead Session、cwd = 工作区）；安装副本带 `lib/client.js`、manifest peers-only（`dependencies` 缺席）、boot 页模块表含本包 client 行（preset-smoke 真会话档断言，安装域经 release-smoke ⑤ 委托覆盖）、端口用后无监听残留；doctor 的运行时行依赖只从安装锚解析，不把 client/构建期 peer 混进 Node 解析。
 - **何时跑**：包结构/release 相关改动时；框架里程碑必跑。
 
 ### L3 领域面（Deep Research 方法论完整性 — 本项目独有）

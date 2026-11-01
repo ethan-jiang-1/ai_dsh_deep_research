@@ -16,24 +16,22 @@
 |---|---|---|
 | preset-smoke.mjs | L1 真挂载：boot 页模块表行（client 半 served）、roster、逐角色建会话、skills 隔离 | keyless（`DSH_SMOKE_REAL=1` 起真 DSH，无模型） |
 | release-smoke.mjs | L2 安装形状：pack → 干净 profile → plugin add → manifest/安装域 client 半断言 → 安装域冒烟 → 端口释放验证（进程卫生：超时预算 + 并发锁 + 退出确认） | keyless（`--install-only` 跳凭据） |
-| product-smoke.mjs | L2 产品装配：原生 `dsh plugin --profile web add` + 安装副本 scaffold，以及 launcher `--setup-only` → profile/种子/设置/幂等/危险目录/项目模式/`.gitignore`/包目录零写入 | keyless（真 dsh/pnpm + 团队层 registry/缓存；缺前置 exit 2） |
-| product-boot-smoke.mjs | L2 首启：真 launcher + Web + 浏览器，Host 注册工作区、blank Lead Session `cwd` = 工作区、Orca/工作区标题/起步卡/Lead/composer | keyless（需浏览器 + 团队层；缺前置 exit 2） |
+| install-shape-smoke.mjs | L2 安装形状：原样执行手册三步（profile init → `dsh plugin add` pack+team → 真启动）；断言 roster 三状态、无 `did not activate`、首屏可达；不跑 launcher/scaffold | keyless（真 dsh/pnpm + 团队层 registry/缓存；缺前置 exit 2） |
+| product-boot-smoke.mjs | L2 首启：纯 `dsh --profile deep-research` + Web + 浏览器；Host 注册工作区、blank Lead Session `cwd` = 工作区、首屏/目录按钮/Lead/composer | keyless（需浏览器 + 团队层；缺前置 exit 2） |
 | cold-start-smoke.mjs | L2 冷启动：独立 `DSH_DEV_HOME` + profile + 端口 + state，`run-driver up --bootstrap` 到浏览器 GREEN；MCP 关闭 | keyless（须先 `source dev/env.sh`；vendor/依赖在位；团队层需 registry/缓存） |
-| scaffold-smoke.mjs | scaffold CLI 行为：参数严格性 / 根守卫 / 父 symlink 越界 / 首次铺种 / sidecar 保护 / `--check` deleted + 所有权分型（contract/corpus）/ `--upgrade` 只升级未改文件 | keyless（临时 pack 副本 + 临时工作区；无 dsh/模型/网络） |
-| preflight-smoke.mjs | preflight 解析锚与验收真伪：fake anchor 齐全绿 / 缺行依赖红（不从仓库泄漏）/ base-only profile 红 / untracked AGENTS 红 / 空凭据红 / workspace `.env` 绿 / 契约类种子漂移点名 | keyless（仓库外临时 home + fake anchor/profile；无 dsh/网络） |
-| real-home-smoke.mjs | 真用户环境安装：仓库外 home + 全局 dsh + tarball → scaffold/preflight 绿 → 真 web 页面 boot graph 含本包；团队层 link 不被改写 | keyless（需全局 dsh + `_dist` tarball；缺前置 exit 2） |
+| doctor-smoke.mjs | doctor 只读判据：fake anchor 齐全绿 / 缺行依赖红 / base-only profile 红 / 缺 pack 红 / 空凭据 warn / 坏设置 warn；不安装、不写 profile | keyless（仓库外临时 home + fake anchor/profile；无 dsh/网络） |
+| real-home-smoke.mjs | 真用户环境安装：仓库外 home + 全局 dsh + tarball → doctor 绿 → 真 web 页面 boot graph 含本包；团队层 link 不被改写 | keyless（需全局 dsh + `_dist` tarball；缺前置 exit 2） |
 | handoff-smoke.mjs | `export-handoff` 产物边界：必备源在场、无运行态/凭据/run 数据/依赖/导出包 | keyless（git archive HEAD；临时 out） |
-| compat-smoke.mjs | T6 rc.3 安装面：全局 rc.3 在干净 home 做 install → dump-config → scaffold/preflight → remove | 需全局 dsh rc.3；缺失 exit 2（未跑 ≠ 通过） |
+| compat-smoke.mjs | T6 rc.3 安装面：全局 rc.3 在干净 home 做 install → dump-config → doctor → remove | 需全局 dsh rc.3；缺失 exit 2（未跑 ≠ 通过） |
 | compat-client-smoke.mjs | rc.3+ 客户端面：全局 dsh 真装 tarball → 真起 web → headless chromium 断言零 apply 失败 + 本包 client bundle 取到 + 研究状态/研究配置页签可见可开 | 需全局 dsh rc.3+、tarball、团队层、chromium；缺一 exit 2 |
 | run-accept-smoke.mjs | run-accept 全链（合成 bundle+会话日志，真 CLI）：绝对 present 归一、连续两次幂等、bundle 外 present 红不写、final 含 sk- 红不写、`--repair`、`--no-write` 真只读、未知参数 exit 2、整数契约（schema/created → manifest 记版本与日期、repair 保 schema 快照、schema-scan CLI 认新契约） 后绿 | keyless |
 | secret-scan-smoke.mjs | 交付物秘密扫描的范围边界：默认不扫 evidence、`--all` 才扫、`--allow-legacy` 只报告、输出不回显值（纯函数正反例归 tests） | keyless |
 | data-smoke.mjs | T5 数据面切片：包目录零写入、假 token 不泄漏、卸载后 workspace 用户文件 + session 日志保留 | keyless（真 web 启动、无模型调用；tarball 需先 export-dist） |
-| pack-smoke.mjs | T0 tarball 形状：入口/patch/preset/种子在场、exports 可解析、无安装脚本/凭据；手册 sha256、两次 npm pack 同 sha、无 symlink/setuid 条目（在场时） | keyless（`npm pack --dry-run --json`；需 lib 已构建） |
+| pack-smoke.mjs | T0 tarball 形状：入口/patch/preset/content/doctor 在场、exports 可解析、无安装脚本/凭据；手册 sha256、两次 npm pack 同 sha、无 symlink/setuid 条目（在场时） | keyless（`npm pack --dry-run --json`；需 lib 已构建） |
 | user-env-smoke.mjs | 已有 bundle + 用户 overlay + session/凭据/workspace 的安装/卸载共存 | keyless（全局 dsh + 本地 tarball） |
 | profile-matrix-smoke.mjs | 多 profile 并存/独立卸载、损坏 tarball 失败原因可读且无半装、用户 overlay 不改写、directory file: 移动/重装、卸载重装后 workspace 数据保留 | keyless（全局 dsh + 本地 tarball） |
-| upgrade-smoke.mjs | 安装 → 模拟下一版覆盖安装 → 种子升级 → 回滚拒绝降级 → 卸载；profile + 工作区双面 | keyless（全局 dsh + npm pack；不调模型） |
+| upgrade-smoke.mjs | 安装 → 模拟下一版覆盖安装 → 回滚拒绝降级 → 卸载；profile + 工作区双面（无种子升级） | keyless（全局 dsh + npm pack；不调模型） |
 | profile-concurrency-smoke.mjs | 两个 `dsh plugin add` + 两个 `remove` 同 profile 并发：至少一个成功、dump 可解析、最终无本包；不留双 bundle/坏 profile | keyless（全局 dsh + tarball） |
-| interrupt-smoke.mjs | SIGKILL 中断 scaffold + 真双进程锁竞争：stale lock、state 临时件清理、重跑补齐全部种子（失败保留现场） | keyless（本地临时 pack，无 dsh） |
 | workspace-isolation-smoke.mjs | B4 双实例：两套 home/profile/port/state/workspace 各起通道、各建会话；会话组绑定自己的 W、home/session 互斥、marker 互不可见 | keyless（真 web，不调模型；更慢，约两套 cold start） |
 | client-load-smoke.mjs | 观察面真浏览器装配、页签与渐进面对账（磁盘参考选择 = client-load-reference.mjs；「研究配置」摘要相位 = client-load-config.mjs；终稿端到端相位 = client-load-final.mjs；主界面「方法库」相位断言 A′ 两列、详情进入访谈、表单检查与显式来源选择，零模型 prompt；失败留现场（png/html/console/meta + `disconnects` 计数），无窗口内交付目标 = exit 2 SKIP | keyless（浏览器） |
 | method-library-tool-smoke.mjs | 真 Loader + Method Editor Agent + Host Tool：验证 UI 操作 claim、内容摘要拒绝、默认/删除写入及 workspace 回读 | keyless（临时 workspace 与确定性 mock LLM） |
@@ -65,8 +63,6 @@
 | 已有用户环境（别的 bundle + overlay + session/凭据/workspace） | `user-env-smoke` | 全局 dsh + tarball |
 | 多 profile、损坏 tarball、目录 file:、卸载重装 | `profile-matrix-smoke` | 全局 dsh + tarball |
 | 下一版/回滚/活数据 | `upgrade-smoke` | 全局 dsh + npm pack |
-| 初始化种子/锁/原子 state/特殊文件/路径穿越 | `scaffold-smoke` | 临时 pack；无 dsh |
-| SIGKILL/stale lock/崩溃恢复 | `interrupt-smoke` | 本地临时 pack；失败保留现场 |
 | 双实例 W/H 隔离 | `workspace-isolation-smoke` | 真 web；约两套 cold start |
 | 数据面零写入/secret/session 保留 | `data-smoke` | 真 web + tarball |
 
@@ -124,7 +120,7 @@
 | lib/stream-diagnostics-core.mjs | stream-diagnostics、stream-diagnostics.test | 模型活动会话筛选（活动事件预筛后再按日志 mtime 取最近 N）+ 尝试时间线投影（assistant/message 计成功、assistant/attempt 计失败/无落面，终态三判 alive-or-idle/recovered/dead） |
 | lib/run-state.mjs | cdp-ask-smoke、hitl-answer、run-kickoff、session-replay、run-state.test、session-events、watch-run | run 操作面状态谓词 |
 | lib/run-source-node.mjs | evidence-audit、node-gate、run-context-node.test、schema-scan | node:fs 的 RunSource 适配器：list/read/version；ENOENT → missing，其余 → unreadable；行窗口与 eof 语义对齐 vendor workspaceFiles |
-| lib/env.mjs | env-credentials.test、compat-smoke、data-smoke、pack-smoke、profile-concurrency-smoke、profile-matrix-smoke、upgrade-smoke、user-env-smoke、workspace-isolation-smoke、session-replay、cdp-ask-smoke、client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、record-role-fixture、release-smoke、snapshot-replay-smoke、team-preflight-smoke、rerun-triage-probe、preflight-smoke、real-home-smoke、compat-client-smoke、run-accept-smoke、product-smoke、product-boot-smoke | 子进程环境清洗（scrubbedEnv/withModelKey）与真模型档前置（requireCredentials/credentialsPresent——凭据卫生） |
+| lib/env.mjs | env-credentials.test、compat-smoke、data-smoke、pack-smoke、profile-concurrency-smoke、profile-matrix-smoke、upgrade-smoke、user-env-smoke、workspace-isolation-smoke、session-replay、cdp-ask-smoke、client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、record-role-fixture、release-smoke、snapshot-replay-smoke、team-preflight-smoke、rerun-triage-probe、real-home-smoke、compat-client-smoke、run-accept-smoke、product-boot-smoke | 子进程环境清洗（scrubbedEnv/withModelKey）与真模型档前置（requireCredentials/credentialsPresent——凭据卫生） |
 | lib/playwright.mjs | session-replay、client-hitl-smoke、client-load-smoke、e2e-021rc2、hitl-answer、snapshot-replay-smoke、compat-client-smoke、product-boot-smoke | Playwright 启停支撑 |
 | lib/cdp-driver.mjs | cdp-probe、scene-capture | 裸 CDP 驱动 |
 | lib/session-replay.mjs | session-replay、session-replay.test | 历史会话定位/元信息/判读整形纯函数（跨组枚举、id 优先、标题歧义如实报候选；会话→工作区靠首事件 cwd） |

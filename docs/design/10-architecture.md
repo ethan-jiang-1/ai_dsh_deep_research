@@ -13,7 +13,7 @@
 ```
 packages/deep-research-pack/   唯一自写包：presets/<role>/ + cordis.patch.yml + 研究驾驶舱（Research Cockpit——观察面 client 套件，src/client/ + lib/client.js；D18 有界例外，用途限定观察/调试；[构成正本](./40-research-cockpit.md)）+ 抓取回退 provider（src/fetch-fallback/ + lib/fetch-fallback.js；D31 有界代码面）
 research-workspace/            dev 工作区实例：角色会话 cwd（研究手册 + drt_<slug>/（run bundle）+ templates/）；
-                               产品用户的工作区 = 任意目录（launcher --workspace）
+                               产品用户的工作区 = 任意目录（首屏选择/`DEEP_RESEARCH_WORKSPACE`）
 docs/ notes/ scripts/ tests/ dev/   文档/决策/门禁/回归/环境（分层原则见 00-index）
 vendor/dsh/                    pinned submodule（只读铁律——verify vendor-pin/vendor-clean 把守；
                                tag 与钉 commit 正本 = AGENTS.md §DSH 源码表；workspace 五件套吸收其包，pnpm dsh 从此起）
@@ -24,7 +24,7 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 **`研究报告 = harness(bundle)`**——全仓最高分层不变量：
 
 - **harness（框架）= 只读函数**：`packages/deep-research-pack/**`（preset+skills+bundle 行）、
-  工作区种子（`workspace/` 包内只读源：手册 + `templates/run/**`；产品部署到用户工作区，dev 实例 = `research-workspace/`）、docs/notes（设计与决策记忆）。
+  内容（`content/` 包内只读源：手册 + `templates/run/**`，`src/content` 注入；不落工作区）、docs/notes（设计与决策记忆）。
   对任何一次研究是同一份；不持任何 per-run 状态；run 期间零写入；演进只走开发环，且只由
   run 复盘的证据驱动。harness 内的可变值都是 per-version 常量（工具行 config/超时/纪律
   文本），随版本走、不随 run 走。
@@ -63,7 +63,7 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 | subagent（工人） | `tool-subagent`（preset 行，spawn；**maxDepth: 2** + **allowedAgentPresets: [scout, analyst, critic]**——teammate 可派 depth-2 worker，worker 不能再派 grandchild；[m2-p1-run-channel](../../notes/implemented/2026-09-24-m2-p1-run-channel.md)） | 单点快捷查证、并行铺方向/深挖；teammate 可派角色化 worker（`agent_preset`） | 每次 delegation 是 activation，完成通知回父；Team profile 禁全局 continuable 控制工具。**机制边界**：worker 的工具目录里看得到 Team 工具但调不通（vendor `packages/experimental/tool-agent-team/README.md` known limitation，同 pin 适用）——派工方应让 worker 明确别调 `spawn_teammate` / `team_task_*` / `wait_agent` |
 | present（交付） | `tool-present`（bundle + lead preset） | 成品声明：final.md 是唯一成品 | 非 lead 的 present = 过程稿展示（研究手册三态） |
 
-团队层版本派生：profile 装 `@…-agent-team-profile@<运行中的 DSH 版本>`——安装侧 `scaffold` 优先从 DSH 安装锚（`--install-anchor` / `DSH_INSTALL_ANCHOR` / PATH 的 `dsh`）取版本，回退 profile 的 `@deepseek-ai/dsh-app-boot`；dev run 通道 `dev/boot-run.sh` 从 pack 兼容矩阵首项派生（两者都必须与运行版本一致，不能用 `engines.dsh` 范围当版本号）。
+团队层版本派生：profile 装 `@…-agent-team-profile@<运行中的 DSH 版本>`——安装侧（用户用 `dsh plugin` 显式装，版本取 `dsh --version`）优先从 DSH 安装锚（`--install-anchor` / `DSH_INSTALL_ANCHOR` / PATH 的 `dsh`）取版本，回退 profile 的 `@deepseek-ai/dsh-app-boot`；dev run 通道 `dev/boot-run.sh` 从 pack 兼容矩阵首项派生（两者都必须与运行版本一致，不能用 `engines.dsh` 范围当版本号）。
 
 ## 4. 工具面（四研究角色共同基座 + 差异；方法编辑工具面见 D37）
 

@@ -1,13 +1,16 @@
 /**
- * profile-plan — 产品 profile 的纯读回/判据（无子进程、无写盘），供 keyless 回归直接导入。
+ * profile-read — 产品 profile 的纯读回/判据（无子进程、无写盘），供 doctor 与 keyless 回归使用。
  *
- * 真正装配/安装的编排（会 spawn dsh/pnpm）留在 profile.mjs，由 product-smoke 证明；
- * 这个拆分让"bundle 读回 / engines / 版本 / manifest"能在 `pnpm test` 里快速咬人。
+ * 只读：profile manifest / bundle roster / 安装副本版本 / pack engines；不安装、不改 profile。
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { satisfiesVersion } from '../version-range.mjs'
-import { validateProfileName } from '../deploy-args.mjs'
+import { satisfiesVersion } from './version-range.mjs'
+
+/** profile 名 = `dsh --profile` 接受的稳定名；校验避免路径注入。 */
+export function validateProfileName(name) {
+  return typeof name === 'string' && /^[a-z0-9][a-z0-9._-]*$/i.test(name)
+}
 
 /** 产品 bundle 名（package name）。 */
 export const PACK_NAME = 'dsh-deep-research-pack'

@@ -17,13 +17,13 @@
 
 | 术语 | DSH 定义 | 本仓落点 |
 |---|---|---|
-| plugin | 导出 `apply(ctx)` 的 TS 模块；注册即 `apply(ctx)`，配置经 cordis schema 校验 | 本仓自写三个插件（两处有界例外：D18 观察面 client、D31 抓取回退）：`src/index.ts`（host 半空壳 = 观察面宿主位）、`src/client/index.ts`（client 半：注册右栏「研究状态」/「研究配置」/「终稿」页签、活标题与研究语义工具卡）、`src/fetch-fallback/index.ts`（抓取回退 provider：本地 `web-fetch-http` → DeepSeek Fetch API；纯判据在 `policy.ts`）；新插件从 `vendor/dsh/docs/user/develop/basic/` 起步 |
+| plugin | 导出 `apply(ctx)` 的 TS 模块；注册即 `apply(ctx)`，配置经 cordis schema 校验 | 本仓自写插件（三处有界例外：D18 观察面 client、D31 抓取回退、D40 启动行/内容注入）：`src/index.ts`（host 半空壳 = 观察面宿主位）、`src/client/index.ts`（client 半：驾驶舱 + 首屏工作区恢复）、`src/client/startup.ts`（纯谓词）、`src/content/index.ts`（手册 runtime context）、`src/startup/index.ts`（工作区登记/会话）、`src/fetch-fallback/index.ts`（抓取回退 provider）；新插件从 `vendor/dsh/docs/user/develop/basic/` 起步 |
 | bundle | 你编写与分发的单位（`dsh.bundle`）——回答"这个包贡献什么"，是插入/覆盖 plugin rows 的 patch 层 | `packages/deep-research-pack/cordis.patch.yml` + 包内 `presets/`、`skills/` |
-| profile | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）——回答"哪些 bundle 按什么顺序组成" | 产品：用户 `$DSH_HOME/profiles/deep-research/`（launcher 运行期装配）；开发镜像：`runtime/harness-home/profiles/research/`（`boot-run.sh` 从 pack 重建） |
+| profile | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）——回答"哪些 bundle 按什么顺序组成" | 产品：用户 `$DSH_HOME/profiles/deep-research/`（DSH 两步安装创建）；开发镜像：`runtime/harness-home/profiles/research/`（`boot-run.sh` 从 pack 重建） |
 | preset | 一个 agent 形态：persona 行 + 时钟行 + skills + 工具行 | `presets/<role>.patch.yml`（preset 行）+ `presets/<role>/skills/`（角色清单 = 盘上 presets/） |
 | patch / overlay | 层叠覆盖条目（id 定向的 config 覆盖、禁用、插入） | `dev/research.overlay.yml`（源码域通道的镜像源） |
 
-**Nothing is both**：bundle 与 profile 是两个 manifest 的两种东西，别把本包写成 profile。产品形态（D38）不改变这条：包仍是 bundle；`dsh-deep-research` 是**运行期装配器**——它调用 `dsh` 创建/补全 profile，不把 profile 写进包 manifest；profile 是启动时产物，不是第二种分发单位。
+**Nothing is both**：bundle 与 profile 是两个 manifest 的两种东西，别把本包写成 profile。产品形态（D40）不改变这条：包仍是 bundle；profile 由用户在 DSH 里创建/启动（`--from-default-profile web` + `dsh plugin`），不是第二种分发单位。产品没有 launcher/scaffold，只有 bundle 内的启动行与只读 doctor。
 
 ## 参与阶梯（本仓版本；DSH 原表见仓外语料 `repo-harness/04`——登记处同上）
 
@@ -99,20 +99,17 @@ DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`�
 | DSH 本体 | 平台（`@deepseek-ai/dsh-base` + `dsh-web-app` 两个 bundle） | 用户装 DSH |
 | 本包 | 一个 bundle（`dsh-deep-research-pack`） | 本仓 |
 | 团队机制层 | 另一个 bundle（`@deepseek-ai/dsh-experimental-agent-team-profile`，**N2 experimental**：上游可改/撤，风险与层级表见 pack README §Compatibility） | vendor（本包**故意不声明**团队行——组合与实战 config 归该层，RFC m2-p1-run-channel A 定案） |
-| 研究工作区 | 会话 cwd 的目录（手册 `AGENTS.md` + `NODES.md` + `question-patterns.md` + `templates/run/` + 版本控制规则 `.gitignore`）；产品用户任意目录，开发实例 = `research-workspace/` | 本包 `workspace/` 种子（`dev/sync-pack-workspace.mjs` 同步） |
-| 产品启动器（可选） | `dsh-deep-research` bin：包装 profile/装包/种子/登记/起 Web（不新增应用进程）；主分发 = `dsh plugin add` + `dsh --profile`（D39） | 本包 `scripts/launch.mjs`（D38） |
+| 研究工作区 | 会话 cwd 的目录；只承载研究产物（`drt_*`/`archive/`/`_abandoned/`/`method-library.md`）；产品用户任意目录，开发实例 = `research-workspace/` | 用户目录（首屏选择/`DEEP_RESEARCH_WORKSPACE`） |
+| 内容注入 + 启动行 | `src/content`：把 `content/manual.md` 以 runtime context 注入；`src/startup`：读产品设置/登记工作区/best-effort 会话 | 本包（D40） |
+| 只读 doctor | `dsh-deep-research-doctor`：profile roster/版本/团队层/工作区/凭据；不安装、不启动 | 本包 `scripts/doctor.mjs` |
 
-工作区是**纪律的载体**：DSH 的 agent-instructions 从会话 cwd 向上发现 `AGENTS.md` 并注入每个
-角色——手册不在工作区，四个研究角色就没有证据契约与完成判据。安装步骤（用户视角）与前置
-检查 = [pack README](../../packages/deep-research-pack/README.md)；部署工具 = 包内两条 bin
-（`dsh-deep-research-preflight` 检查、`dsh-deep-research-scaffold` 铺种子 + 补团队层——
-tarball 装法不生成 PATH bin，用安装副本内脚本全路径，见 pack README §部署）。种子带
-`workspace/seed.json`（版本 + 哈希 + 每文件所有权 policy）；`scaffold --check` 只读报告三态，`--upgrade` 只更新未改文件，
-`--force` 覆盖版本化种子但**不覆盖**用户方法库。
+**内容不落工作区**：研究手册由 `src/content` 以 runtime context 注入每个角色；NODES/判型库是
+Lead 的 skills；模板在包内 `content/templates/run/`。用户项目自己的 `AGENTS.md` 仍由
+agent-instructions 注入，冲突时项目优先。安装步骤（用户视角）与前置 = [pack README](../../packages/deep-research-pack/README.md)；
+诊断 = 包内只读 `dsh-deep-research-doctor`（tarball 装法用安装副本内脚本全路径）。
 
 本仓开发面的生成物各有生成器与新鲜度门禁（漂移即红）：`dev/research.overlay.yml`
-（`dev/render-overlay.mjs` → `overlay-fresh`）、pack 的 `workspace/` 种子
-（`dev/sync-pack-workspace.mjs` → `pack-workspace-fresh`，含 `seed.json`）、run 通道 profile 镜像
+（`dev/render-overlay.mjs` → `overlay-fresh`）、run 通道 profile 镜像
 （`dev/boot-run.sh` 幂等重建，逐文件漂移检测）、dist 导出手册（`scripts/dist/export-dist.mjs`
 → `dist-manual-version`——一条命令出 tarball + 安装手册到 `_dist/`，tarball 不进库，
 手册 tracked；版本动必须重导出，导出不是发布）。
@@ -128,8 +125,8 @@ tarball 装法不生成 PATH bin，用安装副本内脚本全路径，见 pack 
 | 加/换一条 bundle 行（host 共享面） | `cordis.patch.yml` → `node dev/render-overlay.mjs` 重渲染；行引用的 `@deepseek-ai/*` 进 `peerDependencies` | `overlay-fresh` / `row-deps` 门禁 + L1 真挂载 + L2 安装形状 |
 | 加一个研究角色 | `presets/<role>.patch.yml` + `package.json` 的 `dsh.bundle.patch` 数组 + `l4-lite-smoke` 的 `PROMPTS` + 台账 D 号（D2 是角色数） | `preset-smoke` 真挂载（L1）+ `preset-structure` / `role-list-sync` |
 | 加一个方法论 skill | `presets/<role>/skills/<n>/SKILL.md`（frontmatter `name` 逐字等于目录名）；persona 若点名 skill 名须同 diff 对账（各 preset 的 persona 均有硬引用） | `preset-structure` + L1 的 skills 隔离断言 |
-| 改研究手册 / 模板 / 工作区 `.gitignore` | 改 `research-workspace/` 正本 → `node dev/sync-pack-workspace.mjs` 同步进 pack | `pack-workspace-fresh` + `workspace-versioning` 门禁 |
-| 加部署脚本 / bin | `package.json` 的 `files` + `bin` | `release-smoke`（L2：真装一次，装完能跑） |
+| 改研究手册 / 模板 | 改 `packages/deep-research-pack/content/`（手册/模板）；模板路径由 `research_pack_root` 插值 | `content-shape` 门禁 + `snapshot-replay` B 层 + `l4-lite` 真模型 |
+| 加部署脚本 / bin | `package.json` 的 `files` + `bin`（当前只有只读 doctor） | `release-smoke`（L2：真装一次，装完能跑） |
 | 加观察面 client 面能力 | `src/client/` + `tsconfig.client.json` 的 include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `client-load-smoke`（真浏览器）+ `client-keys` 门禁 |
 | 改**现有**观察面页签（最频改动） | 页签 → 文件 → 职责的构成正本 = [design/40 §2](../design/40-research-cockpit.md)；折算住 `src/lib/`（纯函数，别在组件里堆逻辑）；新路径进 design/40 登记 | `client-load-smoke`（页签可点可读；失败留 png/html/console/meta）+ `cockpit-doc-registry` / `client-keys` 门禁 |
 | 改 persona / skill / 手册文本（模型可见） | 同 diff 跑真模型档；运行中的 web 缓存 boot 文本，须重启通道 | `l4-lite-smoke`（真模型档） |

@@ -29,7 +29,7 @@
 
 ### BUG-011：安装与研究就绪分层
 
-[preflight](../../packages/deep-research-pack/scripts/preflight.mjs) 提供显式 `--install-only`（[BUG-011](../../_backlog/_archived/fixed_bugs/BUG-011-release-smoke-keyless-mismatch.md)）。该模式检查发布安装所需的版本、peer、团队层、工作区和构建产物，但跳过模型凭据检查并明确不宣称研究就绪；默认模式仍检查环境变量或 DSH 凭据文件。[scaffold](../../packages/deep-research-pack/scripts/scaffold.mjs) 转发模式，[release-smoke](../../scripts/smoke/release-smoke.mjs) 以清洗环境运行非模型子进程，并验证默认 preflight 会拒绝空凭据 home。
+`../../packages/deep-research-pack/scripts/preflight.mjs` 提供显式 `--install-only`（[BUG-011](../../_backlog/_archived/fixed_bugs/BUG-011-release-smoke-keyless-mismatch.md)）。该模式检查发布安装所需的版本、peer、团队层、工作区和构建产物，但跳过模型凭据检查并明确不宣称研究就绪；默认模式仍检查环境变量或 DSH 凭据文件。`../../packages/deep-research-pack/scripts/scaffold.mjs` 转发模式，[release-smoke](../../scripts/smoke/release-smoke.mjs) 以清洗环境运行非模型子进程，并验证默认 preflight 会拒绝空凭据 home。
 
 ### BUG-012：观察面事实适配
 

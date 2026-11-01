@@ -116,14 +116,14 @@ test('驱动入口不绕过漂移门：boot 必须经 dev/boot-run.sh，禁止�
 // 其中三处仍指 boot-run（前台起、不验浏览器面、不打印呈交块），与 00-index 的 run-driver
 // 首动作分裂。这里钉"首动作一致"：不是禁止 boot-run（它是底层），而是禁止它出现在
 // "用户问怎么启动"的第一条动作位上。
-test('启动首动作一致：产品行 = launcher；开发行 = run-driver', () => {
+test('启动首动作一致：产品行 = DSH 两步安装；开发行 = run-driver', () => {
   const lineOf = (rel, needle) => {
     const line = read(rel).split('\n').find((l) => l.includes(needle));
     assert.ok(line !== undefined, `${rel} 找不到含「${needle}」的行——首动作位缺席`);
     return line;
   };
-  // 产品用户：启动首动作 = dsh-deep-research（D38）；开发通道：run-driver。
-  assert.ok(lineOf('README.md', 'dsh plugin --profile web add').includes('dsh plugin'), 'README 产品原生首动作缺席');
+  // 产品用户：启动首动作 = DSH 两步安装 + 自有 profile（D40）；开发通道：run-driver。
+  assert.ok(lineOf('README.md', '--from-default-profile web').includes('dsh --profile deep-research'), 'README 产品首动作不是 DSH profile 初始化');
   assert.ok(lineOf('README.md', 'dev/run-driver.mjs up').includes('run-driver.mjs up'), 'README 开发入口缺席');
   const productRow = lineOf('docs/00-index.md', '（产品用户）');
   assert.ok(productRow.includes('dsh plugin'), '00-index 产品行首动作不是原生插件安装');

@@ -1,7 +1,7 @@
 /**
  * dsh-home — 把 `$DSH_HOME` 解析成与 DSH 本体相同的绝对路径。
  *
- * 为什么单独成件：scaffold 要写 profile、preflight 要读凭据/profile；两者都必须与
+ * 为什么单独成件：doctor 与启动行都要读凭据/profile；两者都必须与
  * `dsh` 解析到同一个 home。DSH 的规则见 vendor/dsh/packages/util/home-paths/src/index.ts：
  * 全空白 = 未设置；`~` / `~/` / `~\` 展开；其余原样 `resolve`。自己写一份 `resolve(env)`
  * 会在 `~/.dsh-custom`、空白值、相对路径上悄悄分叉（实测：凭据在 DSH 解析的 home 里，

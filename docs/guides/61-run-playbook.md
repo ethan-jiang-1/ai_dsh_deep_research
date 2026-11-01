@@ -2,7 +2,7 @@
 
 > 层：指南（怎么操作）。通道 = run 通道（安装域 research profile：本包 + vendor
 > agent-team-profile 层，P1 定案——[毕业 Note](../../notes/implemented/2026-09-24-m2-p1-run-channel.md)）；
-> **作用域**：本页只服务 M2 开发通道（仓内 `research` profile + `research-workspace/` + run-driver）。产品用户（`dsh-deep-research` + 任意工作区）看 [pack README](../../packages/deep-research-pack/README.md)、[`_dist/安装手册.md`](../../_dist/安装手册.md) 与 [guides/65](65-run-forms.md)；不要把本页的 3083/仓内路径套到产品。
+> **作用域**：本页只服务 M2 开发通道（仓内 `research` profile + `research-workspace/` + run-driver）。产品用户（`dsh --profile deep-research` + 任意工作区）看 [pack README](../../packages/deep-research-pack/README.md)、[`_dist/安装手册.md`](../../_dist/安装手册.md) 与 [guides/65](65-run-forms.md)；不要把本页的 3083/仓内路径套到产品。
 > 跨角色纪律与文件契约 = [研究手册](../../packages/deep-research-pack/content/manual.md)；节点 I/O 正本 = [NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)；
 > 2026-09-24 的四角色流程快照 = [m2-run-mechanics](../../notes/implemented/2026-09-24-m2-run-mechanics.md)（历史，非现行）。本页只答"你现在做什么"。
 
@@ -267,4 +267,4 @@ grep -rn "判型" research-workspace/ --include=journal.md
 输出分两类：`判型未命中` 行 → 新条目候选；`判型命中=P#` 行 → 各条目效用账。
 候选过晋升门槛（跨 run 复现 ≥2 次，或单次造成真实成本〔HITL1 返工 / §Decisions 方向
 修正 / 前提级发现〕）才按六段骨架写新条目、标（留察）；连续 3 次收割零命中的条目移
-休眠节。库的任何变更同 diff 跑 l4-lite + `node dev/sync-pack-workspace.mjs`。
+休眠节。库的任何变更同 diff 跑 l4-lite + `content-shape`。

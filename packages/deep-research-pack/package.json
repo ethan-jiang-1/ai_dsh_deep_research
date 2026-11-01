@@ -1,6 +1,6 @@
 {
   "name": "dsh-deep-research-pack",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": false,
   "type": "module",
   "description": "Deep Research multi-role plugin pack: 4 research role presets (Lead / Scout / Analyst / Critic) + 1 method-editor preset + host bundle rows (preset roster, deliverables, team UI). Team mechanics come from the dsh-experimental-agent-team-profile layer installed per profile. Methodology kernel from codex Deep Research harness. Repository docs: https://github.com/ethan-jiang-1/ai_dsh_deep_research",
@@ -154,9 +154,7 @@
     "zod": "^4.4.3"
   },
   "bin": {
-    "dsh-deep-research-preflight": "./scripts/preflight.mjs",
-    "dsh-deep-research-scaffold": "./scripts/scaffold.mjs",
-    "dsh-deep-research": "./scripts/launch.mjs"
+    "dsh-deep-research-doctor": "./scripts/doctor.mjs"
   },
   "peerDependenciesMeta": {
     "@deepseek-ai/cordis": {

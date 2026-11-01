@@ -2,9 +2,9 @@
 
 > 说明：本 README 随 npm 包发布；指向仓库 `docs/`、`notes/`、`_backlog/` 的链接使用 GitHub 绝对地址。安装包不含这些开发文档，点开即离仓。
 
-Deep Research **产品**（D38）：一个包提供启动器 + 产品 profile + 四研究角色 preset + 方法编辑 preset（D37）+
-研究方法论技能 + 研究驾驶舱（Research Cockpit，观察面 client 套件）+ 抓取回退 provider + 工作区种子。
-运行时仍是 DSH；`dsh-deep-research` 只负责装配 `deep-research` profile、登记用户工作区、起 Web。
+Deep Research **产品**（D40）：一个包提供四研究角色 preset + 方法编辑 preset（D37）+ 方法论技能 +
+研究驾驶舱（Research Cockpit，观察面 client 套件）+ 抓取回退 provider + 研究手册/模板（`content/`）+
+启动行/内容注入。运行时仍是 DSH；产品 = bundle + 自有 `deep-research` profile，**没有 launcher/scaffold**。
 
 一次调研 = 一支四人研究团队（Lead 主编 / Scout 侦察 / Analyst 分析 / Critic 核查）在 DSH 的
 Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bundle 落 `drt_<slug>/`）。
@@ -23,11 +23,13 @@ Agent Teams 通道上协作，产出**证据可溯源**的研究报告（run bun
 | `presets/<role>.patch.yml` | preset roster（四研究角色 + 方法编辑；单行形态：一条 `@deepseek-ai/dsh-agent-preset` 行，config.plugins 内声明 persona/时钟/skills/工具行） | ✓ |
 | `presets/<role>/skills/<n>/SKILL.md` | 研究方法论技能（各角色清单正本 = 盘上 `presets/<role>/skills/` 目录，bundle 自动发现——新增免改本行） | ✓ |
 | `cordis.patch.yml` | bundle 行：preset roster（default: lead）+ **检索底座**（`- id: web` 替换行：搜索 = DeepSeek Search API、fetch = 回退 provider；`research-fetch-fallback` 行注册它——见下节）+ 会话全文检索开关（`session-query-sqlite` `openAt: first-search`——FTS 惰性开，`:memory:` 每进程重建；检索工具行在 lead/critic preset）+ `tool-present` + 团队可视面 `ui-agent-team` + 本包 client 面 | ✓ |
-| `workspace/` | **研究工作区种子**：研究手册（`AGENTS.md`：证据契约/目录约定/完成判据）+ `NODES.md`（节点 I/O 契约）+ `question-patterns.md`（判型库）+ `templates/run/` 八件模板（含 `plan.md` 执行图）+ `method-library.md`（独立空架子种子，不从正本同步）+ `.gitignore`（包内名 `.gitignore.example`——npm 不打包 `.gitignore` 文件，安装时由 scaffold 落地成本名；工作区纳入版本控制时拒收 run bundle/归档/方法库，留档加 `!路径`） | ✓ |
+| `content/` | **研究内容**：`manual.md`（研究手册：证据契约/目录约定/完成判据）+ `templates/run/` 八件模板（含 `plan.md` 执行图）；由 `src/content` 以 runtime context 注入，**不落工作区** | ✓ |
+| `src/content/` → `lib/content.js` | 内容注入行（D40）：注册 `research_pack_root` 变量 + `research:manual` runtime context；模型可见、可重建 | ✓ 构建产物 |
+| `src/startup/` → `lib/startup.js` | 启动行（D40）：读 `DEEP_RESEARCH_WORKSPACE`/产品设置 → 登记 Workspace → best-effort Lead 会话 | ✓ 构建产物 |
 | `src/client/` → `lib/client.js` | **研究驾驶舱**（Research Cockpit——观察面 client 面，D18 有界例外；构成正本 = [design/40](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/design/40-research-cockpit.md)）：右栏「研究状态」页签（流程轨道锚点/人性化活动流/活标题/HITL 横幅/参与指引/决策诚实线）+ 「研究配置」页签 + 「研究图谱」页签（只读 SVG DAG：顶层 plan 节点 / Team 任务 / 依赖边；复合子节点 W2.1.1… 在节点详情展开，节点可复制 `drt_<slug>/W2.1` 引用；Wave 前缀/重号/悬空 parent/deps/墓碑/跨组只读提示；无 plan 或 blocked_by 时明确无图，不提供调整动作）+ 「终稿」页签（认领 `drt_<slug>/` 终稿地址族：`final.md` / `final/vN.md` / `final/readable.md` / `final/readable-vN.md`；有读者版默认看读者版，可切审计版；交付时自动开一次）+ **主界面「方法库」tab**（`conversation.view`；我的库/内置参考/四字段编辑，保存交方法编辑）+ 研究语义工具卡 + 挂起显性化 | ✓ 构建产物 |
 | `src/fetch-fallback/` → `lib/fetch-fallback.js` | **抓取回退 provider（D31）**：先本地匿名抓取，取不到页面时才打 DeepSeek Fetch API；正文带来源标记。纯判据在 `src/fetch-fallback/policy.ts`（keyless 单测），凭据解析与两腿预算在 `index.ts` | ✓ 构建产物 |
 | `src/lib/` → `lib/types/lib/` | 纯函数折算（清单正本 = [design/40](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/design/40-research-cockpit.md)）——keyless 单测直接断言 | ✓ 构建产物 |
-| `scripts/preflight.mjs` · `scripts/scaffold.mjs` | 部署前置检查 + 一键准备（见下） | ✓ |
+| `scripts/doctor.mjs` | 只读诊断（bin `dsh-deep-research-doctor`）：profile roster / 版本 / 团队层 / 工作区 / 凭据；不安装、不启动 | ✓ |
 
 角色职责与方法论：见各 `presets/<role>.patch.yml`（persona）与 `presets/<role>/skills/<n>/SKILL.md`（方法论正文）——都随本包发布。
 
@@ -84,77 +86,74 @@ Tool schemas are stable within a Method Editor request series; a newly selected 
 - 回退只把**目标 URL**发给 DeepSeek（不带 cookie / header）；本地能取到的页面不出本机。
 - 团队 / 多用户：每个用户在自己的 DSH home 配自己的 key；run bundle 与方法库不含凭据。
 
-## 部署（DSH 插件安装）
+## 部署（DSH 原生安装）
 
 运行形态、数据归属、升级/回滚与多实例的完整合同 = [guides/65](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/guides/65-run-forms.md)。
 用户视角完整手册 = [`_dist/安装手册.md`](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_dist/%E5%AE%89%E8%A3%85%E6%89%8B%E5%86%8C.md)。
 
 **前置**：DSH 满足 `engines.dsh`（值以 `package.json` 的 `engines.dsh` 为准；宿主安装/启动会拒绝不匹配版本），
 Node 满足 `engines.node`；`dsh` 在 PATH；**首次装团队层需要 pnpm**；团队层需要 registry 或预装缓存。
-若 `dsh` 不在 PATH，用 `--install-anchor`（或 `DSH_INSTALL_ANCHOR`）给 scaffold/preflight 指安装锚。
+诊断用安装副本的 `dsh-deep-research-doctor`（只读；`--install-anchor` / `DSH_INSTALL_ANCHOR` 可指定安装锚）。
 
 ```sh
-# ① 装包（DSH 原生；web profile 首次使用会自动初始化）
-dsh plugin --profile web add dsh-deep-research-pack
-# 或离线：dsh plugin --profile web add file:/path/to/dsh-deep-research-pack-<版本>.tgz
+# ① 建产品 profile（仅首次；DSH 的 web 模板；破坏性，只对全新 profile 用）
+dsh --profile deep-research --from-default-profile web --dump-default-config
 
-# ② 初始化工作区（安装副本里的 scaffold；不需要全局安装）
-"${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/.bin/dsh-deep-research-scaffold" \
-  --install-only --workspace "$HOME/research" --profile web
+# ② 装 bundle + 团队层（DSH 原生；版本 = 运行中的 DSH）
+dsh plugin --profile deep-research add dsh-deep-research-pack@<版本> \
+  @deepseek-ai/dsh-experimental-agent-team-profile@<与 dsh --version 同版本>
+# 或离线：dsh plugin --profile deep-research add file:/path/to/dsh-deep-research-pack-<版本>.tgz
 
-# ③ 启动（DSH 原生）
-DEEP_RESEARCH_WORKSPACE="$HOME/research" dsh --profile web
+# ③ 启动
+dsh --profile deep-research
 ```
 
-- **profile**：默认用 DSH 自带 `web` profile；不混用其他能力时建专用 profile：
-  `dsh --profile deep-research --from-default-profile web --dump-config` →
-  `dsh plugin --profile deep-research add ...`。顺序不能反（`dsh plugin` 首次初始化未知名 profile 只带 base，
-  没有 Web 应用）；已有 profile 不要重复 `--from-default-profile`。
-- **工作区**：`DEEP_RESEARCH_WORKSPACE` 让 Host 在 Web 起来前登记工作区；不设也能启动，用 DSH 的
-  Workspace picker 选目录。原生 scaffold 在你传入的目录铺种子；要 `<project>/research` 就显式传子目录。
-- **首屏**：Orca 品牌 + 产品化工作区标题 + 起步卡（当前工作区 / 三步起步 / 凭据提示 / 换工作区）；
+- **profile**：产品身份 = `deep-research`。`dsh plugin` 首次初始化未知名 profile 只带 base；顺序不能反
+  （先 `--from-default-profile web`，再 `dsh plugin add`）。已有 profile 不要重复 `--from-default-profile`
+  （它会重置依赖与用户 patch）。
+- **工作区**：首屏 onboarding 询问项目目录；脚本/CI 用 `DEEP_RESEARCH_WORKSPACE=<dir>` 或
+  `$DSH_HOME/deep-research/settings.json`。选 `<dir>` 就是 `<dir>`；像项目时首屏建议 `<dir>/research`，
+  不静默改写。Host 启动行只登记 Workspace + best-effort 建 Lead 会话。
+- **首屏**：Orca 品牌 + 产品化工作区标题 + 起步卡（当前工作区 / 三步起步 / 凭据提示 / 选择项目目录）；
   默认 preset = Deep Research Lead；右栏研究状态/研究配置/研究图谱/终稿；主界面方法库 tab。
-- **可选一条命令**：`dsh plugin --profile web exec dsh-deep-research --profile web --workspace <ws>`
-  （或全局 `npm i -g` 后 `dsh-deep-research --workspace <ws>`）。它包装了上面的 profile/装包/种子/登记/启动；
-  `--check` 只读、`--setup-only` 装配后退出、`--home` 隔离；项目模式与 `--in-place` 只在启动器里有。
-- **检查**：`dsh --profile web --dump-config | grep ...`；安装副本的
-  `.../node_modules/.bin/dsh-deep-research-preflight --install-only --workspace <ws> --profile web`。
-- **数据**：run bundle/方法库/归档全在工作区；启动器设置只在 profile 目录（见 §Data）。
+- **更新**：产品内 Plugins 页（跨面，默认）或 `dsh plugin --profile deep-research add <new>`；重启 profile。
+  没有 launcher/scaffold/自定义安装器。
+- **检查**：`dsh --profile deep-research --dump-config | grep ...`；安装副本的
+  `.../node_modules/.bin/dsh-deep-research-doctor --profile deep-research --install-only`。
+- **数据**：run bundle/方法库/归档全在工作区；产品设置只在 `$DSH_HOME/deep-research/`（见 §Data）。
 
 ## Data
 
 一张表回答「装完数据在哪、谁删、卸载留什么」。承诺用 DSH 数据面的 P0–P4 记号（纯引用 / 会话派生 /
 用户可见文件 / 宿主账本 / 账号配置）；本包**没有 P3 home 账本**。读数：**P2** = 用户可见工作区文件；
-**派生** = 可从日志+文件重建；**只读层** = 随包发布、升级替换；**插件账本** = 插件自己写的工作区元数据。
+**派生** = 可从日志+文件重建；**只读层** = 随包发布、升级替换。
 **可移植** = 换机器/移交后还在不在：`随 bundle`（跟着 `drt_<slug>/` 走）/ `随工作区`（跟着工作区目录走）/
 `随包`、`随 profile`（重装重建）/ `仅本机`（依赖本机 home、日志或浏览器，移交不带）。
 
 | 事实 | 承诺 | 权威 | 位置 | 作用域 | 寿命 / 删除 | 谁看得见 | 秘密 | 卸载后 | 可移植 |
 |---|---|---|---|---|---|---|---|---|---|
-| 角色 / preset / skill | 只读层 | 包 | 安装副本 `node_modules/dsh-deep-research-pack/` | 安装 | 随包版本；`dsh plugin remove` | 模型（注入）/用户 | 否 | 删 | 随包 |
-| 工作区种子（手册 / NODES / 判型库 / 模板） | P2 | 落地后用户 | `<workspace>/{AGENTS.md,NODES.md,question-patterns.md,.gitignore,templates/run/}` | workspace | 用户手删；`--upgrade` 只写 sidecar | 模型（AGENTS 注入）/用户 | 否 | **保留** | 随工作区 |
-| 本工作区方法库 | P2 | 用户 | `<workspace>/method-library.md` | workspace | 任何模式不覆盖；用户手删 | 用户/Lead | 否 | **保留** | 随工作区 |
+| 角色 / preset / skill / 手册 / 模板 / 启动行 | 只读层 | 包 | 安装副本 `node_modules/dsh-deep-research-pack/`（`presets/`、`content/`、`lib/`） | 安装 | 随包版本；`dsh plugin remove` | 模型（注入）/用户 | 否 | 删 | 随包 |
+| 产品 profile（composition + 团队层） | DSH profile | DSH | `$DSH_HOME/profiles/deep-research/` | profile | 用户显式删；本包卸载不删 | 用户/DSH | 否 | **保留** | 随 profile |
+| 产品设置（工作区 / 上次会话） | 产品状态 | 产品 | `$DSH_HOME/deep-research/settings.json` | home | 删目录即重置；无秘密 | 启动行/doctor/用户 | 否 | **保留** | 仅本机 |
+| 浏览器工作区提示键 | 客户端提示（非权威） | 浏览器 | `localStorage['dsh.deep-research.workspaceId.v1']` | device | 清站点数据；权威 = Workspace registry | 用户/浏览器 | 否 | 保留（可重选） | 仅本机 |
+| 本工作区方法库 | P2 | 用户 | `<workspace>/method-library.md` | workspace | 用户手删；本包不覆盖 | 用户/Lead | 否 | **保留** | 随工作区 |
 | run bundle（研究事实） | P2 | 用户 | `<workspace>/drt_<slug>/`、`archive/`、`_abandoned/` | workspace + slug | 用户手删；无自动 GC | 模型/用户 | 否（内容可能含敏感材料） | **保留** | 随 bundle |
 | run.md 状态头 | 声明（非权威） | 事实（bundle 文件 + journal；`schema` 是整数契约、`created` 是人读日期） | `<bundle>/run.md` | run | 角色/ops 随阶段写；门禁只信事实 | 模型/用户 | 否 | **保留** | 随 bundle |
 | 交付 / 审计回执 | 派生 | 无（需日志+文件重建） | bundle 内 `delivered.json` / `manifest.json` / `acceptance.md` / `audit.md` / `node-gate.md` | run | ops 重新验收即重建；present 只记相对标签；权威文件变化即 stale | 用户/ops | 否 | **保留** | 回执随 bundle；`audit.md`/`node-gate.md` 仅本机（需会话语料复算） |
-| 种子状态账本 | 插件账本（寄居 P2） | 插件 | `<workspace>/.dsh-research-seed.json`（含 `schemaVersion`） | workspace | `scaffold --clean`；不自动删 | 用户（gitignored）/插件 | 否 | **保留** | 随工作区（新机可缺，`--check` 报 untracked） |
-| 启动器设置（上次工作区） | 产品设置 | 启动器 | `$DSH_HOME/profiles/<p>/deep-research.launcher.json` | profile | 删 profile 即删；无秘密；可重选 | 启动器/用户 | 否 | **保留**（随 profile） | 随 profile |
-| git 跟踪规则 | P2 | 用户 | `<workspace>/.gitignore` | workspace | 用户手改；产品不静默改，`--gitignore-append` 才追加 | 用户 | 否 | **保留** | 随工作区 |
-| scaffold 临时件 | 插件临时 | 插件 | `<workspace>/.dsh-research-scaffold.lock`、`*.seed-new*`、`*.tmp-*` | workspace | 正常退出删锁；`--clean --write` 清陈旧锁/临时件，sidecar 需 `--discard-sidecars` | 用户 | 否 | 可能保留 | 仅本机 |
 | 会话日志 | DSH | DSH | `$DSH_HOME/sessions/` | session | DSH 管理（无删除 API）；本包不删 | 模型（surface）/用户 | 否（可能含用户数据） | 保留（DSH 语义） | 仅本机 |
 | 凭据 | DSH | provider | `$DSH_HOME/.credentials.yaml` / env / `.env` | home | DSH 管理；本包只按 ref 读 | 用户 / 插件（仅引用） | 是（值只在 provider） | 保留 | 仅本机（不导出） |
-| 团队机制层 | N2 依赖 | vendor experimental | `$DSH_HOME/profiles/<p>/`（依赖 + bundle 行） | profile | 用户显式删；本包卸载不删 | 用户/插件 | 否 | **保留** | 随 profile |
+| 团队机制层 | N2 依赖 | vendor experimental | `$DSH_HOME/profiles/deep-research/`（依赖 + bundle 行） | profile | 用户显式删；本包卸载不删 | 用户/插件 | 否 | **保留** | 随 profile |
 | 浏览器侧栏布局 | 客户端 | 浏览器 | `localStorage['dsh.sidebar-right.v1.<sessionId>']` | device | vendor 管；清站点数据 | 用户/浏览器 | 否 | 保留（vendor 键） | 仅本机 |
 
-- **运行时插件代码对 `$DSH_HOME` 零写入**（不声明 storage domain、不新增 session event、不写浏览器存储）；启动器只写 profile 目录内的一个产品设置文件（无秘密、可删）。
-  home 里的会话/凭据/profile 是 DSH 的。安装/升级由 DSH CLI 写 profile；scaffold 只**触发**团队层安装（N2）。默认共享 `$DSH_HOME`：Web UI 会显示该 home 下其他 Workspace/Session；需要干净环境用 launcher `--home`。
+- **运行时插件代码对 `$DSH_HOME` 的写入只剩产品设置文件**（无秘密、可删）；浏览器只写一个工作区提示键。
+  不声明 storage domain、不新增 session event。home 里的会话/凭据/profile 是 DSH 的。
+  默认共享 `$DSH_HOME`：Web UI 会显示该 home 下其他 Workspace/Session；需要干净环境用 `DSH_HOME=<dir>`。
   驾驶舱只读 `remote.workspaceFiles`（根 = 会话 `header.cwd`，不是可变 working directory）与 `session.follow`。
+- **内容不落工作区**：研究手册由 `src/content` 以 runtime context 注入；NODES/判型库是 Lead 的 skills；
+  模板在包内。工作区只有产物与方法库，没有 seed 账本、没有 `--upgrade` sidecar、没有 `.gitignore` 写入。
 - **present 可移植**：回执里的 `present.path` 写成 `drt_<slug>/final/vN.md`，不写本机绝对路径。
   present 必须指向 **bundle 内**的文件；指向 bundle 外时 `run-accept` 判红（交付副本不能依赖本机路径）。
   历史回执若已被旧版本写进绝对路径，用 `run-accept --repair` 修（只动可再生产物）。
-- **清理自己的残留**：`scaffold --clean` 只报告；`--clean --write` 删除未改过的孤儿种子、陈旧锁与
-  临时状态；**sidecar 默认只报告**（它可能是未合并的种子更新），加 `--discard-sidecars` 才丢弃。
-  **改过的孤儿、种子文件、`drt_*`、`method-library.md` 永不删**。
 - **工作区边界**：不能指到 `$HOME` / `$DSH_HOME` / pack / profile（或其祖先或内部）——否则
   `AGENTS.md` 会变成全局指令或写进安装树。
 - **一个通道一个工作区**：运行通道/实例是宿主级的，但一次研究锚定一个 cwd；多项目请各起通道
@@ -170,15 +169,14 @@ DEEP_RESEARCH_WORKSPACE="$HOME/research" dsh --profile web
 
 **备份 / 恢复 / 跨机器移交**
 
-- 研究数据 = 工作区里的 `drt_<slug>/`、`archive/`、`_abandoned/`、`method-library.md` 与种子文件；
-  复制这些目录即可（`.dsh-research-seed.json` 可带可不带——新机缺席时 scaffold 会按 `--check` 报
-  untracked，再用 `--adopt`/`--upgrade` 明确接受）。`present` 回执只记 bundle 内相对标签，换机不断链。
+- 研究数据 = 工作区里的 `drt_<slug>/`、`archive/`、`_abandoned/`、`method-library.md`；复制这些目录即可。
+  `present` 回执只记 bundle 内相对标签，换机不断链。
 - **随 bundle 走 / 仅本机**：`final/vN`、`run.md`、`delivered.json`、`manifest.json` 随目录走；
   `audit.md` / `node-gate.md` 需要本机 `$DSH_HOME/sessions` 才能复算，`present` 本身是会话事件——
   这两样**不随移交**。所以移交后的 bundle 自证「交付了什么、谁拍的板」，复算审计要在原机或补齐语料。
 - **不要**把 `$DSH_HOME/sessions/`、`.credentials.yaml` 当研究备份；它们是 DSH 的，会话导出走
   `/export`（ZIP 只含日志与附件，不含工作区文件）。
-- 恢复顺序：复制工作区 → `scaffold --check` →（按报告）`--adopt` 或 `--upgrade` → 新会话「继续 <slug>」。
+- 恢复顺序：复制工作区 → 新会话「继续 <slug>」；profile 侧用 `dsh-deep-research-doctor` 检查。
 
 **保留、权限与版本线**
 
@@ -187,8 +185,8 @@ DEEP_RESEARCH_WORKSPACE="$HOME/research" dsh --profile web
   `--json` 给脚本）。
 - **一 Host 一用户**：run bundle 继承工作区权限；共享机器请把工作区放在私有目录（如 `chmod 700`）。
   本包不做每用户分区。
-- **一工作区一条 pack 版本线**：种子状态只有一个 `version`；不同 profile 装不同 pack 版本时，先在
-  旧版跑 `scaffold --check`（会报「工作区记录较新」），不要跨版本直接 `--upgrade`。
+- **一工作区一条 pack 版本线**：不同 profile 装不同 pack 版本时，升级前先看旧 run 的 `run.md` schema
+  与 pack README 的兼容说明；工作区数据不随包降级。
 - `method-library.md` 是用户数据：**run 活跃时不要手改**（Lead 也会写；无锁、无版本史，后写覆盖先写）。
 
 ## Compatibility
@@ -206,35 +204,32 @@ DEEP_RESEARCH_WORKSPACE="$HOME/research" dsh --profile web
 | `tool-present`（交付声明） | **N1 原生插件** | base 无此行，由本包 insert |
 | `session-query-sqlite`（会话搜索） | **N1 原生插件** | 本包显式 `path: ':memory:'`，不落持久索引 |
 | `ctx.credentials`（凭据引用） | **N1 原生插件** | 每次调用解析；值不进本包 |
-| `@deepseek-ai/dsh-experimental-agent-team{,-profile}` | **N2 实验** | **不是产品稳定性承诺**：上游可能改 API 或撤掉能力。本包不写进 `dependencies`；`scaffold` 按运行中的 DSH 版本装团队层，版本不符默认不改写（`--refresh-team` 显式刷新） |
+| `@deepseek-ai/dsh-experimental-agent-team{,-profile}` | **N2 实验** | **不是产品稳定性承诺**：上游可能改 API 或撤掉能力。本包不写进 `dependencies`；团队层由 DSH 两步安装显式装（版本 = 运行中的 DSH），doctor 只报告不刷新 |
 | `@deepseek-ai/dsh-experimental-client-ui-agent-team` | **N2 实验（peer）** | 客户端团队可视面，随宿主提供；不是本包安装的层。上游移除/改名时 client 挂载会失败，`compat-client-smoke` 能抓到 |
 | 社区插件（E1）/ 外部服务（E2） | — | 本包零 E1 依赖；外部只有模型/搜索/抓取 HTTP（隐私边界见上节） |
 
-**三条版本轴**（升级前先 `scaffold --check`）：
+**三条版本轴**（升级前先读兼容说明）：
 
 | 轴 | 当前 | 兼容规则 |
 |---|---|---|
 | 包 semver | 以 `package.json` 为准（本表不抄版本号） | 安装/升级走 `dsh plugin`；`engines.dsh` 不匹配即拒绝 |
-| 工作区种子 | `seed.json.version` = 包版本 | 记录在 `.dsh-research-seed.json`（`schemaVersion` 独立）；`--upgrade` 只覆盖未改文件，改过的写 `.seed-new`；`--force` 不覆盖用户 `.gitignore` |
+| 内容 / 模板 | 随包版本（`content/`） | 升级 = 换包；模型可见内容升级后新开 Lead 会话生效；工作区不保存内容副本 |
 | run bundle 契约 | `run.md` 的 `schema: 2`（D33 整数版本，门禁按整数分档）+ `created:`（人读日期） | 旧 bundle 只有 `contract: YYYY-MM-DD` = 旧形态：读兼容、按日期断代、不追改；未来 schema 由门禁判红，不猜语义 |
 
 ## Uninstall
 
 ```sh
 # 1) 停掉正在跑的 profile（避免运行中替换 node_modules）
-dsh plugin --profile <p> remove dsh-deep-research-pack
-# 2) 团队层是本包的承重依赖（N2 experimental），但不在本包内；不需要时显式移除：
-dsh plugin --profile <p> remove @deepseek-ai/dsh-experimental-agent-team-profile
-# 3) 需要删产品 profile（含启动器设置）时显式删除；工作区不受影响：
-rm -rf "$DSH_HOME/profiles/deep-research"
-# 4) 工作区留给用户；只想清 scaffold 残留时（先报告、再执行）：
-node <pack>/scripts/scaffold.mjs --workspace <ws> --clean
-node <pack>/scripts/scaffold.mjs --workspace <ws> --clean --write
+dsh plugin --profile deep-research remove dsh-deep-research-pack
+# 2) 团队层是独立依赖（N2 experimental），不需要时显式移除：
+dsh plugin --profile deep-research remove @deepseek-ai/dsh-experimental-agent-team-profile
+# 3) 需要删产品 profile（含产品设置）时显式删除；工作区不受影响：
+rm -rf "$DSH_HOME/profiles/deep-research" "$DSH_HOME/deep-research"
 ```
 
-**卸载后留下什么**：工作区种子、`method-library.md`、`drt_*`/`archive/`/`_abandoned/`、种子状态账本、
-可能有的 `.seed-new`/陈旧锁——都在工作区，由用户决定去留；启动器设置随产品 profile 删除；`$DSH_HOME`
-里的 sessions/credentials 是 DSH 的，本包不删；浏览器侧栏布局是 vendor 的 localStorage 键，清站点数据即可。
+**卸载后留下什么**：`method-library.md`、`drt_*`/`archive/`/`_abandoned/` 都在工作区，由用户决定去留；
+产品设置随 `$DSH_HOME/deep-research/` 显式删除；`$DSH_HOME` 里的 sessions/credentials 是 DSH 的，本包不删；
+浏览器提示键与侧栏布局是浏览器状态，清站点数据即可。
 
 ## 研究怎么跑
 
@@ -307,9 +302,9 @@ node <pack>/scripts/scaffold.mjs --workspace <ws> --clean --write
 
 ## 已知限制与延后工作
 
-- **首屏工作区**：默认共享 `$DSH_HOME`；浏览器已有 saved Session 时，Web 可能打开上次的工作区，而不是本次启动工作区（首屏/侧栏显示当前工作区，用 Workspace picker 切换；P0 不承诺自动切回）。需要干净环境用 launcher `--home`。
-- **项目模式（launcher）**：启动器对非空项目默认研究根 = `<project>/research`；agent 可读项目，但写入留在研究子目录（`workspace-write` 根 = Session cwd）。要让 agent 直接写项目根用 `--in-place`。原生 scaffold 不推断：它在你传入的目录铺种子。
-- **已有 `.gitignore`**：产品不静默改写；`--gitignore-append` 才追加带标记块（研究数据默认在子目录时只动研究子目录）。
+- **首屏工作区**：默认共享 `$DSH_HOME`；浏览器已有 saved Session 时，Web 可能打开上次的工作区，而不是本次启动工作区。client 首屏按 `dsh.sessions.current` 与产品提示键判断并切回；P1 才做确定性自动选中。需要干净环境用 `DSH_HOME=<dir>`。
+- **工作区选择**：首屏「选择项目目录」走 native chooser；browse-only 部署没有专门的目录浏览 UI（报错可见，不假装成功）。产品不改写 `.gitignore`；git 仓库缺忽略规则时只提示。
+- **Host 建会话是 best-effort**：webserver 在挂载期 listen，没有 readiness gate；client 用首选 blank / onboarding 兜底。
 - **研究方法配置首版边界**：方法 = 调查路径指导，不新增强制预算/来源数硬门，readiness 不自动验证方法承诺之外的新合同；用户方法库 `method-library.md` 是**工作区本地用户数据**（同工作区的会话都看得到，换工作区不带；由显式页面动作经 Method Editor Host 工具写入，无版本史、无跨设备同步）；高承诺学术模式（系统综述类）不在预设；Settings 管理页不做（需显式重议 D7/D18 架构边界，见 [_backlog 长期管理卡](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_backlog/_archived/settled_issues/2026-10-12-research-method-profile-management.md)）；方法库的增长纪律（命中计数／休眠）与库规模能力（分组／搜索／导入导出／跨工作区）、交付工件的表格档、领域包升格为字段——四项延后，重议条件登记在 [_backlog/triggers.md](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_backlog/triggers.md)；
 
 - **会话必须建在**研究工作区里**才能看到渐进面**：页签读的是会话工作区根（`workspaceFiles`），
@@ -320,8 +315,6 @@ node <pack>/scripts/scaffold.mjs --workspace <ws> --clean --write
   [member-activity-stream 卡](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)）。
   文件读写级动作不入流（噪音定夺）；任务粒度看 `ui-agent-team` 任务板——两面板分工不重复；
   有团队正例首验 = 下一场真实 run；
-- **`workspace/` 种子是快照**：由 `dev/sync-pack-workspace.mjs` 从仓库正本同步（门禁
-  `pack-workspace-fresh` 防漂移）；种子只铺新工作区，**不覆盖**已存在文件（`--force` 除外）；
 - **品牌名与品牌标**已按 [ui-skin](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/notes/rejected/2026-09-24-ui-skin.md) 的重启条件窄复活落地（虎鲸 Orca，mark/name 两槽注入——[Note](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/notes/implemented/2026-10-13-orca-brand.md)）；**皮肤层**（配色/主题）与**专职 synthesizer 角色**的重议条件仍分别由 [ui-skin](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/notes/rejected/2026-09-24-ui-skin.md) 和 [synthesizer](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/notes/rejected/2026-09-24-synthesizer-role.md) 拥有；
 - **工具卡 = 2 张**（spawn_teammate / web_search）；`team_task_*` 与其他协调类工具
   （wait_agent / list_agents / send_message）**不进对话流**（实测：harness 把协调类工具排除在对话渲染外）——团队任务的观察由 ui-agent-team 任务板与 To-dos
@@ -332,7 +325,7 @@ node <pack>/scripts/scaffold.mjs --workspace <ws> --clean --write
 
 ## 发布（维护者）
 
-发布前确认 `bin` 含 `dsh-deep-research`、所有 peer 为 optional（全局 launcher 不拉 DSH peers）、`_dist` 手册由 `export-dist` 重导出。版本、tag 与 npm 发布顺序 = [guides/64 发布规则](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/guides/64-release-versioning.md)。发布前跑 `pnpm release:check`；tag 必须等于本包 `version` 且为 annotated tag。
+发布前确认 `bin` 只有只读 `dsh-deep-research-doctor`、所有 peer 为 optional、`_dist` 手册由 `export-dist` 重导出。版本、tag 与 npm 发布顺序 = [guides/64 发布规则](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/guides/64-release-versioning.md)。发布前跑 `pnpm release:check`；tag 必须等于本包 `version` 且为 annotated tag。
 
 ## License
 

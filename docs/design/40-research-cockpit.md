@@ -205,7 +205,7 @@ pending false→true 迁移时 `openTab` 右栏自动展开；页签 dock 折叠
 **文件**：[StartCard.tsx](../../packages/deep-research-pack/src/client/StartCard.tsx)（D38 产品启动面的首屏件）
 
 `conversation.input.dock` 的全宽起步卡：首屏告诉用户产品是什么、当前工作区、三步起步
-（问一个问题 → Lead 先问三问/计划确认 → 右栏研究状态与终稿）、凭据提示与换工作区入口。
+（问一个问题 → Lead 先问三问/计划确认 → 右栏研究状态与终稿）、凭据提示与「选择项目目录」按钮。
 只在 blank Session、工作区根没有 `drt_*`、且会话还没有用户消息时显示；工作区文件读失败仍显示
 （不阻塞 composer）。「选择项目目录」按钮走 `uiWorkspace.pickDirectory` → `workspaces.create` →
 写 `dsh.deep-research.workspaceId.v1`（设备级提示）→ 开 Lead 会话；不写 session event / storage

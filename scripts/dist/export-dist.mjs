@@ -4,7 +4,7 @@
 //   ① 手册是**生成物**不是手写物——版本/日期/条目数在导出时注入，手册与旁边的 tarball 不能漂移；
 //   ② 打包步骤 = release-smoke 每轮证明的同一条 `npm pack`（cache 钉进仓库 gitignored 区，
 //      工具态纪律：npm 不碰 ~/.npm）；inventory 在导出的产物本体上重申发布边界；
-//   ③ 手册正文每一步都走 release-smoke 验证过的路径（add → dump-config → scaffold → preflight），
+//   ③ 手册正文每一步都走 install-shape-smoke 验证过的路径（profile init → plugin add → 真启动），
 //      是被证明过的顺序，不是设想；
 //   ④ _dist/ 是导出目的地，不是源——tarball gitignored，手册是唯一 tracked 例外
 //      （verify 门禁 dist-manual-version 钉版本一致：版本动 → 必须同 diff 重导出）。
@@ -61,7 +61,7 @@ try {
     `exit ${packed.status}, ${packedName ?? '无 tarball'}${(packed.stderr ?? '').trim() ? `：${packed.stderr.trim().split('\n')[0]}` : ''}`)
 
   // 2. inventory——发布边界在导出的产物本体上重申：必备条目在场、全部 preset 随包、
-  //    工作区种子与部署 bin 随包、tarball 里没有 package/ 之外的东西
+  //    content 与只读 doctor 随包、tarball 里没有 package/ 之外的东西
   const tarball = join(DIST, tarballName)
   const tarballSha = createHash('sha256').update(readFileSync(tarball)).digest('hex')
   const listed = spawnSync('tar', ['-tzf', tarball], { encoding: 'utf8' })
@@ -77,9 +77,8 @@ try {
     'package/content/templates/run/run.md',
     'package/lib/content.js',
     'package/lib/startup.js',
-    'package/scripts/lib/version-range.mjs',
-    'package/scripts/preflight.mjs',
-    'package/scripts/launch.mjs',
+    'package/scripts/doctor.mjs',
+    'package/scripts/lib/profile-read.mjs',
   ]
   const missing = must.filter((entry) => !entries.includes(entry))
   // 发布边界：lib/types 下的 JS 与 sourcemap 是构建中间产物，不是运行时；进包即用户装垃圾。

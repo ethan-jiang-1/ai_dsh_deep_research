@@ -6,11 +6,12 @@ is `packages/deep-research-pack`.
 
 ## Product vs development
 
-The package is a DSH plugin (bundle, D38). Product users install it with `dsh plugin --profile web add`,
-seed the workspace with the installed `dsh-deep-research-scaffold`, and start with `dsh --profile web`
-(D39); `dsh-deep-research` is an optional one-command wrapper. Development in this repository uses the
-isolated `research` profile, `research-workspace/` and `dev/run-driver.mjs` — do not mix the two command
-sets or data roots.
+The package is a DSH plugin (bundle) with its own product profile (D40). Product users create the
+`deep-research` profile from the shipped web template, install the bundle plus the team layer with
+`dsh plugin`, and start with `dsh --profile deep-research`; the first screen asks for the project
+folder. There is no custom installer and no launcher. Development in this repository uses the isolated
+`research` profile, `research-workspace/` and `dev/run-driver.mjs` — do not mix the two command sets or
+data roots.
 
 ## Prerequisites
 

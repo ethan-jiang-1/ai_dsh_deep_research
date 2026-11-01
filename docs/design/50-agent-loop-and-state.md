@@ -33,10 +33,10 @@
 检索/抓取/成员/交付）；写者通常是队员会话，页签需合并 lead + member 流。需要真 mtime 时必须先扩
 vendor `WorkspaceFileStat` 并升 pin，属上游改动。
 
-**安装侧状态不在四类内**：工作区种子账本（`.dsh-research-seed.json`）、scaffold 锁/sidecar、team 层依赖、
-启动器设置（`deep-research.launcher.json`）属于安装/升级面，不是研究状态；合同 = pack README §Data/§Compatibility + [guides/65 §3](../guides/65-run-forms.md)。
-产品工作区 = 任意目录（`dsh-deep-research --workspace`）；dev 实例 = `research-workspace/`。
-角色与审计不得把它们当研究事实读写。
+**安装侧状态不在四类内**：产品 profile、team 层依赖、产品设置（`$DSH_HOME/deep-research/settings.json`）、
+首屏的浏览器提示键属于安装/启动面，不是研究状态；合同 = pack README §Data/§Compatibility +
+[guides/65](../guides/65-run-forms.md)。产品工作区 = 任意目录（首屏选择/`DEEP_RESEARCH_WORKSPACE`）；
+dev 实例 = `research-workspace/`。角色与审计不得把它们当研究事实读写。
 
 ## 恢复优先级
 

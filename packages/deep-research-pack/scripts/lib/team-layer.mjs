@@ -1,12 +1,9 @@
 /**
  * team-layer — 确保产品/dev profile 里有与运行中 DSH 版本一致的团队机制层。
  *
- * 为什么单独成件：scaffold 与产品 launcher 都要"团队层必须在场且版本匹配"，但两者对
- * "已存在但版本不符"的处置不同——scaffold 默认不改用户 pin（显式 --refresh-team 才动），
- * launcher 用同一语义，避免静默替换用户的 N2 依赖。版本派生顺序与 scaffold 一致：
+ * doctor 需要"团队层是否在场、版本是否匹配"的只读判据；版本派生顺序 =
  * 安装锚 → profile 的 app-boot → PATH 上的 `dsh --version`；范围值不作版本号。
- *
- * 只做进程编排，不写 profile 文件；`dsh plugin` 是唯一写入路径。
+ * 只读：不写 profile、不调用 `dsh plugin`（安装/更新是用户显式动作）。
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
@@ -65,68 +62,4 @@ export function resolveTeamVersion({ profileDir, installAnchor = null, dshBin = 
  */
 export function installedTeamVersion(profileDir) {
   return readJson(join(profileDir, 'node_modules', ...TEAM_LAYER.split('/'), 'package.json'))?.version ?? null
-}
-
-/**
- * 确保团队层在场。
- * @param {{
- *   profile: string,
- *   profileDir: string,
- *   installAnchor?: { version?: string } | null,
- *   dshBin?: string,
- *   env?: NodeJS.ProcessEnv,
- *   dryRun?: boolean,
- *   refresh?: boolean,
- *   note?: (ok: boolean, label: string, detail: string) => void,
- * }} options
- * @returns {{ ok: boolean, status: 'present' | 'installed' | 'mismatch' | 'no-version' | 'no-dsh' | 'dry-run' | 'failed', version: string | null, spec: string, detail: string }}
- */
-export function ensureTeamLayer({
-  profile,
-  profileDir,
-  installAnchor = null,
-  dshBin = 'dsh',
-  env = process.env,
-  dryRun = false,
-  refresh = false,
-  note = () => {},
-}) {
-  const label = `团队层 profile「${profile}」`
-  const { version } = resolveTeamVersion({ profileDir, installAnchor, dshBin, env })
-  if (version === null) {
-    const detail = '无法派生团队层版本——安装锚、profile app-boot、PATH dsh 都不可用（团队层是 N2 experimental；先确认 dsh 在 PATH 或给 --install-anchor）'
-    note(false, label, detail)
-    return { ok: false, status: 'no-version', version: null, spec: TEAM_LAYER, detail }
-  }
-  const spec = `${TEAM_LAYER}@${version}`
-  const installed = installedTeamVersion(profileDir)
-  if (installed === version && !refresh) {
-    const detail = `已在场：${spec}（不改写依赖来源；需要刷新用 --refresh-team）`
-    note(true, label, detail)
-    return { ok: true, status: 'present', version, spec, detail }
-  }
-  if (installed !== null && !refresh) {
-    const detail = `已在场但版本是 ${installed}，运行版本期望 ${version}；确认后加 --refresh-team 更新（默认不改用户 pin；N2 experimental 随 DSH 版本走）`
-    note(false, label, detail)
-    return { ok: false, status: 'mismatch', version, spec, detail }
-  }
-  const probe = spawnSync(dshBin, ['--version'], { encoding: 'utf8', env })
-  if (probe.status !== 0) {
-    const detail = 'dsh CLI 不可用——装 DSH 后重跑，或手工在 profile 的 dsh.profile.bundles 加该层'
-    note(false, label, detail)
-    return { ok: false, status: 'no-dsh', version, spec, detail }
-  }
-  if (dryRun) {
-    const detail = `[dry-run] 将执行：dsh plugin --profile ${profile} add ${spec}`
-    note(true, label, detail)
-    return { ok: true, status: 'dry-run', version, spec, detail }
-  }
-  const run = spawnSync(dshBin, ['plugin', '--profile', profile, 'add', spec], { encoding: 'utf8', env })
-  const ok = run.status === 0
-  const reason = run.error?.code === 'ENOENT'
-    ? 'dsh CLI 不在 PATH'
-    : String(run.stderr ?? run.stdout ?? '').trim().split('\n').slice(-2).join(' ')
-  const detail = ok ? `已确保 ${spec} 在场` : `失败：${reason || '未知错误'}（可先跑 dsh-deep-research-scaffold --refresh-team）`
-  note(ok, label, detail)
-  return { ok, status: ok ? 'installed' : 'failed', version, spec, detail }
 }

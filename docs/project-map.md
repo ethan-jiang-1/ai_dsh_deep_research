@@ -6,15 +6,16 @@
 
 ## 先建立模型
 
-本项目交付一个产品化 DSH 插件包（bundle + 产品 launcher，D38），运行时没有独立研究进程。产品用户
-走 `dsh-deep-research`：launcher 装配 `deep-research` profile、登记用户工作区；本页的开发驱动
-（run-driver / `research` profile / `research-workspace/`）只描述 M2。DSH 提供会话、工具、模型调用与
-团队机制；插件提供角色配置、方法论技能和研究驾驶舱；用户工作区承载问题、证据和报告。
+本项目交付一个产品化 DSH 插件包（bundle + 自有 `deep-research` profile，D40），运行时没有独立研究
+进程、没有 launcher/自定义安装器。产品用户走 DSH 两步安装 + `dsh --profile deep-research`；首屏
+询问项目目录，Host 启动行登记工作区。本页的开发驱动（run-driver / `research` profile /
+`research-workspace/`）只描述 M2。DSH 提供会话、工具、模型调用与团队机制；插件提供角色配置、
+方法论技能、content 内容注入和研究驾驶舱；用户工作区承载问题、证据和报告。
 
 | 面 | 负责什么 | 查哪里 |
 |---|---|---|
-| 产品包 | bundle、preset、产品 launcher、产品 runtime skills、驾驶舱 client、部署 bin、发布种子、运行形态合同 | [pack README](../packages/deep-research-pack/README.md)、[插件作者指南](guides/62-plugin-authoring.md)、[运行形态合同](guides/65-run-forms.md) |
-| 启动与开发驱动 | 产品 launcher（用户路径）；vendor 构建、环境隔离、生成物同步、安装组合、web 启动、会话驱动（开发路径） | [开发环](guides/60-dev-loop.md)、[boot-run](../dev/boot-run.sh) |
+| 产品包 | bundle、preset、content 注入、启动行、产品 runtime skills、驾驶舱 client、只读 doctor、运行形态合同 | [pack README](../packages/deep-research-pack/README.md)、[插件作者指南](guides/62-plugin-authoring.md)、[运行形态合同](guides/65-run-forms.md) |
+| 启动与开发驱动 | 产品侧 = DSH profile + 首屏工作区；开发侧 = vendor 构建、环境隔离、生成物同步、安装组合、web 启动、会话驱动 | [开发环](guides/60-dev-loop.md)、[boot-run](../dev/boot-run.sh) |
 | 研究运行数据 | 用户工作区（dev 实例 = `research-workspace/`）：角色会话 cwd、共享手册、节点契约、模板、每次研究 bundle | [研究手册](../packages/deep-research-pack/content/manual.md)、[NODES](../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)、[状态与循环](design/50-agent-loop-and-state.md) |
 | 验证与调试 | 静态门禁、确定性回归、挂载/安装/浏览器 smoke、回放、run 审计和观察 | [验收合同](evaluation.md)、[脚本指令](../scripts/AGENTS.md)、[测试指令](../tests/AGENTS.md) |
 | 人机交互 | Web 中的问卡、会话流、任务板、驾驶舱与交付面板；独立 HTML 仪表盘提供观察投影 | [驾驶舱设计](design/40-research-cockpit.md)、[Run 指南](guides/61-run-playbook.md) |
@@ -29,15 +30,15 @@
 
 | 任务 | 首选入口 | 写盘 | 档位 | 事实来源 | 失败后的下一站 |
 |---|---|---|---|---|---|
-| **启动产品（产品用户）** | `dsh plugin --profile web add dsh-deep-research-pack` → 安装副本 scaffold → `DEEP_RESEARCH_WORKSPACE=<ws> dsh --profile web`（launcher 可选） | 是（profile/种子/会话；launcher 另写设置） | boot keyless；run 需凭据 | [pack README](../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | 见 guides/65；launcher `--check`/`--setup-only` |
+| **启动产品（产品用户）** | `dsh --profile deep-research --from-default-profile web` → `dsh plugin --profile deep-research add <pack> <team>` → `dsh --profile deep-research`；首屏选项目目录 | 是（profile/会话/产品设置） | boot keyless；run 需凭据 | [pack README](../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | 见 guides/65；诊断 = `dsh-deep-research-doctor` |
 | 启动一次研究（开发通道） | `node dev/run-driver.mjs up`（内部调 `bash dev/boot-run.sh`；想守前台看日志才直接跑 boot-run） | 是（会话与 bundle） | boot keyless；run 需凭据 | [Run 指南](guides/61-run-playbook.md) | boot 终端报错 → 下文「调试先看哪份事实」 |
 | 继续在飞 run | 同上；起来后 lead 会话说「继续 \<slug\>」 | 是 | 同上 | bundle 文件 + [Run 指南](guides/61-run-playbook.md) | bundle 缺件 → NODES 判据定位 |
 | 观察在飞 run | boot 自带后台仪表盘 + Web 驾驶舱 | 只读投影 | 浏览器 | [驾驶舱设计](design/40-research-cockpit.md) | 页签坏 → client-load-smoke |
 | 回答 HITL | Web GUI 选项卡（产品面）；代理代答 = `dev/hitl-answer.mjs`（开发面） | 是 | 浏览器；代答需真挂起在场 | [Run 指南](guides/61-run-playbook.md) | 卡未弹 → watch-run 看挂起谓词 |
 | 查看 run 状态与交付 | `<workspace>/drt_<slug>/` 文件事实（dev 实例 = `research-workspace/drt_<slug>/`；仪表盘只是投影） | 只读 | keyless | [NODES](../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) | 交付不明 → node-gate 门②③ |
 | 验证挂载（插件真挂载） | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs` | 否 | keyless 真挂载 | [开发环 §2](guides/60-dev-loop.md) | 红 → preset 源 + render-overlay 后复跑 |
-| 验证安装 | `source dev/env.sh && node scripts/smoke/product-smoke.mjs`（产品装配）/ `release-smoke`（安装域） | 是（测试 home/profile） | keyless（`--install-only` 跳凭据） | [开发环 §2](guides/60-dev-loop.md) | 红 → pack 发布集对账 |
-| 验证首启（产品面） | `node scripts/smoke/product-boot-smoke.mjs`（真 Web + 浏览器，无模型） | 是（测试 home/workspace） | keyless + 浏览器 | [开发环 §2](guides/60-dev-loop.md) | 红 → launcher/Host/StartCard |
+| 验证安装 | `source dev/env.sh && node scripts/smoke/install-shape-smoke.mjs`（手册三步）/ `release-smoke`（安装域） | 是（测试 home/profile） | keyless（`--install-only` 跳凭据） | [开发环 §2](guides/60-dev-loop.md) | 红 → pack 发布集对账 |
+| 验证首启（产品面） | `node scripts/smoke/product-boot-smoke.mjs`（真 Web + 浏览器，无模型） | 是（测试 home/workspace） | keyless + 浏览器 | [开发环 §2](guides/60-dev-loop.md) | 红 → startup/StartCard/client 恢复 |
 | 查漂移（镜像一致性） | boot-run 漂移门（启动即查，不静默用旧镜像）；复用已在飞通道时 `run-driver up/probe` 先跑 `boot-run --drift-only`（漂移 = NOT-RUN，不是绿） | 否 | keyless | boot-run 输出 + run-driver verdict | 红 → 按失败消息重装镜像、重启通道 |
 | 定位故障 | 下文「调试先看哪份事实」表 | 只读 | keyless | 现象 → 事实源映射 | 事实源看完仍不明 → watch-run / node-gate |
 
@@ -85,12 +86,12 @@ run-kickoff 默认用研究工作区的 workspaceId 建 Lead 会话；没有 pro
 | 正本 → 派生物 | 用于什么 | 同步与检查 |
 |---|---|---|
 | pack 角色/bundle 配置 → 开发 overlay | L1 源码域冒烟；不是正式 run 的安装源 | [render-overlay](../dev/render-overlay.mjs)；L0 `overlay-fresh` |
-| 研究工作区手册、NODES、判型库、模板 → pack 工作区种子 | 对外部署铺工作区；run bundle 不进入种子 | `../dev/sync-pack-workspace.mjs`；L0 `pack-workspace-fresh` |
+| 研究手册/模板 → pack `content/`；NODES/判型库 → Lead skills | 随包只读内容，由 `src/content` 注入 | L0 `content-shape` + snapshot B 层 + `l4-lite` |
 | pack 发布集 → research profile 的安装副本 | 正式研究 run 加载的包 | [boot-run](../dev/boot-run.sh) 组合检查与漂移门；修复次序见 [插件作者指南](guides/62-plugin-authoring.md) |
 | pack client 源码 → 浏览器构建产物 | Web 驾驶舱 | 构建与浏览器验收次序见 [开发环](guides/60-dev-loop.md) |
 
 修改源、生成派生物、更新安装副本、让运行进程重新加载，是不同动作。
-boot 的镜像一致性检查只证明发布集与安装副本一致；overlay 与工作区种子的同步另由 L0 检查。
+boot 的镜像一致性检查只证明发布集与安装副本一致；content 是否随包由 L0 `content-shape` 检查。
 
 ## 测试怎么选
 
@@ -105,7 +106,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 确定性回归 | `pnpm test`；`tests/**/*.test.mjs` | 无模型/浏览器/网络/子进程；导入执行路径另核查，见下方限制 | 纯函数行为、解析、状态折算、渲染输出、审计判据与配置契约 |
 | 类型检查 | `pnpm typecheck`；pack 的 `tsconfig.*.json` | 需要 vendor 构建产物；不调模型 | pack 双半 TypeScript 类型面（`src/client` + `src/lib` + host 壳） |
 | L1 真实挂载 | [preset-smoke](../scripts/smoke/preset-smoke.mjs) | 无模型；`DSH_SMOKE_REAL=1` 才起真 DSH，本地 RPC 与子进程 | roster、逐角色创建会话、skills 可见性/隔离；默认档只预检 |
-| L2 安装 | [release-smoke](../scripts/smoke/release-smoke.mjs) | 无模型调用；npm 安装可能访问网络；`--install-only` 安装检查跳过凭据；默认 preflight 检查凭据在场 | pack → 重建测试 profile → 安装 → scaffold/preflight → 安装域挂载 |
+| L2 安装 | [release-smoke](../scripts/smoke/release-smoke.mjs) | 无模型调用；npm 安装可能访问网络；`--install-only` 安装检查跳过凭据；默认 doctor 检查凭据在场 | pack → 重建测试 profile → 安装 → doctor → 安装域挂载 |
 | L2 冷启动 | [cold-start-smoke](../scripts/smoke/cold-start-smoke.mjs) | 无模型调用；团队层需 registry/缓存；MCP 关闭 | 独立 home/profile/端口/state → tarball 安装 → 浏览器面 GREEN |
 | 浏览器加载 | [client-load-smoke](../scripts/smoke/client-load-smoke.mjs) | 无模型；真实 web、浏览器、本地通信 | client 装配、页签、渐进面与文件事实对账 |
 | 升级端到端 | [e2e-021rc2](../scripts/smoke/e2e-021rc2.mjs) | 无模型调用；真实例或自 boot + 浏览器；须先 source | 角色 order 成组（内置 preset 撞车回归锁）、研究状态/配置页签真数据、本插件面零故障 |
@@ -186,5 +187,5 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
   [目录与入口治理 Note](../notes/implemented/2026-10-05-project-navigability.md)。
 - `layering` 主要扫描顶层测试文本；默认 run-state 回归的日志读取路径使用原生 Node 解码，覆盖直读、连续帧及损坏日志，零外部解压子进程。
   真实部署与浏览器脚本仍属于分级 smoke，不进入默认回归。
-- L2 无模型调用；`release-smoke` 使用显式 `--install-only` 跳过模型就绪检查，独立默认 preflight 仍检查凭据在场。
+- L2 无模型调用；`release-smoke` 使用显式 `--install-only` 跳过模型就绪检查，独立默认 doctor 仍检查凭据在场。
 - HTML 仪表盘使用 canonical 日志选择器、共享 HITL 折算和共享步骤折算；它仍是 fail-soft 观察投影，不是交付绿灯——日志回退（BUG-007 形态）下可能显示旧态，回退守卫不进仪表盘（非判据消费方）；判据消费方 = watch-run（内建回退检测）与机械门（缺证据即红，失败方向安全）。

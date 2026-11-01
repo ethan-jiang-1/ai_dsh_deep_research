@@ -1,34 +1,34 @@
 # ai_dsh_deep_research
 
 DSH 插件项目，也是 **Deep Research 产品**：一个包（`packages/deep-research-pack`）提供四个研究角色
-preset（`Deep Research Lead / Scout / Analyst / Critic`）+ 方法编辑 preset（`Method Editor`，D37），
-协作走 DSH 现成 Agent Teams 通道。产品形态 = **DSH 插件（bundle）+ 可选启动器**（D38/D39）：
-插件内容在包内，run bundle / 方法库 / 归档落在用户工作区。
-
-设计来源：方法论内核出自 codex Deep Research harness 考古（[考古报告](notes/implemented/2026-09-24-deep-research-harness-analysis.md)），
-插件工程范式参考作者本地 `ai_dsh_company`（不随仓；[解剖报告](notes/implemented/2026-09-24-dsh-plugin-repo-anatomy.md)）。
+preset（`Deep Research Lead / Scout / Analyst / Critic`）+ 方法编辑 preset（`Method Editor`，D37）+
+研究驾驶舱 + 方法论技能；协作走 DSH Agent Teams。产品形态 = **bundle + 自有 `deep-research` profile**
+（D40）：插件内容（手册/模板/技能/驾驶舱）全在包内，run bundle、方法库与归档落在你指定的工作区。
 
 ## 用它
 
 ```sh
-dsh plugin --profile web add dsh-deep-research-pack
-"${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/.bin/dsh-deep-research-scaffold" \
-  --install-only --workspace "$HOME/research" --profile web
-DEEP_RESEARCH_WORKSPACE="$HOME/research" dsh --profile web
+# ① 建产品 profile（仅首次；DSH 的 web 模板）
+dsh --profile deep-research --from-default-profile web --dump-default-config
+
+# ② 装 bundle + 团队层（DSH 原生；应用内 Plugins 页用于更新）
+dsh plugin --profile deep-research add dsh-deep-research-pack@0.3.0 \
+  @deepseek-ai/dsh-experimental-agent-team-profile@<与 dsh --version 同版本>
+
+# ③ 启动
+DEEP_RESEARCH_WORKSPACE="$HOME/projects/acme" dsh --profile deep-research
 ```
 
-三条命令 = DSH 原生插件安装 + 工作区初始化 + 启动；**不需要全局安装**。第二步铺种子与团队
-机制层，第三步由 Host 登记工作区；Web 首屏是 **Deep Research Lead**
-会话 + 起步卡（当前工作区 / 三步起步 / 凭据提示）。产物 = `<workspace>/drt_<slug>/`；方法库与
-归档也在工作区。专用 `deep-research` profile、一条命令启动器（`dsh-deep-research`）、项目模式与
-`--check`/`--home` = 手册；包合同与数据卡 = [pack README](packages/deep-research-pack/README.md)。
-用户视角完整手册 = [`_dist/安装手册.md`](_dist/安装手册.md)。
+首屏会问「项目目录」（也可以先用 `DEEP_RESEARCH_WORKSPACE` 指定）；选完后研究产物写到
+`<项目>/drt_<slug>/`，方法库 = `<项目>/method-library.md`。不需要 launcher，也没有自定义安装器；
+诊断用安装副本里的 `dsh-deep-research-doctor`。用户视角完整手册 = [`_dist/安装手册.md`](_dist/安装手册.md)；
+数据归属与 `DEEP_RESEARCH_WORKSPACE` 的优先级 = [guides/65](docs/guides/65-run-forms.md)。
 
 ## 首屏会看到
 
 Orca 品牌 + 产品化工作区标题（`Deep Research — <目录名>`）+ 起步卡：直接问一个研究问题 →
 Lead 先确认类型/深度/口径并给计划 → 右栏「研究状态」看进度；交付后右栏「终稿」读读者版。
-有 `drt_*` 或用户消息后起步卡收起。
+没选项目时起步卡给「选择项目目录」；有 `drt_*` 或用户消息后起步卡收起。
 
 ## 改它
 
@@ -51,10 +51,10 @@ Lead 先确认类型/深度/口径并给计划 → 右栏「研究状态」看�
 
 ## Rules In One Screen
 
-- 配置为主的 pack（preset / skill / bundle 行 / 产品 launcher / 工作区注册）+ 观察面 client 面（D18）+
+- 配置为主的 pack（preset / skill / bundle 行 / content 注入 / 启动行 / 只读 doctor）+ 观察面 client 面（D18）+
   抓取回退 provider（D31）；Node 版本区间与 vendor 对齐（正本 = package.json engines，门禁对账）；
   测试用 `node:test` + `node:assert`（无测试框架）。
 - 评估五面（L0 结构 / L1 挂载 / L2 安装 / L3 领域 / L4 交付）不互抵，定义见 `docs/evaluation.md`；
-  产品面增量证据 = `product-smoke` / `product-boot-smoke`（同页 L2 登记）。
+  产品面增量证据 = `install-shape-smoke` / `product-boot-smoke`（同页 L2 登记）。
 - 迭代单位 = 垂直轮（最薄全路径 → 逐轮加宽）；多步工作用会话内计划与 todo 表达顺序。
 - License = [MIT](LICENSE)；贡献者环境与工作流 = [CONTRIBUTING.md](CONTRIBUTING.md)。

@@ -10,7 +10,7 @@
   `package.json` 的 `files` 白名单决定，`tests/`、`docs/`、`notes/`、`_backlog/`、`runtime/`
   都不随包。
 - **贡献者** clone 的是整个开发仓库；`vendor/dsh` 是 pinned submodule，`runtime/` 是本地运行态，
-  `research-workspace/` 是开发通道的运行场实例；产品工作区 = 任意目录（`dsh-deep-research --workspace`）。
+  `research-workspace/` 是开发通道的运行场实例；产品工作区 = 任意目录（首屏选择/`DEEP_RESEARCH_WORKSPACE`）。
 - 因此“用户不装垃圾”靠 pack `files` + 发布冒烟；“仓库不反复打扫”靠 `.gitignore` +
   入库判据 + 门禁。两者不是同一件事。
 
@@ -18,7 +18,7 @@
 
 对每个候选文件问三句，按顺序命中即停：
 
-1. **它是不是源、合同、确定性种子，或门禁消费的证据？**
+1. **它是不是源、合同、确定性内容，或门禁消费的证据？**
    是 → 进 git（源码、配置、presets/skills、模板、文档、决策 Note、测试、fixtures、快照证据）。
 2. **它能不能只由 tracked 源 + lockfile + 生成器确定性重建？**
    是 → 不进 git（构建产物、依赖、缓存、tarball、日志、运行态）。
@@ -27,12 +27,12 @@
 
 **tracked 生成物**是唯一需要额外条件的类别：必须同时有生成器、新鲜度门禁、以及“为什么必须在
 树内”的理由。现有例子 = `_dist/安装手册.md`（`dist-manual-version`）、`dev/research.overlay.yml`
-（`overlay-fresh`）、pack `workspace/` 种子（`pack-workspace-fresh`）。没有门禁的生成物不进 git。
+（`overlay-fresh`）。没有门禁的生成物不进 git。
 
 ## 必须进 git
 
 - 源码、构建配置、`pnpm-lock.yaml`、`package.json`、`.npmrc`、`.gitattributes`、`.editorconfig`
-- `packages/deep-research-pack/` 的 presets、skills、`cordis.patch.yml`、workspace 种子、部署脚本
+- `packages/deep-research-pack/` 的 presets、skills、`content/`、`cordis.patch.yml`、doctor
 - `docs/`、`notes/`、`_backlog/`、`.agents/skills/`、`AGENTS.md`、README/CONTRIBUTING/SECURITY
 - `scripts/` 门禁、冒烟、探针、生成器；`tests/` keyless 回归与 fixtures
 - `snapshots/` 中被回放/审计消费的场景证据（录制流、声明、期望文件）
@@ -63,7 +63,7 @@
 - **夹具/录制**：新录制/新 fixture 不得嵌入本机绝对路径、端口、时间戳或机器名；需要确定性时
   显式归一化或在测试里注入日期（例：node-gate 的契约日注入）。历史 JSONL 中的旧路径保留为
   证据，不再扩写。
-- **生成配置**：`research.overlay.yml`、`workspace/` 种子等由生成器产出；贡献者不手改生成物，
+- **生成配置**：`research.overlay.yml` 等由生成器产出；贡献者不手改生成物，
   改源后跑生成器与新鲜度门禁。
 - **干净 clone 是底线**：`git worktree`/fresh clone + `pnpm install --frozen-lockfile` +
   `source dev/env.sh && pnpm verify && pnpm test` 必须绿。只在作者机器上绿不算绿。
@@ -72,7 +72,7 @@
 ## 新文件怎么判
 
 1. 先看路径：命中 `.gitignore` 的已知运行区 → 默认不进；要进必须写理由。
-2. 再看来源：源/合同/种子 → 进；生成物 → 找生成器与门禁；机器态 → 不进。
+2. 再看来源：源/合同/content → 进；生成物 → 找生成器与门禁；机器态 → 不进。
 3. 最后看环境：内容里出现本机路径、用户名、OS 专属命令 → 改写成环境无关形式；
    改不了就说明它只属于运行区。
 4. 仍拿不准 → 按“不进 git + 在文档/脚本里给出重建方式”处理；不要“先提交再说”。

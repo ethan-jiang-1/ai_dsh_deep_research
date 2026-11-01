@@ -11,16 +11,17 @@
 | 研究团队 / 组队 | Agent Teams（`spawn_teammate` / 任务板，experimental；**组合层 = vendor agent-team-profile**，D16） | `packages/experimental/agent-team` + `tool-agent-team` + `agent-team-profile` + `docs/subsystems/agent-team.md` |
 | 研究工人（一次性查证） | one-shot/continuable subagent（`dsh-tool-subagent`, spawn provider） | `packages/subagent/tool-subagent/README.md` |
 | 研究方法论的载体 | skill（`presets/<role>/skills/<n>/SKILL.md`，硬隔离） | `packages/skill/skill-filesystem` |
-| 研究执行图 / Wave | plan.md 的 **W<wave>.<index>**（W2 = Wave 2 分组，W2.1 = 层内节点，W2.1.1 = 内部拆解）；Wave 按 deps 计算；stage 由节点 kind 派生；旧 N/旧 flat W 只读 | `research-workspace/templates/run/plan.md` + `src/lib/plan-index.ts`（解析/问题提示）+ `src/lib/plan-graph.ts`（Team 任务图）；[Note](../notes/implemented/2026-10-22-w-wave-node-identity.md) |
+| 研究执行图 / Wave | plan.md 的 **W<wave>.<index>**（W2 = Wave 2 分组，W2.1 = 层内节点，W2.1.1 = 内部拆解）；Wave 按 deps 计算；stage 由节点 kind 派生；旧 N/旧 flat W 只读 | `packages/deep-research-pack/content/templates/run/plan.md` + `src/lib/plan-index.ts`（解析/问题提示）+ `src/lib/plan-graph.ts`（Team 任务图）；[Note](../notes/implemented/2026-10-22-w-wave-node-identity.md) |
 
 | HITL1 / HITL2（两次人工停靠） | `ask_user_question` 的停靠面（工具行 = `@deepseek-ai/dsh-tool-ask-user`） | HITL1 = 三问卡 + 计划确认卡两段（`quick_factual` 豁免）；HITL2 = 终局审阅；操作 = [guides/61 §3/§4](./guides/61-run-playbook.md) |
 | web 搜索/抓取 | `dsh-tool-web` + search/fetch provider（本仓：DeepSeek Search API + 抓取回退 provider） | `packages/web/tool-web` + `web-deepseek-api`（`deepseek-search-api`）+ 本包 `deepseek-fallback-fetch`（本地 `web-fetch-http` → Fetch API）；选择 = [D30](./decisions.md) / [D31](./decisions.md) |
 | 成品交付 | `present` 工具 explicit deliveries | `packages/fs/tool-present` + `client/ui-deliverables` |
 | 读者版终稿 | reader-facing final（本仓原生；canonical 的派生压缩，不是第二份事实） | `final/readable.md` → `final/readable-vN.md`（同版交付件）+ lead 的 `reader-final` skill + node-gate 门C + [design/40](./design/40-research-cockpit.md) 终稿页签双视图 |
-| 研究工作区 | 会话 cwd + `agent-instructions` 注入手册 | `packages/context/agent-instructions` |
-| 产品启动 profile（product profile） | DSH profile（`dsh --profile <name>` 的启动组合） | 产品默认 `deep-research`（launcher 装配：web 模板 → 本包 → 团队层）；dev 镜像 = `research`；D38 |
-| 产品启动器（product launcher） | —（可选一条命令便利；不新增应用进程） | `packages/deep-research-pack/scripts/launch.mjs` → bin `dsh-deep-research`；只装配 profile/登记工作区/起 Web，运行时仍是 `dsh`；主分发 = DSH 原生 `dsh plugin add` + `dsh --profile`；D38/D39 |
-| 产品设置（launcher settings） | profile-local 产品文件（非 DSH Config/patch） | `$DSH_HOME/profiles/<p>/deep-research.launcher.json`（上次工作区；无秘密、可删） |
+| 研究工作区 | 会话 cwd + 产品工作区（首屏选择/`DEEP_RESEARCH_WORKSPACE`） | 用户目录；run bundle/方法库/归档在此；[guides/65](./guides/65-run-forms.md) |
+| 研究手册注入（content） | `ctx.systemPrompt.context()` 的 runtime context（包内文本） | `packages/deep-research-pack/src/content/` → `content/manual.md`；用户项目自己的 `AGENTS.md` 仍走 `agent-instructions`（冲突时项目优先） |
+| 产品启动 profile（product profile） | DSH profile（`dsh --profile <name>` 的启动组合） | 产品默认 `deep-research`：`--from-default-profile web` → 本包 → 团队层；dev 镜像 = `research`；D40 |
+| 产品启动行（product startup） | Host 插件行（bundle 插入） | `packages/deep-research-pack/src/startup/`：读 `DEEP_RESEARCH_WORKSPACE`/产品设置 → 登记 Workspace → best-effort Lead 会话；D40 |
+| 产品设置（product settings） | home 级产品文件（非 DSH Config/patch） | `$DSH_HOME/deep-research/settings.json`（工作区/上次会话；无秘密、可删）；GUI 另有一个 localStorage 提示键（设备级） |
 | 产物 / artifacts | —（用户常用词） | = **run bundle**（`<workspace>/drt_<slug>/`）；不另建 artifact store，交付用 `present` 声明工作区文件 |
 | **研究驾驶舱（Research Cockpit）** | —（本仓原生套件名）：观察面 client 套件（观察面伞下最频改的一件） | `packages/deep-research-pack/src/client/` + `src/lib/`；分层与构成正本 = [design/40](./design/40-research-cockpit.md) |
 | 开发 harness / 运行 harness | development harness / runtime harness（同一仓库的两面：前者让 agent 看懂、修改、验证自己；后者是产品运行框架） | 本仓两面并存：`packages/deep-research-pack/` 是 runtime 面，`AGENTS.md` + `docs/` + `notes/` + `.agents/skills/` + 门禁是 development 面 |

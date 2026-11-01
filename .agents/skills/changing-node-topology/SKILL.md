@@ -21,8 +21,8 @@ description: Use when adding, removing, or rewiring a research pipeline node —
 
 | # | 面 | 拥有什么 | 动作 |
 |---|---|---|---|
-| 1 | [research-workspace/NODES.md](../../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) | 契约全表正本（行 + 回边节 + 编制条件性） | 改行/加行；判据级表述同步 |
-| 2 | `dev/sync-pack-workspace.mjs` | NODES/手册/模板/patterns 双副本 | 跑同步（`pack-workspace-fresh` 门禁对账）；profile 镜像随下次 boot-run 重建 |
+| 1 | [nodes-contract skill](../../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) | 契约全表正本（行 + 回边节 + 编制条件性） | 改行/加行；判据级表述同步 |
+| 2 | `packages/deep-research-pack/content/` + Lead skills | 手册/模板随包；NODES/判型库是 skills | `content-shape` 门禁 + snapshot B 层；profile 镜像随下次 boot-run 重建 |
 | 3 | `research-workspace/templates/run/` | 字段级契约实例（模板即 schema） | 新输出件 = 新模板；改必备件 = 改对应模板 |
 | 4 | [研究手册](../../../packages/deep-research-pack/content/manual.md) | 目录约定 + owner 表（一处事实一个家） | 新文件 = 补目录约定与 owner 行（手册有行数预算，挤一补一） |
 | 5 | `packages/deep-research-pack/src/lib/run-fold.ts` | `STEP_ORDER`（观察面轨道折算） | 节点序变才动；动了要 `pnpm build`（client 面）+ `client-load-smoke` |
@@ -35,7 +35,7 @@ run-state 谓词，通常自动——改文件名/轨道序才动）。
 ## 验证档（按改动面选跑，L0 必跑）
 
 - L0：`pnpm verify` + `pnpm test`（新判据的 fixtures 测试在此层）；
-- 动了 NODES/手册/模板（工作区种子）→ `sync-pack-workspace` + boot 漂移检测绿；
+- 动了 NODES/手册/模板（包内容）→ `content-shape` + snapshot B 层 + boot 漂移检测绿；
 - 动了 STEP_ORDER/cockpit → `pnpm build` + `client-load-smoke`（改挂起显性化再加
   `client-hitl-smoke`）；
 - 动了模型可见文本（手册/模板）→ `preset-smoke`（L1）+ `l4-lite-smoke`（真模型档）；
