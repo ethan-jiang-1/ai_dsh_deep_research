@@ -159,7 +159,8 @@ export function scanWitnessLogs(sessionsRoot, slug, { readLog = emptyOnUnreadabl
       for (const e of events) {
         if (e?.type !== 'tool/call' || e?.data?.name !== 'ask_user_question') continue
         const args = String(e.data?.arguments ?? '')
-        if (/交付审阅|HITL2/.test(args)) asks.set(e.data?.callId, { args, time: typeof e.time === 'number' ? e.time : null })
+        // 交付审阅卡的识别面：历史 header（交付审阅 / HITL2）+ 产品当前 header/选项（审阅与拍板 / 定稿（按现稿交付））；大小写不敏感。
+        if (/交付审阅|hitl2|审阅与拍板|定稿（按现稿交付）/i.test(args)) asks.set(e.data?.callId, { args, time: typeof e.time === 'number' ? e.time : null })
       }
       for (const e of events) {
         if (e?.type === 'deliverables/presented') {

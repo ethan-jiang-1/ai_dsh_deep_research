@@ -75,11 +75,13 @@ RED   I4 src/content 注册 systemPrompt.context
 1. ✅ `install-shape-smoke` ALL PASS：全局 dsh rc.3 上原样执行手册三步；roster 三状态、无旧 row、真启动无 `did not activate`。
 2. ✅ `product-boot-smoke` GREEN：用产品设置文件（不带 env）起 `dsh --profile deep-research`；Host 注册工作区、blank Lead Session、`cwd`/`preset` 正确。
 3. ✅ 同冒烟断言工作区无产品内容文件（`AGENTS.md`/`NODES.md`/`templates`/`seed.json` 等）。
-4. ◐ `snapshot-replay` B 层 ALL PASS（手册以 runtime context 进入；4 角色 fixture 重录）；`l4-lite` 5 角色真模型 PASS；`client-hitl-smoke` 真模型 HITL1 + 挂起显性化 PASS。**完整 L4 真实 run（run bundle 交付）未跑**。
+4. ✅ 真实 run `drt_unsc-p5-members`（quick_factual）：HITL1 + HITL2（代理代答，provenance 落 question.md/journal）→ 10 份 evidence + 9 份 provenance + review 3 轮 PASS → `final/v1.md` + `present` → `run-accept` ALL PASS（audit CRITICAL 0、URL 22/22、final 链 14/14、`acceptance.md` 落盘）。`snapshot-replay` B 层 ALL PASS（手册以 runtime context 进入；4 角色 fixture 重录）；`l4-lite` 5 角色真模型 PASS；`client-hitl-smoke` 真模型 HITL1 + 挂起显性化 PASS。
 5. ✅ `pnpm verify` + `pnpm test`（963）全绿；`release-smoke` / `data-smoke` / `doctor-smoke` / `pack-smoke` ALL PASS；真启动无 `did not activate`。
 6. ✅ README / AGENTS / 00-index / guides / pack README / `_dist` 同一叙事；`_dist` 0.3.0 重导出（131 条目）。
 7. ✅ `data-smoke`：卸载后 workspace 用户文件与 session 日志保留；`$DSH_HOME` 只多产品设置。
 8. ✅ `product-invariants` I1–I4 常驻测试；红基线（9/9）在卡上留证。
+
+**业务验收**：真人首启手感仍由用户在实际使用中拍板；本轮只交付机械/真模型证据。
 
 ## 关闭条件
 

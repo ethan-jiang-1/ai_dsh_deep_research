@@ -33,10 +33,11 @@
 - `pack-smoke`：131 条目、content/doctor/startup/content 产物在场、无安装脚本/凭据、两次 pack 同 sha —— **ALL PASS**。
 - `snapshot-replay-smoke`：4 角色 fixture 重录（真模型）+ C 金标准刷新；A 回放通路 + B 组装请求 diff（手册以 runtime context 进入；agent-instructions 两侧缺席时跳过）+ 渲染金标准 —— **ALL PASS**。
 - `l4-lite-smoke`：5 角色真模型响应 + scout `web_search` 工具调用 —— **ALL PASS**。
+- **真实 run `drt_unsc-p5-members`（quick_factual）**：HITL1 + HITL2（代理代答，provenance 落 question.md/journal）→ 10 份 evidence + 9 份 provenance + review 3 轮 PASS → `final/v1.md` + `present` → `run-accept` ALL PASS（audit CRITICAL 0、URL 溯源 22/22、final 链 14/14、`acceptance.md` 落盘）。
 
 ## 残余边界
 
-- 完整 L4 真实 run（HITL1 → 组队 → 证据 → review → HITL2 → final）本轮未跑；`l4-lite` 与 snapshot B 已证手册注入和角色行为，交付链仍是下一轮证据。
+- 真实 run 只跑了 quick_factual（单点事实、one-shot analyst + critic）；标准报告型 run（组队 + 多 wave）未跑。
 - 浏览器提示键是设备/源级；browse-only 部署没有专门目录浏览 UI（报错可见）。
 - Desktop / Windows / 正式 npm 发布未验证。
 - 团队层 N2 experimental：上游可能改 API 或撤能力。
