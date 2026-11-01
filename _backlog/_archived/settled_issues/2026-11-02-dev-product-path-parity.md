@@ -1,11 +1,12 @@
 ---
-status: 等人拍板
+status: 已结
 opened: 2026-11-02
 ---
 
 # 推敲：dev 通道与产品安装路径对齐——同机制、有界差异
 
-> 立卡：2026-11-02 ｜ 状态：等人拍板（技术面已落地，待你验收 dev 手感） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-02 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
+> 去向：implemented — [dev/product parity Note](../../../notes/implemented/2026-11-02-dev-product-path-parity.md)；业务验收：用户（2026-11-02 指示按流程推进落地）。
 
 **意图（先说清为什么做）：**
 
@@ -31,7 +32,7 @@ opened: 2026-11-02
 **当前情况：**
 
 - 已经同形（T）：run 通道启动 = `--from-default-profile web` → `npm pack` → `dsh plugin add file:<tgz>`
-  → 团队层 → roster 四项。见 [boot-run.sh](../../dev/boot-run.sh)。
+  → 团队层 → roster 四项。见 [boot-run.sh](../../../dev/boot-run.sh)。
 - 五处仍不同：
   1. **profile 身份**：dev `research` vs 产品 `deep-research`（`dev/boot-run.sh`、`dev/run-driver.mjs`）。
   2. **团队层版本**：dev 从 `dsh.compatibility.dshReleases` 派生（**该字段已删**，派生已失效）vs 产品按
@@ -41,7 +42,7 @@ opened: 2026-11-02
   4. **重建语义**：dev 缺件即 `rm -rf` 整个 profile；产品是 `plugin add/remove` 增量 + 重启。
   5. **runtime**：dev 走 vendor 源码，产品走 npm 全局——这条属必然差异，只需登记，不需要消除。
 - 另有一处**当前已坏**：`LAYER_VER` 仍读 `dsh.compatibility.dshReleases[0]`，而该字段在
-  [插件生命周期合规](../_archived/settled_issues/2026-11-01-plugin-lifecycle-conformance.md) 里已删——boot-run 现在会在
+  [插件生命周期合规](2026-11-01-plugin-lifecycle-conformance.md) 里已删——boot-run 现在会在
   这一行抛 TypeError。本卡顺手修复。
 
 **未决问题：** 无（两项已由用户口头定：dev profile 就叫 `deep-research`；团队层跟运行中 dsh 同版本）。
@@ -105,13 +106,14 @@ dev 仍是 `dsh --profile deep-research`，run-driver 只是驱动（漂移门 +
 | AC3 MCP 关闭形态 | `MCP_PLAYWRIGHT=0`：覆盖层文件不存在、profile patch 仍 `[]`、web 在 3192 起（T） |
 | AC4 driver 默认 profile | `node dev/run-driver.mjs up --no-probe --port 3193` 起通道打印 token URL，boot 日志 `profile=deep-research`；`--no-probe` 如实 NOT-RUN（T） |
 | AC5 门禁面 | `dev-parity` 绿；`gates-smoke` 案例 `dev-parity-driver-profile` 注入即点名红、还原绿（T） |
-| AC6 全量 | `pnpm verify` / `pnpm test` / `pnpm typecheck` 绿（见下一轮收尾读数）；parity 表在 [dev/README](../../dev/README.md) |
+| AC6 全量 | `pnpm verify` / `pnpm test` / `pnpm typecheck` 绿（见下一轮收尾读数）；parity 表在 [dev/README](../../../dev/README.md) |
 
 附带修复：`LAYER_VER` 不再读已删除的 `dsh.compatibility.dshReleases`（该行此前会让 boot-run 直接抛错）。
 
+**2026-11-02 收尾复跑（交付前自审）**：删掉漂移的 dev profile 后从零重建，逐条复跑 AC1–AC3（`profiles/deep-research` = `file:…0.3.0.tgz` + 四项 bundles + 团队层 `0.2.1-rc.2` = `dsh --version`；patch 保持 `[]`、overlay 生成、`--dump-config --patch` 有 `mcp-playwright`、web 在 3195 起；`MCP_PLAYWRIGHT=0` 时 overlay 不存在、patch 仍 `[]`、web 在 3196 起）。`pnpm verify`（含 `dev-parity`）、`pnpm test` 965/0、`pnpm typecheck`、`gates-smoke --case=dev-parity-driver-profile` 全绿。首跑时 `dev-parity` 的漂移门按设计拦下 pack README 与镜像不一致（本卡改动面导致），重建后转绿——这正是该门的预期行为。
+
 ## 去向
 
-`implemented` → [dev/product parity Note](../../notes/implemented/2026-11-02-dev-product-path-parity.md)。
+`implemented` → [dev/product parity Note](../../../notes/implemented/2026-11-02-dev-product-path-parity.md)。
 
-**待你验收**：这次 dev 启动的手感是否够接近用户路径（Plugins 页安装 → 启动），以及 parity 表里
-"允许差异"的边界是否合适。
+业务验收：用户 2026-11-02 指示按流程推进落地；dev 手感的后续反馈按新卡处理。

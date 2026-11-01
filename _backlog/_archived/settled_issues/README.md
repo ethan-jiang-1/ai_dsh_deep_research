@@ -4,6 +4,7 @@
 
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-11-02-dev-product-path-parity](2026-11-02-dev-product-path-parity.md) | dev 通道与产品路径对齐：同 profile 名/安装源/版本门、profile 用户层零写入（MCP 走 `--patch` 覆盖层）、`dev-parity` 门禁 + parity 表；AC1–AC3 复跑绿；[Note](../../../notes/implemented/2026-11-02-dev-product-path-parity.md) | 2026-11-02 |
 | [2026-11-01-plugin-as-product-v2](2026-11-01-plugin-as-product-v2.md) | 插件即产品 v2：自有 `deep-research` profile + CLI 引导 + Plugins 页装包 + 启动期工作区/内容进包；`product-boot-smoke` GREEN；残余 = 公网 npm 发布；[Note](../../../notes/implemented/2026-11-01-plugin-as-product-v2.md) | 2026-11-02 |
 | [2026-11-01-plugin-lifecycle-conformance](2026-11-01-plugin-lifecycle-conformance.md) | 插件生命周期合规：`engines.dsh`/locale/icon/市场索引/四门禁/文档；本地 registry 端到端 + `lifecycle-smoke`；残余 = 公网 npm 发布；[Note](../../../notes/implemented/2026-11-01-plugin-lifecycle-conformance.md) | 2026-11-02 |
 | [2026-11-01-plugin-as-product](2026-11-01-plugin-as-product.md) | 插件即产品：D38 包/bundle + `dsh-deep-research` launcher + 产品 profile + 用户工作区 + 首屏起步卡 + 文档/`_dist` + 产品 smokes；P1 见 triggers；[Note](../../../notes/implemented/2026-11-01-plugin-as-product.md) | 2026-11-01 |

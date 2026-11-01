@@ -49,7 +49,7 @@
 
 ```mermaid
 flowchart TD
-  E[boot-run：env + vendor 产物检查 + 端口检查] --> P[检查 research profile 组合；缺席或不完整才补装]
+  E[boot-run：env + vendor 产物检查 + 端口检查] --> P[检查 deep-research profile 组合；缺席或不完整才补装]
   P --> M[MCP patch + pack 发布集与安装镜像漂移检查]
   M -->|漂移| X[停止；按失败消息修复镜像]
   M -->|一致| W[启动 DSH web；输出 URL]
@@ -87,7 +87,7 @@ run-kickoff 默认用研究工作区的 workspaceId 建 Lead 会话；没有 pro
 |---|---|---|
 | pack 角色/bundle 配置 → 开发 overlay | L1 源码域冒烟；不是正式 run 的安装源 | [render-overlay](../dev/render-overlay.mjs)；L0 `overlay-fresh` |
 | 研究手册/模板 → pack `content/`；NODES/判型库 → Lead skills | 随包只读内容，由 `src/content` 注入 | L0 `content-shape` + snapshot B 层 + `l4-lite` |
-| pack 发布集 → research profile 的安装副本 | 正式研究 run 加载的包 | [boot-run](../dev/boot-run.sh) 组合检查与漂移门；修复次序见 [插件作者指南](guides/62-plugin-authoring.md) |
+| pack 发布集 → `deep-research` profile 的安装副本 | 正式研究 run 加载的包 | [boot-run](../dev/boot-run.sh) 组合检查与漂移门；修复次序见 [插件作者指南](guides/62-plugin-authoring.md) |
 | pack client 源码 → 浏览器构建产物 | Web 驾驶舱 | 构建与浏览器验收次序见 [开发环](guides/60-dev-loop.md) |
 
 修改源、生成派生物、更新安装副本、让运行进程重新加载，是不同动作。
