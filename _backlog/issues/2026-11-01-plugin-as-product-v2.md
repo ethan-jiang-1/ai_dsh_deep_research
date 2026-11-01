@@ -23,7 +23,7 @@ opened: 2026-11-01
 1. **内容边界 = A**：无种子。手册走 `ctx.systemPrompt.context()`；NODES / 判型库走 Lead skills；模板留包内、手册用 `{{research_pack_root}}` 指路。B（`<workspace>/.deep-research/` 隐藏目录）只在 A 被真模型证据证伪时启用。
 2. **项目目录 = 询问 + 推荐**：用户选 `<dir>` 就是 `<dir>`；若像项目，询问时把 `<dir>/research` 作为推荐项，不静默改写。
 3. **互操作 = 保留一行**：同一个 bundle 装进现有 `web` profile 也能用（首屏照样问工作区），但不是产品形态。
-4. **新产品面 = 接受**：Host 启动行（工作区登记）+ `researchSetup` remote + client 启动控制器/onboarding，作为 D7 第三处有界例外（与 D18 驾驶舱、D31 抓取回退并列），需新 D 号。
+4. **新产品面 = 接受（S2 落成时收窄）**：Host 启动行（工作区登记 + best-effort 会话）+ client 启动控制器/首屏按钮，作为 D7 第三处有界例外（与 D18 驾驶舱、D31 抓取回退并列）。**不新增 Remote**：Typert 生成物不在本包构建链里；改用 DSH 既有 `workspaces.create` / `sessions.create` / `uiWorkspace.startSession` / `pickDirectory`，GUI 只写一个 localStorage 提示键。
 5. **安装 = 只用 DSH**：删除 `dsh-deep-research`（launcher）与 `dsh-deep-research-scaffold`；首次安装 = `dsh --profile deep-research --from-default-profile web` + `dsh plugin --profile deep-research add <pack> <team>`；启动 = `dsh --profile deep-research`；只保留只读 doctor。版本 0.3.0，无兼容、不迁移旧种子。
 
 **下一步：** 按 [实施计划](../research/plugin-as-product-v2/2026-11-01-implementation-plan.md) 从 S0 红基线开始，S0 → S1 → S2 → S3 → S4；每片按 [验收计划](../research/plugin-as-product-v2/2026-11-01-verification-plan.md) 退出。

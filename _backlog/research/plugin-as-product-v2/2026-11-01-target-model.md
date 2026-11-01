@@ -89,17 +89,17 @@ intent: 给出目标产品形态的完整合同——入口、profile、工作�
 1. 读产品设置（`DEEP_RESEARCH_WORKSPACE` 只覆盖本次）——无 → 不登记、不建会话，首屏走 onboarding。
 2. `stat` 目录；失败 → log error，不创建。
 3. `workspaceRegistry.create(path, "Deep Research — <basename>")`（同路径幂等，只登记）。
-4. 暴露产品 remote `researchSetup.get()` → `{ schemaVersion, workspace, sessionId, ready }`；这个 remote 是**读**产品设置的唯一面，也是首屏知道"该去哪个工作区"的来源。
+4. 不新增 Remote（S2 spike 结论：Typert 生成物不在本包构建链里）。首屏用 DSH 既有客户端服务：`workspaces.create` / `sessions.create` / `uiWorkspace.startSession` / `uiWorkspace.pickDirectory`；GUI 的产品工作区记忆只写一个 localStorage 提示键（设备级，不是账本）。
 5. 失败只影响产品行：log 清楚，不阻断 DSH 启动；首屏显示"未就绪"。
 
 **Client 启动行**（页面加载后，可靠）：
 
-1. `remote.researchSetup.get()`。
-2. 有 `workspace`：`session.create({ sessionId: 上次的, cwd: workspace, agentPreset: 'lead' })`（blank/同目录/未归档会复用；否则新建）→ `uiWorkspace.openSession(sessionId)`；把返回的 sessionId 写回设置（`researchSetup.set`）。
-3. 无 `workspace`：`shell.overlay` onboarding（frame-wide，Desktop onboarding 的同款载体）+ DSH 目录选择器（native/browse 两 capability）→ `researchSetup.set({ workspace })` → 建会话 → `openSession`。
+1. 等 `workspaces` / `sessions` 列表 ready；读 localStorage 提示键与 `dsh.sessions.current`。
+2. 有 `workspace`：`uiWorkspace.startSession(workspaceId, { agentPreset: 'lead' })`（blank/同目录复用；否则新建）；当前会话已在该目录则不切。
+3. 无 `workspace`：起步卡的「选择项目目录」按钮 → `uiWorkspace.pickDirectory()` → `workspaces.create({ path })` → 写提示键 → `startSession`。browse-only 部署失败时显示错误、不假装成功。
 4. 监听 `api-session/added`（已转发的 `SessionSummary` 带 `cwd` / `blank`）：Host/其他入口新建的产品会话出现时，若当前会话不在产品工作区，显示横幅或自动切（P1 自动切）。
 
-**产品 remote 的边界**：`researchSetup.get/set` 只读写产品设置文件与目录校验，不写 DSH patch、不声明 storage domain、不新增 session event。它是继驾驶舱（D18）、抓取回退（D31）之后的又一处有界产品面，需新 D 号明确范围。
+**新产品面的边界**：Host 启动行只读设置/登记工作区 + best-effort 建会话；client 只用 DSH 现有服务做导航与目录选择；浏览器只写 `dsh.deep-research.workspaceId.v1` 一个提示键。不写 DSH patch、不声明 storage domain、不新增 session event。它是继驾驶舱（D18）、抓取回退（D31）之后的又一处有界产品面。
 
 ### 多工作区
 
@@ -131,9 +131,9 @@ intent: 给出目标产品形态的完整合同——入口、profile、工作�
 
 ## 5. 首屏
 
-- **载体**：工作区未设置时用 `shell.overlay`（frame-wide、additive；Desktop onboarding 同款座位）承载 onboarding；已设置时用 `conversation.hero.*` 的起步卡（现有 StartCard 改文案，不再解释 setup 仪式）。
+- **载体**：`conversation.input.dock` 的起步卡（现有 StartCard）加「选择项目目录」按钮；不另造 `shell.overlay`（S2 收窄：最小可用路径优先，避免新槽位与浏览态分叉）。
 - **内容**：产品名 + 当前工作区 + "问一个研究问题"；未设置时是"选项目目录"。
-- **动作**：选目录 → `researchSetup.set({ workspace })` → `session.create({ cwd, agentPreset: 'lead' })` → `uiWorkspace.openSession`。写操作只经产品 remote，client 不直写文件。
+- **动作**：选目录 → `workspaces.create` → `uiWorkspace.startSession`。client 不直写文件；产品设置文件只由 Host/doctor 读写。
 - **错工作区**：当前会话的 `cwd` ≠ 设置工作区时，横幅提示 + 一键切到产品会话（`openSession`）；自动切 P1。
 - **凭据提示**保留（无 key 也能用账号登录；不硬拦）。
 - **不依赖** `settings.onboarding`（FAQ 37 #6）；不做皮肤；不新增模型可见事实。

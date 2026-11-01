@@ -64,7 +64,7 @@ pin：`vendor/dsh` = `687f282e86`（submodule tag 见根 AGENTS §DSH 源码表�
 
 ## 未验证项（不得写进用户承诺）
 
-- 产品 remote `researchSetup.get/set` 的实现形状（Typert 远程方法 + client 绑定 + 权限）：机制存在，但本仓没有先例；实现前先做最小 spike。
+- ~~产品 remote `researchSetup`~~：S2 spike 结论 = Typert 生成物不在本包构建链；改用 DSH 既有 workspaces/sessions/uiWorkspace 客户端服务，不新增 Remote。
 - client 加载后自己 `session.create` → `openSession` 的完整链路（FAQ 只分别证了 create 与 openSession；本仓未跑过 client 插件建会话）。
 - runtime context 注入 18.5 KB 手册的**体积行为**（是否被截断/推高首轮成本）与真模型是否仍按手册工作；降级路径 = 隐藏目录种子。
 - `shell.overlay` 上的 onboarding 在窄屏/多面板下的实际可点性（真浏览器冒烟）。
