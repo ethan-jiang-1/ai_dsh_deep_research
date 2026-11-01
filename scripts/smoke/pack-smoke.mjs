@@ -34,7 +34,7 @@ let listed = []
 try { listed = JSON.parse(run.stdout)[0].files.map((f) => f.path) } catch {}
 check(run.status === 0 && listed.length > 0, 'npm pack --dry-run --json 可解析', (run.stderr || '').slice(-500))
 const has = (rel) => listed.includes(rel)
-for (const required of ['package.json', 'cordis.patch.yml', 'lib/index.js', 'lib/client.js', 'presets/lead.patch.yml', 'workspace/seed.json', 'scripts/scaffold.mjs']) {
+for (const required of ['package.json', 'cordis.patch.yml', 'lib/index.js', 'lib/client.js', 'lib/content.js', 'lib/startup.js', 'presets/lead.patch.yml', 'content/manual.md', 'content/templates/run/run.md', 'scripts/doctor.mjs']) {
   check(has(required), `tarball 含 ${required}`)
 }
 for (const forbidden of ['.env', '.credentials' + '.yaml', 'node_modules', '_dist']) {

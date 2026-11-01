@@ -16,6 +16,8 @@ function fakeContext({ withRegistry = true, withSessions = false } = {}) {
   const logs = []
   const ctx = {
     logger: { info: (line) => logs.push(['info', line]), warn: (line) => logs.push(['warn', line]) },
+    // Cordis 的可选服务读取面（启动行用 ctx.get 而不是属性访问——属性会触发 inject 守卫）。
+    get(name) { return ctx[name] },
   }
   if (withRegistry) {
     ctx.workspaceRegistry = {

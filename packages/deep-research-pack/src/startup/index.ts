@@ -65,7 +65,8 @@ export async function apply(ctx: Context): Promise<void> {
 
   // 会话创建是 best-effort：webserver 在挂载期 listen，Host 建会话不保证早于首个请求；
   // 失败/竞态都不影响产品可用（client 可用首选 blank 或 onboarding 兜底）。
-  const sessions = (ctx as unknown as { sessionController?: SessionControllerLike }).sessionController
+  // 可选服务：用 ctx.get 读取；直接属性访问会触发 Cordis 的 inject 守卫（"without inject"）。
+  const sessions = (ctx as unknown as { get(name: string): SessionControllerLike | undefined }).get('sessionController')
   if (sessions === undefined) return
   const previous = readSettings(process.env)
   const savedSessionId = previous.ok ? previous.value.sessionId : undefined

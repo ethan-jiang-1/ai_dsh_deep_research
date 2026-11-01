@@ -307,7 +307,13 @@ for (const { face, scene } of SCENES) {
           return hits;
         };
         const chatOpened = async () => page.evaluate(() => (document.body?.innerText ?? '').includes('观察面录制探针'));
-        const matchedRows = await rowsMatching(UNIQUE_TITLE);
+        let matchedRows = await rowsMatching(UNIQUE_TITLE);
+        if (matchedRows.length === 0) {
+          // 侧栏可能把工作区组折叠（dev home 会话多）；先展开再按标题前缀找一次。
+          const group = page.getByText('research-workspace', { exact: true }).first();
+          if (await group.isVisible().catch(() => false)) { await group.click({ timeout: 8000 }).catch(() => {}); await sleep(1200); }
+          matchedRows = await rowsMatching('快照回放冒烟');
+        }
         let opened = false;
         for (const el of matchedRows) {
           await el.click({ timeout: 10000 }).catch(() => {});

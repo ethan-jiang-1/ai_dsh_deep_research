@@ -15,10 +15,12 @@ import { spawn, spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { sha256 } from '../../packages/deep-research-pack/scripts/lib/seed-core.mjs'
+import { createHash } from 'node:crypto'
 import { scrubbedEnv } from '../lib/env.mjs'
 import { reclaimPort } from '../lib/port-reclaim.mjs'
 import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs'
+
+const sha256 = (data) => createHash('sha256').update(data).digest('hex')
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const BIN = join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts')
@@ -122,20 +124,14 @@ let child = null
 try {
   check(dsh(['--profile', PROFILE, '--from-default-profile', 'web', '--dump-config']).status === 0, '干净 profile 初始化')
   check(dsh(['plugin', '--profile', PROFILE, 'add', `file:${TARBALL}`]).status === 0, '安装 pack tarball')
-  const scaffold = spawnSync(process.execPath, [
-    join(INSTALLED, 'scripts', 'scaffold.mjs'), '--install-only', '--workspace', WS,
-    '--profile', PROFILE, '--host', join(HOME, 'profiles', PROFILE),
-  ], { encoding: 'utf8', env: env() })
-  check(scaffold.status === 0 && existsSync(join(WS, 'AGENTS.md')), 'scaffold 铺工作区种子', (scaffold.stderr || '').slice(-300))
-
   // 用户数据标记：卸载后必须保留。
-  writeFileSync(join(WS, 'AGENTS.md'), '# data-smoke user marker\n')
+  mkdirSync(WS, { recursive: true })
   writeFileSync(join(WS, 'method-library.md'), '# data-smoke user library\n')
   const before = treeHash(INSTALLED)
 
   child = spawn(process.execPath, ['--import', 'tsx/esm', BIN, '--profile', PROFILE, '--', '--port', PORT, '--no-open'], {
     cwd: ROOT,
-    env: scrubbedEnv({ DSH_HOME: HOME, DEEPSEEK_API_KEY: FAKE_KEY, MCP_PLAYWRIGHT: '0' }),
+    env: scrubbedEnv({ DSH_HOME: HOME, DEEPSEEK_API_KEY: FAKE_KEY, MCP_PLAYWRIGHT: '0', DEEP_RESEARCH_WORKSPACE: WS }),
     detached: true, stdio: ['ignore', 'pipe', 'pipe'],
   })
   const boot = await waitFor(child, /dsh web: http:\/\/127\.0\.0\.1:\d+/, 90_000)
@@ -171,8 +167,7 @@ try {
   const profileManifest = JSON.parse(readFileSync(join(HOME, 'profiles', PROFILE, 'package.json'), 'utf8'))
   check(!existsSync(INSTALLED) && !(profileManifest?.dsh?.profile?.bundles ?? []).includes('dsh-deep-research-pack'),
     '卸载后安装副本与 bundles 无插件痕迹')
-  check(readFileSync(join(WS, 'AGENTS.md'), 'utf8') === '# data-smoke user marker\n'
-    && readFileSync(join(WS, 'method-library.md'), 'utf8') === '# data-smoke user library\n',
+  check(readFileSync(join(WS, 'method-library.md'), 'utf8') === '# data-smoke user library\n',
     '卸载后 workspace 用户文件保留')
   check(sessionDir !== null && existsSync(sessionDir), '卸载后 session 日志保留')
   check(dsh(['plugin', '--profile', PROFILE, 'add', `file:${TARBALL}`]).status === 0, '卸载后重装 pack')

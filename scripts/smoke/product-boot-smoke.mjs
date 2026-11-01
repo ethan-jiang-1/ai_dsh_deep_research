@@ -17,7 +17,8 @@ import { readSessionText } from '../lib/session-log.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
-const LAUNCH = join(PACK, 'scripts', 'launch.mjs')
+const PROFILE = 'product-boot'
+const TEAM = '@deepseek-ai/dsh-experimental-agent-team-profile'
 const TEMP_ROOT = join(ROOT, 'runtime', 'smoke-workspace', `product-boot-smoke-${process.pid}`)
 const PORT = Number(process.env.PRODUCT_BOOT_PORT ?? '3137')
 
@@ -59,6 +60,10 @@ function makeSandbox() {
     writeFileSync(dsh, `#!/bin/sh\nexport TSX_TSCONFIG_PATH=${JSON.stringify(join(ROOT, 'tsconfig.json'))}\nexec ${JSON.stringify(process.execPath)} --import ${JSON.stringify(tsx)} ${JSON.stringify(binTs)} "$@"\n`)
   }
   chmodSync(join(bin, 'dsh'), 0o755)
+  mkdirSync(join(home, 'deep-research'), { recursive: true })
+  writeFileSync(join(home, 'deep-research', 'settings.json'), JSON.stringify({
+    schemaVersion: 2, workspace: ws, updatedAt: new Date().toISOString(),
+  }))
   return {
     root, home, ws, bin, dsh,
     env: { ...scrubbedEnv(), DSH_HOME: home, DSH_BIN: dsh, PATH: `${bin}:${process.env.PATH ?? ''}`, npm_config_cache: join(root, 'npm-cache') },
@@ -66,7 +71,13 @@ function makeSandbox() {
 }
 
 function runSetup(sandbox) {
-  return spawnSync(process.execPath, [LAUNCH, '--workspace', sandbox.ws, '--home', sandbox.home, '--profile', 'product-boot', '--setup-only'], { cwd: sandbox.ws, env: sandbox.env, encoding: 'utf8', timeout: 300_000 })
+  const init = spawnSync(sandbox.dsh, ['--profile', PROFILE, '--from-default-profile', 'web', '--dump-default-config'], { cwd: sandbox.ws, env: sandbox.env, encoding: 'utf8', timeout: 300_000 })
+  const add = spawnSync(sandbox.dsh, ['plugin', '--profile', PROFILE, 'add', `file:${PACK}`], { cwd: sandbox.ws, env: sandbox.env, encoding: 'utf8', timeout: 300_000 })
+  const versionText = String(spawnSync(sandbox.dsh, ['--version'], { encoding: 'utf8', env: sandbox.env }).stdout ?? '')
+  const version = versionText.match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/)?.[0] ?? null
+  const team = version === null ? null : spawnSync(sandbox.dsh, ['plugin', '--profile', PROFILE, 'add', `${TEAM}@${version}`], { cwd: sandbox.ws, env: sandbox.env, encoding: 'utf8', timeout: 300_000 })
+  const status = init.status === 0 && add.status === 0 && team !== null && team.status === 0 ? 0 : 1
+  return { status, stdout: `${init.stdout ?? ''}${add.stdout ?? ''}${team?.stdout ?? ''}`, stderr: `${init.stderr ?? ''}${add.stderr ?? ''}${team?.stderr ?? ''}` }
 }
 
 function firstSessionHeader(home) {
@@ -111,7 +122,7 @@ try {
   }
   check('setup exit 0', true)
 
-  child = spawn(process.execPath, [LAUNCH, '--workspace', sandbox.ws, '--home', sandbox.home, '--profile', 'product-boot', '--no-open', '--port', String(PORT)], {
+  child = spawn(sandbox.dsh, ['--profile', PROFILE, '--no-open', '--port', String(PORT)], {
     cwd: sandbox.ws,
     env: sandbox.env,
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -158,7 +169,7 @@ try {
   check('首屏有产品化工作区标题', body.includes('Deep Research — ws'))
   check('首屏有起步卡（标题）', body.includes('一支多角色研究团队'))
   check('首屏有起步卡（当前工作区）', body.includes('当前工作区'))
-  check('首屏有起步卡（三步/换工作区）', body.includes('直接问一个研究问题') && body.includes('换工作区'))
+  check('首屏有起步卡（三步/选项目）', body.includes('直接问一个研究问题') && body.includes('选择项目目录'))
 
   const storagePath = join(sandbox.home, 'storages', 'workspace.json')
   check('workspace.json 在场', existsSync(storagePath))
@@ -166,6 +177,9 @@ try {
   const workspaces = storage === null ? [] : Object.values(storage.tables?.workspaces ?? {})
   check('host 已登记工作区（canonical path 一致）', workspaces.some((ws) => canonical(ws.path) === canonical(sandbox.ws)), JSON.stringify(workspaces).slice(0, 400))
   check('工作区有 session', workspaces.some((ws) => (ws.sessionIds ?? []).length > 0))
+  const wsEntries = readdirSync(sandbox.ws).filter((name) => !name.startsWith('.'))
+  const productContent = ['AGENTS.md', 'NODES.md', 'question-patterns.md', 'templates', 'seed.json', '.gitignore', '.dsh-research-seed.json']
+  check('工作区无产品内容文件（D40）', !wsEntries.some((name) => productContent.includes(name)), JSON.stringify(wsEntries))
 
   const header = firstSessionHeader(sandbox.home)
   check('session header 在场', header !== null)

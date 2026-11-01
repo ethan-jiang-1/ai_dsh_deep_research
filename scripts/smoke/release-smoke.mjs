@@ -8,7 +8,7 @@
 //   ③ dsh plugin --profile release-check add file:<tarball>（⚠ --profile 挂在 plugin 子命令上）
 //   ④ manifest 断言：bundles reconcile / 安装副本带 presets + lib/client.js / peers 在 manifest
 //      且 dependencies 缺席（peers-only 发布形状）/ engines.dsh 与兼容矩阵同源
-//   ④b 部署链（安装副本 scaffold 铺种子 + preflight 复检）
+//   ④b 只读 doctor（安装副本 roster/版本/团队层）
 //   ⑤ preset-smoke 断言（安装域通道：--profile release-check --no-patch，含 boot 页模块表行断言）
 //      → 端口释放验证（释放到静默）
 // 进程卫生（company tools/drivers/release-process.mjs 的移植收窄）：run() 有界进程组（超时 →
@@ -204,6 +204,13 @@ try {
     { cwd: dshSrc, env: scrubbedEnv({ DSH_HOME: home }), timeoutMs: T_INSTALL });
   step(add.status === 0, 'dsh plugin add 安装', tail(add));
 
+  // ③b 团队层（N2；手册第二步的一部分；版本 = 运行中的 DSH）
+  const TEAM_PKG = '@deepseek-ai/dsh-experimental-agent-team-profile';
+  const anchorVersion = JSON.parse(readFileSync(join(dshSrc, 'vendor', 'dsh', 'apps', 'cli', 'package.json'), 'utf8')).version;
+  const teamAdd = await run(process.execPath, ['--import', 'tsx/esm', bin, 'plugin', '--profile', PROFILE, 'add', `${TEAM_PKG}@${anchorVersion}`],
+    { cwd: dshSrc, env: scrubbedEnv({ DSH_HOME: home }), timeoutMs: T_INSTALL });
+  step(teamAdd.status === 0, 'dsh plugin add 团队层', tail(teamAdd));
+
   // ④ manifest 断言（安装副本 = 真实安装形状的 manifest 事实源——npm pack 原样带入）
   const pkg = JSON.parse(readFileSync(join(profileDir, 'package.json'), 'utf8'));
   const installed = join(profileDir, 'node_modules', 'dsh-deep-research-pack');
@@ -234,31 +241,13 @@ try {
     '兼容范围覆盖测试基线（engines.dsh range + dshReleases）',
     `engines.dsh=${installedEngine ?? '（缺）'}；dshReleases=${JSON.stringify(installedMatrix ?? null)}`);
 
-  // ④b 安装形状证据（pack 自带 bin：真铺一个工作区 → 安装验收 preflight 验它）
-  console.log('④b 部署链（安装副本：scaffold 铺种子 + preflight 复检）…');
-  clean('probe', probeWs);
-  const scaffoldDry = await run(process.execPath, [join(installed, 'scripts', 'scaffold.mjs'), '--install-only', '--workspace', probeWs, '--profile', PROFILE, '--host', profileDir, '--dry-run'],
-    { env: scrubbedEnv({ DSH_HOME: home }) });
-  step(scaffoldDry.status === 0 && scaffoldDry.stdout.includes('dry-run') && !existsSync(probeWs),
-    'scaffold --dry-run 可预演且未落盘', scaffoldDry.stdout.split('\n').filter((l) => l.includes('✗')).join(' | '));
-  const scaffoldReal = await run(process.execPath, [join(installed, 'scripts', 'scaffold.mjs'), '--install-only', '--workspace', probeWs, '--profile', PROFILE, '--host', profileDir],
-    { env: scrubbedEnv({ DSH_HOME: home }) });
-  console.log((scaffoldReal.stdout ?? '').split('\n').map((l) => `    ${l}`).join('\n'));
-  const seedTemplates = existsSync(join(probeWs, 'templates', 'run')) ? readdirSync(join(probeWs, 'templates', 'run')).filter((f) => f.endsWith('.md')).length : 0;
-  step(scaffoldReal.status === 0 && existsSync(join(probeWs, 'AGENTS.md')) && seedTemplates >= 6,
-    'scaffold 真铺种子（手册 + ≥6 模板）', `AGENTS.md=${existsSync(join(probeWs, 'AGENTS.md'))} 模板=${seedTemplates}`);
-  const credentialHome = join(tmp, 'credential-home');
-  mkdirSync(credentialHome);
-  const preflight = await run(process.execPath, [join(installed, 'scripts', 'preflight.mjs'), '--install-only', '--workspace', probeWs, '--host', profileDir],
-    { env: scrubbedEnv({ DSH_HOME: credentialHome }) });
-  step(preflight.status === 0 && preflight.stdout.includes('安装验收通过（不代表研究就绪）'), 'preflight 安装验收通过（无凭据）',
-    preflight.stdout.split('\n').filter((l) => l.includes('✗')).join(' | '));
-  const readiness = await run(process.execPath, [join(installed, 'scripts', 'preflight.mjs'), '--workspace', probeWs, '--host', profileDir],
-    { env: scrubbedEnv({ DSH_HOME: credentialHome }) });
-  const rejected = (readiness.stdout ?? '').split('\n').filter((l) => l.includes('✗'));
-  step(readiness.status === 1 && rejected.length === 1 && rejected[0].includes('模型密钥 DEEPSEEK_API_KEY'),
-    '默认 preflight 拒绝缺凭据（保留安装宿主解析锚）', `${readiness.stdout}\n${readiness.stderr}`);
-  clean('probe', probeWs);
+  // ④b 安装形状证据（pack 自带只读 doctor）
+  console.log('④b doctor（安装副本）…');
+  const doctor = await run(process.execPath, [join(installed, 'scripts', 'doctor.mjs'),
+    '--profile', PROFILE, '--home', home,
+    '--install-anchor', join(dshSrc, 'vendor', 'dsh', 'apps', 'cli', 'package.json'), '--install-only'],
+  { env: scrubbedEnv({ DSH_HOME: home }) });
+  step(doctor.status === 0 && (doctor.stdout ?? '').includes('doctor: 通过'), 'doctor 安装验收通过（无凭据）', tail(doctor));
 
   // ⑤ boot + preset-smoke 断言（安装域通道：无 overlay，走已装 pack 的正式路径）
   console.log('⑤ preset-smoke（安装域：--profile release-check --no-patch）…');
@@ -272,7 +261,6 @@ try {
       ...(smoke.status !== 0 && !(smoke.stdout || '').trim() ? [`stderr: ${(smoke.stderr || '').slice(-400)}`] : []) ].join(' | '));
   // ⑤b 卸载形状：remove 后 profile 的 bundles 与 dependencies 都不再提本包（手册“干净卸载”的证据）。
   console.log('⑤b dsh plugin remove …');
-  const TEAM_PKG = '@deepseek-ai/dsh-experimental-agent-team-profile';
   let beforeRemove = null;
   try { beforeRemove = JSON.parse(readFileSync(join(profileDir, 'package.json'), 'utf8')) } catch {}
   const teamBefore = beforeRemove?.dependencies?.[TEAM_PKG];

@@ -106,7 +106,7 @@ if (existsSync(settingsPath)) {
   }
 }
 const workspace = workspaceArg ?? process.env.DEEP_RESEARCH_WORKSPACE ?? settingsWorkspace
-if (workspace === undefined || workspace === '') {
+if (workspace === null || workspace === undefined || workspace === '') {
   warn('工作区', '未设置（首屏 onboarding 会询问；脚本/CI 用 DEEP_RESEARCH_WORKSPACE）')
 } else {
   const path = resolve(resolvePathInput(workspace, homedir()))

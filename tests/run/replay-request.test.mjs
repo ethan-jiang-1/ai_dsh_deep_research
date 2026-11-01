@@ -13,7 +13,7 @@ const roles = MANIFEST.cases.map((item) => item.preset);
 const fixture = (role = 'lead') => readFileSync(new URL(
   `../../snapshots/replay/research-face/${role === 'lead' ? '' : `${role}/`}session.v4.jsonl`, import.meta.url,
 ), 'utf8').split('\n').filter(Boolean).map((line) => JSON.parse(line));
-const IDS = ['persona', 'headers', 'agent-instructions', 'skill-catalog', 'runtime-context', 'time-context'];
+const IDS = ['persona', 'headers', 'skill-catalog', 'runtime-context', 'time-context'];
 const messageOf = (event) => event.type === 'system/message' ? event.data.message : event.data;
 const byKind = (events, kind) => events.find((event) => (
   ['system/message', 'user/message'].includes(event.type) && messageOf(event).source?.kind === kind
@@ -43,13 +43,23 @@ for (const id of IDS) {
   });
 }
 
-test('empty logs never pass a required criterion', () => {
-  const verdicts = compareReplayRequests([], []).map(({ ok }) => ok);
-  assert.equal(verdicts.length, 6, '判据数 = persona + headers + 四个注入面（含 time-context）');
-  assert.deepEqual(verdicts, [false, false, false, false, false, false]);
+test('agent-instructions 两侧都缺席 = 跳过（无项目 AGENTS.md）；单侧缺席 = 红', () => {
+  const injection = { type: 'user/message', time: 1, data: { source: { kind: 'agent-instructions' },
+    content: [{ type: 'text', text: 'project AGENTS.md' }] } };
+  const withProject = [...fixture(), injection];
+  const without = fixture();
+  assert.equal(verdict(without, without, 'agent-instructions'), undefined);
+  assert.equal(verdict(withProject, without, 'agent-instructions').ok, false);
+  assert.equal(verdict(without, withProject, 'agent-instructions').ok, false);
 });
 
-for (const id of ['persona', 'agent-instructions', 'skill-catalog', 'runtime-context']) {
+test('empty logs never pass a required criterion', () => {
+  const verdicts = compareReplayRequests([], []).map(({ ok }) => ok);
+  assert.equal(verdicts.length, 5, '判据数 = persona + headers + 三个必需注入面；agent-instructions 可缺席');
+  assert.deepEqual(verdicts, [false, false, false, false, false]);
+});
+
+for (const id of ['persona', 'skill-catalog', 'runtime-context']) {
   test(`${id} compares every occurrence and preserves message boundaries`, () => {
     const expected = fixture();
     const later = structuredClone(expected.find((event) => matchesCriterion(event, id)));
@@ -65,8 +75,8 @@ for (const id of ['persona', 'agent-instructions', 'skill-catalog', 'runtime-con
 test('injection attribution uses source kind rather than a reminder-looking body', () => {
   const expected = fixture();
   const actual = structuredClone(expected);
-  byKind(actual, 'agent-instructions').data.source.kind = 'user';
-  assert.equal(verdict(expected, actual, 'agent-instructions').ok, false);
+  byKind(actual, 'skill-catalog').data.source.kind = 'user';
+  assert.equal(verdict(expected, actual, 'skill-catalog').ok, false);
 });
 
 test('runtime workspace identity can vary while its exact sandbox and approval rules remain visible', () => {
@@ -181,7 +191,8 @@ test('source identities, digests, event times and session cwd do not replace mod
     if (event.type === 'session') event.cwd = '/tmp/new-cwd';
     if (['system/message', 'user/message'].includes(event.type)) messageOf(event).id = 'new-message-id';
   }
-  byKind(actual, 'agent-instructions').data.source.changes[0].digest = 'f'.repeat(40);
+  const agent = byKind(actual, 'agent-instructions');
+  if (agent !== undefined) agent.data.source.changes[0].digest = 'f'.repeat(40);
   byKind(actual, 'runtime-context').data.source.sections[0].text = 'source bookkeeping changed';
   // time-context 是已登记判据面：两侧都要有注入，且只比 turn/step（墙钟不可复现）。
   const timeContext = (step, stamp) => ({ type: 'user/message', time: 1, data: { source: { kind: 'time-context' },
@@ -191,7 +202,7 @@ test('source identities, digests, event times and session cwd do not replace mod
   assert.ok(compareReplayRequests(expected, actual).every(({ ok }) => ok));
 });
 
-for (const id of ['persona', 'agent-instructions', 'skill-catalog', 'runtime-context']) {
+for (const id of ['persona', 'skill-catalog', 'runtime-context']) {
   test(`${id} retains arbitrary SHA, URL, path and date differences in real text`, () => {
     const expected = fixture();
     const event = expected.find((item) => matchesCriterion(item, id));
@@ -224,10 +235,10 @@ test('runtime tool inventory and approval truth are compared even when workspace
 
 test('non-text content blocks are compared rather than discarded', () => {
   const expected = fixture();
-  byKind(expected, 'agent-instructions').data.content.push({ type: 'image', url: 'image-a' });
+  byKind(expected, 'skill-catalog').data.content.push({ type: 'image', url: 'image-a' });
   const actual = structuredClone(expected);
-  byKind(actual, 'agent-instructions').data.content.at(-1).url = 'image-b';
-  assert.equal(verdict(expected, actual, 'agent-instructions').ok, false);
+  byKind(actual, 'skill-catalog').data.content.at(-1).url = 'image-b';
+  assert.equal(verdict(expected, actual, 'skill-catalog').ok, false);
 });
 
 test('an injection kind absent from the reviewed baseline is surfaced rather than silently ignored', () => {
@@ -265,19 +276,19 @@ test('every recorded role injects only kinds the compared judges cover', () => {
   }
 });
 
-test('recorded roles each expose six independent passing criteria', () => {
+test('recorded roles each expose the required passing criteria', () => {
   for (const role of roles) {
     const events = fixture(role);
     const before = JSON.stringify(events);
     const results = compareReplayRequests(events, structuredClone(events));
-    assert.deepEqual(results.map(({ id }) => id), IDS, role);
+    const expectedIds = IDS.filter((id) => id !== 'agent-instructions' || byKind(events, 'agent-instructions') !== undefined);
+    assert.deepEqual(results.map(({ id }) => id), expectedIds, role);
     assert.ok(results.every(({ ok, detail }) => ok && typeof detail === 'string'), role);
     assert.equal(JSON.stringify(events), before, 'comparison must not mutate input');
   }
 });
 
-for (const [id, kind] of [['persona', 'system-prompt'], ['agent-instructions', 'agent-instructions'],
-  ['skill-catalog', 'skill-catalog'], ['runtime-context', 'runtime-context']]) {
+for (const [id, kind] of [['persona', 'system-prompt'], ['skill-catalog', 'skill-catalog'], ['runtime-context', 'runtime-context']]) {
   test(`${id} catches a changed injected body without consulting unchanged source metadata`, () => {
     const expected = fixture();
     const actual = structuredClone(expected);

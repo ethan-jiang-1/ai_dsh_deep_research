@@ -126,12 +126,15 @@ export function unexpectedInjectionKinds(expectedEvents, actualEvents) {
  * @returns {Array<{id: string, ok: boolean, detail: string}>} Six ordered verdicts.
  */
 export function compareReplayRequests(expectedEvents, actualEvents) {
+  const injections = ['agent-instructions', 'skill-catalog', 'runtime-context', 'time-context']
+    .map((kind) => ({ kind, expected: contentOf(expectedEvents, 'user/message', kind), actual: contentOf(actualEvents, 'user/message', kind) }))
+    // agent-instructions 只在用户项目有 AGENTS.md 时出现（D40 后产品手册改走 runtime context）；
+    // 两侧都缺席 = 该场景没有项目指令，跳过而不判红。
+    .filter(({ kind, expected, actual }) => !(kind === 'agent-instructions' && expected.length === 0 && actual.length === 0))
   return [
     compare('persona', contentOf(expectedEvents, 'system/message', 'system-prompt'), contentOf(actualEvents, 'system/message', 'system-prompt')),
     compare('headers', headersOf(expectedEvents), headersOf(actualEvents)),
-    ...['agent-instructions', 'skill-catalog', 'runtime-context', 'time-context'].map((kind) => compare(
-      kind, contentOf(expectedEvents, 'user/message', kind), contentOf(actualEvents, 'user/message', kind),
-    )),
+    ...injections.map(({ kind, expected, actual }) => compare(kind, expected, actual)),
   ];
 }
 

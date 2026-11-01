@@ -91,7 +91,7 @@
 - **产品面最小真检查（D40）**：`node scripts/smoke/install-shape-smoke.mjs`——原样执行手册三步（profile init → `dsh plugin add` pack+team → 真启动），断言 roster 三状态、无 `did not activate`、首屏可达；缺 pnpm/registry/缓存 = exit 2（未跑 ≠ 绿）。`node scripts/smoke/product-boot-smoke.mjs`——真 Web + 浏览器，断言 Host 注册工作区、首屏 blank Lead Session（`cwd` = 工作区）、Orca/工作区标题/起步卡/Lead preset/composer；无模型调用。
 - **最小真检查**：`release-smoke`：`npm pack` → 在选定 `DSH_HOME` 重建测试 profile → `dsh plugin add` → doctor（`--install-only`，跳过模型就绪检查）→ 安装域会话断言；无模型调用。独立默认 doctor 仍检查凭据在场。进程卫生全程有界：run() 超时预算（install 180s / 默认 120s / preset-smoke 外层 300s——company 实证值）+ mkdir 原子并发锁 + 子进程组退出确认回收。
 - **冷启动补充**：`cold-start-smoke` 用独立 `DSH_DEV_HOME` + 独立 profile/端口/state，从 tarball 安装并经 `run-driver up --bootstrap` 到浏览器面 GREEN；证明不依赖仓内既有 home/profile。MCP 关闭，团队层需 registry 或缓存。
-- **真用户 home 补充**：`real-home-smoke` 把 home 放到系统临时目录（仓库外），用全局 `dsh` 完成 init → install → doctor（`--install-only`）→ 真 web 页面，断言 doctor 不再从 profile 误报 peer、boot graph 含本包、已在场团队层 `link:` 不被改写；缺全局 dsh/tarball = exit 2。`doctor-smoke` 用 fake anchor 覆盖“行依赖缺件必须红 / 无锚标未验证 / base-only profile 红 / 缺 pack 红 / 空凭据 warn”。
+- **真用户 home 补充**：`install-shape-smoke` 在系统临时 home 里原样执行手册三步（profile init → plugin add pack+team → 真启动），断言 roster 三状态、无 `did not activate`；缺全局 dsh/pnpm/团队层/tarball = exit 2。`doctor-smoke` 用 fake anchor 覆盖“缺 pack 红 / engines 不匹配红 / 坏设置 warn / 不写 profile”。
 - **通过判据**：pack 清单与 `files` 声明一致、安装零缺失警告、干净 profile 会话能列出研究角色；产品面 = `install-shape-smoke`/`product-boot-smoke` 绿（roster 三状态、首屏 Lead Session、cwd = 工作区）；安装副本带 `lib/client.js`、manifest peers-only（`dependencies` 缺席）、boot 页模块表含本包 client 行（preset-smoke 真会话档断言，安装域经 release-smoke ⑤ 委托覆盖）、端口用后无监听残留；doctor 的运行时行依赖只从安装锚解析，不把 client/构建期 peer 混进 Node 解析。
 - **何时跑**：包结构/release 相关改动时；框架里程碑必跑。
 
@@ -155,7 +155,7 @@ final 引用链，结果落 bundle 的 audit.md。它不校验日期校准或摘
 |---|---|
 | L0 | `node scripts/verify/verify.mjs` + `pnpm test`（均 0/1；无 2 态） |
 | L1 | `preset-smoke`（缺环境 exit 2） |
-| L2 | `release-smoke` / `cold-start-smoke` / `real-home-smoke`（缺全局 dsh、tarball、chromium = exit 2） |
+| L2 | `release-smoke` / `install-shape-smoke` / `product-boot-smoke` / `cold-start-smoke` / `doctor-smoke`（缺全局 dsh、tarball、chromium = exit 2） |
 | L3 | `pnpm test` 的 `methodology-mapping` + `evaluation-contract` 契约（0/1） |
 | L4 | 上表机器 ①② 的 node-gate / evidence-audit 退出码；③④ 人工走查记录在场即"已跑"，缺席即"未跑" |
 
