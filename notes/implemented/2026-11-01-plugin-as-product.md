@@ -3,13 +3,14 @@
 > 状态：implemented
 
 > 来源：[插件即产品决策卡](../../_backlog/_archived/settled_issues/2026-11-01-plugin-as-product.md)、[落地计划](../../_backlog/_archived/research/plugin-as-product/2026-11-01-landing-plan.md)。
-> 当前合同 = [guides/65](../../docs/guides/65-run-forms.md)、[pack README](../../packages/deep-research-pack/README.md)、[`_dist/安装手册.md`](../../_dist/安装手册.md)；决策 = [D38](../../docs/decisions.md#d38)。
+> 当前合同 = [guides/65](../../docs/guides/65-run-forms.md)、[pack README](../../packages/deep-research-pack/README.md)、[`_dist/安装手册.md`](../../_dist/安装手册.md)；决策 = [D38](../../docs/decisions.md#d38)、[D39](../../docs/decisions.md#d39)。
 
 ## 决定
 
-- **产品形态 = 包（bundle）+ 启动器（运行期 profile 装配器）+ Host 工作区注册（D38）。** 包仍是 bundle；
-  `dsh-deep-research` 只调用 `dsh`：从 Web 模板装配 `deep-research` profile、安装 pack/团队层、铺工作区种子、
-  把工作区登记进 Workspace registry、起 Web。不新增应用进程/应用 bin，不手写 profile，不直接调 `runProfile`。
+- **产品形态 = DSH 插件（bundle）+ 可选启动器 + Host 工作区注册（D38/D39）。** 包仍是 bundle；
+  主分发 = `dsh plugin --profile web add`（或专用 profile）→ 安装副本 scaffold 铺种子/团队层 →
+  `DEEP_RESEARCH_WORKSPACE=<ws> dsh --profile web`；不要求全局安装。`dsh-deep-research` 是把这些步骤
+  包成一条命令的可选便利，只调用 `dsh --profile`；不新增应用进程/应用 bin，不手写 profile，不直接调 `runProfile`。
 - **产品 profile 默认 `deep-research`**；dev 镜像仍是 `research`（`--profile` 可覆盖）。默认共享用户
   `$DSH_HOME`；`--home` 是干净环境/试用的 escape hatch。
 - **工作区解析** = `--workspace` → `DEEP_RESEARCH_WORKSPACE` → profile 设置 → TTY 询问；非 TTY 无值 fail-loud。
@@ -21,9 +22,9 @@
   Session，`header.cwd` = 工作区。
 - **首屏**：`conversation.input.dock` 起步卡（品牌/当前工作区/三步/凭据/换工作区），工作区有 `drt_*` 或
   会话有用户消息时收起；纯 client 渲染，不新增模型可见文本。
-- **分发**：单包 + `dsh-deep-research` bin + 所有 peer `optional`（全局 launcher 安装不拉 DSH peers；
-  profile 安装仍从安装锚解析）；无 install hooks。`_dist/安装手册.md` 由 `scripts/dist/export-dist.mjs`
-  从 `scripts/dist/product-manual.md` 生成。
+- **分发（D39）**：DSH 原生 `dsh plugin add` 为主；单包 + 所有 peer `optional`（launcher 全局安装不拉
+  DSH peers；profile 安装仍从安装锚解析）；无 install hooks。`dsh-deep-research` bin 只作可选便利。
+  `_dist/安装手册.md` 由 `scripts/dist/export-dist.mjs` 从 `scripts/dist/product-manual.md` 生成。
 
 ## 输掉的方案
 
@@ -55,9 +56,10 @@
 - **真实 `npm i -g` launcher bin**：`_dist/dsh-deep-research-pack-0.2.0.tgz` 全局安装只装 1 个包；`bin/dsh-deep-research -> scripts/launch.mjs`，`--help`/`--version` 正常。
 - **`node scripts/smoke/release-smoke.mjs` ALL PASS**：tarball → 干净 profile → plugin add → preset-smoke
   安装域 5 角色真挂载 → remove 无痕 → 团队层保留 → 端口释放。
+- **原生 web-profile 安装/启动 spike（2026-11-01）**：干净 home 下 `dsh plugin --profile web add file:<tarball>` → 安装副本 scaffold → `DEEP_RESEARCH_WORKSPACE=<ws> dsh --profile web`；bundle 顺序正确、种子落地、workspace 登记、浏览器首屏 Orca/工作区/Deep Research Lead/起步卡，pageerror 为空。
 - **`pnpm verify` 全绿；`pnpm test` 1046 pass / 0 fail；`pnpm typecheck` 绿；`pnpm release:check` OK version=0.2.0。**
 - **`node scripts/dist/export-dist.mjs` 全绿**：135 条目、preset 5/5、skill 11、模板 8、seed v0.2.0；
-  `_dist/安装手册.md` 为产品手册（launcher/工作区/首屏/数据/升级/卸载/离线/高级手动）。
+  `_dist/安装手册.md` 为安装/启动手册（DSH 原生安装/启动 + 隔离 profile + 可选 launcher + 数据/升级/卸载/离线）。
 
 ## 残余边界
 

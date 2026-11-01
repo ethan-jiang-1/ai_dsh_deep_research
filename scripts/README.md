@@ -16,7 +16,7 @@
 |---|---|---|
 | preset-smoke.mjs | L1 真挂载：boot 页模块表行（client 半 served）、roster、逐角色建会话、skills 隔离 | keyless（`DSH_SMOKE_REAL=1` 起真 DSH，无模型） |
 | release-smoke.mjs | L2 安装形状：pack → 干净 profile → plugin add → manifest/安装域 client 半断言 → 安装域冒烟 → 端口释放验证（进程卫生：超时预算 + 并发锁 + 退出确认） | keyless（`--install-only` 跳凭据） |
-| product-smoke.mjs | L2 产品装配：`dsh-deep-research --setup-only` → web+pack+team profile / 种子 / 启动器设置 / 幂等 / 危险目录 / 项目模式 / `.gitignore` / 包目录零写入 | keyless（真 dsh/pnpm + 团队层 registry/缓存；缺前置 exit 2） |
+| product-smoke.mjs | L2 产品装配：原生 `dsh plugin --profile web add` + 安装副本 scaffold，以及 launcher `--setup-only` → profile/种子/设置/幂等/危险目录/项目模式/`.gitignore`/包目录零写入 | keyless（真 dsh/pnpm + 团队层 registry/缓存；缺前置 exit 2） |
 | product-boot-smoke.mjs | L2 首启：真 launcher + Web + 浏览器，Host 注册工作区、blank Lead Session `cwd` = 工作区、Orca/工作区标题/起步卡/Lead/composer | keyless（需浏览器 + 团队层；缺前置 exit 2） |
 | cold-start-smoke.mjs | L2 冷启动：独立 `DSH_DEV_HOME` + profile + 端口 + state，`run-driver up --bootstrap` 到浏览器 GREEN；MCP 关闭 | keyless（须先 `source dev/env.sh`；vendor/依赖在位；团队层需 registry/缓存） |
 | scaffold-smoke.mjs | scaffold CLI 行为：参数严格性 / 根守卫 / 父 symlink 越界 / 首次铺种 / sidecar 保护 / `--check` deleted + 所有权分型（contract/corpus）/ `--upgrade` 只升级未改文件 | keyless（临时 pack 副本 + 临时工作区；无 dsh/模型/网络） |

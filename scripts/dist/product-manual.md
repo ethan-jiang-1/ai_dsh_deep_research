@@ -1,4 +1,4 @@
-# dsh-deep-research-pack 产品手册
+# dsh-deep-research-pack 安装与启动手册
 
 | | |
 |---|---|
@@ -8,165 +8,193 @@
 | sha256 | `{{sha256}}` |
 | 验证基线 | DSH `engines.dsh`（当前 `{{dshEngine}}`；不匹配时宿主拒绝加载）+ Node `^22.19.0 || >=24.0.0` |
 
-这个包是 **Deep Research 产品**：自带启动器与产品 profile，启动时知道或询问用户工作区；插件内容
-（角色 preset、方法论 skill、研究驾驶舱、抓取回退、工作区种子、部署脚本）都在包内，run bundle、
-方法库与归档落在用户工作区。共 {{entryCount}} 个条目。
+这是一个 **DSH 插件包（bundle）**，不是独立应用：角色 preset、方法论 skill、研究驾驶舱、抓取回退、
+工作区种子与部署脚本都在包内；run bundle、方法库与归档落在你指定的工作区。安装和启动走 DSH 原生
+命令：`dsh plugin ... add` 装进 profile，`dsh --profile ...` 启动。共 {{entryCount}} 个条目。
 
 ## 一、前置
 
 - DSH 满足包内 `engines.dsh`；`dsh` 在 PATH。
 - Node 满足包内 `engines.node`。
-- **首次安装团队机制层需要 pnpm**（`dsh plugin` 用 pnpm；缺失会 127）。
+- `dsh plugin` 用 pnpm；首次装包/团队层需要 pnpm（缺失会报 127）。
 - 团队机制层需要 registry 或预装缓存；完全离线见 §九。
 - 研究 run 需要模型凭据（DeepSeek API key 或账号登录）；安装/首启本身不调用模型。
 
-## 二、安装启动器
+下文用默认 `DSH_HOME`（`~/.dsh`）；自定义 home 时把 `$DSH_HOME` 换成你的路径。
 
-任选一种：
+## 二、安装（DSH 原生，推荐）
 
-```sh
-# A. npm 全局（包发布后）
-npm install -g dsh-deep-research-pack@{{version}}
-
-# B. 离线 tarball（推荐绝对路径）
-npm install -g /path/to/{{tarballName}}
-```
-
-安装后命令 `dsh-deep-research` 应在 PATH 上。tarball 装法不生成 PATH bin 时，也可直接：
+最省事：装进 DSH 自带的 `web` profile。
 
 ```sh
-node /path/to/node_modules/dsh-deep-research-pack/scripts/launch.mjs --help
+# ① 装包（npm 发布后；离线 tarball 用 file: 绝对路径）
+dsh plugin --profile web add dsh-deep-research-pack@{{version}}
+# 或：
+dsh plugin --profile web add file:/path/to/{{tarballName}}
+
+# ② 初始化研究工作区（用安装副本里的 scaffold；不需要全局安装）
+"${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/.bin/dsh-deep-research-scaffold" \
+  --install-only --workspace "$HOME/research" --profile web
+
+# ③ 启动（DSH 原生）
+DEEP_RESEARCH_WORKSPACE="$HOME/research" dsh --profile web
 ```
 
-## 三、第一次启动：选工作区
+- `dsh plugin` 只是在 profile 里转发 pnpm；`web` profile 首次使用会自动初始化。
+- `scaffold --install-only` 铺工作区种子、安装团队机制层、跑安装验收；可重复执行。
+- `DEEP_RESEARCH_WORKSPACE` 让 Host 在 Web 起来前登记工作区，首屏直接是 blank Lead 会话。
+  不设它也可以启动：DSH 的 Workspace 选择器会让你选目录；选完再对那个目录跑一次 ②。
+- **不需要 `npm install -g`，也不需要另装一个应用。** 包本身就是 DSH 插件。
 
-```sh
-dsh-deep-research
-```
-
-首次运行会：
-
-1. 从 DSH 的 Web 模板装配产品 profile（默认名 `deep-research`）；
-2. 把本包装进该 profile，并确保团队机制层版本与运行中的 DSH 一致；
-3. 询问研究工作区（直接回车 = 当前目录；也可先用 `--workspace` 指定）；
-4. 铺工作区种子（手册 / NODES / 判型库 / 模板 / `.gitignore` / 方法库空种子）；
-5. 起 Web，Host 插件把工作区登记进 Workspace registry；首屏创建 blank
-   **Deep Research Lead** 会话，`header.cwd` = 工作区。
-
-常用形式：
-
-```sh
-dsh-deep-research --workspace ~/projects/acme/research
-dsh-deep-research --workspace ~/projects/acme --in-place
-DEEP_RESEARCH_WORKSPACE=~/research dsh-deep-research
-dsh-deep-research --home ~/.dsh-deep-research --profile deep-research-try
-dsh-deep-research --check --workspace ~/research
-dsh-deep-research --setup-only --workspace ~/research
-```
-
-- **项目目录**：非空项目且没有研究契约时，默认研究根 = `<project>/research`，不碰项目文件；
-  `--in-place` 才用项目根本身（种子会落在项目根）。
-- **已有 `.gitignore`**：不静默改写；打印建议规则，`--gitignore-append` 才追加带标记块。
-- **危险目录**：HOME / `DSH_HOME` / pack / profile 的本身、祖先或内部会被拒绝。
-- **`--home`**：给本次启动一个独立 `DSH_HOME`（干净环境/试用）；默认用用户自己的 home。
-- **`--profile`**：换产品 profile 名（默认 `deep-research`；旧开发镜像仍叫 `research`）。
-
-## 四、首屏会看到
+## 三、首次启动会看到
 
 - Orca 品牌 + 产品化工作区标题（`Deep Research — <目录名>`）；
 - 起步卡：当前工作区、三步起步（问一个问题 → Lead 先确认研究类型/深度/口径并给计划 →
   右栏「研究状态」看进度）、凭据提示、换工作区入口；
-- 默认 preset = **Deep Research Lead**；右栏有「研究状态 / 研究配置 / 研究图谱 / 终稿」，
-  主界面有「方法库」tab。
+- 默认 preset = **Deep Research Lead**；右栏「研究状态 / 研究配置 / 研究图谱 / 终稿」，
+  主界面「方法库」tab。
 
-工作区里出现 `drt_*` 或用户发出第一条消息后，起步卡收起。
+工作区出现 `drt_*` 或用户发出第一条消息后，起步卡收起。
 
-## 五、验证
+## 四、隔离 profile（可选）
+
+不想混进 `web` profile 时，用专用 `deep-research` profile：
 
 ```sh
-dsh-deep-research --check --workspace ~/research
-dsh --profile deep-research --dump-config
+# ① 首次建一个 web-backed 的专用 profile；已存在就跳过（不要重复 --from-default-profile，会重置）
+dsh --profile deep-research --from-default-profile web --dump-config
+
+# ② 装包 + 初始化工作区
+dsh plugin --profile deep-research add dsh-deep-research-pack@{{version}}
+"${DSH_HOME:-$HOME/.dsh}/profiles/deep-research/node_modules/.bin/dsh-deep-research-scaffold" \
+  --install-only --workspace "$HOME/research" --profile deep-research
+
+# ③ 启动
+DEEP_RESEARCH_WORKSPACE="$HOME/research" dsh --profile deep-research
 ```
 
-`--dump-config` 应看到：`preset-lead`（及 scout/analyst/critic/method-editor）、`tool-present`、
-`ui-agent-team`、`research-client`、`research-workspace-boot`、`session-query-sqlite`。
-`--check` 只读；缺 profile/种子/团队层会如实报 red，不安装。
+**顺序很重要**：`dsh plugin` 首次初始化未知名 profile 时只带 `dsh-base`，没有 Web 应用；所以先
+`--from-default-profile web`，再 `plugin add`。已有 `web` 或 `deep-research` profile 时不要重复
+`--from-default-profile`，它会替换整个 profile。
 
-## 六、数据归属
+## 五、一条命令启动器（可选，不是分发主路径）
+
+包内自带 `dsh-deep-research`，把“建/补 profile、装包/团队层、铺种子、登记工作区、起 Web”包成一条
+命令。它可以通过已安装的 profile 直接跑，不需要全局安装：
+
+```sh
+dsh plugin --profile web exec dsh-deep-research --profile web --workspace "$HOME/research"
+```
+
+也可以全局安装后使用（纯便利）：
+
+```sh
+npm install -g dsh-deep-research-pack@{{version}}
+dsh-deep-research --workspace "$HOME/research"
+```
+
+启动器常用 flag：
+
+```sh
+dsh-deep-research --workspace "$HOME/projects/acme/research"
+dsh-deep-research --workspace "$HOME/projects/acme" --in-place
+DEEP_RESEARCH_WORKSPACE="$HOME/research" dsh-deep-research
+dsh-deep-research --home "$HOME/.dsh-deep-research" --profile deep-research-try
+dsh-deep-research --check --workspace "$HOME/research"
+dsh-deep-research --setup-only --workspace "$HOME/research"
+```
+
+- **项目目录**：非空项目且没有研究契约时，启动器默认研究根 = `<project>/research`，不碰项目文件；
+  `--in-place` 才用项目根。**原生 scaffold 没有这个自动推断**：它就在你传入的目录铺种子；
+  要 `<project>/research` 就显式传那个子目录。
+- **已有 `.gitignore`**：启动器不静默改写；`--gitignore-append` 才追加带标记块。
+- **危险目录**：启动器拒绝 HOME / `DSH_HOME` / pack / profile 的本身、祖先或内部。
+- **`--home`**：给本次启动一个独立 `DSH_HOME`（干净环境/试用）；默认用用户自己的 home。
+- 原生路径用 `DSH_HOME=... dsh ...`；不需要 `--home`。
+
+## 六、验证
+
+```sh
+dsh --profile web --dump-config | grep -E 'preset-lead|research-client|research-workspace-boot|tool-present|ui-agent-team'
+"${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/.bin/dsh-deep-research-preflight" \
+  --install-only --workspace "$HOME/research" --profile web
+```
+
+`--dump-config` 应看到 `preset-lead`（及 scout/analyst/critic/method-editor）、`tool-present`、
+`ui-agent-team`、`research-client`、`research-workspace-boot`、`session-query-sqlite`。
+`preflight --install-only` 跳过模型凭据检查；去掉 `--install-only` 会检查研究就绪（需要 key）。
+
+## 七、数据归属
 
 | 事实 | 位置 | 卸载后 |
 |---|---|---|
 | 插件内容（preset/skill/launcher/种子源/驾驶舱） | profile `node_modules/dsh-deep-research-pack/` | 删 |
-| 产品 profile + 团队层依赖 | `$DSH_HOME/profiles/deep-research/` | profile 可显式删；团队层可单删 |
-| 启动器设置（上次工作区） | `$DSH_HOME/profiles/deep-research/deep-research.launcher.json` | 随 profile 删；无秘密 |
+| 产品 profile + 团队层依赖 | `$DSH_HOME/profiles/<p>/` | 包可移除；团队层可单删；profile 可显式删 |
+| 启动器设置（上次工作区，仅 launcher 用） | `$DSH_HOME/profiles/<p>/deep-research.launcher.json` | 随 profile 删；无秘密 |
 | 工作区种子（手册/NODES/模板/.gitignore） | `<workspace>/` | 保留 |
 | 方法库 | `<workspace>/method-library.md` | 保留 |
 | run bundle / archive / _abandoned | `<workspace>/drt_<slug>/` 等 | 保留 |
 | Workspace registration / 会话 / 凭据 | `$DSH_HOME/` | DSH 管理；本包不删 |
 | 浏览器侧栏布局 | 浏览器 localStorage | 清站点数据 |
 
-默认共享用户 `$DSH_HOME`，所以 Web UI 会显示该 home 下其他 Workspace/Session；需要干净环境用
-`--home`。种子是**部署副本**：落地后归工作区、可编辑；包内 `workspace/` 是只读源。
+默认共享 `$DSH_HOME`，所以 Web UI 会显示该 home 下其他 Workspace/Session；需要干净环境用启动器
+`--home`，或原生路径 `DSH_HOME=...`。种子是**部署副本**：落地后归工作区、可编辑；包内
+`workspace/` 是只读源。
 
-## 七、升级 / 回滚
+## 八、升级 / 回滚 / 卸载
+
+**升级**（停掉正在跑的 profile 后）：
 
 ```sh
-# 停掉正在跑的 profile
-npm install -g dsh-deep-research-pack@<new>
-dsh-deep-research --workspace <ws> --profile deep-research
-# 工作区种子升级（先只读检查）
-dsh-deep-research-scaffold --workspace <ws> --profile deep-research --check
-dsh-deep-research-scaffold --workspace <ws> --profile deep-research --upgrade
+# npm 发布后
+dsh plugin --profile web add dsh-deep-research-pack@<new>
+# 离线 tarball
+dsh plugin --profile web add file:/path/to/<new>.tgz
+
+# 工作区种子：先只读检查，再升级
+"${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/.bin/dsh-deep-research-scaffold" \
+  --workspace "$HOME/research" --profile web --check
+"${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/.bin/dsh-deep-research-scaffold" \
+  --workspace "$HOME/research" --profile web --upgrade
 ```
 
-- 升级只替换 profile 里的安装副本；用户 patch 不改写。
-- `scaffold --upgrade` 只覆盖"用户未改过且种子已更新"的文件；改过的写 `.seed-new`；方法库不覆盖。
+- `dsh plugin add` 更新依赖并维护 bundle 层；用户 profile patch 不改写。
+- `scaffold --upgrade` 只覆盖“用户未改过且种子已更新”的文件；改过的写 `.seed-new`；方法库不覆盖。
 - 回滚 = 装回旧版包；工作区种子不随插件降级（旧版 `--check` 会如实报告版本关系）。
 - 已有 blank Session 保留创建时的 preset 快照；装包/换版本后请新开一个 Lead 会话。
 
-## 八、卸载
+**卸载**：
 
 ```sh
 # 1) 停掉正在跑的 profile
 # 2) 移除本包（保留工作区）
-dsh plugin --profile deep-research remove dsh-deep-research-pack
+dsh plugin --profile web remove dsh-deep-research-pack
 # 3) 团队层是独立依赖；不需要时显式移除
-dsh plugin --profile deep-research remove @deepseek-ai/dsh-experimental-agent-team-profile
-# 4) 需要删 profile（含启动器设置）时显式删除
-rm -rf "$DSH_HOME/profiles/deep-research"
+dsh plugin --profile web remove @deepseek-ai/dsh-experimental-agent-team-profile
 ```
 
 工作区种子、方法库、`drt_*`/`archive/`/`_abandoned/` 都保留；`$DSH_HOME` 的会话/凭据/profile
-由 DSH 管理，本包不删。
+由 DSH 管理，本包不删。专用 profile 需要删除时显式 `rm -rf "$DSH_HOME/profiles/deep-research"`。
 
 ## 九、离线 / 故障
 
 - **pnpm 缺失**：`dsh plugin` 会 127；先安装 pnpm。
-- **团队层 registry/缓存不可用**：首装失败；预装/缓存该层，或按 §十手工在 profile 加层。
+- **团队层 registry/缓存不可用**：首装失败；预装/缓存该层，或先手动 `dsh plugin --profile <p> add @deepseek-ai/dsh-experimental-agent-team-profile@0.2.1-rc.2`。
 - **`engines.dsh` 不匹配**：宿主拒绝加载；升级/切换 DSH 或换匹配的包版本。
-- **端口占用**：把 `--port <free>` 转给 dsh；启动器原样转发。
+- **端口占用**：`dsh --profile web -- --port <free>`（启动器把 `--port` 原样转发）。
 - **没有模型 key**：Web 里用 DeepSeek 账号登录也能开始；搜索可用、抓取回退降级为本地。
 - **saved Session 打开在别的工作区**：这是 DSH 的浏览器 selection 行为；首屏/侧栏显示当前
   工作区，用 Workspace picker 切换。P0 不承诺自动切回启动工作区。
+- **`dsh plugin add` 失败**：按输出末尾的 `diagnostics: .../pnpm.log` 看 pnpm 原因；profile 半装时
+  先 `dsh plugin --profile <p> remove dsh-deep-research-pack` 再重试。
 
-## 十、高级：手动装进已有 profile
+## 十、已知限制
 
-启动器是推荐路径。需要把本包装进另一个已有 profile 时：
-
-```sh
-dsh --profile <p> --from-default-profile web --dump-config   # 仅首次；已存在则跳过
-dsh plugin --profile <p> add /path/to/{{tarballName}}
-dsh-deep-research-scaffold --workspace <ws> --profile <p>
-DEEP_RESEARCH_WORKSPACE=<ws> dsh --profile <p>
-```
-
-手动路径不改写用户 patch；但不会自动写启动器设置，也不会自动登记工作区（需 env + Host 行）。
-
-## 已知限制
-
-- 默认共享 `$DSH_HOME`：会看到该 home 下其他 Workspace/Session；需要隔离用 `--home`。
-- 非空项目默认用 `<project>/research`；该模式 agent 可读项目，但写入留在研究子目录；要写项目根用
-  `--in-place`。
+- `web` profile 是共享的：会看到该 `DSH_HOME` 下其他 Workspace/Session；需要隔离用专用
+  `deep-research` profile 或启动器 `--home`。
+- 原生 scaffold 不会推断“非空项目 → `<project>/research`”；它在你传入的目录铺种子。要子目录就
+  显式传子目录；启动器才有项目模式与 `--in-place`。
 - saved Session 可能打开在之前的工作区；P0 只做可见指示/切换，不自动切回。
 - 团队机制层是 N2 experimental：上游可能改 API 或撤能力；版本必须匹配运行中的 DSH。
 - 不承诺 Windows；Desktop 未实测；npm 正式发布前 tarball 是主分发形态。
+- 启动器是可选便利；产品分发/安装/启动以 DSH 原生 `dsh plugin` + `dsh --profile` 为准（D39）。

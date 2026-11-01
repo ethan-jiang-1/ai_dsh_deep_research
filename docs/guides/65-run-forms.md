@@ -10,12 +10,12 @@
 
 | 形态 | 谁在用 | 入口 | 边界 |
 |---|---|---|---|
-| **M1-product 产品形态** | 外部用户 | `dsh-deep-research`（launcher）→ 装配 `deep-research` profile → 用户工作区 | 用户自己的 `DSH_HOME`（默认共享；`--home` 可隔离）+ 自选工作区；插件内容在包内，产物在工作区 |
-| **M1-manual 手动安装** | 高级用户 / 已有 profile | npm/tarball → `dsh plugin add` → `scaffold --workspace` | 不自动写启动器设置；工作区需手动指定/登记 |
+| **M1-product 产品形态** | 外部用户 | `dsh plugin --profile web add` → 安装副本 scaffold → `DEEP_RESEARCH_WORKSPACE=<ws> dsh --profile web` | 用户自己的 `DSH_HOME`（默认共享；`--home`/`DSH_HOME` 可隔离）+ 自选工作区；插件内容在包内，产物在工作区；launcher 可选 |
+| **M1-isolated 隔离 profile** | 高级用户 / 已有 profile | 先 `--from-default-profile web` 建专用 profile，再 `dsh plugin add` → scaffold → `dsh --profile <p>` | 不写启动器设置；工作区需手动指定/登记 |
 | **M2 独立开发形态** | 贡献者 / 本地验证 | 本仓 + `bash dev/bootstrap.sh` + `node dev/run-driver.mjs up --bootstrap` | 默认仓内 `runtime/harness-home` + `research-workspace/`；可用 `DSH_DEV_HOME` 指到仓外 |
 | **M3 移交形态** | 交给另一人或另一台机器 | `scripts/dist/export-handoff.mjs`（源码）或 `export-dist.mjs`（插件） | 不是复制工作树；运行态/凭据/run 数据不随包 |
 
-**决定：A 为主，B 作为可安装门槛，C 不做。** A = 产品 launcher（装配 profile + 登记工作区 + 起 Web）+ 用户工作区；
+**决定：A 为主，B 作为可安装门槛，C 不做。** A = DSH 原生插件安装（`dsh plugin --profile web add`）+ 安装副本 scaffold + `dsh --profile web` 启动 + 用户工作区；launcher 只是可选便利（D39）。
 B = pack 目录在 `pnpm build` 后可 `dsh plugin add file:<目录>`（安装时复制进 profile；移动源目录后旧路径不能重装/升级，需 remove 后从新路径 add；`link:` 才是移动即断链）；C = `cp -r` 整个工作树，
 会带走凭据/会话/run 数据，不提供。移交改用 M3。
 
@@ -56,19 +56,31 @@ bundle 自证的是「交付了什么、谁拍的板」，不是「审计跑过�
 **产品路径（M1-product，推荐）**
 
 ```sh
-npm install -g dsh-deep-research-pack        # 或 tarball
-dsh-deep-research --workspace <ws>           # 首启装配 profile + 铺种子 + 登记工作区
-dsh-deep-research --check --workspace <ws>   # 只读检查
-dsh-deep-research --setup-only --workspace <ws>
+# ① DSH 原生安装（web profile 首次使用自动初始化；也可 tarball file: 绝对路径）
+dsh plugin --profile web add dsh-deep-research-pack
+
+# ② 初始化工作区（安装副本里的 scaffold，不需要全局安装）
+"${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/.bin/dsh-deep-research-scaffold" \
+  --install-only --workspace <ws> --profile web
+
+# ③ DSH 原生启动
+DEEP_RESEARCH_WORKSPACE=<ws> dsh --profile web
 ```
 
-launcher 只在 profile 不存在时从 Web 模板初始化；已有 profile 只补缺，不重置、不触碰用户 patch。
-安装/升级由 `dsh plugin` 写 profile；启动器只写一个 profile-local 设置文件。升级 = 换启动器包后
-重启产品命令；种子升级用 `dsh-deep-research-scaffold --check/--upgrade`。卸载 = 停 profile →
-`dsh plugin --profile deep-research remove dsh-deep-research-pack`；团队层可单删；profile 可显式删；
-工作区保留。
+- 不需要 `npm install -g`；包是 bundle，分发面 = npm/tarball + `dsh plugin add`（D39）。
+- 专用 `deep-research` profile：先 `dsh --profile deep-research --from-default-profile web --dump-config`，
+  再 `dsh plugin --profile deep-research add ...`，然后 scaffold / `dsh --profile deep-research`。顺序不能反。
+- scaffold 在传入目录铺种子；要 `<project>/research` 就显式传子目录。启动器才有项目模式/`--in-place`。
+- 可选一条命令：`dsh plugin --profile web exec dsh-deep-research --profile web --workspace <ws>`；
+  全局 `npm i -g` + `dsh-deep-research` 只是便利。启动器写一个 profile-local 设置文件；原生路径不写。
+- 升级 = `dsh plugin --profile web add ...@<new>`；种子升级 = 安装副本 scaffold `--check/--upgrade`；
+  卸载 = `dsh plugin --profile web remove dsh-deep-research-pack`；团队层可单删；工作区保留。
 
-**手动路径（M1-manual）**
+**隔离 / 手动路径（M1-isolated）**
+
+```sh
+SCAFFOLD="${DSH_HOME:-$HOME/.dsh}/profiles/<p>/node_modules/.bin/dsh-deep-research-scaffold"
+```
 
 - **前置**：DSH 满足包内 `engines.dsh`（值以 `package.json` 为准）；Node 满足 `engines.node`；`dsh` 在 PATH，
   首次补团队层需要 pnpm。团队机制层 `@deepseek-ai/dsh-experimental-agent-team-profile` 是 **N2 experimental**
@@ -76,19 +88,19 @@ launcher 只在 profile 不存在时从 Web 模板初始化；已有 profile 只
   （scaffold 自动补；已在场且版本一致时**不改写来源**，要刷新用 `--refresh-team`）。`dsh` 不在 PATH 时用
   `--install-anchor <@deepseek-ai/dsh 安装目录或 package.json>` / `DSH_INSTALL_ANCHOR`。
 - **安装**：`dsh --profile <p> --from-default-profile web --dump-config` → `dsh plugin --profile <p> add <npm|tarball|目录>`；
-  `scaffold --workspace <w> --profile <p>` 铺种子 + 补团队层 + preflight。首装发现工作区已有别人的
+  `"$SCAFFOLD" --workspace <w> --profile <p>` 铺种子 + 补团队层 + preflight。首装发现工作区已有别人的
   AGENTS/NODES/模板会拒绝（`--force` 覆盖，或 `--upgrade` 生成 sidecar 合并，合并/确认后用 `--adopt`
   显式接受当前工作区）；工作区不能是 HOME/DSH_HOME/pack/profile 的本身、祖先或内部；种子父目录经
   symlink 指向工作区外也拒绝。
-- **升级**：先停正在跑的 profile（避免运行中替换 `node_modules`）→ 装新版包 → 重启 profile → `scaffold --check` →
-  `scaffold --upgrade`。升级只覆盖“用户未改过且种子已更新”的文件；改过的文件保留原样并写 `<文件>.seed-new`
+- **升级**：先停正在跑的 profile（避免运行中替换 `node_modules`）→ 装新版包 → 重启 profile → `"$SCAFFOLD" --check` →
+  `"$SCAFFOLD" --upgrade`。升级只覆盖“用户未改过且种子已更新”的文件；改过的文件保留原样并写 `<文件>.seed-new`
   （已有 sidecar 不覆盖，新种子写 `<文件>.seed-new-<版本>`）；`--adopt` 过的文件按 modified 处理，
   `--upgrade` 也不覆盖；`method-library.md` 任何模式都不覆盖。
 - **回滚**：装回旧版包；工作区种子不回滚（用户数据不随插件降级），`--check` 如实报告版本关系；DSH 必须满足旧包
   `engines.dsh`，否则宿主拒绝加载。
 - **卸载**：先停 profile；`dsh plugin --profile <p> remove dsh-deep-research-pack`；工作区保留，数据清理是用户显式动作。
   团队层不在本包内、卸载不删——不需要时显式 `dsh plugin --profile <p> remove @deepseek-ai/dsh-experimental-agent-team-profile`。
-  scaffold 自己的残留（未改孤儿 / `.seed-new` / 陈旧锁 / 临时状态）用 `scaffold --clean` 报告；
+  scaffold 自己的残留（未改孤儿 / `.seed-new` / 陈旧锁 / 临时状态）用 `"$SCAFFOLD" --clean` 报告；
   `--clean --write` 清未改孤儿/陈旧锁/临时件，**sidecar 默认保留**（可能是未合并的种子更新），
   加 `--discard-sidecars` 才丢弃；改过的孤儿、种子、`drt_*`、方法库永不删。
 

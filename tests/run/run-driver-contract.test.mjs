@@ -123,12 +123,12 @@ test('启动首动作一致：产品行 = launcher；开发行 = run-driver', ()
     return line;
   };
   // 产品用户：启动首动作 = dsh-deep-research（D38）；开发通道：run-driver。
-  assert.ok(lineOf('README.md', 'dsh-deep-research').includes('dsh-deep-research'), 'README 产品首动作缺席');
+  assert.ok(lineOf('README.md', 'dsh plugin --profile web add').includes('dsh plugin'), 'README 产品原生首动作缺席');
   assert.ok(lineOf('README.md', 'dev/run-driver.mjs up').includes('run-driver.mjs up'), 'README 开发入口缺席');
   const productRow = lineOf('docs/00-index.md', '（产品用户）');
-  assert.ok(productRow.includes('dsh-deep-research'), '00-index 产品行首动作不是 launcher');
+  assert.ok(productRow.includes('dsh plugin'), '00-index 产品行首动作不是原生插件安装');
   assert.ok(lineOf('docs/00-index.md', '启动一下').includes('run-driver.mjs up'), '00-index 开发行首动作不是 run-driver');
-  assert.ok(lineOf('docs/project-map.md', '| **启动产品（产品用户）** |').includes('dsh-deep-research'), 'project-map 产品行首动作不是 launcher');
+  assert.ok(lineOf('docs/project-map.md', '| **启动产品（产品用户）** |').includes('dsh plugin'), 'project-map 产品行首动作不是原生插件安装');
   assert.ok(lineOf('docs/project-map.md', '| 启动一次研究（开发通道） |').includes('run-driver.mjs up'), 'project-map 开发行首动作不是 run-driver');
   assert.ok(lineOf('docs/guides/61-run-playbook.md', '- 启动：').includes('run-driver.mjs up'), 'guides/61 开发首动作不是 run-driver');
   // guides/61 §0 的"启动"行不得再以 boot-run 打头（否则同一页先说 boot-run、后说 run-driver）

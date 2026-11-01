@@ -71,6 +71,7 @@ function makeSandbox(label) {
     home,
     ws,
     bin,
+    dsh,
     env: {
       ...scrubbedEnv(),
       DSH_HOME: home,
@@ -87,6 +88,10 @@ function runLauncher(sandbox, args, { timeout = 300_000 } = {}) {
 
 function setup(sandbox, profile, extra = []) {
   return runLauncher(sandbox, ['--workspace', sandbox.ws, '--home', sandbox.home, '--profile', profile, '--setup-only', ...extra])
+}
+
+function runDsh(sandbox, args, timeout = 300_000) {
+  return spawnSync(sandbox.dsh, args, { cwd: sandbox.ws, env: sandbox.env, encoding: 'utf8', timeout })
 }
 
 function profileManifest(sandbox, profile) {
@@ -160,6 +165,16 @@ try {
   for (const rel of packFiles) {
     check(`包源未被写：${rel}`, sha(join(PACK, rel)) === packBefore[rel])
   }
+
+  // 原生 DSH 路径（手册主路径）：web profile + dsh plugin add + 安装副本 scaffold。
+  const native = makeSandbox('native')
+  const nativeAdd = runDsh(native, ['plugin', '--profile', 'web', 'add', `file:${PACK}`])
+  check('原生 dsh plugin add（web profile）exit 0', nativeAdd.status === 0, (nativeAdd.stderr || nativeAdd.stdout).slice(-400))
+  const webManifest = existsSync(join(native.home, 'profiles', 'web', 'package.json')) ? readJson(join(native.home, 'profiles', 'web', 'package.json')) : null
+  check('原生 web profile bundle 含 pack', (webManifest?.dsh?.profile?.bundles ?? []).includes('dsh-deep-research-pack'), JSON.stringify(webManifest?.dsh?.profile?.bundles ?? []))
+  const nativeScaffold = join(native.home, 'profiles', 'web', 'node_modules', '.bin', 'dsh-deep-research-scaffold')
+  const nativeSeed = existsSync(nativeScaffold) ? spawnSync(nativeScaffold, ['--install-only', '--workspace', native.ws, '--profile', 'web'], { cwd: native.ws, env: native.env, encoding: 'utf8', timeout: 300_000 }) : null
+  check('原生安装副本 scaffold 铺种子', nativeSeed !== null && nativeSeed.status === 0 && existsSync(join(native.ws, 'AGENTS.md')) && existsSync(join(native.ws, 'templates', 'run')), nativeSeed === null ? 'scaffold bin 不在' : (nativeSeed.stderr || nativeSeed.stdout).slice(-400))
 
   // 半装：dependency 在、bundle 缺 → fail-loud，不假绿
   const halfProfile = 'product-half'

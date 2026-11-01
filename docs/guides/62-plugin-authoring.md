@@ -100,7 +100,7 @@ DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`�
 | 本包 | 一个 bundle（`dsh-deep-research-pack`） | 本仓 |
 | 团队机制层 | 另一个 bundle（`@deepseek-ai/dsh-experimental-agent-team-profile`，**N2 experimental**：上游可改/撤，风险与层级表见 pack README §Compatibility） | vendor（本包**故意不声明**团队行——组合与实战 config 归该层，RFC m2-p1-run-channel A 定案） |
 | 研究工作区 | 会话 cwd 的目录（手册 `AGENTS.md` + `NODES.md` + `question-patterns.md` + `templates/run/` + 版本控制规则 `.gitignore`）；产品用户任意目录，开发实例 = `research-workspace/` | 本包 `workspace/` 种子（`dev/sync-pack-workspace.mjs` 同步） |
-| 产品启动器 | `dsh-deep-research` bin：装配 `deep-research` profile + 登记工作区 + 起 Web（不新增应用进程） | 本包 `scripts/launch.mjs`（D38） |
+| 产品启动器（可选） | `dsh-deep-research` bin：包装 profile/装包/种子/登记/起 Web（不新增应用进程）；主分发 = `dsh plugin add` + `dsh --profile`（D39） | 本包 `scripts/launch.mjs`（D38） |
 
 工作区是**纪律的载体**：DSH 的 agent-instructions 从会话 cwd 向上发现 `AGENTS.md` 并注入每个
 角色——手册不在工作区，四个研究角色就没有证据契约与完成判据。安装步骤（用户视角）与前置

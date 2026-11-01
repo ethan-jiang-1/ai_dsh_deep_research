@@ -84,7 +84,7 @@ Tool schemas are stable within a Method Editor request series; a newly selected 
 - 回退只把**目标 URL**发给 DeepSeek（不带 cookie / header）；本地能取到的页面不出本机。
 - 团队 / 多用户：每个用户在自己的 DSH home 配自己的 key；run bundle 与方法库不含凭据。
 
-## 部署（产品启动）
+## 部署（DSH 插件安装）
 
 运行形态、数据归属、升级/回滚与多实例的完整合同 = [guides/65](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/guides/65-run-forms.md)。
 用户视角完整手册 = [`_dist/安装手册.md`](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_dist/%E5%AE%89%E8%A3%85%E6%89%8B%E5%86%8C.md)。
@@ -94,28 +94,32 @@ Node 满足 `engines.node`；`dsh` 在 PATH；**首次装团队层需要 pnpm**�
 若 `dsh` 不在 PATH，用 `--install-anchor`（或 `DSH_INSTALL_ANCHOR`）给 scaffold/preflight 指安装锚。
 
 ```sh
-# ① 安装启动器（npm 发布后；离线用 tarball 绝对路径）
-npm install -g dsh-deep-research-pack
-# 或：npm install -g /path/to/dsh-deep-research-pack-<版本>.tgz
+# ① 装包（DSH 原生；web profile 首次使用会自动初始化）
+dsh plugin --profile web add dsh-deep-research-pack
+# 或离线：dsh plugin --profile web add file:/path/to/dsh-deep-research-pack-<版本>.tgz
 
-# ② 一条命令启动产品；首次会装配 profile、装包/团队层、铺工作区种子、登记工作区
-dsh-deep-research --workspace ~/research
-# 不指定 --workspace 时首次启动会询问（回车 = 当前目录）
+# ② 初始化工作区（安装副本里的 scaffold；不需要全局安装）
+"${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/.bin/dsh-deep-research-scaffold" \
+  --install-only --workspace "$HOME/research" --profile web
+
+# ③ 启动（DSH 原生）
+DEEP_RESEARCH_WORKSPACE="$HOME/research" dsh --profile web
 ```
 
-- **profile**：默认 `deep-research`；`--profile <name>` 可换。launcher 只在 profile 不存在时从 Web 模板初始化；
-  已有 profile 只补缺，不重置、不触碰用户 patch。
-- **工作区**：`--workspace <dir>` / `DEEP_RESEARCH_WORKSPACE` / 上次设置 / TTY 询问。
-  非空项目且没有研究契约时默认研究根 = `<project>/research`（不碰项目文件）；`--in-place` 才用项目根。
-  已有 `.gitignore` 不静默改；`--gitignore-append` 显式追加。
+- **profile**：默认用 DSH 自带 `web` profile；不混用其他能力时建专用 profile：
+  `dsh --profile deep-research --from-default-profile web --dump-config` →
+  `dsh plugin --profile deep-research add ...`。顺序不能反（`dsh plugin` 首次初始化未知名 profile 只带 base，
+  没有 Web 应用）；已有 profile 不要重复 `--from-default-profile`。
+- **工作区**：`DEEP_RESEARCH_WORKSPACE` 让 Host 在 Web 起来前登记工作区；不设也能启动，用 DSH 的
+  Workspace picker 选目录。原生 scaffold 在你传入的目录铺种子；要 `<project>/research` 就显式传子目录。
 - **首屏**：Orca 品牌 + 产品化工作区标题 + 起步卡（当前工作区 / 三步起步 / 凭据提示 / 换工作区）；
   默认 preset = Deep Research Lead；右栏研究状态/研究配置/研究图谱/终稿；主界面方法库 tab。
-- **检查/预装**：`dsh-deep-research --check --workspace <ws>` 只读；`--setup-only` 装配/铺种子后退出；
-  `--home <dir>` 用独立 DSH_HOME；`--no-seed` 跳过种子。
-- **数据**：run bundle/方法库/归档全在工作区；启动器只在 profile 目录写一个设置文件（见 §Data）。
-- **手动装进已有 profile（高级）**：`dsh --profile <p> --from-default-profile web --dump-config` →
-  `dsh plugin --profile <p> add <tarball>` → `dsh-deep-research-scaffold --workspace <ws> --profile <p>`
-  → `DEEP_RESEARCH_WORKSPACE=<ws> dsh --profile <p>`。产品路径优先。
+- **可选一条命令**：`dsh plugin --profile web exec dsh-deep-research --profile web --workspace <ws>`
+  （或全局 `npm i -g` 后 `dsh-deep-research --workspace <ws>`）。它包装了上面的 profile/装包/种子/登记/启动；
+  `--check` 只读、`--setup-only` 装配后退出、`--home` 隔离；项目模式与 `--in-place` 只在启动器里有。
+- **检查**：`dsh --profile web --dump-config | grep ...`；安装副本的
+  `.../node_modules/.bin/dsh-deep-research-preflight --install-only --workspace <ws> --profile web`。
+- **数据**：run bundle/方法库/归档全在工作区；启动器设置只在 profile 目录（见 §Data）。
 
 ## Data
 
@@ -304,7 +308,7 @@ node <pack>/scripts/scaffold.mjs --workspace <ws> --clean --write
 ## 已知限制与延后工作
 
 - **首屏工作区**：默认共享 `$DSH_HOME`；浏览器已有 saved Session 时，Web 可能打开上次的工作区，而不是本次启动工作区（首屏/侧栏显示当前工作区，用 Workspace picker 切换；P0 不承诺自动切回）。需要干净环境用 launcher `--home`。
-- **项目模式**：非空项目默认研究根 = `<project>/research`；agent 可读项目，但写入留在研究子目录（`workspace-write` 根 = Session cwd）。要让 agent 直接写项目根用 `--in-place`，并接受种子落在项目根。
+- **项目模式（launcher）**：启动器对非空项目默认研究根 = `<project>/research`；agent 可读项目，但写入留在研究子目录（`workspace-write` 根 = Session cwd）。要让 agent 直接写项目根用 `--in-place`。原生 scaffold 不推断：它在你传入的目录铺种子。
 - **已有 `.gitignore`**：产品不静默改写；`--gitignore-append` 才追加带标记块（研究数据默认在子目录时只动研究子目录）。
 - **研究方法配置首版边界**：方法 = 调查路径指导，不新增强制预算/来源数硬门，readiness 不自动验证方法承诺之外的新合同；用户方法库 `method-library.md` 是**工作区本地用户数据**（同工作区的会话都看得到，换工作区不带；由显式页面动作经 Method Editor Host 工具写入，无版本史、无跨设备同步）；高承诺学术模式（系统综述类）不在预设；Settings 管理页不做（需显式重议 D7/D18 架构边界，见 [_backlog 长期管理卡](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_backlog/_archived/settled_issues/2026-10-12-research-method-profile-management.md)）；方法库的增长纪律（命中计数／休眠）与库规模能力（分组／搜索／导入导出／跨工作区）、交付工件的表格档、领域包升格为字段——四项延后，重议条件登记在 [_backlog/triggers.md](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_backlog/triggers.md)；
 

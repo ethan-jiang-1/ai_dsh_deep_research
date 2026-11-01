@@ -19,7 +19,7 @@
 | 读者版终稿 | reader-facing final（本仓原生；canonical 的派生压缩，不是第二份事实） | `final/readable.md` → `final/readable-vN.md`（同版交付件）+ lead 的 `reader-final` skill + node-gate 门C + [design/40](./design/40-research-cockpit.md) 终稿页签双视图 |
 | 研究工作区 | 会话 cwd + `agent-instructions` 注入手册 | `packages/context/agent-instructions` |
 | 产品启动 profile（product profile） | DSH profile（`dsh --profile <name>` 的启动组合） | 产品默认 `deep-research`（launcher 装配：web 模板 → 本包 → 团队层）；dev 镜像 = `research`；D38 |
-| 产品启动器（product launcher） | —（本仓原生产品入口；不新增应用进程） | `packages/deep-research-pack/scripts/launch.mjs` → bin `dsh-deep-research`；只装配 profile/登记工作区/起 Web，运行时仍是 `dsh`；D38 |
+| 产品启动器（product launcher） | —（可选一条命令便利；不新增应用进程） | `packages/deep-research-pack/scripts/launch.mjs` → bin `dsh-deep-research`；只装配 profile/登记工作区/起 Web，运行时仍是 `dsh`；主分发 = DSH 原生 `dsh plugin add` + `dsh --profile`；D38/D39 |
 | 产品设置（launcher settings） | profile-local 产品文件（非 DSH Config/patch） | `$DSH_HOME/profiles/<p>/deep-research.launcher.json`（上次工作区；无秘密、可删） |
 | 产物 / artifacts | —（用户常用词） | = **run bundle**（`<workspace>/drt_<slug>/`）；不另建 artifact store，交付用 `present` 声明工作区文件 |
 | **研究驾驶舱（Research Cockpit）** | —（本仓原生套件名）：观察面 client 套件（观察面伞下最频改的一件） | `packages/deep-research-pack/src/client/` + `src/lib/`；分层与构成正本 = [design/40](./design/40-research-cockpit.md) |

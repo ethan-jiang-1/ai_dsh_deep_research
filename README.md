@@ -2,8 +2,8 @@
 
 DSH 插件项目，也是 **Deep Research 产品**：一个包（`packages/deep-research-pack`）提供四个研究角色
 preset（`Deep Research Lead / Scout / Analyst / Critic`）+ 方法编辑 preset（`Method Editor`，D37），
-协作走 DSH 现成 Agent Teams 通道。产品形态 = 自带启动 profile + 启动器（D38）：插件内容在包内，
-run bundle / 方法库 / 归档落在用户工作区。
+协作走 DSH 现成 Agent Teams 通道。产品形态 = **DSH 插件（bundle）+ 可选启动器**（D38/D39）：
+插件内容在包内，run bundle / 方法库 / 归档落在用户工作区。
 
 设计来源：方法论内核出自 codex Deep Research harness 考古（[考古报告](notes/implemented/2026-09-24-deep-research-harness-analysis.md)），
 插件工程范式参考作者本地 `ai_dsh_company`（不随仓；[解剖报告](notes/implemented/2026-09-24-dsh-plugin-repo-anatomy.md)）。
@@ -11,17 +11,18 @@ run bundle / 方法库 / 归档落在用户工作区。
 ## 用它
 
 ```sh
-npm install -g dsh-deep-research-pack          # 或 tarball：见 _dist/安装手册.md
-dsh-deep-research --workspace ~/research       # 不指定时首次启动会询问工作区
+dsh plugin --profile web add dsh-deep-research-pack
+"${DSH_HOME:-$HOME/.dsh}/profiles/web/node_modules/.bin/dsh-deep-research-scaffold" \
+  --install-only --workspace "$HOME/research" --profile web
+DEEP_RESEARCH_WORKSPACE="$HOME/research" dsh --profile web
 ```
 
-首启自动装配产品 profile（`deep-research`）、装包与团队机制层、铺工作区种子，并把工作区登记进
-DSH；Web 首屏是 **Deep Research Lead** 会话 + 起步卡（当前工作区 / 三步起步 / 凭据提示）。
-产物 = `<workspace>/drt_<slug>/`；方法库与归档也在工作区。`--check` 只读检查，`--setup-only`
-只装配不起 Web，`--home` 可隔离环境。
-
-用户视角完整手册 = [`_dist/安装手册.md`](_dist/安装手册.md)；包合同与数据卡 =
-[pack README](packages/deep-research-pack/README.md)；想换工作区/项目模式/高级手动安装看手册。
+三条命令 = DSH 原生插件安装 + 工作区初始化 + 启动；**不需要全局安装**。第二步铺种子与团队
+机制层，第三步由 Host 登记工作区；Web 首屏是 **Deep Research Lead**
+会话 + 起步卡（当前工作区 / 三步起步 / 凭据提示）。产物 = `<workspace>/drt_<slug>/`；方法库与
+归档也在工作区。专用 `deep-research` profile、一条命令启动器（`dsh-deep-research`）、项目模式与
+`--check`/`--home` = 手册；包合同与数据卡 = [pack README](packages/deep-research-pack/README.md)。
+用户视角完整手册 = [`_dist/安装手册.md`](_dist/安装手册.md)。
 
 ## 首屏会看到
 

@@ -8,16 +8,16 @@
 
 ## 先分流：用户要"用它"还是"改它"
 
-**先记住这条模型**：本包提供 bundle + preset + **产品 launcher**（D38）；运行时始终是 `dsh`。
-产品用户走 `dsh-deep-research`：launcher 装配自己的 `deep-research` profile、把用户工作区登记进
-DSH，run bundle/方法库留在工作区。开发者在本仓走 `research` profile + `research-workspace/` +
-run-driver。两条路径的命令与数据根不同，不要互相套用。
+**先记住这条模型**：本包是 DSH 插件（bundle + preset），运行时始终是 `dsh`。产品安装/启动走
+DSH 原生：`dsh plugin --profile web add` → 安装副本 scaffold → 工作区 env → `dsh --profile web`；
+专用 `deep-research` profile 与 `dsh-deep-research` launcher 是隔离/便利选项（D39）。开发者在本仓走
+`research` profile + `research-workspace/` + run-driver。两条路径的命令与数据根不同，不要互相套用。
 
 | 用户的说法 | 走哪（该事的唯一 owner） | 首个动作 |
 |---|---|---|
-| "用它""启动这个插件""跑研究""装到我的 DSH"（产品用户） | [pack README](../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) + [guides/65](./guides/65-run-forms.md) | `npm install -g dsh-deep-research-pack` → `dsh-deep-research --workspace <dir>` |
+| "用它""启动这个插件""跑研究""装到我的 DSH"（产品用户） | [pack README](../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) + [guides/65](./guides/65-run-forms.md) | `dsh plugin --profile web add dsh-deep-research-pack` → 安装副本 scaffold → `dsh --profile web` |
 | "在本仓启动/开跑/接着上次跑"（开发通道，默认 `runtime/harness-home`） | [guides/61](./guides/61-run-playbook.md) | `node dev/run-driver.mjs up`（起/复用通道 + 验浏览器面 + 呈交 URL） |
-| "装成产品 profile""换 profile/home""只装配不起 Web" | [guides/65](./guides/65-run-forms.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | `dsh-deep-research --profile <p> --home <h> --setup-only` |
+| "装成隔离 profile""换 profile/home""只装配不起 Web" | [guides/65](./guides/65-run-forms.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | `dsh --profile <p> --from-default-profile web --dump-config`；launcher 另有 `--setup-only`/`--home` |
 | "只验证插件还能挂载/安装"（证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `source dev/env.sh && node scripts/smoke/product-smoke.mjs`（或 preset/release-smoke） |
 | "改插件内容"（角色 / skill / 驾驶舱 / 部署面） | [guides/62](./guides/62-plugin-authoring.md) | 该页 §参与阶梯 + §改动影响面 |
 | "改本仓开发流程或仓库文档"（门禁 / docs / notes / 入口链 / 各 README） | [guides/60 §1](./guides/60-dev-loop.md) | 按工作类型分支（入口链第 3–4 步在此展开） |
@@ -33,7 +33,7 @@ run-driver。两条路径的命令与数据根不同，不要互相套用。
 **歧义裁定**：用户未指定 home 时——产品用户默认 `$DSH_HOME`；开发通道默认
 `runtime/harness-home`（source env.sh）。"启动这个插件"没有额外上下文时默认指本仓开发通道；
 要给外部用户装产品走产品行。**开发通道**别绕过 run-driver 的漂移门（直接 `dsh --profile research`
-会用旧镜像）；**产品用户**直接用 launcher，不要手写 profile。
+会用旧镜像）；**产品用户**用 `dsh plugin add` + 安装副本 scaffold + `dsh --profile`，launcher 只是可选便利。
 
 **裸动词也指开发通道**："启动一下""起一下"未点名对象时，默认指本仓 DSH 环境，首个动作 = `node dev/run-driver.mjs up`；仅当对话正围着另一个可启动物（某条冒烟/探针）时才跟随该物。
 
