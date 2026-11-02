@@ -2,6 +2,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { portableBundlePath } from './path-hygiene.mjs'
+import { finalVersionsIn } from './final-version.mjs'
 import { planCardsOf } from './plan-card.mjs'
 import { HITL_CONTRACT_DATE, PRE_CONTRACT_NOTE, decisionsLines, isPreContract, readinessOf } from './node-gate-contracts.mjs'
 import { epochDateOf, toDateStr } from './schema-scan-core.mjs'
@@ -386,7 +387,7 @@ export function isHitl2Row(line) {
 export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadableLogReader, witness = null) {
   const finalDir = join(bundleDir, 'final')
   // 只认版本副本 `vN.md`；`readable.md`/`readable-vN.md` 是读者版，不是版本记账。
-  const versionFiles = existsSync(finalDir) ? readdirSync(finalDir).filter((f) => /^v\d+\.md$/.test(f)) : []
+  const versionFiles = finalVersionsIn(finalDir).map((n) => `v${n}.md`)
   const qPath = join(bundleDir, 'question.md')
   const qText = existsSync(qPath) ? readFileSync(qPath, 'utf8') : null
   const dec = qText ? decisionsLines(qText) : []

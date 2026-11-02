@@ -20,6 +20,7 @@
 // keyless 纯 fs；dates 可注入（tests/ 层覆盖——夹具 mtime 随检出时间漂，不可作断代依据）。
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs'
 import { basename, join } from 'node:path'
+import { hasFinalVersion } from './final-version.mjs'
 
 export const CONTRACT_DATE = '2026-09-29'
 /** 当前 run bundle 契约版本（run.md 的 `schema:`，整数；模板写、门禁按整数分档）。
@@ -243,7 +244,7 @@ export function scanBundle(bundleDir) {
     const phase = phaseMatch?.[1]
     if (phase === 'delivery' || phase === 'accepted') {
       const finalDirNow = join(bundleDir, 'final')
-      const hasVersion = existsSync(finalDirNow) && readdirSync(finalDirNow).some((f) => /^v\d+\.md$/.test(f))
+      const hasVersion = hasFinalVersion(finalDirNow)
       if (!hasVersion) core.push(`run.md phase=${phase} 但 final/vN 版本账缺席（D28 交付段）`)
       if (rv === null || !/readiness[^\n]{0,40}(PASS|FAIL)/i.test(rv)) core.push(`run.md phase=${phase} 但 review.md 终局 readiness 不可解析（D28 交付段）`)
       const deliveredValue = /^\s*[-*]?\s*delivered\s*[:：]\s*(.+)$/m.exec(run)?.[1]?.trim() ?? ''

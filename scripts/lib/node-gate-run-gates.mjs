@@ -2,6 +2,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { contractEpochOf, deliveryDate, runSchemaOf, runType } from './schema-scan-core.mjs'
+import { finalVersionsIn } from './final-version.mjs'
 import { HEADING_CONTRACT_DATE, LEADS_CONTRACT_DATE, PRE_CONTRACT_NOTE, VERSION_CONTRACT_DATE, decisionsLines, isPreContract } from './node-gate-contracts.mjs'
 
 /**
@@ -160,13 +161,7 @@ export function versionGate(bundleDir, versionDate) {
   if (!existsSync(finalDir)) {
     return { status: 'N/A', detail: 'final/ 不在场——门④ 无对象（bundle 未到版本记账段）' }
   }
-  const versions = readdirSync(finalDir)
-    .map((f) => {
-      const m = f.match(/^v(\d+)\.md$/)
-      return m ? Number(m[1]) : 0
-    })
-    .filter((n) => n >= 2)
-    .sort((a, b) => a - b)
+  const versions = finalVersionsIn(finalDir).filter((n) => n >= 2)
   if (versions.length === 0) {
     return { status: 'N/A', detail: 'final/ 仅 v1 记账（无扩张 rerun）——门④ 无对象（显式标注，不静默跳过）' }
   }

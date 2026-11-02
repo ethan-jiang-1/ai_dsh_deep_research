@@ -18,6 +18,7 @@ import { futureDateFindings } from '../lib/bundle-date-sanity.mjs'
 import { scanHomePaths } from '../lib/path-hygiene.mjs'
 import { formatSecretFinding, scanSecrets } from '../lib/secret-scan.mjs'
 import { presentedInLogs } from '../lib/node-gate-session-gates.mjs'
+import { finalVersionsIn } from '../lib/final-version.mjs'
 import { epochDateOf, runSchemaOf } from '../lib/schema-scan-core.mjs'
 import { buildDelivered, buildManifest, corpusRootLabel, renderAcceptance, repairReceiptPaths, sha256Text, shouldWriteReceipts } from '../lib/run-receipt.mjs'
 import { readZstdText } from '../lib/zstd-read.mjs'
@@ -145,9 +146,7 @@ const stamp = new Date().toISOString()
 // 也不得踩 D28 卫生门（acceptance.md 是 ops 生成物，但内容仍要干净）。
 const corpusRoot = corpusRootLabel(sessions, { home })
 const finalDir = join(bundle, 'final')
-const versions = existsSync(finalDir)
-  ? readdirSync(finalDir).filter((f) => /^v\d+\.md$/.test(f)).map((f) => Number(/^v(\d+)/.exec(f)[1])).sort((a, b) => a - b)
-  : []
+const versions = finalVersionsIn(finalDir)
 const finalVersion = versions.at(-1) ?? null
 const readerVersion = finalVersion !== null && existsSync(join(finalDir, `readable-v${finalVersion}.md`)) ? finalVersion : null
 const presented = presentedInLogs(sessions, slug, readLog, { contract: epochDateOf(bundle) || null })

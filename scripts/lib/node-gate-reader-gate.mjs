@@ -10,6 +10,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { contractEpochOf, runSchemaOf, runType } from './schema-scan-core.mjs'
+import { finalVersionsIn } from './final-version.mjs'
 import { READABLE_CONTRACT_DATE, PRE_CONTRACT_NOTE, isPreContract } from './node-gate-contracts.mjs'
 
 /** 读者版六节（顺序即阅读顺序；机械判据只认这六个二级标题）。 */
@@ -21,16 +22,9 @@ export const READER_LINE_CAP = 180
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
-/** final/ 下最高 vN；没有 = null。 */
+/** final/ 下最高 vN；没有 = null（版本判据 = pack `finalVersionOf`，不收 v0）。 */
 export function highestFinalVersion(bundleDir) {
-  const dir = join(bundleDir, 'final')
-  if (!existsSync(dir)) return null
-  const versions = readdirSync(dir)
-    .map((f) => /^v(\d+)\.md$/.exec(f)?.[1])
-    .filter((v) => v !== undefined)
-    .map(Number)
-    .filter((n) => Number.isSafeInteger(n) && n >= 1)
-    .sort((a, b) => a - b)
+  const versions = finalVersionsIn(join(bundleDir, 'final'))
   return versions.length === 0 ? null : versions[versions.length - 1]
 }
 

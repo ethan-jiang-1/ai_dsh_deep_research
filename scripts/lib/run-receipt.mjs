@@ -10,6 +10,7 @@ import { createHash } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
 import { basename, join, resolve, sep } from 'node:path'
 import { portableBundlePath } from './path-hygiene.mjs'
+import { finalVersionsIn, readableVersionsIn } from './final-version.mjs'
 
 /** Agent 读序（与手册 §状态头、读序与恢复 / RFC §11.2 逐字一致的单点）。 */
 export const READ_ORDER = [
@@ -149,9 +150,7 @@ export function receiptProblems(bundleDir) {
 /** 生成 delivered.json 的主体（调用方负责写盘；值域与 RFC §11.1 一致）。 */
 export function buildDelivered({ slug, bundleDir, corpusRoot, acceptedAt, presented, witness = [] }) {
   const finalDir = join(bundleDir, 'final')
-  const versions = existsSync(finalDir)
-    ? readdirSync(finalDir).filter((f) => /^v\d+\.md$/.test(f)).map((f) => Number(/^v(\d+)/.exec(f)[1])).sort((a, b) => a - b)
-    : []
+  const versions = finalVersionsIn(finalDir)
   const finalVersion = versions.at(-1) ?? null
   const finalPath = finalVersion === null ? null : join(finalDir, `v${finalVersion}.md`)
   const readerPath = finalVersion === null ? null : join(finalDir, `readable-v${finalVersion}.md`)
@@ -258,11 +257,13 @@ export function buildManifest({ slug, bundleDir, contract, schema = null, genera
   files.push(...extra)
   const finalDir = join(bundleDir, 'final')
   if (existsSync(finalDir)) {
-    for (const f of readdirSync(finalDir).filter((x) => /^v\d+\.md$/.test(x)).sort()) {
-      files.push({ path: `final/${f}`, role: FINAL_ROLES.ledger, sha256: sha256Of(join(finalDir, f)) })
+    for (const version of finalVersionsIn(finalDir)) {
+      const name = `v${version}.md`
+      files.push({ path: `final/${name}`, role: FINAL_ROLES.ledger, sha256: sha256Of(join(finalDir, name)) })
     }
-    for (const f of readdirSync(finalDir).filter((x) => /^readable-v\d+\.md$/.test(x)).sort()) {
-      files.push({ path: `final/${f}`, role: FINAL_ROLES.reader, sha256: sha256Of(join(finalDir, f)) })
+    for (const version of readableVersionsIn(finalDir)) {
+      const name = `readable-v${version}.md`
+      files.push({ path: `final/${name}`, role: FINAL_ROLES.reader, sha256: sha256Of(join(finalDir, name)) })
     }
   }
   return {

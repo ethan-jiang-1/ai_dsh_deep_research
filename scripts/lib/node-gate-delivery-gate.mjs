@@ -2,6 +2,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { runType } from './schema-scan-core.mjs'
+import { finalVersionsIn } from './final-version.mjs'
 import { AUDIT_CONTRACT_DATE, isPreContract, readinessOf, auditCriticalCount } from './node-gate-contracts.mjs'
 import { isHitl2Row } from './node-gate-session-gates.mjs'
 import { receiptProblems } from './run-receipt.mjs'
@@ -30,7 +31,7 @@ export function deliveryGate(bundleDir, auditDate) {
     return { status: 'N/A', detail: 'final.md 不在场——门A 无对象（bundle 未到交付段）' }
   }
   const finalDir = join(bundleDir, 'final')
-  const versionFiles = existsSync(finalDir) ? readdirSync(finalDir).filter((f) => /^v\d+\.md$/.test(f)) : []
+  const versionFiles = finalVersionsIn(finalDir).map((n) => `v${n}.md`)
   const hasReview = existsSync(join(bundleDir, 'review.md'))
   const reviewText = hasReview ? readFileSync(join(bundleDir, 'review.md'), 'utf8') : ''
   const { pass: reviewPass, conditional } = readinessOf(reviewText)

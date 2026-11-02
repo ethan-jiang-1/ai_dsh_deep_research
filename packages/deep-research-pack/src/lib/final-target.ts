@@ -80,8 +80,24 @@ export const FINAL_REVIEW_NAME = 'review.md'
 export const FINAL_LEDGER_DIR = 'final'
 /** 读者版工作件（HITL2 前）与同版交付件（`readable-vN.md`；N 与 final/vN 同号）。 */
 export const FINAL_READER_NAME = 'readable.md'
-export const FINAL_READABLE_VERSION_RE = /^readable-v[1-9]\d{0,5}\.md$/
-export const FINAL_VERSION_RE = /^v[1-9]\d{0,5}\.md$/
+export const FINAL_READABLE_VERSION_RE = /^readable-v([1-9]\d{0,5})\.md$/
+export const FINAL_VERSION_RE = /^v([1-9]\d{0,5})\.md$/
+
+/**
+ * 终稿版本文件名 → 版本号；不是版本账（`v0.md` / `v01.md` / 超长号 / 别的名字）→ null。
+ * 单一正本：client 终稿面、run-fold 的 `latestRunVersion`、scripts 的 run 门都从这里取，
+ * 不允许再写第二份 `vN` 正则（2026-11-03 七维卫生审计 D2-3：canonical 曾零消费者、scripts 8 处自写）。
+ */
+export function finalVersionOf(name: string): number | null {
+  const match = FINAL_VERSION_RE.exec(name)
+  return match?.[1] === undefined ? null : Number(match[1])
+}
+
+/** 读者版文件名 `readable-vN.md` → N；非读者版 → null。 */
+export function readableVersionOf(name: string): number | null {
+  const match = FINAL_READABLE_VERSION_RE.exec(name)
+  return match?.[1] === undefined ? null : Number(match[1])
+}
 
 /**
  * run bundle 终稿**地址族**：`final.md` / `final/vN.md` / `final/readable.md` /

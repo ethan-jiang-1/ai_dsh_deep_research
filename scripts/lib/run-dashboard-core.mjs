@@ -12,6 +12,7 @@ import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import { resolveSessionLog, readSessionEvents } from './session-log.mjs';
 import { splitFrontmatter } from './frontmatter.mjs';
+import { hasFinalVersion } from './final-version.mjs';
 import { deriveSteps, latestRunVersion } from '../../packages/deep-research-pack/src/lib/run-fold.ts';
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts';
 import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts';
@@ -299,7 +300,7 @@ export function sceneState(dir) {
   let fin = has('final.md');
   if (!fin) {
     try {
-      fin = readdirSync(join(dir, 'final')).some((f) => /^v\d+\.md$/.test(f));
+      fin = hasFinalVersion(join(dir, 'final'));
     } catch {
       /* final/ 缺席 */
     }

@@ -8,6 +8,7 @@
  * parse*（文件 → 模型）留在 run-dashboard（它直接读盘，client 走 workspaceFiles 数据面
  * 自行取文件内容后喂这里的折算）。
  */
+import { finalVersionOf } from './final-target.ts'
 
 /** 一个 run 的文件在场性（步骤条输入——由调用方从文件内容/在场性构造）。
  *  步序正本 = m2-run-mechanics「运行流程总览」：立项（question+topics 一体）→ 组队 →
@@ -34,10 +35,8 @@ export interface RunStep {
 export function latestRunVersion(files: readonly string[]): number {
   let latest = 0
   for (const file of files) {
-    const match = /^v([1-9]\d*)\.md$/.exec(file)
-    if (match === null || match[1] === undefined) continue
-    const version = Number(match[1])
-    if (Number.isSafeInteger(version)) latest = Math.max(latest, version)
+    const version = finalVersionOf(file)
+    if (version !== null) latest = Math.max(latest, version)
   }
   return latest
 }
