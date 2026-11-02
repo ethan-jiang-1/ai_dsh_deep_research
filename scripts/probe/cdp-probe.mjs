@@ -206,12 +206,16 @@ try {
     // 右栏展开按钮**首屏可能尚未挂载**（2026-10-19 探针实测：frameMounted 后立即查仍是 missing，
     // 固定单击一次 = 什么都没发生，于是后面 12 轮都在"找不到页签"——假红）。故展开也进循环按
     // 状态重试（幂等：已展开时按钮变 Collapse right sidebar，不再点）。
+    // 按钮钩子优先用 `data-sidebar-right-expand`：aria-label 随界面语言变（2026-11-02 实测
+    // zh 界面只有「打开右侧边栏」，旧实现只认英文 → 右栏收起时探针假红）。
     let expanded = false;
     for (let i = 0; i < 12 && !expanded; i++) {
       expanded = await evaluate(`(() => {
         if (document.querySelector('[data-sidebar-right-open]') !== null) return true;
-        const b = document.querySelector('[aria-label="Open right sidebar"]');
-        if (b === null) return false;
+        const labelled = [...document.querySelectorAll('button')].find((b) =>
+          /^(Open|打开).*(right sidebar|右侧边栏)$/i.test((b.getAttribute('aria-label') ?? '').trim()));
+        const b = document.querySelector('[data-sidebar-right-expand]') ?? labelled;
+        if (b === null || b === undefined) return false;
         b.click();
         return false
       })()`) === true;
