@@ -14,18 +14,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import { methodLibraryCommandText } from '../lib/method-library-operation.ts'
 import type { MethodLibraryCoachEvent } from '../lib/method-library-events.ts'
-import { methodLibraryEntryHash } from '../lib/method-library-hash.ts'
 import type { SourcePreview } from '../lib/method-library-source.ts'
 import type { MethodLibraryReadResult } from '../lib/method-library-read.ts'
-import { expectedMethodLibrarySnapshot, methodLibraryMatchesSnapshot, methodLibrarySettlement, methodLibrarySnapshot, shouldStartFreshDraftContext } from '../lib/method-library-operation-state.ts'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import {
   SECTION_LABELS,
-  foldLibrary,
-  renderLibraryEntry,
   summaryOfEntry,
   type LibraryEntry,
 } from '../lib/library-fold.ts'
@@ -38,10 +33,10 @@ import { ColumnHandle } from './method-library/ColumnHandle.tsx'
 import { useLibraryData } from './method-library/useLibraryData.ts'
 import { useRunSourcePicker } from './method-library/useRunSourcePicker.ts'
 import { useDraftState } from './method-library/useDraftState.ts'
+import { useOperationQueue, useOperationQueueState } from './method-library/useOperationQueue.ts'
 import {
-  LIBRARY_PATH, builtinLibraryEntry, operationMetadataMatches,
-  type MethodLibraryOperationRequest, type OperationOutcome, type PendingMethodOperation,
-  type Receipt,
+  LIBRARY_PATH, builtinLibraryEntry,
+  type MethodLibraryOperationRequest,
 } from './method-library/model.ts'
 
 export interface MethodLibraryInjected {
@@ -84,13 +79,16 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   } = useRunSourcePicker({
     sessionId, t: props.t, listDir: props.listDir, readPreview: props.readPreview, readLibrary: props.readLibrary,
   })
+  // 写操作队列的状态面必须先于 useDraftState 创建：草稿 hook 借用这些 ref/setter 判忙与落回执。
+  const {
+    pendingOperationRef, queuedOperationRef, queuedOperationTimeoutRef,
+    operationUnknown, setOperationUnknown, operationUnknownRef,
+    receipt, setReceipt, sending, setSending, pendingDelete, setPendingDelete,
+  } = useOperationQueueState()
   const [coachId, setCoachId] = useState<SessionId | null>(null)
   const [selectedBuiltinSource, setSelectedBuiltinSource] = useState<LibraryEntry | null>(null)
   const [narrowPane, setNarrowPane] = useState(false)
   const [libraryOpen, setLibraryOpen] = useState(false)
-  const pendingOperationRef = useRef<PendingMethodOperation | null>(null)
-  const queuedOperationRef = useRef<MethodLibraryOperationRequest | null>(null)
-  const queuedOperationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [coachReady, setCoachReady] = useState(false)
   const coachReadyRef = useRef(false)
   const coachIdRef = useRef<SessionId | null>(coachId)
@@ -119,11 +117,6 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setCoachVisible(false)
     setReceipt({ ok: false, detail: props.t('operationFailed', { detail: String(cause) }) })
   }, [props.t])
-  const [operationUnknown, setOperationUnknown] = useState(false)
-  const operationUnknownRef = useRef(false)
-  const [receipt, setReceipt] = useState<Receipt | null>(null)
-  const [sending, setSending] = useState(false)
-  const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const [leftWidth, setLeftWidth] = useState(270)
   const {
     mode, setMode, modeRef, workbenchStage, setWorkbenchStage,
@@ -145,6 +138,19 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     pendingOperationRef, queuedOperationRef,
     coachIdRef, setCoachId, coachReadyRef, setCoachReady, setCoachVisible, activeTurnRef,
   })
+  const {
+    settleOperation, runOperation, save, remove, setDefault, clearDefault, refresh,
+  } = useOperationQueue({
+    sessionId, t: props.t, sendCoach: props.sendCoach, readLibrary: props.readLibrary,
+    text, loadState, setLoadState, setLoadError, applyLibraryRead, load,
+    mode, draft, setMode, setDraft, setSelectedName,
+    modeRef, draftRef, activeDraftKeyRef, setActiveDraftKey, releaseCoachIfIdle,
+    coachIdRef, setCoachId, coachReadyRef, setCoachReady, setCoachVisible,
+    coachRetryRef, setCoachEpoch,
+    pendingOperationRef, queuedOperationRef, queuedOperationTimeoutRef,
+    operationUnknownRef, setOperationUnknown, setReceipt, setSending, setPendingDelete,
+  })
+  runOperationRef.current = runOperation
   coachIdRef.current = coachId
   coachReadyRef.current = coachReady
   const canSaveDraft = draft !== null
@@ -202,308 +208,6 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
       if (pendingOperationRef.current !== null) clearTimeout(pendingOperationRef.current.timeout)
     }
   }, [sessionId])
-
-
-  const markOperationUnknown = (operation: PendingMethodOperation): void => {
-    if (pendingOperationRef.current !== operation) return
-    clearTimeout(operation.timeout)
-    operationUnknownRef.current = true
-    setOperationUnknown(true)
-    setSending(false)
-    setReceipt({ ok: false, detail: props.t('operationUnknown') })
-  }
-
-  const settleOperation = async (operation: PendingMethodOperation, outcome: OperationOutcome): Promise<void> => {
-    if (pendingOperationRef.current !== operation) return
-    let current: MethodLibraryReadResult
-    try {
-      current = await props.readLibrary(operation.sourceSessionId, LIBRARY_PATH, new AbortController().signal)
-    } catch (cause) {
-      markOperationUnknown(operation)
-      setLoadError(String(cause))
-      return
-    }
-    if (pendingOperationRef.current !== operation) return
-    if (current.kind === 'error') {
-      if (sessionId === operation.sourceSessionId) applyLibraryRead(current)
-      markOperationUnknown(operation)
-      return
-    }
-    const currentText = current.kind === 'ok' ? current.text : null
-    if (sessionId === operation.sourceSessionId) applyLibraryRead(current)
-    const reached = methodLibraryMatchesSnapshot(currentText, operation.expected)
-    const unchanged = JSON.stringify(methodLibrarySnapshot(currentText)) === JSON.stringify(methodLibrarySnapshot(operation.priorText))
-    const metadataMatches = outcome.kind === 'tool-result' && operationMetadataMatches(operation, outcome.result)
-    const settlement = methodLibrarySettlement({
-      outcome: outcome.kind === 'tool-result' ? outcome.failed ? 'tool-error' : 'tool-success' : outcome.kind,
-      targetReached: reached,
-      unchanged,
-      metadataMatches,
-      callIdObserved: operation.callId !== undefined,
-    })
-    if (settlement === 'unknown') {
-      clearTimeout(operation.timeout)
-      operationUnknownRef.current = true
-      setOperationUnknown(true)
-      setSending(false)
-      setReceipt({ ok: false, detail: (outcome.kind === 'turn-end' || outcome.kind === 'refresh') && reached
-        ? props.t('operationTargetMatchesUnknown')
-        : props.t('operationUnknown') })
-      return
-    }
-    if (settlement === 'verified') {
-      clearTimeout(operation.timeout)
-      pendingOperationRef.current = null
-      operationUnknownRef.current = false
-      if (sessionId !== operation.sourceSessionId) return
-      setOperationUnknown(false)
-      setSending(false)
-      releaseCoachIfIdle()
-      if (operation.action === 'remove') {
-        setPendingDelete(null)
-        setSelectedName(null)
-        setMode('read')
-        setDraft(null)
-        releaseCoachIfIdle()
-        setReceipt({ ok: true, detail: props.t('removed', { name: operation.name ?? '' }) })
-      } else if (operation.action === 'save' || operation.action === 'save-and-set-default') {
-        setMode('read')
-        setSelectedName(operation.name ?? null)
-        setDraft(null)
-        releaseCoachIfIdle()
-        setReceipt({
-          ok: true,
-          detail: operation.action === 'save-and-set-default'
-            ? props.t('defaultSet', { name: operation.name ?? '' })
-            : props.t('saved', { name: operation.name ?? '' }),
-        })
-      } else if (operation.action === 'set-default') {
-        setReceipt({ ok: true, detail: props.t('defaultSet', { name: operation.name ?? '' }) })
-      } else {
-        setReceipt({ ok: true, detail: props.t('defaultCleared') })
-      }
-      return
-    }
-    if (settlement === 'rejected') {
-      clearTimeout(operation.timeout)
-      pendingOperationRef.current = null
-      operationUnknownRef.current = false
-      if (sessionId !== operation.sourceSessionId) return
-      setOperationUnknown(false)
-      setSending(false)
-      releaseCoachIfIdle()
-      setReceipt({ ok: false, detail: props.t('noVerifiedChange') })
-      return
-    }
-    markOperationUnknown(operation)
-  }
-
-  const runOperation = async (input: MethodLibraryOperationRequest, resume = false): Promise<void> => {
-    if (pendingOperationRef.current !== null || operationUnknownRef.current || queuedOperationRef.current !== null) {
-      setReceipt({ ok: false, detail: props.t('operationUnknown') })
-      return
-    }
-    let draftKey = activeDraftKeyRef.current
-    if (shouldStartFreshDraftContext({ mode: modeRef.current, draftKey, resume })) {
-      draftKey = crypto.randomUUID()
-      activeDraftKeyRef.current = draftKey
-      setActiveDraftKey(draftKey)
-      coachIdRef.current = null
-      setCoachId(null)
-      coachReadyRef.current = false
-      setCoachReady(false)
-    }
-    const activeCoachId = coachIdRef.current
-    if (resume && (activeCoachId === null || !coachReadyRef.current)) {
-      setSending(false)
-      setReceipt({ ok: false, detail: props.t('operationUnknown') })
-      return
-    }
-    if (activeCoachId === null || !coachReadyRef.current) {
-      queuedOperationRef.current = input
-      if (coachRetryRef.current) {
-        coachRetryRef.current = false
-        setCoachEpoch((epoch) => epoch + 1)
-      }
-      setCoachVisible(true)
-      setSending(true)
-      setReceipt({ ok: true, detail: props.t('operationSent') })
-      queuedOperationTimeoutRef.current = setTimeout(() => {
-        if (queuedOperationRef.current !== input) return
-        queuedOperationRef.current = null
-        setSending(false)
-        setCoachVisible(false)
-        setReceipt({ ok: false, detail: props.t('editorUnavailable') })
-      }, 30000)
-      return
-    }
-    if (sessionId === undefined) return
-    let baseline: string | null
-    try {
-      const read = await props.readLibrary(sessionId, LIBRARY_PATH, new AbortController().signal)
-      if (read.kind === 'error') {
-        applyLibraryRead(read)
-        setReceipt({ ok: false, detail: props.t('loadBeforeWrite') })
-        return
-      }
-      baseline = read.kind === 'ok' ? read.text : null
-      applyLibraryRead(read)
-    } catch {
-      setReceipt({ ok: false, detail: props.t('loadBeforeWrite') })
-      return
-    }
-    const targetMatches = input.name === undefined ? [] : foldLibrary(baseline).filter((entry) => entry.name === input.name)
-    if (targetMatches.length > 1) {
-      setReceipt({ ok: false, detail: props.t('duplicateNames') })
-      return
-    }
-    if (input.action === 'save' || input.action === 'save-and-set-default') {
-      const currentDraftName = draftRef.current?.currentName
-      const renaming = currentDraftName !== undefined && currentDraftName !== input.name
-      if (targetMatches.length === 1 && (modeRef.current === 'new' || renaming) && input.confirmOverwrite !== true) {
-        setReceipt({ ok: false, detail: props.t('overwriteNotConfirmed') })
-        return
-      }
-    }
-    const expected = expectedMethodLibrarySnapshot({
-      before: baseline,
-      action: input.action,
-      ...(input.name === undefined ? {} : { name: input.name }),
-      ...(input.entryText === undefined ? {} : { entryText: input.entryText }),
-    })
-    if (expected === null) {
-      setReceipt({ ok: false, detail: props.t('operationTargetChanged') })
-      return
-    }
-    const operationId = crypto.randomUUID()
-    const requestId = crypto.randomUUID()
-    let payloadHash: string | undefined
-    try {
-      payloadHash = input.entryText === undefined ? undefined : await methodLibraryEntryHash(input.entryText)
-    } catch (cause) {
-      setReceipt({ ok: false, detail: props.t('operationFailed', { detail: String(cause) }) })
-      return
-    }
-    const command = {
-      operationId,
-      action: input.action,
-      ...(input.name === undefined ? {} : { name: input.name }),
-      ...(payloadHash === undefined ? {} : { payloadHash }),
-    }
-    const marker = methodLibraryCommandText(command)
-    const envelope = `${marker}\n${input.instruction}`
-    const operation = {
-      ...command,
-      sourceSessionId: sessionId,
-      requestId,
-      turn: null,
-      expected,
-      priorText: baseline,
-      timeout: setTimeout(() => { markOperationUnknown(operation) }, 120000),
-    } satisfies PendingMethodOperation
-    pendingOperationRef.current = operation
-    operationUnknownRef.current = false
-    setOperationUnknown(false)
-    setSending(true)
-    setReceipt({ ok: true, detail: props.t('operationSent') })
-    const sent = await props.sendCoach(activeCoachId, envelope, requestId)
-    if (sent.ok) return
-    if (sent.uncertain === true) {
-      markOperationUnknown(operation)
-      return
-    }
-    clearTimeout(operation.timeout)
-    pendingOperationRef.current = null
-    setSending(false)
-    releaseCoachIfIdle()
-    setReceipt({ ok: false, detail: props.t('operationFailed', { detail: sent.detail ?? 'prompt rejected' }) })
-  }
-
-  runOperationRef.current = runOperation
-
-  const save = async (setDefault: boolean): Promise<void> => {
-    if (draft === null) return
-    const name = draft.name.trim()
-    if (name === '') {
-      setReceipt({ ok: false, detail: '名称不能为空' })
-      return
-    }
-    const missing = SECTION_LABELS.filter(({ key }) => {
-      const value = draft.sections[key]
-      return value === null || value.trim() === ''
-    })
-    if (missing.length > 0) {
-      setReceipt({ ok: false, detail: `还缺字段：${missing.map(({ label }) => label).join('、')}——填完再保存` })
-      return
-    }
-    if (loadState !== 'ok' && loadState !== 'absent') {
-      setReceipt({ ok: false, detail: props.t('loadBeforeWrite') })
-      return
-    }
-    const existingEntries = foldLibrary(text).filter((entry) => entry.name === name)
-    if (existingEntries.length > 1) {
-      setReceipt({ ok: false, detail: props.t('duplicateNames') })
-      return
-    }
-    const renaming = mode === 'edit' && draft.currentName !== undefined && draft.currentName !== name
-    if (existingEntries.length === 1 && (mode === 'new' || renaming)) {
-      const confirmed = typeof window === 'undefined'
-        ? true
-        : window.confirm(`库里已有同名方法「${name}」，保存会覆盖它。继续？`)
-      if (!confirmed) {
-        setReceipt({ ok: false, detail: `未保存：库里已有「${name}」` })
-        return
-      }
-    }
-    const entryText = [
-      renderLibraryEntry({ name, sections: draft.sections, provenance: draft.provenance }),
-      ...(draft.legacyText !== null && draft.legacyText.trim() !== '' ? [draft.legacyText.trim()] : []),
-    ].join('\n')
-    const saveAction = setDefault ? 'save-and-set-default' : 'save'
-    const label = mode === 'new' ? '新建' : `更新（原「${draft.currentName ?? name}」）`
-    await runOperation({
-      action: saveAction,
-      name,
-      entryText,
-      confirmOverwrite: existingEntries.length === 1 && (mode === 'new' || renaming),
-      instruction: `保存方法「${name}」到工作区 method-library.md。动作：${label}。必须把 operationId 和 operationHash 原样传给 method_library_upsert，defaultAction=${setDefault ? 'set' : 'preserve'}。entry 必须与下方 method-draft 文本逐字一致。写后停止，不要继续其它工具。\n\`\`\`method-draft\n${entryText}\n\`\`\``,
-    })
-  }
-
-  const remove = async (entry: LibraryEntry): Promise<void> => {
-    await runOperation({
-      action: 'remove',
-      name: entry.name,
-      instruction: `从工作区 method-library.md 删除方法「${entry.name}」。必须调用 method_library_remove，传入 operationId 与名称；写后停止。`,
-    })
-  }
-
-  const setDefault = async (entry: LibraryEntry): Promise<void> => {
-    await runOperation({
-      action: 'set-default',
-      name: entry.name,
-      instruction: `将「${entry.name}」设为唯一默认偏好。调用 method_library_set_default，action=set，传入 operationId 和名称；写后停止。`,
-    })
-  }
-
-  const clearDefault = async (): Promise<void> => {
-    await runOperation({
-      action: 'clear-default',
-      instruction: '清除 method-library.md 中所有默认偏好标记。调用 method_library_set_default，action=clear，只传 operationId，不传 name；写后停止。',
-    })
-  }
-
-  const refresh = (): void => {
-    const controller = new AbortController()
-    setLoadState('loading')
-    void (async () => {
-      const result = await load(controller.signal)
-      const operation = pendingOperationRef.current
-      if (operation !== null && operationUnknownRef.current && result !== null) {
-        await settleOperation(operation, { kind: 'refresh' })
-      }
-    })()
-  }
 
   // 方法编辑首问的上下文：库快照 + 当前草稿 + 内置参考（只读）。只随第一条消息发一次。
   const librarySnapshot = text === null ? '（未加载）' : text.trim() === '' ? '（空）' : text.trim()
