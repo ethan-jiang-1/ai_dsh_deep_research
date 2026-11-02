@@ -46,7 +46,7 @@
 // 渐进面读**会话 journal 工具调用路径绑定的 bundle**（bundle-bind 谓词），D28 三操作桶
 // 都认（位置只用于发现，状态从内容读）。断言的磁盘认证源 = 磁盘侧扫出的最新绑定会话（跑过 run
 // 即有），其 bundle 的 evidence 计数/交付态/问题行以盘上真值对账——不再自造探针 bundle。
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { freemem, loadavg } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -98,6 +98,37 @@ if (!existsSync(bin)) {
   if (!va.ok) {
     console.error(`boot 前自检红：vendor 构建产物缺失（${va.missing.join('、')}）`)
     console.error(ARTIFACT_REMEDY)
+    process.exit(2)
+  }
+  // 构建新鲜度（2026-11-03 七维卫生审计 D6）：`lib/client.js` 必须晚于 src/client 与 src/lib
+  // 的全部源文件。否则 smoke 评的是旧产物——改了源码没 build，红/绿都不描述工作树
+  // （本轮实跑踩过：src 已改、bundle 还是 00:35 的）。mtime 是保守代理：checkout 后
+  // 源文件变新而无实质改动时宁可 exit 2（未跑 ≠ 通过），也不拿旧产物冒充证据。
+  const PACK = join(ROOT, 'packages', 'deep-research-pack')
+  const bundle = join(PACK, 'lib', 'client.js')
+  if (!existsSync(bundle)) {
+    console.error('boot 前自检红：pack 的 lib/client.js 不在——先构建：cd packages/deep-research-pack && pnpm build')
+    process.exit(2)
+  }
+  const newest = (dir) => {
+    let latest = 0
+    const walk = (d) => {
+      for (const ent of readdirSync(d, { withFileTypes: true })) {
+        const p = join(d, ent.name)
+        if (ent.isDirectory()) walk(p)
+        else if (/\.(ts|tsx)$/.test(ent.name)) {
+          const m = statSync(p).mtimeMs
+          if (m > latest) latest = m
+        }
+      }
+    }
+    walk(dir)
+    return latest
+  }
+  const srcNewest = Math.max(newest(join(PACK, 'src', 'client')), newest(join(PACK, 'src', 'lib')))
+  const builtAt = statSync(bundle).mtimeMs
+  if (srcNewest > builtAt) {
+    console.error(`boot 前自检红：lib/client.js（${new Date(builtAt).toISOString()}）旧于 src/client|src/lib（${new Date(srcNewest).toISOString()}）——先构建：cd packages/deep-research-pack && pnpm build`)
     process.exit(2)
   }
 }
@@ -212,9 +243,13 @@ async function boot() {
 
 const failures = []
 const skipped = []
+let lastStep = ''
+// 失败项带 info（期望/实际），否则现场只有标签——2026-11-03 审计 D6-2：
+// "研究配置页签：目标会话可开"这种标签，光看 label 无法知道是哪个选择器/哪段文本没中。
 const step = (ok, label, info = '') => {
+  lastStep = label
   console.log(`  ${ok ? 'PASS' : 'FAIL'} ${label}${info ? `（${info}）` : ''}`)
-  if (!ok) failures.push(label)
+  if (!ok) failures.push(info ? `${label}（${info}）` : label)
 }
 
 // ── 磁盘侧：扫绑定会话（渐进面真数据源）与未绑定会话（不显示别家数据的负样本）──
@@ -223,7 +258,8 @@ const sessionsRoot = join(home, 'sessions')
 const sessionGroup = researchWorkspaceGroup(sessionsRoot)
 let unboundSession = null
 if (sessionGroup === undefined) {
-  console.error('client-load-smoke: dev home sessions 里没有 research-workspace 会话组——先 source dev/env.sh 并跑一场 run')
+  console.error(`client-load-smoke: ${sessionsRoot} 下没有含 "research-workspace" 的会话组（DSH_HOME=${process.env.DSH_HOME ?? '未设置'}；解析出的 home=${home}）`
+    + '——先 source dev/env.sh 并跑一场 run；若 DSH_HOME 指向别处，先 unset 或重新 source')
   process.exit(2)
 }
 const { boundSession: initialBoundSession, unboundCandidates, deliveredSessions, fileFaceOf } = prepareClientLoadReference({ root: ROOT, sessionsRoot, sessionGroup })
@@ -255,6 +291,14 @@ try {
 let page
 let browser = null
 let consoleErrors = []
+// HTTP 4xx/5xx 与请求失败带 URL/状态（D6-3）：console 的 "Failed to load resource: 404"
+// 不带资源名，25 条同形错无法归因到插件还是上游静态资源。
+let httpFailures = []
+const noteHttpFailure = (entry) => {
+  const key = `${entry.status} ${entry.url}`
+  if (httpFailures.some((x) => `${x.status} ${x.url}` === key)) return
+  if (httpFailures.length < 50) httpFailures.push(entry)
+}
 let artifactsSaved = null
 // 失败现场（审计 P0-4）：截图 + DOM + console + meta。agent 的"看见页面"最小证据；
 // 成功不写，失败/异常写 timestamped 目录，路径打印到 stderr。
@@ -274,11 +318,18 @@ const saveArtifacts = async (reason, extra = {}) => {
     // 实测过一次 load 32 / swap 99% 时 web 进程被 OOM 掉，报出来却是断言红。
     const host = { load1: Number(loadavg()[0].toFixed(2)), freeMB: Math.round(freemem() / 1024 / 1024) }
     writeFileSync(join(dir, 'meta.json'), JSON.stringify({
-      reason, at: new Date().toISOString(), failures, skipped, extra, consoleErrors, disconnects, host,
+      reason, at: new Date().toISOString(), failures, skipped,
+      // 归因切片（D6-2/3）：失败时的页面地址、最后一个断言、绑定会话/run、HTTP 失败清单。
+      url: page.url(),
+      lastStep,
+      boundSession: boundSession?.sessionId ?? null,
+      boundSlug: boundSession?.slug ?? null,
+      httpFailures,
+      extra, consoleErrors, disconnects, host,
     }, null, 2))
     artifactsSaved = dir
     console.error(`client-load-smoke: 失败现场 ${dir}（page.png / page.html / console.txt / meta.json；`
-      + `浏览器断连 ${disconnects} 次、主机 load ${host.load1} / free ${host.freeMB}MB——先分流"流抖动/主机不健康"与"产品红"）`)
+      + `浏览器断连 ${disconnects} 次、主机 load ${host.load1} / free ${host.freeMB}MB、HTTP 失败 ${httpFailures.length} 条——先分流"流抖动/主机不健康"与"产品红"）`)
     return dir
   } catch (error) {
     console.error(`client-load-smoke: 现场保存失败：${error.message}`)
@@ -362,8 +413,15 @@ async function setupProbeSession() {
   browser = await launchChromium(chromium)
   page = await browser.newPage()
   consoleErrors = []
+  httpFailures = []
   const urls = []
-  page.on('response', (r) => urls.push(r.url()))
+  page.on('response', (r) => {
+    urls.push(r.url())
+    if (r.status() >= 400) noteHttpFailure({ status: r.status(), url: r.url(), step: lastStep })
+  })
+  page.on('requestfailed', (req) => {
+    noteHttpFailure({ status: 'failed', url: req.url(), error: req.failure()?.errorText ?? null, step: lastStep })
+  })
   page.on('console', (msg) => {
     if (msg.type() === 'error') consoleErrors.push(msg.text())
   })

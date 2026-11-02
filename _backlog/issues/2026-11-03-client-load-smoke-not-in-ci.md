@@ -22,6 +22,14 @@ run-accept-smoke / doctor / pack / release 等，全是 keyless 非浏览器或�
   带历史会话（缺 = exit 2）；CI 没有这种 home。
 - `snapshot-replay-smoke` 能回放录制会话，但场景集是角色组装面，不含已交付 run bundle。
 - CI 已有 chromium 可用的先例？未见；deploy job 不装浏览器。
+- **2026-11-03 实测可行性数据**：seed 体积很小——绑定会话 zstd 423K + 已交付 bundle 192K
+  ≈ 615K，可入库为 `tests/fixtures/client-load-home/`。但三处仍缺：①`bootWeb` 从 vendor
+  源码起，CI 需要先跑 `dev/vendor-build.sh`（deploy job 目前只 build pack）；②chromium 需
+  `playwright install`（仓库无直接 dep，`scripts/lib/playwright.mjs` 从 .pnpm store 找）；
+  ③smoke 目前只认 `DSH_HOME`，无 `--home/--fixture` 参数——seed 注入要加显式参数
+  （并同时给 `DSH_RUN_WORKSPACE`/bundle 根）。
+- 已单独修掉一类"假反馈"：smoke 现在做**构建新鲜度**自检（`lib/client.js` 旧于 src 即
+  exit 2，提示 `pnpm build`），不会再拿旧产物评分。
 
 **未决问题：**
 1. 用"录制一份最小 dev home（会话 + 已交付 bundle）进 fixtures"喂 client-load，还是让
