@@ -5,7 +5,6 @@
 ## 活跃清单
 
 - [2026-11-02 发布面对齐 26_harness-release](2026-11-02-release-surface-26-alignment.md) — 推敲中：术语/六轴/README/手册/数据卡/陈旧事实/门禁收口；AC1–AC12 与证据随 Phase 2–5 更新。
-- [2026-11-02 产品面收窄](2026-11-02-product-surface-narrowing.md) — 等人拍板：去掉主区 Trajectory 与右栏 New Terminal（产品用不到）；已落地并在真 Web 复核，待用户目视确认。
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
@@ -13,6 +12,7 @@
 
 研究证据（已归档）= [research/plugin-as-product](../_archived/research/plugin-as-product/README.md)；本轮新增 = [plugin-as-product-v2](../_archived/research/plugin-as-product-v2/README.md)、[plugin-lifecycle](../_archived/research/plugin-lifecycle/README.md)；落地顺序 = [landing-plan](../_archived/research/plugin-as-product/2026-11-01-landing-plan.md)（S0 决定 → S1 骨架 → S2 首屏 → S3 文档 → S4 硬化）。
 
+- [2026-11-02 产品面收窄](../_archived/settled_issues/2026-11-02-product-surface-narrowing.md) — none：主区 Trajectory 与右栏 New Terminal 在 `deep-research` profile 不挂载；判据 = 组合层断言（零跳过 + 白名单），红证 = 上游改名即红；载体 = [design/40 §2.0](../../docs/design/40-research-cockpit.md#cockpit-surface)。
 - [2026-11-02 dev 通道与产品路径对齐](../_archived/settled_issues/2026-11-02-dev-product-path-parity.md) — implemented：同 profile 名/安装源/版本门、profile 用户层零写入、`dev-parity` 门禁 + parity 表；AC1–AC3 2026-11-02 复跑绿；[Note](../../notes/implemented/2026-11-02-dev-product-path-parity.md)。
 - [2026-11-01 插件即产品 v2](../_archived/settled_issues/2026-11-01-plugin-as-product-v2.md) — implemented：自有 `deep-research` profile + CLI 引导 + Plugins 页装包 + 启动期工作区/内容进包；`product-boot-smoke` 2026-11-02 GREEN；残余 = 公网 npm 发布；[Note](../../notes/implemented/2026-11-01-plugin-as-product-v2.md)。
 - [2026-11-01 插件生命周期合规](../_archived/settled_issues/2026-11-01-plugin-lifecycle-conformance.md) — implemented：`engines.dsh`/locale/icon/市场索引/四门禁/文档取向；本地 registry 端到端 + `lifecycle-smoke`；残余 = 公网 npm 发布；[Note](../../notes/implemented/2026-11-01-plugin-lifecycle-conformance.md)。

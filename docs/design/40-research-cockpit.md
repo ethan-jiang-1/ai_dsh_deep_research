@@ -26,6 +26,26 @@
 
 ## 2. 构成（件 → 文件 → 职责）
 
+<a id="cockpit-surface"></a>
+### 2.0 出厂面契约（哪些出厂入口在、哪些不在）
+
+研究产品的界面是**一张白名单**，不是「DSH 全量面 + 几个页签」：研究用不到的出厂入口在
+`deep-research` profile 里不挂载。取舍结果与边界固定如下，改面先改这张表。
+
+| 面 | 出厂行 | 状态 | 为什么 |
+|---|---|---|---|
+| 主区 Trajectory 页签 | `ui-trajectory` | 关 | 它展示 harness 内部事件流，不是研究证据；证据在 `drt_<slug>/` 的 plan / findings / final |
+| 右栏 New Terminal | `ui-sidebar-terminal` | 关 | 研究产品的逃生口不是 shell；工作区是文件面的 |
+| 主区 对话 | `ui-chat` | 留 | 研究的入口与出口 |
+| 右栏 文件树 | `ui-sidebar-files` | 留 | 终稿页签读 `workspaceFiles`；砍掉等于让人看不见盘上真东西 |
+| 右栏 浏览器 | `ui-sidebar-browser` | 上游关（非 desktop） | DSH 自己就按 profile 关面，本包用同一机制 |
+
+关闭用 Loader 的第一类语义（后置 bundle 层按 id `disabled: true`），不是 CSS 隐藏或改名——隐藏的行
+仍在挂载，快捷键、菜单与后续版本仍可能暴露。机器判据 =
+[bundle-composition](../../tests/contracts/bundle-composition.test.mjs)：按 profile 层序组合出真实 entry 树，
+断言零跳过（任何 `- id:` 落空即红：上游改名会让关闭行静默失效）与上表两侧。像素面（页签真的只剩
+两个、右栏真的没有终端入口）由真 Web 证据承担，两者不合一。
+
 | 件 | 文件 | 一句话 | 详情 |
 |---|---|---|---|
 | 研究状态页签 | ResearchStatusTab.tsx | 右栏页签，自上而下八区（逐区职责见下表） | [§2.1](#cockpit-1) |

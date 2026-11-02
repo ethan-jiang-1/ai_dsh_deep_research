@@ -4,6 +4,7 @@
 
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-11-02-product-surface-narrowing](2026-11-02-product-surface-narrowing.md) | 产品面收窄：主区 Trajectory 与右栏 New Terminal 在 `deep-research` profile 不挂载（bundle 层按 id `disabled: true`）；判据从「读自己的 YAML」换成组合层断言（零跳过 + 白名单两侧），红证 = 上游改名即红；去向 `none` — [design/40 §2.0](../../../docs/design/40-research-cockpit.md#cockpit-surface) + [bundle-composition](../../../tests/contracts/bundle-composition.test.mjs) | 2026-11-03 |
 | [2026-11-02-dev-product-path-parity](2026-11-02-dev-product-path-parity.md) | dev 通道与产品路径对齐：同 profile 名/安装源/版本门、profile 用户层零写入（MCP 走 `--patch` 覆盖层）、`dev-parity` 门禁 + parity 表；AC1–AC3 复跑绿；[Note](../../../notes/implemented/2026-11-02-dev-product-path-parity.md) | 2026-11-02 |
 | [2026-11-01-plugin-as-product-v2](2026-11-01-plugin-as-product-v2.md) | 插件即产品 v2：自有 `deep-research` profile + CLI 引导 + Plugins 页装包 + 启动期工作区/内容进包；`product-boot-smoke` GREEN；残余 = 公网 npm 发布；[Note](../../../notes/implemented/2026-11-01-plugin-as-product-v2.md) | 2026-11-02 |
 | [2026-11-01-plugin-lifecycle-conformance](2026-11-01-plugin-lifecycle-conformance.md) | 插件生命周期合规：`engines.dsh`/locale/icon/市场索引/四门禁/文档；本地 registry 端到端 + `lifecycle-smoke`；残余 = 公网 npm 发布；[Note](../../../notes/implemented/2026-11-01-plugin-lifecycle-conformance.md) | 2026-11-02 |

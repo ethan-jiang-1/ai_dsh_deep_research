@@ -1,11 +1,12 @@
 ---
-status: 等人拍板
+status: 已结
 opened: 2026-11-02
 ---
 
 # 推敲：产品面收窄——去掉主区 Trajectory 与右栏 New Terminal
 
-> 立卡：2026-11-02 ｜ 状态：等人拍板（技术面已落地，待你目视确认） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-02 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
+> 去向：none — 载体 = [design/40 §2.0 出厂面契约](../../../docs/design/40-research-cockpit.md#cockpit-surface) + [bundle-composition](../../../tests/contracts/bundle-composition.test.mjs)；业务验收：用户（2026-11-03 指示按推荐落地）。
 
 **问题与期望结果：** 2026-11-02 用户在实际打开产品后反馈：主区 tab 的 **Trajectory** 不需要，右栏的
 **New Terminal** 也不需要——产品用不到这两处 DSH 出厂能力。期望：产品界面只留研究需要的面
@@ -24,7 +25,8 @@ opened: 2026-11-02
 
 **未决问题：** 无（产品取舍已由用户拍板）。
 
-**下一步：** 你目视确认两个入口确实消失；确认后本卡按流程归档。
+**下一步：** 已结。载体与判据见状态行 `去向`：面契约住 design/40 §2.0，机器判据住
+`bundle-composition`（组合层），本卡留问题与取舍记录。
 
 ## 已知与未决
 
@@ -35,8 +37,18 @@ opened: 2026-11-02
 - 真 Web（本机 dev 通道，`locale=zh-CN`）：打开既有研究会话后主区 tabs = `["对话","方法库"]`；
   全页文本不含「轨迹」/「终端」/`Trajectory`/`Terminal`（2026-11-02 实测）。
 - `_dist/dsh-deep-research-pack-0.3.0.tgz` 内的 `package/cordis.patch.yml` 含两条关闭行（tar 复核）。
-- 回归：`tests/contracts/product-invariants.test.mjs` 新增 I5「产品面收窄」，删除关闭行即红
-  （已跑红→绿）。
+- 回归（2026-11-03 换判据）：原 I5 读我们自己的 YAML —— 只能证明我们写了、证明不了 DSH 认
+  （Loader 对落空的 patch 是警告后跳过）。已换成组合层断言
+  [bundle-composition](../../../tests/contracts/bundle-composition.test.mjs)：用 Loader 自己的
+  `applyEntryPatches`/`entryListSchema` 按 profile 层序组合 base → web-app → pack（含 presets），
+  断言 ① 零跳过 ② 该藏的 disabled、该留的未 disabled。
+  - 绿：组合树 192 行、0 条跳过，两行 `disabled: true`（2026-11-03）。
+  - 红：把 vendor 里 `ui-trajectory` 的 id 改名后重跑 → `patch: entry %C not found ui-trajectory`，
+    ① ② 同时红，还原即绿（2026-11-03 实录，配方 = 文件头注）。
+  - 边界：树层证明挂载状态；像素面由真 Web 证据承担，两者不合一。
+- `dsh --profile deep-research --dump-config`（2026-11-03 复跑）：两行均
+  `# == @deepseek-ai/dsh-web-app, patched by dsh-deep-research-pack` 且 `disabled: true`。
+- `pnpm verify` 全绿 / `pnpm test` 970 → 971 全绿（新增组合层两条断言，2026-11-03）。
 
 **未决（技术，不是方向）**
 
@@ -61,10 +73,11 @@ opened: 2026-11-02
 2. 真 Web 会话语义：主区 tabs = 对话 / 方法库（无 Trajectory），右栏无 New Terminal 入口；
    证据 = 浏览器断言或 `run-driver up` 的浏览器面绿。
 3. `_dist/dsh-deep-research-pack-0.3.0.tgz` 内的 `cordis.patch.yml` 与源码同源（含两条关闭行）。
-4. 回归：`product-invariants` 的 I5 在场，删掉任一关闭行即红（红录已跑）；`pnpm verify` / `pnpm test` 绿。
-5. 用户目视确认两处入口消失。
+4. 回归：组合层断言在场（`bundle-composition` 的零跳过 + 白名单两侧），上游改名或删关闭行即红
+   （红录已跑）；`pnpm verify` / `pnpm test` 绿。
+5. 业务验收：用户 2026-11-03 指示按推荐落地（不单列目视步骤；像素证据见上）。
 
 ## 关闭条件
 
-验收标准 1–4 有证据在场，5 由用户拍板；结论去向按 `_backlog/methods/issue-to-note.md` 选
-（本改动属局部 UI 呈现，预计 `none`，卡本身即记录）。
+验收标准 1–5 有证据在场（4 的判据已由组合层断言取代，理由与红录见 §已知）；去向 = `none`
+（局部 UI 呈现，理由住 design/40 §2.0 与组合层断言，本卡留问题与取舍记录）。
