@@ -39,7 +39,18 @@ export const inject: readonly string[] = ['workspaceRegistry']
  * 启动行 body。
  * @param ctx - Host context。
  */
-export async function apply(ctx: Context): Promise<void> {
+export function apply(ctx: Context): void {
+  // 注册是 effect：HMR/dispose 时取消在途的登记/建会话，避免重复 apply 多开一条 Lead 会话。
+  ctx.effect(() => {
+    const controller = new AbortController()
+    void runStartup(ctx, controller.signal)
+    return () => controller.abort()
+  }, 'deep-research-startup: product host startup')
+}
+
+/** 启动动作本体（effect 作用域内；signal 取消后不再产生新副作用）。测试直接驱动本函数。 */
+export async function runStartup(ctx: Context, signal: AbortSignal): Promise<void> {
+  const cancelled = (): boolean => signal.aborted
   const resolved = resolveStartupWorkspace(process.env, { packRoot: PACK_ROOT })
   if (resolved === null) {
     ctx.logger.info('deep-research: 未配置工作区；等待首屏 onboarding 询问')
@@ -55,6 +66,7 @@ export async function apply(ctx: Context): Promise<void> {
     return
   }
   const title = basename(resolved.path) === '' ? 'Deep Research' : `Deep Research — ${basename(resolved.path)}`
+  if (cancelled()) return
   try {
     const workspace = await registry.create(resolved.path, title)
     ctx.logger.info(`deep-research: workspace registered: ${workspace.path}`)
@@ -67,7 +79,7 @@ export async function apply(ctx: Context): Promise<void> {
   // 失败/竞态都不影响产品可用（client 可用首选 blank 或 onboarding 兜底）。
   // 可选服务：用 ctx.get 读取；直接属性访问会触发 Cordis 的 inject 守卫（"without inject"）。
   const sessions = (ctx as unknown as { get(name: string): SessionControllerLike | undefined }).get('sessionController')
-  if (sessions === undefined) return
+  if (sessions === undefined || cancelled()) return
   const previous = readSettings(process.env)
   const savedSessionId = previous.ok ? previous.value.sessionId : undefined
   try {

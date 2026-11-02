@@ -65,3 +65,26 @@ test('ensureProductWorkspace：当前会话不在产品工作区才切换；同�
   await kept.boot.ensureProductWorkspace();
   assert.deepEqual(kept.calls, [], 'cwd 已在产品工作区 → 不切');
 });
+
+test('ensureProductWorkspace：effect teardown（signal abort）后不再启动会话', async () => {
+  const items = [{ workspaceId: 'w1', title: 'Deep Research — proj', path: '/proj', sessionIds: [] }];
+  const calls = [];
+  const controller = new AbortController();
+  // abort 发生在第一个 cancelled() 检查之后（读 saved 时）——只有 startSession 前的第二次检查能拦住。
+  const storage = {
+    getItem: (key) => {
+      if (key === PRODUCT_WORKSPACE_KEY) { controller.abort(); return 'w1'; }
+      if (key === CURRENT_SESSION_KEY) return JSON.stringify('s1');
+      return null;
+    },
+    setItem: () => {},
+  };
+  const boot = createWorkspaceBoot({
+    workspaces: { list: { getSnapshot: () => ({ phase: 'ready', items }) }, create: async () => ({ workspaceId: 'x' }) },
+    sessions: { list: { getSnapshot: () => ({ phase: 'ready', byId: { s1: { cwd: '/other' } } }) } },
+    uiWorkspace: { pickDirectory: async () => null, startSession: (id) => calls.push(id), openSession: () => {} },
+    storage,
+  });
+  await boot.ensureProductWorkspace(controller.signal);
+  assert.deepEqual(calls, [], '已 dispose 的 effect 不应再开会话');
+});

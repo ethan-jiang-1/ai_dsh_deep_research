@@ -63,10 +63,12 @@ export function createWorkspaceBoot({ workspaces, sessions, uiWorkspace, storage
   }
 
   /** 启动时把选择恢复到产品工作区；失败只记日志，不阻断 composer。 */
-  const ensureProductWorkspace = async (): Promise<void> => {
+  const ensureProductWorkspace = async (signal?: AbortSignal): Promise<void> => {
+    const cancelled = (): boolean => signal?.aborted === true
     try {
       const list = await waitReady(workspaces.list)
       await waitReady(sessions.list)
+      if (cancelled()) return
       const saved = storage.getItem(PRODUCT_WORKSPACE_KEY)
       const workspace = pickProductWorkspace(list.items, saved)
       if (workspace === null) return
@@ -75,6 +77,8 @@ export function createWorkspaceBoot({ workspaces, sessions, uiWorkspace, storage
       const rows = sessions.list.getSnapshot()
       const row = current === null ? undefined : rows.byId[current as SessionId]
       if (!needsProductSwitch(row?.cwd, workspace.path)) return
+      // effect teardown（HMR / dispose）后不再启动会话：避免重复 apply 在竞态窗口里多开一条。
+      if (cancelled()) return
       uiWorkspace.startSession(workspace.workspaceId, { agentPreset: 'lead' })
     } catch (error) {
       console.error('[research-startup] 工作区记忆恢复失败', String(error))

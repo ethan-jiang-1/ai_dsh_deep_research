@@ -319,6 +319,12 @@ export function apply(ctx: ClientContext): void {
     // 这是本包唯一一处"替用户打开东西"：出现时机就是交付本身，别处不再自动弹面。
     scoped.effect(() => watchDelivery({ follow, openFinal, mounted: scoped.sidebarRight.mounted }), 'deep-research-pack: final delivery watcher')
 
-    void ensureProductWorkspace()
+    // 启动恢复挂进 effect 生命周期：dispose/HMR 时取消在途动作（signal），
+    // 避免重复 apply 在会话列表就绪前多开一条 Lead 会话（2026-11-03 ⑧ 收口）。
+    scoped.effect(() => {
+      const controller = new AbortController()
+      void ensureProductWorkspace(controller.signal)
+      return () => controller.abort()
+    }, 'deep-research-pack: product workspace boot')
   })
 }

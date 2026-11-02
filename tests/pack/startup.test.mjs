@@ -5,7 +5,7 @@ import assert from 'node:assert/strict'
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
-import { apply } from '../../packages/deep-research-pack/src/startup/index.ts'
+import { runStartup } from '../../packages/deep-research-pack/src/startup/index.ts'
 
 const temp = () => mkdtempSync(join(tmpdir(), 'dr-startup-'))
 const cleanup = (dir) => rmSync(dir, { recursive: true, force: true })
@@ -64,7 +64,7 @@ test('无 env 且无设置：零行为、不调用 registry', async () => {
   const home = temp()
   try {
     const { ctx, calls } = fakeContext()
-    await withEnv({ DSH_HOME: home, DEEP_RESEARCH_WORKSPACE: undefined }, () => apply(ctx))
+    await withEnv({ DSH_HOME: home, DEEP_RESEARCH_WORKSPACE: undefined }, () => runStartup(ctx, new AbortController().signal))
     assert.deepEqual(calls, [])
   } finally { cleanup(home) }
 })
@@ -74,7 +74,7 @@ test('env 在场：登记绝对路径 + 产品标题', async () => {
   const dir = temp()
   try {
     const { ctx, calls } = fakeContext()
-    await withEnv(workspaceEnv(dir, home), () => apply(ctx))
+    await withEnv(workspaceEnv(dir, home), () => runStartup(ctx, new AbortController().signal))
     assert.equal(calls.length, 1)
     assert.equal(calls[0].path, dir)
     assert.equal(calls[0].title, `Deep Research — ${basename(dir)}`)
@@ -88,7 +88,7 @@ test('非目录：只 warn，不登记、不抛', async () => {
     const file = join(dir, 'file.txt')
     writeFileSync(file, 'x')
     const { ctx, calls, logs } = fakeContext()
-    await withEnv(workspaceEnv(file, home), () => apply(ctx))
+    await withEnv(workspaceEnv(file, home), () => runStartup(ctx, new AbortController().signal))
     assert.deepEqual(calls, [])
     assert.ok(logs.some(([, line]) => line.includes('工作区不可用')))
   } finally { cleanup(home); cleanup(dir) }
@@ -99,7 +99,7 @@ test('registry 缺席：只 warn，不抛', async () => {
   const dir = temp()
   try {
     const { ctx, logs } = fakeContext({ withRegistry: false })
-    await withEnv(workspaceEnv(dir, home), () => apply(ctx))
+    await withEnv(workspaceEnv(dir, home), () => runStartup(ctx, new AbortController().signal))
     assert.ok(logs.some(([, line]) => line.includes('workspaceRegistry')))
   } finally { cleanup(home); cleanup(dir) }
 })
@@ -109,7 +109,7 @@ test('sessionController 在场：建 Lead 会话；env 来源不写设置', asyn
   const dir = temp()
   try {
     const { ctx, sessions } = fakeContext({ withSessions: true })
-    await withEnv(workspaceEnv(dir, home), () => apply(ctx))
+    await withEnv(workspaceEnv(dir, home), () => runStartup(ctx, new AbortController().signal))
     assert.deepEqual(sessions, [{ cwd: dir, agentPreset: 'lead' }])
     assert.equal(existsSync(join(home, 'deep-research', 'settings.json')), false)
   } finally { cleanup(home); cleanup(dir) }
@@ -123,7 +123,7 @@ test('设置文件来源：建会话并回写 sessionId', async () => {
     writeFileSync(join(home, 'deep-research', 'settings.json'),
       JSON.stringify({ schemaVersion: 2, workspace: dir, updatedAt: '2026-11-01T00:00:00.000Z' }))
     const { ctx, calls, sessions } = fakeContext({ withSessions: true })
-    await withEnv({ DSH_HOME: home, DEEP_RESEARCH_WORKSPACE: undefined }, () => apply(ctx))
+    await withEnv({ DSH_HOME: home, DEEP_RESEARCH_WORKSPACE: undefined }, () => runStartup(ctx, new AbortController().signal))
     assert.equal(calls.length, 1)
     assert.deepEqual(sessions, [{ cwd: dir, agentPreset: 'lead' }])
     const saved = JSON.parse(readFileSync(join(home, 'deep-research', 'settings.json'), 'utf8'))
@@ -142,7 +142,7 @@ test('优先级：env 压过设置文件，且不覆盖设置（三入口的顺�
   writeFileSync(settingsFile, saved)
   const { ctx, calls } = fakeContext()
   try {
-    await withEnv({ DSH_HOME: home, DEEP_RESEARCH_WORKSPACE: fromEnv }, () => apply(ctx))
+    await withEnv({ DSH_HOME: home, DEEP_RESEARCH_WORKSPACE: fromEnv }, () => runStartup(ctx, new AbortController().signal))
     assert.deepEqual(calls.map((call) => call.path), [fromEnv], 'env 在场时必须用 env 的工作区')
     assert.equal(readFileSync(settingsFile, 'utf8'), saved, 'env 来源不得回写设置文件')
   } finally {
