@@ -22,12 +22,28 @@ run-accept-smoke / doctor / pack / release 等，全是 keyless 非浏览器或�
   带历史会话（缺 = exit 2）；CI 没有这种 home。
 - `snapshot-replay-smoke` 能回放录制会话，但场景集是角色组装面，不含已交付 run bundle。
 - CI 已有 chromium 可用的先例？未见；deploy job 不装浏览器。
-- **2026-11-03 实测可行性数据**：seed 体积很小——绑定会话 zstd 423K + 已交付 bundle 192K
-  ≈ 615K，可入库为 `tests/fixtures/client-load-home/`。但三处仍缺：①`bootWeb` 从 vendor
-  源码起，CI 需要先跑 `dev/vendor-build.sh`（deploy job 目前只 build pack）；②chromium 需
-  `playwright install`（仓库无直接 dep，`scripts/lib/playwright.mjs` 从 .pnpm store 找）；
-  ③smoke 目前只认 `DSH_HOME`，无 `--home/--fixture` 参数——seed 注入要加显式参数
-  （并同时给 `DSH_RUN_WORKSPACE`/bundle 根）。
+- **2026-11-03 实测可行性数据**：seed 体积很小——绑定会话 zstd 423K / 明文 JSONL 1.25MB +
+  已交付 bundle 192K，可入库为 `tests/fixtures/client-load-home/`。
+- **2026-11-03 本地 seed spike（已跑通前半段，边界如下）**：
+  1. **空 home + shipped `web` profile 可启动**（smoke 传 `--profile web` 用的是 vendor 随带
+     profile，不需要 `--from-default-profile`；实测 `dsh --profile web --from-default-profile web`
+     直接报错"shipped profile cannot be a custom profile target"）。
+  2. **不要复制带 `profiles/` 的旧 home**：副本里的 custom `web` profile 遮蔽 shipped 版，
+     `workspaceController` 等服务 pending，`workspace/create` 直接 service-unavailable。
+  3. **会话身份约束（vendor `assertStoredIdentity`）**：日志头 `id` + `cwd` 必须与文件路径
+     吻合——组目录名 = `projectKey(cwd)`（`--<path 编码>--`），cwd 必须真实存在。行为：
+     放进 `--seed-research-workspace--` 这类组名 → 启动报 corrupt session log，workspace
+     服务整体不激活。
+  4. **mtime 必须早于 30 分钟**：smoke 的绑定候选过滤排除"30 分钟内仍写盘"的会话（在飞
+     run 防竞态），刚拷贝的文件会被当成在飞而丢弃——seed 要 `touch` 回拨。
+  5. 满足 3+4 后：磁盘扫描能绑定、侧栏能列出，但行键点开的主视图切到了另一个会话
+     （active=session-c9d6b79b / bound=session-2473…，marker 未命中）——下一步要查
+     窗口内 marker 与 probe 会话干扰；spike 到此收束，不猜。
+  6. **明文 `.jsonl` 被 vendor 接受**（`session-persistence-jsonl` 同时认 `.jsonl` 与
+     `.jsonl.zstd`）→ fixture 可以是带 `__WORKSPACE__` 占位的明文，seed 时字符串替换 +
+     按 `projectKey` 落组目录；比 zstd 重压缩省一步。
+- 仍缺：①`bootWeb` 从 vendor 源码起，CI 需要先跑 `dev/vendor-build.sh`；②chromium 需
+  `playwright install`；③`--seed` 参数与 materialize 工具（明文替换 + projectKey + mtime 回拨）。
 - 已单独修掉一类"假反馈"：smoke 现在做**构建新鲜度**自检（`lib/client.js` 旧于 src 即
   exit 2，提示 `pnpm build`），不会再拿旧产物评分。
 
