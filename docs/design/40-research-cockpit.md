@@ -48,35 +48,38 @@
 
 | 件 | 文件 | 一句话 | 详情 |
 |---|---|---|---|
-| 研究状态页签 | ResearchStatusTab.tsx | 右栏页签，自上而下八区（逐区职责见下表） | [§2.1](#cockpit-1) |
-| 活标题 | ResearchStatusTitle | 挂起时页签名变「研究状态 · ⏳ 等你拍板」 | [§2.2](#cockpit-2) |
-| 流失败恢复指引 | stream-failure.ts | 末位回合死于上游流失败（MALFORMED_RESPONSE 族）且无新回合接手 → 人话横幅「等一两分钟发『继续』」 | [§2.3](#cockpit-3) |
-| 品牌（虎鲸 Orca） | BrandMark.tsx | 宿主 `sidebar.brand.mark` + `sidebar.brand.name` 两槽的 single occup… | [§2.4](#cockpit-4) |
-| 面板数据面 | config-tables.ts | 两个页签共用的**纯常量**：内置偏好（skill 方法预设的投影）、判型→打法映射、六条底线、四分区标签、领域示范、两个定制… | [§2.5](#cockpit-5) |
-| 研究配置页签 | ResearchConfigTab.tsx | 右栏**摘要页签**（2026-10-21 管理迁移后）：只留 ① 本次研究（采用＋来源＋「换一条」，读 question.m… | [§2.6](#cockpit-6) |
-| 方法库主 tab | MethodLibraryView.tsx | 主界面 `conversation.view` 第二 tab（与「对话」同排）：两列工作台、显式来源选择、详情/访谈/表单检查与经 Host 工具核对的默认/删除操作 | [§2.7](#cockpit-7) |
-| 研究图谱页签 | ResearchGraphTab.tsx | 右栏**只读观察面**：顶层 plan 节点 / `agentTeam` 任务画成 SVG DAG（节点 + 依赖边 + 同层… | [§2.8](#cockpit-8) |
-| 终稿页签 | ResearchFinalTab.tsx | 右栏页签：**认领 `drt_<slug>/` 的终稿地址族**（`final.md` / `final/vN.md` / `… | [§2.9](#cockpit-9) |
-| 浏览器 RunSource 适配器 | run-source-browser.ts | `remote.workspaceFiles` → run-context 的 `Entry` / `Page` / `ver… | [§2.10](#cockpit-10) |
-| 研究图谱页签体 | ResearchGraphTab.tsx | 页签体：头部（「只读观察」标记 + plan/task 计数）+ 正文首行版本轨（`plan/vN` 快照 → 「当前图 / … | [§2.11](#cockpit-11) |
-| 研究图谱注入面 | research-graph/types.ts | 「研究图谱」页签的注入面类型（`runSource` / `follow` / 可选 `openOwner` 三条闭包，数据面… | [§2.12](#cockpit-12) |
-| 研究语义工具卡 | ResearchToolCard.tsx | 对话流卡片：`spawn_teammate` → 组队卡、`web_search` → 检索卡（2 张） | [§2.13](#cockpit-13) |
-| 挂起显性化 | index.ts | pending false→true 迁移时 `openTab` 右栏自动展开 | [§2.14](#cockpit-14) |
-| keyed 常量 | keys.ts | 字面量唯一正本（`client-keys` 门禁对账——拼错不报错、永不渲染） | [§2.15](#cockpit-15) |
-| host 半 | src/index.ts | 空壳宿主位（bundle 行 name = 包名；浏览器半经 `exports["./client"]` 装配） | [§2.16](#cockpit-16) |
-| 产品首屏起步卡 | StartCard.tsx | blank Session + 工作区无 `drt_*` + 无用户消息时显示的产品起步指引 + 「选择项目目录」按钮（D38/D40；`conversation.input.dock`；不新增模型可见文本） | [§2.17](#cockpit-17) |
-| 启动工作区恢复 | startup.ts | 纯谓词：读 `dsh.sessions.current`、按保存 id / 唯一产品标题选工作区、判是否需要切回；只被 index.ts 调用 | [§2.18](#cockpit-18) |
+| 研究状态页签 | ResearchStatusTab.tsx | 右栏主观察面 | [§2.1](#cockpit-1) |
+| 活标题 | ResearchStatusTitle | 挂起时改页签名 | [§2.2](#cockpit-2) |
+| 流失败恢复指引 | stream-failure.ts | 流畸形死亡的人话横幅 | [§2.3](#cockpit-3) |
+| 品牌（虎鲸 Orca） | BrandMark.tsx | 两个品牌槽 | [§2.4](#cockpit-4) |
+| 面板数据面 | config-tables.ts | 两页签共用的纯常量 | [§2.5](#cockpit-5) |
+| 研究配置页签 | ResearchConfigTab.tsx | 右栏摘要页签 | [§2.6](#cockpit-6) |
+| 方法库主 tab | MethodLibraryView.tsx | 主界面第二 tab | [§2.7](#cockpit-7) |
+| 研究图谱页签（装配） | ResearchGraphTab.tsx | 右栏只读 DAG | [§2.8](#cockpit-8) |
+| 终稿页签 | ResearchFinalTab.tsx | 终稿地址族读面 | [§2.9](#cockpit-9) |
+| 浏览器 RunSource 适配器 | run-source-browser.ts | workspaceFiles → RunSource | [§2.10](#cockpit-10) |
+| 研究图谱页签体 | ResearchGraphTab.tsx | 头部 / 版本轨 / 详情 | [§2.11](#cockpit-11) |
+| 研究图谱注入面 | research-graph/types.ts | 三条闭包的类型面 | [§2.12](#cockpit-12) |
+| 研究语义工具卡 | ResearchToolCard.tsx | 组队卡 + 检索卡 | [§2.13](#cockpit-13) |
+| 挂起显性化 | index.ts | 挂起时自动展开 | [§2.14](#cockpit-14) |
+| keyed 常量 | keys.ts | 字面量唯一正本 | [§2.15](#cockpit-15) |
+| host 半 | src/index.ts | 空壳宿主位 | [§2.16](#cockpit-16) |
+| 产品首屏起步卡 | StartCard.tsx | 首屏指引 + 选目录 | [§2.17](#cockpit-17) |
+| 启动工作区恢复 | startup.ts | 选/切产品工作区 | [§2.18](#cockpit-18) |
 
-页签八区（自上而下）：
+页签八区（渲染顺序，自上而下；条件区在括号里标注）：
 
 | 区 | 职责 |
 |---|---|
+| ① HITL 挂起横幅（条件：有挂起） | 点名锚点 + 参与指引——"怎么参与"在需要那一刻说清 |
+| 流失败恢复横幅（条件：末位回合死于上游流失败） | 人话恢复路径「等一两分钟发『继续』」，不虚构"研究失败"；折算 = `stream-failure.ts` |
 | ⓪ 业务摘要层 | 五问业务语言（研究什么 / 已确认什么 / 未知什么 / 你现在要不要操作）；折算住 brief-fold，计数不进本层 |
-| ① HITL 挂起横幅 | 点名锚点 + 参与指引 |
 | ② 流程轨道 | ◆立项确认 + 立项→组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付（步序正本 = [NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)；↻ 图例仅在交付审阅锚点到达后出现，不证明已执行 rerun：补研究回挖掘并扩张版本 / 表述修订原位改 / 结构性重构另起新 bundle；显示 v2+ 才是本 bundle 已有证据扩张版的文件证据；交付节点带 `final/` 版本；步态符号 ✓已过 / ●进行中 / ○未到——done 绿字、current 琥珀唯一、回边落点重入描边，与仪表盘同语法） |
-| ③④⑤ 现状三件 | ③ 研究问题行 · ④ 人性化活动流 · ⑤ 证据计数 + 交付状态（present 见证）+ rerun 版本面一行（`run-version`：已交付版本/rerun 声明/HITL2 待审） |
-| ⑥ 决策诚实线 | 指路 question.md §Decisions |
-| ⑦ 队员动态折叠区 | [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)：agentTeam 投影取 roster → 多路 follow 队员会话 → 检索/抓取/出错动作行，每人一节默认折叠 + 计数徽标 |
+| ⑥ 决策诚实线（条件：已过停靠点） | 指路 question.md §Decisions |
+| ③ 研究问题行 | 本场研究问题（读 question.md） |
+| ⑤ 证据与交付 | 证据计数 + 交付状态（present 见证）+ rerun 版本面一行（`run-version`：已交付版本/rerun 声明/HITL2 待审）；已交付后追加只读折叠块「还不满意？三种改法」 |
+| ④ 活动流 | 人性化活动行（检索 / 派出 / 成员 / 交付）；原始事件类型名不出正文 |
+| ⑦ 队员动态折叠区（条件：有队员） | [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)：agentTeam 投影取 roster → 多路 follow 队员会话 → 检索/抓取/出错动作行，每人一节默认折叠 + 计数徽标 |
 
 折算层（`src/lib/`，全部纯函数、fail-soft 永不 throw；全量清单 = 盘上目录；下表为核心折算件，`library-fold` / `stream-failure` 见上表组件行；journal-wire 为五个入参折算件共享的 wire 解析核）：
 
@@ -112,7 +115,7 @@
 
 **文件**：[ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) + [TrackRail.tsx](../../packages/deep-research-pack/src/client/research-status/TrackRail.tsx)（流程轨道：取色/步态符号/回边几何）+ [useStatusFeed.ts](../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts)（数据装配：journal follow / bundle 扫描 / 绑定可信性 / 锚点与版本面）+ `src/client/research-status/useMemberActivity.ts` + `src/client/research-status/types.ts` + [run-version.ts](../../packages/deep-research-pack/src/lib/run-version.ts)
 
-右栏页签，自上而下八区（逐区职责见 §2 开头的「页签八区」表）；⑤ 另带 rerun 版本面一行（`v1 已交付 · v2 证据扩张 rerun · HITL2 待审`）+ 已交付后的只读折叠块「还不满意？三种改法」（`rerun-triage` 文案）；队员多路 journal 订阅生命周期在页签私有 hook，注入类型在同目录定义
+右栏页签，八区按 §2 开头的渲染顺序表自上而下；⑤ 另带 rerun 版本面一行（`v1 已交付 · v2 证据扩张 rerun · HITL2 待审`）+ 已交付后的只读折叠块「还不满意？三种改法」（`rerun-triage` 文案）；队员多路 journal 订阅生命周期在页签私有 hook，注入类型在同目录定义
 
 <a id="cockpit-2"></a>
 ### 2.2 活标题
@@ -316,13 +319,6 @@ domain。它是 Client 渲染，不进模型请求。
   `archive/drt_e2e-rerun-2026-10-23`（整列 `task_id` 空白时现场显示「状态未知」与覆盖率缺口）。
   Lead 回填后 5s 内与 Team 板对齐；不自动建 task、不改历史 plan。投影未就绪时显示
   「等待团队投影」，不预设缺口。
-
-- **研究图谱页签（2026-10-21）**：只读观察面，不是任务 CRUD、也不是操作台；数据 =
-  `agentTeam` / `subagentCatalog` / session status / `plan.md`。顶部 SVG DAG（顶层 plan 节点优先，
-  边 = plan deps / Team `blocked_by`；同层并行横排），下方节点详情与 `plan.md` 原文；复合节点
-  W3.1… 默认收在父节点详情（图上标 `+n`），节点可复制 `drt_<slug>/W3.1` 引用；重号/悬空 parent/deps/墓碑/跨组
-  显示只读结构提示。无 plan/无依赖边时明确说「没有可画的 DAG」，只显示任务快照。调整回对话或
-  rerun，侧栏不发“让 Lead 调整”这类不知道调什么的指令。任务粒度仍归 `ui-agent-team`。
 
 - **方法库主 tab 只在 active conversation 出现**：DSH 的空白 New Session hero 不渲染
   `conversation.view` tabs（「对话」也没有）；管理库需打开一个有历史的会话。后续若要让
