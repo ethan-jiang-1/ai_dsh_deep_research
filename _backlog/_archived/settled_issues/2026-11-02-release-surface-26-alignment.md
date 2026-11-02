@@ -1,11 +1,12 @@
 ---
-status: 等人拍板
+status: 已结
 opened: 2026-11-02
 ---
 
 # 推敲：发布面对齐 26_harness-release——术语、六轴、README/手册/门禁
 
-> 立卡：2026-11-02 ｜ 状态：等人拍板（Phase 0–5 已落地；N11 模型可见文本 deferred） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-02 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
+> 去向：implemented — [release model & terms Note](../../../notes/implemented/2026-11-02-release-model-terms.md)；业务验收：用户（2026-11-03 指示按推荐落地）。N11 = 拆出为独立卡 [模型可见措辞](../../issues/2026-11-03-model-visible-vocabulary.md)。
 
 **问题与期望结果：** 用户要求以 `deepseek-harness/_faq_on_digested/26_harness-release` 为更规整的
 说法，对齐本仓围绕插件发布的内容：术语与做法按 DSH 推荐，清理历史未对齐项，维持高信噪比；所有
@@ -18,18 +19,18 @@ guides/65、术语、数据卡、历史注记、门禁）一致，`pnpm verify`/
 - 5 路只读审计已完成：规范/实践差（P1–P12）、DSH 源码事实、README/手册形状、术语/历史边界、
   发布文档重复性。结论：技术骨架大体对齐；GAP 在交付模型/术语、六轴 owner、README/手册形状、
   安装事实多源、数据卡标签化、陈旧事实与门禁缺口。
-- 已落：D41（[decisions](../../docs/decisions.md#d41)）、D40 历史注记、[Note](../../notes/implemented/2026-11-02-release-model-terms.md)（决定/输掉的方案/已跑验证）、[terms](../../docs/terms.md)
-  来源三栏与退役词、[external-materials](../../docs/external-materials.md) 的 26 语料登记。
-- 已重写：[pack README](../../packages/deep-research-pack/README.md)（`kind: package-bundle`、七问、
-  数据卡、维护者内容下沉）、[安装手册源](../../scripts/dist/product-manual.md)（运行时/安全/平台/
-  Discover/版本门/Desktop 例外）、[guides/65](../../docs/guides/65-run-forms.md)（六轴 owner、
+- 已落：D41（[decisions](../../../docs/decisions.md#d41)）、D40 历史注记、[Note](../../../notes/implemented/2026-11-02-release-model-terms.md)（决定/输掉的方案/已跑验证）、[terms](../../../docs/terms.md)
+  来源三栏与退役词、[external-materials](../../../docs/external-materials.md) 的 26 语料登记。
+- 已重写：[pack README](../../../packages/deep-research-pack/README.md)（`kind: package-bundle`、七问、
+  数据卡、维护者内容下沉）、[安装手册源](../../../scripts/dist/product-manual.md)（运行时/安全/平台/
+  Discover/版本门/Desktop 例外）、[guides/65](../../../docs/guides/65-run-forms.md)（六轴 owner、
   profile 归属、数据卡指针、去命令复制）。
 - 进行中：Phase 2 传播/去重/陈旧事实清扫；Phase 4 机械门禁；Phase 5 重导出与证据。
 
-**未决问题：** 无阻塞。剩余为执行与证据：Phase 2–5 的传播、门禁反证、`_dist` 重导出、L2 冒烟
-（缺 dsh/pnpm/浏览器时如实 NOT-RUN，不冒充绿）。
+**未决问题：** 无。N11（模型可见 presets/content 的"产品"文本）不在本卡收口：它改的是模型请求，
+须单独一轮 snapshot 录制证据，已拆出为 [模型可见措辞](../../issues/2026-11-03-model-visible-vocabulary.md)。
 
-**下一步：** 你验收 Phase 0–5 的落点；决定 N11（模型可见 presets/content 的“产品”文本）是否单开 snapshot 录制轮。确认后按流程归档。
+**下一步：** 已结。落点与证据见 `## 证据`；本卡留问题、取舍与验收记录，后续由 Note 与门禁承载。
 
 ## 已知与未决
 
@@ -70,7 +71,7 @@ guides/65、术语、数据卡、历史注记、门禁）一致，`pnpm verify`/
 | N8 | doctor 输出 “产品 profile / 产品设置” | `packages/deep-research-pack/scripts/doctor.mjs:5,80,95,101-105`；`scripts/smoke/doctor-smoke.mjs:79` 断言 | 用户可见 | 改 “custom profile / 设置文件”；同步测试 |
 | N9 | 安装/首启 smoke 的注释/标签仍写“产品” | `scripts/smoke/install-shape-smoke.mjs:4,61`；`product-boot-smoke.mjs:3,168-182` | 内部 / 用户可见标签 | 改“安装形态/首屏”；脚本名保留 |
 | N10 | dev 注释与生成物仍写“产品” | `dev/boot-run.sh:2,6,93,150,246`；`dev/research.overlay.yml`（生成物） | 内部 / 生成物 | 改注释；overlay 由 pack 源重渲染 |
-| N11 | 模型可见文本仍写“产品” | `packages/deep-research-pack/presets/*.patch.yml` 4 处；`content/manual.md:3,60` | **模型可见** | **deferred**：改文本会使 snapshot B 漂移，需单独录制一轮；本卡只登记，不与文档混改 |
+| N11 | 模型可见文本仍写“产品” | `packages/deep-research-pack/presets/*.patch.yml` 4 处；`content/manual.md:3,60` | **模型可见** | **拆出为独立卡**：[模型可见措辞](../../issues/2026-11-03-model-visible-vocabulary.md)——改文本会使 snapshot B 漂移，须单独录制一轮；本卡不与文档混改 |
 | N12 | 门禁/测试仍断言旧 README/手册形状 | `scripts/verify/gates/b-pack.mjs:438`（kind bundle + 10 节）；`scripts/lib/gates-cases.mjs` readme-shape 三案例；`tests/contracts/product-invariants.test.mjs` | 现行 / 门禁 | Phase 4 更新为 package-bundle/七问/十一段/新词汇；补反证 |
 | N13 | 旧 “FAQ 26” 引用 | `notes/implemented/2026-10-27-release-data-contract.md`、`2026-10-26-faq24-decisions.md` | 历史 | 加 `> 历史注记`（旧 26 = 数据面；新 26 = harness-release） |
 | N14 | 预算历史里的“产品门面” | `scripts/doc-budgets.json` `_raises` | 历史 | 不改（预算历史） |
@@ -114,9 +115,11 @@ guides/65、术语、数据卡、历史注记、门禁）一致，`pnpm verify`/
 - **AC9 发布生命周期**：guides/64 写清 tarball/手册/market 索引同源、`lifecycle-smoke`、索引
   `source: npm` 与 npm publish 的时序；发布检查不把未跑当绿。
 - **AC10 历史**：D41 + D40 注记 + notes 历史注记 + 26 语料登记；notes/backlog 正文未删。
-- **AC11 门禁**：`readme-shape` 校验 package-bundle/七问/模板节/预算；`manual-shape` 校验十段+
-  运行时/安全/平台/Discover；`release-vocab` 扫被禁词；`dist-manual-fresh` 校验源↔生成物；
-  全部登记 `context.mjs`/`evaluation.md`/`gates-cases.mjs`，每道有 red→green 案例。
+- **AC11 门禁**：`readme-shape` 校验 package-bundle/七问/模板节/预算，并**同门**校验安装手册十段+
+  运行时/安全/平台/Discover（不另立 `manual-shape` 门禁 id：同一份契约、两类形状，案例 id 仍为
+  `manual-shape-*`，登记面 = `evaluation.md` 的 `readme-shape` 行）；`release-vocab` 扫被禁词；
+  `dist-manual-fresh` 校验源↔生成物；全部登记 `context.mjs`/`evaluation.md`/`gates-cases.mjs`，
+  每道有 red→green 案例。
 - **AC12 证据**：`pnpm verify`、`pnpm test`、`gates-smoke` 实际输出；`export-dist` 产出；
   `lifecycle-smoke`/`install-shape-smoke`/`product-boot-smoke` 实际结果或 NOT-RUN；本卡 §证据
   记录命令、exit、关键输出与残余风险。
@@ -137,10 +140,17 @@ guides/65、术语、数据卡、历史注记、门禁）一致，`pnpm verify`/
 - `node scripts/smoke/doctor-smoke.mjs`：**ALL PASS**（齐全/缺 pack/engines 不匹配/坏设置/不写 profile）。
 - `node scripts/smoke/pack-smoke.mjs`：**ALL PASS**（134 条目、export 指向、sha256、可复现、无生命周期脚本）。
 - `node scripts/probe/entry-chain-probe.mjs`：**ALL PASS**（Q1/Q2/Q3；Q2 首次因词面只认“建立”漏接“才建在”判红，已补谓词与单测后复跑绿；留档 `runtime/smoke-workspace/entry-chain-probe-2026-11-02T11-15-12-374Z.md`）。
-- 噪声清单 N1–N10/N12–N18 已落；**N11（模型可见 presets/content 的“产品”文本）仍 deferred**：改文本会改变模型请求、触发 snapshot B 漂移与真模型/录制证据义务，本卡只登记，不与文档混改。
+- 噪声清单 N1–N10/N12–N18 已落；**N11（模型可见 presets/content 的“产品”文本）拆出为独立卡**
+  [模型可见措辞](../../issues/2026-11-03-model-visible-vocabulary.md)：改文本会改变模型请求、触发 snapshot B 漂移
+  与真模型/录制证据义务，故不与本轮文档混改，也不留在本卡悬空——它有任务、去向与证据义务。
+- **收尾复跑（2026-11-03，交付前自审）**：`pnpm verify` 全绿；`pnpm test` **971 pass / 0 fail**
+  （+1 = 新增组合层契约）；`node scripts/smoke/gates-smoke.mjs` 全绿（对照组 + 101 注入案例）。
+  本轮只改文档/测试与卡归档，未触碰 pack 运行时与安装面，故 2026-11-02 的
+  `lifecycle-smoke`/`install-shape-smoke`/`product-boot-smoke` 结果按其记录继续成立，未重跑。
 - 残余：`product-boot-smoke`/`lifecycle-smoke` 依赖本机 dsh/pnpm/浏览器；本轮实际跑绿，CI 仍只跑 keyless（doctor/pack/gates），L2 前置缺席时按 exit 2 记 NOT-RUN。
 
 ## 关闭条件
 
-AC1–AC12 全部有落点与证据；`pnpm verify`/`pnpm test` 绿；可运行的分级冒烟给出实际结果（NOT-RUN
-需明确）；状态行更新 `可关闭：是`，按流程 `git mv` 归档，Note 记录决定与验证。
+AC1–AC12 有落点与证据（AC11 的 `manual-shape` 按 §验收标准 的说明由 `readme-shape` 同门承担）；
+`pnpm verify`/`pnpm test` 绿；可运行的分级冒烟给出实际结果（NOT-RUN 已明确）；N11 拆出为独立卡
+并有去向；状态行 `可关闭：是`，卡按流程归档，Note 记录决定与验证。

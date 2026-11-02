@@ -3,7 +3,7 @@
 > 状态：implemented
 
 > 来源：用户 2026-11-02 批准（“开工 setup goal 记得所有发现的都要落地”）；
-> [issue](../../_backlog/issues/2026-11-02-release-surface-26-alignment.md)（AC1–AC12 与证据）；
+> [issue](../../_backlog/_archived/settled_issues/2026-11-02-release-surface-26-alignment.md)（AC1–AC12 与证据）；
 > 26 语料 `deepseek-harness/_faq_on_digested/26_harness-release`（六轴/生命周期/README/数据卡）；
 > DSH 源核验（`vendor/dsh/scripts/doc-standard.spec.ts`、`vendor/dsh/apps/desktop/README.md`、
 > `vendor/dsh/packages/boot/plugin-manager/src/operations.ts`、`vendor/dsh/vendor/include/src/index.ts`）。
@@ -68,4 +68,8 @@
 - **入口链（真模型，T）**：`entry-chain-probe` ALL PASS（Q1/Q2/Q3）。Q2 首跑因词面只认“建立”漏接
   “才建在”判红，补谓词与单测后复跑绿；留档 `runtime/smoke-workspace/entry-chain-probe-2026-11-02T11-15-12-374Z.md`。
 - **未改/未宣称**：模型可见 presets/content 仍含“产品”文本（改它会改变模型请求、触发 snapshot B 漂移与
-  录制证据义务）；本 Note 只登记为 deferred，不冒充已对齐。`_dist` 已重导出，版本仍 0.3.0（未 bump）。
+  录制证据义务）；它不在本 Note 的收口内，已拆为独立卡
+  [模型可见措辞](../../_backlog/issues/2026-11-03-model-visible-vocabulary.md)，任务是换指称 + 重录
+  `research-face`。`_dist` 已重导出，版本仍 0.3.0（未 bump）。
+- **收尾复跑（2026-11-03，卡关闭时）**：`pnpm verify` 全绿；`pnpm test` 971/0；`gates-smoke` 全绿
+  （101 注入案例）。本轮只改文档/测试与卡归档，未触碰运行时与安装面，故上面的 L2 冒烟结果继续成立。
