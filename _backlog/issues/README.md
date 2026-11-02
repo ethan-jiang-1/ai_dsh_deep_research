@@ -4,7 +4,7 @@
 
 ## 活跃清单
 
-（当前无活跃 issue；新问题按入口两张票新立卡。）
+- [2026-11-02 产品面收窄](2026-11-02-product-surface-narrowing.md) — 等人拍板：去掉主区 Trajectory 与右栏 New Terminal（产品用不到）；已落地并在真 Web 复核，待用户目视确认。
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
