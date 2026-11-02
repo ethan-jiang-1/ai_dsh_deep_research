@@ -42,15 +42,15 @@ export const PRESETS = join(PACK, 'presets');
 export const gates = [
   'md-utf8-newline', 'md-links', 'md-anchors', 'archived-note-pointer', 'count-free', 'doc-now-only', 'doc-budgets',
   'preset-structure', 'pack-bundle-compat', 'client-half', 'row-deps', 'pack-contract-sync', 'role-list-sync', 'client-keys', 'client-effect-wrap', 'cockpit-doc-registry', 'run-context-single-source',
-  'pack-manifest', 'market-index', 'readme-shape',
+  'pack-manifest', 'market-index', 'readme-shape', 'release-vocab',
   'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'proposed-pointer-live',
   'vendor-pin', 'vendor-clean', 'pin-agreement', 'align-ledger', 'discipline-na-trigger', 'discipline-state-vocab', 'repo-conventions', 'vendor-links',
-  'content-shape', 'dev-runtime-clean', 'overlay-fresh', 'release-version', 'dist-manual-version',
+  'content-shape', 'dev-runtime-clean', 'overlay-fresh', 'release-version', 'dist-manual-version', 'dist-manual-fresh',
   'claude-symlink', 'secrets-untracked', 'dev-parity', 'host-paths', 'guard-red-record', 'gate-ledger-sync', 'entry-chain', 'backlog-liveness', 'port-exclusive', 'hooks-active',
 ];
 
 // vendor/dsh 钉身份的 tag 面（commit 面 = vendor-pin 门禁的 PIN；pack-bundle-compat 消费它
-// 断言 pack 兼容矩阵含当前 tag——升 pin 时两处同 diff 改；本文件里的 tag 复述受 pin-agreement 对账）
+// 断言 engines.dsh 覆盖当前 tag——升 pin 时两处同 diff 改；本文件里的 tag 复述受 pin-agreement 对账）
 export const VENDOR_TAG = 'dsh-v0.2.1-rc.2';
 
 // `--only=<gate[,gate]>`：只判指定门禁（输出与退出码都只看它们）。为什么需要——门禁 47 道

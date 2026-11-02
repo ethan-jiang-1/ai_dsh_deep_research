@@ -31,6 +31,8 @@ test('RFC probe recognizes the contract without requiring one phrase order', () 
   // notes/implemented/2026-10-10-entry-chain-probe-lexical-recall.md）：
   assert.equal(rfcBoundaryPasses('不是普遍前置：RFC 仅在「持久决定需要显式评审」时按该项建立（D12；根 AGENTS 入口链第 4 步、dev-loop §1.1）。'), true);
   assert.equal(rfcBoundaryPasses('不是——RFC 只在「持久决定需要显式评审（需在实现前持久化被评审、且理由无法由代码/测试/现有文档说明）」时为该项建立（D12、意图载体总图）。'), true);
+  // 2026-11-02 真模型实录：自然措辞用「才建在」而非「才建立」，且以「并不是」起句拒绝普遍前置。
+  assert.equal(rfcBoundaryPasses('并不是；RFC 只在“持久决定需要在实施前持久化并显式评审”时才建在 notes/proposed/，否则按授权直接做。'), true);
   assert.equal(rfcBoundaryPasses('所有实施都必须先建 RFC。'), false);
   assert.equal(rfcBoundaryPasses('RFC 不是普遍前置。'), false);
   // 假阳性负例（2026-10-10 对抗自审实测：补丁前「无需显式评审」被 /持久决定.{0,24}显式评审/ 放行）：

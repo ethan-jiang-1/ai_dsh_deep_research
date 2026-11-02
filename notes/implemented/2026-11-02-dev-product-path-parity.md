@@ -2,6 +2,8 @@
 
 > 状态：implemented
 
+> 历史注记：“产品路径” = 用户安装路径；措辞由 [D41](../../docs/decisions.md#d41) 收口，技术决定仍现行。
+
 > 来源：[dev/product path parity 卡](../../_backlog/_archived/settled_issues/2026-11-02-dev-product-path-parity.md)（用户 2026-11-02 定调：dev 只为调试而与产品不同，不能是"另一条载入路"）。
 > 当前合同 = [dev/README §parity 表](../../dev/README.md)、[guides/65](../../docs/guides/65-run-forms.md)、[guides/62](../../docs/guides/62-plugin-authoring.md)。
 

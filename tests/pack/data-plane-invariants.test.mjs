@@ -44,12 +44,12 @@ test('bundle patch 不声明 storage domain（状态只走工作区文件/DSH �
   assert.equal(/storage-domain|storageDomain/.test(patch), false, 'cordis.patch.yml 不应声明 storage domain')
 })
 
-test('README 数据卡形状：10 列（含可移植）、P2 行带保留、凭据标秘密、run.md 标声明', () => {
+test('README 数据卡形状：91 十字段、profile/设置/方法库保留、凭据只在 DSH、run.md 派生', () => {
   const lines = readFileSync(join(PACK, 'README.md'), 'utf8').split('\n')
-  const start = lines.findIndex((line) => line.startsWith('| 事实 |'))
+  const start = lines.findIndex((line) => line.startsWith('| Fact |'))
   assert.ok(start >= 0, 'README 缺 Data 数据卡表头')
   const header = lines[start].split('|').slice(1, -1).map((cell) => cell.trim())
-  assert.deepEqual(header, ['事实', '承诺', '权威', '位置', '作用域', '寿命 / 删除', '谁看得见', '秘密', '卸载后', '可移植'])
+  assert.deepEqual(header, ['Fact', 'Owner', 'Authority', 'Source', 'Mechanism/path', 'Scope/key', 'Readers', 'Writers', 'Rebuildability', 'Retention/deletion'])
   let rows = 0
   for (let i = start + 2; i < lines.length; i++) {
     const line = lines[i]
@@ -57,13 +57,14 @@ test('README 数据卡形状：10 列（含可移植）、P2 行带保留、凭�
     const cells = line.split('|').slice(1, -1).map((cell) => cell.trim())
     assert.equal(cells.length, 10, `数据卡行不是 10 列：${line.slice(0, 80)}`)
     rows += 1
-    const [fact, promise, , , , , visibility, secret, uninstall, portable] = cells
-    assert.ok(visibility.length > 0 && secret.length > 0, `${fact} 缺可见性/秘密`)
-    if (promise === 'P2') assert.match(uninstall, /保留/, `${fact} 是 P2 但卸载后未写保留`)
-    if (fact === '凭据') assert.match(secret, /^是/, '凭据行必须标秘密=是')
-    if (fact === 'run.md 状态头') assert.match(cells[1], /声明（非权威）/, 'run.md 必须标声明非权威')
-    // 可移植是闭集词表：随 bundle / 随工作区 / 随包 / 随 profile / 仅本机（可带括注）。
-    assert.match(portable, /^(随 bundle|随工作区|随包|随 profile|仅本机|回执随 bundle)/, `${fact} 的可移植列不在闭集：${portable}`)
+    const [fact, owner, authority, source, mechanism, scope, readers, writers, rebuild, retention] = cells
+    for (const [name, value] of Object.entries({ owner, authority, source, mechanism, scope, readers, writers, rebuild, retention })) {
+      assert.ok(value.length > 0, `${fact} 缺 ${name}`)
+    }
+    if (fact === 'Deep Research settings (workspace, last session)') assert.match(retention, /package removal keeps it/, `${fact} 卸载后未写保留`)
+    if (fact === 'Method library') assert.match(retention, /package removal keeps it/, `${fact} 卸载后未写保留`)
+    if (fact === 'Credentials') assert.match(mechanism, /credentials/, '凭据行必须写 DSH credentials 位置')
+    if (fact === 'Run state header') assert.match(rebuild, /Derived/, 'run.md 必须标派生')
   }
   assert.ok(rows >= 10, `数据卡行数过少（${rows}）——表被截断？`)
 })
@@ -77,9 +78,10 @@ test('回执三态：手册两处副本都写明 install-only 降级（不可履
   }
 })
 
-test('README 数据卡含「谁看得见 / 秘密」列，且 N2 承重依赖已披露', () => {
+test('README 保留 secret/portability 说明，且 N2 承重依赖已披露', () => {
   const readme = readFileSync(join(PACK, 'README.md'), 'utf8')
-  assert.match(readme, /\| 谁看得见 \| 秘密 \|/, '数据卡缺可见性/秘密列')
-  assert.match(readme, /N2 实验/, 'N2 实验依赖未披露')
+  assert.match(readme, /Secrets exist only in DSH credentials/, '数据卡缺秘密面说明')
+  assert.match(readme, /Run bundles and the method library travel with the workspace/, '数据卡缺可移植说明')
+  assert.match(readme, /N2 experimental/, 'N2 实验依赖未披露')
   assert.match(readme, /experimental-client-ui-agent-team/, 'client 侧 N2 peer 未披露')
 })

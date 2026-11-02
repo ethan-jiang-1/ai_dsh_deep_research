@@ -76,7 +76,7 @@ try {
   writeFileSync(join(box.anchor, 'package.json'), JSON.stringify({ name: '@deepseek-ai/dsh', version: ANCHOR_VERSION, type: 'module' }))
   writeFileSync(join(box.home, 'deep-research', 'settings.json'), '{not json')
   const corrupt = runDoctor(box)
-  check('坏设置：warn 不红', corrupt.status === 0 && /产品设置/.test(corrupt.stdout), `${corrupt.status}\n${corrupt.stdout}`)
+  check('坏设置：warn 不红', corrupt.status === 0 && /deep-research 设置文件/.test(corrupt.stdout), `${corrupt.status}\n${corrupt.stdout}`)
   check('doctor 不写 profile', readFileSync(join(box.profile, 'package.json'), 'utf8').includes('dsh-deep-research-pack'))
 } finally {
   rmSync(TEMP, { recursive: true, force: true })

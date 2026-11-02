@@ -14,11 +14,12 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack')
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
 
-test('I1 产品有自己的 profile，安装/启动全走 DSH，无 launcher/scaffold bin', () => {
-  const readme = read('README.md')
-  assert.match(readme, /dsh --profile deep-research --from-default-profile web/, 'README 缺 DSH profile 初始化')
-  assert.match(readme, /dsh plugin --profile deep-research add/, 'README 缺 DSH 原生安装')
-  assert.match(readme, /dsh --profile deep-research/, 'README 缺原生启动')
+test('I1 安装形态：custom profile + DSH 原生安装，无 launcher/scaffold bin', () => {
+  const manual = read('scripts/dist/product-manual.md')
+  assert.match(manual, /dsh --profile deep-research --from-default-profile web/, '手册缺 DSH profile 初始化')
+  assert.match(manual, /dsh plugin --profile deep-research add/, '手册缺 DSH 原生安装')
+  assert.match(manual, /dsh --profile deep-research/, '手册缺原生启动')
+  assert.match(read('README.md'), /_dist\/安装手册\.md/, '根 README 没有把安装步骤指向手册')
   assert.deepEqual(Object.keys(pkg.bin ?? {}), ['dsh-deep-research-doctor'], 'bin 只允许只读 doctor')
   assert.equal(existsSync(join(PACK, 'scripts', 'launch.mjs')), false, 'launcher 必须已删除')
   assert.equal(existsSync(join(PACK, 'scripts', 'scaffold.mjs')), false, 'scaffold 必须已删除')

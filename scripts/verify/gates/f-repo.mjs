@@ -245,7 +245,7 @@ export function runF() {
     fail(gate, `pre-commit 门禁未激活（core.hooksPath = ${v || '未设置'}）——本仓提交纪律 = 红灯拦 commit，未激活 = 裸奔；修正 = source dev/env.sh（幂等 git config core.hooksPath dev/hooks）`);
 }
 // ── dev-parity（dev 通道 = 用户路径的同机制子集，差异有界且登记）──
-// 依据（用户意图 2026-11-02）：dev 只为调试而与产品路径不同，不能是"另一条载入路"。可机械判的
+// 依据（用户意图 2026-11-02）：dev 只为调试而与用户安装路径不同，不能是"另一条载入路"。可机械判的
 // 同形点 = profile 名、安装源、roster 写入者、版本门、profile 用户层零写入；差异清单的载体 =
 // dev/README 的 parity 表。反证：把 run-driver 默认 profile 改回 research → 红；把 MCP 行写回
 // profile patch（cat >> … cordis.patch.yml）→ 红；把团队层版本改回读包清单 → 红。
@@ -261,7 +261,7 @@ export function runF() {
     const boot = readFileSync(bootPath, 'utf8');
     const driver = readFileSync(driverPath, 'utf8');
     if (!/PROFILE="\$\{DSH_RUN_PROFILE:-deep-research\}"/.test(boot))
-      fail(gate, 'boot-run 默认 profile 不是产品名 deep-research——dev 与用户路径身份不一致（改 PROFILE 默认值）');
+      fail(gate, 'boot-run 默认 profile 不是用户安装 profile 名 deep-research——dev 与用户路径身份不一致（改 PROFILE 默认值）');
     if (!/DSH_RUN_PROFILE \|\| 'deep-research'/.test(driver))
       fail(gate, "run-driver 默认 profile 不是 'deep-research'——驱动与安装面身份不一致");
     if (!/LAYER_VER="\$\(dsh --version/.test(boot))
@@ -275,7 +275,7 @@ export function runF() {
   }
   if (existsSync(readmePath)) {
     const readme = readFileSync(readmePath, 'utf8');
-    const section = readme.indexOf('## 与产品路径的 parity');
+    const section = readme.indexOf('## 与用户安装路径的 parity');
     if (section === -1) fail(gate, 'dev/README 缺 parity 表（差异必须显性化，不能只活在代码注释里）');
     else {
       const table = readme.slice(section).split('\n## ')[0];

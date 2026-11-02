@@ -2,7 +2,7 @@
 /**
  * dsh-deep-research-doctor — 只读诊断（D40）。
  *
- * 检查：pack engines / 产品 profile roster / 安装副本版本 / 团队层 / 产品设置与工作区 /
+ * 检查：pack engines / custom profile roster / 安装副本版本 / 团队层 / 设置文件与工作区 /
  * 模型凭据。**不安装、不启动、不写 profile、不写设置**；修复动作只打印建议。
  *
  * 退出码：0 = 无硬失败（可有 warning）；1 = 硬失败；2 = 用法/前置缺失。
@@ -77,7 +77,7 @@ else {
 // 2) profile roster
 const manifest = existsSync(join(profileDir, 'package.json')) ? readProfileManifest(profileDir) : null
 if (manifest === null) {
-  record(false, '产品 profile', `${profileDir} 不存在——先 \`dsh --profile ${profile} --from-default-profile web --dump-default-config\``)
+  record(false, 'custom profile', `${profileDir} 不存在——先 \`dsh --profile ${profile} --from-default-profile web --dump-default-config\``)
 } else {
   const bundles = profileBundles(manifest)
   record(bundles.includes('@deepseek-ai/dsh-base'), 'profile base bundle', bundles.join(', '))
@@ -92,17 +92,17 @@ if (manifest === null) {
   else record(true, '团队层版本', `${team}`)
 }
 
-// 3) 产品设置与工作区（只读）
+// 3) deep-research 设置文件与工作区（只读）
 let settingsWorkspace = null
 const settingsPath = join(home, 'deep-research', 'settings.json')
 if (existsSync(settingsPath)) {
   try {
     const parsed = JSON.parse(readFileSync(settingsPath, 'utf8'))
-    if (parsed?.schemaVersion !== 2) warn('产品设置', `${settingsPath} schemaVersion=${String(parsed?.schemaVersion)}（期望 2）`)
+    if (parsed?.schemaVersion !== 2) warn('deep-research 设置文件', `${settingsPath} schemaVersion=${String(parsed?.schemaVersion)}（期望 2）`)
     else if (typeof parsed.workspace === 'string') settingsWorkspace = parsed.workspace
-    else warn('产品设置', 'schema 2 但没有 workspace——首屏 onboarding 会询问')
+    else warn('deep-research 设置文件', 'schema 2 但没有 workspace——首屏 onboarding 会询问')
   } catch (error) {
-    warn('产品设置', `${settingsPath} 不可读/坏 JSON：${error instanceof Error ? error.message : String(error)}`)
+    warn('deep-research 设置文件', `${settingsPath} 不可读/坏 JSON：${error instanceof Error ? error.message : String(error)}`)
   }
 }
 const workspace = workspaceArg ?? process.env.DEEP_RESEARCH_WORKSPACE ?? settingsWorkspace

@@ -12,9 +12,9 @@ export const rfcBoundaryPasses = (answer) => {
   //   对抗自审实测假阳性）；**残余边界**：后置否定（「显式评审并非必需」）与自相矛盾混合回答
   //   词面层不设防，归留档人工复核——词面预过滤 + 语义留档的分工边界。
   // ②普遍前置的拒绝接受显式短语（不是…普遍前置）或对问句的直接否定起句（「不是——」）。
-  const hasException = /持久决定.{0,24}(?<!无需|无须|不用|不必|不需|不需要|不要求)显式评审/.test(text) && /(?:只有|仅当|仅在|只在|才).{0,60}建立/.test(text);
+  const hasException = /持久决定.{0,24}(?<!无需|无须|不用|不必|不需|不需要|不要求)显式评审/.test(text) && /(?:只有|仅当|仅在|只在|才).{0,60}(?:建立|建在)/.test(text);
   const rejectsUniversal = /(?:不是|并非|不作为|非).{0,16}(?:普遍前置|一般实施工作|实施前置门)/.test(text)
-    || /^(?:不是|并非)/.test(text);
+    || /^(?:并不是|不是|并非)/.test(text);
   return hasException && rejectsUniversal;
 };
 

@@ -2,6 +2,8 @@
 
 > 状态：implemented
 
+> 历史注记：“插件即产品”措辞由 [D41](../../docs/decisions.md#d41) 收口；bundle + custom profile 的技术决定仍现行。
+
 > 来源：[插件即产品 v2 决策卡](../../_backlog/_archived/settled_issues/2026-11-01-plugin-as-product-v2.md)（D40）、[实施计划](../../_backlog/_archived/research/plugin-as-product-v2/2026-11-01-implementation-plan.md)、[复盘](../../_backlog/_archived/research/plugin-as-product-v2/2026-11-01-postmortem-why-crooked.md)。
 > 当前合同 = [pack README](../../packages/deep-research-pack/README.md)、[guides/65](../../docs/guides/65-run-forms.md)、[README](../../README.md)。
 

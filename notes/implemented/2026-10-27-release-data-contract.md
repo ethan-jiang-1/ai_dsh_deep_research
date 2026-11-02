@@ -1,6 +1,8 @@
 # 发布前数据契约：按 FAQ 26 对账后的取舍与落地
 
 > 状态：implemented
+
+> 历史注记：本文的 “FAQ 26” 指 2026-10-27 的数据面语料；现行 26 = `26_harness-release`（发布/六轴），对齐见 [D41](../../docs/decisions.md#d41)。
 > 来源：[发布前数据契约卡](../../_backlog/_archived/settled_issues/2026-10-27-release-data-contract.md)（含 D1–D4 拍板）与
 > [证据 digest](../../_backlog/_archived/research/data-contract/2026-10-27-dsh-data-plane-digest.md)；
 > 缺陷侧 = [BUG-044](../../_backlog/_archived/fixed_bugs/BUG-044-delivery-receipts-leak-absolute-paths.md)。

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // product-boot-smoke — T3 首启面：真 launcher + 真 Web + 浏览器，证明 Host 注册 → 首屏
-// blank Lead Session（cwd = 工作区）→ 产品首屏元素。
+// blank Lead Session（cwd = 工作区）→ 首屏元素。
 //
-// 前置：同 product-smoke（真 dsh/pnpm/团队层 registry/缓存）+ Playwright chromium。
+// 前置：同 install-shape-smoke（真 dsh/pnpm/团队层 registry/缓存）+ Playwright chromium。
 // 缺前置 exit 2；断言失败 exit 1；全绿 exit 0。
 //
 // 用法：node scripts/smoke/product-boot-smoke.mjs
@@ -165,8 +165,8 @@ try {
   }
   check('首屏无 pageerror', pageErrors.length === 0, pageErrors.join('; '))
   check('首屏有 Orca 品牌', body.includes('Orca'))
-  check('首屏有产品 preset（Deep Research Lead）', body.includes('Deep Research Lead'))
-  check('首屏有产品化工作区标题', body.includes('Deep Research — ws'))
+  check('首屏有 Lead preset（Deep Research Lead）', body.includes('Deep Research Lead'))
+  check('首屏有工作区标题', body.includes('Deep Research — ws'))
   check('首屏有起步卡（标题）', body.includes('一支多角色研究团队'))
   check('首屏有起步卡（当前工作区）', body.includes('当前工作区'))
   check('首屏有起步卡（三步/选项目）', body.includes('直接问一个研究问题') && body.includes('选择项目目录'))
@@ -179,7 +179,7 @@ try {
   check('工作区有 session', workspaces.some((ws) => (ws.sessionIds ?? []).length > 0))
   const wsEntries = readdirSync(sandbox.ws).filter((name) => !name.startsWith('.'))
   const productContent = ['AGENTS.md', 'NODES.md', 'question-patterns.md', 'templates', 'seed.json', '.gitignore', '.dsh-research-seed.json']
-  check('工作区无产品内容文件（D40）', !wsEntries.some((name) => productContent.includes(name)), JSON.stringify(wsEntries))
+  check('工作区无包内容文件（D40）', !wsEntries.some((name) => productContent.includes(name)), JSON.stringify(wsEntries))
 
   const header = firstSessionHeader(sandbox.home)
   check('session header 在场', header !== null)

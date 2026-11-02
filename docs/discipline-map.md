@@ -36,7 +36,7 @@
 | Plugins, not loop changes（新行为走扩展点，不改 agent-loop） | 组合面（preset/skill/bundle 行）+ 观察面 client 面（`src/client/` 只注册页签/工具卡槽，D18） | 带证据适配（两处贡献都走 DSH 扩展点；agent-loop 属 vendor，本仓零改动——client 面只用 `slots`/`sidebarRightTabs` 注册面） |
 | Prefer maintained dependencies over hand-rolling（真能删掉自 owned 代码与测试时） | 测试栈 node:test、regex 断言——维护中的标准件顶掉自造；tsx/pnpm 构建链引入（vendor 落地）而非自造。**zstd 解压是反例且有意为之**：`scripts/lib/zstd-read.mjs` 走 `spawnSync('zstd')` 调 CLI，非 `node:zlib`——多帧拼接日志 node:zlib 只解第一帧（2026-09-24 实测整轮误判「1 事件」），该项否决见 [observability-gui](../notes/implemented/2026-09-24-observability-gui.md) 与 [layering-v2](../notes/implemented/2026-10-09-layering-v2.md) 输掉的方案 | 带证据适配（标准件**确实删掉自 owned 代码与测试**的两处兑现：测试栈、构建链；zstd 一项经实测后**主动保留自 owned 调用段**——判据的后半句「确实删掉」不成立时就不替换，正是本规则的边界，非偏离） |
 | Tests describe behavior, not correctness（过时行为随测试一起改） | tests/ 契约测试（evaluation-contract 对手册谓词、dashboard 对文件形状）；行为变更同 diff 改锚 | 照搬 |
-| No hardcoded tunables（部署可变量必须是 config 字段） | preset 工具行 config（tool-todo allowParallelInProgress、tool-web 超时）皆声明为 config；层版本钉在 pack 兼容矩阵 | 带证据适配（载体 = cordis 行 config 而非代码 Config 类型） |
+| No hardcoded tunables（部署可变量必须是 config 字段） | preset 工具行 config（tool-todo allowParallelInProgress、tool-web 超时）皆声明为 config；层版本钉在运行中 dsh 的 exact 版本 | 带证据适配（载体 = cordis 行 config 而非代码 Config 类型） |
 | TODO 标记分级（FIXME/TODO/XXX 按紧急度） | 沿用（仓内出现时按此分级） | 照搬 |
 | Record externally perceptible breaking changes in an upgrade guide（对外可感知破坏面在其引入的变更内即写 `docs/upgrade-guide/`；0.2.0 新增） | 本仓 pack private、无下游消费者；换 pin 的迁移与重审结论由升 pin Note 承载 | 不适用（对外分发/发布 pack 时重估） |
 | Source plane vs artifact plane, never mixed（静态测试走 src，吃构建产物的测试声明依赖） | L1 双通道：preset-smoke 源码域（overlay 指 src）+ 安装域（plugin add 正式路径）；根 tsconfig 门面 = 源码面解析 | 带证据适配（两平面在本仓 = 源码域/安装域两通道，D14） |
@@ -104,8 +104,8 @@ vendor 的事故复盘住在 **`docs/postmortem/`**（编号条目 + `README.md`
 
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
-| 两类同名 Skill 严格区分：repository development Skills（`.agents/skills/`，服务改仓库的 coding agent）vs runtime Skill capability（`packages/skill/`，服务产品内 agent） | 本仓两侧都有且分家：`.agents/skills/`（开发技能，清单 = 盘上目录）+ `packages/deep-research-pack/presets/*/skills/`（研究角色运行时技能） | 照搬 |
-| Skill 的定位 = 可复用工作流 + 专门判断标准（不是产品 API，也不是自动门禁） | 各开发技能带触发条件/步骤/完成判据；机制细节仍链接 owner 文档而非复制 | 照搬 |
+| 两类同名 Skill 严格区分：repository development Skills（`.agents/skills/`，服务改仓库的 coding agent）vs runtime Skill capability（`packages/skill/`，服务运行侧 agent） | 本仓两侧都有且分家：`.agents/skills/`（开发技能，清单 = 盘上目录）+ `packages/deep-research-pack/presets/*/skills/`（研究角色运行时技能） | 照搬 |
+| Skill 的定位 = 可复用工作流 + 专门判断标准（不是公开 API，也不是自动门禁） | 各开发技能带触发条件/步骤/完成判据；机制细节仍链接 owner 文档而非复制 | 照搬 |
 | 五步调用：Match（description 命中）→ Load（读全文，不从摘要猜）→ Resolve sources（读 owner）→ Apply judgment → Verify and report | 技能正文按此组织；`dev-skill-format` 门禁断言 frontmatter 在场且 `name` = 目录名 | 带证据适配（门禁为 regex 版，非 vendor 的 schema 校验） |
 | Skill ≠ gate：机械可判的下沉到类型/脚本/invariant，语义留给 review | 本仓分工表见末节「载体分工」 | 照搬 |
 | 按需加载控制上下文成本（progressive disclosure） | AGENTS 只放常驻（入口链 + 布局树 + 三行命令速查 + 指针），完整命令与流程按需加载（全档命令正本 = guides/60 §2） | 照搬 |

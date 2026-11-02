@@ -4,14 +4,14 @@ Thanks for helping improve the DSH Deep Research pack. This repository is both t
 plugin source and the development environment used to verify it; the shipped package
 is `packages/deep-research-pack`.
 
-## Product vs development
+## Install form vs development
 
-The package is a DSH plugin (bundle) with its own product profile (D40). Product users create the
-`deep-research` profile from the shipped web template, install the bundle plus the team layer with
-`dsh plugin`, and start with `dsh --profile deep-research`; the first screen asks for the project
-folder. There is no custom installer and no launcher. Development in this repository uses the isolated
-`research` profile, `research-workspace/` and `dev/run-driver.mjs` — do not mix the two command sets or
-data roots.
+The package is a DSH bundle installed into a user-created custom profile (`deep-research`). Users
+create the profile from the shipped web template, install the bundle plus the team layer from the
+Plugins page (CLI is for Web automation/offline), and start with `dsh --profile deep-research`; the
+first screen asks for the project folder. There is no custom installer and no launcher. Development
+in this repository uses the isolated `deep-research` profile, `research-workspace/` and
+`dev/run-driver.mjs` — do not mix the two command sets or data roots.
 
 ## Prerequisites
 
@@ -47,10 +47,10 @@ pnpm test
 pnpm typecheck
 ```
 
-Product-surface checks (real install / browser; no model calls):
+Install/first-screen checks (real install / browser; no model calls):
 
 ```sh
-node scripts/smoke/product-smoke.mjs
+node scripts/smoke/install-shape-smoke.mjs
 node scripts/smoke/product-boot-smoke.mjs
 ```
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# dev/boot-run.sh — 开跑就绪命令（幂等，keyless）：deep-research profile（= 产品 profile 名）组合校验/补装 → boot web
+# dev/boot-run.sh — 开跑就绪命令（幂等，keyless）：deep-research profile（= 用户安装 profile 名）组合校验/补装 → boot web
 # → 打印入口步骤。RFC：notes/implemented/2026-09-24-m2-p1-run-channel.md（A 定案：团队机制归
 # vendor agent-team-profile 层）。操作指南全文 = docs/guides/61-run-playbook.md。
 # 用法：bash dev/boot-run.sh（Ctrl-C 停 web）。重复执行不重复安装（组合在位即跳过）。
-# 同机制纪律：dev 与产品走同一条载入路径（tarball → dsh plugin add → roster），差异只看 dev/README
+# 同机制纪律：dev 与用户安装走同一条载入路径（tarball → dsh plugin add → roster），差异只看 dev/README
 # 的 parity 表；profile 用户层（cordis.patch.yml）dev 不写——MCP 行走 --patch 覆盖层。
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -90,7 +90,7 @@ if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/
   exit 1
 fi
 
-# 层版本钉住：与**运行中的 dsh** 同版本（= 产品手册里"与 dsh --version 同版本"那一句）。
+# 层版本钉住：与**运行中的 dsh** 同版本（= 安装手册里"与 dsh --version 同版本"那一句）。
 # vendor 源码只是机制基线；用户拿到的是 npm 全局 runtime——从包清单派生会让 dev 测到用户不会有的组合
 # （历史上还读到已删除的 dsh.compatibility 字段，直接抛错）。读不到版本就 fail-loud，不猜。
 LAYER_VER="$(dsh --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?' | head -1)"
@@ -147,7 +147,7 @@ fi
 
 # ①½ SPA 抓取通道（mcp-playwright，**默认挂载**——2026-10-03 用户拍板常驻，pilot 终版结论 =
 #     采纳 Note；D22 交付约束：零账号零凭据零订阅，npx 自动拉起）。MCP_PLAYWRIGHT=0 = 显式拆。
-#     **不写 profile 用户层**（与产品路径对齐：用户的 cordis.patch.yml 只由用户/设置页写）——
+#     **不写 profile 用户层**（与用户安装路径对齐：用户的 cordis.patch.yml 只由用户/设置页写）——
 #     生成本次启动的 dev 覆盖层，经 launcher `--patch` 传入。决定/淘汰方案/环境踩坑正本 =
 #     notes/implemented/2026-10-02-mcp-playwright-adoption.md。版本钉 0.0.83。
 MCP_MARK_BEGIN='# BEGIN mcp-playwright-block'
@@ -243,6 +243,6 @@ fi
 export NODE_OPTIONS="--require $ISOLATION_GUARD${NODE_OPTIONS:+ $NODE_OPTIONS}"
 export DSH_ISOLATION_ANNOUNCE=1
 # web 输出 tee 进运行区日志：仪表盘 deep-link 从这里抓 token URL（缺席 → 页面不链，fail-soft）
-# 会话 cwd = 工作区（D38：产品 Host 也认 DEEP_RESEARCH_WORKSPACE；dev 通道同样真正生效）
+# 会话 cwd = 工作区（D38：安装态 Host 也认 DEEP_RESEARCH_WORKSPACE；dev 通道同样真正生效）
 cd "$WORKSPACE"
 dsh --profile "$PROFILE" ${PATCH_ARGS[@]+"${PATCH_ARGS[@]}"} -- --port "$PORT" --no-open 2>&1 | tee "$STATE_DIR/web.log"

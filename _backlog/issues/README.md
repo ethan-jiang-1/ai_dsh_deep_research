@@ -4,6 +4,7 @@
 
 ## 活跃清单
 
+- [2026-11-02 发布面对齐 26_harness-release](2026-11-02-release-surface-26-alignment.md) — 推敲中：术语/六轴/README/手册/数据卡/陈旧事实/门禁收口；AC1–AC12 与证据随 Phase 2–5 更新。
 - [2026-11-02 产品面收窄](2026-11-02-product-surface-narrowing.md) — 等人拍板：去掉主区 Trajectory 与右栏 New Terminal（产品用不到）；已落地并在真 Web 复核，待用户目视确认。
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。

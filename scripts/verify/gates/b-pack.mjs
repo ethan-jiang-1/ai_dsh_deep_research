@@ -419,11 +419,11 @@ export function runB() {
   }
 }
 
-// ── readme-shape（文档合同：包 README 的两个读者 + 安装手册的默认路径）──
-// 依据：Plugins 页只读 package.json/locale；文档生成器读 README 前置字段；产品的默认首装 =
-// CLI 建自定义 profile（DSH 没有 UI 建 profile）+ 应用内 Plugins 页装包，CLI 装包只作 web 自动化。
-// 反证：删 README frontmatter → 红；删手册的 profile 引导 / 把它挪到 Plugins 页之后 → 红；
-// 把手册首段改回 CLI 装包优先（Plugins 页首次出现在 dsh plugin 之后）→ 红。
+// ── readme-shape（文档合同：DSH package-bundle + 安装手册默认路径）──
+// 依据：DSH doc-standard 机械推导 dsh.bundle.patch → package-bundle；75 七问；70 十段；
+// 手册默认首装 = CLI 建 custom profile（DSH 没有 UI 建 profile）+ 应用内 Plugins 页装包，
+// CLI 装包只作 web 自动化。反证：kind 改成 bundle → 红；删七问/模板节 → 红；手册缺 profile
+// 引导或把引导挪到 Plugins 页之后 → 红；手册缺安全/平台/Discover 前置 → 红；README 超预算 → 红。
 {
   const gate = 'readme-shape';
   const readmePath = join(PACK, 'README.md');
@@ -434,26 +434,90 @@ export function runB() {
     if (!readme.startsWith('---\n')) fail(gate, 'README 缺前置字段块（description/kind 在首块）——文档生成器不认');
     else {
       const front = readme.slice(4, readme.indexOf('\n---', 3));
+      const keys = [...front.matchAll(/^([a-z][a-z0-9-]*):/gm)].map((m) => m[1]);
+      const unexpected = keys.filter((k) => k !== 'description' && k !== 'kind');
+      if (unexpected.length > 0) fail(gate, `README 前置字段只允许 description/kind，发现 ${unexpected.join(', ')}`);
       if (!/^description:\s*\S/m.test(front)) fail(gate, 'README 前置字段缺 description');
-      if (!/^kind:\s*"?bundle"?\s*$/m.test(front)) fail(gate, 'README 前置字段 kind 必须是 bundle');
+      if (!/^kind:\s*"?package-bundle"?\s*$/m.test(front)) fail(gate, 'README 前置字段 kind 必须是 package-bundle（dsh.bundle.patch 的机械推导）');
+    }
+    for (const heading of ['## Summary', '## Table of Contents', '## Use this package', '## Data', '## Understand the implementation', '## Further Exploration', '## Model Experience', '## Known Limitations and Deferred Work', '## Dev Note']) {
+      if (!readme.includes(heading)) fail(gate, `README 缺 DSH package-bundle 模板节：${heading}`);
+    }
+    for (const heading of ['## 研究怎么跑', '## 新增一个研究角色', '## 新增一个 skill', '## 发布（维护者）']) {
+      if (readme.includes(heading)) fail(gate, `README 不应包含维护者/教程节：${heading}（内容应下沉到 docs/，README 只留链接）`);
     }
     const questions = [...readme.matchAll(/^\*\*([1-7])\. /gm)].map((m) => m[1]);
     if (questions.join('') !== '1234567') fail(gate, `README 首屏七问不全（找到 ${questions.join(',') || '无'}）——装什么/怎么装/版本前置/怎么验证/配置在哪层/升级回退/卸载数据`);
+    if (/dsh\.compatibility/.test(readme)) fail(gate, 'README 仍写已删除的 dsh.compatibility 字段（版本合同只有 engines.dsh）');
+    if (readme.split('\n').length > 310) fail(gate, `README 超出 310 行预算（当前 ${readme.split('\n').length}）——把维护者/架构内容下沉，不要扩顶`);
   }
   if (!existsSync(manualPath)) fail(gate, '安装手册源 scripts/dist/product-manual.md 缺席');
   else {
     const manual = readFileSync(manualPath, 'utf8');
-    const sections = [...manual.matchAll(/^## [一二三四五六七八九十]、/gm)].length;
-    if (sections !== 10) fail(gate, `安装手册应有十个编号节（当前 ${sections}）`);
+    const sections = [...manual.matchAll(/^## [一二三四五六七八九十]+、/gm)].length;
+    if (sections < 10) fail(gate, `安装手册应有至少十个编号节（当前 ${sections}）`);
+    for (const heading of ['一、这是什么', '二、前置', '三、选择运行时与安装方式', '四、安装', '五、首次启动', '六、验证', '七、配置', '八、升级', '九、卸载与数据', '十、故障排查', '十一、安全与平台']) {
+      if (!manual.includes(`## ${heading}`)) fail(gate, `安装手册缺节：${heading}`);
+    }
     const bootstrap = manual.indexOf('--from-default-profile web');
     const plugins = manual.indexOf('Plugins 页');
     const cli = manual.indexOf('dsh plugin');
-    if (bootstrap === -1) fail(gate, '安装手册没有写产品 profile 的 CLI 引导（--from-default-profile web）——DSH 没有 UI 建自定义 profile，缺这一步默认路径到不了 deep-research');
-    else if (plugins !== -1 && bootstrap > plugins) fail(gate, '安装手册把 profile 引导放在 Plugins 页之后——默认路径必须先有产品 profile');
+    if (bootstrap === -1) fail(gate, '安装手册没有写 custom profile 的 CLI 引导（--from-default-profile web）——DSH 没有 UI 建自定义 profile，缺这一步默认路径到不了 deep-research');
+    else if (plugins !== -1 && bootstrap > plugins) fail(gate, '安装手册把 profile 引导放在 Plugins 页之后——默认路径必须先有 custom profile');
     if (!manual.includes('dsh --profile deep-research')) fail(gate, '安装手册没有写 dsh --profile deep-research 启动');
     if (plugins === -1) fail(gate, '安装手册没有把 Plugins 页写成装包入口');
     else if (cli !== -1 && cli < plugins) fail(gate, '安装手册先讲 CLI 装包再讲 Plugins 页——装包入口是应用内 Plugins 页，CLI 只作 web 自动化');
     if (!/仅 `dsh web`/.test(manual)) fail(gate, '安装手册没有标注 CLI 只适用 `dsh web`');
+    if (!manual.includes('Custom plugin markets')) fail(gate, '安装手册没有写 Discover 的 experimental “Custom plugin markets” 前置');
+    if (!manual.includes('--trusted-host')) fail(gate, '安装手册的安全节没有写 --trusted-host / 反代边界');
+    if (!manual.includes('engines.dsh')) fail(gate, '安装手册没有写 engines.dsh');
+  }
+}
+
+// ── release-vocab（现行合同文档不复活退役词）──
+// 依据：D41 的退役词清单；只扫现行合同文件，历史 notes/_backlog/decisions/terms 由历史注记承载。
+// 反证：向 README 注入“产品 profile” → 点名红；还原 → 绿。
+{
+  const gate = 'release-vocab';
+  const files = [
+    'README.md', 'CONTRIBUTING.md',
+    'packages/deep-research-pack/README.md', 'packages/deep-research-pack/AGENTS.md',
+    'scripts/dist/product-manual.md',
+    'docs/00-index.md', 'docs/evaluation.md', 'docs/project-map.md', 'docs/discipline-map.md',
+    'docs/guides/60-dev-loop.md', 'docs/guides/61-run-playbook.md', 'docs/guides/62-plugin-authoring.md',
+    'docs/guides/63-git-boundary.md', 'docs/guides/64-release-versioning.md', 'docs/guides/65-run-forms.md',
+    'docs/design/10-architecture.md', 'docs/design/40-research-cockpit.md', 'docs/design/50-agent-loop-and-state.md',
+    'docs/design/60-intent-carriers.md',
+  ];
+  const banned = /插件即产品|产品 profile|产品形态|产品设置|产品用户|产品启动|产品面|产品化|产品包|产品账本|产品内|P0–P4/;
+  for (const rel of files) {
+    const path = join(ROOT, rel);
+    if (!existsSync(path)) continue;
+    readFileSync(path, 'utf8').split('\n').forEach((line, i) => {
+      if (banned.test(line) && !line.includes('term-policy: allow')) fail(gate, `${rel}:${i + 1} 复活退役词：${line.trim().slice(0, 80)}`);
+    });
+  }
+}
+
+// ── dist-manual-fresh（源手册与 _dist 生成物正文一致）──
+// 依据：安装手册是 tracked 生成物；表头版本由 dist-manual-version 管，本门禁管正文漂移。
+// 反证：向 _dist/安装手册.md 正文追加一行 → 红；重导出 → 绿。
+{
+  const gate = 'dist-manual-fresh';
+  const sourcePath = join(ROOT, 'scripts', 'dist', 'product-manual.md');
+  const generatedPath = join(ROOT, '_dist', '安装手册.md');
+  if (!existsSync(generatedPath)) fail(gate, '_dist/安装手册.md 缺席——先 node scripts/dist/export-dist.mjs');
+  else {
+    const marker = '## 一、';
+    const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
+    const source = readFileSync(sourcePath, 'utf8');
+    const generated = readFileSync(generatedPath, 'utf8');
+    const a = source.slice(source.indexOf(marker))
+      .replaceAll('{{version}}', pkg.version)
+      .replaceAll('{{tarballName}}', `dsh-deep-research-pack-${pkg.version}.tgz`)
+      .replaceAll('{{dshEngine}}', pkg.engines?.dsh ?? '');
+    const b = generated.slice(generated.indexOf(marker));
+    if (a !== b) fail(gate, '源手册正文与 _dist/安装手册.md 不一致——改源后跑 node scripts/dist/export-dist.mjs');
   }
 }
 

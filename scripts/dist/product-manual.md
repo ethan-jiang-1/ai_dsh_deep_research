@@ -1,19 +1,21 @@
-# dsh-deep-research-pack 安装与启动手册
+# dsh-deep-research-pack 安装与使用手册
 
 | | |
 |---|---|
 | 版本 | {{version}} |
 | 安装包 | `{{tarballName}}`（与本手册同目录） |
-| 市场索引 | `market.json`（与本手册同目录；在 Plugins → Discover 里添加其地址） |
+| 市场索引 | `market.json`（可选发现面；使用前需开 experimental “Custom plugin markets”） |
 | 打包日期 | {{date}} |
 | sha256 | `{{sha256}}` |
 | 兼容基线 | DSH `engines.dsh`（当前 `{{dshEngine}}`；不匹配时宿主拒绝加载）+ Node `^22.19.0 || >=24.0.0` |
+| app surface | Web；官方 Desktop 仅互操作；headless/SDK/ACP 不在本包支持范围 |
+| 平台 | macOS 已验证；Linux 预期可用；Windows / 完整 Desktop 路径未承诺 |
 
 ## 一、这是什么
 
 一个 **DSH 插件包（bundle）**，不是一个独立应用：它给宿主贡献一层配置（5 个角色 preset、研究驾驶舱、
-抓取回退 provider、研究手册/模板注入、启动行）；产品形态 = 自有 `deep-research` profile（由 DSH 创建，
-包不预置 profile）。
+抓取回退 provider、研究手册/模板注入、启动行）。安装形态 = **bundle + 用户自建的 custom profile**
+（本手册用 `deep-research`）；包不预置 profile，也不提供运行时。
 
 - **它装什么**：一条 bundle（`dsh.bundle.patch` 六文件）+ 一套 preset/skill/内容资源；不含 launcher、
   不含 scaffold、不含自定义安装器。
@@ -23,57 +25,80 @@
   （会话检索）与 `agent-preset-registry`（默认 preset = lead）。
 - **它不做什么**：不建第二个启动器、不改 `web-startup` 的命令行、不写你的项目目录、不删你的数据。
 - **装完在哪**：profile `deep-research` 的 `node_modules/dsh-deep-research-pack/`；研究产物在你选的
-  工作区；产品设置只在 `$DSH_HOME/deep-research/`（见 §七）。
+  工作区；deep-research 设置文件只在 `$DSH_HOME/deep-research/`（见 §七/§九）。
 
 ## 二、前置
 
-- DSH 满足包内 `engines.dsh`（`dsh --version` 对照；不匹配时安装与启动都会被拒绝）。
-- Node 满足包内 `engines.node`。
-- **CLI 安装**需要 PATH 上有 `pnpm`；团队层需要可访问的 registry（或已缓存/预装）。
-- 研究 run 需要模型凭据（DeepSeek API key 或账号登录）；安装与首启本身不调用模型。
-- 下文用默认 `DSH_HOME`（`~/.dsh`）；自定义 home 时把 `$DSH_HOME` 换成你的路径。
+- **运行时**：用户自带的 `dsh`。支持 npm 全局安装与官方 Desktop 内置运行时；本包不提供、不升级、
+  不签名 `dsh` 本身。`dsh --version` 必须在 `engines.dsh` 范围内。
+- **Node**：满足包内 `engines.node`（`^22.19.0 || >=24.0.0`）。
+- **CLI 安装**：PATH 上有 `pnpm`；团队层需要可访问的 registry（或已缓存/预装）。
+- **研究 run**：需要模型凭据（DeepSeek API key 或账号登录）；安装与首启本身不调用模型。
+- **工作区**：可写目录；不要指向 `$HOME`、`$DSH_HOME`、安装树或它们的祖先。
+- **home**：下文用默认 `DSH_HOME`（`~/.dsh`）；自定义 home 时把 `$DSH_HOME` 换成你的路径。
+  需要干净环境：`DSH_HOME=<dir> dsh --profile deep-research`。
 
-## 三、选择安装方式
+**版本门的行为**：registry/path spec 在写入依赖前检查，不匹配时 `nothing was installed`；
+git/tarball spec 可能在安装后判定并修复；无论哪种，启动时都会再检查一次。不要默认用 exemption；
+确需接受风险时，只对 exact package + exact dsh version 授权。
 
-**产品 profile 先建一次（CLI，仅首次）。** 产品形态要求自有 `deep-research` profile，这一步只能用 CLI：
+## 三、选择运行时与安装方式
+
+**先选运行时**：
+
+| 运行时 | 适用 | 更新/签名责任 | 本手册支持 |
+|---|---|---|---|
+| npm 全局 `dsh` | Web（主路径） | 用户/包管理器 | 是 |
+| 官方 Desktop 内置 `dsh` | Desktop 互操作 | Desktop 应用 | 是（应用内插件页） |
+| 源码 checkout | 本仓开发 | 开发者 | 否（见开发文档） |
+| Python wheel / 容器 | 其他部署形态 | 发行方 | 不在本包范围 |
+
+**再选安装方式**：
+
+| 方式 | 谁执行 | 适用 | 备注 |
+|---|---|---|---|
+| 应用内插件页 | 正在运行的宿主 | Web / Desktop | 默认；当前 profile，无参数 |
+| CLI（`--profile` 转发 pnpm） | 用户 | Web 自动化 / 离线 / headless/SDK/ACP | 面绑定；npm/source CLI 不能 `desktop` |
+| 离线 tarball | 用户 | 无 registry | `file:/path/to/{{tarballName}}` |
+| 市场 Discover | 用户 | 可选发现 | 需 experimental “Custom plugin markets”；索引只提供元数据 |
+
+**custom profile 先建一次（仅首次；破坏性）。** 本手册的主路径要求自有 `deep-research` profile；
+DSH 没有 UI 建自定义 profile，只能用 CLI 引导：
 
 ```sh
-dsh --profile deep-research --from-default-profile web
+dsh --profile deep-research --from-default-profile web --dump-default-config
 ```
 
-DSH 的 Plugins 页只管理当前运行 profile，也没有 UI 建自定义 profile；profile 建好后，装包入口 =
-应用内 Plugins 页：启动 `dsh --profile deep-research`，在 Plugins 页安装 `dsh-deep-research-pack`；
-团队机制层是 DSH **随安装提供、默认关闭**的可选 bundle，在同一个 Plugins 页里打开即可。
+这条命令只创建 profile，不是装包；装包默认走 Plugins 页（CLI 装包仅 Web 自动化/离线）。
 
-**CLI 装包：仅 `dsh web` 的自动化 / 离线场景。** CLI 是面绑定的：它能管理 web/headless/sdk 等显式
-profile，**不能管理 `desktop`**。Desktop 的 Plugins 页把包装进 `desktop` profile——那是互操作形态，
-不是产品形态；产品形态只在 `deep-research` profile。
-
-**离线 / 预发布：tarball。** 拿到 `{{tarballName}}` 时用 `file:` spec 安装（下文 §四-C），
-不需要 registry。
+`--from-default-profile` 是**替换**，不是升级：它删除原依赖与用户 patch。已有 profile 不要重复；
+已有 profile 直接从 §四的默认入口装包。CLI 对未知名 profile 首次只初始化 `dsh-base`，
+不会自带 Web 应用；顺序不能反。
 
 ## 四、安装
 
 ### A. Plugins 页（默认）
 
-1. 建产品 profile（仅首次；见 §三；已有 profile 不要重复）。
+1. 已有 `deep-research` profile（仅首次需要 §三的引导；不要重复）。
 2. `dsh --profile deep-research` 启动。
-3. 打开 Plugins 页，安装 `dsh-deep-research-pack@{{version}}`（来自市场索引或包名）。
-4. 同页找到 `agent-team-profile`（标记为 official/optional），打开它。
+3. 打开 Plugins 页，安装 `dsh-deep-research-pack@{{version}}`（来自包名或已配置的索引）。
+4. 同页找到 `agent-team-profile`（标记为 official/optional），打开它；不需要团队能力可跳过。
 5. 重启 profile，让 bundle membership 生效。
 
-> 市场发现：若要在不认识包名的情况下找它，在 Plugins → **Discover** 里添加本手册同目录
-> `market.json` 的地址（托管地址随发布物给出），再搜索 "Deep Research"。
+Desktop 的 Plugins 页管理的是 application-owned `desktop` profile，装进去是**互操作形态**，不是
+`deep-research` 主路径。npm/source `dsh` 不能管理 `desktop`；Desktop 自带的 carrier 可以，但第三方
+说明默认不把它当用户路径。
 
-### B. CLI 装包（仅 `dsh web` 自动化 / 离线）
+### B. CLI 装包（Web 自动化 / 离线 / headless、SDK、ACP）
 
-前置 = §三 的产品 profile（`--from-default-profile web`，仅首次）。
+前置 = §三的 profile。CLI 安装是面绑定的：npm/source `dsh` 不能管理 `desktop`；headless/SDK/ACP
+没有 Plugins 页，用显式 profile 走同一条命令。面向 Web GUI 用户时，CLI 只作 **`dsh web`** 自动化（仅 `dsh web`）：
 
 ```sh
 # 装 bundle（版本 = 你要装的那个版本，不是 latest 占位）
 dsh plugin --profile deep-research add dsh-deep-research-pack@{{version}}
 
-# 开团队机制层：它是随 DSH 提供的可选 bundle，exact 版本与运行中的 dsh 相同
+# 开团队机制层：随 DSH 提供的可选 bundle，exact 版本与运行中的 dsh 相同
 dsh plugin --profile deep-research add @deepseek-ai/dsh-experimental-agent-team-profile@<与 dsh --version 相同的版本>
 ```
 
@@ -86,11 +111,17 @@ exact 版本。Plugins 页把团队层当开关处理，不涉及版本选择。
 dsh plugin --profile deep-research add file:/path/to/{{tarballName}}
 ```
 
-- **顺序不能反**：`dsh plugin` 对自定义 profile 名首次只初始化 `dsh-base`（没有 Web 应用）；
-  必须先 `--from-default-profile web`。已有 profile 不要重复 `--from-default-profile`（它会重置依赖与
-  用户 patch，是破坏性替换，不是升级）。
 - **"装成功"有三个独立状态**：pnpm 成功 / dependency 写入 / `dsh.profile.bundles` 含本包。
   只有第三个让功能存在。见 §六验证。
+- bundle membership 变化后**必须重启 profile**；只改 config 的 patch 在 HMR 开启时可能即时生效。
+
+### D. 市场 Discover（可选）
+
+Discover 不是安装单位，只是索引：先在 **Plugins → Experimental plugins → More** 打开
+**Custom plugin markets**，再到 **Discover → Add index source** 添加本手册同目录 `market.json` 的
+托管地址（仓库发布物 = `_dist/market.json`）。索引条目的 `source` 是 npm，因此**只在 npm 上已发布
+该版本时可装**；离线 tarball 路径不需要 Discover。索引不改变安装单位，确认安装仍走正常的
+Plugins/插件安装流程。
 
 ## 五、首次启动
 
@@ -99,13 +130,15 @@ DEEP_RESEARCH_WORKSPACE="$HOME/projects/acme" dsh --profile deep-research
 # 或先不带环境变量：dsh --profile deep-research
 ```
 
-- DSH 打印带 token 的 URL；浏览器打开即进产品首屏（Strictly 本机 token，不要截图/转发）。
+- DSH 打印带 token 的 URL；浏览器打开即进首屏。token URL 是本机秘密，不要截图/转发/写日志。
 - 未指定工作区时，首屏起步卡有「选择项目目录」：选完研究产物写到该目录；下次启动会记住
   （浏览器提示键；换浏览器需重选）。
-- 首屏 = Orca 品牌 + 产品化工作区标题 + 起步卡（当前工作区 / 三步起步 / 凭据提示 / 选择项目目录）；
+- 首屏 = Orca 品牌 + 工作区标题 + 起步卡（当前工作区 / 三步起步 / 凭据提示 / 选择项目目录）；
   默认 preset = Deep Research Lead；右栏研究状态 / 研究配置 / 研究图谱 / 终稿；主界面方法库 tab。
 - 工作区解析优先级：`DEEP_RESEARCH_WORKSPACE` > `$DSH_HOME/deep-research/settings.json` 里保存的
-  工作区 > 首屏选择。
+  工作区 > 首屏选择。`header.cwd` 是会话初始目录；后续 `working_directory` 不改变它，也不改变
+  沙箱可写根。
+- 原生首启只有 token 门，没有欢迎向导；首屏由本包的 client/startup 行回答。
 
 ## 六、验证
 
@@ -121,36 +154,49 @@ dsh --profile deep-research --no-open --port 0   # 真启动：应打印 dsh web
 界面上可见的变化：Plugins 页里本包显示为「深度研究 / Deep Research」（中英文随界面语言，带图标）；
 右栏出现研究状态/研究配置/研究图谱/终稿；主界面出现「方法库」。
 
-## 七、配置与数据归属
+只读诊断：
 
-- **包内容**（preset/skill/手册/模板/驾驶舱/启动行）：profile `node_modules/dsh-deep-research-pack/`，
-  随包版本；升级替换。
-- **产品设置**（工作区、上次会话）：`$DSH_HOME/deep-research/settings.json`，无秘密；不是 DSH 全局设置。
-- **浏览器提示键**：`localStorage['dsh.deep-research.workspaceId.v1']`，设备/源级。
-- **工作区产物**：`drt_<slug>/`、`archive/`、`_abandoned/`、`method-library.md`——都是你的文件。
-- **会话 / 凭据 / Workspace 登记**：`$DSH_HOME/`，DSH 管理；本包不删。
-- **抓取回退的开关键**：`research-fetch-fallback.enabled` 标了 `.volatile()`，在 Settings 页可改、改后
-  即时生效；超时等其余字段不是 volatile，改 profile patch 或用 `--patch`。
+```sh
+"${DSH_HOME:-$HOME/.dsh}/profiles/deep-research/node_modules/.bin/dsh-deep-research-doctor" \
+  --profile deep-research --install-only
+```
 
-默认共享 `$DSH_HOME`，Web UI 会显示该 home 下其他 Workspace/Session；要干净环境：
-`DSH_HOME=<dir> dsh --profile deep-research`。
+## 七、配置
 
-## 八、升级 / 回滚 / 卸载
+DSH 的配置层从低到高：Config schema 默认值 → bundle patch（本包默认值）→ profile patch
+（用户/设置页）→ home patch（`$DSH_HOME/cordis.patch.yml`，同 home 所有 profile）→ CLI `--patch`
+→ app args/env/credentials → 客户端状态。后层赢。
+
+- **默认值**在 bundle patch，随包版本发布；用户覆盖留 profile/home patch。
+- **整份替换**：patch 对目标 row 的 `config` 是整份替换，不是字段合并。只写 `port` 会丢 `host`
+  等必填字段，required plugin 可能在 boot 时失败；要么写全，要么只覆盖非必填字段。
+- **`!!js` 表达式**：row 保留表达式时，`--port` 等 app 参数才能压过 config；用户 patch 换成字面值
+  后，参数会被静默忽略。
+- **Settings 页**：只有 `research-fetch-fallback.enabled` 标了 `.volatile()`，可在 Settings 页改、
+  改后即时生效；超时等其余字段不是 volatile，改 profile patch 或用 `--patch`。
+- **deep-research 设置文件**（工作区、上次会话）：`$DSH_HOME/deep-research/settings.json`，无秘密；
+  不是 DSH 全局设置，也不是 profile patch。
+- **凭据**：Models 页 / credentials 服务 / 启动环境变量 / `$DSH_HOME/.credentials.yaml`。凭据不进
+  profile patch；本包只按 ref 读取。搜索与抓取回退都用 `DEEPSEEK_API_KEY`（回退缺失时标
+  `fallback unavailable`，只走本地）。
+
+## 八、升级
 
 **升级**（停掉正在跑的 profile 后）：
 
 ```sh
 # Plugins 页：对本包选 Update（跨面，默认）
-# 或 CLI（仅 dsh web）：
+# 或 CLI（Web 自动化 / 离线）：
 dsh plugin --profile deep-research add dsh-deep-research-pack@<new>
 dsh --profile deep-research
 ```
 
-- bundle membership 有变化时**必须重启 profile**（有 HMR 也只重组一部分）。
+- bundle membership 有变化时**必须重启 profile**；只改 config 的 patch 在 HMR 开启时可能即时生效。
 - 工作区数据不随包升级；方法库不被覆盖；内容（手册/模板）随包版本，新开 Lead 会话生效。
-- **没有命令级回滚**：回退 = 把旧版本重新装一次。升级前记下当前版本；旧包必须满足旧 `engines.dsh`。
+- **没有命令级回滚**：回退 = 把旧版本重新装一次。升级前记下当前版本；旧包必须满足运行中 DSH 的
+  `engines.dsh`。工作区数据不回滚。
 
-**卸载**：
+## 九、卸载与数据
 
 ```sh
 dsh plugin --profile deep-research remove dsh-deep-research-pack
@@ -159,35 +205,49 @@ rm -rf "$DSH_HOME/profiles/deep-research" "$DSH_HOME/deep-research"             
 ```
 
 - 卸载只回收包与 patch 层；**工作区产物保留**（`method-library.md`、`drt_*`、`archive/`、`_abandoned/`）。
-- `$DSH_HOME` 的会话/凭据是 DSH 的，本包不删。
+- `$DSH_HOME` 的会话/凭据/Workspace 登记是 DSH 的，本包不删。
 - 安装副本里的 `node_modules/.bin/dsh-deep-research-doctor` 随包删除——它是只读诊断入口，不写 profile。
 
-## 九、故障排查
+| 事实 | owner | 卸载后 |
+|---|---|---|
+| presets / skills / 手册 / 模板 / 启动行 | 包 | 删除（随包） |
+| `deep-research` profile + 团队层 | 用户 / DSH | 保留；显式删 profile 才消失 |
+| `$DSH_HOME/deep-research/settings.json` | 包 / 用户 | 保留；删目录即重置 |
+| 工作区 `drt_*` / `archive/` / `_abandoned/` / `method-library.md` | 用户 | 保留；用户自己删 |
+| 会话 / 凭据 / Workspace 登记 | DSH | 保留（DSH 语义） |
+| 浏览器提示键 / 侧栏布局 | 浏览器 | 保留；清站点数据 |
+
+完整逐事实数据卡（owner/authority/source/mechanism/scope/readers/writers/rebuildability/retention）=
+[pack README §Data](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/packages/deep-research-pack/README.md#data)。
+
+## 十、故障排查
 
 | 现象 | 判断 | 处置 |
 |---|---|---|
 | 安装命令 127 / 失败 | pnpm 缺失或 registry 不通 | 先装 pnpm；看输出末尾 `diagnostics: …/pnpm.log` |
 | 装完界面没变化 | 没重启 profile，或装进了别的 profile | 重启；`dsh --profile deep-research --dump-config` 确认 roster |
-| `engines.dsh` 不匹配 | 宿主版本超出包声明的范围 | 升级/切换 DSH，或装匹配的包版本；不要默认用 exemption |
+| `engines.dsh` 不匹配 | 宿主版本超出包声明的范围；registry/path 可能装前拒绝，tarball/git 可能装后判定并修复 | 升级/切换 DSH，或装匹配的包版本；不要默认用 exemption |
 | 端口占用 | listener 报 EADDRINUSE | `dsh --profile deep-research -- --port <free>` |
 | 团队工具缺席 | 团队层没开 | Plugins 页打开 `agent-team-profile`，重启 |
 | 没有模型 key | 首屏凭据提示 | Web 里用账号登录，或配 `DEEPSEEK_API_KEY`；搜索可用、抓取回退降级为本地 |
 | profile 半装 | 上次安装中断 | `dsh plugin --profile deep-research remove dsh-deep-research-pack` 后重试 |
+| Desktop 装完没变化 | 装进了 `desktop` 或别的 profile | Desktop 走自己的 Plugins 页；主路径是 `deep-research` profile |
 
-诊断（只读，不安装、不启动、不写 profile）：
+## 十一、安全与平台
 
-```sh
-"${DSH_HOME:-$HOME/.dsh}/profiles/deep-research/node_modules/.bin/dsh-deep-research-doctor" \
-  --profile deep-research --install-only
-```
+- **token URL**：本机秘密；不要截图、转发或写入日志。默认只在本机监听。
+- **远程/反代**：不要 wildcard bind；用具体地址 + 反向代理 + TLS，并配置 `--trusted-host`。
+  `--public-url` 只做广告，不授予信任；`--trusted-host` 才放行代理 authority。
+- **凭据**：走 env / credentials，不写进 profile patch；不要把 `.credentials.yaml` 或会话日志
+  当研究备份。
+- **出网**：搜索 query 与回退时的目标 URL 会发给 DeepSeek；本地抓取成功时页面不出本机。
+- **平台**：macOS 已验证；Linux 预期可用；Windows / 完整 Desktop 路径未承诺。不支持 headless/
+  SDK/ACP 的驾驶舱面。
 
-## 十、已知限制
+已知限制（完整列表 = pack README §Known Limitations）：
 
-- 产品设置是自有文件（不是 DSH 全局设置）；设置页可改本包的可变量（当前 = `research-fetch-fallback.enabled`）。
-- 浏览器提示键是设备/源级的；换浏览器或清站点数据后要重选项目目录（Workspace registration 仍在）。
-- 首屏「选择项目目录」走 native chooser；browse-only 部署没有专门的目录浏览 UI（报错可见，不假装成功）。
-- Host 建会话是 best-effort（webserver 无 readiness gate）；client 用首选 blank / onboarding 兜底。
+- 首屏工作区是 best-effort；浏览器已有 saved Session 时可能打开上次工作区，client 会尝试切回。
+- 首屏「选择项目目录」走 native chooser；browse-only 部署没有专门的目录浏览 UI。
 - 团队机制层是 experimental：上游可能改 API 或撤能力；版本必须匹配运行中的 DSH。
-- 不承诺 Windows / Desktop 的完整路径；Desktop 安装走 Plugins 页，CLI 不能管理 `desktop` profile。
 - 一个工作区一条 pack 版本线；run bundle 无自动 GC，删除是用户显式动作。
 - 本包不使用 attachments / spill / KB-RAG / storage domain；会话删除与附件 GC 是 DSH 边界。

@@ -27,7 +27,7 @@
 1. 决定 semver 版本 `X.Y.Z`。
 2. 同 diff 改两处 `package.json` 的 `version`；若有 lockfile 影响，跑
    `pnpm install --lockfile-only`。
-3. `node scripts/dist/export-dist.mjs` 重导出 `_dist/安装手册.md` 与 tarball；产品面发布前跑 `node scripts/smoke/install-shape-smoke.mjs` + `node scripts/smoke/product-boot-smoke.mjs`（缺前置 exit 2）。
+3. `node scripts/dist/export-dist.mjs` 重导出 `_dist/安装手册.md`、tarball 与 `_dist/market.json`（三件同源同版本）；装/起发布前跑 `node scripts/smoke/lifecycle-smoke.mjs`（market 索引 → tarball → dump → 真启动 → remove 回落）+ `node scripts/smoke/install-shape-smoke.mjs` + `node scripts/smoke/product-boot-smoke.mjs`（缺前置 exit 2，未跑 ≠ 通过）。
 4. `pnpm verify && pnpm test && pnpm typecheck` 全绿；若本次发布**宣告新的 DSH 版本支持**，
    先在该版本的全局宿主上跑 `node scripts/smoke/compat-smoke.mjs` 与
    `node scripts/smoke/compat-client-smoke.mjs`（两者缺环境均 exit 2，未跑 ≠ 通过）。
@@ -39,6 +39,10 @@
 8. `npm publish`（在 `packages/deep-research-pack`，需 `npm login`/2FA）；发布后
    `npm view dsh-deep-research-pack@X.Y.Z version`。
 9. 发布后 tag 不再移动；后续修复发新 patch，不改旧 tag。
+
+**市场索引的时序**：`_dist/market.json` 是发现面元数据，不是安装单位；它的 `source` 是 npm，
+`npm publish` 之前指向的版本实际不可安装。对外托管时在 publish 成功后发布/刷新索引，或明确标注
+staged。索引内容（版本/engines/图标）由 `export-dist` 从包清单与 locale 生成，不手写。
 
 ## 失败处置
 

@@ -642,6 +642,49 @@ export const CASES = [
     writeFileSync(p, `${text.replaceAll('--from-default-profile web', '__PROFILE_BOOTSTRAP__')}\n\n` +
       '`dsh --profile deep-research --from-default-profile web`\n');
   } },
+  // readme-shape：kind 退回旧值——不是 DSH package-bundle。
+  { id: 'readme-shape-wrong-kind', gate: 'readme-shape', mutate: (dir) => {
+    const p = join(dir, 'packages', 'deep-research-pack', 'README.md');
+    const text = readFileSync(p, 'utf8');
+    if (!text.includes('kind: "package-bundle"')) throw new Error('夹具 README kind 不是 package-bundle——案例失效');
+    writeFileSync(p, text.replace('kind: "package-bundle"', 'kind: "bundle"'));
+  } },
+  // readme-shape：维护者节回潮——README 只留用户合同。
+  { id: 'readme-shape-maintainer-section', gate: 'readme-shape', mutate: (dir) => {
+    const p = join(dir, 'packages', 'deep-research-pack', 'README.md');
+    writeFileSync(p, `${readFileSync(p, 'utf8')}\n## 发布（维护者）\n`);
+  } },
+  // readme-shape：README 超预算——维护者内容应下沉。
+  { id: 'readme-shape-too-long', gate: 'readme-shape', mutate: (dir) => {
+    const p = join(dir, 'packages', 'deep-research-pack', 'README.md');
+    writeFileSync(p, `${readFileSync(p, 'utf8')}\n${'x\n'.repeat(40)}`);
+  } },
+  // manual：缺安全/平台节——10+ 节的必需节不齐。
+  { id: 'manual-shape-missing-security', gate: 'readme-shape', mutate: (dir) => {
+    const p = join(dir, 'scripts', 'dist', 'product-manual.md');
+    const text = readFileSync(p, 'utf8');
+    if (!text.includes('## 十一、安全与平台')) throw new Error('夹具手册缺安全节——案例失效');
+    writeFileSync(p, text.replace('## 十一、安全与平台', '## 十一、其他'));
+  } },
+  // manual：缺 Discover 的实验开关前置——市场入口不可执行。
+  { id: 'manual-shape-no-market', gate: 'readme-shape', mutate: (dir) => {
+    const p = join(dir, 'scripts', 'dist', 'product-manual.md');
+    const text = readFileSync(p, 'utf8');
+    if (!text.includes('Custom plugin markets')) throw new Error('夹具手册缺 Custom plugin markets——案例失效');
+    writeFileSync(p, text.replaceAll('Custom plugin markets', 'custom market'));
+  } },
+  // release-vocab：退役词回潮。
+  { id: 'release-vocab-retired-term', gate: 'release-vocab', mutate: (dir) => {
+    const p = join(dir, 'README.md');
+    writeFileSync(p, `${readFileSync(p, 'utf8')}\n产品 profile\n`);
+  } },
+  // dist-manual-fresh：生成物正文漂移。
+  { id: 'dist-manual-fresh-body', gate: 'dist-manual-fresh', mutate: (dir) => {
+    const p = join(dir, '_dist', '安装手册.md');
+    if (!existsSync(p)) throw new Error('夹具缺 _dist/安装手册.md——案例失效');
+    writeFileSync(p, `${readFileSync(p, 'utf8')}\n<!-- drift -->\n`);
+  } },
+
 ];
 
 // 无常驻注入案例的门禁（结构性不适）：断言对象 = submodule 或本机 git config 的真实状态，

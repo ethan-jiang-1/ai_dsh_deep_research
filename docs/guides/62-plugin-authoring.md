@@ -19,11 +19,12 @@
 |---|---|---|
 | plugin | 导出 `apply(ctx)` 的 TS 模块；注册即 `apply(ctx)`，配置经 cordis schema 校验 | 本仓自写插件（三处有界例外：D18 观察面 client、D31 抓取回退、D40 启动行/内容注入）：`src/index.ts`（host 半空壳 = 观察面宿主位）、`src/client/index.ts`（client 半：驾驶舱 + 首屏工作区恢复）、`src/client/startup.ts`（纯谓词）、`src/content/index.ts`（手册 runtime context）、`src/startup/index.ts`（工作区登记/会话）、`src/fetch-fallback/index.ts`（抓取回退 provider）；新插件从 `vendor/dsh/docs/user/develop/basic/` 起步 |
 | bundle | 你编写与分发的单位（`dsh.bundle`）——回答"这个包贡献什么"，是插入/覆盖 plugin rows 的 patch 层 | `packages/deep-research-pack/cordis.patch.yml` + 包内 `presets/`、`skills/` |
-| profile | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）——回答"哪些 bundle 按什么顺序组成" | 产品：用户 `$DSH_HOME/profiles/deep-research/`（DSH：CLI 引导建 profile + Plugins 页装包）；开发镜像：`runtime/harness-home/profiles/deep-research/`（同名 profile；`boot-run.sh` 用 tarball + `dsh plugin add` 安装） |
+| profile / profile 归属 | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）；三种归属 = shipped template / custom profile / application-owned | 本仓 = custom `deep-research`（CLI 引导建；Plugins 页装包）；开发镜像同名；`desktop` 归官方 Desktop；profile 不是发布物、不是隔离边界 |
+| app surface | profile 起的 surface（Web / headless / SDK / ACP / Desktop） | 本包 = Web（`dsh.client.platform: web`）；Desktop 仅互操作；headless/SDK/ACP 不在支持范围 |
 | preset | 一个 agent 形态：persona 行 + 时钟行 + skills + 工具行 | `presets/<role>.patch.yml`（preset 行）+ `presets/<role>/skills/`（角色清单 = 盘上 presets/） |
 | patch / overlay | 层叠覆盖条目（id 定向的 config 覆盖、禁用、插入） | `dev/research.overlay.yml`（源码域通道的镜像源） |
 
-**Nothing is both**：bundle 与 profile 是两个 manifest 的两种东西，别把本包写成 profile。产品形态（D40）不改变这条：包仍是 bundle；profile 由用户在 DSH 里创建/启动（`--from-default-profile web` + `dsh plugin`），不是第二种分发单位。产品没有 launcher/scaffold，只有 bundle 内的启动行与只读 doctor。
+**Nothing is both**：bundle 与 profile 是两个 manifest 的两种东西，别把本包写成 profile。M1 安装形态（[D41](../decisions.md#d41)）不改变这条：包仍是 bundle；profile 由用户在 DSH 里创建/启动（`--from-default-profile web` + Plugins 页装包），不是第二种分发单位。本包没有 launcher/scaffold，只有 bundle 内的启动行与只读 doctor。
 
 ## 参与阶梯（本仓版本；DSH 原表见仓外语料 `repo-harness/04`——登记处同上）
 
@@ -99,14 +100,15 @@ DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`�
 | DSH 本体 | 平台（`@deepseek-ai/dsh-base` + `dsh-web-app` 两个 bundle） | 用户装 DSH |
 | 本包 | 一个 bundle（`dsh-deep-research-pack`） | 本仓 |
 | 团队机制层 | 另一个 bundle（`@deepseek-ai/dsh-experimental-agent-team-profile`，**N2 experimental**：上游可改/撤，风险与层级表见 pack README §Compatibility） | vendor（本包**故意不声明**团队行——组合与实战 config 归该层，RFC m2-p1-run-channel A 定案） |
-| 研究工作区 | 会话 cwd 的目录；只承载研究产物（`drt_*`/`archive/`/`_abandoned/`/`method-library.md`）；产品用户任意目录，开发实例 = `research-workspace/` | 用户目录（首屏选择/`DEEP_RESEARCH_WORKSPACE`） |
-| 内容注入 + 启动行 | `src/content`：把 `content/manual.md` 以 runtime context 注入；`src/startup`：读产品设置/登记工作区/best-effort 会话 | 本包（D40） |
+| 研究工作区 | 会话 cwd 的目录；只承载研究产物（`drt_*`/`archive/`/`_abandoned/`/`method-library.md`）；用户任意目录，开发实例 = `research-workspace/` | 用户目录（首屏选择/`DEEP_RESEARCH_WORKSPACE`） |
+| 内容注入 + 启动行 | `src/content`：把 `content/manual.md` 以 runtime context 注入；`src/startup`：读 `$DSH_HOME/deep-research/settings.json`/登记工作区/best-effort 会话 | 本包（D40） |
 | 只读 doctor | `dsh-deep-research-doctor`：profile roster/版本/团队层/工作区/凭据；不安装、不启动 | 本包 `scripts/doctor.mjs` |
 
 **内容不落工作区**：研究手册由 `src/content` 以 runtime context 注入每个角色；NODES/判型库是
 Lead 的 skills；模板在包内 `content/templates/run/`。用户项目自己的 `AGENTS.md` 仍由
-agent-instructions 注入，冲突时项目优先。安装步骤（用户视角）与前置 = [pack README](../../packages/deep-research-pack/README.md)；
-诊断 = 包内只读 `dsh-deep-research-doctor`（tarball 装法用安装副本内脚本全路径）。
+agent-instructions 注入，冲突时项目优先。安装步骤（用户视角）与前置 = [`_dist/安装手册.md`](../../_dist/安装手册.md)；
+包合同 = [pack README](../../packages/deep-research-pack/README.md)；诊断 = 包内只读
+`dsh-deep-research-doctor`（tarball 装法用安装副本内脚本全路径）。
 
 本仓开发面的生成物各有生成器与新鲜度门禁（漂移即红）：`dev/research.overlay.yml`
 （`dev/render-overlay.mjs` → `overlay-fresh`）、run 通道 profile 镜像
@@ -136,9 +138,11 @@ agent-instructions 注入，冲突时项目优先。安装步骤（用户视角�
 **一句话规则**：源改一处（pack），生成物跑生成器，证据按面选档（keyless 证管道 / 真模型档
 证 agent 行为），部署形状变更追加 L2。
 
-## 继承边界（DSH 不要求插件仓库复制什么）
+## 继承边界（哪些是 DSH 开发机制，哪些是插件交付合同）
 
-`AGENTS.md`、Agent Notes、gates、发布序列是 **DSH 自身作为 development harness** 的参与
-机制；插件仓库直接继承的是**插件形态、配置与打包模型、术语**，分类学精神（一个事实一个
-owner、生成物有生成器、决定有记录）是可迁移原则而非强制要求。本仓选择继承它们，理由 =
-自持与可审计（逐行三态见 [discipline-map](../discipline-map.md)），不是为了模仿形态。
+- **插件交付合同（必须继承）**：bundle/profile/patch 语义、`engines.dsh`、README 与安装说明形状、
+  安装/升级/卸载生命周期、数据卡。这些直接决定用户能否装、能否退、数据在哪。
+- **DSH 自身的 development harness（可选继承）**：`AGENTS.md`、Agent Notes、gates、review 纪律。
+  它们服务“改 DSH/本仓”的 agent；本仓选择继承是为了自持与可审计（逐行三态见
+  [discipline-map](../discipline-map.md)），不是插件发布的强制形态。
+- **可迁移原则**：一个事实一个 owner、生成物有生成器、决定有记录；是原则，不是复制形态。

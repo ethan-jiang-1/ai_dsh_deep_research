@@ -70,8 +70,8 @@
 | L2 安装 | 包结构/release 相关改动 | `source dev/env.sh && node scripts/smoke/release-smoke.mjs`（pack→干净 profile→plugin add→安装域冒烟；无模型调用，安装验收使用 `--install-only`，默认 doctor 仍检查凭据；未 source 自拒） |
 | L2 冷启动 | 独立环境/bootstrap 改动 | `source dev/env.sh && node scripts/smoke/cold-start-smoke.mjs`（独立 home/profile/端口/state；MCP 关闭；团队层需 registry/缓存） |
 | L2 发布面/显示面 | 清单字段、locale/icon、市场索引、安装文档取向 | `node scripts/smoke/lifecycle-smoke.mjs`（market.json 过 DSH 校验器 → 装 tarball → 11 行 dump → 真启动 → `readPluginMeta` 四行显示面 → remove 回落；缺 `_dist` 产物 exit 2） |
-| L2 产品安装 | profile/安装形状/工作区相关改动 | `node scripts/smoke/install-shape-smoke.mjs`（原样执行手册的 CLI 装包分支：profile init → plugin add → 真启动；断言 roster 三状态、无 `did not activate`；缺前置 exit 2） |
-| L2 产品首启 | startup/client 恢复/首屏/StartCard 改动 | `node scripts/smoke/product-boot-smoke.mjs`（纯 `dsh --profile deep-research` + 真 Web + 浏览器；工作区会话、首屏、目录按钮；无模型；缺前置 exit 2） |
+| L2 安装形状 | profile/安装形状/工作区相关改动 | `node scripts/smoke/install-shape-smoke.mjs`（原样执行手册的 CLI 装包分支：profile init → plugin add → 真启动；断言 roster 三状态、无 `did not activate`；缺前置 exit 2） |
+| L2 首启 | startup/client 恢复/首屏/StartCard 改动 | `node scripts/smoke/product-boot-smoke.mjs`（纯 `dsh --profile deep-research` + 真 Web + 浏览器；工作区会话、首屏、目录按钮；无模型；缺前置 exit 2） |
 | L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `node --import tsx/esm --test tests/contracts/evaluation-contract.test.mjs` |
 | L4 交付 | 里程碑级 | `source dev/env.sh && node scripts/smoke/l4-lite-smoke.mjs`（真模型档：需 `DEEPSEEK_API_KEY`，未 source 自拒）/ 完整 run（授权范围） |
 
@@ -93,7 +93,7 @@
 | 改 scripts/lib 支撑模块 / dev 基建本体（`lib/*.mjs`、env.sh、render-overlay） | 支撑模块 + 其**全部消费方**（消费面 grep：roles.mjs 的角色枚举消费方、render-overlay → `overlay-fresh`、run-state → watch-run/hitl-answer/run-dashboard） | 消费方门禁在同 diff 复跑 | L0 + lib 对应契约测试 | 判据变更才写 Note | 消费方门禁与契约测试绿 |
 | 改研究工作区手册 / 模板（结构性调整：模板增删 / 路径与格式修正；**手册正文文本 = 模型可见，走上行〔改 persona / skill / 手册文本〕**） | `packages/deep-research-pack/content/` | 无生成器 | L0 + `content-shape` | — | `content-shape` 绿 |
 | 改部署面（doctor / 发布集） | pack `scripts/` + `package.json` 的 files/bin | — | L0 + L2 | 部署 Note | `release-smoke` ALL PASS |
-| 换 vendor pin | `.gitmodules` + pack 兼容矩阵 | `vendor-build.sh`（含 host 半补建 + 前端壳重建）→ 逐条重审（含 agent-team 合同 diff 与货架增量对账——正本 = [discipline-map §重审触发路径](../discipline-map.md)） | L0 + L1 + L2 + client-load-smoke + L4-lite（0.2.0 轮实证：漏跑观察面 = client bundle 的 build-time externals 漂移漏网） | 升 pin 毕业 Note（重审结论正本） | 全档绿 + 重审入 Note |
+| 换 vendor pin | `.gitmodules` + 运行中 dsh 的 exact 版本（兼容矩阵字段已删，见 D41） | `vendor-build.sh`（含 host 半补建 + 前端壳重建）→ 逐条重审（含 agent-team 合同 diff 与货架增量对账——正本 = [discipline-map §重审触发路径](../discipline-map.md)） | L0 + L1 + L2 + client-load-smoke + L4-lite（0.2.0 轮实证：漏跑观察面 = client bundle 的 build-time externals 漂移漏网） | 升 pin 毕业 Note（重审结论正本） | 全档绿 + 重审入 Note |
 | 纯文档 / 卫生 | 文档自身 | — | L0；改动面含 AGENTS/入口链时加跑 `entry-chain-probe`（真模型档；无凭据退化为语义版人工） | 仅持久决定理由才写 | 门禁绿 |
 | **用户直派** | 按本轮授权直接执行；如需跨步排序使用会话内 todo；仅需显式评审的持久决定才建立 RFC；交付后按 notes 规则决定是否记录决定理由 | 同对应任务型 | 同对应任务型 | 同对应任务型 | 同对应任务型 |
 
@@ -122,7 +122,7 @@ source dev/env.sh                     # ⚠ 双 home + 裸 dsh 拦截（DSH_HOME
 node scripts/smoke/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真挂载档（keyless：roster+逐角色建会话+skills 隔离；--profile <p> --no-patch 切安装域通道）
 cd packages/deep-research-pack && pnpm build   # pack 双半构建（tsc -b . + tsdown → lib/index.js + lib/client.js——观察面 client 面，D18）
 node --import tsx/esm scripts/smoke/client-load-smoke.mjs    # 观察面 client 面真浏览器加载（keyless：boot web + headless chromium——插件零失败 + 页签与渐进面硬断言；渐进面断言 = 磁盘侧绑定会话的真值对账；失败留 png/html/console/meta 现场；无窗口内交付目标 = exit 2 SKIP）
-node scripts/probe/cdp-probe.mjs '<gui-url>' --open-session '<标题>' --open-status --expect-face '<文本>' [--expect-no-leak '<文本>'] [--ask '<消息>'] [--screenshot <path>]   # 交互探针（裸 CDP，借鉴 ai_dsh_loop_advisor）：Playwright actionability 被 DSH UI 挡死时的交互驱动工具——JS 派发点击/输入，JSON 判决；--ask = 完整产品环（输入→发送→等回复）。老会话可能要先在 GUI 里让它进侧栏近列表
+node scripts/probe/cdp-probe.mjs '<gui-url>' --open-session '<标题>' --open-status --expect-face '<文本>' [--expect-no-leak '<文本>'] [--ask '<消息>'] [--screenshot <path>]   # 交互探针（裸 CDP，借鉴 ai_dsh_loop_advisor）：Playwright actionability 被 DSH UI 挡死时的交互驱动工具——JS 派发点击/输入，JSON 判决；--ask = 完整交互环（输入→发送→等回复）。老会话可能要先在 GUI 里让它进侧栏近列表
 node scripts/smoke/e2e-021rc2.mjs            # 升级端到端（keyless 浏览器：角色 order 成组 + 状态/配置页签真数据 + 插件零故障；失败留现场）
 node scripts/smoke/release-smoke.mjs        # L2 真实安装形状：pack→干净 profile→plugin add→安装域冒烟；无模型调用，安装模式跳过模型就绪检查
 node scripts/smoke/cold-start-smoke.mjs     # L2 冷启动：独立 DSH_DEV_HOME/profile/端口/state；MCP 关闭；到浏览器面 GREEN

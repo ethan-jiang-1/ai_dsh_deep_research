@@ -87,11 +87,8 @@ jobs:
       - name: Build pack (pack-smoke needs lib/)
         run: pnpm --filter dsh-deep-research-pack build
 
-      - name: Scaffold CLI + guards
-        run: node scripts/smoke/scaffold-smoke.mjs
-
-      - name: Preflight anchor/profile/workspace/credentials
-        run: node scripts/smoke/preflight-smoke.mjs
+      - name: Doctor (read-only profile/anchor/workspace/credentials)
+        run: node scripts/smoke/doctor-smoke.mjs
 
       - name: Tarball shape
         run: node scripts/smoke/pack-smoke.mjs

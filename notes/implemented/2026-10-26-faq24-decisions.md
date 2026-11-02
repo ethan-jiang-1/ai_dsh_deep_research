@@ -2,6 +2,8 @@
 
 > 状态：implemented
 
+> 历史注记：本文的 “FAQ 26” 指旧数据面语料；现行 26 = `26_harness-release`，对齐见 [D41](../../docs/decisions.md#d41)。
+
 > 来源：用户 2026-10-26「按长期正确性推进 FAQ 24 对齐」；合同 = [guides/65](../../docs/guides/65-run-forms.md)；FAQ 24 = `deepseek-harness/_faq_on_digested/24_plugin-publish-and-agent-data-planes`（外部材料，不随仓）。
 
 ## 决定

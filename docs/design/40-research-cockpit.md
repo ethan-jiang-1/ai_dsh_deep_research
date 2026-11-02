@@ -200,11 +200,11 @@ pending false→true 迁移时 `openTab` 右栏自动展开；页签 dock 折叠
 空壳宿主位（bundle 行 name = 包名；浏览器半经 `exports["./client"]` 装配）
 
 <a id="cockpit-17"></a>
-### 2.17 产品首屏起步卡
+### 2.17 首屏起步卡
 
-**文件**：[StartCard.tsx](../../packages/deep-research-pack/src/client/StartCard.tsx)（D38 产品启动面的首屏件）
+**文件**：[StartCard.tsx](../../packages/deep-research-pack/src/client/StartCard.tsx)（D38 启动面的首屏件）
 
-`conversation.input.dock` 的全宽起步卡：首屏告诉用户产品是什么、当前工作区、三步起步
+`conversation.input.dock` 的全宽起步卡：首屏告诉用户这是什么、当前工作区、三步起步
 （问一个问题 → Lead 先问三问/计划确认 → 右栏研究状态与终稿）、凭据提示与「选择项目目录」按钮。
 只在 blank Session、工作区根没有 `drt_*`、且会话还没有用户消息时显示；工作区文件读失败仍显示
 （不阻塞 composer）。「选择项目目录」按钮走 `uiWorkspace.pickDirectory` → `workspaces.create` →
@@ -217,9 +217,9 @@ domain。它是 Client 渲染，不进模型请求。
 **文件**：[startup.ts](../../packages/deep-research-pack/src/client/startup.ts)（D40）
 
 `index.ts` 在挂载后调用一次：列表 ready 后按「保存的 workspaceId → 唯一 `Deep Research — ` 标题」
-选产品工作区；读 `dsh.sessions.current` 判断当前会话是否已在该目录，不在则
+选用户工作区；读 `dsh.sessions.current` 判断当前会话是否已在该目录，不在则
 `uiWorkspace.startSession`。谓词纯函数（`readCurrentSessionId` / `pickProductWorkspace` /
-`needsProductSwitch`）由 keyless 测试钉住；浏览器只写两个提示键，不做产品账本。
+`needsProductSwitch`）由 keyless 测试钉住；浏览器只写两个提示键，不做本地账本。
 
 ## 3. 数据通道与接线
 

@@ -17,7 +17,7 @@
 | preset-smoke.mjs | L1 真挂载：boot 页模块表行（client 半 served）、roster、逐角色建会话、skills 隔离 | keyless（`DSH_SMOKE_REAL=1` 起真 DSH，无模型） |
 | release-smoke.mjs | L2 安装形状：pack → 干净 profile → plugin add → manifest/安装域 client 半断言 → 安装域冒烟 → 端口释放验证（进程卫生：超时预算 + 并发锁 + 退出确认） | keyless（`--install-only` 跳凭据） |
 | lifecycle-smoke.mjs | L2 发布面/显示面：market.json 过 DSH 校验器 → 装 tarball → 11 行 dump → 真启动无降级 → `readPluginMeta` 读出四个 specifier 的中英标题/图标 → remove 后 roster 回落 | keyless（真 dsh/pnpm + `_dist` 产物；缺前置 exit 2） |
-| install-shape-smoke.mjs | L2 安装形状：原样执行手册的 CLI 装包分支（profile init → `dsh plugin add` pack+team → 真启动）；断言 roster 三状态、无 `did not activate`、首屏可达；不跑 launcher/scaffold | keyless（真 dsh/pnpm + 团队层 registry/缓存；缺前置 exit 2） |
+| install-shape-smoke.mjs | L2 安装形状：原样执行手册的 CLI 装包分支（profile init → `dsh plugin --profile … add` pack+team → 真启动）；断言 roster 三状态、无 `did not activate`、首屏可达 | keyless（真 dsh/pnpm + 团队层 registry/缓存；缺前置 exit 2） |
 | product-boot-smoke.mjs | L2 首启：纯 `dsh --profile deep-research` + Web + 浏览器；Host 注册工作区、blank Lead Session `cwd` = 工作区、首屏/目录按钮/Lead/composer | keyless（需浏览器 + 团队层；缺前置 exit 2） |
 | cold-start-smoke.mjs | L2 冷启动：独立 `DSH_DEV_HOME` + profile + 端口 + state，`run-driver up --bootstrap` 到浏览器 GREEN；MCP 关闭 | keyless（须先 `source dev/env.sh`；vendor/依赖在位；团队层需 registry/缓存） |
 | doctor-smoke.mjs | doctor 只读判据：fake anchor 齐全绿 / 缺行依赖红 / base-only profile 红 / 缺 pack 红 / 空凭据 warn / 坏设置 warn；不安装、不写 profile | keyless（仓库外临时 home + fake anchor/profile；无 dsh/网络） |

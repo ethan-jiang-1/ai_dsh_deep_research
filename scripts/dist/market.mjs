@@ -70,8 +70,8 @@ export function buildMarketIndex() {
     format: 1,
     title: { en: 'Deep Research Pack', zh: '深度研究包' },
     description: {
-      en: 'Community index for the Deep Research bundle. Add this URL in Plugins → Discover.',
-      zh: '深度研究组合包的社区索引。在 Plugins → Discover 里添加本索引地址。',
+      en: 'Community index for the Deep Research bundle. Enable Experimental plugins → Custom plugin markets, then add this URL in Plugins → Discover.',
+      zh: '深度研究组合包的社区索引。先在 Experimental plugins 打开 Custom plugin markets，再在 Plugins → Discover 添加本索引地址。',
     },
     metadata: {
       categories: { research: { title: { en: 'Research', zh: '研究' } } },

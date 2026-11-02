@@ -7,7 +7,7 @@
 `presets/<role>/skills/` + 驾驶舱（`src/client/`，构建产物 `lib/client.js`）+
 `content/`（研究手册 + run 模板，`src/content` 以 runtime context 注入，**不落工作区**）+
 `src/startup/`（Host 工作区登记/会话）+ 只读 `scripts/doctor.mjs`（bin
-`dsh-deep-research-doctor`）。产品 = bundle + 自有 `deep-research` profile（D40）；**没有
+`dsh-deep-research-doctor`）。交付形态 = bundle + 用户自建 custom profile `deep-research`（D41）；**没有
 launcher/scaffold，没有自定义安装器**。包级当前合同在 [README.md](README.md)；
 本文件只放该子树的**指令**。上游对应物 = DSH `packages/AGENTS.md`。
 
@@ -15,7 +15,7 @@ launcher/scaffold，没有自定义安装器**。包级当前合同在 [README.m
 
 - **两处一致**（pack 源 = 唯一真源）：① `dev/research.overlay.yml` 由
   `node dev/render-overlay.mjs` **从 pack 渲染**（门禁 `overlay-fresh` 对账，勿手改）；
-  ② `runtime/harness-home/profiles/research/`（run 通道镜像）随 `boot-run.sh` 同步，
+  ② `runtime/harness-home/profiles/deep-research/`（run 通道镜像）随 `boot-run.sh` 同步，
   其漂移检测逐文件比对，不符即 fail-loud；改完 pack 跑 `node scripts/verify/verify.mjs`；
 - 新增/修改角色走 [`.agents/skills/adding-a-research-role`](../../.agents/skills/adding-a-research-role/SKILL.md)；
 - 行引用的 `@deepseek-ai/*` 必须同时出现在 `peerDependencies`（`row-deps` 门禁）；
@@ -33,7 +33,7 @@ launcher/scaffold，没有自定义安装器**。包级当前合同在 [README.m
 
 ## 文档义务
 
-- 包 README 拥有配置、行为、**部署前置**、限制与扩展点（当前合同）；行为或发布集改变同 diff 更新；
-- 启动/部署面（`src/startup`、`src/content`、`scripts/doctor.mjs`、产品设置）改动要跑
+- 包 README 拥有安装/验证/配置/升级/卸载/数据/兼容（当前合同）；行为/架构细节 = design/，发布 = guides/64；README 或发布集改变同 diff 更新；
+- 启动/部署面（`src/startup`、`src/content`、`scripts/doctor.mjs`、`$DSH_HOME/deep-research/settings.json`）改动要跑
   `install-shape-smoke` + `product-boot-smoke` + `release-smoke`（L2 安装/首启形状）；
-- 已知限制与延后工作放固定节 `## 已知限制与延后工作`（上游 Known Limitations 节同构）。
+- 已知限制与延后工作放固定节 `## Known Limitations and Deferred Work`（中文名：已知限制与延后工作）。
