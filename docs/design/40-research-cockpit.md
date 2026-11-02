@@ -77,6 +77,7 @@
 | 方法库分隔条 | `src/client/method-library/ColumnHandle.tsx` | 拖动/方向键调宽 | [§2.7](#cockpit-7) |
 | 方法库读取状态 | `src/client/method-library/useLibraryData.ts` | 文本/加载/筛选/选中（无 UI） | [§2.7](#cockpit-7) |
 | 方法库 run 来源 | `src/client/method-library/useRunSourcePicker.ts` | run 列表/候选预览/eligible 判定 | [§2.7](#cockpit-7) |
+| 方法库草稿状态 | `src/client/method-library/useDraftState.ts` | 草稿/revision/回填/来源字段/工作台导航（无 UI） | [§2.7](#cockpit-7) |
 
 页签八区（渲染顺序，自上而下；条件区在括号里标注）：
 

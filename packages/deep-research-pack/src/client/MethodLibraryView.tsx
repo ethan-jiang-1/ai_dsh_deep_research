@@ -28,20 +28,20 @@ import {
   renderLibraryEntry,
   summaryOfEntry,
   type LibraryEntry,
-  type LibrarySections,
 } from '../lib/library-fold.ts'
 import { BUILTIN_PREFERENCES } from '../lib/config-tables.ts'
-import { FIELD_LABELS, FIELD_ORDER, coachPatchAppliesToDraft, mergeCoachDraft, parseMethodDraft, type DraftField } from '../lib/method-draft.ts'
+import { FIELD_LABELS, FIELD_ORDER, coachPatchAppliesToDraft, mergeCoachDraft, parseMethodDraft } from '../lib/method-draft.ts'
 import { BUTTON_STYLE, HEADER_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE, ROW_STYLE } from './method-library/styles.ts'
-import { BuiltinView, EditorView, MethodSummaryView, ReadMineView, SourceSelectionView, type Draft, type RunSourceCandidate, type WorkbenchStage } from './method-library/views.tsx'
+import { BuiltinView, EditorView, MethodSummaryView, ReadMineView, SourceSelectionView } from './method-library/views.tsx'
 import { MethodCoachPanel } from './method-library/coach.tsx'
 import { ColumnHandle } from './method-library/ColumnHandle.tsx'
 import { useLibraryData } from './method-library/useLibraryData.ts'
 import { useRunSourcePicker } from './method-library/useRunSourcePicker.ts'
+import { useDraftState } from './method-library/useDraftState.ts'
 import {
-  LIBRARY_PATH, builtinLibraryEntry, draftOf, emptySections, operationMetadataMatches,
-  type MethodLibraryOperationRequest, type Mode, type OperationOutcome, type PendingMethodOperation,
-  type Receipt, type Segment,
+  LIBRARY_PATH, builtinLibraryEntry, operationMetadataMatches,
+  type MethodLibraryOperationRequest, type OperationOutcome, type PendingMethodOperation,
+  type Receipt,
 } from './method-library/model.ts'
 
 export interface MethodLibraryInjected {
@@ -84,41 +84,10 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   } = useRunSourcePicker({
     sessionId, t: props.t, listDir: props.listDir, readPreview: props.readPreview, readLibrary: props.readLibrary,
   })
-  const [mode, setMode] = useState<Mode>('read')
-  const modeRef = useRef<Mode>('read')
-  const [workbenchStage, setWorkbenchStage] = useState<WorkbenchStage>('interview')
-  const [draft, setDraft] = useState<Draft | null>(null)
-  const canSaveDraft = draft !== null
-    && draft.name.trim() !== ''
-    && SECTION_LABELS.every(({ key }) => (draft.sections[key] ?? '').trim() !== '')
-  const [draftRevision, setDraftRevision] = useState(0)
-  const draftRevisionRef = useRef(0)
-  const turnBaseRevisionRef = useRef<number | null>(null)
-  const turnAcceptedRevisionRef = useRef<number | null>(null)
-  const lastAssistantSeqRef = useRef(-1)
-  const [activeDraftKey, setActiveDraftKey] = useState<string | null>(null)
-  const activeDraftKeyRef = useRef<string | null>(null)
   const [coachId, setCoachId] = useState<SessionId | null>(null)
-  const [manual, setManual] = useState<ReadonlySet<DraftField>>(() => new Set())
-  const [coachFields, setCoachFields] = useState<ReadonlySet<DraftField>>(() => new Set())
-  const [sourceFields, setSourceFields] = useState<ReadonlySet<DraftField>>(() => new Set())
-  const [activeField, setActiveField] = useState<DraftField | null>(null)
-  const [coachBase, setCoachBase] = useState<LibraryEntry | null>(null)
   const [selectedBuiltinSource, setSelectedBuiltinSource] = useState<LibraryEntry | null>(null)
   const [narrowPane, setNarrowPane] = useState(false)
   const [libraryOpen, setLibraryOpen] = useState(false)
-  const previousRef = useRef<{
-    draft: Draft
-    manual: ReadonlySet<DraftField>
-    coachFields: ReadonlySet<DraftField>
-    active: DraftField | null
-    base: LibraryEntry | null
-  } | null>(null)
-  const draftRef = useRef<Draft | null>(null)
-  const manualRef = useRef<ReadonlySet<DraftField>>(manual)
-  const coachFieldsRef = useRef<ReadonlySet<DraftField>>(coachFields)
-  const activeRef = useRef<DraftField | null>(activeField)
-  const coachBaseRef = useRef<LibraryEntry | null>(coachBase)
   const pendingOperationRef = useRef<PendingMethodOperation | null>(null)
   const queuedOperationRef = useRef<MethodLibraryOperationRequest | null>(null)
   const queuedOperationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -152,18 +121,35 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   }, [props.t])
   const [operationUnknown, setOperationUnknown] = useState(false)
   const operationUnknownRef = useRef(false)
-  draftRef.current = draft
-  manualRef.current = manual
-  coachFieldsRef.current = coachFields
-  activeRef.current = activeField
-  coachBaseRef.current = coachBase
-  modeRef.current = mode
-  coachIdRef.current = coachId
-  coachReadyRef.current = coachReady
   const [receipt, setReceipt] = useState<Receipt | null>(null)
   const [sending, setSending] = useState(false)
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const [leftWidth, setLeftWidth] = useState(270)
+  const {
+    mode, setMode, modeRef, workbenchStage, setWorkbenchStage,
+    draft, setDraft, draftRef, draftRevision, setDraftRevision, draftRevisionRef,
+    turnBaseRevisionRef, turnAcceptedRevisionRef, lastAssistantSeqRef,
+    activeDraftKey, setActiveDraftKey, activeDraftKeyRef,
+    manual, manualRef, coachFields, setCoachFields, coachFieldsRef,
+    sourceFields, setSourceFields, activeField, setActiveField, activeRef,
+    coachBase, setCoachBase, coachBaseRef, previousRef,
+    bumpDraftRevision, releaseCoachIfIdle, switchSegment, beginNew, beginEdit,
+    selectMine, selectBuiltin, restartSource, useBuiltinReference, startBlank,
+    startBuiltinSource, startRunSource, cancel, updateSection, onNameChange, undoCoach,
+  } = useDraftState({
+    t: props.t,
+    segment, entries, selected, setSegment, setSelectedName,
+    selectedBuiltinSource, setSelectedBuiltinSource,
+    selectedRunSource, setSelectedRunSource, setSelectedRunLoading,
+    abortRunRead, setReceipt, setPendingDelete, setLibraryOpen,
+    pendingOperationRef, queuedOperationRef,
+    coachIdRef, setCoachId, coachReadyRef, setCoachReady, setCoachVisible, activeTurnRef,
+  })
+  coachIdRef.current = coachId
+  coachReadyRef.current = coachReady
+  const canSaveDraft = draft !== null
+    && draft.name.trim() !== ''
+    && SECTION_LABELS.every(({ key }) => (draft.sections[key] ?? '').trim() !== '')
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return undefined
@@ -217,231 +203,6 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     }
   }, [sessionId])
 
-
-  const bumpDraftRevision = (): number => {
-    const next = draftRevisionRef.current + 1
-    draftRevisionRef.current = next
-    setDraftRevision(next)
-    return next
-  }
-
-  const resetDraftRevision = (): void => {
-    draftRevisionRef.current = 0
-    setDraftRevision(0)
-    turnBaseRevisionRef.current = null
-    turnAcceptedRevisionRef.current = null
-    lastAssistantSeqRef.current = -1
-  }
-
-  const dirty = (() => {
-    if (draft === null || mode === 'read') return false
-    if (mode === 'new') {
-      return selectedBuiltinSource !== null || selectedRunSource !== null
-        || draft.name.trim() !== '' || SECTION_LABELS.some(({ key }) => draft.sections[key] !== null)
-    }
-    if (selected === null) return true
-    return draft.name !== selected.name
-      || SECTION_LABELS.some(({ key }) => (draft.sections[key] ?? '') !== (selected.sections[key] ?? ''))
-  })()
-  const confirmDiscard = (): boolean => {
-    if (!dirty) return true
-    return typeof window === 'undefined' ? true : window.confirm('放弃未保存的修改？')
-  }
-
-  const operationLocked = (): boolean => {
-    if (pendingOperationRef.current === null && queuedOperationRef.current === null) return false
-    setReceipt({ ok: false, detail: props.t('operationInProgress') })
-    return true
-  }
-
-  const switchSegment = (next: Segment): void => {
-    if (segment === next || operationLocked()) return
-    if (!confirmDiscard()) return
-    setSegment(next)
-    setSelectedName(next === 'mine' ? entries[0]?.name ?? null : BUILTIN_PREFERENCES[0]?.name ?? null)
-    setMode('read')
-    setDraft(null)
-    setSelectedBuiltinSource(null)
-    setSelectedRunSource(null)
-    setPendingDelete(null)
-    clearCoachFill()
-    releaseCoachIfIdle()
-  }
-
-  const releaseCoachIfIdle = (): void => {
-    setCoachVisible(false)
-    if (pendingOperationRef.current !== null) return
-    coachIdRef.current = null
-    setCoachId(null)
-    coachReadyRef.current = false
-    setCoachReady(false)
-    activeTurnRef.current = null
-  }
-
-  const beginNew = (): void => {
-    if (operationLocked() || !confirmDiscard()) return
-    releaseCoachIfIdle()
-    resetDraftRevision()
-    setSegment('mine')
-    setSelectedName(null)
-    const draftKey = crypto.randomUUID()
-    activeDraftKeyRef.current = draftKey
-    setActiveDraftKey(draftKey)
-    setDraft({ name: '', sections: emptySections(), provenance: null, legacyText: null })
-    setSourceFields(new Set())
-    setMode('new')
-    setWorkbenchStage('source')
-    setSelectedBuiltinSource(null)
-    setSelectedRunSource(null)
-    setSelectedRunLoading(false)
-    setReceipt(null)
-    setPendingDelete(null)
-    clearCoachFill()
-    setLibraryOpen(false)
-  }
-
-  const beginEdit = (entry: LibraryEntry): void => {
-    if (operationLocked() || !confirmDiscard()) return
-    releaseCoachIfIdle()
-    resetDraftRevision()
-    setSegment('mine')
-    setSelectedName(entry.name)
-    const draftKey = crypto.randomUUID()
-    activeDraftKeyRef.current = draftKey
-    setActiveDraftKey(draftKey)
-    setDraft(draftOf(entry))
-    setSelectedBuiltinSource(null)
-    setSelectedRunSource(null)
-    setMode('edit')
-    setWorkbenchStage('interview')
-    setSourceFields(new Set(SECTION_LABELS.filter(({ key }) => entry.sections[key] !== null).map(({ key }) => key)))
-    setReceipt(null)
-    setPendingDelete(null)
-    clearCoachFill()
-    setLibraryOpen(false)
-  }
-
-  const selectMine = (entry: LibraryEntry): void => {
-    if (operationLocked() || !confirmDiscard()) return
-    setSegment('mine')
-    setSelectedName(entry.name)
-    setMode('read')
-    setDraft(null)
-    setReceipt(null)
-    setPendingDelete(null)
-    clearCoachFill()
-    releaseCoachIfIdle()
-    setLibraryOpen(false)
-  }
-
-  const selectBuiltin = (name: string): void => {
-    if (operationLocked() || !confirmDiscard()) return
-    setSegment('builtin')
-    setSelectedName(name)
-    setMode('read')
-    setDraft(null)
-    setReceipt(null)
-    setPendingDelete(null)
-    releaseCoachIfIdle()
-    setLibraryOpen(false)
-  }
-
-  const restartSource = (): void => {
-    if (operationLocked() || !confirmDiscard()) return
-    abortRunRead()
-    resetDraftRevision()
-    const draftKey = crypto.randomUUID()
-    activeDraftKeyRef.current = draftKey
-    setActiveDraftKey(draftKey)
-    releaseCoachIfIdle()
-    setMode('new')
-    setDraft({ name: '', sections: emptySections(), provenance: null, legacyText: null })
-    setSourceFields(new Set())
-    setSelectedBuiltinSource(null)
-    setSelectedRunSource(null)
-    setWorkbenchStage('source')
-    setReceipt(null)
-    clearCoachFill()
-    setLibraryOpen(false)
-  }
-
-  const useBuiltinReference = (source: (typeof BUILTIN_PREFERENCES)[number]): void => {
-    if (operationLocked() || !confirmDiscard()) return
-    const draftKey = crypto.randomUUID()
-    activeDraftKeyRef.current = draftKey
-    setActiveDraftKey(draftKey)
-    releaseCoachIfIdle()
-    abortRunRead()
-    resetDraftRevision()
-    setSegment('mine')
-    setSelectedName(null)
-    setDraft({ name: '', sections: emptySections(), provenance: null, legacyText: null })
-    setSourceFields(new Set())
-    setMode('new')
-    setWorkbenchStage('source')
-    setSelectedBuiltinSource(builtinLibraryEntry(source))
-    setSelectedRunSource(null)
-    setSelectedRunLoading(false)
-    setReceipt(null)
-    setPendingDelete(null)
-    clearCoachFill()
-    setLibraryOpen(false)
-  }
-
-  const startBlank = (): void => {
-    setSelectedBuiltinSource(null)
-    setSelectedRunSource(null)
-    setDraft({ name: '', sections: emptySections(), provenance: null, legacyText: null })
-    bumpDraftRevision()
-    setWorkbenchStage('interview')
-    setSourceFields(new Set())
-    clearCoachFill()
-  }
-
-  const startBuiltinSource = (entry: LibraryEntry): void => {
-    setDraft({
-      name: '',
-      sections: { ...entry.sections },
-      provenance: `参考内置方法：${entry.name}`,
-      legacyText: null,
-    })
-    setSelectedBuiltinSource(entry)
-    setSelectedRunSource(null)
-    bumpDraftRevision()
-    setWorkbenchStage('interview')
-    clearCoachFill()
-    setSourceFields(new Set(SECTION_LABELS.filter(({ key }) => entry.sections[key] !== null).map(({ key }) => key)))
-  }
-
-  const startRunSource = (run: RunSourceCandidate): void => {
-    if (!run.eligible || run.question.kind !== 'ok' || run.question.text.trim() === ''
-      || run.deliverable.kind !== 'ok' || run.deliverable.text.trim() === '') return
-    setDraft({ name: '', sections: emptySections(), provenance: `来自研究：${run.name}`, legacyText: null })
-    setSelectedRunSource(run)
-    setSelectedBuiltinSource(null)
-    bumpDraftRevision()
-    setWorkbenchStage('interview')
-    clearCoachFill()
-    setSourceFields(new Set())
-  }
-
-  const cancel = (): void => {
-    if (operationLocked() || !confirmDiscard()) return
-    setMode('read')
-    setDraft(null)
-    setSourceFields(new Set())
-    setPendingDelete(null)
-    clearCoachFill()
-    abortRunRead()
-    releaseCoachIfIdle()
-  }
-
-  const updateSection = (key: keyof LibrarySections, value: string): void => {
-    if (draft === null) return
-    markManual(key)
-    bumpDraftRevision()
-    setDraft({ ...draft, sections: { ...draft.sections, [key]: value === '' ? null : value } })
-  }
 
   const markOperationUnknown = (operation: PendingMethodOperation): void => {
     if (pendingOperationRef.current !== operation) return
@@ -778,14 +539,6 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     return result
   }
 
-  const clearCoachFill = (): void => {
-    setManual(new Set())
-    setCoachFields(new Set())
-    setActiveField(null)
-    setCoachBase(null)
-    previousRef.current = null
-  }
-
   useEffect(() => {
     if (coachId === null) return undefined
     const controller = new AbortController()
@@ -887,28 +640,6 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     }, 900)
     return () => clearTimeout(handle)
   }, [coachId, draft, manual, props.sendCoach])
-
-  const markManual = (field: DraftField): void => {
-    setManual((current) => current.has(field) ? current : new Set(current).add(field))
-  }
-
-  const onNameChange = (name: string): void => {
-    markManual('name')
-    bumpDraftRevision()
-    setDraft((current) => current === null ? null : { ...current, name })
-  }
-
-  const undoCoach = (): void => {
-    const previous = previousRef.current
-    if (previous === null) return
-    bumpDraftRevision()
-    setDraft(previous.draft)
-    setManual(previous.manual)
-    setCoachFields(previous.coachFields)
-    setActiveField(previous.active)
-    setCoachBase(previous.base)
-    previousRef.current = null
-  }
 
   return (
     <div
