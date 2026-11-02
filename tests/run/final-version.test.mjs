@@ -60,19 +60,20 @@ test('run-fold.latestRunVersion 与单一判据同源（边界形态一致）', 
   assert.equal(latestRunVersion([]), 0);
 });
 
-test('漂移锁：scripts/ 里不再自写 vN 正则（单一正本 = pack final-target）', () => {
+test('漂移锁：scripts/ 与 pack src/lib 不再自写 vN 正则（单一正本 = final-target）', () => {
   const LEGACY = [String.raw`^v\d`, String.raw`^v(\d`];
   const files = [];
-  const walk = (dir) => {
+  const walk = (dir, ext) => {
     for (const ent of readdirSync(dir, { withFileTypes: true })) {
       if (ent.name === 'fixtures' || ent.name === 'node_modules' || ent.name === '_tmp') continue;
       const path = join(dir, ent.name);
-      if (ent.isDirectory()) walk(path);
-      else if (ent.name.endsWith('.mjs')) files.push(path);
+      if (ent.isDirectory()) walk(path, ext);
+      else if (ent.name.endsWith(ext)) files.push(path);
     }
   };
-  walk(join(ROOT, 'scripts'));
-  assert.ok(files.length >= 30, `防空语料：scripts 下只扫到 ${files.length} 个 .mjs`);
+  walk(join(ROOT, 'scripts'), '.mjs');
+  walk(join(ROOT, 'packages', 'deep-research-pack', 'src', 'lib'), '.ts');
+  assert.ok(files.length >= 80, `防空语料：只扫到 ${files.length} 个源文件（scripts + pack src/lib）`);
   const offenders = [];
   for (const path of files) {
     const text = readFileSync(path, 'utf8');
@@ -80,5 +81,5 @@ test('漂移锁：scripts/ 里不再自写 vN 正则（单一正本 = pack final
       if (text.includes(legacy)) offenders.push(`${path.slice(ROOT.length + 1)} 含 ${legacy}`);
     }
   }
-  assert.deepEqual(offenders, [], '终稿版本判据只许从 scripts/lib/final-version.mjs 取；旧正则 = 第二份实现');
+  assert.deepEqual(offenders, [], '终稿版本判据只许从 pack final-target 取（scripts 经 final-version.mjs）；旧正则 = 第二份实现');
 });

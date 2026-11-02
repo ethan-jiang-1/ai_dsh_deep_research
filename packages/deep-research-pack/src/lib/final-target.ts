@@ -143,7 +143,7 @@ export function finalPathOf(raw: unknown): string | null {
 /** 终稿族内的显示优先级：读者版 > 版本副本 > 工作稿（自动打开先开人读的那份）。 */
 function familyRank(path: string): number {
   if (path.includes('/final/readable')) return 3
-  if (/\/final\/v[1-9]\d{0,5}\.md$/.test(path)) return 2
+  if (finalVersionOf(path.slice(path.lastIndexOf('/') + 1)) !== null) return 2
   return 1
 }
 
