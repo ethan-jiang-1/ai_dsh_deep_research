@@ -4,7 +4,7 @@
 // 组件负责读盘/会话/布局；纯判据可 keyless 单测（operationMetadataMatches / draftOf 等）。
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { MethodLibraryAction } from '../../lib/method-library-operation.ts'
-import type { LibrarySections } from '../../lib/library-fold.ts'
+import { summaryOfEntry, type LibrarySections } from '../../lib/library-fold.ts'
 import type { LibraryEntry } from '../../lib/library-fold.ts'
 import type { MethodLibrarySnapshot } from '../../lib/method-library-operation-state.ts'
 import type { BUILTIN_PREFERENCES } from '../../lib/config-tables.ts'
@@ -47,6 +47,14 @@ export interface PendingMethodOperation {
 export type OperationOutcome =
   | { readonly kind: 'tool-result'; readonly failed: boolean; readonly result: unknown }
   | { readonly kind: 'turn-end' | 'refresh' }
+
+/** 库条目的名字/摘要筛选（空查询 = 全量）。纯函数，供 hook 与单测共用。 */
+export function filterLibraryEntries<T extends { readonly name: string }>(entries: readonly T[], query: string): T[] {
+  if (query.trim() === '') return [...entries]
+  const q = query.trim().toLowerCase()
+  return entries.filter((entry) => entry.name.toLowerCase().includes(q)
+    || (summaryOfEntry(entry as never) ?? '').toLowerCase().includes(q))
+}
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)

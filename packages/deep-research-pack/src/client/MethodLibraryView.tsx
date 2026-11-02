@@ -36,9 +36,10 @@ import { BUTTON_STYLE, HEADER_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE, RO
 import { BuiltinView, EditorView, MethodSummaryView, ReadMineView, SourceSelectionView, type Draft, type RunSourceCandidate, type WorkbenchStage } from './method-library/views.tsx'
 import { MethodCoachPanel } from './method-library/coach.tsx'
 import { ColumnHandle } from './method-library/ColumnHandle.tsx'
+import { useLibraryData } from './method-library/useLibraryData.ts'
 import {
   LIBRARY_PATH, builtinLibraryEntry, draftOf, emptySections, operationMetadataMatches,
-  type LoadState, type MethodLibraryOperationRequest, type Mode, type OperationOutcome, type PendingMethodOperation,
+  type MethodLibraryOperationRequest, type Mode, type OperationOutcome, type PendingMethodOperation,
   type Receipt, type Segment,
 } from './method-library/model.ts'
 
@@ -70,16 +71,18 @@ export type MethodLibraryViewProps = PropsRuntime<'conversation.view'> & PropsLo
  */
 export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const sessionId = props.sessionId
-  const [text, setText] = useState<string | null>(null)
-  const [loadState, setLoadState] = useState<LoadState>('loading')
-  const [loadError, setLoadError] = useState<string | null>(null)
-  const [query, setQuery] = useState('')
-  const [segment, setSegment] = useState<Segment>('mine')
-  const [selectedName, setSelectedName] = useState<string | null>(null)
+  const {
+    text, loadState, setLoadState, loadError, setLoadError,
+    query, setQuery, segment, setSegment, selectedName, setSelectedName,
+    entries, filtered, selected, builtin, applyLibraryRead, load, reset: resetLibrary,
+  } = useLibraryData({ sessionId, readLibrary: props.readLibrary })
   const [mode, setMode] = useState<Mode>('read')
   const modeRef = useRef<Mode>('read')
   const [workbenchStage, setWorkbenchStage] = useState<WorkbenchStage>('interview')
   const [draft, setDraft] = useState<Draft | null>(null)
+  const canSaveDraft = draft !== null
+    && draft.name.trim() !== ''
+    && SECTION_LABELS.every(({ key }) => (draft.sections[key] ?? '').trim() !== '')
   const [draftRevision, setDraftRevision] = useState(0)
   const draftRevisionRef = useRef(0)
   const turnBaseRevisionRef = useRef<number | null>(null)
@@ -159,56 +162,6 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const [leftWidth, setLeftWidth] = useState(270)
 
-  const entries = foldLibrary(text)
-  const filtered = entries.filter((entry) => {
-    if (query.trim() === '') return true
-    const q = query.trim().toLowerCase()
-    return entry.name.toLowerCase().includes(q) || (summaryOfEntry(entry) ?? '').toLowerCase().includes(q)
-  })
-  const selected = (segment === 'mine' && query.trim() !== ''
-    ? filtered.find((entry) => entry.name === selectedName)
-    : entries.find((entry) => entry.name === selectedName)) ?? null
-  const builtin = segment === 'builtin'
-    ? BUILTIN_PREFERENCES.find((entry) => entry.name === selectedName) ?? null
-    : null
-  const canSaveDraft = draft !== null
-    && draft.name.trim() !== ''
-    && SECTION_LABELS.every(({ key }) => (draft.sections[key] ?? '').trim() !== '')
-
-  const applyLibraryRead = (result: MethodLibraryReadResult): string | null => {
-    if (result.kind === 'absent') {
-      setText(null)
-      setLoadState('absent')
-      setLoadError(null)
-      return null
-    }
-    if (result.kind === 'error') {
-      setText(null)
-      setLoadState('error')
-      setLoadError(result.detail)
-      return null
-    }
-    setText(result.text)
-    setLoadState('ok')
-    setLoadError(null)
-    return result.text
-  }
-
-  const load = async (signal: AbortSignal): Promise<MethodLibraryReadResult | null> => {
-    if (sessionId === undefined) return null
-    try {
-      const result = await props.readLibrary(sessionId, LIBRARY_PATH, signal)
-      if (signal.aborted) return null
-      applyLibraryRead(result)
-      return result
-    } catch (cause) {
-      if (signal.aborted) return null
-      const result = { kind: 'error' as const, detail: String(cause) }
-      applyLibraryRead(result)
-      return result
-    }
-  }
-
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return undefined
     const query = window.matchMedia('(max-width: 640px)')
@@ -223,9 +176,8 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
 
   useEffect(() => {
     sourceReadControllerRef.current?.abort()
+    resetLibrary()
     setMode('read')
-    setSegment('mine')
-    setSelectedName(null)
     setDraft(null)
     draftRevisionRef.current = 0
     setDraftRevision(0)
@@ -238,7 +190,6 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     activeDraftKeyRef.current = null
     setPendingDelete(null)
     setReceipt(null)
-    setLoadError(null)
     setRunNames([])
     setRunState('idle')
     setSelectedBuiltinSource(null)
@@ -259,7 +210,6 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setOperationUnknown(false)
     setSending(false)
     const controller = new AbortController()
-    setLoadState('loading')
     void load(controller.signal)
     return () => {
       controller.abort()
@@ -268,15 +218,6 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     }
   }, [sessionId])
 
-  useEffect(() => {
-    if (entries.length === 0) {
-      setSelectedName(null)
-      return
-    }
-    if (selectedName === null || !entries.some((entry) => entry.name === selectedName)) {
-      setSelectedName(entries[0]?.name ?? null)
-    }
-  }, [text])
 
   const bumpDraftRevision = (): number => {
     const next = draftRevisionRef.current + 1

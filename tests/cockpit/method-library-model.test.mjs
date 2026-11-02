@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  builtinLibraryEntry, draftOf, emptySections, expectedDefaults, operationMetadataMatches,
+  builtinLibraryEntry, draftOf, emptySections, expectedDefaults, filterLibraryEntries, operationMetadataMatches,
 } from '../../packages/deep-research-pack/src/client/method-library/model.ts';
 
 const snapshot = (entries) => entries;
@@ -58,4 +58,16 @@ test('draftOf / builtinLibraryEntry / emptySections：形状投影', () => {
   assert.equal(builtin.isDefault, false);
 
   assert.deepEqual(emptySections(), { source: null, verify: null, report: null, limit: null });
+});
+
+test('filterLibraryEntries：空查询全量；名字与摘要大小写不敏感', () => {
+  const entries = [
+    { name: '找来源', sections: { source: '官方文档优先', verify: null, report: null, limit: null } },
+    { name: 'Fact Check', sections: { source: 'Primary sources', verify: null, report: null, limit: null } },
+  ];
+  assert.equal(filterLibraryEntries(entries, '').length, 2);
+  assert.equal(filterLibraryEntries(entries, '来源')[0].name, '找来源');
+  assert.equal(filterLibraryEntries(entries, 'fact')[0].name, 'Fact Check');
+  assert.equal(filterLibraryEntries(entries, 'primary')[0].name, 'Fact Check');
+  assert.deepEqual(filterLibraryEntries(entries, 'missing'), []);
 });
