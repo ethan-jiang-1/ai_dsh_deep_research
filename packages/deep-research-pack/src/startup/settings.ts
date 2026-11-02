@@ -1,5 +1,5 @@
 /**
- * product-settings — 产品的 home 级状态（D40）：`$DSH_HOME/deep-research/settings.json`。
+ * settings — 产品的 home 级状态（D40）：`$DSH_HOME/deep-research/settings.json`。
  *
  * 为什么在 home 而不是 profile 目录：Host 行拿不到当前 profile 名（CLI 没把它暴露成
  * env 或服务）；home 级是 FAQ 26 允许的"产品自建 `$DSH_HOME/<plugin>/` 路径约定"。
