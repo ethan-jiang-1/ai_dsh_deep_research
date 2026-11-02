@@ -4,7 +4,7 @@
 
 ## 活跃清单
 
-（当前无活跃卡。）
+- [2026-11-03 驾驶舱 E2E 不在 CI](2026-11-03-client-load-smoke-not-in-ci.md) — 终稿页签认领 glob 失效 11 天未被 CI 发现（已修，回归锁在测试）；待定 fixture home 方案。
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

@@ -27,20 +27,16 @@ export const RESEARCH_FINAL_TAB_KEY = 'dsh-deep-research-pack/research-final'
 /** 「终稿」页签的 kind（页签类型 discriminator；注册与路由同值）。 */
 export const RESEARCH_FINAL_KIND = 'research-final'
 
-/** 「终稿」认领的地址 glob（含分隔符 → 整路径匹配；认领范围另由 canOpen 收窄到三个位置）。 */
-export const RESEARCH_FINAL_PATTERN = '**/final.md'
-
-/** 「终稿」认领的地址 glob（无分隔符 → 按 basename 任意深度匹配，与上一行互补）。 */
-export const RESEARCH_FINAL_PATTERN_ROOT = 'final.md'
-
-/** 「终稿」族：交付副本 `final/vN.md`（含分隔符 → 整路径匹配；canOpen 再收窄）。 */
-export const RESEARCH_FINAL_PATTERN_LEDGER = '**/final/v*.md'
-export const RESEARCH_FINAL_PATTERN_LEDGER_ROOT = 'final/v*.md'
-
-/** 「终稿」族：读者版 `final/readable.md` / `final/readable-vN.md`（canOpen 再收窄）。
- *  第二条是无分隔符 basename 匹配——交付卡片的文件地址常带 session 前缀，宽匹配后再由 canOpen 收窄。 */
-export const RESEARCH_FINAL_PATTERN_READER = '**/final/readable*.md'
-export const RESEARCH_FINAL_PATTERN_READER_ROOT = 'readable*.md'
+// 认领范围 = basename 宽匹配 + `canOpen` 收窄到终稿族（三位置 + final/vN + readable*）。
+//
+// 为什么只写无分隔符的 glob（2026-11-03 实测）：vendor `tab-registry` 对**不含 `:`** 的
+// pattern 一律用 `picomatch(..., { basename: true })` 编译——它拿地址的 basename 去匹配，
+// 所以 `**/final/v*.md` / `final/v*.md` 这类带分隔符的写法**永远不命中**（basename 里没有
+// `/`），终稿页签因此从不参与认领，点「读终稿」落到 vendor 文档预览（页签标题变 `v1.md`）。
+// 精确性由 `canOpen: isFinalAddress` 承担；pattern 只负责进入候选。
+export const RESEARCH_FINAL_PATTERN = 'final.md'
+export const RESEARCH_FINAL_PATTERN_LEDGER = 'v*.md'
+export const RESEARCH_FINAL_PATTERN_READER = 'readable*.md'
 
 /** 「研究状态」页签的 keyed 槽名（sidebar.right.pane.tab）。 */
 export const RESEARCH_PANE_SLOT = 'sidebar.right.pane.tab'
