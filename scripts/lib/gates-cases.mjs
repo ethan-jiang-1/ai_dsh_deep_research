@@ -278,6 +278,13 @@ export const CASES = [
   { id: 'md-links-dead', gate: 'md-links', mutate: appendTo('README.md', '\n[死链探针](./definitely-missing-file.md)\n') },
   { id: 'md-links-untracked', gate: 'md-links', mutate: linkUntrackedTarget() },
   { id: 'md-anchors-missing', gate: 'md-anchors', mutate: appendTo('README.md', '\n[坏锚探针](AGENTS.md#这个锚点肯定不存在xyz)\n') },
+  // doc-paths（2026-11-03 卫生审计 D1-2）：反引号散文件路径指向空处——md-links 看不见，
+  // 但 agent 会照它去读。注入到 docs/ 的 live 文档（fixtures 与 notes 层不在扫描面）。
+  // 副本基线非 PASS 是预期：gates-smoke fixture 不复制 vendor/dsh submodule，文档里省略
+  // `vendor/` 前缀的资产路径（terms/AGENTS 的既有写法）在副本内必然未命中 → expect 指名
+  // 本案例的注入报因，防止既有报因把"注入未生效"蒙混成绿。
+  { id: 'doc-paths-dangling', gate: 'doc-paths', expect: 'scripts/__missing-probe.mjs',
+    mutate: appendTo('docs/project-map.md', '\n路径探针：`scripts/__missing-probe.mjs` 与 `packages/deep-research-pack/__missing__/`\n') },
   // 非 ASCII 路径形态（2026-10-21 卫生轮补宽）：md-utf8-newline / md-anchors 的 ls-files 原无
   // core.quotepath=false——非 ASCII tracked 路径（_dist/安装手册.md）被引号转义后 existsSync
   // miss → 稀疏态 continue 静默跳过 = md-links 已修过的同款漏扫（BUG-016 家族）。案例先红实录：
@@ -587,17 +594,6 @@ export const CASES = [
     },
     expect: '.editorconfig 缺 "root = true"' },
 
-  // 工作区运行区拒收行被删（workspace-versioning）：种子丢掉 `drt_*/` 行——安装方一次
-  // `git add -A` 就把整个 run 历史提交进他自己的库。正本同改保 pack-workspace-fresh 绿
-  // （否则红的是新鲜度门禁，本案例会因别的报因假绿）。
-  // 种子退化成裸 `*` 拒收全部（workspace-versioning）：它会把被跨目录引用的材料一起拒收——
-  // 全新 clone 里 drafts 开发证据全丢，md-links 随之红（fixture 实测形态）。
-  // 未交付停放位拒收行被删（workspace-versioning）：种子丢掉 `_abandoned/` 行——未交付
-  // run 会被安装方一次 `git add -A` 提交进库；正本同改保 pack-workspace-fresh 绿。
-  // 种子清单缺 .gitignore 条目（workspace-versioning）：安装方的忽略规则不在清单里——
-  // scaffold 不会铺，工作区一次 git add -A 会把 run 历史提交进用户库。
-  // 开发证据白名单缺席（workspace-versioning）：删 drafts/.gitignore——drafts/ 重新变成
-  // "探针稿与 dry-run 输出默认可被 git add"。
   // dev/ 运行态回流（dev-runtime-clean）：在源码驱动目录造一个误落位 run bundle——
   // .gitignore 能挡 git，挡不住 cp -r/打包；门禁直接看盘。
   { id: 'dev-runtime-clean-stray', gate: 'dev-runtime-clean', mutate: (dir) => {

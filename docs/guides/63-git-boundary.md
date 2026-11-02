@@ -83,7 +83,7 @@
 - `secrets-untracked`：tracked 清单零凭据/依赖/日志/临时目录/构建中间产物。
 - `host-paths`：live 文档/源码/随包内容零绝对 home 路径（历史 `notes/`、`_backlog/`、
   `snapshots/`、`tests/fixtures/` 豁免）。
-- `pack-workspace-fresh` / `overlay-fresh` / `dist-manual-version`：tracked 生成物不漂移。
+- `overlay-fresh` / `dist-manual-fresh` / `dist-manual-version`：tracked 生成物不漂移。
 - 干净 clone / CI：`pnpm verify` + `pnpm test` keyless；平台差异走运行时判断，不写死环境。
 - 例外：确实必须 tracked 的本机/生成内容 → 同 diff 写 Note，说明消费者、生成器、门禁与
   跨环境替代方案；没有这些就不进。

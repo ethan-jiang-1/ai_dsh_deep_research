@@ -102,7 +102,7 @@ DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`�
 | 团队机制层 | 另一个 bundle（`@deepseek-ai/dsh-experimental-agent-team-profile`，**N2 experimental**：上游可改/撤，风险与层级表见 pack README §Compatibility） | vendor（本包**故意不声明**团队行——组合与实战 config 归该层，RFC m2-p1-run-channel A 定案） |
 | 研究工作区 | 会话 cwd 的目录；只承载研究产物（`drt_*`/`archive/`/`_abandoned/`/`method-library.md`）；用户任意目录，开发实例 = `research-workspace/` | 用户目录（首屏选择/`DEEP_RESEARCH_WORKSPACE`） |
 | 内容注入 + 启动行 | `src/content`：把 `content/manual.md` 以 runtime context 注入；`src/startup`：读 `$DSH_HOME/deep-research/settings.json`/登记工作区/best-effort 会话 | 本包（D40） |
-| 只读 doctor | `dsh-deep-research-doctor`：profile roster/版本/团队层/工作区/凭据；不安装、不启动 | 本包 `scripts/doctor.mjs` |
+| 只读 doctor | `dsh-deep-research-doctor`：profile roster/版本/团队层/工作区/凭据；不安装、不启动 | 本包 `packages/deep-research-pack/scripts/doctor.mjs` |
 
 **内容不落工作区**：研究手册由 `src/content` 以 runtime context 注入每个角色；NODES/判型库是
 Lead 的 skills；模板在包内 `content/templates/run/`。用户项目自己的 `AGENTS.md` 仍由

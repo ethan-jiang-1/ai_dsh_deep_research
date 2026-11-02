@@ -37,7 +37,7 @@ export function runA() {
 
 // ── md-links（所有 tracked .md 的相对链接必须可解析且目标被 git 跟踪；git ls-files 驱动——基础整治 C10）──
 // 原版只扫具名目录（docs/notes/…），根目录其余 tracked .md 逃检——本单子文件初稿 31 条死链
-// 同刻全绿即实证。覆盖面 = tracked 集合（未 staged 的新文件扫不到——pre-commit 在 staged 后兜住）；反引号裸路径不检（设计）。
+// 同刻全绿即实证。覆盖面 = tracked 集合（未 staged 的新文件扫不到——pre-commit 在 staged 后兜住）；反引号仓内路径归 doc-paths 门禁（2026-11-03）。
 // BUG-016 加宽（2026-10-07）：链接目标**盘上存在但未被 git 跟踪**同样红——旧判据查盘上
 // 存在性，绿色依赖机器状态（本机有归档产物就绿，fresh clone 即红，_done/_reference 摘要
 // 链接 research-workspace/archive/ 实证）。链接语法 = 仓内可解析承诺；引用运行区/本机数据
@@ -150,6 +150,57 @@ export function runA() {
         }
       }
     }
+  }
+}
+
+// ── doc-paths（live 文档反引号里的仓内路径必须存在——2026-11-03 七维卫生审计 D1-2）──
+// 为什么：md-links 只管 Markdown 链接，`` `path` `` 散文件路径无人把守；本轮实测两处腐化
+//（guides/62 的 `research-workspace/templates/run/`、changing-node-topology skill 同款），
+// 另有一批"文件改名后散文仍指旧名"（record-role-fixture 缺 .mjs）同族。反引号路径同样是合同：
+// agent 会照它去读文件，指向空处 = 探索成本 + 误诊。
+// 范围：live 文档（排除 notes/ 历史层、_backlog/ 过程层、tests/fixtures/ 样本、vendor/）；
+// 只解析以仓内已知根开头的 token（packages|scripts|dev|docs|tests|snapshots|_dist|research-workspace），
+// 带占位符（<>{ }* ?…）或空格的跳过（示例路径不是事实声明）。
+// 解析优先级：仓根 → 文档所在目录（pack 子树里的 `scripts/doctor.mjs` 这类包内相对写法）→
+// `vendor/dsh/` 前缀（资产文字引用 vendor 路径时省略前缀的既有写法）；无扩展名的 token 另试
+// `.md/.mjs/.sh/.cjs/.ts`（`dev/README` 这类简写）。
+// 外链白名单（必须带理由）：company 仓路径与"守则要求不存在"的反例路径——路径存在性对它们不成立。
+// 防空语料：解析到的 token 数 < 100 → 红（范围被收窄或抓取正则失效）。
+{
+  const gate = 'doc-paths';
+  const files = trackedFiles({
+    gate,
+    glob: '*.md',
+    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f.startsWith('_backlog/') || f.startsWith('tests/fixtures/'),
+    emptyMsg: '防空语料：未扫到任何 live 文档',
+  });
+  if (files) {
+    const ROOTS = /^(packages|scripts|dev|docs|tests|snapshots|_dist|research-workspace)\//;
+    const EXTS = ['.md', '.mjs', '.sh', '.cjs', '.ts'];
+    const EXEMPT = new Map([
+      ['docs/release.md', 'company 仓路径（外部参考，不随本仓）'],
+      ['tests/layering.spec.ts', 'company 仓路径（外部参考，不随本仓）'],
+      ['dev/harness-home', '反例路径：dev-runtime-clean 守则要求它不存在（只作注入样本）'],
+    ]);
+    let checked = 0;
+    for (const { rel, text } of files) {
+      const lines = text.split('\n');
+      for (const [i, line] of lines.entries()) {
+        for (const m of line.matchAll(/`([^`\n]+)`/g)) {
+          const p = m[1].trim().replace(/:\d+(?:-\d+)?$/, '').replace(/[.,;:]+$/, '');
+          if (!ROOTS.test(p)) continue;
+          if (/[<>{}*?…\s]/.test(p) || p.includes('$')) continue;
+          if (EXEMPT.has(p)) continue;
+          checked++;
+          const candidates = [p, 'vendor/dsh/' + p, ...EXTS.map((e) => p + e)];
+          const fromDoc = join(dirname(rel), p);
+          candidates.push(fromDoc, ...EXTS.map((e) => fromDoc + e));
+          if (candidates.some((c) => existsSync(join(ROOT, c)))) continue;
+          fail(gate, `${rel}:${i + 1} 反引号路径 \`${p}\` 不存在（仓根/文档目录/vendor 均未命中）——散文件路径也是合同；修正路径或改用 Markdown 链接`);
+        }
+      }
+    }
+    if (checked < 100) fail(gate, `防空语料：只解析到 ${checked} 条仓内反引号路径（过少 = 扫描面被收窄）`);
   }
 }
 
