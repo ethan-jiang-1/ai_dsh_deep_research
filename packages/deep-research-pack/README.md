@@ -5,6 +5,8 @@ kind: "package-bundle"
 
 # dsh-deep-research-pack
 
+English | [中文](README.zh.md)
+
 ## Summary
 
 This bundle adds a Deep Research capability to a DSH profile: five agent presets (Lead, Scout,

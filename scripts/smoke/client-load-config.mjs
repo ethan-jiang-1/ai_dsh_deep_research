@@ -4,7 +4,7 @@
 // 本次研究 + 「方法库」入口 + 管理/内置/示范/回执负例。主 tab 的列表/编辑/新建由主件
 // pass-3c 验证；自测例库 12 形态由 tests/cockpit/library-fold 的 keyless battery 覆盖
 // （空白自测会话没有 conversation view tab，浏览器相位退役）。
-import { expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES } from '../lib/web-ui-nav.mjs'
+import { expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES, TAB_TEXT, tabTitleIndex } from '../lib/web-ui-nav.mjs'
 
 /**
  * pass-4：「研究配置」页签（D25 期 1 管理中继面）——guide 胶囊在场 + 页签体渲染
@@ -38,7 +38,7 @@ export async function pass4ConfigTabPhase(env) {
   step(capOk, '「研究配置」guide 胶囊在场（tab 类型注册成功 + guide 页可达）')
   if (!capOk) return
   const text = await paneTextOf(page)
-  const seg = text.slice(text.indexOf('研究配置'))
+  const i = tabTitleIndex(text, 'config'); const seg = text.slice(i < 0 ? 0 : i)
   step(seg.includes('本次研究'), '研究配置页签体：本次研究摘要在场')
   step(seg.includes('方法库') && (seg.includes('顶部') || seg.includes('tab')),
     '研究配置页签体：方法库入口指到主界面 tab')

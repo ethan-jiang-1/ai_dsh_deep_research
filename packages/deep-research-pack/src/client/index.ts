@@ -70,7 +70,11 @@ export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'r
  */
 export function apply(ctx: ClientContext): void {
   ctx.inject(['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'sessions', 'workspaces', 'uiWorkspace', 'locale'], (scoped) => {
-    scoped.effect(() => scoped.locale.register('deepResearchPack', { zh, en }), 'deep-research-pack: dictionaries')
+    // 字典必须**同步**注册后再 bind：effect 回调可能延迟到 inject 回调返回后才跑，
+    // 而页签/guide 的 title 在注册期就会被求值（2026-11-03 实测：包成 effect 后标题取不到值）。
+    // 注册是 effect 语义 —— 同步取得 disposer，再交给 scoped.effect 管回收。
+    const disposeDictionaries = scoped.locale.register('deepResearchPack', { zh, en })
+    scoped.effect(() => disposeDictionaries, 'deep-research-pack: dictionaries')
     const t = scoped.locale.bind('deepResearchPack')
     // journal 流式源（company 同款最小投影）：snapshot 给历史、event 给实时；
     // wire 形状 → 领域形状的折算住这里（纯装配），展示住组件。目标两形态：普通会话 id /
@@ -189,10 +193,10 @@ export function apply(ctx: ClientContext): void {
       id: RESEARCH_TAB_KEY,
       kind: RESEARCH_STATUS_TAB_KIND,
       priority: 'extension',
-      title: () => '研究状态',
+      title: () => t('tabStatus'),
       // guide 胶囊的 glyph（vendor SidebarRightGuideEntry.icon：标题前图标——缺席则画方块
       // 占位符；2026-09-28 用户点名要 icon）：仪表盘 = 状态监测语义，与检索/工具图标不撞
-      guide: [{ id: RESEARCH_TAB_KEY, order: 1, title: () => '研究状态', description: () => '研究 run 的步骤、等待与证据状态', icon: IconGaugeOutlineRegular }],
+      guide: [{ id: RESEARCH_TAB_KEY, order: 1, title: () => t('tabStatus'), description: () => t('tabStatusGuide'), icon: IconGaugeOutlineRegular }],
     }), 'deep-research-pack: research-status tab type')
 
     // ── 问卡窄列修复（2026-10-21 实测）──
@@ -230,8 +234,8 @@ export function apply(ctx: ClientContext): void {
       id: RESEARCH_CONFIG_TAB_KEY,
       kind: RESEARCH_CONFIG_TAB_KIND,
       priority: 'extension',
-      title: () => '研究配置',
-      guide: [{ id: RESEARCH_CONFIG_TAB_KEY, order: 2, title: () => '研究配置', description: () => '内置偏好与我的偏好库——一键把管理指令交给 Lead', icon: IconSettingsOutlineRegular }],
+      title: () => t('tabConfig'),
+      guide: [{ id: RESEARCH_CONFIG_TAB_KEY, order: 2, title: () => t('tabConfig'), description: () => t('tabConfigGuide'), icon: IconSettingsOutlineRegular }],
     }), 'deep-research-pack: research-config tab type')
 
     // 「研究图谱」页签（2026-10-21 A0）：依赖形状 + worker 层 + 异常注意力；只读 + 让 Lead 调整。
@@ -240,8 +244,8 @@ export function apply(ctx: ClientContext): void {
       id: RESEARCH_GRAPH_TAB_KEY,
       kind: RESEARCH_GRAPH_TAB_KIND,
       priority: 'extension',
-      title: () => '研究图谱',
-      guide: [{ id: RESEARCH_GRAPH_TAB_KEY, order: 3, title: () => '研究图谱', description: () => '依赖波次、worker 与需要你注意的卡点', icon: IconBranchOutlineRegular }],
+      title: () => t('tabGraph'),
+      guide: [{ id: RESEARCH_GRAPH_TAB_KEY, order: 3, title: () => t('tabGraph'), description: () => t('tabGraphGuide'), icon: IconBranchOutlineRegular }],
     }), 'deep-research-pack: research-graph tab type')
 
     // 「终稿」页签（issue 2026-10-19-final-tab-in-sidebar）：**接管 `drt_<slug>/final.md` 的文件地址**
@@ -257,7 +261,7 @@ export function apply(ctx: ClientContext): void {
       patterns: [RESEARCH_FINAL_PATTERN, RESEARCH_FINAL_PATTERN_LEDGER, RESEARCH_FINAL_PATTERN_READER],
       priority: 'extension',
       canOpen: isFinalAddress,
-      title: () => '终稿',
+      title: () => t('tabFinal'),
     }), 'deep-research-pack: research-final tab type')
 
     // 管理指令发送闭包（D25 期 1）：session/prompt——默认 steer（在飞 run 即时消费），
@@ -550,7 +554,7 @@ export function apply(ctx: ClientContext): void {
 
     scoped.effect(() => scoped.slots.inject(RESEARCH_TITLE_SLOT, () => [
       scoped.slots.register(
-        { name: RESEARCH_TITLE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow, listDir, readFile, revealStatusTab }) },
+        { name: RESEARCH_TITLE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow, listDir, readFile, revealStatusTab, labels: { idle: t('tabStatus'), pending: t('tabStatusPending') } }) },
         ResearchStatusTitle,
       ),
     ]), 'deep-research-pack: research-status live title')

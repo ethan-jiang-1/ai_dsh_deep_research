@@ -36,6 +36,8 @@ export interface ResearchStatusTabInjected {
 /** 活标题注入面：只需要 journal 流（挂起谓词）——标题不读文件、不开面。 */
 export interface ResearchStatusTitleInjected {
   readonly follow: (target: FollowTarget, signal: AbortSignal) => AsyncGenerator<JournalFrame>
+  /** 页签标题文案（locale 注入；挂起态与空闲态分开）。 */
+  readonly labels: { readonly idle: string; readonly pending: string }
 }
 
 /** 槽标准 props + 注入面。 */

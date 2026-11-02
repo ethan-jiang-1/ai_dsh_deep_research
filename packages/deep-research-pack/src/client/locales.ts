@@ -1,5 +1,13 @@
 /** Method Library view action and operation-status copy. */
 export const zh = {
+  tabStatus: '研究状态',
+  tabStatusGuide: '研究 run 的步骤、等待与证据状态',
+  tabStatusPending: '研究状态 · ⏳ 等你拍板',
+  tabConfig: '研究配置',
+  tabConfigGuide: '内置偏好与我的偏好库——一键把管理指令交给 Lead',
+  tabGraph: '研究图谱',
+  tabGraphGuide: '依赖波次、worker 与需要你注意的卡点',
+  tabFinal: '终稿',
   startTitle: 'Deep Research · 一支多角色研究团队',
   startAria: 'Deep Research 起步指引',
   startWorkspace: '当前工作区',
@@ -95,6 +103,14 @@ export const zh = {
 export type DeepResearchPackLocaleKey = keyof typeof zh
 
 export const en = {
+  tabStatus: 'Research Status',
+  tabStatusGuide: 'Steps, waits, and evidence state of the research run',
+  tabStatusPending: 'Research Status · ⏳ Waiting for you',
+  tabConfig: 'Research Config',
+  tabConfigGuide: 'Built-in preferences and my method library — hand management instructions to the Lead in one click',
+  tabGraph: 'Research Graph',
+  tabGraphGuide: 'Dependency waves, workers, and attention points to check',
+  tabFinal: 'Final report',
   startTitle: 'Deep Research · a multi-role research team',
   startAria: 'Deep Research getting-started guide',
   startWorkspace: 'Current workspace',

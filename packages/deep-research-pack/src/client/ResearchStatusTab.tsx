@@ -235,5 +235,5 @@ export function ResearchStatusTitle(props: PropsRuntime<'sidebar.right.pane.tab.
     })()
     return () => { controller.abort() }
   }, [sessionId])
-  return hitl.pending ? '研究状态 · ⏳ 等你拍板' : '研究状态'
+  return hitl.pending ? props.labels.pending : props.labels.idle
 }

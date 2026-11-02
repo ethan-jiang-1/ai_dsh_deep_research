@@ -9,7 +9,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { latestRunVersion } from '../../packages/deep-research-pack/src/lib/run-fold.ts'
-import { openSessionById } from '../lib/web-ui-nav.mjs'
+import { openSessionById, TAB_TEXT } from '../lib/web-ui-nav.mjs'
 
 /**
  * pass-5：终稿端到端（交付门、读者版/审计版切换、静音条、滚动口、两处同源折叠块）。
@@ -24,15 +24,15 @@ export async function pass5FinalDeliveryPhase(env) {
       await expandBtn.first().click({ timeout: 8_000 }).catch(() => {})
       await wait(1_500)
     }
-    const capsuleVisible = async () => page.getByRole('button', { name: /研究状态/ }).first().isVisible().catch(() => false)
-    const chip = page.getByRole('tab', { name: /研究状态/ }).first()
+    const capsuleVisible = async () => page.getByRole('button', { name: TAB_TEXT.status }).first().isVisible().catch(() => false)
+    const chip = page.getByRole('tab', { name: TAB_TEXT.status }).first()
     if (await chip.isVisible().catch(() => false)) { await chip.click({ timeout: 5_000 }).catch(() => {}); return true }
-    if (await capsuleVisible()) { await page.getByRole('button', { name: /研究状态/ }).first().click({ timeout: 5_000 }).catch(() => {}); return true }
+    if (await capsuleVisible()) { await page.getByRole('button', { name: TAB_TEXT.status }).first().click({ timeout: 5_000 }).catch(() => {}); return true }
     const addTab = page.getByRole('button', { name: /^(New tab|新标签页)$/ }).first()
     if (await addTab.isVisible().catch(() => false)) {
       await addTab.click({ timeout: 5_000 }).catch(() => {})
       await wait(1_500)
-      if (await capsuleVisible()) { await page.getByRole('button', { name: /研究状态/ }).first().click({ timeout: 5_000 }).catch(() => {}); return true }
+      if (await capsuleVisible()) { await page.getByRole('button', { name: TAB_TEXT.status }).first().click({ timeout: 5_000 }).catch(() => {}); return true }
     }
     return false
   }
@@ -94,7 +94,7 @@ export async function pass5FinalDeliveryPhase(env) {
     const normalize = (text) => text.replace(/[\s*`#>_[\]()|\-—–:：]/g, '')
     const heading = normalize((finalBody.split('\n').find((l) => l.trim().startsWith('#')) ?? '').replace(/^#+\s*/, '')).slice(0, 12)
     const tabTitles = await page.evaluate(() => [...document.querySelectorAll('[role="tab"]')].map((n) => (n.textContent ?? '').trim()))
-    const onFinalTab = tabTitles.some((t) => t.includes('终稿'))
+    const onFinalTab = tabTitles.some((t) => TAB_TEXT.final.test(t))
     step(onFinalTab, '交付门点开 → 页签标题「终稿」（extension 带接管了文件地址）', `tabs=${JSON.stringify(tabTitles)}`)
     // 终稿页脚同款只读折叠块（与状态页 ⑤ 共用 src/lib/rerun-triage 文案）
     const triageFooter = page.getByText('还不满意？三种改法').first()
@@ -137,7 +137,7 @@ export async function pass5FinalDeliveryPhase(env) {
     })
     step(scrollProbe.ok, '终稿页签自带滚动口（长正文可滚、不被裁）', scrollProbe.why)
     // 状态页 ⑤ 同款折叠块（同一交付目标会话；与终稿页脚共用 src/lib/rerun-triage 文案）
-    const statusChip = page.getByRole('tab', { name: /研究状态/ }).first()
+    const statusChip = page.getByRole('tab', { name: TAB_TEXT.status }).first()
     if (await statusChip.isVisible().catch(() => false)) {
       await statusChip.click({ timeout: 5_000 }).catch(() => {})
       // 切页签后等**显式内容**（状态页的停靠点/交付态）再判——固定读一次会读到终稿页旧 DOM。

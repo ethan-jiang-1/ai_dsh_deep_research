@@ -394,3 +394,22 @@ export async function dismissPreviewNotice(page) {
   }, PREVIEW_NOTICE_HEADING).catch(() => false)
   return still ? 'stuck' : 'dismissed'
 }
+
+// ── 页签标题的中英双语判据（2026-11-03：驾驶舱 chrome 走 locale 后的冒烟基线）──
+// 产品标题随 locale 变（zh 是主语言，en 是默认浏览器语言）；冒烟断言不能只认中文，
+// 否则 i18n 一改就假红。正文内容不在本表内（研究面板文案仍以中文为主）。
+export const TAB_TEXT = {
+  status: /研究状态|Research Status/,
+  statusPending: /研究状态 · ⏳ 等你拍板|Research Status · ⏳ Waiting for you/,
+  config: /研究配置|Research Config/,
+  graph: /研究图谱|Research Graph/,
+  final: /终稿|Final report/,
+}
+
+/** 文本里页签标题/正文起点（中英任一）；找不到 = -1（调用方决定回落语义）。 */
+export function tabTitleIndex(text, key) {
+  const pattern = TAB_TEXT[key]
+  if (pattern === undefined) throw new Error(`tabTitleIndex: 未知页签 ${key}`)
+  const match = pattern.exec(text)
+  return match === null ? -1 : match.index
+}

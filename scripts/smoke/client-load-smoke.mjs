@@ -59,7 +59,7 @@ import { clientHistoryWindow, readSessionEvents, resolveSessionLog, researchWork
 import { prepareClientLoadReference } from './client-load-reference.mjs'
 import { pass4ConfigTabPhase } from './client-load-config.mjs'
 import { pass5FinalDeliveryPhase } from './client-load-final.mjs'
-import { clickRowByText, dismissPreviewNotice, expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES } from '../lib/web-ui-nav.mjs'
+import { clickRowByText, dismissPreviewNotice, expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES, TAB_TEXT, tabTitleIndex } from '../lib/web-ui-nav.mjs'
 import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { isActivePlanNode, planIndex } from '../../packages/deep-research-pack/src/lib/plan-index.ts'
 import { latestRunVersion } from '../../packages/deep-research-pack/src/lib/run-fold.ts'
@@ -358,7 +358,7 @@ async function awaitAppReady(page, settleMs) {
 // 「研究配置」guide 胶囊打开序列：先试已停靠芯片（展开右栏后直接在场），不在则走 dock
 // 「New tab」开 guide 页再试——两条路都试（company 配方核心）。时序参数逐调用点保持
 // 原值（探测窗/重试窗/点击后稳定窗是各上下文实测调的，不统一）；返回 ok = 胶囊已点开。
-async function openGuideCapsule(page, probeMs, retryMs, afterClickMs, pattern = /研究配置/) {
+async function openGuideCapsule(page, probeMs, retryMs, afterClickMs, pattern = TAB_TEXT.config) {
   const expand = page.getByRole('button', { name: 'Open right sidebar' })
   if (await expand.count() > 0) await expand.first().click({ timeout: 8_000 }).catch(() => {})
   await wait(1_500)
@@ -384,12 +384,14 @@ async function openPane(page) {
   const expand = page.getByRole('button', { name: 'Open right sidebar' })
   if (await expand.count() > 0) await expand.first().click({ timeout: 8_000 }).catch(() => {})
   await wait(1_500)
-  const capsule = page.getByRole('button', { name: /研究状态/ }).first()
+  const capsule = page.getByRole('button', { name: TAB_TEXT.status }).first()
   const ok = await capsule.isVisible({ timeout: 12_000 }).catch(() => false)
   if (ok) { await capsule.click({ timeout: 5_000 }).catch(() => {}); await wait(4_000) }
   return ok
 }
 const paneTextOf = (page) => page.evaluate(() => document.body?.innerText ?? '')
+// 页签正文起点：标题随 locale 变（中/英），正文内容不变。
+const segFrom = (text, key) => { const i = tabTitleIndex(text, key); return text.slice(i < 0 ? 0 : i) }
 // 当前主视图选中的会话行键（`aria-selected=true`）——行键是 sessionId 的权威投影；
 // 标题/内容可能因同名会话而骗过断言（2026-10-21 实红：绑定 d47b… 无团队，页面停在 1392… 团队会话）。
 const activeSessionRowKey = (page) => page.evaluate(() =>
@@ -414,6 +416,8 @@ async function setupProbeSession() {
 
   const chromium = await loadChromium(ROOT)
   browser = await launchChromium(chromium)
+  // 浏览器 locale 保持 Playwright 默认（en-US）：本冒烟的 UI chrome 定位器（Open right sidebar /
+  // New tab）是英文；页签标题用 `TAB_TEXT` 中英双语断言，两个语言都能过。
   page = await browser.newPage()
   consoleErrors = []
   httpFailures = []
@@ -492,7 +496,7 @@ async function pass1BoundFacePhase() {
       if (capOk) {
         await wait(6_000)
         const paneText = await paneTextOf(page)
-        let seg = paneText.slice(paneText.indexOf('研究状态'))
+        let seg = segFrom(paneText, 'status')
         // UI/盘侧时点竞态收口（2026-10-11 首验两红）：①UI bundle 面有 30s 刷新周期（slug
         // 变化即扫 + 定时），盘侧文件现扫可领先 UI 一拍；②lead journal 快照取自 boot 前，
         // 挂起/锚点期望拿旧态对 UI 实时态会假红（实测：快照 HITL2 挂起 vs UI 停靠点已过 2）。
@@ -542,7 +546,7 @@ async function pass1BoundFacePhase() {
           if (!(await openPane(page))) break
           await wait(6_000)
           const paneAgain = await paneTextOf(page)
-          seg = paneAgain.slice(paneAgain.indexOf('研究状态'))
+          seg = segFrom(paneAgain, 'status')
           uiFace = parseUiFace(seg, await faceRowText())
           diskSide = diskSideNow()
         }
@@ -556,13 +560,13 @@ async function pass1BoundFacePhase() {
         for (let i = 0; i < 20 && !seg.includes('🎯'); i++) {
           await wait(1_000)
           const t = await paneTextOf(page)
-          seg = t.slice(t.indexOf('研究状态'))
+          seg = segFrom(t, 'status')
           uiFace = parseUiFace(seg, await faceRowText())
         }
         await wait(300) // 摘要块在场后再让一帧（避免读到"块在、行未满"的边界帧）
         {
           const t = await paneTextOf(page)
-          const settled = t.slice(t.indexOf('研究状态'))
+          const settled = segFrom(t, 'status')
           if (settled.includes('🎯')) { seg = settled; uiFace = parseUiFace(seg, await faceRowText()) }
         }
         const stepsOk = ['立项', '组队', '侦察', '挖掘', '综合', '审查', '交付'].every((x) => seg.includes(x))
@@ -716,7 +720,7 @@ async function pass2UnboundNegativePhase() {
       if (!capOk2) continue
       await wait(5_000)
       const t2 = await paneTextOf(page)
-      const seg2 = t2.slice(t2.indexOf('研究状态'))
+      const seg2 = segFrom(t2, 'status')
       unboundSession = cand
       step(seg2.includes('本会话未绑定 run bundle'), '未绑定会话：提示行在场（如实说明，不冒充）', cand.title)
       // 泄漏检查盯**别家面数据**（渐进面/诚实线），不盯占位步骤名——未绑定但本会话有挂起 ask
@@ -817,7 +821,7 @@ async function pass3ActivityStreamPhase() {
     }
     await openPane(page)
     const paneText = await paneTextOf(page)
-    const paneOk = paneText.includes('研究状态') && /(?:🔍|👥|💬|📦)/u.test(paneText)
+    const paneOk = TAB_TEXT.status.test(paneText) && /(?:🔍|👥|💬|📦)/u.test(paneText)
     step(paneOk, '页签体渲染（keyed 槽体挂对 key + follow 通道接通）')
     // 流畸形死亡恢复指引（BUG-023 修复①）：盘侧 streamFailureOf 真值 ↔ UI 横幅对账——
     // 末位回合死于上游流失败且无新回合接手才显示；用真实死亡会话（如渐进面探针会话）作正例。
@@ -877,7 +881,7 @@ async function pass3ActivityStreamPhase() {
  *  数据面 = agentTeam 投影 + 可选 plan.md；无团队时必须显示「还没有团队投影」而不是空白/报错。 */
 async function pass3bGraphTabPhase() {
   await awaitAppReady(page, 5_000)
-  const ok = await openGuideCapsule(page, 4_000, 10_000, 2_500, /研究图谱/)
+  const ok = await openGuideCapsule(page, 4_000, 10_000, 2_500, TAB_TEXT.graph)
   step(ok, '「研究图谱」guide 胶囊在场（tab 类型注册成功 + guide 页可达）')
   if (!ok) return
   const text = await paneTextOf(page)

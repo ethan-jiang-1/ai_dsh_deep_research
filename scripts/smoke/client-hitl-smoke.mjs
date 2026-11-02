@@ -36,7 +36,7 @@ import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs'
 import { readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs'
 import { launchChromium, loadChromium } from '../lib/playwright.mjs'
-import { openSessionById } from '../lib/web-ui-nav.mjs'
+import { openSessionById, TAB_TEXT } from '../lib/web-ui-nav.mjs'
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -181,7 +181,7 @@ try {
   const expand = page.getByRole('button', { name: 'Open right sidebar' })
   if (await expand.count() > 0) await expand.first().click({ timeout: 8_000 }).catch(() => {})
   await sleep(1_500)
-  const capsule = page.getByRole('button', { name: /研究状态/ }).first()
+  const capsule = page.getByRole('button', { name: TAB_TEXT.status }).first()
   const capOk = await capsule.isVisible({ timeout: 12_000 }).catch(() => false)
   step(capOk, '「研究状态」guide 胶囊在场')
   if (capOk) {
@@ -193,7 +193,7 @@ try {
     while (Date.now() < deadline && !(titleFlipped && bannerShown)) {
       await sleep(4_000)
       const text = await page.evaluate(() => document.body?.innerText ?? '')
-      titleFlipped = text.includes('研究状态 · ⏳ 等你拍板')
+      titleFlipped = TAB_TEXT.statusPending.test(text)
       bannerShown = text.includes('在会话里的问题卡上点选项')
       if (!diagPrinted) {
         const i = text.indexOf('journal 流')
