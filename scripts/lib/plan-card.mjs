@@ -9,6 +9,9 @@
 // 严重级语义住消费方：门①把超限记为 **WARN**（不拦交付），理由与升格条件 =
 // notes/implemented/2026-10-11-plan-card-length-warn.md。
 
+// 入参解析正本 = pack `journal-wire.ts` 的 argsObjectOf（2026-11-03 卫生审计 D2-4）。
+import { argsObjectOf } from '../../packages/deep-research-pack/src/lib/journal-wire.ts';
+
 /** 计划卡的签名标签（HITL1 第二段卡的固定选项之一）——比"正文含计划字样"稳。 */
 export const PLAN_CARD_MARK = '按计划开跑';
 
@@ -34,9 +37,7 @@ export function planCardsOf(logText) {
     try { event = JSON.parse(line); } catch { continue; }
     const d = event?.data ?? event;
     if (d?.name !== 'ask_user_question') continue;
-    const raw = d?.arguments;
-    let payload = null;
-    try { payload = typeof raw === 'string' ? JSON.parse(raw) : (raw ?? null); } catch { payload = null; }
+    const payload = argsObjectOf(d?.arguments);
     for (const q of Array.isArray(payload?.questions) ? payload.questions : []) {
       if (!isPlanCardQuestion(q)) continue;
       const chars = String(q?.question ?? '').length;

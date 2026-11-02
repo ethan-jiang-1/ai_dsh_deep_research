@@ -6,6 +6,10 @@
 //   ① UI 形状（卡头消失/题干更换）永不单独判"已提交"——盘侧 answer 落地才是唯一成功判据；
 //   ② Submit 可用 = 唯一提交动作；无卡可读 = 交回盘侧裁决，不自行宣布完成。
 
+// 入参解析正本 = pack `journal-wire.ts` 的 argsObjectOf（JSON 串/对象 + 截断容错同一实现；
+// 2026-11-03 卫生审计 D2-4：scripts 四处自写 JSON.parse，wire 形态变化要改四处）。
+import { argsObjectOf } from '../../packages/deep-research-pack/src/lib/journal-wire.ts'
+
 /**
  * 解析 ask_user_question 调用参数 → 驱动前就知道的盘侧形态。
  * @param argumentsText tool/call 事件的 data.arguments 原始串（坏串不抛，按未知形态处理）。
@@ -13,10 +17,9 @@
  *   文本消息兜底对该形态均不可用，正本 = BUG-005 卡）。
  */
 export function parseAskArgs(argumentsText) {
-  let args = {}
-  try { args = JSON.parse(argumentsText ?? '{}') } catch { args = {} }
-  const questions = Array.isArray(args.questions) ? args.questions : []
-  return { questionCount: questions.length, indefinite: args.wait === -1 }
+  const args = argsObjectOf(argumentsText)
+  const questions = Array.isArray(args?.questions) ? args.questions : []
+  return { questionCount: questions.length, indefinite: args?.wait === -1 }
 }
 
 /**
@@ -27,9 +30,8 @@ export function parseAskArgs(argumentsText) {
  *   header = 问句短标签（persona 硬格式要求每问带 header；provenance 题面富集源，BUG-017）。
  */
 export function parseAskQuestions(argumentsText) {
-  let args = {}
-  try { args = JSON.parse(argumentsText ?? '{}') } catch { return [] }
-  const questions = Array.isArray(args.questions) ? args.questions : []
+  const args = argsObjectOf(argumentsText)
+  const questions = Array.isArray(args?.questions) ? args.questions : []
   return questions
     .filter((q) => q && typeof q === 'object')
     .map((q) => ({

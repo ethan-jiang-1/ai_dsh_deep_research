@@ -13,6 +13,7 @@
 // 消费方：scripts/run-ops/watch-run.mjs（盯场）、dev/hitl-answer.mjs（前置自拒）、
 // tests/run-state.test.mjs（三态夹具与 native log reader，测试路径零子进程，layering 合规）。
 // 运行需 `node --import tsx/esm`（直引 pack .ts 源）。
+import { argsObjectOf } from '../../packages/deep-research-pack/src/lib/journal-wire.ts'
 import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
@@ -63,10 +64,9 @@ export function eventsRegressed(prevCount, curCount) {
 export function askIndefiniteOf(events) {
   const last = [...events].reverse().find((j) => j?.type === 'tool/call' && j?.data?.name === 'ask_user_question')
   if (last === undefined) return null
-  let args = {}
-  try { args = JSON.parse(last?.data?.arguments ?? '{}') } catch { return null }
-  if (!Array.isArray(args.questions)) return null
-  return args.wait === -1
+  const args = argsObjectOf(last?.data?.arguments)
+  if (!Array.isArray(args?.questions)) return null
+  return args?.wait === -1
 }
 
 /** Latest non-empty title assigned to a session; missing title remains unknown. */
