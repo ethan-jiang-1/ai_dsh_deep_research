@@ -44,19 +44,5 @@ test('I2 启动期解决工作区：Host 读设置/登记；client 建/选会话
   assert.match(read('docs/guides/65-run-forms.md'), /--from-default-profile web/, '运行形态合同缺 DSH 安装路径')
 })
 
-test('I3 包内容不落工作区：content 随包、无 workspace 种子', () => {
-  assert.ok(existsSync(join(PACK, 'content', 'manual.md')), 'content/manual.md 缺席')
-  for (const name of ['run.md', 'question.md', 'topics.md', 'plan.md', 'leads.md', 'evidence-entry.md', 'findings.md', 'final.md']) {
-    assert.ok(existsSync(join(PACK, 'content', 'templates', 'run', name)), `content 模板缺 ${name}`)
-  }
-  assert.equal(existsSync(join(PACK, 'workspace')), false, 'workspace/ 种子目录必须已删除')
-  assert.ok(pkg.files.includes('content/**'), 'files 缺 content/**')
-  assert.equal(pkg.files.some((f) => f.startsWith('workspace/')), false, 'files 仍含 workspace/**')
-})
-
-test('I4 内容从包内进入模型：runtime context + 变量', () => {
-  const src = readFileSync(join(PACK, 'src', 'content', 'index.ts'), 'utf8')
-  assert.match(src, /systemPrompt\.context\(/, '未注册 runtime context')
-  assert.match(src, /variable\('research_pack_root'/, '未注册 research_pack_root')
-  assert.match(src, /'content'[\s\S]*'manual\.md'|manual\.md'[\s\S]*'content'/, '未读包内手册')
-})
+// I3/I4（内容随包、runtime context + 变量注入）由 tests/pack/content-injection.test.mjs
+// 单一拥有（2026-11-03 维度⑤去重：同一断言不再两处维护；改内容面只改那一个文件）。
