@@ -79,6 +79,7 @@
 | 方法库 run 来源 | `src/client/method-library/useRunSourcePicker.ts` | run 列表/候选预览/eligible 判定 | [§2.7](#cockpit-7) |
 | 方法库草稿状态 | `src/client/method-library/useDraftState.ts` | 草稿/revision/回填/来源字段/工作台导航（无 UI） | [§2.7](#cockpit-7) |
 | 方法库写操作队列 | `src/client/method-library/useOperationQueue.ts` | claim/结算/保存·默认·删除·刷新（状态面 + 行为面两出口） | [§2.7](#cockpit-7) |
+| 配置页签模型 | `src/client/research-config/config-model.ts` | 四字段执行面表 / 标本骨架 / 详情三态 | [§2.6](#cockpit-6) |
 
 页签八区（渲染顺序，自上而下；条件区在括号里标注）：
 
