@@ -18,8 +18,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readdirSync, readFileSync, existsSync } from 'node:fs'
-import { join, dirname } from 'node:path'
+import { join, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { localImportPath, parseKeylessImports } from '../../scripts/lib/keyless-imports.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const LIB = join(ROOT, 'scripts', 'lib')
@@ -54,12 +55,23 @@ function testFiles() {
   return out
 }
 
-/** 被测试直接 import 的 lib 模块集合（静态文本扫描，等价于 import 图的一跳）。 */
+/**
+ * 被测试**直接 import** 的 lib 模块集合（真 import 语句，非文本提及）。
+ * 2026-11-03 卫生审计 D5-5：旧实现是原文正则——注释里写一句 `scripts/lib/foo.mjs` 就算覆盖。
+ * 现在用 layering 同款 TS 解析器（`parseKeylessImports`）取 import/re-export/动态 import 的
+ * 字面量，再用 `localImportPath` 解析到绝对路径；注释与字符串夹具不再计数。
+ */
 function coveredByTests(files) {
   const covered = new Set()
   for (const file of files) {
-    const text = readFileSync(file, 'utf8')
-    for (const m of text.matchAll(/['"][^'"]*scripts\/lib\/([\w.-]+)\.mjs['"]/g)) covered.add(m[1])
+    const { imports } = parseKeylessImports(readFileSync(file, 'utf8'), file)
+    for (const { specifier } of imports) {
+      const resolved = localImportPath(file, specifier)
+      if (resolved === undefined) continue
+      const rel = relative(LIB, resolved).split('\\').join('/')
+      if (rel.startsWith('..') || !rel.endsWith('.mjs') || rel.includes('/')) continue
+      covered.add(rel.replace(/\.mjs$/, ''))
+    }
   }
   return covered
 }
@@ -83,12 +95,18 @@ test('覆盖边界：每个 scripts/lib 模块有直测，或登记为 SMOKE_ONL
   }
 })
 
-/** pack 纯件（src/lib/*.ts）被测试直接 import 的集合——路径比 scripts/lib 深一层。 */
+/** pack 纯件（src/lib/*.ts）被测试直接 import 的集合——同一解析器，路径比 scripts/lib 深一层。 */
 function coveredPackLib(files) {
   const covered = new Set()
   for (const file of files) {
-    const text = readFileSync(file, 'utf8')
-    for (const m of text.matchAll(/packages\/deep-research-pack\/src\/lib\/([\w.-]+)\.ts/g)) covered.add(m[1])
+    const { imports } = parseKeylessImports(readFileSync(file, 'utf8'), file)
+    for (const { specifier } of imports) {
+      const resolved = localImportPath(file, specifier)
+      if (resolved === undefined) continue
+      const rel = relative(PACK_LIB, resolved).split('\\').join('/')
+      if (rel.startsWith('..') || !rel.endsWith('.ts') || rel.includes('/')) continue
+      covered.add(rel.replace(/\.ts$/, ''))
+    }
   }
   return covered
 }
