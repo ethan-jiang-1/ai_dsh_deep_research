@@ -4,7 +4,7 @@
 
 ## 活跃清单
 
-- [2026-11-03 模型可见措辞](2026-11-03-model-visible-vocabulary.md) — 待落地：清掉 presets/content 里指称本包的「产品」，改 DSH 对象指称；同变更重录 snapshot `research-face`。
+（当前无活跃卡。）
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
@@ -12,7 +12,8 @@
 
 研究证据（已归档）= [research/plugin-as-product](../_archived/research/plugin-as-product/README.md)；本轮新增 = [plugin-as-product-v2](../_archived/research/plugin-as-product-v2/README.md)、[plugin-lifecycle](../_archived/research/plugin-lifecycle/README.md)；落地顺序 = [landing-plan](../_archived/research/plugin-as-product/2026-11-01-landing-plan.md)（S0 决定 → S1 骨架 → S2 首屏 → S3 文档 → S4 硬化）。
 
-- [2026-11-02 发布面对齐 26_harness-release](../_archived/settled_issues/2026-11-02-release-surface-26-alignment.md) — implemented：交付模型 = bundle + custom profile、六轴 owner、package-bundle README + 数据卡、安装手册十段、`readme-shape`/`release-vocab`/`dist-manual-fresh` 三道具名门禁；N11 拆出为 [模型可见措辞](2026-11-03-model-visible-vocabulary.md)；[Note](../../notes/implemented/2026-11-02-release-model-terms.md)。
+- [2026-11-03 模型可见措辞](../_archived/settled_issues/2026-11-03-model-visible-vocabulary.md) — deferred：退役词从 presets/content 清掉要连带重录 snapshot，录制器 boot 等待超时，整轮回退；重开条件 = [triggers](../triggers.md)「模型可见措辞重录」。
+- [2026-11-02 发布面对齐 26_harness-release](../_archived/settled_issues/2026-11-02-release-surface-26-alignment.md) — implemented：交付模型 = bundle + custom profile、六轴 owner、package-bundle README + 数据卡、安装手册十段、`readme-shape`/`release-vocab`/`dist-manual-fresh` 三道具名门禁；N11 拆出为 [模型可见措辞](../_archived/settled_issues/2026-11-03-model-visible-vocabulary.md)；[Note](../../notes/implemented/2026-11-02-release-model-terms.md)。
 - [2026-11-02 产品面收窄](../_archived/settled_issues/2026-11-02-product-surface-narrowing.md) — none：主区 Trajectory 与右栏 New Terminal 在 `deep-research` profile 不挂载；判据 = 组合层断言（零跳过 + 白名单），红证 = 上游改名即红；载体 = [design/40 §2.0](../../docs/design/40-research-cockpit.md#cockpit-surface)。
 - [2026-11-02 dev 通道与产品路径对齐](../_archived/settled_issues/2026-11-02-dev-product-path-parity.md) — implemented：同 profile 名/安装源/版本门、profile 用户层零写入、`dev-parity` 门禁 + parity 表；AC1–AC3 2026-11-02 复跑绿；[Note](../../notes/implemented/2026-11-02-dev-product-path-parity.md)。
 - [2026-11-01 插件即产品 v2](../_archived/settled_issues/2026-11-01-plugin-as-product-v2.md) — implemented：自有 `deep-research` profile + CLI 引导 + Plugins 页装包 + 启动期工作区/内容进包；`product-boot-smoke` 2026-11-02 GREEN；残余 = 公网 npm 发布；[Note](../../notes/implemented/2026-11-01-plugin-as-product-v2.md)。

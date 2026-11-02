@@ -6,7 +6,7 @@ opened: 2026-11-02
 # 推敲：发布面对齐 26_harness-release——术语、六轴、README/手册/门禁
 
 > 立卡：2026-11-02 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
-> 去向：implemented — [release model & terms Note](../../../notes/implemented/2026-11-02-release-model-terms.md)；业务验收：用户（2026-11-03 指示按推荐落地）。N11 = 拆出为独立卡 [模型可见措辞](../../issues/2026-11-03-model-visible-vocabulary.md)。
+> 去向：implemented — [release model & terms Note](../../../notes/implemented/2026-11-02-release-model-terms.md)；业务验收：用户（2026-11-03 指示按推荐落地）。N11 = 拆出为独立卡 [模型可见措辞](2026-11-03-model-visible-vocabulary.md)。
 
 **问题与期望结果：** 用户要求以 `deepseek-harness/_faq_on_digested/26_harness-release` 为更规整的
 说法，对齐本仓围绕插件发布的内容：术语与做法按 DSH 推荐，清理历史未对齐项，维持高信噪比；所有
@@ -28,7 +28,7 @@ guides/65、术语、数据卡、历史注记、门禁）一致，`pnpm verify`/
 - 进行中：Phase 2 传播/去重/陈旧事实清扫；Phase 4 机械门禁；Phase 5 重导出与证据。
 
 **未决问题：** 无。N11（模型可见 presets/content 的"产品"文本）不在本卡收口：它改的是模型请求，
-须单独一轮 snapshot 录制证据，已拆出为 [模型可见措辞](../../issues/2026-11-03-model-visible-vocabulary.md)。
+须单独一轮 snapshot 录制证据，已拆出为 [模型可见措辞](2026-11-03-model-visible-vocabulary.md)。
 
 **下一步：** 已结。落点与证据见 `## 证据`；本卡留问题、取舍与验收记录，后续由 Note 与门禁承载。
 
@@ -71,7 +71,7 @@ guides/65、术语、数据卡、历史注记、门禁）一致，`pnpm verify`/
 | N8 | doctor 输出 “产品 profile / 产品设置” | `packages/deep-research-pack/scripts/doctor.mjs:5,80,95,101-105`；`scripts/smoke/doctor-smoke.mjs:79` 断言 | 用户可见 | 改 “custom profile / 设置文件”；同步测试 |
 | N9 | 安装/首启 smoke 的注释/标签仍写“产品” | `scripts/smoke/install-shape-smoke.mjs:4,61`；`product-boot-smoke.mjs:3,168-182` | 内部 / 用户可见标签 | 改“安装形态/首屏”；脚本名保留 |
 | N10 | dev 注释与生成物仍写“产品” | `dev/boot-run.sh:2,6,93,150,246`；`dev/research.overlay.yml`（生成物） | 内部 / 生成物 | 改注释；overlay 由 pack 源重渲染 |
-| N11 | 模型可见文本仍写“产品” | `packages/deep-research-pack/presets/*.patch.yml` 4 处；`content/manual.md:3,60` | **模型可见** | **拆出为独立卡**：[模型可见措辞](../../issues/2026-11-03-model-visible-vocabulary.md)——改文本会使 snapshot B 漂移，须单独录制一轮；本卡不与文档混改 |
+| N11 | 模型可见文本仍写“产品” | `packages/deep-research-pack/presets/*.patch.yml` 4 处；`content/manual.md:3,60` | **模型可见** | **拆出为独立卡**：[模型可见措辞](2026-11-03-model-visible-vocabulary.md)——改文本会使 snapshot B 漂移，须单独录制一轮；本卡不与文档混改 |
 | N12 | 门禁/测试仍断言旧 README/手册形状 | `scripts/verify/gates/b-pack.mjs:438`（kind bundle + 10 节）；`scripts/lib/gates-cases.mjs` readme-shape 三案例；`tests/contracts/product-invariants.test.mjs` | 现行 / 门禁 | Phase 4 更新为 package-bundle/七问/十一段/新词汇；补反证 |
 | N13 | 旧 “FAQ 26” 引用 | `notes/implemented/2026-10-27-release-data-contract.md`、`2026-10-26-faq24-decisions.md` | 历史 | 加 `> 历史注记`（旧 26 = 数据面；新 26 = harness-release） |
 | N14 | 预算历史里的“产品门面” | `scripts/doc-budgets.json` `_raises` | 历史 | 不改（预算历史） |
@@ -141,7 +141,7 @@ guides/65、术语、数据卡、历史注记、门禁）一致，`pnpm verify`/
 - `node scripts/smoke/pack-smoke.mjs`：**ALL PASS**（134 条目、export 指向、sha256、可复现、无生命周期脚本）。
 - `node scripts/probe/entry-chain-probe.mjs`：**ALL PASS**（Q1/Q2/Q3；Q2 首次因词面只认“建立”漏接“才建在”判红，已补谓词与单测后复跑绿；留档 `runtime/smoke-workspace/entry-chain-probe-2026-11-02T11-15-12-374Z.md`）。
 - 噪声清单 N1–N10/N12–N18 已落；**N11（模型可见 presets/content 的“产品”文本）拆出为独立卡**
-  [模型可见措辞](../../issues/2026-11-03-model-visible-vocabulary.md)：改文本会改变模型请求、触发 snapshot B 漂移
+  [模型可见措辞](2026-11-03-model-visible-vocabulary.md)：改文本会改变模型请求、触发 snapshot B 漂移
   与真模型/录制证据义务，故不与本轮文档混改，也不留在本卡悬空——它有任务、去向与证据义务。
 - **收尾复跑（2026-11-03，交付前自审）**：`pnpm verify` 全绿；`pnpm test` **971 pass / 0 fail**
   （+1 = 新增组合层契约）；`node scripts/smoke/gates-smoke.mjs` 全绿（对照组 + 101 注入案例）。

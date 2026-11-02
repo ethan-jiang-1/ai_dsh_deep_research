@@ -1,12 +1,12 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-03
 ---
 
 # 推敲：模型可见措辞——把退役词从 presets/content 里清掉
 
-> 立卡：2026-11-03 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
-> 去向：implemented — `notes/implemented/2026-11-03-model-visible-vocabulary.md`（交付时写）；业务验收：用户。
+> 立卡：2026-11-03 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：以后做 ｜ 可关闭：是
+> 去向：deferred — [_backlog/triggers.md](../../triggers.md)「模型可见措辞重录」；业务验收：用户（2026-11-03 指示处理掉——录制通道不可用时不留活跃卡）。
 
 **问题与期望结果：** D41 退役了 `插件即产品` / `产品 profile` / `产品面` 等复合词，现行合同文档已清干净，
 但**模型可见**的 preset persona 与内容手册仍写着「产品」。模型读着它，就会用退役词回用户——这是退役语汇
@@ -28,17 +28,17 @@ opened: 2026-11-03
 
 **未决问题：** 无。要跑的是录制轮与证据，不是判断。
 
-**下一步：** 按 `## 验收标准` 改文本 → 重录 research-face → 全量验收 → 与 Note 同变更关闭。
+**下一步：** 已结（deferred）。重启条件 = [triggers](../../triggers.md)「模型可见措辞重录」：修好录制器 boot 等待后的第一个模型可见变更窗口，按 `## 验收标准` 改文本 → 重录 → 验收。
 
 ## 已知与未决
 
 **已知**
 
 - 这些文本进模型请求（persona + runtime context 注入），是 snapshot `replay/research-face` 的比对
-  面；改一个字节回放即红，这是**预期信号**，不是故障（[snapshots/README](../../snapshots/README.md)
+  面；改一个字节回放即红，这是**预期信号**，不是故障（[snapshots/README](../../../snapshots/README.md)
   「模型可见输入有意变更后，重录该场景并更新 source 身份」）。
-- 证据阶梯与重启要求 = [pack AGENTS §模型可见文本](../../packages/deep-research-pack/AGENTS.md)；
-  角色改动的完整程序 = [adding-a-research-role](../../.agents/skills/adding-a-research-role/SKILL.md)。
+- 证据阶梯与重启要求 = [pack AGENTS §模型可见文本](../../../packages/deep-research-pack/AGENTS.md)；
+  角色改动的完整程序 = [adding-a-research-role](../../../.agents/skills/adding-a-research-role/SKILL.md)。
 - 消费面：`scripts/smoke/snapshot-replay-smoke.mjs`（判据）+ `snapshots/replay/research-face/snapshot.json`
   （场景声明，含 `source.codeAnchor` = 录制时本仓 HEAD，必须同变更更新）。
 - 本机 dev home 凭据在场（`DEEPSEEK_API_KEY`），录制可跑。

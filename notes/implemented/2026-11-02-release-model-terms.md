@@ -69,7 +69,7 @@
   “才建在”判红，补谓词与单测后复跑绿；留档 `runtime/smoke-workspace/entry-chain-probe-2026-11-02T11-15-12-374Z.md`。
 - **未改/未宣称**：模型可见 presets/content 仍含“产品”文本（改它会改变模型请求、触发 snapshot B 漂移与
   录制证据义务）；它不在本 Note 的收口内，已拆为独立卡
-  [模型可见措辞](../../_backlog/issues/2026-11-03-model-visible-vocabulary.md)，任务是换指称 + 重录
+  [模型可见措辞](../../_backlog/_archived/settled_issues/2026-11-03-model-visible-vocabulary.md)，任务是换指称 + 重录
   `research-face`。`_dist` 已重导出，版本仍 0.3.0（未 bump）。
 - **收尾复跑（2026-11-03，卡关闭时）**：`pnpm verify` 全绿；`pnpm test` 971/0；`gates-smoke` 全绿
   （101 注入案例）。本轮只改文档/测试与卡归档，未触碰运行时与安装面，故上面的 L2 冒烟结果继续成立。
