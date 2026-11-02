@@ -43,5 +43,5 @@
 | 类型检查进 CI | `pnpm typecheck` 依赖 vendor 构建，CI 无此步；测试走 tsx 剥类型 | 出现"测试全绿但类型退化"的真实合并，或 CI 增加 vendor 构建预算 | [卫生轮 Note](../notes/implemented/2026-11-03-seven-dimension-hygiene-round.md) |
 | decisions 台账去历史化 | 暂不动：退役决策（D35/D38/D39）仍以现在时留在台账，且有 3KB 级修订史单元格 | 用户拍板接受锚点/引用面改动；或同一 D 号第三次追加修订 | [decisions.md](../docs/decisions.md) |
 | bundle 行依赖声明 | `tool-present` / `ui-agent-team` 未声明包依赖，靠 CLI 恰好带 agent-team-profile | 安装域出现 `did not activate`，或上游依赖图调整（升 pin 复核） | [guides/65](../docs/guides/65-run-forms.md) |
-| 启动/内容行不是 effect | `src/content` / `src/startup` 未用 `ctx.effect`，HMR/重复 apply 可能重复注入 | HMR/升级出现重复注入或重复建会话；或做 L2 HMR 演练 | [guides/62](../docs/guides/62-plugin-authoring.md) |
+| 启动行不是 effect | `src/content` 已走 `ctx.effect`（2026-11-03）；`src/startup` 仍是一次性动作，HMR/重复 apply 可能重复建会话 | HMR/升级出现重复会话；或做 L2 HMR 演练 | [guides/62](../docs/guides/62-plugin-authoring.md) |
 | notes implemented 只进不出 | 132 篇中约一半无 live 引用；归档按"不再指导未来"判断，无节奏 | 机制名检索命中多篇互相矛盾的旧决定时做批量体检 | [notes/README](../notes/README.md) |

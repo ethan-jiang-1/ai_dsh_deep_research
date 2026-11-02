@@ -67,17 +67,20 @@ test('行依赖全部声明进 peerDependencies', () => {
   }
 });
 
-test('bundle patch：registry 替换行 + present/ui-agent-team insert 行在位；团队与 web insert 行不进本包', () => {
+test('bundle patch：registry 替换行 + present insert 行在位；团队行（含 ui）与 web insert 行不进本包', () => {
   const yml = readFileSync(join(PACK, 'cordis.patch.yml'), 'utf8');
   // 替换行（0.1.7）：registry 的默认 preset 指研究主编（旧 agent-presets roots 形态已随重设计删除）
   assert.match(yml, /^- id: agent-preset-registry$/m);
   assert.match(yml, /name: '@deepseek-ai\/dsh-agent-preset-registry'/);
   assert.match(yml, /default: lead/);
-  // insert 行：present + ui-agent-team（web 行实证结论 = base 出厂行，不进本包——RFC web-tool-rows）
+  // insert 行：present（web 行实证结论 = base 出厂行，不进本包——RFC web-tool-rows）
   const insertBlock = yml.split(/^- insert:$/m).slice(1).join('\n');
-  for (const row of ['tool-present', 'ui-agent-team']) {
-    assert.match(insertBlock, new RegExp(`^\\s*- id: ${row}$`, 'm'), `insert 行缺失: ${row}`);
-  }
+  assert.match(insertBlock, /^\s*- id: tool-present$/m, 'insert 行缺失: tool-present')
+  // ui-agent-team 归 vendor agent-team-profile 层（该层 patch 已 insert 同一 id；本包再 insert =
+  // 同行双插入，2026-11-03 审计 D7-1）。两边一起断言：本包不插，且层里在——UI 仍随团队层发行。
+  assert.doesNotMatch(insertBlock, /^\s*- id: ui-agent-team$/m, 'ui-agent-team 不应由本包 insert（归团队层，重复插入）')
+  const layer = readFileSync(join(ROOT, 'vendor', 'dsh', 'packages', 'experimental', 'agent-team-profile', 'cordis.patch.yml'), 'utf8')
+  assert.match(layer, /^\s*- id: ui-agent-team$/m, '团队层未提供 ui-agent-team——本包删行后 UI 会缺失')
   // 回归守卫：web 四行的 **insert** 形态不得出现在本包 bundle（insert 会与 web-app surface 的
   // preset-scoping 打架；provider 选择走下面的 `- id: web` 替换行——D30）
   for (const row of ['tool-web', 'web-search', 'web-fetch', 'web']) {

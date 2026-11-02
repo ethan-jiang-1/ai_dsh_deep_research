@@ -207,6 +207,9 @@ const TEAM_ROW = `
         maxPendingMessagesPerMember: 64
         maxMessageBytes: 65536
         disposalTimeoutMs: 5000
+
+    - id: ui-agent-team
+      name: '@deepseek-ai/dsh-experimental-client-ui-agent-team'
 `
 const teamPatchPath = join(ROOT, 'runtime', 'smoke-workspace', 'client-load-team.overlay.yml')
 mkdirSync(dirname(teamPatchPath), { recursive: true })

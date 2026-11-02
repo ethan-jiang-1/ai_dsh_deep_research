@@ -91,9 +91,9 @@
     # ── 团队机制行（agent-team / tool-agent-team）不在此声明（RFC m2-p1-run-channel A 定案）：
     #    组合归 vendor agent-team-profile 层（profile 装 @…-agent-team-profile）——行带实战 config
     #    与 company D18 机械禁令（control / list-agents 禁用、subagent 强制 one-shot）。──
-    # ── 团队 Web 可视面（观察与调试任务起止的最简途径；vendor 层无此行，仍归本包）──
-    - id: ui-agent-team
-      name: '@deepseek-ai/dsh-experimental-client-ui-agent-team'
+    # ── 团队 Web 可视面（ui-agent-team）也归 vendor agent-team-profile 层：该层 patch 已 insert
+    #    同一 id（`packages/experimental/agent-team-profile/cordis.patch.yml`），本包再 insert =
+    #    同行双插入（2026-11-03 审计 D7-1 实证）。本包不再声明；装态由团队层提供。──
     # ── 本包自己的 client 面（D18 有界例外；另一处 = D31 抓取回退 provider）：
     #    host 半是空壳，浏览器半注册研究驾驶舱页签（清单 = design/40 §2，不在此手抄）。
     #    行的 name 就是本包名（company-pack 同款）——host 侧加载 lib/index.js（空壳），
