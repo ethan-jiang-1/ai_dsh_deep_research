@@ -76,6 +76,7 @@
 | 方法库纯模型 | `src/client/method-library/model.ts` | 状态/操作形状与无 UI 判据（可单测） | [§2.7](#cockpit-7) |
 | 方法库分隔条 | `src/client/method-library/ColumnHandle.tsx` | 拖动/方向键调宽 | [§2.7](#cockpit-7) |
 | 方法库读取状态 | `src/client/method-library/useLibraryData.ts` | 文本/加载/筛选/选中（无 UI） | [§2.7](#cockpit-7) |
+| 方法库 run 来源 | `src/client/method-library/useRunSourcePicker.ts` | run 列表/候选预览/eligible 判定 | [§2.7](#cockpit-7) |
 
 页签八区（渲染顺序，自上而下；条件区在括号里标注）：
 

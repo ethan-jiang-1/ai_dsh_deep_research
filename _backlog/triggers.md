@@ -45,3 +45,4 @@
 | bundle 行依赖声明 | `tool-present` / `ui-agent-team` 未声明包依赖，靠 CLI 恰好带 agent-team-profile | 安装域出现 `did not activate`，或上游依赖图调整（升 pin 复核） | [guides/65](../docs/guides/65-run-forms.md) |
 | 启动行不是 effect | `src/content` 已走 `ctx.effect`（2026-11-03）；`src/startup` 仍是一次性动作，HMR/重复 apply 可能重复建会话 | HMR/升级出现重复会话；或做 L2 HMR 演练 | [guides/62](../docs/guides/62-plugin-authoring.md) |
 | notes implemented 只进不出 | 132 篇中约一半无 live 引用；归档按"不再指导未来"判断，无节奏 | 机制名检索命中多篇互相矛盾的旧决定时做批量体检 | [notes/README](../notes/README.md) |
+| 方法库工作台再拆分 | 组件 1152 行：model / ColumnHandle / useLibraryData 已外移；草稿·操作队列·coach 三块状态机仍耦合在一个组件里 | 组件 >1300 行，或第二个功能要复用同一状态机，或一次「改草稿/写操作」的 diff 触及 >5 处 | [design/40](../docs/design/40-research-cockpit.md) |

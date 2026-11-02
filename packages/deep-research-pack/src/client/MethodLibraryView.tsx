@@ -17,7 +17,7 @@ import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots
 import { methodLibraryCommandText } from '../lib/method-library-operation.ts'
 import type { MethodLibraryCoachEvent } from '../lib/method-library-events.ts'
 import { methodLibraryEntryHash } from '../lib/method-library-hash.ts'
-import { isCompletedMethodSourceRun, latestFinalVersion, type SourcePreview } from '../lib/method-library-source.ts'
+import type { SourcePreview } from '../lib/method-library-source.ts'
 import type { MethodLibraryReadResult } from '../lib/method-library-read.ts'
 import { expectedMethodLibrarySnapshot, methodLibraryMatchesSnapshot, methodLibrarySettlement, methodLibrarySnapshot, shouldStartFreshDraftContext } from '../lib/method-library-operation-state.ts'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
@@ -37,6 +37,7 @@ import { BuiltinView, EditorView, MethodSummaryView, ReadMineView, SourceSelecti
 import { MethodCoachPanel } from './method-library/coach.tsx'
 import { ColumnHandle } from './method-library/ColumnHandle.tsx'
 import { useLibraryData } from './method-library/useLibraryData.ts'
+import { useRunSourcePicker } from './method-library/useRunSourcePicker.ts'
 import {
   LIBRARY_PATH, builtinLibraryEntry, draftOf, emptySections, operationMetadataMatches,
   type MethodLibraryOperationRequest, type Mode, type OperationOutcome, type PendingMethodOperation,
@@ -76,6 +77,13 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     query, setQuery, segment, setSegment, selectedName, setSelectedName,
     entries, filtered, selected, builtin, applyLibraryRead, load, reset: resetLibrary,
   } = useLibraryData({ sessionId, readLibrary: props.readLibrary })
+  const {
+    runNames, runState, selectedRunSource, selectedRunLoading,
+    loadRunNames, selectRunSource, abort: abortRunRead, reset: resetRunPicker,
+    setSelectedRunSource, setSelectedRunLoading,
+  } = useRunSourcePicker({
+    sessionId, t: props.t, listDir: props.listDir, readPreview: props.readPreview, readLibrary: props.readLibrary,
+  })
   const [mode, setMode] = useState<Mode>('read')
   const modeRef = useRef<Mode>('read')
   const [workbenchStage, setWorkbenchStage] = useState<WorkbenchStage>('interview')
@@ -96,12 +104,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const [sourceFields, setSourceFields] = useState<ReadonlySet<DraftField>>(() => new Set())
   const [activeField, setActiveField] = useState<DraftField | null>(null)
   const [coachBase, setCoachBase] = useState<LibraryEntry | null>(null)
-  const [runNames, setRunNames] = useState<readonly string[]>([])
-  const [runState, setRunState] = useState<'idle' | 'loading' | 'ready' | 'error' | 'cancelled'>('idle')
   const [selectedBuiltinSource, setSelectedBuiltinSource] = useState<LibraryEntry | null>(null)
-  const [selectedRunSource, setSelectedRunSource] = useState<RunSourceCandidate | null>(null)
-  const [selectedRunLoading, setSelectedRunLoading] = useState(false)
-  const sourceReadControllerRef = useRef<AbortController | null>(null)
   const [narrowPane, setNarrowPane] = useState(false)
   const [libraryOpen, setLibraryOpen] = useState(false)
   const previousRef = useRef<{
@@ -175,7 +178,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   }, [])
 
   useEffect(() => {
-    sourceReadControllerRef.current?.abort()
+    resetRunPicker()
     resetLibrary()
     setMode('read')
     setDraft(null)
@@ -190,11 +193,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     activeDraftKeyRef.current = null
     setPendingDelete(null)
     setReceipt(null)
-    setRunNames([])
-    setRunState('idle')
     setSelectedBuiltinSource(null)
-    setSelectedRunSource(null)
-    setSelectedRunLoading(false)
     setCoachId(null)
     coachIdRef.current = null
     setCoachReady(false)
@@ -349,7 +348,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
 
   const restartSource = (): void => {
     if (operationLocked() || !confirmDiscard()) return
-    sourceReadControllerRef.current?.abort()
+    abortRunRead()
     resetDraftRevision()
     const draftKey = crypto.randomUUID()
     activeDraftKeyRef.current = draftKey
@@ -372,7 +371,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     activeDraftKeyRef.current = draftKey
     setActiveDraftKey(draftKey)
     releaseCoachIfIdle()
-    sourceReadControllerRef.current?.abort()
+    abortRunRead()
     resetDraftRevision()
     setSegment('mine')
     setSelectedName(null)
@@ -433,112 +432,8 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setSourceFields(new Set())
     setPendingDelete(null)
     clearCoachFill()
-    sourceReadControllerRef.current?.abort()
+    abortRunRead()
     releaseCoachIfIdle()
-  }
-
-  const loadRunNames = (): void => {
-    if (sessionId === undefined) return
-    setRunState('loading')
-    setRunNames([])
-    setSelectedRunSource(null)
-    sourceReadControllerRef.current?.abort()
-    const controller = new AbortController()
-    sourceReadControllerRef.current = controller
-    void (async () => {
-      const [root, archive] = await Promise.all([
-        props.listDir(sessionId, '.', controller.signal),
-        props.listDir(sessionId, 'archive', controller.signal),
-      ])
-      if (sourceReadControllerRef.current !== controller) return
-      if (controller.signal.aborted) {
-        setRunState('cancelled')
-        return
-      }
-      if (root === null || archive === null) {
-        setRunState('error')
-        return
-      }
-      const names = [
-        ...root.filter((entry) => entry.type === 'directory' && entry.name.startsWith('drt_')).map((entry) => entry.name),
-        ...archive.filter((entry) => entry.type === 'directory' && entry.name.startsWith('drt_')).map((entry) => `archive/${entry.name}`),
-      ].sort((left, right) => left.localeCompare(right))
-      setRunNames(names)
-      setRunState('ready')
-    })().catch(() => {
-      if (!controller.signal.aborted) setRunState('error')
-    })
-  }
-
-  const selectRunSource = (name: string): void => {
-    if (sessionId === undefined) return
-    sourceReadControllerRef.current?.abort()
-    const controller = new AbortController()
-    sourceReadControllerRef.current = controller
-    setSelectedRunLoading(true)
-    setSelectedRunSource(null)
-    void (async () => {
-      const runFiles = await props.listDir(sessionId, name, controller.signal)
-      const finalFiles = await props.listDir(sessionId, `${name}/final`, controller.signal)
-      if (sourceReadControllerRef.current !== controller) return
-      if (controller.signal.aborted) {
-        setSelectedRunSource({
-          name,
-          finalPath: `${name}/final/v1.md`,
-          question: { kind: 'cancelled' },
-          deliverable: { kind: 'cancelled' },
-          eligible: false,
-          status: props.t('sourceCancelled'),
-        })
-        setSelectedRunLoading(false)
-        return
-      }
-      const version = latestFinalVersion(finalFiles ?? [])
-      const finalPath = version === null ? `${name}/final/v1.md` : `${name}/final/${version}`
-      const [question, deliverable, header, questionComplete] = await Promise.all([
-        props.readPreview(sessionId, `${name}/question.md`, controller.signal),
-        props.readPreview(sessionId, finalPath, controller.signal),
-        props.readPreview(sessionId, `${name}/run.md`, controller.signal),
-        props.readLibrary(sessionId, `${name}/question.md`, controller.signal),
-      ])
-      if (sourceReadControllerRef.current !== controller) return
-      if (controller.signal.aborted) {
-        setSelectedRunSource({ name, finalPath, question: { kind: 'cancelled' }, deliverable: { kind: 'cancelled' }, eligible: false, status: props.t('sourceCancelled') })
-        setSelectedRunLoading(false)
-        return
-      }
-      const deliveredRecord = runFiles?.some((file) => file.name === 'delivered.json') === true
-      const legacyReceipt = runFiles?.some((file) => file.name === 'acceptance.md') === true
-      const hasFinal = version !== null
-      const hasDeliverableContent = deliverable.kind === 'ok' && deliverable.text.trim() !== ''
-      const eligible = isCompletedMethodSourceRun({
-        hasFinalVersion: hasFinal,
-        hasDeliverableContent,
-        runHeader: header,
-        hasDeliveredRecord: deliveredRecord,
-        hasLegacyAcceptance: legacyReceipt,
-        question: questionComplete,
-      })
-      const status = questionComplete.kind !== 'ok'
-        ? props.t('runNoQuestion')
-        : !hasFinal || !hasDeliverableContent
-          ? props.t('runNoFinal')
-          : eligible ? props.t('eligibleRun') : props.t('runNotCompleted')
-      setSelectedRunSource({ name, finalPath, question, deliverable, eligible, status })
-      setSelectedRunLoading(false)
-    })().catch((cause: unknown) => {
-      if (!controller.signal.aborted) {
-        setSelectedRunSource({
-          name,
-          finalPath: `${name}/final/v1.md`,
-          question: { kind: 'error', detail: String(cause) },
-          deliverable: { kind: 'error', detail: String(cause) },
-          eligible: false,
-          status: props.t('sourceReadFailure'),
-        })
-        setSelectedRunLoading(false)
-      }
-    })
   }
 
   const updateSection = (key: keyof LibrarySections, value: string): void => {
@@ -1131,7 +1026,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
               runNames={runNames}
               runState={runState}
               selectedRunLoading={selectedRunLoading}
-              onCancelRunRead={() => { sourceReadControllerRef.current?.abort() }}
+              onCancelRunRead={abortRunRead}
               selectedBuiltin={selectedBuiltinSource}
               selectedRun={selectedRunSource}
               onSelectBuiltin={setSelectedBuiltinSource}
