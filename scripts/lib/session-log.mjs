@@ -8,6 +8,11 @@ import { join, resolve } from 'node:path'
 import { projectKey } from './workspace-root.mjs'
 import * as zlib from 'node:zlib'
 
+/** 组目录名正本（vendor 同形 `projectKey(cwd)`）——再导出给 seed materialize 用，避免第三份实现。
+ *  为什么从这里取：workspace-root 的消费方台账（scripts/README lib 表）已把 session-log 记为
+ *  workspace-root 的消费方；冒烟只从 session-log 取，不新增 lib 表的消费方行列。 */
+export { projectKey }
+
 const LOG_CANDIDATES = [
   'session.v4.jsonl.zstd',
   'session.v4.jsonl',

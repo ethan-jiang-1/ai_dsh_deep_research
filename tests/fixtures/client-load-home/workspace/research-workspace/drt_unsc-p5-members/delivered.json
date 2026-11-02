@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "slug": "drt_unsc-p5-members",
+  "acceptedAt": "2026-11-01T13:11:31.792Z",
+  "sessions": "$DSH_HOME/sessions",
+  "gate": {
+    "status": "PASS",
+    "exit": 0
+  },
+  "audit": {
+    "critical": 0,
+    "sha256": "2bc31b7d65232944e13bdcfa7645bc858002229c882d1a8d997ff613061240fa"
+  },
+  "final": {
+    "version": 1,
+    "sha256": "23213a5291cafe78d58499706f81f3d419e7d8edac1a547734b26e075966b2bf"
+  },
+  "readable": null,
+  "present": {
+    "path": "drt_unsc-p5-members/final/v1.md",
+    "callId": "call_00_o2hgnmWrQJtkM94879Q46371",
+    "version": 1
+  },
+  "witness": {
+    "sessions": [
+      "session-2473b678-4838-496f-b592-5d7600b8a87e"
+    ]
+  }
+}

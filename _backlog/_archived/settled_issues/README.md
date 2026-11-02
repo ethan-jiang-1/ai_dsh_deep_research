@@ -4,6 +4,7 @@
 
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-11-03-client-load-smoke-not-in-ci](2026-11-03-client-load-smoke-not-in-ci.md) | 驾驶舱 E2E 进 CI：`--seed tests/fixtures/client-load-home` 干净机器 69/69 全绿；CI job `client-load`（vendor build + chromium + seed + artifact）；根因 = 凭据 onboarding 模态 + `openSessionById` 吞点击 → fail-loud `opened`，zstd 首帧必须 header 单帧 | 2026-11-03 |
 | [2026-11-03-model-visible-vocabulary](2026-11-03-model-visible-vocabulary.md) | 模型可见措辞：文本改动已验证（verify/971 测试绿），但重录 `research-face` 的通道 boot 超时，整轮回退；去向 `deferred` — [triggers](../../triggers.md)「模型可见措辞重录」 | 2026-11-03 |
 | [2026-11-02-release-surface-26-alignment](2026-11-02-release-surface-26-alignment.md) | 发布面对齐 26：bundle + custom profile 交付模型、六轴 owner、package-bundle README/数据卡、安装手册十段、`readme-shape`/`release-vocab`/`dist-manual-fresh`；N11 拆出为[模型可见措辞](2026-11-03-model-visible-vocabulary.md)；[Note](../../../notes/implemented/2026-11-02-release-model-terms.md) | 2026-11-03 |
 | [2026-11-02-product-surface-narrowing](2026-11-02-product-surface-narrowing.md) | 产品面收窄：主区 Trajectory 与右栏 New Terminal 在 `deep-research` profile 不挂载（bundle 层按 id `disabled: true`）；判据从「读自己的 YAML」换成组合层断言（零跳过 + 白名单两侧），红证 = 上游改名即红；去向 `none` — [design/40 §2.0](../../../docs/design/40-research-cockpit.md#cockpit-surface) + [bundle-composition](../../../tests/contracts/bundle-composition.test.mjs) | 2026-11-03 |

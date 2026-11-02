@@ -37,9 +37,13 @@
 // 同款——boot 起自本仓，行包名经根 node_modules 解析到 pack 源码树，浏览器经
 // exports["./client"] 取已构建的 lib/client.js）。
 // 前置：source dev/env.sh；pack 已构建（lib/client.js 在位——boot 前自检会拦）。
-// 用法：node --import tsx/esm scripts/smoke/client-load-smoke.mjs [--port 3109] [--session <既有会话标题>]
+// 用法：node --import tsx/esm scripts/smoke/client-load-smoke.mjs [--port 3109] [--session <既有会话标题>] [--seed <dir|name>]
 // 前置（B-min 起）：dev home 里有至少一个**绑定 run bundle 的带历史会话**（跑过一场 run 即有——
 // 渐进面断言的磁盘认证源；未绑定会话负样本可选，snapshot-replay 冒烟产生）。
+// `--seed <dir|name>`（2026-11-03，issue 2026-11-03-client-load-smoke-not-in-ci）：先把
+// `tests/fixtures/client-load-home/` 的种子夹具 materialize 到 runtime/smoke-workspace/seed-home
+// （gitignored；含会话组 + 种子工作区），再以它作 DSH_HOME 跑同一套断言——干净机器/CI 不需要
+// 预置 dev home。不带 `--seed` 时行为不变（仍用 source dev/env.sh 指定的 DSH_HOME）。
 //
 // bundle 渐进面断言（2026-09-26 接通，根因链见 notes/archived/2026-09-26-bundle-face-wiring.md；
 // 2026-09-28 起会话绑定——RFC right-pane-ux-debt：渐进面只跟本会话自己的 run）：
@@ -55,7 +59,8 @@ import { reclaimPort } from '../lib/port-reclaim.mjs'
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs'
 import { launchChromium, loadChromium } from '../lib/playwright.mjs'
-import { clientHistoryWindow, readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
+import { clientHistoryWindow, projectKey, readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
+import { materializeSeedHome, resolveSeedFixture, seedFixtureSize } from './client-load-seed.mjs'
 import { prepareClientLoadReference } from './client-load-reference.mjs'
 import { pass4ConfigTabPhase } from './client-load-config.mjs'
 import { pass5FinalDeliveryPhase } from './client-load-final.mjs'
@@ -82,11 +87,42 @@ const GROUP_TITLE = arg('group', 'harness-home')
 const BOOT_TIMEOUT_MS = 120_000
 const RENDER_TIMEOUT_MS = 60_000
 
-const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null
+// ── 种子夹具（--seed）：materialize 到运行区 → 自建 DSH_HOME + 种子工作区 ──────────────
+// 种子工作区 = runtime/smoke-workspace/seed/research-workspace（gitignored）。**不写仓内
+// research-workspace**：dev home 的 bundle/method-library 是运行真值，seed 覆盖会毁数据。
+const SEED_ARG = arg('seed', null)
+const seed = SEED_ARG === null ? null : (() => {
+  let fixture
+  try {
+    fixture = resolveSeedFixture(SEED_ARG, { root: ROOT })
+  } catch (error) {
+    console.error(`client-load-smoke: ${error.message}`)
+    process.exit(2)
+  }
+  const materialized = materializeSeedHome({
+    fixtureDir: fixture.dir,
+    homeDir: join(ROOT, 'runtime', 'smoke-workspace', 'seed-home'),
+    workspaceRoot: join(ROOT, 'runtime', 'smoke-workspace', 'seed'),
+    repoRoot: ROOT,
+    projectKey,
+  })
+  const { files, bytes } = seedFixtureSize(fixture.dir)
+  console.log(`client-load-smoke: seed 夹具 ${fixture.dir}（${files} 文件 / ${(bytes / 1024).toFixed(1)} KB）→ home ${materialized.home} · 工作区 ${materialized.workspace} · 组 ${materialized.group}`)
+  return materialized
+})()
+
+const home = seed !== null
+  ? seed.home
+  : (process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null)
 if (home === null) {
-  console.error('client-load-smoke: 未 source dev/env.sh（DSH_HOME 缺席）——先 source 再跑')
+  console.error('client-load-smoke: 未 source dev/env.sh（DSH_HOME 缺席）——先 source 再跑（或用 --seed 自建 home）')
   process.exit(2)
 }
+// 磁盘参考根（fileFaceOf 拼 `<root>/research-workspace/drt_<slug>`）：dev = 仓根；seed = 种子工作区父目录。
+const referenceRoot = seed !== null ? seed.root : ROOT
+// workspace/create 的登记路径：dev = 仓内 research-workspace；seed = 种子工作区（会话 cwd 必须与它一致）。
+const workspacePath = seed !== null ? seed.workspace : join(ROOT, 'research-workspace')
+
 const bin = join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts')
 if (!existsSync(bin)) {
   console.error(`client-load-smoke: 机制基线源码不在位（${bin}）`)
@@ -258,14 +294,14 @@ const step = (ok, label, info = '') => {
 // ── 磁盘侧：扫绑定会话（渐进面真数据源）与未绑定会话（不显示别家数据的负样本）──
 // 绑定谓词 = pack bundle-bind（journal 工具调用路径里的 drt_<slug>/）；带历史 = 有回合。
 const sessionsRoot = join(home, 'sessions')
-const sessionGroup = researchWorkspaceGroup(sessionsRoot)
+const sessionGroup = researchWorkspaceGroup(sessionsRoot, workspacePath)
 let unboundSession = null
 if (sessionGroup === undefined) {
   console.error(`client-load-smoke: ${sessionsRoot} 下没有含 "research-workspace" 的会话组（DSH_HOME=${process.env.DSH_HOME ?? '未设置'}；解析出的 home=${home}）`
     + '——先 source dev/env.sh 并跑一场 run；若 DSH_HOME 指向别处，先 unset 或重新 source')
   process.exit(2)
 }
-const { boundSession: initialBoundSession, unboundCandidates, deliveredSessions, fileFaceOf } = prepareClientLoadReference({ root: ROOT, sessionsRoot, sessionGroup })
+const { boundSession: initialBoundSession, unboundCandidates, deliveredSessions, fileFaceOf } = prepareClientLoadReference({ root: referenceRoot, sessionsRoot, sessionGroup })
 let boundSession = initialBoundSession
 
 // vendor follow 开窗快照的盘侧复刻（对账同窗，勿折全量日志）：语义 = api/session-controller
@@ -350,10 +386,59 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms))
 // client-hitl-smoke 的私有版全部退役改调 lib；收拢裁决与实红家谱见 lib 头注）。
 // 页面就绪序列（reload → New Session 首屏字样 → 稳定窗）——收口本文件六处同形重复；
 // settleMs 逐调用点保持原值（各处的稳定窗是实测调的，不统一）。
+// seed 模式追加一步：关掉干净 home 首启的**凭据 onboarding 模态**（见 dismissCredentialOnboarding）。
 async function awaitAppReady(page, settleMs) {
   await page.reload({ waitUntil: 'domcontentloaded' })
   await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
   await wait(settleMs)
+  if (seed !== null) await dismissCredentialOnboarding(page)
+}
+// 干净 home 首启的凭据 onboarding（vendor `ui-settings-account` 的 `AccountOnboarding` /
+// `SignInDialog`：Get started / Add API Key / Sign in）。**为什么 seed 模式必须关**（2026-11-03
+// 实测）：无模型凭据文件的 home 首屏必现该 `[role=dialog]`，它盖住主视图；行键的
+// `.click()` 被遮罩拦截（Playwright actionability 超时），旧 openSessionById 把异常吞掉后仍
+// 返回 found:true——主视图停在空会话，marker 全部未命中（就是 backlog 里"active=probe /
+// bound=seed"的那个未决点）。dev home 有凭据 → 该模态不出现，故本函数只在 seed 分支调用。
+// 关不掉 = 后续点击必被挡（不静默：打一行错误，断言会红在具体步骤上）。
+let seedOnboardingNoted = false
+async function dismissCredentialOnboarding(page, { appearMs = seedOnboardingNoted ? 2_000 : 10_000 } = {}) {
+  const findDialog = async () => {
+    const dialogs = page.locator('[role="dialog"]')
+    const count = await dialogs.count().catch(() => 0)
+    for (let i = 0; i < count; i++) {
+      const dialog = dialogs.nth(i)
+      const text = (await dialog.textContent().catch(() => '')) ?? ''
+      if (/Get started|Add API Key|Sign in to your DeepSeek account|开始设置|添加 API Key|登录 DeepSeek/.test(text)) return dialog
+    }
+    return null
+  }
+  let dialog = null
+  for (let waited = 0; waited < appearMs; waited += 250) {
+    dialog = await findDialog()
+    if (dialog !== null) break
+    await page.waitForTimeout(250)
+  }
+  if (dialog === null) return 'absent'
+  for (const name of ['Close', '关闭']) {
+    const close = dialog.getByRole('button', { name }).first()
+    if (await close.isVisible().catch(() => false)) {
+      await close.click({ timeout: 5_000 }).catch(() => {})
+      break
+    }
+  }
+  if (await findDialog() !== null) await page.keyboard.press('Escape').catch(() => {})
+  for (let waited = 0; waited < 10_000; waited += 250) {
+    if (await findDialog() === null) {
+      if (!seedOnboardingNoted) {
+        seedOnboardingNoted = true
+        console.log('  note  seed home：凭据 onboarding 模态已关闭（干净机器首启态；dev home 有凭据时不出现）')
+      }
+      return 'dismissed'
+    }
+    await page.waitForTimeout(250)
+  }
+  console.error('client-load: seed 凭据 onboarding 模态关不掉——后续行键点击会被遮罩拦截')
+  return 'stuck'
 }
 // 「研究配置」guide 胶囊打开序列：先试已停靠芯片（展开右栏后直接在场），不在则走 dock
 // 「New tab」开 guide 页再试——两条路都试（company 配方核心）。时序参数逐调用点保持
@@ -407,7 +492,7 @@ const dialogTextOf = (page) => page.locator('[role="dialog"]').first().textConte
 async function setupProbeSession() {
   const base = `http://127.0.0.1:${PORT}`
   const cookie = await authenticate(base, token)
-  const ws = await rpc(base, cookie, 'workspace/create', { request: { path: join(ROOT, 'research-workspace') } })
+  const ws = await rpc(base, cookie, 'workspace/create', { request: { path: workspacePath } })
   const workspaceId = ws?.workspace?.workspaceId ?? ws?.workspaceId
   step(typeof workspaceId === 'string', '研究工作区已注册（workspace/create 幂等）', String(workspaceId).slice(0, 8))
   const created = await rpc(base, cookie, 'session/create', { request: { workspaceId, agentPreset: 'lead' } })
@@ -466,6 +551,9 @@ async function setupProbeSession() {
   const overlay = await dismissPreviewNotice(page)
   if (overlay === 'stuck') console.error('client-load: 首屏 Preview Notice 遮罩关不掉——后续点击可能被挡')
   await wait(1_500)
+  // seed 模式：干净 home 的凭据 onboarding 模态（dev home 有凭据 → 不出现）。关在**第一次行键
+  // 点击之前**——它盖住主视图，不关则点击全部被遮罩拦截（2026-11-03 seed spike 实红根因）。
+  if (seed !== null) await dismissCredentialOnboarding(page)
 
   // ── 探针会话改名（两遍断言的前置：探针会话=research-workspace，验渐进面真数据；
   //    既有会话验活动流）──
@@ -480,15 +568,31 @@ async function pass1BoundFacePhase() {
   const boundOk = boundSession !== null && expectedFace !== null
   step(boundOk, '磁盘侧找到绑定 run 的带历史会话（渐进面真数据源）', boundOk ? `「${boundSession.title}」→ drt_${boundSession.slug}` : '缺——先跑一场 run（run 通道现用 workspaceId 形态建会话）')
   if (boundOk) {
-    const opened = (await openSessionById(page, boundSession.sessionId, boundSession.title)).found
-    await wait(3_000)
+    const nav = await openSessionById(page, boundSession.sessionId, boundSession.title)
+    // 点击后复核（2026-11-03）：openSessionById 现在把"点了行但主视图没切"如实报成 opened:false
+    // （旧实现吞掉遮罩拦截的 click 异常仍返回 found:true，断言按错会话判）。进行判定用它，
+    // 失败原因（mask 拦截 / 未选中）直接进 step info，现场不再只剩 marker 未命中。
+    const opened = nav.found === true && nav.opened !== false
+    const openNote = nav.opened === false ? `未切换：${nav.reason ?? nav.via}` : ''
+    if (!opened) console.error(`client-load: 行键点击后主视图未切换（${nav.reason ?? 'unknown'}；via=${nav.via}）`)
     // marker 来自 journal 的**原始 Markdown**（可能含链接/反引号），页面上是渲染后的文本——
     // 两侧都剥掉记号再比（2026-10-20 实测：原文 `[final.md](drt_…)` 在 UI 里只剩 `final.md`）。
     const normalizeText = (text) => text.replace(/[\s[\]()*`#>_]/g, '')
     const markerNeedle = boundSession.marker === null ? null : normalizeText(boundSession.marker).slice(0, 12)
-    const onTarget = opened && (markerNeedle === null || normalizeText(await paneTextOf(page)).includes(markerNeedle))
+    const paneHasMarker = async () => markerNeedle === null || normalizeText(await paneTextOf(page)).includes(markerNeedle)
+    // 会话体渲染是**渐进**的（先到 header/tail，再水化中间消息）：干净 home 首次打开 507 事件
+    // 的会话时，3s 读点常见"会话已切、末条 assistant 正文还没渲染"（2026-11-03 seed 实测：
+    // 4s 未见 marker、12s 在场）。dev home 维持原 3s 读点；seed 放大到有界 20s 并等显式状态
+    // （marker 在场）——不是放宽判据：耗尽仍不命中照红。
+    let onTarget = opened && (await paneHasMarker())
+    const markerBudgetMs = seed === null ? 3_000 : 20_000
+    for (let waited = 0; !onTarget && waited < markerBudgetMs; waited += 1_000) {
+      await wait(1_000)
+      onTarget = opened && (await paneHasMarker())
+    }
     step(opened && onTarget, '绑定会话在侧栏可开且主视图已切换（行键 + 身份 marker）',
-      onTarget ? `marker=${JSON.stringify(markerNeedle)}` : `marker 未命中：${JSON.stringify(markerNeedle)}`)
+      onTarget ? `marker=${JSON.stringify(markerNeedle)}`
+        : `${openNote === '' ? '' : `${openNote}；`}marker 未命中：${JSON.stringify(markerNeedle)}`)
     if (opened) {
       await wait(4_000)
       const capOk = await openPane(page)
@@ -713,7 +817,11 @@ async function pass2UnboundNegativePhase() {
   if (unboundCandidates.length > 0) {
     for (const cand of unboundCandidates) {
       await awaitAppReady(page, 5_000)
-      const opened2 = await clickRowByText(page, cand.title)
+      // 行键（id）优先：干净 home 的冷会话行标题可能还是「Untitled」（无投影缓存），按标题点会
+      // miss（2026-11-03 seed 实测）。title 路线保留为旧夹具/无 id 候选的退路。
+      let nav2 = cand.sessionId === undefined ? null : await openSessionById(page, cand.sessionId, cand.title)
+      let opened2 = nav2 !== null && nav2.found === true && nav2.opened !== false
+      if (!opened2) opened2 = await clickRowByText(page, cand.title)
       if (!opened2) continue
       await wait(4_000)
       const capOk2 = await openPane(page)
@@ -773,7 +881,9 @@ async function pass3ActivityStreamPhase() {
   // 判红（表现像产品回归，实为选行缺陷）。`[data-row-key]` 定位不经文本；标题路线只作
   // 折叠态/深列表的退路（它内含 Show N more / Search 兜底）。
   if (boundSessionId !== null) {
-    sessionOk = (await openSessionById(page, boundSessionId, SESSION_TITLE)).found
+    const nav = await openSessionById(page, boundSessionId, SESSION_TITLE)
+    sessionOk = nav.found === true && nav.opened !== false
+    if (!sessionOk && nav.opened === false) console.error(`client-load: 既有会话行键点击后未切换（${nav.reason ?? 'unknown'}）`)
   }
   // 有 boundSessionId 时**绝不**退回按标题点：标题重名会打开别家（2026-10-21 实红：
   // 绑定会话无团队，却打开 Rerun8 团队会话）。只有调用方显式 --session 且没有绑定对象时，
@@ -788,7 +898,10 @@ async function pass3ActivityStreamPhase() {
     // 也查不到，展开是前置条件。
     for (const g of SIDEBAR_GROUP_CANDIDATES) {
       await expandGroup(page, g)
-      if (boundSessionId !== null) sessionOk = (await openSessionById(page, boundSessionId, SESSION_TITLE)).found
+      if (boundSessionId !== null) {
+        const nav = await openSessionById(page, boundSessionId, SESSION_TITLE)
+        sessionOk = nav.found === true && nav.opened !== false
+      }
       if (!sessionOk && boundSessionId === null && SESSION_TITLE !== null) sessionOk = await clickRowByText(page, SESSION_TITLE)
       if (sessionOk) break
     }

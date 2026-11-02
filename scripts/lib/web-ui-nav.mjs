@@ -316,7 +316,7 @@ export async function clickRowByText(page, text, opts = {}) {
  * 目标会话定位总入口（**行键主锚**；吸收原 client-load-smoke 私有 openSessionByRowKey、
  * hitl-answer 私有 revealTargetRow、旧 openSessionById 三套，2026-10-21 收拢）：
  *   ① revealSessionRow（行键直达 → 具名组展开(手风琴回正) → 通用扫展 → Show N more 逐层）
- *      → 点行；
+ *      → 点行 → **复核选中态**；
  *   ② 搜索兜底（title 在手时；懒渲染权威路径——BUG-035）：Search sessions 输入标题 →
  *      行键重试 → 搜索结果按文本点（结果不带行键）；是否真切到目标由调用方复核
  *      （hitl-answer 的 activated() 同款，点错也不代答）。
@@ -324,31 +324,57 @@ export async function clickRowByText(page, text, opts = {}) {
  * 为什么行键优先：标题在 dev home 里会重名（「…发布线跟踪」多份），按标题点会打开另一条
  * ——期望侧绑的却是参考对象选的那条，对账因此假红（2026-10-20 实测）；会话 id 是权威标识，
  * `[data-row-key]` 定位不经文本。
- * @returns { found, via: 'direct'|'named-group'|'sweep'|'show-more'|'search'|'miss', tried }。
+ *
+ * **点击后复核（fail-loud，2026-11-03 seed spike 实红教训）**：`.click()` 被遮罩拦截时
+ * Playwright 抛错，旧实现 `.catch(() => {})` 吞掉后照旧返回 `found: true`——调用方以为会话
+ * 打开了，断言却按"上一条会话"判（现场 = 干净 home 的凭据 onboarding 模态盖住主视图：行键点了
+ * 但 `aria-selected` 仍停在空会话，marker 全部未命中）。现在点完在 `activateTimeoutMs` 内
+ * **等本轮行键真的 `aria-selected="true"`**（与 client-load 的 activeSessionRowKey 同源）；
+ * 不成立 → `{ found: true, opened: false, reason }`。`found` 语义保持向后兼容（找到并点了行），
+ * 新判据是 `opened`；旧调用方不读它也不改变行为。
+ * @returns { found, opened, reason?, via: 'direct'|'named-group'|'sweep'|'show-more'|'search'|'miss', tried }。
  */
 export async function openSessionById(page, sessionId, title = null, opts = {}) {
-  const { clickTimeoutMs = 8_000, searchSettleMs = 2500 } = opts
+  const { clickTimeoutMs = 8_000, searchSettleMs = 2500, activateTimeoutMs = 5_000 } = opts
   const tried = []
+  const rowKey = `session:${sessionId}`
+  const selected = async () => (await page.locator(`[data-row-key="${rowKey}"][aria-selected="true"]`).count().catch(() => 0)) > 0
+  const settle = async (via, clickError) => {
+    if (await selected()) return { found: true, opened: true, via, tried: [...tried, via] }
+    for (let waited = 0; waited < activateTimeoutMs; waited += 250) {
+      await page.waitForTimeout(250)
+      if (await selected()) return { found: true, opened: true, via, tried: [...tried, via] }
+    }
+    return {
+      found: true,
+      opened: false,
+      via,
+      reason: clickError === null ? 'row-click-did-not-select-target' : `row-click-failed: ${clickError.message}`,
+      tried: [...tried, via],
+    }
+  }
   const reveal = await revealSessionRow(page, sessionId, opts)
   if (reveal !== null) {
-    await reveal.row.click({ timeout: clickTimeoutMs }).catch(() => {})
-    return { found: true, via: reveal.via, tried: [...tried, 'reveal'] }
+    let clickError = null
+    await reveal.row.click({ timeout: clickTimeoutMs }).catch((error) => { clickError = error })
+    return settle(reveal.via, clickError)
   }
   tried.push('reveal')
   if (locateSessionStrategy({ triedSearch: false, title }) === 'search') {
     tried.push('search')
     if (await searchSessionByTitle(page, title, { settleMs: searchSettleMs })) {
-      const row = page.locator(`[data-row-key="session:${sessionId}"]`)
+      const row = page.locator(`[data-row-key="${rowKey}"]`)
       if (await row.count().catch(() => 0) > 0 && await row.first().isVisible().catch(() => false)) {
-        await row.first().click({ timeout: clickTimeoutMs }).catch(() => {})
-        return { found: true, via: 'search', tried }
+        let clickError = null
+        await row.first().click({ timeout: clickTimeoutMs }).catch((error) => { clickError = error })
+        return settle('search', clickError)
       }
       // 不再回退“按标题点搜索结果”：标题重名会点到别家（2026-10-21 实红：绑定会话无团队，
       // 却打开 Rerun8 团队会话）。搜索层只认精确 data-row-key；找不到就 miss，由调用方
       // 展开组/深列表后重试。
     }
   }
-  return { found: false, via: 'miss', tried }
+  return { found: false, opened: false, via: 'miss', tried }
 }
 
 // ── 首屏遮罩（Preview Notice）────────────────────────────────────────────────

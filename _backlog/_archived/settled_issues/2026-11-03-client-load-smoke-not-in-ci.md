@@ -1,11 +1,11 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-11-03
 ---
 
 # 推敲：驾驶舱 E2E 不在 CI——终稿页签坏了 11 天没人发现
 
-> 立卡：2026-11-03 ｜ 状态：推敲中 ｜ 类型：未定 ｜ 结论倾向：未定 ｜ 可关闭：否
+> 立卡：2026-11-03 ｜ 状态：已结 ｜ 类型：修复 ｜ 结论倾向：CI 常驻（seed 夹具） ｜ 可关闭：是
 
 **问题与期望结果：** `client-load-smoke`（61 条真浏览器断言，覆盖驾驶舱页签、终稿页签、
 方法库、配置页签与盘侧真值对账）只在本机手工跑。2026-11-03 卫生审计实跑发现终稿页签
@@ -61,3 +61,15 @@ run-accept-smoke / doctor / pack / release 等，全是 keyless 非浏览器或�
 ## 方案与取舍
 
 ## 验收标准
+
+## 结论（2026-11-03 收口）
+
+**已落地**：`client-load-smoke --seed tests/fixtures/client-load-home` 在干净机器可全绿（69/69/0 SKIP，本机两条独立复跑），CI job `client-load` 常驻（vendor build + chromium + seed + 失败 artifact）。
+
+**两个根因（均实测，推翻旧假设）**：
+1. **干净 home 首启凭据 onboarding 模态**盖住主视图；旧 `openSessionById` 的 `.catch(()=>{})` 吞掉被 mask 拦截的点击、仍返回 `found:true`（假反馈）。修法：seed 分支有界关闭模态；`openSessionById` 点后等 `aria-selected="true"`，否则 `{found:true, opened:false, reason}`；冒烟各相位改读 `opened`。
+2. **日志物理形态**：默认 zstd 后端拒绝明文 `.jsonl`（`encodingMismatch` → workspaceRegistry 不激活）；zstd **首帧必须恰好 header 一行**，整份压一帧会被静默跳过。materialize = 帧 1 header、帧 2 其余事件。
+
+**证据**：夹具 29 文件 / ~317KB（bound 507 事件 + unbound 负样本 + 已交付 bundle + 方法库 + archive 正例）；`--seed` 全跑 69 PASS；dev home 不带 seed 同样 69 PASS（行为不变）；`opened:false` 的反证现场（mask intercepts pointer events）。
+
+**残留**：CI job 首次 PR 运行待实证；其他 `openSessionById` 消费方（session-replay / client-hitl）仍只读 `found`（继承假反馈风险，另行收敛）；seed 冷会话侧栏标题「Untitled」（全按行键开，不影响断言）。

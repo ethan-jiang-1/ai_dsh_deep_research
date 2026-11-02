@@ -21,11 +21,15 @@ export async function pass4ConfigTabPhase(env) {
   const targetId = boundSession?.sessionId ?? null
   let opened = false
   if (targetId !== null) {
-    opened = (await openSessionById(page, targetId, targetTitle)).found
+    // 点击后复核（2026-11-03）：openSessionById 的 opened:false = 点了行但主视图没切（遮罩/抢焦点）。
+    // 旧实现只读 found，会把"没打开"当"打开成功"，本相位随后的页签断言按错会话判。
+    const nav = await openSessionById(page, targetId, targetTitle)
+    opened = nav.found === true && nav.opened !== false
     if (!opened) {
       for (const group of SIDEBAR_GROUP_CANDIDATES) {
         await expandGroup(page, group)
-        opened = (await openSessionById(page, targetId, targetTitle)).found
+        const retry = await openSessionById(page, targetId, targetTitle)
+        opened = retry.found === true && retry.opened !== false
         if (opened) break
       }
     }

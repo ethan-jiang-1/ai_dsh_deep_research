@@ -64,6 +64,56 @@ jobs:
       - name: Receipt chain (run-accept end-to-end)
         run: source dev/env.sh && node scripts/smoke/run-accept-smoke.mjs
 
+  client-load:
+    name: client-load (seeded home, real browser)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout (with pinned DSH submodule)
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.7.0
+          run_install: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # 冒烟有构建新鲜度自检：lib/client.js 旧于 src 即 exit 2。
+      - name: Build pack (dual halves)
+        run: pnpm --filter dsh-deep-research-pack build
+
+      # client-load 的 assertVendorArtifacts 需要 vendor 的 typert/client 产物。
+      - name: Build vendor (pin tree)
+        run: bash dev/vendor-build.sh
+
+      # chromium 由 vendor inspector 包的 playwright 安装（loadChromium 从 .pnpm 取 API）。
+      - name: Install chromium
+        run: pnpm --dir vendor/dsh/packages/experimental/inspector exec playwright install --with-deps chromium
+
+      # --seed 自建 home（会话 + 已交付 bundle 夹具），不依赖开发 home/凭据。
+      - name: Client load (seed fixture)
+        run: source dev/env.sh && node --import tsx/esm scripts/smoke/client-load-smoke.mjs --seed tests/fixtures/client-load-home --port 3109
+
+      - name: Upload failure scene
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-load-artifacts
+          path: runtime/smoke-workspace/client-load-*
+          if-no-files-found: warn
+
   deploy:
     name: keyless deploy smokes
     runs-on: ubuntu-latest

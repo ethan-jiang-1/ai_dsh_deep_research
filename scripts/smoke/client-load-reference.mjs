@@ -90,7 +90,12 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
       // 绑定但被排除（探针壳 / 在飞）不进任何候选——塞进未绑定候选会污染负样本（当日实红：
       // 点到绑定探针 → 渐进面无提示行）
       if (!probeTitled && !stillHot) candidates.push({ sessionId, title, slug, events, logPath, eventCount: events.length, marker, tailAskPending: foldHitlPending(windowedEvents).pending })
-    } else if (unboundCandidates.length < 5) unboundCandidates.push({ title })
+    } else if (unboundCandidates.length < 5) {
+      // sessionId 一并带出：干净 home 的侧栏标题来自 vendor 投影缓存（sessionProjectionCache），
+      // 夹具 home 首次启动没有缓存 → 冷会话行只显示「Untitled」，按标题点会 miss（2026-11-03
+      // seed 实测）。负样本的定位与正样本同纪律 = 行键（id）优先；title 只保留给步骤信息。
+      unboundCandidates.push({ sessionId, title })
+    }
     scanned++
     if (candidates.length >= 5 && unboundCandidates.length >= 1 && deliveredSessions.length >= 3) break
     if (scanned >= 150) break

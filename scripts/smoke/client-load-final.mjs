@@ -51,8 +51,11 @@ export async function pass5FinalDeliveryPhase(env) {
   let deliveredTarget = null
   let doorFound = false
   for (const candidate of finalCandidates) {
-    const opened = (await openSessionById(page, candidate.sessionId, candidate.title)).found
-    if (!opened) { trials.push({ ...candidate, opened: false, statusTab: false, door: false }); continue }
+    // 点击后复核（2026-11-03）：opened:false = 行点了但主视图没切；旧实现只读 found 会把
+    // "没打开"当"打开成功"，后续门/页签断言按错会话判。
+    const nav = await openSessionById(page, candidate.sessionId, candidate.title)
+    const opened = nav.found === true && nav.opened !== false
+    if (!opened) { trials.push({ ...candidate, opened: false, reason: nav.reason ?? null, statusTab: false, door: false }); continue }
     await wait(4_000)
     const statusTab = await openStatusTab()
     if (!statusTab) { trials.push({ ...candidate, opened: true, statusTab: false, door: false }); continue }
