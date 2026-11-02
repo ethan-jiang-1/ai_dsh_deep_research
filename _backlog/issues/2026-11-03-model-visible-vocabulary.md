@@ -48,6 +48,22 @@ opened: 2026-11-03
 - 无设计未决。唯一的执行前提 = 一个能连续跑真模型的窗口（录制中途失败会留下半新半旧的基线，
   必须整轮重跑，不能拼接）。
 
+## 首次尝试（2026-11-03，未成交）
+
+文本改动本身一次过：4 个 preset + `content/manual.md` 两处换成 DSH 对象指称，
+`grep -rn 产品 presets/ content/` 只剩 question-patterns 那处研究对象用法；`pnpm verify` 绿、`pnpm test`
+971/0；`dev/render-overlay.yml` 重渲染后 `overlay-fresh` 绿。
+
+**卡在录制通道**：`dev/record-role-fixture.mjs --role scout` 两次都 `等待启动横幅超时`（120s；端口已换
+3105 → 3106，均无占用）。同刻 `dsh --profile research --dump-config` 正常输出 205 行，说明 profile
+组合本身是好的——是录制器的 boot 等待与真启动对不上，不是包或文本的问题。
+
+处置：改动整轮回退（`git reset --hard`），不留半条基线；`research` profile 依赖指回
+`runtime/smoke-workspace/run-pack/` 的规范 tarball。下次从「先修录制器 boot 等待」开始，不要重复
+这条弯路——诊断入口 = 录制器 `banner` Promise 与 `--no-open` 的启动参数，先手工跑一次
+`dsh --profile research -- --port <p> --no-open` 看横幅到底出不出、出在哪条流。
+
+
 ## 方案与取舍
 
 **采用：换指称 + 同变更重录。** 只换指称，不换语义——手册讲的是工作区与目录约定，措辞变了意思不变：
