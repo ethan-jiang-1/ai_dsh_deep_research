@@ -55,7 +55,8 @@ export function StartCard({
     void (async () => {
       try {
         const userMessage = await hasUserMessage(sessionId)
-        const entries = userMessage ? [] : await listDir(sessionId, '', controller.signal)
+        // workspaceFiles.list 拒绝空路径（gateway/bad-request）；`''` = 工作区根，映射成 `.`。
+        const entries = userMessage ? [] : await listDir(sessionId, '.', controller.signal)
         if (cancelled) return
         setVisible(shouldShowStartCard({ hasUserMessage: userMessage, entries }) ? 'show' : 'hide')
       } catch {

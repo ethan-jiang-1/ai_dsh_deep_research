@@ -34,7 +34,7 @@
 | 品牌（虎鲸 Orca） | BrandMark.tsx | 宿主 `sidebar.brand.mark` + `sidebar.brand.name` 两槽的 single occup… | [§2.4](#cockpit-4) |
 | 面板数据面 | config-tables.ts | 两个页签共用的**纯常量**：内置偏好（skill 方法预设的投影）、判型→打法映射、六条底线、四分区标签、领域示范、两个定制… | [§2.5](#cockpit-5) |
 | 研究配置页签 | ResearchConfigTab.tsx | 右栏**摘要页签**（2026-10-21 管理迁移后）：只留 ① 本次研究（采用＋来源＋「换一条」，读 question.m… | [§2.6](#cockpit-6) |
-| 方法库主 tab | MethodLibraryView.tsx | 主界面 `conversation.view` 第三 tab（Chat/Trajectory 同排）：两列工作台、显式来源选择、详情/访谈/表单检查与经 Host 工具核对的默认/删除操作 | [§2.7](#cockpit-7) |
+| 方法库主 tab | MethodLibraryView.tsx | 主界面 `conversation.view` 第二 tab（与「对话」同排）：两列工作台、显式来源选择、详情/访谈/表单检查与经 Host 工具核对的默认/删除操作 | [§2.7](#cockpit-7) |
 | 研究图谱页签 | ResearchGraphTab.tsx | 右栏**只读观察面**：顶层 plan 节点 / `agentTeam` 任务画成 SVG DAG（节点 + 依赖边 + 同层… | [§2.8](#cockpit-8) |
 | 终稿页签 | ResearchFinalTab.tsx | 右栏页签：**认领 `drt_<slug>/` 的终稿地址族**（`final.md` / `final/vN.md` / `… | [§2.9](#cockpit-9) |
 | 浏览器 RunSource 适配器 | run-source-browser.ts | `remote.workspaceFiles` → run-context 的 `Entry` / `Page` / `ver… | [§2.10](#cockpit-10) |
@@ -134,7 +134,7 @@
 
 **文件**：[MethodLibraryView.tsx](../../packages/deep-research-pack/src/client/MethodLibraryView.tsx) + [views.tsx](../../packages/deep-research-pack/src/client/method-library/views.tsx)（详情、来源选择、摘要、访谈/表单，纯展示）+ [coach.tsx](../../packages/deep-research-pack/src/client/method-library/coach.tsx)（访谈对话面板；根级 portal + store）+ [styles.ts](../../packages/deep-research-pack/src/client/method-library/styles.ts) + [locales.ts](../../packages/deep-research-pack/src/client/locales.ts)（方法库文案字典）+ [library-fold.ts](../../packages/deep-research-pack/src/lib/library-fold.ts) + [method-draft.ts](../../packages/deep-research-pack/src/lib/method-draft.ts)（`method-draft` 围栏解析 → 表单回填）+ [method-library-write.ts](../../packages/deep-research-pack/src/lib/method-library-write.ts)（库条目写入纯函数与默认语义）+ [method-library-operation.ts](../../packages/deep-research-pack/src/lib/method-library-operation.ts)（操作命令编解码）+ [method-library-commands.ts](../../packages/deep-research-pack/src/lib/method-library-commands.ts)（Host 操作投影与一次性 claim）+ [method-library-events.ts](../../packages/deep-research-pack/src/lib/method-library-events.ts)（方法编辑 live event 解码）+ [method-library-hash.ts](../../packages/deep-research-pack/src/lib/method-library-hash.ts)（浏览器 SHA-256）+ [method-library-operation-state.ts](../../packages/deep-research-pack/src/lib/method-library-operation-state.ts)（预期整库快照与结算判据）+ [method-library-read.ts](../../packages/deep-research-pack/src/lib/method-library-read.ts)（分页读取完整性）+ [method-library-source.ts](../../packages/deep-research-pack/src/lib/method-library-source.ts)（run 来源完成判据与最终版本选择）+ [method-library-tool.ts](../../packages/deep-research-pack/src/method-library-tool.ts)（host 工具 `method_library_upsert` / `set_default` / `remove`）+ [MethodLibraryToolCard.tsx](../../packages/deep-research-pack/src/client/MethodLibraryToolCard.tsx)（写库工具卡）
 
-主界面 `conversation.view` 第三 tab（Chat/Trajectory 同排），两列工作台：左列搜索/选择我的库或内置参考；右列在读态显示条目详情，在新建/编辑态以同一活动草稿显示顶部摘要与「访谈 / 检查表单」两个互斥表面；≤640px 时左列折叠为可切换的全宽库面板，工作台仅隐藏不卸载，返回时保留草稿与 Coach。新建先从零、某条内置参考或一条有完成记录的 run 中显式选来源；run 只以有界预览读取 question.md 与最高 `final/vN.md`，完成判据要求数值最高版本、可读 question，以及 `delivered.json` 或旧式 `acceptance.md` 的接收回执。摘要显示名称、来源、四字段短摘要、`n/4` 完成度与字段来源；摘要字段可直接切到表单并聚焦，内置参考详情可直接作为新方法来源。普通保存、保存并设为默认、独立设/清默认与删除均为明确动作，未满足名称与四字段 trim 非空时保存禁用。活动草稿维护单调 revision，候选回填只接受当前 turn 的未重复 seq 且 revision 仍等于该 turn base 或上一接受版本；用户中途修改后的迟到候选不合并。方法编辑是 D37 的第 5 个 preset（非研究；工具面不含 web/fs），每个活动草稿使用独立 root session，React 树在根级 `shell.overlay`、`createPortal` 进页面访谈区；页面激活时外层主 composer 由 CSS 隐藏（外层问卡让位）。保存/删除/默认命令带 `operationId`（保存另带 SHA-256）；Host 只接受 owning Session 的 owner prompt 与匹配 `callId`，写入后回读，Client 再完整读取整库并核对目标态。超时或回读不明保持 lock；刷新只观察当前状态，不解锁也不重发。
+主界面 `conversation.view` 第二 tab（与「对话」同排），两列工作台：左列搜索/选择我的库或内置参考；右列在读态显示条目详情，在新建/编辑态以同一活动草稿显示顶部摘要与「访谈 / 检查表单」两个互斥表面；≤640px 时左列折叠为可切换的全宽库面板，工作台仅隐藏不卸载，返回时保留草稿与 Coach。新建先从零、某条内置参考或一条有完成记录的 run 中显式选来源；run 只以有界预览读取 question.md 与最高 `final/vN.md`，完成判据要求数值最高版本、可读 question，以及 `delivered.json` 或旧式 `acceptance.md` 的接收回执。摘要显示名称、来源、四字段短摘要、`n/4` 完成度与字段来源；摘要字段可直接切到表单并聚焦，内置参考详情可直接作为新方法来源。普通保存、保存并设为默认、独立设/清默认与删除均为明确动作，未满足名称与四字段 trim 非空时保存禁用。活动草稿维护单调 revision，候选回填只接受当前 turn 的未重复 seq 且 revision 仍等于该 turn base 或上一接受版本；用户中途修改后的迟到候选不合并。方法编辑是 D37 的第 5 个 preset（非研究；工具面不含 web/fs），每个活动草稿使用独立 root session，React 树在根级 `shell.overlay`、`createPortal` 进页面访谈区；页面激活时外层主 composer 由 CSS 隐藏（外层问卡让位）。保存/删除/默认命令带 `operationId`（保存另带 SHA-256）；Host 只接受 owning Session 的 owner prompt 与匹配 `callId`，写入后回读，Client 再完整读取整库并核对目标态。超时或回读不明保持 lock；刷新只观察当前状态，不解锁也不重发。
 
 <a id="cockpit-8"></a>
 ### 2.8 研究图谱页签
@@ -305,7 +305,7 @@ domain。它是 Client 渲染，不进模型请求。
   rerun，侧栏不发“让 Lead 调整”这类不知道调什么的指令。任务粒度仍归 `ui-agent-team`。
 
 - **方法库主 tab 只在 active conversation 出现**：DSH 的空白 New Session hero 不渲染
-  `conversation.view` tabs（Chat/Trajectory 也没有）；管理库需打开一个有历史的会话。后续若要让
+  `conversation.view` tabs（「对话」也没有）；管理库需打开一个有历史的会话。后续若要让
   新会话也能进库，应在 hero/左栏补入口，不改 `conversation.view` 本身。
 
 - **右栏 pane 仍可能钉在上一会话（vendor 面板会话绑定，2026-10-21 实测）**：主视图切到绑定会话 A

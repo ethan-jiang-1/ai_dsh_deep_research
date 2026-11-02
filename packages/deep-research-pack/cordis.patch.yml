@@ -8,6 +8,15 @@
 # 依赖纪律：runtime 依赖声明为 peerDependencies（pre-stable API 不精确钉死），
 # 版本合同只有 engines.dsh（宿主读它；本文件不另设兼容矩阵字段）。
 
+# ── 产品面收窄（2026-11-02 用户拍板）：去掉出厂的两个入口，产品不提供 ──
+# ui-trajectory = 主区 Trajectory 页签；ui-sidebar-terminal = 右栏 New Terminal。
+# 两行都由 web-app bundle 提供；本包是后置 patch 层，按 id 关闭（Loader 方言 disabled: true）。
+- id: ui-trajectory
+  disabled: true
+
+- id: ui-sidebar-terminal
+  disabled: true
+
 # ── preset roster：替换 web-app 的出厂默认（shipped registry default: standard）──
 - id: agent-preset-registry
   name: '@deepseek-ai/dsh-agent-preset-registry'

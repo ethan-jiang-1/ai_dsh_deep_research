@@ -1,7 +1,7 @@
-// product-invariants — D40 的四条产品不变量（keyless，静态面）。
+// product-invariants — D40 的产品不变量（keyless，静态面）。
 //
 // I1 产品有自己的 profile / 无 launcher；I2 启动期解决工作区；I3 包内容不落工作区；
-// I4 内容从包内注入。反证在 2026-11-01 的红基线上成立：改动前的树 9/9 红（记录 = 决策卡
+// I4 内容从包内注入；I5 产品面收窄（Trajectory / New Terminal 关闭）。反证在 2026-11-01 的红基线上成立：改动前的树 9/9 红（记录 = 决策卡
 // `## 红基线`）。任何"为了好装一点"把入口/内容改回去的改动都会在这里变红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
@@ -26,6 +26,12 @@ test('I1 产品有自己的 profile，安装/启动全走 DSH，无 launcher/sca
   assert.match(patch, /id: research-startup/, 'bundle patch 缺启动行')
   assert.match(patch, /id: research-content/, 'bundle patch 缺内容注入行')
   assert.equal(/research-workspace-boot/.test(patch), false, '旧 workspace-boot 行必须删除')
+})
+
+test('I5 产品面收窄：出厂 Trajectory 页签与右栏 New Terminal 关闭', () => {
+  const patch = read('packages/deep-research-pack/cordis.patch.yml')
+  assert.match(patch, /- id: ui-trajectory\s+disabled: true/, 'bundle patch 未关闭 ui-trajectory（主区 Trajectory 页签）')
+  assert.match(patch, /- id: ui-sidebar-terminal\s+disabled: true/, 'bundle patch 未关闭 ui-sidebar-terminal（右栏 New Terminal）')
 })
 
 test('I2 启动期解决工作区：Host 读设置/登记；client 建/选会话', () => {
