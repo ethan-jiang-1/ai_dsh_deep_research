@@ -14,7 +14,7 @@ import { SECTION_LABELS, type LibraryEntry, type LibrarySections } from '../../l
 import { BUILTIN_PREFERENCES } from '../../lib/config-tables.ts'
 import type { DraftField } from '../../lib/method-draft.ts'
 import {
-  builtinLibraryEntry, draftOf, emptySections,
+  builtinLibraryEntry, draftDirty, draftOf, emptySections,
   type MethodLibraryOperationRequest, type Mode, type PendingMethodOperation,
   type Receipt, type Segment,
 } from './model.ts'
@@ -110,16 +110,7 @@ export function useDraftState(deps: DraftStateDeps) {
     lastAssistantSeqRef.current = -1
   }
 
-  const dirty = (() => {
-    if (draft === null || mode === 'read') return false
-    if (mode === 'new') {
-      return selectedBuiltinSource !== null || selectedRunSource !== null
-        || draft.name.trim() !== '' || SECTION_LABELS.some(({ key }) => draft.sections[key] !== null)
-    }
-    if (selected === null) return true
-    return draft.name !== selected.name
-      || SECTION_LABELS.some(({ key }) => (draft.sections[key] ?? '') !== (selected.sections[key] ?? ''))
-  })()
+  const dirty = draftDirty({ draft, mode, selected, selectedBuiltinSource, selectedRunSource })
   const confirmDiscard = (): boolean => {
     if (!dirty) return true
     return typeof window === 'undefined' ? true : window.confirm('放弃未保存的修改？')

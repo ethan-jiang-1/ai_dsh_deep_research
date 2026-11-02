@@ -4,8 +4,7 @@
 // 组件负责读盘/会话/布局；纯判据可 keyless 单测（operationMetadataMatches / draftOf 等）。
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { MethodLibraryAction } from '../../lib/method-library-operation.ts'
-import { summaryOfEntry, type LibrarySections } from '../../lib/library-fold.ts'
-import type { LibraryEntry } from '../../lib/library-fold.ts'
+import { SECTION_LABELS, summaryOfEntry, type LibraryEntry, type LibrarySections } from '../../lib/library-fold.ts'
 import type { MethodLibrarySnapshot } from '../../lib/method-library-operation-state.ts'
 import type { BUILTIN_PREFERENCES } from '../../lib/config-tables.ts'
 import type { Draft } from './views.tsx'
@@ -103,4 +102,45 @@ export function draftOf(entry: LibraryEntry): Draft {
     provenance: entry.provenance,
     legacyText: entry.legacyText,
   }
+}
+
+/** 草稿未填的四字段标签（保存前校验；空串与 null 都算缺）。 */
+export function missingSections(draft: Draft): string[] {
+  return SECTION_LABELS.filter(({ key }) => {
+    const value = draft.sections[key]
+    return value === null || value.trim() === ''
+  }).map(({ label }) => label)
+}
+
+/** 草稿是否有未保存修改（离开确认用；read 模式恒 false）。 */
+export function draftDirty(input: {
+  readonly draft: Draft | null
+  readonly mode: Mode
+  readonly selected: LibraryEntry | null
+  readonly selectedBuiltinSource: LibraryEntry | null
+  readonly selectedRunSource: unknown | null
+}): boolean {
+  const { draft, mode, selected, selectedBuiltinSource, selectedRunSource } = input
+  if (draft === null || mode === 'read') return false
+  if (mode === 'new') {
+    return selectedBuiltinSource !== null || selectedRunSource !== null
+      || draft.name.trim() !== '' || SECTION_LABELS.some(({ key }) => draft.sections[key] !== null)
+  }
+  if (selected === null) return true
+  return draft.name !== selected.name
+    || SECTION_LABELS.some(({ key }) => (draft.sections[key] ?? '') !== (selected.sections[key] ?? ''))
+}
+
+/** 当前选中条目：分段内搜索时从 filtered 选，否则从全量 entries 选。 */
+export function pickSelectedEntry<T extends LibraryEntry>(input: {
+  readonly entries: readonly T[]
+  readonly filtered: readonly T[]
+  readonly segment: Segment
+  readonly query: string
+  readonly selectedName: string | null
+}): T | null {
+  const { entries, filtered, segment, query, selectedName } = input
+  return (segment === 'mine' && query.trim() !== ''
+    ? filtered.find((entry) => entry.name === selectedName)
+    : entries.find((entry) => entry.name === selectedName)) ?? null
 }

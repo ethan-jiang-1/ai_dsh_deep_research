@@ -14,7 +14,7 @@ import { useRef, useState } from 'react'
 import type { MutableRefObject } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
-import { SECTION_LABELS, foldLibrary, renderLibraryEntry, type LibraryEntry } from '../../lib/library-fold.ts'
+import { foldLibrary, renderLibraryEntry, type LibraryEntry } from '../../lib/library-fold.ts'
 import { methodLibraryCommandText } from '../../lib/method-library-operation.ts'
 import { methodLibraryEntryHash } from '../../lib/method-library-hash.ts'
 import type { MethodLibraryReadResult } from '../../lib/method-library-read.ts'
@@ -23,7 +23,7 @@ import {
   methodLibrarySnapshot, shouldStartFreshDraftContext,
 } from '../../lib/method-library-operation-state.ts'
 import {
-  LIBRARY_PATH, operationMetadataMatches,
+  LIBRARY_PATH, missingSections, operationMetadataMatches,
   type LoadState, type MethodLibraryOperationRequest, type Mode, type OperationOutcome,
   type PendingMethodOperation, type Receipt,
 } from './model.ts'
@@ -333,12 +333,9 @@ export function useOperationQueue(deps: OperationQueueDeps) {
       setReceipt({ ok: false, detail: '名称不能为空' })
       return
     }
-    const missing = SECTION_LABELS.filter(({ key }) => {
-      const value = draft.sections[key]
-      return value === null || value.trim() === ''
-    })
+    const missing = missingSections(draft)
     if (missing.length > 0) {
-      setReceipt({ ok: false, detail: `还缺字段：${missing.map(({ label }) => label).join('、')}——填完再保存` })
+      setReceipt({ ok: false, detail: `还缺字段：${missing.join('、')}——填完再保存` })
       return
     }
     if (loadState !== 'ok' && loadState !== 'absent') {

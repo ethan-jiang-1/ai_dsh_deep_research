@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  builtinLibraryEntry, draftOf, emptySections, expectedDefaults, filterLibraryEntries, operationMetadataMatches,
+  builtinLibraryEntry, draftDirty, draftOf, emptySections, expectedDefaults, filterLibraryEntries, missingSections, operationMetadataMatches, pickSelectedEntry,
 } from '../../packages/deep-research-pack/src/client/method-library/model.ts';
 
 const snapshot = (entries) => entries;
@@ -70,4 +70,37 @@ test('filterLibraryEntries：空查询全量；名字与摘要大小写不敏感
   assert.equal(filterLibraryEntries(entries, 'fact')[0].name, 'Fact Check');
   assert.equal(filterLibraryEntries(entries, 'primary')[0].name, 'Fact Check');
   assert.deepEqual(filterLibraryEntries(entries, 'missing'), []);
+});
+
+test('missingSections：null / 空串都算缺，完整草稿返回空数组', () => {
+  const draft = { name: 'x', sections: { source: 'a', verify: null, report: '  ', limit: null }, currentName: 'x', provenance: '', legacyText: null };
+  const missing = missingSections(draft);
+  assert.equal(missing.length, 3);
+  const full = { ...draft, sections: { source: 'a', verify: 'b', report: 'c', limit: 'd' } };
+  assert.deepEqual(missingSections(full), []);
+});
+
+test('draftDirty：read 恒 false；new 空草稿 false；改名/改节/带来源 true；edit 对照选中', () => {
+  const base = { name: '甲', currentName: '甲', provenance: '', legacyText: null };
+  const sections = { source: 'a', verify: 'b', report: 'c', limit: 'd' };
+  const draft = { ...base, sections };
+  const selected = { name: '甲', provenance: '', sections, legacyText: null, isDefault: false };
+  const common = { selectedBuiltinSource: null, selectedRunSource: null, selected };
+  assert.equal(draftDirty({ ...common, draft, mode: 'read' }), false);
+  assert.equal(draftDirty({ ...common, draft: null, mode: 'new' }), false);
+  assert.equal(draftDirty({ ...common, draft: { ...draft, name: '', sections: emptySections() }, mode: 'new' }), false);
+  assert.equal(draftDirty({ ...common, draft: { ...draft, name: '新' }, mode: 'new' }), true);
+  assert.equal(draftDirty({ ...common, draft, mode: 'new', selectedBuiltinSource: selected }), true);
+  assert.equal(draftDirty({ ...common, draft, mode: 'edit' }), false);
+  assert.equal(draftDirty({ ...common, draft: { ...draft, sections: { ...sections, source: '变了' } }, mode: 'edit' }), true);
+  assert.equal(draftDirty({ ...common, draft, mode: 'edit', selected: null }), true);
+});
+
+test('pickSelectedEntry：查询态从 filtered 选，非查询从全量选；未命中 null', () => {
+  const a = { name: 'a' };
+  const b = { name: 'b' };
+  const entries = [a, b];
+  assert.equal(pickSelectedEntry({ entries, filtered: [b], segment: 'mine', query: 'q', selectedName: 'b' }), b);
+  assert.equal(pickSelectedEntry({ entries, filtered: [b], segment: 'mine', query: 'q', selectedName: 'a' }), null);
+  assert.equal(pickSelectedEntry({ entries, filtered: [], segment: 'mine', query: '', selectedName: 'a' }), a);
 });

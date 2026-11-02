@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { BUILTIN_PREFERENCES } from '../../lib/config-tables.ts'
 import { foldLibrary } from '../../lib/library-fold.ts'
-import { filterLibraryEntries } from './model.ts'
+import { filterLibraryEntries, pickSelectedEntry } from './model.ts'
 import type { MethodLibraryReadResult } from '../../lib/method-library-read.ts'
 import { LIBRARY_PATH, type LoadState, type Segment } from './model.ts'
 
@@ -25,9 +25,7 @@ export function useLibraryData({ sessionId, readLibrary }: LibraryDataDeps) {
 
   const entries = useMemo(() => foldLibrary(text), [text])
   const filtered = useMemo(() => filterLibraryEntries(entries, query), [entries, query])
-  const selected = (segment === 'mine' && query.trim() !== ''
-    ? filtered.find((entry) => entry.name === selectedName)
-    : entries.find((entry) => entry.name === selectedName)) ?? null
+  const selected = pickSelectedEntry({ entries, filtered, segment, query, selectedName })
   const builtin = segment === 'builtin'
     ? BUILTIN_PREFERENCES.find((entry) => entry.name === selectedName) ?? null
     : null
