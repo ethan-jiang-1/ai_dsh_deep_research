@@ -45,13 +45,16 @@ import { MethodCoachPortal, CoachChat } from './method-library/coach.tsx'
 import { ResearchGraphTab } from './ResearchGraphTab.tsx'
 import { ResearchFinalTab } from './ResearchFinalTab.tsx'
 import { browserRunSource } from './run-source-browser.ts'
-import { joinMethodLibraryPages, type MethodLibraryReadResult } from '../lib/method-library-read.ts'
 import { OrcaMark, OrcaName } from './BrandMark.tsx'
 import { createFollow, hasUserMessage, watchCoach } from './session-follow.ts'
 import { createWorkspaceBoot, type SessionsLike, type UiWorkspaceLike, type WorkspacesLike } from './workspace-boot.ts'
 import { installCoachComposerStyles, installQuestionCardNarrowFix } from './styles.ts'
+import { createWorkspaceFiles } from './workspace-files.ts'
+import { createCoachSessions } from './coach-sessions.ts'
+import { watchDelivery } from './delivery-watch.ts'
+import { createLeadPrompt } from './lead-prompt.ts'
 import { StartCard, type StartCardInjected } from './StartCard.tsx'
-import { draftInProgress, finalAddressOf, isFinalAddress, latestFinalDelivery, shouldOpenFinal } from '../lib/final-target.ts'
+import { finalAddressOf, isFinalAddress } from '../lib/final-target.ts'
 
 /** Required services：槽注册表（renderer）+ 右栏页签注册器 + 右栏导航面（openTab——挂起显性化）+ remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
  *  父级则取 .session 炸 "without injecting it"，只声明子级则取父属性炸 "without inject"）。 */
@@ -76,9 +79,8 @@ export function apply(ctx: ClientContext): void {
     const disposeDictionaries = scoped.locale.register('deepResearchPack', { zh, en })
     scoped.effect(() => disposeDictionaries, 'deep-research-pack: dictionaries')
     const t = scoped.locale.bind('deepResearchPack')
-    // 服务句柄在**注入回调内**取好再交给 follow：Cordis 的 service 代理在属性访问时校验
-    // 当前 fiber 的 inject；follow 会在页签组件的渲染 fiber 里被调用，届时再取 `remote.session`
-    // 会报 "cannot get property \"session\" without inject"（2026-11-03 拆模块实测）。
+    // 服务句柄在**注入回调内**取好再闭包：Cordis 在属性访问时校验当前 fiber 的 inject；
+    // follow 会在页签渲染 fiber 里被调用，届时再取 `remote.session` 会 `without inject`（实测）。
     const remoteSession = scoped.remote.session
     const follow = createFollow({ session: { follow: (input, signal) => remoteSession.follow({ address: input.address as never }, signal) } })
     // 首屏起步卡探测 / 方法编辑会话流：纯装配住 session-follow.ts（2026-11-03 P4 拆分）。
@@ -89,6 +91,16 @@ export function apply(ctx: ClientContext): void {
       storage: localStorage,
     })
     const { chooseWorkspace, ensureProductWorkspace, workspaceOf } = boot
+    const workspaceFiles = scoped.remote.workspaceFiles
+    const { listDir, readLibrary, readPreview } = createWorkspaceFiles(workspaceFiles as never)
+    const { sendInstruction } = createLeadPrompt({ prompt: (input, signal) => remoteSession.prompt(input as never, signal) })
+    const { ensureCoachSession, sendCoach } = createCoachSessions(
+      scoped as unknown as { get(name: string): unknown },
+      {
+        rename: (input) => remoteSession.rename(input),
+        prompt: (input, signal) => remoteSession.prompt(input as never, signal),
+      },
+    )
 
     scoped.effect(() => scoped.sidebarRightTabs.register({
       id: RESEARCH_TAB_KEY,
@@ -159,148 +171,10 @@ export function apply(ctx: ClientContext): void {
     // 管理指令发送闭包（D25 期 1）：session/prompt——默认 steer（在飞 run 即时消费），
     // 失败降级 queue（空闲会话排程）；两态结果回执给面板，不静默。requestId 铸造 =
     // vendor 同款（session.ts beginSubmission：randomUUID as SessionRequestId）。
-    const sendInstruction = async (sessionId: SessionId, text: string): Promise<{ ok: boolean; detail: string }> => {
-      const requestId = crypto.randomUUID() as import('@deepseek-ai/dsh-api-remotes/client').SessionRequestId
-      const base = { requestId, sessionId, content: [{ type: 'text' as const, text }] }
-      try {
-        const steer = await scoped.remote.session.prompt({ ...base, mode: 'steer' }, new AbortController().signal)
-        if (steer.ok) return { ok: true, detail: '已发送给 Lead' }
-        const queued = await scoped.remote.session.prompt({ ...base, mode: 'queue' }, new AbortController().signal)
-        return queued.ok ? { ok: true, detail: '已发送给 Lead' } : { ok: false, detail: String(queued.error ?? '未知错误') }
-      } catch (cause) {
-        return { ok: false, detail: String(cause) }
-      }
-    }
-
-    // ── Method Editor sessions: one per in-memory draft key, with no browser persistence. ──
-    interface CoachSessionService {
-      create(opts: { workspaceId?: string; cwd?: string; sessionId?: SessionId; agentPreset?: string }): Promise<SessionId>
-      retain(id: SessionId, opts: { source: string }): {
-        release(): void
-        ready: Promise<unknown>
-        binding: { session: { getSnapshot(): { openState: string } } }
-      }
-      list: { getSnapshot(): { byId: Record<string, { cwd?: string } | undefined> } }
-    }
-    interface CoachWorkspaceService {
-      list: { getSnapshot(): { items: readonly { workspaceId: string; sessionIds: readonly SessionId[] }[] } }
-    }
-    const ensureCoachSession = async (currentSessionId: SessionId, draftKey: string): Promise<{
-      id: SessionId
-      reference: {
-        release(): void
-        ready: Promise<unknown>
-        binding: { session: { getSnapshot(): { openState: string } } }
-      }
-    }> => {
-      const sessions = (scoped as unknown as { get(name: string): unknown }).get('sessions') as CoachSessionService | undefined
-      if (sessions === undefined) throw new Error('sessions 服务不可用')
-      const workspaces = (scoped as unknown as { get(name: string): unknown }).get('workspaces') as CoachWorkspaceService | undefined
-      const workspaceId = workspaces?.list.getSnapshot().items
-        .find((item) => item.sessionIds.includes(currentSessionId))?.workspaceId
-      const cwd = sessions.list.getSnapshot().byId[currentSessionId]?.cwd
-      const deterministicId = `method-coach-${draftKey}` as SessionId
-      try {
-        return { id: deterministicId, reference: sessions.retain(deterministicId, { source: 'methodCoach' }) }
-      } catch {
-        // A missing Session is created below from the current page's selected workspace.
-      }
-      const created = await sessions.create({
-        sessionId: deterministicId,
-        ...(workspaceId === undefined ? {} : { workspaceId }),
-        ...(workspaceId === undefined && cwd !== undefined ? { cwd } : {}),
-        agentPreset: 'method-editor',
-      })
-      try { await scoped.remote.session.rename({ sessionId: created, title: '方法编辑' }) } catch { /* non-fatal */ }
-      return { id: created, reference: sessions.retain(created, { source: 'methodCoach' }) }
-    }
-    const sendCoach = async (
-      sessionId: SessionId,
-      text: string,
-      requestId: string = crypto.randomUUID(),
-    ): Promise<{ readonly ok: boolean; readonly detail?: string; readonly uncertain?: boolean }> => {
-      const typedRequestId = requestId as import('@deepseek-ai/dsh-api-remotes/client').SessionRequestId
-      try {
-        const result = await scoped.remote.session.prompt(
-          { requestId: typedRequestId, sessionId, mode: 'queue', content: [{ type: 'text' as const, text }] },
-          new AbortController().signal,
-        )
-        return result.ok ? { ok: true } : { ok: false, detail: String(result.error ?? 'prompt rejected') }
-      } catch (cause) {
-        return { ok: false, detail: String(cause), uncertain: true }
-      }
-    }
-
-    // workspaceFiles 闭包（bundle 渐进面数据通道；company cultivation 同款，失败降级 null）
-    const listDir = async (sessionId: SessionId, path: string, signal: AbortSignal) => {
-      try {
-        const result = await scoped.remote.workspaceFiles.list(sessionId, path, signal)
-        if (!result.ok) {
-          // 诊断面（RFC research-status-ui 的 bundle 渐进面）：把真实失败原因打到 console，
-          // 便于 client-load-smoke 抓取——静默吞错会让"数据面不可达"与"目录为空"无法区分。
-          // 例外：`workspace-file/not-found` = 目录尚未产出（run 早期证据面还没建、刚 scaffold
-          // 的 bundle 只有 question/topics），是**合法空态**而非故障——按空列表降级、不打 error
-          // （2026-10-19 0.2.1-rc.2 端到端实测：drt_cn-us-agriculture-gap 无 evidence/ 目录，
-          // 页签把正常空态当故障报红）。真故障（权限/通道/其他 code）仍然 fail-loud。
-          const code = (result.error as { code?: string } | undefined)?.code
-          if (code === 'workspace-file/not-found') return []
-          console.error('[research-status] workspaceFiles.list 失败', JSON.stringify({ path, error: result.error }))
-          return null
-        }
-        return result.value.entries as readonly { type: string; name: string }[]
-      } catch (cause) {
-        console.error('[research-status] workspaceFiles.list 抛错', String(cause))
-        return null
-      }
-    }
-    // limit 参数化（BUG-026）：默认 40 行 = bundle 渐进面小读取的历史选择（question.md 首行
-    // 等）；「研究配置」页签的库读传大限（多条目库 >40 行，写死会静默截断——vendor 契约
-    // limit 上限 = 配置 maxLines，默认 5000）。
-    const readLibrary = async (sessionId: SessionId, path: string, signal: AbortSignal): Promise<MethodLibraryReadResult> => {
-      const pages: { text: string; lines: number; eof: boolean }[] = []
-      let offset = 1
-      for (let pageIndex = 0; pageIndex < 20; pageIndex += 1) {
-        try {
-          const result = await scoped.remote.workspaceFiles.read(sessionId, path, { offset, limit: 1000 }, signal)
-          if (!result.ok) {
-            const code = (result.error as { code?: string } | undefined)?.code
-            if (code === 'workspace-file/not-found') return { kind: 'absent' }
-            return { kind: 'error', detail: String(result.error ?? 'workspace read failed') }
-          }
-          const page = result.value
-          pages.push({ text: page.text, lines: page.lines, eof: page.eof })
-          const text = joinMethodLibraryPages(pages)
-          if (text !== null) return { kind: 'ok', text }
-          if (page.lines === 0) return { kind: 'error', detail: 'workspace read returned an empty non-final page' }
-          offset += page.lines
-        } catch (cause) {
-          if (signal.aborted) return { kind: 'error', detail: 'read cancelled' }
-          return { kind: 'error', detail: String(cause) }
-        }
-      }
-      return { kind: 'error', detail: 'method-library.md exceeds 20000 lines' }
-    }
-    const readPreview = async (sessionId: SessionId, path: string, signal: AbortSignal, limit = 80) => {
-      try {
-        const result = await scoped.remote.workspaceFiles.read(sessionId, path, { offset: 1, limit }, signal)
-        if (!result.ok) {
-          const code = (result.error as { code?: string } | undefined)?.code
-          return code === 'workspace-file/not-found'
-            ? { kind: 'absent' as const }
-            : { kind: 'error' as const, detail: String(result.error ?? 'workspace read failed') }
-        }
-        const { text, eof } = result.value
-        if (typeof text !== 'string' || typeof eof !== 'boolean') return { kind: 'error' as const, detail: 'workspace preview response was malformed' }
-        return { kind: 'ok' as const, text, eof }
-      } catch (cause) {
-        return signal.aborted
-          ? { kind: 'cancelled' as const }
-          : { kind: 'error' as const, detail: String(cause) }
-      }
-    }
+    // workspaceFiles 单文件读（渐进面 / 配置页签共用；缺省 40 行；missingOk 区分空态与故障）。
     const readFile = async (sessionId: SessionId, path: string, signal: AbortSignal, limit = 40, missingOk = false) => {
       try {
-        const result = await scoped.remote.workspaceFiles.read(sessionId, path, { limit }, signal)
+        const result = await workspaceFiles.read(sessionId, path, { limit }, signal)
         if (!result.ok) {
           const code = (result.error as { code?: string } | undefined)?.code
           if (missingOk && code === 'workspace-file/not-found') return null
@@ -316,9 +190,8 @@ export function apply(ctx: ClientContext): void {
     }
 
     // 终稿页签的读面：run-context 的浏览器适配器（三位置/读策略/翻页归 lib；页签只拿 view）。
-    const runSource = (sessionId: SessionId) => browserRunSource(scoped.remote.workspaceFiles, sessionId)
+    const runSource = (sessionId: SessionId) => browserRunSource(workspaceFiles, sessionId)
 
-    // 终稿的唯一打开入口：文件地址 → 页签（同地址幂等——交付卡片与自动打开落同一页签）。
     const openFinal = (sessionId: SessionId, path: string) => {
       try { scoped.sidebarRight.openResource(finalAddressOf(sessionId, path)) }
       catch (cause) { console.error('[research-final] openResource 失败', String(cause)) }
@@ -444,44 +317,7 @@ export function apply(ctx: ClientContext): void {
     //   · 只对**在屏会话**动作——切会话弹右栏是既有裁决否决过的打扰
     //     （notes/archived/2026-09-28-right-pane-ux-debt.md §输掉的方案）。
     // 这是本包唯一一处"替用户打开东西"：出现时机就是交付本身，别处不再自动弹面。
-    scoped.effect(() => {
-      const opened = new Set<string>()
-      let followed: SessionId | undefined
-      let controller: AbortController | undefined
-      // 让路判据 = "焦点里有真草稿"（不是"焦点在输入框"）：会话打开即聚焦 composer，
-      // 空输入框不算在写——见 lib/final-target.draftInProgress 的实测来由。
-      const focusedInEditor = () => draftInProgress(document.activeElement)
-      const stop = () => { controller?.abort(); controller = undefined; followed = undefined }
-      const watch = (sessionId: SessionId) => {
-        if (followed === sessionId) return
-        stop()
-        followed = sessionId
-        const next = new AbortController()
-        controller = next
-        void (async () => {
-          try {
-            for await (const frame of follow(sessionId, next.signal)) {
-              if (frame.kind !== 'event') continue
-              const delivery = latestFinalDelivery([frame.event])
-              if (delivery === null) continue
-              if (!shouldOpenFinal(delivery, opened, sessionId, focusedInEditor())) continue
-              opened.add(`${sessionId}:${delivery.callId}`)
-              openFinal(sessionId, delivery.path)
-            }
-          } catch (cause) {
-            if (!next.signal.aborted) console.error('[research-final] 交付监听流失败', String(cause))
-          }
-        })()
-      }
-      const sync = () => {
-        const sessionId = scoped.sidebarRight.mounted.getSnapshot()
-        if (sessionId === undefined) stop()
-        else watch(sessionId)
-      }
-      const unsubscribe = scoped.sidebarRight.mounted.subscribe(sync)
-      sync()
-      return () => { unsubscribe(); stop() }
-    }, 'deep-research-pack: final delivery watcher')
+    scoped.effect(() => watchDelivery({ follow, openFinal, mounted: scoped.sidebarRight.mounted }), 'deep-research-pack: final delivery watcher')
 
     void ensureProductWorkspace()
   })

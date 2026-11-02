@@ -69,6 +69,10 @@
 | 会话流装配 | `src/client/session-follow.ts` | journal 帧 → 领域帧（follow / 首帧探测 / coach 流） | [§2.1](#cockpit-1) |
 | 启动期工作区动作 | `src/client/workspace-boot.ts` | 选目录 / 恢复记忆 / workspaceOf | [§2.18](#cockpit-18) |
 | 页面级样式 | `src/client/styles.ts` | 问卡窄列 + 教练 composer 抑制 | [§2.1](#cockpit-1) |
+| 方法编辑会话 | `src/client/coach-sessions.ts` | 每草稿一会话（retain/create）+ 发送 | [§2.7](#cockpit-7) |
+| 文件读闭包 | `src/client/workspace-files.ts` | listDir / readLibrary / readPreview（失败降级合同） | [§2.1](#cockpit-1) |
+| 交付监听 | `src/client/delivery-watch.ts` | live present → 打开终稿（去重/不打断/在屏） | [§2.9](#cockpit-9) |
+| 管理指令发送 | `src/client/lead-prompt.ts` | steer 优先、queue 降级、两态回执 | [§2.6](#cockpit-6) |
 
 页签八区（渲染顺序，自上而下；条件区在括号里标注）：
 
