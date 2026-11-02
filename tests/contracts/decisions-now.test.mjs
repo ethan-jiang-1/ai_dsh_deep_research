@@ -63,3 +63,10 @@ test('D 号唯一且连续：D1–D41 每个锚点恰好一次', () => {
   for (let n = 1; n <= 41; n += 1) if (!counts.has(n)) missing.push(n);
   assert.deepEqual(missing, [], 'D 号不连续（缺号会让引用悬空）');
 });
+
+// 增长守卫：台账是长表，新增 D 号前先退役/搬 Note；32KB 是硬顶，20KB 的收敛目标登记在
+// _backlog/triggers.md（2026-11-03 实测 29.4KB——继续压缩需逐行搬依据，单列批次做）。
+test('台账总量 ≤32KB（增长硬顶；20KB 目标见 triggers）', () => {
+  const bytes = Buffer.byteLength(TEXT, 'utf8');
+  assert.ok(bytes <= 32 * 1024, `decisions.md ${bytes} bytes 超过 32KB 硬顶——新增决定先退役旧行或搬 Note`);
+});
