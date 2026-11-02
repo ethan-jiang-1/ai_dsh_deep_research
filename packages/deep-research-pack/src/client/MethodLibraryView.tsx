@@ -14,14 +14,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type { MethodLibraryAction } from '../lib/method-library-operation.ts'
 import { methodLibraryCommandText } from '../lib/method-library-operation.ts'
 import type { MethodLibraryCoachEvent } from '../lib/method-library-events.ts'
 import { methodLibraryEntryHash } from '../lib/method-library-hash.ts'
 import { isCompletedMethodSourceRun, latestFinalVersion, type SourcePreview } from '../lib/method-library-source.ts'
 import type { MethodLibraryReadResult } from '../lib/method-library-read.ts'
 import { expectedMethodLibrarySnapshot, methodLibraryMatchesSnapshot, methodLibrarySettlement, methodLibrarySnapshot, shouldStartFreshDraftContext } from '../lib/method-library-operation-state.ts'
-import type { MethodLibrarySnapshot } from '../lib/method-library-operation-state.ts'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import {
@@ -37,8 +35,12 @@ import { FIELD_LABELS, FIELD_ORDER, coachPatchAppliesToDraft, mergeCoachDraft, p
 import { BUTTON_STYLE, HEADER_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE, ROW_STYLE } from './method-library/styles.ts'
 import { BuiltinView, EditorView, MethodSummaryView, ReadMineView, SourceSelectionView, type Draft, type RunSourceCandidate, type WorkbenchStage } from './method-library/views.tsx'
 import { MethodCoachPanel } from './method-library/coach.tsx'
-
-const LIBRARY_PATH = 'method-library.md'
+import { ColumnHandle } from './method-library/ColumnHandle.tsx'
+import {
+  LIBRARY_PATH, builtinLibraryEntry, draftOf, emptySections, operationMetadataMatches,
+  type LoadState, type MethodLibraryOperationRequest, type Mode, type OperationOutcome, type PendingMethodOperation,
+  type Receipt, type Segment,
+} from './method-library/model.ts'
 
 export interface MethodLibraryInjected {
   readonly readLibrary: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<MethodLibraryReadResult>
@@ -62,134 +64,10 @@ export interface MethodLibraryInjected {
 
 export type MethodLibraryViewProps = PropsRuntime<'conversation.view'> & PropsLocale<'deepResearchPack'> & MethodLibraryInjected
 
-type Mode = 'read' | 'edit' | 'new'
-type Segment = 'mine' | 'builtin'
-type LoadState = 'loading' | 'ok' | 'absent' | 'error'
-
-interface Receipt {
-  readonly ok: boolean
-  readonly detail: string
-}
-
-interface MethodLibraryOperationRequest {
-  readonly action: MethodLibraryAction
-  readonly name?: string
-  readonly entryText?: string
-  readonly confirmOverwrite?: boolean
-  readonly instruction: string
-}
-
-interface PendingMethodOperation {
-  readonly operationId: string
-  readonly sourceSessionId: SessionId
-  readonly requestId: string
-  turn: number | null
-  readonly action: MethodLibraryAction
-  readonly name?: string
-  readonly entryText?: string
-  readonly payloadHash?: string
-  readonly expected: MethodLibrarySnapshot
-  readonly priorText: string | null
-  callId?: string
-  timeout: ReturnType<typeof setTimeout>
-}
-
-type OperationOutcome =
-  | { readonly kind: 'tool-result'; readonly failed: boolean; readonly result: unknown }
-  | { readonly kind: 'turn-end' | 'refresh' }
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-function expectedDefaults(operation: PendingMethodOperation): string[] {
-  return operation.expected.filter((entry) => entry.isDefault).map((entry) => entry.name)
-}
-
-function operationMetadataMatches(operation: PendingMethodOperation, value: unknown): boolean {
-  if (!isRecord(value) || value['operationId'] !== operation.operationId) return false
-  const defaults = expectedDefaults(operation)
-  if (!Array.isArray(value['defaults']) || JSON.stringify(value['defaults']) !== JSON.stringify(defaults)) return false
-  switch (operation.action) {
-    case 'save':
-    case 'save-and-set-default':
-      return value['name'] === operation.name
-        && (value['action'] === 'created' || value['action'] === 'updated')
-        && value['isDefault'] === (operation.expected.find((entry) => entry.name === operation.name)?.isDefault === true)
-    case 'set-default':
-      return value['action'] === 'set' && value['name'] === operation.name
-    case 'clear-default':
-      return value['action'] === 'clear'
-    case 'remove':
-      return value['name'] === operation.name && value['removed'] === true
-  }
-}
-
-/** 空四字段草稿。 */
-function emptySections(): LibrarySections {
-  return { source: null, verify: null, report: null, limit: null }
-}
-
-/** Built-in read-only preference projected as a user-library source. */
-function builtinLibraryEntry(entry: (typeof BUILTIN_PREFERENCES)[number]): LibraryEntry {
-  return { name: entry.name, provenance: '内置只读', sections: entry.sections, legacyText: null, isDefault: false }
-}
-
-/** 草稿是否与源条目一致（粗糙但够用的 dirty 判据：用于离开确认，不用于保存）。 */
-function draftOf(entry: LibraryEntry): Draft {
-  return {
-    name: entry.name,
-    sections: entry.sections,
-    currentName: entry.name,
-    provenance: entry.provenance,
-    legacyText: entry.legacyText,
-  }
-}
-
 /**
  * 主界面「方法库」tab。
  * @param props - conversation.view 标准 props + workspace reads and Method Editor session injection.
  */
-function ColumnHandle({ onDrag, value, min, max }: {
-  onDrag: (delta: number) => void
-  value: number
-  min: number
-  max: number
-}): ReactNode {
-  const lastX = useRef<number | null>(null)
-  return (
-    <div
-      role="separator"
-      aria-orientation="vertical"
-      aria-label="调整方法库列宽"
-      aria-valuenow={value}
-      aria-valuemin={min}
-      aria-valuemax={max}
-      tabIndex={0}
-      onKeyDown={(event) => {
-        if (event.key === 'ArrowLeft') onDrag(-16)
-        if (event.key === 'ArrowRight') onDrag(16)
-      }}
-      style={{ flex: '0 0 5px', cursor: 'col-resize', background: 'transparent', position: 'relative', zIndex: 2, touchAction: 'none' }}
-      onPointerDown={(event) => {
-        event.preventDefault()
-        lastX.current = event.clientX
-        event.currentTarget.setPointerCapture(event.pointerId)
-      }}
-      onPointerMove={(event) => {
-        if (lastX.current === null) return
-        const delta = event.clientX - lastX.current
-        lastX.current = event.clientX
-        onDrag(delta)
-      }}
-      onPointerUp={() => { lastX.current = null }}
-      onPointerCancel={() => { lastX.current = null }}
-    >
-      <div style={{ position: 'absolute', left: 2, top: 0, bottom: 0, width: 1, background: 'var(--dsw-alias-border-l1)' }} />
-    </div>
-  )
-}
-
 export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   const sessionId = props.sessionId
   const [text, setText] = useState<string | null>(null)
