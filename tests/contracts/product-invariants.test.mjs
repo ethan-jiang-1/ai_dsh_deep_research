@@ -36,7 +36,9 @@ test('I2 启动期解决工作区：Host 读设置/登记；client 建/选会话
   const startup = read('packages/deep-research-pack/src/startup/index.ts')
   assert.match(startup, /resolveStartupWorkspace/, '启动行未解析产品设置/env 工作区')
   assert.match(startup, /workspaceRegistry\.create|workspaceRegistry\?/, '启动行未登记 Workspace')
+  // client 半已按职责拆分（2026-11-03 P4）：index = 注册装配，workspace-boot = 启动期动作。
   const client = read('packages/deep-research-pack/src/client/index.ts')
+    + read('packages/deep-research-pack/src/client/workspace-boot.ts')
   assert.match(client, /startSession\(/, 'client 未建/选产品会话')
   assert.match(client, /ensureProductWorkspace/, 'client 缺启动恢复')
   assert.match(read('docs/guides/65-run-forms.md'), /--from-default-profile web/, '运行形态合同缺 DSH 安装路径')

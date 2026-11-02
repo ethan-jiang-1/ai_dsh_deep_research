@@ -66,6 +66,9 @@
 | host 半 | src/index.ts | 空壳宿主位 | [§2.16](#cockpit-16) |
 | 产品首屏起步卡 | StartCard.tsx | 首屏指引 + 选目录 | [§2.17](#cockpit-17) |
 | 启动工作区恢复 | startup.ts | 选/切产品工作区 | [§2.18](#cockpit-18) |
+| 会话流装配 | `src/client/session-follow.ts` | journal 帧 → 领域帧（follow / 首帧探测 / coach 流） | [§2.1](#cockpit-1) |
+| 启动期工作区动作 | `src/client/workspace-boot.ts` | 选目录 / 恢复记忆 / workspaceOf | [§2.18](#cockpit-18) |
+| 页面级样式 | `src/client/styles.ts` | 问卡窄列 + 教练 composer 抑制 | [§2.1](#cockpit-1) |
 
 页签八区（渲染顺序，自上而下；条件区在括号里标注）：
 

@@ -38,7 +38,7 @@ import {
 import { IconBranchOutlineRegular, IconGaugeOutlineRegular, IconSettingsOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import { ResearchToolCard } from './ResearchToolCard.tsx'
 import { MethodLibraryToolCard } from './MethodLibraryToolCard.tsx'
-import { ResearchStatusTab, ResearchStatusTitle, type JournalFrame, type FollowTarget } from './ResearchStatusTab.tsx'
+import { ResearchStatusTab, ResearchStatusTitle } from './ResearchStatusTab.tsx'
 import { ResearchConfigTab } from './ResearchConfigTab.tsx'
 import { MethodLibraryView } from './MethodLibraryView.tsx'
 import { MethodCoachPortal, CoachChat } from './method-library/coach.tsx'
@@ -46,11 +46,11 @@ import { ResearchGraphTab } from './ResearchGraphTab.tsx'
 import { ResearchFinalTab } from './ResearchFinalTab.tsx'
 import { browserRunSource } from './run-source-browser.ts'
 import { joinMethodLibraryPages, type MethodLibraryReadResult } from '../lib/method-library-read.ts'
-import { methodLibraryCoachEventOf } from '../lib/method-library-events.ts'
-import type { MethodLibraryCoachEvent } from '../lib/method-library-events.ts'
 import { OrcaMark, OrcaName } from './BrandMark.tsx'
+import { createFollow, hasUserMessage, watchCoach } from './session-follow.ts'
+import { createWorkspaceBoot, type SessionsLike, type UiWorkspaceLike, type WorkspacesLike } from './workspace-boot.ts'
+import { installCoachComposerStyles, installQuestionCardNarrowFix } from './styles.ts'
 import { StartCard, type StartCardInjected } from './StartCard.tsx'
-import { PRODUCT_WORKSPACE_KEY, CURRENT_SESSION_KEY, needsProductSwitch, pickProductWorkspace, readCurrentSessionId } from './startup.ts'
 import { draftInProgress, finalAddressOf, isFinalAddress, latestFinalDelivery, shouldOpenFinal } from '../lib/final-target.ts'
 
 /** Required services：槽注册表（renderer）+ 右栏页签注册器 + 右栏导航面（openTab——挂起显性化）+ remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
@@ -76,118 +76,19 @@ export function apply(ctx: ClientContext): void {
     const disposeDictionaries = scoped.locale.register('deepResearchPack', { zh, en })
     scoped.effect(() => disposeDictionaries, 'deep-research-pack: dictionaries')
     const t = scoped.locale.bind('deepResearchPack')
-    // journal 流式源（company 同款最小投影）：snapshot 给历史、event 给实时；
-    // wire 形状 → 领域形状的折算住这里（纯装配），展示住组件。目标两形态：普通会话 id /
-    // subagent 持久父地址（队员会话——纯 id 被 host 守卫拒，见 FollowTarget 注释）。
-    const follow = async function* (target: FollowTarget, signal: AbortSignal): AsyncGenerator<JournalFrame> {
-      const address = typeof target === 'string' ? { kind: 'session' as const, sessionId: target } : target
-      for await (const frame of scoped.remote.session.follow({ address }, signal)) {
-        if (frame.type === 'snapshot') {
-          yield { kind: 'history', events: frame.records.map((record) => record.event) }
-        } else if (frame.type === 'event') {
-          yield { kind: 'event', event: frame.event }
-        }
-      }
-    }
-
-    // 首屏起步卡的一次性探测：follow 的首帧 snapshot 里有没有用户消息；拿到就 abort，
-    // 不订阅后续事件。失败按"没有消息"处理（卡片仍显示，不红错）。
-    const hasUserMessage = async (sessionId: SessionId): Promise<boolean> => {
-      const controller = new AbortController()
-      try {
-        for await (const frame of follow(sessionId, controller.signal)) {
-          if (frame.kind === 'history') return frame.events.some((event) => (event as { type?: string } | null)?.type === 'user/message')
-          return false
-        }
-      } catch {
-        return false
-      } finally {
-        controller.abort()
-      }
-      return false
-    }
-
-    // 当前 Session 所属 Workspace 的显示信息（vendor picker 已显示标题；卡片再给路径）。
-    const workspaceOf = (sessionId: SessionId): { title: string; path: string } | null => {
-      try {
-        const snapshot = (scoped.workspaces as unknown as {
-          list: { getSnapshot(): { items: readonly { title: string; path: string; sessionIds: readonly SessionId[] }[] } }
-        }).list.getSnapshot()
-        const item = snapshot.items.find((workspace) => workspace.sessionIds.includes(sessionId))
-        return item === undefined ? null : { title: item.title, path: item.path }
-      } catch {
-        return null
-      }
-    }
-
-    /** uiWorkspace 的导航面；类型由 vendor 提供，本包不新增 peer。 */
-    interface UiWorkspaceLike {
-      openSession(target: SessionId): void
-      startSession(workspaceId: string, options?: { agentPreset?: string }): void
-      pickDirectory(): Promise<string | null>
-    }
-    const nav = scoped as unknown as { uiWorkspace: UiWorkspaceLike }
-
-    /** 等列表就绪（pending → ready）；超时返回当前快照。 */
-    const waitReady = async <T extends { phase: 'pending' | 'ready' }>(
-      list: { getSnapshot(): T }, timeoutMs = 2500,
-    ): Promise<T> => {
-      const deadline = Date.now() + timeoutMs
-      let snapshot = list.getSnapshot()
-      while (snapshot.phase === 'pending' && Date.now() < deadline) {
-        await new Promise((resolve) => setTimeout(resolve, 100))
-        snapshot = list.getSnapshot()
-      }
-      return snapshot
-    }
-
-    /** 首屏 onboarding：选目录 → 登记 Workspace → 记住 id → 开 Lead 会话。 */
-    const chooseWorkspace = async (): Promise<void> => {
-      const path = await nav.uiWorkspace.pickDirectory()
-      if (path === null) return
-      const workspace = await scoped.workspaces.create({ path })
-      localStorage.setItem(PRODUCT_WORKSPACE_KEY, workspace.workspaceId)
-      nav.uiWorkspace.startSession(workspace.workspaceId, { agentPreset: 'lead' })
-    }
-
-    /** 启动时把选择恢复到产品工作区；失败只记日志，不阻断 composer。 */
-    const ensureProductWorkspace = async (): Promise<void> => {
-      try {
-        const workspaces = await waitReady(scoped.workspaces.list)
-        await waitReady(scoped.sessions.list)
-        const saved = localStorage.getItem(PRODUCT_WORKSPACE_KEY)
-        const workspace = pickProductWorkspace(workspaces.items, saved)
-        if (workspace === null) return
-        if (saved !== workspace.workspaceId) localStorage.setItem(PRODUCT_WORKSPACE_KEY, workspace.workspaceId)
-        const current = readCurrentSessionId(localStorage.getItem(CURRENT_SESSION_KEY))
-        const sessions = scoped.sessions.list.getSnapshot()
-        const row = current === null ? undefined : sessions.byId[current as SessionId]
-        if (!needsProductSwitch(row?.cwd, workspace.path)) return
-        nav.uiWorkspace.startSession(workspace.workspaceId, { agentPreset: 'lead' })
-      } catch (error) {
-        console.error('[research-startup] 工作区记忆恢复失败', String(error))
-      }
-    }
-
-    const watchCoach = async (
-      sessionId: SessionId,
-      signal: AbortSignal,
-      onEvent: (event: MethodLibraryCoachEvent) => void,
-      onReady: () => void,
-    ): Promise<void> => {
-      let ready = false
-      for await (const frame of follow(sessionId, signal)) {
-        if (frame.kind === 'history') {
-          if (!ready) {
-            ready = true
-            onReady()
-          }
-          continue
-        }
-        const event = methodLibraryCoachEventOf(frame.event)
-        if (event !== null) onEvent(event)
-      }
-    }
+    // 服务句柄在**注入回调内**取好再交给 follow：Cordis 的 service 代理在属性访问时校验
+    // 当前 fiber 的 inject；follow 会在页签组件的渲染 fiber 里被调用，届时再取 `remote.session`
+    // 会报 "cannot get property \"session\" without inject"（2026-11-03 拆模块实测）。
+    const remoteSession = scoped.remote.session
+    const follow = createFollow({ session: { follow: (input, signal) => remoteSession.follow({ address: input.address as never }, signal) } })
+    // 首屏起步卡探测 / 方法编辑会话流：纯装配住 session-follow.ts（2026-11-03 P4 拆分）。
+    const boot = createWorkspaceBoot({
+      workspaces: scoped.workspaces as unknown as WorkspacesLike,
+      sessions: scoped.sessions as unknown as SessionsLike,
+      uiWorkspace: (scoped as unknown as { uiWorkspace: UiWorkspaceLike }).uiWorkspace,
+      storage: localStorage,
+    })
+    const { chooseWorkspace, ensureProductWorkspace, workspaceOf } = boot
 
     scoped.effect(() => scoped.sidebarRightTabs.register({
       id: RESEARCH_TAB_KEY,
@@ -206,16 +107,7 @@ export function apply(ctx: ClientContext): void {
     // `data-question-key`（不是哈希类名）。规则只在窄列生效：卡头允许换行 + 标题给 14em 弹性基准，
     // 宽列仍是一行。**fail-soft**：vendor 若删该钩子，规则只是不再命中，不会影响其它组件。
     // 移除条件：vendor 卡头自带换行/最小宽后删除本 effect（登记在 design/40 §已知限制与延后工作）。
-    scoped.effect(() => {
-      const style = document.createElement('style')
-      style.setAttribute('data-dsh-deep-research', 'question-card-narrow')
-      style.textContent = [
-        '[data-question-key] header{flex-wrap:wrap;row-gap:6px}',
-        '[data-question-key] header>div:first-child{flex:1 1 14em}',
-      ].join('\n')
-      document.head.appendChild(style)
-      return () => style.remove()
-    }, 'deep-research-pack: question card narrow-column fix')
+    scoped.effect(() => installQuestionCardNarrowFix(), 'deep-research-pack: question card narrow-column fix')
 
     // 研究通道品牌（用户定调 2026-10-13：虎鲸 Orca）——宿主侧栏 brand.mark / brand.name 两槽的
     // single occupant（fallback 内置鱼形 logo 与本地构建标签被本登记替换；槽契约 =
@@ -450,7 +342,7 @@ export function apply(ctx: ClientContext): void {
           workspaceTitle: workspace?.title ?? null,
           workspacePath: workspace?.path ?? null,
           listDir: async (sessionId, path, signal) => (await listDir(sessionId, path, signal)) ?? [],
-          hasUserMessage,
+          hasUserMessage: (sessionId: SessionId) => hasUserMessage(follow, sessionId),
           chooseWorkspace,
         }
       },
@@ -493,7 +385,7 @@ export function apply(ctx: ClientContext): void {
         readLibrary,
         ensureCoach: ensureCoachSession,
         sendCoach,
-        watchCoach,
+        watchCoach: (sessionId: SessionId, signal: AbortSignal, onEvent, onReady) => watchCoach(follow, sessionId, signal, onEvent, onReady),
         listDir: (sessionId: SessionId, path: string, signal: AbortSignal) => listDir(sessionId, path, signal),
         readPreview: (sessionId: SessionId, path: string, signal: AbortSignal) => readPreview(sessionId, path, signal),
       }),
@@ -523,22 +415,7 @@ export function apply(ctx: ClientContext): void {
 
     // 方法库新建/编辑态：隐藏外层主 composer，避免两个输入框；只对外层 seat 自己的问卡让位
     // （coach 的问卡在页面里，不能误触发外层 composer）。
-    scoped.effect(() => {
-      const style = document.createElement('style')
-      style.setAttribute('data-dsh-deep-research', 'method-library-coach-composer')
-      style.textContent = [
-        '[data-conversation-scroll]:has([data-method-library-edit]):not(:has(> [data-composer-seat] [data-question-key])) > [data-composer-seat]{display:none}',
-        /* 方法编辑只露一问一答：不显示模型思考行与 skill 工具行（"用户不困惑" #3/#8）。 */
-        '[data-method-coach-portal] [data-preview]{display:none !important}',
-        '[data-method-coach-portal] [data-tool="skill"]{display:none !important}',
-        /* 三栏各自滚动：整页/view 不滚（page 填满 tab，列内滚动）。 */
-        '[data-method-library]{height:100%;overflow:hidden}',
-        '[data-method-library] > div{min-height:0}',
-        '[data-method-library] [data-method-coach-host]{min-height:0;overflow:hidden}',
-      ].join('\n')
-      document.head.appendChild(style)
-      return () => style.remove()
-    }, 'deep-research-pack: method-library coach composer suppression')
+    scoped.effect(() => installCoachComposerStyles(), 'deep-research-pack: method-library coach composer suppression')
 
     // 活标题（HITL 挂起时"研究状态 · ⏳ 等你拍板"——用户点名的观察需求）：同一 fold 谓词
     //（末位事件 = 未答的 ask_user_question），标题组件自己开一条 follow 流（两条流都吃
