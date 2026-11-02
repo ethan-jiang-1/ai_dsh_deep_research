@@ -93,8 +93,10 @@
 **自检 / 补登记**：`dev/run-kickoff.mjs` 建会话前就调 `workspace/create`（幂等，RPC 同上）——
 "这台机器登记过没有"不用记；`runtime/harness-home` 被重建后本步重新需要。
 
-**为什么关键**：研究手册是**会话 cwd 的 `AGENTS.md`**，DSH 从 cwd 向上发现并注入每个角色
-——cwd 不是研究工作区，手册就不进上下文，跨角色证据契约随之丢失。`dev/run-kickoff.mjs` 已默认用 workspaceId 形态把会话建在 research-workspace。
+**为什么关键**：研究手册随包（`content/manual.md`），由本包的 content 行经
+`systemPrompt.context` 注入每个角色，**与会话 cwd 无关**；工作区登记决定的是**角色会话的 cwd**
+——cwd 不在研究工作区，`drt_<slug>/` 就写不到用户工作区。`dev/run-kickoff.mjs` 已默认用
+workspaceId 形态把会话建在 research-workspace。
 
 - web GUI 新建会话：preset 选 Deep Research Lead（默认项），工作区选 research-workspace；
 - 无 GUI 手（代理操作）：`node dev/run-kickoff.mjs --port 3083 --token <横幅 token>

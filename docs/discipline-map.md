@@ -219,7 +219,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | 后缀即层 / 命名即所有权（expected-filenames 门禁强制改名） | [scripts/AGENTS §依赖与分层「命名即层」](../scripts/AGENTS.md)（后缀申报证据类型与档位）+ 真模型档登记制 closed set（tests/contracts/smoke-contract.test.mjs 对账"要求凭据的脚本恰为名单"） | 带证据适配（本仓车道 = glob + 目录形态，非多 vitest 配置） |
 | prove-it-red 前向化到契约测试（不只门禁） | tests/AGENTS 的反证规则（新契约测试同 diff 注入回归看红再还原）+ 门禁 `guard-red-record` 机械把守「负例留证/夹具留证」块。所称「承重四文件抽检」在采纳 Note 中**不存在**（原记误引），已删 | 带证据适配（规则与门禁都在位；但「抽检」这一执行形态本仓未确立，不为无实据的做法背书） |
 | fixture 守卫先于比较（形状 corpus 层） | [scripts/lib/replay-scene.mjs](../scripts/lib/replay-scene.mjs)：比较前 fail-loud 拒绝相对路径/穿越/**symlink**/manifest 结构/角色 roster 齐整/case 唯一/**夹具路径重复**（14 条守卫）；消费测试钉语义，守卫钉形状，两层不同面 | 带证据适配（2026-10-19 复核修正：原判「不适用」与实况相反——等价物早已在该模块） |
-| 快照世代模型 / record-refresh 分叉 / 平台变体 | `sessionFormat` 钉代（replay-scene.mjs:58 强制 = 4，换代须新 `session.vN.jsonl` + 人审，snapshots/README 登记）；`--update-expected` = refresh 语义；record = 真录制（dev/record-role-fixture）；**平台变体（posixOnly/pwshOnly）不适用**（本仓单平台） | 带证据适配（世代/refresh 已落地；仅平台变体不适用——2026-10-19 复核修正原「不适用」整行） |
+| 快照世代模型 / record-refresh 分叉 / 平台变体 | `sessionFormat` 钉代（replay-scene.mjs:58 强制 = 4，换代须新 `session.vN.jsonl` + 人审，snapshots/README 登记）；`--update-expected` = refresh 语义；record = 真录制（`dev/record-role-fixture.mjs`）；**平台变体（posixOnly/pwshOnly）不适用**（本仓单平台） | 带证据适配（世代/refresh 已落地；仅平台变体不适用——2026-10-19 复核修正原「不适用」整行） |
 | 七层宪法层 / coverage 门 / run-gates DAG / 性能基准层 / flake 八分类 | 维持五面合同与偏离登记（L0–L4 已是证据形态分层） | 不适用（理由 = 采纳 Note 输掉的方案；**重估触发**：现有 L0–L4 分层被证明不足（出现该分层接不住的真实缺陷类别）时） |
 
 <a id="source-11"></a>

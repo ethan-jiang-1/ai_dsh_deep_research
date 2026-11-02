@@ -44,7 +44,7 @@
 
 - **代码 / 卫生型** → 本页 §1.2 六步闭环 + §2 面选择表与任务型路由表 + §4 收尾；
 - **研究 run 型** → [guides/61](61-run-playbook.md)（含**硬前置**：`research-workspace` 必须已注册进
-  DSH，否则研究手册不进上下文）+ 开发技能 `running-a-research-run`；
+  DSH，会话 cwd 才落在研究工作区）+ 开发技能 `running-a-research-run`；
 - **交付收尾** → `reviewing-a-delivery`；**加/改角色** → `adding-a-research-role`；
   **加/改门禁** → `writing-a-gate`；**加/调节点轨道** → `changing-node-topology`；
   **换 vendor pin** → `bumping-vendor-pin`；**间歇/环境依赖缺陷** → `reproducing-a-failure`。
@@ -220,7 +220,7 @@ source dev/env.sh        # DSH_HOME=runtime/harness-home（数据面）+ dsh 别
 
 ## 5. 密钥
 
-- 独立真模型档 = `tests/contracts/smoke-contract.test.mjs` 的 REAL_MODEL 闭集（成员以测试为准；`dev/record-role-fixture` 是单独录制工具，完整 run 属 L4）；
+- 独立真模型档 = `tests/contracts/smoke-contract.test.mjs` 的 REAL_MODEL 闭集（成员以测试为准；`dev/record-role-fixture.mjs` 是单独录制工具，完整 run 属 L4）；
   调用凭据可在开发 home 配置（根 [AGENTS §密钥](../../AGENTS.md)）。CDP `--ask` 按当前会话档位；
   永不提交密钥；
 - L1 真挂载无模型调用、无凭据可跑；L2 安装验收无模型调用并使用 `--install-only`，默认 doctor 仍检查凭据在场；

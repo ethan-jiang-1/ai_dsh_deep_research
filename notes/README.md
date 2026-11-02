@@ -74,8 +74,9 @@ triggers；事故原文只作证据。
 
 ## 决定覆盖与取代检查（DSH SDLC reference 01 吸纳，2026-09-24）
 
-来源：`/Users/bowhead/deepseek-harness/_agent_ready_development/sdlc-reference/01-agent-note-lifecycle.md`
-（DSH 官方 SDLC 参考，点状吸纳不推翻——本仓既有规则不变，下列为增量；吸纳 Note =
+来源：DSH 官方 SDLC 参考 `_dsh_plugin_agent_ready_development/sdlc-reference/01-agent-note-lifecycle.md`
+（外部语料不随仓；钉版身份与吸收落点 = [external-materials](../docs/external-materials.md)；
+点状吸纳不推翻——本仓既有规则不变，下列为增量；吸纳 Note =
 [2026-09-24-note-lifecycle-absorption](implemented/2026-09-24-note-lifecycle-absorption.md)）。
 
 - **Note 义务边界 = 持久决定理由**（代码/测试/现有文档解释不了的"为什么"）；机械/局部编辑

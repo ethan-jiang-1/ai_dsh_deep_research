@@ -30,7 +30,7 @@ const SMOKE_ONLY = {
   'cdp-driver': 'Playwright/CDP 驱动：只被 smoke/probe 以真浏览器消费，keyless 回归禁浏览器',
   'playwright': 'chromium 定位与启动：同上（真浏览器档专用）',
   'web-harness': '真 web 启动与 RPC 握手：只在 smoke 档跑，回归禁 spawn/网络',
-  'zstd-read': 'zstd CLI 解压：子进程解压，keyless 回归禁 spawn；其失败契约由消费方（node-gate / evidence-audit）的测试覆盖',
+  'zstd-read': 'zstd CLI 解压：keyless 回归禁 spawn，{ok:false} 分支无直测（消费方测试注入 readLog，不触达解压本身）；失败面证据 = 一次性实测 + 消费方的降级处理',
   'port-reclaim': '端口收割：需要真监听端口与系统进程，回归禁',
   'hitl-card-driver': '浏览器内 DOM 片段（getComputedStyle / HTMLTextAreaElement / 事件派发）：只能真浏览器跑；判据面在 ask-drive（有直测）',
 }

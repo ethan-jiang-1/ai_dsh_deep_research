@@ -10,27 +10,7 @@
 
 ## 最近归档
 
-研究证据（已归档）= [research/plugin-as-product](../_archived/research/plugin-as-product/README.md)；本轮新增 = [plugin-as-product-v2](../_archived/research/plugin-as-product-v2/README.md)、[plugin-lifecycle](../_archived/research/plugin-lifecycle/README.md)；落地顺序 = [landing-plan](../_archived/research/plugin-as-product/2026-11-01-landing-plan.md)（S0 决定 → S1 骨架 → S2 首屏 → S3 文档 → S4 硬化）。
-
-- [2026-11-03 模型可见措辞](../_archived/settled_issues/2026-11-03-model-visible-vocabulary.md) — deferred：退役词从 presets/content 清掉要连带重录 snapshot，录制器 boot 等待超时，整轮回退；重开条件 = [triggers](../triggers.md)「模型可见措辞重录」。
-- [2026-11-02 发布面对齐 26_harness-release](../_archived/settled_issues/2026-11-02-release-surface-26-alignment.md) — implemented：交付模型 = bundle + custom profile、六轴 owner、package-bundle README + 数据卡、安装手册十段、`readme-shape`/`release-vocab`/`dist-manual-fresh` 三道具名门禁；N11 拆出为 [模型可见措辞](../_archived/settled_issues/2026-11-03-model-visible-vocabulary.md)；[Note](../../notes/implemented/2026-11-02-release-model-terms.md)。
-- [2026-11-02 产品面收窄](../_archived/settled_issues/2026-11-02-product-surface-narrowing.md) — none：主区 Trajectory 与右栏 New Terminal 在 `deep-research` profile 不挂载；判据 = 组合层断言（零跳过 + 白名单），红证 = 上游改名即红；载体 = [design/40 §2.0](../../docs/design/40-research-cockpit.md#cockpit-surface)。
-- [2026-11-02 dev 通道与产品路径对齐](../_archived/settled_issues/2026-11-02-dev-product-path-parity.md) — implemented：同 profile 名/安装源/版本门、profile 用户层零写入、`dev-parity` 门禁 + parity 表；AC1–AC3 2026-11-02 复跑绿；[Note](../../notes/implemented/2026-11-02-dev-product-path-parity.md)。
-- [2026-11-01 插件即产品 v2](../_archived/settled_issues/2026-11-01-plugin-as-product-v2.md) — implemented：自有 `deep-research` profile + CLI 引导 + Plugins 页装包 + 启动期工作区/内容进包；`product-boot-smoke` 2026-11-02 GREEN；残余 = 公网 npm 发布；[Note](../../notes/implemented/2026-11-01-plugin-as-product-v2.md)。
-- [2026-11-01 插件生命周期合规](../_archived/settled_issues/2026-11-01-plugin-lifecycle-conformance.md) — implemented：`engines.dsh`/locale/icon/市场索引/四门禁/文档取向；本地 registry 端到端 + `lifecycle-smoke`；残余 = 公网 npm 发布；[Note](../../notes/implemented/2026-11-01-plugin-lifecycle-conformance.md)。
-- [2026-11-01 插件即产品](../_archived/settled_issues/2026-11-01-plugin-as-product.md) — implemented：D38 launcher + 产品 profile + 用户工作区 + 首屏 + 文档/`_dist` + 产品 smokes/release-smoke；[Note](../../notes/implemented/2026-11-01-plugin-as-product.md)；P1 见 triggers。
-- [2026-10-29 方法库工作台重排](../_archived/settled_issues/2026-10-29-method-library-workbench-redesign.md) — implemented：A′ 两列、显式来源、受控 Host 写入/默认、草稿 revision 与窄屏交互；真浏览器/真模型 save/default/clear/delete E2E 全绿；[Note](../../notes/implemented/2026-10-29-method-library-workbench.md)。
-- [2026-10-28 方法库页内对话共创](../_archived/settled_issues/2026-10-28-method-library-cocreation.md) — implemented：页内三栏 + 方法编辑 preset + 草稿回填 + 保存闭环；证据 = 调研 §14 + `runtime/probe-save/artifacts/2026-10-28T14-47-08-504Z/`。
-
-其余最近归档（更早 = [settled 池索引](../_archived/settled_issues/README.md)，逐卡一行；本区不重复维护）：
-
-（[2026-10-28 数据面收口](../_archived/settled_issues/2026-10-28-data-plane-hardening.md) 已结：FAQ 24 对账 → D32–D36；回执三态 / 原生时钟 / 整数契约 + created / 可移植列 / 种子 policy；自审补见证下界回归；P2 与 W/D 同路径转触发器；[Note](../../notes/implemented/2026-10-28-data-plane-hardening.md)。）
-
-（[2026-10-27 复核后硬化](../_archived/settled_issues/2026-10-27-post-review-hardening.md) 已结：run-accept 全链 smoke + 数据卡形状 + 秘密模式扩展；P2.4/P2.5/P3 转触发器。）
-
-（[2026-10-27 发布前数据契约](../_archived/settled_issues/2026-10-27-release-data-contract.md) 已结：FAQ 26 对账 → 数据卡/回执路径/种子 schema/N2 披露/秘密扫描；D1–D4 全采纳；[Note](../../notes/implemented/2026-10-27-release-data-contract.md)。）
-
-（2026-10-25 运行形态合同组已结归档：[合同](../_archived/settled_issues/2026-10-25-run-form-contract.md)、[分发](../_archived/settled_issues/2026-10-25-distribution-contract.md)、[工作区](../_archived/settled_issues/2026-10-25-workspace-ownership-and-upgrade.md)、[数据边界](../_archived/settled_issues/2026-10-25-runtime-data-boundary.md)、[独立启动](../_archived/settled_issues/2026-10-25-standalone-cold-start.md)；残余逐卡记录。）
+逐卡一行 = [_archived/settled_issues](../_archived/settled_issues/README.md)；研究证据 = [_archived/research](../_archived/research/README.md)。本区不维护第二份归档清单（重复清单必然漂移，见 [backlog 入口](../README.md)）。
 
 ## 写一张卡
 

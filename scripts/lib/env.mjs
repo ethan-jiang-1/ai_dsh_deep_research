@@ -10,10 +10,14 @@ import { join } from 'node:path'
 
 const SECRET = /(KEY|SECRET|TOKEN|PASSWORD)/i;
 
-/** 洗掉继承环境里的密钥类变量，再叠加调用点显式的白名单条目。 */
-export function scrubbedEnv(explicit = {}) {
+/**
+ * 洗掉继承环境里的密钥类变量，再叠加调用点显式的白名单条目。
+ * @param explicit - 调用点显式加入的条目（优先于清洗结果）。
+ * @param env - 源环境；缺省 = 进程环境。注入位让清洗谓词可 keyless 直测（2026-11-03 卫生审计）。
+ */
+export function scrubbedEnv(explicit = {}, env = process.env) {
   const out = {};
-  for (const [k, v] of Object.entries(process.env)) {
+  for (const [k, v] of Object.entries(env)) {
     if (SECRET.test(k)) continue;
     out[k] = v;
   }
@@ -22,7 +26,7 @@ export function scrubbedEnv(explicit = {}) {
 
 /** 真模型档专用：显式带白名单的那一把 key（未配置则不带，交由下层 fail-loud）。 */
 export function withModelKey(explicit = {}, env = process.env) {
-  const out = scrubbedEnv(explicit);
+  const out = scrubbedEnv(explicit, env);
   if (typeof env.DEEPSEEK_API_KEY === 'string' && env.DEEPSEEK_API_KEY !== '') {
     out.DEEPSEEK_API_KEY = env.DEEPSEEK_API_KEY;
   }

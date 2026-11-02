@@ -38,14 +38,23 @@ test('正本门：project-map / 61 链接 design/50，NODES 持纯文本指针',
   assert.ok(read('packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md').includes('design/50-agent-loop-and-state.md'), 'NODES.md 未指向 design/50');
 });
 
-test('导航门：任务入口矩阵九任务全覆盖，链接目标全部在场', () => {
+test('导航门：任务入口矩阵逐行完整（六列非空、首选入口可执行），链接目标全部在场', () => {
   const map = read('docs/project-map.md');
   const s = map.indexOf('## 任务入口矩阵');
   assert.ok(s !== -1, 'project-map.md 缺「## 任务入口矩阵」节（RFC Phase 1 第 2 项）');
   const next = map.indexOf('\n## ', s + 1);
   const section = map.slice(s, next === -1 ? undefined : next);
-  for (const task of ['启动', '继续', '观察', '回答 HITL', '查看 run', '验证挂载', '验证安装', '查漂移', '定位故障']) {
-    assert.ok(section.includes(task), `入口矩阵未覆盖任务「${task}」`);
+  // 逐行结构性断言，不用关键词子集（2026-11-03 卫生审计：旧断言只查 9 个关键词，
+  // 矩阵实际 11 行——删掉「验证首启」仍绿；任务名清单不是本测试要手抄的第二个家）。
+  const rows = section.split('\n').filter((line) => line.trimStart().startsWith('|')).slice(2);
+  assert.ok(rows.length >= 9, `入口矩阵数据行过少（${rows.length}）——防空语料：至少覆盖九类任务`);
+  for (const row of rows) {
+    const cells = row.split('|').slice(1, -1).map((c) => c.trim());
+    assert.equal(cells.length, 6, `入口矩阵行不是六列：${row}`);
+    const names = ['任务', '首选入口', '写盘', '档位', '事实来源', '失败后的下一站'];
+    for (const [i, name] of names.entries()) {
+      assert.ok(cells[i] !== '', `入口矩阵「${cells[0] || row}」行的「${name}」列为空`);
+    }
   }
   for (const m of section.matchAll(/\]\(([^)#\s]+?)(#[^)]*)?\)/g)) {
     if (m[1].startsWith('http')) continue;
