@@ -18,6 +18,19 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 
 开工就绪最小集 = 上列 1–3；改仓任务的验收/收尾按第 4 步。仓库全局如何运行、调试、交互和分层验收 → [docs/project-map.md](docs/project-map.md)；验收怎么判 → [docs/evaluation.md](docs/evaluation.md)；意图载体边界 → [docs/design/60-intent-carriers.md](docs/design/60-intent-carriers.md)；run 怎么操作 → [guides/61](docs/guides/61-run-playbook.md)。
 
+## 工作流：从 `_backlog` 到交付（一条线）
+
+`_backlog` 卡/研究题（研究）→ 定性（`待落地`/`修复就绪`/`已定性`）→ 落地（授权后 guides/60；研究题 =
+结论转卡/Note）→ 审查/验收（按重要性；机械不跳）→ 归档（卡与去向载体同变更）。直接授权的工作不建卡
+也按此走，不因 backlog 停等。
+
+- `status` = 阶段唯一家；状态/守卫 = [_backlog/AGENTS.md](_backlog/AGENTS.md)：`待落地` 不是授权；
+  `修复就绪` = P1/P2 修复授权（P0/触面 → `等人拍板`）。
+- `待落地` 只选去向（`proposed` RFC / `implemented` Note），不写 implemented Note；收件/写入时机 =
+  [notes/AGENTS.md](notes/AGENTS.md)；落地 = [guides/60](docs/guides/60-dev-loop.md)。
+- 审查/验收：机械不跳；语义自审按风险；用户按重要性出场；`审查：跳过` 不写成 verified。
+- 归档：卡与去向载体同变更（Note / RFC / triggers / none）；延后项落 [triggers](_backlog/triggers.md)。
+
 ## 布局
 
 ```
@@ -28,7 +41,7 @@ CLAUDE.md→AGENTS.md、.claude/skills→.agents/skills    两条 symlink（编�
 README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令正本 = guides/60 §2，不复制）
 _backlog/                 问题澄清与证据区：issues/、bugs/、research/、methods/、triggers.md、_archived/（另有
                           _done/ 改名兼容指针，见 _backlog/README 载体导航）；
-                          手册 = _backlog/README.md、子树门牌 = _backlog/AGENTS.md（修复授权/状态生命周期速览）
+                          手册 = _backlog/README.md、子树门牌 = _backlog/AGENTS.md（状态机/下一步/守卫）
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 按实际构建需求——见 pnpm-workspace.yaml 头注）
 packages/deep-research-pack/   唯一自写包（配置为主 + 启动行/内容注入（D40）+ 研究驾驶舱[Research Cockpit，观察面 client 套件，[D18](docs/decisions.md#d18)，构成正本 = docs/design/40-research-cockpit.md]）：presets/<role>.patch.yml（单行形态=一条 @deepseek-ai/dsh-agent-preset 行，config.plugins 内声明 persona/时钟/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、content/（研究手册 + run 模板；src/content 以 runtime context 注入）、cordis.patch.yml（bundle 行）、scripts/doctor.mjs（只读 doctor）、src/{content,startup}/、src/client/ 与 src/lib/（驾驶舱 client 半与折算纯函数，构建产物 lib/）；交付与部署形态 = guides/62，合同 = 包 README
 vendor/dsh/               pinned submodule（只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，tag/commit 见 §DSH 源码表）
@@ -36,12 +49,9 @@ research-workspace/      dev 工作区实例（角色会话 cwd；用户工作�
                          方法库）、drt_<slug>/（run bundle）、archive/（已交付归档）、_abandoned/
                          （停放位）、drafts/（开发侧草稿，非 run 产物）
 docs/                    00-index（地图；术语 = terms.md；D 号台账 = decisions.md）→ design/10-60 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ guides/65（运行形态合同）+ evaluation.md（验收合同）
-notes/                   **开发记忆与证据链**（核心流程数据，不是历史附件——见下节）；目录名自带时态，
-                         总图 = notes/README.md（将来 proposed/ · 过去 implemented/archived/rejected/；
-                         立项来历 = 该页 §立项来历——用户定调只进 decisions.md D 号依据列）：
-                         proposed/（需显式评审的持久决定 RFC）→ implemented/（活的决定记忆；不再指导
-                         未来者迁 archived/ 冻结）；
-                         rejected/（否决——"决定不做"，带重启条件；非搁置池）；事故复盘冻结在 archived/（§事故复盘）
+notes/                   开发记忆与证据链（见下节）：proposed/（需评审 RFC）→ implemented/（活的决定）；
+                         不再指导未来 → archived/ 冻结；rejected/（否决 + 重启条件）；事故复盘在 archived/；
+                         立项来历 = notes/README §立项来历（用户定调只进 decisions.md D 号依据列）
 .agents/skills/          开发技能（DSH 约定路径：project-agents 发现根）：任务匹配即加载的程序化工作记忆
                          （换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷）；与随包 runtime skills（presets/*/skills/）分家
 scripts/                 职责分组六目录 + lib/ 支撑库：verify/（L0 门禁聚合）、smoke/（分级冒烟，keyless/真模型档逐件申报）、probe/（交互与行为探针）、run-gates/（run bundle 机械门与审计）、run-ops/（run 观察与运维投影）、dist/（出包→_dist/）、lib/（冒烟/门禁支撑模块）——逐件职责与档位 = scripts/README.md
@@ -63,20 +73,10 @@ _dist/                   对外交付件：安装手册.md（tracked 生成物�
 
 ## `notes/`：开发记忆（常设指令）
 
-**开工先查 notes，再改代码**：按条目名/机制名检索（只读命中的，不通读全树）；**只有承载持久决定
-理由的变更**（代码/测试/现有文档说不清的"为什么选它、放弃了什么"）才需**同一变更**新增或更新
-Note——机械与局部编辑（含本地 UI 呈现与交互改动）豁免。细则是子树指令，不在这里复述：
-
-- **时态总图 = [notes/README.md](notes/README.md)**（`proposed/` = 需显式评审的持久决定提案；
-  `implemented/` `archived/`（冻结；含事故复盘） `rejected/`（防复犯的否决理由） = 决定与证据记忆）；
-- **写入触发 / 取代检查 / 格式与毕业 = [notes/AGENTS.md](notes/AGENTS.md)**；
-- **任务流程**（换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷）= `.agents/skills/` 开发技能，按
-  description 触发加载，不占常驻上下文。
-
-原生定义（vendor 树内，本仓不复制）：`vendor/dsh/.agents/notes/README.md`（生命周期/分类/
-格式骨架）、`vendor/dsh/.agents/notes/AGENTS.md`（取代检查常设指令）、
-`vendor/dsh/.agents/notes/implemented/AGENTS.md`（维护规则）。本仓落地与差异见
-[notes/README.md](notes/README.md)。
+**开工先查 notes，再改代码**（按条目名/机制名检索，只读命中的）；只有承载持久决定理由的变更才需
+**同一变更**写 Note——机械与局部编辑豁免。时态总图 = [notes/README.md](notes/README.md)（proposed →
+implemented/archived/rejected；事故复盘在 archived/）；写入触发/取代检查/格式/毕业 = [notes/AGENTS.md](notes/AGENTS.md)；
+任务流程 = `.agents/skills/`（按 description 加载，不占常驻上下文）。原生定义在 `vendor/dsh/.agents/notes/`；本仓差异见 notes/README。
 
 ## 命令速查（全档正本 = [guides/60 §2](docs/guides/60-dev-loop.md)；run 通道 = [guides/61](docs/guides/61-run-playbook.md)）
 

@@ -11,7 +11,10 @@
 
 ## 从 backlog 进来的结论（收件规则）
 
-载体由 [_backlog 结论去向](../_backlog/methods/issue-to-note.md) 选；本目录只按准入收：`proposed` 仅当决定需实施前显式评审；`implemented` 与交付/决定关闭同一变更写、回链来源卡，卡上有 `## 验收标准` / `## 修复判据` 时验证节对账该判据；`rejected` 仅当否决理由有防复犯价值；`none` / `deferred` 不进本目录。业务质量不随载体转移：issue 的用户验收、bug 的用户业务确认仍归用户；Note 只收决定理由、真实输掉的方案、实际验证与残余风险，问题/讨论/选项/质量契约留在卡上。未裁决的推敲留在 backlog；本目录不是收件箱、停车场或任务队列。`implemented` Note 头部可加 `> 来源：<card>`，不作门禁。
+上游 = [_backlog/AGENTS.md](../_backlog/AGENTS.md) 的状态机；载体 = [结论去向](../_backlog/methods/issue-to-note.md)。
+`待落地` 只选去向、不写 Note；`implemented` 与交付/卡关闭同变更，验证节对账卡上验收/修复判据与 `审查：`；
+`proposed` 与卡关闭同变更、毕业才进 implemented；`none`/`deferred` 不进，`rejected` 仅有防复犯价值时进。
+`审查：跳过` 不写成 verified；`等人拍板` 未答复不写 Note/不归档；本目录不是收件箱/队列；Note 只收理由/输掉方案/验证/残余风险，问题/选项/质量契约留卡上，业务质量归用户。
 
 ## 每新增一篇 Note：取代检查（硬触发）
 
@@ -28,7 +31,7 @@
   rejected`，**与所在目录互验**；状态里不带日期与括号（日期在文件名 = 主题首提日期）；
 - implemented 骨架（`note-format` 门禁强制前三节）：`## 决定` + `## 输掉的方案`
   （"没记击败了什么的决定会重开讼"）+ `## 实际跑过的验证`（**无证据的"完成"不算完成**；
-  标题含 验证/检查/验收/实录/记录/实证/探针/全绿/复验/证据 任一即认，容忍历史命名变体）；
+  标题含 验证/检查/验收/实录/记录/实证/探针/全绿/复验/证据 任一即认，容忍历史命名变体；审查结论/跳过理由进验证节，skip 不算验证）；
 - proposed RFC：仅在持久决定需要显式评审时使用；状态行 + 问题/方案/输掉的方案/验收。RFC 不是实施工作的普遍前置；
 - 章节名映射（本仓 ↔ 上游 canonical）：问题 ↔ `## Problem` · 决定 ↔ `## Decision` ·
   输掉的方案 ↔ `## Alternatives considered` · 验证 ↔ `## Verification`/`## Testing` ·
@@ -41,7 +44,7 @@
 ## 毕业与命名
 
 - RFC 毕业 = **正文改写**（计划体 → 已交付事实体，删未来时态与迁移计划）+ 迁
-  `implemented/`。只改路径不改正文 = 未来计划伪装成当前事实；
+  `implemented/`。只改路径不改正文 = 未来计划伪装成当前事实；来源卡已在 RFC 成立时关闭，不重开；
 - 毕业 Note 不再指导未来工作时 → 搬 `archived/` 冻结（进门条件与纪律 =
   [notes/archived/README.md](archived/README.md)；vendor `dsh-archive-agent-notes` 校准：
   按未来决策价值判定，不按年龄字数；红证/台账引用/负知识/复活条件在身者留活跃）；

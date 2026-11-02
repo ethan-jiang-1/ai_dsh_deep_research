@@ -179,11 +179,11 @@ export function runF() {
     fail(gate, 'AGENTS.md 缺 §入口链 标题——入口链定义的家');
 }
 
-// ── backlog-liveness（backlog 各池的结构与生命周期合同——规则正本 = _backlog/README.md，
-//    实现 = scripts/lib/backlog-liveness.mjs）。只证结构：不证明结论、证据质量或实施授权；
-//    活跃卡带当前 metadata，归档正文保留不追补；空池合法，制度文件缺席/未跟踪即红（防空）。
-//    已知边界：acceptance-presence 族（修复就绪缺 `## 修复判据`、结论倾向「现在做」缺
-//    `## 验收标准`）under-pressure 未落地——补齐时同 diff 扩 backlog-liveness.mjs。──
+// ── backlog-liveness（backlog 各池的结构与生命周期合同——规则正本 = _backlog/AGENTS.md +
+//    _backlog/README.md，实现 = scripts/lib/backlog-liveness.mjs）。只证结构：不证明结论、证据质量或
+//    实施授权；活跃卡带当前 metadata，归档正文保留不追补；空池合法，制度文件缺席/未跟踪即红（防空）。
+//    2026-11-02 补齐 acceptance-presence 族（`待落地` 的 `结论倾向：现在做`/非空 `## 验收标准`/
+//    `去向`、`修复就绪/修复落地` 的非空 `## 修复判据`、活跃研究题名页状态/结论）。──
 {
   const gate = 'backlog-liveness';
   const r = spawnSync('git', ['ls-files', '-z', '_backlog/'], { cwd: ROOT, encoding: 'utf8' });

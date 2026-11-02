@@ -1,6 +1,7 @@
 // direct-authorization-boundary — entry-chain-probe 的词面判据：按授权范围直接执行、无需
-// 重复请批的边界判定。消费 = scripts/probe/entry-chain-probe.mjs 与 tests/entry-chain-probe.test；
-// 词面口径与放宽实录 = notes/implemented/2026-10-10-entry-chain-probe-lexical-recall.md。
+// 重复请批的边界判定。消费 = scripts/probe/entry-chain-probe.mjs 与
+// tests/run/entry-chain-probe.test.mjs；词面口径与放宽实录 =
+// notes/implemented/2026-10-10-entry-chain-probe-lexical-recall.md。
 const normalize = (text) => text.replace(/[，。；、———()（）\s]/g, '');
 
 export const rfcBoundaryPasses = (answer) => {
@@ -12,7 +13,11 @@ export const rfcBoundaryPasses = (answer) => {
   //   对抗自审实测假阳性）；**残余边界**：后置否定（「显式评审并非必需」）与自相矛盾混合回答
   //   词面层不设防，归留档人工复核——词面预过滤 + 语义留档的分工边界。
   // ②普遍前置的拒绝接受显式短语（不是…普遍前置）或对问句的直接否定起句（「不是——」）。
-  const hasException = /持久决定.{0,24}(?<!无需|无须|不用|不必|不需|不需要|不要求)显式评审/.test(text) && /(?:只有|仅当|仅在|只在|才).{0,60}(?:建立|建在)/.test(text);
+  // ③语序不敏感（2026-11-02 真模型实录）：「显式评审的持久决定」与「持久决定需要显式评审」同义；
+  //   负向环视在两种语序都设防，避免把「无需显式评审」的否定句放行。
+  const exception = /持久决定.{0,24}(?<!无需|无须|不用|不必|不需|不需要|不要求)显式评审/.test(text)
+    || /(?<!无需|无须|不用|不必|不需|不需要|不要求)显式评审.{0,24}持久决定/.test(text);
+  const hasException = exception && /(?:只有|仅当|仅在|只在|才).{0,60}(?:建立|建在)/.test(text);
   const rejectsUniversal = /(?:不是|并非|不作为|非).{0,16}(?:普遍前置|一般实施工作|实施前置门)/.test(text)
     || /^(?:并不是|不是|并非)/.test(text);
   return hasException && rejectsUniversal;

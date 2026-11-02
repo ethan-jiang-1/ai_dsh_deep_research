@@ -2,6 +2,8 @@
 
 > 状态：implemented
 
+> 历史注记：2026-11-02 起研究题名页加阶段 `status`（调研中/已定性），材料仍不设 status；位置仍表达活跃/归档——见 [backlog 五段流水线](2026-11-02-backlog-pipeline.md)。
+
 > 来源：用户 2026-10-30 请求——两个 research README 下的内容要有「名头」；研究结束会产出 issue
 > 卡，归档后仍按名头进子目录，今后归档与回溯才容易。授权原话 =「你的理解非常好, 你动手吧」。
 > 规则正文 = [_backlog/research/README.md](../../_backlog/research/README.md) 与

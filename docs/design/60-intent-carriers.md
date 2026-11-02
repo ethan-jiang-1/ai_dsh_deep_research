@@ -35,7 +35,7 @@
                                                └─ 延后 → deferred（triggers.md / owning note / 明确 none）
 ```
 
-Backlog 不是实施前置门，RFC 不是普遍实施要求；未裁决的推敲留在 backlog。结论去向只决定理由住哪，不转移质量责任：issue 的业务验收、bug 的产品可接受性（P0/触面例外由用户拍板）归用户；严重级分诊与技术证据归 agent。notes 的收件规则 = [notes/AGENTS](../../notes/AGENTS.md)。
+Backlog 不是实施前置门，RFC 不是普遍实施要求；未裁决的推敲留在 backlog。卡的交接门 = `待落地`（准备进开发，不是授权）；`proposed` 卡在 RFC 成立时归档、卡已结 ≠ 批准，`implemented` 卡留到交付并与 Note 同变更。结论去向只决定理由住哪，不转移质量责任：issue 的业务验收、bug 的产品可接受性（P0/触面例外由用户拍板）归用户；严重级分诊与技术证据归 agent。状态机 = [_backlog/AGENTS](../../_backlog/AGENTS.md)；notes 的收件规则 = [notes/AGENTS](../../notes/AGENTS.md)。
 
 ## 三、与参考卷的适配
 

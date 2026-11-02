@@ -13,7 +13,17 @@ const ISSUE = '2026-10-08-sample.md';
 const ISSUE_TEXT = '---\nstatus: 推敲中\nopened: 2026-10-08\n---\n\n# Sample\n> 状态：推敲中｜结论倾向：未定｜可关闭：否\n';
 const BUG = 'BUG-018-sample.md';
 const BUG_TEXT = '---\nstatus: 排查中\nseverity: P1\nopened: 2026-10-08\n---\n\n# Bug\n> 严重级别：P1（重要）｜发现：2026-10-08｜状态：排查中\n';
-const RESEARCH_BANNER = '# Example\n> 问题：Why?\n> 消费者：none\n> 产出的卡：—\n\n## 材料\n'
+const READY_ISSUE = '2026-10-09-ready.md';
+const READY_ISSUE_TEXT = '---\nstatus: 待落地\nopened: 2026-10-08\n---\n\n# Ready\n'
+  + '> 立卡：2026-10-08 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否\n'
+  + '> 去向：implemented — `notes/implemented/2026-10-08-ready.md`（交付时写）\n\n'
+  + '## 验收标准\n1. 行为可观察。\n';
+const READY_BUG = 'BUG-019-ready.md';
+const READY_BUG_TEXT = '---\nstatus: 修复就绪\nseverity: P1\nopened: 2026-10-08\n---\n\n# BUG-019\n'
+  + '> 严重级别：P1（重要）｜发现：2026-10-08｜状态：修复就绪\n\n'
+  + '## 修复判据\n1. 回归测试通过。\n';
+const RESEARCH_BANNER = '---\nstatus: 调研中\nopened: 2026-10-08\n---\n\n# Example\n> 状态：调研中\n'
+  + '> 问题：Why?\n> 消费者：none\n> 产出的卡：—\n> 结论：—\n\n## 材料\n'
   + '| [2026-10-08-evidence.md](2026-10-08-evidence.md) | evidence |\n';
 
 function fixture(t) {
@@ -85,6 +95,22 @@ test('active issue validates date, status, metadata order, mirror and graduation
   }
 });
 
+test('待落地 is a ready gate: 现在做 + non-empty 验收标准 + 去向', (t) => {
+  const f = fixture(t);
+  issue(f, READY_ISSUE_TEXT, READY_ISSUE);
+  assert.deepEqual(f.check(), []);
+  for (const [text, expected] of [
+    [READY_ISSUE_TEXT.replace('## 验收标准\n1. 行为可观察。\n', ''), '待落地'],
+    [READY_ISSUE_TEXT.replace('1. 行为可观察。', ''), '待落地'],
+    [READY_ISSUE_TEXT.replace('结论倾向：现在做', '结论倾向：以后做'), '待落地'],
+    [READY_ISSUE_TEXT.replace('> 去向：implemented — `notes/implemented/2026-10-08-ready.md`（交付时写）\n', ''), '待落地'],
+    [READY_ISSUE_TEXT.replace('> 去向：implemented', '> 去向：deferred'), '待落地'],
+  ]) {
+    issue(f, text, READY_ISSUE);
+    assert.ok(f.check().some((p) => p.includes(expected)), expected);
+  }
+});
+
 test('every closed-set graduation value passes with free prose; archived cards skip the lifecycle checks', (t) => {
   const f = fixture(t);
   for (const head of ['未定', '现在做', '以后做', '不做', '并入已有']) {
@@ -118,7 +144,8 @@ test('bugs preserve BUG numbers and enforce severity; archive status metadata is
 test('bug lifecycle enums and status-line mirror are enforced on active cards', (t) => {
   const f = fixture(t);
   for (const phase of ['排查中', '修复就绪', '修复落地', '等人拍板']) {
-    bug(f, BUG_TEXT.replace('status: 排查中', `status: ${phase}`).replace('状态：排查中', `状态：${phase}`));
+    const text = BUG_TEXT.replace('status: 排查中', `status: ${phase}`).replace('状态：排查中', `状态：${phase}`);
+    bug(f, ['修复就绪', '修复落地'].includes(phase) ? `${text}\n## 修复判据\n1. Probe.\n` : text);
     assert.deepEqual(f.check(), [], phase);
   }
   bug(f, BUG_TEXT.replace('status: 排查中', 'status: 修复中').replace('状态：排查中', '状态：修复中'));
@@ -130,6 +157,19 @@ test('bug lifecycle enums and status-line mirror are enforced on active cards', 
   // 🔒 跟在记号后不破坏镜像（owner-only 触发标记的位置约定）。
   bug(f, BUG_TEXT.replace('status: 排查中', 'status: 等人拍板').replace('状态：排查中', '状态：等人拍板🔒'));
   assert.deepEqual(f.check(), []);
+});
+
+test('修复就绪/修复落地 need a non-empty 修复判据', (t) => {
+  const f = fixture(t);
+  bug(f, READY_BUG_TEXT, READY_BUG);
+  assert.deepEqual(f.check(), []);
+  for (const phase of ['修复就绪', '修复落地']) {
+    const text = READY_BUG_TEXT.replace('status: 修复就绪', `status: ${phase}`).replace('状态：修复就绪', `状态：${phase}`);
+    bug(f, text, READY_BUG);
+    assert.deepEqual(f.check(), [], phase);
+    bug(f, text.replace('## 修复判据\n1. 回归测试通过。\n', ''), READY_BUG);
+    assert.ok(f.check().some((p) => p.includes('修复判据')), phase);
+  }
 });
 
 test('research lives in a thread with a banner; topic/intent stay one-line and status-free', (t) => {
@@ -144,6 +184,22 @@ test('research lives in a thread with a banner; topic/intent stay one-line and s
   assert.ok(f.check().some((p) => p.includes('flat scalar mapping')));
 });
 
+test('research topic page carries phase status and a conclusion when 已定性', (t) => {
+  const f = fixture(t);
+  f.put('research/topic/README.md', RESEARCH_BANNER);
+  f.put('research/topic/2026-10-08-evidence.md', '---\ntopic: Example\nintent: "Support"\n---\n\n# Evidence\n');
+  f.put('research/README.md', 'topic/\n');
+  assert.deepEqual(f.check(), []);
+  f.put('research/topic/README.md', '# Example\n> 状态：调研中\n> 问题：Why?\n> 消费者：none\n> 产出的卡：—\n\n## 材料\n| [2026-10-08-evidence.md](2026-10-08-evidence.md) | evidence |\n');
+  assert.ok(f.check().some((p) => p.includes('frontmatter')), 'missing frontmatter');
+  f.put('research/topic/README.md', RESEARCH_BANNER.replace('> 状态：调研中\n', ''));
+  assert.ok(f.check().some((p) => p.includes('status line')), 'missing status line');
+  f.put('research/topic/README.md', RESEARCH_BANNER.replace('status: 调研中', 'status: 已定性').replace('状态：调研中', '状态：已定性'));
+  assert.ok(f.check().some((p) => p.includes('结论')), '已定性 needs conclusion');
+  f.put('research/topic/README.md', RESEARCH_BANNER.replace('status: 调研中', 'status: 已定性').replace('状态：调研中', '状态：已定性').replace('> 结论：—', '> 结论：见 [evidence](2026-10-08-evidence.md)'));
+  assert.deepEqual(f.check(), []);
+});
+
 test('research materials cannot sit flat at the shelf root', (t) => {
   const f = fixture(t);
   f.put('research/2026-10-08-flat.md', '---\ntopic: Example\nintent: "Support"\n---\n\n# Flat\n');
@@ -156,7 +212,7 @@ test('research threads need a banner, an index row and a material list', (t) => 
   f.put('research/topic/2026-10-08-evidence.md', '---\ntopic: Example\nintent: "Support"\n---\n\n# Evidence\n');
   f.put('research/README.md', 'topic/\n');
   assert.ok(f.check().some((p) => p.includes('README.md missing')), 'missing banner');
-  f.put('research/topic/README.md', '# Example\n> 问题：Why?\n> 消费者：none\n> 产出的卡：—\n');
+  f.put('research/topic/README.md', RESEARCH_BANNER.replace('| [2026-10-08-evidence.md](2026-10-08-evidence.md) | evidence |\n', ''));
   assert.ok(f.check().some((p) => p.includes('未在题名页')), 'material not listed');
   f.put('research/topic/README.md', RESEARCH_BANNER);
   assert.deepEqual(f.check(), []);
@@ -166,8 +222,9 @@ test('research threads need a banner, an index row and a material list', (t) => 
 
 test('research banner must name the question, consumer and spawned cards', (t) => {
   const f = fixture(t);
-  f.put('research/topic/README.md', '# Example\n\n## 材料\n| [a.md](a.md) |\n');
-  f.put('research/topic/a.md', '---\ntopic: Example\nintent: "Support"\n---\n\n# A\n');
+  f.put('research/topic/README.md', RESEARCH_BANNER
+    .replace('> 问题：Why?\n', '').replace('> 消费者：none\n', '').replace('> 产出的卡：—\n', ''));
+  f.put('research/topic/2026-10-08-evidence.md', '---\ntopic: Example\nintent: "Support"\n---\n\n# Evidence\n');
   f.put('research/README.md', 'topic/\n');
   const problems = f.check();
   for (const field of ['问题', '消费者', '产出的卡']) assert.ok(problems.some((p) => p.includes(field)), field);

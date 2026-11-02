@@ -1,11 +1,11 @@
 // backlog-liveness — 问题卡、缺陷、调研、方法与归档索引的结构合同（frontmatter 状态 / 结论倾向
-// 闭集头 / 状态行镜像互查 / 池成员索引点名）。消费 = verify 门禁 backlog-liveness 与
-// tests/backlog-liveness.test；规则正本 = _backlog/README（门禁只证结构，不证判断质量）。
+// 闭集头 / 状态行镜像互查 / 池成员索引点名 / ready 门工件）。消费 = verify 门禁 backlog-liveness 与
+// tests/backlog-liveness.test；规则正本 = _backlog/AGENTS（状态机）+ _backlog/README（工作路径/关闭）。
 import { existsSync, lstatSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const CARD_STATES = {
-  issues: ['推敲中', '等人拍板'], bugs: ['排查中', '修复就绪', '修复落地', '等人拍板'],
+  issues: ['推敲中', '待落地', '等人拍板'], bugs: ['排查中', '修复就绪', '修复落地', '等人拍板'],
   '_archived/settled_issues': ['已结'], '_archived/suspended_issues': ['叫停'],
   '_archived/fixed_bugs': ['已修'], '_archived/suspended_bugs': ['待修'],
 };
@@ -39,6 +39,24 @@ function metadata(text) {
 const statusLineOf = (text) => text.split('\n').slice(0, 12)
   .find((line) => /^>\s*.*状态[：:]/.test(line))?.replaceAll('**', '');
 const phaseOf = (line) => /状态[：:]\s*([^\s｜|\n（(]*)/.exec(line)?.[1]?.replace(/🔒/g, '').trim();
+const RESEARCH_STATES = ['调研中', '已定性'];
+const headOf = (text, lines = 40) => text.split('\n').slice(0, lines).join('\n');
+// Section body = content under the first matching `## <heading>` until the next `## `.
+// Used for the ready-gate artefacts: a heading with an empty body is not a written contract.
+const sectionText = (text, heading) => {
+  const match = new RegExp(`^##\\s*${heading}[^\\n]*$`, 'm').exec(text);
+  if (match === null) return null;
+  const rest = text.slice(match.index + match[0].length);
+  const next = rest.search(/^##\s+/m);
+  return (next === -1 ? rest : rest.slice(0, next)).trim();
+};
+const hasFilledSection = (text, heading) => {
+  const body = sectionText(text, heading);
+  return body !== null && body !== '';
+};
+const dispositionOf = (text) => /^>\s*去向[：:]\s*(none|rejected|proposed|implemented|deferred)\b/m
+  .exec(headOf(text))?.[1];
+const conclusionOf = (text) => /^>\s*结论[：:]\s*(.*)$/m.exec(text)?.[1]?.trim();
 
 /** Check current backlog structure over tracked files; empty active shelves are deliberately legal. */
 export function backlogLivenessProblems(backlogRoot, trackedFiles) {
@@ -91,6 +109,25 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
         }
         if (!index.includes(`${thread}/`))
           problems.push(`_backlog/${indexPath} 未登记研究题 ${thread}/——索引按题名一行，不按文件`);
+        if (shelf.startsWith('_archived/')) continue; // 归档研究题保留旧形态，不追补 status。
+        const parsedBanner = metadata(banner);
+        if (parsedBanner.error) {
+          problems.push(`_backlog/${bannerRel} ${parsedBanner.error}——活跃题名页需要 status/opened`);
+          continue;
+        }
+        const bf = parsedBanner.fields;
+        if ([...bf.keys()][0] !== 'status') problems.push(`_backlog/${bannerRel} needs status as first field`);
+        if (!RESEARCH_STATES.includes(bf.get('status'))) problems.push(`_backlog/${bannerRel} invalid status for research topic (${RESEARCH_STATES.join('/')})`);
+        if (!DATE.test(bf.get('opened') ?? '')) problems.push(`_backlog/${bannerRel} needs opened: YYYY-MM-DD`);
+        const bannerStatusLine = statusLineOf(banner);
+        if (!bannerStatusLine) problems.push(`_backlog/${bannerRel} active research topic needs a status line (状态：<调研中|已定性>)`);
+        else if (phaseOf(bannerStatusLine) !== bf.get('status'))
+          problems.push(`_backlog/${bannerRel} status line must mirror frontmatter status (状态：${bf.get('status')})`);
+        if (bf.get('status') === '已定性') {
+          const conclusion = conclusionOf(banner);
+          if (!conclusion || conclusion === '—' || conclusion === '-')
+            problems.push(`_backlog/${bannerRel} 已定性 requires a non-empty > 结论： line`);
+        }
       }
       for (const rel of rels) {
         if (rel === 'README.md' || rel.includes('/')) continue;
@@ -130,6 +167,8 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
         if (!CARD_STATES[shelf].includes(fields.get('status'))) problems.push(`${loc} invalid status for shelf`);
         if (!DATE.test(fields.get('opened') ?? '')) problems.push(`${loc} needs opened: YYYY-MM-DD`);
         if (shelf.endsWith('bugs') && !['P0', 'P1', 'P2'].includes(fields.get('severity'))) problems.push(`${loc} needs severity: P0/P1/P2`);
+        if (shelf.endsWith('bugs') && ['修复就绪', '修复落地'].includes(fields.get('status')) && !hasFilledSection(text, '修复判据'))
+          problems.push(`${loc} ${fields.get('status')} requires a non-empty ## 修复判据`);
         const statusLine = statusLineOf(text);
         // 归档卡的退出值：已结/已修 = 已离开活跃区，状态行（含历史头）不得再写可关闭：否。
         // 只看卡头 25 行——正文里的历史讨论可以引用旧值，卡头是当前记账面。
@@ -144,6 +183,15 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
             problems.push(`${loc} active status line must declare 可关闭：否`);
           if (statusLine && /可关闭\s*[：:=＝]\s*是(?=[｜|\n（(]|$)/.test(statusLine))
             problems.push(`${loc} is closeable but still active; archive in the same change`);
+          if (fields.get('status') === '待落地') {
+            if (!statusLine || !/结论倾向[：:]\s*现在做/.test(statusLine))
+              problems.push(`${loc} 待落地 requires 结论倾向：现在做`);
+            if (!hasFilledSection(text, '验收标准'))
+              problems.push(`${loc} 待落地 requires a non-empty ## 验收标准`);
+            const disposition = dispositionOf(text);
+            if (disposition !== 'proposed' && disposition !== 'implemented')
+              problems.push(`${loc} 待落地 requires 去向：proposed|implemented`);
+          }
         }
         if (shelf === 'bugs' && !/^BUG-\d{3}-[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(name)) problems.push(`${loc} filename must preserve BUG-<NNN>-<slug>.md`);
         if (!archived) {

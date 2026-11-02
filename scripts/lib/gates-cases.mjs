@@ -58,6 +58,14 @@ const negateVerificationSection = (dirRel) => (dir) => {
 
 const ISSUE_NAME = '2099-01-01-probe.md';
 const ISSUE_TEXT = '---\nstatus: 推敲中\nopened: 2099-01-01\n---\n\n# Probe\n> 状态：推敲中｜结论倾向：未定｜可关闭：否\n';
+const READY_ISSUE_NAME = '2099-01-02-ready.md';
+const READY_ISSUE_TEXT = '---\nstatus: 待落地\nopened: 2099-01-01\n---\n\n# Ready\n'
+  + '> 状态：待落地｜结论倾向：现在做｜可关闭：否\n'
+  + '> 去向：implemented — `notes/implemented/2099-01-01-ready.md`（交付时写）\n\n'
+  + '## 验收标准\n1. Probe.\n';
+const READY_BUG_TEXT = '---\nstatus: 修复就绪\nseverity: P1\nopened: 2099-01-01\n---\n\n# Probe\n'
+  + '> 严重级别：P1｜发现：2099-01-01｜状态：修复就绪\n\n'
+  + '## 修复判据\n1. Probe.\n';
 
 function fixtureFile(dir, rel, text, indexed = true) {
   const path = join(dir, rel);
@@ -68,10 +76,13 @@ function fixtureFile(dir, rel, text, indexed = true) {
 
 const backlogIssue = (change = (text) => text, indexed = true) => (dir) =>
   fixtureFile(dir, `_backlog/issues/${ISSUE_NAME}`, change(ISSUE_TEXT), indexed);
+const backlogReadyIssue = (change = (text) => text) => (dir) =>
+  fixtureFile(dir, `_backlog/issues/${READY_ISSUE_NAME}`, change(READY_ISSUE_TEXT), true);
 
 // 研究题（2026-10-30）：材料必须住在题名目录内，题名页逐份点名；索引按题名一行。
 const RESEARCH_TEXT = '---\ntopic: Probe\nintent: "Evidence"\n---\n\n# Probe\n';
-const RESEARCH_BANNER = '# Probe\n> 问题：Why?\n> 消费者：none\n> 产出的卡：—\n\n'
+const RESEARCH_BANNER = '---\nstatus: 调研中\nopened: 2099-01-01\n---\n\n# Probe\n> 状态：调研中\n'
+  + '> 问题：Why?\n> 消费者：none\n> 产出的卡：—\n> 结论：—\n\n'
   + '## 材料\n| [2099-01-01-evidence.md](2099-01-01-evidence.md) | probe |\n';
 const researchThread = (text, { banner = RESEARCH_BANNER, index = 'topic/' } = {}) => (dir) => {
   fixtureFile(dir, '_backlog/research/topic/README.md', banner, false);
@@ -435,10 +446,16 @@ export const CASES = [
     appendFileSync(join(dir, '_backlog/research/README.md'), '\ntopic/\n');
   } },
   { id: 'backlog-research-thread-unindexed', gate: 'backlog-liveness', mutate: researchThread(RESEARCH_TEXT, { index: '' }) },
+  { id: 'backlog-issue-ready-no-acceptance', gate: 'backlog-liveness', mutate: backlogReadyIssue((text) => text.replace('## 验收标准\n1. Probe.\n', '')) },
+  { id: 'backlog-bug-ready-no-criteria', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-996-ready.md', READY_BUG_TEXT.replace('## 修复判据\n1. Probe.\n', '')) },
   { id: 'backlog-research-material-unindexed', gate: 'backlog-liveness', mutate: researchThread(RESEARCH_TEXT,
-    { banner: '# Probe\n> 问题：Why?\n> 消费者：none\n> 产出的卡：—\n\n## 材料\n| [other.md](other.md) |\n' }) },
+    { banner: RESEARCH_BANNER.replace('| [2099-01-01-evidence.md](2099-01-01-evidence.md) | probe |\n', '| [other.md](other.md) |\n') }) },
   { id: 'backlog-research-banner-fields', gate: 'backlog-liveness', mutate: researchThread(RESEARCH_TEXT,
-    { banner: '# Probe\n> 问题：Why?\n> 消费者：none\n\n## 材料\n| [2099-01-01-evidence.md](2099-01-01-evidence.md) |\n' }) },
+    { banner: RESEARCH_BANNER.replace('> 产出的卡：—\n', '') }) },
+  { id: 'backlog-research-topic-no-status', gate: 'backlog-liveness', mutate: researchThread(RESEARCH_TEXT,
+    { banner: '# Probe\n> 状态：调研中\n> 问题：Why?\n> 消费者：none\n> 产出的卡：—\n\n## 材料\n| [2099-01-01-evidence.md](2099-01-01-evidence.md) | probe |\n' }) },
+  { id: 'backlog-research-topic-qualified-no-conclusion', gate: 'backlog-liveness', mutate: researchThread(RESEARCH_TEXT,
+    { banner: RESEARCH_BANNER.replace('status: 调研中', 'status: 已定性').replace('状态：调研中', '状态：已定性') }) },
   { id: 'backlog-research-archived-flat', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/_archived/research/2099-01-01-flat.md', '# Frozen\n', true) },
   { id: 'backlog-method-no-trigger', gate: 'backlog-liveness', mutate: (dir) => {
     const path = join(dir, '_backlog/methods/issue-to-note.md');
@@ -701,6 +718,9 @@ export const NO_CASE_GATES = [
 
 export const CONTROLS = [
   { id: 'backlog-active-issue', gate: 'backlog-liveness', mutate: backlogIssue() },
+  { id: 'backlog-ready-issue', gate: 'backlog-liveness', mutate: backlogReadyIssue() },
+  { id: 'backlog-ready-bug', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-995-ready.md', READY_BUG_TEXT) },
+  { id: 'backlog-research-thread', gate: 'backlog-liveness', mutate: researchThread(RESEARCH_TEXT) },
   // guard-red-record 双址正向：活跃 bugs/ 卡 + 带留证的标题声明 → 门禁照常 PASS
   //（活跃址解析；CONTROLS 断言目标门禁 PASS，其他门禁红不拦——活跃探针卡不满足
   //  全部门禁形状属预期）。

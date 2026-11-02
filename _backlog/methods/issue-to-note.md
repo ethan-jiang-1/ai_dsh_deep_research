@@ -6,15 +6,16 @@ whenToUse: An issue or bug has a confirmed conclusion and needs a durable home, 
 
 # Issue or bug conclusion: choose the durable carrier
 
-**Input:** a confirmed conclusion on a scoped issue, or a bug at `修复落地` / `已修`, with its evidence and, for `proposed` / `implemented`, its quality contract (`## 验收标准` for issues, `## 修复判据` for bugs) and the quality sign-off.
-**Output:** one `去向：<value> — <target>` line on the card, the target artifact (or an explicit no-note reason), and the quality sign-off owner recorded.
+**Input:** a confirmed conclusion on a scoped issue at `待落地` or delivery, or a bug at `修复落地` / `已修`, with its evidence and, for `proposed` / `implemented`, its quality contract (`## 验收标准` for issues, `## 修复判据` for bugs) and the quality sign-off.
+**Output:** one `去向：<value> — <target>` line on the card, the target artifact (or an explicit no-note reason), and the quality sign-off owner recorded. At `待落地` the target may be the planned path in inline code; at closure it is a live relative link or explicit `none`.
 
 The card is the package; do not duplicate its problem, evidence or alternatives here. This method only decides where the conclusion's rationale lives and records that decision.
 
 ## 1. Which mode?
 
 - **Decision-only:** the conclusion itself is the deliverable (a choice, a rejection, a deferral, a review result). Close at conclusion.
-- **Implementation-bound:** the conclusion authorizes a change. Keep the issue active until the change lands; at delivery, write the note in the same change and close.
+- **Implementation-bound:** the conclusion authorizes a change. The issue moves to `待落地` when ready, stays active until the change lands; at delivery, write the note in the same change and close. `待落地` is ready, not authorized; user authorization still gates implementation.
+- **Review-bound:** the conclusion needs explicit review before implementation. Write the RFC and close the card in the same change; the RFC owns the next stage; card closed ≠ RFC approved.
 
 A final decision whose implementation is not authorized yet stays active; it is not `implemented` until the change lands.
 
@@ -33,7 +34,7 @@ Quality ownership does not move with the disposition:
 
 ### Issue → note
 
-The note's `决定` is the issue's conclusion; `输掉的方案` comes from the card's actual alternatives; `实际跑过的验证` is the evidence against `## 验收标准`. The card remains the problem/discussion record.
+The note's `决定` is the issue's conclusion; `输掉的方案` comes from the card's actual alternatives; `实际跑过的验证` is the evidence against `## 验收标准` and the card's `审查：` result. Skip is not verification. The card remains the problem/discussion record.
 
 ### Bug → note
 
@@ -45,7 +46,7 @@ The note's `决定` is the fix approach, only when the fix carries a persistent 
 |---|---|---|---|
 | `none` | An existing doc, code path, test or decision already owns the rationale. | Nothing; link the carrier. | The link is on the card; the carrier's owner owns the quality bar. |
 | `rejected` | The conclusion is "do not do" and the negative knowledge can prevent a tempting recurrence. | `notes/rejected/<date>-<topic>.md` | The note exists and is linked; the user owns the decision. |
-| `proposed` | The conclusion needs explicit review before implementation. | `notes/proposed/<date>-<topic>.md` RFC | The RFC exists and is linked; the reviewer/user owns approval. |
+| `proposed` | The conclusion needs explicit review before implementation. | `notes/proposed/<date>-<topic>.md` RFC | The RFC exists and is linked; the card closes in the same change; the reviewer/user owns approval (card closed ≠ approved). |
 | `implemented` | The conclusion is final and its rationale should persist, delivered as a code/doc change or as the decision itself. | `notes/implemented/<date>-<topic>.md` in the same change | The note exists, links the card, its verification cites or lists the quality contract, and the quality owner in §2 has accepted. |
 | `deferred` | The conclusion is "do later"; no note now. | Only the trigger owner. | The trigger owner is recorded; the user owns the deferral. |
 
@@ -55,7 +56,7 @@ Mapping from the card's `结论倾向`: `现在做` → `proposed` when review i
 
 ## 4. Record it
 
-Add one line under the status line when the card closes:
+Add one line under the status line when the card closes; an implementation-bound card may record the planned target at `待落地`:
 
 ```
 > 去向：implemented — `notes/implemented/<date>-<topic>.md`；业务验收：用户
@@ -63,11 +64,11 @@ Add one line under the status line when the card closes:
 > 去向：deferred — `_backlog/triggers.md`
 ```
 
-The value is the closed set above; the target is a relative Markdown link or an explicit `none`. The line records the quality sign-off owner when it is not the default. For bugs, add `技术验收：agent`; for issues, the business acceptance owner is enough. The `去向` line is the handoff record; no separate request, inbox or acknowledgment is needed.
+The value is the closed set above. At `待落地` the target is the planned path in inline code (the Note/RFC may not exist yet); at closure/载体成立 it is a live relative Markdown link or an explicit `none`—a link to a not-yet-existing Note would fail `md-links`. The line records the quality sign-off owner when it is not the default. For bugs, add `技术验收：agent`; for issues, the business acceptance owner is enough. The `去向` line is the handoff record; no separate request, inbox or acknowledgment is needed.
 
 ## 5. Close
 
-Follow the [backlog closure rules](../README.md) and the issue/bug card rules. A `proposed` card closes with the RFC link; the RFC owns the next stage. An `implemented` card closes only when the note, the delivered decision/change and the business acceptance exist; the note and the card link each other. A `none` or `deferred` card closes with the existing carrier or trigger owner recorded.
+Follow the [backlog closure rules](../README.md) and the issue/bug card rules. A `proposed` card closes with the RFC link; the RFC owns the next stage and its approval is separate (card closed ≠ approved). An `implemented` card stays active through delivery and closes only when the note, the delivered decision/change and the business acceptance exist; the note and the card link each other. A `待落地` card only selects the carrier—it does not write an implemented Note. A `none` or `deferred` card closes with the existing carrier or trigger owner recorded.
 
 When a target moves later (`proposed` → `implemented`, `implemented` → `archived`), the move updates inbound `去向` links in the same change; `md-links` is the guard.
 
@@ -77,5 +78,6 @@ When a target moves later (`proposed` → `implemented`, `implemented` → `arch
 - Unresolved deliberation stays on the issue; do not open a note to park it.
 - Not every issue becomes a note; `none` is a legitimate and common outcome.
 - Quality ownership does not transfer: `none` / `deferred` / `rejected` still need the user's business disposition; the note carries technical evidence, not business acceptance.
+- `待落地` is a carrier-selection point, not a Note trigger; `none` / `deferred` do not enter notes, `rejected` enters only with preventive value.
 - Bugs: apply the table at `修复落地` / `已修` and record the disposition in `修复关联`; mechanical or local fixes are `none`.
 - Carrier admission rules are owned by [notes/AGENTS](../../notes/AGENTS.md); this method does not restate them.
