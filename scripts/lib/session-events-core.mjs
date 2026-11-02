@@ -107,3 +107,30 @@ export function tailEvents(events, n) {
   if (!Number.isFinite(count) || count <= 0) return events.slice()
   return events.slice(-count)
 }
+
+/**
+ * 卡住判定（agent 的"这台 run 是不是停了"入口，2026-11-03 D6）：
+ * 末位回合未闭合（turn/start 之后没有 turn/end / session/end-seed）且末事件静默超过阈值。
+ * 边界：HITL 挂起（awaiting 用户）也是 open turn，但那是"等你"，不是"卡住"——本函数只报
+ * idle 事实，调用方结合 `ask`/`hitlPending`（watch-run）分流；无事件/无开回合 → 明确 reason。
+ * @param events - 会话事件（`time` = epoch ms；缺失事件不参与判定）。
+ * @param now - 当前时刻（测试注入）。
+ * @param thresholdMs - 静默阈值（默认 20 分钟）。
+ */
+export function stuckOf(events, now = Date.now(), thresholdMs = 20 * 60_000) {
+  const list = Array.isArray(events) ? events.filter((event) => typeof event?.time === 'number') : []
+  if (list.length === 0) return { stuck: false, reason: 'no-events', idleMs: 0, lastType: null, openTurn: null }
+  let openTurn = null
+  for (const event of list) {
+    if (event.type === 'turn/start') openTurn = event?.data?.turn ?? null
+    else if (event.type === 'turn/end' || event.type === 'session/end-seed') openTurn = null
+  }
+  const last = list[list.length - 1]
+  const idleMs = Math.max(0, now - last.time)
+  if (openTurn === null) return { stuck: false, reason: 'no-open-turn', idleMs, lastType: last.type, openTurn: null }
+  return {
+    stuck: idleMs > thresholdMs,
+    reason: idleMs > thresholdMs ? 'open-turn-idle' : 'open-turn-active',
+    idleMs, lastType: last.type, openTurn,
+  }
+}

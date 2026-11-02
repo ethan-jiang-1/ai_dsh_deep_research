@@ -7,7 +7,7 @@
 // 本壳复用唯一解码正本（session-log.mjs）与纯摘要/筛选核（session-events-core.mjs）。
 //
 // 用法：node --import tsx/esm scripts/run-ops/session-events.mjs <session-id|标题子串>
-//         [--tail N] [--type <type 子串>] [--grep <原文子串>] [--json] [--sessions <dir>] [--group <组名子串>]
+//         [--tail N] [--type <type 子串>] [--grep <原文子串>] [--json] [--sessions <dir>] [--group <组名子串>] [--stuck-after <分钟>]
 //   --tail 0 = 全部（默认 30）；--json = 原始事件逐行 JSON（不再摘要）。
 //   --group 覆盖缺省 research-workspace 组（组过滤盲区逃生口：冒烟/自测会话组如
 //   dev-smoke-workspace 也读得到；无命中 fail-loud 列在场组）。
@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url'
 import { findGroup, sessionLogsInGroup, readSessionEvents } from '../lib/session-log.mjs'
 import { defaultGroupSubstring } from '../lib/workspace-root.mjs'
 import { sessionTitleOf } from '../lib/run-state.mjs'
-import { filterEvents, tailEvents, formatEventLine, readableTitle } from '../lib/session-events-core.mjs'
+import { filterEvents, tailEvents, formatEventLine, readableTitle, stuckOf } from '../lib/session-events-core.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2)
@@ -29,7 +29,8 @@ const opt = (name, fallback = undefined) => {
 const flag = (name) => argv.includes(name)
 const target = argv.find((a) => !a.startsWith('--') && argv[argv.indexOf(a) - 1] !== '--sessions'
   && argv[argv.indexOf(a) - 1] !== '--tail' && argv[argv.indexOf(a) - 1] !== '--type'
-  && argv[argv.indexOf(a) - 1] !== '--grep' && argv[argv.indexOf(a) - 1] !== '--group')
+  && argv[argv.indexOf(a) - 1] !== '--grep' && argv[argv.indexOf(a) - 1] !== '--group'
+  && argv[argv.indexOf(a) - 1] !== '--stuck-after')
 
 if (target === undefined || flag('--help')) {
   console.error('session-events: 用法 node --import tsx/esm scripts/run-ops/session-events.mjs <session-id|标题子串> [--tail N] [--type <子串>] [--grep <子串>] [--json] [--sessions <dir>] [--group <组名子串>]')
@@ -92,5 +93,13 @@ if (flag('--json')) {
   for (const event of filtered) console.log(JSON.stringify(event))
 } else {
   for (const event of filtered) console.log(formatEventLine(event))
+  const stuckAfter = Number(opt('--stuck-after', ''))
+  if (Number.isFinite(stuckAfter) && stuckAfter > 0) {
+    const verdict = stuckOf(events, Date.now(), stuckAfter * 60_000)
+    const idleMin = Math.round(verdict.idleMs / 60_000)
+    console.log(verdict.stuck
+      ? `STUCK: turn ${verdict.openTurn ?? '?'} 静默 ${idleMin} 分钟（末事件 ${verdict.lastType}）——HITL 挂起也会是 open turn，先看 ask/pending 再判死`
+      : `NOT-STUCK: ${verdict.reason}（静默 ${idleMin} 分钟，末事件 ${verdict.lastType ?? '无'}）`)
+  }
 }
 process.exit(0)

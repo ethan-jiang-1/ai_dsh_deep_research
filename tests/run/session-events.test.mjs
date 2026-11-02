@@ -6,7 +6,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  eventSummary, eventClock, formatEventLine, filterEvents, tailEvents, textOfContent, readableTitle,
+  eventSummary, eventClock, formatEventLine, filterEvents, tailEvents, textOfContent, readableTitle, stuckOf,
 } from '../../scripts/lib/session-events-core.mjs'
 
 test('eventSummary：tool/call 解析 JSON 字符串参数并截断；未知事件保留 type', () => {
@@ -68,3 +68,32 @@ test('eventSummary：session/title 用 readableTitle 摘要（teammate 标题可
   assert.equal(eventSummary(e), 'title You are teammate "crit')
   assert.equal(eventSummary({ type: 'session/title', data: { title: '正常标题' } }), 'title 正常标题')
 })
+
+test('stuckOf：开回合 + 静默超阈 → stuck；无开回合/未超阈/空事件 → 不误报', () => {
+  const t0 = 1_000_000
+  const events = [
+    { type: 'turn/start', time: t0, data: { turn: 3 } },
+    { type: 'tool/call', time: t0 + 1_000, data: { name: 'web_search' } },
+  ];
+  assert.equal(stuckOf(events, t0 + 5 * 60_000, 20 * 60_000).stuck, false, '未超阈 = active');
+  const stuck = stuckOf(events, t0 + 30 * 60_000, 20 * 60_000);
+  assert.equal(stuck.stuck, true);
+  assert.equal(stuck.openTurn, 3);
+  assert.equal(stuck.reason, 'open-turn-idle');
+
+  const closed = [...events, { type: 'turn/end', time: t0 + 2_000, data: { turn: 3 } }];
+  assert.equal(stuckOf(closed, t0 + 60 * 60_000, 20 * 60_000).stuck, false, '回合已闭合不报');
+  assert.equal(stuckOf([], Date.now(), 1).reason, 'no-events');
+});
+
+test('stuckOf：缺失 time 的事件不参与，末事件用最后一条合法时间', () => {
+  const t0 = 2_000_000;
+  const events = [
+    { type: 'turn/start', time: t0, data: { turn: 1 } },
+    { type: 'assistant/message', data: { message: { content: [] } } },
+    { type: 'tool/call', time: t0 + 1_000, data: { name: 'x' } },
+  ];
+  const verdict = stuckOf(events, t0 + 21 * 60_000, 20 * 60_000);
+  assert.equal(verdict.stuck, true);
+  assert.equal(verdict.lastType, 'tool/call');
+});
