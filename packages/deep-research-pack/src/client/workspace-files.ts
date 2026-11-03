@@ -85,5 +85,31 @@ export function createWorkspaceFiles(remote: WorkspaceFilesRemote) {
     }
   }
 
-  return { listDir, readLibrary, readPreview }
+  /**
+   * 单文件读（渐进面 / 配置页签共用）：缺省 40 行；`missingOk` 区分合法空态与真故障。
+   * 失败打 console（冒烟可抓）+ 返回 null，不抛——页面降级为空而不是砖。
+   */
+  const readText = async (
+    sessionId: SessionId,
+    path: string,
+    signal: AbortSignal,
+    limit = 40,
+    missingOk = false,
+  ): Promise<string | null> => {
+    try {
+      const result = await remote.read(sessionId, path, { offset: 1, limit }, signal)
+      if (!result.ok) {
+        if (missingOk && codeOf(result.error) === 'workspace-file/not-found') return null
+        console.error('[research-status] workspaceFiles.read 失败', JSON.stringify({ path, error: result.error }))
+        return null
+      }
+      const text = (result.value as { text?: unknown }).text
+      return typeof text === 'string' ? text : null
+    } catch (cause) {
+      console.error('[research-status] workspaceFiles.read 抛错', String(cause))
+      return null
+    }
+  }
+
+  return { listDir, readLibrary, readPreview, readText }
 }

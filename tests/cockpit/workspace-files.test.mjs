@@ -54,3 +54,22 @@ test('readPreview：缺席/畸形/取消 三态如实', async () => {
   });
   assert.deepEqual(await cancelled.readPreview('s', 'review.md', controller.signal), { kind: 'cancelled' });
 });
+
+test('readText：命中返回文本；missingOk 区分空态；真故障/抛错 → null 且打日志', async () => {
+  const ok = createWorkspaceFiles(remoteOf(null, () => ({ ok: true, value: { text: 'hello', lines: 1, eof: true } })));
+  assert.equal(await ok.readText('s', 'x.md', signal), 'hello');
+
+  const missing = createWorkspaceFiles(remoteOf(null, () => ({ ok: false, error: { code: 'workspace-file/not-found' } })));
+  assert.equal(await missing.readText('s', 'x.md', signal, 40, true), null, 'missingOk → 合法空态');
+  const original = console.error;
+  let logged = 0;
+  console.error = () => { logged += 1; };
+  try {
+    assert.equal(await missing.readText('s', 'x.md', signal), null, '非 missingOk 仍返回 null');
+    assert.ok(logged >= 1, '真故障必须打日志');
+    const broken = createWorkspaceFiles({ list: async () => ({ ok: true, value: { entries: [] } }), read: async () => { throw new Error('boom'); } });
+    assert.equal(await broken.readText('s', 'x.md', signal), null, '抛错不炸页面');
+  } finally {
+    console.error = original;
+  }
+});

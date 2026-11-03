@@ -92,7 +92,7 @@ export function apply(ctx: ClientContext): void {
     })
     const { chooseWorkspace, ensureProductWorkspace, workspaceOf } = boot
     const workspaceFiles = scoped.remote.workspaceFiles
-    const { listDir, readLibrary, readPreview } = createWorkspaceFiles(workspaceFiles as never)
+    const { listDir, readLibrary, readPreview, readText: readFile } = createWorkspaceFiles(workspaceFiles as never)
     const { sendInstruction } = createLeadPrompt({ prompt: (input, signal) => remoteSession.prompt(input as never, signal) })
     const { ensureCoachSession, sendCoach } = createCoachSessions(
       scoped as unknown as { get(name: string): unknown },
@@ -171,24 +171,6 @@ export function apply(ctx: ClientContext): void {
     // 管理指令发送闭包（D25 期 1）：session/prompt——默认 steer（在飞 run 即时消费），
     // 失败降级 queue（空闲会话排程）；两态结果回执给面板，不静默。requestId 铸造 =
     // vendor 同款（session.ts beginSubmission：randomUUID as SessionRequestId）。
-    // workspaceFiles 单文件读（渐进面 / 配置页签共用；缺省 40 行；missingOk 区分空态与故障）。
-    const readFile = async (sessionId: SessionId, path: string, signal: AbortSignal, limit = 40, missingOk = false) => {
-      try {
-        const result = await workspaceFiles.read(sessionId, path, { limit }, signal)
-        if (!result.ok) {
-          const code = (result.error as { code?: string } | undefined)?.code
-          if (missingOk && code === 'workspace-file/not-found') return null
-          console.error('[research-status] workspaceFiles.read 失败', JSON.stringify({ path, error: result.error }))
-          return null
-        }
-        const text = (result.value as { text?: unknown }).text
-        return typeof text === 'string' ? text : null
-      } catch (cause) {
-        console.error('[research-status] workspaceFiles.read 抛错', String(cause))
-        return null
-      }
-    }
-
     // 终稿页签的读面：run-context 的浏览器适配器（三位置/读策略/翻页归 lib；页签只拿 view）。
     const runSource = (sessionId: SessionId) => browserRunSource(workspaceFiles, sessionId)
 
