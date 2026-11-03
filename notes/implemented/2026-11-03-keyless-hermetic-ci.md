@@ -27,6 +27,11 @@
   文档描述它时放行（存在性由构建/pack-smoke 证明）。同轮修正 `terms.md` 的陈旧路径
   `packages/fs/tool-present` → `packages/deliverables/tool-present`（旧路径只是本机 node_modules
   残留，CI 因此红——本地全绿掩盖 fresh-clone 失败的另一实例）。
+- **vendor 源码契约单列 `pnpm test:vendor`**：默认 `pnpm test` 用 client tsconfig（`paths: {}`），
+  vendor 包解析到构建产物 `lib/`；两条契约（组合层 `bundle-composition`、设置 schema
+  `config-volatile`）要 import vendor **源码**，在 fresh clone 上必然 `ERR_MODULE_NOT_FOUND`。
+  处置：两条测试移入 `tests/vendor/*.vendor.mjs`（不在默认 glob），用根 `tsconfig.json` 的 vendor
+  源映射跑 `pnpm test:vendor`——无 vendor 构建也可跑；`tests/AGENTS` 增 `vendor/` 域行。
 
 ## 输掉的方案
 
@@ -48,8 +53,10 @@
 - 本仓 `pnpm test`：**1014/1014 绿**（少的一条即迁入 pack-smoke 的 client 模块表）；`pnpm verify` 全绿。
 - 根 `pnpm build` 成功；`node scripts/smoke/pack-smoke.mjs` **ALL PASS**（含迁入的 client 模块表三条）。
 - 文档同步：evaluation / guides/60 的 typecheck 执行面、scripts/README 的 pack-smoke 义务。
-- **fresh-clone verify 红→绿**：CI run 41555173492 的 `doc-paths` 点名 `packages/deep-research-pack/lib/`
-  与 `packages/fs/tool-present`；修后本地 `--only=doc-paths` 绿，CI 全量待下一轮。
+- **fresh-clone 回归三连红→绿**：run 41555173492 的 `doc-paths` 点名 `packages/deep-research-pack/lib/`
+  与 `packages/fs/tool-present`；run 41556960178 的 keyless 再点名 `bundle-composition` 与
+  `config-volatile` 的 vendor 构建依赖。修后本地 `pnpm test` 1011 + `pnpm test:vendor` 3 全绿，
+  `pnpm verify` 全绿；两条测试在根 tsconfig 下实测通过（vendor 源解析，无 lib 依赖）。
 - **vendor 构建面实测**：`pnpm --dir vendor/dsh install --frozen-lockfile --ignore-scripts
   --pm-on-fail=ignore` 成功（本机 store 热 3.9s）；`bash dev/vendor-build.sh` 的 tsc host / typert
   （30 件）已跑通，完整链路由脚本退出码与 CI 首跑收口。

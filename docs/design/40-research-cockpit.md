@@ -42,7 +42,7 @@
 
 关闭用 Loader 的第一类语义（后置 bundle 层按 id `disabled: true`），不是 CSS 隐藏或改名——隐藏的行
 仍在挂载，快捷键、菜单与后续版本仍可能暴露。机器判据 =
-[bundle-composition](../../tests/contracts/bundle-composition.test.mjs)：按 profile 层序组合出真实 entry 树，
+[bundle-composition](../../tests/vendor/bundle-composition.vendor.mjs)：按 profile 层序组合出真实 entry 树，
 断言零跳过（任何 `- id:` 落空即红：上游改名会让关闭行静默失效）与上表两侧。像素面（页签真的只剩
 两个、右栏真的没有终端入口）由真 Web 证据承担，两者不合一。
 

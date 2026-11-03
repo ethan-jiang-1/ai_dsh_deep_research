@@ -49,6 +49,12 @@ jobs:
       - name: Test (keyless regression)
         run: source dev/env.sh && pnpm test
 
+      # 这两条契约 import vendor **源码**（组合层 Loader / 设置 schema）。默认 test 用
+      # client tsconfig（paths 置空 → vendor 包解析到构建产物 lib/）；本步用根 tsconfig
+      # 的 vendor 源路径映射，fresh clone 无 vendor 构建也能跑。
+      - name: Vendor-source contracts (root tsconfig)
+        run: pnpm test:vendor
+
       # 类型面不在 keyless job：`pnpm typecheck` 要 vendor 构建产物（dev/vendor-build.sh），
       # 而 keyless 的契约是 fresh clone 无构建也能跑。类型门在 deploy job（同一 push/PR 触发）
       # 的 vendor 构建之后执行，覆盖等价、不把构建成本摊到每次回归。

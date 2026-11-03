@@ -23,7 +23,7 @@
 
 - 两门都是 DSH 自带机制（base bundle，零接线）；**不要发明 tasks.md**（DSH 明文否决计划
   文件："a plan directory creates a second durable home"——会话日志即计划与清单的持久真相）。
-- **验收门（TDD 式，[D23](../00-index.md)）**：对已授权工作，在实施前把可判定的验收判据绑定检查方式；可机械者先立红，人工判据明确记录走查证据。验收尚不明确时，澄清是当前任务需要，不会自动阻断已授权且可独立推进的工作；证据设计复用本仓现有 owner，不另造队列。四条硬边界：①**改断言迁就实现不是修法**——断言只在行为/合同真实变化时同 diff 改（[tests/AGENTS](../../tests/AGENTS.md)）；②**未验项不得写 implemented**，被阻断检查如实注明；③**复发升格**——implemented 缺真实验证证据复发时，才考虑升为机械门禁并配负例；④证据和结论不得超出检查实际证明的范围（依据见 [external-materials.md](../external-materials.md) 与 [item-lifecycle-tdd Note](../../notes/implemented/2026-10-05-item-lifecycle-tdd.md)）。
+- **验收门（TDD 式，[D23](../decisions.md#d23)）**：对已授权工作，在实施前把可判定的验收判据绑定检查方式；可机械者先立红，人工判据明确记录走查证据。验收尚不明确时，澄清是当前任务需要，不会自动阻断已授权且可独立推进的工作；证据设计复用本仓现有 owner，不另造队列。四条硬边界：①**改断言迁就实现不是修法**——断言只在行为/合同真实变化时同 diff 改（[tests/AGENTS](../../tests/AGENTS.md)）；②**未验项不得写 implemented**，被阻断检查如实注明；③**复发升格**——implemented 缺真实验证证据复发时，才考虑升为机械门禁并配负例；④证据和结论不得超出检查实际证明的范围（依据见 [external-materials.md](../external-materials.md) 与 [item-lifecycle-tdd Note](../../notes/implemented/2026-10-05-item-lifecycle-tdd.md)）。
 - 多步实施按可独立验收结果拆解；小问题不强行拆成子任务。一次需要多个相互独立的人类判断时，分别记录问题与依赖，不把它们伪装成执行步骤。
 - steer（用户插话）开启新 turn = 清单重排的信号，看得见反馈被吸收。
 
@@ -115,7 +115,8 @@ bash dev/bootstrap.sh --check          # 独立环境前置预检（不安装/�
 bash dev/bootstrap.sh                  # 同上，缺件时执行 submodule/install/vendor 构建（幂等）
 bash dev/vendor-build.sh              # vendor 树构建（换 pin 后必做：--clean 清陈旧产物；tsc host/client + typert 产物 + client bundle + host 半补建 + 前端壳重建——0.1.7 起启动依赖构建产物）
 pnpm verify                           # L0 结构门禁（keyless，收尾必跑）
-pnpm test                             # L0 keyless 回归（命令正本 = package.json 的 test 脚本；layering ④ 钉形状；唯一登记的测试命令）
+pnpm test                             # L0 keyless 回归（命令正本 = package.json 的 test 脚本；layering ④ 钉形状）
+pnpm test:vendor                      # vendor 源码契约（组合层 + 设置 schema；根 tsconfig 的源映射，无需 vendor 构建）
 pnpm typecheck                        # pack 双半 TS 类型检查（tsc -b；CI deploy job 必跑——keyless job 不装 vendor 产物；本地前置 = vendor 构建产物在场，fresh clone 的 L0 不跑）
 node scripts/smoke/gates-smoke.mjs    # 门禁自测（keyless：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组；改门禁逻辑必跑；迭代可用 --case=<id>）
 node dev/render-overlay.mjs            # 生成物：从 pack 渲染 dev/research.overlay.yml（改 pack 后必跑，且**必须先于 L1**）

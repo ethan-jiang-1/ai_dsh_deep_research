@@ -5,7 +5,7 @@
 // `## 红基线`）。任何"为了好装一点"把入口/内容改回去的改动都会在这里变红。
 //
 // 产品面收窄（原 I5）不在本文件：读自己的 YAML 只能证明我们写了、证明不了 DSH 认（Loader 对
-// 落空的 patch 是警告后跳过）。它已迁到组合层断言 —— [bundle-composition](bundle-composition.test.mjs)。
+// 落空的 patch 是警告后跳过）。它已迁到组合层断言 —— [bundle-composition](../vendor/bundle-composition.vendor.mjs)。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'

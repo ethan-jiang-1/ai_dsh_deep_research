@@ -15,6 +15,7 @@
 | `cockpit/` | pack client 观察面与其折算 | pack `src/lib` 折算模块的回归（清单 = 盘上 `src/lib/` 目录）+ `src/client` 抽出的纯逻辑判据（model / use* 内的纯函数；组件行为归 client-load 真机档） |
 | `pack/` | pack 结构、preset、导出与部署 | presets 形状、export-shape、deploy-bin |
 | `contracts/` | 跨仓合同/文档/门禁自测/测试基础设施 | 清单 = 盘上 `contracts/` 目录（evaluation、navigability、layering 等） |
+| `vendor/` | vendor **源码**契约（组合层 Loader、设置 schema） | 不在默认 glob；跑 `pnpm test:vendor`（根 tsconfig 源映射，fresh clone 无 vendor 构建可跑） |
 | `fixtures/` | 构造样本与冻结录制语料 | 测试/smoke 消费；taxonomy = [fixtures/README](fixtures/README.md) |
 
 域内文件名 = 被测模块名 + `.test.mjs`（如 `run/run-state.test.mjs` ↔ `scripts/lib/run-state.mjs`）；
