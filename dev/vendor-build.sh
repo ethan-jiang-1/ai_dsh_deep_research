@@ -20,6 +20,17 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VENDOR="$ROOT/vendor/dsh"
 cd "$VENDOR"
 
+# 前置：vendor 依赖不在位（fresh clone / CI 未在 submodule 内 install）→ 先装。
+# 只用 --frozen-lockfile：submodule 的 lock 是 pin 的一部分，构建不许顺手改锁。
+# --ignore-scripts：本脚本只要类型/构建面；vendor 的 postinstall（lefthook 等）会碰 submodule
+#   的 git config，在 worktree/submodule 布局下失败（2026-11-03 实测），与构建无关。
+# --pm-on-fail=ignore：vendor 自钉 pnpm 11.28，本仓/CI 用 11.7；lockfile 格式兼容，只差版本门。
+# node_modules 已 gitignore（vendor-clean 仍成立）；本地已有则跳过。
+if [[ ! -d node_modules/typescript ]]; then
+  echo "①a vendor 依赖不在位——pnpm install --frozen-lockfile（submodule 内）…"
+  pnpm install --frozen-lockfile --ignore-scripts --pm-on-fail=ignore
+fi
+
 if [[ "${1:-}" == "--clean" ]]; then
   echo "① 清陈旧构建状态（lib/ + *.tsbuildinfo，均在 .gitignore 内）…"
   find packages apps vendor -maxdepth 4 -type d -name lib -not -path '*/node_modules/*' -exec rm -rf {} + 2>/dev/null || true

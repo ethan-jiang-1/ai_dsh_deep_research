@@ -18,6 +18,15 @@
 - **构建顺序与入口单一化**：CI 的 pack 构建统一走根 `pnpm build`（= `pnpm --filter
   dsh-deep-research-pack build`）；deploy/client-load 都先 `bash dev/vendor-build.sh` 再 build pack
   （client-load 原先 build 在 vendor 之前，必然 TS2307）。
+- **vendor 构建自举依赖**：`dev/vendor-build.sh` 在 submodule 内缺 `node_modules/typescript` 时先
+  `pnpm install --frozen-lockfile --ignore-scripts --pm-on-fail=ignore`。理由：CI 的根 install 不覆盖
+  vendor 自己的 toolchain；`--ignore-scripts` 避开 vendor postinstall（lefthook 会改 submodule 的
+  git config，在 submodule/worktree 布局下必败）且类型/构建面不需要它；`--pm-on-fail=ignore` 只跨
+  vendor 自钉 pnpm 11.28 与本仓 11.7 的版本门（lockfile 9.0 兼容）。
+- **`doc-paths` 不把构建产物当合同**：`packages/*/lib/` 是 gitignored 构建输出，fresh clone 不存在；
+  文档描述它时放行（存在性由构建/pack-smoke 证明）。同轮修正 `terms.md` 的陈旧路径
+  `packages/fs/tool-present` → `packages/deliverables/tool-present`（旧路径只是本机 node_modules
+  残留，CI 因此红——本地全绿掩盖 fresh-clone 失败的另一实例）。
 
 ## 输掉的方案
 
@@ -39,3 +48,8 @@
 - 本仓 `pnpm test`：**1014/1014 绿**（少的一条即迁入 pack-smoke 的 client 模块表）；`pnpm verify` 全绿。
 - 根 `pnpm build` 成功；`node scripts/smoke/pack-smoke.mjs` **ALL PASS**（含迁入的 client 模块表三条）。
 - 文档同步：evaluation / guides/60 的 typecheck 执行面、scripts/README 的 pack-smoke 义务。
+- **fresh-clone verify 红→绿**：CI run 41555173492 的 `doc-paths` 点名 `packages/deep-research-pack/lib/`
+  与 `packages/fs/tool-present`；修后本地 `--only=doc-paths` 绿，CI 全量待下一轮。
+- **vendor 构建面实测**：`pnpm --dir vendor/dsh install --frozen-lockfile --ignore-scripts
+  --pm-on-fail=ignore` 成功（本机 store 热 3.9s）；`bash dev/vendor-build.sh` 的 tsc host / typert
+  （30 件）已跑通，完整链路由脚本退出码与 CI 首跑收口。

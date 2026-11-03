@@ -165,6 +165,8 @@ export function runA() {
 // `vendor/dsh/` 前缀（资产文字引用 vendor 路径时省略前缀的既有写法）；无扩展名的 token 另试
 // `.md/.mjs/.sh/.cjs/.ts`（`dev/README` 这类简写）。
 // 外链白名单（必须带理由）：company 仓路径与"守则要求不存在"的反例路径——路径存在性对它们不成立。
+// 构建产物（`packages/*/lib/`）不是 fresh-clone 合同：它是 gitignored 构建输出，CI/新 clone 不存在；
+// 文档描述它时按"构建产物"口径放行。存在性由构建与 pack-smoke 证明，不由文档合同证明。
 // 防空语料：解析到的 token 数 < 100 → 红（范围被收窄或抓取正则失效）。
 {
   const gate = 'doc-paths';
@@ -182,6 +184,7 @@ export function runA() {
       ['tests/layering.spec.ts', 'company 仓路径（外部参考，不随本仓）'],
       ['dev/harness-home', '反例路径：dev-runtime-clean 守则要求它不存在（只作注入样本）'],
     ]);
+    const BUILD_OUTPUT = /^packages\/[^/]+\/lib(\/|$)/;
     let checked = 0;
     for (const { rel, text } of files) {
       const lines = text.split('\n');
@@ -190,6 +193,7 @@ export function runA() {
           const p = m[1].trim().replace(/:\d+(?:-\d+)?$/, '').replace(/[.,;:]+$/, '');
           if (!ROOTS.test(p)) continue;
           if (/[<>{}*?…\s]/.test(p) || p.includes('$')) continue;
+          if (BUILD_OUTPUT.test(p)) continue;
           if (EXEMPT.has(p)) continue;
           checked++;
           const candidates = [p, 'vendor/dsh/' + p, ...EXTS.map((e) => p + e)];
