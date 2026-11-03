@@ -13,7 +13,7 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack')
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
 
 test('T0 files：入口/patch/preset/种子/脚本都在发布白名单', () => {
-  for (const required of ['cordis.patch.yml', 'presets/**', 'lib/**', 'content/**', 'scripts/**']) {
+  for (const required of ['cordis.patch.yml', 'presets/**', 'lib/**', 'content/**', 'scripts/**', 'locale-method-library/**']) {
     assert.ok(pkg.files?.includes(required), `files 缺 ${required}——tarball 会装后坏`)
   }
   for (const patch of pkg.dsh?.bundle?.patch ?? []) {
@@ -28,6 +28,13 @@ test('T0 exports：入口与 client 都有声明，且不依赖未发布源码',
   assert.equal(pkg.exports?.['./startup']?.default, './lib/startup.js')
   assert.equal(pkg.exports?.['./startup']?.types, './lib/types/startup/index.d.ts')
   assert.equal(pkg.exports?.['./content']?.default, './lib/content.js')
+  assert.equal(pkg.exports?.['./cordis.patch.yml'], './cordis.patch.yml')
+  assert.equal(pkg.exports?.['./presets/*.patch.yml'], './presets/*.patch.yml')
+  assert.equal(pkg.exports?.['./method-library-tool/icon'], './icon.svg')
+  assert.equal(pkg.exports?.['./method-library-tool/locale/*.json'], './locale-method-library/*.json')
+  for (const file of ['locale-method-library/en.json', 'locale-method-library/zh.json']) {
+    assert.ok(existsSync(join(PACK, file)), `subpath 显示元数据缺席：${file}`)
+  }
   assert.equal(pkg.main, undefined, 'main 与 exports 双写会制造第二份入口')
 })
 

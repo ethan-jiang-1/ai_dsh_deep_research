@@ -85,7 +85,9 @@ form with that explicit profile. Offline, replace the package spec with
 
 **5. The team layer.** The Agent Teams composition is a separate, official experimental bundle. Do
 not use `@latest`: its `latest` does not track the running DSH version. Install the exact version
-printed by `dsh --version`, or enable it from the same Plugins page.
+printed by `dsh --version`, or enable it from the same Plugins page. **Multi-role research needs this
+layer**: without it the Lead preset loads but its team tools are absent, and `doctor` reports a
+failure. A quick-factual-only profile can skip it.
 
 **6. What “installed” means.** There are three independent states: pnpm exits 0, the dependency is
 written, and the package appears in `dsh.profile.bundles`. Only the third activates the layer.

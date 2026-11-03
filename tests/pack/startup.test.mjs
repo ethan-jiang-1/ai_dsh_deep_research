@@ -104,14 +104,16 @@ test('registry 缺席：只 warn，不抛', async () => {
   } finally { cleanup(home); cleanup(dir) }
 })
 
-test('sessionController 在场：建 Lead 会话；env 来源不写设置', async () => {
+test('sessionController 在场：建 Lead 会话；env 来源也记录 last-used workspace/sessionId', async () => {
   const home = temp()
   const dir = temp()
   try {
     const { ctx, sessions } = fakeContext({ withSessions: true })
     await withEnv(workspaceEnv(dir, home), () => runStartup(ctx, new AbortController().signal))
     assert.deepEqual(sessions, [{ cwd: dir, agentPreset: 'lead' }])
-    assert.equal(existsSync(join(home, 'deep-research', 'settings.json')), false)
+    const saved = JSON.parse(readFileSync(join(home, 'deep-research', 'settings.json'), 'utf8'))
+    assert.equal(saved.workspace, dir)
+    assert.equal(saved.sessionId, 'session-test')
   } finally { cleanup(home); cleanup(dir) }
 })
 
@@ -131,7 +133,7 @@ test('设置文件来源：建会话并回写 sessionId', async () => {
   } finally { cleanup(home); cleanup(dir) }
 })
 
-test('优先级：env 压过设置文件，且不覆盖设置（三入口的顺序有机械判据）', async () => {
+test('优先级：env 压过设置文件；无会话时不写设置（三入口的顺序有机械判据）', async () => {
   const home = temp()
   const outside = temp()
   const fromEnv = mkdirSync(join(outside, 'env-dir'), { recursive: true })
@@ -144,9 +146,32 @@ test('优先级：env 压过设置文件，且不覆盖设置（三入口的顺�
   try {
     await withEnv({ DSH_HOME: home, DEEP_RESEARCH_WORKSPACE: fromEnv }, () => runStartup(ctx, new AbortController().signal))
     assert.deepEqual(calls.map((call) => call.path), [fromEnv], 'env 在场时必须用 env 的工作区')
-    assert.equal(readFileSync(settingsFile, 'utf8'), saved, 'env 来源不得回写设置文件')
+    assert.equal(readFileSync(settingsFile, 'utf8'), saved, '无会话时 env 来源不写设置')
   } finally {
     cleanup(home)
     cleanup(outside)
+  }
+})
+
+test('env 来源：同一工作区复用 saved sessionId；换工作区不复用', async () => {
+  const home = temp()
+  const first = temp()
+  const second = temp()
+  try {
+    mkdirSync(join(home, 'deep-research'), { recursive: true })
+    writeFileSync(join(home, 'deep-research', 'settings.json'),
+      JSON.stringify({ schemaVersion: 2, workspace: first, sessionId: 'saved-session' }))
+
+    const same = fakeContext({ withSessions: true })
+    await withEnv(workspaceEnv(first, home), () => runStartup(same.ctx, new AbortController().signal))
+    assert.deepEqual(same.sessions, [{ cwd: first, agentPreset: 'lead', sessionId: 'saved-session' }])
+
+    const moved = fakeContext({ withSessions: true })
+    await withEnv(workspaceEnv(second, home), () => runStartup(moved.ctx, new AbortController().signal))
+    assert.deepEqual(moved.sessions, [{ cwd: second, agentPreset: 'lead' }])
+  } finally {
+    cleanup(home)
+    cleanup(first)
+    cleanup(second)
   }
 })

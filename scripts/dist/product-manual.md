@@ -83,7 +83,7 @@ dsh --profile deep-research --from-default-profile web --dump-default-config
 1. 已有 `deep-research` profile（仅首次需要 §三的引导；不要重复）。
 2. `dsh --profile deep-research` 启动。
 3. 打开 Plugins 页，安装 `dsh-deep-research-pack@{{version}}`（来自包名或已配置的索引）。
-4. 同页找到 `agent-team-profile`（标记为 official/optional），打开它；不需要团队能力可跳过。
+4. 同页找到 `agent-team-profile`（标记为 official/optional），打开它；**完整多角色研究需要它**（doctor 把缺失记为硬失败；只做 quick_factual 可跳过，但团队任务不可用）。
 5. 重启 profile，让 bundle membership 生效。
 
 Desktop 的 Plugins 页管理的是 application-owned `desktop` profile，装进去是**互操作形态**，不是

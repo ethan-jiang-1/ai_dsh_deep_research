@@ -45,6 +45,7 @@
     "locale-content/**",
     "locale-startup/**",
     "locale-fetch-fallback/**",
+    "locale-method-library/**",
     "icon.svg",
     "scripts/**"
   ],
@@ -120,6 +121,8 @@
       "default": "./lib/fetch-fallback.js"
     },
     "./package.json": "./package.json",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./presets/*.patch.yml": "./presets/*.patch.yml",
     "./icon": "./icon.svg",
     "./locale/*.json": "./locale/*.json",
     "./content/locale/*.json": "./locale-content/*.json",
@@ -132,6 +135,8 @@
       "types": "./lib/types/method-library-tool.d.ts",
       "default": "./lib/method-library-tool.js"
     },
+    "./method-library-tool/icon": "./icon.svg",
+    "./method-library-tool/locale/*.json": "./locale-method-library/*.json",
     "./content": {
       "types": "./lib/types/content/index.d.ts",
       "default": "./lib/content.js"

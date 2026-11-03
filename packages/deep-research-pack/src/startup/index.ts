@@ -82,14 +82,23 @@ export async function runStartup(ctx: Context, signal: AbortSignal): Promise<voi
   const sessions = (ctx as unknown as { get(name: string): SessionControllerLike | undefined }).get('sessionController')
   if (sessions === undefined || cancelled()) return
   const previous = readSettings(process.env)
-  const savedSessionId = previous.ok ? previous.value.sessionId : undefined
+  // 只复用同一工作区的会话：跨工作区的 sessionId 会让 controller 重新建会话（或撞身份）。
+  const savedSessionId = previous.ok && previous.value.workspace === resolved.path
+    ? previous.value.sessionId
+    : undefined
   try {
     const created = await sessions.create({
       cwd: resolved.path,
       agentPreset: 'lead',
       ...(savedSessionId === undefined ? {} : { sessionId: savedSessionId }),
     })
-    if (resolved.source === 'settings') writeSettings({ sessionId: created.sessionId })
+    // 记录 last-used workspace + sessionId：env 仍是下一次启动的覆盖源，这里只让“同一工作区”
+    // 的下一次启动能复用会话，不再每次 mint 一个新的 blank Lead 会话。
+    try {
+      writeSettings({ workspace: resolved.path, sessionId: created.sessionId })
+    } catch (error) {
+      ctx.logger.warn(`deep-research: 会话已建，但设置写入失败（${(error as Error).message}）；下次启动可能新建会话`)
+    }
     ctx.logger.info(`deep-research: session ready: ${created.sessionId}`)
   } catch (error) {
     ctx.logger.warn(`deep-research: 会话创建失败（${(error as Error).message}）；继续启动`)

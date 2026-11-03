@@ -8,6 +8,7 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { scrubbedEnv } from '../lib/env.mjs'
+import { presetRoles } from '../lib/roles.mjs'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -35,7 +36,16 @@ function sandbox() {
     mkdirSync(dir, { recursive: true })
   }
   writeFileSync(join(anchor, 'package.json'), JSON.stringify({ name: '@deepseek-ai/dsh', version: ANCHOR_VERSION, type: 'module' }))
-  writeFileSync(join(profile, 'node_modules', 'dsh-deep-research-pack', 'package.json'), JSON.stringify({ name: 'dsh-deep-research-pack', version: packVersion }))
+  const installed = join(profile, 'node_modules', 'dsh-deep-research-pack')
+  writeFileSync(join(installed, 'package.json'), JSON.stringify({ name: 'dsh-deep-research-pack', version: packVersion }))
+  writeFileSync(join(installed, 'cordis.patch.yml'), '')
+  mkdirSync(join(installed, 'presets'), { recursive: true })
+  for (const role of presetRoles(ROOT)) {
+    writeFileSync(join(installed, 'presets', `${role}.patch.yml`), '')
+  }
+  mkdirSync(join(installed, 'lib'), { recursive: true })
+  writeFileSync(join(installed, 'lib', 'client.js'), '')
+  writeFileSync(join(installed, 'lib', 'index.js'), '')
   writeFileSync(join(profile, 'node_modules', ...TEAM.split('/'), 'package.json'), JSON.stringify({ name: TEAM, version: ANCHOR_VERSION }))
   writeFileSync(join(home, 'deep-research', 'settings.json'), JSON.stringify({ schemaVersion: 2, workspace: ws, updatedAt: new Date().toISOString() }))
   return { home, anchor, ws, profile }
@@ -74,6 +84,11 @@ try {
   check('engines 不匹配：exit 1 且点名', engines.status === 1 && /engines\.dsh/.test(engines.stdout), `${engines.status}\n${engines.stdout}`)
 
   writeFileSync(join(box.anchor, 'package.json'), JSON.stringify({ name: '@deepseek-ai/dsh', version: ANCHOR_VERSION, type: 'module' }))
+  rmSync(join(box.profile, 'node_modules', 'dsh-deep-research-pack', 'lib', 'client.js'))
+  const half = runDoctor(box)
+  check('半装：缺安装副本 client 产物 → exit 1 且点名', half.status === 1 && /安装副本完整性/.test(half.stdout), `${half.status}\n${half.stdout}`)
+  writeFileSync(join(box.profile, 'node_modules', 'dsh-deep-research-pack', 'lib', 'client.js'), '')
+
   writeFileSync(join(box.home, 'deep-research', 'settings.json'), '{not json')
   const corrupt = runDoctor(box)
   check('坏设置：warn 不红', corrupt.status === 0 && /deep-research 设置文件/.test(corrupt.stdout), `${corrupt.status}\n${corrupt.stdout}`)

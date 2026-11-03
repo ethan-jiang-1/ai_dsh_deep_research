@@ -90,6 +90,13 @@ if (manifest === null) {
   if (team === null) warn('团队层版本', '未安装；README §部署 的 dsh plugin 命令会补')
   else if (anchor !== null && team !== anchor.version) warn('团队层版本', `${team} ≠ DSH ${anchor.version}`)
   else record(true, '团队层版本', `${team}`)
+  // 半装/旧装：profile 认了本包，但安装副本缺 patch/client 产物时 roster 会空或驾驶舱白屏。
+  const installedRoot = join(profileDir, 'node_modules', PACK_NAME)
+  if (installed !== null && existsSync(installedRoot)) {
+    const required = ['cordis.patch.yml', ...(pkg.dsh?.bundle?.patch ?? []).filter((p) => p.startsWith('./presets/')).map((p) => p.slice(2)), 'lib/client.js', 'lib/index.js']
+    const missing = required.filter((p) => !existsSync(join(installedRoot, p)))
+    record(missing.length === 0, '安装副本完整性', missing.length === 0 ? `${required.length} 件在场` : `缺 ${missing.join(', ')}；重装本包`)
+  }
 }
 
 // 3) deep-research 设置文件与工作区（只读）

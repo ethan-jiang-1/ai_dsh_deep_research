@@ -77,7 +77,8 @@ profile。离线时，把包 spec 换成 `file:/path/to/dsh-deep-research-pack-<
 
 **5. 团队层。** Agent Teams 组合是一个独立、官方的 experimental 组合包。不要用 `@latest`：它的
 `latest` 不跟踪正在运行的 DSH 版本。安装 `dsh --version` 打印出的确切版本，或在同一个 Plugins 页
-启用它。
+启用它。**完整多角色研究需要这一层**：缺它时 Lead preset 能挂载，但团队工具缺席，doctor 会记硬失败；
+只做 quick_factual 的 profile 可以跳过。
 
 **6. “已安装”意味着什么。** 有三个相互独立的状态：pnpm 退出码 0、依赖已写入、包出现在
 `dsh.profile.bundles` 中。只有第三个状态才会激活该层。没有 `dsh.bundle.patch` 的包只是一个依赖：
