@@ -40,7 +40,7 @@ export const PRESETS = join(PACK, 'presets');
 // 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账——集合比对，不序；
 // 新增门禁两处同步）。数组与文件块同按域分组（A–F）排序，域横幅见各节。
 export const gates = [
-  'md-utf8-newline', 'md-links', 'md-anchors', 'doc-paths', 'archived-note-pointer', 'count-free', 'doc-now-only', 'doc-budgets',
+  'md-utf8-newline', 'md-links', 'md-anchors', 'doc-paths', 'doc-drefs', 'archived-note-pointer', 'count-free', 'doc-now-only', 'doc-budgets',
   'preset-structure', 'pack-bundle-compat', 'client-half', 'row-deps', 'pack-contract-sync', 'role-list-sync', 'client-keys', 'client-effect-wrap', 'cockpit-doc-registry', 'run-context-single-source',
   'pack-manifest', 'market-index', 'readme-shape', 'release-vocab',
   'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'proposed-pointer-live',

@@ -69,13 +69,13 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 
 - **共同基座**：tool-fs / tool-fs-search / tool-skill / tool-todo / **tool-web**（模型面行随
   preset，行 config 照抄 base：`fetch: true` 是启用开关、`searchTimeoutMs` 是搜索预算、
-  `fetchTimeoutMs: 45000` 是抓取回退两腿预算的兜底（D31）——字段语义与值以 preset 源 + [D9](../decisions.md) 为正本）；
+  `fetchTimeoutMs: 45000` 是抓取回退两腿预算的兜底（D31）——字段语义与值以 preset 源 + [D9](../decisions.md#d9) 为正本）；
   web 的 providers（`web` seam / `web-search-deepseek` / `web-deepseek-api` / `web-fetch-http`）
   是 dsh-base 的 **host 面出厂行**、不随 preset——provider 行本身不进本包 bundle；**provider
   选择**由 bundle 的 `- id: web` 替换行固定：搜索 = `deepseek-search-api`（结果带 snippet +
   RFC3339 发布日期，一次请求、不烧模型回合），fetch = 本包回退 provider
   `deepseek-fallback-fetch`（先本地 `http`：真实状态码、markdown 无转义、0.5–2.2s；取不到
-  才打 Fetch API，正文带来源标记）——[D30](../decisions.md) / [D31](../decisions.md)；实证依据 vendor base bundle
+  才打 Fetch API，正文带来源标记）——[D30](../decisions.md#d30) / [D31](../decisions.md#d31)；实证依据 vendor base bundle
   `packages/bundle/base/cordis.patch.yml` + web-app surface 对 `tool-web` 的 preset-scoping
   注释；Search/Fetch API 的 `apiKeyEnv: DEEPSEEK_API_KEY` 与 chat 同一把钥匙（无需独立 key）；
 - **lead 独有**：tool-ask-user（HITL 两点交互的唯一持有人）+ tool-present（成品声明权）；

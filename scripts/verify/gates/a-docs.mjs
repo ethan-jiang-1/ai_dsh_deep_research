@@ -208,6 +208,41 @@ export function runA() {
   }
 }
 
+// ── doc-drefs（D 号引用必须落到 decisions 锚点——2026-11-03 七维卫生审计 D1/D4）──
+// 为什么：D23/D24 曾指向 00-index（该页没有这两个锚点）——点进去落空，"按需跳"失效；
+// md-anchors 只校验目标文件里有没有该 fragment，不校验"这个 D 号应该住在 decisions"。
+// 范围同 doc-paths（live 文档；notes/_backlog 历史层不追改）；只检查 `[D<n>](...)` 形态。
+{
+  const gate = 'doc-drefs';
+  const files = trackedFiles({
+    gate,
+    glob: '*.md',
+    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f.startsWith('_backlog/') || f.startsWith('tests/fixtures/'),
+    emptyMsg: '防空语料：未扫到任何 live 文档',
+  });
+  if (files) {
+    const decisions = readFileSync(join(ROOT, 'docs', 'decisions.md'), 'utf8');
+    const anchors = new Set([...decisions.matchAll(/<a id="(d\d+)"><\/a>/g)].map((m) => m[1]));
+    let checked = 0;
+    for (const { rel, text } of files) {
+      const lines = text.split('\n');
+      for (const [i, line] of lines.entries()) {
+        for (const m of line.matchAll(/\[(D\d+)\]\(([^)\s]+)\)/g)) {
+          const id = m[1].toLowerCase();
+          const [pathPart, frag] = m[2].split('#');
+          const samePage = pathPart === '' && rel.endsWith('decisions.md');
+          const okFile = samePage || pathPart.split('/').at(-1) === 'decisions.md';
+          if (!okFile || frag !== id) {
+            fail(gate, `${rel}:${i + 1} ${m[1]} 引用指向 ${m[2]}——应指向 docs/decisions.md#${id}（D 号台账的锚点才是按需跳的落点）`);
+          }
+          checked++;
+        }
+      }
+    }
+    if (checked < 20) fail(gate, `防空语料：只扫到 ${checked} 个 D 号引用（过少 = 扫描面被收窄）`);
+  }
+}
+
 // ── archived-note-pointer（归档判定的可复核面——notes-stocktake 体检
 //    （_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md）结论"归档判据在本仓不可靠"的机械
 //    切片：活面（notes/archived/ 之外的 tracked .md）以 Markdown 链接引用

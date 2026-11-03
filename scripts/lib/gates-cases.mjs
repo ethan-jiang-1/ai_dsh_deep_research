@@ -285,6 +285,10 @@ export const CASES = [
   // 本案例的注入报因，防止既有报因把"注入未生效"蒙混成绿。
   { id: 'doc-paths-dangling', gate: 'doc-paths', expect: 'scripts/__missing-probe.mjs',
     mutate: appendTo('docs/project-map.md', '\n路径探针：`scripts/__missing-probe.mjs` 与 `packages/deep-research-pack/__missing__/`\n') },
+  // doc-drefs（2026-11-03 七维审计）：D 号引用指向没有该锚点的地图页——点进去落空，
+  // 而 md-anchors 只校验目标文件里有没有 fragment，不校验"这个 D 号该住 decisions"。
+  { id: 'doc-drefs-misdirected', gate: 'doc-drefs',
+    mutate: appendTo('docs/project-map.md', '\nD 号引用探针：[D24](../00-index.md)\n') },
   // 非 ASCII 路径形态（2026-10-21 卫生轮补宽）：md-utf8-newline / md-anchors 的 ls-files 原无
   // core.quotepath=false——非 ASCII tracked 路径（_dist/安装手册.md）被引号转义后 existsSync
   // miss → 稀疏态 continue 静默跳过 = md-links 已修过的同款漏扫（BUG-016 家族）。案例先红实录：
