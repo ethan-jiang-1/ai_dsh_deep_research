@@ -132,7 +132,7 @@
 | lib/unconsumed-evidence.mjs | unconsumed-evidence、unconsumed-evidence.test | B1 机械基座：evidence/ 未进 findings.md 的差集投影（critic 差集出题的操作侧对账；CLI 壳 = run-ops/unconsumed-evidence 行） |
 | lib/acceptance-check.mjs | acceptance-check、acceptance-check.test | 收活判据机械求值：PASS/FAIL/UNVERIFIED 三态（DeerFlow acceptance_criteria keyless 移植，判不了永不静默放行；CLI 壳 = run-ops/acceptance-check 行） |
 | lib/hitl-provenance.mjs | ask-drive.test、hitl-answer、hitl-provenance.test、run-kickoff | 代答 provenance 写盘（BUG-014 正修——代理模拟显式记账；BUG-017 题面富集） |
-| lib/local-date.mjs | export-dist、hitl-answer、local-date.test | 人读日期行本地口径（与 bash date 同源；BUG-017 正修——UTC slice 凌晨窗口差一天） |
+| lib/local-date.mjs | export-dist、hitl-answer、local-date.test、schema-scan-core、schema-scan.test | 人读日期行本地口径（与 bash date 同源；BUG-017 正修——UTC slice 凌晨窗口差一天） |
 | lib/bundle-date-sanity.mjs | bundle-date-sanity.test、run-accept | run bundle 未来日期检查（操作侧验收前哨——r1-license 29 处未来日期事故的机械面；消费语境 = run-accept 行） |
 | lib/vendor-artifacts.mjs | cdp-ask-smoke、client-hitl-smoke、client-load-smoke、discipline-probe、entry-chain-probe、l4-lite-smoke、preset-smoke、session-replay、team-preflight-smoke、vendor-artifacts.test | vendor 构建产物自检 |
 | lib/backlog-liveness.mjs | backlog-liveness.test、context、f-repo | 问题卡、缺陷、调研、方法与归档索引的结构合同；被 verify 入口与 keyless 回归消费 |

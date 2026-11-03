@@ -21,6 +21,7 @@
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { hasFinalVersion } from './final-version.mjs'
+import { localDateStr } from './local-date.mjs'
 
 export const CONTRACT_DATE = '2026-09-29'
 /** 当前 run bundle 契约版本（run.md 的 `schema:`，整数；模板写、门禁按整数分档）。
@@ -31,9 +32,9 @@ export const RUN_PHASES = ['briefing', 'research', 'synthesis', 'review', 'deliv
 
 const read = (p) => (existsSync(p) ? readFileSync(p, 'utf8') : null)
 
-/** 本地日期 YYYY-MM-DD（journal/交付日期按本地时区落——UTC 计算在跨午夜窗口会把本地
- * "今天"误判为未来日期，mcp-hosts run 2026-10-06 实录假阳性；UTC 滞后窗口最长 8 小时）。 */
-export const toDateStr = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+/** 本地日期 YYYY-MM-DD——单一正本 = `local-date.mjs`（BUG-017 的本地日口径；此处保留别名给
+ * schema-scan / node-gate-session-gates 的既有消费点，不再自写实现）。 */
+export const toDateStr = localDateStr
 const mtimeDate = (p) => (existsSync(p) ? toDateStr(statSync(p).mtime) : null)
 
 /** 交付日：final.md mtime，回退 final/v1.md → question.md；全缺 = null（从严处理）。 */

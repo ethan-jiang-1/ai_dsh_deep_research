@@ -63,6 +63,8 @@ test('journal 未来日期异常旗（模型时间感不可信——显性化不
 
 test('toDateStr：本地日期——跨午夜 UTC 滞后窗口不误判"未来"（mcp-hosts run 实录假阳性，UTC now=10-05 时本地 10-06 journal 被误报）', async () => {
   const { toDateStr } = await import('../../scripts/lib/schema-scan-core.mjs')
+  const { localDateStr } = await import('../../scripts/lib/local-date.mjs')
+  assert.equal(toDateStr, localDateStr, '单一正本：schema-scan 不得再自写日期实现（2026-11-03 D2）')
   assert.equal(toDateStr(new Date('2026-10-06T00:30:00')), '2026-10-06')
   assert.equal(toDateStr(new Date(2026, 9, 5, 23, 59)), '2026-10-05')
 })
