@@ -41,11 +41,14 @@ RUNTMP="$STATE_DIR/run-pack"
 # 比对集合 = **实际随包发布的文件**（`npm pack --dry-run --json` 为准），不是源目录全量：
 # pack 的 `files` 字段决定镜像里有什么（例如 AGENTS.md 是子树开发指令、不随包发布），
 # 按源目录全量比对会把"没发布"误报成"镜像缺席"（0.1.7 升 pin 时实测）。
+# 非运行时文件（README/LICENSE）不参与判红（2026-11-03 G-20）：文档漂移不改变页面行为，
+# 只逐条点名提示；发布集完整性由 release-smoke / pack-smoke 负责。否则改一行 README 就把
+# 通道判 NOT-RUN，逼人 `rm -rf profile` 重建。
 # 单跑模式：--drift-only（只读、不碰端口/不安装/不起 web；run-driver 复用通道时调用）
 #           --drift-check（可初始化 profile/MCP patch，旧语义保留）。
 drift_check() {
   local bad=0 rel mirror
-  local shipped
+  local shipped skipped=0
   # 工具态重定向（本仓纪律）：npm 缓存钉在仓库内，避全局 cache 权限/污染（release-smoke 同款）。
   # ⚠ `--ignore-scripts` 是必需的（2026-09-26 跑 run 时实测的环路缺陷）：pack 的 `prepack`
   #   钩子会跑 `pnpm build`，tsdown 的横幅（`ℹ tsdown v…`）混进 stdout 把 `--json` 载荷污染，
@@ -60,6 +63,18 @@ drift_check() {
   [ -n "$shipped" ] || { echo "boot-run: 漂移检测拿不到 pack 发布清单（npm pack --dry-run 失败）" >&2; exit 1; }
   while IFS= read -r rel; do
     mirror="$PROFDIR/node_modules/dsh-deep-research-pack/$rel"
+    # 非运行时文件（README/LICENSE）：文档漂移不改变页面行为，不参与"当前页面是否当前代码"的
+    # 判定（2026-11-03 G-20：改一行 README 曾把整条通道判 NOT-RUN，逼人 rm -rf profile 重建）。
+    # 仍逐文件点名提示，不静默；发布集完整性由 release-smoke / pack-smoke 负责。
+    case "$rel" in
+      README.md|README.zh.md|LICENSE)
+        if [ ! -f "$PACKDIR/$rel" ] || [ ! -f "$mirror" ] || ! diff -q "$PACKDIR/$rel" "$mirror" >/dev/null 2>&1; then
+          echo "boot-run: 注：非运行时文件漂移（$rel）——不影响通道判绿" >&2
+          skipped=$((skipped + 1))
+        fi
+        continue
+        ;;
+    esac
     if [ ! -f "$PACKDIR/$rel" ] || [ ! -f "$mirror" ] || ! diff -q "$PACKDIR/$rel" "$mirror" >/dev/null 2>&1; then
       echo "boot-run: 漂移——$rel 与 profile 镜像不一致（或镜像缺席）" >&2
       bad=1
@@ -69,7 +84,7 @@ drift_check() {
     echo "boot-run: pack 漂移检测红——修复：rm -rf '$PROFDIR' 后重跑本脚本重建（或逐文件 cp 同步）" >&2
     exit 1
   fi
-  echo "boot-run: pack 漂移检测绿（pack 发布集 ↔ profile 镜像一致）"
+  echo "boot-run: pack 漂移检测绿（运行时集 ↔ 镜像一致；跳过 $skipped 个非运行时文件）"
 }
 
 # 只读镜像检查（2026-10-28 反馈真值修复）：run-driver 复用已在飞的通道时必须先回答

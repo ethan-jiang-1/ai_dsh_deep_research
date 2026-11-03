@@ -72,7 +72,8 @@
       同理：绕过漂移检测、静默用旧镜像）：先 `bash dev/boot-run.sh --drift-check` 过门再用它；
   `--drift-check` 模式会检查端口且可初始化环境/补装 profile/写 MCP patch，不是只读探针。要只读地
   回答"当前安装镜像是否等于 pack 源"（不碰活通道）= `bash dev/boot-run.sh --drift-only`——run-driver
-  复用通道时用的就是它。报漂移就按
+  复用通道时用的就是它。判红只看**运行时文件**（`lib/`/presets/content/locale/cordis.patch.yml 等）；
+  README/LICENSE 漂移只提示、不拦绿（页面行为不变）。报漂移就按
       [guides/62 §改动影响面](./62-plugin-authoring.md) 重建镜像；
 - **刷新白屏的判别序**：① `lsof -nP -iTCP:<端口> -sTCP:LISTEN` 有没有监听 → 无 = 进程已停
   （重跑上面任一形态）；② 有监听但仍白屏/401 = token 过期（**每次启动都是新 token**，

@@ -15,6 +15,11 @@
 - **client-load 的 stuck 升为红**：重试一次 `dismissPreviewNotice`，仍可见才 `step(false, ...)`。
   旧注释"只记提示，后续点击会暴露"已被 2026-10-27 事故推翻（JS 派发点击绕过 hit-testing，后续
   断言不会红）。
+- **漂移门判"运行时集"，不判文档**：README/LICENSE 漂移只逐条提示、不判红；`lib/`/presets/content/
+  locale/cordis.patch.yml 等运行时文件仍严格逐文件比对。理由：页面行为只由运行时文件决定，
+  而改一行 README 曾把整条通道判 NOT-RUN、逼人 `rm -rf profile` 重建（2026-11-03 G-20）。
+- **client-load 最近结果指针**：`runtime/smoke-workspace/client-load-latest.json`（PASS/SKIP/FAIL +
+  失败 dir）；失败现场目录继续按时间戳保留，但"最近一次到底是红是绿"不再靠 `ls -t` 猜。
 - **run verdict 带 `page.html`**：截图只能说明"哪里不对"，看不出"哪个节点没渲染"。`cdp-probe` 增
   `--html`（`document.documentElement.outerHTML`），run-driver 把它复制到每份
   `run-verdicts/<ts>-<kind>/page.html`（与 page.png 同址；失败也落）。实测活通道快照 595 KB。
@@ -36,6 +41,10 @@
   （unbound 默认绿 + dataFace 显式；require-data 时 unbound 红且 checks=7）。
 - `tests/run/web-ui-nav.test.mjs`：5/5 绿；新增"标题节点不可见（零尺寸）→ present=false"用例——
   旧判据在该用例下会报 present=true（假 stuck）。
+- 漂移门两态（临时 profile 镜像）：源 README 追加一行 → 绿（跳过 1 个非运行时文件）；删镜像
+  `lib/client.js` → 红并点名该文件。函数本体从 `dev/boot-run.sh` 原样抽出执行，不测副本。
+- client-load 成功后 `client-load-latest.json` 落 `{status:"PASS", dir:null}`；失败路径写
+  `{status:"FAIL", dir:<现场>}`（代码同函数，本轮验 PASS 态）。
 - 本地 `client-load-smoke --seed tests/fixtures/client-load-home`：**ALL PASS**（含新增的
   "首屏 Preview Notice 可关闭"硬断言；此前同一场景打印"遮罩关不掉"仍全绿）。
 - `pnpm test` / `pnpm test:vendor` / `pnpm verify` 全绿（本变更的收尾轮）。
