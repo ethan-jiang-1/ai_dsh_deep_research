@@ -186,7 +186,7 @@ if (sub === 'probe') {
   const { verdict, error } = probeFace(url, expectFace, shot, html);
   if (verdict === null) {
     const payload = { url, ...probeFailureVerdict({ error, expectFace, drift, requireData }) };
-    const saved = persistVerdict('probe', payload);
+    const saved = persistVerdict('probe', payload, undefined, html);
     console.error(`run-driver probe: 探针失败（${error}）；已落 ${saved.dir}，latest-verdict 已更新`);
     process.exit(1);
   }
@@ -295,7 +295,7 @@ const html = join(STATE_DIR, 'run-driver-status.html');
 const { verdict, error } = probeFace(state.url, expectFace, shot, html);
 if (verdict === null) {
   const payload = { url: state.url, port: state.port, ...probeFailureVerdict({ error, expectFace, drift, requireData }) };
-  const saved = persistVerdict('up', payload);
+  const saved = persistVerdict('up', payload, undefined, html);
   console.error(`run-driver: 探针失败（${error}）；已落 ${saved.dir}，latest-verdict 已更新`);
   process.exit(1);
 }

@@ -21,6 +21,8 @@
 - **发布指南与反腐化门对齐**：`guides/64` 不再引用已删除的 `compat-smoke` / `compat-client-smoke`，新 DSH 版本证据 = 现有 L1/L2/client-load；`doc-paths` 扩到命令形态 token（`node scripts/…`、`source dev/…` 等），红证 = 64 的两个已删脚本，修复后绿。
 - **安装 owner 单一**：README / 00-index / guides/65 都指 `scripts/dist/product-manual.md`（源），`_dist/安装手册.md` 只作生成物；CONTRIBUTING 把 `test:vendor` 移出 fresh-clone 最小集。
 - **client-load 反馈门**：console 除 `Failed to load resource:` 之外的错误一律红；HTTP 失败仅允许 seed 的 `changes.summary` 404，其余 4xx/5xx/requestfailed 红。
+- **doctor 完整性扩面**：安装副本检查从 cordis/presets/client/index 扩到 startup/content/fetch-fallback/method-library-tool、`content/manual.md` 与 locale；doctor-smoke 覆盖缺 client 与缺 startup 两形态。
+- **崩溃现场补 html**：probe 崩溃/persist 路径也把 `html` 传给 `persistVerdict`；cdp-probe 已写出现场时 `page.html` 可随 verdict 复制（崩溃前未开页面则仍无）。
 - **第 6 轮复评**：①A− ②A− ③A− ④A− ⑤A− ⑥A− ⑦B。⑦ 的唯一 P1 = 对外发布（`npm whoami` = ENEEDAUTH、`npm view` 404、0.3.0 无 tag），不是仓内可修项；其余六维仅余 P2。
 
 ## 输掉的方案

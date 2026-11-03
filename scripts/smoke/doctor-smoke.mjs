@@ -44,8 +44,14 @@ function sandbox() {
     writeFileSync(join(installed, 'presets', `${role}.patch.yml`), '')
   }
   mkdirSync(join(installed, 'lib'), { recursive: true })
-  writeFileSync(join(installed, 'lib', 'client.js'), '')
-  writeFileSync(join(installed, 'lib', 'index.js'), '')
+  for (const file of ['client.js', 'index.js', 'startup.js', 'content.js', 'fetch-fallback.js', 'method-library-tool.js']) {
+    writeFileSync(join(installed, 'lib', file), '')
+  }
+  mkdirSync(join(installed, 'content'), { recursive: true })
+  writeFileSync(join(installed, 'content', 'manual.md'), '')
+  mkdirSync(join(installed, 'locale'), { recursive: true })
+  writeFileSync(join(installed, 'locale', 'en.json'), '{}')
+  writeFileSync(join(installed, 'locale', 'zh.json'), '{}')
   writeFileSync(join(profile, 'node_modules', ...TEAM.split('/'), 'package.json'), JSON.stringify({ name: TEAM, version: ANCHOR_VERSION }))
   writeFileSync(join(home, 'deep-research', 'settings.json'), JSON.stringify({ schemaVersion: 2, workspace: ws, updatedAt: new Date().toISOString() }))
   return { home, anchor, ws, profile }
@@ -88,6 +94,10 @@ try {
   const half = runDoctor(box)
   check('半装：缺安装副本 client 产物 → exit 1 且点名', half.status === 1 && /安装副本完整性/.test(half.stdout), `${half.status}\n${half.stdout}`)
   writeFileSync(join(box.profile, 'node_modules', 'dsh-deep-research-pack', 'lib', 'client.js'), '')
+  rmSync(join(box.profile, 'node_modules', 'dsh-deep-research-pack', 'lib', 'startup.js'))
+  const halfStartup = runDoctor(box)
+  check('半装：缺 startup 行产物 → exit 1 且点名', halfStartup.status === 1 && /安装副本完整性/.test(halfStartup.stdout), `${halfStartup.status}\n${halfStartup.stdout}`)
+  writeFileSync(join(box.profile, 'node_modules', 'dsh-deep-research-pack', 'lib', 'startup.js'), '')
 
   writeFileSync(join(box.home, 'deep-research', 'settings.json'), '{not json')
   const corrupt = runDoctor(box)
