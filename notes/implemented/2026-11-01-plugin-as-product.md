@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-> 历史注记：“插件即产品”措辞由 [D41](../../docs/decisions.md#d41) 收口；bundle + custom profile 的技术决定仍现行。
+> 历史注记：D38/D39 的 launcher 与“可选启动器”已由 [D40](../../docs/decisions.md#d40) 删除（入口翻回专用 custom profile）；本页含 launcher/部署 bin 的段落按 D40 后的合同读，现行 = [D40](../../docs/decisions.md#d40) + [guides/65](../../docs/guides/65-run-forms.md)。
 
 > 来源：[插件即产品决策卡](../../_backlog/_archived/settled_issues/2026-11-01-plugin-as-product.md)、[落地计划](../../_backlog/_archived/research/plugin-as-product/2026-11-01-landing-plan.md)。
 > 当前合同 = [guides/65](../../docs/guides/65-run-forms.md)、[pack README](../../packages/deep-research-pack/README.md)、[`_dist/安装手册.md`](../../_dist/安装手册.md)；决策 = [D38](../../docs/decisions.md#d38)、[D39](../../docs/decisions.md#d39)。

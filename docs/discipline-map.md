@@ -47,7 +47,7 @@
 | Typed events / declaration merging / assertNever / waterfall next() / branded ids / Trust TypeScript / explicit request-spec split | TS 面（`src/client/` 观察面 + `src/lib/` 折算）只**消费** vendor 的声明合并类型（`import type {} from '@deepseek-ai/dsh-*/client'`），不 author 会话事件、不注册服务或 waterfall 监听器、无跨边界自持 id、无 request/spec 默认化面 | 不适用（无对应机制面；本仓开始 author 事件或服务时重估） |
 | Keep compiler faces explicit（host/client 各出叶配置，根仅 solution） | `packages/deep-research-pack/tsconfig.host.json` · `tsconfig.client.json` 两叶（各自拉不同的 Context 类型增强）+ solution-only 根 `tsconfig.json`（`files: []` + references）；构建 = `tsc -b .` | 照搬 |
 | ESM everywhere / 包命名与 rescope / cordis peer 约定 | 不发布 npm 包（private pack 经 plugin add 分发） | 不适用（本仓无 npm 发布面——**重估触发**：pack 转为公开发布、或需与其他插件共享 peer 依赖时） |
-| Client UI copy is locale-owned | client UI 文案硬编码中文（`src/client/ResearchStatusTab.tsx` · `ResearchToolCard.tsx`——如 `研究状态 · ⏳ 等你拍板`），无 locale 字典面；单语仓不引入 `t`/字典 | 不适用（转多语或对外分发时重估） |
+| Client UI copy is locale-owned | chrome 文案走 `src/client/locales.ts` 的 zh/en 字典（`ctx.locale.register` + `t()`；键集对账 = [client-locale](../tests/pack/client-locale.test.mjs)）；研究面板正文仍以中文为主（产品中文优先，未逐条迁） | 带证据适配（chrome 已迁字典；正文中文优先——**重估触发**：需要英文 UI 或对外多语分发时逐条迁 `views.tsx` / `ResearchConfigTab`） |
 | Choose PR history deliberately / GitHub stacks / Labels taxonomy | 无 GitHub PR 流（本地单仓窄切片提交） | 不适用（等价物 = 窄证据切片 commit 纪律 + pre-commit 门禁；**重估触发**：需多 commit 叠加审阅的 PR 流出现时） |
 | Both SDKs project the loop | 无 SDK 维护面 | 不适用（本仓不维护任何 SDK——**重估触发**：本仓开始对外提供 SDK 或需要同时投影两种运行时面时） |
 

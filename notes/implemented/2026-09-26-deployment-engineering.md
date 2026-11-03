@@ -2,7 +2,8 @@
 
 > 状态：implemented
 
-> 部分取代：[部署真伪与工作区隔离](2026-10-26-deploy-truth-and-isolation.md)（preflight 的 peer 解析锚改为 DSH 安装本体、scaffold 增加参数/工作区/sidecar 守卫；本页其余决定仍有效）。
+> 部分取代：[部署真伪与工作区隔离](2026-10-26-deploy-truth-and-isolation.md)（preflight 的 peer 解析锚改为 DSH 安装本体）。
+> 历史注记：第 1/2 条的 workspace 种子与 `sync-pack-workspace`、第 3 条 scaffold/preflight 已由 [D40](../../docs/decisions.md#d40) 删除（内容改由 `content/` 注入，无种子、无自定义安装器）；现行 = [D40](../../docs/decisions.md#d40) + [guides/65](../../docs/guides/65-run-forms.md)。
 
 ## 决定
 
