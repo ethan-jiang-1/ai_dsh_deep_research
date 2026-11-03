@@ -15,15 +15,16 @@
 | ④ 腐化 | B | **A** | ui-agent-team 8 处、旧 tgz、locale/launcher 台账、计数、D 链接全部收口；`doc-drefs` 防复发 | 15 篇历史 Note 引用旧路径（notes 被门禁排除）；decisions 台账历史细胞（待拍板） |
 | ⑤ 测试资产 | B | **A** | keyless 恢复 fresh-clone（vendor tier）；fetch 码表硬编码；608 行拆三件；fixtures 自包含边界 | 方法库 UI 保存、product-boot/cold-start 未进 CI（P2） |
 | ⑥ 反馈通路 | B | **A** | CI 17 连绿；`dataFace`/`--require-data`；遮罩可见性硬失败；`page.html`；latest 指针；HITL 年龄；drift 只看运行时集 | CI 单轮 ~20 分钟；无 ARIA 快照（P3） |
-| ⑦ DSH 合规 | B | **B** | content 双 disposer 接住；README 与 patch 一致；locale 台账改“带证据适配”；L1/L2 进 CI | 170 处 JSX 中文（产品决策）、全局 `document.head` 样式、启动空会话、peers-only hoisted |
+| ⑦ DSH 合规 | B | **A** | content 双 disposer；README 与 patch 一致；**locale = 中文优先（2026-11-03 用户拍板）**；注入样式挂 `html[data-dsh-deep-research]` 标记 + refcount 卸载；L1/L2 进 CI | 170 处中文 = 产品语言选择；启动空会话登记为产品行为 + trigger；peers-only 登记 D15 |
 
-**结论**：六个维度到 A，**没有 P0/P1 未收口**；D7 仍是 B，两件是真正的产品/技术决策，不是“再修一轮脚本”：
+**结论**：**七个维度全部到 A，没有 P0/P1 未收口**。用户 2026-11-03 拍板 **locale = 中文优先**
+（“中文”）：chrome 保留 zh/en 字典，正文中文是产品语言选择，不是遗漏；台账“带证据适配”如实承载。
+另两件按“登记 + 触发”收口，不静默改首屏语义：
 
-1. **locale**：A) 中文优先（保持 chrome 字典 + 台账“带证据适配”）；B) 全量英文化（170 处进字典）。
-2. **全局样式**：换成容器类/局部作用域，或登记为“带证据适配 + 重估触发”。
-3. **启动空会话**：复用已有 blank Lead 会话，或登记为产品行为。
-
-其中 locale 是唯一需要用户拍板的产品方向；另两件可由 agent 独立做。
+1. **全局样式**：注入规则全部挂 `html[data-dsh-deep-research]` 标记，refcount 归零即移除——
+   所有权可见、卸载不残留；作用域仍是整页（问卡/方法库不在本插件容器内），fail-soft。
+2. **启动空会话**：登记为产品行为（首屏 mint blank Lead 会话）；触发 = 同一工作区出现 ≥3 个空会话
+   或用户要求“开回上次那场”时再实现复用（[_backlog/triggers.md](../../_backlog/triggers.md)）。
 
 ## 输掉的方案
 
@@ -34,6 +35,7 @@
 ## 实际跑过的验证
 
 - CI：run [41597205775](https://github.com/ethan-jiang-1/ai_dsh_deep_research/actions/runs/41597205775)（`247ec68`）三 job 全绿——第 **17** 次连续全绿；deploy 覆盖 L0 + L1 真挂载 + L2 安装/显示/卸载。
+  样式作用域与 locale 决定后的 client-load 在本地 seed 跑 **ALL PASS**（含方法库与窄列断言）。
 - 本地：`pnpm verify` **52 门禁**全绿（新增 `doc-drefs`）；`pnpm test` **1018/1018**；`pnpm test:vendor` **3/3**。
 - fresh worktree 复验（无 `lib/`、无运行区、vendor 为符号链接）：**1015/1018**；3 个失败全部是模拟环境假象
   （2 个 React 因 tsconfig 穿过符号链接；1 个 layering 因 vendor 在根外），与基线一致——**零新增非 hermetic 依赖**。
