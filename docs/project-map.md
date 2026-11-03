@@ -182,6 +182,20 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 `final.md` 是 run 根的当前报告，`final/vN` 是交付副本，`final/readable-vN` 是同版读者版（新 run）；文件出现、watcher 停下、仪表盘显示交付，
 都需要结合拍板行、版本记账、present、门C 和审计来判断。完整判据查 [NODES](../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)。
 
+### 症状 → 首个测试入口（keyless 优先）
+
+| 症状 | 最小证据 | 失败时看什么 |
+|---|---|---|
+| 页面空白 / 插件横幅报错 | [client-load-smoke](../scripts/smoke/client-load-smoke.mjs) | `runtime/smoke-workspace/client-load-*/{page.png,page.html,console.txt,meta.json}` |
+| 页签不出现 / keyed 槽空白 | 同上 + `client-keys` 门禁 | `keys.ts` 字面量与 [驾驶舱 §2](design/40-research-cockpit.md) 的登记 |
+| 状态页显示“未绑定” | [client-load-smoke](../scripts/smoke/client-load-smoke.mjs) 的绑定会话断言；run 通道用 `run-driver probe --require-data` | [bundle-sessions](../scripts/run-ops/bundle-sessions.mjs) 反查会话 id + 状态摘要 |
+| run 卡住 / HITL 不弹 | [watch-run](../scripts/run-ops/watch-run.mjs) + [bundle-sessions](../scripts/run-ops/bundle-sessions.mjs) | 挂起谓词与日志回退检测；语义 = [Run 指南 §3](guides/61-run-playbook.md) |
+| 方法库保存失败 | [method-library 单测](../tests/cockpit/method-library-operation-state.test.mjs) + 写路径 [method-library-tool-smoke](../scripts/smoke/method-library-tool-smoke.mjs)（开发档，需 native 产物） | 回执三态；`useOperationQueue` |
+| 交付门红 | [node-gate-delivery 测试](../tests/run/node-gate-delivery.test.mjs) + [node-gate](../scripts/run-gates/node-gate.mjs) | 门 A/C 判据与 `present` 见证 |
+| 证据链红 | [evidence-audit 测试](../tests/run/evidence-audit.test.mjs) + [evidence-audit](../scripts/run-gates/evidence-audit.mjs) | `source_url` / 摘录 / 引用链 |
+| 安装 / 首启坏 | CI deploy 的 [lifecycle-smoke](../scripts/smoke/lifecycle-smoke.mjs)；本地 [product-boot-smoke](../scripts/smoke/product-boot-smoke.mjs) / [install-shape-smoke](../scripts/smoke/install-shape-smoke.mjs) | market/tarball 形状；首屏工作区 |
+| 镜像漂移（旧页面） | `run-driver probe` 返回 NOT-RUN | 按 boot-run 处方重建；不要直起 `dsh` |
+
 ## 已知限制与延后工作
 
 - `scripts/` 同时包含检查、运维、投影和导出，物理布局依靠[职责索引](../scripts/README.md)解释；`dev/` 同理见 [dev 入口说明](../dev/README.md)；职责分组与目录取舍见

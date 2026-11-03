@@ -17,4 +17,8 @@
 | [events.mjs](events.mjs)（文件级支援件——工厂非语料组；孤儿检查只扫目录组，本行 = 导航登记） | [hitl-fold](../run/hitl-fold.test.mjs) / [hitl-provenance](../run/hitl-provenance.test.mjs) / [bundle-bind](../run/bundle-bind.test.mjs) / [activity-fold](../run/activity-fold.test.mjs) / [member-activity-fold](../run/member-activity-fold.test.mjs) / [evidence-audit](../run/evidence-audit.test.mjs) / [run-dashboard](../run/run-dashboard.test.mjs) / [run-state](../run/run-state.test.mjs) | 会话事件 wire-shape 构造工厂：tool call/result 配对（arguments 为 JSON 字符串的真日志形态）+ zstd 多帧日志文件——这两个形态的单一构造正本 | 支援件非冻结语料——语义由消费测试钉住（改工厂应预期变红） | 否（glob 外，import 不注册测试） |
 | client-load-home/ | [@scripts/smoke/client-load-smoke.mjs](../../scripts/smoke/client-load-smoke.mjs)（`--seed tests/fixtures/client-load-home`；materialize = `scripts/smoke/client-load-seed.mjs`） | client-load 真浏览器断言的种子 home：一条绑定已交付 run 的会话 + 一条未绑定负样本 + 工作区树（bundle / 用户方法库 / archive run）——干净机器/CI 不需要预置 dev home | 人审冻结：会话日志只截断 payload、**不改事件条数/顺序/seq**；绝对路径用 `__WORKSPACE__` / `__REPO_ROOT__` 占位；维护 = 组内 README | 否（smoke 现场 materialize 到 gitignored 运行区） |
 
+> **重复边界**：同一组内的最小样板（`question.md` / `final.md` / `review.md` 等）允许逐字重复——
+> 每个 fixture bundle 必须**自包含**（可单独复制/注入、不依赖兄弟目录），抽共享文件会制造隐式耦合；
+> 重复的是**语料**，不是事实源，语义仍由消费测试钉住。
+>
 > 会话回放场景（整组录制资产 + 场景声明）住仓根 [`snapshots/`](../../snapshots/README.md)——它是独立于纯函数夹具的证据层，消费入口与分类边界由该页拥有。
