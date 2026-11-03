@@ -10,7 +10,7 @@
 // 用法：
 //   node scripts/probe/cdp-probe.mjs '<gui-url>' [--open-session '<标题>'] [--open-status]
 //        [--expect-face '<文本>'] [--expect-no-leak '<文本>'] [--ask '<消息>']
-//        [--session '<会话 id>'] [--sessions '<会话根>'] [--keep-browser]
+//        [--session '<会话 id>'] [--sessions '<会话根>'] [--screenshot <png>] [--html <html>] [--keep-browser]
 //
 //   '<gui-url>'  boot 好的 GUI URL（含 ?token=，boot-run 横幅给出的那条）
 //   --open-session '<标题>'  按标题点开侧栏会话行（最深层元素 JS 派发——行内嵌按钮不抢）
@@ -25,7 +25,7 @@
 //   --keep-browser           保留无头浏览器（打印调试端口供手工检查）
 //
 // stdout 输出一个 JSON verdict；全部期望成立 exit 0，否则 1，用法/环境错 2。
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
@@ -55,6 +55,7 @@ const ask = opt('--ask');
 const sessionOverride = opt('--session');
 const keepBrowser = flag('--keep-browser');
 const screenshotPath = opt('--screenshot');
+const htmlPath = opt('--html');
 // 会话根：显式 > 环境（source dev/env.sh 后 = 本仓 dev home）> 本仓缺省。用哪个根进 verdict
 // （不复刻 evidence-audit 的"外来 DSH_HOME 自拒"：那儿误审会判出假 CRITICAL；这儿错根只会
 //  报 session-log-not-found，可见、fail-loud，不静默给绿）。
@@ -439,6 +440,17 @@ try {
       verdict.screenshot = (await screenshot(screenshotPath, { fullPage: true })).path;
     } catch (error) {
       verdict.screenshotError = String(error?.message ?? error).slice(0, 300);
+    }
+  }
+  // DOM 快照（npm 用户/agent 排障用）：失败也落——比截图更能看出"哪个节点没渲染"。
+  if (htmlPath !== undefined) {
+    try {
+      mkdirSync(join(htmlPath, '..'), { recursive: true });
+      const html = await evaluate('document.documentElement.outerHTML');
+      writeFileSync(htmlPath, typeof html === 'string' ? html : String(html ?? ''));
+      verdict.html = htmlPath;
+    } catch (error) {
+      verdict.htmlError = String(error?.message ?? error).slice(0, 300);
     }
   }
   if (!keepBrowser) await handle.settle();

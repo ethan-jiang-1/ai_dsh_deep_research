@@ -72,7 +72,7 @@ function channelState() {
 
 // ── 浏览器面验证（子进程 = scripts/probe/cdp-probe.mjs，真值的唯一实现）──────────
 
-function probeFace(url, expectFace, screenshotPath = undefined) {
+function probeFace(url, expectFace, screenshotPath = undefined, htmlPath = undefined) {
   const args = [
     join(ROOT, 'scripts/probe/cdp-probe.mjs'),
     url,
@@ -80,6 +80,7 @@ function probeFace(url, expectFace, screenshotPath = undefined) {
     '--expect-face', expectFace,
   ];
   if (screenshotPath !== undefined) args.push('--screenshot', screenshotPath);
+  if (htmlPath !== undefined) args.push('--html', htmlPath);
   const r = spawnSync(process.execPath, args, { encoding: 'utf8', cwd: ROOT, timeout: 300_000 });
   let verdict = null;
   try {
@@ -119,7 +120,7 @@ function mirrorDrift() {
 // （2026-10-27 卫生轮实证：同一通道 21:14 RED、21:22 GREEN，RED 的截图只剩内存里那份）。
 // 现在：run-verdicts/<ts>-<kind>/ 每次一份（verdict.json + page.png），latest-verdict.json
 // 指向最近一次；固定名副本继续写（cold-start-smoke 与既有消费方按固定名读，不动契约）。
-function persistVerdict(kind, payload, screenshotPath) {
+function persistVerdict(kind, payload, screenshotPath, htmlPath) {
   const at = new Date();
   const dir = join(STATE_DIR, 'run-verdicts', `${at.toISOString().replace(/[:.]/g, '-')}-${kind}`);
   mkdirSync(dir, { recursive: true });
@@ -127,8 +128,12 @@ function persistVerdict(kind, payload, screenshotPath) {
   if (screenshotPath !== undefined && existsSync(screenshotPath)) {
     try { copyFileSync(screenshotPath, join(dir, 'page.png')); shot = join(dir, 'page.png'); } catch {}
   }
+  let html = null;
+  if (htmlPath !== undefined && existsSync(htmlPath)) {
+    try { copyFileSync(htmlPath, join(dir, 'page.html')); html = join(dir, 'page.html'); } catch {}
+  }
   const file = join(dir, 'verdict.json');
-  writeFileSync(file, JSON.stringify({ ...payload, at: at.toISOString(), kind, screenshotCopy: shot }, null, 2));
+  writeFileSync(file, JSON.stringify({ ...payload, at: at.toISOString(), kind, screenshotCopy: shot, htmlCopy: html }, null, 2));
   writeFileSync(join(STATE_DIR, 'latest-verdict.json'), JSON.stringify({ kind, dir, verdict: file, at: at.toISOString() }, null, 2));
   const legacy = join(STATE_DIR, kind === 'up' ? 'run-driver-verdict.json' : 'run-driver-probe-verdict.json');
   writeFileSync(legacy, JSON.stringify(payload, null, 2));
@@ -178,14 +183,15 @@ if (sub === 'probe') {
     process.exit(2);
   }
   const shot = join(STATE_DIR, 'run-driver-probe.png');
-  const { verdict, error } = probeFace(url, expectFace, shot);
+  const html = join(STATE_DIR, 'run-driver-probe.html');
+  const { verdict, error } = probeFace(url, expectFace, shot, html);
   if (verdict === null) {
     console.error(`run-driver probe: ${error}`);
     process.exit(1);
   }
   const v = runDriverVerdict({ probe: verdict, expectFace, drift, requireData });
   const payload = { url, ...v, statusPaneText: verdict.statusPaneText?.slice(0, 600), screenshot: verdict.screenshot ?? null };
-  const saved = persistVerdict('probe', payload, verdict.screenshot);
+  const saved = persistVerdict('probe', payload, verdict.screenshot, html);
   console.log(JSON.stringify(payload, null, 2));
   console.error(`run-driver probe: 现场 ${saved.dir}（page.png + verdict.json）；固定名副本 ${saved.legacy}`);
   process.exit(v.exit);
@@ -284,7 +290,8 @@ if (noProbe) {
 }
 
 const shot = join(STATE_DIR, 'run-driver-status.png');
-const { verdict, error } = probeFace(state.url, expectFace, shot);
+const html = join(STATE_DIR, 'run-driver-status.html');
+const { verdict, error } = probeFace(state.url, expectFace, shot, html);
 if (verdict === null) {
   console.error(`run-driver: ${error}`);
   process.exit(1);
@@ -292,7 +299,7 @@ if (verdict === null) {
 const v = runDriverVerdict({ probe: verdict, expectFace, drift, requireData });
 const submitted = v.exit === 0;
 const payload = { url: state.url, port: state.port, ...v, statusPaneText: verdict.statusPaneText?.slice(0, 600), screenshot: verdict.screenshot ?? null };
-const saved = persistVerdict('up', payload, verdict.screenshot);
+const saved = persistVerdict('up', payload, verdict.screenshot, html);
 console.log('──────────────────────────── 呈交块 ────────────────────────────');
 console.log(`通道 URL：${state.url}`);
 console.log(`浏览器面：${v.level}（数据面：${v.dataFace}）${submitted ? '' : `（${v.reason}）`}`);
