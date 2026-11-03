@@ -14,6 +14,7 @@
 - **发布面补齐**：`exports` 增加 `./cordis.patch.yml`、`./presets/*.patch.yml`、`./method-library-tool/{icon,locale}`；`files` 带 `locale-method-library/**`；build 先清 `lib/`；doctor 检查安装副本的 patch/client 完整性。团队层不写成 peerDependency——它是 bundle 不是 Node peer；`doctor` 已把“profile 缺团队层”记为硬失败，手册/README 改为“完整多角色研究必需”。
 - **数据面改为正向证据**：状态页根节点暴露 `data-research-face`（`bound | unbound | kickoff-hold | pending | error | unknown`）；`run-channel` 优先读它，没标记时才回退文本，且回退必须命中“证据 N / 已交付 / 读终稿”正向标记。旧的“没写未绑定 = bound”负判会放过 kickoff/error/空挂载。
 - **`--expect-face` 改为 opt-in**：默认拿页签标题当断言时，标题本来就在 paneText 里 = 重言式；未传该参数时不生成检查项，而不是默认绿。探针崩溃/输出不可解析时也落 `probeError` verdict 并更新 latest，避免 latest 停在上一次旧绿。
+- **页签 render 面**：状态/图谱两页签新增 keyless 空态静态渲染（`react-dom/server`）；配置/终稿页签依赖 primitives 的 `Modal` / `MarkdownText` CSS 模块，tsx 测试加载器不解析 `.css`，其行为证据仍归 client-load 真机档。
 
 ## 输掉的方案
 
@@ -28,7 +29,7 @@
 ## 实际跑过的验证
 
 - `pnpm verify`：52/52 PASS（含本 Note 与 Phase 0 文档变更后的复跑）。
-- `pnpm test`：1021/1021 PASS；`pnpm test:vendor`：3/3 PASS；`pnpm typecheck`：exit 0。
+- `pnpm test`：1023/1023 PASS；`pnpm test:vendor`：3/3 PASS；`pnpm typecheck`：exit 0。
 - `client-load-smoke --seed tests/fixtures/client-load-home --port 3109`：ALL PASS（真 Chromium）。
 - `node scripts/dist/export-dist.mjs`：全绿（147 条目、preset 5/5、模板 8）；clean build 后 `lib/workspace-boot.js` 不再随 tarball（`lib/types/client/workspace-boot.d.ts` 是 client 源码的类型件，不是旧插件）。
 - `node scripts/smoke/doctor-smoke.mjs`：ALL PASS（新增“半装缺 client 产物 → exit 1”反证）。
