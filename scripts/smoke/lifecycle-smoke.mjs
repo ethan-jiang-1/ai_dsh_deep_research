@@ -81,7 +81,7 @@ function writeProbe() {
   writeFileSync(join(probeDir, 'cordis.patch.yml'), "- insert:\n    - id: lifecycle-meta-probe\n      name: '@tmp/lifecycle-meta-probe'\n")
   writeFileSync(join(probeDir, 'index.js'), `import { writeFileSync } from 'node:fs'\nimport { pathToFileURL } from 'node:url'\nexport const name = 'lifecycle-meta-probe'\nexport async function apply() {\n  const out = { results: {} }\n  try {\n    const { createRequire } = await import('node:module')
     const requireFromProfile = createRequire(process.env.LIFECYCLE_PROBE_BASE)
-    const appBoot = await import(pathToFileURL(requireFromProfile.resolve('@deepseek-ai/dsh-app-boot')).href)\n    const base = pathToFileURL(process.env.LIFECYCLE_PROBE_BASE).href\n    for (const spec of ['dsh-deep-research-pack', 'dsh-deep-research-pack/content', 'dsh-deep-research-pack/startup', 'dsh-deep-research-pack/fetch-fallback']) {\n      try { out.results[spec] = appBoot.readPluginMeta(spec, base) } catch (error) { out.results[spec] = { error: String(error) } }\n    }\n  } catch (error) { out.fatal = String(error) }\n  writeFileSync(process.env.LIFECYCLE_PROBE_OUT, JSON.stringify(out, null, 2))\n}\n`)
+    const appBoot = await import(pathToFileURL(requireFromProfile.resolve('@deepseek-ai/dsh-app-boot')).href)\n    const base = pathToFileURL(process.env.LIFECYCLE_PROBE_BASE).href\n    for (const spec of ['dsh-deep-research-pack', 'dsh-deep-research-pack/content', 'dsh-deep-research-pack/startup', 'dsh-deep-research-pack/fetch-fallback', 'dsh-deep-research-pack/method-library-tool']) {\n      try { out.results[spec] = appBoot.readPluginMeta(spec, base) } catch (error) { out.results[spec] = { error: String(error) } }\n    }\n  } catch (error) { out.fatal = String(error) }\n  writeFileSync(process.env.LIFECYCLE_PROBE_OUT, JSON.stringify(out, null, 2))\n}\n`)
 }
 
 try {
@@ -124,7 +124,7 @@ try {
   if (!existsSync(probeOut)) check('⑤ 显示面探针落盘', false, '探针没有写出结果（apply 没跑或 readPluginMeta 抛错）')
   else {
     const result = JSON.parse(readFileSync(probeOut, 'utf8'))
-    const specs = ['dsh-deep-research-pack', 'dsh-deep-research-pack/content', 'dsh-deep-research-pack/startup', 'dsh-deep-research-pack/fetch-fallback']
+    const specs = ['dsh-deep-research-pack', 'dsh-deep-research-pack/content', 'dsh-deep-research-pack/startup', 'dsh-deep-research-pack/fetch-fallback', 'dsh-deep-research-pack/method-library-tool']
     for (const spec of specs) {
       const meta = result.results?.[spec]
       const ok = meta?.title?.zh !== undefined && meta?.description?.zh !== undefined && String(meta?.icon ?? '').startsWith('data:image/svg+xml')

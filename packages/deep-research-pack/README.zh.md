@@ -145,8 +145,8 @@ dsh plugin --profile deep-research remove @deepseek-ai/dsh-experimental-agent-te
 
 | 项 | 值 |
 |---|---|
-| `engines.dsh` | `>=0.2.1-rc.2 <0.3.0-0`（host 权威；没有第二个兼容字段） |
-| 已测基线 | `0.2.1-rc.2`（开发 pin，data plane + client）+ `0.2.1-rc.3`（安装形状 + client 挂载） |
+| `engines.dsh` | `>=0.2.1-rc.2 <=0.2.1-rc.3`（host 权威；只声明有证据的版本带） |
+| 已测基线 | `0.2.1-rc.2`（开发 pin，data plane + client）+ `0.2.1-rc.3`（安装形状 + client 挂载）。`0.2.1-rc.5` 首屏冒烟失败，刻意排除在范围外，等换 pin 拿到证据再放行。 |
 | Node | `^22.19.0 || >=24.0.0` |
 | Surface | Web；Desktop 仅互操作；headless/SDK/ACP 不受本包支持 |
 

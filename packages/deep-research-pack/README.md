@@ -163,8 +163,8 @@ them gone. The full per-fact table is [Data](#data).
 
 | Item | Value |
 |---|---|
-| `engines.dsh` | `>=0.2.1-rc.2 <0.3.0-0` (host authority; there is no second compatibility field) |
-| Tested baseline | `0.2.1-rc.2` (development pin, data plane + client) + `0.2.1-rc.3` (install shape + client mount) |
+| `engines.dsh` | `>=0.2.1-rc.2 <=0.2.1-rc.3` (host authority; tested band only) |
+| Tested baseline | `0.2.1-rc.2` (development pin, data plane + client) + `0.2.1-rc.3` (install shape + client mount). `0.2.1-rc.5` first-screen smoke fails; it is intentionally outside the range until a pin bump provides evidence. |
 | Node | `^22.19.0 || >=24.0.0` |
 | Surface | Web; Desktop is interoperability only; headless/SDK/ACP are not supported by this package |
 

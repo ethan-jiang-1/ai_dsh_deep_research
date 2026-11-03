@@ -67,7 +67,7 @@
           "research"
         ],
         "sortKeys": {
-          "updated": 1793695100
+          "updated": 1793697101
         }
       },
       "dist-tags": {
@@ -76,12 +76,12 @@
       "versions": [
         {
           "version": "0.3.0",
-          "publishTimestamp": 1793695100,
+          "publishTimestamp": 1793697101,
           "source": {
             "type": "npm"
           },
           "engines": {
-            "dsh": ">=0.2.1-rc.2 <0.3.0-0"
+            "dsh": ">=0.2.1-rc.2 <=0.2.1-rc.3"
           }
         }
       ]
