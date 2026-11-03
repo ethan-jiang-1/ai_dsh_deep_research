@@ -4,7 +4,7 @@
 
 | 组 | consumer（真实引用） | 证明什么 | 冻结规则 | 进默认回归 |
 |---|---|---|---|---|
-| node-gate/ | [node-gate.test.mjs](../run/node-gate.test.mjs) + [@scripts/run-gates/node-gate.mjs](../../scripts/run-gates/node-gate.mjs) | 判据级门的用例与永久反证记录（门②③④L 形态） | 契约日用例即反证——改夹具应预期变红 | 是 |
+| node-gate/ | [node-gate-delivery.test.mjs](../run/node-gate-delivery.test.mjs) 等三件（delivery/leads/session） + [@scripts/run-gates/node-gate.mjs](../../scripts/run-gates/node-gate.mjs) | 判据级门的用例与永久反证记录（门②③④L 形态） | 契约日用例即反证——改夹具应预期变红 | 是 |
 | schema-scan/ | [schema-scan.test.mjs](../run/schema-scan.test.mjs)（[@scripts/run-gates/schema-scan.mjs](../../scripts/run-gates/schema-scan.mjs) 判据同源，夹具路径引用在测试） | 在场级断言用例（八节点输出件，断代定红） | 契约日用例即反证——改夹具应预期变红 | 是 |
 | run-state/ | [run-state.test.mjs](../run/run-state.test.mjs) | run 操作面状态谓词（真实会话日志三时点投影 + 构造 zstd 帧） | 语义由消费测试钉住 | 是 |
 | run-dashboard/ | [run-dashboard.test.mjs](../run/run-dashboard.test.mjs) | 仪表盘折算投影（日志选择、HITL 折算、步骤投影） | 同上 | 是 |

@@ -25,6 +25,7 @@
 ## 放置规则（一处证据一个家）
 
 - **`tests/`**：契约测试与守卫（`*.test.mjs`），断言对象是仓库里的自控文件；
+- 域内共享助手（非测试）住 `tests/<domain>/<name>-helpers.mjs`（glob 之外；只放夹具定位/临时目录，不放断言）。
 - **`tests/fixtures/`**：构造样本与经整理、人审冻结的录制回放语料；由测试或独立回放 smoke
   消费。原始运行日志、报告与抓取证据归 `runtime/smoke-workspace/`、`research-workspace/` 的
   `drt_*`/`archive/`，夹具不自动进入默认测试 glob；
