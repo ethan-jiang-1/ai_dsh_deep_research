@@ -15,6 +15,9 @@
 - **client-load 的 stuck 升为红**：重试一次 `dismissPreviewNotice`，仍可见才 `step(false, ...)`。
   旧注释"只记提示，后续点击会暴露"已被 2026-10-27 事故推翻（JS 派发点击绕过 hit-testing，后续
   断言不会红）。
+- **run verdict 带 `page.html`**：截图只能说明"哪里不对"，看不出"哪个节点没渲染"。`cdp-probe` 增
+  `--html`（`document.documentElement.outerHTML`），run-driver 把它复制到每份
+  `run-verdicts/<ts>-<kind>/page.html`（与 page.png 同址；失败也落）。实测活通道快照 595 KB。
 - **`bundle-sessions` 的下一步给 session-id**：`watch-run` 的判据参数是 session-id，旧输出给 slug
   → 照抄即 exit 2（诊断第一步自带坏命令）。同轮加**状态摘要**：反查后直接打印
   `events/readable/hitlPending/runSettled` 一行（runStateOf 同一谓词），诊断不必再手拼两跳。
