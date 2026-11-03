@@ -187,7 +187,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 
 | 症状 | 最小证据 | 失败时看什么 |
 |---|---|---|
-| 页面空白 / 插件横幅报错 | [client-load-smoke](../scripts/smoke/client-load-smoke.mjs) | `runtime/smoke-workspace/client-load-*/{page.png,page.html,console.txt,meta.json}` |
+| 页面空白 / 插件横幅报错 | [client-load-smoke](../scripts/smoke/client-load-smoke.mjs) | `runtime/smoke-workspace/client-load-*/{page.png,page.html,console.txt,meta.json}`；**最近一次结果 = `client-load-latest.json`**（PASS/SKIP/FAIL 指针，旧红目录不再冒充最新） |
 | 页签不出现 / keyed 槽空白 | 同上 + `client-keys` 门禁 | `keys.ts` 字面量与 [驾驶舱 §2](design/40-research-cockpit.md) 的登记 |
 | 状态页显示“未绑定” | [client-load-smoke](../scripts/smoke/client-load-smoke.mjs) 的绑定会话断言；run 通道用 `run-driver probe --require-data` | [bundle-sessions](../scripts/run-ops/bundle-sessions.mjs) 反查会话 id + 状态摘要 |
 | run 卡住 / HITL 不弹 | [watch-run](../scripts/run-ops/watch-run.mjs) + [bundle-sessions](../scripts/run-ops/bundle-sessions.mjs) | 挂起谓词与日志回退检测；语义 = [Run 指南 §3](guides/61-run-playbook.md) |

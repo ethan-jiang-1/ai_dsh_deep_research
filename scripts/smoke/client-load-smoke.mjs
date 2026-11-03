@@ -341,6 +341,19 @@ const noteHttpFailure = (entry) => {
 let artifactsSaved = null
 // 失败现场（审计 P0-4）：截图 + DOM + console + meta。agent 的"看见页面"最小证据；
 // 成功不写，失败/异常写 timestamped 目录，路径打印到 stderr。
+// 最新结果指针（2026-11-03 G-21）：失败现场目录按时间戳保留，但"最近一次到底是红是绿"
+// 不能靠 ls -t 猜（旧红目录会一直在）。PASS 也落一份轻量 meta（不存截图，省磁盘）。
+const LATEST = join(ROOT, 'runtime', 'smoke-workspace', 'client-load-latest.json')
+const writeLatest = (status, dir = null) => {
+  try {
+    mkdirSync(dirname(LATEST), { recursive: true })
+    writeFileSync(LATEST, JSON.stringify({
+      at: new Date().toISOString(), status, dir,
+      failures: failures.slice(0, 8), skipped: skipped.slice(0, 8),
+    }, null, 2))
+  } catch { /* 指针写失败不改变判据 */ }
+}
+
 const saveArtifacts = async (reason, extra = {}) => {
   if (page === null || page === undefined || artifactsSaved !== null) return artifactsSaved
   const stamp = new Date().toISOString().replace(/[:.]/g, '-')
@@ -367,6 +380,7 @@ const saveArtifacts = async (reason, extra = {}) => {
       extra, consoleErrors, disconnects, host,
     }, null, 2))
     artifactsSaved = dir
+    writeLatest('FAIL', dir)
     console.error(`client-load-smoke: 失败现场 ${dir}（page.png / page.html / console.txt / meta.json；`
       + `浏览器断连 ${disconnects} 次、主机 load ${host.load1} / free ${host.freeMB}MB、HTTP 失败 ${httpFailures.length} 条——先分流"流抖动/主机不健康"与"产品红"）`)
     return dir
@@ -1268,6 +1282,7 @@ try {
 }
 
 if (failures.length === 0) {
+  writeLatest(skipped.length === 0 ? 'PASS' : 'SKIP')
   console.log(skipped.length === 0
     ? '\nclient-load-smoke: ALL PASS（观察面 client 面真浏览器加载绿）'
     : `\nclient-load-smoke: ALL PASS + ${skipped.length} SKIP（未跑 ≠ 通过）：\n${skipped.join('\n')}`)
