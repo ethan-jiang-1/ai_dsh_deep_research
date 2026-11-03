@@ -2,6 +2,8 @@
 
 > 状态：implemented
 
+> 历史注记：workspace 种子与 `dev/sync-pack-workspace.mjs` 已由 D40 删除；现行安装形态看 [guides/65](../../docs/guides/65-run-forms.md)。
+
 ## 决定
 
 **一、研究工作区的"跟踪面"分两层，不共用一份规则。**

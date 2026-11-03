@@ -588,7 +588,6 @@ export const CASES = [
       const p = join(dir, 'dev', 'research.overlay.yml');
       writeFileSync(p, readFileSync(p, 'utf8').replace('default: lead', 'default: probe'));
     } },
-  // pack-workspace-fresh：删一件种子（节点契约）——正本仍在、种子缺席即漂移。
   // repo-conventions：本门禁在副本基线**非 PASS**（fixture 无 vendor/dsh/package.json → engines
   // 对齐无证据源）——按驱动壳约定必须带 expect 指名注入报因（同 align-ledger 族），
   // 否则注入未生效也会被既有报因蒙混成绿。注入 = .editorconfig 丢 root 声明。

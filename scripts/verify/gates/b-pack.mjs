@@ -420,7 +420,7 @@ export function runB() {
 }
 
 // ── readme-shape（文档合同：DSH package-bundle + 安装手册默认路径）──
-// 依据：DSH doc-standard 机械推导 dsh.bundle.patch → package-bundle；75 七问；70 十段；
+// 依据：DSH doc-standard 机械推导 dsh.bundle.patch → package-bundle；75 七问；70 十一段；
 // 手册默认首装 = CLI 建 custom profile（DSH 没有 UI 建 profile）+ 应用内 Plugins 页装包，
 // CLI 装包只作 web 自动化。反证：kind 改成 bundle → 红；删七问/模板节 → 红；手册缺 profile
 // 引导或把引导挪到 Plugins 页之后 → 红；手册缺安全/平台/Discover 前置 → 红；README 超预算 → 红。

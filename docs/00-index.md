@@ -12,14 +12,14 @@
 `deep-research`（[D41](./decisions.md#d41)）。首次由 CLI 建 profile（仅首次、破坏性）；之后在应用内
 Plugins 页装包；启动 `dsh --profile deep-research`。没有 launcher、没有 scaffold、没有自定义安装器；
 只保留只读 doctor。开发者在本仓走同名 profile（隔离 home）+ `research-workspace/` + run-driver。
-两条路径的命令与数据根不同，不要互相套用。**安装命令的唯一 owner = [`_dist/安装手册.md`](../_dist/安装手册.md)**。
+两条路径的命令与数据根不同，不要互相套用。**安装步骤的唯一 owner = [`scripts/dist/product-manual.md`](../scripts/dist/product-manual.md)；生成物 = [`_dist/安装手册.md`](../_dist/安装手册.md)（勿手改，重导出 = `node scripts/dist/export-dist.mjs`）**。
 
 | 用户的说法 | 走哪（该事的唯一 owner） | 首个动作 |
 |---|---|---|
 | "用它""启动这个插件""跑研究""装到我的 DSH"（安装用户） | [`_dist/安装手册.md`](../_dist/安装手册.md)（命令唯一 owner）+ [pack README](../packages/deep-research-pack/README.md) + [guides/65](./guides/65-run-forms.md) | 按手册：CLI 建 profile（仅首次）→ 启动 → 应用内 Plugins 页装包；CLI 装包仅 Web 自动化/离线 |
 | "在本仓启动/开跑/接着上次跑"（开发通道，默认 `runtime/harness-home`） | [guides/61](./guides/61-run-playbook.md) | `node dev/run-driver.mjs up`（起/复用通道 + 验浏览器面 + 呈交 URL） |
 | "换 profile/home""装进现有 web profile""诊断装得对不对" | [guides/65](./guides/65-run-forms.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | 换 profile 用新名字重新初始化；**已有 profile 不要重复 `--from-default-profile`**（破坏性）；诊断 = 安装副本的 `dsh-deep-research-doctor` |
-| "只验证插件还能挂载/安装"（证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `source dev/env.sh && node scripts/smoke/install-shape-smoke.mjs`（或 preset/release-smoke） |
+| "只验证插件还能挂载/安装"（证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `node scripts/smoke/install-shape-smoke.mjs`（自带临时 home，无需 source；或 `source dev/env.sh && node scripts/smoke/preset-smoke.mjs` / `release-smoke`） |
 | "改插件内容"（角色 / skill / 驾驶舱 / 部署面） | [guides/62](./guides/62-plugin-authoring.md) | 该页 §参与阶梯 + §改动影响面 |
 | "改本仓开发流程或仓库文档"（门禁 / docs / notes / 入口链 / 各 README） | [guides/60 §1](./guides/60-dev-loop.md) | 按工作类型分支（入口链第 3–4 步在此展开） |
 
@@ -75,9 +75,9 @@ Plugins 页装包；启动 `dsh --profile deep-research`。没有 launcher、没
 | [_backlog/](../_backlog/README.md)（[问题](../_backlog/issues/README.md)） | 问题与证据 | 问题澄清、查证方法、调研材料、缺陷、结论去向与归档 |
 | [snapshots/](../snapshots/README.md) | 问题与证据 | 场景证据层：有持久消费者的整组录制回放资产与场景声明（消费 = snapshot-replay-smoke；证据边界与维护规则见该页） |
 | [guides/60-dev-loop.md](./guides/60-dev-loop.md) | 指南 | 开发环：六步闭环、面选择表、双 home、密钥 |
-| [guides/61-run-playbook.md](./guides/61-run-playbook.md) | 指南 | **run 操作指南**（研究发起人入口）：run-driver/boot-run、lead 会话、HITL 两点、观察面——run 通道（`deep-research` profile：本包 + vendor agent-team-profile 层，P1 定案）的使用面 |
-| [guides/62-plugin-authoring.md](./guides/62-plugin-authoring.md) | 指南 | **插件作者入口**（改插件内容的人/agent 入口）：DSH 词汇对齐（plugin/bundle/profile/preset）、参与阶梯 S0–S3、新行为归属、范本与证据义务、**交付与部署形态**（bundle/profile 拓扑 + 工作区种子 + 部署 bin）、**改动影响面**（添/换/删要一起动什么）——上游 `docs/user/develop/**` 的本仓投影 |
-| [guides/63-git-boundary.md](./guides/63-git-boundary.md) | 指南 | **Git 入库边界与跨环境纪律**：源/合同/种子/证据 vs 生成物/运行态/本机态；三问判据、tracked 生成物条件、跨环境规则与门禁 |
+| [guides/61-run-playbook.md](./guides/61-run-playbook.md) | 指南 | **开发通道 run 操作（M2）**：run-driver/boot-run、lead 会话、HITL 两点、观察面——run 通道（`deep-research` profile：本包 + vendor agent-team-profile 层，P1 定案）的使用面；安装用户看 pack README / 安装手册 / 65 |
+| [guides/62-plugin-authoring.md](./guides/62-plugin-authoring.md) | 指南 | **插件作者入口**（改插件内容的人/agent 入口）：DSH 词汇对齐（plugin/bundle/profile/preset）、参与阶梯 S0–S3、新行为归属、范本与证据义务、**交付与部署形态**（bundle/profile 拓扑 + 包内 content + 部署 bin）、**改动影响面**（添/换/删要一起动什么）——上游 `docs/user/develop/**` 的本仓投影 |
+| [guides/63-git-boundary.md](./guides/63-git-boundary.md) | 指南 | **Git 入库边界与跨环境纪律**：源/合同/证据 vs 生成物/运行态/本机态；三问判据、tracked 生成物条件、跨环境规则与门禁 |
 | [guides/64-release-versioning.md](./guides/64-release-versioning.md) | 指南 | **发布版本、tag 与 npm 发布顺序**：pack 版本 = 唯一发布源、root 镜像、annotated tag、发布前 `release-check` 与 `release-version` 门禁 |
 | [guides/65-run-forms.md](./guides/65-run-forms.md) | 指南 | **运行形态合同**：M1 安装形态 / M1 互操作 / M2 独立开发 / M3 移交；六轴 owner 表；profile 归属与 patch 层；数据卡指针；`engines.dsh` + 团队层钉版；首屏工作区；`DSH_DEV_HOME`/多实例；干净 handoff 与证据矩阵 |
 

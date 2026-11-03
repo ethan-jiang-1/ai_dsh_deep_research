@@ -43,8 +43,8 @@
         "zh": "深度研究"
       },
       "description": {
-        "en": "Four research roles, a research cockpit, and traceable reports for DSH.",
-        "zh": "四个研究角色 + 研究驾驶舱，产出可溯源的研究报告。"
+        "en": "Five presets (four research roles + method editor), a research cockpit, and traceable reports for DSH.",
+        "zh": "五个 preset（四个研究角色 + 方法编辑）+ 研究驾驶舱，产出可溯源的研究报告。"
       },
       "icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJEZWVwIFJlc2VhcmNoIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0idGlsZSIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMxZDRlZDgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMGYyYTY2Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNCIgZmlsbD0idXJsKCN0aWxlKSIvPgogIDxwYXRoIGQ9Ik0xOSAxMmgxN2wxMSAxMXYyOGEyIDIgMCAwIDEtMiAySDE5YTIgMiAwIDAgMS0yLTJWMTRhMiAyIDAgMCAxIDItMnoiIGZpbGw9IiNmZmZmZmYiIG9wYWNpdHk9IjAuOTYiLz4KICA8cGF0aCBkPSJNMzYgMTJ2OWEyIDIgMCAwIDAgMiAyaDkiIGZpbGw9IiNkYmVhZmUiLz4KICA8cGF0aCBkPSJNMjQgNDZoOSIgc3Ryb2tlPSIjOTNjNWZkIiBzdHJva2Utd2lkdGg9IjIuNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPGNpcmNsZSBjeD0iMzEiIGN5PSIzMyIgcj0iNy41IiBmaWxsPSJub25lIiBzdHJva2U9IiMxZDRlZDgiIHN0cm9rZS13aWR0aD0iMy4yIi8+CiAgPHBhdGggZD0iTTM2LjUgMzguNWw2IDYiIHN0cm9rZT0iIzFkNGVkOCIgc3Ryb2tlLXdpZHRoPSIzLjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K",
       "author": "The ai_dsh_deep_research authors",
@@ -67,7 +67,7 @@
           "research"
         ],
         "sortKeys": {
-          "updated": 1793667650
+          "updated": 1793692474
         }
       },
       "dist-tags": {
@@ -76,7 +76,7 @@
       "versions": [
         {
           "version": "0.3.0",
-          "publishTimestamp": 1793667650,
+          "publishTimestamp": 1793692474,
           "source": {
             "type": "npm"
           },

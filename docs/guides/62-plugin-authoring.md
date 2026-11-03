@@ -125,7 +125,7 @@ agent-instructions 注入，冲突时项目优先。安装步骤（用户视角�
 | 你要做的事 | 必须一起动 | 最小证据 |
 |---|---|---|
 | 加/换一条 bundle 行（host 共享面） | `cordis.patch.yml` → `node dev/render-overlay.mjs` 重渲染；行引用的 `@deepseek-ai/*` 进 `peerDependencies` | `overlay-fresh` / `row-deps` 门禁 + L1 真挂载 + L2 安装形状 |
-| 加一个研究角色 | `presets/<role>.patch.yml` + `package.json` 的 `dsh.bundle.patch` 数组 + `l4-lite-smoke` 的 `PROMPTS` + 台账 D 号（D2 是角色数） | `preset-smoke` 真挂载（L1）+ `preset-structure` / `role-list-sync` |
+| 加一个研究角色 | 按 [`adding-a-research-role`](../../.agents/skills/adding-a-research-role/SKILL.md) §2 的同步面逐项做（清单以技能为准） | `preset-smoke` 真挂载（L1）+ `preset-structure` / `role-list-sync` |
 | 加一个方法论 skill | `presets/<role>/skills/<n>/SKILL.md`（frontmatter `name` 逐字等于目录名）；persona 若点名 skill 名须同 diff 对账（各 preset 的 persona 均有硬引用） | `preset-structure` + L1 的 skills 隔离断言 |
 | 改研究手册 / 模板 | 改 `packages/deep-research-pack/content/`（手册/模板）；模板路径由 `research_pack_root` 插值 | `content-shape` 门禁 + `snapshot-replay` B 层 + `l4-lite` 真模型 |
 | 加部署脚本 / bin | `package.json` 的 `files` + `bin`（当前只有只读 doctor） | `release-smoke`（L2：真装一次，装完能跑） |

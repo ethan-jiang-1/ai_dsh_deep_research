@@ -66,7 +66,7 @@
 
 | 面 | 什么时候跑 | 命令 |
 |---|---|---|
-| L0 结构 | 每次收尾必跑；实施期随手 | `pnpm verify` + `pnpm test`（正本 = `package.json` 的 `verify`/`test` 脚本） |
+| L0 结构 | 每次收尾必跑；实施期随手 | `pnpm verify` + `pnpm test`（正本 = `package.json` 的 `verify`/`test` 脚本；fresh clone 首次先 source，见下） |
 | L1 挂载 | preset 内容/结构改动（其完成定义） | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs`（源码域，keyless；未 source 自拒）；安装域加 `--profile <p> --no-patch` |
 | L2 安装 | 包结构/release 相关改动 | `source dev/env.sh && node scripts/smoke/release-smoke.mjs`（pack→干净 profile→plugin add→安装域冒烟；无模型调用，安装验收使用 `--install-only`，默认 doctor 仍检查凭据；未 source 自拒） |
 | L2 冷启动 | 独立环境/bootstrap 改动 | `source dev/env.sh && node scripts/smoke/cold-start-smoke.mjs`（独立 home/profile/端口/state；MCP 关闭；团队层需 registry/缓存） |
@@ -75,6 +75,8 @@
 | L2 首启 | startup/client 恢复/首屏/StartCard 改动 | `node scripts/smoke/product-boot-smoke.mjs`（纯 `dsh --profile deep-research` + 真 Web + 浏览器；工作区会话、首屏、目录按钮；无模型；缺前置 exit 2） |
 | L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `node --import tsx/esm --test tests/contracts/evaluation-contract.test.mjs` |
 | L4 交付 | 里程碑级 | `source dev/env.sh && node scripts/smoke/l4-lite-smoke.mjs`（真模型档：需 `DEEPSEEK_API_KEY`，未 source 自拒）/ 完整 run（授权范围） |
+
+**source 口径**：fresh clone 首次跑 L0 前先 `source dev/env.sh`（激活 pre-commit；此后幂等）。表中标 source 的命令必须 source；`lifecycle-smoke` / `install-shape-smoke` / `product-boot-smoke` 自行设定 home、不依赖 source；run-ops 的 `evidence-audit` / `run-accept` / `plan-card-stats` / `provider-error-stats` 需要 source（见命令块注记）。
 
 判据与负面判据（什么算"框架不合理"）见 [evaluation.md](../evaluation.md)——面与面不互抵。
 
@@ -158,6 +160,8 @@ node scripts/probe/discipline-probe.mjs     # 纪律行为探针（真模型档�
 node packages/deep-research-pack/scripts/doctor.mjs --workspace <dir>   # 只读诊断（pack 自带 bin：DSH 版本/profile roster/安装副本/团队层/工作区/凭据；不安装、不启动、不写 profile）
 ```
 
+CI 另跑 `run-accept-smoke` / `pack-smoke` / `doctor-smoke`；逐件命令索引 = [scripts/README](../../scripts/README.md)（本块是操作入口，不是全量清单）。
+
 档位词汇（keyless / 真模型档）与密钥定义 = [AGENTS.md §密钥](../../AGENTS.md)；脚本头注各带设计依据
 与 RFC 出处。
 
@@ -184,7 +188,7 @@ node packages/deep-research-pack/scripts/doctor.mjs --workspace <dir>   # 只读
 ```sh
 git clone --recurse-submodules <本仓 URL>   # 或 clone 后补：git submodule update --init vendor/dsh
 pnpm install                                # 根 workspace（devDeps 以 link:vendor/dsh 解析——vendor-links 门禁）
-pnpm verify && pnpm test                    # L0 应全绿（无需 vendor 构建产物）
+source dev/env.sh && pnpm verify && pnpm test   # L0 应全绿（source 激活 pre-commit；无需 vendor 构建产物）
 ```
 
 vendor 构建产物（`bash dev/vendor-build.sh`）是 L1/L2/run 通道/`pnpm dsh` 的前置（0.1.7 起启动依赖构建产物），L0 不需要；run 通道凭据前置见 [00-index §先分流](../00-index.md)。

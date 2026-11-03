@@ -81,7 +81,7 @@ implemented/archived/rejected；事故复盘在 archived/）；写入触发/取�
 ## 命令速查（全档正本 = [guides/60 §2](docs/guides/60-dev-loop.md)；run 通道 = [guides/61](docs/guides/61-run-playbook.md)）
 
 ```sh
-source dev/env.sh    # ⚠ 仅 L1/L2 与 guides/60 命令/前置标注须先 source 的脚本需要（scripts/README 档位列只申报凭据/调用模式）；run 通道 dev/boot-run.sh 自 source，勿重复。作用：双 home（DSH_HOME=runtime/harness-home）+ 裸 dsh 拦截；未 source 自拒 exit 2
+source dev/env.sh    # ⚠ fresh clone 首次（激活 hooks）与 L1/L2、部分 run-ops 需先 source；run 通道 dev/boot-run.sh 自 source，勿重复。作用：双 home（DSH_HOME=runtime/harness-home）+ pre-commit + 裸 dsh 拦截；未 source 的脚本自拒 exit 2；口径 = guides/60 §2
 pnpm verify          # L0 结构门禁（keyless，收尾必跑）
 pnpm test            # L0 keyless 回归（默认；vendor 源码契约 = pnpm test:vendor）
 node dev/run-driver.mjs up   # 研究 run 通道（起/复用 + 验浏览器面 + 呈交 URL；操作 = guides/61 §0）

@@ -42,10 +42,13 @@ mechanism baseline for this repository — start there when checking harness beh
 Keyless checks (no model key, no network calls):
 
 ```sh
+source dev/env.sh   # fresh clone：激活 pre-commit；之后幂等
 pnpm verify
 pnpm test
-pnpm typecheck
+pnpm test:vendor
 ```
+
+`pnpm typecheck` 需要 vendor 构建产物（`bash dev/vendor-build.sh`，CI deploy job 跑），不属于 fresh clone 的 keyless 最小集。
 
 Install/first-screen checks (real install / browser; no model calls):
 

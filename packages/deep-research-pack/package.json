@@ -142,7 +142,7 @@
     }
   },
   "scripts": {
-    "build": "tsc -b . && tsdown",
+    "build": "node -e \"require('node:fs').rmSync('lib', { recursive: true, force: true })\" && tsc -b . && tsdown",
     "prepack": "pnpm build"
   },
   "devDependencies": {
