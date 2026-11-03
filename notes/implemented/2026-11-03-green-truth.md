@@ -15,6 +15,9 @@
 - **client-load 的 stuck 升为红**：重试一次 `dismissPreviewNotice`，仍可见才 `step(false, ...)`。
   旧注释"只记提示，后续点击会暴露"已被 2026-10-27 事故推翻（JS 派发点击绕过 hit-testing，后续
   断言不会红）。
+- **HITL 挂起带等待时长**：`runStateOf` 增 `hitlAskedAt` / `hitlAgeMs`（`now` 注入，测试不依赖宿主钟）；
+  `watch-run` 挂起时打印 `STATE-NOTE: HITL 已等待 N 分钟`（`STATE: HITL-PENDING` 行保持原样）。
+  理由：600s timed 超时后仍显示挂起是**预期**（问题保持可答），旧输出无法区分"刚挂起"与"卡了 3 小时"。
 - **漂移门判"运行时集"，不判文档**：README/LICENSE 漂移只逐条提示、不判红；`lib/`/presets/content/
   locale/cordis.patch.yml 等运行时文件仍严格逐文件比对。理由：页面行为只由运行时文件决定，
   而改一行 README 曾把整条通道判 NOT-RUN、逼人 `rm -rf profile` 重建（2026-11-03 G-20）。
@@ -41,6 +44,7 @@
   （unbound 默认绿 + dataFace 显式；require-data 时 unbound 红且 checks=7）。
 - `tests/run/web-ui-nav.test.mjs`：5/5 绿；新增"标题节点不可见（零尺寸）→ present=false"用例——
   旧判据在该用例下会报 present=true（假 stuck）。
+- HITL 年龄：`run-state.test.mjs` 注入 `now = askedAt + 5min` → `hitlAgeMs=300000`；`answered` 夹具 → null。
 - 漂移门两态（临时 profile 镜像）：源 README 追加一行 → 绿（跳过 1 个非运行时文件）；删镜像
   `lib/client.js` → 红并点名该文件。函数本体从 `dev/boot-run.sh` 原样抽出执行，不测副本。
 - client-load 成功后 `client-load-latest.json` 落 `{status:"PASS", dir:null}`；失败路径写

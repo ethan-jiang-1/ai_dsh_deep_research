@@ -116,10 +116,19 @@ export function bundleDirOf(wsRoot, bundleName) {
  * @param params.wsRoot 研究工作区根。
  * @param params.includeSessionIdentity 仅需按 UI 会话身份选路时设 true；默认日志快照不暴露标题与 id。
  */
-export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false }) {
+export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false, now = Date.now() }) {
   const { readable, events } = readSessionEvents(logPath)
   const bundle = bundleStateOf(wsRoot)
   const turnOpen = readable ? turnOpenOf(events) : null
+  const pending = readable ? hitlPendingOf(events) : null
+  // HITL 已等待时长（G-24）：ask 事件自带 time；pending=true 且时间可读才给数，否则 null（不猜）。
+  const lastAsk = readable
+    ? [...events].reverse().find((j) => j?.type === 'tool/call' && j?.data?.name === 'ask_user_question')
+    : undefined
+  const hitlAskedAt = typeof lastAsk?.time === 'number' && Number.isFinite(lastAsk.time) ? lastAsk.time : null
+  const hitlAgeMs = readable && pending?.pending === true && hitlAskedAt !== null && Number.isFinite(now)
+    ? Math.max(0, now - hitlAskedAt)
+    : null
   const identity = includeSessionIdentity === true
     ? {
       sessionId: readable && events[0]?.type === 'session' && typeof events[0].id === 'string' ? events[0].id : null,
@@ -144,7 +153,9 @@ export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false }) 
     // 'lead'），preset 字段对它们不表身份；真信号 = 首事件 origin==='subagent'。无 origin
     // 的顶层会话（kickoff/GUI 建）→ false；不可读 → null（不猜）。
     teammate: readable && events[0]?.type === 'session' ? events[0].origin === 'subagent' : null,
-    hitlPending: readable ? hitlPendingOf(events).pending : null,
+    hitlPending: pending === null ? null : pending.pending,
+    hitlAskedAt,
+    hitlAgeMs,
     askCalls: readable ? toolCallCount(events, 'ask_user_question') : null,
     askIndefinite: readable ? askIndefiniteOf(events) : null,
     presentCalls: readable ? toolCallCount(events, 'present') : null,

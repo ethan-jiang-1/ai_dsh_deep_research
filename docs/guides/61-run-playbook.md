@@ -197,6 +197,8 @@ BUG-020）。
   会话。**不是**按推荐项自动落定。timed 放行是无人值守 run 的生命线：lead persona 的
   ask 硬约束（禁 `wait: -1`，模型单参即可拆掉它）由回归测试钉住——形态判别与救活路径
   的机制正本 = [BUG-005 卡](../../_backlog/_archived/fixed_bugs/BUG-005-hitl1-indefinite-wait-no-floor.md)。
+  等待判据：`watch-run` 的状态行带 `hitlAgeMs`，挂起时另打 `STATE-NOTE: HITL 已等待 N 分钟`——
+  600s 超时后仍显示挂起是预期（问题保持可答），不是"卡死"；判卡死看年龄 + 日志回退。
 
 ## 5. 中断与恢复
 

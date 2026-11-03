@@ -147,6 +147,16 @@ test('三态：挂起 → pending=true / askCalls=1（末位回合事件 = 未�
   assert.equal(turnOpenOf(events), true, '回合仍开（turn/end 未落）');
 });
 
+test('挂起时长：hitlAskedAt = ask 事件 time；hitlAgeMs = now − askedAt（注入 now，不依赖宿主钟）', () => {
+  const askedAt = 1790522886559;
+  const st = runStateOf({ logPath: FIX('pending'), wsRoot: join(ROOT, 'research-workspace'), now: askedAt + 5 * 60_000 });
+  assert.equal(st.hitlPending, true);
+  assert.equal(st.hitlAskedAt, askedAt);
+  assert.equal(st.hitlAgeMs, 5 * 60_000);
+  const notPending = runStateOf({ logPath: FIX('answered'), wsRoot: join(ROOT, 'research-workspace'), now: askedAt + 5 * 60_000 });
+  assert.equal(notPending.hitlAgeMs, null, '非挂起态不报等待时长');
+});
+
 test('三态：已答 → pending=false / askCalls=1（ask 之后有回合事件）', () => {
   const { events } = loadFix('answered');
   assert.equal(hitlPendingOf(events).pending, false);

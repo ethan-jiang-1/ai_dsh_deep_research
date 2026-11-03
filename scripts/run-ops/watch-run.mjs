@@ -75,7 +75,13 @@ while (Date.now() < deadline) {
       console.error(`watch-run: ⚠ 盯的是 ${s.preset} 会话——hitlPending 对非 lead 会话不构成 HITL 停靠信号（lead 的卡才需要操作侧接手）`)
     }
   }
-  if (leadHitlCandidate(s)) { console.log('STATE: HITL-PENDING'); process.exit(0) }
+  if (leadHitlCandidate(s)) {
+    // 等待时长（G-24）：ask 事件自带 time，runStateOf 已算好；给操作侧"卡了多久"的判据，
+    // 但 STATE 行保持原样（下游按精确行解析）。
+    if (typeof s.hitlAgeMs === 'number') console.log(`STATE-NOTE: HITL 已等待 ${Math.round(s.hitlAgeMs / 60000)} 分钟（hitlAgeMs=${s.hitlAgeMs}）`)
+    console.log('STATE: HITL-PENDING')
+    process.exit(0)
+  }
   if (s.runSettled === true) {
     console.log(`STATE: RUN-SETTLED${s.presentCalls === 0 ? '（⚠ present 声明缺席——偏差，需记档）' : ''}`)
     process.exit(0)
