@@ -43,6 +43,7 @@
 | decisions 台账去历史化 | 暂不动：退役决策（D35/D38/D39）仍以现在时留在台账，且有 3KB 级修订史单元格 | 用户拍板接受锚点/引用面改动；或同一 D 号第三次追加修订 | [decisions.md](../docs/decisions.md) |
 | bundle 行依赖声明 | `tool-present` / `ui-agent-team` 未声明包依赖，靠 CLI 恰好带 agent-team-profile | 安装域出现 `did not activate`，或上游依赖图调整（升 pin 复核） | [guides/65](../docs/guides/65-run-forms.md) |
 | 方法库 tool smoke 进 CI | 不进：真 Loader 需要 native system 产物（`build:native`），CI 无该工具链（2026-11-03 实测 system.node 缺席） | CI 提供 native 构建/预编译缓存，或该冒烟改为不启 Loader 的纯工具面驱动 | [method-library-tool-smoke](../scripts/smoke/method-library-tool-smoke.mjs) |
+| 启动空会话复用 | 不复用：每次带 `DEEP_RESEARCH_WORKSPACE` 启动 mint 一个 blank Lead 会话（首屏语义）；settings 源才记 sessionId | 真实首启出现 blank Lead 会话堆积（同一工作区 ≥3 个空会话）或用户要求“开回上次那场”时，再实现复用 | [design/40 §6](../docs/design/40-research-cockpit.md) |
 | 启动行严格幂等 | `src/content`、`src/startup`（host）与 client 启动恢复均挂 `ctx.effect` 且可取消（dispose 后不再建会话，测试 + 红证）；极端竞态（列表就绪前重复 apply）未做严格幂等 | HMR/升级实测出现重复 Lead 会话 | [guides/62](../docs/guides/62-plugin-authoring.md) |
 | notes implemented 只进不出 | 132 篇中约一半无 live 引用；归档按"不再指导未来"判断，无节奏 | 机制名检索命中多篇互相矛盾的旧决定时做批量体检 | [notes/README](../notes/README.md) |
 | 方法库工作台再拆分 | 组件 1152 行：model / ColumnHandle / useLibraryData 已外移；草稿·操作队列·coach 三块状态机仍耦合在一个组件里 | 组件 >1300 行，或第二个功能要复用同一状态机，或一次「改草稿/写操作」的 diff 触及 >5 处 | [design/40](../docs/design/40-research-cockpit.md) |

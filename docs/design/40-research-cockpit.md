@@ -308,6 +308,10 @@ domain。它是 Client 渲染，不进模型请求。
 
 ## 6. 已知限制与延后工作
 
+- **启动空会话不复用**：带 `DEEP_RESEARCH_WORKSPACE` 的每次启动按首屏语义 mint 一个 blank Lead
+  会话（settings 源才记 sessionId）；不自动复用已有 blank 会话。真实使用出现会话堆积时再实现
+  复用（触发 = [_backlog/triggers.md](../../_backlog/triggers.md)）。
+
 - **run-dashboard / client-load-reference oracle 保留独立**：dashboard 是同步 HTML 投影，oracle 的价值在独立（复用生产实现会掩盖漂移）；两者不复用 run-context，边界见 [run-context Note](../../notes/implemented/2026-10-23-run-context.md)。
 
 - **G6 编辑卡片跨会话串联（vendor UI，待查）**：操作侧改动曾混进 run 会话视图；lead journal
