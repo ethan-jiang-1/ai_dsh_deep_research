@@ -19,7 +19,10 @@ test('content.apply：variable/context 注册经 ctx.effect 挂载，返回 disp
     },
     logger: { warn() {}, info() {} },
     systemPrompt: {
-      variable(name) { calls.push(`variable:${name}`); },
+      variable(name) {
+        calls.push(`variable:${name}`);
+        return () => calls.push(`dispose:variable:${name}`);
+      },
       context(input) {
         calls.push(`context:${input.name}`);
         return () => calls.push(`dispose:${input.name}`);
@@ -30,7 +33,8 @@ test('content.apply：variable/context 注册经 ctx.effect 挂载，返回 disp
   assert.ok(calls.includes('effect'), 'apply 没有走 ctx.effect——注册不可回收');
   assert.ok(calls.includes('variable:research_pack_root'), 'variable 未注册');
   assert.ok(calls.includes('context:research:manual'), 'manual context 未注册');
-  assert.equal(disposers.length, 1, 'context 的 disposer 未交给 effect 作用域');
+  assert.equal(disposers.length, 1, '注册的 disposer 未交给 effect 作用域');
   disposers[0]();
-  assert.ok(calls.includes('dispose:research:manual'), 'disposer 未接通');
+  assert.ok(calls.includes('dispose:research:manual'), 'context disposer 未接通');
+  assert.ok(calls.includes('dispose:variable:research_pack_root'), 'variable disposer 未接通——HMR 重名注册会抛');
 });

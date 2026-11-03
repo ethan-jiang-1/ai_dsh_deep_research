@@ -15,6 +15,9 @@
 - **client-load 的 stuck 升为红**：重试一次 `dismissPreviewNotice`，仍可见才 `step(false, ...)`。
   旧注释"只记提示，后续点击会暴露"已被 2026-10-27 事故推翻（JS 派发点击绕过 hit-testing，后续
   断言不会红）。
+- **content 注册接住两个 disposer**：`systemPrompt.variable()` 与 `context()` 都返回 effect
+  disposer（vendor 合同）；此前只接住 context 的，变量留在服务作用域，HMR/重放时重名注册会抛。
+  现在 effect 返回一个统一 disposer，按反序撤销两者；测试钉住两个 dispose 回调（D7 收口）。
 - **HITL 挂起带等待时长**：`runStateOf` 增 `hitlAskedAt` / `hitlAgeMs`（`now` 注入，测试不依赖宿主钟）；
   `watch-run` 挂起时打印 `STATE-NOTE: HITL 已等待 N 分钟`（`STATE: HITL-PENDING` 行保持原样）。
   理由：600s timed 超时后仍显示挂起是**预期**（问题保持可答），旧输出无法区分"刚挂起"与"卡了 3 小时"。
@@ -44,6 +47,8 @@
   （unbound 默认绿 + dataFace 显式；require-data 时 unbound 红且 checks=7）。
 - `tests/run/web-ui-nav.test.mjs`：5/5 绿；新增"标题节点不可见（零尺寸）→ present=false"用例——
   旧判据在该用例下会报 present=true（假 stuck）。
+- content effect：fake systemPrompt 返回两个 disposer；`dispose()` 后两个回调都被调用；
+  `pnpm build` + seed client-load **ALL PASS**（注入行真挂载）。
 - HITL 年龄：`run-state.test.mjs` 注入 `now = askedAt + 5min` → `hitlAgeMs=300000`；`answered` 夹具 → null。
 - 漂移门两态（临时 profile 镜像）：源 README 追加一行 → 绿（跳过 1 个非运行时文件）；删镜像
   `lib/client.js` → 红并点名该文件。函数本体从 `dev/boot-run.sh` 原样抽出执行，不测副本。

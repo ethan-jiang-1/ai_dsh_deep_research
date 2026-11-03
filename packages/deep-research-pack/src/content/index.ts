@@ -59,14 +59,19 @@ export function apply(ctx: Context, input: { packRoot?: string; manual?: string 
   // fiber 回收/HMR 重放时随作用域撤销；否则重复 apply 会重复注入同一段 runtime context
   //（2026-11-03 审计 D7-3）。
   ctx.effect(() => {
-    systemPrompt.variable('research_pack_root', () => packRoot)
-    const dispose = systemPrompt.context({
+    // 两个注册都返回 effect disposer（vendor system-prompt API 合同）；都要接住，否则
+    // HMR/重放时变量留在服务作用域、重名注册会抛（2026-11-03 审计 D7）。
+    const disposeVariable = systemPrompt.variable('research_pack_root', () => packRoot)
+    const disposeContext = systemPrompt.context({
       name: 'research:manual',
       // 外部贡献用固定数值；getContextOrder 只接受 first-party 名单。
       order: 205,
       interpolate: true,
       text: manual,
     })
-    return typeof dispose === 'function' ? dispose : () => {}
+    return () => {
+      if (typeof disposeContext === 'function') disposeContext()
+      if (typeof disposeVariable === 'function') disposeVariable()
+    }
   }, 'deep-research: research manual context')
 }
