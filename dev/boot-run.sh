@@ -69,7 +69,7 @@ drift_check() {
     case "$rel" in
       README.md|README.zh.md|LICENSE)
         if [ ! -f "$PACKDIR/$rel" ] || [ ! -f "$mirror" ] || ! diff -q "$PACKDIR/$rel" "$mirror" >/dev/null 2>&1; then
-          echo "boot-run: 注：非运行时文件漂移（$rel）——不影响通道判绿" >&2
+          echo "boot-run: 注：非运行时文件漂移（${rel}）——不影响通道判绿" >&2
           skipped=$((skipped + 1))
         fi
         continue
@@ -250,7 +250,7 @@ echo "boot-run: boot web（profile=${PROFILE}，端口 ${PORT}；Ctrl-C 停止�
 # 长命复用连接有相位性故障，postmortem 2026-10-13；移除 = 删本行）
 ISOLATION_GUARD="$ROOT/dev/llm-socket-isolation.cjs"
 if [ ! -f "$ISOLATION_GUARD" ]; then
-  echo "boot-run: 隔离预载件缺席（$ISOLATION_GUARD）——拒绝在未隔离通道上启动；先恢复该文件" >&2
+  echo "boot-run: 隔离预载件缺席（${ISOLATION_GUARD}）——拒绝在未隔离通道上启动；先恢复该文件" >&2
   exit 2
 fi
 # DSH_ISOLATION_ANNOUNCE：让预载在 boot 日志打一行确定性自证（判读"隔离下"的核验锚点 =
