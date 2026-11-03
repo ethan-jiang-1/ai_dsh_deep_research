@@ -49,13 +49,10 @@ jobs:
       - name: Test (keyless regression)
         run: source dev/env.sh && pnpm test
 
-      # 类型面也是回归面（2026-11-03 七维卫生审计 D5-1）：测试走 tsx（剥类型），
-      # 类型退化不会被 pnpm test 发现。vendor 类型由 `pnpm install` 的 workspace 链接解析；
-      # 若本步在 CI 报 TS2307，先看是否需要在 job 前补 `bash dev/vendor-build.sh`。
-      - name: Typecheck (pack dual halves)
-        run: pnpm typecheck
-
-      # 门禁自测：87 个注入案例 + 4 个对照，经真实 verify 入口判红/判绿。此前只住在
+      # 类型面不在 keyless job：`pnpm typecheck` 要 vendor 构建产物（dev/vendor-build.sh），
+      # 而 keyless 的契约是 fresh clone 无构建也能跑。类型门在 deploy job（同一 push/PR 触发）
+      # 的 vendor 构建之后执行，覆盖等价、不把构建成本摊到每次回归。
+      # 门禁自测：注入案例 + 对照，经真实 verify 入口判红/判绿。此前只住在
       # "改 verify 必跑"的散文里——CI 上永不执行，门禁钝化只能在本地被发现。
       - name: Gate self-tests (injected regressions must be named red)
         run: source dev/env.sh && node scripts/smoke/gates-smoke.mjs
@@ -90,13 +87,14 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      # 冒烟有构建新鲜度自检：lib/client.js 旧于 src 即 exit 2。
-      - name: Build pack (dual halves)
-        run: pnpm --filter dsh-deep-research-pack build
-
-      # client-load 的 assertVendorArtifacts 需要 vendor 的 typert/client 产物。
+      # 顺序有依赖：pack 的 tsc 需要 vendor 产出的类型（vendor-build 后才有 lib/types）。
+      # client-load 的 assertVendorArtifacts 还需要 vendor 的 typert/client 产物。
       - name: Build vendor (pin tree)
         run: bash dev/vendor-build.sh
+
+      # 冒烟有构建新鲜度自检：lib/client.js 旧于 src 即 exit 2。
+      - name: Build pack (dual halves)
+        run: pnpm build
 
       # chromium 由 vendor inspector 包的 playwright 安装（loadChromium 从 .pnpm 取 API）。
       - name: Install chromium
@@ -117,7 +115,7 @@ jobs:
   deploy:
     name: keyless deploy smokes
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Checkout (with pinned DSH submodule)
         uses: actions/checkout@v5
@@ -140,8 +138,16 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      # 类型面与 pack 构建都需要 vendor 产出的类型（tsc 的 TS2307 实测）。
+      - name: Build vendor (pin tree)
+        run: bash dev/vendor-build.sh
+
+      # 类型门（测试走 tsx 剥类型，typecheck 是唯一类型回归面）。
+      - name: Typecheck (pack dual halves)
+        run: pnpm typecheck
+
       - name: Build pack (pack-smoke needs lib/)
-        run: pnpm --filter dsh-deep-research-pack build
+        run: pnpm build
 
       - name: Doctor (read-only profile/anchor/workspace/credentials)
         run: node scripts/smoke/doctor-smoke.mjs

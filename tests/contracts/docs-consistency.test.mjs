@@ -31,8 +31,14 @@ test('开发技能清单覆盖盘上目录（2026-10-20 审计 P1-1 反证）', 
 // 负例留证 2026-10-21（六维卫生轮 维度4 M1）：本测试首跑即红——research-workspace 根的
 // method-library.md 与 _abandoned/、pack 种子的"偏好库"类别均缺席根 AGENTS 布局块
 //（BUG-042 于 2026-10-19 新增偏好库种子后布局枚举未跟上）。红 → 补布局枚举 → 绿；
-// 此后盘上新增工作区根实体/种子而无布局行 = 常驻红（枚举漂移的机械防线，同"技能清单
+// 此后工作区根实体契约新增而无布局行 = 常驻红（枚举漂移的机械防线，同"技能清单
 // 覆盖盘上目录"先例）。
+//
+// 2026-11-03：**不再扫本机 research-workspace/**。`drt_*`/`archive/`/`_abandoned/`/
+// `method-library.md` 是 gitignored 运行态；CI fresh clone 只有 tracked 的 `drafts/`，
+// 扫盘会把 keyless 回归绑到开发机现场（实测 CI 红：根实体 1 < 5）。契约以常量枚举钉住，
+// 只对 tracked 的 `drafts/` 做存在性校验——运行区不参与 L0（scripts/AGENTS 范围纪律）。
+const WORKSPACE_ROOT_ENTITIES = ['method-library.md', 'drt_<slug>', 'archive/', '_abandoned/', 'drafts/']
 test('根 AGENTS 布局块覆盖工作区根实体与 pack 种子（2026-10-21 卫生轮）', () => {
   const agents = read('AGENTS.md')
   const section = agents.slice(agents.indexOf('## 布局'))
@@ -40,16 +46,11 @@ test('根 AGENTS 布局块覆盖工作区根实体与 pack 种子（2026-10-21 �
   const fence = section.match(/```[^\n]*\n([\s\S]*?)```/)
   assert.ok(fence, 'AGENTS.md 布局节缺围栏块')
   const layout = fence[1]
-  // 工作区根：盘上每个顶层实体（除点文件）必须在布局块点名；drt_* 以 drt_<slug> 形态点名
-  const wsRoot = readdirSync(join(ROOT, 'research-workspace')).filter((n) => !n.startsWith('.'))
-  assert.ok(wsRoot.length >= 5, `防空语料：research-workspace 根实体过少（${wsRoot.length}）`)
-  for (const name of wsRoot) {
-    if (name.startsWith('drt_')) {
-      assert.ok(layout.includes('drt_<slug>'), '布局块未点名 drt_<slug>/（run bundle 位）')
-    } else {
-      assert.ok(layout.includes(name), `根布局未点名 research-workspace/${name}——盘上实体必须进布局枚举`)
-    }
+  assert.ok(WORKSPACE_ROOT_ENTITIES.length >= 5, '防空语料：工作区根实体契约过少')
+  for (const name of WORKSPACE_ROOT_ENTITIES) {
+    assert.ok(layout.includes(name), `根布局未点名 research-workspace/${name}——契约实体必须进布局枚举`)
   }
+  assert.ok(existsSync(join(ROOT, 'research-workspace', 'drafts')), 'tracked 的 research-workspace/drafts 不在场')
   // pack 内容：content/ 是随包只读的研究手册与模板（D40；不再有 workspace/ 种子）
   const contentRoot = join(ROOT, 'packages', 'deep-research-pack', 'content')
   const entries = readdirSync(contentRoot).filter((n) => !n.startsWith('.'))

@@ -116,7 +116,7 @@ bash dev/bootstrap.sh                  # 同上，缺件时执行 submodule/inst
 bash dev/vendor-build.sh              # vendor 树构建（换 pin 后必做：--clean 清陈旧产物；tsc host/client + typert 产物 + client bundle + host 半补建 + 前端壳重建——0.1.7 起启动依赖构建产物）
 pnpm verify                           # L0 结构门禁（keyless，收尾必跑）
 pnpm test                             # L0 keyless 回归（命令正本 = package.json 的 test 脚本；layering ④ 钉形状；唯一登记的测试命令）
-pnpm typecheck                        # pack 双半 TS 类型检查（tsc -b；CI keyless job 必跑；本地前置 = vendor 构建产物在场，fresh clone 的 L0 不跑）
+pnpm typecheck                        # pack 双半 TS 类型检查（tsc -b；CI deploy job 必跑——keyless job 不装 vendor 产物；本地前置 = vendor 构建产物在场，fresh clone 的 L0 不跑）
 node scripts/smoke/gates-smoke.mjs    # 门禁自测（keyless：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组；改门禁逻辑必跑；迭代可用 --case=<id>）
 node dev/render-overlay.mjs            # 生成物：从 pack 渲染 dev/research.overlay.yml（改 pack 后必跑，且**必须先于 L1**）
 source dev/env.sh                     # ⚠ 双 home + 裸 dsh 拦截（DSH_HOME=runtime/harness-home）；下列 L1/L2 必须先 source，否则脚本自拒 exit 2

@@ -1,6 +1,7 @@
 // T0/T8 静态发布契约 — 不构建、不联网，钉住“发出去的是什么/不会执行什么”。
 // 反证：给 pack 加 install 脚本、删 files 里的 cordis.patch.yml、把 exports["./client"]
-// 指向不存在的路径 → 本文件红。运行期产物由 scripts/smoke/pack-smoke.mjs 验。
+// 指向不存在的路径 → 本文件红。**构建产物断言一律不住这里**（fresh clone 无 lib/）：
+// 运行期产物与 client 模块表由 scripts/smoke/pack-smoke.mjs 验（它本就要求 lib/ 在位）。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
@@ -30,7 +31,7 @@ test('T0 exports：入口与 client 都有声明，且不依赖未发布源码',
   assert.equal(pkg.main, undefined, 'main 与 exports 双写会制造第二份入口')
 })
 
-test('D40 分发：只有只读 doctor；无 launcher/scaffold；startup/content 产物在场', () => {
+test('D40 分发：只有只读 doctor；无 launcher/scaffold；startup/content 入口声明在场', () => {
   assert.deepEqual(Object.keys(pkg.bin ?? {}), ['dsh-deep-research-doctor'])
   assert.equal(pkg.bin?.['dsh-deep-research-doctor'], './scripts/doctor.mjs')
   assert.equal(pkg.bin?.['dsh-deep-research'], undefined)
@@ -38,8 +39,6 @@ test('D40 分发：只有只读 doctor；无 launcher/scaffold；startup/content
   assert.ok(existsSync(join(PACK, 'scripts', 'doctor.mjs')), 'doctor 脚本缺席')
   assert.equal(existsSync(join(PACK, 'scripts', 'launch.mjs')), false, 'launcher 应已删除')
   assert.equal(existsSync(join(PACK, 'scripts', 'scaffold.mjs')), false, 'scaffold 应已删除')
-  assert.ok(existsSync(join(PACK, 'lib', 'startup.js')), 'startup 构建产物缺席（先 pnpm build）')
-  assert.ok(existsSync(join(PACK, 'lib', 'content.js')), 'content 构建产物缺席（先 pnpm build）')
 })
 
 test('D38 分发：所有 peer 都是 optional（全局 launcher 安装不拉 DSH peers）', () => {
@@ -48,17 +47,6 @@ test('D38 分发：所有 peer 都是 optional（全局 launcher 安装不拉 DS
   assert.ok(Object.hasOwn(pkg.peerDependencies ?? {}, '@deepseek-ai/dsh-workspace'), 'workspace-boot 服务依赖未声明')
   for (const name of peers) {
     assert.equal(pkg.peerDependenciesMeta?.[name]?.optional, true, `${name} 必须是 optional peer（否则 npm i -g ERESOLVE）`)
-  }
-})
-
-test('client 模块表：构建产物里的 @deepseek-ai require 都在 dsh.client.inject 声明', () => {
-  const client = readFileSync(join(PACK, 'lib/client.js'), 'utf8')
-  const required = [...new Set([...client.matchAll(/require\("(@deepseek-ai\/[^"]+)"\)/g)].map((match) => match[1]))]
-  const inject = new Set(pkg.dsh?.client?.inject ?? [])
-  assert.ok(required.length > 0, '构建产物没有可检查的 @deepseek-ai require（检查 lib/client.js 是否已构建）')
-  for (const name of required) {
-    assert.ok(inject.has(name), `client 运行时 require ${name} 未进 dsh.client.inject——模块表可能先于它注册`)
-    assert.ok(Object.hasOwn(pkg.peerDependencies ?? {}, name), `client inject ${name} 未进 peerDependencies`)
   }
 })
 

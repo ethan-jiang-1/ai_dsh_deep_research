@@ -41,6 +41,18 @@ for (const forbidden of ['.env', '.credentials' + '.yaml', 'node_modules', '_dis
   check(!listed.some((rel) => rel === forbidden || rel.startsWith(`${forbidden}/`)), `tarball 不含 ${forbidden}`)
 }
 check(pkg.exports?.['./client']?.default === './lib/client.js', 'exports["./client"] 指向已存在的 lib/client.js')
+
+// client 模块表（2026-11-03 从 tests/pack/package-contract 迁入）：断言读 lib/client.js，
+// 属构建产物面；keyless 回归必须能 fresh-clone 跑（无 lib/），故由本冒烟拥有——它本就要求
+// lib/ 在位，缺席 exit 2。
+const clientBundle = readFileSync(join(PACK, 'lib', 'client.js'), 'utf8')
+const clientRequires = [...new Set([...clientBundle.matchAll(/require\("(@deepseek-ai\/[^"]+)"\)/g)].map((match) => match[1]))]
+const inject = new Set(pkg.dsh?.client?.inject ?? [])
+check(clientRequires.length > 0, 'client 模块表：构建产物含可检查的 @deepseek-ai require')
+for (const name of clientRequires) {
+  check(inject.has(name), `client 运行时 require ${name} 已在 dsh.client.inject`)
+  check(Object.hasOwn(pkg.peerDependencies ?? {}, name), `client inject ${name} 已在 peerDependencies`)
+}
 const manual = join(ROOT, '_dist', '安装手册.md')
 const tgz = join(ROOT, '_dist', `dsh-deep-research-pack-${pkg.version}.tgz`)
 if (existsSync(manual) && existsSync(tgz)) {

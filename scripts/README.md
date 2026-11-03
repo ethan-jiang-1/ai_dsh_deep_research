@@ -25,7 +25,7 @@
 | run-accept-smoke.mjs | run-accept 全链（合成 bundle+会话日志，真 CLI）：绝对 present 归一、连续两次幂等、bundle 外 present 红不写、final 含 sk- 红不写、`--repair`、`--no-write` 真只读、未知参数 exit 2、整数契约（schema/created → manifest 记版本与日期、repair 保 schema 快照、schema-scan CLI 认新契约） 后绿 | keyless |
 | secret-scan-smoke.mjs | 交付物秘密扫描的范围边界：默认不扫 evidence、`--all` 才扫、`--allow-legacy` 只报告、输出不回显值（纯函数正反例归 tests） | keyless |
 | data-smoke.mjs | T5 数据面切片：包目录零写入、假 token 不泄漏、卸载后 workspace 用户文件 + session 日志保留 | keyless（真 web 启动、无模型调用；tarball 需先 export-dist） |
-| pack-smoke.mjs | T0 tarball 形状：入口/patch/preset/content/doctor 在场、exports 可解析、无安装脚本/凭据；手册 sha256、两次 npm pack 同 sha、无 symlink/setuid 条目（在场时） | keyless（`npm pack --dry-run --json`；需 lib 已构建） |
+| pack-smoke.mjs | T0 tarball 形状：入口/patch/preset/content/doctor 在场、exports 可解析、client 模块表（require ↔ `dsh.client.inject` ↔ peers）、无安装脚本/凭据；手册 sha256、两次 npm pack 同 sha、无 symlink/setuid 条目（在场时） | keyless（`npm pack --dry-run --json`；需 lib 已构建——构建产物断言住这里，keyless 回归保持 fresh-clone 可跑） |
 | user-env-smoke.mjs | 已有 bundle + 用户 overlay + session/凭据/workspace 的安装/卸载共存 | keyless（全局 dsh + 本地 tarball） |
 | profile-concurrency-smoke.mjs | 两个 `dsh plugin add` + 两个 `remove` 同 profile 并发：至少一个成功、dump 可解析、最终无本包；不留双 bundle/坏 profile | keyless（全局 dsh + tarball） |
 | workspace-isolation-smoke.mjs | B4 双实例：两套 home/profile/port/state/workspace 各起通道、各建会话；会话组绑定自己的 W、home/session 互斥、marker 互不可见 | keyless（真 web，不调模型；更慢，约两套 cold start） |
