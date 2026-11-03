@@ -142,9 +142,10 @@ test('入口链导航合同：开跑前置含 vendor 构建/工作区注册；�
 })
 
 test('研究配置面板形态：COMPACT 默认态下 README 不描述已迁走的管理四区（2026-10-27 卫生轮）', () => {
-  const tab = read('packages/deep-research-pack/src/client/ResearchConfigTab.tsx')
-  const compact = /const COMPACT = true/.test(tab)
-  assert.ok(/const COMPACT = (true|false)/.test(tab), 'ResearchConfigTab.tsx 缺 COMPACT 开关——本断言的判据源消失')
+  // 2026-11-03 G-13 拆分：COMPACT 开关随取数状态移入 useConfigFeed（页签体只消费返回值）。
+  const feed = read('packages/deep-research-pack/src/client/research-config/useConfigFeed.ts')
+  const compact = /const COMPACT = true/.test(feed)
+  assert.ok(/const COMPACT = (true|false)/.test(feed), 'useConfigFeed.ts 缺 COMPACT 开关——本断言的判据源消失')
   if (!compact) return // 回滚态：管理块渲染中，README 的四区描述与之一致，不再断言
   const readme = read('packages/deep-research-pack/README.md')
   for (const term of ['四区', '内置打法', '我的偏好库', '底线条']) {
