@@ -155,6 +155,11 @@ jobs:
       - name: Build pack (pack-smoke needs lib/)
         run: pnpm build
 
+      # 方法库写路径的 CI 证据（keyless 真 Loader + mock LLM）：client-load 只数保存按钮，
+      # 证明不了 tool 的 save/delete/workspace 回读；此冒烟在 deploy 的 pack 构建之后跑。
+      - name: Method library tool (real Loader, mock LLM)
+        run: node scripts/smoke/method-library-tool-smoke.mjs
+
       - name: Doctor (read-only profile/anchor/workspace/credentials)
         run: node scripts/smoke/doctor-smoke.mjs
 
