@@ -11,7 +11,7 @@
 独立 repo + 单自写包 + 运行时工作区：
 
 ```
-packages/deep-research-pack/   唯一自写包：presets/<role>/ + cordis.patch.yml + 研究驾驶舱（Research Cockpit——观察面 client 套件，src/client/ + lib/client.js；D18 有界例外，用途限定观察/调试；[构成正本](./40-research-cockpit.md)）+ 抓取回退 provider（src/fetch-fallback/ + lib/fetch-fallback.js；D31 有界代码面）
+packages/deep-research-pack/   唯一自写包：presets/<role>/ + cordis.patch.yml + content/（手册与 run 模板，D40；src/content 注入）+ src/startup/（启动行，D40）+ 研究驾驶舱（Research Cockpit——观察面 client 套件，src/client/ + lib/client.js；D18 有界例外，用途限定观察/调试；[构成正本](./40-research-cockpit.md)）+ 抓取回退 provider（src/fetch-fallback/ + lib/fetch-fallback.js；D31 有界代码面）
 research-workspace/            dev 工作区实例：角色会话 cwd（研究手册 + drt_<slug>/（run bundle）+ templates/）；
                                用户工作区 = 任意目录（首屏选择/`DEEP_RESEARCH_WORKSPACE`）
 docs/ notes/ scripts/ tests/ dev/   文档/决策/门禁/回归/环境（分层原则见 00-index）
@@ -49,7 +49,7 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 
 | 层 | 载体 | 放什么 | 教义 |
 |---|---|---|---|
-| bundle 层 | `cordis.patch.yml` | host 共享行：preset roster（default: lead）、检索底座（D30/D31：`- id: web` 选 Search API + 回退 provider；`research-fetch-fallback` 行注册回退 provider）、present（团队机制行与 ui-agent-team 观察行归 vendor agent-team-profile 层provider 行本身是 base 出厂行——D9，回归守卫在 tests/pack/presets.test.mjs） | `- id:` 只替换已有行；**新增必须 `- insert:`**；baseUrl = profile 目录（路径写 profile 相对 `node_modules/…`，写错 = ENOENT 静默空，UI 无角色） |
+| bundle 层 | `cordis.patch.yml` | host 共享行：preset roster（default: lead）、检索底座（D30/D31：`- id: web` 选 Search API + 回退 provider；`research-fetch-fallback` 行注册回退 provider）、present；团队机制行与 `ui-agent-team` 观察行归 vendor agent-team-profile 层（[Note](../../notes/implemented/2026-09-24-m2-p1-run-channel.md)），provider 行本身是 base 出厂行——D9，回归守卫在 [presets.test.mjs](../../tests/pack/presets.test.mjs) | `- id:` 只替换已有行；**新增必须 `- insert:`**；baseUrl = profile 目录（路径写 profile 相对 `node_modules/…`，写错 = ENOENT 静默空，UI 无角色） |
 | preset 层 | `presets/<role>.patch.yml`（单行形态：一条 `@deepseek-ai/dsh-agent-preset` 行，DSH 0.1.7 起同形态，`config.plugins` 内声明 persona/skills/工具行；`presets/<role>/` 只放 `skills/`） | 角色组合：persona + 时钟（time-context）+ 硬隔离 skills + 工具面 + agent-instructions | **preset 自包含**（DSH 无 patch 继承）：角色要用的行必须自己声明，否则会话只拿到 bundle 少数行（company R1 血泪：工具行不声明 = CEO 读不了文件） |
 
 `tool-todo` 行若显式声明，`allowParallelInProgress` 是**必填 config**（抄行不抄 config =

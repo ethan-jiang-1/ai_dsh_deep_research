@@ -52,7 +52,7 @@
 **进出细节只住各子目录 README**（上表链到的目录宪章）；本表只做导航，不复制会漂移的规则。
 事故复盘不设独立目录（规则 = 下节 §事故复盘）。`research/` 已于 2026-09-27 清并，不再是目录。
 
-问题澄清与执行分开：[_backlog/](../_backlog/README.md) 收录待澄清问题、查证材料、缺陷和按需方法；它不是实施许可或前置门（唯一带日期的范围例外 = 修复就绪缺陷卡的 P1/P2 有界修复，[D24](../docs/00-index.md)）。结论进入 notes 的收件规则 = [notes/AGENTS](AGENTS.md)（§从 backlog 进来的结论），决定程序 = [结论去向](../_backlog/methods/issue-to-note.md)。`proposed/` 仅承载需要显式评审的持久决定提案。卡在 `待落地` 选去向；`待落地` 不写 Note，写入时机 = notes/AGENTS。
+问题澄清与执行分开：[_backlog/](../_backlog/README.md) 收录待澄清问题、查证材料、缺陷和按需方法；它不是实施许可或前置门（唯一带日期的范围例外 = 修复就绪缺陷卡的 P1/P2 有界修复，[D24](../docs/decisions.md#d24)）。结论进入 notes 的收件规则 = [notes/AGENTS](AGENTS.md)（§从 backlog 进来的结论），决定程序 = [结论去向](../_backlog/methods/issue-to-note.md)。`proposed/` 仅承载需要显式评审的持久决定提案。卡在 `待落地` 选去向；`待落地` 不写 Note，写入时机 = notes/AGENTS。
 
 ## 事故复盘（不是目录）
 

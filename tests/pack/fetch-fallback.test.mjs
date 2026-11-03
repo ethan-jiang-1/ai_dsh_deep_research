@@ -12,14 +12,28 @@ import {
 } from '../../packages/deep-research-pack/src/fetch-fallback/policy.ts';
 
 test('回退判据：只救"本地取不到页面"的失败', () => {
-  for (const code of FALLBACK_ERROR_CODES) {
+  // 码表硬编码在测试侧（不遍历实现导出的集合）：新增可回退码必须显式评审并改这里，
+  // 否则实现里多一个码会被自动放行（2026-11-03 审计 D5）。
+  const expected = [
+    'WEB_FETCH_TIMEOUT', 'WEB_FETCH_TOO_LARGE', 'WEB_UNSUPPORTED_CONTENT_TYPE',
+    'WEB_REDIRECT_BLOCKED', 'WEB_PROVIDER_ERROR',
+  ];
+  assert.deepEqual([...FALLBACK_ERROR_CODES].sort(), [...expected].sort(),
+    '可回退码表变了——新增/删除码必须显式评审并同步本表');
+  for (const code of expected) {
     assert.equal(fallbackForError(code), true, `${code} 应可回退`);
   }
 });
 
 test('安全策略与取消绝不回退（内网 URL 不外送、用户取消不重发）', () => {
-  for (const code of NEVER_FALLBACK_ERROR_CODES) {
+  const expected = ['WEB_ABORTED', 'WEB_BLOCKED_URL', 'WEB_INVALID_URL'];
+  assert.deepEqual([...NEVER_FALLBACK_ERROR_CODES].sort(), [...expected].sort(),
+    '绝不回退码表变了——新增/删除码必须显式评审并同步本表');
+  for (const code of expected) {
     assert.equal(fallbackForError(code), false, `${code} 绝不回退`);
+  }
+  for (const code of expected) {
+    assert.equal(FALLBACK_ERROR_CODES.has(code), false, `${code} 不能同时在可回退集合里`);
   }
 });
 

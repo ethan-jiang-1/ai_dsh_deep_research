@@ -24,7 +24,7 @@ Lead 先确认类型/深度/口径并给计划 → 右栏「研究状态」看�
 ## 改它
 
 - 开工入口链（唯一正本，4 步）=[`AGENTS.md`](AGENTS.md) §入口链；文档地图 = [`docs/00-index.md`](docs/00-index.md)。
-- 开发通道：`source dev/env.sh` + `node dev/run-driver.mjs up`（仓内 `deep-research` profile +
+- 开发通道：`node dev/run-driver.mjs up`（boot-run 自 source env；只有 L1/L2 脚本才需要先 `source dev/env.sh`）（仓内 `deep-research` profile +
   `research-workspace/`，不是用户安装路径；操作 = [`docs/guides/61-run-playbook.md`](docs/guides/61-run-playbook.md)）。
 - 改完怎么验：选层地图 = [`docs/project-map.md`](docs/project-map.md)；命令正本 =
   [`docs/guides/60-dev-loop.md`](docs/guides/60-dev-loop.md) §2；判据 = [`docs/evaluation.md`](docs/evaluation.md)。

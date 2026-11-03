@@ -38,7 +38,7 @@ CLAUDE.md→AGENTS.md、.claude/skills→.agents/skills    两条 symlink（编�
                          harness 发现同一批开发技能——verify 门禁 claude-symlink 校验）
 子树 AGENTS.md            docs/ · scripts/ · notes/ · packages/deep-research-pack/ · tests/ · _backlog 各一份——只放该
                          子树的指令（根只放每轮常驻指令；vendor 树内多份同构，份数以盘上为准）
-README.md                 人类门面（Start Here 链接 + 稳定原则摘要；命令正本 = guides/60 §2，不复制）
+README.md                 人类门面（「用它 / 首屏 / 改它」入口 + 稳定原则摘要；命令正本 = guides/60 §2，不复制）
 _backlog/                 问题澄清与证据区：issues/、bugs/、research/、methods/、triggers.md、_archived/（另有
                           _done/ 改名兼容指针，见 _backlog/README 载体导航）；
                           手册 = _backlog/README.md、子树门牌 = _backlog/AGENTS.md（状态机/下一步/守卫）
@@ -83,7 +83,7 @@ implemented/archived/rejected；事故复盘在 archived/）；写入触发/取�
 ```sh
 source dev/env.sh    # ⚠ 仅 L1/L2 与 guides/60 命令/前置标注须先 source 的脚本需要（scripts/README 档位列只申报凭据/调用模式）；run 通道 dev/boot-run.sh 自 source，勿重复。作用：双 home（DSH_HOME=runtime/harness-home）+ 裸 dsh 拦截；未 source 自拒 exit 2
 pnpm verify          # L0 结构门禁（keyless，收尾必跑）
-pnpm test            # L0 keyless 回归（唯一登记的测试命令）
+pnpm test            # L0 keyless 回归（默认；vendor 源码契约 = pnpm test:vendor）
 node dev/run-driver.mjs up   # 研究 run 通道（起/复用 + 验浏览器面 + 呈交 URL；操作 = guides/61 §0）
 ```
 

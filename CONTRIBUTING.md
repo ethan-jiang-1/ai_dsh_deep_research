@@ -72,7 +72,8 @@ map is [`docs/project-map.md`](docs/project-map.md), and the acceptance contract
 ## Working with a running research channel
 
 ```sh
-source dev/env.sh          # isolates DSH_HOME to runtime/harness-home, installs hooks
+# optional: isolate DSH_HOME in this shell and install git hooks (boot-run sources it too)
+source dev/env.sh
 node dev/run-driver.mjs up # boots or reuses the research channel and prints the URL
 ```
 
