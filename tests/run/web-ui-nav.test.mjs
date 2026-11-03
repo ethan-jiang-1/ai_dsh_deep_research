@@ -17,16 +17,21 @@ import assert from 'node:assert/strict'
 import { PREVIEW_NOTICE_CONTINUE, PREVIEW_NOTICE_HEADING, PREVIEW_NOTICE_PROBE_JS } from '../../scripts/lib/web-ui-nav.mjs'
 
 /** 极简假 DOM：只实现探针用到的 querySelectorAll / children / textContent / dispatchEvent。 */
-function fakeDocument({ heading = null, buttons = [] } = {}) {
+function fakeDocument({ heading = null, buttons = [], hidden = false } = {}) {
   const clicks = []
+  const rect = hidden ? { width: 0, height: 0 } : { width: 120, height: 24 }
   const mkButton = (label) => ({
     tagName: 'BUTTON',
     children: [],
     textContent: label,
     offsetParent: {},
+    getBoundingClientRect: () => rect,
     dispatchEvent: (ev) => { clicks.push({ label, type: ev?.type ?? 'unknown' }); return true },
   })
-  const leaves = heading === null ? [] : [{ tagName: 'H2', children: [], textContent: heading }]
+  const leaves = heading === null ? [] : [{
+    tagName: 'H2', children: [], textContent: heading,
+    getBoundingClientRect: () => rect,
+  }]
   const els = buttons.map(mkButton)
   return {
     clicks,
@@ -43,9 +48,10 @@ function fakeDocument({ heading = null, buttons = [] } = {}) {
 /** 在假 DOM 上执行探针源码（源码是 IIFE 表达式；MouseEvent 用最小桩）。 */
 function runProbe(dom) {
   const MouseEvent = class { constructor(type, init) { this.type = type; this.bubbles = init?.bubbles } }
+  const getComputedStyle = () => ({ display: 'block', visibility: 'visible' })
   // eslint-disable-next-line no-new-func
-  const fn = new Function('document', 'MouseEvent', `return ${PREVIEW_NOTICE_PROBE_JS}`)
-  return fn(dom.document, MouseEvent)
+  const fn = new Function('document', 'MouseEvent', 'getComputedStyle', `return ${PREVIEW_NOTICE_PROBE_JS}`)
+  return fn(dom.document, MouseEvent, getComputedStyle)
 }
 
 test('遮罩判据：无遮罩时不点页面上的 Continue（HITL 卡片同名字的防误点）', () => {
@@ -73,6 +79,13 @@ test('遮罩判据：中英三形态文案都认（Continue / 我知道了 / Got
     const dom = fakeDocument({ heading: PREVIEW_NOTICE_HEADING, buttons: [label] })
     assert.equal(runProbe(dom).clicked, true, `文案「${label}」未命中`)
   }
+})
+
+test('遮罩判据：标题节点仍在 DOM 但不可见（display:none / 零尺寸）→ present=false，不假报 stuck', () => {
+  const dom = fakeDocument({ heading: PREVIEW_NOTICE_HEADING, buttons: ['Continue'], hidden: true })
+  const out = runProbe(dom)
+  assert.deepEqual(out, { present: false, clicked: false })
+  assert.equal(dom.clicks.length, 0)
 })
 
 test('遮罩判据：标题在场但关闭键缺席 → present=true / clicked=false（调用方判红，不空转）', () => {

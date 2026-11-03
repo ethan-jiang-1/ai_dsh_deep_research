@@ -7,8 +7,9 @@
 // （dev/run-kickoff.mjs 头注同款教训）。本入口把该序固化成可复跑的一步。
 //
 // 子命令：
-//   up    [--port <p>] [--no-probe]  起通道（或复用已在飞的）+ 验浏览器面 + 打印呈交块
-//   probe [--port <p>] [--expect-face <文本>]   对**已在飞**的通道只做浏览器面验证
+//   up    [--port <p>] [--no-probe] [--require-data]  起通道（或复用已在飞的）+ 验浏览器面 + 打印呈交块
+//   probe [--port <p>] [--expect-face <文本>] [--require-data]   对**已在飞**的通道只做浏览器面验证
+//   --require-data：要求驾驶舱已绑定 run bundle（新会话默认未绑定；未绑定在 verdict 里是显式字段）
 //   url                               打印当前通道 URL（不启动、不验面）
 //
 // 判据（= guides/61 §0 呈交纪律的机械化）：exit 0 = 可呈交（镜像一致 + 宿主侧 + 浏览器面全绿）、
@@ -159,6 +160,7 @@ if (sub === 'url') {
 
 if (sub === 'probe') {
   const expectFace = arg('--expect-face', DEFAULT_FACE);
+  const requireData = has('--require-data');
   const given = arg('--port', null);
   const s = channelState();
   const url = given !== null ? (s.url !== null && s.port === Number(given) ? s.url : null) : s.url;
@@ -181,7 +183,7 @@ if (sub === 'probe') {
     console.error(`run-driver probe: ${error}`);
     process.exit(1);
   }
-  const v = runDriverVerdict({ probe: verdict, expectFace, drift });
+  const v = runDriverVerdict({ probe: verdict, expectFace, drift, requireData });
   const payload = { url, ...v, statusPaneText: verdict.statusPaneText?.slice(0, 600), screenshot: verdict.screenshot ?? null };
   const saved = persistVerdict('probe', payload, verdict.screenshot);
   console.log(JSON.stringify(payload, null, 2));
@@ -190,7 +192,7 @@ if (sub === 'probe') {
 }
 
 if (isCli && sub !== 'up') {
-  console.error('run-driver: 用法 node dev/run-driver.mjs up [--port <p>] [--profile <p>] [--bootstrap] [--no-probe] | probe [--port <p>] [--expect-face <文本>] | url');
+  console.error('run-driver: 用法 node dev/run-driver.mjs up [--port <p>] [--profile <p>] [--bootstrap] [--no-probe] [--require-data] | probe [--port <p>] [--expect-face <文本>] [--require-data] | url');
   process.exit(2);
 }
 
@@ -201,6 +203,7 @@ const wantPort = String(arg('--port', DEFAULT_PORT));
 const wantProfile = arg('--profile', DEFAULT_PROFILE);
 const noProbe = has('--no-probe');
 const expectFace = arg('--expect-face', DEFAULT_FACE);
+const requireData = has('--require-data');
 
 let state = channelState();
 let drift = null;
@@ -286,13 +289,13 @@ if (verdict === null) {
   console.error(`run-driver: ${error}`);
   process.exit(1);
 }
-const v = runDriverVerdict({ probe: verdict, expectFace, drift });
+const v = runDriverVerdict({ probe: verdict, expectFace, drift, requireData });
 const submitted = v.exit === 0;
 const payload = { url: state.url, port: state.port, ...v, statusPaneText: verdict.statusPaneText?.slice(0, 600), screenshot: verdict.screenshot ?? null };
 const saved = persistVerdict('up', payload, verdict.screenshot);
 console.log('──────────────────────────── 呈交块 ────────────────────────────');
 console.log(`通道 URL：${state.url}`);
-console.log(`浏览器面：${v.level}${submitted ? '' : `（${v.reason}）`}`);
+console.log(`浏览器面：${v.level}（数据面：${v.dataFace}）${submitted ? '' : `（${v.reason}）`}`);
 console.log(`可见证据：${saved.dir}/page.png ｜ 判定：${saved.dir}/verdict.json（固定名副本 ${saved.legacy}；latest = ${join(STATE_DIR, 'latest-verdict.json')}）`);
 console.log('自检判据：GUI 里 preset 选单含四个 Deep Research 角色、会话右栏有「研究状态」页签');
 console.log('───────────────────────────────────────────────────────────────');

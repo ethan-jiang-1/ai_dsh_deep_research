@@ -46,6 +46,23 @@ test('verdict 契约：exit 0=全绿 / 1=断言红 / 2=未跑；消息面出现�
   assert.equal(green.exit, 0);
   assert.equal(green.checks.length, 6);
   assert.equal(green.checks[0].id, 'channel-mirror', '镜像一致性是第一条硬检查（旧页面不能当当前代码的绿）');
+  assert.equal(green.dataFace, 'unknown', '没取到 statusPaneText = 数据面未取证，不许当已绑定');
+
+  // 数据面单列：新会话未绑定是正常态（默认仍绿），但 verdict 必须写明；--require-data 才升硬检查。
+  const base = { booted: true, frameMounted: true, overlayCleared: true, statusPaneOpen: true, expectFaceHeld: true, consoleProblems: [], exceptions: [] };
+  const unbound = runDriverVerdict({ probe: { ...base, statusPaneText: '本会话尚未绑定 run bundle' }, expectFace: '研究状态', drift: { clean: true } });
+  assert.equal(unbound.exit, 0, '未绑定不拦新会话的 up');
+  assert.equal(unbound.dataFace, 'unbound');
+  assert.ok(unbound.reason.includes('未绑定'), '呈交原因要显式写数据面');
+  const bound = runDriverVerdict({ probe: { ...base, statusPaneText: '流程轨道七步 证据 10 已交付' }, expectFace: '研究状态', drift: { clean: true } });
+  assert.equal(bound.dataFace, 'bound');
+  const requiredUnbound = runDriverVerdict({ probe: { ...base, statusPaneText: '本会话尚未绑定 run bundle' }, expectFace: '研究状态', drift: { clean: true }, requireData: true });
+  assert.equal(requiredUnbound.exit, 1, '--require-data 时未绑定必须红');
+  assert.ok(requiredUnbound.reason.includes('data-face'), '红因要点名 data-face');
+  assert.equal(requiredUnbound.checks.length, 7);
+  const requiredBound = runDriverVerdict({ probe: { ...base, statusPaneText: '流程轨道七步 证据 10' }, expectFace: '研究状态', drift: { clean: true }, requireData: true });
+  assert.equal(requiredBound.exit, 0);
+  assert.equal(requiredBound.dataFace, 'bound');
 
   // 首屏遮罩没清场 → 红。"DOM 在位"不等于"人看得见"：探针的 JS 派发绕过 hit-testing，
   // 2026-10-27 实测 GREEN 同刻截图仍被 Preview Notice 盖住（见 cdp-probe 同名注释）。

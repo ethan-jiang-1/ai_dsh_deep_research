@@ -38,7 +38,7 @@ export function guiUrlFromWebLog(text) {
  * @param {{probe: object, expectFace: string, drift: {clean: boolean, detail?: string} | null}} input
  * @returns {{exit: 0|1|2, level: 'GREEN'|'RED'|'NOT-RUN', checks: Array<{id: string, ok: boolean, detail: string}>, reason: string}}
  */
-export function runDriverVerdict({ probe, expectFace, drift }) {
+export function runDriverVerdict({ probe, expectFace, drift, requireData = false }) {
   if (drift === null || drift === undefined || drift.clean !== true) {
     const detail = drift?.detail === undefined
       ? '镜像一致性未取证'
@@ -51,6 +51,9 @@ export function runDriverVerdict({ probe, expectFace, drift }) {
     };
   }
   const p = probe ?? {};
+  // 数据面（驾驶舱是否真的绑定了 run bundle）：statusPaneText 为空 = 未取证，不许当绑定。
+  const pane = String(p.statusPaneText ?? '').trim();
+  const dataFace = pane === '' ? 'unknown' : (/未绑定|not bound/i.test(pane) ? 'unbound' : 'bound');
   const checks = [
     { id: 'channel-mirror', ok: true, detail: 'pack 发布集 ↔ 安装镜像一致' },
     { id: 'host-mounted', ok: p.booted === true && p.frameMounted === true, detail: `booted=${p.booted} frameMounted=${p.frameMounted}` },
@@ -65,13 +68,17 @@ export function runDriverVerdict({ probe, expectFace, drift }) {
       detail: `consoleProblems=${p.consoleProblems?.length ?? 0} exceptions=${p.exceptions?.length ?? 0}`,
     },
   ];
+  // 默认 up 面对新会话（未绑定是正常态），故数据面单列为显式字段；--require-data 才升为硬检查。
+  if (requireData) checks.push({ id: 'data-face', ok: dataFace === 'bound', detail: `dataFace=${dataFace}` });
   const failed = checks.filter((c) => !c.ok);
+  const dataNote = dataFace === 'bound' ? '已绑定' : dataFace === 'unbound' ? '未绑定（新会话正常）' : '未取证';
   return {
     exit: failed.length === 0 ? 0 : 1,
     level: failed.length === 0 ? 'GREEN' : 'RED',
     checks,
+    dataFace,
     reason: failed.length === 0
-      ? '浏览器面全绿——可呈交'
+      ? `浏览器面全绿（数据面：${dataNote}）——可呈交`
       : `浏览器面红：${failed.map((c) => `${c.id}(${c.detail})`).join(', ')} ｜ probe=${p.failed ?? 'n/a'}`,
   };
 }

@@ -392,8 +392,15 @@ export const PREVIEW_NOTICE_CONTINUE = ['Continue', '我知道了', 'Got it']
 export const PREVIEW_NOTICE_PROBE_JS = `(() => {
   const heading = ${JSON.stringify(PREVIEW_NOTICE_HEADING)};
   const labels = ${JSON.stringify(PREVIEW_NOTICE_CONTINUE)};
+  // 只认**可见**的标题：关闭后的模态节点仍留在 DOM（display:none）——按 DOM 在场判会把
+  // 已关闭的遮罩报成 stuck（2026-11-03 本地 seed 实测假报，后续点击其实全部成功）。
+  const visible = (el) => {
+    const r = el.getBoundingClientRect();
+    const s = getComputedStyle(el);
+    return r.width > 0 && r.height > 0 && s.display !== 'none' && s.visibility !== 'hidden';
+  };
   const leaves = Array.from(document.querySelectorAll('div,span,h1,h2,strong'));
-  const present = leaves.some((el) => el.children.length === 0 && (el.textContent ?? '').trim() === heading);
+  const present = leaves.some((el) => el.children.length === 0 && (el.textContent ?? '').trim() === heading && visible(el));
   if (!present) return { present: false, clicked: false };
   const btn = Array.from(document.querySelectorAll('button')).find((b) => labels.includes((b.textContent ?? '').trim()));
   if (btn === undefined) return { present: true, clicked: false };
@@ -404,21 +411,22 @@ export const PREVIEW_NOTICE_PROBE_JS = `(() => {
 /** Playwright 版：关闭首屏遮罩并判定结果。返回 'absent' | 'dismissed' | 'stuck'。
  *  调用方把 'stuck' 当红（页面被人挡住 = 人看不到交付面）。 */
 export async function dismissPreviewNotice(page) {
-  const seen = await page.evaluate((heading) => {
+  const present = () => page.evaluate((heading) => {
+    const visible = (el) => {
+      const r = el.getBoundingClientRect()
+      const s = getComputedStyle(el)
+      return r.width > 0 && r.height > 0 && s.display !== 'none' && s.visibility !== 'hidden'
+    }
     const leaves = Array.from(document.querySelectorAll('div,span,h1,h2,strong'))
-    return leaves.some((el) => el.children.length === 0 && (el.textContent ?? '').trim() === heading)
+    return leaves.some((el) => el.children.length === 0 && (el.textContent ?? '').trim() === heading && visible(el))
   }, PREVIEW_NOTICE_HEADING).catch(() => false)
-  if (!seen) return 'absent'
+  if (!(await present())) return 'absent'
   const cont = page.getByRole('button', { name: new RegExp(`^(${PREVIEW_NOTICE_CONTINUE.join('|')})$`) }).first()
   if (await cont.isVisible().catch(() => false)) {
     await cont.click({ timeout: 6_000 }).catch(() => {})
     await page.waitForTimeout?.(1_500) ?? null
   }
-  const still = await page.evaluate((heading) => {
-    const leaves = Array.from(document.querySelectorAll('div,span,h1,h2,strong'))
-    return leaves.some((el) => el.children.length === 0 && (el.textContent ?? '').trim() === heading)
-  }, PREVIEW_NOTICE_HEADING).catch(() => false)
-  return still ? 'stuck' : 'dismissed'
+  return (await present()) ? 'stuck' : 'dismissed'
 }
 
 // ── 页签标题的中英双语判据（2026-11-03：驾驶舱 chrome 走 locale 后的冒烟基线）──

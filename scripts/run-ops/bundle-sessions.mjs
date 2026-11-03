@@ -81,5 +81,6 @@ const top = result.sessions[0]
 console.log('')
 console.log('下一步（诊断）：')
 console.log(`  node scripts/run-ops/stream-diagnostics.mjs --session ${top.sessionId}`)
-console.log(`  node scripts/run-ops/watch-run.mjs ${slug}`)
+// watch-run 的判据参数是 **session-id**，不是 slug（2026-11-03 实测：传 slug → exit 2）。
+console.log(`  node scripts/run-ops/watch-run.mjs ${top.sessionId}`)
 process.exit(0)

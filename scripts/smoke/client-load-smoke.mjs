@@ -546,10 +546,12 @@ async function setupProbeSession() {
   //    d) 点「研究状态」guide 胶囊（展开后直接在场，无需 New tab——company 配方核心；
   //       0.1.7 的 New tab 控件在折叠列内永远 visibility:hidden，不走它）；
   //    e) 页签体渲染 journal 流且 snapshot 历史 ≥1 事件。
-  // 遮罩关闭正本 = web-ui-nav.dismissPreviewNotice（选择器策略与 cdp-probe 共用同一份常量）；
-  // 'stuck' 只记一行提示——后续点击超时会把红暴露在具体断言上，不在这里抢判。
-  const overlay = await dismissPreviewNotice(page)
-  if (overlay === 'stuck') console.error('client-load: 首屏 Preview Notice 遮罩关不掉——后续点击可能被挡')
+  // 遮罩关闭正本 = web-ui-nav.dismissPreviewNotice（选择器策略与 cdp-probe 共用同一份常量）。
+  // 'stuck' **必须红**（2026-10-27 教训：JS 派发点击绕过 hit-testing，遮罩在时后续断言照样过；
+  // 2026-11-03 实测旧文案"只记提示"正是假绿的来源）。重试一次，仍可见才算 stuck。
+  let overlay = await dismissPreviewNotice(page)
+  if (overlay === 'stuck') { await wait(1_200); overlay = await dismissPreviewNotice(page) }
+  step(overlay !== 'stuck', '首屏 Preview Notice 可关闭（人打开 URL 不撞遮罩）', `overlay=${overlay}`)
   await wait(1_500)
   // seed 模式：干净 home 的凭据 onboarding 模态（dev home 有凭据 → 不出现）。关在**第一次行键
   // 点击之前**——它盖住主视图，不关则点击全部被遮罩拦截（2026-11-03 seed spike 实红根因）。
