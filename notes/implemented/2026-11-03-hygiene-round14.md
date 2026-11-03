@@ -17,6 +17,7 @@
 - **页签 render 面**：状态/图谱两页签新增 keyless 空态静态渲染（`react-dom/server`）；配置/终稿页签依赖 primitives 的 `Modal` / `MarkdownText` CSS 模块，tsx 测试加载器不解析 `.css`，其行为证据仍归 client-load 真机档。
 - **smoke CI 归属显式**：`scripts/smoke/registry.json` 给每个 smoke 标 `ci` 或 `dev-only + 理由`；`smoke-registry.test` 与 `ci.yml` 双向对账，新增未登记即红——“新 smoke 永久不跑”不再能静默发生。
 - **`src/lib` 编译面显式**：`src/lib/faces.json` 把 35 个文件分成 host / shared / client 三面；`tsconfig.host` 的 include 与 host+shared 对账，相对 import 图禁止 host→client、client→host、shared→非 shared；pack 子树 AGENTS 记录入口。
+- **scripts 尺寸上限**：`scripts/` 新文件 ≤550 行；超限必须在 `script-file-size.test` 登记例外。现有两笔已登记债务 = `client-load-smoke`（1292，phase-oriented E2E，拆分另立轮）与 `gates-cases`（736，注入案例数据表）。新增 god script 不再能静默长出来。
 
 ## 输掉的方案
 
@@ -31,7 +32,7 @@
 ## 实际跑过的验证
 
 - `pnpm verify`：52/52 PASS（含本 Note 与 Phase 0 文档变更后的复跑）。
-- `pnpm test`：1028/1028 PASS；`pnpm test:vendor`：3/3 PASS；`pnpm typecheck`：exit 0。
+- `pnpm test`：1029/1029 PASS；`pnpm test:vendor`：3/3 PASS；`pnpm typecheck`：exit 0。
 - `client-load-smoke --seed tests/fixtures/client-load-home --port 3109`：ALL PASS（真 Chromium）。
 - `node scripts/dist/export-dist.mjs`：全绿（147 条目、preset 5/5、模板 8）；clean build 后 `lib/workspace-boot.js` 不再随 tarball（`lib/types/client/workspace-boot.d.ts` 是 client 源码的类型件，不是旧插件）。
 - `node scripts/smoke/doctor-smoke.mjs`：ALL PASS（新增“半装缺 client 产物 → exit 1”反证）。
