@@ -155,6 +155,24 @@ jobs:
       - name: Build pack (pack-smoke needs lib/)
         run: pnpm build
 
+      # L1 真挂载（无模型）：roster + 逐角色 session/create + skills 隔离 + boot 页模块表行。
+      # 用 vendor 源码基线（bootWeb 起自本仓），无需全局 dsh；DSH_HOME 由 env.sh 隔离。
+      - name: L1 preset smoke (real mount, keyless)
+        run: source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs
+
+      # L2 发布/安装/卸载：export-dist 出 tarball + market，vendor CLI 作 dsh（无需全局安装）。
+      - name: Export dist (L2 tarball + market)
+        run: node scripts/dist/export-dist.mjs
+
+      - name: L2 lifecycle smoke (install → display → remove)
+        run: |
+          cat > /tmp/dsh-vendor <<EOF
+          #!/usr/bin/env bash
+          exec env TSX_TSCONFIG_PATH="$GITHUB_WORKSPACE/tsconfig.json" node --import tsx/esm "$GITHUB_WORKSPACE/vendor/dsh/apps/cli/src/bin.ts" "\$@"
+          EOF
+          chmod +x /tmp/dsh-vendor
+          DSH_BIN=/tmp/dsh-vendor node scripts/smoke/lifecycle-smoke.mjs
+
       # 方法库 tool smoke 不在此 job：真 Loader 需要 native system 产物（`pnpm build:native`），
       # CI 无该工具链（2026-11-03 实测：system.node 缺席 → MODULE_NOT_FOUND）。证据 = 开发档。
 

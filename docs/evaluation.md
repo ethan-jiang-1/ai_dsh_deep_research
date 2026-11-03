@@ -90,7 +90,7 @@
 - **定义**：每个研究角色 preset 在**真 DSH 会话**里挂载成功——persona 生效、skills 可见、工具面齐全。dump/roster 可见不算（company postmortem 0001 实证：挂载失败只有真会话抓得到）。
 - **最小真检查**：`node scripts/smoke/preset-smoke.mjs`——keyless 预检（环境/安装形状断言）+ 真会话档（`DSH_SMOKE_REAL=1`：boot 真 web/headless 逐角色建会话，机器断言工具/skill 面在场；落地证据 = [L1/L2 绿灯 Note](../notes/implemented/2026-09-24-l1-l2-green.md)）。
 - **通过判据**：全部角色真挂载绿；失败角色即里程碑未完成，无例外。
-- **何时跑**：preset 内容/结构改动时；框架里程碑必跑。
+- **何时跑**：preset 内容/结构改动时；框架里程碑必跑。**CI**：deploy job 在 vendor 构建后跑真挂载档（`DSH_SMOKE_REAL=1`），与 L0 同一次 push。
 
 ### L2 安装面（真实安装形状）
 
@@ -101,7 +101,7 @@
 - **冷启动补充**：`cold-start-smoke` 用独立 `DSH_DEV_HOME` + 独立 profile/端口/state，从 tarball 安装并经 `run-driver up --bootstrap` 到浏览器面 GREEN；证明不依赖仓内既有 home/profile。MCP 关闭，团队层需 registry 或缓存。
 - **真用户 home 补充**：`install-shape-smoke` 在系统临时 home 里原样执行手册的 CLI 装包分支（profile init → plugin add pack+team → 真启动），断言 roster 三状态、无 `did not activate`；缺全局 dsh/pnpm/团队层/tarball = exit 2。`doctor-smoke` 用 fake anchor 覆盖“缺 pack 红 / engines 不匹配红 / 坏设置 warn / 不写 profile”。
 - **通过判据**：pack 清单与 `files` 声明一致、安装零缺失警告、干净 profile 会话能列出研究角色；安装/首启面 = `install-shape-smoke`/`product-boot-smoke` 绿（roster 三状态、首屏 Lead Session、cwd = 工作区）；安装副本带 `lib/client.js`、manifest peers-only（`dependencies` 缺席）、boot 页模块表含本包 client 行（preset-smoke 真会话档断言，安装域经 release-smoke ⑤ 委托覆盖）、端口用后无监听残留；doctor 的运行时行依赖只从安装锚解析，不把 client/构建期 peer 混进 Node 解析。
-- **何时跑**：包结构/release 相关改动时；框架里程碑必跑。
+- **何时跑**：包结构/release 相关改动时；框架里程碑必跑。**CI**：deploy job 在 `export-dist` 之后以 vendor CLI 作 `DSH_BIN` 跑 `lifecycle-smoke`（安装→显示→remove，无全局 dsh）。
 
 ### L3 领域面（Deep Research 方法论完整性 — 本项目独有）
 
