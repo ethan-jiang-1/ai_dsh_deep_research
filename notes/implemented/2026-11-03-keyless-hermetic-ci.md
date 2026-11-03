@@ -54,13 +54,16 @@
 - **fresh worktree 红→绿**：`git worktree add` 出一个无 `lib/`、只有 tracked `drafts/` 的 HEAD 副本；
   修前两文件红，应用本变更后 `node --test tests/pack/package-contract.test.mjs
   tests/contracts/docs-consistency.test.mjs` 为 **13/13 绿**。
-- 本仓 `pnpm test`：**1014/1014 绿**（少的一条即迁入 pack-smoke 的 client 模块表）；`pnpm verify` 全绿。
+- 本仓 `pnpm test`：**1013/1013 绿** + `pnpm test:vendor` **3/3 绿**；`pnpm verify` 全绿。
 - 根 `pnpm build` 成功；`node scripts/smoke/pack-smoke.mjs` **ALL PASS**（含迁入的 client 模块表三条）。
 - 文档同步：evaluation / guides/60 的 typecheck 执行面、scripts/README 的 pack-smoke 义务。
 - **fresh-clone 回归三连红→绿**：run 41555173492 的 `doc-paths` 点名 `packages/deep-research-pack/lib/`
   与 `packages/fs/tool-present`；run 41556960178 的 keyless 再点名 `bundle-composition` 与
-  `config-volatile` 的 vendor 构建依赖。修后本地 `pnpm test` 1011 + `pnpm test:vendor` 3 全绿，
+  `config-volatile` 的 vendor 构建依赖。修后本地 `pnpm test` 1013 + `pnpm test:vendor` 3 全绿，
   `pnpm verify` 全绿；两条测试在根 tsconfig 下实测通过（vendor 源解析，无 lib 依赖）。
 - **vendor 构建面实测**：`pnpm --dir vendor/dsh install --frozen-lockfile --ignore-scripts
-  --pm-on-fail=ignore` 成功（本机 store 热 3.9s）；`bash dev/vendor-build.sh` 的 tsc host / typert
-  （30 件）已跑通，完整链路由脚本退出码与 CI 首跑收口。
+  --pm-on-fail=ignore` 成功（本机 store 热 3.9s）；`bash dev/vendor-build.sh` 全链跑通（tsc host /
+  typert 30 件 / tsc client / root host / 补建 / client bundle）。
+- **CI 全绿**：run [41558484057](https://github.com/ethan-jiang-1/ai_dsh_deep_research/actions/runs/41558484057)
+  （commit `5939be1`）三 job 全绿——keyless verify+tests / deploy smokes / client-load（种子 home +
+  真浏览器）——**2026-10-26 之后首次**；client-load 的 chromium 缓存按平台解析修复同轮入账。
