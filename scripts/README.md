@@ -12,6 +12,9 @@
 
 ## smoke/（分级冒烟）
 
+> CI 归属 = [registry.json](smoke/registry.json)：每个 smoke 必须登记 `ci` 或 `dev-only` + 理由；
+> 机械对账 = [tests/contracts/smoke-registry.test.mjs](../tests/contracts/smoke-registry.test.mjs)（新增件不登记即红）。
+
 | 件 | 证明什么 | 档位 |
 |---|---|---|
 | preset-smoke.mjs | L1 真挂载：boot 页模块表行（client 半 served）、roster、逐角色建会话、skills 隔离 | keyless（`DSH_SMOKE_REAL=1` 起真 DSH，无模型） |

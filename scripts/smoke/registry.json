@@ -1,0 +1,114 @@
+{
+  "cdp-ask-smoke.mjs": {
+    "tier": "dev-only",
+    "reason": "真模型档：cdp-probe --ask 会触发模型；CI keyless 不跑"
+  },
+  "client-hitl-smoke.mjs": {
+    "tier": "dev-only",
+    "reason": "真模型档：需要活 HITL 挂起；CI keyless 不跑"
+  },
+  "client-load-config.mjs": {
+    "tier": "dev-only",
+    "reason": "client-load 的研究配置相位支援件，无独立 CI 入口"
+  },
+  "client-load-final.mjs": {
+    "tier": "dev-only",
+    "reason": "client-load 的终稿相位支援件，无独立 CI 入口"
+  },
+  "client-load-reference.mjs": {
+    "tier": "dev-only",
+    "reason": "client-load 的磁盘参考选择支援件，无独立 CI 入口"
+  },
+  "client-load-seed.mjs": {
+    "tier": "dev-only",
+    "reason": "种子夹具 materialize 支援件（client-load --seed 调用）"
+  },
+  "client-load-smoke.mjs": {
+    "tier": "ci",
+    "job": "client-load"
+  },
+  "cold-start-smoke.mjs": {
+    "tier": "dev-only",
+    "reason": "独立 home/profile/端口 + tarball；CI 组合不复现，L2 手工档"
+  },
+  "data-smoke.mjs": {
+    "tier": "dev-only",
+    "reason": "需 tarball + 真 web；L2 数据面手工档"
+  },
+  "doctor-smoke.mjs": {
+    "tier": "ci",
+    "job": "deploy"
+  },
+  "e2e-021rc2.mjs": {
+    "tier": "dev-only",
+    "reason": "升级端到端，需已装实例；发布前手工档"
+  },
+  "gates-smoke.mjs": {
+    "tier": "ci",
+    "job": "keyless"
+  },
+  "handoff-smoke.mjs": {
+    "tier": "dev-only",
+    "reason": "git archive HEAD + 临时 out；发布前手工档"
+  },
+  "install-shape-smoke.mjs": {
+    "tier": "dev-only",
+    "reason": "需全局 dsh/pnpm + registry；L2 安装手工档"
+  },
+  "l4-lite-smoke.mjs": {
+    "tier": "dev-only",
+    "reason": "真模型档：需要 DEEPSEEK_API_KEY；CI keyless 不跑"
+  },
+  "lifecycle-smoke.mjs": {
+    "tier": "ci",
+    "job": "deploy"
+  },
+  "method-library-tool-smoke.mjs": {
+    "tier": "dev-only",
+    "reason": "需 native system.node；CI 工具链缺，开发档"
+  },
+  "pack-smoke.mjs": {
+    "tier": "ci",
+    "job": "deploy"
+  },
+  "preset-smoke.mjs": {
+    "tier": "ci",
+    "job": "deploy"
+  },
+  "product-boot-smoke.mjs": {
+    "tier": "dev-only",
+    "reason": "真 Web + 浏览器 + 团队层；首启手工档（与 client-load 互补）"
+  },
+  "profile-concurrency-smoke.mjs": {
+    "tier": "dev-only",
+    "reason": "需全局 dsh + tarball；并发安装手工档"
+  },
+  "release-smoke.mjs": {
+    "tier": "dev-only",
+    "reason": "pack→干净 profile→plugin add；L2 安装手工档"
+  },
+  "run-accept-smoke.mjs": {
+    "tier": "ci",
+    "job": "keyless"
+  },
+  "secret-scan-smoke.mjs": {
+    "tier": "dev-only",
+    "reason": "交付物秘密扫描边界；随 run 验收手工跑"
+  },
+  "snapshot-replay-smoke.mjs": {
+    "tier": "dev-only",
+    "reason": "RPC/解压 + 场景资产；回放手工档"
+  },
+  "team-preflight-smoke.mjs": {
+    "tier": "dev-only",
+    "reason": "真模型档：需要 DEEPSEEK_API_KEY；CI keyless 不跑"
+  },
+  "user-env-smoke.mjs": {
+    "tier": "dev-only",
+    "reason": "已有 bundle + 用户 overlay；安装共存手工档"
+  },
+  "workspace-isolation-smoke.mjs": {
+    "tier": "dev-only",
+    "reason": "双实例 cold start；重，手工档"
+  }
+}
