@@ -16,7 +16,8 @@
   旧注释"只记提示，后续点击会暴露"已被 2026-10-27 事故推翻（JS 派发点击绕过 hit-testing，后续
   断言不会红）。
 - **`bundle-sessions` 的下一步给 session-id**：`watch-run` 的判据参数是 session-id，旧输出给 slug
-  → 照抄即 exit 2（诊断第一步自带坏命令）。
+  → 照抄即 exit 2（诊断第一步自带坏命令）。同轮加**状态摘要**：反查后直接打印
+  `events/readable/hitlPending/runSettled` 一行（runStateOf 同一谓词），诊断不必再手拼两跳。
 
 ## 输掉的方案
 
@@ -35,3 +36,5 @@
 - 本地 `client-load-smoke --seed tests/fixtures/client-load-home`：**ALL PASS**（含新增的
   "首屏 Preview Notice 可关闭"硬断言；此前同一场景打印"遮罩关不掉"仍全绿）。
 - `pnpm test` / `pnpm test:vendor` / `pnpm verify` 全绿（本变更的收尾轮）。
+- CI run 41561543486（`ce1e917`）三 job 全绿；方法库 tool smoke 进 deploy 的尝试在 CI 红于
+  `system.node` 缺席（native 产物），按"未跑 ≠ 通过"撤回该步并登记 trigger，证据留在开发档。

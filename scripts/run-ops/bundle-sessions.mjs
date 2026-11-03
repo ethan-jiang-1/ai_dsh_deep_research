@@ -12,7 +12,9 @@ import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { sessionsOfBundleCached } from '../lib/bundle-sessions.mjs'
 import { readZstdText } from '../lib/zstd-read.mjs'
-import { defaultGroupSubstring } from '../lib/workspace-root.mjs'
+import { defaultGroupSubstring, workspaceRoot } from '../lib/workspace-root.mjs'
+import { resolveSessionLog } from '../lib/session-log.mjs'
+import { runStateOf } from '../lib/run-state.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2)
@@ -78,6 +80,20 @@ for (const s of result.sessions) {
   console.log(`  ${s.sessionId}  [${s.group ?? '?'}]  ${tag}`)
 }
 const top = result.sessions[0]
+// 状态摘要（runStateOf 的同一谓词，watch-run 消费的那份）：一条命令把"哪场、哪个会话、
+// 现在什么态"串起来——诊断不必再手拼 watch-run/stream-diagnostics 两跳。
+try {
+  const ws = workspaceRoot({ argv: [], env: process.env, defaultRoot: join(ROOT, 'research-workspace') })
+  const wsRoot = ws.root ?? ws
+  const logPath = resolveSessionLog(join(sessionsRoot, top.group ?? groupRoots[0] ?? '', top.sessionId))
+  if (logPath !== null) {
+    const st = runStateOf({ logPath, wsRoot })
+    console.log('')
+    console.log(`状态：events=${st.events} readable=${st.readable} hitlPending=${st.hitlPending} runSettled=${st.runSettled}${st.teammate === true ? ' teammate=true' : ''}`)
+  }
+} catch (error) {
+  console.error(`状态摘要未取证：${error instanceof Error ? error.message : String(error)}（会话反查结果仍有效）`)
+}
 console.log('')
 console.log('下一步（诊断）：')
 console.log(`  node scripts/run-ops/stream-diagnostics.mjs --session ${top.sessionId}`)
