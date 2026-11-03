@@ -16,6 +16,10 @@ subagent 派活），角色分工天然对齐研究波的语义。第 5 个 pres
 | Critic（核查） | wave1 深度审查 + readiness + hitl2 前置 | 对"看起来完成了"过敏：无来源结论狩猎、质量审计、readiness 判定 | review.md |
 | Method Editor（方法编辑） | 方法库页共创（不属研究生命周期） | 把研究方法聊成四字段库条目；不做研究、不检索、不组队 | method-library.md（与用户确认后由页面保存） |
 
+角色清单的**事实源 = 盘上 `presets/` 目录**（D2）：上表是职责描述；增删/改名角色按
+[adding-a-research-role](../../.agents/skills/adding-a-research-role/SKILL.md) 技能同步代码与 live 文档。
+文档层不做名单机械对账（`role-list-sync` 守的是代码里的字面量），靠该技能的同变更清单。
+
 **事实的 owner 全表**住[研究手册](../../packages/deep-research-pack/content/manual.md)——一处事实一个家，
 L3 判据 2 的载体；任何两类事实不得双 owner 或无 owner。
 

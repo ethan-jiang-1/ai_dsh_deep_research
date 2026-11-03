@@ -5,6 +5,7 @@
 > 输掉了什么"的演进史住 notes 树（§7 指针）。套件名 = 研究驾驶舱（Research Cockpit，
 > 2026-09-28 用户拍板），命名分层表正本 = 本页 §1；命名决定的历史与输掉的备选 =
 > [cockpit-naming 快照](../../notes/archived/2026-09-28-cockpit-naming.md)。
+> 本页 = 设计合同；§5 是验证索引、§7 是演进链指针——按需读，不是设计正文。
 > 读完去哪：运行模型与四类状态 = [50](./50-agent-loop-and-state.md)。
 
 ## 1. 定位与命名分层
@@ -295,17 +296,15 @@ domain。它是 Client 渲染，不进模型请求。
   （图谱：头部 = 只读标记 + plan/task 计数；正文首行 = 版本轨；其下 = 覆盖率 + 刷新时刻），不另立第二套布局说明。
 - **发现规则单源**：驾驶舱 client 的三位置发现实现 = `src/lib/run-context.ts`；机械侧 = `run-context-single-source`（`src/client` 非注释 `_abandoned` 即红；`src/lib` 的终稿地址校验不在词法门禁范围）。`dev/hitl-answer` 与 `dev/run-kickoff` 的盘侧路径枚举、`run-dashboard` 投影与 `client-load-reference` oracle 各自保留，不在此行。
 
-## 5. 验证面与改动路由
+## 5. 验证面与改动路由（索引，非正文）
 
-| 面 | 命令 | 断言什么 |
+| 面 | 入口 | 断言什么 |
 |---|---|---|
-| keyless 真浏览器 | `client-load-smoke` | 插件零失败 + 页签渲染 + 渐进面与**磁盘真值对账**（证据计数 / 交付态〔= `present` 见证〕/ 问题行）+ 图谱覆盖率行（已映射/未映射）+ 锚点轨道与诚实线对账（盘侧独立重算）+ 未绑定负样本 + 终稿页签端到端（⑤ 交付门 → 默认版本账正文与盘侧首标题对账 + 版本切换在场） |
-| 真模型档 | `client-hitl-smoke` | 活标题翻转 + 横幅 + 挂起迁移 → 右栏自动展开（端到端） |
-| keyless 单测 | `pnpm test` | 折算谓词纯函数（§2 所列折算各有测试文件） |
+| keyless 真浏览器 | [client-load-smoke](../../scripts/smoke/client-load-smoke.mjs) | 装配零失败 + 页签渲染 + 渐进面与**磁盘真值对账** + 未绑定负样本 + 终稿端到端（细则以脚本为准） |
+| 真模型档 | [client-hitl-smoke](../../scripts/smoke/client-hitl-smoke.mjs) | 活标题翻转 + 横幅 + 挂起迁移 → 右栏自动展开 |
+| keyless 单测 | `pnpm test` | §2 所列折算各有测试文件 |
 
-改动路由（怎么改、按什么次序）= [guides/60 §2 任务型路由表](../guides/60-dev-loop.md)
-「改驾驶舱」行：`src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进
-`keys.ts` → `pnpm build` → `client-load-smoke`（改挂起显性化再跑 `client-hitl-smoke`）。
+命令与改动次序 = [guides/60 §2](../guides/60-dev-loop.md)「改驾驶舱」行；判据 = [evaluation](../evaluation.md) §L0/L1/L4。本页不复述命令表。
 
 ## 6. 已知限制与延后工作
 
@@ -370,15 +369,12 @@ domain。它是 Client 渲染，不进模型请求。
 - 从未开过页签的会话无 dock 观察者——挂起信号由 vendor 侧栏 Answer 徽标兜底；
 - 版本兼容：`engines.dsh` = `>=0.2.1-rc.2 <0.3.0-0`（`-0` 排除 0.3 预发布）；已测基线 = `0.2.1-rc.2` + `0.2.1-rc.3`。
 
-## 7. 历史指针（"为什么当初这么选"——notes 树）
+## 7. 演进链（指针，不是设计合同）
 
-演进链（每篇含输掉的方案与实测战果）：琢磨稿
-[ui-observability-surfaces](../../notes/archived/2026-09-24-ui-observability-surfaces.md)
-（选项推敲 + company 十二坑考古）→ RFC
-[observability-gui](../../notes/implemented/2026-09-24-observability-gui.md)（马拉松
-Stage 0–3；留活跃：`client-keys` 门禁红证出处）→
-[research-status-ui](../../notes/archived/2026-09-25-research-status-ui.md)（UI 优先改版）→
-[bundle-face-wiring](../../notes/archived/2026-09-26-bundle-face-wiring.md)（渐进面接通根因链）→
-[right-pane-ux-debt](../../notes/archived/2026-09-28-right-pane-ux-debt.md)（挂起显性化 +
-会话绑定）→ [cockpit-naming](../../notes/archived/2026-09-28-cockpit-naming.md)（定名）。
-门禁台账对它的引用 = [evaluation.md §L0](../evaluation.md)。
+选型与输掉的方案住 notes，逐篇含实测：琢磨稿
+[ui-observability-surfaces](../../notes/archived/2026-09-24-ui-observability-surfaces.md) →
+RFC [observability-gui](../../notes/implemented/2026-09-24-observability-gui.md)（`client-keys` 红证出处）→
+[research-status-ui](../../notes/archived/2026-09-25-research-status-ui.md) →
+[bundle-face-wiring](../../notes/archived/2026-09-26-bundle-face-wiring.md) →
+[right-pane-ux-debt](../../notes/archived/2026-09-28-right-pane-ux-debt.md) →
+[cockpit-naming](../../notes/archived/2026-09-28-cockpit-naming.md)。门禁台账引用 = [evaluation §L0](../evaluation.md)。
