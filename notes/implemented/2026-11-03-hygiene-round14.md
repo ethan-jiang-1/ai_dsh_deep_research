@@ -18,6 +18,10 @@
 - **smoke CI 归属显式**：`scripts/smoke/registry.json` 给每个 smoke 标 `ci` 或 `dev-only + 理由`；`smoke-registry.test` 与 `ci.yml` 双向对账，新增未登记即红——“新 smoke 永久不跑”不再能静默发生。
 - **`src/lib` 编译面显式**：`src/lib/faces.json` 把 35 个文件分成 host / shared / client 三面；`tsconfig.host` 的 include 与 host+shared 对账，相对 import 图禁止 host→client、client→host、shared→非 shared；pack 子树 AGENTS 记录入口。
 - **scripts 尺寸上限**：`scripts/` 新文件 ≤550 行；超限必须在 `script-file-size.test` 登记例外。现有两笔已登记债务 = `client-load-smoke`（1292，phase-oriented E2E，拆分另立轮）与 `gates-cases`（736，注入案例数据表）。新增 god script 不再能静默长出来。
+- **发布指南与反腐化门对齐**：`guides/64` 不再引用已删除的 `compat-smoke` / `compat-client-smoke`，新 DSH 版本证据 = 现有 L1/L2/client-load；`doc-paths` 扩到命令形态 token（`node scripts/…`、`source dev/…` 等），红证 = 64 的两个已删脚本，修复后绿。
+- **安装 owner 单一**：README / 00-index / guides/65 都指 `scripts/dist/product-manual.md`（源），`_dist/安装手册.md` 只作生成物；CONTRIBUTING 把 `test:vendor` 移出 fresh-clone 最小集。
+- **client-load 反馈门**：console 除 `Failed to load resource:` 之外的错误一律红；HTTP 失败仅允许 seed 的 `changes.summary` 404，其余 4xx/5xx/requestfailed 红。
+- **第 6 轮复评**：①A− ②A− ③A− ④A− ⑤A− ⑥A− ⑦B。⑦ 的唯一 P1 = 对外发布（`npm whoami` = ENEEDAUTH、`npm view` 404、0.3.0 无 tag），不是仓内可修项；其余六维仅余 P2。
 
 ## 输掉的方案
 
@@ -33,7 +37,7 @@
 
 - `pnpm verify`：52/52 PASS（含本 Note 与 Phase 0 文档变更后的复跑）。
 - `pnpm test`：1029/1029 PASS；`pnpm test:vendor`：3/3 PASS；`pnpm typecheck`：exit 0。
-- `client-load-smoke --seed tests/fixtures/client-load-home --port 3109`：ALL PASS（真 Chromium）。
+- `client-load-smoke --seed tests/fixtures/client-load-home --port 3109`：ALL PASS（真 Chromium；含 console/HTTP 新门）。
 - `node scripts/dist/export-dist.mjs`：全绿（147 条目、preset 5/5、模板 8）；clean build 后 `lib/workspace-boot.js` 不再随 tarball（`lib/types/client/workspace-boot.d.ts` 是 client 源码的类型件，不是旧插件）。
 - `node scripts/smoke/doctor-smoke.mjs`：ALL PASS（新增“半装缺 client 产物 → exit 1”反证）。
 - `node scripts/smoke/product-boot-smoke.mjs`：GREEN（注册 → 首屏 Lead Session，cwd = 工作区）。

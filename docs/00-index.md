@@ -16,7 +16,7 @@ Plugins 页装包；启动 `dsh --profile deep-research`。没有 launcher、没
 
 | 用户的说法 | 走哪（该事的唯一 owner） | 首个动作 |
 |---|---|---|
-| "用它""启动这个插件""跑研究""装到我的 DSH"（安装用户） | [`_dist/安装手册.md`](../_dist/安装手册.md)（命令唯一 owner）+ [pack README](../packages/deep-research-pack/README.md) + [guides/65](./guides/65-run-forms.md) | 按手册：CLI 建 profile（仅首次）→ 启动 → 应用内 Plugins 页装包；CLI 装包仅 Web 自动化/离线 |
+| "用它""启动这个插件""跑研究""装到我的 DSH"（安装用户） | [`_dist/安装手册.md`](../_dist/安装手册.md)（生成物；源 = [product-manual](../scripts/dist/product-manual.md)）+ [pack README](../packages/deep-research-pack/README.md) + [guides/65](./guides/65-run-forms.md) | 按手册：CLI 建 profile（仅首次）→ 启动 → 应用内 Plugins 页装包；CLI 装包仅 Web 自动化/离线 |
 | "在本仓启动/开跑/接着上次跑"（开发通道，默认 `runtime/harness-home`） | [guides/61](./guides/61-run-playbook.md) | `node dev/run-driver.mjs up`（起/复用通道 + 验浏览器面 + 呈交 URL） |
 | "换 profile/home""装进现有 web profile""诊断装得对不对" | [guides/65](./guides/65-run-forms.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | 换 profile 用新名字重新初始化；**已有 profile 不要重复 `--from-default-profile`**（破坏性）；诊断 = 安装副本的 `dsh-deep-research-doctor` |
 | "只验证插件还能挂载/安装"（证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `node scripts/smoke/install-shape-smoke.mjs`（自带临时 home，无需 source；或 `source dev/env.sh && node scripts/smoke/preset-smoke.mjs` / `release-smoke`） |

@@ -45,10 +45,9 @@ Keyless checks (no model key, no network calls):
 source dev/env.sh   # fresh clone：激活 pre-commit；之后幂等
 pnpm verify
 pnpm test
-pnpm test:vendor
 ```
 
-`pnpm typecheck` 需要 vendor 构建产物（`bash dev/vendor-build.sh`，CI deploy job 跑），不属于 fresh clone 的 keyless 最小集。
+`pnpm test:vendor` 是 vendor 源码契约的补充检查（fresh clone 可跑，不计入最小集）。`pnpm typecheck` 需要 vendor 构建产物（`bash dev/vendor-build.sh`，CI deploy job 跑），不属于 fresh clone 的 keyless 最小集。
 
 Install/first-screen checks (real install / browser; no model calls):
 

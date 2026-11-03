@@ -8,7 +8,7 @@ DSH 插件项目：一个 **bundle**（`packages/deep-research-pack`）+ 用户�
 
 ## 用它
 
-安装步骤的唯一 owner = [`_dist/安装手册.md`](_dist/安装手册.md)：首次用 CLI 建 custom profile
+安装步骤的唯一 owner = [`scripts/dist/product-manual.md`](scripts/dist/product-manual.md)（生成 [`_dist/安装手册.md`](_dist/安装手册.md)，勿手改）：首次用 CLI 建 custom profile
 （仅首次、破坏性），启动后在 **Plugins 页**装包，团队机制层同页打开（DSH 随安装提供、默认关闭的
 可选 bundle）；CLI 装包仅 Web 自动化/离线。首屏会问「项目目录」；研究产物写
 `<项目>/drt_<slug>/`，方法库 = `<项目>/method-library.md`。没有 launcher，也没有自定义安装器；

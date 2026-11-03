@@ -190,17 +190,26 @@ export function runA() {
       const lines = text.split('\n');
       for (const [i, line] of lines.entries()) {
         for (const m of line.matchAll(/`([^`\n]+)`/g)) {
-          const p = m[1].trim().replace(/:\d+(?:-\d+)?$/, '').replace(/[.,;:]+$/, '');
-          if (!ROOTS.test(p)) continue;
-          if (/[<>{}*?…\s]/.test(p) || p.includes('$')) continue;
-          if (BUILD_OUTPUT.test(p)) continue;
-          if (EXEMPT.has(p)) continue;
-          checked++;
-          const candidates = [p, 'vendor/dsh/' + p, ...EXTS.map((e) => p + e)];
-          const fromDoc = join(dirname(rel), p);
-          candidates.push(fromDoc, ...EXTS.map((e) => fromDoc + e));
-          if (candidates.some((c) => existsSync(join(ROOT, c)))) continue;
-          fail(gate, `${rel}:${i + 1} 反引号路径 \`${p}\` 不存在（仓根/文档目录/vendor 均未命中）——散文件路径也是合同；修正路径或改用 Markdown 链接`);
+          const token = m[1].trim();
+          const paths = (() => {
+            const p = token.replace(/:\d+(?:-\d+)?$/, '').replace(/[.,;:]+$/, '');
+            if (ROOTS.test(p)) return /[<>{}*?…\s]/.test(p) || p.includes('$') ? [] : [p];
+            // 命令形态（node/bash/source/cd …）里的仓内路径：ROOTS 只认 token 开头，
+            // 曾让 `node scripts/smoke/compat-smoke.mjs` 这类已删除脚本静默通过（2026-11-03 复评）。
+            return [...token.matchAll(/(?:^|[\s"'`])((?:packages|scripts|dev|docs|tests|snapshots|_dist|research-workspace)\/[^\s`'"]+)/g)]
+              .map((x) => x[1].replace(/:\d+(?:-\d+)?$/, '').replace(/[.,;:]+$/, ''))
+              .filter((x) => !/[<>{}*?…]/.test(x) && !x.includes('$'));
+          })();
+          for (const p of paths) {
+            if (BUILD_OUTPUT.test(p)) continue;
+            if (EXEMPT.has(p)) continue;
+            checked++;
+            const candidates = [p, 'vendor/dsh/' + p, ...EXTS.map((e) => p + e)];
+            const fromDoc = join(dirname(rel), p);
+            candidates.push(fromDoc, ...EXTS.map((e) => fromDoc + e));
+            if (candidates.some((c) => existsSync(join(ROOT, c)))) continue;
+            fail(gate, `${rel}:${i + 1} 反引号路径 \`${p}\` 不存在（仓根/文档目录/vendor 均未命中）——散文件路径也是合同；修正路径或改用 Markdown 链接`);
+          }
         }
       }
     }

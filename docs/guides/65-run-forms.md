@@ -22,7 +22,7 @@
 **决定：M1 安装形态为主。** 安装与启动全部是 DSH 命令；本包只多一个 custom profile 名
 （`deep-research`）。自定义 profile 的建立只能用 CLI（DSH 没有 UI 建自定义 profile；CLI 对未知名
 profile 只初始化 `dsh-base`——`--from-default-profile web` 是文档给的路径）。装包入口 = 应用内
-Plugins 页；CLI 装包只作 Web 自动化/离线。本包不发明安装器。**安装命令的唯一 owner = 手册**；
+Plugins 页；CLI 装包只作 Web 自动化/离线。本包不发明安装器。**安装步骤的 owner = [`scripts/dist/product-manual.md`](../../scripts/dist/product-manual.md)（生成 `_dist/安装手册.md`）**；
 本页只写合同，不复制命令。
 
 ## 2. 六轴 owner
@@ -90,7 +90,7 @@ writable roots。`WorkspaceId` 是 DSH Workspace registration ID，不是路径�
 - **回滚**：没有命令级回滚；回退 = 重装旧 exact 版本，旧包必须满足运行中 DSH 的 `engines.dsh`。
 - **卸载**：只移除包与 patch 层；工作区、方法库、deep-research 设置文件、Session、凭据、
   Workspace registration 都保留；显式删 profile/设置目录才清。
-- 命令、前置与故障排查 = [`_dist/安装手册.md`](../../_dist/安装手册.md)（唯一 owner）。
+- 命令、前置与故障排查 = [`scripts/dist/product-manual.md`](../../scripts/dist/product-manual.md)（源；生成 `_dist/安装手册.md`）。
 
 ## 6. 工作区
 

@@ -543,6 +543,12 @@ async function setupProbeSession() {
   await sleep(2_000)
   const loaderFailures = consoleErrors.filter((t) => t.includes('failed to apply loader entry'))
   step(loaderFailures.length === 0, 'console 无 "failed to apply loader entry"', loaderFailures.slice(0, 2).join(' | ').slice(0, 200))
+  // ②b console 非资源文案的错误（React/运行时）也不许绿；资源 404 的文本单独由 HTTP 门判。
+  const nonResourceConsole = consoleErrors.filter((t) => !t.includes('failed to apply loader entry') && !t.startsWith('Failed to load resource:'))
+  step(nonResourceConsole.length === 0, 'console 无 loader/资源文案之外的错误', nonResourceConsole.slice(0, 2).join(' | ').slice(0, 200))
+  // ②c HTTP 失败：seed 的 changes.summary 404 是已知缺省投影；其余 4xx/5xx/requestfailed 都红。
+  const unexpectedHttp = httpFailures.filter((f) => !(seed !== null && f.status === 404 && String(f.url).includes('/api/changes.summary?')))
+  step(unexpectedHttp.length === 0, 'HTTP 失败仅 seed 的 changes.summary 404（其余 = 红）', unexpectedHttp.slice(0, 3).map((f) => `${f.status} ${f.url}`).join(' | ').slice(0, 240))
 
   // ③ 模块表证据（Stage 1）：/plugins/ 批次请求必须包含本包 client bundle 且 200——
   //    证明 host 侧 client-modules 把我们的行编进了 boot 图、浏览器真的取到了模块。
