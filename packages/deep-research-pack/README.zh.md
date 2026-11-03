@@ -41,7 +41,8 @@ Analyst、Critic、Method Editor）、方法论 skill、Web 研究驾驶舱、�
 patch 文件。它装进名为 `deep-research` 的 **custom profile**；profile 是用户自己的具名组装，不是本包
 发布的东西。安装后，该 profile 的 `dsh.profile.bundles` 含有 `dsh-deep-research-pack`，该组合包插入
 `preset-{lead,scout,analyst,critic,method-editor}`、`research-content`、`research-client`、
-`research-startup`、`research-fetch-fallback`、`tool-present` 与 `ui-agent-team`。
+`research-startup`、`research-fetch-fallback` 与 `tool-present`。团队可视化行（`ui-agent-team`）
+由团队机制层提供（同一 profile 内单独安装），本包不插它。
 
 **2. 怎么装（默认）。** 启动该 profile，然后使用 **Plugins** 页：
 
@@ -182,9 +183,10 @@ dsh plugin --profile deep-research remove @deepseek-ai/dsh-experimental-agent-te
 <details>
 <summary>实现内幕 —— 点击展开</summary>
 
-`cordis.patch.yml` 是组合包层。它插入 preset 名册（默认 `lead`）、检索基座（`- id: web` 同时替换
-搜索与抓取选择）、`research-fetch-fallback`、`session-query-sqlite`（`openAt: first-search`，
-`path: ':memory:'`）、`tool-present`、`ui-agent-team`，以及本包的内容、启动与 client 行。
+`cordis.patch.yml` 是组合包层。它把 preset 名册默认值设为 `lead`，改写 `web`（搜索 + 抓取选择）、
+`llm-deepseek`（重试策略）、`session-query-sqlite`（`openAt: first-search`，`path: ':memory:'`）与
+`agent-preset-registry`，并插入 `research-fetch-fallback`、`tool-present` 以及本包的内容、启动与
+client 行。团队可视化行（`ui-agent-team`）归团队机制层，不在本 patch 内。
 `presets/<role>.patch.yml` 是每个角色一条 `@deepseek-ai/dsh-agent-preset` 行；
 `presets/<role>/skills/` 存放该角色的方法论 skill。`content/` 以 runtime context 注入，不写入工作区。
 

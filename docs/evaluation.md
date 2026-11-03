@@ -95,7 +95,7 @@
 ### L2 安装面（真实安装形状）
 
 - **定义**：插件以用户实际获得的方式可用——`npm pack` 产物完整，装进**干净 profile** 成功，起会话可用；client 半（观察面）在安装形状里在场。
-- **发布面/显示面最小真检查**：`node scripts/smoke/lifecycle-smoke.mjs`——`_dist/market.json` 过 DSH 的 `parseMarketIndex` 且版本/engines 与包清单一致、tarball 带 locale/icon 无 sourcemap、干净 profile 装 tarball 后 dump 出本包 11 行、真启动无降级、运行期 `readPluginMeta` 读出四个 specifier 的中英标题/描述/图标、`remove` 后 roster 回落；缺 dsh/pnpm/_dist = exit 2。
+- **发布面/显示面最小真检查**：`node scripts/smoke/lifecycle-smoke.mjs`——`_dist/market.json` 过 DSH 的 `parseMarketIndex` 且版本/engines 与包清单一致、tarball 带 locale/icon 无 sourcemap、干净 profile 装 tarball 后 dump 出本包声明的行、真启动无降级、运行期 `readPluginMeta` 读出四个 specifier 的中英标题/描述/图标、`remove` 后 roster 回落；缺 dsh/pnpm/_dist = exit 2。
 - **安装/首启面最小真检查（D40）**：`node scripts/smoke/install-shape-smoke.mjs`——原样执行手册的 CLI 装包分支（profile init → `dsh plugin --profile … add` pack+team → 真启动），断言 roster 三状态、无 `did not activate`、首屏可达；缺 pnpm/registry/缓存 = exit 2（未跑 ≠ 绿）。`node scripts/smoke/product-boot-smoke.mjs`——真 Web + 浏览器，断言 Host 注册工作区、首屏 blank Lead Session（`cwd` = 工作区）、Orca/工作区标题/起步卡/Lead preset/composer；无模型调用。
 - **最小真检查**：`release-smoke`：`npm pack` → 在选定 `DSH_HOME` 重建测试 profile → `dsh plugin --profile … add` → doctor（`--install-only`，跳过模型就绪检查）→ 安装域会话断言；无模型调用。独立默认 doctor 仍检查凭据在场。进程卫生全程有界：run() 超时预算（install 180s / 默认 120s / preset-smoke 外层 300s——company 实证值）+ mkdir 原子并发锁 + 子进程组退出确认回收。
 - **冷启动补充**：`cold-start-smoke` 用独立 `DSH_DEV_HOME` + 独立 profile/端口/state，从 tarball 安装并经 `run-driver up --bootstrap` 到浏览器面 GREEN；证明不依赖仓内既有 home/profile。MCP 关闭，团队层需 registry 或缓存。

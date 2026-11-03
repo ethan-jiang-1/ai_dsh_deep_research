@@ -4,7 +4,7 @@
 // 与 install-shape-smoke 的分工：那条证"CLI 装包分支 + 团队层"的用户路径；本条证**发布面与显示面**：
 //   ① `_dist/market.json` 过 DSH 自己的 `parseMarketIndex`，且版本/兼容范围与包清单一致
 //   ② tarball 带 locale/icon、不带 sourcemap（DSH 包约定）
-//   ③ 干净 profile 装 tarball → dump 出本包 11 个 entry id、无 `entry "…" not found`
+//   ③ 干净 profile 装 tarball → dump 出本包 10 个 entry id、无 `entry "…" not found`
 //   ④ 真启动打印 token URL、无 `did not activate` / `ERR_MODULE_NOT_FOUND`
 //   ⑤ 运行期用 `readPluginMeta` 读四个 specifier：中英标题/描述/图标真的解析得出来
 //   ⑥ `dsh plugin remove` 后 roster 回到 base + web-app
@@ -96,10 +96,12 @@ try {
 
   const dump = run(['--profile', PROFILE, '--dump-config'])
   const dumpText = `${dump.stdout ?? ''}`
+  // 本包自己的行 = 5 preset + content/client/startup/fetch-fallback/tool-present。
+  // `ui-agent-team` 归团队机制层（agent-team-profile），本 smoke 不装该层，故不在此列。
   const ours = ['preset-lead', 'preset-scout', 'preset-analyst', 'preset-critic', 'preset-method-editor',
-    'research-content', 'research-client', 'research-startup', 'research-fetch-fallback', 'tool-present', 'ui-agent-team']
+    'research-content', 'research-client', 'research-startup', 'research-fetch-fallback', 'tool-present']
   const missing = ours.filter((id) => !dumpText.includes(id))
-  check('③ dump 有本包 11 行', missing.length === 0, `缺：${missing.join(', ')}`)
+  check('③ dump 有本包 10 行', missing.length === 0, `缺：${missing.join(', ')}`)
   check('③ dump 无 entry not found', !/patch: entry ".*" not found/.test(`${dumpText}${dump.stderr ?? ''}`), tail(dump))
 
   const child = spawn(dsh, ['--profile', PROFILE, '--no-open', '--port', '0'], { env, cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] })

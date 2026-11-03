@@ -20,9 +20,10 @@
 - **它装什么**：一条 bundle（`dsh.bundle.patch` 六文件）+ 一套 preset/skill/内容资源；不含 launcher、
   不含 scaffold、不含自定义安装器。
 - **它往 profile 里插什么**（`--dump-config` 可见）：`preset-{lead,scout,analyst,critic,method-editor}`、
-  `research-content`、`research-client`、`research-startup`、`research-fetch-fallback`、`tool-present`、
-  `ui-agent-team`，并改写 base 的 `web`（检索）、`llm-deepseek`（重试）、`session-query-sqlite`
-  （会话检索）与 `agent-preset-registry`（默认 preset = lead）。
+  `research-content`、`research-client`、`research-startup`、`research-fetch-fallback` 与
+  `tool-present`，并改写 base 的 `web`（检索）、`llm-deepseek`（重试）、`session-query-sqlite`
+  （会话检索）与 `agent-preset-registry`（默认 preset = lead）。团队可视化行 `ui-agent-team`
+  由团队机制层提供（安装时同页打开），不随本包插入。
 - **它不做什么**：不建第二个启动器、不改 `web-startup` 的命令行、不写你的项目目录、不删你的数据。
 - **装完在哪**：profile `deep-research` 的 `node_modules/dsh-deep-research-pack/`；研究产物在你选的
   工作区；deep-research 设置文件只在 `$DSH_HOME/deep-research/`（见 §七/§九）。
@@ -148,7 +149,8 @@ dsh --profile deep-research --no-open --port 0   # 真启动：应打印 dsh web
 ```
 
 `--dump-config` 里应出现：`preset-lead`、`research-content`、`research-client`、`research-startup`、
-`research-fetch-fallback`、`tool-present`、`ui-agent-team`、`session-query-sqlite`；stderr 不应有
+`research-fetch-fallback`、`tool-present`、`session-query-sqlite`；若同时打开了团队机制层，还会出现
+`ui-agent-team`。stderr 不应有
 `patch: entry "…" not found`。真启动不应出现 `did not activate` / `ERR_MODULE_NOT_FOUND`。
 
 界面上可见的变化：Plugins 页里本包显示为「深度研究 / Deep Research」（中英文随界面语言，带图标）；

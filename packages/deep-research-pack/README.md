@@ -44,7 +44,9 @@ installer.
 user's named assembly, not something this package ships. After installation the profile's
 `dsh.profile.bundles` contains `dsh-deep-research-pack`, and the bundle inserts
 `preset-{lead,scout,analyst,critic,method-editor}`, `research-content`, `research-client`,
-`research-startup`, `research-fetch-fallback`, `tool-present`, and `ui-agent-team`.
+`research-startup`, `research-fetch-fallback`, and `tool-present`. The team UI row
+(`ui-agent-team`) comes from the team-mechanics layer, installed separately in the same profile;
+this bundle does not insert it.
 
 **2. How to install (default).** Start the profile, then use the **Plugins** page:
 
@@ -200,10 +202,11 @@ use a separate `DSH_HOME` for a clean environment.
 <details>
 <summary>Implementation internals — click to expand</summary>
 
-`cordis.patch.yml` is the bundle layer. It inserts the preset roster (default `lead`), the retrieval
-base (`- id: web` replacing both search and fetch selection), `research-fetch-fallback`,
-`session-query-sqlite` (`openAt: first-search`, `path: ':memory:'`), `tool-present`,
-`ui-agent-team`, and the package's content, startup, and client rows. `presets/<role>.patch.yml` is
+`cordis.patch.yml` is the bundle layer. It sets the preset roster default (`lead`), re-points
+`web` (search + fetch selection), `llm-deepseek` (retry policy), `session-query-sqlite`
+(`openAt: first-search`, `path: ':memory:'`), and `agent-preset-registry`, and inserts
+`research-fetch-fallback`, `tool-present`, and the package's content, startup, and client rows.
+The team UI row (`ui-agent-team`) belongs to the team-mechanics layer, not this patch. `presets/<role>.patch.yml` is
 one `@deepseek-ai/dsh-agent-preset` row per role; `presets/<role>/skills/` holds the role's
 methodology skills. `content/` is injected as runtime context, not written into the workspace.
 
