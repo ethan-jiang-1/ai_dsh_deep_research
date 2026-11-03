@@ -86,6 +86,7 @@ const verdict = {
   sessionOpened: false,
   statusPaneOpen: false,
   statusPaneText: '',
+  dataFaceMarker: '',
   expectFaceHeld: null,
   expectNoLeakHeld: null,
   asked: false,
@@ -263,6 +264,11 @@ try {
     if (verdict.statusPaneOpen) {
       await new Promise((resolve) => { setTimeout(resolve, 3000) });
       verdict.statusPaneText = (await paneText()) ?? '';
+      const marker = await evaluate(`(() => {
+        const el = document.querySelector('[data-research-face]');
+        return el === null ? '' : (el.getAttribute('data-research-face') ?? '');
+      })()`);
+      verdict.dataFaceMarker = typeof marker === 'string' ? marker : '';
     }
   }
 

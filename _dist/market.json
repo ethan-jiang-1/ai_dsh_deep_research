@@ -67,7 +67,7 @@
           "research"
         ],
         "sortKeys": {
-          "updated": 1793694544
+          "updated": 1793695100
         }
       },
       "dist-tags": {
@@ -76,7 +76,7 @@
       "versions": [
         {
           "version": "0.3.0",
-          "publishTimestamp": 1793694544,
+          "publishTimestamp": 1793695100,
           "source": {
             "type": "npm"
           },

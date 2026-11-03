@@ -27,7 +27,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { copyFileSync, existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { guiUrlFromWebLog, runDriverVerdict } from '../scripts/lib/run-channel.mjs';
+import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../scripts/lib/run-channel.mjs';
 
 export { guiUrlFromWebLog, runDriverVerdict };
 
@@ -40,7 +40,6 @@ const WEB_LOG = join(STATE_DIR, 'web.log');
 const BOOT_LOG = join(STATE_DIR, 'run-driver-boot.log');
 const DEFAULT_PORT = process.env.DSH_RUN_PORT || '3083';
 const DEFAULT_PROFILE = process.env.DSH_RUN_PROFILE || 'deep-research';
-const DEFAULT_FACE = '研究状态';
 
 const portOf = (url) => Number(new URL(url).port);
 
@@ -77,8 +76,8 @@ function probeFace(url, expectFace, screenshotPath = undefined, htmlPath = undef
     join(ROOT, 'scripts/probe/cdp-probe.mjs'),
     url,
     '--open-status',
-    '--expect-face', expectFace,
   ];
+  if (expectFace !== undefined) args.push('--expect-face', expectFace);
   if (screenshotPath !== undefined) args.push('--screenshot', screenshotPath);
   if (htmlPath !== undefined) args.push('--html', htmlPath);
   const r = spawnSync(process.execPath, args, { encoding: 'utf8', cwd: ROOT, timeout: 300_000 });
@@ -164,7 +163,7 @@ if (sub === 'url') {
 }
 
 if (sub === 'probe') {
-  const expectFace = arg('--expect-face', DEFAULT_FACE);
+  const expectFace = arg('--expect-face', undefined);
   const requireData = has('--require-data');
   const given = arg('--port', null);
   const s = channelState();
@@ -186,7 +185,9 @@ if (sub === 'probe') {
   const html = join(STATE_DIR, 'run-driver-probe.html');
   const { verdict, error } = probeFace(url, expectFace, shot, html);
   if (verdict === null) {
-    console.error(`run-driver probe: ${error}`);
+    const payload = { url, ...probeFailureVerdict({ error, expectFace, drift, requireData }) };
+    const saved = persistVerdict('probe', payload);
+    console.error(`run-driver probe: 探针失败（${error}）；已落 ${saved.dir}，latest-verdict 已更新`);
     process.exit(1);
   }
   const v = runDriverVerdict({ probe: verdict, expectFace, drift, requireData });
@@ -208,7 +209,7 @@ if (isCli && sub === 'up') {
 const wantPort = String(arg('--port', DEFAULT_PORT));
 const wantProfile = arg('--profile', DEFAULT_PROFILE);
 const noProbe = has('--no-probe');
-const expectFace = arg('--expect-face', DEFAULT_FACE);
+const expectFace = arg('--expect-face', undefined);
 const requireData = has('--require-data');
 
 let state = channelState();
@@ -293,7 +294,9 @@ const shot = join(STATE_DIR, 'run-driver-status.png');
 const html = join(STATE_DIR, 'run-driver-status.html');
 const { verdict, error } = probeFace(state.url, expectFace, shot, html);
 if (verdict === null) {
-  console.error(`run-driver: ${error}`);
+  const payload = { url: state.url, port: state.port, ...probeFailureVerdict({ error, expectFace, drift, requireData }) };
+  const saved = persistVerdict('up', payload);
+  console.error(`run-driver: 探针失败（${error}）；已落 ${saved.dir}，latest-verdict 已更新`);
   process.exit(1);
 }
 const v = runDriverVerdict({ probe: verdict, expectFace, drift, requireData });

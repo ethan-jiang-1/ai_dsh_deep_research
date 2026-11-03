@@ -38,3 +38,28 @@ export function bindingTrust(events: readonly unknown[]): BindingTrust {
   if (binding.kickoffSeen) return { kind: 'suppressed', slug: binding.slug, reason: 'kickoff' }
   return { kind: 'bound', slug: binding.slug, boundBy: 'read' }
 }
+
+/** 状态页暴露给浏览器探针的机器标记；不是给人看的文案。 */
+export type StatusFaceMarker = 'bound' | 'unbound' | 'kickoff-hold' | 'pending' | 'error' | 'unknown'
+
+/**
+ * 状态页的机器可读数据面标记（cdp-probe 读 `[data-research-face]`）。
+ * 顺序 = 页面实际渲染优先级：错误 > 未绑定 > 立项预检 > 绑定 > 挂起抑制 > 未知。
+ * `bound` 必须同时有可信绑定与已读出的 face——只有绑定、没有 face 仍是未知，不能冒充“数据面通了”。
+ * @param input - 页面状态。
+ * @returns 机器标记。
+ */
+export function statusFaceMarker(input: {
+  readonly trust: BindingTrust
+  readonly unbound: boolean
+  readonly kickoffHold: boolean
+  readonly hasError: boolean
+  readonly hasFace: boolean
+}): StatusFaceMarker {
+  if (input.hasError) return 'error'
+  if (input.unbound || input.trust.kind === 'unbound') return 'unbound'
+  if (input.kickoffHold) return 'kickoff-hold'
+  if (input.trust.kind === 'bound' && input.hasFace) return 'bound'
+  if (input.trust.kind === 'suppressed') return 'pending'
+  return 'unknown'
+}

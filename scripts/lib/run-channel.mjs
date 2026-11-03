@@ -51,25 +51,32 @@ export function runDriverVerdict({ probe, expectFace, drift, requireData = false
     };
   }
   const p = probe ?? {};
-  // 数据面（驾驶舱是否真的绑定了 run bundle）：statusPaneText 为空 = 未取证，不许当绑定。
+  // 数据面（驾驶舱是否真的绑定了 run bundle）：优先读状态页的机器标记；没有标记才回退文本，
+  // 且回退必须命中正向证据（“没写未绑定”不是绑定——kickoffHold / error / 空挂载都能绕过负判）。
+  const marker = typeof p.dataFaceMarker === 'string' ? p.dataFaceMarker.trim().toLowerCase() : '';
   const pane = String(p.statusPaneText ?? '').trim();
-  const dataFace = pane === '' ? 'unknown' : (/未绑定|not bound/i.test(pane) ? 'unbound' : 'bound');
+  const positive = /证据\s*\d+|已交付|读终稿/.test(pane);
+  const dataFace = marker === 'bound' || marker === 'unbound'
+    ? marker
+    : marker !== ''
+      ? 'unknown'
+      : pane === '' ? 'unknown' : (/未绑定|not bound/i.test(pane) ? 'unbound' : (positive ? 'bound' : 'unknown'));
   const checks = [
     { id: 'channel-mirror', ok: true, detail: 'pack 发布集 ↔ 安装镜像一致' },
     { id: 'host-mounted', ok: p.booted === true && p.frameMounted === true, detail: `booted=${p.booted} frameMounted=${p.frameMounted}` },
     // overlayCleared 为 null（probe 没取证）**不许**当绿——未跑 ≠ 通过
     { id: 'overlay-clear', ok: p.overlayCleared === true, detail: `overlayPresent=${p.overlayPresent} overlayCleared=${p.overlayCleared}` },
     { id: 'status-pane-open', ok: p.statusPaneOpen === true, detail: `statusPaneOpen=${p.statusPaneOpen}` },
-    // expectFaceHeld 为 null（页签没开、断言根本没执行）**不许**当绿
-    { id: 'expect-face', ok: p.expectFaceHeld === true, detail: `${expectFace}=${p.expectFaceHeld}` },
     {
       id: 'console-clean',
       ok: (p.consoleProblems?.length ?? 0) === 0 && (p.exceptions?.length ?? 0) === 0,
       detail: `consoleProblems=${p.consoleProblems?.length ?? 0} exceptions=${p.exceptions?.length ?? 0}`,
     },
   ];
+  // --expect-face 是 opt-in：默认拿页签标题当断言，标题本身就在 paneText 里 = 重言式。
+  if (expectFace !== undefined) checks.push({ id: 'expect-face', ok: p.expectFaceHeld === true, detail: `${expectFace}=${p.expectFaceHeld}` });
   // 默认 up 面对新会话（未绑定是正常态），故数据面单列为显式字段；--require-data 才升为硬检查。
-  if (requireData) checks.push({ id: 'data-face', ok: dataFace === 'bound', detail: `dataFace=${dataFace}` });
+  if (requireData) checks.push({ id: 'data-face', ok: dataFace === 'bound', detail: `dataFace=${dataFace}${marker === '' ? '' : ` marker=${marker}`}` });
   const failed = checks.filter((c) => !c.ok);
   const dataNote = dataFace === 'bound' ? '已绑定' : dataFace === 'unbound' ? '未绑定（新会话正常）' : '未取证';
   return {
@@ -77,8 +84,20 @@ export function runDriverVerdict({ probe, expectFace, drift, requireData = false
     level: failed.length === 0 ? 'GREEN' : 'RED',
     checks,
     dataFace,
+    dataFaceMarker: marker,
     reason: failed.length === 0
       ? `浏览器面全绿（数据面：${dataNote}）——可呈交`
       : `浏览器面红：${failed.map((c) => `${c.id}(${c.detail})`).join(', ')} ｜ probe=${p.failed ?? 'n/a'}`,
   };
+}
+
+/**
+ * 探针崩溃/输出不可解析时的判定：仍走同一 verdict 契约，但带 probeError 并落盘。
+ * 不返回裸错误——否则 latest-verdict 会停在上一次（可能是 GREEN）。
+ * @param {{ error: unknown, expectFace?: string, drift: unknown, requireData?: boolean }} input
+ * @returns verdict payload（exit 1）。
+ */
+export function probeFailureVerdict({ error, expectFace, drift, requireData = false }) {
+  const verdict = runDriverVerdict({ probe: {}, expectFace, drift, requireData });
+  return { ...verdict, probeError: String(error ?? 'probe failed') };
 }

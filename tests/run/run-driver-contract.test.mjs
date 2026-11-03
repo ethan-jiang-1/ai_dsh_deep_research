@@ -15,7 +15,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 // 判据住 scripts/lib/run-channel.mjs（壳 = dev/run-driver.mjs 含 spawn，测试不许进其 import
 // 闭包——layering 守卫；2026-10-19 实测红后按分层修正）
-import { guiUrlFromWebLog, runDriverVerdict } from '../../scripts/lib/run-channel.mjs';
+import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../../scripts/lib/run-channel.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
@@ -38,6 +38,14 @@ test('URL 抽取：只认最后一条横幅（web.log 每次 boot 截断写，�
   assert.equal(guiUrlFromWebLog('dsh web: http://127.0.0.1:3084/\n'), null);
 });
 
+test('探针崩溃：仍落 verdict（exit 1 + probeError），不把 latest 留成旧绿', () => {
+  const crashed = probeFailureVerdict({ error: 'cdp exit 1', drift: { clean: true } });
+  assert.equal(crashed.exit, 1);
+  assert.equal(crashed.probeError, 'cdp exit 1');
+  assert.equal(crashed.level, 'RED');
+  assert.ok(crashed.checks.some((c) => !c.ok), '崩溃必须带失败检查，不能是空 verdict');
+});
+
 test('verdict 契约：exit 0=全绿 / 1=断言红 / 2=未跑；消息面出现即不绿', () => {
   const green = runDriverVerdict({
     probe: { booted: true, frameMounted: true, overlayCleared: true, statusPaneOpen: true, expectFaceHeld: true, consoleProblems: [], exceptions: [] },
@@ -47,6 +55,12 @@ test('verdict 契约：exit 0=全绿 / 1=断言红 / 2=未跑；消息面出现�
   assert.equal(green.checks.length, 6);
   assert.equal(green.checks[0].id, 'channel-mirror', '镜像一致性是第一条硬检查（旧页面不能当当前代码的绿）');
   assert.equal(green.dataFace, 'unknown', '没取到 statusPaneText = 数据面未取证，不许当已绑定');
+  const noExpect = runDriverVerdict({
+    probe: { booted: true, frameMounted: true, overlayCleared: true, statusPaneOpen: true, consoleProblems: [], exceptions: [] },
+    drift: { clean: true },
+  });
+  assert.equal(noExpect.exit, 0);
+  assert.ok(!noExpect.checks.some((c) => c.id === 'expect-face'), '未传 --expect-face 时不做重言式断言（检查项不出现，而不是默认绿）');
 
   // 数据面单列：新会话未绑定是正常态（默认仍绿），但 verdict 必须写明；--require-data 才升硬检查。
   const base = { booted: true, frameMounted: true, overlayCleared: true, statusPaneOpen: true, expectFaceHeld: true, consoleProblems: [], exceptions: [] };
@@ -63,6 +77,14 @@ test('verdict 契约：exit 0=全绿 / 1=断言红 / 2=未跑；消息面出现�
   const requiredBound = runDriverVerdict({ probe: { ...base, statusPaneText: '流程轨道七步 证据 10' }, expectFace: '研究状态', drift: { clean: true }, requireData: true });
   assert.equal(requiredBound.exit, 0);
   assert.equal(requiredBound.dataFace, 'bound');
+  const markerBound = runDriverVerdict({ probe: { ...base, statusPaneText: '', dataFaceMarker: 'bound' }, expectFace: '研究状态', drift: { clean: true }, requireData: true });
+  assert.equal(markerBound.dataFace, 'bound');
+  const markerError = runDriverVerdict({ probe: { ...base, statusPaneText: '证据 10 份', dataFaceMarker: 'error' }, expectFace: '研究状态', drift: { clean: true }, requireData: true });
+  assert.equal(markerError.dataFace, 'unknown', '错误标记压过文本，不能靠“证据 10 份”假绿');
+  assert.equal(markerError.exit, 1);
+  const kickoffText = runDriverVerdict({ probe: { ...base, statusPaneText: '这场研究还没开始——立项对齐中，读到的是上一场 run 的上下文' }, expectFace: '研究状态', drift: { clean: true }, requireData: true });
+  assert.equal(kickoffText.dataFace, 'unknown', 'kickoff 文案不含“未绑定”，旧负判会假绿');
+  assert.equal(kickoffText.exit, 1);
 
   // 首屏遮罩没清场 → 红。"DOM 在位"不等于"人看得见"：探针的 JS 派发绕过 hit-testing，
   // 2026-10-27 实测 GREEN 同刻截图仍被 Preview Notice 盖住（见 cdp-probe 同名注释）。

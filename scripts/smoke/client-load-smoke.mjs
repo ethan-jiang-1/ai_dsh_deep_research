@@ -615,6 +615,8 @@ async function pass1BoundFacePhase() {
       step(capOk, '「研究状态」guide 胶囊在场（tab 类型注册成功 + 右栏展开）')
       if (capOk) {
         await wait(6_000)
+        const faceMarker = await page.evaluate(() => document.querySelector('[data-research-face]')?.getAttribute('data-research-face') ?? '')
+        step(faceMarker === 'bound', '状态页数据面 marker = bound（正向绑定证据）', `marker=${faceMarker}`)
         const paneText = await paneTextOf(page)
         let seg = segFrom(paneText, 'status')
         // UI/盘侧时点竞态收口（2026-10-11 首验两红）：①UI bundle 面有 30s 刷新周期（slug

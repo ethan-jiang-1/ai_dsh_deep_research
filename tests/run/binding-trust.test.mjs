@@ -3,7 +3,7 @@
 // 本文件把政策钉成一张真值表：write 永远可信；read 在挂起/立项窗抑制；其余 read 可信。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { bindingTrust } from '../../packages/deep-research-pack/src/lib/binding-trust.ts';
+import { bindingTrust, statusFaceMarker } from '../../packages/deep-research-pack/src/lib/binding-trust.ts';
 import { toolCall, toolResult } from '../fixtures/events.mjs';
 
 const read = (path = 'drt_x/a.md') => toolCall({ name: 'read', arguments: { path }, time: '2026-10-23T10:00:00Z' });
@@ -38,4 +38,17 @@ test('只读绑定 + 立项信号（ask 已答）→ suppressed kickoff（立项
 
 test('立项信号后 write 落笔 → 自动恢复 bound write（同一会话的 read→write 翻转）', () => {
   assert.deepEqual(bindingTrust([read(), ask(), answered(), write()]), { kind: 'bound', slug: 'x', boundBy: 'write' });
+});
+
+test('statusFaceMarker：错误/未绑定/立项/绑定/挂起各自一个机器标记', () => {
+  const bound = { kind: 'bound', slug: 'x', boundBy: 'read' };
+  const unbound = { kind: 'unbound' };
+  const suppressed = { kind: 'suppressed', slug: 'x', reason: 'pending' };
+  const marker = (input) => statusFaceMarker({ unbound: false, kickoffHold: false, hasError: false, hasFace: true, ...input });
+  assert.equal(marker({ trust: bound, hasError: true }), 'error');
+  assert.equal(marker({ trust: unbound }), 'unbound');
+  assert.equal(marker({ trust: suppressed, kickoffHold: true }), 'kickoff-hold');
+  assert.equal(marker({ trust: bound }), 'bound');
+  assert.equal(marker({ trust: bound, hasFace: false }), 'unknown', '有绑定但 face 未读出 = 未知，不冒充数据面');
+  assert.equal(marker({ trust: suppressed }), 'pending');
 });
