@@ -17,6 +17,7 @@ launcher/scaffold，没有自定义安装器**。包级当前合同在 [README.m
   `node dev/render-overlay.mjs` **从 pack 渲染**（门禁 `overlay-fresh` 对账，勿手改）；
   ② `runtime/harness-home/profiles/deep-research/`（run 通道镜像）随 `boot-run.sh` 同步，
   其漂移检测逐文件比对，不符即 fail-loud；改完 pack 跑 `node scripts/verify/verify.mjs`；
+- **双重编译面**：`src/lib` 文件的 host/shared/client 归属 = `src/lib/faces.json`；host include = host+shared，client 不得 import host；门禁 = `tests/pack/src-lib-faces.test.mjs`。
 - 新增/修改角色走 [`.agents/skills/adding-a-research-role`](../../.agents/skills/adding-a-research-role/SKILL.md)；
 - 行引用的 `@deepseek-ai/*` 必须同时出现在 `peerDependencies`（`row-deps` 门禁）；
 - 角色清单（roster）的事实源 = 盘上 `presets/`，不要在代码里写第二份角色字面量

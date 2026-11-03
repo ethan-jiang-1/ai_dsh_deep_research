@@ -1,0 +1,43 @@
+{
+  "host": [
+    "method-library-commands.ts",
+    "method-library-write.ts"
+  ],
+  "shared": [
+    "library-fold.ts",
+    "method-library-operation.ts",
+    "text-fold.ts",
+    "workspace-title.ts"
+  ],
+  "client": [
+    "activity-fold.ts",
+    "binding-trust.ts",
+    "brief-fold.ts",
+    "bundle-bind.ts",
+    "config-tables.ts",
+    "final-target.ts",
+    "graph-model.ts",
+    "hitl-fold.ts",
+    "journal-wire.ts",
+    "member-activity.ts",
+    "method-draft.ts",
+    "method-library-events.ts",
+    "method-library-hash.ts",
+    "method-library-operation-state.ts",
+    "method-library-read.ts",
+    "method-library-source.ts",
+    "method-of-question.ts",
+    "plan-diff.ts",
+    "plan-graph.ts",
+    "plan-index.ts",
+    "receipt-fold.ts",
+    "rerun-triage.ts",
+    "review-readiness.ts",
+    "run-context.ts",
+    "run-fold.ts",
+    "run-version.ts",
+    "start-card.ts",
+    "stream-failure.ts",
+    "tool-card.ts"
+  ]
+}
