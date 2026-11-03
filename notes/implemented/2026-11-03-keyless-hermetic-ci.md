@@ -27,6 +27,10 @@
   文档描述它时放行（存在性由构建/pack-smoke 证明）。同轮修正 `terms.md` 的陈旧路径
   `packages/fs/tool-present` → `packages/deliverables/tool-present`（旧路径只是本机 node_modules
   残留，CI 因此红——本地全绿掩盖 fresh-clone 失败的另一实例）。
+- **浏览器缓存按平台解析**：`launchChromium` 的缓存回退原先只认 macOS
+  `~/Library/Caches/ms-playwright`，Linux CI 上必失效（client-load 红在 launch）。拆出纯件
+  `scripts/lib/browser-cache.mjs`（macOS/Linux/Windows 三态 + `PLAYWRIGHT_BROWSERS_PATH` 覆盖），
+  单测 `tests/run/browser-cache.test.mjs`；启动失败时回退任一平台缓存里的可执行文件。
 - **vendor 源码契约单列 `pnpm test:vendor`**：默认 `pnpm test` 用 client tsconfig（`paths: {}`），
   vendor 包解析到构建产物 `lib/`；两条契约（组合层 `bundle-composition`、设置 schema
   `config-volatile`）要 import vendor **源码**，在 fresh clone 上必然 `ERR_MODULE_NOT_FOUND`。

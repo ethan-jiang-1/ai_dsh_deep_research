@@ -117,6 +117,7 @@
 | lib/run-source-node.mjs | evidence-audit、node-gate、run-context-node.test、schema-scan | node:fs 的 RunSource 适配器：list/read/version；ENOENT → missing，其余 → unreadable；行窗口与 eof 语义对齐 vendor workspaceFiles |
 | lib/env.mjs | cdp-ask-smoke、client-hitl-smoke、client-load-smoke、data-smoke、discipline-probe、doctor-smoke、e2e-021rc2、entry-chain-probe、env-credentials.test、install-shape-smoke、l4-lite-smoke、lifecycle-smoke、method-library-probe、pack-smoke、preset-smoke、product-boot-smoke、profile-concurrency-smoke、record-role-fixture、release-smoke、rerun-triage-probe、run-accept-smoke、session-replay、snapshot-replay-smoke、team-preflight-smoke、user-env-smoke、workspace-isolation-smoke | 子进程环境清洗（scrubbedEnv/withModelKey）与真模型档前置（requireCredentials/credentialsPresent——凭据卫生） |
 | lib/playwright.mjs | client-hitl-smoke、client-load-smoke、e2e-021rc2、hitl-answer、product-boot-smoke、session-replay、snapshot-replay-smoke | Playwright 启停支撑 |
+| lib/browser-cache.mjs | playwright、browser-cache.test | 浏览器缓存目录判据（macOS/Linux/Windows 三态 + `PLAYWRIGHT_BROWSERS_PATH` 覆盖） |
 | lib/cdp-driver.mjs | cdp-probe、scene-capture | 裸 CDP 驱动 |
 | lib/session-replay.mjs | session-replay、session-replay.test | 历史会话定位/元信息/判读整形纯函数（跨组枚举、id 优先、标题歧义如实报候选；会话→工作区靠首事件 cwd） |
 | lib/scene-pack.mjs | scene-capture、scene-pack.test | 场景包读取/列示纯函数（五件套概要如实——缺件与坏 meta 不静默；mtime 降序） |

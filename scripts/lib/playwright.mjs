@@ -7,9 +7,9 @@
 // macOS app bundle 与 headless shell 的路径差异），复制第二份必然漂移。
 // 出处：client-load-smoke.mjs（postmortem 0003 起的既有实现）。
 import { existsSync, readdirSync } from 'node:fs'
-import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { browserCacheDirs } from './browser-cache.mjs'
 
 /** 递归找 chromium 可执行文件（headless shell / macOS app bundle / chrome）。 */
 function findExecutable(dir) {
@@ -52,14 +52,15 @@ export async function launchChromium(chromiumApi) {
     return await chromiumApi.launch()
   } catch (error) {
     if (!String(error).includes("Executable doesn't exist")) throw error
-    const cache = process.env.PLAYWRIGHT_BROWSERS_PATH ?? join(homedir(), 'Library/Caches/ms-playwright')
-    if (!existsSync(cache)) throw error
-    const roots = readdirSync(cache)
-      .filter(name => name.startsWith('chromium_headless_shell-') || name.startsWith('chromium-'))
-      .sort().reverse()
-    for (const root of roots) {
-      const executable = findExecutable(join(cache, root))
-      if (executable !== undefined) return await chromiumApi.launch({ executablePath: executable })
+    const caches = browserCacheDirs().filter((dir) => existsSync(dir))
+    for (const cache of caches) {
+      const roots = readdirSync(cache)
+        .filter(name => name.startsWith('chromium_headless_shell-') || name.startsWith('chromium-'))
+        .sort().reverse()
+      for (const root of roots) {
+        const executable = findExecutable(join(cache, root))
+        if (executable !== undefined) return await chromiumApi.launch({ executablePath: executable })
+      }
     }
     throw error
   }
