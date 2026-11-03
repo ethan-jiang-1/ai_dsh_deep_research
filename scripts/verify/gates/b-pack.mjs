@@ -373,48 +373,23 @@ export function runB() {
 // publishTimestamp / source / engines.dsh（规则源 = vendor 的 plugin-market index 格式文档）。
 // L0 是零依赖层，不 import workspace 里的校验器——真 `parseMarketIndex` 归 lifecycle-smoke
 // （那里有完整 node_modules）。本门禁判：结构合法 + 与包清单一致 + 图标在格式上限内。
-// 反证：索引版本改成 9.9.9 → 红；删 icon → 红；把 format 改成 2 → 红。
+// 反证：staged 索引里放回一个插件条目 → 红；删 staged 文案 → 红；把 format 改成 2 → 红。
 {
   const gate = 'market-index';
   const indexPath = join(ROOT, '_dist', 'market.json');
-  const pkgPath = join(PACK, 'package.json');
-  if (!existsSync(indexPath)) fail(gate, '_dist/market.json 缺席——跑 node scripts/dist/market.mjs（或 export-dist）导出');
-  else if (!existsSync(pkgPath)) fail(gate, 'deep-research-pack/package.json 不存在');
+  if (!existsSync(indexPath)) fail(gate, '_dist/market.json 缺席——跑 node scripts/dist/export-dist.mjs 导出');
   else {
-    const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
     let doc;
     try { doc = JSON.parse(readFileSync(indexPath, 'utf8')) } catch (error) { fail(gate, `market.json 不是合法 JSON：${String(error)}`) }
     if (doc !== undefined) {
       if (doc.format !== 1) fail(gate, `format 必须是 1（当前 ${String(doc.format)}）`);
       const localized = (value) => typeof value === 'string' || (typeof value === 'object' && value !== null && typeof value.en === 'string');
       if (!localized(doc.title)) fail(gate, '索引缺 title（LocalizedText，必须含 en）');
-      if (!Array.isArray(doc.plugins) || doc.plugins.length === 0) fail(gate, '索引 plugins 为空（防空语料）');
-      else {
-        const plugin = doc.plugins.find((entry) => entry.name === pkg.name);
-        if (plugin === undefined) fail(gate, `索引里没有本包：${pkg.name}`);
-        else {
-          if (!localized(plugin.title)) fail(gate, '条目缺 title');
-          if (!localized(plugin.description)) fail(gate, '条目缺 description');
-          if (!Array.isArray(plugin.versions) || plugin.versions.length === 0) fail(gate, '条目 versions 为空');
-          else {
-            const version = plugin.versions.find((entry) => entry.version === pkg.version);
-            if (version === undefined) fail(gate, `索引缺版本 ${pkg.version} 的条目`);
-            else {
-              const ts = version.publishTimestamp;
-              if (!Number.isInteger(ts) || ts < 0 || ts >= 1e11) fail(gate, `publishTimestamp 必须是 [0,1e11) 的整数秒（当前 ${String(ts)}）`);
-              if (version.source?.type !== 'npm') fail(gate, 'source 必须是 npm（本包 lib/ 不入 git，git 源装不出构建产物）');
-              if (version.engines?.dsh !== pkg.engines?.dsh)
-                fail(gate, `engines.dsh=${String(version.engines?.dsh)} ≠ 包清单 ${String(pkg.engines?.dsh)}——市场展示的兼容性会与真实准入打架`);
-            }
-          }
-          const latest = plugin['dist-tags']?.latest;
-          if (latest !== pkg.version) fail(gate, `dist-tags.latest=${String(latest)} ≠ 包版本 ${pkg.version}`);
-          if (typeof plugin.icon === 'string' && plugin.icon.startsWith('data:')) {
-            const payload = plugin.icon.slice(plugin.icon.indexOf(',') + 1);
-            if (Buffer.from(payload, 'base64').length > 32 * 1024) fail(gate, '内联图标超过 32 KiB（格式上限）');
-          } else if (plugin.icon === undefined) fail(gate, '条目缺 icon——发现页会用默认图');
-        }
+      if (!localized(doc.description) || !/staged/i.test(String(doc.description?.en ?? ''))) {
+        fail(gate, 'staged 索引必须在 description.en 写明 staged（未发布 npm，本地 tarball 交付）');
       }
+      if (!Array.isArray(doc.plugins)) fail(gate, 'plugins 必须是数组');
+      else if (doc.plugins.length !== 0) fail(gate, `staged 索引不得包含可安装条目（当前 ${doc.plugins.length} 个）——npm 未发布，列出 source=npm 会让用户点到 404`);
     }
   }
 }
@@ -460,13 +435,15 @@ export function runB() {
       if (!manual.includes(`## ${heading}`)) fail(gate, `安装手册缺节：${heading}`);
     }
     const bootstrap = manual.indexOf('--from-default-profile web');
-    const plugins = manual.indexOf('Plugins 页');
+    const plugins = manual.indexOf('### A. Plugins 页');
     const cli = manual.indexOf('dsh plugin');
     if (bootstrap === -1) fail(gate, '安装手册没有写 custom profile 的 CLI 引导（--from-default-profile web）——DSH 没有 UI 建自定义 profile，缺这一步默认路径到不了 deep-research');
     else if (plugins !== -1 && bootstrap > plugins) fail(gate, '安装手册把 profile 引导放在 Plugins 页之后——默认路径必须先有 custom profile');
     if (!manual.includes('dsh --profile deep-research')) fail(gate, '安装手册没有写 dsh --profile deep-research 启动');
-    if (plugins === -1) fail(gate, '安装手册没有把 Plugins 页写成装包入口');
-    else if (cli !== -1 && cli < plugins) fail(gate, '安装手册先讲 CLI 装包再讲 Plugins 页——装包入口是应用内 Plugins 页，CLI 只作 web 自动化');
+    if (plugins === -1) fail(gate, '安装手册没有写 Plugins 页（发布后路径；当前 staged）');
+    else if (cli !== -1 && cli < plugins) fail(gate, '安装手册先讲 CLI 装包再讲 Plugins 页——Plugins 页是发布后路径，CLI 只作 web 自动化');
+    if (!manual.includes('本地 tarball')) fail(gate, '安装手册没有写当前唯一发布形态 = 本地 tarball');
+    if (!/staged/i.test(manual)) fail(gate, '安装手册没有标注 npm/Plugins/Discover 为 staged（0.3.0 未上 npm）');
     if (!/仅 `dsh web`/.test(manual)) fail(gate, '安装手册没有标注 CLI 只适用 `dsh web`');
     if (!manual.includes('Custom plugin markets')) fail(gate, '安装手册没有写 Discover 的 experimental “Custom plugin markets” 前置');
     if (!manual.includes('--trusted-host')) fail(gate, '安装手册的安全节没有写 --trusted-host / 反代边界');

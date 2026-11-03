@@ -4,12 +4,14 @@
 |---|---|
 | 版本 | {{version}} |
 | 安装包 | `{{tarballName}}`（与本手册同目录） |
-| 市场索引 | `market.json`（可选发现面；使用前需开 experimental “Custom plugin markets”） |
+| 市场索引 | `market.json`（staged：0 installable entries；0.3.0 未发布 npm，本地 tarball 交付） |
 | 打包日期 | {{date}} |
 | sha256 | `{{sha256}}` |
 | 兼容基线 | DSH `engines.dsh`（当前 `{{dshEngine}}`；不匹配时宿主拒绝加载）+ Node `^22.19.0 || >=24.0.0` |
 | app surface | Web；官方 Desktop 仅互操作；headless/SDK/ACP 不在本包支持范围 |
 | 平台 | macOS 已验证；Linux 预期可用；Windows / 完整 Desktop 路径未承诺 |
+
+> **当前发布形态（0.3.0）= 本地 tarball（§四 C）。npm/Plugins 页/市场 Discover 是 staged：本包尚未发布到 npm，市场索引不含可安装条目。** 首次仍先用 CLI 建 custom profile（§三），再用 `file:` tarball 装包。
 
 ## 一、这是什么
 
@@ -58,10 +60,10 @@ git/tarball spec 可能在安装后判定并修复；无论哪种，启动时都
 
 | 方式 | 谁执行 | 适用 | 备注 |
 |---|---|---|---|
-| 应用内插件页 | 正在运行的宿主 | Web / Desktop | 默认；当前 profile，无参数 |
+| 应用内插件页 | 正在运行的宿主 | Web / Desktop | 发布后路径（当前 staged，0.3.0 未上 npm） |
 | CLI（`--profile` 转发 pnpm） | 用户 | Web 自动化 / 离线 / headless/SDK/ACP | 面绑定；npm/source CLI 不能 `desktop` |
-| 离线 tarball | 用户 | 无 registry | `file:/path/to/{{tarballName}}` |
-| 市场 Discover | 用户 | 可选发现 | 需 experimental “Custom plugin markets”；索引只提供元数据 |
+| 离线 tarball | 用户 | **当前唯一发布形态** | `file:/path/to/{{tarballName}}` |
+| 市场 Discover | 用户 | staged | 索引无可安装条目；npm 发布后才恢复 |
 
 **custom profile 先建一次（仅首次；破坏性）。** 本手册的主路径要求自有 `deep-research` profile；
 DSH 没有 UI 建自定义 profile，只能用 CLI 引导：
@@ -70,7 +72,7 @@ DSH 没有 UI 建自定义 profile，只能用 CLI 引导：
 dsh --profile deep-research --from-default-profile web --dump-default-config
 ```
 
-这条命令只创建 profile，不是装包；装包默认走 Plugins 页（CLI 装包仅 Web 自动化/离线）。
+这条命令只创建 profile，不是装包；**当前装包走 §四 C 的离线 tarball**；Plugins 页是 npm 发布后的路径（CLI 装包仅 Web 自动化/离线）。
 
 `--from-default-profile` 是**替换**，不是升级：它删除原依赖与用户 patch。已有 profile 不要重复；
 已有 profile 直接从 §四的默认入口装包。CLI 对未知名 profile 首次只初始化 `dsh-base`，
@@ -78,7 +80,7 @@ dsh --profile deep-research --from-default-profile web --dump-default-config
 
 ## 四、安装
 
-### A. Plugins 页（默认）
+### A. Plugins 页（发布后路径；当前 staged）
 
 1. 已有 `deep-research` profile（仅首次需要 §三的引导；不要重复）。
 2. `dsh --profile deep-research` 启动。
@@ -106,7 +108,9 @@ dsh plugin --profile deep-research add @deepseek-ai/dsh-experimental-agent-team-
 **不要用 `@latest` 装团队层**：它在 registry 上的 `latest` 标签不指向当前 DSH 版本线；CLI 侧只认
 exact 版本。Plugins 页把团队层当开关处理，不涉及版本选择。
 
-### C. 离线 tarball
+### C. 离线 tarball（当前唯一发布形态）
+
+0.3.0 当前唯一可装入口；npm 发布前不要走包名/Plugins 页。
 
 ```sh
 dsh plugin --profile deep-research add file:/path/to/{{tarballName}}
@@ -116,13 +120,12 @@ dsh plugin --profile deep-research add file:/path/to/{{tarballName}}
   只有第三个让功能存在。见 §六验证。
 - bundle membership 变化后**必须重启 profile**；只改 config 的 patch 在 HMR 开启时可能即时生效。
 
-### D. 市场 Discover（可选）
+### D. 市场 Discover（staged）
 
-Discover 不是安装单位，只是索引：先在 **Plugins → Experimental plugins → More** 打开
-**Custom plugin markets**，再到 **Discover → Add index source** 添加本手册同目录 `market.json` 的
-托管地址（仓库发布物 = `_dist/market.json`）。索引条目的 `source` 是 npm，因此**只在 npm 上已发布
-该版本时可装**；离线 tarball 路径不需要 Discover。索引不改变安装单位，确认安装仍走正常的
-Plugins/插件安装流程。
+Discover 不是安装单位，只是索引：0.3.0 的 `_dist/market.json` 是 staged 空索引（`plugins: []`），
+**不承诺可安装**；npm 发布前只用 §四 C 的 tarball。npm 发布后，索引恢复条目，再按
+**Plugins → Experimental plugins → More** 打开 **Custom plugin markets**、到
+**Discover → Add index source** 添加托管地址。
 
 ## 五、首次启动
 

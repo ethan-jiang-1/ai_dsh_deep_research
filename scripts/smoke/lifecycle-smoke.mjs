@@ -40,17 +40,15 @@ const marketFile = join(ROOT, '_dist', 'market.json')
 if (!existsSync(tarball)) notRun(`tarball 缺席：${tarball}（先 node scripts/dist/export-dist.mjs）`)
 if (!existsSync(marketFile)) notRun('_dist/market.json 缺席（先 node scripts/dist/export-dist.mjs）')
 
-// ① 市场索引：真校验器 + 与包清单一致。
+// ① 市场索引：真校验器 + staged（npm 未发布，不得出现可安装条目）。
 const parsed = (() => {
   try { return parseMarketIndex(JSON.parse(readFileSync(marketFile, 'utf8')), 'https://example.invalid/market.json') }
   catch (error) { check('① parseMarketIndex 通过', false, String(error)); return undefined }
 })()
 if (parsed !== undefined) {
-  const entry = parsed.plugins.find((p) => p.name === pkg.name)
-  const chosen = entry?.versions.find((v) => v.version === pkg.version)
-  check('① parseMarketIndex 通过', entry !== undefined, `索引里没有 ${pkg.name}`)
-  check('① 索引版本 = 包版本', chosen !== undefined, `缺 ${pkg.version}`)
-  check('① 索引 engines = 包 engines.dsh', chosen?.engines?.dsh === pkg.engines?.dsh, `${String(chosen?.engines?.dsh)} vs ${String(pkg.engines?.dsh)}`)
+  check('① parseMarketIndex 通过', true)
+  check('① staged 索引无安装条目', parsed.plugins.length === 0, `plugins=${parsed.plugins.length}；npm 未发布时不得列 source=npm 条目`)
+  check('① staged 文案在场', /staged/i.test(String(parsed.description?.en ?? '')), String(parsed.description?.en ?? ''))
 }
 
 // ② tarball 形状：locale/icon 在，sourcemap 不在（内容判据由 export-dist 与 pack-manifest 前置保证）。

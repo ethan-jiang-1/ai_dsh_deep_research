@@ -8,9 +8,7 @@ DSH 插件项目：一个 **bundle**（`packages/deep-research-pack`）+ 用户�
 
 ## 用它
 
-安装步骤的唯一 owner = [`scripts/dist/product-manual.md`](scripts/dist/product-manual.md)（生成 [`_dist/安装手册.md`](_dist/安装手册.md)，勿手改）：首次用 CLI 建 custom profile
-（仅首次、破坏性），启动后在 **Plugins 页**装包，团队机制层同页打开（DSH 随安装提供、默认关闭的
-可选 bundle）；CLI 装包仅 Web 自动化/离线。首屏会问「项目目录」；研究产物写
+安装步骤的唯一 owner = [`scripts/dist/product-manual.md`](scripts/dist/product-manual.md)（生成 [`_dist/安装手册.md`](_dist/安装手册.md)，勿手改）：**0.3.0 当前唯一发布形态 = 本地 tarball**（手册 §四 C）：首次用 CLI 建 custom profile（仅首次、破坏性）→ `dsh plugin --profile deep-research add file:<tgz>`；团队机制层同 profile 打开（完整多角色研究必需）。npm/Plugins 页/Discover 为 staged（0.3.0 未上 npm）。首屏会问「项目目录」；研究产物写
 `<项目>/drt_<slug>/`，方法库 = `<项目>/method-library.md`。没有 launcher，也没有自定义安装器；
 诊断用安装副本里的 `dsh-deep-research-doctor`。数据归属与 `DEEP_RESEARCH_WORKSPACE` 的优先级 =
 [guides/65](docs/guides/65-run-forms.md)。

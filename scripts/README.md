@@ -19,7 +19,7 @@
 |---|---|---|
 | preset-smoke.mjs | L1 真挂载：boot 页模块表行（client 半 served）、roster、逐角色建会话、skills 隔离 | keyless（`DSH_SMOKE_REAL=1` 起真 DSH，无模型） |
 | release-smoke.mjs | L2 安装形状：pack → 干净 profile → plugin add → manifest/安装域 client 半断言 → 安装域冒烟 → 端口释放验证（进程卫生：超时预算 + 并发锁 + 退出确认） | keyless（`--install-only` 跳凭据） |
-| lifecycle-smoke.mjs | L2 发布面/显示面：market.json 过 DSH 校验器 → 装 tarball → 本包行 dump → 真启动无降级 → `readPluginMeta` 读出四个 specifier 的中英标题/图标 → remove 后 roster 回落 | keyless（真 dsh/pnpm + `_dist` 产物；缺前置 exit 2） |
+| lifecycle-smoke.mjs | L2 发布面/显示面：staged market.json 过 DSH 校验器（plugins 空 + staged 文案）→ 装 tarball → 本包行 dump → 真启动无降级 → `readPluginMeta` 读出五个 specifier 的中英标题/图标 → remove 后 roster 回落 | keyless（真 dsh/pnpm + `_dist` 产物；缺前置 exit 2） |
 | install-shape-smoke.mjs | L2 安装形状：原样执行手册的 CLI 装包分支（profile init → `dsh plugin --profile … add` pack+team → 真启动）；断言 roster 三状态、无 `did not activate`、首屏可达 | keyless（真 dsh/pnpm + 团队层 registry/缓存；缺前置 exit 2） |
 | product-boot-smoke.mjs | L2 首启：纯 `dsh --profile deep-research` + Web + 浏览器；Host 注册工作区、blank Lead Session `cwd` = 工作区、首屏/目录按钮/Lead/composer | keyless（需浏览器 + 团队层；缺前置 exit 2） |
 | cold-start-smoke.mjs | L2 冷启动：独立 `DSH_DEV_HOME` + profile + 端口 + state，`run-driver up --bootstrap` 到浏览器 GREEN；MCP 关闭 | keyless（须先 `source dev/env.sh`；vendor/依赖在位；团队层需 registry/缓存） |
@@ -95,7 +95,7 @@
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
-| export-dist.mjs | pack → `_dist/` 安装包、安装手册与市场索引（三件同源同版本） | keyless |
+| export-dist.mjs | pack → `_dist/` 安装包、安装手册与 staged 市场索引（tarball/手册同版本；market 为 0 条目） | keyless |
 | market.mjs | 生成 `_dist/market.json`（DSH 插件市场 format 1），先过 `parseMarketIndex` 再落盘；`--check` 只校验 | keyless |
 | export-handoff.mjs | HEAD 的 tracked 源 → `_dist/` 干净移交包（不含运行态/凭据/run 数据/依赖）；submodule 需对方 init | keyless |
 | release-check.mjs | 发布前版本/tag 一致性（root = pack、HEAD tag = version、tag 为 annotated）；只读 | keyless |

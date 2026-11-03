@@ -14,15 +14,15 @@
 
 | 形态 | 谁在用 | 入口 | 边界 |
 |---|---|---|---|
-| **M1 安装形态** | 外部用户 | ① custom profile 首次由 CLI 引导（仅首次、破坏性）② `dsh --profile deep-research` 启动 ③ 应用内 Plugins 页装包 + 团队层开关；CLI 装包仅 Web 自动化/离线；首屏选项目目录 | 用户自己的 `DSH_HOME` + 自选工作区；包内容在包内，产物在工作区；**没有 launcher / scaffold / 自定义安装器** |
+| **M1 安装形态** | 外部用户 | ① custom profile 首次由 CLI 引导（仅首次、破坏性）② `dsh --profile deep-research` 启动 ③ 本地 tarball 装包（当前唯一发布形态；npm/Plugins 为 staged）+ 团队层开关；首屏选项目目录 | 用户自己的 `DSH_HOME` + 自选工作区；包内容在包内，产物在工作区；**没有 launcher / scaffold / 自定义安装器** |
 | **M1 互操作** | 已有 DSH Web/Desktop 的用户 | 把同一个 bundle 装进现有 profile（Plugins 页或显式 CLI） | bundle 自足，首屏照样问工作区；但没有 `deep-research` 的 profile 身份；Desktop 装进 `desktop` = 互操作 |
 | **M2 独立开发形态** | 贡献者 / 本地验证 | 本仓 + `bash dev/bootstrap.sh` + `node dev/run-driver.mjs up --bootstrap` | 默认仓内 `runtime/harness-home` + `research-workspace/`；可用 `DSH_DEV_HOME` 指到仓外 |
 | **M3 移交形态** | 交给另一人或另一台机器 | `scripts/dist/export-handoff.mjs`（源码）或 `export-dist.mjs`（插件） | 不是复制工作树；运行态/凭据/run 数据不随包 |
 
 **决定：M1 安装形态为主。** 安装与启动全部是 DSH 命令；本包只多一个 custom profile 名
 （`deep-research`）。自定义 profile 的建立只能用 CLI（DSH 没有 UI 建自定义 profile；CLI 对未知名
-profile 只初始化 `dsh-base`——`--from-default-profile web` 是文档给的路径）。装包入口 = 应用内
-Plugins 页；CLI 装包只作 Web 自动化/离线。本包不发明安装器。**安装步骤的 owner = [`scripts/dist/product-manual.md`](../../scripts/dist/product-manual.md)（生成 `_dist/安装手册.md`）**；
+profile 只初始化 `dsh-base`——`--from-default-profile web` 是文档给的路径）。装包入口 = 本地 tarball
+（当前唯一发布形态）；npm/Plugins 页是发布后路径（当前 staged）。本包不发明安装器。**安装步骤的 owner = [`scripts/dist/product-manual.md`](../../scripts/dist/product-manual.md)（生成 `_dist/安装手册.md`）**；
 本页只写合同，不复制命令。
 
 ## 2. 六轴 owner
@@ -78,7 +78,8 @@ writable roots。`WorkspaceId` 是 DSH Workspace registration ID，不是路径�
 
 ## 5. 安装、升级、卸载
 
-- **默认入口** = 应用内 Plugins 页（Web/Desktop 同一 UI；Desktop 管理 `desktop` profile，
+- **默认入口** = 本地 tarball（当前唯一发布形态；`file:` 装包）。npm/Plugins 页是发布后路径
+  （当前 staged；Web/Desktop 同一 UI；Desktop 管理 `desktop` profile，
   是互操作）。CLI `dsh plugin --profile` 面绑定：npm/source `dsh` 不能管理 `desktop`；Desktop
   自带 carrier 可以，但第三方文档不把它当用户路径。headless/SDK/ACP 没有 Plugins 页，用显式
   profile 走 CLI。
@@ -141,7 +142,7 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
   roster 三状态、无 `did not activate`、首屏可达。
 - `product-boot-smoke`：纯 `dsh --profile deep-research` + 真 Web + 浏览器；工作区会话、首屏、目录按钮。
 - `release-smoke`：tarball → 干净 profile → 真启动。
-- `lifecycle-smoke`：market 索引 → tarball → dump → 真启动 → `readPluginMeta` → remove 回落。
+- `lifecycle-smoke`：staged market 索引（plugins 空）→ tarball → dump → 真启动 → `readPluginMeta` → remove 回落。
 - `data-smoke`：`$DSH_HOME` 只写 deep-research 设置文件；无 storage domain / 新 session event。
 - `content-shape`（L0）：手册/模板随包、包内无种子。
 - `snapshot-replay` B 层 + `l4-lite`（真模型）：手册以 runtime context 进请求、Lead 仍按手册工作。

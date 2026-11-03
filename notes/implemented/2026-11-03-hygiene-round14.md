@@ -25,6 +25,7 @@
 - **崩溃现场补 html**：probe 崩溃/persist 路径也把 `html` 传给 `persistVerdict`；cdp-probe 已写出现场时 `page.html` 可随 verdict 复制（崩溃前未开页面则仍无）。
 - **第 6 轮复评**：①A− ②A− ③A− ④A− ⑤A− ⑥A− ⑦B。⑦ 的唯一 P1 = 对外发布（`npm whoami` = ENEEDAUTH、`npm view` 404、0.3.0 无 tag），不是仓内可修项；其余六维仅余 P2。
 - **第 7 轮 ⑦ 深挖：兼容范围收窄**：`engines.dsh` 原声明 `<0.3.0-0`，但 global `0.2.1-rc.5` 的 `product-boot-smoke` 首屏 StartCard 三项失败（session/workspace 正常）；范围收窄为 `>=0.2.1-rc.2 <=0.2.1-rc.3`。`version-range` / `host-compat` / `presets` 测试钉住 rc.5 被拒；`lifecycle-smoke` 在 rc.5 上 install/display/remove 曾 ALL PASS，但首屏失败 = 不声明支持。`method-library-tool` 显示面加入 lifecycle 断言，rc.2 支持带 ALL PASS。
+- **发布形态定调（用户 2026-11-03）：本地 tarball**：0.3.0 不发布 npm；`_dist/market.json` 改为 staged 空索引（`plugins: []` + staged 文案），手动/README/00-index/65/62 的默认安装入口改为 `file:` tarball；Plugins 页/Discover/npm 是发布后路径。`market-index` 门禁与 `lifecycle-smoke` 改判 staged；`readme-shape` 增 staged/本地 tarball 断言。⑦ 按本地交付形态 = A−；npm 发布是未启用的未来路径，不再是阻塞。
 
 ## 输掉的方案
 

@@ -621,12 +621,11 @@ export const CASES = [
     pkg.dsh.compatibility = { dshReleases: ['0.2.1-rc.2'] };
     writeFileSync(p, JSON.stringify(pkg, null, 2) + '\n');
   } },
-  // market-index：索引版本与包版本漂移——发现页会装到一个不存在/不匹配的版本。
-  { id: 'market-index-version-drift', gate: 'market-index', mutate: (dir) => {
+  // market-index：staged 索引里放回插件条目——npm 未发布时会让用户点到 404。
+  { id: 'market-index-staged-claim', gate: 'market-index', mutate: (dir) => {
     const p = join(dir, '_dist', 'market.json');
     const doc = JSON.parse(readFileSync(p, 'utf8'));
-    doc.plugins[0]['dist-tags'].latest = '9.9.9';
-    doc.plugins[0].versions[0].version = '9.9.9';
+    doc.plugins.push({ name: 'probe', versions: [] });
     writeFileSync(p, JSON.stringify(doc, null, 2) + '\n');
   } },
   // dev-parity：dev 通道退回另一个 profile 名——dev 与用户路径身份分叉。

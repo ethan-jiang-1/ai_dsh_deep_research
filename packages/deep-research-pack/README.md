@@ -48,15 +48,16 @@ user's named assembly, not something this package ships. After installation the 
 (`ui-agent-team`) comes from the team-mechanics layer, installed separately in the same profile;
 this bundle does not insert it.
 
-**2. How to install (default).** Start the profile, then use the **Plugins** page:
+**2. How to install (current).** 0.3.0 is delivered as a local tarball; the npm/Plugins page path is
+**staged** (no npm publication yet). Install the tarball into the profile:
 
 ```sh
-dsh --profile deep-research
+dsh plugin --profile deep-research add file:/path/to/dsh-deep-research-pack-<version>.tgz
 ```
 
-The Plugins page is the cross-surface install entry for Web and Desktop. On Desktop it manages the
-application-owned `desktop` profile; that is an interoperability form, not the `deep-research`
-custom profile. This package is developed and verified against the Web surface.
+The Plugins page entry becomes available after the package is published to npm. On Desktop that page
+manages the application-owned `desktop` profile; that is an interoperability form, not the
+`deep-research` custom profile. This package is developed and verified against the Web surface.
 
 **3. Create the custom profile first (only if it does not exist).** DSH has no UI for creating a
 custom profile; the CLI is the documented path. `--from-default-profile` is a **destructive

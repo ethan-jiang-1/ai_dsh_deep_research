@@ -120,10 +120,10 @@ try {
   writeFileSync(join(DIST, MANUAL), manual)
   report('手册写入', true, `${MANUAL} — 版本 ${version}，${date}`)
 
-  // 4. 市场索引——发现面（Plugins → Discover）读的是它；文本来自包内 locale，版本/兼容范围
-  //    原样取自包清单，产物先过 DSH 的 parseMarketIndex 再落盘（不发明格式）。
+  // 4. 市场索引——staged 发现面：npm 未发布时只给合法空索引（plugins: []）+ staged 文案，
+  //    不列 source=npm 条目；发布后再由发布流程恢复。
   const market = writeMarketIndex()
-  report('市场索引', true, `market.json — ${version}，${market.bytes}B，sha256 ${market.sha256.slice(0, 12)}…`)
+  report('市场索引', true, `market.json — staged（0 installable entries），${market.bytes}B，sha256 ${market.sha256.slice(0, 12)}…`)
 
   console.log('\n_dist/ 内容：')
   for (const name of readdirSync(DIST).sort()) console.log(`  ${name}`)

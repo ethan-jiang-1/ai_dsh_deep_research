@@ -44,13 +44,14 @@ patch 文件。它装进名为 `deep-research` 的 **custom profile**；profile 
 `research-startup`、`research-fetch-fallback` 与 `tool-present`。团队可视化行（`ui-agent-team`）
 由团队机制层提供（同一 profile 内单独安装），本包不插它。
 
-**2. 怎么装（默认）。** 启动该 profile，然后使用 **Plugins** 页：
+**2. 怎么装（当前）。** 0.3.0 以本地 tarball 交付；npm/Plugins 页路径为 **staged**（尚未发布 npm）。
+把 tarball 装进 profile：
 
 ```sh
-dsh --profile deep-research
+dsh plugin --profile deep-research add file:/path/to/dsh-deep-research-pack-<version>.tgz
 ```
 
-Plugins 页是 Web 与 Desktop 的跨 surface 安装入口。在 Desktop 上它管理应用自有的 `desktop`
+npm 发布后 Plugins 页条目才可用。在 Desktop 上它管理应用自有的 `desktop`
 profile；那是一种互操作形态，不是 `deep-research` custom profile。本包是针对 Web surface 开发和验证的。
 
 **3. 先创建 custom profile（仅当它不存在时）。** DSH 没有创建 custom profile 的 UI；CLI 是文档化的
@@ -60,8 +61,8 @@ profile；那是一种互操作形态，不是 `deep-research` custom profile。
 dsh --profile deep-research --from-default-profile web --dump-default-config
 ```
 
-不要在已存在的 profile 上执行它：它会替换依赖与用户 patch。已存在的 profile 从 Plugins 页安装该
-组合包。
+不要在已存在的 profile 上执行它：它会替换依赖与用户 patch。已存在的 profile 用本地 tarball 安装该
+组合包（npm/Plugins 为 staged）。
 
 **4. CLI 安装（仅限 Web 自动化或离线）。** `dsh plugin --profile` 转发给 pnpm；它不是 GUI 用户的
 默认入口。npm/源码版 `dsh` 拒绝 `desktop` profile；Desktop 应用自有的载体可以管理它，但第三方说明应

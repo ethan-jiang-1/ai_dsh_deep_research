@@ -9,14 +9,13 @@
 ## 先分流：用户要"用它"还是"改它"
 
 **先记住这条模型**：本包是 DSH 插件（bundle），运行环境 = 用户自建的 **custom profile**
-`deep-research`（[D41](./decisions.md#d41)）。首次由 CLI 建 profile（仅首次、破坏性）；之后在应用内
-Plugins 页装包；启动 `dsh --profile deep-research`。没有 launcher、没有 scaffold、没有自定义安装器；
+`deep-research`（[D41](./decisions.md#d41)）。首次由 CLI 建 profile（仅首次、破坏性）；**当前 0.3.0 用本地 tarball 装包（`file:`）**，npm/Plugins 页/Discover 为 staged（未发布 npm）；启动 `dsh --profile deep-research`。没有 launcher、没有 scaffold、没有自定义安装器；
 只保留只读 doctor。开发者在本仓走同名 profile（隔离 home）+ `research-workspace/` + run-driver。
 两条路径的命令与数据根不同，不要互相套用。**安装步骤的唯一 owner = [`scripts/dist/product-manual.md`](../scripts/dist/product-manual.md)；生成物 = [`_dist/安装手册.md`](../_dist/安装手册.md)（勿手改，重导出 = `node scripts/dist/export-dist.mjs`）**。
 
 | 用户的说法 | 走哪（该事的唯一 owner） | 首个动作 |
 |---|---|---|
-| "用它""启动这个插件""跑研究""装到我的 DSH"（安装用户） | [`_dist/安装手册.md`](../_dist/安装手册.md)（生成物；源 = [product-manual](../scripts/dist/product-manual.md)）+ [pack README](../packages/deep-research-pack/README.md) + [guides/65](./guides/65-run-forms.md) | 按手册：CLI 建 profile（仅首次）→ 启动 → 应用内 Plugins 页装包；CLI 装包仅 Web 自动化/离线 |
+| "用它""启动这个插件""跑研究""装到我的 DSH"（安装用户） | [`_dist/安装手册.md`](../_dist/安装手册.md)（生成物；源 = [product-manual](../scripts/dist/product-manual.md)）+ [pack README](../packages/deep-research-pack/README.md) + [guides/65](./guides/65-run-forms.md) | 按手册：CLI 建 profile（仅首次）→ `dsh plugin --profile deep-research add file:<tgz>`（当前唯一发布形态）；npm/Plugins 页/Discover 为 staged |
 | "在本仓启动/开跑/接着上次跑"（开发通道，默认 `runtime/harness-home`） | [guides/61](./guides/61-run-playbook.md) | `node dev/run-driver.mjs up`（起/复用通道 + 验浏览器面 + 呈交 URL） |
 | "换 profile/home""装进现有 web profile""诊断装得对不对" | [guides/65](./guides/65-run-forms.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | 换 profile 用新名字重新初始化；**已有 profile 不要重复 `--from-default-profile`**（破坏性）；诊断 = 安装副本的 `dsh-deep-research-doctor` |
 | "只验证插件还能挂载/安装"（证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `node scripts/smoke/install-shape-smoke.mjs`（自带临时 home，无需 source；或 `source dev/env.sh && node scripts/smoke/preset-smoke.mjs` / `release-smoke`） |
@@ -34,7 +33,7 @@ Plugins 页装包；启动 `dsh --profile deep-research`。没有 launcher、没
 **歧义裁定**：用户未指定 home 时——安装用户默认 `$DSH_HOME`；开发通道默认
 `runtime/harness-home`（source env.sh）。"启动这个插件"没有额外上下文时默认指本仓开发通道；
 要给外部用户安装走安装行。**开发通道**别绕过 run-driver 的漂移门（直接 `dsh --profile deep-research`
-会用旧镜像）；**安装用户**用 DSH 原生安装（CLI 建 profile + Plugins 页装包）+ `dsh --profile deep-research`；首屏问项目目录。
+会用旧镜像）；**安装用户**用 DSH 原生 profile（CLI 建 profile）+ 本地 tarball 装包（npm/Plugins 为 staged）+ `dsh --profile deep-research`；首屏问项目目录。
 
 **裸动词也指开发通道**："启动一下""起一下"未点名对象时，默认指本仓 DSH 环境，首个动作 = `node dev/run-driver.mjs up`；仅当对话正围着另一个可启动物（某条冒烟/探针）时才跟随该物。
 

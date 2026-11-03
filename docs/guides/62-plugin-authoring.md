@@ -19,12 +19,12 @@
 |---|---|---|
 | plugin | 导出 `apply(ctx)` 的 TS 模块；注册即 `apply(ctx)`，配置经 cordis schema 校验 | 本仓自写插件（三处有界例外：D18 观察面 client、D31 抓取回退、D40 启动行/内容注入）：`src/index.ts`（host 半空壳 = 观察面宿主位）、`src/client/index.ts`（client 半：驾驶舱 + 首屏工作区恢复）、`src/client/startup.ts`（纯谓词）、`src/content/index.ts`（手册 runtime context）、`src/startup/index.ts`（工作区登记/会话）、`src/fetch-fallback/index.ts`（抓取回退 provider）；新插件从 `vendor/dsh/docs/user/develop/basic/` 起步 |
 | bundle | 你编写与分发的单位（`dsh.bundle`）——回答"这个包贡献什么"，是插入/覆盖 plugin rows 的 patch 层 | `packages/deep-research-pack/cordis.patch.yml` + 包内 `presets/`、`skills/` |
-| profile / profile 归属 | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）；三种归属 = shipped template / custom profile / application-owned | 本仓 = custom `deep-research`（CLI 引导建；Plugins 页装包）；开发镜像同名；`desktop` 归官方 Desktop；profile 不是发布物、不是隔离边界 |
+| profile / profile 归属 | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）；三种归属 = shipped template / custom profile / application-owned | 本仓 = custom `deep-research`（CLI 引导建；当前用本地 tarball 装包，npm/Plugins 为 staged）；开发镜像同名；`desktop` 归官方 Desktop；profile 不是发布物、不是隔离边界 |
 | app surface | profile 起的 surface（Web / headless / SDK / ACP / Desktop） | 本包 = Web（`dsh.client.platform: web`）；Desktop 仅互操作；headless/SDK/ACP 不在支持范围 |
 | preset | 一个 agent 形态：persona 行 + 时钟行 + skills + 工具行 | `presets/<role>.patch.yml`（preset 行）+ `presets/<role>/skills/`（角色清单 = 盘上 presets/） |
 | patch / overlay | 层叠覆盖条目（id 定向的 config 覆盖、禁用、插入） | `dev/research.overlay.yml`（源码域通道的镜像源） |
 
-**Nothing is both**：bundle 与 profile 是两个 manifest 的两种东西，别把本包写成 profile。M1 安装形态（[D41](../decisions.md#d41)）不改变这条：包仍是 bundle；profile 由用户在 DSH 里创建/启动（`--from-default-profile web` + Plugins 页装包），不是第二种分发单位。本包没有 launcher/scaffold，只有 bundle 内的启动行与只读 doctor。
+**Nothing is both**：bundle 与 profile 是两个 manifest 的两种东西，别把本包写成 profile。M1 安装形态（[D41](../decisions.md#d41)）不改变这条：包仍是 bundle；profile 由用户在 DSH 里创建/启动（`--from-default-profile web` + 本地 tarball 装包；npm/Plugins 为 staged），不是第二种分发单位。本包没有 launcher/scaffold，只有 bundle 内的启动行与只读 doctor。
 
 ## 参与阶梯（本仓版本；DSH 原表见仓外语料 `repo-harness/04`——登记处同上）
 
