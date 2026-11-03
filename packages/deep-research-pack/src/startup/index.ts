@@ -12,6 +12,7 @@ import type { Context } from '@deepseek-ai/cordis'
 import { basename, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readSettings, resolveStartupWorkspace, writeSettings } from './settings.ts'
+import { workspaceTitleFor } from '../lib/workspace-title.ts'
 
 /** Cordis 插件名。 */
 export const name = 'deep-research-startup'
@@ -65,7 +66,7 @@ export async function runStartup(ctx: Context, signal: AbortSignal): Promise<voi
     ctx.logger.warn('deep-research: workspaceRegistry 不在组合中；跳过工作区登记')
     return
   }
-  const title = basename(resolved.path) === '' ? 'Deep Research' : `Deep Research — ${basename(resolved.path)}`
+  const title = workspaceTitleFor(basename(resolved.path))
   if (cancelled()) return
   try {
     const workspace = await registry.create(resolved.path, title)
