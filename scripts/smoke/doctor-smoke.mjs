@@ -5,7 +5,7 @@
 // 前置：无（Node 标准库）；不联网、不起 dsh。
 // 用法：node scripts/smoke/doctor-smoke.mjs
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { scrubbedEnv } from '../lib/env.mjs'
 import { presetRoles } from '../lib/roles.mjs'

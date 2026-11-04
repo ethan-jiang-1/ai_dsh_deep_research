@@ -21,7 +21,6 @@
 import { spawn, execSync } from 'node:child_process'
 import { writeFileSync, readFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
-import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
 import { requireCredentials, scrubbedEnv, withModelKey } from '../scripts/lib/env.mjs'

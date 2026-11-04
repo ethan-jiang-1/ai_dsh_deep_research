@@ -67,7 +67,6 @@ import { pass5FinalDeliveryPhase } from './client-load-final.mjs'
 import { clickRowByText, dismissPreviewNotice, expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES, TAB_TEXT, tabTitleIndex } from '../lib/web-ui-nav.mjs'
 import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { isActivePlanNode, planIndex } from '../../packages/deep-research-pack/src/lib/plan-index.ts'
-import { latestRunVersion } from '../../packages/deep-research-pack/src/lib/run-fold.ts'
 import { deriveBusinessBrief } from '../../packages/deep-research-pack/src/lib/brief-fold.ts'
 import { foldActivityRows } from '../../packages/deep-research-pack/src/lib/activity-fold.ts'
 import { streamFailureOf } from '../../packages/deep-research-pack/src/lib/stream-failure.ts'
@@ -82,8 +81,6 @@ const PORT = Number(arg('port', '3109'))
 // 既有会话默认 = 盘侧最新绑定会话（惰性解析——由下方参考模块选择；硬编码标题会
 // 随会话积累腐烂，BUG-002 清扫轮实测假红）。--session 仍可显式指定。
 const SESSION_TITLE_ARG = arg('session', null)
-// 侧栏把**非当前会话所在的组折叠**（实测：只展开 active 组）——找行前先展开目标组。
-const GROUP_TITLE = arg('group', 'harness-home')
 const BOOT_TIMEOUT_MS = 120_000
 const RENDER_TIMEOUT_MS = 60_000
 

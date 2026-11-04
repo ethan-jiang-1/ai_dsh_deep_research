@@ -6,7 +6,7 @@
 import { readFileSync, existsSync, statSync } from 'node:fs';
 import { join, dirname, resolve, relative, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { ROOT, gates, fail, note, walk, gitOnce, trackedFiles } from '../context.mjs';
+import { ROOT, fail, gitOnce, trackedFiles } from '../context.mjs';
 
 export function runA() {
 // ── md-utf8-newline（所有 tracked .md 严格 UTF-8、恰一个结尾换行；git

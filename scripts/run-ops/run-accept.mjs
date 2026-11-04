@@ -10,7 +10,7 @@
 //       `--no-write` = 只跑预检、不写 bundle（绿也退出 0）；不带它则绿后给两个门 --write 落盘，
 //       再写 delivered.json/manifest.json/acceptance.md；`--archive` 才移入 archive/。
 // 退出码：0 = 验收绿（或 --no-write 预检绿）；1 = 验收红；2 = 用法/前置/未知参数。
-import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'

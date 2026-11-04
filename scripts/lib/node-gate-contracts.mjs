@@ -1,5 +1,5 @@
 // node-gate-contracts.mjs — cross-gate contract dates and report parsers (keyless pure logic).
-import { SCHEMA_VERSION, contractEpochOf, deliveryDate, runSchemaOf } from './schema-scan-core.mjs'
+import { contractEpochOf, deliveryDate, runSchemaOf } from './schema-scan-core.mjs'
 import { terminalVerdictLine } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
 
 /** 门 L 契约日（2026-10-03 = RFC wave0-leads-polish 落地日；此前交付的 bundle 不追溯）。 */
@@ -38,10 +38,6 @@ export function isPreContract(bundleDir, asOf, contractDate) {
 /** PRE-CONTRACT 详情后缀（五门共用；门A 另有带「存量由对账步处置」的长形态）。 */
 export const PRE_CONTRACT_NOTE = '（契约前交付——如实报告不计红，run bundle 是交付记录不改历史）'
 
-/** 装饰前缀的形状上限（与 pack `review-readiness.ts` 同值同义，本地镜像勿单独调）：
- *  短标签至多 1 枚、标题文字至多 1 段——判定词之前不许堆散文。 */
-const VERDICT_PREFIX_MAX_LABELS = 1
-const VERDICT_PREFIX_MAX_HEADING_CHUNKS = 1
 /** 剥去行首装饰，返回以 `readiness` 开头的剩余文本；未到判定词返回 null。
  *  装饰 = 块引用/空白 · 列表符 · 箭头 · 标题标记与短标题文字 · 加粗/反引号 · 短标签（≤10 字 + 冒号）。 */
 

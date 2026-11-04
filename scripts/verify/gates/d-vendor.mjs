@@ -6,7 +6,7 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { ROOT, gates, fail, note, allFiles, gitOnce, trackedFiles, matchSimpleGlob } from '../context.mjs';
+import { ROOT, fail, note, allFiles, gitOnce, trackedFiles, matchSimpleGlob } from '../context.mjs';
 
 export function runD() {
 // ── vendor-pin（vendor/dsh submodule 在位且钉住 dsh-v0.2.1-rc.2 = 687f282e86；

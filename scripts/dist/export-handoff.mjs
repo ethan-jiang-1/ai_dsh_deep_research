@@ -11,7 +11,7 @@
 // 退出码：0 产物可用 / 1 检查失败 / 2 前置缺席（未跑 ≠ 通过）。
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, readFileSync, statSync } from 'node:fs'
+import { mkdirSync, readFileSync, statSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 

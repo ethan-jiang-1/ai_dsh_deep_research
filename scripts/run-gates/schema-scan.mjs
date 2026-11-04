@@ -8,7 +8,7 @@
 // keyless 纯 fs。
 // 用法：node scripts/run-gates/schema-scan.mjs [bundle-dir …]（缺省 = research-workspace/archive/drt_* 全量）
 import { existsSync } from 'node:fs'
-import { basename, dirname, join, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { listRuns } from '../../packages/deep-research-pack/src/lib/run-context.ts'
 import { scanAll } from '../lib/schema-scan-core.mjs'

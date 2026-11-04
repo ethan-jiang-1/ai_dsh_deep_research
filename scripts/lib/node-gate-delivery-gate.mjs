@@ -1,5 +1,5 @@
 // node-gate-delivery-gate.mjs — Gate A delivery completeness (keyless pure logic).
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { runType } from './schema-scan-core.mjs'
 import { finalVersionsIn } from './final-version.mjs'

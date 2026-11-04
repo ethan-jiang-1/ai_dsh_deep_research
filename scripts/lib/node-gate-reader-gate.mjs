@@ -7,8 +7,8 @@
 //
 // 断代：新契约（有 run.md）在 READABLE_CONTRACT_DATE 之后才要求读者版；旧 bundle 无
 // run.md 按 epoch 豁免；quick_factual 编制豁免（与 node-gate 其余门同语义）。
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { basename, join } from 'node:path'
+import { existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { contractEpochOf, runSchemaOf, runType } from './schema-scan-core.mjs'
 import { finalVersionsIn } from './final-version.mjs'
 import { READABLE_CONTRACT_DATE, PRE_CONTRACT_NOTE, isPreContract } from './node-gate-contracts.mjs'

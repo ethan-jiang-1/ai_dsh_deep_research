@@ -28,7 +28,7 @@
 // 用法：node scripts/run-gates/evidence-audit.mjs <run-bundle-dir> [--sessions <会话根>] [--write]（缺省 $DSH_HOME/sessions）
 //       node scripts/run-gates/evidence-audit.mjs --latest [--write]（取 research-workspace 最新 drt_*——根 / archive/ / _abandoned/ 三桶并扫）
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
-import { basename, dirname, join, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { listRuns } from '../../packages/deep-research-pack/src/lib/run-context.ts'
 import { auditBundle } from '../lib/evidence-audit-core.mjs'

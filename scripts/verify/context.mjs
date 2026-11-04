@@ -8,11 +8,9 @@
 // 顺序契约：gates 数组 = 域内顺序 = 入口调用顺序（gate-ledger-sync 用集合比对，不依赖序；
 // 但输出行序仍是 A–F，排障时与 evaluation §L0 表同序）。
 import { spawnSync } from 'node:child_process';
-import { readFileSync, readdirSync, existsSync, lstatSync, readlinkSync, statSync } from 'node:fs';
-import { join, dirname, resolve, relative, sep } from 'node:path';
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
+import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { backlogLivenessProblems } from '../lib/backlog-liveness.mjs';
-import { satisfiesVersion } from '../../packages/deep-research-pack/scripts/lib/version-range.mjs';
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 

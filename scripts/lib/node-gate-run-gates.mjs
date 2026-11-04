@@ -1,7 +1,7 @@
 // node-gate-run-gates.mjs — bundle artifact and research-history gates (keyless pure logic).
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { contractEpochOf, deliveryDate, runSchemaOf, runType } from './schema-scan-core.mjs'
+import { contractEpochOf, runSchemaOf, runType } from './schema-scan-core.mjs'
 import { finalVersionsIn } from './final-version.mjs'
 import { HEADING_CONTRACT_DATE, LEADS_CONTRACT_DATE, PRE_CONTRACT_NOTE, VERSION_CONTRACT_DATE, decisionsLines, isPreContract } from './node-gate-contracts.mjs'
 

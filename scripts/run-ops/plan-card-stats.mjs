@@ -11,13 +11,11 @@
 //
 // 用法：source dev/env.sh && node scripts/run-ops/plan-card-stats.mjs [--days 30] [--group <子串>] [--json]
 // 退出码：0 = 正常输出（超限与否不是本工具的判据）/ 2 = 用法或前置错（未 source dev/env.sh）
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, resolve } from 'node:path';
 import { readSessionText, sessionLogsSince } from '../lib/session-log.mjs';
 import { defaultGroupSubstring } from '../lib/workspace-root.mjs';
 import { planCardsOf, PLAN_CARD_LIMIT } from '../lib/plan-card.mjs';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
   return i === -1 ? fallback : process.argv[i + 1];

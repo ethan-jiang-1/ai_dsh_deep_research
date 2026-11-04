@@ -6,7 +6,7 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { ROOT, PACK, PRESETS, gates, fail, note, walk } from '../context.mjs';
+import { ROOT, PACK, fail, note, walk } from '../context.mjs';
 
 export function runE() {
 // ── content-shape（D40：研究内容在包内，不在工作区）──
