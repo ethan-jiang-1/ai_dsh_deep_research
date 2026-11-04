@@ -19,7 +19,7 @@
  */
 
 /** D28 的三种操作桶；发现顺序 = 根 → archive → _abandoned。 */
-export type Bucket = 'root' | 'archive' | 'abandoned'
+type Bucket = 'root' | 'archive' | 'abandoned'
 
 /** 读面的统一结果：missing（不在场）/ unreadable（通道或权限失败）/ ok（含空值）。 */
 export type Outcome<T> =
@@ -43,7 +43,7 @@ export interface Page {
 }
 
 /** 读面返回的文本文件。truncated = 未读到 eof（固定行窗触顶或翻页触顶）。 */
-export interface TextFile {
+interface TextFile {
   readonly path: string
   readonly text: string
   readonly lines: number
@@ -73,7 +73,7 @@ export interface RunView {
 }
 
 /** listRuns 的枚举项（发现元数据；bucket 只是操作桶标签，不参与状态判定）。 */
-export interface RunRef {
+interface RunRef {
   readonly slug: string
   readonly dir: string
   readonly bucket: Bucket

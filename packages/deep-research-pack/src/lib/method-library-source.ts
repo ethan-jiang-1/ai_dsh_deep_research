@@ -6,7 +6,7 @@ export type SourcePreview =
   | { readonly kind: 'cancelled' }
   | { readonly kind: 'error'; readonly detail: string }
 
-export interface RunCompletionEvidence {
+interface RunCompletionEvidence {
   readonly hasFinalVersion: boolean
   readonly hasDeliverableContent: boolean
   readonly runHeader: SourcePreview

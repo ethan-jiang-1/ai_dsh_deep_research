@@ -6,7 +6,7 @@
  */
 
 /** 判据输入：会话是否已有用户消息 + 工作区根目录条目。 */
-export interface StartCardFacts {
+interface StartCardFacts {
   readonly hasUserMessage: boolean
   readonly entries: readonly { readonly name: string }[]
 }

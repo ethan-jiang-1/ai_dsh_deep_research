@@ -14,7 +14,7 @@
 import { argValueOf, contentTextParts, normalizeQueries } from './journal-wire.ts'
 
 /** 一条队员动作行。 */
-export interface MemberActionRow {
+interface MemberActionRow {
   readonly icon: '🔍' | '🌐' | '⚠️'
   readonly text: string
   readonly time: string | undefined

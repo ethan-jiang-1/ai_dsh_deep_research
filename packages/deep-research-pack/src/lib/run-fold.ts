@@ -14,7 +14,7 @@ import { finalVersionOf } from './final-target.ts'
  *  步序正本 = m2-run-mechanics「运行流程总览」：立项（question+topics 一体）→ 组队 →
  *  侦察 → 挖掘 → 综合 → 审查 → 交付；组队无独立文件，在场性随立项（cursor 停靠语义，
  *  见 deriveSteps）。 */
-export interface RunStepInputs {
+interface RunStepInputs {
   readonly question: boolean
   readonly team: boolean
   readonly leads: boolean

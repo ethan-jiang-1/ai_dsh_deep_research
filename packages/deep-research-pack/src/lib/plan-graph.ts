@@ -18,7 +18,7 @@
  */
 
 /** 图谱任务的最小结构（`agentTeam` 的 `TeamTaskView` 可直接传入）。 */
-export interface GraphTask {
+interface GraphTask {
   readonly id: string
   readonly subject?: string
   readonly description?: string
@@ -41,7 +41,7 @@ export interface Wave<T extends GraphTask = GraphTask> {
 }
 
 /** 头部计数（running / ready / stalled 三数是页签标题行的事实源）。 */
-export interface GraphCounts {
+interface GraphCounts {
   readonly total: number
   readonly running: number
   readonly ready: number
@@ -50,10 +50,10 @@ export interface GraphCounts {
 }
 
 /** 注意力条目的原因（结构性判据；不含「任务失败」——Team 没有这个状态）。 */
-export type AttentionReason = 'unassigned' | 'stalled' | 'owner-failed' | 'blocked-too-long'
+type AttentionReason = 'unassigned' | 'stalled' | 'owner-failed' | 'blocked-too-long'
 
 /** 注意力条目的严重度：critical = owner 会话失败；warning = 待派/可能卡住；info = 阻塞偏久。 */
-export type AttentionSeverity = 'critical' | 'warning' | 'info'
+type AttentionSeverity = 'critical' | 'warning' | 'info'
 
 /** 一条「需要你注意」（task id + 原因 + 严重度 + 人话说明；不冒充事实）。 */
 export interface AttentionItem {
@@ -69,7 +69,7 @@ export interface AttentionItem {
 }
 
 /** 注意力阈值（毫秒）；只用于「超时」标注与 blocked 的入场门。 */
-export interface AttentionThresholds {
+interface AttentionThresholds {
   readonly unassignedMs?: number
   readonly stalledMs?: number
   readonly blockedMs?: number
@@ -93,12 +93,12 @@ export interface MemberStatus {
 }
 
 /** 队员状态查询面：按 owner 名（或 ownerId）索引的记录或 Map。 */
-export type MemberStatusLookup =
+type MemberStatusLookup =
   | Readonly<Record<string, MemberStatus | undefined>>
   | ReadonlyMap<string, MemberStatus>
 
 /** 一层 worker 目录条目（`subagentCatalog` 投影的结构性子集）。 */
-export interface WorkerCatalogEntry {
+interface WorkerCatalogEntry {
   readonly id: string
   readonly mode?: string
   readonly label?: string
@@ -106,10 +106,10 @@ export interface WorkerCatalogEntry {
 }
 
 /** worker 生命周期模式（未知值归一为 `unknown`）。 */
-export type WorkerMode = 'one-shot' | 'external' | 'continuable' | 'unknown'
+type WorkerMode = 'one-shot' | 'external' | 'continuable' | 'unknown'
 
 /** worker 忙闲（会话状态投影；`unknown` = 尚未观测）。 */
-export type WorkerRunStatus = 'running' | 'inactive' | 'unknown'
+type WorkerRunStatus = 'running' | 'inactive' | 'unknown'
 
 /** 一个 worker chip。 */
 export interface WorkerChip {

@@ -26,7 +26,7 @@
  * 相同规则，由 `tests/node-gate.test.mjs` 覆盖终局 PASS/FAIL、历史行内引用与空模板。
  */
 
-export type Readiness = 'PASS' | 'FAIL'
+type Readiness = 'PASS' | 'FAIL'
 
 /** 装饰前缀的**形状上限**：短标签至多 1 枚、标题文字至多 1 段（判定词之前不许堆散文）。 */
 const VERDICT_PREFIX_MAX_LABELS = 1

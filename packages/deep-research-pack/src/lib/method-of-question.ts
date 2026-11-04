@@ -21,7 +21,7 @@
 import { flattenMarkdownInline, truncateWithEllipsis } from './text-fold.ts'
 
 /** 「本次研究」区状态。 */
-export type AdoptionKind = 'no-run' | 'missing' | 'unrecorded' | 'unparsable' | 'recorded'
+type AdoptionKind = 'no-run' | 'missing' | 'unrecorded' | 'unparsable' | 'recorded'
 
 /** 方法节折算结果（recorded 之外各态的内容字段恒为 null——如实，不借默认值占位）。 */
 export interface MethodAdoption {

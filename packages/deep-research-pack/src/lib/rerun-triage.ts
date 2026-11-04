@@ -10,7 +10,7 @@
  */
 
 /** 一行改法：用户语言 + 后果 + 可复制的一句话。 */
-export interface TriageRow {
+interface TriageRow {
   /** 手段名（用户语言，不是我们的三词）。 */
   readonly label: string
   /** 代价与版本后果（用户最关心的一句话）。 */

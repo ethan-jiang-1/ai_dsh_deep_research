@@ -30,7 +30,7 @@ export interface GraphNodeState {
 }
 
 /** Team 任务在映射/状态判定里需要的最小结构面（`TeamTaskView` 结构上兼容）。 */
-export interface TaskStateLike {
+interface TaskStateLike {
   readonly id: string
   readonly status: string
   readonly ready?: boolean
@@ -38,15 +38,15 @@ export interface TaskStateLike {
 }
 
 /** attention 的最小结构面（`AttentionItem` 结构上兼容；本文件不判 severity 文案）。 */
-export interface AttentionLike {
+interface AttentionLike {
   readonly reason?: string
 }
 
 /** plan 节点相对 Team 板的映射状态。 */
-export type PlanMappingState = 'mapped' | 'unmapped' | 'stale' | 'plan-only' | 'duplicate'
+type PlanMappingState = 'mapped' | 'unmapped' | 'stale' | 'plan-only' | 'duplicate'
 
 /** 一个 active plan 节点的映射结果。 */
-export interface PlanMapping<T extends TaskStateLike = TaskStateLike> {
+interface PlanMapping<T extends TaskStateLike = TaskStateLike> {
   readonly planId: string
   readonly state: PlanMappingState
   /** `task_id` 列的声明值（空单元格 → 缺省）。 */
@@ -56,7 +56,7 @@ export interface PlanMapping<T extends TaskStateLike = TaskStateLike> {
 }
 
 /** plan ↔ Team 的整张映射索引。 */
-export interface PlanMappingIndex<T extends TaskStateLike = TaskStateLike> {
+interface PlanMappingIndex<T extends TaskStateLike = TaskStateLike> {
   /** active plan 节点 id → 映射（墓碑不在此表）。 */
   readonly mapping: ReadonlyMap<string, PlanMapping<T>>
   /** plan 节点 id → Team 任务（组件画图用；同一节点多任务时取最后一个，与旧行为一致）。 */

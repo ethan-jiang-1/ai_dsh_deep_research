@@ -14,7 +14,7 @@
  */
 
 /** 业务摘要折算输入（全部为既有事实源的投影；调用方从 journal 流 + workspaceFiles 组装）。 */
-export interface BriefInputs {
+interface BriefInputs {
   /** 本会话已绑定 run bundle（binding.slug 在场且未处于抑制窗）。 */
   readonly bundleBound?: boolean
   /** 立项预检窗口（读绑定 + kickoff 已见 + 无挂起——读到的是上一场上下文）。 */

@@ -13,7 +13,7 @@
 import { SECTION_LABELS, type LibraryEntry } from './library-fold.ts'
 
 /** 回执态（failed 之外的三个正向态逐级收紧）。 */
-export type ReceiptState = 'failed' | 'sent' | 'replied' | 'landed'
+type ReceiptState = 'failed' | 'sent' | 'replied' | 'landed'
 
 /** 落盘对账结果。 */
 export interface LibraryDiff {

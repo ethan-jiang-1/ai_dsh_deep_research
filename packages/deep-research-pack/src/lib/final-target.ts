@@ -18,7 +18,7 @@
  */
 
 /** 交付事件：一条 `present` 声明里指向终稿的那一条。 */
-export interface FinalDelivery {
+interface FinalDelivery {
   /** 规范化的工作区相对路径（`drt_x/final.md` / `archive/drt_x/final.md` / `_abandoned/drt_x/final.md`）。 */
   readonly path: string
   /** 声明所在回合（事件字段，记账/说明用）。 */
@@ -68,7 +68,7 @@ export function shouldOpenFinal(
 }
 
 /** 页签体允许读的三个路径——读面是一张定表，不是任意路径参数。 */
-export interface FinalReadPlan {
+interface FinalReadPlan {
   readonly final: string
   readonly review: string
   readonly versions: string
@@ -217,7 +217,7 @@ export function finalReadPlan(path: string): FinalReadPlan | null {
 }
 
 /** 会话域文件地址的解析结果。 */
-export interface SessionFile {
+interface SessionFile {
   readonly sessionId: string
   /** 解码后的路径（相对工作区根或绝对）。 */
   readonly path: string

@@ -153,7 +153,7 @@ export function renderLibraryEntry(entry: Pick<LibraryEntry, 'name' | 'sections'
 }
 
 /** 期 1 简单动词（面板 ⋯ 菜单其余项）。 */
-export type SimpleAction = 'use-now' | 'set-default' | 'remove'
+type SimpleAction = 'use-now' | 'set-default' | 'remove'
 
 /** 卡片摘要的显示口径（发现 11 修复，2026-10-18）：库文本是 markdown，摘要要进纯文本 div——
  *  源文件标记（`**` 强调、反引号）不是内容，先剥再截断；截断补省略号，不在字中间装作完整句。
@@ -193,7 +193,7 @@ export function instructionOf(action: SimpleAction, name: string): string {
 }
 
 /** 库读状态（component 只画；判定住此处以便 keyless 钉）。 */
-export type LibraryReadState = 'ok' | 'absent' | 'unreadable'
+type LibraryReadState = 'ok' | 'absent' | 'unreadable'
 
 /**
  * 折算「偏好库读没读回来」——**「无结果」≠「失败」**（外部状态文案准则：No result is different

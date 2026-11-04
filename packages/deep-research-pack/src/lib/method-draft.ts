@@ -61,7 +61,7 @@ export function coachPatchAppliesToDraft(input: {
 }
 
 /** 合并前的页面态：当前草稿、手改集合、上一轮 coach 草稿。 */
-export interface CoachDraftState {
+interface CoachDraftState {
   readonly name: string
   readonly sections: import('./library-fold.ts').LibrarySections
   readonly manual: ReadonlySet<DraftField>
@@ -69,7 +69,7 @@ export interface CoachDraftState {
 }
 
 /** 合并结果：coach 提供的字段、刚变化的活动字段、合并后草稿。 */
-export interface CoachDraftMerge {
+interface CoachDraftMerge {
   readonly name: string
   readonly sections: import('./library-fold.ts').LibrarySections
   readonly coachFields: ReadonlySet<DraftField>

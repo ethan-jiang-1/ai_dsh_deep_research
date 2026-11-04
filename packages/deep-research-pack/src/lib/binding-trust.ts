@@ -40,7 +40,7 @@ export function bindingTrust(events: readonly unknown[]): BindingTrust {
 }
 
 /** 状态页暴露给浏览器探针的机器标记；不是给人看的文案。 */
-export type StatusFaceMarker = 'bound' | 'unbound' | 'kickoff-hold' | 'pending' | 'error' | 'unknown'
+type StatusFaceMarker = 'bound' | 'unbound' | 'kickoff-hold' | 'pending' | 'error' | 'unknown'
 
 /**
  * 状态页的机器可读数据面标记（cdp-probe 读 `[data-research-face]`）。

@@ -70,7 +70,7 @@ export function expectedMethodLibrarySnapshot(input: {
 }
 
 /** Durable evidence that can settle the UI's currently pending operation. */
-export type MethodLibrarySettlement = 'verified' | 'rejected' | 'unknown'
+type MethodLibrarySettlement = 'verified' | 'rejected' | 'unknown'
 
 /** Decide whether correlated tool evidence and a complete readback settle an operation. */
 export function methodLibrarySettlement(input: {

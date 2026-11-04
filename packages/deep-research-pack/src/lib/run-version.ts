@@ -20,10 +20,10 @@
 import { latestRunVersion } from './run-fold.ts'
 
 /** rerun 三种语义（D17）。 */
-export type RerunKind = 'evidence-expansion' | 'polish' | 'structural'
+type RerunKind = 'evidence-expansion' | 'polish' | 'structural'
 
 /** `question.md` 里的 rerun 声明（同 bundle rerun 才有）。 */
-export interface RerunDeclaration {
+interface RerunDeclaration {
   readonly version: number
   readonly kind: RerunKind
   /** ISO 日期（声明行里的 YYYY-MM-DD；缺省 = 未写）。 */
@@ -31,7 +31,7 @@ export interface RerunDeclaration {
 }
 
 /** 版本面的输入事实（全部由调用方读盘/读 journal 后传入；本文件不做 I/O）。 */
-export interface RunVersionFacts {
+interface RunVersionFacts {
   /** 当前 `plan.md` 全文。 */
   readonly planText?: string | null
   /** `plan/` 目录里的文件名（`v1.md` …）。 */
@@ -51,7 +51,7 @@ export interface RunVersionFacts {
 }
 
 /** 版本面状态（页签按它决定说什么）。 */
-export type RunVersionState = 'none' | 'drafting' | 'rerun-in-progress' | 'pending-hitl2' | 'delivered'
+type RunVersionState = 'none' | 'drafting' | 'rerun-in-progress' | 'pending-hitl2' | 'delivered'
 
 /** 版本面的一次折算结果。 */
 export interface RunVersionFace {

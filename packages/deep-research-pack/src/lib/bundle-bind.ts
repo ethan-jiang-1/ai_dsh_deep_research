@@ -19,7 +19,7 @@ interface BindEventLike {
 const WRITE_TOOLS = new Set(['write', 'edit', 'multiedit'])
 
 /** 会话 → run bundle 绑定（含绑定强度——RFC cockpit-flow-face G4：read 弱绑定防错绑）。 */
-export interface SessionBinding {
+interface SessionBinding {
   readonly slug: string | undefined
   /** write = 有写命中（可信）；read = 仅有读命中（立项预检等读取也会命中，挂起期不可作渐进面依据）。 */
   readonly boundBy: 'write' | 'read' | undefined

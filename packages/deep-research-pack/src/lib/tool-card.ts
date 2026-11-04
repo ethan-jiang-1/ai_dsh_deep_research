@@ -6,10 +6,10 @@
 import { argsObjectOf, normalizeQueries } from './journal-wire.ts'
 
 /** 卡片生命周期。 */
-export type CardState = 'running' | 'ok' | 'error' | 'stopped'
+type CardState = 'running' | 'ok' | 'error' | 'stopped'
 
 /** 卡片入参的最小形状（wire 上入参是 JSON 字符串，流式期间可能是截断前缀）。 */
-export interface ToolCardArgs {
+interface ToolCardArgs {
   readonly name?: unknown
   readonly description?: unknown
   readonly prompt?: unknown

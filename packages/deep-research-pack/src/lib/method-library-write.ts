@@ -7,7 +7,7 @@
 import { SECTION_LABELS, renderLibraryEntry, type LibraryEntry } from './library-fold.ts'
 
 /** upsert 结果：动作 + 名称 + 写入后的全文。 */
-export interface UpsertMethodEntryResult {
+interface UpsertMethodEntryResult {
   readonly action: 'created' | 'updated'
   readonly name: string
   readonly text: string

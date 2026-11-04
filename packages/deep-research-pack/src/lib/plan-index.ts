@@ -12,7 +12,7 @@
  */
 
 /** 研究流程 stage（由根 W 的 kind 派生；不是独立列）。 */
-export type PlanStage = 'scan' | 'dive' | 'check' | 'synthesis' | 'review' | 'gate' | 'unknown'
+type PlanStage = 'scan' | 'dive' | 'check' | 'synthesis' | 'review' | 'gate' | 'unknown'
 
 /** `plan.md` 节点表的一行：W<wave>.<index> 节点（W2 是 Wave 2，W2.1 是其节点）。 */
 export interface PlanNode {
@@ -68,7 +68,7 @@ export interface PlanIndex {
 }
 
 /** plan 结构稳定性问题（只读提示；不阻断 run，不是 node-gate）。 */
-export type PlanIssueKind =
+type PlanIssueKind =
   | 'duplicate-id'
   | 'missing-parent'
   | 'dangling-dep'

@@ -9,7 +9,7 @@
 const STREAM_FAILURE_CODES: readonly string[] = ['MALFORMED_RESPONSE']
 
 /** 流畸形死亡状态。 */
-export interface StreamFailure {
+interface StreamFailure {
   /** 末位回合死于流失败且尚无新回合接手。 */
   readonly dead: boolean
   /** 失败码（dead 时非 null）。 */

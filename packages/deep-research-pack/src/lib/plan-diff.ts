@@ -18,13 +18,13 @@ import { isActivePlanNode } from './plan-index.ts'
 import type { PlanIndex } from './plan-index.ts'
 
 /** 重编号/并号的一条别名。 */
-export interface PlanDiffAlias {
+interface PlanDiffAlias {
   readonly from: string
   readonly to: string
 }
 
 /** 保留节点的依赖变化。 */
-export interface PlanDiffDependencyChange {
+interface PlanDiffDependencyChange {
   readonly id: string
   readonly from: readonly string[]
   readonly to: readonly string[]

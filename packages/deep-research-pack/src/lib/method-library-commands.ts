@@ -9,13 +9,13 @@ import type { MethodLibraryAction, MethodLibraryOperationCommand } from './metho
 
 export type { MethodLibraryAction, MethodLibraryOperationCommand } from './method-library-operation.ts'
 
-export interface MethodLibraryOperationClaim extends MethodLibraryOperationCommand {
+interface MethodLibraryOperationClaim extends MethodLibraryOperationCommand {
   readonly requestId: string
   readonly turn: number
   readonly callId: string
 }
 
-export interface MethodLibraryOperationState {
+interface MethodLibraryOperationState {
   readonly methodEditor: boolean
   readonly activeTurn: number | null
   readonly pending: (MethodLibraryOperationCommand & { readonly requestId: string; readonly turn: number }) | null

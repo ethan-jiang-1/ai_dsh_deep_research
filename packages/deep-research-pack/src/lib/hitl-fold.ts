@@ -19,7 +19,7 @@
 import { argsObjectOf } from './journal-wire.ts'
 
 /** 一个 journal 事件的最小形状（wire 事件；只取折算要用的字段）。 */
-export interface JournalEventLike {
+interface JournalEventLike {
   readonly type?: unknown
   readonly data?: { readonly name?: unknown } | undefined
   readonly time?: unknown
@@ -162,7 +162,7 @@ function askQuestionCount(args: unknown): number {
 const ANCHOR_LABELS = ['立项确认', '交付审阅'] as const
 
 /** 锚点 passed 态的文件事实（调用方从 bundle 文件在场性构造——与 run-fold 同源）。 */
-export interface AnchorFileFacts {
+interface AnchorFileFacts {
   /** question.md 在场 = 立项拍板已落盘（方向契约只在校准后写入）。 */
   readonly question: boolean
   /** final.md 在场 = 交付拍板已落盘（当前版权威副本）。 */
