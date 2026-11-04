@@ -2,14 +2,10 @@
 // 路径/断代助手 = node-gate-helpers.mjs。
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { basename, dirname, join } from 'node:path'
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { gateBundle } from '../../scripts/lib/node-gate-core.mjs'
-import { decisionsLines } from '../../scripts/lib/node-gate-contracts.mjs'
-import { headingGate, leadsGate } from '../../scripts/lib/node-gate-run-gates.mjs'
-import { hitl2RowGate, isHitl2Row } from '../../scripts/lib/node-gate-session-gates.mjs'
-import { bundle, sessions, PRE_CONTRACT_DATES, structuredAudit, withCompleteBundle } from './node-gate-helpers.mjs'
+import { headingGate } from '../../scripts/lib/node-gate-run-gates.mjs'
+import { isHitl2Row } from '../../scripts/lib/node-gate-session-gates.mjs'
+import { bundle, sessions } from './node-gate-helpers.mjs'
 
 
 

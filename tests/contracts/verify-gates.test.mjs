@@ -12,7 +12,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { CASES, CONTROLS, NO_CASE_GATES } from '../../scripts/lib/gates-cases.mjs';
 
 const here = (p) => new URL(p, import.meta.url);

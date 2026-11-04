@@ -36,7 +36,7 @@
 
 ## 写测试时
 
-- **覆盖边界 + 减法都有契约**：`scripts/lib` 每个模块要么有直测、要么在 [test-surface](contracts/test-surface.test.mjs) 的 `SMOKE_ONLY` 登记"为什么只能 smoke"；覆盖率 = `pnpm test:coverage`（观察面，不设百分比门禁）；未使用 import / 未导出顶层声明由 [no-unused-code](contracts/no-unused-code.test.mjs) 机械清点（只证零引用，删副作用初始化前人工确认）；
+- **覆盖边界 + 减法都有契约**：`scripts/lib` 每个模块要么有直测、要么在 [test-surface](contracts/test-surface.test.mjs) 的 `SMOKE_ONLY` 登记"为什么只能 smoke"；覆盖率 = `pnpm test:coverage`（观察面，不设百分比门禁）；未使用 import / 未导出顶层声明由 [no-unused-code](contracts/no-unused-code.test.mjs) 机械清点（scripts/、dev/、tests/、pack src/；只证零引用，删副作用初始化前人工确认）；
 - **命名即申报**：`*.test.mjs` 命名即进 regression（递归 glob 选中，`layering` 钉 keyless）——
   新检查先想清它是不是 keyless 契约证据再命名；支援件住 `lib/`、`fixtures/`（glob 之外，
   import 不注册测试）；

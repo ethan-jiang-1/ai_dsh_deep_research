@@ -1,4 +1,4 @@
-// 减法契约：scripts / dev / pack src 里不得留下未使用的 import binding 或未导出的顶层声明。
+// 减法契约：scripts / dev / tests / pack src 里不得留下未使用的 import binding 或未导出的顶层声明。
 //
 // 为什么需要（2026-11-04）：本仓把“加法/验证”机械化了（门禁、契约测试、覆盖边界），
 // 但“减法”只有人眼。实证：scripts/verify/context.mjs 等 20+ 处未使用 import、entry-chain-probe
@@ -10,7 +10,7 @@
 //
 // 边界：
 // - 范围用目录遍历（不子进程；layering 禁止 tests spawn）；跳过 node_modules/.git/
-//   fixtures/_tmp，其它 scripts/lib 一律在范围内；
+//   fixtures/_tmp；tests/ 只扫测试与域内助手，不扫夹具样本；
 // - 只报“零引用”，注释/字符串里的同名文本不计（AST 标识符才算）；
 // - 导出声明不在此列（公共面可能被未来消费者使用，是否死导出归 review）；
 // - 有副作用的未使用初始化（如 `const x = sideEffect()`）会先被点名，清理时必须人工确认，
@@ -26,6 +26,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const SCOPES = [
   join(ROOT, 'scripts'),
   join(ROOT, 'dev'),
+  join(ROOT, 'tests'),
   join(ROOT, 'packages', 'deep-research-pack', 'src'),
 ]
 const SKIP_DIRS = new Set(['node_modules', '.git', 'fixtures', '_tmp'])

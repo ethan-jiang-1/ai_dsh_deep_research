@@ -3,7 +3,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds, sentinelInAssistantText, turnCompleted } from '../../scripts/lib/replay-request.mjs';
-import { fileURLToPath } from 'node:url';
 
 // 录制面 = 场景声明里的 cases（research-face 只录研究角色；方法编辑不是研究面，不应
 // 因为盘上多一个 preset 就要求一份不存在的 research-face 录制）。

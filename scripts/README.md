@@ -151,9 +151,9 @@
 | lib/keyless-imports.mjs | layering.test、test-surface.test | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
 | lib/gates-cases.mjs | gates-smoke、verify-gates.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
 | lib/node-gate-core.mjs | node-gate、node-gate-delivery.test、node-gate-leads.test、node-gate-session.test | bundle 判据聚合；唯一导出 = `gateBundle`，领域门直接 import 各自模块 |
-| lib/node-gate-contracts.mjs | node-gate-contracts.test、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、node-gate-delivery.test、node-gate-leads.test、node-gate-session.test、review-readiness.test | 交付日期合同、readiness 与 decisions 行解析 |
-| lib/node-gate-session-gates.mjs | ask-drive.test、bundle-sessions、node-gate-core、node-gate-delivery-gate、node-gate-witness.test、node-gate-delivery.test、node-gate-leads.test、node-gate-session.test、run-accept | HITL、present 与 §Decisions 会话门 |
-| lib/node-gate-run-gates.mjs | node-gate-core、node-gate-delivery.test、node-gate-leads.test、node-gate-session.test | leads、版本与标题退化门 |
+| lib/node-gate-contracts.mjs | node-gate-contracts.test、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、node-gate-delivery.test、review-readiness.test | 交付日期合同、readiness 与 decisions 行解析 |
+| lib/node-gate-session-gates.mjs | ask-drive.test、bundle-sessions、node-gate-core、node-gate-delivery-gate、node-gate-witness.test、node-gate-delivery.test、node-gate-session.test、run-accept | HITL、present 与 §Decisions 会话门 |
+| lib/node-gate-run-gates.mjs | node-gate-core、node-gate-leads.test、node-gate-session.test | leads、版本与标题退化门 |
 | lib/node-gate-delivery-gate.mjs | node-gate-core、run-receipt.test | 门A 交付完整性判据 |
 | lib/node-gate-reader-gate.mjs | node-gate-core、node-gate-reader.test | 门C 读者版合同：同版/六节/长度/无来源路径；数字子集只 WARN；旧场/quick_factual 豁免 |
 | lib/schema-scan-core.mjs | node-gate-contracts、node-gate-contracts.test、node-gate-core、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、run-accept、run-bundle-charter.test、run-receipt.test、schema-scan、schema-scan.test | 节点 I/O 契约在场级断言判据核（交付日/研究类型/条件件豁免/断代定红——从 run-gates 下沉修 lib→入口层反向依赖） |

@@ -16,7 +16,6 @@ import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
-const MAP = join(ROOT, 'docs', 'design', '30-methodology-mapping.md')
 const PRESETS = join(ROOT, 'packages', 'deep-research-pack', 'presets')
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
 

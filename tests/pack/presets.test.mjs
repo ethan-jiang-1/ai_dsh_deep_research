@@ -11,7 +11,7 @@
 //   「lead persona 钉 ask 硬约束」测红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { presetRoles, researchRoles } from '../../scripts/lib/roles.mjs';

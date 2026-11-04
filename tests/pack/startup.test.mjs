@@ -2,7 +2,7 @@
 // 反证：删掉"无配置短路" / 删掉工作区校验 / 删掉 registry 缺席分支 → 本文件红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { runStartup } from '../../packages/deep-research-pack/src/startup/index.ts'
