@@ -9,6 +9,14 @@ import { spawnSync } from 'node:child_process';
 import { ROOT, fail, gitOnce, trackedFiles } from '../context.mjs';
 
 export function runA() {
+  // live 文档范围：notes/_backlog 是历史层、fixtures 是样本，均不追改；doc-paths/doc-drefs 共用。
+  const liveMdFiles = (gate) => trackedFiles({
+    gate,
+    glob: '*.md',
+    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f.startsWith('_backlog/') || f.startsWith('tests/fixtures/'),
+    emptyMsg: '防空语料：未扫到任何 live 文档',
+  });
+
 // ── md-utf8-newline（所有 tracked .md 严格 UTF-8、恰一个结尾换行；git
 //    ls-files 驱动——运行区（gitignored bundle/profile 镜像）不扫，研究手册合同既有；
 //    旧版全树 walk 曾被 live run 的 leads.md 双尾换行咬红，2026-09-24 修正范围）──
@@ -170,12 +178,7 @@ export function runA() {
 // 防空语料：解析到的 token 数 < 100 → 红（范围被收窄或抓取正则失效）。
 {
   const gate = 'doc-paths';
-  const files = trackedFiles({
-    gate,
-    glob: '*.md',
-    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f.startsWith('_backlog/') || f.startsWith('tests/fixtures/'),
-    emptyMsg: '防空语料：未扫到任何 live 文档',
-  });
+  const files = liveMdFiles(gate);
   if (files) {
     const ROOTS = /^(packages|scripts|dev|docs|tests|snapshots|_dist|research-workspace)\//;
     const EXTS = ['.md', '.mjs', '.sh', '.cjs', '.ts'];
@@ -223,12 +226,7 @@ export function runA() {
 // 范围同 doc-paths（live 文档；notes/_backlog 历史层不追改）；只检查 `[D<n>](...)` 形态。
 {
   const gate = 'doc-drefs';
-  const files = trackedFiles({
-    gate,
-    glob: '*.md',
-    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f.startsWith('_backlog/') || f.startsWith('tests/fixtures/'),
-    emptyMsg: '防空语料：未扫到任何 live 文档',
-  });
+  const files = liveMdFiles(gate);
   if (files) {
     const decisions = readFileSync(join(ROOT, 'docs', 'decisions.md'), 'utf8');
     const anchors = new Set([...decisions.matchAll(/<a id="(d\d+)"><\/a>/g)].map((m) => m[1]));
