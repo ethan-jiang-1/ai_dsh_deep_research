@@ -52,7 +52,7 @@ export function parseKeylessImports(text, fileName = 'module.mjs') {
 }
 
 /** 拒进程/网络内置 import（含 Node 无前缀写法）。 */
-export function isForbiddenKeylessModule(specifier) {
+function isForbiddenKeylessModule(specifier) {
   return FORBIDDEN_MODULES.has(specifier.replace(/^node:/, '').split('/')[0])
 }
 

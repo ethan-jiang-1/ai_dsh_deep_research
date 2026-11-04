@@ -14,7 +14,7 @@ import { provenanceOf, sha256OfFile } from './provenance.mjs'
 
 /** 纯日志 reader：.jsonl 直读；.zstd 报线索后返回 null（跳过该文件，语料缺失偏红方向）。
  *  zstd CLI 解压由驱动壳注入，本模块零子进程。 */
-export const skipUnreadableLogReader = (p) => {
+const skipUnreadableLogReader = (p) => {
   if (p.endsWith('.zstd')) {
     console.error(`evidence-audit-core: ${p} 是压缩日志——纯 reader 不解压，跳过该文件（语料缺失偏红方向）；zstd 读取由驱动壳注入（scripts/run-gates/evidence-audit.mjs）`)
     return null

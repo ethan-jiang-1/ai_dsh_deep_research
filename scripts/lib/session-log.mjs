@@ -219,7 +219,7 @@ export function readSessionEvents(logPath) {
  *  seq = 稠密零基下标）定为切点，页 = 切点到末尾的全部事件（非消息事件一并含入）。
  *  唯一正本：client-load-smoke 与交付目标选取（client-load-reference）共用——两处各写一份
  *  就是"同一判据两版实现"。 */
-export const CLIENT_HISTORY_MESSAGE_WINDOW = 50
+const CLIENT_HISTORY_MESSAGE_WINDOW = 50
 
 /**
  * @param {readonly any[]} events - 会话日志事件（seq 序）。

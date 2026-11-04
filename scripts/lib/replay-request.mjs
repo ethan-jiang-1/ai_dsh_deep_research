@@ -144,7 +144,7 @@ export function compareReplayRequests(expectedEvents, actualEvents) {
 // 一落盘时立刻放行（BUG-030 实测：A 层提前放行 → 后续层在回合在飞时执行 → 渲染金标准缺末行）。
 
 /** 会话日志文本 → assistant 消息文本清单（`data.message.content` 的 text 项拼接）。 */
-export function assistantTextsOf(logText) {
+function assistantTextsOf(logText) {
   return String(logText ?? '').split('\n').filter(Boolean)
     .map((line) => { try { return JSON.parse(line) } catch { return null } }).filter(Boolean)
     .filter((event) => event.type === 'assistant/message')

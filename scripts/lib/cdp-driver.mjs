@@ -40,7 +40,7 @@ const CHROME_CANDIDATES = [
   '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
 ].filter(Boolean);
 
-export function findChromeBinary() {
+function findChromeBinary() {
   return CHROME_CANDIDATES.find(candidate => fs.existsSync(candidate));
 }
 

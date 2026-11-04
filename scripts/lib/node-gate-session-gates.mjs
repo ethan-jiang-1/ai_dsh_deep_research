@@ -18,7 +18,7 @@ export const emptyOnUnreadableLogReader = (p) => {
 }
 
 /** 扫会话根：本 bundle 的 slug 是否出现在任一 present 工具调用的载荷里。 */
-export function presentInLogs(sessionsRoot, slug, readLog = emptyOnUnreadableLogReader) {
+function presentInLogs(sessionsRoot, slug, readLog = emptyOnUnreadableLogReader) {
   if (!sessionsRoot || !existsSync(sessionsRoot) || !slug) return false
   const walk = (dir) => {
     for (const ent of readdirSync(dir, { withFileTypes: true })) {

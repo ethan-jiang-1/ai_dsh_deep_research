@@ -20,10 +20,10 @@ const resolvePathInput = (value, home = homedir()) => {
 }
 
 /** Host 使用的工作区环境变量（dev 工具也可用来盯用户 run）。 */
-export const PRODUCT_WORKSPACE_ENV = 'DEEP_RESEARCH_WORKSPACE'
+const PRODUCT_WORKSPACE_ENV = 'DEEP_RESEARCH_WORKSPACE'
 
 /** dev 通道使用的环境变量。 */
-export const DEV_WORKSPACE_ENV = 'DSH_RUN_WORKSPACE'
+const DEV_WORKSPACE_ENV = 'DSH_RUN_WORKSPACE'
 
 /**
  * 从 argv/env 解析 dev 工具的工作区根；顺序 = 显式 flag → DSH_RUN_WORKSPACE → 默认。

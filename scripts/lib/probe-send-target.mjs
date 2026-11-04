@@ -20,7 +20,7 @@ export const SEND_LABELS = [
 export const STOP_LABELS = ['Stop generating', '停止生成'];
 
 /** composer 纵向邻近窗（px）：页面上别处也可能有同名标签的按钮，只认挨着 composer 的那个。 */
-export const COMPOSER_Y_WINDOW = 140;
+const COMPOSER_Y_WINDOW = 140;
 
 /**
  * 从页面按钮表里挑出**本次该点的提交按钮**。

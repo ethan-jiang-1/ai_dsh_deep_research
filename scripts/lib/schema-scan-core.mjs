@@ -23,7 +23,7 @@ import { basename, join } from 'node:path'
 import { hasFinalVersion } from './final-version.mjs'
 import { localDateStr } from './local-date.mjs'
 
-export const CONTRACT_DATE = '2026-09-29'
+const CONTRACT_DATE = '2026-09-29'
 /** 当前 run bundle 契约版本（run.md 的 `schema:`，整数；模板写、门禁按整数分档）。
  *  读兼容：无 schema 的旧形态仍按 `contract:` 日期断代——日期断代只服务历史，不承接新 run。 */
 export const SCHEMA_VERSION = 2

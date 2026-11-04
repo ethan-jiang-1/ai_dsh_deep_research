@@ -14,16 +14,16 @@ import { finalVersionsIn } from './final-version.mjs'
 import { READABLE_CONTRACT_DATE, PRE_CONTRACT_NOTE, isPreContract } from './node-gate-contracts.mjs'
 
 /** 读者版六节（顺序即阅读顺序；机械判据只认这六个二级标题）。 */
-export const READER_SECTIONS = ['结论', '为什么', '这对你意味着什么', '什么会改变这个结论', '目前不能判断', '依据与延伸']
+const READER_SECTIONS = ['结论', '为什么', '这对你意味着什么', '什么会改变这个结论', '目前不能判断', '依据与延伸']
 
 /** 读者版硬顶：1–3 页目标下的机械上限（中文字符 + 行）。 */
 export const READER_CHAR_CAP = 4500
-export const READER_LINE_CAP = 180
+const READER_LINE_CAP = 180
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /** final/ 下最高 vN；没有 = null（版本判据 = pack `finalVersionOf`，不收 v0）。 */
-export function highestFinalVersion(bundleDir) {
+function highestFinalVersion(bundleDir) {
   const versions = finalVersionsIn(join(bundleDir, 'final'))
   return versions.length === 0 ? null : versions[versions.length - 1]
 }

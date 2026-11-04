@@ -8,7 +8,7 @@ const MODEL_ACTIVITY = new Set([
 ]);
 
 /** A session counts as model-active only when its persisted log records model activity. */
-export function hasModelActivity(events) {
+function hasModelActivity(events) {
   return events.some((event) => MODEL_ACTIVITY.has(event?.type));
 }
 

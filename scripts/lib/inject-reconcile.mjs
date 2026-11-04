@@ -11,7 +11,7 @@
 // 取日志与"日志读不出来"的策略留在消费方（探针把 log-unreadable 与 not-landed 分开报）。
 
 /** 默认只认用户注入事件：模型自己的输出（assistant/message）含同文不算"落盘"。 */
-export const INJECT_EVENT_TYPES = ['user/message']
+const INJECT_EVENT_TYPES = ['user/message']
 
 /** 从一条事件的 `data` 里抽出全部文本段（多段 content 拼接；兼容 `data.text` 直挂形态）。 */
 function textOf(data) {

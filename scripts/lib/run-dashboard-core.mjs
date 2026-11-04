@@ -52,7 +52,7 @@ function sectionBody(text, title) {
 
 /** question.md → { question, purpose, profile, depth, decisions }（缺节为 null）。
  *  双形态容纳（debug-dashboard-plus）：模板契约节名 + ad-hoc 场的变体节名/表格行。 */
-export function parseQuestion(text) {
+function parseQuestion(text) {
   const out = { question: null, purpose: null, profile: null, depth: null, decisions: 0 };
   let qSec = sectionBody(text, '研究问题（定稿）');
   if (!qSec) qSec = sectionBody(text, '一句话问题'); // ad-hoc 变体
@@ -80,7 +80,7 @@ export function parseQuestion(text) {
 }
 
 /** topics.md → [{ id, name, questions }]（must_answer 问题列表条数） */
-export function parseTopics(text) {
+function parseTopics(text) {
   const topics = [];
   let cur = null;
   let inMust = false;
@@ -148,7 +148,7 @@ export function parseEvidenceDir(dir) {
 }
 
 /** leads.md → [{ direction, status: 'dig'|'excluded', excludedReason, grades }] */
-export function parseLeads(text) {
+function parseLeads(text) {
   const leads = [];
   let cur = null;
   for (const raw of text.split(/\r?\n/)) {
@@ -178,7 +178,7 @@ export function parseLeads(text) {
 }
 
 /** findings.md → [{ id, conclusion, gap, evidence: [evidence/xx.md] }] */
-export function parseFindings(text) {
+function parseFindings(text) {
   const findings = [];
   let cur = null;
   for (const raw of text.split(/\r?\n/)) {
@@ -218,7 +218,7 @@ export function parseReview(text) {
 }
 
 /** journal.md 尾部 n 条（非空行） */
-export function tailJournal(text, n = 15) {
+function tailJournal(text, n = 15) {
   return text
     .split(/\r?\n/)
     .map((l) => l.trim())

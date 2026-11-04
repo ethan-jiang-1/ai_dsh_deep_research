@@ -7,7 +7,7 @@ import { createHash } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 
-export const PROVENANCE_KINDS = ['web', 'local-file', 'command']
+const PROVENANCE_KINDS = ['web', 'local-file', 'command']
 
 /** 文件 sha256（缺席/不可读 → null，不抛）。 */
 export function sha256OfFile(path) {

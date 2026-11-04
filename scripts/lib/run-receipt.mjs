@@ -27,7 +27,7 @@ export const READ_INTENTS = [
 ]
 
 /** 顶层文件角色（manifest 用；未知文件记 unknown，不猜）。 */
-export const FILE_ROLES = {
+const FILE_ROLES = {
   'run.md': 'state-head',
   'question.md': 'direction-contract',
   'topics.md': 'topics',
@@ -44,7 +44,7 @@ export const FILE_ROLES = {
 }
 
 /** final/ 下的角色（buildManifest 显式赋；不在顶层 FILE_ROLES 里）。 */
-export const FINAL_ROLES = {
+const FINAL_ROLES = {
   ledger: 'version-ledger',
   reader: 'reader-final',
 }
