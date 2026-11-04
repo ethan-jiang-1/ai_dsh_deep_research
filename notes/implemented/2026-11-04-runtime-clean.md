@@ -40,6 +40,9 @@
   还原后绿。
 - dry-run：白名单内 3 个过期条目（`ab-prompts` / `gate-out` / `probe-sessions-2026-10-18`，共 5.4MB）；
   `--yes` 实际删除 3 项，`runtime/` 697M → 691M；第二轮 dry-run 不再列出它们（幂等）。
+- 7 天档人工复核后只删两个 smoke 残留（`boot-run-final.log` + `run-accept-smoke-52456`，0.8MB）；
+  `repair-backup`（pre-repair bundle 备份）、`research-tmp`（现场截图/脚本）、`spike-embed`（spike 件）
+  保留为证据，不因“过保留期”盲删。
 - `pnpm test`：1037/1037；`pnpm verify` 绿；`runtime/README` 与
   [`_backlog/triggers.md`](../../_backlog/triggers.md) 的清理触发同 diff。
 - **未跑**：`scenes` 的删除（工具明确不覆盖，人工处理）；无未验证 flag 留在壳里。
