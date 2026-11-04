@@ -235,6 +235,24 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     })
   }
 
+  // 有边/无边两条渲染分支共用同一张卡；此前两处逐字重复，改一处忘另一处会分叉。
+  const renderNodeCard = (node: GraphNodeView) => (
+    <NodeCard
+      key={node.id}
+      node={node}
+      expanded={expandedId === node.id}
+      onToggle={() => { setExpandedId(expandedId === node.id ? null : node.id) }}
+      copied={copiedId === node.id}
+      onCopy={() => { copyReference(node) }}
+      {...(node.member !== undefined ? { onOpenOwner: () => { openOwner(node.member as TeamMemberProjection) } } : {})}
+      children={node.planNode !== undefined ? childrenByParent.get(node.planNode.id) ?? [] : []}
+      childStateOf={(childId) => (teamReady ? planNodeStateOf(mappingIndex.mapping.get(childId)) : PROJECTION_PENDING_STATE)}
+      leadSessionId={leadSessionId}
+      useSessions={props.useSessions}
+      useSessionStatus={props.useSessionStatus}
+      boundSlug={boundSlug}
+    />
+  )
 
 
   return (
@@ -334,45 +352,13 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
             <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>
               WAVE {wave.level + 1}{wave.tasks.length > 1 ? ` · ${String(wave.tasks.length)} 个并行` : ''}
             </div>
-            {wave.tasks.map((node) => (
-        <NodeCard
-          key={node.id}
-          node={node}
-          expanded={expandedId === node.id}
-          onToggle={() => { setExpandedId(expandedId === node.id ? null : node.id) }}
-          copied={copiedId === node.id}
-          onCopy={() => { copyReference(node) }}
-          {...(node.member !== undefined ? { onOpenOwner: () => { openOwner(node.member as TeamMemberProjection) } } : {})}
-          children={node.planNode !== undefined ? childrenByParent.get(node.planNode.id) ?? [] : []}
-          childStateOf={(childId) => (teamReady ? planNodeStateOf(mappingIndex.mapping.get(childId)) : PROJECTION_PENDING_STATE)}
-          leadSessionId={leadSessionId}
-          useSessions={props.useSessions}
-          useSessionStatus={props.useSessionStatus}
-          boundSlug={boundSlug}
-        />
-      ))}
+            {wave.tasks.map((node) => renderNodeCard(node))}
           </section>
         ))
         : graphNodes.length > 0 && (
           <section style={{ marginBottom: 10 }}>
             <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>任务快照（无依赖边）</div>
-            {graphNodes.map((node) => (
-        <NodeCard
-          key={node.id}
-          node={node}
-          expanded={expandedId === node.id}
-          onToggle={() => { setExpandedId(expandedId === node.id ? null : node.id) }}
-          copied={copiedId === node.id}
-          onCopy={() => { copyReference(node) }}
-          {...(node.member !== undefined ? { onOpenOwner: () => { openOwner(node.member as TeamMemberProjection) } } : {})}
-          children={node.planNode !== undefined ? childrenByParent.get(node.planNode.id) ?? [] : []}
-          childStateOf={(childId) => (teamReady ? planNodeStateOf(mappingIndex.mapping.get(childId)) : PROJECTION_PENDING_STATE)}
-          leadSessionId={leadSessionId}
-          useSessions={props.useSessions}
-          useSessionStatus={props.useSessionStatus}
-          boundSlug={boundSlug}
-        />
-      ))}
+            {graphNodes.map((node) => renderNodeCard(node))}
           </section>
         ))}
 
