@@ -58,6 +58,29 @@ export function researchWorkspaceGroup(sessionsRoot, workspace = null) {
   return findGroup(sessionsRoot, 'research-workspace')
 }
 
+/** Find one session's physical directory under a sessions root.
+ *  `session-<id>` wins over the bare `<id>` form; the first matching group in readdir order wins.
+ *  Missing root or id -> null（不猜、不抛）。2026-11-04 从六个真模型档消费方收进 canonical：
+ *  旧决定“sessionDirOf 保留本地”已重开，双形态/首匹配语义逐字保留（见 session-dir-canonical Note）。 */
+export function findSessionDir(sessionsRoot, sessionId) {
+  if (typeof sessionsRoot !== 'string' || typeof sessionId !== 'string' || !existsSync(sessionsRoot)) return null
+  for (const form of [`session-${sessionId}`, sessionId]) {
+    for (const group of readdirSync(sessionsRoot)) {
+      const dir = join(sessionsRoot, group, form)
+      if (existsSync(dir)) return dir
+    }
+  }
+  return null
+}
+
+/** Read one session's canonical log text by id; missing/unreadable -> ''（六个冒烟/探针消费方的既有契约）。 */
+export function readSessionTextOf(sessionsRoot, sessionId) {
+  const dir = findSessionDir(sessionsRoot, sessionId)
+  if (dir === null) return ''
+  const logPath = resolveSessionLog(dir)
+  return logPath === null ? '' : (readSessionText(logPath) ?? '')
+}
+
 /** List canonical logs in one session group, newest mtime first; inaccessible logs are omitted. */
 export function sessionLogsInGroup(groupDir) {
   if (!existsSync(groupDir)) return []

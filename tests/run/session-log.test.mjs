@@ -6,10 +6,10 @@
 // 「刚才发生了什么」统一入口失效。逃生口 = 组名子串发现（findGroup），缺省语义不变。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { findGroup, researchWorkspaceGroup } from '../../scripts/lib/session-log.mjs';
+import { findGroup, findSessionDir, readSessionTextOf, researchWorkspaceGroup } from '../../scripts/lib/session-log.mjs';
 
 const mkSessionsRoot = () => {
   const root = mkdtempSync(join(tmpdir(), 'session-groups-'));
@@ -46,4 +46,30 @@ test('researchWorkspaceGroup：缺省语义不变——仍只在 research-worksp
     assert.equal(researchWorkspaceGroup(root), '--x-research-workspace--');
   } finally { rmSync(root, { recursive: true, force: true }); }
   assert.equal(researchWorkspaceGroup(join(tmpdir(), 'session-groups-absent')), undefined);
+});
+
+// findSessionDir / readSessionTextOf = 2026-11-04 从六个真模型档消费方收进 canonical 的
+// 双形态会话目录发现（旧决定“sessionDirOf 保留本地”的重开；语义逐字保留）。
+// 反证：函数缺席时本文件 import 即红；实现后绿。
+test('findSessionDir：session-<id> 优先于裸 <id>（形态优先不随组序漂移）', () => {
+  const root = mkdtempSync(join(tmpdir(), 'session-dir-'));
+  try {
+    mkdirSync(join(root, 'group-a', 'session-abc'), { recursive: true });
+    mkdirSync(join(root, 'group-b', 'abc'), { recursive: true });
+    assert.equal(findSessionDir(root, 'abc'), join(root, 'group-a', 'session-abc'));
+    assert.equal(findSessionDir(root, 'missing'), null);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+  assert.equal(findSessionDir(join(tmpdir(), 'session-dir-absent'), 'abc'), null);
+});
+
+test('readSessionTextOf：定位后走 canonical 日志读取；缺件返回空串而不是猜', () => {
+  const root = mkdtempSync(join(tmpdir(), 'session-read-'));
+  try {
+    const dir = join(root, 'group-a', 'abc');
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, 'session.v4.jsonl'), '{"type":"session"}\n');
+    assert.equal(readSessionTextOf(root, 'abc'), '{"type":"session"}\n');
+    assert.equal(readSessionTextOf(root, 'missing'), '');
+  } finally { rmSync(root, { recursive: true, force: true }); }
+  assert.equal(readSessionTextOf(join(tmpdir(), 'session-read-absent'), 'abc'), '');
 });

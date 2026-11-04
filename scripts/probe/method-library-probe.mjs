@@ -12,7 +12,7 @@
 // 前置：source dev/env.sh。用法：node scripts/probe/method-library-probe.mjs [--port 3116]
 import { requireCredentials, withModelKey } from '../lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
-import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
+import { readSessionTextOf } from '../lib/session-log.mjs';
 import { execFileSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from 'node:fs';
@@ -88,23 +88,7 @@ const rpc = makeRpc({
   errorOf: (endpoint, body) => `${endpoint} 失败: ${body?.result?.error?.message ?? JSON.stringify(body).slice(0, 200)}`,
 });
 
-const sessionDirOf = (sessionId) => {
-  const sessionsRoot = join(home, 'sessions');
-  for (const form of [`session-${sessionId}`, sessionId]) {
-    if (!existsSync(sessionsRoot)) continue;
-    for (const ws of readdirSync(sessionsRoot)) {
-      const dir = join(sessionsRoot, ws, form);
-      if (existsSync(dir)) return dir;
-    }
-  }
-  return null;
-};
-const readSessionLog = (sessionId) => {
-  const dir = sessionDirOf(sessionId);
-  if (dir === null) return '';
-  const logPath = resolveSessionLog(dir);
-  return logPath === null ? '' : (readSessionText(logPath) ?? '');
-};
+const readSessionLog = (sessionId) => readSessionTextOf(join(home, 'sessions'), sessionId);
 
 const PROMPT = `你是一名新的研究主编，工作目录就是当前研究的工作区。用户说：
 

@@ -1,6 +1,7 @@
 # 第三轮结构收敛（round3）：web harness 单一正本 + 小件收口
 
 > 状态：implemented
+> 历史注记：`sessionDirOf` 的“保留本地”部分已于 2026-11-04 被 [session-dir-canonical](2026-11-04-session-dir-canonical.md) 部分取代（双形态/首匹配语义不变，收进 canonical `session-log`）；`readSessionLog` 换 canonical 的结论继续有效。
 
 ## 决定
 

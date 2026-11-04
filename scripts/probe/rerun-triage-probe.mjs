@@ -12,7 +12,7 @@
 // 退出码：0 = 五条全中；1 = 有断言未中；2 = 前置缺席（未跑 ≠ 通过）。
 import { requireCredentials, withModelKey } from '../lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
-import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
+import { findSessionDir, readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -109,21 +109,12 @@ const main = async () => {
     request: { requestId: randomUUID(), sessionId, mode: 'queue', content: [{ type: 'text', text: PROMPT }] },
   });
 
-  // 会话目录/日志在 create 之后异步落盘：按两种目录形态有界等待（不猜固定 sleep 时长）。
-  const sessionDirOf = (id) => {
-    const root = join(home, 'sessions');
-    for (const form of [`session-${id}`, id]) {
-      for (const ws of readdirSync(root)) {
-        const dir = join(root, ws, form);
-        if (existsSync(dir)) return dir;
-      }
-    }
-    return null;
-  };
+  // 会话目录/日志在 create 之后异步落盘：按 canonical 双形态发现 + 显式有界等待（不猜固定 sleep 时长）。
+  const sessionsRoot = join(home, 'sessions');
   const deadline = Date.now() + TURN_TIMEOUT_MS;
   let logPath = null;
   while (Date.now() < deadline && logPath === null) {
-    const dir = sessionDirOf(sessionId);
+    const dir = findSessionDir(sessionsRoot, sessionId);
     if (dir !== null) logPath = resolveSessionLog(dir);
     if (logPath === null) await sleep(500);
   }

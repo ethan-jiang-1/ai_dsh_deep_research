@@ -12,13 +12,11 @@
 // 用法：source dev/env.sh && node scripts/probe/entry-chain-probe.mjs [--port 3114]
 import { requireCredentials, withModelKey } from '../lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
-import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
+import { readSessionTextOf } from '../lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, writeFileSync } from 'node:fs';
-import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import * as zlib from 'node:zlib';
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
 import { directAuthorizationBoundaryPasses, rfcBoundaryPasses } from '../lib/direct-authorization-boundary.mjs';
 
@@ -58,41 +56,9 @@ const boot = async () => bootWeb({
 });
 
 
-// 会话日志读取：zstd 多帧切段解压（node:zlib 单帧 API；DSH 日志 = 逐次 append 帧拼接，
-// debug-dashboard-plus 实证 357 帧/639 行）。按 session id 扫描定位，不猜 cwd 编码。
+// 会话日志读取：目录发现/代际选择/解压全归 canonical session-log（node zlib，无子进程）。
 const sessionsRoot = join(home, 'sessions');
-const sessionDirOf = (sessionId) => {
-  for (const form of [`session-${sessionId}`, sessionId]) {
-    if (!existsSync(sessionsRoot)) continue;
-    for (const ws of readdirSync(sessionsRoot)) {
-      const dir = join(sessionsRoot, ws, form);
-      if (existsSync(dir)) return dir;
-    }
-  }
-  return null;
-};
-const decompressLog = (buf) => {
-  const dec = typeof zlib.zstdDecompressSync === 'function' ? zlib.zstdDecompressSync : null;
-  if (!dec) return '';
-  const idxs = [];
-  for (let i = 0; i <= buf.length - 4; i++) {
-    if (buf[i] === 0x28 && buf[i + 1] === 0xb5 && buf[i + 2] === 0x2f && buf[i + 3] === 0xfd) idxs.push(i);
-  }
-  if (!idxs.length || idxs[0] !== 0) return '';
-  const parts = [];
-  for (let k = 0; k < idxs.length; k++) {
-    try { parts.push(dec(buf.subarray(idxs[k], idxs[k + 1] ?? buf.length))); } catch { /* 坏段跳过 */ }
-  }
-  return Buffer.concat(parts).toString('utf8');
-};
-const readSessionLog = (sessionId) => {
-  const dir = sessionDirOf(sessionId); // 本地：双形态目录发现（canonical 无此形态，保形留下）
-  if (dir === null) return '';
-  // 选择与解压归 canonical（session-log.mjs）：代际优先 + node zlib（同输出、不同路；差异记 Note）。
-  const logPath = resolveSessionLog(dir);
-  if (logPath === null) return '';
-  return readSessionText(logPath) ?? '';
-};
+const readSessionLog = (sessionId) => readSessionTextOf(sessionsRoot, sessionId);
 
 /** 轮询直到 assistant 完成作答：等会话日志出现 ≥4 行 "Q<n>:" 的 assistant/message 文本。 */
 const waitForAnswer = async (sessionId) => {

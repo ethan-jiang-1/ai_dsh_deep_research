@@ -15,7 +15,7 @@
 import { spawnSync } from 'node:child_process';
 import { requireCredentials, withModelKey } from '../lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
-import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
+import { readSessionTextOf } from '../lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
@@ -82,28 +82,9 @@ const boot = async () => bootWeb({
 });
 
 
-// ── 会话日志读取（会话日志即真相；按 session id 扫描定位，不猜 cwd 编码）──
+// ── 会话日志读取（会话日志即真相；目录发现/选择/解压全归 canonical session-log）──
 const sessionsRoot = join(home, 'sessions');
-const sessionDirOf = (sessionId) => {
-  for (const form of [`session-${sessionId}`, sessionId]) {
-    if (!existsSync(sessionsRoot)) continue;
-    for (const ws of readdirSync(sessionsRoot)) {
-      const dir = join(sessionsRoot, ws, form);
-      if (existsSync(dir)) return dir;
-    }
-  }
-  return null;
-};
-const readSessionLog = (sessionId) => {
-  const dir = sessionDirOf(sessionId); // 本地：双形态目录发现（canonical 无此形态，保形留下）
-  if (dir === null) return '';
-  // 选择与解压归 canonical（session-log.mjs）：代际优先（v4.zstd → v4 → v3…）+ node zlib。
-  // 契约差（已记 Note）：原首匹配 → 代际优先（dev home 1886 目录多形态=0，等价）；
-  // 原 zstd CLI（maxBuffer 截断上限）→ node zlib 全量解压（同输出、不同路）。
-  const logPath = resolveSessionLog(dir);
-  if (logPath === null) return '';
-  return readSessionText(logPath) ?? '';
-};
+const readSessionLog = (sessionId) => readSessionTextOf(sessionsRoot, sessionId);
 
 /** 等回合真正落定：日志行数连续 QUIET_POLLS 次轮询不变（多步工具回合没有 turn/end 事件，
  *  且模型会在确认语里早现标记——静默是唯一可靠的完成信号；首跑实证）。 */

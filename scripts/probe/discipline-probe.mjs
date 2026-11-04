@@ -28,9 +28,9 @@
 import { spawnSync } from 'node:child_process';
 import { requireCredentials, withModelKey } from '../lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
-import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
+import { readSessionTextOf } from '../lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { presetRoles } from '../lib/roles.mjs';
@@ -84,26 +84,7 @@ const boot = async () => bootWeb({
 
 
 const sessionsRoot = join(home, 'sessions');
-const sessionDirOf = (sessionId) => {
-  for (const form of [`session-${sessionId}`, sessionId]) {
-    if (!existsSync(sessionsRoot)) continue;
-    for (const ws of readdirSync(sessionsRoot)) {
-      const dir = join(sessionsRoot, ws, form);
-      if (existsSync(dir)) return dir;
-    }
-  }
-  return null;
-};
-const readSessionLog = (sessionId) => {
-  const dir = sessionDirOf(sessionId); // 本地：双形态目录发现（canonical 无此形态，保形留下）
-  if (dir === null) return '';
-  // 选择与解压归 canonical（session-log.mjs）：代际优先（v4.zstd → v4 → v3…）+ node zlib。
-  // 契约差（已记 Note）：原首匹配 → 代际优先（dev home 1886 目录多形态=0，等价）；
-  // 原 zstd CLI（maxBuffer 截断上限）→ node zlib 全量解压（同输出、不同路）。
-  const logPath = resolveSessionLog(dir);
-  if (logPath === null) return '';
-  return readSessionText(logPath) ?? '';
-};
+const readSessionLog = (sessionId) => readSessionTextOf(sessionsRoot, sessionId);
 
 /** 轮询会话日志直到断言命中；返回命中行（供留档），超时抛错。 */
 const waitFor = async (sessionId, label, predicate) => {

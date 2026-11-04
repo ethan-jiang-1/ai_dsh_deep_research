@@ -5,15 +5,15 @@
 // （zstd 解压），断言 `assistant/message` 事件携带标记（不是用户消息回显）与
 // `tool/call` 事件真实出现——事件词汇表来自 2026-09-24 首跑实证（见 implemented Note）。
 //
-// 前置：DSH_HOME（dev home 已配凭据，zstd 在 PATH）；DSH_SRC（缺省 = 本仓根——vendor/dsh 钉 tag，E1 起统一默认）。
+// 前置：DSH_HOME（dev home 已配凭据；日志解压走 node zlib）；DSH_SRC（缺省 = 本仓根——vendor/dsh 钉 tag，E1 起统一默认）。
 // 用法：source dev/env.sh && node scripts/smoke/l4-lite-smoke.mjs [--port 3101]
 
 import { spawnSync } from 'node:child_process';
 import { requireCredentials, withModelKey } from '../lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
-import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
+import { readSessionTextOf } from '../lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { presetRoles } from '../lib/roles.mjs';
@@ -33,10 +33,6 @@ const POLL_MS = 3_000;
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
 if (!home) { console.error('l4-lite: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2); }
 requireCredentials('l4-lite', { home });
-if (spawnSync('zstd', ['--version']).status !== 0) {
-  console.error('l4-lite: 需要 zstd 且须在 PATH 上（会话日志为 zstd 压缩，readSessionLog 直接调 zstd）');
-  process.exit(2);
-}
 const dshSrc = process.env.DSH_SRC ?? ROOT; // 机制基线 = 本仓 vendor/dsh 钉 tag（AGENTS §DSH 源码；E1 切换后统一默认）
 const bin = join(dshSrc, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
 if (!existsSync(bin)) { console.error(`l4-lite: 机制基线不在位（${bin}）`); process.exit(2); }
@@ -58,28 +54,9 @@ const boot = async () => bootWeb({
 });
 
 
-// ── 会话日志读取（会话日志即真相；不猜 cwd 编码，按 session id 扫描定位）──
+// ── 会话日志读取（会话日志即真相；目录发现/选择/解压全归 canonical session-log）──
 const sessionsRoot = join(home, 'sessions');
-const sessionDirOf = (sessionId) => {
-  for (const form of [`session-${sessionId}`, sessionId]) {
-    if (!existsSync(sessionsRoot)) continue;
-    for (const ws of readdirSync(sessionsRoot)) {
-      const dir = join(sessionsRoot, ws, form);
-      if (existsSync(dir)) return dir;
-    }
-  }
-  return null;
-};
-const readSessionLog = (sessionId) => {
-  const dir = sessionDirOf(sessionId); // 本地：双形态目录发现（canonical 无此形态，保形留下）
-  if (dir === null) return '';
-  // 选择与解压归 canonical（session-log.mjs）：代际优先（v4.zstd → v4 → v3…）+ node zlib。
-  // 契约差（已记 Note）：原首匹配 → 代际优先（dev home 1886 目录多形态=0，等价）；
-  // 原 zstd CLI（maxBuffer 截断上限）→ node zlib 全量解压（同输出、不同路）。
-  const logPath = resolveSessionLog(dir);
-  if (logPath === null) return '';
-  return readSessionText(logPath) ?? '';
-};
+const readSessionLog = (sessionId) => readSessionTextOf(sessionsRoot, sessionId);
 
 /** 轮询会话日志直到条件函数命中（扫 assistant/message / tool/call 行）。 */
 const waitFor = async (sessionId, label, predicate) => {
