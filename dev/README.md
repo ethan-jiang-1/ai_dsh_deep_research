@@ -59,3 +59,7 @@
 ## 运行区（已外移根级 runtime/）
 
 harness-home/（开发 DSH home）与 smoke-workspace/（冒烟/boot 运行产物）的职责与状态 = [runtime/README.md](../runtime/README.md)——dev/ 只住源码驱动。
+
+## 工作树清理
+
+`git worktree list` 列出 fresh-clone 实验副本。删除前先 `git -C <dir> status --short --ignore-submodules=all`：**有未提交改动 = 等决定，不 `--force`**。再确认 head 无独有工作（`git merge-base --is-ancestor <head> master`），才 `git worktree remove <dir>`；无独有 commit 的干净副本可回收，有未提交改动的保留。
