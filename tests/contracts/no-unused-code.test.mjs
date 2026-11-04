@@ -64,6 +64,10 @@ function unusedIn(file, text) {
     const exported = statement.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword) === true
     if (exported) continue
     if (ts.isFunctionDeclaration(statement) && statement.name) localDeclarations.add(statement.name.text)
+    if ((ts.isClassDeclaration(statement) || ts.isInterfaceDeclaration(statement)
+      || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement)) && statement.name) {
+      localDeclarations.add(statement.name.text)
+    }
     if (ts.isVariableStatement(statement)) {
       for (const declaration of statement.declarationList.declarations) {
         if (ts.isIdentifier(declaration.name)) localDeclarations.add(declaration.name.text)
