@@ -87,7 +87,7 @@ const PLAN_ONLY_TEXT = /plan[-_\s]?only|无\s*task/i
  * @param raw - `task_id` 列原值。
  * @returns 是 → true（不再当缺口、也不当未执行）。
  */
-export function planOnlyMarkOf(raw: string | undefined): boolean {
+function planOnlyMarkOf(raw: string | undefined): boolean {
   if (typeof raw !== 'string') return false
   const value = raw.trim()
   if (value === '') return false

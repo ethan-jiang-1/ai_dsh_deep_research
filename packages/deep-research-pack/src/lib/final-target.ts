@@ -80,7 +80,7 @@ export const FINAL_REVIEW_NAME = 'review.md'
 export const FINAL_LEDGER_DIR = 'final'
 /** 读者版工作件（HITL2 前）与同版交付件（`readable-vN.md`；N 与 final/vN 同号）。 */
 export const FINAL_READER_NAME = 'readable.md'
-export const FINAL_READABLE_VERSION_RE = /^readable-v([1-9]\d{0,5})\.md$/
+const FINAL_READABLE_VERSION_RE = /^readable-v([1-9]\d{0,5})\.md$/
 export const FINAL_VERSION_RE = /^v([1-9]\d{0,5})\.md$/
 
 /**

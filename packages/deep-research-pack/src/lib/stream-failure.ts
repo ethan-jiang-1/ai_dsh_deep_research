@@ -6,7 +6,7 @@
  */
 
 /** 触发恢复指引的流失败码（当前仅上游畸形签名；同族可扩）。 */
-export const STREAM_FAILURE_CODES: readonly string[] = ['MALFORMED_RESPONSE']
+const STREAM_FAILURE_CODES: readonly string[] = ['MALFORMED_RESPONSE']
 
 /** 流畸形死亡状态。 */
 export interface StreamFailure {

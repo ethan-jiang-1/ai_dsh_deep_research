@@ -14,12 +14,12 @@ export interface UpsertMethodEntryResult {
 }
 
 /** 转义正则字面量。 */
-export function escapeRegExp(value: string): string {
+function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 /** 条目标题匹配（名称后可带 `（provenance）` 与 `〔默认偏好〕`）。 */
-export function methodHeadingPattern(name: string): RegExp {
+function methodHeadingPattern(name: string): RegExp {
   return new RegExp(`^##\\s+${escapeRegExp(name)}(?:（[^）\\n]*）)?(?:〔[^〕\\n]*〕)*\\s*$`, 'm')
 }
 

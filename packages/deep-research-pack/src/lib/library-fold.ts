@@ -152,11 +152,6 @@ export function renderLibraryEntry(entry: Pick<LibraryEntry, 'name' | 'sections'
   return lines.join('\n')
 }
 
-/** 多条库条目的 Markdown 预览（顺序 = 输入序）。 */
-export function renderLibrary(entries: readonly LibraryEntry[]): string {
-  return entries.map((entry) => renderLibraryEntry(entry)).join('\n\n')
-}
-
 /** 期 1 简单动词（面板 ⋯ 菜单其余项）。 */
 export type SimpleAction = 'use-now' | 'set-default' | 'remove'
 

@@ -98,7 +98,7 @@ const INT = (raw: string | undefined): number | null => {
  * @param planText - `plan.md` 全文。
  * @returns 两个版本号与是否冲突（缺声明 → null）。
  */
-export function planVersionsOf(planText: string | null | undefined): {
+function planVersionsOf(planText: string | null | undefined): {
   readonly header: number | null
   readonly recorded: number | null
   readonly conflicted: boolean
@@ -128,7 +128,7 @@ export function planVersionsOf(planText: string | null | undefined): {
  * @param questionText - `question.md` 全文。
  * @returns 声明或 null（不解析散文）。
  */
-export function rerunDeclarationOf(questionText: string | null | undefined): RerunDeclaration | null {
+function rerunDeclarationOf(questionText: string | null | undefined): RerunDeclaration | null {
   if (typeof questionText !== 'string' || questionText === '') return null
   const match = /^[ \t]*>[ \t]*rerun[ \t]*[：:][ \t]*v?(\d+)[ \t]*·[ \t]*(evidence-expansion|polish|structural)\b([^\n]*)/mi.exec(questionText)
   if (match === null) return null
