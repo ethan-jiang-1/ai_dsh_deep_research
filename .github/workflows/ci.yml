@@ -49,6 +49,12 @@ jobs:
       - name: Test (keyless regression)
         run: source dev/env.sh && pnpm test
 
+      # 覆盖率是观察面、不设阈值；但命令本身必须真能跑（2026-11-04 实证：
+      # test:coverage 缺 TSX_TSCONFIG_PATH，4 个 views 测试红而 pnpm test 绿）。
+      # 契约侧由 layering ④b 钉共享前缀，这一步提供真实执行证据。
+      - name: Coverage command (observational)
+        run: source dev/env.sh && pnpm test:coverage
+
       # 这两条契约 import vendor **源码**（组合层 Loader / 设置 schema）。默认 test 用
       # client tsconfig（paths 置空 → vendor 包解析到构建产物 lib/）；本步用根 tsconfig
       # 的 vendor 源路径映射，fresh clone 无 vendor 构建也能跑。

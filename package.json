@@ -26,7 +26,7 @@
     "typecheck": "tsc -b packages/deep-research-pack --pretty false",
     "release:check": "node scripts/dist/release-check.mjs",
     "dsh": "node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts",
-    "test:coverage": "node --import tsx/esm --test --experimental-test-coverage 'tests/**/*.test.mjs'"
+    "test:coverage": "TSX_TSCONFIG_PATH=\"$PWD/packages/deep-research-pack/tsconfig.client.json\" node --import tsx/esm --test --experimental-test-coverage 'tests/**/*.test.mjs'"
   },
   "devDependencies": {
     "@deepseek-ai/dsh-agent-instructions": "workspace:*",

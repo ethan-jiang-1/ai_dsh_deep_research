@@ -113,6 +113,21 @@ test('④ test 命令钉：node --test glob 即测试发现配置，改宽/改�
   );
 });
 
+test('④b test:coverage 与 test 共享同一 TSX 配置（只改一条即红）', () => {
+  const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
+  const testCmd = pkg.scripts?.test;
+  const coverageCmd = pkg.scripts?.['test:coverage'];
+  assert.equal(typeof testCmd, 'string', 'test 命令缺席');
+  assert.equal(typeof coverageCmd, 'string', 'test:coverage 命令缺席');
+  // 只钉共享前缀，不复制完整命令：两条命令可以各有 reporter/coverage 旗标，
+  // 但 JSX 运行时配置只能有一个来源（2026-11-04 实证：coverage 缺前缀 → 4 个 views 测试报 React is not defined）。
+  const prefix = testCmd.slice(0, testCmd.indexOf(' --test'));
+  assert.ok(prefix.includes('TSX_TSCONFIG_PATH='), 'test 命令前缀必须声明 TSX_TSCONFIG_PATH');
+  assert.ok(coverageCmd.startsWith(prefix),
+    'test:coverage 必须与 test 共享同一 TSX_TSCONFIG_PATH 前缀——否则 pnpm test:coverage 会在 JSX 测试上红，而 pnpm test 绿');
+  assert.ok(coverageCmd.includes('--experimental-test-coverage'), 'test:coverage 必须实际开启 Node 覆盖率');
+});
+
 test('⑤ 纪律有家：tests/AGENTS 的分层句在场（散文会被忘，这里变成断言）', () => {
   const ag = readFileSync(join(ROOT, 'tests', 'AGENTS.md'), 'utf8');
   assert.ok(ag.includes('真模型/浏览器/网络/子进程检查走独立 smoke'), 'tests/AGENTS 缺分层句——纪律的家丢了');
