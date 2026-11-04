@@ -7,9 +7,9 @@
 //   ② 打印计划；--yes 时逐条复核路径仍在 runtime 内再删。
 //
 // 永不候选：harness-home（活跃 dev home/凭据）、research-workspace（run bundle）、_dist、vendor、
-// packages/*/lib、runtime 根散件、未知名。scenes 是运行证据，默认也不清，需要 --include-scenes。
+// packages/*/lib、runtime 根散件、未知名、scenes（场景包是运行证据，人工处理）。
 //
-// 用法：node scripts/run-ops/runtime-clean.mjs [--older-than <days>] [--include-scenes] [--yes] [--json]
+// 用法：node scripts/run-ops/runtime-clean.mjs [--older-than <days>] [--yes]
 // 退出码：0 = 成功（含无事可做 / dry-run）；1 = 删除失败；2 = 用法/前置错。
 import { existsSync, lstatSync, readdirSync, rmSync } from 'node:fs'
 import { dirname, join, relative, resolve, sep } from 'node:path'
@@ -20,17 +20,15 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const RUNTIME = join(ROOT, 'runtime')
 
 function usage() {
-  console.log(`用法：node scripts/run-ops/runtime-clean.mjs [--older-than <days>] [--include-scenes] [--yes] [--json]
+  console.log(`用法：node scripts/run-ops/runtime-clean.mjs [--older-than <days>] [--yes]
 
 默认 dry-run，只列运行区白名单内、整棵子树都早于保留期的条目。
   --older-than <days>   保留期，缺省 14 天
-  --include-scenes      同时清理 runtime/scenes/<case>（默认保留，场景包是运行证据）
   --yes                 真正删除；没有它只打印计划
-  --json                机器可读输出
   --help                本说明
 
 永不触碰：runtime/harness-home（会话/凭据）、research-workspace/drt_*、_dist、vendor、
-packages/*/lib、runtime 根散件、未知顶层名、symlink。`)
+packages/*/lib、runtime 根散件、未知顶层名、symlink、scenes（证据，人工处理）。`)
 }
 
 function fail(message) {
@@ -39,13 +37,11 @@ function fail(message) {
 }
 
 function parseArgs(argv) {
-  const options = { yes: false, olderThanDays: 14, includeScenes: false, json: false }
+  const options = { yes: false, olderThanDays: 14 }
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
     if (arg === '--help') { usage(); process.exit(0) }
     else if (arg === '--yes') options.yes = true
-    else if (arg === '--json') options.json = true
-    else if (arg === '--include-scenes') options.includeScenes = true
     else if (arg === '--older-than') {
       const raw = argv[++i]
       const days = Number(raw)
@@ -80,7 +76,7 @@ function scanTree(path) {
 }
 
 /** 只枚举白名单根；不遍历未知目录，避免把活跃数据卷进扫描。 */
-function collectEntries(options) {
+function collectEntries() {
   if (!existsSync(RUNTIME)) return []
   const entries = []
   for (const top of readdirSync(RUNTIME, { withFileTypes: true })) {
@@ -89,8 +85,7 @@ function collectEntries(options) {
       entries.push({ relPath: top.name, ...scanTree(join(RUNTIME, top.name)) })
       continue
     }
-    if ((top.name === 'smoke-workspace' || top.name === 'scenes') && top.isDirectory()) {
-      if (top.name === 'scenes' && !options.includeScenes) continue
+    if (top.name === 'smoke-workspace' && top.isDirectory()) {
       let children
       try { children = readdirSync(join(RUNTIME, top.name)) } catch { continue }
       for (const child of children) {
@@ -118,19 +113,12 @@ function insideRuntime(path) {
 }
 
 const options = parseArgs(process.argv.slice(2))
-const entries = collectEntries(options)
+const entries = collectEntries()
 const plan = planRuntimeCleanup(entries, { olderThanDays: options.olderThanDays })
-const payload = {
-  dryRun: !options.yes,
-  olderThanDays: options.olderThanDays,
-  cutoff: new Date(plan.cutoff).toISOString(),
-  remove: plan.remove,
-  keep: plan.keep,
-  removeBytes: plan.removeBytes,
-}
+const cutoff = new Date(plan.cutoff).toISOString()
 
 function printPlan() {
-  console.log(`runtime-clean: ${options.yes ? '执行' : 'dry-run'}（保留期 ${options.olderThanDays} 天；cutoff ${payload.cutoff}）`)
+  console.log(`runtime-clean: ${options.yes ? '执行' : 'dry-run'}（保留期 ${options.olderThanDays} 天；cutoff ${cutoff}）`)
   for (const entry of plan.remove) {
     console.log(`REMOVE  ${mb(entry.sizeBytes).padStart(9)}  ${localDate(entry.newestMtimeMs)}  ${entry.relPath}`)
   }
@@ -141,15 +129,11 @@ function printPlan() {
   if (!options.yes) console.log('dry-run：没有删除任何文件。确认后加 --yes 执行（仍只限上方 REMOVE 清单）。')
 }
 
-if (!options.yes) {
-  if (options.json) console.log(JSON.stringify(payload, null, 2))
-  else printPlan()
-  process.exit(0)
-}
+printPlan()
+if (!options.yes) process.exit(0)
 
-if (!options.json) printPlan()
 let failed = 0
-const removedPaths = []
+let removed = 0
 for (const entry of plan.remove) {
   const path = join(RUNTIME, ...entry.relPath.split('/'))
   if (!insideRuntime(path)) {
@@ -165,14 +149,12 @@ for (const entry of plan.remove) {
       continue
     }
     rmSync(path, { recursive: true, force: true })
-    removedPaths.push(entry.relPath)
-    if (!options.json) console.log(`DELETED ${entry.relPath}`)
+    removed++
+    console.log(`DELETED ${entry.relPath}`)
   } catch (error) {
     console.error(`runtime-clean: 删除失败 ${entry.relPath}：${error.message}`)
     failed++
   }
 }
-const result = { ...payload, dryRun: false, removed: removedPaths, failed }
-if (options.json) console.log(JSON.stringify(result, null, 2))
-else console.log(`完成：删除 ${removedPaths.length} 项；失败 ${failed} 项。`)
+console.log(`完成：删除 ${removed} 项；失败 ${failed} 项。`)
 process.exit(failed === 0 ? 0 : 1)

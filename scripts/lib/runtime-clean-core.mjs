@@ -6,15 +6,15 @@
 // 删除动作与安全边界归 CLI 壳（scripts/run-ops/runtime-clean.mjs）。
 //
 // 判据：
-// - 容器根 smoke-workspace / scenes：候选 = 其**直接子项**（不删容器本身）；
+// - 容器根 smoke-workspace：候选 = 其**直接子项**（不删容器本身）；
 // - 独立实验根：field-sim* / probe-* / explore-* / spike-* / research-tmp / ab-prompts /
 //   gate-out / audit / repair-backup：候选 = 该顶层目录本身；
-// - 其余（harness-home、README、未知名）永不候选；
+// - 其余（harness-home、scenes、README、未知名）永不候选；scenes 是运行证据，人工处理；
 // - symlink 一律不候选（不跟随、不删链接指向）；mtime 不可读 → 不候选；
 // - 保留期按**子树最新 mtime**：只有整棵子树都早于 cutoff 才删，防“目录旧但里面刚写了文件”。
 
 const DAY_MS = 86_400_000
-const CONTAINER_ROOTS = new Set(['smoke-workspace', 'scenes'])
+const CONTAINER_ROOTS = new Set(['smoke-workspace'])
 const STANDALONE_ROOTS = /^(?:field-sim\d*|probe-[a-z0-9][a-z0-9-]*|explore-[a-z0-9][a-z0-9-]*|spike-[a-z0-9][a-z0-9-]*|research-tmp|ab-prompts|gate-out|audit|repair-backup)$/
 
 /**

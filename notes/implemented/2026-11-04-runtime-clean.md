@@ -10,14 +10,14 @@
 
 可删范围是收窄的白名单：
 
-- 容器根 `smoke-workspace/<child>` 与 `scenes/<child>`（`scenes` 需 `--include-scenes`）；
+- 容器根 `smoke-workspace/<child>`；
 - 独立实验根 `field-sim*`、`probe-*`、`explore-*`、`spike-*`、`research-tmp`、`ab-prompts`、
   `gate-out`、`audit`、`repair-backup`；
 - 保留期默认 14 天，按**子树最新 mtime** 判定，防“目录旧但里面刚写了文件”；
 - `harness-home`（会话/凭据）、`research-workspace` 的 `drt_*`/`archive`、`_dist`、`vendor`、
-  `packages/*/lib`、runtime 根散件、未知名、点文件与 symlink 永不候选。
+  `packages/*/lib`、runtime 根散件、未知名、点文件、symlink 与 `scenes` 永不候选。
 
-`scenes` 默认保留：场景包是抓取当时的运行证据；需要清理时显式 `--include-scenes`。
+`scenes` 不在工具范围：场景包是抓取当时的运行证据，需要清理时人工处理，不给工具加未验证分支。
 
 ## 输掉的方案
 
@@ -25,7 +25,8 @@
   目录或 symlink 指向的仓外文件；清理工具必须有 dry-run 和逐条复核。
 - **自动 GC / 定时删除**：与既有“run bundle 不做自动 GC、删除是用户显式动作”的决定冲突；
   运行产物清理也保留人工确认。
-- **把 `scenes` 默认纳入**：场景包不是可再生缓存，删除会丢现场证据；默认保留、opt-in。
+- **把 `scenes` 纳入工具**：场景包不是可再生缓存，删除会丢现场证据；工具不背这个未验证分支，
+  需要时人工处理。
 - **按目录自身 mtime 判保留期**：目录 mtime 在子项写入后不必然更新；会删掉“目录旧、内容新”
   的现场。改为子树最新 mtime。
 - **跟随 symlink 统计/删除**：`field-sim*` 等实验目录含 symlink；跟随会把仓外目标卷进来，
@@ -41,8 +42,7 @@
   `--yes` 实际删除 3 项，`runtime/` 697M → 691M；第二轮 dry-run 不再列出它们（幂等）。
 - `pnpm test`：1037/1037；`pnpm verify` 绿；`runtime/README` 与
   [`_backlog/triggers.md`](../../_backlog/triggers.md) 的清理触发同 diff。
-- **未跑**：`--include-scenes` 的删除路径（场景包是证据，未在本次删除）；`--json --yes` 的删除输出
-  由 dry-run/非 JSON 路径覆盖，未单独跑。
+- **未跑**：`scenes` 的删除（工具明确不覆盖，人工处理）；无未验证 flag 留在壳里。
 
 ## 环境状态
 

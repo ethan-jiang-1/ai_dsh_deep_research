@@ -22,7 +22,7 @@ test('classifyRuntimePath：只认白名单容器/实验根，永不认 harness-
   assert.equal(classifyRuntimePath('explore-20261026'), 'standalone')
   assert.equal(classifyRuntimePath('research-tmp'), 'standalone')
   assert.equal(classifyRuntimePath('smoke-workspace/old-run'), 'container-child')
-  assert.equal(classifyRuntimePath('scenes/case-a'), 'container-child')
+  assert.equal(classifyRuntimePath('scenes/case-a'), null, 'scenes 是运行证据，不在工具范围')
   assert.equal(classifyRuntimePath('smoke-workspace'), null, '容器根本身不是候选')
   assert.equal(classifyRuntimePath('harness-home'), null)
   assert.equal(classifyRuntimePath('harness-home/sessions'), null)
@@ -39,15 +39,14 @@ test('planRuntimeCleanup：整棵子树过期才删；新子树、symlink、未�
     { relPath: 'probe-save', sizeBytes: 36 * 1024 * 1024, newestMtimeMs: old(20) },
     { relPath: 'smoke-workspace/old-run', sizeBytes: 10 * 1024 * 1024, newestMtimeMs: old(40) },
     { relPath: 'smoke-workspace/fresh-run', sizeBytes: 20 * 1024 * 1024, newestMtimeMs: fresh(1) },
-    { relPath: 'scenes/case-a', sizeBytes: 2 * 1024 * 1024, newestMtimeMs: old(15) },
     { relPath: 'harness-home', sizeBytes: 386 * 1024 * 1024, newestMtimeMs: old(90) },
     { relPath: 'unknown-dir', sizeBytes: 1, newestMtimeMs: old(90) },
     { relPath: 'smoke-workspace/linked', sizeBytes: 1, newestMtimeMs: old(90), symlink: true },
     { relPath: 'probe-odd', sizeBytes: 1, newestMtimeMs: Number.NaN },
   ]
   const plan = planRuntimeCleanup(entries, { now: NOW, olderThanDays: 14 })
-  assert.deepEqual(plan.remove.map((entry) => entry.relPath), ['field-sim', 'probe-save', 'scenes/case-a', 'smoke-workspace/old-run'])
-  assert.equal(plan.removeBytes, (39 + 36 + 2 + 10) * 1024 * 1024)
+  assert.deepEqual(plan.remove.map((entry) => entry.relPath), ['field-sim', 'probe-save', 'smoke-workspace/old-run'])
+  assert.equal(plan.removeBytes, (39 + 36 + 10) * 1024 * 1024)
   const kept = new Map(plan.keep.map((entry) => [entry.relPath, entry.reason]))
   assert.equal(kept.get('smoke-workspace/fresh-run'), 'newer-than-cutoff')
   assert.equal(kept.get('harness-home'), 'not-allowlisted')
