@@ -1,6 +1,7 @@
 # 研究工作区的版本控制边界：仓库正本 vs 安装方种子
 
 > 状态：implemented
+> 归档：2026-11-04
 
 > 历史注记：workspace 种子与 `dev/sync-pack-workspace.mjs` 已由 D40 删除；现行安装形态看 [guides/65](../../docs/guides/65-run-forms.md)。
 
