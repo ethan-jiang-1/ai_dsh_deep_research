@@ -90,6 +90,7 @@
 | unconsumed-evidence.mjs | **B1 差集出题的操作侧投影**：bundle 的 evidence/ 未进 findings.md 清单（收尾核验入口——lib 头注承诺"操作侧核验"，此前无 CLI；判据 = lib/unconsumed-evidence.mjs） | keyless |
 | bundle-sessions.mjs | **bundle → 见证会话反查**：给 bundle 或 slug，按绑定谓词（写过 `drt_<slug>/` 的 lead 会话）列出会话 id/组/present 条数，并打印**状态摘要**（runStateOf 的 events/hitlPending/runSettled 一行）与下一步诊断命令——诊断入口都要会话 id，而 bundle 不记它（折算 = lib/bundle-sessions.mjs，绑定语义复用 node-gate 门①②同一条谓词） | keyless（须先 source dev/env.sh；默认只扫 `research-workspace` 组、结果按日志 mtime+size 缓存——首次约 25s、重复调用 <0.1s；`--all` 扫整根、`--no-cache` 绕过） |
 | acceptance-check.mjs | **收活判据三态求值**：`<bundleDir> + <criteria.json>`（判据 = 委派方显式清单，仓内无落盘约定）→ 逐条 PASS/FAIL/UNVERIFIED 与汇总（"收活结论"对账成机械事实；判据 = lib/acceptance-check.mjs） | keyless |
+| runtime-clean.mjs | **运行区清理**：默认 dry-run；`--yes` 才删；白名单容器/实验根 + 子树最新 mtime 保留期（缺省 14 天）；`scenes` 需 `--include-scenes`；symlink / harness-home / research-workspace 永不候选（判据 = lib/runtime-clean-core.mjs） | keyless |
 
 ## dist/（分发）
 
@@ -161,4 +162,5 @@
 | lib/evidence-audit-core.mjs | evidence-audit、evidence-audit.test、provenance.test | 证据溯源审计判据核心（readLog 注入同上） |
 | lib/provenance.mjs | evidence-audit-core、provenance.test | 离线来源证明：kind/URL/路径 + sha256 + 时间 + 通道 + 切片；local-file 哈希核对 |
 | lib/run-inventory-core.mjs | run-inventory、run-inventory.test | 只读保留期折算（逐场文件数/字节/最老；合计；1024 进制格式化） |
+| lib/runtime-clean-core.mjs | runtime-clean、runtime-clean.test | 运行区清理纯判据：白名单容器/实验根 + 子树最新 mtime 保留期；symlink/未知名/穿越 fail-closed |
 | lib/run-receipt.mjs | node-gate-delivery-gate、run-accept、run-bundle-charter.test、run-receipt.test | 交付回执（delivered/manifest/acceptance）纯生成与校验：present 取最新版本化、语料根写可复算标签、final/audit/reader 哈希复算（门A/门C 消费） |

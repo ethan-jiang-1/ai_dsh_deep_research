@@ -152,6 +152,7 @@ node --import tsx/esm scripts/smoke/cdp-ask-smoke.mjs    # 交互探针端到端
 node scripts/smoke/snapshot-replay-smoke.mjs    # keyless 回放冒烟（须先 source dev/env.sh，端口 3103）：场景集由 snapshots/replay/research-face/snapshot.json 声明（研究角色集与盘上 presets/ 对账；方法编辑不属 run 生命周期）——逐场景 A 回放收尾逐字命中 + B 组装请求 diff（persona 全文 + 全部 request/header + 四处 user/message 注入（含时钟序列））+ 声明了 renderExpected 的场景做 C 渲染金标准比对；`--scenario <id>` 单场景、`--update-expected` 重写金标准
 node --import tsx/esm dev/record-role-fixture.mjs --role <scout|analyst|critic|lead>   # 角色组装面 fixture 录制（真模型档一次性：research 档短会话 + 哨兵「探针完成」收尾 + 日志静默判定；录制品人审后入库 + 在场景声明登记 source 身份，此后 keyless 永久回放）
 node scripts/run-ops/run-accept.mjs <bundle>   # 交付验收原子动作：门 A + 证据审计 + 未来日期 sanity → acceptance.md；--archive 才归档
+node scripts/run-ops/runtime-clean.mjs [--older-than 14] [--include-scenes] [--yes]   # 运行区清理：默认 dry-run，只列白名单内过期条目；--yes 才删；黑名单/symlink/保留期 = runtime/README
 node scripts/run-gates/evidence-audit.mjs <bundle>|--latest  # 证据溯源审计（**须先 source dev/env.sh**：它锚定本仓 dev home，DSH_HOME 指向别处即自拒）（keyless：URL/摘录/final 链对会话日志机械对账 → audit.md；CRITICAL 即 exit 1）
 node scripts/run-gates/node-gate.mjs <bundle>|--latest [--sessions <dir>] [--write]  # 节点交接契约门（keyless：交付两门 = §Decisions 拍板行 + present 声明；RED = exit 1 / UNATTESTED = exit 2；默认只读，--write 才落 bundle node-gate.md）
 node scripts/run-gates/schema-scan.mjs [<bundle-dir>…]     # schema 保真度扫描（keyless：八节点输出件在场断言；断代定红——新 run 按 `schema` 整数（低/高版本都判红），旧场按 contract 日期（契约日 2026-09-29）；现行形态违约 = exit 1，契约前/旧场如实报告不计红；默认扫 archive 全量）
