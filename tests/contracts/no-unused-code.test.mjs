@@ -9,7 +9,7 @@
 // 本测试点名该文件与 tmpdir 后红；还原后绿。实现前本文件本身即红（债务 20+ 处）。
 //
 // 边界：
-// - tracked 面用目录遍历（不子进程；layering 禁止 tests spawn）；跳过 node_modules/.git/
+// - 范围用目录遍历（不子进程；layering 禁止 tests spawn）；跳过 node_modules/.git/
 //   fixtures/_tmp，其它 scripts/lib 一律在范围内；
 // - 只报“零引用”，注释/字符串里的同名文本不计（AST 标识符才算）；
 // - 导出声明不在此列（公共面可能被未来消费者使用，是否死导出归 review）；
