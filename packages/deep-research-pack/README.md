@@ -164,8 +164,8 @@ them gone. The full per-fact table is [Data](#data).
 
 | Item | Value |
 |---|---|
-| `engines.dsh` | `>=0.2.1-rc.2 <=0.2.1-rc.3` (host authority; tested band only) |
-| Tested baseline | `0.2.1-rc.2` (development pin, data plane + client) + `0.2.1-rc.3` (install shape + client mount). `0.2.1-rc.5` first-screen smoke fails; it is intentionally outside the range until a pin bump provides evidence. |
+| `engines.dsh` | `>=0.2.1-rc.2 <=0.2.1-rc.5` (host authority; tested band only) |
+| Tested baseline | `0.2.1-rc.2` (development pin, data plane + client) + `0.2.1-rc.3` (install shape + client mount) + `0.2.1-rc.5` (install + product first screen + client mount). `0.2.1-rc.4` is inside the range but was not separately exercised. |
 | Node | `^22.19.0 || >=24.0.0` |
 | Surface | Web; Desktop is interoperability only; headless/SDK/ACP are not supported by this package |
 

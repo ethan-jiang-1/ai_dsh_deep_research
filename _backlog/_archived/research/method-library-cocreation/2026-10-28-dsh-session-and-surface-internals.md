@@ -5,7 +5,7 @@ intent: 为 2026-10-28-method-library-cocreation 卡提供会话选型、页内�
 
 # 方法库页内对话共创：DSH 会话与嵌入面调研
 
-调研日 2026-10-28。基线 = 本仓 `vendor/dsh`（`dsh-v0.2.1-rc.2`，`687f282e8625c6b8d11ff58211a90524be2e4317`）；
+调研日 2026-10-28。基线 = 本仓 `vendor/dsh`（`0.2.1-rc.2`，`687f282e86`）；
 对照 = 本机上游 checkout `deepseek-harness`（`0.2.1-rc.3`，`e3ec3c6`）与其 FAQ 25
 （`deepseek-harness/_faq_on_digested/25_workspaces-and-conversations`）。本仓的机制权威仍是 vendor pin；
 rc.3 只用来确认「这些缝没有在下一版被堵掉」。
@@ -37,7 +37,7 @@ teleport 进页面右栏。直接嵌被递归门拦死、固定浮层被 UX 否�
 
 | 项 | 值 | 用法 |
 |---|---|---|
-| vendor pin | `dsh-v0.2.1-rc.2` @ `687f282` | 本仓机制权威；行号按此树 |
+| vendor pin | `0.2.1-rc.2` @ `687f282` | 本仓机制权威；行号按此树 |
 | 上游 checkout | `0.2.1-rc.3` @ `e3ec3c6` | 只用于确认缝未被下一版改掉 |
 | FAQ 25 | `_faq_on_digested/25_workspaces-and-conversations`（rc.3） | workspace / 会话入组 / Ungrouped 的记录模型 |
 

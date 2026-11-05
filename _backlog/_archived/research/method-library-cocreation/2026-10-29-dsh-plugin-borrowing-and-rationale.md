@@ -11,7 +11,7 @@ intent: 给外部 reviewer 的上下文——用了 DSH 哪些既有机制、每
 
 ## 0. 一句话
 
-整套东西**没有自造 agent loop、聊天 UI、工具协议、主题系统**；全部站在 DSH（`vendor/dsh`，钉 `dsh-v0.2.1-rc.2` @ `687f282e86`）的 preset / skill / tool / client-plugin / slot / conversation 机制上，只写了两层“业务胶水”：**方法库页的三栏/两视图布局** 与 **method-editor 的访谈 persona/skill + 写库窄工具**。
+整套东西**没有自造 agent loop、聊天 UI、工具协议、主题系统**；全部站在 DSH（`vendor/dsh`，钉 `0.2.1-rc.2` @ `687f282e86`）的 preset / skill / tool / client-plugin / slot / conversation 机制上，只写了两层“业务胶水”：**方法库页的三栏/两视图布局** 与 **method-editor 的访谈 persona/skill + 写库窄工具**。
 
 ## 1. 借用清单
 

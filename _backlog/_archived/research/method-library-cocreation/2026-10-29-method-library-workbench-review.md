@@ -305,7 +305,7 @@ Method Editor Session 承载访谈历史；它不是草稿或业务操作结果�
 | Session/workspace 文件访问授权 | 文件 root 由目标 Session header / Host filesystem lookup 决定；Gateway 还可能按 principal/resource/action 执行 policy。 | `workspaceFiles` 将 Session identity 显式放在每次请求；非 owner Peer 在 receiver lookup 前走 RemoteAccess policy。 | Session id 用于选择资源，不单独证明 browser 当前选择、coach 操作与该 workspace 相符；owner Peer 在 Gateway 路径跳过 RemoteAccess decision。Remote 写路径必须在业务 Host owner 再校验 Session/workspace/operation 绑定和允许动作，不能只隐藏按钮或信任 Client 任意 path。（DSH: `vendor/dsh/packages/api/workspace-files/README.md:28-40`; `vendor/dsh/packages/api/gateway/src/index.ts:785-819`; `vendor/dsh/packages/api/remote-access/src/index.ts:190-210`） |
 | 读取/写入被取消、连接断开或组件卸载 | request owner 持有 AbortController；Host tool/文件操作在 Host 侧执行。 | DSH signal 可停止未完成 unary request/watch；workspaceFiles `changes` 有显式 watcher teardown。 | 当前主要读操作包装会将 cancellation 也折成 null；部分 save/delete readback/reload controller 未纳入 component cleanup；RPC abort 是合作式传递，不是副作用 rollback。结果未知时只能回读当前文件并陈述观察，不可说“取消成功所以未写入”，也不可自动重试非幂等操作。（Pack: `packages/deep-research-pack/src/client/index.ts:247-285`; `packages/deep-research-pack/src/client/MethodLibraryView.tsx:418-459,348-352`; DSH: `vendor/dsh/packages/api/workspace-files/README.md:71-73`; `vendor/dsh/packages/api/gateway/README.md:58-60`; `vendor/dsh/packages/api/workspace-files/src/changes.ts:39-55,96-108,135-141`） |
 
-该表中的行号针对当前工作树；pinned DSH 源码版本是 `dsh-v0.2.1-rc.2` @ `687f282e8625c6b8d11ff58211a90524be2e4317`。对尚未实现的行，表格列出的是 A′ 建议的必要协议，不是当前保证。
+该表中的行号针对当前工作树；pinned DSH 源码版本是 `0.2.1-rc.2` @ `687f282e86`。对尚未实现的行，表格列出的是 A′ 建议的必要协议，不是当前保证。
 
 ## 6. 回填、撤销与手改
 

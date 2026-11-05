@@ -49,7 +49,7 @@ export const gates = [
 
 // vendor/dsh 钉身份的 tag 面（commit 面 = vendor-pin 门禁的 PIN；pack-bundle-compat 消费它
 // 断言 engines.dsh 覆盖当前 tag——升 pin 时两处同 diff 改；本文件里的 tag 复述受 pin-agreement 对账）
-export const VENDOR_TAG = 'dsh-v0.2.1-rc.2';
+export const VENDOR_TAG = 'dsh-v0.2.1-rc.5';
 
 // `--only=<gate[,gate]>`：只判指定门禁（输出与退出码都只看它们）。为什么需要——门禁全量
 // 一格到底，改一道要么全跑、要么盲改；有了它，改门禁的循环 = `node scripts/verify/verify.mjs

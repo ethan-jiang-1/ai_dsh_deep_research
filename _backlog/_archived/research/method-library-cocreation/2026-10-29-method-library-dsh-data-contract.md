@@ -7,7 +7,7 @@ intent: 记录 pinned DSH 的一手源码证据，划清 DSH 已有机制、pack
 
 ## 证据范围
 
-本记录把仓库固定的 `vendor/dsh` 作为实现依据：仓库说明其开发基线为 `dsh-v0.2.1-rc.2`、commit `687f282e86`，全局安装不作为机制依据；pinned checkout 自身 `package.json` 版本为 `0.2.1-rc.2`（`AGENTS.md:104-110`；`vendor/dsh/package.json:1-4`）。本会话可见的全局安装清单为 `~/.nvm/versions/node/v22.23.1/lib/node_modules/@deepseek-ai/dsh/package.json:1-4`，版本 `0.2.1-rc.3`。这是运行环境版本差异的观察，不替代仓库 pin；GUI Inspect 或全局安装不能证明 pinned `rc.2` 的能力。
+本记录把仓库固定的 `vendor/dsh` 作为实现依据：仓库说明其开发基线为 `0.2.1-rc.2`、commit `687f282e86`，全局安装不作为机制依据；pinned checkout 自身 `package.json` 版本为 `0.2.1-rc.2`（`AGENTS.md:104-110`；`vendor/dsh/package.json:1-4`）。本会话可见的全局安装清单为 `~/.nvm/versions/node/v22.23.1/lib/node_modules/@deepseek-ai/dsh/package.json:1-4`，版本 `0.2.1-rc.3`。这是运行环境版本差异的观察，不替代仓库 pin；GUI Inspect 或全局安装不能证明 pinned `rc.2` 的能力。
 
 以下引用均指本仓库 pinned 源码/文档，并写出文件路径与行号。描述“可用”指 DSH 有对应机制，不代表方法库 pack 已经实现该业务协议。
 

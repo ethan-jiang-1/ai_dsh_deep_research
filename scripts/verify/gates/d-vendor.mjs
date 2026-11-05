@@ -9,11 +9,11 @@ import { spawnSync } from 'node:child_process';
 import { ROOT, fail, note, allFiles, gitOnce, trackedFiles, matchSimpleGlob } from '../context.mjs';
 
 export function runD() {
-// ── vendor-pin（vendor/dsh submodule 在位且钉住 dsh-v0.2.1-rc.2 = 687f282e86；
+// ── vendor-pin（vendor/dsh submodule 在位且钉住 dsh-v0.2.1-rc.5 = b830ec950f；
 //    D10 销账的机械面——机制权威自持）──
 {
   const gate = 'vendor-pin';
-  const PIN = '687f282e8625c6b8d11ff58211a90524be2e4317';
+  const PIN = 'b830ec950faba0a46dda564be3e2d854afed94f1';
   if (!existsSync(join(ROOT, '.gitmodules'))) fail(gate, '.gitmodules 缺席');
   else {
     const gm = readFileSync(join(ROOT, '.gitmodules'), 'utf8');
@@ -24,7 +24,7 @@ export function runD() {
   const r = gitOnce(['submodule', 'status', 'vendor/dsh']);
   const m = r.stdout ? /^[-+ ]?([0-9a-f]{40})/.exec(r.stdout.trim()) : null;
   if (!m) fail(gate, 'submodule status 不可读——检查 git submodule init/update');
-  else if (m[1] !== PIN) fail(gate, `vendor/dsh 钉在 ${m[1].slice(0, 8)}——应为 ${PIN.slice(0, 8)}（dsh-v0.2.1-rc.2）`);
+  else if (m[1] !== PIN) fail(gate, `vendor/dsh 钉在 ${m[1].slice(0, 8)}——应为 ${PIN.slice(0, 8)}（dsh-v0.2.1-rc.5）`);
 }
 
 // ── vendor-clean（vendor/dsh 只读铁律：零未提交改动——机制权威不许就地改）──

@@ -7,7 +7,7 @@ intent: 为 member-activity-stream 卡未决 1 提供三通道的 vendor 同 pin
 
 > 服务 = [member-activity-stream 卡](../../settled_issues/2026-10-09-member-activity-stream.md) 未决 1（供给侧半边）。
 > 方法 = 只读源码考古：`git -C vendor/dsh rev-parse HEAD` 实测当轮 pin 的 commit（40 位全文记于当轮环境日志，此处不复述以免与换 pin 后的 pin-agreement 打架）
-> （观察时 tag，工作树干净；现 pin dsh-v0.2.1-rc.2）后 grep 定位 → 逐文件读源码取锚；文档仅作旁证并标注"文档"。
+> （观察时 tag，工作树干净；现 pin 0.2.1-rc.2）后 grep 定位 → 逐文件读源码取锚；文档仅作旁证并标注"文档"。
 > vendor 路径以行内代码标注（相对 `vendor/dsh/`），`pack:` = `packages/deep-research-pack/`；行号 = 该 pin
 > 现状，升 pin 后按 [discipline-map 重审触发路径](../../../../docs/discipline-map.md) 复核。
 > 本材料只供事实，不做选型决定——选型按卡等真实 run 素材后定。

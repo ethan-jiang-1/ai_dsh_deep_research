@@ -7,7 +7,7 @@ intent: 基于 pinned DSH 源码核实 prompt/tool 身份、Client Session 就�
 
 ## Scope and pin
 
-This note audits Session prompt identity, Agent admission and tool execution, Client Session ownership/readiness, crash recovery, and persistence semantics relevant to the embedded Method Editor view. The vendor source inspected is exactly `dsh-v0.2.1-rc.2`, commit `687f282e8625c6b8d11ff58211a90524be2e4317`.
+This note audits Session prompt identity, Agent admission and tool execution, Client Session ownership/readiness, crash recovery, and persistence semantics relevant to the embedded Method Editor view. The vendor source inspected is exactly `0.2.1-rc.2`, commit `687f282e86`.
 
 The conclusions below concern that pinned implementation. DSH APIs are not a pack business-operation journal, and provider-specific durability must not be generalized to every `SessionPersistence` implementation.
 

@@ -101,7 +101,7 @@ node --import tsx/esm dev/record-role-fixture.mjs --role lead|scout|analyst|crit
 ```
 
 - 录制身份：`codeAnchor = 72f392a`（录制时 HEAD，工作树干净）、
-  `vendor = 687f282e8625c6b8d11ff58211a90524be2e4317`、`recordedAt` = 各 fixture mtime。
+  `vendor = 687f282e86`、`recordedAt` = 各 fixture mtime。
 - 注入手册 digest = `32108b85` = 当前 `AGENTS.md` sha1（四份一致）。
 - `snapshot-replay-smoke`：A/B 全绿；lead C5 金标准按新措辞重写（仅活动行一句：
   「用 web_search 搜索了…」→「搜了 1 次…」），结构未变——人审接受。

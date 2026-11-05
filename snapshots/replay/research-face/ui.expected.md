@@ -11,4 +11,4 @@
 ## 研究状态页签 · 人性化活动行（icon + 文本）
 
 🔍 检索：DSH harness
-💬 探针完成，搜了 1 次「DSH harness」（8 条结果），抓了 1 个页面 https://g
+💬 探针完成，搜了「DSH harness」（10 条结果，含 npm、GitHub、媒体报道等），抓了

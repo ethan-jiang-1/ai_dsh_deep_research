@@ -5,7 +5,7 @@ intent: 比较模型可见 Host tool 与 Client Remote 直达 Host owner 的一�
 
 # 方法库工作台写入路径比较
 
-> 范围：pinned DSH `dsh-v0.2.1-rc.2` 与当前 pack；这是证据比较，不是实现授权或产品决定。(`AGENTS.md:104-113`)
+> 范围：pinned DSH `0.2.1-rc.2` 与当前 pack；这是证据比较，不是实现授权或产品决定。(`AGENTS.md:104-113`)
 
 ## 当前状态
 

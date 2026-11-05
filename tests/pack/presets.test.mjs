@@ -150,14 +150,14 @@ test('清单只带 DSH 读的 dsh.* 键：bundle 与 client，无自造兼容矩
     'dsh.* 只允许 DSH 消费的 bundle 与 client；版本合同只在 engines.dsh');
 });
 
-test('engines.dsh 覆盖已测基线（rc.2 / rc.3 在范围内；rc.5 不在）', () => {
+test('engines.dsh 覆盖已测基线（rc.2–rc.5 在范围内；0.2.2 不在）', () => {
   const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
-  assert.match(pkg.engines?.dsh ?? '', /^>=0\.2\.1-rc\.2 <=0\.2\.1-rc\.3$/,
+  assert.match(pkg.engines?.dsh ?? '', /^>=0\.2\.1-rc\.2 <=0\.2\.1-rc\.5$/,
     'engines.dsh 必须钉在已有安装/首屏/客户端证据的版本带上');
-  for (const baseline of ['0.2.1-rc.2', '0.2.1-rc.3']) {
+  for (const baseline of ['0.2.1-rc.2', '0.2.1-rc.3', '0.2.1-rc.4', '0.2.1-rc.5']) {
     assert.ok(satisfiesVersion(baseline, pkg.engines.dsh), `已测基线 ${baseline} 不在 engines.dsh 范围内`);
   }
-  assert.equal(satisfiesVersion('0.2.1-rc.5', pkg.engines.dsh), false, 'rc.5 首屏未通过，不得被声明支持');
+  assert.equal(satisfiesVersion('0.2.2', pkg.engines.dsh), false, '未测的 0.2.2 不得被声明支持');
 });
 
 test('critic adversarial-review 钉 leads 交接狩猎（BUG-008 契约：状态词漂移不可穿透交付）', () => {

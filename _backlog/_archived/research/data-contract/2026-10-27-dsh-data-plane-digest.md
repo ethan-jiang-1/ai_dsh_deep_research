@@ -6,7 +6,7 @@ intent: 服务发布前数据契约卡：把 FAQ 26 的「承诺 / 家 / 作用�
 # DSH 数据面阅读：FAQ 26 的框架与本包的落点
 
 > 口径：FAQ 26（`_faq_on_digested/26_plugin-data-model`）按 `0.2.1-rc.3` 写作；本仓 pin =
-> `dsh-v0.2.1-rc.2`（`687f282e86`）。凡「DSH 现在如何」，以 `vendor/dsh` 本 pin 的 docs/源码为准；
+> `0.2.1-rc.2`（`687f282e86`）。凡「DSH 现在如何」，以 `vendor/dsh` 本 pin 的 docs/源码为准；
 > 与 FAQ 不一致处标 VERSION-DIFF。证据等级沿用 FAQ：**C** 当前合同（本 pin 源码/docs）、**H** 历史、
 > **P** 提案、**U** 未确认。本包代码引用一律相对仓根。
 
