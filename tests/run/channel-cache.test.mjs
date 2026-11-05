@@ -53,14 +53,21 @@ test('发布清单缓存：roundtrip / 键不符 miss / 损坏 miss', () => {
   assert.equal(readShippedCache(path, 'k1'), null)
 })
 
-test('probeCacheKey：pid 顺序无关，指纹参与身份', () => {
+test('probeCacheKey：pid 顺序无关、可省略（冷启动跨重启复用）、runtime 参与身份', () => {
   assert.equal(
-    probeCacheKey({ pids: ['12', '11'], packFingerprint: 'f' }),
-    probeCacheKey({ pids: ['11', '12'], packFingerprint: 'f' }),
+    probeCacheKey({ pids: ['12', '11'], packFingerprint: 'f', runtime: 'r' }),
+    probeCacheKey({ pids: ['11', '12'], packFingerprint: 'f', runtime: 'r' }),
   )
   assert.notEqual(
-    probeCacheKey({ pids: ['11'], packFingerprint: 'f' }),
-    probeCacheKey({ pids: ['11'], packFingerprint: 'g' }),
+    probeCacheKey({ pids: ['11'], packFingerprint: 'f', runtime: 'r' }),
+    probeCacheKey({ pids: ['11'], packFingerprint: 'g', runtime: 'r' }),
+  )
+  // 省略 pids = 不绑进程（冷启动也能命中同一份 pack+runtime 的最近 GREEN）
+  assert.equal(probeCacheKey({ packFingerprint: 'f', runtime: 'r' }), probeCacheKey({ pids: null, packFingerprint: 'f', runtime: 'r' }))
+  assert.match(probeCacheKey({ packFingerprint: 'f', runtime: 'r' }), /^any@f@r$/)
+  assert.notEqual(
+    probeCacheKey({ packFingerprint: 'f', runtime: 'r1' }),
+    probeCacheKey({ packFingerprint: 'f', runtime: 'r2' }),
   )
 })
 

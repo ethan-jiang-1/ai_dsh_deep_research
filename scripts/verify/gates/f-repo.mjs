@@ -264,8 +264,12 @@ export function runF() {
       fail(gate, 'boot-run 默认 profile 不是用户安装 profile 名 deep-research——dev 与用户路径身份不一致（改 PROFILE 默认值）');
     if (!/DSH_RUN_PROFILE \|\| 'deep-research'/.test(driver))
       fail(gate, "run-driver 默认 profile 不是 'deep-research'——驱动与安装面身份不一致");
-    if (!/LAYER_VER="\$\(dsh --version/.test(boot))
-      fail(gate, '团队层版本未从运行中 dsh 派生——dev 会测到用户不会有的组合（改 LAYER_VER 派生）');
+    // 版本必须从**实际启动的 runtime**（构建产物 DSH_BOOT 或 tsx 源码 dsh）的 --version 派生，
+    // 不许读包清单——dev 与用户测的必须是同一版本带的组合。
+    const layerDerived = boot.includes('LAYER_VER="$("${DSH_BOOT[@]}" --version')
+      || /LAYER_VER="\$\(dsh --version/.test(boot);
+    if (!layerDerived)
+      fail(gate, '团队层版本未从运行中的 runtime 派生（DSH_BOOT/dsh --version）——dev 会测到用户不会有的组合');
     if (/compatibility\.dshReleases/.test(boot))
       fail(gate, 'boot-run 仍在读 dsh.compatibility.dshReleases（已删除的字段）——版本门只能来自 dsh --version');
     if (!/DEV_OVERLAY="\$STATE_DIR\/dev-overlay\.yml"/.test(boot) || !/PATCH_ARGS=\(--patch "\$DEV_OVERLAY"\)/.test(boot))

@@ -19,8 +19,8 @@
 
 | 件 | 职责 |
 |---|---|
-| run-driver.mjs | **驱动入口（启动/验证/呈交一条命令）**：`up` 起通道（经 boot-run，不绕漂移门）或复用已在飞的（复用先跑 `boot-run --drift-only` 验镜像；漂移/未取证 = NOT-RUN）→ 用 cdp-probe 验浏览器面 + 截图 → 打印呈交块；**验证缓存**：同一 web 进程 + 同一 pack 源 + 10 分钟内的 GREEN 直接复用（`--force-probe` 强制重验；缓存只存 GREEN）；`--bootstrap` 先跑冷启动前置，`--profile`/`DSH_RUN_STATE_DIR` 支持多实例；`probe` 只验面（同样先验镜像、永远真验）、`url` 打印 URL。verdict = exit 0 可呈交 / 1 红 / 2 未跑。通道事实唯一来源 = 本次 state 的 `web.log` 最后一条横幅 |
-| boot-run.sh | run 通道正式启动面：自检 → 组合检查/补装 → 漂移门 → boot web（默认 3083）→ 后台仪表盘；`DSH_RUN_PROFILE`/`DSH_RUN_PORT`/`DSH_RUN_STATE_DIR`/`DSH_RUN_WORKSPACE` 支持多实例（自 source env.sh） |
+| run-driver.mjs | **驱动入口（启动/验证/呈交一条命令）**：`up` 起通道（经 boot-run，不绕漂移门）或复用已在飞的（复用先跑 `boot-run --drift-only` 验镜像；漂移/未取证 = NOT-RUN）→ 用 cdp-probe 验浏览器面 + 截图 → 打印呈交块；**验证缓存**：同一 pack 源 + 同一 runtime 构建 + 30 分钟内的 GREEN 直接复用（冷启动也命中，命中前做 HTTP 就绪检查；`--force-probe` 强制重验；缓存只存 GREEN）；`--bootstrap` 先跑冷启动前置，`--profile`/`DSH_RUN_STATE_DIR` 支持多实例；`probe` 只验面（同样先验镜像、永远真验）、`url` 打印 URL。verdict = exit 0 可呈交 / 1 红 / 2 未跑。通道事实唯一来源 = 本次 state 的 `web.log` 最后一条横幅 |
+| boot-run.sh | run 通道正式启动面：自检 → 组合检查/补装 → 漂移门 → boot web（默认 3083；runtime 默认 vendor 构建产物 `lib/bin.js`，`DSH_RUN_RUNTIME=source` 退回 tsx 源码）→ 后台仪表盘；`DSH_RUN_PROFILE`/`DSH_RUN_PORT`/`DSH_RUN_STATE_DIR`/`DSH_RUN_WORKSPACE` 支持多实例（自 source env.sh） |
 | llm-socket-isolation.cjs | api.deepseek.com socket 隔离预载（NODE_OPTIONS）：LLM 流与 web_search 两类请求均每请求一次性连接、永不复用；上游边缘对长命复用连接有相位性故障（[postmortem](../notes/archived/2026-10-13-llm-stream-malformed-storm.md)），移除 = 摘 boot-run 一行 |
 | run-kickoff.mjs | run 会话驱动：建 lead 会话 + 发 kickoff（GUI 的 RPC 替代入口） |
 
@@ -35,10 +35,10 @@
 | profile 初始化 | `--from-default-profile web` | 同一条命令 | 同形 |
 | 安装源 | registry / tarball | `npm pack` 出的 tarball（`dsh plugin --profile <p> add file:`） | 同形 |
 | roster 写入者 | `dsh plugin --profile <p> add/remove` | 同一个命令（脚本不手写 `dsh.profile.bundles`） | 同形 |
-| 团队层版本 | 与 `dsh --version` 同 exact 版本 | 同（`LAYER_VER` 从运行中 dsh 派生） | 同形 |
+| 团队层版本 | 与 `dsh --version` 同 exact 版本 | 同（`LAYER_VER` 从**实际启动的 runtime** 派生） | 同形 |
 | profile 用户层 | 用户/设置页写 `cordis.patch.yml` | dev 不写；dev-only 行走 `--patch` 覆盖层 | 同形 |
 | 启动命令 | `dsh --profile deep-research` | 同一条（run-driver 只是驱动：漂移门 + probe + 呈交） | 同形 |
-| runtime | npm 全局 `dsh` | vendor 源码（`dev/env.sh` 拦截裸 dsh） | 允许差异（调试必需） |
+| runtime | npm 全局 `dsh` | vendor **构建产物** `lib/bin.js`（同 pin 源码编译，≈3s；`DSH_RUN_RUNTIME=source` 退回 tsx 源码 ≈13s；`dev/env.sh` 拦截裸 dsh） | 允许差异（调试必需；同一 `--profile` 启动面） |
 | 工作区 | 用户自选目录 | `research-workspace/`（`DSH_RUN_WORKSPACE` 可覆写） | 允许差异（调试必需） |
 | 凭据 | 用户 home | `runtime/harness-home/.credentials.yaml` | 允许差异（隔离） |
 | 重建 | `plugin add/remove` 增量 + 重启 | 缺件时 `rm -rf` 重建（幂等加速） | 允许差异（可重复） |

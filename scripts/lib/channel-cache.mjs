@@ -3,13 +3,14 @@
 // 为什么存在（2026-11-05 实测）：`node dev/run-driver.mjs up` 热复用路径 ~21.5s，其中
 //   · 镜像漂移门 5.1s —— 大头是每次重跑 `npm pack --dry-run` 拿发布清单；
 //   · 浏览器探针 12.0s —— 起 Chrome + 打开研究状态页签。
-// 两者的输入在同一 web 进程 + 同一 pack 源下不变，故可缓存：漂移门缓存发布清单（键 = pack 源
-// 指纹），run-driver 缓存**最近一次 GREEN**（键 = web pid + pack 指纹，TTL 默认 10 分钟）。
+// 两者的输入在同一 pack 源 + 同一 runtime 构建下不变，故可缓存：漂移门缓存发布清单（键 = pack 源
+// 指纹），run-driver 缓存**最近一次 GREEN**（键 = pack 指纹 + runtime 构建指纹，TTL 30 分钟）；
+// 冷启动同样可命中（页面内容由 pack + runtime 决定），命中前仍要求 boot 出横幅 + 一次 HTTP 就绪检查。
 //
 // 纪律（缓存不改变判据，只省重复计算）：
 //   · 只缓存 GREEN——NOT-RUN / 红从不入缓存（未跑 ≠ 通过）；
-//   · 键必须含身份：pid 换代或 pack 源改动一律 miss；`--force-probe` 永久绕过；
-//   · 缓存只影响 `up` 热复用路径；`probe` 子命令永远真验。
+//   · 键必须含身份：pack 源或 runtime 构建改动一律 miss；`--force-probe` 永久绕过；
+//   · `probe` 子命令永远真验。
 import { createHash } from 'node:crypto'
 import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -18,8 +19,8 @@ import { fileURLToPath } from 'node:url'
 /** 目录遍历时跳过的噪声（不属于 pack 源内容）。 */
 const SKIP_DIRS = new Set(['node_modules', '.git'])
 
-/** 缺省缓存 TTL：10 分钟（超过即重验，期间任何人改了浏览器侧状态也不会被无限复用）。 */
-export const PROBE_CACHE_TTL_MS = 10 * 60 * 1000
+/** 缺省缓存 TTL：30 分钟（身份 = pack 源 + runtime 构建；超时或身份变化即重验）。 */
+export const PROBE_CACHE_TTL_MS = 30 * 60 * 1000
 
 /**
  * pack 源指纹：把 `[{rel,size,mtimeMs}]` 排序后哈希。
@@ -79,12 +80,15 @@ export function writeShippedCache(path, key, files) {
 }
 
 /**
- * 探针缓存键 = web 进程身份 + pack 源指纹（镜像一致时二者足以确定"这一页就是这份代码"）。
- * @param {{pids: string[]|number[], packFingerprint: string}} input
+ * 探针缓存键 = pack 源指纹 + runtime 构建指纹（可带 web 进程身份）。
+ * 冷启动同样要能命中（同 pack + 同 runtime 的页面内容不变），故默认 **不带 pid**；
+ * 需要进程内绑定时传 `pids`。
+ * @param {{pids?: string[]|number[]|null, packFingerprint: string, runtime?: string}} input
  * @returns {string}
  */
-export function probeCacheKey({ pids, packFingerprint: fingerprint }) {
-  return `${[...pids].map(String).sort().join(',')}@${fingerprint}`
+export function probeCacheKey({ pids = null, packFingerprint: fingerprint, runtime = 'unknown' }) {
+  const pidPart = pids === null || pids === undefined ? 'any' : [...pids].map(String).sort().join(',')
+  return `${pidPart}@${fingerprint}@${runtime}`
 }
 
 /**

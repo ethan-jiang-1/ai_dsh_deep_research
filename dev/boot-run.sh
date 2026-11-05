@@ -115,11 +115,23 @@ if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/
   exit 1
 fi
 
+# runtime 选择（2026-11-05 加速）：默认 vendor **构建产物** lib/bin.js（同一 pin 源码编译，≈3s 启动）；
+# DSH_RUN_RUNTIME=source 退回 tsx 源码（≈13s，机制核对/调试用）；产物缺席自动退回源码并提示。
+# 两者都走同一条 `--profile deep-research` 启动面与同一 roster——只换二进制，不换启动次序。
+BUILT_CLI="$ROOT/vendor/dsh/apps/cli/lib/bin.js"
+if [ "${DSH_RUN_RUNTIME:-built}" = "built" ] && [ -f "$BUILT_CLI" ]; then
+  DSH_BOOT=(node "$BUILT_CLI")
+  DSH_BOOT_LABEL="vendor 构建产物（lib/bin.js；退回源码 = DSH_RUN_RUNTIME=source）"
+else
+  DSH_BOOT=(dsh)
+  DSH_BOOT_LABEL="vendor 源码 tsx（DSH_RUN_RUNTIME=source 或构建产物缺席）"
+fi
+
 # 层版本钉住：与**运行中的 dsh** 同版本（= 安装手册里"与 dsh --version 同版本"那一句）。
-# vendor 源码只是机制基线；用户拿到的是 npm 全局 runtime——从包清单派生会让 dev 测到用户不会有的组合
-# （历史上还读到已删除的 dsh.compatibility 字段，直接抛错）。读不到版本就 fail-loud，不猜。
-LAYER_VER="$(dsh --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?' | head -1)"
-[ -n "$LAYER_VER" ] || { echo "boot-run: 读不到运行中 dsh 的版本（dsh --version）——拒绝用猜的版本门" >&2; exit 1; }
+# 版本必须从**实际启动的那个二进制**派生（构建产物/源码二选一），不许从包清单猜。
+# vendor 源码只是机制基线；从包清单派生会让 dev 测到用户不会有的组合。读不到版本就 fail-loud。
+LAYER_VER="$("${DSH_BOOT[@]}" --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?' | head -1)"
+[ -n "$LAYER_VER" ] || { echo "boot-run: 读不到运行中 dsh 的版本（runtime --version）——拒绝用猜的版本门" >&2; exit 1; }
 LAYER="@deepseek-ai/dsh-experimental-agent-team-profile@$LAYER_VER"
 
 # 组合在位 = bundles 含本包与 vendor 层 + 安装副本每个盘上角色 preset 在位。
@@ -256,6 +268,7 @@ cat <<'STEPS'
 STEPS
 
 echo "boot-run: boot web（profile=${PROFILE}，端口 ${PORT}；Ctrl-C 停止）…"
+echo "boot-run: runtime = ${DSH_BOOT_LABEL}"
 # LLM 流 socket 隔离（用户指令 2026-10-13：LLM 流式请求走一次性连接不复用——上游边缘对
 # 长命复用连接有相位性故障，postmortem 2026-10-13；移除 = 删本行）
 ISOLATION_GUARD="$ROOT/dev/llm-socket-isolation.cjs"
@@ -270,4 +283,4 @@ export DSH_ISOLATION_ANNOUNCE=1
 # web 输出 tee 进运行区日志：仪表盘 deep-link 从这里抓 token URL（缺席 → 页面不链，fail-soft）
 # 会话 cwd = 工作区（D38：安装态 Host 也认 DEEP_RESEARCH_WORKSPACE；dev 通道同样真正生效）
 cd "$WORKSPACE"
-dsh --profile "$PROFILE" ${PATCH_ARGS[@]+"${PATCH_ARGS[@]}"} -- --port "$PORT" --no-open 2>&1 | tee "$STATE_DIR/web.log"
+"${DSH_BOOT[@]}" --profile "$PROFILE" ${PATCH_ARGS[@]+"${PATCH_ARGS[@]}"} -- --port "$PORT" --no-open 2>&1 | tee "$STATE_DIR/web.log"

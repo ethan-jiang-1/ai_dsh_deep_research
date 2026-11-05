@@ -16,9 +16,10 @@
 // 1 = 红了（不得呈交，按 verdict.failed 修）、2 = 未跑（前置缺席，如镜像漂移/未取证 / 无通道）。
 // **未跑 ≠ 通过**。复用已在飞的通道时先跑 boot-run --drift-only：通道加载的镜像 ≠ 当前 pack 源
 // 时，probe 验的是旧页面——2026-10-28 实测通道 18:47 起、pack client 02:50 重建，旧实现仍报 GREEN。
-// 加速（2026-11-05 实测：热复用 21.5s → 0.4–1.9s）：同一 web 进程 + 同一 pack 源 + 10 分钟内的
-// GREEN 直接复用（`--force-probe` 强制重验）；缓存只存 GREEN，冷启动必真验。缓存判据 =
-// scripts/lib/channel-cache.mjs（键含 pid + pack 指纹 + 断言参数）。
+// 加速（2026-11-05 实测）：boot-run 默认起 vendor **构建产物** lib/bin.js（≈3s；`DSH_RUN_RUNTIME=source`
+// 退回 tsx 源码 ≈13s）；`up` 对同一 pack 源 + 同一 runtime 构建的最近 GREEN 在 30 分钟内复用
+// （冷启动同样命中，命中前仍做一次 HTTP 就绪检查）；`--force-probe` 强制真验。缓存只存 GREEN。
+// 缓存判据 = scripts/lib/channel-cache.mjs（键 = pack 指纹 + runtime 构建 + 断言参数）。
 //
 // 通道事实的唯一来源 = runtime/smoke-workspace/web.log 的**最后一条** `dsh web: <url>` 横幅
 // （boot-run 每次 boot 以 tee 截断写该文件；旧横幅 = 旧 token，用旧的必 401）。
@@ -27,11 +28,12 @@
 // research`——那会跳过 pack 漂移检测、静默用旧镜像。boot 是前台进程（脚本退出即 web 停），
 // 故 `up` 以**托管后台 job** 形态起 boot-run，本驱动的 probe 阶段独立取证。
 import { spawn, spawnSync } from 'node:child_process';
-import { copyFileSync, existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, openSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../scripts/lib/run-channel.mjs';
 import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKey } from '../scripts/lib/channel-cache.mjs';
+import { authenticate } from '../scripts/lib/web-harness.mjs';
 
 export { guiUrlFromWebLog, runDriverVerdict };
 
@@ -45,10 +47,37 @@ const BOOT_LOG = join(STATE_DIR, 'run-driver-boot.log');
 const DEFAULT_PORT = process.env.DSH_RUN_PORT || '3083';
 const DEFAULT_PROFILE = process.env.DSH_RUN_PROFILE || 'deep-research';
 const PACK_DIR = join(ROOT, 'packages', 'deep-research-pack');
-// 验证缓存：只存最近一次 GREEN（键 = web pid + pack 指纹 + 断言参数）；见 scripts/lib/channel-cache.mjs。
+// 验证缓存：只存最近一次 GREEN（键 = pack 指纹 + runtime 构建指纹 + 断言参数）；见 scripts/lib/channel-cache.mjs。
 const PROBE_CACHE = join(STATE_DIR, 'probe-cache.json');
 const readProbeCache = () => {
   try { return JSON.parse(readFileSync(PROBE_CACHE, 'utf8')); } catch { return null; }
+};
+// runtime 构建指纹：boot-run 默认起 vendor 构建产物（lib/bin.js），其 mtime 变 = 二进制变；
+// DSH_RUN_RUNTIME=source 时退回 tsx 源码（键里写 source，避免与构建产物互认缓存）。
+const BUILT_CLI = join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'lib', 'bin.js');
+const runtimeFingerprint = () => {
+  try {
+    if (process.env.DSH_RUN_RUNTIME !== 'source' && existsSync(BUILT_CLI)) {
+      return `built@${Math.trunc(statSync(BUILT_CLI).mtimeMs)}`;
+    }
+  } catch {}
+  return 'source';
+};
+// HTTP 就绪（缓存命中仍要求服务器在、shell 可服务）：token 换 cookie 后只读首页，不代替浏览器探针。
+const httpReady = async (url) => {
+  try {
+    const parsed = new URL(url);
+    const token = parsed.searchParams.get('token');
+    if (token === null) return { ok: false, detail: 'URL 无 token' };
+    const cookie = await authenticate(parsed.origin, token);
+    const res = await fetch(`${parsed.origin}/`, { headers: { cookie }, signal: AbortSignal.timeout(3000) });
+    if (!res.ok) return { ok: false, detail: `HTTP ${res.status}` };
+    const text = await res.text();
+    const ok = text.includes('id="root"') || text.includes('__DSH_BOOT__');
+    return { ok, detail: ok ? `HTTP ${res.status}` : `HTTP ${res.status} 无 shell 标记` };
+  } catch (error) {
+    return { ok: false, detail: String(error?.message ?? error) };
+  }
 };
 
 const portOf = (url) => Number(new URL(url).port);
@@ -275,8 +304,9 @@ if (state.alive) {
   let waited = 0;
   let tail = '';
   while (waited < 120_000) {
-    await new Promise((r) => setTimeout(r, 1000));
-    waited += 1000;
+    // 250ms 轮询（2026-11-05 加速）：横幅出现即返回，避免 1s 粒度的平均 0.5s 等待。
+    await new Promise((r) => setTimeout(r, 250));
+    waited += 250;
     tail = existsSync(BOOT_LOG) ? readFileSync(BOOT_LOG, 'utf8') : '';
     if (guiUrlFromWebLog(tail) !== null) break;
     if (/boot-run: .*(?:fail-loud|已退出|失败)|pack 漂移检测红|漂移——/.test(tail) && waited > 5000) break;
@@ -301,23 +331,29 @@ if (noProbe) {
   process.exit(2);
 }
 
-// 验证缓存（2026-11-05 加速）：同一 web 进程 + 同一 pack 源 + TTL 内的最近 GREEN → 复用结论，
-// 省掉 ~12s 浏览器探针。--force-probe 永久绕过；NOT-RUN/红从不入缓存（未跑 ≠ 通过）。
+// 验证缓存（2026-11-05 加速）：同一 pack 源 + 同一 runtime 构建 + TTL（30 分钟）内的最近 GREEN →
+// 复用结论，省掉 ~13s 浏览器探针；**冷启动同样可命中**（页面内容由 pack+runtime 决定）。
+// 命中前仍要求 boot 出横幅 + 一次 HTTP 就绪检查（服务器在、shell 可服务）；HTTP 不过即转真探针。
+// --force-probe 永久绕过；NOT-RUN/红从不入缓存（未跑 ≠ 通过）。
 if (!forceProbe && drift?.clean === true) {
   const cached = readProbeCache();
   const packId = packFingerprint(collectPackEntries(PACK_DIR));
-  const key = `${probeCacheKey({ pids: state.pids, packFingerprint: packId })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
+  const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint() })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
   const hit = probeCacheHit({ entry: cached, key, now: Date.now() });
   if (hit.hit) {
-    const ageS = Math.round((hit.ageMs ?? 0) / 1000);
-    const payload = { ...cached.payload, url: state.url, port: state.port, cached: true, cacheAgeMs: hit.ageMs, reason: `缓存命中（同一 web 进程 + 同一 pack 源；${ageS}s 前 GREEN）——--force-probe 可强制重验` };
-    console.log(`run-driver: 验证缓存命中（${ageS}s 前 GREEN，同一 web 进程 + 同一 pack 源；--force-probe 可强制重验）`);
-    console.log('──────────────────────────── 呈交块（缓存）────────────────────────────');
-    console.log(`通道 URL：${state.url}`);
-    console.log(`浏览器面：GREEN（缓存，${ageS}s 前）`);
-    console.log('───────────────────────────────────────────────────────────────');
-    console.log(JSON.stringify(payload, null, 2));
-    process.exit(0);
+    const ready = await httpReady(state.url);
+    if (ready.ok) {
+      const ageS = Math.round((hit.ageMs ?? 0) / 1000);
+      const payload = { ...cached.payload, url: state.url, port: state.port, cached: true, cacheAgeMs: hit.ageMs, reason: `缓存命中（同一 pack 源 + runtime 构建；${ageS}s 前 GREEN）——--force-probe 可强制重验` };
+      console.log(`run-driver: 验证缓存命中（${ageS}s 前 GREEN，同一 pack 源 + runtime 构建；--force-probe 可强制重验）`);
+      console.log('──────────────────────────── 呈交块（缓存）────────────────────────────');
+      console.log(`通道 URL：${state.url}`);
+      console.log(`浏览器面：GREEN（缓存，${ageS}s 前；HTTP 就绪 ${ready.detail}）`);
+      console.log('───────────────────────────────────────────────────────────────');
+      console.log(JSON.stringify(payload, null, 2));
+      process.exit(0);
+    }
+    console.log(`run-driver: 缓存命中但 HTTP 就绪检查未过（${ready.detail}）——转真探针`);
   }
 }
 
@@ -335,10 +371,10 @@ const submitted = v.exit === 0;
 const payload = { url: state.url, port: state.port, ...v, statusPaneText: verdict.statusPaneText?.slice(0, 600), screenshot: verdict.screenshot ?? null };
 const saved = persistVerdict('up', payload, verdict.screenshot, html);
 if (submitted) {
-  // 只缓存 GREEN（键含 pid + pack 指纹 + 断言参数）；红/未跑永不入缓存。
+  // 只缓存 GREEN（键 = pack 指纹 + runtime 构建 + 断言参数；冷启动可复用）；红/未跑永不入缓存。
   try {
     const packId = packFingerprint(collectPackEntries(PACK_DIR));
-    const key = `${probeCacheKey({ pids: state.pids, packFingerprint: packId })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
+    const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint() })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
     writeFileSync(PROBE_CACHE, JSON.stringify({ key, at: new Date().toISOString(), level: v.level, payload }, null, 2));
   } catch {}
 }
