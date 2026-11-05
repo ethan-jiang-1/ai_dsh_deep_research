@@ -12,8 +12,8 @@
 // （探针 `paneText()` 取 `body.innerText.indexOf('研究状态')`——会话正文提到这个词就假阳）。
 //
 // 判据拆两半，本文件管"该点谁 + 怎么判开没开"：
-//   · 页签胶囊候选 = 带 `data-sidebar-right-guide-entry` 的按钮，按 aria-label 之外的**标题 span**
-//     精确等于目标标题（拒绝描述串入匹配——描述文本变化不许让门禁漂移）；
+//   · 页签身份 = 带 `data-sidebar-right-guide-entry` 的按钮上的**稳定 id**（research-status /
+//     research-graph）；界面语言只改变标题文本，不改变 id——选谁按 id，标题只做断言；
 //   · 页签体 = `[data-sidebar-right-tab]` 元素的文本（vendor 稳定的 data 钩子，不用哈希类名）。
 // 页面侧只读 DOM（evaluate 取按钮签名与 data 钩子），选谁/判绿的决定留在本纯函数里——BUG-021
 // 的 `probe-send-target` 同款分层：判据可被 keyless 测试常驻钉住。
@@ -26,22 +26,38 @@ const TITLE_SPAN_CHARS = 80;
 /**
  * 从页面读到的按钮表里选页签胶囊。
  * @param {{buttons: Array<{tag: string, label: string, title: string, guideEntry: string|null}>}} dom - 页面只读表。
- * @param {string} title - 目标页签标题（如「研究状态」）。
- * @returns {{pickedIndex: number|null, reason: string, candidateTitles: string[]}}
+ * @param {string|string[]} [title] - 目标页签标题（本地化候选，如「研究状态」与 'Research Status'）。
+ * @param {string} [entry] - 稳定的 guide-entry id（vendor `data-sidebar-right-guide-entry`，如
+ *   'research-status'）；界面语言变化不改变它，优先于标题使用。
+ * @returns {{pickedIndex: number|null, reason: string, title?: string, candidateTitles: string[]}}
  *   pickedIndex = 按钮表下标（页面按同一下标点击）；null 时 reason 说明为什么没点。
  */
-export function pickStatusTab({ buttons, title }) {
+export function pickStatusTab({ buttons, title, entry }) {
   const list = Array.isArray(buttons) ? buttons : [];
+  const titles = (Array.isArray(title) ? title : [title]).filter((t) => typeof t === 'string' && t !== '');
   const withGuide = list.map((b, i) => ({ ...b, i })).filter((b) => b.guideEntry !== null && b.guideEntry !== undefined);
-  // 优先：带 vendor guide-entry 钩子的胶囊（右栏 Guide 空态的标准形态）
-  const guideHit = withGuide.find((b) => exactTitle(b.title, title));
+  // 身份优先：guide-entry id 与界面语言无关（2026-11-05 实测：headless 浏览器 locale = en-US，
+  // 标题变 'Research Status'，按中文标题选会假红）。标题只用于断言，不用于选谁。
+  if (typeof entry === 'string' && entry !== '') {
+    const idHit = withGuide.find((b) => b.guideEntry === entry);
+    if (idHit !== undefined) {
+      return {
+        pickedIndex: idHit.i,
+        reason: 'guide-entry-id',
+        title: idHit.title,
+        candidateTitles: withGuide.map((b) => b.title),
+      };
+    }
+  }
+  // 次选：带 vendor guide-entry 钩子的胶囊按本地化标题精确命中（右栏 Guide 空态的标准形态）
+  const guideHit = withGuide.find((b) => titles.some((t) => exactTitle(b.title, t)));
   if (guideHit !== undefined) {
-    return { pickedIndex: guideHit.i, reason: 'guide-entry', candidateTitles: withGuide.map((b) => b.title) };
+    return { pickedIndex: guideHit.i, reason: 'guide-entry', title: guideHit.title, candidateTitles: withGuide.map((b) => b.title) };
   }
   // 退化：页签胶囊已渲染在别处（右栏已被会话页占位）——在**所有**按钮里按标题 span 精确匹配
-  const anyHit = list.map((b, i) => ({ ...b, i })).find((b) => exactTitle(b.title, title));
+  const anyHit = list.map((b, i) => ({ ...b, i })).find((b) => titles.some((t) => exactTitle(b.title, t)));
   if (anyHit !== undefined) {
-    return { pickedIndex: anyHit.i, reason: 'title-span', candidateTitles: list.map((b) => b.title).filter(Boolean) };
+    return { pickedIndex: anyHit.i, reason: 'title-span', title: anyHit.title, candidateTitles: list.map((b) => b.title).filter(Boolean) };
   }
   return { pickedIndex: null, reason: 'not-found', candidateTitles: withGuide.map((b) => b.title) };
 }

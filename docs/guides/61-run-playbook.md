@@ -20,10 +20,26 @@
   补救，**先看占用者是谁**：若是本仓在飞的 run 通道 → **别另起**，用它（URL/token 见启动横幅或
   `runtime/smoke-workspace/web.log`）；不是 → 换端口，或确认后停掉它（**别盲杀**：在飞会话的
   日志尾部可能丢失——BUG-007 卡）。想守在前台看日志 = `bash dev/boot-run.sh`（底层启动面）；
+- **环境不变式（2026-11-05 用户定调）**：启动一律落在**隔离 dev home**（`dev/env.sh` 把 `DSH_HOME`
+  指到 `runtime/harness-home`，绝不落到日用 `~/.dsh`；换实例用 `DSH_DEV_HOME`），且载入路径
+  **尽量与用户安装同形**：CLI 建 profile → `dsh plugin --profile deep-research add file:<tgz>` →
+  `dsh --profile deep-research`。dev-only 差异只许是 [dev/README 的 parity 表](../../dev/README.md)
+  登记过的那几项（MCP Playwright overlay / 观测 / 端口 / 源码 runtime）；要更严格地"当用户"验，
+  走安装形态冒烟（`install-shape-smoke` / `product-boot-smoke` / `release-smoke`）；
 - **已有通道时**：取当前 URL = `node dev/run-driver.mjs url`；只验浏览器面（不启动、不换 token）=
   `node dev/run-driver.mjs probe`。probe/up 复用通道时先跑只读镜像门（`boot-run --drift-only`）：
   通道镜像 ≠ 当前 pack 源 → **exit 2 未跑**（不是绿）——旧页面验不出当前代码，先重建/重启再验。
   URL/token 的唯一来源仍是最后一条启动横幅；旧横幅 = 旧 token；
+- **启动三分支（先判"通道活没活 + 镜像一不一致"，再动手）**（实测：热复用 ≈19s，冷重建 ≈2–3 min）：
+  - 通道活 + 镜像一致 → `up` 复用并跑全量探针；只要当前 URL = `node dev/run-driver.mjs url`（≈0.5s）；
+  - 通道活 + 镜像漂移 → `up` 判 exit 2；确认没有在飞 run 要保活后，一条命令重建：
+    `kill $(lsof -t -iTCP:3083 -sTCP:LISTEN) ; rm -rf runtime/harness-home/profiles/deep-research ; node dev/run-driver.mjs up`
+    ——≈2–3 min 是 npm pack + 两次 plugin add + boot + 探针的必要开销，不是卡死（端口按当次横幅换）；
+  - 通道死 → 直接 `up`（它自己起 boot-run）；**别手起 `dsh --profile deep-research`**，那会绕漂移门；
+- **判定分流（红 ≠ 未跑）**：exit 2 = 未跑（前置缺席：镜像漂移/无通道），按上一条处置；exit 1 = 红——
+  先读 `verdict.checks` 与 `runtime/smoke-workspace/run-verdicts/` 最近几份（同一检查连续红 =
+  多为探针/环境口径，不是当次启动引入），再用两条人话判据复核插件：preset 选单含四个研究角色、
+  会话右栏有「研究状态」页签。先分清是**探针判据**还是**插件没挂上**，修好判据后重跑同一条命令；
 - **启动请求的呈交纪律（2026-09-30 用户定调）**：用户让"启动/起 web" = 代理**先自己跑通再交 URL**——
   run-driver 就是这条纪律的可复跑入口（exit 0 = 可呈交 / 1 = 红不得呈交 / 2 = 未跑）。三步序如下，
   红了按序修后重跑同一条：

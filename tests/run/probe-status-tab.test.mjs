@@ -56,6 +56,38 @@ test('pickStatusTab：空按钮表 → not-found（防空语料：扫不到不�
   assert.equal(pickStatusTab({ buttons: undefined, title: '研究状态' }).reason, 'not-found');
 });
 
+test('pickStatusTab：稳定 guide-entry id 优先于本地化标题（英文界面也能选中）', () => {
+  // 2026-11-05 实测：DSH 界面 locale 跟随浏览器（headless = en-US），右栏胶囊标题变成
+  // Research Status/Research Graph；按中文标题匹配会假红。vendor 的 data 钩子值是稳定的
+  // research-status / research-graph，与语言无关——它才是身份，标题只用来做断言。
+  const r = pickStatusTab({
+    buttons: [btn('Research Config', 'research-config'), btn('Research Status', 'research-status')],
+    title: ['研究状态', 'Research Status'],
+    entry: 'research-status',
+  });
+  assert.equal(r.pickedIndex, 1);
+  assert.equal(r.reason, 'guide-entry-id');
+  assert.equal(r.title, 'Research Status');
+});
+
+test('pickStatusTab：entry id 命中同标题的另一个胶囊时按 id 而不是标题选', () => {
+  const r = pickStatusTab({
+    buttons: [btn('研究状态', 'research-graph'), btn('研究状态', 'research-status')],
+    title: '研究状态',
+    entry: 'research-status',
+  });
+  assert.equal(r.pickedIndex, 1);
+});
+
+test('pickStatusTab：title 接受多语言候选（英文界面回退命中）', () => {
+  const r = pickStatusTab({
+    buttons: [btn('Research Status', 'research-status')],
+    title: ['研究状态', 'Research Status'],
+  });
+  assert.equal(r.pickedIndex, 0);
+  assert.equal(r.reason, 'guide-entry');
+});
+
 test('statusPaneOpened：只认页签体在场，不认会话正文', () => {
   assert.equal(statusPaneOpened({ tabBodies: ['研究状态\n🎯 尚未确认'] }), true);
   // 会话正文提到「研究状态」≠ 页签打开——旧 paneText 会在这里假阳

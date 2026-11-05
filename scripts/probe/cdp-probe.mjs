@@ -48,7 +48,10 @@ const opt = (name) => {
 const openSessionTitle = opt('--open-session');
 const openStatus = flag('--open-status') || flag('--open-graph');
 // 打开哪一页：默认研究状态；--open-graph 切到研究图谱（同一套展开/选取/判据）。
-const paneTitle = flag('--open-graph') ? '研究图谱' : '研究状态';
+// 选谁按 `data-sidebar-right-guide-entry` 的稳定 id（与界面语言无关）；标题只用于判"页签
+// 开没开"，因此带 zh/en 两个候选（headless 浏览器 locale = en-US 时标题是英文）。
+const paneEntry = flag('--open-graph') ? 'research-graph' : 'research-status';
+const paneTitles = flag('--open-graph') ? ['研究图谱', 'Research Graph'] : ['研究状态', 'Research Status'];
 const expectFace = opt('--expect-face');
 const expectNoLeak = opt('--expect-no-leak');
 const ask = opt('--ask');
@@ -230,7 +233,7 @@ try {
     for (let i = 0; i < 12 && !opened; i++) {
       await new Promise((resolve) => { setTimeout(resolve, 1000) });
       const dom = await readStatusDom();
-      const pick = pickStatusTab({ buttons: dom?.buttons ?? [], title: paneTitle });
+      const pick = pickStatusTab({ buttons: dom?.buttons ?? [], title: paneTitles, entry: paneEntry });
       if (!clicked && pick.pickedIndex !== null) {
         // 只点一次：点开后面板就位，下一次读到的已是页签体（重复点会把同一页签再切一次，
         // 实测无害但徒增噪声）——选中判据见下：`clicked` 计数进 --debug-pane。
@@ -241,7 +244,7 @@ try {
       // 判据 = 页签体在场且**标题已切到目标**（页签体首轮可能只渲染标题 span——实测时序）：
       // 认标题或正文任一处，不要求正文里出现目标词（未绑定 run 的正常面也该算"页签开了"）。
       const bodies = after?.tabBodies ?? [];
-      opened = bodies.some((t) => typeof t === 'string' && t.indexOf(paneTitle) !== -1);
+      opened = bodies.some((t) => typeof t === 'string' && paneTitles.some((title) => t.indexOf(title) !== -1));
     }
     return opened;
   };
@@ -249,7 +252,8 @@ try {
     // 页签体优先（不拿会话正文当观察面——那会把对话里提到的词读成页签内容）。多条命中时取
     // **最长**的一条：页签标题 span 与面板 body 共享同一 data 钩子，标题那条只有四个字。
     const bodies = [...document.querySelectorAll('[data-sidebar-right-tab]')].map(e => e.textContent ?? '');
-    const hit = bodies.filter(t => t.includes(${JSON.stringify(paneTitle)})).sort((a, b) => b.length - a.length)[0];
+    const titles = ${JSON.stringify(paneTitles)};
+    const hit = bodies.filter(t => titles.some(title => t.includes(title))).sort((a, b) => b.length - a.length)[0];
     if (hit !== undefined) return hit.slice(0, 4000);
     return (document.body?.innerText ?? '').slice(0, 300)
   })()`);
