@@ -30,12 +30,17 @@
   `node dev/run-driver.mjs probe`。probe/up 复用通道时先跑只读镜像门（`boot-run --drift-only`）：
   通道镜像 ≠ 当前 pack 源 → **exit 2 未跑**（不是绿）——旧页面验不出当前代码，先重建/重启再验。
   URL/token 的唯一来源仍是最后一条启动横幅；旧横幅 = 旧 token；
-- **启动三分支（先判"通道活没活 + 镜像一不一致"，再动手）**（实测：热复用 ≈19s，冷重建 ≈2–3 min）：
+- **启动三分支（先判"通道活没活 + 镜像一不一致"，再动手）**（实测 2026-11-05：缓存热复用 ≈0.5–2s，
+  首次真验 ≈15s，冷启动 ≈25–30s，冷重建 ≈2–3 min）：
   - 通道活 + 镜像一致 → `up` 复用并跑全量探针；只要当前 URL = `node dev/run-driver.mjs url`（≈0.5s）；
   - 通道活 + 镜像漂移 → `up` 判 exit 2；确认没有在飞 run 要保活后，一条命令重建：
     `kill $(lsof -t -iTCP:3083 -sTCP:LISTEN) ; rm -rf runtime/harness-home/profiles/deep-research ; node dev/run-driver.mjs up`
     ——≈2–3 min 是 npm pack + 两次 plugin add + boot + 探针的必要开销，不是卡死（端口按当次横幅换）；
   - 通道死 → 直接 `up`（它自己起 boot-run）；**别手起 `dsh --profile deep-research`**，那会绕漂移门；
+- **验证缓存（加速的事实边界）**：`up` 在"同一 web 进程 + 同一 pack 源 + 最近一次 GREEN 在 10 分钟内"
+  时直接复用该结论（打印"呈交块（缓存）"），把热复用从 ≈15s 压到 ≈1s；`--force-probe` 强制重验。
+  缓存**只存 GREEN**——NOT-RUN/红从不入缓存；冷启动（新进程）必然真验，身份一变（pid/源）即 miss。
+  发布清单也按 pack 源指纹缓存（漂移门 ≈5s → ≈0.7s）；`probe` 子命令永远真验；
 - **判定分流（红 ≠ 未跑）**：exit 2 = 未跑（前置缺席：镜像漂移/无通道），按上一条处置；exit 1 = 红——
   先读 `verdict.checks` 与 `runtime/smoke-workspace/run-verdicts/` 最近几份（同一检查连续红 =
   多为探针/环境口径，不是当次启动引入），再用两条人话判据复核插件：preset 选单含四个研究角色、

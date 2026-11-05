@@ -54,13 +54,23 @@ drift_check() {
   #   钩子会跑 `pnpm build`，tsdown 的横幅（`ℹ tsdown v…`）混进 stdout 把 `--json` 载荷污染，
   #   下游 `JSON.parse` 抛 SyntaxError → **漂移检测整条崩掉**（而它正是"镜像是否等于 pack 源"的
   #   唯一机械证明）。本处只要**发布清单**、不要构建，故显式跳过生命周期脚本。
-  shipped="$(cd "$PACKDIR" && npm pack --dry-run --json --ignore-scripts --cache "$STATE_DIR/npm-cache" 2>/dev/null | node -e '
-    let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => {
-      const j = JSON.parse(s);
-      for (const f of j[0]?.files ?? []) console.log(f.path);
-    });
-  ')"
-  [ -n "$shipped" ] || { echo "boot-run: 漂移检测拿不到 pack 发布清单（npm pack --dry-run 失败）" >&2; exit 1; }
+  # 发布清单缓存（2026-11-05 加速）：`npm pack --dry-run` 是漂移门 ~5s 的主要开销；清单只随
+  # pack 源内容变化，键 = pack 源指纹（路径 + size + mtime，遍历顺序无关）。miss/损坏一律回退真跑。
+  local fp
+  fp="$(node "$ROOT/scripts/lib/channel-cache.mjs" fingerprint "$PACKDIR")"
+  shipped="$(node "$ROOT/scripts/lib/channel-cache.mjs" read "$STATE_DIR/pack-shipped.json" "$fp" 2>/dev/null || true)"
+  if [ -z "$shipped" ]; then
+    shipped="$(cd "$PACKDIR" && npm pack --dry-run --json --ignore-scripts --cache "$STATE_DIR/npm-cache" 2>/dev/null | node -e '
+      let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => {
+        const j = JSON.parse(s);
+        for (const f of j[0]?.files ?? []) console.log(f.path);
+      });
+    ')"
+    [ -n "$shipped" ] || { echo "boot-run: 漂移检测拿不到 pack 发布清单（npm pack --dry-run 失败）" >&2; exit 1; }
+    printf '%s\n' "$shipped" | node "$ROOT/scripts/lib/channel-cache.mjs" save "$STATE_DIR/pack-shipped.json" "$fp" >/dev/null 2>&1 || true
+  else
+    echo "boot-run: 发布清单缓存命中（pack 指纹 ${fp:0:12}）" >&2
+  fi
   while IFS= read -r rel; do
     mirror="$PROFDIR/node_modules/dsh-deep-research-pack/$rel"
     # 非运行时文件（README/LICENSE）：文档漂移不改变页面行为，不参与"当前页面是否当前代码"的

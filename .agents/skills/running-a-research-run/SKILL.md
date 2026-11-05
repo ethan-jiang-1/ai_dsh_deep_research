@@ -23,7 +23,9 @@ run 的操作面是**文件 + 会话通道**，不是代码。启动器、观察
   boot web（`DSH_RUN_PORT`，缺省 3083）→ 仪表盘）+ `cdp-probe --open-status`。**呈交纪律 = 先自跑
   自修（红了当场修）+ 验浏览器面全绿，才把 URL 交给用户**（正本 = guides/61 §0 启动请求的呈交纪律）。
   通道已在飞时 `up` 直接复用不另起；只想重验面 = `node dev/run-driver.mjs probe`。
-  **冷启动按三分支走**（正本 = guides/61 §0）：通道活 + 镜像一致 → 复用（≈19s）；活 + 漂移 →
+  **验证缓存**：同一 web 进程 + 同一 pack 源 + 10 分钟内的最近 GREEN 会被 `up` 直接复用（≈1s；
+  `--force-probe` 强制重验），缓存只存 GREEN、冷启动必真验（正本 = guides/61 §0）。
+  **冷启动按三分支走**（正本 = guides/61 §0）：通道活 + 镜像一致 → 复用（缓存 ≈1s / 首验 ≈15s）；活 + 漂移 →
   `up` exit 2，确认无在飞 run 后一条命令 `kill $(lsof -t -iTCP:3083 -sTCP:LISTEN) ; rm -rf
   runtime/harness-home/profiles/deep-research ; node dev/run-driver.mjs up`（≈2–3 min，不是卡死）；
   通道死 → 直接 `up`。**exit 1 的红先看 checks 与最近 verdict 历史**，再用人话判据（preset 四角色 +

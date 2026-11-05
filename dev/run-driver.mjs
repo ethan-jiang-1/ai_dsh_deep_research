@@ -16,6 +16,9 @@
 // 1 = 红了（不得呈交，按 verdict.failed 修）、2 = 未跑（前置缺席，如镜像漂移/未取证 / 无通道）。
 // **未跑 ≠ 通过**。复用已在飞的通道时先跑 boot-run --drift-only：通道加载的镜像 ≠ 当前 pack 源
 // 时，probe 验的是旧页面——2026-10-28 实测通道 18:47 起、pack client 02:50 重建，旧实现仍报 GREEN。
+// 加速（2026-11-05 实测：热复用 21.5s → 0.4–1.9s）：同一 web 进程 + 同一 pack 源 + 10 分钟内的
+// GREEN 直接复用（`--force-probe` 强制重验）；缓存只存 GREEN，冷启动必真验。缓存判据 =
+// scripts/lib/channel-cache.mjs（键含 pid + pack 指纹 + 断言参数）。
 //
 // 通道事实的唯一来源 = runtime/smoke-workspace/web.log 的**最后一条** `dsh web: <url>` 横幅
 // （boot-run 每次 boot 以 tee 截断写该文件；旧横幅 = 旧 token，用旧的必 401）。
@@ -28,6 +31,7 @@ import { copyFileSync, existsSync, mkdirSync, openSync, readFileSync, writeFileS
 import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../scripts/lib/run-channel.mjs';
+import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKey } from '../scripts/lib/channel-cache.mjs';
 
 export { guiUrlFromWebLog, runDriverVerdict };
 
@@ -40,6 +44,12 @@ const WEB_LOG = join(STATE_DIR, 'web.log');
 const BOOT_LOG = join(STATE_DIR, 'run-driver-boot.log');
 const DEFAULT_PORT = process.env.DSH_RUN_PORT || '3083';
 const DEFAULT_PROFILE = process.env.DSH_RUN_PROFILE || 'deep-research';
+const PACK_DIR = join(ROOT, 'packages', 'deep-research-pack');
+// 验证缓存：只存最近一次 GREEN（键 = web pid + pack 指纹 + 断言参数）；见 scripts/lib/channel-cache.mjs。
+const PROBE_CACHE = join(STATE_DIR, 'probe-cache.json');
+const readProbeCache = () => {
+  try { return JSON.parse(readFileSync(PROBE_CACHE, 'utf8')); } catch { return null; }
+};
 
 const portOf = (url) => Number(new URL(url).port);
 
@@ -199,7 +209,7 @@ if (sub === 'probe') {
 }
 
 if (isCli && sub !== 'up') {
-  console.error('run-driver: 用法 node dev/run-driver.mjs up [--port <p>] [--profile <p>] [--bootstrap] [--no-probe] [--require-data] | probe [--port <p>] [--expect-face <文本>] [--require-data] | url');
+  console.error('run-driver: 用法 node dev/run-driver.mjs up [--port <p>] [--profile <p>] [--bootstrap] [--no-probe] [--force-probe] [--require-data] | probe [--port <p>] [--expect-face <文本>] [--require-data] | url');
   process.exit(2);
 }
 
@@ -209,6 +219,7 @@ if (isCli && sub === 'up') {
 const wantPort = String(arg('--port', DEFAULT_PORT));
 const wantProfile = arg('--profile', DEFAULT_PROFILE);
 const noProbe = has('--no-probe');
+const forceProbe = has('--force-probe');
 const expectFace = arg('--expect-face', undefined);
 const requireData = has('--require-data');
 
@@ -290,6 +301,26 @@ if (noProbe) {
   process.exit(2);
 }
 
+// 验证缓存（2026-11-05 加速）：同一 web 进程 + 同一 pack 源 + TTL 内的最近 GREEN → 复用结论，
+// 省掉 ~12s 浏览器探针。--force-probe 永久绕过；NOT-RUN/红从不入缓存（未跑 ≠ 通过）。
+if (!forceProbe && drift?.clean === true) {
+  const cached = readProbeCache();
+  const packId = packFingerprint(collectPackEntries(PACK_DIR));
+  const key = `${probeCacheKey({ pids: state.pids, packFingerprint: packId })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
+  const hit = probeCacheHit({ entry: cached, key, now: Date.now() });
+  if (hit.hit) {
+    const ageS = Math.round((hit.ageMs ?? 0) / 1000);
+    const payload = { ...cached.payload, url: state.url, port: state.port, cached: true, cacheAgeMs: hit.ageMs, reason: `缓存命中（同一 web 进程 + 同一 pack 源；${ageS}s 前 GREEN）——--force-probe 可强制重验` };
+    console.log(`run-driver: 验证缓存命中（${ageS}s 前 GREEN，同一 web 进程 + 同一 pack 源；--force-probe 可强制重验）`);
+    console.log('──────────────────────────── 呈交块（缓存）────────────────────────────');
+    console.log(`通道 URL：${state.url}`);
+    console.log(`浏览器面：GREEN（缓存，${ageS}s 前）`);
+    console.log('───────────────────────────────────────────────────────────────');
+    console.log(JSON.stringify(payload, null, 2));
+    process.exit(0);
+  }
+}
+
 const shot = join(STATE_DIR, 'run-driver-status.png');
 const html = join(STATE_DIR, 'run-driver-status.html');
 const { verdict, error } = probeFace(state.url, expectFace, shot, html);
@@ -303,6 +334,14 @@ const v = runDriverVerdict({ probe: verdict, expectFace, drift, requireData });
 const submitted = v.exit === 0;
 const payload = { url: state.url, port: state.port, ...v, statusPaneText: verdict.statusPaneText?.slice(0, 600), screenshot: verdict.screenshot ?? null };
 const saved = persistVerdict('up', payload, verdict.screenshot, html);
+if (submitted) {
+  // 只缓存 GREEN（键含 pid + pack 指纹 + 断言参数）；红/未跑永不入缓存。
+  try {
+    const packId = packFingerprint(collectPackEntries(PACK_DIR));
+    const key = `${probeCacheKey({ pids: state.pids, packFingerprint: packId })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
+    writeFileSync(PROBE_CACHE, JSON.stringify({ key, at: new Date().toISOString(), level: v.level, payload }, null, 2));
+  } catch {}
+}
 console.log('──────────────────────────── 呈交块 ────────────────────────────');
 console.log(`通道 URL：${state.url}`);
 console.log(`浏览器面：${v.level}（数据面：${v.dataFace}）${submitted ? '' : `（${v.reason}）`}`);
