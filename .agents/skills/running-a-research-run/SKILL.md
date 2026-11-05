@@ -33,7 +33,9 @@ run 的操作面是**文件 + 会话通道**，不是代码。启动器、观察
   环境不变式：隔离 dev home（`DSH_DEV_HOME` 可换，绝不用日用 `~/.dsh`）+ 与用户安装同形的载入路径
   （CLI 建 profile → `plugin add file:<tgz>` → `dsh --profile`；差异以 dev/README parity 表为准）；
   **启动次序不得重排**：profile → plugin add（roster，成员变更必须重启）→ `dsh --profile` 起 web →
-  工作区/会话；缓存与探针只跳过重复验证，不跳过任何一步（正本 = guides/61 §0）；
+  工作区/会话；缓存与探针只跳过重复验证，不跳过任何一步（正本 = guides/61 §0）。
+  **不许自创**：不手起 `dsh --profile deep-research`、不重复 `--from-default-profile`、不手写 roster、
+  roster 变更不跳过重启；
   改了 pack 文本（persona/skill/手册）必须重启通道——**web 进程缓存 boot 时的文本**；
 - 观察面两处、同一折算：`node scripts/run-ops/run-dashboard.mjs --latest --out <html>`（或 `--watch`，
   多场扫描的 HTML 投影）与 GUI 右栏「研究状态」页签（会话内实时：步骤条 + HITL 挂起横幅 +

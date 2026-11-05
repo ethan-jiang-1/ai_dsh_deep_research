@@ -30,7 +30,10 @@
   重复 `--from-default-profile`，那是破坏性替换）→ ② `dsh plugin --profile deep-research add …` 写
   roster（bundle membership 变更**必须重启**才生效）→ ③ `dsh --profile deep-research` 起 web
   （Host 读 roster → web app → 本包 client 插件）→ ④ 首屏选工作区 → 建会话。boot-run 只在 ② 与 ③
-  之间加自检/漂移门/MCP overlay；验证缓存与探针只跳过"重复验证"，**不跳过任何一步**（冷启动走全序）；
+  之间加自检/漂移门/MCP overlay；验证缓存与探针只跳过"重复验证"，**不跳过任何一步**（冷启动走全序）。
+  **不得自创**：不手起 `dsh --profile deep-research`（dev 绕漂移门）、不对已有 profile 重复
+  `--from-default-profile`、不手写/改 `dsh.profile.bundles`（roster 只经 `dsh plugin add/remove`）、
+  roster 变更后不跳过重启；
 - **已有通道时**：取当前 URL = `node dev/run-driver.mjs url`；只验浏览器面（不启动、不换 token）=
   `node dev/run-driver.mjs probe`。probe/up 复用通道时先跑只读镜像门（`boot-run --drift-only`）：
   通道镜像 ≠ 当前 pack 源 → **exit 2 未跑**（不是绿）——旧页面验不出当前代码，先重建/重启再验。

@@ -85,6 +85,7 @@ source dev/env.sh    # ⚠ fresh clone 首次（激活 hooks）与 L1/L2、部�
 pnpm verify          # L0 结构门禁（keyless，收尾必跑）
 pnpm test            # L0 keyless 回归（默认；vendor 源码契约 = pnpm test:vendor）
 node dev/run-driver.mjs up   # 研究 run 通道（起/复用 + 验浏览器面 + 呈交 URL；操作 = guides/61 §0）
+                             # 启动次序固定 = profile → plugin add(roster) → dsh --profile → 工作区/会话；别手起 dsh、别自创启动路径
 ```
 
 搜索先限定 `packages/`、`tests/`、`scripts/`、`docs/`；`vendor/`、`runtime/`、`packages/*/lib/` 是生成物/运行区，别全仓 grep。
