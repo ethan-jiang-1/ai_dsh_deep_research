@@ -4,7 +4,6 @@
 
 ## 活跃清单
 
-
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
 ## 最近归档

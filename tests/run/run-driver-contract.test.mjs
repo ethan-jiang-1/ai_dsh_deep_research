@@ -164,7 +164,8 @@ test('启动首动作一致：安装行 = 手册（CLI 建 profile + Plugins 页
   // 安装用户：命令唯一 owner = 手册；README/00-index/project-map 只指手册 + 默认入口。开发通道：run-driver。
   assert.ok(lineOf('scripts/dist/product-manual.md', '--from-default-profile web').includes('dsh --profile deep-research'), '手册安装首动作不是 DSH profile 初始化');
   assert.ok(lineOf('README.md', '_dist/安装手册.md').includes('_dist/安装手册.md'), 'README 没有把安装步骤指向手册');
-  assert.ok(lineOf('README.md', 'dev/run-driver.mjs up').includes('run-driver.mjs up'), 'README 开发入口缺席');
+  // 2026-11-07 用户面向改版：README 只留一行开发者路由，开发首动作（run-driver）移到 CONTRIBUTING。
+  assert.ok(lineOf('CONTRIBUTING.md', 'dev/run-driver.mjs up').includes('run-driver.mjs up'), 'CONTRIBUTING 开发入口缺席');
   const installRow = lineOf('docs/00-index.md', '（安装用户）');
   assert.ok(installRow.includes('安装手册'), '00-index 安装行没有把手册写成命令 owner');
   assert.ok(installRow.includes('Plugins 页'), '00-index 安装行没有把 Plugins 页写成装包入口');

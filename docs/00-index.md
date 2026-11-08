@@ -11,7 +11,7 @@
 **先记住这条模型**：本包是 DSH 插件（bundle），运行环境 = 用户自建的 **custom profile**
 `deep-research`（[D41](./decisions.md#d41)）。首次由 CLI 建 profile（仅首次、破坏性）；**当前 0.3.0 用本地 tarball 装包（`file:`）**，npm/Plugins 页/Discover 为 staged（未发布 npm）；启动 `dsh --profile deep-research`。没有 launcher、没有 scaffold、没有自定义安装器；
 只保留只读 doctor。开发者在本仓走同名 profile（隔离 home）+ `research-workspace/` + run-driver。
-两条路径的命令与数据根不同，不要互相套用。**安装步骤的唯一 owner = [`scripts/dist/product-manual.md`](../scripts/dist/product-manual.md)；生成物 = [`_dist/安装手册.md`](../_dist/安装手册.md)（勿手改，重导出 = `node scripts/dist/export-dist.mjs`）**。
+两条路径的命令与数据根不同，不要互相套用。**完整安装合同的 owner = [`scripts/dist/product-manual.md`](../scripts/dist/product-manual.md)；生成物 = [`_dist/安装手册.md`](../_dist/安装手册.md)（勿手改，重导出 = `node scripts/dist/export-dist.mjs`）；根 [README](../README.md) 只放最短路径，命令由契约测试对账**。
 
 | 用户的说法 | 走哪（该事的唯一 owner） | 首个动作 |
 |---|---|---|

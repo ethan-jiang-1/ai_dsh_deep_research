@@ -13,6 +13,20 @@ first screen asks for the project folder. There is no custom installer and no la
 in this repository uses the isolated `deep-research` profile, `research-workspace/` and
 `dev/run-driver.mjs` — do not mix the two command sets or data roots.
 
+## Development charter
+
+Three principles govern product and mechanism choices (user-set 2026-09-27):
+
+1. **Follow DSH, do not invent.** The pinned `vendor/dsh` source is the mechanism authority
+   (read-only). Prefer an existing DSH carrier; a self-built mechanism needs evidence that no
+   carrier fits. The per-source ledger is [`docs/discipline-map.md`](docs/discipline-map.md).
+2. **Solve autonomously, borrow from mature work.** Check how established DSH plugins solve a
+   problem first (adoption is a signal); resolve what can be resolved without asking. The author's
+   local reference repos are not required for public contributors.
+3. **Layered review.** Mechanical gates, provenance audits, predicate probes, and adversarial
+   self-review are done autonomously; only non-delegable judgments (human experience, direction
+   trade-offs) go to the user at stage boundaries. Review is the last resort, not a routine step.
+
 ## Prerequisites
 
 - Node.js `^22.19.0 || >=24.0.0` (the range is pinned in `package.json`)
@@ -86,6 +100,15 @@ outputs; the ignored paths are documented in [`.gitignore`](.gitignore).
 ## Repository rules that matter for review
 
 - Read [`AGENTS.md`](AGENTS.md) first; it routes to design docs, decisions, and skills.
+- The pack is configuration-first: presets, skills, bundle rows, content injection, startup rows,
+  and a read-only doctor. The only code surfaces are the research-cockpit client half, the
+  fetch-fallback provider, and the startup/content rows; keep new behavior inside those boundaries
+  or open a decision first.
+- Evaluation has five faces (L0 structure / L1 mount / L2 install / L3 domain / L4 delivery) that do
+  not substitute for each other; see [`docs/evaluation.md`](docs/evaluation.md).
+- The iteration unit is a vertical round: thinnest end-to-end path first, then widen. Multi-step
+  work is expressed in a plan and todos, not in a batch of unrelated edits.
+- Tests use `node:test` + `node:assert`; there is no test framework.
 - Changes that carry a durable decision also need a Note under `notes/` (see
   [`notes/AGENTS.md`](notes/AGENTS.md)).
 - New gates and contract tests need a failing proof before they turn green; see

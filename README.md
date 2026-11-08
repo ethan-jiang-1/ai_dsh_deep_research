@@ -1,49 +1,73 @@
-# ai_dsh_deep_research
+# Deep Research for DSH
 
-DSH 插件项目：一个 **bundle**（`packages/deep-research-pack`）+ 用户自建的 **custom profile**
-`deep-research`。包提供四个研究角色 preset（`Lead / Scout / Analyst / Critic`）+ 方法编辑 preset
-（`Method Editor`，D37）+ 研究驾驶舱 + 方法论技能；协作走 DSH Agent Teams。包内容（手册/模板/技能/
-驾驶舱）全在包内，run bundle、方法库与归档落在用户指定的工作区。交付模型 = [D41](docs/decisions.md#d41)；
-技术决定 = [D40](docs/decisions.md#d40)。
+把一个问题交给一支会互相核查的研究小队：Lead 拆题，Scout 找来源，Analyst 深读，Critic 挑错，交付一份每条关键结论都标了出处的报告。它装在 DeepSeek Harness（DSH）里；研究产物直接写进你选的项目文件夹。
 
-## 用它
+![打开后：选工作区与 Deep Research Lead；右栏是研究状态 / 配置 / 图谱入口](docs/assets/readme-first-screen.png)
 
-安装步骤的唯一 owner = [`scripts/dist/product-manual.md`](scripts/dist/product-manual.md)（生成 [`_dist/安装手册.md`](_dist/安装手册.md)，勿手改）：**0.3.0 当前唯一发布形态 = 本地 tarball**（手册 §四 C）：首次用 CLI 建 custom profile（仅首次、破坏性）→ `dsh plugin --profile deep-research add file:<tgz>`；团队机制层同 profile 打开（完整多角色研究必需）。npm/Plugins 页/Discover 为 staged（0.3.0 未上 npm）。首屏会问「项目目录」；研究产物写
-`<项目>/drt_<slug>/`，方法库 = `<项目>/method-library.md`。没有 launcher，也没有自定义安装器；
-诊断用安装副本里的 `dsh-deep-research-doctor`。数据归属与 `DEEP_RESEARCH_WORKSPACE` 的优先级 =
-[guides/65](docs/guides/65-run-forms.md)。
+## 你会得到什么
 
-## 首屏会看到
+- **四个角色分工**：Lead 拆题与综合，Scout 找来源，Analyst 读材料，Critic 挑错；复杂题自动组队。
+- **可核查的报告**：关键结论带 `[来源: evidence/xx.md]`；Critic 先查证据链，审阅不通过不交付。
+- **看得见的进度**：右栏「研究状态」显示流程轨道、活动流与等你决定的挂起问题；交付后在「终稿」读读者版。
+- **产物在你的项目里**：`drt_<slug>/`（问题、证据、报告、审阅）、`archive/`，以及跨 run 复用的方法库。
 
-Orca 品牌 + 工作区标题（`Deep Research — <目录名>`）+ 起步卡：直接问一个研究问题 →
-Lead 先确认类型/深度/口径并给计划 → 右栏「研究状态」看进度；交付后右栏「终稿」读读者版。
-没选项目时起步卡给「选择项目目录」；有 `drt_*` 或用户消息后起步卡收起。
+## 5 分钟装好
 
-## 改它
+需要：已装好的 DSH（`dsh --version` 能打印版本，且落在 `0.2.1-rc.2` 到 `0.2.1-rc.5`）、Node `^22.19.0` 或 `>=24.0.0`、`pnpm`。安装与首启不调用模型；跑研究才需要凭据（DeepSeek API key，或在 Web 界面里登录）。
 
-- 开工入口链（唯一正本，4 步）=[`AGENTS.md`](AGENTS.md) §入口链；文档地图 = [`docs/00-index.md`](docs/00-index.md)。
-- 开发通道：`node dev/run-driver.mjs up`（boot-run 自 source env；L1/L2 与部分 run-ops 需先 `source dev/env.sh`，fresh clone 首次跑 L0 也先 source 一次以激活 hooks；口径 = guides/60 §2）（仓内 `deep-research` profile +
-  `research-workspace/`，不是用户安装路径；操作 = [`docs/guides/61-run-playbook.md`](docs/guides/61-run-playbook.md)）。
-- 改完怎么验：选层地图 = [`docs/project-map.md`](docs/project-map.md)；命令正本 =
-  [`docs/guides/60-dev-loop.md`](docs/guides/60-dev-loop.md) §2；判据 = [`docs/evaluation.md`](docs/evaluation.md)。
-- 运行形态/数据归属 = [`docs/guides/65-run-forms.md`](docs/guides/65-run-forms.md)；插件作者入口 =
-  [`docs/guides/62-plugin-authoring.md`](docs/guides/62-plugin-authoring.md)。
+```sh
+# 1) 只做一次：建一个专用配置（DSH 里叫 profile——一份独立的插件配置，不动你现有的 DSH；第一次装就照做，装过本插件才跳过）
+#    注意：--from-default-profile 是替换，会删掉该配置原有的依赖与你加的配置
+dsh --profile deep-research --from-default-profile web --dump-default-config
 
-## 研发宪章（2026-09-27 用户定调）
+# 2) 装插件 + 团队能力（DSH 的可选 agent-team-profile；版本必须等于 dsh --version）
+DSH_VER="$(dsh --version)"
+dsh plugin --profile deep-research add file:/path/to/dsh-deep-research-pack-0.3.0.tgz
+dsh plugin --profile deep-research add "@deepseek-ai/dsh-experimental-agent-team-profile@$DSH_VER"
 
-1. **循 DSH 而不发明**：机制权威 = `vendor/dsh`（钉 tag），纪律全表 = `docs/discipline-map.md`（逐源三态）；
-   优先用 DSH 现成载体，自建机制须有"载体不可用"证据。
-2. **自主优先，借鉴成熟**：问题先探成熟 DSH 插件的解法（采纳度 = 下载量 / 影响力为信号；参考作者本地
-   `ai_dsh_company`，不随仓），能自主解决的静默解决、不外抛。
-3. **审阅分层**：机械门禁 / 溯源审计 / 判据探针 / 对抗自审（critic 式）全部自主做；只有不可代理的
-   判断（真人体验、方向取舍）才在阶段边界请人——不设额外打断点。
+# 3) 启动
+dsh --profile deep-research
+```
 
-## Rules In One Screen
+第 1 步只建配置，不装包。把 `/path/to/dsh-deep-research-pack-0.3.0.tgz` 换成你下载的安装包（发布页或交付目录里的 tgz，通常与手册同目录）。第二条命令装的是团队能力（`agent-team-profile`），不要用 `@latest`——它的 `latest` 不指向当前 DSH 版本线。
 
-- 配置为主的 pack（preset / skill / bundle 行 / content 注入 / 启动行 / 只读 doctor）+ 观察面 client 面（D18）+
-  抓取回退 provider（D31）；Node 版本区间与 vendor 对齐（正本 = package.json engines，门禁对账）；
-  测试用 `node:test` + `node:assert`（无测试框架）。
-- 评估五面（L0 结构 / L1 挂载 / L2 安装 / L3 领域 / L4 交付）不互抵，定义见 `docs/evaluation.md`；
-  安装/首启面增量证据 = `install-shape-smoke` / `product-boot-smoke`（同页 L2 登记）。
-- 迭代单位 = 垂直轮（最薄全路径 → 逐轮加宽）；多步工作用会话内计划与 todo 表达顺序。
-- License = [MIT](LICENSE)；贡献者环境与工作流 = [CONTRIBUTING.md](CONTRIBUTING.md)。
+装好的标志：Plugins 页出现「深度研究 / Deep Research」；会话右栏出现「研究状态 / 研究配置 / 研究图谱 / 终稿」；主界面出现「方法库」。装完或更新插件后要重启 profile（Ctrl-C 停掉，再跑 `dsh --profile deep-research`）。
+
+![Plugins 页里的 Deep Research](docs/assets/readme-plugins.png)
+
+## 第一次研究
+
+1. 打开终端里打印的 URL。它带 token，只在本机用，别截图或转发。
+2. 第一次打开的界面会问你项目目录；选它，研究产物会写到它下面。
+3. 直接说出你的研究问题，一句话到一段话都行。
+4. Lead 先问三件事：研究类型、要多深、报告语言与时间范围；卡片里点选项即可（也能自由输入），选完看计划，确认后开跑。
+5. 开跑后不用盯；要看进度就打开右栏「研究状态」。只有需要你补事实或审阅时才会来问。
+6. 交付前 Lead 会带着证据与审阅建议来找你；在交付卡里选「定稿」或给修改意见，然后读「终稿」的读者版，审计版在 `final/v<N>.md`。
+
+## 产物在哪
+
+```text
+<你的项目>/
+  method-library.md        # 方法库：跨 run 复用
+  drt_<slug>/              # 每场研究（slug = 题目短名）
+    question.md topics.md plan.md
+    evidence/              # 证据与出处
+    findings.md review.md
+    final/v1.md            # 审计版
+    final/readable-v1.md   # 读者版
+  archive/                 # 已交付归档
+```
+
+## 常见问题
+
+- **一定要 API key 吗？** 装和首启不用；跑研究要，用账号登录或 `DEEPSEEK_API_KEY` 都行。
+- **支持哪些平台？** macOS 已验证，Linux 预期可用；Windows 与完整 Desktop 路径未承诺。只支持 Web 界面。
+- **会写我的项目以外的地方吗？** 产物只写你选的工作区；DSH 自己的会话与凭据仍由 DSH 保管（默认 `~/.dsh`）。
+- **装或跑出问题？** 先看手册的「故障排查」一节；还不对，带上终端输出开 issue。
+
+## 更多
+
+- 完整安装、升级、卸载、排障与安全：[_dist/安装手册.md](_dist/安装手册.md)
+- 想改这个仓库：[CONTRIBUTING.md](CONTRIBUTING.md)；让 Agent 接手：[AGENTS.md](AGENTS.md)
+- 设计、决策与方法论：[docs/00-index.md](docs/00-index.md)
+- License: [MIT](LICENSE)
