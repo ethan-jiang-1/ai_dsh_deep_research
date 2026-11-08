@@ -122,7 +122,7 @@ DEEP_RESEARCH_WORKSPACE="$HOME/projects/acme" dsh --profile deep-research
 DSH 会打印带 token 的 URL；浏览器打开即进首屏。token URL 是本机秘密，不要截图、转发或写日志。
 
 - 未指定工作区时，首屏起步卡有「选择项目目录」：选完研究产物写到该目录；下次启动会记住（浏览器提示键；换浏览器需重选）。
-- 首屏 = Orca 品牌 + 工作区标题 + 起步卡（当前工作区 / 三步起步 / 凭据提示 / 选择项目目录）；默认 preset = Deep Research Lead；右栏研究状态 / 研究配置 / 研究图谱 / 终稿；主界面方法库 tab。
+- 首屏 = Orca 品牌 + 工作区标题 + 起步卡（当前工作区 / 三步起步 / 凭据提示 / 选择项目目录）；默认 preset = Deep Research Lead；右栏研究状态 / 研究配置 / 研究图谱（终稿在交付后自动出现）；主界面「方法库」在打开会话后出现。
 - 工作区解析优先级：`DEEP_RESEARCH_WORKSPACE` > `$DSH_HOME/deep-research/settings.json` 里保存的工作区 > 首屏选择。`header.cwd` 是会话初始目录；后续 `working_directory` 不改变它，也不改变沙箱可写根。
 - 原生首启只有 token 门，没有欢迎向导；首屏由本包的 client/startup 行回答。
 
@@ -152,19 +152,19 @@ DSH 会打印带 token 的 URL；浏览器打开即进首屏。token URL 是本�
 
 ## 六、验证
 
-界面可见的变化（先看这三处）：
+界面可见的变化（先看这几处）：
 
 - Plugins 页出现「深度研究 / Deep Research」（中英文随界面语言，带图标）。
-- 会话右栏出现「研究状态 / 研究配置 / 研究图谱 / 终稿」；主界面出现「方法库」。
+- 打开一个会话后：右栏有「研究状态 / 研究配置 / 研究图谱」，主界面有「方法库」；「终稿」在交付后自动出现。
 
 机器核对（可选）：
 
 ```sh
-dsh --profile deep-research --dump-config        # 组合树：看下面这些 id
+dsh --profile deep-research --dump-config        # 组合树：完整清单见附录 A
 dsh --profile deep-research --no-open --port 0   # 真启动：应打印 dsh web: http://…/?token=…
 ```
 
-`--dump-config` 里应出现：`preset-lead`、`research-content`、`research-client`、`research-startup`、`research-fetch-fallback`、`tool-present`、`session-query-sqlite`；若同时打开了团队机制层，还会出现 `ui-agent-team`。stderr 不应有 `patch: entry "…" not found`。真启动不应出现 `did not activate` / `ERR_MODULE_NOT_FOUND`。
+`--dump-config` 的完整 id 清单与期望见附录 A；stderr 不应有 `patch: entry "…" not found`。真启动不应出现 `did not activate` / `ERR_MODULE_NOT_FOUND`。
 
 只读诊断（不写 profile）：
 
@@ -187,14 +187,15 @@ deep-research 自己的设置文件（工作区、上次会话）= `$DSH_HOME/de
 
 ## 八、升级
 
-停掉正在跑的 profile，然后：
+停掉正在跑的 profile，然后按当前发布形态装新版本的 tarball（与 §四 C 同一条命令）：
 
 ```sh
-# Plugins 页：对本包选 Update
-# 或 CLI（Web 自动化 / 离线）：
-dsh plugin --profile deep-research add dsh-deep-research-pack@<new>
+# 把 0.3.1 换成新版本号；路径换成你下载的位置
+dsh plugin --profile deep-research add "file:$HOME/downloads/dsh-deep-research-pack-0.3.1.tgz"
 dsh --profile deep-research
 ```
+
+npm 发布后也可以用 Plugins 页的 Update，或 `dsh plugin --profile deep-research add dsh-deep-research-pack@0.3.1`（把 0.3.1 换成新版本）。
 
 - 装/卸插件后**必须重启 profile**；只改配置的 patch 在 HMR 开启时可能即时生效。
 - 工作区数据不随包升级；方法库不被覆盖；内容（手册/模板）随包版本，新开 Lead 会话生效。
@@ -250,7 +251,7 @@ DSH 的配置层从低到高：Config schema 默认值 → bundle patch（本包
 - **整份替换**：patch 对目标 row 的 `config` 是整份替换，不是字段合并。只写 `port` 会丢 `host` 等必填字段，required plugin 可能在 boot 时失败；要么写全，要么只覆盖非必填字段。
 - **`!!js` 表达式**：row 保留表达式时，`--port` 等 app 参数才能压过 config；用户 patch 换成字面值后，参数会被静默忽略。
 - **Settings 页**：只有 `research-fetch-fallback.enabled` 标了 `.volatile()`，可即时生效；超时等其余字段不是 volatile。
-- **机器核对**：`dsh --profile deep-research --dump-config` 看组合树里的 row id（清单见 §六）。
+- **组合树（`--dump-config`）**：应出现 `preset-lead`、`research-content`、`research-client`、`research-startup`、`research-fetch-fallback`、`tool-present`、`session-query-sqlite`；同时改写 base 的 `web`（检索）、`llm-deepseek`（重试）、`session-query-sqlite`（会话检索）与 `agent-preset-registry`（默认 preset = lead）。打开团队层时还会有 `ui-agent-team`；stderr 不应有 `patch: entry "…" not found`。
 
 ## 已知限制与延后工作
 

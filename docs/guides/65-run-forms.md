@@ -22,7 +22,7 @@
 **决定：M1 安装形态为主。** 安装与启动全部是 DSH 命令；本包只多一个 custom profile 名
 （`deep-research`）。自定义 profile 的建立只能用 CLI（DSH 没有 UI 建自定义 profile；CLI 对未知名
 profile 只初始化 `dsh-base`——`--from-default-profile web` 是文档给的路径）。装包入口 = 本地 tarball
-（当前唯一发布形态）；npm/Plugins 页是发布后路径（当前 staged）。本包不发明安装器。**完整安装合同的 owner = [`scripts/dist/product-manual.md`](../../scripts/dist/product-manual.md)（生成 `_dist/安装手册.md`）；根 README 只放最短路径，命令由 [`readme-manual-commands`](../../tests/contracts/readme-manual-commands.test.mjs) 对账**；
+（当前唯一发布形态）；npm/Plugins 页是发布后路径（当前 staged）。本包不发明安装器。**完整安装合同的 owner = [`scripts/dist/product-manual.md`](../../scripts/dist/product-manual.md)（生成 `_dist/安装手册.md`）；根 README 承担用户路径（最短安装 + 一次走查），命令由 [`readme-manual-commands`](../../tests/contracts/readme-manual-commands.test.mjs) 对账**；
 本页只写合同，不复制命令。
 
 ## 2. 六轴 owner

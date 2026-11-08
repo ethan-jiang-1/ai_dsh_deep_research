@@ -64,8 +64,9 @@ dsh --profile deep-research --from-default-profile web --dump-default-config
 不要在已存在的 profile 上执行它：它会替换依赖与用户 patch。已存在的 profile 用本地 tarball 安装该
 组合包（npm/Plugins 为 staged）。
 
-**4. CLI 安装（仅限 Web 自动化或离线）。** `dsh plugin --profile` 转发给 pnpm；它不是 GUI 用户的
-默认入口。npm/源码版 `dsh` 拒绝 `desktop` profile；Desktop 应用自有的载体可以管理它，但第三方说明应
+**4. CLI 安装（包名形式，发布后；也用于 Web 自动化或离线）。** `dsh plugin --profile` 转发给 pnpm；
+0.3.0 当前安装走第 2 步的本地 tarball，下面的包名形式在 npm 发布后以及 Web 自动化/离线时使用。
+npm/源码版 `dsh` 拒绝 `desktop` profile；Desktop 应用自有的载体可以管理它，但第三方说明应
 停留在显式的非 `desktop` profile 上：
 
 ```sh
@@ -126,8 +127,8 @@ dsh --profile deep-research --no-open --port 0
 
 ### 升级与回退
 
-从 Plugins 页更新本包，或用 `dsh plugin --profile deep-research add
-dsh-deep-research-pack@<new>`，然后在组合包成员关系变化时**重启该 profile**。仅配置的修改在启用 HMR
+0.3.0 升级用新版本的 tarball 重走第 2 步；npm 发布后也可用 Plugins 页更新或包名形式。
+然后在组合包成员关系变化时**重启该 profile**。仅配置的修改在启用 HMR
 时可以热重载。DSH 没有命令级回退：回退就是重装旧的确切版本，且旧包必须满足正在运行的 DSH 的
 `engines.dsh`。工作区数据不会回退。
 

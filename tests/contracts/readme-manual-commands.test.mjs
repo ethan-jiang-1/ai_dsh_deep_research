@@ -4,7 +4,8 @@
 // README 装到一半发现参数对不上。判据 = README 里每条 `dsh …` 行逐字出现在
 // _dist/安装手册.md（tracked 生成物，用户拿到的那份），不比对源模板（含 {{tarballName}} 占位）。
 // 防空：README 少于 3 条 = 测试空转（最短路径至少要有建 profile / 装包 / 启动三条）。
-// 反证：把 README 的 `--from-default-profile` 改成别的值 → 红；改回 → 绿。
+// `$DSH_VER` 同守：README 删掉赋值行时 `@$DSH_VER` 会装成空版本，不能仍绿。
+// 反证：首跑红 = README 0 条命令（防空）；漂移反证 = 改一条命令见红，改回绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -21,13 +22,17 @@ const dshCommands = (text) => text.split('\n')
   .map((line) => line.replace(/\s+#.*$/, ''))
 
 test('README 的最短路径命令与 _dist/安装手册.md 同源', () => {
-  const readme = dshCommands(read('README.md'))
-  const manual = new Set(dshCommands(read('_dist/安装手册.md')))
-  assert.ok(readme.length >= 3, `README 只有 ${readme.length} 条 dsh 命令——最短路径应含建 profile / 装包 / 启动（防空）`)
+  const readmeText = read('README.md')
   const manualText = read('_dist/安装手册.md')
+  const readme = dshCommands(readmeText)
+  const manual = new Set(dshCommands(manualText))
+  assert.ok(readme.length >= 3, `README 只有 ${readme.length} 条 dsh 命令——最短路径应含建 profile / 装包 / 启动（防空）`)
   assert.ok(manual.size >= 3, '安装手册缺 dsh 命令——生成物与源模板对不上，先跑 node scripts/dist/export-dist.mjs')
   for (const command of readme) {
     assert.ok(manual.has(command), `README 的命令不在 _dist/安装手册.md：${command}\n—— 两处必须逐字一致；改一条就同 diff 改另一条（源 = scripts/dist/product-manual.md，记得重导出）`)
   }
-  assert.ok(manualText.includes('--profile deep-research'), '安装手册缺 --profile deep-research——手册的用户路径变了？')
+  if (readme.some((command) => command.includes('$DSH_VER'))) {
+    assert.ok(readmeText.includes('DSH_VER="$(dsh --version)"'), 'README 的团队能力版本赋值行缺席——`@$DSH_VER` 会装成空版本')
+    assert.ok(manualText.includes('DSH_VER="$(dsh --version)"'), '安装手册的团队能力版本赋值行缺席——同一空版本陷阱')
+  }
 })

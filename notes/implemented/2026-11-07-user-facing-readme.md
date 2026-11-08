@@ -29,4 +29,21 @@
 - **新契约反证**：[readme-manual-commands](../../tests/contracts/readme-manual-commands.test.mjs) 首跑红（README 0 条 `dsh` 命令，触发防空断言）→ 重写 README 后绿；不是先绿后补。
 - **冷读探针**（无上下文读者只看 README，七问）：第一遍评分 2/5——七问全对，但缺口 = tgz 来源、DSH 前置未点明、「已有 profile」无法自查、「重启」无命令、登录无指引、术语（时间口径语言/slug/DSH_HOME/Web 面/首屏）。按缺口改完后第二遍 **3/5、七问全对**；剩余 = tgz 分发地址、UI 点击细节、DSH 先验知识（前两类归分发/手册）。
 - **截图**：[首屏](../../docs/assets/readme-first-screen.png) + [Plugins 页](../../docs/assets/readme-plugins.png) 均从真实 3083 通道抓取，无 token；首屏含右栏研究状态/配置/图谱入口。
-- **审查**：语义自审（`reviewing-a-delivery`）通过，无 blocker——意图对齐（七问可答）、合同同步（owner 口径 3 处 + evaluation 台账登记）、断言反证（新测试红在先）、生成物链（`_dist` 由源重导出）。残余风险：手册 A/B/C/D 顺序受 D41 约束、pack README 二期、绑定态驾驶舱截图需在飞 run。
+- **README 原文重放**（2026-11-08）：临时 home 里按 README 安装块执行 profile init → `file:` tarball add → 团队层 add（`@$(dsh --version)`），全部成功，`--dump-config` 5 个目标 id 在场；命令形式可用（路径占位替换）。
+- **契约变异**（2026-11-08）：改 README 一条命令 → 测试红；删 `DSH_VER="$(dsh --version)"` → 原测试仍绿（已补守卫）。
+- **2026-11-08 复核修正**：两轮对抗审查发现首轮交付的全局一致性缺口——AGENTS 入口链/宪章指针、CONTRIBUTING/project-map/pack README 的旧安装口径、手册 §八升级段与 `@<new>`、README 的终稿/方法库可见性/命令编号/跳过判据/交付顺序、测试的 `DSH_VER` 守卫；同变更修正并复跑 verify + test 绿。
+- **审查**：语义自审（`reviewing-a-delivery`）通过，无 blocker——意图对齐（七问可答）、合同同步（owner 口径 3 处 + evaluation 台账登记）、断言反证（新测试红在先）、生成物链（`_dist` 由源重导出）。残余风险：手册 A/B/C/D 顺序受 D41 约束、pack README 全面改写二期（本轮只修安装/升级口径）、绑定态驾驶舱截图需在飞 run。
+
+## 冷读七问记录（第二轮，2026-11-07）
+
+无上下文读者只看 README，七问答案：
+
+1. **是什么/给什么**：DSH 里的四角色研究小队，交付每条关键结论带 `[来源: evidence/xx.md]` 的报告，产物写进所选项目。
+2. **装之前要什么**：已装好的 DSH（版本在范围内）、Node、pnpm、下载的 tgz；跑研究才要凭据。
+3. **第一条命令**：`dsh --profile deep-research --from-default-profile web --dump-default-config`，只建专用配置，不装包，替换已有同名配置。
+4. **第一次研究**：装包 → 团队能力 → 启动 → 开 URL → 选项目目录 → 问问题 → 答三问 → 看计划确认 → 静默 → 交付审阅 → 终稿。
+5. **产物在哪**：所选项目下的 `method-library.md`、`drt_<slug>/`（问题/证据/报告/审阅/终稿）、`archive/`。
+6. **出问题**：先看手册「故障排查」，再带终端输出开 issue。
+7. **不支持什么**：Windows 与完整 Desktop 路径未承诺；只支持 Web 界面；团队能力不要用 `@latest`。
+
+评分 3/5；剩余缺口 = tgz 分发地址、UI 点击细节、DSH 先验知识。

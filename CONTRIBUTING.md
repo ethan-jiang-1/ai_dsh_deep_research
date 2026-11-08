@@ -6,10 +6,11 @@ is `packages/deep-research-pack`.
 
 ## Install form vs development
 
-The package is a DSH bundle installed into a user-created custom profile (`deep-research`). Users
-create the profile from the shipped web template, install the bundle plus the team layer from the
-Plugins page (CLI is for Web automation/offline), and start with `dsh --profile deep-research`; the
-first screen asks for the project folder. There is no custom installer and no launcher. Development
+The package is a DSH bundle installed into a user-created custom profile (`deep-research`). Create
+the profile from the shipped web template, then install the current local tarball plus the
+experimental team layer with `dsh plugin --profile deep-research add …` (commands =
+[`_dist/安装手册.md`](_dist/安装手册.md)); the Plugins page becomes the primary install path after
+npm publication. There is no custom installer and no launcher. Development
 in this repository uses the isolated `deep-research` profile, `research-workspace/` and
 `dev/run-driver.mjs` — do not mix the two command sets or data roots.
 

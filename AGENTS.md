@@ -38,7 +38,7 @@ CLAUDE.md→AGENTS.md、.claude/skills→.agents/skills    两条 symlink（编�
                          harness 发现同一批开发技能——verify 门禁 claude-symlink 校验）
 子树 AGENTS.md            docs/ · scripts/ · notes/ · packages/deep-research-pack/ · tests/ · _backlog 各一份——只放该
                          子树的指令（根只放每轮常驻指令；vendor 树内多份同构，份数以盘上为准）
-README.md                 人类门面（「用它 / 首屏 / 改它」入口 + 稳定原则摘要；命令正本 = guides/60 §2，不复制）
+README.md                 人类门面（使用者：结果 / 安装 / 第一次研究；开发者一行路由；完整安装合同 = _dist/安装手册.md）
 _backlog/                 问题澄清与证据区：issues/、bugs/、research/、methods/、triggers.md、_archived/（另有
                           _done/ 改名兼容指针，见 _backlog/README 载体导航）；
                           手册 = _backlog/README.md、子树门牌 = _backlog/AGENTS.md（状态机/下一步/守卫）
@@ -121,7 +121,7 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 >
 > **证据匹配面**：改动的面 → 证据类型，执行正本 = [guides/60 §2 任务型路由表](docs/guides/60-dev-loop.md)；新契约测试与门禁同 diff 带反证（先看红再交付绿）。
 >
-> **研发宪章**（2026-09-27 用户定调）= [README §研发宪章](README.md)：循 DSH 而不发明 · 自主优先
+> **研发宪章**（2026-09-27 用户定调）= [CONTRIBUTING §Development charter](CONTRIBUTING.md#development-charter)：循 DSH 而不发明 · 自主优先
 > 并借鉴成熟 DSH 插件（采纳度为信号）· **审阅分层**——机械门禁/审计/判据探针/对抗自审自主做，
 > 只在阶段边界请人（REVIEW 是最后手段，不是例行步骤）。
 

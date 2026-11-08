@@ -68,10 +68,12 @@ dsh --profile deep-research --from-default-profile web --dump-default-config
 ```
 
 Do not run it on an existing profile: it replaces dependencies and the user patch. Existing
-profiles install the bundle from the Plugins page.
+profiles install the current local tarball (npm/Plugins are staged).
 
-**4. CLI installation (Web automation or offline only).** `dsh plugin --profile` forwards to pnpm;
-it is not the default entry for a GUI user. npm/source `dsh` refuses the `desktop` profile; the
+**4. CLI installation (package-name form, post-publish; also Web automation or offline).**
+`dsh plugin --profile` forwards to pnpm. For 0.3.0 the current install is the local tarball in
+step 2; the package-name form below applies after npm publication and to Web automation/offline.
+npm/source `dsh` refuses the `desktop` profile; the
 Desktop application's own carrier can manage it, but third-party instructions should stay on
 explicit non-`desktop` profiles:
 
@@ -142,8 +144,9 @@ the main surface gains the method-library tab.
 
 ### Upgrade and rollback
 
-Update the package from the Plugins page, or with `dsh plugin --profile deep-research add
-dsh-deep-research-pack@<new>`, then **restart the profile** when bundle membership changes.
+For 0.3.0, update by installing the new tarball (the same command as step 2, pointing at the
+new file); after npm publication the Plugins page Update or the package-name form also work.
+Then **restart the profile** when bundle membership changes.
 Configuration-only edits can hot-reload when HMR is enabled. DSH has no command-level rollback:
 rollback is reinstalling the old exact version, and the old package must satisfy the running DSH's
 `engines.dsh`. Workspace data does not roll back.
