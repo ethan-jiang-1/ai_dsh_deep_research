@@ -28,6 +28,10 @@ description: 组队决策方法论：这次研究需要谁、不需要谁、走�
   用；Lead spawn `agent_preset=analyst`（depth 1）作 executor，**不进 Team roster/任务板**；child
   是 analyst 克隆，各写 evidence 卡，executor 对账写 `waves/<wave>.json`。有协商/要拍板/要综合的
   层仍走 team 或 spawn_teammate，不用 workflow。
+- **脚本层的唯一派发通道 = `subagent(agent_preset=analyst)`；不要用 `spawn_teammate`**：队友
+  composeFrom Lead，没有 analyst preset 的 workflow/wave-execution（P3 live 实测：teammate 报
+  `TOOL_NOT_IN_SESSION`）；`spawn_teammate` 只用于对话层。**等 subagent 不要用 `wait_agent`**：
+  subagent 不在 Team 轮询面；派完结束回合或继续别的活，completion notice 会作为新消息唤醒。
 
 ## 分派纪律
 

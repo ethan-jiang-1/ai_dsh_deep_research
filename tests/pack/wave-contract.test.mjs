@@ -44,6 +44,8 @@ test('Lead skills：planning / team-assembly / brief 都点名脚本层', () => 
   assert.match(planning, /脚本层不建 Team task/, 'research-planning 缺「脚本层不建 Team task」');
   assert.match(planning, /task_id=plan-only/, 'research-planning 缺 plan-only');
   assert.match(team, /workflow（脚本层执行器/, 'team-assembly 缺 workflow 通道行');
+  assert.match(team, /不要用 `spawn_teammate`/, 'team-assembly 未钉脚本层唯一通道');
+  assert.match(team, /不要用 `wait_agent`/, 'team-assembly 未钉 subagent 等法（completion notice）');
   assert.match(brief, /脚本层点名/, 'research-brief 缺脚本层点名');
   assert.match(brief, /W<n> 脚本扇出/, 'research-brief 缺计划卡授权句');
 });
