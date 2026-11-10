@@ -281,6 +281,7 @@ are composition carriers; their model-facing behavior is owned by the inserted r
   Method Editor Host tools or the Lead's explicit workspace edit.
 - **Agent Teams**: the team packages are N2 experimental; the API may change or disappear, and the
   version must match the running DSH.
+- **Wave execution**: only deep-dive lens×topic is scripted (`content/waves/lens-fanout.js` + analyst workflow mount, D45); reports use `run_id: null`/derived `stop_reason` because rendered results omit both; PTC needs OS `sandbox-exec` (nested DSH sandboxes fail; pilot used full access); a full HITL run is deferred.
 - **Fetch fallback**: it rescues only local failures (timeout, cross-origin redirect, unsupported
   content type, transport error, 5xx); it does not rescue 4xx, blocked URLs, invalid URLs, or user
   cancellation. API fallback text carries a source marker and hides the final URL.

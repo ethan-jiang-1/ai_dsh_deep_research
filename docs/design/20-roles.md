@@ -48,6 +48,11 @@ skill = 盘上目录本身**（单一事实源：`ls packages/deep-research-pack
 （L3 载体，合同随代码同 diff）；每条方法论纪律写在承载它的 SKILL.md 正文里；
 跨角色硬契约（证据 frontmatter 等）住[研究手册](../../packages/deep-research-pack/content/manual.md)。
 
+**脚本层（D45）**：analyst 的 `wave-execution` skill 承载同质 wave 执行器——Lead 用
+`subagent(agent_preset=analyst)` 派它，child 是 analyst 克隆；只做 deep-dive 的 lens×topic
+取证，child 写 evidence、executor 对账写 `waves/<wave>.json`。它不是新角色，也不是第五个
+角色；`spawn_teammate` 不能替代（队友 composeFrom Lead，没有 analyst preset 的 workflow/skill）。
+
 ## 3. 信噪比策略落点（L3 判据 4：显式机制，不靠模型自觉）
 
 Deep Research 的本质困难 = 搜索结果信噪比极差 + 答案位置未知。四道显式防线：
