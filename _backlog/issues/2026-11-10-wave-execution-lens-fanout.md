@@ -255,6 +255,17 @@ Lead root 不占槽；executor depth 1，children depth 2；同一 wave 不再�
   implemented Note 与卡归档**不先写**——P4 未跑，写了就是把未验项写成 implemented。P4 过后同变更
   写 `notes/implemented/2026-11-10-wave-execution-lens-fanout.md` 并归档。
 
+**P4 代理模拟（2026-11-10，进行中；不是用户验收）**：在隔离 profile `wave-pilot` / 端口 3084
+（`DSH_PERMISSION_MODE=danger-full-access`）跑了一场 `drt_api-selection-ds-openai`：HITL1 三问与
+计划卡由 `hitl-answer` 代理作答并在 question/journal 标注「代理模拟」；计划卡 **193 字**、正文
+含「W2 脚本扇出 ×4」；W2 由 Lead `subagent(agent_preset=analyst)` 执行，报告
+`requested 4 / ok 4 / partial 0 / failed 0 / missing 0`（12 张证据卡，含同 lens 拆卡），
+`run_id:null`、`stop_reason:completed`；Lead 派完结束回合、completion notice 唤醒后读报告。
+P4 仍以用户在场的真 run 为验收；代理跑只作机制/容量预演。**本场还抓到**：Lead 初版 plan 按
+team-assembly 矩阵想招 4 个 teammate（+executor 1 + child 4 = 9 槽），已把「先算 8 槽再组队」
+钉进 team-assembly + 测试（commit `f5359ad`）；实际 W2 前只 spawn 了 scout，未撞顶。
+HITL2 尚未到；到卡时按 `timeout: -1` 路径代理作答并记录是否保持 pending。
+
 **P4 开跑清单（待用户在场，一轮跑完）**：
 
 1. 先确认默认通道无在飞 run，再停通道重建镜像（`bash dev/boot-run.sh` / `run-driver up`；
