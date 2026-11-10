@@ -255,16 +255,27 @@ Lead root 不占槽；executor depth 1，children depth 2；同一 wave 不再�
   implemented Note 与卡归档**不先写**——P4 未跑，写了就是把未验项写成 implemented。P4 过后同变更
   写 `notes/implemented/2026-11-10-wave-execution-lens-fanout.md` 并归档。
 
-**P4 代理模拟（2026-11-10，进行中；不是用户验收）**：在隔离 profile `wave-pilot` / 端口 3084
-（`DSH_PERMISSION_MODE=danger-full-access`）跑了一场 `drt_api-selection-ds-openai`：HITL1 三问与
-计划卡由 `hitl-answer` 代理作答并在 question/journal 标注「代理模拟」；计划卡 **193 字**、正文
-含「W2 脚本扇出 ×4」；W2 由 Lead `subagent(agent_preset=analyst)` 执行，报告
-`requested 4 / ok 4 / partial 0 / failed 0 / missing 0`（12 张证据卡，含同 lens 拆卡），
-`run_id:null`、`stop_reason:completed`；Lead 派完结束回合、completion notice 唤醒后读报告。
-P4 仍以用户在场的真 run 为验收；代理跑只作机制/容量预演。**本场还抓到**：Lead 初版 plan 按
-team-assembly 矩阵想招 4 个 teammate（+executor 1 + child 4 = 9 槽），已把「先算 8 槽再组队」
-钉进 team-assembly + 测试（commit `f5359ad`）；实际 W2 前只 spawn 了 scout，未撞顶。
-HITL2 尚未到；到卡时按 `timeout: -1` 路径代理作答并记录是否保持 pending。
+**P4 代理模拟（2026-11-10，已跑到交付；仍不是用户验收）**：隔离 profile `wave-pilot` / 端口
+3084（`DSH_PERMISSION_MODE=danger-full-access`），bundle = `drt_api-selection-ds-openai`：
+
+- HITL1 三问 + 计划卡由 `hitl-answer` 代理作答并标注「代理模拟」；计划卡 **193 字**、正文含
+  「W2 脚本扇出 ×4」，选项未改。
+- W2 由 Lead `subagent(agent_preset=analyst)` 执行：`requested 4 / ok 4 / partial 0 / failed 0 /
+  missing 0`（16 张证据卡，含同 lens 拆卡；报告 `run_id:null`、`stop_reason:completed`）；Lead
+  派完结束回合，completion notice 唤醒后读报告。
+- **HITL2 的 `tool/call` 实测 `timeout: -1`**（seq 1114，交付审阅卡 169 字）；goal 未 pause，
+  等待期间无 goal 轮空转；代理答「定稿」后继续交付。
+- critic 三轮后终局 **readiness PASS，CRITICAL 0 / MAJOR 0**，critical claim 8/8 逐字通过；
+  `final/v1.md`（30KB）+ `final/readable-v1.md`（4.8KB）+ present 已落；`run.md` =
+  `phase: delivery` / `delivered: v1 · present`。
+- **操作侧预检 `run-accept --no-write` = RED**（不是 wave 面）：node-gate 因 `audit.md` 未落盘
+  （先跑 evidence-audit --write 即可）；verdict-audit 报 `not-verbatim`（batch3 raw 与 child 原文
+  不逐字）+ C4/C7 多裁决 duplicate 警告；evidence-audit 本身 PASS（CRITICAL 0 / MAJOR 4）。
+  这属 claim-verdict 质量环，代理预演未继续修；**P4 真 run 时同一条 op 预检要一起过**。
+- **容量 finding**：Lead 初版 plan 按 team-assembly 矩阵想招 4 个 teammate（+executor 1 +
+  child 4 = 9 槽）；已把「先算 8 槽再组队」钉进 team-assembly + 测试（commit `f5359ad`）。
+  实际 W2 前只 spawn 了 scout，未撞顶。
+- 代理跑只作机制/容量预演；**P4 的用户在场真 run 与用户对交付的验收仍未发生**，故本卡不归档。
 
 **P4 开跑清单（待用户在场，一轮跑完）**：
 
