@@ -13,6 +13,8 @@
 > 拆分/合并/删除只做墓碑（`lifecycle` = retired / merged_into / superseded_by），墓碑留在表里
 > 供 byId 解析但不画图；旧号不复用。图版本：v1（每次重写递增）——**重写前先把当前
 > `plan.md` 复制到 `plan/v<被取代的版本>.md`**（只读旧图快照）；`plan.md` 始终是唯一当前版。
+> **脚本层**：同质取证层在 `## Wave 执行` 节声明；该层节点 `task_id` 写 `plan-only`，**不加
+> engine/channel 列**（`plan-index`/驾驶舱不解析该节）。
 
 ## 节点表
 
@@ -38,6 +40,15 @@
 - Wave 5：W5.1
 
 > 不手写 LAYER 表；若为说明写层，标“示意/非权威”。Wave 分组不是任务，不挂 output/task_id。
+
+## Wave 执行
+
+<!-- 只有同质、独立、产物自足、无 HITL 的层才写在这里；一层一个通道；v1 最多一层。
+     该层节点在节点表 task_id 写 plan-only；output 指 waves/<wave>.json + evidence/…；
+     budget 写 N（workflow；maxConcurrentAgents=4）。没有这一节 = 没有脚本层。 -->
+- W2：`lens-fanout` ×4；executor = analyst（spawn，depth 1）；
+  cells = T1×official, T1×quant, T2×practitioner, T2×adversarial；
+  报告 = waves/W2.json
 
 ## 重写记录
 

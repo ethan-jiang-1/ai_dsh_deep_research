@@ -24,6 +24,10 @@ description: 组队决策方法论：这次研究需要谁、不需要谁、走�
 - **claim 级复核（非 quick_factual；subagent 的一次性形态）**：`agent_preset=critic` + claim 表
   （3–5 条/批，claim-first，不给草稿叙事）+ `claim-verdict` skill；child 只回 JSON 数组，Lead 原文落
   `review/verdicts-r<N>.json`。它不进任务板、不做报告级判断——那是团队态 critic 的事。
+- **workflow（脚本层执行器，仅同质取证层）**：只在 plan 的 `## Wave 执行` 点名、计划卡已授权时
+  用；Lead spawn `agent_preset=analyst`（depth 1）作 executor，**不进 Team roster/任务板**；child
+  是 analyst 克隆，各写 evidence 卡，executor 对账写 `waves/<wave>.json`。有协商/要拍板/要综合的
+  层仍走 team 或 spawn_teammate，不用 workflow。
 
 ## 分派纪律
 

@@ -146,6 +146,18 @@ test('delegating preset subagent = maxDepth 2 + allowedAgentPresets；无 stale 
   }
 });
 
+test('只有 analyst 挂 workflow（engine+tool 同 group + isolate + caps）；其余 preset 不挂', () => {
+  const ymlOf = (r) => readFileSync(join(PRESETS, `${r}.patch.yml`), 'utf8');
+  const analyst = ymlOf('analyst');
+  // 探针 P1 的可用形状：engine + tool 同 group，isolate workflowEngine；只插 tool 会 broken。
+  assert.match(analyst, /- id: workflow-delegation\n\s+name: cordis:group\n\s+group: true\n\s+isolate:\n\s+workflowEngine: true/, 'analyst 缺 workflow group/isolate');
+  assert.match(analyst, /- id: workflow-ptc\n\s+name: '@deepseek-ai\/dsh-workflow-ptc'\n\s+config:\n\s+provider: spawn\n\s+maxConcurrentAgents: 4\n\s+maxTotalAgents: 8/, 'analyst 的 workflow engine 配置不完整');
+  assert.match(analyst, /- id: tool-workflow\n\s+name: '@deepseek-ai\/dsh-tool-workflow'\n\s+config:\n\s+enableRunInBackground: false/, 'analyst 的 tool-workflow 未关闭后台');
+  for (const role of ROLES.filter((r) => r !== 'analyst')) {
+    assert.doesNotMatch(ymlOf(role), /workflow-ptc|tool-workflow/, `${role} 不应挂 workflow（只有 analyst 承载）`);
+  }
+});
+
 test('清单只带 DSH 读的 dsh.* 键：bundle 与 client，无自造兼容矩阵', () => {
   const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
   assert.deepEqual(Object.keys(pkg.dsh ?? {}).sort(), ['bundle', 'client'],

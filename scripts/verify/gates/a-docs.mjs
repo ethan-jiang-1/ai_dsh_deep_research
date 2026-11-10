@@ -344,7 +344,11 @@ export function runA() {
 // tests 数 ×2、note 篇数、源面条数、门禁数——本注释原先照抄这些数字，被本门禁自己咬红，
 // 即为它有效的第一份证据）。计数有正本（gates 数组 / evaluation 台账 / ls），散文里的副本
 // 只会腐烂——一律改成"查正本"。
-// 范围：live 文件（排除 notes/ 历史层与 vendor/）。防空语料：0 个文件被检查 → 红。
+// 范围：live 文件（排除 notes/ 历史层、vendor/、pnpm-lock.yaml 与**录制证据**
+// `snapshots/replay/**` / `tests/fixtures/run-state/**`）。录制流是冻结的历史证据，里面是
+// 模型/宿主当时的原文（可能含 `N tests` 一类自指计数）；改夹具来迁就门禁 = 篡改证据。
+// 与 d-vendor 的 vendor-links 录制流豁免同源（2026-09-27 立，2026-10-09 随夹具迁入
+// snapshots/replay/）。防空语料：0 个文件被检查 → 红。
 // 已知边界：只检阿拉伯数字 + 四个名词（门禁/tests/断言/条源面），中文数字与枚举不检
 // （2026-10-20 审计实证：十二件/9 环节/三条/六个 均曾漂移）；关键枚举改指正本，语义面
 // 由 docs-consistency 契约承接。
@@ -353,7 +357,8 @@ export function runA() {
   // 枚举四件套收口（形态正本 = trackedFiles 助手头注）；范围与防空语料措辞是本门禁自己的。
   const files = trackedFiles({
     gate,
-    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f === 'pnpm-lock.yaml',
+    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f === 'pnpm-lock.yaml'
+      || f.startsWith('snapshots/replay/') || f.startsWith('tests/fixtures/run-state/'),
     emptyMsg: '防空语料：未扫到任何 live 文件',
   });
   if (files) for (const { rel, text } of files) {

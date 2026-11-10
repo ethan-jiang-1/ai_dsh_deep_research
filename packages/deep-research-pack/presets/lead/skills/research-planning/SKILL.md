@@ -54,6 +54,10 @@ acceptance / budget / depth / task_id`。头部必须有机器可读版本行 `�
 - **lens 是 cell 属性，不写 plan 列**：从 `topics.md` 每个 topic 的 `lenses:` 读；cells = Σ(topic ×
   该 topic 的 lens 数) ≤12；同一 topic ≥2 lens 时，至少一个 cell 走独立 activation（subagent /
   workflow child），同 activation 顺序跑在 plan/journal 记理由。
+- **脚本层不是列**：同质取证层写在 `## Wave 执行` 节（格式 = 模板）：`W<n>：lens-fanout ×N；
+  cells = …；报告 = waves/W<n>.json`。该层节点 `task_id=plan-only`，`output` 指
+  `waves/W<n>.json + evidence/…`，`budget` 写 `N=…（workflow；maxConcurrentAgents=4）`。
+  `plan-index`/驾驶舱不解析该节；**不要加 engine/channel 列**。
 - 编制先验 = `team-assembly` 矩阵 + `question-patterns` 分派结论；**它们是默认，不是判决**——按
   问题形状偏离时在 plan 的“重写记录”/journal 写一句理由。
 - 预算：顶层节点 ≤12、关键路径 ≤6、每 topic 加深 ≤2 轮、cells（topic × lens）≤12；超了就拆/合并/问用户，不硬堆。
@@ -96,6 +100,9 @@ L2 触发（任一）：关键 claim 单源/只有二手、口径缺失、矛盾
    `task_id` 会失效，按同一规则重绑。**task_id 只是当前会话映射**；canonical 引用始终是 `W2.1`。
 4. 把所有 ready 且无 owner 的 task `team_task_update action=reassign` 给 owner；owner 不在线就
    `send_message` 唤醒。
+5. **脚本层不建 Team task**：executor = Lead `subagent(agent_preset=analyst)`（spawn，depth 1），
+   不是 Team 成员；该层节点 `task_id=plan-only`，`## Wave 执行` 节记录 cells/executor/报告路径。
+   不要为脚本层建 task 或 reassign；Team 板只镜像对话层节点。
 
 ## 5. 调度循环（Lead 的常驻动作）
 
@@ -105,6 +112,10 @@ L2 触发（任一）：关键 claim 单源/只有二手、口径缺失、矛盾
    做 Lead 自己的 synthesis/收口。
 4. teammate 失败/卡住 → `interrupt_agent` + `reassign`（或 reopen）；journal 记原因。
 5. 交付前不结束回合、不问“要不要继续”、不汇报中间进度；只有 HITL1/HITL2 两个交互点。
+6. **脚本层派发**：Lead 用 `subagent(agent_preset=analyst)` 派 executor，brief 按
+   `wave-execution` skill 的七件写全（bundle/plan_version/wave/cells 含 lens 路径与输出路径/
+   授权句）；等 completion notice 后读 `waves/W<n>.json` + 抽查 ≥1 张卡，journal 记一行。
+   同一层不重复跑；脚本层运行期间不再派 subagent worker（8 槽共享）。
 
 ## 6. 重写图（动态编排）
 
@@ -120,7 +131,8 @@ L2 触发（任一）：关键 claim 单源/只有二手、口径缺失、矛盾
   复审 ≤3 轮。
 - 每次重写先落快照再改：把当前 `plan.md` 复制到 `plan/v<被取代的版本>.md`（只读旧图），再改
   头部 `图版本`、节点表与重写记录，journal 记一行。`plan.md` 始终是唯一当前版；旧图只用于
-  diff/追溯，不参与派工。**scope 变更**（超出 question.md
+  diff/追溯，不参与派工。**脚本层运行中不改 plan**；确需改，先等该层 `waves/<wave>.json`
+  落盘，用报告里的 `plan_version` 对账，再重写。**scope 变更**（超出 question.md
   §Scope）回 HITL2，图内重写自主。用户点名 W 时，先读 plan 的 id 行；`W2` 是整层，
   `W2.1` 是节点；反馈记 `node_id + plan_version`。
 
