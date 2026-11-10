@@ -7,7 +7,7 @@ opened: 2026-11-07
 
 > 立卡：2026-11-07 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做——已交付 ｜ 可关闭：是
 > 结论：README 改为产品页（73 行）、手册在 D41 十一段内做用户路径优先、开发面归位 CONTRIBUTING；契约测试红先、冷读 3/5、`install-shape-smoke` 全绿。
-> 去向：implemented — [Note](../../../notes/implemented/2026-11-07-user-facing-readme.md)。
+> 去向：implemented — [Note](../../../notes/archived/2026-11-07-user-facing-readme.md)。
 > 审查：语义自审通过（reviewing-a-delivery）；业务验收 = 用户（2026-11-07 授权落地）。
 
 **问题与期望结果：** 用户 2026-11-07 反馈：根 `README.md` 与安装说明仍主要写给开发者/Agent 看，需要改为面向使用者；面向开发者的内容若必须保留，可另劈一个 MD。期望：**一个已经在用 DSH、没读过本仓任何文档的人**，只看 README 就能在五分钟内回答七个问题——这是什么、能给我什么、装之前要什么、第一条命令是什么、第一次研究怎么走、报告落在哪、坏了去哪。开发者与 Agent 的入口不消失，但不占产品页；能复用既有文件就不新开文件。
@@ -33,7 +33,7 @@ opened: 2026-11-07
 3. 截图：2 张入库到 `docs/assets/`。
 4. 开发面：复用 [CONTRIBUTING.md](../../../CONTRIBUTING.md)（不新开 `DEVELOPMENT.md`）。
 
-**下一步：** 用户验收新 README/手册 → 写 `notes/implemented/2026-11-07-user-facing-readme.md` 并归档（同变更）。本卡不授予实施授权（授权 = 2026-11-07 用户口头确认）。
+**下一步：** 用户验收新 README/手册 → 写 `notes/archived/2026-11-07-user-facing-readme.md` 并归档（同变更）。本卡不授予实施授权（授权 = 2026-11-07 用户口头确认）。
 
 ## 外部依据：插件类项目的 README 与安装说明怎么写
 

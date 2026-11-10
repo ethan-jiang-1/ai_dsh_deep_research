@@ -4,7 +4,7 @@
 > agent-team-profile 层，P1 定案——[毕业 Note](../../notes/implemented/2026-09-24-m2-p1-run-channel.md)）；
 > **作用域**：本页只服务 M2 开发通道（仓内 `deep-research` profile + `research-workspace/` + run-driver）。安装用户（`dsh --profile deep-research` + 任意工作区）看 [pack README](../../packages/deep-research-pack/README.md)、[`_dist/安装手册.md`](../../_dist/安装手册.md) 与 [guides/65](65-run-forms.md)；不要把本页的 3083/仓内路径套到用户安装。
 > 跨角色纪律与文件契约 = [研究手册](../../packages/deep-research-pack/content/manual.md)；节点 I/O 正本 = [NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)；
-> 2026-09-24 的四角色流程快照 = [m2-run-mechanics](../../notes/implemented/2026-09-24-m2-run-mechanics.md)（历史，非现行）。本页只答"你现在做什么"。
+> 2026-09-24 的四角色流程快照 = [m2-run-mechanics](../../notes/archived/2026-09-24-m2-run-mechanics.md)（历史，非现行）。本页只答"你现在做什么"。
 
 ## 0. 开跑（一次性准备 + 每次启动）
 
@@ -81,7 +81,7 @@
 - **SPA 抓取通道（mcp-playwright，默认挂载）**：`bash dev/boot-run.sh` 自带本地 Playwright MCP
   （npx 拉起 `@0.0.83`、headless——SPA 定价页/JS 榜单的渲染抓取；不设任何代理参数，浏览器网络
   继承环境）；`MCP_PLAYWRIGHT=0` = 显式拆。决定与环境踩坑正本 =
-  [mcp-playwright 采纳 Note](../../notes/implemented/2026-10-02-mcp-playwright-adoption.md)；
+  [mcp-playwright 采纳 Note](../../notes/archived/2026-10-02-mcp-playwright-adoption.md)；
 - **网络 = 原生 DSH 行为（零干预）**：boot-run 不探测网络形态、不设任何代理 env、不起任何代理
   进程——代理路由（vendor `util/http-proxy` 原生读 `http_proxy`/`https_proxy`/`no_proxy`）与 SSRF
   守卫都是 vendor 缺省行为，设不设代理完全由用户环境决定。环境处于 TUN/fake-IP 态时 `web_fetch`
@@ -176,7 +176,7 @@ source dev/env.sh && node --import tsx/esm dev/hitl-answer.mjs --port 3083 --tok
 （计划确认卡在 quick_factual 编制下豁免）。**HITL2** 先按 §4 跑 `node-gate` / `evidence-audit`，
 再跑同一条 `hitl-answer`——交付审阅卡在 review readiness 非 PASS 时自拒（exit 4）。
 
-> **交付代答闸**（2026-10-18）：交付审阅卡在场而 review readiness 非 PASS 时，`hitl-answer` 的**默认推荐档会自拒**（exit 4）——请人工裁决，或显式 `--pick <非定稿项>`/`--custom` 表明有意为之（依据 = [hitl-proxy-delivery-guard](../../notes/implemented/2026-10-18-hitl-proxy-delivery-guard.md)）。
+> **交付代答闸**（2026-10-18）：交付审阅卡在场而 review readiness 非 PASS 时，`hitl-answer` 的**默认推荐档会自拒**（exit 4）——请人工裁决，或显式 `--pick <非定稿项>`/`--custom` 表明有意为之（依据 = [hitl-proxy-delivery-guard](../../notes/archived/2026-10-18-hitl-proxy-delivery-guard.md)）。
 
 它逐题打印选择结果；**必须**把这次代答如实记进 bundle 的 `question.md` §Decisions 与
 `journal.md`，标注"代理模拟"（它替的是人，不是人）。HITL1 与 HITL2 都走同一条命令。

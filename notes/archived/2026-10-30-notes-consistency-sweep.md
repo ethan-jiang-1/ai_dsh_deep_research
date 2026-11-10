@@ -32,11 +32,11 @@ archive。规则落 [notes/README §主动清理](../README.md) 与 [notes/AGENT
 | 簇 | 处置 | 代表 |
 |---|---|---|
 | 研究配置 / 方法库（D25 三次修订） | 历史注记：四区管理块已迁「方法库」tab；写入扩为 Method Editor host 工具 | [研究配置页签](../implemented/2026-10-12-research-config-tab.md) · [显式化](../implemented/2026-10-18-research-config-explicitness.md) · [方法配置](../implemented/2026-10-12-research-method-config.md) |
-| run 语义（D28/D29/D33） | 更新或历史注记：位置只用于发现；交付不是冻结；契约纪元 = schema 整数；终稿默认读者版 | [run-ops](../implemented/2026-09-27-run-ops-self-diagnosis.md) · [bundle 分离](../implemented/2026-09-24-run-bundle-drt-separation.md) · [宪章](../implemented/2026-10-23-run-bundle-charter.md) · [版本面](../implemented/2026-10-23-rerun-version-face.md) |
+| run 语义（D28/D29/D33） | 更新或历史注记：位置只用于发现；交付不是冻结；契约纪元 = schema 整数；终稿默认读者版 | [run-ops](2026-09-27-run-ops-self-diagnosis.md) · [bundle 分离](2026-09-24-run-bundle-drt-separation.md) · [宪章](../implemented/2026-10-23-run-bundle-charter.md) · [版本面](../implemented/2026-10-23-rerun-version-face.md) |
 | 门禁 / 工程形态 | 历史注记：单文件 verify 已按域拆；归档复核面已落地；快照覆盖面已扩 | [verify 重排](2026-10-13-verify-domain-regroup.md) · [notes 体检](2026-10-08-notes-stocktake.md) · [重估](2026-10-20-test-asset-reassessment.md) |
-| 旧时代 RFC / 队列 | 历史注记：roadmap/queue 已由 D20 退役，四角色已扩为五 preset | [m2 运行机制](../implemented/2026-09-24-m2-run-mechanics.md) · [R1 搭建](../implemented/2026-09-24-r1-scaffold.md) · [入口链审计](../implemented/2026-09-24-entry-chain-fresh-agent-audit.md) · [backlog 立层](2026-09-28-backlog-deliberation-space.md) |
-| 检索 / 发布 / 部署 | 更新：D31 第二处例外；pin/版本/安装锚与盘上对齐 | [web 行](../implemented/2026-09-24-web-tool-rows.md) · [search seam](../implemented/2026-09-27-search-fallback-seam.md) · [dist 导出](../implemented/2026-09-28-dist-export.md) · [发布版本](../implemented/2026-10-25-release-versioning.md) |
-| 事故 / 自相矛盾 | 更新：根因改判、BUG-022 归档；复审上限 2→3；pilot→常驻 | [重试 Note](../implemented/2026-10-11-provider-malformed-response-retry.md) · [审查回边](../implemented/2026-10-06-review-loop-bound.md) · [MCP Playwright](../implemented/2026-10-02-mcp-playwright-adoption.md) |
+| 旧时代 RFC / 队列 | 历史注记：roadmap/queue 已由 D20 退役，四角色已扩为五 preset | [m2 运行机制](2026-09-24-m2-run-mechanics.md) · [R1 搭建](2026-09-24-r1-scaffold.md) · [入口链审计](2026-09-24-entry-chain-fresh-agent-audit.md) · [backlog 立层](2026-09-28-backlog-deliberation-space.md) |
+| 检索 / 发布 / 部署 | 更新：D31 第二处例外；pin/版本/安装锚与盘上对齐 | [web 行](2026-09-24-web-tool-rows.md) · [search seam](../implemented/2026-09-27-search-fallback-seam.md) · [dist 导出](2026-09-28-dist-export.md) · [发布版本](../implemented/2026-10-25-release-versioning.md) |
+| 事故 / 自相矛盾 | 更新：根因改判、BUG-022 归档；复审上限 2→3；pilot→常驻 | [重试 Note](../implemented/2026-10-11-provider-malformed-response-retry.md) · [审查回边](2026-10-06-review-loop-bound.md) · [MCP Playwright](2026-10-02-mcp-playwright-adoption.md) |
 
 **4. 当前合同里的死指针同步修正。**
 [D9](../../docs/decisions.md#d9) 与 [design/10](../../docs/design/10-architecture.md) 的

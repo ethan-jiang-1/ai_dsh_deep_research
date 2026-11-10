@@ -15,7 +15,7 @@
 
 **不需要**：critic 散文审查实际抓出三根钉子（"2–4 年"无来源 / "1.56×"平台不对称 /
 "国产高 16%"口径）——这就是质量证据；数值 floor 反而有假绿风险（凑数达标 ≠ 真溯源）。
-出处同 [m2-run-mechanics §实施记录](../implemented/2026-09-24-m2-run-mechanics.md)。
+出处同 [m2-run-mechanics §实施记录](../archived/2026-09-24-m2-run-mechanics.md)。
 
 ### 重估追加（2026-09-26，两场 run）
 

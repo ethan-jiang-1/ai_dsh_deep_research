@@ -2,7 +2,7 @@
 
 > 状态：implemented
 >
-> 后继：2026-10-20 起 agent 启动首动作 = [run-driver 入口](2026-10-20-run-driver-entry.md)（本节端口/入口已同步为 3083 / run-driver）。
+> 后继：2026-10-20 起 agent 启动首动作 = [run-driver 入口](../archived/2026-10-20-run-driver-entry.md)（本节端口/入口已同步为 3083 / run-driver）。
 
 归宿：roadmap 队列行已销账（▶ 移交「M2 铺垫 P2」）；定案登记 00-index **D16**。依据：market 粗扫 §2/§4（agent-team-profile 候选基础）+ release-smoke 实证配方（pack → web 模板 profile → `plugin add file:`）+ design/10 §3（通道选型）+ m2-run-dashboard RFC L0（观察面）+ m2-run-mechanics RFC（HITL 两点流程出处）。以下正文除已同步的入口/端口外为 proposed 原貌（定案依据），毕业记录在文末。
 

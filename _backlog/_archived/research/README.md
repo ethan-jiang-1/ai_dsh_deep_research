@@ -12,7 +12,7 @@
 
 ## 题名索引
 
-| [plugin-as-product/](plugin-as-product/README.md) · 插件即产品：独立启动 profile、用户工作区与 run bundle 归属 | 11 份 | [插件即产品决策卡](../settled_issues/2026-11-01-plugin-as-product.md) 及四张子卡 | [父卡](../settled_issues/2026-11-01-plugin-as-product.md)、[D38](../../../docs/decisions.md#d38)、[Note](../../../notes/implemented/2026-11-01-plugin-as-product.md) | 2026-11-01 |
+| [plugin-as-product/](plugin-as-product/README.md) · 插件即产品：独立启动 profile、用户工作区与 run bundle 归属 | 11 份 | [插件即产品决策卡](../settled_issues/2026-11-01-plugin-as-product.md) 及四张子卡 | [父卡](../settled_issues/2026-11-01-plugin-as-product.md)、[D38](../../../docs/decisions.md#d38)、[Note](../../../notes/archived/2026-11-01-plugin-as-product.md) | 2026-11-01 |
 | 名头 | 材料 | 历史消费者 | 产出的卡 | 归档 |
 |---|---|---|---|---|
 | [plugin-as-product-v2/](plugin-as-product-v2/README.md) · 插件即产品 v2：产品 profile、启动期工作区、内容/产物分家 | 7 份 | [插件即产品 v2 决策卡](../settled_issues/2026-11-01-plugin-as-product-v2.md) | [D40](../../../docs/decisions.md#d40)、[Note](../../../notes/implemented/2026-11-01-plugin-as-product-v2.md) | 2026-11-02 |
@@ -29,10 +29,10 @@
 | [rerun-triage/](rerun-triage/README.md) · rerun 不满转接层 | 1 份 | [卡](../settled_issues/2026-10-23-rerun-dissatisfaction-triage.md) | — | 2026-10-23 |
 | [method-config-ux/](method-config-ux/README.md) · 研究方法配置的 UX 推敲 | 2 份 | [配置 UX 卡](../settled_issues/2026-10-18-research-method-config-ux.md)、[打法映射卡](../settled_issues/2026-10-18-research-method-preset-mapping.md) | — | 2026-10-20 |
 | [notes-stocktake/](notes-stocktake/README.md) · notes 存量体检 | 1 份 | [吸收 Note](../../../notes/implemented/2026-10-09-backlog-methodology-absorption.md)、[体检 Note](../../../notes/archived/2026-10-08-notes-stocktake.md) | — | 2026-10-18 |
-| [strategy-benchmark/](strategy-benchmark/README.md) · 策略层对标与 per-topic 卡分布 | 2 份 | [Note](../../../notes/implemented/2026-09-28-strategy-benchmark.md) | — | 2026-10-18 |
+| [strategy-benchmark/](strategy-benchmark/README.md) · 策略层对标与 per-topic 卡分布 | 2 份 | [Note](../../../notes/archived/2026-09-28-strategy-benchmark.md) | — | 2026-10-18 |
 | [2026-10-11-executive-research-ux/](2026-10-11-executive-research-ux/README.md) · 企业高管深度研究搜索 UX | 2 份 | 用户直派（2026-10-11） | [①立项简报](../settled_issues/2026-10-11-executive-research-intake-brief.md)、[②决策报告](../settled_issues/2026-10-11-executive-research-decision-report.md)、[③驾驶舱交付](../settled_issues/2026-10-11-executive-research-ux-delivery.md) | 2026-10-12 |
 | [research-preferences/](research-preferences/README.md) · 研究方法配置 | 1 份 | [总卡](../settled_issues/2026-10-12-research-preference-templates.md)、[单次研究](../settled_issues/2026-10-12-research-method-run-lifecycle.md)、[长期管理](../settled_issues/2026-10-12-research-method-profile-management.md)、[详情 UX](../settled_issues/2026-10-12-research-preference-detail-ux.md) | — | 2026-10-12 |
-| [company-repin-review/](company-repin-review/README.md) · company 钉版与外部材料逐轮复核 | 5 份 | [company 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md) | — | 2026-10-11 |
+| [company-repin-review/](company-repin-review/README.md) · company 钉版与外部材料逐轮复核 | 5 份 | [company 钉版复核 Note](../../../notes/archived/2026-10-09-company-repin-review.md) | — | 2026-10-11 |
 | [teammate-channel-probe/](teammate-channel-probe/README.md) · 队员动作流数据通道 | 1 份 | [member-activity-stream 卡](../settled_issues/2026-10-09-member-activity-stream.md) | — | 2026-10-11 |
 | [company-snapshots/](company-snapshots/README.md) · company snapshots 机制 | 1 份 | [snapshots 落点卡](../settled_issues/2026-10-09-snapshots-adoption.md) | — | 2026-10-10 |
 | [oss-dr-mining/](oss-dr-mining/README.md) · 开源 DR 框架经验挖掘 | 3 份 | [oss-dr 教训卡](../settled_issues/2026-10-06-oss-dr-lessons.md) | — | 2026-10-10 |

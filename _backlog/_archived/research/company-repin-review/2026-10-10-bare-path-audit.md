@@ -5,7 +5,7 @@ intent: 为 company 钉版复核 Note「盘点后定」候选 bare-path 提供�
 
 # live 文档反引号裸路径死指针盘点（2026-10-10）
 
-> 服务 = [company 钉版复核 Note](../../../../notes/implemented/2026-10-09-company-repin-review.md)
+> 服务 = [company 钉版复核 Note](../../../../notes/archived/2026-10-09-company-repin-review.md)
 > 「盘点后定」候选（company 同款盘点实测 21.3% 死指针率）。方法 = 只读脚本扫 tracked .md 的
 > inline code span（剥 frontmatter/围栏块），三级解析（相对所在目录 → 仓库根 → vendor/dsh
 > 前缀回退）+ 盘上存在性判活；死后按同名/同主干/历史归因。判定规则与豁免类全录于

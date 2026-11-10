@@ -6,7 +6,7 @@ opened: 2026-10-11
 
 # BUG-021：cdp-probe `--ask` 发送系统性失败——asked:false 三连，消息不落盘
 
-> 严重级别：P2（次要——不损 bundle，但剥夺运行期最轻量的操作侧续推手段）｜发现：2026-10-11｜状态：活跃 — 已修复 2026-10-11：送达判据改会话日志落盘对账（纯函数 + 页面自动探测会话 id + fail-loud 四态），真模型两阶段 E2E 全绿（含生产现场 `Queue message` 形态）；见修复关联 + [Note](../../../notes/implemented/2026-10-11-cdp-probe-ask-journal-reconcile.md)。
+> 严重级别：P2（次要——不损 bundle，但剥夺运行期最轻量的操作侧续推手段）｜发现：2026-10-11｜状态：活跃 — 已修复 2026-10-11：送达判据改会话日志落盘对账（纯函数 + 页面自动探测会话 id + fail-loud 四态），真模型两阶段 E2E 全绿（含生产现场 `Queue message` 形态）；见修复关联 + [Note](../../../notes/archived/2026-10-11-cdp-probe-ask-journal-reconcile.md)。
 
 ## 症状
 
@@ -44,7 +44,7 @@ opened: 2026-10-11
 ## 修复关联
 
 **修复 commit = 本卡归档的同一次提交**（索引行 = [_archived/fixed_bugs](README.md)）；
-判据变更的持久理由 = [Note](../../../notes/implemented/2026-10-11-cdp-probe-ask-journal-reconcile.md)。落地四处：
+判据变更的持久理由 = [Note](../../../notes/archived/2026-10-11-cdp-probe-ask-journal-reconcile.md)。落地四处：
 
 1. **判据本体（卡上第③条）**：新增纯函数 `scripts/lib/inject-reconcile.mjs` 的
    `reconcileInjectedMessage`——只认 `user/message`、时间下界（点击时刻，防上一次同文注入假阳）、

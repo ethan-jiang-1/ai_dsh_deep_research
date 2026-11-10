@@ -26,7 +26,7 @@
   triggers.md 撤行）；`stream-diagnostics` 去掉 egress 行报告
 
 保留（非网络干预，不动）：MCP Playwright 通道本体（D22 常驻决定，见
-[采纳 Note](../implemented/2026-10-02-mcp-playwright-adoption.md)）；profile `.npmrc` 的
+[采纳 Note](../archived/2026-10-02-mcp-playwright-adoption.md)）；profile `.npmrc` 的
 store/cache 钉定与 `npm_config_cache`（磁盘卫生，不改网络路由）。
 
 ## 为什么（否决依据）
@@ -46,7 +46,7 @@ store/cache 钉定与 `npm_config_cache`（磁盘卫生，不改网络路由）�
 
 - 三态探针 + 自旋 CONNECT 代理 + `DSH_EGRESS_OUTLET` 用户口覆盖（2026-10-10 实施 → 本卡拆除）
 - `no_proxy=api.deepseek.com` 最小手术（2026-10-12；教训保留在
-  [LLM 流直连 Note](../implemented/2026-10-12-llm-stream-direct-no-proxy.md)）
+  [LLM 流直连 Note](../archived/2026-10-12-llm-stream-direct-no-proxy.md)）
 - Playwright `--proxy-server direct://`（以 `page.request.get` 子通道 ENOTFOUND 为代价，随零干预一并去除）
 
 ## 实际跑过的验证

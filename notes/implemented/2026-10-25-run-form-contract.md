@@ -41,4 +41,4 @@
 
 - 团队层与 Playwright MCP 仍有网络前置（registry/npx 或预置）；手册已写离线矩阵。
 - 旧 run bundle（契约前）含本机绝对路径，不追改；新 run 的路径规则由研究手册与移交流程约束。
-- `engines.dsh` 当前为区间 `>=0.2.1-rc.2 <0.3.0-0`（2026-10-26 改区间，见 [FAQ24 决策](2026-10-26-faq24-decisions.md)）；换 pin 时同 diff 改 `dsh.compatibility.dshReleases` 与 `engines.dsh`，门禁会拦漂移。
+- `engines.dsh` 当前为区间 `>=0.2.1-rc.2 <0.3.0-0`（2026-10-26 改区间，见 [FAQ24 决策](../archived/2026-10-26-faq24-decisions.md)）；换 pin 时同 diff 改 `dsh.compatibility.dshReleases` 与 `engines.dsh`，门禁会拦漂移。

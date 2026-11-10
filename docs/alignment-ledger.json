@@ -889,7 +889,7 @@
         "packages/deep-research-pack/README.md",
         "docs/guides/62-plugin-authoring.md"
       ],
-      "note": "0.1.7 重设计：旧 packages/preset/agent-presets 整包删除（迁移见 notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md）"
+      "note": "0.1.7 重设计：旧 packages/preset/agent-presets 整包删除（迁移见 notes/archived/2026-09-25-vendor-pin-bump-017rc2.md）"
     },
     {
       "source": "packages/schedule/AGENTS.md",

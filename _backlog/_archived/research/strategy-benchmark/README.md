@@ -1,7 +1,7 @@
 # strategy-benchmark：策略层对标与 per-topic 卡分布
 
 > 问题：专业 DR 的预算分配 / 迭代深度 / 终止条件怎样对标；per-topic 卡数分布如何标定？
-> 消费者：[strategy-benchmark Note](../../../../notes/implemented/2026-09-28-strategy-benchmark.md)
+> 消费者：[strategy-benchmark Note](../../../../notes/archived/2026-09-28-strategy-benchmark.md)
 > 产出的卡：—
 > 归档：2026-10-18（消费者已结）
 

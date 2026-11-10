@@ -75,5 +75,5 @@ opened: 2026-10-13
 ## 参考
 
 - [BUG-023](BUG-023-provider-malformed-storm-exhausts-retry.md)——判据②触发条件（"只在直连路径再现同签名畸形时才重议"）由本卡成立，触发 owner 按该卡交接至此；
-- [LLM 流直连 Note](../../../notes/implemented/2026-10-12-llm-stream-direct-no-proxy.md)——no_proxy 修复与机制；
+- [LLM 流直连 Note](../../../notes/archived/2026-10-12-llm-stream-direct-no-proxy.md)——no_proxy 修复与机制；
 - 实录会话：`session-36c68186-66fb-49ac-b29a-9893344b91f9`（日志在 `runtime/harness-home/sessions/`，gitignored 运行数据）。

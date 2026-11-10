@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-> 后续：[结论去向与质量责任重写](2026-10-24-backlog-notes-seam.md)（部分取代“下游处理申请/接收方”段；其余决定维持）。
+> 后续：[结论去向与质量责任重写](../archived/2026-10-24-backlog-notes-seam.md)（部分取代“下游处理申请/接收方”段；其余决定维持）。
 
 来源 = `ai_dsh_assitant/_backlog/` reference repository snapshot，commit `ce649dbcdb4c908f7fc3de0d564554b5aa8880ab`；版本作为外部参考，不是 DSH vendor pin。当前合同见 [D19/D20](../../docs/00-index.md) 与 [_backlog 意图载体总图](../../docs/design/60-intent-carriers.md)。
 
@@ -24,7 +24,7 @@
 
 ## 历史裁决 owner
 
-queue 搁置池中的结论不再由索引维护，按决定本身回到现有 owner：workflow adoption → [rejected Note](../rejected/2026-09-30-workflow-adoption.md)；browser-use adoption → [rejected Note](../rejected/2026-09-30-browser-use-adoption.md)；UI skin → [rejected Note](../rejected/2026-09-24-ui-skin.md)；专职 synthesizer → [rejected Note](../rejected/2026-09-24-synthesizer-role.md)；floor gate → [rejected Note](../rejected/2026-09-24-floor-gates.md)；LICENSE → [开源发布 Note](2026-10-25-open-source-launch.md)；frontmatter caliber → [rejected Note](../rejected/2026-09-24-frontmatter-caliber-gate.md)；per-topic floor 数据 → [strategy benchmark Note](2026-09-28-strategy-benchmark.md) 与其 research 数据；HITL2 条件范围轮 → [_backlog settled issue](../../_backlog/_archived/settled_issues/2026-09-28-hitl2-scope-round.md)。重启条件留在各 owner 内，不复制成新清单。
+queue 搁置池中的结论不再由索引维护，按决定本身回到现有 owner：workflow adoption → [rejected Note](../rejected/2026-09-30-workflow-adoption.md)；browser-use adoption → [rejected Note](../rejected/2026-09-30-browser-use-adoption.md)；UI skin → [rejected Note](../rejected/2026-09-24-ui-skin.md)；专职 synthesizer → [rejected Note](../rejected/2026-09-24-synthesizer-role.md)；floor gate → [rejected Note](../rejected/2026-09-24-floor-gates.md)；LICENSE → [开源发布 Note](2026-10-25-open-source-launch.md)；frontmatter caliber → [rejected Note](../rejected/2026-09-24-frontmatter-caliber-gate.md)；per-topic floor 数据 → [strategy benchmark Note](../archived/2026-09-28-strategy-benchmark.md) 与其 research 数据；HITL2 条件范围轮 → [_backlog settled issue](../../_backlog/_archived/settled_issues/2026-09-28-hitl2-scope-round.md)。重启条件留在各 owner 内，不复制成新清单。
 
 ## 实际跑过的验证
 

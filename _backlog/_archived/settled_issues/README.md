@@ -4,16 +4,16 @@
 
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
-| [2026-11-07-user-facing-readme-and-install-guide](2026-11-07-user-facing-readme-and-install-guide.md) | README 改为产品页（73 行）、手册在 D41 十一段内做用户路径优先、开发面归位 CONTRIBUTING；新增 `readme-manual-commands` 契约（红先）、冷读 3/5、`install-shape-smoke` 全绿；[Note](../../../notes/implemented/2026-11-07-user-facing-readme.md) | 2026-11-07 |
+| [2026-11-07-user-facing-readme-and-install-guide](2026-11-07-user-facing-readme-and-install-guide.md) | README 改为产品页（73 行）、手册在 D41 十一段内做用户路径优先、开发面归位 CONTRIBUTING；新增 `readme-manual-commands` 契约（红先）、冷读 3/5、`install-shape-smoke` 全绿；[Note](../../../notes/archived/2026-11-07-user-facing-readme.md) | 2026-11-07 |
 | [2026-11-03-client-load-smoke-not-in-ci](2026-11-03-client-load-smoke-not-in-ci.md) | 驾驶舱 E2E 进 CI：`--seed tests/fixtures/client-load-home` 干净机器 69/69 全绿；CI job `client-load`（vendor build + chromium + seed + artifact）；根因 = 凭据 onboarding 模态 + `openSessionById` 吞点击 → fail-loud `opened`，zstd 首帧必须 header 单帧 | 2026-11-03 |
 | [2026-11-03-model-visible-vocabulary](2026-11-03-model-visible-vocabulary.md) | 模型可见措辞：文本改动已验证（verify/971 测试绿），但重录 `research-face` 的通道 boot 超时，整轮回退；去向 `deferred` — [triggers](../../triggers.md)「模型可见措辞重录」 | 2026-11-03 |
 | [2026-11-02-release-surface-26-alignment](2026-11-02-release-surface-26-alignment.md) | 发布面对齐 26：bundle + custom profile 交付模型、六轴 owner、package-bundle README/数据卡、安装手册十段、`readme-shape`/`release-vocab`/`dist-manual-fresh`；N11 拆出为[模型可见措辞](2026-11-03-model-visible-vocabulary.md)；[Note](../../../notes/implemented/2026-11-02-release-model-terms.md) | 2026-11-03 |
 | [2026-11-02-product-surface-narrowing](2026-11-02-product-surface-narrowing.md) | 产品面收窄：主区 Trajectory 与右栏 New Terminal 在 `deep-research` profile 不挂载（bundle 层按 id `disabled: true`）；判据从「读自己的 YAML」换成组合层断言（零跳过 + 白名单两侧），红证 = 上游改名即红；去向 `none` — [design/40 §2.0](../../../docs/design/40-research-cockpit.md#cockpit-surface) + [bundle-composition](../../../tests/vendor/bundle-composition.vendor.mjs) | 2026-11-03 |
-| [2026-11-02-dev-product-path-parity](2026-11-02-dev-product-path-parity.md) | dev 通道与产品路径对齐：同 profile 名/安装源/版本门、profile 用户层零写入（MCP 走 `--patch` 覆盖层）、`dev-parity` 门禁 + parity 表；AC1–AC3 复跑绿；[Note](../../../notes/implemented/2026-11-02-dev-product-path-parity.md) | 2026-11-02 |
+| [2026-11-02-dev-product-path-parity](2026-11-02-dev-product-path-parity.md) | dev 通道与产品路径对齐：同 profile 名/安装源/版本门、profile 用户层零写入（MCP 走 `--patch` 覆盖层）、`dev-parity` 门禁 + parity 表；AC1–AC3 复跑绿；[Note](../../../notes/archived/2026-11-02-dev-product-path-parity.md) | 2026-11-02 |
 | [2026-11-01-plugin-as-product-v2](2026-11-01-plugin-as-product-v2.md) | 插件即产品 v2：自有 `deep-research` profile + CLI 引导 + Plugins 页装包 + 启动期工作区/内容进包；`product-boot-smoke` GREEN；残余 = 公网 npm 发布；[Note](../../../notes/implemented/2026-11-01-plugin-as-product-v2.md) | 2026-11-02 |
 | [2026-11-01-plugin-lifecycle-conformance](2026-11-01-plugin-lifecycle-conformance.md) | 插件生命周期合规：`engines.dsh`/locale/icon/市场索引/四门禁/文档；本地 registry 端到端 + `lifecycle-smoke`；残余 = 公网 npm 发布；[Note](../../../notes/implemented/2026-11-01-plugin-lifecycle-conformance.md) | 2026-11-02 |
-| [2026-11-01-plugin-as-product](2026-11-01-plugin-as-product.md) | 插件即产品：D38 包/bundle + `dsh-deep-research` launcher + 产品 profile + 用户工作区 + 首屏起步卡 + 文档/`_dist` + 产品 smokes；P1 见 triggers；[Note](../../../notes/implemented/2026-11-01-plugin-as-product.md) | 2026-11-01 |
-| [2026-11-01-product-launch-runtime](2026-11-01-product-launch-runtime.md) | 产品启动运行时：launcher/profile 装配/Host 工作区注册/设置/optional peers + product-smoke；[Note](../../../notes/implemented/2026-11-01-plugin-as-product.md) | 2026-11-01 |
+| [2026-11-01-plugin-as-product](2026-11-01-plugin-as-product.md) | 插件即产品：D38 包/bundle + `dsh-deep-research` launcher + 产品 profile + 用户工作区 + 首屏起步卡 + 文档/`_dist` + 产品 smokes；P1 见 triggers；[Note](../../../notes/archived/2026-11-01-plugin-as-product.md) | 2026-11-01 |
+| [2026-11-01-product-launch-runtime](2026-11-01-product-launch-runtime.md) | 产品启动运行时：launcher/profile 装配/Host 工作区注册/设置/optional peers + product-smoke；[Note](../../../notes/archived/2026-11-01-plugin-as-product.md) | 2026-11-01 |
 | [2026-11-01-product-first-run-ux](2026-11-01-product-first-run-ux.md) | 产品首屏：StartCard + 显隐判据 + product-boot-smoke；saved-session 自动切换 = P1 | 2026-11-01 |
 | [2026-11-01-product-docs-and-dist](2026-11-01-product-docs-and-dist.md) | 产品文档与分发：README/pack README/全仓叙事 + product-manual → `_dist/安装手册.md`；版本 0.2.0 | 2026-11-01 |
 | [2026-11-01-repo-alignment-and-evidence](2026-11-01-repo-alignment-and-evidence.md) | 仓库对齐：workspace-root/projectKey + run-ops/run-gates 迁移 + 测试迁移 + 产品 smokes | 2026-11-01 |
@@ -40,9 +40,9 @@
 | [2026-09-28-hitl2-scope-round](2026-09-28-hitl2-scope-round.md) | 暂缓 HITL2 条件范围轮；复活条件按卡内记录 | 2026-09-29 |
 | [2026-09-28-pipeline-polish](2026-09-28-pipeline-polish.md) | 多轮 polish 按分面收口，后续缺口分别有 owner | 2026-10-04 |
 | [2026-09-29-dispatch-distillation](2026-09-29-dispatch-distillation.md) | 调度蒸馏与模式库落地；[Note](../../../notes/archived/2026-09-29-dispatch-distillation.md) | 2026-09-29 |
-| [2026-10-02-mcp-client-adoption](2026-10-02-mcp-client-adoption.md) | MCP Playwright 采纳；[Note](../../../notes/implemented/2026-10-02-mcp-playwright-adoption.md) | 2026-10-02 |
-| [2026-10-04-fresh-agent-doc-audit](2026-10-04-fresh-agent-doc-audit.md) | 入口文档审计和修复；[Note](../../../notes/implemented/2026-10-04-fresh-agent-doc-audit.md) | 2026-10-04 |
-| [2026-10-04-leads-topic-shape](2026-10-04-leads-topic-shape.md) | 门 L 判据收敛；[Note](../../../notes/implemented/2026-10-04-gate-l-invariant.md) | 2026-10-04 |
+| [2026-10-02-mcp-client-adoption](2026-10-02-mcp-client-adoption.md) | MCP Playwright 采纳；[Note](../../../notes/archived/2026-10-02-mcp-playwright-adoption.md) | 2026-10-02 |
+| [2026-10-04-fresh-agent-doc-audit](2026-10-04-fresh-agent-doc-audit.md) | 入口文档审计和修复；[Note](../../../notes/archived/2026-10-04-fresh-agent-doc-audit.md) | 2026-10-04 |
+| [2026-10-04-leads-topic-shape](2026-10-04-leads-topic-shape.md) | 门 L 判据收敛；[Note](../../../notes/archived/2026-10-04-gate-l-invariant.md) | 2026-10-04 |
 | [2026-10-05-project-navigability-phase1](2026-10-05-project-navigability-phase1.md) | 项目可导航性第一阶段；[Note](../../../notes/implemented/2026-10-05-project-navigability-phase1.md) | 2026-10-05 |
 | [2026-10-05-test-asset-organization](2026-10-05-test-asset-organization.md) | 测试资产组织方式；[Note](../../../notes/archived/2026-10-05-test-asset-organization.md) | 2026-10-05 |
 | [2026-10-06-contract-drift](2026-10-06-contract-drift.md) | NODES 与 run playbook 合同对齐 | 2026-10-06 |
@@ -51,11 +51,11 @@
 | [2026-10-07-cockpit-dashboard-merge](2026-10-07-cockpit-dashboard-merge.md) | 暂不合并；观察触发条件见 [triggers](../../triggers.md) | 2026-10-07 |
 | [2026-10-08-sdlc-reference-absorption](2026-10-08-sdlc-reference-absorption.md) | 采纳/适配结果见本卡与 [吸收 Note](../../../notes/implemented/2026-10-09-backlog-methodology-absorption.md) | 2026-10-08 |
 | [2026-10-09-snapshots-adoption](2026-10-09-snapshots-adoption.md) | 首批四角色 replay 切片落地（含 BUG-018 修复与场景声明消费）；[Note](../../../notes/implemented/2026-10-09-snapshots-adoption.md) | 2026-10-09 |
-| [2026-10-09-release-smoke-hardening](2026-10-09-release-smoke-hardening.md) | L2 安装面五件套补齐（形态 B + company 值；含 HEAD pack build 断链真债同修）；[Note](../../../notes/implemented/2026-10-09-release-smoke-hardening.md) | 2026-10-09 |
+| [2026-10-09-release-smoke-hardening](2026-10-09-release-smoke-hardening.md) | L2 安装面五件套补齐（形态 B + company 值；含 HEAD pack build 断链真债同修）；[Note](../../../notes/archived/2026-10-09-release-smoke-hardening.md) | 2026-10-09 |
 | [2026-10-09-layering-v2](2026-10-09-layering-v2.md) | layering 四件套 + 三活暴露面结构收口（TS 解析器移植）；[Note](../../../notes/implemented/2026-10-09-layering-v2.md) | 2026-10-09 |
 | [2026-10-09-guard-red-record](2026-10-09-guard-red-record.md) | tests 面反证义务机械化（双址 + 留证二选一；存量 14 声明零豁免全留证）；[Note](../../../notes/implemented/2026-10-09-guard-red-record.md) | 2026-10-09 |
 | [2026-10-10-egress-mode-probe](2026-10-10-egress-mode-probe.md) | egress 两态自适应 boot 已实施（#1–#3、#5 验收绿，实录在卡内；commit 4083724）；#4 B/C 态现场补证触发 = [triggers](../../triggers.md)；不另立 Note（去向见卡）；2026-10-13 机制整体拆除 = [网络零干预 Note](../../../notes/rejected/2026-10-13-network-vanilla-restore.md) | 2026-10-10 |
-| [2026-10-09-member-activity-stream](2026-10-09-member-activity-stream.md) | 队员动作流 4/4 验收绿（2026-10-11 真实 run 首验：subagent follow 持久父地址 + smoke 正例环境 + 断言三修）；[Note](../../../notes/implemented/2026-10-11-member-activity-first-validation.md) | 2026-10-11 |
+| [2026-10-09-member-activity-stream](2026-10-09-member-activity-stream.md) | 队员动作流 4/4 验收绿（2026-10-11 真实 run 首验：subagent follow 持久父地址 + smoke 正例环境 + 断言三修）；[Note](../../../notes/archived/2026-10-11-member-activity-first-validation.md) | 2026-10-11 |
 | [2026-10-11-executive-research-intake-brief](2026-10-11-executive-research-intake-brief.md) | HITL1 业务决策简报落地；真 run 三阶段核验 + 业务读者走查通过；结转 = 计划卡字数升硬门前置（连续 ≥3 场达标） | 2026-10-11 |
 | [2026-10-11-executive-research-decision-report](2026-10-11-executive-research-decision-report.md) | 决策摘要首屏六段落地；真实 bundle 三门口 exit 0 + 走查通过；「不矛盾」判据按拍板降格人工判据 | 2026-10-11 |
 | [2026-10-11-executive-research-ux-delivery](2026-10-11-executive-research-ux-delivery.md) | 驾驶舱业务摘要层与纠偏路径落地；真浏览器断言 + 构成正本 + 窄门 + 两面一致性核对；结转 = HITL 挂起态实录 waiting | 2026-10-11 |

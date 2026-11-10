@@ -41,7 +41,7 @@ TUN 态下 `http_proxy/https_proxy` 设给整个 DSH 进程，LLM 流被迫 ride
 **出口路径必死、直连必活**。
 
 - **实际修复** = `dev/boot-run.sh` 追加 `no_proxy=api.deepseek.com`（LLM 与 web_search API 直连，
-  web_fetch 照走出口）；决定理由与输掉的方案 = [LLM 流直连 Note](../../../notes/implemented/2026-10-12-llm-stream-direct-no-proxy.md)；
+  web_fetch 照走出口）；决定理由与输掉的方案 = [LLM 流直连 Note](../../../notes/archived/2026-10-12-llm-stream-direct-no-proxy.md)；
 - 本卡的观察面恢复指引（判据①）仍有价值——直连路径再现时它就是恢复面；
 - 判据②（重试策略升级）**前提已变**：对"路径错"无效，只在**直连路径**再现同签名畸形时才重议（[triggers.md](../../triggers.md) 已改此行）。
 

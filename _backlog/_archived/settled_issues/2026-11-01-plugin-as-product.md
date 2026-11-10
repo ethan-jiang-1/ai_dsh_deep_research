@@ -7,7 +7,7 @@ opened: 2026-11-01
 
 > 立卡：2026-11-01 ｜ 状态：已结（2026-11-01，用户授权归档） ｜ 类型：Task ｜ 结论倾向：现在做——Q1/Q2/Q3/Q4/Q5/Q6/Q7/Q8 已按推荐拍板，按落地计划 S0–S4 推进 ｜ 可关闭：是
 
-**关闭结论（2026-11-01）：** S0–S4 技术面全部交付：D38/Note、launcher/产品 profile/工作区注册、首屏起步卡、产品文档/`_dist`、dev 根解析/projectKey、产品 smokes 与 release-smoke 全绿；版本 0.2.0。P1（saved-session 自动切换、项目模式深化、产品内 onboarding）与未验证项登记在 Note §残余边界 + triggers。 去向：implemented — [插件即产品 Note](../../../notes/implemented/2026-11-01-plugin-as-product.md)。
+**关闭结论（2026-11-01）：** S0–S4 技术面全部交付：D38/Note、launcher/产品 profile/工作区注册、首屏起步卡、产品文档/`_dist`、dev 根解析/projectKey、产品 smokes 与 release-smoke 全绿；版本 0.2.0。P1（saved-session 自动切换、项目模式深化、产品内 onboarding）与未验证项登记在 Note §残余边界 + triggers。 去向：implemented — [插件即产品 Note](../../../notes/archived/2026-11-01-plugin-as-product.md)。
 
 ## 拍板结论（2026-11-01，用户授权静默自主执行）
 
@@ -163,7 +163,7 @@ opened: 2026-11-01
 
 ## 落地记录（2026-11-01，S0–S4 技术面）
 
-- **D38 + Note 已落**：[decisions D38](../../../docs/decisions.md#d38)、[Note](../../../notes/implemented/2026-11-01-plugin-as-product.md)。
+- **D38 + Note 已落**：[decisions D38](../../../docs/decisions.md#d38)、[Note](../../../notes/archived/2026-11-01-plugin-as-product.md)。
 - **S1 骨架**：`scripts/launch.mjs` + `scripts/lib/launcher/*` + `src/workspace-boot/` + profile 装配/设置/种子/守卫；fake-dsh 单测与 `product-smoke` 绿。
 - **S2 首屏**：`StartCard.tsx` + `start-card.ts` 判据 + dock 注册；`product-boot-smoke` 绿（Orca/工作区标题/起步卡/Lead/cwd = 工作区）。
 - **S3 文档/分发**：README/pack README/00-index/61/62/65/project-map/design/terms/AGENTS/CONTRIBUTING；`_dist/安装手册.md` 由 `product-manual.md` 生成；版本 0.2.0。

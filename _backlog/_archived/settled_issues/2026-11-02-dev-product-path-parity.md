@@ -6,7 +6,7 @@ opened: 2026-11-02
 # 推敲：dev 通道与产品安装路径对齐——同机制、有界差异
 
 > 立卡：2026-11-02 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
-> 去向：implemented — [dev/product parity Note](../../../notes/implemented/2026-11-02-dev-product-path-parity.md)；业务验收：用户（2026-11-02 指示按流程推进落地）。
+> 去向：implemented — [dev/product parity Note](../../../notes/archived/2026-11-02-dev-product-path-parity.md)；业务验收：用户（2026-11-02 指示按流程推进落地）。
 
 **意图（先说清为什么做）：**
 
@@ -114,6 +114,6 @@ dev 仍是 `dsh --profile deep-research`，run-driver 只是驱动（漂移门 +
 
 ## 去向
 
-`implemented` → [dev/product parity Note](../../../notes/implemented/2026-11-02-dev-product-path-parity.md)。
+`implemented` → [dev/product parity Note](../../../notes/archived/2026-11-02-dev-product-path-parity.md)。
 
 业务验收：用户 2026-11-02 指示按流程推进落地；dev 手感的后续反馈按新卡处理。

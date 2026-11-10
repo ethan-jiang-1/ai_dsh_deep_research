@@ -35,7 +35,7 @@ C notes 技能 / D vendor 对齐 / E 工作区生成物 / F 仓规环境）导�
   语境与非 ASCII 路径下的输出形态），超出"只去重子进程不改语义"的保形边界；需要特形 env 的
   调用点维持自带 spawn。
 
-与 [2026-10-07 runtime-scripts-layout](../implemented/2026-10-07-runtime-scripts-layout.md)（scripts/ 六目录
+与 [2026-10-07 runtime-scripts-layout](2026-10-07-runtime-scripts-layout.md)（scripts/ 六目录
 分组）互链：本 Note 管聚合入口的**内部**组织，目录级合同仍归彼。
 
 ## 实际跑过的验证

@@ -35,7 +35,7 @@ opened: 2026-10-18
 
 `scripts/lib/node-gate-run-gates.mjs`：判据改为先剥 `**`/`__`/反引号，再认「括号/逗号/顿号 + 独立
 A–D 令牌」（`A` 后不得接字母数字，防撞 URL 片段）。见
-[判据放宽 Note](../../../notes/implemented/2026-10-18-node-gate-judgment-widening.md)。
+[判据放宽 Note](../../../notes/archived/2026-10-18-node-gate-judgment-widening.md)。
 
 ## 实际跑过的验证
 

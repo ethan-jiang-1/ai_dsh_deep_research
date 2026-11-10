@@ -5,9 +5,9 @@ opened: 2026-10-09
 
 # 推敲：release-smoke 补齐——L2 安装面的五处缺口
 
-> 立卡：2026-10-09 ｜ 状态：已结——五件套已实施且全绿（③=形态 B、④=company 值，2026-10-09 用户拍板；L2 红跑另咬出 HEAD 的 pack build 断链真债并同修）；证据与去向 = [release-smoke-hardening Note](../../../notes/implemented/2026-10-09-release-smoke-hardening.md) ｜ 类型：Task ｜ 可关闭：是
+> 立卡：2026-10-09 ｜ 状态：已结——五件套已实施且全绿（③=形态 B、④=company 值，2026-10-09 用户拍板；L2 红跑另咬出 HEAD 的 pack build 断链真债并同修）；证据与去向 = [release-smoke-hardening Note](../../../notes/archived/2026-10-09-release-smoke-hardening.md) ｜ 类型：Task ｜ 可关闭：是
 
-**问题与期望结果：** L2 安装冒烟对 pack 的 client 半验证不足、进程卫生不完整。出处 = [company 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md)（候选②，对照 company@59551f2 逐行差异表）。期望：安装域对 client 面（装配失败 = 整 UI 砖）有断言，且冒烟进程挂死/并发互撞不再可能。
+**问题与期望结果：** L2 安装冒烟对 pack 的 client 半验证不足、进程卫生不完整。出处 = [company 钉版复核 Note](../../../notes/archived/2026-10-09-company-repin-review.md)（候选②，对照 company@59551f2 逐行差异表）。期望：安装域对 client 面（装配失败 = 整 UI 砖）有断言，且冒烟进程挂死/并发互撞不再可能。
 
 **当前情况：** [release-smoke.mjs](../../../scripts/smoke/release-smoke.mjs) 头注已列五条差异（2026-10-09 修订）。缺口按危害排序：
 1. **安装副本 `lib/client.js` 断言缺席**——pack 明确带 client 半（`exports ./client` → lib/client.js、files 含 lib/**），L2 却不验它在安装副本里在场；

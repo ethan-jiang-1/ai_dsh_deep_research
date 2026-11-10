@@ -97,7 +97,7 @@ opened: 2026-10-23
 | 路径耦合 | 第一方 `scripts+pack src+docs` 中 **41 文件/115 处** `drt_` 字面量；29 个 bundle 文件含 `/Users/bowhead/...`；7 个 `source_url` 用 `file:///` | `grep`（复核 §2） |
 | 独立性的真实状态 | **7 条跨 bundle `[来源:]` 证据链接**（computer-use-benchmarks → cn-agentic-parity）；**14 处 `../drt_`**（4 文件）；**37/46** 归档 bundle 散文提到 45 个外部 slug；symlink 0 | 复核 §4.1 |
 | 注入机制 | cwd = `research-workspace/`；基线只注入手册（10,757 B / 16,384 B 预算，余量约 4.6 KB）；嵌套 `AGENTS.md` 在成功 read/write/edit **之后的下一个请求**才注入 | `vendor/dsh/packages/context/agent-instructions/README.md` |
-| 前车之鉴 | 2026-09-24 一份过期的全局 `AGENTS.md` 压过新手册，整个 lead 会话按不存在的 `runs/<slug>/` 开工，7 文件 13 处旧契约返工 | [D17 Note](../../../notes/implemented/2026-09-24-run-bundle-drt-separation.md) |
+| 前车之鉴 | 2026-09-24 一份过期的全局 `AGENTS.md` 压过新手册，整个 lead 会话按不存在的 `runs/<slug>/` 开工，7 文件 13 处旧契约返工 | [D17 Note](../../../notes/archived/2026-09-24-run-bundle-drt-separation.md) |
 | 接续是常态 | 34 次恢复/状态探针命中（32 个真探针）；5 个探针写盘；3 场无范围「继续」重做（最大 92 调用 / 23 处改写）；带「目标=交付闭合」的同类会话收敛；1 场 0 调用空转 | [续跑行为](../research/run-bundle-charter/2026-10-23-resume-behavior.md) |
 | 大文件 | `review.md` 最大 201,341 B（归档）；在飞 hardware 112,043 B；`leads.md` 最大 176,083 B；`final.md` 最大 61,088 B；单次 read 上限 51,200 B | 盘上 `wc -c` |
 | 图会重写 | eu-us 在飞 plan **v1→v6**，新增 W3.2–W3.6 **5 个节点**，文件零搬迁；但全库仅 1 个 `plan/vN` 快照 | plan 头「图版本：v6」 |

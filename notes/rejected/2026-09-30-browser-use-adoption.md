@@ -2,7 +2,7 @@
 
 > 状态：rejected
 
-归宿：本 Note 拥有否决理由、重启条件与采纳 recipe；采纳目录扫描见 [plugin-shelf-adoption](../implemented/2026-09-30-plugin-shelf-adoption.md)；调研全文 = 评估子代理报告
+归宿：本 Note 拥有否决理由、重启条件与采纳 recipe；采纳目录扫描见 [plugin-shelf-adoption](../archived/2026-09-30-plugin-shelf-adoption.md)；调研全文 = 评估子代理报告
 （2026-09-30，vendor `dsh-v0.2.0-rc.2` 源码 + 15 场归档 run 的 grep 实证），本 Note 存蒸馏
 结论、重启判据与采纳 recipe。
 
@@ -48,7 +48,7 @@
   挂、跑完即拆）；建议在 leads-gaps.md 立标签 `js-render-blocked-no-workaround` 使判据可 tally；
 - **C3（累计阈值）**：该标签累计 ≥4 例（历史已 3 例）→ 升级为常设评估。
 
-通道分工（与 [mcp-playwright 采纳 Note](../implemented/2026-10-02-mcp-playwright-adoption.md)）：
+通道分工（与 [mcp-playwright 采纳 Note](../archived/2026-10-02-mcp-playwright-adoption.md)）：
 mcp-playwright 覆盖**单发渲染抓取**（先挂、零账号）；browser-use 留给**多步交互浏览**——C1/C2/C3
 继续在池，pilot 触发时先试 mcp 通道再升 browser-use。
 

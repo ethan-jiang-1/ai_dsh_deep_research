@@ -15,7 +15,7 @@
   见 [hygiene-round2](2026-10-27-hygiene-round2-feedback-truth.md) 与 [scripts/AGENTS](../../scripts/AGENTS.md)。
 - **真·重复收敛为单一正本**：① UI 侧栏导航 `expandGroup`/候选组名 → `scripts/lib/web-ui-nav.mjs`
   （client-load-smoke 与 hitl-answer 的逐字双份）——该件的**定位判据**（搜索兜底 / 不得从单次扫描判
-  "会话不在" / 按 id 显式定位）后由 [会话定位 Note](../implemented/2026-10-18-sidebar-session-location.md) 扩展；② research-workspace 组发现一行 →
+  "会话不在" / 按 id 显式定位）后由 [会话定位 Note](2026-10-18-sidebar-session-location.md) 扩展；② research-workspace 组发现一行 →
   `session-log.researchWorkspaceGroup`（三处同款）；③ journal wire「JSON 串或对象 + 截断容错」
   解析家族 → `packages/deep-research-pack/src/lib/journal-wire.ts`（五文件六处）；
   ④ hitl-fold 末位 ask 状态机 → `lastAskStateMachine` 单一正本（deriveAnchors 原重复扫描

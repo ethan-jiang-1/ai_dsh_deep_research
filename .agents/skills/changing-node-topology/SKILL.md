@@ -28,7 +28,7 @@ description: Use when adding, removing, or rewiring a research pipeline node —
 | 5 | `packages/deep-research-pack/src/lib/run-fold.ts` | `STEP_ORDER`（观察面轨道折算） | 节点序变才动；动了要 `pnpm build`（client 面）+ `client-load-smoke` |
 | 6 | `scripts/run-gates/schema-scan.mjs` + `scripts/run-gates/node-gate.mjs` | 在场级全行断言 + CONDITIONAL 条件件 / 判据级逐行 | 新输出件 = schema-scan 行；条件性节点登记 CONDITIONAL；判据级按证据升格（fixtures 先红后绿 + 契约日） |
 
-**附属两处**（按需，非每次）：[步序正本 Note](../../../notes/implemented/2026-09-24-m2-run-mechanics.md)
+**附属两处**（按需，非每次）：[步序正本 Note](../../../notes/archived/2026-09-24-m2-run-mechanics.md)
 （轨道全图——加/删/并节点须回写或互链新 Note）；`scripts/run-ops/run-dashboard.mjs`（投影跟随
 run-state 谓词，通常自动——改文件名/轨道序才动）。
 

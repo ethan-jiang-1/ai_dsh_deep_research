@@ -14,7 +14,7 @@ trial run（drt_cn-us-open-source，2026-09-28）中用户提出：rerun 启动�
 
 已核实：
 
-- HITL2 本身是**循环的**——每个版本交付重过一次（[m2-run-mechanics](../../../notes/implemented/2026-09-24-m2-run-mechanics.md) §109：ReopenResearchPass = 同 bundle 版本演进）；候选后续①（rerun 交付同样过 HITL2 锚进 skill）待做，与本卡相邻。
+- HITL2 本身是**循环的**——每个版本交付重过一次（[m2-run-mechanics](../../../notes/archived/2026-09-24-m2-run-mechanics.md) §109：ReopenResearchPass = 同 bundle 版本演进）；候选后续①（rerun 交付同样过 HITL2 锚进 skill）待做，与本卡相邻。
 - 一次多问 + 推荐置首的卡片机制现成（HITL1 三问同卡）——范围轮可直接复用形态。
 - HITL2 卡 ≤200 字纪律刚立（[synthesis §5](../../../packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md)，实测 6 张超长卡最长 1280 字把选项挤出视口）——范围细节塞进决策卡会重新破戒。
 - 重入点合同：补研究回挖掘（最深重入点）、修订表述原位改（不回节点）、结构性另起新 bundle（D17）；HITL1 永不重开（rerun-loop-live 记账实证）。

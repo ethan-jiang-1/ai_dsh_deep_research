@@ -9,7 +9,7 @@ opened: 2026-10-09
 
 **问题与期望结果：** 本仓"新契约测试带反证"是散文义务（[tests/AGENTS](../../../tests/AGENTS.md)「同 diff 注入回归看红……只交付绿 = 不知道测试会不会咬人」），verify 门禁面已被 gates-smoke 机械化到超出 company 水平，但 **tests 面无任何机械**——[ask-drive.test.mjs](../../../tests/run/ask-drive.test.mjs) 标题已带 BUG-004/005/015/017 守卫声明，红配方只在头注散文与夹具里，走没走没人拦。期望：标题声称守卫具体事故（BUG-nnn）的测试必须交出**可复核的红配方**，散文义务变机械面。
 
-**当前情况：** 出处 = [company 钉版复核 Note](../../../notes/implemented/2026-10-09-company-repin-review.md)（候选①，三路复核一致排最高价值）。company 原版（`checks/run-gates.mjs` guard-red-record，commit 5c050ea）：spec 标题带 BUG-nnn ⇒ ①事故卡路径可解析（悬空编号红）②文件内有「负例留证」块逐编号对齐；其自认边界 = 只证明红法写在旁边，不证明留证是真的。本仓 verify 面的 gates-smoke 是**真注入真红**，更强；本卡要把同等强度带到 tests 面。
+**当前情况：** 出处 = [company 钉版复核 Note](../../../notes/archived/2026-10-09-company-repin-review.md)（候选①，三路复核一致排最高价值）。company 原版（`checks/run-gates.mjs` guard-red-record，commit 5c050ea）：spec 标题带 BUG-nnn ⇒ ①事故卡路径可解析（悬空编号红）②文件内有「负例留证」块逐编号对齐；其自认边界 = 只证明红法写在旁边，不证明留证是真的。本仓 verify 面的 gates-smoke 是**真注入真红**，更强；本卡要把同等强度带到 tests 面。
 
 **未决问题：**
 1. **BUG 卡双址**：本仓活跃卡住 `_backlog/bugs/`、已修卡住 `_backlog/_archived/fixed_bugs/`——解析时两址并查（company 只认归档址）；

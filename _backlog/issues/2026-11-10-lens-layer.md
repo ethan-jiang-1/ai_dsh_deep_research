@@ -47,6 +47,22 @@ evidence 只记 `supports: topic`，critic 只能按源数/等级/引用链审�
 `notes/implemented/2026-11-10-lens-layer.md`、`可关闭：是`、归档；pilot 硬线失败 → 回
 `推敲中`/`等人拍板` 并附读数，不强行收口。
 
+## 实施记录（2026-11-10，M1/M2）
+
+- **目录与合同**：`content/lenses/` 8 条（`official/quant/practitioner/adversarial/structural/
+  historical/regulatory/academic`）+ `tests/pack/lenses.test.mjs`（先红：缺目录/字段 → 绿）；
+  手册 §研究视角 + 证据八字段；`question-patterns` 索引/默认集；`research-brief` 选择/落格；
+  `team-assembly` lens 装载；`research-planning` cell；`analyst` 卡格式/persona；`critic`
+  覆盖线；`nodes-contract`；templates（question/topics/evidence-entry/findings/final）；
+  `synthesis`/`reader-final`。
+- **文档**：D43（`docs/decisions.md`）；根/pack AGENTS 布局；pack README；design/30 八字段 +
+  wave1 cell。
+- **验证（实际跑过）**：`pnpm verify` 全绿；`pnpm test` 1054 pass；L1 真挂载 ALL PASS；
+  snapshot B ALL PASS（analyst 重录，fixture 同 diff；`source.codeAnchor` 记录录制基线
+  `1ed4917`）；L4-lite ALL PASS；`release-smoke --install-only` ALL PASS。
+- **未跑**：M3 pilot（A8）。下一步 = 用户给 pilot 题/授权；pilot 通过后写 Note + `可关闭：是`。
+  实现改动与 fixture 尚未提交（工作树）；提交时把 pack/测试/快照与 Note 作为窄证据切片一起入库。
+
 ## 已知与未决
 
 **已知（证据锚点）**

@@ -11,7 +11,7 @@
 [长期卡](../../_backlog/_archived/settled_issues/2026-10-12-research-method-profile-management.md)（长期管理，未实施）；
 统一依据 = [综合研究](../../_backlog/_archived/research/research-preferences/2026-10-12-research-preferences.md)。机制基座 =
 [计划确认闸门 Note](2026-10-07-plan-review-gate.md)——HITL1 两段卡结构与豁免规则由其拥有，
-[HITL1 业务决策简报 Note](2026-10-11-hitl1-business-brief.md) 拥有第四问触发机制；本篇只记
+[HITL1 业务决策简报 Note](../archived/2026-10-11-hitl1-business-brief.md) 拥有第四问触发机制；本篇只记
 「方法」这一新增维度的决定理由。
 
 ## 决定

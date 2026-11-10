@@ -2,7 +2,7 @@
 
 > 状态：rejected
 
-归宿：本 Note 拥有否决理由与重启条件；采纳目录扫描见 [plugin-shelf-adoption](../implemented/2026-09-30-plugin-shelf-adoption.md)；调研全文 = 辨析子代理报告
+归宿：本 Note 拥有否决理由与重启条件；采纳目录扫描见 [plugin-shelf-adoption](../archived/2026-09-30-plugin-shelf-adoption.md)；调研全文 = 辨析子代理报告
 （2026-09-30，vendor `dsh-v0.2.0-rc.2` 源码逐行核对），本 Note 存蒸馏结论与重启条件。
 
 ## 决定
@@ -37,7 +37,7 @@
 
 ## 重启条件（2026-10-02 按 vendor 源码重估改写——事实基础先记录）
 
-重估事实（vendor `dsh-v0.2.0-rc.2` 源码核实，与 [m2-run-mechanics Q2](../implemented/2026-09-24-m2-run-mechanics.md) run 实证交叉一致）：
+重估事实（vendor `dsh-v0.2.0-rc.2` 源码核实，与 [m2-run-mechanics Q2](../archived/2026-09-24-m2-run-mechanics.md) run 实证交叉一致）：
 
 - agent-team-profile 只禁四个 subagent 工具行（tool-subagent-control / -list-agents / -subagent / -subagent-fork），**workflow spawn 通道机制层保留**（`agent-team-profile/cordis.patch.yml:4-14`；README:49）——"teams 与 workflow 互斥"不是事实；
 - 但 web-app 把 host 平面 workflow-ptc / tool-workflow 都禁了、移入 preset 平面（`web-app/cordis.patch.yml:539-541` + `standard.patch.yml:119-123`）——**模型可见性由 preset 行决定**，本仓四角色 preset 均未声明；

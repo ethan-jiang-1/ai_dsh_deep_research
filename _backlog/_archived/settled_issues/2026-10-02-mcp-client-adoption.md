@@ -1,10 +1,10 @@
 # 推敲：mcp-client（外部 MCP server 通道）在研究通道的采纳
 
-> 状态：已毕业（批准）｜毕业门判断 = 已拍板（2026-10-02 两轮呈批：Firecrawl 价格问询后选**本地 Playwright MCP**——D22 对外交付约束：用户侧外部账号/凭据/订阅一律不过关）｜下一步 = 实施与 pilot 记录住 [mcp-playwright 采纳 Note](../../../notes/implemented/2026-10-02-mcp-playwright-adoption.md)（本卡内容不重写，只存推敲过程与机制材料）
+> 状态：已毕业（批准）｜毕业门判断 = 已拍板（2026-10-02 两轮呈批：Firecrawl 价格问询后选**本地 Playwright MCP**——D22 对外交付约束：用户侧外部账号/凭据/订阅一律不过关）｜下一步 = 实施与 pilot 记录住 [mcp-playwright 采纳 Note](../../../notes/archived/2026-10-02-mcp-playwright-adoption.md)（本卡内容不重写，只存推敲过程与机制材料）
 
 ## 背景 / 触发
 
-2026-10-02 DSH 新语料反省发现：2026-09-30 插件货架盘点（[plugin-shelf-adoption](../../../notes/implemented/2026-09-30-plugin-shelf-adoption.md)，11 项收口）**漏了 mcp-client**——它在语料里归"扩展机制与运营"组，不在研究相关的显眼八类；当时语料消化不全导致盘点盲区（本卡即该反省的收口产物之一）。缺口真实性侧：[browser-use 否决 Note](../../../notes/rejected/2026-09-30-browser-use-adoption.md) 实证 15 场归档 run 中 13 场命中 SPA 证据失败，绕行对冲大半后残余硬缺口 = 无静态出口的消费端 SPA 定价页与 JS 榜单。mcp-client 是 DSH 接外部抓取/检索 server 的官方通道（每 server 一行，工具以 `mcp__<server>__<tool>` 注册进 `ctx.tools`）。
+2026-10-02 DSH 新语料反省发现：2026-09-30 插件货架盘点（[plugin-shelf-adoption](../../../notes/archived/2026-09-30-plugin-shelf-adoption.md)，11 项收口）**漏了 mcp-client**——它在语料里归"扩展机制与运营"组，不在研究相关的显眼八类；当时语料消化不全导致盘点盲区（本卡即该反省的收口产物之一）。缺口真实性侧：[browser-use 否决 Note](../../../notes/rejected/2026-09-30-browser-use-adoption.md) 实证 15 场归档 run 中 13 场命中 SPA 证据失败，绕行对冲大半后残余硬缺口 = 无静态出口的消费端 SPA 定价页与 JS 榜单。mcp-client 是 DSH 接外部抓取/检索 server 的官方通道（每 server 一行，工具以 `mcp__<server>__<tool>` 注册进 `ctx.tools`）。
 
 ## 已知与未决（vendor 当轮 pin 源码核对，2026-10-02；当轮 tag 属外部材料口径，深挖子代理报告 + 本仓交叉实证）
 
@@ -12,7 +12,7 @@
 
 1. **作用域语义**：连接数 = cordis 行数，与 agent 数完全解耦（`mcp-client/src/index.ts:31-34,154`；不监听任何 agent 事件）。profile 层行 = host 单例一条连接、工具进 `ctx.tools` 全局层；preset 行 = 每个 preset **定义**一条连接（`agent-preset-registry/src/index.ts:102-118,226-266`），eager 于 host 加载（`agent-preset/src/index.ts:27-29`）。→ browser-use 的"每 agent 起 MCP 子进程"形态错配在 mcp-client 上不存在。
 2. **工具可见性**：全局层工具对所有 agent 默认可见；`toolFilter` 是 subagent per-child 概念、**精确名列表无 glob**（`core/tools/src/index.ts:700-711`；`exclude: [mcp_*]` 通配写法在 restrict() 校验 fail-loud，`index.ts:1114-1118`）；server tools/list 漂移后新增工具默认可见。→ 按角色裁面工程成本高且脆。
-3. **teammate 可见性（关键）**：`spawn_teammate` 无 preset/persona/toolFilter 参数（`tool-agent-team/src/index.ts:175-213`），子 agent 一律 `composeFrom` lead（`child-agent.ts:200-219` + registry `bindScopeParent` `273-284`）——**与本仓 m2 首场 run 实证一致**（teammates 挂 roster 默认 preset = lead，角色人格经 spawn prompt；[m2-run-mechanics Q2](../../../notes/implemented/2026-09-24-m2-run-mechanics.md)）。→ MCP 工具要进 teammate 工具面：配 profile 层（或 lead preset 行）；配 scout preset 行对 teammate **无效**。
+3. **teammate 可见性（关键）**：`spawn_teammate` 无 preset/persona/toolFilter 参数（`tool-agent-team/src/index.ts:175-213`），子 agent 一律 `composeFrom` lead（`child-agent.ts:200-219` + registry `bindScopeParent` `273-284`）——**与本仓 m2 首场 run 实证一致**（teammates 挂 roster 默认 preset = lead，角色人格经 spawn prompt；[m2-run-mechanics Q2](../../../notes/archived/2026-09-24-m2-run-mechanics.md)）。→ MCP 工具要进 teammate 工具面：配 profile 层（或 lead preset 行）；配 scout preset 行对 teammate **无效**。
 4. **部署/安全面**：stdio 形态 = host 级受信任进程、**无沙箱**（`transport.ts:16-20` 注释明示绕开 sandboxPolicy/approval）；子进程 env 经 `scrubbedParentEnv()`（`DEEPSEEK_API_KEY` 不隐式外传，传须显式 env/headers，可用 `!!js`）；`failOnStartupError` 默认 false（慢/挂 server 拖慢启动——采纳时建议 true，fail-loud 合本仓纪律）；出厂零默认行（`apps/cli/tests/profile-mcp.spec.ts:27` 断言为空），配置责任全在使用方。
 
 **与既有定案的关系**：[search-fallback-seam](../../../notes/implemented/2026-09-27-search-fallback-seam.md) 定案"换源留给用户拍板，本仓不擅动"——外部 server 选型 + 凭据同属用户拍板面，本卡只备事实与 recipe，不预设结论。**与 browser-use C2 的联动**：若采纳 mcp-client 接抓取 server，C2 的"`.md`/API/raw/存档四绕行全败"判据变五绕行——browser-use Note 的 C2 文本需同 diff 联动修订。

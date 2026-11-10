@@ -95,4 +95,4 @@ duplicate），组件只画；「未执行」不再由映射缺失产生。头�
   证据 = 夹具 `tests/fixtures/plan-mapping/` + `tests/cockpit/graph-model.test.mjs`。
 - **证据**：`pnpm test` 639 pass / 0 fail（净增 11）；`pnpm typecheck`、`pnpm build`、
   `client-load-smoke` ALL PASS（覆盖率行断言在 `drt_cn-us` 命中）、`pnpm verify` 全绿；
-  决定记忆 = [Note](../../../notes/implemented/2026-10-23-graph-mapping-honesty.md)。
+  决定记忆 = [Note](../../../notes/archived/2026-10-23-graph-mapping-honesty.md)。

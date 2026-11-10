@@ -1,7 +1,7 @@
 # company-repin-review：company 钉版与外部材料的逐轮复核
 
 > 问题：company / assitant 两行的钉版前进是否仍安全；吸收面、bare-path 与 preset config 面发生了什么？
-> 消费者：[company 钉版复核 Note](../../../../notes/implemented/2026-10-09-company-repin-review.md)
+> 消费者：[company 钉版复核 Note](../../../../notes/archived/2026-10-09-company-repin-review.md)
 > 产出的卡：—（结论落消费者 Note；候选进 Note 的重议条件）
 > 归档：2026-10-11（消费者已结）
 

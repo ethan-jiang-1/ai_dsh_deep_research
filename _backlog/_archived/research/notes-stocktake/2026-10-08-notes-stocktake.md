@@ -80,10 +80,10 @@ intent: 为 notes-stocktake 实施 Note 保留已完成的存量体检依据。
    正文自写"**复查口常开**……结论补记本 Note"，即它自己声明未来还会被改 → 不能冻结；
    [living-verification-hook](../../../../notes/archived/2026-10-07-living-verification-hook.md)
    自留"低卡数据点入候选 A 标定池…**待候选 A 复核**"。
-2. **假承接**——[acceptance-criteria](../../../../notes/implemented/2026-10-06-acceptance-criteria.md)：
+2. **假承接**——[acceptance-criteria](../../../../notes/archived/2026-10-06-acceptance-criteria.md)：
    `NODES.md` / skill / `acceptance-check.mjs` 只留"UNVERIFIED 结论形状"，而本篇独有
    "判据是 model-supplied 不可信通道数据须框定"等理由全仓无第二处。
-3. **被现行面当正本引用**——[r1-scaffold](../../../../notes/implemented/2026-09-24-r1-scaffold.md)
+3. **被现行面当正本引用**——[r1-scaffold](../../../../notes/archived/2026-09-24-r1-scaffold.md)
    被 `docs/evaluation.md` 门禁登记表引为红证出处（该表由 `gate-ledger-sync` 机械对账）；
    [agent-ready-absorption](../../../../notes/implemented/2026-09-25-agent-ready-absorption.md)
    被 `evaluation.md` 引用 10 次。

@@ -15,7 +15,7 @@ synthesizer（第五角色）。
 
 lead 独任综合**无过载**：journal 两次调度决策干净落地，标准报告 4 topic 规模全程无
 瓶颈。结论 = 不拆角色，本条维持搁置（出处：
-[m2-run-mechanics §实施记录](../implemented/2026-09-24-m2-run-mechanics.md)）。
+[m2-run-mechanics §实施记录](../archived/2026-09-24-m2-run-mechanics.md)）。
 
 ### 重估追加（2026-09-26，两场 run）
 

@@ -108,6 +108,6 @@ notes 五子目录检索面（含本轮补的 rejected//research/）全答出；
    agent 无法从链上确定重启后答哪个题的 HITL1（答错方向 = 浪费一次完整 run）；
    **销账（D17，2026-09-24）**：正解不是拍板题目而是分层修正——题目本就不该进 RFC
    （问句预设了错误分层，撤回）；m2-run-mechanics 已去实例化，见
-   [run-bundle Note](../implemented/2026-09-24-run-bundle-drt-separation.md)。
+   [run-bundle Note](2026-09-24-run-bundle-drt-separation.md)。
 2. **队列行规 ≤3 行 vs 现实 6/8 条目 4–6 行超标**：压缩 / 修订 D12 / 维持现状（去机械化）
    三选一；若压缩，条目 2–7 的细节须有承接家（RFC 或 Note）。

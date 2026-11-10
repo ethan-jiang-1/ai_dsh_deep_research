@@ -6,7 +6,7 @@ opened: 2026-10-16
 
 # BUG-030：snapshot-replay C5 渲染金标准间歇性红——活动行只渲染 1/2（BUG-027 修复后的复发）
 
-> 状态：已修 — 根因 = **A 层"回合完成"判据用全文 `includes` 找哨兵，而哨兵写在 prompt 里**（提前放行 → 后续层在回合在飞时执行 → C5 缺末行）；修法 = 判据收进 `lib/replay-request`（哨兵只认 assistant 文本 + `turn/end` completed），冒烟与录制器共用。证据 = 单元三例先红后绿 · 现场确定性反证（旧判据在「回合已完成=false」时放行，同跑 C0b 3/4 红）· **连续 5 次 ALL PASS** · L0 471/471；去向 = [回合落定判据 Note](../../../notes/implemented/2026-10-16-replay-turn-settled-predicate.md)｜发现：2026-10-16（B1 站点迁移的对照实验顺带实测）
+> 状态：已修 — 根因 = **A 层"回合完成"判据用全文 `includes` 找哨兵，而哨兵写在 prompt 里**（提前放行 → 后续层在回合在飞时执行 → C5 缺末行）；修法 = 判据收进 `lib/replay-request`（哨兵只认 assistant 文本 + `turn/end` completed），冒烟与录制器共用。证据 = 单元三例先红后绿 · 现场确定性反证（旧判据在「回合已完成=false」时放行，同跑 C0b 3/4 红）· **连续 5 次 ALL PASS** · L0 471/471；去向 = [回合落定判据 Note](../../../notes/archived/2026-10-16-replay-turn-settled-predicate.md)｜发现：2026-10-16（B1 站点迁移的对照实验顺带实测）
 
 ## 症状
 
@@ -98,6 +98,6 @@ tool/call 面。
 - **消费方** = `scripts/smoke/snapshot-replay-smoke.mjs` A 层（哨兵 + `turn/end` completed 双条件，fail-loud 文案同步）·
   `dev/record-role-fixture.mjs`（删本地 `assistantTextsOf` 副本，改消费共享件——消灭单边漂移的来源）；
 - **测试** = `tests/run/replay-request.test.mjs` 三例（先红后绿）；
-- **决定记录** = [回合落定判据 Note](../../../notes/implemented/2026-10-16-replay-turn-settled-predicate.md)（含被证伪的假设与撤回记录）；
+- **决定记录** = [回合落定判据 Note](../../../notes/archived/2026-10-16-replay-turn-settled-predicate.md)（含被证伪的假设与撤回记录）；
 - **后续观察面**：本卡是"消费侧没跟上录制侧判据"的一例——B2 五站点若也有自家哨兵/落定判据，迁移时按同一正本核对
   （已写入 [round3 卡](../settled_issues/2026-10-16-structure-round3-convergence.md) 的 B2 待办语境）。

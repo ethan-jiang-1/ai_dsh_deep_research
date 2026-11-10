@@ -34,7 +34,7 @@
 
 ## 保留的正确修复（与上述手段无关，继续有效）
 
-- [LLM 流直连 Note](../implemented/2026-10-12-llm-stream-direct-no-proxy.md)：`no_proxy=api.deepseek.com`
+- [LLM 流直连 Note](../archived/2026-10-12-llm-stream-direct-no-proxy.md)：`no_proxy=api.deepseek.com`
   ——把 LLM 流从 fetch 出口代理摘出（请求层修复，符合硬要求 2）。
 - BUG-023 的产品内恢复横幅：死亡时用人话告诉用户"等一两分钟发『继续』"（产品内 UX，符合硬要求 3）。
 - D17 bundle 恢复语义：研究进度不因回合中断丢失（这是产品本来的能力，不依赖任何外部守护）。
