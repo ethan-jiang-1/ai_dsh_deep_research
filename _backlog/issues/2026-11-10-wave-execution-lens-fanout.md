@@ -257,7 +257,8 @@ Lead root 不占槽；executor depth 1，children depth 2；同一 wave 不再�
 
 **P4 开跑清单（待用户在场，一轮跑完）**：
 
-1. `node dev/run-driver.mjs up`（默认通道；不要另起）；HITL1 正常走三问 + 计划确认卡，
+1. 先确认默认通道无在飞 run，再停通道重建镜像（`bash dev/boot-run.sh` / `run-driver up`；
+   当前 pack 已改，旧通道会报镜像漂移）；HITL1 正常走三问 + 计划确认卡，
    卡正文写 `W2 脚本扇出 ×4`；`plan-card-stats.mjs` 复核 ≤200。
 2. plan 写 `## Wave 执行`；节点 `task_id=plan-only`；Lead `subagent(agent_preset=analyst)`
    （**不是 spawn_teammate**）。
