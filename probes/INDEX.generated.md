@@ -3,7 +3,7 @@
 > 生成器 = `probes/_index.mjs --write`；事实源 = 每支探针头注；本表只答「有哪些、在哪」。
 > 指南 = [../docs/guides/66-probe-playbook.md](../docs/guides/66-probe-playbook.md)。
 
-## behavior/（4 支）
+## behavior/（5 支）
 
 | 探针 | 一句话 | 档位 | 何时跑 | 状态 |
 |---|---|---|---|---|
@@ -11,6 +11,7 @@
 | [entry-chain-probe.mjs](behavior/entry-chain-probe.mjs) | 入口链三问（授权范围/RFC 条件/开发环路径）真模型可召回 | 真模型（DEEPSEEK_API_KEY；REAL_MODEL 闭集） | 改根/子树 AGENTS 或入口链；入口链导航合同变更；纯文档卫生轮 | 常驻 |
 | [method-library-probe.mjs](behavior/method-library-probe.mjs) | Lead 能说出偏好库路径、当前条目数、点名条目缺席（BUG-042 判据 #4） | 真模型（DEEPSEEK_API_KEY；REAL_MODEL 闭集） | 偏好库播种/手册指路/面板文案改动；BUG-042 回归 | 常驻 |
 | [rerun-triage-probe.mjs](behavior/rerun-triage-probe.mjs) | 给一句「太浅」，Lead 按五条转接纪律回话 | 真模型（DEEPSEEK_API_KEY；REAL_MODEL 闭集） | rerun-triage skill/HITL2 文案/终稿页脚改动；2026-10-23 卡回归 | 常驻 |
+| [wave-execution-probe.mjs](behavior/wave-execution-probe.mjs) | analyst 执行器在真模型下按固定 lens-fanout 配方跑通一个 cell，留下八字段证据卡 + waves 报告 | 真模型（DEEPSEEK_API_KEY；REAL_MODEL 闭集） | wave-execution skill / content/waves/lens-fanout.js / analyst workflow 挂载 / plan Wave 契约改动；snapshot 重录后 | 常驻 |
 
 ## browser/（1 支）
 

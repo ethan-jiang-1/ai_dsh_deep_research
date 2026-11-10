@@ -28,6 +28,7 @@ const REAL_MODEL = [
   'probes/behavior/discipline-probe.mjs',
   'probes/behavior/method-library-probe.mjs',
   'probes/behavior/rerun-triage-probe.mjs',
+  'probes/behavior/wave-execution-probe.mjs',
 ];
 
 // 收集 scripts/ 各组入口（每组一层；lib/ 除外）+ probes/ 各域入口（递归），
