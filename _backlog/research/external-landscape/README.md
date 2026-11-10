@@ -42,8 +42,8 @@ opened: 2026-11-10
   `gate_profile`，不是新角色/新轴；六个原型（fact_check / literature_review / landscape /
   regulatory_compare / timeline_watch / decision_memo）见材料。文献综述是 v2 高承诺模式，v1 只能近似并
   如实说明。
-- **约束**：权重不动；本方向只评估 **prompt / skill / preset / plugin / tool / gate / artifact /
-  interaction** 能做的事。训练/换模型不作设计杠杆，外部训练事实只作解释。
+- **约束**：权重不动，只用现成模型；本方向只评估 **prompt / skill / preset / plugin / constraint /
+  gate / artifact / interaction** 能做的事。
 - **口径**：计数单位 = 做法，不是产品；厂商自报数字标「厂商自报」；被挡来源不计入。
 - **已覆盖**：Anthropic / OpenAI / Gemini / Elicit / Undermind / GPTR / DeerFlow / LangGraph / STORM /
   FACT / self-critique / judge preference / persona 研究；第三遍补 Perplexity Agent API、Elicit 全 Setup、

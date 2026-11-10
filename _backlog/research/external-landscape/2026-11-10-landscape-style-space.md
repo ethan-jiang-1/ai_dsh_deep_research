@@ -6,9 +6,9 @@ intent: 不再按产品列功能，而是把外部系统读成一份份「隐含
 # 外部 landscape 第四遍：Deep Research 的 style 空间（2026-11-10）
 
 > 性质：来源综述 + 推断，不是决定。外部事实带 URL；厂商自报标「厂商自报」；本仓事实带文件锚点。
-> **约束（用户 2026-11-10 明确）**：权重不能动；本材料只讨论**权重之上**的杠杆——prompt / skill /
-> preset / plugin / tool / gate / artifact / interaction。训练、微调、换模型都**不作为设计杠杆**；
-> 外部系统的 RL/SFT 事实只用于解释「它们为什么长成这样」，不是我们的 recipe。
+> **约束（用户 2026-11-10 明确）**：权重不动，只用现成模型；本材料只讨论**权重之上**的杠杆——
+> prompt / skill / preset / plugin / constraint / gate / artifact / interaction。不训练、不微调、
+> 不把换模型当方案。
 > 覆盖：第一至第三遍已核的产品/框架只回指，不重复摘录；本遍新增 = style 视角、2026 claim-level
 > factuality 证据、研究文化对照、对本仓 Protocol 的增量建议。被挡来源与未覆盖见 §10。
 > 口径：计数单位 = **style 原型**，不是产品；「style」= 对一类研究承诺什么、什么算完成、什么不算的
@@ -43,8 +43,7 @@ report quality 与 claim-level factuality 是两条轴，且更多搜索会降�
 多智能体 / 单智能体、wave / DAG 是**运输方式**，不是 style；它们可以服务任何 style，但不定义承诺。
 操作顺序是 **promise → means → acceptance**；先选模板/深度、后想承诺，最容易产生 style mismatch。
 
-**不当作杠杆**：训练 / 微调 / RL / 改权重 / 换模型 / per-style 模型。这些不在本仓的设计面内；外部产品的
-训练事实只用于解释「它们为什么有 style」，不能反过来当我们的方案。我们能做的是把 style 写成
+**边界**：权重不动；不训练、不微调、不把换模型当方案、不做 per-style 模型。我们能做的是把 style 写成
 prompt / skill / preset / catalog / gate / artifact，让现成模型在同一套权重上换承诺与验收。
 
 因此，本材料比较的是**同一权重上换 style/验收**能改变什么；不比较「我们的模型 vs Gemini 的模型」。
@@ -88,7 +87,7 @@ gate 引用 profile，不硬编码（[考古报告](../../../notes/archived/2026
   （[Kimi 帮助](https://www.kimi.ai/zh-hant/help/deep-research/deep-research-overview)）
 - **OpenAI Deep Research**：系统卡说它由早期 o3 驱动、**为网页浏览优化**；能力描述是「搜索、点击、
   滚动、读文件、用 Python、综合大量网站以找具体信息或写 comprehensive reports」。
-  （外部产品事实，只解释它为什么是 report style；训练细节不是我们的杠杆。）
+  （外部产品事实，只解释它为什么是 report style；不是我们的做法。）
   （[System Card](https://deploymentsafety.openai.com/deep-research)）
 - **Anthropic Research**：官方工程博客明确说多智能体「尤其擅长 **breadth-first queries**」，策略是
   「start wide, then narrow down」，最后有 CitationAgent 做引用定位；代价是约 **15×** chat token。
@@ -449,9 +448,9 @@ stopping: 覆盖/迭代，而不是 claim-settled
 **判定**：Gemini 的「学术好、事实差」是 **style-task mismatch** 的教科书案例；不是「Gemini 只能做学术」。
 换 style 不等于换模型；但换 style 必须换验收，否则只是把报告写短。
 
-**边界（权重不动）**：我们不动 Gemini 的权重，也不试图复制它的训练；能复制/反制的是它的 **Protocol
-形状**。fact_check style 的收益来自 source / lens / effort / output / gates，不来自模型；如果试点里
-收益主要来自「换了一个更强模型」，那这条线就该停，不该把它包装成 style 的功劳。
+**边界（权重不动）**：我们不动 Gemini 的权重，只反制它的 **Protocol 形状**。fact_check style 的收益
+来自 source / lens / effort / output / gates，不来自模型；如果试点里收益主要来自「换了一个更强模型」，
+那这条线就该停，不该把它包装成 style 的功劳。
 
 ## 8. 对偏好层数据模型的含义
 
