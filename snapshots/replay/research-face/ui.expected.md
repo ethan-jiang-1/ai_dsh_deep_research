@@ -11,4 +11,4 @@
 ## 研究状态页签 · 人性化活动行（icon + 文本）
 
 🔍 检索：DSH harness
-💬 探针完成，搜索了「DSH harness」，并抓取了第一个官方域名 dshbase.com 下的 [
+💬 探针完成，搜了「DSH harness」（8 条结果，含官方仓库 [deepseek-ai/deep

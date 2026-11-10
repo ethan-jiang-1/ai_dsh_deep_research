@@ -11,9 +11,9 @@
       "fixture": "session.v4.jsonl",
       "renderExpected": "ui.expected.md",
       "source": {
-        "codeAnchor": "4763a428ea86ff45568efc1c660cbbb6c434ec46",
+        "codeAnchor": "cc492a186c3e2b2f516d7eec4a4024f6dc230b77",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-10T07:35:57.000Z",
+        "recordedAt": "2026-11-10T10:14:09.297Z",
         "recording": "live"
       }
     },
@@ -33,9 +33,9 @@
       "preset": "analyst",
       "fixture": "analyst/session.v4.jsonl",
       "source": {
-        "codeAnchor": "1ed491777cc85f7792dca5fc3e4e8703d52b1565",
+        "codeAnchor": "6ada0e3b05fe509c169701af81047053adc5b42b",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-10T04:39:23.000Z",
+        "recordedAt": "2026-11-10T10:57:07.038Z",
         "recording": "live"
       }
     },
