@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // verdict-audit —— run bundle 的 claim 级裁决审计（keyless：纯 fs + 会话日志；claim 覆盖 / 原文一致 /
-// child 身份与只读纪律）。契约正本 = `_backlog/research/quality-loop/2026-11-10-verdict-contract.md` §5。
+// child 身份与只读纪律）。契约正本 = `_backlog/_archived/research/quality-loop/2026-11-10-verdict-contract.md` §5。
 //
 // 为什么存在：`review.md` 的 `readiness: PASS` 是报告级 prose——机器读不出「每条关键结论被谁核过、
 // 核成什么、裁决有没有被改」。本工具把 `review/claims.json` + `review/verdicts-r<N>.json` 对成

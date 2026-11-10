@@ -1,4 +1,4 @@
-// verdict-audit —— claim 级裁决判据的 keyless 回归（契约 = `_backlog/research/quality-loop/
+// verdict-audit —— claim 级裁决判据的 keyless 回归（契约 = `_backlog/_archived/research/quality-loop/
 // 2026-11-10-verdict-contract.md` §5；实现 = `scripts/lib/verdict-audit-core.mjs`）。
 //
 // 覆盖形状：绿基线 + 每条红判据各一例（负例即反证：删掉对应断言/放宽判据，这些用例会变绿）。

@@ -2,7 +2,7 @@
 //
 // 为什么存在：交付判据过去只有 `review.md` 的一段 `readiness: PASS`（报告级 prose）。要机械回答
 // 「每条关键结论都被独立核过吗、核成什么、裁决有没有被改」，需要 claim 级 typed 工件 + 覆盖门。
-// 契约正本 = `_backlog/research/quality-loop/2026-11-10-verdict-contract.md` §5（本文件是唯一解析/判据实现，
+// 契约正本 = `_backlog/_archived/research/quality-loop/2026-11-10-verdict-contract.md` §5（本文件是唯一解析/判据实现，
 // 改形状 = 同 diff 改契约与测试；模板 `content/templates/run/claims.json|verdicts.json` 与解析键由测试钉死）。
 //
 // 边界（写进报告页脚，防过度声称）：
