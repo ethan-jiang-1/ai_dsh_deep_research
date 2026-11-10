@@ -7,7 +7,7 @@
 ## 先建立模型
 
 本项目交付一个 DSH 插件包（bundle + 用户自建 custom profile `deep-research`，D41），运行时没有独立研究
-进程、没有 launcher/自定义安装器。安装用户走 DSH 原生安装（CLI 建 profile + Plugins 页装包）+
+进程、没有 launcher/自定义安装器。安装用户走 DSH 原生安装（CLI 建 profile + 本地 tarball 装包；npm/Plugins 为 staged）+
 `dsh --profile deep-research`；首屏询问项目目录，Host 启动行登记工作区。本页的开发驱动（run-driver /
 同名 `deep-research` profile / `research-workspace/`）只描述 M2。DSH 提供会话、工具、模型调用与团队机制；插件提供角色配置、
 方法论技能、content 内容注入和研究驾驶舱；用户工作区承载问题、证据和报告。

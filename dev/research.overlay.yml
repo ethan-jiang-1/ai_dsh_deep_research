@@ -328,7 +328,7 @@
           - id: method-library-tool
             name: 'dsh-deep-research-pack/method-library-tool'
 
-          # 工作区手册注入（handbook-budget 门禁）：给方法与库格式的参考上下文，按预算截断。
+          # 工作区指令注入：给方法与库格式的参考上下文，按 maxBytes 截断。
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:

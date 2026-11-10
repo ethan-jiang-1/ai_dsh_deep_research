@@ -86,6 +86,34 @@ export function runB() {
       fail(gate, 'engines.dsh 未声明——宿主兼容检查会退回 peer 范围（补 packages/deep-research-pack/package.json 的 engines.dsh）');
     else if (!satisfiesVersion(VENDOR_TAG.replace(/^dsh-v/, ''), engine))
       fail(gate, `engines.dsh ${engine} 不覆盖当前 vendor tag ${VENDOR_TAG}——范围写窄或写错`);
+    else {
+      // 同一版本事实有 5 处人类副本（根 README / 包 README / design/40 / 手册源 / 生成手册）。
+      // 当前一致，但没有任何机械对账；2026-11-10 接手复查把它们钉住：精确副本必须含完整范围，
+      // 根 README 至少含两端点。范围一改，本门禁点名所有未同步副本。
+      const range = engine.trim();
+      const endpoints = range.match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/g) ?? [];
+      if (endpoints.length < 2) fail(gate, `engines.dsh ${range} 解析不出两个端点——无法对账人类副本`);
+      const copies = [
+        ['packages/deep-research-pack/README.md', true],
+        ['docs/design/40-research-cockpit.md', true],
+        ['_dist/安装手册.md', true],
+        ['README.md', false],
+      ];
+      for (const [rel, exact] of copies) {
+        const path = join(ROOT, rel);
+        if (!existsSync(path)) {
+          if (rel === '_dist/安装手册.md') continue; // 缺席由 dist-manual-version 负责
+          fail(gate, `${rel} 缺席——engines.dsh 的人类副本无法对账`);
+          continue;
+        }
+        const text = readFileSync(path, 'utf8');
+        const ok = exact ? text.includes(range) : endpoints.every((v) => text.includes(v));
+        if (!ok) fail(gate, `${rel} 的 engines.dsh 副本与 package.json 不一致（应为 ${exact ? range : endpoints.join(' / ')}）——同一事实多副本必须同步`);
+      }
+      // 手册源是模板：{dshEngine} 由 export-dist 注入；占位符改名/删除会让生成物失去版本事实。
+      const manualSource = readFileSync(join(ROOT, 'scripts/dist/product-manual.md'), 'utf8');
+      if (!manualSource.includes('{{dshEngine}}')) fail(gate, 'scripts/dist/product-manual.md 缺 {{dshEngine}} 占位——手册生成物拿不到 engines.dsh');
+    }
   }
 }
 
@@ -423,6 +451,13 @@ export function runB() {
     }
     const questions = [...readme.matchAll(/^\*\*([1-7])\. /gm)].map((m) => m[1]);
     if (questions.join('') !== '1234567') fail(gate, `README 首屏七问不全（找到 ${questions.join(',') || '无'}）——装什么/怎么装/版本前置/怎么验证/配置在哪层/升级回退/卸载数据`);
+    // 首次安装顺序（2026-11-10 接手卫生）：pack README 曾把 tarball 装包写在 profile 引导之前；
+    // 干净机器照做会先得到 base-only profile（缺 web-app，dump 出 3 条 patch entry not found），
+    // 再跑 --from-default-profile 又会替换掉已装包。只查"有引导"不够，必须查先后。
+    const bootstrapAt = readme.indexOf('--from-default-profile web');
+    const installAt = readme.indexOf('add file:');
+    if (bootstrapAt === -1) fail(gate, 'README 没有写 custom profile 的 CLI 引导（--from-default-profile web）——DSH 没有 UI 建自定义 profile');
+    else if (installAt !== -1 && bootstrapAt > installAt) fail(gate, 'README 把 profile 引导放在 tarball 装包之后——首次安装必须先建 profile（顺序不可反）');
     if (/dsh\.compatibility/.test(readme)) fail(gate, 'README 仍写已删除的 dsh.compatibility 字段（版本合同只有 engines.dsh）');
     if (readme.split('\n').length > 310) fail(gate, `README 超出 310 行预算（当前 ${readme.split('\n').length}）——把维护者/架构内容下沉，不要扩顶`);
   }

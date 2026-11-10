@@ -52,15 +52,15 @@ test('已退役表：D35/D38/D39 各有锚点与一行去向，且不在已定�
   assert.match(RETIRED, /D40/, '已退役表应指向取代者 D40');
 });
 
-test('D 号唯一且连续：D1–D41 每个锚点恰好一次', () => {
+test('D 号唯一且连续：D1–D42 每个锚点恰好一次', () => {
   const anchors = [...TEXT.matchAll(/<a id="d(\d+)"><\/a>D\1/g)].map((m) => Number(m[1]));
-  assert.ok(anchors.length >= 41, `锚点过少（${anchors.length}）——防空语料`);
+  assert.ok(anchors.length >= 42, `锚点过少（${anchors.length}）——防空语料`);
   const counts = new Map();
   for (const n of anchors) counts.set(n, (counts.get(n) ?? 0) + 1);
   const dup = [...counts].filter(([, c]) => c > 1).map(([n]) => n);
   assert.deepEqual(dup, [], '同一 D 号出现多次（编号唯一）');
   const missing = [];
-  for (let n = 1; n <= 41; n += 1) if (!counts.has(n)) missing.push(n);
+  for (let n = 1; n <= 42; n += 1) if (!counts.has(n)) missing.push(n);
   assert.deepEqual(missing, [], 'D 号不连续（缺号会让引用悬空）');
 });
 

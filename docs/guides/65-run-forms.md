@@ -34,7 +34,7 @@ profile 只初始化 `dsh-base`——`--from-default-profile web` 是文档给�
 | **patch 层** | 包内 bundle patch 给默认值；profile/home/CLI 可覆盖；对目标 row 的 `config` 是整份替换 | 本包 + 用户 | `dsh --profile deep-research --dump-config`；`skippedBundles` |
 | **app surface** | **Web**（本包 client 插件只注册 Web）；Desktop 仅互操作；headless/SDK/ACP 不在支持范围 | DSH | `dsh web:` URL / Desktop Plugins 页 |
 | **Harness home 与数据** | `$DSH_HOME/deep-research/settings.json` + 用户工作区；sessions/credentials/Workspace registry 归 DSH | 本包 / 用户 / DSH | [pack README §Data](../../packages/deep-research-pack/README.md#data) 逐行 |
-| **生命周期** | Plugins 页默认；CLI 面绑定；membership 变更重启；config-only 可 HMR；无命令级回滚；卸载只回收包与 patch 层 | DSH + 本包文档 | 三态 + `remove` + dump |
+| **生命周期** | 本地 tarball 装包（当前唯一发布形态）；npm/Plugins 发布后；CLI 面绑定；membership 变更重启；config-only 可 HMR；无命令级回滚；卸载只回收包与 patch 层 | DSH + 本包文档 | 三态 + `remove` + dump |
 
 **完整** = 六轴都有明确 owner，没有一格写“默认应该有”。**可控** = 改任一条不用 fork DSH。
 本仓六轴都有决定，但运行时、app surface、生命周期由 DSH/用户提供——这是“bundle + custom profile

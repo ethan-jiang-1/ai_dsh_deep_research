@@ -19,6 +19,12 @@ export function runE() {
   else {
     const manual = readFileSync(manualPath, 'utf8');
     if (manual.trim() === '') fail(gate, 'content/manual.md 为空');
+    // 常驻面预算（2026-11-10 接手卫生）：manual 由 content 行注入每个 agent；旧 handbook-budget
+    // 随 workspace 种子退役后没有替代守卫。上限 = 当前 11,227 字符 + ~9% 余量；超限先下放/压缩，
+    // 不直接抬顶（抬顶须同变更登记理由）。
+    const MANUAL_MAX_CHARS = 12_288;
+    if (manual.length > MANUAL_MAX_CHARS)
+      fail(gate, `content/manual.md ${manual.length} 字符 > ${MANUAL_MAX_CHARS} 预算——模型可见常驻面先下放/压缩，不扩顶`);
     const vars = [...manual.matchAll(/{{([^}]+)}}/g)].map((m) => m[1]);
     const unexpected = vars.filter((v) => v !== 'research_pack_root');
     if (unexpected.length > 0) fail(gate, `content/manual.md 出现未注册插值 {{${unexpected[0]}}}——只有 research_pack_root 由 src/content 注册`);

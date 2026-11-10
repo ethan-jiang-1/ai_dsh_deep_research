@@ -4,6 +4,12 @@
 
 ## 活跃清单
 
+| 卡 | 一句话 | 状态 |
+|---|---|---|
+| [2026-11-10-claim-verdict-quality-loop](2026-11-10-claim-verdict-quality-loop.md) | claim 级独立复核：typed verdict + 机械覆盖门 | 待落地 |
+| [2026-11-10-lens-layer](2026-11-10-lens-layer.md) | 研究视角层（lens）落成 pack 数据层 | 待落地 |
+| [2026-11-10-workflow-wave-executor](2026-11-10-workflow-wave-executor.md) | 编排通道落地：workflow 只做同质 wave 执行器 | 待落地 |
+
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
 ## 最近归档

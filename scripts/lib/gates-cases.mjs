@@ -501,6 +501,13 @@ export const CASES = [
     delete j.engines.dsh;
     writeFileSync(p, JSON.stringify(j, null, 2) + '\n');
   } },
+  // 同一版本范围的 5 处人类副本必须同步；只改包 README 不改 package.json → 点名包 README。
+  { id: 'pack-bundle-compat-engines-copy-drift', gate: 'pack-bundle-compat', mutate: (dir) => {
+    const p = join(dir, 'packages', 'deep-research-pack', 'README.md');
+    const text = readFileSync(p, 'utf8');
+    if (!text.includes('>=0.2.1-rc.2 <=0.2.1-rc.5')) throw new Error('夹具包 README 无 engines 范围——案例失效');
+    writeFileSync(p, text.replace('>=0.2.1-rc.2 <=0.2.1-rc.5', '>=0.2.1-rc.2 <=0.2.1-rc.4'));
+  } },
   // guard-red-record（tests 面反证义务机械化）：标题声明无留证 / 悬空编号双形态。
   { id: 'guard-red-record-no-record', gate: 'guard-red-record', mutate: (dir) => {
     const p = join(dir, 'tests', 'run', 'local-date.test.mjs');
@@ -614,6 +621,10 @@ export const CASES = [
     mkdirSync(join(dir, 'packages', 'deep-research-pack', 'workspace'), { recursive: true });
     writeFileSync(join(dir, 'packages', 'deep-research-pack', 'workspace', 'seed.json'), '{}\n');
   } },
+  // content-shape：手册常驻面超预算——无上限会让每个 agent 的 runtime context 无界膨胀。
+  { id: 'content-shape-manual-over-budget', gate: 'content-shape', mutate: (dir) => {
+    appendFileSync(join(dir, 'packages', 'deep-research-pack', 'content', 'manual.md'), `\n${'x'.repeat(20_000)}\n`);
+  } },
   // pack-manifest：把已退役的自造兼容矩阵放回清单——DSH 不读的 dsh.* 键即红。
   { id: 'pack-manifest-invented-key', gate: 'pack-manifest', mutate: (dir) => {
     const p = join(dir, 'packages', 'deep-research-pack', 'package.json');
@@ -656,6 +667,16 @@ export const CASES = [
     if (!text.includes('--from-default-profile web')) throw new Error('夹具手册无 profile 引导——案例失效');
     writeFileSync(p, `${text.replaceAll('--from-default-profile web', '__PROFILE_BOOTSTRAP__')}\n\n` +
       '`dsh --profile deep-research --from-default-profile web`\n');
+  } },
+  // readme-shape：pack README 把 tarball 装包放在 profile 引导之前——干净机器先得 base-only
+  // profile（缺 web-app），再建 profile 又会替换已装包。顺序断言必须点名红。
+  { id: 'readme-shape-install-before-profile', gate: 'readme-shape', mutate: (dir) => {
+    const p = join(dir, 'packages', 'deep-research-pack', 'README.md');
+    const text = readFileSync(p, 'utf8');
+    const bootstrap = 'dsh --profile deep-research --from-default-profile web --dump-default-config\n';
+    const install = 'dsh plugin --profile deep-research add file:/path/to/dsh-deep-research-pack-<version>.tgz\n';
+    if (!text.includes(bootstrap) || !text.includes(install)) throw new Error('夹具 README 缺 bootstrap/install 行——案例失效');
+    writeFileSync(p, text.replace(bootstrap, '').replace(install, `${install}\n${bootstrap}`));
   } },
   // readme-shape：kind 退回旧值——不是 DSH package-bundle。
   { id: 'readme-shape-wrong-kind', gate: 'readme-shape', mutate: (dir) => {

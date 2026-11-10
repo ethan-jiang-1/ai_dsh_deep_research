@@ -48,7 +48,18 @@ user's named assembly, not something this package ships. After installation the 
 (`ui-agent-team`) comes from the team-mechanics layer, installed separately in the same profile;
 this bundle does not insert it.
 
-**2. How to install (current).** 0.3.0 is delivered as a local tarball; the npm/Plugins page path is
+**2. Create the custom profile first (only if it does not exist).** DSH has no UI for creating a
+custom profile; the CLI is the documented path. `--from-default-profile` is a **destructive
+replacement**, not an upgrade:
+
+```sh
+dsh --profile deep-research --from-default-profile web --dump-default-config
+```
+
+Do not run it on an existing profile: it replaces dependencies and the user patch. The next step
+installs the current local tarball into that profile (npm/Plugins are staged).
+
+**3. How to install (current).** 0.3.0 is delivered as a local tarball; the npm/Plugins page path is
 **staged** (no npm publication yet). Install the tarball into the profile:
 
 ```sh
@@ -58,17 +69,6 @@ dsh plugin --profile deep-research add file:/path/to/dsh-deep-research-pack-<ver
 The Plugins page entry becomes available after the package is published to npm. On Desktop that page
 manages the application-owned `desktop` profile; that is an interoperability form, not the
 `deep-research` custom profile. This package is developed and verified against the Web surface.
-
-**3. Create the custom profile first (only if it does not exist).** DSH has no UI for creating a
-custom profile; the CLI is the documented path. `--from-default-profile` is a **destructive
-replacement**, not an upgrade:
-
-```sh
-dsh --profile deep-research --from-default-profile web --dump-default-config
-```
-
-Do not run it on an existing profile: it replaces dependencies and the user patch. Existing
-profiles install the current local tarball (npm/Plugins are staged).
 
 **4. CLI installation (package-name form, post-publish; also Web automation or offline).**
 `dsh plugin --profile` forwards to pnpm. For 0.3.0 the current install is the local tarball in
@@ -88,7 +88,8 @@ form with that explicit profile. Offline, replace the package spec with
 
 **5. The team layer.** The Agent Teams composition is a separate, official experimental bundle. Do
 not use `@latest`: its `latest` does not track the running DSH version. Install the exact version
-printed by `dsh --version`, or enable it from the same Plugins page. **Multi-role research needs this
+printed by `dsh --version`; after npm publication, the same Plugins page can enable it.
+**Multi-role research needs this
 layer**: without it the Lead preset loads but its team tools are absent, and `doctor` reports a
 failure. A quick-factual-only profile can skip it.
 

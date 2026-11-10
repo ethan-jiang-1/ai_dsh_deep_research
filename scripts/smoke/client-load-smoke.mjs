@@ -51,7 +51,7 @@
 // 都认（位置只用于发现，状态从内容读）。断言的磁盘认证源 = 磁盘侧扫出的最新绑定会话（跑过 run
 // 即有），其 bundle 的 evidence 计数/交付态/问题行以盘上真值对账——不再自造探针 bundle。
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
-import { freemem, loadavg } from 'node:os'
+import { cpus, freemem, loadavg } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { scrubbedEnv } from '../lib/env.mjs'
@@ -60,6 +60,7 @@ import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs'
 import { launchChromium, loadChromium } from '../lib/playwright.mjs'
 import { clientHistoryWindow, projectKey, readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
+import { classifyHostHealth, isHostUnhealthyVerdict } from '../lib/host-health.mjs'
 import { materializeSeedHome, resolveSeedFixture, seedFixtureSize } from './client-load-seed.mjs'
 import { prepareClientLoadReference } from './client-load-reference.mjs'
 import { pass4ConfigTabPhase } from './client-load-config.mjs'
@@ -315,6 +316,22 @@ const expectedFace = boundSession !== null ? fileFaceOf(boundSession.slug) : nul
 // 渲染观察 = 页面 DOM——四类源各归各，不再有任何手抄镜像。
 const anchorBound = boundSession !== null && expectedFace !== null
 
+// 主机预检（2026-11-10）：低内存/高负载主机上 boot 的 dsh server 会中途死，浏览器只剩
+// chrome-error；先判 NOT-RUN（exit 2），不把环境红跑成断言红。失败时还有同一判据的二次收口。
+{
+  const startupHost = { load1: Number(loadavg()[0].toFixed(2)), freeMB: Math.round(freemem() / 1024 / 1024), cpuCount: cpus().length }
+  const startupHealth = classifyHostHealth(startupHost)
+  if (startupHealth.unhealthy) {
+    console.error(`client-load-smoke: NOT-RUN — 主机不健康（load ${startupHost.load1} / free ${startupHost.freeMB}MB / ${startupHost.cpuCount} CPU：${startupHealth.reasons.join('；')}）——先释放主机再跑；未跑 ≠ 通过`)
+    try {
+      const latest = join(ROOT, 'runtime', 'smoke-workspace', 'client-load-latest.json')
+      mkdirSync(dirname(latest), { recursive: true })
+      writeFileSync(latest, JSON.stringify({ at: new Date().toISOString(), status: 'NOT-RUN', dir: null, failures: [], skipped: [], host: { ...startupHost, ...startupHealth } }, null, 2))
+    } catch { /* 指针写失败不改变判据 */ }
+    process.exit(2)
+  }
+}
+
 acquireRunLock()
 let child
 let token
@@ -336,6 +353,7 @@ const noteHttpFailure = (entry) => {
   if (httpFailures.length < 50) httpFailures.push(entry)
 }
 let artifactsSaved = null
+let lastHostHealth = null
 // 失败现场（审计 P0-4）：截图 + DOM + console + meta。agent 的"看见页面"最小证据；
 // 成功不写，失败/异常写 timestamped 目录，路径打印到 stderr。
 // 最新结果指针（2026-11-03 G-21）：失败现场目录按时间戳保留，但"最近一次到底是红是绿"
@@ -365,7 +383,9 @@ const saveArtifacts = async (reason, extra = {}) => {
     const disconnects = consoleErrors.filter((t) => /WebSocket closed|Remote stream|net::ERR_NETWORK_IO_SUSPENDED/.test(t)).length
     // 主机快照（2026-10-28 归因）：一条红是"产品缺陷"还是"这台机器此刻不健康"，看现场就知道——
     // 实测过一次 load 32 / swap 99% 时 web 进程被 OOM 掉，报出来却是断言红。
-    const host = { load1: Number(loadavg()[0].toFixed(2)), freeMB: Math.round(freemem() / 1024 / 1024) }
+    const host = { load1: Number(loadavg()[0].toFixed(2)), freeMB: Math.round(freemem() / 1024 / 1024), cpuCount: cpus().length }
+    const health = classifyHostHealth(host)
+    lastHostHealth = { ...host, ...health }
     writeFileSync(join(dir, 'meta.json'), JSON.stringify({
       reason, at: new Date().toISOString(), failures, skipped,
       // 归因切片（D6-2/3）：失败时的页面地址、最后一个断言、绑定会话/run、HTTP 失败清单。
@@ -374,12 +394,13 @@ const saveArtifacts = async (reason, extra = {}) => {
       boundSession: boundSession?.sessionId ?? null,
       boundSlug: boundSession?.slug ?? null,
       httpFailures,
-      extra, consoleErrors, disconnects, host,
+      extra, consoleErrors, disconnects, host: lastHostHealth,
     }, null, 2))
     artifactsSaved = dir
     writeLatest('FAIL', dir)
     console.error(`client-load-smoke: 失败现场 ${dir}（page.png / page.html / console.txt / meta.json；`
-      + `浏览器断连 ${disconnects} 次、主机 load ${host.load1} / free ${host.freeMB}MB、HTTP 失败 ${httpFailures.length} 条——先分流"流抖动/主机不健康"与"产品红"）`)
+      + `浏览器断连 ${disconnects} 次、主机 load ${host.load1} / free ${host.freeMB}MB、HTTP 失败 ${httpFailures.length} 条；`
+      + `主机健康=${health.unhealthy ? `NO（${health.reasons.join('；')}）` : 'yes'}）`)
     return dir
   } catch (error) {
     console.error(`client-load-smoke: 现场保存失败：${error.message}`)
@@ -1286,12 +1307,28 @@ try {
   releaseRunLock()
 }
 
+// 主机不健康 + 连接死亡：这是环境红，不是产品断言红。判据 = lib/host-health（keyless 直测）。
+// exit 2 与 smoke 契约的"未跑"一致；现场仍保留，主机健康时的连接死亡仍走 exit 1。
+const connectionDeath = httpFailures.some((f) => f.status === 'failed'
+  && /ERR_CONNECTION_REFUSED|ERR_INCOMPLETE_CHUNKED_ENCODING/.test(String(f.error ?? '')))
+const pageLost = (() => { try { return /^chrome-error:/.test(page.url()) } catch { return false } })()
+const hostNotRun = isHostUnhealthyVerdict({
+  hasFailures: failures.length > 0,
+  hostHealth: lastHostHealth,
+  connectionDeath,
+  pageLost,
+})
+
 if (failures.length === 0) {
   writeLatest(skipped.length === 0 ? 'PASS' : 'SKIP')
   console.log(skipped.length === 0
     ? '\nclient-load-smoke: ALL PASS（观察面 client 面真浏览器加载绿）'
     : `\nclient-load-smoke: ALL PASS + ${skipped.length} SKIP（未跑 ≠ 通过）：\n${skipped.join('\n')}`)
+} else if (hostNotRun) {
+  writeLatest('NOT-RUN', artifactsSaved)
+  console.log(`\nclient-load-smoke: NOT-RUN — 主机不健康（load ${lastHostHealth.load1} / free ${lastHostHealth.freeMB}MB / ${lastHostHealth.cpuCount} CPU：${lastHostHealth.reasons.join('；')}）`
+    + `且连接死亡；现场 ${artifactsSaved ?? '未保存'}——未跑 ≠ 通过，健康主机上重跑`)
 } else {
   console.log(`\nclient-load-smoke: ${failures.length} FAILURE(S)\n${failures.join('\n')}`)
 }
-process.exit(failures.length > 0 ? 1 : skipped.length > 0 ? 2 : 0)
+process.exit(hostNotRun ? 2 : failures.length > 0 ? 1 : skipped.length > 0 ? 2 : 0)

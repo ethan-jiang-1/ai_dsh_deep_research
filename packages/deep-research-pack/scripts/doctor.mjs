@@ -82,7 +82,7 @@ if (manifest === null) {
   const bundles = profileBundles(manifest)
   record(bundles.includes('@deepseek-ai/dsh-base'), 'profile base bundle', bundles.join(', '))
   record(bundles.includes(WEB_APP_BUNDLE), 'profile web-app bundle', WEB_APP_BUNDLE)
-  record(bundles.includes(PACK_NAME), 'profile 含本包', `${PACK_NAME}；装法 = dsh plugin --profile ${profile} add ${PACK_NAME}@${pack.version}`)
+  record(bundles.includes(PACK_NAME), 'profile 含本包', `${PACK_NAME}；装法 = dsh plugin --profile ${profile} add file:/path/to/dsh-deep-research-pack-${pack.version}.tgz（npm/Plugins 未发布时；完整 = 包 README 的 Install into a profile 节）`)
   record(bundles.includes(TEAM_LAYER), 'profile 含团队层', TEAM_LAYER)
   const installed = installedPackVersion(profileDir)
   record(installed === pack.version, '安装副本版本', `${installed ?? '未安装'}（pack ${pack.version}）`)
