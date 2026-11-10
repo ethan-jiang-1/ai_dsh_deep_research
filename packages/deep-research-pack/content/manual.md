@@ -146,10 +146,29 @@ present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat 
 
 要改别人 owner 的文件：通过团队通道向 owner 提请求，不直接动手。
 
+## 研究视角（lens）
+
+lens = 本次研究从哪个**证据面**挖（不是角色/persona、不是报告骨架）。出厂目录 =
+`{{research_pack_root}}/content/lenses/<id>.md`（按需 read，不预载全文）；题型默认集与索引 =
+lead 的 `question-patterns` skill。
+
+- **选择**：HITL1 按题型给默认集（默认 2、上限 4；P1 可单 `official`）；完整集合写
+  `question.md` §研究方法 `- 本次视角:` 与 `topics.md` 每个 topic 的 `lenses:`；计划确认卡默认不写，
+  偏离才写一个短标记。per-topic 子集、cells = Σ(topic × lens) ≤12。
+- **执行**：同一 topic 有 ≥2 lens 时，至少一个 lens 在独立 activation 跑（subagent/workflow）；
+  同 activation 顺序跑须在 plan/journal 记理由。
+- **证据**：evidence 卡 `lens: <id>` 单值（一卡一面；多面拆卡）。
+- **覆盖**：review.md 终局块填 `topic × lens` 表；每格 = 卡数+质量，或 `gap：原因/渠道`，或
+  `n/a：理由`。静默空格（无卡也无记录）= MAJOR + readiness FAIL；每个 lens 的盲区要有
+  「配对 / 本题不 material / 显式接受单镜风险」之一。
+- **报告**：报告骨架归研究方法预设；lens 只影响所属章节的证据呈现。final §目前不能判断写
+  一行「视角覆盖：… / 空视角：…」。
+
 ## 证据文件契约（evidence/ 下的硬格式）
 
-frontmatter 必须有（七字段）：`source_url`（真实抓取过的 URL）/ `retrieved_at` / `quality`
-（A–D）/ `found_by` / `supports` / `source_tier`（信源分级，见下表）/ `publisher`（注册域）。
+frontmatter 必须有（八字段）：`source_url`（真实抓取过的 URL）/ `retrieved_at` / `quality`
+（A–D）/ `found_by` / `supports` / `source_tier`（信源分级，见下表）/ `publisher`（注册域）/
+`lens`（本卡所属证据面 id，单个；一卡一面，多面拆卡）。
 正文"原文摘录"与"解读"两节分开。以上即最小契约，**所有角色按此判**；analyst 会话内另有
 全文模板（`evidence-extraction` skill；按角色硬隔离，其他角色加载不到，判据以本手册为准）。**没有 frontmatter 的文件不算证据**（critic 按此判）。
 **口径最小契约**（与 frontmatter 同级）：数字/规格类摘录须带测量条件口径（版本/配置/
@@ -191,7 +210,7 @@ review 审查时间、口径截至）以 **time-context 读数**为准（每步�
 
 整个 run 只有两个人机交互点，都由 lead 执行：**立项对齐（HITL1）**与**交付审阅（HITL2）**——都以 `ask_user_question` 的**结构化选项卡**呈现（一次多问 + options + 推荐项置首带(Recommended)）。
 
-**HITL1 = 两段卡**：第一段固定三问（研究类型/深度篇幅/时间口径与语言），第二段**计划确认卡**——question/topics 定稿后、开工前呈计划要点瘦卡（按计划开跑(Recommended)/ 修订计划（意见附加不替换、一轮制不再二次呈卡）/ 放弃；**quick_factual 豁免**），拍板落 question.md §Decisions 第 1 条，形态细则 = lead 的 research-brief skill；**HITL2 选项** = 定稿（按现稿交付）(Recommended)/补研究（补哪块看报告末节；会出新版本）/改说法（只改措辞，版本不变）；题干给「太浅/方向不对/太长」；分诊 = lead 的 rerun-triage skill。
+**HITL1 = 两段卡**：第一段固定三问（研究类型/深度篇幅/时间口径与语言），第二段**计划确认卡**——question/topics 定稿后、开工前呈计划要点瘦卡（按计划开跑(Recommended)/ 修订计划（意见附加不替换、一轮制不再二次呈卡）/ 放弃；**quick_factual 豁免**；方法行含视角：默认不写、偏离才写），拍板落 question.md §Decisions 第 1 条，形态细则 = lead 的 research-brief skill；**HITL2 选项** = 定稿（按现稿交付）(Recommended)/补研究（补哪块看报告末节；会出新版本）/改说法（只改措辞，版本不变）；题干给「太浅/方向不对/太长」；分诊 = lead 的 rerun-triage skill。
 
 两点之间所有角色静默自主推进——不问"要不要继续"、不汇报进度、不等确认。
 用户主动发消息时直接回答，但回答不改变既定研究方向与分派。
@@ -200,5 +219,6 @@ review 审查时间、口径截至）以 **time-context 读数**为准（每步�
 
 - `final/vN` 的关键结论有真实存在且内容支撑的 `[来源: evidence/xx.md]`；`review.md` 的**终局块**为 PASS 后才进入 HITL2。
 - 新 run 非 quick_factual：review PASS 后、HITL2 前写 `final/readable.md`；交付时 `final/readable-vN.md` 与 `final/vN` 同版在场（门C）。
+- 有 lens 的 run：`review.md` 终局块的 `topic × lens` 覆盖表无静默空格（无卡也无 gap/n-a = FAIL）；`final.md` §目前不能判断写出视角覆盖/空视角；缺 `lens` 字段的新证据卡 = critic MAJOR。
 - 交付回执：`final/vN` + `final/readable-vN` + `question.md` §Decisions 的 HITL2 拍板行 + Lead 的 `deliverables/presented`（含 `final/vN` 与 reader）+ 操作侧 `audit.md`（标题匹配、`CRITICAL=0`）+ `delivered.json`/`acceptance.md`；**无审计工具时按上节三态降级**（写 `no machine audit (install-only)`，不假装绿）。
 - "研究完成"的唯一依据是以上文件事实链，不是任何人的口头宣告。

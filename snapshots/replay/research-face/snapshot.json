@@ -33,9 +33,9 @@
       "preset": "analyst",
       "fixture": "analyst/session.v4.jsonl",
       "source": {
-        "codeAnchor": "3c4f9f2cc85c8d69f8bce3c274db3e5e3172e90c",
+        "codeAnchor": "1ed491777cc85f7792dca5fc3e4e8703d52b1565",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-05T01:30:52.037Z",
+        "recordedAt": "2026-11-10T04:39:23.000Z",
         "recording": "live"
       }
     },

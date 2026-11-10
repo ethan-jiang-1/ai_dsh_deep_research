@@ -9,14 +9,14 @@ description: 综合写作（wave2 语义）方法论：纯综合先行、finding
 
 ## 流程
 
-1. **纯综合（禁止新搜索）**：通读本 run bundle（drt_<slug>/）的 evidence/ 全部文件与 topics.md，写 findings.md——每个 finding 一行：结论 + 支撑证据文件 + gap 状态（`supported` / `needs_search` / `contradicted`）。
+1. **纯综合（禁止新搜索）**：通读本 run bundle（drt_<slug>/）的 evidence/ 全部文件与 topics.md，写 findings.md——每个 finding 一行：结论 + 支撑证据文件 + `lenses`（哪些面支撑）+ `lens_gaps`（哪些面没覆盖）+ gap 状态（`supported` / `needs_search` / `contradicted`）。
 2. **gap 定向补搜**：只对 `needs_search` 的 finding 派一次定向任务（给 analyst 或 subagent，说清找什么、什么算找到）。补完更新 findings.md，**只补一轮**——补了还缺就把该 finding 标 `insufficient` 并在报告里如实呈现。**未取得 ≠ 没有**：拿不到的项，报告里只能落「未取得/无法判定」（写明试过的渠道），**禁止转写成「没有/不提供」**——取证可达性不对称是常态（cn-dr-products 实证：洋厂商一手定价页全域 403，"查不到"进无法判定类），查不到 ≠ 官方没有。
 3. **写 run 根 final.md 当前版**（交付时忠实复制为 final/vN 副本，present 指它）：**决策摘要首屏先行**——六段：
    答案/建议及适用条件（成立条件、口径、有效期；证据不足以支撑建议时如实写
    「目前不能判断」及原因，**不硬给唯一推荐**）→ 备选与取舍（比较依据不足不排序、
    不说服）→ 关键依据（2–4 条最强依据，每条附 `[来源: evidence/<file>.md]`，标来源
    等级 A–D 与关键口径）→ 最强反证（不抹平）→ 目前不能判断（insufficient 如实列出 +
-   试过的渠道）→ 下一步（后续动作/待用户输入；未获用户指定的负责人/期限标**「待定」**，
+   试过的渠道；**有 lens 时加一行视角覆盖/空视角**）→ 下一步（后续动作/待用户输入；未获用户指定的负责人/期限标**「待定」**，
    不编造）。之后按 topic 主体论述 → 来源清单（全部 evidence：路径 + 一句话说明 +
    retrieved_at；来源发布日期以摘录口径为准）。**快速事实型 run 首屏缩略**为
    答案 + 口径 + 依据 + 限制，不强行填满业务选项表。
@@ -51,7 +51,8 @@ description: 综合写作（wave2 语义）方法论：纯综合先行、finding
 - 每条关键结论的 [来源: …] 指向真实存在的 evidence 文件（critic 会逐条猎）；
 - 报告呈现了"我们不知道什么"（insufficient 清单），不是假装全知；
 - 首屏每条建议能沿 [来源: …] 追到真实证据文件——决策摘要不是独立于证据的评论；
-- 「目前不能判断」出现在首屏时，是写明渠道的结论，不是被跳过的思考。
+- 「目前不能判断」出现在首屏时，是写明渠道的结论，不是被跳过的思考；
+- 有 lens 的 run：findings 的 `lenses` / `lens_gaps` 与 review 覆盖表对得上；final「目前不能判断」写出视角覆盖/空视角；空视角没有被抹成「没有」。
 
 ## 反模式
 

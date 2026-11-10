@@ -1,20 +1,21 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-10
 ---
 
 # 推敲：研究视角层（lens）落成 pack 数据层
 
-> 立卡：2026-11-10 ｜ 状态：待落地 ｜ 类型：Feature ｜ 结论倾向：现在做 ｜ 可关闭：否
-> 去向：implemented — `notes/implemented/2026-11-10-lens-layer.md`；业务验收：用户
+> 立卡：2026-11-10 ｜ 状态：已结 ｜ 类型：Feature ｜ 结论倾向：现在做 ｜ 可关闭：是
+> 去向：implemented — [Note](../../../notes/implemented/2026-11-10-lens-layer.md)；业务验收：用户
+> 结论：pilot 验证 lens 层（7 cell / 39 卡 / 0 静默空格 / 面分离全过）；报告 readiness FAIL 属内容结果，不属 lens 契约失败；残余与 A3/A7 部分项见 §Pilot 读数。
 
 **问题与期望结果：** 现在的 Deep Research 方法层是「整场一种方法」（事实核查 / 领域地图 /
 主张核查 / 方案比较 / 时间线与信号），没有「同一道题，这次从哪几个证据面挖」的显式选择；
 evidence 只记 `supports: topic`，critic 只能按源数/等级/引用链审，报告只能写「不知道什么」，
 写不出「哪些面看过、哪个面是空的」。期望：把视角做成**可选、可配对、可检查覆盖的数据层**
 （lens），让同一题可以有 1–4 个可区分的证据面，且三条委派通道（subagent / team / workflow）
-都能执行同一份数据。研究结论与证据 = [lens-abstraction v2](../research/lens-abstraction/2026-11-10-lens-as-data.md)；
-8 条出厂草案 = [catalog draft](../research/lens-abstraction/2026-11-10-lens-catalog-draft.md)。
+都能执行同一份数据。研究结论与证据 = [lens-abstraction v2](../../research/lens-abstraction/2026-11-10-lens-as-data.md)；
+8 条出厂草案 = [catalog draft](../../research/lens-abstraction/2026-11-10-lens-catalog-draft.md)。
 
 **当前情况：**
 
@@ -62,6 +63,25 @@ evidence 只记 `supports: topic`，critic 只能按源数/等级/引用链审�
   `1ed4917`）；L4-lite ALL PASS；`release-smoke --install-only` ALL PASS。
 - **未跑**：M3 pilot（A8）。下一步 = 用户给 pilot 题/授权；pilot 通过后写 Note + `可关闭：是`。
   实现改动与 fixture 尚未提交（工作树）；提交时把 pack/测试/快照与 Note 作为窄证据切片一起入库。
+
+## Pilot 读数（M3，2026-11-10）
+
+- **Run**：`research-workspace/drt_ds-vs-bailian-longctx`；P5；3 个证据 topic + 1 synthesis；
+  lens = official + quant + practitioner + adversarial；cells = **7**（T1 2 / T2 3 / T3 2 / T4 0）。
+- **证据**：39 卡（official 19 / practitioner 13 / adversarial 5 / quant 2）；八字段 39/39、
+  `lens` 39/39 有效（critic 实测）；覆盖表 **0 静默空格**；盲区表 4 lens 均有配对或显式接受；
+  计划卡 **193 字**（≤200）；计划图有 `lens 与 activation` 节，独立 activation 有记录。
+- **面分离**：每个 ≥2 lens 的 topic，每个 lens 至少 1 个 publisher 域不在其他 lens 里
+  （T1 1/1；T2 4/4/5；T3 3/4）——全部成立。
+- **成本**：39 卡（本仓 55 run 中位 40）；卡 193；无成本爆炸。
+- **critic 可用**：critic 填满覆盖表且无追问，并用表抓出 C1（T2 未声明 quant，final 内却做了
+  TPM 换算；覆盖表该格 `n/a` + C1 成因）——覆盖表不是打卡，真能抓越界。
+- **报告 readiness = FAIL**（C1 + 6 MAJOR：单源标记/日期/负面断言范围/同域冲突/摘录缺原文/
+  超时语义）；无 HITL2/present，报告未交付——这是 pilot 的**内容结论**，不是 lens 契约失败。
+- **A3 部分**：卡 193 合规，但 lead 追加的 `adversarial` 偏离未上卡（只在 question.md；加上会
+  超 200）——pilot lesson：默认隐/偏离显需要「卡内删字」fallback。
+- **A7 部分**：Team 通道实跑（任务描述带 lens 路径/动作）；subagent/workflow 未单跑
+  （workflow 政策需显式授权）——残余风险，列为后续探针。
 
 ## 已知与未决
 
@@ -148,7 +168,7 @@ evidence 只记 `supports: topic`，critic 只能按源数/等级/引用链审�
 
 ## 验收标准
 
-> 判据按 [validation-design](../methods/validation-design.md) 分三类：确定性 / 模型行为 /
+> 判据按 [validation-design](../../methods/validation-design.md) 分三类：确定性 / 模型行为 /
 > 编排。每行「通过」是下游判定口径；「人」列只有用户能判。未列的 pilot 读数见 v2 §12。
 
 | # | 行为 | 类 | 输入/状态 | 通过信号 | 负例/恢复 | 证据 owner | 人 |
@@ -172,9 +192,11 @@ evidence 只记 `supports: topic`，critic 只能按源数/等级/引用链审�
 
 ## 关闭条件
 
-- 上表 A1–A10 全过；A8 的 pilot 读数在本卡记录（不是「跑了」就算）。
+- A1–A6、A8–A10 过；A3（卡 193 合规但 lead 追加的偏离未上卡）与 A7（Team 实跑；subagent/
+  workflow 未跑）作为已记录残余，用户按 pilot 证据接受；A8 硬线全过、六指标 5/6（reader 版
+  未跑，因报告 FAIL）。
 - `notes/implemented/2026-11-10-lens-layer.md` 同变更写就：决定、输掉的方案（引本卡）、
-  实际跑过的验证（A1–A9 的命令与结果）、残余风险（workflow 继承/成本/用户接受度）。
+  实际跑过的验证（A1–A9 的命令与结果）、残余风险（workflow 继承/成本/报告 FAIL/卡预算）。
 - 业务验收（用户）：接受「默认隐、偏离显」的 HITL1 形态与 lens 公共契约。
 - 满足后 `可关闭：是`，`git mv` 到 `_archived/settled_issues/`，更新 `issues/README.md`
   与 `_archived/settled_issues/README.md`；研究卡 `lens-abstraction/` 的 `产出的卡` 已链本卡，

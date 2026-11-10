@@ -22,6 +22,7 @@ retrieved_at: <YYYY-MM-DD>
 quality: A|B|C|D
 found_by: analyst
 supports: <topic id>
+lens: <本卡所属证据面 id；一卡一面，多面拆卡>
 ---
 
 ## 原文摘录
@@ -36,6 +37,9 @@ supports: <topic id>
 ```
 
 **摘录与解读必须分开**——把解读写成引文是伪造证据，critic 一票否决。
+
+**一卡一面**：`lens` 写本卡按哪个证据面写的；同一来源要服务两个面（如 official 的规则句 +
+quant 的价目表）时拆成两张卡（可同 `source_url`，摘录/解读按面写），不要一张卡打两个勾。
 
 **摘录硬规则**（研究手册 §证据文件契约 · 摘录最小契约；evidence-audit 机检，违反 = MAJOR 单列）：
 

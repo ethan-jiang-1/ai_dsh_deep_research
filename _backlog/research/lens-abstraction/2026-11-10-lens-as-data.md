@@ -9,7 +9,7 @@ intent: 为 Deep Research 的「不同视角/偏置」给出可落地的抽象�
 > 决定段标「决定」，推断段标「推断」。
 > 版本：v2（2026-11-10）。v1 的九字段、外部证据与失败形态保留；本版改掉四处：`blind_spots` 必需、
 > lens 不拥有报告骨架、题型默认集按成本收紧、每 topic 子集 + 多 lens 默认独立 activation。
-> 消费者：[README](README.md)（题名页）；产出的卡：[lens 数据层](../../issues/2026-11-10-lens-layer.md)；
+> 消费者：[README](README.md)（题名页）；产出的卡：[lens 数据层](../../_archived/settled_issues/2026-11-10-lens-layer.md)；
 > 配套材料：[lens 目录草案](2026-11-10-lens-catalog-draft.md)。
 
 ## 0. 结论

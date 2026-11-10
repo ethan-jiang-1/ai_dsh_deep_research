@@ -4,6 +4,7 @@ retrieved_at: YYYY-MM-DD
 quality: A
 found_by: <发现者角色>
 supports: T1
+lens: <本卡所属证据面 id；一卡一面，多面拆卡>
 source_tier: primary   # primary/secondary/tertiary/weak（信源分级，正本 = 研究手册分级表）
 publisher: example.com # 注册域
 ---

@@ -66,6 +66,18 @@ Critic 的核心方法论。你的产出只有两种价值：找到裂缝（修�
 - 「目前不能判断」清单里的事项被写成确定表述（流畅文字填空）→ MAJOR；
 - 「下一步」编造负责人/期限（未获用户指定又不标「待定」）→ MINOR。
 
+### 7. lens 覆盖核查（有 lens 的 run；MAJOR 级）
+
+- review.md 终局块必须有 `topic × lens` 覆盖表；每个 evidence-producing topic × 其 `lenses:`
+  的每格 = 卡数 + 质量（A/B 数），或 `gap：原因/渠道`，或 `n/a：理由`。**静默空格**（无卡、
+  无 gap、无 n/a）= MAJOR 且 readiness 必须 FAIL。
+- 抽查任意一格：要能指向真实 evidence 文件与 `lens` 字段；找不到卡 = 表造假（MAJOR）。
+- 每个 lens 的 `blind_spots` 要有「配对 lens 接住 / 本题不 material + 理由 / 单镜风险已接受 +
+  理由」之一；缺 = MAJOR。P1 单 `official` 同样要写后两者之一，不许静默。
+- 新 run 证据卡缺 `lens` 字段 = MAJOR（旧 bundle 不追补）；`lens` 值不在本次 `lenses:` /
+  question.md 的集合里 = MAJOR（卡片与选择脱节）。
+- 报告/方法节与 lens 面不一致（如宣称了 practitioner 面但零社区来源）→ MAJOR。
+
 ## 轻量模式（quick_factual 薄路径）
 
 快速事实核查型 run 你**不进团队编制**，草稿成型后单独进场，只做一条 review.md、只查两条线：
@@ -110,6 +122,16 @@ PASS 放宽判据**（readiness 判据不降同款），也不得静默略过未
 - [ ] 证据缺口如实呈现
 - [ ] 首屏建议有证据与适用条件支撑（「目前不能判断」是合法结论，不因格式放行唯一推荐）
 - [ ] 反证与未知未在决策摘要首屏被抹平或写成确定
+- [ ] （有 lens 时）覆盖表无静默空格，盲区处置有记录
+```
+
+**有 lens 时**，终局块另附覆盖表（`—` 只在同行写了 `gap：` / `n/a：` 时合法）：
+
+```
+## 覆盖表（topic × lens）
+| topic | <lens A> | <lens B> |
+|---|---|---|
+| T1 | 3 卡（A2/B1） | — gap：已搜社区，未得 |
 ```
 
 **PASS 只在零 CRITICAL 且判据全勾时给出**；拿不准的项标出来让主编决定，不要替主编放水。

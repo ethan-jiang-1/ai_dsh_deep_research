@@ -51,9 +51,12 @@ acceptance / budget / depth / task_id`。头部必须有机器可读版本行 `�
 - `output` 写 run bundle 相对路径；`acceptance` 写可判条件；`budget` 写最多 worker/搜索轮次。
 - `depth` 写 L0–L3（见 §2），不是 Wave。
 - 先覆盖 `question.md` 的每个 RQ：每个 RQ 至少一个证据生产节点 + 终局 synthesis/review。
+- **lens 是 cell 属性，不写 plan 列**：从 `topics.md` 每个 topic 的 `lenses:` 读；cells = Σ(topic ×
+  该 topic 的 lens 数) ≤12；同一 topic ≥2 lens 时，至少一个 cell 走独立 activation（subagent /
+  workflow child），同 activation 顺序跑在 plan/journal 记理由。
 - 编制先验 = `team-assembly` 矩阵 + `question-patterns` 分派结论；**它们是默认，不是判决**——按
   问题形状偏离时在 plan 的“重写记录”/journal 写一句理由。
-- 预算：顶层节点 ≤12、关键路径 ≤6、每 topic 加深 ≤2 轮；超了就拆/合并/问用户，不硬堆。
+- 预算：顶层节点 ≤12、关键路径 ≤6、每 topic 加深 ≤2 轮、cells（topic × lens）≤12；超了就拆/合并/问用户，不硬堆。
 
 ## 2. 深度档 L0–L3
 
@@ -73,7 +76,8 @@ L2 触发（任一）：关键 claim 单源/只有二手、口径缺失、矛盾
 - **Scan**：query 家族（同义/语言/视角）→ 来源矩阵（官方/二手/行业/社区）→ 覆盖/负结果对账
   → `leads.md`。宽搜加深 = 覆盖谱系，不是多翻页。
 - **Dive**：question-list → 证据（一手/逐字/口径）→ 交叉验证（≥2 独立或显式单源）→ 反例 →
-  清单闭合 → `evidence/*.md`。深搜加深 = 证据链，不是多抓页。
+  清单闭合 → `evidence/*.md`。深搜加深 = 证据链，不是多抓页。**有 lens 的 cell 先按该面的
+  `seek`/`verify` 走**，证据卡写 `lens: <id>`；一卡一面，多面拆卡。
 - **Check**：critic 三线审查 → `review.md`；readiness PASS 才进 HITL2。
 - 一个 topic 至少 Scan + Dive + Check；简单题可退化。cell 内步骤可由 owner 自己做，也可派
   depth-2 worker；worker 必须带 `agent_preset`（scout/analyst/critic），结果回父级，由 owner 写

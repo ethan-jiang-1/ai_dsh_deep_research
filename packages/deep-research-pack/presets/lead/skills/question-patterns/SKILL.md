@@ -177,6 +177,45 @@ drt_zhipu-api-pricing（**跨 run 复现 4 次**——本库最早的自证模�
 - **澄清问法**：从哪个事件/时间算起？（按题给推荐）；「稳」的判据？（推荐：主流生态
   官方支持 + 迁移指南齐备，可改）。
 
+## lens 索引与题型默认集（HITL1 的选择面）
+
+全文 = 研究手册里的 `research_pack_root` 变量的值 + `/content/lenses/<id>.md`（按需 read，不预载）；
+本表只做选择索引。lens 是证据面，不是角色/persona，也不决定报告骨架（骨架归方法预设）。
+
+| id | 面 | 一句话 | 首选配对 |
+|---|---|---|---|
+| `official` | 官方口径 | 状态/价目/规格/规则的官方页与公告 | `practitioner`、`quant` |
+| `quant` | 数字与口径 | 单位/币种/档位/时间对齐后的数字 | `adversarial`、`practitioner` |
+| `practitioner` | 一线实践 | 真实使用、迁移、坑、样本偏差 | `official`、`quant` |
+| `adversarial` | 反例与证伪 | 反例、竞争假设、处罚/召回/撤回 | `official`、`quant` |
+| `structural` | 结构与格局 | 产业链、玩家、依赖、份额边界 | `historical`、`practitioner` |
+| `historical` | 时间与演化 | changelog/生效日/archive 时间线 | `official`、`structural` |
+| `regulatory` | 监管与合规 | 条文、法域、执法、草案/生效 | `official`、`practitioner` |
+| `academic` | 学术与方法 | 同行评议、复现、效应量、局限 | `practitioner`、`quant` |
+
+**题型默认集（选择起点；默认 2、上限 4；P1 可单 `official` 的已记录例外）**：
+
+| 题型 | 默认 lens | 何时加面 |
+|---|---|---|
+| P1 单点事实/状态 | `official` | 状态/是否判定 → `+adversarial` |
+| P2 数据表/价目 | `official` + `quant` | must_answer 含真实账单/总成本 → `+practitioner` |
+| P3 领域全景 | `structural` + `official` + `practitioner` | 受监管 → `+regulatory`（≤4） |
+| P4 断言验证 | `adversarial` + `official` | 含数字 → `+quant`；科学主张 → `+academic` |
+| P5 多维对比 | `quant` + `practitioner` + `structural` | 受监管 → `+regulatory`（≤4） |
+| P6 尽调/评估 | `official` + `quant` + `adversarial` | 受监管 → `+regulatory`（≤4） |
+| P7 方法/方案 | `practitioner` + `academic` | 硬合规约束 → `+regulatory` |
+| P8 事态/时间线 | `historical` + `official` + `practitioner` | 数字趋势 → `+quant` |
+
+**选择与落盘（细则 = research-brief skill；覆盖 = 研究手册 §研究视角）**：
+
+- 完整集合落 `question.md` §研究方法 `- 本次视角:`；每个证据 topic 落 `topics.md` 的 `lenses:`；
+- 计划确认卡**默认不写视角**；偏离默认时只写一个短标记（如 `视角：+监管`），不列全集；
+- `synthesis` / 纯汇总 topic 可 0 个 lens；cells = Σ(topic × lens) ≤12；
+- 同一 topic ≥2 lens：至少一个 lens 在独立 activation 跑（subagent/workflow），同 activation
+  顺序跑须在 plan/journal 记理由；
+- 覆盖：review `topic × lens` 表无静默空格；每个 lens 的盲区要有「配对 / 本题不 material /
+  单镜风险接受」之一。
+
 ## 增长协议（本库如何生长——防膨胀两道闸；外部范式依据 = drafts/self-growing-pattern-library-research.md，开发侧文件，角色无需读）
 
 1. **落痕**（run 内，lead）：立项 journal 行固定携带判型结果——命中：

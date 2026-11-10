@@ -25,7 +25,7 @@ description: 组队决策方法论：这次研究需要谁、不需要谁、走�
 ## 分派纪律
 
 - 每个 topic 单一 owner（一个 analyst 负责的 topic 不重叠）；
-- 每份派发（spawn prompt 与任务板 description 同标准）写全**五件**——任务板没有 reviewed/evidence 字段，验收约定不会被 service 自动解释，只认描述文本：①读哪些文件（question.md/topics.md/leads.md）；②产出什么文件；③验收判据；④怎么验证（可执行检查：evidence frontmatter 齐全、final 引用链真实、口径字段在场）；⑤**方法论装载**（见下节——spawn_teammate 子按角色硬隔离拿不到队友的技能，必须显式指路）；
+- 每份派发（spawn prompt 与任务板 description 同标准）写全**五件**——任务板没有 reviewed/evidence 字段，验收约定不会被 service 自动解释，只认描述文本：①读哪些文件（question.md/topics.md/leads.md）；②产出什么文件；③验收判据；④怎么验证（可执行检查：evidence frontmatter 齐全、final 引用链真实、口径字段在场）；⑤**方法论装载**（见下节——spawn_teammate 子按角色硬隔离拿不到队友的技能，必须显式指路；有 lens 时含 lens id + 全文路径 + 三条动作）；
 - 每份派发点名本次方法关键动作：从 question.md「研究方法（本次实际采用）」节摘该角色相关的调查要求写进任务（scout→信息源策略、analyst→检验策略、critic→核查点）——方法名不替代五件任何一件，fresh 队员靠这条拿到自己的做法；
 - 任务完不成时派发里带修订动作（缺口的处理路径：定向补搜 / 降级标 gap / 上报重派），收"完成"只认文件事实与验证结果，不认 teammate 自报；
 - critic 在草稿成型后才进场（提前进场没有可审对象，浪费一轮）。
@@ -39,6 +39,8 @@ spawn_teammate 子**一律 composeFrom lead**（vendor 机制）——队友的�
 - critic → `presets/critic/skills/adversarial-review/SKILL.md`（对抗核查判据与 readiness 格式）
 
 路径前缀 = 你自己技能的安装位同层（你的 skill 目录在 `presets/lead/skills/`，角色目录是它的兄弟）。路径找不到就用 glob 找 `presets/*/skills/*/SKILL.md` 枚举。队友读完按技能执行；读不到（路径漂移）→ 如实回报并按任务验收判据 + 包内 `content/templates/run/` 模板形态执行，**不得静默跳过**（2026-10-04 scout 的显式报偏即正确形态）。
+
+**lens 装载**（有 lens 的 run）：每份 cell 派发写「本次视角 = `<id>`；全文 = 研究手册 `research_pack_root` + `/content/lenses/<id>.md`（开工先 read）；关键动作 = seek … / verify … / blind_spots …」。同一 topic 有 ≥2 lens 时，至少一个 cell 走独立 subagent（或 workflow child），**不把两个 lens 的 query 合并成一轮**；topic owner 仍对全部 cell 的收活负责。文件读不到就按 brief 内联的三条动作执行，**不静默跳过**。
 
 ## 事中调度（改派与加派）
 

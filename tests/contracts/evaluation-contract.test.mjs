@@ -65,7 +65,7 @@ test('角色职责 owner 表存在（L3 判据 2 的载体）', () => {
 
 test('证据身份链契约存在（L3 判据 3 的载体）', () => {
   const ws = readFileSync(join(ROOT, 'packages', 'deep-research-pack', 'content', 'manual.md'), 'utf8');
-  for (const field of ['source_url', 'retrieved_at', 'quality', 'found_by', 'supports', 'source_tier', 'publisher']) {
+  for (const field of ['source_url', 'retrieved_at', 'quality', 'found_by', 'supports', 'source_tier', 'publisher', 'lens']) {
     assert.ok(ws.includes(field), `证据 frontmatter 契约缺 ${field}`);
   }
 });
@@ -73,6 +73,8 @@ test('证据身份链契约存在（L3 判据 3 的载体）', () => {
 // ── 基础整治 §3.3：契约字段在执行者副本间机械对账（字段必须物理到达执行者，
 //    副本允许存在，但副本与正本漂移必须变红——不是只在手册里出现过就算数）──
 const FIELDS = ['source_url', 'retrieved_at', 'quality', 'found_by', 'supports', 'source_tier', 'publisher'];
+/** 文档/执行者副本的完整契约 = 七字段 + lens（lens 不进仪表盘硬/软谓词：旧 bundle 不追补）。 */
+const CONTRACT_FIELDS = [...FIELDS, 'lens'];
 const CONTRACT_COPIES = [
   ['研究手册（语义正本）', 'packages/deep-research-pack/content/manual.md'],
   ['run 模板副本', 'packages/deep-research-pack/content/templates/run/evidence-entry.md'],
@@ -81,10 +83,10 @@ const CONTRACT_COPIES = [
   ['方法论映射（L3 载体）', 'docs/design/30-methodology-mapping.md'],
 ];
 
-test('证据契约七字段在各执行者副本全部在场（对账，防静默漂移；谓词分层：硬五字段定有效性、软二字段标未分级）', () => {
+test('证据契约八字段在各执行者副本全部在场（对账，防静默漂移；谓词分层：硬五字段定有效性、软二字段标未分级）', () => {
   for (const [label, rel] of CONTRACT_COPIES) {
     const text = readFileSync(join(ROOT, rel), 'utf8');
-    const missing = FIELDS.filter((f) => !text.includes(f));
+    const missing = CONTRACT_FIELDS.filter((f) => !text.includes(f));
     assert.deepEqual(missing, [], `${label}（${rel}）缺字段：${missing.join(', ')}——副本必须与手册正本对齐`);
   }
 });

@@ -1,6 +1,7 @@
 # Topics — <run slug>
 
-<!-- 每 topic 一节；must_answer 是问题列表（2–5 问，每问可判"答了/没答"）；scope_role 定主次 -->
+<!-- 每 topic 一节；must_answer 是问题列表（2–5 问，每问可判"答了/没答"）；scope_role 定主次；
+     lenses = 该 topic 的证据面子集（来自本次 lens 集；synthesis/纯汇总可写 []） -->
 
 ## T1: <topic 名>
 
@@ -9,6 +10,7 @@
   - <问题 2>
 - scope_role: primary | synthesis | comparison | supporting
 - depends_on: <topic id 或 无>
+- lenses: [<id>, <id>]
 
 ## T2: <topic 名>
 
@@ -17,3 +19,4 @@
   - <问题 2>
 - scope_role: supporting
 - depends_on: T1
+- lenses: [<id>]
