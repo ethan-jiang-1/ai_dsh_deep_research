@@ -108,11 +108,11 @@ function channelState() {
   return { url, port, pids, listening: pids.length > 0, alive: pids.length > 0 };
 }
 
-// ── 浏览器面验证（子进程 = scripts/probe/cdp-probe.mjs，真值的唯一实现）──────────
+// ── 浏览器面验证（子进程 = probes/browser/cdp-probe.mjs，真值的唯一实现）──────────
 
 function probeFace(url, expectFace, screenshotPath = undefined, htmlPath = undefined) {
   const args = [
-    join(ROOT, 'scripts/probe/cdp-probe.mjs'),
+    join(ROOT, 'probes/browser/cdp-probe.mjs'),
     url,
     '--open-status',
   ];

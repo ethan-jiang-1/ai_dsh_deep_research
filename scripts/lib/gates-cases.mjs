@@ -401,6 +401,12 @@ export const CASES = [
     if (!m) throw new Error('夹具 l4-lite-smoke 的端口声明形态变了——案例失效');
     appendFileSync(join(dir, 'scripts', 'lib', 'roles.mjs'), `\nconst PORT = ${m[1]};\n`);
   } },
+  // probe-registry：删一支探针的「何时跑」→ 头注六字段缺一，门禁必须点名红（只删字段，
+  // 不动索引；索引同时失鲜也红——本案例只钉「门禁会红」，逐字段报因由纯函数测试钉住）。
+  { id: 'probe-registry-missing-header', gate: 'probe-registry', mutate: (dir) => {
+    const p = join(dir, 'probes', 'browser', 'cdp-probe.mjs');
+    writeFileSync(p, readFileSync(p, 'utf8').split('\n').filter((line) => !line.startsWith('// 何时跑：')).join('\n'));
+  } },
   // archived-note-pointer（归档判定复核面）双形态：①活面加未登记的→archived 链接（归档
   // 前必须解除引用或登记）；②登记条目目标改不存在路径（失存——Note 移位/复活须同步登记簿）。
   { id: 'archived-pointer-unregistered', gate: 'archived-note-pointer', mutate: appendTo('README.md', '\n[归档指针探针](notes/archived/2026-09-24-ui-observability-surfaces.md)\n') },

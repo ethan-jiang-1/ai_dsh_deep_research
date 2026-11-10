@@ -25,6 +25,7 @@ import ts from 'typescript'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const SCOPES = [
   join(ROOT, 'scripts'),
+  join(ROOT, 'probes'),
   join(ROOT, 'dev'),
   join(ROOT, 'tests'),
   join(ROOT, 'packages', 'deep-research-pack', 'src'),

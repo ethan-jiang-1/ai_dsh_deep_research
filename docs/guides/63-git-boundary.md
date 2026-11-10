@@ -34,7 +34,7 @@
 - 源码、构建配置、`pnpm-lock.yaml`、`package.json`、`.npmrc`、`.gitattributes`、`.editorconfig`
 - `packages/deep-research-pack/` 的 presets、skills、`content/`、`cordis.patch.yml`、doctor
 - `docs/`、`notes/`、`_backlog/`、`.agents/skills/`、`AGENTS.md`、README/CONTRIBUTING/SECURITY
-- `scripts/` 门禁、冒烟、探针、生成器；`tests/` keyless 回归与 fixtures
+- `scripts/` 门禁、冒烟、生成器；`probes/` 探针；`tests/` keyless 回归与 fixtures
 - `snapshots/` 中被回放/审计消费的场景证据（录制流、声明、期望文件）
 - `LICENSE`、CI workflow、发布边界需要的 tracked 手册
 

@@ -1,4 +1,12 @@
 #!/usr/bin/env node
+// 探针：rerun-triage-probe
+// 状态：常驻
+// 一句话：给一句「太浅」，Lead 按五条转接纪律回话
+// 何时跑：rerun-triage skill/HITL2 文案/终稿页脚改动；2026-10-23 卡回归
+// 档位：真模型（DEEPSEEK_API_KEY；REAL_MODEL 闭集）
+// 判据：C1 复述不满；C2 ≤2 手段；C3 代价与版本后果；C4 未确认前不动手；C5 范围来自报告末节
+// 不证明：长尾说法不误判（人读）；其他模型；多轮追问
+// 为什么存在：转接话术是模型侧程序，机械面只能钉文本同源
 // rerun-triage-probe.mjs — 不满转接的**模型行为**探针（真模型档，需 DEEPSEEK_API_KEY）。
 // 服务设计卡 2026-10-23-rerun-dissatisfaction-triage §8 第 6 行：给一句「太浅」，Lead 必须
 // （a）复述不满；（b）≤2 个手段；（c）说清代价与版本后果；（d）未确认前不动手；（e）指出范围
@@ -8,11 +16,11 @@
 // 真按它回话，只能真跑一次。探针不证明长尾说法不误判——那是人读（卡 §8 第 6 行人判）。
 //
 // 前置：source dev/env.sh（DSH_HOME + 凭据 + vendor 树）。用法：
-//   node scripts/probe/rerun-triage-probe.mjs [--port 3118]
+//   node probes/behavior/rerun-triage-probe.mjs [--port 3118]
 // 退出码：0 = 五条全中；1 = 有断言未中；2 = 前置缺席（未跑 ≠ 通过）。
-import { requireCredentials, withModelKey } from '../lib/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
-import { findSessionDir, readSessionText, resolveSessionLog } from '../lib/session-log.mjs';
+import { requireCredentials, withModelKey } from '../../scripts/lib/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
+import { findSessionDir, readSessionText, resolveSessionLog } from '../../scripts/lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';

@@ -68,6 +68,6 @@ dsh --profile deep-research
 ## 更多
 
 - 完整安装、升级、卸载、排障与安全：[_dist/安装手册.md](_dist/安装手册.md)
-- 想改这个仓库：[CONTRIBUTING.md](CONTRIBUTING.md)；让 Agent 接手：[AGENTS.md](AGENTS.md)
+- 想改这个仓库：[CONTRIBUTING.md](CONTRIBUTING.md)；让 Agent 接手：[AGENTS.md](AGENTS.md)；调试先看 [probes/](probes/README.md)
 - 设计、决策与方法论：[docs/00-index.md](docs/00-index.md)
 - License: [MIT](LICENSE)

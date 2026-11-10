@@ -48,9 +48,10 @@
   DSH，会话 cwd 才落在研究工作区）+ 开发技能 `running-a-research-run`；
 - **交付收尾** → `reviewing-a-delivery`；**加/改角色** → `adding-a-research-role`；
   **加/改门禁** → `writing-a-gate`；**加/调节点轨道** → `changing-node-topology`；
-  **换 vendor pin** → `bumping-vendor-pin`；**间歇/环境依赖缺陷** → `reproducing-a-failure`。
+  **换 vendor pin** → `bumping-vendor-pin`；**间歇/环境依赖缺陷** → `reproducing-a-failure`；
+  **真实边界单点证据** → `using-a-probe`。
 
-任务命中 `.agents/skills/` 某条 description（上列七个）时**先读该 `SKILL.md` 全文再动手**，不从
+任务命中 `.agents/skills/` 某条 description（上列项）时**先读该 `SKILL.md` 全文再动手**，不从
 摘要猜流程。
 
 ### 1.2 六步闭环
@@ -94,6 +95,7 @@
 | 加 / 改机械门禁 | `context.mjs` gates 数组 + 该域 `verify/gates/<域>.mjs` + `evaluation.md` §L0 台账（案例表有增删再动 `gates-smoke.mjs`） | **注入回归红 → 还原 → 绿** → gates-smoke | L0 + gates-smoke | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 + gates-smoke 绿 |
 | 改 run 通道工具 / 审计门（run-driver / boot-run / watch-run / hitl-answer / run-dashboard / evidence-audit / node-gate / schema-scan / snapshot-replay） | 对应 `scripts/` / `dev/` 脚本 | — | L0 + 对应 `tests/<domain>/*.test.mjs` 契约测试必跑（用例即其反证记录） | 判据变更才写 Note | 对应契约测试绿 |
 | 改 scripts/lib 支撑模块 / dev 基建本体（`lib/*.mjs`、env.sh、render-overlay） | 支撑模块 + 其**全部消费方**（消费面 grep：roles.mjs 的角色枚举消费方、render-overlay → `overlay-fresh`、run-state → watch-run/hitl-answer/run-dashboard） | 消费方门禁在同 diff 复跑 | L0 + lib 对应契约测试 | 判据变更才写 Note | 消费方门禁与契约测试绿 |
+| 查/加探针（真实边界单点证据） | `probes/` 头注 + `probes/INDEX.generated.md` | `node probes/_index.mjs --write` → 跑探针本体 | L0 + 目标探针（真模型档需凭据） | 头注/索引变更才写 | 索引门绿 + 探针红→绿 |
 | 改研究工作区手册 / 模板（结构性调整：模板增删 / 路径与格式修正；**手册正文文本 = 模型可见，走上行〔改 persona / skill / 手册文本〕**） | `packages/deep-research-pack/content/` | 无生成器 | L0 + `content-shape` | — | `content-shape` 绿 |
 | 改部署面（doctor / 发布集） | pack `scripts/` + `package.json` 的 files/bin | — | L0 + L2 | 部署 Note | `release-smoke` ALL PASS |
 | 换 vendor pin | `.gitmodules` + 运行中 dsh 的 exact 版本（兼容矩阵字段已删，见 D41） | `vendor-build.sh`（含 host 半补建 + 前端壳重建）→ 逐条重审（含 agent-team 合同 diff 与货架增量对账——正本 = [discipline-map §重审触发路径](../discipline-map.md)） | L0 + L1 + L2 + client-load-smoke + L4-lite（0.2.0 轮实证：漏跑观察面 = client bundle 的 build-time externals 漂移漏网） | 升 pin 毕业 Note（重审结论正本） | 全档绿 + 重审入 Note |
@@ -130,11 +132,11 @@ node scripts/smoke/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE
 cd packages/deep-research-pack && pnpm build   # pack 双半构建（tsc -b . + tsdown → lib/index.js + lib/client.js——观察面 client 面，D18）
 node --import tsx/esm scripts/smoke/client-load-smoke.mjs    # 观察面 client 面真浏览器加载（keyless：boot web + headless chromium——插件零失败 + 页签与渐进面硬断言；渐进面断言 = 磁盘侧绑定会话的真值对账；失败留 png/html/console/meta 现场；无窗口内交付目标 = exit 2 SKIP；主机不健康 = exit 2 NOT-RUN（预检；失败时连接死亡同判，判据 = lib/host-health））
 node --import tsx/esm scripts/smoke/client-load-smoke.mjs --seed tests/fixtures/client-load-home --port 3109   # 干净机器/CI：用种子夹具自建 home（会话 + 已交付 bundle；不依赖 dev home/凭据），CI job `client-load` 跑的就是这条
-node scripts/probe/cdp-probe.mjs '<gui-url>' --open-session '<标题>' --open-status --expect-face '<文本>' [--expect-no-leak '<文本>'] [--ask '<消息>'] [--screenshot <path>]   # 交互探针（裸 CDP，借鉴 ai_dsh_loop_advisor）：Playwright actionability 被 DSH UI 挡死时的交互驱动工具——JS 派发点击/输入，JSON 判决；--ask = 完整交互环（输入→发送→等回复）。老会话可能要先在 GUI 里让它进侧栏近列表
+node probes/browser/cdp-probe.mjs '<gui-url>' --open-session '<标题>' --open-status --expect-face '<文本>' [--expect-no-leak '<文本>'] [--ask '<消息>'] [--screenshot <path>]   # 交互探针（裸 CDP，借鉴 ai_dsh_loop_advisor）：Playwright actionability 被 DSH UI 挡死时的交互驱动工具——JS 派发点击/输入，JSON 判决；--ask = 完整交互环（输入→发送→等回复）。老会话可能要先在 GUI 里让它进侧栏近列表
 node scripts/smoke/e2e-021rc2.mjs            # 升级端到端（keyless 浏览器：角色 order 成组 + 状态/配置页签真数据 + 插件零故障；失败留现场）
 node scripts/smoke/release-smoke.mjs        # L2 真实安装形状：pack→干净 profile→plugin add→安装域冒烟；无模型调用，安装模式跳过模型就绪检查
 node scripts/smoke/cold-start-smoke.mjs     # L2 冷启动：独立 DSH_DEV_HOME/profile/端口/state；MCP 关闭；到浏览器面 GREEN
-node scripts/probe/method-library-probe.mjs  # 偏好库可发现性三问（真模型档；BUG-042 修复判据）
+node probes/behavior/method-library-probe.mjs  # 偏好库可发现性三问（真模型档；BUG-042 修复判据）
 node scripts/smoke/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：全角色响应 + scout web_search 调用）
 node scripts/smoke/team-preflight-smoke.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + company D18 one-shot worker 探针）
 node dev/run-driver.mjs up          # **run 通道驱动入口（常用）**：起/复用通道（复用先验安装镜像=当前 pack 源）+ 验浏览器面 + 呈交块（exit 0 可呈交/1 红/2 未跑；镜像漂移/未取证 = 2）；--bootstrap 先跑冷启动前置；--profile/DSH_RUN_STATE_DIR 支持多实例；probe = 只验已起通道（同样先验镜像）；url = 打印当前 URL
@@ -159,8 +161,8 @@ node scripts/run-ops/runtime-clean.mjs [--older-than 14] [--yes]   # 运行区�
 node scripts/run-gates/evidence-audit.mjs <bundle>|--latest  # 证据溯源审计（**须先 source dev/env.sh**：它锚定本仓 dev home，DSH_HOME 指向别处即自拒）（keyless：URL/摘录/final 链对会话日志机械对账 → audit.md；CRITICAL 即 exit 1）
 node scripts/run-gates/node-gate.mjs <bundle>|--latest [--sessions <dir>] [--write]  # 节点交接契约门（keyless：交付两门 = §Decisions 拍板行 + present 声明；RED = exit 1 / UNATTESTED = exit 2；默认只读，--write 才落 bundle node-gate.md）
 node scripts/run-gates/schema-scan.mjs [<bundle-dir>…]     # schema 保真度扫描（keyless：八节点输出件在场断言；断代定红——新 run 按 `schema` 整数（低/高版本都判红），旧场按 contract 日期（契约日 2026-09-29）；现行形态违约 = exit 1，契约前/旧场如实报告不计红；默认扫 archive 全量）
-node scripts/probe/entry-chain-probe.mjs    # 入口链探针（真模型档：授权范围、RFC 条件、开发环路径三问；词面断言与原文留档人工复核）
-node scripts/probe/discipline-probe.mjs     # 纪律行为探针（真模型档：A2 超界 / B1 差集 / 收活缺件·UNVERIFIED / 计划确认卡·quick_factual 免发互补对五场景标记断言——先读技能正本再作答；--scenario <id> 定向；留档人工复核）
+node probes/behavior/entry-chain-probe.mjs    # 入口链探针（真模型档：授权范围、RFC 条件、开发环路径三问；词面断言与原文留档人工复核）
+node probes/behavior/discipline-probe.mjs     # 纪律行为探针（真模型档：A2 超界 / B1 差集 / 收活缺件·UNVERIFIED / 计划确认卡·quick_factual 免发互补对五场景标记断言——先读技能正本再作答；--scenario <id> 定向；留档人工复核）
 node packages/deep-research-pack/scripts/doctor.mjs --workspace <dir>   # 只读诊断（pack 自带 bin：DSH 版本/profile roster/安装副本/团队层/工作区/凭据；不安装、不启动、不写 profile）
 ```
 
@@ -173,7 +175,7 @@ CI 另跑 `run-accept-smoke` / `pack-smoke` / `doctor-smoke`；逐件命令索�
 `ai_dsh_assitant` 借入，2026-10-05，钉版见 [external-materials.md](../external-materials.md)）：
 
 - **先加载匹配的开发技能**：任务命中 `.agents/skills/` 某条 description（换 pin / 加角色 /
-  写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷——清单 = 盘上 `.agents/skills/`）→ 先读该 `SKILL.md` 全文再动手，不从摘要猜流程；
+  写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷 / 用探针——清单 = 盘上 `.agents/skills/`）→ 先读该 `SKILL.md` 全文再动手，不从摘要猜流程；
 - **查询实际配置树，别从源码猜部署**：`pnpm dsh --profile deep-research --dump-config` 是
   profile/bundle/patch 叠加后的官方查询（"会加载什么"）；`boot-run.sh` 的漂移检测管另一问
   ——"镜像是否等于 pack 源"；
@@ -226,7 +228,7 @@ source dev/env.sh        # DSH_HOME=runtime/harness-home（数据面）+ dsh 别
 1. docs 只写 now：改过的语义面同步对应文档（合同随代码同 diff）；
 2. 若有 proposed RFC 且决定理由需长期保留，将正文改写为已交付事实后迁 `notes/implemented/`。该 Note 含状态行/决定/输掉的方案/实际跑过的验证/环境状态；正文改写与状态格式见 [notes/AGENTS](../../notes/AGENTS.md)，并非每项交付都要求 Note；
 3. `pnpm verify` + `pnpm test` 全绿（涉及面按 §2 加跑）；
-4. 入口链探针（条目改动面含根/子树 AGENTS 或入口链时必跑，否则按节奏）——机械版：`source dev/env.sh && node scripts/probe/entry-chain-probe.mjs`（真模型档；真值机械抽取 + 软断言；无凭据时退化为语义版人工）；
+4. 入口链探针（条目改动面含根/子树 AGENTS 或入口链时必跑，否则按节奏）——机械版：`source dev/env.sh && node probes/behavior/entry-chain-probe.mjs`（真模型档；真值机械抽取 + 软断言；无凭据时退化为语义版人工）；
 5. commit（窄证据切片：只提交本条目相关改动；pre-commit 钩子自动复跑 verify+tests 拦红灯——§3）。
 
 ## 5. 密钥

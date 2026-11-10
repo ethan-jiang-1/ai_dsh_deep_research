@@ -41,6 +41,7 @@
 | 验证安装 | `source dev/env.sh && node scripts/smoke/install-shape-smoke.mjs`（手册 CLI 装包分支）/ `release-smoke`（安装域） | 是（测试 home/profile） | keyless（`--install-only` 跳凭据） | [开发环 §2](guides/60-dev-loop.md) | 红 → pack 发布集对账 |
 | 验证首启（安装面） | `node scripts/smoke/product-boot-smoke.mjs`（真 Web + 浏览器，无模型） | 是（测试 home/workspace） | keyless + 浏览器 | [开发环 §2](guides/60-dev-loop.md) | 红 → startup/StartCard/client 恢复 |
 | 查漂移（镜像一致性） | boot-run 漂移门（启动即查，不静默用旧镜像）；复用已在飞通道时 `run-driver up/probe` 先跑 `boot-run --drift-only`（漂移 = NOT-RUN，不是绿） | 否 | keyless | boot-run 输出 + run-driver verdict | 红 → 按失败消息重装镜像、重启通道 |
+| 复现/验证一个机制（不是整链） | [probes/](../probes/README.md) + [探针指南](guides/66-probe-playbook.md) | 证据默认写 `runtime/` | 真模型档/连已起 GUI/仪器 | [探针索引](../probes/INDEX.generated.md) | 红/缺件 → 头注「何时跑」与指南 §5 |
 | 定位故障 | 下文「调试先看哪份事实」表 | 只读 | keyless | 现象 → 事实源映射 | 事实源看完仍不明 → watch-run / node-gate |
 
 ## 一次运行怎么串起来
@@ -113,8 +114,8 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 升级端到端 | [e2e-021rc2](../scripts/smoke/e2e-021rc2.mjs) | 无模型调用；真实例或自 boot + 浏览器；须先 source | 角色 order 成组（内置 preset 撞车回归锁）、研究状态/配置页签真数据、本插件面零故障 |
 | 确定性回放 | [snapshot-replay-smoke](../scripts/smoke/snapshot-replay-smoke.mjs) | 无真模型；全角色真实 DSH/RPC/解压子进程；仅声明渲染期望的场景额外浏览器渲染 | 场景声明驱动的全角色回放完成标记；persona、全部 request/header 与四处 user/message 注入（含时钟序列）逐条一致；声明的渲染金标准 |
 | 真模型档 | [smoke-contract](../tests/contracts/smoke-contract.test.mjs) 登记的 REAL_MODEL 闭集（成员以测试为准） | 需要模型凭据；调用模型，部分调用 web 工具 | 角色响应/工具调用、团队机制、导航软断言、纪律行为标记断言、真实 HITL UI 迁移、交互探针端到端；不能替代完整研究质量验收。`dev/record-role-fixture.mjs` 是独立录制工具，不属于该闭集；完整研究 run 属 L4。 |
-| 浏览器交互探针 | [cdp-probe](../scripts/probe/cdp-probe.mjs) | 连接已起 GUI；`--ask` 会发送消息并可能触发模型/工具调用 | 指定场景的显示、点击、会话回复；是否调用模型取决于模式与会话 |
-| 偏好库可发现性 | [method-library-probe](../scripts/probe/method-library-probe.mjs) | 真模型档；cwd = 临时研究工作区 | 偏好库文件名/位置、条目数、点名条目缺席时如实说（BUG-042 修复判据的机器化证明） |
+| 浏览器交互探针 | [cdp-probe](../probes/browser/cdp-probe.mjs) | 连接已起 GUI；`--ask` 会发送消息并可能触发模型/工具调用 | 指定场景的显示、点击、会话回复；是否调用模型取决于模式与会话 |
+| 偏好库可发现性 | [method-library-probe](../probes/behavior/method-library-probe.mjs) | 真模型档；cwd = 临时研究工作区 | 偏好库文件名/位置、条目数、点名条目缺席时如实说（BUG-042 修复判据的机器化证明） |
 | run 文件审计 | [node-gate](../scripts/run-gates/node-gate.mjs)、[schema-scan](../scripts/run-gates/schema-scan.mjs)、[evidence-audit](../scripts/run-gates/evidence-audit.mjs)、[path-hygiene](../scripts/run-gates/path-hygiene.mjs)、[secret-scan](../scripts/run-gates/secret-scan.mjs) | 无主动外网请求；压缩日志读取可能用 zstd 子进程 | 节点在场、部分交接判据、URL/摘录/引用链、本机路径、交付物高置信凭据；默认只读，`--write` 才写审计/门报告 |
 | 交付验收 | [run-accept](../scripts/run-ops/run-accept.mjs) | 无模型；须先 source；会跑 node-gate/evidence-audit/path-hygiene/secret-scan | 门 A + 审计（CRITICAL=0）+ 未来日期 + 本机路径 + 高置信凭据；预检红不写，绿写 delivered.json + manifest.json + acceptance.md（present 归一化为相对标签），`--archive` 才归档；`--repair` 修历史回执 |
 | 完整 L4 | 真实问题的完整研究 run | 模型与真实信息检索、真人 HITL | 报告质量、可追溯结论与整体研究体验 |
@@ -131,7 +132,8 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 单元（纯函数） | run-state / hitl-fold / activity-fold / tool-card / bundle-bind 等谓词与折算断言（消费 [scripts/lib](../scripts/README.md) 纯函数） | `tests/<domain>/*.test.mjs` | keyless |
 | 契约（结构断言） | layering / smoke-contract / evaluation-contract / presets / export-shape / 各门用例 / navigability-contract | `tests/` + [fixtures](../tests/fixtures/README.md) | keyless |
 | 集成（真子系统） | preset-smoke（L1）/ release-smoke（L2）/ snapshot-replay / client-load | `scripts/` 冒烟族 | keyless（子进程/浏览器，无模型） |
-| 端到端（真模型） | l4-lite / team-preflight / entry-chain-probe / discipline-probe / client-hitl；完整 run = L4 全量 | `scripts/` 真模型档 | 需凭据 |
+| 端到端（真模型） | l4-lite / team-preflight / client-hitl；完整 run = L4 全量 | `scripts/` 真模型档 | 需凭据 |
+| 单点机制（探针） | entry-chain / discipline / method-library / rerun-triage / cdp / tee | `probes/`（指南 = [guides/66](guides/66-probe-playbook.md)） | 真模型档/连已起 GUI；**不是第六个评估面** |
 | 生产审计 | node-gate / schema-scan / evidence-audit（对真实 run bundle） | `scripts/` run 门 | keyless |
 
 ### 新检查落家序（加一个检查时按序找家，单一入口）
@@ -139,7 +141,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 1. **`tests/<domain>/*.test.mjs` 契约测试**——断言对象是仓内自控文件、keyless 秒级可判真假。义务：同 diff 在 [evaluation](evaluation.md) 对应面登记；新契约测试带反证（[tests/AGENTS](../tests/AGENTS.md)）；
 2. **一次性检查**——不复现的核对：跑完即弃（运行区临时脚本），证据（命令 + 输出）进条目实施记录；**复现第二次即升格契约测试**，不滞留临时态；
 3. **`*-smoke` 分级冒烟**——需要真子系统（挂载/安装/浏览器/回放）但无模型。义务：后缀申报档位（[scripts/AGENTS](../scripts/AGENTS.md)）；
-4. **真模型档脚本**——需要凭据与模型调用。义务：closed set 登记（`smoke-contract` 契约测试对账）；
+4. **探针 / 真模型档脚本**——真实边界的单点机制证据 → `probes/`（指南 = [guides/66](guides/66-probe-playbook.md)）；需要凭据与模型调用。义务：头注 + 索引登记（`probe-registry` 门禁），closed set 登记（`smoke-contract` 契约测试对账）；
 5. **verify 门禁**——断言跨条目恒真的仓结构不变量。义务：走 [writing-a-gate](../.agents/skills/writing-a-gate/SKILL.md) 全流程（先想红 + `context.gates` 与该域门禁模块 + evaluation 台账同步）；
 6. **run 门（`*-gate` / `*-audit` / `*-scan`）**——断言真实 run bundle 的文件事实，随 run 消费；
 7. **`tests/fixtures/` 支撑样本**——taxonomy 建行，consumer 必须真实（[taxonomy](../tests/fixtures/README.md) + 契约测试零孤儿断言）。
@@ -195,6 +197,9 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 交付门红 | [node-gate-delivery 测试](../tests/run/node-gate-delivery.test.mjs) + [node-gate](../scripts/run-gates/node-gate.mjs) | 门 A/C 判据与 `present` 见证 |
 | 证据链红 | [evidence-audit 测试](../tests/run/evidence-audit.test.mjs) + [evidence-audit](../scripts/run-gates/evidence-audit.mjs) | `source_url` / 摘录 / 引用链 |
 | 安装 / 首启坏 | CI deploy 的 [lifecycle-smoke](../scripts/smoke/lifecycle-smoke.mjs)；本地 [product-boot-smoke](../scripts/smoke/product-boot-smoke.mjs) / [install-shape-smoke](../scripts/smoke/install-shape-smoke.mjs) | market/tarball 形状；首屏工作区 |
+| 模型不按纪律/角色回话 | [discipline-probe](../probes/behavior/discipline-probe.mjs)（真模型档） | 对应纪律合同/persona；先看头注「何时跑」 |
+| Lead 不知道偏好库/条目 | [method-library-probe](../probes/behavior/method-library-probe.mjs)（真模型档） | 偏好库播种/手册指路；BUG-042 |
+| 驾驶舱页签/点击/发送坏 | [cdp-probe](../probes/browser/cdp-probe.mjs)；`--ask` 判据 = 会话日志落盘 | 驾驶舱装配；按会话档决定是否调模型 |
 | 镜像漂移（旧页面） | `run-driver probe` 返回 NOT-RUN | 按 boot-run 处方重建；不要直起 `dsh` |
 
 ## 已知限制与延后工作

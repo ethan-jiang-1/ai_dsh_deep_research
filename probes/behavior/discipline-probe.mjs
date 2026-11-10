@@ -1,4 +1,12 @@
 #!/usr/bin/env node
+// 探针：discipline-probe
+// 状态：常驻
+// 一句话：五场景纪律在真模型下按合同触发（A2/B1/收活两态/计划确认卡）
+// 何时跑：纪律合同/persona/skill 文本改动；收活判据变更；snapshot 重录后
+// 档位：真模型（DEEPSEEK_API_KEY；REAL_MODEL 闭集）
+// 判据：C1 每场景行为标记命中 assistant/message；C2 场景独立无串扰；C3 原文留档
+// 不证明：长上下文/竞争指令下的合规；语义正确性（人读）；run 内行为
+// 为什么存在：散文纪律只在集成层看得出模型是否照做；l4-lite 只证挂载
 // discipline-probe.mjs — 纪律行为探针（真模型档，需 DEEPSEEK_API_KEY）。
 // 定位：A2/收活/B1/计划确认卡四件散文纪律的**集成层**证据——l4-lite 证 skill 挂载，本探针证
 // 「纪律触发场景下模型按合同行事」。诚实强度声明（entry-chain-probe 同款记账）：
@@ -23,18 +31,18 @@
 // 全文留档 runtime/smoke-workspace/discipline-probe-last.md 供人工复核。
 //
 // 前置：source dev/env.sh（DSH_HOME + 凭据 + zstd 在 PATH）。
-// 用法：source dev/env.sh && node scripts/probe/discipline-probe.mjs [--port 3104] [--scenario <id>]
+// 用法：source dev/env.sh && node probes/behavior/discipline-probe.mjs [--port 3104] [--scenario <id>]
 // verdict：exit 0=全绿 / 1=断言红 / 2=前置缺席（冒烟可靠性纪律，未跑 ≠ 通过）。
 import { spawnSync } from 'node:child_process';
-import { requireCredentials, withModelKey } from '../lib/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
-import { readSessionTextOf } from '../lib/session-log.mjs';
+import { requireCredentials, withModelKey } from '../../scripts/lib/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
+import { readSessionTextOf } from '../../scripts/lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { presetRoles } from '../lib/roles.mjs';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
+import { presetRoles } from '../../scripts/lib/roles.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/vendor-artifacts.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const OVERLAY = join(ROOT, 'dev', 'research.overlay.yml');

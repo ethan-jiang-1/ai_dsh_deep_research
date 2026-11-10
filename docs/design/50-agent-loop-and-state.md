@@ -16,7 +16,7 @@
 | Agent Teams（spawn + 任务板，D3/D16） | 协作主通道 | vendor `agent-team` 层 |
 | 研究工作区文件契约 | 节点 I/O、证据格式、owner 表 | [NODES.md](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) + [研究手册](../../packages/deep-research-pack/content/manual.md) |
 
-驱动链（节点细节以 NODES.md 为准）：立项/HITL1 → 组队派工 → 侦察 → 挖掘 → 综合 → 审查 → 读者版派生（review PASS 后、HITL2 前）→ HITL2 → 拍板记账 + 复制 vN/readable-vN + present。GUI 与 [run-kickoff](../../dev/run-kickoff.mjs) 是两个可选的建会话入口；[hitl-answer](../../dev/hitl-answer.mjs) 与 [cdp-probe](../../scripts/probe/cdp-probe.mjs) 是开发/运维驱动或探针，不与产品交互面混称。
+驱动链（节点细节以 NODES.md 为准）：立项/HITL1 → 组队派工 → 侦察 → 挖掘 → 综合 → 审查 → 读者版派生（review PASS 后、HITL2 前）→ HITL2 → 拍板记账 + 复制 vN/readable-vN + present。GUI 与 [run-kickoff](../../dev/run-kickoff.mjs) 是两个可选的建会话入口；[hitl-answer](../../dev/hitl-answer.mjs) 与 [cdp-probe](../../probes/browser/cdp-probe.mjs) 是开发/运维驱动或探针，不与产品交互面混称。
 
 ## 四类运行状态（canonical 合同）
 

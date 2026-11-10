@@ -7,6 +7,7 @@ import { readFileSync, readdirSync, existsSync, lstatSync, readlinkSync } from '
 import { join, relative, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { backlogLivenessProblems } from '../../lib/backlog-liveness.mjs';
+import { missingProbeFields, renderProbeIndex, scanProbeEntries } from '../../lib/probe-index.mjs';
 import { ROOT, gates, fail, walk, gitOnce, trackedFiles } from '../context.mjs';
 
 export function runF() {
@@ -63,7 +64,7 @@ export function runF() {
 // 文档、脚本、CI、工作区种子——新内容必须环境无关（相对路径 / 环境变量 / 占位符）。
 {
   const gate = 'host-paths';
-  const LIVE_PREFIXES = ['packages/deep-research-pack/', 'docs/', 'scripts/', 'dev/', '.github/', '_dist/'];
+  const LIVE_PREFIXES = ['packages/deep-research-pack/', 'docs/', 'scripts/', 'dev/', 'probes/', '.github/', '_dist/'];
   const LIVE_ROOT = new Set(['README.md', 'AGENTS.md', 'CONTRIBUTING.md', 'SECURITY.md', 'LICENSE', 'runtime/README.md']);
   const LIVE_WORKSPACE = new Set(['research-workspace/AGENTS.md', 'research-workspace/NODES.md', 'research-workspace/question-patterns.md', 'research-workspace/.gitignore.example']);
   const isLive = (f) => LIVE_ROOT.has(f) || LIVE_PREFIXES.some((p) => f.startsWith(p))
@@ -83,6 +84,43 @@ export function runF() {
         fail(gate, `${rel}:${i + 1} 出现本机绝对路径「${m[0]}」——live 内容必须环境无关（改相对路径/环境变量/占位符；历史证据留 notes/_backlog/snapshots/tests/fixtures）`);
         break;
       }
+    }
+  }
+}
+
+// ── probe-registry（根 probes/ 的头注与索引保鲜——状态/触发/索引字节一致）──
+// 为什么：探针迁根后，目录清单与触发条件不能靠手维护；company 的教训 = 手写清单必漂。
+// 判据：每支 probes/*.mjs|*.cjs（_index.mjs 除外）头注必填六字段（状态/一句话/何时跑/档位/
+// 判据/不证明）；INDEX.generated.md 与目录渲染字节一致；probes/README.md 链接索引。
+// 防空语料：零探针即红（范围收窄 = 门禁静默空转）。反证 = gates-smoke 案例
+// `probe-registry-missing-header`（删一支的「何时跑」→ 红；还原 → 绿）。
+{
+  const gate = 'probe-registry';
+  const dir = join(ROOT, 'probes');
+  if (!existsSync(dir)) {
+    fail(gate, 'probes/ 缺席——根目录是探针事实源');
+  } else {
+    const entries = scanProbeEntries(dir);
+    if (entries.length === 0) {
+      fail(gate, 'probes/ 扫到 0 支探针——防空语料（目录结构变了而登记面未跟进）');
+    }
+    const missing = [];
+    for (const { file, fields } of entries) {
+      for (const field of missingProbeFields(fields)) missing.push(`${file} 缺「${field}」`);
+    }
+    if (missing.length > 0) {
+      fail(gate, `头注必填字段缺失：${missing.join('；')}——修正 = 按 docs/guides/66-probe-playbook.md 的头注协议补字段`);
+    }
+    const indexPath = join(dir, 'INDEX.generated.md');
+    const expected = renderProbeIndex(entries);
+    if (!existsSync(indexPath)) {
+      fail(gate, 'probes/INDEX.generated.md 缺席——运行 node probes/_index.mjs --write');
+    } else if (readFileSync(indexPath, 'utf8') !== expected) {
+      fail(gate, 'probes/INDEX.generated.md 与目录不一致——运行 node probes/_index.mjs --write（生成物勿手改）');
+    }
+    const readme = join(dir, 'README.md');
+    if (!existsSync(readme) || !readFileSync(readme, 'utf8').includes('](INDEX.generated.md)')) {
+      fail(gate, 'probes/README.md 未链接 INDEX.generated.md——门户只做指针，不手枚举');
     }
   }
 }
@@ -171,7 +209,8 @@ export function runF() {
     'docs/design/50-agent-loop-and-state.md', 'docs/design/60-intent-carriers.md',
     'docs/guides/61-run-playbook.md',
     'docs/guides/62-plugin-authoring.md', 'docs/AGENTS.md', 'scripts/AGENTS.md', 'notes/AGENTS.md',
-    'packages/deep-research-pack/AGENTS.md', 'tests/AGENTS.md', '_backlog/AGENTS.md'];
+    'packages/deep-research-pack/AGENTS.md', 'tests/AGENTS.md', '_backlog/AGENTS.md',
+    'probes/README.md'];
   for (const rel of members) {
     if (!existsSync(join(ROOT, rel))) fail(gate, `入口链成员缺席：${rel}（正本 = AGENTS.md §入口链；改链须同 diff 更新本门禁清单）`);
   }
@@ -194,7 +233,7 @@ export function runF() {
 }
 
 // ── port-exclusive（冒烟/探针端口独占——scripts/AGENTS「端口与临时路径自持有」
-//    承诺的机械面；审计 P3 件⑤）。判据：tracked scripts/ 与 dev/ 的 .mjs/.sh 中，端口
+//    承诺的机械面；审计 P3 件⑤）。判据：tracked scripts/、probes/ 与 dev/ 的 .mjs/.sh 中，端口
 //    缺省声明（`port =` / `PORT=` 赋值行）同一端口号至多一个文件认领；取值引用
 //    DSH_RUN_PORT（run 通道覆写变量）的声明是通道连接方或通道本身（hitl-answer /
 //    run-kickoff / boot-run——连接方跟着通道走不是独占认领），豁免；注释行的用法示例
@@ -202,7 +241,7 @@ export function runF() {
 //    （检测回归 = 门禁静默空转）。──
 {
   const gate = 'port-exclusive';
-  const ls = spawnSync('git', ['-c', 'core.quotepath=false', 'ls-files', 'scripts', 'dev'], { cwd: ROOT, encoding: 'utf8' });
+  const ls = spawnSync('git', ['-c', 'core.quotepath=false', 'ls-files', 'scripts', 'probes', 'dev'], { cwd: ROOT, encoding: 'utf8' });
   if (ls.status !== 0) fail(gate, `git ls-files 不可用（${String(ls.stderr).slice(0, 120)}）——覆盖面依赖仓库态，fail-loud`);
   const claims = new Map();
   let checked = 0;

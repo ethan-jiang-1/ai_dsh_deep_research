@@ -1,4 +1,4 @@
-// scripts/lib/llm-stream-tee-core.mjs — LLM 流透明 tee 预载壳（scripts/probe/llm-stream-tee.cjs）
+// scripts/lib/llm-stream-tee-core.mjs — LLM 流透明 tee 预载壳（probes/stream/llm-stream-tee.cjs）
 // 的可提取纯函数面：捕获目标判定 + 凭据头脱敏。
 //
 // 为什么住 lib：预载壳是活进程仪器（挂进真目标进程才有意义），无 keyless 自动测试；

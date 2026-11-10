@@ -1,4 +1,12 @@
 #!/usr/bin/env node
+// 探针：cdp-probe
+// 状态：常驻
+// 一句话：驾驶舱显示/点击/会话回复在真实浏览器成立（--ask 以日志落盘为判据）
+// 何时跑：改驾驶舱渲染/交互/页签；run-driver 浏览器判据；BUG-021 回归
+// 档位：连已起 GUI（--ask 按会话档）
+// 判据：C1 页面断言（--expect-face/--expect-no-leak）；C2 --ask 消息在会话日志落盘；C3 无 console 异常
+// 不证明：模型内容质量；跨主题视觉；截图之外的布局问题
+// 为什么存在：Playwright actionability 被 DSH UI 挡死；执行冒烟与人工目验之间的交互驱动环
 // cdp-probe —— DSH deep-research 驾驶舱的真浏览器场景（裸 CDP，见 scripts/lib/cdp-driver.mjs）。
 //
 // 为什么存在：执行冒烟（client-load-smoke，Playwright）断言面是"能渲染"，但**交互驱动**在
@@ -8,7 +16,7 @@
 // 借鉴自 ai_dsh_loop_advisor，2026-10-01 owner 指令内化）。
 //
 // 用法：
-//   node scripts/probe/cdp-probe.mjs '<gui-url>' [--open-session '<标题>'] [--open-status]
+//   node probes/browser/cdp-probe.mjs '<gui-url>' [--open-session '<标题>'] [--open-status]
 //        [--expect-face '<文本>'] [--expect-no-leak '<文本>'] [--ask '<消息>']
 //        [--session '<会话 id>'] [--sessions '<会话根>'] [--screenshot <png>] [--html <html>] [--keep-browser]
 //
@@ -29,12 +37,12 @@ import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
-import { launchCdpBrowser } from '../lib/cdp-driver.mjs';
-import { readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs';
-import { PREVIEW_NOTICE_PROBE_JS, SHOW_MORE_SESSIONS_PATTERN } from '../lib/web-ui-nav.mjs';
-import { reconcileInjectedMessage } from '../lib/inject-reconcile.mjs';
-import { pickSendTarget } from '../lib/probe-send-target.mjs';
-import { pickStatusTab } from '../lib/probe-status-tab.mjs';
+import { launchCdpBrowser } from '../../scripts/lib/cdp-driver.mjs';
+import { readSessionEvents, resolveSessionLog } from '../../scripts/lib/session-log.mjs';
+import { PREVIEW_NOTICE_PROBE_JS, SHOW_MORE_SESSIONS_PATTERN } from '../../scripts/lib/web-ui-nav.mjs';
+import { reconcileInjectedMessage } from '../../scripts/lib/inject-reconcile.mjs';
+import { pickSendTarget } from '../../scripts/lib/probe-send-target.mjs';
+import { pickStatusTab } from '../../scripts/lib/probe-status-tab.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 

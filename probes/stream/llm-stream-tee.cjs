@@ -1,5 +1,13 @@
 #!/usr/bin/env node
-// scripts/probe/llm-stream-tee.cjs — LLM 流透明请求/响应 tee（复现仪器转正，CJS 预载形态）。
+// 探针：llm-stream-tee
+// 状态：常驻
+// 一句话：LLM 流异常时留下可离线复判的原始字节/响应头四件套
+// 何时跑：流异常第一动作（MALFORMED/断流/重试风暴）；BUG-022/023/024 复盘
+// 档位：活进程仪器（NODE_OPTIONS 预载；keyless）
+// 判据：不适用（仪器不判 PASS/FAIL；产物完整 = req/meta/sse/err 四件套）
+// 不证明：上游根因；非目标主机；进程崩溃后的完整响应体
+// 为什么存在：流失败归因不能靠错误字符串；一次性捕获工具转正
+// probes/stream/llm-stream-tee.cjs — LLM 流透明请求/响应 tee（复现仪器转正，CJS 预载形态）。
 //
 // 为什么存在：技能 .agents/skills/reproducing-a-failure §2 的「透明 fetch tee」此前无
 // tracked 实现——每次取证按技能现场从零重写（2026-10-13 postmortem 的 capture2.cjs 是
@@ -10,7 +18,7 @@
 // 何时用：流异常第一动作 = 挂 tee 抓原始字节与响应头，不以错误字符串推断归因。
 //
 // 用法①（预载取证——挂进目标进程，如 dsh web / 录制器）：
-//   NODE_OPTIONS="--require /abs/path/scripts/probe/llm-stream-tee.cjs" <目标进程启动命令>
+//   NODE_OPTIONS="--require /abs/path/probes/stream/llm-stream-tee.cjs" <目标进程启动命令>
 //   （boot-run 已挂 llm-socket-isolation 时可叠挂：--require A --require B）
 //   捕获主机子串 = env LLM_STREAM_TEE_HOST（缺省 api.deepseek.com；空串 fail-closed
 //   不捕获——见 lib/llm-stream-tee-core.isCaptureTarget）。
@@ -25,7 +33,7 @@
 //   new Response 重包）；旁路分支读尽落盘。旁路流不设超时——「分块流永不终止」本身
 //   就是 MALFORMED 形态的证据，掐表会丢它。
 //
-// 用法②（单跑预检）：node scripts/probe/llm-stream-tee.cjs --port <目标 web GUI 端口>
+// 用法②（单跑预检）：node probes/stream/llm-stream-tee.cjs --port <目标 web GUI 端口>
 //   校验端口参数与目标进程在场（TCP 连通即在场），打印取证接入命令。
 //   fail-loud exit 2：端口参数错 / 目标进程缺席（verdict 契约：2 = 未跑）。
 //
@@ -36,7 +44,7 @@
 const fs = require('node:fs');
 const net = require('node:net');
 const path = require('node:path');
-const { isCaptureTarget, redactHeaders } = require('../lib/llm-stream-tee-core.mjs');
+const { isCaptureTarget, redactHeaders } = require('../../scripts/lib/llm-stream-tee-core.mjs');
 
 const TAG = '[llm-stream-tee]';
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -140,7 +148,7 @@ async function preflight() {
   const i = argv.indexOf('--port');
   const portArg = i !== -1 ? argv[i + 1] : undefined;
   if (argv.includes('--help') || portArg === undefined || !/^\d+$/.test(portArg) || Number(portArg) < 1 || Number(portArg) > 65535) {
-    console.error('llm-stream-tee: 用法 node scripts/probe/llm-stream-tee.cjs --port <目标 web GUI 端口>');
+    console.error('llm-stream-tee: 用法 node probes/stream/llm-stream-tee.cjs --port <目标 web GUI 端口>');
     console.error('  预检端口参数与目标进程在场，打印取证接入命令；预载形态（用法①）见文件头注。');
     console.error('  退出码：0 = 预检通过；2 = 用法/前置缺席（未跑）。');
     return 2;

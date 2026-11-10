@@ -48,13 +48,14 @@ vendor/dsh/               pinned submodule（只读铁律——verify vendor-pin
 research-workspace/      dev 工作区实例（角色会话 cwd；用户工作区 = 任意目录）：method-library.md（本工作区
                          方法库）、drt_<slug>/（run bundle）、archive/（已交付归档）、_abandoned/
                          （停放位）、drafts/（开发侧草稿，非 run 产物）
-docs/                    00-index（地图；术语 = terms.md；D 号台账 = decisions.md）→ design/10-60 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ guides/65（运行形态合同）+ evaluation.md（验收合同）
+docs/                    00-index（地图；术语 = terms.md；D 号台账 = decisions.md）→ design/10-60 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ guides/65（运行形态合同）+ guides/66（探针）+ evaluation.md（验收合同）
 notes/                   开发记忆与证据链（见下节）：proposed/（需评审 RFC）→ implemented/（活的决定）；
                          不再指导未来 → archived/ 冻结；rejected/（否决 + 重启条件）；事故复盘在 archived/；
                          立项来历 = notes/README §立项来历（用户定调只进 decisions.md D 号依据列）
 .agents/skills/          开发技能（DSH 约定路径：project-agents 发现根）：任务匹配即加载的程序化工作记忆
                          （换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷）；与随包 runtime skills（presets/*/skills/）分家
-scripts/                 职责分组六目录 + lib/ 支撑库：verify/（L0 门禁聚合）、smoke/（分级冒烟，keyless/真模型档逐件申报）、probe/（交互与行为探针）、run-gates/（run bundle 机械门与审计）、run-ops/（run 观察与运维投影）、dist/（出包→_dist/）、lib/（冒烟/门禁支撑模块）——逐件职责与档位 = scripts/README.md
+probes/                  调试第一入口：真实边界单点探针（behavior/browser/stream 三域；真模型/已起 GUI/仪器）；指南 = docs/guides/66，索引 = probes/INDEX.generated.md（生成物）
+scripts/                 职责分组六目录 + lib/ 支撑库：verify/（L0 门禁聚合）、smoke/（分级冒烟，keyless/真模型档逐件申报）、run-gates/（run bundle 机械门与审计）、run-ops/（run 观察与运维投影）、dist/（出包→_dist/）、lib/（冒烟/门禁支撑模块）——逐件职责与档位 = scripts/README.md
 tests/                   keyless 回归（node:test，无测试框架；layering 守卫五件套：提及级禁物+解析级调用+import 闭包图+test 命令钉+有家句——规则见 tests/AGENTS.md）
 snapshots/               场景证据层：整组录制资产 + 场景声明 snapshot.json（消费 = snapshot-replay-smoke
                          经 scripts/lib/replay-scene.mjs）；分类与证据边界 = snapshots/README.md
@@ -119,7 +120,7 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 > 完成定义 = 真检查 · no-key 证管道 / with-key 证 agent · verify the world · 真入口路径 ·
 > 新门禁带反证 · docs = 当前合同 · 同 diff 带 Note · 窄证据切片 · 卫生铁律 · 工具态重定向。
 >
-> **证据匹配面**：改动的面 → 证据类型，执行正本 = [guides/60 §2 任务型路由表](docs/guides/60-dev-loop.md)；新契约测试与门禁同 diff 带反证（先看红再交付绿）。
+> **证据匹配面**：改动的面 → 证据类型，执行正本 = [guides/60 §2 任务型路由表](docs/guides/60-dev-loop.md)；新契约测试与门禁同 diff 带反证（先看红再交付绿）。单点机制/行为（含模型不按纪律）可疑 → 先看 [probes/](probes/README.md)（指南 = guides/66），别先跑整链。
 >
 > **研发宪章**（2026-09-27 用户定调）= [CONTRIBUTING §Development charter](CONTRIBUTING.md#development-charter)：循 DSH 而不发明 · 自主优先
 > 并借鉴成熟 DSH 插件（采纳度为信号）· **审阅分层**——机械门禁/审计/判据探针/对抗自审自主做，

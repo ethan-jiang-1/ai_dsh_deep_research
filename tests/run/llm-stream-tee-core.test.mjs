@@ -1,6 +1,6 @@
 // llm-stream-tee-core 回归 — LLM 流透明 tee 预载壳的可提取纯函数面（keyless）。
 // 反证（红先行实录，2026-10-21 卫生轮 维度6 件⑥）：模块未实现时本文件 import 即红
-// （函数缺席即红）；还原后绿。预载壳本体（scripts/probe/llm-stream-tee.cjs）是活进程
+// （函数缺席即红）；还原后绿。预载壳本体（probes/stream/llm-stream-tee.cjs）是活进程
 // 仪器，无 keyless 自动测试（不硬凑——预载要挂进真目标进程才有意义），此处只钉壳依赖的
 // 两个判据：捕获目标判定（fail-closed）与凭据头脱敏（证据包可外发）。
 import { test } from 'node:test'

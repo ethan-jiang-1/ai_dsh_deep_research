@@ -186,6 +186,7 @@ status——材料的状态就是题的状态。
 |---|---|---|---|
 | [外部 landscape](external-landscape/README.md) | 外部系统已走到哪、哪些是 table stakes；style 空间与隐含 Protocol | 本轮设计推演 | 4 份 |
 | [偏好层](preference-layer/README.md) | 搜索倾向与偏好如何收束成可解析、可审、可扩的数据模型 | 本轮设计推演；待结构选择拍板 | 2 份 |
+| [探针凸显化](probe-surfacing/README.md) | 本仓探针为何被埋没、借鉴 company 的取舍与 S1 落地 | 用户 2026-11-10 直派；产出的卡 = [探针凸显化](../issues/2026-11-10-probe-surfacing.md) | 两份 |
 
 归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单，也不抄状态（状态正本 = 题名页）。
 

@@ -194,7 +194,7 @@ test('资产门：scripts/README lib 表「被谁消费」列 = 实际 import �
       else if (ent.name.endsWith('.mjs')) scanFiles.push(p);
     }
   };
-  collect(join(ROOT, 'scripts')); collect(join(ROOT, 'dev')); collect(join(ROOT, 'tests'));
+  collect(join(ROOT, 'scripts')); collect(join(ROOT, 'probes')); collect(join(ROOT, 'dev')); collect(join(ROOT, 'tests'));
   const importers = new Map();
   for (const file of scanFiles) {
     const text = readFileSync(file, 'utf8');

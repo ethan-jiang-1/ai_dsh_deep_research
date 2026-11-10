@@ -1,4 +1,12 @@
 #!/usr/bin/env node
+// 探针：entry-chain-probe
+// 状态：常驻
+// 一句话：入口链三问（授权范围/RFC 条件/开发环路径）真模型可召回
+// 何时跑：改根/子树 AGENTS 或入口链；入口链导航合同变更；纯文档卫生轮
+// 档位：真模型（DEEPSEEK_API_KEY；REAL_MODEL 闭集）
+// 判据：C1 授权范围；C2 RFC 条件；C3 开发环路径；C4 原文留档
+// 不证明：入口链之外的文档段；模型执行能力；长上下文抗漂移
+// 为什么存在：入口链是 fresh agent 第一跳；词面/语义随模型漂移
 // entry-chain-probe.mjs — 入口链探针（真模型档，需 DEEPSEEK_API_KEY）。
 // RFC：notes/archived/2026-09-24-entry-chain-probe.md · 语义版已人工两跑（2026-09-24，
 // 见 implemented Note），本脚本 = 脚本化 + 制度化（每 feature 条目收尾跑）。
@@ -9,16 +17,16 @@
 //   3. 会话日志即真相：assistant/message 事件里找答案文本（不是用户消息回显），全文留档供人工复核。
 //
 // 前置：source dev/env.sh（DSH_HOME + 凭据）；DSH_SRC 默认本仓根（vendor/dsh）。
-// 用法：source dev/env.sh && node scripts/probe/entry-chain-probe.mjs [--port 3114]
-import { requireCredentials, withModelKey } from '../lib/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
-import { readSessionTextOf } from '../lib/session-log.mjs';
+// 用法：source dev/env.sh && node probes/behavior/entry-chain-probe.mjs [--port 3114]
+import { requireCredentials, withModelKey } from '../../scripts/lib/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
+import { readSessionTextOf } from '../../scripts/lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
-import { directAuthorizationBoundaryPasses, rfcBoundaryPasses } from '../lib/direct-authorization-boundary.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/vendor-artifacts.mjs';
+import { directAuthorizationBoundaryPasses, rfcBoundaryPasses } from '../../scripts/lib/direct-authorization-boundary.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {

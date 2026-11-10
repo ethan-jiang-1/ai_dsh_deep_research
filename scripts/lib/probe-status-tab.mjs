@@ -18,7 +18,7 @@
 // 页面侧只读 DOM（evaluate 取按钮签名与 data 钩子），选谁/判绿的决定留在本纯函数里——BUG-021
 // 的 `probe-send-target` 同款分层：判据可被 keyless 测试常驻钉住。
 //
-// 消费方 = scripts/probe/cdp-probe.mjs（`--open-status`）、dev/run-driver.mjs（浏览器面 verdict）。
+// 消费方 = probes/browser/cdp-probe.mjs（`--open-status`）、dev/run-driver.mjs（浏览器面 verdict）。
 
 /** 页签按钮签名里允许出现的最长子串：标题 span 的精确文本。 */
 const TITLE_SPAN_CHARS = 80;

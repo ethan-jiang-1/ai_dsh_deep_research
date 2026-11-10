@@ -2,9 +2,10 @@
 // 防假绿机制采纳）。契约：exit 0 = 全绿 / 1 = 断言红 / 2 = 未跑（前置缺席）——未跑 ≠ 通过。
 // 登记的真模型档脚本行为由形状断言钉住，防将来漂移；实际成员以 REAL_MODEL 闭集为准。
 // 登记制 closed set（命名即层）：真模型档 = 要凭据的档位，名单就是本文件的 REAL_MODEL——
-// 任何顶层脚本引用 `requireCredentials(`（凭据要求标记；旧形态 `.credentials.yaml` 仍认）而未登记 = 档位词表漂移即红；
+// 任何入口脚本引用 `requireCredentials(`（凭据要求标记；旧形态 `.credentials.yaml` 仍认）而未登记 = 档位词表漂移即红；
 // 反向（登记脚本摘掉凭据要求）同样红。语料事实：`withModelKey` 是条件透传（key 在才传），
 // keyless 冒烟也合法调用，故判据用凭据**要求**而非透传。
+// 覆盖面 = `scripts/` 各组入口 + 根 `probes/`；探针迁根后不再属于 scripts/，但 closed set 语义不变。
 // 反证：①给 keyless 脚本注入 .credentials.yaml 引用 → closed set 红；②删登记脚本的
 // exit(2)/收尾判定 → 对应断言红；还原 → 绿。
 import { test } from 'node:test';
@@ -12,40 +13,44 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { listProbeFiles } from '../../scripts/lib/probe-index.mjs';
 
-const SCRIPTS = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'scripts');
-// 分组布局（2026-10-07 目录治理档 C）：closed set 随现实迁移——登记路径改为组内相对路径，
-// 判据语义不变（对 scripts/ 全部 .mjs 入口对账；lib/ 是支撑模块不在脚本集内）。
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const SCRIPTS = join(ROOT, 'scripts');
+const PROBES = join(ROOT, 'probes');
+// 路径 = 仓根相对（scripts/smoke/…、probes/…），让两类入口同一名单对账。
 const REAL_MODEL = [
-  'smoke/l4-lite-smoke.mjs',
-  'smoke/team-preflight-smoke.mjs',
-  'probe/entry-chain-probe.mjs',
-  'smoke/client-hitl-smoke.mjs',
-  'smoke/cdp-ask-smoke.mjs',
-  'probe/discipline-probe.mjs',
-  'probe/method-library-probe.mjs',
-  'probe/rerun-triage-probe.mjs',
+  'scripts/smoke/l4-lite-smoke.mjs',
+  'scripts/smoke/team-preflight-smoke.mjs',
+  'probes/behavior/entry-chain-probe.mjs',
+  'scripts/smoke/client-hitl-smoke.mjs',
+  'scripts/smoke/cdp-ask-smoke.mjs',
+  'probes/behavior/discipline-probe.mjs',
+  'probes/behavior/method-library-probe.mjs',
+  'probes/behavior/rerun-triage-probe.mjs',
 ];
 
-// 收集 scripts/ 下全部 .mjs 入口（verify/smoke/probe/run-gates/run-ops/dist 各组一层），
-// 相对 scripts/ 的路径；目录组收窄为空集时判红（防空语料）。
-function listScriptRels() {
+// 收集 scripts/ 各组入口（每组一层；lib/ 除外）+ probes/ 各域入口（递归），
+// 仓根相对路径；任一区收窄为空集时判红（防空语料）。
+function listEntryRels() {
   const rels = [];
   for (const ent of readdirSync(SCRIPTS, { withFileTypes: true })) {
     if (ent.name === 'lib' || ent.name === 'node_modules') continue;
     if (ent.isDirectory()) {
       for (const sub of readdirSync(join(SCRIPTS, ent.name), { withFileTypes: true })) {
-        if (sub.isFile() && sub.name.endsWith('.mjs')) rels.push(`${ent.name}/${sub.name}`);
+        if (sub.isFile() && sub.name.endsWith('.mjs')) rels.push(`scripts/${ent.name}/${sub.name}`);
       }
-    } else if (ent.isFile() && ent.name.endsWith('.mjs')) rels.push(ent.name);
+    } else if (ent.isFile() && ent.name.endsWith('.mjs')) rels.push(`scripts/${ent.name}`);
   }
-  assert.ok(rels.length > 0, 'scripts/ 扫到 0 个 .mjs 入口——分组结构变了而 closed set 未跟进');
+  for (const rel of listProbeFiles(PROBES)) rels.push(`probes/${rel}`);
+  assert.ok(rels.some((rel) => rel.startsWith('scripts/')), 'scripts/ 扫到 0 个入口——分组结构变了而 closed set 未跟进');
+  assert.ok(rels.some((rel) => rel.startsWith('probes/')), 'probes/ 扫到 0 个入口——域结构变了而 closed set 未跟进');
   return rels.sort();
 }
 
 test('真模型档 closed set：要求凭据（requireCredentials / .credentials.yaml）的脚本恰为登记名单', () => {
-  const requiring = listScriptRels().filter((f) => {
-    const src = readFileSync(join(SCRIPTS, f), 'utf8');
+  const requiring = listEntryRels().filter((f) => {
+    const src = readFileSync(join(ROOT, f), 'utf8');
     return src.includes('requireCredentials(') || src.includes('.credentials.yaml');
   });
   assert.deepEqual(
@@ -57,14 +62,14 @@ test('真模型档 closed set：要求凭据（requireCredentials / .credentials
 
 test('真模型档脚本：preflight exit(2) 在场（前置缺席 = 未跑，不降级为静默绿）', () => {
   for (const f of REAL_MODEL) {
-    const src = readFileSync(join(SCRIPTS, f), 'utf8');
+    const src = readFileSync(join(ROOT, f), 'utf8');
     assert.match(src, /process\.exit\(2\)/, `${f} 缺 preflight exit(2)——前置缺席会静默继续或误报`);
   }
 });
 
 test('真模型档脚本：收尾 exit(断言红 1 / 全绿 0) 在场（失败必须非零退出）', () => {
   for (const f of REAL_MODEL) {
-    const src = readFileSync(join(SCRIPTS, f), 'utf8');
+    const src = readFileSync(join(ROOT, f), 'utf8');
     assert.match(src, /process\.exit\([^()]*\?\s*0\s*:\s*1\s*\)/, `${f} 缺收尾 exit(绿0/红1) 判定——断言红可能以退出码 0 溜走`);
   }
 });

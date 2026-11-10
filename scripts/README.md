@@ -43,16 +43,9 @@
 | team-preflight-smoke.mjs | spawn_teammate 组队与成员组合画像 | 真模型档 |
 | cdp-ask-smoke.mjs | cdp-probe `--ask` 端到端：空闲态 `Send message` 与在飞态 `Queue message` 双路径发出 + **journal 落盘对账**（BUG-021 正修；判定本体 keyless 钉在 `lib/probe-send-target.mjs`） | 真模型档 |
 
-## probe/（探针）
+## probes/（探针，已迁根）
 
-| 件 | 证明什么 | 档位 |
-|---|---|---|
-| cdp-probe.mjs | 指定场景显示/点击/会话回复（裸 CDP） | 连已起 GUI；`--ask` 按会话档 |
-| llm-stream-tee.cjs | **LLM 流透明 tee**（复现技能 §2 的 tracked 仪器）：预载挂进目标进程只抄写字节（零行为路径改动），四件套证据包（`req/meta/sse/err`，凭据头脱敏）落 `runtime/smoke-workspace/` 时间戳目录；单跑 `--port` 预检目标在场（缺席/参数错 exit 2） | keyless（活进程仪器，无 keyless 自动测试；判据核 = lib/llm-stream-tee-core.mjs） |
-| entry-chain-probe.mjs | 授权范围、RFC 条件与开发环路径三问，词面断言 + 留档人工复核 | 真模型档 |
-| method-library-probe.mjs | 偏好库可发现性三问（文件名/位置、当前条目数、点名条目缺席时是否如实说），cwd = 临时研究工作区。修复判据 #4 的机器化证明（BUG-042） | 真模型档 |
-| discipline-probe.mjs | 散文纪律行为面五场景标记断言（A2 超界 / B1 差集 / 收活缺件 / 收活 UNVERIFIED / 计划确认卡·quick_factual 免发互补对）+ 留档人工复核；`--scenario <id>` 定向跑 | 真模型档 |
-| rerun-triage-probe.mjs | 不满转接的模型行为五条（复述不满 / ≤2 手段 / 代价与版本后果 / 未确认前不动手 / 范围来自报告末节）：给一句「太浅」跑真 lead 会话；五条全中才 PASS（探针不证明长尾说法不误判——人读） | 真模型档 |
+探针住根 [probes/](../probes/README.md)：指南 = [guides/66](../docs/guides/66-probe-playbook.md)，索引 = [probes/INDEX.generated.md](../probes/INDEX.generated.md)。本索引不再手枚举探针（头注是事实源，索引是生成物）。
 
 ## 分发/安装失败面 → 资产
 
@@ -115,7 +108,7 @@
 | lib/web-harness.mjs | client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、rerun-triage-probe、run-driver、session-replay、snapshot-replay-smoke、team-preflight-smoke | DSH web 冒烟族**启停与通道唯一正本**：`bootWeb`（等启动横幅拿 token）+ `authenticate` + `makeRpc`；**参数保形**——端口/超时/尾部字符/rpcId 前缀/失败文案与收割方式全留各站点 |
 | lib/session-log.mjs | bundle-sessions、cdp-ask-smoke、cdp-probe、client-hitl-smoke、client-load-reference、client-load-smoke、data-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、hitl-answer、l4-lite-smoke、method-library-probe、plan-card-stats、product-boot-smoke、provider-error-stats、rerun-triage-probe、run-dashboard-core、run-kickoff、run-state、run-state.test、session-events、session-log.test、session-replay、snapshot-replay-smoke、stream-diagnostics、team-preflight-smoke、verdict-audit、watch-run、workspace-isolation-smoke | canonical 日志选择与读取 + 会话目录发现（findSessionDir 双形态/首匹配；readSessionTextOf 定位+读取——六处真模型档副本 2026-11-04 收口）+ 会话组发现（findGroup 子串参数化，缺省 research-workspace——BUG-010 三处同款一行收敛；冒烟/自测组逃生口 = 观察工具 --group） |
 | lib/session-events-core.mjs | session-events、session-events.test | 会话事件摘要与筛选纯函数（CLI 壳 = run-ops/session-events 行） |
-| lib/llm-stream-tee-core.mjs | llm-stream-tee-core.test | LLM 流 tee 的捕获判定（主机子串，fail-closed）与凭据头脱敏（预载壳 = scripts/probe/llm-stream-tee.cjs——CJS require 面不在 .mjs 对账图内，壳本体是活进程仪器不设 keyless 自测） |
+| lib/llm-stream-tee-core.mjs | llm-stream-tee-core.test | LLM 流 tee 的捕获判定（主机子串，fail-closed）与凭据头脱敏（预载壳 = probes/stream/llm-stream-tee.cjs——CJS require 面不在 .mjs 对账图内，壳本体是活进程仪器不设 keyless 自测） |
 | lib/provider-errors.mjs | provider-error-stats、provider-errors.test | 回合被上游流错误终结的结构化抽取（唯一语义源：只认 `turn/end` + `reason.kind=error`，不双算 `assistant/attempt`） |
 | lib/plan-card.mjs | node-gate-session-gates、plan-card-stats、plan-card.test | 计划确认卡识别与字数口径（唯一语义源：标签「按计划开跑」+ `question` 字段全长 + 阈值 200） |
 | lib/stream-diagnostics-core.mjs | stream-diagnostics、stream-diagnostics.test | 模型活动会话筛选（活动事件预筛后再按日志 mtime 取最近 N）+ 尝试时间线投影（assistant/message 计成功、assistant/attempt 计失败/无落面，终态三判 alive-or-idle/recovered/dead） |
@@ -132,6 +125,7 @@
 | lib/probe-send-target.mjs | cdp-probe、probe-send-target.test | 提交按钮判定纯函数（BUG-021 正修：send 家族六标签状态机 + **stop 家族拒点** + composer 邻近窗；页面只读 DOM 与执行点击） |
 | lib/final-version.mjs | final-version.test、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、run-accept、run-dashboard-core、run-receipt、schema-scan-core、verdict-audit | 终稿版本文件名的唯一判据（纯判据从 pack `src/lib/final-target.ts` 取；目录扫描 = final/ 与 readable-vN）；旧 vN 正则的机械漂移锁 = tests/run/final-version.test |
 | lib/probe-status-tab.mjs | cdp-probe、probe-status-tab.test、session-replay | 右栏「研究状态」页签判定纯函数：胶囊按**标题 span 逐字**匹配（拒绝描述串入 / 近似标题）、页签体只认 `[data-sidebar-right-tab]`（不拿会话正文当观察面） |
+| lib/probe-index.mjs | f-repo、probes/_index.mjs、probe-index.test、smoke-contract.test | 探针索引纯函数（递归扫描 `probes/`、解析头注六字段、按域分组渲染；门禁 probe-registry 消费同一渲染；索引不复制判据/不证明长文） |
 | lib/run-channel.mjs | run-driver、run-driver-contract.test | run 通道驱动判据纯函数：web.log → 当前 GUI URL（取最后一条横幅）、浏览器面 verdict → 呈交判决（GREEN / RED / NOT-RUN） |
 | lib/ask-drive.mjs | ask-drive.test、hitl-answer、run-kickoff | 代答读窗与谓词 |
 | lib/workspace-root.mjs | bundle-sessions、evidence-audit、hitl-answer、node-gate、plan-card-stats、provider-error-stats、schema-scan、session-events、session-log、watch-run、workspace-root.test | dev 工作区根解析（flag → DSH_RUN_WORKSPACE → 仓内默认）+ vendor 同形 `projectKey(cwd)` 会话组（D38 C1：替代数据根/组名各写一份；legacy substring 兜底） |

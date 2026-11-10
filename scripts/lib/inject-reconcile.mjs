@@ -6,7 +6,7 @@
 // 故判据 = **在日志里对账**，不是等 UI 回复、也不是看文本长度增长。
 //
 // 分层：本模块是纯函数（无 fs / 无浏览器 / 无子进程），消费方 =
-//   · `scripts/probe/cdp-probe.mjs`（真浏览器探针；负责取日志并调用）
+//   · `probes/browser/cdp-probe.mjs`（真浏览器探针；负责取日志并调用）
 //   · `tests/inject-reconcile.test.mjs`（keyless 契约测试；用例即负例留证）
 // 取日志与"日志读不出来"的策略留在消费方（探针把 log-unreadable 与 not-landed 分开报）。
 

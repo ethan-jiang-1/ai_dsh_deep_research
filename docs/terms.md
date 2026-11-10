@@ -38,6 +38,7 @@
 | 独立预期（金标准） | oracle（测试判定的独立来源——刷新录制不许顺手改写判定标准；record/refresh ≠ 接受新行为） | vendor `docs/testing.md`（verify the world, not the self-report）+ `snapshots/AGENTS.md`；本仓载体 = snapshot-replay C 层渲染金标准 + [tests/AGENTS](../tests/AGENTS.md)「fix fixtures, not normalizers」 |
 | 真实组合 | real composition（经 Loader 与真实入口组合，只 mock 外部服务/非确定输入；mock-only 单测证明不了组合成立） | vendor `docs/testing.md`（test the real entry path）；本仓载体 = L1 真挂载 + L2 安装域 |
 | 语义评审（对抗自审） | semantic review（意图-实现-文档-证据对齐的判断层，可由 agent 执行，不可机械化） | vendor `dsh-code-review` skill；本仓载体 = [reviewing-a-delivery](../.agents/skills/reviewing-a-delivery/SKILL.md) + 收尾对账（[guides/60 §4](guides/60-dev-loop.md)） |
+| 探针（probe） | —（开发/证据资产；DSH 无此 runtime 概念） | 根 `probes/*-probe.mjs` + [guides/66](guides/66-probe-playbook.md)；头注六字段（状态/一句话/何时跑/档位/判据/不证明），索引 = `probes/INDEX.generated.md`；**不是第六个评估面** |
 
 > **退役词**：现行合同文档不使用 `插件即产品`、`产品 profile`、`产品形态`、`产品启动`、`产品设置`、
 > `产品用户`、`产品面`、`产品化`、`P0–P4`；`产品` 只作 DSH 形容词（product data / product stability /

@@ -82,15 +82,15 @@ test('② 回归层禁物：解析级调用表达式（spawn/exec/fetch——夹
 });
 
 test('③ import 图：tests 禁 import 驱动面 + 本地闭包零禁物（传递引入可见）', () => {
-  // 双道：regex 驱动面禁令（报因明确——smoke/probe/dist/verify 设计上就要起进程/浏览器/
+  // 双道：regex 驱动面禁令（报因明确——smoke/probe/dist/verify/probes 设计上就要起进程/浏览器/
   // 真模型相邻）+ 闭包图（本质守卫：跟随本地字面量 import 含再导出与动态字面量，禁物
   // 零容忍——run-gates/run-ops 的纯件靠它持续背书，混住驱动目录不再是豁免口）。
   const importers = [];
   for (const f of files) {
     if (resolve(join(TESTS, f)) === SELF) continue;
     const src = readFileSync(join(TESTS, f), 'utf8');
-    if (/(?:from|import)\s*\(?['"][^'"]*scripts\/(?:smoke|probe|dist|verify)\//.test(src))
-      importers.push(`${f} → scripts/(smoke|probe|dist|verify) 是驱动面——tests 的本地 import 走 scripts/lib/（run-gates/run-ops 纯件由闭包图背书）`);
+    if (/(?:from|import)\s*\(?['"][^'"]*(?:scripts\/(?:smoke|probe|dist|verify)|probes)\//.test(src))
+      importers.push(`${f} → scripts/(smoke|probe|dist|verify) 或 probes/ 是驱动面——tests 的本地 import 走 scripts/lib/（run-gates/run-ops 纯件由闭包图背书）`);
   }
   assert.deepEqual(importers, [], '驱动面不得被 tests/ import（import 进来会把 spawn/fetch 整条带进回归层）');
 

@@ -1,4 +1,12 @@
 #!/usr/bin/env node
+// 探针：method-library-probe
+// 状态：常驻
+// 一句话：Lead 能说出偏好库路径、当前条目数、点名条目缺席（BUG-042 判据 #4）
+// 何时跑：偏好库播种/手册指路/面板文案改动；BUG-042 回归
+// 档位：真模型（DEEPSEEK_API_KEY；REAL_MODEL 闭集）
+// 判据：C1 文件名+位置；C2 当前条目数；C3 点名条目如实说不在库
+// 不证明：模型是否按偏好执行；长上下文；面板点击链
+// 为什么存在：可发现性只能真模型证明；静态断言只能钉文案
 // method-library-probe.mjs — 偏好库探测探针（真模型档，需 DEEPSEEK_API_KEY）。
 // 服务 BUG-042 的修复判据 #4：全新工作区 scaffold 后，Lead 能否**说出偏好库的路径与当前
 // 条目**——这是"模型探索得到偏好放哪儿"的机器化证明，不是靠人读 prompt 猜。
@@ -9,10 +17,10 @@
 //   Q2 必须报出**当前条目数**（种子 = 0 条，示例在注释里不算 → 答 0 或"空/无条目"才算对）；
 //   Q3 必须说出题面点名的偏好**不在库里**（不得声称"已按该偏好执行"）。
 //
-// 前置：source dev/env.sh。用法：node scripts/probe/method-library-probe.mjs [--port 3116]
-import { requireCredentials, withModelKey } from '../lib/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
-import { readSessionTextOf } from '../lib/session-log.mjs';
+// 前置：source dev/env.sh。用法：node probes/behavior/method-library-probe.mjs [--port 3116]
+import { requireCredentials, withModelKey } from '../../scripts/lib/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
+import { readSessionTextOf } from '../../scripts/lib/session-log.mjs';
 import { execFileSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from 'node:fs';
