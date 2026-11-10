@@ -10,7 +10,7 @@ opened: 2026-11-10
 >
 > 授权：用户 2026-11-10 拍板「先修解析器」（不改手册口径、不重录 snapshot）。
 > 去向：implemented — 并入既有 [终局 readiness 规则 Note](../../../notes/implemented/2026-10-11-review-readiness-terminal-rule.md)（不新建 Note）。
-> 关联：claim-verdict 卡 P4 前的交付风险（[卡](../../issues/2026-11-10-claim-verdict-quality-loop.md) 的「顺带发现」）。
+> 关联：claim-verdict 卡 P4 前的交付风险（[卡](../settled_issues/2026-11-10-claim-verdict-quality-loop.md) 的「顺带发现」）。
 
 ## 症状
 

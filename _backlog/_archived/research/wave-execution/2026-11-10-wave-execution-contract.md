@@ -13,7 +13,7 @@ intent: 在 lens 层与 claim-verdict 已落地、workflow 机制已逐源核过
 > 三段式；⑤ 新增 `waves/<wave>.json` 执行报告；⑥ 计划面**不加列**，用 `## Wave 执行` 节。
 > 相关：[channel-policy v2](../orchestration-primitives/2026-11-10-channel-policy.md) ·
 > [lens-as-data v2](../lens-abstraction/2026-11-10-lens-as-data.md) ·
-> [claim-verdict 卡](../../../issues/2026-11-10-claim-verdict-quality-loop.md) ·
+> [claim-verdict 卡](../../settled_issues/2026-11-10-claim-verdict-quality-loop.md) ·
 > [落地卡](../../settled_issues/2026-11-10-wave-execution-lens-fanout.md)。
 
 ## 0. 一句话
@@ -579,7 +579,7 @@ child ×4（depth 2）= 7 槽。
   - [channel-policy v2](../orchestration-primitives/2026-11-10-channel-policy.md)
   - [channel-probes](../orchestration-primitives/2026-11-10-channel-probes.md)
   - [lens-as-data v2](../lens-abstraction/2026-11-10-lens-as-data.md)
-  - [claim-verdict 卡](../../../issues/2026-11-10-claim-verdict-quality-loop.md)
+  - [claim-verdict 卡](../../settled_issues/2026-11-10-claim-verdict-quality-loop.md)
   - [旧 wave 执行卡](../../settled_issues/2026-11-10-workflow-wave-executor.md)
   - [落地卡](../../settled_issues/2026-11-10-wave-execution-lens-fanout.md)
 - 外部（证据边界见 channel-policy §6）：

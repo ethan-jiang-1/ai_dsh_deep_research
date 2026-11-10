@@ -4,9 +4,7 @@
 
 ## 活跃清单
 
-| 卡 | 一句话 | 状态 |
-|---|---|---|
-| [2026-11-10-claim-verdict-quality-loop](2026-11-10-claim-verdict-quality-loop.md) | claim 级独立复核：typed verdict + 机械覆盖门 | 待落地 |
+（暂无活跃问题。）
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

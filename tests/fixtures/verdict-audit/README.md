@@ -13,7 +13,7 @@
 里的解析规则与 core 的 `parseSessionFacts` 由同一份真实行格式钉住。
 
 原始现场（不入库，gitignored）：`runtime/harness-home/sessions/<group>/394f8a00-78f9-42bf-8911-58e9c786c8fd/`
-（87 行事件、约 400 KB 解压后）。试点 = [claim-verdict 卡](../../../_backlog/issues/2026-11-10-claim-verdict-quality-loop.md) P3；
+（87 行事件、约 400 KB 解压后）。试点 = [claim-verdict 卡](../../../_backlog/_archived/settled_issues/2026-11-10-claim-verdict-quality-loop.md) P3；
 契约 = [verdict-contract](../../../_backlog/_archived/research/quality-loop/2026-11-10-verdict-contract.md) §4/§5。
 
 ## 布局

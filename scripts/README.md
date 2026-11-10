@@ -157,7 +157,7 @@
 | lib/run-dashboard-core.mjs | evaluation-contract.test、run-dashboard、run-dashboard-html、run-dashboard.test | M2 run 观察面解析/场景/模型纯管线（全 fail-soft；HTML 渲染 = run-dashboard-html，CLI/watch/写盘归壳） |
 | lib/run-dashboard-html.mjs | run-dashboard、run-dashboard.test | M2 run 观察面 HTML 渲染薄壳（纯字符串拼接；矩阵/统计来自 core，不读盘） |
 | lib/evidence-audit-core.mjs | evidence-audit、evidence-audit.test、provenance.test | 证据溯源审计判据核心（readLog 注入同上） |
-| lib/verdict-audit-core.mjs | verdict-audit、verdict-audit.test、verdict-audit-fixture.test | claim 级裁决判据核心：claims/verdicts 形状与键集、覆盖（critical 全有结论性裁决）、raw 原文重解析、逐字一致（跨轮单调）、child preset/depth/只读；`parseSessionFacts` = 真实 v4 日志线形 → 会话事实（CLI 只做定位/解压），readiness 读法复用 node-gate 同源 |
+| lib/verdict-audit-core.mjs | verdict-audit、verdict-audit.test、verdict-audit-fixture.test | claim 级裁决判据核心：claims/verdicts 形状与键集、覆盖（critical 全有结论性裁决）、raw 原文重解析（raw 带 ```json 围栏时只剥一层解析，原文比对不放宽）、逐字一致（跨轮单调）、child preset/depth/只读；`parseSessionFacts` = 真实 v4 日志线形 → 会话事实（CLI 只做定位/解压），readiness 读法复用 node-gate 同源 |
 | lib/provenance.mjs | evidence-audit-core、provenance.test | 离线来源证明：kind/URL/路径 + sha256 + 时间 + 通道 + 切片；local-file 哈希核对 |
 | lib/run-inventory-core.mjs | run-inventory、run-inventory.test | 只读保留期折算（逐场文件数/字节/最老；合计；1024 进制格式化） |
 | lib/runtime-clean-core.mjs | runtime-clean、runtime-clean.test | 运行区清理纯判据：白名单容器/实验根 + 子树最新 mtime 保留期；symlink/未知名/穿越 fail-closed |

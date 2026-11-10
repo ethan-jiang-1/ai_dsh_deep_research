@@ -9,7 +9,7 @@ opened: 2026-11-10
 >
 > 去向：implemented — [Note](../../../notes/implemented/2026-11-10-wave-execution-lens-fanout.md)；业务验收：用户 2026-11-10 选择 A（接受 P4 代理交付的 final/v1 + readable-v1；代理 HITL 已在 question/journal 标注）
 >
-> **研究依据**：[wave-execution v2](../research/wave-execution/2026-11-10-wave-execution-contract.md)（新机制事实、A→B 重估、执行合同、试点）→ [channel-policy v2](../research/orchestration-primitives/2026-11-10-channel-policy.md)（通道总表/8 槽/HITL）→ [lens-as-data v2](../research/lens-abstraction/2026-11-10-lens-as-data.md)（已落地 D43）→ [claim-verdict 卡](../../issues/2026-11-10-claim-verdict-quality-loop.md)（D44 在落地）。
+> **研究依据**：[wave-execution v2](../research/wave-execution/2026-11-10-wave-execution-contract.md)（新机制事实、A→B 重估、执行合同、试点）→ [channel-policy v2](../research/orchestration-primitives/2026-11-10-channel-policy.md)（通道总表/8 槽/HITL）→ [lens-as-data v2](../research/lens-abstraction/2026-11-10-lens-as-data.md)（已落地 D43）→ [claim-verdict 卡](2026-11-10-claim-verdict-quality-loop.md)（D44 已落地）。
 >
 > **开工授权**：用户 2026-11-10 直派「深挖 wave-execution，提交 issue，准备落地」= 授权深挖与立卡；
 > **`待落地` 不是实施授权**。本卡改动面含 **pack 公共行为**（analyst 工具面、计划卡措辞、计划模板），

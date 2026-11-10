@@ -4,6 +4,7 @@
 
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-11-10-claim-verdict-quality-loop](2026-11-10-claim-verdict-quality-loop.md) | claim 级独立复核落地（D44）：claims/verdicts 工件 + `verdict-audit` 覆盖门 + `run-accept` 第三道 + HITL2 三行数字；P3 试点 + P4 真 run（`drt_api-context-caching-ds-openai`，claim 14/14、R4 PASS、run-accept 绿）；P3 口径修正 = skill 未挂载、后重建；[Note](../../../notes/implemented/2026-11-10-claim-verdict-quality-loop.md) | 2026-11-11 |
 | [2026-11-10-probe-surfacing](2026-11-10-probe-surfacing.md) | 探针凸显化：根 `probes/` 三域（behavior/browser/stream）+ 生成索引 + 头注/索引门 + `using-a-probe` 技能；六支探针全量实跑（entry/rerun/method-library/discipline ALL PASS，cdp verdict 绿，tee 预检 0）；[Note](../../../notes/implemented/2026-11-10-probe-surfacing.md) | 2026-11-10 |
 | [2026-11-10-lens-layer](2026-11-10-lens-layer.md) | lens 数据层落地：8 条出厂目录 + HITL1 默认集 + evidence 单值 `lens` + review `topic × lens` 覆盖表；pilot（`drt_ds-vs-bailian-longctx`）7 cell / 39 卡 / 0 静默空格 / 面分离全过；报告 readiness FAIL 属内容结果；[Note](../../../notes/implemented/2026-11-10-lens-layer.md) | 2026-11-10 |
 | [2026-11-10-workflow-wave-executor](2026-11-10-workflow-wave-executor.md) | 通道政策记录 + goal pause/resume 裁决：HITL1 timed、HITL2 `timeout:-1` 保持开放回合，goal 不 pause/resume；wave 执行切片移交[新卡](2026-11-10-wave-execution-lens-fanout.md)；[Note](../../../notes/implemented/2026-11-10-goal-hitl-alignment.md) | 2026-11-10 |

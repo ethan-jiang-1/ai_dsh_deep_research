@@ -1,15 +1,15 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-10
 ---
 
 # 落地：claim 级独立复核——typed verdict + 机械覆盖门
 
-> 立卡：2026-11-10 ｜ 状态：待落地 ｜ 类型：Feature ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-10 ｜ 状态：已结 — P4 真 run `drt_api-context-caching-ds-openai` 全链绿（claim 14/14；R4 PASS；run-accept 绿），去向：implemented — [Note](../../../notes/implemented/2026-11-10-claim-verdict-quality-loop.md) ｜ 类型：Feature ｜ 结论倾向：现在做 ｜ 可关闭：是 ｜ 审查：agent 自审 + 用户 2026-11-10 授权落地（P4 代理 HITL 经「你自己来试试看」授权）
 >
 > 去向：implemented — 交付时写 `notes/implemented/2026-11-10-claim-verdict-quality-loop.md`（理由/备选/试点证据进 Note，docs 只写 now）
 >
-> **研究依据**：[quality-loop 题名页](../_archived/research/quality-loop/README.md) → [verdict-contract](../_archived/research/quality-loop/2026-11-10-verdict-contract.md)（契约、机械门清单、备选裁决表、试点、重议条件）
+> **研究依据**：[quality-loop 题名页](../research/quality-loop/README.md) → [verdict-contract](../research/quality-loop/2026-11-10-verdict-contract.md)（契约、机械门清单、备选裁决表、试点、重议条件）
 >
 > **开工授权**：用户 2026-11-10「推动落地」= 授权开工（`待落地` 本身不是授权）；改动面含 **pack 公共行为**，
 > 按审阅分层在阶段边界请人：P1 模型可见面之前一次、P4 真 run 一次、交付验收一次。
@@ -67,7 +67,7 @@ lead persona ≤3 句 + `team-assembly` 表一行。
 
 ## 落地计划（六段；每段一个可独立提交的窄片）
 
-路由依据 = [guides/60 §2 任务型路由表](../../docs/guides/60-dev-loop.md)：本卡叠加三行——「改 run 审计门」
+路由依据 = [guides/60 §2 任务型路由表](../../../docs/guides/60-dev-loop.md)：本卡叠加三行——「改 run 审计门」
 （L0 + `tests/run` 契约）、「改 persona / skill / 手册文本」（`render-overlay` → L1 → snapshot-replay B →
 重启 run 通道；L0 + L1 + L4-lite）、「改 `scripts/lib` 支撑模块」（消费方复跑 + 契约测试）。
 
@@ -93,29 +93,65 @@ lead persona ≤3 句 + `team-assembly` 表一行。
   准入规则写入 `content-shape` 门禁注释。证据：`render-overlay` 重生成、`preset-smoke` ALL PASS（新 skill 挂载 +
   隔离仍绿）、snapshot B 先红（两条 persona 都被捕获）→ lead/critic 真模型重录 + `snapshot.json` 身份更新 →
   C5 金标准重写人审 → replay ALL PASS、`l4-lite-smoke` ALL PASS、`pnpm verify` 全绿、`pnpm test` 1083 绿。
-- **P3 试点 A 已过**（真模型，2026-11-10）：复用已交付 bundle 副本 `drt_claim-pilot`（2 条 critical claim），
-  Lead 派 1 个 `agent_preset=critic` child（session `394f8a00…`，depth 1），child 真加载 claim-verdict、
-  读两张证据卡、重抓两条 URL、做轮反例搜索 → 回 `[supported, partially_supported]`；Lead 原文落
+- **P3 试点 A 已过**（真模型，2026-11-10；**口径修正 2026-11-10 晚**）：复用已交付 bundle 副本
+  `drt_claim-pilot`（2 条 critical claim），Lead 派 1 个 `agent_preset=critic` child（session `394f8a00…`，
+  depth 1），读两张证据卡、重抓两条 URL、做轮反例搜索 → 回 `[supported, partially_supported]`；Lead 原文落
   `review/verdicts-r1.json`，未写 review.md。`verdict-audit --require` 在**真实会话**上 PASS
   （覆盖 2/2，`not-verbatim`/`session-preset`/`session-depth`/`verifier-wrote` 全过——这一条同时补上了
   「dev home 无真实 child 会话」的现场空白；唯一警告 = `review-missing`，因试点故意不写 review.md）。
+  **口径修正**：当时运行通道的 profile 镜像仍是 P1 前的——child 的 `skill(claim-verdict)` 返回
+  `unknown`，它改从 pack 路径 `read` 了 `presets/critic/skills/claim-verdict/SKILL.md` 再按契约回话。
+  所以 P3 证的是「prompt + 文件读契约能产出 typed JSON」，**不证 skill 真挂载**；同日晚 `boot-run
+  --drift-only` 证实 manual、claims/verdicts 模板、claim-verdict skill、critic persona 都不在镜像里。
+  P4 先重建 profile，才在真挂载面上跑。
 - **P4 前置（2026-11-10 补：测试资产与交付门风险）**：
   - **BUG-046 已修**（独立 bug 卡）：手册固定形态 `## readiness（终局）: PASS|FAIL` 此前被
     `terminalVerdictLine` 读成 null（真实 review 靠另一条裸 `readiness: PASS` 才过）。解析器增
     判定词后可选短括号段（≤8 字），未动手册与 snapshot；先红 2 例 → 绿 18/18。卡 =
-    [BUG-046](../_archived/fixed_bugs/BUG-046-readiness-parenthetical-unparsed.md)。
+    [BUG-046](../fixed_bugs/BUG-046-readiness-parenthetical-unparsed.md)。
   - **真实 child 日志夹具已落**：Pilot A 的 child `394f8a00…` 脱敏切面 + 真实 bundle 三件 →
     `tests/fixtures/verdict-audit/pilot-a/`（约 92 KB）；消费测试
     `tests/run/verdict-audit-fixture.test.mjs` 走 `findSessionDir → resolveSessionLog →
     parseSessionFacts → auditClaimVerdicts` 全链（绿 + 三条派生红：改 header preset / 追加 write /
     改 child 正文）。`parseSessionFacts` 从 CLI 抽到 core，补上验收 6 此前“注入对象、不过日志读取”的空档。
-    红先：把 core 的 `preset` 读取改坏 → 该文件 2 红，还原 → 5/5 绿。全量 `pnpm test` **1107/1107**、
+    红先：把 core 的 `preset` 读取改坏 → 该文件 2 红，还原 → 5/5 绿。全量 `pnpm test` **1107/1107**（收尾 1111/1111）、
     `pnpm verify` 全绿、`run-accept-smoke` ALL PASS。
-- **剩**：P4 试点 B（真 run，需用户在场走 HITL1/HITL2）→ P5 收尾（D44 / implemented Note / 卡归档 / 研究题去向）。
+- **P4 试点 B 已过**（真 run，2026-11-11 01:10）：`drt_api-context-caching-ds-openai`（DeepSeek vs OpenAI
+  上下文缓存；非 quick_factual；epoch 2026-11-11 → **覆盖强制 = 是**）。15 条 claims（14 critical）；
+  r1 = 4 批 / 15 裁决（critic child `35c5ad48` / `970ace67` / `00e94a8c` / `a7ccaa83`），r2 = 5 批 / 16 裁决
+  （`5d715513` / `6a660701` / `25da6b4e` / `fec5c8ff` / `dd7cd101`），覆盖 14/14；`verdict-audit` PASS
+  （唯一黄警 = C13/C14 同轮补批 duplicate，均结论性）。报告级审查 R1 FAIL（3 CRITICAL/12 MAJOR）→
+  R2 PASS（r2 只覆盖 10/14，作废）→ R3 FAIL（1 CRITICAL：绝对否定「官方没有一句存储免费」被官方
+  2024-08-02 页反证）→ R4 PASS（仅验修复）。HITL2 三行数字 = L2 / 14/14（supported 6 + partial 8，
+  UNVERIFIED 0）/ 重抓 44 条 · 去重 17 URL；由操作侧代理代答「定稿」，§Decisions + provenance 标代理模拟。
+  `run-accept`：node-gate / evidence-audit（CRITICAL 0 / MAJOR 4）/ verdict-audit / path-hygiene /
+  secret-scan 全 PASS；`delivered.json` + `acceptance.md` 落盘；final v1 sha256 = `afd29aee…`。
+- **中段门禁抓到的四件事（都已修）**：① C3/C5 claim 非 final 逐字 → Lead 改；② Lead 改写 raw/reason、
+  丢 C4 → 按 child 原文重抄四批；③ child 输出带 ```json 围栏 → `parseRawVerdicts` 只剥一层围栏解析
+  （`not-verbatim` 仍按原文；commit `b33ef1e`，红先 2 例 → 32/32）；④ r2 只覆盖 10/14 → 补 1 批
+  C1/C3/C7/C9；HITL2 曾写「14/14」空话 → 打回「改说法」后重发，最终带三行真实数字。
+- **P5 收尾已落**：D44 登记（[decisions.md](../../../docs/decisions.md#d44)）、
+  [implemented Note](../../../notes/implemented/2026-11-10-claim-verdict-quality-loop.md)、本卡归档、
+  issues README 移行；研究题页的「产出的卡」指针同步改到归档路径。
 - **顺带发现（已修，BUG-046）**：手册写「`review.md` 末尾固定 `## readiness（终局）: PASS|FAIL`」，
   但门禁的 `readinessOf` 解析不了这个括号形态——真实 review 能过是因为别处另有一行裸 `readiness: PASS`。
   2026-11-10 用户拍板修解析器（不动手册/snapshot），卡 =
-  [BUG-046](../_archived/fixed_bugs/BUG-046-readiness-parenthetical-unparsed.md)。
+  [BUG-046](../fixed_bugs/BUG-046-readiness-parenthetical-unparsed.md)。
+
+## 验收结果（2026-11-11）
+
+| # | 判据 | 结果 |
+|---|---|---|
+| 1 | 工件契约在场 | ✓ 手册两处 + `claim-verdict` skill + 两份写者模板；字段与 core 解析键由测试钉死 |
+| 2 | critic claim 模式 | ✓ skill 挂载（P4 重建 profile 后）；persona 排斥句；adversarial-review 三线不变 |
+| 3 | lead 派工纪律 | ✓ persona 写死 3–5 条/批 + 等 notice；team-assembly 通道行在场 |
+| 4 | 门禁实现 | ✓ 契约 §5 检查（本卡口径：claims 无 `round`、哈希只在报告）+ 0/1/2 退出码 + `--write` 报告 |
+| 5 | 反证（先红后绿） | ✓ P0 五条红配方各红一次；BUG-046 / 围栏各先红再绿；P4 中段现场再证红 |
+| 6 | keyless 回归 | ✓ `verdict-audit.test` 32 例 + 真实 child 日志夹具 5 例（含三条派生红） |
+| 7 | 接入验收 | ✓ `run-accept` 第三道门；缺 claims/覆盖缺口红；旧 bundle / quick_factual 豁免 |
+| 8 | 试点 A | ✓ child `394f8a00…` depth 1 / preset critic / typed JSON / 无写盘 / 门禁绿；口径修正见上 |
+| 9 | 试点 B | ✓ `drt_api-context-caching-ds-openai` 全链绿；HITL2 三行数字；证据进 Note，不进 CI |
+| 10 | 文档与账 | ✓ scripts/README / evaluation ⑤ / design 20、30 / D44 / Note / 卡归档 |
 
 ## 验收标准
 
