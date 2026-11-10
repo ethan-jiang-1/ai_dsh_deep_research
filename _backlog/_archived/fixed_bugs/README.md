@@ -51,3 +51,4 @@
 | [BUG-043](BUG-043-graph-unmapped-task-shows-unexecuted.md) | 图谱把「未映射 task_id」误报成「未执行」：映射折算抽 `graph-model`（五态含 stale/duplicate/plan-only）+ 覆盖率行 + 投影未就绪门；判据修正（client-load 负例不可达 → 覆盖率行 + 盘侧节点数对账） | 2026-10-23 |
 | [BUG-045](BUG-045-client-load-graph-assert-flakes-on-stream-drop.md) | client-load 图谱断言在 journal 流瞬断时红（图面把读失败渲染成未绑定） | （`followError` 独立文案 + 有界重试 3×2s；冒烟覆盖率断言改 12s 轮询并带失败标记；design/40 §6 立「失败态与空态必须可分」） | 2026-10-28 |
 | [BUG-044](BUG-044-delivery-receipts-leak-absolute-paths.md) | 交付回执写入本机绝对路径（path-hygiene 在写回执之前跑） | （`portableBundlePath` 归一 present + 写前文本校验 + 落盘后复检 + `--repair`；现网真 bundle 两次 `run-accept` 绿、`path-hygiene` 干净） | 2026-10-27 |
+| [BUG-046](BUG-046-readiness-parenthetical-unparsed.md) | 手册的 `## readiness（终局）` 形态门禁读不出，终局 PASS 被读成未判定 | （`VERDICT_LINE`/`EMPTY_TEMPLATE` 增判定词后短括号段 ≤8 字；红先 2 例 → 18/18；未动手册/snapshot） | 2026-11-10 |

@@ -157,6 +157,44 @@ export function parseVerdicts(text) {
   return { value: { round: value.round, batches, verdicts }, problems }
 }
 
+/**
+ * 会话日志文本 → child 会话事实（durable header 为准）：preset / depth / parentSession / 助手正文 / 工具名。
+ *
+ * 为什么在这里：`session-preset` / `session-depth` / `not-verbatim` / `verifier-wrote` 四条判据读的是
+ * 真实的 DSH v4 会话日志，而不是调用方手搓的对象。CLI 壳只负责定位文件和解压（fs + zstd），
+ * 解析留在这里，tests 才能用**真实日志夹具**直测（2026-11-10 补：此前解析内联在 CLI 里，
+ * keyless 用例只注入对象，日志线形漂移无人咬）。
+ *
+ * 失败形：坏行跳过、缺字段给 null（不猜）；同一 child 被续跑时保留**每一轮**助手正文，
+ * 供跨轮单调向后比对。本函数无 fs / 无子进程。
+ * @param {string} text 会话日志全文（`.jsonl` 行式；zstd 解压由调用方做）。
+ */
+export function parseSessionFacts(text) {
+  let preset = null
+  let depth = null
+  let parentSession = null
+  const assistantTexts = []
+  const toolNames = []
+  for (const line of String(text ?? '').split('\n')) {
+    if (line.trim() === '') continue
+    let event
+    try { event = JSON.parse(line) } catch { continue }
+    if (event.type === 'session') {
+      preset = event.agentPreset ?? null
+      depth = typeof event.delegationDepth === 'number' ? event.delegationDepth : null
+      parentSession = event.parentSession ?? null
+    } else if (event.type === 'assistant/message') {
+      const content = event.data?.message?.content
+      if (!Array.isArray(content)) continue
+      const said = content.filter((block) => block?.type === 'text').map((block) => block.text).join('\n')
+      if (said.trim() !== '') assistantTexts.push(said)
+    } else if (event.type === 'tool/call') {
+      if (typeof event.data?.name === 'string') toolNames.push(event.data.name)
+    }
+  }
+  return { preset, depth, parentSession, assistantTexts, toolNames }
+}
+
 /** `raw` 里一条裁决的投影（只取受核字段；用于与文件里的 verdicts 比对）。 */
 const projectRawVerdict = (item) => ({
   claim_id: item?.claim_id,

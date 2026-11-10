@@ -29,6 +29,7 @@
 | 加粗 / 反引号包裹 | ``**`readiness: PASS` 维持不变…**``（cn-agentic-parity）· ``**`readiness: PASS`** —— …``（zhipu） |
 | 短标签（≤10 字 + 冒号） | `**⇒ 复核结论：\`readiness: PASS\`**`（cn-us-open-source）· `**第 2 轮结论**：**\`readiness: PASS\`**`（open-llm） |
 | 值后缀 | `（最终）` / `（可带风险交付）` / `（维持）` / `—— …` |
+| 判定词后的短括号标签 | `## readiness（终局）: PASS`（手册固定形态；2026-11-10 BUG-046） |
 
 **边界同时收紧为可陈述的负例**（装饰前缀有**形状上限**：短标签至多 1 枚、标题文字至多 1 段）：
 
@@ -39,11 +40,14 @@
   标题文字原子（≤9 字 + 空白）；
 - **标题散文堆叠 / 标签链不夺权**：`## 第二轮 复审 结论 说明 readiness: PASS` 与 `## 一审：二审：readiness: PASS`
   都被形状上限挡住——否则"标题里提过 readiness"会整体夺权。
+- **括号标签有形状上限**：`readiness（终局）` / `readiness(最终)` 认（≤8 字）；>8 字的长标签不认，
+  空模板 `readiness（终局）: PASS | FAIL` 仍按未判定处理。
 
 放宽的是"读得出"，不是"放得过"：判定值仍只有 PASS/FAIL 两态、仍取最后一条；`fetchedOk`/门A 等下游
-档位不受影响。实施 = 本 Note 同 diff 两侧（pack 纯函数 + node-gate `.mjs` 镜像）。
+档位不受影响。实施 = 本 Note 同 diff（pack 纯函数；门禁 `readinessOf` 直接委托 `terminalVerdictLine`，
+BUG-040 后不再有第二份 mirror）。
 
-消费方：驾驶舱 `ResearchStatusTab.tsx`、真浏览器冒烟 `scripts/smoke/client-load-smoke.mjs`、`scripts/lib/run-dashboard-core.mjs` 直接调用本函数；node-gate 在独立纯 `.mjs` 判据边界镜像同一行规则，并由 `gateBundle` 测试覆盖。
+消费方：驾驶舱 `ResearchStatusTab.tsx`、真浏览器冒烟 `scripts/smoke/client-load-smoke.mjs`、`scripts/lib/run-dashboard-core.mjs` 直接调用本函数；node-gate 的 `readinessOf` 委托同一 `terminalVerdictLine`，只额外保留附条件语义，由 `gateBundle` 测试覆盖。
 
 交付门也使用终局 readiness：HITL2 的前置必须是 review.md 最后一条有效行首判定为 PASS，历史轮次中的 PASS 不能越过后续 FAIL。node-gate 仍单独提取终局行的附条件标记作为 WARN，不把条件裁决权交给机械门禁。
 
@@ -66,6 +70,9 @@
   正是历史轮次标题。
 - **把 `null` 一律当 FAIL 处理**（省掉放宽）：把"没读到判定"与"判定失败"混为一谈，交付门会误红
   尚未审查的场次（观察面同样失真）——量具的诚实读数必须是三态。
+- **改手册去掉括号（让模型只写裸 `## readiness:`）**（2026-11-10 BUG-046 时再议）：手册是四个角色
+  共用的 runtime context，改一字就要真模型重录四个 snapshot；括号形态本身无歧义（行首、判定词后
+  ≤8 字），在解析器侧窄放宽更便宜，也不动模型可见文本。
 
 ## 实际跑过的验证
 
@@ -97,3 +104,13 @@
   ②把装饰前缀的**形状上限**放开（`MAX_LABELS`/`MAX_HEADING_CHUNKS` → 99）→ "标题散文堆叠/标签链不夺权"
   断言红（这两条负例是形状上限的可执行证明，不是装饰性断言）。
 - L0：`pnpm verify` 全绿；pack 客户端产物重建（`pnpm --filter … build`，`lib/client.js` 非 tracked）。
+
+## 括号形态轮的验证（2026-11-10，BUG-046）
+
+- **先红**：`tests/run/review-readiness.test.mjs` 先写两条 BUG-046 用例（括号 PASS/FAIL、空模板/行内/
+  超长标签负例）→ 修复前 **2 红**（`null !== 'PASS'`）；`readinessOf('## readiness（终局）: PASS')`
+  修复前 = `{ pass: false }`。
+- **后绿**：解析器增可选的判定词后短括号段（≤8 字、不含 `|`/换行）→ 该文件 **18/18 绿**；
+  跨实现一致表补三种括号形态（PASS/FAIL/空模板），`readinessOf` 与 `terminalReadiness` 同判。
+- **红配方**：删掉 `VERDICT_LINE`/`EMPTY_TEMPLATE` 的括号段 → 两条 BUG-046 用例回到 2 红（修复前实测）。
+- 不动手册与 snapshot；`pnpm verify` + `pnpm test` 收尾见 BUG-046 卡。

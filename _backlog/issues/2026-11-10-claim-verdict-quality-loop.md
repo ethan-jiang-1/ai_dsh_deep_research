@@ -99,10 +99,23 @@ lead persona ≤3 句 + `team-assembly` 表一行。
   `review/verdicts-r1.json`，未写 review.md。`verdict-audit --require` 在**真实会话**上 PASS
   （覆盖 2/2，`not-verbatim`/`session-preset`/`session-depth`/`verifier-wrote` 全过——这一条同时补上了
   「dev home 无真实 child 会话」的现场空白；唯一警告 = `review-missing`，因试点故意不写 review.md）。
+- **P4 前置（2026-11-10 补：测试资产与交付门风险）**：
+  - **BUG-046 已修**（独立 bug 卡）：手册固定形态 `## readiness（终局）: PASS|FAIL` 此前被
+    `terminalVerdictLine` 读成 null（真实 review 靠另一条裸 `readiness: PASS` 才过）。解析器增
+    判定词后可选短括号段（≤8 字），未动手册与 snapshot；先红 2 例 → 绿 18/18。卡 =
+    [BUG-046](../_archived/fixed_bugs/BUG-046-readiness-parenthetical-unparsed.md)。
+  - **真实 child 日志夹具已落**：Pilot A 的 child `394f8a00…` 脱敏切面 + 真实 bundle 三件 →
+    `tests/fixtures/verdict-audit/pilot-a/`（约 92 KB）；消费测试
+    `tests/run/verdict-audit-fixture.test.mjs` 走 `findSessionDir → resolveSessionLog →
+    parseSessionFacts → auditClaimVerdicts` 全链（绿 + 三条派生红：改 header preset / 追加 write /
+    改 child 正文）。`parseSessionFacts` 从 CLI 抽到 core，补上验收 6 此前“注入对象、不过日志读取”的空档。
+    红先：把 core 的 `preset` 读取改坏 → 该文件 2 红，还原 → 5/5 绿。全量 `pnpm test` **1107/1107**、
+    `pnpm verify` 全绿、`run-accept-smoke` ALL PASS。
 - **剩**：P4 试点 B（真 run，需用户在场走 HITL1/HITL2）→ P5 收尾（D44 / implemented Note / 卡归档 / 研究题去向）。
-- **顺带发现（不在本卡范围）**：手册写「`review.md` 末尾固定 `## readiness（终局）: PASS|FAIL`」，
+- **顺带发现（已修，BUG-046）**：手册写「`review.md` 末尾固定 `## readiness（终局）: PASS|FAIL`」，
   但门禁的 `readinessOf` 解析不了这个括号形态——真实 review 能过是因为别处另有一行裸 `readiness: PASS`。
-  `verdict-audit` 对此打 `readiness-unparsed` 警告而不静默采信；建议另开 bug 卡修手册或解析器。
+  2026-11-10 用户拍板修解析器（不动手册/snapshot），卡 =
+  [BUG-046](../_archived/fixed_bugs/BUG-046-readiness-parenthetical-unparsed.md)。
 
 ## 验收标准
 

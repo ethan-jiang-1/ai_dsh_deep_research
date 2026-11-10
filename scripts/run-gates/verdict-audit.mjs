@@ -22,7 +22,7 @@ import { fileURLToPath } from 'node:url'
 import { finalVersionsIn } from '../lib/final-version.mjs'
 import { epochDateOf, runType } from '../lib/schema-scan-core.mjs'
 import { findSessionDir, resolveSessionLog } from '../lib/session-log.mjs'
-import { auditClaimVerdicts, CLAIMS_CONTRACT_DATE, parseClaims, parseVerdicts } from '../lib/verdict-audit-core.mjs'
+import { auditClaimVerdicts, CLAIMS_CONTRACT_DATE, parseClaims, parseSessionFacts, parseVerdicts } from '../lib/verdict-audit-core.mjs'
 import { readZstdText } from '../lib/zstd-read.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -40,7 +40,7 @@ function readLog(path) {
   return r.text
 }
 
-/** 会话事实（durable header 为准）：preset / depth / parentSession / 助手正文 / 调过的工具名。 */
+/** 会话事实：定位 + 解压（fs/zstd 归壳），解析归 lib（tests 用真实日志夹具直测）。 */
 function sessionFacts(sessionsRoot, sessionId) {
   const dir = findSessionDir(sessionsRoot, sessionId)
   if (dir === null) return undefined
@@ -48,30 +48,7 @@ function sessionFacts(sessionsRoot, sessionId) {
   if (logPath === null) return undefined
   const text = readLog(logPath)
   if (text === null) return undefined
-  let preset = null
-  let depth = null
-  let parentSession = null
-  const assistantTexts = []
-  const toolNames = []
-  for (const line of text.split('\n')) {
-    if (line.trim() === '') continue
-    let event
-    try { event = JSON.parse(line) } catch { continue }
-    if (event.type === 'session') {
-      preset = event.agentPreset ?? null
-      depth = typeof event.delegationDepth === 'number' ? event.delegationDepth : null
-      parentSession = event.parentSession ?? null
-    } else if (event.type === 'assistant/message') {
-      const content = event.data?.message?.content
-      if (!Array.isArray(content)) continue
-      // 同一 child 可被续跑（复验）：保留每一轮助手正文——原文一致要能在**某一轮**命中且跨轮单调。
-      const said = content.filter((block) => block?.type === 'text').map((block) => block.text).join('\n')
-      if (said.trim() !== '') assistantTexts.push(said)
-    } else if (event.type === 'tool/call') {
-      if (typeof event.data?.name === 'string') toolNames.push(event.data.name)
-    }
-  }
-  return { preset, depth, parentSession, assistantTexts, toolNames }
+  return parseSessionFacts(text)
 }
 
 /** `review/verdicts-r<N>.json` 枚举（按 N 升序）；无名/不合规的文件不管（它们不是本契约工件）。 */

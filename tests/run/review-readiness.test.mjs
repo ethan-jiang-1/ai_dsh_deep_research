@@ -136,6 +136,27 @@ test('终局判定（窄放宽）：不夺权负例逐条钉住（真实语料 +
   assert.equal(terminalReadiness('> **`readiness: PASS | FAIL`**\n'), null, '装饰后的空模板仍是空模板');
 });
 
+// 负例留证 2026-11-10：BUG-046（手册固定形态 `## readiness（终局）: PASS|FAIL` 的括号写在判定词后，
+//   旧 VERDICT_LINE 只认 `readiness` 后直接冒号 → 读成 null；真实 review 靠文中另一条裸
+//   `readiness: PASS` 才过门）。红配方：删掉 VERDICT_LINE/EMPTY_TEMPLATE 的括号段 → 下方两例红。
+test('终局判定（BUG-046）：判定词后的短括号标签（手册形态 `## readiness（终局）`）读得出', () => {
+  assert.equal(terminalReadiness('## readiness（终局）: PASS\n'), 'PASS');
+  assert.equal(terminalReadiness('readiness（终局）：FAIL\n'), 'FAIL');
+  assert.equal(terminalReadiness('## readiness(最终): **PASS**（零 CRITICAL）\n'), 'PASS');
+  assert.equal(readinessOf('## readiness（终局）: PASS\n').pass, true);
+});
+
+test('终局判定（BUG-046）：括号形态的空模板 / 行内提及 / 超长标签不夺权', () => {
+  // 空模板两词并存 = 未判定（与裸形态同一语义）
+  assert.equal(terminalReadiness('## readiness（终局）: PASS | FAIL\n'), null);
+  // 行内提及（prose 中段）仍不夺权
+  assert.equal(terminalReadiness('本文的 readiness（终局）: PASS 不是判定\n'), null);
+  // 括号标签有形状上限（>8 字不认）——否则"任意标签 + 判定词"都能夺权
+  assert.equal(terminalReadiness('## readiness（这一整段标签太长不该被认作判定）: PASS\n'), null);
+  // 末位为准不变
+  assert.equal(terminalReadiness('## readiness（终局）: FAIL\n\n## readiness（终局）: PASS\n'), 'PASS');
+});
+
 // 负例留证 2026-10-18：BUG-040（终局 readiness 两版实现漂移：pack 加了轮次仲裁、门的 readinessOf 未跟随，
 //   同一 bundle 一处判 PASS、一处判 FAIL）。红配方：把 readinessOf 改回自带的"最后一条胜"循环
 //   （或删掉它对 terminalVerdictLine 的委托）→ 下方 AB 两例红。
@@ -145,6 +166,9 @@ test('跨实现一致（BUG-040）：门 readinessOf.pass 必须等于 pack 终�
     ['# 第 2 轮（复审）—— readiness: **PASS**', '', '---', '', '## 第 1 轮 readiness: FAIL', ''].join('\n'),
     '## readiness: FAIL',
     '## readiness: PASS（附条件：补两条来源后放行）',
+    '## readiness（终局）: PASS',
+    '## readiness（终局）: FAIL',
+    '## readiness（终局）: PASS | FAIL',
     ['- **第 1 轮**：`readiness: FAIL`（血统）', '', '## readiness: PASS', ''].join('\n'),
     '没有任何判定行',
   ];

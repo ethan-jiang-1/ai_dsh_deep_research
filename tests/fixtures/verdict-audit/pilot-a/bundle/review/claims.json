@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "finalRef": 1,
+  "claims": [
+    {
+      "id": "C1",
+      "text": "截至 2026 年 11 月 1 日（抓取当刻），联合国安全理事会的五个常任理事国是中国、法国、俄罗斯联邦、大不列颠及北爱尔兰联合王国、美利坚合众国。",
+      "critical": true,
+      "topics": [
+        "T1"
+      ],
+      "evidence": [
+        "evidence/un-sc-current-members.md"
+      ],
+      "urls": [
+        "https://www.un.org/securitycouncil/content/current-members"
+      ]
+    },
+    {
+      "id": "C2",
+      "text": "常任席位自 1945 年宪章生效起即为 5 席；1963 年联大决议与 1965 年生效的宪章修正只把非常任理事国从 6 增至 10（安理会总数 11→15），常任 5 席未动。",
+      "critical": true,
+      "topics": [
+        "T1"
+      ],
+      "evidence": [
+        "evidence/un-sc-membership-research-guide.md"
+      ],
+      "urls": [
+        "https://research.un.org/en/unmembers/scmembers"
+      ]
+    }
+  ]
+}

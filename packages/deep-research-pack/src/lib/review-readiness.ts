@@ -4,8 +4,8 @@
  * 为什么存在（2026-10-11，③-a 新断言当场抓出）：终局 readiness 的读法曾在 node-gate、run-dashboard、
  * 客户端和浏览器冒烟间分叉。`drt_deepseek-default-upgrade` 已交付且终局 `readiness: PASS`，但
  * review.md 文末附录按 critic skill 契约保留了首轮 `readiness: FAIL` 血统记录；未锚行首的末位匹配把
- * 历史 FAIL 读成终局，仪表盘/镜像遂报「审查修复中」。node-gate 现遵循同一终局行规则，在纯 .mjs
- * 判据核内本地镜像（不导入 pack TS）；该测试边界见 `tests/node-gate.test.mjs`。
+ * 历史 FAIL 读成终局，仪表盘/镜像遂报「审查修复中」。node-gate 的 `readinessOf` 现直接委托本模块
+ * （BUG-040 后不再有本地 mirror）；门契约的测试边界见 `tests/run/node-gate-delivery.test.mjs`。
  *
  * 本模块把**终局**语义收成一处，规则 = 只认**行首判定行**，取最后一条；正文/附录里的**行内引用**
  * （如「第 1 轮：`readiness: FAIL`」）是历史留痕，不得夺权。空模板 `PASS | FAIL` 两词并存的行按
@@ -19,11 +19,14 @@
  *   · **长前缀历史标题**（`# 复核轮（Round 2，2026-09-27）——**readiness: PASS**`）与**标题散文堆叠 /
  *     标签链**（`## 第二轮 复审 结论 说明 readiness: PASS`）不夺权——装饰前缀有形状上限：短标签至多
  *     1 枚、标题文字至多 1 段（≤9 字 + 空白），散文前缀堆不出来。
+ *   · **判定词后的短括号标签**（`## readiness（终局）: PASS`，手册的固定形态）读得出；括号 ≤8 字且
+ *     不许含 `|`/换行——空模板、超长标签与行内提及仍不夺权（2026-11-10 BUG-046）。
  * 放宽的是"读得出"，不是"放得过"：判定值仍只有 PASS/FAIL 两态，取最后一条。
  *
  * 消费方：驾驶舱 `ResearchStatusTab.tsx`、`scripts/smoke/client-load-smoke.mjs` 与
- * `scripts/lib/run-dashboard-core.mjs` 直接调用本函数；node-gate 在独立的纯 .mjs 边界本地镜像
- * 相同规则，由 `tests/node-gate.test.mjs` 覆盖终局 PASS/FAIL、历史行内引用与空模板。
+ * `scripts/lib/run-dashboard-core.mjs` 直接调用本函数；门禁的 `readinessOf` 直接委托本函数的
+ * `terminalVerdictLine`（BUG-040 后不再有第二份 mirror），由 `tests/run/review-readiness.test.mjs`
+ * 覆盖终局 PASS/FAIL、历史行内引用与空模板。
  */
 
 type Readiness = 'PASS' | 'FAIL'
@@ -71,10 +74,11 @@ function stripVerdictDecor(line: string): string | null {
   return /^readiness\b/i.test(s) ? s : null
 }
 
-/** 判定行：`readiness` + 冒号 + 可选包裹 + 值（大小写不敏感）。 */
-const VERDICT_LINE = /^readiness\s*[:：]\s*(?:\*\*|__|`{1,2})?\s*(PASS|FAIL)\b/i
-/** 空模板 `readiness: PASS | FAIL` 是完整占位行（装饰形态同样豁免）；带额外说明的是判定，不是模板。 */
-const EMPTY_TEMPLATE = /^readiness\s*[:：]\s*(?:\*\*|__|`{1,2})?\s*PASS\s*\|\s*FAIL[\s`*_]*$/i
+/** 判定行：`readiness` + 可选**判定词后的短括号标签**（手册形态 `readiness（终局）:`）+ 冒号 +
+ *  可选包裹 + 值（大小写不敏感）。括号段 ≤8 字、不许含 `|`/换行——行首锚定不变，长标签仍不夺权。 */
+const VERDICT_LINE = /^readiness(?:\s*[（(][^）)\n|]{1,8}[）)])?\s*[:：]\s*(?:\*\*|__|`{1,2})?\s*(PASS|FAIL)\b/i
+/** 空模板 `readiness（终局）: PASS | FAIL` 是完整占位行（装饰形态同样豁免）；带额外说明的是判定，不是模板。 */
+const EMPTY_TEMPLATE = /^readiness(?:\s*[（(][^）)\n|]{1,8}[）)])?\s*[:：]\s*(?:\*\*|__|`{1,2})?\s*PASS\s*\|\s*FAIL[\s`*_]*$/i
 
 /**
  * review.md 文本 → 终局 readiness；无判定行或输入缺席/畸形时返回 `null`（不猜、不 throw）。

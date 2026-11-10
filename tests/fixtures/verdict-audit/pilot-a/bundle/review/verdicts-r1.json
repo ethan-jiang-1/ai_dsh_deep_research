@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "round": 1,
+  "batches": [
+    {
+      "session": "394f8a00-78f9-42bf-8911-58e9c786c8fd",
+      "preset": "critic",
+      "depth": 1,
+      "raw": "[{\"claim_id\":\"C1\",\"verdict\":\"supported\",\"quote\":\"Five permanent members: China, France, Russian Federation, the United Kingdom, and the United States, and ten non-permanent members elected for two-year terms by the General Assembly (with end of term year):\",\"reason\":\"在 2026-11-10 重新抓取并返回 HTTP 200（本地直接抓取报 WEB_PROVIDER_ERROR，改为经 DeepSeek Fetch API 取回内容；这一通道与证据卡已登记的抓取方式一致），重新抓取得到的正文与证据卡摘录逐字相同；页面中英国用的是短式「the United Kingdom」，而非全称「大不列颠及北爱尔兰联合王国」，但两者指同一国家，没有歧义（同一注册域下的指南页写的是全称「United Kingdom of Great Britain and Northern Ireland」）。反例检索使用了「Security Council reform charter amendment permanent seats increase entered into force」和「安理会 常任理事国 扩容 宪章修正 生效」两条查询，检索到的内容只涉及 2005 年前后的扩容方案以及《宪章》第 108 条的批准要求，没有发现任何已经生效的常任席位变更，也没有第六个常任理事国。结论只写到「截至 2026-11-01 抓取时刻」；日期口径由 retrieved_at=2026-11-01 和本次重抓得到的同一正文互相印证。\",\"rechecked_urls\":[\"https://www.un.org/securitycouncil/content/current-members\"],\"source_tier_ok\":true},{\"claim_id\":\"C2\",\"verdict\":\"partially_supported\",\"quote\":\"Originally, there were 11 members of the Security Council: 5 permanent and 6 non-permanent members. In 1963, the General Assembly recommended an amendment to the Charter to increase the membership of the Security Council: […] Entered into force on 31 August 1965 […] Increased membership from 11 to 15 […] Changed the number of affirmative votes required from 7 to 9\",\"reason\":\"在 2026-11-10 重新抓取并返回 HTTP 200，页面逐字给出了 1963 年 12 月 17 日的 A/RES/1991(XVIII)、1965 年 8 月 31 日生效、席位由 11 增至 15，以及「原先 5 个常任和 6 个非常任」这些内容。但有三处需要降级为 partially_supported：(a) 页面没有出现「1945 年宪章生效」这个时点，其成员年表从 1946 年开始，此年份在本卡证据中缺乏依据，需要另引《宪章》生效日期；(b)「非常任从 6 增至 10」是页面两处表述（原先 6、现行 10 个非常任）推算出来的，原文并没有「6→10」这一句；(c) 限定词「只」与该页面自己列出的内容相冲突——同一次修正还把它列的「可决票由 7 增至 9」一并改了（另有 5/1/2/2 的地域分配模式），因此「常任 5 席未动」成立，但「只把非常任增至 10」的范围过窄。反例检索使用了「UN Charter Article 23 amendment 1963 1965 non-permanent members 6 to 10」「UN Charter entered into force 24 October 1945 Security Council 11 members」「Security Council reform charter amendment permanent seats increase entered into force」三条查询，没有发现任何已经生效的常任扩容；搜索结果中 legal.un.org《Repertory》的「increasing the number of non-permanent members … from six to ten」和 1945 年 10 月 24 日生效的信息可以补强 (a)(b)，但它们不是本证据卡里的证据，本次只是读取了搜索片段，没有使用 web_fetch 取回全文。另外，本证据卡的 source_tier 标为 primary，这一标注偏高：该页是联合国图书馆编制的研究指南（带有汇编性质），本应记为 secondary，或者补引宪章条文与 A/RES/1991(XVIII) 原文；分级本身对这条结论仍可用，但标签需要更正。\",\"rechecked_urls\":[\"https://research.un.org/en/unmembers/scmembers\"],\"source_tier_ok\":true}]"
+    }
+  ],
+  "verdicts": [
+    {
+      "claim_id": "C1",
+      "batch": 0,
+      "verdict": "supported",
+      "quote": "Five permanent members: China, France, Russian Federation, the United Kingdom, and the United States, and ten non-permanent members elected for two-year terms by the General Assembly (with end of term year):",
+      "reason": "在 2026-11-10 重新抓取并返回 HTTP 200（本地直接抓取报 WEB_PROVIDER_ERROR，改为经 DeepSeek Fetch API 取回内容；这一通道与证据卡已登记的抓取方式一致），重新抓取得到的正文与证据卡摘录逐字相同；页面中英国用的是短式「the United Kingdom」，而非全称「大不列颠及北爱尔兰联合王国」，但两者指同一国家，没有歧义（同一注册域下的指南页写的是全称「United Kingdom of Great Britain and Northern Ireland」）。反例检索使用了「Security Council reform charter amendment permanent seats increase entered into force」和「安理会 常任理事国 扩容 宪章修正 生效」两条查询，检索到的内容只涉及 2005 年前后的扩容方案以及《宪章》第 108 条的批准要求，没有发现任何已经生效的常任席位变更，也没有第六个常任理事国。结论只写到「截至 2026-11-01 抓取时刻」；日期口径由 retrieved_at=2026-11-01 和本次重抓得到的同一正文互相印证。",
+      "rechecked_urls": ["https://www.un.org/securitycouncil/content/current-members"],
+      "source_tier_ok": true
+    },
+    {
+      "claim_id": "C2",
+      "batch": 0,
+      "verdict": "partially_supported",
+      "quote": "Originally, there were 11 members of the Security Council: 5 permanent and 6 non-permanent members. In 1963, the General Assembly recommended an amendment to the Charter to increase the membership of the Security Council: […] Entered into force on 31 August 1965 […] Increased membership from 11 to 15 […] Changed the number of affirmative votes required from 7 to 9",
+      "reason": "在 2026-11-10 重新抓取并返回 HTTP 200，页面逐字给出了 1963 年 12 月 17 日的 A/RES/1991(XVIII)、1965 年 8 月 31 日生效、席位由 11 增至 15，以及「原先 5 个常任和 6 个非常任」这些内容。但有三处需要降级为 partially_supported：(a) 页面没有出现「1945 年宪章生效」这个时点，其成员年表从 1946 年开始，此年份在本卡证据中缺乏依据，需要另引《宪章》生效日期；(b)「非常任从 6 增至 10」是页面两处表述（原先 6、现行 10 个非常任）推算出来的，原文并没有「6→10」这一句；(c) 限定词「只」与该页面自己列出的内容相冲突——同一次修正还把它列的「可决票由 7 增至 9」一并改了（另有 5/1/2/2 的地域分配模式），因此「常任 5 席未动」成立，但「只把非常任增至 10」的范围过窄。反例检索使用了「UN Charter Article 23 amendment 1963 1965 non-permanent members 6 to 10」「UN Charter entered into force 24 October 1945 Security Council 11 members」「Security Council reform charter amendment permanent seats increase entered into force」三条查询，没有发现任何已经生效的常任扩容；搜索结果中 legal.un.org《Repertory》的「increasing the number of non-permanent members … from six to ten」和 1945 年 10 月 24 日生效的信息可以补强 (a)(b)，但它们不是本证据卡里的证据，本次只是读取了搜索片段，没有使用 web_fetch 取回全文。另外，本证据卡的 source_tier 标为 primary，这一标注偏高：该页是联合国图书馆编制的研究指南（带有汇编性质），本应记为 secondary，或者补引宪章条文与 A/RES/1991(XVIII) 原文；分级本身对这条结论仍可用，但标签需要更正。",
+      "rechecked_urls": ["https://research.un.org/en/unmembers/scmembers"],
+      "source_tier_ok": true
+    }
+  ]
+}
