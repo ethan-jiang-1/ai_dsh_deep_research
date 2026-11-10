@@ -7,7 +7,7 @@ intent: 给出四个研究角色在 subagent / workflow / agent-teams / goal 之
 
 > 性质：机制事实 + 设计建议。事实段带 vendor 源码/文档锚点；建议段标「建议」。
 > 同 pin：`vendor/dsh` = `dsh-v0.2.1-rc.5` @ `b830ec950f`。升 pin 后按
-> [discipline-map](../../../docs/discipline-map.md) 复核。
+> [discipline-map](../../../../docs/discipline-map.md) 复核。
 > **v2 相对 v1 的修正**：① workflow 不是「不能中途停」——可取消，缺的是 pause/resume 与
 > HITL；② team profile 的 `tool-subagent` disable **不覆盖** preset 自己的同名行（源码已定，
 > 不是未核冲突）；③ `maxActiveSubagents` 不是「continuable 子代理池」——它是**每个 root 的

@@ -8,8 +8,9 @@ opened: 2026-11-10
 > 状态：已定性
 > 问题：怎样让「验证」真的独立于「产出」——独立 activation、只读工具面、裁决原文、可机械复核的哈希；以及按 claim 验证还是按报告验证。
 > 消费者：本轮 presets 设计推演（用户 2026-11-10 直派）；落地消费者 = 推进卡（下方「产出的卡」）。
-> 产出的卡：[claim 级独立复核](../../issues/2026-11-10-claim-verdict-quality-loop.md)（待落地，2026-11-10）
+> 产出的卡：[claim 级独立复核](../../../issues/2026-11-10-claim-verdict-quality-loop.md)（待落地，2026-11-10；卡仍活跃，研究结论已消费）
 > 结论：本仓只到 L2 弱形态（critic 是独立会话，但判据是报告级 prose）；最小增量 = claim 表 + typed verdict + 父级原文落盘 + 覆盖门，不新增角色；Lead 无 bash 故哈希归门禁、`subagent` 无 `outputSchema` 故 typed 输出是唯一未证的大假设——已写成两段试点与六条重议条件。详见 [verdict-contract](2026-11-10-verdict-contract.md)。
+> 归档：2026-11-10（结论已被 claim-verdict 卡消费；卡以链接引用本材料，不使其复活）
 
 ## 研究问题（已逐条回答）
 

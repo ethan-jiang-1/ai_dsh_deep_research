@@ -1,18 +1,19 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-10
 ---
 
 # 推敲：编排通道落地——workflow 只做同质 wave 执行器
 
-> 立卡：2026-11-10 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
-> 去向：proposed — `notes/proposed/` 下的 RFC（文件名在成立时定，首提日期 = 2026-11-10）；业务验收：用户
-> 审查：自审 2026-11-10 — 机制锚点逐条核（vendor rc.5）；P1 真挂载绿/红复现并复原；P2–P4 标明源码级、live 待证；P5 实测；`pnpm verify` 全绿、`pnpm test` 1052/1052。业务验收仍归用户。
+> 立卡：2026-11-10 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
+> 去向：implemented — [Note](../../../notes/implemented/2026-11-10-goal-hitl-alignment.md)；业务验收：用户
+> 审查：自审 2026-11-10 — 机制锚点逐条核（vendor rc.5）；P1 真挂载绿/红复现并复原；P2–P4 标明源码级、live 待证；P5 实测；`pnpm verify` 全绿、`pnpm test` 1052/1052。goal 裁决另跑 keyless + L1 + snapshot + l4-lite（见 §2026-11-10 裁决与实施）。
 >
-> **2026-11-10 深挖后分工**：wave 执行切片已由 [wave-execution-lens-fanout](2026-11-10-wave-execution-lens-fanout.md)
+> **2026-11-10 深挖后分工**：wave 执行切片已由 [wave-execution-lens-fanout](../../issues/2026-11-10-wave-execution-lens-fanout.md)
 > 承接；该卡按新事实把挂点从 A（独立 `wave-runner`）改判 **B（analyst 承载）**，并把范围收窄为
-> deep-dive 的 `lens-fanout`。本卡继续持有 channel-policy 记录、8 槽/HITL 约束与 goal pause/resume
-> 缺陷（`GOAL_TOOL_RESUME_PAUSED`），不因新卡关闭。
+> deep-dive 的 `lens-fanout`。本卡的 goal `GOAL_TOOL_RESUME_PAUSED` 缺陷已按
+> [Note](../../../notes/implemented/2026-11-10-goal-hitl-alignment.md) 裁决并落地；channel-policy
+> 记录保留在本卡与研究材料中。
 
 **问题与期望结果：** 当前研究 run 是「Lead 会话 + Team 板 + 少量 subagent」，`workflow` 完全没挂，
 `goal` 只做记账；四个研究角色该把哪类工作交给哪条原语，只靠 persona 散文，没有机制级选型表，
@@ -60,9 +61,10 @@ workflow 的挂点、容量合同、HITL 授权方式与证据/失败合同，�
 5. **跨方向口径**：lens 材料 §7 的「workflow 子代是 Lead 克隆」只在 C 成立；wave-execution 的
    「HITL1 执行方式」与本卡的「计划卡正文点名、选项不动」需要统一成一句。
 
-**下一步：** wave 执行 = [新卡](2026-11-10-wave-execution-lens-fanout.md)（B + `lens-fanout`，按
-P0→P5 落地）；本卡只保留 channel-policy 记录与 goal `GOAL_TOOL_RESUME_PAUSED` 缺陷的裁决。若仍需
-RFC，只覆盖通道政策与 goal 语义，不覆盖 wave 执行实施；RFC 未批准前不动 preset / plan 模板。
+**下一步：** 本卡已结。wave 执行 = [新卡](../../issues/2026-11-10-wave-execution-lens-fanout.md)
+（B + `lens-fanout`，按 P0→P5 落地）；goal `GOAL_TOOL_RESUME_PAUSED` 缺陷 = 已裁决并落地
+（[Note](../../../notes/implemented/2026-11-10-goal-hitl-alignment.md)）。channel-policy 记录留在
+本卡与研究材料，不再单独写 RFC。
 
 ## 已知与未决
 
@@ -70,9 +72,9 @@ RFC，只覆盖通道政策与 goal 语义，不覆盖 wave 执行实施；RFC �
 
 - 通道能力矩阵、深度/容量/失败/观察语义 = [channel-policy v2 §1](../research/orchestration-primitives/2026-11-10-channel-policy.md)。
 - 五个探针的命令、输出、边界与补证清单 = [探针记录](../research/orchestration-primitives/2026-11-10-channel-probes.md)。
-- 当前 pack 的工具面与 team 组合 = [D16](../../docs/decisions.md#d16)、
-  [10-architecture §3](../../docs/design/10-architecture.md)、
-  [team-assembly](../../packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md)。
+- 当前 pack 的工具面与 team 组合 = [D16](../../../docs/decisions.md#d16)、
+  [10-architecture §3](../../../docs/design/10-architecture.md)、
+  [team-assembly](../../../packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md)。
 - workflow 政策句原文 = `vendor/dsh/packages/workflow/tool-workflow/src/index.ts:326-330`；
   计划卡口径 = `scripts/lib/plan-card.mjs`（200 字，WARN）。
 
@@ -110,7 +112,27 @@ Team/subagent；child 需要拍板 → 写 gap，wave 结束后由 Lead 统一�
 不改两点交互；不新增调度器；不改 vendor。若 RFC 选择 A，新增 preset 属于 pack 公共行为，须在
 RFC 里单列并请用户批准。
 
+## 2026-11-10 裁决与实施（goal pause/resume）
+
+**裁决：不 pause/resume。** HITL1（goal 之前）用默认 600s timed；HITL2 用 `ask_user_question`
+的 `timeout: -1` 保持开放回合，goal 从创建到交付保持 active；模型不 pause（无人工回合时
+`requireDirectHuman` 拒绝）、不 resume durable paused（`GOAL_TOOL_RESUME_PAUSED`）；会话恢复后
+active-but-disarmed 由用户「继续」触发 `resume` rearm。**输掉的方案**：保留 pause/resume、只在
+pending 时 pause、host 插件自动 resume、去掉 goal、HITL1 也 `-1`——逐条理由与机制锚点 = Note。
+
+**验证（实际跑过）**：`tests/pack/presets.test.mjs` 先红（新契约 1 fail）→ 改 persona 后 18/18
+绿；`pnpm verify` 全绿；`pnpm test` 1083 pass；L1 `preset-smoke` 5/5 真挂载 ALL PASS；
+snapshot lead persona 先红 → 重录 + source 更新 → 4 场景 ALL PASS（C5 一行金标准人审重写）；
+`l4-lite-smoke` 全角色 ALL PASS。**未跑**：真实 HITL2 run；模型是否遵守 `timeout:-1` 只有
+prompt 级证据，由 [新卡](../../issues/2026-11-10-wave-execution-lens-fanout.md) P4 补。
+
+**去向**：[Note](../../../notes/implemented/2026-11-10-goal-hitl-alignment.md)。
+
 ## 验收标准
+
+> 以下为立项时的 RFC/通道政策验收标准，**已由 §2026-11-10 裁决与实施取代**，保留为历史；
+> 现行 wave 执行验收 = [新卡](../../issues/2026-11-10-wave-execution-lens-fanout.md) A1–A12，
+> goal 裁决证据 = [Note](../../../notes/implemented/2026-11-10-goal-hitl-alignment.md)。
 
 本卡交付的是 **RFC + 探针证据**，不是实现。RFC 成立时，以下逐条可核：
 
@@ -133,6 +155,6 @@ RFC 里单列并请用户批准。
 
 ## 关闭条件
 
-- RFC 成立并链接在本卡 `去向`；本卡按 `proposed` 归档（卡已结 ≠ RFC 批准）。
-- RFC 被用户否决 → 本卡回 `推敲中`，按否决理由改 A/B/C 后重提；不静默归档。
-- 实施与试点不在本卡：RFC 批准后另开实施卡/试点卡；本卡不冒充交付验收。
+- 本卡按 `implemented` 归档：goal 裁决 + Note 同变更；wave 执行验收归新卡；不再单独写 RFC。
+- 业务验收：用户「依次解决」授权；残余 HITL2 真 run 证据由新卡 P4 承担。
+- 旧验收标准（RFC）保留为历史，不冒充交付验收。

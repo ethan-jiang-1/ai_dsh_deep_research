@@ -15,6 +15,11 @@
 | [plugin-as-product/](plugin-as-product/README.md) · 插件即产品：独立启动 profile、用户工作区与 run bundle 归属 | 11 份 | [插件即产品决策卡](../settled_issues/2026-11-01-plugin-as-product.md) 及四张子卡 | [父卡](../settled_issues/2026-11-01-plugin-as-product.md)、[D38](../../../docs/decisions.md#d38)、[Note](../../../notes/archived/2026-11-01-plugin-as-product.md) | 2026-11-01 |
 | 名头 | 材料 | 历史消费者 | 产出的卡 | 归档 |
 |---|---|---|---|---|
+| [research-shelf/](research-shelf/README.md) · 研究货架：题名、材料、留痕的组织判据 | 2 份 | 本轮研究自身的组织（用户 2026-11-10 直派） | —（元方向：结论直接改目录与索引，不转卡） | 2026-11-10 |
+| [lens-abstraction/](lens-abstraction/README.md) · 研究视角层：把 bias / 视角做成证据面数据 | 2 份 | 本轮 presets 设计推演（用户 2026-11-10 直派） | [lens 数据层卡](../settled_issues/2026-11-10-lens-layer.md)、[D43](../../../docs/decisions.md#d43) | 2026-11-10 |
+| [quality-loop/](quality-loop/README.md) · 产出/验证分离：独立复核与裁决留痕 | 2 份 | 本轮 presets 设计推演（用户 2026-11-10 直派） | [claim 级独立复核卡](../../issues/2026-11-10-claim-verdict-quality-loop.md)（待落地） | 2026-11-10 |
+| [wave-execution/](wave-execution/README.md) · Wave 执行：把计划图编译成可跑工作流 | 2 份 | 本轮 presets 设计推演（用户 2026-11-10 直派） | [lens 扇出落地卡](../../issues/2026-11-10-wave-execution-lens-fanout.md)（待落地） | 2026-11-10 |
+| [orchestration-primitives/](orchestration-primitives/README.md) · 编排原语：谁执行、谁记忆、谁推进 | 2 份 | 本轮 presets 设计推演（用户 2026-11-10 直派） | [workflow wave 执行器卡](../settled_issues/2026-11-10-workflow-wave-executor.md)（已结） | 2026-11-10 |
 | [plugin-as-product-v2/](plugin-as-product-v2/README.md) · 插件即产品 v2：产品 profile、启动期工作区、内容/产物分家 | 7 份 | [插件即产品 v2 决策卡](../settled_issues/2026-11-01-plugin-as-product-v2.md) | [D40](../../../docs/decisions.md#d40)、[Note](../../../notes/implemented/2026-11-01-plugin-as-product-v2.md) | 2026-11-02 |
 | [plugin-lifecycle/](plugin-lifecycle/README.md) · 插件生命周期合规：打包/发布/安装/文档与市场对账 | 3 份 | [插件生命周期合规卡](../settled_issues/2026-11-01-plugin-lifecycle-conformance.md) | [Note](../../../notes/implemented/2026-11-01-plugin-lifecycle-conformance.md) | 2026-11-02 |
 | [method-library-cocreation/](method-library-cocreation/README.md) · 方法库页内共创与工作台重排 | 9 篇 + `ux/` | [2026-10-28 共创](../settled_issues/2026-10-28-method-library-cocreation.md) | [2026-10-29 工作台重排](../settled_issues/2026-10-29-method-library-workbench-redesign.md)、[Note](../../../notes/implemented/2026-10-29-method-library-workbench.md) | 2026-10-30 |

@@ -119,6 +119,9 @@ status——材料的状态就是题的状态。
 - **verdict**：claim 级结论 `supported|partially_supported|unsupported|unverifiable`；`unverifiable` 聚合为 `UNVERIFIED`，**不算 PASS 覆盖**。
 - **UNVERIFIED**：第三态，不是 PASS 也不是 FAIL；永不静默放行。
 - **两轴**：题型（P1–P8）决定深度/编制；lens 决定来源/核实/写作/不承诺。两者正交。
+- **style（第四遍提议，未拍板）**：命名 Protocol + 验收合同（promise / means / acceptance / not_for），
+  不是与题型/lens 并列的第三轴；新增 style = 新 catalog 条目 + 复用/新增 acceptance profile。见
+  [external-landscape 第四遍](external-landscape/2026-11-10-landscape-style-space.md)。
 - **四槽 + 实例**：人（preset）/ 流程（wave+handoff）/ 方法（lens）/ 政策（证据门槛、HITL）；实例 = 这次 run 的 question/topics。
 - **method-library vs lens 目录**：method-library = 用户对**整场方法**的偏好（四字段，workspace，人所有）；lens 目录 = 出厂**证据面**集（pack content，只读）。**同名条目不覆盖 lens**（v2 撤销 v1 的覆盖规则）；单场自定义视角写 `topics.md` 的 `custom:<名>`，重复 ≥2 run 才评估出厂化/工作区覆盖。
 - **HITL1 的「执行方式」**：仍在 HITL1 内，不新增交互点；它是 workflow「explicit ask」的授权点。
@@ -145,10 +148,10 @@ status——材料的状态就是题的状态。
 
 ### 6. 外部证据入口
 
-- 三遍 landscape：[第一遍](external-landscape/2026-11-10-landscape-first-pass.md) / [第二遍](external-landscape/2026-11-10-landscape-second-pass.md) / [第三遍·偏好层](external-landscape/2026-11-10-landscape-preference-layer.md)。
-- 最强证据：Anthropic 90.2% / 15× / prescriptive roles 无大差别（不是「inert」——原文是 did not make much difference）；STORM unique refs 99.83→54.36；self-critique 16→2；judge self-preference 59.3% vs 18%；FACT 78–90% citation accuracy；LangGraph brief string + max+1；Google roles→steps；GPTR 2026 +89%（厂商自报）。偏好层新增：偏好遵循在 10 轮 / ~3k token 跌破 10%；Mem0 3.55 < 无记忆 3.69 < 显式 persona 4.58；定向澄清 2.81 问优于 4.90 问、0–1 问无收益；个性化 6.64–6.78 与事实准确率 3.77 vs 商业化 8.40 存在 trade-off；11 产品 + 8 开源项目无 bias/perspective 控件；一次性研究计划批准门在消费级极稀有（Gemini 是例外）；DeerFlow 2.x 是唯一 token 硬停。
+- 四遍 landscape：[第一遍](external-landscape/2026-11-10-landscape-first-pass.md) / [第二遍](external-landscape/2026-11-10-landscape-second-pass.md) / [第三遍·偏好层](external-landscape/2026-11-10-landscape-preference-layer.md)；[第四遍·style 空间](external-landscape/2026-11-10-landscape-style-space.md)。
+- 最强证据：Anthropic 90.2% / 15× / prescriptive roles 无大差别（不是「inert」——原文是 did not make much difference）；STORM unique refs 99.83→54.36；self-critique 16→2；judge self-preference 59.3% vs 18%；FACT 78–90% citation accuracy；LangGraph brief string + max+1；Google roles→steps；GPTR 2026 +89%（厂商自报）。偏好层新增：偏好遵循在 10 轮 / ~3k token 跌破 10%；Mem0 3.55 < 无记忆 3.69 < 显式 persona 4.58；定向澄清 2.81 问优于 4.90 问、0–1 问无收益；个性化 6.64–6.78 与事实准确率 3.77 vs 商业化 8.40 存在 trade-off；11 产品 + 8 开源项目无 bias/perspective 控件；一次性研究计划批准门在消费级极稀有（Gemini 是例外）；DeerFlow 2.x 是唯一 token 硬停。style 遍新增：claim-level fact-check 39–77%（Gemini 3.1 Pro 48.5 vs Claude Opus 4.5 76.8）；搜索 2→150 calls 降约 42%；Gemini 2.5 Pro DR 113.1 URLs/query / 13.3% 幻觉；Arena jury 与 reach 分离（ii-researcher 1405 Elo / 16% reach）。
 - 被挡来源：Perplexity / Consensus 消费者帮助页；OpenAI help/platform；Google Gemini/Cloud 文档与 Saved Info；Claude Styles→Skills 正文；元宝 / 智谱消费端；You.com / Genspark / SciSpace / Scite。
-- 第三遍剩余：BrowseComp / DeepResearch Arena 全量；上述被挡页；真实用户观察（方法库是否有人用、HITL1 是否足够 informed approval）。
+- 第三/四遍剩余：BrowseComp / DeepResearch Arena 全量；上述被挡页；benchmark agent ≠ 消费端产品；真实用户观察（方法库是否有人用、HITL1 是否足够 informed approval）；本仓 style profile 未试点。
 
 ### 7. 参照项目（仓外，只读）
 
@@ -170,7 +173,7 @@ status——材料的状态就是题的状态。
 
 - **方向 v2 = 挖透**：五件（结论 + 锚点 / 备选与否决 / decision table / pilot plan / 「什么会改变结论」）。
 - **`已定性` = 题名页状态**：`> 结论：` 非空 + 证据评审 + `产出的卡` 已链；没有卡就写 `—` + 一句理由。
-- **元方向（research-shelf）豁免 pilot plan**：用「协议已应用 + 冷读复跑」代替 pilot。
+- **元方向（归档的 `_archived/research/research-shelf/`）豁免 pilot plan**：用「协议已应用 + 冷读复跑」代替 pilot。
 - 冲突时：v2 五件是工作完成度；`已定性` 是状态翻转；两者不互相替代，但可同时满足。
 
 ### 10. 冷读「阻塞项」定义
@@ -181,12 +184,8 @@ status——材料的状态就是题的状态。
 
 | 名头 | 问题 | 消费者 | 材料 |
 |---|---|---|---|
-| [编排原语](orchestration-primitives/README.md) | 哪类工作该由 subagent / workflow / team / goal 承载 | 本轮设计推演；已产出推进卡 | 2 份 |
-| [Wave 执行](wave-execution/README.md) | 计划图如何编译成可执行工作流 | 本轮设计推演；已产出推进卡 | 2 份 |
-| [研究视角层](lens-abstraction/README.md) | 把 bias / lens 做成数据层 | 本轮设计推演；已产出推进卡 | 2 份 |
-| [产出/验证分离](quality-loop/README.md) | 独立复核与裁决留痕 | 本轮设计推演；已产出推进卡 | 2 份 |
-| [外部 landscape](external-landscape/README.md) | 外部系统已走到哪、哪些是 table stakes | 本轮设计推演 | 3 份 |
-| [研究货架](research-shelf/README.md) | 多方向研究的题名、材料与留痕 | 本轮研究自身 | 2 份 |
+| [外部 landscape](external-landscape/README.md) | 外部系统已走到哪、哪些是 table stakes；style 空间与隐含 Protocol | 本轮设计推演 | 4 份 |
+| [偏好层](preference-layer/README.md) | 搜索倾向与偏好如何收束成可解析、可审、可扩的数据模型 | 本轮设计推演；待结构选择拍板 | 2 份 |
 
 归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单，也不抄状态（状态正本 = 题名页）。
 

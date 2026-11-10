@@ -6,15 +6,15 @@ intent: 在 lens 层与 claim-verdict 已落地、workflow 机制已逐源核过
 # Wave 执行：把同质层编译成 workflow（v2）
 
 > 性质：机制事实 + 设计合同。机制同 pin = `dsh-v0.2.1-rc.5` @ `b830ec950f`；升 pin 后按
-> [discipline-map](../../../docs/discipline-map.md) 复核。事实段带 vendor 源码/文档锚点；建议段标「建议」。
+> [discipline-map](../../../../docs/discipline-map.md) 复核。事实段带 vendor 源码/文档锚点；建议段标「建议」。
 > **v2 相对 v1 的修正**：① 不是所有扇出层都值得脚本化——v2 只保留 **deep-dive 的 lens×topic 取证层**；
 > ② claim 验证**不**搬进 workflow（critic subagent + verdicts 已落地）；③ 挂点由 A（独立
 > `wave-runner` preset）改判 **B（analyst 承载）**；④ 新增「child 写产物 + 结构化回执 + 父级对账」
 > 三段式；⑤ 新增 `waves/<wave>.json` 执行报告；⑥ 计划面**不加列**，用 `## Wave 执行` 节。
 > 相关：[channel-policy v2](../orchestration-primitives/2026-11-10-channel-policy.md) ·
 > [lens-as-data v2](../lens-abstraction/2026-11-10-lens-as-data.md) ·
-> [claim-verdict 卡](../../issues/2026-11-10-claim-verdict-quality-loop.md) ·
-> [落地卡](../../issues/2026-11-10-wave-execution-lens-fanout.md)。
+> [claim-verdict 卡](../../../issues/2026-11-10-claim-verdict-quality-loop.md) ·
+> [落地卡](../../../issues/2026-11-10-wave-execution-lens-fanout.md)。
 
 ## 0. 一句话
 
@@ -60,14 +60,18 @@ D2 角色数、不改 plan schema、不搬 claim 验证**。workflow 仍是「�
 - **设计后果**：bundle 里必须有 executor 写的执行报告；Lead 的 journal 只写一行摘要 + 报告路径。
   想看 child 生命周期，去 executor 会话查 `tool-workflow/*`，不要指望 Lead 会话里有。
 
-### 1.4 工具结果给 `runId` / `agentsStarted`，但不给 child ids
+### 1.4 工具结果的 schema 有 `runId`，但模型看到的渲染文本没有
 
-- foreground 结果 = `{kind:'foreground', runId, agentsStarted, result}`
-  （`tool-workflow/src/index.ts:378-407,462-467`）。
-- `agentsStarted` 是「尝试启动的 agent 数」，不是成功数；child 的 `childId` 只在 executor 会话的
-  `tool-workflow/agent-start` 事件里（`types.ts`）。
-- **设计后果**：报告写 `run_id` / `agents_started` / `stop_reason`；**不要伪造 `child_ids`**。需要
-  child 证据时，用 `session_query` 查 executor 会话。
+- foreground 结果 **schema** = `{kind:'foreground', runId, agentsStarted, result}`
+  （`tool-workflow/src/index.ts:378-407,462-467`）；但 `render` 只输出
+  `workflow "<name>" completed (<N> agents). Return value: …`——模型看到的是渲染文本，
+  **看不到 `runId` 字段**。P3 实测（2026-11-10）确认：executor 只能报 `completed (1 agent)`，
+  `runId` 只出现在 executor 会话的 `tool-workflow/run-start` 事件里。
+- `agentsStarted` 是「尝试启动的 agent 数」，不是成功数，且渲染文本只给 `(N agent)`；
+  读不到就写 `null`，不要编造。
+- **设计后果**：报告写 `run_id: null` + `run_id_note`（或由 Lead 从 executor 会话事件补），
+  `agents_started` 从文本读；**不要伪造 `child_ids` / `run_id`**。需要 child 证据时，用
+  `session_query` 查 executor 会话。
 
 ### 1.5 脚本是纯沙箱：没有 fs / network / timer / Node API
 
@@ -349,7 +353,8 @@ return { wave: cfg.wave, recipe: 'lens-fanout', requested: cfg.cells.length, cel
   "wave": "W2",
   "recipe": "lens-fanout",
   "plan_version": "v3",
-  "run_id": "<workflow tool 返回的 runId>",
+  "run_id": null,
+  "run_id_note": "rendered tool result does not expose runId; recover from executor session tool-workflow/run-start if needed",
   "agents_started": 4,
   "stop_reason": "completed",
   "requested": 4,
@@ -364,7 +369,9 @@ return { wave: cfg.wave, recipe: 'lens-fanout', requested: cfg.cells.length, cel
       "status": "ok",
       "evidence_count": 3,
       "gaps": [],
-      "note": ""
+      "note": "",
+      "extra_output_files": [],
+      "reported_path": "evidence/t1-official.md"
     }
   ],
   "errors": [],
@@ -385,11 +392,16 @@ return { wave: cfg.wave, recipe: 'lens-fanout', requested: cfg.cells.length, cel
 | `null` | 文件在且八字段齐 | `ok` + `note: no structured receipt` | **不要因为回执丢失就丢产物** |
 
 - `counts` 由 executor 按最终 `status` 重算，不直接抄脚本的 counts。
-- `stop_reason`：workflow 正常完成 = `completed`；工具报错 = `error`；被取消 = `cancelled`。
+- `stop_reason`：工具调用成功 = `completed`；工具报错 = `error`；被取消 = `cancelled`。不要因为
+  渲染文本没有 `stopReason` 字段就写 `null`——成功与否由工具结果本身（ok/error）判定。
+- child 可能在 `output_path` 之外另写同 lens 拆卡：该 cell 记 `extra_output_files[]`，
+  `evidence_count` 按全部文件计；child 报的 path 与 args 不同就记 `reported_path`。
 - 工具报错时也要写报告：`requested` 从 args 抄，`cells` 可空或只含已知，`errors` 写错误原文；
   **不得**写「绿」。
-- `run_id` / `agents_started` 从 workflow 工具结果抄；`plan_version` 从 plan 头部抄；`recorded_at`
-  用 time-context 读数。抄写错误由 Lead 抽查发现，不进机械门（v1）。
+- `run_id` 通常在模型可见结果里没有（§1.4）；写 `null` + `run_id_note`，需要时由 Lead 从
+  executor 会话的 `tool-workflow/run-start` 取。`agents_started` 从渲染文本的 `(N agent)` 读，
+  读不到写 `null`；`plan_version` 从 plan 头部抄；`recorded_at` 用 time-context 读数。
+  抄写错误由 Lead 抽查发现，不进机械门（v1）。
 
 **谁读**：Lead 读 `waves/W2.json` + 抽查至少一张证据卡；critic 在报告级审查时读同一份；驾驶舱 v1
 **不读** `waves/`（已知缺口，见 §10）。
@@ -567,9 +579,9 @@ child ×4（depth 2）= 7 槽。
   - [channel-policy v2](../orchestration-primitives/2026-11-10-channel-policy.md)
   - [channel-probes](../orchestration-primitives/2026-11-10-channel-probes.md)
   - [lens-as-data v2](../lens-abstraction/2026-11-10-lens-as-data.md)
-  - [claim-verdict 卡](../../issues/2026-11-10-claim-verdict-quality-loop.md)
-  - [旧 wave 执行卡](../../issues/2026-11-10-workflow-wave-executor.md)
-  - [落地卡](../../issues/2026-11-10-wave-execution-lens-fanout.md)
+  - [claim-verdict 卡](../../../issues/2026-11-10-claim-verdict-quality-loop.md)
+  - [旧 wave 执行卡](../../settled_issues/2026-11-10-workflow-wave-executor.md)
+  - [落地卡](../../../issues/2026-11-10-wave-execution-lens-fanout.md)
 - 外部（证据边界见 channel-policy §6）：
   - Anthropic multi-agent research: https://www.anthropic.com/engineering/multi-agent-research-system
   - Cognition, Don't Build Multi-Agents: https://cognition.com/blog/dont-build-multi-agents

@@ -9,7 +9,7 @@ intent: 为 Deep Research 的「不同视角/偏置」给出可落地的抽象�
 > 决定段标「决定」，推断段标「推断」。
 > 版本：v2（2026-11-10）。v1 的九字段、外部证据与失败形态保留；本版改掉四处：`blind_spots` 必需、
 > lens 不拥有报告骨架、题型默认集按成本收紧、每 topic 子集 + 多 lens 默认独立 activation。
-> 消费者：[README](README.md)（题名页）；产出的卡：[lens 数据层](../../_archived/settled_issues/2026-11-10-lens-layer.md)；
+> 消费者：[README](README.md)（题名页）；产出的卡：[lens 数据层](../../settled_issues/2026-11-10-lens-layer.md)；
 > 配套材料：[lens 目录草案](2026-11-10-lens-catalog-draft.md)。
 
 ## 0. 结论
@@ -314,7 +314,7 @@ Anthropic 2026 的「低方差」结论（§8）意味着：同一个 analyst �
 **v1 不加新门**：覆盖是语义判断，机械门只能查「表在场/格式」，查不出「这个面真的挖过」；
 先让 critic 填两个 run，若出现连续 2 次静默空格（无人发现/无人记），再评估
 `evidence-audit` 的 lens 覆盖 INFO/MAJOR（触发条件见 §13）。这与 quality-loop「机械门只查工件
-完整性」的结论一致（`_backlog/research/quality-loop/2026-11-10-claim-verdicts.md:101-118`）。
+完整性」的结论一致（`_backlog/_archived/research/quality-loop/2026-11-10-claim-verdicts.md:101-118`）。
 
 ## 7. 通道：同一份 lens 在三条委派通道都能跑
 

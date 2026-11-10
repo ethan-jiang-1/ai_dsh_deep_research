@@ -7,9 +7,10 @@ opened: 2026-11-10
 
 > 状态：已定性
 > 问题：四个研究角色的哪类工作该由哪条 DSH 原语承载——subagent / workflow / agent-teams / goal 各自保证什么、拒绝什么；当前 pack 实际用的是什么；换通道会在哪里坏。
-> 消费者：本轮 presets 设计推演（用户 2026-11-10 直派）；落地卡 = [workflow wave 执行器](../../issues/2026-11-10-workflow-wave-executor.md)。
-> 产出的卡：[2026-11-10-workflow-wave-executor.md](../../issues/2026-11-10-workflow-wave-executor.md)
+> 消费者：本轮 presets 设计推演（用户 2026-11-10 直派）；落地卡 = [workflow wave 执行器](../../settled_issues/2026-11-10-workflow-wave-executor.md)。
+> 产出的卡：[2026-11-10-workflow-wave-executor.md](../../settled_issues/2026-11-10-workflow-wave-executor.md)
 > 结论：按工作形状选通道——Team 主控、subagent 做角色保真的一次性验证、workflow 只做同质叶层执行器（推荐独立薄 `wave-runner`；必须 engine + tool 同挂；8 槽是全体活子代共享池，teammate 与 workflow child 一起抢）、goal 只做跨轮记账。
+> 归档：2026-11-10（channel-policy/探针已被 workflow-wave-executor 卡与 goal-hitl Note 消费）
 
 ## 研究问题
 

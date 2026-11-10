@@ -5,6 +5,7 @@
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
 | [2026-11-10-lens-layer](2026-11-10-lens-layer.md) | lens 数据层落地：8 条出厂目录 + HITL1 默认集 + evidence 单值 `lens` + review `topic × lens` 覆盖表；pilot（`drt_ds-vs-bailian-longctx`）7 cell / 39 卡 / 0 静默空格 / 面分离全过；报告 readiness FAIL 属内容结果；[Note](../../../notes/implemented/2026-11-10-lens-layer.md) | 2026-11-10 |
+| [2026-11-10-workflow-wave-executor](2026-11-10-workflow-wave-executor.md) | 通道政策记录 + goal pause/resume 裁决：HITL1 timed、HITL2 `timeout:-1` 保持开放回合，goal 不 pause/resume；wave 执行切片移交[新卡](../../issues/2026-11-10-wave-execution-lens-fanout.md)；[Note](../../../notes/implemented/2026-11-10-goal-hitl-alignment.md) | 2026-11-10 |
 | [2026-11-07-user-facing-readme-and-install-guide](2026-11-07-user-facing-readme-and-install-guide.md) | README 改为产品页（73 行）、手册在 D41 十一段内做用户路径优先、开发面归位 CONTRIBUTING；新增 `readme-manual-commands` 契约（红先）、冷读 3/5、`install-shape-smoke` 全绿；[Note](../../../notes/archived/2026-11-07-user-facing-readme.md) | 2026-11-07 |
 | [2026-11-03-client-load-smoke-not-in-ci](2026-11-03-client-load-smoke-not-in-ci.md) | 驾驶舱 E2E 进 CI：`--seed tests/fixtures/client-load-home` 干净机器 69/69 全绿；CI job `client-load`（vendor build + chromium + seed + artifact）；根因 = 凭据 onboarding 模态 + `openSessionById` 吞点击 → fail-loud `opened`，zstd 首帧必须 header 单帧 | 2026-11-03 |
 | [2026-11-03-model-visible-vocabulary](2026-11-03-model-visible-vocabulary.md) | 模型可见措辞：文本改动已验证（verify/971 测试绿），但重录 `research-face` 的通道 boot 超时，整轮回退；去向 `deferred` — [triggers](../../triggers.md)「模型可见措辞重录」 | 2026-11-03 |

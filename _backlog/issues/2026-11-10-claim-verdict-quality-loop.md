@@ -9,7 +9,7 @@ opened: 2026-11-10
 >
 > 去向：implemented — 交付时写 `notes/implemented/2026-11-10-claim-verdict-quality-loop.md`（理由/备选/试点证据进 Note，docs 只写 now）
 >
-> **研究依据**：[quality-loop 题名页](../research/quality-loop/README.md) → [verdict-contract](../research/quality-loop/2026-11-10-verdict-contract.md)（契约、机械门清单、备选裁决表、试点、重议条件）
+> **研究依据**：[quality-loop 题名页](../_archived/research/quality-loop/README.md) → [verdict-contract](../_archived/research/quality-loop/2026-11-10-verdict-contract.md)（契约、机械门清单、备选裁决表、试点、重议条件）
 >
 > **开工授权**：用户 2026-11-10「推动落地」= 授权开工（`待落地` 本身不是授权）；改动面含 **pack 公共行为**，
 > 按审阅分层在阶段边界请人：P1 模型可见面之前一次、P4 真 run 一次、交付验收一次。

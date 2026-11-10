@@ -7,9 +7,10 @@ opened: 2026-11-10
 
 > 状态：已定性
 > 问题：Deep Research 的「不同 bias / 视角」应该抽象成什么——字段、目录、选择规则、组合与覆盖判据；它与 question-patterns（题型）、method-library（用户偏好）、topics（问题图）、evidence（证据卡）各自的分工是什么。
-> 消费者：本轮 presets 设计推演（用户 2026-11-10 直派）；落地产出 = [lens 数据层](../../_archived/settled_issues/2026-11-10-lens-layer.md)。
-> 产出的卡：[2026-11-10-lens-layer.md](../../_archived/settled_issues/2026-11-10-lens-layer.md)（已结，`implemented`）
+> 消费者：本轮 presets 设计推演（用户 2026-11-10 直派）；落地产出 = [lens 数据层](../../settled_issues/2026-11-10-lens-layer.md)。
+> 产出的卡：[2026-11-10-lens-layer.md](../../settled_issues/2026-11-10-lens-layer.md)（已结，`implemented`）
 > 结论：lens = 可选、可配对、可检查覆盖的**证据面数据**（九字段文件，前八必需），不是角色/persona/报告模板；住 pack `content/lenses/` + Lead 索引，HITL1 按题型给 1–4 个默认面（默认 2），per-topic 子集、cells ≤12，证据卡加单值 `lens`，覆盖用 review 表（无新门）。[详见 v2](2026-11-10-lens-as-data.md)。
+> 归档：2026-11-10（落地产出 lens 数据层已结；消费卡无后续活跃引用）
 
 ## 研究问题
 

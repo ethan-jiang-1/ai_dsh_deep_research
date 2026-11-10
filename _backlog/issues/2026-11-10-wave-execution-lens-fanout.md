@@ -9,16 +9,17 @@ opened: 2026-11-10
 >
 > 去向：implemented — 交付时写 `notes/implemented/2026-11-10-wave-execution-lens-fanout.md`（决定/输掉的方案/实际跑过的验证进 Note，docs 只写 now）
 >
-> **研究依据**：[wave-execution v2](../research/wave-execution/2026-11-10-wave-execution-contract.md)（新机制事实、A→B 重估、执行合同、试点）→ [channel-policy v2](../research/orchestration-primitives/2026-11-10-channel-policy.md)（通道总表/8 槽/HITL）→ [lens-as-data v2](../research/lens-abstraction/2026-11-10-lens-as-data.md)（已落地 D43）→ [claim-verdict 卡](2026-11-10-claim-verdict-quality-loop.md)（D44 在落地）。
+> **研究依据**：[wave-execution v2](../_archived/research/wave-execution/2026-11-10-wave-execution-contract.md)（新机制事实、A→B 重估、执行合同、试点）→ [channel-policy v2](../_archived/research/orchestration-primitives/2026-11-10-channel-policy.md)（通道总表/8 槽/HITL）→ [lens-as-data v2](../_archived/research/lens-abstraction/2026-11-10-lens-as-data.md)（已落地 D43）→ [claim-verdict 卡](2026-11-10-claim-verdict-quality-loop.md)（D44 在落地）。
 >
 > **开工授权**：用户 2026-11-10 直派「深挖 wave-execution，提交 issue，准备落地」= 授权深挖与立卡；
 > **`待落地` 不是实施授权**。本卡改动面含 **pack 公共行为**（analyst 工具面、计划卡措辞、计划模板），
 > 实施前请用户明确授权；按审阅分层在 P1（模型可见面）与 P4（真 run）两个阶段边界请人。
 >
-> **与既有卡的关系**：[旧卡](2026-11-10-workflow-wave-executor.md) 的 channel-policy、8 槽、HITL、
-> goal pause/resume 缺陷仍是上游依据；本卡承接其中的 **wave 执行切片**，并按 v2 新事实把挂点从
-> A（独立 `wave-runner`）改判 **B（analyst 承载）**。旧卡继续持有 goal `GOAL_TOOL_RESUME_PAUSED`
-> 缺陷与通道政策记录，不在本卡修。
+> **与既有卡的关系**：[旧卡（已归档）](../_archived/settled_issues/2026-11-10-workflow-wave-executor.md)
+> 的 channel-policy、8 槽、HITL 仍是上游依据；本卡承接其中的 **wave 执行切片**，并按 v2 新事实
+> 把挂点从 A（独立 `wave-runner`）改判 **B（analyst 承载）**。旧卡的 goal
+> `GOAL_TOOL_RESUME_PAUSED` 缺陷已按 [Note](../../notes/implemented/2026-11-10-goal-hitl-alignment.md)
+> 裁决并落地（HITL2 `timeout:-1`，不 pause/resume），本卡不重复。
 >
 > **基座同步（2026-11-10 立项前核对）**：
 > ① lens 层已落（D43，`content/lenses/` 8 条、evidence 八字段、`topic × lens` 覆盖表）；
@@ -50,9 +51,10 @@ opened: 2026-11-10
 - **run 记录只落 executor 会话**：`tool-workflow` 在顶层 transport 写四条 log-only 事件
   （`vendor/dsh/packages/workflow/tool-workflow/src/index.ts:89-151`、`src/types.ts`）；`phase()`/`log()`
   没有 per-line durable surface。Lead 会话里没有这些事件。
-- **工具结果有 `runId` / `agentsStarted`，没有 child ids**
-  （`vendor/dsh/packages/workflow/tool-workflow/src/index.ts:378-407,462-467`）；child id 只在 executor
-  会话的 `tool-workflow/agent-start`。报告不得伪造 `child_ids`。
+- **工具结果 schema 有 `runId` / `agentsStarted`，但模型看到的渲染文本只有 completed + `(N agent)`**
+  （`vendor/dsh/packages/workflow/tool-workflow/src/index.ts:378-407,462-467`）；`runId` 只在 executor
+  会话的 `tool-workflow/run-start`，child id 只在 `agent-start`。报告写 `run_id:null` + note，
+  **不得伪造 `run_id` / `child_ids`**；Lead 需要时用 `session_query` 取。
 - **脚本是纯沙箱**：无 fs / network / timer / Node API（`tool-workflow/src/index.ts:158-166`）→ 脚本
   不能预读 lens、不能检查文件、不能写报告；这些全是 child/executor 的活。
 - **caps 是 engine 级配置**：`maxConcurrentAgents` 默认 `0 → min(16, cores-2)`；`maxTotalAgents`
@@ -143,7 +145,10 @@ Lead（plan 的 W2 同质层 + 计划卡点名）
 
 - child 产物：`evidence/<cell>.md`，八字段（D43 契约），一卡一面。
 - executor 报告：`waves/<wave>.json`，字段：
-  `schema/wave/recipe/plan_version/run_id/agents_started/stop_reason/requested/counts/cells/errors/recorded_at`。
+  `schema/wave/recipe/plan_version/run_id/run_id_note/agents_started/stop_reason/requested/counts/cells/errors/recorded_at`。
+  `run_id` 在模型可见结果里通常不可得 → `null` + note；`agents_started` 从 `(N agent)` 读，读不到 `null`；
+  `stop_reason` 按工具调用成功/报错/取消写 `completed|error|cancelled`，不写 `null`；child 多写同 lens
+  拆卡时该 cell 记 `extra_output_files[]`、`evidence_count` 按全部文件计。
 - 对账：child 回执 `ok` + 文件在八字段齐 → `ok`；文件缺字段 → `partial`；回执 `ok` 但文件不在 →
   `missing`；`null` 但文件在八字段齐 → `ok` + `note: no structured receipt`（**不要丢产物**）；
   `failed`/`null` 且无文件 → `failed`。`counts` 按最终 `status` 重算，四个键（ok/partial/failed/missing）
@@ -207,6 +212,44 @@ Lead root 不占槽；executor depth 1，children depth 2；同一 wave 不再�
 
 **不做的事**：见 §设计合同 9。P0 绿再动 P1；P1/P2 不并行开两个面；P3 只证机制，不替代 P4 真 run。
 
+## 实施进度（2026-11-10）
+
+- **P0/P1/P2 已落**（commit `6ada0e3`）：`content/waves/lens-fanout.js` + keyless 配方测试；
+  analyst preset 的 workflow 组（engine + tool + isolate + caps）；`wave-execution` skill；
+  Lead 的 `research-planning` / `team-assembly` / `research-brief`；plan 模板 `## Wave 执行`；
+  D30 映射补行；`count-free` 录制夹具豁免。验证：`pnpm verify` 绿、`pnpm test` 1089 绿、
+  L1 5/5 真挂载、snapshot lead/analyst 重录后 4 场景 ALL PASS（commit `ac7421d`）、l4-lite ALL PASS。
+- **P3 机制试点已跑**（真模型，direct analyst executor，隔离 profile `wave-pilot`）：
+  session `418e46b5-…`、child `04c21dfb-…`；`waves/W2.json` 1 cell `ok`；`evidence/t1-official.md`
+  12KB、八字段齐；child request header 确认 `research:manual` + `structured_output` +
+  `workflow` + `subagent`（递归风险真实存在，本场未递归）；executor 未用 subagent。
+  证据 = `research-workspace/drt_wave-pilot/`（运行数据，不入库）。
+- **P3+ 4-cell 容量试点已跑**（真模型，direct analyst executor）：
+  session `ccd969bb-…`；`requested 4 / ok 3 / partial 1 / failed 0 / missing 0`；4 个请求路径全部
+  在场、八字段齐；`t1-practitioner` 自报 partial（预算超支/单源，如实记）；`t2-official` 另写
+  2 张同 lens 拆卡（报告 `extra_output_files[]`，`evidence_count=3`）；4 个 `agent-start`，
+  无 `ACTIVATION_LIMIT_REACHED`；无递归。证据 = `research-workspace/drt_wave-pilot4/`。
+  **由此回写合同**：`stop_reason` 按成功/报错/取消写 `completed|error|cancelled`（不写 null）；
+  child 拆卡记 `extra_output_files[]`。
+- **P3b Lead→analyst spawn 试点已跑**（真模型，隔离 profile `wave-pilot`）：
+  session `4cc4bde0-…`。**第一次 Lead 用 `spawn_teammate`**（尽管 prompt 说 analyst）——队友
+  composeFrom Lead，没有 workflow/wave-execution，child 如实报 `TOOL_NOT_IN_SESSION`；
+  **更正为 `subagent(agent_preset=analyst)` 后成功**：child `ff73f513-…` 加载 skill、前台调
+  workflow、写 4 张 evidence 卡 + `waves/W2.json`（counts ok=1）；Lead 在 completion notice 后
+  读报告并回报。`wait_agent` 看不到 subagent（非 Team 成员），Lead 结束回合等通知是正确形态。
+  **由此回写 skill**：team-assembly 钉「脚本层唯一通道 = subagent，不要 spawn_teammate」与
+  「等 subagent 不要 wait_agent」；`wave-contract` 测试钉住两句。
+- **P3 的环境 caveat**：`workspace-write` 下 workflow 首次失败：
+  `workflow execution failed (sandbox-unavailable): sandbox-exec: sandbox_apply: Operation not permitted`
+  ——本机 DSH 进程本身在沙箱内，PTC 再套 `sandbox-exec` 被拒。隔离通道以
+  `DSH_PERMISSION_MODE=danger-full-access` 重跑成功；这是**试点环境**限制，不在代码里放宽默认策略。
+  P4 真 run 需在非嵌套沙箱（或用户同意的 full-access 试点环境）跑。
+- **P3 的新事实（已回写合同）**：模型可见的工具结果只有 `workflow "..." completed (N agent)`，
+  **没有 `runId` 字段**；`runId` 只在 executor 会话 `tool-workflow/run-start`。报告写
+  `run_id:null` + note，不得伪造。
+- **P4 未跑**：需要一场带 HITL1/HITL2 的真 run 与用户在场；当前默认 run 通道有在飞会话
+  （未打扰），且 P4 的 HITL 不能由代理冒充。待用户安排一场 run 时补。
+
 ## 验收标准
 
 | # | 行为 | 类 | 输入/状态 | 通过信号 | 负例/恢复 | 证据 owner | 人 |
@@ -216,7 +259,7 @@ Lead root 不占槽；executor depth 1，children depth 2；同一 wave 不再�
 | A3 | 工具可见性 | 编排 | 真挂载 / 请求头 | analyst 的 `request/header.tools` 含 `workflow`；Lead/scout/critic 不含；workflow child 含（递归风险记录）；snapshot/header 证据 | 任一错位 → 停，修 preset 行；child 递归另记 | P3 探针 + snapshot | 无 |
 | A4 | 计划面不加列、可读 | 确定性 | `content/templates/run/plan.md`、`research-planning/SKILL.md` | `## Wave 执行` 节格式；`task_id=plan-only`；`output` 指 `waves/W2.json + evidence/…`；`planIndex`/`planIssuesOf`/`schema-scan` 不因新增节红；无新列 | 加列/改 parser → 回退；plan 节缺失 → A6 无报告 | test + 人工 grep | 无 |
 | A5 | HITL1 只点名、不加交互 | 模型行为 + 编排 | 新 run 的计划卡 | 卡正文含 `W2 脚本扇出 ×4`；选项仍三路；`plan-card-stats` ≤200；无第四问/新选项；用户拍板落 §Decisions | >200 → 删字；新选项 → 回退；未点名跑脚本 = 违纪 | `plan-card-stats` + 真卡 | **用户**：卡可读、授权语义 |
-| A6 | 报告与对账 | 模型行为 + 编排 | 试点 bundle | `waves/W2.json` 字段齐；`counts` 与文件事实一致；`missing` 不静默；child 证据八字段；`run_id/agents_started` 来自工具结果；错误时 `stop_reason:error` 不写绿 | 回执 ok 但文件缺 → `missing`；报告缺 → 停；counts 不一致 → 停 | pilot bundle + Lead 抽查 | 无 |
+| A6 | 报告与对账 | 模型行为 + 编排 | 试点 bundle | `waves/W2.json` 字段齐；`counts` 与文件事实一致；`missing` 不静默；child 证据八字段；`run_id` 可为 `null` + note（渲染文本不暴露），`agents_started` 从 `(N agent)` 读；`stop_reason` 为 `completed|error|cancelled`，不写 null；多写拆卡记 `extra_output_files[]`；错误时不写绿 | 回执 ok 但文件缺 → `missing`；报告缺 → 停；counts 不一致 → 停；伪造 run_id/stop_reason → 停 | pilot bundle + Lead 抽查 | 无 |
 | A7 | 失败不重试、不伪造 | 编排 | 单 cell null / fatal / 取消 | 单 null → `failed`；`AGENT_START/AGENT_CAP/ITEM_CAP` → fatal 记账；取消 → 已写文件保留；无「重跑碰运气」；报告不写绿 | 任一静默重试/伪造 → 停 | P3/P4 证据 | 无 |
 | A8 | 容量 | 编排 | 试点 | `teammates + 1 + N ≤ 8`；峰值 ≤8；无 `ACTIVATION_LIMIT_REACHED`；`maxConcurrentAgents=4`；N 写 plan `budget` | 撞顶 → 缩 N/team；不先抬 12 | P4 槽位计时 | 无 |
 | A9 | 角色边界 | 确定性 + 编排 | 全树 | 不新增 preset；D2 仍 5；claim 验证仍 critic subagent/verdicts；scan/synthesis/review 不变；Lead 无 workflow 工具 | 新增 preset/搬 claim → 停，回卡 | tests + review | **用户**：公共行为 |

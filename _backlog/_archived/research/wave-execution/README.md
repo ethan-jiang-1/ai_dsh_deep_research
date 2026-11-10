@@ -7,10 +7,11 @@ opened: 2026-11-10
 
 > 状态：已定性
 > 问题：Wave 作为「拓扑层」已经能表达并行与依赖；下一步能否把 `plan.md` 的 wave 子图编译成可执行 workflow（固定配方 + args），同时保住 HITL、动态重写与 bundle 留痕。
-> 消费者：本轮 presets 设计推演（用户 2026-11-10 直派）；落地卡 = [wave-execution-lens-fanout](../../issues/2026-11-10-wave-execution-lens-fanout.md)。
-> 产出的卡：[2026-11-10-wave-execution-lens-fanout.md](../../issues/2026-11-10-wave-execution-lens-fanout.md)
+> 消费者：本轮 presets 设计推演（用户 2026-11-10 直派）；落地卡 = [wave-execution-lens-fanout](../../../issues/2026-11-10-wave-execution-lens-fanout.md)。
+> 产出的卡：[2026-11-10-wave-execution-lens-fanout.md](../../../issues/2026-11-10-wave-execution-lens-fanout.md)
 > 结论：只脚本化 deep-dive 的 lens×topic 取证层（固定配方 `lens-fanout`）；挂点由 A（独立 `wave-runner`）改判 **B（analyst 承载、spawn executor）**，不新增 preset、不改 D2/plan schema；child 写八字段证据卡 + typed 回执，executor 对账后写 `waves/<wave>.json`；claim 验证仍走 critic subagent。
 > 证据评审：2026-11-10 自审 — 机制事实逐条核 vendor rc.5（锚点见 v2 §1）；P1 真挂载复用既有探针；P2–P4 仍为源码级/pilot 待证；外部证据边界见 channel-policy §6。业务验收归用户。
+> 归档：2026-11-10（wave 执行切片交付给 lens-fanout 卡，通道依据已消费）
 
 ## 研究问题
 
@@ -62,7 +63,7 @@ opened: 2026-11-10
   应继承，pilot 抓 header）；② B 的 schema 税实测；③ 真实并发槽位会计时；④ 模型是否遵守
   structured_output/不递归 workflow；⑤ 计划卡 200 字实测。
 - **完成判据**：v2 五件（结论+锚点 / 备选与否决 / decision table / pilot plan / 什么会改变结论）**已达成**；
-  试点与实施 = [落地卡](../../issues/2026-11-10-wave-execution-lens-fanout.md)。
+  试点与实施 = [落地卡](../../../issues/2026-11-10-wave-execution-lens-fanout.md)。
 - **共享底座**：见 [../README.md](../README.md) 的「共享上下文（所有方向必读）」节。
 
 ## 材料

@@ -14,8 +14,8 @@ opened: 2026-11-10
 evidence 只记 `supports: topic`，critic 只能按源数/等级/引用链审，报告只能写「不知道什么」，
 写不出「哪些面看过、哪个面是空的」。期望：把视角做成**可选、可配对、可检查覆盖的数据层**
 （lens），让同一题可以有 1–4 个可区分的证据面，且三条委派通道（subagent / team / workflow）
-都能执行同一份数据。研究结论与证据 = [lens-abstraction v2](../../research/lens-abstraction/2026-11-10-lens-as-data.md)；
-8 条出厂草案 = [catalog draft](../../research/lens-abstraction/2026-11-10-lens-catalog-draft.md)。
+都能执行同一份数据。研究结论与证据 = [lens-abstraction v2](../research/lens-abstraction/2026-11-10-lens-as-data.md)；
+8 条出厂草案 = [catalog draft](../research/lens-abstraction/2026-11-10-lens-catalog-draft.md)。
 
 **当前情况：**
 
@@ -161,7 +161,7 @@ evidence 只记 `supports: topic`，critic 只能按源数/等级/引用链审�
   `content/lenses/` 不破坏 `content/**` 发布；必要时 `release-smoke --install-only`。
 - 文档 = 当前合同：pack README、根 `AGENTS.md` 与 `packages/deep-research-pack/AGENTS.md`
   的 `content/` 布局行（加 `lenses/`）、`docs/design/30-methodology-mapping.md`（方法层）、
-  `docs/decisions.md`（D 号，用户签）；`_backlog/research/lens-abstraction/README.md` 的
+  `docs/decisions.md`（D 号，用户签）；`_backlog/_archived/research/lens-abstraction/README.md` 的
   `产出的卡` 已链本卡。
 - 不变量：四角色身份（D2）、两 HITL 点、`method-library` 四字段与 method-editor、驾驶舱读面
   （v1 不接 evidence）、plan 解析器（不碰）。
