@@ -36,13 +36,13 @@ test('五面可执行性：统一退出语义 + L4 机器/人工分栏 + 四个�
   for (const term of ['机器', '人工走查', '没有记录 = 未跑']) {
     assert.ok(text.includes(term), `L4 判据缺「${term}」——机器/人工没有分栏，验收会空转`);
   }
-  const l4Rows = text.split('\n').map((l) => l.trim()).filter((l) => /^\| [①②③④] /.test(l));
+  const l4Rows = text.split('\n').map((l) => l.trim()).filter((l) => /^\| [①②③④⑤] /.test(l));
   assert.ok(l4Rows.length >= 4, `L4 判据表应有 4 行（实际 ${l4Rows.length}）`);
   // 逐行判类型：①② 必须机器、③④ 必须人工——只查"表里出现过两类词"会漏掉单行退回散文。
   // 判**类型列**本身（第二格），不是"整行里出现过这两类词"——通过列里也会写「人工走查」节，
   // 整行包含式断言会被它满足（2026-10-28 实测：把类型改成「人工检查」仍绿）。
   const typeOf = (n) => l4Rows.find((r) => r.startsWith(`| ${n} `))?.split('|')[2]?.trim();
-  for (const n of ['①', '②']) {
+  for (const n of ['①', '②', '⑤']) {
     assert.equal(typeOf(n), '机器', `L4 判据 ${n} 的类型列必须是「机器」（实际：${typeOf(n) ?? '（缺行）'}）`);
   }
   for (const n of ['③', '④']) {

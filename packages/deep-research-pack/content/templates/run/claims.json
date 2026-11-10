@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "finalRef": 1,
+  "claims": [
+    {
+      "id": "C1",
+      "text": "<final/v1.md 里的一句原话，逐字抄；[来源: …] 标记可以不抄>",
+      "critical": true,
+      "topics": ["T1"],
+      "evidence": ["evidence/<id>.md"],
+      "urls": ["https://<claim 依赖的 URL>"]
+    }
+  ]
+}

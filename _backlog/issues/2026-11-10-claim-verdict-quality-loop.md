@@ -11,8 +11,19 @@ opened: 2026-11-10
 >
 > **研究依据**：[quality-loop 题名页](../research/quality-loop/README.md) → [verdict-contract](../research/quality-loop/2026-11-10-verdict-contract.md)（契约、机械门清单、备选裁决表、试点、重议条件）
 >
-> **开工授权**：本卡 = 准备进开发，不是授权。改动面含 **pack 公共行为**（critic 人设、手册合同、交付判据），
-> 开工等用户一句「做」；开工后先做 keyless 片（门禁 + 契约 + 测试），再动内容面。
+> **开工授权**：用户 2026-11-10「推动落地」= 授权开工（`待落地` 本身不是授权）；改动面含 **pack 公共行为**，
+> 按审阅分层在阶段边界请人：P1 模型可见面之前一次、P4 真 run 一次、交付验收一次。
+>
+> **基座同步（2026-11-10 落地前核对，commit `85a4f1b` 后）**：
+> ① lens 层已落（D43）——`review.md` 终局块已承载 `topic × lens` 覆盖表，本卡的 claim 覆盖必须是**另一块**，
+> 不复用那张表（证据面覆盖 vs 结论覆盖）；D43 明写「v1 不加机械覆盖门」，本卡的门只证**闭集**（`claims.json`
+> 表内逐条有裁决），不证开放集（topic × lens 的语义完整性），边界写进 D44 与 Note。
+> ② `content/manual.md` 有 12,288 字符预算，当前 **12,187（余 101）**——**已定（2026-11-10 用户拍板）**：
+   不抬 cap，做一次**下放**——`plan.md` 条目 626 字符里的 W 语法/节点列/lifecycle 三处重复（正本已在
+   `templates/run/plan.md` 与 `research-planning` skill）压到 ~150 字符，腾出 ~476；再加 claim 两行 +
+   完成判据一行（~200）。落点 ~11,911（余 ~377）。准入规则写进 `content-shape` 门禁注释。
+> ③ D43 已占号 → 本卡交付登记 **D44**。
+> ④ 基线：`pnpm verify` 全绿、`pnpm test` 1054 绿；工作树另有 21 个归档指针卫生改动（非本轮，不并入提交）。
 
 **问题与期望结果：** 现在 critic 的交付判据是一段 prose（`review.md` 的 `readiness: PASS`），
 颗粒度是整篇：一条 CRITICAL 与十条 MINOR 得到同一个「FAIL」，机器读不出「哪条关键结论被谁核过、核成什么」，
@@ -54,10 +65,27 @@ tests 直调，分层同 evidence-audit / node-gate）；检查 = 契约 §5 全
 `presets/critic/skills/claim-verdict/SKILL.md` + persona 一条排斥句（claim 模式不写 review.md）；
 lead persona ≤3 句 + `team-assembly` 表一行。
 
+## 落地计划（六段；每段一个可独立提交的窄片）
+
+路由依据 = [guides/60 §2 任务型路由表](../../docs/guides/60-dev-loop.md)：本卡叠加三行——「改 run 审计门」
+（L0 + `tests/run` 契约）、「改 persona / skill / 手册文本」（`render-overlay` → L1 → snapshot-replay B →
+重启 run 通道；L0 + L1 + L4-lite）、「改 `scripts/lib` 支撑模块」（消费方复跑 + 契约测试）。
+
+| 段 | 内容（改动面） | 红先 / 必跑 | done |
+|---|---|---|---|
+| **P0 门禁核**（keyless，不动模型可见文本） | 新 `scripts/lib/verdict-audit-core.mjs`（纯判据，注入会话事实）、新 `scripts/run-gates/verdict-audit.mjs`（CLI 壳，0/1/2）、新 `tests/run/verdict-audit.test.mjs`；`scripts/run-ops/run-accept.mjs` 第三道预检 + `--write` 落盘；`scripts/README.md` run-gates 与 lib 两表；`docs/evaluation.md` L4 判据 ⑤ + 退出语义行；`tests/contracts/evaluation-contract.test.mjs` 加 ⑤ 断言；`scripts/smoke/run-accept-smoke.mjs` 合成 bundle 两例 | 五条红配方先红（改 `raw` / 删覆盖 / 非法枚举 / 换 session / child 写盘）→ 还原绿；`node scripts/smoke/run-accept-smoke.mjs`；`pnpm verify`（navigability 的 lib 消费列会对账） | 门禁在**合成会话日志**上证明读得到 preset/depth/verbatim；旧 bundle 与 quick_factual 不判；test + smoke 绿 |
+| **P1 契约面**（模型可见，阶段边界请人） | `content/manual.md` 两处（目录约定两行 + 完成判据一行，先预算处置）；新 `presets/critic/skills/claim-verdict/SKILL.md`；`critic.patch.yml` persona 两句；`lead.patch.yml` persona 三句；`lead/skills/team-assembly/SKILL.md` 通道表一行 | `node dev/render-overlay.mjs` → `DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs`（L1）→ `node scripts/smoke/snapshot-replay-smoke.mjs`（B 层红 = 已捕获）→ `--update-expected` 重写金标准 + 人审 diff；`content-shape` 预算 | L1 绿 + snapshot B 绿 + `tests/pack/presets.test.mjs` 新钉绿 + 文档同步 |
+| **P2 装配验证** | 真模型档：`l4-lite-smoke`（四角色响应）；重启 run 通道（web 缓存 boot 时文本） | `source dev/env.sh && node scripts/smoke/l4-lite-smoke.mjs` | L4-lite 绿；未跑项如实列 |
+| **P3 试点 A**（机制，1 child） | 复用已交付 bundle + 手工 `claims.json`；`run-driver up` → `run-kickoff --preset lead` 派一个 critic child；按验收 8 的五条判据收证 | child 会话头 / JSON 可解析 / 无写盘 / 逐字相等 / 门禁绿 | 五条判据全绿；会话 id 与 verdicts 路径进 Note |
+| **P4 试点 B**（真 run，用户在场） | 一场非 quick_factual 真 run 走完 claims → 分批 dispatch → verdicts → review 终局块 → HITL2 → run-accept | HITL1/HITL2 由用户点；`run-accept` 绿 | 验收 9 全绿；证据进 Note，不进 CI |
+| **P5 收尾**（与交付同变更） | `docs/decisions.md` 加 **D44**（≤800 字，含与 D43 的边界）；`notes/implemented/2026-11-10-claim-verdict-quality-loop.md`（决定/输掉的方案/实际跑过的验证）；卡 `git mv` 归档 + 状态行 `已结`/`可关闭：是` + `审查：`；`_backlog/issues/README.md` 移行；研究题页按「消费者离开」决定是否同迁 `_archived/research/` | `pnpm verify` + `pnpm test` 终跑；归档同变更 | 全绿 + 卡与 Note 同变更 + 用户验收 |
+
+**不做的事（同卡「不做」节）**：新只读 `verifier` preset、运行时 veto、语义门禁、host 代码、收据扩展（P6 可选片）。
+
 ## 验收标准
 
-1. **工件契约在场**：手册新增节 + 两份 JSON 模板；模板与门禁解析器同源（`tests/pack/content-injection`
-   的模板清单同 diff 扩充；模板字段名与 core 的解析键逐字一致，测试锁）。
+1. **工件契约在场**：手册两处（目录约定 + 完成判据）+ `claim-verdict` skill 的输出契约；字段名与 core 的
+   解析键逐字一致，测试锁。JSON 形状示例默认住手册/skill，**不新增 `templates/run/*.json`**（理由见「未决」4）。
 2. **critic claim 模式**：`claim-verdict` skill 在场，输出契约为「一个 JSON 数组，每条 verdict 四值之一」；
    persona 有排斥句（接到 claim 级任务 → 按 skill 回 JSON、不写 `review.md`、不给修复建议）；
    报告级 `adversarial-review` 的三线与 readiness 判据**不变**。
@@ -88,17 +116,21 @@ lead persona ≤3 句 + `team-assembly` 表一行。
 - **范围**：上面四件工件 + 门禁 + 三个内容面（手册/模板/critic skill+persona/lead 三句）+ keyless 测试 +
   run-accept 接线 + 两段试点 + 文档账。
 - **不做**：新 `verifier` 只读 preset（重议条件 = 契约 §8 第 2 条）；运行时 veto；语义门禁（quote 真伪）；
-  host 代码；新调度器；把 claim 表做成 must-answer 清单；收据（`delivered.json`）扩展 —— 后者列为可选片 P3，
+  host 代码；新调度器；把 claim 表做成 must-answer 清单；收据（`delivered.json`）扩展 —— 后者列为可选片 P6，
   只有用户在试点后要求「交付后也能复算裁决」时才做（那会动 `run-receipt` 与回执三态契约）。
-- **切片**：P0 = core + 门禁 + keyless + 反证（纯工具面，不动模型可见文本）；P1 = 内容面（手册/模板/skill/persona）；
-  P2 = 试点 A/B + 接线 + 文档账。P0 绿再动 P1；**不并行开三个面**。
+- **切片**：与上方「落地计划」同一编号——P0 = core + 门禁 + keyless + 反证（纯工具面）；P1 = 内容面（手册/skill/persona）；
+  P2 = L4-lite 装配；P3 = 试点 A；P4 = 试点 B；P5 = 收尾（D44/Note/归档）；P6 = 可选收据扩展。
+  P0 绿再动 P1；**不并行开两个面**。
 
 ## 未决（默认按推荐，用户改任一项先回卡）
 
-1. **批量 3–5 条 / child**（推荐）还是 1–2 条（更纯但成本线性涨）——试点 A 后可按实测调。
+1. ~~**批量 3–5 条 / child**~~（2026-11-10 用户采纳推荐）：3–5 条 / child，试点 A 后可按实测调。
 2. **quick_factual 豁免**（推荐，同读者版豁免）还是也要求 claims。
-3. **收据扩展**：v1 不进 `delivered.json`（推荐，门禁报告 + `--write` 文件足够）；要「交付后复算」再加 P3。
-4. **跑 Fly A 的位置**：dev home 的 `research-workspace`（推荐，现场日志可读）还是临时工作区。
+3. **收据扩展**：v1 不进 `delivered.json`（推荐，门禁报告 + `--write` 文件足够）；要「交付后复算」再加 P6。
+4. ~~**JSON 模板去留**~~（2026-11-10 用户采纳推荐：**加**）——新增 `templates/run/claims.json` 与
+   `templates/run/verdicts.json` 作**写者契约**（Lead 不加载 critic skill，形状必须有写者的家），
+   并用测试把模板键集合钉到 core 的解析面（缺/多即红）；模板按需 read，不进常驻上下文。
+5. **跑 Pilot A 的位置**：dev home 的 `research-workspace`（推荐，现场日志可读）还是临时工作区。
 
 ## 已知与未决（诚实边界）
 

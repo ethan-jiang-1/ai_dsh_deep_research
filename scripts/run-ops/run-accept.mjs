@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-// run-accept.mjs — 操作侧交付验收的单一原子动作：门 A + 证据审计 + 未来日期 sanity → 验收回执/归档。
+// run-accept.mjs — 操作侧交付验收的单一原子动作：门 A + 证据审计 + **claim 级裁决覆盖** + 未来日期 sanity → 验收回执/归档。
 //
 // 为什么存在（2026-10-20 审计 P0-2）：两个 bundle 已过 HITL2/present/final/v1，却因缺 audit.md
 // 被门 A 判 RED；观察面/会话侧按"已交付"结束，生命周期里没有"待操作侧验收"这一格。本工具把
-// 三件事绑在一起：node-gate（交付两门/门A）+ evidence-audit（溯源 + audit.md）+ 日期 sanity；
+// 四件事绑在一起：node-gate（交付两门/门A）+ evidence-audit（溯源 + audit.md）+ verdict-audit（claim 覆盖，
+// 新契约 run 强制；旧 bundle/quick_factual/契约日前 = 不适用）+ 日期 sanity；
 // 绿才写 acceptance.md，--archive 才移入 archive/drt_<slug>/。
 //
 // 用法：source dev/env.sh && node scripts/run-ops/run-accept.mjs <bundle> [--sessions <dir>] [--archive] [--repair]
@@ -97,6 +98,8 @@ const readLog = (p) => {
 // 预检：门禁/审计都 --no-write；红跑不写 bundle（observation 只读）。
 const preGate = run('node-gate 预检（--no-write）', 'scripts/run-gates/node-gate.mjs', [bundle, '--sessions', sessions, '--no-write'])
 const preAudit = run('evidence-audit 预检（--no-write）', 'scripts/run-gates/evidence-audit.mjs', [bundle, '--sessions', sessions, '--no-write'])
+// claim 级裁决（新契约 run 强制；旧 bundle / quick_factual / 契约日前 = 不适用，exit 0）。
+const preVerdict = run('verdict-audit 预检（--no-write）', 'scripts/run-gates/verdict-audit.mjs', [bundle, '--sessions', sessions, '--no-write'])
 // 交付门：新 bundle 的本机 home 路径必须为零；旧契约 bundle 按 D28 epoch 豁免只报告。
 const preHygiene = run('path-hygiene 预检（交付门）', 'scripts/run-gates/path-hygiene.mjs', [bundle, ...(legacy ? ['--allow-legacy'] : [])])
 const preSecret = run('secret-scan 预检（交付物）', 'scripts/run-gates/secret-scan.mjs', [bundle, ...(legacy ? ['--allow-legacy'] : [])])
@@ -109,25 +112,26 @@ if (!datesOk) {
 } else {
   console.log('  PASS 日期 sanity（evidence retrieved_at + journal/question 行首日期）')
 }
-const preGreen = preGate.status === 0 && preAudit.status === 0 && preHygiene.status === 0 && preSecret.status === 0 && datesOk
+const preGreen = preGate.status === 0 && preAudit.status === 0 && preVerdict.status === 0 && preHygiene.status === 0 && preSecret.status === 0 && datesOk
 if (!preGreen) {
-  console.error(`run-accept: RED（${slug}）——预检未过；未写 acceptance.md/audit.md/node-gate.md/delivered.json，未归档。先修红项再跑同一条`)
+  console.error(`run-accept: RED（${slug}）——预检未过；未写 acceptance.md/audit.md/node-gate.md/review/verdict-audit-r<N>.md/delivered.json，未归档。先修红项再跑同一条`)
   process.exit(1)
 }
 
 // --no-write：预检绿即停，不落任何 bundle 文件（只读模式要有真实语义，不能靠"未知参数被忽略"）。
 if (flag('--no-write')) {
-  console.log(`run-accept: 预检绿（${slug}）——--no-write：未写 acceptance.md/audit.md/node-gate.md/delivered.json，未归档`)
+  console.log(`run-accept: 预检绿（${slug}）——--no-write：未写 acceptance.md/audit.md/node-gate.md/review/verdict-audit-r<N>.md/delivered.json，未归档`)
   process.exit(0)
 }
 
 // 绿后才落盘：真实门禁/审计 + 回执。
 const gate = run('node-gate（门 A/交付两门）', 'scripts/run-gates/node-gate.mjs', [bundle, '--sessions', sessions, '--write'])
 const audit = run('evidence-audit（溯源 + audit.md）', 'scripts/run-gates/evidence-audit.mjs', [bundle, '--sessions', sessions, '--write'])
+const verdict = run('verdict-audit（claim 覆盖）', 'scripts/run-gates/verdict-audit.mjs', [bundle, '--sessions', sessions, '--write'])
 const auditPath = join(bundle, 'audit.md')
 const auditText = existsSync(auditPath) ? readFileSync(auditPath, 'utf8') : ''
 const critical = /CRITICAL\s+(\d+)/.exec(auditText)?.[1] ?? null
-const green = gate.status === 0 && audit.status === 0
+const green = gate.status === 0 && audit.status === 0 && verdict.status === 0
 if (!green) {
   console.error(`run-accept: RED（${slug}）——预检绿但落盘门禁/审计失败；未写 acceptance.md/delivered.json`)
   process.exit(1)

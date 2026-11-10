@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "round": 1,
+  "batches": [
+    {
+      "session": "<critic child 的 sessionId（subagent 工具结果里的 childId）>",
+      "preset": "critic",
+      "depth": 1,
+      "raw": "[{\"claim_id\":\"C1\",\"verdict\":\"supported\",\"quote\":\"<原文里支持/反驳的那一句>\",\"reason\":\"<一句话>\",\"rechecked_urls\":[\"https://<重抓过的 URL>\"],\"source_tier_ok\":true}]"
+    }
+  ],
+  "verdicts": [
+    {
+      "claim_id": "C1",
+      "batch": 0,
+      "verdict": "supported",
+      "quote": "<原文里支持/反驳的那一句>",
+      "reason": "<一句话>",
+      "rechecked_urls": ["https://<重抓过的 URL>"],
+      "source_tier_ok": true
+    }
+  ]
+}

@@ -21,6 +21,7 @@ const CLI = join(ROOT, 'scripts', 'run-ops', 'run-accept.mjs')
 const HYGIENE = join(ROOT, 'scripts', 'run-gates', 'path-hygiene.mjs')
 const SECRET = join(ROOT, 'scripts', 'run-gates', 'secret-scan.mjs')
 const SCHEMA_SCAN = join(ROOT, 'scripts', 'run-gates', 'schema-scan.mjs')
+const VERDICT = join(ROOT, 'scripts', 'run-gates', 'verdict-audit.mjs')
 const TEMP = join(ROOT, 'runtime', 'smoke-workspace', `run-accept-smoke-${String(process.pid)}`)
 const HOME = join(TEMP, 'home')
 const WS = join(TEMP, 'ws')
@@ -45,11 +46,11 @@ function writeSession(path, slug, cwd, presentPath) {
   writeFileSync(path, [head, ask1, write, ask2, reply, present].map((e) => JSON.stringify(e)).join('\n') + '\n')
 }
 
-function writeBundle(slug, presentPath, finalText = '# v1\n\nclean\n', runHead = '- contract: 2026-10-23') {
+function writeBundle(slug, presentPath, finalText = '# v1\n\nclean\n', runHead = '- contract: 2026-10-23', type = 'quick_factual') {
   const bundle = join(WS, `drt_${slug}`)
   mkdirSync(join(bundle, 'final'), { recursive: true })
   writeFileSync(join(bundle, 'run.md'), `# Run\n\n${runHead}\n- phase: delivery\n- next: none\n`)
-  writeFileSync(join(bundle, 'question.md'), '# Q\n\n## 研究类型\n\nquick_factual\n\n## Decisions（append-only，最新在上）\n\n- 2026-10-24 HITL2 定稿（delta: 新增；agent interpretation: 按现稿交付）\n')
+  writeFileSync(join(bundle, 'question.md'), `# Q\n\n## 研究类型\n\n${type}\n\n## Decisions（append-only，最新在上）\n\n- 2026-10-24 HITL2 定稿（delta: 新增；agent interpretation: 按现稿交付）\n`)
   writeFileSync(join(bundle, 'final.md'), finalText)
   writeFileSync(join(bundle, 'final', 'v1.md'), finalText)
   writeFileSync(join(bundle, 'review.md'), '# Review\n\nreadiness: PASS\n')
@@ -61,6 +62,57 @@ function writeBundle(slug, presentPath, finalText = '# v1\n\nclean\n', runHead =
 
 function accept(bundle, sessions, extra = []) {
   return runNode(CLI, [bundle, '--sessions', sessions, ...extra], env())
+}
+
+/** claim 契约夹具：claims/verdicts + 一个 critic child 会话（preset/depth/parent + 逐字正文）。 */
+function writeClaimFixtures(bundle, sessions, { verdict = 'supported' } = {}) {
+  const claimText = 'X 在 2026 年降到 0.28 美元'
+  const final = `# v1\n\n${claimText}。\n`
+  writeFileSync(join(bundle, 'final.md'), final)
+  writeFileSync(join(bundle, 'final', 'v1.md'), final)
+  writeFileSync(join(bundle, 'review.md'), '# Review\n\n## readiness: PASS\n\n当前裁决 = verdicts-r1.json\n')
+  writeFileSync(join(bundle, 'final', 'readable-v1.md'), [
+    '# 读者版 — drt_claims',
+    '',
+    '> 对应 canonical: final/v1.md；以 canonical 为准。',
+    '',
+    '## 结论',
+    'X 在 2026 年降价。',
+    '## 为什么',
+    '一手来源与独立来源一致。',
+    '## 这对你意味着什么',
+    '采购成本假设可以下调。',
+    '## 什么会改变这个结论',
+    '出现新的一手价目或口径变化。',
+    '## 目前不能判断',
+    '长期价格走势。',
+    '## 依据与延伸',
+    '依据与延伸见 canonical。',
+    '',
+  ].join('\n'))
+  mkdirSync(join(bundle, 'review'), { recursive: true })
+  writeFileSync(join(bundle, 'review', 'claims.json'), `${JSON.stringify({
+    version: 1,
+    finalRef: 1,
+    claims: [{ id: 'C1', text: claimText, critical: true, urls: ['https://a.example/x'] }],
+  }, null, 2)}\n`)
+  const item = { claim_id: 'C1', verdict, quote: '0.28 美元', reason: '原文一致', rechecked_urls: ['https://a.example/x'], source_tier_ok: true }
+  const raw = JSON.stringify([item])
+  const verdicts = verdict === 'supported'
+    ? [{ ...item, batch: 0 }]
+    : []
+  writeFileSync(join(bundle, 'review', 'verdicts-r1.json'), `${JSON.stringify({
+    version: 1,
+    round: 1,
+    batches: [{ session: 'kid1', preset: 'critic', depth: 1, raw: verdict === 'supported' ? raw : '[]' }],
+    verdicts,
+  }, null, 2)}\n`)
+  const child = join(sessions, 'children', 'kid1')
+  mkdirSync(child, { recursive: true })
+  const head = at({ type: 'session', version: 4, id: 'kid1', cwd: WS, delegationDepth: 1, agentPreset: 'critic', parentSession: 's', origin: 'subagent', seq: 0 })
+  const call = at({ type: 'tool/call', seq: 1, data: { turn: 1, callId: 'c1', name: 'read', arguments: '{}' } })
+  const msg = at({ type: 'assistant/message', seq: 2, data: { turn: 1, step: 1, message: { role: 'assistant', content: [{ type: 'text', text: verdict === 'supported' ? raw : '[]' }] } } })
+  writeFileSync(join(child, 'session.v4.jsonl'), [head, call, msg].map((e) => JSON.stringify(e)).join('\n') + '\n')
 }
 
 try {
@@ -166,6 +218,38 @@ try {
     check(delivered.present.path === 'drt_repair/final/v1.md', '⑤ repair 后 present 相对化', JSON.stringify(delivered.present))
     check(runNode(HYGIENE, [bundle], env()).status === 0, '⑤ repair 后 path-hygiene 干净')
   }
+  // ⑦ claim 契约：claims/verdicts + child 会话齐 → 绿，裁决报告落 review/
+  {
+    const { bundle, sessions } = writeBundle('claims', '', '# v1\n\nclean\n', '- schema: 2\n- created: 2026-10-24', '探索性全景')
+    writeSession(join(sessions, 'sess', 'session.v4.jsonl'), 'claims', WS, join(bundle, 'final', 'v1.md'))
+    writeClaimFixtures(bundle, sessions)
+    const result = accept(bundle, sessions)
+    check(result.status === 0, '⑦ claim 契约齐：run-accept 绿', result.stdout.slice(-500))
+    check(existsSync(join(bundle, 'review', 'verdict-audit-r1.md')), '⑦ verdict-audit 报告落 review/verdict-audit-r1.md')
+    check(readFileSync(join(bundle, 'review', 'verdict-audit-r1.md'), 'utf8').includes('有结论性裁决 1'), '⑦ 报告记录覆盖计数')
+  }
+
+  // ⑧ critical 没有裁决 → 预检红、不写回执
+  {
+    const { bundle, sessions } = writeBundle('gap', '', '# v1\n\nclean\n', '- schema: 2\n- created: 2026-10-24', '探索性全景')
+    writeSession(join(sessions, 'sess', 'session.v4.jsonl'), 'gap', WS, join(bundle, 'final', 'v1.md'))
+    writeClaimFixtures(bundle, sessions, { verdict: 'none' })
+    const result = accept(bundle, sessions)
+    check(result.status === 1, '⑧ 覆盖缺口：预检红', result.stdout.slice(-500))
+    check(/coverage-gap/.test(result.stdout + result.stderr), '⑧ 红项点名 coverage-gap')
+    check(!existsSync(join(bundle, 'delivered.json')) && !existsSync(join(bundle, 'acceptance.md')), '⑧ 红跑不写回执')
+  }
+
+  // ⑨ --require 强制新契约面：非 quick_factual 无 claims → 红（epoch 尚未到，run-accept 侧仍豁免）
+  {
+    const { bundle, sessions } = writeBundle('noclaims', '', '# v1\n\nclean\n', '- schema: 2\n- created: 2026-10-24', '探索性全景')
+    writeSession(join(sessions, 'sess', 'session.v4.jsonl'), 'noclaims', WS, join(bundle, 'final', 'v1.md'))
+    const exempt = runNode(VERDICT, [bundle, '--sessions', sessions, '--no-write'], env())
+    check(exempt.status === 0 && /不适用/.test(exempt.stdout + exempt.stderr), '⑨ 契约日前：无 claims → 不适用（epoch 豁免）', exempt.stdout.slice(-300))
+    const forced = runNode(VERDICT, [bundle, '--sessions', sessions, '--no-write', '--require'], env())
+    check(forced.status === 1 && /no-claims/.test(forced.stdout), '⑨ --require 强制：缺 claims → no-claims 红', forced.stdout.slice(-400))
+  }
+
 } catch (error) {
   check(false, 'smoke 未抛异常', String(error))
 } finally {
@@ -177,5 +261,5 @@ if (failures.length > 0) {
   console.error(`\nrun-accept-smoke: ${String(failures.length)} 项失败`)
   process.exit(1)
 }
-console.log('\nrun-accept-smoke: ALL PASS（回执归一/幂等/外部 present/秘密/repair/整数契约 + schema-scan CLI）')
+console.log('\nrun-accept-smoke: ALL PASS（回执归一/幂等/外部 present/秘密/repair/整数契约 + schema-scan CLI + claim 契约绿/覆盖缺口红/--require 强制）')
 process.exit(0)

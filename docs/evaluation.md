@@ -140,12 +140,13 @@ final 引用链，结果落 bundle 的 audit.md。它不校验日期校准或摘
 - **定义**：真模型、真实研究问题、完整研究 run，产出可核查报告。
 - **最小真检查**：
   - **L4-lite（框架里程碑档）**：每角色一条消息的真模型冒烟（验证模型响应 + 工具调用真实发生，类比 company presence-e2e ~$1 档）；
-  - **L4 全量（方法论里程碑档）**：一个真实问题的完整 run。四条判据里**两条机器、两条人工走查**：
+  - **L4 全量（方法论里程碑档）**：一个真实问题的完整 run。五条判据里**三条机器、两条人工走查**：
 
     | 判据 | 类型 | 载体 / 命令 | 通过 |
     |---|---|---|---|
     | ① 报告存在且含来源清单 | 机器 | `node scripts/run-gates/node-gate.mjs <bundle>`（门A）+ `final/vN` 在场 | exit 0 |
     | ② 结论能回溯到来源文件 | 机器 | `node scripts/run-gates/evidence-audit.mjs <bundle>` → `audit.md` | exit 0 且 `CRITICAL=0` |
+    | ⑤ claim 级裁决覆盖（新契约 run） | 机器 | `node scripts/run-gates/verdict-audit.mjs <bundle>` → `review/verdict-audit-r<N>.md` | exit 0（critical 全有结论性裁决；旧 bundle/quick_factual/契约日前不适用） |
     | ③ 两点交互纪律（HITL 之间静默自主） | 人工走查 | 会话日志里 HITL1 与 HITL2 之间无 `ask_user_question`、无"要不要继续"式汇报 | 结论一行 + 日期写进 bundle 的 `acceptance.md`「人工走查」节 |
     | ④ 中断后从 run 工作区恢复 | 人工走查 | 停通道 → 重启 → 新会话说「继续 `<slug>`」，能接着跑且不依赖 chat memory | 同上 |
 
@@ -166,7 +167,7 @@ final 引用链，结果落 bundle 的 audit.md。它不校验日期校准或摘
 | L1 | `preset-smoke`（缺环境 exit 2） |
 | L2 | `lifecycle-smoke` / `release-smoke` / `install-shape-smoke` / `product-boot-smoke` / `cold-start-smoke` / `doctor-smoke`（缺全局 dsh、tarball、chromium = exit 2） |
 | L3 | `pnpm test` 的 `methodology-mapping` + `evaluation-contract` 契约（0/1） |
-| L4 | 上表机器 ①② 的 node-gate / evidence-audit 退出码；③④ 人工走查记录在场即"已跑"，缺席即"未跑" |
+| L4 | 上表机器 ①②⑤ 的 node-gate / evidence-audit / verdict-audit 退出码；③④ 人工走查记录在场即"已跑"，缺席即"未跑" |
 
 ### 完成判断四分离（交付判断公理）
 

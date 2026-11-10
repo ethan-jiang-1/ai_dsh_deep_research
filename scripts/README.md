@@ -71,6 +71,7 @@
 | schema-scan.mjs | 在场级：八节点输出件在场断言（整数契约/日期两态断代；判据核住 lib/schema-scan-core.mjs，本件 = CLI 壳） | keyless |
 | evidence-audit.mjs | URL/摘录/final 链溯源对账；默认只读，`--write` 才落 audit.md——判据核心住 lib/evidence-audit-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless（须 source dev/env.sh） |
 | path-hygiene.mjs | run bundle 的 `final/`/`acceptance.md`/`delivered.json`/`provenance/` 本机 home 路径；默认红，`--allow-legacy` 旧场只报告 | keyless |
+| verdict-audit.mjs | **claim 级裁决审计**：`review/claims.json` + `review/verdicts-r<N>.json` 的覆盖（critical 全有结论性裁决）/ 值域 / raw 原文重解析 / 与 child 会话逐字一致 / child preset·depth·只读；默认只读，`--write` 才落 `review/verdict-audit-r<N>.md`；旧 bundle/quick_factual/契约日前 = 不适用（epoch），`--require` 强制审——判据核心住 lib/verdict-audit-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless（须 source dev/env.sh） |
 | secret-scan.mjs | 交付物面（final/、receipts、audit、node-gate）的高置信凭据形态（sk-/ghp_/AKIA/AIza/xox[baprs]-/PRIVATE KEY/Bearer）；默认红，`--allow-legacy` 旧场只报告，`--all` 加证据/过程件；输出只到 path/line/kind | keyless |
 
 ## run-ops/（run 观察与运维）
@@ -110,9 +111,9 @@
 | lib/bundle-sessions.mjs | bundle-sessions、bundle-sessions.test | run bundle → 见证会话反查：聚合 scanWitnessLogs 的 boundSessions/presented（绑定谓词不另立——与 node-gate 门①②同源）；交付回执的 witness.sessions 亦由此面派生 |
 | lib/hitl-card-driver.mjs | hitl-answer | HITL 问询卡的浏览器内驱动片段（Playwright `page.evaluate` 入参）：问卡可见性、选项结构、提交/推进按钮可用性；纯 DOM 函数、零闭包，业务判定仍在 lib/ask-drive |
 | lib/frontmatter.mjs | bundle-date-sanity、evidence-audit-core、frontmatter.test、run-dashboard-core | `---` frontmatter 拆分**唯一正本**（两 core 共用同一实现） |
-| lib/zstd-read.mjs | bundle-sessions、evidence-audit、node-gate、run-accept | zstd CLI 文本解压**唯一调用段**（多帧拼接靠 CLI；成功/失败结构化返回，**失败契约留各壳**：`''` 继续 vs `null` 跳过） |
+| lib/zstd-read.mjs | bundle-sessions、evidence-audit、node-gate、run-accept、verdict-audit | zstd CLI 文本解压**唯一调用段**（多帧拼接靠 CLI；成功/失败结构化返回，**失败契约留各壳**：`''` 继续 vs `null` 跳过） |
 | lib/web-harness.mjs | client-hitl-smoke、client-load-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、rerun-triage-probe、run-driver、session-replay、snapshot-replay-smoke、team-preflight-smoke | DSH web 冒烟族**启停与通道唯一正本**：`bootWeb`（等启动横幅拿 token）+ `authenticate` + `makeRpc`；**参数保形**——端口/超时/尾部字符/rpcId 前缀/失败文案与收割方式全留各站点 |
-| lib/session-log.mjs | bundle-sessions、cdp-ask-smoke、cdp-probe、client-hitl-smoke、client-load-reference、client-load-smoke、data-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、hitl-answer、l4-lite-smoke、method-library-probe、plan-card-stats、product-boot-smoke、provider-error-stats、rerun-triage-probe、run-dashboard-core、run-kickoff、run-state、run-state.test、session-events、session-log.test、session-replay、snapshot-replay-smoke、stream-diagnostics、team-preflight-smoke、watch-run、workspace-isolation-smoke | canonical 日志选择与读取 + 会话目录发现（findSessionDir 双形态/首匹配；readSessionTextOf 定位+读取——六处真模型档副本 2026-11-04 收口）+ 会话组发现（findGroup 子串参数化，缺省 research-workspace——BUG-010 三处同款一行收敛；冒烟/自测组逃生口 = 观察工具 --group） |
+| lib/session-log.mjs | bundle-sessions、cdp-ask-smoke、cdp-probe、client-hitl-smoke、client-load-reference、client-load-smoke、data-smoke、discipline-probe、e2e-021rc2、entry-chain-probe、hitl-answer、l4-lite-smoke、method-library-probe、plan-card-stats、product-boot-smoke、provider-error-stats、rerun-triage-probe、run-dashboard-core、run-kickoff、run-state、run-state.test、session-events、session-log.test、session-replay、snapshot-replay-smoke、stream-diagnostics、team-preflight-smoke、verdict-audit、watch-run、workspace-isolation-smoke | canonical 日志选择与读取 + 会话目录发现（findSessionDir 双形态/首匹配；readSessionTextOf 定位+读取——六处真模型档副本 2026-11-04 收口）+ 会话组发现（findGroup 子串参数化，缺省 research-workspace——BUG-010 三处同款一行收敛；冒烟/自测组逃生口 = 观察工具 --group） |
 | lib/session-events-core.mjs | session-events、session-events.test | 会话事件摘要与筛选纯函数（CLI 壳 = run-ops/session-events 行） |
 | lib/llm-stream-tee-core.mjs | llm-stream-tee-core.test | LLM 流 tee 的捕获判定（主机子串，fail-closed）与凭据头脱敏（预载壳 = scripts/probe/llm-stream-tee.cjs——CJS require 面不在 .mjs 对账图内，壳本体是活进程仪器不设 keyless 自测） |
 | lib/provider-errors.mjs | provider-error-stats、provider-errors.test | 回合被上游流错误终结的结构化抽取（唯一语义源：只认 `turn/end` + `reason.kind=error`，不双算 `assistant/attempt`） |
@@ -129,7 +130,7 @@
 | lib/scene-pack.mjs | scene-capture、scene-pack.test | 场景包读取/列示纯函数（五件套概要如实——缺件与坏 meta 不静默；mtime 降序） |
 | lib/inject-reconcile.mjs | cdp-probe、inject-reconcile.test、run-kickoff | 注入消息「落盘对账」判据（BUG-021 正修：日志里出现本条 user/message 才算送达；时间下界防同文假阳） |
 | lib/probe-send-target.mjs | cdp-probe、probe-send-target.test | 提交按钮判定纯函数（BUG-021 正修：send 家族六标签状态机 + **stop 家族拒点** + composer 邻近窗；页面只读 DOM 与执行点击） |
-| lib/final-version.mjs | final-version.test、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、run-accept、run-dashboard-core、run-receipt、schema-scan-core | 终稿版本文件名的唯一判据（纯判据从 pack `src/lib/final-target.ts` 取；目录扫描 = final/ 与 readable-vN）；旧 vN 正则的机械漂移锁 = tests/run/final-version.test |
+| lib/final-version.mjs | final-version.test、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、run-accept、run-dashboard-core、run-receipt、schema-scan-core、verdict-audit | 终稿版本文件名的唯一判据（纯判据从 pack `src/lib/final-target.ts` 取；目录扫描 = final/ 与 readable-vN）；旧 vN 正则的机械漂移锁 = tests/run/final-version.test |
 | lib/probe-status-tab.mjs | cdp-probe、probe-status-tab.test、session-replay | 右栏「研究状态」页签判定纯函数：胶囊按**标题 span 逐字**匹配（拒绝描述串入 / 近似标题）、页签体只认 `[data-sidebar-right-tab]`（不拿会话正文当观察面） |
 | lib/run-channel.mjs | run-driver、run-driver-contract.test | run 通道驱动判据纯函数：web.log → 当前 GUI URL（取最后一条横幅）、浏览器面 verdict → 呈交判决（GREEN / RED / NOT-RUN） |
 | lib/ask-drive.mjs | ask-drive.test、hitl-answer、run-kickoff | 代答读窗与谓词 |
@@ -153,15 +154,16 @@
 | lib/keyless-imports.mjs | layering.test、test-surface.test | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
 | lib/gates-cases.mjs | gates-smoke、verify-gates.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
 | lib/node-gate-core.mjs | node-gate、node-gate-delivery.test、node-gate-leads.test、node-gate-session.test | bundle 判据聚合；唯一导出 = `gateBundle`，领域门直接 import 各自模块 |
-| lib/node-gate-contracts.mjs | node-gate-contracts.test、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、node-gate-delivery.test、review-readiness.test | 交付日期合同、readiness 与 decisions 行解析 |
+| lib/node-gate-contracts.mjs | node-gate-contracts.test、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、node-gate-delivery.test、review-readiness.test、verdict-audit-core | 交付日期合同、readiness 与 decisions 行解析 |
 | lib/node-gate-session-gates.mjs | ask-drive.test、bundle-sessions、node-gate-core、node-gate-delivery-gate、node-gate-witness.test、node-gate-delivery.test、node-gate-session.test、run-accept | HITL、present 与 §Decisions 会话门 |
 | lib/node-gate-run-gates.mjs | node-gate-core、node-gate-leads.test、node-gate-session.test | leads、版本与标题退化门 |
 | lib/node-gate-delivery-gate.mjs | node-gate-core、run-receipt.test | 门A 交付完整性判据 |
 | lib/node-gate-reader-gate.mjs | node-gate-core、node-gate-reader.test | 门C 读者版合同：同版/六节/长度/无来源路径；数字子集只 WARN；旧场/quick_factual 豁免 |
-| lib/schema-scan-core.mjs | node-gate-contracts、node-gate-contracts.test、node-gate-core、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、run-accept、run-bundle-charter.test、run-receipt.test、schema-scan、schema-scan.test | 节点 I/O 契约在场级断言判据核（交付日/研究类型/条件件豁免/断代定红——从 run-gates 下沉修 lib→入口层反向依赖） |
+| lib/schema-scan-core.mjs | node-gate-contracts、node-gate-contracts.test、node-gate-core、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、run-accept、run-bundle-charter.test、run-receipt.test、schema-scan、schema-scan.test、verdict-audit | 节点 I/O 契约在场级断言判据核（交付日/研究类型/条件件豁免/断代定红——从 run-gates 下沉修 lib→入口层反向依赖） |
 | lib/run-dashboard-core.mjs | evaluation-contract.test、run-dashboard、run-dashboard-html、run-dashboard.test | M2 run 观察面解析/场景/模型纯管线（全 fail-soft；HTML 渲染 = run-dashboard-html，CLI/watch/写盘归壳） |
 | lib/run-dashboard-html.mjs | run-dashboard、run-dashboard.test | M2 run 观察面 HTML 渲染薄壳（纯字符串拼接；矩阵/统计来自 core，不读盘） |
 | lib/evidence-audit-core.mjs | evidence-audit、evidence-audit.test、provenance.test | 证据溯源审计判据核心（readLog 注入同上） |
+| lib/verdict-audit-core.mjs | verdict-audit、verdict-audit.test | claim 级裁决判据核心：claims/verdicts 形状与键集、覆盖（critical 全有结论性裁决）、raw 原文重解析、逐字一致（跨轮单调）、child preset/depth/只读；readiness 读法复用 node-gate 同源 |
 | lib/provenance.mjs | evidence-audit-core、provenance.test | 离线来源证明：kind/URL/路径 + sha256 + 时间 + 通道 + 切片；local-file 哈希核对 |
 | lib/run-inventory-core.mjs | run-inventory、run-inventory.test | 只读保留期折算（逐场文件数/字节/最老；合计；1024 进制格式化） |
 | lib/runtime-clean-core.mjs | runtime-clean、runtime-clean.test | 运行区清理纯判据：白名单容器/实验根 + 子树最新 mtime 保留期；symlink/未知名/穿越 fail-closed |
