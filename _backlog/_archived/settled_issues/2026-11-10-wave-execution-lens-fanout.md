@@ -1,24 +1,24 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-10
 ---
 
 # 落地：wave 执行——analyst 承载的 lens 扇出（固定配方 + 报告）
 
-> 立卡：2026-11-10 ｜ 状态：待落地 ｜ 类型：Feature ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-10 ｜ 状态：已结 ｜ 类型：Feature ｜ 结论倾向：现在做 ｜ 可关闭：是
 >
-> 去向：implemented — 交付时写 `notes/implemented/2026-11-10-wave-execution-lens-fanout.md`（决定/输掉的方案/实际跑过的验证进 Note，docs 只写 now）
+> 去向：implemented — [Note](../../../notes/implemented/2026-11-10-wave-execution-lens-fanout.md)；业务验收：用户 2026-11-10 选择 A（接受 P4 代理交付的 final/v1 + readable-v1；代理 HITL 已在 question/journal 标注）
 >
-> **研究依据**：[wave-execution v2](../_archived/research/wave-execution/2026-11-10-wave-execution-contract.md)（新机制事实、A→B 重估、执行合同、试点）→ [channel-policy v2](../_archived/research/orchestration-primitives/2026-11-10-channel-policy.md)（通道总表/8 槽/HITL）→ [lens-as-data v2](../_archived/research/lens-abstraction/2026-11-10-lens-as-data.md)（已落地 D43）→ [claim-verdict 卡](2026-11-10-claim-verdict-quality-loop.md)（D44 在落地）。
+> **研究依据**：[wave-execution v2](../research/wave-execution/2026-11-10-wave-execution-contract.md)（新机制事实、A→B 重估、执行合同、试点）→ [channel-policy v2](../research/orchestration-primitives/2026-11-10-channel-policy.md)（通道总表/8 槽/HITL）→ [lens-as-data v2](../research/lens-abstraction/2026-11-10-lens-as-data.md)（已落地 D43）→ [claim-verdict 卡](../../issues/2026-11-10-claim-verdict-quality-loop.md)（D44 在落地）。
 >
 > **开工授权**：用户 2026-11-10 直派「深挖 wave-execution，提交 issue，准备落地」= 授权深挖与立卡；
 > **`待落地` 不是实施授权**。本卡改动面含 **pack 公共行为**（analyst 工具面、计划卡措辞、计划模板），
 > 实施前请用户明确授权；按审阅分层在 P1（模型可见面）与 P4（真 run）两个阶段边界请人。
 >
-> **与既有卡的关系**：[旧卡（已归档）](../_archived/settled_issues/2026-11-10-workflow-wave-executor.md)
+> **与既有卡的关系**：[旧卡（已归档）](2026-11-10-workflow-wave-executor.md)
 > 的 channel-policy、8 槽、HITL 仍是上游依据；本卡承接其中的 **wave 执行切片**，并按 v2 新事实
 > 把挂点从 A（独立 `wave-runner`）改判 **B（analyst 承载）**。旧卡的 goal
-> `GOAL_TOOL_RESUME_PAUSED` 缺陷已按 [Note](../../notes/implemented/2026-11-10-goal-hitl-alignment.md)
+> `GOAL_TOOL_RESUME_PAUSED` 缺陷已按 [Note](../../../notes/implemented/2026-11-10-goal-hitl-alignment.md)
 > 裁决并落地（HITL2 `timeout:-1`，不 pause/resume），本卡不重复。
 >
 > **基座同步（2026-11-10 立项前核对）**：
@@ -247,48 +247,20 @@ Lead root 不占槽；executor depth 1，children depth 2；同一 wave 不再�
 - **P3 的新事实（已回写合同）**：模型可见的工具结果只有 `workflow "..." completed (N agent)`，
   **没有 `runId` 字段**；`runId` 只在 executor 会话 `tool-workflow/run-start`。报告写
   `run_id:null` + note，不得伪造。
-- **P4 未跑**：需要一场带 HITL1/HITL2 的真 run 与用户在场；当前默认 run 通道有在飞会话
-  （未打扰），且 P4 的 HITL 不能由代理冒充。待用户安排一场 run 时补。
-- **P5 部分**：D45 / design/20 / design/30 / pack README 已知限制已落（commit `2b075a2`）；
-  `release-smoke --install-only` **ALL PASS**（pack → 干净 profile → plugin add → 安装域
-  preset-smoke 5/5 → remove/端口释放）——workflow peer 行在安装域可解析，A11 的 L2 面已补。
-  implemented Note 与卡归档**不先写**——P4 未跑，写了就是把未验项写成 implemented。P4 过后同变更
-  写 `notes/implemented/2026-11-10-wave-execution-lens-fanout.md` 并归档。
-
-**P4 代理模拟（2026-11-10，已跑到交付；仍不是用户验收）**：隔离 profile `wave-pilot` / 端口
-3084（`DSH_PERMISSION_MODE=danger-full-access`），bundle = `drt_api-selection-ds-openai`：
-
-- HITL1 三问 + 计划卡由 `hitl-answer` 代理作答并标注「代理模拟」；计划卡 **193 字**、正文含
-  「W2 脚本扇出 ×4」，选项未改。
-- W2 由 Lead `subagent(agent_preset=analyst)` 执行：`requested 4 / ok 4 / partial 0 / failed 0 /
-  missing 0`（16 张证据卡，含同 lens 拆卡；报告 `run_id:null`、`stop_reason:completed`）；Lead
-  派完结束回合，completion notice 唤醒后读报告。
-- **HITL2 的 `tool/call` 实测 `timeout: -1`**（seq 1114，交付审阅卡 169 字）；goal 未 pause，
-  等待期间无 goal 轮空转；代理答「定稿」后继续交付。
-- critic 三轮后终局 **readiness PASS，CRITICAL 0 / MAJOR 0**，critical claim 8/8 逐字通过；
-  `final/v1.md`（30KB）+ `final/readable-v1.md`（4.8KB）+ present 已落；`run.md` =
-  `phase: delivery` / `delivered: v1 · present`。
-- **操作侧预检 `run-accept --no-write` = RED**（不是 wave 面）：node-gate 因 `audit.md` 未落盘
-  （先跑 evidence-audit --write 即可）；verdict-audit 报 `not-verbatim`（batch3 raw 与 child 原文
-  不逐字）+ C4/C7 多裁决 duplicate 警告；evidence-audit 本身 PASS（CRITICAL 0 / MAJOR 4）。
-  这属 claim-verdict 质量环，代理预演未继续修；**P4 真 run 时同一条 op 预检要一起过**。
-- **容量 finding**：Lead 初版 plan 按 team-assembly 矩阵想招 4 个 teammate（+executor 1 +
-  child 4 = 9 槽）；已把「先算 8 槽再组队」钉进 team-assembly + 测试（commit `f5359ad`）。
-  实际 W2 前只 spawn 了 scout，未撞顶。
-- 代理跑只作机制/容量预演；**P4 的用户在场真 run 与用户对交付的验收仍未发生**，故本卡不归档。
-
-**P4 开跑清单（待用户在场，一轮跑完）**：
-
-1. 先确认默认通道无在飞 run，再停通道重建镜像（`bash dev/boot-run.sh` / `run-driver up`；
-   当前 pack 已改，旧通道会报镜像漂移）；HITL1 正常走三问 + 计划确认卡，
-   卡正文写 `W2 脚本扇出 ×4`；`plan-card-stats.mjs` 复核 ≤200。
-2. plan 写 `## Wave 执行`；节点 `task_id=plan-only`；Lead `subagent(agent_preset=analyst)`
-   （**不是 spawn_teammate**）。
-3. HITL2 时抓 `tool/call` 参数：必须是 `timeout: -1`（不是 600/省略）；观察 goal 是否保持 active、
-   无 goal 轮空转。
-4. 验收：`waves/W2.json` 四键 counts 与文件一致、`missing=0`、无 `ACTIVATION_LIMIT_REACHED`、
-   child 不递归 workflow、峰值 ≤8；把 run/critic 结果写进本卡 §实施进度 + Note。
-5. 失败 → 回 `推敲中`/`等人拍板`，附读数；不硬写 Note。
+- **P4 代理交付 + 用户验收 A**：隔离 profile `wave-pilot` / 端口 3084（`danger-full-access`），
+  bundle = `drt_api-selection-ds-openai`；HITL1/计划卡代理作答并标「代理模拟」，计划卡 **193 字**、
+  含「W2 脚本扇出 ×4」；**HITL2 `tool/call` 实测 `timeout: -1`**（seq 1114，交付卡 169 字），
+  goal 未 pause、等待期无空转；W2 `subagent(agent_preset=analyst)` **4/4 ok**（16 张证据卡，
+  `run_id:null`、`stop_reason:completed`）；critic 三轮后 **readiness PASS / CRITICAL 0 / MAJOR 0**；
+  `final/v1.md` + `readable-v1.md` + present 落盘。**用户 2026-11-10 选择 A：接受代理交付作为
+  业务验收，不重跑全量**（代理 HITL 已在 question/journal 标注；非用户在场 run）。
+- **操作侧验收已绿**：`run-accept` 全绿；`audit.md`（CRITICAL 0 / MAJOR 4）、`acceptance.md`、
+  `delivered.json`、`node-gate.md`、`review/verdict-audit-r1.md` 已写。修复项：A-6 lead 补
+  A 级来源；claim 裁决按当前 claims 重做 r1（旧转录存档 `verdicts-r1.superseded.json`），
+  `verdict-audit` 8/8 critical 覆盖；未 `--archive`，保留现场供复核。
+- **P5 已收尾**：D45 / design/20 / design/30 / pack README 已知限制；implemented Note 已写；
+  本卡已 `git mv` 到 settled_issues，issues/settled 两个索引同变更。
+- **P4 用户在场真 run**：用户选择 A 后**未执行**；它是可选的更强复核，不再是本卡交付前置。
 
 ## 验收标准
 

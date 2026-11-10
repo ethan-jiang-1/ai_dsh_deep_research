@@ -9,7 +9,7 @@ opened: 2026-11-10
 > 去向：implemented — [Note](../../../notes/implemented/2026-11-10-goal-hitl-alignment.md)；业务验收：用户
 > 审查：自审 2026-11-10 — 机制锚点逐条核（vendor rc.5）；P1 真挂载绿/红复现并复原；P2–P4 标明源码级、live 待证；P5 实测；`pnpm verify` 全绿、`pnpm test` 1052/1052。goal 裁决另跑 keyless + L1 + snapshot + l4-lite（见 §2026-11-10 裁决与实施）。
 >
-> **2026-11-10 深挖后分工**：wave 执行切片已由 [wave-execution-lens-fanout](../../issues/2026-11-10-wave-execution-lens-fanout.md)
+> **2026-11-10 深挖后分工**：wave 执行切片已由 [wave-execution-lens-fanout](2026-11-10-wave-execution-lens-fanout.md)
 > 承接；该卡按新事实把挂点从 A（独立 `wave-runner`）改判 **B（analyst 承载）**，并把范围收窄为
 > deep-dive 的 `lens-fanout`。本卡的 goal `GOAL_TOOL_RESUME_PAUSED` 缺陷已按
 > [Note](../../../notes/implemented/2026-11-10-goal-hitl-alignment.md) 裁决并落地；channel-policy
@@ -61,7 +61,7 @@ workflow 的挂点、容量合同、HITL 授权方式与证据/失败合同，�
 5. **跨方向口径**：lens 材料 §7 的「workflow 子代是 Lead 克隆」只在 C 成立；wave-execution 的
    「HITL1 执行方式」与本卡的「计划卡正文点名、选项不动」需要统一成一句。
 
-**下一步：** 本卡已结。wave 执行 = [新卡](../../issues/2026-11-10-wave-execution-lens-fanout.md)
+**下一步：** 本卡已结。wave 执行 = [新卡](2026-11-10-wave-execution-lens-fanout.md)
 （B + `lens-fanout`，按 P0→P5 落地）；goal `GOAL_TOOL_RESUME_PAUSED` 缺陷 = 已裁决并落地
 （[Note](../../../notes/implemented/2026-11-10-goal-hitl-alignment.md)）。channel-policy 记录留在
 本卡与研究材料，不再单独写 RFC。
@@ -124,14 +124,14 @@ pending 时 pause、host 插件自动 resume、去掉 goal、HITL1 也 `-1`—�
 绿；`pnpm verify` 全绿；`pnpm test` 1083 pass；L1 `preset-smoke` 5/5 真挂载 ALL PASS；
 snapshot lead persona 先红 → 重录 + source 更新 → 4 场景 ALL PASS（C5 一行金标准人审重写）；
 `l4-lite-smoke` 全角色 ALL PASS。**未跑**：真实 HITL2 run；模型是否遵守 `timeout:-1` 只有
-prompt 级证据，由 [新卡](../../issues/2026-11-10-wave-execution-lens-fanout.md) P4 补。
+prompt 级证据，由 [新卡](2026-11-10-wave-execution-lens-fanout.md) P4 补。
 
 **去向**：[Note](../../../notes/implemented/2026-11-10-goal-hitl-alignment.md)。
 
 ## 验收标准
 
 > 以下为立项时的 RFC/通道政策验收标准，**已由 §2026-11-10 裁决与实施取代**，保留为历史；
-> 现行 wave 执行验收 = [新卡](../../issues/2026-11-10-wave-execution-lens-fanout.md) A1–A12，
+> 现行 wave 执行验收 = [新卡](2026-11-10-wave-execution-lens-fanout.md) A1–A12，
 > goal 裁决证据 = [Note](../../../notes/implemented/2026-11-10-goal-hitl-alignment.md)。
 
 本卡交付的是 **RFC + 探针证据**，不是实现。RFC 成立时，以下逐条可核：
