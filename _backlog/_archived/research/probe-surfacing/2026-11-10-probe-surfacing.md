@@ -7,11 +7,11 @@ intent: 诊断探针为何被埋没，给出借鉴 ai_dsh_company 的取舍、�
 
 > 研究日期 2026-11-10。外部证据 = [company 机制审计](2026-11-10-external-probe-model.md)；
 > 本仓事实 = 盘上文件（锚点逐条核过）。结论已定性；产出卡 =
-> [2026-11-10-probe-surfacing](../../issues/2026-11-10-probe-surfacing.md)。
+> [2026-11-10-probe-surfacing](../../settled_issues/2026-11-10-probe-surfacing.md)（已结，用户验收 2026-11-10）。
 >
 > **执行状态（2026-11-10）**：S1 已落地——根 `probes/`、生成索引、`probe-registry` 门、
 > guides/66、`using-a-probe` 技能与路由均已交付；实现记录 =
-> [Note](../../../notes/implemented/2026-11-10-probe-surfacing.md)。下面 §1 是**迁移前诊断**，
+> [Note](../../../../notes/implemented/2026-11-10-probe-surfacing.md)。下面 §1 是**迁移前诊断**，
 > §4.1.1 保留为执行面清单；当前路径以 `probes/` 为准。
 >
 > **用户定调（2026-11-10）**：方向可以；探针必须在仓库根部，像 company 的 `probes/` 一样明显。
@@ -22,8 +22,8 @@ intent: 诊断探针为何被埋没，给出借鉴 ai_dsh_company 的取舍、�
 本仓**有探针，但没有「探针这件事」**：
 
 - 盘上有五支 `*-probe.mjs` + 一支流取证仪器；真模型档四支登记在 `REAL_MODEL` 闭集；
-- 发现链只有两条：根 [AGENTS.md](../../../AGENTS.md) 布局里一个括号短语（第 57 行），和
-  [scripts/README.md](../../../scripts/README.md) 一张手维护表（第 46 行）；
+- 发现链只有两条：根 [AGENTS.md](../../../../AGENTS.md) 布局里一个括号短语（第 57 行），和
+  [scripts/README.md](../../../../scripts/README.md) 一张手维护表（第 46 行）；
 - 任务路由、症状表、术语表、验收合同、开发技能里都没有「什么时候该用探针」的入口；
 - 五支头注没有 `状态` / `何时跑` 字段（全目录 `grep` 零命中），没有索引、没有头注门；
   新增一支探针不会被任何机械检查要求登记——`smoke-contract` 只管「要求凭据的脚本」，
@@ -71,7 +71,7 @@ intent: 诊断探针为何被埋没，给出借鉴 ai_dsh_company 的取舍、�
   `probe/` 目录名与 `lib/` 文件；不要求点名 `probe/` 内每一支。
 - 没有 `INDEX.generated.md`；没有头注门；`scripts/README` 的表是唯一全量清单，且可静默漏项。
 - 探针全部手动跑；真模型档成本高，不进 CI 是合理设计——但「何时跑」因此更需要写在头注里。
-- 根 `AGENTS.md` 当前 139 行，预算 140（[doc-budgets.json](../../../scripts/doc-budgets.json)）：
+- 根 `AGENTS.md` 当前 139 行，预算 140（[doc-budgets.json](../../../../scripts/doc-budgets.json)）：
   加一行根布局刚好到顶；不能再用新增行加指针。
 
 ## 2. 缺口
@@ -259,6 +259,6 @@ docs/guides/66-probe-playbook.md ← 单一指南（是什么/何时用/怎么�
 - **迁移面**：本版按「根 `probes/`」重排并已执行；当前 `git grep 'scripts/probe'` 只剩历史
   notes/_backlog 证据正文（冻结，不改写）。执行清单 = 本材料 §4.1.1。
 - **未做**：S1 已落地，但没有实跑任何探针本体（真模型/GUI 成本与授权面）；冷读 PASS，
-  红证/绿证见 [Note](../../../notes/implemented/2026-11-10-probe-surfacing.md)。
+  红证/绿证见 [Note](../../../../notes/implemented/2026-11-10-probe-surfacing.md)。
 - **身份**：company HEAD `7326271d64` 与登记钉 `bf76d36` 不一致，属未重钉借鉴；实施前补
   外部材料登记或重钉复核。

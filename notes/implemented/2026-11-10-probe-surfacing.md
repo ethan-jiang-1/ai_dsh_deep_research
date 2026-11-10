@@ -2,8 +2,8 @@
 
 > 状态：implemented
 >
-> 首提 2026-11-10 ｜ 卡 [探针凸显化](../../_backlog/issues/2026-11-10-probe-surfacing.md) ｜
-> 研究 [probe-surfacing](../../_backlog/research/probe-surfacing/README.md) ｜
+> 首提 2026-11-10 ｜ 卡 [探针凸显化](../../_backlog/_archived/settled_issues/2026-11-10-probe-surfacing.md)（已结，用户验收 2026-11-10） ｜
+> 研究 [probe-surfacing](../../_backlog/_archived/research/probe-surfacing/README.md) ｜
 > 指南 [guides/66](../../docs/guides/66-probe-playbook.md) ｜
 > 目录 [probes/](../../probes/README.md) ｜ 索引 [INDEX.generated.md](../../probes/INDEX.generated.md) ｜
 > 门禁 [`probe-registry`](../../scripts/verify/gates/f-repo.mjs) ｜
@@ -92,4 +92,5 @@ home 后以 exit 1 崩——违反「未 source 自拒 exit 2」。加 `isDevHom
 - **D40 适配（实跑发现）**：`method-library-probe` / `rerun-triage-probe` 引用了已删除的
   `packages/deep-research-pack/workspace` 与 `scaffold.mjs`；改为空工作区 / 自建 bundle。
   `method-library-probe` 的 Q2/Q3 在零工具下接受「未核实」诚实态，只拦编造条目与假称已执行。
-- **未跑**：完整研究 run；用户验收（待答复）。
+- **用户验收**：2026-11-10「可以，不错，我们探针已经开始用起来了」；卡与研究题同日归档。
+- **未跑**：完整研究 run。

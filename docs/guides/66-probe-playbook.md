@@ -165,7 +165,7 @@ probes/
 - 真模型/浏览器档成本高，不进 CI；`何时跑` 是唯一的重跑合同。
 - 探针是开发资产：不进发布包；证据默认 `runtime/`（可清），冻结证据才进 `snapshots/`。
 - 外部借镜（company 的 `probes/`、`/tmp` playbook）已按本仓约束改造：不搬 68 支/四域名/
-  65 道门/`--port 0`；详见 [研究材料](../../_backlog/research/probe-surfacing/2026-11-10-probe-surfacing.md)。
+  65 道门/`--port 0`；详见 [研究材料](../../_backlog/_archived/research/probe-surfacing/2026-11-10-probe-surfacing.md)。
 
 ## 9. 相关工作流
 

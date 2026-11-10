@@ -1,13 +1,15 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-10
 ---
 
 # 落地：探针凸显化——根 `probes/`、生成索引与头注门
 
-> 立卡：2026-11-10 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-10 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
 >
-> 去向：implemented — 交付时写 `notes/implemented/2026-11-10-probe-surfacing.md`（决定/输掉的方案/实际跑过的验证进 Note，docs 只写 now）
+> 去向：implemented — [Note](../../../notes/implemented/2026-11-10-probe-surfacing.md)；业务验收：用户 2026-11-10「可以，不错，我们探针已经开始用起来了」。
+>
+> 审查：自审 2026-11-10 — 全量探针实跑（entry-chain / rerun-triage / method-library / discipline ALL PASS；cdp verdict 绿；tee 预检 exit 0）；`pnpm verify` 全绿；`pnpm test` 1100/1100；用户验收同日。
 >
 > **研究依据**：[probe-surfacing](../research/probe-surfacing/README.md)（现状、缺口、借鉴决策、
 > 根迁移面、S1/S2/S3、验收）→ [company 机制审计](../research/probe-surfacing/2026-11-10-external-probe-model.md)
@@ -34,7 +36,7 @@ opened: 2026-11-10
 **未决问题：** 无设计级未决。迁移顺序可拆：先 `git mv` + 修路径让旧门禁绿，再新件与门，
 最后指南/路由/技能；目录名采用复数 `probes/`（与 company 同名），若坚持单数只改目录名与路径。
 
-**下一步：** 实现已落（见 §实现记录）；请用户验收根布局、冷读与门禁边界。验收通过后归档卡与研究题（Note 已写 = [2026-11-10-probe-surfacing](../../notes/implemented/2026-11-10-probe-surfacing.md)）。
+**下一步：** 用户 2026-11-10 验收通过；卡与研究题同日归档（实现记录 = [2026-11-10-probe-surfacing](../../../notes/implemented/2026-11-10-probe-surfacing.md)）。
 
 ## 方案与取舍
 

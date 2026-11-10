@@ -12,7 +12,7 @@ intent: 为「探针凸显化」研究提供可核的外部证据——组织、
 > 本材料只写核过的事实；playbook 的概括与仓库实况不一致处单独标出——借鉴以仓库为准。
 >
 > **身份注意**：company 当前 HEAD = `7326271d64`（2026-11-10），与
-> [外部材料登记](../../../docs/external-materials.md) 钉的 `bf76d36` 不是同一可解析对象。
+> [外部材料登记](../../../../docs/external-materials.md) 钉的 `bf76d36` 不是同一可解析对象。
 > 本轮是**未重钉的借鉴**：结论只覆盖上述盘上文件，不冒充已重审全仓；实施前按钉版纪律补身份。
 
 ## 1. 它怎么组织
@@ -105,7 +105,7 @@ intent: 为「探针凸显化」研究提供可核的外部证据——组织、
 |---|---|---|
 | 域计数索引 | **已借** | 索引标题带「（N 支）」；覆盖一眼可见，生成物不漂 |
 | 布局存在性门 | **已借** | `entry-chain` 成员加 `probes/README.md`；门牌被删即红 |
-| 类型地图（十类） | **已借** | [guides/66 §7.1](../../../docs/guides/66-probe-playbook.md)；按「证明什么」选型，空白显式 |
+| 类型地图（十类） | **已借** | [guides/66 §7.1](../../../../docs/guides/66-probe-playbook.md)；按「证明什么」选型，空白显式 |
 | 域 = 共享 harness | **已借** | `behavior/`（真模型行为）/ `browser/`（真浏览器）/ `stream/`（流取证）；新域按 harness 分，不按 unit/integration |
 | probe-kit 共享 verdict/check | **暂缓** | 本仓六支各有 harness 与 verdict 形状；再增 2–3 支或出现重复 verdict 再抽，过早统一会捆住场景 |
 | `--self-test` 约定 | **暂缓** | 只有 keyless 审计类需要；本仓暂无 keyless 探针，`_index.mjs --check` 已是索引自证 |
