@@ -1,9 +1,8 @@
 # 研究工作区 — 研究手册
 
-这里是 Deep Research 团队的工作区（产品启动时选定/询问的那个目录）。本手册由产品以
-runtime context 注入每个角色会话，**不落在工作区**；角色人格见各自 preset，这里只放
-**跨角色共享的工作纪律与文件契约**。用户项目自己的 `AGENTS.md` 仍由 DSH 注入；与本手册
-冲突时，**项目指令优先**。
+这里是 Deep Research 团队的工作区（产品启动时选定/询问）。本手册由产品以 runtime context 注入
+每个角色会话，**不落在工作区**；角色人格见各自 preset，这里只放**跨角色共享的工作纪律与文件
+契约**。项目自己的 `AGENTS.md` 由 DSH 注入；冲突时**项目指令优先**。
 
 ## 分层铁律（D17：harness / run bundle）
 
@@ -25,19 +24,18 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
                        Decisions（append-only，最新在上）+ 同 bundle rerun 的 `> rerun: v2 ·
                        evidence-expansion · 日期` 行——跨 rerun 持久，bundle 身份核心（lead）
   topics.md            topic 图：must_answer（问题列表 2–5 问）+ scope_role（owner: lead）
-  plan.md              执行图（owner: lead；可选加速器）：节点表 id/parent/lifecycle/kind/question/
-                       owner_role/deps/output/acceptance/budget/depth/task_id + 图版本 vN/重写记录；
-                       **在场时必须有 `## 剩余工作` 小节**（未完成节点 + owner + next；全图可选）；
-                       重写前落 `plan/v<旧版本>.md` 快照；不是交付凭证；Team 任务板是当前会话的
-                       执行镜像；schema-scan/node-gate 不检查全图。**W<wave>.<index>**：W2 是 Wave 2 分组（不是任务），
-                       W2.1/W2.2 是层内并行节点，W2.1.1 是内部拆解；Wave 由 deps 计算，ID
-                       前缀必须一致；跨 Wave 重编号 + 旧号别名；lifecycle 墓碑留在表里但不画图；
-                       stage 由节点 kind 派生；Team 平铺、不建 nested Team
+  plan.md              执行图（owner: lead；可选加速器，不是交付凭证）：节点列/图版本/`W<wave>.<index>`
+                       编号纪律的正本 = 模板 `templates/run/plan.md` 与 lead 的 research-planning skill；
+                       **在场时必须有 `## 剩余工作` 小节**；重写前落 `plan/v<旧版本>.md`；Team 板只是执行镜像；
+                       schema-scan/node-gate 不检查全图
   leads.md             候选方向清单（owner: scout）
   evidence/            证据文件，一条一档（owner: analyst；含工作底稿/失败登记，非承重）
   findings.md          发现账本：结论 + 支撑 + gap 状态（owner: lead）
   review.md            对抗核查报告（owner: critic）：当前终局块（文件头声明最新在上；
                        `readiness: PASS|FAIL` + CRITICAL/MAJOR 清单；历史轮不夺权）
+  review/claims.json   claim 表（lead）：text 必须是 final 原句；critical 标 must-answer 句
+  review/verdicts-r<N>.json
+                       裁决原文 + 批次（lead 写；child 只回文本；形状见同名模板）
   drafts/              过程稿（owner: 各角色，按需）
   final/               **交付副本**：交付时把 run 根 final.md 忠实复制为 v1.md；扩张 rerun 落 v2.md——
                        vN = 交付物全文；索引/回溯放 findings 或 vN 首节。读者版：review PASS 后写
@@ -48,9 +46,8 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
                        URL/路径 + sha256 + 时间 + 通道 + 切片；与 evidence/<id>.md 同名
   delivered.json       交付回执（ops）：门结果/audit 哈希/present 指针/final+reader 哈希
   manifest.json        目录说明书（ops）：文件角色/读序/契约版本/哈希；不是指令
-  audit.md             证据审计快照（ops/派生；不是研究内容）
-  node-gate.md         门禁快照（ops/派生）
-  acceptance.md        验收回执（ops；旧场交付只有它，不是 delivered.json）
+  audit.md / node-gate.md / acceptance.md
+                       操作侧快照与回执（ops/派生；不是研究内容；旧场交付只有 acceptance.md）
   plan/                旧图快照 plan/v<N>.md（owner: lead；重写前落；只读）
   journal.md           运行纪要（追加式；文件头声明方向，默认最新在上；所有角色可写；跨 rerun 累积血统）
 archive/drt_<slug>/    操作桶（交付后操作侧移入；位置不证明交付；仍可被审计投影）
@@ -59,8 +56,8 @@ _abandoned/drt_<slug>/ 停放桶（未投入但保留；原因/复活条件写 r
                       新 run bundle 的起点模板（只读，不直接写；从包内读，复制进 bundle）
 drafts/（工作区根）    开发侧跨 run 草稿（可选；产品安装态没有预置，角色不写不读——run 内过程稿见上）
 nodes-contract skill  节点 I/O 契约全表（八节点 I/O + 下游可开工判据 + 回边版本语义）；Lead 编制
-                       plan.md 时加载。机械把守 = schema-scan（在场级）+ node-gate（判据级门
-                       ①②③④+L+R+A+C）；两者是开发仓工具、不随包，安装态按回执三态降级
+                       plan.md 时加载。机械把守 = schema-scan + node-gate（开发仓工具、不随包；
+                       安装态按回执三态降级）
 question-patterns skill 判型模式库（HITL1 第一对照面；命中走条目、未命中兜底 + journal 标记行；
                        增长协议 = 库尾节）；Lead 立项时加载
 method-library.md      本工作区方法库（用户所有；工作区根；lead 维护；四字段 = 找来源/怎么核实/报告怎么写/不承诺）。
@@ -217,7 +214,7 @@ review 审查时间、口径截至）以 **time-context 读数**为准（每步�
 
 ## 完成判据（verify the world）
 
-- `final/vN` 的关键结论有真实存在且内容支撑的 `[来源: evidence/xx.md]`；`review.md` 的**终局块**为 PASS 后才进入 HITL2。
+- `final/vN` 的关键结论有真实存在且内容支撑的 `[来源: evidence/xx.md]`；`review.md` 的**终局块**为 PASS 后才进入 HITL2；新契约 run 另需 `review/claims.json` 的 critical 全有结论性裁决（`verdict-audit` 绿）。
 - 新 run 非 quick_factual：review PASS 后、HITL2 前写 `final/readable.md`；交付时 `final/readable-vN.md` 与 `final/vN` 同版在场（门C）。
 - 有 lens 的 run：`review.md` 终局块的 `topic × lens` 覆盖表无静默空格（无卡也无 gap/n-a = FAIL）；`final.md` §目前不能判断写出视角覆盖/空视角；缺 `lens` 字段的新证据卡 = critic MAJOR。
 - 交付回执：`final/vN` + `final/readable-vN` + `question.md` §Decisions 的 HITL2 拍板行 + Lead 的 `deliverables/presented`（含 `final/vN` 与 reader）+ 操作侧 `audit.md`（标题匹配、`CRITICAL=0`）+ `delivered.json`/`acceptance.md`；**无审计工具时按上节三态降级**（写 `no machine audit (install-only)`，不假装绿）。

@@ -21,6 +21,9 @@ description: 组队决策方法论：这次研究需要谁、不需要谁、走�
 
 - **spawn_teammate（团队通道，主通道）**：需要持续对话、任务板、多轮往返的协作——scout 汇报方向后 analyst 接力挖、critic 审查后 analyst 补证据，都是多轮往返，走团队。
 - **subagent（一次性 worker）**：单点快捷查证（"去把这个数字查实"），前台等结果，不进任务板。
+- **claim 级复核（非 quick_factual；subagent 的一次性形态）**：`agent_preset=critic` + claim 表
+  （3–5 条/批，claim-first，不给草稿叙事）+ `claim-verdict` skill；child 只回 JSON 数组，Lead 原文落
+  `review/verdicts-r<N>.json`。它不进任务板、不做报告级判断——那是团队态 critic 的事。
 
 ## 分派纪律
 

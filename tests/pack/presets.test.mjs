@@ -283,3 +283,21 @@ test('读者版终稿：reader-final skill + persona + 手册钉面（review PAS
   assert.match(manual, /final\/readable-vN\.md/, '手册缺读者版交付件');
   assert.match(manual, /门C/, '手册缺门C 读者版合同');
 });
+
+test('claim 级复核：critic claim-verdict 契约 + lead 派工纪律（覆盖不可回退成报告级 prose）', () => {
+  const critic = readFileSync(join(PRESETS, 'critic.patch.yml'), 'utf8');
+  assert.match(critic, /claim-verdict/, 'critic persona 未点名 claim-verdict——claim 模式会退回报告级审查');
+  const skill = readFileSync(join(PRESETS, 'critic', 'skills', 'claim-verdict', 'SKILL.md'), 'utf8');
+  for (const token of ['supported', 'partially_supported', 'unsupported', 'unverifiable', 'rechecked_urls', '单值']) {
+    assert.ok(skill.includes(token), `claim-verdict skill 缺 ${token}`);
+  }
+  const lead = readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8');
+  for (const token of ['review/claims.json', 'review/verdicts-r<N>.json', 'claim-verdict', 'UNVERIFIED']) {
+    assert.match(lead, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), `lead persona 缺 ${token}`);
+  }
+  assert.match(lead, /3–5 条/, 'lead persona 缺分批纪律（3–5 条/child）');
+  // 手册（跨角色/恢复合同）：工件目录 + 交付判据
+  const manual = readFileSync(join(PACK, 'content', 'manual.md'), 'utf8');
+  assert.match(manual, /review\/claims\.json/, '手册目录约定缺 claim 表');
+  assert.match(manual, /verdict-audit/, '手册完成判据缺 verdict-audit 覆盖门');
+});
