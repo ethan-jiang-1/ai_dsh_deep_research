@@ -100,6 +100,9 @@ probes/
 
 1. **先红**：改坏夹具、去掉保护或加负例，证明判据真的会红；还原后绿。只交付绿 = 不知道它会不会咬人。
 2. **隔离/端口**：临时目录/临时 home；端口独占；结束清理（`--keep` 才留现场）；拒绝碰日用 home。
+   **工作区夹具**：D40 后包不再播种 workspace 种子，`scaffold.mjs` 也已移除；探针用
+   空工作区或自建 bundle，不要引用已删除的 pack 种子。零工具 prompt 可避免 read/bash 审批把
+   探针挂起；此时模型答「未核实」是诚实态，判据应接受它、只拦编造。
 3. **证据落盘**：`runtime/smoke-workspace/<probe>-<timestamp>/`；verdict + 原始日志/页面文本/截图；
    离线拿同一份证据重跑判据仍得同样结论。只有要冻结成金样才进 `snapshots/`。
 4. **登记**：补头注六字段 → `node probes/_index.mjs --write` → `pnpm verify` 绿；

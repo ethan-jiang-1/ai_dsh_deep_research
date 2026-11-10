@@ -78,7 +78,18 @@ home 后以 exit 1 崩——违反「未 source 自拒 exit 2」。加 `isDevHom
 - **无参前置实跑**：四支行为探针在 ambient `DSH_HOME=~/.dsh` 下修复前 exit 1（boot 平台 home）；
   加 `requireDevHome` 后 exit 2 + 明确「不是开发 home——先 source dev/env.sh」；`cdp-probe` /
   `llm-stream-tee` 无参均 exit 2（用法）。证明导入/ROOT 与 verdict 契约在迁域后仍成立。
-- **真模型实跑**：`entry-chain-probe` **ALL PASS**（2026-11-10；Q1 授权范围、Q2 RFC 条件、
-  Q3 guides/60 路由；留档 `runtime/smoke-workspace/entry-chain-probe-2026-11-10T14-16-47-918Z.md`）。
-  这是迁根后第一支端到端跑通的探针（boot → 会话 → 真模型 → 断言）。
-- **未跑**：其余真模型/GUI 探针本体；完整研究 run；用户验收（待答复）。
+- **全量探针实跑（2026-11-10）**：
+  - `entry-chain-probe` **ALL PASS**（Q1 授权范围、Q2 RFC 条件、Q3 guides/60 路由；留档
+    `runtime/smoke-workspace/entry-chain-probe-2026-11-10T14-16-47-918Z.md`）；
+  - `rerun-triage-probe` **ALL PASS**（a–e 五条；空工作区 + 自建已交付 bundle）；
+  - `method-library-probe` **ALL PASS**（D40 空工作区；零工具 prompt；Q2/Q3 接受「未核实」诚实态，
+    只拦编造条目/假称已执行）；
+  - `discipline-probe` **ALL PASS**（5 场景：a2-escalation / b1-diff-questions /
+    acceptance-missing-file / acceptance-unverifiable / hitl1-plan-card）；
+  - `cdp-probe` verdict：`booted=true` / `frameMounted=true` / `statusPaneOpen=true` /
+    `expectFaceHeld=true`，`consoleProblems=[]`、`exceptions=[]`；
+  - `llm-stream-tee --port 3083` 预检 exit 0（打印 attach 命令）。
+- **D40 适配（实跑发现）**：`method-library-probe` / `rerun-triage-probe` 引用了已删除的
+  `packages/deep-research-pack/workspace` 与 `scaffold.mjs`；改为空工作区 / 自建 bundle。
+  `method-library-probe` 的 Q2/Q3 在零工具下接受「未核实」诚实态，只拦编造条目与假称已执行。
+- **未跑**：完整研究 run；用户验收（待答复）。

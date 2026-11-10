@@ -95,9 +95,12 @@ opened: 2026-11-10
 - **已跑证据**：`pnpm verify` 全绿；`pnpm test` 1100/1100；`gates-smoke` 全绿（107 案例）；
   `probes/_index.mjs --check` 一致；红证 = 索引失鲜 / 缺头注；冷读 PASS（fresh agent 只看
   `AGENTS.md` + `00-index` 能定位 `probes/` 并选探针）。
-- **真模型实跑**：`entry-chain-probe` **ALL PASS**（2026-11-10，Q1–Q3；留档
-  `runtime/smoke-workspace/entry-chain-probe-2026-11-10T14-16-47-918Z.md`）。
-- **未跑**：其余真模型/GUI 探针本体；用户验收待答复。
+- **全量探针实跑**：`entry-chain` / `rerun-triage` / `method-library` / `discipline` 均
+  **ALL PASS**；`cdp-probe` 返回 `booted/frameMounted/statusPaneOpen/expectFaceHeld=true`、
+  `consoleProblems=[]`；`llm-stream-tee --port 3083` 预检 exit 0。
+- **D40 适配**：`method-library` / `rerun-triage` 去掉已删除的 pack workspace 种子 /
+  `scaffold.mjs`；改用空工作区 / 自建 bundle；method-library 在零工具下接受「未核实」诚实态。
+- **未跑**：完整研究 run；用户验收待答复。
 
 ## 关闭条件
 

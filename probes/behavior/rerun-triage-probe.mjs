@@ -22,7 +22,7 @@ import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/
 import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
 import { findSessionDir, readSessionText, resolveSessionLog } from '../../scripts/lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -50,25 +50,10 @@ let failures = 0;
 const pass = (m) => console.log(`  PASS ${m}`);
 const fail = (m) => { failures += 1; console.log(`  FAIL ${m}`); };
 
-// ── 临时研究工作区：pack 种子 + 一份已交付的 probe bundle ─────────────────────
+// ── 临时研究工作区：空工作区 + 一份已交付的 probe bundle（D40 起包不再播种）──
 const WS = join(ROOT, 'runtime', 'smoke-workspace', 'rerun-triage-probe-ws');
 rmSync(WS, { recursive: true, force: true });
 mkdirSync(WS, { recursive: true });
-{
-  const SEED = join(ROOT, 'packages', 'deep-research-pack', 'workspace');
-  const walk = (dir, rel = '') => {
-    for (const ent of readdirSync(dir, { withFileTypes: true })) {
-      const src = join(dir, ent.name);
-      const r = rel === '' ? ent.name : join(rel, ent.name);
-      if (ent.isDirectory()) { walk(src, r); continue; }
-      if (!ent.name.endsWith('.md')) continue;
-      const dst = join(WS, r);
-      mkdirSync(dirname(dst), { recursive: true });
-      writeFileSync(dst, readFileSync(src));
-    }
-  };
-  walk(SEED);
-}
 const B = join(WS, 'drt_probe');
 mkdirSync(join(B, 'final'), { recursive: true });
 mkdirSync(join(B, 'evidence'), { recursive: true });
