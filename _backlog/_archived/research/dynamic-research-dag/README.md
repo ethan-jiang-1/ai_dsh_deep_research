@@ -2,7 +2,7 @@
 
 > 问题：DSH 原生编排原语能支撑怎样的动态研究 DAG；宽搜 / 深搜、搜索底座、观察面与组合决策怎么做？
 > 消费者：用户直派（2026-10-21 动态研究 DAG 推敲）
-> 产出的卡：[动态研究 DAG 卡](../../settled_issues/2026-10-21-dynamic-research-dag.md)、[A0 RFC](../../../../notes/implemented/2026-10-21-dynamic-research-dag-a0.md)
+> 产出的卡：[动态研究 DAG 卡](../../settled_issues/2026-10-21-dynamic-research-dag.md)、[A0 RFC](../../../../notes/archived/2026-10-21-dynamic-research-dag-a0.md)
 > 归档：2026-10-29（消费者已结）
 
 ## 材料

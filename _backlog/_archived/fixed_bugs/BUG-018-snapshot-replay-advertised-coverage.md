@@ -100,4 +100,4 @@ B2 只比 `request/header` 的 tools；C 层只比渲染面 → **A/B/C 三层�
 
 标定材料（逐次判定 / 真阳假阳 / 9 类候选面表 / 两轮对抗自审记录）=
 [模型可见面标定](../research/recorded-session-obligation/2026-10-08-model-visible-calibration.md)；
-判决与依据 = [recorded-session-obligation 条目](../../../notes/implemented/2026-10-08-recorded-session-obligation.md)。
+判决与依据 = [recorded-session-obligation 条目](../../../notes/archived/2026-10-08-recorded-session-obligation.md)。

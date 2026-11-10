@@ -1,7 +1,7 @@
 # 10 · 架构：repo 形态、组合层与通道选型
 
 > 层：设计（为什么）。工程范式照搬 `ai_dsh_company`（解剖报告见
-> [dsh-plugin-repo-anatomy](../../notes/implemented/2026-09-24-dsh-plugin-repo-anatomy.md)）；
+> [dsh-plugin-repo-anatomy](../../notes/archived/2026-09-24-dsh-plugin-repo-anatomy.md)）；
 > DSH 机制的权威在本仓 `vendor/dsh/` pinned submodule（tag 与钉 commit 的正本 = [AGENTS.md §DSH 源码表](../../AGENTS.md) +
 > `.gitmodules`；只读铁律——verify 门禁 `vendor-pin`/`vendor-clean` 把守，D10）。
 > 读完去哪：角色内容 = [20](./20-roles.md)；运行时组合与状态 = [50](./50-agent-loop-and-state.md)。

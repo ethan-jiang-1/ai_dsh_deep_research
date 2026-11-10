@@ -4,7 +4,7 @@
 
 > 历史注记：preflight/scaffold/seed 判据已由 D40 删除；只读 doctor 的安装锚解析仍有效，现行安装形态看 [guides/65](../../docs/guides/65-run-forms.md)。
 
-> 来源：用户 2026-10-26「围绕插件打包/分发/安装/数据隔离，覆盖各种 DSH 环境做探索性测试并固化测试资产」。本 Note 记录本轮由探索证实的决定；部分取代 [部署工程](2026-09-26-deployment-engineering.md) 的 preflight peer 解析与 scaffold 边界。
+> 来源：用户 2026-10-26「围绕插件打包/分发/安装/数据隔离，覆盖各种 DSH 环境做探索性测试并固化测试资产」。本 Note 记录本轮由探索证实的决定；部分取代 [部署工程](../archived/2026-09-26-deployment-engineering.md) 的 preflight peer 解析与 scaffold 边界。
 
 ## 决定
 

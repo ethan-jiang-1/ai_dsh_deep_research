@@ -100,4 +100,4 @@ E1 的 keyless 面与 web-profile 真模型面维持切换；回归排查 = 队�
 ## 后续（pin 换代）
 
 本条钉的是「把 vendor 做进 workspace 并立门禁」这个机制决定，实例值（tag/commit）随换 pin 变更，
-不属本条决定内容。首次换代 = [2026-10-19 vendor pin 升到 dsh-v0.2.1-rc.2](2026-10-19-vendor-pin-bump-021rc2.md)。
+不属本条决定内容。首次换代 = [2026-10-19 vendor pin 升到 dsh-v0.2.1-rc.2](../archived/2026-10-19-vendor-pin-bump-021rc2.md)。

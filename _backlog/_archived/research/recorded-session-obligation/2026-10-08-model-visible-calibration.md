@@ -5,8 +5,8 @@ intent: 为 recorded-session 义务标定与 BUG-018 保存被消费的判定证
 
 # recorded-session 义务标定：判据不可按路径立（且 smoke 广告了它不覆盖的面）
 
-> 服务 = [recorded-session-obligation 条目](../../../../notes/implemented/2026-10-08-recorded-session-obligation.md)（已毕业）
-> ｜RFC（已毕业，正文即上方条目）= [`2026-10-08-recorded-session-obligation.md`](../../../../notes/implemented/2026-10-08-recorded-session-obligation.md)
+> 服务 = [recorded-session-obligation 条目](../../../../notes/archived/2026-10-08-recorded-session-obligation.md)（已毕业）
+> ｜RFC（已毕业，正文即上方条目）= [`2026-10-08-recorded-session-obligation.md`](../../../../notes/archived/2026-10-08-recorded-session-obligation.md)
 > ｜参考卷条款 = `12 §2`「看见的请求」+「可回放的会话」。
 > **本报告只标定，不立门禁**（RFC 判据 6）。`git diff --stat scripts/verify/` 为空即证。
 

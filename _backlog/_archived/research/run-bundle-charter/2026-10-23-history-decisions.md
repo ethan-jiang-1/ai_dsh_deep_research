@@ -20,17 +20,17 @@ intent: 为宪章 RFC 提供决定时间线与「可能做错」的七类判断�
 | 09-26 | 事故→契约 | 当前版 final.md 钉 run 根；放进 final/ 会被审计静默跳过（0/0 假象） | 一次真实 run 位置漂移（`notes/implemented/2026-09-27-polish-to-plateau.md:24`） | 09-29 schema-scan 把「位置违约」列为契约（`notes/implemented/2026-09-29-quality-evidence-loop.md:7`）；final/ 从此只放版本账（`research-workspace/AGENTS.md:36-39`） |
 | 09-27 | 位置=状态（D17 记日） | 在飞住工作区根，交付后操作侧 mv 到 archive/ | 根只留活跃、观察面用位置判态（`docs/decisions.md:27`） | 与宪章「位置非状态」冲突（issue:51）；archive 又可续跑（`docs/guides/61-run-playbook.md:209-213`） |
 | 09-27 | 证据最小契约＋审计 fail-loud | 摘录只放原文／逐段逐字／表格逐格；日期不得凭时间感；source_url 必须真抓 | 八场 run：逐字率 31%→98%，日期五场全错（`notes/implemented/2026-09-27-polish-to-plateau.md:13-30,44-46`） | 审计仍不判注释混入与单元格拆分，靠 critic 人审补位（`research-workspace/AGENTS.md:91`） |
-| 09-28 | rerun-loop-live | 在 archive 的已交付 bundle 上做 v2 证据扩张 | 验证 D17 正宗 rerun（`notes/implemented/2026-09-28-rerun-loop-live.md:11-17`） | G8：HITL2 与 present 双缺席，journal 散文先宣称 present（同文:34-41），次日立门②③ |
+| 09-28 | rerun-loop-live | 在 archive 的已交付 bundle 上做 v2 证据扩张 | 验证 D17 正宗 rerun（`notes/archived/2026-09-28-rerun-loop-live.md:11-17`） | G8：HITL2 与 present 双缺席，journal 散文先宣称 present（同文:34-41），次日立门②③ |
 | 09-29 | NODES + 门②③ | 八节点 I/O；present 须在会话日志；操作侧补齐可 PASS-RELAY | 两场 run 拍板行/present 裸奔（`notes/archived/2026-09-28-node-io-schema.md:13-19`） | NODES:33 把 present 列为交付节点输出，`docs/guides/61-run-playbook.md:38` 却说它不在 bundle；relay 是补丁（`scripts/lib/node-gate-session-gates.mjs:184`） |
 | 10-03 | 门④／门L | 版本记账门（vN≥2 须 §Decisions vN 行＋v1 索引）与 leads 交接门 | 回边版本血统与交接质量（`research-workspace/NODES.md:53-59`） | 用全局「契约日」断代，bundle 不记版本（`scripts/lib/node-gate-contracts.mjs:5-19`） |
 | 10-06 | 门R＋复审上限 | 同标题≥4 红；复审≤3 轮，超界原样升级 HITL2 | 外部事故 #6452；33 场存量标定（`notes/implemented/2026-10-06-heading-degeneration-gate.md:12-27`） | 门R 本仓零事故也立（同文:25-27）；上限先 2 后 3（`notes/implemented/2026-10-06-review-loop-bound.md:42-45`） |
-| 10-07 | 计划确认卡 | HITL1 两段卡；不另立计划文件，question.md 已是方向契约 | 一处事实一个家（`notes/implemented/2026-10-07-plan-review-gate.md:45-46`） | 两周后「计划」改指 plan.md 执行图（`notes/implemented/2026-10-21-dynamic-research-dag-a0.md:17-20`），同名不同物 |
+| 10-07 | 计划确认卡 | HITL1 两段卡；不另立计划文件，question.md 已是方向契约 | 一处事实一个家（`notes/implemented/2026-10-07-plan-review-gate.md:45-46`） | 两周后「计划」改指 plan.md 执行图（`notes/archived/2026-10-21-dynamic-research-dag-a0.md:17-20`），同名不同物 |
 | 10-07/08 | 门A | 交付完整性 = final/ 记账 × readiness × audit CRITICAL=0 | 交付判据在合同／脚本／操作面三方不一致（delivery:7-35） | 7 个归档 bundle 门红以「豁免登记」保留（同文:39-56,106-107）→ archive 内有未按现契约交付者 |
 | 10-12 | D25／方法库 | 工作区根 method-library.md；Lead 写，面板只经 session/prompt 中继 | 偏好跨 run 复用；写路径须模型可见（`docs/decisions.md:35`） | 与「harness 只读、变量全在 bundle」冲突；BUG-042 补种子＋三态＋探针（`_backlog/_archived/fixed_bugs/BUG-042-method-library-seed-absent-no-pointer.md:27-30`） |
 | 10-15/16 | _abandoned | 13 个未归档 bundle 分 A/B/C；新建停放位，可 mv 回根复活 | 活动区清零，且绝不把红场洗成已交付（`_backlog/_archived/settled_issues/2026-10-15-unclosed-bundles-disposition.md:8-10,56-75`） | 位置二值变三值；手册刻意不写（`research-workspace/.gitignore.example:13-16`）；10-19 又删 16 个（`research-workspace/_abandoned/README.md:21-32`） |
 | 10-18 | 门判据放宽 | 门L 剥强调、门③认代答 provenance、门A 认升级路径；readiness 收归单一正本 | 真 run 假红 17 条＋门/UI 判据分叉（`notes/implemented/2026-10-18-node-gate-judgment-widening.md:11-20`） | 改 readiness 会「唤醒」旧 bundle 原本 N/A 的门②③（同文:50）——契约日断代挡不住追溯改判 |
 | 10-19 | 终稿页签／交付判据 | present 才是交付；final.md 在场只算「可审」；final/vN 不是交付凭证；路径三位置回退 | 真 run 里 v1 在 HITL2 前就落盘（`notes/implemented/2026-10-19-final-tab-round-close.md:21-24,41-45`） | 交付证据仍住日志（`docs/guides/61-run-playbook.md:38`）；三位置回退是对「位置会变」的补丁（`docs/design/40-research-cockpit.md:71`） |
-| 10-21 | DAG A0 | plan.md=lead 过程件，进图谱但不进 schema-scan/node-gate；不加 plan-gate | 不引第二套 store/queue（`notes/implemented/2026-10-21-dynamic-research-dag-a0.md:17-20,45-46`） | 恢复仍靠 plan 的 W 节点重建任务（`research-workspace/AGENTS.md:57-58`）；归档中 plan.md 仅 1/46（issue:99） |
+| 10-21 | DAG A0 | plan.md=lead 过程件，进图谱但不进 schema-scan/node-gate；不加 plan-gate | 不引第二套 store/queue（`notes/archived/2026-10-21-dynamic-research-dag-a0.md:17-20,45-46`） | 恢复仍靠 plan 的 W 节点重建任务（`research-workspace/AGENTS.md:57-58`）；归档中 plan.md 仅 1/46（issue:99） |
 | 10-22 | W<wave>.<index> | Wave 由 deps 算；节点 W2.1，内部 W2.1.1；跨波重编号＋旧号别名；旧 N/flat W 只读 | 用户纠正 W=工作包语义（`notes/implemented/2026-10-22-w-wave-node-identity.md:7-12`） | 一个月内第三套节点命名（N→flat W→W<wave>），旧 plan 不迁移（同文:11-30） |
 | 10-23 | rerun 版本面 | 图版本头＋plan/vN 快照＋rerun 行＋final/vN 账；present 无版本号，按账推定 | 版本面只用盘上机器可读事实（rerun:11-21） | 契约版本仍无戳（issue:54）；真实样本头与记录不一致只能「两个都报」（同文:93-96） |
 | 10-23 | 图谱映射诚实 | plan↔Team 五态；「未执行」不再由缺映射产生；覆盖率分母=active 节点 | 恢复后 task_id stale 必现（graph:11-23） | 诚实了，但仍不能回答「还剩什么」——缺口只暴露给人/Lead |
@@ -60,7 +60,7 @@ intent: 为宪章 RFC 提供决定时间线与「可能做错」的七类判断�
 - archive 不是交付证明：7 个归档 bundle 保留红门（delivery:39-56,106-107）；archive 还能被继续
   rerun（`docs/guides/61-run-playbook.md:209-213`）→ 同一位置同时是「已交付」和「在飞」。
 - 10-15 卡把 13 个积压全判成「在飞」，真正原因是停摆/未闭环（card:10,37）；加停放位后工具面
-  被迫认第三位置（`notes/implemented/2026-10-16-structure-round3-harness-convergence.md:70-77`）。
+  被迫认第三位置（`notes/archived/2026-10-16-structure-round3-harness-convergence.md:70-77`）。
 - 按 `docs/guides/61-run-playbook.md:35-39`，当前 4 个活动 bundle 全属 (b)「交付线已在盘、未归档」
   （final/v1＋终局 PASS）——「已交付未归档」是常态，位置无法表达状态。
 

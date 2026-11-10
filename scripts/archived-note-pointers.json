@@ -2,19 +2,294 @@
   "comment": "活面→notes/archived 具名 Note 的 Markdown 链接登记簿（历史指针类）。owner = verify 门禁 archived-note-pointer：未登记的此类链接即红；登记条目失真/失存也红。登记动作 = 活面显式承认'我在引用冻结件'；引用现行权威请改指活跃载体而不是登记。维护：Note 移位/复活时同步本簿；条目按 (source, target) 对登记，同对多链接算一条。",
   "pointers": [
     {
+      "source": "_backlog/_archived/fixed_bugs/BUG-018-snapshot-replay-advertised-coverage.md",
+      "target": "notes/archived/2026-10-08-recorded-session-obligation.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-08-recorded-session-obligation 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/fixed_bugs/BUG-022-provider-stream-malformed-turn-kill.md",
+      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
+      "reason": "受控实验与字节取证快照（postmortem 层退役迁入）"
+    },
+    {
+      "source": "_backlog/_archived/fixed_bugs/BUG-024-direct-path-malformed-storm-recurrence.md",
+      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
+      "reason": "根因实测定案与全程证据快照（postmortem 层退役迁入）"
+    },
+    {
+      "source": "_backlog/_archived/fixed_bugs/BUG-028-llm-socket-isolation-silent-fallback.md",
+      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
+      "reason": "socket 隔离缓解的依据与 soak 结论快照（postmortem 层退役迁入）"
+    },
+    {
+      "source": "_backlog/_archived/research/company-snapshots/2026-10-09-company-snapshots-analysis.md",
+      "target": "notes/archived/2026-10-08-recorded-session-obligation.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-08-recorded-session-obligation 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/dynamic-research-dag/2026-10-22-w-work-package-identity-review.md",
+      "target": "notes/archived/2026-10-21-dynamic-research-dag-a0.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-21-dynamic-research-dag-a0 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/dynamic-research-dag/README.md",
+      "target": "notes/archived/2026-10-21-dynamic-research-dag-a0.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-21-dynamic-research-dag-a0 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/method-config-ux/2026-10-18-method-config-ux-ab.md",
+      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
+      "reason": "同族上游流环境事件的历史快照（postmortem 层退役迁入）"
+    },
+    {
+      "source": "_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md",
+      "target": "notes/archived/2026-09-26-human-gate-acceptance.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-26-human-gate-acceptance 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md",
+      "target": "notes/archived/2026-09-28-hitl-docking-polish.md",
+      "reason": "体检材料历史引用（边界个案小节分析对象；2026-10-10 已裁定归档，仅路径重定向）"
+    },
+    {
+      "source": "_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md",
+      "target": "notes/archived/2026-09-28-node-topology-procedure.md",
+      "reason": "体检材料历史引用（同上）"
+    },
+    {
+      "source": "_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md",
+      "target": "notes/archived/2026-10-07-living-verification-hook.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md",
+      "target": "notes/archived/2026-10-08-notes-stocktake.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-08-notes-stocktake 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/notes-stocktake/README.md",
+      "target": "notes/archived/2026-10-08-notes-stocktake.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-08-notes-stocktake 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/README.md",
+      "target": "notes/archived/2026-10-08-notes-stocktake.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-08-notes-stocktake 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/README.md",
+      "target": "notes/archived/2026-10-08-recorded-session-obligation.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-08-recorded-session-obligation 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/README.md",
+      "target": "notes/archived/2026-10-21-dynamic-research-dag-a0.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-21-dynamic-research-dag-a0 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/recorded-session-obligation/2026-10-08-model-visible-calibration.md",
+      "target": "notes/archived/2026-10-08-recorded-session-obligation.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-08-recorded-session-obligation 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/recorded-session-obligation/README.md",
+      "target": "notes/archived/2026-10-08-recorded-session-obligation.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-08-recorded-session-obligation 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-28-node-io-schema.md",
+      "target": "notes/archived/2026-09-28-node-io-schema.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
+      "target": "notes/archived/2026-09-28-hitl-docking-polish.md",
+      "reason": "已结卡结论指向面⑤首棒 Note（其交付记录的历史家；2026-10-10 裁定归档，路径重定向）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
+      "target": "notes/archived/2026-09-28-node-topology-procedure.md",
+      "reason": "已结卡指向拓扑流程 Note（SKILL 承接核实后 2026-10-10 裁定归档，路径重定向）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
+      "target": "notes/archived/2026-09-28-wave0-leads-polish.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
+      "target": "notes/archived/2026-09-28-wave1-dig-polish.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
+      "target": "notes/archived/2026-09-28-wave2-synthesis-polish.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
+      "target": "notes/archived/2026-09-29-dispatch-distillation.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-29-dispatch-distillation 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-28-retire-roadmap.md",
+      "target": "notes/archived/2026-09-28-backlog-deliberation-space.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-28-backlog-deliberation-space 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-29-dispatch-distillation.md",
+      "target": "notes/archived/2026-09-29-dispatch-distillation.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-29-dispatch-distillation 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-04-leads-topic-shape.md",
+      "target": "notes/archived/2026-09-28-wave0-leads-polish.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-05-test-asset-organization.md",
+      "target": "notes/archived/2026-10-05-test-asset-organization.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-16-structure-round3-convergence.md",
+      "target": "notes/archived/2026-10-05-test-asset-organization.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-16-structure-round3-convergence.md",
+      "target": "notes/archived/2026-10-13-repo-structure-refactor.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-13-repo-structure-refactor 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-16-structure-round3-convergence.md",
+      "target": "notes/archived/2026-10-13-verify-domain-regroup.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-13-verify-domain-regroup 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-16-structure-round3-convergence.md",
+      "target": "notes/archived/2026-10-16-structure-round3-harness-convergence.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-16-structure-round3-harness-convergence 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-19-discipline-map-semantic-drift.md",
+      "target": "notes/archived/2026-10-19-vendor-pin-bump-021rc2.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-19-vendor-pin-bump-021rc2 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-21-dynamic-research-dag.md",
+      "target": "notes/archived/2026-10-21-dynamic-research-dag-a0.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-21-dynamic-research-dag-a0 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-23-rerun-dissatisfaction-triage.md",
+      "target": "notes/archived/2026-09-28-rerun-loop-live.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-28-rerun-loop-live 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-09-28-backlog-deliberation-space.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-28-backlog-deliberation-space 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-09-28-node-io-schema.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-09-29-dispatch-distillation.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-29-dispatch-distillation 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-10-05-test-asset-organization.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-10-16-structure-round3-harness-convergence.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-16-structure-round3-harness-convergence 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-10-21-dynamic-research-dag-a0.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-21-dynamic-research-dag-a0 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/triggers.md",
+      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
+      "reason": "上游流畸形复现条件的历史根因与取证快照（postmortem 层退役迁入）"
+    },
+    {
+      "source": "_backlog/triggers.md",
+      "target": "notes/archived/2026-10-13-verify-domain-regroup.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-13-verify-domain-regroup 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/triggers.md",
+      "target": "notes/archived/2026-10-20-test-asset-reassessment.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-20-test-asset-reassessment 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/triggers.md",
+      "target": "notes/archived/2026-10-20-tests-domain-layout.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-20-tests-domain-layout 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/triggers.md",
+      "target": "notes/archived/2026-10-27-hygiene-round2-feedback-truth.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-27-hygiene-round2-feedback-truth 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/triggers.md",
+      "target": "notes/archived/2026-10-28-hygiene-round3-feedback-truth.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-28-hygiene-round3-feedback-truth 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/triggers.md",
+      "target": "notes/archived/2026-11-03-seven-dimension-hygiene-round.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-11-03-seven-dimension-hygiene-round 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": ".agents/skills/bumping-vendor-pin/SKILL.md",
+      "target": "notes/archived/2026-09-25-vendor-pin-bump-017rc2.md",
+      "reason": "两次实操历史轮次/017 待查项出处（现行流程 owner = 本技能）"
+    },
+    {
+      "source": ".agents/skills/bumping-vendor-pin/SKILL.md",
+      "target": "notes/archived/2026-09-30-vendor-pin-bump-020rc2.md",
+      "reason": "两次实操历史轮次出处（现行流程 owner = 本技能）"
+    },
+    {
+      "source": ".agents/skills/reproducing-a-failure/SKILL.md",
+      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
+      "reason": "postmortem 层退役后的范本事故快照（判据与五节骨架 = notes/README §事故复盘）"
+    },
+    {
+      "source": "dev/README.md",
+      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
+      "reason": "socket 隔离预载的上游相位性故障出处（postmortem 层退役迁入）"
+    },
+    {
+      "source": "docs/decisions.md",
+      "target": "notes/archived/2026-09-24-deep-research-harness-analysis.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-24-deep-research-harness-analysis 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
       "source": "docs/decisions.md",
       "target": "notes/archived/2026-09-24-ui-observability-surfaces.md",
       "reason": "决策台账 D18 行与外部研究材料表的琢磨稿指针（行内标注'已归档'——观察面选项推敲与十二坑考古的历史家）"
     },
     {
-      "source": "docs/external-materials.md",
-      "target": "notes/archived/2026-09-24-dsh-market-scout.md",
-      "reason": "外部研究材料表：DSH 插件生态行的粗扫种子指针（行内标注'冻结'，认真报告已毕业为现行的 dsh-plugin-ecosystem）"
+      "source": "docs/design/10-architecture.md",
+      "target": "notes/archived/2026-09-24-dsh-plugin-repo-anatomy.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-24-dsh-plugin-repo-anatomy 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
-      "source": "docs/design/40-research-cockpit.md",
-      "target": "notes/archived/2026-09-28-cockpit-naming.md",
-      "reason": "头部定名快照指针 + §7 历史指针（演进链末环'定名'——该节明示'为什么当初这么选'住 notes 树）"
+      "source": "docs/design/30-methodology-mapping.md",
+      "target": "notes/archived/2026-09-24-deep-research-harness-analysis.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-24-deep-research-harness-analysis 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
       "source": "docs/design/40-research-cockpit.md",
@@ -33,78 +308,18 @@
     },
     {
       "source": "docs/design/40-research-cockpit.md",
+      "target": "notes/archived/2026-09-28-cockpit-flow-face.md",
+      "reason": "§6 已知限制 G6（vendor UI 待查）的历史根因链出处"
+    },
+    {
+      "source": "docs/design/40-research-cockpit.md",
+      "target": "notes/archived/2026-09-28-cockpit-naming.md",
+      "reason": "头部定名快照指针 + §7 历史指针（演进链末环'定名'——该节明示'为什么当初这么选'住 notes 树）"
+    },
+    {
+      "source": "docs/design/40-research-cockpit.md",
       "target": "notes/archived/2026-09-28-right-pane-ux-debt.md",
       "reason": "§7 历史指针（挂起显性化 + 会话绑定）"
-    },
-    {
-      "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-09-24-foundation-remediation.md",
-      "reason": "L0 登记表 md-links/role-list-sync/gate-ledger-sync 三行的反证出处列引基础整治 Note（红→还原绿实证的历史家；现行执行体 = 门禁本体与 gates-smoke 常驻案例）"
-    },
-    {
-      "source": "docs/guides/61-run-playbook.md",
-      "target": "notes/archived/2026-09-26-bundle-face-wiring.md",
-      "reason": "会话建在别处则渐进面缺席的实测根因指针（根因链历史家；操作事实已在本页现行正文）"
-    },
-    {
-      "source": "notes/implemented/2026-09-24-noise-sweep.md",
-      "target": "notes/archived/2026-09-24-l4-lite-m1-done.md",
-      "reason": "体检对账行引 m1-done Note（其独有内容'会话日志事件词汇表 + M1 证据链'的冻结家——noise-sweep 自身的归档判定记录）"
-    },
-    {
-      "source": "notes/implemented/2026-09-24-noise-sweep.md",
-      "target": "notes/archived/2026-09-24-foundation-remediation.md",
-      "reason": "backfill 指针说明行（'backfill 内为指针非家'——归档去向的历史注记）"
-    },
-    {
-      "source": "notes/implemented/2026-09-25-research-type-coverage.md",
-      "target": "notes/archived/2026-09-26-run-loop-hardening.md",
-      "reason": "六处缺陷清单的历史出处指针（run 环硬化记录的冻结家）"
-    },
-    {
-      "source": "notes/implemented/2026-09-26-signal-to-noise-remediation.md",
-      "target": "notes/archived/2026-09-26-bundle-face-wiring.md",
-      "reason": "workspaceFiles 接通状态的证据指针（'= 已接通'的历史判定记录）"
-    },
-    {
-      "source": "notes/implemented/2026-10-08-notes-stocktake.md",
-      "target": "notes/archived/2026-09-28-hitl-docking-polish.md",
-      "reason": "体检报告历史引用（记录该归档候选当时的承接核实状态；2026-10-10 已裁定归档）"
-    },
-    {
-      "source": "notes/implemented/2026-10-08-notes-stocktake.md",
-      "target": "notes/archived/2026-09-28-node-topology-procedure.md",
-      "reason": "体检报告历史引用（同上——SKILL 承接已核实、活面零引用，2026-10-10 裁定归档）"
-    },
-    {
-      "source": "_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md",
-      "target": "notes/archived/2026-09-28-hitl-docking-polish.md",
-      "reason": "体检材料历史引用（边界个案小节分析对象；2026-10-10 已裁定归档，仅路径重定向）"
-    },
-    {
-      "source": "_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md",
-      "target": "notes/archived/2026-09-28-node-topology-procedure.md",
-      "reason": "体检材料历史引用（同上）"
-    },
-    {
-      "source": "notes/implemented/2026-10-10-archive-review-surface.md",
-      "target": "notes/archived/2026-09-28-hitl-docking-polish.md",
-      "reason": "裁定记录指向归档快照（两案裁定与承接核实的正本——本门禁同 diff 的裁定 Note）"
-    },
-    {
-      "source": "notes/implemented/2026-10-10-archive-review-surface.md",
-      "target": "notes/archived/2026-09-28-node-topology-procedure.md",
-      "reason": "同上"
-    },
-    {
-      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
-      "target": "notes/archived/2026-09-28-hitl-docking-polish.md",
-      "reason": "已结卡结论指向面⑤首棒 Note（其交付记录的历史家；2026-10-10 裁定归档，路径重定向）"
-    },
-    {
-      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
-      "target": "notes/archived/2026-09-28-node-topology-procedure.md",
-      "reason": "已结卡指向拓扑流程 Note（SKILL 承接核实后 2026-10-10 裁定归档，路径重定向）"
     },
     {
       "source": "docs/discipline-map.md",
@@ -112,99 +327,79 @@
       "reason": "头部枚举方法行的首轮清点实录指针（历史出处；现行三态正本 = 本表自身）"
     },
     {
+      "source": "docs/discipline-map.md",
+      "target": "notes/archived/2026-10-19-vendor-pin-bump-021rc2.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-19-vendor-pin-bump-021rc2 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-09-24-foundation-remediation.md",
+      "reason": "L0 登记表 md-links/role-list-sync/gate-ledger-sync 三行的反证出处列引基础整治 Note（红→还原绿实证的历史家；现行执行体 = 门禁本体与 gates-smoke 常驻案例）"
+    },
+    {
+      "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-09-24-noise-sweep.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-24-noise-sweep 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-09-24-review-driven-hardening.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-24-review-driven-hardening 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-09-26-signal-to-noise-remediation.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-26-signal-to-noise-remediation 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-10-07-audit-p3-closure-round.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-07-audit-p3-closure-round 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-10-10-archive-review-surface.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-10-archive-review-surface 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-10-19-vendor-pin-bump-021rc2.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-19-vendor-pin-bump-021rc2 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-11-03-seven-dimension-hygiene-round.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-11-03-seven-dimension-hygiene-round 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "docs/external-materials.md",
+      "target": "notes/archived/2026-09-24-deep-research-harness-analysis.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-24-deep-research-harness-analysis 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "docs/external-materials.md",
+      "target": "notes/archived/2026-09-24-dsh-market-scout.md",
+      "reason": "外部研究材料表：DSH 插件生态行的粗扫种子指针（行内标注'冻结'，认真报告已毕业为现行的 dsh-plugin-ecosystem）"
+    },
+    {
+      "source": "docs/external-materials.md",
+      "target": "notes/archived/2026-09-24-dsh-plugin-repo-anatomy.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-24-dsh-plugin-repo-anatomy 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
       "source": "docs/external-materials.md",
       "target": "notes/archived/2026-09-24-ui-observability-surfaces.md",
       "reason": "外部材料表 DSH client/UI 扩展面行：琢磨稿历史指针（行内标注“已归档”）"
     },
     {
-      "source": "_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md",
-      "target": "notes/archived/2026-10-07-living-verification-hook.md",
-      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+      "source": "docs/guides/60-dev-loop.md",
+      "target": "notes/archived/2026-09-24-agent-friendly-polish.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-24-agent-friendly-polish 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
-      "source": "_backlog/_archived/settled_issues/2026-09-28-node-io-schema.md",
-      "target": "notes/archived/2026-09-28-node-io-schema.md",
-      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
-    },
-    {
-      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
-      "target": "notes/archived/2026-09-28-wave0-leads-polish.md",
-      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
-    },
-    {
-      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
-      "target": "notes/archived/2026-09-28-wave1-dig-polish.md",
-      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
-    },
-    {
-      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
-      "target": "notes/archived/2026-09-28-wave2-synthesis-polish.md",
-      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
-    },
-    {
-      "source": "_backlog/_archived/settled_issues/2026-10-04-leads-topic-shape.md",
-      "target": "notes/archived/2026-09-28-wave0-leads-polish.md",
-      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
-    },
-    {
-      "source": "_backlog/_archived/settled_issues/2026-10-05-test-asset-organization.md",
-      "target": "notes/archived/2026-10-05-test-asset-organization.md",
-      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
-    },
-    {
-      "source": "_backlog/_archived/settled_issues/2026-10-16-structure-round3-convergence.md",
-      "target": "notes/archived/2026-10-05-test-asset-organization.md",
-      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
-    },
-    {
-      "source": "_backlog/_archived/settled_issues/README.md",
-      "target": "notes/archived/2026-09-28-node-io-schema.md",
-      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
-    },
-    {
-      "source": "_backlog/_archived/settled_issues/README.md",
-      "target": "notes/archived/2026-10-05-test-asset-organization.md",
-      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
-    },
-    {
-      "source": "notes/rejected/2026-09-24-frontmatter-caliber-gate.md",
-      "target": "notes/archived/2026-09-24-m2-data-caliber.md",
-      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
-    },
-    {
-      "source": "notes/implemented/2026-09-28-rerun-loop-live.md",
-      "target": "notes/archived/2026-09-28-cockpit-flow-face.md",
-      "reason": "rerun 执行环的流程轨道/回边表达前身；G4/G7 根因链历史出处（现行 owner = design/40）"
-    },
-    {
-      "source": "notes/implemented/2026-10-12-research-config-tab.md",
-      "target": "notes/archived/2026-09-28-cockpit-home.md",
-      "reason": "研究配置页签的“同族先例”历史指针（现行 owner = design/40）"
-    },
-    {
-      "source": "docs/design/40-research-cockpit.md",
-      "target": "notes/archived/2026-09-28-cockpit-flow-face.md",
-      "reason": "§6 已知限制 G6（vendor UI 待查）的历史根因链出处"
-    },
-    {
-      "source": "notes/implemented/2026-10-09-snapshots-adoption.md",
-      "target": "notes/archived/2026-09-24-keyless-snapshot-lane.md",
-      "reason": "部分取代的历史出处：回放通道选型/三层判据现由 snapshots/README + snapshot-replay-smoke 头注承接"
-    },
-    {
-      "source": "notes/implemented/2026-09-26-signal-to-noise-remediation.md",
-      "target": "notes/archived/2026-09-25-vendor-pin-bump-017rc2.md",
-      "reason": "升 pin 历史轮次出处（现行流程 owner = bumping-vendor-pin 技能）"
-    },
-    {
-      "source": ".agents/skills/bumping-vendor-pin/SKILL.md",
-      "target": "notes/archived/2026-09-25-vendor-pin-bump-017rc2.md",
-      "reason": "两次实操历史轮次/017 待查项出处（现行流程 owner = 本技能）"
-    },
-    {
-      "source": ".agents/skills/bumping-vendor-pin/SKILL.md",
-      "target": "notes/archived/2026-09-30-vendor-pin-bump-020rc2.md",
-      "reason": "两次实操历史轮次出处（现行流程 owner = 本技能）"
+      "source": "docs/guides/61-run-playbook.md",
+      "target": "notes/archived/2026-09-26-bundle-face-wiring.md",
+      "reason": "会话建在别处则渐进面缺席的实测根因指针（根因链历史家；操作事实已在本页现行正文）"
     },
     {
       "source": "notes/implemented/2026-09-24-observability-gui.md",
@@ -212,39 +407,29 @@
       "reason": "驾驶舱原初 RFC 指向余项交付快照：B-full/工具卡已由后续轮次交付（现行构成 = design/40）"
     },
     {
-      "source": ".agents/skills/reproducing-a-failure/SKILL.md",
-      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
-      "reason": "postmortem 层退役后的范本事故快照（判据与五节骨架 = notes/README §事故复盘）"
+      "source": "notes/implemented/2026-09-24-vendor-submodule.md",
+      "target": "notes/archived/2026-10-19-vendor-pin-bump-021rc2.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-19-vendor-pin-bump-021rc2 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
-      "source": "_backlog/triggers.md",
-      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
-      "reason": "上游流畸形复现条件的历史根因与取证快照（postmortem 层退役迁入）"
+      "source": "notes/implemented/2026-09-25-agent-ready-absorption.md",
+      "target": "notes/archived/2026-10-08-evidence-liveness-hardening.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-08-evidence-liveness-hardening 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
-      "source": "_backlog/_archived/research/method-config-ux/2026-10-18-method-config-ux-ab.md",
-      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
-      "reason": "同族上游流环境事件的历史快照（postmortem 层退役迁入）"
+      "source": "notes/implemented/2026-10-08-delivery-review-scan-expansion.md",
+      "target": "notes/archived/2026-10-08-recorded-session-obligation.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-08-recorded-session-obligation 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
-      "source": "_backlog/_archived/fixed_bugs/BUG-028-llm-socket-isolation-silent-fallback.md",
-      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
-      "reason": "socket 隔离缓解的依据与 soak 结论快照（postmortem 层退役迁入）"
+      "source": "notes/implemented/2026-10-09-snapshots-adoption.md",
+      "target": "notes/archived/2026-09-24-keyless-snapshot-lane.md",
+      "reason": "部分取代的历史出处：回放通道选型/三层判据现由 snapshots/README + snapshot-replay-smoke 头注承接"
     },
     {
-      "source": "_backlog/_archived/fixed_bugs/BUG-024-direct-path-malformed-storm-recurrence.md",
-      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
-      "reason": "根因实测定案与全程证据快照（postmortem 层退役迁入）"
-    },
-    {
-      "source": "_backlog/_archived/fixed_bugs/BUG-022-provider-stream-malformed-turn-kill.md",
-      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
-      "reason": "受控实验与字节取证快照（postmortem 层退役迁入）"
-    },
-    {
-      "source": "dev/README.md",
-      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
-      "reason": "socket 隔离预载的上游相位性故障出处（postmortem 层退役迁入）"
+      "source": "notes/implemented/2026-10-09-snapshots-adoption.md",
+      "target": "notes/archived/2026-10-08-recorded-session-obligation.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-08-recorded-session-obligation 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
       "source": "notes/implemented/2026-10-11-provider-malformed-response-retry.md",
@@ -252,14 +437,44 @@
       "reason": "根因改判与 BUG-022 归档的历史出处（postmortem 层退役迁入）"
     },
     {
+      "source": "notes/implemented/2026-10-12-research-config-tab.md",
+      "target": "notes/archived/2026-09-28-cockpit-home.md",
+      "reason": "研究配置页签的“同族先例”历史指针（现行 owner = design/40）"
+    },
+    {
       "source": "notes/implemented/2026-10-16-replay-turn-settled-predicate.md",
       "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
       "reason": "录制器收紧的落地件①历史出处（postmortem 层退役迁入）"
     },
     {
-      "source": "notes/implemented/2026-09-26-signal-to-noise-remediation.md",
-      "target": "notes/archived/2026-09-26-roadmap-graduation-drift.md",
-      "reason": "毕业漂移复盘的历史出处（postmortem 层退役迁入）"
+      "source": "notes/implemented/2026-10-18-sidebar-session-location.md",
+      "target": "notes/archived/2026-10-13-repo-structure-refactor.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-13-repo-structure-refactor 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "notes/implemented/2026-10-26-deploy-truth-and-isolation.md",
+      "target": "notes/archived/2026-09-26-deployment-engineering.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-09-26-deployment-engineering 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "notes/implemented/2026-10-27-deepseek-search-api-retrieval.md",
+      "target": "notes/archived/2026-10-21-dynamic-research-dag-a0.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-21-dynamic-research-dag-a0 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "notes/implemented/2026-11-04-session-dir-canonical.md",
+      "target": "notes/archived/2026-10-16-structure-round3-harness-convergence.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-16-structure-round3-harness-convergence 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "notes/implemented/2026-11-05-vendor-pin-bump-021rc5.md",
+      "target": "notes/archived/2026-10-19-vendor-pin-bump-021rc2.md",
+      "reason": "2026-11-10 归档批次路径重定向：2026-10-19-vendor-pin-bump-021rc2 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "notes/rejected/2026-09-24-frontmatter-caliber-gate.md",
+      "target": "notes/archived/2026-09-24-m2-data-caliber.md",
+      "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
     }
   ]
 }

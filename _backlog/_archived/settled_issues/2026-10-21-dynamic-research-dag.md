@@ -8,7 +8,7 @@ opened: 2026-10-21
 > 立卡：2026-10-21 ｜ 状态：已结 ｜ 类型：未定 ｜ 结论倾向：现在做（A0 组合；已实施）
 >
 > 2026-10-21 用户拍板：按推荐组合走；决策 review = [review](../research/dynamic-research-dag/2026-10-21-combination-review.md)。
-> 总计划 [RFC](../../../notes/implemented/2026-10-21-dynamic-research-dag-a0.md) 已毕业为 implemented；受控 4 节点 run + L0/L1/client-load 全绿，本卡归档。
+> 总计划 [RFC](../../../notes/archived/2026-10-21-dynamic-research-dag-a0.md) 已毕业为 implemented；受控 4 节点 run + L0/L1/client-load 全绿，本卡归档。
 
 **问题与期望结果：** 现在四角色 + Agent Teams + 八节点文件契约能跑，但执行图是隐式、模板化的：
 `topics.md` 的 `depends_on` 与 Team task 的 `blocked_by` 只被局部使用，Lead 不会按问题形状现场
@@ -43,7 +43,7 @@ opened: 2026-10-21
    靠 critic/HITL？
 6. 是否向上游提 `workflow.agent()` 的 preset 选择能力，还是本仓只把它留给同质叶级 fan-out？
 
-**下一步：** 已实施并归档。后续若有真实用户委托 run 的观察缺口，另开新卡；pack 默认搜索 / Fetch API 切换 / plan gate 见 [RFC §已知限制与延后工作](../../../notes/implemented/2026-10-21-dynamic-research-dag-a0.md)。
+**下一步：** 已实施并归档。后续若有真实用户委托 run 的观察缺口，另开新卡；pack 默认搜索 / Fetch API 切换 / plan gate 见 [RFC §已知限制与延后工作](../../../notes/archived/2026-10-21-dynamic-research-dag-a0.md)。
 
 ## 已知与未决
 
@@ -78,7 +78,7 @@ acceptance / budget / depth），用 Team 任务板 `blocked_by` 物化；Lead �
 搜索底座见[DeepSeek Search/Fetch API](../research/dynamic-research-dag/2026-10-21-deepseek-search-fetch-api.md)，
 观察面见[侧栏研究图谱](../research/dynamic-research-dag/2026-10-21-cockpit-plan-graph.md)，
 组合评审见[决策 review](../research/dynamic-research-dag/2026-10-21-combination-review.md)，
-总计划见[RFC](../../../notes/implemented/2026-10-21-dynamic-research-dag-a0.md)。
+总计划见[RFC](../../../notes/archived/2026-10-21-dynamic-research-dag-a0.md)。
 
 ## 调研收敛（2026-10-21）
 
@@ -135,4 +135,4 @@ acceptance / budget / depth），用 Team 任务板 `blocked_by` 物化；Lead �
 ## 关闭条件
 
 已满足：A0 组合实施并验证（受控 4 节点 run + L0/L1/client-load 全绿），RFC 毕业为
-[implemented](../../../notes/implemented/2026-10-21-dynamic-research-dag-a0.md)，本卡归档。
+[implemented](../../../notes/archived/2026-10-21-dynamic-research-dag-a0.md)，本卡归档。

@@ -94,4 +94,4 @@ design/40 全文；cockpit keyless 测试对 `WAVE` 文案的断言点（若测�
 - 卡：[2026-10-22-w-work-package-identity.md](../../../_archived/settled_issues/2026-10-22-w-wave-node-identity.md)
 - 机制正本：`vendor/dsh/docs/subsystems/agent-team.md`；[机制盘点](./2026-10-21-dsh-orchestration-primitives.md)
 - 本仓实现：`plan-graph.ts` / `ResearchGraphTab.tsx` / plan 模板 / research-planning skill / NODES.md / 研究手册 / A0 run plan（§1 表内逐条锚点）
-- A0 决定：[2026-10-21-dynamic-research-dag-a0.md](../../../../notes/implemented/2026-10-21-dynamic-research-dag-a0.md)
+- A0 决定：[2026-10-21-dynamic-research-dag-a0.md](../../../../notes/archived/2026-10-21-dynamic-research-dag-a0.md)

@@ -5,7 +5,7 @@
 出处 = [BUG-034](../../_backlog/_archived/fixed_bugs/BUG-034-client-load-smoke-selftest-capsule-intermittent.md)
 与 [BUG-035](../../_backlog/_archived/fixed_bugs/BUG-035-hitl-answer-sidebar-session-invisible.md)
 （2026-10-18 当日立案、当日闭环并归档）。被扩展的 owner =
-[全仓结构重构 Note](2026-10-13-repo-structure-refactor.md)（它建立 `scripts/lib/web-ui-nav.mjs`
+[全仓结构重构 Note](../archived/2026-10-13-repo-structure-refactor.md)（它建立 `scripts/lib/web-ui-nav.mjs`
 为侧栏导航唯一正本；本 Note 只加它的**判据**，不改该收敛本身）。
 
 ## 决定
@@ -29,7 +29,7 @@
   （`scripts/AGENTS.md` §retry 白名单）；
 - **清理 dev home 的会话/工作区来"治本"**：治标且破坏证据（会话日志是冒烟的磁盘真值来源）；
 - **只在冒烟里修（hitl-answer 不动）**：同一判据两版实现正是本仓反复吃过的漂移病
-  （见 [重构 Note](2026-10-13-repo-structure-refactor.md) §真·重复收敛）；
+  （见 [重构 Note](../archived/2026-10-13-repo-structure-refactor.md) §真·重复收敛）；
 - **把"搜索结果"当普通行扫**（假设它带 `data-row-key`）：被实测否掉（计数 0），改为按文本点。
 
 ## 实际跑过的验证

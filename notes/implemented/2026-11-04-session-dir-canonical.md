@@ -15,7 +15,7 @@
 - `scripts/probe/entry-chain-probe.mjs`
 - `scripts/probe/rerun-triage-probe.mjs`
 
-这**部分取代**了 [2026-10-16 round3 Note](2026-10-16-structure-round3-harness-convergence.md)
+这**部分取代**了 [2026-10-16 round3 Note](../archived/2026-10-16-structure-round3-harness-convergence.md)
 里“`sessionDirOf` 保留本地”的决定；该篇已加历史注记。`readSessionLog` 换 canonical
 `resolveSessionLog` + `readSessionText` 的旧结论不变。
 

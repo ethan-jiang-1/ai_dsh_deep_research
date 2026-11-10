@@ -216,7 +216,7 @@ source dev/env.sh        # DSH_HOME=runtime/harness-home（数据面）+ dsh 别
   → boot web 3083 → 入口步骤打印）——用法全文见 [61-run-playbook](./61-run-playbook.md)。
 - 提交门禁：`source dev/env.sh` 幂等启用 pre-commit 钩子（`dev/hooks/pre-commit`：verify +
   tests 红灯即拦 commit——"收尾必跑"的机器化，红 commit 溜进历史的教训见
-  [agent-friendly-polish Note 教训 4](../../notes/implemented/2026-09-24-agent-friendly-polish.md)）；
+  [agent-friendly-polish Note 教训 4](../../notes/archived/2026-09-24-agent-friendly-polish.md)）；
   应急 `--no-verify` 须在 commit message 说明跳过的面与理由。
 
 ## 4. 收尾程序（同 diff，五件）

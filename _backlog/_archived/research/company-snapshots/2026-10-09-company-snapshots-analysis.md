@@ -153,7 +153,7 @@ vendor 提供 `assertConsumed()` 检查未绑定脚本和少驱动调用；compa
 
 来源分别为 [smoke 路径与版本选择:52](../../../../scripts/smoke/snapshot-replay-smoke.mjs)、[真实装配与回放 patch:120](../../../../scripts/smoke/snapshot-replay-smoke.mjs)、[实际 B 层比较:226](../../../../scripts/smoke/snapshot-replay-smoke.mjs)、[场景声明](../../../../snapshots/replay/research-face/snapshot.json)、[录制前置与输出:40](../../../../dev/record-role-fixture.mjs)、[discipline 输出:194](../../../../scripts/probe/discipline-probe.mjs)、[entry-chain 输出:248](../../../../scripts/probe/entry-chain-probe.mjs)、[运行区忽略规则:13](../../../../.gitignore) 与 [四类运行事实:21](../../../../docs/design/50-agent-loop-and-state.md)。观察时自写 smoke 未读取场景声明；落点实施与本报告建议的差异由 [snapshots 落点 issue](../../settled_issues/2026-10-09-snapshots-adoption.md) 记录。
 
-[BUG-018](../../fixed_bugs/BUG-018-snapshot-replay-advertised-coverage.md) 已记录工作区手册、skill-catalog、runtime-context 三类 user/message 注入漏比较，以及源仓实测的漏判。本轮复核 systemTextOf 与 B 层实现确认该缺口仍在；没有重新进行注入或回放实验。skill 正文只在实际读取它的场景中比较，不将 persona 点名技能或 catalog description 当成正文覆盖。[既有标定结论:36](../../../../notes/implemented/2026-10-08-recorded-session-obligation.md)
+[BUG-018](../../fixed_bugs/BUG-018-snapshot-replay-advertised-coverage.md) 已记录工作区手册、skill-catalog、runtime-context 三类 user/message 注入漏比较，以及源仓实测的漏判。本轮复核 systemTextOf 与 B 层实现确认该缺口仍在；没有重新进行注入或回放实验。skill 正文只在实际读取它的场景中比较，不将 persona 点名技能或 catalog description 当成正文覆盖。[既有标定结论:36](../../../../notes/archived/2026-10-08-recorded-session-obligation.md)
 
 DSH 原生 session-snapshot 完整套件提供 manifest、关系保真身份 token、prompt/schema sidecar、完整文件树与协议适配；但其入口直接导入 vitest，只能在 vitest 中使用。原生库限制:12（`ai_dsh_company/vendor/dsh/packages/test-support/session-snapshot/README.md`） 本仓约定 Node 标准库与 node:test，不因目录借鉴顺带引入测试框架；可复用不依赖框架的源码接口前，须核对其导出与依赖，不能直接复制整个 suite。
 
@@ -181,6 +181,6 @@ archive 与 corpora 仅在出现独立消费者时建立。研究 run 继续住 
 4. 精选一次有持久消费者的探针作为落地样例，保存完整日志和失败结果，避免只保成功答案或持续覆盖 last.md。快照为该次证据，不能倒推当前运行状态。
 5. 对外部效果有明确需求时，才添加小型独立 before/expected 场景，例如文件写入或恢复；比较完整文件清单与字节，先注入缺文件、额外文件、错误内容证明判据能拒绝。
 
-只加结构守卫不能推出回放绿。结构检查应使用本仓 tracked-only 规则，并从同一场景读取真正被驱动使用的路径；执行判据必须由独立回放命令验证。无需机械照搬 company 的 64/16 MiB 数值，先量本仓精选资产，再根据实际增长决定预算。泛化路径门禁已有假阳/漏判标定，不能把“改某文件就强制重录”当作覆盖修复。[本仓标定:19](../../../../notes/implemented/2026-10-08-recorded-session-obligation.md)、[脚本范围纪律:17](../../../../scripts/AGENTS.md)
+只加结构守卫不能推出回放绿。结构检查应使用本仓 tracked-only 规则，并从同一场景读取真正被驱动使用的路径；执行判据必须由独立回放命令验证。无需机械照搬 company 的 64/16 MiB 数值，先量本仓精选资产，再根据实际增长决定预算。泛化路径门禁已有假阳/漏判标定，不能把“改某文件就强制重录”当作覆盖修复。[本仓标定:19](../../../../notes/archived/2026-10-08-recorded-session-obligation.md)、[脚本范围纪律:17](../../../../scripts/AGENTS.md)
 
 本轮完成的是来源分析与本仓借鉴建议；未创建 snapshots 目录、未迁移 fixture、未修 BUG-018、未新增采集器或回放门禁，也未重新运行来源仓的 replay。报告与研究索引的结构校验结果以本轮实际命令输出为准。

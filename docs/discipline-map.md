@@ -283,4 +283,4 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
   `不适用` 当成永久免检区 = 依据静默腐烂**（同上教训）；
 - 每轮重校的**重审命中与逐条结论**写进该轮「升 pin 重校」流程记录（本表不建维护页、
   不带版本变更史）——流程与逐轮结论 = [bumping-vendor-pin 技能](../.agents/skills/bumping-vendor-pin/SKILL.md) §3 +
-  [021rc2 Note](../notes/implemented/2026-10-19-vendor-pin-bump-021rc2.md)；历史轮次见归档。
+  [021rc2 Note](../notes/archived/2026-10-19-vendor-pin-bump-021rc2.md)；历史轮次见归档。

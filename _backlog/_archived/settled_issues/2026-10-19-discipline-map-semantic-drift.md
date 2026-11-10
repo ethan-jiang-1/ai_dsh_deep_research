@@ -78,7 +78,7 @@ opened: 2026-10-19
 
 ## 参考
 
-- 本轮毕业 Note（含已修的 9 行与验证矩阵）：[vendor-pin-bump-021rc2](../../../notes/implemented/2026-10-19-vendor-pin-bump-021rc2.md)
+- 本轮毕业 Note（含已修的 9 行与验证矩阵）：[vendor-pin-bump-021rc2](../../../notes/archived/2026-10-19-vendor-pin-bump-021rc2.md)
 - 台账正本：[docs/discipline-map.md](../../../docs/discipline-map.md)（§维护规则 明确"不适用是当时不适用，不是豁免"）
 - 机读投影：[docs/alignment-ledger.json](../../../docs/alignment-ledger.json)（门禁 `align-ledger`，只判存在性）
 - 同盲区前科：[2026-10-08-sdlc-reference-absorption](../../../_backlog/_archived/settled_issues/2026-10-08-sdlc-reference-absorption.md) §二轮复核（当时 10 处 `na`/落点已失真）

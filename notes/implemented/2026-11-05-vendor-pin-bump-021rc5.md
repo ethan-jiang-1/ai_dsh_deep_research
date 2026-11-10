@@ -14,7 +14,7 @@ L4-lite 全绿。triggers 原先登记的「rc.5 首屏冒烟失败」在 rc.5 �
 
 pin 身份四处（submodule gitlink / 根 [AGENTS §DSH 源码表](../../AGENTS.md#dsh-源码机制权威在哪) /
 [evaluation §L0 vendor-pin](../../docs/evaluation.md) / pack `engines.dsh`）同变更落定；`_backlog/_archived/`
-的历史 pin 提及按 `pin-agreement` 去字面量。上一轮 bump = [021rc2](./2026-10-19-vendor-pin-bump-021rc2.md)。
+的历史 pin 提及按 `pin-agreement` 去字面量。上一轮 bump = [021rc2](../archived/2026-10-19-vendor-pin-bump-021rc2.md)。
 
 ## 输掉的方案
 

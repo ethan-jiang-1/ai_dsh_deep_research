@@ -61,7 +61,7 @@ opened: 2026-10-23
 | HITL2 三选一 + ≤200 字 | [synthesis §5](../../../packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md)、[手册 HITL2](../../../packages/deep-research-pack/content/manual.md) | 唯一的结构化出口 | 没有"你为什么不满意"的入口；**结构性重跑不在卡上**；选项文本是 Lead 现场拟的——受控 E2E 实测原文是「按现稿定稿」，见 `research-workspace/archive/drt_e2e-rerun-2026-10-23/question.md` §Decisions |
 | [HITL2 范围轮卡](./2026-09-28-hitl2-scope-round.md)（已毕业未实施） | backlog 归档 | 两条洞见：HITL2 是用户信息最全的时刻；补研究范围只能来自 findings gap / review 残留 / final 末节，**不许 Lead 发明** | 复活条件未触发；只覆盖"补研究"一种 |
 | [高管 UX 调研](../research/2026-10-11-executive-research-ux/index.md) | backlog 归档 | 命题就是"把机制翻译成决策者能消费的信息"；P0 决策简报；"交付/继续"行点出"用户能否无需技术协助找到关键依据"未验证 | 没有做"抱怨 → 手段"的映射表 |
-| [rerun-loop-live](../../../notes/implemented/2026-09-28-rerun-loop-live.md) | notes | 真实证据扩张 rerun 靠 final 末节"v2 优先项四条"零额外交互跑通（D 形态 de facto） | 那是那一场的产物，不是合同；当前 [final 模板](../../../packages/deep-research-pack/content/templates/run/final.md) 六段里没有这一节 |
+| [rerun-loop-live](../../../notes/archived/2026-09-28-rerun-loop-live.md) | notes | 真实证据扩张 rerun 靠 final 末节"v2 优先项四条"零额外交互跑通（D 形态 de facto） | 那是那一场的产物，不是合同；当前 [final 模板](../../../packages/deep-research-pack/content/templates/run/final.md) 六段里没有这一节 |
 | [版本面（2026-10-23）](../../../notes/implemented/2026-10-23-rerun-version-face.md) | 状态页 ⑤ / 图谱 / Note | 有几版、交的是哪版、HITL2 待审 | 是"状态"，不是"手段" |
 | brief-fold 的 actionLine | [brief-fold.ts](../../../packages/deep-research-pack/src/lib/brief-fold.ts) | 已经在说补研究/修订表述 | 只是复述我们的词，没有代价与"可以不重跑" |
 

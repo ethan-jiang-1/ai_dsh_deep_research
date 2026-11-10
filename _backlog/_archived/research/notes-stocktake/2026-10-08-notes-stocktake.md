@@ -6,7 +6,7 @@ intent: 为 notes-stocktake 实施 Note 保留已完成的存量体检依据。
 # notes/ 存量体检：72 篇 implemented Note 的三结局判定（2026-10-08）
 
 > 服务 = [吸收 Note](../../../../notes/implemented/2026-10-09-backlog-methodology-absorption.md) 中的 Note 存量体检材料（已完成）｜RFC =
-> [2026-10-08-notes-stocktake](../../../../notes/implemented/2026-10-08-notes-stocktake.md)。
+> [2026-10-08-notes-stocktake](../../../../notes/archived/2026-10-08-notes-stocktake.md)。
 > 本材料**只做体检、不动 notes 树**（`git status --short notes/` 在本轮体检期间为空）。
 
 ## 一句话结论
@@ -76,7 +76,7 @@ intent: 为 notes-stocktake 实施 Note 保留已完成的存量体检依据。
 对抗证伪要求"打开承接文件、确认里面写着该 Note **独有**的理由（为什么选它 / 放弃了
 什么 / 哪条非显然陷阱），而不只是结论形状"，结果 8/8 全部找出反例，四类：
 
-1. **未兑现承诺（硬豁免）**——[human-gate-acceptance](../../../../notes/implemented/2026-09-26-human-gate-acceptance.md)
+1. **未兑现承诺（硬豁免）**——[human-gate-acceptance](../../../../notes/archived/2026-09-26-human-gate-acceptance.md)
    正文自写"**复查口常开**……结论补记本 Note"，即它自己声明未来还会被改 → 不能冻结；
    [living-verification-hook](../../../../notes/archived/2026-10-07-living-verification-hook.md)
    自留"低卡数据点入候选 A 标定池…**待候选 A 复核**"。

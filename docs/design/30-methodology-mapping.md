@@ -3,7 +3,7 @@
 > 层：设计（为什么）。这是 [evaluation.md](../evaluation.md) L3 领域面的核心载体：
 > 读完去哪：角色内容与信噪比防线落点 = [20](./20-roles.md)；观察面构成 = [40](./40-research-cockpit.md)。
 > 生命周期每一环节在本插件的落点，或带证据的弃用理由。考古来源 =
-> [deep-research-harness-analysis（考古报告）](../../notes/implemented/2026-09-24-deep-research-harness-analysis.md)
+> [deep-research-harness-analysis（考古报告）](../../notes/archived/2026-09-24-deep-research-harness-analysis.md)
 > （codex harness 11-phase 生命周期 / wave 语义 / gate 体系 / 证据四层 / 8 条实证教训）。
 > 原则（用户定案 + company D13）：**不发明**——codex 因宿主缺原语自建的机制，在 DSH 上
 > 一律换原生载体；每个自建残留须有"DSH 载体不可用"的证据。
@@ -13,11 +13,11 @@
 | codex 环节 | codex 载体 | 本插件 DSH 载体 | 状态 |
 |---|---|---|---|
 | instantiation（建 run bundle） | `instantiate-run-bundle.mjs` CLI + rb_* 控制文件脚手架 | lead 收到请求 → 建 `drt_<slug>/`（从 templates/run/ 起步）+ question.md（定稿 + Purpose/RQ 分解/Scope/Constraints 四节 + Decisions append-only） | 照搬语义，载体 = 目录约定 + 研究手册 |
-| **HITL1（立项对齐）** | hitl1 phase（stop:yes）+ rb_profile 写入 | lead preset 的 `tool-ask-user` + `research-brief` skill（研究类型三分 + 澄清三问带推荐 + **计划确认卡**〔两段卡第二段：定稿先呈再开工，quick_factual 豁免——超出 codex 源面的本仓扩展〕）+ `question-patterns` skill（判型模式库：命中走条目、未命中兜底） | **原生**（ask_user_question 即 DSH 的 stop 面） |
+| **HITL1（立项对齐）** | hitl1 phase（stop:yes）+ rb_profile 写入 | lead preset 的 `tool-ask-user` + `research-brief` skill（研究类型三分 + 澄清三问带推荐 + **计划确认卡**〔两段卡第二段：定稿先呈再开工，quick_factual 豁免——超出 codex 源面的本仓扩展〕+ `question-patterns` skill（判型模式库：命中走条目、未命中兜底；lens 默认集 = 题型 × 证据面） | **原生**（ask_user_question 即 DSH 的 stop 面） |
 | setup / seed-topics | enter-phase + operate-topic-state（UID/ordinal 物化） | lead 写 topics.md（must_answer 问题列表 2–5 问 + scope_role + depends_on）+ plan.md 执行图（research-planning skill：W<wave>.<index>、Wave 计算/stage 派生/依赖/owner/depth/预算） | 简化：topic 身份 = markdown 锚点；plan 是过程件，不建 registry/新门禁 |
 | 组队（本仓扩展） | codex 无对应（单 agent 串行跑完 11 阶段） | lead 的 `team-assembly` skill + agent-team 任务板（`spawn_teammate` 派活/收活；成员组合画像由 `run-kickoff` 预检）；轨道上位于立项之后、侦察之前（[NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)） | **角色化 + 原生**（DSH agent-team 原生；队形与派活纪律住 skill） |
 | **wave0（广度侦察 / 广度地基）** | dpt-source-intake 工作单元 + source.yaml + floor 门禁 | **scout 角色**（lead-mapping skill：query 多样化 + A–D 分级 + leads.md） | **角色化**（floor 数值门禁弃用，分级与排除显式化承担质量下限） |
-| **wave1（深度挖掘）** | question-list 契约 + depth-review + 反例/交叉验证参数 | **analyst 角色**（evidence-extraction skill：question-list + 交叉验证 ≥2 + 反例必记） | **角色化**（深度参数不进 profile，进 skill 纪律） |
+| **wave1（深度挖掘）** | question-list 契约 + depth-review + 反例/交叉验证参数 | **analyst 角色**（evidence-extraction skill：question-list + 交叉验证 ≥2 + 反例必记；cell = topic × lens，证据卡带 `lens`） | **角色化**（深度参数不进 profile，进 skill 纪律） |
 | **wave2（综合写作 / 综合）** | 纯综合禁新搜 → finding gap 定向补搜 + finding-index | **lead 的 synthesis skill**（findings.md 的 gap 四态：supported/needs_search/contradicted/insufficient） | **skill 化**（只补一轮 = 参数纪律进 skill 文本） |
 | **hitl2（审阅交付 / 审阅）** | hitl2 phase（stop:yes）+ composition_handoff | lead 的 `reader-final` skill（review PASS 后派生 `final/readable.md`，六节读者版合同）+ `tool-ask-user`（审阅建议 = 证据充分性判断 + 交付/补研究推荐） | **原生 + skill 化**（composition 从 HITL2 提前到 PASS 后成稿，用户先读人话、审计源可切） |
 | readiness（质量把关 / 确定性预检） | readiness phase + 10 gate definition JSON | **critic 角色**（adversarial-review skill：readiness 判据清单 + review.md 的 PASS/FAIL） | **角色化**（确定性 schema 检查降格为 skill 清单——诚实取舍，见 §4 之 3） |
@@ -45,7 +45,7 @@
 
 **为什么唯一**：DSH 没有任何载体承载"研究报告的结论 → 来源文件"的可核查链——web_search
 的返回不落盘、会话日志可读但不是角色间契约面。研究手册的证据 frontmatter 契约
-（`source_url / retrieved_at / quality / found_by / supports / source_tier / publisher`——七字段）+ **口径最小契约**（数字/
+（`source_url / retrieved_at / quality / found_by / supports / source_tier / publisher / lens`——八字段）+ **口径最小契约**（数字/
 规格类摘录带测量条件 ≥2 项；单源关键数字显式标"待破"）+ final.md 的
 `[来源: evidence/xx.md]` 引用格式 + critic 的逐条狩猎 = 轻量等价物：
 

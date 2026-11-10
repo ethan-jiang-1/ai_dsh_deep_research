@@ -4,7 +4,7 @@
 
 > 来源：用户 2026-10-27 指令（"DeepSeek 提供了 search / fetch API……确保我们充分利用"）+
 > [provider audit](../../_backlog/_archived/research/retrieval-backend/2026-10-27-provider-audit.md)。
-> **部分取代** [A0 Note](./2026-10-21-dynamic-research-dag-a0.md) 的「pack 默认搜索延后」条款；
+> **部分取代** [A0 Note](../archived/2026-10-21-dynamic-research-dag-a0.md) 的「pack 默认搜索延后」条款；
 > 该 Note 的其余决定（research-planning / 研究图谱 / fetch 不切）不变。
 
 ## 决定
