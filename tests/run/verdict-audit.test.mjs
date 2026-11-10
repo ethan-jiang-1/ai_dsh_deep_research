@@ -156,6 +156,37 @@ test('解析投影与 raw 原文不一致（手改表）→ raw-reparse', () => 
   assert.ok(codes(result).includes('raw-reparse'))
 })
 
+// 2026-11-11 P4 实测：critic child 常把 JSON 数组包在 ```json 围栏里。raw 仍是逐字原文，
+// 解析只剥一层围栏；不能因为围栏把「原文一致」放宽——raw 与 child 正文仍逐字比。
+test('raw 带 ```json 围栏：剥围栏解析、raw 仍按原文与 child 正文比对（绿）', () => {
+  const fenced = `\`\`\`json\n${rawOf([ITEM])}\n\`\`\``
+  const result = auditClaimVerdicts(fixture({ raw: fenced, assistantTexts: [fenced] }))
+  assert.deepEqual(result.problems, [], JSON.stringify(result.problems))
+})
+
+test('raw 带围栏但投影被改 → raw-reparse（围栏不是放宽投影的借口）', () => {
+  const fenced = `\`\`\`json\n${rawOf([ITEM])}\n\`\`\``
+  const result = auditClaimVerdicts(fixture({
+    raw: fenced,
+    assistantTexts: [fenced],
+    verdicts: [{ ...withBatch(ITEM), reason: '改过的理由' }],
+  }))
+  assert.ok(codes(result).includes('raw-reparse'))
+})
+
+test('raw 带围栏而 child 正文没有围栏 → not-verbatim（原文比对不吃围栏归一）', () => {
+  const fenced = `\`\`\`json\n${rawOf([ITEM])}\n\`\`\``
+  const result = auditClaimVerdicts(fixture({ raw: fenced, assistantTexts: [rawOf([ITEM])] }))
+  assert.ok(codes(result).includes('not-verbatim'))
+  assert.ok(!codes(result).includes('raw-reparse'), '围栏本身可解析，不该误报 raw-reparse')
+})
+
+test('围栏内不是可解析 JSON → raw-reparse', () => {
+  const bad = '```json\n[not json]\n```'
+  const result = auditClaimVerdicts(fixture({ raw: bad, assistantTexts: [bad] }))
+  assert.ok(codes(result).includes('raw-reparse'))
+})
+
 test('裁决指向不存在的 claim → verdict-orphan；batch 越界 → batch-orphan', () => {
   const item = { ...ITEM, claim_id: 'C9' }
   const raw = rawOf([item])

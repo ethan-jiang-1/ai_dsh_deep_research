@@ -195,6 +195,23 @@ export function parseSessionFacts(text) {
   return { preset, depth, parentSession, assistantTexts, toolNames }
 }
 
+/**
+ * 解析 `batch.raw`。raw 是 child 最终正文原文，可能被模型包在 ```json 围栏里（2026-11-11 P4 实测：
+ * 四批里两批带围栏）——解析时只剥**一层**围栏，raw 本身不改；`not-verbatim` 仍按原文与 child 正文
+ * 逐字比对，围栏不构成放宽。直连 JSON 优先（围栏内解析失败不回退）。
+ * @returns {{ok:boolean, value:any}} ok=false = 不可解析（含围栏内坏 JSON）。
+ */
+function parseRawVerdicts(raw) {
+  const attempt = (text) => {
+    try { return { ok: true, value: JSON.parse(text) } } catch { return { ok: false, value: null } }
+  }
+  const direct = attempt(String(raw ?? ''))
+  if (direct.ok) return direct
+  const fenced = /^\s*```(?:json)?[ \t]*\r?\n([\s\S]*?)\r?\n?```\s*$/iu.exec(String(raw ?? ''))
+  if (fenced === null) return direct
+  return attempt(fenced[1])
+}
+
 /** `raw` 里一条裁决的投影（只取受核字段；用于与文件里的 verdicts 比对）。 */
 const projectRawVerdict = (item) => ({
   claim_id: item?.claim_id,
@@ -342,19 +359,17 @@ export function auditClaimVerdicts({
       }
     }
     for (const [bi, batch] of round.batches.entries()) {
-      let rawParsed = null
-      try {
-        rawParsed = JSON.parse(batch.raw)
-      } catch {
-        add('raw-reparse', `${where}：batches[${bi}].raw 不是可解析 JSON——原文必须是 child 逐字正文`)
+      const rawParsed = parseRawVerdicts(batch.raw)
+      if (!rawParsed.ok) {
+        add('raw-reparse', `${where}：batches[${bi}].raw 不是可解析 JSON——原文必须是 child 逐字正文（代码围栏可剥一层）`)
       }
-      if (rawParsed !== null) {
-        if (!Array.isArray(rawParsed)) {
+      if (rawParsed.ok) {
+        if (!Array.isArray(rawParsed.value)) {
           add('raw-reparse', `${where}：batches[${bi}].raw 必须是裁决数组`)
         } else {
           const fileItems = round.verdicts.filter((v) => v.batch === bi)
           const rawIds = new Set()
-          for (const item of rawParsed) {
+          for (const item of rawParsed.value) {
             if (!isPlainObject(item)) { add('raw-reparse', `${where}：batches[${bi}].raw 含非对象条目`); continue }
             rawIds.add(item.claim_id)
             const fileItem = fileItems.find((v) => v.claim_id === item.claim_id)
