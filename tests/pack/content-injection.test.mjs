@@ -5,12 +5,12 @@ import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { CORE_TEMPLATES, templateFiles } from './template-files.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
 const read = (rel) => readFileSync(join(PACK, rel), 'utf8')
 
-const TEMPLATES = ['run.md', 'question.md', 'topics.md', 'plan.md', 'leads.md', 'evidence-entry.md', 'findings.md', 'final.md', 'claims.json', 'verdicts.json']
 
 test('手册随包，且只含 research_pack_root 一个插值变量', () => {
   const manual = read('content/manual.md')
@@ -22,10 +22,9 @@ test('手册随包，且只含 research_pack_root 一个插值变量', () => {
   assert.match(manual, /项目指令优先/, '手册缺项目指令优先句')
 })
 
-test('run 模板随包（八件 md 骨架 + 两件 JSON 写者契约）', () => {
-  for (const name of TEMPLATES) {
-    assert.ok(existsSync(join(PACK, 'content', 'templates', 'run', name)), `缺模板 ${name}`)
-  }
+test('run 模板随包（schema 集 = 盘上集，双向对账）', () => {
+  assert.deepEqual(templateFiles(), [...CORE_TEMPLATES].sort(),
+    'content/templates/run 的盘上集 ≠ schema 集——新增模板须有意改 CORE_TEMPLATES，删除模板须同步消费者')
 })
 
 test('包清单发布 content/**，不再发布 workspace/**', () => {

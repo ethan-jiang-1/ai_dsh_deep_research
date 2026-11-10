@@ -93,6 +93,28 @@ test('无类型标记而条件件缺席 → 维持违约（豁免依据必须是
   assert.equal(red, true)
 })
 
+test('具名非 quick 类型（exploratory_map / claim_verification）：条件件缺席仍红', () => {
+  const base = realpathSync(tmpdir())
+  for (const type of ['exploratory_map', 'claim_verification']) {
+    const dir = mkdtempSync(join(base, 'dsh-schema-type-'))
+    try {
+      cpSync(join(F, 'drt-clean-post'), dir, { recursive: true })
+      const q = readFileSync(join(dir, 'question.md'), 'utf8')
+      writeFileSync(join(dir, 'question.md'), q.replace('## Decisions', `- 研究类型: ${type}\n\n## Decisions`))
+      rmSync(join(dir, 'leads.md'))
+      rmSync(join(dir, 'review.md'))
+      assert.equal(runType(dir), 'other', `${type} 不得被当成 quick_factual`)
+      const row = scanBundle(dir)
+      assert.ok(row.core.some((c) => c.includes('leads.md')), `${type}: leads.md 缺席应红`)
+      assert.ok(row.core.some((c) => c.includes('review.md')), `${type}: review.md 缺席应红`)
+      assert.equal(row.exempt.length, 0, `${type}: 不应走 quick_factual 豁免`)
+    } finally {
+      if (dirname(dir) !== base || !basename(dir).startsWith('dsh-schema-type-')) throw new Error(`refusing cleanup: ${dir}`)
+      rmSync(dir, { recursive: true, force: true })
+    }
+  }
+})
+
 test('run.md 在场但 contract/phase/next 非法：核心违约（D28）', () => {
   const base = realpathSync(tmpdir())
   const dir = mkdtempSync(join(base, 'dsh-schema-'))

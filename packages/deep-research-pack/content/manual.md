@@ -77,35 +77,7 @@ present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat 
 
 新 run 在根落 `run.md`（`schema` / `created` / `phase` / `next` / `delivered` / `parked`；键义 = `{{research_pack_root}}/content/templates/run/run.md`）。**声明不是事实**；冲突以文件为准；`run.md` 不自证批准/交付。`schema` 是整数契约版本（门禁按整数分档，与日期无关）；旧 bundle 只有 `contract:` 日期 = 旧形态，读兼容、不再新写。
 
-**五问**：阶段 / 最近拍板 / 最大未闭合 / 下一步 / 交付态。
-
-**按意图读**（读完即停；五问答齐即停）：
-
-| 意图 | 先读 | 停在哪 | 不读 |
-|---|---|---|---|
-| 继续 | `run.md`（无 → 旧场行；旧场行替代本行，不叠加）→ `question.md §Decisions` → `journal.md` 顶部 3–5 条 → `plan.md §剩余工作` | 五问答齐 | 全部 evidence、历史 review |
-| 交付 | `run.md`（旧场跳过）→ `final/` 最高 `vN` + `final.md §0` → `question.md §Decisions` → `review.md` 当前终局块 → `delivered.json`（新）/`acceptance.md`（旧） | 版本副本 + 拍板 + readiness + 回执齐 | 研究过程、evidence |
-| 查证 | `final.md` 的 claim 句（多卡逐卡）→ `findings.md` 的 F# → 该 `evidence/<id>.md` + `provenance/<id>.json`（若在场；旧场常缺） | 来源与口径（数字/等级/as-of/单源；丢限定语 = 不符） | question/plan/journal、其他 evidence |
-| 旧场 | 旧表（下方）→ `question.md §Decisions` → `journal.md` 顶部 → `final.md` + 最高 `final/vN` → `review.md` 当前终局块 → `acceptance.md`（旧） | 五问答齐 + 回执 | 不补 `run.md`、不读 evidence（查证行除外） |
-
-**交付口径**：`final/` 取最高 `vN`；`final/vN` = 不可变交付副本，`final.md` = 当前稿，不是副本；`final/v1-ledger.md` 不是副本。新契约看 `delivered.json`；旧场只有 `acceptance.md`（二选一，不是都要）。旧场 `final/v1.md` 兼作版本索引：修复回填可在文末加索引行、正文不改；新契约 `final/vN` 不可变。`acceptance.md` 只记硬门（CRITICAL 0）；MAJOR 数看 `audit.md`，不因它重判交付。旧场 receipt 无哈希；交付后改 review/plan 要重跑 `run-accept`；accepted 后只归档。旧场 `present` 可能指 `final.md`/v1，且不是文件（session log 事件）；有 `acceptance.md` + HITL2 行 + 最高 `final/vN` = accepted，present 不指 v2 时注明“操作侧验收”，不伪造模型 present。
-
-**终局块**：`review.md` 只认当前终局块（文件头声明方向；当前实现最新在上）；`readiness: PASS|FAIL` 是判据，末尾/历史轮的 PASS 不算。
-
-**旧 run 推导表**（无 `run.md`；不补）：
-
-| 事实 | phase | 下一步 |
-|---|---|---|
-| 无 `question.md` | 立项前 | 问用户是否立项 |
-| `review.md` 无 PASS 或 `final/` 不在场 | research/review | 继续研究 |
-| review 终局 PASS、无 HITL2 行 | delivery | 呈 HITL2 |
-| HITL2 行 + 最高 `final/vN` +（present 指同一 `vN` 或 `acceptance.md` 在场） | accepted | 可 `run-accept` |
-| 最高 `final/vN` 无对应拍板，或 present 指旧 `vN` 且无 acceptance | delivery | 先补拍板/present |
-| `_abandoned/` + 停放原因 | parked | 按复活条件 |
-
-**冲突 / 过期**：`plan.md` 的剩余工作、`review.md` 历史轮、journal 旧条都可能过期；以**最新 journal + §Decisions + final 事实**为准，不按 stale plan 继续。`> rerun:` 标记不是必需；rerun 以 §Decisions 的 `vN` 行 + `final/vN` 为准。**查证优先于旧场恢复**：先 claim → findings/evidence，不先读 question/plan/journal。
-
-**恢复**：读最小集 → 答五问 → 先定范围（`run.md.next`/`phase`；不明只问一个带范围的澄清问）→ 重问 pending HITL（一次）→ 按 `plan.md §剩余工作` 重建 Team（若已过期以 journal/§Decisions 为准）→ 继续，不重做已完成。
+恢复前先答五问（阶段 / 最近拍板 / 最大未闭合 / 下一步 / 交付态）。**按意图读、读完即停**；读序表、交付口径、终局块、旧 run 推导、冲突/过期与恢复步骤 = `{{research_pack_root}}/content/generic/state-and-recovery.md`（按需 read，不预载）。
 
 ## 交付与审查终局（D28）
 

@@ -12,14 +12,14 @@ import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { SCHEMA_VERSION, RUN_PHASES, createdDateOf, runSchemaOf, schemaIssueOf } from '../../scripts/lib/schema-scan-core.mjs'
 import { READ_INTENTS, READ_ORDER } from '../../scripts/lib/run-receipt.mjs'
+import { handbookSurface } from '../pack/handbook-surface.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
-const HANDBOOK = 'packages/deep-research-pack/content/manual.md'
 const TEMPLATE = 'packages/deep-research-pack/content/templates/run/run.md'
 
 test('手册承 D28 四节与位置语义（模型每轮都会读到的合同）', () => {
-  const h = read(HANDBOOK)
+  const h = handbookSurface()
   for (const section of ['## 状态头、读序与恢复', '## 交付与审查终局', '## 来源证明']) {
     assert.ok(h.includes(section), `手册缺 D28 节：${section}`)
   }
@@ -28,14 +28,14 @@ test('手册承 D28 四节与位置语义（模型每轮都会读到的合同）
 })
 
 test('手册不得留下与 final/vN 交付副本互斥的旧句（B-4 回归）', () => {
-  const h = read(HANDBOOK)
+  const h = handbookSurface()
   assert.equal(h.includes('只放版本记账'), false, '旧句「只放版本记账，不放当前版全文」与交付副本语义互斥')
   assert.ok(h.includes('交付副本'), 'final/vN 必须被表述为交付副本')
   assert.equal(/v1\.md = 索引与关键事实回溯/.test(h), false, '旧索引语义不得回到手册')
 })
 
 test('手册读序逐项 = run-receipt.READ_ORDER（一处事实一个家）', () => {
-  const h = read(HANDBOOK)
+  const h = handbookSurface()
   for (const entry of READ_ORDER) {
     if (entry.startsWith('evidence/ + provenance/')) {
       assert.ok(h.includes('provenance/<id>.json'), '读序缺 provenance 指针')
@@ -76,7 +76,7 @@ test('RFC 现在时描述见证绑定与回执校验（docs = 当前合同）', 
 })
 
 test('手册「按意图读」表 = run-receipt.READ_INTENTS（读完即停的合同）', () => {
-  const h = read(HANDBOOK)
+  const h = handbookSurface()
   for (const intent of READ_INTENTS) {
     assert.ok(h.includes(`| ${intent.label} |`), `手册缺意图行：${intent.label}`)
     for (const file of intent.files) assert.ok(h.includes(file), `手册意图「${intent.label}」缺文件：${file}`)

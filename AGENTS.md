@@ -13,7 +13,7 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 
 1. **本文件**——布局 + 命令速查 + 纪律 + `notes/` 地位 + 本链的定义；
 2. **[docs/00-index.md](docs/00-index.md)**——文档地图（术语对照 = [terms.md](docs/terms.md)；D 号台账 = [decisions.md](docs/decisions.md)，按需跳）；
-3. 按本轮授权进入工作：用户直派按请求范围执行；需澄清、查证或记录的问题按 [意图载体总图](docs/design/60-intent-carriers.md) 路由到 `_backlog/issues/`、`bugs/`、`research/`、`methods/` 或 `triggers.md`（可观察重议条件）。Backlog 不是实施前置门；
+3. 按本轮授权进入工作：用户直派按请求范围执行；需澄清、查证或记录的问题按 [意图载体总图](docs/design/60-intent-carriers.md) 路由到 `_backlog/issues/`、`bugs/`、`research/`、`methods/` 或 `triggers.md`（可观察重议条件）。Backlog 不是实施前置门；**改 `presets/` 或 `content/` 时，Agent 的组织约定 = [design/70](docs/design/70-content-organization.md)（新内容放哪 / 怎么长 / 何时动结构）**；
 4. **[docs/guides/60-dev-loop.md](docs/guides/60-dev-loop.md)**——按改动面选择验收与收尾。仅当持久决定需要显式评审时，才为该项建立 [notes/proposed/](notes/proposed/) RFC。
 
 开工就绪最小集 = 上列 1–3；改仓任务的验收/收尾按第 4 步。仓库全局如何运行、调试、交互和分层验收 → [docs/project-map.md](docs/project-map.md)；验收怎么判 → [docs/evaluation.md](docs/evaluation.md)；意图载体边界 → [docs/design/60-intent-carriers.md](docs/design/60-intent-carriers.md)；run 怎么操作 → [guides/61](docs/guides/61-run-playbook.md)。
@@ -48,7 +48,7 @@ vendor/dsh/               pinned submodule（只读铁律——verify vendor-pin
 research-workspace/      dev 工作区实例（角色会话 cwd；用户工作区 = 任意目录）：method-library.md（本工作区
                          方法库）、drt_<slug>/（run bundle）、archive/（已交付归档）、_abandoned/
                          （停放位）、drafts/（开发侧草稿，非 run 产物）
-docs/                    00-index（地图；术语 = terms.md；D 号台账 = decisions.md）→ design/10-60 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ guides/65（运行形态合同）+ guides/66（探针）+ evaluation.md（验收合同）
+docs/                    00-index（地图；术语 = terms.md；D 号台账 = decisions.md）→ design/10-70 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ guides/65（运行形态合同）+ guides/66（探针）+ evaluation.md（验收合同）
 notes/                   开发记忆与证据链（见下节）：proposed/（需评审 RFC）→ implemented/（活的决定）；
                          不再指导未来 → archived/ 冻结；rejected/（否决 + 重启条件）；事故复盘在 archived/；
                          立项来历 = notes/README §立项来历（用户定调只进 decisions.md D 号依据列）
