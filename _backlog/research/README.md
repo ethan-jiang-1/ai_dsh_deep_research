@@ -145,10 +145,10 @@ status——材料的状态就是题的状态。
 
 ### 6. 外部证据入口
 
-- 两遍 landscape：[第一遍](external-landscape/2026-11-10-landscape-first-pass.md) / [第二遍](external-landscape/2026-11-10-landscape-second-pass.md)。
-- 最强证据：Anthropic 90.2% / 15× / prescriptive roles 无大差别（不是「inert」——原文是 did not make much difference）；STORM unique refs 99.83→54.36；self-critique 16→2；judge self-preference 59.3% vs 18%；FACT 78–90% citation accuracy；LangGraph brief string + max+1；Google roles→steps；GPTR 2026 +89%（厂商自报）。
-- 被挡来源：Perplexity / You.com / Consensus 官方页；Co-STORM 正文未读。
-- 第三遍（不是第二遍）：补 Co-STORM、Perplexity / You.com、中国产品（Kimi / Qwen / 智谱）、BrowseComp / DeepResearch Bench 全量。
+- 三遍 landscape：[第一遍](external-landscape/2026-11-10-landscape-first-pass.md) / [第二遍](external-landscape/2026-11-10-landscape-second-pass.md) / [第三遍·偏好层](external-landscape/2026-11-10-landscape-preference-layer.md)。
+- 最强证据：Anthropic 90.2% / 15× / prescriptive roles 无大差别（不是「inert」——原文是 did not make much difference）；STORM unique refs 99.83→54.36；self-critique 16→2；judge self-preference 59.3% vs 18%；FACT 78–90% citation accuracy；LangGraph brief string + max+1；Google roles→steps；GPTR 2026 +89%（厂商自报）。偏好层新增：偏好遵循在 10 轮 / ~3k token 跌破 10%；Mem0 3.55 < 无记忆 3.69 < 显式 persona 4.58；定向澄清 2.81 问优于 4.90 问、0–1 问无收益；个性化 6.64–6.78 与事实准确率 3.77 vs 商业化 8.40 存在 trade-off；11 产品 + 8 开源项目无 bias/perspective 控件；一次性研究计划批准门在消费级极稀有（Gemini 是例外）；DeerFlow 2.x 是唯一 token 硬停。
+- 被挡来源：Perplexity / Consensus 消费者帮助页；OpenAI help/platform；Google Gemini/Cloud 文档与 Saved Info；Claude Styles→Skills 正文；元宝 / 智谱消费端；You.com / Genspark / SciSpace / Scite。
+- 第三遍剩余：BrowseComp / DeepResearch Arena 全量；上述被挡页；真实用户观察（方法库是否有人用、HITL1 是否足够 informed approval）。
 
 ### 7. 参照项目（仓外，只读）
 
@@ -182,10 +182,10 @@ status——材料的状态就是题的状态。
 | 名头 | 问题 | 消费者 | 材料 |
 |---|---|---|---|
 | [编排原语](orchestration-primitives/README.md) | 哪类工作该由 subagent / workflow / team / goal 承载 | 本轮设计推演；已产出推进卡 | 2 份 |
-| [Wave 执行](wave-execution/README.md) | 计划图如何编译成可执行工作流 | 本轮设计推演 | 1 份 |
+| [Wave 执行](wave-execution/README.md) | 计划图如何编译成可执行工作流 | 本轮设计推演；已产出推进卡 | 2 份 |
 | [研究视角层](lens-abstraction/README.md) | 把 bias / lens 做成数据层 | 本轮设计推演；已产出推进卡 | 2 份 |
 | [产出/验证分离](quality-loop/README.md) | 独立复核与裁决留痕 | 本轮设计推演；已产出推进卡 | 2 份 |
-| [外部 landscape](external-landscape/README.md) | 外部系统已走到哪、哪些是 table stakes | 本轮设计推演 | 2 份 |
+| [外部 landscape](external-landscape/README.md) | 外部系统已走到哪、哪些是 table stakes | 本轮设计推演 | 3 份 |
 | [研究货架](research-shelf/README.md) | 多方向研究的题名、材料与留痕 | 本轮研究自身 | 2 份 |
 
 归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单，也不抄状态（状态正本 = 题名页）。

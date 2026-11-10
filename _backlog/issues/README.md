@@ -8,6 +8,7 @@
 |---|---|---|
 | [2026-11-10-claim-verdict-quality-loop](2026-11-10-claim-verdict-quality-loop.md) | claim 级独立复核：typed verdict + 机械覆盖门 | 待落地 |
 | [2026-11-10-workflow-wave-executor](2026-11-10-workflow-wave-executor.md) | 编排通道落地：workflow 只做同质 wave 执行器 | 待落地 |
+| [2026-11-10-wave-execution-lens-fanout](2026-11-10-wave-execution-lens-fanout.md) | wave 执行：analyst 承载 lens 扇出（固定配方 + 报告） | 待落地 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

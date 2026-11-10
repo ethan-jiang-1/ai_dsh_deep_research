@@ -5,6 +5,10 @@ intent: 判断 wave 子图能否编译成可执行 workflow（固定配方 + arg
 
 # Wave 执行：把计划图变成可跑的工作流（首版）
 
+> **v2 已修正（2026-11-10）**：本页 §3 的 claim 验证脚本化、§4 的三配方、§10 的未决均被
+> [v2 合同](2026-11-10-wave-execution-contract.md)收窄；lens 目录已落地（D43）。最终结论以 v2 为准，
+> 本页保留为首版推演记录。
+>
 > 性质：设计推演。事实（现仓/Wave 语义）与建议分开；未决在末节。
 > 相关：[编排原语](../orchestration-primitives/2026-11-10-channel-policy.md)、[lens-as-data](../lens-abstraction/2026-11-10-lens-as-data.md)。
 

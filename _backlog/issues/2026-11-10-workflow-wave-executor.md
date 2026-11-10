@@ -8,6 +8,11 @@ opened: 2026-11-10
 > 立卡：2026-11-10 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
 > 去向：proposed — `notes/proposed/` 下的 RFC（文件名在成立时定，首提日期 = 2026-11-10）；业务验收：用户
 > 审查：自审 2026-11-10 — 机制锚点逐条核（vendor rc.5）；P1 真挂载绿/红复现并复原；P2–P4 标明源码级、live 待证；P5 实测；`pnpm verify` 全绿、`pnpm test` 1052/1052。业务验收仍归用户。
+>
+> **2026-11-10 深挖后分工**：wave 执行切片已由 [wave-execution-lens-fanout](2026-11-10-wave-execution-lens-fanout.md)
+> 承接；该卡按新事实把挂点从 A（独立 `wave-runner`）改判 **B（analyst 承载）**，并把范围收窄为
+> deep-dive 的 `lens-fanout`。本卡继续持有 channel-policy 记录、8 槽/HITL 约束与 goal pause/resume
+> 缺陷（`GOAL_TOOL_RESUME_PAUSED`），不因新卡关闭。
 
 **问题与期望结果：** 当前研究 run 是「Lead 会话 + Team 板 + 少量 subagent」，`workflow` 完全没挂，
 `goal` 只做记账；四个研究角色该把哪类工作交给哪条原语，只靠 persona 散文，没有机制级选型表，
@@ -44,7 +49,8 @@ workflow 的挂点、容量合同、HITL 授权方式与证据/失败合同，�
 
 1. **挂点选 A 还是 B**：A = 独立薄 `wave-runner` preset（推荐；只有 wave 会话付 workflow schema
    成本、child 工具面干净）；B = 挂 analyst（不新增 preset、方法保留，但每个 analyst 请求都付
-   schema、child 还带 subagent/workflow）。C = 挂 Lead 已否决。
+   schema、child 还带 subagent/workflow）。C = 挂 Lead 已否决。**2026-11-10 新卡已按新事实裁决 B；
+   A 留 fallback（见上「深挖后分工」）。**
 2. **容量**：试点用「team 2 人 + wave-runner 1 + child 4 = 7 槽」，还是把 `maxActiveSubagents`
    提到 12（host 设置、产品面变更）？本轮建议先按 8 槽做试点，不先改全局。
 3. **live 证据**：P2（child 是否继承 `research:manual`）、P3（Lead 工具表里 `subagent` 是否真在）、
@@ -54,9 +60,9 @@ workflow 的挂点、容量合同、HITL 授权方式与证据/失败合同，�
 5. **跨方向口径**：lens 材料 §7 的「workflow 子代是 Lead 克隆」只在 C 成立；wave-execution 的
    「HITL1 执行方式」与本卡的「计划卡正文点名、选项不动」需要统一成一句。
 
-**下一步：** 写 RFC（`notes/proposed/` 下，文件名在成立时定；推荐 A，B 作退路，C 记录
-否决理由），交用户评审；RFC 成立后本卡按 `proposed` 归档，实施与试点另卡。RFC 未批准前不动
-preset / plan 模板。
+**下一步：** wave 执行 = [新卡](2026-11-10-wave-execution-lens-fanout.md)（B + `lens-fanout`，按
+P0→P5 落地）；本卡只保留 channel-policy 记录与 goal `GOAL_TOOL_RESUME_PAUSED` 缺陷的裁决。若仍需
+RFC，只覆盖通道政策与 goal 语义，不覆盖 wave 执行实施；RFC 未批准前不动 preset / plan 模板。
 
 ## 已知与未决
 
