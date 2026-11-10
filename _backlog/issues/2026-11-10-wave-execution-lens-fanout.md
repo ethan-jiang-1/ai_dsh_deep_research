@@ -250,8 +250,22 @@ Lead root 不占槽；executor depth 1，children depth 2；同一 wave 不再�
 - **P4 未跑**：需要一场带 HITL1/HITL2 的真 run 与用户在场；当前默认 run 通道有在飞会话
   （未打扰），且 P4 的 HITL 不能由代理冒充。待用户安排一场 run 时补。
 - **P5 部分**：D45 / design/20 / design/30 / pack README 已知限制已落（commit `2b075a2`）；
+  `release-smoke --install-only` **ALL PASS**（pack → 干净 profile → plugin add → 安装域
+  preset-smoke 5/5 → remove/端口释放）——workflow peer 行在安装域可解析，A11 的 L2 面已补。
   implemented Note 与卡归档**不先写**——P4 未跑，写了就是把未验项写成 implemented。P4 过后同变更
   写 `notes/implemented/2026-11-10-wave-execution-lens-fanout.md` 并归档。
+
+**P4 开跑清单（待用户在场，一轮跑完）**：
+
+1. `node dev/run-driver.mjs up`（默认通道；不要另起）；HITL1 正常走三问 + 计划确认卡，
+   卡正文写 `W2 脚本扇出 ×4`；`plan-card-stats.mjs` 复核 ≤200。
+2. plan 写 `## Wave 执行`；节点 `task_id=plan-only`；Lead `subagent(agent_preset=analyst)`
+   （**不是 spawn_teammate**）。
+3. HITL2 时抓 `tool/call` 参数：必须是 `timeout: -1`（不是 600/省略）；观察 goal 是否保持 active、
+   无 goal 轮空转。
+4. 验收：`waves/W2.json` 四键 counts 与文件一致、`missing=0`、无 `ACTIVATION_LIMIT_REACHED`、
+   child 不递归 workflow、峰值 ≤8；把 run/critic 结果写进本卡 §实施进度 + Note。
+5. 失败 → 回 `推敲中`/`等人拍板`，附读数；不硬写 Note。
 
 ## 验收标准
 
