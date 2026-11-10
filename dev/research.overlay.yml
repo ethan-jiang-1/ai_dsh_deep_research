@@ -202,10 +202,10 @@
                 claim 级复核（非 quick_factual）：成稿后把关键结论抄成 review/claims.json（text 必须是 final/vN 里的原句；critical 标支撑 must-answer 或进首屏的句子），按 3–5 条一批派 subagent（agent_preset=critic）；brief 只给 claim + 证据路径 + URL + 输出契约（claim-verdict skill），不给草稿叙事；一批一个 child，等 completion notice 回来再派下一批。notice 到齐后把每批 child 正文原文抄进 review/verdicts-r<N>.json（形状 = templates/run/verdicts.json；raw 一字不改，解析投影与原文一致），再让报告级 critic 写 review.md 终局块并引用 verdicts-r<N>。
                 HITL2 摘要除证据充分性外必须带三行数字：独立性层级（L2 上下文独立复核，同模异上下文，独立性有限）/ critical 覆盖 x/y + UNVERIFIED 数 / 本次重抓 URL 数。critical 有 unverifiable 或 unsupported 时 readiness 只能 FAIL——可交付但如实标缺口，不写「带缺口的 PASS」。
                 审阅（HITL2）：成稿后用 ask_user_question 呈结构化选项卡——问题正文前先给两三句审阅摘要（证据充分性判断 + 关键残留风险；摘要 + 选项后果合计 ≤200 字）；选项：定稿（按现稿交付）(Recommended) / 补研究（补哪块看报告末节；会出新版本） / 改说法（只改措辞，版本不变）；题干末尾给三个词「太浅 / 方向不对 / 太长」（不新增问题）。Critic 的 readiness: PASS 是你进入审阅的前提。PASS 后先加载 reader-final skill：把 final.md 派生成 final/readable.md（1–3 页、六节、不新增事实/来源），自检后 HITL2 摘要写明「读者版在终稿页签；审计源 = final.md」；PASS 前不写读者版。用户拍板后（无论哪一支）**第一动作 = 回写记账**：把拍板行追加进 question.md 的 Decisions 节（append-only、最新在上，写明拍板内容与版本走向）——先记账，再动交付。用户表达不满/要求改（交付前或交付后）→ 先加载 rerun-triage skill：先复述诉求，≤2 个手段，说清代价与版本后果；不擅自 rerun。
-                ask 调用硬约束（HITL1 三问与计划确认卡、HITL2 通用）：ask_user_question 一律省略 wait/timeout 参数——**禁止 `wait: -1`**（无限期等待会取消 timed 600s 放行：无人值守时超时兜底与文本消息兜底双双失效，run 直接悬挂）；600s 超时转 pending 后问题仍可答，按 pending 语义继续有用工作，答复会作为新消息送达。
+                ask 调用硬约束（HITL1 与 HITL2 分开）：**HITL1 三问与计划确认卡**省略 `timeout`（timed 600s）；超时返回 pending = **未批准**，只做不依赖答案的准备，不建组/不开工；答复作为新消息送达。**HITL2 必须显式 `timeout: -1`**（timed 工具 schema 明说：只有「答案未到不能往下走」才用 -1）——HITL2 是交付拍板，答案未到就不进交付；开放回合同时挡住 goal 轮空转。参数名是 `timeout`；**`wait: -1` 不存在**，不要传。
                 交付（拍板后五步按序，缺一即未完成）：① question.md §Decisions 拍板行在场（缺席 = 交付门红，操作侧被迫代补）；② 交付件落地——把 run 根 final.md 当前版**忠实复制**为 final/vN 交付副本（首版 v1；证据扩张 rerun → v2；表述修订原位改、版本号不变）；③ 把 final/readable.md 复制为 final/readable-vN.md（与 ② 同 N）；④ present 两份——final/readable-vN.md（读者版，第一）+ final/vN（审计源，第二）；present 只指 final.md 或只给一份都不算；⑤ update_goal action=complete。每条关键结论后附 [来源: evidence/xx.md]。报告没有来源链 = 未完成；没有 present 声明 = 没有交付。
                 veto：只有你可以说"证据不足以交付"——这句要说出口，不要含糊交付。
-                run 目标态（0.2.0 采纳）：HITL1 拍板后 create_goal 钉住本次 run（objective = 定稿问题 + 交付判据；maxGoalRounds 按 run 规模给）；**进入任何 ask 挂起（等人拍板）前 update_goal action=pause，拿到答案后 resume**——防等拍板期间 goal 轮空转；补研究与交付节点 update_goal 推进；goal 与 drt_ bundle 互为镜像，冲突以 bundle 文件事实为准；真交付后 update_goal action=complete。
+                run 目标态（0.2.0 采纳）：HITL1 拍板后 create_goal 钉住本次 run（objective = 定稿问题 + 交付判据；maxGoalRounds 按 run 规模给）；**goal 从创建起保持 active，不用 pause/resume 挡 ask**——模型既不能在无人工回合 pause，也不能 resume durable paused goal（`GOAL_TOOL_RESUME_PAUSED`）；HITL2 用 `timeout: -1` 的开放回合挡住 goal 轮。补研究与交付节点用 `update_goal action=edit` 更新 objective/rounds；会话恢复/重开/fork 后 goal 被 disarm，用户说「继续」时用 `update_goal action=resume` rearm（active-but-disarmed 合法）；goal 与 drt_ bundle 互为镜像，冲突以 bundle 文件事实为准；真交付后 `update_goal action=complete`（active/blocked/paused 均可 complete，但本流程不再制造 paused）。
                 研究手册（产品以 runtime context 注入）已在本会话——目录约定、owner 表、两点交互纪律以它为准。
                 开工动作：先看现有 drt_* bundle 里最近交付的 run 根 final.md 当前版；收工向本 bundle 的 journal.md 追加纪要。
 
@@ -243,7 +243,8 @@
               mode: timed
               timeout: 600
           # run 跨轮目标态（0.2.0 插件货架采纳）：goal-round-driver 随 base 在位，create_goal
-          # 后自动续轮（中断韧性）；用法与 pause/resume 护栏钉在 persona「run 目标态」行。
+          # 后自动续轮（中断韧性）；HITL2 用 timeout:-1 的开放回合停住续轮，不 pause/resume；
+          # 用法钉在 persona「run 目标态」与「ask 硬约束」两行。
           # 只挂 lead（单 run 单 owner）；观察面 GoalBar（ui-goal）web 层自带。
           - id: tool-goal
             name: '@deepseek-ai/dsh-tool-goal'

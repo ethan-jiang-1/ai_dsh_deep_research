@@ -9,6 +9,8 @@
 //   「lead persona 钉 HITL1 零例外」测红；还原 → 绿。
 // 负例留证 2026-10-09：BUG-005——lead.patch.yml 删「ask 调用硬约束」句 / 「wait: -1」点名 →
 //   「lead persona 钉 ask 硬约束」测红；还原 → 绿。
+// 负例留证 2026-11-10（改判）：删 HITL2 的 `timeout: -1` 句 / 把旧 `update_goal action=pause`
+//   写回 → 本测红；还原 → 绿。旧「一律禁 -1」只保留 HITL1 内核，HITL2 由 timed schema 明许。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -175,13 +177,19 @@ test('lead persona 钉 HITL1 零例外（BUG-006 契约：快路径自我豁免�
   assert.match(yml, /推荐档/, '零例外句未写明题面自含答案时的操作（取推荐档）');
 });
 
-test('lead persona 钉 ask 硬约束：禁 wait:-1（BUG-005——模型单参绕过 timed 护栏即无人值守悬挂）', () => {
+test('lead persona 钉 ask 硬约束：HITL1 timed、HITL2 timeout:-1（参数名不是 wait）', () => {
   const yml = readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8');
-  // 契约文本两个必备面：约束句在场（HITL1 三问与计划确认卡、HITL2 三处 ask 通用）+ 明确点名 wait: -1 的禁令
-  assert.match(yml, /ask 调用硬约束（HITL1 三问与计划确认卡、HITL2 通用）/, 'persona 缺 ask 硬约束句——timed 护栏可被模型单参绕过');
-  assert.match(yml, /wait: -1/, 'persona 未点名禁 wait: -1');
-  // 双保险：约束句必须同时说明"为什么"（兜底失效后果）——没有后果的禁令对模型是空约束
-  assert.match(yml, /兜底/, 'ask 硬约束句未说明违反后果（超时/文本兜底失效）');
+  // 2026-11-10 改判：timed 工具 schema 明说 `timeout: -1` 只在「答案未到不能往下走」时用。
+  // HITL2 是交付拍板，用开放回合停住 goal 轮；HITL1 仍在 goal 之前、用默认 600s timed。
+  // 旧 BUG-005 的「一律禁 -1」保留其正确内核（HITL1 不悬挂），但不能再套到 HITL2 上。
+  assert.match(yml, /ask 调用硬约束（HITL1 与 HITL2 分开）/, 'persona 缺分档 ask 硬约束句');
+  assert.match(yml, /HITL2 必须显式 `timeout: -1`/, 'HITL2 未钉 timeout:-1——开放回合不成立，goal 会空转');
+  assert.match(yml, /参数名是 `timeout`/, '未纠正旧 wait/timeout 参数名');
+  assert.match(yml, /`wait: -1`/, '未点名旧 wait:-1 不是合法参数');
+  // 机制矛盾必须在 persona 里说清：模型不能 pause（无人工回合）/ 不能 resume durable paused。
+  assert.match(yml, /GOAL_TOOL_RESUME_PAUSED/, '未点名模型不能 resume durable paused goal');
+  assert.doesNotMatch(yml, /update_goal action=pause/, '旧 pause 护栏仍在——pause 需要人工回合，会造成假指令');
+  assert.doesNotMatch(yml, /拿到答案后 resume/, '旧 resume 承诺仍在——模型不能 resume durable paused goal');
 });
 
 test('HITL1 两段卡：计划确认卡钉在模型可见面与合同面（persona + research-brief + 手册 + 模板）', () => {

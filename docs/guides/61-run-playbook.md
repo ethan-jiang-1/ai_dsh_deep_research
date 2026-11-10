@@ -258,7 +258,9 @@ BUG-020）。
   回合由 goal 驱动续轮（韧性增益；goal 语义随 run 生效有实测）；**通道死亡场景以文件恢复
   为准，不假设自动续轮**（通道死亡下续轮未单独实测——机制描述须有盘面支撑，
   [BUG-009 卡](../../_backlog/_archived/fixed_bugs/BUG-009-no-finalization-on-restart.md) 同款教训）；
-  lead 在任何 ask 挂起前 pause goal、答后 resume（防空转），
+  HITL2 用 `ask_user_question` 的 `timeout: -1` 保持开放回合（答案未到不进交付；goal 轮
+  不空转；无人值守时保持 pending、不烧模型调用）；lead 不再 pause/resume goal——模型不能
+  resume durable paused goal，goal 从 HITL1 后保持 active，交付时 complete；
   goal 与 drt_ bundle 互为镜像、冲突以 bundle 文件事实为准；
 - **位置 = 操作桶（D28）**：根 / `archive/` / `_abandoned/` 只用于发现与展示，不证明交付；
   交付由 `final/vN` + `deliverables/presented` + `delivered.json`/`acceptance.md` 判定。归档 =
