@@ -82,6 +82,28 @@ lead persona ≤3 句 + `team-assembly` 表一行。
 
 **不做的事（同卡「不做」节）**：新只读 `verifier` preset、运行时 veto、语义门禁、host 代码、收据扩展（P6 可选片）。
 
+## 落地进度（2026-11-10）
+
+- **P0 门禁核 已落**（commit `7e77d24`）：`verdict-audit-core.mjs` + CLI + 28 例 keyless 回归 +
+  `run-accept` 第三道预检 + `scripts/README` 两表 + `evaluation.md` L4 判据 ⑤ + 两份写者模板。
+  证据：五条红配方真 CLI 各红一次（`not-verbatim` / `coverage-gap` / `verdict-invalid` / `session-preset` /
+  `verifier-wrote`），epoch 豁免 exit 0；`run-accept-smoke` 补齐 claims-绿 / gap-红 / `--require` 强制三例。
+- **P1 内容面 已落**（commit `d324240`）：`claim-verdict` skill、critic/lead persona、team-assembly 通道行、
+  手册两处（**预算下放**：`plan.md` 的 W 语法搬模板+skill、三件 ops 合并，净 12,187 → 12,038，余 250）、
+  准入规则写入 `content-shape` 门禁注释。证据：`render-overlay` 重生成、`preset-smoke` ALL PASS（新 skill 挂载 +
+  隔离仍绿）、snapshot B 先红（两条 persona 都被捕获）→ lead/critic 真模型重录 + `snapshot.json` 身份更新 →
+  C5 金标准重写人审 → replay ALL PASS、`l4-lite-smoke` ALL PASS、`pnpm verify` 全绿、`pnpm test` 1083 绿。
+- **P3 试点 A 已过**（真模型，2026-11-10）：复用已交付 bundle 副本 `drt_claim-pilot`（2 条 critical claim），
+  Lead 派 1 个 `agent_preset=critic` child（session `394f8a00…`，depth 1），child 真加载 claim-verdict、
+  读两张证据卡、重抓两条 URL、做轮反例搜索 → 回 `[supported, partially_supported]`；Lead 原文落
+  `review/verdicts-r1.json`，未写 review.md。`verdict-audit --require` 在**真实会话**上 PASS
+  （覆盖 2/2，`not-verbatim`/`session-preset`/`session-depth`/`verifier-wrote` 全过——这一条同时补上了
+  「dev home 无真实 child 会话」的现场空白；唯一警告 = `review-missing`，因试点故意不写 review.md）。
+- **剩**：P4 试点 B（真 run，需用户在场走 HITL1/HITL2）→ P5 收尾（D44 / implemented Note / 卡归档 / 研究题去向）。
+- **顺带发现（不在本卡范围）**：手册写「`review.md` 末尾固定 `## readiness（终局）: PASS|FAIL`」，
+  但门禁的 `readinessOf` 解析不了这个括号形态——真实 review 能过是因为别处另有一行裸 `readiness: PASS`。
+  `verdict-audit` 对此打 `readiness-unparsed` 警告而不静默采信；建议另开 bug 卡修手册或解析器。
+
 ## 验收标准
 
 1. **工件契约在场**：手册两处（目录约定 + 完成判据）+ `claim-verdict` skill 的输出契约；字段名与 core 的
