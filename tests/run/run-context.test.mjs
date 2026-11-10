@@ -2,7 +2,7 @@
 // 按文件类型的读策略、missing/unreadable 区分、version 探针、listRuns 枚举。
 // 先红后绿（2026-10-23）：本文件先落，lib 模块后写——首跑应红在模块缺席；实现后全绿。
 // 反证口径：1448 行 review 的 FAIL@571 / PASS@1442 是真实 archive 文件的形态（见
-// notes/implemented/2026-10-19-final-tab-round-close.md §4），不是合成怪例。
+// notes/archived/2026-10-19-final-tab-round-close.md §4），不是合成怪例。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts';

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// run-dashboard — M2 run 只读观察面（RFC：notes/implemented/2026-09-24-m2-run-dashboard.md
-// + debug-dashboard-plus：notes/implemented/2026-09-24-debug-dashboard-plus.md）的 CLI 壳：
+// run-dashboard — M2 run 只读观察面（RFC：notes/archived/2026-09-24-m2-run-dashboard.md
+// + debug-dashboard-plus：notes/archived/2026-09-24-debug-dashboard-plus.md）的 CLI 壳：
 // 纯管线（解析→场景→模型，全 fail-soft）住 scripts/lib/run-dashboard-core.mjs；HTML 渲染 = scripts/lib/run-dashboard-html.mjs
 // （2026-10-13 下沉——tests 消费纯函数不再 import CLI 入口），本件只管参数、watch 循环、输出写盘。
 //

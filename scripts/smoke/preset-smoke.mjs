@@ -41,7 +41,7 @@ const NO_PATCH = process.argv.includes('--no-patch');
 const BOOT_TIMEOUT_MS = 120_000;
 // 请求预算（company@59551f2 release-smoke 实证值）：RPC/boot 页 fetch 挂死不拖垮整个冒烟。
 // 值级不可证（构造"接受连接但不响应"的服务才能触发 AbortSignal——证的是 Node 语义非本仓逻辑），
-// 申报见 notes/implemented/2026-10-09-release-smoke-hardening.md 件④。
+// 申报见 notes/archived/2026-10-09-release-smoke-hardening.md 件④。
 const REQUEST_TIMEOUT_MS = 15_000;
 
 let failed = false;

@@ -1,5 +1,5 @@
 // acceptance-check —— 收活验收判据的机械求值器（oss-dr 借鉴：DeerFlow acceptance_criteria
-// 父侧纯函数核查的 keyless 移植，出处 = notes/implemented/2026-10-06-acceptance-criteria.md）。
+// 父侧纯函数核查的 keyless 移植，出处 = notes/archived/2026-10-06-acceptance-criteria.md）。
 // 语义三态 = PASS / FAIL / UNVERIFIED：判据落在文件上且机械可判 → PASS|FAIL；判不了（未知
 // 判据形态 / 非对象 / 求值异常）→ UNVERIFIED 带原因——**永不静默放行**（收活纪律同款：
 // UNVERIFIED 是第三态，不是跳过也不是 PASS）。lead 运行时的文件核验由 team-assembly skill

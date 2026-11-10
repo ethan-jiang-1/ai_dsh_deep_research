@@ -1,13 +1,13 @@
 // direct-authorization-boundary — entry-chain-probe 的词面判据：按授权范围直接执行、无需
 // 重复请批的边界判定。消费 = scripts/probe/entry-chain-probe.mjs 与
 // tests/run/entry-chain-probe.test.mjs；词面口径与放宽实录 =
-// notes/implemented/2026-10-10-entry-chain-probe-lexical-recall.md。
+// notes/archived/2026-10-10-entry-chain-probe-lexical-recall.md。
 const normalize = (text) => text.replace(/[，。；、———()（）\s]/g, '');
 
 export const rfcBoundaryPasses = (answer) => {
   const text = normalize(answer);
   // 词面层 = 留档语义复核的召回预过滤（职责是召回语义正确的形态，不是规定措辞）。
-  // 2026-10-10 真模型双跑实录与放宽依据 = notes/implemented/2026-10-10-entry-chain-probe-lexical-recall.md。
+  // 2026-10-10 真模型双跑实录与放宽依据 = notes/archived/2026-10-10-entry-chain-probe-lexical-recall.md。
   // ①限定语接受 只有/仅当/仅在/只在/才——「仅在/只在…时…建立」含长括注展开是模型自然措辞；
   //   显式评审的紧邻否定（无需/无须/不用/不必/不需/不需要/不要求）用负向环视设防（2026-10-10
   //   对抗自审实测假阳性）；**残余边界**：后置否定（「显式评审并非必需」）与自相矛盾混合回答

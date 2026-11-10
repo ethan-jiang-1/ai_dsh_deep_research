@@ -7,9 +7,24 @@
       "reason": "2026-11-10 归档批次路径重定向：2026-10-08-recorded-session-obligation 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
+      "source": "_backlog/_archived/fixed_bugs/BUG-021-cdp-probe-ask-send-fail.md",
+      "target": "notes/archived/2026-10-11-cdp-probe-ask-journal-reconcile.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-11-cdp-probe-ask-journal-reconcile 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
       "source": "_backlog/_archived/fixed_bugs/BUG-022-provider-stream-malformed-turn-kill.md",
       "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
       "reason": "受控实验与字节取证快照（postmortem 层退役迁入）"
+    },
+    {
+      "source": "_backlog/_archived/fixed_bugs/BUG-023-provider-malformed-storm-exhausts-retry.md",
+      "target": "notes/archived/2026-10-12-llm-stream-direct-no-proxy.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-12-llm-stream-direct-no-proxy 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/fixed_bugs/BUG-024-direct-path-malformed-storm-recurrence.md",
+      "target": "notes/archived/2026-10-12-llm-stream-direct-no-proxy.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-12-llm-stream-direct-no-proxy 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "_backlog/_archived/fixed_bugs/BUG-024-direct-path-malformed-storm-recurrence.md",
@@ -20,6 +35,61 @@
       "source": "_backlog/_archived/fixed_bugs/BUG-028-llm-socket-isolation-silent-fallback.md",
       "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
       "reason": "socket 隔离缓解的依据与 soak 结论快照（postmortem 层退役迁入）"
+    },
+    {
+      "source": "_backlog/_archived/fixed_bugs/BUG-029-evidence-audit-url-extraction-encoded-forms.md",
+      "target": "notes/archived/2026-10-02-mcp-playwright-adoption.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-02-mcp-playwright-adoption 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/fixed_bugs/BUG-029-evidence-audit-url-extraction-encoded-forms.md",
+      "target": "notes/archived/2026-10-15-evidence-audit-url-forms-and-corpus.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-15-evidence-audit-url-forms-and-corpus 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/fixed_bugs/BUG-030-snapshot-replay-c5-activity-row-flicker-recurrence.md",
+      "target": "notes/archived/2026-10-16-replay-turn-settled-predicate.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-16-replay-turn-settled-predicate 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/fixed_bugs/BUG-038-node-gate-leads-grade-markdown-intolerance.md",
+      "target": "notes/archived/2026-10-18-node-gate-judgment-widening.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-18-node-gate-judgment-widening 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/fixed_bugs/BUG-043-graph-unmapped-task-shows-unexecuted.md",
+      "target": "notes/archived/2026-10-23-graph-mapping-honesty.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-23-graph-mapping-honesty 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/company-repin-review/2026-10-10-bare-path-audit.md",
+      "target": "notes/archived/2026-10-09-company-repin-review.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-company-repin-review 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/company-repin-review/2026-10-10-company-drift-review.md",
+      "target": "notes/archived/2026-10-09-company-repin-review.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-company-repin-review 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/company-repin-review/2026-10-10-external-repin-review-round2.md",
+      "target": "notes/archived/2026-10-09-company-repin-review.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-company-repin-review 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/company-repin-review/2026-10-10-external-repin-review.md",
+      "target": "notes/archived/2026-10-09-company-repin-review.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-company-repin-review 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/company-repin-review/2026-10-10-preset-config-audit.md",
+      "target": "notes/archived/2026-10-09-company-repin-review.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-company-repin-review 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/company-repin-review/README.md",
+      "target": "notes/archived/2026-10-09-company-repin-review.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-company-repin-review 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "_backlog/_archived/research/company-snapshots/2026-10-09-company-snapshots-analysis.md",
@@ -43,6 +113,11 @@
     },
     {
       "source": "_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md",
+      "target": "notes/archived/2026-09-24-r1-scaffold.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-r1-scaffold 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md",
       "target": "notes/archived/2026-09-26-human-gate-acceptance.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-09-26-human-gate-acceptance 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
@@ -55,6 +130,11 @@
       "source": "_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md",
       "target": "notes/archived/2026-09-28-node-topology-procedure.md",
       "reason": "体检材料历史引用（同上）"
+    },
+    {
+      "source": "_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md",
+      "target": "notes/archived/2026-10-06-acceptance-criteria.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-06-acceptance-criteria 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md",
@@ -73,6 +153,11 @@
     },
     {
       "source": "_backlog/_archived/research/README.md",
+      "target": "notes/archived/2026-09-28-strategy-benchmark.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-28-strategy-benchmark 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/README.md",
       "target": "notes/archived/2026-10-08-notes-stocktake.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-10-08-notes-stocktake 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
@@ -83,8 +168,18 @@
     },
     {
       "source": "_backlog/_archived/research/README.md",
+      "target": "notes/archived/2026-10-09-company-repin-review.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-company-repin-review 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/README.md",
       "target": "notes/archived/2026-10-21-dynamic-research-dag-a0.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-10-21-dynamic-research-dag-a0 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/README.md",
+      "target": "notes/archived/2026-11-01-plugin-as-product.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-11-01-plugin-as-product 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "_backlog/_archived/research/recorded-session-obligation/2026-10-08-model-visible-calibration.md",
@@ -95,6 +190,16 @@
       "source": "_backlog/_archived/research/recorded-session-obligation/README.md",
       "target": "notes/archived/2026-10-08-recorded-session-obligation.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-10-08-recorded-session-obligation 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/research/strategy-benchmark/README.md",
+      "target": "notes/archived/2026-09-28-strategy-benchmark.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-28-strategy-benchmark 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-28-hitl2-scope-round.md",
+      "target": "notes/archived/2026-09-24-m2-run-mechanics.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-m2-run-mechanics 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "_backlog/_archived/settled_issues/2026-09-28-node-io-schema.md",
@@ -110,6 +215,11 @@
       "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
       "target": "notes/archived/2026-09-28-node-topology-procedure.md",
       "reason": "已结卡指向拓扑流程 Note（SKILL 承接核实后 2026-10-10 裁定归档，路径重定向）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
+      "target": "notes/archived/2026-09-28-strategy-benchmark.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-28-strategy-benchmark 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "_backlog/_archived/settled_issues/2026-09-28-pipeline-polish.md",
@@ -142,6 +252,21 @@
       "reason": "2026-11-10 归档批次路径重定向：2026-09-29-dispatch-distillation 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
+      "source": "_backlog/_archived/settled_issues/2026-10-02-mcp-client-adoption.md",
+      "target": "notes/archived/2026-09-24-m2-run-mechanics.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-m2-run-mechanics 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-02-mcp-client-adoption.md",
+      "target": "notes/archived/2026-09-30-plugin-shelf-adoption.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-30-plugin-shelf-adoption 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-02-mcp-client-adoption.md",
+      "target": "notes/archived/2026-10-02-mcp-playwright-adoption.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-02-mcp-playwright-adoption 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
       "source": "_backlog/_archived/settled_issues/2026-10-04-leads-topic-shape.md",
       "target": "notes/archived/2026-09-28-wave0-leads-polish.md",
       "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
@@ -150,6 +275,36 @@
       "source": "_backlog/_archived/settled_issues/2026-10-05-test-asset-organization.md",
       "target": "notes/archived/2026-10-05-test-asset-organization.md",
       "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-09-guard-red-record.md",
+      "target": "notes/archived/2026-10-09-company-repin-review.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-company-repin-review 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-09-layering-v2.md",
+      "target": "notes/archived/2026-10-09-company-repin-review.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-company-repin-review 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md",
+      "target": "notes/archived/2026-10-09-company-repin-review.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-company-repin-review 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md",
+      "target": "notes/archived/2026-10-11-member-activity-first-validation.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-11-member-activity-first-validation 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-09-release-smoke-hardening.md",
+      "target": "notes/archived/2026-10-09-company-repin-review.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-company-repin-review 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-10-09-release-smoke-hardening.md",
+      "target": "notes/archived/2026-10-09-release-smoke-hardening.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-release-smoke-hardening 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "_backlog/_archived/settled_issues/2026-10-16-structure-round3-convergence.md",
@@ -187,6 +342,46 @@
       "reason": "2026-11-10 归档批次路径重定向：2026-09-28-rerun-loop-live 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
+      "source": "_backlog/_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md",
+      "target": "notes/archived/2026-09-24-run-bundle-drt-separation.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-run-bundle-drt-separation 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-11-01-plugin-as-product.md",
+      "target": "notes/archived/2026-11-01-plugin-as-product.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-11-01-plugin-as-product 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-11-01-product-docs-and-dist.md",
+      "target": "notes/archived/2026-11-01-plugin-as-product.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-11-01-plugin-as-product 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-11-01-product-first-run-ux.md",
+      "target": "notes/archived/2026-11-01-plugin-as-product.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-11-01-plugin-as-product 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-11-01-product-launch-runtime.md",
+      "target": "notes/archived/2026-11-01-plugin-as-product.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-11-01-plugin-as-product 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-11-01-repo-alignment-and-evidence.md",
+      "target": "notes/archived/2026-11-01-plugin-as-product.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-11-01-plugin-as-product 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-11-02-dev-product-path-parity.md",
+      "target": "notes/archived/2026-11-02-dev-product-path-parity.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-11-02-dev-product-path-parity 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-11-07-user-facing-readme-and-install-guide.md",
+      "target": "notes/archived/2026-11-07-user-facing-readme.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-11-07-user-facing-readme 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
       "source": "_backlog/_archived/settled_issues/README.md",
       "target": "notes/archived/2026-09-28-backlog-deliberation-space.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-09-28-backlog-deliberation-space 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
@@ -203,8 +398,33 @@
     },
     {
       "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-10-02-mcp-playwright-adoption.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-02-mcp-playwright-adoption 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-10-04-fresh-agent-doc-audit.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-04-fresh-agent-doc-audit 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-10-04-gate-l-invariant.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-04-gate-l-invariant 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
       "target": "notes/archived/2026-10-05-test-asset-organization.md",
       "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-10-09-release-smoke-hardening.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-release-smoke-hardening 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-10-11-member-activity-first-validation.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-11-member-activity-first-validation 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "_backlog/_archived/settled_issues/README.md",
@@ -215,6 +435,21 @@
       "source": "_backlog/_archived/settled_issues/README.md",
       "target": "notes/archived/2026-10-21-dynamic-research-dag-a0.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-10-21-dynamic-research-dag-a0 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-11-01-plugin-as-product.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-11-01-plugin-as-product 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-11-02-dev-product-path-parity.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-11-02-dev-product-path-parity 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-11-07-user-facing-readme.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-11-07-user-facing-readme 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "_backlog/triggers.md",
@@ -248,6 +483,11 @@
     },
     {
       "source": "_backlog/triggers.md",
+      "target": "notes/archived/2026-11-01-plugin-as-product.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-11-01-plugin-as-product 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "_backlog/triggers.md",
       "target": "notes/archived/2026-11-03-seven-dimension-hygiene-round.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-11-03-seven-dimension-hygiene-round 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
@@ -260,6 +500,11 @@
       "source": ".agents/skills/bumping-vendor-pin/SKILL.md",
       "target": "notes/archived/2026-09-30-vendor-pin-bump-020rc2.md",
       "reason": "两次实操历史轮次出处（现行流程 owner = 本技能）"
+    },
+    {
+      "source": ".agents/skills/changing-node-topology/SKILL.md",
+      "target": "notes/archived/2026-09-24-m2-run-mechanics.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-m2-run-mechanics 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": ".agents/skills/reproducing-a-failure/SKILL.md",
@@ -278,13 +523,53 @@
     },
     {
       "source": "docs/decisions.md",
+      "target": "notes/archived/2026-09-24-l1-l2-green.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-l1-l2-green 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "docs/decisions.md",
+      "target": "notes/archived/2026-09-24-run-bundle-drt-separation.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-run-bundle-drt-separation 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "docs/decisions.md",
       "target": "notes/archived/2026-09-24-ui-observability-surfaces.md",
       "reason": "决策台账 D18 行与外部研究材料表的琢磨稿指针（行内标注'已归档'——观察面选项推敲与十二坑考古的历史家）"
+    },
+    {
+      "source": "docs/decisions.md",
+      "target": "notes/archived/2026-09-24-web-tool-rows.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-web-tool-rows 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "docs/decisions.md",
+      "target": "notes/archived/2026-09-29-cold-start-intent-router.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-29-cold-start-intent-router 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "docs/decisions.md",
+      "target": "notes/archived/2026-10-02-mcp-playwright-adoption.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-02-mcp-playwright-adoption 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "docs/decisions.md",
+      "target": "notes/archived/2026-10-05-item-lifecycle-tdd.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-05-item-lifecycle-tdd 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "docs/decisions.md",
+      "target": "notes/archived/2026-11-02-backlog-pipeline.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-11-02-backlog-pipeline 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "docs/design/10-architecture.md",
       "target": "notes/archived/2026-09-24-dsh-plugin-repo-anatomy.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-09-24-dsh-plugin-repo-anatomy 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "docs/design/20-roles.md",
+      "target": "notes/archived/2026-09-24-m2-run-mechanics.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-m2-run-mechanics 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "docs/design/30-methodology-mapping.md",
@@ -333,13 +618,28 @@
     },
     {
       "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-09-24-entry-chain-fresh-agent-audit.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-entry-chain-fresh-agent-audit 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "docs/evaluation.md",
       "target": "notes/archived/2026-09-24-foundation-remediation.md",
       "reason": "L0 登记表 md-links/role-list-sync/gate-ledger-sync 三行的反证出处列引基础整治 Note（红→还原绿实证的历史家；现行执行体 = 门禁本体与 gates-smoke 常驻案例）"
     },
     {
       "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-09-24-l1-l2-green.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-l1-l2-green 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "docs/evaluation.md",
       "target": "notes/archived/2026-09-24-noise-sweep.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-09-24-noise-sweep 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-09-24-r1-scaffold.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-r1-scaffold 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "docs/evaluation.md",
@@ -353,8 +653,33 @@
     },
     {
       "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-09-28-dist-export.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-28-dist-export 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-10-04-fresh-agent-doc-audit.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-04-fresh-agent-doc-audit 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "docs/evaluation.md",
       "target": "notes/archived/2026-10-07-audit-p3-closure-round.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-10-07-audit-p3-closure-round 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-10-07-lsfiles-gate-coverage-sweep.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-07-lsfiles-gate-coverage-sweep 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-10-07-runtime-scripts-layout.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-07-runtime-scripts-layout 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-10-09-release-smoke-hardening.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-release-smoke-hardening 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "docs/evaluation.md",
@@ -365,6 +690,11 @@
       "source": "docs/evaluation.md",
       "target": "notes/archived/2026-10-19-vendor-pin-bump-021rc2.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-10-19-vendor-pin-bump-021rc2 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+    },
+    {
+      "source": "docs/evaluation.md",
+      "target": "notes/archived/2026-11-02-dev-product-path-parity.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-11-02-dev-product-path-parity 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "docs/evaluation.md",
@@ -392,14 +722,49 @@
       "reason": "外部材料表 DSH client/UI 扩展面行：琢磨稿历史指针（行内标注“已归档”）"
     },
     {
+      "source": "docs/external-materials.md",
+      "target": "notes/archived/2026-10-05-item-lifecycle-tdd.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-05-item-lifecycle-tdd 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "docs/external-materials.md",
+      "target": "notes/archived/2026-10-09-company-repin-review.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-company-repin-review 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
       "source": "docs/guides/60-dev-loop.md",
       "target": "notes/archived/2026-09-24-agent-friendly-polish.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-09-24-agent-friendly-polish 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
+      "source": "docs/guides/60-dev-loop.md",
+      "target": "notes/archived/2026-10-05-item-lifecycle-tdd.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-05-item-lifecycle-tdd 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "docs/guides/61-run-playbook.md",
+      "target": "notes/archived/2026-09-24-m2-run-mechanics.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-m2-run-mechanics 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
       "source": "docs/guides/61-run-playbook.md",
       "target": "notes/archived/2026-09-26-bundle-face-wiring.md",
       "reason": "会话建在别处则渐进面缺席的实测根因指针（根因链历史家；操作事实已在本页现行正文）"
+    },
+    {
+      "source": "docs/guides/61-run-playbook.md",
+      "target": "notes/archived/2026-10-02-mcp-playwright-adoption.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-02-mcp-playwright-adoption 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "docs/guides/61-run-playbook.md",
+      "target": "notes/archived/2026-10-18-hitl-proxy-delivery-guard.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-18-hitl-proxy-delivery-guard 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "notes/implemented/2026-09-24-m2-p1-run-channel.md",
+      "target": "notes/archived/2026-10-20-run-driver-entry.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-20-run-driver-entry 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "notes/implemented/2026-09-24-observability-gui.md",
@@ -417,9 +782,24 @@
       "reason": "2026-11-10 归档批次路径重定向：2026-10-08-evidence-liveness-hardening 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
-      "source": "notes/implemented/2026-10-08-delivery-review-scan-expansion.md",
-      "target": "notes/archived/2026-10-08-recorded-session-obligation.md",
-      "reason": "2026-11-10 归档批次路径重定向：2026-10-08-recorded-session-obligation 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+      "source": "notes/implemented/2026-10-07-plan-review-gate.md",
+      "target": "notes/archived/2026-10-11-hitl1-business-brief.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-11-hitl1-business-brief 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "notes/implemented/2026-10-09-backlog-methodology-absorption.md",
+      "target": "notes/archived/2026-09-28-strategy-benchmark.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-28-strategy-benchmark 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "notes/implemented/2026-10-09-backlog-methodology-absorption.md",
+      "target": "notes/archived/2026-10-24-backlog-notes-seam.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-24-backlog-notes-seam 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "notes/implemented/2026-10-09-layering-v2.md",
+      "target": "notes/archived/2026-10-09-company-repin-review.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-company-repin-review 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "notes/implemented/2026-10-09-snapshots-adoption.md",
@@ -437,19 +817,29 @@
       "reason": "根因改判与 BUG-022 归档的历史出处（postmortem 层退役迁入）"
     },
     {
+      "source": "notes/implemented/2026-10-12-backlog-process-borrow.md",
+      "target": "notes/archived/2026-10-24-backlog-notes-seam.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-24-backlog-notes-seam 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
       "source": "notes/implemented/2026-10-12-research-config-tab.md",
       "target": "notes/archived/2026-09-28-cockpit-home.md",
       "reason": "研究配置页签的“同族先例”历史指针（现行 owner = design/40）"
     },
     {
-      "source": "notes/implemented/2026-10-16-replay-turn-settled-predicate.md",
-      "target": "notes/archived/2026-10-13-llm-stream-malformed-storm.md",
-      "reason": "录制器收紧的落地件①历史出处（postmortem 层退役迁入）"
+      "source": "notes/implemented/2026-10-12-research-method-config.md",
+      "target": "notes/archived/2026-10-11-hitl1-business-brief.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-11-hitl1-business-brief 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
-      "source": "notes/implemented/2026-10-18-sidebar-session-location.md",
-      "target": "notes/archived/2026-10-13-repo-structure-refactor.md",
-      "reason": "2026-11-10 归档批次路径重定向：2026-10-13-repo-structure-refactor 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
+      "source": "notes/implemented/2026-10-21-session-replay.md",
+      "target": "notes/archived/2026-10-21-question-card-narrow-column.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-21-question-card-narrow-column 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "notes/implemented/2026-10-25-run-form-contract.md",
+      "target": "notes/archived/2026-10-26-faq24-decisions.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-26-faq24-decisions 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
       "source": "notes/implemented/2026-10-26-deploy-truth-and-isolation.md",
@@ -462,19 +852,69 @@
       "reason": "2026-11-10 归档批次路径重定向：2026-10-21-dynamic-research-dag-a0 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
-      "source": "notes/implemented/2026-11-04-session-dir-canonical.md",
-      "target": "notes/archived/2026-10-16-structure-round3-harness-convergence.md",
-      "reason": "2026-11-10 归档批次路径重定向：2026-10-16-structure-round3-harness-convergence 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
-    },
-    {
       "source": "notes/implemented/2026-11-05-vendor-pin-bump-021rc5.md",
       "target": "notes/archived/2026-10-19-vendor-pin-bump-021rc2.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-10-19-vendor-pin-bump-021rc2 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
+      "source": "notes/rejected/2026-09-24-floor-gates.md",
+      "target": "notes/archived/2026-09-24-m2-run-mechanics.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-m2-run-mechanics 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
       "source": "notes/rejected/2026-09-24-frontmatter-caliber-gate.md",
       "target": "notes/archived/2026-09-24-m2-data-caliber.md",
       "reason": "2026-10-20 归档批次：归档卡/否决 Note 指向当时实现 Note 的历史指针（实现理由仍可复核）"
+    },
+    {
+      "source": "notes/rejected/2026-09-24-synthesizer-role.md",
+      "target": "notes/archived/2026-09-24-m2-run-mechanics.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-m2-run-mechanics 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "notes/rejected/2026-09-24-ui-skin.md",
+      "target": "notes/archived/2026-10-13-orca-brand.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-13-orca-brand 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "notes/rejected/2026-09-30-browser-use-adoption.md",
+      "target": "notes/archived/2026-09-30-plugin-shelf-adoption.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-30-plugin-shelf-adoption 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "notes/rejected/2026-09-30-browser-use-adoption.md",
+      "target": "notes/archived/2026-10-02-mcp-playwright-adoption.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-02-mcp-playwright-adoption 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "notes/rejected/2026-09-30-workflow-adoption.md",
+      "target": "notes/archived/2026-09-24-m2-run-mechanics.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-m2-run-mechanics 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "notes/rejected/2026-09-30-workflow-adoption.md",
+      "target": "notes/archived/2026-09-30-plugin-shelf-adoption.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-30-plugin-shelf-adoption 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "notes/rejected/2026-10-12-channel-restart-selfheal.md",
+      "target": "notes/archived/2026-10-12-llm-stream-direct-no-proxy.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-12-llm-stream-direct-no-proxy 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "notes/rejected/2026-10-13-network-vanilla-restore.md",
+      "target": "notes/archived/2026-10-02-mcp-playwright-adoption.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-02-mcp-playwright-adoption 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "notes/rejected/2026-10-13-network-vanilla-restore.md",
+      "target": "notes/archived/2026-10-12-llm-stream-direct-no-proxy.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-12-llm-stream-direct-no-proxy 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
+    },
+    {
+      "source": "runtime/README.md",
+      "target": "notes/archived/2026-10-07-runtime-scripts-layout.md",
+      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-07-runtime-scripts-layout 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     }
   ]
 }

@@ -4,7 +4,7 @@
 // 为什么存在：lib/unconsumed-evidence.mjs 头注承诺"供操作侧收尾核验"（critic 差集出题的
 // 机械基座），但仓内此前无 CLI 入口——承诺的动作没有工具。判据与差集语义**不在这里**：
 // 唯一语义源 = scripts/lib/unconsumed-evidence.mjs（消费方 = 本件与 keyless 契约测试
-// tests/run/unconsumed-evidence.test.mjs）；活体验证 E2E = notes/implemented/2026-10-07-living-verification-hook.md。
+// tests/run/unconsumed-evidence.test.mjs）；活体验证 E2E = notes/archived/2026-10-07-living-verification-hook.md。
 //
 // 用法：node scripts/run-ops/unconsumed-evidence.mjs <bundleDir> [--json]
 // 退出码：0 = 正常投影（有无未消费证据是结论不是工具错误）/ 2 = 用法或前置错（bundle 缺席等）

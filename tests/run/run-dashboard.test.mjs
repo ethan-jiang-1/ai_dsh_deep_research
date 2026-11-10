@@ -1,4 +1,4 @@
-// run-dashboard 回归 — RFC notes/implemented/2026-09-24-m2-run-dashboard.md 的 keyless 验收：
+// run-dashboard 回归 — RFC notes/archived/2026-09-24-m2-run-dashboard.md 的 keyless 验收：
 // fixture run 目录 → 断言矩阵计数与分级统计精确；fail-soft（缺失/畸形不 throw）。
 // 反证方法：改 fixture 数字（如 evidence quality A→B）本文件必须红——见 RFC 验收判据。
 import { test } from 'node:test';
@@ -108,7 +108,7 @@ test('渲染壳：关键区块与 meta refresh 在场', () => {
   assert.match(html, /只读投影/);
 });
 
-// ── debug-dashboard-plus（RFC notes/implemented/2026-09-24-debug-dashboard-plus.md）──────
+// ── debug-dashboard-plus（RFC notes/archived/2026-09-24-debug-dashboard-plus.md）──────
 // 多场扫描 / 场内进度 / 步骤推导 / final 与 review 双命名容纳 / HITL 等待检测（zstd 夹具
 // 测试内生成——node:zlib 原生，无子进程，layering 纪律不破）。
 import { mkdirSync, rmSync, writeFileSync, utimesSync, symlinkSync } from 'node:fs';

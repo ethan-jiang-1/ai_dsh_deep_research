@@ -12,7 +12,7 @@ const B = bundle('bundle-acceptance')
 
 // 收活验收判据机械求值器（DeerFlow acceptance_criteria keyless 移植）的单元反证：
 // 模块缺席时本文件导入即红（先红后绿实录，2026-10-06）。三态语义钉 = PASS/FAIL/UNVERIFIED，
-// 核心纪律 = 判不了的永不静默放行（notes/implemented/2026-10-06-acceptance-criteria.md）。
+// 核心纪律 = 判不了的永不静默放行（notes/archived/2026-10-06-acceptance-criteria.md）。
 
 test('file_exists：在场且非空 → PASS；缺席 → FAIL（缺席可判，不是 UNVERIFIED）', () => {
   const r = acceptanceCheck(B, [

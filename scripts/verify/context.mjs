@@ -96,7 +96,7 @@ export function gitOnce(args) {
 
 /** tracked 文件枚举四件套（gitOnce 同款纪律——ls-files 族 fail-loud 文本面的共同形态收口）。
  *  沿革：2026-10-07 ls-files 清扫把逐文件读盘门禁统一为 quotepath=false + 缺席/不可读 fail-loud
- *  + 目录型 symlink 放行（实证 = notes/implemented/2026-10-07-lsfiles-gate-coverage-sweep.md）；
+ *  + 目录型 symlink 放行（实证 = notes/archived/2026-10-07-lsfiles-gate-coverage-sweep.md）；
  *  门禁继续增长后四件套逐字抄写开始漂移（2026-10-21 六维卫生轮 维度2），收口为本助手。
  *  收口面（只此四件，不多不少）：
  *   ① 枚举：`git -c core.quotepath=false ls-files [glob]`（经 gitOnce 去重子进程；quotepath=false =

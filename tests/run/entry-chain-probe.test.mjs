@@ -28,7 +28,7 @@ test('RFC probe recognizes the contract without requiring one phrase order', () 
   assert.equal(rfcBoundaryPasses('RFC 只在某项持久决定需要显式评审时才于 notes/proposed/ 建立，不是实施工作的普遍前置。'), true);
   assert.equal(rfcBoundaryPasses('只有持久决定需要显式评审时，才为该决定建立 RFC；它不是一般实施工作的普遍前置。'), true);
   // 两条真模型实录正例（2026-10-10 探针双跑，语义正确而被旧词面漏接——放宽依据见
-  // notes/implemented/2026-10-10-entry-chain-probe-lexical-recall.md）：
+  // notes/archived/2026-10-10-entry-chain-probe-lexical-recall.md）：
   assert.equal(rfcBoundaryPasses('不是普遍前置：RFC 仅在「持久决定需要显式评审」时按该项建立（D12；根 AGENTS 入口链第 4 步、dev-loop §1.1）。'), true);
   assert.equal(rfcBoundaryPasses('不是——RFC 只在「持久决定需要显式评审（需在实现前持久化被评审、且理由无法由代码/测试/现有文档说明）」时为该项建立（D12、意图载体总图）。'), true);
   // 2026-11-02 真模型实录：自然措辞用「才建在」而非「才建立」，且以「并不是」起句拒绝普遍前置。

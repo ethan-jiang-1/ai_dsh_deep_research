@@ -7,7 +7,7 @@
 //   2. 被动观察——不构成第三个交互点，不从观察面向角色发指令；
 //   3. keyless——纯 fs + node:zlib（zstd 会话日志解压，HITL 等待检测用），无模型/网络/子进程；
 //   4. fail-soft——缺失/畸形文件显示"未开始 / 无法解析"并继续渲染其余部分。
-// 出处：RFC notes/implemented/2026-09-24-m2-run-dashboard.md + debug-dashboard-plus（同目录）。
+// 出处：RFC notes/archived/2026-09-24-m2-run-dashboard.md + debug-dashboard-plus（同目录）。
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import { resolveSessionLog, readSessionEvents } from './session-log.mjs';
