@@ -249,6 +249,9 @@ Lead root 不占槽；executor depth 1，children depth 2；同一 wave 不再�
   `run_id:null` + note，不得伪造。
 - **P4 未跑**：需要一场带 HITL1/HITL2 的真 run 与用户在场；当前默认 run 通道有在飞会话
   （未打扰），且 P4 的 HITL 不能由代理冒充。待用户安排一场 run 时补。
+- **P5 部分**：D45 / design/20 / design/30 / pack README 已知限制已落（commit `2b075a2`）；
+  implemented Note 与卡归档**不先写**——P4 未跑，写了就是把未验项写成 implemented。P4 过后同变更
+  写 `notes/implemented/2026-11-10-wave-execution-lens-fanout.md` 并归档。
 
 ## 验收标准
 
