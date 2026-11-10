@@ -95,7 +95,9 @@ opened: 2026-11-10
 - **已跑证据**：`pnpm verify` 全绿；`pnpm test` 1100/1100；`gates-smoke` 全绿（107 案例）；
   `probes/_index.mjs --check` 一致；红证 = 索引失鲜 / 缺头注；冷读 PASS（fresh agent 只看
   `AGENTS.md` + `00-index` 能定位 `probes/` 并选探针）。
-- **未跑**：真模型/GUI 探针本体（无凭据与授权面）；用户验收待答复。
+- **真模型实跑**：`entry-chain-probe` **ALL PASS**（2026-11-10，Q1–Q3；留档
+  `runtime/smoke-workspace/entry-chain-probe-2026-11-10T14-16-47-918Z.md`）。
+- **未跑**：其余真模型/GUI 探针本体；用户验收待答复。
 
 ## 关闭条件
 

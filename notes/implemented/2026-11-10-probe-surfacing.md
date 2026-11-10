@@ -78,4 +78,7 @@ home 后以 exit 1 崩——违反「未 source 自拒 exit 2」。加 `isDevHom
 - **无参前置实跑**：四支行为探针在 ambient `DSH_HOME=~/.dsh` 下修复前 exit 1（boot 平台 home）；
   加 `requireDevHome` 后 exit 2 + 明确「不是开发 home——先 source dev/env.sh」；`cdp-probe` /
   `llm-stream-tee` 无参均 exit 2（用法）。证明导入/ROOT 与 verdict 契约在迁域后仍成立。
-- **未跑**：任何真模型/GUI 探针本体（本轮无凭据与授权面）；完整研究 run；用户验收（待答复）。
+- **真模型实跑**：`entry-chain-probe` **ALL PASS**（2026-11-10；Q1 授权范围、Q2 RFC 条件、
+  Q3 guides/60 路由；留档 `runtime/smoke-workspace/entry-chain-probe-2026-11-10T14-16-47-918Z.md`）。
+  这是迁根后第一支端到端跑通的探针（boot → 会话 → 真模型 → 断言）。
+- **未跑**：其余真模型/GUI 探针本体；完整研究 run；用户验收（待答复）。
