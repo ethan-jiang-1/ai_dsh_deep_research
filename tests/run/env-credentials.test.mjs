@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { credentialsPresent, scrubbedEnv, withModelKey } from '../../scripts/lib/env.mjs';
+import { credentialsPresent, isDevHome, scrubbedEnv, withModelKey } from '../../scripts/lib/env.mjs';
 
 const CREDENTIAL_FILE = ['.credentials', 'yaml'].join('.');
 
@@ -68,4 +68,15 @@ test('credentialsPresent：同名目录不算凭据文件', (t) => {
   t.after(() => rmSync(home, { recursive: true, force: true }));
   mkdirSync(join(home, ['.credentials', 'yaml'].join('.')));
   assert.equal(credentialsPresent(home), false);
+});
+
+test('isDevHome：默认 dev home 或 DSH_DEV_HOME 才认，ambient 平台 home 拒绝', () => {
+  const root = join(tmpdir(), 'repo-root');
+  const defaultHome = join(root, 'runtime', 'harness-home');
+  assert.equal(isDevHome(defaultHome, { root, customHome: '' }), true);
+  assert.equal(isDevHome(defaultHome, { root, customHome: undefined }), true);
+  assert.equal(isDevHome(join(tmpdir(), 'custom-dev'), { root, customHome: join(tmpdir(), 'custom-dev') }), true);
+  assert.equal(isDevHome(join(tmpdir(), 'platform-home'), { root, customHome: '' }), false);
+  assert.equal(isDevHome('', { root }), false);
+  assert.equal(isDevHome(defaultHome, { root: '' }), false);
 });

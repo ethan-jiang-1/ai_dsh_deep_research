@@ -89,7 +89,10 @@ opened: 2026-11-10
   `project-map` 任务矩阵/症状表/词汇表、`guides/60` §2 任务行、`terms.md`、`evaluation.md`。
 - **机械面**：`smoke-contract` 双区闭集、`navigability` lib 消费图、`layering` 驱动面禁令、
   `port-exclusive` / `host-paths` / `no-unused-code` 扫描面。
-- **已跑证据**：`pnpm verify` 全绿；`pnpm test` 1099/1099；`gates-smoke` 全绿（107 案例）；
+- **前置适配**：无参实跑发现 ambient `DSH_HOME=~/.dsh` 会让四支行为探针 boot 平台 home 后
+  exit 1；加 `requireDevHome` / `isDevHome`（只认 `runtime/harness-home` 或 `DSH_DEV_HOME`）
+  → exit 2 自拒，直测 = `env-credentials.test`。
+- **已跑证据**：`pnpm verify` 全绿；`pnpm test` 1100/1100；`gates-smoke` 全绿（107 案例）；
   `probes/_index.mjs --check` 一致；红证 = 索引失鲜 / 缺头注；冷读 PASS（fresh agent 只看
   `AGENTS.md` + `00-index` 能定位 `probes/` 并选探针）。
 - **未跑**：真模型/GUI 探针本体（无凭据与授权面）；用户验收待答复。

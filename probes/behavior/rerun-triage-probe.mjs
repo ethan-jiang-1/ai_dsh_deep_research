@@ -18,7 +18,7 @@
 // 前置：source dev/env.sh（DSH_HOME + 凭据 + vendor 树）。用法：
 //   node probes/behavior/rerun-triage-probe.mjs [--port 3118]
 // 退出码：0 = 五条全中；1 = 有断言未中；2 = 前置缺席（未跑 ≠ 通过）。
-import { requireCredentials, withModelKey } from '../../scripts/lib/env.mjs';
+import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
 import { findSessionDir, readSessionText, resolveSessionLog } from '../../scripts/lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
@@ -38,6 +38,7 @@ const POLL_MS = 3_000;
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
 if (!home) { console.error('probe: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2); }
+requireDevHome('rerun-triage-probe', { home, root: ROOT });
 requireCredentials('rerun-triage-probe', { home });
 const bin = join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
 const overlay = join(ROOT, 'dev', 'research.overlay.yml');

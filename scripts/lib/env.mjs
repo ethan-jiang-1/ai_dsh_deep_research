@@ -6,7 +6,7 @@
 // （例如真模型档的 DEEPSEEK_API_KEY）——整体透传 `{...process.env}` 是本仓禁止的写法
 // （repo-conventions 门禁机械检查）。
 import { statSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 
 const SECRET = /(KEY|SECRET|TOKEN|PASSWORD)/i;
 
@@ -37,6 +37,35 @@ export function withModelKey(explicit = {}, env = process.env) {
 export function credentialsPresent(home) {
   if (typeof home !== 'string' || home === '') return false;
   try { return statSync(join(home, '.credentials.yaml')).isFile(); } catch { return false; }
+}
+
+/**
+ * 是否本仓开发 home（纯判定）：默认 `runtime/harness-home`，或 `DSH_DEV_HOME` 指定的隔离实例。
+ * 为什么需要：会话/agent shell 的 ambient `DSH_HOME` 常是日用平台 home（~/.dsh）；只查
+ * `DSH_HOME` 在场会让探针去 boot 日用 home，失败成 exit 1，违反「未 source 自拒 exit 2」。
+ */
+export function isDevHome(home, { root, customHome = process.env.DSH_DEV_HOME } = {}) {
+  if (typeof home !== 'string' || home === '' || typeof root !== 'string' || root === '') return false;
+  const actual = resolve(home);
+  if (actual === resolve(root, 'runtime', 'harness-home')) return true;
+  return typeof customHome === 'string' && customHome !== '' && actual === resolve(customHome);
+}
+
+/**
+ * 探针/真模型档的开发 home 前置：不是开发 home → exit 2（未跑 ≠ 通过）。
+ * 只拒绝环境面错误，不判业务；凭据仍由 requireCredentials 单独检查。
+ */
+export function requireDevHome(label, { home, root, customHome } = {}) {
+  if (!home) {
+    console.error(`${label}: 需要 DSH_HOME（先 source dev/env.sh）`);
+    process.exit(2);
+  }
+  if (!isDevHome(home, { root, customHome })) {
+    const expected = typeof root === 'string' ? resolve(root, 'runtime', 'harness-home') : '(未知)';
+    console.error(`${label}: DSH_HOME=${resolve(home)} 不是开发 home——先 source dev/env.sh（默认 ${expected}；隔离实例用 DSH_DEV_HOME）`);
+    process.exit(2);
+  }
+  return home;
 }
 
 /**

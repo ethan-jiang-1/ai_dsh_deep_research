@@ -105,6 +105,11 @@ probes/
 4. **登记**：补头注六字段 → `node probes/_index.mjs --write` → `pnpm verify` 绿；
    `probe-registry` 门查头注、索引字节一致与 `probes/README` 链接。
 
+**前置自检**：真模型/浏览器档先 `source dev/env.sh`；探针只认**开发 home**（默认
+`runtime/harness-home`，或 `DSH_DEV_HOME` 指定的隔离实例）。ambient `DSH_HOME=~/.dsh` 是日用
+平台 home，不是 dev home → exit 2 自拒，不 boot；否则会 boot 到平台 home 再以 exit 1 崩，
+把「未跑」冒充成「红」。
+
 退出码：`0` 全绿 / `1` 断言红 / `2` 前置缺席（未跑）。`SKIP ≠ PASS`；未跑 ≠ 通过。
 重试只许在真模型/浏览器等外部边界，且带理由；确定性检查加重试 = 掩盖竞态。
 

@@ -18,7 +18,7 @@
 //
 // 前置：source dev/env.sh（DSH_HOME + 凭据）；DSH_SRC 默认本仓根（vendor/dsh）。
 // 用法：source dev/env.sh && node probes/behavior/entry-chain-probe.mjs [--port 3114]
-import { requireCredentials, withModelKey } from '../../scripts/lib/env.mjs';
+import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
 import { readSessionTextOf } from '../../scripts/lib/session-log.mjs';
 import { randomUUID } from 'node:crypto';
@@ -41,6 +41,7 @@ const OUT = join(ROOT, 'runtime', 'smoke-workspace');
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
 if (!home) { console.error('probe: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2); }
+requireDevHome('entry-chain-probe', { home, root: ROOT });
 requireCredentials('entry-chain-probe', { home });
 const dshSrc = process.env.DSH_SRC ?? ROOT; // 本仓根 = 安装锚（vendor/dsh submodule）
 const bin = join(dshSrc, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');

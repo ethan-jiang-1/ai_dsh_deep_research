@@ -39,6 +39,11 @@
 改仓根相对）；`navigability` lib 消费图加 `probes/`；`layering` 驱动面禁令加 `probes/`；
 `port-exclusive` 与 `host-paths` 的扫描/豁免面加 `probes/`；`no-unused-code` 扫描根加 `probes/`。
 
+**前置适配（实跑发现）**：无参实跑四支行为探针时，ambient `DSH_HOME=~/.dsh` 让它们 boot 平台
+home 后以 exit 1 崩——违反「未 source 自拒 exit 2」。加 `isDevHome` / `requireDevHome`
+（`env.mjs`）：只认 `runtime/harness-home` 或 `DSH_DEV_HOME` 隔离实例；ambient 平台 home → exit 2
+自拒，不 boot。直测 = `tests/run/env-credentials.test.mjs`。
+
 ## 输掉的方案
 
 - **只加指南、目录继续住 `scripts/probe/`**：改动最小，但用户明确要根目录的可见性；探针仍是
@@ -57,7 +62,7 @@
 
 - `pnpm verify`：全绿（含 `probe-registry`、`gate-ledger-sync`、`md-links`、`doc-budgets`；
   根 `AGENTS.md` 140/140 行）。
-- `pnpm test`：**1099/1099 通过**（含 `smoke-contract` 双区闭集、`navigability` lib 消费图、
+- `pnpm test`：**1100/1100 通过**（含 `smoke-contract` 双区闭集、`navigability` lib 消费图、
   `layering` 驱动面禁令、`probe-index` 纯函数直测）。
 - `node scripts/smoke/gates-smoke.mjs`：**全绿**（零注入对照组 + 107 个注入案例均点名报红）；
   新案例 `probe-registry-missing-header` 单独跑绿。
@@ -70,4 +75,7 @@
   `probes/`、索引、指南与「单点机制用探针」。当时的缺口 = 两份入口只有泛化「模型行为」，
   未点「不按纪律」；已补 `AGENTS.md` 证据匹配面「含模型不按纪律」、`00-index` 行
   「模型不按纪律/角色」、`probes/README` 一条 `discipline-probe` 命令示例。
+- **无参前置实跑**：四支行为探针在 ambient `DSH_HOME=~/.dsh` 下修复前 exit 1（boot 平台 home）；
+  加 `requireDevHome` 后 exit 2 + 明确「不是开发 home——先 source dev/env.sh」；`cdp-probe` /
+  `llm-stream-tee` 无参均 exit 2（用法）。证明导入/ROOT 与 verdict 契约在迁域后仍成立。
 - **未跑**：任何真模型/GUI 探针本体（本轮无凭据与授权面）；完整研究 run；用户验收（待答复）。
