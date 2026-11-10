@@ -32,9 +32,18 @@ description: 作为 Lead 派出的 wave 执行器，按固定配方 lens-fanout 
    - `script`: 第 1 步读到的全文；
    - `args`: 第 3 步的对象。
 5. **对账**：脚本返回 `{requested, cells, counts}`；逐 cell 打开 `path` 检查文件事实。
-   规则见下表。`null` / 回执丢失都不得静默丢。
-6. **写报告**：`<bundle>/waves/<wave>.json`（目录不存在就 write 创建）。把 workflow 工具结果的
-   `runId` / `agentsStarted` / `stopReason` 抄进报告；`counts` 以你对账后的 `status` 重算。
+   child 的 `structured_output` 回执（status/path/evidence_count/gaps）只是加速，**文件事实为准**；
+   `null` / 回执丢失都不得静默丢。规则见下表。
+6. **写报告**：`<bundle>/waves/<wave>.json`（目录不存在就 write 创建）。
+   `stop_reason`：工具调用成功 = `"completed"`；工具返回 error = `"error"`；被取消 = `"cancelled"`；
+   **不要因为有字段读不到就写 `null`**。`agents_started` 从结果文本的 `(N agent)` 读，读不到写
+   `null`。**`runId` 通常不在模型可见的工具结果里**（渲染只给 completed/agent count + return
+   value）——不要编造；写 `"run_id": null` + `"run_id_note": "tool result rendered text does not
+   expose runId"`。Lead 若需要，可从 executor 会话的 `tool-workflow/run-start` 事件取。
+   `counts` 以你对账后的 `status` 重算。
+   若 child 在 `output_path` 之外另写了同 lens 卡（拆卡），报告该 cell 加
+   `extra_output_files[]`，`evidence_count` 按全部文件计——**不丢**；child 报的 path 与 args 不同
+   就写 `reported_path`。
 7. **回报 Lead**：一段话 + 报告路径：`requested/ok/partial/failed/missing`、异常、以及需要
    Lead 拍板的 gap。不要附整篇报告；Lead 会读文件。
 
@@ -82,7 +91,8 @@ description: 作为 Lead 派出的 wave 执行器，按固定配方 lens-fanout 
 - **不重试**：`AGENT_START` / `AGENT_CAP` / `ITEM_CAP` / 脚本 error 都如实写
   `stop_reason: "error"` + `errors[]`；Lead 决定退 Team/subagent 还是缩 N。
 - **不递归**：不要在这个执行器里再调 `workflow`；不要在用 workflow 的同一 wave 里派
-  `subagent` worker（8 槽共享，会撞顶）。child 也不得再起 workflow/subagent——brief 已写。
+  `subagent` worker（8 槽共享，会撞顶）。child 的 brief 已写 `Do not call workflow` /
+  `Do not call subagent`；child 也不得再起。
 - **不 ask**：child 不能问用户；需要拍板 → 写 gap，wave 结束后由 Lead 统一问。
 - **不综合**：不写 `findings.md` / `final.md` / `review.md`；不改 `plan.md`；只写 `evidence/`
   与 `waves/`。
