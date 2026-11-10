@@ -32,6 +32,9 @@ description: 组队决策方法论：这次研究需要谁、不需要谁、走�
   composeFrom Lead，没有 analyst preset 的 workflow/wave-execution（P3 live 实测：teammate 报
   `TOOL_NOT_IN_SESSION`）；`spawn_teammate` 只用于对话层。**等 subagent 不要用 `wait_agent`**：
   subagent 不在 Team 轮询面；派完结束回合或继续别的活，completion notice 会作为新消息唤醒。
+- **有脚本层时先算槽再组队**：teammate、executor、workflow child 共享 8 槽；`team + 1 executor
+  + N child ≤ 8`。N=4 时 team ≤3（pilot 取 scout + critic 2）；不要按 team-assembly 矩阵先招
+  4 人再跑 4 child（=9，必撞 `ACTIVATION_LIMIT_REACHED`）。
 
 ## 分派纪律
 
