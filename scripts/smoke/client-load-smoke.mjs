@@ -318,10 +318,13 @@ const anchorBound = boundSession !== null && expectedFace !== null
 
 // 主机预检（2026-11-10）：低内存/高负载主机上 boot 的 dsh server 会中途死，浏览器只剩
 // chrome-error；先判 NOT-RUN（exit 2），不把环境红跑成断言红。失败时还有同一判据的二次收口。
+// 诊断逃生口：人工确认主机可用时可置 DSH_CLIENT_LOAD_ALLOW_UNHEALTHY=1 强制跑；失败仍按
+// host-health 收口 NOT-RUN，不会产生假产品红。
 {
   const startupHost = { load1: Number(loadavg()[0].toFixed(2)), freeMB: Math.round(freemem() / 1024 / 1024), cpuCount: cpus().length }
   const startupHealth = classifyHostHealth(startupHost)
-  if (startupHealth.unhealthy) {
+  const allowUnhealthy = process.env.DSH_CLIENT_LOAD_ALLOW_UNHEALTHY === '1'
+  if (startupHealth.unhealthy && !allowUnhealthy) {
     console.error(`client-load-smoke: NOT-RUN — 主机不健康（load ${startupHost.load1} / free ${startupHost.freeMB}MB / ${startupHost.cpuCount} CPU：${startupHealth.reasons.join('；')}）——先释放主机再跑；未跑 ≠ 通过`)
     try {
       const latest = join(ROOT, 'runtime', 'smoke-workspace', 'client-load-latest.json')
@@ -329,6 +332,9 @@ const anchorBound = boundSession !== null && expectedFace !== null
       writeFileSync(latest, JSON.stringify({ at: new Date().toISOString(), status: 'NOT-RUN', dir: null, failures: [], skipped: [], host: { ...startupHost, ...startupHealth } }, null, 2))
     } catch { /* 指针写失败不改变判据 */ }
     process.exit(2)
+  }
+  if (startupHealth.unhealthy && allowUnhealthy) {
+    console.error(`client-load-smoke: WARN — 主机不健康（load ${startupHost.load1} / free ${startupHost.freeMB}MB / ${startupHost.cpuCount} CPU：${startupHealth.reasons.join('；')}）；DSH_CLIENT_LOAD_ALLOW_UNHEALTHY=1 强制跑，失败时仍按 host-health 收口 NOT-RUN`)
   }
 }
 
