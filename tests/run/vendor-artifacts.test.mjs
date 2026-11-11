@@ -6,8 +6,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { assertVendorArtifacts, ARTIFACT_REMEDY, REPRESENTATIVE_ARTIFACTS } from '../../scripts/lib/vendor-artifacts.mjs';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { assertVendorArtifacts, ARTIFACT_REMEDY, REPRESENTATIVE_ARTIFACTS, isCliEntry } from '../../scripts/lib/vendor-artifacts.mjs';
 
 const FIX = join(dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'vendor-artifacts');
 
@@ -40,4 +42,19 @@ test('vendor 树整个缺席（未构建的新 clone 边界形态）→ 红不�
 
 test('remedy 一行在场（boot 面失败消息的修正入口）', () => {
   assert.ok(ARTIFACT_REMEDY.includes('vendor-build.sh'), 'remedy 必须指向 vendor-build.sh');
+});
+
+test('CLI 入口判定走 realpath（macOS /tmp → /private/tmp 的 symlink 回归）', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'vendor-artifacts-cli-'));
+  try {
+    const real = join(dir, 'real.mjs');
+    writeFileSync(real, '');
+    const link = join(dir, 'link.mjs');
+    symlinkSync(real, link);
+    assert.equal(isCliEntry(link, pathToFileURL(real).href), true);
+    assert.equal(isCliEntry(join(dir, 'other.mjs'), pathToFileURL(real).href), false);
+    assert.equal(isCliEntry(undefined, pathToFileURL(real).href), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

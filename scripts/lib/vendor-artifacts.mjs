@@ -10,7 +10,7 @@
 // CI 未构建时 L0 仍应秒级绿）；本检查只在"真正要起 web"的时刻拦（boot-run.sh 与四个冒烟/
 // 探针脚本的 boot 前）。代表产物只取两类（0.1.7 实测的两种失败面），不做全量扫描——全量
 // 是 vendor-build.sh 的职责，这里只求"缺失时必拦 + 在位时不误报"。
-import { existsSync } from 'node:fs';
+import { existsSync, realpathSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -39,9 +39,21 @@ export function assertVendorArtifacts(root) {
 export const ARTIFACT_REMEDY =
   'vendor 构建产物缺失——先跑 `bash dev/vendor-build.sh --clean`（升 pin 固定动作，见 docs/guides/60-dev-loop.md §3）';
 
+/** CLI 入口判定：realpath 归一。
+ *  macOS `/tmp` → `/private/tmp` 实测：按字面路径比较会让 CLI 块静默不执行，
+ *  `bootstrap --check` 于是误报“vendor 构建产物在场”。realpath 后比较才是同一文件。 */
+export function isCliEntry(argv1, metaUrl) {
+  if (argv1 === undefined) return false;
+  try {
+    return realpathSync(fileURLToPath(metaUrl)) === realpathSync(argv1);
+  } catch {
+    return false;
+  }
+}
+
 // CLI 模式：node scripts/lib/vendor-artifacts.mjs [root]——缺失即打印 remedy 并 exit 1
 // （boot-run.sh 用；root 缺省 = 本仓根）。判据：只认 process.argv[1] 指向本文件。
-if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === join(process.argv[1])) {
+if (isCliEntry(process.argv[1], import.meta.url)) {
   const root = process.argv[2] ?? join(fileURLToPath(new URL('../..', import.meta.url)));
   const { ok, missing } = assertVendorArtifacts(root);
   if (!ok) {
