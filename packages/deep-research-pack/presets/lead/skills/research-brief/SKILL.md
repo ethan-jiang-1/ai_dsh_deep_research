@@ -47,14 +47,46 @@ description: 立项对齐（HITL1）方法论：判型模式库对照、研究�
    - `must_answer`：一句话，验收时能判"答了/没答"；
    - `scope_role`：`primary`（报告主体）/ `synthesis`（跨 topic 综合）/ `comparison`（对比）/ `supporting`（背景）。
    - topic 数量 = 研究类型 × 篇幅：quick ≤1，standard 2–4，deep 4–8。
-7. **计划确认卡**（HITL1 第二段；**quick_factual 免发**——类型为快速事实核查时跳过本步直接开工）：两文件 + `plan.md` 定稿后、组队/侦察开工前，把计划呈用户拍板——`ask_user_question` 瘦卡：
-   - 问题正文 **≤200 字**——口径 = `ask_user_question` 的 `question` 字段**全部字符**（含业务简报行与「全文 = …」指针）：计划要点（问题定稿一句话 + 业务决策简报行〔决定 / 比较范围 / 输出形式 / 主要未知〕+ **方法行**〔推荐方法一句话 + 调整走修订；视角默认不写、偏离才写一个短词〕+ topic 图骨干 + 执行图骨干（Wave / 并行数 / 最深层数 / 每 topic 深度 L0–L3 / **脚本层 W#**）+ 深度/口径拍板）+「全文 = question.md / topics.md / plan.md」指针；
-   - **脚本层点名**：plan 有 `## Wave 执行` 时，执行图骨干必须带 `W<n> 脚本扇出 ×N`（与 plan 节同号同 N）；这是 workflow explicit-ask 的唯一授权点，卡上没点名 = 该层不得跑脚本。加这行后仍须 ≤200：先删 topic 骨干/旁白，不新增选项。
-   - **呈卡前先数字数**：超限就删次要项再提交（例如逐条 topic 名压成「T1–T4」骨干、括号旁白删净），**不把超限卡递给用户**——交付门按同一口径记账超限（461 字实测 = 超限 2.3 倍，属违纪）；
-   - options 三路：按计划开跑（Recommended）/ 修订计划（自由文本意见，**附加**进计划不替换）/ 放弃（不开跑，bundle 处置照 sibling 预检规矩）；
-   - **一轮制**：修订意见由你逐字落 question.md §Decisions（用户原话 verbatim）后直接开工，不再二次呈卡；意见推翻类型/深度级 → 走放弃重开，不在卡上循环；
-   - 拍板（含选择与修订意见）落 question.md §Decisions 第 1 条 + HITL1 Alignment Snapshot 的「计划确认」字段；
-   - 用户不在场由代理模拟并显式标注"代理模拟"；跳卡直接开工 = 诚实降级不硬拦，但 journal 立项行记「计划确认卡缺席」。
+7. **计划确认卡**（HITL1 第二段；**quick_factual 免发**——类型为快速事实核查时跳过本步直接开工）：
+   两文件 + `plan.md` 定稿后、组队/侦察开工前，先写 `protocol.json`（canonical，模板 = 包内
+   `content/templates/run/protocol.json`），再从它抄卡与 `question.md §Protocol`——**不重写、不脑补**。
+   `ask_user_question` 瘦卡（**5 个维度，≤200 字**；口径 = `ask_user_question` 的 `question` 字段**全部字符**，实测模板 159–177）：
+   - 问题：`<定稿一句话>`
+   - 方法/来源：`<method.id（主）+ adjustments 短标签>；<families>，<recency>，<language>`
+   - 投入/输出：`<band 中文> ≤N 节点；<shape 中文>（<audience>）`
+   - 决定：`<业务简报一句话：决定 / 范围 / 未知>`
+   - 授权：`W<n> 扇出 ×N`（**仅** plan 有 `## Wave 执行` 时；脚本层唯一授权点）
+   - 全文=protocol.json/plan.md（改哪项在修订里说）
+   **脚本层点名**：plan 有 `## Wave 执行` 时，授权行必须带 `W<n> 脚本扇出 ×N`（与 plan 节同号同 N）；
+   这是 workflow explicit-ask 的唯一授权点，卡上没点名 = 该层不得跑脚本。加这行后仍须 ≤200：先删
+   决定细节/问题括注，不删授权行。
+   **删减序**（超 200）：决定细节 → 问题括注 → 指针括注；**授权行不删**。不写 topic 骨干、不写逐 Wave、
+   不写默认 lens（`按计划开跑` 标签不动，`scripts/lib/plan-card.mjs` 据此识别计划卡）。
+   - **呈卡前先数字数**：超限就按删减序压，**不把超限卡递给用户**（交付门按同一口径记账超限）。
+   - options 三路：按计划开跑（Recommended）/ 修订计划（自由文本意见，**附加**进计划不替换）/ 放弃
+     （不开跑，bundle 处置照 sibling 预检规矩）。
+   - **一轮制**：修订意见由你逐字落 question.md §Decisions（用户原话 verbatim）后直接开工，不再二次呈卡；
+     修订涉及方法/来源/投入/输出/计划 → 同步改 `protocol.json`（协议级变更 → v2 + `protocol/v<旧>.json`
+     快照）并 `approval_basis: revision`；只改 plan 节点 → 不升协议；推翻类型/深度级 → 走放弃重开。
+   - 拍板（含选择与修订意见）落 question.md §Decisions 第 1 条（含 `protocol: vN`）+ HITL1 Snapshot 的
+     「计划确认」字段；把 `protocol.json` 的 `status` 改 `approved`、写 `approved_at`、`approval_basis`
+     （卡上开跑 = `card`；修订后直接开工 = `revision`）。quick_factual：`gates.hitl1=none`、
+     `approval_basis=auto`、不要求 Decisions 行；仍写 JSON。
+   - 用户不在场由代理模拟并显式标注"代理模拟"；跳卡直接开工 = 诚实降级不硬拦，但 journal 立项行记
+     「计划确认卡缺席」。
+
+## Protocol（本次研究设计）
+
+- 写 `protocol.json`：字段/枚举 = 模板；`method.fields` 四字段 = 已采用方法的四字段快照；
+  `method.adjustments` 写补法 + 角色（复合方法 = 主方法 id + 补法）；`source_scope` 是解析结果，
+  不是用户原话；`gates` 是出厂 policy，不作偏好开放。
+- `question.md §Protocol`：4 字段行 + 版本行（方法/来源/投入/输出/`protocol: vN`），从 JSON 抄；
+  `plan.md` 头写 `protocol: vN`；版本/方法/band/shape 与 JSON 一致（gate `projection`/`plan-ref`）。
+- `deviations`：来源不可达 / 输出形状改 / 方法步骤跳过 / effort 超带时，**发生即写**
+  （dimension/from/to/why/authority）+ journal 一行；不静默吸收进正文。
+- hash 由 gate 算（`protocol-audit --write`），模型不写 hash；审批证明 = §Decisions 行 + §Protocol 投影
+  + `status=approved`，不是 hash。
+
 
 ## 方法预设（研究方法配置首版，2026-10-12）
 

@@ -4,7 +4,8 @@
 
 ## 活跃清单
 
-（暂无活跃问题。）
+| 卡 | 状态 | 一句话 |
+|---|---|---|
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

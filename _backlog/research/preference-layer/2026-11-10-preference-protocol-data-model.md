@@ -6,6 +6,7 @@ intent: 把「搜索倾向 / 研究偏好」收束成一个可解析、可审、
 # 偏好层的数据结构（2026-11-10）
 
 > 性质：设计提案 + 数据模型；不是决定，未落地。外部证据只用于验证「这个维度真实存在」，不进入命名或 schema。
+> **2026-11-11 收口**：v1 范围与六项结构选择的结论见 [核验与收口](2026-11-11-preference-protocol-verification.md)；本材料保留提案原文，不逐条改写（lens_plan / plan cell 列 / Library 版本 / Brief 对象 / style 已出 v1，output 改 `shape` 闭集）。
 > 范围：一次研究 run 的偏好与搜索配置层；不含角色 persona、run 执行细节、报告内容质量。
 > 上游：[external-landscape 第三遍](../external-landscape/2026-11-10-landscape-preference-layer.md)；本仓现状 = [共享上下文](../README.md) §5、D43 / D25 / D37。
 > **结论先行**：缺的不是更多字段，而是一个「解析后的研究设计」对象（Protocol）。搜索倾向 = 一份命名 Protocol 模板；偏好 = 本次 run 对 Brief/Protocol 的覆盖；执行 = Plan；证据 = Record；新倾向 = 新 catalog/library 条目，不是新字段或新代码。

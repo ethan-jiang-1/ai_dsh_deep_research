@@ -114,7 +114,7 @@ status——材料的状态就是题的状态。
 
 - **channel**：三条委派通道 = subagent / workflow / team；`goal` 是跨轮生命周期原语，不算委派通道；`todo_write` 是轮内清单。材料里「四条通道」的措辞以本节为准。
 - **wave**：deps 算出的拓扑层，不是任务；`W2.1` 是层内节点。材料里的 `W1.5/W2.5` 只是示意，**不要假设小数层合法**；验证层用整数 W + `kind=cross-check`。
-- **cell**：一次可执行单元 = topic × lens × depth。
+- **cell**：覆盖单位 = topic × lens（D43；`design/30` 与 `research-planning:54,63` 同口径）。depth 是 **node** 属性，不是 cell 维度；旧句 `topic × lens × depth` 已于 2026-11-11 校正。
 - **lens**：一种**证据面**（同一道题从哪个面挖），是数据不是角色/persona、不是报告模板；九字段见 lens 材料，`bias`/`blind_spots` 是它与「多搜几篇」的分界。
 - **verdict**：claim 级结论 `supported|partially_supported|unsupported|unverifiable`；`unverifiable` 聚合为 `UNVERIFIED`，**不算 PASS 覆盖**。
 - **UNVERIFIED**：第三态，不是 PASS 也不是 FAIL；永不静默放行。
@@ -130,7 +130,7 @@ status——材料的状态就是题的状态。
 ### 5.1 格式速查（被引用的 schema，免得再猜）
 
 - **Lens 九字段**：`id/name`、`when`、`seek`、`verify`、`frame`、`refuse`、`bias`、`blind_spots`、`pairs_with`（**前八必需**；`pairs_with` 可选。盲区处置三选一：配对 / 本题不 material / 显式接受单镜风险）。
-- **Evidence 八字段**（lens 落地后；现行 pack 仍七字段）：`source_url`、`retrieved_at`、`quality`（A–D）、`found_by`、`supports`（topic）、`source_tier`（primary/secondary/tertiary/weak）、`publisher`（注册域）、`lens`（单个面 id；多面拆卡）。
+- **Evidence 八字段**（D43 已落地；手册 §证据文件契约与模板同为准）：`source_url`、`retrieved_at`、`quality`（A–D）、`found_by`、`supports`（topic）、`source_tier`（primary/secondary/tertiary/weak）、`publisher`（注册域）、`lens`（单个面 id；多面拆卡）。
 - **method-library 四字段**：找来源 / 怎么核实 / 报告怎么写 / 不承诺。
 - **题型 P1–P8**：单点事实/状态核查、数据表/价目核查、领域全景梳理、断言验证、多维对比/差距、尽调/评估、方法/方案指导、事态跟踪/时间线。
 - **plan 节点列**：`id / parent / lifecycle / kind / question / owner_role / deps / output / acceptance / budget / depth / task_id` + 头部 `图版本：vN`。
@@ -143,7 +143,7 @@ status——材料的状态就是题的状态。
 - **plan kind 合法值**：`broad-scan | deep-dive | cross-check | synthesis | review | gate`；子节点可用 `search | fetch`。**lifecycle**：`active | retired | merged_into:<id> | superseded_by:<id>`。**图版本**：头部 `图版本：vN`，每次重写递增；重写前把旧版复制到 `plan/v<旧版本>.md`；重写记录写同一版本号。锚点 = `presets/lead/skills/research-planning/SKILL.md` §0/§1/§6 + `content/templates/run/plan.md`。
 - **run 门**：`scripts/run-gates/schema-scan.mjs`（plan 在场级）、`node-gate.mjs`（节点判据）、`evidence-audit.mjs`（URL/摘录）、`path-hygiene.mjs`；L0 = `scripts/verify/verify.mjs`。**已实测**（2026-11-10 keyless fixture）：evidence 加 `lens` 不改 evidence-audit 硬五字段判定（额外键被 `splitFrontmatter` 收下但不判）；topics 加 `lenses:` 不改 schema-scan（只查在场）。实施后在新 run 复核一次。
 - **驾驶舱读取面**：`docs/design/40-research-cockpit.md` + `packages/deep-research-pack/src/lib/plan-index.ts` / `plan-graph.ts`；当前只读 plan/task，**不读 evidence/topics frontmatter**——覆盖矩阵 v1 由 critic/Lead 填在 review 表，cockpit 接入是后续工作。
-- **lens 目录（提议，未建；v2 定为 `content/lenses/<id>.md`）**：`packages/deep-research-pack/content/lenses/<id>.md`；未建前 workflow args 只能传全文或 brief 内联。路径用 `{{research_pack_root}}/content/lenses/`（`src/content/index.ts:52-70`）；workflow child 是否继承该 context 待探针，读不到就 brief 内联全文。
+- **lens 目录（已建，D43）**：`packages/deep-research-pack/content/lenses/<id>.md`（8 条）；路径用 `{{research_pack_root}}/content/lenses/`（`src/content/index.ts:52-70`）。workflow child 是否继承该 context 仍按 D45 的 brief 内联兜底。
 - **method-editor / method-library 条目模型**：`presets/method-editor/skills/method-interview/SKILL.md`、`presets/method-editor.patch.yml`；四字段条目见 `research-workspace/method-library.md`。不新增第五字段 = 不改 method-interview 的输出契约。
 
 ### 6. 外部证据入口
@@ -185,7 +185,7 @@ status——材料的状态就是题的状态。
 | 名头 | 问题 | 消费者 | 材料 |
 |---|---|---|---|
 | [外部 landscape](external-landscape/README.md) | 外部系统已走到哪、哪些是 table stakes；style 空间与隐含 Protocol | 本轮设计推演 | 4 份 |
-| [偏好层](preference-layer/README.md) | 搜索倾向与偏好如何收束成可解析、可审、可扩的数据模型 | 本轮设计推演；待结构选择拍板 | 2 份 |
+| [偏好层](preference-layer/README.md) | 搜索倾向与偏好如何收束成可解析、可审、可扩的数据模型；表达层（卡/派发/review/交付）的投影与缺口 | 已定性；落地 = [issue 2026-11-11-preference-protocol-layer](../_archived/settled_issues/2026-11-11-preference-protocol-layer.md) | 4 份 |
 
 归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单，也不抄状态（状态正本 = 题名页）。
 

@@ -15,6 +15,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { scrubbedEnv } from '../lib/env.mjs'
+import { projectionOf } from '../lib/protocol-audit-core.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const CLI = join(ROOT, 'scripts', 'run-ops', 'run-accept.mjs')
@@ -31,17 +32,18 @@ const check = (ok, label, detail = '') => {
   if (!ok) failures.push(label)
 }
 const T0 = Date.parse('2026-10-24T10:00:00+08:00')
-const at = (value) => ({ ...value, time: T0 + (value.seq ?? 0) * 1000 })
+const at = (value, t0 = T0) => ({ ...value, time: t0 + (value.seq ?? 0) * 1000 })
 const runNode = (script, args, env) => spawnSync(process.execPath, [script, ...args], { encoding: 'utf8', env, timeout: 180_000 })
 const env = () => scrubbedEnv({ DSH_HOME: HOME })
 
-function writeSession(path, slug, cwd, presentPath) {
-  const head = at({ type: 'session', version: 4, id: 's', cwd, delegationDepth: 0, agentPreset: 'lead', seq: 0 })
-  const ask1 = at({ type: 'tool/call', seq: 1, data: { turn: 1, callId: 'ask1', name: 'ask_user_question', arguments: JSON.stringify({ questions: [{ id: 'research_type', header: '研究类型', question: '这次研究按哪种类型立项？' }] }) } })
-  const write = at({ type: 'tool/call', seq: 2, data: { turn: 1, callId: 'w1', name: 'write', arguments: JSON.stringify({ file_path: `drt_${slug}/question.md`, content: '# Q' }) } })
-  const ask2 = at({ type: 'tool/call', seq: 3, data: { turn: 1, callId: 'ask2', name: 'ask_user_question', arguments: JSON.stringify({ questions: [{ id: 'hitl2_delivery', header: '交付审阅（HITL2）', question: `按现稿定稿？drt_${slug}` }] }) } })
-  const reply = at({ type: 'tool/result', seq: 4, data: { turn: 1, step: 1, message: { role: 'tool', source: { kind: 'tool', callId: 'ask2' }, toolCallId: 'ask2', content: [{ type: 'text', text: JSON.stringify({ answers: [{ id: 'hitl2_delivery', selected: ['按现稿定稿（Recommended）'] }] }) }], isError: false, id: 'r1' } } })
-  const present = at({ type: 'deliverables/presented', seq: 5, data: { turn: 1, callId: 'p1', files: [{ path: presentPath }] } })
+function writeSession(path, slug, cwd, presentPath, t0 = T0) {
+  const stamp = (value) => at(value, t0)
+  const head = stamp({ type: 'session', version: 4, id: 's', cwd, delegationDepth: 0, agentPreset: 'lead', seq: 0 })
+  const ask1 = stamp({ type: 'tool/call', seq: 1, data: { turn: 1, callId: 'ask1', name: 'ask_user_question', arguments: JSON.stringify({ questions: [{ id: 'research_type', header: '研究类型', question: '这次研究按哪种类型立项？' }] }) } })
+  const write = stamp({ type: 'tool/call', seq: 2, data: { turn: 1, callId: 'w1', name: 'write', arguments: JSON.stringify({ file_path: `drt_${slug}/question.md`, content: '# Q' }) } })
+  const ask2 = stamp({ type: 'tool/call', seq: 3, data: { turn: 1, callId: 'ask2', name: 'ask_user_question', arguments: JSON.stringify({ questions: [{ id: 'hitl2_delivery', header: '交付审阅（HITL2）', question: `按现稿定稿？drt_${slug}` }] }) } })
+  const reply = stamp({ type: 'tool/result', seq: 4, data: { turn: 1, step: 1, message: { role: 'tool', source: { kind: 'tool', callId: 'ask2' }, toolCallId: 'ask2', content: [{ type: 'text', text: JSON.stringify({ answers: [{ id: 'hitl2_delivery', selected: ['按现稿定稿（Recommended）'] }] }) }], isError: false, id: 'r1' } } })
+  const present = stamp({ type: 'deliverables/presented', seq: 5, data: { turn: 1, callId: 'p1', files: [{ path: presentPath }] } })
   mkdirSync(dirname(path), { recursive: true })
   writeFileSync(path, [head, ask1, write, ask2, reply, present].map((e) => JSON.stringify(e)).join('\n') + '\n')
 }
@@ -250,6 +252,42 @@ try {
     check(forced.status === 1 && /no-claims/.test(forced.stdout), '⑨ --require 强制：缺 claims → no-claims 红', forced.stdout.slice(-400))
   }
 
+  // ⑩ protocol 契约（表达层补篇 / M2）：契约日后带有效 protocol → 绿 + protocol-audit.md；
+  //    同形缺 protocol → 预检红（no-protocol），不写回执。
+  {
+    const quickProtocol = {
+      schema: 1, version: 1, status: 'approved', created: '2026-11-13T07:00:00+08:00', approved_at: '2026-11-13T07:10:00+08:00', approval_basis: 'auto',
+      method: { id: '事实核查', kind: 'preset', library_name: null, library_fields_sha256: null, fields: { source: '官方页优先', verify: '逐字转写', report: '答案+依据+限制', limit: '不做领域覆盖' }, adjustments: [] },
+      source_scope: { families: ['official'], domains: [], exclude_domains: [], recency: '12m', language: ['zh'], authority: 'primary' },
+      effort: { band: 'quick', band_v: 1, nodes_max: 6, cells_max: 2, waves_max: 5, allowed_depths: ['L0', 'L1'] },
+      output: { shape: 'quick_answer', sections: ['answer', 'basis', 'limits'], length: { min: 300, max: 600, unit: 'words' }, format: 'md', audience: '采购' },
+      gates: { hitl1: 'none', hitl2: 'review', evidence_threshold: 'B', critic: 'report', claim_verification: 'on' }, deviations: [],
+    }
+    const T1 = Date.parse('2026-11-13T09:00:00+08:00')
+    const { bundle, sessions } = writeBundle('proto', '', '# v1\n\nclean\n', '- schema: 2\n- created: 2026-11-13', 'quick_factual')
+    writeSession(join(sessions, 'sess', 'session.v4.jsonl'), 'proto', WS, join(bundle, 'final', 'v1.md'), T1)
+    writeFileSync(join(bundle, 'protocol.json'), `${JSON.stringify(quickProtocol, null, 2)}\n`)
+    writeFileSync(join(bundle, 'question.md'), `${readFileSync(join(bundle, 'question.md'), 'utf8')}\n## 研究方法（本次实际采用）\n\n- 采用: 事实核查（自动采用）\n\n${projectionOf(quickProtocol)}\n`)
+    const ok = accept(bundle, sessions)
+    check(ok.status === 0, '⑩ 契约日后有效 protocol：run-accept 绿', ok.stdout.slice(-500))
+    check(existsSync(join(bundle, 'protocol-audit.md')), '⑩ protocol-audit.md 落盘')
+    check(/^v1 design_sha256=[0-9a-f]{64}$/m.test(readFileSync(join(bundle, 'protocol-audit.md'), 'utf8')), '⑩ 报告含 v1 版本指纹行')
+
+    // 改一个字节 → protocol-changed 红（版本指纹不是装饰；CLI 级反证）。
+    const mutated = JSON.parse(readFileSync(join(bundle, 'protocol.json'), 'utf8'))
+    mutated.output.audience = 'CFO'
+    writeFileSync(join(bundle, 'protocol.json'), `${JSON.stringify(mutated, null, 2)}\n`)
+    const drift = runNode(join(ROOT, 'scripts', 'run-gates', 'protocol-audit.mjs'), [bundle, '--no-write'], env())
+    check(drift.status === 1 && /protocol-changed/.test(drift.stdout), '⑩ 改一个字节：protocol-changed 红', drift.stdout.slice(-300))
+
+    const missing = writeBundle('proto-missing', '', '# v1\n\nclean\n', '- schema: 2\n- created: 2026-11-13', 'quick_factual')
+    writeSession(join(missing.sessions, 'sess', 'session.v4.jsonl'), 'proto-missing', WS, join(missing.bundle, 'final', 'v1.md'), T1)
+    const red = accept(missing.bundle, missing.sessions)
+    check(red.status === 1, '⑩ 契约日后缺 protocol：预检红', red.stdout.slice(-500))
+    check(/no-protocol/.test(red.stdout + red.stderr), '⑩ 红项点名 no-protocol')
+    check(!existsSync(join(missing.bundle, 'delivered.json')) && !existsSync(join(missing.bundle, 'protocol-audit.md')), '⑩ 红跑不写回执/报告')
+  }
+
 } catch (error) {
   check(false, 'smoke 未抛异常', String(error))
 } finally {
@@ -261,5 +299,5 @@ if (failures.length > 0) {
   console.error(`\nrun-accept-smoke: ${String(failures.length)} 项失败`)
   process.exit(1)
 }
-console.log('\nrun-accept-smoke: ALL PASS（回执归一/幂等/外部 present/秘密/repair/整数契约 + schema-scan CLI + claim 契约绿/覆盖缺口红/--require 强制）')
+console.log('\nrun-accept-smoke: ALL PASS（回执归一/幂等/外部 present/秘密/repair/整数契约 + schema-scan CLI + claim 契约绿/覆盖缺口红/--require 强制 + protocol 绿/缺工件红）')
 process.exit(0)

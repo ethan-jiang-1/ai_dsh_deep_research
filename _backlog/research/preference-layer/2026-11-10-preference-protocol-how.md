@@ -6,6 +6,7 @@ intent: 在数据模型之上，深挖最合理的实现路径：Protocol 住哪
 # 偏好层怎么落（2026-11-10）
 
 > 性质：实现设计提案；不是决定，未落地。
+> **2026-11-11 收口**：v1 实现合同以 [核验与收口](2026-11-11-preference-protocol-verification.md) 为准；本材料保留提案原文，不逐条改写（5 行整卡、lens_plan、plan cell 列、method-library 版本、hash 基线均已修正）。
 > 上游：[数据模型](2026-11-10-preference-protocol-data-model.md) · [external-landscape 第三遍](../external-landscape/2026-11-10-landscape-preference-layer.md)。
 > DSH 依据：`vendor/dsh/docs/architecture.md`（插件/事件/效果）、`packages/plan/plan-mode/README.md`（plan-mode + `exit_plan_mode`）、`packages/storage/storage-domain/README.md`（host 侧 typed state）、`packages/settings/README.md`（插件配置）、`AGENTS.md`（pre-stable / released session data / 证据匹配）。
 > 结论先行：**v1 不新增 host 工具、不改 session schema**；用 `protocol.json`（canonical）+ `question.md` 5 行投影 + `scripts/lib/protocol-core.mjs` 纯判据 + `scripts/run-gates/protocol-audit.mjs` 门 + skill/template 承载模型面。旧 bundle 按 epoch 豁免；v2 才考虑 `protocol_check` 工具、coverage/output 门与协议库。

@@ -6,9 +6,9 @@
 
 ## 对话流 · 研究语义卡（web_search 卡标题，状态符不钉）
 
-检索：DSH harness
+检索：DSH harness · DeepSeek Harness DSH · DSH harness DeepSeek ag
 
 ## 研究状态页签 · 人性化活动行（icon + 文本）
 
-🔍 检索：DSH harness
-💬 探针完成，搜了「DSH harness」（8 条结果，含官方仓库 [deepseek-ai/deep
+🔍 检索：DSH harness · DeepSeek Harness DSH · DSH
+💬 探针完成，搜索了「DSH harness」（返回 8 条来源清单），并抓取了官方源码页 [githu

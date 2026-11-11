@@ -1,5 +1,8 @@
 # Final — <run slug>
 
+> 设计：<method.id（主）+ adjustments>；<families>，<recency>，<language>；<band>；<shape>（<audience>）｜Protocol v<N>
+> 偏离：<n>（<一句>；无则写 0）
+
 ## 决策摘要
 
 <首屏直接回答研究问题：答案/建议及其成立条件（适用条件、口径、有效期）；证据不足以支撑建议时如实写「目前不能判断」及原因，不硬给唯一推荐>

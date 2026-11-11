@@ -12,6 +12,9 @@
 
 <一句话，必填：谁的什么决策因此报告而更好——对齐质量的最强约束>
 
+- 读者: <谁读这份报告；与 §Protocol output.audience 一致>
+- 交付形态: <形状 + 篇幅 + 格式；细节以 §Protocol 为准>
+
 ## 研究问题分解
 
 <!-- 3–6 条 Research Questions；每条可判"答了/没答" -->
@@ -44,6 +47,16 @@
 - 调查要求: <本次具体的信息源/检验/综合要求，含用户调整原话；未指定项按预设默认>
 - 明确不承诺: <该方法边界一句话>
 
+## Protocol（本次研究设计）
+
+<!-- 5 行投影；canonical = protocol.json；本节目检；细节看 JSON。版本行与 JSON 的 version 一致。 -->
+
+- 方法: <method.id（主）+ adjustments；四字段见 §研究方法>
+- 来源: <families>；<recency>；<language>；<authority>
+- 投入: <快答|标准|深度>（≤N 节点 / ≤N cells / Lx–Ly）
+- 输出: <shape>；sections = <…>；audience = <…>；md
+- 版本: protocol: v<N>（approved <ISO>）；全文 = protocol.json / plan.md
+
 ## HITL1 Alignment Snapshot
 
 - 研究类型: quick_factual | exploratory_map | claim_verification（三分法为初判速记；完整判型 = question-patterns.md——命中条目按其分派结论落型，未设专型的模式按兜底归 exploratory_map）
@@ -69,4 +82,4 @@
 - 用户原话: <verbatim>
 重跑语义（D17）：证据扩张 = 同 bundle final/ 下一版 + 本文件 Decisions 追加；表述修订 = 当前版原位改、版本号不变。 -->
 
-- 2026-… HITL1 定稿（delta: 新增；agent interpretation: …；用户原话: "…"）
+- 2026-… HITL1 定稿（delta: 新增；protocol: v<N>；agent interpretation: …；用户原话: "…"）

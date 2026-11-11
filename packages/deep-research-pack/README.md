@@ -222,7 +222,7 @@ methodology skills. `content/` is injected as runtime context, not written into 
 | `cordis.patch.yml` | Host bundle rows and default preset |
 | `presets/*.patch.yml` | Five preset rows |
 | `presets/*/skills/` | Role-scoped methodology skills |
-| `content/manual.md`, `content/templates/run/`, `content/lenses/` | Injected manual, run templates, and on-demand lens entries |
+| `content/manual.md`, `content/templates/run/`（含 `protocol.json` 写者契约）, `content/lenses/` | Injected manual, run templates, and on-demand lens entries |
 | `src/content/`, `src/startup/`, `src/client/`, `src/fetch-fallback/` | Source for the injected content, startup row, cockpit, and fetch provider |
 | `scripts/doctor.mjs` | Read-only `dsh-deep-research-doctor` |
 

@@ -49,6 +49,15 @@ Critic 的核心方法论。你的产出只有两种价值：找到裂缝（修�
 - 某条方法要求判不了是否兑现（材料不足以核对）→ 显式 `UNVERIFIED` + 判据缺口说明，按未决对待（同 MAJOR 阻塞 PASS）——不因方法名放行，也不凭方法名追加未被要求的新动作；
 - 轻量模式（quick_factual）：方法节 = 事实核查自动采用时，本节不做完整狩猎，沿用上面两条线 + 自动采用事实在场即可。
 
+### 4b. Protocol 兑现（有 `protocol.json` 时；MAJOR 级）
+
+- 读 `protocol.json`、`question.md §Protocol`、`plan.md` 头。
+- **output**：final 是否兑现 `shape` / `sections` / `audience`（节标题可不同，内容语义要对；缺 = MAJOR）。
+- **source**：`families` / `recency` / `language` 是否兑现；未兑现是否有 `deviations` 记录（无记录 = MAJOR）。
+- **deviations**：对照 plan 节点、派发切片、journal，缺记 = MAJOR。
+- **版本**：`status/version` ↔ `§Decisions` 的 `protocol: vN` ↔ `plan.md` 头（不一致 = MAJOR，交 lead）。
+- 不替代 §4（方法承诺）与 §7（lens 覆盖）：§4 审「方法做没做」，§4b 审「设计交没交」；两者都缺才是 FAIL。
+
 ### 5. leads 交接纪律狩猎（MAJOR 级；leads.md 在场时）
 
 - 每个单元的「- 状态:」值**逐字** ∈ {`建议挖深`, `已排除`}——「**建议深挖**」等近形漂移
@@ -123,6 +132,7 @@ PASS 放宽判据**（readiness 判据不降同款），也不得静默略过未
 - [ ] 首屏建议有证据与适用条件支撑（「目前不能判断」是合法结论，不因格式放行唯一推荐）
 - [ ] 反证与未知未在决策摘要首屏被抹平或写成确定
 - [ ] （有 lens 时）覆盖表无静默空格，盲区处置有记录
+- [ ] （有 protocol.json 时）Protocol 兑现：shape / source / deviations / 版本一致
 ```
 
 **有 lens 时**，终局块另附覆盖表（`—` 只在同行写了 `gap：` / `n/a：` 时合法）：

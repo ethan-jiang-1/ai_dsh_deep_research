@@ -11,10 +11,11 @@
       "fixture": "session.v4.jsonl",
       "renderExpected": "ui.expected.md",
       "source": {
-        "codeAnchor": "cc492a186c3e2b2f516d7eec4a4024f6dc230b77",
+        "codeAnchor": "d082c65d3bf4523979d4a49b2db41f5214916465",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-10T10:14:09.297Z",
-        "recording": "live"
+        "recordedAt": "2026-11-11T00:15:10.000Z",
+        "recording": "live",
+        "note": "M3 模型可见文本变更后重录；录制时工作树含未提交的 M3 改动（codeAnchor = 录制时 HEAD）。"
       }
     },
     {

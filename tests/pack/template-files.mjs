@@ -11,7 +11,7 @@ import { PACK } from './preset-helpers.mjs';
 
 export const TEMPLATES_DIR = join(PACK, 'content', 'templates', 'run');
 
-/** run bundle 模板 schema 集：8 个 md 骨架 + 2 个 JSON 写者契约。 */
+/** run bundle 模板 schema 集：8 个 md 骨架 + 3 个 JSON 写者契约（protocol/claims/verdicts）。 */
 export const CORE_TEMPLATES = [
   'claims.json',
   'evidence-entry.md',
@@ -19,6 +19,7 @@ export const CORE_TEMPLATES = [
   'findings.md',
   'leads.md',
   'plan.md',
+  'protocol.json',
   'question.md',
   'run.md',
   'topics.md',

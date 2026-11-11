@@ -4,6 +4,8 @@
 > 映射，不是持久身份。图必须无环；审查回边用版本化节点（`repair-r1` / `review-r2`）。
 > 深度档：L0 快答 / L1 标准 / L2 深挖 / L3 穷尽（`depth` 列是研究深度，不是 Wave）。
 > 全文 = question.md / topics.md / plan.md。
+> `protocol: v<N>` = 本计划对应的研究设计版本（canonical = protocol.json；与 JSON 的 version 一致）。
+> protocol: v<N>
 >
 > **编号纪律：`W<wave>.<index>`。** `W2` 是 Wave 2（按 deps 算出的拓扑层，分组标题，不是任务）；
 > `W2.1/W2.2` 是 Wave 2 内的节点；`W2.1.1` 是节点内部拆解，不是新 Wave。单节点 Wave 也写

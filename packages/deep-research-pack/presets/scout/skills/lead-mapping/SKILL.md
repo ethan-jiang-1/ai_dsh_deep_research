@@ -37,6 +37,14 @@ Scout 的核心方法论。目标：用最小的搜索成本，画出"答案可�
   约束过 = 伪造检索证据。
 - 反例/竞争视角同样用算子：`"<claim>" 批评`、`-site:` 排掉自家域名、`lang:en` 换语言面。
 
+## Protocol 来源面（派发带 `Protocol vN：来源=…` 时）
+
+开工先按派发的 `source_scope` 选检索面：`families` 决定渠道（official→官方域、academic→论文库、
+regulatory→法域/监管站、practitioner→社区/账单、web→通用）、`recency` 决定 `after:` 起点、`language`
+决定 `lang:`、`domains/exclude_domains` 直接落 `site:`/`-site:`、`authority=primary` 时第三方只作线索。
+**现实够不到（403/无学术库）→ 在覆盖记录写 `source-scope-gap：…`，不改写派发里的值**——这是 critic
+审偏离的输入。
+
 ## 质量分级（每条 lead 必标）
 
 | 级 | 定义（判**内容质量**，不判信源身份） | 用途 |

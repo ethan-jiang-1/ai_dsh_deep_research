@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "version": 1,
+  "status": "draft",
+  "created": "<ISO 时间，以 time-context 读数为准>",
+  "approved_at": null,
+  "approval_basis": null,
+  "method": {
+    "id": "<事实核查 | 领域地图 | 主张核查 | 方案比较 | 时间线与信号 | 用户自定义名>",
+    "kind": "preset",
+    "library_name": null,
+    "library_fields_sha256": null,
+    "fields": {
+      "source": "<找来源：一手渠道/检索面>",
+      "verify": "<怎么核实：交叉/重抓/反例/口径>",
+      "report": "<报告怎么写：骨架/对比轴/读者>",
+      "limit": "<不承诺：方法边界>"
+    },
+    "adjustments": []
+  },
+  "source_scope": {
+    "families": ["official", "web"],
+    "domains": [],
+    "exclude_domains": [],
+    "recency": "12m",
+    "language": ["zh", "en"],
+    "authority": "primary"
+  },
+  "effort": {
+    "band": "standard",
+    "band_v": 1,
+    "nodes_max": 12,
+    "cells_max": 8,
+    "waves_max": 6,
+    "allowed_depths": ["L1", "L2"]
+  },
+  "output": {
+    "shape": "full_report",
+    "sections": ["decision", "options", "criteria", "tradeoffs", "risks"],
+    "length": { "min": 1200, "max": 1600, "unit": "words" },
+    "format": "md",
+    "audience": "<这份报告给谁看>"
+  },
+  "gates": {
+    "hitl1": "protocol_projection",
+    "hitl2": "review",
+    "evidence_threshold": "B",
+    "critic": "both",
+    "claim_verification": "on"
+  },
+  "deviations": []
+}

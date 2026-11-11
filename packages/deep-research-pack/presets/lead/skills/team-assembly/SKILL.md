@@ -56,6 +56,19 @@ spawn_teammate 子**一律 composeFrom lead**（vendor 机制）——队友的�
 
 **lens 装载**（有 lens 的 run）：每份 cell 派发写「本次视角 = `<id>`；全文 = 研究手册 `research_pack_root` + `/content/lenses/<id>.md`（开工先 read）；关键动作 = seek … / verify … / blind_spots …」。同一 topic 有 ≥2 lens 时，至少一个 cell 走独立 subagent（或 workflow child），**不把两个 lens 的 query 合并成一轮**；topic owner 仍对全部 cell 的收活负责。文件读不到就按 brief 内联的三条动作执行，**不静默跳过**。
 
+## Protocol 切片（每份派发必带；值从 `protocol.json` 抄，不重写）
+
+| 角色 | 带什么 |
+|---|---|
+| scout | `method` 的信息源策略 + `source_scope`（families/recency/language/domains/authority） |
+| analyst | `method` 的检验策略 + `output.sections`（本 cell 支撑哪节）+ `effort.allowed_depths` + lens |
+| critic | 六面全量 + `deviations` + `output.shape/sections`（审兑现） |
+
+派发写法：一行 `Protocol vN：方法=<id>；来源=<families>/<recency>/<language>；投入=<band>；输出=<shape>/<audience>`
++ 角色相关两句。**现实变了先记 `deviations`（dimension/from/to/why/authority）再改派发，不改 Protocol
+假装修好**。这条与五件/方法论装载/lens 装载并列，不替代它们；证明在 pilot 抽样（每场 3 份 brief，
+指得回 JSON），prompt 不落 bundle、无 CI 面。
+
 ## 事中调度（改派与加派）
 
 - **锚点重叠改派**：开挖后发现两个 topic 的可行锚点同源（双人会重复钻同一批来源）→ 合并给一个 owner，另一个转纯 topic 或接新 task——改派走任务板 reassign + journal 记账（cn-us-cpu-gap 实证：T1/T2 锚点同源，task-3 中途 reassign analyst-hardware，market 专注 T4）；
