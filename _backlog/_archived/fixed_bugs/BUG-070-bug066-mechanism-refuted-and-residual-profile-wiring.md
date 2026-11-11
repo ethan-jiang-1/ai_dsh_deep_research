@@ -1,14 +1,14 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-12
 ---
 
 # BUG-070：BUG-066 的机制主张被对照实验证伪 + 修复残留（team-preflight 仍钉 `research`；profile-health 指令对该档是死路）
 
-> 严重级别：P2 ｜ 发现：2026-11-12 ｜ 状态：修复就绪（残留项可机械判定；证伪部分为修正记录）
+> 严重级别：P2 ｜ 发现：2026-11-12 ｜ 状态：已修 — 证伪记录保留（rc.2 团队层本身不阻止启动；原 banner 超时原因未定）；残留已收口：`team-preflight` 切 deep-research + 消费 `profile-health`，`profile-health` 按 profile 名给指令（research 档标弃用，不再指向 boot-run），guides/60 标注 research 档弃用（2026-11-12，去向：none — dev 工具修复，审查：agent 自审 + 机械门禁）
 >
-> **关系**：归档卡 [BUG-066](../_archived/fixed_bugs/BUG-066-research-profile-team-version-drift-banner-timeout.md)
+> **关系**：归档卡 [BUG-066](BUG-066-research-profile-team-version-drift-banner-timeout.md)
 > 已修（消费方切换 + `profile-health` 预检 + `startup-hint` 归因）。按「已修卡不重开、修正 = 新卡」，
 > 本卡记录两点：**其根因句被证伪**；**修复有两处残留**。
 
@@ -70,6 +70,15 @@ console.log(profileLayerIssues({ profileDir:'runtime/harness-home/profiles/resea
 4. 先红后绿：拿 `runtime/harness-home/profiles/research`（版本失配档）跑一次 team-preflight 的预检
    分支（不触模型）——当前实现不咬（红），修复后 exit 2 且文案指向正确命令；
 5. `pnpm test` + `pnpm verify` 绿。
+
+## 修复关联
+
+已落地（2026-11-12）：
+- `team-preflight-smoke` 的 `PROFILE` 改 `deep-research`，组合校验后调用 `profileLayerIssues`（失配 exit 2）；
+- `profile-health` 增 `profileName` 参数：`deep-research` 给 boot-run 指令；其它档（含 `research`）输出「已弃用，消费方改用 deep-research」，不再给死路；
+- [guides/60](../../../docs/guides/60-dev-loop.md) 写明 `research` 手工 profile 已弃用、回放/录制/预检统一 `deep-research`；
+- 证据 = `tests/run/profile-health.test.mjs` BUG-070 用例（research 失配 → 弃用提示、不含 boot-run 重建句）。
+- 证伪部分保留为本卡正文：团队层 rc.2 本身不阻止 `dsh web` 启动；原 3113 banner 超时的真正原因仍未定（并发/在办编辑/其他），066 的加固仍是合理防线。
 
 ## 附：本轮独立复核（与残留无关，留作证据）
 

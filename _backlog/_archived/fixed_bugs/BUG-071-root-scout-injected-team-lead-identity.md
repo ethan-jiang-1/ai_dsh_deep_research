@@ -1,12 +1,12 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-12
 ---
 
 # BUG-071：根 scout 被注入「You are the Team Lead」并获得 8 个 Team 工具——与 persona 的 subagent 通道冲突
 
-> 严重级别：P2 ｜ 发现：2026-11-12 ｜ 状态：等人拍板（产品/契约取舍：接受并写进合同，还是按根角色门控）
+> 严重级别：P2 ｜ 发现：2026-11-12 ｜ 状态：已修 — 取方案 C（persona 纠偏 + 契约记录）：scout/analyst/critic 的 persona 明写「Team 工具可能可见，但不是你的通道；并行用 subagent；不要调用 spawn_teammate / team_task_* / wait_agent」；design/10 §4 与 design/20 记录根会话身份文案的 vendor 事实；回放基线仍会含冒名行（B·persona/runtime-context 属快照重录，另计）（2026-11-12，去向：none — 契约/UI 呈现修复，审查：agent 自审 + 机械门禁）。
 
 ## 症状
 
@@ -64,9 +64,9 @@ team=interrupt_agent,list_agents,spawn_teammate,team_task_create,
 
 ## 与现有成文的张力
 
-- [design/10 §4](../../docs/design/10-architecture.md) 只写了「**worker** 的工具目录里看得到 Team 工具
+- [design/10 §4](../../../docs/design/10-architecture.md) 只写了「**worker** 的工具目录里看得到 Team 工具
   但调不通」——没有写「根 scout/analyst/critic 也看得到，且被标成 Team Lead」；
-- [design/20](../../docs/design/20-roles.md) 明说「角色边界靠派发合同 + 人工验收，**不是 preset 机器边界**」
+- [design/20](../../../docs/design/20-roles.md) 明说「角色边界靠派发合同 + 人工验收，**不是 preset 机器边界**」
   ——即工具可见是被接受的；但**身份冒名**（You are the Team Lead）不在该表述覆盖内；
 - scout persona 指定并行走 `subagent`，没有任何「不得组队」的提示（lead teammate 的派发合同里有）。
 
@@ -99,6 +99,12 @@ team=interrupt_agent,list_agents,spawn_teammate,team_task_create,
 
 ## 修复关联
 
-发现来自 [BUG-064](../_archived/fixed_bugs/BUG-064-replay-a-layer-not-self-contained-tool-stall.md)
+已落地（2026-11-12，选项 C）：
+- `presets/scout.patch.yml` / `analyst.patch.yml` / `critic.patch.yml` 各增一句显式纠偏（Team 工具可见 ≠ 组队通道；并行只用 subagent；禁 `spawn_teammate` / `team_task_*` / `wait_agent`）。
+- `docs/design/10-architecture.md` §Agent Teams 与 `docs/design/20-roles.md` 记录：team 层 profile 级启用、vendor 无 per-preset 开关，根会话身份文案是 vendor 事实；行为边界由 persona 承担。
+- 证据 = `tests/pack/presets.test.mjs` BUG-071 用例（三份 persona 句在场、lead 不受影响）。
+- 未做 = 选项 B（根角色门控，需 vendor 支持/上游）；回放 B 基线重录（with-key，另计）。
+
+发现来自 [BUG-064](BUG-064-replay-a-layer-not-self-contained-tool-stall.md)
 修复后的回放复跑（A 已绿，B 暴露该注入）。与 D47（worker profiles/Team 路由）和 D16 相关；若选 B（门控），
 需要 D 号评审。

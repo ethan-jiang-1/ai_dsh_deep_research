@@ -23,6 +23,7 @@ import { writeFileSync, readFileSync, existsSync, mkdirSync, readdirSync, statSy
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
+import { profileLayerIssues, runtimeVersionOf } from '../scripts/lib/profile-health.mjs'
 import { requireCredentials, scrubbedEnv, withModelKey } from '../scripts/lib/env.mjs'
 import { sentinelInAssistantText } from '../scripts/lib/replay-request.mjs'
 
@@ -55,13 +56,17 @@ if (!ROLE || !ROLE_PROMPTS[ROLE]) fail(`需要 --role <角色 id>（可录集 = 
 if (!process.env.DSH_HOME) fail('未 source dev/env.sh（DSH_HOME 缺席）——与 L1/L2 同档自拒')
 const DSH_HOME = resolve(process.env.DSH_HOME)
 requireCredentials('record-role-fixture', { home: DSH_HOME })
+{
+  const issues = profileLayerIssues({ profileDir: join(DSH_HOME, 'profiles', 'deep-research'), runtimeVersion: runtimeVersionOf(ROOT) });
+  if (issues.length > 0) fail(issues.join('；'));
+}
 // 角色 fixture 住场景目录根（lead 的历史落点，ui.expected.md 同目录），其余角色住 <role>/ 子目录
 const OUT_DIR = join(ROOT, 'snapshots', 'replay', 'research-face', ...(ROLE === 'lead' ? [] : [ROLE]))
 if (existsSync(join(OUT_DIR, 'session.v4.jsonl'))) fail(`${OUT_DIR}/session.v4.jsonl 已在——重录请先删除（录制品人审后入库，不静默覆盖）`)
 
 // mirror 是否声明 mcp 行：决定 MCP 组谓词是否适用（MCP_PLAYWRIGHT=0 形态无此行，
 // 竞态与 MCP 组都不存在，谓词跳过——fail-loud 不误伤该形态）。
-const mirrorPatch = join(DSH_HOME, 'profiles', 'research', 'cordis.patch.yml')
+const mirrorPatch = join(DSH_HOME, 'profiles', 'deep-research', 'cordis.patch.yml')
 const expectMcp = existsSync(mirrorPatch) && /mcp|playwright/i.test(readFileSync(mirrorPatch, 'utf8'))
 
 // ── boot + 录一次：返回会话日志全文；spawn/cleanup 每次尝试独立（含 fail 路径——
@@ -72,7 +77,7 @@ const bin = join(VENDOR, 'apps', 'cli', 'src', 'bin.ts')
 const recordOnce = async () => {
   // LLM 流 socket 隔离预载（用户指令 2026-10-13：一次性连接不复用——postmortem 2026-10-13）
   const iso = join(ROOT, 'dev', 'llm-socket-isolation.cjs')
-  const child = spawn(process.execPath, ['--import', 'tsx/esm', bin, '--profile', 'research', '--', '--port', String(PORT), '--no-open'], { cwd: VENDOR, env: withModelKey(scrubbedEnv({ DSH_HOME, PATH: process.env.PATH, NODE_OPTIONS: `--require ${iso}` })), stdio: ['ignore', 'pipe', 'pipe'], detached: true })
+  const child = spawn(process.execPath, ['--import', 'tsx/esm', bin, '--profile', 'deep-research', '--', '--port', String(PORT), '--no-open'], { cwd: VENDOR, env: withModelKey(scrubbedEnv({ DSH_HOME, PATH: process.env.PATH, NODE_OPTIONS: `--require ${iso}` })), stdio: ['ignore', 'pipe', 'pipe'], detached: true })
   let output = ''
   let childGone = false
   child.on('exit', () => { childGone = true })

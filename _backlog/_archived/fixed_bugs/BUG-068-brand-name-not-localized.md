@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-12
 ---
 
 # BUG-068：产品名 Orca 未做双语——中文应叫「Orca 深度搜索」，英文应叫「Orca Deep Research」
 
-> 严重级别：P2｜发现：2026-11-12｜状态：修复就绪 — 根因已证到代码（品牌名组件无 locale 座位、品牌槽注册未声明字典），修法与判据见下；用户定名：zh `Orca 深度搜索` / en `Orca Deep Research`。
+> 严重级别：P2｜发现：2026-11-12｜状态：已修 — `brandName` 进字典（zh `Orca 深度搜索` / en `Orca Deep Research`），`OrcaName` 收 `PropsLocale` 走 `t()`，品牌名槽声明 `locale`；`startTitle` 前缀与 `locale/{zh,en}.json` 的 `meta.title` 同批对齐；静态渲染断言 en 零 CJK/zh 逐字（2026-11-12，去向：none — UI 呈现修复，审查：agent 自审 + 机械门禁）。
 
 ## 症状
 
@@ -32,8 +32,8 @@ opened: 2026-11-12
 
 ## 根因（已证到代码）
 
-1. [BrandMark.tsx](../../packages/deep-research-pack/src/client/BrandMark.tsx) 的 `OrcaName` 是**硬编码字面量** `Orca`，没有接收 `PropsLocale<'deepResearchPack'>`，也没有 `t()`。
-2. [index.ts](../../packages/deep-research-pack/src/client/index.ts) 的品牌名槽注册是 `{ name, priority: -1 }`，**没有 `locale: 'deepResearchPack'`**；因此即使组件想要 `t`，槽也不会注入。
+1. [BrandMark.tsx](../../../packages/deep-research-pack/src/client/BrandMark.tsx) 的 `OrcaName` 是**硬编码字面量** `Orca`，没有接收 `PropsLocale<'deepResearchPack'>`，也没有 `t()`。
+2. [index.ts](../../../packages/deep-research-pack/src/client/index.ts) 的品牌名槽注册是 `{ name, priority: -1 }`，**没有 `locale: 'deepResearchPack'`**；因此即使组件想要 `t`，槽也不会注入。
 3. 品牌名的其它显示位各写各的：`locale/zh.json` / `locale/en.json` 的 `meta.title` 是「深度研究 / Deep Research」，`locales/zh.ts` / `en.ts` 的 `startTitle` 是 `Deep Research · …`；没有单一品牌名来源。
 4. 现有 `tests/cockpit/locales.test.mjs` 只对方法库/状态/图谱视图做 en 渲染断言，未覆盖品牌槽；`cjk-source` 扫描不检查英文硬编码字面量，故 `Orca` 一直绿。
 
@@ -52,4 +52,4 @@ opened: 2026-11-12
 
 ## 修复关联
 
-（修完补：改动文件 / 测试 / 证据）
+已落地（2026-11-12）：`src/client/locales/zh.ts`/`en.ts` 增 `brandName`；`BrandMark.tsx` 的 `OrcaName` 改收 `PropsLocale<'deepResearchPack'>` 并输出 `t('brandName')`；`index.ts` 的 `sidebar.brand.name` 注册补 `locale: 'deepResearchPack'`；`startTitle` 前缀与 `locale/zh.json`/`en.json` 的 `meta.title` 统一为品牌名。证据 = `tests/cockpit/locales.test.mjs` 新增 BUG-068 渲染断言（zh `Orca 深度搜索` / en `Orca Deep Research`、首屏前缀同源）+ 全量 en 零 CJK/键集对账。去向 = none — UI 呈现修复。

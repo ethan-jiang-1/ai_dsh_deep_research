@@ -15,6 +15,7 @@
 // 逐站点迁移（每站点独立 diff，单站点红只回滚该站点）。
 
 import { spawn } from 'node:child_process'
+import { startupFailureHint } from './startup-hint.mjs'
 
 /** 启动横幅里的 token URL——各站点同一形态（boot 输出一行 `http://127.0.0.1:<port>/?token=…`）。 */
 const bannerRe = (port) => new RegExp(`http://127\\.0\\.0\\.1:${port}/\\?token=(\\S+)`)
@@ -56,8 +57,8 @@ export function bootWeb({ bin, cwd, profile, patchPath = null, port, env, timeou
     }
     child.stdout.on('data', onData)
     child.stderr.on('data', onData)
-    child.on('exit', (code) => reject(new Error(`web 进程提前退出（code ${String(code)}）\n${output.slice(-tailChars)}`)))
-    setTimeout(() => reject(new Error(`等待启动横幅超时\n${output.slice(-tailChars)}`)), timeoutMs)
+    child.on('exit', (code) => reject(new Error(`web 进程提前退出（code ${String(code)}）${startupFailureHint(output, profile) === '' ? '' : `\n${startupFailureHint(output, profile)}`}\n${output.slice(-tailChars)}`)))
+    setTimeout(() => reject(new Error(`等待启动横幅超时${startupFailureHint(output, profile) === '' ? '' : `\n${startupFailureHint(output, profile)}`}\n${output.slice(-tailChars)}`)), timeoutMs)
   })
   return banner.then(({ token }) => ({ child, token, output: () => output }))
 }

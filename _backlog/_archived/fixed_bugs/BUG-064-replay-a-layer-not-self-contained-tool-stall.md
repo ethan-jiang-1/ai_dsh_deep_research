@@ -1,12 +1,12 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-11-11
 ---
 
 # BUG-064：回放的 A 层不是自包含的——真实工具调用会卡住整层（无超时归因、无并发锁）
 
-> 严重级别：P2 ｜ 发现：2026-11-11 ｜ 状态：修复落地 — 已落地失败归因（A 超时输出最后事件/tool name/seq）与 run lock；自包含 fixture tool/result 与工具有界超时仍未决（卡内「进展」记录）。
+> 严重级别：P2 ｜ 发现：2026-11-11 ｜ 状态：已修 — A 层改**离线自包含**：dsh 子进程注入 `replay-network-offline.cjs` preload（非 loopback DNS/connect 立即失败），真实工具快速返回错误、回放回合不再卡 `tool/call`；配套 run lock + 超时归因。真机复跑 A PASS、C0–C5 全 PASS（1 卡 · 2 行）；B·persona/headers/runtime-context 的红是快照重录问题（D48/并发 pack 改动后），另计（2026-11-12，去向：none — 测试资产修复，审查：agent 自审 + 真浏览器证据）。
 
 ## 症状
 
@@ -66,8 +66,14 @@ assistant/message → tool/call{name:"web_search"}   ← 到此为止
 
 ## 修复关联
 
-未定（待根因确认）；与 [BUG-061](../_archived/fixed_bugs/BUG-061-replay-c2-guide-capsule-missing-after-locale-pin.md)（C 层定位器）
-和 [BUG-059](../_archived/fixed_bugs/BUG-059-replay-locator-hardcodes-zh-locale-owned-labels.md)（locale）同一条冒烟，但本条在 A 层：
+已落地（2026-11-12）：
+- `scripts/smoke/replay-network-offline.cjs`：只对 dsh 主进程生效（`isDshMain`），非 loopback 的 DNS/connect 立即 `ENOTFOUND`/`ECONNREFUSED`；boot 的安装/MCP 子进程不受影响。
+- `snapshot-replay-smoke` 的 boot env 注入 `REPLAY_NETWORK_OFFLINE=1` + `NODE_OPTIONS --require`；保留 run lock 与 `stallOf` 归因（失败仍会点名 `tool/call web_search`）。
+- 证据 = `tests/run/replay-network-offline.test.mjs`（loopback/外部分类）；真机 A PASS + C2/C3/C5 PASS；离线前后对照 = 无 preload 时停在 `tool/call web_search（seq 17）`，有 preload 时同回合完成。
+- 未修 = B·persona/headers/runtime-context（快照重录，with-key 人审，不属本卡）。
+
+与 [BUG-061](BUG-061-replay-c2-guide-capsule-missing-after-locale-pin.md)（C 层定位器）
+和 [BUG-059](BUG-059-replay-locator-hardcodes-zh-locale-owned-labels.md)（locale）同一条冒烟，但本条在 A 层：
 **证据是「回放本身能不能跑完」**。
 
 ## 进展（2026-11-12）

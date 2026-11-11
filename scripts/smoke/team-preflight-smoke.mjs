@@ -22,13 +22,14 @@ import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { presetRoles } from '../lib/roles.mjs';
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
+import { profileLayerIssues, runtimeVersionOf } from '../lib/profile-health.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
   return i === -1 ? fallback : process.argv[i + 1];
 };
-const PROFILE = 'research';
+const PROFILE = 'deep-research';
 const PORT = Number(arg('port', '3102'));
 const BOOT_TIMEOUT_MS = 120_000;
 const LEAD_TURN_TIMEOUT_MS = 300_000;
@@ -60,9 +61,11 @@ const profDir = join(home, 'profiles', PROFILE);
     ok = ok && existsSync(join(profDir, 'node_modules', 'dsh-deep-research-pack', 'presets', `${r}.patch.yml`));
   }
   if (!ok) {
-    console.error('team-preflight: research profile 组合不完整（本包 + vendor 层 + 盘上全部角色 preset）——先跑 dev/boot-run.sh 再来');
+    console.error(`team-preflight: ${PROFILE} profile 组合不完整（本包 + vendor 层 + 盘上全部角色 preset）——先跑 dev/boot-run.sh 再来`);
     process.exit(2);
   }
+  const issues = profileLayerIssues({ profileDir: profDir, runtimeVersion: runtimeVersionOf(ROOT), profileName: PROFILE });
+  if (issues.length > 0) { console.error(`team-preflight: ${issues.join('；')}——本次未跑（exit 2）`); process.exit(2) }
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

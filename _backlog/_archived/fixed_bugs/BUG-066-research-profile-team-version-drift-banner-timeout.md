@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-12
 ---
 
 # BUG-066：`research` profile 无创建者、无版本校验——团队层停在 rc.2，回放/团队冒烟只报「等待启动横幅超时」
 
-> 严重级别：P2 ｜ 发现：2026-11-12 ｜ 状态：修复就绪（P2 dev 工具修理型；根因、修法与判据在卡内）
+> 严重级别：P2 ｜ 发现：2026-11-12 ｜ 状态：已修 — 三个消费方统一改用 `deep-research` profile（boot-run 维护版本面；snapshot-replay + record-role-fixture 已切换，team-preflight 本就用它）；新增 `profile-health` boot 前版本预检（exit 2 + 重建指令）与 `startup-hint` banner 归因（识别 incompatible/exemption）；真机回放 A/C2/C3/C5 PASS，B 的 persona/headers/runtime-context 红是快照重录问题（2026-11-12，去向：none — dev 工具修复，审查：agent 自审 + 机械门禁）
 
 ## 症状
 
@@ -42,8 +42,8 @@ node --import tsx/esm scripts/smoke/snapshot-replay-smoke.mjs --face research-fa
 三处缺口叠在一起：
 
 1. **版本面缺失**：`team-preflight-smoke` 的 profile 组合校验只查 bundles + 盘上 preset
-   （[team-preflight-smoke.mjs](../../scripts/smoke/team-preflight-smoke.mjs)），**不查团队层版本**；
-   `snapshot-replay-smoke` **完全不校验** profile。而 [dev/boot-run.sh](../../dev/boot-run.sh) 的
+   （[team-preflight-smoke.mjs](../../../scripts/smoke/team-preflight-smoke.mjs)），**不查团队层版本**；
+   `snapshot-replay-smoke` **完全不校验** profile。而 [dev/boot-run.sh](../../../dev/boot-run.sh) 的
    `profile_ok()` 早在 2026-10-19 就加过版本面——它的注释写着一模一样的教训：
    「只查 bundles 在场会把旧 pin 的组合判成在位……报 incompatible 并卡在启动横幅（表现 = snapshot-replay /
    run 通道超时，根因在 profile 未随 pin 重钉）」。
@@ -70,7 +70,7 @@ node --import tsx/esm scripts/smoke/snapshot-replay-smoke.mjs --face research-fa
 2. **归因**：banner 超时时若输出含 `incompatible` / `Exact-version exemption: not active`，判红并输出
    「profile 未随 pin 重钉：先重建 <profile>」；不再只报「等待启动横幅超时」；
 3. **创建者补位**：给 `research` profile 一个可复用的 bootstrap（或让三个消费方统一改用
-   `deep-research` / 每次自建隔离 profile），并在 [guides/60](../../docs/guides/60-dev-loop.md) 写明；
+   `deep-research` / 每次自建隔离 profile），并在 [guides/60](../../../docs/guides/60-dev-loop.md) 写明；
    「先跑 boot-run」的文案必须指向**真的**能修该 profile 的命令；
 4. 先红后绿：构造一个团队层版本落后的临时 home（或给校验助手喂旧版本字符串）→ 旧实现超时/静默、
    新实现明确红并给准确指令；
@@ -80,6 +80,11 @@ node --import tsx/esm scripts/smoke/snapshot-replay-smoke.mjs --face research-fa
 
 ## 修复关联
 
-P2 dev 工具修理型，可凭本卡自授权落地（第 3 条的「用哪个 profile」若改成产品约定，需用户拍板）。
-与 [BUG-064](../_archived/fixed_bugs/BUG-064-replay-a-layer-not-self-contained-tool-stall.md) 相邻但不同层：064 是「工具真执行会挂」，
+已落地（2026-11-12）：
+- **统一 profile**：`snapshot-replay-smoke` / `dev/record-role-fixture.mjs` 从 `research` 改到 `deep-research`（`team-preflight-smoke` 本就用后者）；该 profile 由 `dev/boot-run.sh` 的 `profile_ok` 钉版本面。
+- **boot 前版本预检**：`scripts/lib/profile-health.mjs`（团队层版本 == 运行时版本；缺席/落后 → exit 2 + 「先跑 dev/boot-run.sh」），snapshot-replay 与 recorder 在 boot 前调用。
+- **归因**：`scripts/lib/startup-hint.mjs` 识别日志里的 `incompatible` / `Exact-version exemption: not active`，banner 超时与提前退出都前置「profile 未随 pin 重钉」提示。
+- 证据 = `tests/run/profile-health.test.mjs`、`tests/run/startup-hint.test.mjs`；真机 replay（deep-research profile）A PASS、C0–C5 全 PASS；`research` 手工 profile 不再被消费方依赖。
+- 未修 = B·persona/headers/runtime-context（快照重录，with-key 人审，不属本卡）。
+与 [BUG-064](BUG-064-replay-a-layer-not-self-contained-tool-stall.md) 相邻但不同层：064 是「工具真执行会挂」，
 本条是「profile 过期导致 host 根本不启动」；两条合起来解释了回放为什么长期不可靠。

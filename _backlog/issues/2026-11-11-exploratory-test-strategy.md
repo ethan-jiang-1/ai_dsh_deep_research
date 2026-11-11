@@ -779,7 +779,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 - **071 的 persona 纠偏已在运行级验证**：scout 场景 A PASS；B·persona 的 actual 已含
   「Team 工具可能在本根会话可见（宿主 Team 机制），但组队不是你的通道：并行只用 subagent；不要调用
   spawn_teammate / team_task_*」——与基线差异正是这段新增（基线待重录）。
-- **新卡**：[BUG-072](../bugs/BUG-072-release-vocab-substring-false-positive-product-content.md) **P2**——
+- **新卡**：[BUG-072](../_archived/fixed_bugs/BUG-072-release-vocab-substring-false-positive-product-content.md) **P2**——
   `release-vocab` 用裸子串匹配退役词，`产品内` 误伤 `产品内容`（新文案指南第 300 行），verify 红。
   修复二选一：收窄门禁词（带负向断言）或改文档措辞；同表其他词未见实例（terms/evaluation 的枚举行带
   `term-policy: allow`）。

@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-12
 ---
 
 # BUG-067：回放离线闸的 DNS 面不完整——`dns.resolve*` 实测绕过，子进程工具也不受控
 
-> 严重级别：P2 ｜ 发现：2026-11-12 ｜ 状态：修复就绪（P2 test-support 修理型；与 BUG-064 同批）
+> 严重级别：P2 ｜ 发现：2026-11-12 ｜ 状态：已修 — `install()` 补齐 `dns.resolve*`、`dns.promises.resolve*`、`Resolver.prototype.resolve*`（非 loopback 立即 ENOTFOUND）；头注写清「只覆盖 dsh 主进程，工具 spawn 的子进程不受控」；运行时探针 = fetch/resolve4/lookup 全失败、loopback 连接不被闸门拦（2026-11-12，去向：none — test-support 修复，审查：agent 自审 + 运行时探针）
 >
 > 说明：本卡针对**在办未提交**的 `scripts/smoke/replay-network-offline.cjs`（BUG-064 的修复件）；
 > 现在提出来是为了让它提交前把边界收全。
@@ -77,5 +77,7 @@ REPLAY_NETWORK_OFFLINE=1 node --require ./scripts/smoke/replay-network-offline.c
 
 ## 修复关联
 
-P2 test-support 修理型，随 [BUG-064](../_archived/fixed_bugs/BUG-064-replay-a-layer-not-self-contained-tool-stall.md) 的修复
+已落地（2026-11-12）：`scripts/lib/replay-network-offline.cjs` 增 `RESOLVE_NAMES` 循环，覆盖回调 / promises / `Resolver.prototype` 三面；头注写明子进程边界（不覆盖工具 spawn 的子进程；boot 安装子进程豁免）。证据 = `tests/run/replay-network-offline.test.mjs` 源码守卫 + 一次性运行时探针（`fetchExternal=ERR`、`dnsResolve4=ERR ENOTFOUND`、`dnsLookup=ERR ENOTFOUND`、loopback 未被拦）。去向 = none。
+
+原始处置（留档）：P2 test-support 修理型，随 [BUG-064](BUG-064-replay-a-layer-not-self-contained-tool-stall.md) 的修复
 同批落地即可；若采纳「子进程更严模式」，需评估 boot 期 pnpm 安装路径，必要时提请用户拍板。

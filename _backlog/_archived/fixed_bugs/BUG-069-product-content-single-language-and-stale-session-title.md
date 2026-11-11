@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P1
 opened: 2026-11-12
 ---
 
 # BUG-069：英文界面仍混中文——内置打法内容单语（名称/摘要/四字段/推荐规则）+ 方法编辑历史标题不随 locale
 
-> 严重级别：P1｜发现：2026-11-12｜状态：修复就绪 — 根因已证到代码与渲染证据；修法、影响面清单与判据见下。canonical 内容（skill 表/库格式/模型面）保持不变，只补「显示投影」。
+> 严重级别：P1｜发现：2026-11-12｜状态：已修 — 新增 `builtin-display` 显示投影层（5 个内置打法的名称/摘要/四字段/推荐规则/领域示范），所有显示位经投影、canonical/动作/库格式/模型面逐字不变；方法编辑会话标题按 locale 迁移（打开时 + locale 切换）；40 投影键 + 2 分隔符进 zh/en，真实数据 en 渲染零 CJK（2026-11-12，去向：none — UI 呈现修复，审查：agent 自审 + 机械门禁 + 真实数据静态渲染）。
 
 ## 症状
 
@@ -32,30 +32,30 @@ opened: 2026-11-12
 ## 根因（已证到代码）
 
 **① 产品内容表只有中文，且同时充当“显示名”与“canonical 标识”。**
-[config-tables.ts](../../packages/deep-research-pack/src/lib/config-tables.ts) 的 `BUILTIN_PREFERENCES` 是中文名称/摘要/四字段；它的 `name` 又是库条目、指令载荷、skill 表、判型映射的 canonical 键。UI 直接拿它渲染，没有显示投影层。
+[config-tables.ts](../../../packages/deep-research-pack/src/lib/config-tables.ts) 的 `BUILTIN_PREFERENCES` 是中文名称/摘要/四字段；它的 `name` 又是库条目、指令载荷、skill 表、判型映射的 canonical 键。UI 直接拿它渲染，没有显示投影层。
 
 **② 显示位逐一直接引用 canonical 数据。** 受影响的当前代码（逐处）：
 
 | 位置 | 现状（英文界面） |
 |---|---|
-| [MethodLibraryView.tsx:395-402](../../packages/deep-research-pack/src/client/MethodLibraryView.tsx) 内置参考列表 | `name`/`summary` 中文 |
-| [MethodLibraryView.tsx:432](../../packages/deep-research-pack/src/client/MethodLibraryView.tsx) 来源选择内置候选项 | `name`/`summary` 中文 |
-| [views.tsx:100-106](../../packages/deep-research-pack/src/client/method-library/views.tsx) `SourceSelectionView` 内置预览 | 名称/四字段中文 |
-| [views.tsx:194-208](../../packages/deep-research-pack/src/client/method-library/views.tsx) `BuiltinView` 只读详情 | 名称/摘要/四字段中文 |
-| [ResearchConfigTab.tsx:58-60](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) 卡片菜单「基于此自定义」 | 英文模板 + 中文 `name` |
-| [ResearchConfigTab.tsx:76](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) `patternsFor` | 推荐规则中文 |
-| [ResearchConfigTab.tsx:133-135](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) 详情弹窗自定义按钮 | 同上 |
-| [ResearchConfigTab.tsx:162](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) 详情弹窗标题 | canonical `detail.name` 中文 |
-| [ResearchConfigTab.tsx:183-186](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx)、[187-197](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) 读/编辑四字段 | 值中文 |
-| [ResearchConfigTab.tsx:234-241](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) 标本/推荐 | 标本已 en；推荐规则中文 |
-| [ResearchConfigTab.tsx:275-278](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) 方法选择菜单 | canonical `name` 中文 |
-| [LegacyManagementPane.tsx:43](../../packages/deep-research-pack/src/client/research-config/LegacyManagementPane.tsx) 推荐规则说明 | 中文 |
-| [LegacyManagementPane.tsx:52](../../packages/deep-research-pack/src/client/research-config/LegacyManagementPane.tsx)、[77-81](../../packages/deep-research-pack/src/client/research-config/LegacyManagementPane.tsx) 内置卡片/领域示范 | 名称/摘要/四字段/示范内容中文 |
-| [useDraftState.ts](../../packages/deep-research-pack/src/client/method-library/useDraftState.ts) 内置来源 provenance / 预填 sections | 中文 |
-| [coach-prompts.ts:36](../../packages/deep-research-pack/src/client/method-library/coach-prompts.ts) 方法编辑上下文 | **模型面，必须保持中文 canonical，不翻译** |
+| [MethodLibraryView.tsx:395-402](../../../packages/deep-research-pack/src/client/MethodLibraryView.tsx) 内置参考列表 | `name`/`summary` 中文 |
+| [MethodLibraryView.tsx:432](../../../packages/deep-research-pack/src/client/MethodLibraryView.tsx) 来源选择内置候选项 | `name`/`summary` 中文 |
+| [views.tsx:100-106](../../../packages/deep-research-pack/src/client/method-library/views.tsx) `SourceSelectionView` 内置预览 | 名称/四字段中文 |
+| [views.tsx:194-208](../../../packages/deep-research-pack/src/client/method-library/views.tsx) `BuiltinView` 只读详情 | 名称/摘要/四字段中文 |
+| [ResearchConfigTab.tsx:58-60](../../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) 卡片菜单「基于此自定义」 | 英文模板 + 中文 `name` |
+| [ResearchConfigTab.tsx:76](../../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) `patternsFor` | 推荐规则中文 |
+| [ResearchConfigTab.tsx:133-135](../../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) 详情弹窗自定义按钮 | 同上 |
+| [ResearchConfigTab.tsx:162](../../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) 详情弹窗标题 | canonical `detail.name` 中文 |
+| [ResearchConfigTab.tsx:183-186](../../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx)、[187-197](../../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) 读/编辑四字段 | 值中文 |
+| [ResearchConfigTab.tsx:234-241](../../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) 标本/推荐 | 标本已 en；推荐规则中文 |
+| [ResearchConfigTab.tsx:275-278](../../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) 方法选择菜单 | canonical `name` 中文 |
+| [LegacyManagementPane.tsx:43](../../../packages/deep-research-pack/src/client/research-config/LegacyManagementPane.tsx) 推荐规则说明 | 中文 |
+| [LegacyManagementPane.tsx:52](../../../packages/deep-research-pack/src/client/research-config/LegacyManagementPane.tsx)、[77-81](../../../packages/deep-research-pack/src/client/research-config/LegacyManagementPane.tsx) 内置卡片/领域示范 | 名称/摘要/四字段/示范内容中文 |
+| [useDraftState.ts](../../../packages/deep-research-pack/src/client/method-library/useDraftState.ts) 内置来源 provenance / 预填 sections | 中文 |
+| [coach-prompts.ts:36](../../../packages/deep-research-pack/src/client/method-library/coach-prompts.ts) 方法编辑上下文 | **模型面，必须保持中文 canonical，不翻译** |
 
 **③ 方法编辑会话标题只在创建时取 locale。**
-[coach-sessions.ts:57](../../packages/deep-research-pack/src/client/coach-sessions.ts) 创建会话时 `rename(title: t('methodEditorTitle'))`；已有会话的标题是持久化数据，切 locale 不会重命名，也没有“这是本包自动标题”的标记/迁移。因此英文界面里会看到中文 `方法编辑`（截图顶部）。
+[coach-sessions.ts:57](../../../packages/deep-research-pack/src/client/coach-sessions.ts) 创建会话时 `rename(title: t('methodEditorTitle'))`；已有会话的标题是持久化数据，切 locale 不会重命名，也没有“这是本包自动标题”的标记/迁移。因此英文界面里会看到中文 `方法编辑`（截图顶部）。
 
 **④ 守卫缺口：** `tests/cockpit/cjk-source.test.mjs` 把 `config-tables.ts` 登记为产品数据 allowlist（正确：它是 canonical 内容），但没有断言“UI 必须经显示投影取用”；`tests/cockpit/locales.test.mjs` 的 `BuiltinView` 用**合成英文** entry，从未用真实 `BUILTIN_PREFERENCES` 渲染，所以这个混排一直绿。
 
@@ -108,4 +108,11 @@ Where to look 官方变更点（release notes／changelog／公告／生效日�
 
 ## 修复关联
 
-（修完补：改动文件 / 测试 / 证据）
+已落地（2026-11-12）：
+- 新增 `packages/deep-research-pack/src/client/builtin-display.ts`：以 canonical 名为键的显示投影（`displayNameOf`/`displaySummaryOf`/`displaySectionsOf`/`displayBuiltinOf`/`displayPatternsOf`/`displayDemoOf`；未知名 fail-soft 回退 canonical）。
+- 显示位接入：`MethodLibraryView`（内置列表/来源选择）、`method-library/views.tsx`（`SourceSelectionView`/`BuiltinView`）、`useDraftState`（预填用显示副本，选中仍 canonical）、`ResearchConfigTab`（卡片/菜单/详情/推荐/方法选择/采用行）、`LegacyManagementPane`（推荐规则/领域示范）。
+- 标题：`coach-sessions.ts` 的 `coachTitleMigrationOf`/`migrateCoachTitles`（仅 `method-coach-*` 且仅已知 zh/en 自动标题；失败 fail-soft），`index.ts` 订阅 locale 变化迁移打开中的会话。
+- 字典：40 投影键 + `labelSeparator`/`ruleSeparator`，zh 逐字等于 canonical（测试对钉），en 零 CJK。
+- 测试：`tests/cockpit/builtin-display.test.mjs`、`tests/cockpit/coach-sessions.test.mjs`；`locales.test.mjs` 用真实 `BUILTIN_PREFERENCES` 渲染 `BuiltinView`/`SourceSelectionView`；`cjk-source.test.mjs` 增显示投影接线守卫（allowlist 未放宽）。
+- 证据：`pnpm typecheck`、`pnpm build` 绿；全量 `pnpm test`/`pnpm verify` 待最终跑（本卡落地的测试面 21/21 绿）。
+- 未做：`client-load-smoke` 真机复跑（浏览器档需环境；en 面由真实数据静态渲染证明），B 层快照重录（with-key）另计。

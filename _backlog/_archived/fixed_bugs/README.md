@@ -71,3 +71,10 @@
 | [BUG-061](BUG-061-replay-c2-guide-capsule-missing-after-locale-pin.md) | 钉 zh 后右栏展开按钮仍用英文 `Open right sidebar` → C2/C3/C5 连锁 | （展开/收起/新标签 chrome 双语；C2 诊断补 `role=tab` 与 guide 容器；C2 PASS） | 2026-11-12 |
 | [BUG-065](BUG-065-run-driver-cache-key-omits-dev-overlay.md) | run-driver 的 GREEN 缓存键只有 pack+runtime——dev 通道自身的改动（overlay / boot-run）不失效 | （`probeCacheKey` 增 `extra`；run-driver `devShellFingerprint()` 三文件内容哈希；命中 reason 写清身份） | 2026-11-12 |
 | [BUG-064](BUG-064-replay-a-layer-not-self-contained-tool-stall.md) | 回放的 A 层不自包含：真实工具调用会挂住、240s 静默超时且归因误导 | （`replay-network-offline.cjs` preload 离线闸 + run lock + 超时归因；真机 A PASS、C0–C5 全 PASS） | 2026-11-12 |
+| [BUG-066](BUG-066-research-profile-team-version-drift-banner-timeout.md) | `research` profile 团队层停在 rc.2 且无版本校验 → 回放/团队冒烟只报「等待启动横幅超时」 | （消费方统一 deep-research profile；`profile-health` boot 前版本预检；`startup-hint` banner 归因） | 2026-11-12 |
+| [BUG-067](BUG-067-offline-gate-dns-resolve-bypass.md) | 回放离线闸的 DNS 面不完整：`dns.resolve*` 实测绕过 | （补齐 resolve*/promises/Resolver.prototype；头注声明子进程边界；运行时探针） | 2026-11-12 |
+| [BUG-068](BUG-068-brand-name-not-localized.md) | 产品名 Orca 未做双语 | （`brandName` zh/en；`OrcaName` 走 `PropsLocale`；品牌槽 locale；startTitle/meta.title 对齐） | 2026-11-12 |
+| [BUG-070](BUG-070-bug066-mechanism-refuted-and-residual-profile-wiring.md) | BUG-066 机制被证伪 + 残留：team-preflight 仍钉 research、profile-health 指令是死路 | （team-preflight 切 deep-research + profile-health 预检；profile-health 按档给指令；guides/60 标 research 弃用） | 2026-11-12 |
+| [BUG-071](BUG-071-root-scout-injected-team-lead-identity.md) | 根 scout 被注入 Team Lead 身份与 8 个 Team 工具 | （方案 C：三份非 lead persona 显式纠偏 + design/10 §4/design/20 记录根会话身份事实） | 2026-11-12 |
+| [BUG-069](BUG-069-product-content-single-language-and-stale-session-title.md) | 英文界面仍混中文：内置打法内容单语 + 方法编辑历史标题不随 locale | （`builtin-display` 显示投影 40 键；canonical/模型面不动；coach 标题迁移 + locale 订阅；真实数据 en 渲染零 CJK） | 2026-11-12 |
+| [BUG-072](BUG-072-release-vocab-substring-false-positive-product-content.md) | release-vocab 的「产品内」子串误伤「产品内容」 | （词表 `产品内` → `产品内(?!容)`；裸子串 + 复合词豁免写进头注） | 2026-11-12 |

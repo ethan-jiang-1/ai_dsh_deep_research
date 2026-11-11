@@ -32,7 +32,7 @@
 // 红证（实录）：改 fixture 内一条 assistant 文本 → A 红；改 fixture persona/注入文本或工具 schema
 //   一词 → 对应 B 条红；改 fixture 一条 web_search 查询词 → C 红；各自还原 → 绿。
 import { execSync } from 'node:child_process';
-import { writeFileSync, existsSync, readFileSync, mkdirSync, mkdtempSync, rmSync, statSync } from 'node:fs';
+import { writeFileSync, existsSync, readFileSync, mkdtempSync, statSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -44,6 +44,8 @@ import { loadReplayScene, discoverReplayFaces } from '../lib/replay-scene.mjs';
 import { researchWorkspaceGroup } from '../lib/session-log.mjs';
 import { compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds, sentinelInAssistantText, turnCompleted } from '../lib/replay-request.mjs';
 import { SMOKE_LOCALE, loadChromium, launchChromium } from '../lib/playwright.mjs';
+import { profileLayerIssues, runtimeVersionOf } from '../lib/profile-health.mjs';
+import { acquireRunLock, releaseRunLock } from '../lib/run-lock.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {
@@ -63,6 +65,8 @@ const UNIQUE_TITLE = '快照回放冒烟·渲染面探针';
 const SENTINEL = '探针完成';
 const DSH_HOME = process.env.DSH_HOME ?? join(ROOT, 'runtime', 'harness-home');
 const SESSIONS = join(DSH_HOME, 'sessions');
+const OFFLINE_PRELOAD = join(ROOT, 'scripts', 'lib', 'replay-network-offline.cjs');
+const PROFILE = 'deep-research';
 
 // manifest 是实际驱动的输入；完整角色集、全部判据与文件引用由 consumer 校验。
 // 研究面场景的角色集 = 研究角色（D2 四角色；方法编辑不属 run 生命周期，D37）——
@@ -78,6 +82,14 @@ if (!process.env.DSH_HOME) {
   console.error('snapshot-replay-smoke: 未 source dev/env.sh（DSH_HOME 缺席）——与 L1/L2 同档自拒');
   process.exit(2);
 }
+// profile 版本面：团队层未随 pin 重钉时 dsh 只拒绝服务，banner 只会超时（BUG-066）。
+{
+  const issues = profileLayerIssues({ profileDir: join(DSH_HOME, 'profiles', PROFILE), runtimeVersion: runtimeVersionOf(ROOT) });
+  if (issues.length > 0) {
+    console.error(`snapshot-replay-smoke: ${issues.join('；')}——本次未跑（exit 2）`);
+    process.exit(2);
+  }
+}
 // 端口预检（verdict 契约：未跑 = exit 2）：端口已被占用时 boot 会以 EADDRINUSE 死掉，
 // 若按断言红（exit 1）上报就是把"未跑"谎报成"跑了但失败"（实测：占用时报 3 FAILURE）。
 {
@@ -88,37 +100,18 @@ if (!process.env.DSH_HOME) {
   }
 }
 
-// 运行锁（与 client-load 同款）：回放共享 DSH_HOME / research-workspace，两实例并发会互相
-// 抢会话与真实检索 API（BUG-064 根因方向 #2）。只防本脚本的两个实例；陈旧锁自动接管。
+// 运行锁（共享 DSH_HOME / research-workspace；两实例并发会抢会话与真实检索 API）。
 const LOCK_DIR = join(ROOT, 'runtime', 'smoke-workspace', 'snapshot-replay.lock');
-function releaseRunLock() { rmSync(LOCK_DIR, { recursive: true, force: true }) }
-function lockOwnerPid() {
-  try {
-    const pid = Number(JSON.parse(readFileSync(join(LOCK_DIR, 'owner.json'), 'utf8'))?.pid);
-    if (!Number.isInteger(pid) || pid <= 0) return null;
-    try { process.kill(pid, 0) } catch (error) { if (error.code !== 'EPERM') return null }
-    return pid;
-  } catch { return null }
-}
-function acquireRunLock(retry = true) {
-  try {
-    mkdirSync(LOCK_DIR);
-    writeFileSync(join(LOCK_DIR, 'owner.json'), JSON.stringify({ pid: process.pid, at: new Date().toISOString() }), 'utf8');
-    return;
-  } catch (error) {
-    if (error.code !== 'EEXIST') throw error;
-    const pid = lockOwnerPid();
-    if (pid !== null) {
-      console.error(`snapshot-replay-smoke: 另一个实例在跑（pid ${pid}；锁 ${LOCK_DIR}）——本次未跑（exit 2）`);
-      process.exit(2);
-    }
-    if (!retry) { console.error(`snapshot-replay-smoke: 无法接管陈旧锁 ${LOCK_DIR}——人工确认后删除再跑`); process.exit(2) }
-    rmSync(LOCK_DIR, { recursive: true, force: true });
-    acquireRunLock(false);
-  }
-}
-acquireRunLock();
-process.on('exit', releaseRunLock);
+if (!acquireRunLock({
+  lockDir: LOCK_DIR,
+  onBusy: (pid) => {
+    console.error(pid === null
+      ? `snapshot-replay-smoke: 无法接管陈旧锁 ${LOCK_DIR}——人工确认后删除再跑（未跑 ≠ 通过）`
+      : `snapshot-replay-smoke: 另一个实例在跑（pid ${pid}；锁 ${LOCK_DIR}）——本次未跑（exit 2）`);
+    process.exit(2);
+  },
+})) process.exit(2);
+process.on('exit', () => releaseRunLock(LOCK_DIR));
 
 // ── B 层共享：组装请求面提取 + 挥发性 tokenize（双侧同规——录制/回放身份差异不构成红）──
 const parseLines = (text) => text.split('\n').filter(Boolean)
@@ -206,8 +199,13 @@ for (const { face, scene } of SCENES) {
   // （`rpc(endpoint, args)` 捕获 base/cookie），与 makeRpc 的 `(base, cookie, endpoint, args)`
   // 不同形，硬收敛即行为改写（round3 卡「输掉的方案」）。
   const booted = await bootWeb({
-    bin, cwd: dshSrc, profile: 'research', patchPath, port: PORT,
-    env: scrubbedEnv({ DSH_HOME, PATH: process.env.PATH }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 600,
+    bin, cwd: dshSrc, profile: PROFILE, patchPath, port: PORT,
+    env: scrubbedEnv({
+      DSH_HOME,
+      PATH: process.env.PATH,
+      REPLAY_NETWORK_OFFLINE: '1',
+      NODE_OPTIONS: [process.env.NODE_OPTIONS, `--require ${OFFLINE_PRELOAD}`].filter(Boolean).join(' '),
+    }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 600,
   });
   const child = booted.child;
   let childGone = false;
