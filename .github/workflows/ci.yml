@@ -69,6 +69,10 @@ jobs:
       - name: Gate self-tests (injected regressions must be named red)
         run: source dev/env.sh && node scripts/smoke/gates-smoke.mjs
 
+      # 源码移交：产物边界 + HANDOFF 接收指令；git archive HEAD，无网络/模型依赖
+      - name: Source handoff (artifact boundary + recipient instructions)
+        run: source dev/env.sh && node scripts/smoke/handoff-smoke.mjs
+
       # 交付回执链（合成 bundle + 合成会话日志，真 CLI）：归一/幂等/外部 present/秘密/repair
       - name: Receipt chain (run-accept end-to-end)
         run: source dev/env.sh && node scripts/smoke/run-accept-smoke.mjs

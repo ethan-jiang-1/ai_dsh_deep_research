@@ -95,13 +95,14 @@
 
 ## 8. 当前债与下一步
 
-`content/manual.md` 现为 **12,038 / 12,288 字符**（约 98%）；字符数最大的三节 = 目录约定 3,734、
-状态头/读序/恢复 2,484、证据文件契约 1,595。下一次新增跨角色规则就会撞顶。
+`content/manual.md` 现为 **9,996 字符**：下放触发 = 10,000（余 4），硬顶 = 12,288（余 2,292）。
+两个数只住 `scripts/lib/content-budget.mjs`：触发由 `tests/pack/content-disclosure.test.mjs` 把守，
+硬顶由 `content-shape` 门禁把守；硬顶只防失控，不是可挪用的余量。
 
 **首刀已落（2026-11-11）**：状态头/读序/恢复细则下放到 `content/generic/state-and-recovery.md`；
-T0 = 9,995 字符（余量 2,293）；`content-disclosure` 守卫在场；L1 真挂载绿；L4-lite 全角色真模型绿。
+`content-disclosure` 守卫在场；L1 真挂载绿；L4-lite 全角色真模型绿。
 snapshot B 的旧回放仍绿，但回放的是旧录制对，**不捕获**本次手册变更——重录窗口未开，不能拿它冒充
-新手册的组装证据。下一刀 = 证据文件契约（1,595）或目录约定（3,734），按同一形状增量下放；
+新手册的组装证据。下一刀 = 证据文件契约或目录约定，按同一形状增量下放；
 trigger = T0 >10,000 或新增跨角色规则装不下。首刀卡 = [2026-11-11-content-organization-t0](../../_backlog/_archived/settled_issues/2026-11-11-content-organization-t0.md)。
 
 ## 9. 指针

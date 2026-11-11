@@ -33,7 +33,7 @@ dsh --profile deep-research
 
 > 从源码交付（手里没有现成 tgz 时）：`git clone --recurse-submodules` 后 `pnpm install`，首次再跑 `bash dev/vendor-build.sh`（pack 的 tsc 读 vendor 已构建的 `lib/types`），最后 `node scripts/dist/export-dist.mjs`——它在 `_dist/` 生成 tarball、安装手册与市场索引；发布/升级顺序见 [guides/64](docs/guides/64-release-versioning.md)。
 
-装好的标志：Plugins 页出现「深度研究 / Deep Research」。打开一个会话后，右栏有「研究状态 / 研究配置 / 研究图谱」（终稿在交付后自动出现），主界面有「方法库」。更新插件后要重启 profile（Ctrl-C 停掉，再跑 `dsh --profile deep-research`）。
+装好的标志：Plugins 页 → **Installed plugins** 出现「深度研究 / Deep Research」（市场入口在 npm 发布后才出现）。打开一个会话后，右栏有「研究状态 / 研究配置 / 研究图谱」（终稿在交付后自动出现），主界面有「方法库」。更新插件后要重启 profile（Ctrl-C 停掉，再跑 `dsh --profile deep-research`）。
 
 ![Plugins 页里的 Deep Research](docs/assets/readme-plugins.png)
 

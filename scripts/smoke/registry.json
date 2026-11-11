@@ -48,8 +48,8 @@
     "job": "keyless"
   },
   "handoff-smoke.mjs": {
-    "tier": "dev-only",
-    "reason": "git archive HEAD + 临时 out；发布前手工档"
+    "tier": "ci",
+    "job": "keyless"
   },
   "install-shape-smoke.mjs": {
     "tier": "dev-only",

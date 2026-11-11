@@ -34,7 +34,7 @@ launcher/scaffold，没有自定义安装器**。包级当前合同在 [README.m
 
 ## 文档义务
 
-- 包 README 拥有安装/验证/配置/升级/卸载/数据/兼容（当前合同）；行为/架构细节 = design/，发布 = guides/64；README 或发布集改变同 diff 更新；
+- 包 README 拥有**包级**合同（安装形态摘要/验证/配置/升级/卸载/数据/兼容）；用户逐步安装合同的 owner = 手册源（scripts/dist/product-manual.md），本 README 不复制步骤；行为/架构细节 = design/，发布 = guides/64；README 或发布集改变同 diff 更新；
 - 启动/部署面（`src/startup`、`src/content`、`scripts/doctor.mjs`、`$DSH_HOME/deep-research/settings.json`）改动要跑
   `install-shape-smoke` + `product-boot-smoke` + `release-smoke`（L2 安装/首启形状）；
 - 已知限制与延后工作放固定节 `## Known Limitations and Deferred Work`（中文名：已知限制与延后工作）。

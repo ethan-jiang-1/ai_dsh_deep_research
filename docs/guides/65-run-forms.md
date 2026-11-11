@@ -17,7 +17,7 @@
 | **M1 安装形态** | 外部用户 | ① custom profile 首次由 CLI 引导（仅首次、破坏性）② `dsh --profile deep-research` 启动 ③ 本地 tarball 装包（当前唯一发布形态；npm/Plugins 为 staged）+ 团队层开关；首屏选项目目录 | 用户自己的 `DSH_HOME` + 自选工作区；包内容在包内，产物在工作区；**没有 launcher / scaffold / 自定义安装器** |
 | **M1 互操作** | 已有 DSH Web/Desktop 的用户 | 把同一个 bundle 装进现有 profile（Plugins 页或显式 CLI） | bundle 自足，首屏照样问工作区；但没有 `deep-research` 的 profile 身份；Desktop 装进 `desktop` = 互操作 |
 | **M2 独立开发形态** | 贡献者 / 本地验证 | 本仓 + `bash dev/bootstrap.sh` + `node dev/run-driver.mjs up --bootstrap` | 默认仓内 `runtime/harness-home` + `research-workspace/`；可用 `DSH_DEV_HOME` 指到仓外 |
-| **M3 移交形态** | 交给另一人或另一台机器 | `scripts/dist/export-handoff.mjs`（源码）或 `export-dist.mjs`（插件） | 不是复制工作树；运行态/凭据/run 数据不随包 |
+| **M3 移交形态** | 交给另一人或另一台机器 | `scripts/dist/export-handoff.mjs`（源码，包内 HANDOFF 给 clone / tar 两条接收路径）或 `export-dist.mjs`（插件） | 不是复制工作树；运行态/凭据/run 数据不随包 |
 
 **决定：M1 安装形态为主。** 安装与启动全部是 DSH 命令；本包只多一个 custom profile 名
 （`deep-research`）。自定义 profile 的建立只能用 CLI（DSH 没有 UI 建自定义 profile；CLI 对未知名
@@ -128,7 +128,10 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 ## 8. 移交
 
 - **源码移交**：`node scripts/dist/export-handoff.mjs` → `_dist/ai_dsh_deep_research-src-<version>-<head>.tar.gz`；
-  只含 tracked 源与 `.gitmodules`，对方 `tar xzf` → `git submodule update --init` → `pnpm install`。
+  只含 tracked 源与 `.gitmodules`，包内 HANDOFF.md 给两条接收路径：有 git 的 `git clone --recurse-submodules`，
+  只有 tar 的 `git init` → `git update-index --add --cacheinfo 160000,<submodule-sha>,vendor/dsh` →
+  `git submodule update --init --recursive`；这条不依赖 origin 上有该 HEAD（未 push 的移交也成立），
+  tar 里没有 `.git`，不要直接跑 `git submodule update --init`。
 - **插件移交**：`node scripts/dist/export-dist.mjs` → tarball + 安装手册 + 市场索引（含 sha256、
   升级/回滚、离线矩阵）。
 - **研究数据移交**：run bundle 单独拷贝/归档；移交前跑 `node scripts/run-gates/path-hygiene.mjs <bundle>`。
@@ -144,6 +147,7 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 - `release-smoke`：tarball → 干净 profile → 真启动。
 - `lifecycle-smoke`：staged market 索引（plugins 空）→ tarball → dump → 真启动 → `readPluginMeta` → remove 回落。
 - `data-smoke`：`$DSH_HOME` 只写 deep-research 设置文件；无 storage domain / 新 session event。
+- `scripts/smoke/handoff-smoke.mjs`：源码移交包边界 + HANDOFF 接收指令（CI keyless job）。
 - `content-shape`（L0）：手册/模板随包、包内无种子。
 - `snapshot-replay` B 层 + `l4-lite`（真模型）：手册以 runtime context 进请求、Lead 仍按手册工作。
 

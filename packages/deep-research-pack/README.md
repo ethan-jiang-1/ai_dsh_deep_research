@@ -57,7 +57,8 @@ dsh --profile deep-research --from-default-profile web --dump-default-config
 ```
 
 Do not run it on an existing profile: it replaces dependencies and the user patch. The next step
-installs the current local tarball into that profile (npm/Plugins are staged).
+installs the current local tarball into that profile (npm/Plugins are staged); the full
+install/upgrade/uninstall sequence is owned by the installation manual.
 
 **3. How to install (current).** 0.3.1 is delivered as a local tarball; the npm/Plugins page path is
 **staged** (no npm publication yet). Install the tarball into the profile:
@@ -66,7 +67,7 @@ installs the current local tarball into that profile (npm/Plugins are staged).
 dsh plugin --profile deep-research add file:/path/to/dsh-deep-research-pack-<version>.tgz
 ```
 
-The Plugins page entry becomes available after the package is published to npm. On Desktop that page
+An installed bundle appears under **Installed plugins** immediately; the Plugins page **market entry** (install/update from the page) becomes available after the package is published to npm. On Desktop that page
 manages the application-owned `desktop` profile; that is an interoperability form, not the
 `deep-research` custom profile. This package is developed and verified against the Web surface.
 

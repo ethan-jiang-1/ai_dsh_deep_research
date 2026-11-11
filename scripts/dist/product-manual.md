@@ -154,7 +154,7 @@ DSH 会打印带 token 的 URL；浏览器打开即进首屏。token URL 是本�
 
 界面可见的变化（先看这几处）：
 
-- Plugins 页出现「深度研究 / Deep Research」（中英文随界面语言，带图标）。
+- **Installed plugins** 出现「深度研究 / Deep Research」（中英文随界面语言，带图标）；市场入口（Plugins → Add plugin）在 npm 发布后才出现。
 - 打开一个会话后：右栏有「研究状态 / 研究配置 / 研究图谱」，主界面有「方法库」；「终稿」在交付后自动出现。
 
 机器核对（可选）：

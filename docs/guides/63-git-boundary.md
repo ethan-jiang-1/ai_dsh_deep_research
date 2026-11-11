@@ -67,7 +67,7 @@
   改源后跑生成器与新鲜度门禁。
 - **干净 clone 是底线**：`git worktree`/fresh clone + `pnpm install --frozen-lockfile` +
   `source dev/env.sh && pnpm verify && pnpm test` 必须绿。只在作者机器上绿不算绿。
-- **移交不是复制工作树**：源码移交 = `node scripts/dist/export-handoff.mjs`（只含 tracked 源，不含运行态/凭据/run 数据/依赖）；插件移交 = `export-dist.mjs` 的 tarball；run bundle 单独按研究数据移交。`dev/` 只住源码驱动，门禁 `dev-runtime-clean` 直接看盘。
+- **移交不是复制工作树**：源码移交 = `node scripts/dist/export-handoff.mjs`（只含 tracked 源，不含运行态/凭据/run 数据/依赖；包内 HANDOFF.md 给接收命令，tar 路径用 cacheinfo 写 gitlink，未 push 也成立）；插件移交 = `export-dist.mjs` 的 tarball；run bundle 单独按研究数据移交。`dev/` 只住源码驱动，门禁 `dev-runtime-clean` 直接看盘。
 
 ## 新文件怎么判
 
