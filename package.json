@@ -20,13 +20,13 @@
   },
   "scripts": {
     "verify": "node scripts/verify/verify.mjs",
-    "test": "TSX_TSCONFIG_PATH=\"$PWD/packages/deep-research-pack/tsconfig.client.json\" node --import tsx/esm --test --test-reporter=spec 'tests/**/*.test.mjs'",
-    "test:vendor": "TSX_TSCONFIG_PATH=\"$PWD/tsconfig.json\" node --import tsx/esm --test --test-reporter=spec 'tests/vendor/*.vendor.mjs'",
+    "test": "TSX_TSCONFIG_PATH=\"$(pwd -P)/packages/deep-research-pack/tsconfig.client.json\" node --import tsx/esm --test --test-reporter=spec 'tests/**/*.test.mjs'",
+    "test:vendor": "TSX_TSCONFIG_PATH=\"$(pwd -P)/tsconfig.json\" node --import tsx/esm --test --test-reporter=spec 'tests/vendor/*.vendor.mjs'",
     "build": "pnpm --filter dsh-deep-research-pack build",
     "typecheck": "tsc -b packages/deep-research-pack --pretty false",
     "release:check": "node scripts/dist/release-check.mjs",
     "dsh": "node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts",
-    "test:coverage": "TSX_TSCONFIG_PATH=\"$PWD/packages/deep-research-pack/tsconfig.client.json\" node --import tsx/esm --test --experimental-test-coverage 'tests/**/*.test.mjs'"
+    "test:coverage": "TSX_TSCONFIG_PATH=\"$(pwd -P)/packages/deep-research-pack/tsconfig.client.json\" node --import tsx/esm --test --experimental-test-coverage 'tests/**/*.test.mjs'"
   },
   "devDependencies": {
     "@deepseek-ai/dsh-agent-instructions": "workspace:*",
