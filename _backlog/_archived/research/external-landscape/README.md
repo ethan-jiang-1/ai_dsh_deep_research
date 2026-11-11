@@ -1,15 +1,16 @@
 ---
-status: 调研中
+status: 已定性
 opened: 2026-11-10
 ---
 
 # 外部 landscape：别人已经走到哪
 
-> 状态：调研中
+> 状态：已定性
 > 问题：2025–2026 外部多智能体深度研究系统各自把什么做成了机制；哪些做法已是 table stakes，哪些仍是差异化；我们哪些老思路该停、哪些还站得住。
-> 消费者：本轮 presets 设计推演（用户 2026-11-10 直派）；产出卡待立。
-> 产出的卡：—
-> 结论：—
+> 消费者：本轮 presets 设计推演（用户 2026-11-10 直派）；结论并入 [策略投影 + HITL1 typed 输入（O1）](../../settled_issues/2026-11-11-strategy-projection.md)。
+> 产出的卡：[策略投影 + HITL1 typed 输入（O1）](../../settled_issues/2026-11-11-strategy-projection.md)
+> 结论：三层同构（出厂预设 / 用户保存配置 / per-run 选择 + 计划门）；typed step/brief/证据工件是耐久层；lens 按覆盖计；同模 critic 不可当独立验证；style 是命名 Protocol + 验收合同，不是新轴。详见「本方向上下文」。
+> 归档：2026-11-11
 
 ## 研究问题
 
@@ -60,7 +61,7 @@ opened: 2026-11-10
   claim-level 证据 + 对偏好层的增量建议；不写泛行业综述。第三、四遍都已按此完成（仍未覆盖项见上，故题仍
   `调研中`）。
 - **共享底座**：见 [../README.md](../README.md) 的「共享上下文（所有方向必读）」节。
-- **后续**：偏好层数据模型 = [preference-layer](../../_archived/research/preference-layer/README.md)（第三遍的设计推演，不是外部证据）；
+- **后续**：偏好层数据模型 = [preference-layer](../preference-layer/README.md)（第三遍的设计推演，不是外部证据）；
   style 空间 = 第四遍，给偏好层的增量是 `style_ref` + `gate_profile`（待拍板）。
 
 ## 材料

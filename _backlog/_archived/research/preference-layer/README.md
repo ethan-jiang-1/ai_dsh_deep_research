@@ -40,7 +40,7 @@ opened: 2026-11-10
   `question.md` 三节；Library 继续四字段；Catalog 先为闭集，不建目录。
 - **第四遍补（style）**：style 不是新轴，是**命名 Protocol + 验收合同**（promise / means / acceptance /
   not_for）；增量 = style catalog + `style_ref` + `gates.profile`。**本卡不做，v2 独立卡**；证据与六个原型 =
-  [external-landscape 第四遍](../../../research/external-landscape/2026-11-10-landscape-style-space.md)。
+  [external-landscape 第四遍](../external-landscape/2026-11-10-landscape-style-space.md)。
 - **落点（how 材料 + 核验修正）**：v1 = `protocol.json` canonical + `question.md` 5 行投影 + 纯判据 gate +
   `run-accept` 第四道；不新增 host 工具、不改 session schema；旧 bundle 按 epoch 豁免。HITL1 卡是 5 维度压缩
   （问题 / 方法+来源 / 投入+输出 / 决定 / 授权；见表达层补篇），不是 5 行整张卡（5 行本身 138 字，加问题/业务简报/指针会破 200）。
@@ -60,8 +60,8 @@ opened: 2026-11-10
   （盘上实测、17 条事实核验、结构选择结论 11 项 + 3 条边界、v1 合同、三个倾向纸面跑、未决 3 项）；
   [表达层补篇](2026-11-11-preference-protocol-expression.md)（7 个表达面的实测、5 个缺口、v1 表达合同 = 5 投影 +
   4 规则、两条数据层澄清；**v1 合同修订提案**，未改 pack/门禁）。
-- **上游**：[external-landscape 第三遍](../../../research/external-landscape/2026-11-10-landscape-preference-layer.md)（外部维度验证；
-  不进 schema）；[第四遍·style 空间](../../../research/external-landscape/2026-11-10-landscape-style-space.md)（style = 命名 Protocol +
+- **上游**：[external-landscape 第三遍](../external-landscape/2026-11-10-landscape-preference-layer.md)（外部维度验证；
+  不进 schema）；[第四遍·style 空间](../external-landscape/2026-11-10-landscape-style-space.md)（style = 命名 Protocol +
   验收合同；`style_ref` + `gate_profile` 建议）。
 - **完成判据**：已满足——原始六项 + 新增五项 + 三条边界有结论（核验 §5）、数据字典与 v1 不变量稳定（§6）、三个倾向在
   v1 字段上纸面跑通（§7）、v1 落点与试点判据可执行（§6/§9）；表达层五个投影与四条规则有落点与 issue delta

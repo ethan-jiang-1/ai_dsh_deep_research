@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { foldLibrary, instructionOf, editInstruction, createInstruction, saveInstruction, renderLibraryEntry, summaryOfEntry, SUMMARY_MAX_LENGTH, SECTION_LABELS, libraryReadStateOf } from '../../packages/deep-research-pack/src/lib/library-fold.ts';
+import { foldLibrary, instructionOf, editInstruction, createInstruction, saveInstruction, renderLibraryEntry, flattenSectionValue, summaryOfEntry, SUMMARY_MAX_LENGTH, SECTION_LABELS, libraryReadStateOf } from '../../packages/deep-research-pack/src/lib/library-fold.ts';
 import { SELFTEST_LIBRARY } from '../../scripts/lib/selftest-library.mjs';
 import { locateSessionStrategy, SHOW_MORE_SESSIONS_PATTERN } from '../../scripts/lib/web-ui-nav.mjs';
 import { METHOD_PRESETS_SKILL_PATH, methodPresetsFromSkillFile, patternMethodMappingFromSkill, baselineDisciplinesFromSkill } from '../../scripts/lib/method-presets.mjs';
@@ -383,4 +383,22 @@ test('renderLibraryEntry：四字段/来源/默认标注可 round-trip 回 foldL
   assert.equal(folded.provenance, '2026-10-21，用户');
   assert.equal(folded.isDefault, true);
   assert.deepEqual(folded.sections, entry.sections);
+});
+
+test('renderLibraryEntry：多行字段压成一行，内容不丢（库格式一行一字段）', () => {
+  assert.equal(flattenSectionValue('官方页\n第二行'), '官方页 第二行');
+  assert.equal(flattenSectionValue('a\r\n\r\nb'), 'a b');
+  const entry = {
+    name: '多行测试',
+    provenance: null,
+    isDefault: false,
+    sections: { source: '官方页\n第二行', verify: 'a\r\nb', report: 'c', limit: 'd' },
+  };
+  const rendered = renderLibraryEntry(entry);
+  assert.equal(rendered.split('\n').filter((line) => line.startsWith('- 找来源: ')).length, 1);
+  const [folded] = foldLibrary(rendered);
+  assert.equal(folded.sections.source, '官方页 第二行');
+  assert.equal(folded.sections.verify, 'a b');
+  assert.equal(folded.sections.report, 'c');
+  assert.equal(folded.sections.limit, 'd');
 });

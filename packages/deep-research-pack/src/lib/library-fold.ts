@@ -137,6 +137,11 @@ export function saveInstruction(name: string, sections: LibrarySections, current
   return `${action}研究偏好「${name}」${target}——${payload}`
 }
 
+/** 库格式一行一字段；多行输入压成单行，内容不丢（换行当空格）。 */
+export function flattenSectionValue(value: string): string {
+  return value.replace(/\r\n?/g, '\n').replace(/\s*\n\s*/g, ' ').replace(/[ \t]{2,}/g, ' ').trim()
+}
+
 /** 一条库条目的 Markdown 预览（编辑器/round-trip；不是写盘路径）。 */
 export function renderLibraryEntry(entry: Pick<LibraryEntry, 'name' | 'sections'> & {
   readonly provenance?: string | null
@@ -147,7 +152,7 @@ export function renderLibraryEntry(entry: Pick<LibraryEntry, 'name' | 'sections'
   const lines = [`## ${entry.name}${provenance}${defaultMark}`]
   for (const { key, label } of SECTION_LABELS) {
     const value = entry.sections[key]
-    if (value !== null && value.trim() !== '') lines.push(`- ${label}: ${value.trim()}`)
+    if (value !== null && value.trim() !== '') lines.push(`- ${label}: ${flattenSectionValue(value)}`)
   }
   return lines.join('\n')
 }

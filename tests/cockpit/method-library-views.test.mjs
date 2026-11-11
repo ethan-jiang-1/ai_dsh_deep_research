@@ -7,7 +7,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { BuiltinView, ReadMineView } from '../../packages/deep-research-pack/src/client/method-library/views.tsx'
+import { BuiltinView, EditorView, ReadMineView } from '../../packages/deep-research-pack/src/client/method-library/views.tsx'
 import { SECTION_LABELS } from '../../packages/deep-research-pack/src/lib/library-fold.ts'
 
 const entry = {
@@ -27,6 +27,28 @@ test('ReadMineView：条目名/四字段标签与值/操作按钮接线', () => 
   assert.ok(html.includes('continueInterview'), '编辑按钮文案应走 t()')
   assert.ok(html.includes('setDefault'))
   assert.ok(html.includes('删除…'))
+})
+
+test('EditorView：编辑态名称只读，改名走新建', () => {
+  const html = renderToStaticMarkup(createElement(EditorView, {
+    mode: 'edit',
+    sending: false,
+    t: (key) => key,
+    draft: {
+      name: '事实核查',
+      currentName: '事实核查',
+      provenance: null,
+      legacyText: null,
+      sections: { source: '官方优先', verify: '两源交叉', report: '六段结论先行', limit: '中文' },
+    },
+    onNameChange() {},
+    onSectionChange() {},
+    onSave() {},
+    onCancel() {},
+  }))
+  const nameInput = (html.match(/<input[^>]*>/g) ?? [])[0] ?? ''
+  assert.match(nameInput, /\sreadonly(?:="")?/, '编辑态名称 input 必须只读，避免“改名变另存”')
+  assert.match(html, /编辑态名称固定/)
 })
 
 test('BuiltinView：只读内置条目的名字/摘要/使用按钮', () => {

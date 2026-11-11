@@ -6,7 +6,7 @@ intent: 在数据模型与 how 材料之上做一次盘上核验：逐条核对�
 # 偏好层 v1 核验与收口（2026-11-11）
 
 > 性质：核验与收口；结论供 issue 落地，不是已落地合同。
-> 上游：[数据模型](2026-11-10-preference-protocol-data-model.md) · [怎么落](2026-11-10-preference-protocol-how.md) · [external-landscape 第三遍](../../../research/external-landscape/2026-11-10-landscape-preference-layer.md) · [第四遍·style](../../../research/external-landscape/2026-11-10-landscape-style-space.md)。
+> 上游：[数据模型](2026-11-10-preference-protocol-data-model.md) · [怎么落](2026-11-10-preference-protocol-how.md) · [external-landscape 第三遍](../external-landscape/2026-11-10-landscape-preference-layer.md) · [第四遍·style](../external-landscape/2026-11-10-landscape-style-space.md)。
 > **结论先行**：两份材料的设计方向成立，但 v1 的边界要收——**Protocol 只拥有 method / source_scope / effort / output / gates / deviations 六个 typed 面；lens 留在 `topics.md`（D43 的家），plan 不加 cell 列，method-library 不动 schema，Brief 不独立成对象，style 留 v2。** effort 数字按盘上实测收成 6 / 12 / 12 节点带；5 行投影进 `question.md`，HITL1 卡仍用 3 维度压缩守住 200 字。
 
 ## 0. 一句话
@@ -380,7 +380,7 @@ protocol:
 ## 11. 来源 / 锚点
 
 - 设计与 how：[数据模型](2026-11-10-preference-protocol-data-model.md) / [怎么落](2026-11-10-preference-protocol-how.md)。
-- 外部维度：[第三遍·偏好层](../../../research/external-landscape/2026-11-10-landscape-preference-layer.md) §3–§5、§8.2；[第四遍·style](../../../research/external-landscape/2026-11-10-landscape-style-space.md) §8.7–§8.8。
+- 外部维度：[第三遍·偏好层](../external-landscape/2026-11-10-landscape-preference-layer.md) §3–§5、§8.2；[第四遍·style](../external-landscape/2026-11-10-landscape-style-space.md) §8.7–§8.8。
 - 盘上事实：
   - `packages/deep-research-pack/content/manual.md`（12,038 字符；§研究视角、§交互纪律、§事实的 owner）；
   - `packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md:50-57,84-85,116-117`（HITL1 卡、200 字、lens 落格）；

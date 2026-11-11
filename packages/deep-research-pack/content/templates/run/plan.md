@@ -6,6 +6,7 @@
 > 全文 = question.md / topics.md / plan.md。
 > `protocol: v<N>` = 本计划对应的研究设计版本（canonical = protocol.json；与 JSON 的 version 一致）。
 > protocol: v<N>
+> - 策略: 通道=<team|spawn|workflow>；worker=<research-worker|research-wave|角色>；门=<hitl1/critic/claim>；预算=<nodes_max>/<cells_max>/<depths>（上限，照 protocol.json 抄，不写实际节点数）
 >
 > **编号纪律：`W<wave>.<index>`。** `W2` 是 Wave 2（按 deps 算出的拓扑层，分组标题，不是任务）；
 > `W2.1/W2.2` 是 Wave 2 内的节点；`W2.1.1` 是节点内部拆解，不是新 Wave。单节点 Wave 也写

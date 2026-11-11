@@ -2,7 +2,7 @@
 
 > 状态：implemented
 >
-> 关联：[issue 卡](../../_backlog/_archived/settled_issues/2026-11-11-preference-protocol-layer.md) · [D46](../../docs/decisions.md#d46) · [核验材料](../../_backlog/_archived/research/preference-layer/2026-11-11-preference-protocol-verification.md) · [表达层补篇](../../_backlog/_archived/research/preference-layer/2026-11-11-preference-protocol-expression.md)
+> 关联：[issue 卡](../../_backlog/_archived/settled_issues/2026-11-11-preference-protocol-layer.md) · [D46](../../docs/decisions.md#d46) · [核验材料](../../_backlog/_archived/research/preference-layer/2026-11-11-preference-protocol-verification.md) · [表达层补篇](../../_backlog/_archived/research/preference-layer/2026-11-11-preference-protocol-expression.md) · [Strategy 投影（D48，扩展 protocol-audit）](2026-11-11-strategy-projection.md)
 
 ## 决定
 

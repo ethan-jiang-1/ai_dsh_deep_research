@@ -315,11 +315,15 @@ export function EditorView(props: {
           <span style={{ fontSize: 11, opacity: 0.6 }}>名称</span>
           {marker('name')}
         </div>
-        <div style={{ fontSize: 11, opacity: 0.45, marginBottom: 4 }}>用你的口径起名；新建时别和已有条目撞名</div>
+        <div style={{ fontSize: 11, opacity: 0.45, marginBottom: 4 }}>
+          {mode === 'edit' ? '编辑态名称固定；要改名请新建一条（另存）' : '用你的口径起名；新建时别和已有条目撞名'}
+        </div>
         <input
           style={{ ...INPUT_STYLE, ...fieldStyle('name') }}
           value={draft.name}
           placeholder="例如：投研尽调（我的口径）"
+          readOnly={mode === 'edit'}
+          aria-readonly={mode === 'edit'}
           onChange={(event) => { onNameChange(event.target.value) }}
         />
       </label>

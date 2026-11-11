@@ -149,7 +149,7 @@ final 引用链，结果落 bundle 的 audit.md。它不校验日期校准或摘
     | ① 报告存在且含来源清单 | 机器 | `node scripts/run-gates/node-gate.mjs <bundle>`（门A）+ `final/vN` 在场 | exit 0 |
     | ② 结论能回溯到来源文件 | 机器 | `node scripts/run-gates/evidence-audit.mjs <bundle>` → `audit.md` | exit 0 且 `CRITICAL=0` |
     | ⑤ claim 级裁决覆盖（新契约 run） | 机器 | `node scripts/run-gates/verdict-audit.mjs <bundle>` → `review/verdict-audit-r<N>.md` | exit 0（critical 全有结论性裁决；旧 bundle/quick_factual/契约日前不适用） |
-    | ⑥ Protocol 工件与审计（新契约 run） | 机器 | `node scripts/run-gates/protocol-audit.mjs <bundle>` → `protocol-audit.md` | exit 0（schema/effort/output/投影/版本/批准链自洽；旧 bundle/契约日前不适用） |
+    | ⑥ Protocol 工件与审计（新契约 run） | 机器 | `node scripts/run-gates/protocol-audit.mjs <bundle>` → `protocol-audit.md` | exit 0（schema/effort/output/投影/版本/批准链自洽；plan 的 `- 策略:` 行按 Strategy 投影对账通道/worker/预算上限，预算不可解析 = 红；旧 bundle/契约日前不适用） |
     | ③ 两点交互纪律（HITL 之间静默自主） | 人工走查 | 会话日志里 HITL1 与 HITL2 之间无 `ask_user_question`、无"要不要继续"式汇报 | 结论一行 + 日期写进 bundle 的 `acceptance.md`「人工走查」节 |
     | ④ 中断后从 run 工作区恢复 | 人工走查 | 停通道 → 重启 → 新会话说「继续 `<slug>`」，能接着跑且不依赖 chat memory | 同上 |
 

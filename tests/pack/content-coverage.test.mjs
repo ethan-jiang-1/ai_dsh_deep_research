@@ -27,6 +27,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { PACK, presetRoles, skillsOf } from './preset-helpers.mjs';
 import { TEMPLATES_DIR, templateFiles } from './template-files.mjs';
+import { OUTPUT_SHAPES } from '../../scripts/lib/protocol-core.mjs';
 
 const CONTENT = join(PACK, 'content');
 const LENSES = join(CONTENT, 'lenses');
@@ -66,7 +67,10 @@ test('研究类型词表不出现闭集外的近形（content + presets 全文�
   const text = [MANUAL, ...readdirSync(CONTENT, { recursive: true })
     .filter((name) => typeof name === 'string' && /\.(md|json)$/.test(name))
     .map((name) => readFileSync(join(CONTENT, name), 'utf8')), allPresetText()].join('\n');
-  const observed = new Set([...text.matchAll(/\b[a-z][a-z0-9]*_(?:factual|map|verification)\b/g)].map((match) => match[0]));
+  // output shape 里的 `*_map`（如 landscape_map，D46 枚举）不是研究类型；只排除已知 shape id。
+  const observed = new Set([...text.matchAll(/\b[a-z][a-z0-9]*_(?:factual|map|verification)\b/g)]
+    .map((match) => match[0])
+    .filter((token) => !OUTPUT_SHAPES.includes(token)));
   const unknown = [...observed].filter((token) => !RESEARCH_TYPES.includes(token));
   assert.deepEqual(unknown, [], `出现闭集外的研究类型词：${unknown.join(', ')}（类型枚举 = ${RESEARCH_TYPES.join(' / ')}）`);
 });

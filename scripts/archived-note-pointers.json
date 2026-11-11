@@ -917,7 +917,7 @@
       "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-07-runtime-scripts-layout 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
-      "source": "_backlog/research/external-landscape/2026-11-10-landscape-style-space.md",
+      "source": "_backlog/_archived/research/external-landscape/2026-11-10-landscape-style-space.md",
       "target": "notes/archived/2026-09-24-deep-research-harness-analysis.md",
       "reason": "2026-11-10 第四遍 style 空间引用旧 harness 的 research_profile / research_style_params 作为方法源头（历史指针）；当前映射以 docs/design/30-methodology-mapping.md 为准，归档件只用于说明「验收 profile」这层曾被丢掉"
     }

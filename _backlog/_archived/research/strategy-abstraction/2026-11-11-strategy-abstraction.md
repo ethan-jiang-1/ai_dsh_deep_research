@@ -6,7 +6,7 @@ intent: 在模型权重不可改、只有 preset 层（knowledge / orchestration
 # 策略抽象：固定权重下，UI → 数据 → 行动
 
 > 材料日期：2026-11-11。证据边界：3 个有 `protocol.json` 的 run bundle、pack 源码、四遍外部
-> landscape、[orchestration-alignment](../../_archived/research/orchestration-alignment/2026-11-11-orchestration-alignment.md)、
+> landscape、[orchestration-alignment](../orchestration-alignment/2026-11-11-orchestration-alignment.md)、
 > `protocol-audit` 红队实验。**没有新跑真模型 run，没有用户研究**；UI 结论是静态源码推断
 > （未起 GUI），标注「待 GUI 复核」的条目不能当已观测行为。
 
@@ -167,7 +167,7 @@ prose 的解释。workflow 形状、并发（`analyst.patch.yml:59-77` 固定 4/
 
 ### 2.3 行动层：DSH 原语，不是自由编排
 
-[orchestration-alignment](../../_archived/research/orchestration-alignment/2026-11-11-orchestration-alignment.md) 的
+[orchestration-alignment](../orchestration-alignment/2026-11-11-orchestration-alignment.md) 的
 六条不变量，对本研究最要紧的四条：
 
 1. **只有 in-process spawn 能钉独立 preset**；teammate 走 `composeFrom Lead`，workflow 分支继承
@@ -182,15 +182,38 @@ prose 的解释。workflow 形状、并发（`analyst.patch.yml:59-77` 固定 4/
 
 | 策略维度 | 住哪 | 机制 |
 |---|---|---|
-| 组队 | `team-assembly` 矩阵（quick=subagent；exploratory/claim=scout+analyst+critic） | 政策（Lead 按 skill 执行） |
-| 通道 | `team-assembly` §通道选择（team / subagent / workflow） | 政策；workflow 需卡上授权 |
+| 组队 | `team-assembly` 路由矩阵（一次性→`research-worker` / 角色；多轮→Team；wave→`research-wave`） | 政策（Lead 按 skill 执行） |
+| 通道 | `team-assembly` §通道选择（team / subagent / workflow）；workflow 只在 `research-wave` | 政策；workflow 需卡上授权 |
 | 拓扑 | `research-planning` W<wave>.<index>、deps、cells、depth、budget | 政策 + plan 门禁（节点数/深度/cells） |
 | 重写 | `research-planning` §6 回边/墓碑/快照 | 政策 + 模型判断 |
-| 槽 | `team-assembly` 8 槽公式（仅脚本层） | 政策；无全局 scheduler |
+| 槽 | `team-assembly` 8 槽公式（**全 run**，D47 合同） | 政策；无全局 scheduler |
 | 门 | persona + ask + critic + claim/verdict | 部分机器（claim/verdict），部分行为 |
 
 **结论**：行动层能兑现的策略，受原语能力矩阵约束；UI/Protocol 不能承诺矩阵外的策略
 （例如「critic 绝不能问用户」在 team 主通道只能靠政策，不能靠组合）。这是「可行性」的来源。
+
+### 2.4 2026-11-11 后续落地：D47 与两份合同
+
+本材料初稿基于 D47 之前的行动层。同一天又落了三条，直接改变本文的「可行性」判断：
+
+| 落地 | 内容 | 对本文的影响 | 仍残留 |
+|---|---|---|---|
+| [`team-subagent-contract`](../../../../notes/implemented/2026-11-11-team-subagent-contract.md) | Team 组合里 subagent = one-shot（child 不是 Team 成员，Team `send_message`/`interrupt_agent` 不能寻址它）；派发加角色边界四禁（ask/goal/present/spawn_teammate）；8 槽公式扩到全 run；docs 限定 root preset | G2 从「假承诺」变「合同明说」；8 槽从「仅脚本层」变「全 run」；G1 仍是政策，但派发合同显式 | vendor `subagent` 描述仍带 steer 句；显式指令仍可让 Lead 撞 namespace；G1 无机器边界 |
+| [`worker-profiles`（D47）](../../../../notes/implemented/2026-11-11-worker-profiles.md) | 新增 `research-worker`（薄叶子）/`research-wave`（wave executor）；Lead/Scout/Analyst 默认 `agentPreset: research-worker`；workflow 从 analyst 移到 wave；角色 skill 进 `customSkillDirs`；路由矩阵 | G3/G4/G5 部分落地：省略 preset 不再落 Lead 克隆；workflow 只在 wave；角色 skill 可用 `skill` 加载 | teammate 仍 composeFrom Lead（G1）；worker/wave 出现在用户选择器；`present` host 穿透；无真模型 workflow child header 证据 |
+| [`provenance-hash-contract`](../../../../notes/implemented/2026-11-11-provenance-hash-contract.md) | provenance sha256 owner = ops/Lead，不是 analyst；缺 hash = UNATTESTED；不新增工具 | 行动层的「知识/门」少一条越权路径；不是策略杠杆 | 无 run 内 hash 审计；若以后要 run 内 hash 需窄工具 |
+
+**读法**：
+
+- **D47 改变了默认 spawn 目标**：矩阵里的 spawn 现在默认 `research-worker`，不再是 Lead 克隆；
+  角色任务显式传 `agent_preset=scout/analyst/critic`；wave 用 `research-wave`。
+- **workflow 只在 `research-wave`**：普通 analyst 不再有 workflow；`research-planning` /
+  `team-assembly` 的 executor 改为 `research-wave`；workflow child 继承薄 executor。
+- **Team 主通道仍是 Lead 克隆**：G1 的机器边界仍需 Package C（spawn-first / teammate preset），
+  但 G2、角色边界四禁、8 槽已合同化；critic 的硬边界仍只能靠派发合同 + 人工验收。
+- **provenance hash 是 ops 合同，不是 strategy 字段**：它影响证据链的 UNATTESTED 语义，
+  不影响 K/O/G/B 的选择。
+- 因此 §6.3 的 A/B/C/D 需要按 D47 修订；§3 的三场是 **D47 之前**的 pilot，channel 结论仍成立，
+  但具体 preset 名要按 D47 读（quick 的 `subagent(analyst)` 今天默认会是 `research-worker`）。
 
 ## 3. 三个 run 的实证
 
@@ -208,6 +231,10 @@ deep-regulatory。
 | channel（plan  prose） | **不组队**：subagent(analyst) + 轻量 critic | team：scout-1 + analyst-a/b + critic-1 | team：scout + analyst + critic |
 | plan | 3 节点，2 Wave | 12 节点，6 Wave，9 cells | 12 节点，5 Wave，11 cells，**图 v2 加 3 个回边** |
 | 偏离 | 0 | output length 超 2–3×；source/language 各 0 条 | output length 超 2.3 万汉字 |
+
+> **时点**：三场都是 D47 之前的 pilot。今天 quick 的 `subagent(analyst)` 默认会落
+> `research-worker`，同质 wave 会用 `research-wave`；channel 结论（quick 不组队 vs deep 组队）
+> 不受影响，但具体 preset 名要按 D47 读。
 
 **读法**：
 
@@ -230,9 +257,10 @@ deep-regulatory。
 7. **Protocol 的语义面没有行动层消费者**：`source_scope.*` 只改 query 文本/验收措辞；
    `output.sections/audience/length` 只改报告骨架/头行（synthesis 不读 Protocol）；
    `gates` 的四个字段（hitl2/evidence_threshold/critic/claim_verification）除枚举外零引用；
-   `method.fields`/`adjustments` 只改派发话术；`deviations` 纯记账。**真正改 run 结构的只有
-   `effort.band/nodes_max/cells_max`**（节点数、cells 数）。这是「UI 偏好无法转换成策略」的
-   另一半原因：不是 UI 没给，而是给了也没有行动层消费者。
+   `method.fields`/`adjustments` 只改派发话术；`deviations` 纯记账。**Protocol 内真正改
+   run 结构的只有 `effort.band/nodes_max/cells_max`**（节点数、cells 数）；行动层的
+   worker/wave 路由是 D47 的另一层。这是「UI 偏好无法转换成策略」的另一半原因：不是 UI
+   没给，而是给了也没有行动层消费者。
 
 ## 4. 红队：`protocol-audit` 咬住什么
 
@@ -325,7 +353,7 @@ UI 只能通过 HITL1 答案、方法选择、自由文本影响它。**没有 t
 - channel mix（team/spawn/workflow）← `team-assembly` §通道选择；
 - 角色/preset 组合 ← `team-assembly` 矩阵 + `research-planning` §4；
 - workflow 授权 ← `plan.md ## Wave 执行` + 计划卡授权行；
-- activation 槽 ← `team-assembly` 8 槽公式（仅脚本层）；
+- activation 槽 ← `team-assembly` 8 槽公式（**全 run**，D47 合同）；
 - 重写政策 ← `research-planning` §6；
 - acceptance profile / style ← v2（style §8.3/§8.5）。
 
@@ -338,12 +366,17 @@ UI 只能通过 HITL1 答案、方法选择、自由文本影响它。**没有 t
 | 同质并行扇出 | 可（多 teammate） | 可（多 child） | **是**（脚本） | — | — |
 | 深度控制 | 绝对量 | 绝对量 | child=executor+1 | — | depth 列 |
 | 知识装载 | Lead 技能目录 | 角色 preset | 继承 executor | — | — |
-| 门/HITL | ask 在 Lead | 无 ask | 无 HITL | 跨轮 | — |
+| 门/HITL | ask 在 Lead（teammate 继承） | 无 ask | 无 HITL | 跨轮 | — |
 | 中途 steer | 两点 HITL | 无 | 无 | — | — |
 | 预算/容量 | 8 槽共享 | 8 槽共享 | 8 槽共享 | — | 节点/cells 上限 |
 | 重写 | Lead 判断 | — | 脚本不可改 | — | plan vN |
 
 （来源：orchestration-alignment §3/§4.2/§6/§7；`team-assembly` §通道选择；`research-planning` §4–6。）
+
+**D47 后的 spawn 形态**：上表是通道级能力；spawn 列现在分三形态——默认
+`research-worker`（薄叶子）、显式 `scout/analyst/critic`（角色 preset）、`research-wave`
+（唯一 workflow executor）。worker profile 是 spawn 的目标，不新增通道；team 仍不能给
+teammate 钉 preset。
 
 **四个硬约束（比策略清单更先）**：
 
@@ -367,15 +400,16 @@ UI 只能通过 HITL1 答案、方法选择、自由文本影响它。**没有 t
 
 **可行性清单（按通道分类）**：
 
-- **A. team 主通道不可兑现**：角色工具隔离、worker 必须带角色 preset、teammate 跑脚本层、对
-  subagent child 中途 steer/续驶、角色技能自动可见、per-role 深度/容量、任务板当验收门、
-  队友 present 当交付。
-- **B. 必须走 spawn**：要钉死 preset 的执行（claim 复核、wave executor、depth-2 worker）、
-  需要独立上下文的复核、要「默认就是薄 worker」的场景（必须显式传 `agent_preset`，否则继承父）。
-- **C. 需 Package B/C**：省略 preset 落薄 worker、workflow 只挂 executor、全 run Activation
-  预算、critic 硬边界、teammate 角色 preset。
+- **A. team 主通道不可兑现**：角色工具隔离、team 不能给 worker 钉角色 preset、teammate 跑
+  脚本层、对 subagent child 中途 steer/续驶、角色边界/角色技能不是 teammate 自己的组合
+  （技能可加载，边界仍是政策）、per-role 深度/容量、任务板当验收门、队友 present 当交付。
+- **B. 必须走 spawn**：要钉死角色 preset 的执行（claim 复核、role worker）、需要独立上下文的
+  复核。默认已是 `research-worker`，角色任务显式传 `agent_preset`（省略不再落 Lead 克隆）。
+- **C. 需 Package C（Package B 已由 D47 落地）**：critic 硬边界、teammate 角色 preset。
+  省略 preset 落薄 worker、workflow 只挂 executor 已不再是 C。
 - **D. 只能合同纠偏 + 事后审计**：workflow explicit-ask、派发五件/方法论/lens 装载、
-  readiness PASS、证据判据、8 槽预算、subagent one-shot、goal 完成判据。
+  readiness PASS、证据判据、goal 完成判据。**D47 已把 subagent one-shot、角色边界四禁、
+  8 槽全 run 落进合同**；这些从「待做」变「合同已写，仍是文本不是机械闸」。
 
 **编译器检查顺序**：1（能否在首回合前定）→ 2（通道能不能兑现）→ 3（记录写哪）→ 4（谁授权）
 → 再看具体策略维度。这个顺序解释了为什么「换一条」在 run 中只是提示：它既改不了 preset，
@@ -402,9 +436,9 @@ UI 只能通过 HITL1 答案、方法选择、自由文本影响它。**没有 t
 
 | 策略 | promise | Protocol 默认 | K | O | G | B |
 |---|---|---|---|---|---|---|
-| `quick_fact_check` | 可核价的单点数字/状态 | 事实核查；official/primary；quick；quick_answer | 方法四字段 + official lens | **不组队**：spawn analyst+critic，3 节点/2 Wave | hitl1 none；critic light；claim off | 3/2/L1–L2 |
-| `landscape_deep` | 谁在哪、关系、边界、截至何时 | 领域地图；academic+web；deep；landscape_map | academic/structural/practitioner/adversarial | team：scout+2 analyst+critic，12 节点/6 Wave | hitl1 protocol；critic both；claim on | 12/9/L1–L3 |
-| `regulatory_compare` | 法域 × 义务 × 条文/生效/罚则 | 方案比较；official+regulatory；deep；full_report | regulatory/official/historical/adversarial | team：scout+analyst+critic，12 节点/5 Wave + 回边 | hitl1 protocol；critic both；claim on | 12/11/L1–L3 |
+| `quick_fact_check` | 可核价的单点数字/状态 | 事实核查；official/primary；quick；quick_answer | 方法四字段 + official lens | **不组队**：spawn `research-worker`（取数）+ `critic`（复核），3 节点/2 Wave | hitl1 none；critic light；claim off | 3/2/L1–L2 |
+| `landscape_deep` | 谁在哪、关系、边界、截至何时 | 领域地图；academic+web；deep；landscape_map | academic/structural/practitioner/adversarial | team：scout + 2 analyst + critic；一次性取证可落 `research-worker`，12 节点/6 Wave | hitl1 protocol；critic both；claim on | 12/9/L1–L3 |
+| `regulatory_compare` | 法域 × 义务 × 条文/生效/罚则 | 方案比较；official+regulatory；deep；full_report | regulatory/official/historical/adversarial | team：scout + analyst + critic；一次性取证可落 `research-worker`，12 节点/5 Wave + 回边 | hitl1 protocol；critic both；claim on | 12/11/L1–L3 |
 
 **读法**：这三张卡不是新 schema，而是把「method + source + effort + output + gates」和
 「channel + roles + topology + budget」放在同一行。它们对应 style 空间里的
@@ -459,6 +493,7 @@ K/O/G/B 默认 + 一段 promise/not_for**；新增策略 = 新增卡，不是新
 | U6 | 面板显示的是 question.md 的投影，不是 protocol.json；投影可漂移（regulatory ≤18 vs 12，audit PASS） | `ResearchConfigTab.tsx:310-312`；`protocol-audit-core.mjs:85-100` | **改**：显示从 JSON 派生；gate 查数字，不只查档位标签 |
 | U7 | 库 adoption 无记账；0/63 可能是低估计 | landscape run 的 adjustments；`protocol.json` 无 adoption 字段 | **改**：Protocol 或 journal 加 `library_adopted`（先只读/记账，不改库 schema） |
 | U8 | 两个管理面（配置页签指令 vs 方法库 host tool）语义重叠、回执不同 | §2.1；D25/D37 | **改**：留一个入口；另一个做只读摘要 |
+| U9 | D47 的 `research-worker` / `research-wave` 会出现在用户 preset 选择器（DSH 无 hidden 标志）；UI 无过滤；产品命名已做 | `notes/implemented/2026-11-11-worker-profiles.md`；`packages/deep-research-pack/workers/` | **改**：产品决定——接受命名，或按 id 过滤；不要把 worker 混成研究角色 |
 
 ### 7.3 不建议加的（外部证据判「不做」）
 
@@ -471,15 +506,18 @@ K/O/G/B 默认 + 一段 promise/not_for**；新增策略 = 新增卡，不是新
 | 选项 | 内容 | 证据 | 代价 | 可逆 | 结论 |
 |---|---|---|---|---|---|
 | **O0 只测量** | 加 adoption/strategy 记账；不改 UI/schema | 0/63 采用；投影漂移 | 低 | 高 | 不够；只证问题 |
-| **O1 编译器显式化** | 派生 Strategy 投影（K/O/G/B）+ 3 个 typed 输入（source families / output shape / effort 代价）+ 方法库=命名策略目录 + 投影 gate | 外部「typed 只在决策点强制」；红队；UI 审计 | 中（skill/模板/gate） | 高 | **建议先做** |
+| **O1 编译器显式化** | 派生 Strategy 投影（K/O/G/B）+ 3 个 typed 输入（source families / output shape / effort 代价）+ 投影 gate + M0 修 U1/U3；方法库保持 prose | 外部「typed 只在决策点强制」；红队；UI 审计 | 中（skill/模板/gate） | 高 | **决策：先做（已立卡）** |
 | **O2 策略优先 UI** | 6 个命名 style 作为主输入；选承诺→source→effort→output；计划卡变策略审阅；库=style catalog | style §6/§8；外部「模板+acceptance」 | 中高（HITL1 合同、UI） | 中 | 试点后做 |
-| **O3 编排优先** | Package B worker preset / Package C spawn-first，让角色/工具边界变成机器边界 | orchestration G1/G3/G4 | 高（D2/主通道） | 低 | 只有「角色边界是硬要求」才做 |
+| **O3 编排优先（Package C）** | spawn-first / teammate preset，让 team 主通道的角色边界也变成机器边界；**Package B（worker/wave）已由 D47 落地** | orchestration G1；D47 | 高（D2/主通道） | 低 | 只有「G1 也是硬要求」才做 |
 
-**建议**：O1 先做，O2 在 3 场 pilot 后决定，O3 条件触发。最小可证动作不是改 UI，而是：
+**决策（2026-11-11）**：**O1 先做，已立卡——
+[策略投影 + HITL1 typed 输入（O1）](../../settled_issues/2026-11-11-strategy-projection.md)**；
+M0 先修 U1/U3，再做投影与 typed 输入；O2 等库采用证据；O3 只剩 G1 条件触发
+（worker/wave 已由 D47 落地）。最小可证动作不是改 UI，而是：
 
 1. 在 3 个现有 bundle 上生成**只读 Strategy 投影**（channel/roles/topology/gates/budget），
    对照 plan 和实际会话，看投影是否可读、是否与执行一致；
-2. 在 HITL1 加 2–3 个 typed 输入（source families / output shape / effort 代价一句），
+2. 在 HITL1 加 3 个 typed 输入（source families / output shape / effort 代价），
    看用户是否真的改、改了是否进 Protocol；
 3. 记录 library adoption（不论是否采用），看 0/63 是否真是 0。
 
@@ -495,8 +533,9 @@ Lead 的下一条回复，不能改当前组合（Lead preset 锁定、worker pr
 | P2 HITL1 typed 输入 | 下一场 run 加 source families / output shape / effort 代价 | 用户至少改 1 项；Protocol 与投影一致；不超 200 字卡 |
 | P3 库采用 | 2–4 周内是否出现「采用库条目」的 run | ≥1 场；否则 O2 的 catalog 不立项 |
 | P4 投影门 | 给 `protocol-audit` 加 source/output 数字检查，跑 3 个 bundle | 0 误伤 + 抓到 regulatory 的 ≤18 vs 12 |
-| P5 角色边界 | 读一次真 run 的 critic teammate 工具面 | 若出现不该有的 ask/goal，O3 优先级上升 |
+| P5 角色边界（G1） | 读一次真 run 的 critic teammate 工具面 | 若出现不该有的 ask/goal，O3 优先级上升 |
 | P6 组合锁 | 新会话首回合后尝试换 preset/工具面；观察 `agent-preset/locked` | 确认锁；把策略选择前移到新 run 入口 |
+| P7 D47 路由 | 读一次 D47 后的真 run：一次性任务是否落 `research-worker`、wave 是否只由 `research-wave` 调、普通 analyst 无 workflow | 路由矩阵 3/3；否则回 D47 |
 
 **决策点**：P3 仍 0 → 先修 U1–U3，不要做 O2；P2 用户不改 → 说明 source/output 不是用户
 想控的，O1 缩到只读投影；P5 出现越界 → O3 进入议程；P6 若锁不存在（DSH 放开）→ 「run 中
@@ -515,6 +554,10 @@ Lead 的下一条回复，不能改当前组合（Lead preset 锁定、worker pr
 8. **DSH 放开 preset 锁**（首回合后可换 preset/工具面）或给 `spawn_teammate` 加 preset：
    策略切换可以在 run 中发生，UI 的「换一条」才可能变成真策略切换；否则只能在**新 run
    首回合前**选。
+9. **D47 已落**：`research-worker` / `research-wave` 改变了行动层基线，O3 的 Package B
+   不再是待办；若 G1（team teammate 的角色边界）仍可接受「政策 + 人工验收」，O3 只剩
+   Package C，优先级下降。反过来，若 D47 的路由矩阵在真 run 里没被遵守，O3 的
+   spawn-first 反而更必要。
 
 ## 11. 未覆盖
 
@@ -525,6 +568,9 @@ Lead 的下一条回复，不能改当前组合（Lead preset 锁定、worker pr
 - 外部消费端帮助页仍被挡；2026 论文数字是 benchmark agent，不是产品 A/B。
 - 没有测 8192 skill 裁剪、8 槽实际峰值、workflow 授权越权。
 - 没有实测 `agent-preset/locked`（读 vendor 源码；P6 待跑）；没有测「首回合前换策略」的真实体验。
+- D47 的 worker/wave 路由没有真 run 证据（P7 待跑）；workflow child 的 `request/header` 未证；
+  `present` 的 host 穿透按「非 lead = 过程稿」接受，未做 host scoping。
+- `provenance-hash-contract` 未跑 quick_factual pilot；缺 hash = UNATTESTED 的实际行为待观察。
 
 ## 12. 来源与锚点
 
@@ -535,10 +581,15 @@ Lead 的下一条回复，不能改当前组合（Lead preset 锁定、worker pr
   `research-config/config-model.ts`；`src/client/MethodLibraryView.tsx`；`method-library/views.tsx`；
   `method-library/useOperationQueue.ts`；`src/lib/library-fold.ts`；`src/lib/method-library-tool` 同族。
 - 行动层：`presets/lead/skills/team-assembly/SKILL.md`；`presets/lead/skills/research-planning/SKILL.md`；
-  `presets/lead.patch.yml:25-35`；`docs/decisions.md` D43/D46。
+  `presets/lead.patch.yml:25-35`；`packages/deep-research-pack/workers/`；`docs/decisions.md` D43/D46/D47。
+- 后续落地：`notes/implemented/2026-11-11-team-subagent-contract.md`；
+  `notes/implemented/2026-11-11-worker-profiles.md`；
+  `notes/implemented/2026-11-11-provenance-hash-contract.md`；
+  归档卡：`_backlog/_archived/settled_issues/2026-11-11-team-subagent-contract.md`、
+  `2026-11-11-worker-profiles-and-routing.md`、`2026-11-11-provenance-hash-contract.md`。
 - run 实证：`research-workspace/drt_openai-api-pricing-context/`、`drt_llm-memory-landscape/`、
   `drt_ai-model-regulation-cn-eu-us/` 的 `protocol.json` / `question.md` / `plan.md`。
-- 并行：[orchestration-alignment](../../_archived/research/orchestration-alignment/2026-11-11-orchestration-alignment.md)
+- 并行：[orchestration-alignment](../orchestration-alignment/2026-11-11-orchestration-alignment.md)
   §3 六不变量、§4.2 通道表、§6 G1–G8、§7 方案包。
 
 **外部**
@@ -558,21 +609,29 @@ Lead 的下一条回复，不能改当前组合（Lead preset 锁定、worker pr
 2. **现有 UI 不是策略输入面。** shipped 配置页签只剩「换一条」，且只在 run 已记录后出现；
    首回合后 preset 锁定，换不了组合；方法库是 prose 作者工具，不是策略编辑器。
 3. **Protocol 的机器面只咬自洽性 + 三个计数**（节点/cells/waves）。source_scope、output
-   sections/length、四个 gates 字段语义零消费；唯一能改 run 结构的只有 effort 计数。
-4. **行动层的硬约束是 DSH 原语**：team 主通道的角色边界是政策，只有 spawn 能钉 preset；
-   workflow 无 preset；深度只计数、容量 8 槽共享；没有全局调度器。
+   sections/length、四个 gates 字段语义零消费；**Protocol 内**唯一能改 run 结构的只有
+   effort 计数；行动层的 worker/wave 路由是 D47 的另一层。
+4. **行动层的硬约束是 DSH 原语**：team 主通道的角色边界仍是政策；但 D47 已落 worker
+   profiles——默认 spawn=`research-worker`、wave=`research-wave`、workflow 只在 wave；
+   深度只计数、8 槽共享、没有全局调度器。
 5. **下一步不是加控件**，而是「派生 Strategy 投影 + 3 场试点 + 投影门」；O2 等库采用证据，
-   O3 等「角色边界是硬要求」。
+   O3 只剩 G1 的 Package C。
 
-## 14. 讨论问题（等用户拍板）
+## 14. 决策记录（2026-11-11，agent 判断）
 
-1. 接受「Protocol = 设计 / Strategy = 行动配置」的拆分吗？还是坚持只用一个数据层，把
-   channel/roles 也塞进 Protocol？
-2. 先修 UI 死路径/保真 bug（U1–U3），还是先做 Strategy 投影（O1）？两项都不大，但顺序会
-   影响试点能否读到真实策略。
-3. 方法库的定位：命名策略目录（含 K/O/G/B 默认）还是继续做方法 prose 库？前者是 O2 的入口，
-   后者是现状。
-4. 角色/工具边界是否成为硬产品要求？是 → O3（Package C / worker preset）进议程；否 → 保持
-   政策 + 事后审计，不在 UI 承诺机器边界。
-5. 是否接受「策略选择只在新 run 首回合前」这个 UX 约束？不接受 → 需要 DSH 上游改动
-   （放开 preset 锁 / teammate preset），不是本仓能单独解决的。
+用户 2026-11-11 授权「按最合适的做」；以下为按证据取的判断，已落卡
+[策略投影 + HITL1 typed 输入（O1）](../../settled_issues/2026-11-11-strategy-projection.md)。业务验收归用户，
+但不再把选项原样抛回。
+
+1. **Protocol = 设计 / Strategy = 行动配置：做。** 只用一个数据层会把 channel/roles 塞进
+   Protocol，和 D46 的「设计记录」语义打架；Strategy 先做派生投影，不新建 canonical 文件。
+2. **先修 U1/U3，再做 O1。** U1 让唯一的 method 切换在 run 前不可达；U3 让库长文本丢续行、
+   改名变另存。pilot 前不修，试点数据不可信。
+3. **方法库先保持 prose 方法库，不做策略目录。** 0/63 采用；先证明 source/output/effort
+   三个输入有人用，再把库变成命名策略目录（O2）。
+4. **G1 暂不做 Package C。** D47 已落 worker/wave；team 主通道的角色边界仍是政策，但证据是
+   「潜伏，不是已发生」。触发条件 = 真 run 出现 critic 调 ask/goal/present；届时再升级。
+5. **接受「策略选择只在新 run 首回合前」。** preset 在首回合后锁定；run 中「换一条」只能
+   影响 Lead 下一条回复，不能改组合。UI 应把选择放在新研究入口，不在 run 中承诺换策略。
+6. **worker/wave 在用户选择器里先接受命名，不加 id 过滤。** DSH 无 hidden 标志；产品命名
+   已做；是否过滤是后续产品决定，不阻塞本卡。

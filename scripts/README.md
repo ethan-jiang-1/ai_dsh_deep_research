@@ -65,7 +65,7 @@
 | evidence-audit.mjs | URL/摘录/final 链溯源对账；默认只读，`--write` 才落 audit.md——判据核心住 lib/evidence-audit-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless（须 source dev/env.sh） |
 | path-hygiene.mjs | run bundle 的 `final/`/`acceptance.md`/`delivered.json`/`provenance/` 本机 home 路径；默认红，`--allow-legacy` 旧场只报告 | keyless |
 | verdict-audit.mjs | **claim 级裁决审计**：`review/claims.json` + `review/verdicts-r<N>.json` 的覆盖（critical 全有结论性裁决）/ 值域 / raw 原文重解析 / 与 child 会话逐字一致 / child preset·depth·只读；默认只读，`--write` 才落 `review/verdict-audit-r<N>.md`；旧 bundle/quick_factual/契约日前 = 不适用（epoch），`--require` 强制审——判据核心住 lib/verdict-audit-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless（须 source dev/env.sh） |
-| protocol-audit.mjs | **Protocol（研究设计）审计**：schema/枚举/四字段/canonical hash/effort 合同/output 形状/`§Protocol` 投影/`§Decisions` 与 `plan.md` 版本/`approval_basis`/复合方法包含判据/`deviations` 形状；默认只读，`--write` 才落 `protocol-audit.md`（版本指纹行）；旧 bundle/契约日前 = 不适用（epoch），`--require` 强制审——判据核心住 lib/protocol-core.mjs（schema）+ lib/protocol-audit-core.mjs（bundle 审计；本件 = CLI 壳 + bundle 读取） | keyless |
+| protocol-audit.mjs | **Protocol（研究设计）审计**：schema/枚举/四字段/canonical hash/effort 合同/output 形状/`§Protocol` 投影/策略行投影（通道/worker/预算上限；预算不可解析 = 红）/`§Decisions` 与 `plan.md` 版本/`approval_basis`/复合方法包含判据/`deviations` 形状；默认只读，`--write` 才落 `protocol-audit.md`（版本指纹行）；旧 bundle/契约日前 = 不适用（epoch），`--require` 强制审——判据核心住 lib/protocol-core.mjs（schema）+ lib/protocol-audit-core.mjs（bundle 审计；本件 = CLI 壳 + bundle 读取） | keyless |
 | secret-scan.mjs | 交付物面（final/、receipts、audit、node-gate）的高置信凭据形态（sk-/ghp_/AKIA/AIza/xox[baprs]-/PRIVATE KEY/Bearer）；默认红，`--allow-legacy` 旧场只报告，`--all` 加证据/过程件；输出只到 path/line/kind | keyless |
 
 ## run-ops/（run 观察与运维）
@@ -101,7 +101,7 @@
 | 模块 | 被谁消费 | 说明 |
 |---|---|---|
 | lib/content-budget.mjs | e-workspace、content-disclosure.test | T0 常驻面两级预算（下放触发 10,000 / 硬顶 12,288）唯一正本 |
-| lib/roles.mjs | discipline-probe、doctor-smoke、fetch-fallback-orchestration.test、l4-lite-smoke、preset-smoke、presets.test、release-smoke、replay-scene.test、snapshot-replay-smoke、team-preflight-smoke | 角色清单访问器（presetRoles = 盘上全部；researchRoles = 研究面；事实源 = 盘上 presets/） |
+| lib/roles.mjs | discipline-probe、doctor-smoke、fetch-fallback-orchestration.test、l4-lite-smoke、preset-smoke、presets.test、release-smoke、replay-scene.test、snapshot-replay-smoke、strategy-core.test、team-preflight-smoke | 角色清单访问器（presetRoles = 盘上全部；researchRoles = 研究面；事实源 = 盘上 presets/） |
 | lib/cli-entry.mjs | export-handoff、gates-smoke、market、run-dashboard、protocol-audit、schema-scan、verdict-audit、node-gate、evidence-audit、channel-cache、run-driver、vendor-artifacts、cli-entry.test | symlink-safe CLI 入口判定（realpath 归一；macOS `/tmp` → `/private/tmp` 下不静默） |
 | lib/channel-cache.mjs | run-driver、channel-cache.test | 启动加速缓存判据：pack 源指纹（路径+size+mtime）+ 发布清单缓存（漂移门 ≈5s→≈0.7s，CLI 供 boot-run.sh 消费）+ 探针 GREEN 缓存（热复用 ≈0.5s / 冷启动命中 ≈10s；键 = pack 指纹 + runtime 构建 + 断言参数，TTL 30 分钟；命中前 HTTP 就绪检查；只存 GREEN，`--force-probe` 绕过） |
 | lib/bundle-sessions.mjs | bundle-sessions、bundle-sessions.test | run bundle → 见证会话反查：聚合 scanWitnessLogs 的 boundSessions/presented（绑定谓词不另立——与 node-gate 门①②同源）；交付回执的 witness.sessions 亦由此面派生 |
@@ -114,8 +114,9 @@
 | lib/llm-stream-tee-core.mjs | llm-stream-tee-core.test | LLM 流 tee 的捕获判定（主机子串，fail-closed）与凭据头脱敏（预载壳 = probes/stream/llm-stream-tee.cjs——CJS require 面不在 .mjs 对账图内，壳本体是活进程仪器不设 keyless 自测） |
 | lib/provider-errors.mjs | provider-error-stats、provider-errors.test | 回合被上游流错误终结的结构化抽取（唯一语义源：只认 `turn/end` + `reason.kind=error`，不双算 `assistant/attempt`） |
 | lib/plan-card.mjs | node-gate-session-gates、plan-card-stats、plan-card.test | 计划确认卡识别与字数口径（唯一语义源：标签「按计划开跑」+ `question` 字段全长 + 阈值 200） |
-| lib/protocol-core.mjs | protocol-audit、protocol-audit-core、protocol-core.test | Protocol **schema 半**：枚举/canonical/hash/validateProtocol/§研究方法 与 §Decisions 解析（无 IO；口径 = 核验 §6 + 表达层补篇 §4–§7） |
-| lib/protocol-audit-core.mjs | protocol-audit、protocol-core.test、run-accept-smoke | Protocol **bundle 级判据**：effort 合同/投影/批准链/plan 引用/audit hash/版本快照 + `projectionOf`/卡文（无 IO） |
+| lib/protocol-core.mjs | content-coverage.test、protocol-audit、protocol-audit-core、protocol-core.test、strategy-core | Protocol **schema 半**：枚举/canonical/hash/validateProtocol/§研究方法 与 §Decisions 解析（无 IO；口径 = 核验 §6 + 表达层补篇 §4–§7） |
+| lib/protocol-audit-core.mjs | protocol-audit、protocol-core.test、run-accept-smoke | Protocol **bundle 级判据**：effort 合同/投影/策略行投影（通道/worker/预算 cap；fail-loud）/批准链/plan 引用/audit hash/版本快照 + `projectionOf`/卡文（无 IO） |
+| lib/strategy-core.mjs | protocol-audit-core、strategy-core.test | Strategy 投影（K/O/G/B）纯派生：Protocol + plan + topics → 通道/worker/角色/拓扑/门/预算；不读模型/会话 |
 | lib/stream-diagnostics-core.mjs | stream-diagnostics、stream-diagnostics.test | 模型活动会话筛选（活动事件预筛后再按日志 mtime 取最近 N）+ 尝试时间线投影（assistant/message 计成功、assistant/attempt 计失败/无落面，终态三判 alive-or-idle/recovered/dead） |
 | lib/run-state.mjs | bundle-sessions、cdp-ask-smoke、hitl-answer、run-kickoff、run-state.test、session-events、session-replay、watch-run | run 操作面状态谓词 |
 | lib/run-source-node.mjs | evidence-audit、node-gate、run-context-node.test、schema-scan | node:fs 的 RunSource 适配器：list/read/version；ENOENT → missing，其余 → unreadable；行窗口与 eof 语义对齐 vendor workspaceFiles |

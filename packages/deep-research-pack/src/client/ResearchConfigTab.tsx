@@ -261,6 +261,22 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
     />
   ) : null
 
+  const methodPicker = (label: string) => (
+    <Menu
+      open={switchOpen}
+      anchor={<Button variant="ghost" size="sm" onClick={() => setSwitchOpen(!switchOpen)}>{label}</Button>}
+      onClose={() => setSwitchOpen(false)}
+      align="start"
+    >
+      {BUILTIN_PREFERENCES.map((b) => (
+        <MenuItemButton key={b.name} onSelect={() => { setSwitchOpen(false); void send(instructionOf('use-now', b.name), { target: b.name, expectsChange: false }) }}>{b.name}</MenuItemButton>
+      ))}
+      {(entries ?? []).map((e) => (
+        <MenuItemButton key={`l-${e.name}`} onSelect={() => { setSwitchOpen(false); void send(instructionOf('use-now', e.name), { target: e.name, expectsChange: false }) }}>{e.name}</MenuItemButton>
+      ))}
+    </Menu>
+  )
+
   return (
     <div style={{ padding: 12, flex: 1, minHeight: 0, overflowY: 'auto', fontSize: 13, lineHeight: 1.7 }}>
       <div style={{ fontWeight: 700, marginBottom: 2 }}>研究偏好</div>
@@ -278,24 +294,13 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
             <span>本次研究：{adoption.adopted}</span>
             {adoption.origin !== null && <span style={{ opacity: 0.7 }}>（来源：{adoption.origin}）</span>}
             <span style={{ opacity: 0.4 }}>·</span>
-            <Menu
-              open={switchOpen}
-              anchor={<Button variant="ghost" size="sm" onClick={() => setSwitchOpen(!switchOpen)}>换一条</Button>}
-              onClose={() => setSwitchOpen(false)}
-              align="start"
-            >
-              {BUILTIN_PREFERENCES.map((b) => (
-                <MenuItemButton key={b.name} onSelect={() => { setSwitchOpen(false); void send(instructionOf('use-now', b.name), { target: b.name, expectsChange: false }) }}>{b.name}</MenuItemButton>
-              ))}
-              {(entries ?? []).map((e) => (
-                <MenuItemButton key={`l-${e.name}`} onSelect={() => { setSwitchOpen(false); void send(instructionOf('use-now', e.name), { target: e.name, expectsChange: false }) }}>{e.name}</MenuItemButton>
-              ))}
-            </Menu>
+            {methodPicker('换一条')}
           </div>
         )}
         {adoption.kind === 'no-run' && (
-          <div style={{ marginTop: 2, opacity: 0.75 }}>
-            本会话暂无研究——选一条打法交给 Lead，或直接在对话里提问。交法：点任意一条的 ⋯ →「用于本次研究」。
+          <div style={{ marginTop: 2, opacity: 0.75, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+            本会话暂无研究——选一条打法交给 Lead，或直接在对话里提问。
+            {methodPicker('选方法（发给 Lead）')}
           </div>
         )}
         {adoption.kind === 'missing' && (

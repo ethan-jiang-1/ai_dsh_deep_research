@@ -67,8 +67,8 @@ prompt / skill / preset / catalog / gate / artifact，让现成模型在同一�
 
 本仓方法论源头（codex harness）在 `rb_profile.yaml` 里同时有 `research_profile` 和
 `research_style_params`：各波 floor、`topic_unique_ratio`、反例搜索、交叉验证、quality tier，阈值由
-gate 引用 profile，不硬编码（[考古报告](../../../notes/archived/2026-09-24-deep-research-harness-analysis.md)
-§3/§5/§7）。本仓重建时**弃用了数值 floor**，把深度参数放回 skill 纪律（[30-methodology-mapping](../../../docs/design/30-methodology-mapping.md)
+gate 引用 profile，不硬编码（[考古报告](../../../../notes/archived/2026-09-24-deep-research-harness-analysis.md)
+§3/§5/§7）。本仓重建时**弃用了数值 floor**，把深度参数放回 skill 纪律（[30-methodology-mapping](../../../../docs/design/30-methodology-mapping.md)
 的 wave1 行）。这个取舍是对的：floor 容易变成形式主义。
 
 但旧 harness 有**好的一半**：它把「这类研究的验收阈值」写成 profile 数据，而不是散文。我们丢掉了 floor，
@@ -648,8 +648,8 @@ preference-layer §11 有六个结构选择；本遍建议加一个候选（不�
 - Perplexity effort/profile/skills：第三遍 §2.1
 - STORM perspective 消融：第二遍 §2
 - GPT-Researcher / DeerFlow / LangGraph 参数与强制：第三遍 §2.5
-- 本仓偏好层：[preference-layer](../../_archived/research/preference-layer/README.md) 与
-  [数据模型](../../_archived/research/preference-layer/2026-11-10-preference-protocol-data-model.md)
+- 本仓偏好层：[preference-layer](../preference-layer/README.md) 与
+  [数据模型](../preference-layer/2026-11-10-preference-protocol-data-model.md)
 - 旧 harness 的 `research_profile` / `research_style_params`：
-  [考古报告](../../../notes/archived/2026-09-24-deep-research-harness-analysis.md)；
-  弃用数值 floor 的映射：[30-methodology-mapping](../../../docs/design/30-methodology-mapping.md)
+  [考古报告](../../../../notes/archived/2026-09-24-deep-research-harness-analysis.md)；
+  弃用数值 floor 的映射：[30-methodology-mapping](../../../../docs/design/30-methodology-mapping.md)

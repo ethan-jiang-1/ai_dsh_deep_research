@@ -296,6 +296,42 @@ test('projection：缺档位 / 缺 shape → 红', () => {
   assert.ok(has(evaluateBundle({ protocol, questionText: noShape, planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false }), 'projection'))
 })
 
+test('projection-number / source / output：§Protocol 的数字与枚举必须与 JSON 一致', () => {
+  const protocol = baseProtocol()
+  const base = { planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false }
+  const nodes = evaluateBundle({ protocol, questionText: questionOf(protocol, { bandLine: '- 投入: 标准（≤18 节点 / ≤8 cells / L1–L2）' }), ...base })
+  assert.ok(has(nodes, 'projection-number'), '节点数漂移（≤18 vs 12）必须红')
+  const cells = evaluateBundle({ protocol, questionText: questionOf(protocol, { bandLine: '- 投入: 标准（≤12 节点 / ≤9 cells / L1–L2）' }), ...base })
+  assert.ok(has(cells, 'projection-number'), 'cells 漂移必须红')
+  const depth = evaluateBundle({ protocol, questionText: questionOf(protocol, { bandLine: '- 投入: 标准（≤12 节点 / ≤8 cells / L1–L3）' }), ...base })
+  assert.ok(has(depth, 'projection-number'), '深度带漂移必须红')
+  const source = evaluateBundle({ protocol, questionText: questionOf(protocol).replace('- 来源: official + web', '- 来源: official'), ...base })
+  assert.ok(has(source, 'projection-source'), '缺 source family 必须红')
+  const output = evaluateBundle({ protocol, questionText: questionOf(protocol).replace('sections = decision / options / criteria / tradeoffs / risks', 'sections = decision / options'), ...base })
+  assert.ok(has(output, 'projection-output'), '缺 output section 必须红')
+})
+
+test('strategy：缺派生行 → warning；在场但与派生值不一致 → 红', () => {
+  const protocol = baseProtocol()
+  const base = { protocol, questionText: questionOf(protocol), topicsText: topicsOf(6), auditText: '', hasSnapshot: false }
+  const missing = evaluateBundle({ ...base, planText: planOf(6) })
+  assert.ok(missing.some((item) => item.code === 'strategy-missing'), '旧 plan 缺策略行应只 warning')
+  const okLine = planOf(6).replace('> protocol: v1', '> protocol: v1\n> - 策略: 通道=spawn；worker=research-worker；预算=12/8')
+  assert.deepEqual(noRed(evaluateBundle({ ...base, planText: okLine })), [])
+  const roleLine = planOf(6).replace('> protocol: v1', '> protocol: v1\n> - 策略: 通道=spawn；worker=analyst；预算=12/8')
+  assert.deepEqual(noRed(evaluateBundle({ ...base, planText: roleLine })), [], '角色 worker 是合法显式选择')
+  const badWorker = planOf(6).replace('> protocol: v1', '> protocol: v1\n> - 策略: 通道=spawn；worker=research-wave；预算=12/8')
+  assert.ok(has(evaluateBundle({ ...base, planText: badWorker }), 'strategy-mismatch'), 'spawn 写 research-wave 必须红')
+  const badBudget = planOf(6).replace('> protocol: v1', '> protocol: v1\n> - 策略: 通道=spawn；worker=research-worker；预算=18/8')
+  assert.ok(has(evaluateBundle({ ...base, planText: badBudget }), 'strategy-mismatch'), '预算漂移必须红')
+  const badChannel = planOf(6).replace('> protocol: v1', '> protocol: v1\n> - 策略: 通道=bogus；worker=research-worker；预算=12/8')
+  assert.ok(has(evaluateBundle({ ...base, planText: badChannel }), 'strategy-mismatch'), '非法通道必须红')
+  const proseBudget = planOf(6).replace('> protocol: v1', '> protocol: v1\n> - 策略: 通道=spawn；worker=research-worker；预算=6 节点 / 11 cells / L1–L2')
+  assert.ok(has(evaluateBundle({ ...base, planText: proseBudget }), 'strategy-mismatch'), '带单位的散文预算须解析后对账（6/11 ≠ 12/8）')
+  const unreadableBudget = planOf(6).replace('> protocol: v1', '> protocol: v1\n> - 策略: 通道=spawn；worker=research-worker；预算=很多/很少')
+  assert.ok(has(evaluateBundle({ ...base, planText: unreadableBudget }), 'strategy-budget-unparseable'), '读不出的预算必须红（不可静默跳过）')
+})
+
 test('复合方法：method.id = 主方法，§研究方法 原文包含即通过', () => {
   const protocol = baseProtocol()
   protocol.method.id = '方案比较'

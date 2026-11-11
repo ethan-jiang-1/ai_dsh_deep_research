@@ -895,6 +895,7 @@ async function pass2UnboundNegativePhase() {
         const cfg = (await dialogTextOf(page)) ?? ''
         const cfgText = cfg !== '' ? cfg : await paneTextOf(page)
         const noRunOk = cfgText.includes('本会话暂无研究') && !cfgText.includes('本次研究：')
+          && cfgText.includes('选方法（发给 Lead）')
         step(noRunOk, '未绑定会话·本次研究区：无 run 态如实（给入口、不回落默认打法名）')
       } else {
         console.log('  note  未绑定会话·本次研究区：配置胶囊不可开（跳过——右栏态依赖）')

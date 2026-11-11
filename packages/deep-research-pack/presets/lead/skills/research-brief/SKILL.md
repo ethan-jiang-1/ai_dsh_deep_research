@@ -25,12 +25,22 @@ description: 立项对齐（HITL1）方法论：判型模式库对照、研究�
    - **选视角**：按 question-patterns 的「lens 索引与题型默认集」给 1–4 个证据面（默认 2、上限 4；P1 可单 `official`）；完整集合落 question.md `- 本次视角:`，per-topic 子集落 topics.md `lenses:`；默认不逐条上卡，偏离才写短标记。
 3. **澄清三件事**（用 ask_user_question，每件带推荐）：
    - 研究类型（类型问卡按第 1 步命中条目或三分法拟定，附你判断的理由）；
-   - 深度与篇幅（快答 / 标准报告 / 深度报告——推荐依据 = 预期检索往返：快答 = 1–2 次
-     往返可答；标准 = 多源交叉的复杂学习；深度 = 长周期穷尽研究）；
-   - 口径（时间范围、语言、地域、排除项）。
+   - 深度与篇幅 + **输出形态**（快答 / 标准报告 / 深度报告；输出 = quick_answer /
+     full_report / one_page_memo / comparison_table / timeline / landscape_map——推荐依据 =
+     预期检索往返与报告用途：快答 = 1–2 次往返可答；标准 = 多源交叉的复杂学习；深度 =
+     长周期穷尽研究）；
+   - 口径 + **来源范围**（时间范围、语言、地域、排除项；families = official / academic /
+     regulatory / practitioner / web / local，authority = primary / secondary / any，
+     recency = 6m / 12m / 24m / as-of-capture）。
 
-   澄清纪律：用户已提供的信息不再问；一次问全（结构化选项卡，不挤牙膏）；定稿进
-   question.md 时未确认的维度显式标 open，**禁止脑补补全**。
+   **typed 输入落格**：Q2 的 output shape → `protocol.output.shape`；Q3 的 source families /
+   authority / recency → `protocol.source_scope`；方法仍由 Q1 推荐。三问一次问全，**不新增
+   第四问**；卡仍 5 维 ≤200 字，source/output 用短标签，不新增维度。
+
+   澄清纪律：用户已提供的信息不再问；**source/output 例外**——即使题面暗示来源或输出，
+   也在 Q2/Q3 的 options 里给推荐项让用户点一次（它们决定 Protocol 的 typed 字段，不是重复
+   问句）；一次问全（结构化选项卡，不挤牙膏）；定稿进 question.md 时未确认的维度显式标
+   open，**禁止脑补补全**。
 
    业务决策简报（信息充分性触发，不设固定第四问）：从题面与用户已给信息提取**决策对象**
    （为谁的什么决策）、**待决定事项**、**比较选项**、**期限**、**成功标准与约束**——
@@ -57,6 +67,7 @@ description: 立项对齐（HITL1）方法论：判型模式库对照、研究�
    - 决定：`<业务简报一句话：决定 / 范围 / 未知>`
    - 授权：`W<n> 扇出 ×N`（**仅** plan 有 `## Wave 执行` 时；脚本层唯一授权点）
    - 全文=protocol.json/plan.md（改哪项在修订里说）
+   - 计划头写 `- 策略: 通道=<team|spawn|workflow>；worker=<research-worker|research-wave|角色>；门=<hitl1/critic/claim>；预算=<nodes_max>/<cells_max>/<depths>`（派生视图，不新增 canonical 文件；值从 protocol/plan 抄，不重写；预算 = protocol 的上限，不是实际节点数）
    **脚本层点名**：plan 有 `## Wave 执行` 时，授权行必须带 `W<n> 脚本扇出 ×N`（与 plan 节同号同 N）；
    这是 workflow explicit-ask 的唯一授权点，卡上没点名 = 该层不得跑脚本。加这行后仍须 ≤200：先删
    决定细节/问题括注，不删授权行。

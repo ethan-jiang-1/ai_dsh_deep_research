@@ -1,15 +1,16 @@
 ---
-status: 调研中
+status: 已定性
 opened: 2026-11-11
 ---
 
 # 策略抽象：固定权重下，UI → 数据 → 行动
 
-> 状态：调研中
+> 状态：已定性
 > 问题：在模型权重不可改、只有 preset 层（knowledge / orchestration / workflow / gates）可变的约束下，用户 UI 输入能否、以及如何编译成不同的 Deep Research 策略；现有 UI 哪些合理、哪些该改/停。
-> 消费者：用户 2026-11-11 直派的设计复核；与 [orchestration-alignment](../../_archived/research/orchestration-alignment/README.md) 并行——后者提供 DSH 行动层约束，本题目只做「UI → 数据 → 行动」的转换与可行性。
-> 产出的卡：—（待与用户讨论后决定）
-> 结论：—（初步结论与讨论问题见材料 §13–§14；待用户讨论后定性）
+> 消费者：用户 2026-11-11 直派的设计复核；落地 = [策略投影 + HITL1 typed 输入](../../settled_issues/2026-11-11-strategy-projection.md)；与 [orchestration-alignment](../orchestration-alignment/README.md) 并行——后者提供 DSH 行动层约束。
+> 产出的卡：[策略投影 + HITL1 typed 输入（O1）](../../settled_issues/2026-11-11-strategy-projection.md)
+> 结论：三层抽象成立，缺的是 Strategy（K/O/G/B）层；按 O1 立卡（派生投影 + HITL1 三个 typed 输入 + 投影门 + 3 场 pilot），O2/O3 暂不做。D47 + team-subagent/provenance 合同已并入材料 §2.4/§6.3。
+> 归档：2026-11-11
 
 ## 研究问题
 

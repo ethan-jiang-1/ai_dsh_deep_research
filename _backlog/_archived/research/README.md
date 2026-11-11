@@ -14,6 +14,8 @@
 
 | [plugin-as-product/](plugin-as-product/README.md) · 插件即产品：独立启动 profile、用户工作区与 run bundle 归属 | 11 份 | [插件即产品决策卡](../settled_issues/2026-11-01-plugin-as-product.md) 及四张子卡 | [父卡](../settled_issues/2026-11-01-plugin-as-product.md)、[D38](../../../docs/decisions.md#d38)、[Note](../../../notes/archived/2026-11-01-plugin-as-product.md) | 2026-11-01 |
 | 名头 | 材料 | 历史消费者 | 产出的卡 | 归档 |
+| [strategy-abstraction/](strategy-abstraction/README.md) · 策略抽象：固定权重下 UI → 数据 → 行动 | 1 份 | 用户 2026-11-11 直派设计复核 | [策略投影 + HITL1 typed 输入（O1）](../settled_issues/2026-11-11-strategy-projection.md)、[D48](../../../docs/decisions.md#d48)、[Note](../../../notes/implemented/2026-11-11-strategy-projection.md) | 2026-11-11 |
+| [external-landscape/](external-landscape/README.md) · 外部 landscape：别人已经走到哪 | 4 份 | 本轮 presets 设计推演（用户 2026-11-10 直派） | [策略投影 + HITL1 typed 输入（O1）](../settled_issues/2026-11-11-strategy-projection.md) | 2026-11-11 |
 |---|---|---|---|---|
 | [orchestration-alignment/](orchestration-alignment/README.md) · DSH 编排对齐：本仓 Lead/Team/Subagent/Workflow/Goal 的原生形状与 GAP | 4 份 + 资产 | 用户 2026-11-11 直派；三张 issue | [team-subagent 合同](../settled_issues/2026-11-11-team-subagent-contract.md)、[worker profiles](../settled_issues/2026-11-11-worker-profiles-and-routing.md)、[provenance hash](../settled_issues/2026-11-11-provenance-hash-contract.md)、[D47](../../../docs/decisions.md#d47) | 2026-11-11 |
 | [preference-layer/](preference-layer/README.md) · 偏好层：搜索倾向与偏好的数据结构 + 表达层投影（卡/派发/review/HITL2/final） | 4 份 | 本轮 presets 设计推演（用户 2026-11-10 直派） | [Protocol 层已结卡](../settled_issues/2026-11-11-preference-protocol-layer.md)、[D46](../../../docs/decisions.md#d46)、[Note](../../../notes/implemented/2026-11-11-preference-protocol-layer.md) | 2026-11-11 |

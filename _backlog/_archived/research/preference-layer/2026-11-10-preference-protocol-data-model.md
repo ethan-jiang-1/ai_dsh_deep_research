@@ -8,7 +8,7 @@ intent: 把「搜索倾向 / 研究偏好」收束成一个可解析、可审、
 > 性质：设计提案 + 数据模型；不是决定，未落地。外部证据只用于验证「这个维度真实存在」，不进入命名或 schema。
 > **2026-11-11 收口**：v1 范围与六项结构选择的结论见 [核验与收口](2026-11-11-preference-protocol-verification.md)；本材料保留提案原文，不逐条改写（lens_plan / plan cell 列 / Library 版本 / Brief 对象 / style 已出 v1，output 改 `shape` 闭集）。
 > 范围：一次研究 run 的偏好与搜索配置层；不含角色 persona、run 执行细节、报告内容质量。
-> 上游：[external-landscape 第三遍](../../../research/external-landscape/2026-11-10-landscape-preference-layer.md)；本仓现状 = [共享上下文](../../../research/README.md) §5、D43 / D25 / D37。
+> 上游：[external-landscape 第三遍](../external-landscape/2026-11-10-landscape-preference-layer.md)；本仓现状 = [共享上下文](../../../research/README.md) §5、D43 / D25 / D37。
 > **结论先行**：缺的不是更多字段，而是一个「解析后的研究设计」对象（Protocol）。搜索倾向 = 一份命名 Protocol 模板；偏好 = 本次 run 对 Brief/Protocol 的覆盖；执行 = Plan；证据 = Record；新倾向 = 新 catalog/library 条目，不是新字段或新代码。
 
 ## 0. 一句话
@@ -326,7 +326,7 @@ tendency:
 
 > 第四遍补：tendency 还缺 **acceptance**。不是所有新 tendency 都能「只加条目」——如果它带来新的 warrant
 > （例如 claim-level fact-check、法域矩阵），就需要一个 acceptance profile / gate；如果只是换
-> method/source/lens/output 的组合，才是纯数据。见 [第四遍 §8](../../../research/external-landscape/2026-11-10-landscape-style-space.md#8-对偏好层数据模型的含义)。
+> method/source/lens/output 的组合，才是纯数据。见 [第四遍 §8](../external-landscape/2026-11-10-landscape-style-space.md#8-对偏好层数据模型的含义)。
 
 ### 8.1 纸面跑三个倾向（验证 schema 够不够）
 
@@ -377,7 +377,7 @@ HITL1 的 200 字卡 → **Protocol 5 行投影**（方法 / lens / 来源 / 投
 
 **候选第 7 项（第四遍提议，未拍板）**：style 归 Library/Catalog，Protocol 只存 `style_ref` + 解析值；
 验收 profile 由出厂 policy 选，用户不能关。理由/代价见
-[external-landscape 第四遍](../../../research/external-landscape/2026-11-10-landscape-style-space.md) §8.8；它不改上面六项，
+[external-landscape 第四遍](../external-landscape/2026-11-10-landscape-style-space.md) §8.8；它不改上面六项，
 只补「style 自带验收」这层。
 
 ## 12. 什么会改变这个设计
@@ -391,7 +391,7 @@ HITL1 的 200 字卡 → **Protocol 5 行投影**（方法 / lens / 来源 / 投
 
 ## 13. 来源
 
-- 外部维度验证：[external-landscape 第三遍](../../../research/external-landscape/2026-11-10-landscape-preference-layer.md)（11 产品 + 8 开源 + 2026 澄清/个性化证据；产品名不进入本 schema）。
+- 外部维度验证：[external-landscape 第三遍](../external-landscape/2026-11-10-landscape-preference-layer.md)（11 产品 + 8 开源 + 2026 澄清/个性化证据；产品名不进入本 schema）。
 - 本仓现状：`packages/deep-research-pack/content/manual.md` §研究视角 / §证据契约 / §交互纪律；
   `presets/lead/skills/research-brief/SKILL.md`；`presets/lead/skills/research-planning/SKILL.md`；
   `content/templates/run/{question,topics,plan}.md`；`research-workspace/method-library.md`；

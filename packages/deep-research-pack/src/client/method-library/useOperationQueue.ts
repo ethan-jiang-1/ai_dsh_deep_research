@@ -342,13 +342,16 @@ export function useOperationQueue(deps: OperationQueueDeps) {
       setReceipt({ ok: false, detail: t('loadBeforeWrite') })
       return
     }
+    if (mode === 'edit' && draft.currentName !== undefined && draft.currentName !== name) {
+      setReceipt({ ok: false, detail: '编辑态不能改名；请用「新建」另存一条' })
+      return
+    }
     const existingEntries = foldLibrary(text).filter((entry) => entry.name === name)
     if (existingEntries.length > 1) {
       setReceipt({ ok: false, detail: t('duplicateNames') })
       return
     }
-    const renaming = mode === 'edit' && draft.currentName !== undefined && draft.currentName !== name
-    if (existingEntries.length === 1 && (mode === 'new' || renaming)) {
+    if (existingEntries.length === 1 && mode === 'new') {
       const confirmed = typeof window === 'undefined'
         ? true
         : window.confirm(`库里已有同名方法「${name}」，保存会覆盖它。继续？`)
@@ -362,12 +365,12 @@ export function useOperationQueue(deps: OperationQueueDeps) {
       ...(draft.legacyText !== null && draft.legacyText.trim() !== '' ? [draft.legacyText.trim()] : []),
     ].join('\n')
     const saveAction = setDefault ? 'save-and-set-default' : 'save'
-    const label = mode === 'new' ? '新建' : `更新（原「${draft.currentName ?? name}」）`
+    const label = mode === 'new' ? '新建' : '更新'
     await runOperation({
       action: saveAction,
       name,
       entryText,
-      confirmOverwrite: existingEntries.length === 1 && (mode === 'new' || renaming),
+      confirmOverwrite: existingEntries.length === 1 && mode === 'new',
       instruction: `保存方法「${name}」到工作区 method-library.md。动作：${label}。必须把 operationId 和 operationHash 原样传给 method_library_upsert，defaultAction=${setDefault ? 'set' : 'preserve'}。entry 必须与下方 method-draft 文本逐字一致。写后停止，不要继续其它工具。\n\`\`\`method-draft\n${entryText}\n\`\`\``,
     })
   }

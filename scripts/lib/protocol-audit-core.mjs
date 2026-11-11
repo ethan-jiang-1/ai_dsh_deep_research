@@ -5,6 +5,7 @@
 // 单文件行数上限；拆开后 protocol-core 只答「JSON 形状对不对」，本件只答「bundle 的设计合同齐不齐」。
 
 import { planIndex, isActivePlanNode } from '../../packages/deep-research-pack/src/lib/plan-index.ts'
+import { strategyOf } from './strategy-core.mjs'
 import {
   BAND_LABELS,
   BAND_TABLE,
@@ -46,6 +47,7 @@ export function evaluateBundle(input) {
     ...shape,
     ...checkEffortContract(protocol, planText, topicsText),
     ...checkProjection(protocol, questionText),
+    ...checkStrategy(protocol, planText, topicsText),
     ...checkProtocolStatus(protocol, questionText),
     ...checkPlanRef(protocol, planText),
     ...checkAudit(protocol, auditText, hasSnapshot),
@@ -82,6 +84,51 @@ function checkEffortContract(protocol, planText, topicsText) {
   return out
 }
 
+/** §Protocol 里可核的数字/枚举：投入节点/cells/深度、来源 families、输出 sections。 */
+function checkProjectionDetails(protocol, section) {
+  const out = []
+  const bandLine = /^-\s*投入\s*[:：]\s*(.+)$/m.exec(section)?.[1] ?? ''
+  if (bandLine !== '') {
+    const nodes = /≤\s*(\d+)\s*节点/.exec(bandLine)
+    if (nodes !== null && Number(nodes[1]) !== protocol.effort.nodes_max) {
+      out.push(red('projection-number', `§Protocol 投入节点 ≤${nodes[1]} ≠ JSON nodes_max ${protocol.effort.nodes_max}`))
+    }
+    const cells = /≤\s*(\d+)\s*cells/i.exec(bandLine)
+    if (cells !== null && Number(cells[1]) !== protocol.effort.cells_max) {
+      out.push(red('projection-number', `§Protocol 投入 cells ≤${cells[1]} ≠ JSON cells_max ${protocol.effort.cells_max}`))
+    }
+    const range = /L([0-3])\s*[–-]\s*L([0-3])/.exec(bandLine)
+    if (range !== null) {
+      const expected = new Set(protocol.effort.allowed_depths)
+      const actual = new Set(Array.from(
+        { length: Number(range[2]) - Number(range[1]) + 1 },
+        (_, index) => `L${Number(range[1]) + index}`,
+      ))
+      const mismatch = [...actual].some((depth) => !expected.has(depth))
+        || [...expected].some((depth) => !actual.has(depth))
+      if (mismatch) {
+        out.push(red('projection-number', `§Protocol 投入深度 ${range[0]} ≠ JSON allowed_depths ${protocol.effort.allowed_depths.join(',')}`))
+      }
+    }
+  }
+  const sourceLine = /^-\s*来源\s*[:：]\s*(.+)$/m.exec(section)?.[1] ?? ''
+  if (sourceLine !== '') {
+    const lower = sourceLine.toLowerCase()
+    for (const family of protocol.source_scope.families) {
+      if (!lower.includes(String(family).toLowerCase())) out.push(red('projection-source', `§Protocol 来源缺 family ${family}`))
+    }
+  }
+  const outputLine = /^-\s*输出\s*[:：]\s*(.+)$/m.exec(section)?.[1] ?? ''
+  const sectionList = /sections\s*=\s*([^；;\n]+)/i.exec(outputLine)?.[1]
+  if (sectionList !== undefined) {
+    const lower = sectionList.toLowerCase()
+    for (const name of protocol.output.sections) {
+      if (!lower.includes(String(name).toLowerCase())) out.push(red('projection-output', `§Protocol 输出缺 section ${name}`))
+    }
+  }
+  return out
+}
+
 function checkProjection(protocol, questionText) {
   const out = []
   const section = sectionOf(questionText, /^##\s*Protocol/m)
@@ -91,10 +138,52 @@ function checkProjection(protocol, questionText) {
   if (!section.includes(BAND_LABELS[protocol.effort.band])) out.push(red('projection', '§Protocol 缺档位（band 中文标签）'))
   if (!section.includes(protocol.output.shape)) out.push(red('projection', '§Protocol 缺 output.shape'))
   if (!section.includes('protocol.json')) out.push(red('projection', '§Protocol 缺 protocol.json 指针'))
+  out.push(...checkProjectionDetails(protocol, section))
   const adopted = methodAdoptedOf(questionText)
   if (adopted === null) out.push(red('method-consistency', 'question.md §研究方法 缺「- 采用:」行'))
   else if (!methodNameMatches(adopted, protocol.method.id)) {
     out.push(red('method-consistency', `§研究方法「采用」与 method.id 不一致：${adopted}`))
+  }
+  return out
+}
+
+/** plan 头的派生策略行：v1 缺 = warning（旧 bundle 兼容），在场但与派生值不一致 = red；
+ * 预算字段存在但不可机检 = red（fail-loud：散文预算不得静默跳过）。 */
+function checkStrategy(protocol, planText, topicsText) {
+  const line = /^>?\s*-\s*策略\s*[:：]\s*(.+)$/m.exec(planText)?.[1]
+  if (line === undefined) return [warn('strategy-missing', 'plan 头缺「- 策略:」派生行（v1 只警告）')]
+  const expected = strategyOf({ protocol, planText, topicsText })
+  if (expected === null) return []
+  const out = []
+  const channel = /通道\s*=\s*([a-z]+)/i.exec(line)?.[1]
+  if (channel !== undefined && !['team', 'spawn', 'workflow'].includes(channel)) {
+    out.push(red('strategy-mismatch', `策略行通道 ${channel} 不在 team/spawn/workflow`))
+  }
+  const workerRaw = /worker\s*=\s*([^；;\n]+)/.exec(line)?.[1]?.trim()
+  const expectedWorker = expected.orchestration.channel === 'workflow'
+    ? expected.orchestration.workers.wave
+    : expected.orchestration.workers.oneShot
+  // 角色名由 plan 拥有（事实源 = presets/），这里只比较 research-* profile id；非 research-*
+  // 视为显式角色选择（策略行模板允许 `<research-worker|research-wave|角色>`）。
+  const workerToken = workerRaw === undefined ? undefined : /^([a-z][a-z-]*)/i.exec(workerRaw)?.[1]
+  if (workerRaw === undefined) {
+    out.push(warn('strategy-worker-missing', '策略行缺 worker=（research-worker / research-wave / 角色）'))
+  } else if (workerToken !== undefined && workerToken.toLowerCase().startsWith('research-')
+    && expectedWorker !== null && workerToken.toLowerCase() !== expectedWorker) {
+    out.push(red('strategy-mismatch', `策略行 worker ${workerToken} ≠ 派生 ${expectedWorker}`))
+  }
+  const budgetRaw = /预算\s*=\s*([^；;\n]+)/.exec(line)?.[1]?.trim()
+  if (budgetRaw === undefined) {
+    out.push(warn('strategy-budget-missing', '策略行缺 预算=<nodes_max>/<cells_max>/<depths>（投影不完整）'))
+  } else {
+    // 宽容读取模型常见写法（`≤4 节点 / ≤2 cells`、`nodes 12/cells 12`），但解析不了必须红：
+    // 静默跳过 = 投影不可机检（2026-11-11 pilot 实测的 fail-open）。
+    const budget = /^\s*(?:≤\s*)?(?:(?:nodes?|节点)\s*)?(\d+)\s*(?:节点|nodes?)?\s*\/\s*(?:≤\s*)?(?:(?:cells?|格)\s*)?(\d+)/.exec(budgetRaw)
+    if (budget === null) {
+      out.push(red('strategy-budget-unparseable', `策略行预算「${budgetRaw}」读不出 <nodes_max>/<cells_max>（不可静默跳过）`))
+    } else if (Number(budget[1]) !== protocol.effort.nodes_max || Number(budget[2]) !== protocol.effort.cells_max) {
+      out.push(red('strategy-mismatch', `策略行预算 ${budget[1]}/${budget[2]} ≠ JSON ${protocol.effort.nodes_max}/${protocol.effort.cells_max}`))
+    }
   }
   return out
 }
