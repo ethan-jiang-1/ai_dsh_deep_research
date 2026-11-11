@@ -130,8 +130,13 @@ test('英文 locale 下：研究状态 / 研究图谱空态不渲染任何中文
 // 还原法 = 组件退回 <>Orca</>、槽注册去掉 locale。
 test('BUG-068 品牌名随 locale：zh=Orca 深度搜索 / en=Orca Deep Research', () => {
   const tZh = (key, params = {}) => String(zh[key]).replace(/\{([A-Za-z0-9_]+)\}/g, (all, name) => (name in params ? String(params[name]) : all))
-  assert.equal(renderToStaticMarkup(createElement(OrcaName, { t: tZh })), 'Orca 深度搜索')
-  assert.equal(renderToStaticMarkup(createElement(OrcaName, { t: tEn })), 'Orca Deep Research')
+  const stripTags = (html) => html.replace(/<[^>]*>/g, '')
+  const zhBrand = renderToStaticMarkup(createElement(OrcaName, { t: tZh }))
+  const enBrand = renderToStaticMarkup(createElement(OrcaName, { t: tEn }))
+  assert.equal(stripTags(zhBrand), 'Orca 深度搜索')
+  assert.equal(stripTags(enBrand), 'Orca Deep Research')
+  // 侧栏品牌槽 24px 定高：长名必须单行（折行会被裁）——BUG-069 的现场回归。
+  for (const html of [zhBrand, enBrand]) assert.match(html, /white-space:nowrap/, '品牌名必须单行渲染')
   assert.equal(zh.brandName, 'Orca 深度搜索')
   assert.equal(en.brandName, 'Orca Deep Research')
   assert.ok(zh.startTitle.startsWith('Orca 深度搜索 · '), '首屏标题前缀用同一品牌名')

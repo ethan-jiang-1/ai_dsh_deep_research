@@ -27,5 +27,8 @@ export function OrcaMark({ size = 24 }: { readonly size?: number }): ReactNode {
 /** 品牌名（替换 fallback 的本地构建标签；owner share 为空——内容与宽度自持）。
  *  名字随 locale：zh `Orca 深度搜索` / en `Orca Deep Research`（字典 `brandName`）。 */
 export function OrcaName(props: PropsLocale<'deepResearchPack'>): ReactNode {
-  return <>{props.t('brandName')}</>
+  // 侧栏品牌槽是 24px 定高的单行（host `.brandName` = 18px/24px，无 nowrap）：长名（en
+  // "Orca Deep Research"）会折成两行被裁掉。这里自持单行 + 17px + 省略号兜底窄侧栏。
+  const name = props.t('brandName')
+  return <span title={name} style={{ display: 'inline-block', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 17, letterSpacing: 0.01 }}>{name}</span>
 }

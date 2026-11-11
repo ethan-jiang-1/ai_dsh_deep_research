@@ -78,3 +78,4 @@
 | [BUG-071](BUG-071-root-scout-injected-team-lead-identity.md) | 根 scout 被注入 Team Lead 身份与 8 个 Team 工具 | （方案 C：三份非 lead persona 显式纠偏 + design/10 §4/design/20 记录根会话身份事实） | 2026-11-12 |
 | [BUG-069](BUG-069-product-content-single-language-and-stale-session-title.md) | 英文界面仍混中文：内置打法内容单语 + 方法编辑历史标题不随 locale | （`builtin-display` 显示投影 40 键；canonical/模型面不动；coach 标题迁移 + locale 订阅；真实数据 en 渲染零 CJK） | 2026-11-12 |
 | [BUG-072](BUG-072-release-vocab-substring-false-positive-product-content.md) | release-vocab 的「产品内」子串误伤「产品内容」 | （词表 `产品内` → `产品内(?!容)`；裸子串 + 复合词豁免写进头注） | 2026-11-12 |
+| [BUG-073](BUG-073-run-lock-creation-window-race.md) | run-lock 的建锁不是原子的——目录先于 owner.json 可见，并发者会接管并覆盖属主 | （候选目录先写 owner.json 再 rename；3×50ms 宽限；rename 后复核；释放只动自己的锁；client-load 共用） | 2026-11-12 |

@@ -301,6 +301,8 @@ domain。它是 Client 渲染，不进模型请求。
   动作/库格式/模型 prompt 继续用 canonical；模型面 prompt 与用户内容/技术标识不翻译。守卫 =
   `tests/cockpit/{builtin-display,locales,i18n,cjk-source}.test.mjs`；新增/修改文案步骤 =
   [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)。
+- **默认语言 = 中文**（D49）：bundle patch 把 `locale.preference` 钉到 `zh`，装包即中文、不跟随浏览器
+  语言；用户显式选择住 profile patch 层，仍可切 English。
 - **页签自带滚动口**：vendor `.tabBody` 是定高 flex 列且 `overflow: hidden`——页签体必须自己开内
   滚动区（根 `flex: 1; minHeight: 0`，内容区 `overflowY: auto`），否则长内容被裁且滚不动（2026-10-12
   状态页、2026-10-20 终稿页各踩一次；`client-load-smoke` 断言终稿滚动口可动）；

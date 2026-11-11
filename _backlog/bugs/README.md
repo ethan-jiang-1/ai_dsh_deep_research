@@ -124,3 +124,4 @@ opened: YYYY-MM-DD
 **状态行追写法**（状态行镜像 frontmatter；位置只表达粗段：活跃区/归档池）：卡在本目录时 `状态：` 记号镜像 frontmatter（`pnpm verify` 互查），随翻转更新；判断、去向与审查**追加**在记号之后，既有记录不删除——翻到 `已修` 时形如 `状态：已修 — <结论，去向：implemented — Note / none — 机械修复，审查：agent/跳过 — 理由>（YYYY-MM-DD）`；进暂停池**不加任何判断**（没有判断落地）。
 
 **边界**：当场修掉的缺陷不建档（轮次 Note 照旧）；建档 = 发现时决定不当场修。把每个 bug 当**契约探针**——一个具体缺陷往往牵出一类失败，顺藤摸瓜值得横切排查。
+（BUG-073 已于 2026-11-12 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-073-run-lock-creation-window-race.md)——原子建锁 + 创建窗口宽限 + 写后复核 + 释放守卫；client-load 迁移共享锁；`run-lock.test` 4 例。）

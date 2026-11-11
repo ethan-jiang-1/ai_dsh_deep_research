@@ -50,7 +50,7 @@
 // 渐进面读**会话 journal 工具调用路径绑定的 bundle**（bundle-bind 谓词），D28 三操作桶
 // 都认（位置只用于发现，状态从内容读）。断言的磁盘认证源 = 磁盘侧扫出的最新绑定会话（跑过 run
 // 即有），其 bundle 的 evidence 计数/交付态/问题行以盘上真值对账——不再自造探针 bundle。
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { cpus, freemem, loadavg } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
@@ -62,6 +62,7 @@ import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.
 import { SMOKE_LOCALE, launchChromium, loadChromium } from '../lib/playwright.mjs'
 import { clientHistoryWindow, projectKey, readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
 import { availableMemoryMBFromMeminfo, availableMemoryMBFromVmStat, classifyHostHealth, isHostUnhealthyVerdict } from '../lib/host-health.mjs'
+import { acquireRunLock, releaseRunLock } from '../lib/run-lock.mjs'
 import { materializeSeedHome, resolveSeedFixture, seedFixtureSize } from './client-load-seed.mjs'
 import { prepareClientLoadReference } from './client-load-reference.mjs'
 import { pass4ConfigTabPhase } from './client-load-config.mjs'
@@ -170,53 +171,8 @@ if (!existsSync(bin)) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
-// ── 运行锁：同一时刻只允许一个 client-load ────────────────────────────────────
-// 为什么需要（2026-10-28 实测）：两路验证同时跑 client-load，双方 boot 前都 reclaim 3109，
-// 互相把对方的 web 杀掉（症状 = 一侧 `page.reload: ERR_CONNECTION_REFUSED`、disconnects 上升），
-// 看起来像产品红。锁只防**本脚本的两个实例**；陈旧锁（pid 已死）自动接管，不阻塞。
-// 不锁整个 31xx 面：每个脚本独占自己的端口是 port-exclusive 门禁的职责。
+// ── 运行锁：同一时刻只允许一个 client-load（原子建锁/陈旧接管 = lib/run-lock，BUG-073）──
 const LOCK_DIR = join(ROOT, 'runtime', 'smoke-workspace', 'client-load.lock')
-function releaseRunLock() {
-  rmSync(LOCK_DIR, { recursive: true, force: true })
-}
-function lockOwnerPid() {
-  let pid
-  try {
-    const owner = JSON.parse(readFileSync(join(LOCK_DIR, 'owner.json'), 'utf8'))
-    pid = Number(owner?.pid)
-  } catch {
-    return null
-  }
-  if (!Number.isInteger(pid) || pid <= 0) return null
-  try {
-    process.kill(pid, 0)
-  } catch (error) {
-    // EPERM = 进程存在但不在我们的权限域（多用户机器）——仍算活着，绝不接管。
-    if (error.code !== 'EPERM') return null
-  }
-  return pid
-}
-function acquireRunLock(retry = true) {
-  try {
-    mkdirSync(LOCK_DIR)
-    writeFileSync(join(LOCK_DIR, 'owner.json'), JSON.stringify({ pid: process.pid, at: new Date().toISOString() }), 'utf8')
-    return
-  } catch (error) {
-    if (error.code !== 'EEXIST') throw error
-    const pid = lockOwnerPid()
-    if (pid !== null) {
-      console.error(`client-load-smoke: 另一个实例在跑（pid ${pid}；锁 ${LOCK_DIR}）——共享 3109，等它结束再跑（未跑 ≠ 通过）`)
-      process.exit(2)
-    }
-    // 锁在、属主已死 = 上次异常退出的残留：接管（只重试一次，避免两路同时接管死锁）。
-    if (!retry) {
-      console.error(`client-load-smoke: 无法接管陈旧锁 ${LOCK_DIR}——人工确认后删除再跑`)
-      process.exit(2)
-    }
-    rmSync(LOCK_DIR, { recursive: true, force: true })
-    acquireRunLock(false)
-  }
-}
 
 // ── RPC（造"会话建在 research-workspace"的条件——渐进面断言的前提）──
 // RPC 正本 = lib/web-harness.makeRpc（原值逐字参数化：前缀 `cls-`、**无** AbortSignal 预算、
@@ -261,7 +217,7 @@ writeFileSync(teamPatchPath, readFileSync(join(ROOT, 'dev', 'research.overlay.ym
 async function boot() {
   const stale = await reclaimPort(PORT)
   if (stale !== null) {
-    releaseRunLock()
+    releaseRunLock(LOCK_DIR)
     console.error(`client-load-smoke: 端口 ${PORT} 预收割失败：${stale}`)
     process.exit(2)
   }
@@ -355,13 +311,22 @@ function hostFreeMB() {
   }
 }
 
-acquireRunLock()
+if (!acquireRunLock({
+  lockDir: LOCK_DIR,
+  onBusy: (pid) => {
+    console.error(pid === null
+      ? `client-load-smoke: 无法接管陈旧锁 ${LOCK_DIR}——人工确认后删除再跑（未跑 ≠ 通过）`
+      : `client-load-smoke: 另一个实例在跑（pid ${pid}；锁 ${LOCK_DIR}）——共享 3109，等它结束再跑（未跑 ≠ 通过）`)
+    process.exit(2)
+  },
+})) process.exit(2)
+process.on('exit', () => releaseRunLock(LOCK_DIR))
 let child
 let token
 try {
   ({ child, token } = await boot())
 } catch (error) {
-  releaseRunLock()
+  releaseRunLock(LOCK_DIR)
   throw error
 }
 let page
@@ -1331,7 +1296,7 @@ try {
     failures.push(leak)
     console.error(`  FAIL ${leak}`)
   }
-  releaseRunLock()
+  releaseRunLock(LOCK_DIR)
 }
 
 // 主机不健康 + 连接死亡：这是环境红，不是产品断言红。判据 = lib/host-health（keyless 直测）。

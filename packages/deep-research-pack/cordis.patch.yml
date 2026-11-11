@@ -17,6 +17,13 @@
 - id: ui-sidebar-terminal
   disabled: true
 
+# ── 默认界面语言（2026-11-12 用户定调）：产品面向中文用户，首次启动即中文；用户仍可在
+#    设置里切 English（显式选择写进 settings，覆盖这里的缺省）。web-app 的 locale 行缺省跟随
+#    浏览器语言——浏览器报 en/US 时会落到英文，故这里把缺省钉到 zh。──
+- id: locale
+  config:
+    preference: zh
+
 # ── preset roster：替换 web-app 的出厂默认（shipped registry default: standard）──
 - id: agent-preset-registry
   name: '@deepseek-ai/dsh-agent-preset-registry'

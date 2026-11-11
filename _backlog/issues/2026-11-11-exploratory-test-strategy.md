@@ -369,6 +369,19 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
   版本门会看错源。当前无实例。
 - **未跑**：X6；快照重录（with-key，需预算）。
 
+### 第 27 轮（2026-11-12 04:0x）：全绿树上的并发锁窗口
+
+- **现场**：对方已提交三个修复（`948a4e74` 双语产品内容/品牌、`e061ccc9` 根角色身份 + 072、`3ead53c3`
+  回放自包含/profile 预检/超时归因）；`verify` **0 红**、`pnpm test` **1233 绿**、构建新鲜。
+  072 按建议收窄为 `产品内(?!容)` 并留注释。
+- **新卡**：[BUG-073](../_archived/fixed_bugs/BUG-073-run-lock-creation-window-race.md) **P2**——共用
+  `scripts/lib/run-lock.mjs` 的建锁非原子：`mkdir` 与写 `owner.json` 之间的窗口里，并发者把半成品锁
+  当陈旧锁接管；创建者随后写回自己的 pid，覆盖新属主 → 两者都以为持有锁，且文件变成失效 pid 后
+  第三方可再接管。已用确定性步骤复现（`B acquired = true` → `owner = null, file pid 99999`）。
+- **关闭假设**：`builtin-display` 的显示投影完整性（5 个内置打法的 name/summary/sections/pattern
+  在 zh/en 下均非空、zh 逐字等于 canonical、en 已译）；用户条目渲染走 `entry.name` 不经过投影，
+  `isBuiltin` 分支守卫正确——无新泄漏点。
+- **X8**：在全绿树上重新起跑（结果见下轮/本节更新）。
 ## 用户答复（2026-11-11）
 
 - **Q1**：采纳；持续做，不设固定轮数（goal 驱动，剥洋葱式逐层深入）。

@@ -34,7 +34,6 @@ const SMOKE_ONLY = {
   'zstd-read': 'zstd CLI 解压：keyless 回归禁 spawn，{ok:false} 分支无直测（消费方测试注入 readLog，不触达解压本身）；失败面证据 = 一次性实测 + 消费方的降级处理',
   'port-reclaim': '端口收割：需要真监听端口与系统进程，回归禁',
   'hitl-card-driver': '浏览器内 DOM 片段（getComputedStyle / HTMLTextAreaElement / 事件派发）：只能真浏览器跑；判据面在 ask-drive（有直测）',
-  'run-lock': '真实 pid/文件系统互斥：只在 smoke 档起跑；纯判据（owner pid/陈旧接管）由消费方冒烟覆盖',
 }
 
 function libModules() {
