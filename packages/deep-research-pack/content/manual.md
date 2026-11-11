@@ -42,8 +42,8 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
                        final/readable.md，定稿后复制为 final/readable-vN.md（同版）
   final.md             当前工作稿（run 根）；交付先落 `final/vN` 副本再 present；[来源:] 相对 run 根解析；
                        **不放 final/ 里**（位置漂移会让审计静默跳过——正本钉死在 run 根）
-  provenance/<id>.json 来源证明（C-lite；owner: analyst/ops）：kind web|local-file|command +
-                       URL/路径 + sha256 + 时间 + 通道 + 切片；与 evidence/<id>.md 同名
+  provenance/<id>.json 来源证明（C-lite；可选；owner: ops/Lead）：kind web|local-file|command +
+                       URL/路径 + sha256 + 时间 + 通道 + 切片；与 evidence/<id>.md 同名；hash 由 ops/Lead 后补
   delivered.json       交付回执（ops）：门结果/audit 哈希/present 指针/final+reader 哈希
   manifest.json        目录说明书（ops）：文件角色/读序/契约版本/哈希；不是指令
   audit.md / node-gate.md / acceptance.md
@@ -95,11 +95,10 @@ present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat 
 
 ## 来源证明（C-lite）
 
-- 每条证据卡可在 `provenance/<id>.json` 带来源证明：kind（web|local-file|command）+ url/path +
-  sha256 + retrieved_at + channel + slice。
-- `file://` 只作 local-file（不再按网页验）；`path` 必须相对、`sha256` 必须匹配；新 run 的
-  `file://` 无 provenance = MAJOR。
-- 语料缺席时 audit 以 provenance 离线复算；无 provenance 才 UNATTESTED/MAJOR，不判“伪造”。
+- provenance 可选；**hash 的 owner 是 ops/Lead，不是 analyst**：派发不得要求它用
+  `python3 hashlib`；hash 由 ops/Lead 后补。缺 hash 是 UNATTESTED，不是伪造。
+- `file://` 无 provenance = MAJOR；`path` 相对、`sha256` 匹配。细节 =
+  `{{research_pack_root}}/content/generic/state-and-recovery.md`。
 
 ## 事实的 owner（一处事实一个家）
 

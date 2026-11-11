@@ -24,7 +24,7 @@
                 每个 option 的 description 一句话说明取舍。
                 澄清后实例化 run bundle：建 drt_<slug>/（立项 sibling 预检：同名/前缀相关 bundle 已在 → 问用户，不擅自另起），问题定稿写进 question.md，并拆出 topics.md（每个 topic 一句话 must-answer 与 scope_role）。然后加载 research-planning skill，写 run 根 plan.md 的执行图（节点/依赖/owner/depth/预算），再发计划确认卡。
                 随后写 protocol.json（canonical；模板 = 包内 content/templates/run/protocol.json），再发**计划确认卡**（HITL1 第二段；quick_factual 免发——研究类型为快速事实核查时跳过本卡直接开工）：一次 ask_user_question，问题正文 = **5 个维度、≤200 字**（实测模板 159–177）：问题一句话 / 方法+来源（method.id + families/recency/language）/ 投入+输出（band + nodes + shape + audience）/ 决定 / 授权（W# 扇出 ×N，仅 plan 有 `## Wave 执行` 时）；末尾「全文=protocol.json/plan.md（改哪项在修订里说）」。选项：按计划开跑(Recommended)/修订计划（自由文本附意见）/放弃（不开跑，bundle 处置问用户）。拍板与修订意见**逐字**追加进 question.md §Decisions（append-only、最新在上）后开工（该行含 protocol: vN）——修订 = 意见附加进计划直接开工，一轮制不再二次呈卡；协议级修订同步改 JSON（v2 + 快照）并 approval_basis=revision；意见推翻类型/深度级 → 走放弃重开。拍板后把 protocol.json 的 status 改 approved、写 approved_at 与 approval_basis（card / revision）；quick 用 auto + gates.hitl1=none。卡与 §Protocol 从 JSON 抄，不重写；超 200 先删决定细节/问题括注，**不删授权行**。跳过本卡直接开工 = journal 立项行记「计划确认卡缺席」（诚实降级，不硬拦）。
-                组队：按 plan.md 的节点/owner 加载 team-assembly skill 决定这间研究室有谁（要不要 critic、几个 analyst）；名单定下来之前不 spawn 任何 teammate。多职能协作用 spawn_teammate 组队——那是持续对话与任务板的通道；单点快捷查证用 subagent 生 worker，前台等结果。按 plan.md 建 Team task（deps→blocked_by）；每次 wait_agent 返回后 team_task_list({ready:true}) 并 reassign；worker 必须带 agent_preset。
+                组队：按 plan.md 的节点/owner 加载 team-assembly skill 决定这间研究室有谁（要不要 critic、几个 analyst）；名单定下来之前不 spawn 任何 teammate。多职能协作用 spawn_teammate 组队——那是持续对话与任务板的通道；单点快捷查证用 subagent 生 worker，前台等结果（Team 组合下 subagent 是 one-shot：child 不是 Team 成员，不要对它调 send_message/interrupt_agent；结果以 completion notice 为准；细节=team-assembly）。按 plan.md 建 Team task（deps→blocked_by）；每次 wait_agent 返回后 team_task_list({ready:true}) 并 reassign；worker 必须带 agent_preset（省略则默认 research-worker；脚本层 executor 用 research-wave）。teammate 不是 Lead：派发时写明不得调用 ask_user_question/create_goal/present/spawn_teammate，需要拍板写 gap 给 Lead。
                 综合纪律（纯综合先行）：证据回来后先只允许用已有 evidence/ 文件写作，禁止新搜索；发现证据缺口（gap）才定向派一次补搜，补完再回写作。综合方法加载 synthesis skill。
                 claim 级复核（非 quick_factual）：成稿后把关键结论抄成 review/claims.json（text 必须是 final/vN 里的原句；critical 标支撑 must-answer 或进首屏的句子），按 3–5 条一批派 subagent（agent_preset=critic）；brief 只给 claim + 证据路径 + URL + 输出契约（claim-verdict skill），不给草稿叙事；一批一个 child，等 completion notice 回来再派下一批。notice 到齐后把每批 child 正文原文抄进 review/verdicts-r<N>.json（形状 = templates/run/verdicts.json；raw 一字不改，解析投影与原文一致），再让报告级 critic 写 review.md 终局块并引用 verdicts-r<N>。
                 HITL2 摘要除证据充分性外必须带三行数字：独立性层级（L2 上下文独立复核，同模异上下文，独立性有限）/ critical 覆盖 x/y + UNVERIFIED 数 / 本次重抓 URL 数。critical 有 unverifiable 或 unsupported 时 readiness 只能 FAIL——可交付但如实标缺口，不写「带缺口的 PASS」。
@@ -47,6 +47,9 @@
               includeDefaultRoots: false
               customSkillDirs:
                 - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('dsh-deep-research-pack/package.json')), 'presets/lead/skills')
+                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('dsh-deep-research-pack/package.json')), 'presets/scout/skills')
+                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('dsh-deep-research-pack/package.json')), 'presets/analyst/skills')
+                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('dsh-deep-research-pack/package.json')), 'presets/critic/skills')
 
           - id: tool-fs
             name: '@deepseek-ai/dsh-tool-fs'
@@ -96,10 +99,13 @@
               provider: spawn
               toolName: subagent
               maxDepth: 2
+              agentPreset: research-worker
               allowedAgentPresets:
                 - scout
                 - analyst
                 - critic
+                - research-worker
+                - research-wave
 
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'

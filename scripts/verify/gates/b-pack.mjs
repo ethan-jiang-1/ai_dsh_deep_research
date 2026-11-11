@@ -143,8 +143,10 @@ export function runB() {
   const gate = 'row-deps';
   const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
   const peers = new Set(Object.keys(pkg.peerDependencies ?? {}));
+  const WORKERS = join(PACK, 'workers');
   const declFiles = [
     ...readdirSync(PRESETS).filter((f) => f.endsWith('.patch.yml')).map((f) => join(PRESETS, f)),
+    ...(existsSync(WORKERS) ? readdirSync(WORKERS).filter((f) => f.endsWith('.patch.yml')).map((f) => join(WORKERS, f)) : []),
     join(PACK, 'cordis.patch.yml'),
   ];
   for (const f of declFiles.filter(existsSync)) {

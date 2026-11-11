@@ -1,0 +1,56 @@
+{
+  "mode": "subagent-steer",
+  "port": 3108,
+  "startedAt": "2026-11-11T08:42:05.601Z",
+  "checks": [
+    {
+      "check": "Lead 调用了 subagent",
+      "ok": true
+    },
+    {
+      "check": "Lead 尝试 send_message 到 child",
+      "ok": true,
+      "detail": "{\"target\": \"93e6bf05-c073-441e-b691-0b076485aadb\", \"message\": \"Please also check 2+2=5.\"}"
+    },
+    {
+      "check": "send_message 结果（错误/成功）",
+      "ok": true,
+      "detail": "Error: active teammate \"93e6bf05-c073-441e-b691-0b076485aadb\" not found"
+    },
+    {
+      "check": "端口回收",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "sessions": {
+    "lead": {
+      "id": "session-f6aea58c-d4ec-45c2-9306-ed0eadb2462d",
+      "toolCalls": [
+        {
+          "seq": 20,
+          "name": "subagent",
+          "args": "{\"description\": \"steer-probe\", \"agent_preset\": \"critic\", \"prompt\": \"Review this claim: 1+1=3. Reply with a one-line verdict.\"}"
+        },
+        {
+          "seq": 27,
+          "name": "send_message",
+          "args": "{\"target\": \"93e6bf05-c073-441e-b691-0b076485aadb\", \"message\": \"Please also check 2+2=5.\"}"
+        }
+      ],
+      "toolResults": [
+        {
+          "seq": 22,
+          "callId": "call_00_ET_npBv8CasC2F6Vx53tYZz0622",
+          "text": "started subagent 93e6bf05-c073-441e-b691-0b076485aadb"
+        },
+        {
+          "seq": 28,
+          "callId": "call_00_KO2gQtQNQOcGteoYIh6t8341",
+          "text": "Error: active teammate \"93e6bf05-c073-441e-b691-0b076485aadb\" not found"
+        }
+      ],
+      "assistantTail": "The child finished with its closing message. The probe asked for a one-line verdict but the child returned the claim-verdict JSON contract (critic preset). Worth reporting as an observation: the preset-level output contract overrode the task instruction \"reply with a one-line verdict\" — a useful mechanism reading.\n\nNote the \"please also check 2+2=5\" message never arrived, as evidenced by no mention of it in the closing message. That's the confirmation that steer failed.\n\nKeep brief. No files written, no goal, no HITL.子 agent 已完成，关闭消息如下（原文）：\n\n```json\n[{\"claim_id\":\"C1\",\"verdict\":\"unsupported\",\"reason\":\"1+1=3 与整数算术定义直接冲突，且该 claim 未附任何证据文件或 URL，无原文可重抓（无 URL → rechecked_urls 为空）；未搜到任何可支持它的信源，按命题自身即可判定为假。\",\"rechecked_urls\":[],\"source_tier_ok\":false}]\n```\n\n两条额外读数：\n\n1. **steer 确实没到**：关闭消息只处理了 `1+1=3`，对 `2+2=5` 零提及——与上一步 `send_message` 的 `not found` 报错互相印证，那条消息从未进入 child 的输入。\n2. **preset 输出契约压过 prompt 指令**：prompt 明确要求 \"one-line verdict\"，child 却回了 `claim-verdict` 的 JSON 数组形状。说明 `critic` preset 的 skill 契约在 child 侧优先于任务级措辞——派发 critic 时若要非标准输出，得在 prompt 里显式豁免该契约，或改走 `research-worker`。\n\n机制结论不变：`subagent` 的 id 是 one-shot 会话句柄，不是可 steer 的 teammate target；要中途改向只能用 `spawn_teammate` 建持久成员。"
+    }
+  }
+}

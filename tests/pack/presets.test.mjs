@@ -146,16 +146,17 @@ test('delegating preset subagent = maxDepth 2 + allowedAgentPresets；无 stale 
   }
 });
 
-test('只有 analyst 挂 workflow（engine+tool 同 group + isolate + caps）；其余 preset 不挂', () => {
+test('研究角色不挂 workflow；research-wave worker 唯一挂 engine+tool（D47）', () => {
   const ymlOf = (r) => readFileSync(join(PRESETS, `${r}.patch.yml`), 'utf8');
-  const analyst = ymlOf('analyst');
-  // 探针 P1 的可用形状：engine + tool 同 group，isolate workflowEngine；只插 tool 会 broken。
-  assert.match(analyst, /- id: workflow-delegation\n\s+name: cordis:group\n\s+group: true\n\s+isolate:\n\s+workflowEngine: true/, 'analyst 缺 workflow group/isolate');
-  assert.match(analyst, /- id: workflow-ptc\n\s+name: '@deepseek-ai\/dsh-workflow-ptc'\n\s+config:\n\s+provider: spawn\n\s+maxConcurrentAgents: 4\n\s+maxTotalAgents: 8/, 'analyst 的 workflow engine 配置不完整');
-  assert.match(analyst, /- id: tool-workflow\n\s+name: '@deepseek-ai\/dsh-tool-workflow'\n\s+config:\n\s+enableRunInBackground: false/, 'analyst 的 tool-workflow 未关闭后台');
-  for (const role of ROLES.filter((r) => r !== 'analyst')) {
-    assert.doesNotMatch(ymlOf(role), /workflow-ptc|tool-workflow/, `${role} 不应挂 workflow（只有 analyst 承载）`);
+  for (const role of ROLES) {
+    assert.doesNotMatch(ymlOf(role), /workflow-ptc|tool-workflow/, `${role} 不应挂 workflow（D47：只有 research-wave worker 承载）`);
   }
+  const wave = readFileSync(join(PACK, 'workers', 'research-wave.patch.yml'), 'utf8');
+  assert.match(wave, /- id: workflow-delegation\n\s+name: cordis:group\n\s+group: true\n\s+isolate:\n\s+workflowEngine: true/, 'research-wave 缺 workflow group/isolate');
+  assert.match(wave, /- id: workflow-ptc\n\s+name: '@deepseek-ai\/dsh-workflow-ptc'\n\s+config:\n\s+provider: spawn\n\s+maxConcurrentAgents: 4\n\s+maxTotalAgents: 8/, 'research-wave 的 workflow engine 配置不完整');
+  assert.match(wave, /- id: tool-workflow\n\s+name: '@deepseek-ai\/dsh-tool-workflow'\n\s+config:\n\s+enableRunInBackground: false/, 'research-wave 的 tool-workflow 未关闭后台');
+  const worker = readFileSync(join(PACK, 'workers', 'research-worker.patch.yml'), 'utf8');
+  assert.doesNotMatch(worker, /workflow-ptc|tool-workflow/, 'research-worker 不应挂 workflow（叶子）');
 });
 
 test('清单只带 DSH 读的 dsh.* 键：bundle 与 client，无自造兼容矩阵', () => {
@@ -320,4 +321,35 @@ test('claim 级复核：critic claim-verdict 契约 + lead 派工纪律（覆盖
   const manual = readFileSync(join(PACK, 'content', 'manual.md'), 'utf8');
   assert.match(manual, /review\/claims\.json/, '手册目录约定缺 claim 表');
   assert.match(manual, /verdict-audit/, '手册完成判据缺 verdict-audit 覆盖门');
+});
+
+test('Team 组合 subagent one-shot 合同：team-assembly + persona + design/10 限定', () => {
+  const team = readFileSync(join(PRESETS, 'lead', 'skills', 'team-assembly', 'SKILL.md'), 'utf8');
+  const lead = readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8');
+  const design = readFileSync(join(ROOT, 'docs', 'design', '10-architecture.md'), 'utf8');
+  // team-assembly：namespace + one-shot + settlement + 全 run 8 槽 + 角色边界
+  assert.match(team, /child \*\*不是 Team 成员\*\*/, 'team-assembly 缺 child 不是 Team 成员的 namespace 句');
+  assert.match(team, /settlement notice/, 'team-assembly 缺 settlement notice 结果通道');
+  assert.match(team, /不要对 child id/, 'team-assembly 缺「不要对 child id 调 send_message」');
+  assert.match(team, /全 run 8 槽预算/, 'team-assembly 缺全 run 8 槽公式');
+  assert.match(team, /角色边界（teammate 不是 Lead）/, 'team-assembly 缺角色边界块');
+  // persona：模型每次请求都看得到的最强钉
+  assert.match(lead, /Team 组合下 subagent 是 one-shot/, 'lead persona 缺 subagent one-shot 钉');
+  assert.match(lead, /teammate 不是 Lead/, 'lead persona 缺 teammate 角色边界钉');
+  // design/10：不再把 provider continuable 写成控制面可达，也不把 teammate 写成机器边界
+  assert.match(design, /provider 可续但 Team 控制面不可达/, 'design/10 缺 one-shot 的实际语义限定');
+  assert.match(design, /root preset 的机器边界/, 'design/10 未区分 root preset 与 teammate 会话');
+});
+
+test('provenance hash 合同：owner = ops/Lead，不派给 analyst，不用 workflow 当计算器', () => {
+  const manual = readFileSync(join(PACK, 'content', 'manual.md'), 'utf8');
+  const analyst = readFileSync(join(PRESETS, 'analyst', 'skills', 'evidence-extraction', 'SKILL.md'), 'utf8');
+  const team = readFileSync(join(PRESETS, 'lead', 'skills', 'team-assembly', 'SKILL.md'), 'utf8');
+  assert.match(manual, /hash 的 owner 是 ops\/Lead，不是 analyst/, '手册缺 hash owner 合同');
+  assert.match(manual, /不得要求它用\s+`python3 hashlib`/, '手册未禁止要求 analyst 用 python3 hashlib');
+  assert.match(manual, /缺 hash 是 UNATTESTED，不是伪造/, '手册未定义缺 hash 的审计语义');
+  assert.match(analyst, /## provenance \/ hash 边界/, 'analyst skill 缺 provenance/hash 边界节');
+  assert.match(analyst, /你不计算 `sha256`/, 'analyst skill 未明确不计算 sha256');
+  assert.match(team, /provenance hash 不派给角色/, 'team-assembly 缺 provenance hash 派发禁令');
+  assert.match(team, /不要把 `workflow` 当计算器/, 'team-assembly 未禁止用 workflow 当计算器');
 });

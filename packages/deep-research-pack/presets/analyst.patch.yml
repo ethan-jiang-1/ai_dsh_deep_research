@@ -16,7 +16,7 @@
             config:
               prefix: |-
                 你是这支 Deep Research 团队的分析员（Analyst）——深度是你的领地。你把候选方向变成可核查的证据，证据链的质量决定报告的可信度。
-                接到任务先加载 evidence-extraction skill。当 Lead 的 brief 点名 `W<n> 脚本扇出`（计划卡已授权）时，第一动作改加载 wave-execution skill，按固定配方当执行器：不亲自挖 cell、不综合、不自行发起 workflow；对账由你写 waves/ 报告。没有该点名就按普通 analyst 任务做。
+                接到任务先加载 evidence-extraction skill。wave 执行器是 `research-wave` worker profile，不是你——你只做证据抽取/写卡/交叉验证；不要自行发起 workflow。
                 工作节奏（question-list 驱动）：每个 topic 先列问题清单（要回答什么才能满足 must-answer），逐问题找证据；问题清单随发现演进——新冒出的问题追加，已答的划掉。
                 证据抽取纪律：每条证据一个文件落本 run bundle（drt_<slug>/）的 evidence/，frontmatter 必须带 source_url / retrieved_at / quality（A–D）/ found_by / supports（topic）/ source_tier（信源分级 primary|secondary|tertiary|weak）/ publisher（注册域）/ lens（证据面 id；一卡一面，多面拆卡）；正文是原文原句摘录与你的解读两节分开，禁止把解读写成引文。
                 交叉验证：关键 claim（支撑 must-answer 的）必须 ≥2 个独立来源；独立性 = 不同注册域且非同一通稿/转载链（同源两票不算两票）；确属单源的显式标注"单源——待破"并说明风险。
@@ -56,36 +56,18 @@
               searchTimeoutMs: 60000
               fetchTimeoutMs: 45000
 
-          # Wave 执行器（D45）：analyst 是唯一挂 workflow 的研究 preset。engine 与 tool 必须
-          # 同 group + isolate（只插 tool → waiting for workflowEngine；探针 P1 实证）。
-          # child 加入 analyst 修订，因此保留 evidence-extraction；上限压到 4/8，配合 8 槽共享池。
-          - id: workflow-delegation
-            name: cordis:group
-            group: true
-            isolate:
-              workflowEngine: true
-            config:
-              - id: workflow-ptc
-                name: '@deepseek-ai/dsh-workflow-ptc'
-                config:
-                  provider: spawn
-                  maxConcurrentAgents: 4
-                  maxTotalAgents: 8
-              - id: tool-workflow
-                name: '@deepseek-ai/dsh-tool-workflow'
-                config:
-                  enableRunInBackground: false
-
           - id: tool-subagent
             name: '@deepseek-ai/dsh-tool-subagent'
             config:
               provider: spawn
               toolName: subagent
               maxDepth: 2
+              agentPreset: research-worker
               allowedAgentPresets:
                 - scout
                 - analyst
                 - critic
+                - research-worker
 
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'

@@ -1,0 +1,7 @@
+{
+  "omissionWithDefault": "research-worker",
+  "explicitCritic": "critic",
+  "descriptionWithDefault": "Agent preset for this child. Omit to use research-worker.",
+  "descriptionWithoutDefault": "Agent preset for this child. Omit to inherit the parent agent's current preset."
+}
+PASS: 省略默认 = research-worker；无默认 = 继承父；显式 critic 正常

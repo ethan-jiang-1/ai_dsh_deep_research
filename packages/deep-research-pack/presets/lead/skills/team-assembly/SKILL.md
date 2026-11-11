@@ -25,28 +25,66 @@ description: 组队决策方法论：这次研究需要谁、不需要谁、走�
   （3–5 条/批，claim-first，不给草稿叙事）+ `claim-verdict` skill；child 只回 JSON 数组，Lead 原文落
   `review/verdicts-r<N>.json`。它不进任务板、不做报告级判断——那是团队态 critic 的事。
 - **workflow（脚本层执行器，仅同质取证层）**：只在 plan 的 `## Wave 执行` 点名、计划卡已授权时
-  用；Lead spawn `agent_preset=analyst`（depth 1）作 executor，**不进 Team roster/任务板**；child
-  是 analyst 克隆，各写 evidence 卡，executor 对账写 `waves/<wave>.json`。有协商/要拍板/要综合的
-  层仍走 team 或 spawn_teammate，不用 workflow。
-- **脚本层的唯一派发通道 = `subagent(agent_preset=analyst)`；不要用 `spawn_teammate`**：队友
-  composeFrom Lead，没有 analyst preset 的 workflow/wave-execution（P3 live 实测：teammate 报
-  `TOOL_NOT_IN_SESSION`）；`spawn_teammate` 只用于对话层。**等 subagent 不要用 `wait_agent`**：
-  subagent 不在 Team 轮询面；派完结束回合或继续别的活，completion notice 会作为新消息唤醒。
-- **有脚本层时先算槽再组队**：teammate、executor、workflow child 共享 8 槽；`team + 1 executor
-  + N child ≤ 8`。N=4 时 team ≤3（pilot 取 scout + critic 2）；不要按 team-assembly 矩阵先招
-  4 人再跑 4 child（=9，必撞 `ACTIVATION_LIMIT_REACHED`）。
+  用；Lead spawn `agent_preset=research-wave`（depth 1）作 executor，**不进 Team roster/任务板**；
+  child 继承 `research-wave` 薄组合（无 Team/goal/ask/present/subagent），各写 evidence 卡，
+  executor 对账写 `waves/<wave>.json`。有协商/要拍板/要综合的层仍走 team 或 spawn_teammate，
+  不用 workflow。
+- **脚本层的唯一派发通道 = `subagent(agent_preset=research-wave)`；不要用 `spawn_teammate`**：
+  队友 composeFrom Lead，没有 worker preset 的 workflow/wave-execution（P3 live 实测：teammate
+  报 `TOOL_NOT_IN_SESSION`）；`spawn_teammate` 只用于对话层。**等 subagent 不要用 `wait_agent`**：
+  subagent 不在 Team 轮询面；派完结束回合或继续别的活，completion notice 会作为新消息唤醒
+  （Team 组合下它是 one-shot：child 不是 Team 成员，不要对它调 `send_message` /
+  `interrupt_agent`；工具描述里的续驶句在本组合不可达）。
+- **全 run 8 槽预算**：teammate、所有 subagent worker、executor、workflow child 共享 8 个
+  Activation；`team + worker + executor + N child ≤ 8`。有脚本层时先算槽再组队；普通 worker
+  也计入。N=4 时 team ≤3（pilot 取 scout + critic 2）；不要按矩阵先招 4 人再跑 4 child
+  （=9，必撞 `ACTIVATION_LIMIT_REACHED`）。
+
+## 路由矩阵（D47）
+
+| 工作形状 | 通道 | preset |
+|---|---|---|
+| 一次性 scout 宽搜 / 方向发现 | `subagent` | `scout` |
+| 一次性 analyst 取证批 / 定向补搜 | `subagent` | `analyst` |
+| claim 级独立复核 | `subagent` | `critic` |
+| 通用一次性执行 / 未指定角色 | `subagent` | `research-worker`（省略 `agent_preset` 的默认） |
+| 多轮 critic 复审 / analyst 接力（需要上下文） | Team | Lead 克隆 + 派发合同 |
+| 同质 wave（计划卡授权的脚本层） | `subagent` | `research-wave`（唯一挂 workflow） |
+
+路由原则：**一次性能做完的走 subagent，需要跨轮记忆的留 Team，同质扇出走 research-wave**。
+不要让 teammate 兼任所有角色；teammate 是协调面，角色执行面在 worker preset 上。
+
+## Team 组合里的 subagent（one-shot 合同，2026-11-11）
+
+Team profile 把全局 `send_message` / `interrupt_agent` / `list_agents` 换成 Team-scoped 工具；
+`subagent` child **不是 Team 成员**，Team `send_message` 不能寻址它；角色 child（critic/analyst
+preset）也没有 `send_message`。因此：
+
+- 工具描述里的 “use `send_message` to steer / continue” 在本组合**不可达**；不要对 child id
+  调 `send_message` / `interrupt_agent`。
+- child 的结果经 **settlement notice**（收尾消息）到达，不是 `send_message`；`subagent` 在本
+  组合里按 **one-shot** 用。provider 的 continuable 能力 ≠ 控制面可达。
+- 需要多轮追问/复审时，用 `spawn_teammate` 建 Team 成员，或重新派一发带上下文的 subagent；
+  不要指望 steer 一个已派出的 subagent child。
 
 ## 分派纪律
 
 - 每个 topic 单一 owner（一个 analyst 负责的 topic 不重叠）；
-- 每份派发（spawn prompt 与任务板 description 同标准）写全**五件**——任务板没有 reviewed/evidence 字段，验收约定不会被 service 自动解释，只认描述文本：①读哪些文件（question.md/topics.md/leads.md）；②产出什么文件；③验收判据；④怎么验证（可执行检查：evidence frontmatter 齐全、final 引用链真实、口径字段在场）；⑤**方法论装载**（见下节——spawn_teammate 子按角色硬隔离拿不到队友的技能，必须显式指路；有 lens 时含 lens id + 全文路径 + 三条动作）；
+- **角色边界（teammate 不是 Lead）**：每份 spawn prompt 写明不得调用
+  `ask_user_question` / `create_goal` / `present` / `spawn_teammate`；`subagent` 只在任务
+  明确要求时用；需要拍板写 gap 回 Lead。critic/analyst teammate 看得到这些工具，但它们是
+  Lead 的交互面，不是角色权限；
+- 每份派发（spawn prompt 与任务板 description 同标准）写全**五件**——任务板没有 reviewed/evidence 字段，验收约定不会被 service 自动解释，只认描述文本：①读哪些文件（question.md/topics.md/leads.md）；②产出什么文件；③验收判据；④怎么验证（可执行检查：evidence frontmatter 齐全、final 引用链真实、口径字段在场）；⑤**方法论装载**（见下节——teammate 继承 Lead 的技能目录，可用 `skill` 加载角色方法论；有 lens 时含 lens id + 全文路径 + 三条动作）；
 - 每份派发点名本次方法关键动作：从 question.md「研究方法（本次实际采用）」节摘该角色相关的调查要求写进任务（scout→信息源策略、analyst→检验策略、critic→核查点）——方法名不替代五件任何一件，fresh 队员靠这条拿到自己的做法；
 - 任务完不成时派发里带修订动作（缺口的处理路径：定向补搜 / 降级标 gap / 上报重派），收"完成"只认文件事实与验证结果，不认 teammate 自报；
 - critic 在草稿成型后才进场（提前进场没有可审对象，浪费一轮）。
+- **provenance hash 不派给角色**：不要要求 analyst 用 `python3 hashlib` 或在自己的
+  turn 里算 `sha256`；analyst 只写非 hash 元数据。hash 由 ops/Lead 在 run 后补，或走显式窄工具；
+  缺 hash = UNATTESTED，不是伪造。不要把 `workflow` 当计算器——它不是通用 JS 沙箱。
 
-## 方法论装载（派发第五件，2026-10-04 验收双 run 实证）
+## 方法论装载（派发第五件，D47 更新）
 
-spawn_teammate 子**一律 composeFrom lead**（vendor 机制）——队友的技能目录里只有你的 lead 技能，**scout/analyst/critic 的方法论技能按角色硬隔离根本不在其目录**（2026-10-04 两场实测：队友日志 grep 零命中；scout 自报"skill 不存在"后按模板形态 improvising）。因此每份 spawn prompt 首段必须令队友**开工先 `read` 自己的方法论技能文件**（文件就在与你同安装位的 pack 里，fs 工具可读）：
+Lead 现在挂 `lead + scout + analyst + critic` 四个技能目录（D47）；teammate composeFrom Lead，所以队友的技能目录里**也能看到角色技能**。每份 spawn prompt 首段令队友**开工先 `skill` 加载自己的方法论**（name = 下表）；`skill` 解析失败再 fallback `read` 文件路径（文件就在与你同安装位的 pack 里，fs 工具可读）：
 
 - scout → `presets/scout/skills/lead-mapping/SKILL.md`（搜索纪律 / 质量分级 / leads.md 格式 / 定稿三对账）
 - analyst → `presets/analyst/skills/evidence-extraction/SKILL.md`（question-list 工作流 / 证据文件格式 / 交叉验证与反例）

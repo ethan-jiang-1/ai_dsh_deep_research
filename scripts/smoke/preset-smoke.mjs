@@ -15,10 +15,10 @@
 
 import { withModelKey } from '../lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { presetRoles } from '../lib/roles.mjs';
+import { presetRoles, researchRoles, workerPresets } from '../lib/roles.mjs';
 import { reclaimPort } from '../lib/port-reclaim.mjs';
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
 
@@ -27,6 +27,8 @@ const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
 // 角色清单事实源 = 盘上 presets/ 目录（§3.2；硬编码清单被 verify role-list-sync 咬）
 const ROLES = presetRoles(ROOT);
+const WORKERS = workerPresets(ROOT);
+const RESEARCH_ROLES = researchRoles(ROOT);
 const OVERLAY = join(ROOT, 'dev', 'research.overlay.yml');
 
 const arg = (name, fallback) => {
@@ -59,6 +61,9 @@ for (const r of ROLES) {
   );
   const skills = join(PACK, 'presets', r, 'skills');
   step(existsSync(skills) && readdirSync(skills).length > 0, `pack: presets/${r} skills 非空`);
+}
+for (const w of WORKERS) {
+  step(existsSync(join(PACK, 'workers', `${w}.patch.yml`)), `pack: workers/${w}.patch.yml（D47 worker profile）`);
 }
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
@@ -96,6 +101,17 @@ step(existsSync(bin), `env: 机制基线源码在位（${bin}）`, '检查 DSH_S
 
 const roleSkills = (role) => readdirSync(join(PRESETS, role, 'skills'), { withFileTypes: true })
   .filter((e) => e.isDirectory()).map((e) => e.name).sort();
+const unionSkills = (roles) => [...new Set(roles.flatMap((role) => roleSkills(role)))].sort();
+// D47：Lead 是协调面，挂全部研究角色的技能目录；teammate composeFrom Lead 后可用 skill 加载角色方法论。
+const LEAD_SKILLS = unionSkills(RESEARCH_ROLES);
+// worker profile 的技能目录从 worker patch 的 customSkillDirs 现取，避免在脚本里再抄一份角色清单。
+const workerSkillRoles = (id) => {
+  const raw = readFileSync(join(PACK, 'workers', `${id}.patch.yml`), 'utf8');
+  return [...new Set([...raw.matchAll(/presets\/([a-z0-9-]+)\/skills/g)].map((match) => match[1]))].sort();
+};
+const expectedSkills = (id) => id === 'lead'
+  ? LEAD_SKILLS
+  : WORKERS.includes(id) ? unionSkills(workerSkillRoles(id)) : roleSkills(id);
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // RPC 正本 = lib/web-harness.makeRpc（原值逐字参数化：前缀 `smoke-`、AbortSignal 预算 15s、
@@ -159,38 +175,43 @@ try {
   // ① roster：盘上全部角色都在且零 broken
   const roster = await rpc(base, cookie, 'agentPresets/list', {});
   const presets = roster.presets ?? [];
-  for (const role of ROLES) {
-    await check(`roster 含 ${role}`, async () => {
-      const row = presets.find((p) => p.id === role);
-      if (row === undefined) throw new Error(`roster 里没有 ${role}（共 ${presets.length} 条）`);
+  for (const id of [...ROLES, ...WORKERS]) {
+    await check(`roster 含 ${id}`, async () => {
+      const row = presets.find((p) => p.id === id);
+      if (row === undefined) throw new Error(`roster 里没有 ${id}（共 ${presets.length} 条）`);
       if (row.broken !== undefined) throw new Error(`preset 被标 broken：${String(row.broken).slice(0, 160)}`);
     });
   }
 
   // ② 真入口：逐角色建会话——这一步才触发行 config 校验
   const sessionIds = new Map();
-  for (const role of ROLES) {
-    await check(`session/create 挂上 ${role}`, async () => {
-      const created = await rpc(base, cookie, 'session/create', { request: { cwd: SMOKE_CWD, agentPreset: role } });
-      if (created?.agentPreset !== role) throw new Error(`返回的 preset 不是 ${role}：${JSON.stringify(created).slice(0, 200)}`);
-      const id = created?.id ?? created?.sessionId;
-      if (typeof id !== 'string') throw new Error(`session/create 没返回会话 id：${JSON.stringify(created).slice(0, 200)}`);
-      sessionIds.set(role, id);
+  for (const id of [...ROLES, ...WORKERS]) {
+    await check(`session/create 挂上 ${id}`, async () => {
+      const created = await rpc(base, cookie, 'session/create', { request: { cwd: SMOKE_CWD, agentPreset: id } });
+      if (created?.agentPreset !== id) throw new Error(`返回的 preset 不是 ${id}：${JSON.stringify(created).slice(0, 200)}`);
+      const sessionId = created?.id ?? created?.sessionId;
+      if (typeof sessionId !== 'string') throw new Error(`session/create 没返回会话 id：${JSON.stringify(created).slice(0, 200)}`);
+      sessionIds.set(id, sessionId);
     });
   }
 
-  // ③ skills 硬隔离：每角色只看见自己的 skills（includeDefaultRoots: false 的真入口断言）
-  for (const role of ROLES) {
-    await check(`${role} 只看见自己的 skills`, async () => {
-      const sessionId = sessionIds.get(role);
+  // ③ skills：Lead 挂角色技能目录（D47 协调面）；研究角色保持硬隔离；worker 挂自己的角色技能子集。
+  for (const id of [...ROLES, ...WORKERS]) {
+    const label = id === 'lead'
+      ? 'Lead 看见 lead+角色 skills（D47 协调面）'
+      : WORKERS.includes(id)
+        ? `${id} 看见角色 skills（D47 worker）`
+        : `${id} 只看见自己的 skills`;
+    await check(label, async () => {
+      const sessionId = sessionIds.get(id);
       if (sessionId === undefined) throw new Error('没有会话 id（上一步未通过）');
       const value = await rpc(base, cookie, 'skills/list', { request: { sessionId } });
       const actual = (value.skills ?? []).map((s) => s.name).sort();
-      const expected = roleSkills(role);
+      const expected = expectedSkills(id);
       const extra = actual.filter((n) => !expected.includes(n));
       const missing = expected.filter((n) => !actual.includes(n));
-      if (extra.length > 0) throw new Error(`看见了非本角色的 skill：${extra.join(', ')}`);
-      if (missing.length > 0) throw new Error(`本角色 skill 缺席：${missing.join(', ')}`);
+      if (extra.length > 0) throw new Error(`看见了不该看的 skill：${extra.join(', ')}`);
+      if (missing.length > 0) throw new Error(`skill 缺席：${missing.join(', ')}`);
     });
   }
 } finally {
@@ -203,6 +224,6 @@ try {
 }
 
 console.log(failures.length === 0
-  ? `\npreset-smoke: ALL PASS（${ROLES.length} 个 preset 全部真挂载绿）`
+  ? `\npreset-smoke: ALL PASS（${ROLES.length} 个角色 + ${WORKERS.length} 个 worker profile 全部真挂载绿）`
   : `\npreset-smoke: ${failures.length} FAILURE(S)\n${failures.join('\n')}`);
 process.exit(failures.length === 0 ? 0 : 1);

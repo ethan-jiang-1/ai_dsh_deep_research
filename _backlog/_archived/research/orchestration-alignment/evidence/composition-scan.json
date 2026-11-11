@@ -1,0 +1,161 @@
+{
+  "port": 3105,
+  "combinedOverlay": "/Users/bowhead/ai_dsh_deep_research/_backlog/research/orchestration-alignment/prototypes/combined.overlay.yml",
+  "presetRows": [
+    {
+      "id": "standard",
+      "broken": null
+    },
+    {
+      "id": "ptc",
+      "broken": null
+    },
+    {
+      "id": "minimal",
+      "broken": null
+    },
+    {
+      "id": "cordis",
+      "broken": null
+    },
+    {
+      "id": "lead",
+      "name": "Deep Research Lead",
+      "broken": null
+    },
+    {
+      "id": "scout",
+      "name": "Deep Research Scout",
+      "broken": null
+    },
+    {
+      "id": "analyst",
+      "name": "Deep Research Analyst",
+      "broken": null
+    },
+    {
+      "id": "critic",
+      "name": "Deep Research Critic",
+      "broken": null
+    },
+    {
+      "id": "method-editor",
+      "name": "Method Editor",
+      "broken": null
+    },
+    {
+      "id": "research-worker",
+      "name": "Research Worker",
+      "broken": null
+    },
+    {
+      "id": "research-wave",
+      "name": "Research Wave Executor",
+      "broken": null
+    }
+  ],
+  "sessions": [
+    {
+      "preset": "research-worker",
+      "id": "session-8a78ef88-6eff-47e5-ab38-698dc6ea75bb",
+      "agentPreset": "research-worker",
+      "skills": [
+        "adversarial-review",
+        "claim-verdict",
+        "evidence-extraction",
+        "wave-execution"
+      ]
+    },
+    {
+      "preset": "research-wave",
+      "id": "session-dcbec2e4-252d-41df-b208-cd5ab11853b2",
+      "agentPreset": "research-wave",
+      "skills": [
+        "adversarial-review",
+        "claim-verdict",
+        "evidence-extraction",
+        "wave-execution"
+      ]
+    },
+    {
+      "preset": "critic",
+      "id": "session-31d2f0c1-1e08-4140-9cc1-a0f7f3987727",
+      "agentPreset": "critic",
+      "skills": [
+        "adversarial-review",
+        "claim-verdict"
+      ]
+    }
+  ],
+  "skillChars": {
+    "presets/analyst/skills/evidence-extraction/SKILL.md": 2518,
+    "presets/analyst/skills/wave-execution/SKILL.md": 3926,
+    "presets/critic/skills/adversarial-review/SKILL.md": 5019,
+    "presets/critic/skills/claim-verdict/SKILL.md": 1341,
+    "presets/scout/skills/lead-mapping/SKILL.md": 3933
+  },
+  "checks": [
+    {
+      "check": "roster 含 research-worker",
+      "ok": true,
+      "detail": {
+        "id": "research-worker",
+        "name": "Research Worker",
+        "broken": null
+      }
+    },
+    {
+      "check": "roster 含 research-wave",
+      "ok": true,
+      "detail": {
+        "id": "research-wave",
+        "name": "Research Wave Executor",
+        "broken": null
+      }
+    },
+    {
+      "check": "session/create research-worker",
+      "ok": true,
+      "detail": "research-worker"
+    },
+    {
+      "check": "research-worker 看见 evidence-extraction",
+      "ok": true
+    },
+    {
+      "check": "research-worker 看见 adversarial-review",
+      "ok": true
+    },
+    {
+      "check": "research-worker 看不见 lead 的 team-assembly",
+      "ok": true
+    },
+    {
+      "check": "session/create research-wave",
+      "ok": true,
+      "detail": "research-wave"
+    },
+    {
+      "check": "research-wave 看见 evidence-extraction",
+      "ok": true
+    },
+    {
+      "check": "research-wave 看见 adversarial-review",
+      "ok": true
+    },
+    {
+      "check": "research-wave 看不见 lead 的 team-assembly",
+      "ok": true
+    },
+    {
+      "check": "session/create critic",
+      "ok": true,
+      "detail": "critic"
+    },
+    {
+      "check": "端口回收",
+      "ok": true,
+      "detail": null
+    }
+  ]
+}

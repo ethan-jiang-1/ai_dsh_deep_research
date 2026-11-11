@@ -62,10 +62,12 @@
               provider: spawn
               toolName: subagent
               maxDepth: 2
+              agentPreset: research-worker
               allowedAgentPresets:
                 - scout
                 - analyst
                 - critic
+                - research-worker
 
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'

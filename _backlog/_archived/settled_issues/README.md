@@ -4,6 +4,9 @@
 
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-11-11-team-subagent-contract](2026-11-11-team-subagent-contract.md) | Team/subagent 合同纠偏：one-shot / 角色边界 / 全 run 8 槽写入模型可见面；`design/10` 限定 root preset；L1/L2/L4-lite + snapshot B 绿；[Note](../../../notes/implemented/2026-11-11-team-subagent-contract.md) | 2026-11-11 |
+| [2026-11-11-worker-profiles-and-routing](2026-11-11-worker-profiles-and-routing.md) | Worker profiles（D47）：`research-worker` / `research-wave` + 默认 + 路由矩阵 + 角色 skill 载体；研究角色仍 4；L1/L2/L4 与真模型工具面绿；[Note](../../../notes/implemented/2026-11-11-worker-profiles.md) | 2026-11-11 |
+| [2026-11-11-provenance-hash-contract](2026-11-11-provenance-hash-contract.md) | Provenance hash owner = ops/Lead；manual/analyst skill/team-assembly 同步；T0 9973；analyst 工具面无 workflow；[Note](../../../notes/implemented/2026-11-11-provenance-hash-contract.md) | 2026-11-11 |
 | [2026-11-11-preference-protocol-layer](2026-11-11-preference-protocol-layer.md) | 偏好层 Protocol 数据层 + 既有文本面投影（D46）：`protocol.json` canonical + 卡/派发/review §4b/HITL2/final 头派生；`protocol-audit` 接 run-accept；pilot 3 场 Protocol 层全绿，D44 claim 层残余另案；[Note](../../../notes/implemented/2026-11-11-preference-protocol-layer.md) | 2026-11-11 |
 | [2026-11-11-content-organization-t0](2026-11-11-content-organization-t0.md) | manual T0 首刀：状态/读序/恢复 → `content/generic/state-and-recovery.md`；T0 12,038→9,995；`content-disclosure` 4 例；L1 + L4-lite 绿；snapshot B 未重录（旧回放不捕获）；[Note](../../../notes/implemented/2026-11-11-content-organization-t0.md) | 2026-11-11 |
 | [2026-11-11-test-asset-coverage](2026-11-11-test-asset-coverage.md) | 测试资产覆盖收口：模板 schema 集双向对账、解析键契约（4 模板）、具名非 quick 类型合成 bundle；1127 测试 + verify 全绿，红证 4 组；[Note](../../../notes/implemented/2026-11-11-test-asset-coverage.md) | 2026-11-11 |

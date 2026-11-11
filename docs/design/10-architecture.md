@@ -59,9 +59,11 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 
 | 通道 | 载体 | 用途 | 边界依据 |
 |---|---|---|---|
-| **Agent Teams（主通道）** | `agent-team` + `tool-agent-team`（vendor **agent-team-profile 层**行〔版本派生见表下注〕，带实战 config + company D18 机械禁令——control / list-agents 禁用、subagent 强制 one-shot；[m2-p1-run-channel](../../notes/implemented/2026-09-24-m2-p1-run-channel.md) A 定案） | 持续对话、任务板、多轮往返：scout 汇报 → analyst 接力 → critic 审查 → analyst 补证 | 续驶语义归 team：team-scoped 会话里 continuable child 不可达（company D18 实证）——层把边界从纪律文本升级为组合层禁令 |
-| subagent（工人） | `tool-subagent`（preset 行，spawn；**maxDepth: 2** + **allowedAgentPresets: [scout, analyst, critic]**——teammate 可派 depth-2 worker，worker 不能再派 grandchild；[m2-p1-run-channel](../../notes/implemented/2026-09-24-m2-p1-run-channel.md)） | 单点快捷查证、并行铺方向/深挖；teammate 可派角色化 worker（`agent_preset`） | 每次 delegation 是 activation，完成通知回父；Team profile 禁全局 continuable 控制工具。**机制边界**：worker 的工具目录里看得到 Team 工具但调不通（vendor `packages/experimental/tool-agent-team/README.md` known limitation，同 pin 适用）——派工方应让 worker 明确别调 `spawn_teammate` / `team_task_*` / `wait_agent` |
+| **Agent Teams（主通道）** | `agent-team` + `tool-agent-team`（vendor **agent-team-profile 层**行〔版本派生见表下注〕，带实战 config + company D18 机械禁令——control / list-agents 禁用；subagent 工具面仍在（preset 行覆盖 layer 禁令），provider 可续但 Team 控制面不可达，实际是 one-shot；[m2-p1-run-channel](../../notes/implemented/2026-09-24-m2-p1-run-channel.md) A 定案） | 持续对话、任务板、多轮往返：scout 汇报 → analyst 接力 → critic 审查 → analyst 补证 | 续驶语义归 team：team-scoped 会话里 continuable child 不可达（company D18 实证）；层禁的是全局控制面，不是 subagent 工具本身——实际 one-shot，工具描述的续驶句在本组合不可达，合同 = `team-assembly` §Team 组合里的 subagent |
+| subagent（工人） | `tool-subagent`（preset 行，spawn；**maxDepth: 2** + **allowedAgentPresets: [scout, analyst, critic, research-worker, research-wave]**；**agentPreset 默认 = research-worker**——teammate 可派 depth-2 worker，worker 不能再派 grandchild；[m2-p1-run-channel](../../notes/implemented/2026-09-24-m2-p1-run-channel.md) / **D47**） | 单点快捷查证、并行铺方向/深挖；role work 显式 `agent_preset=scout/analyst/critic`；wave 显式 `research-wave`；省略落薄 worker | 每次 delegation 是 activation，完成通知回父；Team profile 禁全局 continuable 控制工具。**机制边界**：worker 的工具目录里看得到 Team 工具但调不通（vendor `packages/experimental/tool-agent-team/README.md` known limitation，同 pin 适用）——派工方应让 worker 明确别调 `spawn_teammate` / `team_task_*` / `wait_agent` |
 | present（交付） | `tool-present`（bundle + lead preset） | 成品声明：final.md 是唯一成品 | 非 lead 的 present = 过程稿展示（研究手册三态） |
+
+**worker profiles（D47）**：`workers/research-worker.patch.yml`（叶子：fs/fs-search/skill/todo/web，无 Team/goal/ask/present/subagent/workflow）与 `workers/research-wave.patch.yml`（叶子 + workflow engine/tool，唯一挂 workflow）。它们是**非研究角色**，不计入 `presets/` 角色清单；一次性角色工作走 `subagent(agent_preset=…)`，多轮协作留 Team，同质 wave 用 `research-wave`。
 
 团队层版本派生：profile 装 `@…-agent-team-profile@<运行中的 DSH 版本>`——安装侧（用户用 `dsh plugin` 显式装，版本取 `dsh --version`）优先从 DSH 安装锚（`--install-anchor` / `DSH_INSTALL_ANCHOR` / PATH 的 `dsh`）取版本，回退 profile 的 `@deepseek-ai/dsh-app-boot`；dev run 通道 `dev/boot-run.sh` 从运行中 dsh 的 exact 版本派生（两者都必须与运行版本一致，不能用 `engines.dsh` 范围当版本号）。
 
@@ -80,7 +82,7 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
   注释；Search/Fetch API 的 `apiKeyEnv: DEEPSEEK_API_KEY` 与 chat 同一把钥匙（无需独立 key）；
 - **lead 独有**：tool-ask-user（HITL 两点交互的唯一持有人）+ tool-present（成品声明权）；
 - **lead/scout/analyst**：tool-subagent（工人；`maxDepth: 2` + `allowedAgentPresets` 见 §3）；
-- **critic 刻意无**：ask-user（静默审查）、subagent（聚焦独行）——工具面即职责边界的机器表达。
+- **critic 刻意无**（root critic preset）：ask-user（静默审查）、subagent（聚焦独行）——这是 root preset 的机器边界。**teammate 会话是 Lead 组合**：critic teammate 看得到这些工具，但角色边界靠派发合同 + 人工验收，不靠 preset；HITL 仍只由 Lead 发起。
 
 ## 5. 环境与验证
 

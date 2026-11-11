@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 
 export const PACK = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'packages', 'deep-research-pack');
 const PRESETS = join(PACK, 'presets');
+const WORKERS = join(PACK, 'workers');
 
 const yaml = createRequire(join(PACK, '..', '..', 'vendor', 'dsh', 'package.json'))('js-yaml');
 // DSH preset 用 `!!js` 表达式；测试只把它当字符串，不求值。
@@ -19,12 +20,25 @@ const SCHEMA = yaml.DEFAULT_SCHEMA.extend([
   new yaml.Type('tag:yaml.org,2002:js', { kind: 'scalar', construct: (data) => data }),
 ]);
 
-/** 盘上角色清单（单一事实源 = presets/*.patch.yml）。 */
+/** 盘上角色清单（单一事实源 = presets/*.patch.yml；workers/ 不计入角色）。 */
 export function presetRoles() {
   return readdirSync(PRESETS)
     .filter((name) => name.endsWith('.patch.yml'))
     .map((name) => name.replace(/\.patch\.yml$/, ''))
     .sort();
+}
+
+/** 盘上 worker profile 清单（D47；非研究角色，单独目录）。 */
+export function workerPresets() {
+  try {
+    return readdirSync(WORKERS)
+      .filter((name) => name.endsWith('.patch.yml'))
+      .map((name) => name.replace(/\.patch\.yml$/, ''))
+      .sort();
+  } catch (error) {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  }
 }
 
 /** 递归展开 group 行：`config` 是数组时才是子行（普通行的 config 对象不展开）。 */
@@ -43,6 +57,17 @@ function flattenPlugins(plugins) {
 /** 按行 id 找一行（含 group 子行）。 */
 export function rowById(rows, id) {
   return rows.find((row) => row?.id === id);
+}
+
+/** 读一个 worker profile（workers/<id>.patch.yml）。 */
+export function loadWorker(id) {
+  const raw = readFileSync(join(WORKERS, `${id}.patch.yml`), 'utf8');
+  const docs = yaml.load(raw, { schema: SCHEMA });
+  const row = docs?.[0]?.insert?.find((item) => item?.name === '@deepseek-ai/dsh-agent-preset');
+  if (row === undefined) throw new Error(`${id}: 缺 @deepseek-ai/dsh-agent-preset 行`);
+  const plugins = row?.config?.plugins;
+  if (!Array.isArray(plugins)) throw new Error(`${id}: config.plugins 不是数组`);
+  return { role: id, raw, plugins, rows: flattenPlugins(plugins) };
 }
 
 /** 读一个 preset，返回 config.plugins 与展开后的全部行。 */

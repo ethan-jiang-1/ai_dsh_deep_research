@@ -38,6 +38,13 @@ lens: <本卡所属证据面 id；一卡一面，多面拆卡>
 
 **摘录与解读必须分开**——把解读写成引文是伪造证据，critic 一票否决。
 
+## provenance / hash 边界
+
+- 你不计算 `sha256`，也不把 `workflow` 当计算器；provenance 的 hash 由 ops/Lead 在 run 后补
+  （或走显式窄工具）。analyst 的工具面没有 bash/python——要求你算 hash 的派发是错配，不是你的失职。
+- 你只写 evidence 卡与可选 provenance 的**非 hash** 元数据（kind/url/path/retrieved_at/channel/slice）；
+  需要 hash 时写 gap 交 Lead，不静默、不自己找沙箱。
+
 **一卡一面**：`lens` 写本卡按哪个证据面写的；同一来源要服务两个面（如 official 的规则句 +
 quant 的价目表）时拆成两张卡（可同 `source_url`，摘录/解读按面写），不要一张卡打两个勾。
 

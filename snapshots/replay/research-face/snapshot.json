@@ -1,7 +1,7 @@
 {
   "version": 1,
   "scenario": "research-face",
-  "profile": "research",
+  "profile": "deep-research",
   "workspace": "research-workspace",
   "sessionFormat": 4,
   "cases": [
@@ -11,11 +11,11 @@
       "fixture": "session.v4.jsonl",
       "renderExpected": "ui.expected.md",
       "source": {
-        "codeAnchor": "d082c65d3bf4523979d4a49b2db41f5214916465",
+        "codeAnchor": "bd7159c492de8fb12db44ec3a78e69c7e9831a35",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-11T00:15:10.000Z",
+        "recordedAt": "2026-11-11T08:22:00.000Z",
         "recording": "live",
-        "note": "M3 模型可见文本变更后重录；录制时工作树含未提交的 M3 改动（codeAnchor = 录制时 HEAD）。"
+        "note": "D47 worker profiles + M3 text changes; lead re-recorded with 3-query/2-fetch probe to exercise status-tab activity (working tree)."
       }
     },
     {
@@ -23,10 +23,11 @@
       "preset": "scout",
       "fixture": "scout/session.v4.jsonl",
       "source": {
-        "codeAnchor": "3c4f9f2cc85c8d69f8bce3c274db3e5e3172e90c",
+        "codeAnchor": "bd7159c492de8fb12db44ec3a78e69c7e9831a35",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-05T01:30:52.037Z",
-        "recording": "live"
+        "recordedAt": "2026-11-11T08:18:35.000Z",
+        "recording": "live",
+        "note": "D47 worker profiles + M3 model-visible text changes; recorded with working-tree changes (codeAnchor = HEAD)."
       }
     },
     {
@@ -34,10 +35,11 @@
       "preset": "analyst",
       "fixture": "analyst/session.v4.jsonl",
       "source": {
-        "codeAnchor": "6ada0e3b05fe509c169701af81047053adc5b42b",
+        "codeAnchor": "bd7159c492de8fb12db44ec3a78e69c7e9831a35",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-10T10:57:07.038Z",
-        "recording": "live"
+        "recordedAt": "2026-11-11T08:18:35.000Z",
+        "recording": "live",
+        "note": "D47 worker profiles + M3 model-visible text changes; recorded with working-tree changes (codeAnchor = HEAD)."
       }
     },
     {
@@ -45,10 +47,11 @@
       "preset": "critic",
       "fixture": "critic/session.v4.jsonl",
       "source": {
-        "codeAnchor": "4763a428ea86ff45568efc1c660cbbb6c434ec46",
+        "codeAnchor": "bd7159c492de8fb12db44ec3a78e69c7e9831a35",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-10T07:35:57.000Z",
-        "recording": "live"
+        "recordedAt": "2026-11-11T08:18:35.000Z",
+        "recording": "live",
+        "note": "D47 worker profiles + M3 model-visible text changes; recorded with working-tree changes (codeAnchor = HEAD)."
       }
     }
   ]

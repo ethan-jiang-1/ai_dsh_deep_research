@@ -32,3 +32,11 @@
 **冲突 / 过期**：`plan.md` 的剩余工作、`review.md` 历史轮、journal 旧条都可能过期；以**最新 journal + §Decisions + final 事实**为准，不按 stale plan 继续。`> rerun:` 标记不是必需；rerun 以 §Decisions 的 `vN` 行 + `final/vN` 为准。**查证优先于旧场恢复**：先 claim → findings/evidence，不先读 question/plan/journal。
 
 **恢复**：读最小集 → 答五问 → 先定范围（`run.md.next`/`phase`；不明只问一个带范围的澄清问）→ 重问 pending HITL（一次）→ 按 `plan.md §剩余工作` 重建 Team（若已过期以 journal/§Decisions 为准）→ 继续，不重做已完成。
+
+## provenance 与 hash
+
+- provenance 可选；owner = ops/Lead。analyst 只写 kind/url/path/retrieved_at/channel/slice 等
+  **非 hash** 元数据；hash 由 ops/Lead 在 run 后用 shell 补，或走显式窄工具。
+- 不要要求 analyst 用 `python3 hashlib` 或在 run 内算 `sha256`；也不要把 `workflow` 当通用
+  计算器——它不是 JS 沙箱工具。
+- 缺 hash = UNATTESTED，不是伪造；`file://` 无 provenance = MAJOR。

@@ -51,3 +51,4 @@
 | notes implemented 只进不出 | 132 篇中约一半无 live 引用；归档按"不再指导未来"判断，无节奏 | 机制名检索命中多篇互相矛盾的旧决定时做批量体检 | [notes/README](../notes/README.md) |
 | 方法库工作台再拆分 | 组件 1152 行：model / ColumnHandle / useLibraryData 已外移；草稿·操作队列·coach 三块状态机仍耦合在一个组件里 | 组件 >1300 行，或第二个功能要复用同一状态机，或一次「改草稿/写操作」的 diff 触及 >5 处 | [design/40](../docs/design/40-research-cockpit.md) |
 | 决策台账 20KB 收敛 | 当前 29.4KB（41 行；单行 ≤800 已守、无日期史；32KB 硬顶由 `tests/contracts/decisions-now.test.mjs` 把守） | 下一次批量改 D 号，或台账被 32KB 硬顶拦下时 | [docs/decisions.md](../docs/decisions.md) |
+| snapshot-replay C2/C3 右栏 guide | 0.3.1 客户端上 `Open right sidebar` 不可见，C2/C3 红；A/B 层与 `client-load-smoke` 的状态页签仍是有效证据 | 快照 UI 轮次、右栏控件再改名，或 `client-load-smoke` 也失败时：先修 `openPane` 配方（当前控制 = `More conversation views` / 右栏 guide 槽）再重录 C 金标准 | [team-subagent 合同 Note](../notes/implemented/2026-11-11-team-subagent-contract.md) |

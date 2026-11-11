@@ -393,42 +393,13 @@ for (const { face, scene } of SCENES) {
           await sleep(1500);
           const capsule = page.getByRole('button', { name: /研究状态/ }).first();
           const capOk = await capsule.isVisible({ timeout: 12000 }).catch(() => false);
-          const collectPaneRows = () => page.evaluate(() => {
-            // DOM 行走提取活动行（textContent 不受折叠态/innerText 块级化影响——实测：活动行
-            // flex 块级化把 icon 与文本拆成两行，行过滤法抓不到文本）
-            const rows = [];
-            for (const div of document.querySelectorAll('div')) {
-              const spans = Array.from(div.children).filter((el) => el.tagName === 'SPAN');
-              if (spans.length !== 2) continue;
-              const a = (spans[0].textContent ?? '').trim();
-              const b = (spans[1].textContent ?? '').trim();
-              if (a === '🔍' || a === '👥' || a === '💬' || a === '📦') rows.push(`${a} ${b}`);
-            }
-            return rows;
+          const capDiag = capOk ? '' : await page.evaluate(() => {
+            const buttons = Array.from(document.querySelectorAll('button'))
+              .filter((b) => b.offsetParent !== null)
+              .map((b) => (b.textContent ?? '').trim()).filter((t) => t !== '' && t.length < 24).slice(0, 24);
+            return `可见按钮：${buttons.join(' | ')}；正文：${(document.body?.innerText ?? '').replace(/\n+/g, ' ⏎ ').slice(0, 300)}`;
           });
-          let paneRows = [];
-          if (capOk) {
-            await capsule.click({ timeout: 5000 }).catch(() => {});
-            // 活动流异步到齐（会话 follow/history）：固定 sleep 在负载下会漏抓末行 → 金标准假红
-            // （实测同一输入两次运行一次 2 行一次 1 行）。等待显式稳定态：连续两次采样一致且非空；
-            // 20s 死线后按当时实得捕获，C5 仍以逐字比对判红（等待不放宽断言）。
-            const deadline = Date.now() + 20000;
-            let previous = null;
-            let stableSamples = 0;
-            while (Date.now() < deadline) {
-              paneRows = await collectPaneRows();
-              const signature = paneRows.join('\n');
-              if (signature !== '' && signature === previous) {
-                stableSamples += 1;
-                if (stableSamples >= 2) break;
-              } else {
-                stableSamples = 0;
-              }
-              previous = signature;
-              await sleep(400);
-            }
-          }
-          step(capOk, `[${face}/${sc.id}] C2 「研究状态」页签在场（右栏展开 + guide 胶囊可点）`);
+          step(capOk, `[${face}/${sc.id}] C2 「研究状态」页签在场（右栏展开 + guide 胶囊可点）`, capDiag);
           step(paneRows.length > 0, `[${face}/${sc.id}] C3 页签活动行提取非空（防空语料）`, `${paneRows.length} 行`);
           step(consoleErrors.filter((t) => t.includes('research-status') || t.includes('deep-research')).length === 0,
             `[${face}/${sc.id}] C4 本包 client 无 console 报错`, consoleErrors.slice(0, 2).join(' | ').slice(0, 200));

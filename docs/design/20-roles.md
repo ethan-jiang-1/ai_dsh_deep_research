@@ -28,7 +28,22 @@ teammate 会话加载的是 **Lead 的组合**（composeFrom ⇒ lead preset）�
 + 工作区手册注入，而**不是**成员角色自己的 preset——名册角色名 ≠ 该会话加载的 preset。各自 role
 preset 只在**根会话**（直接以该角色开新会话）时生效；**depth-2 worker 例外**：teammate 用
 `subagent(agent_preset=…)` 派出的 worker 可挂载独立角色 preset（spawn only），角色工具面因此是
-精确的。
+精确的。**角色边界因此是派发合同 + 人工验收，不是 preset 机器边界**：critic teammate 看得到
+`ask_user_question` / `subagent`，但不该用——HITL 只由 Lead 发起，subagent 只在任务明确要求时用。
+
+## 0.1 worker profiles（D47，非研究角色）
+
+研究角色仍是 **4 个**（D2）；`workers/` 下另有两个**非研究角色**的薄 profile：
+
+| preset | 工具面 | 用途 |
+|---|---|---|
+| `research-worker` | fs / fs-search / skill / todo / web；无 Team/goal/ask/present/subagent/workflow | 一次性取证、写卡、检索；Lead/Scout/Analyst 的 `agentPreset` 默认 |
+| `research-wave` | 同上 + workflow engine/tool（4/8 caps、无后台） | 同质 wave executor；child 继承此薄组合 |
+
+它们**不计入** `presets/` 角色清单，也不进 run 生命周期的角色 owner 表；路由矩阵住
+`team-assembly`：一次性角色工作走 `subagent(agent_preset=…)`，多轮协作留 Team，同质 wave 用
+`research-wave`。角色 skill 目录进 Lead + worker 的 `customSkillDirs`，teammate/worker 用 `skill`
+加载方法论；Lead 仍只发起 HITL。
 
 ## 1. persona 要素（每角色 prefix 必含）
 

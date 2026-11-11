@@ -1,0 +1,57 @@
+{
+  "mode": "worker-tools",
+  "port": 3106,
+  "startedAt": "2026-11-11T08:40:36.363Z",
+  "checks": [
+    {
+      "check": "research-worker request/header 在场",
+      "ok": true
+    },
+    {
+      "check": "research-wave request/header 在场",
+      "ok": true
+    },
+    {
+      "check": "端口回收",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "sessions": {
+    "research-worker": {
+      "id": "session-dcd57221-9e56-41e0-8ad7-1eb991e470ed",
+      "tools": [
+        "edit",
+        "glob",
+        "grep",
+        "present",
+        "read",
+        "read_image",
+        "skill",
+        "todo_write",
+        "web_fetch",
+        "web_search",
+        "working_directory",
+        "write"
+      ]
+    },
+    "research-wave": {
+      "id": "session-c3347c54-c818-40ab-8ec4-5eb5e6dbb331",
+      "tools": [
+        "edit",
+        "glob",
+        "grep",
+        "present",
+        "read",
+        "read_image",
+        "skill",
+        "todo_write",
+        "web_fetch",
+        "web_search",
+        "workflow",
+        "working_directory",
+        "write"
+      ]
+    }
+  }
+}

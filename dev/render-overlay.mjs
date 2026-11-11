@@ -12,18 +12,27 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const OUT = join(ROOT, 'dev', 'research.overlay.yml');
 
-/** 取每个 preset patch 文件 `- insert:` 之后的正文（缩进已 ≥4，可直接并入 overlay 的 insert 列表）。 */
-function presetBodies() {
-  const dir = join(PACK, 'presets');
+/** 取一个目录下 patch 文件 `- insert:` 之后的正文（缩进已 ≥4，可直接并入 overlay 的 insert 列表）。 */
+function patchBodies(dir, label) {
   const parts = [];
   for (const f of readdirSync(dir).filter((x) => x.endsWith('.patch.yml')).sort()) {
     const lines = readFileSync(join(dir, f), 'utf8').split('\n').filter((l) => !l.startsWith('#'));
     const i = lines.findIndex((l) => l.trim() === '- insert:');
     if (i === -1) throw new Error(`${f}: 缺 "- insert:" 行`);
     const body = lines.slice(i + 1).join('\n').replace(/\s+$/, '');
-    parts.push(`    # ── ${f}（由 dev/render-overlay.mjs 从 pack 渲染）──\n${body}`);
+    parts.push(`    # ── ${f}（由 dev/render-overlay.mjs 从 pack ${label} 渲染）──\n${body}`);
   }
   return parts.join('\n\n');
+}
+
+function presetBodies() {
+  return patchBodies(join(PACK, 'presets'), 'presets');
+}
+
+function workerBodies() {
+  const dir = join(PACK, 'workers');
+  if (!existsSync(dir)) return '';
+  return patchBodies(dir, 'workers');
 }
 
 /** 取 cordis.patch.yml 的 replace 块（`- insert:` 之前的顶层行，去注释与空行）——bundle 级
@@ -59,6 +68,8 @@ ${bundleReplaces()}
 
 - insert:
 ${presetBodies()}
+
+${workerBodies()}
 
 ${bundleInserts()}
 `;

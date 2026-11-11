@@ -84,7 +84,7 @@ L2 触发（任一）：关键 claim 单源/只有二手、口径缺失、矛盾
   `seek`/`verify` 走**，证据卡写 `lens: <id>`；一卡一面，多面拆卡。
 - **Check**：critic 三线审查 → `review.md`；readiness PASS 才进 HITL2。
 - 一个 topic 至少 Scan + Dive + Check；简单题可退化。cell 内步骤可由 owner 自己做，也可派
-  depth-2 worker；worker 必须带 `agent_preset`（scout/analyst/critic），结果回父级，由 owner 写
+  depth-2 worker；角色 worker 必须带 `agent_preset`（scout/analyst/critic），省略默认 research-worker；脚本层 executor 用 research-wave；结果回父级，由 owner 写
   evidence。**不建 nested Team**；需要另一个 owner 就找 Lead 加 teammate（≤8）。
 
 ## 4. 物化到 Team
@@ -100,7 +100,7 @@ L2 触发（任一）：关键 claim 单源/只有二手、口径缺失、矛盾
    `task_id` 会失效，按同一规则重绑。**task_id 只是当前会话映射**；canonical 引用始终是 `W2.1`。
 4. 把所有 ready 且无 owner 的 task `team_task_update action=reassign` 给 owner；owner 不在线就
    `send_message` 唤醒。
-5. **脚本层不建 Team task**：executor = Lead `subagent(agent_preset=analyst)`（spawn，depth 1），
+5. **脚本层不建 Team task**：executor = Lead `subagent(agent_preset=research-wave)`（spawn，depth 1），
    不是 Team 成员；该层节点 `task_id=plan-only`，`## Wave 执行` 节记录 cells/executor/报告路径。
    不要为脚本层建 task 或 reassign；Team 板只镜像对话层节点。
 
@@ -112,7 +112,7 @@ L2 触发（任一）：关键 claim 单源/只有二手、口径缺失、矛盾
    做 Lead 自己的 synthesis/收口。
 4. teammate 失败/卡住 → `interrupt_agent` + `reassign`（或 reopen）；journal 记原因。
 5. 交付前不结束回合、不问“要不要继续”、不汇报中间进度；只有 HITL1/HITL2 两个交互点。
-6. **脚本层派发**：Lead 用 `subagent(agent_preset=analyst)` 派 executor，brief 按
+6. **脚本层派发**：Lead 用 `subagent(agent_preset=research-wave)` 派 executor，brief 按
    `wave-execution` skill 的七件写全（bundle/plan_version/wave/cells 含 lens 路径与输出路径/
    授权句）；等 completion notice 后读 `waves/W<n>.json` + 抽查 ≥1 张卡，journal 记一行。
    同一层不重复跑；脚本层运行期间不再派 subagent worker（8 槽共享）。

@@ -1,0 +1,68 @@
+# Research Wave Executor —— 非研究角色的同质 wave 执行器（D47）。
+# 用途：Lead 在计划卡授权后 spawn subagent(agent_preset=research-wave) 跑 lens-fanout；
+# child 继承此薄组合（无 Team / goal / ask-user / present / subagent），因此不会再长成
+# analyst 克隆去递归 workflow/subagent。workflow 只在这个 preset 上出现。
+- insert:
+    - id: preset-research-wave
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: research-wave
+        name: Research Wave Executor
+        description: 同质取证 wave 的执行器（非研究角色）——固定配方扇出，不综合、不组队、不问人
+        order: 21
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                你是同质取证 wave 的执行器（不是 Lead、不是研究角色）。只按 brief 与固定配方 `lens-fanout` 跑一个 wave；开工先 `skill` 加载 wave-execution。不综合、不写 final/review、不组队、不问用户、不设 goal。
+                child 继承你的薄组合；它们只做单 cell 取证。不要递归调用 workflow 或 subagent；需要拍板的事写 gap 回给 Lead。
+                你不计算 `sha256`，也不把 workflow 当计算器；provenance 的 hash 由 ops/Lead 后补。
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+            config:
+              includeDefaultRoots: false
+              customSkillDirs:
+                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('dsh-deep-research-pack/package.json')), 'presets/analyst/skills')
+                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('dsh-deep-research-pack/package.json')), 'presets/critic/skills')
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: true
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+              fetchTimeoutMs: 45000
+          - id: workflow-delegation
+            name: cordis:group
+            group: true
+            isolate:
+              workflowEngine: true
+            config:
+              - id: workflow-ptc
+                name: '@deepseek-ai/dsh-workflow-ptc'
+                config:
+                  provider: spawn
+                  maxConcurrentAgents: 4
+                  maxTotalAgents: 8
+              - id: tool-workflow
+                name: '@deepseek-ai/dsh-tool-workflow'
+                config:
+                  enableRunInBackground: false
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 22528
+              projectRootMarkers: []

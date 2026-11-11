@@ -47,7 +47,7 @@ test('Lead skills：planning / team-assembly / brief 都点名脚本层', () => 
   assert.match(team, /不要用 `spawn_teammate`/, 'team-assembly 未钉脚本层唯一通道');
   assert.match(team, /不要用 `wait_agent`/, 'team-assembly 未钉 subagent 等法（completion notice）');
   assert.match(team, /有脚本层时先算槽再组队/, 'team-assembly 未钉脚本层容量公式');
-  assert.match(team, /team \+ 1 executor\s*\n?\s*\+ N child ≤ 8|team \+ 1 executor \+ N child ≤ 8/, 'team-assembly 未钉 8 槽公式');
+  assert.match(team, /team \+ worker \+ executor \+ N child ≤ 8/, 'team-assembly 未钉全 run 8 槽公式');
   assert.match(brief, /脚本层点名/, 'research-brief 缺脚本层点名');
   assert.match(brief, /W<n> 脚本扇出/, 'research-brief 缺计划卡授权句');
 });

@@ -23,25 +23,34 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { PACK, loadPreset, presetRoles, rowById, skillsOf } from './preset-helpers.mjs';
+import { PACK, loadPreset, loadWorker, presetRoles, rowById, skillsOf, workerPresets } from './preset-helpers.mjs';
 
 const ROLES = presetRoles();
-const ROLE_SET = new Set(ROLES);
+const RESEARCH_ROLES = ROLES.filter((role) => role !== 'method-editor');
+const WORKER_IDS = workerPresets();
+const ROLE_SET = new Set([...ROLES, ...WORKER_IDS]);
 const MANUAL = readFileSync(join(PACK, 'content', 'manual.md'), 'utf8');
+const WORKER_PERSONAS = workerPresets().map((id) => ({
+  path: `${id}:persona`,
+  text: rowById(loadWorker(id).rows, 'persona')?.config?.prefix ?? '',
+}));
 
 const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const mentioned = (text, name) => new RegExp(`\\b${escapeRegExp(name)}\\b`).test(text);
 
-test('每个 preset 恰有一条 skill-filesystem，且只装自己的 skills 目录', () => {
+test('每个 preset 恰有一条 skill-filesystem；Lead 例外可装角色技能目录（D47）', () => {
   for (const role of ROLES) {
     const preset = loadPreset(role);
     const rows = preset.rows.filter((row) => row.id === 'skill-filesystem');
     assert.equal(rows.length, 1, `${role}: skill-filesystem 行必须恰有一条（当前 ${rows.length}）`);
     const dirs = rows[0]?.config?.customSkillDirs;
-    assert.ok(Array.isArray(dirs) && dirs.length === 1, `${role}: customSkillDirs 必须恰有一个目录`);
-    const roots = [...String(dirs[0]).matchAll(/presets\/[a-z0-9-]+\/skills/g)].map((match) => match[0]);
-    assert.deepEqual([...new Set(roots)], [`presets/${role}/skills`],
-      `${role}: skill 根必须且只能是自己的 presets/${role}/skills（实际：${roots.join(', ') || '（无）'}）`);
+    assert.ok(Array.isArray(dirs) && dirs.length >= 1, `${role}: customSkillDirs 必须至少有一个目录`);
+    const roots = [...new Set(dirs.flatMap((d) => [...String(d).matchAll(/presets\/[a-z0-9-]+\/skills/g)].map((match) => match[0])))].sort();
+    const expected = role === 'lead'
+      ? RESEARCH_ROLES.map((r) => `presets/${r}/skills`).sort()
+      : [`presets/${role}/skills`];
+    assert.deepEqual(roots, expected,
+      `${role}: skill 根不符合合同（实际：${roots.join(', ') || '（无）'}）`);
   }
 });
 
@@ -80,6 +89,7 @@ test('每个技能都有消费面：自己的 persona / 手册 / 同角色另一
       const sources = [
         ...(typeof persona === 'string' ? [{ path: `${role}:persona`, text: persona }] : []),
         { path: 'content/manual.md', text: MANUAL },
+        ...WORKER_PERSONAS,
         ...ownSkills.filter((source) => source.path !== own),
       ];
       if (!sources.some((source) => mentioned(source.text, skill))) orphans.push(own);
@@ -112,7 +122,7 @@ test('行里出现的 agentPreset / allowedAgentPresets 都指向盘上角色', 
       if (typeof config.agentPreset === 'string') refs.push(config.agentPreset);
       if (Array.isArray(config.allowedAgentPresets)) refs.push(...config.allowedAgentPresets);
       for (const ref of refs) {
-        assert.ok(ROLE_SET.has(ref), `${role}: ${row.id} 引用了不存在的 agentPreset「${ref}」`);
+        assert.ok(ROLE_SET.has(ref), `${role}: ${row.id} 引用了不存在的 agentPreset「${ref}」（角色或 worker）`);
       }
     }
   }

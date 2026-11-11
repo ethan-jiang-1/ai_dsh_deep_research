@@ -1,5 +1,5 @@
 ---
-description: "面向 DSH 的 Deep Research 组合包：五个 preset、一个研究驾驶舱，以及可溯源的研究报告。"
+description: "面向 DSH 的 Deep Research 组合包：五个角色 preset、两个 worker profile、一个研究驾驶舱，以及可溯源的研究报告。"
 kind: "package-bundle"
 ---
 
@@ -9,8 +9,9 @@ kind: "package-bundle"
 
 ## 摘要
 
-本组合包为 DSH profile 增加深度研究（Deep Research）能力：五个 agent preset（Lead、Scout、
-Analyst、Critic、Method Editor）、方法论 skill、Web 研究驾驶舱、一个抓取回退 provider、注入式研究内容，
+本组合包为 DSH profile 增加深度研究（Deep Research）能力：五个角色 preset（Lead、Scout、
+Analyst、Critic、Method Editor）、两个非角色 worker profile（Research Worker / Research Wave Executor）、
+方法论 skill、Web 研究驾驶舱、一个抓取回退 provider、注入式研究内容，
 以及用于登记一个工作区并打开首个 Lead 会话的启动行。它是组合包，不是 profile，也不是应用：它装进用户
 自建的 custom profile（例如 `deep-research`），用户用 `dsh --profile` 启动该 profile。研究成果留在
 用户的工作区；本包自身不携带运行时、启动器或安装器。
@@ -40,7 +41,7 @@ Analyst、Critic、Method Editor）、方法论 skill、Web 研究驾驶舱、�
 **1. 它是什么、装到哪里。** 一个**组合包**：`package.json` 在 `dsh.bundle.patch` 下声明六个
 patch 文件。它装进名为 `deep-research` 的 **custom profile**；profile 是用户自己的具名组装，不是本包
 发布的东西。安装后，该 profile 的 `dsh.profile.bundles` 含有 `dsh-deep-research-pack`，该组合包插入
-`preset-{lead,scout,analyst,critic,method-editor}`、`research-content`、`research-client`、
+`preset-{lead,scout,analyst,critic,method-editor}`、`preset-{research-worker,research-wave}`、`research-content`、`research-client`、
 `research-startup`、`research-fetch-fallback` 与 `tool-present`。团队可视化行（`ui-agent-team`）
 由团队机制层提供（同一 profile 内单独安装），本包不插它。
 
@@ -197,7 +198,8 @@ client 行。团队可视化行（`ui-agent-team`）归团队机制层，不在�
 | 路径 | 角色 |
 |---|---|
 | `cordis.patch.yml` | Host 侧的组合包行与默认 preset |
-| `presets/*.patch.yml` | 五条 preset 行 |
+| `presets/*.patch.yml` | 五条角色 preset 行 |
+| `workers/*.patch.yml` | 两条非角色 worker profile 行（`research-worker` / `research-wave`） |
 | `presets/*/skills/` | 按角色硬隔离的方法论 skill |
 | `content/manual.md`, `content/templates/run/` | 注入的手册与 run 模板 |
 | `src/content/`, `src/startup/`, `src/client/`, `src/fetch-fallback/` | 注入内容、启动行、驾驶舱与抓取 provider 的源码 |

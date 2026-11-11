@@ -1,0 +1,53 @@
+# Research Worker —— 非研究角色的薄 worker profile（D47）。
+# 用途：一次性角色工作（单批取证/写卡/检索/对账）走 subagent(agent_preset=research-worker)；
+# 无 Team / goal / ask-user / present / subagent / workflow 工具行；child 不再长成 Lead 克隆。
+# 不是第五个研究角色：D2 的角色清单仍只数 presets/*.patch.yml（workers/ 不计入）。
+- insert:
+    - id: preset-research-worker
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: research-worker
+        name: Research Worker
+        description: 研究执行 worker（非研究角色）——只做指派的取证/写卡/检索，不组队、不问人、不设目标
+        order: 20
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                你是研究执行 worker（不是研究角色、不是 Lead）。只做 brief 指派的一个 cell：取证、检索、写卡、对账；不组队、不问用户、不设 goal、不声明交付。
+                开工先按 brief 用 `skill` 加载对应方法论（evidence-extraction / lead-mapping / adversarial-review 之一）。需要拍板或超出 brief 的事，写成 gap 回给派发者；不要自己扩大范围。
+                你不计算 `sha256`，也不把 workflow 当计算器；provenance 的 hash 由 ops/Lead 后补。
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+            config:
+              includeDefaultRoots: false
+              customSkillDirs:
+                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('dsh-deep-research-pack/package.json')), 'presets/scout/skills')
+                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('dsh-deep-research-pack/package.json')), 'presets/analyst/skills')
+                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('dsh-deep-research-pack/package.json')), 'presets/critic/skills')
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: true
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+              fetchTimeoutMs: 45000
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 22528
+              projectRootMarkers: []

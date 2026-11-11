@@ -1,5 +1,5 @@
 ---
-description: "Deep Research bundle for DSH: five presets, a research cockpit, and traceable reports."
+description: "Deep Research bundle for DSH: five role presets, two worker profiles, a research cockpit, and traceable reports."
 kind: "package-bundle"
 ---
 
@@ -9,11 +9,10 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This bundle adds a Deep Research capability to a DSH profile: five agent presets (Lead, Scout,
-Analyst, Critic, Method Editor), methodology skills, a Web research cockpit, a fetch-fallback
-provider, injected research content, and startup rows that register a workspace and open the first
-Lead session. It is a bundle, not a profile or an application: it installs into a user-created
-custom profile such as `deep-research`, and the user starts that profile with `dsh --profile`.
+This bundle adds a Deep Research capability to a DSH profile: five role presets (Lead, Scout,
+Analyst, Critic, Method Editor), two non-role worker profiles (Research Worker, Research Wave
+Executor), methodology skills, a Web research cockpit, a fetch-fallback provider, injected research
+content, and startup rows that register a workspace and open the first Lead session. It is a bundle, not a profile or an application: it installs into a user-created custom profile such as `deep-research`, and the user starts that profile with `dsh --profile`.
 Research output stays in the user's workspace; the package itself carries no runtime, launcher, or
 installer.
 
@@ -39,12 +38,13 @@ installer.
 
 ### Install into a profile
 
-**1. What it is and where it goes.** A **bundle**: `package.json` declares six patch files under
+**1. What it is and where it goes.** A **bundle**: `package.json` declares eight patch files under
 `dsh.bundle.patch`. It installs into a **custom profile** named `deep-research`; the profile is the
 user's named assembly, not something this package ships. After installation the profile's
 `dsh.profile.bundles` contains `dsh-deep-research-pack`, and the bundle inserts
-`preset-{lead,scout,analyst,critic,method-editor}`, `research-content`, `research-client`,
-`research-startup`, `research-fetch-fallback`, and `tool-present`. The team UI row
+`preset-{lead,scout,analyst,critic,method-editor}`, `preset-{research-worker,research-wave}`,
+`research-content`, `research-client`, `research-startup`, `research-fetch-fallback`, and
+`tool-present`. The team UI row
 (`ui-agent-team`) comes from the team-mechanics layer, installed separately in the same profile;
 this bundle does not insert it.
 
@@ -215,13 +215,13 @@ use a separate `DSH_HOME` for a clean environment.
 (`openAt: first-search`, `path: ':memory:'`), and `agent-preset-registry`, and inserts
 `research-fetch-fallback`, `tool-present`, and the package's content, startup, and client rows.
 The team UI row (`ui-agent-team`) belongs to the team-mechanics layer, not this patch. `presets/<role>.patch.yml` is
-one `@deepseek-ai/dsh-agent-preset` row per role; `presets/<role>/skills/` holds the role's
-methodology skills. `content/` is injected as runtime context, not written into the workspace.
+one `@deepseek-ai/dsh-agent-preset` row per role; `workers/<profile>.patch.yml` is one
+non-role worker row; `presets/<role>/skills/` holds the role's methodology skills. `content/` is injected as runtime context, not written into the workspace.
 
 | Path | Role |
 |---|---|
 | `cordis.patch.yml` | Host bundle rows and default preset |
-| `presets/*.patch.yml` | Five preset rows |
+| `presets/*.patch.yml` · `workers/*.patch.yml` | Five role preset rows + two non-role worker profile rows (`research-worker`, `research-wave`) |
 | `presets/*/skills/` | Role-scoped methodology skills |
 | `content/manual.md`, `content/templates/run/`（含 `protocol.json` 写者契约）, `content/lenses/` | Injected manual, run templates, and on-demand lens entries |
 | `src/content/`, `src/startup/`, `src/client/`, `src/fetch-fallback/` | Source for the injected content, startup row, cockpit, and fetch provider |

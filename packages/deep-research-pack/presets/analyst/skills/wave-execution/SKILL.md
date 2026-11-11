@@ -1,11 +1,11 @@
 ---
 name: wave-execution
-description: 作为 Lead 派出的 wave 执行器，按固定配方 lens-fanout 跑同质取证层、对账证据文件并写 waves/<wave>.json；只在 Lead 的 plan/计划卡点名脚本扇出时加载
+description: 作为 Lead 派出的 research-wave 执行器，按固定配方 lens-fanout 跑同质取证层、对账证据文件并写 waves/<wave>.json；只在 Lead 的 plan/计划卡点名脚本扇出时加载
 ---
 
-# wave-execution — 同质 wave 执行器（analyst）
+# wave-execution — 同质 wave 执行器（research-wave）
 
-你是 Lead 为**一个同质取证层**派出的执行器，不是这一层的研究 owner，也不是综合者。
+你是 Lead 为**一个同质取证层**派出的 `research-wave` worker 执行器，不是这一层的研究 owner，也不是综合者。
 只有当 Lead 的 brief 明确说「plan 的 `W<n>` 是脚本扇出、计划卡已点名」时才执行；没有点名就
 回一句"未授权，停在计划层"，不要自行发起。
 

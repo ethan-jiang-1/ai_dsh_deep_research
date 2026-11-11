@@ -185,6 +185,7 @@ status——材料的状态就是题的状态。
 | 名头 | 问题 | 消费者 | 材料 |
 |---|---|---|---|
 | [外部 landscape](external-landscape/README.md) | 外部系统已走到哪、哪些是 table stakes；style 空间与隐含 Protocol | 本轮设计推演 | 4 份 |
+| [策略抽象](strategy-abstraction/README.md) | 固定权重下 UI→数据→行动 的可编译性；现有 UI 哪些合理、哪些该改/停 | 用户 2026-11-11 直派设计复核；并行 orchestration-alignment | 1 份 |
 
 归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单，也不抄状态（状态正本 = 题名页）。
 

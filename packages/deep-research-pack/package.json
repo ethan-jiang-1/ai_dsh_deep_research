@@ -3,7 +3,7 @@
   "version": "0.3.1",
   "private": false,
   "type": "module",
-  "description": "Deep Research multi-role plugin pack: 4 research role presets (Lead / Scout / Analyst / Critic) + 1 method-editor preset + host bundle rows (preset roster, deliverables, team UI). Team mechanics come from the dsh-experimental-agent-team-profile layer installed per profile. Methodology kernel from codex Deep Research harness. Repository docs: https://github.com/ethan-jiang-1/ai_dsh_deep_research",
+  "description": "Deep Research multi-role plugin pack: 4 research role presets (Lead / Scout / Analyst / Critic) + 1 method-editor preset + 2 non-role worker profiles (Research Worker / Research Wave Executor) + host bundle rows (preset roster, deliverables, team UI). Team mechanics come from the dsh-experimental-agent-team-profile layer installed per profile. Methodology kernel from codex Deep Research harness. Repository docs: https://github.com/ethan-jiang-1/ai_dsh_deep_research",
   "license": "MIT",
   "author": "The ai_dsh_deep_research authors",
   "repository": {
@@ -34,6 +34,7 @@
   "files": [
     "LICENSE",
     "presets/**",
+    "workers/**",
     "content/**",
     "cordis.patch.yml",
     "lib/**",
@@ -92,7 +93,9 @@
         "./presets/critic.patch.yml",
         "./presets/lead.patch.yml",
         "./presets/scout.patch.yml",
-        "./presets/method-editor.patch.yml"
+        "./presets/method-editor.patch.yml",
+      "./workers/research-worker.patch.yml",
+      "./workers/research-wave.patch.yml"
       ]
     },
     "client": {
