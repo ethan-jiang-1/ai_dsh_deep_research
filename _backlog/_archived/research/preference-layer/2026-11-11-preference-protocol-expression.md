@@ -8,8 +8,8 @@ intent: 在数据层 v1 合同之外，盘一次 run 里「研究设计」被表
 > 性质：v1 合同修订提案。只读盘上与文本；未改 pack / 模板 / 门禁 / 卡片。
 > 上游：[数据模型](2026-11-10-preference-protocol-data-model.md) · [怎么落](2026-11-10-preference-protocol-how.md) ·
 > [核验与收口](2026-11-11-preference-protocol-verification.md) ·
-> [第三遍·偏好层](../external-landscape/2026-11-10-landscape-preference-layer.md) ·
-> [第四遍·style](../external-landscape/2026-11-10-landscape-style-space.md)。
+> [第三遍·偏好层](../../../research/external-landscape/2026-11-10-landscape-preference-layer.md) ·
+> [第四遍·style](../../../research/external-landscape/2026-11-10-landscape-style-space.md)。
 > **结论先行：数据层不是不够，而是不够「到人」。** v1 的 `protocol.json` 若只接 gate、不接四个时刻
 > （HITL1 卡 / 派发 / critic / HITL2+final），它会变成又一份手写表达，而不是单一真源。表达层缺口 =
 > **5 个派生投影 + 4 条规则 + 2 个数据层语义澄清**；全部是 skill / persona / 模板文本 + core 的

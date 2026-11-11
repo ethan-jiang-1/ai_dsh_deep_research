@@ -60,7 +60,7 @@ opened: 2026-11-10
   claim-level 证据 + 对偏好层的增量建议；不写泛行业综述。第三、四遍都已按此完成（仍未覆盖项见上，故题仍
   `调研中`）。
 - **共享底座**：见 [../README.md](../README.md) 的「共享上下文（所有方向必读）」节。
-- **后续**：偏好层数据模型 = [preference-layer](../preference-layer/README.md)（第三遍的设计推演，不是外部证据）；
+- **后续**：偏好层数据模型 = [preference-layer](../../_archived/research/preference-layer/README.md)（第三遍的设计推演，不是外部证据）；
   style 空间 = 第四遍，给偏好层的增量是 `style_ref` + `gate_profile`（待拍板）。
 
 ## 材料

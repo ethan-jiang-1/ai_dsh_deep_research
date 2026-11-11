@@ -15,6 +15,7 @@
 | [plugin-as-product/](plugin-as-product/README.md) · 插件即产品：独立启动 profile、用户工作区与 run bundle 归属 | 11 份 | [插件即产品决策卡](../settled_issues/2026-11-01-plugin-as-product.md) 及四张子卡 | [父卡](../settled_issues/2026-11-01-plugin-as-product.md)、[D38](../../../docs/decisions.md#d38)、[Note](../../../notes/archived/2026-11-01-plugin-as-product.md) | 2026-11-01 |
 | 名头 | 材料 | 历史消费者 | 产出的卡 | 归档 |
 |---|---|---|---|---|
+| [preference-layer/](preference-layer/README.md) · 偏好层：搜索倾向与偏好的数据结构 + 表达层投影（卡/派发/review/HITL2/final） | 4 份 | 本轮 presets 设计推演（用户 2026-11-10 直派） | [Protocol 层已结卡](../settled_issues/2026-11-11-preference-protocol-layer.md)、[D46](../../../docs/decisions.md#d46)、[Note](../../../notes/implemented/2026-11-11-preference-protocol-layer.md) | 2026-11-11 |
 | [presets-content-test-coverage/](presets-content-test-coverage/README.md) · presets/content 测试组织与内容组织 | 2 份 | 用户 2026-11-11 直派（“挖掘挖掘、实验实验，想明白再动手”） | [测试组织已结卡](../settled_issues/2026-11-11-presets-content-test-coverage.md)、[测试资产收口已结卡](../settled_issues/2026-11-11-test-asset-coverage.md)、[内容组织 T0 已结卡](../settled_issues/2026-11-11-content-organization-t0.md)；[design/70](../../../docs/design/70-content-organization.md) | 2026-11-11 |
 | [probe-surfacing/](probe-surfacing/README.md) · 探针凸显化：根 `probes/`、生成索引与头注门 | 两份 | 用户 2026-11-10 直派 | [探针凸显化卡](../settled_issues/2026-11-10-probe-surfacing.md)（已结，用户验收 2026-11-10） | 2026-11-10 |
 | [research-shelf/](research-shelf/README.md) · 研究货架：题名、材料、留痕的组织判据 | 2 份 | 本轮研究自身的组织（用户 2026-11-10 直派） | —（元方向：结论直接改目录与索引，不转卡） | 2026-11-10 |

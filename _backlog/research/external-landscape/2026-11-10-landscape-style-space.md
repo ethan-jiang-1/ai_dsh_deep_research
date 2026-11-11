@@ -648,8 +648,8 @@ preference-layer §11 有六个结构选择；本遍建议加一个候选（不�
 - Perplexity effort/profile/skills：第三遍 §2.1
 - STORM perspective 消融：第二遍 §2
 - GPT-Researcher / DeerFlow / LangGraph 参数与强制：第三遍 §2.5
-- 本仓偏好层：[preference-layer](../preference-layer/README.md) 与
-  [数据模型](../preference-layer/2026-11-10-preference-protocol-data-model.md)
+- 本仓偏好层：[preference-layer](../../_archived/research/preference-layer/README.md) 与
+  [数据模型](../../_archived/research/preference-layer/2026-11-10-preference-protocol-data-model.md)
 - 旧 harness 的 `research_profile` / `research_style_params`：
   [考古报告](../../../notes/archived/2026-09-24-deep-research-harness-analysis.md)；
   弃用数值 floor 的映射：[30-methodology-mapping](../../../docs/design/30-methodology-mapping.md)

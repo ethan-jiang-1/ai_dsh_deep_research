@@ -5,7 +5,7 @@
 // 为什么单独成模块：同一份合同有多个消费面（CLI gate、keyless 测试、以后驾驶舱/导出工具）——口径只能
 // 有一份。纯函数 = keyless 可测；bundle 读取与 legacy 判定归 protocol-audit.mjs。
 //
-// 口径正本 = _backlog/research/preference-layer/2026-11-11-preference-protocol-verification.md §6
+// 口径正本 = _backlog/_archived/research/preference-layer/2026-11-11-preference-protocol-verification.md §6
 // + 2026-11-11-preference-protocol-expression.md §4–§7（approval_basis / 复合方法 / 投影与卡）。
 //
 // 边界：

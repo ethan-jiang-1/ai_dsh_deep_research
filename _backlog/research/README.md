@@ -185,7 +185,6 @@ status——材料的状态就是题的状态。
 | 名头 | 问题 | 消费者 | 材料 |
 |---|---|---|---|
 | [外部 landscape](external-landscape/README.md) | 外部系统已走到哪、哪些是 table stakes；style 空间与隐含 Protocol | 本轮设计推演 | 4 份 |
-| [偏好层](preference-layer/README.md) | 搜索倾向与偏好如何收束成可解析、可审、可扩的数据模型；表达层（卡/派发/review/交付）的投影与缺口 | 已定性；落地 = [issue 2026-11-11-preference-protocol-layer](../_archived/settled_issues/2026-11-11-preference-protocol-layer.md) | 4 份 |
 
 归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单，也不抄状态（状态正本 = 题名页）。
 

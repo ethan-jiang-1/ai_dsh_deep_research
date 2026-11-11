@@ -10,9 +10,9 @@ opened: 2026-11-11
 >
 > **关闭**：2026-11-11 ｜ 审查：机械门禁全绿（verify/test/L1/L4-lite/snapshot/smoke）+ 语义自审；用户选择 A：接受 Protocol 层残余（D44 claim 层另案）｜ 去向：implemented Note + D46。
 >
-> **研究依据**：[preference-layer 题名页](../../research/preference-layer/README.md) → [v1 核验与收口](../../research/preference-layer/2026-11-11-preference-protocol-verification.md)
-> （盘上 63 个 bundle 的实测、结构选择收口、v1 合同、三个倾向纸面跑）；设计底稿 = [数据模型](../../research/preference-layer/2026-11-10-preference-protocol-data-model.md) / [怎么落](../../research/preference-layer/2026-11-10-preference-protocol-how.md)；
-> **表达层补篇** = [卡/派发/review/HITL2/final 的缺口与 v1 表达合同](../../research/preference-layer/2026-11-11-preference-protocol-expression.md)。
+> **研究依据**：[preference-layer 题名页](../research/preference-layer/README.md) → [v1 核验与收口](../research/preference-layer/2026-11-11-preference-protocol-verification.md)
+> （盘上 63 个 bundle 的实测、结构选择收口、v1 合同、三个倾向纸面跑）；设计底稿 = [数据模型](../research/preference-layer/2026-11-10-preference-protocol-data-model.md) / [怎么落](../research/preference-layer/2026-11-10-preference-protocol-how.md)；
+> **表达层补篇** = [卡/派发/review/HITL2/final 的缺口与 v1 表达合同](../research/preference-layer/2026-11-11-preference-protocol-expression.md)。
 >
 > **开工授权**：本卡触及 pack 公共行为（HITL1 卡、question/plan 模板、run-accept、模型可见 skill/persona），
 > D46 登记与业务验收归用户。技术项按用户 2026-11-11 指示取推荐值、不逐项拍板；M1–M2（keyless）自主，
@@ -34,7 +34,7 @@ opened: 2026-11-11
 **当前情况：**
 
 - 研究已 `已定性`（2026-11-11）：两份材料 + 一次盘上核验收口。结论见
-  [核验与收口](../../research/preference-layer/2026-11-11-preference-protocol-verification.md)。
+  [核验与收口](../research/preference-layer/2026-11-11-preference-protocol-verification.md)。
 - **v1 五刀**（核验材料 §5/§10 的推荐）：① Protocol **不含 `lens_plan`**——lens 的家仍是
   `topics.md`（D43，2026-11-10 刚落）；② plan **不加 `cell` 列**——`research-planning/SKILL.md:54`
   明写「lens 是 cell 属性，不写 plan 列」；③ **不改** `method-library.md` / `Method Editor` 的
@@ -53,7 +53,7 @@ opened: 2026-11-11
   （批准边界 / 派生不重写 / 一受众一时刻 / 偏离一等）；并反推**两条数据层澄清**：复合方法
   = `id` 主方法 + `adjustments`（不新增 schema；gate 用「包含」而非「相等」）、`approval_basis`
   = `card | revision | auto`（quick 无卡记 `auto`、修订 v2 记 `revision`；`approved` 不再无名）。全部文本 + core 两条判据，
-  不新增客户端 / host 工具 / 交互点。详见[表达层补篇](../../research/preference-layer/2026-11-11-preference-protocol-expression.md)。
+  不新增客户端 / host 工具 / 交互点。详见[表达层补篇](../research/preference-layer/2026-11-11-preference-protocol-expression.md)。
 
 **决定记录（2026-11-11）**：用户指示「技术项按推荐、不必逐项拍板」；下列 1/2/4/5/6 取推荐值，
 3 的 D46 与业务验收留交付时由用户签。视觉面（驾驶舱/新页签）不在本轮，留以后按 `projectionOf()` 适配。
