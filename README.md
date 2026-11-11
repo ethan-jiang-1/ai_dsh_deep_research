@@ -22,14 +22,16 @@ dsh --profile deep-research --from-default-profile web --dump-default-config
 
 # 2) 装插件 + 团队能力（DSH 的可选 agent-team-profile；版本必须等于 dsh --version）
 DSH_VER="$(dsh --version)"
-dsh plugin --profile deep-research add file:/path/to/dsh-deep-research-pack-0.3.0.tgz
+dsh plugin --profile deep-research add file:/path/to/dsh-deep-research-pack-0.3.1.tgz
 dsh plugin --profile deep-research add "@deepseek-ai/dsh-experimental-agent-team-profile@$DSH_VER"
 
 # 3) 启动
 dsh --profile deep-research
 ```
 
-第 1 步只建配置，不装包。把 `/path/to/dsh-deep-research-pack-0.3.0.tgz` 换成你下载的安装包（发布页或交付目录里的 tgz，通常与手册同目录）。第二条 `dsh plugin` 命令装的是团队能力（`agent-team-profile`），不要用 `@latest`——它的 `latest` 不指向当前 DSH 版本线。npm / Plugins 页装包是发布后路径（当前 staged）；0.3.0 用上面的 tarball。
+第 1 步只建配置，不装包。把 `/path/to/dsh-deep-research-pack-0.3.1.tgz` 换成你下载的安装包（发布页或交付目录里的 tgz，通常与手册同目录）。第二条 `dsh plugin` 命令装的是团队能力（`agent-team-profile`），不要用 `@latest`——它的 `latest` 不指向当前 DSH 版本线。npm / Plugins 页装包是发布后路径（当前 staged）；0.3.1 用上面的 tarball。
+
+> 从源码交付（手里没有现成 tgz 时）：仓根 `pnpm install`，再跑 `node scripts/dist/export-dist.mjs`——它在 `_dist/` 生成 tarball、安装手册与市场索引；发布/升级顺序见 [guides/64](docs/guides/64-release-versioning.md)。
 
 装好的标志：Plugins 页出现「深度研究 / Deep Research」。打开一个会话后，右栏有「研究状态 / 研究配置 / 研究图谱」（终稿在交付后自动出现），主界面有「方法库」。更新插件后要重启 profile（Ctrl-C 停掉，再跑 `dsh --profile deep-research`）。
 

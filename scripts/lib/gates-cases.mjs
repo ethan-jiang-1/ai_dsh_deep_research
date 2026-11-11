@@ -739,6 +739,7 @@ export const NO_CASE_GATES = [
   { gate: 'vendor-clean', reason: '断言对象 = submodule 的 git status（副本无此仓库）' },
   { gate: 'pin-agreement', reason: '真串读取在 submodule 一步 fail-loud，注入的伪串永不到达扫描步' },
   { gate: 'hooks-active', reason: '断言对象 = 本机 git config core.hooksPath（副本 git init 后本就未设）' },
+  { gate: 'dist-tarball', reason: '断言对象 = gitignored _dist 制品；gates-smoke 副本不含 tarball，注入 sha 漂移会落缺席 note 分支' },
 ];
 
 export const CONTROLS = [

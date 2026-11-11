@@ -6,6 +6,7 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { ROOT, PACK, fail, note, walk } from '../context.mjs';
 
 export function runE() {
@@ -125,6 +126,53 @@ export function runE() {
     const t = head.match(/\|\s*安装包\s*\|\s*`([^`]+)`/);
     if (!t || t[1] !== `dsh-deep-research-pack-${packVersion}.tgz`) {
       fail(gate, `_dist/安装手册.md: 表头未指名当前 tarball dsh-deep-research-pack-${packVersion}.tgz——手册与旁边的产物漂移，重导出`);
+    }
+  }
+}
+
+// ── dist-tarball（发布制品与 tracked 手册/源包同源；tarball gitignored，缺席时明确 note）──
+// 依据：2026-11-11 接手诊断——_dist tgz 与 HEAD 源漂移（旧 0.3.0 无 protocol.json）却全绿；
+// dist-manual-version 只查手册表头，不查制品本体。存在 _dist/dsh-deep-research-pack-<version>.tgz 时：
+//   ① 手册 sha256 = 制品 sha256；② 制品 package.json version = pack version；
+//   ③ dsh.bundle.patch 每个目标在包内；④ content/templates/run/ 源文件逐件在包内。
+// 缺席（clean clone / 源码 handoff）→ note，不静默；发布前跑 export-dist。
+// 反证：临时改手册 sha 行 → 本门禁红；还原 → 绿（一次性红录住 Note）。
+{
+  const gate = 'dist-tarball';
+  const pack = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
+  const tarball = join(ROOT, '_dist', `dsh-deep-research-pack-${pack.version}.tgz`);
+  if (!existsSync(tarball)) {
+    note(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 缺席（源码 handoff）——制品 sha/内容检查跳过；发布前跑 node scripts/dist/export-dist.mjs`);
+  } else {
+    const manualPath = join(ROOT, '_dist', '安装手册.md');
+    if (!existsSync(manualPath)) {
+      fail(gate, '_dist/安装手册.md 缺席——跑 node scripts/dist/export-dist.mjs');
+    } else {
+      const manual = readFileSync(manualPath, 'utf8');
+      const m = manual.match(/\|\s*sha256\s*\|\s*`([0-9a-f]{64})`\s*\|/);
+      const actual = createHash('sha256').update(readFileSync(tarball)).digest('hex');
+      if (!m) fail(gate, '_dist/安装手册.md 表头缺 sha256 行——手册是生成物，跑 node scripts/dist/export-dist.mjs');
+      else if (m[1] !== actual) fail(gate, `_dist/安装手册.md 的 sha256 ${m[1]} ≠ 制品 ${actual}——手册与 tarball 漂移，重导出`);
+    }
+    const listed = spawnSync('tar', ['-tzf', tarball], { encoding: 'utf8' });
+    if (listed.status !== 0) {
+      fail(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 不可读（tar exit ${listed.status}）——重导出`);
+    } else {
+      const entries = new Set((listed.stdout ?? '').split('\n').filter(Boolean));
+      const packedPkg = spawnSync('tar', ['-xOf', tarball, 'package/package.json'], { encoding: 'utf8' });
+      let packedVersion = null;
+      try { packedVersion = JSON.parse(packedPkg.stdout ?? '{}').version; } catch { /* 下面统一报红 */ }
+      if (packedVersion !== pack.version) {
+        fail(gate, `tarball 内 package.json version = ${String(packedVersion)} ≠ pack ${pack.version}——重导出`);
+      }
+      const targets = (pack.dsh?.bundle?.patch ?? []).map((p) => `package/${String(p).replace(/^\.\//, '')}`);
+      const templatesDir = join(PACK, 'content', 'templates', 'run');
+      const templates = existsSync(templatesDir)
+        ? readdirSync(templatesDir, { withFileTypes: true }).filter((e) => e.isFile()).map((e) => `package/content/templates/run/${e.name}`)
+        : [];
+      if (templates.length === 0) fail(gate, '源 content/templates/run/ 为空——制品内容检查失去语料（防空）');
+      const missing = [...targets, ...templates].filter((p) => !entries.has(p));
+      if (missing.length > 0) fail(gate, `tarball 缺源包条目：${missing.slice(0, 6).join('、')}${missing.length > 6 ? '…' : ''}——重导出（制品与 HEAD 源漂移）`);
     }
   }
 }

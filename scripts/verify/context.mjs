@@ -43,7 +43,7 @@ export const gates = [
   'pack-manifest', 'market-index', 'readme-shape', 'release-vocab',
   'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'proposed-pointer-live',
   'vendor-pin', 'vendor-clean', 'pin-agreement', 'align-ledger', 'discipline-na-trigger', 'discipline-state-vocab', 'repo-conventions', 'vendor-links',
-  'content-shape', 'dev-runtime-clean', 'overlay-fresh', 'release-version', 'dist-manual-version', 'dist-manual-fresh',
+  'content-shape', 'dev-runtime-clean', 'overlay-fresh', 'release-version', 'dist-manual-version', 'dist-tarball', 'dist-manual-fresh',
   'claude-symlink', 'secrets-untracked', 'dev-parity', 'host-paths', 'probe-registry', 'guard-red-record', 'gate-ledger-sync', 'entry-chain', 'backlog-liveness', 'port-exclusive', 'hooks-active',
 ];
 

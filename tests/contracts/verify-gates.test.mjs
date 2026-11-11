@@ -56,7 +56,7 @@ test('每个案例门禁都真实存在于 verify.mjs gates 数组（改名/退�
 // 反向覆盖：gates 数组里没有常驻案例的门禁，必须恰为 NO_CASE_GATES 登记的名单。
 // 2026-10-27 卫生轮立红：此前只做单向对账（案例 → gates），新增门禁不带案例、案例退役后
 // 遗留缺口都不会红，账本因此漂到 39/43（真值 43/47）。分子分母改由代码维护，散文只指这里。
-test('覆盖缺口恰为登记的 4 道结构性例外（新增门禁不带案例 = 红）', () => {
+test('覆盖缺口恰为 NO_CASE_GATES 登记的结构性例外（新增门禁不带案例 = 红）', () => {
   const covered = new Set(CASES.map((c) => c.gate));
   const uncovered = gatesArray.filter((g) => !covered.has(g)).sort();
   const registered = NO_CASE_GATES.map((e) => e.gate).sort();

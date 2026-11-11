@@ -478,7 +478,7 @@ export function runB() {
     if (plugins === -1) fail(gate, '安装手册没有写 Plugins 页（发布后路径；当前 staged）');
     else if (cli !== -1 && cli < plugins) fail(gate, '安装手册先讲 CLI 装包再讲 Plugins 页——Plugins 页是发布后路径，CLI 只作 web 自动化');
     if (!manual.includes('本地 tarball')) fail(gate, '安装手册没有写当前唯一发布形态 = 本地 tarball');
-    if (!/staged/i.test(manual)) fail(gate, '安装手册没有标注 npm/Plugins/Discover 为 staged（0.3.0 未上 npm）');
+    if (!/staged/i.test(manual)) fail(gate, '安装手册没有标注 npm/Plugins/Discover 为 staged（当前版本未上 npm）');
     if (!/仅 `dsh web`/.test(manual)) fail(gate, '安装手册没有标注 CLI 只适用 `dsh web`');
     if (!manual.includes('Custom plugin markets')) fail(gate, '安装手册没有写 Discover 的 experimental “Custom plugin markets” 前置');
     if (!manual.includes('--trusted-host')) fail(gate, '安装手册的安全节没有写 --trusted-host / 反代边界');

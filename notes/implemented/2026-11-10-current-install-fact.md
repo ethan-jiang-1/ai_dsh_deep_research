@@ -2,6 +2,8 @@
 
 > 状态：implemented
 
+> 历史注记：版本事实已由 [交接缺口收口](2026-11-11-handoff-gap-closure.md) 更新到 0.3.1；安装形态与 staged 结论不变。
+
 ## 决定
 
 D40/D41 保留 2026-11-01/02 的决定语境（bundle + custom profile；Plugins 页是发布后的默认形态）。0.3.0 的当前安装事实另立 [D42](../../docs/decisions.md#d42)：本地 tarball 是唯一发布形态，npm 包名 / Plugins 页 / Discover 均未发布（staged）。装/卸/验证命令的 owner = [安装手册](../../_dist/安装手册.md)；台账不再复制命令。

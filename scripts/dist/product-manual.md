@@ -94,7 +94,7 @@ dsh plugin --profile deep-research add "@deepseek-ai/dsh-experimental-agent-team
 
 ### C. 本地 tarball（当前唯一发布形态）
 
-0.3.0 现在就走这段；npm 发布前不要走包名或 Plugins 页。
+{{version}} 现在就走这段；npm 发布前不要走包名或 Plugins 页。
 
 ```sh
 # 团队层版本必须等于运行中的 dsh --version
@@ -190,12 +190,12 @@ deep-research 自己的设置文件（工作区、上次会话）= `$DSH_HOME/de
 停掉正在跑的 profile，然后按当前发布形态装新版本的 tarball（与 §四 C 同一条命令）：
 
 ```sh
-# 把 0.3.1 换成新版本号；路径换成你下载的位置
-dsh plugin --profile deep-research add "file:$HOME/downloads/dsh-deep-research-pack-0.3.1.tgz"
+# 把 0.3.2 换成新版本号；路径换成你下载的位置
+dsh plugin --profile deep-research add "file:$HOME/downloads/dsh-deep-research-pack-0.3.2.tgz"
 dsh --profile deep-research
 ```
 
-npm 发布后也可以用 Plugins 页的 Update，或 `dsh plugin --profile deep-research add dsh-deep-research-pack@0.3.1`（把 0.3.1 换成新版本）。
+npm 发布后也可以用 Plugins 页的 Update，或 `dsh plugin --profile deep-research add dsh-deep-research-pack@0.3.2`（把 0.3.2 换成新版本）。
 
 - 装/卸插件后**必须重启 profile**；只改配置的 patch 在 HMR 开启时可能即时生效。
 - 工作区数据不随包升级；方法库不被覆盖；内容（手册/模板）随包版本，新开 Lead 会话生效。

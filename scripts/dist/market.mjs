@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // market.mjs — 生成 `_dist/market.json`（format 1）的 **staged** 形态。
 //
-// 为什么是 staged：本包当前按“本地 tarball”交付，0.3.0 未发布到 npm。DSH Discover 只读静态
+// 为什么是 staged：本包当前按“本地 tarball”交付，当前版本未发布到 npm。DSH Discover 只读静态
 // 索引；若索引列出 `source: npm` 的版本，用户点安装会 404。staged 形态 = 合法空索引
 // （`plugins: []`）+ 明确文案，发现面可见但**不承诺可安装**；npm 发布后再由发布流程恢复条目。
 //
