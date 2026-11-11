@@ -25,6 +25,7 @@ import {
   type LibraryEntry,
 } from '../lib/library-fold.ts'
 import { BUILTIN_PREFERENCES } from '../lib/config-tables.ts'
+import { displayNameOf, displaySummaryOf } from './builtin-display.ts'
 import { coachPatchAppliesToDraft, mergeCoachDraft, parseMethodDraft } from '../lib/method-draft.ts'
 import { BUTTON_STYLE, HEADER_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE } from './method-library/styles.ts'
 import { BuiltinView, EditorView, LibraryRow, MethodSummaryView, ReadMineView, SourceSelectionView } from './method-library/views.tsx'
@@ -395,8 +396,8 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
               {BUILTIN_PREFERENCES.map((entry) => (
                 <LibraryRow
                   key={entry.name}
-                  name={entry.name}
-                  summary={entry.summary}
+                  name={displayNameOf(entry.name, props.t)}
+                  summary={displaySummaryOf(entry.name, props.t)}
                   selected={selectedName === entry.name}
                   t={props.t}
                   onSelect={() => { selectBuiltin(entry.name) }}
@@ -429,7 +430,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
               </div>
             )}
             {mode === 'new' && workbenchStage === 'source' && <SourceSelectionView
-              builtinChoices={BUILTIN_PREFERENCES.map((entry) => ({ ...builtinLibraryEntry(entry, props.t('builtinReadOnly')), summary: entry.summary }))}
+              builtinChoices={BUILTIN_PREFERENCES.map((entry) => builtinLibraryEntry(entry, props.t('builtinReadOnly')))}
               runNames={runNames}
               runState={runState}
               selectedRunLoading={selectedRunLoading}

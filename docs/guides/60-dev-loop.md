@@ -90,7 +90,7 @@
 |---|---|---|---|---|---|
 | 改 preset 结构（角色/工具行/roster 接线；新增 skill 文件按下行） | pack 源 `presets/` | **`render-overlay` 先于 L1**（L1 挂的是 overlay，不是 pack 源） | L0 + L1 | 行为/发布集变才写 Note | 全部 preset 真挂载绿 + 文档同步 |
 | 改 persona / skill / 手册文本（模型可见） | pack 源 + `research-workspace/` 正本 | `render-overlay` 先于 L1 → L1 → snapshot-replay B 层（细则 = 表后脚注①）→ 重启 run 通道（web 缓存 boot 时文本） | L0 + L1 + L4-lite | 同上 | 真模型档证据 + L1 绿 |
-| **改驾驶舱**（观察面 client 面——`src/client/` 套件，[构成正本](../design/40-research-cockpit.md)） | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `pnpm build` → `client-load-smoke`（改挂起显性化再跑 `client-hitl-smoke`） | L0 + client-load-smoke | 同上 | 真浏览器断言全绿 |
+| **改驾驶舱**（观察面 client 面——`src/client/` 套件，[构成正本](../design/40-research-cockpit.md)） | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` + **可见文案 zh/en 键**（任何界面文本 day-one 双语，步骤 = [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)） | `pnpm build` → `client-load-smoke`（改挂起显性化再跑 `client-hitl-smoke`） | L0 + client-load-smoke | 同上 | 真浏览器断言全绿 |
 | 改 `src/lib/` 纯函数 / 类型面（pack 两半的编译面） | 对应 `src/lib` / `src/client` 类型位 | `pnpm typecheck` → `pnpm test`（typecheck 前置 = vendor 构建产物在场） | L0 + typecheck | 同上 | typecheck + 对应测试绿 |
 | 加 / 改机械门禁 | `context.mjs` gates 数组 + 该域 `verify/gates/<域>.mjs` + `evaluation.md` §L0 台账（案例表有增删再动 `gates-smoke.mjs`） | **注入回归红 → 还原 → 绿** → gates-smoke | L0 + gates-smoke | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 + gates-smoke 绿 |
 | 改 run 通道工具 / 审计门（run-driver / boot-run / watch-run / hitl-answer / run-dashboard / evidence-audit / node-gate / schema-scan / snapshot-replay） | 对应 `scripts/` / `dev/` 脚本 | — | L0 + 对应 `tests/<domain>/*.test.mjs` 契约测试必跑（用例即其反证记录） | 判据变更才写 Note | 对应契约测试绿 |
@@ -154,8 +154,10 @@ node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <t>   # HITL 代�
 pnpm dsh <args…>                      # 机制基线 CLI（vendor/dsh 钉 tag 源码；等价 dev/env.sh 的 dsh 函数）
 node --import tsx/esm scripts/smoke/client-hitl-smoke.mjs   # 观察面活标题触发验证（真模型档：RPC followup 造挂起态 + 盘侧谓词 + 浏览器观察点）
 node --import tsx/esm scripts/smoke/cdp-ask-smoke.mjs    # 交互探针端到端（真模型档：一次性通道跑 --ask，断言发出 + journal 落盘；空闲态与在飞态两阶段）
+`research` 手工 profile 已弃用：回放/录制/团队预检统一用 `deep-research`（`dev/boot-run.sh` 维护版本面）；残留的 `research` 档不要再扩用。
+
 node scripts/smoke/snapshot-replay-smoke.mjs    # keyless 回放冒烟（须先 source dev/env.sh，端口 3103）：场景集由 snapshots/replay/research-face/snapshot.json 声明（研究角色集与盘上 presets/ 对账；方法编辑不属 run 生命周期）——逐场景 A 回放收尾逐字命中 + B 组装请求 diff（persona 全文 + 全部 request/header + 四处 user/message 注入（含时钟序列））+ 声明了 renderExpected 的场景做 C 渲染金标准比对；`--scenario <id>` 单场景、`--update-expected` 重写金标准
-node --import tsx/esm dev/record-role-fixture.mjs --role <scout|analyst|critic|lead>   # 角色组装面 fixture 录制（真模型档一次性：research 档短会话 + 哨兵「探针完成」收尾 + 日志静默判定；录制品人审后入库 + 在场景声明登记 source 身份，此后 keyless 永久回放）
+node --import tsx/esm dev/record-role-fixture.mjs --role <scout|analyst|critic|lead>   # 角色组装面 fixture 录制（真模型档一次性：`deep-research` profile（与回放同域，boot-run 维护版本面）+ 哨兵「探针完成」收尾 + 日志静默判定；录制品人审后入库 + 在场景声明登记 source 身份，此后 keyless 永久回放）
 node scripts/run-ops/run-accept.mjs <bundle>   # 交付验收原子动作：门 A + 证据审计 + 未来日期 sanity → acceptance.md；--archive 才归档
 node scripts/run-ops/runtime-clean.mjs [--older-than 14] [--yes]   # 运行区清理：默认 dry-run，只列白名单内过期条目；--yes 才删；黑名单/symlink/scenes/保留期 = runtime/README
 node scripts/run-gates/evidence-audit.mjs <bundle>|--latest  # 证据溯源审计（**须先 source dev/env.sh**：它锚定本仓 dev home，DSH_HOME 指向别处即自拒）（keyless：URL/摘录/final 链对会话日志机械对账 → audit.md；CRITICAL 即 exit 1）

@@ -108,6 +108,68 @@ test('client/lib 源码：除已登记的模型面/数据面/格式面外，不�
   assert.deepEqual(offenders, [], `以下源码在 UI 面写死中文（改用字典 key；模型面请移入允许清单并写理由）：\n${offenders.join('\n')}`)
 })
 
+// 负例留证 2026-11-12：BUG-069——显示位必须经 builtin-display 投影，canonical 只做键。
+// 红配方：把 BuiltinView 改回 `{entry.name}` / `{entry.summary}`、SourceSelectionView 候选改回
+// `{entry.name}`、MethodLibraryView 内置行改回 `name={entry.name}`、ResearchConfigTab 改回
+// `{b.name}`/`PATTERN_METHOD_RULES...join`、LegacyManagementPane 改回 `DEMO_ENTRY.name` —— 本
+// 测试逐条点名；把 coach-prompts 接上 builtin-display（模型面被翻译）→ 「模型面」断言红。
+test('BUG-069 内置内容的显示位必须经 builtin-display（定向源面守卫，不扫全仓）', () => {
+  const read = (rel) => readFileSync(join(SRC, rel), 'utf8')
+  /** 取两个标记之间的源码，把断言钉在目标组件体内（同名 `entry.name` 在用户条目视图里合法）。 */
+  const sectionOf = (text, startMarker, endMarker) => {
+    const start = text.indexOf(startMarker)
+    assert.notEqual(start, -1, `源码缺标记 ${startMarker}`)
+    const end = text.indexOf(endMarker, start)
+    return text.slice(start, end === -1 ? undefined : end)
+  }
+
+  // ① 方法库左栏内置清单：显示名/摘要走投影；key/选中/动作仍是 canonical。
+  const library = read('client/MethodLibraryView.tsx')
+  assert.match(library, /name=\{displayNameOf\(entry\.name, props\.t\)\}/, '内置参考列表的名称必须走 displayNameOf')
+  assert.match(library, /summary=\{displaySummaryOf\(entry\.name, props\.t\)\}/, '内置参考列表的摘要必须走 displaySummaryOf')
+  assert.match(library, /key=\{entry\.name\}/, 'canonical name 仍是列表 key')
+  assert.match(library, /selectedName === entry\.name/, 'canonical name 仍是选中键')
+  assert.match(library, /selectBuiltin\(entry\.name\)/, 'canonical name 仍是选择动作的键')
+
+  // ② 方法库详情/来源选择：目标组件体内的显示位全部走投影。
+  const views = read('client/method-library/views.tsx')
+  const builtinView = sectionOf(views, 'export function BuiltinView', 'export function ReadMineView')
+  assert.match(builtinView, /displayBuiltinOf\(entry, t\)/, 'BuiltinView 必须整条投影')
+  assert.doesNotMatch(builtinView, /\{entry\.(name|summary|sections)/, 'BuiltinView 不得直接渲染 canonical 名称/摘要/四字段')
+  const sourceView = sectionOf(views, 'export function SourceSelectionView', 'export function MethodSummaryView')
+  assert.match(sourceView, /displayBuiltinOf\(selectedBuiltin, t\)/, 'SourceSelectionView 的预览必须走投影')
+  assert.match(sourceView, /displayNameOf\(entry\.name, t\)/, 'SourceSelectionView 的内置候选项必须走 displayNameOf')
+  assert.doesNotMatch(sourceView, /\{entry\.name\}<\/button>/, '内置候选项不得直接渲染 canonical name')
+  assert.doesNotMatch(sourceView, /\{selectedBuiltin\.(name|sections)/, '内置预览不得直接渲染 canonical name/sections')
+
+  // ③ 研究配置页签：卡片/菜单/详情/推荐规则/领域示范的显示位走投影；动作载荷仍 canonical。
+  const config = read('client/ResearchConfigTab.tsx')
+  assert.match(config, /const createFromBuiltin = \(name: string\): void =>/, '基于内置建草稿必须收口到 createFromBuiltin（显示投影一处）')
+  assert.match(config, /displayPatternsOf\(method, props\.t\)/, '推荐规则必须走 displayPatternsOf')
+  assert.match(config, /displaySectionsOf\(detail\.name, props\.t\)/, '详情读态四字段必须走显示投影')
+  assert.match(config, /displaySummaryOf\(name, props\.t\)/, '内置卡片摘要必须走显示投影')
+  assert.match(config, /sourceName: builtin\.name/, 'create 的 sourceName 必须保持 canonical')
+  assert.match(config, /instructionOf\('use-now', name\)/, '面板动作指令仍用 canonical name')
+
+  // ④ 旧管理面：领域示范与推荐规则说明位的显示投影。
+  const legacy = read('client/research-config/LegacyManagementPane.tsx')
+  assert.match(legacy, /const demo = displayDemoOf\(t\)/, '领域示范读显示投影')
+  assert.match(legacy, /displayNameOf\(r\.method, t\)/, '推荐规则说明位中的打法名走显示投影')
+  assert.doesNotMatch(legacy, /DEMO_ENTRY/, '旧管理面不得再直接渲染 canonical DEMO_ENTRY')
+
+  // ⑤ 草稿预填：显示副本进草稿，选择仍留 canonical（喂模型面）。
+  const draftState = read('client/method-library/useDraftState.ts')
+  assert.match(draftState, /displayBuiltinOf\(entry, t\)/, 'startBuiltinSource 的预填必须走显示投影')
+  assert.match(draftState, /setSelectedBuiltinSource\(entry\)/, 'selectedBuiltinSource 必须保持 canonical')
+
+  // ⑥ 模型面不接显示投影（coach-prompts 仍是 canonical 中文）。
+  assert.doesNotMatch(read('client/method-library/coach-prompts.ts'), /builtin-display/, 'coach-prompts 是模型面，不得引用显示投影')
+
+  // ⑦ 方法编辑标题随 locale：装配面挂了 locale 订阅（会话开着切界面也迁移，不只是下次打开）。
+  assert.match(read('client/index.ts'), /scoped\.locale\.subscribe\(\(\) => \{ void migrateKnownCoachTitles\(\) \}\)/,
+    'index.ts 必须在 locale 快照变化时调用 migrateKnownCoachTitles')
+})
+
 test('允许清单：每件都存在（防清单腐烂）', () => {
   const missing = [...ALLOWED.keys()].filter((rel) => !existsSync(join(SRC, rel)))
   assert.deepEqual(missing, [], `允许清单条目已不存在：${missing.join(', ')}`)

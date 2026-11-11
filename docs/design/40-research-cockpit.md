@@ -78,6 +78,7 @@
 | 方法编辑模型指令 | `src/client/method-library/coach-prompts.ts` | 发给 Method Editor 的内部 prompt（非 UI） | [§2.7](#cockpit-7) |
 | 方法编辑工具指令 | `src/client/method-library/operation-prompts.ts` | 写库操作的内部指令（非 UI） | [§2.7](#cockpit-7) |
 | 四字段 UI 标签 | `src/client/research-config/section-labels.ts` | 四字段标题/提示的 locale 投影 | [§2.6](#cockpit-6) |
+| 内置内容显示投影 | `src/client/builtin-display.ts` | canonical 内置打法/领域示范 → 当前 locale 的显示名/摘要/四字段/推荐规则（canonical 不动） | [§4](#cockpit-4) |
 | 方法编辑会话 | `src/client/coach-sessions.ts` | 每草稿一会话（retain/create）+ 发送 | [§2.7](#cockpit-7) |
 | 文件读闭包 | `src/client/workspace-files.ts` | listDir / readLibrary / readPreview（失败降级合同） | [§2.1](#cockpit-1) |
 | 交付监听 | `src/client/delivery-watch.ts` | live present → 打开终稿（去重/不打断/在屏） | [§2.9](#cockpit-9) |
@@ -161,7 +162,7 @@
 
 **文件**：[BrandMark.tsx](../../packages/deep-research-pack/src/client/BrandMark.tsx)
 
-宿主 `sidebar.brand.mark` + `sidebar.brand.name` 两槽的 single occupant（替换内置鱼形 logo 与本地构建标签）——用户定调 2026-10-13
+宿主 `sidebar.brand.mark` + `sidebar.brand.name` 两槽的 single occupant（替换内置鱼形 logo 与本地构建标签）——用户定调 2026-10-13；品牌名随 locale（zh `Orca 深度搜索` / en `Orca Deep Research`，字典 `brandName`），name 槽注册声明 `locale: 'deepResearchPack'`。
 
 <a id="cockpit-5"></a>
 ### 2.5 面板数据面
@@ -294,6 +295,12 @@ domain。它是 Client 渲染，不进模型请求。
 - **折算进 `src/lib` 纯函数 + keyless 单测；组件薄渲染**（数据/展示分层——折算可回放可
   断言，组件只画）；
 - **keyed 字面量单一正本** `keys.ts`（`client-keys` 门禁逐处对账）；
+- **界面文案 day-one 双语**：任何用户可见文本必须同时有 zh/en——chrome（页签/按钮/空态/提示）住
+  `src/client/locales/{zh,en}.ts`；数据面折层输出住 `{zh,en}-fold.ts`，函数接受 `PackTranslate`、UI 传
+  `props.t`；产品文案（内置打法/领域示范等 canonical 表）**不翻译 canonical 本身**，UI 经显示投影取词，
+  动作/库格式/模型 prompt 继续用 canonical；模型面 prompt 与用户内容/技术标识不翻译。守卫 =
+  `tests/cockpit/{builtin-display,locales,i18n,cjk-source}.test.mjs`；新增/修改文案步骤 =
+  [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)。
 - **页签自带滚动口**：vendor `.tabBody` 是定高 flex 列且 `overflow: hidden`——页签体必须自己开内
   滚动区（根 `flex: 1; minHeight: 0`，内容区 `overflowY: auto`），否则长内容被裁且滚不动（2026-10-12
   状态页、2026-10-20 终稿页各踩一次；`client-load-smoke` 断言终稿滚动口可动）；

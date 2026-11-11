@@ -13,7 +13,8 @@ import {
   createInstruction, editInstruction, instructionOf, legacyLinesOf,
   type LibrarySections,
 } from '../lib/library-fold.ts'
-import { BUILTIN_PREFERENCES, PATTERN_METHOD_RULES, SECTIONS } from '../lib/config-tables.ts'
+import { BUILTIN_PREFERENCES, SECTIONS } from '../lib/config-tables.ts'
+import { displayBuiltinOf, displayNameOf, displayPatternsOf, displaySectionsOf, displaySummaryOf } from './builtin-display.ts'
 import { LegacyManagementPane } from './research-config/LegacyManagementPane.tsx'
 import { fieldExecutionRowsOf, specimenSkeletonsOf } from './research-config/config-model.ts'
 import { sectionLabelOf } from './research-config/section-labels.ts'
@@ -39,11 +40,22 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
   const executionRows = fieldExecutionRowsOf(props.t)
   const specimenSkeletons = specimenSkeletonsOf(props.t)
 
-  const cardMenu = (name: string, opts: { isBuiltin: boolean; isDefault: boolean }) => (
+  // 内置条目从这里起造草稿：名称/四字段用**显示投影**（英文界面下草稿即英文，用户条目）；
+  // `sourceName` 仍是 canonical（createInstruction / 库查找的键，BUG-069）。
+  const createFromBuiltin = (name: string): void => {
+    const builtin = BUILTIN_PREFERENCES.find((b) => b.name === name)
+    if (builtin === undefined) return
+    const display = displayBuiltinOf(builtin, props.t)
+    setDetail({ mode: 'create', sourceName: builtin.name, drafts: { name: props.t('basedOnBuiltin', { name: display.name }), ...display.sections } })
+  }
+
+  const cardMenu = (name: string, opts: { isBuiltin: boolean; isDefault: boolean }) => {
+    const shownName = opts.isBuiltin ? displayNameOf(name, props.t) : name
+    return (
     <Menu
       open={menuFor === name}
       anchor={(
-        <Button variant="ghost" size="sm" aria-label={props.t('rowMenuAria', { name })} onClick={() => setMenuFor(menuFor === name ? null : name)}>⋯</Button>
+        <Button variant="ghost" size="sm" aria-label={props.t('rowMenuAria', { name: shownName })} onClick={() => setMenuFor(menuFor === name ? null : name)}>⋯</Button>
       )}
       onClose={() => setMenuFor(null)}
       align="end"
@@ -55,9 +67,8 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
       {opts.isBuiltin ? (
         <MenuItemButton onSelect={() => {
           setMenuFor(null)
-          const builtin = BUILTIN_PREFERENCES.find((b) => b.name === name)
-          if (builtin !== undefined) setDetail({ mode: 'create', sourceName: builtin.name, drafts: { name: props.t('basedOnBuiltin', { name: builtin.name }), ...builtin.sections } })
-        }}>{props.t('basedOnBuiltin', { name })}</MenuItemButton>
+          createFromBuiltin(name)
+        }}>{props.t('basedOnBuiltin', { name: shownName })}</MenuItemButton>
       ) : (
         <MenuItemButton onSelect={() => {
           setMenuFor(null)
@@ -69,11 +80,12 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
         <MenuItemButton danger separatorBefore onSelect={() => { setMenuFor(null); setConfirmDelete(name) }}>{props.t('deleteAction')}</MenuItemButton>
       )}
     </Menu>
-  )
+    )
+  }
 
-  /** 推荐规则投影：这条打法在哪些题面形态下会被推出来（正本 = skill 判型→打法映射表）。 */
-  const patternsFor = (method: string): string =>
-    PATTERN_METHOD_RULES.filter((r) => r.method === method).map((r) => r.patterns).join(' · ')
+  /** 推荐规则投影：这条打法在哪些题面形态下会被推出来（canonical = skill 判型→打法映射表；
+   *  显示位走 `displayPatternsOf`，英文界面不露中文规则）。 */
+  const patternsFor = (method: string): string => displayPatternsOf(method, props.t)
 
   /** 标本位文案：① 本工作区历史 run（仅当本会话这次研究用的就是这条）＋ ③ 内联骨架片段。 */
   const specimenLine = (name: string, isBuiltin: boolean): string => {
@@ -82,22 +94,27 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
     return props.t('specimenBuiltin')
   }
 
-  const card = (name: string, summary: string | null, isDefault: boolean, opts: { isBuiltin: boolean }, onOpen: () => void): ReactNode => (
+  const card = (name: string, summary: string | null, isDefault: boolean, opts: { isBuiltin: boolean }, onOpen: () => void): ReactNode => {
+    // 卡面是显示位：内置名/摘要/推荐规则走投影；库条目（用户内容）原样。
+    const shownName = opts.isBuiltin ? displayNameOf(name, props.t) : name
+    const shownSummary = opts.isBuiltin ? (displaySummaryOf(name, props.t) || summary) : summary
+    return (
     <div key={`${opts.isBuiltin ? 'b' : 'l'}-${name}`} style={{ padding: '7px 10px', marginBottom: 6, borderRadius: 6, background: opts.isBuiltin ? '#00000008' : '#22c55e14', border: opts.isBuiltin ? 'none' : '1px solid #22c55e33' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <button type="button" onClick={onOpen} style={{ flex: 1, textAlign: 'left', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontWeight: 600, fontSize: 13, color: 'inherit' }}>
-          {name} ›
+          {shownName} ›
         </button>
         {isDefault && <Tag tone="success">{props.t('defaultPreference')}</Tag>}
         {cardMenu(name, { isBuiltin: opts.isBuiltin, isDefault })}
       </div>
-      {summary !== null && summary !== '' && <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>{summary}</div>}
+      {shownSummary !== null && shownSummary !== '' && <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>{shownSummary}</div>}
       {opts.isBuiltin && (
         <div style={{ fontSize: 11, opacity: 0.6, marginTop: 2 }}>{props.t('whenToUse', { patterns: patternsFor(name) })}</div>
       )}
       <div style={{ fontSize: 11, opacity: 0.45, marginTop: 1 }}>{specimenLine(name, opts.isBuiltin)}</div>
     </div>
-  )
+    )
+  }
 
   const sectionBlock = (label: string, value: string | null) => (
     <div key={label} style={{ marginBottom: 8 }}>
@@ -125,14 +142,15 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
       if (detail.mode === 'edit') setDetail({ ...detail, sections: { ...detail.sections, [key]: value } })
       else if (detail.mode === 'create') setDetail({ ...detail, drafts: { ...detail.drafts, [key]: value } })
     }
+    // 读态内置条目：四字段值走显示投影；库条目（用户内容）与编辑/新建草稿原样。
+    const displayedSections = detail.mode === 'read' && detail.kind === 'builtin'
+      ? (displaySectionsOf(detail.name, props.t) ?? detail.sections)
+      : null
     const readFooter = detail.mode === 'read' ? (
       <>
         {detail.kind === 'builtin'
           ? (
-            <Button variant="outline" onClick={() => {
-              const builtin = BUILTIN_PREFERENCES.find((b) => b.name === detail.name)
-              if (builtin !== undefined) setDetail({ mode: 'create', sourceName: builtin.name, drafts: { name: props.t('basedOnBuiltin', { name: builtin.name }), ...builtin.sections } })
-            }}>{props.t('basedOnBuiltin', { name: detail.name })}</Button>
+            <Button variant="outline" onClick={() => createFromBuiltin(detail.name)}>{props.t('basedOnBuiltin', { name: displayNameOf(detail.name, props.t) })}</Button>
           )
           : (
             <Button variant="outline" onClick={() => setDetail({ mode: 'edit', name: detail.name, sections: { ...detail.sections }, legacy: detail.legacyText === null ? null : legacyLinesOf(detail.legacyText).join('\n') })}>{props.t('editContent')}</Button>
@@ -159,7 +177,7 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
       <Modal
         open
         onClose={() => setDetail(null)}
-        title={detail.mode === 'create' ? props.t('newPreference') : detail.name}
+        title={detail.mode === 'create' ? props.t('newPreference') : detail.mode === 'read' && detail.kind === 'builtin' ? displayNameOf(detail.name, props.t) : detail.name}
         closeLabel={props.t('closeDetail')}
         description={detail.mode === 'read' && detail.provenance !== null ? props.t('provenancePrefix', { provenance: detail.provenance }) : detail.mode === 'edit' ? props.t('configDetailEditDesc') : props.t('configDetailCreateDesc')}
         footer={<div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>{readFooter ?? editingFooter}</div>}
@@ -180,7 +198,7 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
               ? legacyBlock(props.t('preferenceCustomRequirement'), legacyLinesOf(detail.legacyText))
               : (
                 <>
-                  {SECTIONS.map(({ key }) => sectionBlock(sectionLabel(key), detail.sections[key]))}
+                  {SECTIONS.map(({ key }) => sectionBlock(sectionLabel(key), displayedSections?.[key] ?? detail.sections[key]))}
                   {detail.kind === 'library' && detail.legacyText !== null ? legacyBlock(props.t('preferenceCustomRequirementLegacy'), legacyLinesOf(detail.legacyText)) : null}
                 </>
                 ))
@@ -273,7 +291,7 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
       align="start"
     >
       {BUILTIN_PREFERENCES.map((b) => (
-        <MenuItemButton key={b.name} onSelect={() => { setSwitchOpen(false); void send(instructionOf('use-now', b.name), { target: b.name, expectsChange: false }) }}>{b.name}</MenuItemButton>
+        <MenuItemButton key={b.name} onSelect={() => { setSwitchOpen(false); void send(instructionOf('use-now', b.name), { target: b.name, expectsChange: false }) }}>{displayNameOf(b.name, props.t)}</MenuItemButton>
       ))}
       {(entries ?? []).map((e) => (
         <MenuItemButton key={`l-${e.name}`} onSelect={() => { setSwitchOpen(false); void send(instructionOf('use-now', e.name), { target: e.name, expectsChange: false }) }}>{e.name}</MenuItemButton>
@@ -295,7 +313,7 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
         <div style={{ fontWeight: 700, fontSize: 12, opacity: 0.75 }}>{props.t('configThisRun')}</div>
         {adoption.kind === 'recorded' && (
           <div style={{ marginTop: 2, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
-            <span>{props.t('configThisRunAdopted', { name: adoption.adopted })}</span>
+            <span>{props.t('configThisRunAdopted', { name: adoption.adopted === null ? '' : displayNameOf(adoption.adopted, props.t) })}</span>
             {adoption.origin !== null && <span style={{ opacity: 0.7 }}>{props.t('configSourceInline', { origin: adoption.origin })}</span>}
             <span style={{ opacity: 0.4 }}>·</span>
             {methodPicker(props.t('switchMethod'))}

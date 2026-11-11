@@ -9,6 +9,7 @@ import { SECTION_LABELS, renderLibraryEntry, type LibraryEntry, type LibrarySect
 import type { DraftField } from '../../lib/method-draft.ts'
 import type { SourcePreview } from '../../lib/method-library-source.ts'
 import { BUTTON_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE, ROW_STYLE, TEXTAREA_STYLE, libraryRowStyle } from './styles.ts'
+import { displayBuiltinOf, displayNameOf } from '../builtin-display.ts'
 import type { DeepResearchPackLocaleKey } from '../locales.ts'
 
 /** 编辑态草稿（父级持有；`currentName` = 编辑目标原名，新建时省略）。 */
@@ -77,6 +78,8 @@ export function SourceSelectionView(props: {
   readonly t: TranslateNS<'deepResearchPack'>
 }): ReactNode {
   const { builtinChoices, runNames, runState, selectedRunLoading, onCancelRunRead, selectedBuiltin, selectedRun, onSelectBuiltin, onSelectRun, onLoadRuns, onStartBlank, onStartBuiltin, onStartRun, onCancel, t } = props
+  // 内置条目在 UI 只走显示投影（canonical 名称仍是选择/动作的键；BUG-069）。未登记名称回退原值。
+  const selectedBuiltinDisplay = selectedBuiltin === null ? null : displayBuiltinOf(selectedBuiltin, t)
   const previewText = (preview: SourcePreview): ReactNode => preview.kind === 'ok'
     ? <><pre style={{ whiteSpace: 'pre-wrap', maxHeight: 160, overflow: 'auto', margin: '4px 0', fontSize: 12 }}>{preview.text}</pre>{preview.eof === false && <span style={MUTED_STYLE}>{t('previewPartial')}</span>}</>
     : <span style={{ color: preview.kind === 'error' ? 'var(--dsw-alias-label-error)' : 'var(--dsw-alias-label-secondary)' }}>{preview.kind === 'error' ? `${t('sourceReadFailure')}: ${preview.detail}` : preview.kind === 'cancelled' ? t('sourceCancelled') : t('sourceMissing')}</span>
@@ -97,14 +100,14 @@ export function SourceSelectionView(props: {
         <div>
           <h3 style={{ fontSize: 14 }}>{t('builtinSources')}</h3>
           {builtinChoices.map((entry) => (
-            <button key={entry.name} type="button" data-method-source-builtin="" style={{ ...BUTTON_STYLE, display: 'block', width: '100%', textAlign: 'left', marginBottom: 4 }} onClick={() => { onSelectBuiltin(entry) }}>{entry.name}</button>
+            <button key={entry.name} type="button" data-method-source-builtin="" style={{ ...BUTTON_STYLE, display: 'block', width: '100%', textAlign: 'left', marginBottom: 4 }} onClick={() => { onSelectBuiltin(entry) }}>{displayNameOf(entry.name, t)}</button>
           ))}
         </div>
         <div aria-live="polite" data-method-source-preview="">
-          {selectedBuiltin === null ? <span style={MUTED_STYLE}>{t('chooseBuiltin')}</span> : <>
-            <strong>{selectedBuiltin.name}</strong>
-            {SECTION_LABELS.map(({ key }) => <div key={key} style={{ marginTop: 6 }}><span style={MUTED_STYLE}>{sectionLabel(t, key)}</span><div style={{ whiteSpace: 'pre-wrap', fontSize: 12 }}>{selectedBuiltin.sections[key] ?? '—'}</div></div>)}
-            <button type="button" data-method-source-use-builtin="" style={{ ...PRIMARY_STYLE, marginTop: 8 }} onClick={() => { onStartBuiltin(selectedBuiltin) }}>{t('useBuiltin')}</button>
+          {selectedBuiltinDisplay === null ? <span style={MUTED_STYLE}>{t('chooseBuiltin')}</span> : <>
+            <strong>{selectedBuiltinDisplay.name}</strong>
+            {SECTION_LABELS.map(({ key }) => <div key={key} style={{ marginTop: 6 }}><span style={MUTED_STYLE}>{sectionLabel(t, key)}</span><div style={{ whiteSpace: 'pre-wrap', fontSize: 12 }}>{selectedBuiltinDisplay.sections[key] ?? '—'}</div></div>)}
+            <button type="button" data-method-source-use-builtin="" style={{ ...PRIMARY_STYLE, marginTop: 8 }} onClick={() => { if (selectedBuiltin !== null) onStartBuiltin(selectedBuiltin) }}>{t('useBuiltin')}</button>
           </>}
         </div>
       </section>
@@ -197,19 +200,21 @@ export function BuiltinView({ entry, onUse, useLabel, t }: {
   readonly useLabel?: string
   readonly t: TranslateNS<'deepResearchPack'>
 }): ReactNode {
+  // 只读详情 = 显示位：名称/摘要/四字段走当前 locale 的投影（canonical 仍是库与指令的键）。
+  const display = displayBuiltinOf(entry, t)
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
-        <strong style={{ fontSize: 16 }}>{entry.name}</strong>
+        <strong style={{ fontSize: 16 }}>{display.name}</strong>
         <span style={MUTED_STYLE}>{t('builtinReadOnly')}</span>
         {onUse !== undefined && <button type="button" data-method-builtin-use="" style={{ ...PRIMARY_STYLE, marginLeft: 'auto' }} onClick={onUse}>{useLabel ?? t('startFromThis')}</button>}
       </div>
-      <div style={{ ...MUTED_STYLE, marginBottom: 8 }}>{entry.summary}</div>
+      <div style={{ ...MUTED_STYLE, marginBottom: 8 }}>{display.summary}</div>
       <div style={{ lineHeight: 1.65, fontSize: 13 }}>
         {SECTION_LABELS.map(({ key }) => (
           <div key={key} style={{ marginBottom: 6 }}>
             <div style={{ fontSize: 11, opacity: 0.55 }}>{sectionLabel(t, key)}</div>
-            <div style={{ whiteSpace: 'pre-wrap' }}>{entry.sections[key] ?? '—'}</div>
+            <div style={{ whiteSpace: 'pre-wrap' }}>{display.sections[key] ?? '—'}</div>
           </div>
         ))}
       </div>

@@ -6,6 +6,7 @@
  * （背鳍/身/尾叶/胸鳍四块）。
  */
 import type { ReactNode } from 'react'
+import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 
 /** 虎鲸标的几何（viewBox 24；供 size 缩放；面朝右）。 */
 export function OrcaMark({ size = 24 }: { readonly size?: number }): ReactNode {
@@ -23,7 +24,8 @@ export function OrcaMark({ size = 24 }: { readonly size?: number }): ReactNode {
   )
 }
 
-/** 品牌名（替换 fallback 的本地构建标签；owner share 为空——内容与宽度自持）。 */
-export function OrcaName(): ReactNode {
-  return <>Orca</>
+/** 品牌名（替换 fallback 的本地构建标签；owner share 为空——内容与宽度自持）。
+ *  名字随 locale：zh `Orca 深度搜索` / en `Orca Deep Research`（字典 `brandName`）。 */
+export function OrcaName(props: PropsLocale<'deepResearchPack'>): ReactNode {
+  return <>{props.t('brandName')}</>
 }

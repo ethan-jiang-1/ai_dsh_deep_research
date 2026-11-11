@@ -10,7 +10,10 @@ import assert from 'node:assert/strict'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { en, zh } from '../../packages/deep-research-pack/src/client/locales.ts'
-import { BuiltinView, EditorView, LibraryRow, ReadMineView } from '../../packages/deep-research-pack/src/client/method-library/views.tsx'
+import { BuiltinView, EditorView, LibraryRow, ReadMineView, SourceSelectionView } from '../../packages/deep-research-pack/src/client/method-library/views.tsx'
+import { builtinLibraryEntry } from '../../packages/deep-research-pack/src/client/method-library/model.ts'
+import { BUILTIN_PREFERENCES } from '../../packages/deep-research-pack/src/lib/config-tables.ts'
+import { OrcaName } from '../../packages/deep-research-pack/src/client/BrandMark.tsx'
 import { ResearchStatusTab } from '../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx'
 import { ResearchGraphTab } from '../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx'
 
@@ -58,6 +61,42 @@ test('英文 locale 下：方法库关键视图不渲染任何中文', () => {
   }
 })
 
+// 负例留证 2026-11-12：BUG-069——此前本文件的 BuiltinView 只用合成英文 entry，真实
+// BUILTIN_PREFERENCES（中文 canonical）从未被渲染，所以「en 界面内置内容整片中文」一直绿。
+// 红配方：把 views.tsx 的 BuiltinView/SourceSelectionView 退回直接渲染 entry.name/sections →
+// 下面的真实数据渲染断言红；把 SourceSelectionView 的内置候选项退回 entry.name → 同红。
+test('BUG-069 英文 locale 下：真实 BUILTIN_PREFERENCES 渲染 BuiltinView / SourceSelectionView 零 CJK', () => {
+  const renders = {}
+  for (const entry of BUILTIN_PREFERENCES) {
+    renders[`BuiltinView:${entry.name}`] = renderToStaticMarkup(createElement(BuiltinView, {
+      entry: builtinLibraryEntry(entry, tEn('builtinReadOnly')), onUse() {}, t: tEn,
+    }))
+  }
+  const builtinChoices = BUILTIN_PREFERENCES.map((entry) => builtinLibraryEntry(entry, tEn('builtinReadOnly')))
+  renders.SourceSelectionView = renderToStaticMarkup(createElement(SourceSelectionView, {
+    builtinChoices,
+    runNames: [],
+    runState: 'idle',
+    selectedRunLoading: false,
+    onCancelRunRead() {},
+    selectedBuiltin: builtinChoices[4],
+    selectedRun: null,
+    onSelectBuiltin() {},
+    onSelectRun() {},
+    onLoadRuns() {},
+    onStartBlank() {},
+    onStartBuiltin() {},
+    onStartRun() {},
+    onCancel() {},
+    t: tEn,
+  }))
+  for (const [name, html] of Object.entries(renders)) {
+    const hit = html.match(new RegExp(CJK.source + '[^<]*'))
+    assert.equal(hit, null, `${name} 在英文 locale 下仍渲染中文：${hit?.[0] ?? ''}`)
+  }
+  assert.ok(renders[`BuiltinView:${BUILTIN_PREFERENCES[4].name}`].includes('Timeline &amp; signals'), '真实内置条目应渲染英文显示名')
+})
+
 test('英文 locale 下：研究状态 / 研究图谱空态不渲染任何中文（数据面折层同守）', () => {
   // 两页签的空态壳会走 brief-fold / run-fold / state-note 的折层文案——它们不是组件字面量，
   // 漏传 `t` 时只会在真实界面里露出中文。静态渲染是最便宜的端到端守卫（渲染面 = 组件树）。
@@ -84,4 +123,17 @@ test('英文 locale 下：研究状态 / 研究图谱空态不渲染任何中文
     const hit = html.match(new RegExp(CJK.source + '[^<]*'))
     assert.equal(hit, null, `${name} 在英文 locale 下仍渲染中文：${hit?.[0] ?? ''}`)
   }
+})
+
+
+// 负例留证 2026-11-12：BUG-068——修复前 OrcaName 硬编码 `Orca`，品牌槽也未声明 locale。
+// 还原法 = 组件退回 <>Orca</>、槽注册去掉 locale。
+test('BUG-068 品牌名随 locale：zh=Orca 深度搜索 / en=Orca Deep Research', () => {
+  const tZh = (key, params = {}) => String(zh[key]).replace(/\{([A-Za-z0-9_]+)\}/g, (all, name) => (name in params ? String(params[name]) : all))
+  assert.equal(renderToStaticMarkup(createElement(OrcaName, { t: tZh })), 'Orca 深度搜索')
+  assert.equal(renderToStaticMarkup(createElement(OrcaName, { t: tEn })), 'Orca Deep Research')
+  assert.equal(zh.brandName, 'Orca 深度搜索')
+  assert.equal(en.brandName, 'Orca Deep Research')
+  assert.ok(zh.startTitle.startsWith('Orca 深度搜索 · '), '首屏标题前缀用同一品牌名')
+  assert.ok(en.startTitle.startsWith('Orca Deep Research · '), '英文首屏标题前缀用同一品牌名')
 })

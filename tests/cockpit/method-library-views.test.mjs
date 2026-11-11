@@ -10,6 +10,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { BuiltinView, EditorView, ReadMineView } from '../../packages/deep-research-pack/src/client/method-library/views.tsx'
 import { SECTION_LABELS } from '../../packages/deep-research-pack/src/lib/library-fold.ts'
 import { zh } from '../../packages/deep-research-pack/src/client/locales.ts'
+import { BUILTIN_PREFERENCES } from '../../packages/deep-research-pack/src/lib/config-tables.ts'
 
 /** 中文 locale 的 t 桩（组件文案迁到字典后，断言仍按产品中文口径）。 */
 const tZh = (key, params = {}) => String(zh[key]).replace(/\{([A-Za-z0-9_]+)\}/g, (all, name) => (name in params ? String(params[name]) : all))
@@ -55,12 +56,16 @@ test('EditorView：编辑态名称只读，改名走新建', () => {
   assert.match(html, /编辑态名称固定/)
 })
 
-test('BuiltinView：只读内置条目的名字/摘要/使用按钮', () => {
+test('BuiltinView：只读内置条目的名字/摘要/使用按钮（canonical 真值 + 显示投影）', () => {
+  // BUG-069 后内置详情按 canonical 名称取显示投影：这里直接用真实内置条目（zh 投影 = canonical）。
+  const landscape = BUILTIN_PREFERENCES[1]
+  assert.equal(landscape.name, '领域地图')
   const html = renderToStaticMarkup(createElement(BuiltinView, {
-    entry: { name: '领域地图', summary: '把谁在做什么铺开', sections: entry.sections },
+    entry: { name: landscape.name, summary: landscape.summary, sections: landscape.sections },
     useLabel: '用于本次研究', t: tZh, onUse() {},
   }))
-  assert.match(html, /领域地图/)
-  assert.match(html, /把谁在做什么铺开/)
+  assert.ok(html.includes(landscape.name), '内置显示名在场')
+  assert.ok(html.includes(landscape.summary), '内置摘要在场')
+  assert.ok(html.includes(landscape.sections.source), '内置四字段值在场')
   assert.match(html, /用于本次研究/)
 })

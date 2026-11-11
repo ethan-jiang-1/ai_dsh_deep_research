@@ -94,7 +94,7 @@ export function apply(ctx: ClientContext): void {
     const workspaceFiles = scoped.remote.workspaceFiles
     const { listDir, readLibrary, readPreview, readText: readFile } = createWorkspaceFiles(workspaceFiles as never)
     const { sendInstruction } = createLeadPrompt({ prompt: (input, signal) => remoteSession.prompt(input as never, signal) }, t)
-    const { ensureCoachSession, sendCoach } = createCoachSessions(
+    const { ensureCoachSession, sendCoach, migrateKnownCoachTitles } = createCoachSessions(
       scoped as unknown as { get(name: string): unknown },
       {
         rename: (input) => remoteSession.rename(input),
@@ -102,6 +102,10 @@ export function apply(ctx: ClientContext): void {
       },
       t,
     )
+
+    // 方法编辑自动标题随 locale（BUG-069）：locale 快照变化时重扫本包会话，把已知默认标题
+    // 迁到当前 locale（会话开着切界面也生效）；自定义标题与其它会话不动。
+    scoped.effect(() => scoped.locale.subscribe(() => { void migrateKnownCoachTitles() }), 'deep-research-pack: method-editor title locale sync')
 
     scoped.effect(() => scoped.sidebarRightTabs.register({
       id: RESEARCH_TAB_KEY,
@@ -130,7 +134,7 @@ export function apply(ctx: ClientContext): void {
     ]), 'deep-research-pack: orca brand mark')
 
     scoped.effect(() => scoped.slots.inject(RESEARCH_BRAND_NAME_SLOT, () => [
-      scoped.slots.register({ name: RESEARCH_BRAND_NAME_SLOT, priority: -1 }, OrcaName),
+      scoped.slots.register({ name: RESEARCH_BRAND_NAME_SLOT, priority: -1, locale: 'deepResearchPack' }, OrcaName),
     ]), 'deep-research-pack: orca brand name')
 
     // 「研究配置」页签（D25 期 1 管理中继面）：显示偏好库投影 + 生成管理指令发 Lead——

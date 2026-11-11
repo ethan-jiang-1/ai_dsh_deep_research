@@ -302,6 +302,73 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 **收口条件（建议）**：X8 跑出判定、回放 C 层跑出判定、BUG-064 定性完成；若三者均无新独立缺陷，
 本卡可按「覆盖与收益耗尽」收口——`未跑清单` 与 `快照重录` 作为遗留项交给用户决定，不冒充已验。
 
+### 第 22 轮（2026-11-12 02:0x）：第二轮探索——profile 过期 + i18n 面对账
+
+- **进入**：用户反馈「探索有效、继续」；新 goal 优先今日新面。先做 i18n 静态对账，再跑运行级验证。
+- **发现**：[BUG-066](../_archived/fixed_bugs/BUG-066-research-profile-team-version-drift-banner-timeout.md) **P2**——
+  `research` profile（回放/团队冒烟/录制工具三方依赖）的团队层停在 **rc.2**，runtime 是 **rc.5**：
+  `dsh web` 拒绝启动，冒烟以「等待启动横幅超时」收场（原文里才有 incompatible）。三处缺口：
+  ① 版本面只修过 `deep-research` 那一份 `profile_ok`（boot-run.sh 注释写着同一事故教训），smoke 的镜像版
+  不查版本、replay 完全不查；② 超时归因不识别 `incompatible` 文本；③ 「先跑 boot-run」是死路
+  （boot-run 只建 `deep-research`），且 repo 内**无人创建** `research` profile。
+- **关闭假设（有证据）**：
+  - `locales.ts` 的 zh/en **key 完全对齐**（521 = 521，零缺失）；
+  - 占位符 `{...}` 在两种语言里**逐 key 一致**（0 mismatch）；空值 0；
+  - 代码里 `t('…')` 用到的 267 个 key **全部存在**（0 missing）；数据面函数的主调用点都显式传了 `props.t`。
+- **未跑**：回放运行级（被本条挡住）、X8（另一实例/构建）、X6。
+- **下一层**：等 profile 修复（或自建隔离 profile）后跑回放 A/C；继续 i18n 面（折叠文案的 en 断言、
+  section-labels 的 zh/en 覆盖）；run 通道 boot 序列。
+
+### 第 23 轮（2026-11-12 02:1x）：X8 首次全绿
+
+- **X8 真跑绿**：`node --import tsx/esm scripts/smoke/client-load-smoke.mjs` → **75 PASS / 0 FAIL**
+  （`client-load-smoke: ALL PASS`）。覆盖：工作区注册/探针会话、插件加载零横幅、seed 数据、方法库
+  （列表/详情/开始动作/内置参考）、研究配置页签、终稿页签（读者版/审计版切换、footer 三改法、
+  不泄漏中间路径、可滚动）、状态页 ⑤，以及**首屏 Preview Notice 可关闭**（BUG-063 的双语匹配修复在
+  真浏览器里成立）。
+- **推论**：Client 半（D48 typed 输入与今日 i18n 全量）在真浏览器可用；此前回放 C2 的「研究状态页签
+  不在」是回放脚本自身流程/定位问题（059/061 已修），**不是产品缺页签**——X8 的 tabs 清单里
+  「对话/方法库/研究状态/研究图谱/研究配置/终稿」全在。
+- **i18n 静态面（收口）**：`locales.ts` 521=521、`zh-fold/en-fold` 214=214、占位符逐 key 0 mismatch、
+  `t()` 用到的 267 key 全存在；数据面主调用点均显式传 `props.t`。
+- **回放仍被 [BUG-066](../_archived/fixed_bugs/BUG-066-research-profile-team-version-drift-banner-timeout.md) 挡**：
+  `research` profile 团队层 rc.2 vs runtime rc.5，`dsh web` 拒绝启动（banner 超时）。等该卡修复或
+  重建 profile 后再跑 A/C。
+- **门禁**：`verify` 1 红、`pnpm test` 1 红——均为另一 agent 在办的
+  `tests/run/replay-network-offline.test.mjs`（缺负例留证块 + import 了 `scripts/smoke/*` 触发 layering）。
+
+### 第 24 轮（2026-11-12 02:2x）：离线闸的边界
+
+- **发现**：[BUG-067](../_archived/fixed_bugs/BUG-067-offline-gate-dns-resolve-bypass.md) **P2**——BUG-064 的修复件
+  （在办未提交的 `replay-network-offline.cjs`）在**武装态**（argv 命中 `isDshMain`）下实测：
+  `fetch` 外网 → ECONNREFUSED ✓、`dns.lookup` → ENOTFOUND ✓、loopback → 200 ✓，但
+  **`dns.promises.resolve4('example.com')` 仍解析成功**（172.66.147.243 / 104.20.23.154）——`resolve*`
+  一族与 `Resolver` 未打补丁；且 preload 只在 dsh 主进程安装，**工具 spawn 的子进程**（bash/curl）不受控。
+  当前 fixture（web_search/web_fetch 走 fetch）已被覆盖，所以是边界/承诺问题，不是现行故障。
+- **方法记录**：探针用 `/tmp/fake/apps/cli/lib/bin.js` 让 argv 尾命中 `isDshMain()` 的形态，从而真正
+  安装闸门——比单纯 require 模块更能复现真实武装态。
+- **未跑**：回放 A/C（仍被 [BUG-066](../_archived/fixed_bugs/BUG-066-research-profile-team-version-drift-banner-timeout.md)
+  的 profile 版本挡住）；X6。
+- **下一层**：BUG-066 修复后跑回放；继续 run 通道 boot 序列与 i18n 折叠文案的 en 运行断言。
+
+### 第 25 轮（2026-11-12 02:2x）：回放闭环 + 一次自我修正
+
+- **回放独立复跑（安静窗口，锁空闲）**：`snapshot-replay-smoke --face research-face --scenario lead`
+  → **A PASS、C0–C5 全 PASS**（C5 逐字命中金标准）。这同时确认了 **BUG-064**（离线闸生效）与
+  **BUG-061**（C2 页签 + 渲染金标准）的运行级修复；仍红的三条 B 是 **D48 后快照未重录**（persona/headers/
+  runtime-context），属已知的 with-key 项。
+- **自我修正（撤回）**：[归档 BUG-066](../_archived/fixed_bugs/BUG-066-research-profile-team-version-drift-banner-timeout.md)
+  的机制句「团队层 rc.2 → dsh 拒绝启动」被三组对照实验证伪（research 无闸 / research+闸 /
+  deep-research+闸 全部出横幅）。02:0x 那次 banner 超时仍未复现，原因未定。
+- **新卡**：[BUG-070](../_archived/fixed_bugs/BUG-070-bug066-mechanism-refuted-and-residual-profile-wiring.md) **P2**——
+  记录上述证伪 + 两处残留：① `team-preflight` 仍 `PROFILE='research'` 且未用 `profile-health`
+  （归档 066 状态行称「team-preflight 本就用它」与代码不符）；② `profile-health` 的「先跑 boot-run
+  重建」对 `research` 是死路（boot-run 只建 deep-research）。
+- **顺带观察（不建卡）**：`profile-health.runtimeVersionOf` 读 `vendor/dsh/package.json` 的 version，
+  而 boot 实际用的是 `apps/cli` 的构建产物/源码——两者在当前 pin 下同版本；若未来子包版本漂移，
+  版本门会看错源。当前无实例。
+- **未跑**：X6；快照重录（with-key，需预算）。
+
 ## 用户答复（2026-11-11）
 
 - **Q1**：采纳；持续做，不设固定轮数（goal 驱动，剥洋葱式逐层深入）。
@@ -496,7 +563,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 - **未跑**：X6 真模型。
 ### 第 18 轮（2026-11-11）：回放 A 层为什么间歇挂
 
-- **发现**：[BUG-064](../bugs/BUG-064-replay-a-layer-not-self-contained-tool-stall.md)（排查中，P2）——
+- **发现**：[BUG-064](../_archived/fixed_bugs/BUG-064-replay-a-layer-not-self-contained-tool-stall.md)（排查中，P2）——
   lead 场景 A 层在静默窗口仍 240s 超时；盘上现场显示失败会话**停在第一个 `tool/call web_search`**
   （19 事件，无 tool/result / 无 turn/end），而同日 23:47:26 另一场回放完整成功（67 事件 / 7 步 /
   turn/end completed）。根因方向三条：① `llm-replay` 只回放 LLM chunk、**工具照真执行**，检索 API 一挂
@@ -642,3 +709,103 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 - **未跑**：X8（client 半仍被改）、X6 真模型。
 - **下一层**：其它「预算/上限类」计数的输入解析（nodes/waves/sources）、`run-accept` 预检标签的
   N/A 观感。
+
+
+## 第二轮 goal 记录（2026-11-12，轮次按发生顺序补记）
+
+> 说明：上面的轮次小节因多次插入锚点不同而顺序错乱；本节按时间顺序补记第二轮 goal 的关键结论，
+> 细节以对应 bug 卡为准。
+
+### N1（02:1x）X8 首次全绿
+- `node --import tsx/esm scripts/smoke/client-load-smoke.mjs` → **75 PASS / 0 FAIL**；覆盖方法库/研究配置/
+  终稿/状态页/Preview Notice 关闭。`client-load-latest.json` 写 ALL PASS。
+
+### N2（02:2x）离线闸边界 → BUG-067
+- 武装态探针：fetch 外网 ECONNREFUSED、lookup ENOTFOUND、loopback 200，但 **`dns.resolve4` 仍成功**；
+  子进程工具不受控 → [BUG-067](../_archived/fixed_bugs/BUG-067-offline-gate-dns-resolve-bypass.md)。
+- 修复方随后补齐 resolve*/Resolver 并归档（已验证）。
+
+### N3（02:2x）回放闭环 + 自我修正 → BUG-070
+- 回放 lead：**A PASS，C0–C5 全 PASS**（C5 逐字命中金标准）→ 064/061 运行级确认。
+- 三组对照 boot 实验（research 无闸 / research+闸 / deep-research+闸）全部成功出横幅 →
+  **BUG-066 的「版本漂移必然拒绝启动」被证伪**，按纪律另开
+  [BUG-070](../_archived/fixed_bugs/BUG-070-bug066-mechanism-refuted-and-residual-profile-wiring.md)
+  记录撤回 + 残留；修复方随后收口残留（team-preflight 切 deep-research、profile-health 按档给指令）并归档。
+
+### N4（02:3x）scout 场景暴露 Team 身份注入 → BUG-071
+- `--scenario scout`：A PASS；B·persona/headers/runtime-context 红。红的内容是 **根 scout 被注入
+  `You are the Team Lead named "lead".` + `Agent Teams is available in this session …`**，且
+  `request/header.tools` 含 **8 个 Team 工具**（spawn_teammate / wait_agent / interrupt_agent /
+  list_agents / team_task_*×4）。
+- [BUG-071](../_archived/fixed_bugs/BUG-071-root-scout-injected-team-lead-identity.md) P2 等人拍板：接受并写契约 /
+  按根角色门控 / persona 纠偏，三选一。
+- 机理：vendor `tool-agent-team` 在 profile 级启用、不按 preset 门控；设计只成文了「worker 看得到 Team
+  工具」，未成文「根 scout 被标成 Team Lead」。
+
+### N5（02:3x）analyst/critic 复跑 + run-driver 复用路径
+- `--scenario analyst` / `--scenario critic`：**A 均 PASS**；B·persona / runtime-context 与 scout 同形
+  （多出 Team policy + `You are the Team Lead named "lead"`）→ BUG-071 波及面确认为**全部非 lead 根角色**。
+- `node dev/run-driver.mjs up`（复用已起通道）：**exit 2 漂移红**——镜像与 pack 源差 5 个文件
+  （`lib/types/client/**` 等），脚本明确「当前页面不是当前代码；先重建/重启通道再验（未跑，不是通过）」。
+  这是**漂移门按设计工作**（另一 agent 改了 client 之后未重建 profile），不是缺陷；但它意味着 3083 上
+  在跑的通道现在服务的是旧镜像。
+- 观察（不建卡）：漂移门把 `lib/types/**/*.d.ts` 也算进镜像一致性——纯类型改动也会要求重建 profile
+  （约 20s）。若嫌严可另议，当前不改。
+
+### N6（02:3x）062 双路径复核 + 两处观察
+- **BUG-062 修复完整（静态+行为复核）**：`run-accept` 的绿跑写盘路径也接了
+  `withManualEvidence(renderAcceptance(...), previousAcceptance)`——重跑验收不再抹掉「人工走查」节；
+  `--repair` 侧此前已验证。两条路径都保留人工证据。
+- **观察（不建卡）：path-hygiene 不扫 `drafts/`**。`docs/design/10` 把 `drafts` 列为 bundle 结构的一部分，
+  但 `path-hygiene` 的文件清单不含它；历史归档场次里确有 6 个 `drafts/*` 文件带 `/Users/...` 绝对路径
+  （新场次如 `drt_eu-cn-gpai-obligations/drafts` 无命中）。当前门禁报「干净（95 个文件）」。若未来要把
+  历史 bundle 移交，建议把 drafts 纳入扫描或在交付说明里标「drafts 为工作稿」。
+- **观察（不建卡）：`web-harness.bootWeb` 的 banner 超时 timer 在成功后不清理**——各冒烟都在末尾显式
+  `process.exit`，所以现在被掩盖；若未来有库式消费者（await 后继续跑），进程会被这个 timer 多留
+  120–240s。
+
+### N7（02:3x）071 方案 C 的覆盖缺口（观察）
+- **071 已修（方案 C）**：scout / analyst / critic 三份 persona 均加了纠偏句，design/10 §4 + design/20 记录
+  vendor 的根会话身份事实；回放基线待重录（B 层仍红属快照项）。
+- **观察（不建卡）**：`method-editor` 也是**非 lead 根会话**，机制上同样会拿到 `team:policy` + "You are the
+  Team Lead" + 8 个 Team 工具，但方案 C 的三份 persona 里没有它。运行时证据缺席（method-coach 会话日志
+  没有 request/header，无法确认工具面）。建议：要么给 method-editor persona 加同一句，要么在 design/20
+  明写「方法编辑不在组队面、Team 注入可视而不理」。
+- **修复方在办的自伤（只记录，不代改）**：方案 C 在 `tests/pack/presets.test.mjs` 硬编码
+  `['scout','analyst','critic']` → 触发 `role-list-sync` 3 处；改了 presets 未重渲染 overlay →
+  `overlay-fresh` 红。等其收口后复跑。
+
+### N8（02:4x）scout 纠偏已验证 + 门禁子串误伤
+- **071 的 persona 纠偏已在运行级验证**：scout 场景 A PASS；B·persona 的 actual 已含
+  「Team 工具可能在本根会话可见（宿主 Team 机制），但组队不是你的通道：并行只用 subagent；不要调用
+  spawn_teammate / team_task_*」——与基线差异正是这段新增（基线待重录）。
+- **新卡**：[BUG-072](../bugs/BUG-072-release-vocab-substring-false-positive-product-content.md) **P2**——
+  `release-vocab` 用裸子串匹配退役词，`产品内` 误伤 `产品内容`（新文案指南第 300 行），verify 红。
+  修复二选一：收窄门禁词（带负向断言）或改文档措辞；同表其他词未见实例（terms/evaluation 的枚举行带
+  `term-policy: allow`）。
+- **未跑**：X8（构建仍过期 11 文件）、快照重录、X6。
+
+### N9（02:4x）候选证伪 + 状态
+- **候选证伪（不建卡）**：新技能 `changing-ui-copy` 里裸文件名 `coach-prompts.ts` /
+  `operation-prompts.ts` 一度被怀疑「引用不存在的模块」——实查位于
+  `packages/deep-research-pack/src/client/method-library/` 下，**文件真实存在**；`cjk-source` 的
+  ALLOWED 表还有「键必须在场」的自检（第 174 行），没有死条目。撤回该假设。
+- **附带观察**：`doc-paths` 只对以仓根目录名开头的 token 做解析，**裸文件名**（如 `foo.ts`）不检查；
+  与其头注「仓根/文档目录/vendor 三处试」的表述有出入。当前无真实漏检实例（本技能里的裸名都在场），
+  记观察不建卡；若未来要收口，可作为 `writing-a-gate` 轮。
+- **072 未修**（门禁词表与文档措辞都未动）。
+- **071 的 persona 纠偏已在运行级验证**（scout B·persona actual 含新纠偏句；基线待重录）。
+- **未跑**：X8（`ResearchConfigTab.tsx` 02:42 改动后构建过期）、快照重录、X6。
+
+### N10（02:44）X8 终验被并发编辑挡住
+- 构建在 02:43 刚刷新（`lib/client.js` 02:43:04），但 X8 的自检仍判「src 更新到 02:44:15」——
+  对方正在写 BUG-069 的 client 代码，文件在两次检查之间变化；不是构建门误报（其判据 = 逐源文件 mtime，
+  注释已写明「宁可 exit 2 也不拿旧产物冒充证据」）。
+- 因此 **X8 终验未跑**（未跑 ≠ 通过）。等对方停止编辑并重建后，一条命令即可：
+  `node --import tsx/esm scripts/smoke/client-load-smoke.mjs`。
+- `verify` 剩余 7 红：role-list-sync×3 / overlay-fresh / release-vocab（=BUG-072）/ 归档索引×2，均非本卡。
+
+### 当前未跑 / 阻塞
+- analyst / critic 场景（推断同根因，未验证）；X6 真模型（未授权）；回放 B 层快照重录（with-key，需预算）。
+- 门禁：`pnpm test` 3 红（BuiltinView、scripts/README 资产表对账等，均为另一 agent 在办）；
+  `verify` 2 红（cockpit-doc-registry 新文件未登记、070 归档索引未补）。

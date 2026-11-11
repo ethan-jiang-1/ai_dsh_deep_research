@@ -70,3 +70,4 @@
 | [BUG-059](BUG-059-replay-locator-hardcodes-zh-locale-owned-labels.md) | 回放冒烟页签定位器写死中文——UI 文案随 locale 后 en-US 环境 C2→C3/C5 必红 | （`SMOKE_LOCALE='zh-CN'` 显式钉住 + 双语定位；场景 `source.locale` 与金标准头注；lead C2/C3/C5 PASS） | 2026-11-12 |
 | [BUG-061](BUG-061-replay-c2-guide-capsule-missing-after-locale-pin.md) | 钉 zh 后右栏展开按钮仍用英文 `Open right sidebar` → C2/C3/C5 连锁 | （展开/收起/新标签 chrome 双语；C2 诊断补 `role=tab` 与 guide 容器；C2 PASS） | 2026-11-12 |
 | [BUG-065](BUG-065-run-driver-cache-key-omits-dev-overlay.md) | run-driver 的 GREEN 缓存键只有 pack+runtime——dev 通道自身的改动（overlay / boot-run）不失效 | （`probeCacheKey` 增 `extra`；run-driver `devShellFingerprint()` 三文件内容哈希；命中 reason 写清身份） | 2026-11-12 |
+| [BUG-064](BUG-064-replay-a-layer-not-self-contained-tool-stall.md) | 回放的 A 层不自包含：真实工具调用会挂住、240s 静默超时且归因误导 | （`replay-network-offline.cjs` preload 离线闸 + run lock + 超时归因；真机 A PASS、C0–C5 全 PASS） | 2026-11-12 |

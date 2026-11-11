@@ -9,7 +9,8 @@
 import type { ReactNode } from 'react'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PackTranslate } from '../../lib/i18n.ts'
-import { BUILTIN_PREFERENCES, DEMO_ENTRY, DISTILL_INSTRUCTION, DRAFT_INSTRUCTION, PATTERN_METHOD_RULES, SECTIONS } from '../../lib/config-tables.ts'
+import { BUILTIN_PREFERENCES, DISTILL_INSTRUCTION, DRAFT_INSTRUCTION, PATTERN_METHOD_RULES, SECTIONS } from '../../lib/config-tables.ts'
+import { displayDemoOf, displayNameOf } from '../builtin-display.ts'
 import { summaryOfEntry, type LibraryEntry, type LibrarySections } from '../../lib/library-fold.ts'
 import { sectionLabelOf } from './section-labels.ts'
 
@@ -40,7 +41,9 @@ export interface LegacyManagementPaneProps {
 
 export function LegacyManagementPane(props: LegacyManagementPaneProps): ReactNode {
   const { t, entries, libraryRead, receipt, sending, sessionId, card, onOpenDetail, send, onRefresh } = props
-  const rules = PATTERN_METHOD_RULES.map((r) => `${r.patterns.split(' · ').map((p) => p.split(' ')[0]).join('·')}→${r.method}`).join('；')
+  // 显示位：打法名/领域示范走显示投影（canonical 仍是映射表的键；BUG-069）。
+  const demo = displayDemoOf(t)
+  const rules = PATTERN_METHOD_RULES.map((r) => `${r.patterns.split(' · ').map((p) => p.split(' ')[0]).join('·')}→${displayNameOf(r.method, t)}`).join(t('ruleSeparator'))
   return (
     <>
 
@@ -74,11 +77,11 @@ export function LegacyManagementPane(props: LegacyManagementPaneProps): ReactNod
         {t('legacyDemoHint')}
       </div>
       <div style={{ padding: '7px 10px', borderRadius: 6, background: '#00000008' }}>
-        <div style={{ fontWeight: 600, fontSize: 13 }}>{DEMO_ENTRY.name}</div>
+        <div style={{ fontWeight: 600, fontSize: 13 }}>{demo.name}</div>
         {SECTIONS.map(({ key }) => (
           <div key={key} style={{ marginTop: 4, fontSize: 12, lineHeight: 1.6 }}>
-            <span style={{ fontWeight: 600, opacity: 0.75 }}>{sectionLabelOf(t, key)}：</span>
-            <span style={{ opacity: 0.85 }}>{DEMO_ENTRY.sections[key]}</span>
+            <span style={{ fontWeight: 600, opacity: 0.75 }}>{sectionLabelOf(t, key)}{t('labelSeparator')}</span>
+            <span style={{ opacity: 0.85 }}>{demo.sections[key]}</span>
           </div>
         ))}
       </div>

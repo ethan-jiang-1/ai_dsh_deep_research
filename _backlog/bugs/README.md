@@ -12,7 +12,8 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [BUG-064](BUG-064-replay-a-layer-not-self-contained-tool-stall.md) | 修复落地 | P2 | 回放 A 层不自包含：真实 `web_search` 挂住 + 无锁 → 240s 静默超时且归因误导 |
+| [BUG-069](BUG-069-product-content-single-language-and-stale-session-title.md) | 修复就绪 | P1 | 英文界面仍混中文：内置打法内容（名称/摘要/四字段/推荐规则/示范）单语 + 方法编辑历史标题不随 locale |
+| [BUG-072](BUG-072-release-vocab-substring-false-positive-product-content.md) | 等人拍板 | P2 | release-vocab 的「产品内」子串误伤「产品内容」——合法文案被自家门禁判红 |
 
 ## 最近归档
 

@@ -12,6 +12,7 @@ import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import { SECTION_LABELS, type LibraryEntry, type LibrarySections } from '../../lib/library-fold.ts'
 import { BUILTIN_PREFERENCES } from '../../lib/config-tables.ts'
+import { displayBuiltinOf } from '../builtin-display.ts'
 import type { DraftField } from '../../lib/method-draft.ts'
 import {
   builtinLibraryEntry, draftDirty, draftOf, emptySections,
@@ -267,10 +268,13 @@ export function useDraftState(deps: DraftStateDeps) {
   }
 
   const startBuiltinSource = (entry: LibraryEntry): void => {
+    // 预填 = 显示副本（英文界面下草稿即英文；保存的是新用户条目，不是内置条目）。
+    // 选择留 canonical `entry`：它要喂 coach 上下文/动作句（模型面保持 canonical，BUG-069）。
+    const display = displayBuiltinOf(entry, t)
     setDraft({
       name: '',
-      sections: { ...entry.sections },
-      provenance: t('provenanceBuiltin', { name: entry.name }),
+      sections: { ...display.sections },
+      provenance: t('provenanceBuiltin', { name: display.name }),
       legacyText: null,
     })
     setSelectedBuiltinSource(entry)
@@ -278,7 +282,7 @@ export function useDraftState(deps: DraftStateDeps) {
     bumpDraftRevision()
     setWorkbenchStage('interview')
     clearCoachFill()
-    setSourceFields(new Set(SECTION_LABELS.filter(({ key }) => entry.sections[key] !== null).map(({ key }) => key)))
+    setSourceFields(new Set(SECTION_LABELS.filter(({ key }) => display.sections[key] !== null).map(({ key }) => key)))
   }
 
   const startRunSource = (run: RunSourceCandidate): void => {
