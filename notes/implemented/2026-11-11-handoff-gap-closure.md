@@ -6,7 +6,7 @@
 
 0.3.0 的 `_dist` tarball 是 2026-11-10 产物；HEAD 17e866d 在其后新增 `content/templates/run/protocol.json` 并改 lead/preset 文本。两者都叫 0.3.0，且没有 0.3.0 tag。下一个本地 tarball 定为 **0.3.1**：root/pack 同 diff 升版，`node scripts/dist/export-dist.mjs` 重导出 tarball、安装手册与 market；0.3.0 制品不重发。D42 的当前安装事实随之更新到 0.3.1，安装形态（本地 tarball / npm staged）不变。
 
-根 README 增加“从源码交付”一行：`pnpm install` 后跑 `node scripts/dist/export-dist.mjs`，在 `_dist/` 生成 tarball、手册与市场索引；手册正文仍由生成器注入。
+根 README 增加“从源码交付”一行：`git clone --recurse-submodules` → `pnpm install` → `bash dev/vendor-build.sh`（pack 的 tsc 读 vendor 已构建的 `lib/types`）→ `node scripts/dist/export-dist.mjs`；在 `_dist/` 生成 tarball、手册与市场索引，手册正文仍由生成器注入。
 
 新 L0 门禁 `dist-tarball`：制品在场时核对手册 sha256、制品内 `package.json` version、`dsh.bundle.patch` 每个目标与 `content/templates/run/` 源文件逐件在制品内；制品缺席（clean clone）→ note 而非静默。制品 gitignored，gates-smoke 副本无 tarball，故登记 `NO_CASE_GATES`，反证 = 一次性红录。
 
@@ -33,4 +33,4 @@
 
 ## 环境状态
 
-macOS；Node 22.23.1；pnpm 11.7.0；全局 DSH 0.2.1-rc.5。0.3.1 是本地 tarball：已打本地 annotated tag `0.3.1`，未 push、未 npm publish；发布锚由该 tag 持有。`_dist/` 只留 0.3.1 制品，0.3.0 tgz 由 `export-dist` 清理。`client-load-smoke` 因主机空闲内存不足 NOT-RUN（exit 2），不是通过。
+macOS；Node 22.23.1；pnpm 11.7.0；全局 DSH 0.2.1-rc.5。0.3.1 是本地 tarball：已打本地 annotated tag `0.3.1`，未 push、未 npm publish；发布锚由该 tag 持有。`_dist/` 只留 0.3.1 制品，0.3.0 tgz 由 `export-dist` 清理。`client-load-smoke` 因主机空闲内存不足 NOT-RUN（exit 2），不是通过。clean clone 的 `export-dist` 未在本轮重演（本机 vendor 构建产物在场）；前置 `bash dev/vendor-build.sh` 已写进 README 与 Note，clean-clone 复跑记 U。
