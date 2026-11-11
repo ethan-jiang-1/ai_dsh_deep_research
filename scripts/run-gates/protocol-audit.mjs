@@ -15,10 +15,10 @@
 // 退出码：0 = 绿（含 legacy-not-applicable）；1 = 红；2 = 用法/前置（bundle 不在场）。
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { epochDateOf, runType } from '../lib/schema-scan-core.mjs'
 import { PROTOCOL_CONTRACT_DATE, designSha256 } from '../lib/protocol-core.mjs'
 import { evaluateBundle } from '../lib/protocol-audit-core.mjs'
+import { isMain } from '../lib/cli-entry.mjs'
 
 const readIf = (path) => (existsSync(path) ? readFileSync(path, 'utf8') : '')
 const versionOf = (protocol) => (typeof protocol?.version === 'number' ? protocol.version : null)
@@ -77,7 +77,7 @@ function renderReport({ bundle, epoch, type, required, findings, version, hash }
 }
 
 // ── CLI ──
-if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+if (isMain(import.meta.url)) {
   const argv = process.argv.slice(2)
   const KNOWN = new Set(['--write', '--no-write', '--require'])
   for (const arg of argv) {

@@ -21,6 +21,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CASES, CONTROLS } from '../lib/gates-cases.mjs';
+import { isMain } from '../lib/cli-entry.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const VERIFY_REL = join('scripts', 'verify', 'verify.mjs');
@@ -159,4 +160,4 @@ function main() {
 }
 
 // 直跑守卫：tests/verify-gates.test.mjs 经 lib/gates-cases.mjs 静态对账案例表，import 不触发执行
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
+if (isMain(import.meta.url)) main();

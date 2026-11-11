@@ -30,7 +30,8 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { copyFileSync, existsSync, mkdirSync, openSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve as resolvePath } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
+import { isMain } from '../scripts/lib/cli-entry.mjs';
 import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../scripts/lib/run-channel.mjs';
 import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKey } from '../scripts/lib/channel-cache.mjs';
 import { authenticate } from '../scripts/lib/web-harness.mjs';
@@ -187,7 +188,7 @@ const arg = (name, dflt) => {
 const has = (name) => process.argv.includes(name);
 // CLI 守卫：本文件同时被 tests/run-driver-contract.test.mjs import（纯函数面），import 时不许
 // 跑子命令（否则 `pnpm test` 里一 import 就 exit 2）。与 scripts/run-ops/run-dashboard.mjs 同款。
-const isCli = process.argv[1] !== undefined && import.meta.url === pathToFileURL(resolvePath(process.argv[1])).href;
+const isCli = isMain(import.meta.url);
 const sub = isCli ? process.argv[2] : undefined;
 const wantBootstrap = isCli && process.argv.includes('--bootstrap');
 

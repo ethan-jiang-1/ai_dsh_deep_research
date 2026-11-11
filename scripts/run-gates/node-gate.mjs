@@ -44,6 +44,7 @@ import { gateBundle } from '../lib/node-gate-core.mjs'
 import { nodeRunSource } from '../lib/run-source-node.mjs'
 import { workspaceRoot } from '../lib/workspace-root.mjs'
 import { readZstdText } from '../lib/zstd-read.mjs'
+import { isMain } from '../lib/cli-entry.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -64,7 +65,7 @@ function readLog(p) {
 }
 
 // ── CLI ──
-if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+if (isMain(import.meta.url)) {
   const argv = process.argv.slice(2)
   const latest = argv.includes('--latest')
   const sessionsIdx = argv.indexOf('--sessions')

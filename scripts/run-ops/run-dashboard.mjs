@@ -10,9 +10,9 @@
 //   加 --watch --interval <秒> 持续再生成（配合页面 meta refresh；默认 5s）
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
 import { listScenes, sceneState, buildModel, deriveStep, detectHitlWait, readGuiBase, isArchivedScene, isParkedScene } from '../lib/run-dashboard-core.mjs';
 import { renderHtml } from '../lib/run-dashboard-html.mjs';
+import { isMain } from '../lib/cli-entry.mjs';
 
 // ── CLI ─────────────────────────────────────────────────────────────────────
 
@@ -73,4 +73,4 @@ function main() {
   }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();
+if (isMain(import.meta.url)) main();

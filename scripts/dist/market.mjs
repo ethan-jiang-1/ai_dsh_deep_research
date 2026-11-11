@@ -11,8 +11,9 @@
 import { createHash } from 'node:crypto'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { fileURLToPath } from 'node:url'
 import { parseMarketIndex } from '@deepseek-ai/dsh-plugin-market-index'
+import { isMain } from '../lib/cli-entry.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const DIST = join(ROOT, '_dist')
@@ -60,7 +61,7 @@ export function writeMarketIndex(options = {}) {
   return { path: OUT, bytes: Buffer.byteLength(body), sha256, index: parsed }
 }
 
-const invokedDirectly = process.argv[1] !== undefined && import.meta.url === pathToFileURL(resolve(process.argv[1])).href
+const invokedDirectly = isMain(import.meta.url)
 if (invokedDirectly) {
   const check = process.argv.includes('--check')
   try {

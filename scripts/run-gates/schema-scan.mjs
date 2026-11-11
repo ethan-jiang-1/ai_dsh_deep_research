@@ -14,11 +14,12 @@ import { listRuns } from '../../packages/deep-research-pack/src/lib/run-context.
 import { scanAll } from '../lib/schema-scan-core.mjs'
 import { nodeRunSource } from '../lib/run-source-node.mjs'
 import { workspaceRoot } from '../lib/workspace-root.mjs'
+import { isMain } from '../lib/cli-entry.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
 // ── CLI ──
-if (process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+if (isMain(import.meta.url)) {
   const args = process.argv.slice(2).filter((a) => !a.startsWith('--'))
   const wsRoot = workspaceRoot({ argv: process.argv.slice(2), env: process.env, defaultRoot: join(ROOT, 'research-workspace') }).root
   const archive = join(wsRoot, 'archive')

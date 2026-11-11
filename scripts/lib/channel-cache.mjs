@@ -14,7 +14,7 @@
 import { createHash } from 'node:crypto'
 import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { isMain } from './cli-entry.mjs'
 
 /** 目录遍历时跳过的噪声（不属于 pack 源内容）。 */
 const SKIP_DIRS = new Set(['node_modules', '.git'])
@@ -110,7 +110,7 @@ export function probeCacheHit({ entry, key, now, ttlMs = PROBE_CACHE_TTL_MS }) {
 //   fingerprint <packDir>                 打印 pack 源指纹
 //   read <cachePath> <key>                命中则逐行打印发布清单；miss/损坏 exit 1
 //   save <cachePath> <key>                从 stdin 读逐行清单并写缓存
-const isCli = process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.argv[1]
+const isCli = isMain(import.meta.url)
 if (isCli) {
   const [cmd, ...rest] = process.argv.slice(2)
   if (cmd === 'fingerprint' && rest[0] !== undefined) {
