@@ -503,7 +503,8 @@ export function runB() {
     'docs/design/10-architecture.md', 'docs/design/40-research-cockpit.md', 'docs/design/50-agent-loop-and-state.md',
     'docs/design/60-intent-carriers.md',
   ];
-  const banned = /插件即产品|产品 profile|产品形态|产品设置|产品用户|产品启动|产品面|产品化|产品包|产品账本|产品内|P0–P4/;
+  // 中文裸子串匹配；`产品内(?!容)` 豁免复合词「产品内容」（BUG-072）——真正要退的「产品内嵌」仍红。
+  const banned = /插件即产品|产品 profile|产品形态|产品设置|产品用户|产品启动|产品面|产品化|产品包|产品账本|产品内(?!容)|P0–P4/;
   for (const rel of files) {
     const path = join(ROOT, rel);
     if (!existsSync(path)) continue;

@@ -183,6 +183,19 @@ test('critic adversarial-review 钉 leads 交接狩猎（BUG-008 契约：状态
   assert.match(yml, /建议深挖/, '近形漂移形态未点名（critic 不知道要抓什么）');
 });
 
+
+// 负例留证 2026-11-12：BUG-071——非 lead 根角色被注入 Team Lead 身份与 Team 工具；
+// 修复 = persona 显式纠偏（可见但不是通道）。还原法 = 删三份 persona 的纠偏句。
+test('BUG-071 非 lead 根会话：Team 工具可见，但 persona 明示不是组队通道', () => {
+  for (const role of RESEARCH_ROLES.filter((item) => item !== 'lead')) {
+    const yml = readFileSync(join(PRESETS, `${role}.patch.yml`), 'utf8');
+    assert.match(yml, /Team 工具可能在本根会话可见/, `${role}: 缺 Team 可见性纠偏句`);
+    assert.match(yml, /不要调用 spawn_teammate/, `${role}: 缺禁用组队工具句`);
+    assert.match(yml, /subagent|brief 分派/, `${role}: 未给出替代通道`);
+  }
+  assert.doesNotMatch(readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8'), /Team 工具可能在本根会话可见/, 'lead 是 Team 通道，不应纠偏');
+});
+
 test('lead persona 钉 HITL1 零例外（BUG-006 契约：快路径自我豁免不可见即违法）', () => {
   const yml = readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8');
   // 契约文本两个必备面：零例外句在场 + 指明"题面自含答案"也必须问（取推荐档即时拍板）

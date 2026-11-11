@@ -28,7 +28,7 @@ teammate 会话加载的是 **Lead 的组合**（composeFrom ⇒ lead preset）�
 + 工作区手册注入，而**不是**成员角色自己的 preset——名册角色名 ≠ 该会话加载的 preset。各自 role
 preset 只在**根会话**（直接以该角色开新会话）时生效；**depth-2 worker 例外**：teammate 用
 `subagent(agent_preset=…)` 派出的 worker 可挂载独立角色 preset（spawn only），角色工具面因此是
-精确的。**角色边界因此是派发合同 + 人工验收，不是 preset 机器边界**：critic teammate 看得到
+精确的。**角色边界因此是派发合同 + 人工验收，不是 preset 机器边界**：根 scout/analyst/critic 也会看到 Team Lead 身份与 Team 工具（vendor profile 级启用），persona 明写「可见但不是通道、并行用 subagent、不要调用组队工具」；critic teammate 看得到
 `ask_user_question` / `subagent`，但不该用——HITL 只由 Lead 发起，subagent 只在任务明确要求时用。
 
 ## 0.1 worker profiles（D47，非研究角色）
