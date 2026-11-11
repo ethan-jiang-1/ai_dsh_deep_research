@@ -1,7 +1,7 @@
 // host-health — 真浏览器冒烟的主机健康判据（client-load 的 NOT-RUN 归因）。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { classifyHostHealth, HOST_HEALTH_THRESHOLDS, isHostUnhealthyVerdict } from '../../scripts/lib/host-health.mjs'
+import { availableMemoryMBFromMeminfo, availableMemoryMBFromVmStat, classifyHostHealth, HOST_HEALTH_THRESHOLDS, isHostUnhealthyVerdict } from '../../scripts/lib/host-health.mjs'
 
 test('健康主机：free 与 load/cpu 都在阈值内', () => {
   const h = classifyHostHealth({ freeMB: 2048, load1: 2, cpuCount: 8 })
@@ -51,4 +51,41 @@ test('NOT-RUN 只在失败 + 主机不健康 + 连接死亡/页面丢失同时�
   assert.equal(isHostUnhealthyVerdict({ hasFailures: true, hostHealth: healthy, connectionDeath: true, pageLost: true }), false)
   assert.equal(isHostUnhealthyVerdict({ hasFailures: true, hostHealth: unhealthy, connectionDeath: false, pageLost: false }), false)
   assert.equal(isHostUnhealthyVerdict({ hasFailures: true, hostHealth: null, connectionDeath: true, pageLost: true }), false)
+})
+
+// 负例留证 2026-11-11：BUG-060——修复前 client-load 用 node:os 的 freemem()（只算 free pages），
+// macOS 上常态 <512MB → NOT-RUN。还原法 = 采集侧改回 Math.round(freemem()/1048576)。
+test('BUG-060 可用内存：macOS vm_stat 计入 inactive/speculative/purgeable', () => {
+  const vmStat = [
+    'Mach Virtual Memory Statistics: (page size of 16384 bytes)',
+    'Pages free:                               10404.',
+    'Pages active:                            123456.',
+    'Pages inactive:                          430601.',
+    'Pages speculative:                         1201.',
+    'Pages purgeable:                              0.',
+  ].join('\n')
+  assert.equal(availableMemoryMBFromVmStat(vmStat), Math.round(((10404 + 430601 + 1201) * 16384) / 1048576))
+  assert.equal(availableMemoryMBFromVmStat('garbage'), null, '读不出 → null（fail-loud，不回 free pages）')
+})
+
+test('BUG-060 可用内存：Linux 用 MemAvailable，缺失时回退 MemFree+Buffers+Cached', () => {
+  const meminfo = [
+    'MemTotal:       16384000 kB',
+    'MemFree:          1048576 kB',
+    'MemAvailable:     8388608 kB',
+    'Buffers:           102400 kB',
+    'Cached:           2048000 kB',
+  ].join('\n')
+  assert.equal(availableMemoryMBFromMeminfo(meminfo), 8192)
+  const fallback = ['MemFree: 100000 kB', 'Buffers: 20000 kB', 'Cached: 30000 kB'].join('\n')
+  assert.equal(availableMemoryMBFromMeminfo(fallback), Math.round((100000 + 20000 + 30000) / 1024))
+  assert.equal(availableMemoryMBFromMeminfo('nothing here'), null)
+})
+
+test('BUG-060 端到端：vm_stat 的可用量喂 classifyHostHealth → 健康（不再被 free pages 误判）', () => {
+  const vmStat = 'Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free: 5000.\nPages inactive: 430601.\nPages speculative: 1201.\nPages purgeable: 0.'
+  const freeMB = availableMemoryMBFromVmStat(vmStat)
+  const health = classifyHostHealth({ freeMB, load1: 0.88 * 10, cpuCount: 10 })
+  assert.equal(health.unhealthy, false, JSON.stringify(health))
+  assert.equal(health.freeMB, freeMB)
 })

@@ -11,6 +11,11 @@ import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { browserCacheDirs } from './browser-cache.mjs'
 
+/** 真浏览器冒烟的产品口径 locale：定位器与金标准按中文录制，显式钉住而不是依赖
+ *  Playwright 默认 en-US（BUG-059：文案随 locale 后中文单语定位器会整片失配）。
+ *  需要英文面证据的档位应另建自己的上下文，不要改这个默认。 */
+export const SMOKE_LOCALE = 'zh-CN'
+
 /** 递归找 chromium 可执行文件（headless shell / macOS app bundle / chrome）。 */
 function findExecutable(dir) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {

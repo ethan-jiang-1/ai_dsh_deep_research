@@ -70,6 +70,14 @@
 | 会话流装配 | `src/client/session-follow.ts` | journal 帧 → 领域帧（follow / 首帧探测 / coach 流） | [§2.1](#cockpit-1) |
 | 启动期工作区动作 | `src/client/workspace-boot.ts` | 选目录 / 恢复记忆 / workspaceOf | [§2.18](#cockpit-18) |
 | 页面级样式 | `src/client/styles.ts` | 问卡窄列 + 教练 composer 抑制 | [§2.1](#cockpit-1) |
+| UI 字典（中文） | `src/client/locales/zh.ts` | 中文文案与键集正本（`t()` 的 zh 侧） | [§2.1](#cockpit-1) |
+| UI 字典（英文） | `src/client/locales/en.ts` | 英文文案（键集与占位符由 zh 侧约束） | [§2.1](#cockpit-1) |
+| UI 字典（折层中文） | `src/client/locales/zh-fold.ts` | 七步/摘要/图谱等数据面文案（zh） | [§2.1](#cockpit-1) |
+| UI 字典（折层英文） | `src/client/locales/en-fold.ts` | 数据面文案（en） | [§2.1](#cockpit-1) |
+| 折层翻译桥 | `src/lib/i18n.ts` | 纯折算函数接受 `t` 的类型与缺省插值 | [§2.1](#cockpit-1) |
+| 方法编辑模型指令 | `src/client/method-library/coach-prompts.ts` | 发给 Method Editor 的内部 prompt（非 UI） | [§2.7](#cockpit-7) |
+| 方法编辑工具指令 | `src/client/method-library/operation-prompts.ts` | 写库操作的内部指令（非 UI） | [§2.7](#cockpit-7) |
+| 四字段 UI 标签 | `src/client/research-config/section-labels.ts` | 四字段标题/提示的 locale 投影 | [§2.6](#cockpit-6) |
 | 方法编辑会话 | `src/client/coach-sessions.ts` | 每草稿一会话（retain/create）+ 发送 | [§2.7](#cockpit-7) |
 | 文件读闭包 | `src/client/workspace-files.ts` | listDir / readLibrary / readPreview（失败降级合同） | [§2.1](#cockpit-1) |
 | 交付监听 | `src/client/delivery-watch.ts` | live present → 打开终稿（去重/不打断/在屏） | [§2.9](#cockpit-9) |

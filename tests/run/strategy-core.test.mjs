@@ -105,3 +105,15 @@ test('strategyOf：图版本 v2 → back-edge；Wave 执行 → workflow / resea
   assert.equal(wave.orchestration.channel, 'workflow')
   assert.equal(wave.orchestration.workers.wave, 'research-wave')
 })
+
+// 负例留证 2026-11-11：BUG-054——修复前 lensIdsOf 只认 `- lenses:`，星号/缩进/大写变体
+// 会让 knowledge.lenses 为空、cells 计 0。还原法 = 恢复本地单正则实现。
+test('BUG-054 变体 lens 行：knowledge.lenses 与 cells 用同一解析助手', () => {
+  const strategy = strategyOf({
+    protocol: protocolOf(),
+    planText: planOf({ count: 3 }),
+    topicsText: ['# Topics — fixture', '', '* lenses: [official, web]'].join('\n'),
+  })
+  assert.deepEqual(strategy.knowledge.lenses, ['official', 'web'])
+  assert.equal(strategy.orchestration.topology.cells, 2)
+})

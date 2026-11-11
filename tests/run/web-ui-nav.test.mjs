@@ -73,12 +73,17 @@ test('遮罩判据：标题在场 + Continue → 点它一次并报告 clicked',
   assert.equal(dom.clicks[0].type, 'click')
 })
 
-test('遮罩判据：中英三形态文案都认（Continue / 我知道了 / Got it）', () => {
-  assert.deepEqual(PREVIEW_NOTICE_CONTINUE, ['Continue', '我知道了', 'Got it'])
+test('遮罩判据：中英四形态文案都认（Continue / 继续 / 我知道了 / Got it）', () => {
+  assert.deepEqual(PREVIEW_NOTICE_CONTINUE, ['Continue', '继续', '我知道了', 'Got it'])
   for (const label of PREVIEW_NOTICE_CONTINUE) {
     const dom = fakeDocument({ heading: PREVIEW_NOTICE_HEADING, buttons: [label] })
     assert.equal(runProbe(dom).clicked, true, `文案「${label}」未命中`)
   }
+})
+
+test('遮罩判据：zh 标题（预览版说明）与「继续」也认', () => {
+  const dom = fakeDocument({ heading: '预览版说明', buttons: ['继续'] })
+  assert.deepEqual(runProbe(dom), { present: true, clicked: true })
 })
 
 test('遮罩判据：标题节点仍在 DOM 但不可见（display:none / 零尺寸）→ present=false，不假报 stuck', () => {

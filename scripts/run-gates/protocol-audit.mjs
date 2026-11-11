@@ -16,8 +16,8 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
 import { epochDateOf, runType } from '../lib/schema-scan-core.mjs'
-import { PROTOCOL_CONTRACT_DATE, designSha256 } from '../lib/protocol-core.mjs'
-import { evaluateBundle } from '../lib/protocol-audit-core.mjs'
+import { designSha256, preContractByDelivery } from '../lib/protocol-core.mjs'
+import { evaluateBundle, requiredByProtocolContract } from '../lib/protocol-audit-core.mjs'
 import { isMain } from '../lib/cli-entry.mjs'
 
 const readIf = (path) => (existsSync(path) ? readFileSync(path, 'utf8') : '')
@@ -31,6 +31,18 @@ function readProtocol(bundle) {
     return { protocol: JSON.parse(readFileSync(path, 'utf8')) }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
+  }
+}
+
+/** delivered.json 的 acceptedAt（交付时事实）；缺席 / 坏 JSON → null（不猜）。 */
+function acceptedAtOf(bundle) {
+  const text = readIf(join(bundle, 'delivered.json'))
+  if (text === '') return null
+  try {
+    const value = JSON.parse(text)?.acceptedAt
+    return typeof value === 'string' && value.trim() !== '' ? value : null
+  } catch {
+    return null
   }
 }
 
@@ -100,12 +112,21 @@ if (isMain(import.meta.url)) {
   const write = argv.includes('--write') && !argv.includes('--no-write')
   const legacy = !existsSync(join(bundle, 'run.md'))
   const epoch = legacy ? null : epochDateOf(bundle)
+  const acceptedAt = acceptedAtOf(bundle)
   const type = runType(bundle)
-  const required = argv.includes('--require')
-    || (!legacy && typeof epoch === 'string' && epoch !== '' && epoch >= PROTOCOL_CONTRACT_DATE)
+  // 断代：交付回执时刻优先于日粒度 created（同日早场不追溯适用新契约）；无回执 → 日期口径从严。
+  const required = requiredByProtocolContract({
+    hasRunMd: !legacy,
+    epoch,
+    acceptedAt,
+    forced: argv.includes('--require'),
+  })
 
   if (!required) {
-    console.log(`protocol-audit: 不适用（${legacy ? '旧 bundle 无 run.md' : `契约日前（epoch=${String(epoch)}）`}）——Protocol 不判，未写报告`)
+    const reason = !legacy && preContractByDelivery({ acceptedAt }) === true
+      ? `交付回执早于契约落地时刻（acceptedAt=${acceptedAt}）`
+      : legacy ? '旧 bundle 无 run.md' : `契约日前（epoch=${String(epoch)}）`
+    console.log(`protocol-audit: 不适用（${reason}）——Protocol 不判，未写报告`)
     process.exit(0)
   }
 

@@ -32,7 +32,7 @@
 // 红证（实录）：改 fixture 内一条 assistant 文本 → A 红；改 fixture persona/注入文本或工具 schema
 //   一词 → 对应 B 条红；改 fixture 一条 web_search 查询词 → C 红；各自还原 → 绿。
 import { execSync } from 'node:child_process';
-import { writeFileSync, existsSync, readFileSync, mkdtempSync, statSync } from 'node:fs';
+import { writeFileSync, existsSync, readFileSync, mkdirSync, mkdtempSync, rmSync, statSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -43,7 +43,7 @@ import { researchRoles } from '../lib/roles.mjs';
 import { loadReplayScene, discoverReplayFaces } from '../lib/replay-scene.mjs';
 import { researchWorkspaceGroup } from '../lib/session-log.mjs';
 import { compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds, sentinelInAssistantText, turnCompleted } from '../lib/replay-request.mjs';
-import { loadChromium, launchChromium } from '../lib/playwright.mjs';
+import { SMOKE_LOCALE, loadChromium, launchChromium } from '../lib/playwright.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {
@@ -88,9 +88,52 @@ if (!process.env.DSH_HOME) {
   }
 }
 
+// 运行锁（与 client-load 同款）：回放共享 DSH_HOME / research-workspace，两实例并发会互相
+// 抢会话与真实检索 API（BUG-064 根因方向 #2）。只防本脚本的两个实例；陈旧锁自动接管。
+const LOCK_DIR = join(ROOT, 'runtime', 'smoke-workspace', 'snapshot-replay.lock');
+function releaseRunLock() { rmSync(LOCK_DIR, { recursive: true, force: true }) }
+function lockOwnerPid() {
+  try {
+    const pid = Number(JSON.parse(readFileSync(join(LOCK_DIR, 'owner.json'), 'utf8'))?.pid);
+    if (!Number.isInteger(pid) || pid <= 0) return null;
+    try { process.kill(pid, 0) } catch (error) { if (error.code !== 'EPERM') return null }
+    return pid;
+  } catch { return null }
+}
+function acquireRunLock(retry = true) {
+  try {
+    mkdirSync(LOCK_DIR);
+    writeFileSync(join(LOCK_DIR, 'owner.json'), JSON.stringify({ pid: process.pid, at: new Date().toISOString() }), 'utf8');
+    return;
+  } catch (error) {
+    if (error.code !== 'EEXIST') throw error;
+    const pid = lockOwnerPid();
+    if (pid !== null) {
+      console.error(`snapshot-replay-smoke: 另一个实例在跑（pid ${pid}；锁 ${LOCK_DIR}）——本次未跑（exit 2）`);
+      process.exit(2);
+    }
+    if (!retry) { console.error(`snapshot-replay-smoke: 无法接管陈旧锁 ${LOCK_DIR}——人工确认后删除再跑`); process.exit(2) }
+    rmSync(LOCK_DIR, { recursive: true, force: true });
+    acquireRunLock(false);
+  }
+}
+acquireRunLock();
+process.on('exit', releaseRunLock);
+
 // ── B 层共享：组装请求面提取 + 挥发性 tokenize（双侧同规——录制/回放身份差异不构成红）──
 const parseLines = (text) => text.split('\n').filter(Boolean)
   .map((l) => { try { return JSON.parse(l) } catch { return null } }).filter(Boolean);
+
+/** A 层超时归因：最后事件 = 什么；停在 tool/call 时点名工具（区分「工具未回」与「回放未喂到」）。 */
+function stallOf(text) {
+  if (text === null) return '无本次日志';
+  const events = String(text).split('\n').filter(Boolean).flatMap((line) => { try { return [JSON.parse(line)] } catch { return [] } });
+  const last = events.at(-1);
+  if (last === undefined) return '本次日志为空';
+  const type = last.type ?? '(无 type)';
+  if (type === 'tool/call') return `stalled at tool/call ${last.data?.name ?? '?'}（最后 seq ${last.seq ?? '?'}）`;
+  return `最后事件 ${type}（seq ${last.seq ?? '?'}）`;
+}
 const diffExcerpt = (a, b) => {
   let i = 0;
   while (i < Math.min(a.length, b.length) && a[i] === b[i]) i += 1;
@@ -215,12 +258,14 @@ for (const { face, scene } of SCENES) {
       catch { return null }
     };
     let finalOk = false;
+    let lastLogText = null;
     const deadline = Date.now() + TURN_TIMEOUT_MS;
     while (Date.now() < deadline) {
       await sleep(4000);
       const fresh = existsSync(ownLog) && statSync(ownLog).mtimeMs >= BOOT_START;
       if (fresh) {
         const text = readLog(ownLog);
+        lastLogText = text;
         // 回合落定判据正本 = lib/replay-request（BUG-030 正修）：哨兵**只认 assistant 文本**
         // ——哨兵字样写在录制 prompt 里，旧的全日志 includes 会在 user/message 一落盘就放行，
         // 后续层于是在回合在飞时执行（实测 = C5 金标准缺末行，4 红 / 6 跑）。另要求 turn/end
@@ -232,7 +277,7 @@ for (const { face, scene } of SCENES) {
       if (childGone) { failures.push(`[${face}/${sc.id}] web 进程在回合结束前退出`); break }
     }
     step(finalOk, `[${face}/${sc.id}] A 回放通路（零真模型调用完整回放；收尾文本逐字命中；只认本次新写日志）`,
-      finalOk ? '' : `回放回合未在 ${TURN_TIMEOUT_MS / 1000}s 内以 completed 走完并让收尾文本（"${SENTINEL}"）落进 assistant 消息——canned 回放未走通`);
+      finalOk ? '' : `回放回合未在 ${TURN_TIMEOUT_MS / 1000}s 内以 completed 走完并让收尾文本（"${SENTINEL}"）落进 assistant 消息——canned 回放未走通；${stallOf(lastLogText)}`);
 
     // ── B 层：组装请求 diff（persona + 全序列 request/header + 四处 user/message 注入，
     //    双侧定向归一化后逐条比对；判据由 manifest 声明、consumer 固定为全集）──
@@ -258,7 +303,7 @@ for (const { face, scene } of SCENES) {
       const chromium = await loadChromium(ROOT);
       const browser = await launchChromium(chromium);
       try {
-        const page = await browser.newPage();
+        const page = await browser.newPage({ locale: SMOKE_LOCALE });
         await page.goto(`${base}/?token=${token}`, { waitUntil: 'domcontentloaded' });
         await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {});
         const cont = page.getByRole('button', { name: /continue/i }).first();
@@ -388,17 +433,56 @@ for (const { face, scene } of SCENES) {
           step(cardList.length > 0, `[${face}/${sc.id}] C1 对话流研究语义卡提取非空（防空语料——空提取 = 假绿）`,
             `${cardList.length} 卡；chat 调用锚 ${anchors.length} 个${anchors.length > 0 ? `：${anchors.slice(0, 4).join(' / ')}` : ''}`);
           // 「研究状态」页签：展开右栏 + 点 guide 胶囊（client-load-smoke 同款配方）
-          const expand = page.getByRole('button', { name: 'Open right sidebar' });
+          const expand = page.getByRole('button', { name: /Open right sidebar|打开右侧边栏/i });
           if (await expand.count() > 0) await expand.first().click({ timeout: 8000 }).catch(() => {});
           await sleep(1500);
-          const capsule = page.getByRole('button', { name: /研究状态/ }).first();
+          const capsule = page.getByRole('button', { name: /研究状态|Research Status/i }).first();
           const capOk = await capsule.isVisible({ timeout: 12000 }).catch(() => false);
           const capDiag = capOk ? '' : await page.evaluate(() => {
             const buttons = Array.from(document.querySelectorAll('button'))
               .filter((b) => b.offsetParent !== null)
               .map((b) => (b.textContent ?? '').trim()).filter((t) => t !== '' && t.length < 24).slice(0, 24);
-            return `可见按钮：${buttons.join(' | ')}；正文：${(document.body?.innerText ?? '').replace(/\n+/g, ' ⏎ ').slice(0, 300)}`;
+            // 区分「交互配方过时」与「页签注册缺失」：给出 role=tab 的 id/label 与 guide 容器在场性。
+            const tabs = Array.from(document.querySelectorAll('[role="tab"]'))
+              .map((el) => ({ id: el.id ?? '', label: (el.textContent ?? '').trim() })).slice(0, 12);
+            const guide = document.querySelector('[data-guide-page]') !== null;
+            return `可见按钮：${buttons.join(' | ')}；role=tab=${JSON.stringify(tabs)}；guide 容器=${guide ? '在场' : '缺席'}；正文：${(document.body?.innerText ?? '').replace(/\n+/g, ' ⏎ ').slice(0, 300)}`;
           });
+          const collectPaneRows = () => page.evaluate(() => {
+            // DOM 行走提取活动行（textContent 不受折叠态/innerText 块级化影响——实测：活动行
+            // flex 块级化把 icon 与文本拆成两行，行过滤法抓不到文本）
+            const rows = [];
+            for (const div of document.querySelectorAll('div')) {
+              const spans = Array.from(div.children).filter((el) => el.tagName === 'SPAN');
+              if (spans.length !== 2) continue;
+              const a = (spans[0].textContent ?? '').trim();
+              const b = (spans[1].textContent ?? '').trim();
+              if (a === '🔍' || a === '👥' || a === '💬' || a === '📦') rows.push(`${a} ${b}`);
+            }
+            return rows;
+          });
+          let paneRows = [];
+          if (capOk) {
+            await capsule.click({ timeout: 5000 }).catch(() => {});
+            // 活动流异步到齐（会话 follow/history）：固定 sleep 在负载下会漏抓末行 → 金标准假红
+            // （实测同一输入两次运行一次 2 行一次 1 行）。等待显式稳定态：连续两次采样一致且非空；
+            // 20s 死线后按当时实得捕获，C5 仍以逐字比对判红（等待不放宽断言）。
+            const deadline = Date.now() + 20000;
+            let previous = null;
+            let stableSamples = 0;
+            while (Date.now() < deadline) {
+              paneRows = await collectPaneRows();
+              const signature = paneRows.join('\n');
+              if (signature !== '' && signature === previous) {
+                stableSamples += 1;
+                if (stableSamples >= 2) break;
+              } else {
+                stableSamples = 0;
+              }
+              previous = signature;
+              await sleep(400);
+            }
+          }
           step(capOk, `[${face}/${sc.id}] C2 「研究状态」页签在场（右栏展开 + guide 胶囊可点）`, capDiag);
           step(paneRows.length > 0, `[${face}/${sc.id}] C3 页签活动行提取非空（防空语料）`, `${paneRows.length} 行`);
           step(consoleErrors.filter((t) => t.includes('research-status') || t.includes('deep-research')).length === 0,
@@ -408,6 +492,7 @@ for (const { face, scene } of SCENES) {
             `# ui.expected —— 渲染金标准（scenario: ${scene.scenario}）`,
             '',
             '> 生成物：`node scripts/smoke/snapshot-replay-smoke.mjs --update-expected` 从真实回放渲染捕获；',
+            '> locale: zh-CN（浏览器上下文显式钉住；文案随 locale，本金标准不是 en-US 转录）；',
             '> 比较 = 逐字。窄带：只钉录制流驱动的确定性面（卡片标题行 + 人性化活动行）；',
             '> 不钉工具结果体/时间戳/bundle 渐进面（后者依赖工作区态，非录制流）。',
             '',

@@ -210,7 +210,7 @@ BUG-020）。
   run 的文件数/大小/最老日期与合计（`--json` 给脚本）；它不删除任何文件，删/归档仍是显式动作。
 - **拍板后操作侧跑一次验收（原子动作）**：`source dev/env.sh && node scripts/run-ops/run-accept.mjs
   research-workspace/drt_<slug>`——node-gate + evidence-audit + path-hygiene（本机 home 路径）+ 未来日期 sanity 同次跑；预检红不写，绿写
-  `delivered.json` + `manifest.json` + `acceptance.md`（新 run 非 quick_factual 的 reader 角色/哈希一并绑定）；回执里 present 只记
+  `delivered.json` + `manifest.json` + `acceptance.md`（新 run 非 quick_factual 的 reader 角色/哈希一并绑定）；`acceptance.md` 的「人工走查」节是 L4 ③④ 的唯一载体，重跑验收与 `--repair` 保留该节；回执里 present 只记
   `drt_<slug>/final/vN` 相对标签，不写本机绝对路径；落盘后还会复检一次门禁/审计生成物。复核后加 `--archive` 才移入
   `archive/drt_<slug>/`。门 A/C、审计或日期红时不要手工归档。历史 bundle 的旧回执若已带绝对路径，用 `--repair` 显式修
   （只归一化 delivered.json 并删除可再生的 acceptance/node-gate，再走同一套预检）。

@@ -28,6 +28,7 @@
 // research`——那会跳过 pack 漂移检测、静默用旧镜像。boot 是前台进程（脚本退出即 web 停），
 // 故 `up` 以**托管后台 job** 形态起 boot-run，本驱动的 probe 阶段独立取证。
 import { spawn, spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { copyFileSync, existsSync, mkdirSync, openSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -63,6 +64,17 @@ const runtimeFingerprint = () => {
     }
   } catch {}
   return 'source';
+};
+// dev 外壳指纹：决定被探测页面内容的 overlay / boot 序列 / 渲染器。pack 没动但外壳变了也必须
+// miss（BUG-065：旧键只有 pack+runtime，会拿 30 分钟前的 GREEN 冒充当前页面）。
+const DEV_SHELL_FILES = ['dev/research.overlay.yml', 'dev/boot-run.sh', 'dev/render-overlay.mjs'];
+const devShellFingerprint = () => {
+  const hash = createHash('sha256');
+  for (const rel of DEV_SHELL_FILES) {
+    hash.update(rel).update('\0');
+    try { hash.update(readFileSync(join(ROOT, rel))); } catch { hash.update('missing'); }
+  }
+  return hash.digest('hex').slice(0, 16);
 };
 // HTTP 就绪（缓存命中仍要求服务器在、shell 可服务）：token 换 cookie 后只读首页，不代替浏览器探针。
 const httpReady = async (url) => {
@@ -339,14 +351,14 @@ if (noProbe) {
 if (!forceProbe && drift?.clean === true) {
   const cached = readProbeCache();
   const packId = packFingerprint(collectPackEntries(PACK_DIR));
-  const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint() })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
+  const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint(), extra: devShellFingerprint() })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
   const hit = probeCacheHit({ entry: cached, key, now: Date.now() });
   if (hit.hit) {
     const ready = await httpReady(state.url);
     if (ready.ok) {
       const ageS = Math.round((hit.ageMs ?? 0) / 1000);
-      const payload = { ...cached.payload, url: state.url, port: state.port, cached: true, cacheAgeMs: hit.ageMs, reason: `缓存命中（同一 pack 源 + runtime 构建；${ageS}s 前 GREEN）——--force-probe 可强制重验` };
-      console.log(`run-driver: 验证缓存命中（${ageS}s 前 GREEN，同一 pack 源 + runtime 构建；--force-probe 可强制重验）`);
+      const payload = { ...cached.payload, url: state.url, port: state.port, cached: true, cacheAgeMs: hit.ageMs, reason: `缓存命中（同一 pack 源 + runtime 构建 + dev 外壳；${ageS}s 前 GREEN）——--force-probe 可强制重验` };
+      console.log(`run-driver: 验证缓存命中（${ageS}s 前 GREEN，同一 pack 源 + runtime 构建 + dev 外壳；--force-probe 可强制重验）`);
       console.log('──────────────────────────── 呈交块（缓存）────────────────────────────');
       console.log(`通道 URL：${state.url}`);
       console.log(`浏览器面：GREEN（缓存，${ageS}s 前；HTTP 就绪 ${ready.detail}）`);
@@ -375,7 +387,7 @@ if (submitted) {
   // 只缓存 GREEN（键 = pack 指纹 + runtime 构建 + 断言参数；冷启动可复用）；红/未跑永不入缓存。
   try {
     const packId = packFingerprint(collectPackEntries(PACK_DIR));
-    const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint() })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
+    const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint(), extra: devShellFingerprint() })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
     writeFileSync(PROBE_CACHE, JSON.stringify({ key, at: new Date().toISOString(), level: v.level, payload }, null, 2));
   } catch {}
 }

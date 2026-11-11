@@ -22,7 +22,7 @@ import { formatSecretFinding, scanSecrets } from '../lib/secret-scan.mjs'
 import { presentedInLogs } from '../lib/node-gate-session-gates.mjs'
 import { finalVersionsIn } from '../lib/final-version.mjs'
 import { epochDateOf, runSchemaOf } from '../lib/schema-scan-core.mjs'
-import { buildDelivered, buildManifest, corpusRootLabel, renderAcceptance, repairReceiptPaths, sha256Text, shouldWriteReceipts } from '../lib/run-receipt.mjs'
+import { buildDelivered, buildManifest, corpusRootLabel, renderAcceptance, repairReceiptPaths, sha256Text, shouldWriteReceipts, withManualEvidence } from '../lib/run-receipt.mjs'
 import { readZstdText } from '../lib/zstd-read.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -192,7 +192,10 @@ if (legacy) {
   console.log(`  PASS 回执已生成（final ${delivered.final.version === null ? '—' : `v${delivered.final.version}`} / reader ${readerVersion === null ? '—' : `v${readerVersion}`} / present ${delivered.present?.path ?? '—'} / manifest ${manifest.files.length} 条）`)
 }
 
-const acceptanceText = renderAcceptance({
+const acceptancePath = join(bundle, 'acceptance.md')
+// 人工走查节是 L4 ③④ 的唯一载体，不可再生（BUG-062）：重跑验收时把它拼回新回执。
+const previousAcceptance = existsSync(acceptancePath) ? readFileSync(acceptancePath, 'utf8') : ''
+const acceptanceText = withManualEvidence(renderAcceptance({
   slug,
   stamp,
   critical,
@@ -201,7 +204,7 @@ const acceptanceText = renderAcceptance({
   present: delivered?.present ?? null,
   corpusRoot,
   legacy,
-})
+}), previousAcceptance)
 // 写盘前校验**待写文本**（不是历史文件）：回执是最容易带进本机路径的地方。
 const leaks = scanHomePaths([
   ...(deliveredText === null ? [] : [{ path: 'delivered.json', text: deliveredText }]),
@@ -225,7 +228,7 @@ if (receiptSecrets.length > 0) {
 }
 if (deliveredText !== null) writeFileSync(join(bundle, 'delivered.json'), deliveredText)
 if (manifestText !== null) writeFileSync(join(bundle, 'manifest.json'), manifestText)
-writeFileSync(join(bundle, 'acceptance.md'), acceptanceText)
+writeFileSync(acceptancePath, acceptanceText)
 console.log(`  PASS acceptance.md 已写：${join(bundle, 'acceptance.md')}（语料根标签 ${corpusRoot}；绝对根 ${sessions}）`)
 if (presented.status !== 'FOUND') console.log(`  note present 见证未取到：${presented.detail}（回执 present 记 null，不猜）`)
 

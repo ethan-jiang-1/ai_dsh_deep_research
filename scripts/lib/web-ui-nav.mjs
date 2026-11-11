@@ -38,7 +38,7 @@ export const SIDEBAR_GROUP_CANDIDATES = [
  *  CDP 消费方要把这个模式插进 evaluate 字符串，JSON.stringify(RegExp) 会丢 source；
  *  Playwright 消费方 new RegExp(SHOW_MORE_SESSIONS_PATTERN) 等价。唯一正本——vendor 换
  *  文案只改这一处，各消费方一起跟。keyless 钉 = tests/cockpit/library-fold.test.mjs。 */
-export const SHOW_MORE_SESSIONS_PATTERN = 'Show \\d+ more sessions'
+export const SHOW_MORE_SESSIONS_PATTERN = 'Show \\d+ more sessions|展开其余 \\d+ 个会话'
 
 // ── 行键定位原语（data-row-key 主锚）──────────────────────────────────────────────
 
@@ -381,16 +381,16 @@ export async function openSessionById(page, sessionId, title = null, opts = {}) 
 
 /** 首屏预告遮罩的标题文本。DSH 版本升级后首次访问必现：全屏 `_mask_` 盖住侧栏与输入框，
  *  不点 Continue 则后续点击全被吞（compat-client-smoke 2026-10 实测注释）。 */
-export const PREVIEW_NOTICE_HEADING = 'Preview Notice'
+export const PREVIEW_NOTICE_HEADING = 'Preview Notice|预览版说明'
 
 /** 遮罩关闭按钮文案（中英三形态；Continue 同时也是问询卡提交按钮——只在遮罩标题在场时点它，
  *  避免误点 HITL 卡片，见 dev/hitl-answer.mjs 的同名教训）。 */
-export const PREVIEW_NOTICE_CONTINUE = ['Continue', '我知道了', 'Got it']
+export const PREVIEW_NOTICE_CONTINUE = ['Continue', '继续', '我知道了', 'Got it']
 
 /** CDP evaluate 用的探测器源码（cdp-probe 字符串插值消费；Playwright 消费方下方函数）。
  *  返回 { present, clicked }：present = 遮罩标题在场；clicked = 本次是否点到关闭按钮。 */
 export const PREVIEW_NOTICE_PROBE_JS = `(() => {
-  const heading = ${JSON.stringify(PREVIEW_NOTICE_HEADING)};
+  const heading = new RegExp(${JSON.stringify(PREVIEW_NOTICE_HEADING)});
   const labels = ${JSON.stringify(PREVIEW_NOTICE_CONTINUE)};
   // 只认**可见**的标题：关闭后的模态节点仍留在 DOM（display:none）——按 DOM 在场判会把
   // 已关闭的遮罩报成 stuck（2026-11-03 本地 seed 实测假报，后续点击其实全部成功）。
@@ -400,7 +400,7 @@ export const PREVIEW_NOTICE_PROBE_JS = `(() => {
     return r.width > 0 && r.height > 0 && s.display !== 'none' && s.visibility !== 'hidden';
   };
   const leaves = Array.from(document.querySelectorAll('div,span,h1,h2,strong'));
-  const present = leaves.some((el) => el.children.length === 0 && (el.textContent ?? '').trim() === heading && visible(el));
+  const present = leaves.some((el) => el.children.length === 0 && heading.test((el.textContent ?? '').trim()) && visible(el));
   if (!present) return { present: false, clicked: false };
   const btn = Array.from(document.querySelectorAll('button')).find((b) => labels.includes((b.textContent ?? '').trim()));
   if (btn === undefined) return { present: true, clicked: false };
@@ -408,20 +408,24 @@ export const PREVIEW_NOTICE_PROBE_JS = `(() => {
   return { present: true, clicked: true };
 })()`
 
-/** Playwright 版：关闭首屏遮罩并判定结果。返回 'absent' | 'dismissed' | 'stuck'。
+/** Playwright 版：关闭首屏遮罩并判定结果。返回 'absent' | 'unknown' | 'dismissed' | 'stuck'。
  *  调用方把 'stuck' 当红（页面被人挡住 = 人看不到交付面）。 */
 export async function dismissPreviewNotice(page) {
-  const present = () => page.evaluate((heading) => {
+  const present = () => page.evaluate((headingSource) => {
+    const heading = new RegExp(headingSource)
     const visible = (el) => {
       const r = el.getBoundingClientRect()
       const s = getComputedStyle(el)
       return r.width > 0 && r.height > 0 && s.display !== 'none' && s.visibility !== 'hidden'
     }
     const leaves = Array.from(document.querySelectorAll('div,span,h1,h2,strong'))
-    return leaves.some((el) => el.children.length === 0 && (el.textContent ?? '').trim() === heading && visible(el))
+    return leaves.some((el) => el.children.length === 0 && heading.test((el.textContent ?? '').trim()) && visible(el))
   }, PREVIEW_NOTICE_HEADING).catch(() => false)
-  if (!(await present())) return 'absent'
   const cont = page.getByRole('button', { name: new RegExp(`^(${PREVIEW_NOTICE_CONTINUE.join('|')})$`) }).first()
+  if (!(await present())) {
+    // 标题认不出但 Continue 候选在场：不猜点（可能误点 HITL 卡），显式报 unknown 交给调用方。
+    return await cont.isVisible().catch(() => false) ? 'unknown' : 'absent'
+  }
   if (await cont.isVisible().catch(() => false)) {
     await cont.click({ timeout: 6_000 }).catch(() => {})
     await page.waitForTimeout?.(1_500) ?? null

@@ -8,6 +8,7 @@ import assert from 'node:assert/strict'
 import { readFileSync, existsSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { RERUN_TRIAGE_HINT, RERUN_TRIAGE_ROWS, RERUN_TRIAGE_TITLE } from '../../packages/deep-research-pack/src/lib/rerun-triage.ts'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
@@ -86,10 +87,14 @@ test('L3 只读出口：两组件共用 src/lib 常量，且不引入动作按�
   for (const rel of ['packages/deep-research-pack/src/client/ResearchStatusTab.tsx', 'packages/deep-research-pack/src/client/ResearchFinalTab.tsx']) {
     const c = read(rel)
     assert.ok(c.includes("lib/rerun-triage.ts"), `${rel} 未引用共享常量`)
+    assert.ok(c.includes('rerunTriageRowsOf(props.t)'), `${rel} 未走 locale 取词（BUG-055：英文界面不得回退中文）`)
   }
+  assert.match(RERUN_TRIAGE_TITLE, /三种改法/, '常量缺折叠块标题')
+  assert.ok(RERUN_TRIAGE_ROWS.some((row) => row.copy.includes('这份')), '常量缺可复制的一句话')
+  assert.match(RERUN_TRIAGE_HINT, /照抄/, '常量缺使用提示')
+  // 文案正本迁到 zh-fold（BUG-055）：中文常量由它派生，词表必须仍逐字在场。
+  assert.match(read('packages/deep-research-pack/src/client/locales/zh-fold.ts'), /这份/, 'zh-fold 缺可复制的一句话')
   const libText = read(lib)
-  assert.match(libText, /三种改法/, '常量缺折叠块标题')
-  assert.match(libText, /这份/, '常量缺可复制的一句话')
   assert.equal(/spawn|send_message|team_task|run-accept/.test(libText), false, '常量模块不得含动作面（只读出口）')
 })
 

@@ -80,15 +80,16 @@ export function writeShippedCache(path, key, files) {
 }
 
 /**
- * 探针缓存键 = pack 源指纹 + runtime 构建指纹（可带 web 进程身份）。
+ * 探针缓存键 = pack 源指纹 + runtime 构建指纹 + dev 外壳指纹（可带 web 进程身份）。
  * 冷启动同样要能命中（同 pack + 同 runtime 的页面内容不变），故默认 **不带 pid**；
  * 需要进程内绑定时传 `pids`。
  * @param {{pids?: string[]|number[]|null, packFingerprint: string, runtime?: string}} input
  * @returns {string}
  */
-export function probeCacheKey({ pids = null, packFingerprint: fingerprint, runtime = 'unknown' }) {
+export function probeCacheKey({ pids = null, packFingerprint: fingerprint, runtime = 'unknown', extra = '' }) {
   const pidPart = pids === null || pids === undefined ? 'any' : [...pids].map(String).sort().join(',')
-  return `${pidPart}@${fingerprint}@${runtime}`
+  const extraPart = extra === '' || extra === null || extra === undefined ? '' : `@${extra}`
+  return `${pidPart}@${fingerprint}@${runtime}${extraPart}`
 }
 
 /**

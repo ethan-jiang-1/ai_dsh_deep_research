@@ -3,27 +3,14 @@
 // 边界：不读会话/驾驶舱，不调用模型，不判断策略好坏；解析失败退化为空值，不 throw。
 
 import { planIndex, isActivePlanNode } from '../../packages/deep-research-pack/src/lib/plan-index.ts'
-import { countCellsOf, waveCountOf } from './protocol-core.mjs'
+import { headerBlockOf, lensScanOf, waveCountOf } from './protocol-core.mjs'
 
 const unique = (values) => [...new Set(values.filter((value) => value !== ''))]
 
-/** 从 topics.md 的 `- lenses: [a, b]` 行取证据面 id（去重、保序）。 */
-function lensIdsOf(topicsText) {
-  const ids = []
-  for (const line of String(topicsText ?? '').split(/\r?\n/)) {
-    const match = /^\s*-\s*lenses\s*:\s*\[(.*?)\]\s*$/i.exec(line)
-    if (match === null) continue
-    for (const raw of match[1].split(/[,，]/)) {
-      const id = raw.trim()
-      if (id !== '') ids.push(id)
-    }
-  }
-  return unique(ids)
-}
-
-/** plan 的通道形态：显式策略行 > 显式脚本层 > Team 协作 > 一次性 spawn。 */
+/** plan 的通道形态：显式策略行 > 显式脚本层 > Team 协作 > 一次性 spawn。
+ *  策略行只在 plan 头（首个 `##` 之前）里认——正文提及不能冒充头部（BUG-053）。 */
 function channelOf(planText, hasWave) {
-  const declared = /^>?\s*-\s*策略\s*[:：][^\n]*?通道\s*=\s*([a-z]+)/m.exec(planText)?.[1]
+  const declared = /^>?\s*-\s*策略\s*[:：][^\n]*?通道\s*=\s*([a-z]+)/m.exec(headerBlockOf(planText))?.[1]
   if (declared === 'team' || declared === 'spawn' || declared === 'workflow') return declared
   if (hasWave) return 'workflow'
   return /spawn_teammate|team_task_|Team 任务|Team task|teammate/i.test(planText) ? 'team' : 'spawn'
@@ -40,6 +27,7 @@ export function strategyOf(input) {
   const index = planIndex(planText)
   const active = index.nodes.filter(isActivePlanNode)
   const hasWave = /^##\s*Wave 执行/m.test(planText) && /research-wave|wave-executor|lens-fanout/i.test(planText)
+  const lensScan = lensScanOf(topicsText)
   const roles = unique(active
     .map((node) => String(node.ownerRole ?? '').trim().toLowerCase())
     .filter((role) => role !== '' && role !== 'lead'))
@@ -51,7 +39,7 @@ export function strategyOf(input) {
       methodKind: protocol.method?.kind ?? null,
       source: protocol.source_scope ?? null,
       output: protocol.output?.shape ?? null,
-      lenses: lensIdsOf(topicsText),
+      lenses: lensScan.ids,
     },
     orchestration: {
       channel: channelOf(planText, hasWave),
@@ -59,7 +47,7 @@ export function strategyOf(input) {
       roles,
       topology: {
         nodes: index.topLevel.length,
-        cells: countCellsOf(topicsText),
+        cells: lensScan.cells,
         waves: waveCountOf(index),
         depths: protocol.effort?.allowed_depths ?? [],
       },

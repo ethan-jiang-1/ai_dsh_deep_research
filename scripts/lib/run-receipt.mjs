@@ -188,9 +188,32 @@ export function buildDelivered({ slug, bundleDir, corpusRoot, acceptedAt, presen
 }
 
 /**
+ * 取 acceptance.md 的「## 人工走查」节（含标题；无内容 → null）。人工走查是 L4 ③④ 的唯一载体，
+ * 不可再生（BUG-062）：重跑验收 / --repair 必须保留它，不能按「可再生产物」删掉。
+ */
+export function manualEvidenceOf(text) {
+  const lines = String(text ?? '').split(/\r?\n/)
+  const start = lines.findIndex((line) => /^##\s*人工走查\s*$/.test(line))
+  if (start === -1) return null
+  const rest = lines.slice(start + 1)
+  const end = rest.findIndex((line) => /^##\s/.test(line))
+  const section = (end === -1 ? rest : rest.slice(0, end)).join('\n').trim()
+  return section === '' ? null : `## 人工走查\n\n${section}`
+}
+
+/** 把旧 acceptance.md 的人工走查节拼进新生成的文本（已含则原样返回；无可保留节则原样返回）。 */
+export function withManualEvidence(generated, existing) {
+  const manual = manualEvidenceOf(existing)
+  if (manual === null) return generated
+  if (String(generated).includes(manual)) return generated
+  return `${String(generated).trimEnd()}\n\n${manual}\n`
+}
+
+/**
  * 修复历史回执的本机路径（BUG-044 之前写出的 bundle）。
- * 只动**可再生产物**：`delivered.json` 的 present 归一化为可移植标签；`acceptance.md` /
- * `node-gate.md` 删除（run-accept 绿后会重新生成）。不动研究内容、不动 audit.md。
+ * 只动**可再生产物**：`delivered.json` 的 present 归一化为可移植标签；`acceptance.md` 若含
+ * 「## 人工走查」节则只保留该节（旧机械回执丢弃），否则删除；`node-gate.md` 删除
+ * （run-accept 绿后会重新生成）。不动研究内容、不动 audit.md。
  * @param {string} bundleDir run bundle 根。
  * @returns {{ok:boolean, actions:string[], reason?:string}} ok=false 时未做任何修改。
  */
@@ -236,6 +259,14 @@ export function repairReceiptPaths(bundleDir) {
     const target = join(bundleDir, name)
     if (!existsSync(target)) continue
     try {
+      if (name === 'acceptance.md') {
+        const manual = manualEvidenceOf(readFileSync(target, 'utf8'))
+        if (manual !== null) {
+          writeFileSync(target, `# Acceptance\n\n${manual}\n`)
+          actions.push('acceptance.md: 保留人工走查节（旧机械回执删除）')
+          continue
+        }
+      }
       unlinkSync(target)
       actions.push(`${name}: 删除（可再生产物，验收时重建）`)
     } catch (error) {

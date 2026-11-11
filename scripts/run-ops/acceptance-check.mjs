@@ -11,10 +11,10 @@
 // 叶子三型 = file_exists / file_contains / frontmatter_fields）。
 //
 // 用法：node scripts/run-ops/acceptance-check.mjs <bundleDir> <criteria.json>
-// 退出码：0 = 求值完成（PASS/FAIL/UNVERIFIED 是求值结果，不是工具错误）/ 2 = 用法或前置错
+// 退出码：0 = 全 PASS（至少一条判据）/ 1 = 有 FAIL / UNVERIFIED / 零判据（收活不放行）/ 2 = 用法或前置错
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { acceptanceCheck } from '../lib/acceptance-check.mjs';
+import { acceptanceCheck, acceptanceExitCode } from '../lib/acceptance-check.mjs';
 
 const positional = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 if (positional.length !== 2) {
@@ -49,4 +49,4 @@ console.log(`acceptance-check: 判据 ${summary.total} 条 · PASS ${summary.pas
 for (const v of verdicts) console.log(`  [${v.status}] ${v.criterion} — ${v.detail}`);
 if (summary.fail > 0) console.log('  → 有 FAIL：收活不放行（三态语义与处置 = lib 头注）');
 if (summary.unverified > 0) console.log('  → 有 UNVERIFIED：需人工或 critic 判——永不静默放行');
-process.exit(0);
+process.exit(acceptanceExitCode(summary));

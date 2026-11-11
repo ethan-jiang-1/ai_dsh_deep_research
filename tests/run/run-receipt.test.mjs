@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import {
   READ_ORDER, buildDelivered, buildManifest, corpusRootLabel, pickPresented, receiptProblems,
-  renderAcceptance, repairReceiptPaths, shouldWriteReceipts, sha256Of, sha256Text,
+  manualEvidenceOf, renderAcceptance, repairReceiptPaths, shouldWriteReceipts, sha256Of, sha256Text, withManualEvidence,
 } from '../../scripts/lib/run-receipt.mjs'
 import { hygieneOf } from '../../scripts/lib/schema-scan-core.mjs'
 
@@ -289,4 +289,38 @@ test('manifest 带 schema 与有效契约日期：新形态取 created，不让�
     const legacy = buildManifest({ slug: 'drt_s', bundleDir: b, contract: '2026-10-23', generatedAt: '2026-10-23T00:00:00.000Z' })
     assert.equal(legacy.schema, null, '未传 schema（旧形态）→ null，不冒充整数契约')
   } finally { cleanup() }
+})
+
+// 负例留证 2026-11-11：BUG-062——修复前 --repair 把 acceptance.md 当纯可再生产物删除，
+// run-accept 重跑也无条件覆盖；人工走查（L4 ③④ 唯一载体）静默丢失。还原法 = 删掉
+// manualEvidenceOf / withManualEvidence 与 repair 的保留分支。
+test('BUG-062 repairReceiptPaths：含人工走查节时只保留该节，不删除', () => {
+  const { dir, cleanup } = makeRoot()
+  try {
+    const b = writeBundle(dir)
+    writeFileSync(join(b, 'delivered.json'), JSON.stringify({
+      version: 1, slug: 'drt_x', present: { path: join(b, 'final', 'v2.md'), callId: 'p1', version: 2 },
+    }, null, 2) + '\n')
+    writeFileSync(join(b, 'acceptance.md'), '# Acceptance\n\n/Users/alice/secret\n\n## 人工走查\n\n- ③ HITL 之间无 ask（记录人：ops）\n- ④ 中断后恢复（记录人：ops）\n')
+    const r = repairReceiptPaths(b)
+    assert.equal(r.ok, true)
+    assert.equal(existsSync(join(b, 'acceptance.md')), true, '人工走查载体不得被删')
+    const kept = readFileSync(join(b, 'acceptance.md'), 'utf8')
+    assert.match(kept, /③ HITL 之间无 ask/)
+    assert.match(kept, /④ 中断后恢复/)
+    assert.equal(kept.includes('/Users/alice/secret'), false, '旧机械回执的本机路径仍被清掉')
+    assert.ok(r.actions.some((a) => a.includes('保留人工走查')), r.actions.join('；'))
+  } finally { cleanup() }
+})
+
+test('BUG-062 withManualEvidence：重跑验收把旧人工节拼回新回执；无人工节时原样', () => {
+  const generated = '# Acceptance\n\n## 检查\n\n- PASS\n'
+  const existing = '# Acceptance\n\n## 人工走查\n\n- ③ 已走查\n'
+  const merged = withManualEvidence(generated, existing)
+  assert.ok(merged.includes('## 检查'))
+  assert.ok(merged.includes('## 人工走查'))
+  assert.ok(merged.includes('③ 已走查'))
+  assert.equal(withManualEvidence(generated, '# Acceptance\n'), generated)
+  assert.equal(manualEvidenceOf(existing), '## 人工走查\n\n- ③ 已走查')
+  assert.equal(manualEvidenceOf('# Acceptance\n\n## 人工走查\n'), null, '空节不算证据')
 })

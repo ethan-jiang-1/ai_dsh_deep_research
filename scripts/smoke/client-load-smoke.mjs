@@ -51,6 +51,7 @@
 // 都认（位置只用于发现，状态从内容读）。断言的磁盘认证源 = 磁盘侧扫出的最新绑定会话（跑过 run
 // 即有），其 bundle 的 evidence 计数/交付态/问题行以盘上真值对账——不再自造探针 bundle。
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 import { cpus, freemem, loadavg } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -58,9 +59,9 @@ import { scrubbedEnv } from '../lib/env.mjs'
 import { reclaimPort } from '../lib/port-reclaim.mjs'
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs'
-import { launchChromium, loadChromium } from '../lib/playwright.mjs'
+import { SMOKE_LOCALE, launchChromium, loadChromium } from '../lib/playwright.mjs'
 import { clientHistoryWindow, projectKey, readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
-import { classifyHostHealth, isHostUnhealthyVerdict } from '../lib/host-health.mjs'
+import { availableMemoryMBFromMeminfo, availableMemoryMBFromVmStat, classifyHostHealth, isHostUnhealthyVerdict } from '../lib/host-health.mjs'
 import { materializeSeedHome, resolveSeedFixture, seedFixtureSize } from './client-load-seed.mjs'
 import { prepareClientLoadReference } from './client-load-reference.mjs'
 import { pass4ConfigTabPhase } from './client-load-config.mjs'
@@ -320,8 +321,24 @@ const anchorBound = boundSession !== null && expectedFace !== null
 // chrome-error；先判 NOT-RUN（exit 2），不把环境红跑成断言红。失败时还有同一判据的二次收口。
 // 诊断逃生口：人工确认主机可用时可置 DSH_CLIENT_LOAD_ALLOW_UNHEALTHY=1 强制跑；失败仍按
 // host-health 收口 NOT-RUN，不会产生假产品红。
+// 可用内存按平台口径采集：macOS 的 os.freemem() 只算 free pages（BUG-060），必须读 vm_stat；
+// Linux 读 /proc/meminfo 的 MemAvailable。采集失败 → null（classifyHostHealth 判不健康，fail-loud）。
+function hostFreeMB() {
+  try {
+    if (process.platform === 'darwin') {
+      return availableMemoryMBFromVmStat(execFileSync('vm_stat', { encoding: 'utf8' }))
+    }
+    if (process.platform === 'linux') {
+      return availableMemoryMBFromMeminfo(readFileSync('/proc/meminfo', 'utf8'))
+    }
+  } catch {
+    return null
+  }
+  return Math.round(freemem() / 1024 / 1024)
+}
+
 {
-  const startupHost = { load1: Number(loadavg()[0].toFixed(2)), freeMB: Math.round(freemem() / 1024 / 1024), cpuCount: cpus().length }
+  const startupHost = { load1: Number(loadavg()[0].toFixed(2)), freeMB: hostFreeMB(), cpuCount: cpus().length }
   const startupHealth = classifyHostHealth(startupHost)
   const allowUnhealthy = process.env.DSH_CLIENT_LOAD_ALLOW_UNHEALTHY === '1'
   if (startupHealth.unhealthy && !allowUnhealthy) {
@@ -389,7 +406,7 @@ const saveArtifacts = async (reason, extra = {}) => {
     const disconnects = consoleErrors.filter((t) => /WebSocket closed|Remote stream|net::ERR_NETWORK_IO_SUSPENDED/.test(t)).length
     // 主机快照（2026-10-28 归因）：一条红是"产品缺陷"还是"这台机器此刻不健康"，看现场就知道——
     // 实测过一次 load 32 / swap 99% 时 web 进程被 OOM 掉，报出来却是断言红。
-    const host = { load1: Number(loadavg()[0].toFixed(2)), freeMB: Math.round(freemem() / 1024 / 1024), cpuCount: cpus().length }
+    const host = { load1: Number(loadavg()[0].toFixed(2)), freeMB: hostFreeMB(), cpuCount: cpus().length }
     const health = classifyHostHealth(host)
     lastHostHealth = { ...host, ...health }
     writeFileSync(join(dir, 'meta.json'), JSON.stringify({
@@ -427,7 +444,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms))
 // seed 模式追加一步：关掉干净 home 首启的**凭据 onboarding 模态**（见 dismissCredentialOnboarding）。
 async function awaitAppReady(page, settleMs) {
   await page.reload({ waitUntil: 'domcontentloaded' })
-  await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
+  await page.waitForFunction(() => /New Session|新会话/.test(document.body?.innerText ?? ''), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
   await wait(settleMs)
   if (seed !== null) await dismissCredentialOnboarding(page)
 }
@@ -482,13 +499,13 @@ async function dismissCredentialOnboarding(page, { appearMs = seedOnboardingNote
 // 「New tab」开 guide 页再试——两条路都试（company 配方核心）。时序参数逐调用点保持
 // 原值（探测窗/重试窗/点击后稳定窗是各上下文实测调的，不统一）；返回 ok = 胶囊已点开。
 async function openGuideCapsule(page, probeMs, retryMs, afterClickMs, pattern = TAB_TEXT.config) {
-  const expand = page.getByRole('button', { name: 'Open right sidebar' })
+  const expand = page.getByRole('button', { name: /Open right sidebar|打开右侧边栏/i })
   if (await expand.count() > 0) await expand.first().click({ timeout: 8_000 }).catch(() => {})
   await wait(1_500)
   let cap = page.getByRole('button', { name: pattern }).first()
   let ok = await cap.isVisible({ timeout: probeMs }).catch(() => false)
   if (!ok) {
-    const addTab = page.getByRole('button', { name: 'New tab' }).first()
+    const addTab = page.getByRole('button', { name: /New tab|新标签页/i }).first()
     if (await addTab.count() > 0) {
       await addTab.click({ timeout: 5_000 }).catch(() => {})
       await wait(2_000)
@@ -504,7 +521,7 @@ async function openGuideCapsule(page, probeMs, retryMs, afterClickMs, pattern = 
 }
 
 async function openPane(page) {
-  const expand = page.getByRole('button', { name: 'Open right sidebar' })
+  const expand = page.getByRole('button', { name: /Open right sidebar|打开右侧边栏/i })
   if (await expand.count() > 0) await expand.first().click({ timeout: 8_000 }).catch(() => {})
   await wait(1_500)
   const capsule = page.getByRole('button', { name: TAB_TEXT.status }).first()
@@ -539,9 +556,10 @@ async function setupProbeSession() {
 
   const chromium = await loadChromium(ROOT)
   browser = await launchChromium(chromium)
-  // 浏览器 locale 保持 Playwright 默认（en-US）：本冒烟的 UI chrome 定位器（Open right sidebar /
-  // New tab）是英文；页签标题用 `TAB_TEXT` 中英双语断言，两个语言都能过。
-  page = await browser.newPage()
+  // 浏览器 locale 显式钉 zh-CN（SMOKE_LOCALE）：产品文案随 locale，本冒烟的中文正文断言与
+  // 金标准按产品中文口径；宿主 chrome（Open right sidebar / New tab）同步做双语定位，
+  // 不依赖 Playwright 默认 en-US。
+  page = await browser.newPage({ locale: SMOKE_LOCALE })
   consoleErrors = []
   httpFailures = []
   const urls = []
@@ -559,7 +577,7 @@ async function setupProbeSession() {
 
   // ① 先等 app 真渲染（首屏字样在场——此前 bodyText 抓太早，横幅晚于断言出现造成假绿，实测踩过），
   //    再断言零插件挂载失败横幅（apply 抛错会把 UI 砖在 BootPage）。
-  await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
+  await page.waitForFunction(() => /New Session|新会话/.test(document.body?.innerText ?? ''), null, { timeout: RENDER_TIMEOUT_MS }).catch(() => {})
   const bodyText = await page.evaluate(() => document.body?.innerText ?? '')
   step(!bodyText.includes('Failed to load plugins'), '页面无 "Failed to load plugins" 横幅')
 
@@ -976,7 +994,7 @@ async function pass3ActivityStreamPhase() {
       activeOk ? String(activeKey) : `active=${String(activeKey)} bound=session:${boundSessionId}`)
     if (!activeOk) return
     // 右栏可能仍钉在上一条会话（vendor 面板状态）；收起再展开强制按当前会话重挂。
-    const collapse = page.getByRole('button', { name: 'Collapse right sidebar' })
+    const collapse = page.getByRole('button', { name: /Collapse right sidebar|收起右侧边栏/i })
     if (await collapse.count().catch(() => 0) > 0) {
       await collapse.first().click({ timeout: 5_000 }).catch(() => {})
       await wait(1_000)
@@ -1147,7 +1165,9 @@ async function pass3cMethodLibraryPhase() {
   } else {
     step(false, '方法库库条目「在工作台继续」不可见')
   }
-  const create = page.getByRole('button', { name: '新建' }).first()
+  // 稳定钩子 = 方法库根内的 data-method-new：zh 环境里侧栏还有「新建会话」按钮，
+  // `getByRole('button', { name: '新建' })` 会先命中它（2026-11-11 钉 zh-CN 后实测）。
+  const create = page.locator('[data-method-new]').first()
   if (await create.isVisible({ timeout: 5_000 }).catch(() => false)) {
     await create.click({ timeout: 5_000 }).catch(() => {})
     await wait(500)
@@ -1240,7 +1260,7 @@ async function pass3cMethodLibraryPhase() {
     }
     await page.setViewportSize(initialViewport)
     await wait(300)
-    const expandRight = page.getByRole('button', { name: 'Open right sidebar' }).first()
+    const expandRight = page.getByRole('button', { name: /Open right sidebar|打开右侧边栏/i }).first()
     if (await expandRight.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await expandRight.click({ timeout: 5_000 }).catch(() => {})
       await wait(800)

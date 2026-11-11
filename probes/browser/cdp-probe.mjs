@@ -179,7 +179,8 @@ try {
     // 行不可见的最常见原因 = 「Show N more sessions」折叠（组内 65+ 会话）→ 点开重试。
     // 文本模式正本 = lib/web-ui-nav.SHOW_MORE_SESSIONS_PATTERN（纯常量——CDP evaluate
     // 字符串形态无法共用 page 鸭子类型接口，保留薄 CDP 适配层，但选择器策略从 lib 取）。
-    await evaluate(`(() => { const m = Array.from(document.querySelectorAll('button,span')).find(x => new RegExp(${JSON.stringify(SHOW_MORE_SESSIONS_PATTERN)}).test(x.textContent ?? '')); if (m) { m.click(); return true } return false })()`);
+    const expanded = await evaluate(`(() => { const m = Array.from(document.querySelectorAll('button,span')).find(x => new RegExp(${JSON.stringify(SHOW_MORE_SESSIONS_PATTERN)}).test(x.textContent ?? '')); if (m) { m.click(); return true } return false })()`);
+    if (expanded !== true) console.error('cdp-probe: 「展开更多会话」未命中（expand=not-found）——目标行可能仍在折叠组里');
     await new Promise((resolve) => { setTimeout(resolve, 2500) });
     return evaluate(`(() => {
       const t = ${JSON.stringify(text)};

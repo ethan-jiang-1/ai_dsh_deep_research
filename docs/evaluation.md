@@ -149,12 +149,13 @@ final 引用链，结果落 bundle 的 audit.md。它不校验日期校准或摘
     | ① 报告存在且含来源清单 | 机器 | `node scripts/run-gates/node-gate.mjs <bundle>`（门A）+ `final/vN` 在场 | exit 0 |
     | ② 结论能回溯到来源文件 | 机器 | `node scripts/run-gates/evidence-audit.mjs <bundle>` → `audit.md` | exit 0 且 `CRITICAL=0` |
     | ⑤ claim 级裁决覆盖（新契约 run） | 机器 | `node scripts/run-gates/verdict-audit.mjs <bundle>` → `review/verdict-audit-r<N>.md` | exit 0（critical 全有结论性裁决；旧 bundle/quick_factual/契约日前不适用） |
-    | ⑥ Protocol 工件与审计（新契约 run） | 机器 | `node scripts/run-gates/protocol-audit.mjs <bundle>` → `protocol-audit.md` | exit 0（schema/effort/output/投影/版本/批准链自洽；plan 的 `- 策略:` 行按 Strategy 投影对账通道/worker/预算上限，预算不可解析 = 红；旧 bundle/契约日前不适用） |
+    | ⑥ Protocol 工件与审计（新契约 run） | 机器 | `node scripts/run-gates/protocol-audit.mjs <bundle>` → `protocol-audit.md` | exit 0（schema/effort/output/投影/版本/批准链自洽；§Protocol 的 来源/投入/输出 行缺席 = warning（不静默通过），行在值漂移 = 红；深度集合按端点区间或显式集合对账（单值/非连续不再跳过）；plan 的 `- 策略:` 行按 Strategy 投影对账通道/worker/预算上限，通道缺席 = warning，声明 workflow 无 Wave 拓扑 = 红，预算不可解析 = 红；plan 依赖图有环 = 红；旧 bundle/契约日前不适用） |
     | ③ 两点交互纪律（HITL 之间静默自主） | 人工走查 | 会话日志里 HITL1 与 HITL2 之间无 `ask_user_question`、无"要不要继续"式汇报 | 结论一行 + 日期写进 bundle 的 `acceptance.md`「人工走查」节 |
     | ④ 中断后从 run 工作区恢复 | 人工走查 | 停通道 → 重启 → 新会话说「继续 `<slug>`」，能接着跑且不依赖 chat memory | 同上 |
 
     人工走查不是"随便看看"：**没有记录 = 未跑**（未跑 ≠ 通过）。记录位之所以选 `acceptance.md`
-    而不是新文件，是因为它已经由 `run-accept` 生成、随 bundle 交付。
+    而不是新文件，是因为它已经由 `run-accept` 生成、随 bundle 交付。该文件的「人工走查」节是
+    唯一不可再生的部分：重新验收与 `--repair` 都保留它（只重建机械回执）；要清除必须手改文件。
 - **通过判据**：按档位全绿；L4 全量**不进常规回归**（成本），只在里程碑跑。
 - **何时跑**：**里程碑 + [guides/60 §2 任务型路由表](guides/60-dev-loop.md)要求跑 L4-lite 的改动，取并集**。
 

@@ -4,7 +4,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { acceptanceCheck } from '../../scripts/lib/acceptance-check.mjs'
+import { acceptanceCheck, acceptanceExitCode } from '../../scripts/lib/acceptance-check.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const bundle = (name) => join(HERE, '..', 'fixtures', 'review-aids', name)
@@ -79,4 +79,22 @@ test('summary 计数对账：三态计数 = 判据总数', () => {
   assert.equal(r.summary.fail, 1)
   assert.equal(r.summary.unverified, 1)
   assert.equal(r.summary.total, 3)
+})
+
+// 负例留证 2026-11-11：BUG-057——修复前 CLI 求值后无条件 exit 0（FAIL/UNVERIFIED/零判据都同码）。
+// 还原法 = CLI 改回 process.exit(0)。
+test('CLI 退出码：全 PASS=0；FAIL / UNVERIFIED / noCriteria=1（收活不放行）', () => {
+  const pass = acceptanceCheck(B, [{ type: 'file_exists', path: 'evidence/full-card.md' }])
+  assert.equal(acceptanceExitCode(pass.summary), 0)
+  const fail = acceptanceCheck(B, [{ type: 'file_exists', path: 'evidence/absent.md' }])
+  assert.equal(acceptanceExitCode(fail.summary), 1, 'FAIL 不得与全绿同码')
+  const unverified = acceptanceCheck(B, [{ type: 'numbers_match_source_page', file: 'evidence/full-card.md' }])
+  assert.equal(acceptanceExitCode(unverified.summary), 1, 'UNVERIFIED 不得静默放行')
+  const noCriteria = acceptanceCheck(B, [])
+  assert.equal(acceptanceExitCode(noCriteria.summary), 1, '零判据是缺陷形态，不得 exit 0')
+  const mixed = acceptanceCheck(B, [
+    { type: 'file_exists', path: 'evidence/full-card.md' },
+    { type: 'file_exists', path: 'evidence/absent.md' },
+  ])
+  assert.equal(acceptanceExitCode(mixed.summary), 1, '有 PASS 也有 FAIL 仍不放行')
 })

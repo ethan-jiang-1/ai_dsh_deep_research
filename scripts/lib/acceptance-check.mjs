@@ -73,3 +73,15 @@ export function acceptanceCheck(bundleDir, criteria) {
   }
   return { verdicts, summary }
 }
+
+/**
+ * CLI 退出码（全仓 verdict 契约的机械出口）：0 = 全 PASS 且至少一条判据；
+ * 1 = 有 FAIL / UNVERIFIED / 零判据（noCriteria）；2 = 用法或前置错（由 CLI 壳判，不经过本函数）。
+ * 文本三态仍逐条打印；本函数只把「收活是否放行」压成机器可消费的退出码。
+ * @param {{pass: number, fail: number, unverified: number, noCriteria: boolean}} summary
+ * @returns {0|1}
+ */
+export function acceptanceExitCode(summary) {
+  if (summary?.noCriteria === true || (summary?.pass ?? 0) === 0) return 1
+  return (summary.fail ?? 0) > 0 || (summary.unverified ?? 0) > 0 ? 1 : 0
+}

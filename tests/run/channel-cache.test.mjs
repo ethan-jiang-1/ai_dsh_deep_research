@@ -93,3 +93,16 @@ test('probeCacheHit：TTL 外与未来时间戳都 miss', () => {
     false,
   )
 })
+
+// 负例留证 2026-11-11：BUG-065——修复前缓存键只有 pack + runtime，只改 dev overlay/boot-run
+// 仍命中旧 GREEN。还原法 = probeCacheKey 忽略 extra、run-driver 不传 devShellFingerprint。
+test('BUG-065 probeCacheKey：dev 外壳身份参与键（extra 不同 → miss）', () => {
+  const base = { packFingerprint: 'f', runtime: 'r' }
+  assert.equal(probeCacheKey(base), 'any@f@r', '无 extra 时保持旧形态（向后兼容）')
+  assert.notEqual(
+    probeCacheKey({ ...base, extra: 'shell-a' }),
+    probeCacheKey({ ...base, extra: 'shell-b' }),
+    'dev 外壳指纹不同必须得到不同键',
+  )
+  assert.equal(probeCacheKey({ ...base, extra: '' }), 'any@f@r', '空 extra 不改变旧键')
+})

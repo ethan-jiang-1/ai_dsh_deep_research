@@ -22,6 +22,19 @@ export const PROTOCOL_SCHEMA = 1
 /** 契约日：此日及以后的 bundle 必须带 protocol.json；之前按 epoch 豁免。 */
 export const PROTOCOL_CONTRACT_DATE = '2026-11-11'
 
+/** 契约落地时刻（D46 提交 17e866d，2026-11-11T10:01:02+08:00）：同日早于此时刻交付的 bundle
+ *  仍是旧 bundle——日期串 `>=` 分不出同日早场/晚场（BUG-052）。 */
+export const PROTOCOL_CONTRACT_AT = '2026-11-11T10:01:02+08:00'
+
+/** 交付回执时间是否早于契约落地时刻；返回 true/false，无可用证据 → null（调用方回退日期口径）。 */
+export function preContractByDelivery({ acceptedAt = null, contractAt = PROTOCOL_CONTRACT_AT } = {}) {
+  if (typeof acceptedAt !== 'string' || acceptedAt.trim() === '') return null
+  const delivered = Date.parse(acceptedAt)
+  const contract = Date.parse(contractAt)
+  if (!Number.isFinite(delivered) || !Number.isFinite(contract)) return null
+  return delivered < contract
+}
+
 /** 方法预设闭集（D25/D37 的五条；自定义/库条目走 kind=custom|library）。 */
 export const METHOD_PRESETS = ['事实核查', '领域地图', '主张核查', '方案比较', '时间线与信号']
 
@@ -179,15 +192,86 @@ export function sectionOf(text, heading) {
   return (end === -1 ? rest : rest.slice(0, end)).join('\n')
 }
 
-/** topics.md 的 lens 总数（`- lenses: [a, b]` 逐行去重后求和；无该行 = 0）。 */
-export function countCellsOf(topicsText) {
-  const text = String(topicsText ?? '').replace(/<!--[\s\S]*?-->/g, '')
-  let total = 0
-  for (const match of text.matchAll(/^-\s*lenses\s*[:：]\s*\[(.*)\]\s*$/gm)) {
-    const ids = match[1].split(/[,，]/).map((id) => id.trim()).filter(Boolean)
-    total += new Set(ids).size
+/** plan 的「头」= 首个 `## ` 之前的文本（标题/引用块/头部列表项）；无 `##` → 全文。
+ *  「头字段」判据必须走这里：全文搜索会让正文提及冒充头部（BUG-053）。 */
+export function headerBlockOf(text) {
+  const lines = String(text ?? '').split(/\r?\n/)
+  const end = lines.findIndex((line) => /^##\s/.test(line))
+  return (end === -1 ? lines : lines.slice(0, end)).join('\n')
+}
+
+/** 深度集合 → 投影文本（编码唯一正本；检查器用 depthsOfText 反解）：连续集合写端点区间
+ *  `L1–L3`（模板与手写习惯），非连续写显式集合 `L0 / L2`（不能写区间——L0–L2 会读成含 L1），
+ *  单值原样。生成器与检查器共用本函数，不再各自拼串/拆串。 */
+export function depthsTextOf(depths) {
+  const values = new Set((Array.isArray(depths) ? depths : [])
+    .map((depth) => String(depth).trim().toUpperCase()))
+  const ordered = DEPTHS.filter((depth) => values.has(depth))
+  if (ordered.length === 0) return ''
+  if (ordered.length === 1) return ordered[0]
+  const indices = ordered.map((depth) => DEPTHS.indexOf(depth))
+  const contiguous = indices.every((value, index) => index === 0 || value === indices[index - 1] + 1)
+  return contiguous ? `${ordered[0]}–${ordered.at(-1)}` : ordered.join(' / ')
+}
+
+/** 投影深度段 → 深度集合；读不出 → null。与 depthsTextOf 对称：
+ *  单 token = 单值；恰两个 token 以 –/- 连接 = 闭区间（模板端点写法 Lx–Ly）；
+ *  其余形态（三 token 生成器写法 L1–L2–L3、显式集合 `L0 / L2`）= token 集合。
+ *  非连续集合必须写显式集合；把 L0 / L2 写成 L0–L2 会按区间读成 {L0,L1,L2} → 判红（fail-loud）。 */
+export function depthsOfText(text) {
+  const span = /L[0-3](?:\s*(?:[–-]|\/|、|,|，)\s*L[0-3])*/i.exec(String(text ?? ''))?.[0]
+  if (span === undefined) return null
+  const tokens = [...new Set([...span.matchAll(/L[0-3]/gi)].map((match) => match[0].toUpperCase()))]
+  if (tokens.length === 0) return null
+  if (tokens.length === 1) return new Set(tokens)
+  if (tokens.length === 2 && !/[\/、,，]/.test(span) && /[–-]/.test(span)) {
+    const [start, end] = tokens.map((token) => DEPTHS.indexOf(token)).sort((a, b) => a - b)
+    return new Set(DEPTHS.slice(start, end + 1))
   }
-  return total
+  return new Set(tokens)
+}
+
+/** topics.md 的 lens 行扫描（**单一解析正本**，countCellsOf 与 strategyOf 共用）：
+ *  - ids：全局去重保序（投影的 knowledge.lenses）；
+ *  - cells：逐行去重后求和（同模板口径：同一 section 内重复不重复计）；
+ *  - unparsable：看起来像 lens 声明（列表符 + lenses + 冒号）但读不出 `[...]` 的行。
+ *  列表符接受 `-` / `*` / `+`、前导缩进、大小写 `Lenses`——Markdown 变体不得静默计 0。 */
+export function lensScanOf(topicsText) {
+  const text = String(topicsText ?? '').replace(/<!--[\s\S]*?-->/g, '')
+  const ids = []
+  const unparsable = []
+  let cells = 0
+  for (const line of text.split(/\r?\n/)) {
+    const declaration = /^\s*[-*+]\s+lenses\s*[:：]\s*(.*)$/i.exec(line)
+    if (declaration === null) {
+      if (/^\s*[-*+]\s+lenses\b/i.test(line)) unparsable.push(line.trim())
+      continue
+    }
+    const raw = declaration[1].trim()
+    const bracket = /^\[(.*)\]$/.exec(raw)
+    // 括号形态必须成对：`[a, b` / `[a, b]]` 读不出 → unparsable，不猜。
+    if (bracket === null && /[[\]]/.test(raw)) {
+      unparsable.push(line.trim())
+      continue
+    }
+    // 无括号是历史简写（真实场 `- lenses: official`）与逗号列表；空值才是读不出。
+    // 括号形态的 `[]` 是合法的零 lens 行（不参与计数，但不是解析失败）。
+    const payload = bracket === null ? raw : bracket[1]
+    if (payload === '' && bracket === null) {
+      unparsable.push(line.trim())
+      continue
+    }
+    const lineIds = [...new Set(payload.split(/[,，]/).map((id) => id.trim()).filter(Boolean))]
+    for (const id of lineIds) if (!ids.includes(id)) ids.push(id)
+    cells += lineIds.length
+  }
+  return { cells, ids, unparsable }
+}
+
+/** topics.md 的 lens 总数（`- lenses: [a, b]` 逐行去重后求和；无该行 = 0）。
+ *  读不出的 lens 行不是 0：由 protocol-audit 的 `cells-unparseable` 判红（见 lensScanOf.unparsable）。 */
+export function countCellsOf(topicsText) {
+  return lensScanOf(topicsText).cells
 }
 
 /** 由 deps 算 Wave 层数（只用于 waves_max warning）；有环 → null。 */

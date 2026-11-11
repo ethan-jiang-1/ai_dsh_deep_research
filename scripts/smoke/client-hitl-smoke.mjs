@@ -35,7 +35,7 @@ import { requireCredentials, withModelKey } from '../lib/env.mjs'
 import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs'
 import { readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs'
-import { launchChromium, loadChromium } from '../lib/playwright.mjs'
+import { SMOKE_LOCALE, launchChromium, loadChromium } from '../lib/playwright.mjs'
 import { openSessionById, TAB_TEXT } from '../lib/web-ui-nav.mjs'
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 
@@ -154,7 +154,7 @@ try {
   // ⓪ 浏览器就位 + 关测试须知模态（全屏 _mask_ 不关则一切点击超时）。
   const chromium = await loadChromium(ROOT)
   const browser = await launchChromium(chromium)
-  const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } })
+  const page = await browser.newPage({ locale: SMOKE_LOCALE, viewport: { width: 1600, height: 1000 } })
   const settle = async () => {
     await page.waitForFunction(() => (document.body?.innerText ?? '').includes('New Session'), null, { timeout: 60_000 }).catch(() => {})
     await sleep(3_000)
@@ -178,7 +178,7 @@ try {
   }
 
   // ④ 展右栏 → 点「研究状态」胶囊 → 等活标题翻转 + 横幅行。
-  const expand = page.getByRole('button', { name: 'Open right sidebar' })
+  const expand = page.getByRole('button', { name: /Open right sidebar|打开右侧边栏/i })
   if (await expand.count() > 0) await expand.first().click({ timeout: 8_000 }).catch(() => {})
   await sleep(1_500)
   const capsule = page.getByRole('button', { name: TAB_TEXT.status }).first()
@@ -215,7 +215,7 @@ try {
     if (collapsed) {
       await collapseBtn.click({ timeout: 5_000 }).catch(() => {})
       await sleep(2_000)
-      const expandBack = page.getByRole('button', { name: 'Open right sidebar' })
+      const expandBack = page.getByRole('button', { name: /Open right sidebar|打开右侧边栏/i })
       const expandBackVisible = await expandBack.isVisible({ timeout: 6_000 }).catch(() => false)
       step(expandBackVisible, '⑤a 右栏已收起（页签 dock 保持挂载——观察者仍在）')
       // 答掉挂起卡（hitl-answer 子进程 = 代理模拟的唯一实现；本冒烟即验证场，标注如实）
@@ -256,7 +256,7 @@ try {
           const deadline2 = Date.now() + 30_000
           while (Date.now() < deadline2 && !(autoExpanded && banner2)) {
             await sleep(2_500)
-            const expandStill = await page.getByRole('button', { name: 'Open right sidebar' }).isVisible().catch(() => false)
+            const expandStill = await page.getByRole('button', { name: /Open right sidebar|打开右侧边栏/i }).isVisible().catch(() => false)
             autoExpanded = !expandStill
             banner2 = (await page.evaluate(() => document.body?.innerText ?? '')).includes('在会话里的问题卡上点选项')
           }

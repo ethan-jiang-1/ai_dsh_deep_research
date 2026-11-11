@@ -8,11 +8,41 @@
 //
 // 边界：只判主机资源，不判产品；健康主机上出现连接死亡仍按产品红 exit 1。
 
-/** 默认阈值：free < 512MB 或 load1 / CPU > 1.5 视为不健康。 */
+/** 默认阈值：**可用内存** < 512MB 或 load1 / CPU > 1.5 视为不健康。
+ *  `freeMB` 字段名保留（调用方与测试契约），语义 = 平台可回收的可用内存：
+ *  macOS = vm_stat 的 free + inactive + speculative + purgeable；Linux = /proc/meminfo 的
+ *  MemAvailable（回退 MemFree+Buffers+Cached）。直接拿 `os.freemem()` 会只算 free pages，
+ *  在 macOS 上系统性偏严（BUG-060）。 */
 export const HOST_HEALTH_THRESHOLDS = Object.freeze({
   minFreeMB: 512,
   maxLoadPerCpu: 1.5,
 })
+
+/** `vm_stat` 文本 → 可用内存 MB（free + inactive + speculative + purgeable）；读不出 → null。 */
+export function availableMemoryMBFromVmStat(text) {
+  const pageSize = Number(/page size of (\d+) bytes/.exec(String(text))?.[1] ?? 4096)
+  let pages = 0
+  for (const match of String(text).matchAll(/^Pages (?:free|inactive|speculative|purgeable):\s+(\d+)\./gm)) {
+    pages += Number(match[1])
+  }
+  if (!Number.isFinite(pages) || pages <= 0) return null
+  return Math.round((pages * pageSize) / 1048576)
+}
+
+/** `/proc/meminfo` 文本 → 可用内存 MB（MemAvailable，回退 MemFree+Buffers+Cached）；读不出 → null。 */
+export function availableMemoryMBFromMeminfo(text) {
+  const kb = (name) => {
+    const value = new RegExp(`^${name}:\\s+(\\d+)\\s*kB`, 'm').exec(String(text))?.[1]
+    return value === undefined ? Number.NaN : Number(value)
+  }
+  const available = kb('MemAvailable')
+  const fallback = (Number.isFinite(kb('MemFree')) ? kb('MemFree') : 0)
+    + (Number.isFinite(kb('Buffers')) ? kb('Buffers') : 0)
+    + (Number.isFinite(kb('Cached')) ? kb('Cached') : 0)
+  const total = Number.isFinite(available) ? available : fallback
+  if (!Number.isFinite(total) || total <= 0) return null
+  return Math.round(total / 1024)
+}
 
 /**
  * 判主机是否健康。

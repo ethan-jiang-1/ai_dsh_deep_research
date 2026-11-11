@@ -10,10 +10,31 @@
 
 ## 活跃列表
 
-（暂无活跃缺陷。）
+| 卡 | 状态 | 严重级 | 一句话 |
+|---|---|---|---|
+| [BUG-064](BUG-064-replay-a-layer-not-self-contained-tool-stall.md) | 修复落地 | P2 | 回放 A 层不自包含：真实 `web_search` 挂住 + 无锁 → 240s 静默超时且归因误导 |
 
 ## 最近归档
 
+（2026-11-11 同批协议审计 / 收活契约 fail-loud 收口，去向 = [Note](../../notes/implemented/2026-11-11-protocol-audit-presence-and-depth-codec.md)：
+[BUG-048](../_archived/fixed_bugs/BUG-048-protocol-depth-projection-first-pair-only.md) 深度集合单一编解码（deep 生成器 / 单值 / 非连续不再假红或漏检）；
+[BUG-049](../_archived/fixed_bugs/BUG-049-protocol-projection-lines-absent-silent.md) §Protocol 三行缺席改 warning；
+[BUG-050](../_archived/fixed_bugs/BUG-050-strategy-channel-absent-and-workflow-null-workers.md) 通道缺席 warning + workflow 无 Wave 拓扑 red；
+[BUG-052](../_archived/fixed_bugs/BUG-052-protocol-epoch-day-granularity-retro-red.md) 断代认交付回执时刻，同日早场不再追溯；
+[BUG-053](../_archived/fixed_bugs/BUG-053-plan-header-claims-first-match-anywhere.md) plan 头抽 `headerBlockOf`，正文提及不冒充；
+[BUG-054](../_archived/fixed_bugs/BUG-054-cells-cap-count-only-canonical-bullet.md) lens 行单一解析（`-`/`*`/`+`/缩进/大小写），读不出 = red；
+[BUG-056](../_archived/fixed_bugs/BUG-056-protocol-projection-unreadable-values-silent.md) §Protocol 数值/分节读不出 = red；投入数字按上限语义；
+[BUG-057](../_archived/fixed_bugs/BUG-057-acceptance-check-exit-code-contradicts-verdict-contract.md) acceptance-check 退出码收回全仓 verdict 契约（FAIL/UNVERIFIED/零判据 = 1）；
+[BUG-058](../_archived/fixed_bugs/BUG-058-plan-cycle-has-no-mechanical-check.md) 有环 plan → red `plan-cycle`，`planIssuesOf` 增 cycle 并抑制误导性 wave-prefix；
+[BUG-060](../_archived/fixed_bugs/BUG-060-host-health-freemem-macos-underreports.md) host-health 改平台可用内存口径（macOS vm_stat / Linux MemAvailable），client-load 不再常态 NOT-RUN；
+[BUG-062](../_archived/fixed_bugs/BUG-062-acceptance-manual-evidence-overwritten-by-regeneration.md) `acceptance.md` 的人工走查节在重跑验收 / `--repair` 时保留，不再静默丢失；
+[BUG-063](../_archived/fixed_bugs/BUG-063-web-ui-nav-chrome-copy-english-only.md) web-ui-nav 的 sidebar/preview chrome 常量改双语，cdp-probe 展开未命中显式报错；
+[BUG-055](../_archived/fixed_bugs/BUG-055-mixed-language-ui-half-i18n.md) 驾驶舱 UI 全部走 locale（521 键、组件 + 数据面 fold；en 零 CJK，源码 CJK 扫描守卫）；
+[BUG-051](../_archived/fixed_bugs/BUG-051-replay-smoke-panerows-undeclared.md) 回放 C3/C5 的 `paneRows` 崩溃修复；真机 C0–C5 全 PASS（B·persona 快照红另计）；
+[BUG-059](../_archived/fixed_bugs/BUG-059-replay-locator-hardcodes-zh-locale-owned-labels.md) 回放浏览器钉 zh-CN + 双语定位；lead C2/C3/C5 PASS；
+[BUG-061](../_archived/fixed_bugs/BUG-061-replay-c2-guide-capsule-missing-after-locale-pin.md) 右栏展开/收起 chrome 双语 + C2 结构化诊断；
+[BUG-065](../_archived/fixed_bugs/BUG-065-run-driver-cache-key-omits-dev-overlay.md) run-driver 缓存键纳入 dev 外壳指纹。）
+（BUG-047 已于 2026-11-11 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-047-method-library-selection-invisible.md)——`var()` 后拼十六进制 alpha 的声明被浏览器整条丢弃 → `LibraryRow` + `color-mix` 选中态（tint/边线/accent bar/名字加重）+ 焦点环分离 + 源码扫描契约测试；真机隔离档 computed 值与截图双证）
 （BUG-046 已于 2026-11-10 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-046-readiness-parenthetical-unparsed.md)——`## readiness（终局）` 短括号标签窄放宽；红先 2 例 → 18/18，全量 1107/1107 + verify 绿；未动手册/snapshot）
 （2026-10-23 宪章复核发现的历史偏差按 **grandfather** 处理：只读证据、不建卡、不修、不追改；它们只用于约束新 run 的契约，记录 = [复核证据](../_archived/research/run-bundle-charter/2026-10-23-issue-review-verification.md)。）
 （BUG-045 已于 2026-10-28 修复归档到 [fixed 池](../_archived/fixed_bugs/BUG-045-client-load-graph-assert-flakes-on-stream-drop.md)——图面区分「读失败」与「未绑定」+ 有界重试，冒烟改轮询并自解释；

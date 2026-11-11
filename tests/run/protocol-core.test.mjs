@@ -16,11 +16,13 @@ import {
   countCellsOf,
   decisionsProtocolVersionOf,
   designSha256,
+  lensScanOf,
   methodAdoptedOf,
   methodNameMatches,
+  preContractByDelivery,
   validateProtocol,
 } from '../../scripts/lib/protocol-core.mjs'
-import { cardTextOf, evaluateBundle, projectionOf } from '../../scripts/lib/protocol-audit-core.mjs'
+import { cardTextOf, evaluateBundle, projectionOf, requiredByProtocolContract } from '../../scripts/lib/protocol-audit-core.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const TEMPLATE = join(ROOT, 'packages', 'deep-research-pack', 'content', 'templates', 'run', 'protocol.json')
@@ -89,21 +91,22 @@ const QUESTION_HEAD = `# Question — fixture
 - 明确不承诺: 不替用户决定偏好
 `
 
-function questionOf(protocol, { methodLine = '- 方法: 方案比较（主）；四字段见 §研究方法', bandLine = '- 投入: 标准（≤12 节点 / ≤8 cells / L1–L2）', decisions = true } = {}) {
+function questionOf(protocol, { methodLine = '- 方法: 方案比较（主）；四字段见 §研究方法', bandLine = '- 投入: 标准（≤12 节点 / ≤8 cells / L1–L2）', decisions = true, protocolSection = null } = {}) {
   const lines = [
     QUESTION_HEAD,
-    `## Protocol（本次研究设计，v${protocol.version}）`,
+    protocolSection ?? `## Protocol（本次研究设计，v${protocol.version}）`,
     '',
-    methodLine,
-    '- 来源: official + web；近 12 月；zh/en；primary',
-    bandLine,
-    `- 输出: ${protocol.output.shape}；sections = ${protocol.output.sections.join(' / ')}；audience = ${protocol.output.audience}；md`,
-    `- 版本: protocol: v${protocol.version}（approved 2026-11-11T07:10:00+08:00）；全文 = protocol.json / plan.md`,
-    '',
-    '## HITL1 Alignment Snapshot',
-    '',
-    '- 研究类型: exploratory_map',
   ]
+  if (protocolSection === null) {
+    lines.push(
+      methodLine,
+      '- 来源: official + web；近 12 月；zh/en；primary',
+      bandLine,
+      `- 输出: ${protocol.output.shape}；sections = ${protocol.output.sections.join(' / ')}；audience = ${protocol.output.audience}；md`,
+      `- 版本: protocol: v${protocol.version}（approved 2026-11-11T07:10:00+08:00）；全文 = protocol.json / plan.md`,
+    )
+  }
+  lines.push('', '## HITL1 Alignment Snapshot', '', '- 研究类型: exploratory_map')
   if (decisions) {
     lines.push('', '## Decisions（append-only，最新在上）', '', `- 2026-11-11 HITL1 定稿（protocol: v${protocol.version}；按计划开跑）`)
   }
@@ -330,6 +333,186 @@ test('strategy：缺派生行 → warning；在场但与派生值不一致 → �
   assert.ok(has(evaluateBundle({ ...base, planText: proseBudget }), 'strategy-mismatch'), '带单位的散文预算须解析后对账（6/11 ≠ 12/8）')
   const unreadableBudget = planOf(6).replace('> protocol: v1', '> protocol: v1\n> - 策略: 通道=spawn；worker=research-worker；预算=很多/很少')
   assert.ok(has(evaluateBundle({ ...base, planText: unreadableBudget }), 'strategy-budget-unparseable'), '读不出的预算必须红（不可静默跳过）')
+})
+
+// 负例留证 2026-11-11：BUG-048——修复前 deep 档 + projectionOf() 只解析首对（L1–L2）→ 假红；
+// allowed_depths 单值 / 非连续时正则不命中 → 深度段整段跳过（写错也绿）。还原法 = 把
+// depthsOfText 去掉、投影检查换回 `/L([0-3])\s*[–-]\s*L([0-3])/` 单捕获对。
+test('BUG-048 深度投影：生成器写法 / 端点写法 / 单深度 / 非连续都要真正对账', () => {
+  const deep = baseProtocol()
+  deep.effort = { band: 'deep', band_v: 1, nodes_max: 12, cells_max: 12, waves_max: 7, allowed_depths: ['L1', 'L2', 'L3'] }
+  const base = { protocol: deep, planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false }
+  const generated = evaluateBundle({ ...base, questionText: questionOf(deep, { protocolSection: projectionOf(deep) }) })
+  assert.equal(has(generated, 'projection-number'), false, `生成器投影应绿：${JSON.stringify(generated)}`)
+  const endpoint = evaluateBundle({ ...base, questionText: questionOf(deep, { bandLine: '- 投入: 深度（≤12 节点 / ≤12 cells / L1–L3）' }) })
+  assert.equal(has(endpoint, 'projection-number'), false, '端点写法必须继续绿')
+
+  // 单深度 = 生产 archive 两个 bundle 的真实形状（quick / L0 或 L1）
+  const quick = baseProtocol({ effort: { band: 'quick', band_v: 1, nodes_max: 4, cells_max: 2, waves_max: 5, allowed_depths: ['L0'] } })
+  quick.gates.hitl1 = 'none'
+  quick.approval_basis = 'auto'
+  quick.output = { shape: 'quick_answer', sections: ['answer', 'basis', 'limits'], length: { min: 300, max: 600, unit: 'words' }, format: 'md', audience: '采购' }
+  const quickBase = { protocol: quick, planText: planOf(2, { depth: 'L0' }), topicsText: topicsOf(2), auditText: '', hasSnapshot: false }
+  const singleGreen = evaluateBundle({ ...quickBase, questionText: questionOf(quick, { protocolSection: projectionOf(quick), decisions: false }) })
+  assert.equal(has(singleGreen, 'projection-number'), false, `单深度 L0 生成器投影应绿：${JSON.stringify(singleGreen)}`)
+  const singleRed = evaluateBundle({ ...quickBase, questionText: questionOf(quick, { bandLine: '- 投入: 快答（≤4 节点 / ≤2 cells / L1）', decisions: false }) })
+  assert.ok(has(singleRed, 'projection-number'), '单深度 L0 写成 L1 必须红（旧实现整段跳过）')
+
+  // 非连续：L0 + L2 生成器写法绿；写成区间 L0–L2（= L0/L1/L2）必须红
+  const nonContig = baseProtocol({ effort: { band: 'deep', band_v: 1, nodes_max: 12, cells_max: 12, waves_max: 7, allowed_depths: ['L0', 'L2'] } })
+  const nonBase = { protocol: nonContig, planText: planOf(6, { depth: 'L0' }), topicsText: topicsOf(6), auditText: '', hasSnapshot: false }
+  const nonGreen = evaluateBundle({ ...nonBase, questionText: questionOf(nonContig, { protocolSection: projectionOf(nonContig) }) })
+  assert.equal(has(nonGreen, 'projection-number'), false, `非连续生成器投影应绿：${JSON.stringify(nonGreen)}`)
+  const nonRed = evaluateBundle({ ...nonBase, questionText: questionOf(nonContig, { bandLine: '- 投入: 深度（≤12 节点 / ≤12 cells / L0–L2）' }) })
+  assert.ok(has(nonRed, 'projection-number'), '非连续写区间（含未允许的 L1）必须红')
+})
+
+// 负例留证 2026-11-11：BUG-049——修复前把「- 来源 / - 投入 / - 输出」任一行删掉，审计零 finding
+// （`?? ''` + `if (line !== '')` 把缺席折叠成通过）。还原法 = 删掉投影缺失 warn 三支。
+test('BUG-049 §Protocol 的 来源/投入/输出 行缺席 → 至少 warn（不得静默通过）', () => {
+  const protocol = baseProtocol()
+  const base = { protocol, planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false }
+  const projectionMissing = (findings) => findings.filter((item) => [
+    'projection-source-missing', 'projection-effort-missing', 'projection-output-missing',
+  ].includes(item.code))
+  const full = evaluateBundle({ ...base, questionText: questionOf(protocol) })
+  assert.deepEqual(projectionMissing(full), [], `完整投影不应报缺席：${JSON.stringify(full)}`)
+  const lines = questionOf(protocol).split('\n')
+  const omit = (label) => lines.filter((line) => !new RegExp(`^-\\s*${label}\\s*[:：]`).test(line)).join('\n')
+  const cases = [
+    ['来源', 'projection-source-missing'],
+    ['投入', 'projection-effort-missing'],
+    ['输出', 'projection-output-missing'],
+  ]
+  for (const [label, code] of cases) {
+    const findings = evaluateBundle({ ...base, questionText: omit(label) })
+    assert.ok(findings.some((item) => item.code === code && item.level === 'warning'), `${label} 行缺席必须 warn：${JSON.stringify(findings)}`)
+  }
+})
+
+// 负例留证 2026-11-11：BUG-050——修复前策略行缺「通道=」零 finding；声明 workflow 但 plan 无
+// Wave 拓扑时派生 workers.wave=null，被当作「无需对账」哨兵 → worker 写什么都绿。还原法 = 删掉
+// 通道缺席支与 strategy-workflow-without-wave 支，并把 expectedWorker 改回 null 即跳过。
+test('BUG-050 策略行：通道缺席 warn；声明 workflow 但无 Wave 拓扑 red', () => {
+  const protocol = baseProtocol()
+  const base = { protocol, questionText: questionOf(protocol), topicsText: topicsOf(6), auditText: '', hasSnapshot: false }
+  const withLine = (line) => planOf(6).replace('> protocol: v1', `> protocol: v1\n> - 策略: ${line}`)
+  const noChannel = evaluateBundle({ ...base, planText: withLine('worker=research-worker；预算=12/8') })
+  assert.ok(noChannel.some((item) => item.code === 'strategy-channel-missing' && item.level === 'warning'),
+    `通道缺席必须 warn（与 worker/预算缺席对称）：${JSON.stringify(noChannel)}`)
+  for (const worker of ['research-worker', 'research-wave']) {
+    const findings = evaluateBundle({ ...base, planText: withLine(`通道=workflow；worker=${worker}；预算=12/8`) })
+    assert.ok(has(findings, 'strategy-workflow-without-wave'), `workflow 无 Wave（worker=${worker}）必须红：${JSON.stringify(findings)}`)
+  }
+  // 负对照：有 Wave 拓扑时 research-wave 绿、research-worker 仍红（既有判据不许被新分支绕过）
+  const wave = '\n\n## Wave 执行\n\nW2：lens-fanout ×2；executor = research-wave。'
+  const waveReady = withLine('通道=workflow；worker=research-wave；预算=12/8') + wave
+  assert.deepEqual(noRed(evaluateBundle({ ...base, planText: waveReady })), [], '有 Wave 拓扑 + research-wave 应绿')
+  const waveWrongWorker = withLine('通道=workflow；worker=research-worker；预算=12/8') + wave
+  assert.ok(has(evaluateBundle({ ...base, planText: waveWrongWorker }), 'strategy-mismatch'), '既有负对照仍须咬人')
+})
+
+// 负例留证 2026-11-11：BUG-052——修复前协议审计只看 run.md 的日粒度 created，同日 01:10 交付的
+// bundle 被按 10:01 才落地的 D46 契约判红。还原法 = requiredByProtocolContract 去掉 acceptedAt 分支。
+test('BUG-052 同日早场：交付回执早于契约落地时刻 → 不判 Protocol；无回执仍从严', () => {
+  assert.equal(preContractByDelivery({ acceptedAt: '2026-11-10T17:10:51.321Z' }), true, '01:10 +08 早于 10:01 +08')
+  assert.equal(preContractByDelivery({ acceptedAt: '2026-11-11T03:00:00.000Z' }), false, '11:00 +08 晚于契约时刻')
+  assert.equal(preContractByDelivery({ acceptedAt: null }), null, '无交付证据 = 不可判定')
+  assert.equal(preContractByDelivery({ acceptedAt: 'not-a-date' }), null, '坏时间不猜')
+  assert.equal(requiredByProtocolContract({ hasRunMd: true, epoch: '2026-11-11', acceptedAt: '2026-11-10T17:10:51.321Z' }), false,
+    '同日早场交付按 legacy：不要求 protocol.json')
+  assert.equal(requiredByProtocolContract({ hasRunMd: true, epoch: '2026-11-11', acceptedAt: '2026-11-11T03:00:00.000Z' }), true,
+    '契约时刻之后交付仍须 protocol.json')
+  assert.equal(requiredByProtocolContract({ hasRunMd: true, epoch: '2026-11-11', acceptedAt: null }), true,
+    '无 acceptedAt 可依 → 从严（不许同日全豁免）')
+  assert.equal(requiredByProtocolContract({ hasRunMd: false, epoch: null, acceptedAt: null }), false, '旧 bundle 无 run.md 仍豁免')
+})
+
+// 负例留证 2026-11-11：BUG-053——修复前 protocolVersionIn / 策略行正则扫全文，正文提及可冒充 plan 头
+// （缺头 protocol 判绿、正文策略行让审计零 finding）。还原法 = 两处改回全文匹配。
+test('BUG-053 plan 头：正文提及不能冒充头部 protocol 版本行 / 策略行', () => {
+  const protocol = baseProtocol()
+  const base = { protocol, questionText: questionOf(protocol), topicsText: topicsOf(6), auditText: '', hasSnapshot: false }
+  const bodyVersion = `${planOf(6).replace('> protocol: v1\n', '')}\n\n## 备注\n\n- 修订记录：protocol: v1 仍适用\n`
+  assert.ok(has(evaluateBundle({ ...base, planText: bodyVersion }), 'plan-ref'),
+    '头部缺 protocol 版本行、正文提及 → 必须 red（旧实现绿）')
+  const bodyStrategy = `${planOf(6)}\n\n## 备注\n\n- 策略: 通道=spawn；worker=research-worker；预算=12/8\n`
+  const bodyFindings = evaluateBundle({ ...base, planText: bodyStrategy })
+  assert.ok(bodyFindings.some((item) => item.code === 'strategy-missing'),
+    `正文策略行不能冒充头部（至少 warn）：${JSON.stringify(bodyFindings)}`)
+  const bareHeader = planOf(6).replace('> protocol: v1', 'protocol: v1')
+  assert.deepEqual(noRed(evaluateBundle({ ...base, planText: bareHeader })), [], '头部无 > 前缀的旧写法仍兼容')
+})
+
+// 负例留证 2026-11-11：BUG-054——修复前 cells 计数只认行首小写 `- lenses:`；`*`/`+`/缩进/大写均计 0，
+// 超 cap 静默通过，且没有「读不出」的红。还原法 = countCellsOf 改回单条 `^-` 正则且删 cells-unparseable。
+test('BUG-054 cells：lens 行变体计数一致；读不出 → red（不得计 0 静默放行）', () => {
+  const quick = baseProtocol({ effort: { band: 'quick', band_v: 1, nodes_max: 6, cells_max: 2, waves_max: 5, allowed_depths: ['L0', 'L1'] } })
+  quick.gates.hitl1 = 'none'
+  quick.approval_basis = 'auto'
+  quick.output = { shape: 'quick_answer', sections: ['answer', 'basis', 'limits'], length: { min: 300, max: 600, unit: 'words' }, format: 'md', audience: '采购' }
+  const base = {
+    protocol: quick,
+    questionText: questionOf(quick, { protocolSection: projectionOf(quick), decisions: false }),
+    planText: planOf(2, { depth: 'L0' }),
+    auditText: '',
+    hasSnapshot: false,
+  }
+  const topics = (line) => ['# Topics — fixture', '', '## T1: 主问题', '', line].join('\n')
+  for (const [label, line] of [
+    ['模板写法', '- lenses: [a, b, c, d]'],
+    ['星号清单', '* lenses: [a, b, c, d]'],
+    ['加号清单', '+ lenses: [a, b, c, d]'],
+    ['缩进清单', '  - lenses: [a, b, c, d]'],
+    ['大写字段', '- Lenses: [a, b, c, d]'],
+    ['无括号逗号', '- lenses: a, b, c, d'],
+  ]) {
+    const findings = evaluateBundle({ ...base, topicsText: topics(line) })
+    assert.ok(has(findings, 'effort-contract'), `${label} 的 4 lens 超过 quick cap 2 必须红：${JSON.stringify(findings)}`)
+  }
+  const unparseable = evaluateBundle({ ...base, topicsText: topics('- lenses: [a, b, c, d') })
+  assert.ok(has(unparseable, 'cells-unparseable'), `括号不成对的 lens 行必须红（不可计 0）：${JSON.stringify(unparseable)}`)
+  assert.deepEqual(lensScanOf('* lenses: [a, b, a]').ids, ['a', 'b'], 'lensIds 与 countCells 同源解析')
+})
+
+// 负例留证 2026-11-11：BUG-056——修复前 nodes/cells 正则把 `≤` 写成必要条件、sections 只认
+// `sections =`；行在场但读不出时静默跳过。还原法 = 恢复旧正则与 `!== undefined` 守卫。
+test('BUG-056 §Protocol 行在场但数值 / 分节读不出 → red（不得跳过）', () => {
+  const protocol = baseProtocol()
+  const base = { protocol, planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false }
+  const over = evaluateBundle({ ...base, questionText: questionOf(protocol, { bandLine: '- 投入: 18 节点 / 18 cells / L1–L2' }) })
+  assert.ok(has(over, 'projection-number'), `无 ≤ 的上限也要解析并对账：${JSON.stringify(over)}`)
+  const english = evaluateBundle({ ...base, questionText: questionOf(protocol, { bandLine: '- 投入: 12 nodes / 8 cells / L1–L2' }) })
+  assert.equal(has(english, 'projection-number'), false, '英文单位 + 等值上限应绿')
+  const bare = evaluateBundle({ ...base, questionText: questionOf(protocol, { bandLine: '- 投入: 12 / 8 / L1–L2' }) })
+  assert.ok(has(bare, 'projection-number-unparseable'), `读不出节点/cells 必须红：${JSON.stringify(bare)}`)
+  const colon = evaluateBundle({
+    ...base,
+    questionText: questionOf(protocol).replace('sections = decision / options / criteria / tradeoffs / risks', 'sections: decision'),
+  })
+  assert.ok(has(colon, 'projection-output'), `sections: 写法要解析并比对（缺 risks）必须红：${JSON.stringify(colon)}`)
+  const alias = evaluateBundle({
+    ...base,
+    questionText: questionOf(protocol).replace('sections = decision / options / criteria / tradeoffs / risks', '分节 = decision'),
+  })
+  assert.ok(has(alias, 'projection-output-unparseable'), `读不出 sections 必须红：${JSON.stringify(alias)}`)
+})
+
+// 负例留证 2026-11-11：BUG-058——修复前 waveCountOf 返回 null（有环）被 checkEffortContract 当作
+// 「无需检查」，有环 plan 零 finding。还原法 = 把 waves === null 分支改回 `waves !== null && …`。
+test('BUG-058 有环 plan：交付审计 red plan-cycle（不可执行图不得给绿）', () => {
+  const protocol = baseProtocol()
+  const cyclic = [
+    '# Plan — fixture', '', '> protocol: v1', '',
+    '## 节点表', '',
+    '| id | parent | lifecycle | kind | question | owner_role | deps | output | acceptance | budget | depth | task_id |',
+    '|---|---|---|---|---|---|---|---|---|---|---|---|',
+    '| W1.1 | — | active | deep-dive | q1 | analyst | W2.1 | evidence/t1.md | ok | 2 轮 | L1 | |',
+    '| W2.1 | — | active | deep-dive | q2 | analyst | W1.1 | evidence/t2.md | ok | 2 轮 | L1 | |',
+  ].join('\n')
+  const base = { protocol, questionText: questionOf(protocol), topicsText: topicsOf(6), auditText: '', hasSnapshot: false }
+  assert.ok(has(evaluateBundle({ ...base, planText: cyclic }), 'plan-cycle'), '有环 plan 必须 red')
+  assert.equal(has(evaluateBundle({ ...base, planText: planOf(6) }), 'plan-cycle'), false, '无环对照不得误报')
 })
 
 test('复合方法：method.id = 主方法，§研究方法 原文包含即通过', () => {
