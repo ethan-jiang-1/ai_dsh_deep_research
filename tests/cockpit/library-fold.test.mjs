@@ -326,7 +326,10 @@ test('面板关键文案静态钉：术语表/影响范围/底线区别/按钮�
   // 面板文案现在跨两个模块：摘要页签（ResearchConfigTab）与 COMPACT=false 的四区回滚面
   // （LegacyManagementPane，2026-10-28 搬出）——钉的是"面板上还看得到这些防错读句"，
   // 不关心它住哪个文件。
+  // 文案已迁到 locales/zh.ts（BUG-055 双语化）：面板文案的 home = 字典 zh 值 + 仍留在组件里的句子。
   const source = readFileSync(CLIENT_PREFERENCES_SOURCE, 'utf8')
+    + readFileSync(join(ROOT, 'packages/deep-research-pack/src/client/locales/zh.ts'), 'utf8')
+    + readFileSync(join(ROOT, 'packages/deep-research-pack/src/client/locales/zh-fold.ts'), 'utf8')
     + readFileSync(join(ROOT, 'packages/deep-research-pack/src/client/research-config/LegacyManagementPane.tsx'), 'utf8');
   const missing = COPY_PINS.filter((pin) => !source.includes(pin));
   assert.deepEqual(missing, [], `以下关键文案不在场（删改即红——它们是零上下文探针点出的防错读句）：${missing.join('、')}`);
@@ -351,9 +354,10 @@ test('侧栏定位策略：扫不到且手上有标题 → 必须走搜索（BUG
 // 字符串形态，JSON.stringify(RegExp) 会丢 source，故不是 RegExp 实例；策略不双写）。
 // 反证：把常量改成无数字形态（'Show more sessions'）或丢了 `\\d` 转义 → 本例如实红。
 test('侧栏导航常量：Show N more 文本模式唯一正本（regex source 字符串）', () => {
-  assert.equal(SHOW_MORE_SESSIONS_PATTERN, 'Show \\d+ more sessions');
+  assert.equal(SHOW_MORE_SESSIONS_PATTERN, 'Show \\d+ more sessions|展开其余 \\d+ 个会话');
   const rx = new RegExp(SHOW_MORE_SESSIONS_PATTERN);
   assert.match('Show 12 more sessions', rx);
+  assert.match('展开其余 12 个会话', rx, 'zh UI 的同一按钮必须命中');
   assert.doesNotMatch('Show more sessions', rx, '无数字形态不是分页按钮');
   assert.doesNotMatch('显示 12 more sessions', rx);
 });

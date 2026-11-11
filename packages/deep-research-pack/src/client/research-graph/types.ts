@@ -5,7 +5,7 @@
 //   · listDir   = remote.workspaceFiles.list 的会话级闭包（列 `plan/` 快照；不可达 → null）；
 //   · openOwner = 可选：打开队员会话（vendor `ui-agent-team` 的 openTeammate 同款接线；
 //                 本页签只在提供时渲染「打开负责人」）。
-import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { RunSource } from '../../lib/run-context.ts'
 import type { TeamMemberProjection, TeamTaskView } from '@deepseek-ai/dsh-experimental-agent-team/client'
@@ -32,7 +32,7 @@ export interface ResearchGraphInjected {
 }
 
 /** 槽标准 props + 注入面。 */
-export type ResearchGraphTabProps = PropsRuntime<'sidebar.right.pane.tab'> & ResearchGraphInjected
+export type ResearchGraphTabProps = PropsRuntime<'sidebar.right.pane.tab'> & PropsLocale<'deepResearchPack'> & ResearchGraphInjected
 
 /** 图上的一个节点：plan 节点（优先）或 Team 任务；边 = blockedBy / plan deps。 */
 export interface GraphNodeView {

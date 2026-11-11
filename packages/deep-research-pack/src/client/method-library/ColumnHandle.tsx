@@ -4,18 +4,19 @@
 import { useRef } from 'react'
 import type { ReactNode } from 'react'
 
-export function ColumnHandle({ onDrag, value, min, max }: {
+export function ColumnHandle({ onDrag, value, min, max, label }: {
   onDrag: (delta: number) => void
   value: number
   min: number
   max: number
+  label: string
 }): ReactNode {
   const lastX = useRef<number | null>(null)
   return (
     <div
       role="separator"
       aria-orientation="vertical"
-      aria-label="调整方法库列宽"
+      aria-label={label}
       aria-valuenow={value}
       aria-valuemin={min}
       aria-valuemax={max}

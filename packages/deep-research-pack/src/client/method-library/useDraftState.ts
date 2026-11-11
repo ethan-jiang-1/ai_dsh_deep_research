@@ -113,7 +113,7 @@ export function useDraftState(deps: DraftStateDeps) {
   const dirty = draftDirty({ draft, mode, selected, selectedBuiltinSource, selectedRunSource })
   const confirmDiscard = (): boolean => {
     if (!dirty) return true
-    return typeof window === 'undefined' ? true : window.confirm('放弃未保存的修改？')
+    return typeof window === 'undefined' ? true : window.confirm(t('discardUnsaved'))
   }
 
   const operationLocked = (): boolean => {
@@ -247,7 +247,7 @@ export function useDraftState(deps: DraftStateDeps) {
     setSourceFields(new Set())
     setMode('new')
     setWorkbenchStage('source')
-    setSelectedBuiltinSource(builtinLibraryEntry(source))
+    setSelectedBuiltinSource(builtinLibraryEntry(source, t('builtinReadOnly')))
     setSelectedRunSource(null)
     setSelectedRunLoading(false)
     setReceipt(null)
@@ -270,7 +270,7 @@ export function useDraftState(deps: DraftStateDeps) {
     setDraft({
       name: '',
       sections: { ...entry.sections },
-      provenance: `参考内置方法：${entry.name}`,
+      provenance: t('provenanceBuiltin', { name: entry.name }),
       legacyText: null,
     })
     setSelectedBuiltinSource(entry)
@@ -284,7 +284,7 @@ export function useDraftState(deps: DraftStateDeps) {
   const startRunSource = (run: RunSourceCandidate): void => {
     if (!run.eligible || run.question.kind !== 'ok' || run.question.text.trim() === ''
       || run.deliverable.kind !== 'ok' || run.deliverable.text.trim() === '') return
-    setDraft({ name: '', sections: emptySections(), provenance: `来自研究：${run.name}`, legacyText: null })
+    setDraft({ name: '', sections: emptySections(), provenance: t('provenanceRun', { name: run.name }), legacyText: null })
     setSelectedRunSource(run)
     setSelectedBuiltinSource(null)
     bumpDraftRevision()

@@ -23,11 +23,22 @@ import {
   methodLibrarySnapshot, shouldStartFreshDraftContext,
 } from '../../lib/method-library-operation-state.ts'
 import {
-  LIBRARY_PATH, missingSections, operationMetadataMatches,
+  LIBRARY_PATH, missingSectionKeys, operationMetadataMatches,
   type LoadState, type MethodLibraryOperationRequest, type Mode, type OperationOutcome,
   type PendingMethodOperation, type Receipt,
 } from './model.ts'
 import type { Draft } from './views.tsx'
+import {
+  clearDefaultOperationInstruction, removeOperationInstruction, saveOperationInstruction, setDefaultOperationInstruction,
+} from './operation-prompts.ts'
+
+/** 四字段标签的字典键（UI 回执按 locale 取词；file-format 标签仍住 library-fold）。 */
+const SECTION_LABEL_KEYS = {
+  source: 'sectionSource',
+  verify: 'sectionVerify',
+  report: 'sectionReport',
+  limit: 'sectionLimit',
+} as const
 
 /** 写操作队列的状态面；`useOperationQueue` 借用同一批 ref/setter（不复制、不重建）。 */
 export interface OperationQueueState {
@@ -330,12 +341,12 @@ export function useOperationQueue(deps: OperationQueueDeps) {
     if (draft === null) return
     const name = draft.name.trim()
     if (name === '') {
-      setReceipt({ ok: false, detail: '名称不能为空' })
+      setReceipt({ ok: false, detail: t('nameRequired') })
       return
     }
-    const missing = missingSections(draft)
+    const missing = missingSectionKeys(draft).map((key) => t(SECTION_LABEL_KEYS[key]))
     if (missing.length > 0) {
-      setReceipt({ ok: false, detail: `还缺字段：${missing.join('、')}——填完再保存` })
+      setReceipt({ ok: false, detail: t('missingFields', { fields: missing.join(t('listSeparator')) }) })
       return
     }
     if (loadState !== 'ok' && loadState !== 'absent') {
@@ -343,7 +354,7 @@ export function useOperationQueue(deps: OperationQueueDeps) {
       return
     }
     if (mode === 'edit' && draft.currentName !== undefined && draft.currentName !== name) {
-      setReceipt({ ok: false, detail: '编辑态不能改名；请用「新建」另存一条' })
+      setReceipt({ ok: false, detail: t('renameInEdit') })
       return
     }
     const existingEntries = foldLibrary(text).filter((entry) => entry.name === name)
@@ -354,9 +365,9 @@ export function useOperationQueue(deps: OperationQueueDeps) {
     if (existingEntries.length === 1 && mode === 'new') {
       const confirmed = typeof window === 'undefined'
         ? true
-        : window.confirm(`库里已有同名方法「${name}」，保存会覆盖它。继续？`)
+        : window.confirm(t('overwriteConfirm', { name }))
       if (!confirmed) {
-        setReceipt({ ok: false, detail: `未保存：库里已有「${name}」` })
+        setReceipt({ ok: false, detail: t('unsavedDuplicate', { name }) })
         return
       }
     }
@@ -365,13 +376,12 @@ export function useOperationQueue(deps: OperationQueueDeps) {
       ...(draft.legacyText !== null && draft.legacyText.trim() !== '' ? [draft.legacyText.trim()] : []),
     ].join('\n')
     const saveAction = setDefault ? 'save-and-set-default' : 'save'
-    const label = mode === 'new' ? '新建' : '更新'
     await runOperation({
       action: saveAction,
       name,
       entryText,
       confirmOverwrite: existingEntries.length === 1 && mode === 'new',
-      instruction: `保存方法「${name}」到工作区 method-library.md。动作：${label}。必须把 operationId 和 operationHash 原样传给 method_library_upsert，defaultAction=${setDefault ? 'set' : 'preserve'}。entry 必须与下方 method-draft 文本逐字一致。写后停止，不要继续其它工具。\n\`\`\`method-draft\n${entryText}\n\`\`\``,
+      instruction: saveOperationInstruction({ name, entryText, setDefault, mode }),
     })
   }
 
@@ -379,7 +389,7 @@ export function useOperationQueue(deps: OperationQueueDeps) {
     await runOperation({
       action: 'remove',
       name: entry.name,
-      instruction: `从工作区 method-library.md 删除方法「${entry.name}」。必须调用 method_library_remove，传入 operationId 与名称；写后停止。`,
+      instruction: removeOperationInstruction(entry.name),
     })
   }
 
@@ -387,14 +397,14 @@ export function useOperationQueue(deps: OperationQueueDeps) {
     await runOperation({
       action: 'set-default',
       name: entry.name,
-      instruction: `将「${entry.name}」设为唯一默认偏好。调用 method_library_set_default，action=set，传入 operationId 和名称；写后停止。`,
+      instruction: setDefaultOperationInstruction(entry.name),
     })
   }
 
   const clearDefault = async (): Promise<void> => {
     await runOperation({
       action: 'clear-default',
-      instruction: '清除 method-library.md 中所有默认偏好标记。调用 method_library_set_default，action=clear，只传 operationId，不传 name；写后停止。',
+      instruction: clearDefaultOperationInstruction(),
     })
   }
 

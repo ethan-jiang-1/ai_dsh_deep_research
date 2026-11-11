@@ -11,6 +11,7 @@ import { bindingTrust } from '../../lib/binding-trust.ts'
 import { openRun, type RunSource } from '../../lib/run-context.ts'
 import { foldMethodAdoption, type MethodAdoption } from '../../lib/method-of-question.ts'
 import { assistantReplyAfter, libraryDiff, receiptOf, type LibraryDiff } from '../../lib/receipt-fold.ts'
+import type { PackTranslate } from '../../lib/i18n.ts'
 import { LIBRARY_PATH, type DetailState } from './config-model.ts'
 import type { FollowTarget, JournalFrame } from '../ResearchStatusTab.tsx'
 
@@ -29,7 +30,7 @@ export interface ResearchConfigTabInjected {
   readonly sendInstruction: (sessionId: SessionId, text: string) => Promise<{ ok: boolean; detail: string }>
 }
 
-export type ConfigFeedInput = ResearchConfigTabInjected & { readonly sessionId: SessionId | undefined }
+export type ConfigFeedInput = ResearchConfigTabInjected & { readonly sessionId: SessionId | undefined; readonly t: PackTranslate }
 
 export function useConfigFeed(props: ConfigFeedInput) {
   const [entries, setEntries] = useState<readonly LibraryEntry[] | null>(null)
@@ -128,7 +129,7 @@ export function useConfigFeed(props: ConfigFeedInput) {
   /** 回执文案（三态优先级 = 失败 > 已落盘 > 已回话 > 已发送）。 */
   const receipt = receiptBase === null
     ? null
-    : { ...receiptOf({ ok: receiptBase.ok, detail: receiptBase.detail, replied, diff: receiptBase.expectsChange ? receiptDiff : null }), expectsChange: receiptBase.expectsChange }
+    : { ...receiptOf({ ok: receiptBase.ok, detail: receiptBase.detail, replied, diff: receiptBase.expectsChange ? receiptDiff : null }, props.t), expectsChange: receiptBase.expectsChange }
 
   /**
    * 发送指令 + 起落盘对账轮询。
@@ -156,7 +157,7 @@ export function useConfigFeed(props: ConfigFeedInput) {
         await new Promise((resolve) => setTimeout(resolve, 3000))
         if (!aliveRef.current) return
         const after = await reload(sid)
-        const diff = libraryDiff(diffBase.current ?? [], after, intent.target)
+        const diff = libraryDiff(diffBase.current ?? [], after, intent.target, props.t)
         if (diff.landed) { setReceiptDiff(diff); return }
       }
     } finally {

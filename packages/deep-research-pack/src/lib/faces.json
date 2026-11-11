@@ -18,6 +18,7 @@
     "final-target.ts",
     "graph-model.ts",
     "hitl-fold.ts",
+    "i18n.ts",
     "journal-wire.ts",
     "member-activity.ts",
     "method-draft.ts",

@@ -9,6 +9,7 @@
  */
 
 import { argValueOf, contentTextParts, normalizeQueries } from './journal-wire.ts'
+import { translateZh, type PackTranslate } from './i18n.ts'
 
 /** 一条人性化活动行。 */
 export interface ActivityRow {
@@ -52,9 +53,10 @@ const MAX_ROWS = 30
 /**
  * 折算：journal 事件序列 → 人性化活动行（尾部保留；噪音过滤）。
  * @param events - 按 wire 顺序的事件（follow 的 snapshot 历史或实时流）。
+ * @param t - UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
  * @returns 活动行（永不 throw）。
  */
-export function foldActivityRows(events: readonly unknown[]): readonly ActivityRow[] {
+export function foldActivityRows(events: readonly unknown[], t: PackTranslate = translateZh): readonly ActivityRow[] {
   const rows: ActivityRow[] = []
   for (const event of events) {
     if (typeof event !== 'object' || event === null) continue
@@ -66,19 +68,20 @@ export function foldActivityRows(events: readonly unknown[]): readonly ActivityR
         // wire 权威形状 = queries 数组（vendor tool-web search schema；录制流实证——2026-09-27
         // 快照 lane 首个战果：旧代码读 query 单串，真实 web_search 行从未出过 🔍 行）。
         const list = normalizeQueries(argValueOf(e.data?.arguments, 'queries'))
-        if (list.length > 0) rows.push({ icon: '🔍', text: `检索：${list.join(' · ').slice(0, 40)}`, time })
+        if (list.length > 0) rows.push({ icon: '🔍', text: t('activitySearch', { queries: list.join(' · ').slice(0, 40) }), time })
       } else if (name === 'spawn_teammate') {
-        const n = argOf(e.data?.arguments, 'name') ?? '(未具名)'
+        const n = argOf(e.data?.arguments, 'name') ?? t('activitySpawnUnnamed')
         const d = argOf(e.data?.arguments, 'description') ?? ''
-        rows.push({ icon: '👥', text: `派出 ${n}${d === '' ? '' : `：${d.slice(0, 30)}`}`, time })
+        rows.push({ icon: '👥', text: d === '' ? t('activitySpawn', { name: n }) : t('activitySpawnDetail', { name: n, detail: d.slice(0, 30) }), time })
       } else if (name === 'present') {
-        rows.push({ icon: '📦', text: '交付声明', time })
+        rows.push({ icon: '📦', text: t('activityPresent'), time })
       } else if (name === 'wait_agent') {
         // 静默区观察盲区缓解（RFC cockpit-flow-face G2）：lead 等队员期间页签不再全静——
         // 连续重复折叠（wait_agent 可多次调用，同文行不重复出）。
+        const waiting = t('activityWaiting')
         const lastRow = rows[rows.length - 1]
-        if (lastRow?.text !== '队员作业中——等待返回') {
-          rows.push({ icon: '👥', text: '队员作业中——等待返回', time })
+        if (lastRow?.text !== waiting) {
+          rows.push({ icon: '👥', text: waiting, time })
         }
       }
       // 其他工具调用：v1 不出行（可按需加 key→icon 映射）

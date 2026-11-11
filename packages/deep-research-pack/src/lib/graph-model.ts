@@ -21,6 +21,7 @@
  */
 import { isActivePlanNode, planNodeOf } from './plan-index.ts'
 import type { PlanIndex } from './plan-index.ts'
+import { translateZh, type PackTranslate } from './i18n.ts'
 
 /** 节点视觉状态（组件只消费，不重新判定）。 */
 export interface GraphNodeState {
@@ -182,40 +183,47 @@ export function coverageOf<T extends TaskStateLike>(
  * 头部一行摘要：`plan N 节点 · Team M 任务 · 已映射 K · 未映射 N-K`（另有缺口/plan-only/
  * 未进 plan 的任务时才追加）。文案即契约（客户端冒烟按它断言）。
  * @param coverage - {@link coverageOf} 的结果。
+ * @param t - UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
  * @returns 单行文本。
  */
-export function coverageLineOf(coverage: GraphCoverage): string {
+export function coverageLineOf(coverage: GraphCoverage, t: PackTranslate = translateZh): string {
   const parts = [
-    `plan ${String(coverage.planNodes)} 节点`,
-    `Team ${String(coverage.teamTasks)} 任务`,
-    `已映射 ${String(coverage.mapped)}`,
-    `未映射 ${String(coverage.unmapped)}`,
+    t('graphCoveragePlanNodes', { count: String(coverage.planNodes) }),
+    t('graphCoverageTeamTasksShort', { count: String(coverage.teamTasks) }),
+    t('graphCoverageMapped', { count: String(coverage.mapped) }),
+    t('graphCoverageUnmapped', { count: String(coverage.unmapped) }),
   ]
-  if (coverage.stale > 0) parts.push(`映射失效 ${String(coverage.stale)}`)
-  if (coverage.duplicate > 0) parts.push(`task_id 重复 ${String(coverage.duplicate)}`)
-  if (coverage.planOnly > 0) parts.push(`plan-only ${String(coverage.planOnly)}`)
-  if (coverage.tasksOutsidePlan > 0) parts.push(`未进 plan 的 Team 任务 ${String(coverage.tasksOutsidePlan)}`)
+  if (coverage.stale > 0) parts.push(t('graphCoverageStale', { count: String(coverage.stale) }))
+  if (coverage.duplicate > 0) parts.push(t('graphCoverageDuplicate', { count: String(coverage.duplicate) }))
+  if (coverage.planOnly > 0) parts.push(t('graphCoveragePlanOnly', { count: String(coverage.planOnly) }))
+  if (coverage.tasksOutsidePlan > 0) parts.push(t('graphCoverageOutside', { count: String(coverage.tasksOutsidePlan) }))
   return parts.join(' · ')
 }
 
 /**
  * 映射缺口警告（黄色横幅）；没有缺口 → null。
  * @param coverage - {@link coverageOf} 的结果。
+ * @param t - UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
  * @returns 一句人话（说清“图谱不知道”，而不是“没跑”）。
  */
-export function coverageWarningOf(coverage: GraphCoverage): string | null {
+export function coverageWarningOf(coverage: GraphCoverage, t: PackTranslate = translateZh): string | null {
   const gap = coverage.unmapped + coverage.stale + coverage.duplicate
   if (gap === 0) return null
   const detail = [
-    coverage.unmapped > 0 ? `未映射 ${String(coverage.unmapped)}` : null,
-    coverage.stale > 0 ? `映射失效 ${String(coverage.stale)}` : null,
-    coverage.duplicate > 0 ? `task_id 重复 ${String(coverage.duplicate)}` : null,
+    coverage.unmapped > 0 ? t('graphCoverageUnmapped', { count: String(coverage.unmapped) }) : null,
+    coverage.stale > 0 ? t('graphCoverageStale', { count: String(coverage.stale) }) : null,
+    coverage.duplicate > 0 ? t('graphCoverageDuplicate', { count: String(coverage.duplicate) }) : null,
   ].filter((part): part is string => part !== null).join(' · ')
-  return `图谱无法判断 ${String(gap)} 个 plan 节点的进度（${detail}）：plan 的 task_id 还没回填、指向的任务已不在当前 Team 板，或被多个节点声明。修正 task_id 或显式标 plan-only 后消失。`
+  return t('graphCoverageWarning', { count: String(gap), detail })
 }
 
 /** Team 投影尚未就绪时的节点状态（不把“还没收到数据”说成映射缺口）。 */
-export const PROJECTION_PENDING_STATE: GraphNodeState = { text: '等待团队投影', icon: '…', color: '#9ca3af' }
+export const PROJECTION_PENDING_STATE: GraphNodeState = { text: translateZh('graphWaitingTeam'), icon: '…', color: '#9ca3af' }
+
+/** 投影未就绪状态的本地化形态（组件用；常量 `PROJECTION_PENDING_STATE` 保留给非 UI 面）。 */
+export function projectionPendingState(t: PackTranslate = translateZh): GraphNodeState {
+  return { text: t('graphWaitingTeam'), icon: '…', color: '#9ca3af' }
+}
 
 /**
  * Team 任务 → 节点状态（原住组件，2026-10-23 迁入本件以便 keyless 钉住）。
@@ -223,24 +231,26 @@ export const PROJECTION_PENDING_STATE: GraphNodeState = { text: '等待团队投
  * @param task - Team 任务结构面。
  * @param running - owner 是否正在跑（未知 → undefined）。
  * @param attention - 该任务的 attention 条目（可为 undefined）。
+ * @param t - UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
  * @returns 视觉状态。
  */
 export function nodeStateOf(
   task: TaskStateLike,
   running: boolean | undefined,
   attention: AttentionLike | undefined,
+  t: PackTranslate = translateZh,
 ): GraphNodeState {
-  if (task.status === 'completed') return { text: '完成', icon: '✓', color: '#16a34a' }
-  if (task.status === 'deleted') return { text: '已删除', icon: '·', color: '#9ca3af' }
-  if (attention?.reason === 'owner-failed') return { text: 'owner 失败', icon: '✕', color: '#dc2626' }
+  if (task.status === 'completed') return { text: t('graphStateDone'), icon: '✓', color: '#16a34a' }
+  if (task.status === 'deleted') return { text: t('graphStateDeleted'), icon: '·', color: '#9ca3af' }
+  if (attention?.reason === 'owner-failed') return { text: t('graphStateOwnerFailed'), icon: '✕', color: '#dc2626' }
   if (task.status === 'in_progress') {
-    if (attention?.reason === 'stalled') return { text: '可能卡住', icon: '⚠', color: '#b45309' }
-    return { text: running === true ? '进行中' : '进行中（owner 未知）', icon: '●', color: '#2563eb' }
+    if (attention?.reason === 'stalled') return { text: t('graphStateStalled'), icon: '⚠', color: '#b45309' }
+    return { text: running === true ? t('graphStateRunning') : t('graphStateRunningUnknown'), icon: '●', color: '#2563eb' }
   }
-  if (attention?.reason === 'unassigned') return { text: '待派', icon: '⚠', color: '#b45309' }
-  if (attention?.reason === 'blocked-too-long') return { text: '阻塞偏久', icon: '⏳', color: '#b45309' }
-  if (task.ready === true) return { text: '就绪', icon: '○', color: '#6b7280' }
-  return { text: `等 ${task.blockedBy.join(', ')}`, icon: '○', color: '#6b7280' }
+  if (attention?.reason === 'unassigned') return { text: t('graphStateUnassigned'), icon: '⚠', color: '#b45309' }
+  if (attention?.reason === 'blocked-too-long') return { text: t('graphStateBlockedLong'), icon: '⏳', color: '#b45309' }
+  if (task.ready === true) return { text: t('graphStateReady'), icon: '○', color: '#6b7280' }
+  return { text: t('graphStateBlocked', { deps: task.blockedBy.join(', ') }), icon: '○', color: '#6b7280' }
 }
 
 /**
@@ -248,29 +258,31 @@ export function nodeStateOf(
  * @param mapping - {@link planMappingOf} 里该节点的映射（缺失 = 调用方传错，仍不 throw）。
  * @param running - owner 忙闲（仅 mapped 用）。
  * @param attention - 该任务的 attention（仅 mapped 用）。
+ * @param t - UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
  * @returns 视觉状态；unmapped/stale 一律「状态未知」，plan-only 明说无任务。
  */
 export function planNodeStateOf<T extends TaskStateLike>(
   mapping: PlanMapping<T> | null | undefined,
   running?: boolean,
   attention?: AttentionLike,
+  t: PackTranslate = translateZh,
 ): GraphNodeState {
   if (mapping === null || mapping === undefined) {
-    return { text: '状态未知（plan 未索引）', icon: '?', color: '#b45309' }
+    return { text: t('graphStateUnknownPlanIndex'), icon: '?', color: '#b45309' }
   }
   if (mapping.state === 'mapped') {
     return mapping.task !== undefined
-      ? nodeStateOf(mapping.task, running, attention)
-      : { text: '状态未知（映射缺任务）', icon: '?', color: '#b45309' }
+      ? nodeStateOf(mapping.task, running, attention, t)
+      : { text: t('graphStateUnknownMapping'), icon: '?', color: '#b45309' }
   }
   if (mapping.state === 'stale') {
-    return { text: `状态未知（task_id 失效：${mapping.declaredTaskId ?? '?'}）`, icon: '?', color: '#b45309' }
+    return { text: t('graphStateUnknownStale', { id: mapping.declaredTaskId ?? '?' }), icon: '?', color: '#b45309' }
   }
   if (mapping.state === 'duplicate') {
-    return { text: `状态未知（task_id 重复：${mapping.declaredTaskId ?? '?'}）`, icon: '?', color: '#b45309' }
+    return { text: t('graphStateUnknownDuplicate', { id: mapping.declaredTaskId ?? '?' }), icon: '?', color: '#b45309' }
   }
   if (mapping.state === 'plan-only') {
-    return { text: 'plan-only（无 Team 任务）', icon: '·', color: '#9ca3af' }
+    return { text: t('graphStatePlanOnly'), icon: '·', color: '#9ca3af' }
   }
-  return { text: '状态未知（未映射 task_id）', icon: '?', color: '#b45309' }
+  return { text: t('graphStateUnknownUnmapped'), icon: '?', color: '#b45309' }
 }

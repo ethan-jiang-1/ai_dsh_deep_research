@@ -182,3 +182,24 @@ test('Wave 固定测试资产：W1.1/W2.1/W2.2 并行、W3.1 汇合、无 legacy
   assert.equal(index.byId.get('W3.1')?.stage, 'synthesis');
   assert.deepEqual(planIssuesOf(index), [], '固定 Wave 资产不得有结构提示');
 });
+
+// 负例留证 2026-11-11：BUG-058——修复前 planIssuesOf 没有 cycle kind，有环只报误导性的
+// wave-prefix（重编号不能解环）。还原法 = 删 cycle 检测与 wave-prefix 抑制。
+test('BUG-058 有环 plan：planIssuesOf 报 cycle，且不再给误导性的 wave-prefix', () => {
+  const index = planIndex([
+    '# Plan — cycle',
+    '',
+    '> protocol: v1',
+    '',
+    '## 节点表',
+    '',
+    '| id | parent | lifecycle | kind | question | owner_role | deps | output | acceptance | budget | depth | task_id |',
+    '|---|---|---|---|---|---|---|---|---|---|---|---|',
+    '| W1.1 | — | active | deep-dive | q1 | analyst | W2.1 | evidence/t1.md | ok | 2 轮 | L1 | |',
+    '| W2.1 | — | active | deep-dive | q2 | analyst | W1.1 | evidence/t2.md | ok | 2 轮 | L1 | |',
+  ].join('\n'))
+  const issues = planIssuesOf(index)
+  assert.ok(issues.some((issue) => issue.kind === 'cycle'), `有环必须报 cycle：${JSON.stringify(issues)}`)
+  assert.equal(issues.some((issue) => issue.kind === 'wave-prefix'), false, '有环时不得给重编号提示')
+  assert.match(issues.find((issue) => issue.kind === 'cycle').message, /不可执行/)
+})

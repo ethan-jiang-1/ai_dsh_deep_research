@@ -16,6 +16,7 @@
  */
 import { isActivePlanNode } from './plan-index.ts'
 import type { PlanIndex } from './plan-index.ts'
+import { translateZh, type PackTranslate } from './i18n.ts'
 
 /** 重编号/并号的一条别名。 */
 interface PlanDiffAlias {
@@ -61,9 +62,10 @@ function sameDeps(a: readonly string[], b: readonly string[]): boolean {
  * 结构 diff。
  * @param previous - 旧图快照的 {@link PlanIndex}（可为 null）。
  * @param next - 当前 plan 的 {@link PlanIndex}（可为 null）。
+ * @param t - UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
  * @returns {@link PlanDiff}（永不 throw）。
  */
-export function planDiffOf(previous: PlanIndex | null | undefined, next: PlanIndex | null | undefined): PlanDiff {
+export function planDiffOf(previous: PlanIndex | null | undefined, next: PlanIndex | null | undefined, t: PackTranslate = translateZh): PlanDiff {
   const oldNodes = (previous?.nodes ?? []).filter((node) => isActivePlanNode(node))
   const newNodes = (next?.nodes ?? []).filter((node) => isActivePlanNode(node))
   const oldById = new Map(oldNodes.map((node) => [node.id, node]))
@@ -119,11 +121,11 @@ export function planDiffOf(previous: PlanIndex | null | undefined, next: PlanInd
   void oldTombstones
 
   const parts: string[] = []
-  if (added.length > 0) parts.push(`+${String(added.length)} 新增`)
-  if (kept.length > 0) parts.push(`${String(kept.length)} 保留`)
-  if (removed.length > 0) parts.push(`${String(removed.length)} 退役`)
-  if (aliases.length > 0) parts.push(`${String(aliases.length)} 重编号`)
-  if (dependencyChanges.length > 0) parts.push(`${String(dependencyChanges.length)} 依赖变化`)
+  if (added.length > 0) parts.push(t('diffAdded', { count: String(added.length) }))
+  if (kept.length > 0) parts.push(t('diffKept', { count: String(kept.length) }))
+  if (removed.length > 0) parts.push(t('diffRemoved', { count: String(removed.length) }))
+  if (aliases.length > 0) parts.push(t('diffRenumbered', { count: String(aliases.length) }))
+  if (dependencyChanges.length > 0) parts.push(t('diffDepsChanged', { count: String(dependencyChanges.length) }))
 
   return {
     added,
@@ -131,6 +133,6 @@ export function planDiffOf(previous: PlanIndex | null | undefined, next: PlanInd
     kept,
     aliases,
     dependencyChanges,
-    summary: parts.length > 0 ? parts.join(' / ') : '两侧都没有节点',
+    summary: parts.length > 0 ? parts.join(' / ') : t('diffEmpty'),
   }
 }

@@ -9,6 +9,7 @@
  * 自行取文件内容后喂这里的折算）。
  */
 import { finalVersionOf } from './final-target.ts'
+import { translateZh, type PackTranslate } from './i18n.ts'
 
 /** 一个 run 的文件在场性（步骤条输入——由调用方从文件内容/在场性构造）。
  *  步序正本 = m2-run-mechanics「运行流程总览」：立项（question+topics 一体）→ 组队 →
@@ -42,16 +43,25 @@ export function latestRunVersion(files: readonly string[]): number {
 }
 
 const STEP_ORDER = ['question', 'team', 'leads', 'evidence', 'findings', 'review', 'final'] as const
-const STEP_LABELS = { question: '立项', team: '组队', leads: '侦察', evidence: '挖掘', findings: '综合', review: '审查', final: '交付' }
+const STEP_LABEL_KEYS = {
+  question: 'stepQuestion',
+  team: 'stepTeam',
+  leads: 'stepLeads',
+  evidence: 'stepEvidence',
+  findings: 'stepFindings',
+  review: 'stepReview',
+  final: 'stepFinal',
+} as const
 
 /**
  * 步骤条推导：在场性 → 七步三态（最后在场的步 = current，之前 done，之后 pending）。
  * 组队的输入随立项（question 在场即 team 在场）——组队无独立文件，cursor 在"立项完成 →
  * 侦察交付"的窗口内停靠在组队（该窗口即组队+侦察进行段，正本图同序）。
  * @param inputs - 文件在场性（evidence 为计数 >0 判定）。
+ * @param t - UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
  * @returns 步骤条。
  */
-export function deriveSteps(inputs: RunStepInputs): readonly RunStep[] {
+export function deriveSteps(inputs: RunStepInputs, t: PackTranslate = translateZh): readonly RunStep[] {
   const has: Record<string, boolean> = {
     question: inputs.question,
     team: inputs.team,
@@ -65,7 +75,7 @@ export function deriveSteps(inputs: RunStepInputs): readonly RunStep[] {
   for (const [i, k] of STEP_ORDER.entries()) if (has[k]) lastDone = i
   return STEP_ORDER.map((k, i) => ({
     key: k,
-    label: STEP_LABELS[k],
+    label: t(STEP_LABEL_KEYS[k]),
     state: i < lastDone ? 'done' : i === lastDone ? 'current' : 'pending',
   }))
 }

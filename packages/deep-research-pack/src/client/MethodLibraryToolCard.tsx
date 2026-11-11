@@ -26,7 +26,7 @@ export function MethodLibraryToolCard(props: MethodLibraryToolCardProps): ReactN
   const removing = props.toolName === METHOD_LIBRARY_REMOVE
   const defaulting = props.toolName === METHOD_LIBRARY_DEFAULT
   const defaultAction = args?.action === 'set' ? 'set' : 'clear'
-  const target = name === '' ? '方法条目' : name
+  const target = name === '' ? props.t('methodEntries') : name
   const label = state === 'running'
     ? removing ? props.t('toolRemoveRunning') : defaulting
       ? props.t(defaultAction === 'set' ? 'toolDefaultSetRunning' : 'toolDefaultClearRunning')

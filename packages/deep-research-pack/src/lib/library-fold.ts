@@ -142,17 +142,26 @@ export function flattenSectionValue(value: string): string {
   return value.replace(/\r\n?/g, '\n').replace(/\s*\n\s*/g, ' ').replace(/[ \t]{2,}/g, ' ').trim()
 }
 
+/** 预览词表（UI 层按语言注入；缺省中文 = 旧行为）。 */
+export interface LibraryPreviewLabels {
+  readonly sections?: Partial<Record<keyof LibrarySections, string>>
+  readonly provenance?: (value: string) => string
+  readonly defaultMark?: string
+}
+
 /** 一条库条目的 Markdown 预览（编辑器/round-trip；不是写盘路径）。 */
 export function renderLibraryEntry(entry: Pick<LibraryEntry, 'name' | 'sections'> & {
   readonly provenance?: string | null
   readonly isDefault?: boolean
-}): string {
-  const provenance = entry.provenance !== null && entry.provenance !== undefined ? `（${entry.provenance}）` : ''
-  const defaultMark = entry.isDefault === true ? '〔默认偏好〕' : ''
+}, labels?: LibraryPreviewLabels): string {
+  const provenance = entry.provenance !== null && entry.provenance !== undefined
+    ? (labels?.provenance?.(entry.provenance) ?? `（${entry.provenance}）`)
+    : ''
+  const defaultMark = entry.isDefault === true ? (labels?.defaultMark ?? '〔默认偏好〕') : ''
   const lines = [`## ${entry.name}${provenance}${defaultMark}`]
   for (const { key, label } of SECTION_LABELS) {
     const value = entry.sections[key]
-    if (value !== null && value.trim() !== '') lines.push(`- ${label}: ${flattenSectionValue(value)}`)
+    if (value !== null && value.trim() !== '') lines.push(`- ${labels?.sections?.[key] ?? label}: ${flattenSectionValue(value)}`)
   }
   return lines.join('\n')
 }

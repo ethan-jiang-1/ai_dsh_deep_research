@@ -5,6 +5,7 @@
 // 只读本件；父级只负责图数据与选中态。
 import type { ReactNode } from 'react'
 import type { UseSessions, UseSessionStatus } from '@deepseek-ai/dsh-client-ui-session/client'
+import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import type { PlanNode } from '../../lib/plan-index.ts'
 import type { GraphNodeState } from '../../lib/graph-model.ts'
 import type { GraphNodeView } from './types.ts'
@@ -45,8 +46,9 @@ export function NodeCard(props: {
   readonly useSessions: UseSessions
   readonly useSessionStatus: UseSessionStatus
   readonly boundSlug: string | null
+  readonly t: TranslateNS<'deepResearchPack'>
 }): ReactNode {
-  const { node, expanded, onToggle, copied, onCopy, onOpenOwner, children: childNodes, childStateOf, leadSessionId, useSessions, useSessionStatus, boundSlug } = props
+  const { node, expanded, onToggle, copied, onCopy, onOpenOwner, children: childNodes, childStateOf, leadSessionId, useSessions, useSessionStatus, boundSlug, t } = props
     const task = node.task
     const planNode = node.planNode
     const member = node.member
@@ -62,12 +64,12 @@ export function NodeCard(props: {
             <strong style={{ fontSize: 13 }}>{node.id}</strong>
             {planNode?.kind !== undefined && <span style={{ fontSize: 11, opacity: 0.65 }}>{planNode.kind}</span>}
             {planNode?.stage !== undefined && <span style={{ fontSize: 10, opacity: 0.55 }}>stage {planNode.stage}</span>}
-            {childNodes.length > 0 && <span style={{ fontSize: 10, color: '#6366f1' }}>内部 {String(childNodes.length)}</span>}
+            {childNodes.length > 0 && <span style={{ fontSize: 10, color: '#6366f1' }}>{t('graphInternalCount', { count: String(childNodes.length) })}</span>}
             <span style={{ fontSize: 12, flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>{shortLabel(node.subject, 72)}</span>
             <span style={{ fontSize: 11, color: node.state.color, whiteSpace: 'nowrap' }}>{node.state.icon} {node.state.text}</span>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 11, opacity: 0.65, marginTop: 2 }}>
-            <span>owner：{node.ownerName ?? '未指派'}</span>
+            <span>{t('graphOwner', { name: node.ownerName ?? t('graphUnassignedOwner') })}</span>
             {node.blockedBy.length > 0 && <span>deps：{node.blockedBy.join(', ')}</span>}
             {planNode?.depth !== undefined && <span>depth：{planNode.depth}</span>}
             {task !== undefined && <span>task：{task.id}</span>}
@@ -81,15 +83,15 @@ export function NodeCard(props: {
             {task?.description !== undefined && task.description !== '' && (
               <div style={{ whiteSpace: 'pre-wrap', opacity: 0.85, maxHeight: 120, overflowY: 'auto', paddingRight: 4 }}>{task.description}</div>
             )}
-            <div style={{ opacity: 0.8 }}>owner：{node.ownerName ?? '未指派'}{member !== undefined ? `（${member.phase}）` : ''}</div>
-            {node.blockedBy.length > 0 && <div style={{ opacity: 0.8 }}>依赖：{node.blockedBy.join(', ')}</div>}
+            <div style={{ opacity: 0.8 }}>{t('graphOwner', { name: node.ownerName ?? t('graphUnassignedOwner') })}{member !== undefined ? ` (${member.phase})` : ''}</div>
+            {node.blockedBy.length > 0 && <div style={{ opacity: 0.8 }}>{t('graphDependency', { ids: node.blockedBy.join(', ') })}</div>}
             {task !== undefined && <div style={{ opacity: 0.8 }}>revision：{task.revision}{task.ready ? ' · ready' : ''}</div>}
             {planNode !== undefined
               ? planLines(planNode)
-              : <div style={{ opacity: 0.5 }}>plan.md 未记录此节点（旧 run；rerun 时会生成 plan）</div>}
+              : <div style={{ opacity: 0.5 }}>{t('graphNodeNotInPlan')}</div>}
             {childNodes.length > 0 && (
               <div style={{ marginTop: 4, padding: '4px 6px', border: '1px solid #6366f126', borderRadius: 4, background: '#6366f108' }}>
-                <div style={{ fontSize: 11, color: '#6366f1', marginBottom: 2 }}>内部节点（复合展开，只读）</div>
+                <div style={{ fontSize: 11, color: '#6366f1', marginBottom: 2 }}>{t('graphInternalNodes')}</div>
                 {childNodes.map((child) => {
                   // 子节点同样走四态词表：没有映射 = 状态未知，不是未执行。
                   const childState = childStateOf(child.id)
@@ -109,15 +111,15 @@ export function NodeCard(props: {
             <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap', alignItems: 'center' }}>
               {onOpenOwner !== undefined && member !== undefined && member.id !== leadSessionId
                 && member.phase !== 'failed' && member.phase !== 'provisioning' && (
-                <button type="button" style={BUTTON_STYLE} onClick={() => { onOpenOwner?.() }}>打开负责人</button>
+                <button type="button" style={BUTTON_STYLE} onClick={() => { onOpenOwner?.() }}>{t('graphOpenOwner')}</button>
               )}
               <button
                 type="button"
                 style={BUTTON_STYLE}
-                title={boundSlug !== null ? `复制 drt_${boundSlug}/${node.id}，粘贴到对话引用这个节点` : `复制 ${node.id}`}
+                title={boundSlug !== null ? t('graphCopyRefTitle', { slug: boundSlug, id: node.id }) : t('graphCopyRefTitleBare', { id: node.id })}
                 onClick={onCopy}
-              >{copied ? '已复制' : '复制引用'}</button>
-              <span style={MUTED_STYLE}>只读观察；调整请在对话里进行或 rerun。</span>
+              >{copied ? t('graphCopied') : t('graphCopyRef')}</button>
+              <span style={MUTED_STYLE}>{t('graphReadOnlyHint')}</span>
             </div>
           </div>
         )}

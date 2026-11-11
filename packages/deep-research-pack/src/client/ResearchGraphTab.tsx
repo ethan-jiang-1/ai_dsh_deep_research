@@ -45,7 +45,7 @@ import {
   planMappingOf,
   planNodeStateOf,
   nodeStateOf,
-  PROJECTION_PENDING_STATE,
+  projectionPendingState,
   type GraphCoverage,
 } from '../lib/graph-model.ts'
 import { useGraphFeed } from './research-graph/useGraphFeed.ts'
@@ -121,13 +121,13 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     memberStatus.set(member.id, status)
     memberByName.set(member.name, member)
   }
-  const attention = attentionOf(tasks, memberStatus, Date.now(), DEFAULT_ATTENTION_THRESHOLDS)
+  const attention = attentionOf(tasks, memberStatus, Date.now(), DEFAULT_ATTENTION_THRESHOLDS, props.t)
   const counts = countsOf(tasks, memberStatus)
   const planNodes: readonly PlanNode[] = plan?.nodes ?? []
   const topPlanNodes: readonly PlanNode[] = (plan?.topLevel ?? planNodes)
     .filter((node, index, all) => all.findIndex((candidate) => candidate.id === node.id) === index)
   const childrenByParent = plan?.childrenByParent ?? new Map<string, readonly PlanNode[]>()
-  const planIssues = planIssuesOf(plan)
+  const planIssues = planIssuesOf(plan, props.t)
   const childCounts = new Map<string, number>()
   for (const [parentId, children] of childrenByParent) childCounts.set(parentId, children.length)
 
@@ -136,7 +136,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   const mappingIndex = planMappingOf(plan, tasks)
   const taskByPlanId = mappingIndex.taskByPlanId
   const coverage: GraphCoverage = coverageOf(plan, tasks, mappingIndex)
-  const coverageWarning = coverageWarningOf(coverage)
+  const coverageWarning = coverageWarningOf(coverage, props.t)
   const unmappedTasks = planNodes.length > 0 ? mappingIndex.tasksOutsidePlan : []
 
   // 顶层图只画 parent 缺省的 active 节点；W3.1… 默认收在 W3 详情里（复合节点折叠；墓碑不进图）。
@@ -151,8 +151,8 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
       // 绝不在没有映射时落回“未执行”。
       // 投影未就绪时不给映射结论：这是“还没收到数据”，不是“映射缺口”。
       const state = teamReady
-        ? planNodeStateOf(mappingIndex.mapping.get(planNode.id), running, attentionItem)
-        : PROJECTION_PENDING_STATE
+        ? planNodeStateOf(mappingIndex.mapping.get(planNode.id), running, attentionItem, props.t)
+        : projectionPendingState(props.t)
       return {
         id: planNode.id,
         label: planNode.kind ?? planNode.id,
@@ -184,11 +184,11 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         ...(member !== undefined ? { member } : {}),
         ...(running !== undefined ? { running } : {}),
         ...(attentionItem !== undefined ? { attention: attentionItem } : {}),
-        state: nodeStateOf(task, running, attentionItem),
+        state: nodeStateOf(task, running, attentionItem, props.t),
       }
     })
 
-  const planDiff: PlanDiff | null = snapshotPlan !== null && plan !== null ? planDiffOf(snapshotPlan, plan) : null
+  const planDiff: PlanDiff | null = snapshotPlan !== null && plan !== null ? planDiffOf(snapshotPlan, plan, props.t) : null
 
   const knownIds = new Set(graphNodes.map((node) => node.id))
   const hasEdges = graphNodes.some((node) => node.blockedBy.some((dep) => dep !== node.id && knownIds.has(dep)))
@@ -196,7 +196,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   const hasTopLevel = topPlanNodes.length > 0
 
   // 降级说明（纯映射，住 research-graph/state-note.ts）
-  const stateNote = graphStateNote({ planState, boundSlug, followError, hasPlan, hasEdges, hasTopLevel })
+  const stateNote = graphStateNote({ planState, boundSlug, followError, hasPlan, hasEdges, hasTopLevel }, props.t)
   const waves = wavesOf(graphNodes)
   const nodeByTaskId = new Map<string, GraphNodeView>()
   for (const node of graphNodes) {
@@ -246,11 +246,12 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
       onCopy={() => { copyReference(node) }}
       {...(node.member !== undefined ? { onOpenOwner: () => { openOwner(node.member as TeamMemberProjection) } } : {})}
       children={node.planNode !== undefined ? childrenByParent.get(node.planNode.id) ?? [] : []}
-      childStateOf={(childId) => (teamReady ? planNodeStateOf(mappingIndex.mapping.get(childId)) : PROJECTION_PENDING_STATE)}
+      childStateOf={(childId) => (teamReady ? planNodeStateOf(mappingIndex.mapping.get(childId), undefined, undefined, props.t) : projectionPendingState(props.t))}
       leadSessionId={leadSessionId}
       useSessions={props.useSessions}
       useSessionStatus={props.useSessionStatus}
       boundSlug={boundSlug}
+      t={props.t}
     />
   )
 
@@ -259,15 +260,15 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     // 滚动义务在页签体自己（vendor .tabBody = overflow:hidden 的定高 flex 列——同状态页/终稿页）。
     <div style={{ padding: 12, flex: 1, minHeight: 0, overflowY: 'auto' }}>
       <div style={HEADER_STYLE}>
-        <strong style={{ fontSize: 14 }}>研究图谱</strong>
-        <span style={BADGE_STYLE}>只读观察</span>
+        <strong style={{ fontSize: 14 }}>{props.t('graphHeader')}</strong>
+        <span style={BADGE_STYLE}>{props.t('graphReadonly')}</span>
         {boundSlug !== null && <span style={{ ...MUTED_STYLE, opacity: 0.5 }}>run drt_{shortLabel(boundSlug, 32)}</span>}
         <span style={MUTED_STYLE}>
-          {hasPlan ? `plan ${String(topPlanNodes.length)} 顶层${planNodes.length !== topPlanNodes.length ? ` / ${String(planNodes.length)} 节点` : ''} · ` : ''}Team {String(counts.total)} 任务 · 完成 {String(counts.done)}
+          {hasPlan ? `${props.t('graphPlanLoaded', { version: '' })} ${String(topPlanNodes.length)} ${topPlanNodes.length === 1 ? 'top-level' : 'top-level'}${planNodes.length !== topPlanNodes.length ? ` / ${String(planNodes.length)} nodes` : ''} · ` : ''}{props.t('graphTeamTasks', { total: String(counts.total), done: String(counts.done) })}
         </span>
-        {counts.running > 0 && <span style={{ ...MUTED_STYLE, color: '#2563eb' }}>● {String(counts.running)} 进行</span>}
-        {counts.ready > 0 && <span style={{ ...MUTED_STYLE, color: '#b45309' }}>○ {String(counts.ready)} 待派</span>}
-        {counts.stalled > 0 && <span style={{ ...MUTED_STYLE, color: '#b45309' }}>⚠ {String(counts.stalled)} 可能卡住</span>}
+        {counts.running > 0 && <span style={{ ...MUTED_STYLE, color: '#2563eb' }}>● {props.t('graphRunning', { count: String(counts.running) })}</span>}
+        {counts.ready > 0 && <span style={{ ...MUTED_STYLE, color: '#b45309' }}>○ {props.t('graphReady', { count: String(counts.ready) })}</span>}
+        {counts.stalled > 0 && <span style={{ ...MUTED_STYLE, color: '#b45309' }}>⚠ {props.t('graphStalled', { count: String(counts.stalled) })}</span>}
       </div>
 
       <GraphVersionRail
@@ -281,22 +282,23 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         setGraphView={setGraphView}
         snapshotState={snapshotState}
         snapshotPlan={snapshotPlan}
+        t={props.t}
       />
 
       {/* 结构差异：只比 id/lifecycle/deps（重编号靠 superseded_by，不解析散文）。 */}
       {graphView === 'diff' && (
         <div style={CARD_STYLE}>
-          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>结构差异（v{String(latestSnapshot)} → 当前）</div>
+          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>{props.t('graphStructDiff', { from: String(latestSnapshot) })}</div>
           {planDiff === null ? (
-            <div style={MUTED_STYLE}>{snapshotState === 'missing' ? '旧图快照读不到，不能 diff' : '旧图快照读取中…'}</div>
+            <div style={MUTED_STYLE}>{snapshotState === 'missing' ? props.t('oldGraphUnread') : props.t('oldGraphLoading')}</div>
           ) : (
             <>
               <div style={{ fontSize: 12, marginBottom: 2 }}>{planDiff.summary}</div>
-              {planDiff.added.length > 0 && <div style={{ fontSize: 11, color: '#16a34a' }}>+ 新增：{planDiff.added.join(', ')}</div>}
-              {planDiff.removed.length > 0 && <div style={{ fontSize: 11, color: '#b45309' }}>− 退役：{planDiff.removed.join(', ')}</div>}
-              {planDiff.aliases.length > 0 && <div style={{ fontSize: 11, color: '#6366f1' }}>↔ 重编号：{planDiff.aliases.map((alias) => `${alias.from} → ${alias.to}`).join('、')}</div>}
-              {planDiff.dependencyChanges.length > 0 && <div style={{ fontSize: 11, color: '#b45309' }}>~ 依赖变化：{planDiff.dependencyChanges.map((change) => `${change.id}（${change.from.join(',') || '—'} → ${change.to.join(',') || '—'}）`).join('；')}</div>}
-              {planDiff.kept.length > 0 && <div style={MUTED_STYLE}>保留 {String(planDiff.kept.length)} 个节点</div>}
+              {planDiff.added.length > 0 && <div style={{ fontSize: 11, color: '#16a34a' }}>{props.t('planAdded', { items: planDiff.added.join(', ') })}</div>}
+              {planDiff.removed.length > 0 && <div style={{ fontSize: 11, color: '#b45309' }}>{props.t('planRemoved', { items: planDiff.removed.join(', ') })}</div>}
+              {planDiff.aliases.length > 0 && <div style={{ fontSize: 11, color: '#6366f1' }}>{props.t('planRenumbered', { items: planDiff.aliases.map((alias) => `${alias.from} → ${alias.to}`).join('、') })}</div>}
+              {planDiff.dependencyChanges.length > 0 && <div style={{ fontSize: 11, color: '#b45309' }}>{props.t('planDepsChanged', { items: planDiff.dependencyChanges.map((change) => `${change.id}（${change.from.join(',') || '—'} → ${change.to.join(',') || '—'}）`).join('；') })}</div>}
+              {planDiff.kept.length > 0 && <div style={MUTED_STYLE}>{props.t('graphKept', { count: String(planDiff.kept.length) })}</div>}
             </>
           )}
         </div>
@@ -305,7 +307,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
       {/* 映射缺口：说“图谱无法判断”，不说“未执行”——这是 BUG-043 的产品层修复点。 */}
       {hasPlan && teamReady && coverageWarning !== null && (
         <div style={{ ...BANNER_STYLE, background: '#f59e0b12', borderColor: '#f59e0b48' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2, color: '#b45309' }}>映射缺口（只读）</div>
+          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2, color: '#b45309' }}>{props.t('graphMappingGap')}</div>
           <div style={MUTED_STYLE}>{coverageWarning}</div>
         </div>
       )}
@@ -319,29 +321,29 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
 
       {hasPlan && (
         <div style={{ ...MUTED_STYLE, marginBottom: 6 }}>
-          plan{plan?.version !== undefined ? ` ${plan.version}` : ''} · {String(coverage.topNodes)} 顶层 / {String(coverage.planNodes)} 节点 · {teamReady ? coverageLineOf(coverage) : '等待团队投影'}
-          {planLoadedAt !== null ? ` · 刷新 ${formatClock(planLoadedAt)}` : ''}
+          {props.t('graphPlanLoaded', { version: plan?.version !== undefined ? ` ${String(plan.version)}` : '' })} · {props.t('graphCoverage', { top: String(coverage.topNodes), nodes: String(coverage.planNodes) })} · {teamReady ? coverageLineOf(coverage, props.t) : props.t('graphWaitingTeam')}
+          {planLoadedAt !== null ? props.t('refreshAt', { clock: formatClock(planLoadedAt) }) : ''}
         </div>
       )}
 
-      <GraphNotices planIssues={planIssues} attention={attention} onFocusTask={focusTask} />
+      <GraphNotices planIssues={planIssues} attention={attention} onFocusTask={focusTask} t={props.t} />
 
       {team === undefined && (
         <div style={EMPTY_STYLE}>
-          还没有团队投影——研究图谱在 Lead 组队后出现（当前是队员会话时，这里会读 Lead 的团队）。
+          {props.t('graphNoTeam')}
         </div>
       )}
       {team !== undefined && tasks.length === 0 && planNodes.length === 0 && (
         <div style={EMPTY_STYLE}>
-          任务板还没有任务——Lead 排好计划、建 Team 任务后，这里画出依赖图。
+          {props.t('graphNoTasks')}
         </div>
       )}
 
       {hasEdges && graphView === 'current' && (
         <>
-          <DagMap nodes={graphNodes} selectedId={expandedId} childCounts={childCounts} onSelect={setExpandedId} />
+          <DagMap nodes={graphNodes} selectedId={expandedId} childCounts={childCounts} onSelect={setExpandedId} t={props.t} />
           <div style={{ ...MUTED_STYLE, marginBottom: 8 }}>
-            → 依赖边（plan deps / Team blocked_by） · 点节点选中详情 · 圆点 = 状态
+            {props.t('graphEdgesHint')}
           </div>
         </>
       )}
@@ -350,24 +352,24 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         ? waves.map((wave) => (
           <section key={wave.level} style={{ marginBottom: 10 }}>
             <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>
-              WAVE {wave.level + 1}{wave.tasks.length > 1 ? ` · ${String(wave.tasks.length)} 个并行` : ''}
+              WAVE {wave.level + 1}{wave.tasks.length > 1 ? props.t('parallelCount', { count: String(wave.tasks.length) }) : ''}
             </div>
             {wave.tasks.map((node) => renderNodeCard(node))}
           </section>
         ))
         : graphNodes.length > 0 && (
           <section style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>任务快照（无依赖边）</div>
+            <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>{props.t('graphNoEdges')}</div>
             {graphNodes.map((node) => renderNodeCard(node))}
           </section>
         ))}
 
       {unmappedTasks.length > 0 && (
         <section style={{ marginBottom: 10 }}>
-          <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>未进 plan 的 Team 任务</div>
+          <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>{props.t('graphUnplannedTasks')}</div>
           {unmappedTasks.map((task) => (
             <div key={task.id} style={{ ...CARD_STYLE, fontSize: 12 }}>
-              <strong>{task.id}</strong> · {shortLabel(task.subject ?? task.id, 60)} · owner {task.ownerName ?? '未指派'} · {task.status}
+              <strong>{task.id}</strong> · {shortLabel(task.subject ?? task.id, 60)} · {props.t('graphOwner', { name: task.ownerName ?? props.t('unassigned') })} · {task.status}
             </div>
           ))}
         </section>
@@ -375,7 +377,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
 
       {planState === 'ready' && planText !== null && (
         <details style={{ marginTop: 8 }}>
-          <summary style={{ ...MUTED_STYLE, cursor: 'pointer' }}>查看 plan.md 原文（只读，含重写记录）</summary>
+          <summary style={{ ...MUTED_STYLE, cursor: 'pointer' }}>{props.t('graphPlanSource')}</summary>
           <pre style={{
             maxHeight: 180, overflow: 'auto', whiteSpace: 'pre-wrap', fontSize: 11, lineHeight: 1.5,
             background: '#00000005', padding: 6, borderRadius: 4, marginTop: 4,

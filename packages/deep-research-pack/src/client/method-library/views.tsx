@@ -8,7 +8,8 @@ import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import { SECTION_LABELS, renderLibraryEntry, type LibraryEntry, type LibrarySections } from '../../lib/library-fold.ts'
 import type { DraftField } from '../../lib/method-draft.ts'
 import type { SourcePreview } from '../../lib/method-library-source.ts'
-import { BUTTON_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE, TEXTAREA_STYLE } from './styles.ts'
+import { BUTTON_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE, ROW_STYLE, TEXTAREA_STYLE, libraryRowStyle } from './styles.ts'
+import type { DeepResearchPackLocaleKey } from '../locales.ts'
 
 /** 编辑态草稿（父级持有；`currentName` = 编辑目标原名，新建时省略）。 */
 export interface Draft {
@@ -28,6 +29,34 @@ export interface RunSourceCandidate {
   readonly deliverable: SourcePreview
   readonly eligible: boolean
   readonly status: string
+}
+
+/** 方法库左栏的条目行。选中态只用 `aria-current` 表达（视觉锚点 = BUG-047 的修复面：
+ *  `libraryRowStyle` 的 tint/边线/accent bar + 名字加重；hover/焦点环住注入样式表）。 */
+export function LibraryRow(props: {
+  readonly name: string
+  readonly summary: string | null
+  readonly isDefault?: boolean
+  readonly selected: boolean
+  readonly t: TranslateNS<'deepResearchPack'>
+  readonly onSelect: () => void
+}): ReactNode {
+  const { name, summary, isDefault = false, selected, t, onSelect } = props
+  return (
+    <button
+      type="button"
+      data-method-library-row=""
+      aria-current={selected ? 'true' : undefined}
+      style={{ ...ROW_STYLE, ...libraryRowStyle(selected) }}
+      onClick={onSelect}
+    >
+      <div style={{ fontSize: 13, display: 'flex', gap: 6, alignItems: 'baseline' }}>
+        <span data-method-row-name="" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: selected ? 600 : undefined }}>{name}</span>
+        {isDefault && <span style={{ fontSize: 10, color: 'var(--dsw-alias-brand-primary)' }}>{t('defaultBadge')}</span>}
+      </div>
+      {summary !== null && <div style={{ ...MUTED_STYLE, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{summary}</div>}
+    </button>
+  )
 }
 
 export function SourceSelectionView(props: {
@@ -74,7 +103,7 @@ export function SourceSelectionView(props: {
         <div aria-live="polite" data-method-source-preview="">
           {selectedBuiltin === null ? <span style={MUTED_STYLE}>{t('chooseBuiltin')}</span> : <>
             <strong>{selectedBuiltin.name}</strong>
-            {SECTION_LABELS.map(({ key, label }) => <div key={key} style={{ marginTop: 6 }}><span style={MUTED_STYLE}>{label}</span><div style={{ whiteSpace: 'pre-wrap', fontSize: 12 }}>{selectedBuiltin.sections[key] ?? '—'}</div></div>)}
+            {SECTION_LABELS.map(({ key }) => <div key={key} style={{ marginTop: 6 }}><span style={MUTED_STYLE}>{sectionLabel(t, key)}</span><div style={{ whiteSpace: 'pre-wrap', fontSize: 12 }}>{selectedBuiltin.sections[key] ?? '—'}</div></div>)}
             <button type="button" data-method-source-use-builtin="" style={{ ...PRIMARY_STYLE, marginTop: 8 }} onClick={() => { onStartBuiltin(selectedBuiltin) }}>{t('useBuiltin')}</button>
           </>}
         </div>
@@ -121,7 +150,7 @@ export function MethodSummaryView(props: {
   const filled = SECTION_LABELS.filter(({ key }) => (draft.sections[key] ?? '').trim() !== '').length
   const missingFields = [
     ...(draft.name.trim() === '' ? [t('methodName')] : []),
-    ...SECTION_LABELS.filter(({ key }) => (draft.sections[key] ?? '').trim() === '').map(({ label }) => label),
+    ...SECTION_LABELS.filter(({ key }) => (draft.sections[key] ?? '').trim() === '').map(({ key }) => sectionLabel(t, key)),
   ]
   return (
     <section data-method-summary="" style={{ flex: '0 0 auto', minWidth: 0, padding: '10px 14px', borderBottom: '1px solid var(--dsw-alias-border-l1)' }}>
@@ -133,12 +162,12 @@ export function MethodSummaryView(props: {
         <span style={{ ...MUTED_STYLE, marginLeft: 'auto' }}>{t('fieldProgress', { count: String(filled) })}</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '5px 14px', marginTop: 8 }}>
-        {SECTION_LABELS.map(({ key, label }) => {
+        {SECTION_LABELS.map(({ key }) => {
           const value = draft.sections[key]?.trim() ?? ''
           const source = manualFields.has(key) ? t('changedManually') : coachFields.has(key) ? t('changedInInterview') : sourceFields.has(key) ? t('fromSource') : t('fieldPending')
           return (
             <button key={key} type="button" data-method-summary-field={key} onClick={() => { onFocusField(key) }} style={fieldButtonStyle}>
-              <span style={{ color: 'var(--dsw-alias-label-secondary)', flex: '0 0 auto' }}>{label}</span>
+              <span style={{ color: 'var(--dsw-alias-label-secondary)', flex: '0 0 auto' }}>{sectionLabel(t, key)}</span>
               <span title={value} style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
                 {value === '' ? '—' : value}
               </span>
@@ -156,29 +185,30 @@ export function MethodSummaryView(props: {
       <button type="button" style={BUTTON_STYLE} disabled={!canSave || sending} title={t('saveAndSetDefaultDescription')} onClick={() => { onSave(true) }}>{t('saveAndSetDefault')}</button>
       <button type="button" style={{ ...BUTTON_STYLE, marginLeft: 'auto' }} onClick={onRestartSource}>{t('restartSource')}</button>
       </div>
-      {!canSave && <div role="status" style={{ ...MUTED_STYLE, marginTop: 6 }}>{t('incompleteFields', { fields: missingFields.join('、') })}</div>}
+      {!canSave && <div role="status" style={{ ...MUTED_STYLE, marginTop: 6 }}>{t('incompleteFields', { fields: missingFields.join(t('listSeparator')) })}</div>}
     </section>
   )
 }
 
 /** 内置打法的只读视图（summary + 四字段；可直接作为新方法来源）。 */
-export function BuiltinView({ entry, onUse, useLabel }: {
+export function BuiltinView({ entry, onUse, useLabel, t }: {
   readonly entry: { readonly name: string; readonly summary: string; readonly sections: LibrarySections }
   readonly onUse?: () => void
   readonly useLabel?: string
+  readonly t: TranslateNS<'deepResearchPack'>
 }): ReactNode {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
         <strong style={{ fontSize: 16 }}>{entry.name}</strong>
-        <span style={MUTED_STYLE}>内置只读</span>
-        {onUse !== undefined && <button type="button" data-method-builtin-use="" style={{ ...PRIMARY_STYLE, marginLeft: 'auto' }} onClick={onUse}>{useLabel ?? '以此开始'}</button>}
+        <span style={MUTED_STYLE}>{t('builtinReadOnly')}</span>
+        {onUse !== undefined && <button type="button" data-method-builtin-use="" style={{ ...PRIMARY_STYLE, marginLeft: 'auto' }} onClick={onUse}>{useLabel ?? t('startFromThis')}</button>}
       </div>
       <div style={{ ...MUTED_STYLE, marginBottom: 8 }}>{entry.summary}</div>
       <div style={{ lineHeight: 1.65, fontSize: 13 }}>
-        {SECTION_LABELS.map(({ key, label }) => (
+        {SECTION_LABELS.map(({ key }) => (
           <div key={key} style={{ marginBottom: 6 }}>
-            <div style={{ fontSize: 11, opacity: 0.55 }}>{label}</div>
+            <div style={{ fontSize: 11, opacity: 0.55 }}>{sectionLabel(t, key)}</div>
             <div style={{ whiteSpace: 'pre-wrap' }}>{entry.sections[key] ?? '—'}</div>
           </div>
         ))}
@@ -204,33 +234,33 @@ export function ReadMineView(props: {
     <div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
         <strong style={{ fontSize: 16 }}>{entry.name}</strong>
-        {entry.isDefault && <span style={{ fontSize: 10, color: 'var(--dsw-alias-brand-primary)' }}>默认偏好</span>}
+        {entry.isDefault && <span style={{ fontSize: 10, color: 'var(--dsw-alias-brand-primary)' }}>{t('defaultPreference')}</span>}
         {entry.provenance !== null && <span style={MUTED_STYLE}>{entry.provenance}</span>}
         <span style={{ flex: 1 }} />
         <button type="button" style={BUTTON_STYLE} onClick={() => { onEdit(entry) }}>{t('continueInterview')}</button>
         {entry.isDefault
           ? <button type="button" style={BUTTON_STYLE} disabled={sending} onClick={onClearDefault}>{t('clearDefault')}</button>
           : <button type="button" style={BUTTON_STYLE} disabled={sending} onClick={() => { onSetDefault(entry) }}>{t('setDefault')}</button>}
-        <button type="button" style={BUTTON_STYLE} onClick={() => { onPendingDelete(entry.name) }}>删除…</button>
+        <button type="button" style={BUTTON_STYLE} onClick={() => { onPendingDelete(entry.name) }}>{t('deleteAction')}</button>
       </div>
       {pendingDelete === entry.name && (
-        <div style={{ ...MUTED_STYLE, padding: '6px 8px', border: '1px solid var(--dsw-alias-label-error)40', borderRadius: 4, marginBottom: 8 }}>
-          删除「{entry.name}」？方法编辑会从库里删掉它。
-          <button type="button" style={{ ...BUTTON_STYLE, marginLeft: 8 }} disabled={sending} onClick={() => { onRemove(entry) }}>确认删除</button>
-          <button type="button" style={{ ...BUTTON_STYLE, marginLeft: 6 }} onClick={() => { onPendingDelete(null) }}>取消</button>
+        <div style={{ ...MUTED_STYLE, padding: '6px 8px', border: '1px solid color-mix(in srgb, var(--dsw-alias-label-error) 28%, transparent)', borderRadius: 4, marginBottom: 8 }}>
+          {t('deleteConfirm', { name: entry.name })}
+          <button type="button" style={{ ...BUTTON_STYLE, marginLeft: 8 }} disabled={sending} onClick={() => { onRemove(entry) }}>{t('confirmDelete')}</button>
+          <button type="button" style={{ ...BUTTON_STYLE, marginLeft: 6 }} onClick={() => { onPendingDelete(null) }}>{t('cancel')}</button>
         </div>
       )}
       <div style={{ lineHeight: 1.65, fontSize: 13 }}>
-        {SECTION_LABELS.map(({ key, label }) => {
+        {SECTION_LABELS.map(({ key }) => {
           const value = entry.sections[key]
           return (
             <div key={key} style={{ marginBottom: 6 }}>
-              <div style={{ fontSize: 11, opacity: 0.55 }}>{label}</div>
-              <div style={{ whiteSpace: 'pre-wrap' }}>{value ?? <span style={{ opacity: 0.5 }}>未填写</span>}</div>
+              <div style={{ fontSize: 11, opacity: 0.55 }}>{sectionLabel(t, key)}</div>
+              <div style={{ whiteSpace: 'pre-wrap' }}>{value ?? <span style={{ opacity: 0.5 }}>{t('notFilled')}</span>}</div>
             </div>
           )
         })}
-        {entry.legacyText !== null && <div style={{ ...MUTED_STYLE, marginTop: 6 }}>旧格式正文：{entry.legacyText}</div>}
+        {entry.legacyText !== null && <div style={{ ...MUTED_STYLE, marginTop: 6 }}>{t('legacyBody', { text: entry.legacyText })}</div>}
       </div>
     </div>
   )
@@ -239,12 +269,24 @@ export function ReadMineView(props: {
 /** 编辑/新建表单：四字段 + Markdown 预览 + 保存/取消。 */
 const MARKER_STYLE = { fontSize: 10, padding: '1px 6px', borderRadius: 999, background: 'var(--dsw-alias-bg-layer-2)', opacity: 0.65 } as const
 
-/** 每格的人话提示（用户不该先学 schema）。 */
-const SECTION_HINTS: Record<keyof LibrarySections, string> = {
-  source: '先看哪里、信谁：官方文档 / 定价页 / 公告优先',
-  verify: '冲突时怎么裁、数字怎么回原表复算',
-  report: '第一屏给谁看、分几节、什么形态',
-  limit: '这条方法明确不做什么（至少一条）',
+/** 每格的人话提示的 locale key（用户不该先学 schema）。 */
+const SECTION_LABEL_KEYS: Record<keyof LibrarySections, DeepResearchPackLocaleKey> = {
+  source: 'sectionSource',
+  verify: 'sectionVerify',
+  report: 'sectionReport',
+  limit: 'sectionLimit',
+}
+
+/** 四字段标题走 locale（`SECTION_LABELS` 的数据只用于纯折算，不做展示）。 */
+function sectionLabel(t: TranslateNS<'deepResearchPack'>, key: keyof LibrarySections): string {
+  return t(SECTION_LABEL_KEYS[key])
+}
+
+const SECTION_HINT_KEYS: Record<keyof LibrarySections, DeepResearchPackLocaleKey> = {
+  source: 'sectionHintSource',
+  verify: 'sectionHintVerify',
+  report: 'sectionHintReport',
+  limit: 'sectionHintLimit',
 }
 
 export function EditorView(props: {
@@ -276,52 +318,52 @@ export function EditorView(props: {
   if (draft === null) return null
   const missingFields = [
     ...(draft.name.trim() === '' ? [t('methodName')] : []),
-    ...SECTION_LABELS.filter(({ key }) => (draft.sections[key] ?? '').trim() === '').map(({ label }) => label),
+    ...SECTION_LABELS.filter(({ key }) => (draft.sections[key] ?? '').trim() === '').map(({ key }) => sectionLabel(t, key)),
   ]
   const canSave = missingFields.length === 0
   const filled = SECTION_LABELS.filter(({ key }) => (draft.sections[key] ?? '').trim() !== '').length
   const marker = (field: DraftField): ReactNode => {
-    if (manualFields?.has(field) === true) return <span style={MARKER_STYLE}>手改</span>
-    if (coachFields?.has(field) === true) return <span style={MARKER_STYLE}>来自对话</span>
-    return <span style={MARKER_STYLE}>待定</span>
+    if (manualFields?.has(field) === true) return <span style={MARKER_STYLE}>{t('changedManually')}</span>
+    if (coachFields?.has(field) === true) return <span style={MARKER_STYLE}>{t('changedInInterview')}</span>
+    return <span style={MARKER_STYLE}>{t('fieldPending')}</span>
   }
   const fieldStyle = (field: DraftField) => activeField === field
-    ? { borderColor: 'var(--dsw-alias-brand-primary)', boxShadow: '0 0 0 2px var(--dsw-alias-brand-primary)18' }
+    ? { borderColor: 'var(--dsw-alias-brand-primary)', boxShadow: '0 0 0 2px color-mix(in srgb, var(--dsw-alias-brand-primary) 12%, transparent)' }
     : undefined
   return (
     <div ref={rootRef}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 }}>
-        <strong style={{ fontSize: 16 }}>{mode === 'new' ? '新建方法' : '编辑方法'}</strong>
-        <span style={MUTED_STYLE}>字段会随右侧对话逐格成形；保存由方法编辑写入库。</span>
+        <strong style={{ fontSize: 16 }}>{mode === 'new' ? t('newMethod') : t('editMethod')}</strong>
+        <span style={MUTED_STYLE}>{t('editorHint')}</span>
         <span style={{ flex: 1 }} />
-        <span style={MUTED_STYLE}>{filled}/4 已定</span>
+        <span style={MUTED_STYLE}>{t('filledCount', { count: String(filled) })}</span>
       </div>
       {coachUpdated === true && (
         <div style={{ ...MUTED_STYLE, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-          <span>已按方法编辑的草稿更新。</span>
-          <button type="button" style={BUTTON_STYLE} onClick={onUndoCoach}>撤销对话更新</button>
+          <span>{t('coachUpdated')}</span>
+          <button type="button" style={BUTTON_STYLE} onClick={onUndoCoach}>{t('undoCoach')}</button>
         </div>
       )}
       {draft.legacyText !== null && (
-        <div style={{ ...MUTED_STYLE, marginBottom: 8, padding: '4px 6px', border: '1px solid var(--dsw-alias-label-caption)40', borderRadius: 4 }}>
-          旧格式正文会保留（只读）：{draft.legacyText}
+        <div style={{ ...MUTED_STYLE, marginBottom: 8, padding: '4px 6px', border: '1px solid color-mix(in srgb, var(--dsw-alias-label-caption) 30%, transparent)', borderRadius: 4 }}>
+          {t('legacyBodyReadonly', { text: draft.legacyText })}
         </div>
       )}
       <label
         data-field="name"
-        style={{ display: 'block', marginBottom: 10, borderRadius: 6, ...(activeField === 'name' ? { background: 'var(--dsw-alias-brand-primary)08', padding: 6, marginLeft: -6, marginRight: -6 } : {}) }}
+        style={{ display: 'block', marginBottom: 10, borderRadius: 6, ...(activeField === 'name' ? { background: 'color-mix(in srgb, var(--dsw-alias-brand-primary) 5%, transparent)', padding: 6, marginLeft: -6, marginRight: -6 } : {}) }}
       >
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 3 }}>
-          <span style={{ fontSize: 11, opacity: 0.6 }}>名称</span>
+          <span style={{ fontSize: 11, opacity: 0.6 }}>{t('nameLabel')}</span>
           {marker('name')}
         </div>
         <div style={{ fontSize: 11, opacity: 0.45, marginBottom: 4 }}>
-          {mode === 'edit' ? '编辑态名称固定；要改名请新建一条（另存）' : '用你的口径起名；新建时别和已有条目撞名'}
+          {mode === 'edit' ? t('nameHintEdit') : t('nameHintNew')}
         </div>
         <input
           style={{ ...INPUT_STYLE, ...fieldStyle('name') }}
           value={draft.name}
-          placeholder="例如：投研尽调（我的口径）"
+          placeholder={t('namePlaceholder')}
           readOnly={mode === 'edit'}
           aria-readonly={mode === 'edit'}
           onChange={(event) => { onNameChange(event.target.value) }}
@@ -331,30 +373,34 @@ export function EditorView(props: {
         <label
           key={section.key}
           data-field={section.key}
-          style={{ display: 'block', marginBottom: 10, borderRadius: 6, ...(activeField === section.key ? { background: 'var(--dsw-alias-brand-primary)08', padding: 6, marginLeft: -6, marginRight: -6 } : {}) }}
+          style={{ display: 'block', marginBottom: 10, borderRadius: 6, ...(activeField === section.key ? { background: 'color-mix(in srgb, var(--dsw-alias-brand-primary) 5%, transparent)', padding: 6, marginLeft: -6, marginRight: -6 } : {}) }}
         >
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 3 }}>
-            <span style={{ fontSize: 11, opacity: 0.6 }}>{section.label}</span>
+            <span style={{ fontSize: 11, opacity: 0.6 }}>{sectionLabel(t, section.key)}</span>
             {marker(section.key)}
           </div>
-          <div style={{ fontSize: 11, opacity: 0.45, marginBottom: 4 }}>{SECTION_HINTS[section.key]}</div>
+          <div style={{ fontSize: 11, opacity: 0.45, marginBottom: 4 }}>{t(SECTION_HINT_KEYS[section.key])}</div>
           <textarea
             style={{ ...TEXTAREA_STYLE, ...fieldStyle(section.key) }}
             value={draft.sections[section.key] ?? ''}
-            placeholder="可以从右侧对话开始，也可以直接填…"
+            placeholder={t('bodyPlaceholder')}
             onChange={(event) => { onSectionChange(section.key, event.target.value) }}
           />
         </label>
       ))}
-      {!canSave && <div role="status" style={{ color: 'var(--dsw-alias-label-secondary)', margin: '6px 0' }}>{t('incompleteFields', { fields: missingFields.join('、') })}</div>}
+      {!canSave && <div role="status" style={{ color: 'var(--dsw-alias-label-secondary)', margin: '6px 0' }}>{t('incompleteFields', { fields: missingFields.join(t('listSeparator')) })}</div>}
       <details style={{ marginBottom: 10 }}>
-        <summary style={{ ...MUTED_STYLE, cursor: 'pointer' }}>Markdown 预览（只读）</summary>
-        <pre style={{ maxHeight: 140, overflow: 'auto', whiteSpace: 'pre-wrap', fontSize: 11, lineHeight: 1.5, background: 'var(--dsw-alias-bg-layer-1)', padding: 6, borderRadius: 4 }}>{renderLibraryEntry({ name: draft.name.trim() === '' ? '（未命名）' : draft.name.trim(), sections: draft.sections, provenance: draft.provenance })}</pre>
+        <summary style={{ ...MUTED_STYLE, cursor: 'pointer' }}>{t('markdownPreview')}</summary>
+        <pre style={{ maxHeight: 140, overflow: 'auto', whiteSpace: 'pre-wrap', fontSize: 11, lineHeight: 1.5, background: 'var(--dsw-alias-bg-layer-1)', padding: 6, borderRadius: 4 }}>{renderLibraryEntry({ name: draft.name.trim() === '' ? t('unnamed') : draft.name.trim(), sections: draft.sections, provenance: draft.provenance }, {
+          sections: Object.fromEntries(SECTION_LABELS.map(({ key }) => [key, sectionLabel(t, key)])),
+          provenance: (value) => t('provenancePrefix', { provenance: value }),
+          defaultMark: t('defaultPreference'),
+        })}</pre>
       </details>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <button type="button" style={PRIMARY_STYLE} disabled={sending || !canSave} onClick={() => { onSave(false) }}>{sending ? t('saving') : t('save')}</button>
         <button type="button" style={BUTTON_STYLE} disabled={sending || !canSave} title={t('saveAndSetDefaultDescription')} onClick={() => { onSave(true) }}>{t('saveAndSetDefault')}</button>
-        <button type="button" style={BUTTON_STYLE} disabled={sending} onClick={onCancel}>取消</button>
+        <button type="button" style={BUTTON_STYLE} disabled={sending} onClick={onCancel}>{t('cancel')}</button>
       </div>
     </div>
   )

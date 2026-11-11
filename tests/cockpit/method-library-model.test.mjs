@@ -53,7 +53,7 @@ test('draftOf / builtinLibraryEntry / emptySections：形状投影', () => {
   assert.equal(draft.provenance, '我的库');
   assert.equal(draft.legacyText, null);
 
-  const builtin = builtinLibraryEntry({ name: '内置', sections: { source: 's', verify: null, report: null, limit: null } });
+  const builtin = builtinLibraryEntry({ name: '内置', sections: { source: 's', verify: null, report: null, limit: null } }, '内置只读');
   assert.equal(builtin.provenance, '内置只读');
   assert.equal(builtin.isDefault, false);
 

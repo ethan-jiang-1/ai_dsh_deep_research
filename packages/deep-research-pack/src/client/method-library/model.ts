@@ -89,8 +89,8 @@ export function emptySections(): LibrarySections {
 }
 
 /** Built-in read-only preference projected as a user-library source. */
-export function builtinLibraryEntry(entry: (typeof BUILTIN_PREFERENCES)[number]): LibraryEntry {
-  return { name: entry.name, provenance: '内置只读', sections: entry.sections, legacyText: null, isDefault: false }
+export function builtinLibraryEntry(entry: (typeof BUILTIN_PREFERENCES)[number], provenanceLabel: string): LibraryEntry {
+  return { name: entry.name, provenance: provenanceLabel, sections: entry.sections, legacyText: null, isDefault: false }
 }
 
 /** 草稿是否与源条目一致（粗糙但够用的 dirty 判据：用于离开确认，不用于保存）。 */
@@ -104,12 +104,18 @@ export function draftOf(entry: LibraryEntry): Draft {
   }
 }
 
-/** 草稿未填的四字段标签（保存前校验；空串与 null 都算缺）。 */
-export function missingSections(draft: Draft): string[] {
+/** 草稿未填的四字段键（保存前校验；空串与 null 都算缺；标签由 UI 按 locale 取）。 */
+export function missingSectionKeys(draft: Draft): (keyof LibrarySections)[] {
   return SECTION_LABELS.filter(({ key }) => {
     const value = draft.sections[key]
     return value === null || value.trim() === ''
-  }).map(({ label }) => label)
+  }).map(({ key }) => key)
+}
+
+/** 草稿未填的四字段标签（保存前校验；空串与 null 都算缺）。保留给非 UI 面/测试。 */
+export function missingSections(draft: Draft): string[] {
+  const keys = new Set(missingSectionKeys(draft))
+  return SECTION_LABELS.filter(({ key }) => keys.has(key)).map(({ label }) => label)
 }
 
 /** 草稿是否有未保存修改（离开确认用；read 模式恒 false）。 */

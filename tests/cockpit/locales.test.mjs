@@ -11,6 +11,8 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { en, zh } from '../../packages/deep-research-pack/src/client/locales.ts'
 import { BuiltinView, EditorView, LibraryRow, ReadMineView } from '../../packages/deep-research-pack/src/client/method-library/views.tsx'
+import { ResearchStatusTab } from '../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx'
+import { ResearchGraphTab } from '../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx'
 
 const CJK = /[\u4e00-\u9fa5]/
 const placeholders = (text) => [...String(text).matchAll(/\{([A-Za-z0-9_]+)\}/g)].map((m) => m[1]).sort()
@@ -49,6 +51,34 @@ test('英文 locale 下：方法库关键视图不渲染任何中文', () => {
     BuiltinView: renderToStaticMarkup(createElement(BuiltinView, {
       entry: { name: 'Landscape', summary: 'Map who is doing what', sections }, onUse() {}, t: tEn,
     })),
+  }
+  for (const [name, html] of Object.entries(renders)) {
+    const hit = html.match(new RegExp(CJK.source + '[^<]*'))
+    assert.equal(hit, null, `${name} 在英文 locale 下仍渲染中文：${hit?.[0] ?? ''}`)
+  }
+})
+
+test('英文 locale 下：研究状态 / 研究图谱空态不渲染任何中文（数据面折层同守）', () => {
+  // 两页签的空态壳会走 brief-fold / run-fold / state-note 的折层文案——它们不是组件字面量，
+  // 漏传 `t` 时只会在真实界面里露出中文。静态渲染是最便宜的端到端守卫（渲染面 = 组件树）。
+  const props = {
+    sessionId: 'session-test',
+    t: tEn,
+    useSession: () => undefined,
+    useSessions: () => undefined,
+    useSessionStatus: () => undefined,
+    openFinal: () => {},
+    openOwner: () => {},
+    follow: async function* () {},
+    readFile: async () => null,
+    listDir: async () => [],
+    runSource: () => ({}),
+    send: async () => {},
+    visible: true,
+  }
+  const renders = {
+    ResearchStatusTab: renderToStaticMarkup(createElement(ResearchStatusTab, props)),
+    ResearchGraphTab: renderToStaticMarkup(createElement(ResearchGraphTab, props)),
   }
   for (const [name, html] of Object.entries(renders)) {
     const hit = html.match(new RegExp(CJK.source + '[^<]*'))

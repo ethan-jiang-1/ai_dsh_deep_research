@@ -9,10 +9,13 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { ResearchStatusTab } from '../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx'
 import { ResearchGraphTab } from '../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx'
+import { zh } from '../../packages/deep-research-pack/src/client/locales.ts'
+
+const tZh = (key, params = {}) => String(zh[key]).replace(/\{([A-Za-z0-9_]+)\}/g, (all, name) => (name in params ? String(params[name]) : all))
 
 const baseProps = {
   sessionId: 'session-test',
-  t: (key) => key,
+  t: tZh,
   useSession: () => undefined,
   useSessions: () => undefined,
   useSessionStatus: () => undefined,

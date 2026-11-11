@@ -97,7 +97,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
           else events = [...events, frame.event]
           setJournalEvents(events)
           setJournalSeen(true)
-          setRows(foldActivityRows(events))
+          setRows(foldActivityRows(events, props.t))
           const next = foldHitlPending(events)
           setHitl(next)
           // 挂起信号显性化（RFC right-pane-ux-debt）：false→true 迁移时打开本页签——
@@ -119,7 +119,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
       }
     })()
     return () => { controller.abort() }
-  }, [props.sessionId])
+  }, [props.sessionId, props.t])
 
   // 切换会话时重开状态页签（F1）：仅在"上一个会话正被观察"时触发；初始挂载与
   // 未观察会话之间的切换不动作（不覆盖用户刻意收起的常态——只在观察被切断时续上）。
@@ -136,6 +136,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
     memberIds,
     sessionId: props.sessionId,
     follow: props.follow,
+    t: props.t,
     setMemberSummaries,
   })
 
@@ -213,7 +214,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
             findings: names.has('findings.md'),
             review: names.has('review.md'),
             final: names.has('final.md'),
-          }),
+          }, props.t),
           evidenceCount,
           delivered: names.has('final.md'),
           versions,
@@ -229,7 +230,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
     void scan()
     const timer = setInterval(() => { void scan() }, REFRESH_MS)
     return () => { stopped = true; clearInterval(timer) }
-  }, [props.sessionId, trust, journalSeen, props.runSource])
+  }, [props.sessionId, trust, journalSeen, props.runSource, props.t])
 
   // 锚点 = 混合折算（尾窗约束的实测产物，RFC cockpit-flow-face）：passed 态由文件事实承载
   // （question.md/final.md 在场），pending 态由 journal 尾窗承载——face 缺席时退化为纯尾窗判定。
@@ -240,8 +241,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   // 流畸形死亡（BUG-023 修复①）：journal 尾窗折算，与 HITL 挂起互斥显示（挂起时主横幅让位）。
   const streamFailure = useMemo(() => streamFailureOf(journalEvents), [journalEvents])
   const anchors = useMemo(
-    () => deriveAnchors(journalEvents, face !== null ? { question: face.hasQuestion, delivered: face.delivered } : undefined),
-    [journalEvents, face],
+    () => deriveAnchors(journalEvents, face !== null ? { question: face.hasQuestion, delivered: face.delivered } : undefined, props.t),
+    [journalEvents, face, props.t],
   )
 
   // rerun 版本面（只读投影）：交付版本由 present 见证 + `final/vN` 版本账推定；
@@ -259,8 +260,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         deliveredVersion: latestPresentedFinalVersion(journalEvents),
         hitlPending: hitl2Pending,
         draftPresent: face.hasFinal,
-      }),
-    [face, delivery, hitl2Pending, journalEvents],
+      }, props.t),
+    [face, delivery, hitl2Pending, journalEvents, props.t],
   )
 
   return {

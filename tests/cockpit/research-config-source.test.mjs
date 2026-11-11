@@ -10,13 +10,17 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { zh } from '../../packages/deep-research-pack/src/client/locales.ts'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const CONFIG = join(ROOT, 'packages', 'deep-research-pack', 'src', 'client', 'ResearchConfigTab.tsx')
 
 test('ResearchConfigTab：run 前有选方法入口，不再指向死卡片菜单', () => {
   const text = readFileSync(CONFIG, 'utf8')
-  assert.match(text, /选方法（发给 Lead）/, 'no-run 态必须有可点的选方法入口')
-  assert.match(text, /methodPicker\('换一条'\)/, 'recorded 态的换一条应复用同一 picker')
+  // 文案已迁到 locales（BUG-055）：组件侧钉 key 接线，文案侧钉 zh 值在场。
+  assert.match(text, /props\.t\('pickMethodForLead'\)/, 'no-run 态必须有可点的选方法入口')
+  assert.match(text, /methodPicker\(props\.t\('switchMethod'\)\)/, 'recorded 态的换一条应复用同一 picker')
+  assert.equal(zh.pickMethodForLead, '选方法（发给 Lead）')
+  assert.equal(zh.switchMethod, '换一条')
   assert.doesNotMatch(text, /点任意一条的 ⋯/, 'no-run 文案不能指向未渲染的卡片菜单')
 })

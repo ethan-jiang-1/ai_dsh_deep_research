@@ -4,6 +4,7 @@
 // 数据由父级算好（planIssues / attention），本件只管排序、截断与点击定位。
 import type { ReactNode } from 'react'
 import type { PlanIssue } from '../../lib/plan-index.ts'
+import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import type { AttentionItem } from '../../lib/plan-graph.ts'
 import { ATTENTION_ROW_STYLE, BANNER_STYLE, MUTED_STYLE } from './styles.ts'
 import { severityIcon } from './format.ts'
@@ -12,24 +13,25 @@ export function GraphNotices(props: {
   readonly planIssues: readonly PlanIssue[]
   readonly attention: readonly AttentionItem[]
   readonly onFocusTask: (taskId: string) => void
+  readonly t: TranslateNS<'deepResearchPack'>
 }): ReactNode {
-  const { planIssues, attention, onFocusTask } = props
+  const { planIssues, attention, onFocusTask, t } = props
   return (
     <>
       {planIssues.length > 0 && (
         <div style={{ ...BANNER_STYLE, background: '#dc262610', borderColor: '#dc262640' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2, color: '#b91c1c' }}>plan 结构提示（只读）</div>
+          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2, color: '#b91c1c' }}>{t('graphPlanIssues')}</div>
           {planIssues.slice(0, 6).map((issue) => (
             <div key={`${issue.kind}:${issue.nodeId}:${issue.message}`} style={{ ...MUTED_STYLE, color: '#b91c1c' }}>{issue.message}</div>
           ))}
-          {planIssues.length > 6 && <div style={MUTED_STYLE}>…另有 {String(planIssues.length - 6)} 条</div>}
+          {planIssues.length > 6 && <div style={MUTED_STYLE}>{t('graphMoreIssues', { count: String(planIssues.length - 6) })}</div>}
         </div>
       )}
 
 
       {attention.length > 0 && (
         <div style={{ marginBottom: 10, padding: '6px 10px', borderRadius: 6, background: '#f59e0b14', border: '1px solid #f59e0b40' }}>
-          <div style={{ fontWeight: 600, fontSize: 12, marginBottom: 2 }}>需要你注意（只读）</div>
+          <div style={{ fontWeight: 600, fontSize: 12, marginBottom: 2 }}>{t('graphAttention')}</div>
           {attention.slice(0, 8).map((item) => (
             <button
               key={`${item.taskId}:${item.reason}`}
@@ -38,7 +40,7 @@ export function GraphNotices(props: {
               onClick={() => { onFocusTask(item.taskId) }}
             >{severityIcon(item.severity)} {item.taskId} · {item.message}</button>
           ))}
-          {attention.length > 8 && <div style={MUTED_STYLE}>…另有 {String(attention.length - 8)} 条</div>}
+          {attention.length > 8 && <div style={MUTED_STYLE}>{t('graphMoreIssues', { count: String(attention.length - 8) })}</div>}
         </div>
       )}
     </>

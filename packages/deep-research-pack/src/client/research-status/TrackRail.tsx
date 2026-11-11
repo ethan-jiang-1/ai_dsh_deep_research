@@ -9,6 +9,7 @@
 // 绑定/未读到"，与 face===null 同义）。步态符号语法与图例文案逐字保留（2026-09-28 trial 的实红
 // 教训：done 与 pending 都读成"没走过"，回边 ▲ 紧贴芯片造成"挖掘被点亮"的误读）。
 import type { ReactNode } from 'react'
+import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import type { RunAnchor } from '../../lib/hitl-fold.ts'
 import type { RunStep } from '../../lib/run-fold.ts'
 
@@ -22,15 +23,16 @@ export function TrackRail(props: {
   /** `final/` 记录的版本数；null = 尚未读到绑定面（与"无版本"不同形）。 */
   readonly faceVersions: number | null
   readonly hitlPending: boolean
+  readonly t: TranslateNS<'deepResearchPack'>
 }): ReactNode {
-  const { anchors, steps, faceVersions, hitlPending } = props
+  const { anchors, steps, faceVersions, hitlPending, t } = props
   const hasFace = faceVersions !== null
   const railVisible = hasFace || hitlPending || anchors.some((a) => a.state !== 'upcoming')
   if (!railVisible) return null
 
   const anchorChip = (a: RunAnchor): ReactNode => (
     <span key={a.key} style={{ padding: '2px 8px', borderRadius: 4, fontWeight: a.state === 'pending' ? 700 : 400, background: a.state === 'pending' ? '#f59e0b33' : a.state === 'passed' ? '#22c55e22' : '#0000000d', color: a.state === 'pending' ? '#b45309' : a.state === 'passed' ? '#16a34a' : '#888' }}>
-      ◆{a.label}{a.state === 'pending' && a.questions > 0 ? `（${a.questions} 问）` : ''} {a.state === 'pending' ? '⏳' : a.state === 'passed' ? '✓' : '·'}
+      ◆{a.label}{a.state === 'pending' && a.questions > 0 ? t('questionCount', { count: String(a.questions) }) : ''} {a.state === 'pending' ? '⏳' : a.state === 'passed' ? '✓' : '·'}
     </span>
   )
   // 步态符号（✓ 已过 / ● 进行中 / ○ 未到）与重入点虚线描边 = 既有视觉契约，逐字保留。
@@ -43,9 +45,9 @@ export function TrackRail(props: {
   }
 
   const railNodes: { key: string; chip: ReactNode }[] = [
-    { key: 'anchor-1', chip: anchorChip(anchors[0] ?? { key: 'anchor-1', label: '立项确认', state: 'upcoming', questions: 0 }) },
+    { key: 'anchor-1', chip: anchorChip(anchors[0] ?? { key: 'anchor-1', label: t('anchorKickoff'), state: 'upcoming', questions: 0 }) },
     ...steps.slice(0, 6).map((s) => ({ key: s.key, chip: stepChip(s) })),
-    { key: 'anchor-2', chip: anchorChip(anchors[1] ?? { key: 'anchor-2', label: '交付审阅', state: 'upcoming', questions: 0 }) },
+    { key: 'anchor-2', chip: anchorChip(anchors[1] ?? { key: 'anchor-2', label: t('anchorDelivery'), state: 'upcoming', questions: 0 }) },
     ...steps.slice(6).map((s) => ({ key: s.key, chip: stepChip(s) })),
     ...anchors.slice(2).map((a) => ({ key: a.key, chip: anchorChip(a) })),
   ]
@@ -59,12 +61,12 @@ export function TrackRail(props: {
         {loopOn && (
           <div style={{ gridRow: 2, gridColumn: `${EV_COL} / ${A2_COL + 1}`, position: 'relative', margin: '4px 6px 0', border: '1px dashed #c08a2e', borderTop: 'none', borderRadius: '0 0 8px 8px', padding: '2px 6px 3px', color: '#b45309', textAlign: 'center', minWidth: 0, lineHeight: 1.4, whiteSpace: 'normal' }}>
             <span style={{ position: 'absolute', top: -9, left: 3, fontSize: 10, color: '#b45309' }}>▲</span>
-            ↻ rerun 图例（非执行记录）：补研究 = 同 bundle 回挖掘、final/ vN+1；表述修订 = 原位改、版本不变；结构性重构 = 另起新 bundle{faceVersions !== null && faceVersions >= 2 ? ` · 本 bundle 已有 v${faceVersions}（证据扩张）` : ''}
+            {t('trackRerunLegend', { version: faceVersions !== null && faceVersions >= 2 ? t('trackRerunSuffix', { version: String(faceVersions) }) : '' })}
           </div>
         )}
       </div>
       {hasFace && (
-        <div style={{ fontSize: 11, opacity: 0.55, marginBottom: 8 }}>✓ 已过 · ● 进行中 · ○ 未到 · 虚线描边 = ↻ 回边落点（重入点）</div>
+        <div style={{ fontSize: 11, opacity: 0.55, marginBottom: 8 }}>{t('trackLegend')}</div>
       )}
     </>
   )

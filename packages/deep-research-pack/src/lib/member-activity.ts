@@ -12,6 +12,7 @@
  */
 
 import { argValueOf, contentTextParts, normalizeQueries } from './journal-wire.ts'
+import { translateZh, type PackTranslate } from './i18n.ts'
 
 /** 一条队员动作行。 */
 interface MemberActionRow {
@@ -54,18 +55,19 @@ function argOf(args: unknown, key: string): string | undefined {
 }
 
 /** 失败 result 的正文（content 数组 text 项拼接，剥 "Error: " 工程前缀）。 */
-function errorTextOf(content: unknown): string {
+function errorTextOf(content: unknown, t: PackTranslate): string {
   const parts = contentTextParts(content)
   const joined = parts.join(' ').replace(/^Error:\s*/, '').trim()
-  return joined === '' ? '(工具失败)' : joined
+  return joined === '' ? t('activityToolFailure') : joined
 }
 
 /**
  * 折算：队员 journal 事件序列 → 动作摘要（尾部行 + 全量计数）。
  * @param events - 按 wire 顺序的事件（follow 的 snapshot 历史或实时流）。
+ * @param t - UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
  * @returns 摘要（永不 throw；空事件 = 空区）。
  */
-export function foldMemberActivity(events: readonly unknown[]): MemberActivitySummary {
+export function foldMemberActivity(events: readonly unknown[], t: PackTranslate = translateZh): MemberActivitySummary {
   const rows: MemberActionRow[] = []
   let searchCount = 0
   let fetchCount = 0
@@ -80,20 +82,20 @@ export function foldMemberActivity(events: readonly unknown[]): MemberActivitySu
         const list = normalizeQueries(argValueOf(e.data?.arguments, 'queries'))
         if (list.length > 0) {
           searchCount++
-          rows.push({ icon: '🔍', text: `检索：${list.join(' · ').slice(0, 40)}`, time })
+          rows.push({ icon: '🔍', text: t('activitySearch', { queries: list.join(' · ').slice(0, 40) }), time })
         }
       } else if (name === 'web_fetch') {
         const url = argOf(e.data?.arguments, 'url')
         if (url !== undefined) {
           fetchCount++
-          rows.push({ icon: '🌐', text: `抓取：${url.slice(0, 60)}`, time })
+          rows.push({ icon: '🌐', text: t('activityFetch', { url: url.slice(0, 60) }), time })
         }
       }
       // 其他工具（read/write/edit/team_*/spawn…）：v1 不出行（用户定夺的粒度边界）
     } else if (e.type === 'tool/result') {
       if (e.data?.message?.isError === true) {
         errorCount++
-        rows.push({ icon: '⚠️', text: `失败：${errorTextOf(e.data.message.content).slice(0, 70)}`, time })
+        rows.push({ icon: '⚠️', text: t('activityFailed', { text: errorTextOf(e.data.message.content, t).slice(0, 70) }), time })
       }
     }
     // 其余事件类型（step/turn/session/user/system/assistant…）：噪音，不出行

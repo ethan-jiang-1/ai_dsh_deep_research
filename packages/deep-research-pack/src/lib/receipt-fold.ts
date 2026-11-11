@@ -11,6 +11,7 @@
  * 实时化（卡已裁定：列表实时化缓做，不在本卡）。
  */
 import { SECTION_LABELS, type LibraryEntry } from './library-fold.ts'
+import { translateZh, type PackTranslate } from './i18n.ts'
 
 /** 回执态（failed 之外的三个正向态逐级收紧）。 */
 type ReceiptState = 'failed' | 'sent' | 'replied' | 'landed'
@@ -43,52 +44,66 @@ function entryByName(entries: readonly LibraryEntry[], name: string): LibraryEnt
 }
 
 /** 摘要值（用于 diff 文案；过长截断）。 */
-function brief(value: string | null): string {
-  if (value === null || value === '') return '（空）'
+function brief(value: string | null, t: PackTranslate): string {
+  if (value === null || value === '') return t('receiptEmpty')
   return value.length > 24 ? `${value.slice(0, 24)}…` : value
 }
+
+/** 四分区标签的字典键（file-format 标签住 library-fold；UI 用当前语言）。 */
+const SECTION_LABEL_KEYS = {
+  source: 'sectionSource',
+  verify: 'sectionVerify',
+  report: 'sectionReport',
+  limit: 'sectionLimit',
+} as const
 
 /**
  * 库快照对账：发送前 vs 回读后。
  * @param before - 发送前的条目投影。
  * @param after - 回读后的条目投影。
  * @param target - 指令涉及的目标条目名；新建指令传 null（看条目数增量）。
+ * @param t - UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
  * @returns landed + 人读 diff 文案（无变化 → landed=false, text=null）。
  */
 export function libraryDiff(
   before: readonly LibraryEntry[],
   after: readonly LibraryEntry[],
   target: string | null,
+  t: PackTranslate = translateZh,
 ): LibraryDiff {
   if (target === null) {
     const added = after.filter((e) => entryByName(before, e.name) === undefined)
     const last = added.at(-1)
     if (last === undefined) return { landed: false, text: null }
-    return { landed: true, text: `新增「${last.name}」` }
+    return { landed: true, text: t('receiptAdded', { name: last.name }) }
   }
   const was = entryByName(before, target)
   const now = entryByName(after, target)
-  if (was === undefined && now !== undefined) return { landed: true, text: `新增「${target}」` }
-  if (was !== undefined && now === undefined) return { landed: true, text: `删掉「${target}」` }
+  if (was === undefined && now !== undefined) return { landed: true, text: t('receiptAdded', { name: target }) }
+  if (was !== undefined && now === undefined) return { landed: true, text: t('receiptRemoved', { name: target }) }
   if (was === undefined || now === undefined) return { landed: false, text: null }
 
   const changed: string[] = []
-  for (const { key, label } of SECTION_LABELS) {
+  for (const { key } of SECTION_LABELS) {
     const from = was.sections[key]
     const to = now.sections[key]
     if (from === to) continue
-    changed.push(from === null || from === '' ? `补上「${label}」=${brief(to)}` : `把「${label}」从 ${brief(from)} 改成 ${brief(to)}`)
+    const label = t(SECTION_LABEL_KEYS[key])
+    changed.push(from === null || from === ''
+      ? t('receiptAddedField', { field: label, value: brief(to, t) })
+      : t('receiptChangedField', { field: label, from: brief(from, t), to: brief(to, t) }))
   }
-  if (was.isDefault !== now.isDefault) changed.push(now.isDefault ? `把「${target}」设为默认` : `取消「${target}」的默认标注`)
+  if (was.isDefault !== now.isDefault) changed.push(now.isDefault ? t('receiptSetDefault', { name: target }) : t('receiptClearDefault', { name: target }))
   if (changed.length === 0) return { landed: false, text: null }
   const head = changed[0]
   if (head === undefined) return { landed: false, text: null }
-  return { landed: true, text: changed.length === 1 ? head : `${head}（等 ${changed.length} 处）` }
+  return { landed: true, text: changed.length === 1 ? head : t('receiptMore', { head, count: String(changed.length) }) }
 }
 
 /**
  * 回执折算（状态优先级：失败 > 已落盘 > 已回话 > 已发送）。
  * @param input - 发送结果、回话信号、落盘对账。
+ * @param t - UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
  * @returns 回执态与文案。
  */
 export function receiptOf(input: {
@@ -96,11 +111,11 @@ export function receiptOf(input: {
   readonly detail: string
   readonly replied: boolean
   readonly diff: LibraryDiff | null
-}): Receipt {
-  if (!input.ok) return { state: 'failed', text: `发送失败，草稿已保留：${input.detail}` }
+}, t: PackTranslate = translateZh): Receipt {
+  if (!input.ok) return { state: 'failed', text: t('receiptFailed', { detail: input.detail }) }
   if (input.diff !== null && input.diff.landed && input.diff.text !== null) {
-    return { state: 'landed', text: `已落盘：${input.diff.text}` }
+    return { state: 'landed', text: t('receiptLanded', { text: input.diff.text }) }
   }
-  if (input.replied) return { state: 'replied', text: 'Lead 已回话，但库里还没读到这次改动（回话 ≠ 落地）' }
-  return { state: 'sent', text: '已发送，等 Lead 回话' }
+  if (input.replied) return { state: 'replied', text: t('receiptReplied') }
+  return { state: 'sent', text: t('receiptSent') }
 }

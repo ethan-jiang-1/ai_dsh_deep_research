@@ -12,6 +12,7 @@
  *   为空时如实缺省，不虚构；
  * - fail-soft：畸形/缺席输入永不 throw，输出如实缺省（deriveAnchors 同款纪律）。
  */
+import { translateZh, type PackTranslate } from './i18n.ts'
 
 /** 业务摘要折算输入（全部为既有事实源的投影；调用方从 journal 流 + workspaceFiles 组装）。 */
 interface BriefInputs {
@@ -61,15 +62,14 @@ export interface BusinessBrief {
   readonly userActionNeeded: boolean
 }
 
-const NEEDLESS = '你现在无需操作——只有需要你补充业务事实、确认方向或审阅交付时才会在这里标出'
-
 /**
  * 业务摘要折算：九态输入 → 五问输出（末位优先级 = 挂起 > 预检窗 > 未绑定 > 审查 FAIL >
  * 已交付 > 推进中；fail-soft 永不 throw）。
  * @param inputs 事实源投影（全字段可选）。
+ * @param t UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
  * @returns 业务摘要。
  */
-export function deriveBusinessBrief(inputs: BriefInputs): BusinessBrief {
+export function deriveBusinessBrief(inputs: BriefInputs, t: PackTranslate = translateZh): BusinessBrief {
   const bundleBound = inputs.bundleBound === true
   const kickoffHold = inputs.kickoffHold === true
   const hitlPending = inputs.hitlPending === true
@@ -86,7 +86,11 @@ export function deriveBusinessBrief(inputs: BriefInputs): BusinessBrief {
   const openItems = Array.isArray(inputs.openItems) ? inputs.openItems.filter((x): x is string => typeof x === 'string' && x.trim() !== '') : []
 
   const goalKnown = hasQuestion && questionLine !== null
-  const goal = goalKnown ? questionLine : '尚未确认——问题定稿写盘后在这里显示'
+  const goal = goalKnown ? questionLine : t('briefGoalUnknownPending')
+  const needless = t('briefActionNone')
+  const pendingItems = openItems.length > 0
+    ? t('briefPendingItems', { items: openItems.join(t('briefItemsSeparator')) })
+    : null
 
   // 挂起分支（hitl1 / 交付审阅 / 契约外中途确认）：kind unknown + 无 question 文件 =
   // 立项窗口（deriveAnchors a1Pending 同款判定），如实并档。
@@ -94,29 +98,31 @@ export function deriveBusinessBrief(inputs: BriefInputs): BusinessBrief {
     if (pendingKind === 'hitl2') {
       return {
         goal, goalKnown,
-        stageLine: '交付审阅——报告已成稿，等你拍板',
-        knownLine: '报告当前版已就绪；你的选择会写入 question.md §Decisions',
-        unknownLine: reviewFail === true ? '审查未决项已按上限升级到本次审阅——由你裁决' : null,
-        actionLine: '需要你操作：定稿 / 补研究（记 final/ 下一版本）/ 修订表述（原位改、版本不变）',
+        stageLine: t('briefStageHitl2'),
+        knownLine: t('briefKnownHitl2'),
+        unknownLine: reviewFail === true ? t('briefUnknownHitl2') : null,
+        actionLine: t('briefActionHitl2'),
         userActionNeeded: true,
       }
     }
     if (pendingKind === 'unknown' && hasQuestion) {
       return {
         goal, goalKnown,
-        stageLine: '中途确认——研究过程中出现了问题卡',
-        knownLine: '研究按既定方向推进中；此次确认不改既定方向',
+        stageLine: t('briefStageMidway'),
+        knownLine: t('briefKnownMidway'),
         unknownLine: null,
-        actionLine: '需要你操作：在会话里的问题卡上回答（推荐项已置首）',
+        actionLine: t('briefActionMidway'),
         userActionNeeded: true,
       }
     }
     return {
       goal, goalKnown,
-      stageLine: `立项确认——等你回答问题卡${pendingQuestions > 0 ? `（${pendingQuestions} 问）` : ''}`,
-      knownLine: '问题定稿、计划确认后团队才会开工；推荐项已置首',
+      stageLine: pendingQuestions > 0
+        ? t('briefStageHitl1Count', { count: pendingQuestions })
+        : t('briefStageHitl1'),
+      knownLine: t('briefKnownHitl1'),
       unknownLine: null,
-      actionLine: '需要你操作：在会话里的问题卡上点选项（一次问全，不挤牙膏）',
+      actionLine: t('briefActionHitl1'),
       userActionNeeded: true,
     }
   }
@@ -124,12 +130,12 @@ export function deriveBusinessBrief(inputs: BriefInputs): BusinessBrief {
   // 立项预检窗（读绑定 + kickoff 已见 + 无挂起）：如实显示"还没开始"。
   if (kickoffHold) {
     return {
-      goal: '尚未确认——本场研究的立项对齐中',
+      goal: t('briefGoalUnknownKickoff'),
       goalKnown: false,
-      stageLine: '这场研究还没开始——立项对齐中，当前读到的是上一场 run 的上下文',
-      knownLine: '落笔开跑后这里显示本场状态',
+      stageLine: t('briefStageKickoff'),
+      knownLine: t('briefKnownKickoff'),
       unknownLine: null,
-      actionLine: NEEDLESS,
+      actionLine: needless,
       userActionNeeded: false,
     }
   }
@@ -137,12 +143,12 @@ export function deriveBusinessBrief(inputs: BriefInputs): BusinessBrief {
   // 未绑定：不显示别家数据（bundle-bind 纪律）。
   if (!bundleBound) {
     return {
-      goal: '尚未确认',
+      goal: t('briefGoalUnknown'),
       goalKnown: false,
-      stageLine: '本会话尚未绑定研究 run',
-      knownLine: '研究状态只跟本会话自己的 run；绑定后这里显示本场进度',
+      stageLine: t('briefStageUnbound'),
+      knownLine: t('briefKnownUnbound'),
       unknownLine: null,
-      actionLine: NEEDLESS,
+      actionLine: needless,
       userActionNeeded: false,
     }
   }
@@ -151,10 +157,10 @@ export function deriveBusinessBrief(inputs: BriefInputs): BusinessBrief {
   if (reviewFail === true) {
     return {
       goal, goalKnown,
-      stageLine: '对抗审查发现问题——团队修复后复审（质量修复静默推进，不需要你操作）',
-      knownLine: '审查未决项修复中；复审轮次记账见 review.md',
-      unknownLine: '审查未决项存在——修复完成并通过复审前报告不交付',
-      actionLine: NEEDLESS,
+      stageLine: t('briefStageReviewFail'),
+      knownLine: t('briefKnownReviewFail'),
+      unknownLine: t('briefUnknownReviewFail'),
+      actionLine: needless,
       userActionNeeded: false,
     }
   }
@@ -163,20 +169,20 @@ export function deriveBusinessBrief(inputs: BriefInputs): BusinessBrief {
   // 未读时 null，如实落通用文案）。
   if (delivered) {
     const stageLine = lastDecisionKind === 'more'
-      ? '补研究已按你的拍板启动——重入挖掘，新增证据记 final/ 下一版本'
+      ? t('briefStageDeliveredMore')
       : lastDecisionKind === 'rewrite'
-        ? '表述修订已按你的拍板执行——原位修改，不产生新版本'
+        ? t('briefStageDeliveredRewrite')
         : lastDecisionKind === 'approve'
-          ? '报告已按你的拍板定稿交付'
+          ? t('briefStageDeliveredApprove')
           : versions >= 2
-            ? '报告已交付（含补研究版本记账）'
-            : '报告已交付'
+            ? t('briefStageDeliveredVersions')
+            : t('briefStageDelivered')
     return {
       goal, goalKnown,
       stageLine,
-      knownLine: '当前版已交付；历史拍板见 question.md §Decisions',
-      unknownLine: openItems.length > 0 ? `待确认：${openItems.join('；')}` : null,
-      actionLine: '你现在无需操作；需要继续研究时在会话里提出（补研究/修订表述走交付审阅语义）',
+      knownLine: t('briefKnownDelivered'),
+      unknownLine: pendingItems,
+      actionLine: t('briefActionDelivered'),
       userActionNeeded: false,
     }
   }
@@ -184,10 +190,10 @@ export function deriveBusinessBrief(inputs: BriefInputs): BusinessBrief {
   // 研究推进中（默认态）：阶段 + 诚实的能力边界。
   return {
     goal, goalKnown,
-    stageLine: currentStage !== null ? `研究推进中——${currentStage}` : '研究推进中——按既定问题自主研究',
-    knownLine: findingsPresent ? '综合材料已在场——结论以交付报告为准，当前不冒充完成' : '来源核对推进中，尚未形成结论',
-    unknownLine: openItems.length > 0 ? `待确认：${openItems.join('；')}` : null,
-    actionLine: NEEDLESS,
+    stageLine: currentStage !== null ? t('briefStageProgress', { stage: currentStage }) : t('briefStageProgressAuto'),
+    knownLine: findingsPresent ? t('briefKnownFindings') : t('briefKnownNoFindings'),
+    unknownLine: pendingItems,
+    actionLine: needless,
     userActionNeeded: false,
   }
 }

@@ -25,10 +25,11 @@ import {
   type LibraryEntry,
 } from '../lib/library-fold.ts'
 import { BUILTIN_PREFERENCES } from '../lib/config-tables.ts'
-import { FIELD_LABELS, FIELD_ORDER, coachPatchAppliesToDraft, mergeCoachDraft, parseMethodDraft } from '../lib/method-draft.ts'
-import { BUTTON_STYLE, HEADER_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE, ROW_STYLE } from './method-library/styles.ts'
-import { BuiltinView, EditorView, MethodSummaryView, ReadMineView, SourceSelectionView } from './method-library/views.tsx'
+import { coachPatchAppliesToDraft, mergeCoachDraft, parseMethodDraft } from '../lib/method-draft.ts'
+import { BUTTON_STYLE, HEADER_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE } from './method-library/styles.ts'
+import { BuiltinView, EditorView, LibraryRow, MethodSummaryView, ReadMineView, SourceSelectionView } from './method-library/views.tsx'
 import { MethodCoachPanel } from './method-library/coach.tsx'
+import { coachContextOf, coachStartAction, manualEditPrompt } from './method-library/coach-prompts.ts'
 import { ColumnHandle } from './method-library/ColumnHandle.tsx'
 import { useLibraryData } from './method-library/useLibraryData.ts'
 import { useRunSourcePicker } from './method-library/useRunSourcePicker.ts'
@@ -210,32 +211,12 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   }, [sessionId])
 
   // 方法编辑首问的上下文：库快照 + 当前草稿 + 内置参考（只读）。只随第一条消息发一次。
-  const librarySnapshot = text === null ? '（未加载）' : text.trim() === '' ? '（空）' : text.trim()
-  const draftSnapshot = draft === null
-    ? '（新建：四字段为空）'
-    : [
-        `名称：${draft.name.trim() === '' ? '（未命名）' : draft.name}`,
-        ...SECTION_LABELS.map((item) => `${item.label}：${draft.sections[item.key] ?? '（空）'}`),
-      ].join('\n')
-  const previewForCoach = (label: string, preview: SourcePreview): string => preview.kind === 'ok'
-    ? `${label}（eof=${String(preview.eof)}）：\n${preview.text}`
-    : `${label}（${preview.kind}）：${preview.kind === 'error' ? preview.detail : '文件缺席'}`
-  const coachContext = [
-    '【页面自动附带的上下文，不是用户输入】',
-    `当前方法库（method-library.md）：\n${librarySnapshot}`,
-    `当前草稿（版本 ${draftRevision}）：\n${draftSnapshot}`,
-    `内置参考（只读，仅对照，不要照抄）：${BUILTIN_PREFERENCES.map((entry) => `${entry.name}（${entry.summary}）`).join('；')}`,
-    ...(selectedBuiltinSource === null ? [] : [`用户选择的内置参考（只读）：${selectedBuiltinSource.name}\n${SECTION_LABELS.map(({ key, label }) => `${label}：${selectedBuiltinSource.sections[key] ?? '（待定）'}`).join('\n')}`]),
-    ...(selectedRunSource === null ? [] : [`用户选择的已完成研究：${selectedRunSource.name}\n来源文件：question.md 与 ${selectedRunSource.finalPath}\n${previewForCoach('研究问题预览', selectedRunSource.question)}\n${previewForCoach('交付物预览', selectedRunSource.deliverable)}`]),
-  ].join('\n\n')
+  // 文案住 coach-prompts（模型面，不是 UI）——见 BUG-055 的扫描守卫边界。
+  const coachContext = coachContextOf({ text, draft, draftRevision, selectedBuiltinSource, selectedRunSource })
 
 
   const startInterview = async (id: SessionId): Promise<{ readonly ok: boolean; readonly detail?: string; readonly uncertain?: boolean }> => {
-    const action = selectedRunSource !== null
-      ? `请使用已加载的 method-from-run skill，从所选已完成研究“${selectedRunSource.name}”的有界预览归纳实际采用的方法；只记录可见证据，不补造缺失做法。`
-      : selectedBuiltinSource !== null
-        ? `以用户选择的内置参考“${selectedBuiltinSource.name}”为起点，先确认希望保留或修改哪些方面，不要照抄成品。`
-        : '从零开始，先询问研究场景与交付对象，一次只问一个问题。'
+    const action = coachStartAction(selectedRunSource, selectedBuiltinSource)
     const requestId = crypto.randomUUID()
     const result = await props.sendCoach(id, `${coachContext}\n\n${action}`, requestId)
     if (result.ok) return result
@@ -335,12 +316,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   useEffect(() => {
     if (coachId === null || manual.size === 0 || draft === null) return undefined
     const handle = setTimeout(() => {
-      const lines = FIELD_ORDER
-        .filter((field) => manual.has(field))
-        .map((field) => field === 'name'
-          ? `名称：${draft.name}`
-          : `${FIELD_LABELS[field]}：${draft.sections[field] ?? '（空）'}`)
-      void props.sendCoach(coachId, `【用户手改，以下值以用户为准，不要覆盖】\n${lines.join('\n')}`).catch(() => { /* fail-soft */ })
+      void props.sendCoach(coachId, manualEditPrompt(draft, manual)).catch(() => { /* fail-soft */ })
     }, 900)
     return () => clearTimeout(handle)
   }, [coachId, draft, manual, props.sendCoach])
@@ -353,8 +329,8 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
       style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, height: '100%', overflow: 'hidden' }}
     >
       <div style={HEADER_STYLE}>
-        <strong style={{ fontSize: 15 }}>方法库</strong>
-        <span style={MUTED_STYLE}>本工作区共享 · 保存交方法编辑</span>
+        <strong style={{ fontSize: 15 }}>{props.t('methodLibrary')}</strong>
+        <span style={MUTED_STYLE}>{props.t('librarySharedHint')}</span>
         <span style={{ flex: 1 }} />
         {narrowPane && (
           <button
@@ -366,8 +342,8 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
             onClick={() => { setLibraryOpen((open) => !open) }}
           >{libraryOpen ? props.t('workbenchPane') : props.t('libraryPane')}</button>
         )}
-        <button type="button" style={BUTTON_STYLE} onClick={refresh}>刷新</button>
-        <button type="button" style={PRIMARY_STYLE} disabled={sending || operationUnknown} onClick={beginNew}>新建</button>
+        <button type="button" style={BUTTON_STYLE} onClick={refresh}>{props.t('refresh')}</button>
+        <button type="button" data-method-new="" style={PRIMARY_STYLE} disabled={sending || operationUnknown} onClick={beginNew}>{props.t('newAction')}</button>
       </div>
       {receipt !== null && (
         <div role="status" aria-live="polite" style={{
@@ -391,49 +367,45 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
           }}
         >
           <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
-            <button type="button" style={{ ...BUTTON_STYLE, ...(segment === 'mine' ? { borderColor: 'var(--dsw-alias-brand-primary)', color: 'var(--dsw-alias-brand-primary)' } : {}) }} onClick={() => { switchSegment('mine') }}>我的库</button>
-            <button type="button" style={{ ...BUTTON_STYLE, ...(segment === 'builtin' ? { borderColor: 'var(--dsw-alias-brand-primary)', color: 'var(--dsw-alias-brand-primary)' } : {}) }} onClick={() => { switchSegment('builtin') }}>内置参考</button>
+            <button type="button" style={{ ...BUTTON_STYLE, ...(segment === 'mine' ? { borderColor: 'var(--dsw-alias-brand-primary)', color: 'var(--dsw-alias-brand-primary)' } : {}) }} onClick={() => { switchSegment('mine') }}>{props.t('segmentMine')}</button>
+            <button type="button" style={{ ...BUTTON_STYLE, ...(segment === 'builtin' ? { borderColor: 'var(--dsw-alias-brand-primary)', color: 'var(--dsw-alias-brand-primary)' } : {}) }} onClick={() => { switchSegment('builtin') }}>{props.t('segmentBuiltin')}</button>
           </div>
           {segment === 'mine' && (
             <>
               <input style={{ ...INPUT_STYLE, marginBottom: 8 }} aria-label={props.t('searchMethods')} placeholder={props.t('searchMethods')} value={query} onChange={(event) => { setQuery(event.target.value) }} />
-              {loadState === 'loading' && <div style={MUTED_STYLE}>读取中…</div>}
-              {loadState === 'error' && <div style={{ ...MUTED_STYLE, color: 'var(--dsw-alias-label-error)' }}>读不到 {LIBRARY_PATH}：{loadError}</div>}
-              {loadState === 'absent' && <div style={MUTED_STYLE}>本工作区还没有 {LIBRARY_PATH}。新建第一条，或让 Lead 在研究里记住一种做法。</div>}
-              {loadState === 'ok' && filtered.length === 0 && <div style={MUTED_STYLE}>{entries.length === 0 ? '库还是空的。' : '没有匹配的方法。'}</div>}
+              {loadState === 'loading' && <div style={MUTED_STYLE}>{props.t('reading')}</div>}
+              {loadState === 'error' && <div style={{ ...MUTED_STYLE, color: 'var(--dsw-alias-label-error)' }}>{props.t('loadError', { path: LIBRARY_PATH, detail: loadError })}</div>}
+              {loadState === 'absent' && <div style={MUTED_STYLE}>{props.t('libraryAbsent', { path: LIBRARY_PATH })}</div>}
+              {loadState === 'ok' && filtered.length === 0 && <div style={MUTED_STYLE}>{entries.length === 0 ? props.t('emptyLibrary') : props.t('noMatchingMethods')}</div>}
               {filtered.map((entry) => (
-                <button
+                <LibraryRow
                   key={entry.name}
-                  type="button"
-                  style={{ ...ROW_STYLE, ...(selectedName === entry.name && segment === 'mine' ? { background: 'var(--dsw-alias-brand-primary)0f', borderColor: 'var(--dsw-alias-brand-primary)30' } : {}) }}
-                  onClick={() => { selectMine(entry) }}
-                >
-                  <div style={{ fontSize: 13, display: 'flex', gap: 6, alignItems: 'baseline' }}>
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.name}</span>
-                    {entry.isDefault && <span style={{ fontSize: 10, color: 'var(--dsw-alias-brand-primary)' }}>默认</span>}
-                  </div>
-                  <div style={{ ...MUTED_STYLE, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{summaryOfEntry(entry) ?? '（无摘要）'}</div>
-                </button>
+                  name={entry.name}
+                  summary={summaryOfEntry(entry) ?? props.t('noSummary')}
+                  isDefault={entry.isDefault}
+                  selected={selectedName === entry.name && segment === 'mine'}
+                  t={props.t}
+                  onSelect={() => { selectMine(entry) }}
+                />
               ))}
             </>
           )}
           {segment === 'builtin' && (
             <>
               {BUILTIN_PREFERENCES.map((entry) => (
-                <button
+                <LibraryRow
                   key={entry.name}
-                  type="button"
-                  style={{ ...ROW_STYLE, ...(selectedName === entry.name ? { background: 'var(--dsw-alias-brand-primary)0f', borderColor: 'var(--dsw-alias-brand-primary)30' } : {}) }}
-                  onClick={() => { selectBuiltin(entry.name) }}
-                >
-                  <div style={{ fontSize: 13 }}>{entry.name}</div>
-                  <div style={{ ...MUTED_STYLE, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.summary}</div>
-                </button>
+                  name={entry.name}
+                  summary={entry.summary}
+                  selected={selectedName === entry.name}
+                  t={props.t}
+                  onSelect={() => { selectBuiltin(entry.name) }}
+                />
               ))}
             </>
           )}
         </aside>
-        {!narrowPane && <ColumnHandle onDrag={(delta) => { setLeftWidth((width) => Math.max(120, Math.min(420, width + delta))) }} value={leftWidth} min={120} max={420} />}
+        {!narrowPane && <ColumnHandle onDrag={(delta) => { setLeftWidth((width) => Math.max(120, Math.min(420, width + delta))) }} value={leftWidth} min={120} max={420} label={props.t('columnResize')} />}
         <main
           id="method-library-workbench-pane"
           data-method-library-pane="workbench"
@@ -447,17 +419,17 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
             <MethodSummaryView draft={draft} stage={workbenchStage} manualFields={manual} coachFields={coachFields} sourceFields={sourceFields} onStageChange={setWorkbenchStage} onFocusField={(field) => { setActiveField(field); setWorkbenchStage('form-check') }} onRestartSource={restartSource} canSave={canSaveDraft} sending={sending || operationUnknown} onSave={(setDefault) => { void save(setDefault) }} t={props.t} />
           )}
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, minWidth: 0, padding: 14, overflowY: mode === 'read' || workbenchStage !== 'interview' ? 'auto' : 'hidden', boxSizing: 'border-box' }}>
-            {mode === 'read' && segment === 'builtin' && builtin !== null && <BuiltinView entry={builtin} onUse={() => { useBuiltinReference(builtin) }} useLabel={props.t('useBuiltin')} />}
+            {mode === 'read' && segment === 'builtin' && builtin !== null && <BuiltinView entry={builtin} onUse={() => { useBuiltinReference(builtin) }} useLabel={props.t('useBuiltin')} t={props.t} />}
             {mode === 'read' && segment === 'mine' && selected !== null && <ReadMineView entry={selected} pendingDelete={pendingDelete} sending={sending || operationUnknown} onEdit={beginEdit} onPendingDelete={setPendingDelete} onRemove={(entry) => { void remove(entry) }} onSetDefault={(entry) => { void setDefault(entry) }} onClearDefault={() => { void clearDefault() }} t={props.t} />}
             {mode === 'read' && segment === 'mine' && selected === null && (
               <div style={{ ...MUTED_STYLE, paddingTop: 20 }}>
                 {loadState === 'absent'
-                  ? '还没有方法。点「新建」写第一条；或让 Lead 从一次 run 里沉淀。'
-                  : query.trim() !== '' ? '没有匹配的方法。' : '从左边选一条方法。'}
+                  ? props.t('noMethodsHint')
+                  : query.trim() !== '' ? props.t('noMatchingMethods') : props.t('pickMethodFromLeft')}
               </div>
             )}
             {mode === 'new' && workbenchStage === 'source' && <SourceSelectionView
-              builtinChoices={BUILTIN_PREFERENCES.map((entry) => ({ ...builtinLibraryEntry(entry), summary: entry.summary }))}
+              builtinChoices={BUILTIN_PREFERENCES.map((entry) => ({ ...builtinLibraryEntry(entry, props.t('builtinReadOnly')), summary: entry.summary }))}
               runNames={runNames}
               runState={runState}
               selectedRunLoading={selectedRunLoading}
@@ -475,7 +447,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
             />}
             {(mode === 'edit' || mode === 'new') && workbenchStage === 'form-check' && <EditorView draft={draft} mode={mode} sending={sending || operationUnknown} t={props.t} onNameChange={onNameChange} onSectionChange={updateSection} onSave={(setDefault) => { void save(setDefault) }} onCancel={cancel} coachFields={coachFields} manualFields={manual} activeField={activeField} coachUpdated={coachBase !== null} onUndoCoach={undoCoach} />}
             {sessionId !== undefined && (coachVisible || (mode !== 'read' && workbenchStage !== 'source')) && (
-              <MethodCoachPanel key={`${sessionId}:${coachEpoch}:${activeDraftKey}`} sessionId={sessionId} draftKey={activeDraftKey ?? 'pending'} visible={(mode === 'edit' || mode === 'new') && workbenchStage === 'interview'} ensure={props.ensureCoach} onCoach={onCoachReady} onError={onCoachError} onStartInterview={startInterview} title={props.t('methodEditorTitle')} startLabel={props.t('startInterview')} readyLabel={props.t('interviewReady')} pendingLabel={props.t('startingInterview')} startedLabel={props.t('interviewStarted')} />
+              <MethodCoachPanel key={`${sessionId}:${coachEpoch}:${activeDraftKey}`} sessionId={sessionId} draftKey={activeDraftKey ?? 'pending'} visible={(mode === 'edit' || mode === 'new') && workbenchStage === 'interview'} ensure={props.ensureCoach} onCoach={onCoachReady} onError={onCoachError} onStartInterview={startInterview} title={props.t('methodEditorTitle')} startLabel={props.t('startInterview')} readyLabel={props.t('interviewReady')} pendingLabel={props.t('startingInterview')} startedLabel={props.t('interviewStarted')} t={props.t} />
             )}
           </div>
         </main>

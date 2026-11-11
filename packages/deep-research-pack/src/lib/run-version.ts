@@ -18,6 +18,7 @@
  * 结构性 rerun 另起 bundle，本文件只认声明，不画血缘。
  */
 import { latestRunVersion } from './run-fold.ts'
+import { translateZh, type PackTranslate } from './i18n.ts'
 
 /** rerun 三种语义（D17）。 */
 type RerunKind = 'evidence-expansion' | 'polish' | 'structural'
@@ -81,10 +82,10 @@ export interface RunVersionFace {
   readonly label: string
 }
 
-const KIND_LABEL: Readonly<Record<RerunKind, string>> = {
-  'evidence-expansion': '证据扩张',
-  polish: '表述修订',
-  structural: '结构性',
+const KIND_LABEL_KEYS: Readonly<Record<RerunKind, 'versionRerunEvidenceExpansion' | 'versionRerunPolish' | 'versionRerunStructural'>> = {
+  'evidence-expansion': 'versionRerunEvidenceExpansion',
+  polish: 'versionRerunPolish',
+  structural: 'versionRerunStructural',
 }
 
 const INT = (raw: string | undefined): number | null => {
@@ -154,9 +155,10 @@ function versionsOf(names: readonly string[] | null | undefined): number[] {
 /**
  * 版本面折算（fail-soft：缺什么就说什么，不抛）。
  * @param facts - 读盘/读 journal 后的事实。
+ * @param t UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
  * @returns {@link RunVersionFace}。
  */
-export function runVersionFaceOf(facts: RunVersionFacts): RunVersionFace {
+export function runVersionFaceOf(facts: RunVersionFacts, t: PackTranslate = translateZh): RunVersionFace {
   const { header, recorded, conflicted } = planVersionsOf(facts.planText)
   const planSnapshots = versionsOf(facts.planSnapshotNames)
   const effectivePlanVersion = recorded ?? header
@@ -188,30 +190,31 @@ export function runVersionFaceOf(facts: RunVersionFacts): RunVersionFace {
           ? 'drafting'
           : 'none'
 
+  const kindLabel = (kind: RerunKind): string => t(KIND_LABEL_KEYS[kind])
   const parts: string[] = []
-  if (conflicted) parts.push(`版本声明不一致（头 v${String(header)} / 记录 v${String(recorded)}）`)
+  if (conflicted) parts.push(t('versionConflict', { header: String(header), recorded: String(recorded) }))
   else if (typeof facts.planText === 'string' && facts.planText !== '' && header === null && recorded === null) {
-    parts.push('plan 版本未声明')
+    parts.push(t('versionPlanUndeclared'))
   }
-  if (snapshotAnomaly.length > 0) parts.push(`plan/${snapshotAnomaly.map((v) => `v${String(v)}`).join('、')} 快照编号异常`)
+  if (snapshotAnomaly.length > 0) parts.push(t('versionSnapshotAnomaly', { versions: snapshotAnomaly.map((v) => `v${String(v)}`).join(t('listSeparator')) }))
   const deliveredThisRerun = rerun !== null && deliveredFinalVersion !== null && rerun.version <= deliveredFinalVersion
   parts.push(
     deliveredThisRerun && rerun !== null
-      ? `v${String(deliveredFinalVersion)} ${KIND_LABEL[rerun.kind]} rerun 已交付`
+      ? t('versionDeliveredRerun', { version: String(deliveredFinalVersion), kind: kindLabel(rerun.kind) })
       : deliveredFinalVersion !== null
-        ? `v${String(deliveredFinalVersion)} 已交付`
+        ? t('versionDelivered', { version: String(deliveredFinalVersion) })
         : delivered && deliveryVersionAmbiguous
-          ? `已交付（版本未记载；版本账 v${String(ledgerFinalVersion)}）`
+          ? t('versionDeliveredUnrecorded', { version: String(ledgerFinalVersion) })
           : delivered
-            ? '已交付（版本未记账）'
+            ? t('versionDeliveredNoLedger')
             : ledgerFinalVersion > 0
             // 版本账在、但 present 不在本会话的 journal 窗口里：只说“没见证”，不说“没交付”。
-              ? `v${String(ledgerFinalVersion)} 版本账 · 交付未见证`
-              : '未交付',
+              ? t('versionLedgerUnwitnessed', { version: String(ledgerFinalVersion) })
+              : t('versionUndelivered'),
   )
-  if (rerun !== null && !deliveredThisRerun) parts.push(`v${String(rerun.version)} ${KIND_LABEL[rerun.kind]} rerun`)
-  if (draftPresent && (deliveredFinalVersion !== null || deliveryVersionAmbiguous || rerun !== null)) parts.push('当前工作稿')
-  if (hitlPending) parts.push('HITL2 待审')
+  if (rerun !== null && !deliveredThisRerun) parts.push(t('versionRerunInProgress', { version: String(rerun.version), kind: kindLabel(rerun.kind) }))
+  if (draftPresent && (deliveredFinalVersion !== null || deliveryVersionAmbiguous || rerun !== null)) parts.push(t('versionWorkingDraft'))
+  if (hitlPending) parts.push(t('versionHitl2Pending'))
 
   return {
     currentPlanVersion: header,

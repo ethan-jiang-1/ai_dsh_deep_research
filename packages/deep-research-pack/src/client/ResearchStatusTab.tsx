@@ -7,7 +7,7 @@
  *      在场性折算——两段数据源分开，HITL1 等待时 bundle 未建而锚点仍在场）；
  *   ③ 研究问题行（question.md 首行，剥 markdown 强调符）；
  *   ④ 团队动态 = 人性化活动流（activity-fold：🔍/👥/💬/📦，噪音过滤——**原始事件类型名不出正文**）；
- *   ⑤ 证据概览 + 交付状态（evidence/ 计数 + `deliverables/presented` 见证 → ✅ 已交付 + rerun 三分图例）；
+ *   ⑤ 证据概览 + 交付状态（evidence/ 计数 + `deliverables/presented` 见证 → {props.t('statusDelivered')} + rerun 三分图例）；
  *   ⑥ 决策诚实线（停靠点已过 → 指路 question.md §Decisions——谁答的不复制进 UI，家在文件）；
  *   ⑦ 队员动态折叠区（member-activity-stream，2026-10-10 定夺：agentTeam 投影取 roster（队员
  *      会话 id 的唯一发现源——spawn 返回不带 id，通道探明实证）→ 多路 follow 队员会话 →
@@ -34,7 +34,7 @@ import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { deriveSteps } from '../lib/run-fold.ts'
 import { foldHitlPending, type HitlState } from '../lib/hitl-fold.ts'
 import { deriveBusinessBrief, type BusinessBrief } from '../lib/brief-fold.ts'
-import { RERUN_TRIAGE_HINT, RERUN_TRIAGE_ROWS, RERUN_TRIAGE_TITLE } from '../lib/rerun-triage.ts'
+import { rerunTriageRowsOf } from '../lib/rerun-triage.ts'
 import { statusFaceMarker } from '../lib/binding-trust.ts'
 import type { ResearchStatusTabProps, ResearchStatusTitleInjected } from './research-status/types.ts'
 import { TrackRail } from './research-status/TrackRail.tsx'
@@ -59,7 +59,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   // 步骤段从文件在场性折算——face 缺席时以占位态渲染（不冒充进度）。
   const passedCount = anchors.filter((a) => a.state === 'passed').length
   const pendingAnchor = anchors.find((a) => a.state === 'pending')
-  const steps = face !== null ? face.steps : deriveSteps({ question: false, team: false, leads: false, evidence: 0, findings: false, review: false, final: false })
+  const steps = face !== null ? face.steps : deriveSteps({ question: false, team: false, leads: false, evidence: 0, findings: false, review: false, final: false }, props.t)
   // 业务摘要（issue 2026-10-11-executive-research-ux-delivery）：既有事实源 → 五问折算。
   // 计数进不了本层（brief-fold 输入面无计数——类型级禁词，keyless 单测钉）；挂起种类由
   // 锚点 key 折算（anchor-1=hitl1 / anchor-2=hitl2 / 其余=契约外 unknown），不引 hitl-fold
@@ -80,8 +80,8 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       versions: face?.versions ?? 0,
       lastDecisionKind: null,
       openItems: [],
-    }),
-    [unbound, trust, kickoffHold, hitl.pending, pendingAnchor, face, steps, delivery],
+    }, props.t),
+    [unbound, trust, kickoffHold, hitl.pending, pendingAnchor, face, steps, delivery, props.t],
   )
   return (
     // 滚动义务在页签体自己（vendor .tabBody = overflow:hidden 的定高 flex 列——BUG 2026-10-12
@@ -92,32 +92,35 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       {/* ① HITL 挂起横幅（最醒目位置；点名锚点 + 参与指引——"怎么参与"在需要那一刻说清） */}
       {hitl.pending && (
         <div style={{ fontWeight: 700, padding: '8px 12px', marginBottom: 10, borderRadius: 6, background: '#f59e0b33', border: '1px solid #f59e0b66' }}>
-          ⏳ 等你拍板——{pendingAnchor?.label ?? '决定'}{pendingAnchor !== undefined && pendingAnchor.questions > 0 ? `（${pendingAnchor.questions} 问）` : ''}：在会话里的问题卡上点选项即可（推荐项已置首）
+          {props.t('hitlBanner', {
+            label: pendingAnchor?.label ?? props.t('decideLabel'),
+            count: pendingAnchor !== undefined && pendingAnchor.questions > 0 ? props.t('questionCount', { count: String(pendingAnchor.questions) }) : '',
+          })}
         </div>
       )}
       {/* 流畸形死亡恢复指引（BUG-023 修复①）：末位回合死于上游流失败且无新回合接手时，
           给人话恢复路径——不虚构"研究失败"，档案都在 bundle。折算 = stream-failure.ts。 */}
       {streamFailure.dead && !hitl.pending && (
         <div style={{ fontWeight: 600, padding: '8px 12px', marginBottom: 10, borderRadius: 6, background: '#ef444418', border: '1px solid #ef444440' }}>
-          ⚠️ 上游模型流连续异常，刚才那回合没跑成——研究档案都在。等一两分钟，在对话里发「继续」即可接着跑。
+          {props.t('streamFailureBanner')}
         </div>
       )}
       {/* ⓪ 业务摘要层（issue 2026-10-11-executive-research-ux-delivery）：五问业务语言——
           研究什么 / 已确认什么 / 未知什么 / 我是否要操作；折算住 brief-fold（计数不进本层），
           组件薄渲染。 */}
       <div style={{ marginBottom: 10, padding: '8px 12px', borderRadius: 6, background: '#22c55e14', border: '1px solid #22c55e33', fontSize: 13, lineHeight: 1.7 }}>
-        <div style={{ fontWeight: 700 }}>🎯 {brief.goal}</div>
+        <div style={{ fontWeight: 700 }}>{props.t('statusGoalPrefix', { goal: brief.goal })}</div>
         <div>{brief.stageLine}</div>
         <div style={{ opacity: 0.85 }}>{brief.knownLine}</div>
         {brief.unknownLine !== null && <div style={{ color: '#b45309' }}>⚠ {brief.unknownLine}</div>}
         <div style={{ fontWeight: brief.userActionNeeded ? 700 : 400, color: brief.userActionNeeded ? '#b45309' : undefined }}>{brief.actionLine}</div>
       </div>
       {/* ② 流程轨道：◆立项确认 + 主轨 + ◆交付审阅 + 交付；↻ 回边 = 拍板的分支后果画进流程 */}
-      <TrackRail anchors={anchors} steps={steps} faceVersions={face?.versions ?? null} hitlPending={hitl.pending} />
+      <TrackRail anchors={anchors} steps={steps} faceVersions={face?.versions ?? null} hitlPending={hitl.pending} t={props.t} />
       {/* ⑥ 决策诚实线（指路不复制——谁答的家在 question.md §Decisions） */}
       {passedCount > 0 && (
         <div style={{ marginBottom: 8, fontSize: 12, opacity: 0.55 }}>
-          停靠点已过 {passedCount} 个 · 每次拍板的记录见 question.md §Decisions
+          {props.t('statusDecisionStops', { count: String(passedCount) })}
         </div>
       )}
       {/* ③ 研究问题行 */}
@@ -129,18 +132,18 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           已交付 → 门（读终稿）；未交付 → 承诺（终稿将在交付后自动出现在右栏，许在用户已经在看的地方）。 */}
       {face !== null && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10, fontSize: 13, opacity: 0.85 }}>
-          <span>证据 {face.evidenceCount} 份</span>
-          {delivery !== null && <span style={{ color: '#16a34a', fontWeight: 600 }}>✅ 已交付</span>}
+          <span>{props.t('statusEvidenceCount', { count: String(face.evidenceCount) })}</span>
+          {delivery !== null && <span style={{ color: '#16a34a', fontWeight: 600 }}>{props.t('statusDelivered')}</span>}
           {delivery !== null && props.sessionId !== undefined && (
             <button
               type="button"
               onClick={() => { props.openFinal(props.sessionId as NonNullable<typeof props.sessionId>, delivery.path) }}
               style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}
-            >读终稿 →</button>
+            >{props.t('statusOpenFinal')}</button>
           )}
-          {delivery === null && <span style={{ opacity: 0.6 }}>终稿将在交付后自动出现在右栏</span>}
+          {delivery === null && <span style={{ opacity: 0.6 }}>{props.t('statusFinalAfterDelivery')}</span>}
           {versionFace !== null && (face.hasFinal || versionFace.ledgerFinalVersion >= 1) && (
-            <span style={{ fontSize: 12, opacity: 0.8 }} title="版本面只读投影：final/vN 是版本账，final.md 是工作稿">
+            <span style={{ fontSize: 12, opacity: 0.8 }} title={props.t('versionReadonlyNote')}>
               {versionFace.label}
             </span>
           )}
@@ -149,38 +152,38 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       {/* 交付后只读出口（rerun 不满转接：三种改法 + 可复制话术；D18 只读——不按钮化 rerun） */}
       {face !== null && delivery !== null && (
         <details style={{ marginBottom: 10, fontSize: 12, opacity: 0.9 }}>
-          <summary style={{ cursor: 'pointer' }}>{RERUN_TRIAGE_TITLE}</summary>
+          <summary style={{ cursor: 'pointer' }}>{props.t('triageTitle')}</summary>
           <div style={{ marginTop: 6, lineHeight: 1.6 }}>
-            {RERUN_TRIAGE_ROWS.map((row) => (
+            {rerunTriageRowsOf(props.t).map((row) => (
               <div key={row.label} style={{ marginBottom: 4 }}>
-                <strong>{row.label}</strong>：{row.consequence}
-                <div style={{ opacity: 0.75 }}>「{row.copy}」</div>
+                <strong>{row.label}</strong>{props.t('triageConsequenceSuffix', { consequence: row.consequence })}
+                <div style={{ opacity: 0.75 }}>{props.t('triageCopyLine', { copy: row.copy })}</div>
               </div>
             ))}
-            <div style={{ opacity: 0.6 }}>{RERUN_TRIAGE_HINT}</div>
+            <div style={{ opacity: 0.6 }}>{props.t('triageHint')}</div>
           </div>
         </details>
       )}
       {/* 未绑定 / 绑定待确认提示（RFC right-pane-ux-debt + cockpit-flow-face G4） */}
       {unbound && (
         <div style={{ marginBottom: 10, fontSize: 12, opacity: 0.55 }}>
-          （本会话未绑定 run bundle——研究状态只跟本会话自己的 run）
+          {props.t('statusUnbound')}
         </div>
       )}
       {kickoffHold && (
         <div style={{ marginBottom: 10, fontSize: 12, padding: '6px 10px', borderRadius: 6, background: '#0000000d' }}>
-          🌱 这场研究还没开始——立项对齐中，读到的是上一场 run（drt_{trust.kind === 'suppressed' ? trust.slug : ''}）的上下文；落笔开跑后这里显示本场状态。
+          {props.t('statusKickoffHold', { slug: trust.kind === 'suppressed' ? trust.slug : '' })}
         </div>
       )}
       {!unbound && !kickoffHold && face === null && trust.kind === 'suppressed' && trust.reason === 'pending' && (
         <div style={{ marginBottom: 10, fontSize: 12, opacity: 0.55 }}>
-          （挂起期间不显示 bundle 渐进面——当前绑定仅由读取推断，落笔后确认）
+          {props.t('statusPendingBinding')}
         </div>
       )}
       {error !== null && <div style={{ color: '#b00', marginBottom: 6, fontSize: 12 }}>{error}</div>}
       {/* ④ 团队动态（人性化活动行——原始事件类型名不出正文） */}
       <div style={{ fontSize: 13, lineHeight: 1.7 }}>
-        {rows.length === 0 && props.sessionId !== undefined && <span style={{ opacity: 0.5 }}>（研究中，暂无可见动作）</span>}
+        {rows.length === 0 && props.sessionId !== undefined && <span style={{ opacity: 0.5 }}>{props.t('statusNoActivity')}</span>}
         {rows.map((r, i) => (
           <div key={i} style={{ display: 'flex', gap: 6 }}>
             <span>{r.icon}</span>
@@ -191,7 +194,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       {/* ⑦ 队员动态折叠区（每人一节，默认折叠；动作粒度 = 检索/抓取/出错——任务粒度归 ui-agent-team 任务板，不双 home） */}
       {members.length > 0 && (
         <div style={{ marginTop: 10, fontSize: 12 }}>
-          <div style={{ opacity: 0.55, marginBottom: 4 }}>队员动态（检索 / 抓取 / 出错）</div>
+          <div style={{ opacity: 0.55, marginBottom: 4 }}>{props.t('statusMembersTitle')}</div>
           {members.map((m) => {
             const summary = memberSummaries[m.id]
             return (
@@ -207,7 +210,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
                       <span style={{ flex: 1 }}>{r.text}</span>
                     </div>
                   ))}
-                  {(summary?.rows ?? []).length === 0 && <span style={{ opacity: 0.5 }}>（暂无可见动作）</span>}
+                  {(summary?.rows ?? []).length === 0 && <span style={{ opacity: 0.5 }}>{props.t('statusNoMemberActivity')}</span>}
                 </div>
               </details>
             )

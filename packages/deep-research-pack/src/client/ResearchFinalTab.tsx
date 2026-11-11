@@ -18,11 +18,11 @@
  * 更新语义：文件被改写时，正在看（`tab.visible`）→ 顶部提示条"重新读取"，不换掉你正在读的
  * 字；没在看 → 静默重读。轮询节奏与驾驶舱其余面同款（30s）。
  */
-import { RERUN_TRIAGE_HINT, RERUN_TRIAGE_ROWS, RERUN_TRIAGE_TITLE } from '../lib/rerun-triage.ts'
+import { rerunTriageRowsOf } from '../lib/rerun-triage.ts'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { MarkdownText } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import {
   FINAL_LEDGER_DIR, FINAL_NAME, FINAL_READER_NAME, FINAL_REVIEW_NAME, finalReadPlan, sessionFileOf,
@@ -39,7 +39,7 @@ export interface ResearchFinalTabInjected {
 }
 
 /** 槽标准 props + 注入面。 */
-export type ResearchFinalTabProps = PropsRuntime<'sidebar.right.pane.tab'> & ResearchFinalTabInjected
+export type ResearchFinalTabProps = PropsRuntime<'sidebar.right.pane.tab'> & PropsLocale<'deepResearchPack'> & ResearchFinalTabInjected
 
 /** 文件改写的巡检节奏（与驾驶舱其余面一致）。 */
 const REFRESH_MS = 30_000
@@ -47,14 +47,19 @@ const REFRESH_MS = 30_000
 /** 三种视图：读者版 / 审计版（vN 或 final.md）/ 当前工作稿（仅无 reader 的旧形态）。 */
 type FinalView = 'reader' | 'audit' | 'draft'
 
-/** Markdown 词表（常量：`MarkdownText` 按引用比较，重建会重挂渲染器）。 */
-const MARKDOWN_LABELS = {
-  code: {
-    copyLabel: '复制',
-    copiedLabel: '已复制',
-    toolbarLabels: { codeLabel: '代码', wrapLabel: '换行', unwrapLabel: '不换行' },
-  },
-  footnotes: '脚注',
+/** Markdown 词表（随语言构建；`MarkdownText` 按引用比较，故用 useMemo 钉住同一语言下的引用）。 */
+function markdownLabels(t: ResearchFinalTabProps['t']): {
+  readonly code: { readonly copyLabel: string; readonly copiedLabel: string; readonly toolbarLabels: { readonly codeLabel: string; readonly wrapLabel: string; readonly unwrapLabel: string } }
+  readonly footnotes: string
+} {
+  return {
+    code: {
+      copyLabel: t('copy'),
+      copiedLabel: t('copied'),
+      toolbarLabels: { codeLabel: t('codeLabel'), wrapLabel: t('wrapLabel'), unwrapLabel: t('unwrapLabel') },
+    },
+    footnotes: t('footnotes'),
+  }
 }
 
 const MESSAGE: React.CSSProperties = { padding: '12px', fontSize: 12.5, opacity: 0.6, lineHeight: 1.6 }
@@ -80,6 +85,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   const tab = props.useTabInfo()
   const sessionId = props.sessionId
   const address = tab.tab.navigation.address
+  const markdownLabelsMemo = useMemo(() => markdownLabels(props.t), [props.t])
   const file = useMemo(() => sessionFileOf(address), [address])
   const plan = useMemo(() => (file === null ? null : finalReadPlan(file.path)), [file])
 
@@ -95,7 +101,8 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   const [text, setText] = useState<string | null>(null)
   const [readerText, setReaderText] = useState<string | null>(null)
   const [draftText, setDraftText] = useState<string | null>(null)
-  const [failure, setFailure] = useState<string | null>(null)
+  // 失败态存字典键（不存译文）：locale 切换后同一失败仍按当前语言渲染。
+  const [failure, setFailure] = useState<'finalUnreadable' | 'finalReadFailed' | null>(null)
   const [loading, setLoading] = useState(true)
   const [versions, setVersions] = useState(0)
   const [readerName, setReaderName] = useState<string | null>(null)
@@ -118,7 +125,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     const opened = await openRun(io.runSource(sessionId), plan.final, { signal })
     if (signal.aborted || !aliveRef.current) return
     if (!opened.ok) {
-      setFailure(opened.reason === 'missing' ? '读不到终稿文件（可能已被移动或归档）' : '终稿读取失败（通道或权限）')
+      setFailure(opened.reason === 'missing' ? 'finalUnreadable' : 'finalReadFailed')
       setLoading(false)
       return
     }
@@ -141,7 +148,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     ])
     if (signal.aborted || !aliveRef.current) return
     if (!body.ok) {
-      setFailure(body.reason === 'missing' ? '读不到终稿文件（可能已被移动或归档）' : '终稿读取失败（通道或权限）')
+      setFailure(body.reason === 'missing' ? 'finalUnreadable' : 'finalReadFailed')
       setLoading(false)
       return
     }
@@ -200,19 +207,19 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     return () => { clearInterval(timer); controller.abort() }
   }, [sessionId, load])
 
-  if (file === null || plan === null) return <div style={MESSAGE}>（这不是研究终稿文件）</div>
-  if (loading && text === null) return <div style={MESSAGE}>正在读取终稿…</div>
+  if (file === null || plan === null) return <div style={MESSAGE}>{props.t('notFinalFile')}</div>
+  if (loading && text === null) return <div style={MESSAGE}>{props.t('finalLoading')}</div>
   if (failure !== null && text === null) {
     return (
       <div style={MESSAGE}>
-        {failure}
+        {props.t(failure)}
         <div style={{ marginTop: 6 }}>
-          <button type="button" style={LINK_BUTTON} onClick={() => { void load(new AbortController().signal) }}>重试</button>
+          <button type="button" style={LINK_BUTTON} onClick={() => { void load(new AbortController().signal) }}>{props.t('retry')}</button>
         </div>
       </div>
     )
   }
-  if (text === null) return <div style={MESSAGE}>（终稿未能读取）</div>
+  if (text === null) return <div style={MESSAGE}>{props.t('finalUnread')}</div>
 
   const hasReader = readerText !== null
   const showingReader = hasReader && view === 'reader'
@@ -223,21 +230,21 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     ? `${FINAL_LEDGER_DIR}/${readerName}`
     : showingDraft ? FINAL_NAME : resolved ?? plan.final
   const state = pass === false
-    ? '审查未过'
+    ? props.t('reviewFailed')
     : showingReader
-      ? `读者版${versions >= 1 ? ` · v${String(versions)}` : ' · 未定稿'}`
+      ? versions >= 1 ? props.t('readerEditionVersion', { version: String(versions) }) : `${props.t('readerEdition')}${props.t('notFinalized')}`
       : versions >= 1
-        ? (showingDraft ? '当前工作稿' : `审计版 · v${String(versions)}`)
-        : '当前版'
+        ? (showingDraft ? props.t('workingDraft') : props.t('auditEdition', { version: String(versions) }))
+        : props.t('currentVersion')
   const stateStyle = pass === false
     ? { color: '#b45309', fontWeight: 600 }
     : undefined
   const toggleLabel = hasReader
     ? view === 'reader'
-      ? `看审计版${versions >= 1 ? ` v${String(versions)}` : ''}`
-      : '看读者版'
+      ? props.t('auditToggleLabel', { version: versions >= 1 ? props.t('versionV', { version: String(versions) }) : '' })
+      : props.t('viewReader')
     : versions >= 1
-      ? view === 'draft' ? `看 v${String(versions)}（版本账）` : '看当前工作稿'
+      ? view === 'draft' ? props.t('viewVersion', { version: String(versions) }) : props.t('viewCurrentDraft')
       : null
   // 滚动义务在页签体自己：vendor 的 `.tabBody` 是定高 flex 列且 `overflow: hidden`，
   // 内容超出即被裁且不可滚（2026-10-20 用户实测报障：终稿页签不滚）。同款约定见
@@ -247,8 +254,8 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       {stale && (
         <div style={{ ...BAR, margin: '8px 12px 0', flexShrink: 0 }}>
-          <span style={{ flex: 1 }}>终稿有更新</span>
-          <button type="button" style={LINK_BUTTON} onClick={() => { void load(new AbortController().signal) }}>重新读取</button>
+          <span style={{ flex: 1 }}>{props.t('finalUpdated')}</span>
+          <button type="button" style={LINK_BUTTON} onClick={() => { void load(new AbortController().signal) }}>{props.t('finalReload')}</button>
         </div>
       )}
       <div style={{ ...STRIP, padding: '3px 12px 7px', flexShrink: 0 }} title={displayedPath}>
@@ -259,8 +266,8 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
             type="button"
             style={LINK_BUTTON}
             title={hasReader
-              ? (view === 'reader' ? '审计版 = canonical：final/vN（未交付时 final.md）' : '读者版 = 1–3 页人读版')
-              : '版本账 = final/vN；交付与否以「研究状态」的 ✅ present 为准'}
+              ? (view === 'reader' ? props.t('auditCanonicalNote') : props.t('readerNote'))
+              : props.t('ledgerNote')}
             onClick={() => {
               setView(hasReader
                 ? (view === 'reader' ? 'audit' : 'reader')
@@ -268,27 +275,27 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
             }}
           >{toggleLabel}</button>
         )}
-        <button type="button" style={LINK_BUTTON} onClick={() => { tab.tab.actions.openTab(RESEARCH_STATUS_TAB_KIND) }}>过程 →</button>
+        <button type="button" style={LINK_BUTTON} onClick={() => { tab.tab.actions.openTab(RESEARCH_STATUS_TAB_KIND) }}>{props.t('finalProcess')}</button>
       </div>
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', padding: '0 12px 40px', fontSize: 13.5, lineHeight: 1.75, overflowWrap: 'anywhere' }}>
-        <MarkdownText text={displayed ?? ''} labels={MARKDOWN_LABELS} />
+        <MarkdownText text={displayed ?? ''} labels={markdownLabelsMemo} />
         {displayedTruncated && (
           <div style={{ marginTop: 12, fontSize: 11.5, opacity: 0.6 }}>
-            文件过长，已截断（显示前 {(displayed ?? '').split('\n').length} 行）
+            {props.t('finalTruncated', { count: String((displayed ?? '').split('\n').length) })}
           </div>
         )}
-        {failure !== null && <div style={{ marginTop: 12, fontSize: 11.5, color: '#b00' }}>{failure}</div>}
+        {failure !== null && <div style={{ marginTop: 12, fontSize: 11.5, color: '#b00' }}>{props.t(failure)}</div>}
         {/* 交付后只读出口（同状态页 ⑤，共用 src/lib 文案；D18 只读） */}
         <details style={{ marginTop: 18, fontSize: 12, opacity: 0.9 }}>
-          <summary style={{ cursor: 'pointer' }}>{RERUN_TRIAGE_TITLE}</summary>
+          <summary style={{ cursor: 'pointer' }}>{props.t('triageTitle')}</summary>
           <div style={{ marginTop: 6, lineHeight: 1.6 }}>
-            {RERUN_TRIAGE_ROWS.map((row) => (
+            {rerunTriageRowsOf(props.t).map((row) => (
               <div key={row.label} style={{ marginBottom: 4 }}>
-                <strong>{row.label}</strong>：{row.consequence}
-                <div style={{ opacity: 0.75 }}>「{row.copy}」</div>
+                <strong>{row.label}</strong>{props.t('triageConsequenceSuffix', { consequence: row.consequence })}
+                <div style={{ opacity: 0.75 }}>{props.t('triageCopyLine', { copy: row.copy })}</div>
               </div>
             ))}
-            <div style={{ opacity: 0.6 }}>{RERUN_TRIAGE_HINT}</div>
+            <div style={{ opacity: 0.6 }}>{props.t('triageHint')}</div>
           </div>
         </details>
       </div>

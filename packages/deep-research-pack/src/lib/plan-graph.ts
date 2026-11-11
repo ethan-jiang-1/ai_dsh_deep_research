@@ -16,6 +16,7 @@
  * - 不猜年龄：没有 `since` 时间戳就不编造「已经 N 分钟」，只如实说状态；
  * - 缺 blocker 忽略、成环钳在节点数 - 1（company `dag.ts` 同款），畸形输入退化为空结果。
  */
+import { translateZh, type PackTranslate } from './i18n.ts'
 
 /** 图谱任务的最小结构（`agentTeam` 的 `TeamTaskView` 可直接传入）。 */
 interface GraphTask {
@@ -270,6 +271,7 @@ function minutesOf(ageMs: number): number {
  * @param memberStatus - 按 owner 名/indexed 的队员状态（记录或 Map）。
  * @param now - 当前时刻（epoch ms；不可用时不猜年龄）。
  * @param thresholds - 阈值覆盖（缺省 = {@link DEFAULT_ATTENTION_THRESHOLDS}）。
+ * @param t - UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
  * @returns 按严重度排序的注意力条目（同级保持任务输入序）。
  */
 export function attentionOf(
@@ -277,6 +279,7 @@ export function attentionOf(
   memberStatus: MemberStatusLookup | null | undefined,
   now: number,
   thresholds: AttentionThresholds = DEFAULT_ATTENTION_THRESHOLDS,
+  t: PackTranslate = translateZh,
 ): readonly AttentionItem[] {
   const list = asTasks(tasks)
   const unassignedMs = thresholds.unassignedMs ?? DEFAULT_ATTENTION_THRESHOLDS.unassignedMs ?? 0
@@ -296,7 +299,7 @@ export function attentionOf(
         taskId: task.id,
         reason: 'owner-failed',
         severity: 'critical',
-        message: owner !== undefined ? `owner「${owner}」会话失败` : '负责人会话失败',
+        message: owner !== undefined ? t('attentionOwnerFailed', { owner }) : t('attentionOwnerFailedBare'),
         ...(owner !== undefined ? { ownerName: owner } : {}),
         overdue: false,
       })
@@ -310,8 +313,12 @@ export function attentionOf(
         reason: 'stalled',
         severity: 'warning',
         message: owner !== undefined
-          ? `owner「${owner}」当前不在运行——可能卡住${age !== undefined ? `（约 ${String(minutesOf(age))} 分钟）` : ''}`
-          : `负责人当前不在运行——可能卡住${age !== undefined ? `（约 ${String(minutesOf(age))} 分钟）` : ''}`,
+          ? age !== undefined
+            ? t('attentionStalledAged', { owner, minutes: String(minutesOf(age)) })
+            : t('attentionStalled', { owner })
+          : age !== undefined
+            ? t('attentionStalledBareAged', { minutes: String(minutesOf(age)) })
+            : t('attentionStalledBare'),
         ...(owner !== undefined ? { ownerName: owner } : {}),
         ...(age !== undefined ? { ageMs: age } : {}),
         overdue: age !== undefined && age >= stalledMs,
@@ -327,8 +334,8 @@ export function attentionOf(
           reason: 'unassigned',
           severity: 'warning',
           message: taskAge !== undefined
-            ? `已就绪 ${String(minutesOf(taskAge))} 分钟仍无人领取`
-            : '已就绪但无人领取',
+            ? t('attentionUnassignedAged', { minutes: String(minutesOf(taskAge)) })
+            : t('attentionUnassigned'),
           ...(taskAge !== undefined ? { ageMs: taskAge } : {}),
           overdue: taskAge !== undefined && taskAge >= unassignedMs,
         })
@@ -339,7 +346,7 @@ export function attentionOf(
           taskId: task.id,
           reason: 'blocked-too-long',
           severity: 'info',
-          message: `被 ${blockedBy.join(', ')} 阻塞约 ${String(minutesOf(taskAge))} 分钟`,
+          message: t('attentionBlocked', { deps: blockedBy.join(', '), minutes: String(minutesOf(taskAge)) }),
           ageMs: taskAge,
           overdue: true,
         })

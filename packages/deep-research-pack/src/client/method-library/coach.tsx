@@ -13,7 +13,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { PropsRenderFactories, PropsRenderSlots, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import type { PropsRenderFactories, PropsRenderSlots, PropsRuntime, TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ConversationViewsProps } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { METHOD_COACH_CHAT } from '../keys.ts'
 
@@ -123,6 +123,8 @@ export interface MethodCoachPanelProps {
   readonly readyLabel: string
   readonly pendingLabel: string
   readonly startedLabel: string
+  /** 当前 UI 翻译器（错误/历史未就绪文案）。 */
+  readonly t: TranslateNS<'deepResearchPack'>
 }
 
 /**
@@ -130,7 +132,7 @@ export interface MethodCoachPanelProps {
  * @param props - 当前会话、draft key 与 ensure/start 注入。
  */
 export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
-  const { sessionId, draftKey, ensure, onCoach, onError, onStartInterview, visible, title, startLabel, readyLabel, pendingLabel, startedLabel } = props
+  const { sessionId, draftKey, ensure, onCoach, onError, onStartInterview, visible, title, startLabel, readyLabel, pendingLabel, startedLabel, t } = props
   const [coach, setCoach] = useState<{ id: SessionId; reference: CoachSessionReference } | null>(null)
   const [host, setHost] = useState<HTMLElement | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -172,7 +174,7 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
         await held.ready
         if (cancelled) return
         const openState = held.binding?.session.getSnapshot().openState
-        if (openState !== undefined && openState !== 'open') throw new Error(`方法编辑历史未就绪：${openState}`)
+        if (openState !== undefined && openState !== 'open') throw new Error(t('coachHistoryNotReady', { state: openState }))
         if (cancelled) return
         setCoach(result)
         onCoach?.(result.id)
@@ -235,7 +237,7 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
         </div>
       </div>
       {error !== null && (
-        <div style={{ fontSize: 12, color: 'var(--dsw-alias-label-error)', padding: '6px 12px' }}>方法编辑暂不可用：{error}（表单可以继续填，稍后重试）</div>
+        <div style={{ fontSize: 12, color: 'var(--dsw-alias-label-error)', padding: '6px 12px' }}>{t('coachUnavailable', { detail: error ?? '' })}</div>
       )}
       <div
         ref={(element) => { setHost(element) }}

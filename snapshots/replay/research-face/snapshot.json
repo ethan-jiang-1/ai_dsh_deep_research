@@ -15,6 +15,7 @@
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
         "recordedAt": "2026-11-11T08:22:00.000Z",
         "recording": "live",
+        "locale": "zh-CN",
         "note": "D47 worker profiles + M3 text changes; lead re-recorded with 3-query/2-fetch probe to exercise status-tab activity (working tree)."
       }
     },
@@ -27,6 +28,7 @@
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
         "recordedAt": "2026-11-11T08:18:35.000Z",
         "recording": "live",
+        "locale": "zh-CN",
         "note": "D47 worker profiles + M3 model-visible text changes; recorded with working-tree changes (codeAnchor = HEAD)."
       }
     },
@@ -39,6 +41,7 @@
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
         "recordedAt": "2026-11-11T08:18:35.000Z",
         "recording": "live",
+        "locale": "zh-CN",
         "note": "D47 worker profiles + M3 model-visible text changes; recorded with working-tree changes (codeAnchor = HEAD)."
       }
     },
@@ -51,6 +54,7 @@
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
         "recordedAt": "2026-11-11T08:18:35.000Z",
         "recording": "live",
+        "locale": "zh-CN",
         "note": "D47 worker profiles + M3 model-visible text changes; recorded with working-tree changes (codeAnchor = HEAD)."
       }
     }

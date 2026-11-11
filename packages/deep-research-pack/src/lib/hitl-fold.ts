@@ -17,6 +17,7 @@
  */
 
 import { argsObjectOf } from './journal-wire.ts'
+import { translateZh, type PackTranslate } from './i18n.ts'
 
 /** 一个 journal 事件的最小形状（wire 事件；只取折算要用的字段）。 */
 interface JournalEventLike {
@@ -158,8 +159,8 @@ function askQuestionCount(args: unknown): number {
   return Array.isArray(qs) ? qs.length : 0
 }
 
-/** 固定锚点标签（HITL1/HITL2，正本 = 研究手册 §交互纪律）。 */
-const ANCHOR_LABELS = ['立项确认', '交付审阅'] as const
+/** 固定锚点标签的字典键（HITL1/HITL2，正本 = 研究手册 §交互纪律）。 */
+const ANCHOR_LABEL_KEYS = ['anchorKickoff', 'anchorDelivery'] as const
 
 /** 锚点 passed 态的文件事实（调用方从 bundle 文件在场性构造——与 run-fold 同源）。 */
 interface AnchorFileFacts {
@@ -206,9 +207,10 @@ function askKindOf(args: unknown): AskKind {
  * 如实缀第三锚。开放 ask 优先于文件 passed 态——决策点重新开放时 pending 是诚实显示。
  * @param events - 按 wire 顺序的事件（follow 的 snapshot + 实时流；畸形输入 fail-soft）。
  * @param fileFacts - bundle 文件在场性（face 缺席时省略）。
+ * @param t - UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
  * @returns 锚点列表（固定两位 + 契约外挂起追加；永不 throw）。
  */
-export function deriveAnchors(events: readonly unknown[], fileFacts?: AnchorFileFacts): readonly RunAnchor[] {
+export function deriveAnchors(events: readonly unknown[], fileFacts?: AnchorFileFacts, t: PackTranslate = translateZh): readonly RunAnchor[] {
   // 一次扫描取三件（挂起态 + 问数 + 判型）——状态机单一正本 lastAskStateMachine（原先
   // 经尾部包装各扫一遍：foldHitlPending ×3 + findLastAsk ×2，语义无差纯重复）。
   const { pending: tailUnanswered, ask } = lastAskStateMachine(events)
@@ -220,22 +222,24 @@ export function deriveAnchors(events: readonly unknown[], fileFacts?: AnchorFile
   const a1Pending = tailUnanswered && (kind === 'hitl1' || (kind === 'unknown' && !q))
   const a2Pending = tailUnanswered && kind === 'hitl2'
   const extraPending = tailUnanswered && kind === 'unknown' && q
+  const kickoffLabel = t(ANCHOR_LABEL_KEYS[0])
+  const deliveryLabel = t(ANCHOR_LABEL_KEYS[1])
   slots.push(
     a1Pending
-      ? { key: 'anchor-1', label: ANCHOR_LABELS[0] ?? '立项确认', state: 'pending', questions: pendingQs }
+      ? { key: 'anchor-1', label: kickoffLabel, state: 'pending', questions: pendingQs }
       : q
-        ? { key: 'anchor-1', label: ANCHOR_LABELS[0] ?? '立项确认', state: 'passed', questions: 0 }
-        : { key: 'anchor-1', label: ANCHOR_LABELS[0] ?? '立项确认', state: 'upcoming', questions: 0 },
+        ? { key: 'anchor-1', label: kickoffLabel, state: 'passed', questions: 0 }
+        : { key: 'anchor-1', label: kickoffLabel, state: 'upcoming', questions: 0 },
   )
   slots.push(
     a2Pending
-      ? { key: 'anchor-2', label: ANCHOR_LABELS[1] ?? '交付审阅', state: 'pending', questions: pendingQs }
+      ? { key: 'anchor-2', label: deliveryLabel, state: 'pending', questions: pendingQs }
       : f
-        ? { key: 'anchor-2', label: ANCHOR_LABELS[1] ?? '交付审阅', state: 'passed', questions: 0 }
-        : { key: 'anchor-2', label: ANCHOR_LABELS[1] ?? '交付审阅', state: 'upcoming', questions: 0 },
+        ? { key: 'anchor-2', label: deliveryLabel, state: 'passed', questions: 0 }
+        : { key: 'anchor-2', label: deliveryLabel, state: 'upcoming', questions: 0 },
   )
   if (extraPending) {
-    slots.push({ key: 'anchor-extra', label: '中途确认', state: 'pending', questions: pendingQs })
+    slots.push({ key: 'anchor-extra', label: t('anchorMidway'), state: 'pending', questions: pendingQs })
   }
   return slots
 }

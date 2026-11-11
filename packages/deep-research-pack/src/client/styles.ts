@@ -50,3 +50,19 @@ export function installCoachComposerStyles(): () => void {
   document.head.appendChild(style)
   return () => { style.remove(); release() }
 }
+
+/** 方法库条目行的状态样式（hover / 焦点环 / 过渡）。选中视觉住 `libraryRowStyle`（inline）；
+ *  焦点环画在行外圈、与选中态分开——"焦点 = 选中"的误读是 BUG-047 的另一半现场。 */
+export function installMethodLibrarySelectionStyles(): () => void {
+  const style = document.createElement('style')
+  style.setAttribute(MARKER, 'method-library-row-states')
+  style.textContent = [
+    `html[${MARKER}] [data-method-library-row]{background:transparent;transition:background-color .12s ease,border-color .12s ease}`,
+    `html[${MARKER}] [data-method-library-row]:not([aria-current="true"]):hover{background:var(--dsw-alias-interactive-bg-hover)}`,
+    `html[${MARKER}] [data-method-library-row]:focus-visible{outline:2px solid color-mix(in srgb, var(--dsw-alias-state-business-primary) 70%, transparent);outline-offset:2px}`,
+    `html[${MARKER}] [data-method-library-row]:focus:not(:focus-visible){outline:none}`,
+  ].join('\n')
+  acquire()
+  document.head.appendChild(style)
+  return () => { style.remove(); release() }
+}

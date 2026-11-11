@@ -48,7 +48,7 @@ import { browserRunSource } from './run-source-browser.ts'
 import { OrcaMark, OrcaName } from './BrandMark.tsx'
 import { createFollow, hasUserMessage, watchCoach } from './session-follow.ts'
 import { createWorkspaceBoot, type SessionsLike, type UiWorkspaceLike, type WorkspacesLike } from './workspace-boot.ts'
-import { installCoachComposerStyles, installQuestionCardNarrowFix } from './styles.ts'
+import { installCoachComposerStyles, installMethodLibrarySelectionStyles, installQuestionCardNarrowFix } from './styles.ts'
 import { createWorkspaceFiles } from './workspace-files.ts'
 import { createCoachSessions } from './coach-sessions.ts'
 import { watchDelivery } from './delivery-watch.ts'
@@ -93,13 +93,14 @@ export function apply(ctx: ClientContext): void {
     const { chooseWorkspace, ensureProductWorkspace, workspaceOf } = boot
     const workspaceFiles = scoped.remote.workspaceFiles
     const { listDir, readLibrary, readPreview, readText: readFile } = createWorkspaceFiles(workspaceFiles as never)
-    const { sendInstruction } = createLeadPrompt({ prompt: (input, signal) => remoteSession.prompt(input as never, signal) })
+    const { sendInstruction } = createLeadPrompt({ prompt: (input, signal) => remoteSession.prompt(input as never, signal) }, t)
     const { ensureCoachSession, sendCoach } = createCoachSessions(
       scoped as unknown as { get(name: string): unknown },
       {
         rename: (input) => remoteSession.rename(input),
         prompt: (input, signal) => remoteSession.prompt(input as never, signal),
       },
+      t,
     )
 
     scoped.effect(() => scoped.sidebarRightTabs.register({
@@ -205,25 +206,25 @@ export function apply(ctx: ClientContext): void {
 
     scoped.effect(() => scoped.slots.inject(RESEARCH_PANE_SLOT, () => [
       scoped.slots.register(
-        { name: RESEARCH_PANE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow, runSource, revealStatusTab, openFinal }) },
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_TAB_KEY, locale: 'deepResearchPack', inject: () => ({ follow, runSource, revealStatusTab, openFinal }) },
         ResearchStatusTab,
       ),
       scoped.slots.register(
         // 「研究配置」注入面 2026-10-18 扩：+ listDir/follow（「本次研究」区要按会话绑定定位
         // bundle 并读 question.md 方法节；回执的「Lead 已回话」信号也走 journal 流）。
-        { name: RESEARCH_PANE_SLOT, key: RESEARCH_CONFIG_TAB_KEY, inject: () => ({ readFile, listDir, follow, runSource, sendInstruction }) },
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_CONFIG_TAB_KEY, locale: 'deepResearchPack', inject: () => ({ readFile, listDir, follow, runSource, sendInstruction }) },
         ResearchConfigTab,
       ),
       // 「研究图谱」页签体：只读观察（DAG 图 + plan 原文 + 映射），不提供调整动作；
       // plan.md 缺文件合法（readFile missingOk=true 不打 console.error）；follow 只用于
       // sessionBindingOf 定位 `drt_<slug>/`，不对图折活动流。
       scoped.slots.register(
-        { name: RESEARCH_PANE_SLOT, key: RESEARCH_GRAPH_TAB_KEY, inject: () => ({ runSource, follow }) },
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_GRAPH_TAB_KEY, locale: 'deepResearchPack', inject: () => ({ runSource, follow }) },
         ResearchGraphTab,
       ),
       // 「终稿」页签体：读面 = run-context（三位置/readPolicy/翻页），审查判定与版本目录在此之上。
       scoped.slots.register(
-        { name: RESEARCH_PANE_SLOT, key: RESEARCH_FINAL_TAB_KEY, inject: () => ({ runSource }) },
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_FINAL_TAB_KEY, locale: 'deepResearchPack', inject: () => ({ runSource }) },
         ResearchFinalTab,
       ),
     ]), 'deep-research-pack: research-pane tabs')
@@ -272,6 +273,9 @@ export function apply(ctx: ClientContext): void {
     // （coach 的问卡在页面里，不能误触发外层 composer）。
     scoped.effect(() => installCoachComposerStyles(), 'deep-research-pack: method-library coach composer suppression')
 
+    // 方法库条目行状态（hover / 焦点环 / 过渡）：选中视觉走 inline libraryRowStyle（BUG-047）。
+    scoped.effect(() => installMethodLibrarySelectionStyles(), 'deep-research-pack: method-library row states')
+
     // 活标题（HITL 挂起时"研究状态 · ⏳ 等你拍板"——用户点名的观察需求）：同一 fold 谓词
     //（末位事件 = 未答的 ask_user_question），标题组件自己开一条 follow 流（两条流都吃
     // 同一 WebSocket 数据面，v1 接受；合流进共享 store 是后续优化）。
@@ -281,7 +285,7 @@ export function apply(ctx: ClientContext): void {
     // 零裸注册，门禁 client-effect-wrap 把守；test-strategy 语料台阶③收口）。
     for (const key of RESEARCH_TOOL_KEYS) {
       scoped.effect(() => scoped.slots.inject(RESEARCH_TOOLVIEW_SLOT, () =>
-        scoped.slots.register({ name: RESEARCH_TOOLVIEW_SLOT, key, priority: -1 }, ResearchToolCard)), `deep-research-pack: toolview ${key}`)
+        scoped.slots.register({ name: RESEARCH_TOOLVIEW_SLOT, key, priority: -1, locale: 'deepResearchPack' }, ResearchToolCard)), `deep-research-pack: toolview ${key}`)
     }
 
     scoped.effect(() => scoped.slots.inject(RESEARCH_TITLE_SLOT, () => [

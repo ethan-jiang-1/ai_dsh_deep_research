@@ -4,6 +4,7 @@
  */
 
 import { argsObjectOf, normalizeQueries } from './journal-wire.ts'
+import { translateZh, type PackTranslate } from './i18n.ts'
 
 /** 卡片生命周期。 */
 type CardState = 'running' | 'ok' | 'error' | 'stopped'
@@ -34,16 +35,18 @@ export function parseArgsObject(argsRaw: string): ToolCardArgs | null {
 }
 
 /** 工具卡标题行（研究语义）：spawn → 成员与职责；web_search → 查询词。 */
-export function cardTitleOf(toolName: string, args: ToolCardArgs | null, argsRaw: string): string {
+export function cardTitleOf(toolName: string, args: ToolCardArgs | null, argsRaw: string, t: PackTranslate = translateZh): string {
   if (args !== null) {
     if (toolName === 'spawn_teammate') {
-      const name = typeof args.name === 'string' ? args.name : '(未具名)'
+      const name = typeof args.name === 'string' ? args.name : t('activitySpawnUnnamed')
       const desc = typeof args.description === 'string' ? args.description : typeof args.prompt === 'string' ? args.prompt.slice(0, 40) : ''
-      return `组队：${name}${desc === '' ? '' : ` — ${desc.slice(0, 50)}`}`
+      return desc === ''
+        ? t('toolCardSpawn', { name })
+        : t('toolCardSpawnDetail', { name, detail: desc.slice(0, 50) })
     }
     if (toolName === 'web_search') {
       const q = normalizeQueries(args.queries).join(' · ')
-      return q === '' ? '检索' : `检索：${q.slice(0, 60)}`
+      return q === '' ? t('toolCardSearch') : t('toolCardSearchQueries', { queries: q.slice(0, 60) })
     }
 
   }

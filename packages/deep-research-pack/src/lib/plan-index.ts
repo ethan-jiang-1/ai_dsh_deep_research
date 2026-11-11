@@ -7,9 +7,10 @@
  *
  * - `planIndex` / `planNodeOf`：节点查询面（id / parent / kind / depth / acceptance / task_id）；
  *   `topLevel` 只含 parent 缺省的 active 节点（复合子节点 W3.1… 默认不进图；墓碑不进图）。
- * - `planIssuesOf`：重号 / 悬空 parent / 悬空 dep / 自依赖 / wave 前缀 → 只读稳定性提示
+ * - `planIssuesOf`：重号 / 悬空 parent / 悬空 dep / 自依赖 / 环 / wave 前缀 → 只读稳定性提示
  *   （不是 node-gate）。
  */
+import { translateZh, type PackTranslate } from './i18n.ts'
 
 /** 研究流程 stage（由根 W 的 kind 派生；不是独立列）。 */
 type PlanStage = 'scan' | 'dive' | 'check' | 'synthesis' | 'review' | 'gate' | 'unknown'
@@ -73,6 +74,7 @@ type PlanIssueKind =
   | 'missing-parent'
   | 'dangling-dep'
   | 'self-dependency'
+  | 'cycle'
   | 'mixed-family'
   | 'child-prefix'
   | 'too-deep'
@@ -241,9 +243,10 @@ export function planIndex(text: string | null | undefined): PlanIndex {
  * - `dangling-dep` / `self-dependency`：deps 指向不存在的节点 / 自己。
  * 这些提示让用户看到“计划重排/编号复用”的迹象，而不是静默画错图。
  * @param index - {@link planIndex} 的结果（可为 null）。
+ * @param t - UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
  * @returns 稳定性问题列表（空 = 未发现）。
  */
-export function planIssuesOf(index: PlanIndex | null | undefined): readonly PlanIssue[] {
+export function planIssuesOf(index: PlanIndex | null | undefined, t: PackTranslate = translateZh): readonly PlanIssue[] {
   if (index === null || index === undefined) return []
   const issues: PlanIssue[] = []
   const seen = new Set<string>()
@@ -253,12 +256,12 @@ export function planIssuesOf(index: PlanIndex | null | undefined): readonly Plan
     else seen.add(node.id)
   }
   for (const id of duplicated) {
-    issues.push({ kind: 'duplicate-id', nodeId: id, message: `${id} 出现了多次——编号只能分配一次` })
+    issues.push({ kind: 'duplicate-id', nodeId: id, message: t('planIssueDuplicateId', { id }) })
   }
   const hasW = index.nodes.some((node) => /^W(?:[0-9]|$)/.test(node.id))
   const hasN = index.nodes.some((node) => /^N(?:[0-9]|$)/.test(node.id))
   if (hasW && hasN) {
-    issues.push({ kind: 'mixed-family', nodeId: '*', message: '同一 plan 混用 W/N 家族——新 plan 用 W，旧 N 只读兼容' })
+    issues.push({ kind: 'mixed-family', nodeId: '*', message: t('planIssueMixedFamily') })
   }
   const rootOf = (node: PlanNode): PlanNode => {
     let current = node
@@ -269,11 +272,47 @@ export function planIssuesOf(index: PlanIndex | null | undefined): readonly Plan
     }
     return current
   }
+  // 环检测：有环的图不可执行，且 wave-prefix 的重编号提示会把读者带偏（重编号不能解环）。
+  // 只沿 active 节点与 active dep 走，与 waveCountOf 的检测面一致。
+  const activeById = new Map(index.nodes.filter(isActivePlanNode).map((node) => [node.id, node]))
+  const cycle = (() => {
+    const state = new Map<string, 1 | 2>()
+    const stack: string[] = []
+    const visit = (id: string): readonly string[] | null => {
+      const mark = state.get(id)
+      if (mark === 1) return [...stack.slice(stack.indexOf(id)), id]
+      if (mark === 2) return null
+      const node = activeById.get(id)
+      if (node === undefined) return null
+      state.set(id, 1)
+      stack.push(id)
+      for (const dep of node.deps) {
+        if (dep === id) continue // 自依赖单列，不冒充环
+        const found = visit(dep)
+        if (found !== null) return found
+      }
+      stack.pop()
+      state.set(id, 2)
+      return null
+    }
+    for (const node of activeById.values()) {
+      const found = visit(node.id)
+      if (found !== null) return found
+    }
+    return null
+  })()
+  if (cycle !== null) {
+    issues.push({
+      kind: 'cycle',
+      nodeId: cycle[0]!,
+      message: t('planIssueCycle', { cycle: cycle.join(' → ') }),
+    })
+  }
   // Wave 身份：顶层 W 节点 id 必须是 W<wave>.<index>；wave = deps 最长路径 + 1。
   // 旧 flat W（W1/W2，无 .index）是 2026-10-22 之前的 working-package 形态，只读兼容并显式提示。
   const flatW = index.topLevel.filter((node) => /^W\d+$/.test(node.id))
   if (flatW.length > 0) {
-    issues.push({ kind: 'legacy-flat-w', nodeId: flatW[0]!.id, message: '旧 flat W（W1/W2…）只读；新 plan 用 W<wave>.<index>（如 W2.1）' })
+    issues.push({ kind: 'legacy-flat-w', nodeId: flatW[0]!.id, message: t('planIssueLegacyFlatW') })
   }
   const waveLevel = new Map<string, number>()
   const waveOf = (node: PlanNode, visiting = new Set<string>()): number => {
@@ -292,42 +331,44 @@ export function planIssuesOf(index: PlanIndex | null | undefined): readonly Plan
     waveLevel.set(node.id, level)
     return level
   }
-  for (const node of index.topLevel) {
-    if (!/^W\d+\./.test(node.id)) continue
-    const prefix = Number(/^W(\d+)\./.exec(node.id)?.[1])
-    const expected = waveOf(node)
-    if (Number.isFinite(prefix) && prefix !== expected) {
-      issues.push({ kind: 'wave-prefix', nodeId: node.id, message: `${node.id} 实际在 Wave ${expected}——按 deps 重编号并写旧号别名` })
+  if (cycle === null) {
+    for (const node of index.topLevel) {
+      if (!/^W\d+\./.test(node.id)) continue
+      const prefix = Number(/^W(\d+)\./.exec(node.id)?.[1])
+      const expected = waveOf(node)
+      if (Number.isFinite(prefix) && prefix !== expected) {
+        issues.push({ kind: 'wave-prefix', nodeId: node.id, message: t('planIssueWavePrefix', { id: node.id, wave: String(expected) }) })
+      }
     }
   }
   for (const node of index.nodes) {
     if (node.parent !== undefined && !index.byId.has(node.parent)) {
-      issues.push({ kind: 'missing-parent', nodeId: node.id, message: `${node.id} 的 parent ${node.parent} 不在节点表里` })
+      issues.push({ kind: 'missing-parent', nodeId: node.id, message: t('planIssueMissingParent', { id: node.id, parent: node.parent }) })
     }
     if (node.parent !== undefined && !node.id.startsWith(`${node.parent}.`)) {
-      issues.push({ kind: 'child-prefix', nodeId: node.id, message: `${node.id} 的 id 必须以父号 ${node.parent}. 开头` })
+      issues.push({ kind: 'child-prefix', nodeId: node.id, message: t('planIssueChildPrefix', { id: node.id, parent: node.parent }) })
     }
     if (node.id.split('.').length > 3) {
-      issues.push({ kind: 'too-deep', nodeId: node.id, message: `${node.id} 超过 3 层——更深请折叠/摘要` })
+      issues.push({ kind: 'too-deep', nodeId: node.id, message: t('planIssueTooDeep', { id: node.id }) })
     }
     if (!isActivePlanNode(node) && !/(?:merged_into|superseded_by|derived_from)/i.test(node.lifecycle ?? '')) {
-      issues.push({ kind: 'tombstone-without-successor', nodeId: node.id, message: `${node.id} 是墓碑但没有 merged_into/superseded_by` })
+      issues.push({ kind: 'tombstone-without-successor', nodeId: node.id, message: t('planIssueTombstone', { id: node.id }) })
     }
     for (const dep of node.deps) {
       if (dep === node.id) {
-        issues.push({ kind: 'self-dependency', nodeId: node.id, message: `${node.id} 依赖自己` })
+        issues.push({ kind: 'self-dependency', nodeId: node.id, message: t('planIssueSelfDependency', { id: node.id }) })
         continue
       }
       const depNode = index.byId.get(dep)
       if (depNode === undefined) {
-        issues.push({ kind: 'dangling-dep', nodeId: node.id, message: `${node.id} 的 dep ${dep} 不在节点表里` })
+        issues.push({ kind: 'dangling-dep', nodeId: node.id, message: t('planIssueDanglingDep', { id: node.id, dep }) })
         continue
       }
       if (isActivePlanNode(node) && !isActivePlanNode(depNode)) {
-        issues.push({ kind: 'retired-dep', nodeId: node.id, message: `${node.id} 依赖了已退役的 ${dep}；改指 successor 或提升到父级` })
+        issues.push({ kind: 'retired-dep', nodeId: node.id, message: t('planIssueRetiredDep', { id: node.id, dep }) })
       }
       if (node.parent !== undefined && rootOf(node).id !== rootOf(depNode).id) {
-        issues.push({ kind: 'cross-group-child-dep', nodeId: node.id, message: `${node.id} 跨组依赖 ${dep}——提升到父 W 依赖` })
+        issues.push({ kind: 'cross-group-child-dep', nodeId: node.id, message: t('planIssueCrossGroup', { id: node.id, dep }) })
       }
     }
   }

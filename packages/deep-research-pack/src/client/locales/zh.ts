@@ -1,5 +1,7 @@
-/** 中文 UI 字典（唯一正本；en 由它约束键集）。 */
-export const zh = {
+/** 中文 UI 字典（唯一正本；en 由它约束键集）。数据面（fold 层）文案住 `zh-fold.ts`。 */
+import { zhFold } from './zh-fold.ts'
+
+const zhBase = {
   tabStatus: '研究状态',
   tabStatusGuide: '研究 run 的步骤、等待与证据状态',
   tabStatusPending: '研究状态 · ⏳ 等你拍板',
@@ -309,5 +311,7 @@ export const zh = {
   graphNodeTitle: '{id} · {label} · {owner} · {state}',
   trackRerunSuffix: ' · 本 bundle 已有 v{version}（证据扩张）',
 } as const
+
+export const zh = { ...zhBase, ...zhFold } as const
 
 export type DeepResearchPackLocaleKey = keyof typeof zh

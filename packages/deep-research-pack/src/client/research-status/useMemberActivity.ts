@@ -5,6 +5,7 @@
 import { useEffect } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { foldMemberActivity, type MemberActivitySummary } from '../../lib/member-activity.ts'
+import type { PackTranslate } from '../../lib/i18n.ts'
 import type { FollowTarget, JournalFrame } from './types.ts'
 
 interface UseMemberActivityOptions {
@@ -12,6 +13,8 @@ interface UseMemberActivityOptions {
   readonly memberIds: string
   readonly sessionId: SessionId | undefined
   readonly follow: (target: FollowTarget, signal: AbortSignal) => AsyncGenerator<JournalFrame>
+  /** UI 翻译器（活动行随 locale；缺省中文）。 */
+  readonly t: PackTranslate
   /** Caller-owned state setter keeps the parent's state slot in its original hook position. */
   readonly setMemberSummaries: (summaries: Readonly<Record<string, MemberActivitySummary>>) => void
 }
@@ -23,7 +26,7 @@ interface UseMemberActivityOptions {
  * 数据面——通道探明：gateway 无流数上限）；AbortController 统一回收。首帧 snapshot 为全量
  * 历史（量级 ≈ lead 同阶）——行截尾部、计数全量，折算住 lib。history 替换本队员事件序列，
  * event 只追加；cleanup 先禁止旧流写状态再 abort。 */
-export function useMemberActivity({ memberIds, sessionId, follow, setMemberSummaries }: UseMemberActivityOptions): void {
+export function useMemberActivity({ memberIds, sessionId, follow, t, setMemberSummaries }: UseMemberActivityOptions): void {
   useEffect(() => {
     if (memberIds === '' || sessionId === undefined) { setMemberSummaries({}); return }
     const controller = new AbortController()
@@ -42,7 +45,7 @@ export function useMemberActivity({ memberIds, sessionId, follow, setMemberSumma
           if (frame.kind === 'history') events = [...frame.events]
           else events = [...events, frame.event]
           if (!alive) return
-          state[id] = foldMemberActivity(events)
+          state[id] = foldMemberActivity(events, t)
           setMemberSummaries({ ...state })
         }
       } catch (cause) {
@@ -50,6 +53,6 @@ export function useMemberActivity({ memberIds, sessionId, follow, setMemberSumma
       }
     }))
     return () => { alive = false; controller.abort() }
-  }, [memberIds, sessionId])
+  }, [memberIds, sessionId, t])
 
 }

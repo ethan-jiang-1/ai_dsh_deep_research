@@ -9,6 +9,10 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { BuiltinView, EditorView, ReadMineView } from '../../packages/deep-research-pack/src/client/method-library/views.tsx'
 import { SECTION_LABELS } from '../../packages/deep-research-pack/src/lib/library-fold.ts'
+import { zh } from '../../packages/deep-research-pack/src/client/locales.ts'
+
+/** 中文 locale 的 t 桩（组件文案迁到字典后，断言仍按产品中文口径）。 */
+const tZh = (key, params = {}) => String(zh[key]).replace(/\{([A-Za-z0-9_]+)\}/g, (all, name) => (name in params ? String(params[name]) : all))
 
 const entry = {
   name: '事实核查', provenance: '我的库', isDefault: false, legacyText: null,
@@ -18,22 +22,22 @@ const entry = {
 test('ReadMineView：条目名/四字段标签与值/操作按钮接线', () => {
   const html = renderToStaticMarkup(createElement(ReadMineView, {
     entry, pendingDelete: null, sending: false,
-    t: (key) => key, onEdit() {}, onPendingDelete() {}, onRemove() {},
+    t: tZh, onEdit() {}, onPendingDelete() {}, onRemove() {},
   }))
   assert.match(html, /事实核查/)
   assert.match(html, /我的库/)
   for (const { label } of SECTION_LABELS) assert.ok(html.includes(label), `缺字段标签 ${label}`)
   assert.ok(html.includes('官方优先'))
-  assert.ok(html.includes('continueInterview'), '编辑按钮文案应走 t()')
-  assert.ok(html.includes('setDefault'))
-  assert.ok(html.includes('删除…'))
+  assert.ok(html.includes(zh.continueInterview), '编辑按钮文案应走 t()')
+  assert.ok(html.includes(zh.setDefault))
+  assert.ok(html.includes('删除…'), '删除入口文案在场')
 })
 
 test('EditorView：编辑态名称只读，改名走新建', () => {
   const html = renderToStaticMarkup(createElement(EditorView, {
     mode: 'edit',
     sending: false,
-    t: (key) => key,
+    t: tZh,
     draft: {
       name: '事实核查',
       currentName: '事实核查',
@@ -54,7 +58,7 @@ test('EditorView：编辑态名称只读，改名走新建', () => {
 test('BuiltinView：只读内置条目的名字/摘要/使用按钮', () => {
   const html = renderToStaticMarkup(createElement(BuiltinView, {
     entry: { name: '领域地图', summary: '把谁在做什么铺开', sections: entry.sections },
-    useLabel: '用于本次研究', onUse() {},
+    useLabel: '用于本次研究', t: tZh, onUse() {},
   }))
   assert.match(html, /领域地图/)
   assert.match(html, /把谁在做什么铺开/)

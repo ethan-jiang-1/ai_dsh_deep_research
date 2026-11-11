@@ -1,7 +1,8 @@
-/** English UI dictionary; keys are constrained by the zh owner. */
+/** English UI dictionary; keys are constrained by the zh owner. Fold-layer copy lives in `en-fold.ts`. */
 import type { DeepResearchPackLocaleKey } from './zh.ts'
+import { enFold } from './en-fold.ts'
 
-export const en = {
+const enBase = {
   tabStatus: 'Research Status',
   tabStatusGuide: 'Steps, waits, and evidence state of the research run',
   tabStatusPending: 'Research Status · ⏳ Waiting for you',
@@ -310,4 +311,6 @@ export const en = {
   graphUnassignedOwner: 'Unassigned',
   graphNodeTitle: '{id} · {label} · {owner} · {state}',
   trackRerunSuffix: ' · this bundle already has v{version} (evidence expansion)',
-} satisfies Record<DeepResearchPackLocaleKey, string>
+} as const
+
+export const en = { ...enBase, ...enFold } satisfies Record<DeepResearchPackLocaleKey, string>

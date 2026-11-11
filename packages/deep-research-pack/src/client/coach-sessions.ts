@@ -4,6 +4,7 @@
 // （`method-coach-<draftKey>`），无浏览器持久化；`retain` 失败才创建（会话缺席 = 首次打开）。
 // 服务经 `ctx.get` 读取（Cordis：直接属性访问会触发 inject 守卫）。
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import { translateZh, type PackTranslate } from '../lib/i18n.ts'
 
 /** 会话服务最小面（vendor sessions）。 */
 export interface CoachSessionService {
@@ -33,10 +34,10 @@ export interface CoachReference {
   binding: { session: { getSnapshot(): { openState: string } } }
 }
 
-export function createCoachSessions(ctx: { get(name: string): unknown }, remote: CoachRemote) {
+export function createCoachSessions(ctx: { get(name: string): unknown }, remote: CoachRemote, t: PackTranslate = translateZh) {
   const ensureCoachSession = async (currentSessionId: SessionId, draftKey: string): Promise<{ id: SessionId; reference: CoachReference }> => {
     const sessions = ctx.get('sessions') as CoachSessionService | undefined
-    if (sessions === undefined) throw new Error('sessions 服务不可用')
+    if (sessions === undefined) throw new Error(t('sessionsUnavailable'))
     const workspaces = ctx.get('workspaces') as CoachWorkspaceService | undefined
     const workspaceId = workspaces?.list.getSnapshot().items
       .find((item) => item.sessionIds.includes(currentSessionId))?.workspaceId
@@ -53,7 +54,7 @@ export function createCoachSessions(ctx: { get(name: string): unknown }, remote:
       ...(workspaceId === undefined && cwd !== undefined ? { cwd } : {}),
       agentPreset: 'method-editor',
     })
-    try { await remote.rename({ sessionId: created, title: '方法编辑' }) } catch { /* non-fatal */ }
+    try { await remote.rename({ sessionId: created, title: t('methodEditorTitle') }) } catch { /* non-fatal */ }
     return { id: created, reference: sessions.retain(created, { source: 'methodCoach' }) }
   }
 

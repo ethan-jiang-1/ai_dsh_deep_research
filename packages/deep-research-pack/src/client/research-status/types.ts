@@ -2,7 +2,7 @@
 // 被谁消费：本目录 useMemberActivity.ts 与 src/client/ResearchStatusTab.tsx 两消费方。
 // 怎么不改坏：FollowTarget 的 subagent 父地址形态是 host 守卫要求（纯 id 被拒——2026-10-11
 // 实测），改形状须连 follow 调用方与 vendor sessionAddress() 语义一起重校。
-import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { RunSource } from '../../lib/run-context.ts'
 import type { RunStep } from '../../lib/run-fold.ts'
@@ -41,7 +41,7 @@ export interface ResearchStatusTitleInjected {
 }
 
 /** 槽标准 props + 注入面。 */
-export type ResearchStatusTabProps = PropsRuntime<'sidebar.right.pane.tab'> & ResearchStatusTabInjected
+export type ResearchStatusTabProps = PropsRuntime<'sidebar.right.pane.tab'> & PropsLocale<'deepResearchPack'> & ResearchStatusTabInjected
 
 /** bundle 渐进面模型（问题行 + 步骤 + 证据 + 交付）。 */
 export interface BundleFace {

@@ -4,6 +4,7 @@
 // 两个纯格式化 + SVG 渲染），此前埋在 560 行的页签体文件里；`research-graph/` 子目录一度只装
 // types.ts。切出后页签体只留数据装配与布局，DAG 的几何/交互改动只读本文件。
 import type { ReactNode } from 'react'
+import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import { wavesOf } from '../../lib/plan-graph.ts'
 import type { GraphNodeView } from './types.ts'
 import { shortLabel } from './format.ts'
@@ -21,6 +22,7 @@ interface DagMapProps {
   readonly selectedId: string | null
   readonly childCounts: ReadonlyMap<string, number>
   readonly onSelect: (id: string) => void
+  readonly t: TranslateNS<'deepResearchPack'>
 }
 
 
@@ -36,7 +38,7 @@ function fillOf(node: GraphNodeView): string {
  * 顶部 DAG 小图：按 `wavesOf` 分层；同层节点横排；边从 blocker 底边到 dependent 顶边。
  * 没有边时不渲染（父级明确说“没有可画的 DAG”，不画假图）。
  */
-export function DagMap({ nodes, selectedId, childCounts, onSelect }: DagMapProps): ReactNode {
+export function DagMap({ nodes, selectedId, childCounts, onSelect, t }: DagMapProps): ReactNode {
   const waves = wavesOf(nodes)
   if (waves.length === 0) return null
   const pos = new Map<string, { x: number; y: number }>()
@@ -63,7 +65,7 @@ export function DagMap({ nodes, selectedId, childCounts, onSelect }: DagMapProps
         height={height}
         viewBox={`0 0 ${String(width)} ${String(height)}`}
         role="img"
-        aria-label="研究依赖图：节点与依赖边"
+        aria-label={t('graphDagAria')}
         style={{ display: 'block', margin: '0 auto' }}
       >
         <defs>
@@ -113,7 +115,7 @@ export function DagMap({ nodes, selectedId, childCounts, onSelect }: DagMapProps
                 }
               }}
             >
-              <title>{`${node.id} · ${node.label} · ${node.ownerName ?? '未指派'} · ${node.state.text}`}</title>
+              <title>{t('graphNodeTitle', { id: node.id, label: node.label, owner: node.ownerName ?? t('graphUnassignedOwner'), state: node.state.text })}</title>
               <rect
                 width={NODE_W}
                 height={NODE_H}

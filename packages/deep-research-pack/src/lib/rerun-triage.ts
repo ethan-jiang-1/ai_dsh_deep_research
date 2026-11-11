@@ -7,7 +7,11 @@
  *
  * 边界：观察面只读（D18）——这里只有**话术**，不含按钮、不带动作 API（rerun 仍由用户把这句话
  * 发给 Lead 触发）。纯函数/常量，keyless 单测面。
+ *
+ * 文案走折层字典（`zh-fold` / `en-fold`）：中文常量保留给非 UI 消费面；UI 组件用
+ * `rerunTriageRowsOf(props.t)` 取当前语言。
  */
+import { translateZh, type PackTranslate } from './i18n.ts'
 
 /** 一行改法：用户语言 + 后果 + 可复制的一句话。 */
 interface TriageRow {
@@ -20,29 +24,50 @@ interface TriageRow {
 }
 
 /** 折叠块标题（两处共用，改文案只改这里）。 */
-export const RERUN_TRIAGE_TITLE = '还不满意？三种改法'
+export const RERUN_TRIAGE_TITLE = translateZh('triageTitle')
 
 /** 折叠块脚注（告诉用户怎么用这句话）。 */
-export const RERUN_TRIAGE_HINT = '照抄一句发给我即可；三种改法的代价写在每行后面。'
+export const RERUN_TRIAGE_HINT = translateZh('triageHint')
 
 /** 三种改法（顺序 = 推荐尝试顺序：先补证据，再改表达，最后才是重做）。 */
 export const RERUN_TRIAGE_ROWS: readonly TriageRow[] = [
   {
-    label: '补研究',
-    consequence: '按报告末节补证据，出新版本（vN+1）；已有结论与旧版本不变',
-    copy: '这份太浅，按报告末节的第 1 条补一轮，出新版本',
+    label: translateZh('triageMoreLabel'),
+    consequence: translateZh('triageMoreConsequence'),
+    copy: translateZh('triageMoreCopy'),
   },
   {
-    label: '改说法',
-    consequence: '只改措辞与结构，版本不变、不用重跑',
-    copy: '这份太长，帮我改说法，版本不用变',
+    label: translateZh('triageRewriteLabel'),
+    consequence: translateZh('triageRewriteConsequence'),
+    copy: translateZh('triageRewriteCopy'),
   },
   {
-    label: '另起一个 bundle',
-    consequence: '方向变了就重做一份，旧报告原样保留（成本≈一场新 run）',
-    copy: '方向不对，另起一个 bundle 重做，旧报告保留',
+    label: translateZh('triageRestartLabel'),
+    consequence: translateZh('triageRestartConsequence'),
+    copy: translateZh('triageRestartCopy'),
   },
 ]
+
+/** 当前语言的三行（UI 组件用）。 */
+export function rerunTriageRowsOf(t: PackTranslate = translateZh): readonly TriageRow[] {
+  return [
+    {
+      label: t('triageMoreLabel'),
+      consequence: t('triageMoreConsequence'),
+      copy: t('triageMoreCopy'),
+    },
+    {
+      label: t('triageRewriteLabel'),
+      consequence: t('triageRewriteConsequence'),
+      copy: t('triageRewriteCopy'),
+    },
+    {
+      label: t('triageRestartLabel'),
+      consequence: t('triageRestartConsequence'),
+      copy: t('triageRestartCopy'),
+    },
+  ]
+}
 
 /**
  * 折叠块的纯文本行（测试与 client-load 冒烟共用；渲染组件按行画，不另拼文案）。
@@ -50,8 +75,8 @@ export const RERUN_TRIAGE_ROWS: readonly TriageRow[] = [
  */
 export function triageFoldLines(rows: readonly TriageRow[] = RERUN_TRIAGE_ROWS): string[] {
   return [
-    RERUN_TRIAGE_TITLE,
+    translateZh('triageTitle'),
     ...rows.map((row) => `${row.label}：${row.consequence}｜「${row.copy}」`),
-    RERUN_TRIAGE_HINT,
+    translateZh('triageHint'),
   ]
 }
