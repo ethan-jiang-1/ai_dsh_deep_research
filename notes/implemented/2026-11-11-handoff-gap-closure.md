@@ -32,10 +32,10 @@
 - `source dev/env.sh && node scripts/smoke/l4-lite-smoke.mjs` → ALL PASS：五个角色（含 method-editor）assistant 响应 + scout `web_search` 真实工具调用。
 - `node --import tsx/esm --test tests/contracts/cli-entry.test.mjs tests/run/vendor-artifacts.test.mjs` → 7 pass；symlink 调用 `node /tmp/market-link.mjs --check` 与 `node /tmp/channel-cache-link.mjs fingerprint packages/deep-research-pack` → exit 0 且有输出（修前 `/tmp` 字面比较会静默 exit 0）。
 - `pnpm typecheck` → exit 0。
-- `node --import tsx/esm scripts/smoke/client-load-smoke.mjs --seed tests/fixtures/client-load-home --port 3109` → NOT-RUN 三次（主机健康门；最近 load 28.06 / free 455MB / 10 CPU：free < 512MB 且 load/cpu 2.81 > 1.5）；未跑 ≠ 通过。
-- clean-clone 探针：`git worktree` + 本地 submodule init + `pnpm install --frozen-lockfile` → 成功（10.6s）；`bash dev/vendor-build.sh` 的 tsc host 遍在 load 20.26 / free 82MB 下 15 分钟无产物，主动停止并移除 worktree——完整 export-dist 复跑记 U。
+- `node --import tsx/esm scripts/smoke/client-load-smoke.mjs --seed tests/fixtures/client-load-home --port 3109` → 正常健康门三次 NOT-RUN（最近 load 28.06 / free 455MB / 10 CPU）；按文档逃生口 `DSH_CLIENT_LOAD_ALLOW_UNHEALTHY=1` 强制跑 → ALL PASS（观察面 / 方法库 / 研究配置 / 终稿 / 状态页断言全绿）。正常门在本机仍会 NOT-RUN，取证不伪装常绿。
+- clean-clone 全链：`/private/tmp/dsh-clean-0.3.1` worktree + 本地 submodule init（离线替代远端）+ `pnpm install --frozen-lockfile` → `bash dev/vendor-build.sh` exit 0 → `node scripts/dist/export-dist.mjs` 全绿：163 条目、protocol 1、手册 sha 与当次 tgz 一致（`06f7…`）。与主 `_dist`（`cc92…`）sha 不同，但 `lib/client.js` / `lib/index.js` / `package.json` / `content/manual.md` 四件内容 sha 相同——差异在 tar 元数据，不是内容或路径泄漏；worktree 已移除。
 - `node scripts/dist/release-check.mjs` → OK version=0.3.1（tag 0.3.1，annotated；未 push、未 npm publish）。
 
 ## 环境状态
 
-macOS；Node 22.23.1；pnpm 11.7.0；全局 DSH 0.2.1-rc.5。0.3.1 是本地 tarball：已打本地 annotated tag `0.3.1`，未 push、未 npm publish；发布锚由该 tag 持有。`_dist/` 只留 0.3.1 制品，0.3.0 tgz 由 `export-dist` 清理。`client-load-smoke` 三次均因主机健康门 NOT-RUN（exit 2），不是通过。clean-clone 探针完成到 `pnpm install`；vendor-build 在低内存/高负载下未完成（U），前置已写进 README 与 Note。
+macOS；Node 22.23.1；pnpm 11.7.0；全局 DSH 0.2.1-rc.5。0.3.1 是本地 tarball：已打本地 annotated tag `0.3.1`，未 push、未 npm publish；发布锚由该 tag 持有。`_dist/` 只留 0.3.1 制品，0.3.0 tgz 由 `export-dist` 清理。clean-clone 全链已在本机 `/private/tmp` 复跑通过；`client-load-smoke` 正常健康门在本机仍 NOT-RUN，已用文档逃生口强制跑通过——两者都不写成“常绿”。
