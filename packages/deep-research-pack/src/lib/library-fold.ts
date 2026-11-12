@@ -37,13 +37,64 @@ const SECTION_LINE: Record<keyof LibrarySections, RegExp> = {
   limit: /^\s*[-*+]\s*不承诺\s*[:：]\s*(.*)$/,
 }
 
-/** 库条目标题行（`## ` 与 `##\t` 同判——读/写共用，BUG-083）。 */
-export const isLibraryHeadingLine = (line: string): boolean => /^##\s+/.test(line)
+/** 标题解析结果：`wellFormed=false` = 名称后还有无法归类的尾缀（写路径拒写，BUG-138）。 */
+export interface ParsedMethodHeading {
+  readonly name: string
+  readonly provenance: string | null
+  readonly isDefault: boolean
+  readonly wellFormed: boolean
+}
 
-/** 名称里不许出现的标注字符：`（…）` 是 provenance 语法、`〔…〕` 是默认标记语法；
+const HEADING_LINE = /^##\s+(.+)$/
+/** 标题段：`（…）` / `(…)` 来源注记，或 `〔…〕` 标注。 */
+const HEADING_SEGMENT = /^(?:[（(][^）)]*[）)]|〔[^〕]*〕)/
+const DEFAULT_MARK = '〔默认偏好〕'
+
+/**
+ * 方法库 heading 的**单一 codec**（D51，BUG-083/085/123/124/127/128 的类）：
+ * `## <名>[（provenance）][〔默认偏好〕]`——段间允许空白（含 U+3000），段序不限；
+ * 名称 = 首个段之前的文本。`wellFormed` = 名称之后只剩段与空白；尾缀（如 `）备注`）判非法。
+ *
+ * fold 与写路径共用本函数：两侧对同一行必须得到同一个 name/provenance/isDefault。
+ */
+export function parseMethodHeading(line: string): ParsedMethodHeading | null {
+  const match = HEADING_LINE.exec(line.trimEnd())
+  if (match === null) return null
+  const title = (match[1] ?? '').trim()
+  if (title === '') return null
+  const firstSegment = title.search(/[（(〔]/)
+  const name = (firstSegment === -1 ? title : title.slice(0, firstSegment)).trim()
+  if (name === '') return null
+  let rest = firstSegment === -1 ? '' : title.slice(firstSegment)
+  let provenance: string | null = null
+  let isDefault = false
+  let wellFormed = true
+  while (rest !== '') {
+    const ws = /^\s+/.exec(rest)
+    if (ws !== null) { rest = rest.slice(ws[0].length); continue }
+    const segment = HEADING_SEGMENT.exec(rest)
+    if (segment === null) { wellFormed = false; break }
+    const raw = segment[0]
+    if ((raw.startsWith('（') || raw.startsWith('(')) && provenance === null) provenance = raw.slice(1, -1)
+    else if (raw === DEFAULT_MARK) isDefault = true
+    rest = rest.slice(raw.length)
+  }
+  return { name, provenance, isDefault, wellFormed }
+}
+
+/** 渲染规范 heading（写路径的 default 操作使用；段序 = name → provenance → 默认标记）。 */
+export function renderMethodHeading(heading: Pick<ParsedMethodHeading, 'name' | 'provenance' | 'isDefault'>): string {
+  const provenance = heading.provenance === null ? '' : `（${heading.provenance}）`
+  return `## ${heading.name}${provenance}${heading.isDefault ? DEFAULT_MARK : ''}`
+}
+
+/** 库条目标题行（`## ` 与 `##\t` 同判——读/写共用，BUG-083）。 */
+export const isLibraryHeadingLine = (line: string): boolean => parseMethodHeading(line) !== null
+
+/** 名称里不许出现的标注字符：`（…）`/`(…)` 是 provenance 语法、`〔…〕` 是默认标记语法；
  *  含这些字符的名称会让 fold 与写路径名字不对称（BUG-081）。 */
 export function methodNameIssue(name: string): string | null {
-  if (/[（）〔〕]/.test(name)) return '名称不能包含全角括号「（）」或「〔〕」——它们是来源注记/默认标记的语法'
+  if (/[（）()〔〕]/.test(name)) return '名称不能包含全角括号「（）」、半角括号「()」或「〔〕」——它们是来源注记/默认标记的语法'
   return null
 }
 
@@ -60,15 +111,13 @@ export function foldLibrary(text: string | null): readonly LibraryEntry[] {
   }
   for (const rawLine of text.split('\n')) {
     const line = rawLine.trimEnd()
-    const heading = /^##\s+(.+)$/.exec(line)
+    const heading = parseMethodHeading(line)
     if (heading !== null) {
       flush()
-      const title = (heading[1] ?? '').trim()
-      const openParen = title.search(/[（(]/)
       current = {
-        name: (openParen === -1 ? title : title.slice(0, openParen)).replace(/〔[^〕]*〕/g, '').trim(),
-        provenance: openParen === -1 ? null : (title.slice(openParen + 1).split(/[）)]/)[0] ?? null),
-        isDefault: title.replace(/[（(][^）)]*[）)]/g, ' ').includes('〔默认偏好〕'),
+        name: heading.name,
+        provenance: heading.provenance,
+        isDefault: heading.isDefault,
         sections: { source: null, verify: null, report: null, limit: null },
         legacy: [],
       }

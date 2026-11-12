@@ -44,7 +44,11 @@ version/present 是否要为此改驾驶舱投影的读数路径（客户端读 
   正文提及标记不算。无标记的旧回执只认规范标题 `## 人工走查` 并在返回时补标记（一次性迁移）；标题变体不再识别。
   `renderAcceptance` 加写入指引；`withManualEvidence` 在已有标记块时替换而非追加。
 - **证据**：`tests/run/run-receipt.test.mjs` 22 例（含不成对/变体/正文提及/替换不重复四负例）；`pnpm test` 1377 通过 / 0 失败；`verify` 全绿。
-- **未做**：S2 method heading codec、S3 version/present 结构化优先。
+- **S2 方法库 heading**：新增单一 codec `parseMethodHeading`（名称 + `（…）`/`(…)` 来源段 + `〔默认偏好〕` 段，
+  段间空白含 U+3000、段序不限；尾缀判 `wellFormed=false`）；fold 与写路径共用；`renderMethodHeading` 统一默认操作；
+  `methodNameIssue` 同时拒半角括号。变异矩阵 `tests/cockpit/library-heading-codec.test.mjs`（5 不变式）。
+- **证据（S2 追加）**：`pnpm test` 1382 通过 / 0 失败；`verify` 全绿。
+- **未做**：S3 version/present 结构化优先。
 
 ## 验收标准
 

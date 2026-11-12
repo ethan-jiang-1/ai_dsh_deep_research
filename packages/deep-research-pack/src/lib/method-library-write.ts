@@ -4,24 +4,13 @@
  * 纯函数（keyless）；文本级替换——保留库头（第一个 `## ` 之前）、其它条目（含旧格式正文）与空行；
  * 同名条目整段覆盖。四字段必须都有内容（「（待定）」占位符由 parser 归一为空，不在此放行）。
  */
-import { SECTION_LABELS, foldLibrary, isLibraryHeadingLine, methodNameIssue, renderLibraryEntry, type LibraryEntry } from './library-fold.ts'
+import { SECTION_LABELS, methodNameIssue, parseMethodHeading, renderLibraryEntry, renderMethodHeading, type LibraryEntry } from './library-fold.ts'
 
 /** upsert 结果：动作 + 名称 + 写入后的全文。 */
 interface UpsertMethodEntryResult {
   readonly action: 'created' | 'updated'
   readonly name: string
   readonly text: string
-}
-
-/** 转义正则字面量。 */
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-}
-
-/** 条目标题匹配（名称后可带 `（provenance）` 与 `〔默认偏好〕`）。 */
-function methodHeadingPattern(name: string): RegExp {
-  // provenance 与默认标记可任意顺序（BUG-085）：标题 = 名称 + 若干「（…）」/「〔…〕」段。
-  return new RegExp(`^##\\s+${escapeRegExp(name)}(?:[^\\S\\n]*(?:[（(][^）)\\n]*[）)]|〔[^〕\\n]*〕))*[^\\S\\n]*$`, 'm')
 }
 
 /**
@@ -92,49 +81,58 @@ export function setDefaultMethodEntry(text: string, name: string): { readonly te
 
 /** Clear all default markers; zero-default libraries are valid. */
 export function clearDefaultMethodEntry(text: string): { readonly changed: boolean; readonly text: string } {
-  const next = text.split('\n').map((line) => isLibraryHeadingLine(line) ? line.replace(/〔默认偏好〕/g, '') : line).join('\n')
-  return { changed: next !== text, text: next }
+  let changed = false
+  const next = text.split('\n').map((line) => {
+    const parsed = parseMethodHeading(line)
+    if (parsed === null || !parsed.wellFormed || !parsed.isDefault) return line
+    changed = true
+    return renderMethodHeading({ ...parsed, isDefault: false })
+  }).join('\n')
+  return { changed, text: next }
 }
 
 function defaultCount(text: string): number {
-  return text.split('\n').filter((line) => isLibraryHeadingLine(line) && line.includes('〔默认偏好〕')).length
+  let count = 0
+  for (const line of text.split('\n')) {
+    const parsed = parseMethodHeading(line)
+    if (parsed !== null && parsed.wellFormed && parsed.isDefault) count += 1
+  }
+  return count
 }
 
 function setDefaultText(text: string, name: string): string {
-  const pattern = methodHeadingPattern(name)
   let targetCount = 0
   const lines = text.split('\n').map((line) => {
-    if (!isLibraryHeadingLine(line)) return line
-    const isTarget = pattern.test(line)
-    if (isTarget) targetCount += 1
-    const clean = line.replace(/〔默认偏好〕/g, '')
-    return isTarget ? `${clean}〔默认偏好〕` : clean
+    const parsed = parseMethodHeading(line)
+    if (parsed === null || !parsed.wellFormed) return line
+    if (parsed.name === name) {
+      targetCount += 1
+      return renderMethodHeading({ ...parsed, isDefault: true })
+    }
+    return parsed.isDefault ? renderMethodHeading({ ...parsed, isDefault: false }) : line
   })
   if (targetCount !== 1) throw new Error(`库里${targetCount === 0 ? '没有' : '有重名方法'}「${name}」，拒绝设为默认`)
   return lines.join('\n')
 }
 
-/** fold 视角的同名标题行（宽松名称提取；用于识别写路径正则覆盖不到的尾部文本，BUG-138）。 */
-function foldedHeadingLines(text: string, name: string): readonly { readonly line: string; readonly offset: number }[] {
+/** 同名标题行（codec 单点解析；`wellFormed` 过滤非法尾缀，BUG-138）。 */
+function headingLinesWhere(text: string, predicate: (parsed: NonNullable<ReturnType<typeof parseMethodHeading>>) => boolean): readonly { readonly line: string; readonly offset: number }[] {
   const matches: { line: string; offset: number }[] = []
   let offset = 0
   for (const line of text.split('\n')) {
-    if (isLibraryHeadingLine(line) && foldLibrary(line)[0]?.name === name) matches.push({ line, offset })
+    const parsed = parseMethodHeading(line)
+    if (parsed !== null && predicate(parsed)) matches.push({ line, offset })
     offset += line.length + 1
   }
   return matches
 }
 
-function matchingHeadingLines(text: string, name: string): readonly { readonly line: string; readonly offset: number }[] {
-  const pattern = methodHeadingPattern(name)
-  const matches: { line: string; offset: number }[] = []
-  let offset = 0
-  for (const line of text.split('\n')) {
-    if (pattern.test(line)) matches.push({ line, offset })
-    offset += line.length + 1
-  }
-  return matches
-}
+/** 写路径可安全改写的同名行（标题无非法尾缀）。 */
+const matchingHeadingLines = (text: string, name: string) => headingLinesWhere(text, (parsed) => parsed.wellFormed && parsed.name === name)
+/** 名称可寻址但标题非法的行（删除可用；编辑拒写，BUG-138）。 */
+const foldedHeadingLines = (text: string, name: string) => headingLinesWhere(text, (parsed) => !parsed.wellFormed && parsed.name === name)
+/** 任意同名行（删除入口：非法标题也可按名称寻址）。 */
+const namedHeadingLines = (text: string, name: string) => headingLinesWhere(text, (parsed) => parsed.name === name)
 
 /**
  * 从库文本里删除一条同名条目（保留库头与其它条目）。
@@ -147,7 +145,7 @@ export function removeMethodEntry(text: string, name: string): { removed: boolea
   if (target === '') throw new Error('删除方法需要名称')
   const nameIssue = methodNameIssue(target)
   if (nameIssue !== null) throw new Error(`方法条目名不合法：${nameIssue}`)
-  const matches = foldedHeadingLines(text, target)
+  const matches = namedHeadingLines(text, target)
   if (matches.length === 0) return { removed: false, text }
   if (matches.length > 1) throw new Error(`库里有重名方法「${target}」，拒绝删除`)
   const start = matches[0]?.offset ?? 0
