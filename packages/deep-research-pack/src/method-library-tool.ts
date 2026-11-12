@@ -9,20 +9,9 @@ import { defineTool } from '@deepseek-ai/dsh-tools'
 import { methodLibraryOperationProjection, hasMethodLibraryClaim } from './lib/method-library-commands.ts'
 import type {} from '@deepseek-ai/dsh-session-projection/types'
 import type {} from '@deepseek-ai/dsh-api-session-controller/types'
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { mutateMethodLibrary } from './method-library-io.ts'
 import { foldLibrary } from './lib/library-fold.ts'
 import { clearDefaultMethodEntry, removeMethodEntry, setDefaultMethodEntry, upsertMethodEntry } from './lib/method-library-write.ts'
-
-/** Read the user-owned method file; a missing file is the empty library. */
-function readLibrary(path: string): string {
-  try {
-    return readFileSync(path, 'utf8')
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
-    return ''
-  }
-}
 
 function digestText(text: string): string {
   return createHash('sha256').update(text, 'utf8').digest('hex')
@@ -89,15 +78,15 @@ export function apply(ctx: Context): void {
       const entries = foldLibrary(args.entry)
       const parsed = entries[0]
       if (entries.length !== 1 || parsed === undefined) throw new Error('entry 必须且只能包含一条可解析的库条目')
-      const path = join(cwd, 'method-library.md')
-      const text = readLibrary(path)
-      const priorEntries = foldLibrary(text)
-      const priorDefaults = priorEntries.filter((entry) => entry.isDefault).map((entry) => entry.name)
-      const priorNames = priorEntries.map((entry) => entry.name)
-      const result = upsertMethodEntry(text, parsed, { defaultAction: args.defaultAction })
-      mkdirSync(cwd, { recursive: true })
-      writeFileSync(path, result.text, 'utf8')
-      const persisted = readLibrary(path)
+      const mutated = mutateMethodLibrary(cwd, (text) => {
+        const priorEntries = foldLibrary(text)
+        const priorDefaults = priorEntries.filter((entry) => entry.isDefault).map((entry) => entry.name)
+        const priorNames = priorEntries.map((entry) => entry.name)
+        const result = upsertMethodEntry(text, parsed, { defaultAction: args.defaultAction })
+        return { text: result.text, value: { result, priorEntries, priorDefaults, priorNames } }
+      })
+      const { result, priorEntries, priorDefaults, priorNames } = mutated.value
+      const persisted = mutated.after
       const savedEntries = foldLibrary(persisted)
       const savedMatches = savedEntries.filter((entry) => entry.name === result.name)
       const saved = savedMatches[0]
@@ -160,13 +149,13 @@ export function apply(ctx: Context): void {
       if (args.action === 'set' && (name === undefined || name.trim() === '')) throw new Error('设默认需要方法名称')
       const cwd = session.header.cwd
       if (cwd === undefined) throw new Error('默认操作需要 owning agent session（没有 cwd）')
-      const path = join(cwd, 'method-library.md')
-      const text = readLibrary(path)
-      const result = args.action === 'set'
-        ? setDefaultMethodEntry(text, name ?? '')
-        : clearDefaultMethodEntry(text)
-      if (result.text !== text) writeFileSync(path, result.text, 'utf8')
-      const persisted = readLibrary(path)
+      const mutated = mutateMethodLibrary(cwd, (text) => {
+        const result = args.action === 'set'
+          ? setDefaultMethodEntry(text, name ?? '')
+          : clearDefaultMethodEntry(text)
+        return { text: result.text, value: result }
+      })
+      const persisted = mutated.after
       const defaults = foldLibrary(persisted).filter((entry) => entry.isDefault).map((entry) => entry.name)
       if (defaults.length > 1 || (args.action === 'set' && (defaults.length !== 1 || defaults[0] !== name))
         || (args.action === 'clear' && defaults.length !== 0)) {
@@ -176,7 +165,7 @@ export function apply(ctx: Context): void {
         operationId: args.operationId,
         action: args.action,
         name: args.action === 'set' ? name ?? '' : '',
-        changed: persisted !== text,
+        changed: persisted !== mutated.before,
         defaults,
       })
     },
@@ -218,14 +207,14 @@ export function apply(ctx: Context): void {
       })) throw new Error('方法库删除没有匹配到当前 UI 操作，拒绝删除')
       const cwd = session.header.cwd
       if (cwd === undefined) throw new Error('method_library_remove 需要 owning agent session（没有 cwd）')
-      const path = join(cwd, 'method-library.md')
-      const text = readLibrary(path)
-      const priorDefaults = foldLibrary(text).filter((entry) => entry.isDefault && entry.name !== args.name).map((entry) => entry.name)
-      const result = removeMethodEntry(text, args.name)
-      if (!result.removed) throw new Error(`库里没有「${args.name}」`)
-      writeFileSync(path, result.text, 'utf8')
-      const persisted = readLibrary(path)
-      const entries = foldLibrary(persisted)
+      let priorDefaults: string[] = []
+      const mutated = mutateMethodLibrary(cwd, (text) => {
+        priorDefaults = foldLibrary(text).filter((entry) => entry.isDefault && entry.name !== args.name).map((entry) => entry.name)
+        const result = removeMethodEntry(text, args.name)
+        if (!result.removed) throw new Error(`库里没有「${args.name}」`)
+        return { text: result.text, value: result }
+      })
+      const entries = foldLibrary(mutated.after)
       const remains = entries.some((entry) => entry.name === args.name)
       const defaults = entries.filter((entry) => entry.isDefault).map((entry) => entry.name)
       if (remains || JSON.stringify(defaults) !== JSON.stringify(priorDefaults)) throw new Error(`删除后方法「${args.name}」回读核对失败`)

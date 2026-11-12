@@ -23,7 +23,7 @@ type Bucket = 'root' | 'archive' | 'abandoned'
 
 /** 读面的统一结果：missing（不在场）/ unreadable（通道或权限失败）/ ok（含空值）。 */
 export type Outcome<T> =
-  | { readonly ok: true; readonly value: T }
+  | { readonly ok: true; readonly value: T; readonly warnings?: readonly string[] }
   | { readonly ok: false; readonly reason: 'missing' | 'unreadable'; readonly detail?: string }
 
 /** 目录项（结构性子集；不依赖 vendor 类型）。 */
@@ -67,6 +67,8 @@ export interface RunView {
   /** openRun 时的根目录快照（在场判定用；实时刷新走 list()）。 */
   readonly entries: readonly Entry[]
   readonly names: ReadonlySet<string>
+  /** 只含 `type === 'file'` 的条目（同名目录不算文件，BUG-100）。 */
+  hasFile(name: string): boolean
   list(dir?: string, opts?: { readonly signal?: AbortSignal }): Promise<Outcome<readonly Entry[]>>
   read(name: string, opts?: { readonly signal?: AbortSignal }): Promise<Outcome<TextFile>>
   version(name: string, opts?: { readonly signal?: AbortSignal }): Promise<Outcome<string>>
@@ -180,12 +182,14 @@ export async function openRun(source: RunSource, ref: string, opts?: { readonly 
     }
     const entries = listed.value
     const names = new Set(entries.map((entry) => entry.name))
+    const files = new Set(entries.filter((entry) => entry.type === 'file').map((entry) => entry.name))
     const view: RunView = {
       slug: parsed.slug,
       dir,
       bucket,
       entries,
       names,
+      hasFile: (name) => files.has(name),
       list: async (sub = '', listOpts) => {
         const rel = safeDir(sub)
         if (rel === null) return { ok: false, reason: 'unreadable', detail: `invalid directory: ${String(sub)}` }
@@ -290,11 +294,12 @@ export async function listRuns(source: RunSource, opts?: { readonly buckets?: re
   }
   const refs = [...seen.values()]
   if (refs.length === 0) return firstError ?? { ok: false, reason: 'missing', detail: 'no run bundles' }
+  const warnings = firstError === null ? [] : [`unreadable bucket: ${firstError.detail ?? firstError.reason}`]
   const allTimed = refs.every((ref) => typeof ref.mtimeMs === 'number')
   if (allTimed) {
     refs.sort((left, right) => ((right.mtimeMs ?? 0) - (left.mtimeMs ?? 0)) || left.slug.localeCompare(right.slug))
   } else {
     refs.sort((left, right) => (RANK[left.bucket] - RANK[right.bucket]) || left.slug.localeCompare(right.slug))
   }
-  return { ok: true, value: refs }
+  return { ok: true, value: refs, ...(warnings.length > 0 ? { warnings } : {}) }
 }

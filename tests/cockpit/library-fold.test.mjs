@@ -1,3 +1,8 @@
+// 负例留证 2026-11-12：BUG-081（名称含全角括号被当 provenance）
+// 负例留证 2026-11-12：BUG-082（默认判定裸子串）
+// 负例留证 2026-11-12：BUG-083（tab heading 读写口径不一致）
+// 负例留证 2026-11-12：BUG-085（marker/provenance 反序复制条目）
+// 负例留证 2026-11-12：BUG-093（四字段 bullet/缩进/全角冒号变体读空）
 // 方法库折算回归（library-fold）——「研究配置」页签数据面（D25 期 1 + detail-ux 期 1.5）。
 // 四字段新格式 + 旧格式兼容 + 解析容错 + 指令生成（管理动词正本 = research-brief skill；
 // 面板只生成不直写）。红证：模块缺席/断言松绑即红（node --test 直接可验）。
@@ -6,7 +11,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { foldLibrary, instructionOf, editInstruction, createInstruction, saveInstruction, renderLibraryEntry, flattenSectionValue, summaryOfEntry, SUMMARY_MAX_LENGTH, SECTION_LABELS, libraryReadStateOf } from '../../packages/deep-research-pack/src/lib/library-fold.ts';
+import { foldLibrary, instructionOf, editInstruction, createInstruction, saveInstruction, renderLibraryEntry, flattenSectionValue, summaryOfEntry, SUMMARY_MAX_LENGTH, SECTION_LABELS, libraryReadStateOf, methodNameIssue } from '../../packages/deep-research-pack/src/lib/library-fold.ts';
+import { upsertMethodEntry, clearDefaultMethodEntry, setDefaultMethodEntry } from '../../packages/deep-research-pack/src/lib/method-library-write.ts';
 import { SELFTEST_LIBRARY } from '../../scripts/lib/selftest-library.mjs';
 import { locateSessionStrategy, SHOW_MORE_SESSIONS_PATTERN } from '../../scripts/lib/web-ui-nav.mjs';
 import { METHOD_PRESETS_SKILL_PATH, methodPresetsFromSkillFile, patternMethodMappingFromSkill, baselineDisciplinesFromSkill } from '../../scripts/lib/method-presets.mjs';
@@ -280,9 +286,9 @@ test('电池·空条目：四分区全 null + legacyText null；editInstruction 
   assert.equal(editInstruction(e), '把研究偏好「空条目」改为：');
 });
 
-test('电池·杂项行：未知字段行忽略；全角冒号行不匹配分区（canonical = 半角冒号，静默忽略不编造）；### 非条目、其后分区行归上一条', () => {
+test('电池·杂项行：未知字段行忽略；全角冒号行按 BUG-093 读出；### 非条目、其后分区行归上一条', () => {
   const e = battery().find((x) => x.name === '杂项行条目');
-  assert.deepEqual(e.sections, { source: null, verify: '三级标题后的行归上一条', report: null, limit: null });
+  assert.deepEqual(e.sections, { source: '全角冒号不匹配', verify: '三级标题后的行归上一条', report: null, limit: null });
   assert.equal(e.legacyText, null);
 });
 
@@ -294,7 +300,7 @@ test('电池·旧格式续行：非前缀行续入 legacyText；载荷剥前缀�
 
 test('电池·CRLF+缩进：\\r 被 trimEnd 消化（分区仍匹配）；前导空格分区行不匹配——边界注记：canonical 写入为顶格', () => {
   const e = battery().find((x) => x.name === '缩进行条目');
-  assert.deepEqual(e.sections, { source: null, verify: '尾随空格行', report: null, limit: null });
+  assert.deepEqual(e.sections, { source: '前导空格行', verify: '尾随空格行', report: null, limit: null });
 });
 
 test('电池·指令族与容错：部分字段 createInstruction 只载非 null；乱输入不抛、无条目不编造', () => {
@@ -406,3 +412,40 @@ test('renderLibraryEntry：多行字段压成一行，内容不丢（库格式�
   assert.equal(folded.sections.report, 'c');
   assert.equal(folded.sections.limit, 'd');
 });
+
+
+const libEntry = (name) => ({ name, provenance: null, isDefault: false, sections: { source: '官方', verify: '双源', report: '结论先行', limit: '无' }, legacyText: null })
+// 负例留证 2026-11-12：BUG-081/082/083/093——fold 的标题/默认/四字段解析变体。
+// 还原法：名称校验删除、isDefault 退回 includes('默认偏好')、四字段退回 startsWith('- …:')。
+test('BUG-081 名称含全角括号：校验明确拒绝（不再被 fold 当 provenance）', () => {
+  assert.match(methodNameIssue('事实核查（变体）'), /全角括号/)
+  assert.equal(methodNameIssue('事实核查'), null)
+  assert.throws(() => upsertMethodEntry('', { ...libEntry('事实核查（变体）') }), /不合法/)
+})
+
+test('BUG-082 默认判定：只认精确〔默认偏好〕，provenance 含词不误判', () => {
+  assert.equal(foldLibrary('## 事实核查（我的默认偏好库，2026-10-12）\n- 找来源: 官方\n')[0].isDefault, false)
+  assert.equal(foldLibrary('## 事实核查（2026-10-12）〔默认偏好〕\n- 找来源: 官方\n')[0].isDefault, true)
+})
+
+test('BUG-083 heading 空白：tab heading 的 clear/set 与 fold 同口径', () => {
+  const lib = '# 库\n\n##\t目标（2026-10-12）〔默认偏好〕\n- 找来源: 官方\n- 怎么核实: 双源\n- 报告怎么写: 结论先行\n- 不承诺: 无\n'
+  assert.equal(foldLibrary(lib)[0].isDefault, true)
+  const cleared = clearDefaultMethodEntry(lib)
+  assert.equal(cleared.changed, true)
+  assert.equal(foldLibrary(cleared.text)[0].isDefault, false)
+  const set = setDefaultMethodEntry('# 库\n\n##\t目标（2026-10-12）\n', '目标')
+  assert.equal(foldLibrary(set.text)[0].isDefault, true)
+})
+
+test('BUG-085 provenance/默认标记反序：upsert 走 updated，不复制同名条目', () => {
+  const lib = '# 库\n\n## 目标〔默认偏好〕（2026-10-12）\n- 找来源: 官方\n'
+  const result = upsertMethodEntry(lib, { ...libEntry('目标'), sections: { source: '官方', verify: '双源', report: '结论先行', limit: '无' } })
+  assert.equal(result.action, 'updated')
+  assert.equal(foldLibrary(result.text).filter((item) => item.name === '目标').length, 1)
+})
+
+test('BUG-093 四字段 bullet/缩进/全角冒号变体都读出', () => {
+  const [e] = foldLibrary('## 目标（2026-10-12）\n* 找来源：官方\n+ 怎么核实: 双源\n  - 报告怎么写：结论先行\n- 不承诺: 无\n')
+  assert.deepEqual(e.sections, { source: '官方', verify: '双源', report: '结论先行', limit: '无' })
+})

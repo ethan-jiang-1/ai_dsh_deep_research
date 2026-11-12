@@ -141,10 +141,12 @@ export function planIndex(text: string | null | undefined): PlanIndex {
   // 取**最后**一条版本声明，并且先剥掉 HTML 注释（模板里的示例行也写 `图版本：vN`）。
   // 不剥注释/取第一条会把重写后的 plan 读成样板值（受控 E2E 实测：v2 被读成 v1 或 vN）。
   const withoutComments = text.replace(/<!--[\s\S]*?-->/g, '')
+  // 只认首个 `##` 之前的头部（正文旧版引用不夺权，BUG-102）；无 `##` 退化为全文首个。
+  const headerBlock = withoutComments.split(/^##\s/m)[0] ?? withoutComments
   let version: string | undefined
-  for (const match of withoutComments.matchAll(/(?:图版本|plan_version)\s*[：:]\s*([A-Za-z0-9._-]+)/g)) {
-    if (match[1] !== undefined) version = match[1]
-  }
+  const headerMatches = [...headerBlock.matchAll(/(?:图版本|plan_version)\s*[：:]\s*([A-Za-z0-9._-]+)/g)]
+  if (headerMatches.length > 0) version = headerMatches.at(-1)?.[1]
+  else version = withoutComments.match(/(?:图版本|plan_version)\s*[：:]\s*([A-Za-z0-9._-]+)/)?.[1]
   const lines = text.split(/\r?\n/)
   const nodes: PlanNode[] = []
   let columns: Map<string, number> | undefined

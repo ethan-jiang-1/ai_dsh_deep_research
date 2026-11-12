@@ -89,6 +89,11 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
     const controller = new AbortController()
     trustRef.current = { kind: 'unbound' }
     prevPending.current = false
+    setJournalEvents([])
+    setRows([])
+    setJournalSeen(false)
+    setHitl({ pending: false, since: undefined })
+    setError(null)
     void (async () => {
       try {
         let events: unknown[] = []
@@ -179,7 +184,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
           : []
         const versions = latestRunVersion(finalFileNames)
         // 版本面事实：plan 头/重写记录 + plan/ 快照清单（rerun 版本轨的数据源，折算住 run-version）。
-        const planRead = names.has('plan.md') ? await view.read('plan.md', { signal }) : null
+        const planRead = view.hasFile('plan.md') ? await view.read('plan.md', { signal }) : null
         if (stopped) return
         const planText = planRead !== null && planRead.ok && !planRead.value.truncated ? planRead.value.text : null
         const planDir = names.has('plan') ? await view.list('plan', { signal }) : null
@@ -190,12 +195,12 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         // review 终局 readiness（业务摘要审查态的数据源）：判定规则收在 pack lib
         // `review-readiness.terminalReadiness`——只认**行首**判定行、取最后一条。run-context
         // 的 review 策略是读到 eof：终局判定在文末，固定行窗会读到中段旧 FAIL（BUG-036 同族）。
-        const reviewRead = names.has('review.md') ? await view.read('review.md', { signal }) : null
+        const reviewRead = view.hasFile('review.md') ? await view.read('review.md', { signal }) : null
         if (stopped) return
         const reviewText = reviewRead !== null && reviewRead.ok && !reviewRead.value.truncated ? reviewRead.value.text : null
         const readiness = terminalReadiness(reviewText)
         const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : null
-        const questionRead = names.has('question.md') ? await view.read('question.md', { signal }) : null
+        const questionRead = view.hasFile('question.md') ? await view.read('question.md', { signal }) : null
         if (stopped) return
         const questionText = questionRead !== null && questionRead.ok ? questionRead.value.text : null
         // G3（RFC cockpit-flow-face）：剥 markdown 强调符再截断——`**` 与反引号是源文件
@@ -205,25 +210,25 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         const firstLine = flat === null || flat === '' ? null : flat.length > 72 ? `${flat.slice(0, 72)}…` : flat
         setFace({
           questionLine: firstLine,
-          hasQuestion: names.has('question.md'),
+          hasQuestion: view.hasFile('question.md'),
           steps: deriveSteps({
-            question: names.has('question.md'),
-            team: names.has('question.md'),
+            question: view.hasFile('question.md'),
+            team: view.hasFile('question.md'),
             leads: names.has('leads.md'),
             evidence: evidenceCount,
             findings: names.has('findings.md'),
-            review: names.has('review.md'),
-            final: names.has('final.md'),
+            review: view.hasFile('review.md'),
+            final: view.hasFile('final.md'),
           }, props.t),
           evidenceCount,
-          delivered: names.has('final.md'),
+          delivered: view.hasFile('final.md'),
           versions,
           reviewFail,
           planText,
           planSnapshotNames,
           questionText,
           finalFileNames,
-          hasFinal: names.has('final.md'),
+          hasFinal: view.hasFile('final.md'),
         })
       } catch (cause) { console.error('[research-status] scan 异常', String(cause)) }
     }
@@ -241,7 +246,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   // 流畸形死亡（BUG-023 修复①）：journal 尾窗折算，与 HITL 挂起互斥显示（挂起时主横幅让位）。
   const streamFailure = useMemo(() => streamFailureOf(journalEvents), [journalEvents])
   const anchors = useMemo(
-    () => deriveAnchors(journalEvents, face !== null ? { question: face.hasQuestion, delivered: face.delivered } : undefined, props.t),
+    () => deriveAnchors(journalEvents, face !== null ? { question: face.hasQuestion, delivered: delivery !== null } : undefined, props.t),
     [journalEvents, face, props.t],
   )
 

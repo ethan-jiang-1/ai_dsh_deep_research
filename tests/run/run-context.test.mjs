@@ -311,3 +311,25 @@ test('bundleCandidates / readPolicyOf：候选顺序与读策略表是纯函数'
   assert.equal(readPolicyOf('question.md'), 80);
   assert.equal(readPolicyOf('evidence/e.md'), 40);
 });
+
+// 负例留证 2026-11-12：BUG-089——修复前一桶有结果就丢另一桶 unreadable；BUG-100——names 只按名字。
+// 还原法 = listRuns 不收集 firstError / RunView 不建 files 集。
+test('BUG-089 listRuns：部分桶不可读 → ok 带 warnings；全空且有错 → unreadable', async () => {
+  const tree = { drt_root: { 'question.md': 'Q' }, archive: {} }
+  const partial = await listRuns(fakeSource(tree, { errors: { archive: 'unreadable' } }))
+  assert.equal(partial.ok, true)
+  assert.equal(partial.value.length, 1)
+  assert.deepEqual(partial.warnings, ['unreadable bucket: list archive'])
+  const none = await listRuns(fakeSource({ archive: {} }, { errors: { archive: 'unreadable' } }))
+  assert.equal(none.ok, false)
+  assert.equal(none.reason, 'unreadable')
+})
+
+test('BUG-100 RunView.hasFile：同名目录不算文件；普通文件才算', async () => {
+  const tree = { drt_x: { 'final.md': { 'nested.md': 'x' }, 'question.md': 'Q' } }
+  const opened = await openRun(fakeSource(tree), 'drt_x')
+  assert.equal(opened.ok, true)
+  assert.equal(opened.value.names.has('final.md'), true)
+  assert.equal(opened.value.hasFile('final.md'), false)
+  assert.equal(opened.value.hasFile('question.md'), true)
+})

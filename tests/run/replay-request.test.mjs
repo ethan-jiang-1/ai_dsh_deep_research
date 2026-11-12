@@ -339,3 +339,22 @@ test('time-context 只比 turn/step：墙钟不同不红，步序不同红', () 
   const verdict = compareReplayRequests(expected, diffStep).find(({ id }) => id === 'time-context');
   assert.equal(verdict.ok, false, '注入步序变化必须红');
 });
+
+// 负例留证 2026-11-12：BUG-091/106——历史 completed + 哨兵不得为后续 open/failed 回合作证。
+// 还原法 = turnCompleted 用全量 some；sentinelInAssistantText 用全量 assistant texts。
+test('BUG-091/106 当前回合：历史 completed/哨兵不夺权，末回合 completed 才放行', () => {
+  const line = (obj) => JSON.stringify(obj)
+  const done = [
+    line({ type: 'turn/start', data: { turn: 1 } }),
+    line({ type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '探针完成' }] } } }),
+    line({ type: 'turn/end', data: { turn: 1, reason: { kind: 'completed' } } }),
+  ]
+  const open = [...done, line({ type: 'turn/start', data: { turn: 2 } }), line({ type: 'assistant/message', data: { message: { content: [{ type: 'text', text: '仍在工作' }] } } })]
+  const failed = [...open, line({ type: 'turn/end', data: { turn: 2, reason: { kind: 'failed' } } })]
+  assert.equal(turnCompleted(done.join('\n')), true)
+  assert.equal(turnCompleted(open.join('\n')), false)
+  assert.equal(turnCompleted(failed.join('\n')), false)
+  assert.equal(sentinelInAssistantText(done.join('\n'), '探针完成'), true)
+  assert.equal(sentinelInAssistantText(open.join('\n'), '探针完成'), false)
+  assert.equal(sentinelInAssistantText(failed.join('\n'), '探针完成'), false)
+})

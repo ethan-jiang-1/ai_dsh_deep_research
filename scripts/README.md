@@ -148,6 +148,7 @@
 | lib/replay-request.mjs | record-role-fixture、replay-request.test、snapshot-replay-smoke | 组装请求面逐条比较：persona、header 全序列、四处 user/message 注入（含时钟序列）（定向归一化） |
 | lib/profile-health.mjs | profile-health.test、record-role-fixture、snapshot-replay-smoke、team-preflight-smoke | dev profile 版本面预检：团队层版本 == 运行时 dsh 版本；缺席/落后 → 明确 exit 2 + 重建指令（BUG-066） |
 | lib/startup-hint.mjs | startup-hint.test、web-harness | boot 失败归因：识别日志里的 incompatible/exemption，指出 profile 未随 pin 重钉（BUG-066） |
+| lib/port-reclaim-policy.mjs | port-reclaim.test、port-reclaim | 端口 listener 身份纯判据（只认本仓 DSH web；无子进程依赖） |
 | lib/run-lock.mjs | client-load-smoke、run-lock.test、snapshot-replay-smoke | 冒烟脚本进程级运行锁：存活拒跑、陈旧锁接管、释放（共享 DSH_HOME 的脚本互斥） |
 | lib/replay-network-offline.cjs | snapshot-replay-smoke | 回放 A 层离线闸 preload：非 loopback DNS(lookup/resolve*)/connect 立即失败；只作用于 dsh 主进程（BUG-064/067） |
 | lib/replay-network-offline-policy.cjs | replay-network-offline.test | 离线闸纯判据（isLoopback/isDshMain；无 node:net 依赖，测试可直引） |

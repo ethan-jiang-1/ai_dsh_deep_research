@@ -6,7 +6,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { foldLibrary, libraryReadStateOf, type LibraryEntry } from '../../lib/library-fold.ts'
+import { foldLibrary, type LibraryEntry } from '../../lib/library-fold.ts'
 import { bindingTrust } from '../../lib/binding-trust.ts'
 import { openRun, type RunSource } from '../../lib/run-context.ts'
 import { foldMethodAdoption, type MethodAdoption } from '../../lib/method-of-question.ts'
@@ -15,12 +15,15 @@ import type { PackTranslate } from '../../lib/i18n.ts'
 import { LIBRARY_PATH, type DetailState } from './config-model.ts'
 import type { FollowTarget, JournalFrame } from '../ResearchStatusTab.tsx'
 import type { DefaultsStore } from '../defaults/store.ts'
+import type { MethodLibraryReadResult } from '../../lib/method-library-read.ts'
 
 /** 页签体注入面：库文件读取 + 目录列举（本次研究区定位 bundle）+ journal 流 + 指令发送闭包
  *  （index.ts 装配，绑定 remote）。 */
 export interface ResearchConfigTabInjected {
-  /** 读工作区文本文件（limit = 行上限，缺省 40——库读传大限防截断，见 BUG-026）；不可达 → null。 */
+  /** 读工作区文本文件（limit = 行上限，缺省 40）；不可达 → null。 */
   readonly readFile: (sessionId: SessionId, path: string, signal: AbortSignal, limit?: number) => Promise<string | null>
+  /** 完整方法库读面（分页 + eof；配置页签不再用固定 1000 行截断，BUG-088）。 */
+  readonly readLibrary: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<MethodLibraryReadResult>
   /** 以当前会话打开的 run bundle 读面（位置/读策略归 lib）。 */
   readonly runSource: (sessionId: SessionId) => RunSource
   /** 列工作区目录（方法库 `.` 等）；run bundle 的三位置发现归 run-context。 */
@@ -34,6 +37,10 @@ export interface ResearchConfigTabInjected {
 }
 
 export type ConfigFeedInput = ResearchConfigTabInjected & { readonly sessionId: SessionId | undefined; readonly t: PackTranslate }
+
+/** session epoch：reload 只允许「当前 session + 当前序号」回写（BUG-086）。 */
+export interface FeedEpoch { current: SessionId | undefined; seq: number }
+export const isReloadCurrent = (epoch: FeedEpoch, sid: SessionId, seq: number): boolean => epoch.current === sid && epoch.seq === seq
 
 export function useConfigFeed(props: ConfigFeedInput) {
   const [entries, setEntries] = useState<readonly LibraryEntry[] | null>(null)
@@ -60,22 +67,48 @@ export function useConfigFeed(props: ConfigFeedInput) {
   const aliveRef = useRef(true)
   useEffect(() => () => { aliveRef.current = false }, [])
 
+  const sessionRef = useRef(sessionId)
+  sessionRef.current = sessionId
+  const epochRef = useRef<FeedEpoch>({ current: sessionId, seq: 0 })
+  const reloadControllerRef = useRef<AbortController | null>(null)
+
   const reload = useCallback(async (sid: SessionId): Promise<readonly LibraryEntry[]> => {
-    // 库读行上限 1000（BUG-026：写死 40 会静默截断多条目库——≥150 条目量级，留 vendor
-    // maxLines〔默认 5000〕配置余量）
-    const text = await props.readFile(sid, LIBRARY_PATH, new AbortController().signal, 1000)
-    const folded = foldLibrary(text)
-    setEntries(folded)
-    // 「无结果」≠「失败」（外部状态文案准则：No result is different from failure）：先问目录
-    // 文件在不在——不存在 = 新工作区的正常空态；在而读不回 = 如实报读不到，不冒充"正在读取"。
-    const files = await props.listDir(sid, '.', new AbortController().signal)
-    setLibraryRead(libraryReadStateOf(text, files, LIBRARY_PATH))
+    const seq = ++epochRef.current.seq
+    epochRef.current.current = sid
+    reloadControllerRef.current?.abort()
+    const controller = new AbortController()
+    reloadControllerRef.current = controller
+    // 完整读面（readLibrary 分页到 eof）：固定 1000 行会在 >1000 行时静默短读（BUG-088）。
+    const result = await props.readLibrary(sid, LIBRARY_PATH, controller.signal)
+    const folded = result.kind === 'ok' ? foldLibrary(result.text) : []
+    if (!isReloadCurrent(epochRef.current, sid, seq) || sessionRef.current !== sid) return folded
+    if (result.kind === 'ok') { setEntries(folded); setLibraryRead('ok') }
+    else if (result.kind === 'absent') { setEntries([]); setLibraryRead('absent') }
+    else { setEntries(null); setLibraryRead('unreadable') }
     return folded
-  }, [props.readFile, props.listDir])
+  }, [props.readLibrary])
 
   useEffect(() => {
-    if (sessionId === undefined) { setEntries(null); return }
+    // 切会话：取消上一轮读 + 推进 epoch（旧 resolve 不再回写，BUG-086）；交互态归零（BUG-108）。
+    reloadControllerRef.current?.abort()
+    epochRef.current.seq += 1
+    epochRef.current.current = sessionId
+    setReceiptBase(null)
+    setReceiptDiff(null)
+    setReplied(false)
+    setDetail(null)
+    setMenuFor(null)
+    setConfirmDelete(null)
+    setSwitchOpen(false)
+    setSending(false)
+    repliedMarker.current = 0
+    diffBase.current = null
+    if (sessionId === undefined) { setEntries(null); setLibraryRead('absent'); return }
     void reload(sessionId)
+    return () => {
+      reloadControllerRef.current?.abort()
+      epochRef.current.seq += 1
+    }
   }, [sessionId, reload])
 
   // journal 流（只为本面板的两件事：会话绑定 → bundle 定位；发送后的 assistant 事件 → 已回话）。
@@ -121,7 +154,7 @@ export function useConfigFeed(props: ConfigFeedInput) {
         return
       }
       const view = opened.value
-      const hasQuestion = view.names.has('question.md')
+      const hasQuestion = view.hasFile('question.md')
       const text = hasQuestion ? await view.read('question.md', { signal: controller.signal }) : null
       if (stopped) return
       setAdoption(foldMethodAdoption(text?.ok === true ? text.value.text : null, { bundle: true, question: hasQuestion }))
@@ -150,10 +183,14 @@ export function useConfigFeed(props: ConfigFeedInput) {
       repliedMarker.current = events.length
       diffBase.current = entries
       const result = await props.sendInstruction(sid, text)
+      if (sessionRef.current !== sid) return
       setReceiptBase({ ok: result.ok, detail: result.detail, target: intent.target, expectsChange: intent.expectsChange })
       if (!result.ok) return
       onOk?.()
-      if (!intent.expectsChange) { setTimeout(() => { void reload(sid) }, 2500); return }
+      if (!intent.expectsChange) {
+        setTimeout(() => { if (sessionRef.current === sid) void reload(sid) }, 2500)
+        return
+      }
       // 落盘对账：有界轮询（20 × 3s）。Lead 是模型，落笔时间不可预期——轮询到对账出 diff 即停，
       // 超时停在「已发送／已回话」态（不冒充落地）。
       for (let i = 0; i < 20 && aliveRef.current; i++) {

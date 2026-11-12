@@ -50,15 +50,24 @@ export function bootWeb({ bin, cwd, profile, patchPath = null, port, env, timeou
   const child = spawn(process.execPath, argv, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'], detached })
   let output = ''
   const banner = new Promise((resolve, reject) => {
+    let timer
+    const settle = (fn, value) => {
+      if (timer !== undefined) clearTimeout(timer)
+      timer = undefined
+      child.off('exit', onExit)
+      fn(value)
+    }
     const onData = (chunk) => {
       output += String(chunk)
       const m = bannerRe(port).exec(output)
-      if (m !== null) resolve({ token: m[1] })
+      if (m !== null) settle(resolve, { token: m[1] })
     }
+    const onExit = (code) => settle(reject, new Error(`web 进程提前退出（code ${String(code)}）${startupFailureHint(output, profile) === '' ? '' : `\n${startupFailureHint(output, profile)}`}\n${output.slice(-tailChars)}`))
     child.stdout.on('data', onData)
     child.stderr.on('data', onData)
-    child.on('exit', (code) => reject(new Error(`web 进程提前退出（code ${String(code)}）${startupFailureHint(output, profile) === '' ? '' : `\n${startupFailureHint(output, profile)}`}\n${output.slice(-tailChars)}`)))
-    setTimeout(() => reject(new Error(`等待启动横幅超时${startupFailureHint(output, profile) === '' ? '' : `\n${startupFailureHint(output, profile)}`}\n${output.slice(-tailChars)}`)), timeoutMs)
+    child.on('exit', onExit)
+    // 成功/失败/提前退出任一结算点都清 timer：库式消费者不再被 120–240s 的 timeout 多留（BUG-095）。
+    timer = setTimeout(() => settle(reject, new Error(`等待启动横幅超时${startupFailureHint(output, profile) === '' ? '' : `\n${startupFailureHint(output, profile)}`}\n${output.slice(-tailChars)}`)), timeoutMs)
   })
   return banner.then(({ token }) => ({ child, token, output: () => output }))
 }

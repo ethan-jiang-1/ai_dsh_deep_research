@@ -29,11 +29,22 @@ export interface LibraryEntry {
 }
 
 const SECTION_KEYS: readonly (keyof LibrarySections)[] = ['source', 'verify', 'report', 'limit']
-const SECTION_PREFIXES: Record<keyof LibrarySections, string> = {
-  source: '- 找来源:',
-  verify: '- 怎么核实:',
-  report: '- 报告怎么写:',
-  limit: '- 不承诺:',
+/** 四字段行：Markdown bullet 变体（`-`/`*`/`+`/缩进）+ 半/全角冒号（BUG-093）。 */
+const SECTION_LINE: Record<keyof LibrarySections, RegExp> = {
+  source: /^\s*[-*+]\s*找来源\s*[:：]\s*(.*)$/,
+  verify: /^\s*[-*+]\s*怎么核实\s*[:：]\s*(.*)$/,
+  report: /^\s*[-*+]\s*报告怎么写\s*[:：]\s*(.*)$/,
+  limit: /^\s*[-*+]\s*不承诺\s*[:：]\s*(.*)$/,
+}
+
+/** 库条目标题行（`## ` 与 `##\t` 同判——读/写共用，BUG-083）。 */
+export const isLibraryHeadingLine = (line: string): boolean => /^##\s+/.test(line)
+
+/** 名称里不许出现的标注字符：`（…）` 是 provenance 语法、`〔…〕` 是默认标记语法；
+ *  含这些字符的名称会让 fold 与写路径名字不对称（BUG-081）。 */
+export function methodNameIssue(name: string): string | null {
+  if (/[（）〔〕]/.test(name)) return '名称不能包含全角括号「（）」或「〔〕」——它们是来源注记/默认标记的语法'
+  return null
 }
 
 /** 从库文本折算条目清单（顺序 = 文件顺序；重名不去重——如实投影，去重归 Lead）。 */
@@ -57,7 +68,7 @@ export function foldLibrary(text: string | null): readonly LibraryEntry[] {
       current = {
         name: (openParen === -1 ? title : title.slice(0, openParen)).replace(/〔[^〕]*〕/g, '').trim(),
         provenance: openParen === -1 ? null : (title.slice(openParen + 1).split('）')[0] ?? null),
-        isDefault: title.includes('默认偏好'),
+        isDefault: title.includes('〔默认偏好〕'),
         sections: { source: null, verify: null, report: null, limit: null },
         legacy: [],
       }
@@ -66,9 +77,9 @@ export function foldLibrary(text: string | null): readonly LibraryEntry[] {
     if (current === null) continue
     let matched = false
     for (const key of SECTION_KEYS) {
-      const prefix = SECTION_PREFIXES[key]
-      if (line.startsWith(prefix)) {
-        current.sections[key] = line.slice(prefix.length).trim() || null
+      const match = SECTION_LINE[key].exec(line)
+      if (match !== null) {
+        current.sections[key] = (match[1] ?? '').trim() || null
         matched = true
         break
       }

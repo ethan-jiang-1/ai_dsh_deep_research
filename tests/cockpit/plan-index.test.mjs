@@ -203,3 +203,10 @@ test('BUG-058 有环 plan：planIssuesOf 报 cycle，且不再给误导性的 wa
   assert.equal(issues.some((issue) => issue.kind === 'wave-prefix'), false, '有环时不得给重编号提示')
   assert.match(issues.find((issue) => issue.kind === 'cycle').message, /不可执行/)
 })
+
+// 负例留证 2026-11-12：BUG-102——正文「旧版图版本：v1」覆盖头部 v2。
+// 还原法 = 版本声明回到全文本 matchAll 取最后一条。
+test('BUG-102 版本声明只认首个 ## 之前的头部，正文引用不夺权', () => {
+  const text = ['# Plan', '', '图版本：v2', '', '## 备注', '旧版图版本：v1 已废弃', ''].join('\n')
+  assert.equal(planIndex(text).version, 'v2')
+})

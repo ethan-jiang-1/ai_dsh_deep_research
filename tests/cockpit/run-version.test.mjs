@@ -168,3 +168,33 @@ test('fail-soft：全空输入不 throw，如实未交付且无版本', () => {
   assert.equal(face.state, 'none')
   assert.equal(face.label, '未交付')
 });
+
+// 负例留证 2026-11-12：BUG-101——presented=false 时 deliveredVersion 仍渲染「已交付」。
+// 还原法 = deliveredFinalVersion 无条件取 explicitDelivered。
+test('BUG-101 没有 present（delivered=false）→ 不认 deliveredVersion/label 已交付', () => {
+  const face = runVersionFaceOf({ delivered: false, deliveredVersion: 9, finalFileNames: ['v1.md'], planText: '图版本：v2' })
+  assert.equal(face.deliveredFinalVersion, null)
+  assert.doesNotMatch(face.label, /已交付 v9/)
+})
+
+// 负例留证 2026-11-12：BUG-102/112——正文版本引用/普通斜杠 bullet 不得制造头版本或冲突。
+// 还原法 = planVersionsOf 全文取最后一条 / recorded 恢复无上下文斜杠分支。
+test('BUG-102/112 头部 v2 + 正文旧版引用 v1 → current=2；普通 `- 参考 / v1 /` 不产生 recorded', () => {
+  const text = ['# Plan', '', '图版本：v2', '', '## 备注', '旧版图版本：v1 已废弃', '- 参考 / v1 / 旧方案示例', ''].join('\n')
+  const face = runVersionFaceOf({ delivered: false, finalFileNames: [], planText: text })
+  assert.equal(face.currentPlanVersion, 2)
+  assert.equal(face.recordedPlanVersion, null)
+  assert.equal(face.versionConflicted, false)
+  const realRecord = ['# Plan', '', '图版本：v3', '', '- 2026-11-12 / v1 / 重写记录', ''].join('\n')
+  assert.equal(runVersionFaceOf({ delivered: false, finalFileNames: [], planText: realRecord }).recordedPlanVersion, 1)
+})
+
+// 负例留证 2026-11-12：BUG-105——`polish-extra` 被 \b 截成 polish。还原法 = 恢复 \b。
+test('BUG-105 rerun kind 必须有分隔符/行尾边界，后缀不截断', () => {
+  const base = (kind) => ['# Q', '', `> rerun: v2 · ${kind} 2026-11-12`, ''].join('\n')
+  assert.equal(runVersionFaceOf({ delivered: false, finalFileNames: [], planText: '', questionText: base('polish') }).rerun?.kind, 'polish')
+  assert.equal(runVersionFaceOf({ delivered: false, finalFileNames: [], planText: '', questionText: base('structural') }).rerun?.kind, 'structural')
+  assert.equal(runVersionFaceOf({ delivered: false, finalFileNames: [], planText: '', questionText: base('evidence-expansion') }).rerun?.kind, 'evidence-expansion')
+  assert.equal(runVersionFaceOf({ delivered: false, finalFileNames: [], planText: '', questionText: base('polish-extra') }).rerun, null)
+  assert.equal(runVersionFaceOf({ delivered: false, finalFileNames: [], planText: '', questionText: base('structural-extra') }).rerun, null)
+})

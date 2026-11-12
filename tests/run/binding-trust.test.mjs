@@ -8,7 +8,7 @@ import { toolCall, toolResult } from '../fixtures/events.mjs';
 
 const read = (path = 'drt_x/a.md') => toolCall({ name: 'read', arguments: { path }, time: '2026-10-23T10:00:00Z' });
 const write = (path = 'drt_x/a.md') => toolCall({ name: 'write', arguments: { file_path: path }, time: '2026-10-23T10:00:00Z' });
-const ask = (callId = 'call-1') => toolCall({ name: 'ask_user_question', callId, arguments: { questions: [{}] }, time: '2026-10-23T10:00:00Z' });
+const ask = (callId = 'call-1') => toolCall({ name: 'ask_user_question', callId, arguments: { questions: [{ header: '研究类型' }] }, time: '2026-10-23T10:00:00Z' });
 const answered = (callId = 'call-1') => toolResult({ callId, text: JSON.stringify({ answers: [{ id: 'q1', selected: ['a'] }] }), time: '2026-10-23T10:01:00Z' });
 
 test('无绑定 → unbound；write 命中 → bound write（即使有挂起）', () => {

@@ -14,7 +14,7 @@
 // tests/run-state.test.mjs（三态夹具与 native log reader，测试路径零子进程，layering 合规）。
 // 运行需 `node --import tsx/esm`（直引 pack .ts 源）。
 import { argsObjectOf } from '../../packages/deep-research-pack/src/lib/journal-wire.ts'
-import { existsSync, readdirSync } from 'node:fs'
+import { existsSync, lstatSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { sessionBindingOf } from '../../packages/deep-research-pack/src/lib/bundle-bind.ts'
@@ -108,6 +108,11 @@ export function bundleDirOf(wsRoot, bundleName) {
   return null
 }
 
+/** 普通文件在场（同名目录/symlink 不算交付，BUG-100）。 */
+function isRegularFile(path) {
+  try { return lstatSync(path).isFile() } catch { return false }
+}
+
 /**
  * 会话 + 工作区组合快照（watcher 与前置自拒的判定输入；全字段可 JSON 序列化打日志）。
  * activeBundle / finalWritten / runSettled 只跟**本会话绑定**的 bundle 走；无绑定 = null
@@ -140,7 +145,7 @@ export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false, no
   const bundleDir = activeBundle === null ? null : bundleDirOf(wsRoot, activeBundle)
   // null = 无绑定/不可读，不能判；false = 绑定的 bundle 无 final；true = 有。
   // D28：final 判定跨三操作桶，不因归档/停放把已落 final 误报成未落。
-  const finalWritten = bundleDir === null ? null : existsSync(join(bundleDir, 'final.md'))
+  const finalWritten = bundleDir === null ? null : isRegularFile(join(bundleDir, 'final.md'))
   const bundleLocation = bundleDir === null ? null
     : bundleDir === join(wsRoot, 'archive', activeBundle) ? 'archive'
       : bundleDir === join(wsRoot, '_abandoned', activeBundle) ? 'abandoned' : 'root'

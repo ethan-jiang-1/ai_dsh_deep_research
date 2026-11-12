@@ -4,7 +4,7 @@
  * 纯函数（keyless）；文本级替换——保留库头（第一个 `## ` 之前）、其它条目（含旧格式正文）与空行；
  * 同名条目整段覆盖。四字段必须都有内容（「（待定）」占位符由 parser 归一为空，不在此放行）。
  */
-import { SECTION_LABELS, renderLibraryEntry, type LibraryEntry } from './library-fold.ts'
+import { SECTION_LABELS, isLibraryHeadingLine, methodNameIssue, renderLibraryEntry, type LibraryEntry } from './library-fold.ts'
 
 /** upsert 结果：动作 + 名称 + 写入后的全文。 */
 interface UpsertMethodEntryResult {
@@ -20,7 +20,8 @@ function escapeRegExp(value: string): string {
 
 /** 条目标题匹配（名称后可带 `（provenance）` 与 `〔默认偏好〕`）。 */
 function methodHeadingPattern(name: string): RegExp {
-  return new RegExp(`^##\\s+${escapeRegExp(name)}(?:（[^）\\n]*）)?(?:〔[^〕\\n]*〕)*\\s*$`, 'm')
+  // provenance 与默认标记可任意顺序（BUG-085）：标题 = 名称 + 若干「（…）」/「〔…〕」段。
+  return new RegExp(`^##\\s+${escapeRegExp(name)}(?:(?:（[^）\\n]*）)|(?:〔[^〕\\n]*〕))*\\s*$`, 'm')
 }
 
 /**
@@ -36,6 +37,8 @@ export function upsertMethodEntry(
 ): UpsertMethodEntryResult {
   const name = entry.name.trim()
   if (name === '') throw new Error('方法条目缺名称')
+  const nameIssue = methodNameIssue(name)
+  if (nameIssue !== null) throw new Error(`方法条目名不合法：${nameIssue}`)
   const missing = SECTION_LABELS.filter(({ key }) => {
     const value = entry.sections[key]
     return value === null || value.trim() === ''
@@ -75,6 +78,8 @@ export function upsertMethodEntry(
 export function setDefaultMethodEntry(text: string, name: string): { readonly text: string } {
   const target = name.trim()
   if (target === '') throw new Error('方法条目缺名称')
+  const nameIssue = methodNameIssue(target)
+  if (nameIssue !== null) throw new Error(`方法条目名不合法：${nameIssue}`)
   const matches = matchingHeadingLines(text, target)
   if (matches.length === 0) throw new Error(`库里没有「${target}」`)
   if (matches.length > 1) throw new Error(`库里有重名方法「${target}」，拒绝设为默认`)
@@ -83,19 +88,19 @@ export function setDefaultMethodEntry(text: string, name: string): { readonly te
 
 /** Clear all default markers; zero-default libraries are valid. */
 export function clearDefaultMethodEntry(text: string): { readonly changed: boolean; readonly text: string } {
-  const next = text.split('\n').map((line) => line.startsWith('## ') ? line.replace(/〔默认偏好〕/g, '') : line).join('\n')
+  const next = text.split('\n').map((line) => isLibraryHeadingLine(line) ? line.replace(/〔默认偏好〕/g, '') : line).join('\n')
   return { changed: next !== text, text: next }
 }
 
 function defaultCount(text: string): number {
-  return text.split('\n').filter((line) => line.startsWith('## ') && line.includes('〔默认偏好〕')).length
+  return text.split('\n').filter((line) => isLibraryHeadingLine(line) && line.includes('〔默认偏好〕')).length
 }
 
 function setDefaultText(text: string, name: string): string {
   const pattern = methodHeadingPattern(name)
   let targetCount = 0
   const lines = text.split('\n').map((line) => {
-    if (!line.startsWith('## ')) return line
+    if (!isLibraryHeadingLine(line)) return line
     const isTarget = pattern.test(line)
     if (isTarget) targetCount += 1
     const clean = line.replace(/〔默认偏好〕/g, '')
@@ -125,6 +130,8 @@ function matchingHeadingLines(text: string, name: string): readonly { readonly l
 export function removeMethodEntry(text: string, name: string): { removed: boolean; text: string } {
   const target = name.trim()
   if (target === '') throw new Error('删除方法需要名称')
+  const nameIssue = methodNameIssue(target)
+  if (nameIssue !== null) throw new Error(`方法条目名不合法：${nameIssue}`)
   const matches = matchingHeadingLines(text, target)
   if (matches.length === 0) return { removed: false, text }
   if (matches.length > 1) throw new Error(`库里有重名方法「${target}」，拒绝删除`)

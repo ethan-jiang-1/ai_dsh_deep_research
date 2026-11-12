@@ -245,7 +245,7 @@ export function apply(ctx: ClientContext): void {
       scoped.slots.register(
         // 「研究配置」注入面 2026-10-18 扩：+ listDir/follow（「本次研究」区要按会话绑定定位
         // bundle 并读 question.md 方法节；回执的「Lead 已回话」信号也走 journal 流）。
-        { name: RESEARCH_PANE_SLOT, key: RESEARCH_CONFIG_TAB_KEY, locale: 'deepResearchPack', inject: () => ({ readFile, listDir, follow, runSource, sendInstruction, defaults: defaultsStore }) },
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_CONFIG_TAB_KEY, locale: 'deepResearchPack', inject: () => ({ readFile, readLibrary, listDir, follow, runSource, sendInstruction, defaults: defaultsStore }) },
         ResearchConfigTab,
       ),
       // 「研究图谱」页签体：只读观察（DAG 图 + plan 原文 + 映射），不提供调整动作；

@@ -3,7 +3,7 @@
 // 以及 missing / unreadable 的区分；位置与读策略本身由 run-context.test.mjs 钉。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, utimesSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { openRun, listRuns } from '../../packages/deep-research-pack/src/lib/run-context.ts';
@@ -94,3 +94,20 @@ test('nodeRunSource：空文件是 ok 空值，不是 missing；listRuns 三桶�
   assert.deepEqual(runs.value.map((run) => run.slug), ['a', 'b', 'c']);
   assert.deepEqual(runs.value.map((run) => run.bucket), ['root', 'archive', 'abandoned']);
 });
+
+// 负例留证 2026-11-12：BUG-110——修复前 readdir/readFile 跟随 symlink，drt_evil 可读工作区外文件。
+// 还原法 = 删 resolvedInside / 直接 join(base,path)。
+test('BUG-110 nodeRunSource：run bundle 为逃逸 symlink → 拒绝读取工作区外', async (t) => {
+  const root = mkdtempSync(join(tmpdir(), 'run-context-symlink-'))
+  const outside = mkdtempSync(join(tmpdir(), 'run-context-outside-'))
+  t.after(() => { rmSync(root, { recursive: true, force: true }); rmSync(outside, { recursive: true, force: true }) })
+  writeFileSync(join(outside, 'question.md'), 'OUTSIDE SECRET\n')
+  symlinkSync(outside, join(root, 'drt_evil'), 'dir')
+  const source = nodeRunSource(root)
+  const opened = await openRun(source, 'drt_evil')
+  assert.equal(opened.ok, false)
+  assert.equal(opened.reason, 'unreadable')
+  const listed = await source.list('drt_evil')
+  assert.equal(listed.ok, false)
+  assert.equal(listed.reason, 'unreadable')
+})

@@ -21,6 +21,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import {
   SECTION_LABELS,
+  methodNameIssue,
   summaryOfEntry,
   type LibraryEntry,
 } from '../lib/library-fold.ts'
@@ -157,6 +158,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   coachReadyRef.current = coachReady
   const canSaveDraft = draft !== null
     && draft.name.trim() !== ''
+    && methodNameIssue(draft.name) === null
     && SECTION_LABELS.every(({ key }) => (draft.sections[key] ?? '').trim() !== '')
 
   useEffect(() => {

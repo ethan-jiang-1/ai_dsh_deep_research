@@ -147,6 +147,7 @@ export function createDefaultsStore(deps: DefaultsStoreDeps): DefaultsStore {
   const listeners = new Set<() => void>()
   const controllers = new Map<SessionId, AbortController>()
   const sequences = new Map<SessionId, number>()
+  const writeQueues = new Map<SessionId, Promise<void>>()
 
   const notify = (): void => {
     for (const listener of [...listeners]) {
@@ -182,13 +183,15 @@ export function createDefaultsStore(deps: DefaultsStoreDeps): DefaultsStore {
     ])
     if (signal.aborted || sequences.get(sessionId) !== sequence) return
 
+    // 列表与读文本双 null = 工作区通道不可达，不能当「文件缺席 = 自动」（BUG-092）。
+    const channelDown = entries === null && text === null
     const exists = entries === null
-      ? text !== null // 列表不可达时不把 null 误判成「缺席」以外的新错误
+      ? text !== null
       : entries.some((entry) => entry.name === DEFAULTS_FILE && entry.type === 'file')
     const parsed = parseDefaults(text)
-    const unreadable = text === null && exists
+    const unreadable = channelDown || (text === null && exists)
     const problems: readonly DefaultsProblem[] = unreadable
-      ? [{ field: 'file', code: 'io', detail: `${DEFAULTS_FILE} exists but could not be read` }]
+      ? [{ field: 'file', code: 'io', detail: channelDown ? 'workspace unreachable' : `${DEFAULTS_FILE} exists but could not be read` }]
       : parsed.problems
     const methodRead: 'ok' | 'absent' | 'error' = library.kind === 'ok' ? 'ok' : library.kind
     const methodEntries = library.kind === 'ok' ? foldLibrary(library.text) : []
@@ -210,9 +213,16 @@ export function createDefaultsStore(deps: DefaultsStoreDeps): DefaultsStore {
     setState(sessionId, next)
   }
 
+  /** 同会话写串行化：pending 期间的第二次写排队，不静默丢弃（BUG-107）。 */
+  const enqueueWrite = (sessionId: SessionId, task: () => Promise<void>): Promise<void> => {
+    const previous = writeQueues.get(sessionId) ?? Promise.resolve()
+    const next = previous.catch(() => {}).then(task)
+    writeQueues.set(sessionId, next)
+    void next.finally(() => { if (writeQueues.get(sessionId) === next) writeQueues.delete(sessionId) })
+    return next
+  }
+
   const runWrite = async (sessionId: SessionId, line: string): Promise<void> => {
-    const current = stateOf(sessionId)
-    if (current.pending) return
     patchState(sessionId, { pending: true, outcome: null })
     let result: CommandRemoteResult
     try {
@@ -242,32 +252,38 @@ export function createDefaultsStore(deps: DefaultsStoreDeps): DefaultsStore {
       await refresh(sessionId)
     },
     async setPatch(sessionId, patch) {
-      if (stateOf(sessionId).phase === 'loading') return
-      const sanitized = sanitizePatch(patch)
-      if (sanitized.problems.length > 0) {
-        patchState(sessionId, {
-          outcome: {
-            kind: 'error',
-            code: 'invalid',
-            detail: sanitized.problems.map((item) => `${item.field}:${item.code}`).join(','),
-          },
-        })
-        return
-      }
-      const revision = stateOf(sessionId).revision
-      await runWrite(sessionId, `/research-defaults set ${JSON.stringify({ expectedRevision: revision, patch: sanitized.patch })}`)
+      await enqueueWrite(sessionId, async () => {
+        if (stateOf(sessionId).phase === 'loading') return
+        const sanitized = sanitizePatch(patch)
+        if (sanitized.problems.length > 0) {
+          patchState(sessionId, {
+            outcome: {
+              kind: 'error',
+              code: 'invalid',
+              detail: sanitized.problems.map((item) => `${item.field}:${item.code}`).join(','),
+            },
+          })
+          return
+        }
+        const revision = stateOf(sessionId).revision
+        await runWrite(sessionId, `/research-defaults set ${JSON.stringify({ expectedRevision: revision, patch: sanitized.patch })}`)
+      })
     },
     async unset(sessionId, fields) {
-      if (stateOf(sessionId).phase === 'loading') return
-      const valid = fields.filter((field) => (DEFAULTS_AXES as readonly string[]).includes(field))
-      if (valid.length === 0) return
-      const revision = stateOf(sessionId).revision
-      await runWrite(sessionId, `/research-defaults unset ${valid.join(',')} revision=${revision}`)
+      await enqueueWrite(sessionId, async () => {
+        if (stateOf(sessionId).phase === 'loading') return
+        const valid = fields.filter((field) => (DEFAULTS_AXES as readonly string[]).includes(field))
+        if (valid.length === 0) return
+        const revision = stateOf(sessionId).revision
+        await runWrite(sessionId, `/research-defaults unset ${valid.join(',')} revision=${revision}`)
+      })
     },
     async clear(sessionId) {
-      if (stateOf(sessionId).phase === 'loading') return
-      const revision = stateOf(sessionId).revision
-      await runWrite(sessionId, `/research-defaults clear revision=${revision}`)
+      await enqueueWrite(sessionId, async () => {
+        if (stateOf(sessionId).phase === 'loading') return
+        const revision = stateOf(sessionId).revision
+        await runWrite(sessionId, `/research-defaults clear revision=${revision}`)
+      })
     },
     dispose() {
       for (const controller of controllers.values()) controller.abort()

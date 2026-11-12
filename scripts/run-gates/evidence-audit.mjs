@@ -79,6 +79,10 @@ if (isMain(import.meta.url)) {
     // 同名时根优先（只作发现，不把位置当状态）。枚举规则归 run-context。
     const ws = workspaceRoot({ argv: process.argv.slice(2), env: process.env, defaultRoot: join(ROOT, 'research-workspace') }).root
     const runs = await listRuns(nodeRunSource(ws), { buckets: ['root', 'archive', 'abandoned'] })
+    if (runs.ok && runs.warnings !== undefined && runs.warnings.length > 0) {
+      console.error(`evidence-audit: 无法枚举 run bundle（部分桶不可读：${runs.warnings.join('；')}）`)
+      process.exit(2)
+    }
     if (!runs.ok) {
       console.error(`evidence-audit: 无法枚举 run bundle（${runs.reason}${runs.detail === undefined ? '' : `：${runs.detail}`}）`)
       process.exit(2)

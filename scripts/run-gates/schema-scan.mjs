@@ -35,6 +35,10 @@ if (isMain(import.meta.url)) {
     // 缺省只扫 archive（交付件的最终停靠处）；要扫在飞/停放请显式点名。范围是显式参数。
     const ws = wsRoot
     const runs = await listRuns(nodeRunSource(ws), { buckets: ['archive'] })
+    if (runs.ok && runs.warnings !== undefined && runs.warnings.length > 0) {
+      console.error(`schema-scan: 无法枚举 archive run（部分桶不可读：${runs.warnings.join('；')}）`)
+      process.exit(2)
+    }
     if (!runs.ok) {
       console.error(`schema-scan: 无法枚举 archive run（${runs.reason}${runs.detail === undefined ? '' : `：${runs.detail}`}）`)
       process.exit(2)

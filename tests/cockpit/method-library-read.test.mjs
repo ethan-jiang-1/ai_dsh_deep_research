@@ -46,3 +46,16 @@ test('entry hashes match the standard SHA-256 digest and change with content', a
   assert.equal(await methodLibraryEntryHash('abc'), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad')
   assert.notEqual(await methodLibraryEntryHash('abc'), await methodLibraryEntryHash('abd'))
 })
+
+// 负例留证 2026-11-12：BUG-084——run 模板写 `- phase: accepted`，旧正则只认行首裸 `phase:`。
+// 还原法 = 恢复 /^phase:\s*accepted\s*$/m 且不切头部。
+test('BUG-084 完成判据：模板 `- phase:` 与裸 phase 都认，正文假 phase 不认', () => {
+  const base = {
+    hasFinalVersion: true, hasDeliverableContent: true, hasDeliveredRecord: true, hasLegacyAcceptance: false,
+    question: { kind: 'ok', text: '# Q\n' },
+  }
+  assert.equal(isCompletedMethodSourceRun({ ...base, runHeader: { kind: 'ok', text: '- phase: accepted\n' } }), true)
+  assert.equal(isCompletedMethodSourceRun({ ...base, runHeader: { kind: 'ok', text: 'phase: accepted\n' } }), true)
+  assert.equal(isCompletedMethodSourceRun({ ...base, runHeader: { kind: 'ok', text: '- phase: review\n' } }), false)
+  assert.equal(isCompletedMethodSourceRun({ ...base, runHeader: { kind: 'ok', text: '- phase: review\n\n## 备注\n\nphase: accepted\n' } }), false)
+})

@@ -86,3 +86,35 @@
 | [BUG-078](BUG-078-portable-bundle-path-relative-escape.md) | portableBundlePath 把相对 `..` 当可移植 → 门②接受 bundle 外 present | （相对路径 resolve + 包含性检查，含 `..` 一律 null；repair null+unportable） | 2026-11-12 |
 | [BUG-079](BUG-079-user-env-smoke-dead-import-seed-core.md) | user-env-smoke 引用已删 seed-core → 启动即 ERR_MODULE_NOT_FOUND | （sha256 改 node:crypto；真跑 13/13 ALL PASS） | 2026-11-12 |
 | [BUG-080](BUG-080-snapshot-research-face-stale-team-baseline.md) | snapshot-replay research-face B 层缺 Team Lead/Team 工具 baseline | （4 角色真模型重录 + source 身份 + C 金标准 --update-expected 人审；mcp:false 场景声明 + replay-fixtures 条件守卫；snapshot-replay ALL PASS；无产品代码） | 2026-11-12 |
+| [BUG-081](BUG-081-method-name-parenthesis-provenance-collision.md) | BUG-081：方法库条目名含全角「（」时被 fold 当作 provenance——保存 claim 永不成立，用户按占位符示例起名即失败 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-082](BUG-082-default-marker-substring-false-positive.md) | BUG-082：方法库默认判定用裸子串「默认偏好」——provenance 含该词即误判默认；写后回读与写前 expected 自相矛盾 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-083](BUG-083-tab-heading-default-inconsistency.md) | BUG-083：方法库 heading 空白口径不一致——fold 认 `##\t`，clear/set/defaultCount 只认 `## `，默认操作静 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-084](BUG-084-source-phase-bullet-mismatch.md) | BUG-084：方法库来源完成判据要求行首 `phase:`，run 模板写 `- phase:`——按模板交付的 run 永远不可选 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-085](BUG-085-marker-provenance-order-duplicate.md) | BUG-085：方法库 heading 的〔默认偏好〕与（provenance）顺序——fold 认反序，upsert 只认正序，同名条目被复制 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-086](BUG-086-config-feed-session-race.md) | BUG-086：useConfigFeed 切换会话时旧 reload 不取消/不校验 sessionId——慢读覆盖新会话的方法库 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-087](BUG-087-status-feed-session-stale.md) | BUG-087：useStatusFeed 切换会话不重置 journalEvents/rows/journalSeen——旧会话活动在新会话页签里残留 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-088](BUG-088-config-library-1000-line-truncation.md) | BUG-088：配置页签读库固定 1000 行——>1000 行库被静默截断却仍标 `ok`（readText 丢掉 eof） | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-089](BUG-089-list-runs-partial-unreadable.md) | BUG-089：listRuns 部分桶 unreadable 仍返回 ok——归档/停放桶的 run 被静默漏枚举 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-090](BUG-090-bundle-bind-content-false-positive.md) | BUG-090：sessionBindingOf 把工具参数正文里的 `drt_<slug>/` 当路径——写 notes.md 提到别的 bundle 即强绑 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-091](BUG-091-turn-completed-any-turn.md) | BUG-091：turnCompleted 对整份日志任一 `turn/end completed` 返回 true——后续 failed/open turn  | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-092](BUG-092-defaults-double-read-failure-auto.md) | BUG-092：defaultsStore 双读失败被当成 auto——listDir + readText 都 null 时按钮显示「自动」且无 proble | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-093](BUG-093-library-section-bullet-variants.md) | BUG-093：方法库四字段只认行首 `- 找来源:`——`*`/`+`/缩进/全角冒号写法被读成空段 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-094](BUG-094-hitl2-anchor-final-vs-present.md) | BUG-094：HITL2 锚点把 final.md 当交付拍板——综合步落盘即显示「交付审阅 passed」，present 仍空 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-095](BUG-095-boot-web-timer-leak.md) | BUG-095：web-harness.bootWeb 成功路径不清理 banner timeout——库式消费者被长 timer 多留 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-096](BUG-096-hitl2-counts-as-kickoff.md) | BUG-096：isKickoffCall 把任何 ask_user_question（含 HITL2）当新 run 开工——恢复会话交付审阅后 read 绑定 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-097](BUG-097-method-library-lost-update.md) | BUG-097：method-library 写工具读-改-写无锁——两个 method-editor 会话并发保存会 lost update | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-098](BUG-098-method-library-non-atomic-write.md) | BUG-098：方法库三写工具直接 writeFileSync 覆盖，无 temp+rename——中途失败/崩溃会截断 method-library.md | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-099](BUG-099-run-source-list-error-as-empty.md) | BUG-099：run source picker 把 listDir null 当空列表——final 目录读失败显示「无 final」，不是读取失败 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-100](BUG-100-final-md-directory-as-delivered.md) | BUG-100：final.md 只按名字在场判定，不校验 entry.type=file——同名目录会被当交付 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-101](BUG-101-present-version-non-bundle.md) | BUG-101：latestPresentedFinalVersion 不校验终稿族——`notes/final/v9.md` 被当交付版本，版本面 label | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-102](BUG-102-plan-version-body-overrides-header.md) | BUG-102：planVersionsOf 取全文最后一条「图版本：vN」——正文/历史引用覆盖头部声明 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-103](BUG-103-present-version-max-vs-last.md) | BUG-103：latestPresentedFinalVersion 取所有 present 的 max，不是最后一条——re-present 旧版后交付版本 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-104](BUG-104-port-reclaim-kills-any-listener.md) | BUG-104：port-reclaim 对端口上的任意 listener SIGKILL，无进程身份校验——无关服务被冒烟脚本杀掉 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-105](BUG-105-rerun-kind-suffix-match.md) | BUG-105：rerun kind 正则用 `\b`——`polish-extra` / `structural-extra` 被截成合法 kind | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-106](BUG-106-sentinel-any-history.md) | BUG-106：sentinelInAssistantText 扫全部 assistant 消息——早期回合的哨兵会让当前 open/failed 回放被当完成 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-107](BUG-107-defaults-pending-drop.md) | BUG-107：defaultsStore pending 期间第二次写静默丢弃——不排队、无回执；快速跨轴编辑丢改动 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-108](BUG-108-config-feed-interaction-state-stale.md) | BUG-108：useConfigFeed 切换会话不重置交互态——旧会话回执/删除确认/发送中留在新会话 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-109](BUG-109-run-source-delivered-dir-eligible.md) | BUG-109：run source picker 的 delivered.json/acceptance.md 只查名字——同名目录让 run 被当已交付、e | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-110](BUG-110-run-source-symlink-escape.md) | BUG-110：nodeRunSource 跟随 symlink run bundle——drt_x 可指向工作区外，run-context/status 读取 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-111](BUG-111-method-library-symlink-write-escape.md) | BUG-111：method-library 写工具跟随 method-library.md symlink——可把库写到工作区外 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-112](BUG-112-plan-recorded-slash-false-positive.md) | BUG-112：planVersionsOf 的 recorded 斜杠字段无上下文——正文 bullet `- 参考 / v1 /` 被当重写记录，制造 ve | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |

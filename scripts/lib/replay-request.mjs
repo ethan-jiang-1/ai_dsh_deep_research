@@ -143,25 +143,38 @@ export function compareReplayRequests(expectedEvents, actualEvents) {
 // 为什么必须单独成件：哨兵字样**写在录制 prompt 里**，用"全文 includes"判回合完成会在 user/message
 // 一落盘时立刻放行（BUG-030 实测：A 层提前放行 → 后续层在回合在飞时执行 → 渲染金标准缺末行）。
 
-/** 会话日志文本 → assistant 消息文本清单（`data.message.content` 的 text 项拼接）。 */
-function assistantTextsOf(logText) {
+/** 会话日志文本 → 事件清单（坏行跳过；只保留对象）。 */
+function eventsOf(logText) {
   return String(logText ?? '').split('\n').filter(Boolean)
     .map((line) => { try { return JSON.parse(line) } catch { return null } }).filter(Boolean)
+}
+
+/** 当前回合事件 = 最后一个 `turn/start` 之后（无 start 的旧日志退化为全量）。 */
+function currentTurnEventsOf(logText) {
+  const events = eventsOf(logText)
+  let start = -1
+  for (let i = 0; i < events.length; i++) if (events[i]?.type === 'turn/start') start = i
+  return start === -1 ? events : events.slice(start + 1)
+}
+
+/** 会话日志文本 → **当前回合**的 assistant 消息文本清单（`data.message.content` 的 text 项拼接）。 */
+function assistantTextsOf(logText) {
+  return currentTurnEventsOf(logText)
     .filter((event) => event.type === 'assistant/message')
     .map((event) => (event.data?.message?.content ?? []).filter((c) => c.type === 'text').map((c) => c.text).join(''))
     .filter(Boolean)
 }
 
-/** 收尾哨兵是否已**由 assistant 消息**落地——prompt/回执回显里的同名字样不算数（BUG-030 根因）。 */
+/** 收尾哨兵是否已**由当前回合的 assistant 消息**落地——prompt/回执回显/历史回合的哨兵不算数
+ *  （BUG-030 根因 + BUG-106 当前回合限定）。 */
 export function sentinelInAssistantText(logText, sentinel) {
   return assistantTextsOf(logText).some((text) => text.includes(sentinel))
 }
 
-/** 回合是否以 `completed` 结束（`turn/end` 显式态；缺席或非 completed = 未结束，fail-loud 不静默放行）。 */
+/** 当前回合是否以 `completed` 结束（`turn/end` 显式态；缺席或非 completed = 未结束，fail-loud 不静默放行）。
+ *  只认最后 `turn/start` 之后最后一个 `turn/end`（BUG-091：历史 completed 不得为后续 open/failed 回合作证）。 */
 export function turnCompleted(logText) {
-  return String(logText ?? '').split('\n').filter(Boolean).some((line) => {
-    let event = null
-    try { event = JSON.parse(line) } catch { return false }
-    return event?.type === 'turn/end' && event?.data?.reason?.kind === 'completed'
-  })
+  const ends = currentTurnEventsOf(logText).filter((event) => event?.type === 'turn/end')
+  const last = ends.at(-1)
+  return last?.data?.reason?.kind === 'completed'
 }

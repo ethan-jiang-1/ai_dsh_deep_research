@@ -29,10 +29,10 @@ const PACK_LIB = join(ROOT, 'packages', 'deep-research-pack', 'src', 'lib')
 /** 只可能由 smoke/probe 覆盖的模块（keyless 回归禁浏览器/子进程/端口，见 layering 五件套）。 */
 const SMOKE_ONLY = {
   'playwright': 'chromium 定位与启动（纯件 browser-cache 有直测；launch 本身真浏览器档）',
+  'port-reclaim': '端口收割：需要真监听端口与系统进程，回归禁；身份纯判据 port-reclaim-policy 有直测',
   'cdp-driver': 'Playwright/CDP 驱动：只被 smoke/probe 以真浏览器消费，keyless 回归禁浏览器',
   'web-harness': '真 web 启动与 RPC 握手：只在 smoke 档跑，回归禁 spawn/网络',
   'zstd-read': 'zstd CLI 解压：keyless 回归禁 spawn，{ok:false} 分支无直测（消费方测试注入 readLog，不触达解压本身）；失败面证据 = 一次性实测 + 消费方的降级处理',
-  'port-reclaim': '端口收割：需要真监听端口与系统进程，回归禁',
   'hitl-card-driver': '浏览器内 DOM 片段（getComputedStyle / HTMLTextAreaElement / 事件派发）：只能真浏览器跑；判据面在 ask-drive（有直测）',
 }
 

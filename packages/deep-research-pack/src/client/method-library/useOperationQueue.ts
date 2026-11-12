@@ -1,4 +1,5 @@
 // useOperationQueue.ts — 方法库写操作队列：一次只允许一个显式写操作，从发送走到结算或结果未知。
+import { methodNameIssue } from '../../lib/library-fold.ts'
 //
 // 从 MethodLibraryView.tsx 拆出（2026-11-03 审计 P4 续拆）。同文件两半，调用顺序是硬约束：
 // - `useOperationQueueState`：队列自己的 state/refs，必须在 `useDraftState` **之前**调用——
@@ -342,6 +343,10 @@ export function useOperationQueue(deps: OperationQueueDeps) {
     const name = draft.name.trim()
     if (name === '') {
       setReceipt({ ok: false, detail: t('nameRequired') })
+      return
+    }
+    if (methodNameIssue(name) !== null) {
+      setReceipt({ ok: false, detail: t('invalidMethodName') })
       return
     }
     const missing = missingSectionKeys(draft).map((key) => t(SECTION_LABEL_KEYS[key]))

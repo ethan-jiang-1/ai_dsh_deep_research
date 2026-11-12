@@ -71,7 +71,7 @@ test('kickoff：research-brief skill 加载（开工第一步）→ kickoffSeen 
 test('kickoff：ask_user_question 调用（HITL1 三问）→ kickoffSeen true（含仅读绑定的立项窗口）', () => {
   const events = [
     call('read', { path: 'drt_old-run/final.md' }), // 预检读取旧 bundle（错绑源）
-    call('ask_user_question', { questions: [{ id: 'q1' }] }),
+    call('ask_user_question', { questions: [{ id: 'q1', header: '研究类型' }] }),
   ];
   const b = sessionBindingOf(events);
   assert.equal(b.slug, 'old-run');
@@ -113,5 +113,30 @@ test('畸形输入 fail-soft 不崩', () => {
 
 test('slug 形态边界：连字符合法、数字合法、斜杠后必须真有路径段', () => {
   assert.equal(sessionBundleOf([call('write', { path: 'drt_a-1-b/v2/x.md' })]), 'a-1-b');
-  assert.equal(sessionBundleOf([call('write', { text: 'mention drt_foo/ in prose only' })]), 'foo'); // JSON.stringify 后命中路径形态——宽松面：宁可多绑（随后 listDir 找不到文件如实无面）
+  assert.equal(sessionBundleOf([call('write', { file_path: 'notes.md', content: 'mention drt_foo/ in prose only' })]), undefined); // 正文提及不算绑定（BUG-090）
 });
+
+
+// 负例留证 2026-11-12：BUG-096——修复前任何 ask_user_question 都置 kickoff；HITL2 交付审阅
+// 被误当新 run 开工。还原法 = isKickoffCall 对 ask 直接 true。
+test('BUG-096 kickoff：HITL1 三问才算；HITL2 交付审阅/未知 ask 不算', () => {
+  const hitl1 = call('ask_user_question', { questions: [{ id: 'q1', header: '研究类型' }] })
+  const hitl2 = call('ask_user_question', { questions: [{ id: 'q1', header: '审阅与拍板', options: ['定稿（按现稿交付）'] }] })
+  const unknown = call('ask_user_question', { questions: [{ id: 'q1', header: '中途确认' }] })
+  assert.equal(sessionBindingOf([hitl1]).kickoffSeen, true)
+  assert.equal(sessionBindingOf([hitl2]).kickoffSeen, false)
+  assert.equal(sessionBindingOf([unknown]).kickoffSeen, false)
+  assert.equal(sessionBindingOf([call('skill', { name: 'research-brief' })]).kickoffSeen, true)
+})
+
+
+// 负例留证 2026-11-12：BUG-090——修复前全量 stringify 参数，正文里的 drt_ 也强绑定。
+// 还原法 = slugInArgs 回到 JSON.stringify(obj) 子串匹配。
+test('BUG-090 绑定只看真实路径字段：正文/grep pattern 不绑，路径段边界要成立', () => {
+  assert.equal(sessionBundleOf([call('write', { file_path: 'notes.md', content: 'see drt_other/run.md' })]), undefined)
+  assert.equal(sessionBundleOf([call('grep', { pattern: 'drt_other/run.md' })]), undefined)
+  assert.equal(sessionBundleOf([call('write', { file_path: 'drt_real/run.md' })]), 'real')
+  assert.equal(sessionBundleOf([call('glob', { pattern: 'drt_globbed/evidence/*.md' })]), 'globbed')
+  assert.equal(sessionBundleOf([call('write', { file_path: 'not_drt_fake/x.md' })]), undefined)
+  assert.equal(sessionBundleOf([call('read', { paths: ['a.md', 'drt_multi/final.md'] })]), 'multi')
+})

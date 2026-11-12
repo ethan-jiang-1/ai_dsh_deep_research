@@ -23,7 +23,7 @@ function harness(initial = {}) {
   }
   const deps = {
     readText: async (sid) => state.files[sid] ?? null,
-    listDir: async (sid) => state.entries[sid] ?? [],
+    listDir: async (sid) => state.entries[sid] === undefined ? [] : state.entries[sid],
     readLibrary: async (sid) => state.libraries[sid] ?? { kind: 'absent' },
     execute: async (sid, line) => {
       state.commands.push({ sid, line })
@@ -182,4 +182,34 @@ test('loading 期间 set/unset/clear 不发 command（防首帧误写）', async
   await store.unset('s1', ['effort'])
   await store.clear('s1')
   assert.equal(state.commands.length, 0)
+})
+
+// 负例留证 2026-11-12：BUG-092——双 null 被当 auto；BUG-107——pending 期间第二次写被静默丢。
+// 还原法：exists/unreadable 不区分 channelDown；runWrite 恢复 `if (pending) return`。
+test('BUG-092 工作区不可达（listDir + readText 双 null）→ unreadable，不是 auto', async () => {
+  const { store } = harness({ files: { s1: null }, entries: { s1: null } })
+  await store.refresh('s1')
+  const snapshot = store.getSnapshot('s1')
+  assert.equal(snapshot.phase, 'unreadable')
+  assert.ok(snapshot.problems.some((item) => item.code === 'io'))
+})
+
+test('BUG-107 pending 期间的第二次写排队执行，不丢改动', async () => {
+  const { store, state } = harness()
+  await store.refresh('s1')
+  let release
+  const gate = new Promise((resolve) => { release = resolve })
+  state.execute = async () => {
+    await gate
+    return { ok: true, value: { result: { kind: 'success', text: 'ok revision=1' } } }
+  }
+  const first = store.setPatch('s1', { effort: 'deep' })
+  await flush()
+  const second = store.setPatch('s1', { output: { audience: '决策层' } })
+  await flush()
+  assert.equal(state.commands.length, 1, '第二次写应排队而非并发')
+  release()
+  await first
+  await second
+  assert.equal(state.commands.length, 2, '排队后的第二次写必须执行')
 })

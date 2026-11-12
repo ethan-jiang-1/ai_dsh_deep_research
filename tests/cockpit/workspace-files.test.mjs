@@ -73,3 +73,20 @@ test('readText：命中返回文本；missingOk 区分空态；真故障/抛错 
     console.error = original;
   }
 });
+
+// 负例留证 2026-11-12：BUG-088——>1000 行库必须分页读到 eof，不能固定 1000 行静默短读。
+// 还原法 = 配置页签回到 readText(...,1000) / readLibrary 只读一页。
+test('BUG-088 readLibrary：1001 行库分两页读到第 1001 行', async () => {
+  let call = 0;
+  const remote = { list: async () => null, read: async (_id, _path, opts) => {
+    call += 1;
+    const start = opts.offset;
+    const end = Math.min(1001, start + opts.limit - 1);
+    const text = Array.from({ length: end - start + 1 }, (_, i) => `line-${start + i}`).join('\n');
+    return { ok: true, value: { text, lines: end - start + 1, eof: end === 1001 } };
+  } };
+  const result = await createWorkspaceFiles(remote).readLibrary('s', 'method-library.md', signal);
+  assert.equal(result.kind, 'ok');
+  assert.ok(result.text.includes('line-1001'), '第 1001 行必须读回');
+  assert.equal(call, 2);
+});

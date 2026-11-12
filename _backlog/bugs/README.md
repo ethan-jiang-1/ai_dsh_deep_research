@@ -16,6 +16,40 @@
 
 ## 最近归档
 
+（2026-11-13 探索协议批（32 张，081–112）：
+[081](../_archived/fixed_bugs/BUG-081-method-name-parenthesis-provenance-collision.md) 名称全角括号校验；
+[082](../_archived/fixed_bugs/BUG-082-default-marker-substring-false-positive.md) 默认标记精确判定；
+[083](../_archived/fixed_bugs/BUG-083-tab-heading-default-inconsistency.md) tab heading 读写同口径；
+[084](../_archived/fixed_bugs/BUG-084-source-phase-bullet-mismatch.md) run phase 列表形态；
+[085](../_archived/fixed_bugs/BUG-085-marker-provenance-order-duplicate.md) marker/provenance 反序；
+[086](../_archived/fixed_bugs/BUG-086-config-feed-session-race.md) config reload 会话 epoch；
+[087](../_archived/fixed_bugs/BUG-087-status-feed-session-stale.md) status 切会话清投影；
+[088](../_archived/fixed_bugs/BUG-088-config-library-1000-line-truncation.md) 库读分页；
+[089](../_archived/fixed_bugs/BUG-089-list-runs-partial-unreadable.md) listRuns 缺口；
+[090](../_archived/fixed_bugs/BUG-090-bundle-bind-content-false-positive.md) 绑定只认路径字段；
+[091](../_archived/fixed_bugs/BUG-091-turn-completed-any-turn.md) 末回合 completed；
+[092](../_archived/fixed_bugs/BUG-092-defaults-double-read-failure-auto.md) defaults 不可达；
+[093](../_archived/fixed_bugs/BUG-093-library-section-bullet-variants.md) 四字段变体；
+[094](../_archived/fixed_bugs/BUG-094-hitl2-anchor-final-vs-present.md) HITL2 锚点 present；
+[095](../_archived/fixed_bugs/BUG-095-boot-web-timer-leak.md) boot timer 清理；
+[096](../_archived/fixed_bugs/BUG-096-hitl2-counts-as-kickoff.md) HITL2 非 kickoff；
+[097](../_archived/fixed_bugs/BUG-097-method-library-lost-update.md) 库写锁；
+[098](../_archived/fixed_bugs/BUG-098-method-library-non-atomic-write.md) 原子写；
+[099](../_archived/fixed_bugs/BUG-099-run-source-list-error-as-empty.md) run source 读失败；
+[100](../_archived/fixed_bugs/BUG-100-final-md-directory-as-delivered.md) final.md 文件谓词；
+[101](../_archived/fixed_bugs/BUG-101-present-version-non-bundle.md) present 版本族；
+[102](../_archived/fixed_bugs/BUG-102-plan-version-body-overrides-header.md) plan 头范围；
+[103](../_archived/fixed_bugs/BUG-103-present-version-max-vs-last.md) 最后 present；
+[104](../_archived/fixed_bugs/BUG-104-port-reclaim-kills-any-listener.md) 端口身份；
+[105](../_archived/fixed_bugs/BUG-105-rerun-kind-suffix-match.md) rerun kind 边界；
+[106](../_archived/fixed_bugs/BUG-106-sentinel-any-history.md) 哨兵当前回合；
+[107](../_archived/fixed_bugs/BUG-107-defaults-pending-drop.md) defaults 写队列；
+[108](../_archived/fixed_bugs/BUG-108-config-feed-interaction-state-stale.md) config 交互态复位；
+[109](../_archived/fixed_bugs/BUG-109-run-source-delivered-dir-eligible.md) 回执 file 谓词；
+[110](../_archived/fixed_bugs/BUG-110-run-source-symlink-escape.md) run symlink 边界；
+[111](../_archived/fixed_bugs/BUG-111-method-library-symlink-write-escape.md) 库 symlink 拒绝；
+[112](../_archived/fixed_bugs/BUG-112-plan-recorded-slash-false-positive.md) recorded 上下文。
+）
 （2026-11-12 交付门/回归链修整：
 [BUG-074](../_archived/fixed_bugs/BUG-074-readiness-inline-quote-hijack.md) readiness 同行多判定取真实终局；
 [BUG-075](../_archived/fixed_bugs/BUG-075-hitl2-pending-row-counted-as-decision.md) HITL2 未决行不再当成拍板 + 最新 ask 见证；

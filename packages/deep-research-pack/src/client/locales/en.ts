@@ -101,6 +101,7 @@ const enBase = {
   fieldProgress: '{count}/4 filled',
   incompleteFields: 'Complete: {fields}',
   methodName: 'Name',
+  invalidMethodName: 'Name cannot contain full-width parentheses 「（）」 or 「〔〕」 (reserved for provenance/default markers).',
   continueInterview: 'Continue in workbench',
   cancel: 'Cancel',
   restartSource: 'Choose a different source',

@@ -994,3 +994,366 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 - analyst / critic 场景（推断同根因，未验证）；X6 真模型（未授权）；回放 B 层快照重录（with-key，需预算）。
 - 门禁：`pnpm test` 3 红（BuiltinView、scripts/README 资产表对账等，均为另一 agent 在办）；
   `verify` 2 红（cockpit-doc-registry 新文件未登记、070 归档索引未补）。
+
+## 第三轮 goal（2026-11-12 23:xx）：继续探索（只报 bug，不修代码）
+
+### N11：方法库名称语法面 → BUG-081
+
+- **命题**：方法库条目的名称可以自由输入；含全角括号的名称仍能走完 save claim 并写库。
+- **最低层**：纯函数（`renderLibraryEntry` / `foldLibrary`）+ `applyMethodLibraryOperationEvent`
+  claim 投影；无模型、无浏览器。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/name-parenthesis.mjs`
+- **证据**：`runtime/explore-20261112/name-parenthesis.mjs` 实测输出——`投研尽调（我的口径）`
+  → fold 名 `投研尽调`、provenance `我的口径`、claim 0；ASCII 括号对照 claim 1。
+  UI 名称占位符 `src/client/locales/zh.ts:200` 正是 `投研尽调（我的口径）`。
+- **判定**：**发现** → [BUG-081](../_archived/fixed_bugs/BUG-081-method-name-parenthesis-provenance-collision.md)（P2，排查中；未改产品代码）。
+- **下一层**：同一 claim/写入族的其它语法边界（`〔〕`、零宽字符、旧库 provenance 歧义）；
+  以及 `method_library_set_default/remove` 的名称比对；未跑，记空白。
+
+### N12：默认判定与写入口径不一致 → BUG-082
+
+- **命题**：方法库的「默认偏好」只由精确标记 `〔默认偏好〕` 决定，读/写同一口径。
+- **最低层**：纯函数（`foldLibrary` + `upsertMethodEntry`）；无模型、无浏览器。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/default-marker-substring.mjs`
+  +
+  `... runtime/explore-20261112/default-marker-write-path.mjs`
+- **证据**：无标记但 provenance 含「默认偏好实验」→ `isDefault:true`；写路径
+  `textHasMarker:false` / `savedIsDefault:true` / `expectedDefault:false` →
+  `wouldFailToolReadback:true`（文件已写、工具报回读失败）。
+- **判定**：**发现** → [BUG-082](../_archived/fixed_bugs/BUG-082-default-marker-substring-false-positive.md)（P2，排查中；未改产品代码）。
+- **下一层**：旧格式 `- 默认偏好:` 行、marker 重复/全角空白；`findDefaultMethod` 的消费面
+  （`research:defaults` 注入）是否把误判放大；未跑，记空白。
+
+### N13：heading 空白口径分叉 → BUG-083
+
+- **命题**：方法库的 heading 读/写使用同一空白谓词；tab heading 的默认操作与 fold 一致。
+- **最低层**：纯函数（`foldLibrary` + `clearDefaultMethodEntry` + `setDefaultMethodEntry`）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/tab-heading-default.mjs`
+- **证据**：`##\t方法甲\t〔默认偏好〕` → fold name/isDefault 正常；clear `changed:false` 且仍默认；
+  set 抛「库里没有」；`defaultCount` 漏计。
+- **判定**：**发现** → [BUG-083](../_archived/fixed_bugs/BUG-083-tab-heading-default-inconsistency.md)（P2，排查中；未改产品代码）。
+- **下一层**：前导空格 heading、`##\r`、全角空格；`matchingHeadingLines` 与 `renderLibraryEntry`
+  的规范化是否同源；未跑，记空白。
+
+### N14：run 状态头模板与来源判据分叉 → BUG-084
+
+- **命题**：按 run 模板写出的 `- phase: accepted` 已交付 run，能被方法库来源完成判据识别。
+- **最低层**：纯函数（`isCompletedMethodSourceRun`）；无模型/浏览器。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/source-phase-bullet.mjs`
+- **证据**：模板形态 `- phase: accepted` → `accepted:false`；裸 `phase: accepted` → `true`；
+  `- phase: review` → false。另：`- phase: review` + 正文/代码块裸 `phase: accepted` → true
+  （`runtime/explore-20261112/source-phase-false-positive.mjs`）——同谓词假阳。模板行 = `content/templates/run/run.md:8`；判据 =
+  `method-library-source.ts:32`；fixture 注释明说裸行才能匹配。
+- **判定**：**发现** → [BUG-084](../_archived/fixed_bugs/BUG-084-source-phase-bullet-mismatch.md)（P2，排查中；未改产品代码）。
+- **下一层**：run.md 其它状态键（`delivered`/`parked`/`next`）的模板↔解析一致性；未跑，记空白。
+
+### N15：heading marker/provenance 顺序读写不对称 → BUG-085
+
+- **命题**：fold 与 upsert 对「name + provenance + 〔默认偏好〕」的任意合法顺序使用同一语法。
+- **最低层**：纯函数（`foldLibrary` + `upsertMethodEntry`）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/marker-before-provenance.mjs`
+- **证据**：反序标题 `## 方法甲〔默认偏好〕（...）` → fold 正常；upsert 返回 `action:"created"`，
+  写后同名条目 **2** 条（一默认一非默认）；正序不在同一路径。
+- **判定**：**发现** → [BUG-085](../_archived/fixed_bugs/BUG-085-marker-provenance-order-duplicate.md)（P2，排查中；未改产品代码）。
+- **下一层**：marker 在 name 前、多个 marker、全角空白；以及 `matchingHeadingLines` 的
+  provenance 括号内含 `）` 的切分；未跑，记空白。
+
+### N16：client 异步回写 race → BUG-086
+
+- **命题**：研究配置页签切换会话后，旧会话的异步读不会覆盖新会话的库投影。
+- **最低层**：hook 级真跑（happy-dom + react-dom/client；假 `readFile` 控制慢读），无模型。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/config-feed-session-race.mjs`
+- **证据**：`reads ["s1","s2"]`；切到 s2 后先 `新会话方法`，旧 s1 的 120ms 慢读 resolve 后
+  变成 `旧会话方法`（`bug:true`）。hook 的 effect 无 cleanup，`reload` 在 await 后无条件 setState。
+- **判定**：**发现** → [BUG-086](../_archived/fixed_bugs/BUG-086-config-feed-session-race.md)（P2，排查中；未改产品代码）。
+- **下一层**：`useStatusFeed`/`useGraphFeed`/`useDraftState` 的同类 epoch/abort 面；真实 workspaceFiles
+  延迟分布；未跑，记空白。
+
+### N17：status feed 跨会话 state 残留 → BUG-087
+
+- **命题**：研究状态页签切换会话后，旧会话的 journal 事件/活动行/seen 不进入新会话投影。
+- **最低层**：hook 级真跑（happy-dom + react-dom/client；s1 history，s2 follow 挂起）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/status-feed-session-stale.mjs`
+- **证据**：s1 后 `events:1/rows:0/seen:true`；切 s2 后仍是 `events:1/rows:0/seen:true`（`stale:true`）。
+  effect 只重置 refs，未清 state。
+- **判定**：**发现** → [BUG-087](../_archived/fixed_bugs/BUG-087-status-feed-session-stale.md)（P2，排查中；未改产品代码）。
+- **下一层**：`face`/`hitl`/`unbound` 的真实时序窗口；上层是否 keyed remount；未跑，记空白。
+
+### N18：配置页签 1000 行库静默截断 → BUG-088
+
+- **命题**：研究配置页签读到的库投影等于工作区完整库；>1000 行时不得静默短读。
+- **最低层**：client 适配器（`createWorkspaceFiles.readText` + `libraryReadStateOf`），无模型/浏览器。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/config-library-truncation.mjs`
+- **证据**：1001 行库、remote `eof:false`、`readText(limit=1000)` 返回 1000 行；
+  `hasLastLine:false`、`readState:"ok"`、`silentlyTruncated:true`。
+- **判定**：**发现** → [BUG-088](../_archived/fixed_bugs/BUG-088-config-library-1000-line-truncation.md)（P2，排查中；未改产品代码）。
+- **下一层**：主库 `readLibrary` 20 页上限、其它 `readText` 调用点（question/preview）的截断面；未跑，记空白。
+
+### N19：run 枚举部分 unreadable 静默降级 → BUG-089
+
+- **命题**：`listRuns` 任一桶不可读时，调用方必须能感知缺口，不能把部分清单当完整。
+- **最低层**：纯函数 + 假 RunSource；无模型/浏览器。
+- **实际命令**：`node --import tsx/esm runtime/explore-20261112/list-runs-partial-unreadable.mjs`
+- **证据**：root 有 `drt_root-run`，archive 返回 `unreadable/EACCES`；结果仍 `ok:true` 且只含
+  root（`silentPartial:true`），无 error/warning。
+- **判定**：**发现** → [BUG-089](../_archived/fixed_bugs/BUG-089-list-runs-partial-unreadable.md)（P2，排查中；未改产品代码）。
+- **下一层**：三个消费门禁（schema-scan/node-gate/evidence-audit）的 partial 处理；`other`/symlink
+  目录的发现语义；未跑，记空白。
+
+### N20：bundle 绑定用全量参数子串 → BUG-090
+
+- **命题**：会话绑定只认工具调用里的**真实路径**；正文/pattern 提到 `drt_<slug>/` 不构成绑定。
+- **最低层**：纯函数（`sessionBindingOf`）；无模型/浏览器。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/bundle-bind-content-path.mjs`
+- **证据**：`write({file_path:'notes.md', content:'compare with drt_other-run/run.md'})` →
+  `{slug:'other-run',boundBy:'write'}`；`not_drt_fake/` 也命中；`grep` pattern 产生 read 绑定。
+  只有真实 `drt_real-run/run.md` 路径才应命中。
+- **判定**：**发现** → [BUG-090](../_archived/fixed_bugs/BUG-090-bundle-bind-content-false-positive.md)（P2，排查中；未改产品代码）。
+- **下一层**：`bindingTrust` 的 write 强绑定消费链（状态/配置/终稿）、多工具参数形态；未跑，记空白。
+
+### N21：replay 收尾谓词 any-turn 假绿 → BUG-091
+
+- **命题**：`turnCompleted` 判定的是「最后一个回合以 completed 结束」，不是历史上任一回合一完成。
+- **最低层**：纯函数（`scripts/lib/replay-request.mjs`）；无模型/浏览器。
+- **实际命令**：`node --import tsx/esm runtime/explore-20261112/turn-completed-any-turn.mjs`
+- **证据**：单回合 completed → true；completed 后再开新回合（未结束）→ true；completed 后
+  新回合 failed → true。后两者当前回合未完成。
+- **判定**：**发现** → [BUG-091](../_archived/fixed_bugs/BUG-091-turn-completed-any-turn.md)（P2，排查中；未改产品代码）。
+- **下一层**：`snapshot-replay-smoke` A 层 + `record-role-fixture` 的真实多 turn 形态；
+  `turnOpenOf` 等「计数型」时序谓词；未跑，记空白。
+
+### N22：defaults 双读失败被当 auto → BUG-092
+
+- **命题**：defaultsStore 只有在**确认文件不存在**时才进入 auto；读通道不可达必须显性。
+- **最低层**：store 级（fake readText/listDir 全 null）；无模型/浏览器。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/defaults-double-read-failure.mjs`
+- **证据**：`phase:"ready"`、`value:{schema,revision:0}`、`problems:[]`、`methodRead:"error"`、
+  `buttonWouldSayAuto:true`。双失败被渲染成「没有默认」。
+- **判定**：**发现** → [BUG-092](../_archived/fixed_bugs/BUG-092-defaults-double-read-failure-auto.md)（P2，排查中；未改产品代码）。
+- **下一层**：按钮/面板对 unreadable 的视觉态；`listDir` 失败但文件可读的单失败形态；未跑，记空白。
+
+### N23：方法库四字段 bullet/冒号变体 → BUG-093
+
+- **命题**：Markdown 等价的四字段写法（`*`/`+`/缩进/全角冒号）与 canonical 写法读出同一内容。
+- **最低层**：纯函数（`foldLibrary` + `summaryOfEntry`）；无模型/浏览器。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/library-section-bullets.mjs`
+- **证据**：canonical 四字段有值、summary `a`；`*`/`+`/两格缩进/全角冒号四种变体 sections 全 null、
+  summary null。
+- **判定**：**发现** → [BUG-093](../_archived/fixed_bugs/BUG-093-library-section-bullet-variants.md)（P2，排查中；未改产品代码）。
+- **下一层**：旧格式 `调查要求`/`适用说明` 的兼容、section-like 行的 warning、写回 canonical 的
+  round-trip；未跑，记空白。
+
+### N24：交付事实双源（final.md vs present）→ BUG-094
+
+- **命题**：HITL2「交付审阅」passed 与 ⑤ present 交付见证来自同一权威成功点。
+- **最低层**：纯函数（`deriveAnchors` + `latestFinalDelivery`）+ 源码路径（useStatusFeed）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/anchor-final-vs-present.mjs`
+- **证据**：`deriveAnchors([], {question:true, delivered:true})` → anchor-2 `passed`；
+  `latestFinalDelivery([])` → `null`；useStatusFeed 的 `face.delivered = names.has('final.md')`。
+- **判定**：**发现** → [BUG-094](../_archived/fixed_bugs/BUG-094-hitl2-anchor-final-vs-present.md)（P2，排查中；未改产品代码）。
+- **下一层**：HITL1 的 question.md 是否也有类似的「在场≠拍板」双源；真实 run 时序；未跑，记空白。
+
+### N25：bootWeb 成功路径 timer 未清理 → BUG-095
+
+- **命题**：`bootWeb` 无论成功/失败都释放 banner timeout；库式消费者不因 boot 残留 timer。
+- **最低层**：fake CLI + `process.getActiveResourcesInfo()`；无真模型/浏览器。
+- **实际命令**：`node --import tsx/esm runtime/explore-20261112/boot-web-timer-leak.mjs`
+- **证据**：banner 成功 `token:"fake-token"` 后仍有 `activeTimeouts:1`（timeoutMs 5000）。
+  成功路径没有 clearTimeout；当前脚本 process.exit 掩盖了它。
+- **判定**：**发现** → [BUG-095](../_archived/fixed_bugs/BUG-095-boot-web-timer-leak.md)（P3，排查中；未改产品代码）。
+- **下一层**：失败/child-exit 路径的 timer 清理、stdout/stderr listener 回收；未跑，记空白。
+
+### N26：HITL2 被当 kickoff → BUG-096
+
+- **命题**：kickoffSeen 只由 HITL1 / research-brief 立项动作触发；HITL2 交付审阅不是新 run。
+- **最低层**：纯函数（`sessionBindingOf` + `bindingTrust`）；无模型/浏览器。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/hitl2-counts-as-kickoff.mjs`
+- **证据**：read `drt_resumed/run.md` + HITL2 ask（`定稿（按现稿交付）`）+ 已答；
+  binding `{slug:'resumed',boundBy:'read',kickoffSeen:true}`；trust `suppressed/kickoff`。
+- **判定**：**发现** → [BUG-096](../_archived/fixed_bugs/BUG-096-hitl2-counts-as-kickoff.md)（P2，排查中；未改产品代码）。
+- **下一层**：HITL1/HITL2 判型与 binding-trust 的 pending/kickoff 政策交叉；未跑，记空白。
+
+### N27：方法库跨会话 lost update → BUG-097
+
+- **命题**：方法库写工具的 read-modify-write 对并发写者安全（检测/合并冲突，不静默覆盖）。
+- **最低层**：纯函数交错模拟 + 源码路径（`method-library-tool.ts` 三个 execute）；无模型/浏览器。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/method-library-lost-update.mjs`
+- **证据**：A/B 都读 base，A 写 `{方法A}`、B 写 `{方法B}`；最终 entries 只有 `{方法B}`，
+  `lostA:true`。工具无锁/无 revision CAS。
+- **判定**：**发现** → [BUG-097](../_archived/fixed_bugs/BUG-097-method-library-lost-update.md)（P2，排查中；未改产品代码）。
+- **下一层**：真实双标签页并发、set-default/remove 的同类交错、写文件原子性；未跑，记空白。
+
+### N28：方法库写非原子 → BUG-098
+
+- **命题**：方法库三个写工具对用户唯一文件使用原子写（temp+rename/backup），中途失败不截断旧库。
+- **最低层**：源码路径 + 写语义（不做破坏性崩溃注入）。
+- **实际命令**：
+  `grep -n "writeFileSync" packages/deep-research-pack/src/method-library-tool.ts` →
+  99/168/226；`grep -n "renameSync\|mkdtemp\|tmp"` → 无输出。
+- **证据**：三处直接 `writeFileSync(path, ..., 'utf8')`，无临时文件/rename；对照 defaults
+  command 已原子写。
+- **判定**：**发现** → [BUG-098](../_archived/fixed_bugs/BUG-098-method-library-non-atomic-write.md)（P2，排查中；未改产品代码）。
+- **下一层**：可控失败注入、backup 恢复、文件系统 rename 语义；未跑，记空白。
+
+### N29：run source picker 读失败当空列表 → BUG-099
+
+- **命题**：来源选择器对 `listDir` 的 null（失败）与 []（空目录）分家；失败显示读取错误。
+- **最低层**：hook 级真跑（happy-dom + react-dom/client；final 目录 null）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/run-source-list-error-as-empty.mjs`
+- **证据**：`{"status":"runNoFinal","eligible":false}`——final 读失败被渲染成「没有 final」。
+- **判定**：**发现** → [BUG-099](../_archived/fixed_bugs/BUG-099-run-source-list-error-as-empty.md)（P2，排查中；未改产品代码）。
+- **下一层**：根清单 null、`sourceReadFailure` 的 catch 路径、真实 workspaceFiles 分布；未跑，记空白。
+
+### N30：final.md 同名目录被当交付 → BUG-100
+
+- **命题**：final.md 的交付/在场判定要求 `entry.type === 'file'`，不是名字在场。
+- **最低层**：纯函数（`openRun` 假 RunSource 返回 directory 项）；无模型/浏览器。
+- **实际命令**：`node --import tsx/esm runtime/explore-20261112/final-md-directory-as-delivered.mjs`
+- **证据**：`names` 含 final.md、`finalEntryType:"directory"`、`consumerNamesHasFinal:true`、
+  `read('final.md')` → missing。消费面 `names.has` / `existsSync` 不校验类型。
+- **判定**：**发现** → [BUG-100](../_archived/fixed_bugs/BUG-100-final-md-directory-as-delivered.md)（P2，排查中；未改产品代码）。
+- **下一层**：question/review/plan 的同类目录/symlink 形态、终稿页签打开行为；未跑，记空白。
+
+### N31：present 非终稿族路径被当交付版本 → BUG-101
+
+- **命题**：交付版本只从 `drt_.../final/vN.md` 终稿族取，且必须与 present 交付事实同源。
+- **最低层**：纯函数（`latestFinalDelivery` + `latestPresentedFinalVersion` + `runVersionFaceOf`）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/present-version-non-bundle.mjs`
+- **证据**：present `notes/final/v9.md` → delivery null、deliveredVersion 9、faceState none、
+  faceLabel `v9 已交付`（contradiction true）。
+- **判定**：**发现** → [BUG-101](../_archived/fixed_bugs/BUG-101-present-version-non-bundle.md)（P2，排查中；未改产品代码）。
+- **下一层**：同事件多文件/真假族混合、readable-vN、present 跨事件 max；未跑，记空白。
+
+### N32：plan 正文版本引用覆盖头部声明 → BUG-102
+
+- **命题**：`planVersionsOf` 的 currentPlanVersion 只取头部/声明块，正文历史引用不覆盖。
+- **最低层**：纯函数（`runVersionFaceOf`）；无模型/浏览器。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/plan-version-body-overrides-header.mjs`
+- **证据**：头部 `图版本：v2` + 正文「旧版图版本：v1」→ currentPlanVersion 1、
+  versionConflicted false。
+- **判定**：**发现** → [BUG-102](../_archived/fixed_bugs/BUG-102-plan-version-body-overrides-header.md)（P2，排查中；未改产品代码）。
+- **下一层**：头部 Markdown 形态（代码块/引用/无 ##）、recorded 斜杠解析；未跑，记空白。
+
+### N33：present 版本 max vs 最后事件 → BUG-103
+
+- **命题**：交付版本跟随**最后一条** present 事件，与 latestFinalDelivery 同一权威点。
+- **最低层**：纯函数（`latestFinalDelivery` + `latestPresentedFinalVersion`）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/present-version-max-vs-last.mjs`
+- **证据**：present v2（turn2）后 present v1（turn3）；latestFinalDelivery 指 v1，
+  latestPresentedFinalVersion=2（contradiction true）。
+- **判定**：**发现** → [BUG-103](../_archived/fixed_bugs/BUG-103-present-version-max-vs-last.md)（P2，排查中；未改产品代码）。
+- **下一层**：同事件多文件/读者版、turn/callId 缺失、rollback 语义；未跑，记空白。
+
+### N34：port-reclaim 杀任意 listener → BUG-104
+
+- **命题**：reclaimPort 只收割本仓/冒烟自己的遗留进程，不杀端口上的无关服务。
+- **最低层**：子进程级（自起 node net listener 占 3127，再 reclaim）；无模型/浏览器。
+- **实际命令**：
+  `node --import tsx/esm runtime/explore-20261112/port-reclaim-kills-any-listener.mjs`
+- **证据**：before pid 65694 → reclaimed null、childExited true、signalCode SIGKILL、
+  killedArbitraryListener true。
+- **判定**：**发现** → [BUG-104](../_archived/fixed_bugs/BUG-104-port-reclaim-kills-any-listener.md)（P2，排查中；未改产品代码）。
+- **下一层**：ps/cmdline 身份校验、pid 锁、端口占用 fail-loud；未跑，记空白。
+
+### N35：rerun kind 边界过宽 → BUG-105
+
+- **命题**：rerun 声明只接受精确 kind；`polish-extra`/`structural-extra` 等非法后缀不解析。
+- **最低层**：纯函数（`runVersionFaceOf` 的 `rerun`）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/rerun-kind-suffix-match.mjs`
+- **证据**：`polish-extra` → rerun.kind `polish`、state rerun-in-progress；
+  `structural-extra` → `structural`；合法 `polish` 正常。
+- **判定**：**发现** → [BUG-105](../_archived/fixed_bugs/BUG-105-rerun-kind-suffix-match.md)（P2，排查中；未改产品代码）。
+- **下一层**：全角分隔/大小写/evidence-expansion 后缀；未跑，记空白。
+
+### N36：早期回合哨兵污染 A 层 → BUG-106
+
+- **命题**：A 层/录制器的收尾哨兵只认当前（最后）回合的 assistant 文本。
+- **最低层**：纯函数（`sentinelInAssistantText`）。
+- **实际命令**：`node --import tsx/esm runtime/explore-20261112/sentinel-any-history.mjs`
+- **证据**：currentDone true；oldDoneThenOpen true；oldDoneThenFailed true（后两者当前回合
+  无哨兵）。
+- **判定**：**发现** → [BUG-106](../_archived/fixed_bugs/BUG-106-sentinel-any-history.md)（P2，排查中；未改产品代码）。
+- **下一层**：与 BUG-091 的 turnCompleted 组合、多 turn 回放/录制真实样本；未跑，记空白。
+
+### N37：defaults 写 pending 期间静默丢弃 → BUG-107
+
+- **命题**：defaultsStore 在 pending 期间收到第二次 set/unset/clear 时排队或显式 busy，
+  不静默丢写。
+- **最低层**：store 级（fake execute 延迟；连续两次 setPatch）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/defaults-pending-drop.mjs`
+- **证据**：commandsBeforeRelease 1 / total 1；第二次 output.shape 未应用；outcome 只有第一次的 ok。
+- **判定**：**发现** → [BUG-107](../_archived/fixed_bugs/BUG-107-defaults-pending-drop.md)（P2，排查中；未改产品代码）。
+- **下一层**：真实面板 blur→select 事件顺序、跨轴合并语义、host revision；未跑，记空白。
+
+### N38：config feed 交互态跨会话残留 → BUG-108
+
+- **命题**：useConfigFeed 切换会话时清空 receipt/detail/menu/confirm/sending 等交互态。
+- **最低层**：hook 级真跑（happy-dom + react-dom/client；s1 send 后切 s2）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/config-feed-receipt-stale.mjs`
+- **证据**：afterSend 与 afterSwitch 的 receipt 都是 `sent/receiptSent`；staleReceipt true。
+- **判定**：**发现** → [BUG-108](../_archived/fixed_bugs/BUG-108-config-feed-interaction-state-stale.md)（P2，排查中；未改产品代码）。
+- **下一层**：receiptDiff/replied/轮询晚到、删除确认/菜单的完整 UI 影响；未跑，记空白。
+
+### N39：来源回执目录被当文件 → BUG-109
+
+- **命题**：run source 的交付回执在场判定要求 `type === 'file'`，名字相同目录不算。
+- **最低层**：hook 级真跑（happy-dom；drt_x/delivered.json 为 directory）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/run-source-delivered-dir-eligible.mjs`
+- **证据**：`{"status":"eligibleRun","eligible":true}`，deliveredRecord 命中目录。
+- **判定**：**发现** → [BUG-109](../_archived/fixed_bugs/BUG-109-run-source-delivered-dir-eligible.md)（P2，排查中；未改产品代码）。
+- **下一层**：acceptance.md 同类、其它名字在场消费面、真实畸形 bundle；未跑，记空白。
+
+### N40：run source symlink 越界 → BUG-110
+
+- **命题**：Node RunSource 的 run bundle 根必须落在工作区内；symlink 不得引到外部。
+- **最低层**：临时目录 symlink + `nodeRunSource`/`openRun`；无模型/浏览器。
+- **实际命令**：
+  `node --import tsx/esm runtime/explore-20261112/run-source-symlink-escape.mjs`
+- **证据**：drt_evil -> outside；list 见 question.md；openRun 读 `OUTSIDE SECRET`；escaped true。
+  run-context 只做词法 `..`/绝对路径检查，nodeRunSource 跟随 symlink。
+- **判定**：**发现** → [BUG-110](../_archived/fixed_bugs/BUG-110-run-source-symlink-escape.md)（P2，排查中；未改产品代码）。
+- **下一层**：symlink 文件（非根）、browserRunSource 语义、写路径 symlink；未跑，记空白。
+
+### N41：方法库写 symlink 越界 → BUG-111
+
+- **命题**：方法库写工具的 read-modify-write 不跟随 symlink，写入必须落在工作区内。
+- **最低层**：临时目录 symlink + 工具同款 read/upsert/write；无模型/浏览器。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/method-library-symlink-write-escape.mjs`
+- **证据**：method-library.md -> outside-target.md；写入后 outsideChanged true、
+  outsideHasEntry true；symlink 仍保留。
+- **判定**：**发现** → [BUG-111](../_archived/fixed_bugs/BUG-111-method-library-symlink-write-escape.md)（P2，排查中；未改产品代码）。
+- **下一层**：目录 symlink、hardlink、写后回读的边界；未跑，记空白。
+
+### N42：plan recorded 斜杠字段假阳 → BUG-112
+
+- **命题**：recorded 版本只从真正的重写记录取，普通正文 bullet 的 `/ vN /` 不算。
+- **最低层**：纯函数（`runVersionFaceOf`）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/plan-recorded-slash-false-positive.mjs`
+- **证据**：头部 v3 + 正文 `- 参考 / v1 / 旧方案示例` → recorded 1、versionConflicted true、
+  label「版本声明不一致」。
+- **判定**：**发现** → [BUG-112](../_archived/fixed_bugs/BUG-112-plan-recorded-slash-false-positive.md)（P2，排查中；未改产品代码）。
+- **下一层**：记录节上下文、真实重写记录形态；未跑，记空白。

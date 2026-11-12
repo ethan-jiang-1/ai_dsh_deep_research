@@ -104,7 +104,19 @@ export function useRunSourcePicker(deps: RunSourcePickerDeps) {
         setSelectedRunLoading(false)
         return
       }
-      const version = latestFinalVersion(finalFiles ?? [])
+      if (finalFiles === null || runFiles === null) {
+        setSelectedRunSource({
+          name,
+          finalPath: `${name}/final/v1.md`,
+          question: { kind: 'error', detail: 'run listing failed' },
+          deliverable: { kind: 'error', detail: 'run listing failed' },
+          eligible: false,
+          status: t('sourceReadFailure'),
+        })
+        setSelectedRunLoading(false)
+        return
+      }
+      const version = latestFinalVersion(finalFiles)
       const finalPath = version === null ? `${name}/final/v1.md` : `${name}/final/${version}`
       const [question, deliverable, header, questionComplete] = await Promise.all([
         readPreview(sessionId, `${name}/question.md`, controller.signal),
@@ -118,8 +130,8 @@ export function useRunSourcePicker(deps: RunSourcePickerDeps) {
         setSelectedRunLoading(false)
         return
       }
-      const deliveredRecord = runFiles?.some((file) => file.name === 'delivered.json') === true
-      const legacyReceipt = runFiles?.some((file) => file.name === 'acceptance.md') === true
+      const deliveredRecord = runFiles.some((file) => file.type === 'file' && file.name === 'delivered.json')
+      const legacyReceipt = runFiles.some((file) => file.type === 'file' && file.name === 'acceptance.md')
       const hasFinal = version !== null
       const hasDeliverableContent = deliverable.kind === 'ok' && deliverable.text.trim() !== ''
       const eligible = isCompletedMethodSourceRun({

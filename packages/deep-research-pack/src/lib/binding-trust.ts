@@ -8,7 +8,7 @@
  * 政策：
  *   - write 命中 → 永远可信（写进 bundle 的动作是强信号）；
  *   - read 命中 + HITL 挂起 → 抑制（挂起期本 run 的 bundle 多半还没实例化，读绑定是预检）；
- *   - read 命中 + 立项信号（ask_user_question / research-brief skill）→ 抑制（立项轨道）；
+ *   - read 命中 + 立项信号（HITL1 ask / research-brief skill）→ 抑制（立项轨道；HITL2 不算，BUG-096）；
  *   - read 命中、无挂起无立项 → 可信（恢复会话的只读查询）。
  * 抑制带 reason：状态页用 `kickoff` 显示“这场还没开始”横幅，`pending` 显示挂起期说明。
  *

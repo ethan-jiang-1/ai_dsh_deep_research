@@ -7,6 +7,13 @@
 // scripts/smoke/release-smoke.mjs（⑤ 安装域冒烟后的释放验证——preset-smoke 被外层超时击杀
 // 时其 finally 不及跑，web 孙进程独立进程组会漏占端口）。
 import { spawnSync } from 'node:child_process';
+import { isOwnListener } from './port-reclaim-policy.mjs';
+
+const commandOf = (pid) => {
+  const r = spawnSync('ps', ['-o', 'command=', '-p', String(pid)], { encoding: 'utf8' })
+  if (r.error !== undefined || r.status !== 0) return null
+  return r.stdout.trim()
+}
 
 export const listenersOn = (port) => {
   const r = spawnSync('lsof', ['-t', '-nP', `-iTCP:${port}`, '-sTCP:LISTEN'], { encoding: 'utf8' });
@@ -23,7 +30,12 @@ export const reclaimPort = async (port) => {
     const pids = listenersOn(port);
     if (pids === null) return `lsof 缺席，跳过端口 ${port} 收割校验（本机无 lsof）`;
     if (pids.length === 0) return null;
-    for (const pid of pids) { try { process.kill(Number(pid), 'SIGKILL') } catch { /* 已死 */ } }
+    for (const pid of pids) {
+      const command = commandOf(pid)
+      if (command === null) return `端口 ${port} 的 listener pid ${pid} 身份不可读——拒绝收割（未确认 ≠ 本仓进程）`
+      if (!isOwnListener(command)) return `端口 ${port} 被非本仓进程占用（pid ${pid}：${command.slice(0, 160)}）——换端口或人工处理，拒绝 SIGKILL`
+      try { process.kill(Number(pid), 'SIGKILL') } catch { /* 已死 */ }
+    }
     await sleep(800);
   }
   const left = listenersOn(port);

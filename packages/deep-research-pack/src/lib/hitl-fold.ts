@@ -166,7 +166,7 @@ const ANCHOR_LABEL_KEYS = ['anchorKickoff', 'anchorDelivery'] as const
 interface AnchorFileFacts {
   /** question.md 在场 = 立项拍板已落盘（方向契约只在校准后写入）。 */
   readonly question: boolean
-  /** final.md 在场 = 交付拍板已落盘（当前版权威副本）。 */
+  /** present 交付见证已落（HITL2 拍板 + present；final.md 只是终稿，BUG-094）。 */
   readonly delivered: boolean
 }
 

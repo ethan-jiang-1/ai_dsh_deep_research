@@ -190,15 +190,15 @@ export function latestPresentedFinalVersion(events: readonly unknown[]): number 
     if (record.type !== 'deliverables/presented') continue
     const data = record.data as { files?: unknown } | null | undefined
     if (typeof data !== 'object' || data === null || !Array.isArray(data.files)) continue
+    const versions: number[] = []
     for (const file of data.files) {
-      const raw = (file as { path?: unknown } | null | undefined)?.path
-      if (typeof raw !== 'string') continue
-      const normalized = raw.replace(/\\/g, '/').replace(/\/{2,}/g, '/')
-      const version = /(?:^|\/)final\/(?:v|readable-v)([1-9]\d{0,5})\.md$/.exec(normalized)?.[1]
-      if (version === undefined) continue
-      const value = Number(version)
-      if (Number.isSafeInteger(value) && (latest === null || value > latest)) latest = value
+      const path = finalPathOf((file as { path?: unknown } | null | undefined)?.path)
+      if (path === null) continue // 非终稿族（notes/final/v9.md 等）不算交付版本（BUG-101）
+      const version = /(?:^|\/)final\/(?:v|readable-v)([1-9]\d{0,5})\.md$/.exec(path)?.[1]
+      if (version !== undefined) versions.push(Number(version))
     }
+    // 最后一条**含终稿版本**的 present 胜出；同一事件多份取最高（BUG-103：不是全历史 max）。
+    if (versions.length > 0) latest = Math.max(...versions)
   }
   return latest
 }

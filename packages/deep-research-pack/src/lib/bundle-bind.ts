@@ -32,18 +32,42 @@ interface SessionBinding {
   readonly kickoffSeen: boolean
 }
 
-/** 从调用参数（JSON 字符串或对象）里找 `drt_<slug>/` 路径形态；找不到 → undefined。
- *  解析核 = journal-wire.argsObjectOf（共享正本）；本件哨兵 = undefined（缺/截断不算绑定）。 */
-function slugInArgs(args: unknown): string | undefined {
+/** 真实路径字段（正文/示例里的 `drt_` 不算绑定，BUG-090）。 */
+const PATH_FIELDS = ['file_path', 'path', 'paths', 'filePath', 'file'] as const
+
+function pathStringsOf(value: unknown, out: string[]): void {
+  if (typeof value === 'string') { out.push(value); return }
+  if (Array.isArray(value)) { for (const item of value) pathStringsOf(item, out); return }
+  if (value !== null && typeof value === 'object') {
+    for (const [key, nested] of Object.entries(value)) {
+      if ((PATH_FIELDS as readonly string[]).includes(key)) pathStringsOf(nested, out)
+    }
+  }
+}
+
+/** 从工具参数的真实路径字段里找 `drt_<slug>/`（路径段边界；content/pattern 正文不参与）。
+ *  解析核 = journal-wire.argsObjectOf；本件哨兵 = undefined（缺/截断不算绑定）。 */
+function slugInArgs(name: string, args: unknown): string | undefined {
   const obj = argsObjectOf(args)
   if (obj === null) return undefined
-  const m = /drt_([a-z0-9][a-z0-9-]*)\//.exec(JSON.stringify(obj))
-  return m?.[1]
+  const paths: string[] = []
+  for (const field of PATH_FIELDS) if (field in obj) pathStringsOf(obj[field], paths)
+  // glob 的 pattern 是路径 glob；grep 的 pattern 是搜索词（不参与绑定）。
+  if (name === 'glob' && typeof obj.pattern === 'string') paths.push(obj.pattern)
+  for (const raw of paths) {
+    const m = /(?:^|[\\/])drt_([a-z0-9][a-z0-9-]*)[\\/]/.exec(raw.replace(/\\/g, '/'))
+    if (m !== null) return m[1]
+  }
+  return undefined
 }
 
 /** 立项语义动作判定（BUG-001）：ask_user_question 调用，或 skill 调用加载 research-brief。 */
 function isKickoffCall(name: string, args: unknown): boolean {
-  if (name === 'ask_user_question') return true
+  // 只有 HITL1 三问（签名 = 首问「研究类型」）是新 run 开工；HITL2 交付审阅/未知 ask 不是（BUG-096）。
+  if (name === 'ask_user_question') {
+    const obj = argsObjectOf(args)
+    return obj !== null && JSON.stringify(obj).includes('研究类型') // i18n-ignore: HITL1 wire signature
+  }
   if (name !== 'skill') return false
   const obj = argsObjectOf(args)
   return obj !== null && obj.name === 'research-brief'
@@ -68,7 +92,7 @@ export function sessionBindingOf(events: readonly unknown[]): SessionBinding {
     if (e.type !== 'tool/call') continue
     const name = typeof e.data?.name === 'string' ? e.data.name : ''
     if (isKickoffCall(name, e.data?.arguments)) kickoffSeen = true
-    const slug = slugInArgs(e.data?.arguments)
+    const slug = slugInArgs(name, e.data?.arguments)
     if (slug === undefined) continue
     if (WRITE_TOOLS.has(name)) writeSlug = slug
     else readSlug = slug

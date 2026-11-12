@@ -109,16 +109,18 @@ function planVersionsOf(planText: string | null | undefined): {
   // `图版本：v1（每次重写递增）`，真正声明在它下面；取第一条会把重写后的 plan 读成 v1
   // （受控 E2E 实测：v2 被读成 v1 / vN）。
   const withoutComments = planText.replace(/<!--[\s\S]*?-->/g, '')
-  let header: number | null = null
-  for (const match of withoutComments.matchAll(/图版本\s*[：:]\s*v?(\d+)/g)) {
-    const version = INT(match[1])
-    if (version !== null) header = version
-  }
+  // 头部声明只认**首个 `##` 之前**的块（正文里的「旧版图版本：v1」不夺权，BUG-102）；
+  // 无 `##` 的旧形态退化为全文首个声明。
+  const headerBlock = withoutComments.split(/^##\s/m)[0] ?? withoutComments
+  const headerMatches = [...headerBlock.matchAll(/图版本\s*[：:]\s*v?(\d+)/g)]
+  let header: number | null = headerMatches.length > 0
+    ? INT(headerMatches.at(-1)?.[1] ?? '')
+    : INT(withoutComments.match(/图版本\s*[：:]\s*v?(\d+)/)?.[1] ?? '')
   // 重写记录的行形态会有漂移：模板写 `图版本 vN`，模型常写成 `日期 / vN / 动作`。
-  // 两种都认（后者只认斜杠分隔的独立字段，不把正文里的 v24 当版本）。
+  // 斜杠分支必须有重写语义/日期上下文（正文 `- 参考 / v1 / 示例` 不算，BUG-112）。
   let recorded: number | null = null
-  for (const match of withoutComments.matchAll(/^[ \t]*[-*][^\n]*?(?:图版本\s*v?(\d+)|[/｜|]\s*v(\d+)\s*[/｜|])/gm)) {
-    const version = INT(match[1] ?? match[2])
+  for (const match of withoutComments.matchAll(/^[ \t]*[-*][^\n]*?(?:图版本\s*v?(\d+)|(?:重写|版本记录)[^\n]*?[/｜|]\s*v(\d+)\s*[/｜|]|\d{4}-\d{2}-\d{2}[^\n]*?[/｜|]\s*v(\d+)\s*[/｜|])/gm)) {
+    const version = INT(match[1] ?? match[2] ?? match[3])
     if (version !== null && (recorded === null || version > recorded)) recorded = version
   }
   return { header, recorded, conflicted: header !== null && recorded !== null && header !== recorded }
@@ -131,7 +133,7 @@ function planVersionsOf(planText: string | null | undefined): {
  */
 function rerunDeclarationOf(questionText: string | null | undefined): RerunDeclaration | null {
   if (typeof questionText !== 'string' || questionText === '') return null
-  const match = /^[ \t]*>[ \t]*rerun[ \t]*[：:][ \t]*v?(\d+)[ \t]*·[ \t]*(evidence-expansion|polish|structural)\b([^\n]*)/mi.exec(questionText)
+  const match = /^[ \t]*>[ \t]*rerun[ \t]*[：:][ \t]*v?(\d+)[ \t]*·[ \t]*(evidence-expansion|polish|structural)(?=\s|·|$)([^\n]*)/mi.exec(questionText)
   if (match === null) return null
   const version = INT(match[1])
   const kind = match[2] as RerunKind | undefined
@@ -170,11 +172,13 @@ export function runVersionFaceOf(facts: RunVersionFacts, t: PackTranslate = tran
   const explicitDelivered = INT(String(facts.deliveredVersion ?? ''))
   // 版本账只有 v1 时「已交付 = v1」是可靠的（首版交付只有一个版本）；版本账 >1 且 present
   // 只点名 final.md 时，交付的是哪版**盘上不可知**——说「未记载」，不拿版本账最高号冒充。
-  const deliveredFinalVersion = explicitDelivered !== null
-    ? explicitDelivered
-    : delivered && ledgerFinalVersion === 1
-      ? 1
-      : null
+  const deliveredFinalVersion = !delivered
+    ? null // 没有 present 就不说「已交付」，不管 present 版本号是否被别处传入（BUG-101）
+    : explicitDelivered !== null
+      ? explicitDelivered
+      : ledgerFinalVersion === 1
+        ? 1
+        : null
   const deliveryVersionAmbiguous = delivered && deliveredFinalVersion === null && ledgerFinalVersion > 1
   const draftPresent = facts.draftPresent === true
   const rerun = rerunDeclarationOf(facts.questionText)

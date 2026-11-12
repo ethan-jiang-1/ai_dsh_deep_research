@@ -9,8 +9,8 @@
 //   - eof = 本页含文件最后一行。
 // 失败映射：ENOENT → missing；其它（ENOTDIR、EISDIR、EACCES…）→ unreadable。
 
-import { readFileSync, readdirSync, statSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { readFileSync, readdirSync, realpathSync, statSync } from 'node:fs'
+import { join, resolve, sep } from 'node:path'
 
 const missing = () => ({ ok: false, reason: 'missing' })
 const unreadable = (detail) => ({ ok: false, reason: 'unreadable', detail })
@@ -32,22 +32,35 @@ function linesOf(text) {
  */
 export function nodeRunSource(root) {
   const base = resolve(root)
+  const baseReal = (() => { try { return realpathSync(base) } catch { return base } })()
+  /** 解析真实路径并校验仍在工作区内；symlink 逃逸 → ESCAPE（BUG-110）。 */
+  const resolvedInside = (path) => {
+    const real = realpathSync(join(base, path))
+    if (real !== baseReal && !real.startsWith(`${baseReal}${sep}`)) {
+      throw Object.assign(new Error(`path escapes workspace: ${path}`), { code: 'ESCAPE' })
+    }
+    return real
+  }
+  const failureOf = (error, action, path) => error?.code === 'ESCAPE'
+    ? unreadable(`${action} ${path}: escapes workspace`)
+    : isMissing(error) ? missing() : unreadable(`${action} ${path}: ${error?.code ?? String(error)}`)
   return {
     async list(dir) {
       try {
-        const entries = readdirSync(join(base, dir), { withFileTypes: true }).map((entry) => {
-          const full = join(base, dir, entry.name)
+        const realDir = resolvedInside(dir)
+        const entries = readdirSync(realDir, { withFileTypes: true }).map((entry) => {
+          const full = join(realDir, entry.name)
           let mtimeMs
           try { mtimeMs = statSync(full).mtimeMs } catch { mtimeMs = undefined }
           return {
             name: entry.name,
-            type: entry.isDirectory() ? 'directory' : entry.isFile() ? 'file' : 'other',
+            type: entry.isSymbolicLink() ? 'other' : entry.isDirectory() ? 'directory' : entry.isFile() ? 'file' : 'other',
             ...(mtimeMs !== undefined ? { mtimeMs } : {}),
           }
         })
         return { ok: true, value: entries }
       } catch (error) {
-        return isMissing(error) ? missing() : unreadable(`list ${dir}: ${error?.code ?? String(error)}`)
+        return failureOf(error, 'list', dir)
       }
     },
     async read(path, { offset, limit }) {
@@ -55,7 +68,7 @@ export function nodeRunSource(root) {
         return unreadable(`bad page window: offset=${String(offset)} limit=${String(limit)}`)
       }
       try {
-        const full = join(base, path)
+        const full = resolvedInside(path)
         const text = readFileSync(full, 'utf8')
         const all = linesOf(text)
         const slice = all.slice(offset - 1, offset - 1 + limit)
@@ -71,14 +84,14 @@ export function nodeRunSource(root) {
           },
         }
       } catch (error) {
-        return isMissing(error) ? missing() : unreadable(`read ${path}: ${error?.code ?? String(error)}`)
+        return failureOf(error, 'read', path)
       }
     },
     async version(path) {
       try {
-        return { ok: true, value: String(statSync(join(base, path)).mtimeMs) }
+        return { ok: true, value: String(statSync(resolvedInside(path)).mtimeMs) }
       } catch (error) {
-        return isMissing(error) ? missing() : unreadable(`stat ${path}: ${error?.code ?? String(error)}`)
+        return failureOf(error, 'stat', path)
       }
     },
   }

@@ -168,3 +168,12 @@ test('地址认领：终稿族三位置 + final/ 下 vN/readable 都认；drafts
   assert.equal(isFinalAddress(finalAddressOf('sess-1', 'notes/final/v1.md')), false);
   assert.equal(isFinalAddress(finalAddressOf('sess-1', 'drt_x/final/readable-final.md')), false);
 });
+
+// 负例留证 2026-11-12：BUG-101——非终稿族 notes/final/v9.md 被当交付版本；
+// BUG-103——全历史 max 与最后一条 present 错位。还原法 = 去掉 finalPathOf 过滤 / 改回 max。
+test('BUG-101/103 latestPresentedFinalVersion：只认终稿族，且以最后一条含版本的 present 为准', () => {
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'notes/final/v9.md' }])]), null)
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_x/final/v2.md' }]), presented([{ path: 'drt_x/final/v1.md' }])]), 1)
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_x/final/v1.md' }]), presented([{ path: 'drt_x/final/v2.md' }])]), 2)
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_x/final/v1.md' }, { path: 'drt_x/final/v3.md' }])]), 3)
+})

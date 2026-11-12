@@ -100,6 +100,7 @@ const zhBase = {
   fieldProgress: '{count}/4 已填写',
   incompleteFields: '还需补齐：{fields}',
   methodName: '名称',
+  invalidMethodName: '名称不能包含全角括号「（）」或「〔〕」——它们是来源注记/默认标记的语法',
   continueInterview: '在工作台继续',
   cancel: '取消',
   restartSource: '重新选择来源',
