@@ -7,69 +7,45 @@
  * 历史 FAIL 读成终局，仪表盘/镜像遂报「审查修复中」。node-gate 的 `readinessOf` 现直接委托本模块
  * （BUG-040 后不再有本地 mirror）；门契约的测试边界见 `tests/run/node-gate-delivery.test.mjs`。
  *
- * 本模块把**终局**语义收成一处，规则 = 只认**行首判定行**，取最后一条；正文/附录里的**行内引用**
- * （如「第 1 轮：`readiness: FAIL`」）是历史留痕，不得夺权。空模板 `PASS | FAIL` 两词并存的行按
- * 未判定处理（不猜）。
+ * 本模块把**终局**语义收成一处（D51，判据不猜）：判定只认结构化位置——**行首**（仅 Markdown 装饰）
+ * 或 `；;。` 分隔符之后的**裸写** `readiness: PASS|FAIL`；正文/附录里的行内引用（反引号、加粗、括号包裹）
+ * 与散文前缀（`旧轮记录：`、`结论行：`、`本轮 `）都不构成判定。空模板 `PASS | FAIL` 两词并存按未判定处理。
  *
- * 装饰容忍（2026-10-16 窄放宽 (A)，13 场真实 review.md 实证）：判定行的**行首装饰**不改变它是判定行
- * ——块引用/列表符/箭头、标题标记与**短标题文字**、加粗与反引号包裹、短标签（`结论行：`/`复核结论：`/
- * `第 2 轮结论：` 这类 ≤10 字 + 冒号）、值后 `（最终）` 类后缀，都读得出。边界同样明确：
- *   · **行内提及**（prose 中段的 `` …我将…给出 `readiness: PASS` ``）不构成判定行——它是承诺/历史；
- *   · **表格单元**（`| **readiness: FAIL** |`）不夺权（要行内匹配才读得到，会放历史引用越权）；
- *   · **长前缀历史标题**（`# 复核轮（Round 2，2026-09-27）——**readiness: PASS**`）与**标题散文堆叠 /
- *     标签链**（`## 第二轮 复审 结论 说明 readiness: PASS`）不夺权——装饰前缀有形状上限：短标签至多
- *     1 枚、标题文字至多 1 段（≤9 字 + 空白），散文前缀堆不出来。
- *   · **判定词后的短括号标签**（`## readiness（终局）: PASS`，手册的固定形态）读得出；括号 ≤8 字且
- *     不许含 `|`/换行——空模板、超长标签与行内提及仍不夺权（2026-11-10 BUG-046）。
- * 放宽的是"读得出"，不是"放得过"：判定值仍只有 PASS/FAIL 两态，取最后一条。
+ * 歧义即无法判定：同一行出现互斥裸写判定、或行首判定与同行裸写判定不一致 → 返回 `null`（不取最后一个
+ * 冒充、不按关键词挑「最像的」）。轮次标题（`# 第 2 轮（复审）—— readiness: PASS`）作为轮次信号保留：
+ * 无轮次标注者为终局；全带轮次时轮次高者胜（文末附录的旧轮记录因此不夺权）。
+ *
+ * 残留边界：轮次标题的「第 N 轮」与判定之间允许至多 24 字插入语；这一段是下一片声明件要替代的形态，
+ * 不在本函数里再加宽容。
  *
  * 消费方：驾驶舱 `ResearchStatusTab.tsx`、`scripts/smoke/client-load-smoke.mjs` 与
  * `scripts/lib/run-dashboard-core.mjs` 直接调用本函数；门禁的 `readinessOf` 直接委托本函数的
  * `terminalVerdictLine`（BUG-040 后不再有第二份 mirror），由 `tests/run/review-readiness.test.mjs`
- * 覆盖终局 PASS/FAIL、历史行内引用与空模板。
+ * 与 `tests/contracts/verdict-conformance.test.mjs`（变异矩阵 + 不变量）覆盖。
  */
 
 type Readiness = 'PASS' | 'FAIL'
+/** 同一行出现互斥裸写判定 = 无法判定（D51：不取最后一个冒充）。 */
+const AMBIGUOUS = 'ambiguous' as const
 
-/** 装饰前缀的**形状上限**：短标签至多 1 枚、标题文字至多 1 段（判定词之前不许堆散文）。 */
-const VERDICT_PREFIX_MAX_LABELS = 1
-const VERDICT_PREFIX_MAX_HEADING_CHUNKS = 1
-
-/** 剥去行首装饰，返回以 `readiness` 开头的剩余文本；未到判定词返回 null。 */
+/**
+ * 剥去**行首 Markdown 装饰**，返回以 `readiness` 开头的剩余文本；未到判定词返回 null。
+ *
+ * 只认 Markdown 结构（空白/引用/列表符/标题/加粗/反引号），不认散文：`结论行：`、`本轮 `、`旧轮记录：`
+ * 都是文字，不是装饰——把任意短标签当装饰正是历史引用夺权的入口（D51，BUG-150 的类）。
+ * 判定行要独立成行；写入纪律见研究手册。
+ */
 function stripVerdictDecor(line: string): string | null {
   let s = line
-  let labels = 0
-  let headingChunks = 0
-  let heading = false
   for (let i = 0; i < 12; i++) {
     if (/^readiness\b/i.test(s)) return s
-    const before = s
-    let m = /^[\s>→⇒]+/.exec(s)
-    if (m !== null) s = s.slice(m[0].length)
-    m = /^[-*+]\s+/.exec(s)
-    if (m !== null) s = s.slice(m[0].length)
-    if (/^readiness\b/i.test(s)) return s
-    m = /^#{1,6}\s*/.exec(s)
-    if (m !== null) { heading = true; s = s.slice(m[0].length) } else {
-      m = /^(?:\*\*|__|`{1,2})\s*/.exec(s)
-      if (m !== null) { s = s.slice(m[0].length); continue }
-    }
-    if (/^readiness\b/i.test(s)) return s
-    // 短标签：≤10 字 + 冒号（`结论行：` / `⇒ 复核结论：` / `第 2 轮结论**：` 的加粗壳已在上一步剥掉）
-    m = /^[^|\n：:]{1,10}[：:]\s*/.exec(s)
-    if (m !== null) {
-      if (labels >= VERDICT_PREFIX_MAX_LABELS) return null
-      labels += 1; s = s.slice(m[0].length); continue
-    }
-    // 标题文字（仅标题行，且至多一段）：短词 + 空白（`## 终验 readiness:`）
-    if (heading) {
-      m = /^[^|\n：:]{1,9}\s+/.exec(s)
-      if (m !== null) {
-        if (headingChunks >= VERDICT_PREFIX_MAX_HEADING_CHUNKS) return null
-        headingChunks += 1; s = s.slice(m[0].length); continue
-      }
-    }
-    if (s === before) break
+    const next = s
+      .replace(/^[\s>]+/, '')
+      .replace(/^(?:[-*+]|\d+[.)])\s+/, '')
+      .replace(/^#{1,6}\s*/, '')
+      .replace(/^(?:\*\*|__|`{1,2})\s*/, '')
+    if (next === s) break
+    s = next
   }
   return /^readiness\b/i.test(s) ? s : null
 }
@@ -80,34 +56,40 @@ const VERDICT_LINE = /^readiness(?:\s*[（(][^）)\n|]{1,8}[）)])?\s*[:：]\s*(
 /** 空模板 `readiness（终局）: PASS | FAIL` 是完整占位行（装饰形态同样豁免）；带额外说明的是判定，不是模板。 */
 const EMPTY_TEMPLATE = /^readiness(?:\s*[（(][^）)\n|]{1,8}[）)])?\s*[:：]\s*(?:\*\*|__|`{1,2})?\s*PASS\s*\|\s*FAIL[\s`*_]*$/i
 
-/** 同一行内、未被反引号/加粗包裹的 `readiness:` 判定；只认带「本轮/终局/真实/最终/当前/最后」语境的行。 */
+/** 同一行内、未被反引号/加粗/括号包裹的 `readiness:` 判定（裸写）。包裹内的是引用，不夺权。 */
 const INLINE_VERDICT = /readiness(?:\s*[（(][^）)\n|]{1,8}[）)])?\s*[:：]\s*(?:\*\*|__|`{1,2})?\s*(PASS|FAIL)\b/gi
-function lastInlineVerdict(line: string): Readiness | null {
+
+/**
+ * 一行里的判定候选（D51）：只有「行首（仅 Markdown 装饰）」或「分隔符之后**立即**是判定词」的裸写才算；
+ * 散文前缀（`旧轮记录：`、`本轮 `、`随后 `）一律不算——措辞不是结构，位置才是。
+ *
+ * 反证：`readiness: PASS；随后 readiness: FAIL` 里，第一个是裸写、第二个是散文前缀；两者值互斥时返回
+ * `ambiguous`（拒绝在两种读法里挑一个），不是取最后一个。
+ */
+function lastInlineVerdict(line: string): Readiness | typeof AMBIGUOUS | null {
   if (/^\s*\|/.test(line)) return null // 表格单元不夺权
   const ranges: Array<[number, number]> = []
   for (const m of line.matchAll(/(`+)[\s\S]*?\1/g)) ranges.push([m.index ?? 0, (m.index ?? 0) + m[0].length])
   for (const m of line.matchAll(/(\*\*|__)[\s\S]*?\1/g)) ranges.push([m.index ?? 0, (m.index ?? 0) + m[0].length])
   // 括号内的判定是历史引用（`（第 1 轮 readiness: FAIL）`），不夺权。
   for (const m of line.matchAll(/[（(][^）)]*[）)]/g)) ranges.push([m.index ?? 0, (m.index ?? 0) + m[0].length])
-  let found: Readiness | null = null
+  let bare: Readiness | null = null
+  const prose: Readiness[] = []
   for (const match of line.matchAll(INLINE_VERDICT)) {
     const index = match.index ?? 0
     if (ranges.some(([start, end]) => index >= start && index < end)) continue
     const before = line.slice(0, index)
     const segment = before.split(/[；;。]/).pop() ?? before
-    // 旧轮/历史引用（无论是否带引号）不作当前判定。
-    if (/(?:旧轮|上轮|旧记录|历史|此前|原来|第\s*\d+\s*轮)/i.test(segment)) continue
-    // 裸写判定必须位于行首（仅装饰前缀）或某个分隔符之后；prose 中段提及不夺权。
-    const atStart = before.replace(/[\s>*#\-+`]/g, '') === ''
-    const afterSeparator = /[；;。]/.test(before)
-    const currentPrefix = /^(?:本轮|终局|真实|最终|当前|最后|现在|新判定)\s*$/i.test(segment.trim())
-    if (!atStart && !afterSeparator && !currentPrefix) continue
     const value = match[1]!.toUpperCase() as Readiness
-    // 同一行多个当前裸写判定且互相矛盾 → fail-closed（不取最后一个冒充）。
-    if (found !== null && found !== value) return null
-    found = value
+    // 分隔符到判定词之间只许有 Markdown 装饰；有文字 = 散文提及。
+    if (segment.replace(/[\s>*#\-+`]/g, '') !== '') { prose.push(value); continue }
+    if (bare !== null && bare !== value) return AMBIGUOUS
+    bare = value
   }
-  return found
+  if (bare === null) return null
+  // 裸写判定与同一行的散文提及互斥 = 两种读法，拒绝挑一个（不取「更晚/更像」的）。
+  if (prose.some((value) => value !== bare)) return AMBIGUOUS
+  return bare
 }
 
 /**
@@ -130,22 +112,30 @@ export function terminalVerdictLine(reviewText: string | null | undefined): { va
   interface Candidate { readonly value: Readiness; readonly round: number | null; readonly index: number }
   const candidates: Candidate[] = []
   const lines = reviewText.split('\n')
+  let ambiguous = false
   for (const [index, line] of lines.entries()) {
     const rest = stripVerdictDecor(line)
-    const inline = EMPTY_TEMPLATE.test(line) ? null : lastInlineVerdict(line)
-    if (rest !== null && !EMPTY_TEMPLATE.test(rest)) {
+    // 空模板 `readiness: PASS | FAIL` 不是判定（含装饰形态）——任何路径都要先排除。
+    const template = (rest !== null && EMPTY_TEMPLATE.test(rest)) || EMPTY_TEMPLATE.test(line)
+    const inline = template ? null : lastInlineVerdict(line)
+    if (inline === AMBIGUOUS) { ambiguous = true; continue }
+    if (inline !== null) {
+      const round = /第\s*([0-9]+)\s*轮|轮次\s*[:：]?\s*([0-9]+)|\bround\s*([0-9]+)\b/i.exec(line)
+      const roundText = round?.[1] ?? round?.[2] ?? round?.[3]
+      candidates.push({ value: inline, round: roundText === undefined ? null : Number(roundText), index })
+      continue
+    }
+    // 无裸写时，只接受「整行就是判定」的包裹形态（`**readiness: PASS**（附条件）`）：
+    // 判定词之后只许收尾包裹与短括号，后面还有正文 = 引用，不夺权。
+    if (rest !== null && !template) {
       const match = VERDICT_LINE.exec(rest)
-      const value = inline ?? match?.[1]
-      if (value !== undefined) {
+      const tail = match === null ? '' : rest.slice(match[0].length)
+      if (match !== null && /^\s*(?:\*\*|__|`{1,2})?\s*(?:[（(][^）)\n]*[）)])?\s*$/.test(tail)) {
         const round = /第\s*([0-9]+)\s*轮|轮次\s*[:：]?\s*([0-9]+)|\bround\s*([0-9]+)\b/i.exec(line)
         const roundText = round?.[1] ?? round?.[2] ?? round?.[3]
-        candidates.push({ value: value.toUpperCase() as Readiness, round: roundText === undefined ? null : Number(roundText), index })
+        candidates.push({ value: match[1]!.toUpperCase() as Readiness, round: roundText === undefined ? null : Number(roundText), index })
         continue
       }
-    }
-    if (rest === null && inline !== null) {
-      candidates.push({ value: inline, round: null, index })
-      continue
     }
     const roundMatch = ROUND_HEADING.exec(line)
     const roundValue = roundMatch?.[2]
@@ -154,6 +144,7 @@ export function terminalVerdictLine(reviewText: string | null | undefined): { va
       candidates.push({ value: roundValue.toUpperCase() as Readiness, round: Number(roundNo), index })
     }
   }
+  if (ambiguous) return null
   if (candidates.length === 0) return null
   const unlabeled = candidates.filter((c) => c.round === null)
   const winner = unlabeled.length > 0

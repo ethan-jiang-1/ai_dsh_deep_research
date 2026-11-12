@@ -142,7 +142,7 @@ test('attributionBundleOf：写命中盖过立项窗口的预检读（计划确�
 // 负例留证 2026-10-21：BUG-041——run-kickoff 自由文本关闭挂起（官方恢复手段）的落账函数此前
 //   零测试消费（export 级对账实证；同形事故 BUG-014/041 均「声称写盘实际没写」）。红绿实录：
 //   ①「尾随节」与「§Decisions 缺节 fail-loud」两用例首跑即红——旧实现盲 append 到文件尾，
-//   question.md 在 §Decisions 后有尾随节时记账行落节外（node-gate 门③ isHitl2Row 只读节内行
+//   question.md 在 §Decisions 后有尾随节时记账行落节外（node-gate 门③ isHitl2Mention 只读节内行
 //   = 记账白落），缺节时静默落错位；②改节内插入 + 缺节 fail-loud 后全绿；③sabotage（journal
 //   双写降级 no-op）→ journal 断言红 → 还原绿。
 
@@ -181,7 +181,7 @@ test('appendDecisionsRow：§Decisions 后有尾随节 → 行落节内而非文
     const q = readFileSync(join(bundle, 'question.md'), 'utf8');
     const appendixAt = q.indexOf('## 附录');
     assert.ok(appendixAt > q.indexOf('## Decisions'), '夹具形态错误');
-    assert.ok(q.indexOf('操作侧代理模拟') < appendixAt, '记账行落到 §Decisions 节外（尾随节形态）——门③ isHitl2Row 读不到 = 记账白落');
+    assert.ok(q.indexOf('操作侧代理模拟') < appendixAt, '记账行落到 §Decisions 节外（尾随节形态）——门③ isHitl2Mention 读不到 = 记账白落');
     assert.ok(q.includes('附录内容'), '尾随节内容被改写');
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });

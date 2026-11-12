@@ -98,23 +98,28 @@ test('终局判定：空模板 `## readiness: PASS | FAIL` 两词并存 → null
   assert.equal(terminalReadiness('## readiness: PASS | FAIL\n判据清单：\n'), null);
 });
 
-// ── 2026-10-16 窄放宽 (A)：行首判定行的**装饰形态**（13 场真实 review.md 逐字语料）──────────
-// 动因：13 场已交付 bundle 的终局判定带装饰（加粗/反引号/块引用/标题标记/短标签/箭头/值后缀），
-// 旧规则读不出 → 3 场被更早的历史 FAIL 夺权（假 FAIL）、4 场"未判定"（假 unknown）。
-// 边界未动：行内提及、表格单元、长前缀历史标题仍不得夺权。
-test('终局判定（窄放宽）：装饰形态真实语料逐条读得出', () => {
-  const cases = [
-    ['## 终验 readiness: **PASS**', 'PASS'],                                   // drt_agent-memory-landscape
-    ['**`readiness: PASS` 维持不变，且效力范围已按 `final/final.md` 实体复核完毕。**', 'PASS'], // drt_cn-agentic-parity
-    ['**⇒ 复核结论：`readiness: PASS`**（零 CRITICAL；五条判据全勾）', 'PASS'],      // drt_cn-us-open-source
-    ['→ **`readiness: PASS`**（放行至 HITL2；MAJOR-1 建议在定稿前补 2 句）', 'PASS'], // drt_deepseek-chat-price-check
-    ['> **## readiness: PASS（最终）**', 'PASS'],                                // drt_kimi-api-pricing
-    ['**`readiness: PASS`** —— 无 CRITICAL 未修复；价格主体经独立重抓逐格复核', 'PASS'], // drt_zhipu-api-pricing
-    ['**第 2 轮结论**：**`readiness: PASS`（维持）**。**MAJOR 0（全部关单）**', 'PASS'], // drt_open-llm-inference-engine-landscape
-    ['## 结论先行：**readiness: PASS**（第四轮复核收口）', 'PASS'],                  // drt_geometry-coaching
-    ['**结论行：`readiness: PASS`**', 'PASS'],                                   // 同场文首形态
+// ── 2026-11-13 判据形状（D51）：行首只认 Markdown 装饰 ──────────────────────────────────────
+// 负例留证 2026-11-13：D51——「短标签 ≤10 字」「标题文字 ≤9 字」两步把散文前缀当装饰，正是历史引用
+// 夺权的入口；回填这两步后，下方 proseOnly 例会读成 PASS/FAIL 而不是「无法判定」。
+test('终局判定（判据形状）：行首只认 Markdown 装饰，散文前缀不构成判定行', () => {
+  const readable = [
+    ['## readiness: **PASS**', 'PASS'],
+    ['> readiness: PASS', 'PASS'],
+    ['- readiness: FAIL', 'FAIL'],
+    ['**readiness: PASS**（附条件）', 'PASS'],
+    ['`readiness: FAIL`', 'FAIL'],
+    ['### readiness（终局）: PASS', 'PASS'],
   ];
-  for (const [line, want] of cases) assert.equal(terminalReadiness(`${line}\n`), want, line);
+  for (const [line, want] of readable) assert.equal(terminalReadiness(`${line}\n`), want, line);
+  const proseOnly = [
+    '## 终验 readiness: **PASS**',
+    '**结论行：`readiness: PASS`**',
+    '**⇒ 复核结论：`readiness: PASS`**（零 CRITICAL）',
+    '→ **`readiness: PASS`**（放行至 HITL2）',
+    '## 结论先行：**readiness: PASS**（第四轮复核收口）',
+    '**第 2 轮结论**：**`readiness: PASS`（维持）**',
+  ];
+  for (const line of proseOnly) assert.equal(terminalReadiness(`${line}\n`), null, line);
 });
 
 test('终局判定（窄放宽）：不夺权负例逐条钉住（真实语料 + 边界形态）', () => {
@@ -185,39 +190,44 @@ test('跨实现一致（BUG-040）：附条件 PASS 仍算 pass（门独有语�
 });
 
 // 负例留证 2026-11-12：BUG-074——同一行先引用旧 readiness、再写真实终局时，旧实现取首个匹配
-// （或整行 null），导致 fail-open 或误杀。还原法 = 删 lastInlineVerdict / 改回首个匹配。
-test('终局判定（BUG-074）：同行多判定取「本轮/真实终局」的那个，引用不夺权', () => {
+// （或整行 null），导致 fail-open 或误杀。D51 收口：散文前缀不是判定，互斥提及一律「无法判定」。
+// 红配方：把 lastInlineVerdict 的「分隔符后立即是判定词」退回关键词白名单（旧 074/141/150 修法）→
+// 下方各例会读成 PASS/FAIL 而不是 null。
+test('BUG-074 同行散文前缀不构成判定：互斥提及 → 无法判定（不取最晚/最像）', () => {
   const cases = [
-    ['旧轮记录：`readiness: PASS`；本轮真实终局：readiness: FAIL', 'FAIL'],
-    ['`readiness: PASS`；本轮 readiness: FAIL', 'FAIL'],
-    ['备注：**readiness: PASS**；本轮 readiness: FAIL', 'FAIL'],
-    ['- **第 1 轮**：`readiness: FAIL` 血统；本轮 readiness: PASS', 'PASS'],
-    ['- 上轮 `readiness: PASS`；本轮 readiness: FAIL', 'FAIL'],
+    '旧轮记录：`readiness: PASS`；本轮真实终局：readiness: FAIL',
+    '`readiness: PASS`；本轮 readiness: FAIL',
+    '备注：**readiness: PASS**；本轮 readiness: FAIL',
+    '- **第 1 轮**：`readiness: FAIL` 血统；本轮 readiness: PASS',
+    '- 上轮 `readiness: PASS`；本轮 readiness: FAIL',
   ];
-  for (const [line, want] of cases) assert.equal(terminalReadiness(`${line}\n`), want, line);
-  // 边界不回归：无「本轮/终局」语境的 prose 引用、表格、空模板仍不夺权
-  assert.equal(terminalReadiness('上一场 review 的结论是（第 1 轮 readiness: FAIL），本场尚未审查。\n'), null);
+  for (const line of cases) assert.equal(terminalReadiness(`${line}\n`), null, line);
+  // 边界：行首判定仍可读；表格与空模板不夺权
+  assert.equal(terminalReadiness('## readiness: PASS\n'), 'PASS');
   assert.equal(terminalReadiness('## readiness: FAIL\n\n| —— 结论 —— | **readiness: PASS** |\n'), 'FAIL');
   assert.equal(terminalReadiness('## readiness: PASS | FAIL\n'), null);
 });
 
-// 负例留证 2026-11-13：BUG-141——旧引用带关键词、真实判定裸写时旧值劫持。还原法 = 关键词过滤 + 括号不排除。
-test('BUG-141 行内仲裁按「未包裹」而非关键词：裸写真实判定胜出', () => {
+// 负例留证 2026-11-13：BUG-141——旧引用带关键词、真实判定裸写时旧值劫持。
+test('BUG-141 判定只认结构位置：散文提及不参与仲裁', () => {
   const cases = [
-    ['旧轮真实记录：`readiness: PASS`；现在 readiness: FAIL', 'FAIL'],
-    ['旧轮真实记录：`readiness: FAIL`；现在 readiness: PASS', 'PASS'],
-    ['见最终结论：旧记录 `readiness: PASS`；新判定 readiness: FAIL', 'FAIL'],
-    ['上轮 readiness: PASS；本轮 readiness: FAIL', 'FAIL'],
-    ['本轮 readiness: FAIL；旧轮 readiness: PASS', 'FAIL'],
+    '旧轮真实记录：`readiness: PASS`；现在 readiness: FAIL',
+    '旧轮真实记录：`readiness: FAIL`；现在 readiness: PASS',
+    '见最终结论：旧记录 `readiness: PASS`；新判定 readiness: FAIL',
+    '上轮 readiness: PASS；本轮 readiness: FAIL',
+    '本轮 readiness: FAIL；旧轮 readiness: PASS',
   ]
-  for (const [line, want] of cases) assert.equal(terminalReadiness(`${line}\n`), want, line)
+  for (const line of cases) assert.equal(terminalReadiness(`${line}\n`), null, line)
   // 括号内历史引用仍不夺权
   assert.equal(terminalReadiness('上一场 review 的结论是（第 1 轮 readiness: FAIL），本场尚未审查。\n'), null)
 })
 
 // 负例留证 2026-11-13：BUG-150——随后/复核后/结论/本 run 的裸写 FAIL 仍被旧 PASS 劫持。
-test('BUG-150 裸写真实判定不要求关键词：分隔符后取最后裸写', () => {
+// D51：这些前缀是散文，不是结构；判定要独立成行，旧引用与新判定同行 = 无法判定。
+test('BUG-150 散文前缀不夺权：随后/复核后/结论/本 run 一律不构成判定', () => {
   for (const lead of ['随后', '复核后', '结论', '本 run']) {
-    assert.equal(terminalReadiness(`旧轮真实记录：\`readiness: PASS\`；${lead} readiness: FAIL\n`), 'FAIL', lead)
+    assert.equal(terminalReadiness(`旧轮真实记录：\`readiness: PASS\`；${lead} readiness: FAIL\n`), null, lead)
   }
+  // 结构形态（判定独立成行）仍读得出
+  assert.equal(terminalReadiness('旧轮真实记录：`readiness: PASS`\n\n## readiness: FAIL\n'), 'FAIL')
 })

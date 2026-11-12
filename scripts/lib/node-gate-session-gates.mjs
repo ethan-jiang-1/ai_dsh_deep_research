@@ -383,28 +383,11 @@ function planCardNote(planCards, planCardOver) {
  * @returns { gate: { status, detail }, rows: HITL2 拍板行列表 }
  */
 /**
- * 一行 §Decisions 是否算「HITL2 拍板行」（单一判据；门③ 与门A 共用）。
- * 两条已文档化形态都认：① 字面 `HITL2`；② **代理代答 provenance 行**（`hitl-answer` 驱动，
- * 行内点明「交付审阅」且带「代理模拟」标记——操作侧代驱的显式记账纪律，见 hitl-provenance）。
- * @param line §Decisions 的单行文本。
- * @returns 是否计为 HITL2 拍板行。
+ * 一行 §Decisions 是否是 HITL2 的**记录行**（人读副本；不参与交付决策）。
+ * 两条已文档化形态：① 字面 `HITL2`；② 代理代答 provenance 行（`hitl-answer` 驱动，行内点明「交付审阅」
+ * 且带「代理模拟」标记）。决策由门③ 的事件链判（D51），记录行只要求在场。
  */
 export const isHitl2Mention = (line) => /HITL2/i.test(line) || (/交付审阅/.test(line) && /代理模拟|hitl-answer/.test(line))
-const HITL2_PENDING = /(?:待(?:用户)?确认|待定|待办|等待|等回复|挂起|推迟|暂缓|暂不|尚未|未拍板|未最终|未裁决|未决(?!项)|未定|未答复|pending|await|on hold)/i
-const HITL2_DECISION = /定稿|追认|拍板|按现稿|批准|认可|确认|通过|改说法|补研究|修订|同意|无异议|采纳|\bOK\b|approved|finalize|deliver as[- ]is|继续|照办/i
-
-/**
- * 一行 §Decisions 是否算「HITL2 拍板行」。
- * 代理记账行（`交付审阅` + `代理模拟`）是官方写入器产物，直接算拍板（BUG-144）；
- * 自由行：明确 pending 语义即排除，否则 HITL2 提及行默认算拍板（不再依赖决策词白名单，BUG-140）。
- */
-export function isHitl2Row(line) {
-  if (!isHitl2Mention(line)) return false
-  if (/交付审阅/.test(line) && /代理模拟|hitl-answer/.test(line)) return !/(?:未拍板|待用户确认|待确认|未定|未答复)/.test(line)
-  if (HITL2_PENDING.test(line)) return false
-  // fail-closed：没有明确决策证据就不算拍板（BUG-149；默认放行会把 pending 词表的洞放大）。
-  return HITL2_DECISION.test(line)
-}
 
 export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadableLogReader, witness = null) {
   const finalDir = join(bundleDir, 'final')
@@ -413,62 +396,46 @@ export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadabl
   const qPath = join(bundleDir, 'question.md')
   const qText = existsSync(qPath) ? readFileSync(qPath, 'utf8') : null
   const dec = qText ? decisionsLines(qText) : []
-  const hitl2Mentions = dec.filter((l) => isHitl2Mention(l))
-  // 最新行 = 日期最新；无日期时按文件顺序后出现者（append 语义）。不能取首行：
-  // §Decisions 可能旧在前/新在后（BUG-156）。
-  const latestMention = [...hitl2Mentions].map((line, index) => ({ line, index, date: /(\d{4}-\d{2}-\d{2})/.exec(line)?.[1] ?? '' }))
-    .sort((a, b) => a.date === b.date ? a.index - b.index : a.date.localeCompare(b.date))
-    .at(-1)?.line ?? null
-  const hitl2Rows = hitl2Mentions.filter((l) => isHitl2Row(l))
-  const proxyRows = hitl2Rows.filter((l) => !/HITL2/.test(l))
+  const mentions = dec.filter((l) => isHitl2Mention(l))
   const epoch = epochDateOf(bundleDir)
-  const newContract = epoch !== null
-  const contract = epoch === '' ? null : epoch
-  // fail-closed：run.md 在场但纪元非法 = 没有下界，不能把任意历史答复当本 run 见证。
-  if (newContract && contract === null) return { status: 'RED', detail: 'run.md 契约纪元缺失/非法（schema 需 created，旧形态需合法 contract）——见证不能无下界采信' }
+  const hasRun = epoch !== null
+  const contract = epoch === null || epoch === '' ? null : epoch
   let gate
   if (versionFiles.length === 0) {
     gate = { status: 'N/A', detail: 'final/ 版本记账不在场——门③无对象（bundle 未到交付段；显式标注，不静默跳过）' }
   } else if (!qText) {
     gate = { status: 'RED', detail: 'final/ 记账在场但 question.md 缺席——方向契约文件失踪，fail-loud（不静默跳过）' }
-  } else if (hitl2Mentions.length === 0) {
-    gate = { status: 'RED', detail: `final/ 记账在场（${versionFiles.join(', ')}）但 §Decisions 无任何 HITL2 行——版本落盘先于用户裁决（G8 形态）` }
-  } else if (latestMention !== null && !isHitl2Row(latestMention)) {
-    gate = { status: 'RED', detail: `§Decisions 最新一条 HITL2 行是未决形（${latestMention.trim().slice(0, 80)}）——版本落盘先于用户裁决（G8 形态）；旧答复不能为它作证` }
-  } else if (latestMention !== null && (() => {
-    const rowVersion = /\bv([1-9]\d*)\b/i.exec(latestMention)?.[1]
-    const newestFinal = Math.max(...versionFiles.map((name) => Number(/^v([1-9]\d*)\.md$/.exec(name)?.[1] ?? 0)))
-    return rowVersion !== undefined && Number(rowVersion) < newestFinal
-  })()) {
-    const rowVersion = /\bv([1-9]\d*)\b/i.exec(latestMention)?.[1]
-    const newestFinal = Math.max(...versionFiles.map((name) => Number(/^v([1-9]\d*)\.md$/.exec(name)?.[1] ?? 0)))
-    gate = { status: 'RED', detail: `最新 HITL2 拍板行指向 v${String(rowVersion)}，但 final/ 最新版本是 v${String(newestFinal)}——最新版本无对应拍板（版本配对失败）` }
-  } else if (newContract) {
+  } else if (mentions.length === 0) {
+    gate = { status: 'RED', detail: `final/ 记账在场（${versionFiles.join(', ')}）但 §Decisions 无任何 HITL2 记录行——人读记录缺席（G8 形态）` }
+  } else if (!hasRun) {
+    // 迁移残留：无 run.md 的旧场没有结构化见证面，保留文本记录路径。新契约 run 一律走下面的事件链。
+    // 删除条件 = node-gate 夹具族迁到新契约形状（issue 验收 5）；不是「新判据又开了兼容口」。
+    gate = { status: 'PASS', detail: `旧场（无 run.md）：§Decisions 含 ${mentions.length} 条 HITL2 记录行，迁移期按文本路径放行——新契约 run 不适用` }
+  } else if (contract === null) {
+    // fail-closed（D51）：run.md 在场但纪元非法 = 没有下界，不能把任意历史答复当本 run 的拍板。
+    gate = { status: 'RED', detail: 'run.md 契约纪元缺失/非法——门③见证无下界，不采信历史答复（修正 = 补 created/contract）' }
+  } else {
+    // 决策 = 事件链（D51）：绑定本 bundle 的 lead 会话里，最新交付审阅 ask 必须拿到 callId 绑定的答复。
+    // 散文行只要求在场，不判 pending / 决策词——词表判型已删除（BUG-140/149 的类）。
     const scan = witness ?? scanWitnessLogs(sessionsRoot, basename(bundleDir), { readLog, contract })
     const reply = repliesStatusOf(scan)
     if (reply.status === 'UNATTESTED') {
-      gate = { status: 'UNATTESTED', detail: `§Decisions 有 ${hitl2Rows.length} 条 HITL2 行，但会话语料缺席——事件链无证据（无证据 ≠ PASS）` }
+      gate = { status: 'UNATTESTED', detail: `§Decisions 有 ${mentions.length} 条 HITL2 记录行，但会话语料缺席——事件链无证据（无证据 ≠ PASS）` }
     } else if (reply.status !== 'FOUND') {
       gate = {
         status: 'RED',
-        detail: `§Decisions 有 ${hitl2Rows.length} 条 HITL2 行，但${reply.stale > 0 ? ` ${reply.stale} 条答复早于契约纪元、` : ''}会话语料无**绑定本 bundle 的 lead 会话**里 callId 绑定的答复（选定定稿）——文本行不能自证，跨 run 答复不作证`,
+        detail: `§Decisions 有 ${mentions.length} 条 HITL2 记录行，但${reply.stale > 0 ? ` ${reply.stale} 条答复早于契约纪元、` : ''}会话语料无**绑定本 bundle 的 lead 会话**里 callId 绑定的答复（选定定稿）——文本行不能自证，跨 run 答复不作证`,
       }
     } else if (reply.latestAsk === undefined) {
-      gate = { status: 'RED', detail: 'HITL2 行在场，但绑定会话里没有交付审阅 ask——答复无对象，不能自证' }
+      gate = { status: 'RED', detail: 'HITL2 记录行在场，但绑定会话里没有交付审阅 ask——答复无对象，不能自证' }
     } else if (reply.latestReply === null) {
-      gate = { status: 'RED', detail: `HITL2 行在场，但最新交付审阅 ask（callId ${reply.latestAsk.callId}）未答复——更早 ask 的答复不能为更新的版本作证（G8 形态）` }
+      gate = { status: 'RED', detail: `HITL2 记录行在场，但最新交付审阅 ask（callId ${reply.latestAsk.callId}）未答复——更早 ask 的答复不能为更新的版本作证（G8 形态）` }
     } else {
       const r = reply.latestReply
       gate = { status: 'PASS', detail: `HITL2 事件链在场：最新 ask callId ${r.callId} 选定「${r.label}」${r.proxy ? '（代理模拟，已显式标记）' : ''}` }
     }
-  } else {
-    gate = {
-      status: 'PASS',
-      detail: `§Decisions 含 ${hitl2Rows.length} 条 HITL2 拍板行`
-        + (proxyRows.length > 0 ? `（其中 ${proxyRows.length} 条为**代理代答 provenance**——已按显式记账纪律落行；旧场无 run.md，按 epoch 豁免事件链）` : '旧场无 run.md，按 epoch 豁免事件链'),
-    }
   }
-  return { gate, rows: hitl2Rows }
+  return { gate, rows: mentions }
 }
 
 /**
@@ -500,8 +467,16 @@ export function presentGate(bundleDir, sessionsRoot, hitl2Rows, readLog = emptyO
     if (versioned.length === 0) {
       return { status: 'RED', detail: 'deliverables/presented 在场，但未指向在场的 final/vN（present 指 final.md 或版本账缺席——不可变快照不成立）' }
     }
+    // 版本配对（D51）：present 必须指向**最新**版本账；v2 在场而只 present v1 = 新版本没有交付见证。
+    // 不再读 §Decisions 行里的 vN（散文不是判据）。
+    const newest = Math.max(...finalVersionsIn(join(bundleDir, 'final')))
+    const newestPresent = versioned.filter((e) => e.version === newest)
+    if (newestPresent.length === 0) {
+      const seen = [...new Set(versioned.map((e) => `v${e.version}`))].join(' / ')
+      return { status: 'RED', detail: `final/ 最新版本是 v${newest}，但 present 只指向 ${seen}——最新版本未交付（版本配对失败）` }
+    }
     const timeOf = (e) => (typeof e?.time === 'number' ? e.time : -Infinity)
-    const hit = versioned.reduce((a, b) => (timeOf(b) > timeOf(a) ? b : a))
+    const hit = newestPresent.reduce((a, b) => (timeOf(b) > timeOf(a) ? b : a))
     const reply = scan.replies.reduce((a, b) => (timeOf(b) > timeOf(a) ? b : a), null)
     if (reply !== null && Number.isFinite(timeOf(reply)) && Number.isFinite(timeOf(hit)) && timeOf(hit) < timeOf(reply)) {
       return { status: 'RED', detail: `present（${new Date(timeOf(hit)).toISOString()}）早于 HITL2 答复（${new Date(timeOf(reply)).toISOString()}）——交付事件链顺序不成立（ask → answer → present）` }

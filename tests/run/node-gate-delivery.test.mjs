@@ -243,9 +243,17 @@ test('node-gate 终局 readiness：最终 PASS 的附条件注记仍显性保留
   })
 })
 
-test('node-gate 终局 readiness（窄放宽 2026-10-16）：装饰形态的终局 PASS 读得出 → PASS', () => {
+// 负例留证 2026-11-13：D51——整行包裹的句子是引用/承诺，不是判定行；判定要独立成行。
+// 红配方：把 stripVerdictDecor 的散文前缀放宽加回（2026-10-16 的短标签/标题文字）→ 本例误读成 PASS。
+test('node-gate 终局 readiness：整行包裹的引用不构成判定 → 沿用上一行 FAIL', () => {
   withCompleteBundle((dir) => {
     writeFileSync(join(dir, 'review.md'), '## readiness: FAIL\n\n**`readiness: PASS` 维持不变，且效力范围已按 `final/final.md` 实体复核完毕。**\n')
+    const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
+    assert.equal(g.status, 'RED', JSON.stringify(g.detail))
+  })
+  // 判定独立成行（手册形态）仍 PASS
+  withCompleteBundle((dir) => {
+    writeFileSync(join(dir, 'review.md'), '## readiness: FAIL\n\n## readiness（终局）: PASS\n')
     const g = gateBundle(dir, sessions('s-complete'), { auditDate: '2026-10-08' }).gates.delivery
     assert.equal(g.status, 'PASS', JSON.stringify(g.detail))
   })
@@ -305,7 +313,7 @@ test('门A 豁免反证：非 quick_factual 而记账在场、review.md 缺席 �
 // 负例留证 2026-10-18：BUG-038（门L 分级判据不容忍 `**A**` 加粗 → 对已分级条目假红）与
 //   BUG-039（门③ 不认代理代答 provenance 行；门A 不认「未决项升级到用户裁决」这条既定路径）。
 //   红配方（038）：把门L 的分级判据改回 `/[(（]\s*[ABCD]\b/`（不剥强调）→ 本文件 bold-grade 例红。
-//   红配方（039）：删掉 isHitl2Row 的"代理代答"分支 → 本文件代理行例红；
+//   红配方（039）：删掉 isHitl2Mention 的「代理模拟」分支 → 本文件代理行例红；
 //     删掉门A 的 escalationNoted/escalationAdjudicated 判据 → escalation 例红。
 test('门A升级路径：readiness FAIL + 未决项升级记账 + HITL2 拍板行 → 不判"越过审查前置"（BUG-039）', () => {
   const g = A('fixture-escalation-adjudicated', '2026-10-08');

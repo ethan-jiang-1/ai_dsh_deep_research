@@ -14,7 +14,7 @@ import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import { hitl2ReplyInLogs, presentedInLogs } from '../../scripts/lib/node-gate-session-gates.mjs'
-import { hitl2RowGate, isHitl2Row, presentGate } from '../../scripts/lib/node-gate-session-gates.mjs'
+import { hitl2RowGate, isHitl2Mention, presentGate } from '../../scripts/lib/node-gate-session-gates.mjs'
 import { deriveAnchors } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { closingProvenanceRow } from '../../scripts/lib/hitl-provenance.mjs'
 
@@ -236,7 +236,9 @@ test('hitl2RowGate：新 run 有行 + 本 run 事件链才 PASS；有行无事�
   } finally { cleanup() }
 })
 
-test('旧场（无 run.md）保持文本兼容：有 HITL2 行即 PASS，不要求事件链', () => {
+// 迁移残留（issue 验收 5）：无 run.md 的旧场保留文本路径；新契约 run 走事件链。
+// 删除条件 = 夹具族迁到新契约形状；在此之前本用例钉住「残留只在无 run.md 时成立」。
+test('旧场（无 run.md）：文本记录路径保留，detail 显式标注迁移期', () => {
   const { dir, cleanup } = makeRoot('witness')
   try {
     const b = join(dir, 'drt_legacy')
@@ -245,7 +247,13 @@ test('旧场（无 run.md）保持文本兼容：有 HITL2 行即 PASS，不要�
     writeFileSync(join(b, 'final', 'v1.md'), '# v1\n')
     const r = hitl2RowGate(b, join(dir, 'nope'))
     assert.equal(r.gate.status, 'PASS')
-    assert.match(r.gate.detail, /epoch/)
+    assert.match(r.gate.detail, /旧场|迁移期/)
+
+    // run.md 在场而纪元非法 = 没有下界：RED（与旧场两条路径分开）
+    writeFileSync(join(b, 'run.md'), '# Run\n\n- phase: delivery\n')
+    const red = hitl2RowGate(b, join(dir, 'nope'))
+    assert.equal(red.gate.status, 'RED')
+    assert.match(red.gate.detail, /纪元|下界/)
   } finally { cleanup() }
 })
 
@@ -284,21 +292,22 @@ test('presentGate：present 指向 bundle 外 → RED（不可移交），且 de
   } finally { cleanup() }
 })
 
-// 负例留证 2026-11-12：BUG-075——旧实现 isHitl2Row 只做关键词存在判断，pending 行 + 旧答复
-// 即可 PASS（G8 fail-open）。还原法 = isHitl2Row 退回 /HITL2/ 单判、门③只取任意一条答复。
-test('BUG-075 HITL2：最新行是未决形 + 旧答复 → RED', () => {
+// 负例留证 2026-11-12：BUG-075——旧实现按行文关键词判「拍板/未决」，旧答复即可放行（G8 fail-open）。
+// D51 收口：决策只认最新 ask 的 callId 答复；行文措辞不参与（pending 字样不否决真实答复）。
+// 红配方：把门③ 的决策退回 isHitl2Row 行判 → 本例的 pending 行会被判 RED，或旧答复被当拍板。
+test('BUG-075 HITL2：未决措辞不否决真实答复——最新 ask 已答复 = PASS（事件为准）', () => {
   const { dir, cleanup } = makeRoot('witness')
   try {
     const b = writeBundle(dir)
     writeFileSync(join(b, 'question.md'), '# Q\n\n## Decisions（append-only，最新在上）\n\n- 2026-10-23 HITL2（v2）：未拍板（等待用户确认）\n')
     const sessions = writeSession(dir, [bind(), ask(), reply()])
     const r = hitl2RowGate(b, sessions)
-    assert.equal(r.gate.status, 'RED', JSON.stringify(r.gate))
-    assert.match(r.gate.detail, /未决|未拍板|G8/)
+    assert.equal(r.gate.status, 'PASS', JSON.stringify(r.gate))
+    assert.match(r.gate.detail, /ask1/)
   } finally { cleanup() }
 })
 
-test('BUG-075 HITL2：未决形 + 无答复 → RED（旧实现已红，保持）', () => {
+test('BUG-075 HITL2：pending 行 + 无答复 → RED', () => {
   const { dir, cleanup } = makeRoot('witness')
   try {
     const b = writeBundle(dir)
@@ -352,22 +361,20 @@ test('BUG-134 门③绑定只看真实路径字段：content 提及别的 bundle
   } finally { cleanup() }
 })
 
-// 负例留证 2026-11-13：BUG-140/144/146——HITL2 词表双向误判、代理行被打哑、英文卡判型。
-// 还原法：pending 只枚举待确认 / 代理行要求决策词 / askKind 只认中文文案。
-test('BUG-140 HITL2 行：待用户确认不算；无异议/OK/approved/采纳/附未决项算', () => {
-  assert.equal(isHitl2Row('- 2026-11-23 HITL2 待用户确认（v2）'), false)
-  assert.equal(isHitl2Row('- HITL2：用户无异议'), true)
-  assert.equal(isHitl2Row('- HITL2: user replied OK'), true)
-  assert.equal(isHitl2Row('- HITL2: approved'), true)
-  assert.equal(isHitl2Row('- HITL2：采纳'), true)
-  assert.equal(isHitl2Row('- HITL2 定稿（附未决项：补研究 W3）'), true)
-  assert.equal(isHitl2Row('- HITL2 通过（待补引用 3 处）'), true)
+// 负例留证 2026-11-13：BUG-140——HITL2 词表双向误判（pending 当拍板 / 决策同义词误杀）。
+// D51 收口：行文只算「记录在场」，决策归门③ 的事件链；两张词表已删除。
+// 红配方：恢复 isHitl2Row + HITL2_PENDING/HITL2_DECISION → 本组 pending 行会被判成拍板或误杀。
+test('BUG-140 HITL2 记录行：任何措辞都只算记录在场，不算拍板', () => {
+  for (const row of ['- 2026-11-23 HITL2 待用户确认（v2）', '- HITL2：用户无异议', '- HITL2: approved', '- HITL2 等回复', '- HITL2 on hold']) {
+    assert.equal(isHitl2Mention(row), true, row)
+  }
+  assert.equal(isHitl2Mention('- 计划确认卡：「交付审阅」按推荐开跑'), false, '没有 HITL2 / 代理记账，不是记录行')
 })
 
-test('BUG-144 代理记账行：原话 OK/继续/就按这个吧 仍算 HITL2 拍板', () => {
+test('BUG-144 代理记账行：原话 OK/继续/就按这个吧 仍是 HITL2 记录行', () => {
   for (const text of ['OK', '继续', '就按这个吧']) {
     const row = closingProvenanceRow({ cardKey: 'anchor-2', text, date: '2026-11-13' })
-    assert.equal(isHitl2Row(row), true, `${text} -> ${row}`)
+    assert.equal(isHitl2Mention(row), true, `${text} -> ${row}`)
   }
 })
 
@@ -386,26 +393,41 @@ test('BUG-146 英文 HITL2 卡：门③认 id/英文选项，UI 判 pending', ()
 })
 
 // 负例留证 2026-11-13：BUG-149——pending 词表洞导致「等回复/未最终裁决/挂起/推迟/未决/hold」被当拍板。
-test('BUG-149 HITL2 pending 词表洞：无明确决策证据一律未决', () => {
-  for (const row of ['HITL2 等回复', 'HITL2 未最终裁决', 'HITL2 挂起', 'HITL2 推迟', 'HITL2 待办：等用户', 'HITL2 未决', 'HITL2 暂不交付', 'HITL2 on hold']) {
-    assert.equal(isHitl2Row(`- ${row}`), false, row)
-  }
-  for (const row of ['HITL2 定稿', 'HITL2 用户无异议', 'HITL2 approved', 'HITL2 采纳']) {
-    assert.equal(isHitl2Row(`- ${row}`), true, row)
-  }
+// 现在决策只认事件链：同样的 pending 行，最新 ask 已答复 → PASS；未答复 → RED。
+test('BUG-149 行文措辞不改变决策：pending 与 decision 词同判（事件为准）', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  try {
+    const answered = writeBundle(dir)
+    writeFileSync(join(answered, 'question.md'), '# Q\n\n## Decisions\n\n- HITL2 等回复\n- HITL2 on hold\n')
+    const sessions = writeSession(dir, [bind(), ask(), reply()])
+    assert.equal(hitl2RowGate(answered, sessions).gate.status, 'PASS')
+
+    const unanswered = join(dir, 'drt_y')
+    mkdirSync(join(unanswered, 'final'), { recursive: true })
+    writeFileSync(join(unanswered, 'run.md'), '# Run\n\n- contract: 2026-10-23\n- phase: delivery\n')
+    writeFileSync(join(unanswered, 'question.md'), '# Q\n\n## Decisions\n\n- HITL2 定稿（用户已拍板）\n')
+    writeFileSync(join(unanswered, 'final', 'v1.md'), '# v1\n')
+    const unansweredSessions = writeSessionAt(dir, [bind('y'), ask('y')], { name: 'session-y.jsonl' })
+    const red = hitl2RowGate(unanswered, unansweredSessions)
+    assert.equal(red.gate.status, 'RED', JSON.stringify(red.gate))
+    assert.match(red.gate.detail, /callId 绑定|答复|G8/)
+  } finally { cleanup() }
 })
 
-// 负例留证 2026-11-13：BUG-156——最新 v2 pending 行 + 旧 v1 拍板/答复仍 PASS。
-// 还原法 = latestMention 取首行（旧 v1）且不做版本配对。
-test('BUG-156 最新 HITL2 行/版本仲裁：v2 pending + v1 旧答复 → RED', () => {
+// 负例留证 2026-11-13：BUG-156——最新 v2 在场 + 只 present v1 仍 PASS（版本配对缺失）。
+// D51：配对读 present 事件，不读 §Decisions 行里的 vN。
+// 红配方：presentGate 只要求「任一在场 vN」而不要求最新版本 → 下方 RED 例变 PASS。
+test('BUG-156 版本配对：v2 在场而只 present v1 → RED（门②）', () => {
   const { dir, cleanup } = makeRoot('witness')
   try {
     const b = writeBundle(dir)
-    writeFileSync(join(b, 'question.md'), '# Q\n\n## Decisions\n\n- 2026-11-01 HITL2 定稿（v1）\n- 2026-11-23 HITL2 待用户确认（v2）\n')
     writeFileSync(join(b, 'final', 'v2.md'), '# v2\n')
-    const sessions = writeSession(dir, [bind(), ask(), reply()])
-    const r = hitl2RowGate(b, sessions)
-    assert.equal(r.gate.status, 'RED', JSON.stringify(r.gate))
-    assert.match(r.gate.detail, /未决|最新|版本/)
+    const sessions = writeSession(dir, [bind(), ask(), reply('按现稿定稿（Recommended）', T + 60_000), present('drt_x/final/v1.md', T + 120_000)])
+    const r = presentGate(b, sessions, [])
+    assert.equal(r.status, 'RED', JSON.stringify(r))
+    assert.match(r.detail, /最新版本|配对/)
+
+    const v2 = writeSessionAt(dir, [bind(), ask(), reply(), present('drt_x/final/v2.md')], { name: 'session-v2.jsonl' })
+    assert.equal(presentGate(b, v2, []).status, 'PASS')
   } finally { cleanup() }
 })

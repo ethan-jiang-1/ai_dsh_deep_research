@@ -92,7 +92,7 @@ export function attributionBundleOf(events) {
  * 自由文本关闭挂起的记账行（BUG-041，2026-10-18）：`run-kickoff --session <id> --prompt "<文本>"`
  * 是仓里官方的恢复手段，但它不走结构化作答 → 此前**不落任何记账**，于是交付段 §Decisions 无 HITL2 行、
  * 门②/门③ 如实判红，而复盘看不出"谁在何时答的、答了什么"。
- * 措辞与门侧 `isHitl2Row` **同钉**：交付审阅卡的行必须写明「交付审阅」+「代理模拟」，否则记账白落。
+ * 措辞与门侧 `isHitl2Mention` **同钉**：交付审阅卡的行必须写明「交付审阅」+「代理模拟」，否则记账白落。
  * @param obs cardKey（'anchor-1'|'anchor-2'|其它）/ text（操作者发的自由文本）/ date。
  * @returns §Decisions 行（字符串）。
  */
@@ -110,7 +110,7 @@ export function closingProvenanceRow({ cardKey = 'unknown', text = '', date = ''
  * appendProvenance 同契约：bundle 路径缺席或契约件不全即 throw，拒绝静默）。
  * 节内插入 = 下一个 `## ` 节之前、§Decisions 既有行之后（节在文件尾的模板形态两者等价）；
  * §Decisions 节缺席 fail-loud——盲 append 到文件尾在尾随节形态下会把记账行落到节外，
- * 而 node-gate 门③（isHitl2Row）只读节内行 = 记账白落（2026-10-21 卫生轮立红实录）。
+ * 而 node-gate 门③（isHitl2Mention）只读节内行 = 记账白落（2026-10-21 卫生轮立红实录）。
  * @param obs bundle（bundle 目录路径）/ row（要追加的记账行）/ journalNote（journal 侧人话备注；空串 = 不写 journal）。
  */
 export function appendDecisionsRow({ bundle, row, journalNote = '' }) {

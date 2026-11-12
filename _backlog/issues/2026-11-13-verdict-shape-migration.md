@@ -61,6 +61,23 @@ canonical JSON、文件事实）是唯一权威，散文只做交叉核对。做
 - **Slice C（keyless）**：`tests/contracts/verdict-conformance.test.mjs` + 变异矩阵夹具（包裹/分隔/互斥/缺席四族），
   把 Slice A 的行为钉成不变量；其余面（人工走查节、method heading、version/present）按同模式排队。
 
+## 落地记录（2026-11-13，Slice A + C）
+
+- **readiness**：`stripVerdictDecor` 只认 Markdown 装饰；`lastInlineVerdict` 删除语境关键词与历史词表，改为
+  「行首（仅装饰）或分隔符后**立即**是判定词」；互斥读法（同行两个裸写、裸写与散文提及相反）→ `null`。
+  散文前缀（本轮/随后/结论行/箭头）与整行包裹不再构成判定。
+- **门③**：`isHitl2Row` 与 pending/decision 两张词表删除；决策 = 绑定会话里最新 HITL2 ask 的 callId 答复；
+  §Decisions 只要求记录行在场（`isHitl2Mention`）。代理行与用户行同一条判据。
+- **门②**：版本配对改读 present 事件——present 必须指向 `final/` 最新版本（`v2` 在场而只 present `v1` → RED）。
+- **常驻守卫**：`tests/contracts/verdict-conformance.test.mjs`（五条不变量 + 生成矩阵）。
+- **证据**：`pnpm test` 1369 通过 / 0 失败；`pnpm verify` 全绿；`pnpm typecheck` 绿。
+- **历史语料对账（只读，未删除）**：71 个 bundle 中 8 个归档件的 `review.md` 在新判据下读作「无法判定」
+  （全部在 `archive/`，无在飞）；0 个 `delivered` 版本落后于 `final/` 最新版。无活跃冲突，故未删除任何数据；
+  归档件只在被重新验收时才会红。
+- **残留 1**：无 `run.md` 的旧场在门③ 保留文本记录路径；删除条件 = `tests/fixtures/node-gate` 夹具族迁到
+  新契约形状（当前夹具无 session 头、无 HITL2 事件，直接删分支会连坐门①/④/门A 的隔离用例）。
+- **残留 2**：readiness 的轮次标题路径仍允许「第 N 轮」与判定词之间 ≤24 字插入语；由 Slice B 的声明件替代。
+
 ## 验收标准
 
 | # | 行为 | 类 | 现红 → 后绿的判据 | 证据 owner |

@@ -4,7 +4,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { gateBundle } from '../../scripts/lib/node-gate-core.mjs'
 import { headingGate } from '../../scripts/lib/node-gate-run-gates.mjs'
-import { isHitl2Row } from '../../scripts/lib/node-gate-session-gates.mjs'
+import { isHitl2Mention } from '../../scripts/lib/node-gate-session-gates.mjs'
 import { bundle, sessions } from './node-gate-helpers.mjs'
 
 
@@ -110,9 +110,11 @@ test('门R隔离：门R红不连坐其他门（其余门在本夹具全 N/A—�
 // 记账在场 × readiness FAIL 交叉（交付越过审查前置）/ 附条件 PASS（WARN 注记不红）/
 // 合规 / 断代 / N/A。日期注入（夹具 mtime 随检出时间漂——同门L/④ 成例）。
 
-test('isHitl2Row：字面 HITL2 与代理代答 provenance 都算拍板行；仅提"交付审阅"不算（BUG-039）', () => {
-  assert.equal(isHitl2Row('- 2026-10-18 HITL2 定稿（用户原话: "可以"）'), true);
-  assert.equal(isHitl2Row('- 2026-10-18｜**HITL 交互 = 操作侧代理模拟（hitl-answer 驱动，pick=recommended）**：Q1「交付审阅」→「按现稿定稿（Recommended）」'), true);
-  assert.equal(isHitl2Row('- 2026-10-18 计划确认卡：「交付审阅」按推荐开跑'), false, '没有代理标记的普通提及不算拍板行');
-  assert.equal(isHitl2Row('- 2026-10-18 用户要求修订表述'), false);
+// 负例留证 2026-11-13：BUG-039——门③ 不认代理代答 provenance 行（记账白落）。
+// 红配方：删掉 isHitl2Mention 的「代理模拟|hitl-answer」分支 → 下方代理行断言红。
+test('isHitl2Mention：记录行只判在场；决策归门③ 的事件链（BUG-039）', () => {
+  assert.equal(isHitl2Mention('- 2026-10-18 HITL2 定稿（用户原话: "可以"）'), true);
+  assert.equal(isHitl2Mention('- 2026-10-18｜**HITL 交互 = 操作侧代理模拟（hitl-answer 驱动，pick=recommended）**：Q1「交付审阅」→「按现稿定稿（Recommended）」'), true);
+  assert.equal(isHitl2Mention('- 2026-10-18 计划确认卡：「交付审阅」按推荐开跑'), false, '没有代理标记的普通提及不是记录行');
+  assert.equal(isHitl2Mention('- 2026-10-18 用户要求修订表述'), false);
 });
