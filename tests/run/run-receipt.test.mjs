@@ -12,6 +12,8 @@ import {
 } from '../../scripts/lib/run-receipt.mjs'
 import { hygieneOf } from '../../scripts/lib/schema-scan-core.mjs'
 
+const marked = (body) => `<!-- manual-walkthrough:start -->\n${body}\n<!-- manual-walkthrough:end -->`
+
 const makeRoot = () => {
   const base = realpathSync(tmpdir())
   const dir = mkdtempSync(join(base, 'dsh-receipt-'))
@@ -321,7 +323,7 @@ test('BUG-062 withManualEvidence：重跑验收把旧人工节拼回新回执；
   assert.ok(merged.includes('## 人工走查'))
   assert.ok(merged.includes('③ 已走查'))
   assert.equal(withManualEvidence(generated, '# Acceptance\n'), generated)
-  assert.equal(manualEvidenceOf(existing), '## 人工走查\n\n- ③ 已走查')
+  assert.equal(manualEvidenceOf(existing), marked('## 人工走查\n\n- ③ 已走查'))
   assert.equal(manualEvidenceOf('# Acceptance\n\n## 人工走查\n'), null, '空节不算证据')
 })
 
@@ -347,9 +349,9 @@ test('BUG-078 repairReceiptPaths：相对 `..` present → null + unportable，�
 // 还原法 = manualEvidenceOf 在任意 /^##\s/ 处截断。
 test('BUG-145 人工走查内含二级标题：完整保留到 EOF（或已知节前）', () => {
   const inside = '## 人工走查\n\n## 检查记录\n\n已核。'
-  assert.equal(manualEvidenceOf(inside), '## 人工走查\n\n## 检查记录\n\n已核。')
+  assert.equal(manualEvidenceOf(inside), marked('## 人工走查\n\n## 检查记录\n\n已核。'))
   const tail = '## 人工走查\n\n### 检查\n\n- 项1\n\n## 附注\n\n其它。'
-  assert.equal(manualEvidenceOf(tail), '## 人工走查\n\n### 检查\n\n- 项1\n\n## 附注\n\n其它。')
+  assert.equal(manualEvidenceOf(tail), marked('## 人工走查\n\n### 检查\n\n- 项1\n\n## 附注\n\n其它。'))
   assert.match(withManualEvidence('# Acceptance\n\nmech\n', inside), /## 检查记录\n\n已核。/)
   assert.match(withManualEvidence('# Acceptance\n\nmech\n', tail), /## 附注\n\n其它。/)
 })
@@ -382,9 +384,25 @@ test('BUG-154 manifest：protocol 角色 + review/waves/protocol 目录带 sha25
 })
 
 // 负例留证 2026-11-13：BUG-155——人工节的 ## 检查/清单/回执/读者版 被误当回执节截断。
+// 负例留证 2026-11-13：D51——人工走查的节边界必须是显式标记；标题猜测（含变体）是 BUG-145/155 的类。
+// 红配方：把 manualEvidenceOf 退回「找 ## 人工走查 标题取到文件尾」→ 有标记时会把标记后的生成文本一并吞掉。
+test('人工走查：标记界定边界；不成对/变体标题不猜', () => {
+  const generatedTail = '\n\n## 检查\n\n| node-gate | PASS |\n'
+  const text = `# Acceptance\n\n${marked('## 人工走查\n\n## 清单\n\n已核。')}${generatedTail}`
+  assert.equal(manualEvidenceOf(text), marked('## 人工走查\n\n## 清单\n\n已核。'))
+  assert.equal(manualEvidenceOf('<!-- manual-walkthrough:start -->\n## 人工走查\n\n无尾标记\n'), null, '不成对标记不猜节尾')
+  assert.equal(manualEvidenceOf('## 检查\n\n- ③ 已走查\n'), null, '变体标题不识别（fail-closed）')
+  assert.equal(manualEvidenceOf('> 人工走查写在 `<!-- manual-walkthrough:start -->` 之间\n'), null, '正文提及标记不算（必须独立成行）')
+  // 新回执已有标记块时替换，不追加第二份
+  const merged = withManualEvidence(`# Acceptance\n\n${marked('## 人工走查\n\n- 旧')}\n`, `# Acceptance\n\n${marked('## 人工走查\n\n- 新')}\n`)
+  assert.equal(merged.match(/manual-walkthrough:start/g)?.length, 1)
+  assert.match(merged, /- 新/)
+  assert.doesNotMatch(merged, /- 旧/)
+})
+
 test('BUG-155 人工走查的通用 ## 标题仍完整保留', () => {
   for (const title of ['检查', '清单', '回执', '读者版']) {
     const text = `## 人工走查\n\n## ${title}\n\n已核。`
-    assert.equal(manualEvidenceOf(text), text, title)
+    assert.equal(manualEvidenceOf(text), marked(text), title)
   }
 })

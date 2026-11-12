@@ -38,6 +38,14 @@ version/present 是否要为此改驾驶舱投影的读数路径（客户端读 
 | method heading | 单一 heading codec（归一空白/括号宽度/全角空格），fold 与写路径共用 | 变异矩阵全绿；两侧对同一 heading 的解析逐字一致 | 两侧各补正则 |
 | version/present | `deliverables/presented` 事件 + `delivered.json` | 有结构化事实时不用正文；正文只在无结构化事实的旧场回退，歧义即红 | 继续修正文解析（每形态一张卡） |
 
+## 落地记录（2026-11-13，S1）
+
+- **人工走查节**：改为独立成行的显式标记 `<!-- manual-walkthrough:start/end -->` 界定；不成对 → null（不猜节尾）；
+  正文提及标记不算。无标记的旧回执只认规范标题 `## 人工走查` 并在返回时补标记（一次性迁移）；标题变体不再识别。
+  `renderAcceptance` 加写入指引；`withManualEvidence` 在已有标记块时替换而非追加。
+- **证据**：`tests/run/run-receipt.test.mjs` 22 例（含不成对/变体/正文提及/替换不重复四负例）；`pnpm test` 1377 通过 / 0 失败；`verify` 全绿。
+- **未做**：S2 method heading codec、S3 version/present 结构化优先。
+
 ## 验收标准
 
 | # | 行为 | 类 | 判据 | 证据 owner |

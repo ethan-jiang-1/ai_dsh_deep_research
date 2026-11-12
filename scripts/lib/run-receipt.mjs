@@ -194,22 +194,47 @@ export function buildDelivered({ slug, bundleDir, corpusRoot, acceptedAt, presen
  * 不可再生（BUG-062）：重跑验收 / --repair 必须保留它，不能按「可再生产物」删掉。
  */
 const MANUAL_TITLE = /^##\s*人工走查\s*$/
+const MANUAL_START = '<!-- manual-walkthrough:start -->'
+const MANUAL_END = '<!-- manual-walkthrough:end -->'
+const MANUAL_START_LINE = /^<!--\s*manual-walkthrough:start\s*-->\s*$/
+const MANUAL_END_LINE = /^<!--\s*manual-walkthrough:end\s*-->\s*$/
+
+/**
+ * 人工走查节（D51）：由**独立成行**的显式标记界定，不靠标题猜测；正文里提及标记不算。
+ *
+ * 标记成对在场 → 取标记之间整块（含 `##` 子标题与后续内容）；不成对 → null（不猜节尾）。
+ * 无标记的旧回执只认规范标题 `## 人工走查`（独立成行），取到文件尾并在返回时补标记（一次性迁移）；
+ * 标题变体（`## 检查`/`## 清单`/带后缀）不再识别——那是词表猜测定界的入口。
+ */
 export function manualEvidenceOf(text) {
   const lines = String(text ?? '').split(/\r?\n/)
-  const start = lines.findIndex((line) => MANUAL_TITLE.test(line))
-  if (start === -1) return null
-  const rest = lines.slice(start + 1)
-  // 生成器不产 `##` 节：人工走查按惯例在末尾，取到文件尾（BUG-145/155）。
-  const section = rest.join('\n').trim()
-  return section === '' ? null : `## 人工走查\n\n${section}`
+  const start = lines.findIndex((line) => MANUAL_START_LINE.test(line))
+  if (start !== -1) {
+    const end = lines.findIndex((line, index) => index > start && MANUAL_END_LINE.test(line))
+    if (end === -1) return null
+    const body = lines.slice(start + 1, end)
+    return body.join('').trim() === '' ? null : [MANUAL_START, ...body, MANUAL_END].join('\n')
+  }
+  const at = lines.findIndex((line) => MANUAL_TITLE.test(line))
+  if (at === -1) return null
+  const section = lines.slice(at + 1).join('\n').trim()
+  if (section === '') return null
+  return `${MANUAL_START}\n## 人工走查\n\n${section}\n${MANUAL_END}`
 }
 
-/** 把旧 acceptance.md 的人工走查节拼进新生成的文本（已含则原样返回；无可保留节则原样返回）。 */
+/** 把旧 acceptance.md 的人工走查节拼进新生成的文本（新文本已有标记块则替换；无可保留节则原样返回）。 */
 export function withManualEvidence(generated, existing) {
   const manual = manualEvidenceOf(existing)
   if (manual === null) return generated
-  if (String(generated).includes(manual)) return generated
-  return `${String(generated).trimEnd()}\n\n${manual}\n`
+  const lines = String(generated).split('\n')
+  const start = lines.findIndex((line) => MANUAL_START_LINE.test(line))
+  const end = start === -1 ? -1 : lines.findIndex((line, index) => index > start && MANUAL_END_LINE.test(line))
+  if (start !== -1 && end !== -1) {
+    return [...lines.slice(0, start), ...manual.split('\n'), ...lines.slice(end + 1)].join('\n')
+  }
+  const text = String(generated)
+  if (text.includes(manual)) return text
+  return `${text.trimEnd()}\n\n${manual}\n`
 }
 
 /**
@@ -349,6 +374,7 @@ export function renderAcceptance({ slug, stamp, critical, finalVersion, readable
 
 > 由 scripts/run-ops/run-accept.mjs 生成（操作侧验收回执；不是研究内容）。
 > 预检（--no-write）先过，才落盘 node-gate/audit${legacy ? '' : ' 并写 delivered.json/manifest.json'}；红跑不写 bundle。
+> 人工走查写在 \`<!-- manual-walkthrough:start -->\` 与 \`<!-- manual-walkthrough:end -->\` 之间（重跑验收原样保留；无标记的旧回执按 \`## 人工走查\` 迁移一次）。
 ${legacy ? '> 旧契约 bundle（无 run.md）：只留本回执，不补新契约回执（D28 epoch 豁免）。\n' : ''}
 | 检查 | 结果 |
 |---|---|
