@@ -159,10 +159,11 @@ const SCRIPT_FILE_RE = /\.(?:sh|bash|zsh|py|rb|pl|mjs|cjs|js|ts)(?:~)?$/i
 /** 绝对路径族（不只 /Users/：换机/换 home 即断源）。 */
 const ABS_PATH_RE = /(?:^|[\s(`"'\[])(?:\/(?:Users|home|tmp|private|var|Volumes|opt|mnt|media|root)\/|[A-Za-z]:\\|~\/)/
 /** D28 顶层白名单（RFC §11；新 run 只许这些条目，未登记 = 核心违约）。 */
-const TOP_LEVEL_ALLOWED = new Set([
+export const TOP_LEVEL_ALLOWED = new Set([
   'run.md', 'question.md', 'topics.md', 'plan.md', 'leads.md', 'findings.md', 'review.md', 'final.md', 'journal.md',
   'audit.md', 'node-gate.md', 'acceptance.md', 'delivered.json', 'manifest.json',
-  'plan', 'leads', 'evidence', 'provenance', 'final', 'journal', 'drafts',
+  'protocol.json', 'protocol-audit.md',
+  'plan', 'leads', 'evidence', 'provenance', 'final', 'journal', 'drafts', 'protocol', 'review', 'waves',
 ])
 
 /**

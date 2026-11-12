@@ -80,6 +80,24 @@ const VERDICT_LINE = /^readiness(?:\s*[（(][^）)\n|]{1,8}[）)])?\s*[:：]\s*(
 /** 空模板 `readiness（终局）: PASS | FAIL` 是完整占位行（装饰形态同样豁免）；带额外说明的是判定，不是模板。 */
 const EMPTY_TEMPLATE = /^readiness(?:\s*[（(][^）)\n|]{1,8}[）)])?\s*[:：]\s*(?:\*\*|__|`{1,2})?\s*PASS\s*\|\s*FAIL[\s`*_]*$/i
 
+/** 同一行内、未被反引号/加粗包裹的 `readiness:` 判定；只认带「本轮/终局/真实/最终/当前/最后」语境的行。 */
+const INLINE_VERDICT = /readiness(?:\s*[（(][^）)\n|]{1,8}[）)])?\s*[:：]\s*(?:\*\*|__|`{1,2})?\s*(PASS|FAIL)\b/gi
+function lastInlineVerdict(line: string): Readiness | null {
+  if (/^\s*\|/.test(line)) return null // 表格单元不夺权
+  const ranges: Array<[number, number]> = []
+  for (const m of line.matchAll(/(`+)[\s\S]*?\1/g)) ranges.push([m.index ?? 0, (m.index ?? 0) + m[0].length])
+  for (const m of line.matchAll(/(\*\*|__)[\s\S]*?\1/g)) ranges.push([m.index ?? 0, (m.index ?? 0) + m[0].length])
+  let found: Readiness | null = null
+  for (const match of line.matchAll(INLINE_VERDICT)) {
+    const index = match.index ?? 0
+    if (ranges.some(([start, end]) => index >= start && index < end)) continue
+    const before = line.slice(Math.max(0, index - 20), index)
+    if (!/本轮|终局|真实|最终|当前|最后/.test(before)) continue
+    found = match[1]!.toUpperCase() as Readiness
+  }
+  return found
+}
+
 /**
  * review.md 文本 → 终局 readiness；无判定行或输入缺席/畸形时返回 `null`（不猜、不 throw）。
  *
@@ -102,15 +120,20 @@ export function terminalVerdictLine(reviewText: string | null | undefined): { va
   const lines = reviewText.split('\n')
   for (const [index, line] of lines.entries()) {
     const rest = stripVerdictDecor(line)
+    const inline = EMPTY_TEMPLATE.test(line) ? null : lastInlineVerdict(line)
     if (rest !== null && !EMPTY_TEMPLATE.test(rest)) {
       const match = VERDICT_LINE.exec(rest)
-      const value = match?.[1]
+      const value = inline ?? match?.[1]
       if (value !== undefined) {
         const round = /第\s*([0-9]+)\s*轮|轮次\s*[:：]?\s*([0-9]+)|\bround\s*([0-9]+)\b/i.exec(line)
         const roundText = round?.[1] ?? round?.[2] ?? round?.[3]
         candidates.push({ value: value.toUpperCase() as Readiness, round: roundText === undefined ? null : Number(roundText), index })
         continue
       }
+    }
+    if (rest === null && inline !== null) {
+      candidates.push({ value: inline, round: null, index })
+      continue
     }
     const roundMatch = ROUND_HEADING.exec(line)
     const roundValue = roundMatch?.[2]

@@ -324,3 +324,21 @@ test('BUG-062 withManualEvidence：重跑验收把旧人工节拼回新回执；
   assert.equal(manualEvidenceOf(existing), '## 人工走查\n\n- ③ 已走查')
   assert.equal(manualEvidenceOf('# Acceptance\n\n## 人工走查\n'), null, '空节不算证据')
 })
+
+// 负例留证 2026-11-12：BUG-078——相对 `..` present 修复前被原样保留（ok=true/actions=[]）；
+// 修复后必须 null + unportable（回执不指向 bundle 外）。还原法 = portableBundlePath 相对分支原样返回。
+test('BUG-078 repairReceiptPaths：相对 `..` present → null + unportable，不保留外部指针', () => {
+  const { dir, cleanup } = makeRoot()
+  try {
+    const b = writeBundle(dir)
+    writeFileSync(join(b, 'delivered.json'), JSON.stringify({
+      version: 1, slug: 'drt_x', present: { path: '../other/final/v1.md', callId: 'p1', version: 1 },
+    }, null, 2) + '\n')
+    const r = repairReceiptPaths(b)
+    assert.equal(r.ok, true)
+    const receipt = JSON.parse(readFileSync(join(b, 'delivered.json'), 'utf8'))
+    assert.equal(receipt.present.path, null)
+    assert.equal(receipt.present.unportable, true)
+    assert.ok(r.actions.some((a) => a.includes('present')), r.actions.join('；'))
+  } finally { cleanup() }
+})

@@ -23,10 +23,10 @@ export function scanHomePaths(entries) {
 
 /**
  * 把 present/回执里的路径归一成「bundle 内可移植标签」。
- * - 已是相对路径：原样返回（旧样本/手写回执的既有形态）。
- * - bundle 内的绝对路径：`drt_<slug>/<相对路径>`（vendor `present` 记录的是绝对路径，
- *   这是最常见的输入）。
- * - bundle 外的绝对路径：返回 null——不得把本机路径写进回执，调用方必须拒收。
+ * - 已是 `drt_<slug>/…` 标签：原样返回（幂等）。
+ * - 其它相对路径：resolve 到 bundleDir 后做包含性检查；含 `..` 段一律 null（逃逸不猜）。
+ * - bundle 内绝对路径：`drt_<slug>/<相对路径>`（vendor `present` 记录的是绝对路径）。
+ * - bundle 外绝对路径 / 相对逃逸：null——调用方必须拒收（门② / repair 同源）。
  * @param {string} path 原始路径。
  * @param {string} bundleDir bundle 根（绝对或可解析）。
  * @returns {string|null} 可移植标签或 null。
@@ -34,12 +34,23 @@ export function scanHomePaths(entries) {
 export function portableBundlePath(path, bundleDir) {
   const raw = String(path ?? '')
   if (raw === '') return ''
-  if (!isAbsolute(raw)) return raw.replace(/\\/g, '/')
   // 同一目录可能经 symlink 访问：present 记的是 realpath，bundleDir 可能不是——两侧都先
   // realpath（不存在的目标回落 resolve），否则会把自己的交付判成「bundle 外」。
   const realOrResolve = (value) => { try { return realpathSync(value) } catch { return resolve(value) } }
+  const normalized = raw.replace(/\\/g, '/')
+  if (!isAbsolute(normalized)) {
+    const base = basename(resolve(bundleDir))
+    if (normalized === base || normalized.startsWith(`${base}/`)) return normalized
+    if (normalized.split('/').includes('..')) return null
+    const bundle = realOrResolve(bundleDir)
+    const target = realOrResolve(resolve(bundleDir, normalized))
+    const prefix = bundle.endsWith(sep) ? bundle : `${bundle}${sep}`
+    if (!target.startsWith(prefix)) return null
+    const rel = target.slice(prefix.length).split(sep).join('/')
+    return `${base}/${rel}`
+  }
   const bundle = realOrResolve(bundleDir)
-  const target = realOrResolve(raw)
+  const target = realOrResolve(normalized)
   const prefix = bundle.endsWith(sep) ? bundle : `${bundle}${sep}`
   if (!target.startsWith(prefix)) return null
   const rel = target.slice(prefix.length).split(sep).join('/')

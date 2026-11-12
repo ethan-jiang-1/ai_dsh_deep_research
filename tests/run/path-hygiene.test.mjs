@@ -47,9 +47,17 @@ test('portableBundlePath：bundle 内绝对路径 → drt_<slug>/ 相对标签�
   assert.equal(portableBundlePath(join(BUNDLE, 'final', 'readable-v1.md'), BUNDLE), 'drt_x/final/readable-v1.md')
 })
 
-test('portableBundlePath：已是相对路径 → 原样保留（旧样本/手写回执）', () => {
+test('portableBundlePath：已是 drt_<slug>/ 标签幂等；bundle 内相对路径归一成标签', () => {
   assert.equal(portableBundlePath('drt_x/final/v1.md', BUNDLE), 'drt_x/final/v1.md')
-  assert.equal(portableBundlePath('final/v1.md', BUNDLE), 'final/v1.md')
+  assert.equal(portableBundlePath('final/v1.md', BUNDLE), 'drt_x/final/v1.md')
+})
+
+// 负例留证 2026-11-12：BUG-078——修复前相对路径原样返回，`../` 逃逸被门②当可移植 PASS。
+// 还原法 = 相对分支直接 `return raw.replace(/\\/g,'/')`，不做 resolve/包含性检查。
+test('BUG-078 portableBundlePath：相对 `..` 一律 null（含绕回本 bundle 的形态）', () => {
+  assert.equal(portableBundlePath('../drt_x/final/v1.md', BUNDLE), null)
+  assert.equal(portableBundlePath('../other/final/v1.md', BUNDLE), null)
+  assert.equal(portableBundlePath('a/../../drt_x/final/v1.md', BUNDLE), null)
 })
 
 test('portableBundlePath：bundle 外绝对路径 → null（不得把本机路径写进回执）', () => {

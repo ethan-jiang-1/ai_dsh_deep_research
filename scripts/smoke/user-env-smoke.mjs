@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { sha256 } from '../../packages/deep-research-pack/scripts/lib/seed-core.mjs'
+import { createHash } from 'node:crypto'
 import { scrubbedEnv } from '../lib/env.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -25,6 +25,7 @@ const check = (ok, label, detail = '') => {
 const dsh = (args) => spawnSync('dsh', args, { encoding: 'utf8', env: scrubbedEnv({ DSH_HOME: HOME }), timeout: 180_000 })
 const profileDir = join(HOME, 'profiles', PROFILE)
 const manifest = () => JSON.parse(readFileSync(join(profileDir, 'package.json'), 'utf8'))
+const sha256 = (text) => createHash('sha256').update(String(text)).digest('hex')
 const hash = (p) => sha256(readFileSync(p, 'utf8'))
 
 if (!existsSync(TARBALL)) { console.error(`user-env-smoke: tarball 缺席（${TARBALL}）`); process.exit(2) }

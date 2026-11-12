@@ -16,7 +16,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
 import { epochDateOf, runType } from '../lib/schema-scan-core.mjs'
-import { designSha256, preContractByDelivery } from '../lib/protocol-core.mjs'
+import { PROTOCOL_CONTRACT_DATE, designSha256, preContractByDelivery } from '../lib/protocol-core.mjs'
 import { evaluateBundle, requiredByProtocolContract } from '../lib/protocol-audit-core.mjs'
 import { isMain } from '../lib/cli-entry.mjs'
 

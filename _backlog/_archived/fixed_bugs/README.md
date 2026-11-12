@@ -79,3 +79,9 @@
 | [BUG-069](BUG-069-product-content-single-language-and-stale-session-title.md) | 英文界面仍混中文：内置打法内容单语 + 方法编辑历史标题不随 locale | （`builtin-display` 显示投影 40 键；canonical/模型面不动；coach 标题迁移 + locale 订阅；真实数据 en 渲染零 CJK） | 2026-11-12 |
 | [BUG-072](BUG-072-release-vocab-substring-false-positive-product-content.md) | release-vocab 的「产品内」子串误伤「产品内容」 | （词表 `产品内` → `产品内(?!容)`；裸子串 + 复合词豁免写进头注） | 2026-11-12 |
 | [BUG-073](BUG-073-run-lock-creation-window-race.md) | run-lock 的建锁不是原子的——目录先于 owner.json 可见，并发者会接管并覆盖属主 | （候选目录先写 owner.json 再 rename；3×50ms 宽限；rename 后复核；释放只动自己的锁；client-load 共用） | 2026-11-12 |
+| [BUG-074](BUG-074-readiness-inline-quote-hijack.md) | readiness 终局被同行引用的旧 PASS 劫持 → 真实 FAIL 读成 PASS | （同行多判定取本轮/真实终局的未包裹判定；引用/表格/空模板不夺权；五形态测试） | 2026-11-12 |
+| [BUG-075](BUG-075-hitl2-pending-row-counted-as-decision.md) | 门③把「HITL2 未拍板」当拍板行，旧答复即可放行 | （决策形判据 + 最新 HITL2 行未决即 RED + 最新 ask callId 答复见证） | 2026-11-12 |
+| [BUG-076](BUG-076-schema-scan-whitelist-missing-protocol-artifacts.md) | schema-scan 白名单漏协议/复核/wave 新件 → 新契约 run 必红 | （补 protocol.json/protocol-audit.md/protocol/review/waves；真违约仍红测试） | 2026-11-12 |
+| [BUG-077](BUG-077-protocol-audit-write-reference-error.md) | protocol-audit `--write` 缺 import → ReferenceError | （补 PROTOCOL_CONTRACT_DATE import；--write 落盘 + run-accept-smoke ALL PASS；源码契约测试） | 2026-11-12 |
+| [BUG-078](BUG-078-portable-bundle-path-relative-escape.md) | portableBundlePath 把相对 `..` 当可移植 → 门②接受 bundle 外 present | （相对路径 resolve + 包含性检查，含 `..` 一律 null；repair null+unportable） | 2026-11-12 |
+| [BUG-079](BUG-079-user-env-smoke-dead-import-seed-core.md) | user-env-smoke 引用已删 seed-core → 启动即 ERR_MODULE_NOT_FOUND | （sha256 改 node:crypto；真跑 13/13 ALL PASS） | 2026-11-12 |

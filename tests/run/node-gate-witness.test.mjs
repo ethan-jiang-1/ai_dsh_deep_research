@@ -278,3 +278,53 @@ test('presentGate：present 指向 bundle 外 → RED（不可移交），且 de
     assert.equal(r.detail.includes(dir), false, 'detail 不得回显本机绝对路径')
   } finally { cleanup() }
 })
+
+// 负例留证 2026-11-12：BUG-075——旧实现 isHitl2Row 只做关键词存在判断，pending 行 + 旧答复
+// 即可 PASS（G8 fail-open）。还原法 = isHitl2Row 退回 /HITL2/ 单判、门③只取任意一条答复。
+test('BUG-075 HITL2：最新行是未决形 + 旧答复 → RED', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  try {
+    const b = writeBundle(dir)
+    writeFileSync(join(b, 'question.md'), '# Q\n\n## Decisions（append-only，最新在上）\n\n- 2026-10-23 HITL2（v2）：未拍板（等待用户确认）\n')
+    const sessions = writeSession(dir, [bind(), ask(), reply()])
+    const r = hitl2RowGate(b, sessions)
+    assert.equal(r.gate.status, 'RED', JSON.stringify(r.gate))
+    assert.match(r.gate.detail, /未决|未拍板|G8/)
+  } finally { cleanup() }
+})
+
+test('BUG-075 HITL2：未决形 + 无答复 → RED（旧实现已红，保持）', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  try {
+    const b = writeBundle(dir)
+    writeFileSync(join(b, 'question.md'), '# Q\n\n## Decisions\n\n- 2026-10-23 HITL2：未拍板\n')
+    const sessions = writeSession(dir, [bind()])
+    const r = hitl2RowGate(b, sessions)
+    assert.equal(r.gate.status, 'RED')
+  } finally { cleanup() }
+})
+
+test('BUG-075 HITL2：最新 ask 未答复时，更早 ask 的答复不得放行', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  try {
+    const b = writeBundle(dir)
+    const ask2 = at({ type: 'tool/call', data: { turn: 2, callId: 'ask2', name: 'ask_user_question', arguments: JSON.stringify({ questions: [{ id: 'hitl2_delivery', header: '交付审阅（HITL2）', question: 'v2 定稿？drt_x' }] }) } }, T + 120_000)
+    const sessions = writeSession(dir, [bind(), ask(T), reply('按现稿定稿（Recommended）', T + 60_000), ask2])
+    const r = hitl2RowGate(b, sessions)
+    assert.equal(r.gate.status, 'RED', JSON.stringify(r.gate))
+    assert.match(r.gate.detail, /ask2|最新/)
+  } finally { cleanup() }
+})
+
+test('BUG-075 HITL2：最新 ask 已答复 → PASS（旧答复不再夺权）', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  try {
+    const b = writeBundle(dir)
+    const ask2 = at({ type: 'tool/call', data: { turn: 2, callId: 'ask2', name: 'ask_user_question', arguments: JSON.stringify({ questions: [{ id: 'hitl2_delivery', header: '交付审阅（HITL2）', question: 'v2 定稿？drt_x' }] }) } }, T + 120_000)
+    const reply2 = at({ type: 'agent/inbox/spliced', data: { inserted: [{ source: { kind: 'user-question-reply', callId: 'ask2', outcome: 'answered' }, content: [{ type: 'text', text: JSON.stringify({ answers: [{ id: 'hitl2_delivery', selected: ['按现稿定稿（Recommended）'] }] }) }] }] } }, T + 180_000)
+    const sessions = writeSession(dir, [bind(), ask(T), reply('按现稿定稿（Recommended）', T + 60_000), ask2, reply2])
+    const r = hitl2RowGate(b, sessions)
+    assert.equal(r.gate.status, 'PASS', JSON.stringify(r.gate))
+    assert.match(r.gate.detail, /ask2/)
+  } finally { cleanup() }
+})

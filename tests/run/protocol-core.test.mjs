@@ -162,6 +162,17 @@ test('绿基线：valid protocol + 投影 + plan 头 + Decisions + audit 行 →
   assert.deepEqual(noRed(findings), [], codes(findings).join(','))
 })
 
+
+// 负例留证 2026-11-12：BUG-077——protocol-audit 的 renderReport 引用 PROTOCOL_CONTRACT_DATE，
+// 但 CLI 的 import 被删 → --write 阶段 ReferenceError。还原法 = 删 import 里的该常量。
+test('BUG-077 protocol-audit --write：renderReport 引用的契约日常量必须在 import 内', () => {
+  const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
+  const source = readFileSync(resolve(root, 'scripts/run-gates/protocol-audit.mjs'), 'utf8')
+  assert.match(source, /PROTOCOL_CONTRACT_DATE/ , 'renderReport 仍引用契约日')
+  assert.match(source, /import \{[^}]*PROTOCOL_CONTRACT_DATE[^}]*\} from '\.\.\/lib\/protocol-core\.mjs'/,
+    'protocol-audit CLI 必须 import PROTOCOL_CONTRACT_DATE（否则 --write ReferenceError）')
+})
+
 test('schema：未知顶层字段 / 缺 output → 红', () => {
   const unknown = baseProtocol()
   unknown.extra = true

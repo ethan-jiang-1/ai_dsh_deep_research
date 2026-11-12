@@ -183,3 +183,20 @@ test('跨实现一致（BUG-040）：附条件 PASS 仍算 pass（门独有语�
   assert.equal(readinessOf(t).conditional, true, '附条件标记必须保留');
   assert.equal(readinessOf('## readiness: PASS').conditional, false);
 });
+
+// 负例留证 2026-11-12：BUG-074——同一行先引用旧 readiness、再写真实终局时，旧实现取首个匹配
+// （或整行 null），导致 fail-open 或误杀。还原法 = 删 lastInlineVerdict / 改回首个匹配。
+test('终局判定（BUG-074）：同行多判定取「本轮/真实终局」的那个，引用不夺权', () => {
+  const cases = [
+    ['旧轮记录：`readiness: PASS`；本轮真实终局：readiness: FAIL', 'FAIL'],
+    ['`readiness: PASS`；本轮 readiness: FAIL', 'FAIL'],
+    ['备注：**readiness: PASS**；本轮 readiness: FAIL', 'FAIL'],
+    ['- **第 1 轮**：`readiness: FAIL` 血统；本轮 readiness: PASS', 'PASS'],
+    ['- 上轮 `readiness: PASS`；本轮 readiness: FAIL', 'FAIL'],
+  ];
+  for (const [line, want] of cases) assert.equal(terminalReadiness(`${line}\n`), want, line);
+  // 边界不回归：无「本轮/终局」语境的 prose 引用、表格、空模板仍不夺权
+  assert.equal(terminalReadiness('上一场 review 的结论是（第 1 轮 readiness: FAIL），本场尚未审查。\n'), null);
+  assert.equal(terminalReadiness('## readiness: FAIL\n\n| —— 结论 —— | **readiness: PASS** |\n'), 'FAIL');
+  assert.equal(terminalReadiness('## readiness: PASS | FAIL\n'), null);
+});

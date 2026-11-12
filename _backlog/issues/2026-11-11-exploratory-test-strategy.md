@@ -382,6 +382,178 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
   在 zh/en 下均非空、zh 逐字等于 canonical、en 已译）；用户条目渲染走 `entry.name` 不经过投影，
   `isBuiltin` 分支守卫正确——无新泄漏点。
 - **X8**：在全绿树上重新起跑（结果见下轮/本节更新）。
+### 第 28 轮（2026-11-12 04:1x）：解析器变异矩阵抓到 readiness 劫持
+
+- **新卡**：[BUG-074](../_archived/fixed_bugs/BUG-074-readiness-inline-quote-hijack.md) **P1**——readiness 终局解析被
+  **行内引用的旧判定**劫持：`旧轮记录：\`readiness: PASS\`；本轮真实终局：readiness: FAIL` → 判 **PASS**
+  （fail-open，门A/门②③/run-accept 都吃它）；反向 `- **第 1 轮**：\`readiness: FAIL\` 血统；本轮 readiness: PASS`
+  → 判 **FAIL**（误杀）。根因：`stripVerdictDecor` 的「短标签 → 包裹壳 → 行首 readiness」把引用内容
+  当成判定行，每行只取第一个 match；源码头注声称「行内引用两条路径都不认」，与实测不符。单测只覆盖
+  「引用在独立行」的附录形态，未覆盖同行。
+- **关闭假设（契约成立，不建卡）**：verdict raw 的「前导语 + 围栏」「围栏 + 尾注」被判 `raw-reparse` 红——
+  与 `claim-verdict` skill 的「唯一产出 = 一段 JSON 数组，放在最终消息里」一致，是纪律信号不是解析 bug；
+  仅记录「错误文案可更具体（raw 含围栏外文字）」，不建卡。
+- **观察**：D49 默认中文的「用户显式选 English 仍覆盖」目前只有手工验证；`client-load` 已把浏览器钉 zh，
+  运行时 en 切换路径没有真浏览器冒烟覆盖，且 Note 自述 L2 安装形态未复跑（bundle patch 改的是安装缺省）。
+- **同一轮再抓一条**：[BUG-075](../_archived/fixed_bugs/BUG-075-hitl2-pending-row-counted-as-decision.md) **P1**——
+  门③ 把「HITL2 **未拍板**」当拍板行：`isHitl2Row` 只做 `/HITL2/` 词面判断；合成 bundle 实测
+  「pending-only 行 + 同 run 旧答复」→ 门③ **PASS**（G8 形态 fail-open：v2 未裁决也能放行）。
+  根因 = 行判据无决策/否定语义 + 见证不绑最新 ask/版本。
+- **状态纪律**：074/075 都触及门禁与验收合同 → 按 `_backlog/AGENTS` 翻转守卫改为 **等人拍板**（不是修复就绪）。
+- **未跑**：X8 seed 模式（主机 load/cpu 2.87 → NOT-RUN）；X6/快照重录（预算）。
+### 第 29 轮（2026-11-12 04:3x）：交付链全量扫出假红
+
+- **新卡**：[BUG-076](../_archived/fixed_bugs/BUG-076-schema-scan-whitelist-missing-protocol-artifacts.md) **P2 等人拍板**——
+  `schema-scan` 的 D28 顶层白名单漏了今天协议/复核/wave 的 canonical 件：`protocol.json`(8)、`review/`(8)、
+  `protocol-audit.md`(5)、`waves/`(4)、`protocol/`(1)；契约期新 run 必红。`run-accept` 不跑该门（不阻塞
+  验收），但 L4/发布清单被误判；真违约（`.probe.py` 等）反而被淹没。
+- **同轮确认（非新卡）**：`drt_ai-model-regulation-cn-eu-us` 的 `protocol-audit` 红（投入节点 18 > JSON 12）
+  是 Note 已登记的既有数据偏差，不重复建卡。
+- **门② 观察**：`presentGate` 只要求「有一条 present 指向在场的 final/vN」，不要求是最新版本——v2 在场而
+  只 present v1 会 PASS。契约文本写的是「不可变快照 + 事件链」，按现行语义不算违约；记观察不建卡，
+  若产品要「交付必须是最新 vN」再另立判据。
+- **未跑**：X8 seed（load 高）、X6/快照重录（预算）。
+### 第 30 轮（2026-11-12 04:2x）：安装/打包面首次整档跑绿
+
+- **L2/T0 冒烟全绿（本会话首次）**：
+  - `pack-smoke`：ALL PASS（174 tarball 条目；导出/入口/凭据边界/两次 npm pack 同 sha）；
+  - `lifecycle-smoke`：ALL PASS（21 项：market.json 校验 → 装 tarball → 本包行 dump → 真启动 → 五个
+    specifier 中英标题/图标 → remove 后 roster 回落）；
+  - `profile-concurrency-smoke`：ALL PASS（并发 plugin add/remove 后 profile 可解析、无双 bundle）；
+  - `release-smoke --install-only`：ALL PASS（19 项：真实安装形状 + **端口释放无残留**，进程卫生面成立）；
+  - `doctor-smoke`：ALL PASS（半装点名、坏设置 warn、doctor 不写 profile）。
+- **观察（不建卡）**：D49「装本包首次启动即中文」的**安装域**仍无判据——上述冒烟只验形状/显示标题，
+  不查 `locale.preference`；且 `_dist` tarball 是 16:06 旧产物（D49 之前的包），安装域断言只能等
+  重新出包后复跑。Note 已自述 L2 未复跑。
+- **交付链门禁全量扫**：path-hygiene/secret-scan 在 3 个样本 bundle 上干净；schema-scan 的假红见 076；
+  protocol-audit 的 18>12 是既有数据偏差（Note 已登记）。
+- **未跑**：X8 seed（load 高）、X6/快照重录（预算）。
+### 第 31 轮（2026-11-12 04:3x）：D49 后 X8 复验 + 四个假设关闭
+
+- **X8（D49 + 品牌改动之后）**：`client-load-smoke` → **76 PASS / 0 FAIL，ALL PASS**。默认中文 +
+  `Orca 深度搜索` 单行品牌在实际渲染下成立（冒烟钉 zh-CN 浏览器）。
+- **关闭假设（均无现场实例，不建卡）**：
+  - 门④「提及即记账」：扫全部 final/v2+ 的真实 bundle，**0 例**仅非决策提及（弃用/未执行）——理论
+    缺口未落地；
+  - 门②「present 旧版本也算」：扫真实 delivered.json，**0 例** delivered < max(final/vN)；
+  - `acceptance.md` 人工走查拼接：`manualEvidenceOf` 在下一个 `##` 处截断、`withManualEvidence` 幂等，
+    模板不生成同名节——无重复/丢失；
+  - evidence-audit 与新契约一致：原 bundle（`drt_llm-inference-cost-routes`）实跑 CRITICAL 0 / MAJOR 4，
+    与盘上 audit.md 逐项一致（复制到 /tmp 的副本因会话绑定丢失而全红，是**绑定语义正确**的证据，
+    不是 gate bug）。
+- **观察**：D49 的**安装域**默认中文仍无判据（`_dist` tarball 为 16:06 旧包）；client-load 钉 zh 后，
+  运行时 en 切换路径没有真浏览器覆盖。
+- **未跑**：X6/快照重录（预算）。
+### 第 32 轮（2026-11-12 04:4x）：run-accept 全链冒烟抓到硬崩溃
+
+- **新卡**：[BUG-077](../_archived/fixed_bugs/BUG-077-protocol-audit-write-reference-error.md) **P1**——
+  `protocol-audit --write` 在 `renderReport` 里引用未 import 的 `PROTOCOL_CONTRACT_DATE`
+  （`6a463a20` 删了 import 但模板还在用）→ `ReferenceError` exit 1；`run-accept` 预检全绿后
+  **写报告阶段必败**，`protocol-audit.md` 永远写不出、验收被卡死。
+- **现场**：`node scripts/smoke/run-accept-smoke.mjs` 3 项失败（⑩ run-accept 绿 / protocol-audit.md
+  落盘 / ENOENT），可稳定复现；手跑 `--write` 拿到完整 ReferenceError 栈（`--no-write` 正常，所以
+  预检与既有测试没咬）。
+- **同轮顺带跑绿**：seed 模式 X8 **74 PASS / 0 FAIL**（干净机器首启 + 绑定 run + 侧栏切换）；
+  `product-boot-smoke` GREEN（16 项）；`run-lock` 8 路并发实测 **1 成功 / 7 busy**（原子锁成立）；
+  回放 CLI 未知 face/scenario 正确 exit 2。
+- **写路径横扫（补证）**：在真实 bundle 副本上逐个跑 `--write`——`evidence-audit` / `verdict-audit` /
+  `node-gate` 的 write 路径均无崩溃（红跑也照写报告）；**只有 `protocol-audit --write` 崩**（077）。
+- **观察（不建卡）**：`manifest.json` 的 `FILE_ROLES` 未登记 `protocol.json` / `protocol-audit.md`
+  （role=unknown），`review/`·`waves/`·`protocol/` 目录不入清单——与 076 同批「新件未登记」类，
+  但 manifest 是 ops 目录说明书、无门禁消费，先记观察。
+### 第 33 轮（2026-11-12 04:5x）：门② 的相对逃逸
+
+- **新卡**：[BUG-078](../_archived/fixed_bugs/BUG-078-portable-bundle-path-relative-escape.md) **P2 等人拍板**——
+  `portableBundlePath` 对相对路径直接放行（不查 `..`），门② `presentGate` 把
+  `../drt_x/final/v1.md`（bundle 外）当可移植标签并 **PASS**；绝对外部路径则正确 RED。
+  `repairReceiptPaths` 同病：外部相对指针原样保留、`ok=true`、无 action。
+- **可达性**：vendor present 正常写绝对路径（绝对外部已 RED），需相对路径事件才触发；真实日志扫描
+  0 例——属包含性/纵深防御缺口，非现行故障。
+- **同轮排除**：`repairReceiptPaths` 的绝对路径归一化、broken JSON、manual-only、present=null 四态
+  行为均正确（无崩溃/无静默数据丢失）；`run-dashboard` 在新契约 bundle 上正常生成。
+- **同轮补跑（全绿）**：`data-smoke` **16 PASS**（包目录零写入 / 假 token 不泄漏 / 卸载保留 workspace+session）；
+  `install-shape-smoke` **9 PASS**（profile init → add pack+team → 真启动出 token、无 did not activate）。
+- **死链面收口**：对 299 个 mjs/ts 做相对 import 静态解析扫描——**只有 user-env-smoke 一处断链**
+  （=079），`dev/` 的 shell 引用也无缺（`ui-sidebar-right` 为 vendor 相对路径，存在）。
+- **未跑**：077 仍未修（`run-accept-smoke` 红着）；X6/快照重录（预算）。
+### 第 34 轮（2026-11-12 04:5x）：冒烟清单里躺着一具死尸
+
+- **新卡**：[BUG-079](../_archived/fixed_bugs/BUG-079-user-env-smoke-dead-import-seed-core.md) **P2**——
+  `user-env-smoke.mjs` 仍 import D40 S3（`33eea10b`）已删除的
+  `packages/.../scripts/lib/seed-core.mjs` → **启动即 ERR_MODULE_NOT_FOUND**；而 `scripts/README.md`
+  仍把它列为 keyless 关键面（「已有用户环境共存」）——自 11-01 起零覆盖，`smoke-contract` 只对账
+  成员/档位、不验可启动性，所以一直绿。
+- **同轮跑绿**：`workspace-isolation-smoke` **ALL PASS**（17 项：两套 home/profile/port/state/workspace
+  各自绑定、会话组互斥、marker 互不可见、端口释放）。
+- **环境观察（不建卡，但会挡发布）**：本机 `~/.npm/_cacache` 有 root 属主文件 → `npm pack` 报
+  EPERM（`sudo chown -R 502:20 ~/.npm` 可修）。`pack-smoke`（dry-run）不受影响；真实 `npm pack` /
+  `export-dist` 在本机会失败。另：`npm pack` 会触发 `prepack` 重建 `lib/`，跑之前注意别与在办构建
+  撞车（本轮撞到一次 lib 空窗，已自行恢复）。
+- **未跑**：077 仍未修（`run-accept-smoke` 红着）；X6/快照重录（预算）。
+### 第 35 轮（2026-11-12 04:5x）：D49 的 English 覆盖运行级验证
+
+- **探针（一次性，未入库）**：`bootWeb` 启 `deep-research` profile + `--patch`（`locale.preference: en`），
+  playwright `en-US` 打开首屏 → **品牌显示 `Orca Deep Research`**（`Orca 深度搜索` 不出现）。
+  即：D49 的「bundle 缺省 zh、profile patch 显式覆盖 en」在运行时成立。
+- 局限：探针没有开 session，页签 chrome 未渲染，只验到品牌（同一个 translator 的输出）；要验全部 chrome
+  需建会话（client-load 已覆盖 zh 面，en 面可另立探针）。
+- **同轮跑绿**：`discipline-probe` **ALL PASS**（5 场景行为标记：b1 差集出题 / 收活缺件打回 /
+  UNVERIFIED 第三态 / hitl1 计划卡）。
+- **未跑**：077/079 仍未修；X6/快照重录（预算）。
+### 第 36 轮（2026-11-12 05:0x）：protocol-audit 变异矩阵——全部与成文契约一致
+
+在真实 bundle（v2 protocol）副本上做 6 组变异：
+
+| 变异 | 结果 | 判定 |
+|---|---|---|
+| plan.md `protocol: v1` vs JSON v2 | RED `plan-ref` | ✓ |
+| 策略行预算 99/99 vs JSON 8/12 | RED `strategy-mismatch` | ✓ |
+| 删掉整行 `- 策略:` | warn `strategy-missing` + PASS | ✓（D48 成文：缺字段 = warning） |
+| §Protocol `protocol: v1` vs JSON v2 | RED `projection` | ✓ |
+| JSON audience 改一字 | RED `protocol-changed` | ✓（v2 设计指纹） |
+| 预算写成「八个节点」 | RED `strategy-budget-unparseable` | ✓（fail-loud） |
+| 预算= 空值 | warn `strategy-budget-missing` + PASS | ✓（缺字段 = warning） |
+
+结论：protocol-audit 的判据与 D48 笔记逐条吻合，未找到新的假绿/假红；该门唯一缺陷仍是
+[BUG-077](../_archived/fixed_bugs/BUG-077-protocol-audit-write-reference-error.md)（`--write` 崩溃）。
+- **未跑**：077/079 未修；X6/快照重录（预算）。
+## 第三轮 goal 收口（2026-11-12 05:0x，12 轮用满）
+
+### 本轮新发现（6 张卡）
+
+| 卡 | 级别 | 一句话 | 状态 |
+|---|---|---|---|
+| [BUG-074](../_archived/fixed_bugs/BUG-074-readiness-inline-quote-hijack.md) | P1 | readiness 终局被行内引用劫持：同行旧 PASS + 真实 FAIL 读成 PASS（反向误杀） | 等人拍板 |
+| [BUG-075](../_archived/fixed_bugs/BUG-075-hitl2-pending-row-counted-as-decision.md) | P1 | 门③ 把「HITL2 未拍板」当拍板行：同 run 旧答复即可放行（G8 fail-open） | 等人拍板 |
+| [BUG-076](../_archived/fixed_bugs/BUG-076-schema-scan-whitelist-missing-protocol-artifacts.md) | P2 | schema-scan 白名单漏 protocol/review/waves/protocol-audit.md → 新契约 run 必红 | 等人拍板 |
+| [BUG-077](../_archived/fixed_bugs/BUG-077-protocol-audit-write-reference-error.md) | P1 | `protocol-audit --write` 缺 import 崩溃 → run-accept 写报告阶段必败 | 修复就绪 |
+| [BUG-078](../_archived/fixed_bugs/BUG-078-portable-bundle-path-relative-escape.md) | P2 | 相对 `..` present 路径绕过 bundle 外拒收（门② PASS） | 等人拍板 |
+| [BUG-079](../_archived/fixed_bugs/BUG-079-user-env-smoke-dead-import-seed-core.md) | P2 | user-env-smoke 引用已删除 seed-core → 启动即崩，README 仍宣称覆盖 | 修复就绪 |
+
+### 覆盖增量（本轮跑过的档位/探针）
+
+- **L2/T0 岛首次整档**：pack-smoke ALL PASS、lifecycle-smoke ALL PASS（21）、profile-concurrency ALL PASS、
+  release-smoke `--install-only` ALL PASS（19，含端口释放）、doctor-smoke ALL PASS、data-smoke ALL PASS（16）、
+  install-shape-smoke ALL PASS（9）、workspace-isolation-smoke ALL PASS（17）。
+- **非默认路径**：`client-load --seed`（干净机器）**74 PASS / 0 FAIL**；`product-boot-smoke` GREEN（16）；
+  D49 English 覆盖探针（profile patch en）→ 品牌 `Orca Deep Research`（缺省 zh 可被显式覆盖）。
+- **并发/进程卫生**：run-lock 8 路并发 1 成功 / 7 busy；release-smoke 端口释放无残留。
+- **解析器/门禁变异**：readiness（行内引用劫持→074）、planIndex（自环/2-环/重复 id/CRLF 均正确报 issue）、
+  protocol-audit（7 组变异全部与 D48 成文一致）、repairReceiptPaths（四态正确）、frontmatter（BOM 理论盲点，
+  2795 个真实 evidence 零实例）。
+- **死链扫描**：299 个 mjs/ts 相对 import 静态解析 → 仅 079 一处断链。
+
+### 未跑（交给下一轮/预算）
+
+- **X6 真模型 worker 行为**、**回放 B 层快照重录**（均需预算/with-key）；`client-hitl-smoke` /
+  `team-preflight-smoke` 等真模型档同理。
+- 077/079 落地后的复跑（`run-accept-smoke` / `user-env-smoke`）。
+- 安装域默认中文（需重新出包；本机 npm cache 有 root 属主文件，`npm pack` EPERM，先
+  `sudo chown -R 502:20 ~/.npm`）。
+
+### 拍板事项（074/075/076/078）
+
+四条都指向**门禁/验收合同**，按 `_backlog/AGENTS` 需要你或评审放行；修复方落 077/079 即可解除验收阻塞。
 ## 用户答复（2026-11-11）
 
 - **Q1**：采纳；持续做，不设固定轮数（goal 驱动，剥洋葱式逐层深入）。

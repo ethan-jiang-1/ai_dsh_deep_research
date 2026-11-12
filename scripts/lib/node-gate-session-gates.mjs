@@ -136,7 +136,7 @@ const collectLabels = (o, labels) => {
  * @returns {{logs:number, boundLogs:number, presented:Array, replies:Array, stalePresented:number, staleReplies:number}}
  */
 export function scanWitnessLogs(sessionsRoot, slug, { readLog = emptyOnUnreadableLogReader, contract = null } = {}) {
-  const out = { logs: 0, boundLogs: 0, presented: [], replies: [], stalePresented: 0, staleReplies: 0, boundSessions: [] }
+  const out = { logs: 0, boundLogs: 0, presented: [], replies: [], stalePresented: 0, staleReplies: 0, boundSessions: [], latestAsk: undefined, latestReply: null }
   const bare = String(slug ?? '').replace(/^drt_/, '')
   if (!sessionsRoot || !bare || !existsSync(sessionsRoot)) return out
   const pathRe = new RegExp(`(?:^|/)(?:archive/|_abandoned/)?drt_${escapeRe(bare)}/(final(?:/v(\\d+))?\\.md)$`)
@@ -162,6 +162,11 @@ export function scanWitnessLogs(sessionsRoot, slug, { readLog = emptyOnUnreadabl
         const args = String(e.data?.arguments ?? '')
         // 交付审阅卡的识别面：历史 header（交付审阅 / HITL2）+ 产品当前 header/选项（审阅与拍板 / 定稿（按现稿交付））；大小写不敏感。
         if (/交付审阅|hitl2|审阅与拍板|定稿（按现稿交付）/i.test(args)) asks.set(e.data?.callId, { args, time: typeof e.time === 'number' ? e.time : null })
+      }
+      // 只认最新一条交付审阅 ask：更早 ask 的答复不得为更新的版本作证（BUG-075）。
+      for (const [callId, info] of asks) {
+        const current = out.latestAsk
+        if (current === undefined || (info.time ?? 0) >= (current.time ?? 0)) out.latestAsk = { callId, time: info.time }
       }
       for (const e of events) {
         if (e?.type === 'deliverables/presented') {
@@ -237,6 +242,9 @@ export function scanWitnessLogs(sessionsRoot, slug, { readLog = emptyOnUnreadabl
     }
   }
   walk(sessionsRoot)
+  if (out.latestAsk !== undefined) {
+    out.latestReply = out.replies.filter((reply) => reply.callId === out.latestAsk.callId).at(-1) ?? null
+  }
   return out
 }
 
@@ -255,7 +263,7 @@ function presentedStatusOf(scan) {
 /** 扫描结果 → HITL2 答复见证三态。 */
 function repliesStatusOf(scan) {
   if (scan.logs === 0) return { status: 'UNATTESTED', detail: '会话语料缺席——HITL2 答复无证据', replies: [], logs: 0, boundLogs: 0, stale: 0 }
-  const base = { replies: [], logs: scan.logs, boundLogs: scan.boundLogs, stale: scan.staleReplies }
+  const base = { replies: [], logs: scan.logs, boundLogs: scan.boundLogs, stale: scan.staleReplies, latestAsk: scan.latestAsk, latestReply: scan.latestReply ?? null }
   if (scan.replies.length > 0) {
     return { ...base, status: 'FOUND', replies: scan.replies, detail: `user-question-reply ${scan.replies.length} 条（绑定本 bundle 的 lead 会话 ${scan.boundLogs} 个）` }
   }
@@ -379,9 +387,14 @@ function planCardNote(planCards, planCardOver) {
  * @param line §Decisions 的单行文本。
  * @returns 是否计为 HITL2 拍板行。
  */
+export const isHitl2Mention = (line) => /HITL2/i.test(line) || (/交付审阅/.test(line) && /代理模拟|hitl-answer/.test(line))
+const HITL2_NEGATIVE = /未拍板|未定|待确认|待定|等待|尚未|未决|待补|待审|未答复|pending/i
+const HITL2_DECISION = /定稿|追认|拍板|按现稿|批准|认可|确认|通过|改说法|补研究|修订/
+
 export function isHitl2Row(line) {
-  if (/HITL2/.test(line)) return true
-  return /交付审阅/.test(line) && /代理模拟|hitl-answer/.test(line)
+  if (!isHitl2Mention(line)) return false
+  if (HITL2_NEGATIVE.test(line)) return false
+  return HITL2_DECISION.test(line)
 }
 
 export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadableLogReader, witness = null) {
@@ -391,7 +404,9 @@ export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadabl
   const qPath = join(bundleDir, 'question.md')
   const qText = existsSync(qPath) ? readFileSync(qPath, 'utf8') : null
   const dec = qText ? decisionsLines(qText) : []
-  const hitl2Rows = dec.filter((l) => isHitl2Row(l))
+  const hitl2Mentions = dec.filter((l) => isHitl2Mention(l))
+  const latestMention = hitl2Mentions[0] ?? null
+  const hitl2Rows = hitl2Mentions.filter((l) => isHitl2Row(l))
   const proxyRows = hitl2Rows.filter((l) => !/HITL2/.test(l))
   const epoch = epochDateOf(bundleDir)
   const newContract = epoch !== null
@@ -403,8 +418,10 @@ export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadabl
     gate = { status: 'N/A', detail: 'final/ 版本记账不在场——门③无对象（bundle 未到交付段；显式标注，不静默跳过）' }
   } else if (!qText) {
     gate = { status: 'RED', detail: 'final/ 记账在场但 question.md 缺席——方向契约文件失踪，fail-loud（不静默跳过）' }
-  } else if (hitl2Rows.length === 0) {
-    gate = { status: 'RED', detail: `final/ 记账在场（${versionFiles.join(', ')}）但 §Decisions 无任何 HITL2 拍板行——版本落盘先于用户裁决（G8 形态）` }
+  } else if (hitl2Mentions.length === 0) {
+    gate = { status: 'RED', detail: `final/ 记账在场（${versionFiles.join(', ')}）但 §Decisions 无任何 HITL2 行——版本落盘先于用户裁决（G8 形态）` }
+  } else if (latestMention !== null && !isHitl2Row(latestMention)) {
+    gate = { status: 'RED', detail: `§Decisions 最新一条 HITL2 行是未决形（${latestMention.trim().slice(0, 80)}）——版本落盘先于用户裁决（G8 形态）；旧答复不能为它作证` }
   } else if (newContract) {
     const scan = witness ?? scanWitnessLogs(sessionsRoot, basename(bundleDir), { readLog, contract })
     const reply = repliesStatusOf(scan)
@@ -415,9 +432,13 @@ export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadabl
         status: 'RED',
         detail: `§Decisions 有 ${hitl2Rows.length} 条 HITL2 行，但${reply.stale > 0 ? ` ${reply.stale} 条答复早于契约纪元、` : ''}会话语料无**绑定本 bundle 的 lead 会话**里 callId 绑定的答复（选定定稿）——文本行不能自证，跨 run 答复不作证`,
       }
+    } else if (reply.latestAsk === undefined) {
+      gate = { status: 'RED', detail: 'HITL2 行在场，但绑定会话里没有交付审阅 ask——答复无对象，不能自证' }
+    } else if (reply.latestReply === null) {
+      gate = { status: 'RED', detail: `HITL2 行在场，但最新交付审阅 ask（callId ${reply.latestAsk.callId}）未答复——更早 ask 的答复不能为更新的版本作证（G8 形态）` }
     } else {
-      const r = reply.replies[0]
-      gate = { status: 'PASS', detail: `HITL2 事件链在场：callId ${r.callId} 选定「${r.label}」${r.proxy ? '（代理模拟，已显式标记）' : ''}` }
+      const r = reply.latestReply
+      gate = { status: 'PASS', detail: `HITL2 事件链在场：最新 ask callId ${r.callId} 选定「${r.label}」${r.proxy ? '（代理模拟，已显式标记）' : ''}` }
     }
   } else {
     gate = {

@@ -391,3 +391,20 @@ test('模板自洽：按 templates/run/run.md 造的新 run 零核心违约（�
     rmSync(dir, { recursive: true, force: true })
   }
 })
+
+// 负例留证 2026-11-12：BUG-076——白名单漏 protocol.json/protocol/protocol-audit.md/review/waves，
+// 新契约 run 必红。还原法 = 从 TOP_LEVEL_ALLOWED 删这 5 项。
+test('BUG-076 D28 白名单：协议 / claim 复核 / wave 新 canonical 件不再假红，真违约仍红', () => {
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), 'dsh-schema-top-'))
+  try {
+    writeFileSync(join(dir, 'run.md'), '# Run\n\n- contract: 2026-10-23\n')
+    for (const name of ['protocol.json', 'protocol-audit.md']) writeFileSync(join(dir, name), '{}\n')
+    for (const name of ['protocol', 'review', 'waves']) mkdirSync(join(dir, name), { recursive: true })
+    writeFileSync(join(dir, 'x.py'), 'print(1)\n')
+    const core = hygieneOf(dir)
+    assert.ok(core.some((c) => c.includes('x.py')), '真违约必须仍红')
+    for (const name of ['protocol.json', 'protocol-audit.md', 'protocol', 'review', 'waves']) {
+      assert.equal(core.some((c) => c.includes(name)), false, `${name} 不得再判未登记`)
+    }
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
