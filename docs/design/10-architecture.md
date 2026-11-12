@@ -12,7 +12,7 @@
 
 ```
 packages/deep-research-pack/   唯一自写包：presets/<role>/ + cordis.patch.yml + content/（手册与 run 模板，D40；src/content 注入）+ src/startup/（启动行，D40）+ 研究驾驶舱（Research Cockpit——观察面 client 套件，src/client/ + lib/client.js；D18 有界例外，用途限定观察/调试；[构成正本](./40-research-cockpit.md)）+ 抓取回退 provider（src/fetch-fallback/ + lib/fetch-fallback.js；D31 有界代码面）
-research-workspace/            dev 工作区实例：角色会话 cwd（研究手册 + drt_<slug>/（run bundle）+ templates/）；
+research-workspace/            dev 工作区实例：角色会话 cwd（drt_<slug>/（run bundle）+ method-library.md + 可选 research-defaults.json）；
                                用户工作区 = 任意目录（首屏选择/`DEEP_RESEARCH_WORKSPACE`）
 docs/ notes/ scripts/ tests/ dev/   文档/决策/门禁/回归/环境（分层原则见 00-index）
 vendor/dsh/                    pinned submodule（只读铁律——verify vendor-pin/vendor-clean 把守；

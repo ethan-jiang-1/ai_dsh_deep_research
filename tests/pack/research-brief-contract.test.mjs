@@ -23,6 +23,16 @@ test('research-brief：三问带 output/source typed 落格，不新增第四问
   assert.match(skill, /不新增\s*第四问/)
 })
 
+test('research-brief：项目默认被消费（项目默认 / Lead 判断 / 用户本次三分）', () => {
+  const skill = readFileSync(SKILL, 'utf8')
+  assert.match(skill, /research:defaults/, '未点名项目默认注入段')
+  assert.match(skill, /项目默认/, '未要求标「项目默认」')
+  assert.match(skill, /Lead 判断/, '未要求自动维度标「Lead 判断」')
+  assert.match(skill, /用户本次/, '未记录用户本次覆盖')
+  assert.match(skill, /\{\{默认偏好\}\}|〔默认偏好〕/, '方法默认未进消费链')
+  assert.match(skill, /不新增\s*第四问/)
+})
+
 test('lead persona：HITL1 三问卡把 output/source 写进选项，quick 也照发', () => {
   const lead = readFileSync(LEAD, 'utf8')
   assert.match(lead, /深度与篇幅 \+ 输出形态/)

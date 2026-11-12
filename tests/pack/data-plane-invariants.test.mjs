@@ -67,6 +67,7 @@ test('README 数据卡形状：91 十字段、profile/设置/方法库保留、�
     if (fact === 'Run state header') assert.match(rebuild, /Derived/, 'run.md 必须标派生')
   }
   assert.ok(rows >= 10, `数据卡行数过少（${rows}）——表被截断？`)
+  assert.ok(lines.some((line) => line.startsWith('| Project research defaults |')), '数据卡缺项目研究默认行')
 })
 
 test('回执三态：手册两处副本都写明 install-only 降级（不可履行不得写成已履行）', () => {
@@ -81,7 +82,7 @@ test('回执三态：手册两处副本都写明 install-only 降级（不可履
 test('README 保留 secret/portability 说明，且 N2 承重依赖已披露', () => {
   const readme = readFileSync(join(PACK, 'README.md'), 'utf8')
   assert.match(readme, /Secrets exist only in DSH credentials/, '数据卡缺秘密面说明')
-  assert.match(readme, /Run bundles and the method library travel with the workspace/, '数据卡缺可移植说明')
+  assert.match(readme, /Run bundles, the method library, and project research defaults travel with the\s+workspace/, '数据卡缺可移植说明')
   assert.match(readme, /N2 experimental/, 'N2 实验依赖未披露')
   assert.match(readme, /experimental-client-ui-agent-team/, 'client 侧 N2 peer 未披露')
 })

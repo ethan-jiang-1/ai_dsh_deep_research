@@ -65,7 +65,7 @@ import { availableMemoryMBFromMeminfo, availableMemoryMBFromVmStat, classifyHost
 import { acquireRunLock, releaseRunLock } from '../lib/run-lock.mjs'
 import { materializeSeedHome, resolveSeedFixture, seedFixtureSize } from './client-load-seed.mjs'
 import { prepareClientLoadReference } from './client-load-reference.mjs'
-import { pass4ConfigTabPhase } from './client-load-config.mjs'
+import { pass3dDefaultsPhase, pass4ConfigTabPhase } from './client-load-config.mjs'
 import { pass5FinalDeliveryPhase } from './client-load-final.mjs'
 import { clickRowByText, dismissPreviewNotice, expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES, TAB_TEXT, tabTitleIndex } from '../lib/web-ui-nav.mjs'
 import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
@@ -1268,6 +1268,10 @@ try {
   await pass2UnboundNegativePhase()
   await pass3ActivityStreamPhase()
   await pass3bGraphTabPhase()
+  await pass3dDefaultsPhase({
+    page, step, wait, sessionTitleArg: SESSION_TITLE_ARG, boundSession, unboundSession,
+    awaitAppReady, clickRowByText, workspacePath, seeded: seed !== null,
+  })
   await pass3cMethodLibraryPhase()
   // pass-4「研究配置」摘要 = client-load-config.mjs（env 注入主件文件级 helper 与调用时刻的
   // boundSession/unboundSession 快照）。自测例库 12 形态的浏览器相位已退役：管理迁到主界面

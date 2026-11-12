@@ -53,6 +53,12 @@ export const RESEARCH_BRAND_NAME_SLOT = 'sidebar.brand.name'
 /** 产品首屏起步卡的 dock 槽名（conversation.input.dock；D38）。 */
 export const RESEARCH_START_DOCK_SLOT = 'conversation.input.dock'
 
+/** 项目研究默认的 composer 左侧按钮槽（conversation.input.left；D50）。 */
+export const RESEARCH_DEFAULTS_SLOT = 'conversation.input.left'
+
+/** 项目研究默认按钮的 entry id（同一槽内的稳定身份）。 */
+export const RESEARCH_DEFAULTS_BUTTON_ID = 'deep-research-defaults'
+
 /** 研究语义工具卡的 keyed 槽名（tool.call.toolview；key = wire 工具名，见 ResearchToolCard）。 */
 export const RESEARCH_TOOLVIEW_SLOT = 'tool.call.toolview'
 

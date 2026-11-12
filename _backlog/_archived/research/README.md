@@ -14,6 +14,7 @@
 
 | [plugin-as-product/](plugin-as-product/README.md) · 插件即产品：独立启动 profile、用户工作区与 run bundle 归属 | 11 份 | [插件即产品决策卡](../settled_issues/2026-11-01-plugin-as-product.md) 及四张子卡 | [父卡](../settled_issues/2026-11-01-plugin-as-product.md)、[D38](../../../docs/decisions.md#d38)、[Note](../../../notes/archived/2026-11-01-plugin-as-product.md) | 2026-11-01 |
 | 名头 | 材料 | 历史消费者 | 产出的卡 | 归档 |
+| [startup-preferences/](startup-preferences/README.md) · 项目研究默认：每个项目起来按哪套偏好跑 | 2 份 + `ux/` | 用户 2026-11-12 直派（公司仓 startup-settings issue 启发） | [项目研究默认卡](../settled_issues/2026-11-12-project-research-defaults.md)、[D50](../../../docs/decisions.md#d50)、[Note](../../../notes/implemented/2026-11-12-project-research-defaults.md) | 2026-11-12 |
 | [strategy-abstraction/](strategy-abstraction/README.md) · 策略抽象：固定权重下 UI → 数据 → 行动 | 1 份 | 用户 2026-11-11 直派设计复核 | [策略投影 + HITL1 typed 输入（O1）](../settled_issues/2026-11-11-strategy-projection.md)、[D48](../../../docs/decisions.md#d48)、[Note](../../../notes/implemented/2026-11-11-strategy-projection.md) | 2026-11-11 |
 | [external-landscape/](external-landscape/README.md) · 外部 landscape：别人已经走到哪 | 4 份 | 本轮 presets 设计推演（用户 2026-11-10 直派） | [策略投影 + HITL1 typed 输入（O1）](../settled_issues/2026-11-11-strategy-projection.md) | 2026-11-11 |
 |---|---|---|---|---|

@@ -19,6 +19,7 @@ import { LegacyManagementPane } from './research-config/LegacyManagementPane.tsx
 import { fieldExecutionRowsOf, specimenSkeletonsOf } from './research-config/config-model.ts'
 import { sectionLabelOf } from './research-config/section-labels.ts'
 import { useConfigFeed, type ResearchConfigTabInjected } from './research-config/useConfigFeed.ts'
+import { DefaultsPanel } from './defaults/DefaultsPanel.tsx'
 
 export type { ResearchConfigTabInjected }
 export type ResearchConfigTabProps = PropsRuntime<'sidebar.right.pane.tab'> & PropsLocale<'deepResearchPack'> & ResearchConfigTabInjected
@@ -302,6 +303,7 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
   return (
     <div style={{ padding: 12, flex: 1, minHeight: 0, overflowY: 'auto', fontSize: 13, lineHeight: 1.7 }}>
       <div style={{ fontWeight: 700, marginBottom: 2 }}>{props.t('configHeader')}</div>
+      {sessionId === undefined ? null : <DefaultsPanel sessionId={sessionId} store={props.defaults} t={props.t} />}
       <div style={{ opacity: 0.65, marginBottom: 8, fontSize: 11, lineHeight: 1.6 }}>
         {COMPACT
           ? props.t('configMethodHint')

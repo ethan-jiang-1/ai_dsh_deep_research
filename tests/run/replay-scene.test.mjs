@@ -62,6 +62,16 @@ test('loads the complete role scene as absolute files with all required judges',
   }
 });
 
+test('mcp 声明：false 透传；非 bool fail（MCP_PLAYWRIGHT=0 形态的场景自描述）', (t) => {
+  const { dir, manifest, save } = scene(t);
+  manifest.mcp = false;
+  save();
+  assert.equal(loadReplayScene(dir, ROLES).mcp, false);
+  manifest.mcp = 'false';
+  save();
+  assert.throws(() => loadReplayScene(dir, ROLES), /mcp/i);
+});
+
 test('research-face 场景覆盖研究角色面（方法编辑不属 run 生命周期）', () => {
   const research = researchRoles(ROOT);
   assert.ok(research.length > 0 && !research.includes('method-editor'));

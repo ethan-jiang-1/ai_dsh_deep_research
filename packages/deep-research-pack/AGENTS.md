@@ -6,7 +6,7 @@
 `@deepseek-ai/dsh-agent-preset` 行，config.plugins 内声明 persona/skills/工具行）+
 `presets/<role>/skills/` + 驾驶舱（`src/client/`，构建产物 `lib/client.js`）+
 `content/`（研究手册 T0 + generic 按需细则 + run 模板 + lens 目录，`src/content` 以 runtime context 注入，**不落工作区**）+
-`src/startup/`（Host 工作区登记/会话）+ 只读 `scripts/doctor.mjs`（bin
+`src/startup/`（Host 工作区登记/会话）+ `src/defaults/`（项目研究默认 host command + 注入，D50）+ 只读 `scripts/doctor.mjs`（bin
 `dsh-deep-research-doctor`）。交付形态 = bundle + 用户自建 custom profile `deep-research`（D41）；**没有
 launcher/scaffold，没有自定义安装器**。包级当前合同在 [README.md](README.md)；
 本文件只放该子树的**指令**。上游对应物 = DSH `packages/AGENTS.md`。
@@ -38,6 +38,6 @@ launcher/scaffold，没有自定义安装器**。包级当前合同在 [README.m
 ## 文档义务
 
 - 包 README 拥有**包级**合同（安装形态摘要/验证/配置/升级/卸载/数据/兼容）；用户逐步安装合同的 owner = 手册源（scripts/dist/product-manual.md），本 README 不复制步骤；行为/架构细节 = design/，发布 = guides/64；README 或发布集改变同 diff 更新；
-- 启动/部署面（`src/startup`、`src/content`、`scripts/doctor.mjs`、`$DSH_HOME/deep-research/settings.json`）改动要跑
+- 启动/部署面（`src/startup`、`src/content`、`src/defaults`、`scripts/doctor.mjs`、`$DSH_HOME/deep-research/settings.json`）改动要跑
   `install-shape-smoke` + `product-boot-smoke` + `release-smoke`（L2 安装/首启形状）；
 - 已知限制与延后工作放固定节 `## Known Limitations and Deferred Work`（中文名：已知限制与延后工作）。

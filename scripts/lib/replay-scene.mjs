@@ -91,6 +91,7 @@ export function loadReplayScene(sceneDir, roles, { only } = {}) {
   if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) fail('manifest must be an object');
   if (manifest.version !== 1) fail('version must be 1');
   if (manifest.sessionFormat !== 4) fail('sessionFormat must be 4 (the supported replay format)');
+  if (manifest.mcp !== undefined && typeof manifest.mcp !== 'boolean') fail('mcp must be a boolean when present');
   for (const field of ['scenario', 'profile', 'workspace']) text(manifest[field], field);
   scenePath(ROOT, manifest.workspace, 'workspace', true);
   if (!Array.isArray(roles) || roles.length === 0 || roles.some((role) => typeof role !== 'string' || role.trim() === '') || new Set(roles).size !== roles.length) {
@@ -121,7 +122,7 @@ export function loadReplayScene(sceneDir, roles, { only } = {}) {
   if (new Set(cases.map((item) => item.fixture)).size !== cases.length) fail('duplicate fixture paths cannot stand in for distinct role recordings');
   if (only !== undefined && !ids.includes(only)) fail(`only ${String(only)} does not name a case`);
   return {
-    scenario: manifest.scenario, profile: manifest.profile, workspace: manifest.workspace, sessionFormat: manifest.sessionFormat,
+    scenario: manifest.scenario, profile: manifest.profile, workspace: manifest.workspace, sessionFormat: manifest.sessionFormat, mcp: manifest.mcp === true,
     cases: cases.filter((item) => only === undefined || item.id === only),
   };
 }

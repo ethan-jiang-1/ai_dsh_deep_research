@@ -94,8 +94,8 @@
         "./presets/lead.patch.yml",
         "./presets/scout.patch.yml",
         "./presets/method-editor.patch.yml",
-      "./workers/research-worker.patch.yml",
-      "./workers/research-wave.patch.yml"
+        "./workers/research-worker.patch.yml",
+        "./workers/research-wave.patch.yml"
       ]
     },
     "client": {
@@ -149,6 +149,10 @@
     "./startup": {
       "types": "./lib/types/startup/index.d.ts",
       "default": "./lib/startup.js"
+    },
+    "./defaults": {
+      "types": "./lib/types/defaults/index.d.ts",
+      "default": "./lib/defaults.js"
     }
   },
   "scripts": {

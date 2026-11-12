@@ -85,3 +85,4 @@
 | [BUG-077](BUG-077-protocol-audit-write-reference-error.md) | protocol-audit `--write` 缺 import → ReferenceError | （补 PROTOCOL_CONTRACT_DATE import；--write 落盘 + run-accept-smoke ALL PASS；源码契约测试） | 2026-11-12 |
 | [BUG-078](BUG-078-portable-bundle-path-relative-escape.md) | portableBundlePath 把相对 `..` 当可移植 → 门②接受 bundle 外 present | （相对路径 resolve + 包含性检查，含 `..` 一律 null；repair null+unportable） | 2026-11-12 |
 | [BUG-079](BUG-079-user-env-smoke-dead-import-seed-core.md) | user-env-smoke 引用已删 seed-core → 启动即 ERR_MODULE_NOT_FOUND | （sha256 改 node:crypto；真跑 13/13 ALL PASS） | 2026-11-12 |
+| [BUG-080](BUG-080-snapshot-research-face-stale-team-baseline.md) | snapshot-replay research-face B 层缺 Team Lead/Team 工具 baseline | （4 角色真模型重录 + source 身份 + C 金标准 --update-expected 人审；mcp:false 场景声明 + replay-fixtures 条件守卫；snapshot-replay ALL PASS；无产品代码） | 2026-11-12 |

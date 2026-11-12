@@ -3,10 +3,11 @@
 > 生成器 = `probes/_index.mjs --write`；事实源 = 每支探针头注；本表只答「有哪些、在哪」。
 > 指南 = [../docs/guides/66-probe-playbook.md](../docs/guides/66-probe-playbook.md)。
 
-## behavior/（5 支）
+## behavior/（6 支）
 
 | 探针 | 一句话 | 档位 | 何时跑 | 状态 |
 |---|---|---|---|---|
+| [defaults-probe.mjs](behavior/defaults-probe.mjs) | seeded 项目默认进入 HITL1 首推、auto 不冒充默认、三问不变、语言不冒充项目默认 | 真模型（DEEPSEEK_API_KEY；REAL_MODEL 闭集） | `research:defaults` context / `research-brief` / HITL1 合同改动；D50 回归 | 常驻 |
 | [discipline-probe.mjs](behavior/discipline-probe.mjs) | 五场景纪律在真模型下按合同触发（A2/B1/收活两态/计划确认卡） | 真模型（DEEPSEEK_API_KEY；REAL_MODEL 闭集） | 纪律合同/persona/skill 文本改动；收活判据变更；snapshot 重录后 | 常驻 |
 | [entry-chain-probe.mjs](behavior/entry-chain-probe.mjs) | 入口链三问（授权范围/RFC 条件/开发环路径）真模型可召回 | 真模型（DEEPSEEK_API_KEY；REAL_MODEL 闭集） | 改根/子树 AGENTS 或入口链；入口链导航合同变更；纯文档卫生轮 | 常驻 |
 | [method-library-probe.mjs](behavior/method-library-probe.mjs) | Lead 能说出偏好库路径、当前条目数、点名条目缺席（BUG-042 判据 #4） | 真模型（DEEPSEEK_API_KEY；REAL_MODEL 闭集） | 偏好库播种/手册指路/面板文案改动；BUG-042 回归 | 常驻 |

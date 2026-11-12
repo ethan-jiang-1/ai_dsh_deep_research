@@ -24,6 +24,7 @@
 | app surface | profile 起的 surface | 本包 = Web（`dsh.client.platform: web`）；Desktop 仅互操作；headless/SDK/ACP 不支持 |
 | 启动行（startup row） | Host 插件行（bundle insert） | `packages/deep-research-pack/src/startup/`：读 `DEEP_RESEARCH_WORKSPACE`/设置文件 → 登记 Workspace → best-effort Lead 会话；D40 |
 | deep-research 设置文件 | 发行方自有 home 文件（非 DSH Config/patch） | `$DSH_HOME/deep-research/settings.json`（工作区/上次会话；无秘密、可删）；GUI 另有一个 localStorage 提示键（设备级） |
+| 项目研究默认 | workspace 用户数据文件 | `<workspace>/research-defaults.json`（depth/output/source；缺席 = 自动 = Lead 判断）；`research:defaults` 注入 + `/research-defaults` 唯一写路径；D50 |
 | 六轴 | —（借用 26 语料；DSH 无此对象） | 检查表装置：运行时 / profile / patch 层 / app surface / Harness home+数据 / 生命周期；owner 表 = [guides/65](./guides/65-run-forms.md) |
 | 数据卡 | 每份事实分别记 owner / authority / source / mechanism-path / scope-key / readers / writers / rebuildability / retention | [pack README](../packages/deep-research-pack/README.md) §Data；模板 = 91 |
 | 产物 / artifacts | —（用户常用词） | = **run bundle**（`<workspace>/drt_<slug>/`）；不另建 artifact store，交付用 `present` 声明工作区文件 |

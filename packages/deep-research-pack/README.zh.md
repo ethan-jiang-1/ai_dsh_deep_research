@@ -123,6 +123,9 @@ dsh --profile deep-research --no-open --port 0
   的唯一字段，且立即生效。超时与其他字段需要 profile patch 或 `--patch`。
 - **工作区与上次会话**位于 `$DSH_HOME/deep-research/settings.json`，这是包自有的 home 文件，不是
   DSH 全局设置。解析顺序：`DEEP_RESEARCH_WORKSPACE` → 该文件 → 首屏选择器。
+- **项目研究默认**在 `<workspace>/research-defaults.json`，只影响下一场研究的 HITL1 推荐。入口 =
+  composer 的「研究默认」按钮、研究配置页签，或 `/research-defaults`。字段缺席 = 自动：由 Lead
+  按题型判断；文件不写 `auto`。方法默认仍住 `method-library.md`。
 - **凭据**来自 DSH：Models 页、凭据服务、环境变量，或 `$DSH_HOME/.credentials.yaml`。本包从不打包
   或转发 key。搜索使用 `DEEPSEEK_API_KEY`；抓取回退解析同一个 ref，缺失时报告
   `fallback unavailable`。
@@ -170,6 +173,7 @@ dsh plugin --profile deep-research remove @deepseek-ai/dsh-experimental-agent-te
 | Deep Research 设置（工作区、上次会话） | 本包 / 用户 | 文件 | 启动行、用户 | `$DSH_HOME/deep-research/settings.json` | home | 启动行、doctor、用户 | 启动行、用户 | 重选工作区 | 删除目录；卸载本包会保留 |
 | 浏览器工作区提示 | 浏览器 | DSH Workspace registry | client | `localStorage['dsh.deep-research.workspaceId.v1']` | 设备/源 | client | client | 重选工作区 | 清除站点数据 |
 | 方法库 | 用户 | 文件 | 用户、Lead、Method Editor | `<workspace>/method-library.md` | 工作区 | 用户、模型 | 用户、Lead、Method Editor 工具 | 否（用户数据） | 用户删除；卸载本包会保留 |
+| 项目研究默认 | 用户 | 文件 | 用户、面板 | `<workspace>/research-defaults.json` | 工作区 | 模型（注入）、面板 | 面板经 `/research-defaults` host command | 否（用户数据） | 删文件即恢复自动；卸载本包会保留 |
 | run bundle | 用户 | 文件 + journal | 角色 | `<workspace>/drt_<slug>/`, `archive/`, `_abandoned/` | 工作区 + slug | 模型、用户 | 角色、ops | 否 | 用户删除；无自动 GC |
 | run 状态头 | run | 事实 + journal | 角色 | `<bundle>/run.md` | run | 模型、ops | 角色、ops | 派生 | 随 run bundle 走 |
 | 交付与审计回执 | run / ops | 文件 + 会话日志 | `present`、ops | `delivered.json`, `manifest.json`, `acceptance.md`, `audit.md`, `node-gate.md` | run | 用户、ops | ops | ops 重跑 | 随 run bundle 走；审计需要本地会话 |

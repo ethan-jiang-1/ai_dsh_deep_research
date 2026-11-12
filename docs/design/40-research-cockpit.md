@@ -90,6 +90,10 @@
 | 方法库草稿状态 | `src/client/method-library/useDraftState.ts` | 草稿/revision/回填/来源字段/工作台导航（无 UI） | [§2.7](#cockpit-7) |
 | 方法库写操作队列 | `src/client/method-library/useOperationQueue.ts` | claim/结算/保存·默认·删除·刷新（状态面 + 行为面两出口） | [§2.7](#cockpit-7) |
 | 配置页签模型 | `src/client/research-config/config-model.ts` | 四字段执行面表 / 标本骨架 / 详情三态 | [§2.6](#cockpit-6) |
+| 项目默认状态机 | `src/client/defaults/store.ts` | 按 session 读 `research-defaults.json` + 方法库、经 host command 写、按钮与面板共用快照 | [§2.6](#cockpit-6) |
+| 项目默认按钮 | `src/client/defaults/DefaultsButton.tsx` | composer 左侧状态按钮（自动 / 方法 X / 已设 N 项 / 需检查） | [§2.6](#cockpit-6) |
+| 项目默认面板 | `src/client/defaults/DefaultsPanel.tsx` | 研究配置页签顶部「项目默认」块（方法只读；深度/输出/来源可改；无保存） | [§2.6](#cockpit-6) |
+| 项目默认显示投影 | `src/client/defaults/labels.ts` | canonical id → 字典 key（按钮/面板共用；不翻译数据） | [§2.6](#cockpit-6) |
 | 配置页签取数 | `src/client/research-config/useConfigFeed.ts` | 库读四态 / journal 绑定 / 方法节五态 / 发送回执三态（视图只消费） | [§2.6](#cockpit-6) |
 
 页签八区（渲染顺序，自上而下；条件区在括号里标注）：
@@ -133,6 +137,7 @@
 | [text-fold](../../packages/deep-research-pack/src/lib/text-fold.ts) | markdown 行内文本 → 可进纯文本节点的文本 | 剥 `**` 与反引号 ＋ 压空白 ＋ 截断补省略号；状态页签与配置页签共用本件（`**` 字面星号上卡面、长摘要拉爆列表——唯一正本在本件） |
 | [method-of-question](../../packages/deep-research-pack/src/lib/method-of-question.ts) | question.md 文本 ＋ bundle 在场性 → 「本次研究」区五态 | 无 run／文件缺／未记录／无法判定／已记录；**判不了就说判不了**——绝不回落成默认打法名（旧 run 未记录 = 合法形态，不回填）；读方法节须显式足额 limit（模板第 32–40 行卡默认 40 行，BUG-026 同族） |
 | [receipt-fold](../../packages/deep-research-pack/src/lib/receipt-fold.ts) | 发送结果 ＋ 回话信号 ＋ 库前后快照 → 回执三态与 diff | 已发送（prompt ok）／Lead 已回话（发送**之后**的 assistant 事件）／已落盘（回读对账出 diff：`把「找来源」从 A 改成 B`）；对账读不出变化就退到已回话，不冒充落地 |
+| [research-defaults](../../packages/deep-research-pack/src/lib/research-defaults.ts) | `research-defaults.json` 文本 → typed 值 / problems；patch 合并/删除/序列化；按钮粗状态；command 结果解析 | 缺席 = auto（不写 sentinel、不物化默认）；六个 output shape = HITL1 面（protocol 的 literature_review 不在本层）；source families/authorities 与 protocol-core 对账 |
 
 ---
 
@@ -176,7 +181,9 @@
 
 **文件**：[ResearchConfigTab.tsx](../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx) + [LegacyManagementPane.tsx](../../packages/deep-research-pack/src/client/research-config/LegacyManagementPane.tsx)（`COMPACT=false` 的四区回滚面，D25）+ [method-of-question.ts](../../packages/deep-research-pack/src/lib/method-of-question.ts)
 
-右栏**摘要页签**（2026-10-21 管理迁移后）：只留 ① 本次研究（采用＋来源＋「换一条」，读 question.md 方法节五态）与「方法库（本工作区）→ 顶部 tab」入口；库列表/内置卡/领域示范/术语/管理回执移入主界面「方法库」tab。指令仍经 `session/prompt` 交 Lead（面板不直写文件）
+右栏**摘要页签**（2026-10-21 管理迁移后）：只留 ① 本次研究（采用＋来源＋「换一条」，读 question.md 方法节五态）与「方法库（本工作区）→ 顶部 tab」入口；库列表/内置卡/领域示范/术语/管理回执移入主界面「方法库」tab。「本次研究/方法库入口」指令仍经 `session/prompt` 交 Lead；项目默认块（D50）经 `/research-defaults` host command，不直写盘。
+
+**项目默认块（D50）**：页签顶部；方法行只读（库默认/按题型），深度/输出/来源可改；首项「自动」= 字段省略 = Lead 按题型判断（不是系统默认）；无保存按钮，面板经 `/research-defaults` host command 写 workspace 文件；按钮与面板共用 `src/client/defaults/store.ts`。
 
 <a id="cockpit-7"></a>
 ### 2.7 方法库主 tab
@@ -270,8 +277,16 @@ domain。它是 Client 渲染，不进模型请求。
 `uiWorkspace.startSession`。谓词纯函数（`readCurrentSessionId` / `pickProductWorkspace` /
 `needsProductSwitch`）由 keyless 测试钉住；浏览器只写两个提示键，不做本地账本。
 
+<a id="cockpit-19"></a>
+### 2.19 项目默认按钮
+
+**文件**：[DefaultsButton.tsx](../../packages/deep-research-pack/src/client/defaults/DefaultsButton.tsx) + [store.ts](../../packages/deep-research-pack/src/client/defaults/store.ts)
+
+composer 左侧 `conversation.input.left` 的状态按钮（有 session 才渲染）：文案 = 自动 / 方法 X / 已设 N 项 / 需检查；点击打开「研究配置」页签。tooltip 列生效值；按钮不写盘，写只经面板/命令。无 session 不渲染，不新增 StartCard 入口。
+
 ## 3. 数据通道与接线
 
+- **项目默认写通道（D50）**：面板 → `remote.commands.execute('/research-defaults …')` → host command 原子写 `<workspace>/research-defaults.json`；读走 `workspaceFiles`，写不走（只读），也不走 session/prompt。命令事件进会话日志；文件内容随后被 `research:defaults` 注入。
 - **两条官方通道，零自建协议**：`remote.session.follow`（WebSocket journal 流：snapshot
   帧 = 历史、event 帧 = 实时）喂活动流 / HITL 谓词 / 会话绑定；`remote.workspaceFiles`
   （会话工作区文件）喂 bundle 渐进面（失败降级 null + `console.error` 便于冒烟抓取）；
@@ -324,6 +339,8 @@ domain。它是 Client 渲染，不进模型请求。
 命令与改动次序 = [guides/60 §2](../guides/60-dev-loop.md)「改驾驶舱」行；判据 = [evaluation](../evaluation.md) §L0/L1/L4。本页不复述命令表。
 
 ## 6. 已知限制与延后工作
+
+- **项目默认只存 depth/output/source**：方法默认仍在方法库（面板只读）；lens/参考目录/输出语言/用户级跨 workspace 默认 = v2；protocol 的 `literature_review` 不在面板六种内（单源对账另案）。
 
 - **启动空会话不复用**：带 `DEEP_RESEARCH_WORKSPACE` 的每次启动按首屏语义 mint 一个 blank Lead
   会话（settings 源才记 sessionId）；不自动复用已有 blank 会话。真实使用出现会话堆积时再实现

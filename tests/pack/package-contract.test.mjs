@@ -28,6 +28,8 @@ test('T0 exports：入口与 client 都有声明，且不依赖未发布源码',
   assert.equal(pkg.exports?.['./startup']?.default, './lib/startup.js')
   assert.equal(pkg.exports?.['./startup']?.types, './lib/types/startup/index.d.ts')
   assert.equal(pkg.exports?.['./content']?.default, './lib/content.js')
+  assert.equal(pkg.exports?.['./defaults']?.default, './lib/defaults.js')
+  assert.equal(pkg.exports?.['./defaults']?.types, './lib/types/defaults/index.d.ts')
   assert.equal(pkg.exports?.['./cordis.patch.yml'], './cordis.patch.yml')
   assert.equal(pkg.exports?.['./presets/*.patch.yml'], './presets/*.patch.yml')
   assert.equal(pkg.exports?.['./method-library-tool/icon'], './icon.svg')

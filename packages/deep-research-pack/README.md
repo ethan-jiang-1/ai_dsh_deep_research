@@ -136,13 +136,12 @@ the main surface gains the method-library tab.
 - **Settings page**: only `research-fetch-fallback.enabled` is marked `.volatile()`, so it is the
   only field exposed by the Settings UI and it applies immediately. Timeouts and other fields need
   a profile patch or `--patch`.
-- **Workspace and last session** live in `$DSH_HOME/deep-research/settings.json`, a package-owned
-  home file, not DSH global settings. Resolution order:
-  `DEEP_RESEARCH_WORKSPACE` → that file → first-screen chooser.
-- **Credentials** come from DSH: the Models page, the credentials service, the environment, or
-  `$DSH_HOME/.credentials.yaml`. The package never bundles or forwards a key. Search uses
-  `DEEPSEEK_API_KEY`; the fetch fallback resolves the same ref and reports
-  `fallback unavailable` when it is missing.
+- **Workspace and last session** live in `$DSH_HOME/deep-research/settings.json` (package-owned, not
+  DSH global): `DEEP_RESEARCH_WORKSPACE` → that file → first-screen chooser.
+- **Project research defaults** (`<workspace>/research-defaults.json`) feed the next run's HITL1 recommendations; absent fields mean auto (Lead decides). Edit via the composer button, Research Config, or `/research-defaults`; method defaults stay in `method-library.md`.
+- **Credentials** come from DSH (Models page, credentials service, environment, or
+  `$DSH_HOME/.credentials.yaml`); the package never bundles one. Search uses `DEEPSEEK_API_KEY`;
+  the fetch fallback resolves the same ref and reports `fallback unavailable` when missing.
 
 ### Upgrade and rollback
 
@@ -191,6 +190,7 @@ them into one label.
 | Deep Research settings (workspace, last session) | Package / user | File | Startup row, user | `$DSH_HOME/deep-research/settings.json` | Home | Startup row, doctor, user | Startup row, user | Re-select workspace | Delete directory; package removal keeps it |
 | Browser workspace hint | Browser | DSH Workspace registry | Client | `localStorage['dsh.deep-research.workspaceId.v1']` | Device/origin | Client | Client | Re-select workspace | Clear site data |
 | Method library | User | File | User, Lead, Method Editor | `<workspace>/method-library.md` | Workspace | User, model | User, Lead, Method Editor tools | No (user data) | User deletes; package removal keeps it |
+| Project research defaults | User | File | User, panel | `<workspace>/research-defaults.json` | Workspace | Model (injected), panel | Panel via `/research-defaults` host command | No (user data) | Delete file; package removal keeps it |
 | Run bundle | User | Files + journal | Roles | `<workspace>/drt_<slug>/`, `archive/`, `_abandoned/` | Workspace + slug | Model, user | Roles, ops | No | User deletes; no automatic GC |
 | Run state header | Run | Facts + journal | Roles | `<bundle>/run.md` | Run | Model, ops | Roles, ops | Derived | Follows bundle |
 | Delivery and audit receipts | Run / ops | Files + session log | `present`, ops | `delivered.json`, `manifest.json`, `acceptance.md`, `audit.md`, `node-gate.md` | Run | User, ops | Ops | Ops re-run | Follows bundle; audit needs local sessions |
@@ -200,9 +200,9 @@ them into one label.
 | Sidebar layout | Vendor / browser | Browser | Client | `localStorage['dsh.sidebar-right.v1.<sessionId>']` | Device | Client | Client | Reset | Clear site data |
 
 **Secrets and portability.** Secrets exist only in DSH credentials; the package stores none and
-forwards none. Run bundles and the method library travel with the workspace; delivery receipts
-travel with the bundle; `audit.md`, `node-gate.md`, and session-derived evidence need the original
-`$DSH_HOME/sessions` and do not travel. A shared `$DSH_HOME` shows other workspaces and sessions;
+forwards none. Run bundles, the method library, and project research defaults travel with the
+workspace; delivery receipts travel with the bundle; audits need the original `$DSH_HOME/sessions`.
+A shared `$DSH_HOME` shows other workspaces and sessions;
 use a separate `DSH_HOME` for a clean environment.
 
 ## Understand the implementation

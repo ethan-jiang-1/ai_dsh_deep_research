@@ -102,7 +102,7 @@ writable roots。`WorkspaceId` 是 DSH Workspace registration ID，不是路径�
 - GUI 记住上次选择用浏览器 localStorage 提示键（设备级）；权威仍是 DSH Workspace registry。
 - 选 `<dir>` 就是 `<dir>`；像项目时首屏建议 `<dir>/research`，不静默改写。
 - 危险目录（HOME / DSH_HOME / 安装树及其祖先）拒绝；不写 `.gitignore`（git 仓库缺忽略规则时只提示）。
-- 工作区产物：`drt_<slug>/`、`archive/`、`_abandoned/`、`method-library.md`。
+- 工作区产物：`drt_<slug>/`、`archive/`、`_abandoned/`、`method-library.md`、可选 `research-defaults.json`（项目研究默认；D50）。
 - 一 Host 一用户；run bundle 继承工作区权限。一个工作区一条 pack 版本线。
 
 ## 7. 独立环境与多实例

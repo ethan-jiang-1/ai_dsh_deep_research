@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <g font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif">
+    <rect width="1600" height="1000" fill="#f3f4f6"/>
+
+    <!-- title -->
+    <text x="48" y="48" font-size="22" font-weight="600" fill="#111827">项目默认：状态与交互</text>
+    <text x="48" y="74" font-size="13" fill="#6b7280">同一块面板，四个关键状态：入口文案、下拉的「自动」、写回执/失效、方法行只读。</text>
+
+    <!-- section A: button states -->
+    <rect x="48" y="104" width="1504" height="166" rx="14" fill="#ffffff" stroke="#e5e7eb"/>
+    <text x="80" y="136" font-size="13" font-weight="600" fill="#374151">入口按钮：文案就是当前状态，不是「设置」</text>
+    <text x="80" y="156" font-size="11" fill="#9ca3af">悬停 tooltip 列出生效值；点击打开右侧「研究配置」页签。</text>
+
+    <!-- state 1 -->
+    <rect x="80" y="176" width="300" height="46" rx="23" fill="#f9fafb" stroke="#d1d5db"/>
+    <path d="M100 188h12M100 194h12M100 200h12" stroke="#6b7280" stroke-width="1.3" stroke-linecap="round"/>
+    <circle cx="104" cy="188" r="2" fill="#6b7280"/>
+    <circle cx="108" cy="194" r="2" fill="#6b7280"/>
+    <circle cx="102" cy="200" r="2" fill="#6b7280"/>
+    <text x="120" y="203" font-size="13" fill="#374151">研究默认：自动</text>
+    <text x="80" y="242" font-size="11" fill="#6b7280">没有任何默认（含方法）</text>
+
+    <!-- state 2 -->
+    <rect x="420" y="176" width="300" height="46" rx="23" fill="#eff6ff" stroke="#93c5fd"/>
+    <path d="M440 188h12M440 194h12M440 200h12" stroke="#2563eb" stroke-width="1.3" stroke-linecap="round"/>
+    <circle cx="444" cy="188" r="2" fill="#2563eb"/>
+    <circle cx="448" cy="194" r="2" fill="#2563eb"/>
+    <circle cx="442" cy="200" r="2" fill="#2563eb"/>
+    <text x="460" y="203" font-size="13" fill="#1d4ed8">研究默认：方法 格局调研</text>
+    <text x="420" y="242" font-size="11" fill="#6b7280">只有方法库默认，其余自动</text>
+
+    <!-- state 3 -->
+    <rect x="760" y="176" width="300" height="46" rx="23" fill="#eff6ff" stroke="#2563eb"/>
+    <path d="M780 188h12M780 194h12M780 200h12" stroke="#2563eb" stroke-width="1.3" stroke-linecap="round"/>
+    <circle cx="784" cy="188" r="2" fill="#2563eb"/>
+    <circle cx="788" cy="194" r="2" fill="#2563eb"/>
+    <circle cx="782" cy="200" r="2" fill="#2563eb"/>
+    <text x="800" y="203" font-size="13" font-weight="600" fill="#1d4ed8">研究默认：已设 3 项</text>
+    <circle cx="1030" cy="199" r="7" fill="#22c55e"/>
+    <path d="M1026 199l3 3 5-6" stroke="#ffffff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="760" y="242" font-size="11" fill="#6b7280">depth / output / source 有值</text>
+
+    <!-- state 4 -->
+    <rect x="1100" y="176" width="300" height="46" rx="23" fill="#fff7ed" stroke="#fdba74"/>
+    <path d="M1120 188h12M1120 194h12M1120 200h12" stroke="#c2410c" stroke-width="1.3" stroke-linecap="round"/>
+    <circle cx="1124" cy="188" r="2" fill="#c2410c"/>
+    <circle cx="1128" cy="194" r="2" fill="#c2410c"/>
+    <circle cx="1122" cy="200" r="2" fill="#c2410c"/>
+    <text x="1140" y="203" font-size="13" fill="#c2410c">研究默认：需检查</text>
+    <text x="1100" y="242" font-size="11" fill="#6b7280">文件损坏或枚举非法；不静默</text>
+
+    <!-- section B: dropdown -->
+    <rect x="48" y="294" width="720" height="416" rx="14" fill="#ffffff" stroke="#e5e7eb"/>
+    <text x="80" y="326" font-size="13" font-weight="600" fill="#374151">下拉：第一项永远是「自动」</text>
+    <text x="80" y="346" font-size="11" fill="#9ca3af">自动 = 该字段省略，不是写 "auto"；不选 = Lead 自主判断。</text>
+
+    <text x="80" y="386" font-size="11" fill="#6b7280">输出形态</text>
+    <rect x="80" y="396" width="300" height="40" rx="8" fill="#ffffff" stroke="#2563eb"/>
+    <text x="96" y="421" font-size="12.5" fill="#111827">自动</text>
+    <path d="M352 411l5 5 5-5" stroke="#6b7280" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    <text x="400" y="421" font-size="11" fill="#9ca3af">选中即清除该字段</text>
+
+    <!-- dropdown panel -->
+    <rect x="80" y="444" width="360" height="250" rx="10" fill="#ffffff" stroke="#d1d5db"/>
+    <rect x="88" y="452" width="344" height="46" rx="7" fill="#eff6ff"/>
+    <text x="104" y="474" font-size="12.5" font-weight="600" fill="#1d4ed8">自动（由 Lead 判断）</text>
+    <text x="104" y="490" font-size="10.5" fill="#6b7280">不选 = 不约束；Lead 按题型判断</text>
+    <path d="M408 469l4 4 4-4" stroke="#2563eb" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+    <text x="104" y="518" font-size="12.5" fill="#374151">快答</text>
+    <line x1="88" y1="530" x2="432" y2="530" stroke="#f3f4f6"/>
+    <text x="104" y="548" font-size="12.5" fill="#374151">完整报告</text>
+    <line x1="88" y1="560" x2="432" y2="560" stroke="#f3f4f6"/>
+    <text x="104" y="578" font-size="12.5" fill="#374151">一页备忘</text>
+    <line x1="88" y1="590" x2="432" y2="590" stroke="#f3f4f6"/>
+    <text x="104" y="608" font-size="12.5" fill="#374151">对比表</text>
+    <line x1="88" y1="620" x2="432" y2="620" stroke="#f3f4f6"/>
+    <text x="104" y="638" font-size="12.5" fill="#374151">时间线</text>
+    <line x1="88" y1="650" x2="432" y2="650" stroke="#f3f4f6"/>
+    <text x="104" y="668" font-size="12.5" fill="#374151">全景地图</text>
+
+    <text x="480" y="474" font-size="11" fill="#6b7280">闭集：六种 HITL1 形态 + 自动。</text>
+    <text x="480" y="494" font-size="11" fill="#6b7280">增删要改共享枚举 + 测试，</text>
+    <text x="480" y="514" font-size="11" fill="#6b7280">不从目录动态枚举。</text>
+
+    <!-- section C: receipts / invalid / stale -->
+    <rect x="792" y="294" width="760" height="416" rx="14" fill="#ffffff" stroke="#e5e7eb"/>
+    <text x="824" y="326" font-size="13" font-weight="600" fill="#374151">写回执与失效：不静默</text>
+    <text x="824" y="346" font-size="11" fill="#9ca3af">没有「保存」按钮；改完即写，下一轮 prompt 生效。</text>
+
+    <!-- receipt -->
+    <rect x="824" y="366" width="696" height="62" rx="9" fill="#ecfdf5" stroke="#bbf7d0"/>
+    <circle cx="844" cy="397" r="8" fill="#22c55e"/>
+    <path d="M840 397l3 3 5-6" stroke="#ffffff" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="862" y="392" font-size="12.5" font-weight="600" fill="#15803d">已保存 · v5</text>
+    <text x="862" y="412" font-size="10.5" fill="#166534">下一轮 prompt 生效；按钮文案同步变「已设 N 项」。</text>
+
+    <!-- invalid -->
+    <rect x="824" y="442" width="696" height="62" rx="9" fill="#fffbeb" stroke="#fde68a"/>
+    <text x="844" y="468" font-size="12.5" font-weight="600" fill="#b45309">配置有无效项：effort = bogus</text>
+    <text x="844" y="488" font-size="10.5" fill="#92400e">该字段已忽略，不静默沿用；select 重选或点「清除」修复。</text>
+
+    <!-- stale -->
+    <rect x="824" y="518" width="696" height="62" rx="9" fill="#eff6ff" stroke="#bfdbfe"/>
+    <text x="844" y="544" font-size="12.5" font-weight="600" fill="#1d4ed8">已在别处修改，已刷新为 v5</text>
+    <text x="844" y="564" font-size="10.5" fill="#1e40af">revision 不匹配：本次修改未写入；面板已重读，请再改一次。</text>
+
+    <!-- clear -->
+    <text x="824" y="614" font-size="12" fill="#b91c1c">清除本项目默认</text>
+    <rect x="924" y="598" width="100" height="26" rx="13" fill="#ffffff" stroke="#fca5a5"/>
+    <text x="938" y="615" font-size="10.5" fill="#b91c1c">再点一次确认</text>
+    <text x="1040" y="615" font-size="10.5" fill="#9ca3af">只删 workspace 文件，不动方法库默认</text>
+
+    <text x="824" y="664" font-size="11" fill="#6b7280">写路径 = host command：原子写 + revision + 回读；面板不直写盘。</text>
+    <text x="824" y="684" font-size="11" fill="#9ca3af">方法默认不在这里写；见下方。</text>
+
+    <!-- section D: method read-only -->
+    <rect x="48" y="734" width="1504" height="210" rx="14" fill="#ffffff" stroke="#e5e7eb"/>
+    <text x="80" y="766" font-size="13" font-weight="600" fill="#374151">方法行只读：方法默认仍住方法库</text>
+    <text x="80" y="786" font-size="11" fill="#9ca3af">面板显示方法与默认；写入仍归顶部「方法库」tab（D25/D37 的窄工具）。</text>
+
+    <!-- card 1 -->
+    <rect x="80" y="802" width="424" height="116" rx="10" fill="#f9fafb" stroke="#eef0f3"/>
+    <text x="96" y="826" font-size="11" font-weight="600" fill="#374151">面板（只读）</text>
+    <text x="96" y="852" font-size="11" fill="#6b7280">方法</text>
+    <text x="136" y="852" font-size="12" fill="#111827">自动（库默认：格局调研）</text>
+    <rect x="96" y="866" width="80" height="20" rx="10" fill="#ffffff" stroke="#d1d5db"/>
+    <path d="M104 872h6v6h-4v-4" stroke="#9ca3af" stroke-width="1.1" fill="none"/>
+    <text x="116" y="880" font-size="9.5" fill="#9ca3af">只读</text>
+    <text x="400" y="852" font-size="11" fill="#2563eb" text-anchor="end">去方法库 ›</text>
+    <text x="96" y="904" font-size="10" fill="#9ca3af">不复制、不改写方法默认</text>
+
+    <!-- arrow 1 -->
+    <path d="M518 860h24M536 854l6 6-6 6" stroke="#9ca3af" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- card 2 -->
+    <rect x="560" y="802" width="424" height="116" rx="10" fill="#eff6ff" stroke="#bfdbfe"/>
+    <text x="576" y="826" font-size="11" font-weight="600" fill="#1e40af">方法库 tab（唯一写入口）</text>
+    <text x="576" y="852" font-size="12" fill="#111827">格局调研</text>
+    <text x="640" y="852" font-size="10.5" fill="#2563eb">〔默认偏好〕</text>
+    <rect x="576" y="866" width="76" height="24" rx="12" fill="#ffffff" stroke="#93c5fd"/>
+    <text x="590" y="882" font-size="10.5" fill="#1d4ed8">设为默认</text>
+    <text x="576" y="906" font-size="10" fill="#1e40af">方法库写入仍是窄 host 工具</text>
+
+    <!-- arrow 2 -->
+    <path d="M998 860h24M1016 854l6 6-6 6" stroke="#9ca3af" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- card 3 -->
+    <rect x="1040" y="802" width="464" height="116" rx="10" fill="#f9fafb" stroke="#eef0f3"/>
+    <text x="1056" y="826" font-size="11" font-weight="600" fill="#374151">立项消费</text>
+    <text x="1056" y="852" font-size="11" fill="#6b7280">research:defaults 段</text>
+    <text x="1190" y="852" font-size="11" fill="#6b7280">→</text>
+    <text x="1208" y="852" font-size="12" fill="#111827">HITL1 第一问首推</text>
+    <text x="1056" y="874" font-size="10" fill="#9ca3af">方法默认只作推荐；题面点名的仍优先</text>
+    <text x="1056" y="896" font-size="10" fill="#9ca3af">三问照发；默认不替代本次选择</text>
+
+    <text x="80" y="936" font-size="10.5" fill="#9ca3af">方法默认与 depth/output/source 在立项时合并成同一段 research:defaults；不新增第四问。</text>
+
+    <!-- footer data strip -->
+    <text x="48" y="978" font-size="11" fill="#6b7280">数据落点：workspace/research-defaults.json（depth / output / source） + method-library.md（方法默认） → research:defaults → HITL1 三问 → protocol.json。</text>
+  </g>
+</svg>

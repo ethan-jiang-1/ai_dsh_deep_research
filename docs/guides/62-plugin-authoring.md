@@ -17,7 +17,7 @@
 
 | 术语 | DSH 定义 | 本仓落点 |
 |---|---|---|
-| plugin | 导出 `apply(ctx)` 的 TS 模块；注册即 `apply(ctx)`，配置经 cordis schema 校验 | 本仓自写插件（三处有界例外：D18 观察面 client、D31 抓取回退、D40 启动行/内容注入）：`src/index.ts`（host 半空壳 = 观察面宿主位）、`src/client/index.ts`（client 半：驾驶舱 + 首屏工作区恢复）、`src/client/startup.ts`（纯谓词）、`src/content/index.ts`（手册 runtime context）、`src/startup/index.ts`（工作区登记/会话）、`src/fetch-fallback/index.ts`（抓取回退 provider）；新插件从 `vendor/dsh/docs/user/develop/basic/` 起步 |
+| plugin | 导出 `apply(ctx)` 的 TS 模块；注册即 `apply(ctx)`，配置经 cordis schema 校验 | 本仓自写插件（三处有界例外：D18 观察面 client、D31 抓取回退、D40 启动行/内容注入）：`src/index.ts`（host 半空壳 = 观察面宿主位）、`src/client/index.ts`（client 半：驾驶舱 + 首屏工作区恢复）、`src/client/startup.ts`（纯谓词）、`src/content/index.ts`（手册 runtime context）、`src/startup/index.ts`（工作区登记/会话）、`src/defaults/index.ts`（项目研究默认：`research:defaults` 注入 + `/research-defaults` host command，D50）、`src/fetch-fallback/index.ts`（抓取回退 provider）；新插件从 `vendor/dsh/docs/user/develop/basic/` 起步 |
 | bundle | 你编写与分发的单位（`dsh.bundle`）——回答"这个包贡献什么"，是插入/覆盖 plugin rows 的 patch 层 | `packages/deep-research-pack/cordis.patch.yml` + 包内 `presets/`、`skills/` |
 | profile / profile 归属 | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）；三种归属 = shipped template / custom profile / application-owned | 本仓 = custom `deep-research`（CLI 引导建；当前用本地 tarball 装包，npm/Plugins 为 staged）；开发镜像同名；`desktop` 归官方 Desktop；profile 不是发布物、不是隔离边界 |
 | app surface | profile 起的 surface（Web / headless / SDK / ACP / Desktop） | 本包 = Web（`dsh.client.platform: web`）；Desktop 仅互操作；headless/SDK/ACP 不在支持范围 |
@@ -39,7 +39,7 @@
 
 阶梯不是价值排序：S0 的部署替换是完整系统能力，S3 只是影响面最大。**横切义务**：任何层级
 新增"模型可见"的事实时，必须同时扩展 `SessionEventMap` 并从日志可投影（model-visible ⟺
-logged）——pack 行只引入**现成**能力，这项义务落在 vendor 面；本仓自写 client 注册 Orca 品牌、研究配置/状态页签与观察面槽位。配置页将用户选择的偏好管理指令经标准 `session/prompt` 发送给 Lead，形成普通、可记录的用户消息；client 不直接写 bundle 文件，也不新增会话事件类型。
+logged）——pack 行只引入**现成**能力，这项义务落在 vendor 面；本仓自写 client 注册 Orca 品牌、研究配置/状态页签与观察面槽位。配置页将用户选择的偏好管理指令经标准 `session/prompt` 发送给 Lead；项目默认块经 `/research-defaults` host command 写 workspace 文件（D50）。client 不直接写 bundle 文件，也不新增会话事件类型。
 
 ## 新行为落在哪：按顺序问归属
 
@@ -102,6 +102,7 @@ DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`�
 | 团队机制层 | 另一个 bundle（`@deepseek-ai/dsh-experimental-agent-team-profile`，**N2 experimental**：上游可改/撤，风险与层级表见 pack README §Compatibility） | vendor（本包**故意不声明**团队行——组合与实战 config 归该层，RFC m2-p1-run-channel A 定案） |
 | 研究工作区 | 会话 cwd 的目录；只承载研究产物（`drt_*`/`archive/`/`_abandoned/`/`method-library.md`）；用户任意目录，开发实例 = `research-workspace/` | 用户目录（首屏选择/`DEEP_RESEARCH_WORKSPACE`） |
 | 内容注入 + 启动行 | `src/content`：把 `content/manual.md` 以 runtime context 注入；`src/startup`：读 `$DSH_HOME/deep-research/settings.json`/登记工作区/best-effort 会话 | 本包（D40） |
+| 项目研究默认 | `src/defaults`：`research:defaults` runtime context + `/research-defaults` host command；`research-defaults.json` 住 workspace | 本包（D50） |
 | 只读 doctor | `dsh-deep-research-doctor`：profile roster/版本/团队层/工作区/凭据；不安装、不启动 | 本包 `packages/deep-research-pack/scripts/doctor.mjs` |
 
 **内容不落工作区**：研究手册由 `src/content` 以 runtime context 注入每个角色；NODES/判型库是

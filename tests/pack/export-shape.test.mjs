@@ -15,6 +15,7 @@ const HALVES = [
   ['client 半（驾驶舱）', 'client/index.ts'],
   ['startup（产品启动行）', 'startup/index.ts'],
   ['content（研究手册注入）', 'content/index.ts'],
+  ['defaults（项目研究默认行）', 'defaults/index.ts'],
 ];
 
 test('插件两半：named exports 在场（inject/apply）且零 export default', () => {

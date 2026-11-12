@@ -34,6 +34,7 @@ import {
   RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT, RESEARCH_TOOL_KEYS, METHOD_LIBRARY_TOOL, METHOD_LIBRARY_REMOVE, METHOD_LIBRARY_DEFAULT,
   RESEARCH_BRAND_MARK_SLOT, RESEARCH_BRAND_NAME_SLOT, RESEARCH_START_DOCK_SLOT, METHOD_LIBRARY_VIEW,
   METHOD_COACH_PORTAL, METHOD_COACH_PORTAL_ID, METHOD_COACH_CHAT,
+  RESEARCH_DEFAULTS_SLOT, RESEARCH_DEFAULTS_BUTTON_ID,
 } from './keys.ts'
 import { IconBranchOutlineRegular, IconGaugeOutlineRegular, IconSettingsOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import { ResearchToolCard } from './ResearchToolCard.tsx'
@@ -54,6 +55,8 @@ import { createCoachSessions } from './coach-sessions.ts'
 import { watchDelivery } from './delivery-watch.ts'
 import { createLeadPrompt } from './lead-prompt.ts'
 import { StartCard, type StartCardInjected } from './StartCard.tsx'
+import { DefaultsButton, type DefaultsButtonInjected } from './defaults/DefaultsButton.tsx'
+import { createDefaultsStore } from './defaults/store.ts'
 import { finalAddressOf, isFinalAddress } from '../lib/final-target.ts'
 
 /** Required services：槽注册表（renderer）+ 右栏页签注册器 + 右栏导航面（openTab——挂起显性化）+ remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
@@ -64,7 +67,7 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
   }
 }
 
-export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'sessions', 'workspaces', 'uiWorkspace', 'locale']
+export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'remote.commands', 'sessions', 'workspaces', 'uiWorkspace', 'locale']
 
 /**
  * Client plugin body：登记「研究状态」页签（类型 + keyed 槽体共享同一 key——拼错任一处
@@ -72,7 +75,7 @@ export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'r
  * @param ctx - client root context。
  */
 export function apply(ctx: ClientContext): void {
-  ctx.inject(['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'sessions', 'workspaces', 'uiWorkspace', 'locale'], (scoped) => {
+  ctx.inject(['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'remote.commands', 'sessions', 'workspaces', 'uiWorkspace', 'locale'], (scoped) => {
     // 字典必须**同步**注册后再 bind：effect 回调可能延迟到 inject 回调返回后才跑，
     // 而页签/guide 的 title 在注册期就会被求值（2026-11-03 实测：包成 effect 后标题取不到值）。
     // 注册是 effect 语义 —— 同步取得 disposer，再交给 scoped.effect 管回收。
@@ -93,6 +96,19 @@ export function apply(ctx: ClientContext): void {
     const { chooseWorkspace, ensureProductWorkspace, workspaceOf } = boot
     const workspaceFiles = scoped.remote.workspaceFiles
     const { listDir, readLibrary, readPreview, readText: readFile } = createWorkspaceFiles(workspaceFiles as never)
+    // 项目研究默认（D50）：按钮与配置页签共用同一 store；写只经 host command。
+    const defaultsStore = createDefaultsStore({
+      readText: readFile,
+      listDir,
+      readLibrary,
+      execute: async (sessionId, line) => {
+        const result = await scoped.remote.commands.execute(sessionId, line, [])
+        if (!result.ok) return result
+        if (result.value === undefined) return { ok: false, error: 'command returned no execution' }
+        return { ok: true, value: result.value }
+      },
+    })
+    scoped.effect(() => () => defaultsStore.dispose(), 'deep-research-pack: project defaults store')
     const { sendInstruction } = createLeadPrompt({ prompt: (input, signal) => remoteSession.prompt(input as never, signal) }, t)
     const { ensureCoachSession, sendCoach, migrateKnownCoachTitles } = createCoachSessions(
       scoped as unknown as { get(name: string): unknown },
@@ -136,6 +152,19 @@ export function apply(ctx: ClientContext): void {
     scoped.effect(() => scoped.slots.inject(RESEARCH_BRAND_NAME_SLOT, () => [
       scoped.slots.register({ name: RESEARCH_BRAND_NAME_SLOT, priority: -1, locale: 'deepResearchPack' }, OrcaName),
     ]), 'deep-research-pack: orca brand name')
+
+    // 项目研究默认按钮（D50）：composer 左侧状态按钮；点击打开现有「研究配置」页签。
+    scoped.effect(() => scoped.slots.inject(RESEARCH_DEFAULTS_SLOT, () => scoped.slots.register({
+      name: RESEARCH_DEFAULTS_SLOT,
+      id: RESEARCH_DEFAULTS_BUTTON_ID,
+      order: 20,
+      locale: 'deepResearchPack',
+      inject: (sessionId: SessionId): DefaultsButtonInjected => ({
+        sessionId,
+        store: defaultsStore,
+        openConfig: () => scoped.sidebarRight.openTab(RESEARCH_CONFIG_TAB_KIND),
+      }),
+    }, DefaultsButton)), 'deep-research-pack: project defaults button')
 
     // 「研究配置」页签（D25 期 1 管理中继面）：显示偏好库投影 + 生成管理指令发 Lead——
     // 面板不直写文件（写路径唯一 = Lead，模型可见、会话日志留痕）。
@@ -216,7 +245,7 @@ export function apply(ctx: ClientContext): void {
       scoped.slots.register(
         // 「研究配置」注入面 2026-10-18 扩：+ listDir/follow（「本次研究」区要按会话绑定定位
         // bundle 并读 question.md 方法节；回执的「Lead 已回话」信号也走 journal 流）。
-        { name: RESEARCH_PANE_SLOT, key: RESEARCH_CONFIG_TAB_KEY, locale: 'deepResearchPack', inject: () => ({ readFile, listDir, follow, runSource, sendInstruction }) },
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_CONFIG_TAB_KEY, locale: 'deepResearchPack', inject: () => ({ readFile, listDir, follow, runSource, sendInstruction, defaults: defaultsStore }) },
         ResearchConfigTab,
       ),
       // 「研究图谱」页签体：只读观察（DAG 图 + plan 原文 + 映射），不提供调整动作；

@@ -14,6 +14,7 @@ import { assistantReplyAfter, libraryDiff, receiptOf, type LibraryDiff } from '.
 import type { PackTranslate } from '../../lib/i18n.ts'
 import { LIBRARY_PATH, type DetailState } from './config-model.ts'
 import type { FollowTarget, JournalFrame } from '../ResearchStatusTab.tsx'
+import type { DefaultsStore } from '../defaults/store.ts'
 
 /** 页签体注入面：库文件读取 + 目录列举（本次研究区定位 bundle）+ journal 流 + 指令发送闭包
  *  （index.ts 装配，绑定 remote）。 */
@@ -28,6 +29,8 @@ export interface ResearchConfigTabInjected {
   readonly follow: (target: FollowTarget, signal: AbortSignal) => AsyncGenerator<JournalFrame>
   /** 发送指令给当前会话 Lead（steer→queue 降级在闭包内）；ok=false 时 detail = 原因。 */
   readonly sendInstruction: (sessionId: SessionId, text: string) => Promise<{ ok: boolean; detail: string }>
+  /** 项目研究默认 store（D50；与 composer 按钮共用）。 */
+  readonly defaults: DefaultsStore
 }
 
 export type ConfigFeedInput = ResearchConfigTabInjected & { readonly sessionId: SessionId | undefined; readonly t: PackTranslate }

@@ -1,0 +1,227 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <clipPath id="windowClip">
+      <rect x="40" y="60" width="1520" height="880" rx="16"/>
+    </clipPath>
+  </defs>
+
+  <g font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif">
+    <!-- canvas -->
+    <rect width="1600" height="1000" fill="#f3f4f6"/>
+
+    <!-- top annotation -->
+    <text x="40" y="34" font-size="14" fill="#4b5563">项目默认：入口在输入框左侧；点开是右侧「研究配置」页签——不挡对话，随时可改。</text>
+    <text x="1338" y="34" font-size="12" font-weight="600" fill="#ef4444">② 右侧滑出，不挡对话</text>
+
+    <!-- window shadow -->
+    <rect x="44" y="66" width="1520" height="880" rx="16" fill="#dfe3e8"/>
+
+    <g clip-path="url(#windowClip)">
+      <!-- window -->
+      <rect x="40" y="60" width="1520" height="880" fill="#ffffff"/>
+
+      <!-- left sidebar -->
+      <rect x="40" y="60" width="240" height="880" fill="#fafafa"/>
+      <line x1="280" y1="60" x2="280" y2="940" stroke="#eef0f3"/>
+
+      <!-- brand -->
+      <circle cx="70" cy="100" r="11" fill="#0f172a"/>
+      <path d="M64 96c4 1 6 4 6 8 0 3-2 5-5 4-2-1-3-3-3-6 0-2 1-4 2-6z" fill="#ffffff"/>
+      <circle cx="74" cy="98" r="1.6" fill="#0f172a"/>
+      <text x="90" y="105" font-size="15" font-weight="600" fill="#111827">Orca 深度搜索</text>
+
+      <!-- session list -->
+      <text x="64" y="150" font-size="11" letter-spacing="1" fill="#9ca3af">会话</text>
+      <rect x="54" y="164" width="212" height="38" rx="8" fill="#eef2ff"/>
+      <text x="70" y="188" font-size="13.5" font-weight="600" fill="#1d4ed8">AI 编程助手市场</text>
+      <text x="70" y="230" font-size="13.5" fill="#4b5563">监管合规跟踪</text>
+      <text x="70" y="268" font-size="13.5" fill="#4b5563">供应商比价</text>
+      <text x="70" y="306" font-size="13.5" fill="#4b5563">架构评审</text>
+      <text x="70" y="344" font-size="13.5" fill="#4b5563">交付评审</text>
+
+      <line x1="64" y1="376" x2="256" y2="376" stroke="#eef0f3"/>
+
+      <!-- workspace -->
+      <text x="64" y="406" font-size="11" letter-spacing="1" fill="#9ca3af">工作区</text>
+      <rect x="54" y="420" width="212" height="62" rx="8" fill="#ffffff" stroke="#eef0f3"/>
+      <text x="68" y="442" font-size="12" fill="#374151">~/research/ai-coding</text>
+      <text x="68" y="462" font-size="11" fill="#9ca3af">method-library.md · 1 个默认</text>
+
+      <!-- main chat -->
+      <rect x="280" y="60" width="760" height="880" fill="#ffffff"/>
+      <line x1="280" y1="120" x2="1040" y2="120" stroke="#eef0f3"/>
+      <text x="312" y="98" font-size="16" font-weight="600" fill="#111827">AI 编程助手市场</text>
+      <rect x="462" y="82" width="66" height="22" rx="11" fill="#f3f4f6"/>
+      <text x="474" y="97" font-size="11" fill="#6b7280">研究 run</text>
+      <text x="960" y="98" font-size="11" fill="#9ca3af" text-anchor="end">Lead · 立项中</text>
+
+      <!-- user bubble -->
+      <rect x="312" y="148" width="452" height="64" rx="12" fill="#f3f4f6"/>
+      <text x="330" y="176" font-size="13.5" fill="#111827">把国内 AI 编程助手的市场格局摸一遍，</text>
+      <text x="330" y="196" font-size="13.5" fill="#111827">重点看定价与产品形态。</text>
+
+      <!-- assistant -->
+      <text x="312" y="250" font-size="13.5" fill="#111827">好的。先按项目默认给你一版立项卡：</text>
+      <text x="312" y="276" font-size="13.5" font-weight="600" fill="#1d4ed8">格局调研 · 标准档 · 完整报告（决策层） · official + regulatory</text>
+      <text x="312" y="298" font-size="12" fill="#6b7280">HITL1 三问仍会确认；要改哪项直接说。</text>
+
+      <!-- hitl card -->
+      <rect x="312" y="322" width="580" height="196" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+      <rect x="312" y="322" width="580" height="40" rx="12" fill="#f9fafb"/>
+      <rect x="312" y="350" width="580" height="12" fill="#f9fafb"/>
+      <text x="330" y="347" font-size="12" font-weight="600" fill="#374151">立项确认 · HITL1</text>
+      <text x="872" y="347" font-size="11" fill="#9ca3af" text-anchor="end">项目默认已预填</text>
+      <line x1="312" y1="362" x2="892" y2="362" stroke="#eef0f3"/>
+
+      <text x="330" y="390" font-size="12" fill="#6b7280">研究类型</text>
+      <text x="420" y="390" font-size="12.5" fill="#111827">探索性全景</text>
+      <text x="330" y="416" font-size="12" fill="#6b7280">方法</text>
+      <text x="420" y="416" font-size="12.5" fill="#111827">格局调研</text>
+      <rect x="488" y="402" width="58" height="19" rx="9.5" fill="#eff6ff"/>
+      <text x="497" y="416" font-size="10.5" fill="#2563eb">项目默认</text>
+      <text x="330" y="442" font-size="12" fill="#6b7280">深度</text>
+      <text x="420" y="442" font-size="12.5" fill="#111827">标准档</text>
+      <text x="330" y="468" font-size="12" fill="#6b7280">输出</text>
+      <text x="420" y="468" font-size="12.5" fill="#111827">完整报告 · 读者 决策层</text>
+      <text x="330" y="494" font-size="12" fill="#6b7280">来源</text>
+      <text x="420" y="494" font-size="12.5" fill="#111827">official + regulatory · 12m</text>
+
+      <line x1="330" y1="508" x2="874" y2="508" stroke="#f3f4f6"/>
+      <text x="330" y="528" font-size="11" fill="#9ca3af">计划确认卡仍会照发；默认只作推荐，本次要求优先。</text>
+
+      <!-- composer -->
+      <rect x="312" y="780" width="700" height="120" rx="14" fill="#ffffff" stroke="#d1d5db"/>
+      <text x="332" y="814" font-size="13.5" fill="#9ca3af">问一个研究问题，或让 Lead 继续……</text>
+
+      <!-- composer bottom controls -->
+      <circle cx="334" cy="866" r="12" fill="#ffffff" stroke="#d1d5db"/>
+      <path d="M334 860v12M328 866h12" stroke="#4b5563" stroke-width="1.4" stroke-linecap="round"/>
+
+      <rect x="356" y="850" width="60" height="32" rx="16" fill="#ffffff" stroke="#d1d5db"/>
+      <text x="368" y="871" font-size="12" fill="#374151">权限</text>
+      <path d="M404 862l4 4 4-4" stroke="#6b7280" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+
+      <rect x="426" y="850" width="52" height="32" rx="16" fill="#ffffff" stroke="#d1d5db"/>
+      <text x="439" y="871" font-size="12" fill="#374151">Plan</text>
+
+      <!-- defaults state button -->
+      <rect x="490" y="848" width="202" height="36" rx="18" fill="#eff6ff" stroke="#93c5fd"/>
+      <path d="M508 858h12M508 864h12M508 870h12" stroke="#2563eb" stroke-width="1.3" stroke-linecap="round"/>
+      <circle cx="512" cy="858" r="2" fill="#2563eb"/>
+      <circle cx="516" cy="864" r="2" fill="#2563eb"/>
+      <circle cx="510" cy="870" r="2" fill="#2563eb"/>
+      <text x="528" y="871" font-size="12.5" font-weight="600" fill="#1d4ed8">研究默认：已设 3 项</text>
+
+      <!-- red callout around button -->
+      <rect x="480" y="838" width="222" height="56" rx="10" fill="none" stroke="#ef4444" stroke-width="1.6" stroke-dasharray="6 4"/>
+      <text x="516" y="826" font-size="11.5" font-weight="600" fill="#ef4444">① 点这里：入口显示当前状态</text>
+
+      <rect x="706" y="850" width="112" height="32" rx="16" fill="#ffffff" stroke="#d1d5db"/>
+      <text x="720" y="871" font-size="12" fill="#374151">DeepSeek</text>
+      <path d="M798 862l4 4 4-4" stroke="#6b7280" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+
+      <circle cx="972" cy="866" r="16" fill="#0f172a"/>
+      <path d="M972 873v-12M966 867l6-6 6 6" stroke="#ffffff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <!-- right sidebar -->
+      <rect x="1040" y="60" width="520" height="880" fill="#fcfcfd"/>
+      <line x1="1040" y1="60" x2="1040" y2="940" stroke="#eef0f3"/>
+
+      <!-- tabs -->
+      <text x="1064" y="90" font-size="12.5" fill="#6b7280">研究状态</text>
+      <text x="1132" y="90" font-size="12.5" font-weight="600" fill="#1d4ed8">研究配置</text>
+      <rect x="1132" y="100" width="52" height="2" rx="1" fill="#2563eb"/>
+      <text x="1204" y="90" font-size="12.5" fill="#6b7280">研究图谱</text>
+      <text x="1276" y="90" font-size="12.5" fill="#6b7280">终稿</text>
+      <line x1="1040" y1="120" x2="1560" y2="120" stroke="#eef0f3"/>
+
+      <!-- panel header -->
+      <text x="1064" y="154" font-size="20" font-weight="600" fill="#111827">项目默认</text>
+      <rect x="1146" y="137" width="48" height="21" rx="10.5" fill="#eff6ff"/>
+      <text x="1157" y="152" font-size="10.5" fill="#2563eb">本项目</text>
+      <text x="1536" y="154" font-size="11" fill="#9ca3af" text-anchor="end">v5</text>
+      <text x="1064" y="178" font-size="11.5" fill="#6b7280">影响下一场研究的立项推荐；本次研究仍以 HITL1 为准。</text>
+      <line x1="1064" y1="194" x2="1536" y2="194" stroke="#eef0f3"/>
+
+      <!-- method row -->
+      <text x="1064" y="222" font-size="11.5" fill="#6b7280">方法</text>
+      <text x="1124" y="222" font-size="13" fill="#111827">自动（库默认：格局调研）</text>
+      <text x="1536" y="222" font-size="11.5" fill="#2563eb" text-anchor="end">方法库 ›</text>
+      <text x="1124" y="242" font-size="10.5" fill="#9ca3af">方法默认在顶部「方法库」tab 设置；面板只读</text>
+
+      <!-- depth -->
+      <text x="1064" y="286" font-size="11.5" fill="#6b7280">深度</text>
+      <rect x="1124" y="266" width="380" height="36" rx="8" fill="#ffffff" stroke="#d1d5db"/>
+      <text x="1140" y="289" font-size="12.5" fill="#111827">标准档</text>
+      <path d="M1480 280l5 5 5-5" stroke="#6b7280" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      <text x="1124" y="318" font-size="10.5" fill="#9ca3af">三种：快答档 / 标准档 / 深度档；自动 = 由 Lead 判断</text>
+
+      <!-- output -->
+      <text x="1064" y="352" font-size="11.5" fill="#6b7280">输出</text>
+      <rect x="1124" y="332" width="184" height="36" rx="8" fill="#ffffff" stroke="#d1d5db"/>
+      <text x="1140" y="355" font-size="12.5" fill="#111827">完整报告</text>
+      <path d="M1284 346l5 5 5-5" stroke="#6b7280" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      <text x="1324" y="352" font-size="11.5" fill="#6b7280">读者</text>
+      <rect x="1362" y="332" width="174" height="36" rx="8" fill="#ffffff" stroke="#d1d5db"/>
+      <text x="1376" y="355" font-size="12.5" fill="#111827">决策层</text>
+
+      <!-- source -->
+      <text x="1064" y="404" font-size="11.5" fill="#6b7280">来源</text>
+      <rect x="1124" y="386" width="52" height="28" rx="14" fill="#eff6ff" stroke="#93c5fd"/>
+      <text x="1135" y="405" font-size="11.5" fill="#1d4ed8">官方</text>
+      <rect x="1182" y="386" width="52" height="28" rx="14" fill="#ffffff" stroke="#d1d5db"/>
+      <text x="1193" y="405" font-size="11.5" fill="#4b5563">学术</text>
+      <rect x="1240" y="386" width="52" height="28" rx="14" fill="#eff6ff" stroke="#93c5fd"/>
+      <text x="1251" y="405" font-size="11.5" fill="#1d4ed8">监管</text>
+      <rect x="1298" y="386" width="52" height="28" rx="14" fill="#ffffff" stroke="#d1d5db"/>
+      <text x="1309" y="405" font-size="11.5" fill="#4b5563">从业</text>
+      <rect x="1356" y="386" width="52" height="28" rx="14" fill="#ffffff" stroke="#d1d5db"/>
+      <text x="1367" y="405" font-size="11.5" fill="#4b5563">网络</text>
+      <rect x="1414" y="386" width="52" height="28" rx="14" fill="#ffffff" stroke="#d1d5db"/>
+      <text x="1427" y="405" font-size="11.5" fill="#4b5563">本地</text>
+
+      <!-- authority / recency -->
+      <text x="1064" y="462" font-size="11.5" fill="#6b7280">权威</text>
+      <rect x="1124" y="442" width="150" height="36" rx="8" fill="#ffffff" stroke="#d1d5db"/>
+      <text x="1140" y="465" font-size="12.5" fill="#111827">一手优先</text>
+      <path d="M1250 456l5 5 5-5" stroke="#6b7280" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      <text x="1290" y="462" font-size="11.5" fill="#6b7280">时效</text>
+      <rect x="1330" y="442" width="172" height="36" rx="8" fill="#ffffff" stroke="#d1d5db"/>
+      <text x="1346" y="465" font-size="12.5" fill="#111827">近 12 个月</text>
+      <path d="M1478 456l5 5 5-5" stroke="#6b7280" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+
+      <line x1="1064" y1="500" x2="1536" y2="500" stroke="#eef0f3"/>
+
+      <!-- receipt -->
+      <circle cx="1070" cy="522" r="5" fill="#22c55e"/>
+      <path d="M1067 522l2 2 4-4" stroke="#ffffff" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="1082" y="527" font-size="12" fill="#15803d">已保存 · v5</text>
+      <text x="1162" y="527" font-size="10.5" fill="#9ca3af">自动保存，无「保存」按钮</text>
+      <text x="1064" y="552" font-size="11.5" fill="#b91c1c">清除本项目默认</text>
+
+      <line x1="1064" y1="572" x2="1536" y2="572" stroke="#eef0f3"/>
+
+      <!-- current run -->
+      <text x="1064" y="600" font-size="12.5" font-weight="600" fill="#374151">本次研究</text>
+      <text x="1064" y="626" font-size="11.5" fill="#6b7280">采用：格局调研 · official+regulatory · 读者 决策层</text>
+      <text x="1536" y="626" font-size="11.5" fill="#2563eb" text-anchor="end">换一条</text>
+      <text x="1064" y="650" font-size="11.5" fill="#2563eb">方法库（本工作区）→ 顶部 tab</text>
+
+      <!-- footer note -->
+      <rect x="1064" y="686" width="472" height="104" rx="10" fill="#f9fafb" stroke="#eef0f3"/>
+      <text x="1080" y="710" font-size="11" fill="#6b7280">项目默认只影响立项推荐。</text>
+      <text x="1080" y="731" font-size="11" fill="#6b7280">HITL1 三问仍会确认；本次要求优先。</text>
+      <text x="1080" y="752" font-size="11" fill="#6b7280">方法默认仍住方法库；这里只存深度 / 输出 / 来源。</text>
+      <text x="1080" y="773" font-size="11" fill="#9ca3af">自动 = 字段省略：由 Lead 按题型判断，不是系统默认。</text>
+
+      <!-- bottom hint inside right pane -->
+      <text x="1064" y="828" font-size="10.5" fill="#9ca3af">写入 = host command（原子写 + revision）；下一轮 prompt 生效。</text>
+    </g>
+
+    <!-- window border -->
+    <rect x="40" y="60" width="1520" height="880" rx="16" fill="none" stroke="#e5e7eb"/>
+
+    <!-- bottom legend -->
+    <text x="40" y="972" font-size="12" fill="#6b7280">同一块面板：方法默认来自方法库；深度 / 输出 / 来源存 workspace；没有「保存」，改完下一场研究生效。</text>
+  </g>
+</svg>

@@ -9,6 +9,7 @@
 | 字段 | 含义 |
 |---|---|
 | `version` / `sessionFormat` | 声明格式版本与回放的 session 事件版本；`sessionFormat` 钉住现有录制代，故意换代须新 `session.vN.jsonl` + 人审 |
+| `mcp`（可选 bool） | 录制窗口的 profile 是否含 MCP 行。`false` = MCP_PLAYWRIGHT=0 形态（fixture 不得含 `list_mcp_resources`）；缺省/`true` = 按 BUG-019 要求 MCP 组在场 |
 | `scenario` / `profile` / `workspace` | 场景名、启动档、回放工作区（仓内相对路径） |
 | `cases[]` | 逐个角色的 `id`/`preset`/`fixture`，可带 `renderExpected` 渲染金标准（只在录制流确实产生渲染面时声明——空渲染的转录声明它只会得到假红） |
 | `cases[].source` | 录制身份：`codeAnchor`（录制时本仓 HEAD——**被装配进请求的**模型可见输入（比对面五面 + 时钟序列）与该 commit 一致；录制后若改了**未被加载进请求**的文本，B 层基线仍有效，但须在该场 Note 记录，不能默默改锚点）、`vendor`（录制时的 vendor pin）、`recordedAt`、`recording`（`live` = 真模型录制）。前两者须为 40 位 commit 或如实标记 `unknown-historical`（历史缺失不许猜填） |

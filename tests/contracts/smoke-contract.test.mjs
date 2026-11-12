@@ -27,6 +27,7 @@ const REAL_MODEL = [
   'scripts/smoke/cdp-ask-smoke.mjs',
   'probes/behavior/discipline-probe.mjs',
   'probes/behavior/method-library-probe.mjs',
+  'probes/behavior/defaults-probe.mjs',
   'probes/behavior/rerun-triage-probe.mjs',
   'probes/behavior/wave-execution-probe.mjs',
 ];
