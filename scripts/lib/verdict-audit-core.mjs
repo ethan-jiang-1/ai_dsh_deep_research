@@ -254,6 +254,7 @@ export function auditClaimVerdicts({
   sessions = {},
   bundleFiles = null,
   topicsText = null,
+  readinessPass = null,
 } = {}) {
   const problems = []
   const warnings = []
@@ -468,7 +469,9 @@ export function auditClaimVerdicts({
   stats.verdicts = latestVerdicts.length
 
   // 终局 PASS 的读法**不在这里另写一份**：判据正本 = 门禁同源的 readinessOf（末条行首判定行生效，历史引用不夺权）。
-  const passClaimed = typeof reviewText === 'string' && readinessOf(reviewText).pass
+  const passClaimed = readinessPass !== null
+    ? readinessPass === true
+    : typeof reviewText === 'string' && readinessOf(reviewText).pass
   if (typeof reviewText !== 'string' || reviewText.trim() === '') {
     if (required) add('review-missing', 'review.md 缺席/空——交付需要 readiness 裁决，不能以「无法核」通过')
     else warn('review-missing', 'review.md 不可读——readiness 与轮次引用未核')

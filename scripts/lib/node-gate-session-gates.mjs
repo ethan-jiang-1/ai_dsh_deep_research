@@ -4,7 +4,7 @@ import { basename, dirname, join } from 'node:path'
 import { portableBundlePath } from './path-hygiene.mjs'
 import { finalVersionsIn } from './final-version.mjs'
 import { planCardsOf } from './plan-card.mjs'
-import { HITL_CONTRACT_DATE, PRE_CONTRACT_NOTE, decisionsLines, isPreContract, readinessOf } from './node-gate-contracts.mjs'
+import { HITL_CONTRACT_DATE, PRE_CONTRACT_NOTE, decisionsLines, isPreContract, readinessOfBundle } from './node-gate-contracts.mjs'
 import { epochDateOf, toDateStr } from './schema-scan-core.mjs'
 import { slugInArgs } from '../../packages/deep-research-pack/src/lib/bundle-bind.ts'
 import { askKindOf } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
@@ -408,9 +408,9 @@ export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadabl
   } else if (mentions.length === 0) {
     gate = { status: 'RED', detail: `final/ 记账在场（${versionFiles.join(', ')}）但 §Decisions 无任何 HITL2 记录行——人读记录缺席（G8 形态）` }
   } else if (!hasRun) {
-    // 迁移残留：无 run.md 的旧场没有结构化见证面，保留文本记录路径。新契约 run 一律走下面的事件链。
-    // 删除条件 = node-gate 夹具族迁到新契约形状（issue 验收 5）；不是「新判据又开了兼容口」。
-    gate = { status: 'PASS', detail: `旧场（无 run.md）：§Decisions 含 ${mentions.length} 条 HITL2 记录行，迁移期按文本路径放行——新契约 run 不适用` }
+    // 旧场（无 run.md）没有结构化见证面：不给 PASS，也不判 RED——「无证据 ≠ 通过」（exit 2 语义）。
+    // 新契约 run 一律走下面的事件链；旧 bundle 要重新验收，先补 run.md 契约纪元。
+    gate = { status: 'UNATTESTED', detail: '无 run.md 契约纪元——门③无结构化见证面（旧场不做证据推断；重新验收先补契约纪元）' }
   } else if (contract === null) {
     // fail-closed（D51）：run.md 在场但纪元非法 = 没有下界，不能把任意历史答复当本 run 的拍板。
     gate = { status: 'RED', detail: 'run.md 契约纪元缺失/非法——门③见证无下界，不采信历史答复（修正 = 补 created/contract）' }
@@ -445,14 +445,16 @@ export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadabl
 export function presentGate(bundleDir, sessionsRoot, hitl2Rows, readLog = emptyOnUnreadableLogReader, witness = null) {
   const slug = basename(bundleDir)
   const finalPath = join(bundleDir, 'final.md')
-  const reviewPath = join(bundleDir, 'review.md')
-  const reviewText = existsSync(reviewPath) ? readFileSync(reviewPath, 'utf8') : ''
-  const reviewPass = readinessOf(reviewText).pass
+  const readiness = readinessOfBundle(bundleDir)
   if (!existsSync(finalPath)) {
     return { status: 'N/A', detail: 'final.md 当前版不在场——门②无对象' }
   }
-  if (!reviewPass) {
-    return { status: 'N/A', detail: 'review.md readiness 非 PASS——HITL2 前置未达成，交付门②无对象' }
+  // 声明缺席 / 非法 / 与散文不一致 = 判据坏，不是「前置未达成」——fail-closed 红，不降级成 N/A。
+  if (['missing', 'invalid', 'mismatch'].includes(readiness.source)) {
+    return { status: 'RED', detail: readiness.detail }
+  }
+  if (!readiness.pass) {
+    return { status: 'N/A', detail: '终局 readiness 非 PASS（声明/散文）——HITL2 前置未达成，交付门②无对象' }
   }
   const epoch = epochDateOf(bundleDir)
   const newContract = epoch !== null

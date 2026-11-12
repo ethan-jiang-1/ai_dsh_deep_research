@@ -2,7 +2,7 @@
 
 > 状态：implemented
 > 关联：[D51](../../docs/decisions.md#d51)；合同 = [evaluation §判据形状](../../docs/evaluation.md#verdict-shape)；
-> 迁移清单与顺序 = [判据形状迁移](../../_backlog/issues/2026-11-13-verdict-shape-migration.md)
+> 迁移清单与顺序 = [判据形状迁移](../../_backlog/_archived/settled_issues/2026-11-13-verdict-shape-migration.md)
 
 ## 决定
 
@@ -55,11 +55,15 @@ BUG-150 的卡自己写明：「词表路线必然漏同义措辞」。
   `本轮 readiness: PASS；本轮 readiness: FAIL` → `null`（互斥已 fail-closed）；`本轮 readiness: PASS` 单独一行
   → **PASS**（语境关键词路由仍在，是本卡要拆的残余）。
 - **HITL2 双向**（`isHitl2Row`，node 直跑）：代理 + 「待用户点头」→ **true**（fail-open）；
-  「可以 / 行 / LGTM」三形态 → **false**（误杀）。证据命令与输出留在 [issue](../../_backlog/issues/2026-11-13-verdict-shape-migration.md) §当前情况。
+  「可以 / 行 / LGTM」三形态 → **false**（误杀）。证据命令与输出留在 [issue](../../_backlog/_archived/settled_issues/2026-11-13-verdict-shape-migration.md) §当前情况。
 - **基线**：`node scripts/verify/verify.mjs` 全绿；`pnpm test` 1364 通过 / 0 失败（2026-11-13，基线 `4d6308c9`）。
 - **落地（Slice A + C，2026-11-13）**：readiness 去关键词与历史词表、互斥读法判 `null`；门③ 决策改事件链
   （`isHitl2Row` 与两张词表删除）；门② 版本配对改读 present；`tests/contracts/verdict-conformance.test.mjs`
   五条不变量 + 生成矩阵。`pnpm test` 1369 通过 / 0 失败、`pnpm verify` 全绿、`pnpm typecheck` 绿。
+- **Slice B（2026-11-13）**：`review/readiness.json` 成为门禁权威（门A/门②/verdict-audit）；review.md 判定行
+  降为交叉核对，不一致/缺席/非法 = 红；无 `review/` 的旧场回退散文。critic persona + `adversarial-review` skill +
+  手册同步，critic 快照重录后 replay 全绿。
+- **门③ 旧场收口**：文本 PASS 分支删除，无 `run.md` → `UNATTESTED`（exit 2）。
 - **历史语料对账（只读）**：71 个 bundle 中 8 个归档件的 `review.md` 在新判据下读作「无法判定」，0 个
   present 版本落后；无活跃冲突，未删除数据。
 - **git 血缘**：`git log --oneline -- _backlog/_archived/fixed_bugs/BUG-{074,141,150}*` 与

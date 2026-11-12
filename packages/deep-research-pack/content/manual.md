@@ -77,18 +77,17 @@ present；Team 板是执行镜像，恢复时按 plan 的 W 节点（N/旧 flat 
 
 新 run 在根落 `run.md`（`schema` / `created` / `phase` / `next` / `delivered` / `parked`；键义 = `{{research_pack_root}}/content/templates/run/run.md`）。**声明不是事实**；冲突以文件为准；`run.md` 不自证批准/交付。`schema` 是整数契约版本（门禁按整数分档，与日期无关）；旧 bundle 只有 `contract:` 日期 = 旧形态，读兼容、不再新写。
 
-恢复前先答五问（阶段 / 最近拍板 / 最大未闭合 / 下一步 / 交付态）。**按意图读、读完即停**；读序表、交付口径、终局块、旧 run 推导、冲突/过期与恢复步骤 = `{{research_pack_root}}/content/generic/state-and-recovery.md`（按需 read，不预载）。
+恢复前先答五问（阶段 / 最近拍板 / 最大未闭合 / 下一步 / 交付态）。**按意图读、读完即停**；读序/交付口径/终局块/旧 run/冲突与恢复 = `{{research_pack_root}}/content/generic/state-and-recovery.md`（按需 read，不预载）。
 
 ## 交付与审查终局（D28）
 
-- `review.md` 末尾固定 `## readiness（终局）: PASS|FAIL`；**只有 critic 能写**。历史轮/附录不夺权；
-  lead 升级须引用 critic 授权并落**新的**终局块；旧场按 epoch 豁免。
+- `review.md` 末尾固定 `## readiness（终局）: PASS|FAIL`；**只有 critic 能写**。同轮写
+  `review/readiness.json`——门禁以声明为准，review.md 判定行只做副本（细则 = `content/generic/state-and-recovery.md`）。
 - 交付 = `final/vN`（不可变副本）+ `final/readable-vN`（新 run 非 quick_factual；同版读者版）+
   `presented`（lead 顶层；`files[].path` 含两者，reader 第一）+ `delivered.json`/`acceptance.md`
   回执；`final.md` 是工作稿，present 指它不算。
 - 见证只认**本 run 的 lead 顶层会话**（写过 `drt_<slug>/`）：跨 run/子 agent 不作证，present 须晚于 HITL2 答复。
-- `audit.md` / `node-gate.md` / `acceptance.md` 是 ops 派生/回执：默认只读，`--write`/`run-accept`
-  才落；观察不写 bundle。
+- `audit.md`/`node-gate.md`/`acceptance.md` 是 ops 派生/回执：默认只读，`--write`/`run-accept` 才落。
 - **回执三态**：有审计工具 → `audit.md` 绿 + `delivered.json`；无工具（只有安装包）→ `run.md` 的
   `delivered:` 与 journal 显式写 `no machine audit (install-only)`，**绝不声称 `CRITICAL=0`**，`phase`
   停在 `delivery`；`accepted` 只在验收工具跑绿后由操作侧写。

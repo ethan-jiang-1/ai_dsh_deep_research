@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { runType } from './schema-scan-core.mjs'
 import { finalVersionsIn } from './final-version.mjs'
-import { AUDIT_CONTRACT_DATE, isPreContract, readinessOf, auditCriticalCount } from './node-gate-contracts.mjs'
+import { AUDIT_CONTRACT_DATE, isPreContract, readinessOfBundle, auditCriticalCount } from './node-gate-contracts.mjs'
 import { isHitl2Mention } from './node-gate-session-gates.mjs'
 import { receiptProblems } from './run-receipt.mjs'
 
@@ -34,7 +34,7 @@ export function deliveryGate(bundleDir, auditDate) {
   const versionFiles = finalVersionsIn(finalDir).map((n) => `v${n}.md`)
   const hasReview = existsSync(join(bundleDir, 'review.md'))
   const reviewText = hasReview ? readFileSync(join(bundleDir, 'review.md'), 'utf8') : ''
-  const { pass: reviewPass, conditional } = readinessOf(reviewText)
+  const { pass: reviewPass, conditional } = readinessOfBundle(bundleDir)
   // quick_factual 编制豁免 review.md（schema-scan CONDITIONAL 同语义同判据源——豁免依据 =
   // question.md 自带类型标记，不硬编码名单）；豁免型缺席不得被 A1 判"越过审查"。
   const quickFactual = runType(bundleDir) === 'quick_factual'

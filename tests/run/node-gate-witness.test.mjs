@@ -236,9 +236,9 @@ test('hitl2RowGate：新 run 有行 + 本 run 事件链才 PASS；有行无事�
   } finally { cleanup() }
 })
 
-// 迁移残留（issue 验收 5）：无 run.md 的旧场保留文本路径；新契约 run 走事件链。
-// 删除条件 = 夹具族迁到新契约形状；在此之前本用例钉住「残留只在无 run.md 时成立」。
-test('旧场（无 run.md）：文本记录路径保留，detail 显式标注迁移期', () => {
+// 负例留证 2026-11-13：D51——无 run.md 的旧场不再按文本行 PASS：证据缺席 = UNATTESTED（exit 2）。
+// 红配方：恢复「无 run.md → 有记录行即 PASS」的旧分支 → 本例第一条断言红。
+test('旧场（无 run.md）：文本行不给 PASS，证据缺席 = UNATTESTED', () => {
   const { dir, cleanup } = makeRoot('witness')
   try {
     const b = join(dir, 'drt_legacy')
@@ -246,8 +246,8 @@ test('旧场（无 run.md）：文本记录路径保留，detail 显式标注迁
     writeFileSync(join(b, 'question.md'), '# Q\n\n## Decisions\n\n- 2026-10-05 HITL2 拍板\n')
     writeFileSync(join(b, 'final', 'v1.md'), '# v1\n')
     const r = hitl2RowGate(b, join(dir, 'nope'))
-    assert.equal(r.gate.status, 'PASS')
-    assert.match(r.gate.detail, /旧场|迁移期/)
+    assert.equal(r.gate.status, 'UNATTESTED')
+    assert.match(r.gate.detail, /无 run.md|证据/)
 
     // run.md 在场而纪元非法 = 没有下界：RED（与旧场两条路径分开）
     writeFileSync(join(b, 'run.md'), '# Run\n\n- phase: delivery\n')

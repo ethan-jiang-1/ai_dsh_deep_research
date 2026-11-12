@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os'
 import { gateBundle } from '../../scripts/lib/node-gate-core.mjs'
 import { decisionsLines } from '../../scripts/lib/node-gate-contracts.mjs'
 import { hitl2RowGate } from '../../scripts/lib/node-gate-session-gates.mjs'
-import { bundle, sessions, PRE_CONTRACT_DATES, structuredAudit, withCompleteBundle } from './node-gate-helpers.mjs'
+import { bundle, sessions, newContractSession, PRE_CONTRACT_DATES, structuredAudit, withCompleteBundle } from './node-gate-helpers.mjs'
 
 const V = (name, date) => gateBundle(bundle(name), undefined, { versionDate: date }).gates.version
 const A = (name, date) => gateBundle(bundle(name), undefined, { auditDate: date }).gates.delivery
@@ -24,21 +24,26 @@ test('门③反证：final/ 在场而 §Decisions 无 HITL2 拍板行 → RED（
 test('门②反证：final + readiness PASS 在场而日志无 present、无操作侧标注 → RED', () => {
   const r = gateBundle(bundle('fixture-present-missing'), sessions('s-present-missing'))
   assert.equal(r.gates.present.status, 'RED', '静默缺席必须红')
-  assert.equal(r.gates.hitl2Row.status, 'PASS', '隔离性：门③不因门②红而连坐')
+  assert.equal(r.gates.hitl2Row.status, 'UNATTESTED', '隔离性：门③不因门②红而连坐（旧场无结构化证据 = UNATTESTED）')
   assert.equal(r.red, true)
 })
 
-test('合规形态：拍板行 + present 日志 → 双绿', () => {
-  const r = gateBundle(bundle('fixture-complete'), sessions('s-complete'))
-  assert.equal(r.gates.hitl2Row.status, 'PASS')
-  assert.equal(r.gates.present.status, 'PASS')
-  assert.equal(r.red, false)
+test('合规形态（新契约）：事件链 + present 指向最新版本 → 双绿', () => {
+  withCompleteBundle((dir) => {
+    // 契约纪元取 2026-10-20：门②/③/门A 适用，门C（reader，2026-10-23 起）按断代豁免——
+    // 本用例只证门②/③ 的事件链合规，不把 reader 合同拖进来。
+    writeFileSync(join(dir, 'run.md'), '# Run\n\n- contract: 2026-10-20\n- phase: delivery\n')
+    const r = gateBundle(dir, newContractSession(dir, 'fixture-complete'))
+    assert.equal(r.gates.hitl2Row.status, 'PASS', JSON.stringify(r.gates.hitl2Row))
+    assert.equal(r.gates.present.status, 'PASS', JSON.stringify(r.gates.present))
+    assert.equal(r.red, false)
+  })
 })
 
 test('通道死恢复路径：操作侧补齐显式记账 → PASS-RELAY 放行带注（显性化不静默）', () => {
   const r = gateBundle(bundle('fixture-relay'), sessions('s-relay'), PRE_CONTRACT_DATES)
   assert.equal(r.gates.present.status, 'PASS-RELAY', '显式记账的操作侧补齐不是违规')
-  assert.equal(r.gates.hitl2Row.status, 'PASS')
+  assert.equal(r.gates.hitl2Row.status, 'UNATTESTED')
   assert.equal(r.red, false)
 })
 
@@ -100,7 +105,7 @@ test('门④ 断代：契约前交付日 → PRE-CONTRACT 不计红（kimi 09-26
 test('门④ 隔离性：门④ RED 不连坐门③（HITL2 行在场 → 门③ PASS）', () => {
   const r = gateBundle(bundle('fixture-version-missing-decision'), undefined, { versionDate: '2026-10-04' })
   assert.equal(r.gates.version.status, 'RED')
-  assert.equal(r.gates.hitl2Row.status, 'PASS', '门③不因门④红而连坐')
+  assert.equal(r.gates.hitl2Row.status, 'UNATTESTED', '门③不因门④红而连坐（旧场无结构化证据）')
 })
 
 test('门A反证：交付前置达成（readiness PASS + final.md）而 audit.md 缺席 → RED（7 bundle 实测形态）', () => {

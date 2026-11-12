@@ -110,6 +110,21 @@ PASS 放宽判据**（readiness 判据不降同款），也不得静默略过未
 契约第 1 条——实测教训：第四场 run 的 critic 修复轮要求补"读法说明"，卡片把说明写进了摘录节，
 一次引入十余条契约违规。说明性文字混进引文，等于让下一个人分不清哪些字是来源的）。
 
+## 结构化声明：`review/readiness.json`（门禁判据）
+
+写完 review.md 后，把终局判定落成机器可读件 `review/readiness.json`：门禁以它为准，review.md 的
+判定行只做人读副本；两者不一致 = 红（D51）。
+
+```json
+{ "version": 1, "readiness": "PASS", "conditional": false, "round": 2, "at": "<date 读数>" }
+```
+
+- `version` 必填 = 1；`readiness` 必填 = `PASS | FAIL`；`conditional` 仅在 PASS 附条件时写 `true`；
+  `round` = 本次审查轮次；`at` = 写入时刻（先跑 `date`）。
+- 判定行仍写在 review.md（`## readiness（终局）: PASS|FAIL`）且与声明同值；历史轮/附录不夺权。
+- 缺声明、坏 JSON、未知键、声明与判定行不一致 → 门禁红（不猜、不退回散文）。
+- 文件住 `review/`（与 claims.json / verdicts-rN.json 同目录）；目录由 Lead 建，你只写文件。
+
 ## review.md 格式
 
 ```

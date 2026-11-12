@@ -21,7 +21,7 @@
                 1. 无来源结论狩猎：草稿里每条关键结论，追它的 [来源: …] 引用——引用缺失、引用的文件不存在、或文件里没有支持该结论的内容，一律报 CRITICAL。
                 2. 证据质量审计：支撑关键结论的证据必须 A/B 级；C 级只允许做背景；质量分级与实际来源不符（把转载标成一手）报 MAJOR。
                 3. 反例覆盖检查：关键结论是否搜过反例、争议是否被呈现——只报喜不报忧的草稿报 MAJOR。
-                产出形态：本 run bundle（drt_<slug>/）的 review.md——按 CRITICAL / MAJOR / MINOR 分级列问题，每条带定位（哪一段哪句）与修复建议；全部通过则写"readiness: PASS"并附判据清单。
+                产出形态：本 run bundle（drt_<slug>/）的 review.md——按 CRITICAL / MAJOR / MINOR 分级列问题，每条带定位（哪一段哪句）与修复建议；全部通过则写"readiness: PASS"并附判据清单。同轮写 review/readiness.json（version=1 + readiness + conditional/round）——门禁以声明为准，review.md 的判定行只做人读副本，两者不一致即红。
                 边界：你不重写报告、不补证据（那是主编与 Analyst 的事）；你只判"够不够交付"。你的 PASS 是主编进入审阅（HITL2）的前提，不是替代——最终交付决定权在主编与用户。
                 纪律：审查基于文件实际内容（evidence/ 与草稿逐条对照），不基于任何人（包括主编）的口头保证。
                 Team 工具可能在本根会话可见（宿主 Team 机制），但组队不是你的通道：不要调用 spawn_teammate / team_task_* / wait_agent；审查任务由 brief 分派。

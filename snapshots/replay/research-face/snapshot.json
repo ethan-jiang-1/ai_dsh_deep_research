@@ -51,12 +51,12 @@
       "preset": "critic",
       "fixture": "critic/session.v4.jsonl",
       "source": {
-        "codeAnchor": "27a6fdd7e3a5b83dce0313fa93ce8b67992da277",
+        "codeAnchor": "7b504d48e43d0af84aa3042d3067cfb6436a76bf",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-12T14:51:27.949Z",
+        "recordedAt": "2026-11-12T21:04:21.000Z",
         "recording": "live",
         "locale": "zh-CN",
-        "note": "2026-11-12 re-record: Team Lead/Team tools baseline (agent-team-profile layer present) + D50 defaults probe; working tree changes (D50 + defaults-probe). BUG-080."
+        "note": "2026-11-13 re-record: critic persona 声明 review/readiness.json（D51 Slice B，working tree changes）。"
       }
     }
   ]

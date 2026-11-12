@@ -23,6 +23,7 @@ import { finalVersionsIn } from '../lib/final-version.mjs'
 import { epochDateOf, runType } from '../lib/schema-scan-core.mjs'
 import { findSessionDir, resolveSessionLog } from '../lib/session-log.mjs'
 import { auditClaimVerdicts, CLAIMS_CONTRACT_DATE, parseClaims, parseSessionFacts, parseVerdicts } from '../lib/verdict-audit-core.mjs'
+import { readinessOfBundle } from '../lib/node-gate-contracts.mjs'
 import { readZstdText } from '../lib/zstd-read.mjs'
 import { isMain } from '../lib/cli-entry.mjs'
 
@@ -179,6 +180,7 @@ if (isMain(import.meta.url)) {
     finalVersion,
     finalText,
     reviewText: readIf(join(bundle, 'review.md')),
+    readinessPass: readinessOfBundle(bundle).pass,
     topicsText: readIf(join(bundle, 'topics.md')),
     bundleFiles: existsSync(join(bundle, 'evidence'))
       ? readdirSync(join(bundle, 'evidence')).filter((name) => name.endsWith('.md')).map((name) => `evidence/${name}`)

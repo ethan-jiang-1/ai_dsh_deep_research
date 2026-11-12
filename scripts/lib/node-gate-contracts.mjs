@@ -1,4 +1,6 @@
 // node-gate-contracts.mjs — cross-gate contract dates and report parsers (keyless pure logic).
+import { existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { contractEpochOf, deliveryDate, runSchemaOf } from './schema-scan-core.mjs'
 import { terminalVerdictLine } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
 
@@ -50,6 +52,59 @@ export function readinessOf(reviewText) {
   const terminal = terminalVerdictLine(reviewText)
   if (terminal === null || terminal.value !== 'PASS') return { pass: false, conditional: false }
   return { pass: true, conditional: /附条件|条件\s*[=＝：:]/.test(terminal.line) }
+}
+
+/**
+ * 结构化审查声明（D51）：`review/readiness.json` = critic 写出的终局声明，门禁以它为准；
+ * review.md 的判定行只做人读副本与交叉核对（不一致 = 红）。
+ *
+ * 要求条件 = `review/` 目录在场（D44 的结构化审查面）；无 `review/` 的旧场回退散文判据。
+ * 缺声明、JSON 非法、未知键、值与散文不一致 → `pass:false`（fail-closed）。
+ * @param {string} bundleDir run bundle 根。
+ * @returns {{pass:boolean, conditional:boolean, source:'declaration'|'prose'|'missing'|'invalid'|'mismatch', detail?:string}}
+ */
+export function readinessOfBundle(bundleDir) {
+  const reviewPath = join(bundleDir, 'review.md')
+  const reviewText = existsSync(reviewPath) ? readFileSync(reviewPath, 'utf8') : ''
+  const proseValue = terminalVerdictLine(reviewText)?.value ?? null
+  const hasReviewDir = existsSync(join(bundleDir, 'review'))
+  const declPath = join(bundleDir, 'review', 'readiness.json')
+  if (!existsSync(declPath)) {
+    if (!hasReviewDir) return { ...readinessOf(reviewText), source: 'prose' }
+    return {
+      pass: false,
+      conditional: false,
+      source: 'missing',
+      detail: 'review/ 在场但 review/readiness.json 缺席——结构化审查必须声明终局（修正 = critic 按 adversarial-review skill 写声明）',
+    }
+  }
+  let raw
+  try { raw = JSON.parse(readFileSync(declPath, 'utf8')) } catch {
+    return { pass: false, conditional: false, source: 'invalid', detail: 'review/readiness.json 不是合法 JSON' }
+  }
+  const problems = []
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) problems.push('顶层必须是对象')
+  else {
+    for (const key of Object.keys(raw)) {
+      if (!['version', 'readiness', 'conditional', 'round', 'at'].includes(key)) problems.push(`未知键 ${key}`)
+    }
+    if (raw.version !== 1) problems.push('version 必须为 1')
+    if (raw.readiness !== 'PASS' && raw.readiness !== 'FAIL') problems.push('readiness 必须为 PASS/FAIL')
+    if ('conditional' in raw && typeof raw.conditional !== 'boolean') problems.push('conditional 必须是布尔')
+    if ('round' in raw && (!Number.isInteger(raw.round) || raw.round < 1)) problems.push('round 必须是 ≥1 的整数')
+  }
+  if (problems.length > 0) {
+    return { pass: false, conditional: false, source: 'invalid', detail: `review/readiness.json 不合法：${problems.join('；')}` }
+  }
+  if (proseValue !== null && proseValue !== raw.readiness) {
+    return {
+      pass: false,
+      conditional: false,
+      source: 'mismatch',
+      detail: `声明 ${raw.readiness} 与 review.md 判定行 ${proseValue} 不一致——散文与声明必须同判（修正 = 改一处或删旧行）`,
+    }
+  }
+  return { pass: raw.readiness === 'PASS', conditional: raw.conditional === true, source: 'declaration' }
 }
 
 /** audit.md 的 CRITICAL 计数解析。结构化报告须有唯一概要摘要、唯一 CRITICAL 节、匹配当前 bundle 的标题，

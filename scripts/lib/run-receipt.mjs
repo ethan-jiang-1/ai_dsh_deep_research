@@ -293,6 +293,7 @@ export function buildManifest({ slug, bundleDir, contract, schema = null, genera
   const dirRole = (dir, name) => {
     if (dir === 'review') {
       if (name === 'claims.json') return 'review-claims'
+      if (name === 'readiness.json') return 'review-readiness'
       if (/^verdicts-r\d+\.json$/.test(name)) return 'review-verdicts'
       if (/^verdict-audit-r\d+\.md$/.test(name)) return 'review-verdict-audit'
       return 'review-evidence'
