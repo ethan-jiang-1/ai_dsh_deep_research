@@ -85,3 +85,18 @@ test('BUG-114 旧 owner 释放不删新 owner 的锁（token 不匹配）', () =
     assert.equal(existsSync(lock), true, '旧 owner 的 finally 不得删新锁')
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })
+
+
+// 负例留证 2026-11-13：BUG-130——活 pid + 1 小时旧锁只报「稍后重试」，无锁路径/恢复入口。
+// 还原法 = 活 pid 分支不拼锁路径与处置。
+test('BUG-130 活 pid 长龄锁：错误含锁文件路径与删除处置，死 pid 仍可接管', () => {
+  const dir = root()
+  const lock = join(dir, '.method-library.lock')
+  try {
+    writeFileSync(lock, JSON.stringify({ pid: process.pid, token: 'live', at: new Date(Date.now() - 3600_000).toISOString() }))
+    utimesSync(lock, new Date(Date.now() - 3600_000), new Date(Date.now() - 3600_000))
+    assert.throws(() => withMethodLibraryLock(dir, () => 1), (error) => /锁文件/.test(error.message) && /删除/.test(error.message) && /疑似陈旧/.test(error.message))
+    writeFileSync(lock, JSON.stringify({ pid: 999999, token: 'dead', at: new Date().toISOString() }))
+    assert.equal(withMethodLibraryLock(dir, () => 1), 1)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})

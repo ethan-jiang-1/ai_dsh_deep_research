@@ -333,3 +333,13 @@ test('BUG-100 RunView.hasFile：同名目录不算文件；普通文件才算', 
   assert.equal(opened.value.hasFile('final.md'), false)
   assert.equal(opened.value.hasFile('question.md'), true)
 })
+
+// 负例留证 2026-11-13：BUG-135——openRun 的 SLUG 只认 kebab，下划线 bundle 打不开。
+// 还原法 = RUN_SLUG 退回 kebab。
+test('BUG-135 openRun 接受下划线/点号 slug', async () => {
+  const tree = { drt_llm_inference_cost: { 'question.md': 'Q' }, drt_v1_2: { 'final.md': 'F' } }
+  for (const ref of ['drt_llm_inference_cost', 'drt_v1_2']) {
+    const opened = await openRun(fakeSource(tree), ref)
+    assert.equal(opened.ok, true, ref)
+  }
+})

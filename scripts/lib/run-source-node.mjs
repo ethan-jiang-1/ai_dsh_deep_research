@@ -45,6 +45,7 @@ export function nodeRunSource(root) {
     ? unreadable(`${action} ${path}: escapes workspace`)
     : isMissing(error) ? missing() : unreadable(`${action} ${path}: ${error?.code ?? String(error)}`)
   return {
+    root: base,
     async list(dir) {
       try {
         const realDir = resolvedInside(dir)

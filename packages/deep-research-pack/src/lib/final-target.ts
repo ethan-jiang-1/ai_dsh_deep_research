@@ -148,6 +148,33 @@ export function finalPathOf(raw: unknown): string | null {
   return FINAL_FAMILY_RELATIVE.test(match[1]) ? match[1] : null
 }
 
+/** POSIX 绝对路径归一（client 不能 import node:path）：折叠 `.`/`..`，保留根。 */
+function normalizeAbsolute(path: string): string {
+  const parts: string[] = []
+  for (const part of path.split('/')) {
+    if (part === '' || part === '.') continue
+    if (part === '..') { parts.pop(); continue }
+    parts.push(part)
+  }
+  return `/${parts.join('/')}`
+}
+
+/**
+ * 带工作区根的终稿路径判定：绝对路径必须 resolve 后落在 cwd（含 archive/_abandoned）内，
+ * 否则 null——跨 workspace 的同 slug 不得别名成当前 cwd 的 bundle（BUG-129）。
+ * 相对路径沿用 `finalPathOf` 语义（由调用方按 cwd 解读）。
+ */
+export function finalPathOfWithin(raw: unknown, cwd: string | undefined): string | null {
+  const relative = finalPathOf(raw)
+  if (relative === null) return null
+  if (typeof raw !== 'string' || !raw.replace(/\\/g, '/').startsWith('/')) return relative
+  if (typeof cwd !== 'string' || cwd.trim() === '') return null
+  const base = normalizeAbsolute(cwd.replace(/\\/g, '/'))
+  const target = normalizeAbsolute(raw.replace(/\\/g, '/'))
+  if (target !== base && !target.startsWith(`${base}/`)) return null
+  return relative
+}
+
 /** 终稿族内的显示优先级：读者版 > 版本副本 > 工作稿（自动打开先开人读的那份）。 */
 function familyRank(path: string): number {
   if (path.includes('/final/readable')) return 3
@@ -156,7 +183,7 @@ function familyRank(path: string): number {
 }
 
 /** 事件流 → 最后一条指向终稿族的交付；同一声明多份时取读者版优先。无 / 畸形 → null。 */
-export function latestFinalDelivery(events: readonly unknown[]): FinalDelivery | null {
+export function latestFinalDelivery(events: readonly unknown[], cwd?: string): FinalDelivery | null {
   let latest: FinalDelivery | null = null
   for (const event of events) {
     if (typeof event !== 'object' || event === null) continue
@@ -166,7 +193,7 @@ export function latestFinalDelivery(events: readonly unknown[]): FinalDelivery |
     if (typeof data !== 'object' || data === null || !Array.isArray(data.files)) continue
     let best: { path: string; rank: number } | null = null
     for (const file of data.files) {
-      const path = finalPathOf((file as { path?: unknown } | null | undefined)?.path)
+      const path = finalPathOfWithin((file as { path?: unknown } | null | undefined)?.path, cwd)
       if (path === null) continue
       const rank = familyRank(path)
       if (best === null || rank > best.rank) best = { path, rank }
@@ -190,7 +217,7 @@ export function latestFinalDelivery(events: readonly unknown[]): FinalDelivery |
  * @param events - 会话事件流。
  * @returns 最高版本号或 null。
  */
-export function latestPresentedFinalVersion(events: readonly unknown[]): number | null {
+export function latestPresentedFinalVersion(events: readonly unknown[], cwd?: string): number | null {
   let latest: number | null = null
   for (const event of events) {
     if (typeof event !== 'object' || event === null) continue
@@ -201,7 +228,7 @@ export function latestPresentedFinalVersion(events: readonly unknown[]): number 
     const versions: number[] = []
     let finalFamily = false
     for (const file of data.files) {
-      const path = finalPathOf((file as { path?: unknown } | null | undefined)?.path)
+      const path = finalPathOfWithin((file as { path?: unknown } | null | undefined)?.path, cwd)
       if (path === null) continue // 非终稿族（notes/final/v9.md 等）不算交付版本（BUG-101）
       finalFamily = true
       const version = /(?:^|\/)final\/(?:v|readable-v)([1-9]\d{0,5})\.md$/.exec(path)?.[1]

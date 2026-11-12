@@ -247,7 +247,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   // （question.md/final.md 在场），pending 态由 journal 尾窗承载——face 缺席时退化为纯尾窗判定。
   // 交付事实（issue 2026-10-19）：`present` 声明 = 交付的机械判据（node-gate 门②）；`final.md`
   // 在场只说明"有终稿可审"（综合步就落盘），两者不可互相顶替——⑤ 的措辞与门都由此分流。
-  const delivery = useMemo(() => latestFinalDelivery(journalEvents), [journalEvents])
+  const cwd = props.sessionId === undefined ? undefined : props.runSource(props.sessionId).root
+  const delivery = useMemo(() => latestFinalDelivery(journalEvents, cwd), [journalEvents, cwd])
 
   // 流畸形死亡（BUG-023 修复①）：journal 尾窗折算，与 HITL 挂起互斥显示（挂起时主横幅让位）。
   const streamFailure = useMemo(() => streamFailureOf(journalEvents), [journalEvents])
@@ -268,11 +269,11 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         finalFileNames: face.finalFileNames,
         questionText: face.questionText,
         delivered: delivery !== null,
-        deliveredVersion: latestPresentedFinalVersion(journalEvents),
+        deliveredVersion: latestPresentedFinalVersion(journalEvents, cwd),
         hitlPending: hitl2Pending,
         draftPresent: face.hasFinal,
       }, props.t),
-    [face, delivery, hitl2Pending, journalEvents, props.t],
+    [face, delivery, hitl2Pending, journalEvents, props.t, cwd],
   )
 
   return {

@@ -16,6 +16,7 @@ import { basename, dirname, join, sep } from 'node:path'
 export const LIBRARY_FILE = 'method-library.md'
 const LOCK_FILE = '.method-library.lock'
 const LOCK_STALE_MS = 30_000
+const LOCK_LIVE_SUSPECT_MS = 10 * 60_000
 
 /** 安全目标：拒绝 symlink/非普通文件；realpath 必须在 cwd 内。 */
 export function safeMethodLibraryPath(cwd: string): string {
@@ -96,8 +97,13 @@ export function withMethodLibraryLock<T>(cwd: string, fn: () => T): T {
       const owner = lockOwnerOf(lock)
       const pid = typeof owner?.pid === 'number' ? owner.pid : null
       const age = (() => { try { return Date.now() - statSync(lock).mtimeMs } catch { return Infinity } })()
-      // 活 pid：无论 mtime 多旧都不接管（长写/暂停不是死亡）。
-      if (pid !== null && pidAlive(pid)) throw new Error('另一个方法库写入正在进行，请稍后重试（未写入）')
+      // 活 pid：不自动接管（长写/暂停不是死亡），但给出可恢复的明确错误（BUG-130）。
+      if (pid !== null && pidAlive(pid)) {
+        if (age > LOCK_LIVE_SUSPECT_MS) {
+          throw new Error(`方法库锁疑似陈旧：pid ${pid} 存活但锁龄 ${Math.round(age / 60_000)} 分钟（锁文件 ${lock}）——确认没有其它写入后删除该文件再重试`)
+        }
+        throw new Error(`另一个方法库写入正在进行（pid ${pid}；锁文件 ${lock}）——请稍后重试；确认没有其它写入后可删除该锁文件`)
+      }
       if (retry && (pid === null ? age > LOCK_STALE_MS : true)) {
         rmSync(lock, { force: true })
         return acquire(false)

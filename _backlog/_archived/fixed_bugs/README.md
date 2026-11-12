@@ -132,3 +132,12 @@
 | [BUG-124](BUG-124-heading-whitespace-between-segments.md) | BUG-124：heading 段间空白——fold 接受 `## 方法 （来源）` / `（来源） 〔默认偏好〕`，upsert 只认无空白段，同名被复制 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
 | [BUG-125](BUG-125-plan-no-heading-version-last.md) | BUG-125：无 `##` 的 plan：headerBlock=全文，版本取 last——注释说退化首个，正文旧版本仍覆盖 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
 | [BUG-126](BUG-126-method-lock-stale-live-pid.md) | BUG-126：withMethodLibraryLock 陈旧判定只看 mtime——活 pid 持锁 >30s 被另一个写者接管 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-127](BUG-127-library-halfwidth-parens-provenance-default.md) | BUG-127：library-fold 只识全角括号——半角 `(来源〔默认偏好〕)` 的标记被当默认，且名称含 provenance | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-128](BUG-128-method-heading-ideographic-space-duplicate.md) | BUG-128：method 写路径的标题正则不认全角空格（U+3000）——编辑一次就多出一条同名方法 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-129](BUG-129-final-path-drops-absolute-root-alias.md) | BUG-129：finalPathOf 丢弃绝对路径的根——跨 workspace 的同 slug 交付被别名成当前 cwd 的 bundle | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-130](BUG-130-method-lock-live-pid-reuse-permanent-block.md) | BUG-130：方法库锁遇「活 pid」永久卡死（pid 复用/挂起属主），且错误文案不给恢复入口 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-131](BUG-131-defaults-unknown-key-warnings-unsurfaced.md) | BUG-131：research-defaults 的 unknown-key warning 无人消费——打错关键字静默失效，下一次写入静默删除 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-132](BUG-132-defaults-expected-revision-race-lost-update.md) | BUG-132：/research-defaults 的 expectedRevision 不是原子 CAS——并发写入双双成功，丢一次更新 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-133](BUG-133-sanitize-patch-nested-unknown-keys-silent.md) | BUG-133：sanitizePatch 对 output/source 的未知子键「静默忽略」——与头注「未知子键拒绝」相反，拼错即丢 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-134](BUG-134-gate-witness-bound-slugs-scans-content.md) | BUG-134：门③见证绑定扫描整段 args 文本——content 里提到 `drt_<别的>/` 就把会话绑到别的 bundle，拍板见证可被借用 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-135](BUG-135-slug-charset-unwritten-binding-silent.md) | BUG-135：slug 字符集未成文，绑定只认 `[a-z0-9-]`——`drt_my_topic/` 静默不绑定（状态页签/归因/见证全失效） | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |

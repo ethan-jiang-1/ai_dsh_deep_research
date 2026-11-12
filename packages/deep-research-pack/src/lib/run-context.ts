@@ -54,6 +54,8 @@ interface TextFile {
 
 /** 注入的 I/O 接缝；路径 = 工作区相对路径（浏览器适配器负责其通道的绝对/相对差异）。 */
 export interface RunSource {
+  /** 工作区绝对根（Node 适配器提供；浏览器适配器可缺——绝对 present 路径的根校验用）。 */
+  readonly root?: string
   list(dir: string, opts?: { readonly signal?: AbortSignal }): Promise<Outcome<readonly Entry[]>>
   read(path: string, opts: { readonly offset: number; readonly limit: number; readonly signal?: AbortSignal }): Promise<Outcome<Page>>
   version(path: string, opts?: { readonly signal?: AbortSignal }): Promise<Outcome<string>>
@@ -96,7 +98,9 @@ const PLAN_NAME = /^(?:plan\.md|plan\/v[1-9]\d*\.md)$/
 /** 这些文件必须读到 eof：终局判定在文末，固定行窗会读到中段的旧判定。 */
 const EOF_NAME = /^(?:review\.md|final\.md|final\/v[1-9]\d*\.md)$/
 /** run bundle slug 形态（与 bundle-bind 的 `drt_<slug>/` 词法一致）。 */
-const SLUG = /^[a-z0-9][a-z0-9-]*$/
+/** run bundle slug 字符集（成文；binding/门/CLI 共用——BUG-135）。 */
+export const RUN_SLUG = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
+const SLUG = RUN_SLUG
 
 type Failure = { readonly ok: false; readonly reason: 'missing' | 'unreadable'; readonly detail?: string }
 

@@ -6,6 +6,7 @@ import { finalVersionsIn } from './final-version.mjs'
 import { planCardsOf } from './plan-card.mjs'
 import { HITL_CONTRACT_DATE, PRE_CONTRACT_NOTE, decisionsLines, isPreContract, readinessOf } from './node-gate-contracts.mjs'
 import { epochDateOf, toDateStr } from './schema-scan-core.mjs'
+import { slugInArgs } from '../../packages/deep-research-pack/src/lib/bundle-bind.ts'
 
 /** 纯日志 reader：.jsonl 直读；.zstd 报线索后按空语料继续（''，判据偏红方向——红必须带线索）。
  *  zstd CLI 解压由驱动壳注入，本模块零子进程。 */
@@ -67,7 +68,6 @@ const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /** 变更类工具（写强绑定信号；正本口径 = pack `bundle-bind.ts` 的 WRITE_TOOLS）。 */
 const WRITE_TOOLS = new Set(['write', 'edit', 'multiedit'])
-const BIND_PATH_RE = /drt_([a-z0-9][a-z0-9-]*)\//g
 
 /** 事件的本地日期；时间戳缺失/非法 → null（不猜）。 */
 const eventDateOf = (e) => (typeof e?.time === 'number' && Number.isFinite(e.time) ? toDateStr(new Date(e.time)) : null)
@@ -112,9 +112,9 @@ function boundSlugsOf(events) {
   const slugs = new Set()
   for (const e of events) {
     if (e?.type !== 'tool/call' || !WRITE_TOOLS.has(e?.data?.name)) continue
-    // `arguments` 是 JSON 字符串（未解析）；同一日志族里出现过 `\/` 编码形态——统一按 `/` 判。
-    const args = String(e?.data?.arguments ?? '').replace(/\\\//g, '/')
-    for (const m of args.matchAll(BIND_PATH_RE)) slugs.add(m[1])
+    // 与 pack `slugInArgs` 同源：只认真实路径字段（content/pattern 正文不绑定，BUG-090/134）。
+    const slug = slugInArgs(String(e?.data?.name ?? ''), e?.data?.arguments)
+    if (slug !== undefined) slugs.add(slug)
   }
   return slugs
 }

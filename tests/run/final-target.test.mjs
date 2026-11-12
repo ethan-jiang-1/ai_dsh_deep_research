@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  draftInProgress, finalAddressOf, finalPathOf, finalReadPlan, isFinalAddress, latestFinalDelivery, latestPresentedFinalVersion,
+  draftInProgress, finalAddressOf, finalPathOf, finalPathOfWithin, finalReadPlan, isFinalAddress, latestFinalDelivery, latestPresentedFinalVersion,
   sessionFileOf, shouldOpenFinal,
 } from '../../packages/deep-research-pack/src/lib/final-target.ts';
 
@@ -187,4 +187,15 @@ test('BUG-116/122 最后一条终稿 present 无版本 → null；嵌套 notes/d
   assert.equal(finalPathOf('/tmp/notes/drt_x/final.md'), null)
   assert.equal(finalPathOf('drt_x/final.md'), 'drt_x/final.md')
   assert.equal(finalPathOf('archive/drt_x/final.md'), 'archive/drt_x/final.md')
+})
+
+// 负例留证 2026-11-13：BUG-129——绝对路径根被丢弃，跨 workspace 同 slug 被别名。还原法 = 不含根校验。
+test('BUG-129 finalPathOfWithin：绝对路径必须落在 cwd 内，跨 workspace/.. 返回 null', () => {
+  const cwd = '/Users/me/research-workspace'
+  assert.equal(finalPathOfWithin('/Users/me/research-workspace/drt_x/final.md', cwd), 'drt_x/final.md')
+  assert.equal(finalPathOfWithin('/Users/me/research-workspace/archive/drt_x/final.md', cwd), 'archive/drt_x/final.md')
+  assert.equal(finalPathOfWithin('/tmp/other-workspace/drt_x/final.md', cwd), null)
+  assert.equal(finalPathOfWithin('/Users/me/research-workspace/../other/drt_x/final.md', cwd), null)
+  assert.equal(latestFinalDelivery([presented([{ path: '/tmp/other-workspace/drt_x/final.md' }])], cwd), null)
+  assert.equal(latestPresentedFinalVersion([presented([{ path: '/tmp/other-workspace/drt_x/final/v9.md' }])], cwd), null)
 })

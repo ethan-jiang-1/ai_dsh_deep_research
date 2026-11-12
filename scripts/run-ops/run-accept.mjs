@@ -60,7 +60,7 @@ if (!existsSync(bundle) || !statSync(bundle).isDirectory()) {
   process.exit(2)
 }
 const slug = basename(bundle)
-if (!/^drt_[a-z0-9][a-z0-9-]*$/.test(slug)) {
+if (!/^drt_[A-Za-z0-9][A-Za-z0-9._-]*$/.test(slug)) {
   console.error(`run-accept: bundle 目录名必须是 drt_<slug>：${slug}`)
   process.exit(2)
 }

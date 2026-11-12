@@ -6,7 +6,7 @@
 // 红证：把 stale 比较翻成恒等、删 safeTarget 的 symlink 检查、或让 unset 不升 revision → 红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { runDefaultsCommand } from '../../packages/deep-research-pack/src/defaults/command.ts'
@@ -166,4 +166,47 @@ test('patch 可只改 audience；shape 保持 auto（不物化 shape）', () => 
   const parsed = written(cwd)
   assert.equal(parsed.value.output?.shape, undefined)
   assert.equal(parsed.value.output?.audience, '工程团队')
+})
+
+
+// 负例留证 2026-11-13：BUG-131——未知键 show 零提示，set 静默删除。还原法 = show 不拼 warn / set 不看 warnings。
+test('BUG-131 未知键：show 带 warn，set 拒绝而不是静默删除', async () => {
+  const root = mkdtempSync(join(realpathSync(tmpdir()), 'defaults-warn-'))
+  try {
+    const file = join(root, 'research-defaults.json')
+    writeFileSync(file, JSON.stringify({ schema: 1, revision: 3, efort: 'deep', effort: 'deep', output: { shape: 'full_report', audiance: 'CFO' } }, null, 2))
+    const shown = runDefaultsCommand({ cwd: root, rawInput: 'show' })
+    assert.equal(shown.kind, 'success')
+    assert.match(shown.text, /warn=.*unknown/)
+    assert.match(shown.text, /efort=unknown/)
+    assert.match(shown.text, /audiance=unknown/)
+    const before = readFileSync(file, 'utf8')
+    const set = runDefaultsCommand({ cwd: root, rawInput: 'set {"patch":{"source":{"authority":"primary"}}}' })
+    assert.equal(set.kind, 'error')
+    assert.match(set.text, /unknown-keys/)
+    assert.equal(readFileSync(file, 'utf8'), before, '拒绝写入时文件不得变化')
+  } finally { rmSync(root, { recursive: true, force: true }) }
+})
+
+// 负例留证 2026-11-13：BUG-132——expectedRevision 非原子 CAS，并发双双成功；
+// BUG-133——未知子键 set 成功但字段丢失。还原法 = 去掉 withDefaultsLock / warnings 传 []。
+test('BUG-132 expectedRevision 串行 CAS：同 revision 第二次 stale', () => {
+  const root = workspace()
+  writeFileSync(join(root, DEFAULTS_FILE), JSON.stringify({ schema: 1, revision: 3, effort: 'quick' }))
+  const first = runDefaultsCommand({ cwd: root, rawInput: 'set {"expectedRevision":3,"patch":{"effort":"deep"}}' })
+  assert.equal(first.kind, 'success')
+  const second = runDefaultsCommand({ cwd: root, rawInput: 'set {"expectedRevision":3,"patch":{"effort":"standard"}}' })
+  assert.equal(second.kind, 'error')
+  assert.match(second.text, /stale/)
+  assert.equal(JSON.parse(readFileSync(join(root, DEFAULTS_FILE), 'utf8')).effort, 'deep')
+})
+
+test('BUG-133 set 未知子键：返回 invalid 且不写文件', () => {
+  const root = workspace()
+  const before = JSON.stringify({ schema: 1, revision: 1, effort: 'quick' })
+  writeFileSync(join(root, DEFAULTS_FILE), before)
+  const r = runDefaultsCommand({ cwd: root, rawInput: 'set {"patch":{"output":{"shape":"full_report","audiance":"CFO"}}}' })
+  assert.equal(r.kind, 'error')
+  assert.match(r.text, /output\.audiance/)
+  assert.equal(readFileSync(join(root, DEFAULTS_FILE), 'utf8'), before)
 })

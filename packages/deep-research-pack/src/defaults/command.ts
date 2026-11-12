@@ -7,7 +7,8 @@
  * 文案；命令本身不做 prose。
  */
 import { existsSync, lstatSync, readFileSync, renameSync, rmSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
-import { isAbsolute, join } from 'node:path'
+import { dirname, isAbsolute, join } from 'node:path'
+import { withMethodLibraryLock } from '../method-library-io.ts'
 import {
   DEFAULTS_AXES, DEFAULTS_FILE, DEFAULTS_SCHEMA,
   emptyDefaults, mergeDefaults, parseDefaults, sanitizePatch, serializeDefaults, unsetDefaults,
@@ -36,6 +37,9 @@ const failure = (text: string): CommandResultLike => ({ kind: 'error', text })
 
 const problemText = (problems: readonly DefaultsProblem[]): string =>
   problems.map((item) => `${item.field}=${item.code}`).join(',')
+
+const warningText = (warnings: readonly DefaultsProblem[]): string =>
+  warnings.map((item) => `${item.field}=${item.code}`).join(',')
 
 function summaryOf(value: DefaultsValue): string {
   const parts = [`revision=${value.revision}`]
@@ -73,14 +77,14 @@ function safeTarget(target: string): CommandResultLike | null {
   }
 }
 
-function readCurrent(target: string): { value: DefaultsValue; problems: readonly DefaultsProblem[]; exists: boolean } | CommandResultLike {
+function readCurrent(target: string): { value: DefaultsValue; problems: readonly DefaultsProblem[]; warnings: readonly DefaultsProblem[]; exists: boolean } | CommandResultLike {
   const unsafe = safeTarget(target)
   if (unsafe !== null) return unsafe
-  if (!existsSync(target)) return { value: emptyDefaults(), problems: [], exists: false }
+  if (!existsSync(target)) return { value: emptyDefaults(), problems: [], warnings: [], exists: false }
   try {
     const text = readFileSync(target, 'utf8')
     const parsed = parseDefaults(text)
-    return { value: parsed.value, problems: parsed.problems, exists: true }
+    return { value: parsed.value, problems: parsed.problems, warnings: parsed.warnings, exists: true }
   } catch (error) {
     return failure(`error io ${(error as Error).message}`)
   }
@@ -104,7 +108,8 @@ function writeValue(target: string, value: DefaultsValue): CommandResultLike {
   if (isFailure(back)) return back
   if (back.problems.length > 0) return failure(`error invalid ${problemText(back.problems)}`)
   if (back.value.revision !== value.revision) return failure(`error io revision-mismatch expected=${value.revision} actual=${back.value.revision}`)
-  return success(`ok ${summaryOf(back.value)}`)
+  const warn = back.warnings.length > 0 ? ` warn=${warningText(back.warnings)}` : ''
+  return success(`ok ${summaryOf(back.value)}${warn}`)
 }
 
 function withRevision(value: DefaultsValue, revision: number, now: () => Date): DefaultsValue {
@@ -120,6 +125,18 @@ function revisionToken(rest: string): { revision?: number; error?: CommandResult
     revision = Number(match[1])
   }
   return revision === undefined ? {} : { revision }
+}
+
+/** 跨进程串行化设置写入（与 BUG-132 的 expectedRevision 组成原子 CAS）。 */
+function withDefaultsLock(cwd: string, fn: () => CommandResultLike): CommandResultLike {
+  // 并发写者短等锁：拿到锁后重读 revision，返回 stale（而不是把锁竞争当业务错误）。
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    try { return withMethodLibraryLock(cwd, fn) } catch (error) {
+      if (attempt === 5) return failure(`error lock ${(error as Error).message}`)
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 30)
+    }
+  }
+  return failure('error lock')
 }
 
 function runSet(input: RunDefaultsCommandInput, target: string, raw: string): CommandResultLike {
@@ -143,13 +160,16 @@ function runSet(input: RunDefaultsCommandInput, target: string, raw: string): Co
   if (sanitized.problems.length > 0) return failure(`error invalid ${problemText(sanitized.problems)}`)
   if (Object.keys(sanitized.patch).length === 0) return failure('error bad-request empty-patch')
 
-  const current = readCurrent(target)
-  if (isFailure(current)) return current
-  if (current.problems.length > 0) return failure(`error invalid ${problemText(current.problems)}`)
-  if (expected !== undefined && expected !== current.value.revision) return failure(`error stale revision=${current.value.revision}`)
+  return withDefaultsLock(dirname(target), () => {
+    const current = readCurrent(target)
+    if (isFailure(current)) return current
+    if (current.problems.length > 0) return failure(`error invalid ${problemText(current.problems)}`)
+    if (current.warnings.length > 0) return failure(`error unknown-keys ${warningText(current.warnings)}——请先修正 research-defaults.json（未知键不会被静默删除）`)
+    if (expected !== undefined && expected !== current.value.revision) return failure(`error stale revision=${current.value.revision}`)
 
-  const merged = withRevision(mergeDefaults(current.value, sanitized.patch), current.value.revision + 1, input.now ?? (() => new Date()))
-  return writeValue(target, merged)
+    const merged = withRevision(mergeDefaults(current.value, sanitized.patch), current.value.revision + 1, input.now ?? (() => new Date()))
+    return writeValue(target, merged)
+  })
 }
 
 function runUnset(input: RunDefaultsCommandInput, target: string, raw: string): CommandResultLike {
@@ -162,35 +182,40 @@ function runUnset(input: RunDefaultsCommandInput, target: string, raw: string): 
   const parsedRevision = revisionToken(tokens.slice(1).join(' '))
   if (parsedRevision.error !== undefined) return parsedRevision.error
 
-  const current = readCurrent(target)
-  if (isFailure(current)) return current
-  if (current.problems.length > 0) return failure(`error invalid ${problemText(current.problems)}`)
-  if (!current.exists) return success('ok revision=0')
-  if (parsedRevision.revision !== undefined && parsedRevision.revision !== current.value.revision) {
-    return failure(`error stale revision=${current.value.revision}`)
-  }
-  const next = withRevision(unsetDefaults(current.value, fields as readonly DefaultsAxis[]), current.value.revision + 1, input.now ?? (() => new Date()))
-  return writeValue(target, next)
+  return withDefaultsLock(dirname(target), () => {
+    const current = readCurrent(target)
+    if (isFailure(current)) return current
+    if (current.problems.length > 0) return failure(`error invalid ${problemText(current.problems)}`)
+    if (current.warnings.length > 0) return failure(`error unknown-keys ${warningText(current.warnings)}——请先修正 research-defaults.json（未知键不会被静默删除）`)
+    if (!current.exists) return success('ok revision=0')
+    if (parsedRevision.revision !== undefined && parsedRevision.revision !== current.value.revision) {
+      return failure(`error stale revision=${current.value.revision}`)
+    }
+    const next = withRevision(unsetDefaults(current.value, fields as readonly DefaultsAxis[]), current.value.revision + 1, input.now ?? (() => new Date()))
+    return writeValue(target, next)
+  })
 }
 
 function runClear(target: string, raw: string): CommandResultLike {
   const parsedRevision = revisionToken(raw)
   if (parsedRevision.error !== undefined) return parsedRevision.error
-  const unsafe = safeTarget(target)
-  if (unsafe !== null) return unsafe
-  if (!existsSync(target)) return success('ok revision=0')
-  const current = readCurrent(target)
-  if (isFailure(current)) return current
-  // clear 是显式修复动作：坏文件也允许删；只有能读出 revision 时才做 stale 校验。
-  if (current.problems.length === 0 && parsedRevision.revision !== undefined && parsedRevision.revision !== current.value.revision) {
-    return failure(`error stale revision=${current.value.revision}`)
-  }
-  try {
-    unlinkSync(target)
-  } catch (error) {
-    return failure(`error io ${(error as Error).message}`)
-  }
-  return success(`ok cleared revision=${current.value.revision}`)
+  return withDefaultsLock(dirname(target), () => {
+    const unsafe = safeTarget(target)
+    if (unsafe !== null) return unsafe
+    if (!existsSync(target)) return success('ok revision=0')
+    const current = readCurrent(target)
+    if (isFailure(current)) return current
+    // clear 是显式修复动作：坏文件也允许删；只有能读出 revision 时才做 stale 校验。
+    if (current.problems.length === 0 && parsedRevision.revision !== undefined && parsedRevision.revision !== current.value.revision) {
+      return failure(`error stale revision=${current.value.revision}`)
+    }
+    try {
+      unlinkSync(target)
+    } catch (error) {
+      return failure(`error io ${(error as Error).message}`)
+    }
+    return success(`ok cleared revision=${current.value.revision}`)
+  })
 }
 
 function runShow(target: string): CommandResultLike {
@@ -198,7 +223,8 @@ function runShow(target: string): CommandResultLike {
   if (isFailure(current)) return current
   if (!current.exists) return success('ok revision=0 empty')
   if (current.problems.length > 0) return failure(`error invalid ${problemText(current.problems)}`)
-  return success(`ok ${summaryOf(current.value)}`)
+  const warn = current.warnings.length > 0 ? ` warn=${warningText(current.warnings)}` : ''
+  return success(`ok ${summaryOf(current.value)}${warn}`)
 }
 
 /**

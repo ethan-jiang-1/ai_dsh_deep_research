@@ -554,6 +554,64 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 ### 拍板事项（074/075/076/078）
 
 四条都指向**门禁/验收合同**，按 `_backlog/AGENTS` 需要你或评审放行；修复方落 077/079 即可解除验收阻塞。
+### 第 37 轮（2026-11-13 02:4x）：半角括号绕过 BUG-123 的修复
+
+- **新卡**：[BUG-127](../_archived/fixed_bugs/BUG-127-library-halfwidth-parens-provenance-default.md) **P2 修复就绪**——
+  `library-fold` 的标题解析只认全角 `（）`：半角 `## 方法(来源〔默认偏好〕)` 里**括号内的标记被算成真默认**
+  且 name 变成 `方法(来源)`；交换文档顺序后 `findDefaultMethod` 会把该条选成库默认（注入错误的
+  `research:defaults` 方法默认）。BUG-123/124 的修复只覆盖全角。
+- **验证方式**：`foldLibrary` + `findDefaultMethod` 矩阵（6 变体 + 默认顺序对照），见卡内复现。
+- **下一层**：同族归一助手是否还漏半角（upsert/render 往返）、半角 `〔〕` 与其他全角标点；未跑，记空白。
+### 第 38 轮（2026-11-13 02:5x）：全角空格让 upsert 变成 dup
+
+- **新卡**：[BUG-128](../_archived/fixed_bugs/BUG-128-method-heading-ideographic-space-duplicate.md) **P2 修复就绪**——
+  `methodHeadingPattern` 只把 `[ \t]` 当空白：标题含 **U+3000 全角空格**（中文输入法常见）时 fold 读得出
+  name，upsert 却判 `created` → 编辑一次多出一条同名方法；旧条目后续编辑会改错对象，两条都带默认标记时
+  普通保存被「多个默认偏好」拒绝。
+- **实测**：`## 方法\u3000（来源）` 与 `## 方法（来源）\u3000〔默认偏好〕` 均 `created` / 2 条。
+- **下一层**：把「标题归一（空白+括号宽度）」抽成 fold/write 共用件（与 127 同源）；其他标题标点
+  （全角冒号/顿号）未扫，记空白。
+### 第 39 轮（2026-11-13 03:0x）：绝对路径的根被丢掉
+
+- **新卡**：[BUG-129](../_archived/fixed_bugs/BUG-129-final-path-drops-absolute-root-alias.md) **P2 修复就绪**——
+  `finalPathOf` 对绝对路径只留终稿族后缀：`/tmp/other-workspace/drt_x/final.md` 与
+  `/ws/../other/drt_x/final/v2.md` 都返回 `drt_x/...`；两个消费方（delivery-watch / useStatusFeed）
+  没有原文可校验 → 跨 workspace 同 slug 的 present 会被别名成当前 cwd 的 bundle（打开错文件或静默失败）。
+- **实测**：5 条路径矩阵见卡；本 workspace 根/archive/_abandoned 正确，跨 workspace 与 `..` 均被接受。
+- **下一层**：`presentInLogs`（旧场非结构化 present）是否有同类根丢弃；未跑，记空白。
+### 第 40 轮（2026-11-13 03:0x）：D50 的未知键静默失效
+
+- **新卡**：[BUG-131](../_archived/fixed_bugs/BUG-131-defaults-unknown-key-warnings-unsurfaced.md) **P2 修复就绪**——
+  手写 `research-defaults.json` 打错键（`efort` / `audiance`）时：`show` 无任何提示、面板不渲染
+  `store.warnings`、下一次写入把未知键**静默删除**。实测 show 输出 `ok revision=3 effort=deep
+  output=full_report`（两个错键零提示），set 后文件里错键消失。
+- **根因**：parse 把未知键归 warnings；command 的 code-like 词表没有 warn 通道；store 存了 warnings
+  但 DefaultsPanel/Button 零消费。
+- **下一层**：warnings 的本地化文案与 problems 的视觉区分；未跑，记空白。
+### 第 41 轮（2026-11-13 03:1x）：expectedRevision 不是 CAS
+
+- **新卡**：[BUG-132](../_archived/fixed_bugs/BUG-132-defaults-expected-revision-race-lost-update.md) **P2 修复就绪**——
+  8 进程同时 `set`（同一 `expectedRevision=3`），**首轮就有 2 个返回 `ok revision=4`**：乐观并发的
+  「stale 拒绝」只覆盖「读完→写前」的串行交错，**同时读**的写者都通过检查，后写覆盖先写，一次更新
+  静默丢失（revision 只 +1）。unset/clear 同构。
+- **根因**：runSet 读→比→写无跨进程锁，rename 前不复核；writeValue 回读只比对 revision（双方都是 4）。
+- **下一层**：clear 与 set 的并发（unlink 竞态）未单独实测；记空白。
+### 第 42 轮（2026-11-13 03:1x）：sanitizePatch 的「拒绝」没落地
+
+- **新卡**：[BUG-133](../_archived/fixed_bugs/BUG-133-sanitize-patch-nested-unknown-keys-silent.md) **P2 修复就绪**——
+  `sanitizePatch` 头注写「output/source 的未知子键拒绝」，实现却把未知子键塞进 warnings 后传 `[]`
+  丢弃：`{"output":{"shape":"full_report","audiance":"CFO"}}` → problems=[]、patch 只剩 shape，
+  命令 `ok` 写盘（audience 丢）；`{"source":{"familes":[…]}}` → 整条丢、只报 empty-patch（误导）。
+- **对照**：顶层未知键 `efort` 正确拒绝（problems not-allowed）——同一函数两套标准。
+- **下一层**：面板 `store.setPatch` 同样放行（未知子键不进 problems）；warnings 词表与 131 统一；记空白。
+### 第 43 轮（2026-11-13 03:2x）：门③绑定扫 content
+
+- **新卡**：[BUG-134](../_archived/fixed_bugs/BUG-134-gate-witness-bound-slugs-scans-content.md) **P1 等人拍板**——
+  门侧 `boundSlugsOf` 对整段 `arguments` 做 `drt_<slug>/` 子串扫描；合成会话只写过
+  `drt_a/notes.md`、但 content 里提到 `drt_b/final/v1.md` → **drt_b 门③ PASS**（借到了 drt_a 的 HITL2 答复）。
+  pack 侧 `slugInArgs` 已修过 BUG-090（只认路径字段），门侧没共享该判据（注释声称同源）。
+- **对照**：真实写过 drt_b 路径 + HITL2 答复仍应 PASS（修复判据里的绿对照）。
+- **下一层**：`presentGate` 的会话范围同样受此绑定污染（路径仍需匹配本 bundle，风险较低）；未跑，记空白。
 ## 用户答复（2026-11-11）
 
 - **Q1**：采纳；持续做，不设固定轮数（goal 驱动，剥洋葱式逐层深入）。

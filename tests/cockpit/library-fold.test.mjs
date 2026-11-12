@@ -13,6 +13,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { foldLibrary, instructionOf, editInstruction, createInstruction, saveInstruction, renderLibraryEntry, flattenSectionValue, summaryOfEntry, SUMMARY_MAX_LENGTH, SECTION_LABELS, libraryReadStateOf, methodNameIssue } from '../../packages/deep-research-pack/src/lib/library-fold.ts';
 import { upsertMethodEntry, clearDefaultMethodEntry, setDefaultMethodEntry } from '../../packages/deep-research-pack/src/lib/method-library-write.ts';
+import { findDefaultMethod } from '../../packages/deep-research-pack/src/lib/research-defaults.ts';
 import { SELFTEST_LIBRARY } from '../../scripts/lib/selftest-library.mjs';
 import { locateSessionStrategy, SHOW_MORE_SESSIONS_PATTERN } from '../../scripts/lib/web-ui-nav.mjs';
 import { METHOD_PRESETS_SKILL_PATH, methodPresetsFromSkillFile, patternMethodMappingFromSkill, baselineDisciplinesFromSkill } from '../../scripts/lib/method-presets.mjs';
@@ -466,4 +467,31 @@ test('BUG-124 heading 段间空格：同名 upsert 仍走 updated，不复制', 
   const result = upsertMethodEntry(lib, libEntry('方法'))
   assert.equal(result.action, 'updated')
   assert.equal(foldLibrary(result.text).filter((item) => item.name === '方法').length, 1)
+})
+
+// 负例留证 2026-11-13：BUG-127（半角括号 provenance/default）、BUG-128（U+3000 全角空格）。
+// 还原法 = 只看全角括号 / 空白类退回 [ \t]*。
+test('BUG-127 半角括号与全角同义：provenance 剥出，括号内标记不算默认', () => {
+  const half = foldLibrary('## 方法(来源)〔默认偏好〕\n- 找来源: a\n')[0]
+  assert.equal(half.name, '方法')
+  assert.equal(half.provenance, '来源')
+  assert.equal(half.isDefault, true)
+  const inner = foldLibrary('## 假默认(来源〔默认偏好〕)\n- 找来源: a\n')[0]
+  assert.equal(inner.name, '假默认')
+  assert.equal(inner.isDefault, false)
+  const lib = '# 库\n\n## 假默认(来源〔默认偏好〕)\n\n- 找来源: a\n\n## 真默认（来源）〔默认偏好〕\n\n- 找来源: b\n'
+  assert.equal(findDefaultMethod(lib), '真默认')
+})
+
+test('BUG-128 全角空格 U+3000：upsert 仍匹配同一标题，不复制', () => {
+  for (const lib of ['# 库\n\n## 方法\u3000（来源）\n\n- 找来源: a\n', '# 库\n\n## 方法（来源）\u3000〔默认偏好〕\n\n- 找来源: a\n']) {
+    const result = upsertMethodEntry(lib, libEntry('方法'))
+    assert.equal(result.action, 'updated', lib)
+    assert.equal(foldLibrary(result.text).filter((item) => item.name === '方法').length, 1)
+  }
+})
+
+test('BUG-127 半角 heading 的 upsert 也命中 updated', () => {
+  const result = upsertMethodEntry('# 库\n\n## 方法(来源)\n\n- 找来源: a\n', libEntry('方法'))
+  assert.equal(result.action, 'updated')
 })

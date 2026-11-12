@@ -8,6 +8,7 @@
  */
 
 import { argsObjectOf } from './journal-wire.ts'
+import { RUN_SLUG } from './run-context.ts'
 
 /** journal 事件的最小形状（wire 事件；只取折算要用的字段）。 */
 interface BindEventLike {
@@ -47,7 +48,7 @@ function pathStringsOf(value: unknown, out: string[]): void {
 
 /** 从工具参数的真实路径字段里找 `drt_<slug>/`（路径段边界；content/pattern 正文不参与）。
  *  解析核 = journal-wire.argsObjectOf；本件哨兵 = undefined（缺/截断不算绑定）。 */
-function slugInArgs(name: string, args: unknown): string | undefined {
+export function slugInArgs(name: string, args: unknown): string | undefined {
   const obj = argsObjectOf(args)
   if (obj === null) return undefined
   const paths: string[] = []
@@ -55,8 +56,8 @@ function slugInArgs(name: string, args: unknown): string | undefined {
   // glob 的 pattern 是路径 glob；grep 的 pattern 是搜索词（不参与绑定）。
   if (name === 'glob' && typeof obj.pattern === 'string') paths.push(obj.pattern)
   for (const raw of paths) {
-    const m = /(?:^|[\\/])drt_([a-z0-9][a-z0-9-]*)[\\/]/.exec(raw.replace(/\\/g, '/'))
-    if (m !== null) return m[1]
+    const m = /(?:^|[\\/])drt_([^\\/\s]+)[\\/]/.exec(raw.replace(/\\/g, '/'))
+    if (m !== null && RUN_SLUG.test(m[1] ?? '')) return m[1]
   }
   return undefined
 }

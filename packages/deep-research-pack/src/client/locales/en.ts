@@ -57,6 +57,7 @@ const enBase = {
   defaultsSaved: 'Saved · v{revision}',
   defaultsStale: 'Changed elsewhere; refreshed. Please change it again.',
   defaultsInvalidBanner: 'Invalid values: {detail}. Ignored; reselect or clear.',
+  defaultsWarnings: 'Unknown fields ignored: {detail}. Fix research-defaults.json before writing (they are not silently dropped).',
   defaultsInvalidField: 'Invalid value; reselect or clear.',
   defaultsIoError: 'Write failed: {detail}',
   defaultsClear: 'Clear project defaults',

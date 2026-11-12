@@ -16,6 +16,17 @@
 
 ## 最近归档
 
+（2026-11-13 [BUG-135](../_archived/fixed_bugs/BUG-135-slug-charset-unwritten-binding-silent.md) slug 字符集成文并放宽为 `[A-Za-z0-9][A-Za-z0-9._-]*`；绑定/门/CLI 共用。）
+（2026-11-13 边界复查批（8 张，127–134）：
+[127](../_archived/fixed_bugs/BUG-127-library-halfwidth-parens-provenance-default.md) 半角括号；
+[128](../_archived/fixed_bugs/BUG-128-method-heading-ideographic-space-duplicate.md) U+3000；
+[129](../_archived/fixed_bugs/BUG-129-final-path-drops-absolute-root-alias.md) 绝对路径根；
+[130](../_archived/fixed_bugs/BUG-130-method-lock-live-pid-reuse-permanent-block.md) 锁恢复入口；
+[131](../_archived/fixed_bugs/BUG-131-defaults-unknown-key-warnings-unsurfaced.md) 未知键提示；
+[132](../_archived/fixed_bugs/BUG-132-defaults-expected-revision-race-lost-update.md) CAS 锁；
+[133](../_archived/fixed_bugs/BUG-133-sanitize-patch-nested-unknown-keys-silent.md) 子键校验；
+[134](../_archived/fixed_bugs/BUG-134-gate-witness-bound-slugs-scans-content.md) 门侧绑定路径字段。
+）
 （2026-11-13 复查批（14 张，113–126）：
 [113](../_archived/fixed_bugs/BUG-113-port-own-listener-overmatch.md) 端口身份精确化；
 [114](../_archived/fixed_bugs/BUG-114-method-lock-release-stale-owner.md) 锁释放 token；

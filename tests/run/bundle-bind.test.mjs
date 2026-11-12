@@ -140,3 +140,12 @@ test('BUG-090 绑定只看真实路径字段：正文/grep pattern 不绑，路�
   assert.equal(sessionBundleOf([call('write', { file_path: 'not_drt_fake/x.md' })]), undefined)
   assert.equal(sessionBundleOf([call('read', { paths: ['a.md', 'drt_multi/final.md'] })]), 'multi')
 })
+
+// 负例留证 2026-11-13：BUG-135——slug 字符集未成文，下划线/点号目录静默不绑定。
+// 还原法 = bind 正则退回 [a-z0-9][a-z0-9-]*。
+test('BUG-135 slug 字符集：下划线/点号/大写目录也绑定', () => {
+  assert.equal(sessionBundleOf([call('write', { file_path: 'drt_llm_inference_cost/final.md' })]), 'llm_inference_cost')
+  assert.equal(sessionBundleOf([call('write', { file_path: 'drt_v1.2/final.md' })]), 'v1.2')
+  assert.equal(sessionBundleOf([call('write', { file_path: 'drt_Mixed_Case/final.md' })]), 'Mixed_Case')
+  assert.equal(sessionBundleOf([call('write', { file_path: 'drt_bad slug/final.md' })]), undefined)
+})

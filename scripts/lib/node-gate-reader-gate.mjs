@@ -79,7 +79,7 @@ export function readerGate(bundleDir, opts = {}) {
   // 来源面：读者版不带行内来源标记 / evidence 路径 / bundle 路径
   if (text.includes('[来源:')) problems.push(`${rel} 含行内 [来源:]——依据应链回 canonical，不复制来源链`)
   if (/evidence\//.test(text)) problems.push(`${rel} 含 evidence/ 路径——依据应链回 canonical`)
-  if (/drt_[a-z0-9][a-z0-9-]*\//.test(text)) problems.push(`${rel} 含 drt_ bundle 路径——对读者只链 canonical`)
+  if (/drt_[A-Za-z0-9][A-Za-z0-9._-]*\//.test(text)) problems.push(`${rel} 含 drt_ bundle 路径——对读者只链 canonical`)
   // 相对链接按 reader 所在 final/ 解析：v1.md / ../final.md / ../findings.md 等必须真实在场。
   // 2026-10-23 真实 run 抓到 reader 写 `final/v1.md`、`final.md`（会解析成 final/final/...）——契约
   // 要求「canonical 链接可解析」，所以这是红，不是观感问题。

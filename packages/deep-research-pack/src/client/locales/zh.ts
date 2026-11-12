@@ -56,6 +56,7 @@ const zhBase = {
   defaultsSaved: '已保存 · v{revision}',
   defaultsStale: '已在别处修改，已刷新；请再改一次。',
   defaultsInvalidBanner: '配置有无效项：{detail}；已忽略，请重选或清除。',
+  defaultsWarnings: '未知字段已忽略：{detail}；写入前请先修正 research-defaults.json（不会被静默删除）。',
   defaultsInvalidField: '这项值无效；请重选或清除。',
   defaultsIoError: '写入失败：{detail}',
   defaultsClear: '清除本项目默认',

@@ -218,3 +218,13 @@ test('枚举单源：面板六种 = protocol 七种减去 literature_review；fa
   assert.deepEqual([...EFFORT_BANDS], ['quick', 'standard', 'deep'])
   assert.deepEqual([...RECENCIES], ['6m', '12m', '24m', 'as-of-capture'])
 })
+
+// 负例留证 2026-11-13：BUG-133——output/source 未知子键被静默丢弃，problems 为空。
+// 还原法 = normalizeOutput/normalizeSource 的 warnings 传临时 []。
+test('BUG-133 sanitizePatch：output/source 未知子键进 problems，不静默丢', () => {
+  const output = sanitizePatch({ output: { shape: 'full_report', audiance: 'CFO' } })
+  assert.ok(output.problems.some((item) => item.field === 'output.audiance' && item.code === 'unknown'))
+  const source = sanitizePatch({ source: { familes: ['official'] } })
+  assert.ok(source.problems.some((item) => item.field === 'source.familes' && item.code === 'unknown'))
+  assert.deepEqual(sanitizePatch({ output: { shape: 'full_report', audience: 'CFO' } }).problems, [])
+})

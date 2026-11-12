@@ -73,11 +73,12 @@ export function DefaultsButton(props: DefaultsButtonProps): ReactNode {
         : button.kind === 'count'
           ? props.t('defaultsButtonCount', { count: button.count })
           : props.t('defaultsButtonAuto')
+  const warn = state.warnings.map((item) => `${item.field}:${item.code}`).join('\n')
   const tooltip = loading
     ? props.t('defaultsTooltipAuto')
     : invalid
       ? state.problems.map((item) => `${item.field}:${item.code}`).join('\n')
-      : tooltipOf(state, props.t)
+      : (warn === '' ? tooltipOf(state, props.t) : `${tooltipOf(state, props.t)}\n${props.t('defaultsWarnings', { detail: warn })}`)
   const active = !loading && !invalid && (button.kind === 'method' || button.kind === 'count')
   return (
     <button

@@ -328,3 +328,21 @@ test('BUG-075 HITL2：最新 ask 已答复 → PASS（旧答复不再夺权）',
     assert.match(r.gate.detail, /ask2/)
   } finally { cleanup() }
 })
+
+// 负例留证 2026-11-13：BUG-134——门侧绑定扫整段 args，content 提到别的 drt_ 就借用见证。
+// 还原法 = boundSlugsOf 回到 String(arguments).matchAll(/drt_(...)\//)。
+test('BUG-134 门③绑定只看真实路径字段：content 提及别的 bundle 不借见证', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  try {
+    const b = writeBundle(dir, 'b')
+    const mention = at({ type: 'tool/call', data: { turn: 1, callId: 'w1', name: 'write', arguments: JSON.stringify({ file_path: 'drt_a/notes.md', content: '参考 drt_b/final/v1.md 的写法' }) } })
+    const sessions = writeSession(dir, [mention, ask('b'), reply()])
+    const red = hitl2RowGate(b, sessions)
+    assert.equal(red.gate.status, 'RED', JSON.stringify(red.gate))
+    assert.match(red.gate.detail, /绑定|会话|HITL2/)
+    // 对照组：真实写 drt_b 路径仍 PASS
+    const sessions2 = writeSessionAt(dir, [bind('b'), ask('b'), reply()])
+    const green = hitl2RowGate(b, sessions2)
+    assert.equal(green.gate.status, 'PASS', JSON.stringify(green.gate))
+  } finally { cleanup() }
+})

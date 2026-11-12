@@ -359,7 +359,7 @@ export function sanitizePatch(patch: unknown): { patch: DefaultsPatch; problems:
   }
   let output: OutputDefaults | undefined
   if (patch.output !== undefined) {
-    const normalized = normalizeOutput(patch.output, problems, [])
+    const normalized = normalizeOutput(patch.output, problems, problems)
     if (normalized !== undefined) {
       if (normalized.shape === undefined && normalized.audience === undefined) problems.push(problem('output', 'empty', 'output needs shape or audience'))
       else output = normalized
@@ -367,7 +367,7 @@ export function sanitizePatch(patch: unknown): { patch: DefaultsPatch; problems:
   }
   let source: SourceDefaults | undefined
   if (patch.source !== undefined) {
-    const normalized = normalizeSource(patch.source, problems, [])
+    const normalized = normalizeSource(patch.source, problems, problems)
     if (normalized !== undefined) {
       if (normalized.families === undefined && normalized.authority === undefined && normalized.recency === undefined) {
         problems.push(problem('source', 'empty', 'source needs families, authority or recency'))

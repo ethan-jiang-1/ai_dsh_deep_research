@@ -33,7 +33,7 @@ if (target === undefined || flag('--help')) {
 // 入参三形态：bundle 目录 / drt_<slug> / 裸 slug
 const asDir = resolve(target)
 const slug = existsSync(asDir) && statSync(asDir).isDirectory() ? basename(asDir) : basename(target.replace(/\/$/, ''))
-if (!/^drt_[a-z0-9][a-z0-9-]*$/.test(slug)) {
+if (!/^drt_[A-Za-z0-9][A-Za-z0-9._-]*$/.test(slug)) {
   console.error(`bundle-sessions: 认不出 bundle 名（期望 drt_<slug>）：${slug}`)
   process.exit(2)
 }

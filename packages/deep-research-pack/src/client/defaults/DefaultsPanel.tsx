@@ -96,6 +96,7 @@ export function DefaultsPanel({ sessionId, store, t }: DefaultsPanelProps): Reac
   const authority = source?.authority
   const recency = source?.recency
   const problems = state.problems
+  const warnings = state.warnings
   const receipt = receiptOf(state, t)
 
   const apply = (patch: DefaultsPatch): void => { void store.setPatch(sessionId, patch) }
@@ -138,6 +139,11 @@ export function DefaultsPanel({ sessionId, store, t }: DefaultsPanelProps): Reac
       {problems.length > 0 ? (
         <div role="alert" style={{ fontSize: 11, padding: '5px 8px', borderRadius: 6, background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c' }}>
           {t('defaultsInvalidBanner', { detail: problems.map((item) => `${item.field}:${item.code}`).join('; ') })}
+        </div>
+      ) : null}
+      {warnings.length > 0 ? (
+        <div role="status" data-testid="defaults-warnings" style={{ fontSize: 11, padding: '5px 8px', borderRadius: 6, background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e' }}>
+          {t('defaultsWarnings', { detail: warnings.map((item) => `${item.field}:${item.code}`).join('; ') })}
         </div>
       ) : null}
 
