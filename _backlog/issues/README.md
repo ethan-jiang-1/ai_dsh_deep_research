@@ -7,7 +7,6 @@
 | 卡 | 状态 | 一句话 |
 |---|---|---|
 | [2026-11-11-exploratory-test-strategy](2026-11-11-exploratory-test-strategy.md) | 等人拍板 | 探索性验证协议 + 第 1 轮 charter；pilot 已跑出 2 类 fail-open |
-| [2026-11-13-prose-surfaces-migration](2026-11-13-prose-surfaces-migration.md) | 待落地 | 判据形状迁移 II：人工走查节、method heading、version/present |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

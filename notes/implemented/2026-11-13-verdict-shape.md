@@ -51,9 +51,9 @@ BUG-150 的卡自己写明：「词表路线必然漏同义措辞」。
 
 ## 实际跑过的验证
 
-- **readiness 三态**（`terminalVerdictLine`，tsx 直跑）：同行旧引用 + 随后裸写 FAIL → FAIL（074/150 形态已过）；
+- **readiness 三态（改前探针）**（`terminalVerdictLine`，tsx 直跑）：同行旧引用 + 随后裸写 FAIL → FAIL（074/150 形态已过）；
   `本轮 readiness: PASS；本轮 readiness: FAIL` → `null`（互斥已 fail-closed）；`本轮 readiness: PASS` 单独一行
-  → **PASS**（语境关键词路由仍在，是本卡要拆的残余）。
+  → **PASS**（**改前**：语境关键词路由仍在；Slice A 已拆，现返回 `null`）。
 - **HITL2 双向**（`isHitl2Row`，node 直跑）：代理 + 「待用户点头」→ **true**（fail-open）；
   「可以 / 行 / LGTM」三形态 → **false**（误杀）。证据命令与输出留在 [issue](../../_backlog/_archived/settled_issues/2026-11-13-verdict-shape-migration.md) §当前情况。
 - **基线**：`node scripts/verify/verify.mjs` 全绿；`pnpm test` 1364 通过 / 0 失败（2026-11-13，基线 `4d6308c9`）。
@@ -66,10 +66,20 @@ BUG-150 的卡自己写明：「词表路线必然漏同义措辞」。
 - **门③ 旧场收口**：文本 PASS 分支删除，无 `run.md` → `UNATTESTED`（exit 2）。
 - **历史语料对账（只读）**：71 个 bundle 中 8 个归档件的 `review.md` 在新判据下读作「无法判定」，0 个
   present 版本落后；无活跃冲突，未删除数据。
+- **迁移 II·S1（人工走查）**：节边界改独立成行的显式标记；不成对 → `null`、正文提及不算、变体标题不识别；
+  旧回执只认规范 `## 人工走查` 并补标记迁移。`run-receipt` 22 例（含四负例）。
+- **迁移 II·S2（方法库 heading）**：`parseMethodHeading` 单一 codec（全/半角括号、U+3000、段间空白、段序）；
+  fold 与写路径共用；尾缀 `wellFormed=false`（写拒写、删除可按名寻址）；默认标记只认段。
+  `tests/cockpit/library-heading-codec.test.mjs` 5 条不变量。
+- **迁移 II·S3（版本/present）**：审计确认交付版本只认 `deliverables/presented` 事件；plan 版本 = 头部声明
+  并报冲突，重写记录只作显示。`tests/contracts/present-version-conformance.test.mjs` 4 条不变量。
+- **最终基线**：`pnpm test` 1386 通过 / 0 失败；`pnpm verify` 全绿；`pnpm typecheck` 绿（2026-11-13）。
 - **git 血缘**：`git log --oneline -- _backlog/_archived/fixed_bugs/BUG-{074,141,150}*` 与
   `git show 4d6308c9 -- scripts/lib/node-gate-session-gates.mjs` 可见上述四轮与词表扩张。
 
 ## 环境状态
 
-本 Note 只承载决定与证据。逐面迁移的清单、分片与验收标准住 issue；机械把守（变异矩阵 + 不变量测试）
-随迁移落 `tests/contracts/`，不另立文档。
+本 Note 只承载决定与证据。两张迁移卡均已归档（[I](../../_backlog/_archived/settled_issues/2026-11-13-verdict-shape-migration.md) ·
+[II](../../_backlog/_archived/settled_issues/2026-11-13-prose-surfaces-migration.md)）；机械把守 = `tests/contracts/`
+的不变量测试 + 面级测试，不另立文档。已知残余：驾驶舱状态页的 readiness 显示仍读 review.md（投影层，
+不是交付判据；门禁读声明件）。

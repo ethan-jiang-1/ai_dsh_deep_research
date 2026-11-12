@@ -2,6 +2,7 @@
 
 结论已形成并已按卡片关闭条件处理的问题卡。这里记录问题讨论历史，不表示相应实现已通过交付验收；实施证据仍由卡上指向的下游记录负责。
 
+| [2026-11-13-prose-surfaces-migration](2026-11-13-prose-surfaces-migration.md) | 判据形状迁移 II：人工走查改显式标记、方法库 heading 单一 codec（fold/写同判）、版本/present 审计 + 不变量；`pnpm test` 1386 / verify 绿；[Note](../../../notes/implemented/2026-11-13-verdict-shape.md) | 2026-11-13 |
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
 | [2026-11-13-verdict-shape-migration](2026-11-13-verdict-shape-migration.md) | 判据形状迁移（D51）：readiness 去关键词/词表、门③ 决策改事件链（旧场 UNATTESTED）、门② 版本配对读 present、`review/readiness.json` 声明件成为权威、变异矩阵常驻；verify/test/typecheck + replay 4 场景 + l4-lite 全绿；[Note](../../../notes/implemented/2026-11-13-verdict-shape.md) | 2026-11-13 |

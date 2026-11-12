@@ -112,4 +112,4 @@ canonical JSON、文件事实）是唯一权威，散文只做交叉核对。做
 
 ## 队列（另卡）
 
-- 人工走查节、method heading 归一、version/present 散文解析：同一模式的其余判据面 = [判据形状迁移 II](../../issues/2026-11-13-prose-surfaces-migration.md)；本卡不假装已覆盖。
+- 人工走查节、method heading 归一、version/present 散文解析：同一模式的其余判据面 = [判据形状迁移 II](2026-11-13-prose-surfaces-migration.md)；本卡不假装已覆盖。

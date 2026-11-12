@@ -1,16 +1,21 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-13
 ---
 
 # 推敲：判据形状迁移 II——人工走查、method heading、version/present
 
-> 立卡：2026-11-13 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-13 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
 >
 > **一句话**：把第一张迁移卡队列里的三个判据面——`acceptance.md` 人工走查节、方法库 heading、版本/present
 > 散文解析——按 D51 同一模式收口：结构化位置优先，歧义即红，散文只做副本。
 >
-> 去向：implemented — `notes/implemented/2026-11-13-verdict-shape.md`（第一张卡的 Note 续记验证）
+> 结论：三面收口——人工走查改显式标记；方法库 heading 单一 codec（fold/写同判、非法尾缀两侧同判）；
+> 版本/present 审计确认 present 已是事件源、plan 版本只作显示并报冲突，补不变量测试防回退。
+> 证据：`pnpm test` 1386 通过 / 0 失败、`verify` 全绿、`typecheck` 绿。
+> 去向：implemented — [Note](../../../notes/implemented/2026-11-13-verdict-shape.md)。
+> 授权：用户 2026-11-13「做到底」的持续授权。
+> 审查：机械门禁全跑；语义自审逐条对验收；三面均为 keyless 面，未新增模型可见文本。
 
 **问题与期望结果：** 第一张卡把 readiness / HITL2 两族从「猜判定」迁到「结构位置 + 事件链」。同类的
 三处仍是散文判定：① 人工走查节靠标题词表识别，重跑验收会整节丢失（BUG-062/145/155 的类）；② 方法库
@@ -48,7 +53,10 @@ version/present 是否要为此改驾驶舱投影的读数路径（客户端读 
   段间空白含 U+3000、段序不限；尾缀判 `wellFormed=false`）；fold 与写路径共用；`renderMethodHeading` 统一默认操作；
   `methodNameIssue` 同时拒半角括号。变异矩阵 `tests/cockpit/library-heading-codec.test.mjs`（5 不变式）。
 - **证据（S2 追加）**：`pnpm test` 1382 通过 / 0 失败；`verify` 全绿。
-- **未做**：S3 version/present 结构化优先。
+- **S3 版本/present**：审计结论 = present 交付版本已是事件源（`latestPresentedFinalVersion` 只读
+  `deliverables/presented`）；plan 的「图版本」= 头部声明（`currentPlanVersion`），重写记录只作显示，
+  冲突报 `versionConflicted`；补 `tests/contracts/present-version-conformance.test.mjs`（4 不变量）防回退。
+- **证据（S3 追加）**：`pnpm test` 1386 通过 / 0 失败；`verify` 全绿；`typecheck` 绿。
 
 ## 验收标准
 
@@ -68,4 +76,4 @@ version/present 是否要为此改驾驶舱投影的读数路径（客户端读 
 
 ## 队列
 
-- 第一张卡（已归档）= [判据形状迁移](../_archived/settled_issues/2026-11-13-verdict-shape-migration.md)。
+- 第一张卡（已归档）= [判据形状迁移](2026-11-13-verdict-shape-migration.md)。
