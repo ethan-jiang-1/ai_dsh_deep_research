@@ -1,3 +1,6 @@
+// 负例留证 2026-11-13：BUG-140（HITL2 词表双向误判）
+// 负例留证 2026-11-13：BUG-144（代理记账行被打哑）
+// 负例留证 2026-11-13：BUG-146（英文 HITL2 卡判型）
 // D28 结构化见证回归 — 新 run（有 run.md）的门②/③ 只认**绑定本 bundle 的 lead 会话**里的
 // `deliverables/presented` 与 `user-question-reply`；文本行、前缀 slug、非 lead 日志、别的 run 的
 // 答复、早于契约纪元的事件都不算。旧场无 run.md 走文本兼容路径。
@@ -11,7 +14,9 @@ import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import { hitl2ReplyInLogs, presentedInLogs } from '../../scripts/lib/node-gate-session-gates.mjs'
-import { hitl2RowGate, presentGate } from '../../scripts/lib/node-gate-session-gates.mjs'
+import { hitl2RowGate, isHitl2Row, presentGate } from '../../scripts/lib/node-gate-session-gates.mjs'
+import { deriveAnchors } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
+import { closingProvenanceRow } from '../../scripts/lib/hitl-provenance.mjs'
 
 const makeRoot = (tag) => {
   const base = realpathSync(tmpdir())
@@ -344,5 +349,38 @@ test('BUG-134 门③绑定只看真实路径字段：content 提及别的 bundle
     const sessions2 = writeSessionAt(dir, [bind('b'), ask('b'), reply()])
     const green = hitl2RowGate(b, sessions2)
     assert.equal(green.gate.status, 'PASS', JSON.stringify(green.gate))
+  } finally { cleanup() }
+})
+
+// 负例留证 2026-11-13：BUG-140/144/146——HITL2 词表双向误判、代理行被打哑、英文卡判型。
+// 还原法：pending 只枚举待确认 / 代理行要求决策词 / askKind 只认中文文案。
+test('BUG-140 HITL2 行：待用户确认不算；无异议/OK/approved/采纳/附未决项算', () => {
+  assert.equal(isHitl2Row('- 2026-11-23 HITL2 待用户确认（v2）'), false)
+  assert.equal(isHitl2Row('- HITL2：用户无异议'), true)
+  assert.equal(isHitl2Row('- HITL2: user replied OK'), true)
+  assert.equal(isHitl2Row('- HITL2: approved'), true)
+  assert.equal(isHitl2Row('- HITL2：采纳'), true)
+  assert.equal(isHitl2Row('- HITL2 定稿（附未决项：补研究 W3）'), true)
+  assert.equal(isHitl2Row('- HITL2 通过（待补引用 3 处）'), true)
+})
+
+test('BUG-144 代理记账行：原话 OK/继续/就按这个吧 仍算 HITL2 拍板', () => {
+  for (const text of ['OK', '继续', '就按这个吧']) {
+    const row = closingProvenanceRow({ cardKey: 'anchor-2', text, date: '2026-11-13' })
+    assert.equal(isHitl2Row(row), true, `${text} -> ${row}`)
+  }
+})
+
+test('BUG-146 英文 HITL2 卡：门③认 id/英文选项，UI 判 pending', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  try {
+    const b = writeBundle(dir)
+    const askEn = at({ type: 'tool/call', data: { turn: 1, callId: 'ask1', name: 'ask_user_question', arguments: JSON.stringify({ questions: [{ id: 'hitl2_delivery', header: 'Delivery review (HITL2)', question: 'Finalize?', options: [{ label: 'Finalize (deliver as-is)' }] }] }) } })
+    const replyEn = at({ type: 'tool/result', data: { turn: 1, step: 1, message: { role: 'tool', toolCallId: 'ask1', content: [{ type: 'text', text: JSON.stringify({ answers: [{ id: 'hitl2_delivery', selected: ['Finalize (deliver as-is)'] }] }) }] } } }, T + 60_000)
+    const sessions = writeSession(dir, [bind(), askEn, replyEn])
+    const r = hitl2RowGate(b, sessions)
+    assert.equal(r.gate.status, 'PASS', JSON.stringify(r.gate))
+    const anchors = deriveAnchors([JSON.parse(askEn)], { question: true, delivered: false })
+    assert.equal(anchors.find((a) => a.key === 'anchor-2')?.state, 'pending')
   } finally { cleanup() }
 })

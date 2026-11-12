@@ -4,7 +4,7 @@
  * 纯函数（keyless）；文本级替换——保留库头（第一个 `## ` 之前）、其它条目（含旧格式正文）与空行；
  * 同名条目整段覆盖。四字段必须都有内容（「（待定）」占位符由 parser 归一为空，不在此放行）。
  */
-import { SECTION_LABELS, isLibraryHeadingLine, methodNameIssue, renderLibraryEntry, type LibraryEntry } from './library-fold.ts'
+import { SECTION_LABELS, foldLibrary, isLibraryHeadingLine, methodNameIssue, renderLibraryEntry, type LibraryEntry } from './library-fold.ts'
 
 /** upsert 结果：动作 + 名称 + 写入后的全文。 */
 interface UpsertMethodEntryResult {
@@ -47,7 +47,11 @@ export function upsertMethodEntry(
     throw new Error(`方法条目「${name}」缺字段：${missing.map(({ label }) => label).join('、')}`)
   }
   const target = matchingHeadingLines(text, name)
-  if (target.length > 1) throw new Error(`库里有重名方法「${name}」，拒绝写入`)
+  const folded = foldedHeadingLines(text, name)
+  if (target.length > 1 || folded.length > 1) throw new Error(`库里有重名方法「${name}」，拒绝写入`)
+  if (target.length === 0 && folded.length > 0) {
+    throw new Error(`已存在同名条目但标题格式不可识别（第 ${String((folded[0]?.offset ?? 0) + 1)} 行附近）——先规范化标题再编辑`)
+  }
   if (options.defaultAction !== 'set' && defaultCount(text) > 1) throw new Error('库里存在多个默认偏好，拒绝普通保存')
   const makeDefault = options.defaultAction !== 'set' && target[0]?.line.includes('〔默认偏好〕') === true
   const legacy = entry.legacyText !== null && entry.legacyText.trim() !== '' ? entry.legacyText.trim() : null
@@ -110,6 +114,17 @@ function setDefaultText(text: string, name: string): string {
   return lines.join('\n')
 }
 
+/** fold 视角的同名标题行（宽松名称提取；用于识别写路径正则覆盖不到的尾部文本，BUG-138）。 */
+function foldedHeadingLines(text: string, name: string): readonly { readonly line: string; readonly offset: number }[] {
+  const matches: { line: string; offset: number }[] = []
+  let offset = 0
+  for (const line of text.split('\n')) {
+    if (isLibraryHeadingLine(line) && foldLibrary(line)[0]?.name === name) matches.push({ line, offset })
+    offset += line.length + 1
+  }
+  return matches
+}
+
 function matchingHeadingLines(text: string, name: string): readonly { readonly line: string; readonly offset: number }[] {
   const pattern = methodHeadingPattern(name)
   const matches: { line: string; offset: number }[] = []
@@ -132,13 +147,11 @@ export function removeMethodEntry(text: string, name: string): { removed: boolea
   if (target === '') throw new Error('删除方法需要名称')
   const nameIssue = methodNameIssue(target)
   if (nameIssue !== null) throw new Error(`方法条目名不合法：${nameIssue}`)
-  const matches = matchingHeadingLines(text, target)
+  const matches = foldedHeadingLines(text, target)
   if (matches.length === 0) return { removed: false, text }
   if (matches.length > 1) throw new Error(`库里有重名方法「${target}」，拒绝删除`)
   const start = matches[0]?.offset ?? 0
-  const found = methodHeadingPattern(target).exec(text)
-  if (found === null) return { removed: false, text }
-  const afterHeading = start + found[0].length
+  const afterHeading = start + (matches[0]?.line.length ?? 0)
   const rest = text.slice(afterHeading)
   const nextHeading = rest.search(/^##\s/m)
   const end = nextHeading === -1 ? text.length : afterHeading + nextHeading

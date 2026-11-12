@@ -139,3 +139,9 @@ function insertDecisionsRow(text, row) {
   const sep = before.endsWith('\n\n') ? '' : before.endsWith('\n') ? '\n' : '\n\n'
   return before + sep + row + '\n' + (rest === '' ? '' : rest.startsWith('\n') ? rest.slice(1) : '\n' + rest)
 }
+
+/** hitl-answer 输出里的「共作答 N 题」计数；读不出 → null（0 是合法但非“已答”，BUG-147）。 */
+export function answeredCountOf(stdout) {
+  const match = /共作答\s*(\d+)\s*题/.exec(String(stdout ?? ''))
+  return match?.[1] === undefined ? null : Number(match[1])
+}

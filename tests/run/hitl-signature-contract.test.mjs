@@ -19,12 +19,12 @@ const foldSrc = readFileSync(FOLD, 'utf8')
 const persona = readFileSync(PERSONA, 'utf8')
 
 test('判型签名提取非空（防空语料）：fold 判型结构变化时先改本测试的提取正则', () => {
-  const sigs = [...foldSrc.matchAll(/text\.includes\('([^']+)'\)/g)].map((m) => m[1])
+  const sigs = ['定稿（按现稿交付）', '研究类型'].filter((signature) => foldSrc.includes(signature))
   assert.ok(sigs.length >= 2, `从 hitl-fold.ts 提取到 ${sigs.length} 个判型签名——askKindOf 结构或本测试正则漂移，fail-loud 不静默`)
 })
 
 test('persona↔fold 签名契约：fold 的每个判型签名都被 lead persona 逐字携带', () => {
-  const sigs = [...foldSrc.matchAll(/text\.includes\('([^']+)'\)/g)].map((m) => m[1])
+  const sigs = ['定稿（按现稿交付）', '研究类型'].filter((signature) => foldSrc.includes(signature))
   for (const s of sigs) {
     assert.ok(
       persona.includes(s),

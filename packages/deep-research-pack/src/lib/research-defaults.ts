@@ -214,10 +214,13 @@ function normalizeSource(value: unknown, problems: DefaultsProblem[], warnings: 
  */
 export function parseDefaults(text: string | null | undefined): ParsedDefaults {
   const empty: ParsedDefaults = { value: emptyDefaults(), problems: [], warnings: [], hasAnyValue: false }
-  if (text === null || text === undefined || text.trim() === '') return empty
+  if (text === null || text === undefined) return empty
+  // Windows 编辑器常写 UTF-8 BOM；RFC 8259 允许忽略（BUG-139）。
+  const normalized = String(text).replace(/^\uFEFF/, '')
+  if (normalized.trim() === '') return empty
   let parsed: unknown
   try {
-    parsed = JSON.parse(text)
+    parsed = JSON.parse(normalized)
   } catch (error) {
     return { ...empty, problems: [problem('file', 'parse', (error as Error).message)] }
   }

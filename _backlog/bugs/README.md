@@ -16,6 +16,21 @@
 
 ## 最近归档
 
+（2026-11-13 真模型/一致性复查批（13 张，136–148）：
+[136](../_archived/fixed_bugs/BUG-136-defaults-probe-port-self-lock.md) probe 端口退避；
+[137](../_archived/fixed_bugs/BUG-137-defaults-probe-language-merged-into-defaults-option.md) 语言不冒充默认；
+[138](../_archived/fixed_bugs/BUG-138-method-heading-unrecognized-suffix-ghost-entry.md) 幽灵条目；
+[139](../_archived/fixed_bugs/BUG-139-defaults-bom-parse-failure.md) BOM；
+[140](../_archived/fixed_bugs/BUG-140-hitl2-vocabulary-two-way-misclassification.md) HITL2 词表；
+[141](../_archived/fixed_bugs/BUG-141-readiness-inline-context-keyword-gap.md) readiness 行内仲裁；
+[142](../_archived/fixed_bugs/BUG-142-client-load-selects-method-editor-session.md) client-load 选 lead；
+[143](../_archived/fixed_bugs/BUG-143-method-editor-root-has-team-lead-tools.md) method-editor 边界；
+[144](../_archived/fixed_bugs/BUG-144-kickoff-provenance-rows-not-counted-as-hitl2.md) 代理记账行；
+[145](../_archived/fixed_bugs/BUG-145-manual-evidence-subheading-truncation.md) 人工走查标题；
+[146](../_archived/fixed_bugs/BUG-146-hitl-signatures-chinese-only-bilingual.md) HITL 双语；
+[147](../_archived/fixed_bugs/BUG-147-client-hitl-zero-answers-false-green.md) 0 题假绿；
+[148](../_archived/fixed_bugs/BUG-148-evidence-short-quotes-not-audited.md) 短引文审计。
+）
 （2026-11-13 [BUG-135](../_archived/fixed_bugs/BUG-135-slug-charset-unwritten-binding-silent.md) slug 字符集成文并放宽为 `[A-Za-z0-9][A-Za-z0-9._-]*`；绑定/门/CLI 共用。）
 （2026-11-13 边界复查批（8 张，127–134）：
 [127](../_archived/fixed_bugs/BUG-127-library-halfwidth-parens-provenance-default.md) 半角括号；

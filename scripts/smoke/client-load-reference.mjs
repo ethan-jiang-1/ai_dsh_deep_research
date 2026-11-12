@@ -10,6 +10,7 @@ import { deriveSteps, latestRunVersion } from '../../packages/deep-research-pack
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
 import { latestFinalDelivery } from '../../packages/deep-research-pack/src/lib/final-target.ts'
+import { selectBoundSession } from '../lib/client-load-select.mjs'
 
 /**
  * 从 dev home 会话与研究 bundle 盘上事实建立 client-load 冒烟的参考对象。
@@ -89,7 +90,7 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
     if (slug !== undefined) {
       // 绑定但被排除（探针壳 / 在飞）不进任何候选——塞进未绑定候选会污染负样本（当日实红：
       // 点到绑定探针 → 渐进面无提示行）
-      if (!probeTitled && !stillHot) candidates.push({ sessionId, title, slug, events, logPath, eventCount: events.length, marker, tailAskPending: foldHitlPending(windowedEvents).pending })
+      if (!probeTitled && !stillHot) candidates.push({ sessionId, title, slug, events, logPath, eventCount: events.length, marker, tailAskPending: foldHitlPending(windowedEvents).pending, agentPreset: events.find((j) => j?.type === 'session')?.agentPreset })
     } else if (unboundCandidates.length < 5) {
       // sessionId 一并带出：干净 home 的侧栏标题来自 vendor 投影缓存（sessionProjectionCache），
       // 夹具 home 首次启动没有缓存 → 冷会话行只显示「Untitled」，按标题点会 miss（2026-11-03
@@ -106,12 +107,7 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
   // 保证 GUI 侧栏可见性（旧富会话可能被侧栏窗口挤出——实红教训）。
   const RICH_FLOOR = 60
   deliveredSessions.sort((a, b) => a.tail - b.tail)
-  const boundSession = (() => {
-    const rich = candidates.filter((c) => c.eventCount >= RICH_FLOOR)
-    const pool = rich.length > 0 ? rich : candidates
-    const unique = pool.filter((c) => titleCounts.get(c.title) === 1)
-    return unique.length > 0 ? unique[0] : (pool.length > 0 ? pool[0] : null)
-  })()
+  const boundSession = selectBoundSession(candidates, titleCounts, RICH_FLOOR)
 
   // 绑定 bundle 的磁盘真值（evidence 计数 / 交付态 / 问题行首行——与页签折算同口径；
   // slug 无 drt_ 前缀、目录名有——拼回）。D28 三操作桶：工作区根 / archive/

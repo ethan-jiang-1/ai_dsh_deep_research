@@ -366,3 +366,17 @@ test('provenance hash 合同：owner = ops/Lead，不派给 analyst，不用 wor
   assert.match(team, /provenance hash 不派给角色/, 'team-assembly 缺 provenance hash 派发禁令');
   assert.match(team, /不要把 `workflow` 当计算器/, 'team-assembly 未禁止用 workflow 当计算器');
 });
+
+// 负例留证 2026-11-13：BUG-143——method-editor 根仍拿 Team 工具/身份；BUG-137——语言并入项目默认选项。
+// 还原法 = 删除 method-editor 的 Team 边界句 / research-brief 的选项 label 禁令。
+test('BUG-143 method-editor persona：Team 可见但不是通道，不写 drt_/run', () => {
+  const yml = readFileSync(join(PRESETS, 'method-editor.patch.yml'), 'utf8')
+  assert.match(yml, /Team 工具可能在本根会话可见/)
+  assert.match(yml, /不要调用 spawn_teammate/)
+  assert.match(yml, /不要写 `drt_\*\/run\.md` 或启动 run/)
+})
+
+test('BUG-137 research-brief：HITL1 选项 label 不得把语言并进项目默认', () => {
+  const skill = readFileSync(join(PRESETS, 'lead', 'skills', 'research-brief', 'SKILL.md'), 'utf8')
+  assert.match(skill, /带「项目默认\/库默认」的\*\*选项名\/分句不得出现语言词\*\*/)
+})

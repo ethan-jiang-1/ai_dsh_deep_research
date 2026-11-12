@@ -193,7 +193,7 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = skipUnreadableL
     for (const f of readdirSync(evDir).filter((x) => x.endsWith('.md')).sort()) {
       const raw = readFileSync(join(evDir, f), 'utf8')
       const { fm, body } = splitFrontmatter(raw)
-      const rec = { file: f, fm, claimedUrls: [], quotes: [] }
+      const rec = { file: f, fm, claimedUrls: [], quotes: [], shortQuotes: [] }
       if (fm?.source_url) rec.claimedUrls.push(fm.source_url)
       rec.claimedUrls.push(...urlsOf(body))
       rec.claimedUrls = [...new Set(rec.claimedUrls)]
@@ -207,7 +207,14 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = skipUnreadableL
       }
       for (const line of secLines) {
         const m = /^>\s*(.+)$/.exec(line)
-        if (m && m[1].trim().length >= 16) rec.quotes.push(m[1].trim())
+        if (!m) continue
+        const quote = m[1].trim()
+        if (quote === '') continue
+        if (quote.length >= 16) rec.quotes.push(quote)
+        else rec.shortQuotes.push(quote)
+      }
+      for (const quote of rec.shortQuotes) {
+        findings.push({ level: 'INFO', file: f, kind: '短引文未回溯', detail: `「${quote}」（${quote.length} 字）——太短未进入转写回溯，需人工核对` })
       }
       if (!fm) findings.push({ level: 'MAJOR', file: f, kind: '契约不符', detail: '无 frontmatter（硬五字段全缺）——存量散文式证据卡' })
       else {
@@ -327,7 +334,9 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = skipUnreadableL
   let quoteTotal = 0
   let quoteComposite = 0
   let quoteBad = 0
+  let shortQuotes = 0
   for (const rec of evidence) {
+    shortQuotes += rec.shortQuotes.length
     for (const q of rec.quotes) {
       quoteTotal += 1
       const n = normalize(q)
@@ -401,7 +410,7 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = skipUnreadableL
 |---|---|
 | 证据文件 | ${evidence.length} 份（frontmatter 契约符合：${evidence.filter((r) => r.fm).length} 份） |
 | ① URL 溯源 | ${urlOk}/${urlTotal} 可回溯到会话日志工具事件 |
-| ② 摘录转写回溯 | ${quoteOk}/${quoteTotal} 可在工具结果语料中找到 |
+| ② 摘录转写回溯 | ${quoteOk}/${quoteTotal} 可在工具结果语料中找到；短引文 ${shortQuotes} 条未回溯 |
 | ③ final 溯源链 | ${finalRefs} 条引用，断链 ${finalBroken} 条 |
 | 发现 | CRITICAL ${critical.length} · MAJOR ${major.length} · INFO ${info.length} |
 
@@ -417,5 +426,5 @@ ${major.length === 0 ? '（无）' : major.map((f) => `- **${f.file}** [${f.kind
 
 ${info.length === 0 ? '（无）' : info.map((f) => `- **${f.file}** [${f.kind}] ${f.detail}`).join('\n')}
 `
-  return { findings, criticalCount: critical.length, stats: { evidence: evidence.length, withFm: evidence.filter((r) => r.fm).length, urlOk, urlTotal, srcFetched, srcNeverFetched, quoteOk, quoteTotal, quoteComposite, quoteBad, finalRefs, finalBroken, critical: critical.length, major: major.length, info: info.length, sessionFiles: corpus.sessionFiles, windowFiles: corpus.windowFiles, windowSkipped: corpus.windowSkipped }, report }
+  return { findings, criticalCount: critical.length, stats: { evidence: evidence.length, withFm: evidence.filter((r) => r.fm).length, urlOk, urlTotal, srcFetched, srcNeverFetched, quoteOk, quoteTotal, quoteComposite, quoteBad, shortQuotes, finalRefs, finalBroken, critical: critical.length, major: major.length, info: info.length, sessionFiles: corpus.sessionFiles, windowFiles: corpus.windowFiles, windowSkipped: corpus.windowSkipped }, report }
 }

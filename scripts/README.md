@@ -138,7 +138,7 @@
 | lib/web-ui-nav.mjs | cdp-probe、client-hitl-smoke、client-load-config、client-load-final、client-load-smoke、e2e-021rc2、hitl-answer、library-fold.test、session-replay、web-ui-nav.test | 观察面侧栏会话定位**唯一正本**（2026-10-21 收拢，六处私有版退役）：data-row-key 主锚（session:\<id\>/workspace: 行键）+ 折叠组展开（expandGroup，data-row-key 主 + 类名兜底）+「Show N more」逐层 + 搜索兜底（结果无行键→按文本点）；类名扫描降级为兜底——两套选择器各有实红教训，裁决依据 = 模块头注；零依赖 page 鸭子类型；CDP 边界 = 纯常量 SHOW_MORE_SESSIONS_PATTERN / PREVIEW_NOTICE_PROBE_JS 供 cdp-probe evaluate 字符串消费（后者 = 首屏 Preview Notice 遮罩的探测与关闭，keyless 钉 = web-ui-nav.test）；真浏览器证据归消费方冒烟档（client-load-smoke / e2e-021rc2） |
 | lib/unconsumed-evidence.mjs | unconsumed-evidence、unconsumed-evidence.test | B1 机械基座：evidence/ 未进 findings.md 的差集投影（critic 差集出题的操作侧对账；CLI 壳 = run-ops/unconsumed-evidence 行） |
 | lib/acceptance-check.mjs | acceptance-check、acceptance-check.test | 收活判据机械求值：PASS/FAIL/UNVERIFIED 三态（DeerFlow acceptance_criteria keyless 移植，判不了永不静默放行；CLI 壳 = run-ops/acceptance-check 行） |
-| lib/hitl-provenance.mjs | ask-drive.test、hitl-answer、hitl-provenance.test、run-kickoff | 代答 provenance 写盘（BUG-014 正修——代理模拟显式记账；BUG-017 题面富集） |
+| lib/hitl-provenance.mjs | ask-drive.test、client-hitl-smoke、hitl-answer、hitl-provenance.test、node-gate-witness.test、run-kickoff | 代答 provenance 写盘（BUG-014 正修——代理模拟显式记账；BUG-017 题面富集） |
 | lib/local-date.mjs | export-dist、hitl-answer、local-date.test、schema-scan-core、schema-scan.test | 人读日期行本地口径（与 bash date 同源；BUG-017 正修——UTC slice 凌晨窗口差一天） |
 | lib/bundle-date-sanity.mjs | bundle-date-sanity.test、run-accept | run bundle 未来日期检查（操作侧验收前哨——r1-license 29 处未来日期事故的机械面；消费语境 = run-accept 行） |
 | lib/vendor-artifacts.mjs | cdp-ask-smoke、client-hitl-smoke、client-load-smoke、defaults-probe、discipline-probe、wave-execution-probe、entry-chain-probe、l4-lite-smoke、preset-smoke、session-replay、team-preflight-smoke、vendor-artifacts.test | vendor 构建产物自检 |
@@ -148,6 +148,7 @@
 | lib/replay-request.mjs | record-role-fixture、replay-request.test、snapshot-replay-smoke | 组装请求面逐条比较：persona、header 全序列、四处 user/message 注入（含时钟序列）（定向归一化） |
 | lib/profile-health.mjs | profile-health.test、record-role-fixture、snapshot-replay-smoke、team-preflight-smoke | dev profile 版本面预检：团队层版本 == 运行时 dsh 版本；缺席/落后 → 明确 exit 2 + 重建指令（BUG-066） |
 | lib/startup-hint.mjs | startup-hint.test、web-harness | boot 失败归因：识别日志里的 incompatible/exemption，指出 profile 未随 pin 重钉（BUG-066） |
+| lib/client-load-select.mjs | client-load-reference、client-load-select.test | client-load 绑定会话选择（只认 lead 根；防富 coach 会话假红，BUG-142） |
 | lib/port-reclaim-policy.mjs | port-reclaim.test、port-reclaim | 端口 listener 身份纯判据（只认本仓 DSH web；无子进程依赖） |
 | lib/run-lock.mjs | client-load-smoke、run-lock.test、snapshot-replay-smoke | 冒烟脚本进程级运行锁：存活拒跑、陈旧锁接管、释放（共享 DSH_HOME 的脚本互斥） |
 | lib/replay-network-offline.cjs | snapshot-replay-smoke | 回放 A 层离线闸 preload：非 loopback DNS(lookup/resolve*)/connect 立即失败；只作用于 dsh 主进程（BUG-064/067） |

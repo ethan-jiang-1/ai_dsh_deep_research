@@ -7,6 +7,8 @@ import { planCardsOf } from './plan-card.mjs'
 import { HITL_CONTRACT_DATE, PRE_CONTRACT_NOTE, decisionsLines, isPreContract, readinessOf } from './node-gate-contracts.mjs'
 import { epochDateOf, toDateStr } from './schema-scan-core.mjs'
 import { slugInArgs } from '../../packages/deep-research-pack/src/lib/bundle-bind.ts'
+import { askKindOf } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
+import { argsObjectOf } from '../../packages/deep-research-pack/src/lib/journal-wire.ts'
 
 /** 纯日志 reader：.jsonl 直读；.zstd 报线索后按空语料继续（''，判据偏红方向——红必须带线索）。
  *  zstd CLI 解压由驱动壳注入，本模块零子进程。 */
@@ -161,7 +163,7 @@ export function scanWitnessLogs(sessionsRoot, slug, { readLog = emptyOnUnreadabl
         if (e?.type !== 'tool/call' || e?.data?.name !== 'ask_user_question') continue
         const args = String(e.data?.arguments ?? '')
         // 交付审阅卡的识别面：历史 header（交付审阅 / HITL2）+ 产品当前 header/选项（审阅与拍板 / 定稿（按现稿交付））；大小写不敏感。
-        if (/交付审阅|hitl2|审阅与拍板|定稿（按现稿交付）/i.test(args)) asks.set(e.data?.callId, { args, time: typeof e.time === 'number' ? e.time : null })
+        if (askKindOf(argsObjectOf(args)) === 'hitl2') asks.set(e.data?.callId, { args, time: typeof e.time === 'number' ? e.time : null })
       }
       // 只认最新一条交付审阅 ask：更早 ask 的答复不得为更新的版本作证（BUG-075）。
       for (const [callId, info] of asks) {
@@ -200,7 +202,7 @@ export function scanWitnessLogs(sessionsRoot, slug, { readLog = emptyOnUnreadabl
             try { parsed = JSON.parse(content) } catch { /* 文本答复 */ }
             const labels = []
             collectLabels(parsed, labels)
-            const label = labels.find((l) => /定稿/.test(l))
+            const label = labels.find((l) => /定稿|finalize|deliver as[- ]is/i.test(l))
             if (label !== undefined) {
               const date = eventDateOf(e)
               if (contract !== null && date !== null && date < contract) out.staleReplies++
@@ -228,7 +230,7 @@ export function scanWitnessLogs(sessionsRoot, slug, { readLog = emptyOnUnreadabl
           const labels = []
           collectLabels(parsed, labels)
           if (labels.length === 0 && content.trim() !== '') labels.push(content.trim())
-          const label = labels.find((l) => /定稿/.test(l))
+          const label = labels.find((l) => /定稿|finalize|deliver as[- ]is/i.test(l))
           if (label === undefined) continue
           out.replies.push({
             callId: src.callId,
@@ -388,13 +390,19 @@ function planCardNote(planCards, planCardOver) {
  * @returns 是否计为 HITL2 拍板行。
  */
 export const isHitl2Mention = (line) => /HITL2/i.test(line) || (/交付审阅/.test(line) && /代理模拟|hitl-answer/.test(line))
-const HITL2_NEGATIVE = /未拍板|未定|待确认|待定|等待|尚未|未决|待补|待审|未答复|pending/i
-const HITL2_DECISION = /定稿|追认|拍板|按现稿|批准|认可|确认|通过|改说法|补研究|修订/
+const HITL2_PENDING = /(?:待(?:用户)?确认|待定|等待|尚未|暂缓|未拍板|未定|未答复|pending|await)/i
+const HITL2_DECISION = /定稿|追认|拍板|按现稿|批准|认可|确认|通过|改说法|补研究|修订|同意|无异议|采纳|\bOK\b|approved|finalize|deliver as[- ]is|继续|照办/i
 
+/**
+ * 一行 §Decisions 是否算「HITL2 拍板行」。
+ * 代理记账行（`交付审阅` + `代理模拟`）是官方写入器产物，直接算拍板（BUG-144）；
+ * 自由行：明确 pending 语义即排除，否则 HITL2 提及行默认算拍板（不再依赖决策词白名单，BUG-140）。
+ */
 export function isHitl2Row(line) {
   if (!isHitl2Mention(line)) return false
-  if (HITL2_NEGATIVE.test(line)) return false
-  return HITL2_DECISION.test(line)
+  if (/交付审阅/.test(line) && /代理模拟|hitl-answer/.test(line)) return !HITL2_PENDING.test(line)
+  if (HITL2_PENDING.test(line)) return false
+  return HITL2_DECISION.test(line) || /HITL2/i.test(line)
 }
 
 export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadableLogReader, witness = null) {

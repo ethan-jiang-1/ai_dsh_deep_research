@@ -342,3 +342,14 @@ test('BUG-078 repairReceiptPaths：相对 `..` present → null + unportable，�
     assert.ok(r.actions.some((a) => a.includes('present')), r.actions.join('；'))
   } finally { cleanup() }
 })
+
+// 负例留证 2026-11-13：BUG-145——人工走查内含 ## 标题被当节尾，重跑/repair 静默丢整节/尾部。
+// 还原法 = manualEvidenceOf 在任意 /^##\s/ 处截断。
+test('BUG-145 人工走查内含二级标题：完整保留到 EOF（或已知节前）', () => {
+  const inside = '## 人工走查\n\n## 检查记录\n\n已核。'
+  assert.equal(manualEvidenceOf(inside), '## 人工走查\n\n## 检查记录\n\n已核。')
+  const tail = '## 人工走查\n\n### 检查\n\n- 项1\n\n## 附注\n\n其它。'
+  assert.equal(manualEvidenceOf(tail), '## 人工走查\n\n### 检查\n\n- 项1\n\n## 附注\n\n其它。')
+  assert.match(withManualEvidence('# Acceptance\n\nmech\n', inside), /## 检查记录\n\n已核。/)
+  assert.match(withManualEvidence('# Acceptance\n\nmech\n', tail), /## 附注\n\n其它。/)
+})

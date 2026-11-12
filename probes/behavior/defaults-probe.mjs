@@ -22,7 +22,8 @@ import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mj
 import { readSessionTextOf } from '../../scripts/lib/session-log.mjs';
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/vendor-artifacts.mjs';
 import { reclaimPort } from '../../scripts/lib/port-reclaim.mjs';
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto'
+import { createServer } from 'node:net';
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -32,7 +33,7 @@ const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
   return i === -1 ? fallback : process.argv[i + 1];
 };
-const PORT = Number(arg('port', '3124'));
+let port = Number(arg('port', '3124'));
 const KEEP = process.argv.includes('--keep');
 const BOOT_TIMEOUT_MS = 180_000;
 const TURN_TIMEOUT_MS = 180_000;
@@ -55,8 +56,23 @@ if (!existsSync(join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts'))) {
   }
 }
 
-const stale = await reclaimPort(PORT);
-if (stale !== null) { console.error(`defaults-probe: 端口 ${PORT} 预收割失败：${stale}`); process.exit(2); }
+const freePort = async () => {
+  const server = createServer()
+  const chosen = await new Promise((resolve, reject) => {
+    server.once('error', reject)
+    server.listen(0, '127.0.0.1', () => resolve(server.address().port))
+  })
+  await new Promise((resolve) => server.close(resolve))
+  return chosen
+}
+{
+  const stale = await reclaimPort(port)
+  if (stale !== null) {
+    const next = await freePort()
+    console.error(`defaults-probe: 端口 ${port} 预收割失败（${stale}）——自动改用临时端口 ${next}`)
+    port = next
+  }
+}
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const failures = [];
@@ -127,13 +143,13 @@ try {
     cwd: ROOT,
     profile: 'web',
     patchPath: join(ROOT, 'dev', 'research.overlay.yml'),
-    port: PORT,
+    port,
     env: withModelKey({ DSH_HOME: home }),
     timeoutMs: BOOT_TIMEOUT_MS,
     tailChars: 800,
-    detached: false,
+    detached: true,
   });
-  const base = `http://127.0.0.1:${PORT}`;
+  const base = `http://127.0.0.1:${port}`;
   const cookie = await authenticate(base, booted.token);
   const seeded = await askOf(base, cookie, seededWs, 'seeded');
   const auto = await askOf(base, cookie, autoWs, 'auto');
@@ -150,7 +166,7 @@ try {
   const report = [
     '# defaults-probe',
     '',
-    `- port: ${PORT}`,
+    `- port: ${port}`,
     `- seeded session: ${seeded.sessionId} ask=${seeded.args !== null} questions=${qSeeded}`,
     `- seeded args: ${argsSeeded.slice(0, 8000)}`,
     `- seeded assistant tail: ${String(seeded.assistant ?? '').slice(0, 1500)}`,
@@ -202,7 +218,10 @@ try {
   console.error('defaults-probe: 异常', error);
   exitCode = 1;
 } finally {
-  try { await booted?.stop?.(); } catch { /* stop 失败不掩盖判定 */ }
+  // web 会派生孙进程：整组 SIGKILL；失败再杀直接子进程（BUG-136：失败路径不得留宿主）。
+  if (booted?.child?.pid !== undefined) {
+    try { process.kill(-booted.child.pid, 'SIGKILL') } catch { try { booted.child.kill('SIGKILL') } catch { /* 已死 */ } }
+  }
   if (!KEEP) rmSync(WS, { recursive: true, force: true });
 }
 process.exit(failures.length === 0 && exitCode === 0 ? 0 : 1);

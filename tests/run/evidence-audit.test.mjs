@@ -301,3 +301,14 @@ test('file:// 源：新 run 无 provenance → MAJOR；旧场（无 run.md）→
     assert.equal(oldHit[0].level, 'INFO', '旧场只提示，不追溯判红');
   } finally { rmSync(base, { recursive: true, force: true }); }
 });
+
+// 负例留证 2026-11-13：BUG-148——<16 字引文被静默丢弃，短伪造无 finding。还原法 = 长度门槛直接 continue。
+test('BUG-148 短引文不静默：进 shortQuotes 统计并产 INFO finding', () => withTmpCleanup(() => {
+  const { bundle, sessions } = fixture()
+  const evPath = join(bundle, 'evidence', 'ev-a.md')
+  writeFileSync(evPath, readFileSync(evPath, 'utf8').replace('\n## 解读', '\n> 短句伪造。\n\n## 解读'))
+  const r = auditBundle(bundle, sessions)
+  assert.equal(r.stats.shortQuotes, 1)
+  assert.ok(r.findings.some((f) => f.kind === '短引文未回溯' && f.detail.includes('短句伪造')))
+  assert.match(r.report, /短引文 1 条未回溯/)
+}))

@@ -141,3 +141,16 @@
 | [BUG-133](BUG-133-sanitize-patch-nested-unknown-keys-silent.md) | BUG-133：sanitizePatch 对 output/source 的未知子键「静默忽略」——与头注「未知子键拒绝」相反，拼错即丢 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
 | [BUG-134](BUG-134-gate-witness-bound-slugs-scans-content.md) | BUG-134：门③见证绑定扫描整段 args 文本——content 里提到 `drt_<别的>/` 就把会话绑到别的 bundle，拍板见证可被借用 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
 | [BUG-135](BUG-135-slug-charset-unwritten-binding-silent.md) | BUG-135：slug 字符集未成文，绑定只认 `[a-z0-9-]`——`drt_my_topic/` 静默不绑定（状态页签/归因/见证全失效） | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-136](BUG-136-defaults-probe-port-self-lock.md) | BUG-136：defaults-probe 自锁——泄漏的 3124 宿主 + 身份检查 → 拒绝收割、探针永远「未跑」 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-137](BUG-137-defaults-probe-language-merged-into-defaults-option.md) | BUG-137：D50 真模型探针 C5 红——语言被写进「沿用项目默认」选项名（语言冒充项目默认） | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-138](BUG-138-method-heading-unrecognized-suffix-ghost-entry.md) | BUG-138：标题带未识别后缀的方法条目——编辑会新建同名条目，旧条目成为「删不掉、改不动」的幽灵 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-139](BUG-139-defaults-bom-parse-failure.md) | BUG-139：research-defaults.json 带 UTF-8 BOM 即被判「parse 错」——整份设置失效，Windows 编辑器常规产出 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-140](BUG-140-hitl2-vocabulary-two-way-misclassification.md) | BUG-140：isHitl2Row 的词表双向误判——「待用户确认」仍算拍板（门③ fail-open 复发），「无异议/OK/approved/采纳」不算（ | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-141](BUG-141-readiness-inline-context-keyword-gap.md) | BUG-141：readiness 行内引用的修复只认上下文关键词——旧引用带关键词、真实判定不带 → 仍被旧值劫持（双向） | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-142](BUG-142-client-load-selects-method-editor-session.md) | BUG-142：client-load 的绑定会话选择未限定 lead——富的 method-editor 会话被选中，状态页断言假红（X8 68 PASS / | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-143](BUG-143-method-editor-root-has-team-lead-tools.md) | BUG-143：method-editor 根会话仍拿到 Team Lead 工具与身份——实测在 method-editor 会话里 spawn_teamma | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-144](BUG-144-kickoff-provenance-rows-not-counted-as-hitl2.md) | BUG-144：run-kickoff 的代理记账行被 075 的词表修复打哑——「OK/继续/就按这个吧」的合法代理拍板不再算 HITL2 行 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-145](BUG-145-manual-evidence-subheading-truncation.md) | BUG-145：manualEvidenceOf 以任意 `##` 为节尾——人工走查里出现二级标题，整节/尾部在重跑验收时静默丢弃（062 复发） | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-146](BUG-146-hitl-signatures-chinese-only-bilingual.md) | BUG-146：HITL 判型/答复识别只认中文文案——英语卡让门③必红、UI 停靠点误判（id 本已语言无关） | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-147](BUG-147-client-hitl-zero-answers-false-green.md) | BUG-147：client-hitl-smoke ⑤b 把「共作答 0 题」当通过——代理一题未答，却断言「挂起卡已答」 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-148](BUG-148-evidence-short-quotes-not-audited.md) | BUG-148：evidence-audit 只回溯 ≥16 字的引文——短伪造摘录完全不进审计（无 finding） | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |

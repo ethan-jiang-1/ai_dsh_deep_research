@@ -12,7 +12,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { foldLibrary, instructionOf, editInstruction, createInstruction, saveInstruction, renderLibraryEntry, flattenSectionValue, summaryOfEntry, SUMMARY_MAX_LENGTH, SECTION_LABELS, libraryReadStateOf, methodNameIssue } from '../../packages/deep-research-pack/src/lib/library-fold.ts';
-import { upsertMethodEntry, clearDefaultMethodEntry, setDefaultMethodEntry } from '../../packages/deep-research-pack/src/lib/method-library-write.ts';
+import { upsertMethodEntry, clearDefaultMethodEntry, setDefaultMethodEntry, removeMethodEntry } from '../../packages/deep-research-pack/src/lib/method-library-write.ts';
 import { findDefaultMethod } from '../../packages/deep-research-pack/src/lib/research-defaults.ts';
 import { SELFTEST_LIBRARY } from '../../scripts/lib/selftest-library.mjs';
 import { locateSessionStrategy, SHOW_MORE_SESSIONS_PATTERN } from '../../scripts/lib/web-ui-nav.mjs';
@@ -494,4 +494,14 @@ test('BUG-128 全角空格 U+3000：upsert 仍匹配同一标题，不复制', (
 test('BUG-127 半角 heading 的 upsert 也命中 updated', () => {
   const result = upsertMethodEntry('# 库\n\n## 方法(来源)\n\n- 找来源: a\n', libEntry('方法'))
   assert.equal(result.action, 'updated')
+})
+
+// 负例留证 2026-11-13：BUG-138——标题带未识别尾部文本时 upsert 新建、remove 删不掉幽灵。
+// 还原法 = target.length===0 直接 created / remove 只按标题正则。
+test('BUG-138 未识别尾部标题：编辑 fail-loud，删除按 fold 名称可寻址', () => {
+  const lib = '# 库\n\n## 方法（来源）[草稿]\n\n- 找来源: a\n- 怎么核实: b\n- 报告怎么写: c\n- 不承诺: d\n'
+  assert.throws(() => upsertMethodEntry(lib, libEntry('方法')), /标题格式不可识别/)
+  const removed = removeMethodEntry(lib, '方法')
+  assert.equal(removed.removed, true)
+  assert.equal(foldLibrary(removed.text).some((entry) => entry.name === '方法'), false)
 })

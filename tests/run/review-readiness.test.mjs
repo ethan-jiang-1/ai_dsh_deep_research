@@ -200,3 +200,17 @@ test('终局判定（BUG-074）：同行多判定取「本轮/真实终局」的
   assert.equal(terminalReadiness('## readiness: FAIL\n\n| —— 结论 —— | **readiness: PASS** |\n'), 'FAIL');
   assert.equal(terminalReadiness('## readiness: PASS | FAIL\n'), null);
 });
+
+// 负例留证 2026-11-13：BUG-141——旧引用带关键词、真实判定裸写时旧值劫持。还原法 = 关键词过滤 + 括号不排除。
+test('BUG-141 行内仲裁按「未包裹」而非关键词：裸写真实判定胜出', () => {
+  const cases = [
+    ['旧轮真实记录：`readiness: PASS`；现在 readiness: FAIL', 'FAIL'],
+    ['旧轮真实记录：`readiness: FAIL`；现在 readiness: PASS', 'PASS'],
+    ['见最终结论：旧记录 `readiness: PASS`；新判定 readiness: FAIL', 'FAIL'],
+    ['上轮 readiness: PASS；本轮 readiness: FAIL', 'FAIL'],
+    ['本轮 readiness: FAIL；旧轮 readiness: PASS', 'FAIL'],
+  ]
+  for (const [line, want] of cases) assert.equal(terminalReadiness(`${line}\n`), want, line)
+  // 括号内历史引用仍不夺权
+  assert.equal(terminalReadiness('上一场 review 的结论是（第 1 轮 readiness: FAIL），本场尚未审查。\n'), null)
+})

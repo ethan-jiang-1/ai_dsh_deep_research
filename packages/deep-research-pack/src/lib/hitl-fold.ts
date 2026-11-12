@@ -176,18 +176,20 @@ interface AnchorFileFacts {
  * 卡片形状：HITL1 首问 header 恒为「研究类型」；HITL2 选项恒含「按现稿定稿」。其余 =
  * 契约外（中途确认）。
  */
-type AskKind = 'hitl1' | 'hitl2' | 'unknown'
+export type AskKind = 'hitl1' | 'hitl2' | 'unknown'
 
 /** 开放 ask 的归属判型（解析核 = journal-wire.argsObjectOf；本件哨兵 = 'unknown'）。 */
-function askKindOf(args: unknown): AskKind {
+export function askKindOf(args: unknown): AskKind {
   const obj = argsObjectOf(args)
   if (obj === null) return 'unknown'
-  const text = JSON.stringify(obj)
-  // 当前 HITL2 措辞（rerun 不满转接卡：`定稿（按现稿交付）`）；旧措辞 `按现稿定稿` 只作历史别名——
-  // 历史会话的尾窗仍要判成交付审阅，否则旧 run 的锚点如实退化成「中途确认」。
-  if (text.includes('定稿（按现稿交付）')) return 'hitl2'
-  if (['按现稿定稿'].some((legacy) => text.includes(legacy))) return 'hitl2'
-  if (text.includes('研究类型')) return 'hitl1'
+  const questions = Array.isArray(obj.questions) ? obj.questions : []
+  const texts = questions.map((q) => JSON.stringify(q ?? {})).join('\n') + '\n' + JSON.stringify(obj)
+  // 结构化 id 优先（语言无关）：HITL1 首问 research_type；HITL2 卡 hitl2_delivery（BUG-146）。
+  if (questions.some((q) => (q as { id?: unknown } | null)?.id === 'hitl2_delivery')) return 'hitl2'
+  if (questions.some((q) => (q as { id?: unknown } | null)?.id === 'research_type')) return 'hitl1'
+  // 文案签名只作历史兼容兜底（中文旧卡 + 英文新卡）。
+  if (/定稿（按现稿交付）|按现稿定稿|finalize|deliver as[- ]is/i.test(texts)) return 'hitl2'
+  if (/研究类型|research type/i.test(texts)) return 'hitl1'
   return 'unknown'
 }
 

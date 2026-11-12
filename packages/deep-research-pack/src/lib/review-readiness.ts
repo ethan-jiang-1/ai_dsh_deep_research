@@ -87,12 +87,14 @@ function lastInlineVerdict(line: string): Readiness | null {
   const ranges: Array<[number, number]> = []
   for (const m of line.matchAll(/(`+)[\s\S]*?\1/g)) ranges.push([m.index ?? 0, (m.index ?? 0) + m[0].length])
   for (const m of line.matchAll(/(\*\*|__)[\s\S]*?\1/g)) ranges.push([m.index ?? 0, (m.index ?? 0) + m[0].length])
+  // 括号内的判定是历史引用（`（第 1 轮 readiness: FAIL）`），不夺权。
+  for (const m of line.matchAll(/[（(][^）)]*[）)]/g)) ranges.push([m.index ?? 0, (m.index ?? 0) + m[0].length])
   let found: Readiness | null = null
   for (const match of line.matchAll(INLINE_VERDICT)) {
     const index = match.index ?? 0
     if (ranges.some(([start, end]) => index >= start && index < end)) continue
     const before = line.slice(Math.max(0, index - 20), index)
-    if (!/本轮|终局|真实|最终|当前|最后/.test(before)) continue
+    if (!/本轮|终局|真实|最终|当前|最后|现在|新判定/.test(before)) continue
     found = match[1]!.toUpperCase() as Readiness
   }
   return found

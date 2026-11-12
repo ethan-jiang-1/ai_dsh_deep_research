@@ -612,6 +612,155 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
   pack 侧 `slugInArgs` 已修过 BUG-090（只认路径字段），门侧没共享该判据（注释声称同源）。
 - **对照**：真实写过 drt_b 路径 + HITL2 答复仍应 PASS（修复判据里的绿对照）。
 - **下一层**：`presentGate` 的会话范围同样受此绑定污染（路径仍需匹配本 bundle，风险较低）；未跑，记空白。
+### 第 46 轮（2026-11-13 03:4x）：D50 真模型探针 C5 红 + 探针失败路径泄漏
+
+- **新卡**：[BUG-137](../_archived/fixed_bugs/BUG-137-defaults-probe-language-merged-into-defaults-option.md) **P2 等人拍板**——
+  `defaults-probe` seeded 场景 C5 失败：HITL1 第三问的选项名写成
+  「沿用项目默认：近 12 个月 + official/regulatory + **中文**」——语言被并入「项目默认」选项（D50 明令禁止）。
+  auto 场景对照 PASS，说明不是探针一律判红。
+- **BUG-136 补证（第二例）**：同一探针**失败退出也不清理宿主**（3125 留下 pid 81155）→ 换端口重跑即
+  「身份不可读拒绝收割」exit 2；我已清理自己起的 3125 宿主，3124 的陌生宿主（73948）未动。
+- **未跑**：C5 的多次稳定性采样（需先修 136，避免继续制造孤儿宿主）；记空白。
+### 第 47 轮（2026-11-13 03:5x）：归一化覆盖不到的尾部 = 幽灵条目
+
+- **新卡**：[BUG-138](../_archived/fixed_bugs/BUG-138-method-heading-unrecognized-suffix-ghost-entry.md) **P2 修复就绪**——
+  标题带未识别尾部（`[草稿]`、`v2`）时，fold 读得出 name，但 upsert 的白名单正则匹配不到 → **created**
+  造出第二条同名；`removeMethodEntry` 只删得掉新的那条，旧条目成**幽灵**（再删返回 false、再编辑又新建）。
+  实测：`created [方法, 方法]` → remove `[方法]` → remove again `false`。
+- **对照**：`(待审)`（半角括号段）能正常 updated——差别只在尾部段是否在正则白名单里。
+- **下一层**：默认标记与幽灵的组合（两同名条目的 default 计数）；`removeMethodEntry` 按 fold 行号定位的
+  改法未实现；记空白。
+### 第 48 轮（2026-11-13 04:0x）：设置文件的 BOM
+
+- **新卡**：[BUG-139](../_archived/fixed_bugs/BUG-139-defaults-bom-parse-failure.md) **P2 修复就绪**——
+  `research-defaults.json` 首字节为 UTF-8 BOM 时 `parseDefaults` 直接 `JSON.parse` → `file=parse`：
+  面板 invalid、命令拒绝、`research:defaults` prompt 整段不注入，唯一出路是 clear（丢设置）。
+  Windows 记事本/PowerShell 的常规「UTF-8 with BOM」即可触发。
+- **对照**：无 BOM 的同一内容 problems=[]、value 正常。
+- **下一层**：`frontmatter.mjs` 的 BOM 面（工具写入为主，风险低）未改；记空白。
+### 第 49 轮（2026-11-13 04:1x）：两条 P1 的修复只收窄了词表/关键词
+
+- **[BUG-140](../_archived/fixed_bugs/BUG-140-hitl2-vocabulary-two-way-misclassification.md) P1 等人拍板**——075 修复的
+  邻接复发：`HITL2 待用户确认（v2）` 不在否定表（表里只有「待确认」）却含决策词「确认」→ 计为拍板行；
+  合成 bundle（v1 答复 + v2 pending 行）**门③ PASS**。反向：`无异议/OK/approved/采纳` 不在决策白名单
+  → 真拍板被判非行（误杀）。
+- **[BUG-141](../_archived/fixed_bugs/BUG-141-readiness-inline-context-keyword-gap.md) P1 等人拍板**——074 修复的邻接复发：
+  `旧轮真实记录：\`readiness: PASS\`；现在 readiness: FAIL` → **PASS**（旧引用带「真实」、裸写新判定不带
+  关键词）；反向 → **FAIL**；引号 PASS + 裸写 FAIL → **null**。
+- **共性**：两处都把语义判断做成了有限词表/上下文窗口；修复方向应是「范围仲裁 + pending 优先/默认」
+  而不是继续加词。
+- **修复回归（A 的 127–135 批）**：`sanitizePatch` 嵌套未知键现在进 problems（133 ✓）；8 进程同
+  expectedRevision 并发写从「2 个成功」变「**恰好 1 个成功**」（132 ✓）；`show` 输出带 `warn=` 且
+  set/unset 对未知键 fail-loud（131 ✓）。
+- **下一层**：X8（client-load）在 275b8c03 上跑（12 PASS 进行中）；074/075 正向用例回归；记空白。
+### 第 50 轮（2026-11-13 04:2x）：X8 红追到「method-editor 会话」
+
+- **X8 现状（275b8c03）**：68 PASS / 4 FAIL（上次绿 620ff4d3），失败项：重入点描边 / rerun 图例 /
+  停靠点诚实线（状态页）。
+- **追因**：meta.boundSession = `method-coach-0d7456dd…`（title 方法编辑，header preset =
+  **method-editor**）；它**写过** `drt_cn-us-ai-perception/run.md`（boundBy=write），事件数 ≥60、标题唯一
+  → 被选择器当成「真实 run 的绑定会话」。
+- **新卡**：
+  - [BUG-142](../_archived/fixed_bugs/BUG-142-client-load-selects-method-editor-session.md) P2 修复就绪——选择器缺
+    「lead 根」门；method-editor 富会话被选中 → 状态页按 lead 期望判 → **假红**（不是产品渲染回归）。
+  - [BUG-143](../_archived/fixed_bugs/BUG-143-method-editor-root-has-team-lead-tools.md) P2 等人拍板——method-editor
+    根会话**仍拿到 Team Lead 全套工具**（实测 spawn_teammate×4 / team_task_create×9 / create_goal×1 /
+    写 run.md）；071 的 persona 纠偏没覆盖 method-editor（当时「下一层」原话）。
+- **下一层**：若产品希望 method-editor 能看 run 状态，则 142 的修法改为「按 coach 自己的锚点真值判」；
+  143 需产品决定 persona 边界还是 vendor 门控；记空白。
+### 第 51 轮（2026-11-13 04:3x）：写侧/读侧不成对——代理记账行被打哑
+
+- **新卡**：[BUG-144](../_archived/fixed_bugs/BUG-144-kickoff-provenance-rows-not-counted-as-hitl2.md) **P1 等人拍板**——
+  `run-kickoff` 的官方代理记账行（`closingProvenanceRow` 写入 §Decisions）在 075 修复后不再被
+  `isHitl2Row` 认：原话是 `OK`/`继续`/`就按这个吧` 时行内含「交付审阅 + 代理模拟」却无决策词 → false。
+  实测：`OK` false、`继续` false、`就按这个吧` false、`同意按现稿交付` true。
+- **根因**：mention 白名单专门把「交付审阅+代理模拟」当 HITL2 行，decision 白名单又把它一票否决；
+  写侧不强制决策词，读侧却要求——**官方写入器不在读侧白名单里**。
+- **与 140 的区别**：140 是用户手写行的词表双向误判；本条是写/读不成对（修复点不同）。
+- **下一层**：历史 §Decisions 里的代理行统计（真实语料）未扫；记空白。
+### 第 52 轮（2026-11-13 04:4x）：人工走查里的二级标题
+
+- **新卡**：[BUG-145](../_archived/fixed_bugs/BUG-145-manual-evidence-subheading-truncation.md) **P2 修复就绪**——
+  `manualEvidenceOf` 以任意 `##` 为节尾：人工走查内含 `## 检查记录` → 返回 **null**（整节丢失）；
+  `## 附注` → 尾部被截断。重跑验收/`--repair` 静默覆盖，062 的「保留人工证据」承诺在自由书写下失效。
+- **对照**：纯文本与 `###` 子标题正常保留。
+- **同轮排除**：`projectionOf` ↔ `evaluateBundle` 在 8 个真实 protocol 上 **0 红**（写/读同源）；
+  `serializeDefaults` ↔ `parseDefaults` 8960 组矩阵只差 families 的规范化排序（设计行为，不建卡）。
+- **下一层**：acceptance 其它保留面（`--repair` 的 acceptance 处置已覆盖）未扫；记空白。
+### 第 53 轮（2026-11-13 04:5x）：真挂载档全绿 + 140 证据补强
+
+- **preset-smoke 真挂载**（`DSH_SMOKE_REAL=1`）：**37 PASS / 0 FAIL**——5 角色 + 2 worker profile
+  全部真挂载；method-editor 只看见自己的 skills、Lead 看见 lead+角色 skills（D47 协调面）。
+  （注意：不带 `DSH_SMOKE_REAL=1` 时它只跑文件预检并 exit 0，输出写「预检绿」——不算 ALL PASS。）
+- **140 补证**：拍板行里含跟进词也会被否定表误杀——`HITL2 定稿（附未决项：补研究 W3）` 与
+  `HITL2 通过（待补引用 3 处）` 都判 **false**（true 应保留）；已补进 140 的表格。
+- **本轮无新卡**：keyless 面的新发现开始变薄；剩余主动面 = 136–145 修复后的回归、真模型探针
+  （136 端口自锁未修前不宜再跑，避免继续制造孤儿宿主）。
+### 第 54 轮（2026-11-13 05:0x）：双语产品 × 中文 HITL 签名
+
+- **新卡**：[BUG-146](../_archived/fixed_bugs/BUG-146-hitl-signatures-chinese-only-bilingual.md) **P2 等人拍板**——
+  HITL 判型只认中文文案（`研究类型` / `定稿（按现稿交付）`），门侧答复要求 label 含「定稿」：
+  英文 HITL2 卡 + 英文答复 → **门③ RED**（答复在但不被认）；`deriveAnchors` → anchor-2 **upcoming**
+  （开放交付审阅不显示 pending）。
+- **关键**：ask 的 id 是语言无关的（`research_type` / `hitl2_delivery`），修法应优先用结构 id，
+  文案只作历史兼容；若产品决定「卡文案永远中文」，则 skill/persona 需显式钉住。
+- **下一层**：中文旧卡/历史卡回归、英文 idle 卡的 UI 实测；记空白。
+### 第 55 轮（2026-11-13 05:1x）：全绿输出里的「0 题」假绿
+
+- **新卡**：[BUG-147](../_archived/fixed_bugs/BUG-147-client-hitl-zero-answers-false-green.md) **P2 修复就绪**——
+  `client-hitl-smoke` 全绿（12 PASS），但 ⑤b 明细是「共作答 **0** 题 / 卡共 1 题 · Submit 已点击」；
+  断言 `/共作答 \d+ 题/` 把 0 也当通过 → 「挂起卡已答」是假绿（选择器未选中任何项，空提交关闭了回合）。
+- **同轮**：client-hitl 的其余观察（活标题翻转、横幅、右栏自动展开、二次挂起）**实打实 PASS**；
+  真模型调用正常。截图留档 `runtime/smoke-workspace/client-hitl-2026-11-12T19-19-45-025Z.png`。
+- **下一层**：`hitl-answer` 为何 0 题（选择器/卡片结构）；空提交是否产品允许；记空白。
+### 第 56 轮（2026-11-13 05:2x）：短引文不进审计
+
+- **新卡**：[BUG-148](../_archived/fixed_bugs/BUG-148-evidence-short-quotes-not-audited.md) **P2 修复就绪**——
+  evidence-audit 只收集 ≥16 字的 `>` 引文；插入「短句伪造。」（6 字）与一条 23 字伪造，长伪造被
+  `[转写不符]` 点名，**短伪造在 audit.md 里 0 次出现**（连 INFO 都没有；`摘录回溯 0/325` 的分母也不含它）。
+- **对照**：长伪造 finding 正确；短引文是「静默丢弃」而非「降级报告」。
+- **下一层**：真实 bundle 的短 `>` 行统计（避免修完大规模误报）；记空白。
+## 第四轮 goal 收口（2026-11-13 05:3x，9 轮；目标 10，实际 22）
+
+### 本轮新发现（127–148，22 张）
+
+- **已修归档（127–135，9 张）**：半角括号默认标记 / U+3000 重复 / 绝对路径根别名 / 锁活 pid 永久阻塞 /
+  defaults 未知键静默 / expectedRevision 非原子 CAS / sanitizePatch 嵌套未知键 / 门③绑定扫 content /
+  slug 字符集未成文。
+- **活跃 13 张（136–148）**：
+  - 136 defaults-probe 端口自锁（泄漏宿主 + 身份检查；失败路径也泄漏）
+  - 137 D50 探针 C5：语言被并入「沿用项目默认」选项
+  - 138 方法标题未识别后缀 → 编辑生成同名幽灵（删不掉/改不动）
+  - 139 research-defaults BOM → 整份设置失效
+  - 140 isHitl2Row 词表双向误判（pending 词变体仍算拍板；无异议/OK/approved 误杀；含跟进词误杀）
+  - 141 readiness 行内引用修复只认上下文关键词（旧引用劫持 / null）
+  - 142 client-load 绑定会话未限定 lead（method-editor 富会话 → X8 68/4 假红）
+  - 143 method-editor 根会话仍有 Team Lead 工具/身份（实测 spawn_teammate/team_task/写 run.md）
+  - 144 run-kickoff 代理记账行不被 isHitl2Row 认（官方恢复路径被打哑）
+  - 145 人工走查节含二级标题 → 整节/尾部在重跑验收时静默丢弃（062 复发）
+  - 146 HITL 判型/答复识别只认中文文案（英语卡 → 门③必红、UI 锚点误判）
+  - 147 client-hitl ⑤b 把「共作答 0 题」当通过（代理一题未答的假绿）
+  - 148 evidence-audit 只回溯 ≥16 字引文（短伪造无 finding、分母漏计）
+
+### 覆盖增量（本 goal 新增）
+
+- 真模型：defaults-probe（2 调用，C5 红→137）、client-hitl（2 调用，12 PASS，但暴露 147 的 0 题假绿）。
+- 观察面：X8 在 275b8c03 上 68/4（142 选择器假红，非渲染回归）；seed X8 74/0、product-boot 16/0（更早轮）。
+- 对账/矩阵：projection↔audit 8/8 绿；defaults serialize↔parse 8960 组仅规范化排序；library render↔fold
+  干净；claims/verdicts 模板与解析器字段一致；写/读配对（145/144/146）成高产来源。
+- 「门槛/计数静默放行」类：0 题（147）、短引文（148）、未知键（131）、待用户确认（140）。
+
+### 未跑（交给下一轮/修复后）
+
+- 136 修好后的 137 复跑（≥2 次采样）；147 修好后的 client-hitl（须 ≥1 题且 selected 非空）；
+- 143 需产品取舍（persona 边界 vs vendor 门控）、146 的中文卡钉死或双语识别；
+- X6/team-preflight（真模型大档）未跑；`npm pack`/export-dist 受本机 root-owned npm cache 阻塞
+  （`sudo chown -R 502:20 ~/.npm`）。
+
+### 结论
+
+可达面在最后三轮明显见底（3→2→1 张新卡，最后多为「门槛静默放行/写读不成对」的邻接变体）。
+目标（≥10）早已达成；剩余价值集中在 **A 修完 136–148 后的逐条回归**与 **136 解除后的真模型复跑**。
 ## 用户答复（2026-11-11）
 
 - **Q1**：采纳；持续做，不设固定轮数（goal 驱动，剥洋葱式逐层深入）。

@@ -27,6 +27,7 @@
 // 前置：source dev/env.sh；DEEPSEEK_API_KEY 已配；pack 已构建；zstd CLI 在 PATH。
 // 用法：source dev/env.sh && node --import tsx/esm scripts/smoke/client-hitl-smoke.mjs [--port 3113]
 import { spawnSync } from 'node:child_process'
+import { answeredCountOf } from '../lib/hitl-provenance.mjs'
 import { readdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -220,7 +221,8 @@ try {
       step(expandBackVisible, '⑤a 右栏已收起（页签 dock 保持挂载——观察者仍在）')
       // 答掉挂起卡（hitl-answer 子进程 = 代理模拟的唯一实现；本冒烟即验证场，标注如实）
       const answeredRun = spawnSync(process.execPath, ['--import', 'tsx/esm', join(ROOT, 'dev', 'hitl-answer.mjs'), '--port', String(PORT), '--token', token], { encoding: 'utf8', cwd: ROOT })
-      const answeredOk = answeredRun.status === 0 && /共作答 \d+ 题/.test(answeredRun.stdout ?? '')
+      const answeredCount = answeredCountOf(answeredRun.stdout ?? '')
+      const answeredOk = answeredRun.status === 0 && answeredCount !== null && answeredCount >= 1
       step(answeredOk, '⑤b 挂起卡已答（hitl-answer 子进程——代理模拟，如实标注）', (answeredRun.stdout ?? answeredRun.stderr ?? '').split('\n').filter((l) => l.includes('共作答') || l.includes('第 1 题'))[0]?.trim() ?? String(answeredRun.status))
       // 等回合闭合（lead 处理完答案落 turn/end；若再追问则再答一轮——最多两轮）
       let turnClosed = false

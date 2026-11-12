@@ -191,12 +191,20 @@ export function buildDelivered({ slug, bundleDir, corpusRoot, acceptedAt, presen
  * 取 acceptance.md 的「## 人工走查」节（含标题；无内容 → null）。人工走查是 L4 ③④ 的唯一载体，
  * 不可再生（BUG-062）：重跑验收 / --repair 必须保留它，不能按「可再生产物」删掉。
  */
+const MANUAL_TITLE = /^##\s*人工走查\s*$/
+/** acceptance 的已知节标题（生成器当前无 `##` 节；保留集合供未来扩展——人工节内部标题不算节尾）。 */
+const ACCEPTANCE_SECTION_TITLES = new Set(['人工走查', '检查', '回执', '清单', '读者版'])
+
 export function manualEvidenceOf(text) {
   const lines = String(text ?? '').split(/\r?\n/)
-  const start = lines.findIndex((line) => /^##\s*人工走查\s*$/.test(line))
+  const start = lines.findIndex((line) => MANUAL_TITLE.test(line))
   if (start === -1) return null
   const rest = lines.slice(start + 1)
-  const end = rest.findIndex((line) => /^##\s/.test(line))
+  // 只在**已知回执节标题**处截断；人工节内部的 `## 检查记录/## 附注` 是自由文本（BUG-145）。
+  const end = rest.findIndex((line) => {
+    const match = /^##\s*(.+?)\s*$/.exec(line)
+    return match !== null && ACCEPTANCE_SECTION_TITLES.has(match[1] ?? '') && !MANUAL_TITLE.test(line)
+  })
   const section = (end === -1 ? rest : rest.slice(0, end)).join('\n').trim()
   return section === '' ? null : `## 人工走查\n\n${section}`
 }

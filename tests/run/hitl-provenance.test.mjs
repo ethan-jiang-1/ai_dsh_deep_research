@@ -19,7 +19,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { provenanceLines, appendProvenance, batchToAnswered, attributionBundleOf, appendDecisionsRow, closingProvenanceRow } from '../../scripts/lib/hitl-provenance.mjs';
+import { answeredCountOf, provenanceLines, appendProvenance, batchToAnswered, attributionBundleOf, appendDecisionsRow, closingProvenanceRow } from '../../scripts/lib/hitl-provenance.mjs';
 import { toolCall } from '../fixtures/events.mjs';
 
 const ANSWERED = [
@@ -206,3 +206,10 @@ test('appendDecisionsRow：缺件 fail-loud——bundle 缺席 / 契约件不全
     );
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+// 负例留证 2026-11-13：BUG-147——「共作答 0 题」被当已答。还原法 = 正则 \\d+ 接受 0。
+test('BUG-147 answeredCountOf：0 题 → 0（不得当已答），1 题 → 1，无计数 → null', () => {
+  assert.equal(answeredCountOf('hitl-answer: 共作答 0 题 / 卡共 1 题 · Submit 已点击'), 0)
+  assert.equal(answeredCountOf('hitl-answer: 共作答 1 题 / 卡共 1 题'), 1)
+  assert.equal(answeredCountOf('no count'), null)
+})

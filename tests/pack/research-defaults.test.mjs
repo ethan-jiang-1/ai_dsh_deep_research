@@ -228,3 +228,12 @@ test('BUG-133 sanitizePatch：output/source 未知子键进 problems，不静默
   assert.ok(source.problems.some((item) => item.field === 'source.familes' && item.code === 'unknown'))
   assert.deepEqual(sanitizePatch({ output: { shape: 'full_report', audience: 'CFO' } }).problems, [])
 })
+
+// 负例留证 2026-11-13：BUG-139——BOM + 合法 JSON 被判 parse 错（整份设置失效）。
+// 还原法 = parseDefaults 直接 JSON.parse(text)。
+test('BUG-139 parseDefaults 容忍 UTF-8 BOM，坏 JSON 仍报 parse', () => {
+  const ok = parseDefaults('\uFEFF' + JSON.stringify({ schema: 1, revision: 2, effort: 'deep' }))
+  assert.deepEqual(ok.problems, [])
+  assert.equal(ok.value.effort, 'deep')
+  assert.equal(parseDefaults('\uFEFF{broken').problems[0]?.code, 'parse')
+})
