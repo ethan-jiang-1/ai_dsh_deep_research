@@ -80,6 +80,21 @@ BUG-150 的卡自己写明：「词表路线必然漏同义措辞」。
 - **git 血缘**：`git log --oneline -- _backlog/_archived/fixed_bugs/BUG-{074,141,150}*` 与
   `git show 4d6308c9 -- scripts/lib/node-gate-session-gates.mjs` 可见上述四轮与词表扩张。
 
+## 残留审计（2026-11-13 收口）
+
+判据面逐项三态（本仓 `scripts/lib` + pack `src/lib` 的判定路径）：
+
+- **结构化事实**：HITL2/present（会话事件）、readiness（`review/readiness.json`，门禁与驾驶舱同源）、
+  claims/verdicts（JSON）、protocol（JSON）、人工走查（显式标记）。
+- **闭集字段校验（不是猜）**：门L 的 `- 状态:` 与 A–D 分级（词表 = 模板闭集，只容忍 Markdown 装饰）；
+  方法来源的 `phase:` 行（闭集）；`schema-scan` 的 readiness 存在级检查（只判在场，不判值）。
+- **遗留回退（只服务旧形态，不覆盖新契约 run）**：无 `review/` 的 readiness 散文、无 `run.md` 的
+  `UNATTESTED`、旧 HITL 卡的文案判型、门A 升级豁免的关键词（与门③ 事件链取合取——单读它不放行）。
+- **投影层**：驾驶舱与 `run-dashboard` 的 readiness 已读声明件；其余折层（活动流/摘要）只展示事实，
+  不产生交付判定。
+
+结论：交付判定路径上没有「在多种读法里挑一个」的残留；剩余容忍项都落在闭集字段、旧形态回退或投影层。
+
 ## 环境状态
 
 本 Note 只承载决定与证据。两张迁移卡均已归档（[I](../../_backlog/_archived/settled_issues/2026-11-13-verdict-shape-migration.md) ·

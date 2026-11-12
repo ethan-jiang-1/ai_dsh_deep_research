@@ -36,3 +36,11 @@ test('BUG-117/118 切会话清 trust/face/unbound；leads/findings 走 hasFile',
   assert.match(source, /leads: view\.hasFile\('leads\.md'\)/)
   assert.match(source, /findings: view\.hasFile\('findings\.md'\)/)
 })
+
+// 负例留证 2026-11-13：D51——状态页 readiness 曾只读 review.md 散文，与门禁（读声明件）分叉。
+// 红配方：把 useStatusFeed 的声明读取删掉、退回 terminalReadiness → 本组断言红。
+test('D51 接线：状态页读 review/readiness.json，并与门禁共用 readinessOfSources', () => {
+  const source = readFileSync(join(ROOT, 'packages/deep-research-pack/src/client/research-status/useStatusFeed.ts'), 'utf8')
+  assert.match(source, /view\.hasFile\('review\/readiness\.json'\)/)
+  assert.match(source, /readinessOfSources\(\{ reviewText, declarationText, hasReviewDir: names\.has\('review'\) \}\)/)
+})
