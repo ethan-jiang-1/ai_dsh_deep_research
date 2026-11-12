@@ -76,7 +76,7 @@ BUG-150 的卡自己写明：「词表路线必然漏同义措辞」。
 - **驾驶舱投影（同日收口）**：`useStatusFeed` 改读 `review/readiness.json`，与门禁共用
   `readinessOfSources`（声明优先、散文副本、歧义 unknown）；单测 + `typecheck` 绿；`client-load-smoke`
   当次 **NOT-RUN**（host load/cpu 4.47 > 1.5，未跑 ≠ 通过），待安静窗口复跑。
-- **最终基线**：`pnpm test` 1386 通过 / 0 失败；`pnpm verify` 全绿；`pnpm typecheck` 绿（2026-11-13）。
+- **最终基线**：`pnpm test` 1388 通过 / 0 失败；`pnpm verify` 全绿；`pnpm typecheck` 绿（2026-11-13）。
 - **git 血缘**：`git log --oneline -- _backlog/_archived/fixed_bugs/BUG-{074,141,150}*` 与
   `git show 4d6308c9 -- scripts/lib/node-gate-session-gates.mjs` 可见上述四轮与词表扩张。
 
