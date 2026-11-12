@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  draftInProgress, finalAddressOf, finalPathOf, finalPathOfWithin, finalReadPlan, isFinalAddress, latestFinalDelivery, latestPresentedFinalVersion,
+  deliveryFromReceipt, draftInProgress, finalAddressOf, finalPathOf, finalPathOfWithin, finalReadPlan, finalVersionOfPath, isFinalAddress, latestFinalDelivery, latestPresentedFinalVersion,
   sessionFileOf, shouldOpenFinal,
 } from '../../packages/deep-research-pack/src/lib/final-target.ts';
 
@@ -198,4 +198,25 @@ test('BUG-129 finalPathOfWithin：绝对路径必须落在 cwd 内，跨 workspa
   assert.equal(finalPathOfWithin('/Users/me/research-workspace/../other/drt_x/final.md', cwd), null)
   assert.equal(latestFinalDelivery([presented([{ path: '/tmp/other-workspace/drt_x/final.md' }])], cwd), null)
   assert.equal(latestPresentedFinalVersion([presented([{ path: '/tmp/other-workspace/drt_x/final/v9.md' }])], cwd), null)
+})
+
+// 负例留证 2026-11-13：D51——会话窗口不含旧 present 时，交付态从窗口读成「未交付」；
+// 持久回执 delivered.json 是同一事实。红配方：删掉 deliveryFromReceipt 的兜底接线（只留 present 事件）。
+test('deliveryFromReceipt：回执 → 交付见证（窗口外 present 的持久兜底）', () => {
+  const receipt = { present: { path: 'drt_x/final/v2.md', callId: 'p1', version: 2 }, final: { version: 2 } }
+  assert.deepEqual(deliveryFromReceipt(receipt), { path: 'drt_x/final/v2.md', turn: 0, callId: 'p1' })
+  // 缺 present.path 时用 slug + final.version 合成
+  assert.equal(deliveryFromReceipt({ final: { version: 3 } }, 'x')?.path, 'drt_x/final/v3.md')
+  // 畸形/空回执不冒充
+  assert.equal(deliveryFromReceipt(null), null)
+  assert.equal(deliveryFromReceipt({}), null)
+  assert.equal(deliveryFromReceipt({ present: { path: '  ' } }), null)
+})
+
+test('finalVersionOfPath：版本族路径才取版本', () => {
+  assert.equal(finalVersionOfPath('drt_x/final/v2.md'), 2)
+  assert.equal(finalVersionOfPath('drt_x/final/readable-v2.md'), 2)
+  assert.equal(finalVersionOfPath('drt_x/final.md'), null)
+  assert.equal(finalVersionOfPath('drt_x/notes/v9.md'), null)
+  assert.equal(finalVersionOfPath(undefined), null)
 })

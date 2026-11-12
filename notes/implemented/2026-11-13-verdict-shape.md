@@ -74,9 +74,12 @@ BUG-150 的卡自己写明：「词表路线必然漏同义措辞」。
 - **迁移 II·S3（版本/present）**：审计确认交付版本只认 `deliverables/presented` 事件；plan 版本 = 头部声明
   并报冲突，重写记录只作显示。`tests/contracts/present-version-conformance.test.mjs` 4 条不变量。
 - **驾驶舱投影（同日收口）**：`useStatusFeed` 改读 `review/readiness.json`，与门禁共用
-  `readinessOfSources`（声明优先、散文副本、歧义 unknown）；单测 + `typecheck` 绿；`client-load-smoke`
-  当次 **NOT-RUN**（host load/cpu 4.47 > 1.5，未跑 ≠ 通过），待安静窗口复跑。
-- **最终基线**：`pnpm test` 1388 通过 / 0 失败；`pnpm verify` 全绿；`pnpm typecheck` 绿（2026-11-13）。
+  `readinessOfSources`（声明优先、散文副本、歧义 unknown）。交付态另加持久回执兜底
+  （`deliveryFromReceipt`）：会话窗口不含旧 `present` 时读 `delivered.json`，修掉「已交付 run 显示
+  交付未见」的既有分叉；冒烟期望同步改用同一判据（声明件 + 回执）。
+  `client-load-smoke` **两档全绿**：`--seed` ALL PASS；dev 档 ALL PASS + 1 SKIP（无窗口内交付目标，
+  SKIP ≠ 通过，按冒烟口径记录）。
+- **最终基线**：`pnpm test` 1390 通过 / 0 失败；`pnpm verify` 全绿；`pnpm typecheck` 绿（2026-11-13）。
 - **git 血缘**：`git log --oneline -- _backlog/_archived/fixed_bugs/BUG-{074,141,150}*` 与
   `git show 4d6308c9 -- scripts/lib/node-gate-session-gates.mjs` 可见上述四轮与词表扩张。
 

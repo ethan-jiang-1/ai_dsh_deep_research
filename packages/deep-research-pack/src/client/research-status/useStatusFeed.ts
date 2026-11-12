@@ -15,7 +15,7 @@ import type { MemberActivitySummary } from '../../lib/member-activity.ts'
 import { bindingTrust, type BindingTrust } from '../../lib/binding-trust.ts'
 import { openRun } from '../../lib/run-context.ts'
 import { streamFailureOf } from '../../lib/stream-failure.ts'
-import { latestFinalDelivery, latestPresentedFinalVersion } from '../../lib/final-target.ts'
+import { deliveryFromReceipt, finalVersionOfPath, latestFinalDelivery, latestPresentedFinalVersion } from '../../lib/final-target.ts'
 import { runVersionFaceOf, type RunVersionFace } from '../../lib/run-version.ts'
 import { readinessOfSources } from '../../lib/review-readiness.ts'
 import type { TeamProjection } from '@deepseek-ai/dsh-experimental-agent-team/client'
@@ -60,6 +60,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   const [unbound, setUnbound] = useState(false)
   const [trust, setTrust] = useState<BindingTrust>({ kind: 'unbound' })
   const [journalSeen, setJournalSeen] = useState(false)
+  // 交付回执兜底（D51）：会话窗口可能不含旧的 present 事件；回执是持久事实。
+  const [receiptDelivery, setReceiptDelivery] = useState<ReturnType<typeof deliveryFromReceipt> | null>(null)
   const [kickoffHold, setKickoffHold] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const trustRef = useRef<BindingTrust>({ kind: 'unbound' })
@@ -162,6 +164,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
     const sessionId = props.sessionId
     if (sessionId === undefined || trust.kind !== 'bound') {
       setFace(null)
+      setReceiptDelivery(null)
       setUnbound(trust.kind === 'unbound' && journalSeen)
       setKickoffHold(trust.kind === 'suppressed' && trust.reason === 'kickoff')
       return
@@ -175,7 +178,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         const signal = new AbortController().signal
         const opened = await openRun(props.runSource(sessionId), `drt_${boundSlug}`, { signal })
         if (stopped) return
-        if (!opened.ok) { setFace(null); return }
+        if (!opened.ok) { setFace(null); setReceiptDelivery(null); return }
         const view = opened.value
         const names = view.names
         const evidenceDir = names.has('evidence') ? await view.list('evidence', { signal }) : null
@@ -188,6 +191,14 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         const finalFileNames = finalDir !== null && finalDir.ok
           ? finalDir.value.filter((entry) => entry.type === 'file').map((entry) => entry.name)
           : []
+        // 交付回执（持久事实）：窗口外的 present 由它兜底；畸形回执只是不兜底，不冒充。
+        const receiptRead = names.has('delivered.json') ? await view.read('delivered.json', { signal }) : null
+        if (stopped) return
+        let receiptValue: unknown = null
+        if (receiptRead !== null && receiptRead.ok) {
+          try { receiptValue = JSON.parse(receiptRead.value.text) } catch { receiptValue = null }
+        }
+        setReceiptDelivery(deliveryFromReceipt(receiptValue, boundSlug))
         const versions = latestRunVersion(finalFileNames)
         // 版本面事实：plan 头/重写记录 + plan/ 快照清单（rerun 版本轨的数据源，折算住 run-version）。
         const planRead = view.hasFile('plan.md') ? await view.read('plan.md', { signal }) : null
@@ -255,7 +266,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   // 交付事实（issue 2026-10-19）：`present` 声明 = 交付的机械判据（node-gate 门②）；`final.md`
   // 在场只说明"有终稿可审"（综合步就落盘），两者不可互相顶替——⑤ 的措辞与门都由此分流。
   const cwd = props.sessionId === undefined ? undefined : props.runSource(props.sessionId).root
-  const delivery = useMemo(() => latestFinalDelivery(journalEvents, cwd), [journalEvents, cwd])
+  const delivery = useMemo(() => latestFinalDelivery(journalEvents, cwd) ?? receiptDelivery, [journalEvents, cwd, receiptDelivery])
 
   // 流畸形死亡（BUG-023 修复①）：journal 尾窗折算，与 HITL 挂起互斥显示（挂起时主横幅让位）。
   const streamFailure = useMemo(() => streamFailureOf(journalEvents), [journalEvents])
@@ -276,7 +287,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         finalFileNames: face.finalFileNames,
         questionText: face.questionText,
         delivered: delivery !== null,
-        deliveredVersion: latestPresentedFinalVersion(journalEvents, cwd),
+        deliveredVersion: latestPresentedFinalVersion(journalEvents, cwd) ?? finalVersionOfPath(delivery?.path),
         hitlPending: hitl2Pending,
         draftPresent: face.hasFinal,
       }, props.t),

@@ -8,7 +8,7 @@ import { clientHistoryWindow, readSessionEvents, resolveSessionLog } from '../li
 import { sessionBundleOf } from '../../packages/deep-research-pack/src/lib/bundle-bind.ts'
 import { deriveSteps, latestRunVersion } from '../../packages/deep-research-pack/src/lib/run-fold.ts'
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
-import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
+import { readinessOfSources } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
 import { latestFinalDelivery } from '../../packages/deep-research-pack/src/lib/final-target.ts'
 import { selectBoundSession } from '../lib/client-load-select.mjs'
 
@@ -143,8 +143,14 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
     // 冒烟里不再抄第二版 regex。2026-10-11 实测教训：抄来的「未锚行首末位匹配」把 review.md 文末
     // 附录保留的首轮 `readiness: FAIL` 读成终局，于是盘侧期望与 UI 渲染对不上（红得对）。
     const reviewText = names.has('review.md') ? readFileSync(join(base, 'review.md'), 'utf8') : null
-    const readiness = terminalReadiness(reviewText)
-    const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : null
+    // 与 UI/门禁同一判据（D51）：声明件优先，散文只做副本；无 review/ 的旧场回退散文。
+    const declarationText = names.has('review') && existsSync(join(base, 'review', 'readiness.json'))
+      ? readFileSync(join(base, 'review', 'readiness.json'), 'utf8')
+      : null
+    const reading = readinessOfSources({ reviewText, declarationText, hasReviewDir: names.has('review') })
+    const reviewFail = reading.source === 'declaration' || reading.source === 'prose'
+      ? (reading.pass ? false : true)
+      : null
     const versions = existsSync(join(base, 'final')) ? latestRunVersion(readdirSync(join(base, 'final'))) : 0
     // 步态盘侧真值（BUG-001 轮修正）：done/current 期望随磁盘文件走——绑到的会话不一定是
     // 已交付 run（在飞 bundle 只做了一部分步骤）；deriveSteps 与页签同一谓词，期望值不再

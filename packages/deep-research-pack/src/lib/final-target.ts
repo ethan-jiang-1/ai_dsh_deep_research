@@ -242,6 +242,38 @@ export function latestPresentedFinalVersion(events: readonly unknown[], cwd?: st
 }
 
 /**
+ * 交付回执（`delivered.json`）→ 交付见证（D51）：回执是 ops 写的**持久结构化事实**，
+ * 会话日志窗口可能不含旧的 `deliverables/presented` 事件（驾驶舱只折窗口）。门禁仍以
+ * present 事件 + 回执哈希为准；这里只给观察面一个不随窗口丢失的交付态。
+ *
+ * @param receipt - 解析后的 delivered.json；畸形 → null。
+ * @param slug - bundle slug（回执缺 present.path 时用于合成 `drt_<slug>/final/vN.md`）。
+ * @returns 规范化交付见证或 null。
+ */
+/** 终稿族路径 → 版本号（`final/vN.md` / `readable-vN.md`）；非版本族 → null。 */
+export function finalVersionOfPath(path: string | null | undefined): number | null {
+  if (typeof path !== 'string') return null
+  const match = /(?:^|\/)final\/(?:v|readable-v)([1-9]\d{0,5})\.md$/.exec(path)
+  return match === null ? null : Number(match[1])
+}
+
+export function deliveryFromReceipt(receipt: unknown, slug?: string): FinalDelivery | null {
+  if (typeof receipt !== 'object' || receipt === null) return null
+  const record = receipt as { present?: unknown; final?: unknown }
+  const present = typeof record.present === 'object' && record.present !== null
+    ? record.present as { path?: unknown; callId?: unknown; version?: unknown }
+    : null
+  const final = typeof record.final === 'object' && record.final !== null
+    ? record.final as { version?: unknown }
+    : null
+  const version = typeof present?.version === 'number' ? present.version : (typeof final?.version === 'number' ? final.version : null)
+  const declared = typeof present?.path === 'string' && present.path.trim() !== '' ? present.path : null
+  const path = declared ?? (version !== null && slug !== undefined ? `drt_${slug}/final/v${version}.md` : null)
+  if (path === null) return null
+  return { path, turn: 0, callId: typeof present?.callId === 'string' ? present.callId : '' }
+}
+
+/**
  * 终稿族路径 → 页签体的读面定表；非法路径 → null。
  * 不论地址是 final.md、final/vN.md 还是 readable(-vN).md，页签都从同一 bundle 读
  * final.md / review.md / final/；地址只决定「打开哪个页签」，不决定读哪份正文。

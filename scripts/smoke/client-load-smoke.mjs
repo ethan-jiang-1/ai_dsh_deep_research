@@ -61,6 +61,7 @@ import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs'
 import { SMOKE_LOCALE, launchChromium, loadChromium } from '../lib/playwright.mjs'
 import { clientHistoryWindow, projectKey, readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
+import { deliveryFromReceipt } from '../../packages/deep-research-pack/src/lib/final-target.ts'
 import { availableMemoryMBFromMeminfo, availableMemoryMBFromVmStat, classifyHostHealth, isHostUnhealthyVerdict } from '../lib/host-health.mjs'
 import { acquireRunLock, releaseRunLock } from '../lib/run-lock.mjs'
 import { materializeSeedHome, resolveSeedFixture, seedFixtureSize } from './client-load-seed.mjs'
@@ -655,13 +656,18 @@ async function pass1BoundFacePhase() {
             boundSession = { ...boundSession, events, tailAskPending: foldHitlPending(events).pending }
           }
           faceNow = fileFaceOf(boundSession.slug) ?? expectedFace
+          // 交付态 = present 见证（窗口内事件优先）+ 持久回执兜底（D51）：窗口可能不含旧 present，
+          // delivered.json 是 ops 写的持久事实——UI 与期望值必须同源，否则锚点/摘要两侧分叉。
+          const windowed = clientHistoryWindowOf(boundSession.events)
+          const receipt = existsSync(join(faceNow.base ?? '', 'delivered.json'))
+            ? JSON.parse(readFileSync(join(faceNow.base, 'delivered.json'), 'utf8'))
+            : null
+          const delivery = latestFinalDelivery(windowed) ?? deliveryFromReceipt(receipt, boundSession.slug)
+          const delivered = delivery !== null
           // 锚点也按**客户端窗口**折（UI 的 journalEvents = 开场快照那一窗；全量 log 会假红）
-          const anchors = deriveAnchors(clientHistoryWindowOf(boundSession.events), { question: faceNow.hasQuestion, delivered: faceNow.delivered })
-          // 交付态 = present 见证（与页签同源折算 = lib/final-target）；final.md 在场仍是步态/锚点
-          // 的输入（交付阶段 current），两者不互相顶替——2026-10-20 起 UI ⑤ 的 ✅ 只认 present。
-          const delivery = latestFinalDelivery(clientHistoryWindowOf(boundSession.events))
+          const anchors = deriveAnchors(windowed, { question: faceNow.hasQuestion, delivered })
           return {
-            evidence: faceNow.evidenceCount, delivered: delivery !== null, delivery,
+            evidence: faceNow.evidenceCount, delivered, delivery,
             deliveredFile: faceNow.delivered, base: faceNow.base,
             passed: anchors.filter((a) => a.state === 'passed').length, anchors,
           }
