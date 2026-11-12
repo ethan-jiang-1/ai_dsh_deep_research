@@ -7,8 +7,11 @@ import { isOwnListener } from '../../scripts/lib/port-reclaim-policy.mjs'
 
 test('BUG-104 只认本仓 DSH web 命令行；无关 listener 不杀', () => {
   assert.equal(isOwnListener('node --import tsx/esm /repo/vendor/dsh/apps/cli/src/bin.ts --profile web'), true)
-  assert.equal(isOwnListener('node /Users/me/ai_dsh_deep_research/packages/deep-research-pack/lib/client.js'), true)
+  assert.equal(isOwnListener('node /Users/me/ai_dsh_deep_research/packages/deep-research-pack/lib/client.js'), false)
   assert.equal(isOwnListener('python3 -m http.server 3103'), false)
+  assert.equal(isOwnListener('tail -f /Users/me/ai_dsh_deep_research/runtime/x.log'), false)
+  assert.equal(isOwnListener('node /Users/me/ai_dsh_deep_research/scripts/my-server.mjs'), false)
+  assert.equal(isOwnListener('dsh --profile deep-research web'), true)
   assert.equal(isOwnListener('node unrelated-service.js'), false)
   assert.equal(isOwnListener(''), false)
 })

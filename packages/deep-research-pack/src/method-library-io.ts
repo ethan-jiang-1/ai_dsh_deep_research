@@ -28,6 +28,7 @@ export function safeMethodLibraryPath(cwd: string): string {
   }
   if (st.isSymbolicLink()) throw new Error(`${LIBRARY_FILE} 是 symlink，拒绝读写（工作区文件必须是普通文件）`)
   if (!st.isFile()) throw new Error(`${LIBRARY_FILE} 不是普通文件，拒绝读写`)
+  if (st.nlink > 1) throw new Error(`${LIBRARY_FILE} 是 hardlink（nlink=${st.nlink}），拒绝读写——方法库必须是工作区独立文件`)
   const base = realpathSync(cwd)
   const real = realpathSync(path)
   if (real !== base && !real.startsWith(`${base}${sep}`)) throw new Error(`${LIBRARY_FILE} 解析到工作区外，拒绝读写`)
@@ -68,30 +69,48 @@ export function writeLibraryFileAtomic(cwd: string, text: string): void {
   }
 }
 
-/** 跨进程写锁：wx 创建；陈旧锁（>30s）移除一次后重试；活锁 → 明确冲突。 */
+/** 锁属主存活：ESRCH = 死；EPERM = 活（无权限也视为活，不接管）。 */
+function pidAlive(pid: number): boolean {
+  try { process.kill(pid, 0); return true } catch (error) { return (error as NodeJS.ErrnoException).code === 'EPERM' }
+}
+
+interface LockOwner { readonly pid?: unknown; readonly token?: unknown; readonly at?: unknown }
+
+function lockOwnerOf(lock: string): LockOwner | null {
+  try { return JSON.parse(readFileSync(lock, 'utf8')) as LockOwner } catch { return null }
+}
+
+/** 跨进程写锁：token 属主 + pid 存活；只有「死 pid 且超龄」或坏锁超龄才接管（BUG-114/126）。 */
 export function withMethodLibraryLock<T>(cwd: string, fn: () => T): T {
   mkdirSync(cwd, { recursive: true })
   const lock = join(cwd, LOCK_FILE)
-  const acquire = (retry: boolean): number | null => {
+  const token = randomUUID()
+  const acquire = (retry: boolean): boolean => {
     try {
       const fd = openSync(lock, 'wx', 0o600)
-      writeFileSync(fd, JSON.stringify({ pid: process.pid, at: new Date().toISOString() }), 'utf8')
-      return fd
+      writeFileSync(fd, JSON.stringify({ pid: process.pid, token, at: new Date().toISOString() }), 'utf8')
+      closeSync(fd)
+      return true
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
-      let age = 0
-      try { age = Date.now() - statSync(lock).mtimeMs } catch { age = 0 }
-      if (retry && age > LOCK_STALE_MS) { rmSync(lock, { force: true }); return acquire(false) }
+      const owner = lockOwnerOf(lock)
+      const pid = typeof owner?.pid === 'number' ? owner.pid : null
+      const age = (() => { try { return Date.now() - statSync(lock).mtimeMs } catch { return Infinity } })()
+      // 活 pid：无论 mtime 多旧都不接管（长写/暂停不是死亡）。
+      if (pid !== null && pidAlive(pid)) throw new Error('另一个方法库写入正在进行，请稍后重试（未写入）')
+      if (retry && (pid === null ? age > LOCK_STALE_MS : true)) {
+        rmSync(lock, { force: true })
+        return acquire(false)
+      }
       throw new Error('另一个方法库写入正在进行，请稍后重试（未写入）')
     }
   }
-  const fd = acquire(true)
-  if (fd === null) throw new Error('无法获取方法库写锁')
-  closeSync(fd)
+  if (!acquire(true)) throw new Error('无法获取方法库写锁')
   try {
     return fn()
   } finally {
-    rmSync(lock, { force: true })
+    // 只删自己的锁：陈旧接管后旧 owner 的 finally 不得删新 owner 的锁（BUG-114）。
+    if (lockOwnerOf(lock)?.token === token) rmSync(lock, { force: true })
   }
 }
 

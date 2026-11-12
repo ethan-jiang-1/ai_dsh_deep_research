@@ -24,3 +24,11 @@ test('BUG-086/108 接线：readLibrary 全量读 + 切会话复位交互态', ()
   }
   assert.match(source, /isReloadCurrent\(epochRef\.current, sid, seq\)/, 'await 后必须有 epoch 守卫')
 })
+
+// 负例留证 2026-11-13：BUG-119——切会话清 receipt 但不清 events/adoption，旧绑定继续驱动摘要。
+// 还原法 = 删除 setEvents([]) / setAdoption(no-run) effect。
+test('BUG-119 切会话清 events + adoption 到 no-run', () => {
+  const source = readFileSync(join(ROOT, 'packages/deep-research-pack/src/client/research-config/useConfigFeed.ts'), 'utf8')
+  assert.match(source, /setEvents\(\[\]\)/)
+  assert.match(source, /setAdoption\(\{ kind: 'no-run', adopted: null, origin: null, requirements: null \}\)/)
+})

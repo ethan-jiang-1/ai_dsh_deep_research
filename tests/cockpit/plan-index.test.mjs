@@ -210,3 +210,9 @@ test('BUG-102 版本声明只认首个 ## 之前的头部，正文引用不夺�
   const text = ['# Plan', '', '图版本：v2', '', '## 备注', '旧版图版本：v1 已废弃', ''].join('\n')
   assert.equal(planIndex(text).version, 'v2')
 })
+
+// 负例留证 2026-11-13：BUG-125——无 ## 时取 last，正文旧版覆盖头部。还原法 = 无 heading 也 at(-1)。
+test('BUG-125 无 ## 的 plan 取首个声明（跳过模板 blockquote）', () => {
+  const text = ['# Plan', '', '图版本：v2', '', '旧版图版本：v1 已废弃', ''].join('\n')
+  assert.equal(planIndex(text).version, 'v2')
+})

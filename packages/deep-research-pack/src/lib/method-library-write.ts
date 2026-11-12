@@ -21,7 +21,7 @@ function escapeRegExp(value: string): string {
 /** 条目标题匹配（名称后可带 `（provenance）` 与 `〔默认偏好〕`）。 */
 function methodHeadingPattern(name: string): RegExp {
   // provenance 与默认标记可任意顺序（BUG-085）：标题 = 名称 + 若干「（…）」/「〔…〕」段。
-  return new RegExp(`^##\\s+${escapeRegExp(name)}(?:(?:（[^）\\n]*）)|(?:〔[^〕\\n]*〕))*\\s*$`, 'm')
+  return new RegExp(`^##\\s+${escapeRegExp(name)}(?:[ \\t]*(?:（[^）\\n]*）|〔[^〕\\n]*〕))*[ \\t]*$`, 'm')
 }
 
 /**

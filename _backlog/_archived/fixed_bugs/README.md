@@ -118,3 +118,17 @@
 | [BUG-110](BUG-110-run-source-symlink-escape.md) | BUG-110：nodeRunSource 跟随 symlink run bundle——drt_x 可指向工作区外，run-context/status 读取 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
 | [BUG-111](BUG-111-method-library-symlink-write-escape.md) | BUG-111：method-library 写工具跟随 method-library.md symlink——可把库写到工作区外 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
 | [BUG-112](BUG-112-plan-recorded-slash-false-positive.md) | BUG-112：planVersionsOf 的 recorded 斜杠字段无上下文——正文 bullet `- 参考 / v1 /` 被当重写记录，制造 ve | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-113](BUG-113-port-own-listener-overmatch.md) | BUG-113：port-reclaim 身份判定按仓库路径子串——仓库里启动的无关进程仍会被 SIGKILL | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-114](BUG-114-method-lock-release-stale-owner.md) | BUG-114：withMethodLibraryLock 释放无 owner token——陈旧锁被接管后，旧 owner 会删掉新 owner 的锁 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-115](BUG-115-name-placeholder-invalid-after-fix.md) | BUG-115：BUG-081 修复后 zh `namePlaceholder` 仍建议全角括号名称——照示例输入立刻被拒 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-116](BUG-116-present-version-last-unversioned.md) | BUG-116：latestPresentedFinalVersion 最后一条 present 不含版本时保留旧版本——与 latestFinalDelive | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-117](BUG-117-status-feed-trust-stale.md) | BUG-117：useStatusFeed 切会话只清 journal/rows，trust/face/unbound 仍保留旧值——旧绑定继续驱动新会话扫描 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-118](BUG-118-status-leads-findings-directory.md) | BUG-118：useStatusFeed 的 leads.md/findings.md 仍用 names.has——同名目录被当步骤文件 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-119](BUG-119-config-feed-adoption-stale.md) | BUG-119：useConfigFeed 切会话清 receipt 但不清 events/adoption——旧绑定继续驱动新会话的「本次研究」 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-120](BUG-120-method-library-hardlink-read-escape.md) | BUG-120：method-library 安全路径只拒 symlink——hardlink 是普通文件，读可越界读工作区外内容 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-121](BUG-121-source-phase-trailing-comment.md) | BUG-121：isCompletedMethodSourceRun 的 phase 行不接受尾部注释——模板带 `#` 注释，accepted 被读成未完成 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-122](BUG-122-final-path-nested-non-bundle.md) | BUG-122：finalPathOf 后缀匹配接受 `notes/drt_x/final.md`——非 bundle 路径被当终稿族 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-123](BUG-123-default-marker-in-provenance.md) | BUG-123：isDefault 精确标记仍看整条 title——provenance 里含〔默认偏好〕被误判默认（render 可生成） | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-124](BUG-124-heading-whitespace-between-segments.md) | BUG-124：heading 段间空白——fold 接受 `## 方法 （来源）` / `（来源） 〔默认偏好〕`，upsert 只认无空白段，同名被复制 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-125](BUG-125-plan-no-heading-version-last.md) | BUG-125：无 `##` 的 plan：headerBlock=全文，版本取 last——注释说退化首个，正文旧版本仍覆盖 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-126](BUG-126-method-lock-stale-live-pid.md) | BUG-126：withMethodLibraryLock 陈旧判定只看 mtime——活 pid 持锁 >30s 被另一个写者接管 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |

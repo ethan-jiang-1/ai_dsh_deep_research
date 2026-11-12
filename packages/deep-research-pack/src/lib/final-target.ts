@@ -135,6 +135,14 @@ export function finalPathOf(raw: unknown): string | null {
   if (typeof raw !== 'string') return null
   const normalized = raw.replace(/\\/g, '/').replace(/^(?:\.\/)+/, '').replace(/\/+$/, '')
   if (normalized === '') return null
+  const absolute = normalized.startsWith('/')
+  if (!absolute) {
+    // 相对路径必须以根/archive/_abandoned 的 drt_ 开头；notes/drafts 嵌套不冒充（BUG-122）。
+    if (!/^(?:archive\/|_abandoned\/)?drt_[^/]+\//.test(normalized)) return null
+    return FINAL_FAMILY_RELATIVE.test(normalized) ? normalized : null
+  }
+  // 绝对路径：拒绝明显非 bundle 容器下的嵌套；其余按终稿族后缀提取（调用方按会话 cwd 解读）。
+  if (/(?:^|\/)(?:notes|drafts|src|tests)\/drt_/.test(normalized)) return null
   const match = FINAL_FAMILY_SUFFIX.exec(normalized)
   if (match?.[1] === undefined) return null
   return FINAL_FAMILY_RELATIVE.test(match[1]) ? match[1] : null
@@ -191,14 +199,17 @@ export function latestPresentedFinalVersion(events: readonly unknown[]): number 
     const data = record.data as { files?: unknown } | null | undefined
     if (typeof data !== 'object' || data === null || !Array.isArray(data.files)) continue
     const versions: number[] = []
+    let finalFamily = false
     for (const file of data.files) {
       const path = finalPathOf((file as { path?: unknown } | null | undefined)?.path)
       if (path === null) continue // 非终稿族（notes/final/v9.md 等）不算交付版本（BUG-101）
+      finalFamily = true
       const version = /(?:^|\/)final\/(?:v|readable-v)([1-9]\d{0,5})\.md$/.exec(path)?.[1]
       if (version !== undefined) versions.push(Number(version))
     }
-    // 最后一条**含终稿版本**的 present 胜出；同一事件多份取最高（BUG-103：不是全历史 max）。
-    if (versions.length > 0) latest = Math.max(...versions)
+    // 最后一条**含终稿族**的 present 胜出；该条无版本 → null（与 latestFinalDelivery 同步，BUG-116）；
+    // 同一事件多份取最高（BUG-103：不是全历史 max）。
+    if (finalFamily) latest = versions.length > 0 ? Math.max(...versions) : null
   }
   return latest
 }

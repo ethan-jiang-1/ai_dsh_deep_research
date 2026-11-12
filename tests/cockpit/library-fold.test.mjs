@@ -449,3 +449,21 @@ test('BUG-093 四字段 bullet/缩进/全角冒号变体都读出', () => {
   const [e] = foldLibrary('## 目标（2026-10-12）\n* 找来源：官方\n+ 怎么核实: 双源\n  - 报告怎么写：结论先行\n- 不承诺: 无\n')
   assert.deepEqual(e.sections, { source: '官方', verify: '双源', report: '结论先行', limit: '无' })
 })
+
+
+// 负例留证 2026-11-13：BUG-123——provenance 里的〔默认偏好〕被误判默认；
+// BUG-124——heading 段间空格使 upsert 复制同名。还原法 = isDefault 看整条 title / 段间无 \s*。
+test('BUG-123 默认标记只认括号外：provenance 内同形文字不算', () => {
+  assert.equal(foldLibrary('## 方法（〔默认偏好〕）\n- 找来源: 官方\n')[0].isDefault, false)
+  assert.equal(foldLibrary('## 方法（来源）〔默认偏好〕\n- 找来源: 官方\n')[0].isDefault, true)
+  const rendered = renderLibraryEntry({ name: '方法', provenance: '〔默认偏好〕', sections: { source: '官方', verify: '双源', report: '结论先行', limit: '无' } })
+  assert.equal(foldLibrary(rendered)[0].isDefault, false)
+})
+
+test('BUG-124 heading 段间空格：同名 upsert 仍走 updated，不复制', () => {
+  const lib = '# 库\n\n## 方法 （来源） 〔默认偏好〕\n- 找来源: 官方\n'
+  assert.equal(foldLibrary(lib)[0].name, '方法')
+  const result = upsertMethodEntry(lib, libEntry('方法'))
+  assert.equal(result.action, 'updated')
+  assert.equal(foldLibrary(result.text).filter((item) => item.name === '方法').length, 1)
+})

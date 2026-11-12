@@ -177,3 +177,14 @@ test('BUG-101/103 latestPresentedFinalVersion：只认终稿族，且以最后�
   assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_x/final/v1.md' }]), presented([{ path: 'drt_x/final/v2.md' }])]), 2)
   assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_x/final/v1.md' }, { path: 'drt_x/final/v3.md' }])]), 3)
 })
+
+// 负例留证 2026-11-13：BUG-116——v2 后 present 无版本 final.md 仍保留 v2；
+// BUG-122——notes/drt_x/final.md 被当终稿族。还原法 = 不重置 latest / 后缀直接提取。
+test('BUG-116/122 最后一条终稿 present 无版本 → null；嵌套 notes/drafts 不认终稿', () => {
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_x/final/v2.md' }]), presented([{ path: 'drt_x/final.md' }])]), null)
+  assert.equal(finalPathOf('notes/drt_x/final.md'), null)
+  assert.equal(finalPathOf('drafts/drt_x/final/v2.md'), null)
+  assert.equal(finalPathOf('/tmp/notes/drt_x/final.md'), null)
+  assert.equal(finalPathOf('drt_x/final.md'), 'drt_x/final.md')
+  assert.equal(finalPathOf('archive/drt_x/final.md'), 'archive/drt_x/final.md')
+})

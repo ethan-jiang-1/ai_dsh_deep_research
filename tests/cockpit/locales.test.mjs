@@ -1,3 +1,4 @@
+import { methodNameIssue } from '../../packages/deep-research-pack/src/lib/library-fold.ts'
 // locales.test.mjs — 插件 UI 的中英文对账（BUG-055 的机械守卫）。
 //
 // 为什么存在：2026-11-11 用户报障 = 方法库面板 tab 名是英文、按钮/空态却是中文（半套 i18n）。
@@ -141,4 +142,11 @@ test('BUG-068 品牌名随 locale：zh=Orca 深度搜索 / en=Orca Deep Research
   assert.equal(en.brandName, 'Orca Deep Research')
   assert.ok(zh.startTitle.startsWith('Orca 深度搜索 · '), '首屏标题前缀用同一品牌名')
   assert.ok(en.startTitle.startsWith('Orca Deep Research · '), '英文首屏标题前缀用同一品牌名')
+})
+
+
+// 负例留证 2026-11-13：BUG-115——zh namePlaceholder 示例本身被名称校验拒绝。
+test('BUG-115 zh 名称占位符示例必须能通过方法名校验', () => {
+  const example = String(zh.namePlaceholder).replace(/^例如：/, '').trim()
+  assert.equal(methodNameIssue(example), null, example)
 })

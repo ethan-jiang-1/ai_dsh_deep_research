@@ -35,6 +35,6 @@ export function isCompletedMethodSourceRun(evidence: RunCompletionEvidence): boo
   const headerText = evidence.runHeader.kind === 'ok'
     ? evidence.runHeader.text.split(/^##\s/m)[0] ?? ''
     : ''
-  const acceptedHeader = evidence.runHeader.kind === 'ok' && /^(?:-\s*)?phase:\s*accepted\s*$/m.test(headerText)
+  const acceptedHeader = evidence.runHeader.kind === 'ok' && /^(?:-\s*)?phase:\s*accepted(?:\s*#.*)?\s*$/m.test(headerText)
   return (acceptedHeader && evidence.hasDeliveredRecord) || evidence.hasLegacyAcceptance
 }

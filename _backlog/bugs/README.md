@@ -16,6 +16,22 @@
 
 ## 最近归档
 
+（2026-11-13 复查批（14 张，113–126）：
+[113](../_archived/fixed_bugs/BUG-113-port-own-listener-overmatch.md) 端口身份精确化；
+[114](../_archived/fixed_bugs/BUG-114-method-lock-release-stale-owner.md) 锁释放 token；
+[115](../_archived/fixed_bugs/BUG-115-name-placeholder-invalid-after-fix.md) 名称占位符合法；
+[116](../_archived/fixed_bugs/BUG-116-present-version-last-unversioned.md) 末条无版本 present；
+[117](../_archived/fixed_bugs/BUG-117-status-feed-trust-stale.md) status trust 复位；
+[118](../_archived/fixed_bugs/BUG-118-status-leads-findings-directory.md) leads/findings hasFile；
+[119](../_archived/fixed_bugs/BUG-119-config-feed-adoption-stale.md) config adoption 复位；
+[120](../_archived/fixed_bugs/BUG-120-method-library-hardlink-read-escape.md) hardlink 拒绝；
+[121](../_archived/fixed_bugs/BUG-121-source-phase-trailing-comment.md) phase 尾注释；
+[122](../_archived/fixed_bugs/BUG-122-final-path-nested-non-bundle.md) 终稿路径前缀；
+[123](../_archived/fixed_bugs/BUG-123-default-marker-in-provenance.md) 默认标记位置；
+[124](../_archived/fixed_bugs/BUG-124-heading-whitespace-between-segments.md) heading 段间空白；
+[125](../_archived/fixed_bugs/BUG-125-plan-no-heading-version-last.md) 无 heading 版本；
+[126](../_archived/fixed_bugs/BUG-126-method-lock-stale-live-pid.md) 活 pid 锁。
+）
 （2026-11-13 探索协议批（32 张，081–112）：
 [081](../_archived/fixed_bugs/BUG-081-method-name-parenthesis-provenance-collision.md) 名称全角括号校验；
 [082](../_archived/fixed_bugs/BUG-082-default-marker-substring-false-positive.md) 默认标记精确判定；

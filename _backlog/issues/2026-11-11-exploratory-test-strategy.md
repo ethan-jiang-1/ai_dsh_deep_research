@@ -1357,3 +1357,142 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
   label「版本声明不一致」。
 - **判定**：**发现** → [BUG-112](../_archived/fixed_bugs/BUG-112-plan-recorded-slash-false-positive.md)（P2，排查中；未改产品代码）。
 - **下一层**：记录节上下文、真实重写记录形态；未跑，记空白。
+
+### N43：port-reclaim 身份 overmatch → BUG-113
+
+- **命题**：port-reclaim 只杀真正 DSH web/本仓入口，不杀仓库路径下的无关进程。
+- **最低层**：纯函数 `isOwnListener`；无子进程。
+- **实际命令**：`node --import tsx/esm runtime/explore-20261112/port-own-listener-overmatch.mjs`
+- **证据**：`node .../ai_dsh_deep_research/scripts/my-server.mjs` own=true；`tail -f .../ai_dsh_deep_research/...` own=true。
+- **判定**：**发现** → [BUG-113](../_archived/fixed_bugs/BUG-113-port-own-listener-overmatch.md)（P2，排查中；未改产品代码）。
+- **下一层**：argv 解析/pid 锁身份；未跑，记空白。
+
+### N44：方法库锁释放删新锁 → BUG-114
+
+- **命题**：陈旧锁被接管后，旧 owner 的释放不得删除新 owner 的锁。
+- **最低层**：临时目录单进程确定性复现（A 持锁→过期→B 接管→C 建锁→A finally）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/method-lock-release-stale-owner.mjs`
+- **证据**：A 返回后 lockStillExists=false（C 锁被删），bug true。
+- **判定**：**发现** → [BUG-114](../_archived/fixed_bugs/BUG-114-method-lock-release-stale-owner.md)（P2，排查中；未改产品代码）。
+- **下一层**：真实 >30s 写停顿、flock/租约语义；未跑，记空白。
+
+### N45：BUG-081 修复后名称占位符仍非法 → BUG-115
+
+- **命题**：用户可见的名称示例必须通过名称校验；修复后中英提示一致。
+- **最低层**：字典 + 纯函数（`zh.namePlaceholder` + `methodNameIssue`）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/name-placeholder-invalid-after-fix.mjs`
+- **证据**：zh placeholder `投研尽调（我的口径）` 被 `methodNameIssue` 拒绝；
+  en placeholder ASCII 括号通过；zhPlaceholderInvalid true。
+- **判定**：**发现** → [BUG-115](../_archived/fixed_bugs/BUG-115-name-placeholder-invalid-after-fix.md)（P2，排查中；未改产品代码）。
+- **下一层**：其它用户可见示例名（coach prompt/内置内容）的合法性；未跑，记空白。
+
+### N46：最后一条 present 无版本仍报旧版本 → BUG-116
+
+- **命题**：交付版本跟随最后一条 present；最后一条无版本时返回 null，与 latestFinalDelivery 一致。
+- **最低层**：纯函数（`latestFinalDelivery` + `latestPresentedFinalVersion`）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/present-version-last-unversioned.mjs`
+- **证据**：present v2 后 present final.md → latestFinalDelivery final.md（turn3），
+  latestPresentedVersion 2；mismatch true。
+- **判定**：**发现** → [BUG-116](../_archived/fixed_bugs/BUG-116-present-version-last-unversioned.md)（P2，排查中；未改产品代码）。
+- **下一层**：同事件 reader/vN、真实 re-present 形态；未跑，记空白。
+
+### N47：status feed trust/face 跨会话残留 → BUG-117
+
+- **命题**：状态页切会话后 trust/face/unbound 与 journal 一起重置。
+- **最低层**：hook 级真跑（happy-dom；s1 write 绑定，s2 follow 无帧）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/status-feed-trust-stale.mjs`
+- **证据**：afterS1/afterS2 trust 都是 bound/old；events 0；staleTrust true。
+- **判定**：**发现** → [BUG-117](../_archived/fixed_bugs/BUG-117-status-feed-trust-stale.md)（P2，排查中；未改产品代码）。
+- **下一层**：face/unbound 的真实时序、member summaries；未跑，记空白。
+
+### N48：status leads/findings 目录被当文件 → BUG-118
+
+- **命题**：步骤条的 leads.md/findings.md 与 question/review/final 一样用 hasFile。
+- **最低层**：纯函数/源码（openRun entries 目录 + view.hasFile）。
+- **实际命令**：`node --import tsx/esm runtime/explore-20261112/status-leads-findings-directory.mjs`
+- **证据**：namesHasLeads true / hasFileLeads false；findings 同。
+- **判定**：**发现** → [BUG-118](../_archived/fixed_bugs/BUG-118-status-leads-findings-directory.md)（P2，排查中；未改产品代码）。
+- **下一层**：其它 names.has 消费面；未跑，记空白。
+
+### N49：config adoption 跨会话残留 → BUG-119
+
+- **命题**：配置页签切会话后 events/adoption 与 receipt 一起复位。
+- **最低层**：hook 级真跑（happy-dom；稳定 runSource/readFile；s1 write 绑定）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/config-feed-adoption-stale.mjs`
+- **证据**：afterS1/afterS2 adoption 都是 unrecorded；staleAdoption true。
+- **判定**：**发现** → [BUG-119](../_archived/fixed_bugs/BUG-119-config-feed-adoption-stale.md)（P2，排查中；未改产品代码）。
+- **下一层**：真实首帧延迟、keyed remount；未跑，记空白。
+
+### N50：方法库 hardlink 读越界 → BUG-120
+
+- **命题**：方法库目标必须是工作区独立文件；hardlink 不得读出工作区外内容。
+- **最低层**：临时目录 hardlink + `safeMethodLibraryPath`/`readLibraryFile`。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/method-library-hardlink-read-escape.mjs`
+- **证据**：hardlink 外部 `OUTSIDE SECRET`；escapedRead true；写 rename 后 outside 仍原样。
+- **判定**：**发现** → [BUG-120](../_archived/fixed_bugs/BUG-120-method-library-hardlink-read-escape.md)（P2，排查中；未改产品代码）。
+- **下一层**：nlink>1 策略、NFS/跨设备语义；未跑，记空白。
+
+### N51：phase 行尾注释被拒 → BUG-121
+
+- **命题**：run 模板的 `- phase: accepted   # ...` 仍能被完成判据识别。
+- **最低层**：纯函数（`isCompletedMethodSourceRun`）。
+- **实际命令**：`node --import tsx/esm runtime/explore-20261112/source-phase-trailing-comment.mjs`
+- **证据**：裸/`- phase:` accepted true；带 `# done` / 模板注释 false。
+- **判定**：**发现** → [BUG-121](../_archived/fixed_bugs/BUG-121-source-phase-trailing-comment.md)（P2，排查中；未改产品代码）。
+- **下一层**：其它行尾装饰、真实 run.md 注释；未跑，记空白。
+
+### N52：finalPathOf 嵌套非 bundle 后缀 → BUG-122
+
+- **命题**：finalPathOf 只接受工作区根/archive/_abandoned 下的终稿族；notes/drafts 前缀不算。
+- **最低层**：纯函数（`finalPathOf`）。
+- **实际命令**：`node --import tsx/esm runtime/explore-20261112/final-path-nested-non-bundle.mjs`
+- **证据**：notes/drt_x/final.md → drt_x/final.md；drafts/drt_x/final/v2.md → drt_x/final/v2.md。
+- **判定**：**发现** → [BUG-122](../_archived/fixed_bugs/BUG-122-final-path-nested-non-bundle.md)（P2，排查中；未改产品代码）。
+- **下一层**：绝对路径工作区根校验、真实 present 分布；未跑，记空白。
+
+### N53：默认标记在 provenance 里被误判 → BUG-123
+
+- **命题**：`isDefault` 只认括号外的 `〔默认偏好〕`；provenance 内的同形文字不算。
+- **最低层**：纯函数（`foldLibrary` + `renderLibraryEntry`）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/library-default-marker-in-provenance.mjs`
+- **证据**：`## 方法（〔默认偏好〕）` → provenance 标记、isDefault true；真实标记/无标记对照符合。
+- **判定**：**发现** → [BUG-123](../_archived/fixed_bugs/BUG-123-default-marker-in-provenance.md)（P2，排查中；未改产品代码）。
+- **下一层**：其他 title 段（多标记/全角空白）、默认消费链；未跑，记空白。
+
+### N54：heading 段间空白被 upsert 漏认 → BUG-124
+
+- **命题**：fold 接受的 name/provenance/标记间空白，写路径也必须匹配为同一条目。
+- **最低层**：纯函数（`foldLibrary` + `upsertMethodEntry`）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/heading-whitespace-between-segments.mjs`
+- **证据**：无空格 updated/1 条；`## 方法（来源） 〔默认偏好〕` 与 `## 方法 （来源）` created/2 条同名。
+- **判定**：**发现** → [BUG-124](../_archived/fixed_bugs/BUG-124-heading-whitespace-between-segments.md)（P2，排查中；未改产品代码）。
+- **下一层**：全角空白/多空格/换行 heading；未跑，记空白。
+
+### N55：无 `##` plan 版本取 last → BUG-125
+
+- **命题**：无 `##` 的旧 plan 退化到全文**首个**版本声明；正文旧引用不覆盖。
+- **最低层**：纯函数（`runVersionFaceOf` + `planIndex`）。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/plan-no-heading-version-last.mjs`
+- **证据**：无 `##`、头 v2、正文「旧版图版本：v1」→ runVersionCurrent 1 / planIndexVersion v1；
+  expected 2。
+- **判定**：**发现** → [BUG-125](../_archived/fixed_bugs/BUG-125-plan-no-heading-version-last.md)（P2，排查中；未改产品代码）。
+- **下一层**：共享版本解析/多版本 header；未跑，记空白。
+
+### N56：方法库锁活 pid 被当陈旧 → BUG-126
+
+- **命题**：锁接管前确认持有 pid 已死；活进程的长写不得被抢锁。
+- **最低层**：临时目录锁文件（当前 pid + 旧 mtime）+ `withMethodLibraryLock`。
+- **实际命令**：
+  `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/method-lock-stale-live-pid.mjs`
+- **证据**：pidAlive true、oldLockTakenOver true、bug true。
+- **判定**：**发现** → [BUG-126](../_archived/fixed_bugs/BUG-126-method-lock-stale-live-pid.md)（P2，排查中；未改产品代码）。
+- **下一层**：pid 复用/心跳/flock 语义；未跑，记空白。

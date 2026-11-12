@@ -68,7 +68,7 @@ export function foldLibrary(text: string | null): readonly LibraryEntry[] {
       current = {
         name: (openParen === -1 ? title : title.slice(0, openParen)).replace(/〔[^〕]*〕/g, '').trim(),
         provenance: openParen === -1 ? null : (title.slice(openParen + 1).split('）')[0] ?? null),
-        isDefault: title.includes('〔默认偏好〕'),
+        isDefault: title.replace(/（[^）]*）/g, ' ').includes('〔默认偏好〕'),
         sections: { source: null, verify: null, report: null, limit: null },
         legacy: [],
       }

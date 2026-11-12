@@ -198,7 +198,7 @@ const zhBase = {
   nameLabel: '名称',
   nameHintEdit: '编辑态名称固定；要改名请新建一条（另存）',
   nameHintNew: '用你的口径起名；新建时别和已有条目撞名',
-  namePlaceholder: '例如：投研尽调（我的口径）',
+  namePlaceholder: '例如：投研尽调-我的口径',
   bodyPlaceholder: '可以从右侧对话开始，也可以直接填…',
   markdownPreview: 'Markdown 预览（只读）',
   unnamed: '（未命名）',

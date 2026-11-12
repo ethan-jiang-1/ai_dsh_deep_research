@@ -59,3 +59,11 @@ test('BUG-084 完成判据：模板 `- phase:` 与裸 phase 都认，正文假 p
   assert.equal(isCompletedMethodSourceRun({ ...base, runHeader: { kind: 'ok', text: '- phase: review\n' } }), false)
   assert.equal(isCompletedMethodSourceRun({ ...base, runHeader: { kind: 'ok', text: '- phase: review\n\n## 备注\n\nphase: accepted\n' } }), false)
 })
+
+// 负例留证 2026-11-13：BUG-121——phase 行尾 # 注释被当值的一部分。还原法 = 恢复 \s*$。
+test('BUG-121 phase 行接受行尾注释，review 注释仍 false', () => {
+  const base = { hasFinalVersion: true, hasDeliverableContent: true, hasDeliveredRecord: true, hasLegacyAcceptance: false, question: { kind: 'ok', text: '# Q\n' } }
+  assert.equal(isCompletedMethodSourceRun({ ...base, runHeader: { kind: 'ok', text: '- phase: accepted   # done\n' } }), true)
+  assert.equal(isCompletedMethodSourceRun({ ...base, runHeader: { kind: 'ok', text: '- phase: accepted # briefing | research | accepted\n' } }), true)
+  assert.equal(isCompletedMethodSourceRun({ ...base, runHeader: { kind: 'ok', text: '- phase: review # x\n' } }), false)
+})

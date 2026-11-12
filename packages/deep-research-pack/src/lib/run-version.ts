@@ -111,11 +111,15 @@ function planVersionsOf(planText: string | null | undefined): {
   const withoutComments = planText.replace(/<!--[\s\S]*?-->/g, '')
   // 头部声明只认**首个 `##` 之前**的块（正文里的「旧版图版本：v1」不夺权，BUG-102）；
   // 无 `##` 的旧形态退化为全文首个声明。
-  const headerBlock = withoutComments.split(/^##\s/m)[0] ?? withoutComments
+  const hasHeading = /^##\s/m.test(withoutComments)
+  const headerBlock = hasHeading
+    ? (withoutComments.split(/^##\s/m)[0] ?? '')
+    : withoutComments.split('\n').filter((line) => !/^\s*>/.test(line)).join('\n')
   const headerMatches = [...headerBlock.matchAll(/图版本\s*[：:]\s*v?(\d+)/g)]
-  let header: number | null = headerMatches.length > 0
-    ? INT(headerMatches.at(-1)?.[1] ?? '')
-    : INT(withoutComments.match(/图版本\s*[：:]\s*v?(\d+)/)?.[1] ?? '')
+  // 有分节：头部最后一个声明；无分节（旧形态）：全文**首个**声明（BUG-125，不再取 last）。
+  let header: number | null = headerMatches.length === 0
+    ? null
+    : INT((hasHeading ? headerMatches.at(-1)?.[1] : headerMatches[0]?.[1]) ?? '')
   // 重写记录的行形态会有漂移：模板写 `图版本 vN`，模型常写成 `日期 / vN / 动作`。
   // 斜杠分支必须有重写语义/日期上下文（正文 `- 参考 / v1 / 示例` 不算，BUG-112）。
   let recorded: number | null = null

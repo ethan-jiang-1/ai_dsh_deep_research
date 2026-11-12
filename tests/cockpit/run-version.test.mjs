@@ -198,3 +198,9 @@ test('BUG-105 rerun kind 必须有分隔符/行尾边界，后缀不截断', () 
   assert.equal(runVersionFaceOf({ delivered: false, finalFileNames: [], planText: '', questionText: base('polish-extra') }).rerun, null)
   assert.equal(runVersionFaceOf({ delivered: false, finalFileNames: [], planText: '', questionText: base('structural-extra') }).rerun, null)
 })
+
+// 负例留证 2026-11-13：BUG-125——无 ## 时 run-version 也取 last。
+test('BUG-125 无 ## 的 plan：头部 v2 + 正文旧 v1 → current=2', () => {
+  const text = ['# Plan', '', '图版本：v2', '', '旧版图版本：v1 已废弃', ''].join('\n')
+  assert.equal(runVersionFaceOf({ delivered: false, finalFileNames: [], planText: text }).currentPlanVersion, 2)
+})

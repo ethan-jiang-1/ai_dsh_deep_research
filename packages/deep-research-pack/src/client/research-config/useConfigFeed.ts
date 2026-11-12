@@ -101,6 +101,7 @@ export function useConfigFeed(props: ConfigFeedInput) {
     setConfirmDelete(null)
     setSwitchOpen(false)
     setSending(false)
+    setEvents([])
     repliedMarker.current = 0
     diffBase.current = null
     if (sessionId === undefined) { setEntries(null); setLibraryRead('absent'); return }
@@ -139,6 +140,10 @@ export function useConfigFeed(props: ConfigFeedInput) {
   const trust = useMemo(() => bindingTrust(events), [events])
   const boundSlug = trust.kind === 'bound' ? trust.slug : undefined
   const [adoption, setAdoption] = useState<MethodAdoption>({ kind: 'no-run', adopted: null, origin: null, requirements: null })
+  useEffect(() => {
+    // 切会话先清「本次研究」派生面；新 journal 首帧到达后再由绑定 effect 填回（BUG-119）。
+    setAdoption({ kind: 'no-run', adopted: null, origin: null, requirements: null })
+  }, [sessionId])
   useEffect(() => {
     const sid = sessionId
     if (sid === undefined) { setAdoption({ kind: 'no-run', adopted: null, origin: null, requirements: null }); return }

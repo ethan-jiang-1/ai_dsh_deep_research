@@ -94,6 +94,12 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
     setJournalSeen(false)
     setHitl({ pending: false, since: undefined })
     setError(null)
+    // policy state 也必须复位：旧 trust 会驱动新 session 的 bundle 扫描（BUG-117）。
+    setTrust({ kind: 'unbound' })
+    setFace(null)
+    setUnbound(false)
+    setKickoffHold(false)
+    setMemberSummaries({})
     void (async () => {
       try {
         let events: unknown[] = []
@@ -214,9 +220,9 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
           steps: deriveSteps({
             question: view.hasFile('question.md'),
             team: view.hasFile('question.md'),
-            leads: names.has('leads.md'),
+            leads: view.hasFile('leads.md'),
             evidence: evidenceCount,
-            findings: names.has('findings.md'),
+            findings: view.hasFile('findings.md'),
             review: view.hasFile('review.md'),
             final: view.hasFile('final.md'),
           }, props.t),
