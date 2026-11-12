@@ -13,6 +13,7 @@ import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import { readinessOfBundle } from '../../scripts/lib/node-gate-contracts.mjs'
+import { readinessOfSources } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
 import { deliveryGate } from '../../scripts/lib/node-gate-delivery-gate.mjs'
 import { withCompleteBundle } from './node-gate-helpers.mjs'
 
@@ -98,6 +99,13 @@ test('非法声明：坏 JSON / 未知键 / 错版本 / 错值 → fail-closed',
       assert.equal(r.source, 'invalid', JSON.stringify(declaration))
     } finally { cleanup() }
   }
+})
+
+test('共享判据：驾驶舱与门禁同一函数——声明 PASS + 无散文判定 → PASS', () => {
+  const r = readinessOfSources({ reviewText: '## 审查\n无判定行\n', declarationText: JSON.stringify({ version: 1, readiness: 'PASS', conditional: true }), hasReviewDir: true })
+  assert.equal(r.pass, true)
+  assert.equal(r.source, 'declaration')
+  assert.equal(r.conditional, true)
 })
 
 test('门A 集成：散文 PASS + 声明 FAIL 的 bundle 不得判绿（mismatch 传导）', () => {

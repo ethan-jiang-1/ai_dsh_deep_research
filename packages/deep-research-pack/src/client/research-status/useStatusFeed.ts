@@ -17,7 +17,7 @@ import { openRun } from '../../lib/run-context.ts'
 import { streamFailureOf } from '../../lib/stream-failure.ts'
 import { latestFinalDelivery, latestPresentedFinalVersion } from '../../lib/final-target.ts'
 import { runVersionFaceOf, type RunVersionFace } from '../../lib/run-version.ts'
-import { terminalReadiness } from '../../lib/review-readiness.ts'
+import { readinessOfSources } from '../../lib/review-readiness.ts'
 import type { TeamProjection } from '@deepseek-ai/dsh-experimental-agent-team/client'
 import { useMemberActivity } from './useMemberActivity.ts'
 import type { ResearchStatusTabProps } from './types.ts'
@@ -204,7 +204,14 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         const reviewRead = view.hasFile('review.md') ? await view.read('review.md', { signal }) : null
         if (stopped) return
         const reviewText = reviewRead !== null && reviewRead.ok && !reviewRead.value.truncated ? reviewRead.value.text : null
-        const readiness = terminalReadiness(reviewText)
+        // 终局 readiness 与门禁同源（D51）：声明件优先，散文只做副本；无 review/ 的旧场回退散文。
+        const declRead = view.hasFile('review/readiness.json') ? await view.read('review/readiness.json', { signal }) : null
+        if (stopped) return
+        const declarationText = declRead !== null && declRead.ok && !declRead.value.truncated ? declRead.value.text : null
+        const reading = readinessOfSources({ reviewText, declarationText, hasReviewDir: names.has('review') })
+        const readiness = reading.source === 'declaration' || reading.source === 'prose'
+          ? (reading.pass ? 'PASS' : 'FAIL')
+          : null
         const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : null
         const questionRead = view.hasFile('question.md') ? await view.read('question.md', { signal }) : null
         if (stopped) return

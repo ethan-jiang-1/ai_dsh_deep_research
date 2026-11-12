@@ -35,6 +35,7 @@ const ALLOWED = new Map([
   ['lib/method-library-operation.ts', 'wire 命令标记（非 UI）'],
   ['lib/method-library-write.ts', 'Host 工具回执/校验消息（模型面）'],
   ['lib/hitl-fold.ts', 'ask_user_question 签名匹配串（数据谓词，非 UI）'],
+  ['lib/review-readiness.ts', '门禁/驾驶舱共用的 readiness 判据诊断（Node 门禁消费 detail；client 只读 pass/source，非 UI）'],
   ['client/delivery-watch.ts', '交付监听失败的 console 诊断（运行日志，非 UI）'],
   ['content/index.ts', 'systemPrompt 注入的研究手册正文（模型面）'],
   ['fetch-fallback/policy.ts', '抓取回退正文的来源标记与失败说明（模型面）'],

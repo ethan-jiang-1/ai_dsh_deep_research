@@ -166,3 +166,71 @@ export function terminalVerdictLine(reviewText: string | null | undefined): { va
 export function terminalReadiness(reviewText: string | null | undefined): Readiness | null {
   return terminalVerdictLine(reviewText)?.value ?? null
 }
+
+/** 结构化声明（`review/readiness.json`）的解析结果。 */
+export interface ReadinessDeclaration {
+  readonly readiness: Readiness
+  readonly conditional: boolean
+}
+
+/**
+ * 解析 `review/readiness.json`（D51）：只认已知键，坏 JSON/未知键/错值 = 非法。
+ * 门禁与驾驶舱共用本函数——同一份声明在两侧必须同判。
+ */
+export function parseReadinessDeclaration(text: string): { readonly ok: true; readonly value: ReadinessDeclaration } | { readonly ok: false; readonly detail: string } {
+  let raw: unknown
+  try { raw = JSON.parse(text) } catch { return { ok: false, detail: 'review/readiness.json 不是合法 JSON' } }
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return { ok: false, detail: 'review/readiness.json 顶层必须是对象' }
+  const record = raw as Record<string, unknown>
+  const problems: string[] = []
+  for (const key of Object.keys(record)) {
+    if (!['version', 'readiness', 'conditional', 'round', 'at'].includes(key)) problems.push(`未知键 ${key}`)
+  }
+  if (record.version !== 1) problems.push('version 必须为 1')
+  if (record.readiness !== 'PASS' && record.readiness !== 'FAIL') problems.push('readiness 必须为 PASS/FAIL')
+  if ('conditional' in record && typeof record.conditional !== 'boolean') problems.push('conditional 必须是布尔')
+  if ('round' in record && (!Number.isInteger(record.round) || (record.round as number) < 1)) problems.push('round 必须是 ≥1 的整数')
+  if (problems.length > 0) return { ok: false, detail: `review/readiness.json 不合法：${problems.join('；')}` }
+  return { ok: true, value: { readiness: record.readiness as Readiness, conditional: record.conditional === true } }
+}
+
+/** 终局 readiness 的判据来源（声明件优先；散文只做副本；无 review/ 的旧场回退散文）。 */
+export interface ReadinessReading {
+  readonly pass: boolean
+  readonly conditional: boolean
+  readonly source: 'declaration' | 'prose' | 'missing' | 'invalid' | 'mismatch'
+  readonly detail?: string
+}
+
+/**
+ * 由（review.md 文本 + 声明文本 + 是否有 review/ 目录）判终局 readiness。
+ * 门禁 `readinessOfBundle` 与驾驶舱状态页共用——**同一事实一个判据**。
+ */
+export function readinessOfSources(input: {
+  readonly reviewText: string | null | undefined
+  readonly declarationText: string | null | undefined
+  readonly hasReviewDir: boolean
+}): ReadinessReading {
+  const terminal = terminalVerdictLine(input.reviewText)
+  const proseValue = terminal?.value ?? null
+  if (typeof input.declarationText !== 'string') {
+    if (!input.hasReviewDir) return { pass: terminal?.value === 'PASS', conditional: terminal !== null && /附条件|条件\s*[=＝：:]/.test(terminal.line), source: 'prose' }
+    return {
+      pass: false,
+      conditional: false,
+      source: 'missing',
+      detail: 'review/ 在场但 review/readiness.json 缺席——结构化审查必须声明终局（修正 = critic 按 adversarial-review skill 写声明）',
+    }
+  }
+  const parsed = parseReadinessDeclaration(input.declarationText)
+  if (!parsed.ok) return { pass: false, conditional: false, source: 'invalid', detail: parsed.detail }
+  if (proseValue !== null && proseValue !== parsed.value.readiness) {
+    return {
+      pass: false,
+      conditional: false,
+      source: 'mismatch',
+      detail: `声明 ${parsed.value.readiness} 与 review.md 判定行 ${proseValue} 不一致——散文与声明必须同判（修正 = 改一处或删旧行）`,
+    }
+  }
+  return { pass: parsed.value.readiness === 'PASS', conditional: parsed.value.conditional, source: 'declaration' }
+}
