@@ -154,3 +154,14 @@
 | [BUG-146](BUG-146-hitl-signatures-chinese-only-bilingual.md) | BUG-146：HITL 判型/答复识别只认中文文案——英语卡让门③必红、UI 停靠点误判（id 本已语言无关） | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
 | [BUG-147](BUG-147-client-hitl-zero-answers-false-green.md) | BUG-147：client-hitl-smoke ⑤b 把「共作答 0 题」当通过——代理一题未答，却断言「挂起卡已答」 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
 | [BUG-148](BUG-148-evidence-short-quotes-not-audited.md) | BUG-148：evidence-audit 只回溯 ≥16 字的引文——短伪造摘录完全不进审计（无 finding） | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-149](BUG-149-hitl2-pending-vocabulary-holes.md) | BUG-149：isHitl2Row 的 pending 词表仍有洞——「等回复/未最终裁决/挂起/推迟/未决/on hold」都被当拍板（140 修复的默认放 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-150](BUG-150-readiness-keyword-window-still-hijacked.md) | BUG-150：readiness 行内仲裁仍以「关键词窗口」区分真实判定——`随后/复核后/结论/本 run` 的裸写 FAIL 仍被旧 PASS 劫持 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-151](BUG-151-client-hitl-click-count-false-red.md) | BUG-151：147 的修法用「点击计数」判已答，与 hitl-answer 自己的判据矛盾——Recommended 预选卡答案已落地却判红（client- | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-152](BUG-152-client-load-unhealthy-host-assertion-red.md) | BUG-152：client-load 的 host-health 收口只认「连接死亡」——负载升高时的状态页断言失败仍判 FAILURE（疑似负载假红） | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-153](BUG-153-protocol-snapshot-presence-only-not-content.md) | BUG-153：protocol-audit 的版本快照只查「文件在场」——`protocol/v1.json = {}` 也 PASS，历史链内容未校验 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-154](BUG-154-manifest-roles-missing-new-artifacts.md) | BUG-154：manifest 的 FILE_ROLES 未登记新契约件——protocol.json/protocol-audit.md 角色 unknow | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-155](BUG-155-manual-evidence-known-titles-are-table-labels.md) | BUG-155：manualEvidenceOf 的「已知回执节」来自表格行标签，而生成的 acceptance 没有 `##` 节——人工写 `## 检查/# | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-156](BUG-156-hitl2-gate-no-version-pairing-pending-filtered.md) | BUG-156：门③过滤掉 pending 行后，旧拍板行 + 旧答复仍放行新版本——没有「最新版本必须已拍板」的仲裁 | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-157](BUG-157-verdicts-missing-session-only-warning.md) | BUG-157：verdicts 的 batch.session 缺失只 warning——伪造裁决可引用不存在的 child 会话通过（身份/原文未核） | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-158](BUG-158-verdict-audit-review-missing-only-warning.md) | BUG-158：verdict-audit 在 review.md 整缺时只 warning——「critical unverifiable + 无 readi | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-159](BUG-159-claims-evidence-topics-not-validated.md) | BUG-159：claims 的 evidence/topics 从未与盘上对账——可引用不存在的证据文件或绝对路径，audit 无红；schema-scan  | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |

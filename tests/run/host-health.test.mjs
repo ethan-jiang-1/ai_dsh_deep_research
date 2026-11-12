@@ -49,7 +49,7 @@ test('NOT-RUN 只在失败 + 主机不健康 + 连接死亡/页面丢失同时�
   assert.equal(isHostUnhealthyVerdict({ hasFailures: true, hostHealth: unhealthy, connectionDeath: false, pageLost: true }), true)
   assert.equal(isHostUnhealthyVerdict({ hasFailures: false, hostHealth: unhealthy, connectionDeath: true, pageLost: true }), false)
   assert.equal(isHostUnhealthyVerdict({ hasFailures: true, hostHealth: healthy, connectionDeath: true, pageLost: true }), false)
-  assert.equal(isHostUnhealthyVerdict({ hasFailures: true, hostHealth: unhealthy, connectionDeath: false, pageLost: false }), false)
+  assert.equal(isHostUnhealthyVerdict({ hasFailures: true, hostHealth: unhealthy, connectionDeath: false, pageLost: false }), true, '不健康主机 + 断言失败 = NOT-RUN（BUG-152）')
   assert.equal(isHostUnhealthyVerdict({ hasFailures: true, hostHealth: null, connectionDeath: true, pageLost: true }), false)
 })
 

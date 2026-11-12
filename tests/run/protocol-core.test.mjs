@@ -624,3 +624,14 @@ test('deviations：未知维度 / 空 why → 红', () => {
   protocol.deviations = [{ dimension: 'style', from: 'a', to: 'b', why: '', authority: 'user' }]
   assert.ok(has(validateProtocol(protocol), 'deviation-shape'))
 })
+
+// 负例留证 2026-11-13：BUG-153——protocol/v1.json = {} 也 PASS；历史快照需合法 schema/version/指纹。
+test('BUG-153 协议快照内容：空对象/错版 RED，合法 v1 快照 PASS', () => {
+  const protocol = baseProtocol({ version: 2 })
+  const base = { protocol, questionText: questionOf(protocol), planText: planOf(6, { version: 2 }), topicsText: topicsOf(6), auditText: '', hasSnapshot: true }
+  assert.ok(has(evaluateBundle({ ...base, snapshot: {} }), 'protocol-snapshot'))
+  const wrong = baseProtocol({ version: 99 })
+  assert.ok(has(evaluateBundle({ ...base, snapshot: wrong }), 'protocol-snapshot'))
+  const good = evaluateBundle({ ...base, snapshot: baseProtocol() })
+  assert.equal(has(good, 'protocol-snapshot'), false, JSON.stringify(good.filter((f) => f.level === 'red')))
+})

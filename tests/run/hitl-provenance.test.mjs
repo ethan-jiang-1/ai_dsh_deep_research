@@ -19,7 +19,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { answeredCountOf, provenanceLines, appendProvenance, batchToAnswered, attributionBundleOf, appendDecisionsRow, closingProvenanceRow } from '../../scripts/lib/hitl-provenance.mjs';
+import { answeredCountOf, landedAnswerOf, provenanceLines, appendProvenance, batchToAnswered, attributionBundleOf, appendDecisionsRow, closingProvenanceRow } from '../../scripts/lib/hitl-provenance.mjs';
 import { toolCall } from '../fixtures/events.mjs';
 
 const ANSWERED = [
@@ -212,4 +212,16 @@ test('BUG-147 answeredCountOf：0 题 → 0（不得当已答），1 题 → 1�
   assert.equal(answeredCountOf('hitl-answer: 共作答 0 题 / 卡共 1 题 · Submit 已点击'), 0)
   assert.equal(answeredCountOf('hitl-answer: 共作答 1 题 / 卡共 1 题'), 1)
   assert.equal(answeredCountOf('no count'), null)
+})
+
+// 负例留证 2026-11-13：BUG-151——点击计数 0 但盘侧 answer 批已落地，client-hitl ⑤b 假红。
+// 判据 = landedAnswerOf（tool/result 或 inbox 的 selected 非空），不是点击计数。
+test('BUG-151 landedAnswerOf：预选 Recommended 的 tool/result selected 非空 → 已答', () => {
+  const events = [
+    { type: 'tool/call', data: { callId: 'c1', name: 'ask_user_question', arguments: '{}' } },
+    { type: 'tool/result', data: { message: { toolCallId: 'c1', content: [{ type: 'text', text: JSON.stringify({ answers: [{ id: 'x', selected: ['要 (Recommended)'] }] }) }] } } },
+  ]
+  assert.deepEqual(landedAnswerOf(events), { callId: 'c1', selected: ['要 (Recommended)'] })
+  assert.equal(landedAnswerOf([events[0]]), null)
+  assert.equal(landedAnswerOf([events[0], { type: 'tool/result', data: { message: { toolCallId: 'c1', content: [{ type: 'text', text: JSON.stringify({ answers: [{ id: 'x', selected: [] }] }) }] } } }]), null)
 })

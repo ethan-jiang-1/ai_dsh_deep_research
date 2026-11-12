@@ -214,3 +214,10 @@ test('BUG-141 行内仲裁按「未包裹」而非关键词：裸写真实判定
   // 括号内历史引用仍不夺权
   assert.equal(terminalReadiness('上一场 review 的结论是（第 1 轮 readiness: FAIL），本场尚未审查。\n'), null)
 })
+
+// 负例留证 2026-11-13：BUG-150——随后/复核后/结论/本 run 的裸写 FAIL 仍被旧 PASS 劫持。
+test('BUG-150 裸写真实判定不要求关键词：分隔符后取最后裸写', () => {
+  for (const lead of ['随后', '复核后', '结论', '本 run']) {
+    assert.equal(terminalReadiness(`旧轮真实记录：\`readiness: PASS\`；${lead} readiness: FAIL\n`), 'FAIL', lead)
+  }
+})

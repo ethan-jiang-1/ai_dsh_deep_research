@@ -79,7 +79,6 @@ export function classifyHostHealth(metrics, thresholds = {}) {
  * @returns {boolean}
  */
 export function isHostUnhealthyVerdict({ hasFailures, hostHealth, connectionDeath, pageLost }) {
-  return hasFailures === true
-    && hostHealth?.unhealthy === true
-    && (connectionDeath === true || pageLost === true)
+  // 主机不健康 + 断言失败即判 NOT-RUN（不再要求连接死亡）；健康主机的断言红仍是产品红（BUG-152）。
+  return hasFailures === true && hostHealth?.unhealthy === true
 }

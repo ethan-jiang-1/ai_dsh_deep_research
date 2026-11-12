@@ -179,6 +179,10 @@ if (isMain(import.meta.url)) {
     finalVersion,
     finalText,
     reviewText: readIf(join(bundle, 'review.md')),
+    topicsText: readIf(join(bundle, 'topics.md')),
+    bundleFiles: existsSync(join(bundle, 'evidence'))
+      ? readdirSync(join(bundle, 'evidence')).filter((name) => name.endsWith('.md')).map((name) => `evidence/${name}`)
+      : [],
     sessions,
   })
 

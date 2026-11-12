@@ -1,3 +1,6 @@
+// 负例留证 2026-11-13：BUG-157（session-missing 只 warning）
+// 负例留证 2026-11-13：BUG-158（review-missing 只 warning）
+// 负例留证 2026-11-13：BUG-159（claims evidence/topics 不盘上对账）
 // verdict-audit —— claim 级裁决判据的 keyless 回归（契约 = `_backlog/_archived/research/quality-loop/
 // 2026-11-10-verdict-contract.md` §5；实现 = `scripts/lib/verdict-audit-core.mjs`）。
 //
@@ -246,10 +249,9 @@ test('复验轮拿早期正文冒充后一轮 → not-verbatim（原文一致跨
   assert.ok(codes(result).includes('not-verbatim'))
 })
 
-test('会话日志不可读 → 只打 session-missing 警告（不假装核过原文）', () => {
+test('BUG-157 交付期会话日志不可读 → session-missing 红（不假装核过原文）', () => {
   const result = auditClaimVerdicts(fixture({ sessions: {} }))
-  assert.deepEqual(result.problems, [])
-  assert.ok(warnCodes(result).includes('session-missing'))
+  assert.ok(codes(result).includes('session-missing'))
 })
 
 test('claim 表没有 critical → no-critical 警告（覆盖判据仍绿）', () => {
@@ -297,4 +299,20 @@ test('写者契约：templates/run/claims.json 与 verdicts.json 必须能被 co
 
 test('契约日常量在场（epoch 豁免的唯一依据）', () => {
   assert.match(CLAIMS_CONTRACT_DATE, /^\d{4}-\d{2}-\d{2}$/)
+})
+
+
+// 负例留证 2026-11-13：BUG-158——review.md 整缺只 warning；BUG-159——claims 的 evidence/topics 不盘上对账。
+test('BUG-158 review.md 缺席 → required 下 RED', () => {
+  const result = auditClaimVerdicts(fixture({ reviewText: '' }))
+  assert.ok(codes(result).includes('review-missing'))
+})
+
+test('BUG-159 claims evidence/topics：不存在/绝对路径/不存在 topic → RED', () => {
+  const claim = { ...C1, evidence: ['evidence/nope.md'], topics: ['T9'] }
+  const result = auditClaimVerdicts({ ...fixture({ claims: [claim] }), bundleFiles: [], topicsText: '## T1\n' })
+  assert.ok(codes(result).includes('claim-evidence'))
+  assert.ok(codes(result).includes('claim-topic'))
+  const absolute = auditClaimVerdicts({ ...fixture({ claims: [{ ...C1, evidence: ['/Users/me/secret.md'] }] }), bundleFiles: [], topicsText: '## T1\n' })
+  assert.ok(codes(absolute).includes('claim-evidence'))
 })

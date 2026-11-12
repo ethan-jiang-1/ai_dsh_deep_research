@@ -353,3 +353,36 @@ test('BUG-145 人工走查内含二级标题：完整保留到 EOF（或已知�
   assert.match(withManualEvidence('# Acceptance\n\nmech\n', inside), /## 检查记录\n\n已核。/)
   assert.match(withManualEvidence('# Acceptance\n\nmech\n', tail), /## 附注\n\n其它。/)
 })
+
+// 负例留证 2026-11-13：BUG-154——manifest 角色表漏协议件、review//waves/ 证据不入清单。
+test('BUG-154 manifest：protocol 角色 + review/waves/protocol 目录带 sha256 入清单', () => {
+  const { dir, cleanup } = makeRoot()
+  try {
+    const b = writeBundle(dir)
+    writeFileSync(join(b, 'protocol.json'), '{}\n')
+    writeFileSync(join(b, 'protocol-audit.md'), '# audit\n')
+    mkdirSync(join(b, 'review'), { recursive: true })
+    writeFileSync(join(b, 'review', 'claims.json'), '[]\n')
+    writeFileSync(join(b, 'review', 'verdicts-r1.json'), '[]\n')
+    mkdirSync(join(b, 'waves'), { recursive: true })
+    writeFileSync(join(b, 'waves', 'w1.json'), '{}\n')
+    mkdirSync(join(b, 'protocol'), { recursive: true })
+    writeFileSync(join(b, 'protocol', 'v1.json'), '{}\n')
+    const manifest = buildManifest({ slug: 'x', bundleDir: b, contract: '2026-11-13', generatedAt: '2026-11-13T00:00:00+08:00' })
+    const roleOf = (path) => manifest.files.find((f) => f.path === path)?.role
+    assert.equal(roleOf('protocol.json'), 'protocol')
+    assert.equal(roleOf('protocol-audit.md'), 'protocol-audit')
+    assert.equal(roleOf('review/claims.json'), 'review-claims')
+    assert.equal(roleOf('review/verdicts-r1.json'), 'review-verdicts')
+    assert.equal(roleOf('waves/w1.json'), 'wave-report')
+    assert.equal(roleOf('protocol/v1.json'), 'protocol-snapshot')
+  } finally { cleanup() }
+})
+
+// 负例留证 2026-11-13：BUG-155——人工节的 ## 检查/清单/回执/读者版 被误当回执节截断。
+test('BUG-155 人工走查的通用 ## 标题仍完整保留', () => {
+  for (const title of ['检查', '清单', '回执', '读者版']) {
+    const text = `## 人工走查\n\n## ${title}\n\n已核。`
+    assert.equal(manualEvidenceOf(text), text, title)
+  }
+})

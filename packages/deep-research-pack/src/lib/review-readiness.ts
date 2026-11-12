@@ -93,9 +93,19 @@ function lastInlineVerdict(line: string): Readiness | null {
   for (const match of line.matchAll(INLINE_VERDICT)) {
     const index = match.index ?? 0
     if (ranges.some(([start, end]) => index >= start && index < end)) continue
-    const before = line.slice(Math.max(0, index - 20), index)
-    if (!/本轮|终局|真实|最终|当前|最后|现在|新判定/.test(before)) continue
-    found = match[1]!.toUpperCase() as Readiness
+    const before = line.slice(0, index)
+    const segment = before.split(/[；;。]/).pop() ?? before
+    // 旧轮/历史引用（无论是否带引号）不作当前判定。
+    if (/(?:旧轮|上轮|旧记录|历史|此前|原来|第\s*\d+\s*轮)/i.test(segment)) continue
+    // 裸写判定必须位于行首（仅装饰前缀）或某个分隔符之后；prose 中段提及不夺权。
+    const atStart = before.replace(/[\s>*#\-+`]/g, '') === ''
+    const afterSeparator = /[；;。]/.test(before)
+    const currentPrefix = /^(?:本轮|终局|真实|最终|当前|最后|现在|新判定)\s*$/i.test(segment.trim())
+    if (!atStart && !afterSeparator && !currentPrefix) continue
+    const value = match[1]!.toUpperCase() as Readiness
+    // 同一行多个当前裸写判定且互相矛盾 → fail-closed（不取最后一个冒充）。
+    if (found !== null && found !== value) return null
+    found = value
   }
   return found
 }

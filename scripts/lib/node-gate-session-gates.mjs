@@ -390,7 +390,7 @@ function planCardNote(planCards, planCardOver) {
  * @returns 是否计为 HITL2 拍板行。
  */
 export const isHitl2Mention = (line) => /HITL2/i.test(line) || (/交付审阅/.test(line) && /代理模拟|hitl-answer/.test(line))
-const HITL2_PENDING = /(?:待(?:用户)?确认|待定|等待|尚未|暂缓|未拍板|未定|未答复|pending|await)/i
+const HITL2_PENDING = /(?:待(?:用户)?确认|待定|待办|等待|等回复|挂起|推迟|暂缓|暂不|尚未|未拍板|未最终|未裁决|未决(?!项)|未定|未答复|pending|await|on hold)/i
 const HITL2_DECISION = /定稿|追认|拍板|按现稿|批准|认可|确认|通过|改说法|补研究|修订|同意|无异议|采纳|\bOK\b|approved|finalize|deliver as[- ]is|继续|照办/i
 
 /**
@@ -400,9 +400,10 @@ const HITL2_DECISION = /定稿|追认|拍板|按现稿|批准|认可|确认|通�
  */
 export function isHitl2Row(line) {
   if (!isHitl2Mention(line)) return false
-  if (/交付审阅/.test(line) && /代理模拟|hitl-answer/.test(line)) return !HITL2_PENDING.test(line)
+  if (/交付审阅/.test(line) && /代理模拟|hitl-answer/.test(line)) return !/(?:未拍板|待用户确认|待确认|未定|未答复)/.test(line)
   if (HITL2_PENDING.test(line)) return false
-  return HITL2_DECISION.test(line) || /HITL2/i.test(line)
+  // fail-closed：没有明确决策证据就不算拍板（BUG-149；默认放行会把 pending 词表的洞放大）。
+  return HITL2_DECISION.test(line)
 }
 
 export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadableLogReader, witness = null) {
@@ -413,7 +414,11 @@ export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadabl
   const qText = existsSync(qPath) ? readFileSync(qPath, 'utf8') : null
   const dec = qText ? decisionsLines(qText) : []
   const hitl2Mentions = dec.filter((l) => isHitl2Mention(l))
-  const latestMention = hitl2Mentions[0] ?? null
+  // 最新行 = 日期最新；无日期时按文件顺序后出现者（append 语义）。不能取首行：
+  // §Decisions 可能旧在前/新在后（BUG-156）。
+  const latestMention = [...hitl2Mentions].map((line, index) => ({ line, index, date: /(\d{4}-\d{2}-\d{2})/.exec(line)?.[1] ?? '' }))
+    .sort((a, b) => a.date === b.date ? a.index - b.index : a.date.localeCompare(b.date))
+    .at(-1)?.line ?? null
   const hitl2Rows = hitl2Mentions.filter((l) => isHitl2Row(l))
   const proxyRows = hitl2Rows.filter((l) => !/HITL2/.test(l))
   const epoch = epochDateOf(bundleDir)
@@ -430,6 +435,14 @@ export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadabl
     gate = { status: 'RED', detail: `final/ 记账在场（${versionFiles.join(', ')}）但 §Decisions 无任何 HITL2 行——版本落盘先于用户裁决（G8 形态）` }
   } else if (latestMention !== null && !isHitl2Row(latestMention)) {
     gate = { status: 'RED', detail: `§Decisions 最新一条 HITL2 行是未决形（${latestMention.trim().slice(0, 80)}）——版本落盘先于用户裁决（G8 形态）；旧答复不能为它作证` }
+  } else if (latestMention !== null && (() => {
+    const rowVersion = /\bv([1-9]\d*)\b/i.exec(latestMention)?.[1]
+    const newestFinal = Math.max(...versionFiles.map((name) => Number(/^v([1-9]\d*)\.md$/.exec(name)?.[1] ?? 0)))
+    return rowVersion !== undefined && Number(rowVersion) < newestFinal
+  })()) {
+    const rowVersion = /\bv([1-9]\d*)\b/i.exec(latestMention)?.[1]
+    const newestFinal = Math.max(...versionFiles.map((name) => Number(/^v([1-9]\d*)\.md$/.exec(name)?.[1] ?? 0)))
+    gate = { status: 'RED', detail: `最新 HITL2 拍板行指向 v${String(rowVersion)}，但 final/ 最新版本是 v${String(newestFinal)}——最新版本无对应拍板（版本配对失败）` }
   } else if (newContract) {
     const scan = witness ?? scanWitnessLogs(sessionsRoot, basename(bundleDir), { readLog, contract })
     const reply = repliesStatusOf(scan)

@@ -137,7 +137,12 @@ if (isMain(import.meta.url)) {
     process.exit(1)
   }
   const version = versionOf(protocol)
-  const hasSnapshot = version !== null && version > 1 && existsSync(join(bundle, 'protocol', `v${version - 1}.json`))
+  const snapshotPath = version !== null && version > 1 ? join(bundle, 'protocol', `v${version - 1}.json`) : null
+  const hasSnapshot = snapshotPath !== null && existsSync(snapshotPath)
+  let snapshot = null
+  if (hasSnapshot && snapshotPath !== null) {
+    try { snapshot = JSON.parse(readIf(snapshotPath)) } catch { snapshot = null }
+  }
   const findings = evaluateBundle({
     protocol,
     questionText: readIf(join(bundle, 'question.md')),
@@ -145,6 +150,7 @@ if (isMain(import.meta.url)) {
     topicsText: readIf(join(bundle, 'topics.md')),
     auditText: readIf(join(bundle, 'protocol-audit.md')),
     hasSnapshot,
+    snapshot,
     legacy: false,
   })
   const problems = findings.filter((item) => item.level === 'red')

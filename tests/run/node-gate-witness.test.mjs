@@ -384,3 +384,28 @@ test('BUG-146 英文 HITL2 卡：门③认 id/英文选项，UI 判 pending', ()
     assert.equal(anchors.find((a) => a.key === 'anchor-2')?.state, 'pending')
   } finally { cleanup() }
 })
+
+// 负例留证 2026-11-13：BUG-149——pending 词表洞导致「等回复/未最终裁决/挂起/推迟/未决/hold」被当拍板。
+test('BUG-149 HITL2 pending 词表洞：无明确决策证据一律未决', () => {
+  for (const row of ['HITL2 等回复', 'HITL2 未最终裁决', 'HITL2 挂起', 'HITL2 推迟', 'HITL2 待办：等用户', 'HITL2 未决', 'HITL2 暂不交付', 'HITL2 on hold']) {
+    assert.equal(isHitl2Row(`- ${row}`), false, row)
+  }
+  for (const row of ['HITL2 定稿', 'HITL2 用户无异议', 'HITL2 approved', 'HITL2 采纳']) {
+    assert.equal(isHitl2Row(`- ${row}`), true, row)
+  }
+})
+
+// 负例留证 2026-11-13：BUG-156——最新 v2 pending 行 + 旧 v1 拍板/答复仍 PASS。
+// 还原法 = latestMention 取首行（旧 v1）且不做版本配对。
+test('BUG-156 最新 HITL2 行/版本仲裁：v2 pending + v1 旧答复 → RED', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  try {
+    const b = writeBundle(dir)
+    writeFileSync(join(b, 'question.md'), '# Q\n\n## Decisions\n\n- 2026-11-01 HITL2 定稿（v1）\n- 2026-11-23 HITL2 待用户确认（v2）\n')
+    writeFileSync(join(b, 'final', 'v2.md'), '# v2\n')
+    const sessions = writeSession(dir, [bind(), ask(), reply()])
+    const r = hitl2RowGate(b, sessions)
+    assert.equal(r.gate.status, 'RED', JSON.stringify(r.gate))
+    assert.match(r.gate.detail, /未决|最新|版本/)
+  } finally { cleanup() }
+})

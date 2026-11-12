@@ -16,6 +16,19 @@
 
 ## 最近归档
 
+（2026-11-13 交付门/证据面复查批（11 张，149–159）：
+[149](../_archived/fixed_bugs/BUG-149-hitl2-pending-vocabulary-holes.md) HITL2 pending 词表；
+[150](../_archived/fixed_bugs/BUG-150-readiness-keyword-window-still-hijacked.md) readiness 范围仲裁；
+[151](../_archived/fixed_bugs/BUG-151-client-hitl-click-count-false-red.md) 盘侧 answer；
+[152](../_archived/fixed_bugs/BUG-152-client-load-unhealthy-host-assertion-red.md) 不健康主机 NOT-RUN；
+[153](../_archived/fixed_bugs/BUG-153-protocol-snapshot-presence-only-not-content.md) 协议快照内容；
+[154](../_archived/fixed_bugs/BUG-154-manifest-roles-missing-new-artifacts.md) manifest 新件；
+[155](../_archived/fixed_bugs/BUG-155-manual-evidence-known-titles-are-table-labels.md) 人工走查边界；
+[156](../_archived/fixed_bugs/BUG-156-hitl2-gate-no-version-pairing-pending-filtered.md) HITL2 版本仲裁；
+[157](../_archived/fixed_bugs/BUG-157-verdicts-missing-session-only-warning.md) verdict session 缺失；
+[158](../_archived/fixed_bugs/BUG-158-verdict-audit-review-missing-only-warning.md) verdict review 缺失；
+[159](../_archived/fixed_bugs/BUG-159-claims-evidence-topics-not-validated.md) claims 证据/主题对账。
+）
 （2026-11-13 真模型/一致性复查批（13 张，136–148）：
 [136](../_archived/fixed_bugs/BUG-136-defaults-probe-port-self-lock.md) probe 端口退避；
 [137](../_archived/fixed_bugs/BUG-137-defaults-probe-language-merged-into-defaults-option.md) 语言不冒充默认；

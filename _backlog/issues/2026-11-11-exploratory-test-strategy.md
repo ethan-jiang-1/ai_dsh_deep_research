@@ -761,6 +761,148 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 
 可达面在最后三轮明显见底（3→2→1 张新卡，最后多为「门槛静默放行/写读不成对」的邻接变体）。
 目标（≥10）早已达成；剩余价值集中在 **A 修完 136–148 后的逐条回归**与 **136 解除后的真模型复跑**。
+## 第五轮 goal 记录（2026-11-13 03:5x 起）
+
+### 第 57 轮（05:0x）：修完即验——140/141 的邻接复发
+
+- **背景**：A 的 `bb0323ac` 修完 136–148 并归档；`verify` 0 红、`test` 1355 绿、构建 03:45 新鲜。
+- **新卡**：
+  - [BUG-149](../_archived/fixed_bugs/BUG-149-hitl2-pending-vocabulary-holes.md) **P1 等人拍板**——140 修复把判据反成
+    「无 pending 即默认拍板」，pending 词表的遗漏被放大：`等回复/未最终裁决/挂起/推迟/待办：等用户/未决/暂不交付/on hold`
+    **全部 APPROVE**（仅 `awaiting reply` 命中 await）。
+  - [BUG-150](../_archived/fixed_bugs/BUG-150-readiness-keyword-window-still-hijacked.md) **P1 等人拍板**——141 修复只把
+    关键词表扩到「现在/新判定」；`随后/复核后/结论/本 run` 的裸写 FAIL 仍被旧 PASS 劫持（实测 4/4 PASS）。
+- **修复回归（已验绿）**：145 人工走查含 `##` 完整保留；146 英文 HITL2 门③ PASS；148 短引文产出 finding。
+- **共性**：两处都在用**有限词表**做语义判断；修复方向应是「默认 fail-closed / 范围仲裁」，而不是继续加词。
+### 第 58 轮（2026-11-13 05:1x）：147 修成了假红
+
+- **新卡**：[BUG-151](../_archived/fixed_bugs/BUG-151-client-hitl-click-count-false-red.md) **P2 修复就绪**——
+  147 用「点击计数 ≥1」判已答；但 Recommended 预选卡无需点击，答案批已落地
+  （盘侧 `selected:["要 (Recommended)"]`）→ `client-hitl --port 3143` **⑤b FAIL（共作答 0 题）**，
+  10 PASS / 2 FAIL。hitl-answer 自己的注释早写明「点击计数不可作判据」——修法选错了判据层。
+- **同轮**：140/141 的邻接复发已立 149/150（两条 P1）；145/146/148 修复验证为绿。
+- **共性**：代理指标（点击计数/关键词/词表）代替盘侧事实——最近的修复反复在这条线上翻车。
+### 第 59 轮（2026-11-13 05:2x）：X8 仍红——是负载假红？
+
+- **新卡**：[BUG-152](../_archived/fixed_bugs/BUG-152-client-load-unhealthy-host-assertion-red.md) **P2 修复就绪**——
+  142 的选择器修复已验（本轮 boundSession 是 **lead**，marker「处理已写入文件记录，采用」），但 X8 仍
+  **68 PASS / 4 FAIL**；失败现场 `meta.json`：`reason=assertions`、`hostHealth=NO（load 15.45 / load/cpu 1.54）`、
+  断连 0 次。收口判据 `isHostUnhealthyVerdict` 只在**连接死亡/pageLost** 时转 NOT-RUN → 负载下的
+  渲染断言失败被判成产品红（3 项状态页断言）。
+- **修复回归（已验绿）**：136（探针端口回退/清理，3124 占用时自动换临时端口）、137（defaults-probe
+  **ALL PASS**，C5 语言并入已修）、139 BOM、142 选择器、143 method-editor persona 明禁组队/写 run、
+  144 代理记账行、145 人工走查、146 英文 HITL2（门③ PASS、anchor-2 pending）、148 短引文 finding。
+- **下一层**：在健康窗口复跑 X8（若仍红则把 152 升级为产品回归）；149/150/151/152 待 A 修。
+### 第 60 轮（2026-11-13 05:3x）：安装/发布面复跑 + 修复回归
+
+- **安装/发布面（bb0323ac 之后）**：`lifecycle-smoke` **ALL PASS**（22 项）、
+  `release-smoke --install-only` **ALL PASS**（57 项）——安装形状/端口释放未受 127–152 修复影响。
+- **回归已验绿**（本轮逐条）：136 探针端口回退/清理（3124 被占时自动换临时端口；跑完 3124 无残留）、
+  137 defaults-probe **ALL PASS**（C5 语言不再并入）、139 BOM、142 选择器（boundSession 已是 lead）、
+  143 method-editor persona 明禁组队/写 run、144 代理记账行、145 人工走查含 `##` 完整保留、
+  146 英文 HITL2（门③ PASS / anchor-2 pending）、148 短引文 finding。
+- **未跑（主机 load 24 时不做浏览器/真模型）**：X8 健康窗口复跑、team-preflight/X6、151 的 client-hitl 复跑。
+### 第 61 轮（2026-11-13 05:4x）：版本快照只查在场
+
+- **新卡**：[BUG-153](../_archived/fixed_bugs/BUG-153-protocol-snapshot-presence-only-not-content.md) **P2 等人拍板**——
+  protocol v2 + `protocol/v1.json = {}` → `protocol-audit` **PASS**：历史快照只查文件在场，schema/版本/
+  设计指纹全未校验（D46 的「协议版本链」可被占位文件冒充）。
+- **对照**：当前版本的设计指纹（`protocol-audit.md` 的 vN design_sha256）已核；历史版本没有任何核对。
+- **下一层**：v3 多级链（只查 v{n-1} 是否足够）、真实 bundle 的 v1 快照内容复核；记空白。
+### 第 62 轮（2026-11-13 06:0x）：交付清单漏了新证据体
+
+- **新卡**：[BUG-154](../_archived/fixed_bugs/BUG-154-manifest-roles-missing-new-artifacts.md) **P2 修复就绪**——
+  `buildManifest` 在新契约 bundle 上：`protocol.json`/`protocol-audit.md` 角色 **unknown**；
+  `review/`（claims/verdicts）与 `waves/`、`protocol/vN.json` **完全不在 manifest**（无哈希）——
+  D44/D46 的核心证据不在交付可校验清单内。
+- **对照**：schema-scan 白名单（076）已修；manifest 的角色表未同步。
+- **下一层**：目录清单的数量上限/分节设计、run-accept 的 manifest 生成路径复跑；记空白。
+### 第 63 轮（2026-11-13 06:1x）：人工证据的边界又错了
+
+- **新卡**：[BUG-155](../_archived/fixed_bugs/BUG-155-manual-evidence-known-titles-are-table-labels.md) **P2 修复就绪**——
+  145 的截断表 `{检查, 回执, 清单, 读者版}` 来自 acceptance **表格行标签**，而生成器根本没有 `##` 节：
+  人工在走查里写 `## 检查`/`## 清单` → `manualEvidenceOf` 返回 **null**（整节丢失）。
+- **实测**：生成的 acceptance `## ` 标题数 = 0；四个通用标题全部 null；只有 145 的 `## 检查记录` 保留。
+- **下一层**：历史 acceptance 的人工节位置分布、`--repair` 后的字节级保留；记空白。
+### 第 64 轮（2026-11-13 06:2x）：门③的版本级 fail-open
+
+- **新卡**：[BUG-156](../_archived/fixed_bugs/BUG-156-hitl2-gate-no-version-pairing-pending-filtered.md) **P1 等人拍板**——
+  §Decisions 同时有旧拍板行（v1 定稿）与最新 pending 行（v2 待用户确认）时：pending 行被
+  `isHitl2Row` 过滤 → 旧行 + 旧答复满足门③ → **PASS**（v2 未拍板仍放行）。把 pending 写成「未决」更糟：
+  149 的词表不含它，被当拍板行（同样 PASS）。
+- **根因**：075/140/144/149 修的都是**行分类**；门③没有「最新一行/最新版本必须已拍板」的**版本配对**
+  （门④有版本记账，门③没有）。`latestAsk` 只保证答复对应最新 ask（v1 的），v2 根本没问。
+- **下一层**：行内 `vN` 提取与 final 最高版本的对账设计；真实多版本 run 语料；记空白。
+### 第 65 轮（2026-11-13 06:3x）：证据出处/必要输入缺席 = warning
+
+- **新卡**：
+  - [BUG-157](../_archived/fixed_bugs/BUG-157-verdicts-missing-session-only-warning.md) **P1 等人拍板**——verdicts 的
+    `batch.session` 指向不存在的会话时 `problems=[]`（仅 `session-missing` warning）→ 伪裁决可过 audit；
+    原文/身份/深度/父会话四条判据同时失效。
+  - [BUG-158](../_archived/fixed_bugs/BUG-158-verdict-audit-review-missing-only-warning.md) **P2 等人拍板**——review.md
+    整缺时 critical `unverifiable` 不产生红（`review-missing`/`unverified-critical` 都 warning）；同场景
+    有「坏 review」反而红（`review-round-ref`），即「文件越缺越绿」。交付整体由 node-gate 兜底（实测红），
+    但 verdict-audit 的独立 PASS 不可信。
+- **门④/门②的版本配对**：156 已覆盖门③；present 版本 vs 最新 final 的观察（不算违约）暂不建卡。
+- **累计**：本 goal **10 条（149–158）**，目标达成。
+### 第 66 轮（2026-11-13 06:4x）：claim 的证据指针没人管
+
+- **新卡**：[BUG-159](../_archived/fixed_bugs/BUG-159-claims-evidence-topics-not-validated.md) **P2 等人拍板**——
+  claims 的 `evidence`/`topics` 从不与盘上对账：`evidence/nope.md`、`/Users/...`、`topics:["T9"]`
+  全部 `problems=[]`；把 `/Users/...` 写进 `review/claims.json` 后 `schema-scan` 仍 **green**
+  （内容扫描只对 `.md` 生效）。与 154（review/ 不入清单）叠加，三层都没拦住。
+- **对照**：claims 的 id/text/urls/critical 形状校验严格；坏的是**语义/在场**层。
+- **下一层**：verdicts-rN.json 的绝对路径（同样不在 .md 扫描面）、topics.md 的 id 解析；记空白。
+## 第五轮 goal 收口（2026-11-13 06:4x，6 轮；目标 10，实际 11）
+
+### 新卡（149–159，共 11 张）
+
+| 卡 | 级别 | 一句话 |
+|---|---|---|
+| [149](../_archived/fixed_bugs/BUG-149-hitl2-pending-vocabulary-holes.md) | P1 | 140 反成默认拍板：等回复/未最终裁决/挂起/推迟/未决/on hold 全 APPROVE |
+| [150](../_archived/fixed_bugs/BUG-150-readiness-keyword-window-still-hijacked.md) | P1 | 141 只扩关键词：随后/复核后/结论/本 run 的裸写 FAIL 仍被旧 PASS 劫持 |
+| [151](../_archived/fixed_bugs/BUG-151-client-hitl-click-count-false-red.md) | P2 | 147 用点击计数：Recommended 预选卡答案已落地却判红（client-hitl ⑤b 假红） |
+| [152](../_archived/fixed_bugs/BUG-152-client-load-unhealthy-host-assertion-red.md) | P2 | client-load 的 host-health 收口只认连接死亡——负载下断言失败仍判 FAILURE |
+| [153](../_archived/fixed_bugs/BUG-153-protocol-snapshot-presence-only-not-content.md) | P2 | protocol 版本快照只查在场：`v1.json = {}` 也 PASS |
+| [154](../_archived/fixed_bugs/BUG-154-manifest-roles-missing-new-artifacts.md) | P2 | manifest 角色表未登记 protocol.json/protocol-audit.md；review//waves/ 不入清单 |
+| [155](../_archived/fixed_bugs/BUG-155-manual-evidence-known-titles-are-table-labels.md) | P2 | 人工走查的「已知节」来自表格标签——`## 检查/## 清单` 整节丢失 |
+| [156](../_archived/fixed_bugs/BUG-156-hitl2-gate-no-version-pairing-pending-filtered.md) | P1 | 门③过滤 pending 后，旧拍板行+旧答复仍放行新版本（无版本配对） |
+| [157](../_archived/fixed_bugs/BUG-157-verdicts-missing-session-only-warning.md) | P1 | verdicts 的 batch.session 不存在只 warning——伪造裁决可过 |
+| [158](../_archived/fixed_bugs/BUG-158-verdict-audit-review-missing-only-warning.md) | P2 | review.md 整缺时 critical unverifiable 不红（node-gate 兜底） |
+| [159](../_archived/fixed_bugs/BUG-159-claims-evidence-topics-not-validated.md) | P2 | claims 的 evidence/topics 未与盘上对账；schema-scan 只扫 .md |
+
+### 已验绿的修复回归（139/136/137/142/143/144/145/146/148/130）
+
+- 136 探针端口回退/清理；137 defaults-probe **ALL PASS**（C5）；139 BOM；142 选择器（boundSession=lead）；
+  143 method-editor persona；144 代理记账行；145/146/148 人工走查/英文 HITL2/短引文；
+  130 锁恢复入口（错误带锁路径与处置）。
+- 安装/发布面：`lifecycle-smoke` 22 PASS、`release-smoke --install-only` 57 PASS。
+
+### 未跑 / 状态说明
+
+- 主机 load 20+，X8 健康窗口复跑、team-preflight/X6、client-hitl 复跑未跑。
+- **A 正在实时修 149–159 的批次**（工作树 12 个源文件修改中，测试从 4 红降到 1 红）；收口时
+  `pnpm test` 1 红、`verify` 0 红，均为 in-flight 状态，未建卡。
+
+### 收口时的修复回归（A 的工作树，未提交；verify 0 / test 1361-0）
+
+| 卡 | 回归结果 |
+|---|---|
+| 149 | 8 个 pending 变体全部 pending ✓ |
+| 150 | 4 个裸写 FAIL 全部 FAIL ✓（范围仲裁已落地） |
+| 151 | client-hitl 改用 `landedAnswerOf`（盘侧 landed batch）✓ |
+| 152 | `isHostUnhealthyVerdict` = 不健康 + 断言失败即 NOT-RUN（不再要求连接死亡）✓ |
+| 153 | `protocol/v1.json={}` → RED（缺字段 + version undefined）✓ |
+| 154 | manifest 角色：protocol/protocol-audit/review-claims/review-verdicts/protocol-snapshot ✓ |
+| 155 | `## 检查`/`## 清单` 的人工走查完整保留 ✓ |
+| 156 | 旧拍板 + 最新 pending 仍 **PASS**（未修） |
+| 157/158/159 | `problems=[]`（verdict-audit-core 未在修改面，未修） |
+
+### 结论
+
+目标（≥10）达成（11 张）；A 的批次在工作树已让 149–155 转绿（未提交），**156–159 仍开放**。
+三条高产线：**有限词表/关键词做语义判断**、**缺席/在场即放行**、**呈现层标签或代理指标当结构/判据**。
+剩余价值 = 156–159 的修复 + 安静窗口真模型/观察面复跑（X8/team-preflight/client-hitl）。
 ## 用户答复（2026-11-11）
 
 - **Q1**：采纳；持续做，不设固定轮数（goal 驱动，剥洋葱式逐层深入）。

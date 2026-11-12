@@ -41,6 +41,8 @@ const FILE_ROLES = {
   'node-gate.md': 'gate-snapshot',
   'acceptance.md': 'acceptance-receipt',
   'delivered.json': 'delivery-receipt',
+  'protocol.json': 'protocol',
+  'protocol-audit.md': 'protocol-audit',
 }
 
 /** final/ 下的角色（buildManifest 显式赋；不在顶层 FILE_ROLES 里）。 */
@@ -192,20 +194,13 @@ export function buildDelivered({ slug, bundleDir, corpusRoot, acceptedAt, presen
  * 不可再生（BUG-062）：重跑验收 / --repair 必须保留它，不能按「可再生产物」删掉。
  */
 const MANUAL_TITLE = /^##\s*人工走查\s*$/
-/** acceptance 的已知节标题（生成器当前无 `##` 节；保留集合供未来扩展——人工节内部标题不算节尾）。 */
-const ACCEPTANCE_SECTION_TITLES = new Set(['人工走查', '检查', '回执', '清单', '读者版'])
-
 export function manualEvidenceOf(text) {
   const lines = String(text ?? '').split(/\r?\n/)
   const start = lines.findIndex((line) => MANUAL_TITLE.test(line))
   if (start === -1) return null
   const rest = lines.slice(start + 1)
-  // 只在**已知回执节标题**处截断；人工节内部的 `## 检查记录/## 附注` 是自由文本（BUG-145）。
-  const end = rest.findIndex((line) => {
-    const match = /^##\s*(.+?)\s*$/.exec(line)
-    return match !== null && ACCEPTANCE_SECTION_TITLES.has(match[1] ?? '') && !MANUAL_TITLE.test(line)
-  })
-  const section = (end === -1 ? rest : rest.slice(0, end)).join('\n').trim()
+  // 生成器不产 `##` 节：人工走查按惯例在末尾，取到文件尾（BUG-145/155）。
+  const section = rest.join('\n').trim()
   return section === '' ? null : `## 人工走查\n\n${section}`
 }
 
@@ -294,6 +289,30 @@ export function buildManifest({ slug, bundleDir, contract, schema = null, genera
   // extra = 与 manifest 同时生成、尚未落盘的件（delivered.json 先算文本哈希再写，避免
   // 「先写 delivered 才能被 manifest 看见」的时序依赖）。
   files.push(...extra)
+  // 受控目录：D44/D46 的证据本体进清单（review/claims+verdicts、waves、protocol 历史）。
+  const dirRole = (dir, name) => {
+    if (dir === 'review') {
+      if (name === 'claims.json') return 'review-claims'
+      if (/^verdicts-r\d+\.json$/.test(name)) return 'review-verdicts'
+      if (/^verdict-audit-r\d+\.md$/.test(name)) return 'review-verdict-audit'
+      return 'review-evidence'
+    }
+    if (dir === 'waves') return 'wave-report'
+    if (dir === 'protocol' && name.startsWith('v') && name.endsWith('.json')) {
+      const version = name.slice(1, -5)
+      if (/^[1-9]\d*$/.test(version)) return 'protocol-snapshot'
+    }
+    return 'unknown'
+  }
+  for (const dir of ['review', 'waves', 'protocol']) {
+    const full = join(bundleDir, dir)
+    if (!existsSync(full)) continue
+    for (const ent of readdirSync(full, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+      if (!ent.isFile() || ent.name.startsWith('.')) continue
+      const rel = `${dir}/${ent.name}`
+      files.push({ path: rel, role: dirRole(dir, ent.name), sha256: sha256Of(join(full, ent.name)) })
+    }
+  }
   const finalDir = join(bundleDir, 'final')
   if (existsSync(finalDir)) {
     for (const version of finalVersionsIn(finalDir)) {

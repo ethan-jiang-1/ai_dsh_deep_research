@@ -252,6 +252,8 @@ export function auditClaimVerdicts({
   finalText = null,
   reviewText = null,
   sessions = {},
+  bundleFiles = null,
+  topicsText = null,
 } = {}) {
   const problems = []
   const warnings = []
@@ -282,6 +284,23 @@ export function auditClaimVerdicts({
   const { finalRef, claims } = claimsParsed.value
   const byId = new Map(claims.map((c) => [c.id, c]))
   stats.claims = claims.length
+
+  // claim 的证据指针与 topic 归属必须与盘上/主题表对账（BUG-159）。
+  const topicIds = new Set([...String(topicsText ?? '').matchAll(/^##\s*(T\d+)/gm)].map((match) => match[1]))
+  for (const claim of claims) {
+    for (const evidence of claim.evidence) {
+      if (typeof evidence !== 'string' || evidence.trim() === '' || evidence.startsWith('/') || evidence.split('/').includes('..') || !evidence.endsWith('.md')) {
+        problems.push({ code: 'claim-evidence', detail: `${claim.id} 的 evidence 不是安全的 bundle 内 .md 相对路径：${String(evidence)}` })
+      } else if (Array.isArray(bundleFiles) && !bundleFiles.includes(evidence)) {
+        problems.push({ code: 'claim-evidence', detail: `${claim.id} 的 evidence 指向不存在的文件：${evidence}` })
+      }
+    }
+    if (topicIds.size > 0) {
+      for (const topic of claim.topics) {
+        if (!topicIds.has(String(topic))) problems.push({ code: 'claim-topic', detail: `${claim.id} 的 topic ${String(topic)} 不在 topics.md 中` })
+      }
+    }
+  }
   stats.critical = claims.filter((c) => c.critical).length
   if (stats.critical === 0) warn('no-critical', 'claim 表没有一条 critical——「全都不关键」通常是表做漏了（覆盖判据只看 critical）')
 
@@ -389,7 +408,8 @@ export function auditClaimVerdicts({
       // 会话面：身份 / 只读 / 原文一致（跨轮单调向后）。
       const facts = sessions[batch.session]
       if (!facts) {
-        warn('session-missing', `${where}：找不到会话 ${batch.session} 的日志——只核到文件自洽，原文与身份未核`)
+        if (required) add('session-missing', `${where}：找不到会话 ${batch.session} 的日志——交付期裁决出处不可核（补语料或走存档豁免）`)
+        else warn('session-missing', `${where}：找不到会话 ${batch.session} 的日志——只核到文件自洽，原文与身份未核`)
         continue
       }
       if (facts.preset !== batch.preset) {
@@ -450,7 +470,8 @@ export function auditClaimVerdicts({
   // 终局 PASS 的读法**不在这里另写一份**：判据正本 = 门禁同源的 readinessOf（末条行首判定行生效，历史引用不夺权）。
   const passClaimed = typeof reviewText === 'string' && readinessOf(reviewText).pass
   if (typeof reviewText !== 'string' || reviewText.trim() === '') {
-    warn('review-missing', 'review.md 不可读——readiness 与轮次引用未核')
+    if (required) add('review-missing', 'review.md 缺席/空——交付需要 readiness 裁决，不能以「无法核」通过')
+    else warn('review-missing', 'review.md 不可读——readiness 与轮次引用未核')
   } else {
     if (!new RegExp(`verdicts-r${latest.round}\\b`, 'u').test(reviewText)) {
       add('review-round-ref', `review.md 没有引用最新一轮 verdicts-r${latest.round}——终局块要指向当前裁决`)

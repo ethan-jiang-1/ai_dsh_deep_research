@@ -145,3 +145,41 @@ export function answeredCountOf(stdout) {
   const match = /共作答\s*(\d+)\s*题/.exec(String(stdout ?? ''))
   return match?.[1] === undefined ? null : Number(match[1])
 }
+
+/** 盘侧 landed answer：最后一条 HITL ask 的 tool/result 或 user-question-reply 里 selected/custom 非空。 */
+export function landedAnswerOf(events) {
+  let askCallId = null
+  for (const event of Array.isArray(events) ? events : []) {
+    if (event?.type === 'tool/call' && event?.data?.name === 'ask_user_question' && typeof event?.data?.callId === 'string') {
+      askCallId = event.data.callId
+    }
+  }
+  if (askCallId === null) return null
+  const selectedOf = (content) => {
+    const labels = []
+    const walk = (value) => {
+      if (value === null || typeof value !== 'object') return
+      if (Array.isArray(value.selected)) labels.push(...value.selected.map(String))
+      else if (typeof value.selected === 'string') labels.push(value.selected)
+      if (typeof value.custom === 'string' && value.custom.trim() !== '') labels.push(value.custom)
+      for (const nested of Object.values(value)) if (nested !== null && typeof nested === 'object') walk(nested)
+    }
+    walk(content)
+    return labels.filter((label) => label.trim() !== '')
+  }
+  for (const event of Array.isArray(events) ? events : []) {
+    if (event?.type === 'tool/result' && event?.data?.message?.toolCallId === askCallId) {
+      const content = (Array.isArray(event.data.message.content) ? event.data.message.content : []).map((block) => block?.text ?? '').join('\n')
+      try { const selected = selectedOf(JSON.parse(content)); if (selected.length > 0) return { callId: askCallId, selected } } catch { /* 文本答复不算 landed */ }
+    }
+    if (event?.type === 'agent/inbox/spliced') {
+      const inserted = Array.isArray(event?.data?.inserted) ? event.data.inserted : []
+      for (const item of inserted) {
+        if (item?.source?.kind !== 'user-question-reply' || item?.source?.callId !== askCallId) continue
+        const content = (Array.isArray(item.content) ? item.content : []).map((block) => block?.text ?? '').join('\n')
+        try { const selected = selectedOf(JSON.parse(content)); if (selected.length > 0) return { callId: askCallId, selected } } catch { /* ignore */ }
+      }
+    }
+  }
+  return null
+}
