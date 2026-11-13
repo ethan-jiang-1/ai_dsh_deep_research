@@ -320,6 +320,7 @@ W3-6 D54 + Note（全卡收口）
 - **2026-11-13 Wave 3 W3-7 先行片（CI 聚合）**：`.github/workflows/ci.yml` 新增书签式 `all-checks-passed`（`needs` 四 job：keyless/client-load/snapshot-replay/deploy；failure/cancelled/skipped 判红）；新增 `tests/checks/ci-jobs.test.mjs` 静态契约（needs 覆盖全 job、skip 判红、snapshot job 真跑 A/B）。红证：删一个 need → 红；还原 → 绿。with-key 可触发通道 = `.github/workflows/model-smoke.yml`（只 `workflow_dispatch`；secret 注入；`l4-lite.e2e`；缺 key preflight exit 2），契约 = [model-workflow](../../tests/checks/model-workflow.test.mjs)；本机未实跑（需凭据）。
 - **2026-11-13 Wave 1 W1-5（可选层缺席）**：`lifecycle.entry` 新增断言——未装团队层的干净 profile，dump 无 `ui-agent-team`，但本包 10 行/真启动/显示面/remove 全过；实跑 `DSH_BIN=/tmp/dsh-vendor lifecycle.entry` ALL PASS（22 项）。
 - **2026-11-13 Wave 1 W1-6（世界树设计稿）**：`snapshots/README` 新增「场景世界树」——`workspaceFinal` + `workspace.expected/` 形状、digest/文件集判据、record/refresh 永不写、独立刷新命令 + `--why` + 人审、触发条件（首个 bundle 终态场景/首次回放绿但世界漂移）。**未实施**：当前无场景声称 bundle 终态，不建空目录。
+- **2026-11-13 Wave 1 W1-4 先行片（装起 + 内容效果）**：`lifecycle.entry` 探针改为「装起的 tarball 里 import `content` → 用 fake ctx 调 `apply` → 断言 `variable:research_pack_root` / `context:research:manual` / disposer」；实跑 ALL PASS（23 项）。**未证明**：startup/defaults 的安装态 apply 效果；仍待 W1-4 后续。
 
 ## 关闭条件
 

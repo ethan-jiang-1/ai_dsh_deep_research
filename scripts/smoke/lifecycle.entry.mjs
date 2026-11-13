@@ -77,9 +77,43 @@ function writeProbe() {
     files: ['cordis.patch.yml', 'index.js'],
   }, null, 2)}\n`)
   writeFileSync(join(probeDir, 'cordis.patch.yml'), "- insert:\n    - id: lifecycle-meta-probe\n      name: '@tmp/lifecycle-meta-probe'\n")
-  writeFileSync(join(probeDir, 'index.js'), `import { writeFileSync } from 'node:fs'\nimport { pathToFileURL } from 'node:url'\nexport const name = 'lifecycle-meta-probe'\nexport async function apply() {\n  const out = { results: {} }\n  try {\n    const { createRequire } = await import('node:module')
+  writeFileSync(join(probeDir, 'index.js'), `import { writeFileSync } from 'node:fs'
+import { dirname } from 'node:path'
+import { pathToFileURL } from 'node:url'
+export const name = 'lifecycle-meta-probe'
+export async function apply() {
+  const out = { results: {} }
+  try {
+    const { createRequire } = await import('node:module')
     const requireFromProfile = createRequire(process.env.LIFECYCLE_PROBE_BASE)
-    const appBoot = await import(pathToFileURL(requireFromProfile.resolve('@deepseek-ai/dsh-app-boot')).href)\n    const base = pathToFileURL(process.env.LIFECYCLE_PROBE_BASE).href\n    for (const spec of ['dsh-deep-research-pack', 'dsh-deep-research-pack/content', 'dsh-deep-research-pack/startup', 'dsh-deep-research-pack/fetch-fallback', 'dsh-deep-research-pack/method-library-tool']) {\n      try { out.results[spec] = appBoot.readPluginMeta(spec, base) } catch (error) { out.results[spec] = { error: String(error) } }\n    }\n  } catch (error) { out.fatal = String(error) }\n  writeFileSync(process.env.LIFECYCLE_PROBE_OUT, JSON.stringify(out, null, 2))\n}\n`)
+    const appBoot = await import(pathToFileURL(requireFromProfile.resolve('@deepseek-ai/dsh-app-boot')).href)
+    const base = pathToFileURL(process.env.LIFECYCLE_PROBE_BASE).href
+    for (const spec of ['dsh-deep-research-pack', 'dsh-deep-research-pack/content', 'dsh-deep-research-pack/startup', 'dsh-deep-research-pack/fetch-fallback', 'dsh-deep-research-pack/method-library-tool']) {
+      try { out.results[spec] = appBoot.readPluginMeta(spec, base) } catch (error) { out.results[spec] = { error: String(error) } }
+    }
+    try {
+      const contentEntry = requireFromProfile.resolve('dsh-deep-research-pack/content')
+      const content = await import(pathToFileURL(contentEntry).href)
+      const calls = []
+      const disposers = []
+      const fakeCtx = {
+        effect(fn) { calls.push('effect'); const dispose = fn(); if (typeof dispose === 'function') disposers.push(dispose); return dispose },
+        logger: { warn() {}, info() {} },
+        systemPrompt: {
+          variable(name) { calls.push('variable:' + name); return () => {} },
+          context(input) { calls.push('context:' + input.name); return () => {} },
+        },
+      }
+      const packRoot = dirname(dirname(contentEntry))
+      content.apply(fakeCtx, { packRoot, manual: '# installed effect probe' })
+      const disposerCount = disposers.length
+      for (const dispose of disposers) dispose()
+      out.effect = { calls, disposers: disposerCount }
+    } catch (error) { out.effect = { error: String(error) } }
+  } catch (error) { out.fatal = String(error) }
+  writeFileSync(process.env.LIFECYCLE_PROBE_OUT, JSON.stringify(out, null, 2))
+}
+`)
 }
 
 try {
@@ -129,6 +163,11 @@ try {
       const ok = meta?.title?.zh !== undefined && meta?.description?.zh !== undefined && String(meta?.icon ?? '').startsWith('data:image/svg+xml')
       check(`⑤ ${spec} 有中英标题/描述/图标`, ok, String(JSON.stringify(meta)).slice(0, 300))
     }
+    const effect = result.effect ?? {}
+    const effectOk = Array.isArray(effect.calls) && effect.calls.includes('effect') &&
+      effect.calls.includes('variable:research_pack_root') && effect.calls.includes('context:research:manual') &&
+      Number(effect.disposers) >= 1
+    check('⑤ 装起后 content.apply 真注册 variable/context 且返回 disposer', effectOk, String(JSON.stringify(effect)).slice(0, 400))
   }
   try { child.kill('SIGTERM') } catch {}
   await new Promise((r) => { child.once('exit', r); setTimeout(r, 5000) })
