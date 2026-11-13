@@ -328,6 +328,7 @@ W3-6 D54 + Note（全卡收口）
 - **2026-11-13 C UI 复验（W1-2 收尾）**：`snapshot-replay.entry` C0 从「点同命 title span」改为 `data-row-key` 的 `openSessionById`，并在 reload 后调 `dismissPreviewNotice` 关首访遮罩；C0–C5 全 PASS，`ui.expected.md` 由真实 UI 捕获重写（卡片 2 / 活动行 3，含 💬）。C 仍不进 CI（需 Chromium）。
 - **2026-11-13 命名迁移补洞 + 全量 e2e 车道**：`guard-red-record` 此前只扫 `tests/**/*.spec.mjs`，命名迁移后 `tests/checks/*.test.mjs` 的判据测试逃逸；现两车道都扫，`gates-cases` 的 conformance 注入目标改为 `tests/checks/probe-conformance.test.mjs`。`gates.e2e` 108 案例全绿；`pnpm test:e2e` 全量 **PASS 6 / FAIL 0 / SKIP 0**。`run-lane` 加单件/车道耗时与 `--only <substr>`；guides/67 增「成本预算」节（默认秒级、重资产按变更触发、新增入口先过成本关）。
 - **2026-11-13 with-key 真模型（本机）**：`node scripts/smoke/l4-lite.e2e.mjs` **ALL PASS**——5 角色（含 method-editor）assistant 标记 + scout web_search 工具调用真实发生；`model-smoke.yml` 的 GitHub secret 运行仍未做，静态契约/缺 key exit 2 已在。
+- **2026-11-13 成本重构（门禁自测并行）**：`gates.e2e` 108 个独立注入案例改为有界并行（默认 `min(4, CPU)`，`--jobs=<n>` 可调）；实测串行 **248s** → 并行 **86s**（2.9×），108 案例仍全跑、判据不变。全量 `test:e2e` 复跑 **PASS 6 / FAIL 0 / SKIP 0**；`run-lane` 单件/车道耗时 + `--only` 已落。
 
 ## Wave 2/3 剩余裁决（2026-11-13，阶段边界）
 

@@ -38,7 +38,7 @@
 | client-load-seed.support.mjs | client-load.entry（`--seed`） | 种子夹具 materialize：会话组名 = projectKey(种子工作区) 现算、zstd 两帧（header 单帧）、mtime 回拨 2h、`__WORKSPACE__`/`__REPO_ROOT__` 替换；不写仓内 research-workspace | 支援件（fixture → runtime） |
 | method-library-tool.e2e.mjs | 真 Loader + Method Editor Agent + Host Tool：验证 UI 操作 claim、内容摘要拒绝、默认/删除写入及 workspace 回读 | keyless（临时 workspace 与确定性 mock LLM） |
 | snapshot-replay.entry.mjs | 场景 manifest 驱动的角色面组装回放（persona/header 全序列/四处注入，含时钟序列；research-face = 四研究角色 + 方法编辑）+ 声明的渲染金标准；场景集 = `snapshots/replay/` 下含 snapshot.json 的全部目录（发现式，`--face <name>` 定向单集） | keyless（RPC/解压子进程，无模型；A/B 进 CI `snapshot-replay`，`--layers a,b`；C 本地已复验（需 Chromium）；须先 source dev/env.sh） |
-| gates.e2e.mjs | 门禁自测：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组；`--case=<id[,id]>` 只跑指定案例（改一道门禁的迭代口，末尾自报仅跑几个）；CI keyless job 每次全量跑 | keyless（git/node 子进程，无模型） |
+| gates.e2e.mjs | 门禁自测：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组；`--case=<id[,id]>` 只跑指定案例（改一道门禁的迭代口，末尾自报仅跑几个）；CI keyless job 每次全量跑（有界并行默认 4；--jobs/--case） | keyless（git/node 子进程，无模型） |
 | client-hitl.entry.mjs | 活标题触发与挂起显性化 | 真模型档 |
 | l4-lite.e2e.mjs | 全角色真模型响应（含 method-editor）+ scout web_search 调用 | 真模型档 |
 | team-preflight.e2e.mjs | spawn_teammate 组队与成员组合画像 | 真模型档 |

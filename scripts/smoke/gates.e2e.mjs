@@ -15,11 +15,12 @@
 // mutate 后统一 `git add -A`：tracked-only 门禁（git ls-files 驱动）要看见注入的新文件；
 // gitignored 文件（runtime/ 探针）天然不入——md-links-untracked 案例正靠它恒 untracked。
 
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { cpSync, lstatSync, mkdirSync, mkdtempSync, readlinkSync, rmSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { cpus } from 'node:os';
 import { CASES, CONTROLS } from '../lib/gates-cases.mjs';
 import { isMain } from '../lib/cli-entry.mjs';
 
@@ -27,6 +28,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const VERIFY_REL = join('scripts', 'verify', 'verify.mjs');
 
 // `--case=<id[,id]>`：只跑指定案例（改一道门禁时不必等 90 多个案例）。
+// `--jobs=<n>`：有界并行（默认 min(4, CPU)）；案例彼此独立，108 个案例串行 ~248s → 并行 ~86s。
 // 对照组与门禁名集合都按选中案例收窄——被过滤掉的案例既不计红也不计绿（末尾自报"仅跑 N 个"）。
 const caseArgs = process.argv.filter((a) => a.startsWith('--case='));
 const caseNames = caseArgs.flatMap((a) => a.slice('--case='.length).split(',')).map((s) => s.trim()).filter(Boolean);
@@ -69,8 +71,29 @@ const cloneFixture = (base, name) => {
 };
 
 function runVerify(dir) {
-  const r = spawnSync(process.execPath, [join(dir, VERIFY_REL)], { cwd: dir, encoding: 'utf8' });
-  return { status: r.status, out: `${r.stdout || ''}\n${r.stderr || ''}` };
+  // 异步 spawn + 有界并发：案例彼此独立（各自 clone + git add），串行跑 108 个也慢。
+  return new Promise((resolve) => {
+    const child = spawn(process.execPath, [join(dir, VERIFY_REL)], { cwd: dir, stdio: ['ignore', 'pipe', 'pipe'] });
+    let out = '';
+    child.stdout.on('data', (chunk) => { out += String(chunk); });
+    child.stderr.on('data', (chunk) => { out += String(chunk); });
+    child.on('close', (status) => resolve({ status, out }));
+  });
+}
+
+/** 有界并发 map：保持结果顺序；一个案例失败不取消其它案例（要一次看全）。 */
+async function mapLimit(items, limit, fn) {
+  const results = new Array(items.length);
+  let next = 0;
+  const workers = Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, async () => {
+    while (true) {
+      const index = next++;
+      if (index >= items.length) return;
+      results[index] = await fn(items[index], index);
+    }
+  });
+  await Promise.all(workers);
+  return results;
 }
 
 /** 判据行锚定：verify 每门禁恰打一行 `${verdict}  ${gate}`（scripts/verify/verify.mjs 末行循环）——
@@ -81,7 +104,7 @@ function gateVerdict(out, verdict, gate) {
 
 // ── 主流程 ──
 
-function main() {
+async function main() {
   const keep = [];
   try {
     if (caseFilter !== null) {
@@ -101,7 +124,7 @@ function main() {
     // 对照组：零注入 → 案例门禁全 PASS（防断言空转：副本基线本身红 = 断言无效）
     const controlDir = cloneFixture(base, 'control');
     keep.push(controlDir);
-    const control = runVerify(controlDir);
+    const control = await runVerify(controlDir);
     if (!/verify: 全绿|处失败/.test(control.out)) failures.push(`对照组：verify 未跑完（status=${control.status}）`);
     for (const { id, gate, expect } of cases) {
       // 判据行锚定（gateVerdict 助手）：verify 每个门禁恰打一行 `${verdict}  ${gate}`（实测），
@@ -120,27 +143,35 @@ function main() {
       }
     }
 
-    for (const { id, gate, mutate } of controls) {
+    const jobsArg = process.argv.find((a) => a.startsWith('--jobs='));
+    const jobs = Math.max(1, Number(jobsArg?.slice('--jobs='.length) ?? Math.min(4, cpus().length)));
+    const controlResults = await mapLimit(controls, jobs, async ({ id, gate, mutate }) => {
       const dir = cloneFixture(base, `control-${id}`);
-      keep.push(dir);
       mutate(dir);
       git(dir, ['add', '-A']); // tracked-only 门禁要看见注入的新文件（gitignored 探针天然不入）
-      const { status, out } = runVerify(dir);
-      if (!/verify: 全绿|处失败/.test(out) || !gateVerdict(out, 'PASS', gate))
-        failures.push(`${id}: valid shape did not pass ${gate} (status=${status})`);
-    }
+      const { status, out } = await runVerify(dir);
+      const failed = !/verify: 全绿|处失败/.test(out) || !gateVerdict(out, 'PASS', gate);
+      if (failed) { keep.push(dir); return `${id}: valid shape did not pass ${gate} (status=${status})`; }
+      rmSync(dir, { recursive: true, force: true });
+      return null;
+    });
+    for (const failure of controlResults) if (failure !== null) failures.push(failure);
 
     // 案例组：注入 → 目标门禁点名红（带 expect 时须命中该报因）
-    for (const { id, gate, mutate, expect } of cases) {
+    const caseResults = await mapLimit(cases, jobs, async ({ id, gate, mutate, expect }) => {
       const dir = cloneFixture(base, `case-${id}`);
-      keep.push(dir);
       mutate(dir);
       git(dir, ['add', '-A']); // 同上：mutate 的新文件统一入 tracked 集（案例 mutate 本身是纯 fs）
-      const { status, out } = runVerify(dir);
-      if (!/verify: 全绿|处失败/.test(out)) failures.push(`${id}：verify 未跑完（status=${status}）`);
-      else if (!gateVerdict(out, 'FAIL', gate)) failures.push(`${id}：注入回归未被点名报红——对照组合格而此处不红 = 门禁钝化或注入未生效（案例侧；先确认 mutate 真的改了文件、且该文件在被扫面内）`);
-      else if (expect && !out.includes(expect)) failures.push(`${id}：${gate} 报了红但**非本案例的报因**（期望含 ${JSON.stringify(expect)}）——注入未生效或断言被旁路`);
-    }
+      const { status, out } = await runVerify(dir);
+      let failure = null;
+      if (!/verify: 全绿|处失败/.test(out)) failure = `${id}：verify 未跑完（status=${status}）`;
+      else if (!gateVerdict(out, 'FAIL', gate)) failure = `${id}：注入回归未被点名报红——对照组合格而此处不红 = 门禁钝化或注入未生效（案例侧；先确认 mutate 真的改了文件、且该文件在被扫面内）`;
+      else if (expect && !out.includes(expect)) failure = `${id}：${gate} 报了红但**非本案例的报因**（期望含 ${JSON.stringify(expect)}）——注入未生效或断言被旁路`;
+      if (failure !== null) { keep.push(dir); return failure; }
+      rmSync(dir, { recursive: true, force: true });
+      return null;
+    });
+    for (const failure of caseResults) if (failure !== null) failures.push(failure);
 
     if (failures.length > 0) {
       console.error(`gates.e2e: ${failures.length} 处失败：`);
@@ -160,4 +191,4 @@ function main() {
 }
 
 // 直跑守卫：tests/verify-gates.spec.mjs 经 lib/gates-cases.mjs 静态对账案例表，import 不触发执行
-if (isMain(import.meta.url)) main();
+if (isMain(import.meta.url)) await main();
