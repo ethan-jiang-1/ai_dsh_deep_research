@@ -60,7 +60,7 @@ Do not run it on an existing profile: it replaces dependencies and the user patc
 installs the current local tarball into that profile (npm/Plugins are staged); the full
 install/upgrade/uninstall sequence is owned by the installation manual.
 
-**3. How to install (current).** 0.3.1 is delivered as a local tarball; the npm/Plugins page path is
+**3. How to install (current).** 0.3.2 is delivered as a local tarball; the npm/Plugins page path is
 **staged** (no npm publication yet). Install the tarball into the profile:
 
 ```sh
@@ -72,7 +72,7 @@ manages the application-owned `desktop` profile; that is an interoperability for
 `deep-research` custom profile. This package is developed and verified against the Web surface.
 
 **4. CLI installation (package-name form, post-publish; also Web automation or offline).**
-`dsh plugin --profile` forwards to pnpm. For 0.3.1 the current install is the local tarball in
+`dsh plugin --profile` forwards to pnpm. For 0.3.2 the current install is the local tarball in
 step 2; the package-name form below applies after npm publication and to Web automation/offline.
 npm/source `dsh` refuses the `desktop` profile; the
 Desktop application's own carrier can manage it, but third-party instructions should stay on
@@ -145,7 +145,7 @@ the main surface gains the method-library tab.
 
 ### Upgrade and rollback
 
-For 0.3.1, update by installing the new tarball (the same command as step 2, pointing at the
+For 0.3.2, update by installing the new tarball (the same command as step 2, pointing at the
 new file); after npm publication the Plugins page Update or the package-name form also work.
 Then **restart the profile** when bundle membership changes.
 Configuration-only edits can hot-reload when HMR is enabled. DSH has no command-level rollback:

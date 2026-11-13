@@ -1,6 +1,7 @@
 # 交接缺口收口：0.3.1 发布身份、源码取包入口与 dist 制品门禁
 
 > 状态：implemented
+> 历史注记：0.3.1 发布锚；现行发布身份 = [2026-11-13-handoff-gap-closure-0.3.2](2026-11-13-handoff-gap-closure-0.3.2.md)。
 
 ## 决定
 

@@ -159,6 +159,8 @@ try {
     await page.goto(urlMatch, { waitUntil: 'domcontentloaded' })
     await page.locator('[data-composer-input][contenteditable="true"]').first().waitFor({ timeout: 60_000 })
     await page.getByText('Deep Research Lead', { exact: false }).first().waitFor({ timeout: 30_000 })
+    // 起步卡判据是异步的（hasUserMessage + listDir）；等显式 testid，不抢读 body。
+    await page.locator('[data-testid="deep-research-start"]').waitFor({ timeout: 30_000 })
     body = (await page.locator('body').innerText()).replace(/\n+/g, ' | ')
   } finally {
     await browser.close()

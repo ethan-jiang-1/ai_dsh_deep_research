@@ -52,6 +52,31 @@ pnpm install
 The pinned DSH source lives in `vendor/dsh` (read-only; do not edit it). It is the
 mechanism baseline for this repository — start there when checking harness behavior.
 
+## From source to first run
+
+A clean clone has no `_dist/*.tgz`; build the release artifact before installing it. The
+first block is setup, the second creates the profile and starts the Web surface:
+
+```sh
+git clone --recurse-submodules https://github.com/ethan-jiang-1/ai_dsh_deep_research.git
+cd ai_dsh_deep_research
+pnpm install
+bash dev/vendor-build.sh          # pack's tsc reads vendor lib/types
+node scripts/dist/export-dist.mjs # writes _dist/tarball + manual + market
+```
+
+```sh
+dsh --profile deep-research --from-default-profile web --dump-default-config
+TGZ="_dist/dsh-deep-research-pack-$(node -p "require('./packages/deep-research-pack/package.json').version").tgz"
+dsh plugin --profile deep-research add "file:$PWD/$TGZ"
+dsh plugin --profile deep-research add "@deepseek-ai/dsh-experimental-agent-team-profile@$(dsh --version)"
+dsh --profile deep-research
+```
+
+`--from-default-profile` is destructive: use it only for a new profile. The team-layer
+version must equal `dsh --version`. The install/upgrade/uninstall contract is owned by
+[`_dist/安装手册.md`](_dist/安装手册.md).
+
 ## Verify your change
 
 Keyless checks (no model key, no network calls):

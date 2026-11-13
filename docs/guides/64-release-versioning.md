@@ -1,7 +1,7 @@
 # 64 · 发布版本、tag 与 npm 发布顺序
 
 > 层：指南。本页拥有版本号、git tag、npm 发布三者的唯一顺序。发布前逐条走，不凭记忆。
-> **当前发布形态（0.3.1）= 本地 tarball；npm publish 未执行（凭据未就绪）。以下 npm 顺序是发布后路径，不是当前完成条件。**
+> **当前发布形态（0.3.2）= 本地 tarball；npm publish 未执行（凭据未就绪）。以下 npm 顺序是发布后路径，不是当前完成条件。**
 > 决定理由与输掉的方案 = [release-versioning Note](../../notes/implemented/2026-10-25-release-versioning.md)。
 
 ## 单一版本源
@@ -41,7 +41,7 @@
    `npm view dsh-deep-research-pack@X.Y.Z version`。
 9. 发布后 tag 不再移动；后续修复发新 patch，不改旧 tag。
 
-**市场索引的时序**：`_dist/market.json` 是发现面元数据，不是安装单位；0.3.1 它是 **staged 空索引**
+**市场索引的时序**：`_dist/market.json` 是发现面元数据，不是安装单位；0.3.2 它是 **staged 空索引**
 （`plugins: []` + staged 文案），不承诺可安装。npm publish 成功后由发布流程恢复条目；索引内容
 （版本/engines/图标）由 `export-dist` 从包清单与 locale 生成，不手写。
 
