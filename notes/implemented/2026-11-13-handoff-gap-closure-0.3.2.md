@@ -1,6 +1,7 @@
 # 交接缺口收口：0.3.2 发布身份、源码首跑路径与常驻面预算
 
 > 状态：implemented
+> 历史注记：0.3.2 发布锚；现行发布身份 = [2026-11-13-handoff-evidence-closure-0.3.3](2026-11-13-handoff-evidence-closure-0.3.3.md)。
 
 ## 决定
 

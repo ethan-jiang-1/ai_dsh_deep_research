@@ -100,7 +100,7 @@
 
 | 模块 | 被谁消费 | 说明 |
 |---|---|---|
-| lib/content-budget.mjs | e-workspace、content-disclosure.test | T0 常驻面两级预算（下放触发 10,000 / 硬顶 12,288）唯一正本 |
+| lib/content-budget.mjs | e-workspace、content-disclosure.test | 常驻面预算唯一正本：T0 两级（下放 10,000 / 硬顶 12,288）+ lead persona/合计的 char/byte/token |
 | lib/roles.mjs | discipline-probe、doctor-smoke、fetch-fallback-orchestration.test、l4-lite-smoke、preset-smoke、presets.test、release-smoke、replay-scene.test、snapshot-replay-smoke、strategy-core.test、team-preflight-smoke | 角色清单访问器（presetRoles = 盘上全部；researchRoles = 研究面；事实源 = 盘上 presets/） |
 | lib/cli-entry.mjs | export-handoff、gates-smoke、market、run-dashboard、protocol-audit、schema-scan、verdict-audit、node-gate、evidence-audit、channel-cache、run-driver、vendor-artifacts、cli-entry.test | symlink-safe CLI 入口判定（realpath 归一；macOS `/tmp` → `/private/tmp` 下不静默） |
 | lib/channel-cache.mjs | run-driver、channel-cache.test | 启动加速缓存判据：pack 源指纹（路径+size+mtime）+ 发布清单缓存（漂移门 ≈5s→≈0.7s，CLI 供 boot-run.sh 消费）+ 探针 GREEN 缓存（热复用 ≈0.5s / 冷启动命中 ≈10s；键 = pack 指纹 + runtime 构建 + 断言参数，TTL 30 分钟；命中前 HTTP 就绪检查；只存 GREEN，`--force-probe` 绕过） |

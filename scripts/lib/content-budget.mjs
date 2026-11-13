@@ -12,3 +12,21 @@ export const T0_HARD_MAX_CHARS = 12_288;
 // 当前解析口径 9,991 + 5,760 = 15,751，预算 16,500（原始口径 16,058）。
 export const LEAD_PERSONA_MAX_CHARS = 6_500;
 export const RESIDENT_TOTAL_MAX_CHARS = 16_500;
+
+// 常驻面的真实 payload 与固定密度估计（2026-11-13 实测）：
+//   lead persona 10,750 B / 1,444 tok；T0 16,991 B / 2,502 tok；
+//   合计 27,741 B / 3,946 tok。byte 是硬 payload；token 是 DSH
+//   fixed-density 估计（CHARS_PER_TOKEN=4 + BLOCK_OVERHEAD=4；CJK 会低估）。
+export const LEAD_PERSONA_MAX_BYTES = 11_500;
+export const RESIDENT_TOTAL_MAX_BYTES = 29_000;
+export const LEAD_PERSONA_MAX_TOKENS = 1_550;
+export const RESIDENT_TOTAL_MAX_TOKENS = 4_150;
+
+/**
+ * DSH fixed-density estimate（与 vendor token-meter/estimate.ts 同式；CJK 低估）。
+ * @param {string} text - model-visible text.
+ * @returns {number} heuristic tokens.
+ */
+export function estimateFixedDensity(text) {
+  return Math.ceil(text.length / 4) + 4;
+}

@@ -7,8 +7,8 @@
 //
 // 红配方：在 content/generic/ 新增 orphan.md 且 T0 不指针 → 本文件红；删 T0 的
 // state-and-recovery 指针 → 红；把 generic 的 H1 抄回 T0 → 红；T0 超下放触发 10,000 字符 → 红
-//（硬顶 12,288 只防失控，不是可挪用的余量）；lead persona 超预算或 T0+persona
-// 合计超预算 → 红。
+//（硬顶 12,288 只防失控，不是可挪用的余量）；lead persona 或 T0+persona 超
+// char/byte/token 预算 → 红。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
@@ -16,8 +16,13 @@ import { join } from 'node:path';
 import { genericFiles, manualT0 } from './handbook-surface.mjs';
 import { PACK, loadPreset } from './preset-helpers.mjs';
 import {
+  estimateFixedDensity,
+  LEAD_PERSONA_MAX_BYTES,
   LEAD_PERSONA_MAX_CHARS,
+  LEAD_PERSONA_MAX_TOKENS,
+  RESIDENT_TOTAL_MAX_BYTES,
   RESIDENT_TOTAL_MAX_CHARS,
+  RESIDENT_TOTAL_MAX_TOKENS,
   T0_HARD_MAX_CHARS,
   T0_TRIGGER_CHARS,
 } from '../../scripts/lib/content-budget.mjs';
@@ -53,6 +58,27 @@ test('常驻面合计（T0 + lead persona）≤ 预算', () => {
   const total = manualT0().length + leadPersona().length;
   assert.ok(total <= RESIDENT_TOTAL_MAX_CHARS,
     `常驻合计 ${total} 字符 > 预算 ${RESIDENT_TOTAL_MAX_CHARS}——T0 与 persona 不能互相挪用`);
+});
+
+test('lead persona 常驻面 ≤ byte/token 预算', () => {
+  const text = leadPersona();
+  const bytes = Buffer.byteLength(text, 'utf8');
+  const tokens = estimateFixedDensity(text);
+  assert.ok(bytes <= LEAD_PERSONA_MAX_BYTES,
+    `lead persona ${bytes} B > 预算 ${LEAD_PERSONA_MAX_BYTES} B——先下放/压缩`);
+  assert.ok(tokens <= LEAD_PERSONA_MAX_TOKENS,
+    `lead persona ${tokens} tok > 预算 ${LEAD_PERSONA_MAX_TOKENS} tok——先下放/压缩`);
+});
+
+test('常驻面合计（T0 + lead persona）≤ byte/token 预算', () => {
+  const persona = leadPersona();
+  const manual = manualT0();
+  const bytes = Buffer.byteLength(persona, 'utf8') + Buffer.byteLength(manual, 'utf8');
+  const tokens = estimateFixedDensity(persona) + estimateFixedDensity(manual);
+  assert.ok(bytes <= RESIDENT_TOTAL_MAX_BYTES,
+    `常驻合计 ${bytes} B > 预算 ${RESIDENT_TOTAL_MAX_BYTES} B——T0 与 persona 不能互相挪用`);
+  assert.ok(tokens <= RESIDENT_TOTAL_MAX_TOKENS,
+    `常驻合计 ${tokens} tok > 预算 ${RESIDENT_TOTAL_MAX_TOKENS} tok——T0 与 persona 不能互相挪用`);
 });
 
 test('每个 generic 细则都被 T0 指针点名，且没有孤儿', () => {

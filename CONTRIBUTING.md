@@ -77,6 +77,22 @@ dsh --profile deep-research
 version must equal `dsh --version`. The install/upgrade/uninstall contract is owned by
 [`_dist/安装手册.md`](_dist/安装手册.md).
 
+## Handoff
+
+Hand off a clean clone at the release tag plus the `_dist` artifact — never a copy of this
+working tree (`runtime/harness-home` holds credentials/sessions; `research-workspace/drt_*`
+holds run data). The source handoff exporter writes only HEAD's tracked source and a
+`HANDOFF.md` with receiver commands; its smoke proves the archive has no runtime/credentials/
+run data:
+
+```sh
+node scripts/dist/export-handoff.mjs --out /tmp/handoff
+node scripts/smoke/handoff-smoke.mjs
+```
+
+Attach `_dist/dsh-deep-research-pack-<version>.tgz` and the installation manual from the
+release tag.
+
 ## Verify your change
 
 Keyless checks (no model key, no network calls):
