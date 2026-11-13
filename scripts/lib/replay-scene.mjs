@@ -66,7 +66,7 @@ function scenePath(base, path, field, directory = false) {
   return target;
 }
 
-/** Load a snapshot.json scene. roles is the complete preset roster; only selects after validation. */
+/** Load a snapshot.json scene. roles = allowed preset roster; scene roleFace (or roles) selects cases; only filters after validation. */
 export function loadReplayScene(sceneDir, roles, { only } = {}) {
   const requested = resolve(sceneDir);
   const dirStat = lstatSync(requested);
@@ -98,10 +98,17 @@ export function loadReplayScene(sceneDir, roles, { only } = {}) {
   if (!Array.isArray(roles) || roles.length === 0 || roles.some((role) => typeof role !== 'string' || role.trim() === '') || new Set(roles).size !== roles.length) {
     fail('roles must be a nonempty unique preset roster');
   }
+  // W1-3：场景显式声明角色面（roleFace）；缺省 = 调用方给的 roles（legacy 单场景语义）。
+  // roleFace 必须是非空唯一数组且是调用方 roster 的子集——防止场景声明一个盘上不存在的角色。
+  const roleFace = manifest.roleFace ?? roles;
+  if (!Array.isArray(roleFace) || roleFace.length === 0 || roleFace.some((role) => typeof role !== 'string' || role.trim() === '') || new Set(roleFace).size !== roleFace.length) {
+    fail('roleFace must be a nonempty unique preset roster when present');
+  }
+  if (roleFace.some((role) => !roles.includes(role))) fail('roleFace must be a subset of the provided preset roster');
   if (!Array.isArray(manifest.cases) || manifest.cases.length === 0) fail('cases must be nonempty');
   const ids = manifest.cases.map((item) => item?.id);
   if (new Set(ids).size !== ids.length) fail('duplicate case id');
-  if (ids.length !== roles.length || ids.some((id) => !roles.includes(id))) fail('cases must match roles exactly');
+  if (ids.length !== roleFace.length || ids.some((id) => !roleFace.includes(id))) fail('cases must match roleFace exactly');
   const cases = manifest.cases.map((item) => {
     if (item.preset !== item.id) fail(`case ${item.id} preset must match its role`);
     text(item.fixture, `case ${item.id} fixture`);
@@ -124,6 +131,7 @@ export function loadReplayScene(sceneDir, roles, { only } = {}) {
   if (only !== undefined && !ids.includes(only)) fail(`only ${String(only)} does not name a case`);
   return {
     scenario: manifest.scenario, profile: manifest.profile, workspace: manifest.workspace, sessionFormat: manifest.sessionFormat, mcp: manifest.mcp === true,
+    roles: [...roleFace],
     cases: cases.filter((item) => only === undefined || item.id === only),
   };
 }

@@ -5,6 +5,13 @@
   "workspace": "research-workspace",
   "sessionFormat": 4,
   "mcp": false,
+  "roleFace": [
+    "lead",
+    "scout",
+    "analyst",
+    "critic",
+    "method-editor"
+  ],
   "cases": [
     {
       "id": "lead",
@@ -57,6 +64,19 @@
         "recording": "live",
         "locale": "zh-CN",
         "note": "2026-11-13 re-record: current pack content (D51/D52 manual edits) + W1-2 fresh-profile baseline; all four research roles."
+      }
+    },
+    {
+      "id": "method-editor",
+      "preset": "method-editor",
+      "fixture": "method-editor/session.v4.jsonl",
+      "source": {
+        "codeAnchor": "da4eed0522a9183a59c7409178b8c5a98c75d584",
+        "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
+        "recordedAt": "2026-11-13T10:25:07Z",
+        "recording": "live",
+        "locale": "zh-CN",
+        "note": "2026-11-13 W1-3: method-editor role face recorded from record-home fresh profile; pack content same as W1-2 baseline."
       }
     }
   ],

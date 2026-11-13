@@ -72,11 +72,29 @@ test('mcp 声明：false 透传；非 bool fail（MCP_PLAYWRIGHT=0 形态的场�
   assert.throws(() => loadReplayScene(dir, ROLES), /mcp/i);
 });
 
-test('research-face 场景覆盖研究角色面（方法编辑不属 run 生命周期）', () => {
+test('research-face 显式 roleFace 覆盖研究四角色 + 方法编辑', () => {
+  const all = presetRoles(ROOT);
   const research = researchRoles(ROOT);
+  assert.ok(all.includes('method-editor'));
   assert.ok(research.length > 0 && !research.includes('method-editor'));
-  const loaded = loadReplayScene(join(ROOT, 'snapshots', 'replay', 'research-face'), research);
-  assert.deepEqual(loaded.cases.map((c) => c.id).sort(), research);
+  const loaded = loadReplayScene(join(ROOT, 'snapshots', 'replay', 'research-face'), all);
+  assert.deepEqual(loaded.roles.slice().sort(), all.slice().sort());
+  assert.deepEqual(loaded.cases.map((c) => c.id).sort(), all.slice().sort());
+  assert.ok(loaded.roles.includes('method-editor'), '方法编辑必须进显式 roleFace');
+});
+
+test('roleFace：显式子集合法；空/重复/非子集 fail', (t) => {
+  const { dir, manifest, save } = scene(t);
+  manifest.roleFace = ['lead', 'method-editor'];
+  manifest.cases = manifest.cases.filter((c) => ['lead', 'method-editor'].includes(c.id));
+  save();
+  const loaded = loadReplayScene(dir, ROLES);
+  assert.deepEqual(loaded.roles, ['lead', 'method-editor']);
+  for (const bad of [[], ['lead', 'lead'], ['foreign']]) {
+    manifest.roleFace = bad;
+    save();
+    assert.throws(() => loadReplayScene(dir, ROLES), /roleFace|roles|roster/i);
+  }
 });
 
 test('validates the whole role roster before ONLY selects one case', (t) => {
@@ -84,7 +102,7 @@ test('validates the whole role roster before ONLY selects one case', (t) => {
   assert.deepEqual(loadReplayScene(dir, ROLES, { only: 'lead' }).cases.map((c) => c.id), ['lead']);
   for (const only of ['typo', '']) assert.throws(() => loadReplayScene(dir, ROLES, { only }), /only/i);
   for (const roles of [[], [ROLES[0], ROLES[0]], ['foreign'], null]) {
-    assert.throws(() => loadReplayScene(dir, roles), /roles|roster/i);
+    assert.throws(() => loadReplayScene(dir, roles), /roles|roster|roleFace/i);
   }
   const original = structuredClone(manifest.cases);
   for (const cases of [[], original.slice(1), [...original, original[0]], [...original, { ...original[0], id: 'extra' }]]) {

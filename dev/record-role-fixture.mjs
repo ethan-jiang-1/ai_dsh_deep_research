@@ -49,6 +49,7 @@ const ROLE_PROMPTS = {
   scout: '用一两句话说明你作为 Scout 的侦察职责与顺位（何时被指派、产出什么），然后另起一行以「探针完成」收尾。不要调用任何工具。',
   analyst: '用一两句话说明你作为 Analyst 的挖掘职责与证据卡纪律（来源四字段、摘录可回溯），然后另起一行以「探针完成」收尾。不要调用任何工具。',
   critic: '用一两句话说明你作为 Critic 的核查职责与狩猎对象（伪造链接、断链、记账不实），然后另起一行以「探针完成」收尾。不要调用任何工具。',
+  'method-editor': '用一两句话说明你作为 Method Editor 的方法库编辑职责（何时被调用、产出什么、边界），然后另起一行以「探针完成」收尾。不要调用任何工具。',
 }
 
 const fail = (msg) => { console.error(`record-role-fixture: ${msg}`); process.exit(2) }
