@@ -186,6 +186,7 @@ status——材料的状态就是题的状态。
 |---|---|---|---|
 | [加工环路的实体检查缺口](workflow-substance/README.md) | 哪些环节只查形式不查实体，fresh agent 会怎么走错 | [issue 2026-11-13-workflow-substance-gates](../_archived/settled_issues/2026-11-13-workflow-substance-gates.md) | [three-audits](workflow-substance/2026-11-13-three-audits.md) |
 | [测试资产围栏](test-asset-fence/README.md) | 现有测试资产成本/覆盖如何，哪些慢资产可降级/合并/退役、哪些快守卫要补 | [issue 2026-11-13-test-asset-fence](../issues/2026-11-13-test-asset-fence.md) | [test-asset-fence](test-asset-fence/2026-11-13-test-asset-fence.md) |
+| [DSH 测试策略对标](dsh-test-strategy/README.md) | DSH 测试策略强在哪，本仓 159 张 BUG 暴露哪些类级缺口，哪些该借鉴/缩编/不适用 | 用户 2026-11-13 请求 + goal `ca549260` | [dsh-test-strategy-gap](dsh-test-strategy/2026-11-13-dsh-test-strategy-gap.md) |
 
 归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单，也不抄状态（状态正本 = 题名页）。
 
