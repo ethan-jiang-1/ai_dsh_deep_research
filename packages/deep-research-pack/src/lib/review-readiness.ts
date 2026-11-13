@@ -93,13 +93,17 @@ function lastInlineVerdict(line: string): Readiness | typeof AMBIGUOUS | null {
 }
 
 /**
- * review.md 文本 → 终局 readiness；无判定行或输入缺席/畸形时返回 `null`（不猜、不 throw）。
- *
- * @param reviewText review.md 全文（null/undefined/空白 → null）
- * @returns `'PASS' | 'FAIL' | null`
+ * 判定分析：值 + 命中行 + **是否互斥**。互斥时 value=null——调用方不得把它当「无判定」
+ * （否则「声明 PASS + 散文互斥」会被当成散文缺席而放行，D51 的 fail-open 复现）。
  */
-export function terminalVerdictLine(reviewText: string | null | undefined): { value: Readiness; line: string } | null {
-  if (typeof reviewText !== 'string' || reviewText.trim() === '') return null
+export interface VerdictAnalysis {
+  readonly value: Readiness | null
+  readonly line: string | null
+  readonly ambiguous: boolean
+}
+
+export function verdictAnalysisOf(reviewText: string | null | undefined): VerdictAnalysis {
+  if (typeof reviewText !== 'string' || reviewText.trim() === '') return { value: null, line: null, ambiguous: false }
   // 两条候选路径 + 一种仲裁（BUG-036，2026-10-18 实测）：
   //  · 规范路径 = 装饰剥离后行首即 `readiness:`（现状，含 `## readiness:` 等）；
   //  · 轮次路径 = **行首标记之后直接是「第 N 轮」**的标题行（`# 第 2 轮（复审）—— readiness: PASS`）
@@ -144,8 +148,8 @@ export function terminalVerdictLine(reviewText: string | null | undefined): { va
       candidates.push({ value: roundValue.toUpperCase() as Readiness, round: Number(roundNo), index })
     }
   }
-  if (ambiguous) return null
-  if (candidates.length === 0) return null
+  if (ambiguous) return { value: null, line: null, ambiguous: true }
+  if (candidates.length === 0) return { value: null, line: null, ambiguous: false }
   const unlabeled = candidates.filter((c) => c.round === null)
   const winner = unlabeled.length > 0
     ? unlabeled[unlabeled.length - 1]!
@@ -159,7 +163,13 @@ export function terminalVerdictLine(reviewText: string | null | undefined): { va
         }
         return best
       })()
-  return { value: winner.value, line: lines[winner.index] ?? '' }
+  return { value: winner.value, line: lines[winner.index] ?? '', ambiguous: false }
+}
+
+/** 终局 readiness 值与命中行；无判定行/输入缺席 **或互斥** 时返回 `null`（不猜、不 throw）。 */
+export function terminalVerdictLine(reviewText: string | null | undefined): { value: Readiness; line: string } | null {
+  const analysis = verdictAnalysisOf(reviewText)
+  return analysis.value === null ? null : { value: analysis.value, line: analysis.line ?? '' }
 }
 
 /** 终局 readiness 值（`terminalVerdictLine` 的薄壳——**判据单一正本**，消费方别各写一份）。 */
@@ -178,6 +188,10 @@ export interface ReadinessDeclaration {
  * 门禁与驾驶舱共用本函数——同一份声明在两侧必须同判。
  */
 export function parseReadinessDeclaration(text: string): { readonly ok: true; readonly value: ReadinessDeclaration } | { readonly ok: false; readonly detail: string } {
+  // 重复键 = 两种读法（JSON.parse 静默取末值）——flat schema 上按已知键计数，fail-closed。
+  const declaredKeys = [...text.matchAll(/"(version|readiness|conditional|round|at)"\s*:/g)].map((match) => match[1])
+  const duplicate = declaredKeys.find((key, index) => declaredKeys.indexOf(key) !== index)
+  if (duplicate !== undefined) return { ok: false, detail: `review/readiness.json 重复键 ${duplicate}（拒绝取末值）` }
   let raw: unknown
   try { raw = JSON.parse(text) } catch { return { ok: false, detail: 'review/readiness.json 不是合法 JSON' } }
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return { ok: false, detail: 'review/readiness.json 顶层必须是对象' }
@@ -198,7 +212,7 @@ export function parseReadinessDeclaration(text: string): { readonly ok: true; re
 export interface ReadinessReading {
   readonly pass: boolean
   readonly conditional: boolean
-  readonly source: 'declaration' | 'prose' | 'missing' | 'invalid' | 'mismatch'
+  readonly source: 'declaration' | 'prose' | 'missing' | 'invalid' | 'mismatch' | 'ambiguous'
   readonly detail?: string
 }
 
@@ -211,8 +225,17 @@ export function readinessOfSources(input: {
   readonly declarationText: string | null | undefined
   readonly hasReviewDir: boolean
 }): ReadinessReading {
-  const terminal = terminalVerdictLine(input.reviewText)
-  const proseValue = terminal?.value ?? null
+  const analysis = verdictAnalysisOf(input.reviewText)
+  if (analysis.ambiguous) {
+    return {
+      pass: false,
+      conditional: false,
+      source: 'ambiguous',
+      detail: 'review.md 的判定行互斥（同一行两个相反的裸写判定）——无法与声明对账（修正 = 保留一条终局判定）',
+    }
+  }
+  const terminal = analysis.value === null ? null : { value: analysis.value, line: analysis.line ?? '' }
+  const proseValue = analysis.value
   if (typeof input.declarationText !== 'string') {
     if (!input.hasReviewDir) return { pass: terminal?.value === 'PASS', conditional: terminal !== null && /附条件|条件\s*[=＝：:]/.test(terminal.line), source: 'prose' }
     return {

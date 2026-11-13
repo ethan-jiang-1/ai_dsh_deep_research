@@ -450,7 +450,7 @@ export function presentGate(bundleDir, sessionsRoot, hitl2Rows, readLog = emptyO
     return { status: 'N/A', detail: 'final.md 当前版不在场——门②无对象' }
   }
   // 声明缺席 / 非法 / 与散文不一致 = 判据坏，不是「前置未达成」——fail-closed 红，不降级成 N/A。
-  if (['missing', 'invalid', 'mismatch'].includes(readiness.source)) {
+  if (['missing', 'invalid', 'mismatch', 'ambiguous'].includes(readiness.source)) {
     return { status: 'RED', detail: readiness.detail }
   }
   if (!readiness.pass) {

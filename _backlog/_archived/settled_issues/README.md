@@ -2,9 +2,9 @@
 
 结论已形成并已按卡片关闭条件处理的问题卡。这里记录问题讨论历史，不表示相应实现已通过交付验收；实施证据仍由卡上指向的下游记录负责。
 
-| [2026-11-13-prose-surfaces-migration](2026-11-13-prose-surfaces-migration.md) | 判据形状迁移 II：人工走查改显式标记、方法库 heading 单一 codec（fold/写同判）、版本/present 审计 + 不变量；`pnpm test` 1386 / verify 绿；[Note](../../../notes/implemented/2026-11-13-verdict-shape.md) | 2026-11-13 |
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-11-13-prose-surfaces-migration](2026-11-13-prose-surfaces-migration.md) | 判据形状迁移 II：人工走查改显式标记、方法库 heading 单一 codec（fold/写同判）、版本/present 审计 + 不变量；`pnpm test` 1386 / verify 绿；[Note](../../../notes/implemented/2026-11-13-verdict-shape.md) | 2026-11-13 |
 | [2026-11-13-verdict-shape-migration](2026-11-13-verdict-shape-migration.md) | 判据形状迁移（D51）：readiness 去关键词/词表、门③ 决策改事件链（旧场 UNATTESTED）、门② 版本配对读 present、`review/readiness.json` 声明件成为权威、变异矩阵常驻；verify/test/typecheck + replay 4 场景 + l4-lite 全绿；[Note](../../../notes/implemented/2026-11-13-verdict-shape.md) | 2026-11-13 |
 | [2026-11-12-project-research-defaults](2026-11-12-project-research-defaults.md) | 项目研究默认（D50）：workspace 文件 + `/research-defaults` host command + 活注入 + composer 按钮/配置页签；自动 = 缺席 = Lead 判断；L0–L2/client-load/L4-lite 绿，snapshot B 既有 Team Lead 漂移另案；[Note](../../../notes/implemented/2026-11-12-project-research-defaults.md) | 2026-11-12 |
 | [2026-11-11-strategy-projection](2026-11-11-strategy-projection.md) | Strategy 投影（K/O/G/B 派生）+ HITL1 typed source/output + `protocol-audit` 投影门（D48）；3 场 pilot（quick×2 `run-accept` PASS；deep×2 `protocol-audit` 绿、`run-accept` 被 D44 形状红阻断已记残余）；[Note](../../../notes/implemented/2026-11-11-strategy-projection.md) | 2026-11-11 |

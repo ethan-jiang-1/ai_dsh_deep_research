@@ -79,7 +79,12 @@ BUG-150 的卡自己写明：「词表路线必然漏同义措辞」。
   交付未见」的既有分叉；冒烟期望同步改用同一判据（声明件 + 回执）。
   `client-load-smoke` **两档全绿**：`--seed` ALL PASS；dev 档 ALL PASS + 1 SKIP（无窗口内交付目标，
   SKIP ≠ 通过，按冒烟口径记录）。
-- **最终基线**：`pnpm test` 1390 通过 / 0 失败；`pnpm verify` 全绿；`pnpm typecheck` 绿（2026-11-13）。
+- **fresh-agent 审计补口（2026-11-13）**：抓到两个 fail-open——① 散文互斥（`readiness: PASS；readiness: FAIL`）
+  被当成「散文缺席」，声明 PASS 直接放行；② 声明 JSON 重复键被 `JSON.parse` 静默取末值。已修：
+  `verdictAnalysisOf` 显式暴露 `ambiguous`、`readinessOfSources` 判红；声明重复键 fail-closed。
+  负例 2 例（`tests/run/readiness-declaration.test.mjs`）。
+- **最终基线**：`pnpm test` 1392 通过 / 0 失败；`pnpm verify` 全绿；`pnpm typecheck` 绿；
+  `client-load-smoke --seed` 全绿（2026-11-13）。
 - **git 血缘**：`git log --oneline -- _backlog/_archived/fixed_bugs/BUG-{074,141,150}*` 与
   `git show 4d6308c9 -- scripts/lib/node-gate-session-gates.mjs` 可见上述四轮与词表扩张。
 

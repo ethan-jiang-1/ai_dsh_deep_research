@@ -6,6 +6,7 @@
 
 | 对象 | 当前决定 | 具体观察（出现位置） | owner |
 |---|---|---|---|
+| 归档 bundle 的 readiness 新判据冲突 | 新判据下 8 个归档件的 review.md 读作「无法判定」；无活跃消费者，未删除、不追改（数据不可逆） | 任何归档 bundle 被重新 `run-accept`／需要重读 readiness 时：按新判据补 `review/readiness.json`，或按用户决定删除该 bundle；不为其加 epoch 豁免 | [迁移 I](_archived/settled_issues/2026-11-13-verdict-shape-migration.md) |
 | Cockpit 与 Dashboard 合并 | 暂不合并；当前互跳足够，产品级整合证据不足 | 任一场 run 记录到“必须在 Web 外查看进度”这一具体观察，或用户明确要求产品级整合；run 证据写入对应交付记录 | [settled issue](./_archived/settled_issues/2026-10-07-cockpit-dashboard-merge.md) |
 | 外部参考仓钉版漂移 | 00-index §外部研究材料的钉版 = 复核时点 HEAD；比对不一致 = 「上游已前进、结论待复核」态 | 升 pin 或引用外部材料复核时，`git -C <参考仓> log -1 --format=%h` 与 00-index 钉版比对不一致 | [00-index §外部研究材料](../docs/00-index.md) + [discipline-map §重审触发路径](../docs/discipline-map.md) |
 | 文档承诺的动作缺工具 | 遇到即按同一形状补工具（已落一件：续跑唤醒 = `run-kickoff --session`，自带送达对账）；判据 = 该动作能被仓库里的命令复跑，而不是只能当场写脚本 | 手册/指南里出现「发一句即…」「点一下即…」「按…即…」式承诺动作，而 `scripts/`、`dev/` 下搜不到对应命令入口 | [settled issue](./_archived/settled_issues/2026-10-11-recovery-action-instrument-gap.md) |

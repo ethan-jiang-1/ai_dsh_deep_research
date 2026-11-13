@@ -221,7 +221,7 @@ final 引用链，结果落 bundle 的 audit.md。它不校验日期校准或摘
 - **不猜**：同一行或同一文件存在互斥判定，或只有散文包裹、没有裸写声明 → 不判 PASS/FAIL，判「无法判定」。
 - **不新增兼容分支**：新判据对全部 bundle 同一口径；历史 bundle 冲突时由操作者按清单删除（用户 2026-11-13 裁定），不为它加 epoch 豁免。既有门的 schema/日期断代 = [D33](decisions.md#d33)，不在本条范围。
 - **机械化**：可判的是行为，不是措辞——变异矩阵 + 不变量测试住 `tests/contracts/`（L0），不另造 grep 门禁。判据形状的常驻守卫 = `tests/contracts/verdict-conformance.test.mjs`（五条不变量 + 生成矩阵）。
-- **逐面迁移**：第一张卡（readiness / HITL2 / 声明件）已归档 = [判据形状迁移](../_backlog/_archived/settled_issues/2026-11-13-verdict-shape-migration.md)；其余面的清单与顺序 = [判据形状迁移 II](../_backlog/_archived/settled_issues/2026-11-13-prose-surfaces-migration.md)。本页只写规则，不复述进度。
+- **逐面迁移**：判据面清单与迁移记录 = [迁移 I](../_backlog/_archived/settled_issues/2026-11-13-verdict-shape-migration.md) · [迁移 II](../_backlog/_archived/settled_issues/2026-11-13-prose-surfaces-migration.md)；本页只写规则，不复述进度。
 
 ## 2. 负面判据（任一出现 = 框架不合理，触发重构而非继续堆功能）
 

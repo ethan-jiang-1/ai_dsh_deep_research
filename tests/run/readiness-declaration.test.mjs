@@ -13,7 +13,7 @@ import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import { readinessOfBundle } from '../../scripts/lib/node-gate-contracts.mjs'
-import { readinessOfSources } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
+import { parseReadinessDeclaration, readinessOfSources } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
 import { deliveryGate } from '../../scripts/lib/node-gate-delivery-gate.mjs'
 import { withCompleteBundle } from './node-gate-helpers.mjs'
 
@@ -116,4 +116,24 @@ test('门A 集成：散文 PASS + 声明 FAIL 的 bundle 不得判绿（mismatch
     const g = deliveryGate(dir, '2026-10-08')
     assert.equal(g.status, 'RED', JSON.stringify(g))
   })
+})
+
+// 负例留证 2026-11-13：fresh-agent 审计抓到——「散文互斥」被当成「散文缺席」，声明 PASS 直接放行。
+// 红配方：readinessOfSources 不区分 ambiguous / null（退回 terminalVerdictLine 单值）→ 本组第一例变绿。
+test('D51 负例：散文互斥 + 声明 PASS → 仍红（互斥不是缺席）', () => {
+  const r = readinessOfSources({
+    reviewText: 'readiness: PASS；readiness: FAIL',
+    declarationText: JSON.stringify({ version: 1, readiness: 'PASS' }),
+    hasReviewDir: true,
+  })
+  assert.equal(r.pass, false)
+  assert.equal(r.source, 'ambiguous')
+})
+
+// 负例留证 2026-11-13：JSON.parse 对重复键静默取末值（FAIL→PASS 的假绿）。
+// 红配方：删掉 parseReadinessDeclaration 的重复键检测 → 本例如期 PASS。
+test('D51 负例：声明重复键 → fail-closed（不取末值）', () => {
+  const parsed = parseReadinessDeclaration('{"version":1,"readiness":"FAIL","readiness":"PASS"}')
+  assert.equal(parsed.ok, false)
+  assert.match(parsed.detail, /重复键/)
 })
