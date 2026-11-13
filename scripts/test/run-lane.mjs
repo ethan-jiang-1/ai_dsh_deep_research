@@ -28,7 +28,8 @@ let pass = 0; let fail = 0; let skip = 0; const laneStart = Date.now()
 for (const entry of entries) {
   console.log(`\n── ${entry.file}（${entry.tier}/${entry.cost}）`)
   const started = Date.now()
-  const result = spawnSync(process.execPath, ['--import', 'tsx/esm', entry.file], { cwd: ROOT, stdio: 'inherit', env: process.env })
+  const args = Array.isArray(entry.args) ? entry.args : []
+  const result = spawnSync(process.execPath, ['--import', 'tsx/esm', entry.file, ...args], { cwd: ROOT, stdio: 'inherit', env: process.env })
   const seconds = ((Date.now() - started) / 1000).toFixed(1)
   if (result.status === 0) { pass += 1; console.log(`PASS  ${entry.file}（${seconds}s）`) }
   else if (result.status === 2) { skip += 1; console.log(`SKIP  ${entry.file}（exit 2：前置缺席/未跑；${seconds}s）`) }

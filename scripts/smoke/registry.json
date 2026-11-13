@@ -77,7 +77,11 @@
       "tests/run/host-health.spec.mjs"
     ],
     "sunset": "当 snapshot/preset 的 keyless 档能覆盖装配面时退役",
-    "lane": "entry"
+    "lane": "entry",
+    "args": [
+      "--seed",
+      "tests/fixtures/client-load-home"
+    ]
   },
   "cold-start.entry.mjs": {
     "tier": "dev-only",
