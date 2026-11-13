@@ -1,11 +1,11 @@
 ---
-status: 待落地
+status: 等人拍板
 opened: 2026-11-13
 ---
 
 # 落地：测试策略制度化——从失败类账本到类级守卫、模型可见证据与资产治理
 
-> 立卡：2026-11-13 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-13 ｜ 状态：等人拍板 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否（待用户验收）
 >
 > 去向：implemented — `notes/implemented/2026-11-13-test-strategy-institutionalization.md`
 > 授权：用户 2026-11-13 明确要求「长期正确、全面、代价不怕」；方向由 agent 定，不再逐项给选项；
@@ -341,6 +341,17 @@ W3-6 D54 + Note（全卡收口）
   `guard-red-record` 门禁；通用 mutation harness 未建——成本高于收益，且逐片红录已能证明守卫会咬人。
   新守卫仍必须先看红；没有红录的守卫不得交付。
 - **W3-5 资产退役**：已完成——`e2e-021rc2.entry` 的 picker 断言已迁入 `client-load.entry` 并实跑 ALL PASS；旧件、registry、文档行、注释同 diff 清除，退役 Note + trigger 在场。
+
+## 阶段边界报告（2026-11-13）
+
+- **已交付**：D53 命名四车道 + D54 三环四账五关 + `guides/67` + 探索技能 + 复盘；快照 5 角色
+  A/B 进 CI；content/startup/defaults 安装态效果；可选团队层缺席；world-tree 设计；role consumer
+  matrix；CI `skipped=failure` 聚合 + with-key 手动通道；`e2e-021rc2` 退役（picker 迁入 client-load）。
+- **实跑**：`pnpm verify` 绿；`pnpm test` spec 1341 / checks 102；`pnpm test:vendor` 4；`pnpm typecheck`
+  通过；snapshot 5 角色 A/B 全 PASS；`lifecycle.entry` 25/25；`client-load.entry --seed` ALL PASS。
+- **未跑/未证明**：C 层 UI 复验、`test:e2e`/`test:entry` 全量、`model-smoke` 真实运行、rc.2→rc.5
+  真实升级；均已在交付 Note「未跑/未证明」分列。
+- **待用户**：验收（测试/CI/验收合同触面）；验收通过后把本卡归档并把状态改 `已结`。
 
 ## 关闭条件
 
