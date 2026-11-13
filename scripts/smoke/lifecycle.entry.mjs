@@ -13,7 +13,7 @@
 // `node scripts/dist/export-dist.mjs`）。缺任一 = exit 2（未跑 ≠ 通过）；断言失败 = exit 1。
 // 用法：node scripts/smoke/lifecycle.entry.mjs
 import { spawn, spawnSync } from 'node:child_process'
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -62,7 +62,9 @@ check('② tarball 无 sourcemap', entries.every((e) => !e.endsWith('.js.map')),
 const home = mkdtempSync(join(tmpdir(), 'dsh-lifecycle-'))
 const probeDir = mkdtempSync(join(tmpdir(), 'dsh-lifecycle-probe-'))
 const probeOut = join(probeDir, 'out.json')
-const env = scrubbedEnv({ DSH_HOME: home, LIFECYCLE_PROBE_OUT: probeOut, LIFECYCLE_PROBE_BASE: join(home, 'profiles', PROFILE, 'package.json') })
+const probeWorkspace = join(probeDir, 'workspace')
+mkdirSync(probeWorkspace, { recursive: true })
+const env = scrubbedEnv({ DSH_HOME: home, LIFECYCLE_PROBE_OUT: probeOut, LIFECYCLE_PROBE_BASE: join(home, 'profiles', PROFILE, 'package.json'), LIFECYCLE_PROBE_WORKSPACE: probeWorkspace })
 const run = (args, timeout = 180_000) => spawnSync(dsh, args, { encoding: 'utf8', env, cwd: ROOT, timeout })
 
 // 探针包：只读 —— 在 apply 里调 DSH 的 readPluginMeta 读四个 specifier 的显示面，结果落文件。
@@ -110,6 +112,51 @@ export async function apply() {
       for (const dispose of disposers) dispose()
       out.effect = { calls, disposers: disposerCount }
     } catch (error) { out.effect = { error: String(error) } }
+    try {
+      const startupEntry = requireFromProfile.resolve('dsh-deep-research-pack/startup')
+      const startup = await import(pathToFileURL(startupEntry).href)
+      const calls = []
+      const disposers = []
+      const fakeCtx = {
+        effect(fn) { const dispose = fn(); if (typeof dispose === 'function') disposers.push(dispose); return dispose },
+        logger: { info() {}, warn() {} },
+        workspaceRegistry: { create: async (path) => { calls.push('workspace:' + path); return { path, workspaceId: 'probe' } } },
+        get(name) { return name === 'sessionController' ? { create: async () => { calls.push('session'); return { sessionId: 'probe' } } } : undefined },
+      }
+      process.env.DEEP_RESEARCH_WORKSPACE = process.env.LIFECYCLE_PROBE_WORKSPACE
+      startup.apply(fakeCtx)
+      await new Promise((resolve) => setTimeout(resolve, 50))
+      for (const dispose of disposers) dispose()
+      out.startup = { calls, disposers: disposers.length }
+    } catch (error) { out.startup = { error: String(error) } }
+    try {
+      const defaultsEntry = requireFromProfile.resolve('dsh-deep-research-pack/defaults')
+      const defaults = await import(pathToFileURL(defaultsEntry).href)
+      const calls = []
+      const disposers = []
+      const fakeCtx = {
+        effect(fn) { const dispose = fn(); if (typeof dispose === 'function') disposers.push(dispose); return dispose },
+        logger: { info() {}, warn() {} },
+        systemPrompt: {
+          context(input) {
+            calls.push('context:' + input.name)
+            if (typeof input.text === 'function') {
+              try { input.text({ agent: { session: { header: { cwd: process.env.LIFECYCLE_PROBE_WORKSPACE } } } }) } catch { /* 空库/坏文件由 warnOnce 承担 */ }
+            }
+            return () => {}
+          },
+        },
+        inject(names, callback) {
+          calls.push('inject:' + names.join(','))
+          callback({
+            commands: { register(definition) { calls.push('command:' + definition.name); return () => {} } },
+            effect(fn) { const dispose = fn(); if (typeof dispose === 'function') disposers.push(dispose); return dispose },
+          })
+        },
+      }
+      defaults.apply(fakeCtx)
+      out.defaults = { calls, disposers: disposers.length }
+    } catch (error) { out.defaults = { error: String(error) } }
   } catch (error) { out.fatal = String(error) }
   writeFileSync(process.env.LIFECYCLE_PROBE_OUT, JSON.stringify(out, null, 2))
 }
@@ -168,6 +215,13 @@ try {
       effect.calls.includes('variable:research_pack_root') && effect.calls.includes('context:research:manual') &&
       Number(effect.disposers) >= 1
     check('⑤ 装起后 content.apply 真注册 variable/context 且返回 disposer', effectOk, String(JSON.stringify(effect)).slice(0, 400))
+    const startup = result.startup ?? {}
+    const startupOk = Array.isArray(startup.calls) && startup.calls.some((call) => String(call).startsWith('workspace:')) && Number(startup.disposers) >= 1
+    check('⑤ 装起后 startup.apply 真登记工作区且返回 disposer', startupOk, String(JSON.stringify(startup)).slice(0, 400))
+    const defaults = result.defaults ?? {}
+    const defaultsOk = Array.isArray(defaults.calls) && defaults.calls.includes('context:research:defaults') &&
+      defaults.calls.includes('command:research-defaults') && Number(defaults.disposers) >= 1
+    check('⑤ 装起后 defaults.apply 真注册 context/命令且返回 disposer', defaultsOk, String(JSON.stringify(defaults)).slice(0, 400))
   }
   try { child.kill('SIGTERM') } catch {}
   await new Promise((r) => { child.once('exit', r); setTimeout(r, 5000) })
