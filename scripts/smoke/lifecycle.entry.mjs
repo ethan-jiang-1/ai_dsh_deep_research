@@ -100,6 +100,7 @@ try {
     'research-content', 'research-client', 'research-startup', 'research-fetch-fallback', 'tool-present']
   const missing = ours.filter((id) => !dumpText.includes(id))
   check('③ dump 有本包 10 行', missing.length === 0, `缺：${missing.join(', ')}`)
+  check('③ 未装团队层：dump 无 ui-agent-team（可选层缺席不阻断本包）', !dumpText.includes('ui-agent-team'), '团队层未装却出现 ui-agent-team 行——可选层归属/组合漂移')
   check('③ dump 无 entry not found', !/patch: entry ".*" not found/.test(`${dumpText}${dump.stderr ?? ''}`), tail(dump))
 
   const child = spawn(dsh, ['--profile', PROFILE, '--no-open', '--port', '0'], { env, cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] })
