@@ -329,6 +329,7 @@ W3-6 D54 + Note（全卡收口）
 - **2026-11-13 命名迁移补洞 + 全量 e2e 车道**：`guard-red-record` 此前只扫 `tests/**/*.spec.mjs`，命名迁移后 `tests/checks/*.test.mjs` 的判据测试逃逸；现两车道都扫，`gates-cases` 的 conformance 注入目标改为 `tests/checks/probe-conformance.test.mjs`。`gates.e2e` 108 案例全绿；`pnpm test:e2e` 全量 **PASS 6 / FAIL 0 / SKIP 0**。`run-lane` 加单件/车道耗时与 `--only <substr>`；guides/67 增「成本预算」节（默认秒级、重资产按变更触发、新增入口先过成本关）。
 - **2026-11-13 with-key 真模型（本机）**：`node scripts/smoke/l4-lite.e2e.mjs` **ALL PASS**——5 角色（含 method-editor）assistant 标记 + scout web_search 工具调用真实发生；`model-smoke.yml` 的 GitHub secret 运行仍未做，静态契约/缺 key exit 2 已在。
 - **2026-11-13 成本重构（门禁自测并行）**：`gates.e2e` 108 个独立注入案例改为有界并行（默认 `min(4, CPU)`，`--jobs=<n>` 可调）；实测串行 **248s** → 并行 **86s**（2.9×），108 案例仍全跑、判据不变。全量 `test:e2e` 复跑 **PASS 6 / FAIL 0 / SKIP 0**；`run-lane` 单件/车道耗时 + `--only` 已落。
+- **2026-11-13 成本预算 ratchet**：新增 `tests/checks/smoke-cost-budget.test.mjs`——CI 入口 ≤9、CI `slow` ≤3、全部 `slow` ≤15（当前 9/3/15），slow 资产必须有 sunset；红证：往 registry 加一个 ci/slow 假条目 → 红；删除 → 绿。
 
 ## Wave 2/3 剩余裁决（2026-11-13，阶段边界）
 
