@@ -70,6 +70,6 @@ snapshots/replay/<scene>/
 - 目前只有 `replay/research-face` 一个场景族；探针与视觉证据的分类尚未建立。
 - **角色面已显式化（W1-3）**：consumer 用 `presetRoles()` 作允许集，场景自带 `roleFace`（缺省 = 研究四角色）；新增非研究场景族（方法库 / 视觉面等）必须在 `snapshot.json` 声明 `roleFace`，不再硬编码 `researchRoles()`。
 - 场景不进入默认 `pnpm test` 与 pre-commit 链；A/B 由 CI `snapshot-replay` job 驱动，C 与重录由 [开发环的任务型路由表](../docs/guides/60-dev-loop.md) 驱动。
-- **2026-11-13 W1-2 后 C UI 未复验**：四角色按当前 pack 重录后，temp home 的侧栏同名探针会话导致 C0 选中歧义；`ui.expected.md` 的卡片/活动行由 `cardTitleOf`/`foldActivityRows` 纯函数重算，C UI 重跑待后续（不在 CI）。
+- **2026-11-13 C UI 已复验**：C0 改用 `data-row-key`（`openSessionById`）+ `dismissPreviewNotice` 关首访遮罩后，C0–C5 全 PASS；`ui.expected.md` 由真实 UI 捕获重写（卡片 2 / 活动行 3，含 💬 行）。C 仍不在 CI（需 Chromium）。
 - **场景资格三态未立**：场景集发现已是发现式——`snapshots/replay/` 下含 `snapshot.json` 的全部目录都进冒烟（判据核 = [lib/replay-scene.discoverReplayFaces](../scripts/lib/replay-scene.mjs)；`snapshot-replay.entry --face <name>` 定向单集），新场景集落地即被发现；但 runnable（进冒烟）与证据（只留档不跑）尚无区分。**触发条件**：首个声明"不跑冒烟"的场景集或首个降为永久证据的场景集出现时，立资格三态 + 带判定日期的资格理由 + 声明↔盘面秒级结构门禁（company replay-scene-liveness 形态）——判定日期与 recordedAt 是两件事（录制时刻 ≠ 判据最近全绿时刻），场景数增长后缺它即过期不可见。
 - **体积预算未立**：当前总量有界（单场景族、无按次累积来源）。**触发条件**：任何"每轮一份"的累积型证据类别（探针按次留档、轮末拷贝）入库时，立总量 + 唯一无界源分类子预算（company 64/16 MiB 形态）。

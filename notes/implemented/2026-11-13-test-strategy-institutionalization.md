@@ -47,15 +47,15 @@ dev-only；客户端 36/59 文件无直测；慢资产无账本；交付无证�
 
 - `pnpm test:spec`：1341 / 0；`pnpm test:checks`：102 / 0；`pnpm test:vendor`：4 / 0。
 - `pnpm verify`：全绿；`pnpm typecheck`：通过。
-- 5 角色 snapshot A/B：全 PASS；`lifecycle.entry`：25/25；`client-load.entry --seed`：ALL PASS
-  （含角色 picker 连续断言）。
+- 5 角色 snapshot A/B：全 PASS；lead C 层 C0–C5：全 PASS（UI 金标准已重写）；`lifecycle.entry`：25/25；
+  `client-load.entry --seed`：ALL PASS（含角色 picker 连续断言）。
 - 红证：命名错后缀/旧名、roleFace 漏 method-editor、CI 聚合删 need、model-smoke 加 PR 触发等
   均先红后绿（记录在程序卡/各 Note）。
 
 ## 未跑 / 未证明
 
-- C 层 UI 渲染在新 fixture 下未复验（temp home 侧栏同名会话干扰 C0）；`ui.expected.md` 由
-  `cardTitleOf`/`foldActivityRows` 重算，CI 只跑 A/B。
+- C 层 UI 已复验：C0 改用 `data-row-key` + `dismissPreviewNotice` 后 C0–C5 全 PASS；`ui.expected.md`
+  由真实 UI 捕获重写（卡片 2 / 活动行 3，含 💬）。C 仍不在 CI（需 Chromium）。
 - `test:e2e` / `test:entry` 全量未跑（需 dev home/浏览器/安装前置）；命令与选择面已验。
 - `model-smoke.yml` 未真实运行（需 `DEEPSEEK_API_KEY`）；静态契约在，缺 key 会 exit 2。
 - 0.2.1-rc.2 → rc.5 真实升级未重跑（`e2e-021rc2` 已退役；复活条件在 trigger）。

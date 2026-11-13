@@ -44,6 +44,7 @@ import { loadReplayScene, discoverReplayFaces } from '../lib/replay-scene.mjs';
 import { researchWorkspaceGroup } from '../lib/session-log.mjs';
 import { compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds, sentinelInAssistantText, turnCompleted } from '../lib/replay-request.mjs';
 import { SMOKE_LOCALE, loadChromium, launchChromium } from '../lib/playwright.mjs';
+import { dismissPreviewNotice, openSessionById } from '../lib/web-ui-nav.mjs';
 import { profileLayerIssues, runtimeVersionOf } from '../lib/profile-health.mjs';
 import { acquireRunLock, releaseRunLock } from '../lib/run-lock.mjs';
 import { resolveSnapshotMode } from '../lib/snapshot-mode.mjs';
@@ -324,6 +325,8 @@ for (const { face, scene } of SCENES) {
         await sleep(1500);
         const cont2 = page.getByRole('button', { name: /continue/i }).first();
         if (await cont2.isVisible({ timeout: 10_000 }).catch(() => false)) await cont2.click({ timeout: 6000 }).catch(() => {});
+        // 首访预览说明遮罩（`_mask_`）会拦截侧栏点击；统一用 web-ui-nav 的关闭正本（中英 Continue/继续/Got it）。
+        await dismissPreviewNotice(page).catch(() => {});
         await sleep(1500);
         // 工作区选择态兜底（实测竞态：reload 后 app 可能停在 "Choose a workspace to start"，
         // 此时侧栏会话行尚未存在，C0 必然误红）。等的是显式状态消失，不是固定 sleep。
@@ -344,46 +347,26 @@ for (const { face, scene } of SCENES) {
           workspaceOpen ? '' : '工作区选择态未消失——侧栏会话行不会出现');
         // 侧栏找本次会话（唯一标题；只认左栏可见行——client-load.entry 同款配方）。点击后验证
         // 对话区真渲染（录制 prompt 文本在场），未开成则试下一个同命行（重排竞态兜底）。
-        const rowsMatching = async (text) => {
-          const rows = page.locator('span[class*="_root_"]');
-          const n = await rows.count();
-          const hits = [];
-          for (let i = 0; i < Math.min(n, 60); i++) {
-            const el = rows.nth(i);
-            if (!(await el.isVisible().catch(() => false))) continue;
-            const box = await el.boundingBox().catch(() => null);
-            if (box === null || box.x >= 256) continue;
-            const rowText = (await el.textContent() ?? '').trim();
-            if (rowText.includes(text)) hits.push(el);
-          }
-          return hits;
-        };
+        // W3-5/C 层修复：按 data-row-key 精定位（openSessionById 唯一正本），不再点侧栏 title span。
+        // title 重排/同名探针会话会让「点第一个同命行」打开空白新会话（2026-11-13 实测 C0 假红）。
         const chatOpened = async () => page.evaluate(() => (document.body?.innerText ?? '').includes('观察面录制探针'));
-        let matchedRows = await rowsMatching(UNIQUE_TITLE);
-        if (matchedRows.length === 0) {
-          // 侧栏可能把工作区组折叠（dev home 会话多）；先展开再按标题前缀找一次。
-          const group = page.getByText('research-workspace', { exact: true }).first();
-          if (await group.isVisible().catch(() => false)) { await group.click({ timeout: 8000 }).catch(() => {}); await sleep(1200); }
-          matchedRows = await rowsMatching('快照回放冒烟');
-        }
+        const nav = await openSessionById(page, sessionId, UNIQUE_TITLE);
         let opened = false;
-        for (const el of matchedRows) {
-          await el.click({ timeout: 10000 }).catch(() => {});
-          await sleep(2500);
+        if (nav.found) {
+          await sleep(2_500);
           // Completed 会话可能默认落 Trajectory 页签（Chat 内容不进 DOM）——显式切 Chat
           const chatTab = page.getByRole('button', { name: /^Chat$/ }).first();
-          if (await chatTab.isVisible().catch(() => false)) await chatTab.click({ timeout: 5000 }).catch(() => {});
-          await sleep(1500);
-          if (await chatOpened().catch(() => false)) { opened = true; break }
+          if (await chatTab.isVisible().catch(() => false)) await chatTab.click({ timeout: 5_000 }).catch(() => {});
+          await sleep(1_500);
+          opened = await chatOpened().catch(() => false);
         }
-        const openDiag = opened ? '' : await page.evaluate(() => {
+        const openDiag = opened ? '' : await page.evaluate((navInfo) => {
           const buttons = Array.from(document.querySelectorAll('button'))
             .filter((b) => b.offsetParent !== null)
             .map((b) => (b.textContent ?? '').trim()).filter((t) => t !== '' && t.length < 24).slice(0, 24);
-          return `匹配行 ${0}；可见按钮：${buttons.join(' | ')}；正文：${(document.body?.innerText ?? '').replace(/\n+/g, ' ⏎ ').slice(0, 500)}`;
-        });
-        step(opened, `[${face}/${sc.id}] C0 回放会话在侧栏可开且对话区真渲染（唯一标题定位 + Chat 页签 + 录制 prompt 在场）`,
-          openDiag.replace('匹配行 0', `匹配行 ${matchedRows.length}`));
+          return `openSessionById=${navInfo}；可见按钮：${buttons.join(' | ')}；正文：${(document.body?.innerText ?? '').replace(/\n+/g, ' ⏎ ').slice(0, 500)}`;
+        }, JSON.stringify(nav));
+        step(opened, `[${face}/${sc.id}] C0 回放会话在侧栏可开且对话区真渲染（data-row-key 定位 + Chat 页签 + 录制 prompt 在场）`, openDiag);
         if (opened) {
           // 等 chat 历史真渲染（工具调用锚点在场——ToolCall 的 DOM 锚 data-chat-call-id）
           await page.waitForFunction(

@@ -46,9 +46,8 @@
   `decisions-now` D53/D54；`pnpm test` spec 1339 + checks 101 全绿，`pnpm verify` 全绿（本机 2026-11-13）。
 - 类级守卫先行片：方法库 heading 40 格、run-lock 7 例、方法库路径 8 例、CI 聚合 skipped=failure、
   lifecycle 装起后 content.apply 效果 + 可选团队层缺席。
-- 未证明：W1-3 非研究角色面、W1-4 startup/defaults 安装态效果、W2-3 消费者全矩阵、W2-6/7 全族
-  假绿 oracle/变异证明、W3-5 资产退役、W0-6 hook/DOM 行为面；`test:e2e`/`test:entry` 全量未跑；
-  C 层 UI 未复验。
+- 未证明：W2-3 消费者全矩阵（已落 role 窄矩阵）、W2-6/7 全族假绿 oracle/变异证明、W3-5 资产退役（已完成）、
+  W0-6 hook/DOM 行为面；`test:e2e`/`test:entry` 全量未跑。
 
 ## 环境状态
 

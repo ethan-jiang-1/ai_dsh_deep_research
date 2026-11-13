@@ -301,9 +301,8 @@ W3-6 D54 + Note（全卡收口）
   `replay-request` 的 runtime-context 归一化补「profile 安装根」（dev home vs CI temp home 是
   位置身份；包内 content 后缀仍逐字比较），直测在 `tests/run/replay-request.spec.mjs`。
   实测：`DSH_HOME=runtime/record-home ... --layers a,b` 四角色 A+B 全绿；`tests/run/replay-fixtures`
-  按新 fixture 重算 `ui.expected.md` 后 `pnpm test` 1428/0。**未验证**：C 层 UI 捕获在 temp home
-  被侧栏同名探针会话干扰（C0 失败），`ui.expected.md` 的卡片/活动行由 `cardTitleOf`/
-  `foldActivityRows` 纯函数重算，C UI 重跑待后续；CI 不跑 C（只 A/B）。
+  按新 fixture 重算 `ui.expected.md` 后 `pnpm test` 1428/0。**C UI 已复验**：C0 改用 `data-row-key`（`openSessionById`）+ `dismissPreviewNotice` 关遮罩后，
+  C0–C5 全 PASS；`ui.expected.md` 由真实 UI 捕获重写（卡片 2 / 活动行 3，含 💬）。CI 仍只跑 A/B。
 - **2026-11-13 Wave 0 W0-10（命名对齐）**：按用户 2026-11-13 的四车道方案全仓迁移——
   `tests/{run,cockpit,pack,contracts}/**/*.test.mjs` → `*.spec.mjs`；门禁自身 → `tests/checks/*.test.mjs`；
   `tests/vendor/*.vendor.mjs` → `*.vendor.spec.mjs`；28 个 smoke → `<target>.e2e.mjs`（真进程，10）/
@@ -326,6 +325,7 @@ W3-6 D54 + Note（全卡收口）
 - **2026-11-13 Wave 0 W0-6（触发条件登记）**：hook/DOM 行为面暂缓，静态 `client-effect-return` 已钉「effect 回调必须返回 disposer」；真实回收/组件行为 harness 的触发条件已落 [`_backlog/triggers.md`](../triggers.md)（effect 返回 disposer 但真实挂载不回收，或引入 DOM harness 时）。
 - **2026-11-13 Wave 2 W2-3 先行片（角色消费者矩阵）**：新增 `tests/pack/role-consumer-matrix.spec.mjs`——`presetRoles()` 的每个角色必须在 ① patch `id: preset-<role>` ② `presets/<role>/skills/` 非空 ③ snapshot `roleFace` ④ roleFace 与盘上 roster 精确相等，四面同时在场；红证：删 method-editor roleFace → 红；还原 → 绿。
 - **2026-11-13 Wave 3 W3-5（资产退役）**：把 `e2e-021rc2.entry` 的角色 picker 连续断言迁入 `client-load.entry`，seed 档实跑 **ALL PASS**（picker 序列 = 四个 Deep Research 连续 + Method Editor）；随后退役 319 行 dev-only smoke，清 registry/README/guides/60/project-map/注释，写 [退役 Note](../../notes/archived/2026-11-13-e2e-021rc2-retirement.md) + trigger。替代证据 = required CI `client-load`，不是「删了」。
+- **2026-11-13 C UI 复验（W1-2 收尾）**：`snapshot-replay.entry` C0 从「点同命 title span」改为 `data-row-key` 的 `openSessionById`，并在 reload 后调 `dismissPreviewNotice` 关首访遮罩；C0–C5 全 PASS，`ui.expected.md` 由真实 UI 捕获重写（卡片 2 / 活动行 3，含 💬）。C 仍不进 CI（需 Chromium）。
 
 ## Wave 2/3 剩余裁决（2026-11-13，阶段边界）
 
@@ -349,8 +349,8 @@ W3-6 D54 + Note（全卡收口）
   matrix；CI `skipped=failure` 聚合 + with-key 手动通道；`e2e-021rc2` 退役（picker 迁入 client-load）。
 - **实跑**：`pnpm verify` 绿；`pnpm test` spec 1341 / checks 102；`pnpm test:vendor` 4；`pnpm typecheck`
   通过；snapshot 5 角色 A/B 全 PASS；`lifecycle.entry` 25/25；`client-load.entry --seed` ALL PASS。
-- **未跑/未证明**：C 层 UI 复验、`test:e2e`/`test:entry` 全量、`model-smoke` 真实运行、rc.2→rc.5
-  真实升级；均已在交付 Note「未跑/未证明」分列。
+- **未跑/未证明**：`test:e2e`/`test:entry` 全量、`model-smoke` 真实运行、rc.2→rc.5 真实升级；
+  C 层 UI 已复验，不在此列。
 - **待用户**：验收（测试/CI/验收合同触面）；验收通过后把本卡归档并把状态改 `已结`。
 
 ## 关闭条件
