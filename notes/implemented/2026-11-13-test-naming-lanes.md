@@ -1,7 +1,7 @@
 # 测试命名四车道：spec / e2e / entry / checks
 
 > 状态：implemented
-> 关联：[测试策略制度化程序卡](../../_backlog/issues/2026-11-13-test-strategy-institutionalization.md)（W0-10）；
+> 关联：[D53](../../docs/decisions.md#d53)；[测试策略制度化程序卡](../../_backlog/issues/2026-11-13-test-strategy-institutionalization.md)（W0-10）；
 > DSH `.spec.ts` / `.e2e.ts` 约定 = [test-strategy 语料](../../docs/external-materials.md)；
 > 测试栈 = D26（node:test，不迁 vitest）
 

@@ -1,4 +1,4 @@
-// decisions-now.spec.mjs — 决策台账只写当前决定（2026-11-03 七维卫生审计 D1-7）。
+// decisions-now.test.mjs — 决策台账只写当前决定（2026-11-03 七维卫生审计 D1-7）。
 //
 // 背景：`docs/decisions.md` 曾是「当前决定 + 修订史 + 退役决策」混在一张表里——D35/D38/D39
 // 已退役却以现在时叙述，最大行 3KB、带「2026-10-21 修订」式日期史。读者无法从文件形态判断
@@ -52,16 +52,25 @@ test('已退役表：D35/D38/D39 各有锚点与一行去向，且不在已定�
   assert.match(RETIRED, /D40/, '已退役表应指向取代者 D40');
 });
 
-test('D 号唯一且连续：D1–D42 每个锚点恰好一次', () => {
+test('D 号唯一且连续：D1–D53 每个锚点恰好一次', () => {
   const anchors = [...TEXT.matchAll(/<a id="d(\d+)"><\/a>D\1/g)].map((m) => Number(m[1]));
-  assert.ok(anchors.length >= 42, `锚点过少（${anchors.length}）——防空语料`);
+  assert.ok(anchors.length >= 53, `锚点过少（${anchors.length}）——防空语料`);
   const counts = new Map();
   for (const n of anchors) counts.set(n, (counts.get(n) ?? 0) + 1);
   const dup = [...counts].filter(([, c]) => c > 1).map(([n]) => n);
   assert.deepEqual(dup, [], '同一 D 号出现多次（编号唯一）');
   const missing = [];
-  for (let n = 1; n <= 42; n += 1) if (!counts.has(n)) missing.push(n);
+  for (let n = 1; n <= 53; n += 1) if (!counts.has(n)) missing.push(n);
   assert.deepEqual(missing, [], 'D 号不连续（缺号会让引用悬空）');
+});
+
+test('D53 测试命名四车道在册且指向命名 Note', () => {
+  const row = activeRows(ACTIVE).find((candidate) => candidate.number === '53');
+  assert.ok(row, 'D53 缺席——测试命名纪律失去宪法锚点');
+  for (const token of ['*.spec.mjs', '*.e2e.mjs', '*.entry.mjs', 'tests/checks/*.test.mjs']) {
+    assert.ok(row.decision.includes(token), `D53 缺车道 ${token}`);
+  }
+  assert.ok(row.refs.includes('2026-11-13-test-naming-lanes.md'), 'D53 必须指向命名 Note');
 });
 
 // 增长守卫：台账是长表，新增 D 号前先退役/搬 Note；32KB 是硬顶，20KB 的收敛目标登记在

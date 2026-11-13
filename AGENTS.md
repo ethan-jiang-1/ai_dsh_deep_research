@@ -121,10 +121,9 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 > 新门禁带反证 · docs = 当前合同 · 同 diff 带 Note · 窄证据切片 · 卫生铁律 · 工具态重定向。
 >
 > **证据匹配面**：改动的面 → 证据类型，执行正本 = [guides/60 §2 任务型路由表](docs/guides/60-dev-loop.md)；新契约测试与门禁同 diff 带反证（先看红再交付绿）。单点机制/行为（含模型不按纪律）可疑 → 先看 [probes/](probes/README.md)（指南 = guides/66），别先跑整链。
+> **命名即车道**（[D53](docs/decisions.md#d53)）：测试文件名 = 证据车道——`.spec.mjs` 进程内 / `.e2e.mjs` 真进程 / `.entry.mjs` 真入口 / `tests/checks/*.test.mjs` 门禁；错后缀或错 lane = 红。规则 = [tests/AGENTS](tests/AGENTS.md)。
 >
-> **研发宪章**（2026-09-27 用户定调）= [CONTRIBUTING §Development charter](CONTRIBUTING.md#development-charter)：循 DSH 而不发明 · 自主优先
-> 并借鉴成熟 DSH 插件（采纳度为信号）· **审阅分层**——机械门禁/审计/判据探针/对抗自审自主做，
-> 只在阶段边界请人（REVIEW 是最后手段，不是例行步骤）。
+> **研发宪章**（2026-09-27 用户定调）= [CONTRIBUTING §Development charter](CONTRIBUTING.md#development-charter)：循 DSH 而不发明 · 自主优先并借鉴成熟 DSH 插件（采纳度为信号）· **审阅分层**——机械门禁/审计/判据探针/对抗自审自主做，只在阶段边界请人（REVIEW 是最后手段，不是例行步骤）。
 
 ## 编辑这些指令
 

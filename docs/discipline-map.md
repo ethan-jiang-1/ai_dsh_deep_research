@@ -268,6 +268,12 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 复核结论（"无命中/改写哪几行"）连同新 tag 与日期，写进该轮「升 pin 重校」条目的毕业 Note
 ——**逐条结论本身即是重审记录**，不另建维护页（避免第二份会漂移的清单）。
 
+## 本仓自定纪律（非 DSH 源；D 号为准）
+
+| 纪律 | 落点 | 机械把守 |
+|---|---|---|
+| [D53](decisions.md#d53) 测试文件名 = 证据车道 | [tests/AGENTS](../tests/AGENTS.md) / [scripts/AGENTS](../scripts/AGENTS.md) / [scripts/README](../scripts/README.md) | [test-lanes](../tests/checks/test-lanes.test.mjs) / [smoke-registry](../tests/checks/smoke-registry.test.mjs) / [smoke-oracle-surface](../tests/checks/smoke-oracle-surface.test.mjs) / layering ④ |
+
 ## 维护规则
 
 - 本表随 vendor 换 tag 重校（升级 vendor pin 时重校）；新增三态行同 diff 落
