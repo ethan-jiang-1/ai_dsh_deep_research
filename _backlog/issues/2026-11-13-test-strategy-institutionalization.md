@@ -252,6 +252,13 @@ W3-6 D53 + Note（全卡收口）
   红证 = 临时新增 `src/client/__probe-untested.ts` → 契约点名红；删除 → 绿。实跑：
   `pnpm test` 1421/0、`pnpm verify` 全绿。未跑：慢档/真模型/hook DOM 环境（hook 仍登记为
   smoke-only，待 Wave 3 L）。
+- **2026-11-13 Wave 0 W0-8（车道/可见性）**：新增 `tests/contracts/test-lanes.test.mjs`——①
+  `*.test.mjs` 必须住 `run/cockpit/pack/contracts` 四域；② `tests/` 下不得有
+  `*.spec.mjs`/`*.e2e.mjs`，非测试 `.mjs` 必须是 fixture/vendor/被测试 import 的支援件；③ 默认
+  回归零 skip（`test.skip`/`skipIf`/`{ skip: }` 全红）。红证：新建 `tests/root-lane.test.mjs`、
+  `tests/cockpit/x.spec.mjs`、给测试加 `test.skip` 各红；删除/还原 → 绿。
+  `scripts/README` 的 `keyless-imports` 消费列同步加 `test-lanes.test`。实跑：`pnpm test`
+  1424/0、`pnpm verify` 全绿。未跑：慢档/真模型。
 
 ## 关闭条件
 
