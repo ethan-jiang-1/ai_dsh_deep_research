@@ -7,6 +7,7 @@
 | 卡 | 状态 | 一句话 |
 |---|---|---|
 | [2026-11-11-exploratory-test-strategy](2026-11-11-exploratory-test-strategy.md) | 等人拍板 | 探索性验证协议 + 第 1 轮 charter；pilot 已跑出 2 类 fail-open |
+| [2026-11-13-workflow-substance-gates](2026-11-13-workflow-substance-gates.md) | 待落地 | 加工环路的实体检查：判据形状字段 + 收口门 + 复发必答 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
