@@ -185,6 +185,7 @@ status——材料的状态就是题的状态。
 | 名头 | 问题 | 消费者 | 材料 |
 |---|---|---|---|
 | [加工环路的实体检查缺口](workflow-substance/README.md) | 哪些环节只查形式不查实体，fresh agent 会怎么走错 | [issue 2026-11-13-workflow-substance-gates](../_archived/settled_issues/2026-11-13-workflow-substance-gates.md) | [three-audits](workflow-substance/2026-11-13-three-audits.md) |
+| [测试资产围栏](test-asset-fence/README.md) | 现有测试资产成本/覆盖如何，哪些慢资产可降级/合并/退役、哪些快守卫要补 | [issue 2026-11-13-test-asset-fence](../issues/2026-11-13-test-asset-fence.md) | [test-asset-fence](test-asset-fence/2026-11-13-test-asset-fence.md) |
 
 归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单，也不抄状态（状态正本 = 题名页）。
 

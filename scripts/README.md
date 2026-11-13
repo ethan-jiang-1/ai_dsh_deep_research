@@ -161,6 +161,7 @@
 | lib/method-presets.mjs | library-fold.test、method-presets.test | research-brief skill「方法预设」表的唯一解析入口（表头/行列数/防空集 fail-loud）——内置名单不再各写一份手写副本 |
 | lib/keyless-imports.mjs | layering.test、test-surface.test | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
 | lib/gates-cases.mjs | gates-smoke、verify-gates.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
+| lib/run-accept-fixture.mjs | run-accept-smoke、run-accept-fixture.test | claim 夹具的 review/readiness 文本（D51 同源：有声明 = declaration/PASS，缺声明 = missing/红） |
 | lib/node-gate-core.mjs | node-gate、node-gate-delivery.test、node-gate-leads.test、node-gate-session.test | bundle 判据聚合；唯一导出 = `gateBundle`，领域门直接 import 各自模块 |
 | lib/node-gate-contracts.mjs | node-gate-contracts.test、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、node-gate-delivery.test、readiness-declaration.test、review-readiness.test、verdict-audit、verdict-audit-core | 交付日期合同、readiness 与 decisions 行解析 |
 | lib/node-gate-session-gates.mjs | ask-drive.test、bundle-sessions、node-gate-core、node-gate-delivery-gate、node-gate-witness.test、node-gate-delivery.test、node-gate-session.test、run-accept | HITL、present 与 §Decisions 会话门 |

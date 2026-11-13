@@ -16,6 +16,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { scrubbedEnv } from '../lib/env.mjs'
 import { projectionOf } from '../lib/protocol-audit-core.mjs'
+import { claimReviewFixture } from '../lib/run-accept-fixture.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const CLI = join(ROOT, 'scripts', 'run-ops', 'run-accept.mjs')
@@ -72,7 +73,8 @@ function writeClaimFixtures(bundle, sessions, { verdict = 'supported' } = {}) {
   const final = `# v1\n\n${claimText}。\n`
   writeFileSync(join(bundle, 'final.md'), final)
   writeFileSync(join(bundle, 'final', 'v1.md'), final)
-  writeFileSync(join(bundle, 'review.md'), '# Review\n\n## readiness: PASS\n\n当前裁决 = verdicts-r1.json\n')
+  const reviewFixture = claimReviewFixture()
+  writeFileSync(join(bundle, 'review.md'), reviewFixture.reviewText)
   writeFileSync(join(bundle, 'final', 'readable-v1.md'), [
     '# 读者版 — drt_claims',
     '',
@@ -93,6 +95,7 @@ function writeClaimFixtures(bundle, sessions, { verdict = 'supported' } = {}) {
     '',
   ].join('\n'))
   mkdirSync(join(bundle, 'review'), { recursive: true })
+  writeFileSync(join(bundle, 'review', 'readiness.json'), reviewFixture.declarationText)
   writeFileSync(join(bundle, 'review', 'claims.json'), `${JSON.stringify({
     version: 1,
     finalRef: 1,
