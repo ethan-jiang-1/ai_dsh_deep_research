@@ -7,8 +7,9 @@ import { readFileSync, readdirSync, existsSync, lstatSync, readlinkSync } from '
 import { join, relative, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { backlogLivenessProblems } from '../../lib/backlog-liveness.mjs';
+import { parseStagedChanges, stagedChangePairingProblems } from '../../lib/staged-change-pairing.mjs';
 import { missingProbeFields, renderProbeIndex, scanProbeEntries } from '../../lib/probe-index.mjs';
-import { ROOT, gates, fail, walk, gitOnce, trackedFiles } from '../context.mjs';
+import { ROOT, gates, fail, note, walk, gitOnce, trackedFiles } from '../context.mjs';
 
 export function runF() {
 // ── claude-symlink（CLAUDE.md 必须是指向 AGENTS.md 的 symlink）──
@@ -155,6 +156,13 @@ export function runF() {
     // ① 标题里的 BUG 号 = 守卫声明（node:test 的 test('…')；含 await t.test 子测形态）
     const claimed = new Set();
     for (const m of text.matchAll(/^\s*(?:await\s+)?(?:t\.)?(?:test|it)\(\s*['"`][^'"`]*?(BUG-\d{3})/gm)) claimed.add(m[1]);
+    // 判据测试（文件名含 conformance）= 不变量 + 变异矩阵的常驻守卫：必须给出红配方，
+    // 即使标题不声称具体事故（D52；否则「只交付绿」的判据测试没人知道会不会咬人）。
+    if (/conformance\.test\.mjs$/.test(f)) {
+      claims++;
+      if (!/^\s*\/\/\s*(?:负例留证|夹具留证)\s+\d{4}-\d{2}-\d{2}：/m.test(text))
+        problems.push(`${f}：判据测试（*conformance*）缺「// 负例留证/夹具留证 YYYY-MM-DD：」块——不变量测试必须给出红配方`);
+    }
     if (claimed.size === 0) continue;
     for (const id of [...claimed].sort()) {
       claims++;
@@ -173,6 +181,31 @@ export function runF() {
   }
   if (claims === 0) fail(gate, '防空语料：tests 标题零个 BUG-nnn 守卫声明被扫到——判据源失效（已知 ask-drive 等多处带声明）');
   else if (problems.length > 0) fail(gate, `这些测试声称守卫具体事故却没交出可复核的红配方：${problems.join('；')}`);
+}
+
+// ── staged-change-pairing（D52）：暂存区里的成对变更 ──
+// 为什么：卡归档与 Note、金标准与重录理由都要求「同一变更」，但这两条此前只是散文。
+// 无暂存（普通 verify / 干净树）= 无对象；pre-commit 才有真对象。
+{
+  const gate = 'staged-change-pairing';
+  const env = { ...process.env };
+  for (const key of ['GIT_DIR', 'GIT_INDEX_FILE', 'GIT_WORK_TREE', 'GIT_NAMESPACE']) delete env[key];
+  const stagedOut = spawnSync('git', ['diff', '--cached', '--name-status', '-M'], { cwd: ROOT, encoding: 'utf8', env });
+  if (stagedOut.status !== 0) {
+    note(gate, 'git 不可用——无暂存上下文，跳过（非仓库/初始状态）');
+  } else {
+    const staged = parseStagedChanges(stagedOut.stdout);
+    if (staged.length === 0) {
+      note(gate, '暂存区为空——无对象');
+    } else {
+      const problems = stagedChangePairingProblems({
+        staged,
+        read: (rel) => { try { return readFileSync(join(ROOT, rel), 'utf8'); } catch { return null; } },
+        exists: (rel) => existsSync(join(ROOT, rel)),
+      });
+      if (problems.length > 0) fail(gate, problems.join('；'));
+    }
+  }
 }
 
 // ── gate-ledger-sync（docs/evaluation.md §L0 门禁登记表 = 本脚本 gates 数组，不漂移）──

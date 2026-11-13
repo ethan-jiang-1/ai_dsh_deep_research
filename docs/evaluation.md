@@ -76,6 +76,7 @@
 | `hooks-active` | pre-commit 激活态：`git config core.hooksPath` 指向 dev/hooks | [审计 P3 收尾轮 Note](../notes/archived/2026-10-07-audit-p3-closure-round.md)；副本注入不适（理由：断言对象 = 本机 git config 而非 tracked 文件面——fixture 副本 git init 后本就未设 hooksPath，注入无红可造），反证 = 一次性 Note 红录 |
 | `doc-now-only` | live 文档只写 now：禁「已销账 / 修订 → / 曾用 / 首版…已由…替换」措辞（docs/AGENTS.md 与本门禁自我引用行豁免） | [信噪比整治 RFC](../notes/archived/2026-09-26-signal-to-noise-remediation.md) + [lsfiles RFC](../notes/archived/2026-10-07-lsfiles-gate-coverage-sweep.md) |
 | `backlog-liveness` | backlog 各池（问题/缺陷/调研/方法/触发索引/归档）在场且生命周期合同合规——含研究题目录/题名页状态与材料清单对账、`待落地` 的非空验收标准与去向、`修复就绪/修复落地` 的修复判据；结构检查不证明结论、证据质量或实施授权 | gates-smoke 注入案例（含生命周期形态 + 活跃索引幽灵 / 归档退出值 / 研究题平铺与题名页 + 新 ready 形状）+ 仓内红→绿实录；借鉴三态 = [借鉴 Note](../notes/implemented/2026-10-12-backlog-process-borrow.md)；规则正本 = [backlog 门牌](../_backlog/AGENTS.md) + [入口](../_backlog/README.md)，实现 = [backlog-liveness](../scripts/lib/backlog-liveness.mjs) |
+| `staged-change-pairing` | 暂存区成对变更：归档卡 ↔ 去向 Note 同暂存集；`ui.expected` ↔ `snapshot.lastRewrite`（why 非空、载体存在）；无暂存 = 无对象 | 一次性注入红录（需 git 索引；gates-smoke 副本无索引，NO_CASE 登记） |
 | `release-version` | 发布版本单一源：root/pack `package.json` 都是三段 semver 且相等（tag 一致性由 `release-check` 在发布前查） | [发布规则](./guides/64-release-versioning.md)；反证 = gates-smoke 改 pack 版本为 9.9.9 红 |
 | `dist-manual-version` | dist 导出合同：`_dist/安装手册.md` 在库且表头版本 = pack 版本、指名 `dsh-deep-research-pack-<version>.tgz` | [dist-export Note](../notes/archived/2026-09-28-dist-export.md) |
 | `dist-manual-fresh` | 源手册 `scripts/dist/product-manual.md` 的正文与 `_dist/安装手册.md` 正文逐字一致（表头版本由 `dist-manual-version` 管） | [dist-export Note](../notes/archived/2026-09-28-dist-export.md)；gates-smoke `dist-manual-fresh-body` 常驻案例 |
@@ -220,7 +221,7 @@ final 引用链，结果落 bundle 的 audit.md。它不校验日期校准或摘
 - **权威输入 = 结构化事实**：canonical JSON、会话事件、文件事实。散文（review.md / question.md / leads.md）是人读副本；判据读它只做交叉核对，不一致 = 红。交付终局的第一例 = `review/readiness.json`（critic 写；门禁以它为准，review.md 的判定行只做副本）。
 - **不猜**：同一行或同一文件存在互斥判定，或只有散文包裹、没有裸写声明 → 不判 PASS/FAIL，判「无法判定」。
 - **不新增兼容分支**：新判据对全部 bundle 同一口径；历史 bundle 冲突时由操作者按清单删除（用户 2026-11-13 裁定），不为它加 epoch 豁免。既有门的 schema/日期断代 = [D33](decisions.md#d33)，不在本条范围。
-- **机械化**：可判的是行为，不是措辞——变异矩阵 + 不变量测试住 `tests/contracts/`（L0），不另造 grep 门禁。判据形状的常驻守卫 = `tests/contracts/verdict-conformance.test.mjs`（五条不变量 + 生成矩阵）。
+- **机械化**：可判的是行为，不是措辞——变异矩阵 + 不变量测试住 `tests/contracts/`（L0），不另造 grep 门禁。设计方法 = [_backlog/methods/judgment-design.md](../_backlog/methods/judgment-design.md)。判据形状的常驻守卫 = `tests/contracts/verdict-conformance.test.mjs`（五条不变量 + 生成矩阵）。
 - **逐面迁移**：判据面清单与迁移记录 = [迁移 I](../_backlog/_archived/settled_issues/2026-11-13-verdict-shape-migration.md) · [迁移 II](../_backlog/_archived/settled_issues/2026-11-13-prose-surfaces-migration.md)；本页只写规则，不复述进度。
 
 ## 2. 负面判据（任一出现 = 框架不合理，触发重构而非继续堆功能）

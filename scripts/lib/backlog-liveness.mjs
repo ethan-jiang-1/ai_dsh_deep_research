@@ -2,7 +2,7 @@
 // 闭集头 / 状态行镜像互查 / 池成员索引点名 / ready 门工件）。消费 = verify 门禁 backlog-liveness 与
 // tests/backlog-liveness.test；规则正本 = _backlog/AGENTS（状态机）+ _backlog/README（工作路径/关闭）。
 import { existsSync, lstatSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 
 const CARD_STATES = {
   issues: ['推敲中', '待落地', '等人拍板'], bugs: ['排查中', '修复就绪', '修复落地', '等人拍板'],
@@ -56,6 +56,16 @@ const hasFilledSection = (text, heading) => {
 };
 const dispositionOf = (text) => /^>\s*去向[：:]\s*(none|rejected|proposed|implemented|deferred)\b/m
   .exec(headOf(text))?.[1];
+/** 去向行的目标（inline code 或相对链接）；用于「Note 是否早写」。 */
+export const dispositionTargetOf = (text) => {
+  const line = /^>\s*去向[：:][^\n]*/m.exec(headOf(text))?.[0];
+  if (line === undefined) return null;
+  const code = /`([^`]+)`/.exec(line);
+  if (code !== null) return { kind: 'code', value: code[1].trim() };
+  const link = /\]\(([^)]+)\)/.exec(line);
+  if (link !== null) return { kind: 'link', value: link[1].trim() };
+  return null;
+};
 const conclusionOf = (text) => /^>\s*结论[：:]\s*(.*)$/m.exec(text)?.[1]?.trim();
 
 /** Check current backlog structure over tracked files; empty active shelves are deliberately legal. */
@@ -191,6 +201,17 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
             const disposition = dispositionOf(text);
             if (disposition !== 'proposed' && disposition !== 'implemented')
               problems.push(`${loc} 待落地 requires 去向：proposed|implemented`);
+            // Note 与卡关闭同变更（D52）：待落地 阶段目标 Note 已存在 = 提前写了 Note，红。
+            if (disposition === 'implemented') {
+              const target = dispositionTargetOf(text);
+              if (target !== null && !target.value.startsWith('http')) {
+                const targetPath = target.kind === 'link'
+                  ? resolve(dirname(join(backlogRoot, rel)), target.value)
+                  : resolve(backlogRoot, '..', target.value);
+                if (existsSync(targetPath))
+                  problems.push(`${loc} 待落地 但 去向：implemented 的目标已存在（${target.value}）——Note 与卡关闭同变更：先交付，或把卡翻到已结`);
+              }
+            }
           }
         }
         if (shelf === 'bugs' && !/^BUG-\d{3}-[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(name)) problems.push(`${loc} filename must preserve BUG-<NNN>-<slug>.md`);

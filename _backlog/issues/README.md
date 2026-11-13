@@ -7,7 +7,6 @@
 | 卡 | 状态 | 一句话 |
 |---|---|---|
 | [2026-11-11-exploratory-test-strategy](2026-11-11-exploratory-test-strategy.md) | 等人拍板 | 探索性验证协议 + 第 1 轮 charter；pilot 已跑出 2 类 fail-open |
-| [2026-11-13-workflow-substance-gates](2026-11-13-workflow-substance-gates.md) | 待落地 | 加工环路的实体检查：判据形状字段 + 收口门 + 复发必答 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
@@ -39,6 +38,16 @@ opened: YYYY-MM-DD
 ## 已知与未决
 
 ## 方案与取舍
+
+## 判据形状（引入/修改判据时必填；否则写「不适用」）
+
+- 权威事实：<谁写、写成什么结构化形式：JSON 字段 / 会话事件 / 文件字段>
+- 读取方：<gate / UI / 审计>
+- 坏输入：缺 → <红 / unknown>；非法 → <红>；互斥 → <红>
+- 旧形态：<迁移方式 / 删除条件>
+- 反证：<变异矩阵或不变量的位置>
+
+方法 = [设计判据](../methods/judgment-design.md)。缺这节 = 设计未完成，不翻 `待落地`（评审判据）。
 
 ## 验收标准
 

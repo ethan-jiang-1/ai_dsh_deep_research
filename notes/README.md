@@ -52,7 +52,7 @@
 **进出细节只住各子目录 README**（上表链到的目录宪章）；本表只做导航，不复制会漂移的规则。
 事故复盘不设独立目录（规则 = 下节 §事故复盘）。`research/` 已于 2026-09-27 清并，不再是目录。
 
-问题澄清与执行分开：[_backlog/](../_backlog/README.md) 收录待澄清问题、查证材料、缺陷和按需方法；它不是实施许可或前置门（唯一带日期的范围例外 = 修复就绪缺陷卡的 P1/P2 有界修复，[D24](../docs/decisions.md#d24)）。结论进入 notes 的收件规则 = [notes/AGENTS](AGENTS.md)（§从 backlog 进来的结论），决定程序 = [结论去向](../_backlog/methods/issue-to-note.md)。`proposed/` 仅承载需要显式评审的持久决定提案。卡在 `待落地` 选去向；`待落地` 不写 Note，写入时机 = notes/AGENTS。
+问题澄清与执行分开：问题、证据与授权工作住发起方的记录区，**不是 notes 的职责，也不是写 Note 的前置门**。结论进入 notes 的唯一交接物 = Note 本身；收件规则 = [notes/AGENTS](AGENTS.md)（§收件与写入时机）。`proposed/` 仅承载需要显式评审的持久决定提案；写入时机 = 与决定/变更同一变更。
 
 ## 事故复盘（不是目录）
 
@@ -64,8 +64,8 @@
 **不收**：探针抓到的文档漂移（卫生整治，归 `implemented/`）；未到达“不该到达的地方”的普通
 bug（修在 `implemented/` 的验证节）。
 
-新增防线落 [evaluation](../docs/evaluation.md)（门禁）或 [_backlog/triggers](../_backlog/triggers.md)
-（复发观察）才算闭环。防复发的现行入口 = `reviewing-a-delivery` / `reproducing-a-failure` 技能与
+新增防线落 [evaluation](../docs/evaluation.md)（门禁）或由发起方登记复发观察才算闭环；
+notes 不维护发起方的观察清单。防复发的现行入口 = `reviewing-a-delivery` / `reproducing-a-failure` 技能与
 triggers；事故原文只作证据。
 
 ## proposed → implemented 的执行纪律（门牌）

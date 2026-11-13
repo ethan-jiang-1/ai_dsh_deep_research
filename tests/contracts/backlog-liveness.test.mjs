@@ -291,3 +291,22 @@ test('已结/已修归档卡不得保留可关闭：否（2026-10-20 P0-3 反证
     '---\nstatus: 已结\nopened: 2026-10-08\n---\n\n# Frozen legacy\n> 状态：已结｜可关闭：是\n');
   assert.deepEqual(f.check(), []);
 });
+
+// 负例留证 2026-11-13：D52——待落地卡在目标 Note 已存在时仍被当「准备进开发」，Note 早写无门可拦。
+// 红配方：删掉 backlogLivenessProblems 的 dispositionTargetOf/existsSync 分支 → 本例变绿。
+test('D52：待落地 + 去向 implemented 的目标 Note 已存在 → 红', (t) => {
+  const f = fixture(t);
+  issue(f, READY_ISSUE_TEXT, READY_ISSUE);
+  const note = join(f.repo, 'notes', 'implemented', '2026-10-08-ready.md');
+  mkdirSync(dirname(note), { recursive: true });
+  writeFileSync(note, '# Note\n');
+  const problems = f.check();
+  assert.ok(problems.some((p) => p.includes('Note 与卡关闭同变更')), problems.join('\n'));
+});
+
+test('D52：目标 Note 不在场时不误报', (t) => {
+  const f = fixture(t);
+  issue(f, READY_ISSUE_TEXT, READY_ISSUE);
+  const problems = f.check();
+  assert.equal(problems.filter((p) => p.includes('Note 与卡关闭同变更')).length, 0, problems.join('\n'));
+});

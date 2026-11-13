@@ -1,17 +1,21 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-13
 ---
 
 # 推敲：把加工环路的「实体检查」显性化——判据形状字段 + 收口门
 
-> 立卡：2026-11-13 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-13 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
 >
 > **一句话**：本仓不缺「判据不猜」的原则，缺的是让原则落地的**字段和门**——设计期把判据的
 > 权威输入/歧义行为写成必填格，收口期把「Note 早写 / 卡关而行为未停」变成机械红，bug 通道把
-> 「同类第 N 次」变成必答。三次独立审计的证据 = [research](../research/workflow-substance/README.md)。
+> 「同类第 N 次」变成必答。三次独立审计的证据 = [research](../../research/workflow-substance/README.md)。
 >
-> 去向：implemented — `notes/implemented/2026-11-13-workflow-substance-gates.md`
+> 结论：判据形状字段 + Note 同节 + 两道收口门（Note 早写、暂存区配对）+ 复发必答 + 判据测试负例 +
+> 金标准理由全部落地；D52 入台账，gates-smoke 108 案例全绿。
+> 去向：implemented — [Note](../../../notes/implemented/2026-11-13-workflow-substance-gates.md)
+> 授权：用户 2026-11-13 直派「真正执行它」；业务验收 = 本轮 diff 与 Note 待用户复核。
+> 审查：机械门禁全跑（verify/test/typecheck/gates-smoke + 新门一次性红录）；语义自审逐条对验收。
 
 **问题与期望结果：** 最近两天 68 张 bug 卡里，大量是「同一判据的第 2–4 次修复」（readiness 4 轮、
 HITL2 7 张、方法库 heading 一串）。三次独立审计（fresh-agent 冷启动 / D51 真实链路 / 五类失败对照）
@@ -23,7 +27,27 @@ HITL2 7 张、方法库 heading 一串）。三次独立审计（fresh-agent 冷
 
 - 原则已在：`docs/evaluation.md` §判据形状、`writing-a-gate` 的「先想红」、`tests/AGENTS` 的反证义务、
   `notes/AGENTS` 的取代检查、`guides/60` 脚注①的「金标准只许重写」。
-- 拦不住的原因：`backlog-liveness` 只查 `## 验收标准/修复判据` 非空；`note-format` 只查骨架；
+- 拦不住的原因：`backlog-liveness` 只查 `## 落地记录（2026-11-13）
+
+- **F1**：`_backlog/methods/judgment-design.md`（四格 + 矩阵维度 + 三问 + 两例，入 methods 索引）；
+  issue/RFC 模板 `## 判据形状`；`tests/AGENTS` 判据测试规则；bugs 复发必答；`guides/60 §2` 任务行；
+  `writing-a-gate` 与 `evaluation §判据形状` 指针。
+- **F2**：`backlog-liveness` 拦 Note 早写（2 例）；新门 `staged-change-pairing`（归档卡↔Note、
+  expected↔lastRewrite；6 例 + 一次性真红录）；`--update-expected --why` + `snapshot.json.lastRewrite`。
+- **F7**：`guard-red-record` 扩到 `*conformance*`（含 gates-smoke 新案例）。
+- **D52** 入 decisions；evaluation §L0 台账 + gates 数组 + NO_CASE 登记；notes 层去除 backlog 状态机依赖。
+- **证据**：`verify` 全绿、`test` 1400 / 0、`typecheck` 绿、`gates-smoke` 108 案例全绿。
+
+## 判据形状
+
+- **权威事实**：卡片/Note 的显式节（人写）+ git 暂存索引（机器）+ `snapshot.json.lastRewrite`。
+- **读取方**：`backlog-liveness` / `staged-change-pairing` / `guard-red-record` / 评审。
+- **坏输入**：缺节 → 评审退回；目标 Note 早存在 → 红；归档卡目标不在暂存集 → 红；
+  `lastRewrite.why` 空/载体不存在 → 红；暂存区为空 → 无对象。
+- **旧形态**：无（新规则；旧卡 grandfather，不追改）。
+- **反证**：`backlog-liveness` 2 例、`staged-change-pairing` 6 例 + 真红录、`guard` 案例、`gates-smoke`。
+
+## 验收标准/修复判据` 非空；`note-format` 只查骨架；
   `guard-red-record` 只由「标题带 BUG-nnn」触发。散文规则 → 形态门，中间没有字段。
 - 实证（详见 research §2）：D51 这次真实链路有 **6 处违反自己的规则**而零门禁拦截——Note 在立项
   即写成 implemented、D51 禁兼容分支而代码保留散文回退、8 个冲突 bundle 未删未登 trigger、归档索引
@@ -87,7 +111,7 @@ HITL2 7 张、方法库 heading 一串）。三次独立审计（fresh-agent 冷
 
 ## 与已有载体的关系
 
-- 原则 = [D51](../../docs/decisions.md#d51) + [evaluation §判据形状](../../docs/evaluation.md#verdict-shape)；
+- 原则 = [D51](../../../docs/decisions.md#d51) + [evaluation §判据形状](../../../docs/evaluation.md#verdict-shape)；
   本卡只做「让原则有字段和门」，不改原则。
-- 证据 = [research](../research/workflow-substance/README.md)；
+- 证据 = [research](../../research/workflow-substance/README.md)；
 - 已两处修复（互斥散文 / 重复键）= `b64d170b`，负例在 `tests/run/readiness-declaration.test.mjs`。

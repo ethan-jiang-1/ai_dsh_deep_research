@@ -27,7 +27,7 @@
 // 录制：新角色或重录用 `node --import tsx/esm dev/record-role-fixture.mjs --role <r>`
 // （with-key 一次，之后 keyless 永久回放；录制品人审后入库，并在场景声明登记 source 身份）。
 //
-// 用法：source dev/env.sh && node scripts/smoke/snapshot-replay-smoke.mjs [--port 3103] [--update-expected] [--scenario <id>] [--face <name>]
+// 用法：source dev/env.sh && node scripts/smoke/snapshot-replay-smoke.mjs [--port 3103] [--update-expected --why <载体>] [--scenario <id>] [--face <name>]
 //   --scenario <id> 在每个选中场景集内都必须在场（缺席即 fail-loud exit 2，不静默缩场景）。
 // 红证（实录）：改 fixture 内一条 assistant 文本 → A 红；改 fixture persona/注入文本或工具 schema
 //   一词 → 对应 B 条红；改 fixture 一条 web_search 查询词 → C 红；各自还原 → 绿。
@@ -57,6 +57,11 @@ const PORT = Number(arg('port', '3103'));
 const ONLY = arg('scenario'); // --scenario <id> 单场景跑（红证定向/迭代用；缺省全场景）
 const FACE_ONLY = arg('face'); // --face <name> 定向单场景集（全名）；缺省 = 发现全部场景集逐场景跑
 const UPDATE_EXPECTED = process.argv.includes('--update-expected');
+const WHY = arg('why', null); // 金标准重录的理由载体（D52）：--update-expected 必带
+if (UPDATE_EXPECTED && (WHY === null || WHY.trim() === '')) {
+  console.error('snapshot-replay-smoke: --update-expected 必须带 --why <载体>（issue/Note/卡的仓内路径或 none）——金标准重录是合同变更，不许无理由重写');
+  process.exit(2);
+}
 const BOOT_TIMEOUT_MS = 120_000;
 const TURN_TIMEOUT_MS = 240_000;
 const RENDER_TIMEOUT_MS = 60_000;
@@ -505,7 +510,14 @@ for (const { face, scene } of SCENES) {
           ].join('\n');
           if (UPDATE_EXPECTED) {
             writeFileSync(EXPECTED, projection);
-            step(true, `[${face}/${sc.id}] C5 金标准已重写（--update-expected）`, `卡片 ${cardList.length} · 活动行 ${paneRows.length}——内容需人审后提交`);
+            // 重录理由随场景声明落盘（D52）：staged-change-pairing 门禁据此判「expected 变更有没有理由」。
+            try {
+              const sceneJson = join(REPLAY_ROOT, face, 'snapshot.json');
+              const manifest = JSON.parse(readFileSync(sceneJson, 'utf8'));
+              manifest.lastRewrite = { why: WHY, at: new Date().toISOString() };
+              writeFileSync(sceneJson, `${JSON.stringify(manifest, null, 2)}\n`);
+            } catch { /* 场景声明缺席：scene loader 已校验主文件，这里不阻塞重写 */ }
+            step(true, `[${face}/${sc.id}] C5 金标准已重写（--update-expected --why ${WHY}）`, `卡片 ${cardList.length} · 活动行 ${paneRows.length}——内容需人审后提交`);
           } else if (existsSync(EXPECTED)) {
             const expected = readFileSync(EXPECTED, 'utf8');
             const ok = expected === projection;

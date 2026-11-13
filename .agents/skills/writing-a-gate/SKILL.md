@@ -16,6 +16,7 @@ description: Use when adding, widening, or retiring a mechanical check in script
 
 - 能 → 门禁（`scripts/verify/gates/<域>.mjs`）或契约测试（`tests/`）；
 - 不能（需要读语境、权衡设计）→ 写进 owner 文档或 Skill，别造一条会漂移的假门禁。
+- 若门禁判的是散文/自由输入（不是结构字段）：先读 [_backlog/methods/judgment-design.md](../../../_backlog/methods/judgment-design.md)——结构化权威、歧义即红、不变量+变异矩阵；不要造 grep 门禁。
 
 选择了门禁就用 `fail()` 报**失败对象 + 违反的规则 + 修正入口**——下一次行动由可读的
 失败驱动，而不是从"检查失败"猜原因。

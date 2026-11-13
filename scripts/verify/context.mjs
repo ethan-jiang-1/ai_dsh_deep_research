@@ -44,7 +44,7 @@ export const gates = [
   'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'proposed-pointer-live',
   'vendor-pin', 'vendor-clean', 'pin-agreement', 'align-ledger', 'discipline-na-trigger', 'discipline-state-vocab', 'repo-conventions', 'vendor-links',
   'content-shape', 'dev-runtime-clean', 'overlay-fresh', 'release-version', 'dist-manual-version', 'dist-tarball', 'dist-manual-fresh',
-  'claude-symlink', 'secrets-untracked', 'dev-parity', 'host-paths', 'probe-registry', 'guard-red-record', 'gate-ledger-sync', 'entry-chain', 'backlog-liveness', 'port-exclusive', 'hooks-active',
+  'claude-symlink', 'secrets-untracked', 'dev-parity', 'host-paths', 'probe-registry', 'guard-red-record', 'gate-ledger-sync', 'entry-chain', 'backlog-liveness', 'staged-change-pairing', 'port-exclusive', 'hooks-active',
 ];
 
 // vendor/dsh 钉身份的 tag 面（commit 面 = vendor-pin 门禁的 PIN；pack-bundle-compat 消费它

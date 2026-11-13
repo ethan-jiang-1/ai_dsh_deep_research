@@ -41,6 +41,7 @@
   新检查先想清它是不是 keyless 契约证据再命名；支援件住 `lib/`、`fixtures/`（glob 之外，
   import 不注册测试）；
 - **verify the world**：断言重读文件或观察持久状态，不信"代码里已经设好了"；
+- **判据测试 = 不变量 + 变异矩阵**：被测对象是「从散文/自由输入里判一个值」时，覆盖缺/空/非法/互斥/旧形态/编码变体，断言「任何组合下不许悄悄选一个」；手写例子只算回归（方法 = [_backlog/methods/judgment-design.md](../_backlog/methods/judgment-design.md)）。
 - **新契约测试带反证**：同 diff 注入回归看红（改夹具 / 松判据 / 删断言）再还原——只交付绿 = 不知道测试会不会咬人；
   声称守卫具体事故（标题带 BUG-nnn）须留「负例留证/夹具留证」块（机械面 = `guard-red-record`）；
 - **改夹具先想红**：夹具语义由消费它的契约测试钉住（node-gate / schema-scan 的用例即永久反证

@@ -6,7 +6,7 @@ intent: 为 issue 2026-11-13-workflow-substance-gates 提供 fresh-agent 路径�
 # 三次独立审计：加工环路哪里只查形式、不查实体
 
 > 证据边界：三次审计均为只读（未改仓库）；两个 false-green 的复现命令与输出见 §1.4；链路违规的
-> 引文见 §2。消费者 = [_backlog/issues/2026-11-13-workflow-substance-gates.md](../../issues/2026-11-13-workflow-substance-gates.md)。
+> 引文见 §2。消费者 = [_backlog/_archived/settled_issues/2026-11-13-workflow-substance-gates.md](../../_archived/settled_issues/2026-11-13-workflow-substance-gates.md)。
 
 ## 1. 冷启动 fresh agent：路径、摩擦、两个假绿
 

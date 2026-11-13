@@ -4,9 +4,9 @@
     "AGENTS.md": "130→132（2026-09-29）：§入口链 增「用 vs 改」意图分流句——冷启动探针实证 4/4 fresh agent 在「启动这个插件」上必须反问，分流句是每轮在场的判据，下放不了。132→138（2026-10-04）：§布局补账——pack src/ 双半源码、research-workspace 的 NODES/判型库、_dist/、双 symlink 行、run 门脚本与 lib 全模块、骨架图声明行（fresh-agent-doc-audit 对账实证 22 条盘上实体不在地图；重项导航是每轮在场事实，下放无更深的家——布局就是它的家）。138→140（2026-10-07）：§布局增 runtime/ 行（两物理行）——运行态区外移根级（目录治理第二轮档 B，[毕业 Note](../notes/archived/2026-10-07-runtime-scripts-layout.md)）：源码驱动与 gitignored 运行区物理分离是每轮在场的布局事实，dev/ 行不再兼载运行区。",
     "README.md": "30→31（2026-09-29）：Start Here 增「想用它」意图入口（同上分流句的人类门面对应行）。31→60（2026-11-01 D38）：产品门面需要「用它 / 首屏 / 改它」三段 + 研发宪章；产品用户第一入口不能逼人去读 00-index 才知道怎么启动，dev 细节已下放 AGENTS/guides——升顶理由 = 产品门面是每轮用户第一入口。 60→80（2026-11-07 用户面向改版）：产品页需要 quickstart 命令块 + 第一次研究走查 + FAQ，开发面同时移出 README（约 28 行）——净增是用户路径；证据 = _backlog/_archived/settled_issues/2026-11-07-user-facing-readme-and-install-guide.md。",
     "scripts/AGENTS.md": "45→54（2026-10-04）：test-strategy 语料采纳——冒烟脚本可靠性纪律四条（verdict 契约/retry 白名单/等显式状态/释放到静默）+ 命名即层规则（后缀申报证据类型与档位/真模型档登记制 closed set）常驻该子树指令层；下放无更深的家（冒烟写作规则的家就是本文件），压缩已清重复条款（verbatim 重复的失败信息条款、范围纪律合并），余 9 行升顶。54→57（2026-10-10 预算处置轮）：全件为实测教训与机械合同（流程载 writing-a-gate 技能，本文件只记必须在场事实），无下放深家、压缩已清过——54 顶格使任何新教训必撞线，升至 57 留 5% 余量。",
-    "tests/AGENTS.md": "30→48（2026-10-20 用户指令 tests/ 分域）：域→源代码映射表 + 递归 glob 纪律是 fresh agent 每轮导航事实，下放无更深家；保留预算防再膨胀。48→50（2026-11-03）：新增 vendor/ 域行（vendor 源码契约不在默认 glob，跑 pnpm test:vendor）——fresh-clone 契约的一部分，无更深家。",
+    "tests/AGENTS.md": "30→48（2026-10-20 用户指令 tests/ 分域）：域→源代码映射表 + 递归 glob 纪律是 fresh agent 每轮导航事实，下放无更深家；保留预算防再膨胀。48→50（2026-11-03）：新增 vendor/ 域行（vendor 源码契约不在默认 glob，跑 pnpm test:vendor）——fresh-clone 契约的一部分，无更深家。 50→52（2026-11-13）：判据测试 = 不变量 + 变异矩阵——D51 的测试面判据，写在「写测试时」必读；细节下放 `_backlog/methods/judgment-design.md`，本文件只留一句。",
     "packages/deep-research-pack/AGENTS.md": "35→40（2026-11-01 D40）：content 注入/启动行/只读 doctor 取代 workspace 种子与 launcher/scaffold，子树布局与 smoke 义务必须逐项在场；下放无更深家（包子树指令的家就是本文件）。 40→43（2026-11-12）：界面文案 day-one 双语纪律——任何用户可见文本（chrome/折层/产品内容）必须 zh+en，canonical 内容经显示投影，模型面不翻译；该子树任何 UI 改动都要先看到，下放 design/40 不会在改组件前被读到。",
-    "notes/AGENTS.md": "50→52（2026-11-02）：backlog→notes 的写入时机/审查对账是跨子树合同——`待落地` 只选去向、`proposed` 毕业才进、skip 不写成 verified；三条分支缺一则提前写 Note 或把跳过写成验证，下放会断链。"
+    "notes/AGENTS.md": "50→52（2026-11-02）：backlog→notes 的写入时机/审查对账是跨子树合同——`待落地` 只选去向、`proposed` 毕业才进、skip 不写成 verified；三条分支缺一则提前写 Note 或把跳过写成验证，下放会断链。 52→54（2026-11-13）：判据类 Note 必须带 `## 判据形状`——毕业守卫；细节下放 judgment-design 方法，本文件只留一行。"
   },
   "AGENTS.md": 140,
   "_backlog/AGENTS.md": 48,
@@ -14,7 +14,7 @@
   "docs/00-index.md": 120,
   "docs/AGENTS.md": 85,
   "scripts/AGENTS.md": 57,
-  "notes/AGENTS.md": 52,
+  "notes/AGENTS.md": 54,
   "packages/deep-research-pack/AGENTS.md": 43,
-  "tests/AGENTS.md": 50
+  "tests/AGENTS.md": 52
 }

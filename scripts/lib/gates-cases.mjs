@@ -523,6 +523,10 @@ export const CASES = [
     const p = join(dir, 'tests', 'run', 'local-date.test.mjs');
     appendFileSync(p, "\ntest('探针：悬空编号 BUG-999', () => {});\n");
   } },
+  // D52：判据测试（*conformance*）即使标题不带 BUG 号，也必须给红配方。
+  { id: 'guard-red-record-conformance-no-block', gate: 'guard-red-record', mutate: (dir) => {
+    writeFileSync(join(dir, 'tests', 'contracts', 'probe-conformance.test.mjs'), "import test from 'node:test';\n\ntest('probe', () => {});\n");
+  } },
   // align-ledger 在副本基线**非 PASS**（vendor/dsh 是 gitlink submodule，副本不拷其内容 →
   // "vendor 里不存在"是副本环境的固有报因）。故两案例必须带 expect 指名"na 活性"报因，
   // 否则注入未生效也会因既有的 vendor 报因看到 FAIL 而假绿。
@@ -738,6 +742,7 @@ export const NO_CASE_GATES = [
   { gate: 'vendor-pin', reason: '断言对象 = submodule 钉身份（副本不含 submodule 内容，基线即红）' },
   { gate: 'vendor-clean', reason: '断言对象 = submodule 的 git status（副本无此仓库）' },
   { gate: 'pin-agreement', reason: '真串读取在 submodule 一步 fail-loud，注入的伪串永不到达扫描步' },
+  { gate: 'staged-change-pairing', reason: '断言对象 = git 暂存区；gates-smoke 的注入副本不建立暂存索引，副本基线无对象' },
   { gate: 'hooks-active', reason: '断言对象 = 本机 git config core.hooksPath（副本 git init 后本就未设）' },
   { gate: 'dist-tarball', reason: '断言对象 = gitignored _dist 制品；gates-smoke 副本不含 tarball，注入 sha 漂移会落缺席 note 分支' },
 ];
