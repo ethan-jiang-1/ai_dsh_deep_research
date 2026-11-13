@@ -273,6 +273,16 @@ W3-6 D53 + Note（全卡收口）
   `scripts/README` smoke 表加字段说明；`evaluation` §L0 登记。红证：删一条 oracle → 红；
   oracle 改不存在路径 → 红；`none` 理由太短 → 红；还原 → 绿。实跑：`pnpm test` 1425/0、
   `pnpm verify` 全绿。未跑：慢档/真模型。
+- **2026-11-13 Wave 0 W0-6（client dispose，形状半 + 行为面阻断）**：新增
+  `tests/contracts/client-effect-return.test.mjs`——用 TypeScript AST 断言 `src/client/index.ts`
+  每个 `scoped.effect(callback)` 的 block body 都有 `return`（expression body 视为返回），
+  防空语料 ≥10 个 effect。红证 = 把 `installQuestionCardNarrowFix` 的 effect 改成
+  `() => { install... }`（丢 return）→ 红；还原 → 绿。**行为面（apply(fakeCtx) → dispose →
+  贡献消失）未落地**：client 半在默认 `node:test` 里不能直接 import（`.css` + 浏览器 API）；
+  已 spike 出 CSS stub 可 import，但 fake ctx 需覆盖 locale/remote/slots/sidebarRight/
+  localStorage 等整条装配面，成本 > 本轮。**触发 = W3 L 的 hook/DOM harness**；当前覆盖 =
+  本形状契约 + `client-effect-wrap` 门禁 + `client-load` 真浏览器。实跑：`pnpm test` 1426/0、
+  `pnpm verify` 全绿。
 
 ## 关闭条件
 
