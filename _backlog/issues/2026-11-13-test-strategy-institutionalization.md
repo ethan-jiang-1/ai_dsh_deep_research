@@ -323,6 +323,7 @@ W3-6 D54 + Note（全卡收口）
 - **2026-11-13 Wave 1 W1-4（装起 + 效果）**：`lifecycle.entry` 探针从装起的 tarball import `content`/`startup`/`defaults`，用 fake ctx 调 `apply`：断言 `research_pack_root`/`research:manual` 注册、startup 真登记工作区、defaults 注册 `research:defaults` context + `/research-defaults` 命令，三者均返回 disposer；实跑 **ALL PASS（25 项）**。
 - **2026-11-13 Wave 3 W3-6（D54 + Note）**：升 [D54](../../docs/decisions.md#d54)「测试制度 = 三环四账五关」+ [implemented Note](../../notes/implemented/2026-11-13-test-strategy-operating-model.md)；`guides/67` 为操作手册；`decisions-now` 扩到 D1–D54 并加 D54 锚点/手册/Note 断言；台账 32,725 bytes（硬顶 32,768），压缩 D44/D40 换空间。实跑 checks 101/0、verify 绿。
 - **2026-11-13 Wave 1 W1-3（角色面）**：`snapshot.json` 增 `roleFace`（显式角色面；缺省 = 研究四角色），consumer 用 `presetRoles()` 作允许集、按 `roleFace` 对账；`research-face` 增 `method-editor` case，从 `record-home` fresh profile 重录（首次 dev-home 录制 runtime-context 漂移 → 按 W1-2 纪律换 fresh profile 重录）。实跑 5 角色 A+B 全 PASS；`replay-scene.spec` 15/0；CI snapshot job 自动覆盖第 5 角色。
+- **2026-11-13 Wave 0 W0-6（触发条件登记）**：hook/DOM 行为面暂缓，静态 `client-effect-return` 已钉「effect 回调必须返回 disposer」；真实回收/组件行为 harness 的触发条件已落 [`_backlog/triggers.md`](../triggers.md)（effect 返回 disposer 但真实挂载不回收，或引入 DOM harness 时）。
 
 ## 关闭条件
 
