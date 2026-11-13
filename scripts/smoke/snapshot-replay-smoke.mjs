@@ -27,7 +27,7 @@
 // 录制：新角色或重录用 `node --import tsx/esm dev/record-role-fixture.mjs --role <r>`
 // （with-key 一次，之后 keyless 永久回放；录制品人审后入库，并在场景声明登记 source 身份）。
 //
-// 用法：source dev/env.sh && node scripts/smoke/snapshot-replay-smoke.mjs [--port 3103] [--update-expected --why <载体>] [--scenario <id>] [--face <name>]
+// 用法：source dev/env.sh && node scripts/smoke/snapshot-replay-smoke.mjs [--port 3103] [--read-only] [--update-expected --why <载体>] [--scenario <id>] [--face <name>]
 //   --scenario <id> 在每个选中场景集内都必须在场（缺席即 fail-loud exit 2，不静默缩场景）。
 // 红证（实录）：改 fixture 内一条 assistant 文本 → A 红；改 fixture persona/注入文本或工具 schema
 //   一词 → 对应 B 条红；改 fixture 一条 web_search 查询词 → C 红；各自还原 → 绿。
@@ -46,6 +46,7 @@ import { compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds
 import { SMOKE_LOCALE, loadChromium, launchChromium } from '../lib/playwright.mjs';
 import { profileLayerIssues, runtimeVersionOf } from '../lib/profile-health.mjs';
 import { acquireRunLock, releaseRunLock } from '../lib/run-lock.mjs';
+import { resolveSnapshotMode } from '../lib/snapshot-mode.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {
@@ -56,12 +57,10 @@ const argvOf = (i) => process.argv[i + 1];
 const PORT = Number(arg('port', '3103'));
 const ONLY = arg('scenario'); // --scenario <id> 单场景跑（红证定向/迭代用；缺省全场景）
 const FACE_ONLY = arg('face'); // --face <name> 定向单场景集（全名）；缺省 = 发现全部场景集逐场景跑
-const UPDATE_EXPECTED = process.argv.includes('--update-expected');
-const WHY = arg('why', null); // 金标准重录的理由载体（D52）：--update-expected 必带
-if (UPDATE_EXPECTED && (WHY === null || WHY.trim() === '')) {
-  console.error('snapshot-replay-smoke: --update-expected 必须带 --why <载体>（issue/Note/卡的仓内路径或 none）——金标准重录是合同变更，不许无理由重写');
-  process.exit(2);
-}
+let snapshotMode;
+try { snapshotMode = resolveSnapshotMode({ argv: process.argv, env: process.env }); }
+catch (error) { console.error(`snapshot-replay-smoke: ${error.message}`); process.exit(2); }
+const { updateExpected: UPDATE_EXPECTED, why: WHY } = snapshotMode;
 const BOOT_TIMEOUT_MS = 120_000;
 const TURN_TIMEOUT_MS = 240_000;
 const RENDER_TIMEOUT_MS = 60_000;

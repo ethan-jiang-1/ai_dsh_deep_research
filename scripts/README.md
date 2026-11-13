@@ -149,6 +149,7 @@
 | lib/direct-authorization-boundary.mjs | entry-chain-probe、entry-chain-probe.test | 按授权范围执行、无需重复请批的词面判定；由探针与 keyless 回归消费 |
 | lib/replay-scene.mjs | replay-scene.test、snapshot-replay-smoke | 场景声明消费者：roster/版本/来源形状/路径校验（缺件、串角色、垃圾锚点 fail-loud）+ 场景集发现（`replay/*/snapshot.json` 全集、防空语料、--face 全名定向） |
 | lib/replay-request.mjs | record-role-fixture、replay-request.test、snapshot-replay-smoke | 组装请求面逐条比较：persona、header 全序列、四处 user/message 注入（含时钟序列）（定向归一化） |
+| lib/snapshot-mode.mjs | snapshot-readonly.test、snapshot-replay-smoke | 快照 smoke 模式判据：只读/刷新互斥、`DSH_SNAPSHOT` 只认 replay、刷新必须 `--why` |
 | lib/profile-health.mjs | profile-health.test、record-role-fixture、snapshot-replay-smoke、team-preflight-smoke | dev profile 版本面预检：团队层版本 == 运行时 dsh 版本；缺席/落后 → 明确 exit 2 + 重建指令（BUG-066） |
 | lib/startup-hint.mjs | startup-hint.test、web-harness | boot 失败归因：识别日志里的 incompatible/exemption，指出 profile 未随 pin 重钉（BUG-066） |
 | lib/client-load-select.mjs | client-load-reference、client-load-select.test | client-load 绑定会话选择（只认 lead 根；防富 coach 会话假红，BUG-142） |

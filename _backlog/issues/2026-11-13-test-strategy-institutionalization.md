@@ -283,6 +283,13 @@ W3-6 D53 + Note（全卡收口）
   localStorage 等整条装配面，成本 > 本轮。**触发 = W3 L 的 hook/DOM harness**；当前覆盖 =
   本形状契约 + `client-effect-wrap` 门禁 + `client-load` 真浏览器。实跑：`pnpm test` 1426/0、
   `pnpm verify` 全绿。
+- **2026-11-13 Wave 1 W1-1（快照只读）**：抽出 `scripts/lib/snapshot-mode.mjs`（纯判据核）：
+  默认回放；`--read-only` / `DSH_SNAPSHOT=replay` → 只读；`--update-expected` 必带非空
+  `--why`；只读与刷新互斥；`DSH_SNAPSHOT` 只认 `replay`（record/refresh 不走本脚本）。
+  smoke 壳改为消费该纯函数（脚本从 559 行降到 544 行，过 `script-file-size`）；新增
+  `tests/contracts/snapshot-readonly.test.mjs` 直测判据核。红证 = 去掉互斥分支 → 红；还原 → 绿。
+  CLI 实测：双 flag / `DSH_SNAPSHOT=record` / `replay + --update-expected` 均 exit 2。
+  实跑：`pnpm test` 1427/0、`pnpm verify` 全绿。未跑：真回放（W1-2 的 CI job）。
 
 ## 关闭条件
 
