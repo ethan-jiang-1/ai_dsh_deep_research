@@ -14,20 +14,20 @@ D40 已退役的 `workspace/seed.json` 不再出现。
 
 产物边界改为归档根锚定：`runtime/` 与 `research-workspace/` 只禁 `sessions` / `drt_*` 形态，
 `tests/fixtures` 里的同名样本与 `runtime` 的 tracked 骨架（README / `.gitkeep`）不再被误判为运行数据。
-`handoff-smoke` 改为 import 同一组常量，断言 HANDOFF 命令与边界；registry 从 `dev-only` 升为
+`handoff.e2e` 改为 import 同一组常量，断言 HANDOFF 命令与边界；registry 从 `dev-only` 升为
 `ci/keyless`，`.github/workflows/ci.yml` 的 keyless job 真跑它。
 
 ## 输掉的方案
 
 - **恢复 `workspace/seed.json`**：违反 D40 与 `content-shape`，并把已退役内容种子带回模型可见面。
 - **只改 must 字面量、保留 `git submodule update --init`**：tar 里没有 `.git`，接收方第一步就失败。
-- **只修脚本、不接消费者**：`handoff-smoke` 上次就是这样腐的（脚本与 smoke 互相确认旧契约，CI 从不执行）。
+- **只修脚本、不接消费者**：`handoff.e2e` 上次就是这样腐的（脚本与 smoke 互相确认旧契约，CI 从不执行）。
 - **换成 `git bundle`**：能得 `.git`，但 M3 的既有产物与文档是 tar，接收方也未必有 git；
   HANDOFF 的两条路径同时覆盖有/无 git。
 
 ## 实际跑过的验证
 
-- `node scripts/smoke/handoff-smoke.mjs` → `ALL PASS`（产物边界、边界判据两向自检、HANDOFF 可读、
+- `node scripts/smoke/handoff.e2e.mjs` → `ALL PASS`（产物边界、边界判据两向自检、HANDOFF 可读、
   `git init` / `git fetch origin` / `git reset --hard` / `git submodule update --init --recursive` /
   `pnpm install --frozen-lockfile` 命令在场）。
 - `node scripts/dist/export-handoff.mjs --out /tmp/dsh-handoff-check` → exit 0；产物含

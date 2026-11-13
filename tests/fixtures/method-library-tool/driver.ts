@@ -182,7 +182,7 @@ async function main(): Promise<void> {
     assert(!persisted.includes('〔默认偏好〕'), 'clear-default left a marker')
 
     process.stdout.write(`${JSON.stringify({
-      type: 'method-library-tool-smoke',
+      type: 'method-library-tool.e2e',
       checks: checkCount,
       methodToolSchemaTokenEstimate: { before: previousToolTokens, after: currentToolTokens, delta: currentToolTokens - previousToolTokens },
       firstTurnInputTokenEstimate: { before: previousSchemaFirstTurnTokens, after: currentFirstTurnTokens, messageTokens: firstTurn.messageTokens, delta: currentFirstTurnTokens - previousSchemaFirstTurnTokens },

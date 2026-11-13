@@ -2,7 +2,7 @@
  * orchestrate.ts —— 抓取回退的**两腿编排**（D31）：本地 → API 的决策流，依赖全注入。
  *
  * 零 vendor 运行时依赖：provider 实例、凭据解析、时钟、deadline、错误构造都由
- * `src/fetch-fallback/index.ts` 注入；keyless 回归（tests/pack/fetch-fallback.test.mjs）
+ * `src/fetch-fallback/index.ts` 注入；keyless 回归（tests/pack/fetch-fallback.spec.mjs）
  * 用假腿覆盖"什么情况回退 / 什么情况绝不回退 / 两腿失败怎么报"。
  */
 

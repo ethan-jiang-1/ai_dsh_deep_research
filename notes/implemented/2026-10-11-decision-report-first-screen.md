@@ -25,7 +25,7 @@ P0 候选③「结论可信度可判断」）。
 6. 落面：[final.md 模板](../../packages/deep-research-pack/content/templates/run/final.md) · synthesis skill
    第 3 步 + 判据 + 反模式 · adversarial-review skill 线 5 + 判据清单 · pack README
    「研究怎么跑」§3 · [样例集](../../research-workspace/drafts/2026-10-11-decision-report-samples.md)
-   （四组虚构样例 + 刻意反例）；契约钉 = `tests/pack/presets.test.mjs`「报告首屏决策摘要」。
+   （四组虚构样例 + 刻意反例）；契约钉 = `tests/pack/presets.spec.mjs`「报告首屏决策摘要」。
 
 ## 输掉的方案
 
@@ -40,10 +40,10 @@ P0 候选③「结论可信度可判断」）。
 
 ## 实际跑过的验证
 
-- 立红：`tests/pack/presets.test.mjs` 新断言先红（「final.md 模板缺首屏节：决策摘要」实录）→
+- 立红：`tests/pack/presets.spec.mjs` 新断言先红（「final.md 模板缺首屏节：决策摘要」实录）→
   实现转绿（focused 12/12）；
 - L0：verify 全绿 + tests 339/339（净 +1）；
-- L1：preset-smoke 真挂载四 preset ALL PASS；
+- L1：preset.e2e 真挂载四 preset ALL PASS；
 - L4-lite：四角色 assistant 响应 + scout web_search ALL PASS；
 - 回放面：snapshot-replay 4 场景 ALL PASS——**零重录**：skill 正文不进组装请求、persona
   与 skill description 未动，B 层组装面无漂移（与 2026-10-11 业务简报变更的 persona 重录

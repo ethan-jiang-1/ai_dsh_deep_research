@@ -1,6 +1,6 @@
 # verdict-audit — 真实 child 会话线形夹具
 
-消费方 = [verdict-audit-fixture.test.mjs](../../run/verdict-audit-fixture.test.mjs)（keyless；默认回归）。
+消费方 = [verdict-audit-fixture.spec.mjs](../../run/verdict-audit-fixture.spec.mjs)（keyless；默认回归）。
 资产来源 = claim 级裁决试点 A 的一次**真实 critic child** 会话 + 它对应的 bundle 工件。
 
 ## 为什么冻结这一份

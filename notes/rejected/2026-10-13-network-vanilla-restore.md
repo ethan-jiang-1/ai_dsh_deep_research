@@ -18,7 +18,7 @@
 - egress 三态探针：`dev/egress-probe.mjs` + `scripts/lib/egress.mjs`（boot-run 判定分支）
 - 自旋本地转发代理：`dev/egress-proxy.mjs` + `scripts/lib/egress-proxy.mjs`（缺省端口 14200）+
   `scripts/smoke/egress-proxy-smoke.mjs`（boot-run TUN 出口分支 + `DSH_EGRESS_OUTLET` 覆盖）
-- `tests/egress-probe.test.mjs`（探针契约测试）
+- `tests/egress-probe.spec.mjs`（探针契约测试）
 - MCP Playwright 启动参数 `--proxy-server direct:// --proxy-bypass *`（浏览器网络改为继承环境）
 - 运行态残留：research profile patch 里的 proxy 参数、`runtime/smoke-workspace/forward-proxy.mjs`
   （10-07 排障一次性脚本）
@@ -51,7 +51,7 @@ store/cache 钉定与 `npm_config_cache`（磁盘卫生，不改网络路由）�
 
 ## 实际跑过的验证
 
-- `node scripts/smoke/gates-smoke.mjs` / `pnpm verify` / `pnpm test` / `DSH_RUN_PORT=<空闲口> bash
+- `node scripts/smoke/gates.e2e.mjs` / `pnpm verify` / `pnpm test` / `DSH_RUN_PORT=<空闲口> bash
   dev/boot-run.sh --drift-check` 全绿（同 diff 实跑；门禁面无增删——port-exclusive 认领随文件删除自然退场）
 - 残留实测清零：活面（dev/scripts/tests/packages/docs/根 AGENTS）`egress|proxy` 检索仅剩历史层
   （notes/、`_backlog/_archived/`）与 triggers 的防复犯行；`lsof -iTCP:14200` 无监听；research

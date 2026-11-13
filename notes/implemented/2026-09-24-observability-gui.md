@@ -38,7 +38,7 @@
   （谓词：从尾扫跳过 session/* 元数据后，末位回合事件 = 未答的 ask_user_question——v4 修正：
   0.1.7 自动命名 session/title 落在 ask 之后）+ keyless 单测 7 断言 + 测试基建切
   `node --import tsx/esm --test`（测试可吃 src/lib 的 TS 折算，三处同 diff）+
-  `client-hitl-smoke`（真模型档：RPC followup 既有交付会话造挂起态，盘侧谓词与页签共用
+  `client-hitl.entry`（真模型档：RPC followup 既有交付会话造挂起态，盘侧谓词与页签共用
   同一 fold；实测真模型真实调 ask 且挂起、盘侧命中）。
 
 ## 实际跑过的验证（马拉松档，全部实跑）
@@ -46,9 +46,9 @@
 | 面 | 结果 |
 |---|---|
 | L0 | 25 门禁 + 35 tests 全绿 |
-| client-load-smoke | **ALL PASS 7/7**：零失败横幅 / 无 loader entry 失败 / client bundle 进 /plugins/ 批次 / 既有会话在场 / guide 胶囊在场 / 页签渲染 / **journal 真数据（331 事件）** |
-| client-hitl-smoke | 盘侧全证：真模型真实调 ask_user_question 且挂起（多会话末位实证）+ 谓词命中 + 标题提取；浏览器端到端翻转为**观察点**（截图留档） |
-| 收尾链 | L1 真挂载 / L2 release-smoke / L4-lite / team-preflight / entry-chain-probe 全 ALL PASS |
+| client-load.entry | **ALL PASS 7/7**：零失败横幅 / 无 loader entry 失败 / client bundle 进 /plugins/ 批次 / 既有会话在场 / guide 胶囊在场 / 页签渲染 / **journal 真数据（331 事件）** |
+| client-hitl.entry | 盘侧全证：真模型真实调 ask_user_question 且挂起（多会话末位实证）+ 谓词命中 + 标题提取；浏览器端到端翻转为**观察点**（截图留档） |
+| 收尾链 | L1 真挂载 / L2 release.entry / L4-lite / team-preflight / entry-chain-probe 全 ALL PASS |
 | 主线 | research profile 重建到最终 pack（漂移绿），web 3081 实测可用 |
 
 ## 未完成部分（如实，时间盒边界）

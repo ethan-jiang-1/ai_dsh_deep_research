@@ -25,7 +25,7 @@
 - **生成索引**：`scripts/lib/probe-index.mjs` 纯函数（递归扫描/解析/按域渲染）+ `probes/_index.mjs`
   （`--write` / `--check`）；`probes/INDEX.generated.md` 按域分组并带域计数，头注是唯一事实源。
 - **门禁**：`probe-registry`（f-repo）查头注六字段 + 索引字节一致 + `probes/README` 链接索引；
-  零探针即红。登记 = `context.gates` + evaluation §L0 + `gates-smoke` 案例
+  零探针即红。登记 = `context.gates` + evaluation §L0 + `gates.e2e` 案例
   `probe-registry-missing-header`。
 - **回忆层**：`docs/guides/66-probe-playbook.md`（定义/选择/新增/证据/边界）、
   `.agents/skills/using-a-probe/SKILL.md`（description 每轮进目录）、根 `AGENTS.md` 布局独立一行 +
@@ -42,7 +42,7 @@
 **前置适配（实跑发现）**：无参实跑四支行为探针时，ambient `DSH_HOME=~/.dsh` 让它们 boot 平台
 home 后以 exit 1 崩——违反「未 source 自拒 exit 2」。加 `isDevHome` / `requireDevHome`
 （`env.mjs`）：只认 `runtime/harness-home` 或 `DSH_DEV_HOME` 隔离实例；ambient 平台 home → exit 2
-自拒，不 boot。直测 = `tests/run/env-credentials.test.mjs`。
+自拒，不 boot。直测 = `tests/run/env-credentials.spec.mjs`。
 
 ## 输掉的方案
 
@@ -64,12 +64,12 @@ home 后以 exit 1 崩——违反「未 source 自拒 exit 2」。加 `isDevHom
   根 `AGENTS.md` 140/140 行）。
 - `pnpm test`：**1100/1100 通过**（含 `smoke-contract` 双区闭集、`navigability` lib 消费图、
   `layering` 驱动面禁令、`probe-index` 纯函数直测）。
-- `node scripts/smoke/gates-smoke.mjs`：**全绿**（零注入对照组 + 107 个注入案例均点名报红）；
+- `node scripts/smoke/gates.e2e.mjs`：**全绿**（零注入对照组 + 107 个注入案例均点名报红）；
   新案例 `probe-registry-missing-header` 单独跑绿。
 - `node probes/_index.mjs --check`：一致（六支）。
 - **红证（索引失鲜）**：临时在 `INDEX.generated.md` 末尾加一行 → `verify --only=probe-registry`
   报 `probes/INDEX.generated.md 与目录不一致`（exit 1）；还原 → `--check` 绿。
-- **红证（缺头注）**：`gates-smoke --case=probe-registry-missing-header` 删 `cdp-probe` 的
+- **红证（缺头注）**：`gates.e2e --case=probe-registry-missing-header` 删 `cdp-probe` 的
   `何时跑` → 门禁点名红；案例组绿。
 - **冷读**：fresh-context agent 只看根目录 + `AGENTS.md` + `00-index.md` → PASS：能指出根
   `probes/`、索引、指南与「单点机制用探针」。当时的缺口 = 两份入口只有泛化「模型行为」，

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // record-role-fixture.mjs — 角色组装面 fixture 录制工具（dev 工具态，非检查——命名语法不覆盖）。
-// 为 snapshot-replay-smoke 的多场景化录制 per-role canned 会话：boot research 档（真模型档，
+// 为 snapshot-replay.entry 的多场景化录制 per-role canned 会话：boot research 档（真模型档，
 // 需 DEEPSEEK_API_KEY）→ 以 <role> preset 建会话 → 发角色探针 prompt（含哨兵指令）→ 等回合
 // 落定（哨兵出现在 **assistant 文本** + 日志静默）→ 解压会话日志写 fixture（人审后入库；
 // 场景声明由人登记）。哨兵只认 assistant 文本：prompt 原文自带「探针完成」字样，全文 grep
@@ -8,7 +8,7 @@
 // 实录 6 连 MALFORMED_RESPONSE 的死回合被旧判据误收，折算层（缺 assistant 文本）才咬住。
 // 录一次，之后 keyless 永久回放（B 层组装请求 diff 钉 persona 全文 + 工具 schema）。
 // ⚠ 副作用自知：每次录制在 dev home 会话组留一段一次性探针会话（事件数只有真实 run 的
-// 零头）——量大后会污染 client-load-smoke 的绑定窗（实红教训），按标题前缀
+// 零头）——量大后会污染 client-load.entry 的绑定窗（实红教训），按标题前缀
 // 「用一两句话说明你作为」定期清理即可。
 // 2026-10-18 实红复现与清理补充：生成式标题**会多次更新**，按"首个 title 事件"匹配会漏（我第一轮
 // 清理就漏了）；清理脚本要按**全部** `"title":"…"` 事件任一命中来判，另把「渐进面探针会话」「探针会话…」
@@ -123,7 +123,7 @@ const recordOnce = async () => {
     const logOf = (sid) => join(SESSIONS, group, sid, 'session.v4.jsonl.zstd')
     const readLog = (log) => { try { return execSync(`zstd -dc "${log}" 2>/dev/null`, { maxBuffer: 64 * 1024 * 1024 }).toString('utf8') } catch { return null } }
     // 哨兵只认 assistant 文本 + 等日志静默（死回合防误收，2026-10-13）。判据正本 =
-    // lib/replay-request（BUG-030 起与 snapshot-replay-smoke A 层同源，不再各持一份）。
+    // lib/replay-request（BUG-030 起与 snapshot-replay.entry A 层同源，不再各持一份）。
     let logText = null
     let lastSize = -1
     let quietRounds = 0
@@ -178,4 +178,4 @@ writeFileSync(join(OUT_DIR, 'session.v4.jsonl'), logText)
 // 填进对应 case——smoke 会因 case 集 ≠ 盘上 presets/ 而 fail-loud，漏登记不会静默通过。
 const rel = ROLE === 'lead' ? 'session.v4.jsonl' : `${ROLE}/session.v4.jsonl`
 console.log(`  已写 ${OUT_DIR}/session.v4.jsonl——请在 snapshots/replay/research-face/snapshot.json 登记 case「${ROLE}」（fixture: ${rel} + 录制身份），人审后入库（git add）。`)
-if (ROLE === 'lead') console.log('  C 金标准刷新 = snapshot-replay-smoke --update-expected + 人审。')
+if (ROLE === 'lead') console.log('  C 金标准刷新 = snapshot-replay.entry --update-expected + 人审。')

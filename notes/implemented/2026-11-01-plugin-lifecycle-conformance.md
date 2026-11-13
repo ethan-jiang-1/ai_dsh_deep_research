@@ -19,7 +19,7 @@
 - **保留 `dsh.compatibility` 并在 README 里解释它是"兼容矩阵镜像"**：解释不能让它被读；多一个自造字段就多一处与 `engines.dsh` 打架的真相。删掉，基线搬进测试。
 - **丢掉 `bin` 用 `node …/doctor.mjs`**：少一个副作用，但用户/排障脚本要记长路径；doctor 是只读入口，保留更实用，代价（`.bin` 一行）写进手册。
 - **让市场条目指向 git+commit**：格式允许，但本包 git 树没有 `lib/`，装完无法构建；等于发布一个装不上的条目。
-- **把 `parseMarketIndex` 放进 L0 门禁**：L0 是零依赖层（fixture 无 `node_modules`），import workspace 校验器会让门禁在副本里加载失败；改为 L0 判结构 + 与包清单一致，真校验归 `lifecycle-smoke`。
+- **把 `parseMarketIndex` 放进 L0 门禁**：L0 是零依赖层（fixture 无 `node_modules`），import workspace 校验器会让门禁在副本里加载失败；改为 L0 判结构 + 与包清单一致，真校验归 `lifecycle.entry`。
 - **把工作区设置迁到 profile patch（`Config.volatile`）**：要迁移旧 `settings.json` + 处理多 profile 共享语义，收益不抵风险；保留自有 store，补优先级与迁移边界。
 - **在 Host 侧自造显示标题**：DSH 的显示面只认 locale/icon 导出，自造等于再发明一套。
 
@@ -28,11 +28,11 @@
 - **显示面（T）**：探针 bundle 在 scratch profile 里调 DSH 的 `readPluginMeta`，四个 specifier 都拿到 `{en, zh}` 标题/描述与 `data:image/svg+xml` 图标，无 error。
 - **市场（T）**：`parseMarketIndex` 通过；静态服务 + `pluginMarket.search` 返回条目（title/描述/图标/defaultVersion/`install.spec`/`compatibility.compatible: true`），`entry` 命中。
 - **registry 端到端（T）**：本地 Verdaccio 上 `npm publish` 0.3.0 → `npm view` 读到 `engines.dsh` → 市场条目算出的 `dsh-deep-research-pack@0.3.0` 在全新 scratch home 安装成功、roster 三项。
-- **L0 门禁**：`pack-manifest` / `market-index` / `readme-shape` 全绿；注入案例在 `gates-smoke` 点名红后还原绿（`pack-manifest-invented-key` / `market-index-version-drift` / `readme-shape-no-frontmatter` / `readme-shape-no-profile-bootstrap` / `readme-shape-profile-after-plugins`）。
-- **文档合同测试**：`tests/run/run-driver-contract.test.mjs` 增加「产品行含 Plugins 页」断言；临时去掉 00-index 的 Plugins 页 → 红（`00-index 产品行没有把 Plugins 页写成装包入口`），还原 → 绿。
+- **L0 门禁**：`pack-manifest` / `market-index` / `readme-shape` 全绿；注入案例在 `gates.e2e` 点名红后还原绿（`pack-manifest-invented-key` / `market-index-version-drift` / `readme-shape-no-frontmatter` / `readme-shape-no-profile-bootstrap` / `readme-shape-profile-after-plugins`）。
+- **文档合同测试**：`tests/run/run-driver-contract.spec.mjs` 增加「产品行含 Plugins 页」断言；临时去掉 00-index 的 Plugins 页 → 红（`00-index 产品行没有把 Plugins 页写成装包入口`），还原 → 绿。
 - **契约测试**：`config-volatile`（删 `.volatile()` 即红，红录已跑）、`startup` 优先级新增用例；`presets` 改为判 `dsh.*` 白名单与 `engines.dsh` 基线覆盖。
 - **团队层开关（C）**：`setBundleEnabled` → `selectBundle` 只写 `dsh.profile.bundles`（启用追加、停用移除，保留顺序与已装依赖），`saveManifest` 原子写；CLI 没有等价开关命令。
-- **L2**：`lifecycle-smoke` ALL PASS（索引校验、tarball 无 sourcemap、11 行 dump、真启动无降级、四行显示面、remove 后 roster 回落）。
+- **L2**：`lifecycle.entry` ALL PASS（索引校验、tarball 无 sourcemap、11 行 dump、真启动无降级、四行显示面、remove 后 roster 回落）。
 
 ## 残余风险
 

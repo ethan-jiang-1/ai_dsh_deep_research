@@ -39,15 +39,15 @@
 | No hardcoded tunables（部署可变量必须是 config 字段） | preset 工具行 config（tool-todo allowParallelInProgress、tool-web 超时）皆声明为 config；层版本钉在运行中 dsh 的 exact 版本 | 带证据适配（载体 = cordis 行 config 而非代码 Config 类型） |
 | TODO 标记分级（FIXME/TODO/XXX 按紧急度） | 沿用（仓内出现时按此分级） | 照搬 |
 | Record externally perceptible breaking changes in an upgrade guide（对外可感知破坏面在其引入的变更内即写 `docs/upgrade-guide/`；0.2.0 新增） | 本仓 pack private、无下游消费者；换 pin 的迁移与重审结论由升 pin Note 承载 | 不适用（对外分发/发布 pack 时重估） |
-| Source plane vs artifact plane, never mixed（静态测试走 src，吃构建产物的测试声明依赖） | L1 双通道：preset-smoke 源码域（overlay 指 src）+ 安装域（plugin add 正式路径）；根 tsconfig 门面 = 源码面解析 | 带证据适配（两平面在本仓 = 源码域/安装域两通道，D14） |
+| Source plane vs artifact plane, never mixed（静态测试走 src，吃构建产物的测试声明依赖） | L1 双通道：preset.e2e 源码域（overlay 指 src）+ 安装域（plugin add 正式路径）；根 tsconfig 门面 = 源码面解析 | 带证据适配（两平面在本仓 = 源码域/安装域两通道，D14） |
 | Design each tool's UI presentation up front（呈现先于实现设计） | 观察面确实先设计后实现：run-dashboard 走 RFC；debug-dashboard-plus 无独立 RFC（该文档名悬空，实际随 [observability-gui](../notes/implemented/2026-09-24-observability-gui.md) 落地）。preset persona/skill 是工具的行为呈现面（先定稿文本再挂载），但「R1 起逐角色先定稿」在 R1 scaffold Note 中无记载——属事后归纳，不是当时纪律 | 带证据适配（呈现面 = 观察面的先设计兑现；persona 侧是归纳而非既成纪律） |
 | Plan unit/e2e/snapshot coverage for seams | evaluation.md 五面合同（L0–L4）先于框架定案（D6） | 带证据适配 |
-| Registrations are effects（一切贡献走 ctx.effect，register 返回 disposer） | client 面 `src/client/index.ts`：四处注册全量 `scoped.effect(...)` 包裹（页签类型 `sidebarRightTabs.register` / 页签槽体 / 活标题槽体 / 工具卡循环逐 key `slots.inject`） | 照搬（D18 后本仓有自写 cordis 插件代码；证据 = 门禁 `client-effect-wrap` 全量断言 + `client-load-smoke` 真浏览器挂载断言） |
+| Registrations are effects（一切贡献走 ctx.effect，register 返回 disposer） | client 面 `src/client/index.ts`：四处注册全量 `scoped.effect(...)` 包裹（页签类型 `sidebarRightTabs.register` / 页签槽体 / 活标题槽体 / 工具卡循环逐 key `slots.inject`） | 照搬（D18 后本仓有自写 cordis 插件代码；证据 = 门禁 `client-effect-wrap` 全量断言 + `client-load.entry` 真浏览器挂载断言） |
 | ~~Runtime invariants assert owned relationships~~（invariant 包规则） | **vendor 0.2.1 已删除**该条与布局行 `runtime-diagnostics/`，`packages/` 下亦无 invariant 组——本仓无需落点。**复活条件** = 上游恢复 invariant 包族 | 不适用（上游已移除——2026-10-19 复核：pin 0.1.7 有该条、0.2.1 零命中；**复活条件**：上游恢复 invariant 包族时） |
 | Typed events / declaration merging / assertNever / waterfall next() / branded ids / Trust TypeScript / explicit request-spec split | TS 面（`src/client/` 观察面 + `src/lib/` 折算）只**消费** vendor 的声明合并类型（`import type {} from '@deepseek-ai/dsh-*/client'`），不 author 会话事件、不注册服务或 waterfall 监听器、无跨边界自持 id、无 request/spec 默认化面 | 不适用（无对应机制面；本仓开始 author 事件或服务时重估） |
 | Keep compiler faces explicit（host/client 各出叶配置，根仅 solution） | `packages/deep-research-pack/tsconfig.host.json` · `tsconfig.client.json` 两叶（各自拉不同的 Context 类型增强）+ solution-only 根 `tsconfig.json`（`files: []` + references）；构建 = `tsc -b .` | 照搬 |
 | ESM everywhere / 包命名与 rescope / cordis peer 约定 | 不发布 npm 包（private pack 经 plugin add 分发） | 不适用（本仓无 npm 发布面——**重估触发**：pack 转为公开发布、或需与其他插件共享 peer 依赖时） |
-| Client UI copy is locale-owned | chrome 文案走 `src/client/locales.ts` 的 zh/en 字典（`ctx.locale.register` + `t()`；键集对账 = [client-locale](../tests/pack/client-locale.test.mjs)）；研究面板正文仍以中文为主（产品中文优先，未逐条迁） | 带证据适配（chrome 已迁字典；正文中文优先——**重估触发**：需要英文 UI 或对外多语分发时逐条迁 `views.tsx` / `ResearchConfigTab`） |
+| Client UI copy is locale-owned | chrome 文案走 `src/client/locales.ts` 的 zh/en 字典（`ctx.locale.register` + `t()`；键集对账 = [client-locale](../tests/pack/client-locale.spec.mjs)）；研究面板正文仍以中文为主（产品中文优先，未逐条迁） | 带证据适配（chrome 已迁字典；正文中文优先——**重估触发**：需要英文 UI 或对外多语分发时逐条迁 `views.tsx` / `ResearchConfigTab`） |
 | Choose PR history deliberately / GitHub stacks / Labels taxonomy | 无 GitHub PR 流（本地单仓窄切片提交） | 不适用（等价物 = 窄证据切片 commit 纪律 + pre-commit 门禁；**重估触发**：需多 commit 叠加审阅的 PR 流出现时） |
 | Both SDKs project the loop | 无 SDK 维护面 | 不适用（本仓不维护任何 SDK——**重估触发**：本仓开始对外提供 SDK 或需要同时投影两种运行时面时） |
 
@@ -57,12 +57,12 @@
 |---|---|---|
 | Tiers：keyless（无凭据可跑）与 with-key 分层 | 档位词汇（AGENTS §密钥）：verify/tests/smokes keyless；l4-lite / team-preflight / entry-chain-probe / client-hitl 真模型档 | 照搬 |
 | Verify the world, not the self-report | evaluation L4 判据 + 手册完成判据 + 探针留档人工复核 | 照搬 |
-| Test the real entry path（发布产物路径） | release-smoke L2：pack → 干净 profile → plugin add → 安装域冒烟 | 照搬 |
+| Test the real entry path（发布产物路径） | release.entry L2：pack → 干净 profile → plugin add → 安装域冒烟 | 照搬 |
 | Prefer the real implementation over a mock | L1 真挂载档（真会话断言工具/skill 面——dump/roster 可见不算） | 照搬 |
 | The with-key policy: inference is cheap（语义面用真模型证） | 真模型档脚本（清单正本 = AGENTS §密钥）；入口链探针 = 语义漂移的真模型检测 | 照搬 |
 | Test resolution: source plane only | keyless 回归断言 tracked 源文件（md-utf8-newline 改 git ls-files 驱动即为此则——运行区不扫，live run 实证） | 带证据适配 |
-| Snapshot tests（关键用户可见变更更新录制快照） | 等价物 = snapshot-replay-smoke 三层判据（A 回放收尾逐字命中 / B 组装请求 diff = persona + 全部 request/header + 四处 user/message 注入（含时钟序列）〔工作区指令 / skill 目录 / 运行时上下文〕/ C 渲染金标准）+ 真模型档会话日志断言（zstd 逐事件）+ `client-load-smoke` 真浏览器断言；真录制通道不做——B 层 diff 已是模型可见变更的独立 keyless 信号（输掉的方案 = test-strategy 采纳 Note） | 带证据适配 |
-| Test subprocess launch modes（构建产物/源码启动模式分立） | 本仓不设双启动模式：冒烟子进程一律走 tsx 源码通道（`node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts`）；构建产物另有在场断言（`lib/client.js` 经 exports["./client"] 由 `client-load-smoke` 加载，缺件由 `vendor-artifacts` 自检拦） | 不适用（现无分立需求——**重估触发**：冒烟开始以构建产物（非 tsx 源码）启动 CLI，或引入第二种启动入口时） |
+| Snapshot tests（关键用户可见变更更新录制快照） | 等价物 = snapshot-replay.entry 三层判据（A 回放收尾逐字命中 / B 组装请求 diff = persona + 全部 request/header + 四处 user/message 注入（含时钟序列）〔工作区指令 / skill 目录 / 运行时上下文〕/ C 渲染金标准）+ 真模型档会话日志断言（zstd 逐事件）+ `client-load.entry` 真浏览器断言；真录制通道不做——B 层 diff 已是模型可见变更的独立 keyless 信号（输掉的方案 = test-strategy 采纳 Note） | 带证据适配 |
+| Test subprocess launch modes（构建产物/源码启动模式分立） | 本仓不设双启动模式：冒烟子进程一律走 tsx 源码通道（`node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts`）；构建产物另有在场断言（`lib/client.js` 经 exports["./client"] 由 `client-load.entry` 加载，缺件由 `vendor-artifacts` 自检拦） | 不适用（现无分立需求——**重估触发**：冒烟开始以构建产物（非 tsx 源码）启动 CLI，或引入第二种启动入口时） |
 
 ## 源 3：vendor docs/AGENTS.md（文档标准）
 
@@ -140,8 +140,8 @@ implemented/ 而退役）。
 | 编译期 | 类型与穷举分支 | pack 双面编译（host/client 两叶 → `lib/types/**`） | `cd packages/deep-research-pack && pnpm build` |
 | Load / parser | 输入在最早可解析点合法 | L0 门禁 + cordis 行校验 | `node scripts/verify/verify.mjs` |
 | 局部行为 | 模块正例/错误/生命周期 | L0 契约测试 | `pnpm test` |
-| 组装行为 | 真实入口产生预期外部结果 | L1 真挂载 + L2 安装形状 | `preset-smoke`（`DSH_SMOKE_REAL=1`）/ `release-smoke` |
-| 运行时关系 | 活系统中的 owner relationship | 本仓等价物 = 真模型档与 run 内 critic（无 invariant companion 面） | `l4-lite-smoke` / `team-preflight-smoke` / `entry-chain-probe` / `client-hitl-smoke` |
+| 组装行为 | 真实入口产生预期外部结果 | L1 真挂载 + L2 安装形状 | `preset.e2e`（`DSH_SMOKE_REAL=1`）/ `release.entry` |
+| 运行时关系 | 活系统中的 owner relationship | 本仓等价物 = 真模型档与 run 内 critic（无 invariant companion 面） | `l4-lite.e2e` / `team-preflight.e2e` / `entry-chain-probe` / `client-hitl.entry` |
 | 语义判断 | 意图、架构、风险与证据对齐 | 人工验收 + run 内 critic | 用户验收 / `review.md` |
 
 **三问自检**（评估任何 development harness，vendor `repo-harness/07` 归纳）：
@@ -195,7 +195,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | `docs/glossary.md` | 已具备：`docs/terms.md`（一个概念一个 canonical term，含 DSH↔本仓对照） |
 | `docs/development.md` · `docs/testing.md` · `docs/architecture.md` · `docs/cookbook/` · `docs/subsystems/` | 已具备（改名映射）：guides/60 · evaluation + guides/60 §2 · design/10 · guides/61/62 · design/ |
 | `docs/i18n/` · `docs/user/` · `website/` | 不适用：单语、无对外产品文档站与站点投影 |
-| `snapshots/`（session 回放 fixture） | **已具备**：[snapshots/](../snapshots/README.md) 场景证据层——研究角色场景 [场景证据层 snapshots/](../snapshots/README.md) 的 `snapshot.json` 由 [replay-scene](../scripts/lib/replay-scene.mjs) 消费并驱动 [snapshot-replay-smoke](../scripts/smoke/snapshot-replay-smoke.mjs)（keyless，禁 llm-deepseek + 插 vendor `dsh-llm-replay`）；纯函数夹具仍住 `tests/fixtures/`；判据见本表源 2 "Snapshot tests" 行 | 带证据适配 |
+| `snapshots/`（session 回放 fixture） | **已具备**：[snapshots/](../snapshots/README.md) 场景证据层——研究角色场景 [场景证据层 snapshots/](../snapshots/README.md) 的 `snapshot.json` 由 [replay-scene](../scripts/lib/replay-scene.mjs) 消费并驱动 [snapshot-replay.entry](../scripts/smoke/snapshot-replay.entry.mjs)（keyless，禁 llm-deepseek + 插 vendor `dsh-llm-replay`）；纯函数夹具仍住 `tests/fixtures/`；判据见本表源 2 "Snapshot tests" 行 | 带证据适配 |
 | `benchmarks/` · `native/` · `python/` · `patches/` · `apps/` | 不适用：本仓无这些发布 lane 与运行时面 |
 | `CONTRIBUTING.md` · `SAFETY.md` · `SECURITY` · `THIRD_PARTY_NOTICES.md` · `BRAND_GUIDELINES.md` | **已具备（2026-10-25 开源发布）**：`CONTRIBUTING.md` / `SECURITY.md` / `.github/workflows/ci.yml`；`SAFETY.md`、`THIRD_PARTY_NOTICES.md`、`BRAND_GUIDELINES.md` 仍不适用（无运行时安全授权面、无捆绑第三方代码、无独立品牌资产政策）；重估触发 = 出现外部贡献分级审批或捆绑第三方代码时 |
 | `.editorconfig` · `.gitattributes` · lint（oxlint）· 重复代码检测（jscpd）· vitest 系列配置 · `lefthook.yml` | 前两件已具备（`repo-conventions` 门禁强制与 vendor 对齐）；后四件未引入（TS 面 = 一个包的 `src/`，测试栈 = node:test）；Markdown 纪律由门禁（md-utf8-newline / md-links / md-anchors / doc-budgets）承担，git 钩子 = `dev/hooks/pre-commit` |
@@ -212,11 +212,11 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 |---|---|---|
 | 证据匹配面（改动的面 ↔ 证据类型） | [guides/60 §2 任务型路由表](guides/60-dev-loop.md) + [guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md) + 根 AGENTS §纪律常驻指针 | 照搬（增量 = 常驻化：路由表与阶梯本就分住 guides/60 §2 与 guides/62，本条只是把指针常驻进根 AGENTS§纪律） |
 | 可靠性三纪律：retry 白名单 / 等待显式状态 / 释放到静默 | [scripts/AGENTS §冒烟脚本可靠性纪律](../scripts/AGENTS.md) | 照搬（载体 = 冒烟脚本层） |
-| 防假绿 verdict 契约（0 绿 / 1 红 / 2 未跑；未跑 ≠ 通过） | 真模型档脚本既有行为 → scripts/AGENTS.md 契约化 + `tests/contracts/smoke-contract.test.mjs` 机械钉住 | 带证据适配（行为先在，语料后成文） |
-| 插件五台阶证据阶梯（导出守卫 → 行为 → 注册生命周期 → 真挂载 → 组装面） | [guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md) + `tests/pack/export-shape.test.mjs`（台阶①）+ verify 门禁 `client-effect-wrap`（台阶③） | 带证据适配（自写代码面 = 驾驶舱） |
+| 防假绿 verdict 契约（0 绿 / 1 红 / 2 未跑；未跑 ≠ 通过） | 真模型档脚本既有行为 → scripts/AGENTS.md 契约化 + `tests/checks/smoke-contract.test.mjs` 机械钉住 | 带证据适配（行为先在，语料后成文） |
+| 插件五台阶证据阶梯（导出守卫 → 行为 → 注册生命周期 → 真挂载 → 组装面） | [guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md) + `tests/pack/export-shape.spec.mjs`（台阶①）+ verify 门禁 `client-effect-wrap`（台阶③） | 带证据适配（自写代码面 = 驾驶舱） |
 | registrations are effects 的 HMR 投影（dispose 即撤销贡献） | 驾驶舱 slot 注册包 effect + 门禁 `client-effect-wrap` 静态把守（正则查包裹，不判 dispose 是否真发生）；HMR 行为断言不做（迭代循环走重启）。2026-10-19 实测该门禁的盲区：`ctx.inject(..., scoped => scoped.effect(...))` 里 scoped 作用域在回调返回后失活，注册被静默撤销，门禁照绿——静态包裹证明不了生命周期正确 | 带证据适配（静态收口形态；dispose 行为面未验证，2026-10-19 撞到真失效一次，修法 = 效果挂根 ctx 而非注入作用域） |
 | fix fixtures, not normalizers（证据不许磨到跟 bug 吻合） | [tests/AGENTS「改夹具先想红」](../tests/AGENTS.md) + guides/60 金标准红线（只许 `--update-expected` 重写，不许放宽比对） | 照搬 |
-| 后缀即层 / 命名即所有权（expected-filenames 门禁强制改名） | [scripts/AGENTS §依赖与分层「命名即层」](../scripts/AGENTS.md)（后缀申报证据类型与档位）+ 真模型档登记制 closed set（tests/contracts/smoke-contract.test.mjs 对账"要求凭据的脚本恰为名单"） | 带证据适配（本仓车道 = glob + 目录形态，非多 vitest 配置） |
+| 后缀即层 / 命名即所有权（expected-filenames 门禁强制改名） | [scripts/AGENTS §依赖与分层「命名即层」](../scripts/AGENTS.md)（后缀申报证据类型与档位）+ 真模型档登记制 closed set（tests/checks/smoke-contract.test.mjs 对账"要求凭据的脚本恰为名单"） | 带证据适配（本仓车道 = glob + 目录形态，非多 vitest 配置） |
 | prove-it-red 前向化到契约测试（不只门禁） | tests/AGENTS 的反证规则（新契约测试同 diff 注入回归看红再还原）+ 门禁 `guard-red-record` 机械把守「负例留证/夹具留证」块。所称「承重四文件抽检」在采纳 Note 中**不存在**（原记误引），已删 | 带证据适配（规则与门禁都在位；但「抽检」这一执行形态本仓未确立，不为无实据的做法背书） |
 | fixture 守卫先于比较（形状 corpus 层） | [scripts/lib/replay-scene.mjs](../scripts/lib/replay-scene.mjs)：比较前 fail-loud 拒绝相对路径/穿越/**symlink**/manifest 结构/角色 roster 齐整/case 唯一/**夹具路径重复**（14 条守卫）；消费测试钉语义，守卫钉形状，两层不同面 | 带证据适配（2026-10-19 复核修正：原判「不适用」与实况相反——等价物早已在该模块） |
 | 快照世代模型 / record-refresh 分叉 / 平台变体 | `sessionFormat` 钉代（replay-scene.mjs:58 强制 = 4，换代须新 `session.vN.jsonl` + 人审，snapshots/README 登记）；`--update-expected` = refresh 语义；record = 真录制（`dev/record-role-fixture.mjs`）；**平台变体（posixOnly/pwshOnly）不适用**（本仓单平台） | 带证据适配（世代/refresh 已落地；仅平台变体不适用——2026-10-19 复核修正原「不适用」整行） |
@@ -231,7 +231,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 |---|---|---|
 | 交付判断四角色：机械检查 / 语义评审 / 批准 / 显式交互——各证明不同的东西，互不冒充 | [evaluation §完成判断四分离](evaluation.md) + [reviewing-a-delivery](../.agents/skills/reviewing-a-delivery/SKILL.md) 技能（语义自审层——agent 可自主完成的角色） | 照搬（判据固化 + 技能载体） |
 | 完成判断公理：能加载 ≠ 有行为证据 ≠ 能安装 ≠ 已获交付批准 | evaluation §完成判断四分离（四结果 ↔ L1 挂载 / L1 行为断言 / L2 / 收尾对账+用户批准） | 照搬 |
-| 门禁自测模式（语料 verify.test.mjs：完整副本 + 真实 verifier 入口 + invalid case 真被拒才算数） | [gates-smoke](../scripts/smoke/gates-smoke.mjs)（临时副本 + 注入回归经真实 verify 入口点名报红 + 零注入对照组防断言空转）+ [tests/contracts/verify-gates.test.mjs](../tests/contracts/verify-gates.test.mjs)（案例表 ↔ gates 数组静态对账） | 带证据适配（子进程归 smoke 道——layering 禁默认回归 spawn；副本 = tracked 全量，等价 fresh clone——曾有的「运行区链接目标补拷」对冲已随 BUG-016 修复移除） |
+| 门禁自测模式（语料 verify.spec.mjs：完整副本 + 真实 verifier 入口 + invalid case 真被拒才算数） | [gates.e2e](../scripts/smoke/gates.e2e.mjs)（临时副本 + 注入回归经真实 verify 入口点名报红 + 零注入对照组防断言空转）+ [tests/checks/verify-gates.test.mjs](../tests/checks/verify-gates.test.mjs)（案例表 ↔ gates 数组静态对账） | 带证据适配（子进程归 smoke 道——layering 禁默认回归 spawn；副本 = tracked 全量，等价 fresh clone——曾有的「运行区链接目标补拷」对冲已随 BUG-016 修复移除） |
 | 验证词汇：oracle 独立预期 / real composition / semantic review | [terms.md](terms.md) 验证词汇行 | 照搬 |
 | 六误区清单（goal≠验收 / mock-only / 刷新≠接受 / 空 invariant / agent-loop / 不抄主仓治理） | 逐条散落既有登记（D6 / L1 真挂载 / tests·AGENTS fix fixtures / 本表源 1 与 alignment-ledger / 不适用登记）——不另立第二份清单（理由 = [毕业 Note](../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md) 输掉的方案） | 带证据适配（散落形态：六条各自有登记载体，本条不另立第二份清单——理由见毕业 Note 输掉的方案；散落 = 需按条检索，不是免检） |
 | 主仓治理全套（Issue/PR policy、weighted approval、stacked PR、release lane、`.github/` 执行层） | 最小开源治理 = keyless CI（[ci.yml](../.github/workflows/ci.yml)）+ 本地 pre-commit + 窄切片 + 收尾对账；Issue/PR policy、weighted approval、stacked PR、release lane 未采纳 | 带证据适配（2026-10-25 开源发布：CI 骨架落地；其余治理面的重估 = 需要外部贡献者分级审批、堆叠 PR 或自动化发布时） |

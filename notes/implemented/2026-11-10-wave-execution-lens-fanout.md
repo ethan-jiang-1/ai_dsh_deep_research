@@ -48,13 +48,13 @@
 
 **真挂载 / 安装 / 模型行为**
 
-- `DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs`：5 preset 真挂载 ALL PASS；
+- `DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs`：5 preset 真挂载 ALL PASS；
   `--role scout` 的 wave probe 红对照证明 workflow 不在 scout 工具面。
-- `snapshot-replay-smoke`：lead/analyst 重录后 4 场景 ALL PASS（lead `codeAnchor=cc492a1` /
+- `snapshot-replay.entry`：lead/analyst 重录后 4 场景 ALL PASS（lead `codeAnchor=cc492a1` /
   analyst `6ada0e3`；C5 一行金标准人审重写）。
-- `l4-lite-smoke`：全角色（含 method-editor）ALL PASS。
-- `release-smoke --install-only`：ALL PASS（pack → 干净 profile → plugin add → 安装域
-  preset-smoke 5/5 → remove/端口释放）——workflow peer 行安装域可解析。
+- `l4-lite.e2e`：全角色（含 method-editor）ALL PASS。
+- `release.entry --install-only`：ALL PASS（pack → 干净 profile → plugin add → 安装域
+  preset.e2e 5/5 → remove/端口释放）——workflow peer 行安装域可解析。
 - `wave-execution-probe`：ALL PASS（C1 header workflow / C2 tool-workflow 生命周期 /
   C3 waves 报告 requested=1 ok=1 / C4 八字段 / C5 child 不递归 / C6 executor 不调 subagent）；
   `--role scout` 红对照 5 处失败；端口 3120 回收。
@@ -103,7 +103,7 @@
 - pack：`content/waves/lens-fanout.js`、analyst workflow group、`wave-execution` skill、
   Lead `research-planning`/`team-assembly`/`research-brief`、plan 模板 `## Wave 执行`、
   `package.json` peerDeps、`docs/design/30`、D45、design/20、pack README 已知限制。
-- 测试：`tests/pack/wave-recipes.test.mjs`、`wave-contract.test.mjs`、`presets.test.mjs`；
+- 测试：`tests/pack/wave-recipes.spec.mjs`、`wave-contract.spec.mjs`、`presets.spec.mjs`；
   `probes/behavior/wave-execution-probe.mjs` + 索引/REAL_MODEL/README 消费列；
   snapshot lead/analyst 重录；`dev/research.overlay.yml` 生成物。
 - 运行：`runtime/smoke-workspace/wave-execution-probe-last/`（探针留档）；

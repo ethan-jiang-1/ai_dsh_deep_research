@@ -57,7 +57,7 @@
 |---|---|
 | fail-loud、model-visible ⟺ logged、registrations are effects、plugins not loop changes | vendor 根 AGENTS Conventions（discipline-map 源 1 已逐条三态） |
 | 机械门禁优先于散文约定；每条门禁带负例（红→还原→绿） | 20 条门禁 + evaluation.md 登记表的反证记录列 |
-| verify the world, not the self-report；真入口路径 = 发布产物 | evaluation L4 + 手册完成判据 + release-smoke（L2） |
+| verify the world, not the self-report；真入口路径 = 发布产物 | evaluation L4 + 手册完成判据 + release.entry（L2） |
 | 文档预算与处置序（下放 → 压缩 → 升顶须登记） | `entry-budget` 门禁 + AGENTS 纪律节下放实证（2026-09-24） |
 | Agent Note 生命周期、取代检查、alternatives 必载、目录树代替索引 | notes/README + note-format 门禁（2026-09-24 吸纳 Note） |
 | 一个事实一个 owner；docs 只写 now | 00-index 组织原则 + 各文档 owner 表 |
@@ -108,7 +108,7 @@
   - `dev-skill-format`：把 `writing-a-gate/SKILL.md` 的 `name:` 改成 `writing-a-gates` →
     `[dev-skill-format] frontmatter name=writing-a-gates ≠ 目录名`；还原后 PASS。
 - **门禁与台账对账**：`gate-ledger-sync` 绿（gates 数组 20 = evaluation.md §L0 登记表 20 行）。
-- **keyless 回归**：`node --test tests/*.test.mjs` 全绿（23 tests）。
+- **keyless 回归**：`node --test tests/*.spec.mjs` 全绿（23 tests）。
 
 ## 环境状态
 
@@ -236,7 +236,7 @@ gitignored 运行区，可重跑复现），聚合成 **80 个唯一源面**。
 | 缺口 | 结果 | 证据 |
 |---|---|---|
 | vendored 链接无门禁 | **已落地**：门禁 `vendor-links`（devDep 必须在 lockfile importer 解析为 `link:vendor/dsh/...`；overrides 三件套无 registry 条目；`link:vendor/dsh/` 为 0 即红） | 三形态红证（改 registry 版 / 注入 registry 条目 / 清空 link） |
-| 声明未用的依赖 | **已核销**：`dsh-session-snapshot`、`dsh-llm-replay` 移除（E1 修复的最小集是 14 而非 16） | 移除后双通道复跑：research profile 真模型调用 ✅ + `l4-lite-smoke` ALL PASS ✅ |
+| 声明未用的依赖 | **已核销**：`dsh-session-snapshot`、`dsh-llm-replay` 移除（E1 修复的最小集是 14 而非 16） | 移除后双通道复跑：research profile 真模型调用 ✅ + `l4-lite.e2e` ALL PASS ✅ |
 | docs 写作顺序 / 分类 | **已落地**：docs/AGENTS.md 新增「分类与写作顺序」（tutorial/reference、前置与难度、作者六步）+ 配方页新鲜度契约（预算同步升顶 70→85，理由同变更） | verify 绿（doc-budgets 覆盖升顶） |
 | 门禁防空/收窄语料 | **已落地**：scripts/AGENTS.md 新增「语料面纪律」+ writing-a-gate 同步（防空集、测边界形态） | — |
 | 包 README 义务节 | **已落地**：pack README 新增「模型体验」（persona/skill/工具行/手册注入的可见面与代价）与「已知限制与延后工作」四节 | — |

@@ -4,7 +4,7 @@
 
 ## 场景声明
 
-场景身份住场景目录的 `snapshot.json`，由 [replay 场景消费者](../scripts/lib/replay-scene.mjs) 读取并校验，[snapshot-replay-smoke](../scripts/smoke/snapshot-replay-smoke.mjs) 是它的执行入口：
+场景身份住场景目录的 `snapshot.json`，由 [replay 场景消费者](../scripts/lib/replay-scene.mjs) 读取并校验，[snapshot-replay.entry](../scripts/smoke/snapshot-replay.entry.mjs) 是它的执行入口：
 
 | 字段 | 含义 |
 |---|---|
@@ -31,7 +31,7 @@
 ## CI 车道
 
 A/B 层（A 回放通路 + B 组装请求 diff）进 CI job `snapshot-replay`：fresh temp home → `boot-run --prepare-profile`
-装当前 pack + 团队层 → `snapshot-replay-smoke --read-only --layers a,b`。C 渲染层不在 CI（需 Chromium，
+装当前 pack + 团队层 → `snapshot-replay.entry --read-only --layers a,b`。C 渲染层不在 CI（需 Chromium，
 且对侧栏同名会话敏感），仍是本地/里程碑档。
 
 ## 维护
@@ -44,10 +44,10 @@ A/B 层（A 回放通路 + B 组装请求 diff）进 CI job `snapshot-replay`：
 ## 已知限制与延后工作
 
 - 目前只有 `replay/research-face` 一个场景族；探针与视觉证据的分类尚未建立。
-- **角色面选择目前固定为研究角色**：`snapshot-replay-smoke` 对所有发现的场景集都用
+- **角色面选择目前固定为研究角色**：`snapshot-replay.entry` 对所有发现的场景集都用
   `researchRoles()` 对账；新增非研究场景族（方法库 / 视觉面等）前，须先给场景声明角色面或让
   consumer 按场景选角色，否则会在加载期按研究角色报错。
 - 场景不进入默认 `pnpm test` 与 pre-commit 链；A/B 由 CI `snapshot-replay` job 驱动，C 与重录由 [开发环的任务型路由表](../docs/guides/60-dev-loop.md) 驱动。
 - **2026-11-13 W1-2 后 C UI 未复验**：四角色按当前 pack 重录后，temp home 的侧栏同名探针会话导致 C0 选中歧义；`ui.expected.md` 的卡片/活动行由 `cardTitleOf`/`foldActivityRows` 纯函数重算，C UI 重跑待后续（不在 CI）。
-- **场景资格三态未立**：场景集发现已是发现式——`snapshots/replay/` 下含 `snapshot.json` 的全部目录都进冒烟（判据核 = [lib/replay-scene.discoverReplayFaces](../scripts/lib/replay-scene.mjs)；`snapshot-replay-smoke --face <name>` 定向单集），新场景集落地即被发现；但 runnable（进冒烟）与证据（只留档不跑）尚无区分。**触发条件**：首个声明"不跑冒烟"的场景集或首个降为永久证据的场景集出现时，立资格三态 + 带判定日期的资格理由 + 声明↔盘面秒级结构门禁（company replay-scene-liveness 形态）——判定日期与 recordedAt 是两件事（录制时刻 ≠ 判据最近全绿时刻），场景数增长后缺它即过期不可见。
+- **场景资格三态未立**：场景集发现已是发现式——`snapshots/replay/` 下含 `snapshot.json` 的全部目录都进冒烟（判据核 = [lib/replay-scene.discoverReplayFaces](../scripts/lib/replay-scene.mjs)；`snapshot-replay.entry --face <name>` 定向单集），新场景集落地即被发现；但 runnable（进冒烟）与证据（只留档不跑）尚无区分。**触发条件**：首个声明"不跑冒烟"的场景集或首个降为永久证据的场景集出现时，立资格三态 + 带判定日期的资格理由 + 声明↔盘面秒级结构门禁（company replay-scene-liveness 形态）——判定日期与 recordedAt 是两件事（录制时刻 ≠ 判据最近全绿时刻），场景数增长后缺它即过期不可见。
 - **体积预算未立**：当前总量有界（单场景族、无按次累积来源）。**触发条件**：任何"每轮一份"的累积型证据类别（探针按次留档、轮末拷贝）入库时，立总量 + 唯一无界源分类子预算（company 64/16 MiB 形态）。

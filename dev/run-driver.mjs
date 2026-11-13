@@ -170,7 +170,7 @@ function mirrorDrift() {
 // **红的现场会被后来的绿抹掉**——agent 复跑一次就再也看不到当时哪条检查红、页面长什么样
 // （2026-10-27 卫生轮实证：同一通道 21:14 RED、21:22 GREEN，RED 的截图只剩内存里那份）。
 // 现在：run-verdicts/<ts>-<kind>/ 每次一份（verdict.json + page.png），latest-verdict.json
-// 指向最近一次；固定名副本继续写（cold-start-smoke 与既有消费方按固定名读，不动契约）。
+// 指向最近一次；固定名副本继续写（cold-start.entry 与既有消费方按固定名读，不动契约）。
 function persistVerdict(kind, payload, screenshotPath, htmlPath) {
   const at = new Date();
   const dir = join(STATE_DIR, 'run-verdicts', `${at.toISOString().replace(/[:.]/g, '-')}-${kind}`);
@@ -198,7 +198,7 @@ const arg = (name, dflt) => {
   return i >= 0 ? (process.argv[i + 1] ?? dflt) : dflt;
 };
 const has = (name) => process.argv.includes(name);
-// CLI 守卫：本文件同时被 tests/run-driver-contract.test.mjs import（纯函数面），import 时不许
+// CLI 守卫：本文件同时被 tests/run-driver-contract.spec.mjs import（纯函数面），import 时不许
 // 跑子命令（否则 `pnpm test` 里一 import 就 exit 2）。与 scripts/run-ops/run-dashboard.mjs 同款。
 const isCli = isMain(import.meta.url);
 const sub = isCli ? process.argv[2] : undefined;

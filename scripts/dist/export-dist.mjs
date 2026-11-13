@@ -2,9 +2,9 @@
 // export-dist.mjs — 一条命令出完整交付：tarball + 安装手册 → _dist/。
 // 精神移植自 ai_dsh_architect scripts/dist/export-dist.mjs（docs/distribution.md 的导出合同）：
 //   ① 手册是**生成物**不是手写物——版本/日期/条目数在导出时注入，手册与旁边的 tarball 不能漂移；
-//   ② 打包步骤 = release-smoke 每轮证明的同一条 `npm pack`（cache 钉进仓库 gitignored 区，
+//   ② 打包步骤 = release.entry 每轮证明的同一条 `npm pack`（cache 钉进仓库 gitignored 区，
 //      工具态纪律：npm 不碰 ~/.npm）；inventory 在导出的产物本体上重申发布边界；
-//   ③ 手册正文每一步都走 install-shape-smoke 验证过的路径（profile init → plugin add → 真启动），
+//   ③ 手册正文每一步都走 install-shape.entry 验证过的路径（profile init → plugin add → 真启动），
 //      是被证明过的顺序，不是设想；
 //   ④ _dist/ 是导出目的地，不是源——tarball gitignored，手册是唯一 tracked 例外
 //      （verify 门禁 dist-manual-version 钉版本一致：版本动 → 必须同 diff 重导出）。
@@ -106,7 +106,7 @@ try {
       : outside.length > 0 ? `package/ 之外的条目：${outside.join(', ')}`
         : `${entries.length} 条目，preset 行 ${presetRows}/${expectedPresetRows}，skill ${skills}，模板 ${templates}`)
 
-  // 3. 手册——版本/日期/条目数注入，让它指名它旁边这份产物；步骤 = release-smoke 的路径
+  // 3. 手册——版本/日期/条目数注入，让它指名它旁边这份产物；步骤 = release.entry 的路径
   //    日期 = 本地口径（人读日期行；UTC slice 在 00:00–08:00 窗口差一天——BUG-017 同款口径纪律）
   const date = localDateStr()
   const manual = readFileSync(join(ROOT, 'scripts', 'dist', 'product-manual.md'), 'utf8')

@@ -4,7 +4,7 @@
 >
 > 首提 2026-10-23 ｜ 合同 [研究手册 §状态头、读序与恢复](../../packages/deep-research-pack/content/manual.md) ·
 > [NODES §审查](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) ｜
-> 代码 [run-receipt](../../scripts/lib/run-receipt.mjs) · [run-bundle-charter.test](../../tests/contracts/run-bundle-charter.test.mjs) ｜
+> 代码 [run-receipt](../../scripts/lib/run-receipt.mjs) · [run-bundle-charter.test](../../tests/contracts/run-bundle-charter.spec.mjs) ｜
 > 相关 [run bundle 宪章](./2026-10-23-run-bundle-charter.md)
 
 ## 决定
@@ -50,7 +50,7 @@
     卡片实为 B/10-21 且单域 `单源——待破`；这是**研究内容的口径问题**，不是读序问题，未改
     已交付报告（要改须出新版本）。
 - `pnpm verify` **44 门全绿**（含 `handbook-budget`：17,461B + 1,024B ≤ 18,944B）；
-  `pnpm test` **747/747**；`preset-smoke` 真挂载 **ALL PASS**；`overlay-fresh` /
+  `pnpm test` **747/747**；`preset.e2e` 真挂载 **ALL PASS**；`overlay-fresh` /
   `pack-workspace-fresh` 绿（overlay 与 pack 种子已重生成）。
 - 旧 bundle 数据对齐：review H1/文末注、plan 剩余工作、acceptance 重跑；`run-accept` 绿，
   CRITICAL 0 / MAJOR 42；旧场无 v2 present / 无 delivered.json，按 epoch 豁免。

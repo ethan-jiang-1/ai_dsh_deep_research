@@ -25,8 +25,8 @@
 ## 实际跑过的验证
 
 - **L0**：`pnpm verify` 全绿；`pnpm test` **1152 全绿**（protocol-core 20 例 + run-accept smoke protocol ⑩）。
-- **L1/L3**：`preset-smoke` ALL PASS；`l4-lite-smoke` ALL PASS（真模型五角色 + scout 工具调用）；`snapshot-replay-smoke` 全场景 PASS（lead persona 重录，`source.note` 记未提交工作树）。
-- **M2**：`run-accept-smoke` ALL PASS（protocol 绿 / 缺工件 `no-protocol` 红 / 改字节 `protocol-changed` 红 / `--write` 落版本指纹）。
+- **L1/L3**：`preset.e2e` ALL PASS；`l4-lite.e2e` ALL PASS（真模型五角色 + scout 工具调用）；`snapshot-replay.entry` 全场景 PASS（lead persona 重录，`source.note` 记未提交工作树）。
+- **M2**：`run-accept.e2e` ALL PASS（protocol 绿 / 缺工件 `no-protocol` 红 / 改字节 `protocol-changed` 红 / `--write` 落版本指纹）。
 - **M4 pilot（3 场）**：
   - Pilot 1 `drt_openai-api-pricing-context`（quick）：`run-accept` **绿**；protocol 首版 6 红（5 schema 过紧 + cells）→ 修订后 0；HITL2 218/221/235 字（>200）；final 设计头缺失；`deviations` 未记 403 偏离。
   - Pilot 2 `drt_llm-memory-landscape`（deep）：`protocol-audit` PASS；node/evidence/path/secret/date PASS；review §4b 抓到 `deviations` 缺口（A12 行为证据）；`run-accept` 仅 D44 `verdict-audit` 红（最新 r2 覆盖/raw）。

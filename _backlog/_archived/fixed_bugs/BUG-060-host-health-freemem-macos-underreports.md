@@ -40,7 +40,7 @@ source dev/env.sh && node --import tsx/esm scripts/smoke/client-load-smoke.mjs; 
 ```
 
 判据实现：[classifyHostHealth](../../../scripts/lib/host-health.mjs)（`freeMB < 512` 即 unhealthy）；
-指标来源：[client-load-smoke](../../../scripts/smoke/client-load-smoke.mjs) 的
+指标来源：[client-load-smoke](../../../scripts/smoke/client-load.entry.mjs) 的
 `freeMB: Math.round(freemem() / 1024 / 1024)`（`node:os`）。
 
 ## 根因（已证）

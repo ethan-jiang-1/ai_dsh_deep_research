@@ -47,7 +47,7 @@
 档位不受影响。实施 = 本 Note 同 diff（pack 纯函数；门禁 `readinessOf` 直接委托 `terminalVerdictLine`，
 BUG-040 后不再有第二份 mirror）。
 
-消费方：驾驶舱 `ResearchStatusTab.tsx`、真浏览器冒烟 `scripts/smoke/client-load-smoke.mjs`、`scripts/lib/run-dashboard-core.mjs` 直接调用本函数；node-gate 的 `readinessOf` 委托同一 `terminalVerdictLine`，只额外保留附条件语义，由 `gateBundle` 测试覆盖。
+消费方：驾驶舱 `ResearchStatusTab.tsx`、真浏览器冒烟 `scripts/smoke/client-load.entry.mjs`、`scripts/lib/run-dashboard-core.mjs` 直接调用本函数；node-gate 的 `readinessOf` 委托同一 `terminalVerdictLine`，只额外保留附条件语义，由 `gateBundle` 测试覆盖。
 
 交付门也使用终局 readiness：HITL2 的前置必须是 review.md 最后一条有效行首判定为 PASS，历史轮次中的 PASS 不能越过后续 FAIL。node-gate 仍单独提取终局行的附条件标记作为 WARN，不把条件裁决权交给机械门禁。
 
@@ -76,23 +76,23 @@ BUG-040 后不再有第二份 mirror）。
 
 ## 实际跑过的验证
 
-- `tests/run/review-readiness.test.mjs` 9 用例：先红（模块缺席）→ 实现 → 9/9 绿。关键用例 = **真实形态**
+- `tests/run/review-readiness.spec.mjs` 9 用例：先红（模块缺席）→ 实现 → 9/9 绿。关键用例 = **真实形态**
   （终局 PASS + 文末附录保留首轮 FAIL 的行内引用 → 仍 PASS）。
 - **两路反证注入**（红→还原→绿）：①改回未锚行首的末位匹配 → 2 红；②改成取首个匹配 → 2 红。
 - **真浏览器负例证明**（`validation-design` §3 要求新守卫先证负例）：把驾驶舱摘要层的
-  `knownLine` 渲染行抽掉 → `client-load-smoke` 的「业务摘要层 = 盘侧 brief-fold 真值」断言
+  `knownLine` 渲染行抽掉 → `client-load.entry` 的「业务摘要层 = 盘侧 brief-fold 真值」断言
   **红并点名缺行**（缺行：当前版已交付；历史拍板见 que…）→ 还原 → **ALL PASS**。
-- **新增断言本身**：`client-load-smoke` 补「业务摘要层五问逐行对账」（盘侧直调 `deriveBusinessBrief`
+- **新增断言本身**：`client-load.entry` 补「业务摘要层五问逐行对账」（盘侧直调 `deriveBusinessBrief`
   算期望）+「未绑定会话摘要层如实『尚未确认』」两条；此前该层浏览器断言命中数为 **0**。
-- L0：`pnpm verify` 全绿、`pnpm test` **369/369**（含本模块 9 用例与既有 `run-dashboard.test.mjs`
+- L0：`pnpm verify` 全绿、`pnpm test` **369/369**（含本模块 9 用例与既有 `run-dashboard.spec.mjs`
   的两相用例保持绿）。
 
 事故与验收记录：[③驾驶舱卡](../../_backlog/_archived/settled_issues/2026-10-11-executive-research-ux-delivery.md)（③-a 行）。
 
 ## 窄放宽轮的验证（2026-10-16）
 
-- **契约测试先红后绿**：`tests/run/review-readiness.test.mjs` 新增"装饰形态真实语料逐条读得出"与
-  "不夺权负例逐条钉住"两条；`tests/run/node-gate.test.mjs` 新增镜像侧装饰 PASS / 承诺句与表格单元 RED 两条
+- **契约测试先红后绿**：`tests/run/review-readiness.spec.mjs` 新增"装饰形态真实语料逐条读得出"与
+  "不夺权负例逐条钉住"两条；`tests/run/node-gate.spec.mjs` 新增镜像侧装饰 PASS / 承诺句与表格单元 RED 两条
   ——实现前 2 红 → 实现后 80/80 绿（两文件）。
 - **两处同判**：52 场扫描（41 场有 review.md）中 pack 纯函数与 node-gate `.mjs` 镜像**不同判 0**；
   旧码/新码差分 = 8 场迁移，全部落在预期集（3 场假 FAIL 归零 + 4 场假 unknown 归零 + geometry 场
@@ -107,7 +107,7 @@ BUG-040 后不再有第二份 mirror）。
 
 ## 括号形态轮的验证（2026-11-10，BUG-046）
 
-- **先红**：`tests/run/review-readiness.test.mjs` 先写两条 BUG-046 用例（括号 PASS/FAIL、空模板/行内/
+- **先红**：`tests/run/review-readiness.spec.mjs` 先写两条 BUG-046 用例（括号 PASS/FAIL、空模板/行内/
   超长标签负例）→ 修复前 **2 红**（`null !== 'PASS'`）；`readinessOf('## readiness（终局）: PASS')`
   修复前 = `{ pass: false }`。
 - **后绿**：解析器增可选的判定词后短括号段（≤8 字、不含 `|`/换行）→ 该文件 **18/18 绿**；

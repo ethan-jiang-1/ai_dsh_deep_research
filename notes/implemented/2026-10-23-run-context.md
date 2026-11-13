@@ -7,10 +7,10 @@
 > [run-source-browser.ts](../../packages/deep-research-pack/src/client/run-source-browser.ts) +
 > [run-source-node.mjs](../../scripts/lib/run-source-node.mjs) ｜
 > 信任 [binding-trust.ts](../../packages/deep-research-pack/src/lib/binding-trust.ts) ｜
-> 回归 [run-context.test.mjs](../../tests/run/run-context.test.mjs) ·
-> [run-context-node.test.mjs](../../tests/run/run-context-node.test.mjs) ·
-> [run-source-browser.test.mjs](../../tests/cockpit/run-source-browser.test.mjs) ·
-> [binding-trust.test.mjs](../../tests/run/binding-trust.test.mjs)
+> 回归 [run-context.spec.mjs](../../tests/run/run-context.spec.mjs) ·
+> [run-context-node.spec.mjs](../../tests/run/run-context-node.spec.mjs) ·
+> [run-source-browser.spec.mjs](../../tests/cockpit/run-source-browser.spec.mjs) ·
+> [binding-trust.spec.mjs](../../tests/run/binding-trust.spec.mjs)
 
 ## 决定
 
@@ -53,23 +53,23 @@ D28 的三操作桶（根 / `archive/` / `_abandoned/`）此前在四个页签�
   keyless 的发现/翻页测试面；不解决“规则没有家”。
 - **给 `node-gate --latest` 强行扫 `_abandoned`**：停放桶不参与自动审计是合理操作语义；改为在
   调用点显式写 buckets，并用测试钉住范围，而不是让三个工具各写一份隐式范围。
-- **强迁 `run-dashboard` / `client-load-reference` oracle**：dashboard 是同步 HTML 投影；
+- **强迁 `run-dashboard` / `client-load-reference.support` oracle**：dashboard 是同步 HTML 投影；
   oracle 的价值在独立——让它复用生产实现会掩盖实现自己的漂移。两者保留，边界登记在
   design/40 §6。
 
 ## 实际跑过的验证
 
 - 红证（每条都是先看到红，再还原绿）：
-  - 模块缺席时 `run-context.test.mjs` import 失败（首跑 1 文件红）；
+  - 模块缺席时 `run-context.spec.mjs` import 失败（首跑 1 文件红）；
   - 把 `review.md` 从 EOF 策略移除 → 1448 行用例读成 40 行、`terminalReadiness` 判红；
   - 删掉 Node 适配器的空文件 `[]` 行切分 → 空文件用例读成 1 行红；
   - 浏览器适配器把 not-found 与其它错误都映射成 missing → 错误分类用例红；
   - 删掉 `bindingTrust` 的 pending 分支 → 挂起真值表用例红；
   - 向 `ResearchStatusTab.tsx` 注入 `['drt_x', 'archive/drt_x', '_abandoned/drt_x']` →
     `run-context-single-source` 点名红；还原绿。
-- `pnpm test` **746 pass / 0 fail**；`pnpm verify` 44 门禁全绿；`gates-smoke` 78 案例全绿；
+- `pnpm test` **746 pass / 0 fail**；`pnpm verify` 44 门禁全绿；`gates.e2e` 78 案例全绿；
   `pnpm typecheck` 通过；pack 双半 `pnpm build` 通过。
-- `client-load-smoke` 真浏览器 **ALL PASS**：状态页证据计数 160/160、业务摘要、HITL 锚点；
+- `client-load.entry` 真浏览器 **ALL PASS**：状态页证据计数 160/160、业务摘要、HITL 锚点；
   图谱覆盖率；配置页本次研究摘要；终稿页 v2 版本账、首标题、版本切换、静音条、滚动口。
 - Node 工具实跑：`schema-scan` 扫 46 份归档（0 契约期违约）；`node-gate --latest` 落到
   `drt_e2e-rerun-2026-10-23` 全绿；`evidence-audit --latest` 4 份证据、URL 8/8、CRITICAL 0。

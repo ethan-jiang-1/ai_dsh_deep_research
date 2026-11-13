@@ -7,7 +7,7 @@
  * 会在 `~/.dsh-custom`、空白值、相对路径上悄悄分叉（实测：凭据在 DSH 解析的 home 里，
  * preflight 却报“两者皆无”）。
  *
- * 只依赖 node:path / node:os，不读盘；tests/pack/dsh-home.test.mjs 直接断言。
+ * 只依赖 node:path / node:os，不读盘；tests/pack/dsh-home.spec.mjs 直接断言。
  */
 import { homedir } from 'node:os'
 import { join, resolve } from 'node:path'

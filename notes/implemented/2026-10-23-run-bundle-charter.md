@@ -366,7 +366,7 @@ manifest 时机）= 锚点卡 [§7.2](../../_backlog/_archived/settled_issues/20
 - **P1 D28**：`docs/decisions.md` 新增 D28、D17 位置子句改操作桶；design/40、design/50、guides/61
   同步；`grep 位置=状态` = 0；`pnpm test` 661 pass（含 docs-consistency 的 archive 路径断言）。
 - **P2 run.md/epoch**：模板 + 创建 skill + `contractEpochOf` + `schema-scan` 形状检查 + `workspace-contract`
-  全表；`tests/run/node-gate-contracts.test` 3 例、`schema-scan.test` 11 例；`gates-smoke` 77 案例全绿。
+  全表；`tests/run/node-gate-contracts.test` 3 例、`schema-scan.test` 11 例；`gates.e2e` 77 案例全绿。
 - **P3 交付见证**：门② 读 `deliverables/presented`、门③ 读 `user-question-reply`、UNATTESTED/exit 2；
   `run-accept` 预检 `--no-write` 红不写、绿写 `delivered.json`/`acceptance.md`；witness 6 例；
   红/绿双跑实录。`pnpm test` 671→677。
@@ -376,22 +376,22 @@ manifest 时机）= 锚点卡 [§7.2](../../_backlog/_archived/settled_issues/20
   新 run 卫生扫描；`provenance.test` 3 例、卫生例；`pnpm test` 677。
 - **P7 手册/快照**：手册 15,274B/190 行（行预算 127→200 登记理由）、NODES 同步；snapshot B 层先红
   → 四角色真模型重录 → A/B/C 全绿；lead C5 仅一条活动行措辞变化，`--update-expected` 人审后接受；
-  `preset-smoke` 预检绿。`pnpm verify` 全绿、`pnpm test` 677 pass。
+  `preset.e2e` 预检绿。`pnpm verify` 全绿、`pnpm test` 677 pass。
 - **P8 收口**：手册后 4 样本 post **4/4**（subagent；正式 lead 会话两次因通道 max-tokens 在 5 个
-  工具调用后结束、无 assistant 文本 → 记 UNATTESTED，不冒充 lead PASS）；`client-load-smoke` ALL PASS；
-  `snapshot-replay-smoke` 4 场景 ALL PASS；RFC 毕业、锚点卡归档。
+  工具调用后结束、无 assistant 文本 → 记 UNATTESTED，不冒充 lead PASS）；`client-load.entry` ALL PASS；
+  `snapshot-replay.entry` 4 场景 ALL PASS；RFC 毕业、锚点卡归档。
 - **2026-10-23 复核轮（D28 落地缺口收口）**：门③ 曾接受**别的 run 的** HITL2 答复（真实语料复现：
   全新 bundle 借 2026-10 旧答复 PASS）；`delivered.json` 无消费者；run-accept 回执写绝对语料根
   与 hygiene 门互斥；手册 `final/` 行与 `final/vN` 交付语义互斥。修复 + 反证测试：
-  `tests/run/node-gate-witness.test.mjs` 13 例（跨 run/未绑定/epoch/顺序）、
-  `tests/run/run-receipt.test.mjs` 7 例（回执无绝对路径/哈希/最新 present）、
-  `tests/run/schema-scan.test.mjs` 18 例（绝对路径族/指令文件/脚本/symlink/顶层白名单/分片登记/
-  delivery 相位）；`tests/run/node-gate.test.mjs` 增门④ D28 例。`pnpm verify` 全绿、`pnpm test`
-  697 pass、`gates-smoke` 77 例全绿。
+  `tests/run/node-gate-witness.spec.mjs` 13 例（跨 run/未绑定/epoch/顺序）、
+  `tests/run/run-receipt.spec.mjs` 7 例（回执无绝对路径/哈希/最新 present）、
+  `tests/run/schema-scan.spec.mjs` 18 例（绝对路径族/指令文件/脚本/symlink/顶层白名单/分片登记/
+  delivery 相位）；`tests/run/node-gate.spec.mjs` 增门④ D28 例。`pnpm verify` 全绿、`pnpm test`
+  697 pass、`gates.e2e` 77 例全绿。
 - **P7 二批（2026-10-23 复核轮）**：手册 `final/` 语义与见证绑定句改动 → 四角色真模型重录
   （`codeAnchor` = `72f392a`、vendor `687f282e…`、手册 digest
-  `32108b85…`）→ `snapshot-replay-smoke` 4 场景 ALL PASS（lead C5 金标准按新措辞重写并人审：
-  仅活动行一句话变化）；`preset-smoke` 预检绿。
+  `32108b85…`）→ `snapshot-replay.entry` 4 场景 ALL PASS（lead C5 金标准按新措辞重写并人审：
+  仅活动行一句话变化）；`preset.e2e` 预检绿。
 - **未跑**：L2 安装验收（本轮不是发布轮）。正式 lead 盲测的仪器缺口保留在锚点卡 §16。
 
 

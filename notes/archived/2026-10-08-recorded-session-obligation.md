@@ -18,7 +18,7 @@
 
 参考卷原条款（DSH `docs/testing.md` "When a snapshot test is required"）：非平凡
 model-visible 变化 → **同一 PR 内**新增或更新 keyless recorded-session 夹具。
-本仓等价物 = [snapshot-replay-smoke](../../scripts/smoke/snapshot-replay-smoke.mjs) 的
+本仓等价物 = [snapshot-replay-smoke](../../scripts/smoke/snapshot-replay.entry.mjs) 的
 `snapshots/replay/research-face/`。
 
 ### 核心数据

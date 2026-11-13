@@ -45,7 +45,7 @@ if (!token) {
 
 const base = `http://127.0.0.1:${port}`;
 
-// token → cookie（同 team-preflight-smoke 的 authenticate 形状）
+// token → cookie（同 team-preflight.e2e 的 authenticate 形状）
 const authRes = await fetch(`${base}/?token=${token}`, { redirect: 'manual' });
 const cookies = [...authRes.headers.getSetCookie()];
 if (cookies.length === 0) throw new Error('token 交换没拿到 cookie');

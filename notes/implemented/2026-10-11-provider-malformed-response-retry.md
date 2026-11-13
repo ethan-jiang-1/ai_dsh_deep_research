@@ -50,9 +50,9 @@
   `dsh --profile web --patch dev/research.overlay.yml --dump-config` → 组合树里 `llm-deepseek` 行带
   `retryableCodes: [… , MALFORMED_RESPONSE]`，且 `name` 仍为 `@deepseek-ai/dsh-llm-deepseek-api-key`
   —— 同时证明"命中既有行替换"（非误建新行）与"策略已进组合"。
-- **L1 真挂载**：`DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs` → ALL PASS（四 preset）。
-- **L2 安装形状**：`node scripts/smoke/release-smoke.mjs` → **ALL PASS**（pack → 干净 profile →
-  plugin add → 安装域 `preset-smoke` 全绿 + 端口 3100 用后无监听残留）。
+- **L1 真挂载**：`DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs` → ALL PASS（四 preset）。
+- **L2 安装形状**：`node scripts/smoke/release.entry.mjs` → **ALL PASS**（pack → 干净 profile →
+  plugin add → 安装域 `preset.e2e` 全绿 + 端口 3100 用后无监听残留）。
 - **L0**：`pnpm verify` 全绿 / `pnpm test` 399-399。
 - **未运行项（如实标注）**：**"畸形流真的被重试"没有现场证据**——要等 provider 再抽风才能观察到。
   可证的到此为止：重试决策的判据（vendor 源码）+ 策略已进组合（dump-config）。别把"配置在位"读成"故障已解"。

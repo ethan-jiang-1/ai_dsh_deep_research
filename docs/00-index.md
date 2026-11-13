@@ -18,7 +18,7 @@
 | "用它""启动这个插件""跑研究""装到我的 DSH"（安装用户） | [`_dist/安装手册.md`](../_dist/安装手册.md)（生成物；源 = [product-manual](../scripts/dist/product-manual.md)）+ [pack README](../packages/deep-research-pack/README.md) + [guides/65](./guides/65-run-forms.md) | 按手册：CLI 建 profile（仅首次）→ `dsh plugin --profile deep-research add file:<tgz>`（当前唯一发布形态）；npm/Plugins 页/Discover 为 staged |
 | "在本仓启动/开跑/接着上次跑"（开发通道，默认 `runtime/harness-home`） | [guides/61](./guides/61-run-playbook.md) | `node dev/run-driver.mjs up`（起/复用通道 + 验浏览器面 + 呈交 URL） |
 | "换 profile/home""装进现有 web profile""诊断装得对不对" | [guides/65](./guides/65-run-forms.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | 换 profile 用新名字重新初始化；**已有 profile 不要重复 `--from-default-profile`**（破坏性）；诊断 = 安装副本的 `dsh-deep-research-doctor` |
-| "只验证插件还能挂载/安装"（证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `node scripts/smoke/install-shape-smoke.mjs`（自带临时 home，无需 source；或 `source dev/env.sh && node scripts/smoke/preset-smoke.mjs` / `release-smoke`） |
+| "只验证插件还能挂载/安装"（证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `node scripts/smoke/install-shape.entry.mjs`（自带临时 home，无需 source；或 `source dev/env.sh && node scripts/smoke/preset.e2e.mjs` / `release.entry`） |
 | "复现/验证某个机制"（模型不按纪律/角色、GUI、入口链、流） | [guides/66](guides/66-probe-playbook.md) + [probes/](../probes/README.md) | 先看 [探针索引](../probes/INDEX.generated.md)，再跑现有探针；没有就按指南新增 |
 | "改插件内容"（角色 / skill / 驾驶舱 / 部署面） | [guides/62](./guides/62-plugin-authoring.md) | 该页 §参与阶梯 + §改动影响面 |
 | "改本仓开发流程或仓库文档"（门禁 / docs / notes / 入口链 / 各 README） | [guides/60 §1](./guides/60-dev-loop.md) | 按工作类型分支（入口链第 3–4 步在此展开） |
@@ -74,7 +74,7 @@
 | [alignment-ledger.json](./alignment-ledger.json) | 合同 | **对齐台账（机读）**：vendor/dsh harness 源面逐项结论（adopted/adapted/na + 落点 + 理由；条数以台账 `sources` 数组为准）；门禁 `align-ledger` 对账（source 在 vendor 存在 / 落点存在 / na 有理由）——人读视图 = discipline-map 全源表 |
 | [discipline-map.md](./discipline-map.md) | 合同 | **纪律全量枚举**：vendor 逐源三态表（照搬/带证据适配/不适用+理由）——AGENTS §纪律的正本（随 vendor 换 tag 重校） |
 | [_backlog/](../_backlog/README.md)（[问题](../_backlog/issues/README.md)） | 问题与证据 | 问题澄清、查证方法、调研材料、缺陷、结论去向与归档 |
-| [snapshots/](../snapshots/README.md) | 问题与证据 | 场景证据层：有持久消费者的整组录制回放资产与场景声明（消费 = snapshot-replay-smoke；证据边界与维护规则见该页） |
+| [snapshots/](../snapshots/README.md) | 问题与证据 | 场景证据层：有持久消费者的整组录制回放资产与场景声明（消费 = snapshot-replay.entry；证据边界与维护规则见该页） |
 | [guides/60-dev-loop.md](./guides/60-dev-loop.md) | 指南 | 开发环：六步闭环、面选择表、双 home、密钥 |
 | [guides/61-run-playbook.md](./guides/61-run-playbook.md) | 指南 | **开发通道 run 操作（M2）**：run-driver/boot-run、lead 会话、HITL 两点、观察面——run 通道（`deep-research` profile：本包 + vendor agent-team-profile 层，P1 定案）的使用面；安装用户看 pack README / 安装手册 / 65 |
 | [guides/62-plugin-authoring.md](./guides/62-plugin-authoring.md) | 指南 | **插件作者入口**（改插件内容的人/agent 入口）：DSH 词汇对齐（plugin/bundle/profile/preset）、参与阶梯 S0–S3、新行为归属、范本与证据义务、**交付与部署形态**（bundle/profile 拓扑 + 包内 content + 部署 bin）、**改动影响面**（添/换/删要一起动什么）——上游 `docs/user/develop/**` 的本仓投影 |

@@ -32,7 +32,7 @@
 
 ## 实际跑过的验证
 
-- 先红：`tests/run/protocol-core.test.mjs` 新增 BUG-048/049/050/052/053/054 六例；修复前该文件 3 fail（048/049/050）+ 新用例断言级红；修复后 30/30 pass（含 BUG-056/058）。`tests/cockpit/plan-index.test.mjs` 增 cycle 用例（`cycle` 在、`wave-prefix` 不在）。`tests/run/strategy-core.test.mjs` 新增 BUG-054 变体例，6/6 pass。
+- 先红：`tests/run/protocol-core.spec.mjs` 新增 BUG-048/049/050/052/053/054 六例；修复前该文件 3 fail（048/049/050）+ 新用例断言级红；修复后 30/30 pass（含 BUG-056/058）。`tests/cockpit/plan-index.spec.mjs` 增 cycle 用例（`cycle` 在、`wave-prefix` 不在）。`tests/run/strategy-core.spec.mjs` 新增 BUG-054 变体例，6/6 pass。
 - 全量：`pnpm test` 1184 pass / 0 fail（新增用例后总数以最终跑为准）；`pnpm verify` 全绿。
 - 生产 bundle 回归：8 个带 `protocol.json` 的 bundle 逐个跑 `protocol-audit`；修复前后唯一红仍是既有的 `drt_ai-model-regulation-cn-eu-us` 投入节点漂移（18 > JSON 12），其余 7 个 PASS 不变（含 `drt_cn-us-ai-perception` 的 ≤10/8 ≤ JSON 14/12）；`drt_api-context-caching-ds-openai` 因交付回执早于契约时刻转 legacy（exit 0），其晚场回执 / 无回执副本仍红 `no-protocol`。单深度形状回归：把 `drt_anthropic-claude-api-limits` 副本的投影 L0 改成 L1 → 新判红（旧实现零 finding）。
 - 审查：agent 自审 + 机械门禁（`docs/evaluation.md` 同 diff 更新；`guard-red-record` 留证块随测试同 diff）。

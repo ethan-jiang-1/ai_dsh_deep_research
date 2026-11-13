@@ -87,7 +87,7 @@ run data:
 
 ```sh
 node scripts/dist/export-handoff.mjs --out /tmp/handoff
-node scripts/smoke/handoff-smoke.mjs
+node scripts/smoke/handoff.e2e.mjs
 ```
 
 Attach `_dist/dsh-deep-research-pack-<version>.tgz` and the installation manual from the
@@ -108,8 +108,8 @@ pnpm test
 Install/first-screen checks (real install / browser; no model calls):
 
 ```sh
-node scripts/smoke/install-shape-smoke.mjs
-node scripts/smoke/product-boot-smoke.mjs
+node scripts/smoke/install-shape.entry.mjs
+node scripts/smoke/product-boot.entry.mjs
 ```
 
 They need pnpm, the team-layer registry/cache, and Playwright chromium (the repo's `.pnpm` store);
@@ -119,7 +119,7 @@ missing prerequisites exit 2, not green.
 suite. When you change a gate, also run:
 
 ```sh
-node scripts/smoke/gates-smoke.mjs
+node scripts/smoke/gates.e2e.mjs
 ```
 
 For the full development loop — including which evidence tier applies to a change —

@@ -1,6 +1,6 @@
 // selftest-library.mjs —— 「研究配置」面板/library-fold 自测例库（单一正本，2026-10-13
 // 用户委托自测轮立）：12 形态条目覆盖解析与渲染的真实边界。消费者 = tests/library-fold
-// （纯函数断言）与 scripts/smoke/client-load-smoke（抛弃型自测工作区种子，驱动真浏览器
+// （纯函数断言）与 scripts/smoke/client-load.entry（抛弃型自测工作区种子，驱动真浏览器
 // 面板对账）——两处共用同一文本，防形态漂移。
 //
 // 形态清单（每条目一个形态；canonical 形态 = research-brief skill「用户方法库」节）：

@@ -35,7 +35,7 @@
 - **文档先行、门禁后补**：用户裁定全套一轮——新枚举在旧门禁眼里是红的，形状先拧巴一轮；「格式先行无门禁」正是借鉴源要修的病。
 - **只立卡不动文档**（借鉴源当时的形态）：本仓用户直接授权落地，推敲轮没有要等的增量信息。
 - **英文枚举直搬**：本仓 `_backlog` 人面中文（模板、归档值全中文），直搬造成一区内双语。
-- **镜像互查立新门禁族**：既有 liveness 类内加强自带既有反证面（gates-smoke 案例表），新族走 promote-on-recurrence。
+- **镜像互查立新门禁族**：既有 liveness 类内加强自带既有反证面（gates.e2e 案例表），新族走 promote-on-recurrence。
 - **保留「活跃」作 bugs 枚举**：与手册自己的「活跃区」词汇相撞（对方同款理由）；零活跃卡时点切换免迁移。
 - **镜像互查覆盖归档卡**：归档卡状态行是「原值 + 追加结论」的历史形态，互查会强迫重写历史正文——违反「位置即状态、正文不重写」铁律；门禁对归档卡豁免。
 
@@ -49,9 +49,9 @@
 - 探针④ bugs 镜像漂移（frontmatter `排查中` / 状态行 `修复就绪`）→ 红：`[backlog-liveness] _backlog/bugs/BUG-997-probe.md status line must mirror frontmatter status (状态：排查中；记号 = 修复就绪)`；还原 → 绿。
 - 还原后复查：backlog-liveness 无红，探针文件与索引行零残留（盘上与 git index 双查）。
 
-常驻反证 = gates-smoke 案例表新增四形态注入（`backlog-issue-graduation-open` / `backlog-issue-mirror-drift` / `backlog-bug-enum-invalid` / `backlog-bug-mirror-drift`）+ `backlog-bug-severity` 案例与 `guard-red-record-active-bug` 正例改新枚举形态；契约测试 = `tests/contracts/backlog-liveness.test.mjs`（生命周期全值/镜像漂移/倾向头越界/闭集全值通过/归档豁免/🔒 记号不破坏镜像断言）。
+常驻反证 = gates.e2e 案例表新增四形态注入（`backlog-issue-graduation-open` / `backlog-issue-mirror-drift` / `backlog-bug-enum-invalid` / `backlog-bug-mirror-drift`）+ `backlog-bug-severity` 案例与 `guard-red-record-active-bug` 正例改新枚举形态；契约测试 = `tests/checks/backlog-liveness.test.mjs`（生命周期全值/镜像漂移/倾向头越界/闭集全值通过/归档豁免/🔒 记号不破坏镜像断言）。
 
-全量收尾（2026-10-12）：`pnpm verify` 全绿；`pnpm test` 全绿；`node scripts/smoke/gates-smoke.mjs` 全绿（对照组零注入全 PASS + 注入案例均被点名报红）。
+全量收尾（2026-10-12）：`pnpm verify` 全绿；`pnpm test` 全绿；`node scripts/smoke/gates.e2e.mjs` 全绿（对照组零注入全 PASS + 注入案例均被点名报红）。
 
 ## 环境状态
 

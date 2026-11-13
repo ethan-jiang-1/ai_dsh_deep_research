@@ -23,13 +23,13 @@
 
 ## 实际跑过的验证
 
-- **keyless 契约测试** 8 条（`tests/run/session-replay.test.mjs`，先红后绿）：模块缺席红 → 实现绿；sabotage ×2（歧义改成取首个 → 1 红；子串改前缀 → 3 红）→ 还原 8/8。
+- **keyless 契约测试** 8 条（`tests/run/session-replay.spec.mjs`，先红后绿）：模块缺席红 → 实现绿；sabotage ×2（歧义改成取首个 → 1 红；子串改前缀 → 3 红）→ 还原 8/8。
 - **实走 3 次真会话 + 3 个场景包**（keyless，起一次性通道 3117）：
   1. `session-d47bf789…`（research-workspace 组，"Anthropic Claude 模型发布线追踪"）→ 已捕获 174790B；读回页面 = 标题 + Agent Team/Deep Research Lead 徽标 + Chat/Trajectory + **HITL1 选项卡完整渲染**（三选项 / 1/4 / Skip·Next）。
   2. `session-7a10b535…`（`cdp-ask-1792545383930` smoke 组）→ 已捕获 174927B（跨组可用）。
   3. 同 1 加 `--open-status` → 右栏「研究状态」入镜（命中方式 `guide-entry`），可见立项对齐横幅与检索行。
 - 场景包读回：`scene-capture --show replay-2026-10-21T01-35-40-966Z` 正常（五件套齐）。
-- 机械面：`pnpm verify` 全绿；`pnpm test` 605/605（597 + 8）；`gates-smoke` 全绿。
+- 机械面：`pnpm verify` 全绿；`pnpm test` 605/605（597 + 8）；`gates.e2e` 全绿。
 
 ## 环境状态
 

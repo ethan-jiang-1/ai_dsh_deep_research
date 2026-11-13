@@ -24,7 +24,7 @@ export function runA() {
   const gate = 'md-utf8-newline';
   // quotepath=false（2026-10-21 卫生轮补宽，md-links 同款先例）：非 ASCII tracked 路径
   //（_dist/安装手册.md）被引号转义后 existsSync miss → 稀疏态 continue 静默跳过 = 漏扫；
-  // 反证 = gates-smoke 案例 md-utf8-newline-nonascii-path（先红后绿实录见案例注释）。
+  // 反证 = gates.e2e 案例 md-utf8-newline-nonascii-path（先红后绿实录见案例注释）。
   const r = gitOnce(['-c', 'core.quotepath=false', 'ls-files', '*.md']);
   if (r.status !== 0) fail(gate, `git ls-files 不可用（${String(r.stderr).slice(0, 120)}）——fail-loud`);
   else {
@@ -135,7 +135,7 @@ export function runA() {
     return cache.get(f);
   };
   // quotepath=false（2026-10-21 卫生轮补宽，同 md-utf8-newline/md-links 先例）：非 ASCII tracked
-  // 路径的引号转义会让 existsSync miss → 静默跳过；反证 = gates-smoke 案例 md-anchors-nonascii-path。
+  // 路径的引号转义会让 existsSync miss → 静默跳过；反证 = gates.e2e 案例 md-anchors-nonascii-path。
   const r = gitOnce(['-c', 'core.quotepath=false', 'ls-files', '*.md']);
   if (r.status !== 0) fail(gate, 'git ls-files 不可用——覆盖面依赖仓库态，fail-loud');
   else {
@@ -174,7 +174,7 @@ export function runA() {
 // `.md/.mjs/.sh/.cjs/.ts`（`dev/README` 这类简写）。
 // 外链白名单（必须带理由）：company 仓路径与"守则要求不存在"的反例路径——路径存在性对它们不成立。
 // 构建产物（`packages/*/lib/`）不是 fresh-clone 合同：它是 gitignored 构建输出，CI/新 clone 不存在；
-// 文档描述它时按"构建产物"口径放行。存在性由构建与 pack-smoke 证明，不由文档合同证明。
+// 文档描述它时按"构建产物"口径放行。存在性由构建与 pack.e2e 证明，不由文档合同证明。
 // 防空语料：解析到的 token 数 < 100 → 红（范围被收窄或抓取正则失效）。
 {
   const gate = 'doc-paths';
@@ -423,7 +423,7 @@ export function runA() {
     }
     // AGENTS.md 枚举 = tracked-only（git ls-files；md-links 族同款 quotepath=false）。
     // 2026-10-08 收口（审计 P3 件④）：原 walk(ROOT) 无差别枚举把 gitignored 运行区卷进
-    // 预算登记面——release-smoke probeWs 直接铺工作区（非 node_modules 层）的 AGENTS.md
+    // 预算登记面——release.entry probeWs 直接铺工作区（非 node_modules 层）的 AGENTS.md
     // 实测误红（runtime/smoke-workspace 探针复现）。范围纪律正解 = 覆盖面跟 tracked 走。
     const lsAgents = spawnSync('git', ['-c', 'core.quotepath=false', 'ls-files', '*AGENTS.md'], { cwd: ROOT, encoding: 'utf8' });
     if (lsAgents.status !== 0) fail(gate, `git ls-files 不可用（${String(lsAgents.stderr).slice(0, 120)}）——覆盖面依赖仓库态，fail-loud`);

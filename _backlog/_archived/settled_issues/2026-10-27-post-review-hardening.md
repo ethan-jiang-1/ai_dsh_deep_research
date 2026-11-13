@@ -60,7 +60,7 @@ opened: 2026-10-27
 
 | 项 | 结果 | 证据 |
 |---|---|---|
-| P1.1 `run-accept` 集成 smoke | 已落地 | [run-accept-smoke](../../../scripts/smoke/run-accept-smoke.mjs) ALL PASS（5 条路径） |
+| P1.1 `run-accept` 集成 smoke | 已落地 | [run-accept-smoke](../../../scripts/smoke/run-accept.e2e.mjs) ALL PASS（5 条路径） |
 | P1.2 数据卡形状测试 | 已落地 | `tests/pack/data-plane-invariants` 4 例；删「谁看得见」列 → 红（已录） |
 | P2.3 秘密模式扩展 | 已落地 | `AIza` / `xox[baprs]-` + 正反例；`pnpm test` 900 |
 | P2.4 保留期只读报告 | 已落地 | [run-inventory](../../../scripts/run-ops/run-inventory.mjs) + lib 单测；现网实跑 56 场/26.2 MiB |

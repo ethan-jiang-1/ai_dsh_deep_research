@@ -48,7 +48,7 @@ fails through the real runner **for each changed acceptance rule**」）。注�
 | `dsh-code-review/SKILL.md:54` | 「verify a deliberately invalid case fails **through the real runner** for each changed acceptance rule」 | **每条验收规则** | 无（review 清单） |
 
 三点非显然：
-- **`through the real runner`** 是防「用 assert 在测试里自证」的关键限定。本仓 `gates-smoke`
+- **`through the real runner`** 是防「用 assert 在测试里自证」的关键限定。本仓 `gates.e2e`
   （真注入 → 跑真 `verify` 入口 → 判红）是这个形态；单测里的 `assert.throws` 不是。
 - DSH 把「证明」当**规则**写，不当流程写——所以它出现在 `packages/AGENTS.md`（常驻指令）
   而不是某个 cookbook。本仓的对应物是 `tests/AGENTS.md:44`（见 A.5）。
@@ -162,10 +162,10 @@ DSH 最接近的替代物是**全仓语法守卫**：`vendor/dsh/scripts/verify-
 1. DSH 的 property 测试**不是泛用**，只给「协议形状 + 任意交错」的组件（流式装配、日程递推）。
    它不拿 fast-check 测散文解析——因为散文解析根本不在 DSH 的判据面上。
 2. `it.each` 的 2,489 处说明**表驱动是默认写法**，不是高级技巧。本仓的对应物是
-   文件内 `for (const x of [...])`（`verdict-conformance.test.mjs:17-22`、`:72-88`），**等价且零依赖**——
+   文件内 `for (const x of [...])`（`verdict-conformance.spec.mjs:17-22`、`:72-88`），**等价且零依赖**——
    不需要为「表驱动」引任何东西。
-3. **没有 mutation testing 不代表没有变异**：DSH 的变异在 `gates-smoke` 式「注入回归看红」里
-   （一次性、人工构造），本仓 `scripts/smoke/gates-smoke.mjs` 的 108 个注入案例是同一件事的
+3. **没有 mutation testing 不代表没有变异**：DSH 的变异在 `gates.e2e` 式「注入回归看红」里
+   （一次性、人工构造），本仓 `scripts/smoke/gates.e2e.mjs` 的 108 个注入案例是同一件事的
    规模化形态。**这是本仓唯一领先上游的机械面**，值得在写新守卫时优先复用
    （把新门禁也加入注入案例表，而不是只写一条 `assert.throws`）。
 
@@ -201,16 +201,16 @@ DSH 最接近的替代物是**全仓语法守卫**：`vendor/dsh/scripts/verify-
 
 | 文件 | 行/例数 | 主形状 | 副形状 | 缺的那一维 |
 |---|---|---|---|---|
-| `tests/run/review-readiness.test.mjs` | 233 / 21 | 例子集合 | 边界表、同源对账 | **生成矩阵**（唯一没有的，见 B.1） |
-| `tests/cockpit/library-fold.test.mjs` | 507 / 41 | 例子集合（夹具电池） | 边界表、单点 round-trip | **语法变体笛卡尔 + fold⇄write 同源**（见 B.2） |
-| `tests/run/node-gate-witness.test.mjs` | 433 / 29 | 状态交错 | 消费者清单、假绿 oracle | **时刻×绑定的组合矩阵**（见 B.3） |
-| `tests/contracts/verdict-conformance.test.mjs` | 89 / 5 | **不变量 + 笛卡尔矩阵** | 边界表 | **编码变体**（BOM/CRLF/U+3000 不在矩阵里，见 B.4） |
-| `tests/contracts/present-version-conformance.test.mjs` | 49 / 4 | 不变量 | 同源对账 | **输入空间**（present 条数×路径形态×事件序，见 B.5） |
-| `tests/run/replay-request.test.mjs` | 360 / 22 | 同源对账 | 假绿 oracle、消费者清单 | **归一化边界的对偶矩阵**（见 B.6） |
-| `tests/pack/method-library-io.test.mjs` | 102 / 7 | 路径/形态矩阵 | 状态交错 | **空格/unicode/超长 + 读写同源显式对账**（见 B.7） |
-| `tests/run/run-lock.test.mjs` | 63 / 4 | 状态交错 | 边界表 | **跨进程真并发 + pid 复用长龄**（见 B.8） |
+| `tests/run/review-readiness.spec.mjs` | 233 / 21 | 例子集合 | 边界表、同源对账 | **生成矩阵**（唯一没有的，见 B.1） |
+| `tests/cockpit/library-fold.spec.mjs` | 507 / 41 | 例子集合（夹具电池） | 边界表、单点 round-trip | **语法变体笛卡尔 + fold⇄write 同源**（见 B.2） |
+| `tests/run/node-gate-witness.spec.mjs` | 433 / 29 | 状态交错 | 消费者清单、假绿 oracle | **时刻×绑定的组合矩阵**（见 B.3） |
+| `tests/contracts/verdict-conformance.spec.mjs` | 89 / 5 | **不变量 + 笛卡尔矩阵** | 边界表 | **编码变体**（BOM/CRLF/U+3000 不在矩阵里，见 B.4） |
+| `tests/contracts/present-version-conformance.spec.mjs` | 49 / 4 | 不变量 | 同源对账 | **输入空间**（present 条数×路径形态×事件序，见 B.5） |
+| `tests/run/replay-request.spec.mjs` | 360 / 22 | 同源对账 | 假绿 oracle、消费者清单 | **归一化边界的对偶矩阵**（见 B.6） |
+| `tests/pack/method-library-io.spec.mjs` | 102 / 7 | 路径/形态矩阵 | 状态交错 | **空格/unicode/超长 + 读写同源显式对账**（见 B.7） |
+| `tests/run/run-lock.spec.mjs` | 63 / 4 | 状态交错 | 边界表 | **跨进程真并发 + pid 复用长龄**（见 B.8） |
 
-### B.1 `review-readiness.test.mjs` —— 例子集合 + 跨实现对账，缺矩阵
+### B.1 `review-readiness.spec.mjs` —— 例子集合 + 跨实现对账，缺矩阵
 
 **形状**：21 例，绝大多数是「一种写法 → 一个期望」。头注 `:1-13` 是本文见到的**最好的判据头注**：
 它把三条反证配方逐条写成「改回 X → 用例 N 红」（`:9-12`），而不是笼统说「有负例」。
@@ -227,16 +227,16 @@ DSH 最接近的替代物是**全仓语法守卫**：`vendor/dsh/scripts/verify-
 「同行两个判定，谁说了算」，输入空间 = (位置) × (值) × (散文前导) × (包裹形态)。
 现有 21 例覆盖了这个空间的**约 8 个点**，且全部来自三张卡的报告行。
 
-**这个缺口现在被补上了，但补在另一个文件里**：`tests/contracts/verdict-conformance.test.mjs:68-88`
+**这个缺口现在被补上了，但补在另一个文件里**：`tests/contracts/verdict-conformance.spec.mjs:68-88`
 就是那个矩阵。所以真实状态是「**矩阵存在，但与 21 例的回归集分居两个文件、两套命名**」——
 搜索「readiness」的人会命中前者，搜索「不变量」的人命中后者，两者互不指认。
 这是组织缺口不是能力缺口，修法成本 ≈ 两行交叉引用。
 
-### B.2 `library-fold.test.mjs` —— 夹具电池，缺语法笛卡尔与写侧同源
+### B.2 `library-fold.spec.mjs` —— 夹具电池，缺语法笛卡尔与写侧同源
 
 **形状**：41 例。核心是 **「自测例电池」**（`:226-230` 定义、`:233-330` 十个「电池·X」用例）：
 一份 12 条条目的夹具 `SELFTEST_LIBRARY`（单一正本在 `scripts/lib/selftest-library.mjs`，
-与 `client-load-smoke` 自测工作区共用），逐条断言。这个形状的价值是**夹具与冒烟共享**，
+与 `client-load.entry` 自测工作区共用），逐条断言。这个形状的价值是**夹具与冒烟共享**，
 防形态漂移——比每个测试自带内联字符串强。
 
 **已有的类级成分**：
@@ -260,13 +260,13 @@ DSH 最接近的替代物是**全仓语法守卫**：`vendor/dsh/scripts/verify-
 
 这 8 条的共同命题只有一句：**「同一段标题文本，fold（读）与 upsert（定位）必须给出同一个名字」**。
 每次修完只补了报告里的那一个字符串，于是下一次换一个空白类/括号类/后缀类就复发。
-`method-library-write.test.mjs` 里虽然有 `foldLibrary(result.text)` 的 round-trip（`:25`、`:31`），
+`method-library-write.spec.mjs` 里虽然有 `foldLibrary(result.text)` 的 round-trip（`:25`、`:31`），
 但**只在 canonical 形态上跑**，且**在另一个文件里**——两个文件的断言从不交叉验证同一输入。
 
 **这一族的类级守卫形态本该是**：括号宽度 × 段顺序 × 分隔符空白类 × 后缀 × 标记位置 的笛卡尔，
 oracle = 「`fold(h).name` 命中的行 == `upsert` 命中的行」（见 §D 示例二）。
 
-### B.3 `node-gate-witness.test.mjs` —— 状态交错 + 假绿 oracle，缺组合维
+### B.3 `node-gate-witness.spec.mjs` —— 状态交错 + 假绿 oracle，缺组合维
 
 **形状**：29 例，是本文见到的**最接近「状态交错」**的本仓样本。它的骨架是**真实语料形状的
 夹具构造器**（`:24-70`）：
@@ -297,7 +297,7 @@ user-question-reply 20 条；reply 正文是 `{answers:[{id,selected:[…]}]}`�
 时限{纪元前/纪元后} × 版本{v1/v2/末条无版本}。现在覆盖 ≈ 11/24 个点，且 `:420`（BUG-156
 版本配对）是**最后一个被发现的**——它正是 (版本 × 末条) 这一维的交叉点。
 
-### B.4 `verdict-conformance.test.mjs` —— 本仓最标准的类级样本
+### B.4 `verdict-conformance.spec.mjs` —— 本仓最标准的类级样本
 
 **形状**：5 个用例，恰好是「四条不变量 + 一个生成矩阵」：
 
@@ -318,7 +318,7 @@ user-question-reply 20 条；reply 正文是 `{answers:[{id,selected:[…]}]}`�
 「encoding (full-width/half-width, U+3000, BOM, CRLF)」列进必覆盖清单，而本文件没照做。
 **这是本仓「写对了形态但漏了一维」的典型**，也是成本最低的一处补强（加两行 `for`）。
 
-### B.5 `present-version-conformance.test.mjs` —— 纯不变量，无空间
+### B.5 `present-version-conformance.spec.mjs` —— 纯不变量，无空间
 
 **形状**：4 条不变量（`:19`/`:26`/`:33`/`:38`），零矩阵。
 - 不变①：交付版本只认 present 事件路径，正文提及 v9 不算。
@@ -333,7 +333,7 @@ user-question-reply 20 条；reply 正文是 `{answers:[{id,selected:[…]}]}`�
 **缺口**：`null` 的三态语义（无版本 / 未交付 / 有版本）只有 `:26` 一个点；present 条数从 0 到 N
 只测了 1 和 2。若将来出现「present 只发 v2、v1 从未发」这类形态，无从判断。轻，但便宜。
 
-### B.6 `replay-request.test.mjs` —— 同源对账 + 假绿 oracle
+### B.6 `replay-request.spec.mjs` —— 同源对账 + 假绿 oracle
 
 **形状**：22 例，几乎每一例都是一条「比较器语义」的**边**：
 
@@ -355,7 +355,7 @@ user-question-reply 20 条；reply 正文是 `{answers:[{id,selected:[…]}]}`�
 runtime context（例如 cwd 之外的某个根），第三条 replace 的句式就失配，而测试不会红——
 **这正是 `:30` 注释里已记过一次的失效形态（0.2.1 换 pin 时 persona 归一化变死规则）**。
 
-### B.7 `method-library-io.test.mjs` —— 路径/形态矩阵（本仓最佳路径样本）
+### B.7 `method-library-io.spec.mjs` —— 路径/形态矩阵（本仓最佳路径样本）
 
 **形状**：7 例，每例一个**形态**，且每例都断言「外部文件不变」这个**世界侧真值**：
 
@@ -372,11 +372,11 @@ runtime context（例如 cwd 之外的某个根），第三条 replace 的句式
 强在三点：①**每个形态都覆盖双向**（该拒的拒 + 外部世界没变）；②`:92` 把「错误信息可操作」
 当契约测；③锁族的四个变体（活/死/旧 owner/长龄）是同一状态机的四个边。
 
-**缺口**：①没有空格/unicode/超长路径（`replay-scene.test.mjs:196` 有「路径含空格」的先例，
+**缺口**：①没有空格/unicode/超长路径（`replay-scene.spec.mjs:196` 有「路径含空格」的先例，
 可移植）；②「读路径与写路径用同一判据」是**逐个断言**而非显式对账——现在靠每个 test 都调
 `assert.throws` 间接证明，若将来只改一侧，另一侧的测试仍绿（这是 081 族的同构失败）。
 
-### B.8 `run-lock.test.mjs` —— 状态交错，缺真并发
+### B.8 `run-lock.spec.mjs` —— 状态交错，缺真并发
 
 **形状**：4 例，覆盖建锁原子性（`:14`）、死 pid 接管（`:30`）、**创建窗口**（`:42`，且断言
 「必须给创建者 ≥100ms 宽限」而不是断言「最终拿到了」）、释放所有权（`:54`）。
@@ -388,7 +388,7 @@ runtime context（例如 cwd 之外的某个根），第三条 replace 的句式
 **缺口**：①**同进程两次调用 ≠ 跨进程并发**——真正的并发面（两个进程各自 `acquireRunLock`）
 需要子进程，测试没有；而 DSH 的判据恰好是「run independent test processes concurrently」
 （`dsh-ci-test-reliability/SKILL.md` §Prove the intended regression）。②pid 复用的长龄分支
-只在 `method-library-io.test.mjs:92` 测过（另一个模块的锁），`run-lock` 自己没有。
+只在 `method-library-io.spec.mjs:92` 测过（另一个模块的锁），`run-lock` 自己没有。
 
 ---
 
@@ -479,7 +479,7 @@ round-trip 天然覆盖；**用户手写的等价形态**只能靠 `HEADS` 表�
 
 | 项 | 内容 |
 |---|---|
-| **适用失败类** | 「新工件/字段/角色/文案键出现后，N 个消费者里有一个没学会」。本仓实例：`presets-wiring.test.mjs:79`（每个技能都有消费面）、`:57`（skill-filesystem 与 tool-skill 成对）、`navigability-contract.test.mjs:65`/`:76`/`:85`（索引覆盖全量入口、每组 ≥1 consumer）、`test-surface`（每模块有直测或登记） |
+| **适用失败类** | 「新工件/字段/角色/文案键出现后，N 个消费者里有一个没学会」。本仓实例：`presets-wiring.spec.mjs:79`（每个技能都有消费面）、`:57`（skill-filesystem 与 tool-skill 成对）、`navigability-contract.spec.mjs:65`/`:76`/`:85`（索引覆盖全量入口、每组 ≥1 consumer）、`test-surface`（每模块有直测或登记） |
 | **输入空间** | **生产者集合**（从盘上扫，不手写），每个生产者 → 消费者集合。判据双向：零孤儿（每个生产者有消费者）+ 全覆盖（每个声明面被覆盖） |
 | **oracle** | 集合相等 / 覆盖为真；且**防空语料**（扫到 0 个即红） |
 | **负控** | 临时新增一个生产者（未登记）→ 必须红；删掉一条登记 → 必须红 |
@@ -630,8 +630,8 @@ test('负控：<邻近形态> 必被拒', () => { assert.equal(judge(NEIGHBOR), 
    （双址 `_backlog/bugs/` ∪ `_backlog/_archived/fixed_bugs/`）。**因此类级守卫的正确做法是
    标题写不变量、不写 BUG 号**——BUG 号进留证块。否则一个矩阵文件会挂上七八个 BUG 号，
    每个都要一条配方，而矩阵本身只有一条红法。
-3. **文件名带 `*-conformance.test.mjs` 会自动触发义务**：`f-repo.mjs:159-164` 对
-   `*conformance.test.mjs` 一律要求「负例留证/夹具留证」块，**即使标题里没有 BUG 号**。
+3. **文件名带 `*-conformance.spec.mjs` 会自动触发义务**：`f-repo.mjs:159-164` 对
+   `*conformance.spec.mjs` 一律要求「负例留证/夹具留证」块，**即使标题里没有 BUG 号**。
    这是本仓一个隐式的命名即契约（用好了很省事：命名即声明「我是判据测试」）。
 
 ### D.2 示例一：readiness 族（BUG-046 → 074 → 141 → 150）
@@ -649,7 +649,7 @@ test('负控：<邻近形态> 必被拒', () => { assert.equal(judge(NEIGHBOR), 
 因为自然语言里"引用"的表达是开放的，任何关键词白名单都是对开放集合的有限枚举。
 类名 = **「仲裁依据必须是结构位置，不能是词法特征」**。
 
-**守卫**（`tests/contracts/verdict-conformance.test.mjs`，已在位）：
+**守卫**（`tests/contracts/verdict-conformance.spec.mjs`，已在位）：
 
 ```
 不变量① 结构位置 → 采用（9 种装饰前缀 × 2 值的笛卡尔）           :16-25
@@ -678,9 +678,9 @@ test('负控：<邻近形态> 必被拒', () => { assert.equal(judge(NEIGHBOR), 
 
 **一个反面教训**：BUG-150 的修法（去掉关键词）本身是对的，但**修法落地在 `lastInlineVerdict`，
 而守卫在 `verdict-conformance`**——两者之间没有指针。下次有人改 `lastInlineVerdict`，
-`review-readiness.test.mjs` 的 21 例会红，`verdict-conformance` 也会红，但**没人知道去跑后者**
-（`guides/60 §2` 的路由表只写「改判据 → 对应 `tests/<domain>/*.test.mjs`」）。
-修法成本 ≈ 在 `review-readiness.test.mjs` 头注加一行「矩阵正本见 verdict-conformance」。
+`review-readiness.spec.mjs` 的 21 例会红，`verdict-conformance` 也会红，但**没人知道去跑后者**
+（`guides/60 §2` 的路由表只写「改判据 → 对应 `tests/<domain>/*.spec.mjs`」）。
+修法成本 ≈ 在 `review-readiness.spec.mjs` 头注加一行「矩阵正本见 verdict-conformance」。
 
 ### D.3 示例二：方法库标题族（BUG-081/085/093/123/124/127/128/138）
 
@@ -737,10 +737,10 @@ test('负控：带未识别后缀的标题 → upsert 抛错，而不是新建',
 
 **成本**：`2×2×5×2 = 40` 个标题 × 一次 upsert + 一次 fold，纯字符串操作，估算 < 50ms。
 放在 `tests/cockpit/`（`tests/AGENTS.md` 的域映射：pack `src/lib` → `cockpit/`），
-或独立成 `tests/cockpit/library-heading-consistency.test.mjs`——**不要**叫 `*-conformance.test.mjs`
+或独立成 `tests/cockpit/library-heading-consistency.spec.mjs`——**不要**叫 `*-conformance.spec.mjs`
 除非你愿意同时交出 `负例留证` 块（`f-repo.mjs:159-164` 会强制）。
 
-**为什么这条能一次咬住 8 个变体，而 41 例的 `library-fold.test.mjs` 没有**：
+**为什么这条能一次咬住 8 个变体，而 41 例的 `library-fold.spec.mjs` 没有**：
 
 | | 41 例（现状） | 40 格矩阵（建议） |
 |---|---|---|
@@ -757,7 +757,7 @@ test('负控：带未识别后缀的标题 → upsert 抛错，而不是新建',
 |---|---|---|
 | **矩阵剧场** | 很多行，但改一个 `if` 只让一格红——等价于「一条路径 + 多维装饰」 | 判据：给矩阵每格标注它走的分支；若 > 80% 的格落在同一分支，砍维。`verdict-conformance:72-80` 的 32 格里真正分支只有 2 个（`lead === ''` / 否则），所以它的价值在**负控与期望生成规则**，不在格数——认清这一点才不会继续加维 |
 | **过拟合报出的输入** | 修复提交里新增的用例，全部取自带 BUG 卡的症状表 | **BUG-141 → 150** 是教科书案例：141 的修复把关键词表从 6 个扩到 8 个，新增的两个词正是 141 报告里的「现在/新判定」；150 的四种措辞一个都不在表内。修法 = 类级规则（结构位置），不是扩表 |
-| **把实现当行为** | 断言的对象是源码文本/正则/结构，而非运行结果 | `tests/pack/export-shape.test.mjs:24`（对源文本 `doesNotMatch(/export\s+default/)`）——它的失效形态已在 `special-topics.md §1.3` 登记。另一类是「断言渲染出的字符串」，但 `library-fold.test.mjs:391` 断 `renderLibraryEntry` 的输出格式，这是**与 Lead 的契约**（skill 契约要求该形态），不算反模式——**区分标准：这段文本有外部消费者吗** |
+| **把实现当行为** | 断言的对象是源码文本/正则/结构，而非运行结果 | `tests/pack/export-shape.spec.mjs:24`（对源文本 `doesNotMatch(/export\s+default/)`）——它的失效形态已在 `special-topics.md §1.3` 登记。另一类是「断言渲染出的字符串」，但 `library-fold.spec.mjs:391` 断 `renderLibraryEntry` 的输出格式，这是**与 Lead 的契约**（skill 契约要求该形态），不算反模式——**区分标准：这段文本有外部消费者吗** |
 | **夹具迁就谓词** | 修复一并改了夹具，使判据「看起来」通过 | test-asset-fence 的 S0 明确拒绝了这条路：`run-accept` 第 ⑦ 段红的原因是夹具创建了 `review/` 却没有 `review/readiness.json`，**没有**去放宽 `readinessOfSources`，也没有改 `## readiness: PASS` 标题（`_backlog/issues/2026-11-13-test-asset-fence.md` §方案与取舍：「不改标题：`terminalReadiness` 会剥 `##` 读成 PASS，改标题是误诊」） |
 | **归一化凑绿** | 为了让新录制/新环境通过，给比较器加 replace | `scripts/lib/replay-request.mjs:23` 已把这条堵死（persona 归一化**清零**，而不是「加一条 replace」）；`snapshots/README.md` 写「只许重写、不许放宽比对」；反面教材 = `docs/postmortem/0002`（refresh 把 `UNKNOWN_TOOL` 当成新金标准，「A snapshot refresh is fixture production, not correctness review」） |
 | **只交付绿** | 没有红过的守卫 | `guard-red-record` 门禁就是为这条存在的（`f-repo.mjs:129-184`）。注意门禁自己声明了边界：「它不制造回归不跑测试，故**不证明留证是真的**」——留证写了但假，门禁看不出。**这是本仓唯一无法机械化的诚实缺口，必须靠人复现一次** |
@@ -798,8 +798,8 @@ test('负控：带未识别后缀的标题 → upsert 抛错，而不是新建',
 | 情形 | 为什么不需要 | 本仓实例 |
 |---|---|---|
 | 纯算术 / 纯折算 | 输入空间连续，代数性质（交换/结合/单位元）比矩阵强 | `src/lib/*-fold.mjs` 的计数类 |
-| **封闭枚举 + 写入方唯一** | 等价类只有一个，矩阵是剧场 | locale key 集合（`tests/pack/client-locale.test.mjs`）、协议常量 `TOOL_TIMEOUT` |
-| **否决式不变量**（X 不能影响 Y） | ∀ 已在命题里，举例即证 | `present-version-conformance.test.mjs:19`（正文提及任何版本都不算） |
+| **封闭枚举 + 写入方唯一** | 等价类只有一个，矩阵是剧场 | locale key 集合（`tests/pack/client-locale.spec.mjs`）、协议常量 `TOOL_TIMEOUT` |
+| **否决式不变量**（X 不能影响 Y） | ∀ 已在命题里，举例即证 | `present-version-conformance.spec.mjs:19`（正文提及任何版本都不算） |
 | 路径来源是受控常量 | 无攻击面 | 仓内 `join(ROOT, …)` 的拼装 |
 | 单次调用契约 | 没有输入变体，只有调用方契约 | `export-shape`（应改成 `unwrapExports` 往返，不是矩阵） |
 
@@ -809,9 +809,9 @@ test('负控：带未识别后缀的标题 → upsert 抛错，而不是新建',
 
 | 判据需要什么 | 落点 | 理由 |
 |---|---|---|
-| 运行行为（同一函数在不同输入下返回什么） | `tests/`（形态 1/2/4/6） | grep 判不出「猜不猜」（`verdict-conformance.test.mjs:3` 的原话） |
-| 全仓静态一致性（每个文件都有 X） | `verify/gates/<域>.mjs`（形态 3 的静态版） | 需要跨全仓扫；有 `gates-smoke` 注入案例可复用 |
-| 「守卫本身会不会咬人」 | `gates-smoke` 注入案例表 | 本仓 108 个注入案例（fence 研究 `:77`），**新增门禁必须同 diff 加案例**（`scripts/AGENTS.md` 新增或改门禁节） |
+| 运行行为（同一函数在不同输入下返回什么） | `tests/`（形态 1/2/4/6） | grep 判不出「猜不猜」（`verdict-conformance.spec.mjs:3` 的原话） |
+| 全仓静态一致性（每个文件都有 X） | `verify/gates/<域>.mjs`（形态 3 的静态版） | 需要跨全仓扫；有 `gates.e2e` 注入案例可复用 |
+| 「守卫本身会不会咬人」 | `gates.e2e` 注入案例表 | 本仓 108 个注入案例（fence 研究 `:77`），**新增门禁必须同 diff 加案例**（`scripts/AGENTS.md` 新增或改门禁节） |
 | 一次性红证（本文件不常驻） | 测试头注的「负例留证」块 | `guard-red-record` 机械对账块的存在，不对账内容真假 |
 
 ---

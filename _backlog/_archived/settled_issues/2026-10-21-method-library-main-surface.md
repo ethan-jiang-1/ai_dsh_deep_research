@@ -40,7 +40,7 @@ opened: 2026-10-21
 - [library-fold.ts](../../../packages/deep-research-pack/src/lib/library-fold.ts) 加 `saveInstruction` /
   `renderLibraryEntry` / `renderLibrary`；[ResearchConfigTab.tsx](../../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx)
   `COMPACT` 只渲染摘要 + 入口。
-- 测试：[library-fold 测试](../../../tests/cockpit/library-fold.test.mjs) + `client-load-smoke` 的
+- 测试：[library-fold 测试](../../../tests/cockpit/library-fold.spec.mjs) + `client-load-smoke` 的
   方法库 tab/编辑/新建/内置参考断言与侧栏管理区负例。
 
 ## 验收标准

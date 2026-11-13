@@ -26,10 +26,10 @@
 ## 实际跑过的验证
 
 - **L0**：`pnpm verify` 全绿；`pnpm test` **1178 pass / 0 fail**；`pnpm typecheck` 通过（M0–M3 记录）。
-- **M1**：`tests/run/strategy-core.test.mjs` 6 例（null / quick spawn / team / back-edge / wave / lenses）；红证 = `channelOf` 永远返回 `spawn` → Team 例红，恢复绿。
-- **M3**：`tests/run/protocol-core.test.mjs` 24 例 + 预算 2 例（带单位散文对账、读不出必红）；红证 = 翻转 nodes 比较 → 单例红；删 `checkStrategy` 调用 → strategy 例红；散文预算旧实现绿 / 新实现红。四个真实 bundle 复核：quick A/B PASS；landscape/regulatory 协议收口后 PASS（0 误伤）。
-- **M0**：`tests/cockpit/library-fold.test.mjs` 多行 round-trip（红证 = 回退 `value.trim()` → 红）；`tests/cockpit/method-library-views.test.mjs` 编辑态名称 readonly（红证 = 删 `readOnly` → 红）；`tests/cockpit/research-config-source.test.mjs` 钉 run 前入口（红证 = 改回死文案 → 红）。GUI：`client-load-smoke` 强制档 **ALL PASS**（主机 free < 512MB 自拒，用 `DSH_CLIENT_LOAD_ALLOW_UNHEALTHY=1` 实跑；非清洁档）。
-- **M2**：`tests/pack/research-brief-contract.test.mjs` 2 例；`tests/pack/content-coverage.test.mjs` 排除 `*_map` 近形扫描（红证实跑）；L1 `preset-smoke` ALL PASS（5 角色 + 2 worker）；L4-lite ALL PASS（5 角色 + method-editor + scout 工具调用）。
+- **M1**：`tests/run/strategy-core.spec.mjs` 6 例（null / quick spawn / team / back-edge / wave / lenses）；红证 = `channelOf` 永远返回 `spawn` → Team 例红，恢复绿。
+- **M3**：`tests/run/protocol-core.spec.mjs` 24 例 + 预算 2 例（带单位散文对账、读不出必红）；红证 = 翻转 nodes 比较 → 单例红；删 `checkStrategy` 调用 → strategy 例红；散文预算旧实现绿 / 新实现红。四个真实 bundle 复核：quick A/B PASS；landscape/regulatory 协议收口后 PASS（0 误伤）。
+- **M0**：`tests/cockpit/library-fold.spec.mjs` 多行 round-trip（红证 = 回退 `value.trim()` → 红）；`tests/cockpit/method-library-views.spec.mjs` 编辑态名称 readonly（红证 = 删 `readOnly` → 红）；`tests/cockpit/research-config-source.spec.mjs` 钉 run 前入口（红证 = 改回死文案 → 红）。GUI：`client-load.entry` 强制档 **ALL PASS**（主机 free < 512MB 自拒，用 `DSH_CLIENT_LOAD_ALLOW_UNHEALTHY=1` 实跑；非清洁档）。
+- **M2**：`tests/pack/research-brief-contract.spec.mjs` 2 例；`tests/pack/content-coverage.spec.mjs` 排除 `*_map` 近形扫描（红证实跑）；L1 `preset.e2e` ALL PASS（5 角色 + 2 worker）；L4-lite ALL PASS（5 角色 + method-editor + scout 工具调用）。
 - **M4 pilot（3 场，dev 通道；HITL 均为操作侧代理模拟并逐条记入 bundle §Decisions/journal）**：
   - quick A `drt_deepseek-chat-context-limits`：HITL1 卡 output/source 未上卡（M2 gap 实测）；修 persona 后 quick B 上卡。`protocol-audit` deviation-shape → 修 authority → PASS；`run-accept` PASS。
   - quick B `drt_anthropic-claude-api-limits`：HITL1 Q2/Q3 typed（`quick_answer` / official）；`protocol-audit` PASS；`run-accept` PASS。

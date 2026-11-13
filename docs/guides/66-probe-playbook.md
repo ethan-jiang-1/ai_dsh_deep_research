@@ -92,7 +92,7 @@ probes/
 - `何时跑` 越具体越好：改了什么、什么时候必须重跑。
 - `不证明` 不是免责声明，是防止别人把绿读大；没有它，探针会变成新的假绿来源。
 - `档位` 申报凭据与调用模式：真模型档必须登记在
-  [smoke-contract](../../tests/contracts/smoke-contract.test.mjs) 的 `REAL_MODEL` 闭集。
+  [smoke-contract](../../tests/checks/smoke-contract.test.mjs) 的 `REAL_MODEL` 闭集。
 - 端口：每个脚本独占固定端口（`scripts/AGENTS §端口与临时路径自持有`），由 `port-exclusive`
   门禁把守；不要改成 `--port 0`。
 

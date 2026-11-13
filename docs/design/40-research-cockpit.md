@@ -43,7 +43,7 @@
 
 关闭用 Loader 的第一类语义（后置 bundle 层按 id `disabled: true`），不是 CSS 隐藏或改名——隐藏的行
 仍在挂载，快捷键、菜单与后续版本仍可能暴露。机器判据 =
-[bundle-composition](../../tests/vendor/bundle-composition.vendor.mjs)：按 profile 层序组合出真实 entry 树，
+[bundle-composition](../../tests/vendor/bundle-composition.vendor.spec.mjs)：按 profile 层序组合出真实 entry 树，
 断言零跳过（任何 `- id:` 落空即红：上游改名会让关闭行静默失效）与上表两侧。像素面（页签真的只剩
 两个、右栏真的没有终端入口）由真 Web 证据承担，两者不合一。
 
@@ -133,7 +133,7 @@
 | [member-activity](../../packages/deep-research-pack/src/lib/member-activity.ts) | 队员 journal 事件 → 检索/抓取/出错动作行 + 全量计数 | 粒度定夺 = [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)（2026-10-10 用户三问：文件读写不入流）；失败行剥 "Error: " 工程前缀；行截尾窗与 activity-fold 同款 |
 | [brief-fold](../../packages/deep-research-pack/src/lib/brief-fold.ts) | 既有事实源投影 → 业务摘要五问 | 输入面**不含**证据计数与工具调用数（计数在类型层面进不了完成态文案，keyless 禁词单测钉）；九态优先级 = 挂起 > 立项预检窗 > 未绑定 > 审查 FAIL > 已交付 > 推进中；派生不出的状态显式缺省，不虚构 |
 | [workspace-title](../../packages/deep-research-pack/src/lib/workspace-title.ts) | 工作区目录名 → 产品标题 | 前缀单一正本（client 的 startsWith 过滤与 host 的登记标题共用）；空名 = `Deep Research` |
-| [review-readiness](../../packages/deep-research-pack/src/lib/review-readiness.ts) | review.md 全文 → 终局 readiness 三态 | 只认**行首**判定行、取最后一条：文末附录保留的轮次血统（如首轮 `readiness: FAIL`）是行内引用，不得夺权；空模板 `PASS \| FAIL`、无判定行或输入畸形 → `null`（不猜）。驾驶舱、仪表盘与 client-load-smoke 直接消费；node-gate 在纯 `.mjs` 边界镜像同一规则并由 `gateBundle` 回归覆盖 |
+| [review-readiness](../../packages/deep-research-pack/src/lib/review-readiness.ts) | review.md 全文 → 终局 readiness 三态 | 只认**行首**判定行、取最后一条：文末附录保留的轮次血统（如首轮 `readiness: FAIL`）是行内引用，不得夺权；空模板 `PASS \| FAIL`、无判定行或输入畸形 → `null`（不猜）。驾驶舱、仪表盘与 client-load.entry 直接消费；node-gate 在纯 `.mjs` 边界镜像同一规则并由 `gateBundle` 回归覆盖 |
 | [text-fold](../../packages/deep-research-pack/src/lib/text-fold.ts) | markdown 行内文本 → 可进纯文本节点的文本 | 剥 `**` 与反引号 ＋ 压空白 ＋ 截断补省略号；状态页签与配置页签共用本件（`**` 字面星号上卡面、长摘要拉爆列表——唯一正本在本件） |
 | [method-of-question](../../packages/deep-research-pack/src/lib/method-of-question.ts) | question.md 文本 ＋ bundle 在场性 → 「本次研究」区五态 | 无 run／文件缺／未记录／无法判定／已记录；**判不了就说判不了**——绝不回落成默认打法名（旧 run 未记录 = 合法形态，不回填）；读方法节须显式足额 limit（模板第 32–40 行卡默认 40 行，BUG-026 同族） |
 | [receipt-fold](../../packages/deep-research-pack/src/lib/receipt-fold.ts) | 发送结果 ＋ 回话信号 ＋ 库前后快照 → 回执三态与 diff | 已发送（prompt ok）／Lead 已回话（发送**之后**的 assistant 事件）／已落盘（回读对账出 diff：`把「找来源」从 A 改成 B`）；对账读不出变化就退到已回话，不冒充落地 |
@@ -314,26 +314,26 @@ composer 左侧 `conversation.input.left` 的状态按钮（有 session 才渲�
   `src/client/locales/{zh,en}.ts`；数据面折层输出住 `{zh,en}-fold.ts`，函数接受 `PackTranslate`、UI 传
   `props.t`；产品文案（内置打法/领域示范等 canonical 表）**不翻译 canonical 本身**，UI 经显示投影取词，
   动作/库格式/模型 prompt 继续用 canonical；模型面 prompt 与用户内容/技术标识不翻译。守卫 =
-  `tests/cockpit/{builtin-display,locales,i18n,cjk-source}.test.mjs`；新增/修改文案步骤 =
+  `tests/cockpit/{builtin-display,locales,i18n,cjk-source}.spec.mjs`；新增/修改文案步骤 =
   [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)。
 - **默认语言 = 中文**（D49）：bundle patch 把 `locale.preference` 钉到 `zh`，装包即中文、不跟随浏览器
   语言；用户显式选择住 profile patch 层，仍可切 English。
 - **页签自带滚动口**：vendor `.tabBody` 是定高 flex 列且 `overflow: hidden`——页签体必须自己开内
   滚动区（根 `flex: 1; minHeight: 0`，内容区 `overflowY: auto`），否则长内容被裁且滚不动（2026-10-12
-  状态页、2026-10-20 终稿页各踩一次；`client-load-smoke` 断言终稿滚动口可动）；
+  状态页、2026-10-20 终稿页各踩一次；`client-load.entry` 断言终稿滚动口可动）；
 - **会话绑定**：渐进面只显示**本会话自己的** run bundle（不显示别家数据）；位置只用于发现，
   三个位置都认（根 / `archive/` / `_abandoned/`），状态从内容读（D28）；未绑定如实提示；写强读弱 +
   挂起期抑制仅读绑定的渐进面（预检读取不算"本会话的 run"）。
 - **页签内区块归属**：每个页签的头部/正文/底部以 §2 的页签行为准；新增块先在该行写归属区
   （图谱：头部 = 只读标记 + plan/task 计数；正文首行 = 版本轨；其下 = 覆盖率 + 刷新时刻），不另立第二套布局说明。
-- **发现规则单源**：驾驶舱 client 的三位置发现实现 = `src/lib/run-context.ts`；机械侧 = `run-context-single-source`（`src/client` 非注释 `_abandoned` 即红；`src/lib` 的终稿地址校验不在词法门禁范围）。`dev/hitl-answer` 与 `dev/run-kickoff` 的盘侧路径枚举、`run-dashboard` 投影与 `client-load-reference` oracle 各自保留，不在此行。
+- **发现规则单源**：驾驶舱 client 的三位置发现实现 = `src/lib/run-context.ts`；机械侧 = `run-context-single-source`（`src/client` 非注释 `_abandoned` 即红；`src/lib` 的终稿地址校验不在词法门禁范围）。`dev/hitl-answer` 与 `dev/run-kickoff` 的盘侧路径枚举、`run-dashboard` 投影与 `client-load-reference.support` oracle 各自保留，不在此行。
 
 ## 5. 验证面与改动路由（索引，非正文）
 
 | 面 | 入口 | 断言什么 |
 |---|---|---|
-| keyless 真浏览器 | [client-load-smoke](../../scripts/smoke/client-load-smoke.mjs) | 装配零失败 + 页签渲染 + 渐进面与**磁盘真值对账** + 未绑定负样本 + 终稿端到端（细则以脚本为准） |
-| 真模型档 | [client-hitl-smoke](../../scripts/smoke/client-hitl-smoke.mjs) | 活标题翻转 + 横幅 + 挂起迁移 → 右栏自动展开 |
+| keyless 真浏览器 | [client-load.entry](../../scripts/smoke/client-load.entry.mjs) | 装配零失败 + 页签渲染 + 渐进面与**磁盘真值对账** + 未绑定负样本 + 终稿端到端（细则以脚本为准） |
+| 真模型档 | [client-hitl.entry](../../scripts/smoke/client-hitl.entry.mjs) | 活标题翻转 + 横幅 + 挂起迁移 → 右栏自动展开 |
 | keyless 单测 | `pnpm test` | §2 所列折算各有测试文件 |
 
 命令与改动次序 = [guides/60 §2](../guides/60-dev-loop.md)「改驾驶舱」行；判据 = [evaluation](../evaluation.md) §L0/L1/L4。本页不复述命令表。
@@ -346,7 +346,7 @@ composer 左侧 `conversation.input.left` 的状态按钮（有 session 才渲�
   会话（settings 源才记 sessionId）；不自动复用已有 blank 会话。真实使用出现会话堆积时再实现
   复用（触发 = [_backlog/triggers.md](../../_backlog/triggers.md)）。
 
-- **run-dashboard / client-load-reference oracle 保留独立**：dashboard 是同步 HTML 投影，oracle 的价值在独立（复用生产实现会掩盖漂移）；两者不复用 run-context，边界见 [run-context Note](../../notes/implemented/2026-10-23-run-context.md)。
+- **run-dashboard / client-load-reference.support oracle 保留独立**：dashboard 是同步 HTML 投影，oracle 的价值在独立（复用生产实现会掩盖漂移）；两者不复用 run-context，边界见 [run-context Note](../../notes/implemented/2026-10-23-run-context.md)。
 
 - **G6 编辑卡片跨会话串联（vendor UI，待查）**：操作侧改动曾混进 run 会话视图；lead journal
   核实无 harness 写入，归 vendor UI 归属问题；历史根因链 = [归档中国 cockpit-flow-face](../../notes/archived/2026-09-28-cockpit-flow-face.md)。
@@ -378,7 +378,7 @@ composer 左侧 `conversation.input.left` 的状态按钮（有 session 才渲�
   新会话也能进库，应在 hero/左栏补入口，不改 `conversation.view` 本身。
 
 - **右栏 pane 仍可能钉在上一会话（vendor 面板会话绑定，2026-10-21 实测）**：主视图切到绑定会话 A
-  后，右栏仍显示会话 B 的页签内容（client-load-smoke 实测：active row = d47b…，面板仍是
+  后，右栏仍显示会话 B 的页签内容（client-load.entry 实测：active row = d47b…，面板仍是
   1392… 的 Rerun8 团队/2 subagents）。收起/重开右栏可重绑；状态/图谱页签以 **pane 的 session**
   为准，不把 pane 内容当主视图真值。修复归 vendor 的 pane 会话绑定，不归本页签。
 
@@ -388,7 +388,7 @@ composer 左侧 `conversation.input.left` 的状态按钮（有 session 才渲�
   队员动作走**每人折叠区**（agentTeam 投影发现队员会话 id——spawn 返回不带 id，通道探明实证；
   多路 follow 各自会话）→ member-activity 折算**检索/抓取/出错**粒度（文件读写不入流，用户
   定夺）。边界：① 有团队正例首验 = 下一场真实 run（投影不进 journal，keyless 回放不可造；
-  无团队负例已入 client-load-smoke 常驻断言，spawn 名 ↔ roster 对账断言已编码、届时自动生效）；
+  无团队负例已入 client-load.entry 常驻断言，spawn 名 ↔ roster 对账断言已编码、届时自动生效）；
   ② 每队员 follow 首帧 = 全量历史（量级 ≈ lead 同阶）；③ 分工不双 home——任务粒度归
   `ui-agent-team` 任务板，本区只答动作粒度；
 - **组队步无独立文件**：轨道的组队步在场性随立项（cursor 在"立项完成 → 侦察交付"窗口停靠

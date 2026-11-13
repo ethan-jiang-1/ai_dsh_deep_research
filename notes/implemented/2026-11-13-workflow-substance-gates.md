@@ -29,7 +29,7 @@
   `lastRewrite.why` 空/载体不存在 → 红；暂存区为空 → 无对象（不判）。
 - **旧形态**：无（新规则；旧卡 grandfather，不追改）。
 - **反证**：`backlog-liveness` 两例；`staged-change-pairing` 六例 + 一次性真红录；`guard-red-record`
-  新案例；`gates-smoke` 108 案例全绿。
+  新案例；`gates.e2e` 108 案例全绿。
 
 ## 为什么
 
@@ -55,7 +55,7 @@ D51 的真实链路本身有 6 处违反自己的规则（Note 立项即 impleme
 ## 实际跑过的验证
 
 - `pnpm verify` 全绿；`pnpm test` 1400 通过 / 0 失败；`pnpm typecheck` 绿。
-- `node scripts/smoke/gates-smoke.mjs` 全绿（零注入对照 + 108 个注入案例点名报红）。
+- `node scripts/smoke/gates.e2e.mjs` 全绿（零注入对照 + 108 个注入案例点名报红）。
 - **新门红证（一次性）**：造一张归档卡、只暂存卡不暂存 Note → `staged-change-pairing` 点名红：
   「归档但其去向 Note … 不在同一暂存集」；还原后绿。
 - 新增回归：`backlog-liveness` 2 例、`staged-change-pairing` 6 例、`guard-red-record` 新案例。

@@ -9,7 +9,7 @@
 
 根 README 的源码交付行改为链到 CONTRIBUTING 的 `## From source to first run` 节：clean clone 没有 `_dist/*.tgz`，四段命令 = clone → install + vendor-build → export-dist → profile/团队层/启动；手册“tgz 与本手册同目录”只在交付目录成立，源码路径单独写明。
 
-新增两条常驻面回归：`LEAD_PERSONA_MAX_CHARS` / `RESIDENT_TOTAL_MAX_CHARS` 住 `scripts/lib/content-budget.mjs`，由 `tests/pack/content-disclosure.test.mjs` 把守；`tests/contracts/release-copies.test.mjs` 扫 live 安装文档的版本与 tarball 名，旧副本即红。`product-boot-smoke` 改为等 `[data-testid="deep-research-start"]` 再读 body，消除异步起步卡抢读的假红。
+新增两条常驻面回归：`LEAD_PERSONA_MAX_CHARS` / `RESIDENT_TOTAL_MAX_CHARS` 住 `scripts/lib/content-budget.mjs`，由 `tests/pack/content-disclosure.spec.mjs` 把守；`tests/checks/release-copies.test.mjs` 扫 live 安装文档的版本与 tarball 名，旧副本即红。`product-boot.entry` 改为等 `[data-testid="deep-research-start"]` 再读 body，消除异步起步卡抢读的假红。
 
 ## 输掉的方案
 
@@ -22,9 +22,9 @@
 ## 实际跑过的验证
 
 - `node scripts/dist/export-dist.mjs` → 全绿：`pnpm build` exit 0；185 条目；preset 行 5/5；skill 15；模板 11；手册 0.3.2 / 2026-11-13；`_dist` 只留 0.3.2 tgz。
-- `node scripts/smoke/lifecycle-smoke.mjs` → ALL PASS：market staged、tarball locale/icon、profile 初始化、装 tarball、dump 10 行、真启动 token URL、五个 specifier 中英标题/图标、remove 后 roster 回落。
-- `node scripts/smoke/install-shape-smoke.mjs` → ALL PASS：profile 初始化 → 装 pack → 装团队层 → 真启动无 `did not activate`。
-- `node scripts/smoke/product-boot-smoke.mjs` → RED（3 处起步卡）→ 加显式等待 → GREEN：Orca / Lead / 工作区标题 / 起步卡三行 / session cwd / preset。
+- `node scripts/smoke/lifecycle.entry.mjs` → ALL PASS：market staged、tarball locale/icon、profile 初始化、装 tarball、dump 10 行、真启动 token URL、五个 specifier 中英标题/图标、remove 后 roster 回落。
+- `node scripts/smoke/install-shape.entry.mjs` → ALL PASS：profile 初始化 → 装 pack → 装团队层 → 真启动无 `did not activate`。
+- `node scripts/smoke/product-boot.entry.mjs` → RED（3 处起步卡）→ 加显式等待 → GREEN：Orca / Lead / 工作区标题 / 起步卡三行 / session cwd / preset。
 - `pnpm verify` → 全绿（含 `release-version` / `dist-manual-version` / `dist-tarball` / `dist-manual-fresh` / `md-anchors` / `doc-budgets`）。
 - `pnpm test` → 1,404 pass / 0 fail / 0 skipped / 约 3.9s（新增 `release-copies` + persona 预算；红证：persona 预算改 1 → `lead persona 5,760 > 1` 红；README 改 0.3.9 → `release-copies` 两测红；还原绿）。
 - `pnpm typecheck` → exit 0。
@@ -33,4 +33,4 @@
 
 ## 环境状态
 
-macOS；Node 22.23.1；pnpm 11.7.0；全局 DSH 0.2.1-rc.5。0.3.2 tarball 本地生成；annotated tag `0.3.2` 本地创建，未 push、未 npm publish。`client-load-smoke` 未跑（本轮 L2 由 lifecycle / install-shape / product-boot 覆盖；client-load 需要 Playwright 健康门与种子 home，另档）。
+macOS；Node 22.23.1；pnpm 11.7.0；全局 DSH 0.2.1-rc.5。0.3.2 tarball 本地生成；annotated tag `0.3.2` 本地创建，未 push、未 npm publish。`client-load.entry` 未跑（本轮 L2 由 lifecycle / install-shape / product-boot 覆盖；client-load 需要 Playwright 健康门与种子 home，另档）。

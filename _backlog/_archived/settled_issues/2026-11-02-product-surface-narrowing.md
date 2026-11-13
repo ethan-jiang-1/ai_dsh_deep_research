@@ -6,7 +6,7 @@ opened: 2026-11-02
 # 推敲：产品面收窄——去掉主区 Trajectory 与右栏 New Terminal
 
 > 立卡：2026-11-02 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
-> 去向：none — 载体 = [design/40 §2.0 出厂面契约](../../../docs/design/40-research-cockpit.md#cockpit-surface) + [bundle-composition](../../../tests/vendor/bundle-composition.vendor.mjs)；业务验收：用户（2026-11-03 指示按推荐落地）。
+> 去向：none — 载体 = [design/40 §2.0 出厂面契约](../../../docs/design/40-research-cockpit.md#cockpit-surface) + [bundle-composition](../../../tests/vendor/bundle-composition.vendor.spec.mjs)；业务验收：用户（2026-11-03 指示按推荐落地）。
 
 **问题与期望结果：** 2026-11-02 用户在实际打开产品后反馈：主区 tab 的 **Trajectory** 不需要，右栏的
 **New Terminal** 也不需要——产品用不到这两处 DSH 出厂能力。期望：产品界面只留研究需要的面
@@ -39,7 +39,7 @@ opened: 2026-11-02
 - `_dist/dsh-deep-research-pack-0.3.0.tgz` 内的 `package/cordis.patch.yml` 含两条关闭行（tar 复核）。
 - 回归（2026-11-03 换判据）：原 I5 读我们自己的 YAML —— 只能证明我们写了、证明不了 DSH 认
   （Loader 对落空的 patch 是警告后跳过）。已换成组合层断言
-  [bundle-composition](../../../tests/vendor/bundle-composition.vendor.mjs)：用 Loader 自己的
+  [bundle-composition](../../../tests/vendor/bundle-composition.vendor.spec.mjs)：用 Loader 自己的
   `applyEntryPatches`/`entryListSchema` 按 profile 层序组合 base → web-app → pack（含 presets），
   断言 ① 零跳过 ② 该藏的 disabled、该留的未 disabled。
   - 绿：组合树 192 行、0 条跳过，两行 `disabled: true`（2026-11-03）。

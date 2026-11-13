@@ -43,19 +43,19 @@ Lead 的 goal 生命周期改成「创建后保持 active，直到交付 complet
 
 ## 实际跑过的验证
 
-- **红先**：新增/改写的 `tests/pack/presets.test.mjs`「lead persona 钉 ask 硬约束」在旧
+- **红先**：新增/改写的 `tests/pack/presets.spec.mjs`「lead persona 钉 ask 硬约束」在旧
   persona 上红（17 pass / 1 fail：缺分档句、缺 `timeout: -1`、旧 `update_goal action=pause`
   仍在）；改 persona 后 **18/18 绿**。
 - `pnpm verify`：全绿（含 `overlay-fresh`、`preset-structure`、`backlog-liveness`）。
 - `pnpm test`：**1083 pass / 0 fail**。
-- `DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs`：5 个 preset 全部真挂载
+- `DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs`：5 个 preset 全部真挂载
   **ALL PASS**（lead roster / session/create / skills 隔离）。
-- `node scripts/smoke/snapshot-replay-smoke.mjs`：改 persona 后 lead **B·persona 红 = 已捕获**；
+- `node scripts/smoke/snapshot-replay.entry.mjs`：改 persona 后 lead **B·persona 红 = 已捕获**；
   重录 lead fixture（`codeAnchor=cc492a18`、`vendor=b830ec95`、`recordedAt=2026-11-10T10:14:09Z`）
   并更新 `snapshot.json` 后 **4 场景 ALL PASS**（A 回放 + B 组装 diff + C 金标准）。
   C5 活动行金标准有一行因新录制的模型措辞重写（旧「dshbase.com…」→ 新「8 条结果…」），
   人审后接受；其余渲染面未变。
-- `node scripts/smoke/l4-lite-smoke.mjs`：全角色（含 method-editor）assistant 响应 + scout
+- `node scripts/smoke/l4-lite.e2e.mjs`：全角色（含 method-editor）assistant 响应 + scout
   `web_search` 工具调用 **ALL PASS**。
 - 录制品人审：fixture 的 system/message 含新 persona 的 `HITL2 必须显式 timeout: -1` 与
   `GOAL_TOOL_RESUME_PAUSED` 句；`snapshot.json` 的 lead source 已更新，未改比对规则。
@@ -74,7 +74,7 @@ Lead 的 goal 生命周期改成「创建后保持 active，直到交付 complet
 
 ## 环境状态
 
-- 改：`packages/deep-research-pack/presets/lead.patch.yml`、`tests/pack/presets.test.mjs`、
+- 改：`packages/deep-research-pack/presets/lead.patch.yml`、`tests/pack/presets.spec.mjs`、
   `docs/guides/61-run-playbook.md`、`dev/research.overlay.yml`（生成物）。
 - 录制品：`snapshots/replay/research-face/session.v4.jsonl`、`snapshot.json` lead source、
   `ui.expected.md` C5 一行。

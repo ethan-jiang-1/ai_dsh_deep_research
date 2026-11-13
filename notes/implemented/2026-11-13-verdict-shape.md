@@ -58,7 +58,7 @@ BUG-150 的卡自己写明：「词表路线必然漏同义措辞」。
   「可以 / 行 / LGTM」三形态 → **false**（误杀）。证据命令与输出留在 [issue](../../_backlog/_archived/settled_issues/2026-11-13-verdict-shape-migration.md) §当前情况。
 - **基线**：`node scripts/verify/verify.mjs` 全绿；`pnpm test` 1364 通过 / 0 失败（2026-11-13，基线 `4d6308c9`）。
 - **落地（Slice A + C，2026-11-13）**：readiness 去关键词与历史词表、互斥读法判 `null`；门③ 决策改事件链
-  （`isHitl2Row` 与两张词表删除）；门② 版本配对改读 present；`tests/contracts/verdict-conformance.test.mjs`
+  （`isHitl2Row` 与两张词表删除）；门② 版本配对改读 present；`tests/contracts/verdict-conformance.spec.mjs`
   五条不变量 + 生成矩阵。`pnpm test` 1369 通过 / 0 失败、`pnpm verify` 全绿、`pnpm typecheck` 绿。
 - **Slice B（2026-11-13）**：`review/readiness.json` 成为门禁权威（门A/门②/verdict-audit）；review.md 判定行
   降为交叉核对，不一致/缺席/非法 = 红；无 `review/` 的旧场回退散文。critic persona + `adversarial-review` skill +
@@ -70,21 +70,21 @@ BUG-150 的卡自己写明：「词表路线必然漏同义措辞」。
   旧回执只认规范 `## 人工走查` 并补标记迁移。`run-receipt` 22 例（含四负例）。
 - **迁移 II·S2（方法库 heading）**：`parseMethodHeading` 单一 codec（全/半角括号、U+3000、段间空白、段序）；
   fold 与写路径共用；尾缀 `wellFormed=false`（写拒写、删除可按名寻址）；默认标记只认段。
-  `tests/cockpit/library-heading-codec.test.mjs` 5 条不变量。
+  `tests/cockpit/library-heading-codec.spec.mjs` 5 条不变量。
 - **迁移 II·S3（版本/present）**：审计确认交付版本只认 `deliverables/presented` 事件；plan 版本 = 头部声明
-  并报冲突，重写记录只作显示。`tests/contracts/present-version-conformance.test.mjs` 4 条不变量。
+  并报冲突，重写记录只作显示。`tests/contracts/present-version-conformance.spec.mjs` 4 条不变量。
 - **驾驶舱投影（同日收口）**：`useStatusFeed` 改读 `review/readiness.json`，与门禁共用
   `readinessOfSources`（声明优先、散文副本、歧义 unknown）。交付态另加持久回执兜底
   （`deliveryFromReceipt`）：会话窗口不含旧 `present` 时读 `delivered.json`，修掉「已交付 run 显示
   交付未见」的既有分叉；冒烟期望同步改用同一判据（声明件 + 回执）。
-  `client-load-smoke` **两档全绿**：`--seed` ALL PASS；dev 档 ALL PASS + 1 SKIP（无窗口内交付目标，
+  `client-load.entry` **两档全绿**：`--seed` ALL PASS；dev 档 ALL PASS + 1 SKIP（无窗口内交付目标，
   SKIP ≠ 通过，按冒烟口径记录）。
 - **fresh-agent 审计补口（2026-11-13）**：抓到两个 fail-open——① 散文互斥（`readiness: PASS；readiness: FAIL`）
   被当成「散文缺席」，声明 PASS 直接放行；② 声明 JSON 重复键被 `JSON.parse` 静默取末值。已修：
   `verdictAnalysisOf` 显式暴露 `ambiguous`、`readinessOfSources` 判红；声明重复键 fail-closed。
-  负例 2 例（`tests/run/readiness-declaration.test.mjs`）。
+  负例 2 例（`tests/run/readiness-declaration.spec.mjs`）。
 - **最终基线**：`pnpm test` 1392 通过 / 0 失败；`pnpm verify` 全绿；`pnpm typecheck` 绿；
-  `client-load-smoke --seed` 全绿（2026-11-13）。
+  `client-load.entry --seed` 全绿（2026-11-13）。
 - **git 血缘**：`git log --oneline -- _backlog/_archived/fixed_bugs/BUG-{074,141,150}*` 与
   `git show 4d6308c9 -- scripts/lib/node-gate-session-gates.mjs` 可见上述四轮与词表扩张。
 

@@ -8,7 +8,7 @@
  *
  * 缺省翻译器 = zh：非 UI 消费面（run-dashboard HTML 投影、冒烟脚本、keyless 测试）不传 `t` 时
  * 保持中文优先（2026-11-03 用户拍板）——**UI 组件必须传 `props.t`**，由
- * `tests/cockpit/locales-data.test.mjs` 的 en 断言与 `locales.test.mjs` 的渲染断言把守。
+ * `tests/cockpit/locales-data.spec.mjs` 的 en 断言与 `locales.spec.mjs` 的渲染断言把守。
  *
  * 依赖方向说明：`client/locales/zh.ts` 是纯数据（无 import）；lib → client 的这条边只有本文件
  * 与类型面，运行时只把字典读进来，不引入 React/浏览器依赖。

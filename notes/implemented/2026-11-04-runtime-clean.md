@@ -34,13 +34,13 @@
 
 ## 实际跑过的验证
 
-- `tests/run/runtime-clean.test.mjs`：4/4 绿（白名单/穿越/symlink/未知 mtime/子树过期/边界当天/
+- `tests/run/runtime-clean.spec.mjs`：4/4 绿（白名单/穿越/symlink/未知 mtime/子树过期/边界当天/
   空输入/非法参数）。
 - 反证：把 standalone 白名单放宽成“任意顶层目录” → 两条用例红（`harness-home` / 未知根被当候选）；
   还原后绿。
 - dry-run：白名单内 3 个过期条目（`ab-prompts` / `gate-out` / `probe-sessions-2026-10-18`，共 5.4MB）；
   `--yes` 实际删除 3 项，`runtime/` 697M → 691M；第二轮 dry-run 不再列出它们（幂等）。
-- 7 天档人工复核后只删两个 smoke 残留（`boot-run-final.log` + `run-accept-smoke-52456`，0.8MB）；
+- 7 天档人工复核后只删两个 smoke 残留（`boot-run-final.log` + `run-accept.e2e-52456`，0.8MB）；
   `repair-backup`（pre-repair bundle 备份）、`research-tmp`（现场截图/脚本）、`spike-embed`（spike 件）
   保留为证据，不因“过保留期”盲删。
 - `pnpm test`：1037/1037；`pnpm verify` 绿；`runtime/README` 与

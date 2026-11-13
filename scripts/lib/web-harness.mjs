@@ -7,11 +7,11 @@
 // ⚠ **参数保形**是硬约束：各站点的差异一律参数化，不合并、不取中间值。留在站点侧的（不许进本件）：
 //   · **端口**：各站点自持（`port-exclusive` 门禁；本件不给缺省端口）；
 //   · **超时与截断**：boot 超时、横幅失败时输出的尾部字符数、RPC 的 AbortSignal 预算；
-//   · **失败收割**：preset-smoke 失败时组杀 + 回收端口、snapshot-replay 自持 cleanup 与
+//   · **失败收割**：preset.e2e 失败时组杀 + 回收端口、snapshot-replay 自持 cleanup 与
 //     "释放到静默"等待——本件只负责"横幅失败即 reject"，收割语义留调用方（各站点判据的载重墙）；
 //   · **boot 环境**：`withModelKey` / `scrubbedEnv` 由调用方构造后传入（凭据卫生的 owner 是站点）。
 //
-// 消费方：scripts/smoke/preset-smoke.mjs（首批）；client-load-smoke / snapshot-replay-smoke 随后
+// 消费方：scripts/smoke/preset.e2e.mjs（首批）；client-load.entry / snapshot-replay.entry 随后
 // 逐站点迁移（每站点独立 diff，单站点红只回滚该站点）。
 
 import { spawn } from 'node:child_process'
@@ -34,7 +34,7 @@ const bannerRe = (port) => new RegExp(`http://127\\.0\\.0\\.1:${port}/\\?token=(
  * @param {number} o.tailChars  失败信息里附的输出尾部字符数（各站点原值）
  * @param {string[]} [o.extraArgs]  `--` 之后的额外参数（各站点自持）
  * @param {boolean} [o.detached]  是否让子进程当组长（**原值保形，勿统一**）：组长能被整组收割
- *   （preset-smoke / snapshot-replay 的 `process.kill(-pid)` 依赖它），非组长随父进程组走
+ *   （preset.e2e / snapshot-replay 的 `process.kill(-pid)` 依赖它），非组长随父进程组走
  *   （client-load 等原本如此——把它悄悄改成组长会改 Ctrl-C 与孤儿回收的行为）
  * @returns {Promise<{child: import('node:child_process').ChildProcess, token: string}>}
  *          横幅失败 → reject（收割留调用方；见文件头注）。
@@ -86,7 +86,7 @@ export async function authenticate(base, token) {
 /**
  * 造 `client-request` RPC 调用器。各站点差异全部参数化（**原值**）：
  *   · `prefix`：rpcId 前缀（`smoke-` / `cls-` / `snap-` …）；
- *   · `timeoutMs`：给了才挂 `AbortSignal.timeout`（原仅 preset-smoke 有）；
+ *   · `timeoutMs`：给了才挂 `AbortSignal.timeout`（原仅 preset.e2e 有）；
  *   · `errorOf(endpoint, body)`：失败信息拼法（各站点文案与截断长度不同——逐字保形）。
  */
 export function makeRpc({ prefix, timeoutMs = null, errorOf }) {

@@ -184,7 +184,7 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
         footer={<div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>{readFooter ?? editingFooter}</div>}
       >
         {/* 正文内滚（2026-10-18 实测缺陷修复）：显式化块让详情变高——不设上限时弹窗高过视口，
-            头部关闭钮被顶到视口外点不到（client-load-smoke 实测 1129px 弹窗 / 720px 视口）。
+            头部关闭钮被顶到视口外点不到（client-load.entry 实测 1129px 弹窗 / 720px 视口）。
             maxHeight 用 vh，短窗口同样成立。 */}
         <div style={{ maxHeight: '52vh', overflowY: 'auto', paddingRight: 4 }}>
         {detail.mode === 'create' && (

@@ -1,5 +1,5 @@
 // 组装请求面逐条比较（persona 全文 / 全部 request/header / 四处 user/message 注入（含时钟序列；定向归一化）。
-// 消费 = snapshot-replay-smoke B 层；比对面与判据集正本 = snapshots/README（声明不能削减比对面凑绿）。
+// 消费 = snapshot-replay.entry B 层；比对面与判据集正本 = snapshots/README（声明不能削减比对面凑绿）。
 // Pure comparison of durable model-visible request assembly, in event order.
 const stableStringify = (value) => JSON.stringify(value, (_key, item) => (
   item !== null && typeof item === 'object' && !Array.isArray(item)
@@ -143,7 +143,7 @@ export function compareReplayRequests(expectedEvents, actualEvents) {
 }
 
 // ── 回合落定判据（BUG-030 正修；单一正本）──────────────────────────────────────────────
-// 消费 = snapshot-replay-smoke A 层（"回放回合是否走完"）+ dev/record-role-fixture（录制收尾）。
+// 消费 = snapshot-replay.entry A 层（"回放回合是否走完"）+ dev/record-role-fixture（录制收尾）。
 // 为什么必须单独成件：哨兵字样**写在录制 prompt 里**，用"全文 includes"判回合完成会在 user/message
 // 一落盘时立刻放行（BUG-030 实测：A 层提前放行 → 后续层在回合在飞时执行 → 渲染金标准缺末行）。
 

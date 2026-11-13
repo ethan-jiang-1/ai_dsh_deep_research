@@ -7,7 +7,7 @@
 //
 // 分层：本模块是纯函数（无 fs / 无浏览器 / 无子进程），消费方 =
 //   · `probes/browser/cdp-probe.mjs`（真浏览器探针；负责取日志并调用）
-//   · `tests/inject-reconcile.test.mjs`（keyless 契约测试；用例即负例留证）
+//   · `tests/inject-reconcile.spec.mjs`（keyless 契约测试；用例即负例留证）
 // 取日志与"日志读不出来"的策略留在消费方（探针把 log-unreadable 与 not-landed 分开报）。
 
 /** 默认只认用户注入事件：模型自己的输出（assistant/message）含同文不算"落盘"。 */

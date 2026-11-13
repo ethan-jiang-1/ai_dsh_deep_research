@@ -5,7 +5,7 @@
  * 客户端和浏览器冒烟间分叉。`drt_deepseek-default-upgrade` 已交付且终局 `readiness: PASS`，但
  * review.md 文末附录按 critic skill 契约保留了首轮 `readiness: FAIL` 血统记录；未锚行首的末位匹配把
  * 历史 FAIL 读成终局，仪表盘/镜像遂报「审查修复中」。node-gate 的 `readinessOf` 现直接委托本模块
- * （BUG-040 后不再有本地 mirror）；门契约的测试边界见 `tests/run/node-gate-delivery.test.mjs`。
+ * （BUG-040 后不再有本地 mirror）；门契约的测试边界见 `tests/run/node-gate-delivery.spec.mjs`。
  *
  * 本模块把**终局**语义收成一处（D51，判据不猜）：判定只认结构化位置——**行首**（仅 Markdown 装饰）
  * 或 `；;。` 分隔符之后的**裸写** `readiness: PASS|FAIL`；正文/附录里的行内引用（反引号、加粗、括号包裹）
@@ -18,10 +18,10 @@
  * 残留边界：轮次标题的「第 N 轮」与判定之间允许至多 24 字插入语；这一段是下一片声明件要替代的形态，
  * 不在本函数里再加宽容。
  *
- * 消费方：驾驶舱 `ResearchStatusTab.tsx`、`scripts/smoke/client-load-smoke.mjs` 与
+ * 消费方：驾驶舱 `ResearchStatusTab.tsx`、`scripts/smoke/client-load.entry.mjs` 与
  * `scripts/lib/run-dashboard-core.mjs` 直接调用本函数；门禁的 `readinessOf` 直接委托本函数的
- * `terminalVerdictLine`（BUG-040 后不再有第二份 mirror），由 `tests/run/review-readiness.test.mjs`
- * 与 `tests/contracts/verdict-conformance.test.mjs`（变异矩阵 + 不变量）覆盖。
+ * `terminalVerdictLine`（BUG-040 后不再有第二份 mirror），由 `tests/run/review-readiness.spec.mjs`
+ * 与 `tests/contracts/verdict-conformance.spec.mjs`（变异矩阵 + 不变量）覆盖。
  */
 
 type Readiness = 'PASS' | 'FAIL'

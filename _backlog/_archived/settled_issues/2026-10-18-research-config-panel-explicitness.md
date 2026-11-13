@@ -97,7 +97,7 @@ opened: 2026-10-18
   （改动影响之后的研究；要改正在跑的这场用「用于本次研究」，记 §Decisions 不算重跑）；底线块补"来源链 ≠ 找来源"、readiness
   解释、"自定义副本同样受这六条约束"；库读改**四态**（loading／ok／absent／unreadable——折算入 lib `libraryReadStateOf`
   ＋ keyless 单测 ＋ 反证）；回执"已回话"补"（回话 ≠ 落地）"；标本/刷新/未记录态等措辞收敛。
-- **机械钉**：新文案 8 句进 [tests/cockpit/library-fold.test.mjs](../../../tests/cockpit/library-fold.test.mjs) 静态钉（反证：改「交给 Lead 新建」→ 红）；
+- **机械钉**：新文案 8 句进 [tests/cockpit/library-fold.test.mjs](../../../tests/cockpit/library-fold.spec.mjs) 静态钉（反证：改「交给 Lead 新建」→ 红）；
   库读四态断言（正本 = tests/cockpit/library-fold.test.mjs；反证：absent/unreadable 判反 → 红）；client-load-smoke 同步加 3 组在场断言。
 - **关闭依据**：①-1..①-6 机械面全绿（`pnpm verify` 全绿 · `pnpm test` **516/516** · `client-load-smoke` 曾 ALL PASS）；
   本轮两次复跑的红**全落在已知间歇**（BUG-033 同族的摘要层水化、BUG-034/035 同族的侧栏会话行与胶囊不渲染），不含本卡断言。

@@ -44,13 +44,13 @@
 ## 实际跑过的验证
 
 - `pnpm typecheck`：通过；pack client/host 构建通过。
-- `pnpm test`：**628 pass / 0 fail**；`tests/cockpit/plan-graph.test.mjs` 覆盖 `W1.1/W2.1/W2.2/W2.1.1`、
+- `pnpm test`：**628 pass / 0 fail**；`tests/cockpit/plan-graph.spec.mjs` 覆盖 `W1.1/W2.1/W2.2/W2.1.1`、
   `wave-prefix`、legacy flat W、stage、lifecycle。
 - **固定测试资产**：`tests/fixtures/plan-wave/plan.md`（W1.1 → W2.1/W2.2 并行 → W3.1 汇合）；
   `plan-graph` 直接读该文件，断言 topLevel/stage 且 `planIssuesOf` 为空。
 - `pnpm verify`：全绿（含 `pack-workspace-fresh`、`backlog-liveness`、`md-links`）。
-- `preset-smoke`：ALL PASS。
-- `client-load-smoke`：ALL PASS（WAVE 文案断言）。
+- `preset.e2e`：ALL PASS。
+- `client-load.entry`：ALL PASS（WAVE 文案断言）。
 - 临时 Wave plan 浏览器走查：`WAVE 2 · 2 个并行`、`W2.1/W2.2` 并排、无 LAYER；随后恢复 plan。
 - **真实 Wave run（已跑）**：`drt_node24-lts-status`（Node.js 24 生命周期，quick_factual）由修正后的
   profile 生成：`W1.1 → W2.1/W2.2（WAVE 2 · 2 个并行）→ W3.1 → W4.1 → W5.1`；graph 显示

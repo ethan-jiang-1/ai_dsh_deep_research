@@ -47,7 +47,7 @@
 
 **目录与回归**
 
-- `node --test tests/pack/lenses.test.mjs`：先红（缺 `content/lenses/` 目录 / 缺字段行），
+- `node --test tests/pack/lenses.spec.mjs`：先红（缺 `content/lenses/` 目录 / 缺字段行），
   补 8 条后绿（2/2）。
 - `pnpm verify`：全绿（含 `content-shape`、`overlay-fresh`、`backlog-liveness`、`md-links`）。
 - `pnpm test`：1054 pass / 0 fail（含新增 lens 目录测试与证据契约 7→8 字段对账）。
@@ -55,15 +55,15 @@
 
 **模型可见面**
 
-- `DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs`：5 个 preset 全部真挂载 ALL PASS
+- `DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs`：5 个 preset 全部真挂载 ALL PASS
   （roster / 逐角色建会话 / skills 隔离）。
-- `node scripts/smoke/snapshot-replay-smoke.mjs`：analyst persona 变更先红（B·persona 捕获），
+- `node scripts/smoke/snapshot-replay.entry.mjs`：analyst persona 变更先红（B·persona 捕获），
   重录 analyst fixture 后 **4 场景 ALL PASS**（A 回放 + B 组装 diff + C 金标准）；场景
   `source.codeAnchor` 记录录制基线 `1ed4917`、`recordedAt=2026-11-10T04:39:23.000Z`。
-- `node scripts/smoke/l4-lite-smoke.mjs`：全角色（含 method-editor）assistant 响应 +
+- `node scripts/smoke/l4-lite.e2e.mjs`：全角色（含 method-editor）assistant 响应 +
   scout web_search 工具调用 **ALL PASS**。
-- `node scripts/smoke/release-smoke.mjs --install-only`：真实安装形状 **ALL PASS**
-  （pack → 干净 profile → plugin add → 安装域 preset-smoke → remove/端口释放）。
+- `node scripts/smoke/release.entry.mjs --install-only`：真实安装形状 **ALL PASS**
+  （pack → 干净 profile → plugin add → 安装域 preset.e2e → remove/端口释放）。
 
 **pilot（P5，一场真 run）**
 
@@ -100,6 +100,6 @@
   表的信息源/检验两列，再评估合并（触发已在 v2 §2.1/§13）。
 - **驾驶舱覆盖矩阵未接**：v1 覆盖表由 critic/Lead 手填；cockpit 仍只读 plan/task/run。
 
-**环境状态**：pack 源 + `tests/pack/lenses.test.mjs` + analyst fixture/snapshot 身份 +
+**环境状态**：pack 源 + `tests/pack/lenses.spec.mjs` + analyst fixture/snapshot 身份 +
 `dev/research.overlay.yml` + D43/AGENTS/pack README/design30 同变更；run 通道镜像已重建
-（`release-smoke` 安装域绿）；pilot bundle 在 `research-workspace/` 根，报告未交付。
+（`release.entry` 安装域绿）；pilot bundle 在 `research-workspace/` 根，报告未交付。

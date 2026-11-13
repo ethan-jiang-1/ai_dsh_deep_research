@@ -47,7 +47,7 @@ description: Use when a mechanism's contract needs evidence at a real boundary �
 5. **登记**：补头注六字段（状态 / 一句话 / 何时跑 / 档位 / 判据 / 不证明；为什么存在推荐）
    → `node probes/_index.mjs --write` → `pnpm verify` 绿。
 6. **分层**：探针之间不互相 import；共享纯函数放 `scripts/lib/`，真实驱动放 driver 面；
-   真模型档同 diff 登记 `REAL_MODEL` 闭集（`tests/contracts/smoke-contract.test.mjs`）。
+   真模型档同 diff 登记 `REAL_MODEL` 闭集（`tests/checks/smoke-contract.test.mjs`）。
 
 ## 4. 反模式（写之前先排除）
 

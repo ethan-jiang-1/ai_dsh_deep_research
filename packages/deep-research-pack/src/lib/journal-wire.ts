@@ -4,7 +4,7 @@
  * 来源：五文件六处手抄的「JSON 字符串或对象 + 截断容错」解析家族收敛（2026-10-13 结构重构）——
  * 同一 wire 形态多处实现是漂移病：vendor schema 变形时要逐一找齐改漏即红。收敛后各消费方
  * 保留自己的**失败哨兵**（null / undefined / false / 0 / 'unknown'——共享核统一返回 null，
- * 消费方薄包装在原地翻译），行为由各 1:1 keyless 测试与 tests/journal-wire.test.mjs 钉住。
+ * 消费方薄包装在原地翻译），行为由各 1:1 keyless 测试与 tests/journal-wire.spec.mjs 钉住。
  *
  * 刻意不收的：hitl-fold 的 resultTextOf/resultBlockText（嵌套 tool-result 块 + 递归语义，
  * 与本模块的平铺 text 项骨架不同）与各文件私有的 EventLike 最小形状（= 各折算自己读哪些

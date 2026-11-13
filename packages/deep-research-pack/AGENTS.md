@@ -17,10 +17,10 @@ launcher/scaffold，没有自定义安装器**。包级当前合同在 [README.m
   `node dev/render-overlay.mjs` **从 pack 渲染**（门禁 `overlay-fresh` 对账，勿手改）；
   ② `runtime/harness-home/profiles/deep-research/`（run 通道镜像）随 `boot-run.sh` 同步，
   其漂移检测逐文件比对，不符即 fail-loud；改完 pack 跑 `node scripts/verify/verify.mjs`；
-- **双重编译面**：`src/lib` 文件的 host/shared/client 归属 = `src/lib/faces.json`；host include = host+shared，client 不得 import host；门禁 = `tests/pack/src-lib-faces.test.mjs`。
+- **双重编译面**：`src/lib` 文件的 host/shared/client 归属 = `src/lib/faces.json`；host include = host+shared，client 不得 import host；门禁 = `tests/pack/src-lib-faces.spec.mjs`。
 - **界面文案 day-one 双语**：任何用户可见文本（页签/按钮/空态/提示、数据面折层、内置打法/领域示范等）必须同时有 zh/en；
   chrome/折层走 `src/client/locales/`，canonical 内容（skill/库格式/模型 prompt）不动、UI 经显示投影取词，模型面不翻译。
-  改前加载 [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)；守卫 = `tests/cockpit/{locales,i18n,cjk-source}.test.mjs`；合同 = [design/40 §4](../../docs/design/40-research-cockpit.md)。
+  改前加载 [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)；守卫 = `tests/cockpit/{locales,i18n,cjk-source}.spec.mjs`；合同 = [design/40 §4](../../docs/design/40-research-cockpit.md)。
 - 新增/修改角色走 [`.agents/skills/adding-a-research-role`](../../.agents/skills/adding-a-research-role/SKILL.md)；
 - 行引用的 `@deepseek-ai/*` 必须同时出现在 `peerDependencies`（`row-deps` 门禁）；
 - 角色清单（roster）的事实源 = 盘上 `presets/`，不要在代码里写第二份角色字面量
@@ -33,11 +33,11 @@ launcher/scaffold，没有自定义安装器**。包级当前合同在 [README.m
 - 它们**进模型请求** = "模型可见"面：证据阶梯（真模型档 + snapshot B 层）与重启要求 =
   [adding-a-research-role 技能 §3–4](../../.agents/skills/adding-a-research-role/SKILL.md)；
   skills 按角色硬隔离（`preset-structure` + L1 真挂载断言）；手册走
-  `ctx.systemPrompt.context()`，改它要重录 snapshot B 层并跑 `l4-lite-smoke`。
+  `ctx.systemPrompt.context()`，改它要重录 snapshot B 层并跑 `l4-lite.e2e`。
 
 ## 文档义务
 
 - 包 README 拥有**包级**合同（安装形态摘要/验证/配置/升级/卸载/数据/兼容）；用户逐步安装合同的 owner = 手册源（scripts/dist/product-manual.md），本 README 不复制步骤；行为/架构细节 = design/，发布 = guides/64；README 或发布集改变同 diff 更新；
 - 启动/部署面（`src/startup`、`src/content`、`src/defaults`、`scripts/doctor.mjs`、`$DSH_HOME/deep-research/settings.json`）改动要跑
-  `install-shape-smoke` + `product-boot-smoke` + `release-smoke`（L2 安装/首启形状）；
+  `install-shape.entry` + `product-boot.entry` + `release.entry`（L2 安装/首启形状）；
 - 已知限制与延后工作放固定节 `## Known Limitations and Deferred Work`（中文名：已知限制与延后工作）。

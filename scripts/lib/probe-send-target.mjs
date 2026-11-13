@@ -6,7 +6,7 @@
 // 字符串 → 在飞时构造性零命中。更危险的是同一位置在 `running && 草稿为空` 或**有挂起交互**时
 // 变成 `input.stop`（`Stop generating`／`停止生成`）——盲点"composer 区最后一个按钮"会**掐断
 // 在飞 turn**。这两条规则原先只活在页面 `evaluate()` 字符串里，唯一证据是一次性的真模型 harness；
-// 抽成纯函数后由 keyless 测试常驻钉住（消费方 = cdp-probe 与 cdp-ask-smoke）。
+// 抽成纯函数后由 keyless 测试常驻钉住（消费方 = cdp-probe 与 cdp-ask.entry）。
 //
 // 分工：**页面只读 DOM 与执行点击**，判定（选谁 / 拒点）住这里。
 

@@ -67,15 +67,15 @@ jobs:
       # 门禁自测：注入案例 + 对照，经真实 verify 入口判红/判绿。此前只住在
       # "改 verify 必跑"的散文里——CI 上永不执行，门禁钝化只能在本地被发现。
       - name: Gate self-tests (injected regressions must be named red)
-        run: source dev/env.sh && node scripts/smoke/gates-smoke.mjs
+        run: source dev/env.sh && node scripts/smoke/gates.e2e.mjs
 
       # 源码移交：产物边界 + HANDOFF 接收指令；git archive HEAD，无网络/模型依赖
       - name: Source handoff (artifact boundary + recipient instructions)
-        run: source dev/env.sh && node scripts/smoke/handoff-smoke.mjs
+        run: source dev/env.sh && node scripts/smoke/handoff.e2e.mjs
 
       # 交付回执链（合成 bundle + 合成会话日志，真 CLI）：归一/幂等/外部 present/秘密/repair
       - name: Receipt chain (run-accept end-to-end)
-        run: source dev/env.sh && node scripts/smoke/run-accept-smoke.mjs
+        run: source dev/env.sh && node scripts/smoke/run-accept.e2e.mjs
 
   client-load:
     name: client-load (seeded home, real browser)
@@ -118,7 +118,7 @@ jobs:
 
       # --seed 自建 home（会话 + 已交付 bundle 夹具），不依赖开发 home/凭据。
       - name: Client load (seed fixture)
-        run: source dev/env.sh && node --import tsx/esm scripts/smoke/client-load-smoke.mjs --seed tests/fixtures/client-load-home --port 3109
+        run: source dev/env.sh && node --import tsx/esm scripts/smoke/client-load.entry.mjs --seed tests/fixtures/client-load-home --port 3109
 
       - name: Upload failure scene
         if: failure()
@@ -170,7 +170,7 @@ jobs:
           export DSH_RUN_PORT=3199
           source dev/env.sh
           bash dev/boot-run.sh --prepare-profile
-          node scripts/smoke/snapshot-replay-smoke.mjs --read-only --layers a,b --port 3110
+          node scripts/smoke/snapshot-replay.entry.mjs --read-only --layers a,b --port 3110
 
   deploy:
     name: keyless deploy smokes
@@ -206,13 +206,13 @@ jobs:
       - name: Typecheck (pack dual halves)
         run: pnpm typecheck
 
-      - name: Build pack (pack-smoke needs lib/)
+      - name: Build pack (pack.e2e needs lib/)
         run: pnpm build
 
       # L1 真挂载（无模型）：roster + 逐角色 session/create + skills 隔离 + boot 页模块表行。
       # 用 vendor 源码基线（bootWeb 起自本仓），无需全局 dsh；DSH_HOME 由 env.sh 隔离。
       - name: L1 preset smoke (real mount, keyless)
-        run: source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs
+        run: source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs
 
       # L2 发布/安装/卸载：export-dist 出 tarball + market，vendor CLI 作 dsh（无需全局安装）。
       - name: Export dist (L2 tarball + market)
@@ -225,13 +225,13 @@ jobs:
           exec env TSX_TSCONFIG_PATH="$GITHUB_WORKSPACE/tsconfig.json" node --import tsx/esm "$GITHUB_WORKSPACE/vendor/dsh/apps/cli/src/bin.ts" "\$@"
           EOF
           chmod +x /tmp/dsh-vendor
-          DSH_BIN=/tmp/dsh-vendor node scripts/smoke/lifecycle-smoke.mjs
+          DSH_BIN=/tmp/dsh-vendor node scripts/smoke/lifecycle.entry.mjs
 
       # 方法库 tool smoke 不在此 job：真 Loader 需要 native system 产物（`pnpm build:native`），
       # CI 无该工具链（2026-11-03 实测：system.node 缺席 → MODULE_NOT_FOUND）。证据 = 开发档。
 
       - name: Doctor (read-only profile/anchor/workspace/credentials)
-        run: node scripts/smoke/doctor-smoke.mjs
+        run: node scripts/smoke/doctor.e2e.mjs
 
       - name: Tarball shape
-        run: node scripts/smoke/pack-smoke.mjs
+        run: node scripts/smoke/pack.e2e.mjs

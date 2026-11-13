@@ -5,8 +5,8 @@
 //
 // 能证明什么 / 不证明什么（company 原文边界照搬）：包内幕与 computed module name 不被证明
 // （unresolvedImports 是观测不是认证）。返回的 unresolvedImports 只如实记录，白名单裁决归
-// 消费方（tests/layering.test.mjs）。
-// 消费方：tests/layering.test.mjs（解析级禁物 + import 闭包图）。
+// 消费方（tests/layering.spec.mjs）。
+// 消费方：tests/layering.spec.mjs（解析级禁物 + import 闭包图）。
 import { readFileSync, realpathSync } from 'node:fs'
 import { dirname, isAbsolute, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'

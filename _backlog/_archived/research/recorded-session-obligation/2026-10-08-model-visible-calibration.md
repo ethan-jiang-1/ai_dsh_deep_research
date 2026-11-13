@@ -39,7 +39,7 @@ smoke 自己的盲区（循环论证）；本版修正，并如实记录首版�
 > recorded-session scenario in the same PR; package, e2e, mock-only, and rationale evidence
 > does not replace the assembled transcript.
 
-本仓等价物 = [snapshot-replay-smoke](../../../../scripts/smoke/snapshot-replay-smoke.mjs) 的
+本仓等价物 = [snapshot-replay-smoke](../../../../scripts/smoke/snapshot-replay.entry.mjs) 的
 夹具 `tests/fixtures/snapshot-research-face/`（`dsh-llm-replay` 驱动，keyless）。
 **它钉什么由 smoke 自己的 B 层定义**（`snapshot-replay-smoke.mjs:226-240`）：
 

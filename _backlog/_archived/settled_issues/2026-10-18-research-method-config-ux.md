@@ -65,7 +65,7 @@ opened: 2026-10-18
 | 驾驶舱设计正本 | [design/40](../../../docs/design/40-research-cockpit.md) | 面板在架构里的位置与边界 |
 | 架构边界 | [00-index D25](../../../docs/00-index.md) | 「面板不直写文件、写路径唯一 = Lead」的裁决出处 |
 | D25 一期的决定理由 | [研究配置页签 Note](../../../notes/implemented/2026-10-12-research-config-tab.md) | 输掉的方案（直写库／Settings 页）与同钉约束 |
-| 同钉（实测四处＋未钉枚举） | [library-fold 测试](../../../tests/cockpit/library-fold.test.mjs) ＋ [client-load-smoke](../../../scripts/smoke/client-load-smoke.mjs) | 测试解析 skill 表与客户端 AST 后深比对（覆盖名称＋摘要＋四字段）；**未钉面**：面板显示标签（发现 13）、冒烟内置名单（发现 14）、模板 `采用:` 行与 pack README 枚举（发现 15） |
+| 同钉（实测四处＋未钉枚举） | [library-fold 测试](../../../tests/cockpit/library-fold.spec.mjs) ＋ [client-load-smoke](../../../scripts/smoke/client-load.entry.mjs) | 测试解析 skill 表与客户端 AST 后深比对（覆盖名称＋摘要＋四字段）；**未钉面**：面板显示标签（发现 13）、冒烟内置名单（发现 14）、模板 `采用:` 行与 pack README 枚举（发现 15） |
 
 ## Review 要点（待用户裁定——本轮不实施）
 

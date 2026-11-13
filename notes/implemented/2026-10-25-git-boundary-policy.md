@@ -32,7 +32,7 @@
 - **对所有 tracked 文件禁绝对路径**：会误伤历史 Note、`_backlog` 证据、录制 JSONL；
   改为 live 面机械扫描 + 历史豁免，并由 guide 写明新 fixture 的归一化义务。
 - **只在 CONTRIBUTING 写一段散文**：没有门禁，迭代中必回潮；落成 `host-paths` +
-  `secrets-untracked` 两条机械断言，并带 gates-smoke 注入案例。
+  `secrets-untracked` 两条机械断言，并带 gates.e2e 注入案例。
 - **要求贡献者手工对齐本机环境**：把环境差异留给人记；改为 setup 脚本 + 相对路径 +
   占位符 + 干净 clone 验收。
 
@@ -40,7 +40,7 @@
 
 - `pnpm verify`：全绿（含新增 `host-paths`；`secrets-untracked` 扩编辑器/OS/缓存残留）。
 - `pnpm test`：769 pass / 0 fail。
-- `node scripts/smoke/gates-smoke.mjs`：83 个注入案例全红、对照组全绿；新增
+- `node scripts/smoke/gates.e2e.mjs`：83 个注入案例全红、对照组全绿；新增
   `host-paths-home-leak` 与 `secrets-untracked-editor-state-leak`。
 - `git diff --check` / `md-links` / `doc-budgets` / `gate-ledger-sync`：随 verify 全绿。
 - 跨环境部分以 [开源发布面 Note](2026-10-25-open-source-launch.md) 记录的干净 worktree

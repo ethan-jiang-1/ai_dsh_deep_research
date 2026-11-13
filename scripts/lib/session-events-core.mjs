@@ -1,7 +1,7 @@
 // session-events-core.mjs — 会话日志事件的**人读摘要**与筛选（agent 的"刚才发生了什么"入口）。
 //
 // 为什么住 lib：session-events.mjs 是 CLI 壳（解析参数/发现会话/打印）；摘要与筛选是纯函数，
-// 默认回归可直接断言（tests/session-events.test.mjs），不需要真日志或子进程。
+// 默认回归可直接断言（tests/session-events.spec.mjs），不需要真日志或子进程。
 // 事件形状只取已知稳定字段；未知事件保留 type + 截断 data，不猜语义。
 
 const MAX_TEXT = 160

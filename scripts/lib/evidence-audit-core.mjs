@@ -1,12 +1,12 @@
 // evidence-audit-core.mjs — run bundle 证据溯源审计的判据核心（keyless 纯逻辑）。
 // 从 scripts/run-gates/evidence-audit.mjs 拆出（2026-10-09 layering 二代：tests/
-// evidence-audit.test.mjs 消费 auditBundle——驱动壳起子进程（zstd CLI），不得被 tests
+// evidence-audit.spec.mjs 消费 auditBundle——驱动壳起子进程（zstd CLI），不得被 tests
 // import；三条断言与语料窗的判据注释住在驱动壳头注，本文件只搬函数与判据内注释）。
 // readLog 注入（company keyless-imports 的 injected readers 同型）：默认纯 reader 只读
 // .jsonl——.zstd 报线索后返回 null（调用方跳过该文件，语料缺失偏红方向）；zstd CLI
 // reader 由驱动壳注入（scripts/run-gates/evidence-audit.mjs——多帧拼接日志靠 CLI 解全帧，
 // 行为不变）。返回 null 与抛错都按"跳过该文件"处理，不吞整个目录。
-// 消费方：scripts/run-gates/evidence-audit.mjs（驱动壳）+ tests/evidence-audit.test.mjs（纯 .jsonl 夹具直调）。
+// 消费方：scripts/run-gates/evidence-audit.mjs（驱动壳）+ tests/evidence-audit.spec.mjs（纯 .jsonl 夹具直调）。
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { splitFrontmatter } from './frontmatter.mjs'

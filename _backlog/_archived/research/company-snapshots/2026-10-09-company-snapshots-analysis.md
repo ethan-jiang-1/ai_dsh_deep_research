@@ -139,7 +139,7 @@ vendor 提供 `assertConsumed()` 检查未绑定脚本和少驱动调用；compa
 
 ## 8. 本仓已经有什么、实际缺什么
 
-本仓已具备 snapshots 思路的核心部分。四角色录制在 [fixtures taxonomy:11](../../../../tests/fixtures/README.md)，独立 [snapshot-replay-smoke:58](../../../../scripts/smoke/snapshot-replay-smoke.mjs) 经真实 DSH CLI、research profile 与 Web RPC 创建研究会话，用 llm-replay 替换模型；B 层比较 persona 和工具 schema，Lead 另有 C 层渲染期望。它不属于默认 `pnpm test`，因此默认回归绿不能推出回放通过。[测试职责:150](../../../../docs/project-map.md)
+本仓已具备 snapshots 思路的核心部分。四角色录制在 [fixtures taxonomy:11](../../../../tests/fixtures/README.md)，独立 [snapshot-replay-smoke:58](../../../../scripts/smoke/snapshot-replay.entry.mjs) 经真实 DSH CLI、research profile 与 Web RPC 创建研究会话，用 llm-replay 替换模型；B 层比较 persona 和工具 schema，Lead 另有 C 层渲染期望。它不属于默认 `pnpm test`，因此默认回归绿不能推出回放通过。[测试职责:150](../../../../docs/project-map.md)
 
 | 对照面 | 本仓实际情况 | 借鉴的增量 |
 |---|---|---|
@@ -151,7 +151,7 @@ vendor 提供 `assertConsumed()` 检查未绑定脚本和少驱动调用；compa
 | 工作区外部效果 | 当前角色探针未比较完整 before/expected 文件树 | 为写文件、恢复、交付等具体需求建立隔离场景，独立编写 before/expected，不拿实际运行副本当期望 |
 | 录制保存 | 录制器要求先删除旧 session.v4，再录同名文件 | 区分 Session 格式版本与录制次数；同格式重录用新场景修订或受审更新，不能把录制次数伪装成 session.v5 |
 
-来源分别为 [smoke 路径与版本选择:52](../../../../scripts/smoke/snapshot-replay-smoke.mjs)、[真实装配与回放 patch:120](../../../../scripts/smoke/snapshot-replay-smoke.mjs)、[实际 B 层比较:226](../../../../scripts/smoke/snapshot-replay-smoke.mjs)、[场景声明](../../../../snapshots/replay/research-face/snapshot.json)、[录制前置与输出:40](../../../../dev/record-role-fixture.mjs)、[discipline 输出:194](../../../../probes/behavior/discipline-probe.mjs)、[entry-chain 输出:248](../../../../probes/behavior/entry-chain-probe.mjs)、[运行区忽略规则:13](../../../../.gitignore) 与 [四类运行事实:21](../../../../docs/design/50-agent-loop-and-state.md)。观察时自写 smoke 未读取场景声明；落点实施与本报告建议的差异由 [snapshots 落点 issue](../../settled_issues/2026-10-09-snapshots-adoption.md) 记录。
+来源分别为 [smoke 路径与版本选择:52](../../../../scripts/smoke/snapshot-replay.entry.mjs)、[真实装配与回放 patch:120](../../../../scripts/smoke/snapshot-replay.entry.mjs)、[实际 B 层比较:226](../../../../scripts/smoke/snapshot-replay.entry.mjs)、[场景声明](../../../../snapshots/replay/research-face/snapshot.json)、[录制前置与输出:40](../../../../dev/record-role-fixture.mjs)、[discipline 输出:194](../../../../probes/behavior/discipline-probe.mjs)、[entry-chain 输出:248](../../../../probes/behavior/entry-chain-probe.mjs)、[运行区忽略规则:13](../../../../.gitignore) 与 [四类运行事实:21](../../../../docs/design/50-agent-loop-and-state.md)。观察时自写 smoke 未读取场景声明；落点实施与本报告建议的差异由 [snapshots 落点 issue](../../settled_issues/2026-10-09-snapshots-adoption.md) 记录。
 
 [BUG-018](../../fixed_bugs/BUG-018-snapshot-replay-advertised-coverage.md) 已记录工作区手册、skill-catalog、runtime-context 三类 user/message 注入漏比较，以及源仓实测的漏判。本轮复核 systemTextOf 与 B 层实现确认该缺口仍在；没有重新进行注入或回放实验。skill 正文只在实际读取它的场景中比较，不将 persona 点名技能或 catalog description 当成正文覆盖。[既有标定结论:36](../../../../notes/archived/2026-10-08-recorded-session-obligation.md)
 

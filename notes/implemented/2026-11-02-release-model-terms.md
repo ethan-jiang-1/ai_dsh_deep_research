@@ -59,17 +59,17 @@
   复合词从 40 处降到 18 处（截至本 Note 写入时）；`docs/terms.md` 已改为“DSH / 借用 / 本仓”三栏，
   退役词清单在页尾。
 - **L0 复跑（2026-11-02）**：`pnpm verify` 全绿（含新增 `readme-shape`/`release-vocab`/
-  `dist-manual-fresh` 与 `gate-ledger-sync`）；`pnpm test` 967 pass / 0 fail；`gates-smoke` 全绿
+  `dist-manual-fresh` 与 `gate-ledger-sync`）；`pnpm test` 967 pass / 0 fail；`gates.e2e` 全绿
   （97 个注入案例均点名报红）；`pnpm typecheck` exit 0。
 - **发布物重导出（T）**：`export-dist` 全绿（134 条目、preset 5/5、skill 13、模板 8、market 3337B）；
-  `lifecycle-smoke` ALL PASS（索引 → tarball → dump 11 行 → 真启动 → readPluginMeta → remove）；
-  `install-shape-smoke` ALL PASS；`product-boot-smoke` GREEN；`doctor-smoke`/`pack-smoke` ALL PASS。
-  `product-boot-smoke` 连跑第一次 RED（3 处失败，sandbox = `runtime/smoke-workspace/product-boot-smoke-26020/main/`），立即复跑 GREEN——按浏览器/端口外部边界记残余 flake。
+  `lifecycle.entry` ALL PASS（索引 → tarball → dump 11 行 → 真启动 → readPluginMeta → remove）；
+  `install-shape.entry` ALL PASS；`product-boot.entry` GREEN；`doctor.e2e`/`pack.e2e` ALL PASS。
+  `product-boot.entry` 连跑第一次 RED（3 处失败，sandbox = `runtime/smoke-workspace/product-boot.entry-26020/main/`），立即复跑 GREEN——按浏览器/端口外部边界记残余 flake。
 - **入口链（真模型，T）**：`entry-chain-probe` ALL PASS（Q1/Q2/Q3）。Q2 首跑因词面只认“建立”漏接
   “才建在”判红，补谓词与单测后复跑绿；留档 `runtime/smoke-workspace/entry-chain-probe-2026-11-02T11-15-12-374Z.md`。
 - **未改/未宣称**：模型可见 presets/content 仍含“产品”文本（改它会改变模型请求、触发 snapshot B 漂移与
   录制证据义务）；它不在本 Note 的收口内，已拆为独立卡
   [模型可见措辞](../../_backlog/_archived/settled_issues/2026-11-03-model-visible-vocabulary.md)，任务是换指称 + 重录
   `research-face`。`_dist` 已重导出，版本仍 0.3.0（未 bump）。
-- **收尾复跑（2026-11-03，卡关闭时）**：`pnpm verify` 全绿；`pnpm test` 971/0；`gates-smoke` 全绿
+- **收尾复跑（2026-11-03，卡关闭时）**：`pnpm verify` 全绿；`pnpm test` 971/0；`gates.e2e` 全绿
   （101 注入案例）。本轮只改文档/测试与卡归档，未触碰运行时与安装面，故上面的 L2 冒烟结果继续成立。

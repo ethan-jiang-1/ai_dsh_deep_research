@@ -20,10 +20,10 @@ D40/D41 行尾加“0.3.0 当前安装事实 = D42”指针，不修改原决定
 
 - `pnpm verify` → `verify: 全绿`（52 道门禁；含 `readme-shape` 顺序断言、`content-shape` 手册预算、`pack-bundle-compat` engines 副本同步）。
 - `pnpm test` → 全绿（含 `decisions-now` D1–D42 连续性与新增 `host-health` 直测）。
-- `node scripts/smoke/gates-smoke.mjs --case=readme-shape-install-before-profile,content-shape-manual-over-budget,pack-bundle-compat-engines-copy-drift` → 注入案例全绿（3 案例、0 对照；全量对照由 `pnpm verify` 绿作对照）。
-- `node scripts/smoke/lifecycle-smoke.mjs` / `install-shape-smoke.mjs` / `doctor-smoke.mjs` → ALL PASS。
+- `node scripts/smoke/gates.e2e.mjs --case=readme-shape-install-before-profile,content-shape-manual-over-budget,pack-bundle-compat-engines-copy-drift` → 注入案例全绿（3 案例、0 对照；全量对照由 `pnpm verify` 绿作对照）。
+- `node scripts/smoke/lifecycle.entry.mjs` / `install-shape.entry.mjs` / `doctor.e2e.mjs` → ALL PASS。
 - 真安装：干净 home `plugin add file:_dist/dsh-deep-research-pack-0.3.0.tgz` → 启动打印 `dsh web:` URL；remove 后 profile bundles 回 base + web-app，无本包行。
 
 ## 环境状态
 
-macOS 已验；`client-load-smoke` 在 2026-11-10 低内存主机上的复跑由 [lib/host-health](../../scripts/lib/host-health.mjs) 归类为 NOT-RUN（exit 2），健康主机复跑仍待；未跑 ≠ 通过。
+macOS 已验；`client-load.entry` 在 2026-11-10 低内存主机上的复跑由 [lib/host-health](../../scripts/lib/host-health.mjs) 归类为 NOT-RUN（exit 2），健康主机复跑仍待；未跑 ≠ 通过。

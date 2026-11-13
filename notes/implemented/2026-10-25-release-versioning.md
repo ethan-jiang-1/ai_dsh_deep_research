@@ -42,5 +42,5 @@
 - `node scripts/dist/release-check.mjs`：打 tag 前 `OK version=0.1.2（HEAD 未打 tag）`；
   打 annotated tag 后 `OK version=0.1.2 tag=0.1.2（annotated）`。
 - `pnpm verify`（含 `release-version` 与 `dist-manual-version`）、`pnpm test` 769 pass。
-- `gates-smoke` 含 `release-version-drift` 注入案例（pack 改 9.9.9 → 红）。
+- `gates.e2e` 含 `release-version-drift` 注入案例（pack 改 9.9.9 → 红）。
 - GitHub Actions keyless run：verify + test 全绿。

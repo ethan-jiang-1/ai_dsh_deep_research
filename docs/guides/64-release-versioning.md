@@ -28,7 +28,7 @@
 1. 决定 semver 版本 `X.Y.Z`。
 2. 同 diff 改两处 `package.json` 的 `version`；若有 lockfile 影响，跑
    `pnpm install --lockfile-only`。
-3. `node scripts/dist/export-dist.mjs` 重导出 `_dist/安装手册.md`、tarball 与 `_dist/market.json`（三件同源同版本；首次/换 pin 后先 `bash dev/vendor-build.sh`——pack 的 tsc 读 vendor 构建产物）；装/起发布前跑 `node scripts/smoke/lifecycle-smoke.mjs`（market 索引 → tarball → dump → 真启动 → remove 回落）+ `node scripts/smoke/install-shape-smoke.mjs` + `node scripts/smoke/product-boot-smoke.mjs`（缺前置 exit 2，未跑 ≠ 通过）。
+3. `node scripts/dist/export-dist.mjs` 重导出 `_dist/安装手册.md`、tarball 与 `_dist/market.json`（三件同源同版本；首次/换 pin 后先 `bash dev/vendor-build.sh`——pack 的 tsc 读 vendor 构建产物）；装/起发布前跑 `node scripts/smoke/lifecycle.entry.mjs`（market 索引 → tarball → dump → 真启动 → remove 回落）+ `node scripts/smoke/install-shape.entry.mjs` + `node scripts/smoke/product-boot.entry.mjs`（缺前置 exit 2，未跑 ≠ 通过）。
 4. `pnpm verify && pnpm test && pnpm typecheck` 全绿；若本次发布**宣告新的 DSH 版本支持**，
    先在该版本的全局宿主上跑 L1 真挂载 + L2 安装/首启 + client-load（命令 = [guides/60 §2](60-dev-loop.md)；
    缺环境 exit 2，未跑 ≠ 通过）。

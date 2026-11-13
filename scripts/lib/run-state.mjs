@@ -11,7 +11,7 @@
 //     偏差要显性，不能静默放行）。
 //
 // 消费方：scripts/run-ops/watch-run.mjs（盯场）、dev/hitl-answer.mjs（前置自拒）、
-// tests/run-state.test.mjs（三态夹具与 native log reader，测试路径零子进程，layering 合规）。
+// tests/run-state.spec.mjs（三态夹具与 native log reader，测试路径零子进程，layering 合规）。
 // 运行需 `node --import tsx/esm`（直引 pack .ts 源）。
 import { argsObjectOf } from '../../packages/deep-research-pack/src/lib/journal-wire.ts'
 import { existsSync, lstatSync, readdirSync } from 'node:fs'

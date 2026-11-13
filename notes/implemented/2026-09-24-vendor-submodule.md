@@ -21,7 +21,7 @@ tag 升级时无从机械校验。
    `dsh` 从钉住源码起会话（替代 env.sh 的 company 借用路径）；
 3. verify 新门禁两条：**vendor-pin**（submodule 在位 + 指向钉住 commit）与
    **vendor-clean**（只读纪律：无未提交改动）；红绿反证按门禁规矩；
-4. 机制权威切换：dev/env.sh 的 dsh 别名与 preset-smoke/release-smoke 的 DSH_SRC
+4. 机制权威切换：dev/env.sh 的 dsh 别名与 preset.e2e/release.entry 的 DSH_SRC
    从 company checkout 切到本仓 vendor（D14 的源码域/安装域双通道随之切）；
 5. D10 偏离登记簿销账（AGENTS.md 偏离表 + design/10 头注同步）。
 
@@ -35,14 +35,14 @@ tag 升级时无从机械校验。
 
 - vendor-pin/clean 门禁红绿反证在案（门禁 15→17，gate-ledger-sync 同步）；
 - `pnpm dsh` 一条命令从本仓 vendor 起会话（实证一次）；
-- preset-smoke 源码域 + release-smoke 安装域在 DSH_SRC 切换后全绿；
+- preset.e2e 源码域 + release.entry 安装域在 DSH_SRC 切换后全绿；
 - D10 从偏离登记簿销账；AGENTS.md 布局树 vendor 行更新。
 
 ## 实施记录（2026-09-24，同日毕业——本文件即毕业 Note，全文自足）
 
 **全部验收判据通过**：vendor-pin/clean 门禁红绿在案（15→17 门禁，gate-ledger-sync 同步）；
-`pnpm dsh` 与 env.sh 函数双通道实证（0.1.5-rc.2）；preset-smoke 源码域预检绿 +
-release-smoke 安装域 ALL PASS（内嵌四 preset 真挂载）；D10 从偏离登记簿销账、AGENTS
+`pnpm dsh` 与 env.sh 函数双通道实证（0.1.5-rc.2）；preset.e2e 源码域预检绿 +
+release.entry 安装域 ALL PASS（内嵌四 preset 真挂载）；D10 从偏离登记簿销账、AGENTS
 布局树/① 行/design/10 同步。
 
 **实现全录**：
@@ -90,7 +90,7 @@ roadmap 触发型条目「升 pin 重校」。
 + 真模型（entry-chain-probe）在本仓 vendor 上也正常（排除凭据与 vendor 整体因素）。
 **回归面 = research profile（本包 + agent-team-profile 层）× 本仓 vendor 的组合**。
 
-**测试缺口根因**：E1 验收只重跑了 keyless 面（preset-smoke/release-smoke——无模型调用）
+**测试缺口根因**：E1 验收只重跑了 keyless 面（preset.e2e/release.entry——无模型调用）
 + web profile 真模型（探针）——research profile 的 with-key 面没在切换后重验。
 "no-key 证管道，with-key 证 agent" 的反面教训：**机制基线切换必须把 with-key 面也重验**。
 

@@ -36,5 +36,5 @@ DSH 的 locale 解析顺序是「显式偏好 → 浏览器语言 → 英文兜�
 
 ## 环境状态
 
-开发通道（3083）已验证；用户安装形态（L2 `install-shape-smoke` / `release-smoke`）未在本次复跑——
+开发通道（3083）已验证；用户安装形态（L2 `install-shape.entry` / `release.entry`）未在本次复跑——
 缺省值走的是 bundle patch，与安装形态无关，但发布前仍应随发布清单复跑一次。

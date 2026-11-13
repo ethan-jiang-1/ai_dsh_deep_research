@@ -1,6 +1,6 @@
 // browser-cache.mjs — 浏览器缓存目录判据（平台缺省三态）。
 // 从 playwright.mjs 拆出的纯件：Linux CI 曾因只认 macOS 路径导致 chromium 回退失效
-// （2026-11-03 client-load 红在 launch）；单测 = tests/run/browser-cache.test.mjs。
+// （2026-11-03 client-load 红在 launch）；单测 = tests/run/browser-cache.spec.mjs。
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 

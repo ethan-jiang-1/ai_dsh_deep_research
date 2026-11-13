@@ -55,7 +55,7 @@ C2 红 → C3/C5 连带。
 2. ~~注册假设（extension 页签注册失败）~~——不成立：C4 无 console 错误，且缺席的直接原因是右栏未展开；
 3. ~~场景假设（回放上下文不触发胶囊）~~——不成立：同一夹具在金标准录制时可见，问题在定位器。
 
-**同批对照**：[client-load-smoke](../../../scripts/smoke/client-load-smoke.mjs) 明确保持 **en-US**
+**同批对照**：[client-load-smoke](../../../scripts/smoke/client-load.entry.mjs) 明确保持 **en-US**
 （注释：「浏览器 locale 保持 Playwright 默认（en-US）：本冒烟的 UI chrome 定位器（Open right sidebar / …）」），
 所以它的英文 chrome 定位器成立；回放冒烟选择了 **钉 zh**，却没同步 chrome 定位器——两条策略各自自洽，
 混用才出事。

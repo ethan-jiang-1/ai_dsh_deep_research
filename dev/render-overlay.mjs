@@ -1,7 +1,7 @@
 // dev/render-overlay.mjs — 从 pack 渲染源码域 overlay（生成物，勿手改；`--check` 给门禁用）。
 //
 // 作用：从 pack 的 presets/*.patch.yml 与 cordis.patch.yml 渲染源码域 overlay（生成物）。
-// 源码域通道（preset-smoke 真挂载）用 `--profile web --patch <本文件>` 迭代 preset，因此必须
+// 源码域通道（preset.e2e 真挂载）用 `--profile web --patch <本文件>` 迭代 preset，因此必须
 // 携带同样的 preset 行——为避免「pack 一份、overlay 一份」两处漂移，overlay 由本脚本生成，
 // 门禁 `overlay-fresh` 对账。
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
@@ -58,7 +58,7 @@ function bundleInserts() {
 const rendered = `# 生成文件 —— 由 dev/render-overlay.mjs 从 packages/deep-research-pack 渲染；**勿手改**
 # （门禁 overlay-fresh 对账：改 pack 后跑 \`node dev/render-overlay.mjs\` 重生成）。
 #
-# research.overlay.yml — 源码域 overlay（preset-smoke 真挂载用）
+# research.overlay.yml — 源码域 overlay（preset.e2e 真挂载用）
 # 机制：\`--profile web --patch <本文件绝对路径>\` 在 profile 层之后追加本 overlay——行包名在
 # vendor 源码工作区解析（boot 进程起自本仓，tsx/esm 从其 node_modules 解析），零安装混线。
 # 0.1.7：preset 即行（config.plugins），web-app bundle 已 insert 出厂 registry（default:

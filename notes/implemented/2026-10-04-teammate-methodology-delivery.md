@@ -28,7 +28,7 @@
 ## 验证
 
 - L0：verify 34 门全绿 + tests 140/0；
-- L1：preset-smoke 四角色真挂载 ALL PASS（team-assembly 文本变更真挂载绿）；
+- L1：preset.e2e 四角色真挂载 ALL PASS（team-assembly 文本变更真挂载绿）；
 - L4-lite：四角色真模型 ALL PASS；
 - snapshot-replay 三层 ALL PASS（skill 正文不进 request/header——两场一致的既证行为）；
 - **模式活体预验**：第二场 run 的 lead **自发**执行了同款装载（三份 spawn prompt 均带

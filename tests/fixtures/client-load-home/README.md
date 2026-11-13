@@ -1,7 +1,7 @@
-# client-load-home — client-load-smoke 的种子夹具
+# client-load-home — client-load.entry 的种子夹具
 
-用途：让 `scripts/smoke/client-load-smoke.mjs` 在**干净机器 / CI** 上跑完整的真浏览器断言
-（`--seed tests/fixtures/client-load-home`），不需要预置 dev home。实现 = `scripts/smoke/client-load-seed.mjs`。
+用途：让 `scripts/smoke/client-load.entry.mjs` 在**干净机器 / CI** 上跑完整的真浏览器断言
+（`--seed tests/fixtures/client-load-home`），不需要预置 dev home。实现 = `scripts/smoke/client-load-seed.support.mjs`。
 
 ## 布局
 
@@ -13,7 +13,7 @@ workspace/research-workspace/
   archive/drt_cn-open-vs-us-closed-agentic/  方法库「从已完成研究沉淀」的来源正例（smoke 里点名）
 ```
 
-文本里两个占位（`scripts/smoke/client-load-seed.mjs` 在 materialize 时替换）：
+文本里两个占位（`scripts/smoke/client-load-seed.support.mjs` 在 materialize 时替换）：
 
 - `__WORKSPACE__` → 种子工作区绝对路径（如 `runtime/smoke-workspace/seed/research-workspace`）；
 - `__REPO_ROOT__` → 当前 checkout 的仓根（会话日志里历史工具路径的仓根前缀，仅为可移植性）。
@@ -56,5 +56,5 @@ workspace/research-workspace/
    仓根换 `__REPO_ROOT__`）；
 3. 同步更新对应 bundle（只保留 client 读的文件：question/findings/review/final/final\/vN/plan/topics/
    evidence；**不要**带 provenance/audit/manifest——客户端不读，徒增体积）；
-4. 跑 `node --import tsx/esm scripts/smoke/client-load-smoke.mjs --seed tests/fixtures/client-load-home --port 3109`
+4. 跑 `node --import tsx/esm scripts/smoke/client-load.entry.mjs --seed tests/fixtures/client-load-home --port 3109`
    全绿后提交；体积目标 < 0.5 MB（当前 ≈ 0.31 MB / 29 文件，含本 README）。

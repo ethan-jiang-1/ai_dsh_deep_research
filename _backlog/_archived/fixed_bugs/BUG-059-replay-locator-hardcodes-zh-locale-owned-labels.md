@@ -38,7 +38,7 @@ node scripts/smoke/snapshot-replay-smoke.mjs --face research-face --scenario lea
 # 默认 Playwright locale = en-US；C2 红，诊断行里页签标题是英文
 ```
 
-对照（同仓已有正确写法）：[client-load-smoke](../../../scripts/smoke/client-load-smoke.mjs) 的页签定位
+对照（同仓已有正确写法）：[client-load-smoke](../../../scripts/smoke/client-load.entry.mjs) 的页签定位
 **显式接受双语**并写明理由：
 
 ```js

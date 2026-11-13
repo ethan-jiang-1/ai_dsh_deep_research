@@ -49,7 +49,7 @@
 - note-format 红绿反证（双形态）：无骨架无 grandfather 的临时 Note 注入 → 红（精确
   点名缺"## 决定"与"## 输掉的方案"）→ 删除；无状态行的临时 RFC 注入 → 红（点名状态行
   缺席 + 输掉的方案缺席）→ 删除 → 复绿。
-- `node --test tests/*.test.mjs`：20 tests 全绿。
+- `node --test tests/*.spec.mjs`：20 tests 全绿。
 
 ## 环境状态
 

@@ -88,7 +88,7 @@
   全部存量门A PRE-CONTRACT 不计红 ✓；token-factory 追认后门③ 转 PASS ✓；
   deepseek-api-pricing 豁免形态 PASS 带注记 ✓。
 - **收尾全绿（2026-10-08）**：`pnpm verify` 全绿、`pnpm test` 248/248、
-  `node scripts/smoke/gates-smoke.mjs` 全绿（对照组零注入 PASS + 7 注入案例点名报红）。
+  `node scripts/smoke/gates.e2e.mjs` 全绿（对照组零注入 PASS + 7 注入案例点名报红）。
 - **证据选型（任务型路由对账）**：改动面 = run-gates 脚本 + tests 夹具 + 工作区手册正本与
   种子 + guides61——路由行「改工作区手册/模板」= L0 档（sync → verify +
   pack-workspace-fresh）；preset/plugin 行未动，**L1/L2 无对象未跑**（如实分列，非"通过"）。
@@ -101,7 +101,7 @@
   bundle 的 audit.md（evidence-audit 补跑产出）、token-factory §Decisions 追认行。
 - 改动：`docs/guides/61-run-playbook.md`（§4 审计步 + 门A 预期态）、
   `research-workspace/NODES.md`（图例）+ `research-workspace/AGENTS.md`（门全集枚举）+
-  pack workspace 种子（sync 重生成）、`tests/run/node-gate.test.mjs`（+9 用例）。
+  pack workspace 种子（sync 重生成）、`tests/run/node-gate.spec.mjs`（+9 用例）。
 - 队列：本条目毕业离队，▶ 移交「审计 P3 收尾轮」。
 - 归档区门禁现状：除豁免登记 7 bundle 的既有红门（门①/②/③/L 如实保留）外，契约期交付
   bundle 门A 全绿。

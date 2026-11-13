@@ -45,7 +45,7 @@
 | 观测 | 无 | probe / 仪表盘 / 日志 / LLM socket 隔离预载 | 允许差异（调试必需） |
 | dev-only 工具行 | 无 | MCP Playwright（`--patch` 覆盖层，`MCP_PLAYWRIGHT=0` 可拆） | 允许差异（dev 工具） |
 
-`dev/research.overlay.yml` 是**源码域冒烟 harness**（`--profile web --patch`，preset-smoke 用），
+`dev/research.overlay.yml` 是**源码域冒烟 harness**（`--profile web --patch`，preset.e2e 用），
 不是用户载入路径，也不进上面的同形列——它不经过 bundle/tarball，判据只对 L1 挂载面有效。
 
 ## 开发驱动

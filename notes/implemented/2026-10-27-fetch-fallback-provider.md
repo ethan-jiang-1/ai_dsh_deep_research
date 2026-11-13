@@ -58,11 +58,11 @@
 - **价值抽样（11 URL，本地 vs API）**：2 例被回退救回（`http://github.com/…` 跨源重定向、
   `http://arxiv.org/…` 传输错误），8 例两腿都失败（wikipedia/BBC/Medium/X/NYTimes/知乎/PDF），
   1 例两腿都成功（163）。回退不是万能，但失败时不再直接放弃。
-- 测试资产：`tests/pack/fetch-fallback.test.mjs`（判据常量）、`fetch-fallback-orchestration.test.mjs`
+- 测试资产：`tests/pack/fetch-fallback.spec.mjs`（判据常量）、`fetch-fallback-orchestration.spec.mjs`
   （假腿覆盖回退/安全拒绝/取消/无凭据/两腿失败/状态码/预算/开关 14 例 + YAML id 与预算对账）、
-  `fetch-fallback-credentials.test.mjs`（服务优先/环境兜底/都没有）、`presets.test.mjs`（行与
+  `fetch-fallback-credentials.spec.mjs`（服务优先/环境兜底/都没有）、`presets.spec.mjs`（行与
   `fetchTimeoutMs`）。反证：删 orchestrate 的 `fallbackForError` 守卫 → 安全拒绝测红；还原 → 绿。
-  L1 preset-smoke 真挂载全绿（插件在真实 profile 里加载、四角色建会话）；L2 安装域 ALL PASS。
+  L1 preset.e2e 真挂载全绿（插件在真实 profile 里加载、四角色建会话）；L2 安装域 ALL PASS。
 - 未跑：账号登录用户的回退（不支持）、429/402 压测、真实 run 全流程（下一次 L4）。
 
 ## 环境状态 / 残余

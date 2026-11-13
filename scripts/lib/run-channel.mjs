@@ -5,7 +5,7 @@
 // 契约测试若直接 import 壳，layering 守卫当场判红。故判据下沉本模块（无子进程、无网络、
 // 纯函数），壳与测试都 import 它：与 probe-send-target / probe-status-tab 同款分层。
 //
-// 消费方 = dev/run-driver.mjs（壳）、tests/run-driver-contract.test.mjs（契约）。
+// 消费方 = dev/run-driver.mjs（壳）、tests/run-driver-contract.spec.mjs（契约）。
 
 /**
  * web.log 文本 → 最后一条横幅的完整 GUI URL。

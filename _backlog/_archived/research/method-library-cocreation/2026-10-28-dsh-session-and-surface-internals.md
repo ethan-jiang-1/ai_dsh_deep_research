@@ -264,11 +264,11 @@ D2 = 「角色 = 4 个」+「增删角色 = 推翻本条，先登记新 D 号」
 
 | 面 | 现状 | 新增后 |
 |---|---|---|
-| 数量哨兵 | `assert.equal(ROLES.length, 4)`（[presets.test.mjs L26-L33](../../../../tests/pack/presets.test.mjs)） | 改为 5（或研究角色 4 + 工具 preset 1 的表述） |
+| 数量哨兵 | `assert.equal(ROLES.length, 4)`（[presets.test.mjs L26-L33](../../../../tests/pack/presets.spec.mjs)） | 改为 5（或研究角色 4 + 工具 preset 1 的表述） |
 | `preset-structure` 时钟行 | 每个 preset 恰一条 `time-context`（[b-pack.mjs L33-L38](../../../../scripts/verify/gates/b-pack.mjs)） | 新 preset 必须挂 `@deepseek-ai/dsh-time-context` |
 | `bundle.patch` | 盘上每个 patch 必须登记（`pack-bundle-compat`） | 加 `./presets/method-editor.patch.yml` |
 | `role-list-sync` | 盘上 preset 名都算「角色」 | 新名字会被纳入检测；文档 roster 同步 |
-| `l4-lite` | 盘上每个角色必须有 `PROMPTS`（[l4-lite-smoke.mjs L108-L125](../../../../scripts/smoke/l4-lite-smoke.mjs)） | 加 `method-editor` 标记 prompt |
+| `l4-lite` | 盘上每个角色必须有 `PROMPTS`（[l4-lite-smoke.mjs L108-L125](../../../../scripts/smoke/l4-lite.e2e.mjs)） | 加 `method-editor` 标记 prompt |
 | snapshot replay | 每个角色的 request 组装有 fixture | 新 preset 需录 fixture / 更新 expected |
 | 文档 | pack README 写「4 research roles」；`docs/design/20-roles.md` | 改成「4 研究角色 + 1 方法编辑（非研究）」 |
 
@@ -419,7 +419,7 @@ A 的「面板永不直写」不变：页面只发 prompt，写的是模型可�
 | 20 | 库格式与四标签 | [library-fold.ts L31-L95](../../../../packages/deep-research-pack/src/lib/library-fold.ts) |
 | 21 | Lead 的方法库政策（格式/管理动词） | [research-brief SKILL.md L87-L105](../../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md) |
 | 22 | D2 / D25 现文 | [decisions.md L15](../../../../docs/decisions.md) / [L38](../../../../docs/decisions.md) |
-| 23 | 新 preset 的机械面（数量哨兵/时钟/冒烟） | [presets.test.mjs L26-L33](../../../../tests/pack/presets.test.mjs) · [b-pack.mjs L33-L38](../../../../scripts/verify/gates/b-pack.mjs) · [l4-lite-smoke.mjs L108-L125](../../../../scripts/smoke/l4-lite-smoke.mjs) |
+| 23 | 新 preset 的机械面（数量哨兵/时钟/冒烟） | [presets.test.mjs L26-L33](../../../../tests/pack/presets.spec.mjs) · [b-pack.mjs L33-L38](../../../../scripts/verify/gates/b-pack.mjs) · [l4-lite-smoke.mjs L108-L125](../../../../scripts/smoke/l4-lite.e2e.mjs) |
 | 24 | client key/effect 门禁 | [b-pack.mjs L177+](../../../../scripts/verify/gates/b-pack.mjs) |
 
 ## 12. 验证计划（按顺序，先证伪再实现）

@@ -26,10 +26,10 @@
 - `install-copies` 红证：把 root README 的团队层命令改成 `@latest` → 红；还原 → 绿。
 - 正常档 client-load：清 3 个 stale repo dev web 后 `ALL PASS`（load 12.58，无强制）；随后非 repo 负载把 load 抬到 28.74，正常门 `NOT-RUN`，新 hint 打印 repo/非 repo 分诊；`DSH_CLIENT_LOAD_ALLOW_UNHEALTHY=1` 强制档 `ALL PASS`。
 - `pnpm verify` → 全绿；`pnpm test` → 1,407 pass / 0 fail / 0 skipped；`pnpm typecheck` → exit 0。
-- L2 对 0.3.4 制品：`lifecycle-smoke` ALL PASS、`install-shape-smoke` ALL PASS、`product-boot-smoke` GREEN。
+- L2 对 0.3.4 制品：`lifecycle.entry` ALL PASS、`install-shape.entry` ALL PASS、`product-boot.entry` GREEN。
 - `node scripts/dist/export-dist.mjs` → 0.3.4 全绿：185 条目、5/5 preset 行、15 skill、11 模板；手册 0.3.4 / 2026-11-13；升级示例为 `<new-version>`，无 0.3.2/0.3.3 残留。
 - `node scripts/dist/release-check.mjs` → 打 tag 前/后结果见交付报告；tag 后必须 `version=0.3.4 tag=0.3.4（annotated）`。
-- `handoff-smoke` 在 0.3.4 HEAD/tag 上跑 → ALL PASS（源码移交不含 runtime/凭据/run 数据，HANDOFF 接收命令齐全）。
+- `handoff.e2e` 在 0.3.4 HEAD/tag 上跑 → ALL PASS（源码移交不含 runtime/凭据/run 数据，HANDOFF 接收命令齐全）。
 
 ## 环境状态
 

@@ -12,7 +12,7 @@ commit；现 pin 已 `687f282e86`，两者已不同步——见 [external-materi
 
 对照结论（吸收的依据）：九条教义大半本仓已有同构落点——证据匹配面（五面合同 + 任务型路由
 表）、with-key policy（真模型档四脚本 + 未跑≠通过）、verify the world（evidence-audit /
-client-load-smoke 磁盘真值对账 / watch-run 谓词化）、真入口路径（L2 release-smoke）、mock 只放
+client-load.entry 磁盘真值对账 / watch-run 谓词化）、真入口路径（L2 release.entry）、mock 只放
 边界（本仓近乎零 mock）、prove-it-red（门禁反证台账）、防假绿①（脚本 preflight exit 2）、
 "单跑才绿 = 自己的缺陷"（scripts/AGENTS 原话同构）、快照层（snapshot-replay 三层判据）、
 "明说测试不覆盖哪里"（值级不可证条款）。真实增量三类：消化未成登记资产、少数机械缺口
@@ -30,16 +30,16 @@ client-load-smoke 磁盘真值对账 / watch-run 谓词化）、真入口路径�
    §自写代码证据阶梯（五台阶：导出守卫 → 行为谓词 → 注册生命周期 → 真挂载 → 组装面——将来
    任何 `src/` 套件对号入座）；根 AGENTS §纪律常驻「证据匹配面」行（密钥节压缩腾位，132/132
    维持）；tests/AGENTS 前向反证规则 + 改夹具先想红。
-3. **机械**：`tests/pack/export-shape.test.mjs`（插件两半 named exports / 零 default / inject
-   形状；host 半空 inject 合法有注）；`tests/contracts/smoke-contract.test.mjs`（真模型档 verdict 契约
+3. **机械**：`tests/pack/export-shape.spec.mjs`（插件两半 named exports / 零 default / inject
+   形状；host 半空 inject 合法有注）；`tests/checks/smoke-contract.test.mjs`（真模型档 verdict 契约
    机械钉住——行为本已合规，零脚本改动）；`src/client/index.ts` 工具卡循环 `scoped.effect`
    包裹收口（registrations are effects 达成全量包裹，源 1 行的裸注册例外消除）+ verify 门禁
    `client-effect-wrap`（防空语料：零注册即红；层边界 = 只查 index.ts 装配位）。
 4. **命名即层**（用户点名的语料实践——"后缀即层"的本仓移植）：scripts/AGENTS §依赖与分层
-   立命名规则（后缀申报证据类型与档位：`.test.mjs` = 唯一 regression 成员、`*-smoke` /
+   立命名规则（后缀申报证据类型与档位：`.spec.mjs` = 唯一 regression 成员、`*-smoke` /
    `*-probe` / `*-gate`/`*-audit`/`*-scan` / 支援件在车道外）+ **真模型档登记制 closed
-   set**——`tests/contracts/smoke-contract.test.mjs` 机械对账"要求凭据（引用 `.credentials.yaml`）的顶层脚本
-   必须恰为名单"。判据事实：`withModelKey` 是条件透传（keyless 冒烟也合法调用，release-smoke
+   set**——`tests/checks/smoke-contract.test.mjs` 机械对账"要求凭据（引用 `.credentials.yaml`）的顶层脚本
+   必须恰为名单"。判据事实：`withModelKey` 是条件透传（keyless 冒烟也合法调用，release.entry
    实测四处调用），不能作档位判据；**凭据要求**（缺席即 exit 2）才是——文本标记恰好干净切出
    四脚本。今后"真模型档"是有机器账面的封闭词表，新档位脚本同 diff 进名单。
 
@@ -81,7 +81,7 @@ client-load-smoke 磁盘真值对账 / watch-run 谓词化）、真入口路径�
   fail 1 → 还原 pass 3/fail 0（closed set 事实基线 = 顶层 scripts 引用 `.credentials.yaml`
   者恰为四真模型档脚本）。
 - L0 计数终态：`pnpm test` pass 145 / fail 0（原 140 + 新增 5）。
-- 改动面（`src/client/`）真挂载：pack 构建 + `client-load-smoke`——22 条断言 PASS、2 条 FAIL
+- 改动面（`src/client/`）真挂载：pack 构建 + `client-load.entry`——22 条断言 PASS、2 条 FAIL
   （重入点描边 / ↻ rerun 回边）。**隔离反证**：还原裸版重建重跑，失败集完全一致——2 红与本
   改动无关，系绑定会话（`drt_2026-ai-video-generation-landscape`）盘侧真值与 UI 渲染的既有
   错位，立 [BUG-003](../../_backlog/_archived/fixed_bugs/BUG-003-client-load-smoke-loop-edge-mismatch.md)
@@ -97,7 +97,7 @@ closed set 的证明范围：后缀不决定凭据档位；凭据字符串名单
 
 - 工作树含上条目在飞改动 `dev/hitl-answer.mjs`（HITL 代答修复待实弹复验）——本条目未触碰，
   窄证据切片提交绕开。
-- 未跑项（如实分列，均非本条目改动面）：L1 preset-smoke / L2 release-smoke（无 preset 与包
+- 未跑项（如实分列，均非本条目改动面）：L1 preset.e2e / L2 release.entry（无 preset 与包
   结构改动）；entry-chain 探针（未动 docs/AGENTS.md，按节奏不跑）；L4-lite（无模型可见文本
   改动）。
 - 语料消化输入 = `/Users/bowhead/deepseek-harness/_digested/test-strategy/`（11 篇全文）。

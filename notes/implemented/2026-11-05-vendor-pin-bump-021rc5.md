@@ -28,13 +28,13 @@ pin 身份四处（submodule gitlink / 根 [AGENTS §DSH 源码表](../../AGENTS
 ## 实际跑过的验证
 
 - L0：`pnpm verify` 全绿；`pnpm test` 1038/1038。
-- L1：`preset-smoke`（真挂载档）绿。
-- L2：`install-shape-smoke` ALL PASS——全局 `dsh 0.2.1-rc.5` 真实用户形态（profile init → tarball
-  `plugin add` → team 层 rc.5 → 真启动，roster 三态齐）；`product-boot-smoke` GREEN——首屏品牌 /
+- L1：`preset.e2e`（真挂载档）绿。
+- L2：`install-shape.entry` ALL PASS——全局 `dsh 0.2.1-rc.5` 真实用户形态（profile init → tarball
+  `plugin add` → team 层 rc.5 → 真启动，roster 三态齐）；`product-boot.entry` GREEN——首屏品牌 /
   Lead preset / 工作区标题 / StartCard 三步全过（2026-11-03 记录的三项失败已恢复）。
-- `client-load-smoke` ALL PASS（观察面 client 真浏览器加载、页签与终稿面）。
-- `l4-lite-smoke` ALL PASS（5 角色 assistant 响应 + scout `web_search` 工具调用真实发生）。
-- snapshot：`snapshot-replay-smoke` ALL PASS——research-face 4 场景真模型重录（lead / scout /
+- `client-load.entry` ALL PASS（观察面 client 真浏览器加载、页签与终稿面）。
+- `l4-lite.e2e` ALL PASS（5 角色 assistant 响应 + scout `web_search` 工具调用真实发生）。
+- snapshot：`snapshot-replay.entry` ALL PASS——research-face 4 场景真模型重录（lead / scout /
   analyst / critic），`snapshot.json` 场景身份（`vendor` / `recordedAt` / `codeAnchor`）同步；
   C 金标准按真实回放重写 1 行（模型结果数 8→10），未削减判据面。
 - run 通道：`boot-run` 重建 profile（team 层 = rc.5）→ `run-driver up` GREEN（镜像一致 + 宿主挂载 +

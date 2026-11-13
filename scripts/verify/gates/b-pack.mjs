@@ -117,12 +117,12 @@ export function runB() {
   }
 }
 
-// ── client-half（pack 的 client 半声明闭环——release-smoke-hardening 件⑤a）──
+// ── client-half（pack 的 client 半声明闭环——release.entry-hardening 件⑤a）──
 // 为什么：vendor 的 validateClientHalvesDeclared() 只 glob vendor 树内 packages/client/*，仓外
 // pack 的 client 半在它射程外（company postmortem 0002 §Why every safety net missed it：上游
 // 门禁有 scope，out-of-tree pack 落在外面——本地镜像同款规则）。任一方向脱钩都是静默失效：
 // 有 exports 无声明 = 浏览器模块表永不枚举（client 半等于不存在）；有声明无 exports = 装载
-// 入口缺席。本门禁守声明面；真实安装形状（lib/client.js 在场）归 L2 release-smoke。
+// 入口缺席。本门禁守声明面；真实安装形状（lib/client.js 在场）归 L2 release.entry。
 {
   const gate = 'client-half';
   const pkgPath = join(PACK, 'package.json');
@@ -401,7 +401,7 @@ export function runB() {
 // ── market-index（发现面：_dist/market.json 是 format 1，且与包清单同源同版本）──
 // 依据：发现页/`plugin_market` 只读静态索引；格式 1 的硬字段 = name / versions[].version /
 // publishTimestamp / source / engines.dsh（规则源 = vendor 的 plugin-market index 格式文档）。
-// L0 是零依赖层，不 import workspace 里的校验器——真 `parseMarketIndex` 归 lifecycle-smoke
+// L0 是零依赖层，不 import workspace 里的校验器——真 `parseMarketIndex` 归 lifecycle.entry
 // （那里有完整 node_modules）。本门禁判：结构合法 + 与包清单一致 + 图标在格式上限内。
 // 反证：staged 索引里放回一个插件条目 → 红；删 staged 文案 → 红；把 format 改成 2 → 红。
 {

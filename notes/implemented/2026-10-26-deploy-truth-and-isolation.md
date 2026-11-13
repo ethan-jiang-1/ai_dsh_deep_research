@@ -39,4 +39,4 @@
 
 - CI 的 `deploy` job 已加入 workflow，但本机不能执行 GitHub Actions；Linux 上的安装形状仍以 CI 首跑为准。
 - Windows / DSH Desktop / 真实 npm registry / 活升级与卸载 / 共享 home 仍无证据；属未覆盖环境。
-- `export-dist` 改为显式 `pnpm build` + `npm pack --ignore-scripts`，不再把构建押在 `prepack` 的脚本开关上；`prepack` 仍保留给 npm publish/release-smoke 的同一条 pack 路径。
+- `export-dist` 改为显式 `pnpm build` + `npm pack --ignore-scripts`，不再把构建押在 `prepack` 的脚本开关上；`prepack` 仍保留给 npm publish/release.entry 的同一条 pack 路径。

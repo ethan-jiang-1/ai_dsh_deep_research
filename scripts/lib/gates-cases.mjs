@@ -1,8 +1,8 @@
 // gates-cases.mjs — 门禁自测的注入案例表（纯 fs 注入手法 + CASES/CONTROLS 数据）。
-// 从 scripts/smoke/gates-smoke.mjs 拆出（2026-10-09 layering 二代：tests/contracts/verify-gates.test.mjs
+// 从 scripts/smoke/gates.e2e.mjs 拆出（2026-10-09 layering 二代：tests/checks/verify-gates.test.mjs
 // 静态对账消费本表——驱动面（smoke 道，起子进程）不得被 tests import，案例表因此住 lib；
 // 每 mutate 只做纯 fs 操作，git add 由驱动壳在 mutate 后统一执行，本模块零子进程）。
-// 消费方：scripts/smoke/gates-smoke.mjs（真执行体）+ tests/contracts/verify-gates.test.mjs（静态对账）。
+// 消费方：scripts/smoke/gates.e2e.mjs（真执行体）+ tests/checks/verify-gates.test.mjs（静态对账）。
 import { appendFileSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 
@@ -232,7 +232,7 @@ const linkUntrackedTarget = () => (dir) => {
   appendFileSync(join(dir, 'README.md'), '\n[孤儿探针](runtime/smoke-workspace/orphan-probe.md)\n');
 };
 
-/** 承重门禁抽样（增删同 diff：本表 + tests/contracts/verify-gates.test.mjs 无需改——它动态对账本表）。
+/** 承重门禁抽样（增删同 diff：本表 + tests/checks/verify-gates.test.mjs 无需改——它动态对账本表）。
  *  id = 案例唯一标识（同一门禁可有多个注入形态，id 防重复条目）；gate = 期望点名的门禁；
  *  mutate(dir) = 在 fixture 内注入该门禁负责拦的回归（纯 fs——git add 由驱动壳统一执行）。
  *  expect（可选）= 断言红**必须含此子串**；用于"该门禁在副本基线本就非 PASS"的场景——
@@ -280,7 +280,7 @@ export const CASES = [
   { id: 'md-anchors-missing', gate: 'md-anchors', mutate: appendTo('README.md', '\n[坏锚探针](AGENTS.md#这个锚点肯定不存在xyz)\n') },
   // doc-paths（2026-11-03 卫生审计 D1-2）：反引号散文件路径指向空处——md-links 看不见，
   // 但 agent 会照它去读。注入到 docs/ 的 live 文档（fixtures 与 notes 层不在扫描面）。
-  // 副本基线非 PASS 是预期：gates-smoke fixture 不复制 vendor/dsh submodule，文档里省略
+  // 副本基线非 PASS 是预期：gates.e2e fixture 不复制 vendor/dsh submodule，文档里省略
   // `vendor/` 前缀的资产路径（terms/AGENTS 的既有写法）在副本内必然未命中 → expect 指名
   // 本案例的注入报因，防止既有报因把"注入未生效"蒙混成绿。
   { id: 'doc-paths-dangling', gate: 'doc-paths', expect: 'scripts/__missing-probe.mjs',
@@ -396,9 +396,9 @@ export const CASES = [
   } },
   // 自咬防护：端口号从被撞文件现取（本文件处于 port-exclusive 扫描面，且不得写 'port = 数字' 形态）
   { id: 'port-exclusive-double-claim', gate: 'port-exclusive', mutate: (dir) => {
-    const src = readFileSync(join(dir, 'scripts', 'smoke', 'l4-lite-smoke.mjs'), 'utf8');
+    const src = readFileSync(join(dir, 'scripts', 'smoke', 'l4-lite.e2e.mjs'), 'utf8');
     const m = /'port',\s*'(\d{4,5})'/.exec(src);
-    if (!m) throw new Error('夹具 l4-lite-smoke 的端口声明形态变了——案例失效');
+    if (!m) throw new Error('夹具 l4-lite.e2e 的端口声明形态变了——案例失效');
     appendFileSync(join(dir, 'scripts', 'lib', 'roles.mjs'), `\nconst PORT = ${m[1]};\n`);
   } },
   // probe-registry：删一支探针的「何时跑」→ 头注六字段缺一，门禁必须点名红（只删字段，
@@ -482,7 +482,7 @@ export const CASES = [
   // handbook-budget 事故形态：四 preset 同降过限（手册字节 + 余量 > maxBytes）——company
   // 同构面出过真实事故（手册 17.4KB 超预算后注入静默截断，2026-10-09 钉版复核吸收）。
   // S1 事故形态（对抗自审抓获）：单个 preset 丢 maxBytes 行——摊平收集会静默放行，逐文件收集必须红
-  // client-half 双方向（release-smoke-hardening 件⑤a）：exports ./client 与 dsh.client 声明
+  // client-half 双方向（release.entry-hardening 件⑤a）：exports ./client 与 dsh.client 声明
   // 任一脱钩都是静默失效（company postmortem 0002：vendor 门禁只 glob 树内包，仓外 pack 射程外）。
   { id: 'client-half-no-export', gate: 'client-half', mutate: (dir) => {
     const p = join(dir, 'packages/deep-research-pack/package.json');
@@ -516,16 +516,16 @@ export const CASES = [
   } },
   // guard-red-record（tests 面反证义务机械化）：标题声明无留证 / 悬空编号双形态。
   { id: 'guard-red-record-no-record', gate: 'guard-red-record', mutate: (dir) => {
-    const p = join(dir, 'tests', 'run', 'local-date.test.mjs');
+    const p = join(dir, 'tests', 'run', 'local-date.spec.mjs');
     appendFileSync(p, "\ntest('探针：声称守卫 BUG-004 但本文件无留证', () => {});\n");
   } },
   { id: 'guard-red-record-dangling', gate: 'guard-red-record', mutate: (dir) => {
-    const p = join(dir, 'tests', 'run', 'local-date.test.mjs');
+    const p = join(dir, 'tests', 'run', 'local-date.spec.mjs');
     appendFileSync(p, "\ntest('探针：悬空编号 BUG-999', () => {});\n");
   } },
   // D52：判据测试（*conformance*）即使标题不带 BUG 号，也必须给红配方。
   { id: 'guard-red-record-conformance-no-block', gate: 'guard-red-record', mutate: (dir) => {
-    writeFileSync(join(dir, 'tests', 'contracts', 'probe-conformance.test.mjs'), "import test from 'node:test';\n\ntest('probe', () => {});\n");
+    writeFileSync(join(dir, 'tests', 'contracts', 'probe-conformance.spec.mjs'), "import test from 'node:test';\n\ntest('probe', () => {});\n");
   } },
   // align-ledger 在副本基线**非 PASS**（vendor/dsh 是 gitlink submodule，副本不拷其内容 →
   // "vendor 里不存在"是副本环境的固有报因）。故两案例必须带 expect 指名"na 活性"报因，
@@ -742,9 +742,9 @@ export const NO_CASE_GATES = [
   { gate: 'vendor-pin', reason: '断言对象 = submodule 钉身份（副本不含 submodule 内容，基线即红）' },
   { gate: 'vendor-clean', reason: '断言对象 = submodule 的 git status（副本无此仓库）' },
   { gate: 'pin-agreement', reason: '真串读取在 submodule 一步 fail-loud，注入的伪串永不到达扫描步' },
-  { gate: 'staged-change-pairing', reason: '断言对象 = git 暂存区；gates-smoke 的注入副本不建立暂存索引，副本基线无对象' },
+  { gate: 'staged-change-pairing', reason: '断言对象 = git 暂存区；gates.e2e 的注入副本不建立暂存索引，副本基线无对象' },
   { gate: 'hooks-active', reason: '断言对象 = 本机 git config core.hooksPath（副本 git init 后本就未设）' },
-  { gate: 'dist-tarball', reason: '断言对象 = gitignored _dist 制品；gates-smoke 副本不含 tarball，注入 sha 漂移会落缺席 note 分支' },
+  { gate: 'dist-tarball', reason: '断言对象 = gitignored _dist 制品；gates.e2e 副本不含 tarball，注入 sha 漂移会落缺席 note 分支' },
 ];
 
 export const CONTROLS = [
@@ -759,7 +759,7 @@ export const CONTROLS = [
     writeFileSync(join(dir, '_backlog', 'bugs', 'BUG-991-probe.md'),
       '---\nstatus: 排查中\nseverity: P2\nopened: 2099-01-01\n---\n\n# Probe\n> 严重级别：P2（次要）｜发现：2099-01-01｜状态：排查中\n');
     appendFileSync(join(dir, '_backlog', 'bugs', 'README.md'), '\n[BUG-991-probe](BUG-991-probe.md)\n');
-    appendFileSync(join(dir, 'tests', 'run', 'local-date.test.mjs'),
+    appendFileSync(join(dir, 'tests', 'run', 'local-date.spec.mjs'),
       "\n// 负例留证 2099-01-01：BUG-991——探针负例正本 = 本行（改判据 → 红；还原 → 绿）。\ntest('探针：活跃卡声明 BUG-991', () => {});\n");
   } },
   { id: 'client-keys-ignore-node-modules-and-directory-symlink', gate: 'client-keys', mutate: addIgnoredClientPaths() },

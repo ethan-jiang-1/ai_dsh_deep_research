@@ -11,7 +11,7 @@
 //
 // 为什么要拆（维度2 实测）：单文件一格到底时，改一道门禁要读全文件（或盲改），
 // 而改门禁的循环本来就是 `--only=<名>` 的窄面。拆后单域数百行，判据与文案逐字未改
-// （红绿基线与拆分前一致——gates-smoke 的注入案例与对照同一判）。
+// （红绿基线与拆分前一致——gates.e2e 的注入案例与对照同一判）。
 //
 // 用法：node scripts/verify/verify.mjs [--only=<gate[,gate]>]（可多次传，取并集）
 
@@ -49,7 +49,7 @@ runF();
 
 // ── 汇报 ──
 // 归因正则钉 [^\]]+（到首个 ] 为止）：贪婪 (.+)\] 会被消息内嵌的 ]（如队列行的 [RFC] 链接）
-// 污染，抓到最后一个 ] ——失败详情在场、门禁行却打 PASS（2026-10-07 gates-smoke 实证抓获）。
+// 污染，抓到最后一个 ] ——失败详情在场、门禁行却打 PASS（2026-10-07 gates.e2e 实证抓获）。
 const failed = new Set(failures.map((f) => f.match(/^\[([^\]]+)\]/)[1]));
 for (const g of gates) { if (only === null || only.has(g)) console.log(`${failed.has(g) ? 'FAIL' : 'PASS'}  ${g}`); }
 for (const n of notes) console.log(`note  ${n}`);

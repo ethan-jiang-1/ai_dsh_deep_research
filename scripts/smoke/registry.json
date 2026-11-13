@@ -1,27 +1,29 @@
 {
-  "cdp-ask-smoke.mjs": {
+  "cdp-ask.entry.mjs": {
     "tier": "dev-only",
     "reason": "真模型档：cdp-probe --ask 会触发模型；CI keyless 不跑",
     "cost": "slow",
     "uniqueClaim": "真模型交互探针 --ask：空闲 Send / 在飞 Queue 双路径 + journal 落盘对账",
     "oracle": [
-      "tests/run/inject-reconcile.test.mjs",
-      "tests/run/probe-send-target.test.mjs"
+      "tests/run/inject-reconcile.spec.mjs",
+      "tests/run/probe-send-target.spec.mjs"
     ],
-    "sunset": "当 client-hitl 的 HITL 代答覆盖发送/排队两路径时退役"
+    "sunset": "当 client-hitl 的 HITL 代答覆盖发送/排队两路径时退役",
+    "lane": "entry"
   },
-  "client-hitl-smoke.mjs": {
+  "client-hitl.entry.mjs": {
     "tier": "dev-only",
     "reason": "真模型档：需要活 HITL 挂起；CI keyless 不跑",
     "cost": "slow",
     "uniqueClaim": "真模型 HITL 活标题/挂起自动展开/代答盘侧落盘",
     "oracle": [
-      "tests/run/hitl-provenance.test.mjs",
-      "tests/run/ask-drive.test.mjs"
+      "tests/run/hitl-provenance.spec.mjs",
+      "tests/run/ask-drive.spec.mjs"
     ],
-    "sunset": "当 client-load 能造活挂起且 hitl-provenance 覆盖 UI 面时退役"
+    "sunset": "当 client-load 能造活挂起且 hitl-provenance 覆盖 UI 面时退役",
+    "lane": "entry"
   },
-  "client-load-config.mjs": {
+  "client-load-config.support.mjs": {
     "tier": "dev-only",
     "reason": "client-load 的研究配置相位支援件，无独立 CI 入口",
     "cost": "medium",
@@ -29,9 +31,10 @@
     "oracle": [
       "none: 支援件；相位断言在 client-load 主壳，无独立判据核"
     ],
-    "sunset": "并入 client-load 主模块后退役"
+    "sunset": "并入 client-load 主模块后退役",
+    "lane": "support"
   },
-  "client-load-final.mjs": {
+  "client-load-final.support.mjs": {
     "tier": "dev-only",
     "reason": "client-load 的终稿相位支援件，无独立 CI 入口",
     "cost": "medium",
@@ -39,40 +42,44 @@
     "oracle": [
       "none: 支援件；终稿相位断言在 client-load 主壳，无独立判据核"
     ],
-    "sunset": "并入 client-load 主模块后退役"
+    "sunset": "并入 client-load 主模块后退役",
+    "lane": "support"
   },
-  "client-load-reference.mjs": {
+  "client-load-reference.support.mjs": {
     "tier": "dev-only",
     "reason": "client-load 的磁盘参考选择支援件，无独立 CI 入口",
     "cost": "medium",
     "uniqueClaim": "client-load 磁盘参考选择支援件：绑定会话/参考选择",
     "oracle": [
-      "tests/run/client-load-select.test.mjs"
+      "tests/run/client-load-select.spec.mjs"
     ],
-    "sunset": "并入 client-load 主模块后退役"
+    "sunset": "并入 client-load 主模块后退役",
+    "lane": "support"
   },
-  "client-load-seed.mjs": {
+  "client-load-seed.support.mjs": {
     "tier": "dev-only",
     "reason": "种子夹具 materialize 支援件（client-load --seed 调用）",
     "cost": "medium",
     "uniqueClaim": "seed home materialize：组名/zstd 两帧/mtime/占位替换",
     "oracle": [
-      "none: 支援件；seed 形状由 client-load-smoke 的 --seed 实跑覆盖"
+      "none: 支援件；seed 形状由 client-load.entry 的 --seed 实跑覆盖"
     ],
-    "sunset": "并入 client-load 主模块后退役"
+    "sunset": "并入 client-load 主模块后退役",
+    "lane": "support"
   },
-  "client-load-smoke.mjs": {
+  "client-load.entry.mjs": {
     "tier": "ci",
     "job": "client-load",
     "cost": "slow",
     "uniqueClaim": "真浏览器驾驶舱装配/页签/渐进面/磁盘真值对账",
     "oracle": [
-      "tests/run/client-load-select.test.mjs",
-      "tests/run/host-health.test.mjs"
+      "tests/run/client-load-select.spec.mjs",
+      "tests/run/host-health.spec.mjs"
     ],
-    "sunset": "当 snapshot/preset 的 keyless 档能覆盖装配面时退役"
+    "sunset": "当 snapshot/preset 的 keyless 档能覆盖装配面时退役",
+    "lane": "entry"
   },
-  "cold-start-smoke.mjs": {
+  "cold-start.entry.mjs": {
     "tier": "dev-only",
     "reason": "独立 home/profile/端口 + tarball；CI 组合不复现，L2 手工档",
     "cost": "slow",
@@ -80,19 +87,21 @@
     "oracle": [
       "none: 组合/环境传输面，无独立判据核"
     ],
-    "sunset": "与 release/install 合并后退役"
+    "sunset": "与 release/install 合并后退役",
+    "lane": "entry"
   },
-  "data-smoke.mjs": {
+  "data.entry.mjs": {
     "tier": "dev-only",
     "reason": "需 tarball + 真 web；L2 数据面手工档",
     "cost": "slow",
     "uniqueClaim": "真 web 数据面：包目录零写入/假 token 不泄漏/卸载保留用户文件",
     "oracle": [
-      "tests/pack/data-plane-invariants.test.mjs"
+      "tests/pack/data-plane-invariants.spec.mjs"
     ],
-    "sunset": "当 data-plane-invariants 能覆盖真 IO 时退役"
+    "sunset": "当 data-plane-invariants 能覆盖真 IO 时退役",
+    "lane": "entry"
   },
-  "doctor-smoke.mjs": {
+  "doctor.e2e.mjs": {
     "tier": "ci",
     "job": "deploy",
     "cost": "medium",
@@ -100,29 +109,32 @@
     "oracle": [
       "none: doctor 判据仍在脚本内，抽纯核未做"
     ],
-    "sunset": "doctor 判据抽到 scripts/lib 并直测后退役"
+    "sunset": "doctor 判据抽到 scripts/lib 并直测后退役",
+    "lane": "e2e"
   },
-  "e2e-021rc2.mjs": {
+  "e2e-021rc2.entry.mjs": {
     "tier": "dev-only",
     "reason": "升级端到端，需已装实例；发布前手工档",
     "cost": "manual",
     "uniqueClaim": "升级后角色连续成组 + 研究状态/配置两页签真数据 + 插件零故障（真实 picker）",
     "oracle": [
-      "tests/pack/presets.test.mjs"
+      "tests/pack/presets.spec.mjs"
     ],
-    "sunset": "client-load 的真实 picker 顺序断言到位后退役"
+    "sunset": "client-load 的真实 picker 顺序断言到位后退役",
+    "lane": "entry"
   },
-  "gates-smoke.mjs": {
+  "gates.e2e.mjs": {
     "tier": "ci",
     "job": "keyless",
     "cost": "slow",
     "uniqueClaim": "注入回归经真实 verify 入口点名报红 + 零注入对照组",
     "oracle": [
-      "tests/contracts/verify-gates.test.mjs"
+      "tests/checks/verify-gates.test.mjs"
     ],
-    "sunset": "门禁案例并入单测或 verify 自检时退役"
+    "sunset": "门禁案例并入单测或 verify 自检时退役",
+    "lane": "e2e"
   },
-  "handoff-smoke.mjs": {
+  "handoff.e2e.mjs": {
     "tier": "ci",
     "job": "keyless",
     "cost": "fast",
@@ -130,9 +142,10 @@
     "oracle": [
       "none: git archive 传输面，无独立判据核"
     ],
-    "sunset": "当移交面退役或并入 dist 导出时"
+    "sunset": "当移交面退役或并入 dist 导出时",
+    "lane": "e2e"
   },
-  "install-shape-smoke.mjs": {
+  "install-shape.entry.mjs": {
     "tier": "dev-only",
     "reason": "需全局 dsh/pnpm + registry；L2 安装手工档",
     "cost": "slow",
@@ -140,9 +153,10 @@
     "oracle": [
       "none: 全局 dsh 安装传输面"
     ],
-    "sunset": "并入 release-smoke 后退役"
+    "sunset": "并入 release.entry 后退役",
+    "lane": "entry"
   },
-  "l4-lite-smoke.mjs": {
+  "l4-lite.e2e.mjs": {
     "tier": "dev-only",
     "reason": "真模型档：需要 DEEPSEEK_API_KEY；CI keyless 不跑",
     "cost": "slow",
@@ -150,40 +164,44 @@
     "oracle": [
       "none: 真模型行为，无 keyless oracle"
     ],
-    "sunset": "当快照/探针能覆盖真模型行为时退役"
+    "sunset": "当快照/探针能覆盖真模型行为时退役",
+    "lane": "e2e"
   },
-  "lifecycle-smoke.mjs": {
+  "lifecycle.entry.mjs": {
     "tier": "ci",
     "job": "deploy",
     "cost": "medium",
     "uniqueClaim": "market/tarball 显示面 + readPluginMeta + remove 回落",
     "oracle": [
-      "none: 发布面传输；manifest 判据归 pack-smoke/package-contract"
+      "none: 发布面传输；manifest 判据归 pack.e2e/package-contract"
     ],
-    "sunset": "当发布面退役或与 release-smoke 合并时"
+    "sunset": "当发布面退役或与 release.entry 合并时",
+    "lane": "entry"
   },
-  "method-library-tool-smoke.mjs": {
+  "method-library-tool.e2e.mjs": {
     "tier": "dev-only",
     "reason": "需 native system.node；CI 工具链缺，开发档",
     "cost": "medium",
     "uniqueClaim": "真 Loader + Method Editor + Host Tool + mock LLM：claim/摘要/默认/删除写读",
     "oracle": [
-      "tests/pack/method-library-io.test.mjs",
-      "tests/pack/method-library-write.test.mjs"
+      "tests/pack/method-library-io.spec.mjs",
+      "tests/pack/method-library-write.spec.mjs"
     ],
-    "sunset": "当 host tool 组装可由 preset-smoke 覆盖时退役"
+    "sunset": "当 host tool 组装可由 preset.e2e 覆盖时退役",
+    "lane": "e2e"
   },
-  "pack-smoke.mjs": {
+  "pack.e2e.mjs": {
     "tier": "ci",
     "job": "deploy",
     "cost": "medium",
     "uniqueClaim": "tarball 条目/模块表/sha/无 symlink/无安装脚本",
     "oracle": [
-      "tests/pack/package-contract.test.mjs"
+      "tests/pack/package-contract.spec.mjs"
     ],
-    "sunset": "当 pack 形状由构建门覆盖时退役"
+    "sunset": "当 pack 形状由构建门覆盖时退役",
+    "lane": "e2e"
   },
-  "preset-smoke.mjs": {
+  "preset.e2e.mjs": {
     "tier": "ci",
     "job": "deploy",
     "cost": "medium",
@@ -191,20 +209,22 @@
     "oracle": [
       "none: 真装配面，判据在脚本；结构面归 tests/pack/presets"
     ],
-    "sunset": "当 snapshot/结构测试能覆盖真挂载时退役"
+    "sunset": "当 snapshot/结构测试能覆盖真挂载时退役",
+    "lane": "e2e"
   },
-  "product-boot-smoke.mjs": {
+  "product-boot.entry.mjs": {
     "tier": "dev-only",
     "reason": "真 Web + 浏览器 + 团队层；首启手工档（与 client-load 互补）",
     "cost": "slow",
     "uniqueClaim": "首启 blank Lead Session/cwd/StartCard/目录按钮",
     "oracle": [
-      "tests/cockpit/workspace-boot.test.mjs",
-      "tests/cockpit/start-card.test.mjs"
+      "tests/cockpit/workspace-boot.spec.mjs",
+      "tests/cockpit/start-card.spec.mjs"
     ],
-    "sunset": "当 client-load 首启相位覆盖时退役"
+    "sunset": "当 client-load 首启相位覆盖时退役",
+    "lane": "entry"
   },
-  "profile-concurrency-smoke.mjs": {
+  "profile-concurrency.entry.mjs": {
     "tier": "dev-only",
     "reason": "需全局 dsh + tarball；并发安装手工档",
     "cost": "slow",
@@ -212,52 +232,57 @@
     "oracle": [
       "none: 并发安装是传输面，无独立判据核"
     ],
-    "sunset": "当并发安装面退役或由 profile CAS 覆盖时"
+    "sunset": "当并发安装面退役或由 profile CAS 覆盖时",
+    "lane": "entry"
   },
-  "release-smoke.mjs": {
+  "release.entry.mjs": {
     "tier": "dev-only",
     "reason": "pack→干净 profile→plugin add；L2 安装手工档",
     "cost": "slow",
     "uniqueClaim": "pack→干净 profile→plugin add→安装域挂载→端口释放",
     "oracle": [
-      "none: 安装传输面；安装域挂载判据归 preset-smoke --no-patch"
+      "none: 安装传输面；安装域挂载判据归 preset.e2e --no-patch"
     ],
-    "sunset": "与 install-shape 合并后退役"
+    "sunset": "与 install-shape 合并后退役",
+    "lane": "entry"
   },
-  "run-accept-smoke.mjs": {
+  "run-accept.e2e.mjs": {
     "tier": "ci",
     "job": "keyless",
     "cost": "medium",
     "uniqueClaim": "run-accept 全链：归一/幂等/外部 present/秘密/repair/schema/claim",
     "oracle": [
-      "tests/run/run-accept-fixture.test.mjs",
-      "tests/run/run-receipt.test.mjs"
+      "tests/run/run-accept-fixture.spec.mjs",
+      "tests/run/run-receipt.spec.mjs"
     ],
-    "sunset": "当 run-accept 核心有完整直测时退役"
+    "sunset": "当 run-accept 核心有完整直测时退役",
+    "lane": "e2e"
   },
-  "secret-scan-smoke.mjs": {
+  "secret-scan.e2e.mjs": {
     "tier": "dev-only",
     "reason": "交付物秘密扫描边界；随 run 验收手工跑",
     "cost": "medium",
     "uniqueClaim": "CLI 扫描范围边界：默认不扫 evidence/--all 才扫/不回显",
     "oracle": [
-      "tests/run/secret-scan.test.mjs"
+      "tests/run/secret-scan.spec.mjs"
     ],
-    "sunset": "当 secret-scan 范围由纯函数覆盖时退役"
+    "sunset": "当 secret-scan 范围由纯函数覆盖时退役",
+    "lane": "e2e"
   },
-  "snapshot-replay-smoke.mjs": {
+  "snapshot-replay.entry.mjs": {
     "tier": "ci",
     "cost": "slow",
     "uniqueClaim": "A 回放通路 / B 组装请求 diff / C lead 渲染金标准",
     "oracle": [
-      "tests/run/replay-request.test.mjs",
-      "tests/run/replay-scene.test.mjs",
-      "tests/run/replay-fixtures.test.mjs"
+      "tests/run/replay-request.spec.mjs",
+      "tests/run/replay-scene.spec.mjs",
+      "tests/run/replay-fixtures.spec.mjs"
     ],
     "sunset": "当 A/B 进 CI 且 C 降里程碑时退役",
-    "job": "snapshot-replay"
+    "job": "snapshot-replay",
+    "lane": "entry"
   },
-  "team-preflight-smoke.mjs": {
+  "team-preflight.e2e.mjs": {
     "tier": "dev-only",
     "reason": "真模型档：需要 DEEPSEEK_API_KEY；CI keyless 不跑",
     "cost": "slow",
@@ -265,9 +290,10 @@
     "oracle": [
       "none: 真模型行为，无 keyless oracle"
     ],
-    "sunset": "当 team 行为由快照/探针覆盖时退役"
+    "sunset": "当 team 行为由快照/探针覆盖时退役",
+    "lane": "e2e"
   },
-  "user-env-smoke.mjs": {
+  "user-env.entry.mjs": {
     "tier": "dev-only",
     "reason": "已有 bundle + 用户 overlay；安装共存手工档",
     "cost": "slow",
@@ -275,9 +301,10 @@
     "oracle": [
       "none: 安装共存是传输面，无独立判据核"
     ],
-    "sunset": "当共存安装面退役或由 install-shape 覆盖时"
+    "sunset": "当共存安装面退役或由 install-shape 覆盖时",
+    "lane": "entry"
   },
-  "workspace-isolation-smoke.mjs": {
+  "workspace-isolation.entry.mjs": {
     "tier": "dev-only",
     "reason": "双实例 cold start；重，手工档",
     "cost": "slow",
@@ -285,6 +312,7 @@
     "oracle": [
       "none: 双实例隔离是传输面，无独立判据核"
     ],
-    "sunset": "隔离面由 cold-start 覆盖时退役"
+    "sunset": "隔离面由 cold-start 覆盖时退役",
+    "lane": "entry"
   }
 }

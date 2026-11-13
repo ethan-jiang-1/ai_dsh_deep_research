@@ -65,7 +65,7 @@
 
 - **L0**：`pnpm verify` 全绿（19 项含 overlay-fresh / pack-workspace-fresh / doc-budgets）；
   `pnpm test` **405/405**（含方法节相关契约钉）；
-- **L1**：preset-smoke 真挂载 **ALL PASS**（4 preset + skills 硬隔离断言）——证明 persona/
+- **L1**：preset.e2e 真挂载 **ALL PASS**（4 preset + skills 硬隔离断言）——证明 persona/
   skills 装配真生效（no-key 证管道）；
 - **真模型走查**（quick_factual「DeepSeek chat 上下文长度」，HITL 代答 pick=recommended 并
   显式记账代理模拟）：方法节自动采用落格含判型理由/本题化调查要求/不承诺边界；派工五件含

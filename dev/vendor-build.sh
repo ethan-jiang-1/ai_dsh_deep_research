@@ -60,7 +60,7 @@ fi
 #    单元集合——自带 `tsdown.config.ts` 的包（hostPhase / 双 bundle / CSS 面）只由这一遍产出，
 #    本仓 ⑤ 的逐包补建**故意不碰**它们（用无插件配置补建会覆盖包配置）。少了这一遍，安装态
 #    profile 的 `dsh plugin add @deepseek-ai/dsh-web-app` 解析不到 tool-ask-user / tool-goal 等
-#    peer（0.2.1 轮 release-smoke 首红症状）。放在 ④ 之后：它吃 client 遍发射的 lib/types。
+#    peer（0.2.1 轮 release.entry 首红症状）。放在 ④ 之后：它吃 client 遍发射的 lib/types。
 echo "④a root host 遍（tsdown workspace 单元；自带 tsdown 配置的包由此产出 host 半）…"
 npx tsdown --env.DSH_BUILD_FACE host
 
@@ -73,7 +73,7 @@ npx tsdown --env.DSH_BUILD_FACE host
 #   的 lib/，它们同样命中该判据。
 #   **顺序铁律（0.2.0 轮实证）**：本步必须在 ⑥ tsdown client **之前**——client bundle 构建时
 #   依赖缺 lib/index.js 会被静默外置成 require，事后补建救不了已生成的 bundle（症状 = Web
-#   boot 17 包 failed / "missed the module table"；换 pin 必跑面含 client-load-smoke 把关）。
+#   boot 17 包 failed / "missed the module table"；换 pin 必跑面含 client-load.entry 把关）。
 #   0.2.1 轮补：判据加 `! tsdown.config.ts`——上游给部分包加了**包自己的 tsdown 配置**
 #   （clientBundle(…, { hostPhase: true }) / 双 bundle 等），root 的 workspace glob **不进**这类
 #   包单元（包配置自成一单元），所以它们同样会缺 lib/index.js，但用本仓无插件配置补建 =

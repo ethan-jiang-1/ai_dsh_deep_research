@@ -1,7 +1,7 @@
 // scripts/lib/ask-drive.mjs — ask 卡代答驱动策略与裁决（纯函数：观察进、动作出）。
 //
 // 为什么存在（BUG-004/BUG-005 的机制落点）：真浏览器适配层无法进 keyless 回归——把
-// 驱动决策与成功裁决抽成纯函数，行为契约由 tests/ask-drive.test.mjs 钉死；适配层
+// 驱动决策与成功裁决抽成纯函数，行为契约由 tests/ask-drive.spec.mjs 钉死；适配层
 // （dev/hitl-answer.mjs）只做 IO 搬运。两条铁律：
 //   ① UI 形状（卡头消失/题干更换）永不单独判"已提交"——盘侧 answer 落地才是唯一成功判据；
 //   ② Submit 可用 = 唯一提交动作；无卡可读 = 交回盘侧裁决，不自行宣布完成。
@@ -94,7 +94,7 @@ export function questionCardKeyOf(sessionId, callId) {
  *
  * 浏览器边界孪生：真判据在 dev/hitl-answer.mjs 的 page.evaluate 内（每次动作同轮复核，防竞态）；
  * page 边界无法共享闭包，故本函数 + 下方 hitlUiIdentityOf 是同一组规则的 keyless 可测正本
- * （tests/ask-drive.test.mjs 钉 mutation：会话不符/歧义/缺席、卡陈旧/歧义/缺身份）。两处规则
+ * （tests/ask-drive.spec.mjs 钉 mutation：会话不符/歧义/缺席、卡陈旧/歧义/缺身份）。两处规则
  * 改动必须同步——这是有意的重复，不是可删的死 API。
  */
 export function hitlUiSessionOf({ targetSessionId, activeSessionIds = [], selectedSessionIds = [] } = {}) {

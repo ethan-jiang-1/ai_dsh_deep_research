@@ -7,7 +7,7 @@
 > [registry 否决](../rejected/2026-10-23-gate-registry.md) ｜
 > 合同 [evaluation §L0](../../docs/evaluation.md) · [design/40](../../docs/design/40-research-cockpit.md) ·
 > [design/50](../../docs/design/50-agent-loop-and-state.md) ｜
-> 门禁 [verify.mjs](../../scripts/verify/verify.mjs) · [gates-smoke](../../scripts/smoke/gates-smoke.mjs)
+> 门禁 [verify.mjs](../../scripts/verify/verify.mjs) · [gates-smoke](../../scripts/smoke/gates.e2e.mjs)
 
 ## 决定
 

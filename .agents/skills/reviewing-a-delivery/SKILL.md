@@ -74,7 +74,7 @@ description: Use when preparing delivery, when a cross-surface diff (pack, docs,
 5. **模型实际看到的 prompt / tool schema / result / diagnostic / transcript**：
    金标准只许重写不许放宽；run 通道缓存重启了吗。本仓实例：`presets/<role>.patch.yml` 的
    persona/skills/工具行、`src/lib/` 中进入 model 上下文的部分、`cordis.patch.yml` 声明行；
-   机械侧 = `snapshot-replay-smoke`（研究角色组装面录制语料）。
+   机械侧 = `snapshot-replay.entry`（研究角色组装面录制语料）。
 6. **denial 在直接与替代调用路径都到达最终 operation**：拒绝不能只堵一条路。
    本仓实例：工具权限/密钥检查若只在一条调用链上做，另一条（如 client 侧直调、
    mcp 通道）就绕过了。查：新增的拒绝/守卫是否有第二个入口未覆盖；
@@ -98,11 +98,11 @@ description: Use when preparing delivery, when a cross-surface diff (pack, docs,
 
 9. **shipped entry path**：Loader / bin / worker / subprocess / built artifact 走的是
    真入口路径。本仓实例：L2 安装验收 = `npm pack → 干净 profile → plugin add → 真会话`
-   （`docs/evaluation.md:14`）；`gates-smoke` 用**真实 verify 入口**注入而非单测门禁函数；
-   `client-load-smoke` 经真 DSH web 装载。查：新证据是否走真入口，还是走了测试专用旁路。
+   （`docs/evaluation.md:14`）；`gates.e2e` 用**真实 verify 入口**注入而非单测门禁函数；
+   `client-load.entry` 经真 DSH web 装载。查：新证据是否走真入口，还是走了测试专用旁路。
 10. **assertion 在目标 regression 上真会失败 + negative control 经真实 runner 被拒**：
     正本 = [`.agents/skills/writing-a-gate`](../writing-a-gate/SKILL.md)（先想红再写绿）。
-    本仓实例：`gates-smoke` 的零注入对照组 + 注入组双轨；新门禁必须同 diff 带反证；
+    本仓实例：`gates.e2e` 的零注入对照组 + 注入组双轨；新门禁必须同 diff 带反证；
     改断言迁就实现不是修法（`guides/60 §0` 硬边界②）。
 11. **proposed Note 被实现时同 diff 移动并改写为 present-tense shipped reality**：
     计划体不许留在 implemented。本仓实例：交付后的 RFC 迁 `implemented/` + **正文

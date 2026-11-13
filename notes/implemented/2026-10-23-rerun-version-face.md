@@ -8,7 +8,7 @@
 >
 > 首提 2026-10-23 ｜ 设计卡 [_backlog/issues/2026-10-23-rerun-versioned-graph.md](../../_backlog/_archived/settled_issues/2026-10-23-rerun-versioned-graph.md)（§7 决议）
 > ｜ 合同 [design/40 §2](../../docs/design/40-research-cockpit.md) · [guides/61 §5](../../docs/guides/61-run-playbook.md)
-> ｜ 折算 [run-version](../../packages/deep-research-pack/src/lib/run-version.ts) ｜ 测试 [run-version.test.mjs](../../tests/cockpit/run-version.test.mjs)
+> ｜ 折算 [run-version](../../packages/deep-research-pack/src/lib/run-version.ts) ｜ 测试 [run-version.spec.mjs](../../tests/cockpit/run-version.spec.mjs)
 
 ## 决定
 
@@ -59,17 +59,17 @@ HITL2 待审 = hitl-fold 的 anchor-2 pending）；终稿页签默认看版本�
 ## 实际跑过的验证
 
 - 基线：`pnpm verify` 全绿、`pnpm test` 639 pass / 0 fail。
-- **红**：`run-version.test.mjs` 在模块缺席时 import 失败（1 文件 / 1 fail）；实现后 11 条全绿。
+- **红**：`run-version.spec.mjs` 在模块缺席时 import 失败（1 文件 / 1 fail）；实现后 11 条全绿。
 - `pnpm typecheck` 通过；`pnpm test` 656 pass / 0 fail（含 `plan-diff` 6 条）；`pnpm build`（pack 双半）通过。
-- `client-load-smoke` ALL PASS：新增「终稿页签版本切换在场（版本账 / 当前工作稿）」，首标题对账
+- `client-load.entry` ALL PASS：新增「终稿页签版本切换在场（版本账 / 当前工作稿）」，首标题对账
   已改为跟默认视图（`final/vN`）走。
-- `preset-smoke`（L1 真挂载）ALL PASS：4 个 preset 全绿。
+- `preset.e2e`（L1 真挂载）ALL PASS：4 个 preset 全绿。
 - `snapshot-replay`：B 层在改动前基线即 9 项漂移（Wave 文本/NODES/subagent 工具 schema 旧金标准 +
   本轮 handbook 文本）；四个角色 fixture 已用真模型重录、`snapshot.json` 的 source 身份同 diff
   更新，回放全绿。
 - `pnpm verify` 全绿（`cockpit-doc-registry` 登记 `run-version`、fixtures taxonomy `run-rerun/`）。
 - 图谱版本轨：没有带 `plan/vN` 快照的**绑定会话**可做浏览器断言（dev home 的 run 都没有快照，
-  绑定只来自 journal，keyless 造不出）——UI 证据 = `pnpm build` + `client-load-smoke` 零回归；
+  绑定只来自 journal，keyless 造不出）——UI 证据 = `pnpm build` + `client-load.entry` 零回归；
   切换/差异逻辑由 `plan-diff` 单测与 `run-rerun` 夹具钉住。
 - **受控 v1→v2 E2E（真模型）**：`drt_e2e-rerun-2026-10-23`（已归档 `research-workspace/archive/`）。
   v1：HITL1 代理代答 → 1 证据节点 / 2 抓取 → `final/v1.md` + present → node-gate 门②③ PASS（门A

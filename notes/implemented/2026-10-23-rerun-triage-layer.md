@@ -50,12 +50,12 @@ HITL2 卡没有"你为什么不满意"的入口、结构性重跑不在卡上、
 - `pnpm verify`：全绿（含 `handbook-budget`、`pack-workspace-fresh`、`overlay-fresh`、
   `cockpit-doc-registry`）。
 - `pnpm test`：**719 pass / 0 fail**（新增 rerun-triage 契约 7 + cockpit 3 + hitl-fold 1）。
-- `snapshot-replay-smoke`：四角色真模型重录后 **4 场景 ALL PASS**（persona + 手册 + skill catalog
+- `snapshot-replay.entry`：四角色真模型重录后 **4 场景 ALL PASS**（persona + 手册 + skill catalog
   三处模型可见面同批；`codeAnchor` = 录制时 HEAD）。
-- `client-load-smoke`：终稿页脚与状态页 ⑤ 两处「还不满意？三种改法」折叠块均真浏览器 **PASS**
+- `client-load.entry`：终稿页脚与状态页 ⑤ 两处「还不满意？三种改法」折叠块均真浏览器 **PASS**
   （展开后可复制话术在场；切页签按显式内容有界等待，不读旧 DOM）——两处共用同一文案常量，
   契约测试钉 import。
-- `preset-smoke`（`DSH_SMOKE_REAL=1`）：**4 个 preset 全部真挂载绿**；lead/scout/analyst/critic
+- `preset.e2e`（`DSH_SMOKE_REAL=1`）：**4 个 preset 全部真挂载绿**；lead/scout/analyst/critic
   各自只看见自己的 skills（技能隔离随新 skill 一起成立）。
 - **真模型探针**：`scripts/probe/rerun-triage-probe.mjs` **五条全中**——(a) 复述为"证据不足、
   不是方向错"；(b) 两个手段（补研究 / 改说法）；(c) 各自写出版本后果与代价；(d) 未确认前零

@@ -29,7 +29,7 @@
 
 ### BUG-011：安装与研究就绪分层
 
-`../../packages/deep-research-pack/scripts/preflight.mjs` 提供显式 `--install-only`（[BUG-011](../../_backlog/_archived/fixed_bugs/BUG-011-release-smoke-keyless-mismatch.md)）。该模式检查发布安装所需的版本、peer、团队层、工作区和构建产物，但跳过模型凭据检查并明确不宣称研究就绪；默认模式仍检查环境变量或 DSH 凭据文件。`../../packages/deep-research-pack/scripts/scaffold.mjs` 转发模式，[release-smoke](../../scripts/smoke/release-smoke.mjs) 以清洗环境运行非模型子进程，并验证默认 preflight 会拒绝空凭据 home。
+`../../packages/deep-research-pack/scripts/preflight.mjs` 提供显式 `--install-only`（[BUG-011](../../_backlog/_archived/fixed_bugs/BUG-011-release-smoke-keyless-mismatch.md)）。该模式检查发布安装所需的版本、peer、团队层、工作区和构建产物，但跳过模型凭据检查并明确不宣称研究就绪；默认模式仍检查环境变量或 DSH 凭据文件。`../../packages/deep-research-pack/scripts/scaffold.mjs` 转发模式，[release.entry](../../scripts/smoke/release.entry.mjs) 以清洗环境运行非模型子进程，并验证默认 preflight 会拒绝空凭据 home。
 
 ### BUG-012：观察面事实适配
 
@@ -52,16 +52,16 @@ L2 不调用模型，要求凭据会把安装结构证据与生产研究前置�
 ## 验证
 
 - `pnpm test`：194 passed，0 failed。
-- `pnpm exec node --import tsx/esm --test tests/run/run-state.test.mjs tests/run/run-dashboard.test.mjs tests/run/hitl-fold.test.mjs`：50 passed，0 failed。
-- `node --test tests/pack/deploy-bin.test.mjs`：10 passed，0 failed。
+- `pnpm exec node --import tsx/esm --test tests/run/run-state.spec.mjs tests/run/run-dashboard.spec.mjs tests/run/hitl-fold.spec.mjs`：50 passed，0 failed。
+- `node --test tests/pack/deploy-bin.spec.mjs`：10 passed，0 failed。
 - BUG-011 隔离 CLI：空凭据 home 下 `--install-only` 退出 0，默认模式退出 1，且默认模式只拒绝模型密钥检查。
 - `tsc -p packages/deep-research-pack/tsconfig.json --noEmit` 与相关脚本语法检查通过。
-- `source dev/env.sh && node scripts/release-smoke.mjs`：ALL PASS；npm pack、干净 profile 安装、scaffold 真铺种子、空凭据安装模式通过、默认模式拒绝，以及安装域四角色真挂载全部通过。
-- `source dev/env.sh && node --import tsx/esm scripts/client-load-smoke.mjs`：ALL PASS；真实浏览器 client 装配、HITL 锚点、步骤条与盘侧文件对账通过。未绑定会话负样本候选不可打开，该断言跳过。
+- `source dev/env.sh && node scripts/release.entry.mjs`：ALL PASS；npm pack、干净 profile 安装、scaffold 真铺种子、空凭据安装模式通过、默认模式拒绝，以及安装域四角色真挂载全部通过。
+- `source dev/env.sh && node --import tsx/esm scripts/client-load.entry.mjs`：ALL PASS；真实浏览器 client 装配、HITL 锚点、步骤条与盘侧文件对账通过。未绑定会话负样本候选不可打开，该断言跳过。
 - `source dev/env.sh && node scripts/entry-chain-probe.mjs`：ALL PASS；正确识别空队列、入口 owner 与开发环，人工复核探针原文 `runtime/smoke-workspace/entry-chain-probe-2026-10-05T10-03-28-369Z.md`（运行区本机数据，留档非入库件）。
-- `source dev/env.sh && node scripts/snapshot-replay-smoke.mjs`：四角色 A 回放、B2 工具 schema、非 Lead 的 B1 persona，以及 Lead C 渲染金标准通过；Lead B1 persona 失败。失败源为本次未修改的既有 persona 与旧录制语料错位，记为 [BUG-013](../../_backlog/_archived/fixed_bugs/BUG-013-lead-replay-persona-stale.md)（2026-10-05 当日修复闭卡），未放宽比较器或重写金标准。
+- `source dev/env.sh && node scripts/snapshot-replay.entry.mjs`：四角色 A 回放、B2 工具 schema、非 Lead 的 B1 persona，以及 Lead C 渲染金标准通过；Lead B1 persona 失败。失败源为本次未修改的既有 persona 与旧录制语料错位，记为 [BUG-013](../../_backlog/_archived/fixed_bugs/BUG-013-lead-replay-persona-stale.md)（2026-10-05 当日修复闭卡），未放宽比较器或重写金标准。
 - `pnpm verify` 全绿；结构门禁最终通过临时 Git 索引把新增文件纳入 tracked 扫描，真实暂存区保持原样。
-- 执行路径探针：`node --experimental-test-isolation=none --import ./dev/smoke-workspace/regression-process-guard.mjs --test tests/*.test.mjs`，194 项通过、0 次子进程调用。向 guard 注入被吞掉的 `execSync` 后退出 1，证明监测可咬中原缺陷类型。
+- 执行路径探针：`node --experimental-test-isolation=none --import ./dev/smoke-workspace/regression-process-guard.mjs --test tests/*.spec.mjs`，194 项通过、0 次子进程调用。向 guard 注入被吞掉的 `execSync` 后退出 1，证明监测可咬中原缺陷类型。
 - 反证：日志选择器临时用跟随 symlink 的 `statSync` 替代目录项检查，断链 v4 选择与 dashboard 测试变红；`sceneState.done` 临时改成最后步索引加一，final-only 断言变红。合计 3 项失败，还原后同套用例通过。
 
 上述验证日期为 2026-10-05。源码域独立 L1、完整研究质量验收与 L4-lite 未跑，本条目没有修改研究角色、方法论文本或模型工具 schema。

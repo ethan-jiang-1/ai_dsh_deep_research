@@ -7,7 +7,7 @@
 缺陷判决与实测 = [BUG-018](../../_backlog/_archived/fixed_bugs/BUG-018-snapshot-replay-advertised-coverage.md) +
 [recorded-session 义务标定](../archived/2026-10-08-recorded-session-obligation.md)。
 部分取代 [keyless-snapshot-lane](../archived/2026-09-24-keyless-snapshot-lane.md)（回放通道选型与三层判据现由
-[snapshots/README](../../snapshots/README.md) 与 [snapshot-replay-smoke 头注](../../scripts/smoke/snapshot-replay-smoke.mjs)
+[snapshots/README](../../snapshots/README.md) 与 [snapshot-replay.entry 头注](../../scripts/smoke/snapshot-replay.entry.mjs)
 承接；本文取代其 "声明住 `snapshot.yml`、`tests/fixtures/` 落点" 的部分；历史出处见归档快照）。
 
 ## 决定
@@ -16,7 +16,7 @@
 （分类、保存边界与证据边界正本 = [snapshots/README.md](../../snapshots/README.md)）。
 
 - **场景声明实际驱动回放**：`snapshot.json` 是声明正本，由 [replay-scene](../../scripts/lib/replay-scene.mjs)
-  读取校验后交给 [snapshot-replay-smoke](../../scripts/smoke/snapshot-replay-smoke.mjs)。case 集必须与**该场景角色面**精确一致
+  读取校验后交给 [snapshot-replay.entry](../../scripts/smoke/snapshot-replay.entry.mjs)。case 集必须与**该场景角色面**精确一致
   （`research-face` = 研究角色子集；方法编辑不属 run 生命周期，D37）；缺字段、串角色、缺件、路径越界、symlink、重复 fixture 都在加载期 fail-loud。
   旧场景声明 `snapshot.yml` 退役（同一事实不留两份），其 `retired-tools` 钉法与 `sessionFormat` 版本语义
   并入 manifest 字段与 snapshots/README。
@@ -62,21 +62,21 @@
   （旧基线手册与当前手册差异），persona/headers/skill-catalog/runtime-context 绿——正是 BUG-018 记录的
   静默盲区被点亮。
 - **重录后绿**：`node --import tsx/esm dev/record-role-fixture.mjs --role <scout|analyst|critic|lead>`
-  四角色真模型重录，随后 `source dev/env.sh && node scripts/smoke/snapshot-replay-smoke.mjs` 全场景
+  四角色真模型重录，随后 `source dev/env.sh && node scripts/smoke/snapshot-replay.entry.mjs` 全场景
   A 回放 + 五条 B 判据 + coverage 自守通过。
 - **覆盖自守反证**：守卫测试先跑红（模块未导出）→ 实现后绿；含"基线外注入种类被点名"、"新 system/message
   注入种类同样被点名"、"四角色基线注入种类均在比对面内"与"未登记种类确实会被报出"（防空对照）四条——
   对抗自审抓获首版只查 `user/message` 且"恰好覆盖"断言是集合与自身比较（恒真），本版已改为可证伪不变量。
 - **来源形状反证**：垃圾锚点（非 hex 的 codeAnchor/vendor、不可解析的 recordedAt）先红 → 形状校验与
   `unknown-historical` 合法标记并存 → 绿。
-- **比对面单测反证**（实现期实录，住 [replay-request.test.mjs](../../tests/run/replay-request.test.mjs)）：
+- **比对面单测反证**（实现期实录，住 [replay-request.spec.mjs](../../tests/run/replay-request.spec.mjs)）：
   后续 header 改 model、定向归一化缺失、缺席/空 content/缺 provider-model-tools 各形态先红后绿。
 - **pin-agreement 扩围反证**：夹具迁入 `snapshots/` 未带豁免 → 逐个录制流点名 ≠ submodule HEAD → 红；
   豁免收拢到 `snapshots/replay/` + `run-state` → 绿。
-- **声明消费者反证**（住 [replay-scene.test.mjs](../../tests/run/replay-scene.test.mjs)）：模块缺失、ONLY 未知、
+- **声明消费者反证**（住 [replay-scene.spec.mjs](../../tests/run/replay-scene.spec.mjs)）：模块缺失、ONLY 未知、
   schema 版本、绝对/穿越/symlink 路径、重复 fixture 各形态先红后绿。
-- **L0**：`pnpm verify` 全绿 + `pnpm test` 全绿；`node scripts/smoke/gates-smoke.mjs` 全绿（对照组零注入 + 各注入案例均被点名报红）。
-- **默认入口复现**：`source dev/env.sh && node scripts/smoke/snapshot-replay-smoke.mjs` 连跑两次（含一次
+- **L0**：`pnpm verify` 全绿 + `pnpm test` 全绿；`node scripts/smoke/gates.e2e.mjs` 全绿（对照组零注入 + 各注入案例均被点名报红）。
+- **默认入口复现**：`source dev/env.sh && node scripts/smoke/snapshot-replay.entry.mjs` 连跑两次（含一次
   `--update-expected` 重写金标准之后）均 ALL PASS——四场景 A + 五条 B + coverage 自守 + lead C 金标准。
 
 ## 未跑与边界

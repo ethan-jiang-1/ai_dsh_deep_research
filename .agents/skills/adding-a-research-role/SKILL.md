@@ -34,25 +34,25 @@ description: Use when adding a research role preset, renaming one, or changing a
   `role-list-sync` 门禁（角色清单与 pack 对账）；
 - **persona 引用对账**：每个 preset 的 persona 文本硬引用 skill 名（如 critic「先加载
   adversarial-review skill」）——增删/改名 skill 时同 diff 检查 persona 是否跟着改（模型可见面）；
-- **真模型档覆盖**：`scripts/smoke/l4-lite-smoke.mjs` 的 `PROMPTS` 加该角色的标记 prompt——它是
+- **真模型档覆盖**：`scripts/smoke/l4-lite.e2e.mjs` 的 `PROMPTS` 加该角色的标记 prompt——它是
   全角色冒烟，盘上有角色而无覆盖即 exit 2；
 - **台账**：增删角色 = 推翻 D2（角色 = 5 个：4 研究 + 方法编辑，D37），先在 `docs/decisions.md` 台账登记新 D 号，
-  再动代码——`tests/pack/presets.test.mjs` 的数量哨兵会拦住没登记的增删。
+  再动代码——`tests/pack/presets.spec.mjs` 的数量哨兵会拦住没登记的增删。
 
 ## 3. 验证（完成判据，keyless 优先）
 
 ```sh
 node dev/render-overlay.mjs                       # 生成物先行：L1 挂的是 overlay 不是 pack 源（改 pack 后必跑且先于 L1）
 node scripts/verify/verify.mjs                    # preset-structure / row-deps / role-list-sync
-source dev/env.sh && node scripts/smoke/preset-smoke.mjs                  # L1 接线（dump 面；未 source 自拒）
-source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs # L1 真挂载：真会话 + 逐角色断言 + skills 隔离
-source dev/env.sh && node scripts/smoke/release-smoke.mjs --install-only  # L2 仅部署面改动时必跑（跳凭据；未 source 自拒）
+source dev/env.sh && node scripts/smoke/preset.e2e.mjs                  # L1 接线（dump 面；未 source 自拒）
+source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs # L1 真挂载：真会话 + 逐角色断言 + skills 隔离
+source dev/env.sh && node scripts/smoke/release.entry.mjs --install-only  # L2 仅部署面改动时必跑（跳凭据；未 source 自拒）
 ```
 
-改了模型可见行（persona/skill 文本）→ keyless 先跑 `node scripts/smoke/snapshot-replay-smoke.mjs`
+改了模型可见行（persona/skill 文本）→ keyless 先跑 `node scripts/smoke/snapshot-replay.entry.mjs`
 （B 层组装请求 diff：persona 全文 + 全部 request/header + 四处 user/message 注入（含时钟序列）；有意变更的
 红 = 已捕获，走重录场景或 `--update-expected` 重写金标准）→ 再跑真模型档
-`source dev/env.sh && node scripts/smoke/l4-lite-smoke.mjs`（全角色响应，含 method-editor；+ scout 工具调用）。
+`source dev/env.sh && node scripts/smoke/l4-lite.e2e.mjs`（全角色响应，含 method-editor；+ scout 工具调用）。
 **只跑 keyless 不算验过角色行为**——机制基线切换的
 教训（E1 回归）就是漏了 with-key 面。
 

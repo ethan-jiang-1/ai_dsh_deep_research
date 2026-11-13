@@ -34,17 +34,17 @@
 
 ## 实际跑过的验证
 
-- `node --test tests/pack/content-disclosure.test.mjs`：T0 从 10433 压到 9973 字符，
+- `node --test tests/pack/content-disclosure.spec.mjs`：T0 从 10433 压到 9973 字符，
   低于 10000 触发线；generic 指针/结构绿。
-- `node --test tests/pack/presets.test.mjs`：provenance hash 合同三条（manual / analyst
-  skill / team-assembly）绿；`node --test tests/pack/wave-contract.test.mjs` 绿。
+- `node --test tests/pack/presets.spec.mjs`：provenance hash 合同三条（manual / analyst
+  skill / team-assembly）绿；`node --test tests/pack/wave-contract.spec.mjs` 绿。
 - `pnpm test`：1165 pass / 0 fail。
-- `DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs`：角色/worker 真挂载绿（模型
+- `DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs`：角色/worker 真挂载绿（模型
   可见文本变更后的 L1）。
-- `node scripts/smoke/l4-lite-smoke.mjs`：全角色响应 + scout 工具调用绿。
+- `node scripts/smoke/l4-lite.e2e.mjs`：全角色响应 + scout 工具调用绿。
 - 真模型 `analyst` 会话 `request/header`：`present` / `subagent`，**无 workflow**；
   SHA 误用的工具路径已从普通 analyst 上消失。
-- `node scripts/smoke/release-smoke.mjs --install-only`：安装域全绿。
+- `node scripts/smoke/release.entry.mjs --install-only`：安装域全绿。
 - `node scripts/dist/export-dist.mjs`：0.3.1 tarball 与手册重生成。
 
 ## 残余风险

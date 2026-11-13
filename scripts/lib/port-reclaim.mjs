@@ -1,10 +1,10 @@
 // port-reclaim.mjs — 端口收割执行器（scripts/AGENTS.md「端口与临时路径自持有」的机械面）。
-// 实测依据（2026-09-26/27，preset-smoke 出生现场）：web 服务进程不在 spawn 子进程的进程组里
+// 实测依据（2026-09-26/27，preset.e2e 出生现场）：web 服务进程不在 spawn 子进程的进程组里
 // （SIGTERM / 整组 SIGKILL 都够不着——连跑三次实测，每次跑完端口仍被占、下一次冒烟直接
 // EADDRINUSE），按**端口**收割才可靠；web 有 supervisor 式监听重建行为，杀完立刻验存在竞态
 // 窗口——三轮"杀→等→验"，仍不干净才 fail-loud（一个只在单独运行时通过的脚本是脚本的缺陷）。
-// 消费方：scripts/smoke/preset-smoke.mjs（boot 失败兜底 + 收尾双保险）、
-// scripts/smoke/release-smoke.mjs（⑤ 安装域冒烟后的释放验证——preset-smoke 被外层超时击杀
+// 消费方：scripts/smoke/preset.e2e.mjs（boot 失败兜底 + 收尾双保险）、
+// scripts/smoke/release.entry.mjs（⑤ 安装域冒烟后的释放验证——preset.e2e 被外层超时击杀
 // 时其 finally 不及跑，web 孙进程独立进程组会漏占端口）。
 import { spawnSync } from 'node:child_process';
 import { isOwnListener } from './port-reclaim-policy.mjs';
@@ -24,7 +24,7 @@ export const listenersOn = (port) => {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // 返回 null = 端口已释放；非 null = 残留/降级描述（fail-loud 依据——lsof 缺席同样返回描述，
-// 与 preset-smoke 既有语义一致：无法校验就不宣称已释放）。
+// 与 preset.e2e 既有语义一致：无法校验就不宣称已释放）。
 export const reclaimPort = async (port) => {
   for (let attempt = 0; attempt < 3; attempt++) {
     const pids = listenersOn(port);

@@ -31,7 +31,7 @@
 - **角色面**：scout skill 补"查询算子"表 + "摘要 + 发布日期"去留判；analyst skill 补"定向补搜
   用算子"与 `retrieved_at` 的搜索结果日期校准信号。研究手册不动——注入载荷受字节/行预算约束，
   算子属角色方法论，放 skill 更合适。
-- **记录**：D30；机械把守 = `tests/pack/presets.test.mjs` 的替换行断言。
+- **记录**：D30；机械把守 = `tests/pack/presets.spec.mjs` 的替换行断言。
 
 ## 输掉的方案
 
@@ -51,7 +51,7 @@
 
 - `node dev/render-overlay.mjs` 重渲染（345 行）；`dsh --profile web --patch dev/research.overlay.yml
   --dump-config` → `- id: web` 下两行新值，`^- id: web$` 计数 = 1（替换不是新增），base 行名保留。
-- `node --test tests/pack/presets.test.mjs` → 17/17 绿。新断言先对 HEAD 的 bundle 跑出红
+- `node --test tests/pack/presets.spec.mjs` → 17/17 绿。新断言先对 HEAD 的 bundle 跑出红
   （pre-change `false` / working tree `true`）；删 `fetchProvider` 或改回 `deepseek-official`
   同样红（判别力，不是恒真）。
 - headless 真模型回合 A/B（同 prompt，只差 patch）：默认 3 条来源 = 标题 + URL；加 patch =

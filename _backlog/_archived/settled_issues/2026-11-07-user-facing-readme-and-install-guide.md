@@ -19,11 +19,11 @@ opened: 2026-11-07
 - 上一轮 [D38](../../../docs/decisions.md#d38)（2026-11-01）已把 README 从纯开发入口改成「用它 / 首屏 / 改它」，但「用它」仍是 owner 指针 + 内部术语，没有到产品页；[已结卡](2026-11-01-product-docs-and-dist.md) 的目标只完成了一半。
 - 三个读者共用一页：使用者、贡献者、Agent。[CONTRIBUTING.md](../../../CONTRIBUTING.md)（121 行）已承载开发前置、验证与通道；[AGENTS.md](../../../AGENTS.md) 承载 Agent 入口；[docs/00-index.md](../../../docs/00-index.md) 承载文档地图——开发面有现成的家。
 - 约束（改写时必须一起处理）：
-  - [product-invariants](../../../tests/contracts/product-invariants.test.mjs) 断言根 README 出现 `_dist/安装手册.md`（安装入口指针不能丢）；
+  - [product-invariants](../../../tests/contracts/product-invariants.spec.mjs) 断言根 README 出现 `_dist/安装手册.md`（安装入口指针不能丢）；
   - `dist-manual-fresh` 要求 `_dist/安装手册.md` 与 `scripts/dist/product-manual.md` 同步（只能改源再重导出，不能手改生成物）；
   - `doc-budgets` 给 README 的顶是 60 行（[doc-budgets.json](../../../scripts/doc-budgets.json)）；
   - `md-links` / `md-anchors` 覆盖 README 的所有链接与锚点；
-  - [pack README](../../../packages/deep-research-pack/README.md)（303 行）与 `README.zh.md` 由 [readme-bilingual](../../../tests/pack/readme-bilingual.test.mjs) 锁同构，改一面要同时改两面。
+  - [pack README](../../../packages/deep-research-pack/README.md)（303 行）与 `README.zh.md` 由 [readme-bilingual](../../../tests/pack/readme-bilingual.spec.mjs) 锁同构，改一面要同时改两面。
 - 面向使用者的「用户手册」已经存在（`_dist/安装手册.md` 随 tarball 交付）；问题是它的**主路径被参考内容淹没**，不是缺页。
 
 **已拍板（2026-11-07，用户确认按推荐）：**
@@ -192,7 +192,7 @@ opened: 2026-11-07
 - **手册**：保留 [D41](../../../docs/decisions.md#d41) 的十一段骨架（D 号变更需用户拍板，本轮不擅改）；用户路径优先落在内容上——§三 压成两张短表 + 「现在装 → §四 C」显式跳转，§四 开头即 profile 命令，§六 先给界面可见变化，§七 只留日常三项，patch 层/`--dump-config` 进附录 A。
 - **开发面**：宪章与仓库规则进 [CONTRIBUTING.md](../../../CONTRIBUTING.md)；README 只留一行。
 - **owner 口径**：[00-index](../../../docs/00-index.md) 与 [guides/65](../../../docs/guides/65-run-forms.md) 改为「完整合同 = 手册；最短路径 = README，命令由契约测试对账」。
-- **契约测试**：新增 [readme-manual-commands](../../../tests/contracts/readme-manual-commands.test.mjs)，首跑红（README 0 条 `dsh` 命令，防空断言）→ 重写后绿；[run-driver-contract](../../../tests/run/run-driver-contract.test.mjs) 的开发入口断言随内容迁移到 CONTRIBUTING。
+- **契约测试**：新增 [readme-manual-commands](../../../tests/checks/readme-manual-commands.test.mjs)，首跑红（README 0 条 `dsh` 命令，防空断言）→ 重写后绿；[run-driver-contract](../../../tests/run/run-driver-contract.spec.mjs) 的开发入口断言随内容迁移到 CONTRIBUTING。
 - **截图**：[首屏](../../../docs/assets/readme-first-screen.png)（含右栏研究状态/配置/图谱入口）+ [Plugins 页](../../../docs/assets/readme-plugins.png)（安装证据）；均在真实 3083 通道抓取，无 token。
 - **冷读探针（2026-11-07）**：第一遍（72 行版）七问全对但评分 2/5；缺口 = tgz 来源、DSH 前置未点明、「已有 profile」无法自查、「重启」无命令、登录无指引、术语（时间口径语言 / slug / DSH_HOME / Web 面 / 首屏）。按缺口改完后第二遍评分 3/5、七问全对；剩余缺口 = tgz 分发地址、UI 操作细节（卡片怎么点）、DSH 先验知识——前两类归分发/手册，本轮不追。
 - **验证**：`pnpm verify` 全绿；`pnpm test` 1045/1045；`install-shape-smoke` ALL PASS（profile → 两条 plugin add → 真启动出 token）；`readme-manual-commands` 首跑红 → 绿；`dist-manual-fresh` / `dist-manual-version` 绿。

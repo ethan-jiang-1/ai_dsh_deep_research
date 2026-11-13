@@ -4,14 +4,14 @@
 >
 > 后继：2026-10-20 起 agent 启动首动作 = [run-driver 入口](../archived/2026-10-20-run-driver-entry.md)（本节端口/入口已同步为 3083 / run-driver）。
 
-归宿：roadmap 队列行已销账（▶ 移交「M2 铺垫 P2」）；定案登记 00-index **D16**。依据：market 粗扫 §2/§4（agent-team-profile 候选基础）+ release-smoke 实证配方（pack → web 模板 profile → `plugin add file:`）+ design/10 §3（通道选型）+ m2-run-dashboard RFC L0（观察面）+ m2-run-mechanics RFC（HITL 两点流程出处）。以下正文除已同步的入口/端口外为 proposed 原貌（定案依据），毕业记录在文末。
+归宿：roadmap 队列行已销账（▶ 移交「M2 铺垫 P2」）；定案登记 00-index **D16**。依据：market 粗扫 §2/§4（agent-team-profile 候选基础）+ release.entry 实证配方（pack → web 模板 profile → `plugin add file:`）+ design/10 §3（通道选型）+ m2-run-dashboard RFC L0（观察面）+ m2-run-mechanics RFC（HITL 两点流程出处）。以下正文除已同步的入口/端口外为 proposed 原貌（定案依据），毕业记录在文末。
 
 ## 问题
 
 M2 的完成定义 = 一次完整 run（L4 全量四判据），但 **run 的启动通道不存在**：
 
-- M1 验证的都是验证通道：preset-smoke 源码域（web 出厂 profile + overlay 指向本仓
-  presets 源码，迭代工具）、release-smoke 一次性干净 profile（先删后建，用完即弃）
+- M1 验证的都是验证通道：preset.e2e 源码域（web 出厂 profile + overlay 指向本仓
+  presets 源码，迭代工具）、release.entry 一次性干净 profile（先删后建，用完即弃）
   ——没有文档化、可反复使用的真入口 run 通道；
 - 用户开 run 的操作面（开哪个会话 / 说什么 / HITL 两点会看到什么 / 往哪看）没有
   一页说明——事前设计定死，不在 run 中途发明（run-dashboard RFC 同款原则）。
@@ -21,7 +21,7 @@ M2 的完成定义 = 一次完整 run（L4 全量四判据），但 **run 的启
 - `dev/harness-home/profiles/research/` **已是安装域形状**（bundles = base + web-app +
   dsh-deep-research-pack，冒烟轮顺手所建）——通道的骨架已在，缺的是"转正"：文档化、
   幂等重建、开跑入口；
-- `release-check` = release-smoke 的一次性验证 profile（同形状，每次重建）；
+- `release-check` = release.entry 的一次性验证 profile（同形状，每次重建）；
   `web` = 出厂 profile（源码域 overlay 的宿主）——三者不混用。
 
 ## 方案
@@ -34,7 +34,7 @@ M2 的完成定义 = 一次完整 run（L4 全量四判据），但 **run 的启
   在位（roster 四角色 + presets；缺则 pack → `plugin add file:` 补装）→
   `dsh web --profile research -- --port 3083 --no-open` → 打印入口步骤（与操作指南
   同源一句话版）；
-- keyless：安装与 boot 零模型调用（release-smoke 已实证整条通道）。
+- keyless：安装与 boot 零模型调用（release.entry 已实证整条通道）。
 
 ### 2. 核心决策：agent-team-profile 复用 vs 自组（请用户定案）
 
@@ -89,7 +89,7 @@ M2 的完成定义 = 一次完整 run（L4 全量四判据），但 **run 的启
 
 - 幂等开跑（keyless 实跑）：删 research profile 重建 → `dev/boot-run.sh` 一键到位
   （组合校验 + web 起 + 步骤打印）；重复执行不坏、不重复安装；
-- 组合断言：profile 会话 roster 列出四研究角色（安装域通道：preset-smoke
+- 组合断言：profile 会话 roster 列出四研究角色（安装域通道：preset.e2e
   `--profile research --no-patch`）；
 - （若 A）叠加语义 keyless 判定落 Note（组合 dump：tool-subagent 生效模式 = profile
   层 one-shot vs preset 行 continuable 谁赢）+ 本包行变更后 L1 安装域 + L2 重跑绿；
@@ -139,7 +139,7 @@ research profile 转正；指南 = guides/61；暂无仪表盘开关。
   ——报错持有 **preset 行的值** = preset 行覆盖 profile 行。处置 = 三 preset 改声明
   one-shot（D18 对齐；D3 台账原文"单点快捷查证走 one-shot subagent"——preset 旧
   continuable 声明实为与 D3 的潜在漂移，本轮顺带修复）；
-- L1 双通道全绿（源码域含 overlay 改动；安装域 research = pack + 层）；L2 release-smoke
+- L1 双通道全绿（源码域含 overlay 改动；安装域 research = pack + 层）；L2 release.entry
   ALL PASS（pack 孤立形状——组合通道的验收归 boot-run + research profile，两面各司其职）。
 
 **顺带修的真 bug**：env.sh 两处 `$VAR（全角标点` 写法（nounset 下 bash 把全角字符当变量
@@ -155,9 +155,9 @@ HITL 两点/观察面/中断恢复/完成判据，全带出处）；AGENTS 布�
 （D16），P2 与 run 验证的 = one-shot worker 在 team 语境的真实可用性 + spawn_teammate
 组合行为。
 
-**实际跑过的验证**：`verify` 9 门禁全绿；`node --test` 10 pass；preset-smoke 源码域 ALL
+**实际跑过的验证**：`verify` 9 门禁全绿；`node --test` 10 pass；preset.e2e 源码域 ALL
 PASS（12 会话断言）+ 安装域（research）ALL PASS ×2（撤行后 continuable 包、one-shot
-对齐后包各一次）；release-smoke ALL PASS；boot-run 重建 + 幂等两档实测；差分实验红证在案；
+对齐后包各一次）；release.entry ALL PASS；boot-run 重建 + 幂等两档实测；差分实验红证在案；
 fresh-agent 入口链探针（改动面含入口链 → 必跑）：**6/6 PASS、零盲找零脱链、14 文件**——
 run 通道启动与档位 / 团队行归属与版本钉法 / one-shot 值与定案证据链 / ▶ 指针（已移交
 P2）/ L2 分工 / 发起研究入口；链健康度：D16 台账、patch、三 preset、毕业 Note 四处口径

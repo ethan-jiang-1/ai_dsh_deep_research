@@ -9,7 +9,7 @@
  * 解析顺序：显式 `--install-anchor` → `$DSH_INSTALL_ANCHOR` → PATH 上的 `dsh` 可执行文件。
  * 解析不到时返回 null（调用方标“未验证”，不硬红），不猜目录。
  *
- * 只读盘，不执行子进程；tests/pack/install-anchor.test.mjs 直接断言。
+ * 只读盘，不执行子进程；tests/pack/install-anchor.spec.mjs 直接断言。
  */
 import { accessSync, constants as fsConstants, existsSync, readFileSync, realpathSync, statSync } from 'node:fs'
 import { createRequire } from 'node:module'

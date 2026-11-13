@@ -67,17 +67,17 @@
 
 | 面 | 什么时候跑 | 命令 |
 |---|---|---|
-| L0 结构 | 每次收尾必跑；实施期随手 | `pnpm verify` + `pnpm test`（正本 = `package.json` 的 `verify`/`test` 脚本；fresh clone 首次先 source，见下） |
-| L1 挂载 | preset 内容/结构改动（其完成定义） | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs`（源码域，keyless；未 source 自拒）；安装域加 `--profile <p> --no-patch` |
-| L2 安装 | 包结构/release 相关改动 | `source dev/env.sh && node scripts/smoke/release-smoke.mjs`（pack→干净 profile→plugin add→安装域冒烟；无模型调用，安装验收使用 `--install-only`，默认 doctor 仍检查凭据；未 source 自拒） |
-| L2 冷启动 | 独立环境/bootstrap 改动 | `source dev/env.sh && node scripts/smoke/cold-start-smoke.mjs`（独立 home/profile/端口/state；MCP 关闭；团队层需 registry/缓存） |
-| L2 发布面/显示面 | 清单字段、locale/icon、市场索引、安装文档取向 | `node scripts/smoke/lifecycle-smoke.mjs`（market.json 过 DSH 校验器 → 装 tarball → 本包行 dump → 真启动 → `readPluginMeta` 四行显示面 → remove 回落；缺 `_dist` 产物 exit 2） |
-| L2 安装形状 | profile/安装形状/工作区相关改动 | `node scripts/smoke/install-shape-smoke.mjs`（原样执行手册的 CLI 装包分支：profile init → plugin add → 真启动；断言 roster 三状态、无 `did not activate`；缺前置 exit 2） |
-| L2 首启 | startup/client 恢复/首屏/StartCard 改动 | `node scripts/smoke/product-boot-smoke.mjs`（纯 `dsh --profile deep-research` + 真 Web + 浏览器；工作区会话、首屏、目录按钮；无模型；缺前置 exit 2） |
-| L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `node --import tsx/esm --test tests/contracts/evaluation-contract.test.mjs` |
-| L4 交付 | 里程碑级 | `source dev/env.sh && node scripts/smoke/l4-lite-smoke.mjs`（真模型档：需 `DEEPSEEK_API_KEY`，未 source 自拒）/ 完整 run（授权范围） |
+| L0 结构 | 每次收尾必跑；实施期随手 | `pnpm verify` + `pnpm test`（= `test:spec` + `test:checks`；正本 = `package.json`；fresh clone 首次先 source，见下） |
+| L1 挂载 | preset 内容/结构改动（其完成定义） | `source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs`（源码域，keyless；未 source 自拒）；安装域加 `--profile <p> --no-patch` |
+| L2 安装 | 包结构/release 相关改动 | `source dev/env.sh && node scripts/smoke/release.entry.mjs`（pack→干净 profile→plugin add→安装域冒烟；无模型调用，安装验收使用 `--install-only`，默认 doctor 仍检查凭据；未 source 自拒） |
+| L2 冷启动 | 独立环境/bootstrap 改动 | `source dev/env.sh && node scripts/smoke/cold-start.entry.mjs`（独立 home/profile/端口/state；MCP 关闭；团队层需 registry/缓存） |
+| L2 发布面/显示面 | 清单字段、locale/icon、市场索引、安装文档取向 | `node scripts/smoke/lifecycle.entry.mjs`（market.json 过 DSH 校验器 → 装 tarball → 本包行 dump → 真启动 → `readPluginMeta` 四行显示面 → remove 回落；缺 `_dist` 产物 exit 2） |
+| L2 安装形状 | profile/安装形状/工作区相关改动 | `node scripts/smoke/install-shape.entry.mjs`（原样执行手册的 CLI 装包分支：profile init → plugin add → 真启动；断言 roster 三状态、无 `did not activate`；缺前置 exit 2） |
+| L2 首启 | startup/client 恢复/首屏/StartCard 改动 | `node scripts/smoke/product-boot.entry.mjs`（纯 `dsh --profile deep-research` + 真 Web + 浏览器；工作区会话、首屏、目录按钮；无模型；缺前置 exit 2） |
+| L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `node --import tsx/esm --test tests/checks/evaluation-contract.test.mjs` |
+| L4 交付 | 里程碑级 | `source dev/env.sh && node scripts/smoke/l4-lite.e2e.mjs`（真模型档：需 `DEEPSEEK_API_KEY`，未 source 自拒）/ 完整 run（授权范围） |
 
-**source 口径**：fresh clone 首次跑 L0 前先 `source dev/env.sh`（激活 pre-commit；此后幂等）。表中标 source 的命令必须 source；`lifecycle-smoke` / `install-shape-smoke` / `product-boot-smoke` 自行设定 home、不依赖 source；run-ops 的 `evidence-audit` / `run-accept` / `plan-card-stats` / `provider-error-stats` 需要 source（见命令块注记）。
+**source 口径**：fresh clone 首次跑 L0 前先 `source dev/env.sh`（激活 pre-commit；此后幂等）。表中标 source 的命令必须 source；`lifecycle.entry` / `install-shape.entry` / `product-boot.entry` 自行设定 home、不依赖 source；run-ops 的 `evidence-audit` / `run-accept` / `plan-card-stats` / `provider-error-stats` 需要 source（见命令块注记）。
 
 判据与负面判据（什么算"框架不合理"）见 [evaluation.md](../evaluation.md)——面与面不互抵。
 
@@ -90,16 +90,16 @@
 |---|---|---|---|---|---|
 | 改 preset 结构（角色/工具行/roster 接线；新增 skill 文件按下行） | pack 源 `presets/` | **`render-overlay` 先于 L1**（L1 挂的是 overlay，不是 pack 源） | L0 + L1 | 行为/发布集变才写 Note | 全部 preset 真挂载绿 + 文档同步 |
 | 改 persona / skill / 手册文本（模型可见） | pack 源 + `research-workspace/` 正本 | `render-overlay` 先于 L1 → L1 → snapshot-replay B 层（CI `snapshot-replay` job 自动跑；本地 `--layers a,b` 定向；细则 = 表后脚注①）→ 重启 run 通道（web 缓存 boot 时文本） | L0 + L1 + L4-lite | 同上 | 真模型档证据 + L1 绿 + CI B 绿 |
-| **改驾驶舱**（观察面 client 面——`src/client/` 套件，[构成正本](../design/40-research-cockpit.md)） | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` + **可见文案 zh/en 键**（任何界面文本 day-one 双语，步骤 = [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)） | `pnpm build` → `client-load-smoke`（改挂起显性化再跑 `client-hitl-smoke`） | L0 + client-load-smoke | 同上 | 真浏览器断言全绿 |
+| **改驾驶舱**（观察面 client 面——`src/client/` 套件，[构成正本](../design/40-research-cockpit.md)） | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` + **可见文案 zh/en 键**（任何界面文本 day-one 双语，步骤 = [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)） | `pnpm build` → `client-load.entry`（改挂起显性化再跑 `client-hitl.entry`） | L0 + client-load.entry | 同上 | 真浏览器断言全绿 |
 | 改 `src/lib/` 纯函数 / 类型面（pack 两半的编译面） | 对应 `src/lib` / `src/client` 类型位 | `pnpm typecheck` → `pnpm test`（typecheck 前置 = vendor 构建产物在场） | L0 + typecheck | 同上 | typecheck + 对应测试绿 |
 | **新增/修改机器判据**（门禁/审计/交付决定从散文里判值） | 设计卡 `## 判据形状` + 判据测试（不变量+矩阵） | 先写变异矩阵（红）→ 实现 → L0 | L0 + 判据测试 | 判据形状 + 反证 | 歧义会红 + 矩阵绿 |
-| 加 / 改机械门禁 | `context.mjs` gates 数组 + 该域 `verify/gates/<域>.mjs` + `evaluation.md` §L0 台账（案例表有增删再动 `gates-smoke.mjs`） | **注入回归红 → 还原 → 绿** → gates-smoke | L0 + gates-smoke | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 + gates-smoke 绿 |
-| 改 run 通道工具 / 审计门（run-driver / boot-run / watch-run / hitl-answer / run-dashboard / evidence-audit / node-gate / schema-scan / snapshot-replay） | 对应 `scripts/` / `dev/` 脚本 | — | L0 + 对应 `tests/<domain>/*.test.mjs` 契约测试必跑（用例即其反证记录） | 判据变更才写 Note | 对应契约测试绿 |
+| 加 / 改机械门禁 | `context.mjs` gates 数组 + 该域 `verify/gates/<域>.mjs` + `evaluation.md` §L0 台账（案例表有增删再动 `gates.e2e.mjs`） | **注入回归红 → 还原 → 绿** → gates.e2e | L0 + gates.e2e | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 + gates.e2e 绿 |
+| 改 run 通道工具 / 审计门（run-driver / boot-run / watch-run / hitl-answer / run-dashboard / evidence-audit / node-gate / schema-scan / snapshot-replay） | 对应 `scripts/` / `dev/` 脚本 | — | L0 + 对应 `tests/<domain>/*.spec.mjs` 契约测试必跑（用例即其反证记录） | 判据变更才写 Note | 对应契约测试绿 |
 | 改 scripts/lib 支撑模块 / dev 基建本体（`lib/*.mjs`、env.sh、render-overlay） | 支撑模块 + 其**全部消费方**（消费面 grep：roles.mjs 的角色枚举消费方、render-overlay → `overlay-fresh`、run-state → watch-run/hitl-answer/run-dashboard） | 消费方门禁在同 diff 复跑 | L0 + lib 对应契约测试 | 判据变更才写 Note | 消费方门禁与契约测试绿 |
 | 查/加探针（真实边界单点证据） | `probes/` 头注 + `probes/INDEX.generated.md` | `node probes/_index.mjs --write` → 跑探针本体 | L0 + 目标探针（真模型档需凭据） | 头注/索引变更才写 | 索引门绿 + 探针红→绿 |
 | 改研究工作区手册 / 模板（结构性调整：模板增删 / 路径与格式修正；**手册正文文本 = 模型可见，走上行〔改 persona / skill / 手册文本〕**） | `packages/deep-research-pack/content/` | 无生成器 | L0 + `content-shape` | — | `content-shape` 绿 |
-| 改部署面（doctor / 发布集） | pack `scripts/` + `package.json` 的 files/bin | — | L0 + L2 | 部署 Note | `release-smoke` ALL PASS |
-| 换 vendor pin | `.gitmodules` + 运行中 dsh 的 exact 版本（兼容矩阵字段已删，见 D41） | `vendor-build.sh`（含 host 半补建 + 前端壳重建）→ 逐条重审（含 agent-team 合同 diff 与货架增量对账——正本 = [discipline-map §重审触发路径](../discipline-map.md)） | L0 + L1 + L2 + client-load-smoke + L4-lite（0.2.0 轮实证：漏跑观察面 = client bundle 的 build-time externals 漂移漏网） | 升 pin 毕业 Note（重审结论正本） | 全档绿 + 重审入 Note |
+| 改部署面（doctor / 发布集） | pack `scripts/` + `package.json` 的 files/bin | — | L0 + L2 | 部署 Note | `release.entry` ALL PASS |
+| 换 vendor pin | `.gitmodules` + 运行中 dsh 的 exact 版本（兼容矩阵字段已删，见 D41） | `vendor-build.sh`（含 host 半补建 + 前端壳重建）→ 逐条重审（含 agent-team 合同 diff 与货架增量对账——正本 = [discipline-map §重审触发路径](../discipline-map.md)） | L0 + L1 + L2 + client-load.entry + L4-lite（0.2.0 轮实证：漏跑观察面 = client bundle 的 build-time externals 漂移漏网） | 升 pin 毕业 Note（重审结论正本） | 全档绿 + 重审入 Note |
 | 纯文档 / 卫生 | 文档自身 | — | L0；改动面含 AGENTS/入口链时加跑 `entry-chain-probe`（真模型档；无凭据退化为语义版人工） | 仅持久决定理由才写 | 门禁绿 |
 | **用户直派** | 按本轮授权直接执行；如需跨步排序使用会话内 todo；仅需显式评审的持久决定才建立 RFC；交付后按 notes 规则决定是否记录决定理由 | 同对应任务型 | 同对应任务型 | 同对应任务型 | 同对应任务型 |
 
@@ -123,23 +123,27 @@ bash dev/bootstrap.sh --check          # 独立环境前置预检（不安装/�
 bash dev/bootstrap.sh                  # 同上，缺件时执行 submodule/install/vendor 构建（幂等）
 bash dev/vendor-build.sh              # vendor 树构建（换 pin 后必做：--clean 清陈旧产物；tsc host/client + typert 产物 + client bundle + host 半补建 + 前端壳重建——0.1.7 起启动依赖构建产物）
 pnpm verify                           # L0 结构门禁（keyless，收尾必跑）
-pnpm test                             # L0 keyless 回归（命令正本 = package.json 的 test 脚本；layering ④ 钉形状）
+pnpm test                             # L0 keyless 聚合 = test:spec + test:checks（layering ④ 钉形状）
+pnpm test:spec                        # 进程内 spec（tests/{run,cockpit,pack,contracts}/**/*.spec.mjs）
+pnpm test:checks                      # 门禁自身（tests/checks/*.test.mjs）
+pnpm test:e2e                         # 真进程车道（registry lane=e2e，默认 tier=ci；--all 带 dev-only）
+pnpm test:entry                       # 真浏览器/profile/tarball 车道（lane=entry）
 pnpm test:vendor                      # vendor 源码契约（组合层 + 设置 schema；根 tsconfig 的源映射，无需 vendor 构建）
 pnpm typecheck                        # pack 双半 TS 类型检查（tsc -b；CI deploy job 必跑——keyless job 不装 vendor 产物；本地前置 = vendor 构建产物在场，fresh clone 的 L0 不跑）
-node scripts/smoke/gates-smoke.mjs    # 门禁自测（keyless：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组；改门禁逻辑必跑；迭代可用 --case=<id>）
+node scripts/smoke/gates.e2e.mjs    # 门禁自测（keyless：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组；改门禁逻辑必跑；迭代可用 --case=<id>）
 node dev/render-overlay.mjs            # 生成物：从 pack 渲染 dev/research.overlay.yml（改 pack 后必跑，且**必须先于 L1**）
 source dev/env.sh                     # ⚠ 双 home + 裸 dsh 拦截（DSH_HOME=runtime/harness-home）；下列 L1/L2 必须先 source，否则脚本自拒 exit 2
-node scripts/smoke/preset-smoke.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真挂载档（keyless：roster+逐角色建会话+skills 隔离；--profile <p> --no-patch 切安装域通道）
+node scripts/smoke/preset.e2e.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真挂载档（keyless：roster+逐角色建会话+skills 隔离；--profile <p> --no-patch 切安装域通道）
 cd packages/deep-research-pack && pnpm build   # pack 双半构建（tsc -b . + tsdown → lib/index.js + lib/client.js——观察面 client 面，D18）
-node --import tsx/esm scripts/smoke/client-load-smoke.mjs    # 观察面 client 面真浏览器加载（keyless：boot web + headless chromium——插件零失败 + 页签与渐进面硬断言；渐进面断言 = 磁盘侧绑定会话的真值对账；失败留 png/html/console/meta 现场；无窗口内交付目标 = exit 2 SKIP；主机不健康 = exit 2 NOT-RUN（预检；失败时连接死亡同判，判据 = lib/host-health））
-node --import tsx/esm scripts/smoke/client-load-smoke.mjs --seed tests/fixtures/client-load-home --port 3109   # 干净机器/CI：用种子夹具自建 home（会话 + 已交付 bundle；不依赖 dev home/凭据），CI job `client-load` 跑的就是这条
+node --import tsx/esm scripts/smoke/client-load.entry.mjs    # 观察面 client 面真浏览器加载（keyless：boot web + headless chromium——插件零失败 + 页签与渐进面硬断言；渐进面断言 = 磁盘侧绑定会话的真值对账；失败留 png/html/console/meta 现场；无窗口内交付目标 = exit 2 SKIP；主机不健康 = exit 2 NOT-RUN（预检；失败时连接死亡同判，判据 = lib/host-health））
+node --import tsx/esm scripts/smoke/client-load.entry.mjs --seed tests/fixtures/client-load-home --port 3109   # 干净机器/CI：用种子夹具自建 home（会话 + 已交付 bundle；不依赖 dev home/凭据），CI job `client-load` 跑的就是这条
 node probes/browser/cdp-probe.mjs '<gui-url>' --open-session '<标题>' --open-status --expect-face '<文本>' [--expect-no-leak '<文本>'] [--ask '<消息>'] [--screenshot <path>]   # 交互探针（裸 CDP，借鉴 ai_dsh_loop_advisor）：Playwright actionability 被 DSH UI 挡死时的交互驱动工具——JS 派发点击/输入，JSON 判决；--ask = 完整交互环（输入→发送→等回复）。老会话可能要先在 GUI 里让它进侧栏近列表
-node scripts/smoke/e2e-021rc2.mjs            # 升级端到端（keyless 浏览器：角色 order 成组 + 状态/配置页签真数据 + 插件零故障；失败留现场）
-node scripts/smoke/release-smoke.mjs        # L2 真实安装形状：pack→干净 profile→plugin add→安装域冒烟；无模型调用，安装模式跳过模型就绪检查
-node scripts/smoke/cold-start-smoke.mjs     # L2 冷启动：独立 DSH_DEV_HOME/profile/端口/state；MCP 关闭；到浏览器面 GREEN
+node scripts/smoke/e2e-021rc2.entry.mjs            # 升级端到端（keyless 浏览器：角色 order 成组 + 状态/配置页签真数据 + 插件零故障；失败留现场）
+node scripts/smoke/release.entry.mjs        # L2 真实安装形状：pack→干净 profile→plugin add→安装域冒烟；无模型调用，安装模式跳过模型就绪检查
+node scripts/smoke/cold-start.entry.mjs     # L2 冷启动：独立 DSH_DEV_HOME/profile/端口/state；MCP 关闭；到浏览器面 GREEN
 node probes/behavior/method-library-probe.mjs  # 偏好库可发现性三问（真模型档；BUG-042 修复判据）
-node scripts/smoke/l4-lite-smoke.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：全角色响应 + scout web_search 调用）
-node scripts/smoke/team-preflight-smoke.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + company D18 one-shot worker 探针）
+node scripts/smoke/l4-lite.e2e.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：全角色响应 + scout web_search 调用）
+node scripts/smoke/team-preflight.e2e.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + company D18 one-shot worker 探针）
 node dev/run-driver.mjs up          # **run 通道驱动入口（常用）**：起/复用通道（复用先验安装镜像=当前 pack 源）+ 验浏览器面 + 呈交块（exit 0 可呈交/1 红/2 未跑；镜像漂移/未取证 = 2）；--bootstrap 先跑冷启动前置；--profile/DSH_RUN_STATE_DIR 支持多实例；probe = 只验已起通道（同样先验镜像）；url = 打印当前 URL
 bash dev/boot-run.sh                  # run 通道底层启动面：自检→组合检查/必要补装→漂移门；仪表盘后台观察、web 前台 3083；用法 = 61（驱动入口内部调它）
 node scripts/run-ops/stream-diagnostics.mjs --recent N   # 流失败归因诊断（尝试时间线/失败密度/provider 实名；出问题第一步）
@@ -153,11 +157,11 @@ node scripts/run-ops/session-replay.mjs <session-id|标题子串> [--group <子�
 node --import tsx/esm scripts/run-ops/session-events.mjs <session-id|标题> --tail 30   # 会话事件尾部（agent 看"刚才发生了什么"：tool/call、tool/result、turn/end 摘要；--type/--grep/--json）
 node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <t>   # HITL 代答（代理模拟；默认逐题选推荐项——先盘侧谓词自拒：无真挂起不开浏览器；answerer 只在浏览器客户端，故用真浏览器）
 pnpm dsh <args…>                      # 机制基线 CLI（vendor/dsh 钉 tag 源码；等价 dev/env.sh 的 dsh 函数）
-node --import tsx/esm scripts/smoke/client-hitl-smoke.mjs   # 观察面活标题触发验证（真模型档：RPC followup 造挂起态 + 盘侧谓词 + 浏览器观察点）
-node --import tsx/esm scripts/smoke/cdp-ask-smoke.mjs    # 交互探针端到端（真模型档：一次性通道跑 --ask，断言发出 + journal 落盘；空闲态与在飞态两阶段）
+node --import tsx/esm scripts/smoke/client-hitl.entry.mjs   # 观察面活标题触发验证（真模型档：RPC followup 造挂起态 + 盘侧谓词 + 浏览器观察点）
+node --import tsx/esm scripts/smoke/cdp-ask.entry.mjs    # 交互探针端到端（真模型档：一次性通道跑 --ask，断言发出 + journal 落盘；空闲态与在飞态两阶段）
 `research` 手工 profile 已弃用：回放/录制/团队预检统一用 `deep-research`（`dev/boot-run.sh` 维护版本面）；残留的 `research` 档不要再扩用。
 
-node scripts/smoke/snapshot-replay-smoke.mjs --read-only --layers a,b   # keyless 回放冒烟（须先 source dev/env.sh，端口 3103）：CI job `snapshot-replay` 跑同一条 A/B；场景集由 snapshots/replay/research-face/snapshot.json 声明（研究角色集与盘上 presets/ 对账；方法编辑不属 run 生命周期）——逐场景 A 回放收尾逐字命中 + B 组装请求 diff（persona 全文 + 全部 request/header + 四处 user/message 注入（含时钟序列））；`--layers c` + 声明了 renderExpected 的场景做 C 渲染金标准比对（C 本地/里程碑）；`--scenario <id>` 单场景、`--update-expected --why <载体>` 重写金标准
+node scripts/smoke/snapshot-replay.entry.mjs --read-only --layers a,b   # keyless 回放冒烟（须先 source dev/env.sh，端口 3103）：CI job `snapshot-replay` 跑同一条 A/B；场景集由 snapshots/replay/research-face/snapshot.json 声明（研究角色集与盘上 presets/ 对账；方法编辑不属 run 生命周期）——逐场景 A 回放收尾逐字命中 + B 组装请求 diff（persona 全文 + 全部 request/header + 四处 user/message 注入（含时钟序列））；`--layers c` + 声明了 renderExpected 的场景做 C 渲染金标准比对（C 本地/里程碑）；`--scenario <id>` 单场景、`--update-expected --why <载体>` 重写金标准
 node --import tsx/esm dev/record-role-fixture.mjs --role <scout|analyst|critic|lead>   # 角色组装面 fixture 录制（真模型档一次性：`deep-research` profile（与回放同域，boot-run 维护版本面）+ 哨兵「探针完成」收尾 + 日志静默判定；录制品人审后入库 + 在场景声明登记 source 身份，此后 keyless 永久回放）
 node scripts/run-ops/run-accept.mjs <bundle>   # 交付验收原子动作：门 A + 证据审计 + 未来日期 sanity → acceptance.md；--archive 才归档
 node scripts/run-ops/runtime-clean.mjs [--older-than 14] [--yes]   # 运行区清理：默认 dry-run，只列白名单内过期条目；--yes 才删；黑名单/symlink/scenes/保留期 = runtime/README
@@ -169,7 +173,7 @@ node probes/behavior/discipline-probe.mjs     # 纪律行为探针（真模型�
 node packages/deep-research-pack/scripts/doctor.mjs --workspace <dir>   # 只读诊断（pack 自带 bin：DSH 版本/profile roster/安装副本/团队层/工作区/凭据；不安装、不启动、不写 profile）
 ```
 
-CI 另跑 `run-accept-smoke` / `pack-smoke` / `doctor-smoke`；逐件命令索引 = [scripts/README](../../scripts/README.md)（本块是操作入口，不是全量清单）。
+CI 另跑 `run-accept.e2e` / `pack.e2e` / `doctor.e2e`；逐件命令索引 = [scripts/README](../../scripts/README.md)（本块是操作入口，不是全量清单）。
 
 档位词汇（keyless / 真模型档）与密钥定义 = [AGENTS.md §密钥](../../AGENTS.md)；脚本头注各带设计依据
 与 RFC 出处。
@@ -236,7 +240,7 @@ source dev/env.sh        # DSH_HOME=runtime/harness-home（数据面）+ dsh 别
 
 ## 5. 密钥
 
-- 独立真模型档 = `tests/contracts/smoke-contract.test.mjs` 的 REAL_MODEL 闭集（成员以测试为准；`dev/record-role-fixture.mjs` 是单独录制工具，完整 run 属 L4）；
+- 独立真模型档 = `tests/checks/smoke-contract.test.mjs` 的 REAL_MODEL 闭集（成员以测试为准；`dev/record-role-fixture.mjs` 是单独录制工具，完整 run 属 L4）；
   调用凭据可在开发 home 配置（根 [AGENTS §密钥](../../AGENTS.md)）。CDP `--ask` 按当前会话档位；
   永不提交密钥；
 - L1 真挂载无模型调用、无凭据可跑；L2 安装验收无模型调用并使用 `--install-only`，默认 doctor 仍检查凭据在场；

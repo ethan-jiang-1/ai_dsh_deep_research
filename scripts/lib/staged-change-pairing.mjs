@@ -66,7 +66,7 @@ export function stagedChangePairingProblems({ staged, read, exists }) {
     const match = /^(snapshots\/replay\/.+)\/ui\.expected\.md$/.exec(path)
     if (match === null) continue
     // 只判「重录」（M/R）。A = 新场景的首次金标准（随场景一起生成），没有 lastRewrite 语义；
-    // gates-smoke 的全量副本把所有文件标 A，也必须落在这里。
+    // gates.e2e 的全量副本把所有文件标 A，也必须落在这里。
     if (!/^[MR]/.test(statusOf.get(path) ?? '')) continue
     const snapshotPath = `${match[1]}/snapshot.json`
     if (!present.has(snapshotPath)) {

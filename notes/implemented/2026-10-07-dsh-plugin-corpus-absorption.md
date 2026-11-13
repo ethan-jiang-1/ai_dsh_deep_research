@@ -12,7 +12,7 @@
 一起改（RFC 已呈批通过）。
 
 审计范围 = 语料全部正文 .md（三卷各自 README 与 00-index、native-development-model 01–02、
-sdlc-reference 01–11、repo-harness 01–09、`_coverage` 两篇）+ 语料 verify.mjs / verify.test.mjs
+sdlc-reference 01–11、repo-harness 01–09、`_coverage` 两篇）+ 语料 verify.mjs / verify.spec.mjs
 规则面；SVG 未逐张读（图服务正文，归属页已读）。对照面 = 本仓入口链全链 + evaluation +
 discipline-map + project-map + guides/60–62 + tests·scripts·notes 三份子树 AGENTS + 一代吸纳 Note
 （`2026-09-25-agent-ready-absorption`）。一代语料已三轮吸纳，本审计只认二代增量。
@@ -28,7 +28,7 @@ discipline-map + project-map + guides/60–62 + tests·scripts·notes 三份子�
 | 缺口 | 判断依据（语料出处） | 落点 |
 |---|---|---|
 | 语义自审层缺席——交付判断四角色（机械检查/语义评审/批准/显式交互）中 agent 可自主承担的角色未程序化 | 卷一闭环第 7 步 + sdlc-reference 06 | `.agents/skills/reviewing-a-delivery/SKILL.md`（blocking requirements 本仓化） |
-| 门禁自测缺席——门禁反证全是一次性人工实录，verify.mjs 自身零自动回归，门禁钝化机器发现不了 | 语料 verify.test.mjs 模式 | `scripts/smoke/gates-smoke.mjs` + `tests/contracts/verify-gates.test.mjs` |
+| 门禁自测缺席——门禁反证全是一次性人工实录，verify.mjs 自身零自动回归，门禁钝化机器发现不了 | 语料 verify.spec.mjs 模式 | `scripts/smoke/gates.e2e.mjs` + `tests/checks/verify-gates.test.mjs` |
 | 完成判断公理与验证词汇不显性——四分离公理只隐含在 L0–L4 里，oracle/real composition/semantic review 词汇缺席 | 卷一 00-index + 术语页 | evaluation §完成判断四分离 + 00-index §术语映射验证词汇行 |
 
 **不适用维持**：主仓治理全套（Issue/PR policy、weighted approval、stacked PR、release lane、
@@ -42,7 +42,7 @@ discipline-map + project-map + guides/60–62 + tests·scripts·notes 三份子�
 - **"质量成问题"** → 语义自审层 + 完成判断公理两缺口。
 - **"流程上也有问题"** → 门禁自测缺口（质量保障的地基无回归守护）。
 - **"测试资产不知道在哪儿"** → 既有落点已建（project-map 测试资产地图，2026-10-05）；本条目
-  增量 = 验证词汇进术语映射 + gates-smoke 进测试资产表。
+  增量 = 验证词汇进术语映射 + gates.e2e 进测试资产表。
 
 ### 落地形态
 
@@ -51,9 +51,9 @@ discipline-map + project-map + guides/60–62 + tests·scripts·notes 三份子�
   选型 / 完成判断四分离 / 记录判据）+ 高风险语义扫描 + 产出边界。写后按 writing-for-agents
   杠杆自查，两处否定式边界段改正向表述。落盘即被 harness 技能目录发现（机制实证）。
 - **B 门禁自测**：落点在实施中修正（原方案把执行体放 tests/ 撞 layering 门禁——默认回归禁
-  spawn），改为 smoke 道执行体 + 静态契约：`gates-smoke.mjs`（tracked 全量副本 + 被 tracked md
+  spawn），改为 smoke 道执行体 + 静态契约：`gates.e2e.mjs`（tracked 全量副本 + 被 tracked md
   引用的运行区链接目标补拷 + git init + 注入违规经真实 verify 入口点名报红 + 零注入对照组防
-  断言空转；verdict 契约 0/1/2；失败保留临时目录）+ `tests/contracts/verify-gates.test.mjs`（案例门禁名
+  断言空转；verdict 契约 0/1/2；失败保留临时目录）+ `tests/checks/verify-gates.test.mjs`（案例门禁名
   ↔ verify gates 数组对账——门禁改名/退役未跟案例即红）。承重抽样 = md-links / md-anchors /
   note-format / entry-chain / gate-ledger-sync。
 - **C 完成判断公理固化**：evaluation 新节「完成判断四分离」（公理 + 四结果 ↔ L1 挂载 / L1 行为
@@ -62,7 +62,7 @@ discipline-map + project-map + guides/60–62 + tests·scripts·notes 三份子�
 - **D 登记与入册**：00-index §外部研究材料登记二代语料 @ `bbcf346ddb`；discipline-map 新增
   源 11（二代增量三态表）；B 面文档同步 = scripts/README、scripts/AGENTS（门禁自测条款）、
   guides/60 §2（全档命令 + 任务型路由行）、根 AGENTS 布局树 smoke 行、project-map 证据表。
-- **附带战果**：gates-smoke 对照组首跑即红，暴露 **BUG-016**（fresh clone 上 `pnpm verify` 红
+- **附带战果**：gates.e2e 对照组首跑即红，暴露 **BUG-016**（fresh clone 上 `pnpm verify` 红
   ——`_done/_reference` 摘要链接 `research-workspace/archive/` 运行区文件，门禁绿依赖机器状态）；
   已立缺陷卡（修复方向两候选在卡内），顺手修 `_done/README` 的 Next BUG ID stale（取号
   BUG-016，指针改指 BUG-017）。
@@ -91,15 +91,15 @@ discipline-map + project-map + guides/60–62 + tests·scripts·notes 三份子�
      JSDoc 同步 / 断言有效性↔assertion fails on target regression + negative control / 完成判断
      四分离↔机器绿灯与批准各不冒充 / 记录判据↔Note 与证据放置规则），高风险扫描收其语义维度
      的本仓面；
-  2. 门禁自测：`node scripts/smoke/gates-smoke.mjs` 全绿（对照组零注入全 PASS + 承重抽样注入
+  2. 门禁自测：`node scripts/smoke/gates.e2e.mjs` 全绿（对照组零注入全 PASS + 承重抽样注入
      案例均被点名报红）；`pnpm test` 含 verify-gates.test 两断言绿；
   3. evaluation「完成判断四分离」节在场（md-anchors 覆盖 discipline-map `#source-11` 锚点链）；
   4. 00-index 术语映射验证词汇行在场；
   5. 钉版对账：`git -C /Users/bowhead/deepseek-harness log -1 --format=%h` = `bbcf346ddb`；
   6. discipline-map 源 11 在场（三态行齐全）；
-  7. 收尾：`pnpm verify` 全绿 + `pnpm test` 全绿（keyless 回归全过）+ gates-smoke 全绿 +
+  7. 收尾：`pnpm verify` 全绿 + `pnpm test` 全绿（keyless 回归全过）+ gates.e2e 全绿 +
      入口链探针 ALL PASS（真模型档，留档 runtime/smoke-workspace/entry-chain-probe-2026-10-07T14-08-34-557Z.md）。
-- **两面反证实录**：① 钝化 verify.mjs 的 md-anchors（块内遮蔽 fail 为 no-op）→ gates-smoke
+- **两面反证实录**：① 钝化 verify.mjs 的 md-anchors（块内遮蔽 fail 为 no-op）→ gates.e2e
   精确红「md-anchors：注入回归未被点名报红」→ 还原 → 复绿；② 改契约测试案例门禁名为不存在值
   → 测试红（报因含改法）→ 还原 → 绿。
 - **探针过程战果**：队列行格式首写偏离编号惯例（裸 ▶ 行），探针真值锚 fail-loud 报错 → 改为
@@ -109,8 +109,8 @@ discipline-map + project-map + guides/60–62 + tests·scripts·notes 三份子�
 
 ## 环境状态
 
-- 新增：`.agents/skills/reviewing-a-delivery/SKILL.md`、`scripts/smoke/gates-smoke.mjs`、
-  `tests/contracts/verify-gates.test.mjs`、`_backlog/bugs/BUG-016-fresh-clone-mdlinks-runtime-links.md`。
+- 新增：`.agents/skills/reviewing-a-delivery/SKILL.md`、`scripts/smoke/gates.e2e.mjs`、
+  `tests/checks/verify-gates.test.mjs`、`_backlog/bugs/BUG-016-fresh-clone-mdlinks-runtime-links.md`。
 - 改动：`docs/evaluation.md`（完成判断四分离节）、`docs/00-index.md`（术语映射三行 + 外部材料
   登记）、`docs/discipline-map.md`（源 11）、`docs/project-map.md`（证据表
   门禁自测行）、`docs/guides/60-dev-loop.md`（全档命令 + 任务型路由行）、`scripts/README.md`
@@ -122,7 +122,7 @@ discipline-map + project-map + guides/60–62 + tests·scripts·notes 三份子�
   技能清单枚举补齐（其中三处系存量漂移：改轨道缺席）；evaluation 四分离节的"正本"指向
   纠正（判据正本 = evaluation 自身，discipline-map 源 11 = 来源登记）；"验收四角色"统一为
   "交付判断四角色"（与技能/discipline-map 用词一致）；技能 description 补跨面触发（正文
-  有而指针缺 = 触发面丢失）；BUG-016 卡复现措辞与 gates-smoke 注释交叉引用收口。
+  有而指针缺 = 触发面丢失）；BUG-016 卡复现措辞与 gates.e2e 注释交叉引用收口。
 - 语料钉版身份：`deepseek-harness` @ `bbcf346ddb`（登记于 00-index §外部研究材料；语料自钉
   `dsh-v0.2.0-rc.2` = 本仓 vendor pin 同版——vendor 换 pin 时语料结论随 discipline-map
   §重审触发路径复核）。
@@ -135,7 +135,7 @@ discipline-map + project-map + guides/60–62 + tests·scripts·notes 三份子�
 | 卷一闭环 3：条件性使用 Issue/Note/Plan | notes/AGENTS 写入触发；guides/60 反馈门①；队列制 D11/D12 |
 | 卷一闭环 4：完整垂直切片 | guides/60 §4 收尾五件 + 同 diff 纪律；任务型路由"同 diff 必改"列 |
 | 卷一闭环 5：测试观察真实对象、每层只证明自己能观察的性质 | evaluation 五面 + project-map §测试怎么选 + discipline-map 源 8 |
-| 卷一闭环 6：安装形态 + 版本范围声明 | L2 release-smoke + pack 兼容矩阵 dshReleases |
+| 卷一闭环 6：安装形态 + 版本范围声明 | L2 release.entry + pack 兼容矩阵 dshReleases |
 | 卷一误区：goal≠验收 / mock-only / 刷新≠接受 / agent-loop / 不抄主仓治理 | D6；L1 真挂载；tests/AGENTS fix fixtures；源 1 plugins-not-loop-changes；不适用登记 |
 | 卷二 01/04/05/09：Note 生命周期 / 证据路由 / 文档标准 / 意图入口 | note-lifecycle-absorption + note-* 三门禁；guides/60 §2 路由表 + 五条纪律；docs/AGENTS 全套；队列制 + 取题文化 |
 | 卷三 01–09 全部 | 入口链 + D21 分流；一个事实一个 owner + 负知识；`.agents/skills/` + dev-skill-format；guides/62 参与阶梯；源 8 + 三问自检；--dump-config 纪律；源 7 五形态；guides/62 投影 |

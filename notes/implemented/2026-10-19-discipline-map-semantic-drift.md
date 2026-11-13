@@ -66,8 +66,8 @@
 | `pnpm verify` | **全绿**（含新增 `discipline-state-vocab`、`gate-ledger-sync` 对账通过） |
 | `pnpm test` | **542/542 pass** |
 | 新门禁**首次运行即红** | 抓出 2 行 `已具备`（`证据匹配面`、`六误区清单`）→ 改 `照搬` / `带证据适配` 后绿 |
-| `gates-smoke` | **全绿（49 个注入案例均被点名报红）**，含新增 2 条 |
-| **归因反证（关键）** | ① 把 `!THREE_STATES.some(...)` 短路 → `gates-smoke` 报"`discipline-state-vocab-out-of-domain`：注入回归未被点名报红——门禁钝化或案例失效"；② 把下限守卫短路 → 报 "`-rows-vanished`" 同款 |
+| `gates.e2e` | **全绿（49 个注入案例均被点名报红）**，含新增 2 条 |
+| **归因反证（关键）** | ① 把 `!THREE_STATES.some(...)` 短路 → `gates.e2e` 报"`discipline-state-vocab-out-of-domain`：注入回归未被点名报红——门禁钝化或案例失效"；② 把下限守卫短路 → 报 "`-rows-vanished`" 同款 |
 | **案例非空转（关键）** | 首版防空案例用"改表头"注入，实测**注释掉 `tablesWithState` 守卫后案例仍绿**——两条守卫同时成立，案例分不清归因。改成"清空 75% 状态列"后归因唯一：只短路下限守卫即报红 |
 | `alignment-ledger.json` diff | **纯新增 47 行、零删除**（1 行 `_note` + 46 行标记）；语义等价性用"剥离新字段后 JSON 深比较"验证 |
 

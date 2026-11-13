@@ -13,7 +13,7 @@
 - **首刀 = 状态头/读序/恢复**：`content/generic/state-and-recovery.md` 承接五问、按意图读表、
   交付口径、终局块、旧 run 推导、冲突/过期与恢复步骤；T0 保留 `run.md` 键、声明不是事实、
   五问与指针。manual 从 12,038 → 9,995 字符（余量 2,293）。
-- **披露守卫**：`tests/pack/content-disclosure.test.mjs` 断言 T0 ≤10,000、每个 generic 被 T0 指针
+- **披露守卫**：`tests/pack/content-disclosure.spec.mjs` 断言 T0 ≤10,000、每个 generic 被 T0 指针
   点名、指针可解析、T0 不复制 generic 的 H1、generic 不依赖未注册插值；`tests/pack/handbook-surface.mjs`
   让“手册面” = T0 + generic，`run-bundle-charter` 等断言不再因下放假红。
 - **不新增内容层/不重排顶层**：`content/{manual.md,generic/,templates/,lenses/,waves/}` 的寿命边界不变；
@@ -33,11 +33,11 @@
 - `pnpm test`：1131/1131 全绿（新增 `content-disclosure` 4 例；`handbook-surface` 让既有手册断言
   覆盖 T0 + generic）。
 - `pnpm verify`：全绿。
-- **L1**：`DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs` → ALL PASS（5 preset 真挂载、
+- **L1**：`DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs` → ALL PASS（5 preset 真挂载、
   skills 隔离、client 行 served）。
-- **L4-lite**：`node scripts/smoke/l4-lite-smoke.mjs` → ALL PASS（全角色 assistant 响应 + scout
+- **L4-lite**：`node scripts/smoke/l4-lite.e2e.mjs` → ALL PASS（全角色 assistant 响应 + scout
   `web_search` 工具调用）。
-- **snapshot B**：`node scripts/smoke/snapshot-replay-smoke.mjs` → ALL PASS，但回放的是**旧录制对**；
+- **snapshot B**：`node scripts/smoke/snapshot-replay.entry.mjs` → ALL PASS，但回放的是**旧录制对**；
   它不捕获本次 manual 变更，**不作为新手册组装证据**。重录窗口未开，残余风险见下。
 - 红证（逐条先红后绿）：
   - 新增 `content/generic/orphan.md` 且 T0 不指针 → `content-disclosure` 红；删除 → 绿。

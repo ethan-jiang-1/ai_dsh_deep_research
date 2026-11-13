@@ -3,7 +3,7 @@
  *
  * 为什么不引 semver：pack 的 preflight 是安装副本里的零依赖脚本；为一条兼容声明拖入运行时
  * 依赖会破坏 peers-only 发布形状。这里覆盖的语法就是本包声明会用的语法；扩语法时同 diff
- * 扩测试（tests/pack/version-range.test.mjs）。
+ * 扩测试（tests/pack/version-range.spec.mjs）。
  */
 const VERSION = /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?$/
 

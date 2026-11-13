@@ -26,15 +26,15 @@
 
 ## 实际跑过的验证
 
-- `pnpm verify` 全绿；`pnpm test` **963 pass / 0 fail**（含 `tests/contracts/product-invariants.test.mjs` 的 I1–I4）。
-- `install-shape-smoke`：全局 dsh 0.2.1-rc.3 上原样执行手册的 CLI 装包分支；roster 三状态、dump 有 `research-content`/`research-startup`、无旧 `research-workspace-boot`、真启动无 `did not activate` —— **ALL PASS**。
-- `product-boot-smoke`：真 Web + 浏览器；**用产品设置文件（不带 env）** 起 `dsh --profile deep-research`；Host 注册工作区、blank Lead Session、`cwd` = 工作区、`preset=lead`、首屏元素与「选择项目目录」、工作区无产品内容文件 —— **GREEN**。
-- `release-smoke`：tarball → 干净 profile → plugin add pack + 团队层 → 安装副本 client/peers/矩阵 → doctor → 安装域 preset-smoke 5 角色全绿 → remove → 团队层保留 → 端口释放 —— **ALL PASS**。
-- `data-smoke`：包目录零写入、假 token 不泄漏、卸载后 workspace 用户文件与 session 日志保留 —— **ALL PASS**。
-- `doctor-smoke`：齐全绿 / 缺 pack 红 / engines 不匹配红 / 坏设置 warn / 不写 profile —— **ALL PASS**。
-- `pack-smoke`：131 条目、content/doctor/startup/content 产物在场、无安装脚本/凭据、两次 pack 同 sha —— **ALL PASS**。
-- `snapshot-replay-smoke`：4 角色 fixture 重录（真模型）+ C 金标准刷新；A 回放通路 + B 组装请求 diff（手册以 runtime context 进入；agent-instructions 两侧缺席时跳过）+ 渲染金标准 —— **ALL PASS**。
-- `l4-lite-smoke`：5 角色真模型响应 + scout `web_search` 工具调用 —— **ALL PASS**。
+- `pnpm verify` 全绿；`pnpm test` **963 pass / 0 fail**（含 `tests/contracts/product-invariants.spec.mjs` 的 I1–I4）。
+- `install-shape.entry`：全局 dsh 0.2.1-rc.3 上原样执行手册的 CLI 装包分支；roster 三状态、dump 有 `research-content`/`research-startup`、无旧 `research-workspace-boot`、真启动无 `did not activate` —— **ALL PASS**。
+- `product-boot.entry`：真 Web + 浏览器；**用产品设置文件（不带 env）** 起 `dsh --profile deep-research`；Host 注册工作区、blank Lead Session、`cwd` = 工作区、`preset=lead`、首屏元素与「选择项目目录」、工作区无产品内容文件 —— **GREEN**。
+- `release.entry`：tarball → 干净 profile → plugin add pack + 团队层 → 安装副本 client/peers/矩阵 → doctor → 安装域 preset.e2e 5 角色全绿 → remove → 团队层保留 → 端口释放 —— **ALL PASS**。
+- `data.entry`：包目录零写入、假 token 不泄漏、卸载后 workspace 用户文件与 session 日志保留 —— **ALL PASS**。
+- `doctor.e2e`：齐全绿 / 缺 pack 红 / engines 不匹配红 / 坏设置 warn / 不写 profile —— **ALL PASS**。
+- `pack.e2e`：131 条目、content/doctor/startup/content 产物在场、无安装脚本/凭据、两次 pack 同 sha —— **ALL PASS**。
+- `snapshot-replay.entry`：4 角色 fixture 重录（真模型）+ C 金标准刷新；A 回放通路 + B 组装请求 diff（手册以 runtime context 进入；agent-instructions 两侧缺席时跳过）+ 渲染金标准 —— **ALL PASS**。
+- `l4-lite.e2e`：5 角色真模型响应 + scout `web_search` 工具调用 —— **ALL PASS**。
 - **真实 run `drt_unsc-p5-members`（quick_factual）**：HITL1 + HITL2（代理代答，provenance 落 question.md/journal）→ 10 份 evidence + 9 份 provenance + review 3 轮 PASS → `final/v1.md` + `present` → `run-accept` ALL PASS（audit CRITICAL 0、URL 溯源 22/22、final 链 14/14、`acceptance.md` 落盘）。
 
 ## 残余边界

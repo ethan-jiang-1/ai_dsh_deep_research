@@ -54,7 +54,7 @@ agent-instructions 的 maxBytes 超限时 vendor **静默截断**手册尾部—
 3. 00-index client-face 行：「五页签」→「8 页签」；`agentTeams.view` → `agentTeam 投影
    （sessions 座位，rc.2 起）」；
 4. preset 头注 ×4 / 根 AGENTS 布局行 / design/10：「0.1.7 形态」→「单行形态（rc.2 有效）」；
-5. [release-smoke.mjs](../../scripts/smoke/release-smoke.mjs) 头注：「照搬」→「裁剪自 + 差异列举」
+5. [release-smoke.mjs](../../scripts/smoke/release.entry.mjs) 头注：「照搬」→「裁剪自 + 差异列举」
    （company 该节已演进为 0–5 步，且我们缺其四项断言——列为候选）。
 
 ### 对抗自审收紧（同 diff 落地）

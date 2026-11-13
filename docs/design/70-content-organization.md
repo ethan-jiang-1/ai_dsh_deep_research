@@ -2,7 +2,7 @@
 
 > 层：设计（为什么 / 怎么长）。适用 = `packages/deep-research-pack/{presets,content}`。
 > 本页不是文件清单：清单 = 盘上目录。本页只定**新内容放哪、怎么长、什么时候该动结构**。
-> 相关：常驻面预算 = `content-shape` 门禁；接线守卫 = `tests/pack/{presets-wiring,content-coverage}.test.mjs`；
+> 相关：常驻面预算 = `content-shape` 门禁；接线守卫 = `tests/pack/{presets-wiring,content-coverage}.spec.mjs`；
 > 测试落家 = [project-map §测试怎么选](../project-map.md)；上游参照（只读，不随仓）= `ai_dsh_company/docs/content-charter.md`。
 
 ## 0. 一句话
@@ -77,7 +77,7 @@
 - **manual 撞顶**：`content/manual.md` 超预算，或剩余空间装不下一条新规则 → 先下放一节到
   `generic/`，再谈扩顶；一次下放一节，带 L1/snapshot 证据。
 - **第二个角色复用同一 skill**：建 `_shared`，放宽 presets-wiring 的根断言。
-- **`presets.test.mjs` 膨胀**：>500 行，或出现第二个**独立合同模型**（不是多一个主题），才按模型拆；
+- **`presets.spec.mjs` 膨胀**：>500 行，或出现第二个**独立合同模型**（不是多一个主题），才按模型拆；
   不按 structure/delegation/hitl 这类主题切片。
 - **content 顶层出现新的寿命**（不是新文件）：更新本页 + 加消费边 + 加守卫；不直接往根目录扔文件。
 - **新增研究类型 / 题型**：闭集词表变更，同 diff 改模板枚举、组队矩阵、research-brief、测试。
@@ -88,7 +88,7 @@
 
 - 不造 product-type / delivery-mode / company 层：本仓只有一套方法论，没有多公司/多产品轴。
 - 不造 `content/manifest.json` 或全量清单：清单会腐；盘上枚举 + 消费边才是正本。
-- 不预建 `_shared/`、不预拆 `tests/pack/`、不预拆 `presets.test.mjs`：等 trigger。
+- 不预建 `_shared/`、不预拆 `tests/pack/`、不预拆 `presets.spec.mjs`：等 trigger。
 - 不把能按需读的程序塞进 persona；**例外 = 必须每轮在场的硬门**（HITL 两点、交付顺序、veto），
   因为 skill 加载不保证。
 - 不在没有 L1/snapshot 证据时改模型可见内容；不在 keyless 层假装行为已被证明。
@@ -96,7 +96,7 @@
 ## 8. 当前债与下一步
 
 `content/manual.md` 现为 **9,996 字符**：下放触发 = 10,000（余 4），硬顶 = 12,288（余 2,292）。
-两个数只住 `scripts/lib/content-budget.mjs`：触发由 `tests/pack/content-disclosure.test.mjs` 把守，
+两个数只住 `scripts/lib/content-budget.mjs`：触发由 `tests/pack/content-disclosure.spec.mjs` 把守，
 硬顶由 `content-shape` 门禁把守；硬顶只防失控，不是可挪用的余量。
 
 **首刀已落（2026-11-11）**：状态头/读序/恢复细则下放到 `content/generic/state-and-recovery.md`；
@@ -108,6 +108,6 @@ trigger = T0 >10,000 或新增跨角色规则装不下。首刀卡 = [2026-11-11
 ## 9. 指针
 
 - 常驻面预算与准入规则 = [`content-shape` 门禁](../../scripts/verify/gates/e-workspace.mjs)
-- 内容接线守卫 = [presets-wiring](../../tests/pack/presets-wiring.test.mjs) · [content-coverage](../../tests/pack/content-coverage.test.mjs)
+- 内容接线守卫 = [presets-wiring](../../tests/pack/presets-wiring.spec.mjs) · [content-coverage](../../tests/pack/content-coverage.spec.mjs)
 - 测试落家与证据分层 = [project-map §测试怎么选](../project-map.md) · [evaluation §L0/L3](../evaluation.md)
 - 参照仓内容宪章（只读） = `ai_dsh_company/docs/content-charter.md`

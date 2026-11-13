@@ -624,7 +624,7 @@
     {
       "source": "docs/evaluation.md",
       "target": "notes/archived/2026-09-24-foundation-remediation.md",
-      "reason": "L0 登记表 md-links/role-list-sync/gate-ledger-sync 三行的反证出处列引基础整治 Note（红→还原绿实证的历史家；现行执行体 = 门禁本体与 gates-smoke 常驻案例）"
+      "reason": "L0 登记表 md-links/role-list-sync/gate-ledger-sync 三行的反证出处列引基础整治 Note（红→还原绿实证的历史家；现行执行体 = 门禁本体与 gates.e2e 常驻案例）"
     },
     {
       "source": "docs/evaluation.md",
@@ -804,7 +804,7 @@
     {
       "source": "notes/implemented/2026-10-09-snapshots-adoption.md",
       "target": "notes/archived/2026-09-24-keyless-snapshot-lane.md",
-      "reason": "部分取代的历史出处：回放通道选型/三层判据现由 snapshots/README + snapshot-replay-smoke 头注承接"
+      "reason": "部分取代的历史出处：回放通道选型/三层判据现由 snapshots/README + snapshot-replay.entry 头注承接"
     },
     {
       "source": "notes/implemented/2026-10-09-snapshots-adoption.md",

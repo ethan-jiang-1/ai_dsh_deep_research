@@ -4,7 +4,7 @@
 // group 展开逻辑各抄一份，抄错一次测试就会静默少看一半行。参照 company 仓 tests/presets/preset-yaml.ts：
 // 模型（期望）住测试，观测从同一份解析器出来。
 //
-// 不是测试：文件名不带 `.test.mjs`，`pnpm test` 的递归 glob 不会选中本文件。
+// 不是测试：文件名不带 `.spec.mjs`，`pnpm test` 的递归 glob 不会选中本文件。
 import { createRequire } from 'node:module';
 import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';

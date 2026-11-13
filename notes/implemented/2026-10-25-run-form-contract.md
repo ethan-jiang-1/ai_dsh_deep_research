@@ -12,7 +12,7 @@
 - **P/H/W 三分。** P = pack（只读，发布集白名单）；H = `$DSH_HOME`（会话/凭据/profile，不随源或包移交）；W = 研究工作区（run bundle/方法库/归档，用户所有）。`dev/` 只住源码驱动，运行态住 `runtime/` 或工作区（门禁 `dev-runtime-clean`）。
 - **兼容性以宿主字段 `engines.dsh` 为单一权威**；`dsh.compatibility.dshReleases` 只作人读矩阵镜像，由门禁与契约测试对账。团队层版本从同一字段派生，`scaffold` 不再装未钉版最新层；`preflight` 以 `--install-anchor` / PATH `dsh` 安装锚为准，profile 的 `@deepseek-ai/dsh-app-boot` 只作辅助（安装锚优先，见 [deploy-truth](2026-10-26-deploy-truth-and-isolation.md)）。
 - **工作区种子版本化。** `workspace/seed.json` 记录版本 + 文件 sha256；`scaffold --check` 只读报告 missing/stale/untracked/modified，`--upgrade` 只覆盖未改文件（改过的写 `.seed-new`），`--force` 覆盖版本化种子但**不覆盖** `method-library.md`；状态写 `.dsh-research-seed.json`。状态 schema、`--clean` 与 `.gitignore` owner 的后续收口见 [发布前数据契约](2026-10-27-release-data-contract.md)。
-- **独立启动 = bootstrap + 参数化。** `dev/bootstrap.sh` 串起 submodule/install/vendor 构建/env/凭据检查；`run-driver up --bootstrap` 起通道；`cold-start-smoke` 用独立 home/profile/端口/state 到浏览器面 GREEN。
+- **独立启动 = bootstrap + 参数化。** `dev/bootstrap.sh` 串起 submodule/install/vendor 构建/env/凭据检查；`run-driver up --bootstrap` 起通道；`cold-start.entry` 用独立 home/profile/端口/state 到浏览器面 GREEN。
 - **不新增 D 号。** 本决定未改变 D17（harness/run bundle）、D18（驾驶舱例外）、D21（启动分流）的边界；若后续改变这些边界，另立 D。
 
 ## 输掉的方案
@@ -28,9 +28,9 @@
 ## 实际跑过的验证
 
 - `pnpm verify` 全绿；`pnpm test` 779 pass / 0 fail。
-- `node scripts/smoke/gates-smoke.mjs` 全绿（含 `pack-bundle-compat-engines-drift`、`dev-runtime-clean-stray`、`workspace-versioning-seed-gitignore-missing` 注入案例）；`seed-core` 测试做过 branch-swap 红/还原绿的反证。
-- `node scripts/smoke/release-smoke.mjs` ALL PASS：安装副本 `engines.dsh`/矩阵、团队层钉版、scaffold/preflight、安装域全角色真挂载。
-- `node scripts/smoke/cold-start-smoke.mjs` GREEN：独立 `DSH_DEV_HOME` + `cold-start-smoke` profile + 3129 + 独立 state，浏览器面可呈交；MCP 关闭。
+- `node scripts/smoke/gates.e2e.mjs` 全绿（含 `pack-bundle-compat-engines-drift`、`dev-runtime-clean-stray`、`workspace-versioning-seed-gitignore-missing` 注入案例）；`seed-core` 测试做过 branch-swap 红/还原绿的反证。
+- `node scripts/smoke/release.entry.mjs` ALL PASS：安装副本 `engines.dsh`/矩阵、团队层钉版、scaffold/preflight、安装域全角色真挂载。
+- `node scripts/smoke/cold-start.entry.mjs` GREEN：独立 `DSH_DEV_HOME` + `cold-start.entry` profile + 3129 + 独立 state，浏览器面可呈交；MCP 关闭。
 - 两个实例并行：不同 home/profile/port/state（3131/3132）同时出横幅；不同 state 允许并行；默认 state 的重复启动检查仍生效，自定义 state 由端口检查兜底。
 - pack 目录安装：`pnpm build` 后 `dsh plugin add file:<pack>` 成功，`--dump-config` 见本包行；profile 记录绝对路径，作为 B 门槛而非分发形态。
 - `export-handoff` 实跑：`git archive HEAD` 1102 条目、2.4 MiB，含 `.gitmodules`/`seed.json`，无运行态/凭据/run 数据/依赖/导出包。

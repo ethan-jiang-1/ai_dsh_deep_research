@@ -25,7 +25,7 @@
   **尽量与用户安装同形**：CLI 建 profile → `dsh plugin --profile deep-research add file:<tgz>` →
   `dsh --profile deep-research`。dev-only 差异只许是 [dev/README 的 parity 表](../../dev/README.md)
   登记过的那几项（MCP Playwright overlay / 观测 / 端口 / 源码 runtime）；要更严格地"当用户"验，
-  走安装形态冒烟（`install-shape-smoke` / `product-boot-smoke` / `release-smoke`）；
+  走安装形态冒烟（`install-shape.entry` / `product-boot.entry` / `release.entry`）；
 - **启动次序（DSH 原生顺序，dev 通道不得重排）**：① 建 profile（CLI，仅首次；已有 profile **不要**
   重复 `--from-default-profile`，那是破坏性替换）→ ② `dsh plugin --profile deep-research add …` 写
   roster（bundle membership 变更**必须重启**才生效）→ ③ `dsh --profile deep-research` 起 web

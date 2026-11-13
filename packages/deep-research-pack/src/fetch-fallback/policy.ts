@@ -1,7 +1,7 @@
 /**
  * policy.ts —— 本地抓取 → DeepSeek Fetch API 回退的**纯判据**（D31）。
  *
- * 零运行时依赖：keyless 回归（tests/pack/fetch-fallback.test.mjs）直接 import 本文件；
+ * 零运行时依赖：keyless 回归（tests/pack/fetch-fallback.spec.mjs）直接 import 本文件；
  * 决策流在 ./orchestrate.ts（依赖注入，同样 keyless 可测），vendor 接线只在 ./index.ts。
  *
  * 判据边界（为什么这样切）：

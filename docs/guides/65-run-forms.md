@@ -22,7 +22,7 @@
 **决定：M1 安装形态为主。** 安装与启动全部是 DSH 命令；本包只多一个 custom profile 名
 （`deep-research`）。自定义 profile 的建立只能用 CLI（DSH 没有 UI 建自定义 profile；CLI 对未知名
 profile 只初始化 `dsh-base`——`--from-default-profile web` 是文档给的路径）。装包入口 = 本地 tarball
-（当前唯一发布形态）；npm/Plugins 页是发布后路径（当前 staged）。本包不发明安装器。**完整安装合同的 owner = [`scripts/dist/product-manual.md`](../../scripts/dist/product-manual.md)（生成 `_dist/安装手册.md`）；根 README 承担用户路径（最短安装 + 一次走查），命令由 [`readme-manual-commands`](../../tests/contracts/readme-manual-commands.test.mjs) 对账**；
+（当前唯一发布形态）；npm/Plugins 页是发布后路径（当前 staged）。本包不发明安装器。**完整安装合同的 owner = [`scripts/dist/product-manual.md`](../../scripts/dist/product-manual.md)（生成 `_dist/安装手册.md`）；根 README 承担用户路径（最短安装 + 一次走查），命令由 [`readme-manual-commands`](../../tests/checks/readme-manual-commands.test.mjs) 对账**；
 本页只写合同，不复制命令。
 
 ## 2. 六轴 owner
@@ -141,13 +141,13 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 
 证据档位、命令与选择规则 = [guides/60 §2](60-dev-loop.md)（唯一 owner，本页不复述）。本合同的增量证据：
 
-- `install-shape-smoke`：原样执行手册的 CLI 装包分支（profile init → plugin add → 真启动）；断言
+- `install-shape.entry`：原样执行手册的 CLI 装包分支（profile init → plugin add → 真启动）；断言
   roster 三状态、无 `did not activate`、首屏可达。
-- `product-boot-smoke`：纯 `dsh --profile deep-research` + 真 Web + 浏览器；工作区会话、首屏、目录按钮。
-- `release-smoke`：tarball → 干净 profile → 真启动。
-- `lifecycle-smoke`：staged market 索引（plugins 空）→ tarball → dump → 真启动 → `readPluginMeta` → remove 回落。
-- `data-smoke`：`$DSH_HOME` 只写 deep-research 设置文件；无 storage domain / 新 session event。
-- `scripts/smoke/handoff-smoke.mjs`：源码移交包边界 + HANDOFF 接收指令（CI keyless job）。
+- `product-boot.entry`：纯 `dsh --profile deep-research` + 真 Web + 浏览器；工作区会话、首屏、目录按钮。
+- `release.entry`：tarball → 干净 profile → 真启动。
+- `lifecycle.entry`：staged market 索引（plugins 空）→ tarball → dump → 真启动 → `readPluginMeta` → remove 回落。
+- `data.entry`：`$DSH_HOME` 只写 deep-research 设置文件；无 storage domain / 新 session event。
+- `scripts/smoke/handoff.e2e.mjs`：源码移交包边界 + HANDOFF 接收指令（CI keyless job）。
 - `content-shape`（L0）：手册/模板随包、包内无种子。
 - `snapshot-replay` B 层 + `l4-lite`（真模型）：手册以 runtime context 进请求、Lead 仍按手册工作。
 

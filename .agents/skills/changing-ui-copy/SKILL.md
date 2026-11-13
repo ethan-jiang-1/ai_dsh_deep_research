@@ -6,8 +6,8 @@ description: Use when adding or changing any user-visible text in the deep-resea
 # 改界面文案：day-one 双语
 
 本技能是 **guidance，不是 checklist**。合同正本 = [design/40 §4](../../../docs/design/40-research-cockpit.md)；
-守卫 = `tests/cockpit/locales.test.mjs`（键集/占位符/en 值/渲染）、`tests/cockpit/i18n.test.mjs`（折层
-en 零 CJK）、`tests/cockpit/cjk-source.test.mjs`（源码中文扫描 + 允许清单）。相关技能：
+守卫 = `tests/cockpit/locales.spec.mjs`（键集/占位符/en 值/渲染）、`tests/cockpit/i18n.spec.mjs`（折层
+en 零 CJK）、`tests/checks/cjk-source.test.mjs`（源码中文扫描 + 允许清单）。相关技能：
 [`reviewing-a-delivery`](../reviewing-a-delivery/SKILL.md)。
 
 **判据只有一句：任何界面上出现的东西，同一 diff 里必须有 zh 和 en。** 界面会持续调整，所以这不是
@@ -62,7 +62,7 @@ pnpm test          # locales/i18n/cjk-source + 既有契约
 pnpm typecheck
 pnpm build         # client bundle 变化时
 pnpm verify
-node --import tsx/esm scripts/smoke/client-load-smoke.mjs --seed tests/fixtures/client-load-home
+node --import tsx/esm scripts/smoke/client-load.entry.mjs --seed tests/fixtures/client-load-home
 ```
 
 `cjk-source` 的允许清单只收**模型面/数据面/格式面**（如 `config-tables`、`library-fold`、

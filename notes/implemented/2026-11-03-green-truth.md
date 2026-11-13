@@ -43,18 +43,18 @@
 
 ## 实际跑过的验证
 
-- `tests/run/run-driver-contract.test.mjs`：6/6 绿；新增 unbound/bound/`--require-data` 三态断言
+- `tests/run/run-driver-contract.spec.mjs`：6/6 绿；新增 unbound/bound/`--require-data` 三态断言
   （unbound 默认绿 + dataFace 显式；require-data 时 unbound 红且 checks=7）。
-- `tests/run/web-ui-nav.test.mjs`：5/5 绿；新增"标题节点不可见（零尺寸）→ present=false"用例——
+- `tests/run/web-ui-nav.spec.mjs`：5/5 绿；新增"标题节点不可见（零尺寸）→ present=false"用例——
   旧判据在该用例下会报 present=true（假 stuck）。
 - content effect：fake systemPrompt 返回两个 disposer；`dispose()` 后两个回调都被调用；
   `pnpm build` + seed client-load **ALL PASS**（注入行真挂载）。
-- HITL 年龄：`run-state.test.mjs` 注入 `now = askedAt + 5min` → `hitlAgeMs=300000`；`answered` 夹具 → null。
+- HITL 年龄：`run-state.spec.mjs` 注入 `now = askedAt + 5min` → `hitlAgeMs=300000`；`answered` 夹具 → null。
 - 漂移门两态（临时 profile 镜像）：源 README 追加一行 → 绿（跳过 1 个非运行时文件）；删镜像
   `lib/client.js` → 红并点名该文件。函数本体从 `dev/boot-run.sh` 原样抽出执行，不测副本。
 - client-load 成功后 `client-load-latest.json` 落 `{status:"PASS", dir:null}`；失败路径写
   `{status:"FAIL", dir:<现场>}`（代码同函数，本轮验 PASS 态）。
-- 本地 `client-load-smoke --seed tests/fixtures/client-load-home`：**ALL PASS**（含新增的
+- 本地 `client-load.entry --seed tests/fixtures/client-load-home`：**ALL PASS**（含新增的
   "首屏 Preview Notice 可关闭"硬断言；此前同一场景打印"遮罩关不掉"仍全绿）。
 - `pnpm test` / `pnpm test:vendor` / `pnpm verify` 全绿（本变更的收尾轮）。
 - CI run 41561543486（`ce1e917`）三 job 全绿；方法库 tool smoke 进 deploy 的尝试在 CI 红于

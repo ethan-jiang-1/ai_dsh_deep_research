@@ -36,7 +36,7 @@ build-time externals 会把新 host 半的改动静默稀释（020rc2 轮实证�
 
 ## 4. 全档证据（漏一档 = 有实证的漏网形态）
 
-按路由行：**L0 + L1 + L2 + client-load-smoke + L4-lite**。client-load-smoke 不是可选——
+按路由行：**L0 + L1 + L2 + client-load.entry + L4-lite**。client-load.entry 不是可选——
 020rc2 轮的漏网直接原因 = 必跑面不含它（build-time externals 漂移只有浏览器模块表能抓）。
 L4-lite 需凭据（真模型档）；未跑项如实分列，不算通过。
 

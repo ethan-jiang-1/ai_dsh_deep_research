@@ -28,7 +28,7 @@
 
 ## 输掉的方案
 
-- **新只读 `verifier` preset**：代价 = 推翻 D2 + 新 D 号 + preset-smoke/roster/团队表全链；v1 复用 critic +
+- **新只读 `verifier` preset**：代价 = 推翻 D2 + 新 D 号 + preset.e2e/roster/团队表全链；v1 复用 critic +
   `verifier-wrote` 事后审计，等试点证明「任务形状管不住写盘」再上。
 - **运行时 veto**：门禁是事后检测；改盘仍可能发生，但 `raw-reparse`/`not-verbatim` 会抓。
 - **语义门禁**：quote 是否真支持 claim、claim 表是否完整、source tier 配不配只能语义判；门禁只证「表内每条都真、
@@ -46,14 +46,14 @@
 
 - `verdict-audit-core` + CLI + 28 例回归；五条红配方在真 CLI 各红一次（`not-verbatim` / `coverage-gap` /
   `verdict-invalid` / `session-preset` / `verifier-wrote`），epoch 豁免 exit 0。
-- `run-accept-smoke` 补 claims-绿 / gap-红 / `--require` 强制三例；`docs/evaluation.md` L4 判据 ⑤ 与
+- `run-accept.e2e` 补 claims-绿 / gap-红 / `--require` 强制三例；`docs/evaluation.md` L4 判据 ⑤ 与
   `scripts/README` 两表同步。
 
 ### P1 内容面（commit d324240）
 
 - `claim-verdict` skill + critic/lead persona + team-assembly 通道行 + 手册两处；预算下放 12,187 → 12,038。
-- `render-overlay` 重生成；`preset-smoke` ALL PASS；snapshot B 先红（两条 persona 被捕获）→ lead/critic 真模型重录
-  → replay ALL PASS；`l4-lite-smoke` ALL PASS。
+- `render-overlay` 重生成；`preset.e2e` ALL PASS；snapshot B 先红（两条 persona 被捕获）→ lead/critic 真模型重录
+  → replay ALL PASS；`l4-lite.e2e` ALL PASS。
 
 ### P3 机制试点（2026-11-10；口径修正）
 
@@ -66,7 +66,7 @@
   persona 都不在镜像里。P4 先重建 profile，才在真挂载面上跑。
 - **真实线形夹具**（2026-11-11 补）：Pilot A 的 child 日志脱敏切面 + 真实 bundle 三件 →
   `tests/fixtures/verdict-audit/pilot-a/`（约 92 KB）；`parseSessionFacts` 从 CLI 抽到 core；消费测试
-  `tests/run/verdict-audit-fixture.test.mjs` 走 `findSessionDir → resolveSessionLog → parseSessionFacts →
+  `tests/run/verdict-audit-fixture.spec.mjs` 走 `findSessionDir → resolveSessionLog → parseSessionFacts →
   auditClaimVerdicts`（绿 + 三条派生红：改 header preset / 追加 write / 改 child 正文）。红先：把 core 的 `preset`
   读取改坏 → 2 红，还原 → 5/5 绿。
 
@@ -94,12 +94,12 @@
 
 ### 测试资产与探针
 
-- keyless：`tests/run/verdict-audit.test.mjs`（32 例，含围栏四例、模板键集钉）、
-  `tests/run/verdict-audit-fixture.test.mjs`（5 例，真实 child 日志线形）。
+- keyless：`tests/run/verdict-audit.spec.mjs`（32 例，含围栏四例、模板键集钉）、
+  `tests/run/verdict-audit-fixture.spec.mjs`（5 例，真实 child 日志线形）。
 - 真模型档：本轮没有新增常驻 claim-verdict 探针；P4 本身是整链证据，中段用 `verdict-audit --no-write`
   当检查点（正是这次抓到 raw 改写/围栏/覆盖缺口的层）。若后续 claim 段再漂移，优先补
   `probes/behavior/claim-verdict-probe.mjs`（1 lead + 1 critic child；不替代 P4 的 HITL2/交付面）。
-- L0：`pnpm verify` 全绿；`pnpm test` 1111/1111（P0 时 1083；围栏四例后 1111）；`run-accept-smoke` ALL PASS。
+- L0：`pnpm verify` 全绿；`pnpm test` 1111/1111（P0 时 1083；围栏四例后 1111）；`run-accept.e2e` ALL PASS。
 
 ## 残余风险与未决
 

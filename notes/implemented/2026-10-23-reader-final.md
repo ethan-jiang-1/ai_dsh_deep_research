@@ -69,7 +69,7 @@
   `node-gate` 门①③②L④R A C 全 PASS（门④ N/A：仅 v1）；`run-accept` 写
   `delivered.json`（`readable.path=final/readable-v1.md` + sha256）/`manifest.json`
   （role `reader-final`）/`acceptance.md`（读者版行）。
-- **观察面真浏览器**：`client-load-smoke` 在已交付 bundle 上以真实 reader 走
+- **观察面真浏览器**：`client-load.entry` 在已交付 bundle 上以真实 reader 走
   「默认读者版 → 看审计版切换 → 静音条 = 读者版 · v1」全 PASS
   （临时 reader 用于探针，已移除；同一轮也验证旧 bundle 无 reader 时回退审计版）。
 - **真实 run 抓出的四个门禁缺陷，同 diff 修复并各带回归**：

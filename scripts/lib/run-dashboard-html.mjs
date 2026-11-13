@@ -2,7 +2,7 @@
 // run-dashboard-core 的模型/矩阵/统计）。2026-10-28 从 run-dashboard-core.mjs 拆出：
 // “把文件折成模型”和“把模型画成 HTML”是两个变更面；拆开后 core 不再含渲染函数。
 //
-// 消费方：scripts/run-ops/run-dashboard.mjs（CLI 壳）、tests/run/run-dashboard.test.mjs。
+// 消费方：scripts/run-ops/run-dashboard.mjs（CLI 壳）、tests/run/run-dashboard.spec.mjs。
 import { gapStats, topicEvidenceMatrix } from './run-dashboard-core.mjs'
 
 // ── 渲染薄壳（纯字符串拼接；数据全来自上面的纯函数）──────────────────────────

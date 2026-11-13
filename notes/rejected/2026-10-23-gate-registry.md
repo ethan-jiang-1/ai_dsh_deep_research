@@ -3,7 +3,7 @@
 > 状态：rejected
 >
 > 首提 2026-10-23 ｜ 测量对象 [verify.mjs](../../scripts/verify/verify.mjs) ·
-> [gates-smoke.mjs](../../scripts/smoke/gates-smoke.mjs) ｜ 台账 [evaluation §L0](../../docs/evaluation.md)
+> [gates.e2e.mjs](../../scripts/smoke/gates.e2e.mjs) ｜ 台账 [evaluation §L0](../../docs/evaluation.md)
 
 ## 原方案
 
@@ -15,7 +15,7 @@ spawn 整账；`gates` 数组、evaluation 表、`CASES`、`verify-gates` 静态
 ## 否决理由
 
 - **测量不支持**：2026-10-23 定向扫描落地后，`verify` 暖跑中位 **1.42s**（改前 3.5s）；
-  `gates-smoke` **2m28s**（77 案例 + 4 对照），只在改门禁时跑，不在 pre-commit 热路径。
+  `gates.e2e` **2m28s**（77 案例 + 4 对照），只在改门禁时跑，不在 pre-commit 热路径。
   真正的全树 walk 成本已在 P2 用 `walkMany` + 惰性 `allFiles` 消掉。
 - **风险不对称**：43 条门禁 / 1712 行是当前最强的安全网；registry 是一次大爆炸式重排，
   收益是“加门禁少改两处 + 案例跑得快”，代价是可能把门禁本身改红。
@@ -26,6 +26,6 @@ spawn 整账；`gates` 数组、evaluation 表、`CASES`、`verify-gates` 静态
 
 ## 复活条件
 
-- 门禁数增长到 > 60，或 `gates-smoke` 超过 5 分钟、被纳入每次提交；
+- 门禁数增长到 > 60，或 `gates.e2e` 超过 5 分钟、被纳入每次提交；
 - 出现一次真实的注册面漏改事故（evaluation 表 / `CASES` / 数组不同步）且现有对账门禁没拦住；
 - 需要单门禁 CI、JSON 报告或第三方消费门禁结果。

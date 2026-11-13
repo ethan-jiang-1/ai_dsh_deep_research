@@ -111,7 +111,7 @@
 [BUG-076](../_archived/fixed_bugs/BUG-076-schema-scan-whitelist-missing-protocol-artifacts.md) schema-scan 白名单补协议/复核/wave 新件；
 [BUG-077](../_archived/fixed_bugs/BUG-077-protocol-audit-write-reference-error.md) protocol-audit `--write` 补 import；
 [BUG-078](../_archived/fixed_bugs/BUG-078-portable-bundle-path-relative-escape.md) portableBundlePath 相对 `..` 逃逸拒绝；
-[BUG-079](../_archived/fixed_bugs/BUG-079-user-env-smoke-dead-import-seed-core.md) user-env-smoke 死 import 复活。
+[BUG-079](../_archived/fixed_bugs/BUG-079-user-env-smoke-dead-import-seed-core.md) user-env.entry 死 import 复活。
 ）
 （2026-11-11 同批协议审计 / 收活契约 fail-loud 收口，去向 = [Note](../../notes/implemented/2026-11-11-protocol-audit-presence-and-depth-codec.md)：
 [BUG-048](../_archived/fixed_bugs/BUG-048-protocol-depth-projection-first-pair-only.md) 深度集合单一编解码（deep 生成器 / 单值 / 非连续不再假红或漏检）；

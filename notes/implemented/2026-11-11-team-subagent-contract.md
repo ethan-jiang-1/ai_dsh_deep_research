@@ -35,16 +35,16 @@ notice 到达（[issue 证据](../../_backlog/_archived/settled_issues/2026-11-1
 ## 实际跑过的验证
 
 - `node dev/render-overlay.mjs`：source overlay 重生成（含 persona/skill 变更）。
-- `DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs`：5 角色 + 2 worker profile
+- `DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs`：5 角色 + 2 worker profile
   全部真挂载 ALL PASS（roster / session/create / skills）。
-- `node scripts/smoke/l4-lite-smoke.mjs`：全角色（含 method-editor）assistant 响应 +
+- `node scripts/smoke/l4-lite.e2e.mjs`：全角色（含 method-editor）assistant 响应 +
   scout `web_search` 调用 **ALL PASS**。
-- `node scripts/smoke/release-smoke.mjs --install-only`：真实安装形状 **ALL PASS**
-  （pack → 干净 profile → plugin add → 安装域 preset-smoke；含 worker rows）。
-- `node scripts/smoke/snapshot-replay-smoke.mjs`：A 回放 + B 组装请求（persona /
+- `node scripts/smoke/release.entry.mjs --install-only`：真实安装形状 **ALL PASS**
+  （pack → 干净 profile → plugin add → 安装域 preset.e2e；含 worker rows）。
+- `node scripts/smoke/snapshot-replay.entry.mjs`：A 回放 + B 组装请求（persona /
   headers / skill-catalog / runtime-context / time-context）**全 PASS**；C2/C3 因当前
   客户端 `Open right sidebar` 控件不可见而红（UI 夹具问题，非本合同；状态页签归
-  `client-load-smoke` 的活体证据）。`ui.expected.md` 的卡片/活动行已按 fixture 折算
+  `client-load.entry` 的活体证据）。`ui.expected.md` 的卡片/活动行已按 fixture 折算
   重写，`tests/run/replay-fixtures` 绿。
 - 行为探针（真模型，`deep-research` profile 更新到 0.3.1 后）：
   - critic teammate 在“可以问用户/可以再派 subagent”的压力 prompt 下 **零工具调用**，
@@ -62,5 +62,5 @@ notice 到达（[issue 证据](../../_backlog/_archived/settled_issues/2026-11-1
 - `subagent` 工具描述仍带 “send_message steer” 句；本仓无法改 vendor。模型在显式指令
   下仍会撞 namespace error；需要的话下一步加 run 级审计（扫描 `TEAM_MEMBER_NOT_FOUND`），
   不阻断交付。
-- C2/C3 的右栏 guide 控件漂移是 UI 夹具问题，未在本卡修；`client-load-smoke` 是状态页签
+- C2/C3 的右栏 guide 控件漂移是 UI 夹具问题，未在本卡修；`client-load.entry` 是状态页签
   的 owner，后续 UI 轮次应更新快照配方。

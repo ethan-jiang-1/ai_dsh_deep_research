@@ -15,14 +15,14 @@ opened: 2026-11-13
 > S3（慢档降本/退役/合并）触面更大，另卡，不在本卡关闭条件内。
 
 **问题与期望结果：** 研究实测发现：快核健康（verify 2.5s、test 4.4s），但慢档有成本悬崖
-（`gates-smoke` 202s、`snapshot-replay` 162s）；真正缺口是慢资产判据仍长在慢壳里、客户端 19 个
+（`gates.e2e` 202s、`snapshot-replay` 162s）；真正缺口是慢资产判据仍长在慢壳里、客户端 19 个
 文件无测试路径、夹具随判据漂移。期望：先让 CI keyless 绿，再把“纯逻辑进快测、慢档只证装配、
 夹具同源、慢资产有台账”变成可对账的围栏；不以新增 E2E 换覆盖。
 
 **当前情况：**
 
 - 研究正文与第二遍复核 = [2026-11-13-test-asset-fence.md](../research/test-asset-fence/2026-11-13-test-asset-fence.md)。
-- **S0 前红（现已修复）**：`node scripts/smoke/run-accept-smoke.mjs` 第 ⑦ 段曾 exit 1。根因不是
+- **S0 前红（现已修复）**：`node scripts/smoke/run-accept.e2e.mjs` 第 ⑦ 段曾 exit 1。根因不是
   `## readiness: PASS` 标题行，而是 claim 夹具创建了 `review/` 却没有 `review/readiness.json`；
   D51 的 `readinessOfSources({hasReviewDir:true})` 判 `source:'missing'`。实测补声明件后
   `run-accept` exit 0、`review/verdict-audit-r1.md` 落盘；S0 已按此落地（§执行记录）。
@@ -30,13 +30,13 @@ opened: 2026-11-13
   测试路径。4 个零路径纯逻辑：`lead-prompt`、`section-labels`、`operation-prompts`、`coach-prompts`；
   另 2 个有组件可达但无直测：`research-graph/format`、`defaults/labels`。
 - `verify --only` 只过滤输出、全部门禁仍执行；实测 `--only=md-links` 3.24s ≥ 全量 2.53s，
-  **不能用于 gates-smoke 降本**。
-- `e2e-021rc2` 退役需先有 `client-load` 的真实 picker 顺序断言；静态 order 只是代理。若仍承诺
+  **不能用于 gates.e2e 降本**。
+- `e2e-021rc2.entry` 退役需先有 `client-load` 的真实 picker 顺序断言；静态 order 只是代理。若仍承诺
   从 0.2.1-rc.2 升级，则更新而非退役。
 
 **未决问题（本卡外）：**
 
-- S3 的具体顺序：`snapshot-replay` 定向/并行、`client-load` 纯逻辑外移、`e2e-021rc2` 退役、
+- S3 的具体顺序：`snapshot-replay` 定向/并行、`client-load` 纯逻辑外移、`e2e-021rc2.entry` 退役、
   `install-shape` 合并、`cold-start` 补隔离断言——各自前置已写在研究 §3/§5，触面跨 smoke/CI/
   发布文档，另卡推进。
 - `verdict-audit-core` 第 483 行把“声明缺席”说成“不是终局判定行”的误导文案：可随 S0 同 diff，
@@ -71,7 +71,7 @@ opened: 2026-11-13
   `client-surface`，不改旧门）；smoke registry 只有 tier/reason（S2 加字段，28 条一次性填齐，不设
   grandfather）。
 - **反证**：
-  - S0：fast 测试断言“有声明 = declaration/PASS；缺声明 = missing/红”；S0 落地前 `run-accept-smoke`
+  - S0：fast 测试断言“有声明 = declaration/PASS；缺声明 = missing/红”；S0 落地前 `run-accept.e2e`
     当前红即真红录。
   - S1：注入一个未测试纯逻辑件 → `client-surface` 点名红；删除断言/登记 → 红。
   - S2：删一条 `oracle` 或填不存在的路径 → 契约红；新增 smoke 不登记 → 红。
@@ -80,12 +80,12 @@ opened: 2026-11-13
 
 | # | 行为 | 类 | 判据 | 证据 owner |
 |---|---|---|---|---|
-| 1 | **S0** run-accept claim 夹具带声明件，CI keyless 恢复绿 | 确定性逻辑 | `review/readiness.json` 由 shared fixture 写出；`node scripts/smoke/run-accept-smoke.mjs` exit 0；`review/verdict-audit-r1.md` 落盘 | `tests/run/run-accept-fixture.test.mjs` + `run-accept-smoke` 实跑 |
+| 1 | **S0** run-accept claim 夹具带声明件，CI keyless 恢复绿 | 确定性逻辑 | `review/readiness.json` 由 shared fixture 写出；`node scripts/smoke/run-accept.e2e.mjs` exit 0；`review/verdict-audit-r1.md` 落盘 | `tests/run/run-accept-fixture.spec.mjs` + `run-accept.e2e` 实跑 |
 | 2 | **S0 反证** 缺声明件必须红 | 确定性逻辑 | fast 测试：`readinessOfSources({hasReviewDir:true, declarationText:null})` → `source:'missing'`、`pass:false`；有声明 → `source:'declaration'`、`pass:true` | same test；负例留证块 |
 | 3 | **S1** 4 个零路径纯逻辑 + 2 个无直测件有直测 | 确定性逻辑 | 6 个测试文件/用例在场；`pnpm test` 增加且绿 | `tests/cockpit/*` + `tests/run/*` |
-| 4 | **S1 围栏** 新纯客户端模块不写测试 = 红 | 确定性逻辑 | `client-surface` 契约：纯逻辑件必须被测试直接 import；其余在 `CLIENT_SMOKE_ONLY` 有理由 | `tests/contracts/client-surface.test.mjs` + 一次性注入红录 |
-| 5 | **S2** 28 条 smoke 有成本/唯一证明面/判据核台账 | 确定性逻辑 | `registry.json` 每条 `cost`/`uniqueClaim`/`oracle` 齐；`oracle` 路径存在且被测试 import，或 `none:` 有理由；新增 smoke 不登记 = 红 | `tests/contracts/smoke-oracle-surface.test.mjs` |
-| 6 | 收尾不回归 | 确定性逻辑 | `pnpm verify` 绿；`pnpm test` 绿；`pnpm typecheck` 绿（触 pack 时）；`run-accept-smoke` 绿 | 命令输出 + Note |
+| 4 | **S1 围栏** 新纯客户端模块不写测试 = 红 | 确定性逻辑 | `client-surface` 契约：纯逻辑件必须被测试直接 import；其余在 `CLIENT_SMOKE_ONLY` 有理由 | `tests/checks/client-surface.test.mjs` + 一次性注入红录 |
+| 5 | **S2** 28 条 smoke 有成本/唯一证明面/判据核台账 | 确定性逻辑 | `registry.json` 每条 `cost`/`uniqueClaim`/`oracle` 齐；`oracle` 路径存在且被测试 import，或 `none:` 有理由；新增 smoke 不登记 = 红 | `tests/checks/smoke-oracle-surface.test.mjs` |
+| 6 | 收尾不回归 | 确定性逻辑 | `pnpm verify` 绿；`pnpm test` 绿；`pnpm typecheck` 绿（触 pack 时）；`run-accept.e2e` 绿 | 命令输出 + Note |
 | 7 | 交付记录 | — | Note 与研究/卡同变更；`scripts/README` 的 lib 表与 registry 说明同步 | `notes/implemented/2026-11-13-test-asset-fence.md` |
 
 **排除项**：不新增浏览器/真模型档；不改产品行为；不做 S3 的慢档退役/合并；不设覆盖率百分比门禁；
@@ -94,16 +94,16 @@ opened: 2026-11-13
 ## 执行记录
 
 - **2026-11-13 S0（已落地）**：新增 `scripts/lib/run-accept-fixture.mjs`（claim 夹具的
-  `review.md` + `review/readiness.json` 文本，D51 同源）与 `tests/run/run-accept-fixture.test.mjs`
-  （有声明 = declaration/PASS，缺声明 = missing/红）。`run-accept-smoke` 第 ⑦ 段由 3 FAIL
+  `review.md` + `review/readiness.json` 文本，D51 同源）与 `tests/run/run-accept-fixture.spec.mjs`
+  （有声明 = declaration/PASS，缺声明 = missing/红）。`run-accept.e2e` 第 ⑦ 段由 3 FAIL
   → **ALL PASS**；`pnpm test` **1,409 / 0**；`pnpm verify` 全绿。
-- 证据：`node scripts/smoke/run-accept-smoke.mjs` → ALL PASS；新测 2 例绿；`scripts/README`
+- 证据：`node scripts/smoke/run-accept.e2e.mjs` → ALL PASS；新测 2 例绿；`scripts/README`
   lib 表已登记新模块。
 - 待办：S1（客户端纯逻辑 + `client-surface`）、S2（smoke oracle/cost 台账）。
 
 ## 关闭条件
 
 - S0–S2 全部落地，且每条新判据有一次真红录（S0 当前红 + S1/S2 注入红）。
-- `pnpm verify`、`pnpm test`、`pnpm typecheck`（触 pack 时）、`run-accept-smoke` 绿。
+- `pnpm verify`、`pnpm test`、`pnpm typecheck`（触 pack 时）、`run-accept.e2e` 绿。
 - Note 与卡关闭同变更；研究文档与 `scripts/README` 同步；S3 登记为后续卡/trigger。
 - 用户验收（测试资产/CI 触面）。

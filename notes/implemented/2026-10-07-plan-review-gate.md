@@ -59,7 +59,7 @@ running-a-research-run §2 · guides/61 §2 · pack README「研究怎么跑」�
 
 - L0：verify 全绿 + tests 234/234（净 +1：契约测试「HITL1 两段卡四面在场」——stash 四
   源文件红 → 还原绿反证实录；BUG-005 ask 硬约束断言随合同措辞真实变化同 diff 改）；
-- L1：preset-smoke 真挂载四 preset ALL PASS（skills 硬隔离断言含）；
+- L1：preset.e2e 真挂载四 preset ALL PASS（skills 硬隔离断言含）；
 - 回放面：snapshot-replay 4 场景 ALL PASS——lead fixture 真模型重录（BUG-013 程序：
   git rm 旧语料 + record-role-fixture；B1 全文一致 9888 字，persona 合同在场含计划确认卡
   ×3/quick_factual 免发/推荐项形态/ask 硬约束新措辞）+ C 渲染金标准重写人审（窄带：

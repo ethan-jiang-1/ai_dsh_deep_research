@@ -1,7 +1,7 @@
 // method-presets.mjs —— research-brief skill「方法预设」表的**唯一解析入口**（2026-10-18 立）。
 //
 // 为什么要有它：「内置打法」这一份事实散在四处（客户端常量 / skill 表 / tests 期望 /
-// client-load-smoke 名单，总卡发现 14）——解析逻辑各写一份就是第四份手写副本，改条数时
+// client-load.entry 名单，总卡发现 14）——解析逻辑各写一份就是第四份手写副本，改条数时
 // 静默漂移。本件把解析收成一份，测试与冒烟共用：contract 变了就一起红（fail-loud）。
 //
 // 表形状合同（research-brief SKILL.md §方法预设）：表头恰为 METHOD_PRESET_HEADERS，
@@ -9,8 +9,8 @@
 // 表头缺席 / 分隔行非法 / 行列数不符 / 解析到 0 行都抛——静默解析成空集等于门禁不存在
 // （防空语料纪律，scripts/AGENTS.md）。
 //
-// 消费方：tests/library-fold.test.mjs（客户端常量 ↔ skill 表 ↔ 期望三方对钉）、
-// scripts/smoke/client-load-smoke.mjs（内置名单从表派生，不再手写）。
+// 消费方：tests/library-fold.spec.mjs（客户端常量 ↔ skill 表 ↔ 期望三方对钉）、
+// scripts/smoke/client-load.entry.mjs（内置名单从表派生，不再手写）。
 import { readFileSync } from 'node:fs'
 
 /** canonical 表头（列序即语义：方法｜给用户的一句话｜信息源策略｜检验策略｜综合与呈现｜明确不承诺）。 */

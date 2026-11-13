@@ -47,7 +47,7 @@ export function findGroup(sessionsRoot, substring) {
 }
 
 /** research-workspace 组的目录名（run 通道组名约定 = 组名含该子串；组随会话 cwd 走）。
- *  组不在场（未 source env.sh / 无 run 历史）→ undefined。三消费方（client-load-smoke /
+ *  组不在场（未 source env.sh / 无 run 历史）→ undefined。三消费方（client-load.entry /
  *  hitl-answer / watch-run）原各写一份同款一行——收敛为唯一正本（2026-10-13 结构重构）；
  *  判据本体复用 findGroup（子串可参数化的那一份），缺省子串 = research-workspace。 */
 export function researchWorkspaceGroup(sessionsRoot, workspace = null) {
@@ -217,7 +217,7 @@ export function readSessionEvents(logPath) {
  *  `paginate` + `DEFAULT_MAX_MESSAGES = 50`——从日志末尾倒序数 50 条 surface append 消息事件
  *  （user/message | assistant/message），第 50 条处（其 sourceEventSeqs 组起点更早则取组起点；
  *  seq = 稠密零基下标）定为切点，页 = 切点到末尾的全部事件（非消息事件一并含入）。
- *  唯一正本：client-load-smoke 与交付目标选取（client-load-reference）共用——两处各写一份
+ *  唯一正本：client-load.entry 与交付目标选取（client-load-reference.support）共用——两处各写一份
  *  就是"同一判据两版实现"。 */
 const CLIENT_HISTORY_MESSAGE_WINDOW = 50
 

@@ -383,7 +383,7 @@ const zhBase = {
   trackRerunSuffix: ' · 本 bundle 已有 v{version}（证据扩张）',
   // ── 内置打法显示投影（BUG-069）：canonical 内容住 lib/config-tables.ts（名称同时是指令/库
   //    格式/skill 表的键），这一组只是 UI 显示副本。zh 必须逐字等于 canonical（对钉 =
-  //    tests/cockpit/builtin-display.test.mjs）；en 只用于显示，不得含中文。
+  //    tests/cockpit/builtin-display.spec.mjs）；en 只用于显示，不得含中文。
   builtinFactCheckName: '事实核查',
   builtinFactCheckSummary: '核准具体事实/数字/状态的对象、时点与口径',
   builtinFactCheckSource: '官方/原始来源优先，第三方只作线索',

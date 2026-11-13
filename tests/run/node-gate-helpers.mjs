@@ -1,5 +1,5 @@
 // node-gate-helpers.mjs — node-gate 测试共享的夹具定位与临时 bundle 助手。
-// 非测试文件（默认 glob 只选 *.test.mjs）；三件测试共用同一套路径/断代/审计摘要。
+// 非测试文件（默认 glob 只选 *.spec.mjs）；三件测试共用同一套路径/断代/审计摘要。
 import { cpSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'

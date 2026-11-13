@@ -31,7 +31,7 @@ P0/P1/复发有复盘；探索成为常驻实践。
 多 OS），只借它的制度判据，落到本仓现有载体。
 
 **首个可验收批次**：W0-1（全量失败类账本）+ W0-2（类级守卫方法）——它们是决策/方法载体，
-不改产品代码；随后 W0-3..W0-9（资产账/客户端面/导出守卫/可见性/文档）。
+不改产品代码；随后 W0-3..W0-10（资产账/客户端面/导出守卫/可见性/文档/命名）。
 **本卡边界**：本卡只提出方案与验收，**不修改 repo**；下一阶段经用户批准后从 Wave 0 开工。
 详细切片是候选，不是执行队列；每片开工前按 `## 判据形状` 细化，先立红再交付。
 
@@ -57,14 +57,14 @@ dev-only，靠人记得跑；客户端 36/59 文件无直测；慢资产没有�
 - 研究正文（779 行）= [dsh-test-strategy-gap](../research/dsh-test-strategy/2026-11-13-dsh-test-strategy-gap.md)：
   DSH 16 篇 digest + `vendor/dsh` rc.5 一手源核验；本仓资产/失败史对照；差距矩阵；三环四账五关。
 - 已测事实：`pnpm verify` 3.9s（L0 门禁全绿；计数正本 = `scripts/verify/context.mjs` 的 `gates` 数组）；
-  `pnpm test` 4.6s / 全绿 / 0 skipped（用例计数正本 = `pnpm test` 汇总）；`gates-smoke` 202s（CI）；
+  `pnpm test` 4.6s / 全绿 / 0 skipped（用例计数正本 = `pnpm test` 汇总）；`gates.e2e` 202s（CI）；
   `snapshot-replay` 162s（dev-only）；真模型档零 CI（名单正本 = `smoke-contract` 的 `REAL_MODEL`）；
   `test-surface` 只覆盖 `scripts/lib` 与 pack `src/lib`，`src/client` 有直测缺口；`smoke-registry`
   只有 `ci/dev-only` + 理由；CI 各 job 无 `needs`/聚合；`guard-red-record` 只证留证文本在场。
-- 已落地 S0（test-asset-fence）：`scripts/lib/run-accept-fixture.mjs` + 直测，`run-accept-smoke` ⑦ 绿。
+- 已落地 S0（test-asset-fence）：`scripts/lib/run-accept-fixture.mjs` + 直测，`run-accept.e2e` ⑦ 绿。
 - 未落地：S1（客户端直测面 + `client-surface`）、S2（smoke 台账 + `smoke-oracle-surface`）、
   快照只读/CI、CI 聚合、运行时导出守卫、客户端 dispose、证据账本、文档纠偏、复盘、探索毕业。
-- 未跑：本轮未复跑 `gates-smoke` / `snapshot-replay` / L1/L2/L4 / 真模型；慢档数字引用
+- 未跑：本轮未复跑 `gates.e2e` / `snapshot-replay` / L1/L2/L4 / 真模型；慢档数字引用
   test-asset-fence 的实测（HEAD `ec652a30`）。
 
 ## 这件事的意义（为什么不是普通测试卡）
@@ -147,6 +147,7 @@ W3-6 D53 + Note（全卡收口）
 | W0-7 证据账本 | `reviewing-a-delivery` 加「证据账本」节 + issue 模板 | 一次真实交付按模板填写；评审能指出未覆盖行 | 无 |
 | W0-8 可见性契约 | lane-membership（测试文件空间穷尽）、`pnpm test` 零 skip、spoiler 失败分列 | 错后缀/`test.skip`/新增 lane 不登记 → 红 | 无 |
 | W0-9 文档纠偏 | external-materials 16 篇/rc.5；evaluation 5→6；probes 4→6；scripts 25→28；guides/66；JUDGES 5 vs six | `pnpm verify` 绿；不吹「全部对齐」 | 无 |
+| W0-10 命名系统 | 四车道：`*.spec.mjs`（进程内）/ `*.e2e.mjs`（真进程）/ `*.entry.mjs`（真浏览器·profile·tarball）/ `tests/checks/*.test.mjs`（门禁自身）；smoke 加 `lane`/`support`；`test:spec/checks/e2e/entry` | 命令可跑；错后缀/错 lane/孤儿支援件 → 红；`pnpm test` 聚合 spec+checks | W1-2 后 |
 
 ### Wave 1：模型可见证据与真实入口（最高产品风险）
 
@@ -179,7 +180,7 @@ W3-6 D53 + Note（全卡收口）
 | W3-2 复盘 | BUG-081..159 一次五节复盘（症状/为什么没早发现/根因/修复/新增防线） | 至少一条新守卫进 Wave 0/2；P0/P1/复发触发写进 rules | W0-1 |
 | W3-3 失败类→层表 | `guides/67` 一张 12 行表：失败类 → 最低可见层 → 反例 → 证据 | 被 guides/60 与 reviewing-a-delivery 引用；真实变更能按表选层 | W0-2 |
 | W3-4 政策收口 | `guides/67` + `evaluation` 指针；必要时升 `docs/testing.md` | 一个入口能回答「绿为什么有意义/怎么选层/怎么记账」 | W3-3 |
-| W3-5 资产退役 | `e2e-021rc2` 补 picker 断言后退役；安装档合并评估 | 退役有替代证据；无消费者资产清零 | W0-3 |
+| W3-5 资产退役 | `e2e-021rc2.entry` 补 picker 断言后退役；安装档合并评估 | 退役有替代证据；无消费者资产清零 | W0-3 |
 | W3-6 D53 + Note | 把三环四账五关升 D53；写 implemented Note | D 号台账/Note/研究题互链；`pnpm verify` 绿 | Wave 0–3 |
 | W3-7 CI 聚合 + with-key | `needs` 聚合裁决（含 skipped）+ job 清单契约；`workflow_dispatch` l4-lite + preflight | 删 needs/新增 job 不登记 → 红；with-key 可触发且缺 key 硬失败 | 无 |
 
@@ -212,11 +213,11 @@ W3-6 D53 + Note（全卡收口）
 |---|---|---|---|---|
 | 1 | 全量 159 张 BUG 有失败类账本 | 确定性/文档 | 每张有主类/发现层/守卫/红录状态；不可归类有原因；Top 5 有类级守卫建议 | `runtime/` 普查 → `guides/67` 表 |
 | 2 | 6 种类级守卫形态 + 2 个真实族示例 | 确定性/文档 | 模板可照做；示例矩阵能咬住邻接变体 | `_backlog/methods/class-level-guards.md` |
-| 3 | smoke 资产账 28 条 | 确定性 | `cost/uniqueClaim/oracle/sunset` 齐；新增 smoke 不登记 = 红 | `scripts/smoke/registry.json` + `tests/contracts/smoke-oracle-surface.test.mjs` |
-| 4 | 客户端 6 件直测 + `client-surface` | 确定性 | 注入未测试纯件 → 红；6 测绿 | `tests/cockpit/*` + `tests/contracts/client-surface.test.mjs` |
-| 5 | 运行时导出守卫 + client dispose | 确定性 | 注入 default/re-export/不 dispose → 红 | `tests/pack/export-shape.test.mjs` + `tests/cockpit/client-effect-dispose.test.mjs` |
-| 6 | 快照只读 + A/B CI | 确定性/装配 | 双 flag → exit 2；CI 基线绿；改 persona → B 红；≤5 min | `snapshot-replay-smoke` + `.github/workflows/ci.yml` |
-| 7 | 装起 + 效果 / 可选依赖 | 装配 | 删 apply 效果 → 红；可选缺席仍启动 | `lifecycle/release-smoke` + 新断言 |
+| 3 | smoke 资产账 28 条 | 确定性 | `cost/uniqueClaim/oracle/sunset` 齐；新增 smoke 不登记 = 红 | `scripts/smoke/registry.json` + `tests/checks/smoke-oracle-surface.test.mjs` |
+| 4 | 客户端 6 件直测 + `client-surface` | 确定性 | 注入未测试纯件 → 红；6 测绿 | `tests/cockpit/*` + `tests/checks/client-surface.test.mjs` |
+| 5 | 运行时导出守卫 + client dispose | 确定性 | 注入 default/re-export/不 dispose → 红 | `tests/pack/export-shape.spec.mjs` + `tests/cockpit/client-effect-dispose.spec.mjs` |
+| 6 | 快照只读 + A/B CI | 确定性/装配 | 双 flag → exit 2；CI 基线绿；改 persona → B 红；≤5 min | `snapshot-replay.entry` + `.github/workflows/ci.yml` |
+| 7 | 装起 + 效果 / 可选依赖 | 装配 | 删 apply 效果 → 红；可选缺席仍启动 | `lifecycle/release.entry` + 新断言 |
 | 8 | 类级守卫 top 5 | 确定性 | 每类至少一条邻接变异红录；矩阵/同源/消费者/状态/路径/假绿至少覆盖四类 | `tests/` + `scripts/lib/gates-cases.mjs` |
 | 9 | 探索技能 + 复盘 + 失败类→层表 | 文档/流程 | 技能可加载；复盘有「为什么没早发现」；表被引用 | `.agents/skills/` + `guides/67` + `notes/archived/` |
 | 10 | 资产退役 + D53 + Note | 文档/治理 | 退役有替代证据；D53/Note/研究题互链；verify 绿 | `docs/decisions.md` + `notes/implemented/` |
@@ -229,33 +230,33 @@ W3-6 D53 + Note（全卡收口）
 ## 执行记录
 
 - **2026-11-13 Wave 2 先行片（W2-2 同源 codec）**：新增
-  `tests/cockpit/library-heading-consistency.test.mjs`——40 格矩阵（2 括号宽 × 2 段序 × 5 空白类 ×
+  `tests/cockpit/library-heading-consistency.spec.mjs`——40 格矩阵（2 括号宽 × 2 段序 × 5 空白类 ×
   2 后缀），断言 `foldLibrary` 与 `upsertMethodEntry` 对同一标题变体的「同名」判断一致；未识别
   后缀 fail-loud。红证① = 去掉 `parseMethodHeading` 的半角括号分支 → 红（`## 方法(来源)〔默认偏好〕`
   名称错）；红证② = 去掉 `matchingHeadingLines` 的 `wellFormed` 过滤 → 两条红；各自还原 → 绿。
   登记 = `docs/evaluation.md` §L0 契约回归。实跑：单测 2/2 绿；`pnpm test` 1411/0；
   `pnpm verify` 全绿。未跑：慢档/真模型（非本片面）。
-- **2026-11-13 Wave 0 W0-5（运行时导出守卫）**：`tests/pack/export-shape.test.mjs` 宿主半
+- **2026-11-13 Wave 0 W0-5（运行时导出守卫）**：`tests/pack/export-shape.spec.mjs` 宿主半
   import 后断言模块形状（`default` 不在、`apply`/`inject`/`name` 在场），静态面补
-  `export default` / `as default` / `{ default } from` 三种写法；`tests/vendor/export-shape.vendor.mjs`
+  `export default` / `as default` / `{ default } from` 三种写法；`tests/vendor/export-shape.vendor.spec.mjs`
   用真 Loader `unwrapExports` 往返（`pnpm test:vendor`，root tsconfig 的 vendor 源映射）。红证① =
   给 `src/index.ts` 加 `export default` → 静态 + 模块形状红；红证② = 给 client 加
   `export { apply as default }` → 静态红（补 `as default` 正则前实测漏过）；还原 → 绿。
   边界：client 半 `.css` 不可 import、fetch-fallback 的 `fetch` 被 `layering` 闭包图禁入，两者保留
   静态 + `client-load`/L1/L2。实跑：`pnpm test` 1412/0、`pnpm test:vendor` 4/0、`pnpm verify` 全绿。
   未跑：慢档/真模型。
-- **2026-11-13 Wave 0 W0-4（客户端直测面 S1）**：新增 `tests/cockpit/client-pure-logic.test.mjs`
+- **2026-11-13 Wave 0 W0-4（客户端直测面 S1）**：新增 `tests/cockpit/client-pure-logic.spec.mjs`
   （6 个无直测/无路径件：lead-prompt、research-graph/format、coach-prompts、operation-prompts、
-  section-labels、defaults/labels；8 例）与 `tests/contracts/client-surface.test.mjs`
+  section-labels、defaults/labels；8 例）与 `tests/checks/client-surface.test.mjs`
   （`src/client/**/*.ts` 每个有直测或 `CLIENT_SMOKE_ONLY` 理由；`.tsx` 整体归 client-load；
   15 个登记件逐条写理由；`scripts/README` 的 `keyless-imports` 消费列同步加 `client-surface.test`）。
   红证 = 临时新增 `src/client/__probe-untested.ts` → 契约点名红；删除 → 绿。实跑：
   `pnpm test` 1421/0、`pnpm verify` 全绿。未跑：慢档/真模型/hook DOM 环境（hook 仍登记为
   smoke-only，待 Wave 3 L）。
-- **2026-11-13 Wave 0 W0-8（车道/可见性）**：新增 `tests/contracts/test-lanes.test.mjs`——①
-  `*.test.mjs` 必须住 `run/cockpit/pack/contracts` 四域；② `tests/` 下不得有
+- **2026-11-13 Wave 0 W0-8（车道/可见性）**：新增 `tests/checks/test-lanes.test.mjs`——①
+  `*.spec.mjs` 必须住 `run/cockpit/pack/contracts` 四域；② `tests/` 下不得有
   `*.spec.mjs`/`*.e2e.mjs`，非测试 `.mjs` 必须是 fixture/vendor/被测试 import 的支援件；③ 默认
-  回归零 skip（`test.skip`/`skipIf`/`{ skip: }` 全红）。红证：新建 `tests/root-lane.test.mjs`、
+  回归零 skip（`test.skip`/`skipIf`/`{ skip: }` 全红）。红证：新建 `tests/root-lane.spec.mjs`、
   `tests/cockpit/x.spec.mjs`、给测试加 `test.skip` 各红；删除/还原 → 绿。
   `scripts/README` 的 `keyless-imports` 消费列同步加 `test-lanes.test`。实跑：`pnpm test`
   1424/0、`pnpm verify` 全绿。未跑：慢档/真模型。
@@ -268,13 +269,13 @@ W3-6 D53 + Note（全卡收口）
   `guides/66` 补 defaults/wave 探针并注明「暂无专用探针 ≠ 没有证据」；`replay-scene` 注释改为
   「五个声明 judge + time-context 另并」。实跑：`pnpm verify` 全绿、`pnpm test` 1424/0。
 - **2026-11-13 Wave 0 W0-3（smoke 资产账 S2）**：`scripts/smoke/registry.json` 28 条各加
-  `cost` / `uniqueClaim` / `oracle` / `sunset`；新增 `tests/contracts/smoke-oracle-surface.test.mjs`
+  `cost` / `uniqueClaim` / `oracle` / `sunset`；新增 `tests/checks/smoke-oracle-surface.test.mjs`
   （字段齐、cost 闭集、oracle 路径存在或 `none:` 有理由、真实 oracle ≥10、防空语料）；
   `scripts/README` smoke 表加字段说明；`evaluation` §L0 登记。红证：删一条 oracle → 红；
   oracle 改不存在路径 → 红；`none` 理由太短 → 红；还原 → 绿。实跑：`pnpm test` 1425/0、
   `pnpm verify` 全绿。未跑：慢档/真模型。
 - **2026-11-13 Wave 0 W0-6（client dispose，形状半 + 行为面阻断）**：新增
-  `tests/contracts/client-effect-return.test.mjs`——用 TypeScript AST 断言 `src/client/index.ts`
+  `tests/checks/client-effect-return.test.mjs`——用 TypeScript AST 断言 `src/client/index.ts`
   每个 `scoped.effect(callback)` 的 block body 都有 `return`（expression body 视为返回），
   防空语料 ≥10 个 effect。红证 = 把 `installQuestionCardNarrowFix` 的 effect 改成
   `() => { install... }`（丢 return）→ 红；还原 → 绿。**行为面（apply(fakeCtx) → dispose →
@@ -287,22 +288,31 @@ W3-6 D53 + Note（全卡收口）
   默认回放；`--read-only` / `DSH_SNAPSHOT=replay` → 只读；`--update-expected` 必带非空
   `--why`；只读与刷新互斥；`DSH_SNAPSHOT` 只认 `replay`（record/refresh 不走本脚本）。
   smoke 壳改为消费该纯函数（脚本从 559 行降到 544 行，过 `script-file-size`）；新增
-  `tests/contracts/snapshot-readonly.test.mjs` 直测判据核。红证 = 去掉互斥分支 → 红；还原 → 绿。
+  `tests/checks/snapshot-readonly.test.mjs` 直测判据核。红证 = 去掉互斥分支 → 红；还原 → 绿。
   CLI 实测：双 flag / `DSH_SNAPSHOT=record` / `replay + --update-expected` 均 exit 2。
   实跑：`pnpm test` 1427/0、`pnpm verify` 全绿。未跑：真回放（W1-2 的 CI job）。
 
-- **2026-11-13 Wave 1 W1-2（快照 A/B 进 CI）**：`snapshot-replay-smoke` 加 `--layers a,b,c`（CI 用
+- **2026-11-13 Wave 1 W1-2（快照 A/B 进 CI）**：`snapshot-replay.entry` 加 `--layers a,b,c`（CI 用
   `a,b` 砍掉 chromium 渲染层）；`dev/boot-run.sh --prepare-profile` 只装/校验 profile、不起 web；
   `snapshots/replay/research-face` 四角色按当前 pack 重录（source 身份更新到 `da4eed05` / vendor
   `b830ec950f`）——重录前 dev home 的 profile 内容陈旧，B 层在 fresh profile 下红，正是本次
   要抓的漂移。CI 新增 `snapshot-replay` job（vendor build + pack build + temp home profile +
   `zstd` + `--read-only --layers a,b`），`smoke/registry.json` 的 snapshot 条目改 `ci`/`snapshot-replay`。
   `replay-request` 的 runtime-context 归一化补「profile 安装根」（dev home vs CI temp home 是
-  位置身份；包内 content 后缀仍逐字比较），直测在 `tests/run/replay-request.test.mjs`。
+  位置身份；包内 content 后缀仍逐字比较），直测在 `tests/run/replay-request.spec.mjs`。
   实测：`DSH_HOME=runtime/record-home ... --layers a,b` 四角色 A+B 全绿；`tests/run/replay-fixtures`
   按新 fixture 重算 `ui.expected.md` 后 `pnpm test` 1428/0。**未验证**：C 层 UI 捕获在 temp home
   被侧栏同名探针会话干扰（C0 失败），`ui.expected.md` 的卡片/活动行由 `cardTitleOf`/
-  `foldActivityRows` 纯函数重算，C UI 重跑待后续；CI 不跑 C（只 A/B）。
+  `foldActivityRows` 纯函数重算，C UI 重跑待后续；CI 不跑 C（只 A/B）。- **2026-11-13 Wave 0 W0-10（命名对齐）**：按用户 2026-11-13 的四车道方案全仓迁移——
+  `tests/{run,cockpit,pack,contracts}/**/*.test.mjs` → `*.spec.mjs`；门禁自身 → `tests/checks/*.test.mjs`；
+  `tests/vendor/*.vendor.mjs` → `*.vendor.spec.mjs`；28 个 smoke → `<target>.e2e.mjs`（真进程，10）/
+  `<target>.entry.mjs`（真浏览器·profile·tarball，14）/ `<target>.support.mjs`（支援件，4）；
+  `package.json` 新 `test:spec` / `test:checks` / `test:e2e` / `test:entry`，`test` = spec+checks；
+  `scripts/test/run-lane.mjs` + `scripts/lib/smoke-lane.mjs` 按 registry `lane`/`tier` 选跑；
+  `test-lanes` / `smoke-registry` / `smoke-oracle` 契约钉后缀与 lane。红证：根目录 spec、checks 嵌套、
+  旧 `.test.mjs`、`*.e2e.mjs` 进 tests、错 lane、孤儿支援件各红。实跑：`pnpm test` spec+checks、
+  `pnpm test:vendor`、lane `--list` 全绿；详见 [命名 Note](../../notes/implemented/2026-11-13-test-naming-lanes.md)。
+
 ## 关闭条件
 
 - Wave 0–3 的验收项全部有真实红绿证据；Top 5 类各有至少一条邻接变异红录。

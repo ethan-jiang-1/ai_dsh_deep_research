@@ -50,7 +50,7 @@ archive。规则落 [notes/README §主动清理](../README.md) 与 [notes/AGENT
 第 5 个 preset（Method Editor，D37）加入后，`snapshot-replay-smoke` 仍拿盘上全部 preset 与
 `research-face` 的四个 case 对账，场景加载即报 `cases must match roles exactly`。修复 =
 smoke 改用 `researchRoles()`（方法编辑不属 run 生命周期），并在
-[replay-scene.test.mjs](../../tests/run/replay-scene.test.mjs) 增加“真实场景覆盖研究角色面”的
+[replay-scene.test.mjs](../../tests/run/replay-scene.spec.mjs) 增加“真实场景覆盖研究角色面”的
 回归；`snapshots/README`、guides/60、snapshots-adoption Note 同步口径。
 
 **6. 本轮 archive 只用于“层退役”：2 篇事故复盘迁入 archived/。**

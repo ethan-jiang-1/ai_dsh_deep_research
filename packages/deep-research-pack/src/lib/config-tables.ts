@@ -15,7 +15,7 @@ import type { LibrarySections } from './library-fold.ts'
 /** 内置研究偏好（只读；内容正本 = research-brief skill 方法预设表——此处仅投影）。
  *  `summary` = 该表第 2 列「给用户的一句话」——**卡面显示的就是它**（2026-10-16 用户拍板：
  *  面板是用户面，就显示专门为用户写的那句话；四分区详情仍在详情弹窗，不丢信息）。
- *  三处同钉（客户端 ↔ skill 表 ↔ 测试期望），漂移即红：tests/library-fold.test.mjs。 */
+ *  三处同钉（客户端 ↔ skill 表 ↔ 测试期望），漂移即红：tests/library-fold.spec.mjs。 */
 export interface BuiltinPreference {
   readonly name: string
   readonly summary: string

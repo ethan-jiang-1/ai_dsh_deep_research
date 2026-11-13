@@ -1,6 +1,6 @@
 # scripts/ · 职责索引
 
-> 职责分组（2026-10-07 目录治理档 C）：六个子目录 + `lib/` 支撑库；每个盘上入口一行：类 / 证明什么 / 档位。命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)；档位列申报凭据/调用模式，不替代 guides/60 的 `source` 前置；子树纪律 = [AGENTS.md](AGENTS.md)；测试资产分层 = [tests/fixtures taxonomy](../tests/fixtures/README.md)。本索引不改脚本路径与命令。
+> 职责分组（2026-10-07 目录治理档 C；2026-11-13 命名对齐加 `test/`）：`verify/`、`smoke/`、`test/`、`run-gates/`、`run-ops/`、`dist/` + `lib/` 支撑库；每个盘上入口一行：类 / 证明什么 / 档位。命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)；档位列申报凭据/调用模式，不替代 guides/60 的 `source` 前置；子树纪律 = [AGENTS.md](AGENTS.md)；测试资产分层 = [tests/fixtures taxonomy](../tests/fixtures/README.md)。本索引不改脚本路径与命令。
 
 ## verify/（L0 结构门禁）
 
@@ -13,37 +13,37 @@
 ## smoke/（分级冒烟）
 
 > CI 归属 = [registry.json](smoke/registry.json)：每个 smoke 必须登记 `ci` 或 `dev-only` + 理由；
-> 机械对账 = [tests/contracts/smoke-registry.test.mjs](../tests/contracts/smoke-registry.test.mjs)（新增件不登记即红）。
-> 下表按职责列件；client-load 支援件（`client-load-{config,final,reference,seed}`）在 client-load 行内点名，不单列；盘上集合以目录为准。
-> `registry.json` 每条另有 `cost` / `uniqueClaim` / `oracle` / `sunset`；契约 = [tests/contracts/smoke-oracle-surface.test.mjs](../tests/contracts/smoke-oracle-surface.test.mjs)（oracle 可直测或 `none:` 有理由）。
+> 机械对账 = [tests/checks/smoke-registry.test.mjs](../tests/checks/smoke-registry.test.mjs)（新增件不登记即红）。
+> 命名即车道：`<target>.e2e.mjs` = 真进程，`<target>.entry.mjs` = 真浏览器/profile/tarball，`<target>.support.mjs` = 支援件；`pnpm test:e2e` / `pnpm test:entry` 由 [test/run-lane.mjs](test/run-lane.mjs) 按 registry 的 `lane` 选跑。
+> `registry.json` 每条另有 `cost` / `uniqueClaim` / `oracle` / `sunset`；契约 = [tests/checks/smoke-oracle-surface.test.mjs](../tests/checks/smoke-oracle-surface.test.mjs)（oracle 可直测或 `none:` 有理由）。
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
-| preset-smoke.mjs | L1 真挂载：boot 页模块表行（client 半 served）、roster、逐角色建会话、skills 隔离 | keyless（`DSH_SMOKE_REAL=1` 起真 DSH，无模型） |
-| release-smoke.mjs | L2 安装形状：pack → 干净 profile → plugin add → manifest/安装域 client 半断言 → 安装域冒烟 → 端口释放验证（进程卫生：超时预算 + 并发锁 + 退出确认） | keyless（`--install-only` 跳凭据） |
-| lifecycle-smoke.mjs | L2 发布面/显示面：staged market.json 过 DSH 校验器（plugins 空 + staged 文案）→ 装 tarball → 本包行 dump → 真启动无降级 → `readPluginMeta` 读出五个 specifier 的中英标题/图标 → remove 后 roster 回落 | keyless（真 dsh/pnpm + `_dist` 产物；缺前置 exit 2） |
-| install-shape-smoke.mjs | L2 安装形状：原样执行手册的 CLI 装包分支（profile init → `dsh plugin --profile … add` pack+team → 真启动）；断言 roster 三状态、无 `did not activate`、首屏可达 | keyless（真 dsh/pnpm + 团队层 registry/缓存；缺前置 exit 2） |
-| product-boot-smoke.mjs | L2 首启：纯 `dsh --profile deep-research` + Web + 浏览器；Host 注册工作区、blank Lead Session `cwd` = 工作区、首屏/目录按钮/Lead/composer | keyless（需浏览器 + 团队层；缺前置 exit 2） |
-| cold-start-smoke.mjs | L2 冷启动：独立 `DSH_DEV_HOME` + profile + 端口 + state，`run-driver up --bootstrap` 到浏览器 GREEN；MCP 关闭 | keyless（须先 `source dev/env.sh`；vendor/依赖在位；团队层需 registry/缓存） |
-| doctor-smoke.mjs | doctor 只读判据：fake anchor 齐全绿 / 缺行依赖红 / base-only profile 红 / 缺 pack 红 / 空凭据 warn / 坏设置 warn；不安装、不写 profile | keyless（仓库外临时 home + fake anchor/profile；无 dsh/网络） |
-| handoff-smoke.mjs | `export-handoff` 产物边界与接收指令：必备源在场、HANDOFF 含 `git init`/fetch/reset/submodule update、无运行态/凭据/run 数据/依赖/.git/导出包 | keyless（git archive HEAD；临时 out；CI keyless 档） |
-| run-accept-smoke.mjs | run-accept 全链（合成 bundle+会话日志，真 CLI）：绝对 present 归一、连续两次幂等、bundle 外 present 红不写、final 含 sk- 红不写、`--repair`、`--no-write` 真只读、未知参数 exit 2、整数契约（schema/created → manifest 记版本与日期、repair 保 schema 快照、schema-scan CLI 认新契约） 后绿 | keyless |
-| secret-scan-smoke.mjs | 交付物秘密扫描的范围边界：默认不扫 evidence、`--all` 才扫、`--allow-legacy` 只报告、输出不回显值（纯函数正反例归 tests） | keyless |
-| data-smoke.mjs | T5 数据面切片：包目录零写入、假 token 不泄漏、卸载后 workspace 用户文件 + session 日志保留 | keyless（真 web 启动、无模型调用；tarball 需先 export-dist） |
-| pack-smoke.mjs | T0 tarball 形状：入口/patch/preset/content/doctor 在场、exports 可解析、client 模块表（require ↔ `dsh.client.inject` ↔ peers）、无安装脚本/凭据；手册 sha256、两次 npm pack 同 sha、无 symlink/setuid 条目（在场时） | keyless（`npm pack --dry-run --json`；需 lib 已构建——构建产物断言住这里，keyless 回归保持 fresh-clone 可跑） |
-| user-env-smoke.mjs | 已有 bundle + 用户 overlay + session/凭据/workspace 的安装/卸载共存 | keyless（全局 dsh + 本地 tarball） |
-| profile-concurrency-smoke.mjs | 两个 `dsh plugin add` + 两个 `remove` 同 profile 并发：至少一个成功、dump 可解析、最终无本包；不留双 bundle/坏 profile | keyless（全局 dsh + tarball） |
-| workspace-isolation-smoke.mjs | B4 双实例：两套 home/profile/port/state/workspace 各起通道、各建会话；会话组绑定自己的 W、home/session 互斥、marker 互不可见 | keyless（真 web，不调模型；更慢，约两套 cold start） |
-| client-load-smoke.mjs | 观察面真浏览器装配、页签与渐进面对账（`--seed <dir\|name>` = 从 tests/fixtures/client-load-home 自建 home，CI/干净机器用；磁盘参考选择 = client-load-reference.mjs；「研究配置」摘要相位 = client-load-config.mjs；终稿端到端相位 = client-load-final.mjs；主界面「方法库」相位断言 A′ 两列、详情进入访谈、表单检查与显式来源选择，零模型 prompt；失败留现场（png/html/console/meta + `disconnects` 计数），无窗口内交付目标 = exit 2 SKIP；主机不健康 = exit 2 NOT-RUN（预检；失败时连接死亡同判，判据 = lib/host-health；诊断逃生口 `DSH_CLIENT_LOAD_ALLOW_UNHEALTHY=1` 人工强制跑，失败仍 NOT-RUN） | keyless（浏览器） |
-| client-load-seed.mjs | client-load-smoke（`--seed`） | 种子夹具 materialize：会话组名 = projectKey(种子工作区) 现算、zstd 两帧（header 单帧）、mtime 回拨 2h、`__WORKSPACE__`/`__REPO_ROOT__` 替换；不写仓内 research-workspace | 支援件（fixture → runtime） |
-| method-library-tool-smoke.mjs | 真 Loader + Method Editor Agent + Host Tool：验证 UI 操作 claim、内容摘要拒绝、默认/删除写入及 workspace 回读 | keyless（临时 workspace 与确定性 mock LLM） |
-| e2e-021rc2.mjs | **升级端到端验收**（0.2.1-rc.2 起）：① 四个研究角色在角色列表里连续成组（内置 standard/ptc/minimal/creator 与 pack order 撞车的回归锁）② 右栏「研究状态」胶囊可点 + 页签体真数据 ③「研究配置」同上 ④ 本插件面零故障；真实实例走完用户路径，不靠人眼 | keyless（浏览器；须先 source dev/env.sh；失败留现场） |
-| snapshot-replay-smoke.mjs | 场景 manifest 驱动的研究角色组装面回放（persona/header 全序列/四处注入，含时钟序列）+ 声明的渲染金标准；场景集 = `snapshots/replay/` 下含 snapshot.json 的全部目录（发现式，`--face <name>` 定向单集） | keyless（RPC/解压子进程，无模型；A/B 进 CI `snapshot-replay`，`--layers a,b`；C 本地；须先 source dev/env.sh） |
-| gates-smoke.mjs | 门禁自测：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组；`--case=<id[,id]>` 只跑指定案例（改一道门禁的迭代口，末尾自报仅跑几个）；CI keyless job 每次全量跑 | keyless（git/node 子进程，无模型） |
-| client-hitl-smoke.mjs | 活标题触发与挂起显性化 | 真模型档 |
-| l4-lite-smoke.mjs | 全角色真模型响应（含 method-editor）+ scout web_search 调用 | 真模型档 |
-| team-preflight-smoke.mjs | spawn_teammate 组队与成员组合画像 | 真模型档 |
-| cdp-ask-smoke.mjs | cdp-probe `--ask` 端到端：空闲态 `Send message` 与在飞态 `Queue message` 双路径发出 + **journal 落盘对账**（BUG-021 正修；判定本体 keyless 钉在 `lib/probe-send-target.mjs`） | 真模型档 |
+| preset.e2e.mjs | L1 真挂载：boot 页模块表行（client 半 served）、roster、逐角色建会话、skills 隔离 | keyless（`DSH_SMOKE_REAL=1` 起真 DSH，无模型） |
+| release.entry.mjs | L2 安装形状：pack → 干净 profile → plugin add → manifest/安装域 client 半断言 → 安装域冒烟 → 端口释放验证（进程卫生：超时预算 + 并发锁 + 退出确认） | keyless（`--install-only` 跳凭据） |
+| lifecycle.entry.mjs | L2 发布面/显示面：staged market.json 过 DSH 校验器（plugins 空 + staged 文案）→ 装 tarball → 本包行 dump → 真启动无降级 → `readPluginMeta` 读出五个 specifier 的中英标题/图标 → remove 后 roster 回落 | keyless（真 dsh/pnpm + `_dist` 产物；缺前置 exit 2） |
+| install-shape.entry.mjs | L2 安装形状：原样执行手册的 CLI 装包分支（profile init → `dsh plugin --profile … add` pack+team → 真启动）；断言 roster 三状态、无 `did not activate`、首屏可达 | keyless（真 dsh/pnpm + 团队层 registry/缓存；缺前置 exit 2） |
+| product-boot.entry.mjs | L2 首启：纯 `dsh --profile deep-research` + Web + 浏览器；Host 注册工作区、blank Lead Session `cwd` = 工作区、首屏/目录按钮/Lead/composer | keyless（需浏览器 + 团队层；缺前置 exit 2） |
+| cold-start.entry.mjs | L2 冷启动：独立 `DSH_DEV_HOME` + profile + 端口 + state，`run-driver up --bootstrap` 到浏览器 GREEN；MCP 关闭 | keyless（须先 `source dev/env.sh`；vendor/依赖在位；团队层需 registry/缓存） |
+| doctor.e2e.mjs | doctor 只读判据：fake anchor 齐全绿 / 缺行依赖红 / base-only profile 红 / 缺 pack 红 / 空凭据 warn / 坏设置 warn；不安装、不写 profile | keyless（仓库外临时 home + fake anchor/profile；无 dsh/网络） |
+| handoff.e2e.mjs | `export-handoff` 产物边界与接收指令：必备源在场、HANDOFF 含 `git init`/fetch/reset/submodule update、无运行态/凭据/run 数据/依赖/.git/导出包 | keyless（git archive HEAD；临时 out；CI keyless 档） |
+| run-accept.e2e.mjs | run-accept 全链（合成 bundle+会话日志，真 CLI）：绝对 present 归一、连续两次幂等、bundle 外 present 红不写、final 含 sk- 红不写、`--repair`、`--no-write` 真只读、未知参数 exit 2、整数契约（schema/created → manifest 记版本与日期、repair 保 schema 快照、schema-scan CLI 认新契约） 后绿 | keyless |
+| secret-scan.e2e.mjs | 交付物秘密扫描的范围边界：默认不扫 evidence、`--all` 才扫、`--allow-legacy` 只报告、输出不回显值（纯函数正反例归 tests） | keyless |
+| data.entry.mjs | T5 数据面切片：包目录零写入、假 token 不泄漏、卸载后 workspace 用户文件 + session 日志保留 | keyless（真 web 启动、无模型调用；tarball 需先 export-dist） |
+| pack.e2e.mjs | T0 tarball 形状：入口/patch/preset/content/doctor 在场、exports 可解析、client 模块表（require ↔ `dsh.client.inject` ↔ peers）、无安装脚本/凭据；手册 sha256、两次 npm pack 同 sha、无 symlink/setuid 条目（在场时） | keyless（`npm pack --dry-run --json`；需 lib 已构建——构建产物断言住这里，keyless 回归保持 fresh-clone 可跑） |
+| user-env.entry.mjs | 已有 bundle + 用户 overlay + session/凭据/workspace 的安装/卸载共存 | keyless（全局 dsh + 本地 tarball） |
+| profile-concurrency.entry.mjs | 两个 `dsh plugin add` + 两个 `remove` 同 profile 并发：至少一个成功、dump 可解析、最终无本包；不留双 bundle/坏 profile | keyless（全局 dsh + tarball） |
+| workspace-isolation.entry.mjs | B4 双实例：两套 home/profile/port/state/workspace 各起通道、各建会话；会话组绑定自己的 W、home/session 互斥、marker 互不可见 | keyless（真 web，不调模型；更慢，约两套 cold start） |
+| client-load.entry.mjs | 观察面真浏览器装配、页签与渐进面对账（`--seed <dir\|name>` = 从 tests/fixtures/client-load-home 自建 home，CI/干净机器用；磁盘参考选择 = client-load-reference.support.mjs；「研究配置」摘要相位 = client-load-config.support.mjs；终稿端到端相位 = client-load-final.support.mjs；主界面「方法库」相位断言 A′ 两列、详情进入访谈、表单检查与显式来源选择，零模型 prompt；失败留现场（png/html/console/meta + `disconnects` 计数），无窗口内交付目标 = exit 2 SKIP；主机不健康 = exit 2 NOT-RUN（预检；失败时连接死亡同判，判据 = lib/host-health；诊断逃生口 `DSH_CLIENT_LOAD_ALLOW_UNHEALTHY=1` 人工强制跑，失败仍 NOT-RUN） | keyless（浏览器） |
+| client-load-seed.support.mjs | client-load.entry（`--seed`） | 种子夹具 materialize：会话组名 = projectKey(种子工作区) 现算、zstd 两帧（header 单帧）、mtime 回拨 2h、`__WORKSPACE__`/`__REPO_ROOT__` 替换；不写仓内 research-workspace | 支援件（fixture → runtime） |
+| method-library-tool.e2e.mjs | 真 Loader + Method Editor Agent + Host Tool：验证 UI 操作 claim、内容摘要拒绝、默认/删除写入及 workspace 回读 | keyless（临时 workspace 与确定性 mock LLM） |
+| e2e-021rc2.entry.mjs | **升级端到端验收**（0.2.1-rc.2 起）：① 四个研究角色在角色列表里连续成组（内置 standard/ptc/minimal/creator 与 pack order 撞车的回归锁）② 右栏「研究状态」胶囊可点 + 页签体真数据 ③「研究配置」同上 ④ 本插件面零故障；真实实例走完用户路径，不靠人眼 | keyless（浏览器；须先 source dev/env.sh；失败留现场） |
+| snapshot-replay.entry.mjs | 场景 manifest 驱动的研究角色组装面回放（persona/header 全序列/四处注入，含时钟序列）+ 声明的渲染金标准；场景集 = `snapshots/replay/` 下含 snapshot.json 的全部目录（发现式，`--face <name>` 定向单集） | keyless（RPC/解压子进程，无模型；A/B 进 CI `snapshot-replay`，`--layers a,b`；C 本地；须先 source dev/env.sh） |
+| gates.e2e.mjs | 门禁自测：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组；`--case=<id[,id]>` 只跑指定案例（改一道门禁的迭代口，末尾自报仅跑几个）；CI keyless job 每次全量跑 | keyless（git/node 子进程，无模型） |
+| client-hitl.entry.mjs | 活标题触发与挂起显性化 | 真模型档 |
+| l4-lite.e2e.mjs | 全角色真模型响应（含 method-editor）+ scout web_search 调用 | 真模型档 |
+| team-preflight.e2e.mjs | spawn_teammate 组队与成员组合画像 | 真模型档 |
+| cdp-ask.entry.mjs | cdp-probe `--ask` 端到端：空闲态 `Send message` 与在飞态 `Queue message` 双路径发出 + **journal 落盘对账**（BUG-021 正修；判定本体 keyless 钉在 `lib/probe-send-target.mjs`） | 真模型档 |
 
 ## probes/（探针，已迁根）
 
@@ -53,10 +53,10 @@
 
 | 失败面 | 资产 | 前置 |
 |---|---|---|
-| 包内容/导出/安装脚本/手册 sha | `pack-smoke`、`package-contract.test`、`export-dist` | 需 lib；手册/tarball 在场 |
-| 已有用户环境（别的 bundle + overlay + session/凭据/workspace） | `user-env-smoke` | 全局 dsh + tarball |
-| 双实例 W/H 隔离 | `workspace-isolation-smoke` | 真 web；约两套 cold start |
-| 数据面零写入/secret/session 保留 | `data-smoke` | 真 web + tarball |
+| 包内容/导出/安装脚本/手册 sha | `pack.e2e`、`package-contract.spec`、`export-dist` | 需 lib；手册/tarball 在场 |
+| 已有用户环境（别的 bundle + overlay + session/凭据/workspace） | `user-env.entry` | 全局 dsh + tarball |
+| 双实例 W/H 隔离 | `workspace-isolation.entry` | 真 web；约两套 cold start |
+| 数据面零写入/secret/session 保留 | `data.entry` | 真 web + tarball |
 
 ## run-gates/（run bundle 机械门与审计）
 
@@ -98,85 +98,93 @@
 | export-handoff.mjs | HEAD 的 tracked 源 → `_dist/` 干净移交包（不含运行态/凭据/run 数据/依赖）；submodule 需对方 init | keyless |
 | release-check.mjs | 发布前版本/tag 一致性（root = pack、HEAD tag = version、tag 为 annotated）；只读 | keyless |
 
+## test/（测试车道 runner）
+
+| 件 | 证明什么 | 档位 | 事实来源 |
+|---|---|---|---|
+| run-lane.mjs | `pnpm test:e2e` / `test:entry`：按 `scripts/smoke/registry.json` 的 `lane`/`tier` 选跑，0/1/2 汇总 | keyless 壳（脚本自检前置） | registry.json + `lib/smoke-lane.mjs` |
+
 ## lib/（支撑库）
+
 
 | 模块 | 被谁消费 | 说明 |
 |---|---|---|
-| lib/content-budget.mjs | e-workspace、content-disclosure.test | 常驻面预算唯一正本：T0 两级（下放 10,000 / 硬顶 12,288）+ lead persona/合计的 char/byte/token |
-| lib/roles.mjs | discipline-probe、doctor-smoke、fetch-fallback-orchestration.test、l4-lite-smoke、preset-smoke、presets.test、release-smoke、replay-scene.test、snapshot-replay-smoke、strategy-core.test、team-preflight-smoke | 角色清单访问器（presetRoles = 盘上全部；researchRoles = 研究面；事实源 = 盘上 presets/） |
-| lib/cli-entry.mjs | export-handoff、gates-smoke、market、run-dashboard、protocol-audit、schema-scan、verdict-audit、node-gate、evidence-audit、channel-cache、run-driver、vendor-artifacts、cli-entry.test | symlink-safe CLI 入口判定（realpath 归一；macOS `/tmp` → `/private/tmp` 下不静默） |
-| lib/channel-cache.mjs | run-driver、channel-cache.test | 启动加速缓存判据：pack 源指纹（路径+size+mtime）+ 发布清单缓存（漂移门 ≈5s→≈0.7s，CLI 供 boot-run.sh 消费）+ 探针 GREEN 缓存（热复用 ≈0.5s / 冷启动命中 ≈10s；键 = pack 指纹 + runtime 构建 + 断言参数，TTL 30 分钟；命中前 HTTP 就绪检查；只存 GREEN，`--force-probe` 绕过） |
-| lib/bundle-sessions.mjs | bundle-sessions、bundle-sessions.test | run bundle → 见证会话反查：聚合 scanWitnessLogs 的 boundSessions/presented（绑定谓词不另立——与 node-gate 门①②同源）；交付回执的 witness.sessions 亦由此面派生 |
+| lib/content-budget.mjs | e-workspace、content-disclosure.spec | 常驻面预算唯一正本：T0 两级（下放 10,000 / 硬顶 12,288）+ lead persona/合计的 char/byte/token |
+| lib/roles.mjs | discipline-probe、doctor.e2e、fetch-fallback-orchestration.spec、l4-lite.e2e、preset.e2e、presets.spec、release.entry、replay-scene.spec、snapshot-replay.entry、strategy-core.spec、team-preflight.e2e | 角色清单访问器（presetRoles = 盘上全部；researchRoles = 研究面；事实源 = 盘上 presets/） |
+| lib/cli-entry.mjs | export-handoff、gates.e2e、market、run-dashboard、protocol-audit、schema-scan、verdict-audit、node-gate、evidence-audit、channel-cache、run-driver、vendor-artifacts、cli-entry.test | symlink-safe CLI 入口判定（realpath 归一；macOS `/tmp` → `/private/tmp` 下不静默） |
+| lib/channel-cache.mjs | run-driver、channel-cache.spec | 启动加速缓存判据：pack 源指纹（路径+size+mtime）+ 发布清单缓存（漂移门 ≈5s→≈0.7s，CLI 供 boot-run.sh 消费）+ 探针 GREEN 缓存（热复用 ≈0.5s / 冷启动命中 ≈10s；键 = pack 指纹 + runtime 构建 + 断言参数，TTL 30 分钟；命中前 HTTP 就绪检查；只存 GREEN，`--force-probe` 绕过） |
+| lib/bundle-sessions.mjs | bundle-sessions、bundle-sessions.spec | run bundle → 见证会话反查：聚合 scanWitnessLogs 的 boundSessions/presented（绑定谓词不另立——与 node-gate 门①②同源）；交付回执的 witness.sessions 亦由此面派生 |
 | lib/hitl-card-driver.mjs | hitl-answer | HITL 问询卡的浏览器内驱动片段（Playwright `page.evaluate` 入参）：问卡可见性、选项结构、提交/推进按钮可用性；纯 DOM 函数、零闭包，业务判定仍在 lib/ask-drive |
-| lib/frontmatter.mjs | bundle-date-sanity、evidence-audit-core、frontmatter.test、run-dashboard-core | `---` frontmatter 拆分**唯一正本**（两 core 共用同一实现） |
+| lib/frontmatter.mjs | bundle-date-sanity、evidence-audit-core、frontmatter.spec、run-dashboard-core | `---` frontmatter 拆分**唯一正本**（两 core 共用同一实现） |
 | lib/zstd-read.mjs | bundle-sessions、evidence-audit、node-gate、run-accept、verdict-audit | zstd CLI 文本解压**唯一调用段**（多帧拼接靠 CLI；成功/失败结构化返回，**失败契约留各壳**：`''` 继续 vs `null` 跳过） |
-| lib/web-harness.mjs | client-hitl-smoke、client-load-smoke、defaults-probe、discipline-probe、wave-execution-probe、e2e-021rc2、entry-chain-probe、l4-lite-smoke、method-library-probe、preset-smoke、rerun-triage-probe、run-driver、session-replay、snapshot-replay-smoke、team-preflight-smoke | DSH web 冒烟族**启停与通道唯一正本**：`bootWeb`（等启动横幅拿 token）+ `authenticate` + `makeRpc`；**参数保形**——端口/超时/尾部字符/rpcId 前缀/失败文案与收割方式全留各站点 |
-| lib/session-log.mjs | bundle-sessions、cdp-ask-smoke、cdp-probe、client-hitl-smoke、client-load-reference、defaults-probe、client-load-smoke、data-smoke、discipline-probe、wave-execution-probe、e2e-021rc2、entry-chain-probe、hitl-answer、l4-lite-smoke、method-library-probe、plan-card-stats、product-boot-smoke、provider-error-stats、rerun-triage-probe、run-dashboard-core、run-kickoff、run-state、run-state.test、session-events、session-log.test、session-replay、snapshot-replay-smoke、stream-diagnostics、team-preflight-smoke、verdict-audit、verdict-audit-fixture.test、watch-run、workspace-isolation-smoke | canonical 日志选择与读取 + 会话目录发现（findSessionDir 双形态/首匹配；readSessionTextOf 定位+读取——六处真模型档副本 2026-11-04 收口）+ 会话组发现（findGroup 子串参数化，缺省 research-workspace——BUG-010 三处同款一行收敛；冒烟/自测组逃生口 = 观察工具 --group） |
-| lib/session-events-core.mjs | session-events、session-events.test | 会话事件摘要与筛选纯函数（CLI 壳 = run-ops/session-events 行） |
-| lib/llm-stream-tee-core.mjs | llm-stream-tee-core.test | LLM 流 tee 的捕获判定（主机子串，fail-closed）与凭据头脱敏（预载壳 = probes/stream/llm-stream-tee.cjs——CJS require 面不在 .mjs 对账图内，壳本体是活进程仪器不设 keyless 自测） |
-| lib/provider-errors.mjs | provider-error-stats、provider-errors.test | 回合被上游流错误终结的结构化抽取（唯一语义源：只认 `turn/end` + `reason.kind=error`，不双算 `assistant/attempt`） |
-| lib/plan-card.mjs | node-gate-session-gates、plan-card-stats、plan-card.test | 计划确认卡识别与字数口径（唯一语义源：标签「按计划开跑」+ `question` 字段全长 + 阈值 200） |
-| lib/protocol-core.mjs | content-coverage.test、protocol-audit、protocol-audit-core、protocol-core.test、research-defaults.test、strategy-core | Protocol **schema 半**：枚举/canonical/hash/validateProtocol/§研究方法 与 §Decisions 解析（无 IO；口径 = 核验 §6 + 表达层补篇 §4–§7） |
-| lib/protocol-audit-core.mjs | protocol-audit、protocol-core.test、run-accept-smoke | Protocol **bundle 级判据**：effort 合同/投影/策略行投影（通道/worker/预算 cap；fail-loud）/批准链/plan 引用/audit hash/版本快照 + `projectionOf`/卡文（无 IO） |
-| lib/strategy-core.mjs | protocol-audit-core、strategy-core.test | Strategy 投影（K/O/G/B）纯派生：Protocol + plan + topics → 通道/worker/角色/拓扑/门/预算；不读模型/会话 |
-| lib/stream-diagnostics-core.mjs | stream-diagnostics、stream-diagnostics.test | 模型活动会话筛选（活动事件预筛后再按日志 mtime 取最近 N）+ 尝试时间线投影（assistant/message 计成功、assistant/attempt 计失败/无落面，终态三判 alive-or-idle/recovered/dead） |
-| lib/run-state.mjs | bundle-sessions、cdp-ask-smoke、hitl-answer、run-kickoff、run-state.test、session-events、session-replay、watch-run | run 操作面状态谓词 |
-| lib/run-source-node.mjs | evidence-audit、node-gate、run-context-node.test、schema-scan | node:fs 的 RunSource 适配器：list/read/version；ENOENT → missing，其余 → unreadable；行窗口与 eof 语义对齐 vendor workspaceFiles |
-| lib/env.mjs | cdp-ask-smoke、client-hitl-smoke、client-load-smoke、data-smoke、defaults-probe、discipline-probe、wave-execution-probe、doctor-smoke、e2e-021rc2、entry-chain-probe、env-credentials.test、install-shape-smoke、l4-lite-smoke、lifecycle-smoke、method-library-probe、pack-smoke、preset-smoke、product-boot-smoke、profile-concurrency-smoke、record-role-fixture、release-smoke、rerun-triage-probe、run-accept-smoke、session-replay、snapshot-replay-smoke、team-preflight-smoke、user-env-smoke、workspace-isolation-smoke | 子进程环境清洗（scrubbedEnv/withModelKey）与真模型档前置（requireCredentials/credentialsPresent——凭据卫生） |
-| lib/playwright.mjs | client-hitl-smoke、client-load-smoke、e2e-021rc2、hitl-answer、product-boot-smoke、session-replay、snapshot-replay-smoke | Playwright 启停支撑 |
-| lib/browser-cache.mjs | playwright、browser-cache.test | 浏览器缓存目录判据（macOS/Linux/Windows 三态 + `PLAYWRIGHT_BROWSERS_PATH` 覆盖） |
-| lib/host-health.mjs | client-load-smoke、host-health.test | 真浏览器冒烟的主机健康判据（freeMB / load-per-CPU）：预检与失败归因都把环境红归为 NOT-RUN（exit 2），不伪装产品红 |
+| lib/web-harness.mjs | client-hitl.entry、client-load.entry、defaults-probe、discipline-probe、wave-execution-probe、e2e-021rc2.entry、entry-chain-probe、l4-lite.e2e、method-library-probe、preset.e2e、rerun-triage-probe、run-driver、session-replay、snapshot-replay.entry、team-preflight.e2e | DSH web 冒烟族**启停与通道唯一正本**：`bootWeb`（等启动横幅拿 token）+ `authenticate` + `makeRpc`；**参数保形**——端口/超时/尾部字符/rpcId 前缀/失败文案与收割方式全留各站点 |
+| lib/session-log.mjs | bundle-sessions、cdp-ask.entry、cdp-probe、client-hitl.entry、client-load-reference.support、defaults-probe、client-load.entry、data.entry、discipline-probe、wave-execution-probe、e2e-021rc2.entry、entry-chain-probe、hitl-answer、l4-lite.e2e、method-library-probe、plan-card-stats、product-boot.entry、provider-error-stats、rerun-triage-probe、run-dashboard-core、run-kickoff、run-state、run-state.spec、session-events、session-log.spec、session-replay、snapshot-replay.entry、stream-diagnostics、team-preflight.e2e、verdict-audit、verdict-audit-fixture.spec、watch-run、workspace-isolation.entry | canonical 日志选择与读取 + 会话目录发现（findSessionDir 双形态/首匹配；readSessionTextOf 定位+读取——六处真模型档副本 2026-11-04 收口）+ 会话组发现（findGroup 子串参数化，缺省 research-workspace——BUG-010 三处同款一行收敛；冒烟/自测组逃生口 = 观察工具 --group） |
+| lib/session-events-core.mjs | session-events、session-events.spec | 会话事件摘要与筛选纯函数（CLI 壳 = run-ops/session-events 行） |
+| lib/llm-stream-tee-core.mjs | llm-stream-tee-core.spec | LLM 流 tee 的捕获判定（主机子串，fail-closed）与凭据头脱敏（预载壳 = probes/stream/llm-stream-tee.cjs——CJS require 面不在 .mjs 对账图内，壳本体是活进程仪器不设 keyless 自测） |
+| lib/provider-errors.mjs | provider-error-stats、provider-errors.spec | 回合被上游流错误终结的结构化抽取（唯一语义源：只认 `turn/end` + `reason.kind=error`，不双算 `assistant/attempt`） |
+| lib/plan-card.mjs | node-gate-session-gates、plan-card-stats、plan-card.spec | 计划确认卡识别与字数口径（唯一语义源：标签「按计划开跑」+ `question` 字段全长 + 阈值 200） |
+| lib/protocol-core.mjs | content-coverage.spec、protocol-audit、protocol-audit-core、protocol-core.spec、research-defaults.spec、strategy-core | Protocol **schema 半**：枚举/canonical/hash/validateProtocol/§研究方法 与 §Decisions 解析（无 IO；口径 = 核验 §6 + 表达层补篇 §4–§7） |
+| lib/protocol-audit-core.mjs | protocol-audit、protocol-core.spec、run-accept.e2e | Protocol **bundle 级判据**：effort 合同/投影/策略行投影（通道/worker/预算 cap；fail-loud）/批准链/plan 引用/audit hash/版本快照 + `projectionOf`/卡文（无 IO） |
+| lib/strategy-core.mjs | protocol-audit-core、strategy-core.spec | Strategy 投影（K/O/G/B）纯派生：Protocol + plan + topics → 通道/worker/角色/拓扑/门/预算；不读模型/会话 |
+| lib/stream-diagnostics-core.mjs | stream-diagnostics、stream-diagnostics.spec | 模型活动会话筛选（活动事件预筛后再按日志 mtime 取最近 N）+ 尝试时间线投影（assistant/message 计成功、assistant/attempt 计失败/无落面，终态三判 alive-or-idle/recovered/dead） |
+| lib/run-state.mjs | bundle-sessions、cdp-ask.entry、hitl-answer、run-kickoff、run-state.spec、session-events、session-replay、watch-run | run 操作面状态谓词 |
+| lib/run-source-node.mjs | evidence-audit、node-gate、run-context-node.spec、schema-scan | node:fs 的 RunSource 适配器：list/read/version；ENOENT → missing，其余 → unreadable；行窗口与 eof 语义对齐 vendor workspaceFiles |
+| lib/env.mjs | cdp-ask.entry、client-hitl.entry、client-load.entry、data.entry、defaults-probe、discipline-probe、wave-execution-probe、doctor.e2e、e2e-021rc2.entry、entry-chain-probe、env-credentials.spec、install-shape.entry、l4-lite.e2e、lifecycle.entry、method-library-probe、pack.e2e、preset.e2e、product-boot.entry、profile-concurrency.entry、record-role-fixture、release.entry、rerun-triage-probe、run-accept.e2e、session-replay、snapshot-replay.entry、team-preflight.e2e、user-env.entry、workspace-isolation.entry | 子进程环境清洗（scrubbedEnv/withModelKey）与真模型档前置（requireCredentials/credentialsPresent——凭据卫生） |
+| lib/playwright.mjs | client-hitl.entry、client-load.entry、e2e-021rc2.entry、hitl-answer、product-boot.entry、session-replay、snapshot-replay.entry | Playwright 启停支撑 |
+| lib/browser-cache.mjs | playwright、browser-cache.spec | 浏览器缓存目录判据（macOS/Linux/Windows 三态 + `PLAYWRIGHT_BROWSERS_PATH` 覆盖） |
+| lib/host-health.mjs | client-load.entry、host-health.spec | 真浏览器冒烟的主机健康判据（freeMB / load-per-CPU）：预检与失败归因都把环境红归为 NOT-RUN（exit 2），不伪装产品红 |
 | lib/cdp-driver.mjs | cdp-probe、scene-capture | 裸 CDP 驱动 |
-| lib/session-replay.mjs | session-replay、session-replay.test | 历史会话定位/元信息/判读整形纯函数（跨组枚举、id 优先、标题歧义如实报候选；会话→工作区靠首事件 cwd） |
-| lib/scene-pack.mjs | scene-capture、scene-pack.test | 场景包读取/列示纯函数（五件套概要如实——缺件与坏 meta 不静默；mtime 降序） |
-| lib/inject-reconcile.mjs | cdp-probe、inject-reconcile.test、run-kickoff | 注入消息「落盘对账」判据（BUG-021 正修：日志里出现本条 user/message 才算送达；时间下界防同文假阳） |
-| lib/probe-send-target.mjs | cdp-probe、probe-send-target.test | 提交按钮判定纯函数（BUG-021 正修：send 家族六标签状态机 + **stop 家族拒点** + composer 邻近窗；页面只读 DOM 与执行点击） |
-| lib/final-version.mjs | final-version.test、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、run-accept、run-dashboard-core、run-receipt、schema-scan-core、verdict-audit | 终稿版本文件名的唯一判据（纯判据从 pack `src/lib/final-target.ts` 取；目录扫描 = final/ 与 readable-vN）；旧 vN 正则的机械漂移锁 = tests/run/final-version.test |
-| lib/probe-status-tab.mjs | cdp-probe、probe-status-tab.test、session-replay | 右栏「研究状态」页签判定纯函数：胶囊按**标题 span 逐字**匹配（拒绝描述串入 / 近似标题）、页签体只认 `[data-sidebar-right-tab]`（不拿会话正文当观察面） |
-| lib/probe-index.mjs | f-repo、probes/_index.mjs、probe-index.test、smoke-contract.test | 探针索引纯函数（递归扫描 `probes/`、解析头注六字段、按域分组渲染；门禁 probe-registry 消费同一渲染；索引不复制判据/不证明长文） |
-| lib/run-channel.mjs | run-driver、run-driver-contract.test | run 通道驱动判据纯函数：web.log → 当前 GUI URL（取最后一条横幅）、浏览器面 verdict → 呈交判决（GREEN / RED / NOT-RUN） |
-| lib/ask-drive.mjs | ask-drive.test、hitl-answer、run-kickoff | 代答读窗与谓词 |
-| lib/workspace-root.mjs | bundle-sessions、evidence-audit、hitl-answer、node-gate、plan-card-stats、provider-error-stats、schema-scan、session-events、session-log、watch-run、workspace-root.test | dev 工作区根解析（flag → DSH_RUN_WORKSPACE → 仓内默认）+ vendor 同形 `projectKey(cwd)` 会话组（D38 C1：替代数据根/组名各写一份；legacy substring 兜底） |
-| lib/web-ui-nav.mjs | cdp-probe、client-hitl-smoke、client-load-config、client-load-final、client-load-smoke、e2e-021rc2、hitl-answer、library-fold.test、session-replay、web-ui-nav.test | 观察面侧栏会话定位**唯一正本**（2026-10-21 收拢，六处私有版退役）：data-row-key 主锚（session:\<id\>/workspace: 行键）+ 折叠组展开（expandGroup，data-row-key 主 + 类名兜底）+「Show N more」逐层 + 搜索兜底（结果无行键→按文本点）；类名扫描降级为兜底——两套选择器各有实红教训，裁决依据 = 模块头注；零依赖 page 鸭子类型；CDP 边界 = 纯常量 SHOW_MORE_SESSIONS_PATTERN / PREVIEW_NOTICE_PROBE_JS 供 cdp-probe evaluate 字符串消费（后者 = 首屏 Preview Notice 遮罩的探测与关闭，keyless 钉 = web-ui-nav.test）；真浏览器证据归消费方冒烟档（client-load-smoke / e2e-021rc2） |
-| lib/unconsumed-evidence.mjs | unconsumed-evidence、unconsumed-evidence.test | B1 机械基座：evidence/ 未进 findings.md 的差集投影（critic 差集出题的操作侧对账；CLI 壳 = run-ops/unconsumed-evidence 行） |
-| lib/acceptance-check.mjs | acceptance-check、acceptance-check.test | 收活判据机械求值：PASS/FAIL/UNVERIFIED 三态（DeerFlow acceptance_criteria keyless 移植，判不了永不静默放行；CLI 壳 = run-ops/acceptance-check 行） |
-| lib/hitl-provenance.mjs | ask-drive.test、client-hitl-smoke、hitl-answer、hitl-provenance.test、node-gate-witness.test、run-kickoff | 代答 provenance 写盘（BUG-014 正修——代理模拟显式记账；BUG-017 题面富集） |
-| lib/local-date.mjs | export-dist、hitl-answer、local-date.test、schema-scan-core、schema-scan.test | 人读日期行本地口径（与 bash date 同源；BUG-017 正修——UTC slice 凌晨窗口差一天） |
-| lib/bundle-date-sanity.mjs | bundle-date-sanity.test、run-accept | run bundle 未来日期检查（操作侧验收前哨——r1-license 29 处未来日期事故的机械面；消费语境 = run-accept 行） |
-| lib/vendor-artifacts.mjs | cdp-ask-smoke、client-hitl-smoke、client-load-smoke、defaults-probe、discipline-probe、wave-execution-probe、entry-chain-probe、l4-lite-smoke、preset-smoke、session-replay、team-preflight-smoke、vendor-artifacts.test | vendor 构建产物自检 |
+| lib/session-replay.mjs | session-replay、session-replay.spec | 历史会话定位/元信息/判读整形纯函数（跨组枚举、id 优先、标题歧义如实报候选；会话→工作区靠首事件 cwd） |
+| lib/scene-pack.mjs | scene-capture、scene-pack.spec | 场景包读取/列示纯函数（五件套概要如实——缺件与坏 meta 不静默；mtime 降序） |
+| lib/inject-reconcile.mjs | cdp-probe、inject-reconcile.spec、run-kickoff | 注入消息「落盘对账」判据（BUG-021 正修：日志里出现本条 user/message 才算送达；时间下界防同文假阳） |
+| lib/probe-send-target.mjs | cdp-probe、probe-send-target.spec | 提交按钮判定纯函数（BUG-021 正修：send 家族六标签状态机 + **stop 家族拒点** + composer 邻近窗；页面只读 DOM 与执行点击） |
+| lib/final-version.mjs | final-version.spec、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、run-accept、run-dashboard-core、run-receipt、schema-scan-core、verdict-audit | 终稿版本文件名的唯一判据（纯判据从 pack `src/lib/final-target.ts` 取；目录扫描 = final/ 与 readable-vN）；旧 vN 正则的机械漂移锁 = tests/run/final-version.spec |
+| lib/probe-status-tab.mjs | cdp-probe、probe-status-tab.spec、session-replay | 右栏「研究状态」页签判定纯函数：胶囊按**标题 span 逐字**匹配（拒绝描述串入 / 近似标题）、页签体只认 `[data-sidebar-right-tab]`（不拿会话正文当观察面） |
+| lib/probe-index.mjs | f-repo、probes/_index.mjs、probe-index.spec、smoke-contract.test | 探针索引纯函数（递归扫描 `probes/`、解析头注六字段、按域分组渲染；门禁 probe-registry 消费同一渲染；索引不复制判据/不证明长文） |
+| lib/run-channel.mjs | run-driver、run-driver-contract.spec | run 通道驱动判据纯函数：web.log → 当前 GUI URL（取最后一条横幅）、浏览器面 verdict → 呈交判决（GREEN / RED / NOT-RUN） |
+| lib/ask-drive.mjs | ask-drive.spec、hitl-answer、run-kickoff | 代答读窗与谓词 |
+| lib/workspace-root.mjs | bundle-sessions、evidence-audit、hitl-answer、node-gate、plan-card-stats、provider-error-stats、schema-scan、session-events、session-log、watch-run、workspace-root.spec | dev 工作区根解析（flag → DSH_RUN_WORKSPACE → 仓内默认）+ vendor 同形 `projectKey(cwd)` 会话组（D38 C1：替代数据根/组名各写一份；legacy substring 兜底） |
+| lib/web-ui-nav.mjs | cdp-probe、client-hitl.entry、client-load-config.support、client-load-final.support、client-load.entry、e2e-021rc2.entry、hitl-answer、library-fold.spec、session-replay、web-ui-nav.spec | 观察面侧栏会话定位**唯一正本**（2026-10-21 收拢，六处私有版退役）：data-row-key 主锚（session:\<id\>/workspace: 行键）+ 折叠组展开（expandGroup，data-row-key 主 + 类名兜底）+「Show N more」逐层 + 搜索兜底（结果无行键→按文本点）；类名扫描降级为兜底——两套选择器各有实红教训，裁决依据 = 模块头注；零依赖 page 鸭子类型；CDP 边界 = 纯常量 SHOW_MORE_SESSIONS_PATTERN / PREVIEW_NOTICE_PROBE_JS 供 cdp-probe evaluate 字符串消费（后者 = 首屏 Preview Notice 遮罩的探测与关闭，keyless 钉 = web-ui-nav.spec）；真浏览器证据归消费方冒烟档（client-load.entry / e2e-021rc2.entry） |
+| lib/unconsumed-evidence.mjs | unconsumed-evidence、unconsumed-evidence.spec | B1 机械基座：evidence/ 未进 findings.md 的差集投影（critic 差集出题的操作侧对账；CLI 壳 = run-ops/unconsumed-evidence 行） |
+| lib/acceptance-check.mjs | acceptance-check、acceptance-check.spec | 收活判据机械求值：PASS/FAIL/UNVERIFIED 三态（DeerFlow acceptance_criteria keyless 移植，判不了永不静默放行；CLI 壳 = run-ops/acceptance-check 行） |
+| lib/hitl-provenance.mjs | ask-drive.spec、client-hitl.entry、hitl-answer、hitl-provenance.spec、node-gate-witness.spec、run-kickoff | 代答 provenance 写盘（BUG-014 正修——代理模拟显式记账；BUG-017 题面富集） |
+| lib/local-date.mjs | export-dist、hitl-answer、local-date.spec、schema-scan-core、schema-scan.spec | 人读日期行本地口径（与 bash date 同源；BUG-017 正修——UTC slice 凌晨窗口差一天） |
+| lib/bundle-date-sanity.mjs | bundle-date-sanity.spec、run-accept | run bundle 未来日期检查（操作侧验收前哨——r1-license 29 处未来日期事故的机械面；消费语境 = run-accept 行） |
+| lib/vendor-artifacts.mjs | cdp-ask.entry、client-hitl.entry、client-load.entry、defaults-probe、discipline-probe、wave-execution-probe、entry-chain-probe、l4-lite.e2e、preset.e2e、session-replay、team-preflight.e2e、vendor-artifacts.spec | vendor 构建产物自检 |
 | lib/backlog-liveness.mjs | backlog-liveness.test、f-repo、staged-change-pairing | 问题卡、缺陷、调研、方法与归档索引的结构合同；被 verify 入口与 keyless 回归消费 |
 | lib/staged-change-pairing.mjs | staged-change-pairing.test、f-repo | 暂存区成对变更判据（归档卡↔Note、ui.expected↔lastRewrite）；纯函数，git 由门禁注入 |
-| lib/direct-authorization-boundary.mjs | entry-chain-probe、entry-chain-probe.test | 按授权范围执行、无需重复请批的词面判定；由探针与 keyless 回归消费 |
-| lib/replay-scene.mjs | replay-scene.test、snapshot-replay-smoke | 场景声明消费者：roster/版本/来源形状/路径校验（缺件、串角色、垃圾锚点 fail-loud）+ 场景集发现（`replay/*/snapshot.json` 全集、防空语料、--face 全名定向） |
-| lib/replay-request.mjs | record-role-fixture、replay-request.test、snapshot-replay-smoke | 组装请求面逐条比较：persona、header 全序列、四处 user/message 注入（含时钟序列）（定向归一化） |
-| lib/snapshot-mode.mjs | snapshot-readonly.test、snapshot-replay-smoke | 快照 smoke 模式判据：只读/刷新互斥、`DSH_SNAPSHOT` 只认 replay、刷新必须 `--why` |
-| lib/profile-health.mjs | profile-health.test、record-role-fixture、snapshot-replay-smoke、team-preflight-smoke | dev profile 版本面预检：团队层版本 == 运行时 dsh 版本；缺席/落后 → 明确 exit 2 + 重建指令（BUG-066） |
-| lib/startup-hint.mjs | startup-hint.test、web-harness | boot 失败归因：识别日志里的 incompatible/exemption，指出 profile 未随 pin 重钉（BUG-066） |
-| lib/client-load-select.mjs | client-load-reference、client-load-select.test | client-load 绑定会话选择（只认 lead 根；防富 coach 会话假红，BUG-142） |
-| lib/port-reclaim-policy.mjs | port-reclaim.test、port-reclaim | 端口 listener 身份纯判据（只认本仓 DSH web；无子进程依赖） |
-| lib/run-lock.mjs | client-load-smoke、run-lock.test、snapshot-replay-smoke | 冒烟脚本进程级运行锁：存活拒跑、陈旧锁接管、释放（共享 DSH_HOME 的脚本互斥） |
-| lib/replay-network-offline.cjs | snapshot-replay-smoke | 回放 A 层离线闸 preload：非 loopback DNS(lookup/resolve*)/connect 立即失败；只作用于 dsh 主进程（BUG-064/067） |
-| lib/replay-network-offline-policy.cjs | replay-network-offline.test | 离线闸纯判据（isLoopback/isDshMain；无 node:net 依赖，测试可直引） |
-| lib/port-reclaim.mjs | client-load-smoke、cold-start-smoke、data-smoke、defaults-probe、preset-smoke、product-boot-smoke、release-smoke、wave-execution-probe、workspace-isolation-smoke | 端口收割执行器（按端口杀 + 三轮验证释放；实测依据 = web 孙进程不在子进程组里） |
-| lib/path-hygiene.mjs | node-gate-session-gates、path-hygiene、path-hygiene.test、run-accept、run-receipt | 本机 home 路径纯文本检测（Unix/macOS/Windows 前缀；行号）+ `portableBundlePath`（bundle 内绝对路径 → `drt_<slug>/…` 可移植标签；bundle 外 → null） |
-| lib/secret-scan.mjs | run-accept、secret-scan、secret-scan.test | 高置信凭据形态检测（sk-/ghp_/AKIA/PRIVATE KEY/Bearer）；只报 path/line/kind，不回显原文 |
-| lib/selftest-library.mjs | library-fold.test | 「研究配置」面板/library-fold 自测例库单一正本：12 形态条目（四字段/部分/空值/旧格式/混居/重名/空条目/杂项行/续行/缩进），两处共用防形态漂移 |
-| lib/method-presets.mjs | library-fold.test、method-presets.test | research-brief skill「方法预设」表的唯一解析入口（表头/行列数/防空集 fail-loud）——内置名单不再各写一份手写副本 |
+| lib/direct-authorization-boundary.mjs | entry-chain-probe、entry-chain-probe.spec | 按授权范围执行、无需重复请批的词面判定；由探针与 keyless 回归消费 |
+| lib/replay-scene.mjs | replay-scene.spec、snapshot-replay.entry | 场景声明消费者：roster/版本/来源形状/路径校验（缺件、串角色、垃圾锚点 fail-loud）+ 场景集发现（`replay/*/snapshot.json` 全集、防空语料、--face 全名定向） |
+| lib/replay-request.mjs | record-role-fixture、replay-request.spec、snapshot-replay.entry | 组装请求面逐条比较：persona、header 全序列、四处 user/message 注入（含时钟序列）（定向归一化） |
+| lib/snapshot-mode.mjs | snapshot-readonly.test、snapshot-replay.entry | 快照 smoke 模式判据：只读/刷新互斥、`DSH_SNAPSHOT` 只认 replay、刷新必须 `--why` |
+| lib/smoke-lane.mjs | run-lane、smoke-lane.test | smoke 车道选择：lane/tier 过滤、support 不进车道、默认 ci + `--all` |
+| lib/profile-health.mjs | profile-health.spec、record-role-fixture、snapshot-replay.entry、team-preflight.e2e | dev profile 版本面预检：团队层版本 == 运行时 dsh 版本；缺席/落后 → 明确 exit 2 + 重建指令（BUG-066） |
+| lib/startup-hint.mjs | startup-hint.spec、web-harness | boot 失败归因：识别日志里的 incompatible/exemption，指出 profile 未随 pin 重钉（BUG-066） |
+| lib/client-load-select.mjs | client-load-reference.support、client-load-select.spec | client-load 绑定会话选择（只认 lead 根；防富 coach 会话假红，BUG-142） |
+| lib/port-reclaim-policy.mjs | port-reclaim.spec、port-reclaim | 端口 listener 身份纯判据（只认本仓 DSH web；无子进程依赖） |
+| lib/run-lock.mjs | client-load.entry、run-lock.spec、snapshot-replay.entry | 冒烟脚本进程级运行锁：存活拒跑、陈旧锁接管、释放（共享 DSH_HOME 的脚本互斥） |
+| lib/replay-network-offline.cjs | snapshot-replay.entry | 回放 A 层离线闸 preload：非 loopback DNS(lookup/resolve*)/connect 立即失败；只作用于 dsh 主进程（BUG-064/067） |
+| lib/replay-network-offline-policy.cjs | replay-network-offline.spec | 离线闸纯判据（isLoopback/isDshMain；无 node:net 依赖，测试可直引） |
+| lib/port-reclaim.mjs | client-load.entry、cold-start.entry、data.entry、defaults-probe、preset.e2e、product-boot.entry、release.entry、wave-execution-probe、workspace-isolation.entry | 端口收割执行器（按端口杀 + 三轮验证释放；实测依据 = web 孙进程不在子进程组里） |
+| lib/path-hygiene.mjs | node-gate-session-gates、path-hygiene、path-hygiene.spec、run-accept、run-receipt | 本机 home 路径纯文本检测（Unix/macOS/Windows 前缀；行号）+ `portableBundlePath`（bundle 内绝对路径 → `drt_<slug>/…` 可移植标签；bundle 外 → null） |
+| lib/secret-scan.mjs | run-accept、secret-scan、secret-scan.spec | 高置信凭据形态检测（sk-/ghp_/AKIA/PRIVATE KEY/Bearer）；只报 path/line/kind，不回显原文 |
+| lib/selftest-library.mjs | library-fold.spec | 「研究配置」面板/library-fold 自测例库单一正本：12 形态条目（四字段/部分/空值/旧格式/混居/重名/空条目/杂项行/续行/缩进），两处共用防形态漂移 |
+| lib/method-presets.mjs | library-fold.spec、method-presets.spec | research-brief skill「方法预设」表的唯一解析入口（表头/行列数/防空集 fail-loud）——内置名单不再各写一份手写副本 |
 | lib/keyless-imports.mjs | layering.test、test-surface.test、client-surface.test、test-lanes.test | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
-| lib/gates-cases.mjs | gates-smoke、verify-gates.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
-| lib/run-accept-fixture.mjs | run-accept-smoke、run-accept-fixture.test | claim 夹具的 review/readiness 文本（D51 同源：有声明 = declaration/PASS，缺声明 = missing/红） |
-| lib/node-gate-core.mjs | node-gate、node-gate-delivery.test、node-gate-leads.test、node-gate-session.test | bundle 判据聚合；唯一导出 = `gateBundle`，领域门直接 import 各自模块 |
-| lib/node-gate-contracts.mjs | node-gate-contracts.test、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、node-gate-delivery.test、readiness-declaration.test、review-readiness.test、verdict-audit、verdict-audit-core | 交付日期合同、readiness 与 decisions 行解析 |
-| lib/node-gate-session-gates.mjs | ask-drive.test、bundle-sessions、node-gate-core、node-gate-delivery-gate、node-gate-witness.test、node-gate-delivery.test、node-gate-session.test、run-accept | HITL、present 与 §Decisions 会话门 |
-| lib/node-gate-run-gates.mjs | node-gate-core、node-gate-leads.test、node-gate-session.test | leads、版本与标题退化门 |
-| lib/node-gate-delivery-gate.mjs | node-gate-core、readiness-declaration.test、run-receipt.test | 门A 交付完整性判据 |
-| lib/node-gate-reader-gate.mjs | node-gate-core、node-gate-reader.test | 门C 读者版合同：同版/六节/长度/无来源路径；数字子集只 WARN；旧场/quick_factual 豁免 |
-| lib/schema-scan-core.mjs | node-gate-contracts、node-gate-contracts.test、node-gate-core、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、protocol-audit、run-accept、run-bundle-charter.test、run-receipt.test、schema-scan、schema-scan.test、verdict-audit | 节点 I/O 契约在场级断言判据核（交付日/研究类型/条件件豁免/断代定红——从 run-gates 下沉修 lib→入口层反向依赖） |
-| lib/run-dashboard-core.mjs | evaluation-contract.test、run-dashboard、run-dashboard-html、run-dashboard.test | M2 run 观察面解析/场景/模型纯管线（全 fail-soft；HTML 渲染 = run-dashboard-html，CLI/watch/写盘归壳） |
-| lib/run-dashboard-html.mjs | run-dashboard、run-dashboard.test | M2 run 观察面 HTML 渲染薄壳（纯字符串拼接；矩阵/统计来自 core，不读盘） |
-| lib/evidence-audit-core.mjs | evidence-audit、evidence-audit.test、provenance.test | 证据溯源审计判据核心（readLog 注入同上） |
-| lib/verdict-audit-core.mjs | verdict-audit、verdict-audit.test、verdict-audit-fixture.test | claim 级裁决判据核心：claims/verdicts 形状与键集、覆盖（critical 全有结论性裁决）、raw 原文重解析（raw 带 ```json 围栏时只剥一层解析，原文比对不放宽）、逐字一致（跨轮单调）、child preset/depth/只读；`parseSessionFacts` = 真实 v4 日志线形 → 会话事实（CLI 只做定位/解压），readiness 读法复用 node-gate 同源 |
-| lib/provenance.mjs | evidence-audit-core、provenance.test | 离线来源证明：kind/URL/路径 + sha256 + 时间 + 通道 + 切片；local-file 哈希核对 |
-| lib/run-inventory-core.mjs | run-inventory、run-inventory.test | 只读保留期折算（逐场文件数/字节/最老；合计；1024 进制格式化） |
-| lib/runtime-clean-core.mjs | runtime-clean、runtime-clean.test | 运行区清理纯判据：白名单容器/实验根 + 子树最新 mtime 保留期；symlink/未知名/穿越 fail-closed |
-| lib/run-receipt.mjs | node-gate-delivery-gate、run-accept、run-bundle-charter.test、run-receipt.test | 交付回执（delivered/manifest/acceptance）纯生成与校验：present 取最新版本化、语料根写可复算标签、final/audit/reader 哈希复算（门A/门C 消费） |
+| lib/gates-cases.mjs | gates.e2e、verify-gates.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
+| lib/run-accept-fixture.mjs | run-accept.e2e、run-accept-fixture.spec | claim 夹具的 review/readiness 文本（D51 同源：有声明 = declaration/PASS，缺声明 = missing/红） |
+| lib/node-gate-core.mjs | node-gate、node-gate-delivery.spec、node-gate-leads.spec、node-gate-session.spec | bundle 判据聚合；唯一导出 = `gateBundle`，领域门直接 import 各自模块 |
+| lib/node-gate-contracts.mjs | node-gate-contracts.spec、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、node-gate-delivery.spec、readiness-declaration.spec、review-readiness.spec、verdict-audit、verdict-audit-core | 交付日期合同、readiness 与 decisions 行解析 |
+| lib/node-gate-session-gates.mjs | ask-drive.spec、bundle-sessions、node-gate-core、node-gate-delivery-gate、node-gate-witness.spec、node-gate-delivery.spec、node-gate-session.spec、run-accept | HITL、present 与 §Decisions 会话门 |
+| lib/node-gate-run-gates.mjs | node-gate-core、node-gate-leads.spec、node-gate-session.spec | leads、版本与标题退化门 |
+| lib/node-gate-delivery-gate.mjs | node-gate-core、readiness-declaration.spec、run-receipt.spec | 门A 交付完整性判据 |
+| lib/node-gate-reader-gate.mjs | node-gate-core、node-gate-reader.spec | 门C 读者版合同：同版/六节/长度/无来源路径；数字子集只 WARN；旧场/quick_factual 豁免 |
+| lib/schema-scan-core.mjs | node-gate-contracts、node-gate-contracts.spec、node-gate-core、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、protocol-audit、run-accept、run-bundle-charter.spec、run-receipt.spec、schema-scan、schema-scan.spec、verdict-audit | 节点 I/O 契约在场级断言判据核（交付日/研究类型/条件件豁免/断代定红——从 run-gates 下沉修 lib→入口层反向依赖） |
+| lib/run-dashboard-core.mjs | evaluation-contract.test、run-dashboard、run-dashboard-html、run-dashboard.spec | M2 run 观察面解析/场景/模型纯管线（全 fail-soft；HTML 渲染 = run-dashboard-html，CLI/watch/写盘归壳） |
+| lib/run-dashboard-html.mjs | run-dashboard、run-dashboard.spec | M2 run 观察面 HTML 渲染薄壳（纯字符串拼接；矩阵/统计来自 core，不读盘） |
+| lib/evidence-audit-core.mjs | evidence-audit、evidence-audit.spec、provenance.spec | 证据溯源审计判据核心（readLog 注入同上） |
+| lib/verdict-audit-core.mjs | verdict-audit、verdict-audit.spec、verdict-audit-fixture.spec | claim 级裁决判据核心：claims/verdicts 形状与键集、覆盖（critical 全有结论性裁决）、raw 原文重解析（raw 带 ```json 围栏时只剥一层解析，原文比对不放宽）、逐字一致（跨轮单调）、child preset/depth/只读；`parseSessionFacts` = 真实 v4 日志线形 → 会话事实（CLI 只做定位/解压），readiness 读法复用 node-gate 同源 |
+| lib/provenance.mjs | evidence-audit-core、provenance.spec | 离线来源证明：kind/URL/路径 + sha256 + 时间 + 通道 + 切片；local-file 哈希核对 |
+| lib/run-inventory-core.mjs | run-inventory、run-inventory.spec | 只读保留期折算（逐场文件数/字节/最老；合计；1024 进制格式化） |
+| lib/runtime-clean-core.mjs | runtime-clean、runtime-clean.spec | 运行区清理纯判据：白名单容器/实验根 + 子树最新 mtime 保留期；symlink/未知名/穿越 fail-closed |
+| lib/run-receipt.mjs | node-gate-delivery-gate、run-accept、run-bundle-charter.spec、run-receipt.spec | 交付回执（delivered/manifest/acceptance）纯生成与校验：present 取最新版本化、语料根写可复算标签、final/audit/reader 哈希复算（门A/门C 消费） |

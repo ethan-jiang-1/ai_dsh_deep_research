@@ -93,7 +93,7 @@ export function runF() {
 // 为什么：探针迁根后，目录清单与触发条件不能靠手维护；company 的教训 = 手写清单必漂。
 // 判据：每支 probes/*.mjs|*.cjs（_index.mjs 除外）头注必填六字段（状态/一句话/何时跑/档位/
 // 判据/不证明）；INDEX.generated.md 与目录渲染字节一致；probes/README.md 链接索引。
-// 防空语料：零探针即红（范围收窄 = 门禁静默空转）。反证 = gates-smoke 案例
+// 防空语料：零探针即红（范围收窄 = 门禁静默空转）。反证 = gates.e2e 案例
 // `probe-registry-missing-header`（删一支的「何时跑」→ 红；还原 → 绿）。
 {
   const gate = 'probe-registry';
@@ -128,7 +128,7 @@ export function runF() {
 
 // ── guard-red-record（tests 面反证义务机械化——2026-10-09 卡收官）──
 // 为什么：「新契约测试带反证」此前是 tests/AGENTS 的散文义务（「只交付绿 = 不知道测试会不会
-// 咬人」）——verify 门禁面有 gates-smoke（真注入真红），tests 面零机械：标题声称守卫具体事故
+// 咬人」）——verify 门禁面有 gates.e2e（真注入真红），tests 面零机械：标题声称守卫具体事故
 // （BUG-nnn）的测试，红配方只在头注散文里，走没走没人拦。判法（company checks/run-gates.mjs
 // guard-red-record@5c050ea 移植 + 本仓适配：双址解析 + 夹具留证第二形态 + 防空语料）：
 //   ① 守卫声明 = test/it 标题串带 BUG-nnn——标题是"我在守一条具体不变量"的正式声明，
@@ -147,9 +147,9 @@ export function runF() {
   const problems = [];
   let claims = 0;
   // 2026-10-20 起 tests/ 按域分子目录（run/cockpit/pack/contracts）：递归扫描，fixtures/_tmp 除外。
-  const testFiles = walk(join(ROOT, 'tests')).filter((f) => f.endsWith('.test.mjs')
+  const testFiles = walk(join(ROOT, 'tests')).filter((f) => f.endsWith('.spec.mjs')
     && !f.includes(`${sep}fixtures${sep}`) && !f.includes(`${sep}_tmp${sep}`));
-  if (testFiles.length === 0) fail(gate, '防空语料：tests/ 下零个 *.test.mjs——扫描面失效');
+  if (testFiles.length === 0) fail(gate, '防空语料：tests/ 下零个 *.spec.mjs——扫描面失效');
   for (const file of testFiles.sort()) {
     const f = relative(ROOT, file);
     const text = readFileSync(file, 'utf8');

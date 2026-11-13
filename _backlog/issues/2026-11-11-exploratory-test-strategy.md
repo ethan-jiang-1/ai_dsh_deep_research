@@ -27,7 +27,7 @@ profiles、D48 Strategy 投影 + HITL1 typed inputs、探针迁根、T0 两级�
 - 基线全绿：`pnpm verify`、`pnpm test`（1178 例）当日实跑通过——探索不以「先怀疑基线」开场。
 - 两个 fail-open 都在 `checkStrategy`（[protocol-audit-core](../../scripts/lib/protocol-audit-core.mjs)）：
   **通道字段缺席零提示**、**通道=workflow 且无 Wave 拓扑时 worker 对账被静默跳过**。现有契约测试
-  （[protocol-core.test](../../tests/run/protocol-core.test.mjs)）覆盖了非法通道/预算漂移/不可解析预算，
+  （[protocol-core.test](../../tests/run/protocol-core.spec.mjs)）覆盖了非法通道/预算漂移/不可解析预算，
   恰好没有这两个形态——实现者按 happy path 写测试的典型盲区，也是本策略最稳定的收益来源。
 - 已关闭的面：canonical hash 稳定性、T0 两级预算计数（实跑）；worker profile 结构与回放角色覆盖
   （静态核对，未重跑 smoke；证据见 §第 0 轮表）。
@@ -84,8 +84,8 @@ profiles、D48 Strategy 投影 + HITL1 typed inputs、探针迁根、T0 两级�
 |---|---|---|---|
 | 纯派生是否一致 / 边界输入会不会放行 | 纯函数 | `node --import tsx/esm` + 合成输入（`scripts/lib/*-core.mjs`） | 秒 |
 | 结构/副本是否漂移 | L0 门禁 + 契约测试 | `pnpm verify` / `pnpm test` | 秒 |
-| 新 preset/worker 真挂载了吗 | L1 keyless | `preset-smoke`（已含 worker profiles） | 分钟 |
-| 装配出的 model-visible 文本变了吗 | 回放（无模型） | `snapshot-replay-smoke` | 分钟 |
+| 新 preset/worker 真挂载了吗 | L1 keyless | `preset.e2e`（已含 worker profiles） | 分钟 |
+| 装配出的 model-visible 文本变了吗 | 回放（无模型） | `snapshot-replay.entry` | 分钟 |
 | 模型遵守散文纪律吗 | 探针 | `probes/behavior/*`（一次 boot 多场景） | 分钟 + 模型 |
 | 整条用户链路通不通 | L4 | 完整 run | 30–60 分钟 + 模型 |
 
@@ -99,7 +99,7 @@ profiles、D48 Strategy 投影 + HITL1 typed inputs、探针迁根、T0 两级�
 1. **散文合同变异**：把 docs/审计里写死的「必须红」逐字变成输入，喂给被测函数；绿 = 候选 fail-open。
    这是收益最高的一类——测试通常由实现者按同一条 happy path 写。
 2. **表示层差分**：列出「同一事实的两份副本」，逐字段/逐字对账；漂移 = 观察或 bug。
-3. **回放差分**：不重录金样，直接跑 `snapshot-replay-smoke`；diff 告诉我「这次改动进了哪个座位的
+3. **回放差分**：不重录金样，直接跑 `snapshot-replay.entry`；diff 告诉我「这次改动进了哪个座位的
    model-visible 文本」，再判应然/实然。零模型、分钟级，是内容/persona 改动的归因器。
 4. **后验取证**：既有会话与 run bundle 就是免费样本（`session-events --stuck-after`、
    `stream-diagnostics --recent`、`provider-error-stats`、`run-inventory`、`unconsumed-evidence`）；
@@ -147,11 +147,11 @@ ID｜假设（要杀死的命题）｜最低可观察层｜oracle 与变异/场�
 | P1 | `checkStrategy` 策略行对账（D48） | 8 个变异输入跑 `evaluateBundle` | 3 个绿（2 类 fail-open）+ 4 个红（负对照）+ 1 个应绿 | 已开 [BUG-050](../_archived/fixed_bugs/BUG-050-strategy-channel-absent-and-workflow-null-workers.md)（P2） |
 | P2 | `canonicalize` / `designSha256` | 顶层/嵌套 key 换序、`-0`/`0`、未知键 | hash 全稳定；schema 拒未知键 | 关闭 |
 | P3 | T0 两级预算 | 两个消费点的计数口径 | 同一 `manual` 文本、同一 `.length`；CJK 计 1 | 关闭 |
-| P4 | worker profiles（D47） | 结构契约 + row-deps（读码核对） | 6 条契约测试把守行形态；`preset-smoke` 已把 workers 纳入真挂载 | 关闭（一处观察） |
+| P4 | worker profiles（D47） | 结构契约 + row-deps（读码核对） | 6 条契约测试把守行形态；`preset.e2e` 已把 workers 纳入真挂载 | 关闭（一处观察） |
 | P5 | 回放角色覆盖 | `snapshots/replay/research-face` 声明（读旧样本核对） | 4 个研究角色；workers/method-editor 按角色语义不入研究面 | 不是缺口；worker 行为仍零证据 → X6 |
 
 **成本**：5 个面（3 个实跑 + 2 个静态核对），0 次模型调用，约 15 分钟；证据为一次性脚本
-（运行区 `explore-20261111`，gitignored，可清）。**本轮未跑**：`preset-smoke`、任何 smoke、任何探针。
+（运行区 `explore-20261111`，gitignored，可清）。**本轮未跑**：`preset.e2e`、任何 smoke、任何探针。
 
 **两条 shared 前缀**：散文正本 = [D48](../../docs/decisions.md#d48)「plan 头 `- 策略:` 行由
 `protocol-audit` 对账通道/worker/预算 cap（预算读不出 = 红）」；下面两个 fail-open 都是这句在
@@ -183,11 +183,11 @@ ID｜假设（要杀死的命题）｜最低可观察层｜oracle 与变异/场�
 **负对照（证明 oracle 会咬人）**：`通道=Team` → red；`预算=每格看着办` → red；
 `预算=4 节点/4 cells` → red；`通道=spawn；worker=research-wave` → red。
 
-**重建方法**：用 `tests/run/protocol-core.test.mjs` 的 `baseProtocol` 作底，配 `strategyOf` 同形态的
+**重建方法**：用 `tests/run/protocol-core.spec.mjs` 的 `baseProtocol` 作底，配 `strategyOf` 同形态的
 plan 文本，跑 `evaluateBundle`，只看 `strategy-*` code。
 
 **P4 观察（不是 bug）**：`preset-structure` 门禁只 glob `presets/`，`workers/` 的「行形态」由
-[tests/pack/workers.test.mjs](../../tests/pack/workers.test.mjs) 六条契约把守（`row-deps` 已覆盖 workers）。
+[tests/pack/workers.spec.mjs](../../tests/pack/workers.spec.mjs) 六条契约把守（`row-deps` 已覆盖 workers）。
 契约有家，门禁形状偏窄——owner = `scripts/verify`，本轮不修。
 
 ## 第 1 轮 charter 图（待授权）
@@ -199,11 +199,11 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 | X1 | 投影四处（protocol JSON / §Protocol / 策略行 / 卡文）任一字段漂移都会红或 warn | 纯函数 | 逐字段变异：缺/非法/大小写/单位/边界/自相矛盾 | ~10 min | 变绿 = 候选 fail-open |
 | X2 | Protocol 边界输入下 hash/版本/审计解析稳定 | 纯函数 | `auditHashOf` 版本前缀（v1 vs v10）、多 hash 取首、数组顺序敏感性、时区 | ~10 min | 差异 = 候选 |
 | X3 | 最近改动没有留下未同步的副本 | 静态 + 逐字 | README.zh↔README、plan 模板策略行↔派生、design/20↔workers、手册源↔`_dist`、overlay↔render | ~10 min | 漂移 → owner/观察 |
-| X4 | 内容改动没有意外进入其它座位的 model-visible 文本 | 回放 | 不重录跑 `snapshot-replay-smoke`，逐座位读 diff | ~2 min | 差异需判应然/实然 |
+| X4 | 内容改动没有意外进入其它座位的 model-visible 文本 | 回放 | 不重录跑 `snapshot-replay.entry`，逐座位读 diff | ~2 min | 差异需判应然/实然 |
 | X5 | 既有 run/会话里没有系统性异常 | 既有证据 | `session-events` / `stream-diagnostics` / `provider-error-stats` / `run-inventory` / `unconsumed-evidence` | ~10 min | 只记计数与分布 |
 | X6 | worker profile 真按薄工具面与 brief 边界行动 | 探针（1 boot） | subagent 默认落 `research-worker`；child 无 team/goal/ask；被要求组队时不编造工具 | ≤6 次调用 / ≤10 min | 单场不写「稳定」 |
-| X7 | symlink checkout 与交接路径没有静默不执行 | keyless | `handoff-smoke`；`isMain` 负例（相对路径/不存在/目录）；`/tmp`→`/private/tmp` | ~5 min | 未跑记未跑 |
-| X8 | 新 typed 输入在真浏览器可用 | 已起 GUI | `client-load-smoke` + `cdp-probe`；ResearchConfigTab 新字段 | ~5 min | 未起 GUI = 未跑 |
+| X7 | symlink checkout 与交接路径没有静默不执行 | keyless | `handoff.e2e`；`isMain` 负例（相对路径/不存在/目录）；`/tmp`→`/private/tmp` | ~5 min | 未跑记未跑 |
+| X8 | 新 typed 输入在真浏览器可用 | 已起 GUI | `client-load.entry` + `cdp-probe`；ResearchConfigTab 新字段 | ~5 min | 未起 GUI = 未跑 |
 
 ## 预算与授权门
 
@@ -246,12 +246,12 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 | §Protocol 投影对账（`checkProjectionDetails`） | 已探 | 缺席容忍 + 深度表示不一致 → [BUG-049](../_archived/fixed_bugs/BUG-049-protocol-projection-lines-absent-silent.md)、[BUG-048](../_archived/fixed_bugs/BUG-048-protocol-depth-projection-first-pair-only.md) |
 | canonical / design_sha256 | 已关闭 | 第 0 轮 P2（顺序、`-0`、未知键均稳） |
 | T0 两级预算计数 | 已关闭 | 第 0 轮 P3（同文本同口径） |
-| worker profile 结构 / 挂载 | 已关闭（静态） | 第 0 轮 P4（契约测试 + preset-smoke 覆盖） |
+| worker profile 结构 / 挂载 | 已关闭（静态） | 第 0 轮 P4（契约测试 + preset.e2e 覆盖） |
 | 回放角色覆盖（角色面） | 已关闭（静态） | 第 0 轮 P5（研究角色 4 席；workers 不入研究面） |
 | 回放差分（X4） | 已探 | [BUG-051](../_archived/fixed_bugs/BUG-051-replay-smoke-panerows-undeclared.md)；lead 快照待重录；C2 未归属 |
 | 后验扫场（X5） | 已关闭 | 71 场/3742 文件；provider/stream 无系统性异常 |
 | 真实 bundle 反向验证 | 已探 | 8/8 `protocol-audit PASS`；2 个单深度 → [BUG-048](../_archived/fixed_bugs/BUG-048-protocol-depth-projection-first-pair-only.md) 生产证据 |
-| 入口 / 交接路径（X7） | 已关闭 | `isMain` 五形态无发现；`handoff-smoke` ALL PASS |
+| 入口 / 交接路径（X7） | 已关闭 | `isMain` 五形态无发现；`handoff.e2e` ALL PASS |
 | GUI typed 输入（X8） | 未跑 | 需已起 dev GUI |
 | worker 行为（X6） | 未跑 | 真模型批未授权 |
 | 门禁的缺席语义（node-gate N/A 聚合） | 已探 | 观察：空 bundle 全 N/A、exit 0；acceptance 仍由 evidence-audit 兜底 |
@@ -321,8 +321,8 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 
 ### 第 23 轮（2026-11-12 02:1x）：X8 首次全绿
 
-- **X8 真跑绿**：`node --import tsx/esm scripts/smoke/client-load-smoke.mjs` → **75 PASS / 0 FAIL**
-  （`client-load-smoke: ALL PASS`）。覆盖：工作区注册/探针会话、插件加载零横幅、seed 数据、方法库
+- **X8 真跑绿**：`node --import tsx/esm scripts/smoke/client-load.entry.mjs` → **75 PASS / 0 FAIL**
+  （`client-load.entry: ALL PASS`）。覆盖：工作区注册/探针会话、插件加载零横幅、seed 数据、方法库
   （列表/详情/开始动作/内置参考）、研究配置页签、终稿页签（读者版/审计版切换、footer 三改法、
   不泄漏中间路径、可滚动）、状态页 ⑤，以及**首屏 Preview Notice 可关闭**（BUG-063 的双语匹配修复在
   真浏览器里成立）。
@@ -335,7 +335,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
   `research` profile 团队层 rc.2 vs runtime rc.5，`dsh web` 拒绝启动（banner 超时）。等该卡修复或
   重建 profile 后再跑 A/C。
 - **门禁**：`verify` 1 红、`pnpm test` 1 红——均为另一 agent 在办的
-  `tests/run/replay-network-offline.test.mjs`（缺负例留证块 + import 了 `scripts/smoke/*` 触发 layering）。
+  `tests/run/replay-network-offline.spec.mjs`（缺负例留证块 + import 了 `scripts/smoke/*` 触发 layering）。
 
 ### 第 24 轮（2026-11-12 02:2x）：离线闸的边界
 
@@ -353,7 +353,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 
 ### 第 25 轮（2026-11-12 02:2x）：回放闭环 + 一次自我修正
 
-- **回放独立复跑（安静窗口，锁空闲）**：`snapshot-replay-smoke --face research-face --scenario lead`
+- **回放独立复跑（安静窗口，锁空闲）**：`snapshot-replay.entry --face research-face --scenario lead`
   → **A PASS、C0–C5 全 PASS**（C5 逐字命中金标准）。这同时确认了 **BUG-064**（离线闸生效）与
   **BUG-061**（C2 页签 + 渲染金标准）的运行级修复；仍红的三条 B 是 **D48 后快照未重录**（persona/headers/
   runtime-context），属已知的 with-key 项。
@@ -416,12 +416,12 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 ### 第 30 轮（2026-11-12 04:2x）：安装/打包面首次整档跑绿
 
 - **L2/T0 冒烟全绿（本会话首次）**：
-  - `pack-smoke`：ALL PASS（174 tarball 条目；导出/入口/凭据边界/两次 npm pack 同 sha）；
-  - `lifecycle-smoke`：ALL PASS（21 项：market.json 校验 → 装 tarball → 本包行 dump → 真启动 → 五个
+  - `pack.e2e`：ALL PASS（174 tarball 条目；导出/入口/凭据边界/两次 npm pack 同 sha）；
+  - `lifecycle.entry`：ALL PASS（21 项：market.json 校验 → 装 tarball → 本包行 dump → 真启动 → 五个
     specifier 中英标题/图标 → remove 后 roster 回落）；
-  - `profile-concurrency-smoke`：ALL PASS（并发 plugin add/remove 后 profile 可解析、无双 bundle）；
-  - `release-smoke --install-only`：ALL PASS（19 项：真实安装形状 + **端口释放无残留**，进程卫生面成立）；
-  - `doctor-smoke`：ALL PASS（半装点名、坏设置 warn、doctor 不写 profile）。
+  - `profile-concurrency.entry`：ALL PASS（并发 plugin add/remove 后 profile 可解析、无双 bundle）；
+  - `release.entry --install-only`：ALL PASS（19 项：真实安装形状 + **端口释放无残留**，进程卫生面成立）；
+  - `doctor.e2e`：ALL PASS（半装点名、坏设置 warn、doctor 不写 profile）。
 - **观察（不建卡）**：D49「装本包首次启动即中文」的**安装域**仍无判据——上述冒烟只验形状/显示标题，
   不查 `locale.preference`；且 `_dist` tarball 是 16:06 旧产物（D49 之前的包），安装域断言只能等
   重新出包后复跑。Note 已自述 L2 未复跑。
@@ -430,7 +430,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 - **未跑**：X8 seed（load 高）、X6/快照重录（预算）。
 ### 第 31 轮（2026-11-12 04:3x）：D49 后 X8 复验 + 四个假设关闭
 
-- **X8（D49 + 品牌改动之后）**：`client-load-smoke` → **76 PASS / 0 FAIL，ALL PASS**。默认中文 +
+- **X8（D49 + 品牌改动之后）**：`client-load.entry` → **76 PASS / 0 FAIL，ALL PASS**。默认中文 +
   `Orca 深度搜索` 单行品牌在实际渲染下成立（冒烟钉 zh-CN 浏览器）。
 - **关闭假设（均无现场实例，不建卡）**：
   - 门④「提及即记账」：扫全部 final/v2+ 的真实 bundle，**0 例**仅非决策提及（弃用/未执行）——理论
@@ -450,11 +450,11 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
   `protocol-audit --write` 在 `renderReport` 里引用未 import 的 `PROTOCOL_CONTRACT_DATE`
   （`6a463a20` 删了 import 但模板还在用）→ `ReferenceError` exit 1；`run-accept` 预检全绿后
   **写报告阶段必败**，`protocol-audit.md` 永远写不出、验收被卡死。
-- **现场**：`node scripts/smoke/run-accept-smoke.mjs` 3 项失败（⑩ run-accept 绿 / protocol-audit.md
+- **现场**：`node scripts/smoke/run-accept.e2e.mjs` 3 项失败（⑩ run-accept 绿 / protocol-audit.md
   落盘 / ENOENT），可稳定复现；手跑 `--write` 拿到完整 ReferenceError 栈（`--no-write` 正常，所以
   预检与既有测试没咬）。
 - **同轮顺带跑绿**：seed 模式 X8 **74 PASS / 0 FAIL**（干净机器首启 + 绑定 run + 侧栏切换）；
-  `product-boot-smoke` GREEN（16 项）；`run-lock` 8 路并发实测 **1 成功 / 7 busy**（原子锁成立）；
+  `product-boot.entry` GREEN（16 项）；`run-lock` 8 路并发实测 **1 成功 / 7 busy**（原子锁成立）；
   回放 CLI 未知 face/scenario 正确 exit 2。
 - **写路径横扫（补证）**：在真实 bundle 副本上逐个跑 `--write`——`evidence-audit` / `verdict-audit` /
   `node-gate` 的 write 路径均无崩溃（红跑也照写报告）；**只有 `protocol-audit --write` 崩**（077）。
@@ -471,25 +471,25 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
   0 例——属包含性/纵深防御缺口，非现行故障。
 - **同轮排除**：`repairReceiptPaths` 的绝对路径归一化、broken JSON、manual-only、present=null 四态
   行为均正确（无崩溃/无静默数据丢失）；`run-dashboard` 在新契约 bundle 上正常生成。
-- **同轮补跑（全绿）**：`data-smoke` **16 PASS**（包目录零写入 / 假 token 不泄漏 / 卸载保留 workspace+session）；
-  `install-shape-smoke` **9 PASS**（profile init → add pack+team → 真启动出 token、无 did not activate）。
-- **死链面收口**：对 299 个 mjs/ts 做相对 import 静态解析扫描——**只有 user-env-smoke 一处断链**
+- **同轮补跑（全绿）**：`data.entry` **16 PASS**（包目录零写入 / 假 token 不泄漏 / 卸载保留 workspace+session）；
+  `install-shape.entry` **9 PASS**（profile init → add pack+team → 真启动出 token、无 did not activate）。
+- **死链面收口**：对 299 个 mjs/ts 做相对 import 静态解析扫描——**只有 user-env.entry 一处断链**
   （=079），`dev/` 的 shell 引用也无缺（`ui-sidebar-right` 为 vendor 相对路径，存在）。
-- **未跑**：077 仍未修（`run-accept-smoke` 红着）；X6/快照重录（预算）。
+- **未跑**：077 仍未修（`run-accept.e2e` 红着）；X6/快照重录（预算）。
 ### 第 34 轮（2026-11-12 04:5x）：冒烟清单里躺着一具死尸
 
 - **新卡**：[BUG-079](../_archived/fixed_bugs/BUG-079-user-env-smoke-dead-import-seed-core.md) **P2**——
-  `user-env-smoke.mjs` 仍 import D40 S3（`33eea10b`）已删除的
+  `user-env.entry.mjs` 仍 import D40 S3（`33eea10b`）已删除的
   `packages/.../scripts/lib/seed-core.mjs` → **启动即 ERR_MODULE_NOT_FOUND**；而 `scripts/README.md`
   仍把它列为 keyless 关键面（「已有用户环境共存」）——自 11-01 起零覆盖，`smoke-contract` 只对账
   成员/档位、不验可启动性，所以一直绿。
-- **同轮跑绿**：`workspace-isolation-smoke` **ALL PASS**（17 项：两套 home/profile/port/state/workspace
+- **同轮跑绿**：`workspace-isolation.entry` **ALL PASS**（17 项：两套 home/profile/port/state/workspace
   各自绑定、会话组互斥、marker 互不可见、端口释放）。
 - **环境观察（不建卡，但会挡发布）**：本机 `~/.npm/_cacache` 有 root 属主文件 → `npm pack` 报
-  EPERM（`sudo chown -R 502:20 ~/.npm` 可修）。`pack-smoke`（dry-run）不受影响；真实 `npm pack` /
+  EPERM（`sudo chown -R 502:20 ~/.npm` 可修）。`pack.e2e`（dry-run）不受影响；真实 `npm pack` /
   `export-dist` 在本机会失败。另：`npm pack` 会触发 `prepack` 重建 `lib/`，跑之前注意别与在办构建
   撞车（本轮撞到一次 lib 空窗，已自行恢复）。
-- **未跑**：077 仍未修（`run-accept-smoke` 红着）；X6/快照重录（预算）。
+- **未跑**：077 仍未修（`run-accept.e2e` 红着）；X6/快照重录（预算）。
 ### 第 35 轮（2026-11-12 04:5x）：D49 的 English 覆盖运行级验证
 
 - **探针（一次性，未入库）**：`bootWeb` 启 `deep-research` profile + `--patch`（`locale.preference: en`），
@@ -528,16 +528,16 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 | [BUG-076](../_archived/fixed_bugs/BUG-076-schema-scan-whitelist-missing-protocol-artifacts.md) | P2 | schema-scan 白名单漏 protocol/review/waves/protocol-audit.md → 新契约 run 必红 | 等人拍板 |
 | [BUG-077](../_archived/fixed_bugs/BUG-077-protocol-audit-write-reference-error.md) | P1 | `protocol-audit --write` 缺 import 崩溃 → run-accept 写报告阶段必败 | 修复就绪 |
 | [BUG-078](../_archived/fixed_bugs/BUG-078-portable-bundle-path-relative-escape.md) | P2 | 相对 `..` present 路径绕过 bundle 外拒收（门② PASS） | 等人拍板 |
-| [BUG-079](../_archived/fixed_bugs/BUG-079-user-env-smoke-dead-import-seed-core.md) | P2 | user-env-smoke 引用已删除 seed-core → 启动即崩，README 仍宣称覆盖 | 修复就绪 |
+| [BUG-079](../_archived/fixed_bugs/BUG-079-user-env-smoke-dead-import-seed-core.md) | P2 | user-env.entry 引用已删除 seed-core → 启动即崩，README 仍宣称覆盖 | 修复就绪 |
 
 ### 覆盖增量（本轮跑过的档位/探针）
 
-- **L2/T0 岛首次整档**：pack-smoke ALL PASS、lifecycle-smoke ALL PASS（21）、profile-concurrency ALL PASS、
-  release-smoke `--install-only` ALL PASS（19，含端口释放）、doctor-smoke ALL PASS、data-smoke ALL PASS（16）、
-  install-shape-smoke ALL PASS（9）、workspace-isolation-smoke ALL PASS（17）。
-- **非默认路径**：`client-load --seed`（干净机器）**74 PASS / 0 FAIL**；`product-boot-smoke` GREEN（16）；
+- **L2/T0 岛首次整档**：pack.e2e ALL PASS、lifecycle.entry ALL PASS（21）、profile-concurrency ALL PASS、
+  release.entry `--install-only` ALL PASS（19，含端口释放）、doctor.e2e ALL PASS、data.entry ALL PASS（16）、
+  install-shape.entry ALL PASS（9）、workspace-isolation.entry ALL PASS（17）。
+- **非默认路径**：`client-load --seed`（干净机器）**74 PASS / 0 FAIL**；`product-boot.entry` GREEN（16）；
   D49 English 覆盖探针（profile patch en）→ 品牌 `Orca Deep Research`（缺省 zh 可被显式覆盖）。
-- **并发/进程卫生**：run-lock 8 路并发 1 成功 / 7 busy；release-smoke 端口释放无残留。
+- **并发/进程卫生**：run-lock 8 路并发 1 成功 / 7 busy；release.entry 端口释放无残留。
 - **解析器/门禁变异**：readiness（行内引用劫持→074）、planIndex（自环/2-环/重复 id/CRLF 均正确报 issue）、
   protocol-audit（7 组变异全部与 D48 成文一致）、repairReceiptPaths（四态正确）、frontmatter（BOM 理论盲点，
   2795 个真实 evidence 零实例）。
@@ -545,9 +545,9 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 
 ### 未跑（交给下一轮/预算）
 
-- **X6 真模型 worker 行为**、**回放 B 层快照重录**（均需预算/with-key）；`client-hitl-smoke` /
-  `team-preflight-smoke` 等真模型档同理。
-- 077/079 落地后的复跑（`run-accept-smoke` / `user-env-smoke`）。
+- **X6 真模型 worker 行为**、**回放 B 层快照重录**（均需预算/with-key）；`client-hitl.entry` /
+  `team-preflight.e2e` 等真模型档同理。
+- 077/079 落地后的复跑（`run-accept.e2e` / `user-env.entry`）。
 - 安装域默认中文（需重新出包；本机 npm cache 有 root 属主文件，`npm pack` EPERM，先
   `sudo chown -R 502:20 ~/.npm`）。
 
@@ -689,7 +689,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 - **下一层**：acceptance 其它保留面（`--repair` 的 acceptance 处置已覆盖）未扫；记空白。
 ### 第 53 轮（2026-11-13 04:5x）：真挂载档全绿 + 140 证据补强
 
-- **preset-smoke 真挂载**（`DSH_SMOKE_REAL=1`）：**37 PASS / 0 FAIL**——5 角色 + 2 worker profile
+- **preset.e2e 真挂载**（`DSH_SMOKE_REAL=1`）：**37 PASS / 0 FAIL**——5 角色 + 2 worker profile
   全部真挂载；method-editor 只看见自己的 skills、Lead 看见 lead+角色 skills（D47 协调面）。
   （注意：不带 `DSH_SMOKE_REAL=1` 时它只跑文件预检并 exit 0，输出写「预检绿」——不算 ALL PASS。）
 - **140 补证**：拍板行里含跟进词也会被否定表误杀——`HITL2 定稿（附未决项：补研究 W3）` 与
@@ -708,7 +708,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 ### 第 55 轮（2026-11-13 05:1x）：全绿输出里的「0 题」假绿
 
 - **新卡**：[BUG-147](../_archived/fixed_bugs/BUG-147-client-hitl-zero-answers-false-green.md) **P2 修复就绪**——
-  `client-hitl-smoke` 全绿（12 PASS），但 ⑤b 明细是「共作答 **0** 题 / 卡共 1 题 · Submit 已点击」；
+  `client-hitl.entry` 全绿（12 PASS），但 ⑤b 明细是「共作答 **0** 题 / 卡共 1 题 · Submit 已点击」；
   断言 `/共作答 \d+ 题/` 把 0 也当通过 → 「挂起卡已答」是假绿（选择器未选中任何项，空提交关闭了回合）。
 - **同轮**：client-hitl 的其余观察（活标题翻转、横幅、右栏自动展开、二次挂起）**实打实 PASS**；
   真模型调用正常。截图留档 `runtime/smoke-workspace/client-hitl-2026-11-12T19-19-45-025Z.png`。
@@ -795,8 +795,8 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 - **下一层**：在健康窗口复跑 X8（若仍红则把 152 升级为产品回归）；149/150/151/152 待 A 修。
 ### 第 60 轮（2026-11-13 05:3x）：安装/发布面复跑 + 修复回归
 
-- **安装/发布面（bb0323ac 之后）**：`lifecycle-smoke` **ALL PASS**（22 项）、
-  `release-smoke --install-only` **ALL PASS**（57 项）——安装形状/端口释放未受 127–152 修复影响。
+- **安装/发布面（bb0323ac 之后）**：`lifecycle.entry` **ALL PASS**（22 项）、
+  `release.entry --install-only` **ALL PASS**（57 项）——安装形状/端口释放未受 127–152 修复影响。
 - **回归已验绿**（本轮逐条）：136 探针端口回退/清理（3124 被占时自动换临时端口；跑完 3124 无残留）、
   137 defaults-probe **ALL PASS**（C5 语言不再并入）、139 BOM、142 选择器（boundSession 已是 lead）、
   143 method-editor persona 明禁组队/写 run、144 代理记账行、145 人工走查含 `##` 完整保留、
@@ -876,7 +876,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 - 136 探针端口回退/清理；137 defaults-probe **ALL PASS**（C5）；139 BOM；142 选择器（boundSession=lead）；
   143 method-editor persona；144 代理记账行；145/146/148 人工走查/英文 HITL2/短引文；
   130 锁恢复入口（错误带锁路径与处置）。
-- 安装/发布面：`lifecycle-smoke` 22 PASS、`release-smoke --install-only` 57 PASS。
+- 安装/发布面：`lifecycle.entry` 22 PASS、`release.entry --install-only` 57 PASS。
 
 ### 未跑 / 状态说明
 
@@ -936,7 +936,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 ### 第 2 轮（2026-11-11）：回放差分 + 后验扫场 + 生产数据反证
 
 - **X4 回放差分**（keyless，`--face research-face`）：lead 场景 3 条红。
-  - [BUG-051](../_archived/fixed_bugs/BUG-051-replay-smoke-panerows-undeclared.md) **P2**（新发现）：`snapshot-replay-smoke`
+  - [BUG-051](../_archived/fixed_bugs/BUG-051-replay-smoke-panerows-undeclared.md) **P2**（新发现）：`snapshot-replay.entry`
     的 C3/C5 引用 `paneRows`，而该变量与采集块在提交 `1f15379` 被整块删除 → 渲染金标准断言永远抛
     ReferenceError、`--update-expected` 同样不可用。归因到提交级。
   - **快照过期（观察，非 bug）**：lead 的 `B·persona` 红，diff 正是 D48 的「深度与篇幅 + 输出形态」合并
@@ -954,12 +954,12 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
   ② §Protocol 枚举用子串匹配：来源行写 `unofficial` 可满足 `official`、`risks_ignored` 可满足 `risks`
   （假通过；修法需 token 匹配，代价是可能误红，留待二次复现再定性）。
 - **X7 入口（部分）**：`isMain` 五形态实跑——直接/相对路径/符号链接/硬链接均 `true`，目录与不存在路径均
-  `false`；`/private/tmp` 归一化按预期生效。**无发现**。`handoff-smoke` 未跑（下轮）。
-- **未跑**：X7 的 handoff-smoke（本轮补跑，见下）、X8 GUI typed 输入；X6 真模型未授权。
+  `false`；`/private/tmp` 归一化按预期生效。**无发现**。`handoff.e2e` 未跑（下轮）。
+- **未跑**：X7 的 handoff.e2e（本轮补跑，见下）、X8 GUI typed 输入；X6 真模型未授权。
 
 ### 第 3 轮（2026-11-11）：门禁的缺席语义 + 已交付 bundle 复核
 
-- **X7 补跑（闭合）**：`handoff-smoke` **ALL PASS**（HANDOFF 含 git init / gitlink 40 位 SHA /
+- **X7 补跑（闭合）**：`handoff.e2e` **ALL PASS**（HANDOFF 含 git init / gitlink 40 位 SHA /
   submodule update / pnpm install；无运行态、凭据、run 数据）。入口面本轮无发现。
 - **发现**：[BUG-052](../_archived/fixed_bugs/BUG-052-protocol-epoch-day-granularity-retro-red.md) **P2**——已交付
   bundle `drt_api-context-caching-ds-openai`（交付 01:10，D46 落地 10:01）今天被 `protocol-audit`
@@ -972,7 +972,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
     evidence-audit 拦住（空 bundle 实测 RED），故不构成放行；记为**观察**（owner = scripts/run-gates），
     不建卡。
   - `verdict-audit` 的会话缺席 → 只 warn `session-missing`、不判红：**设计与测试已在案**
-    （verdict-audit-core 头注 + `tests/run/verdict-audit.test.mjs` 明确「不假装核过原文」），不建卡。
+    （verdict-audit-core 头注 + `tests/run/verdict-audit.spec.mjs` 明确「不假装核过原文」），不建卡。
 - **未跑**：X8 GUI typed 输入（需已起 dev GUI；且 client 半正被另一个 agent 修改）；X6 真模型未授权。
 - **下一层**：其余契约门的同日窗口（`CONTRACT_DATE` 族逐条核）、`run-accept` 的「预检项 PASS/红
   标签」是否会把 N/A 读成绿、以及 BUG-051 修复后的回放复跑（C2/C5 归属）。
@@ -1004,13 +1004,13 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
   - `门A` 的 `audit.md` 解析很紧：恰一个标题/概要/发现行/CRITICAL 章节，计数 0 时必须仅含「（无）」，
     >0 时条目数必须等量——**没有「摘要行说谎」的假通过**；且 `receiptProblems` 会核对回执哈希
     （交付后改 final/audit 即红），此前「回执不落地校验」的猜测被证伪。
-- **并发上下文**：另一个 agent 正在改 `protocol-audit-core` / `protocol-core` / `snapshot-replay-smoke`
+- **并发上下文**：另一个 agent 正在改 `protocol-audit-core` / `protocol-core` / `snapshot-replay.entry`
   （paneRows 已恢复、protocol 测试在动）——本轮结论以**未改文件**的机制为准；被打补丁的面上不再追新卡。
 - **回放复跑（测试已全绿、client 改动仍在工作树）**：lead 仍 4 红，`C2` 稳定复现——右栏可见页签只有
   Agent Team / Chat / Method library，**「研究状态」与「研究配置」两个 pack 页签都不在**；C3/C5 连带。
   当前树含未提交的 client i18n 重构（14 文件，含 ResearchStatusTab/ResearchConfigTab/ResearchGraphTab），
   归属待其提交后复跑；**不先建卡**（未落地的在办改动不算缺陷）。复现命令 =
-  `node scripts/smoke/snapshot-replay-smoke.mjs --face research-face --scenario lead`。
+  `node scripts/smoke/snapshot-replay.entry.mjs --face research-face --scenario lead`。
 - **快照（B·persona）**：仍为 D48 后未重录，需 with-key 重录（用户预算）。
 
 ### 第 11 轮（2026-11-11）：文案断言的 locale 归属
@@ -1018,9 +1018,9 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 - **发现**：[BUG-059](../_archived/fixed_bugs/BUG-059-replay-locator-hardcodes-zh-locale-owned-labels.md) **P2**——
   回放冒烟的 guide 胶囊定位器写死中文 `/研究状态/`，而客户端文案已随 locale（同一环境可见页签是
   **英文 `Method library`**，Playwright 默认 en-US）→ C2 必红，C3（0 行）/C5（金标准）连带，
-  **渲染金标准守卫在 en-US 环境整片失效**。同仓 `client-load-smoke` 已有正确写法（双语正则 + 注释
+  **渲染金标准守卫在 en-US 环境整片失效**。同仓 `client-load.entry` 已有正确写法（双语正则 + 注释
   「Tab title is locale-owned」），可作修复范本。
-- **X8 未跑（honest）**：`client-load-smoke` **exit 2 NOT-RUN**——主机不健康（load 7.77 / free 86MB < 512MB）。
+- **X8 未跑（honest）**：`client-load.entry` **exit 2 NOT-RUN**——主机不健康（load 7.77 / free 86MB < 512MB）。
   未跑 ≠ 通过；等主机释放后再跑。
 - **归属依据**：当前工作树仍含未提交的 client i18n 重构，故 C2 的「成因已证、修复归属待提交后确认」；
   卡里只主张**定位器与 locale 契约**这一层，不主张产品 bug。
@@ -1029,12 +1029,12 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 
 - **发现**：[BUG-060](../_archived/fixed_bugs/BUG-060-host-health-freemem-macos-underreports.md) **P2**——`host-health` 的
   free 判据用 `os.freemem()`（macOS 只报 free pages），实测 182MB < 512MB 阈值判「不健康」，而同一时刻
-  `vm_stat` 的 inactive+free+speculative ≈ 6.9GB 可回收、load/cpu = 0.88——**误报**。后果：`client-load-smoke`
+  `vm_stat` 的 inactive+free+speculative ≈ 6.9GB 可回收、load/cpu = 0.88——**误报**。后果：`client-load.entry`
   在开发机上常态 NOT-RUN（X8 长期不可达），且真实产品红可能被 `isHostUnhealthyVerdict` 收口成环境红。
   修复方向 = 平台相关可用量（macOS: free+inactive+speculative；Linux: MemAvailable），阈值语义写清。
 - **[BUG-059](../_archived/fixed_bugs/BUG-059-replay-locator-hardcodes-zh-locale-owned-labels.md) 扩证到代码层**：
   `launchChromium()` = `chromium.launch()`（无 locale）+ `newPage()`（无 context 选项）= Playwright 默认
-  `en-US`；同批脚本的 locale-owned 文案定位器清单已列进卡（client-load-final / client-load-smoke），
+  `en-US`；同批脚本的 locale-owned 文案定位器清单已列进卡（client-load-final.support / client-load.entry），
   修一处不必再逐条踩。
 - **未跑**：X6 真模型；X8 仍被主机健康判据挡住（本卡）。
 ### 第 13 轮（2026-11-11）：locale 修好后的残余
@@ -1046,7 +1046,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
   **修复就绪**——locale 修好之后 C2 仍红，根因已证到 vendor 文案键：回放钉了 `zh-CN`，但右栏展开按钮
   仍用英文 `getByRole('button', { name: 'Open right sidebar' })`，而 vendor `chrome.expandAria` 的
   zh 是 **「打开右侧边栏」** → `count() === 0` → 右栏没展开 → guide 胶囊不可见 → C3/C5 连带。
-  同批 `client-load-smoke` 明确保持 en-US 且注释了理由——两条策略各自自洽，**混用**才出事。
+  同批 `client-load.entry` 明确保持 en-US 且注释了理由——两条策略各自自洽，**混用**才出事。
   三条初始假设（流程/注册/场景）已作撤回记录留在卡上。
 - **未跑**：X6 真模型；X8 仍被 [BUG-060](../_archived/fixed_bugs/BUG-060-host-health-freemem-macos-underreports.md) 挡住。
 ### 第 14 轮（2026-11-11）：观察面放行后的第一跑
@@ -1055,7 +1055,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
   平台采集——macOS 读 `vm_stat` 的 free+inactive+speculative+purgeable（`availableMemoryMBFromVmStat`），
   Linux 读 `MemAvailable`（回退 MemFree+Buffers+Cached）；本机实测 available = **7616MB** → healthy
   （此前 `os.freemem()` 182MB → unhealthy）。纯函数单测 10 例绿（含「读不出 → null」的 fail-loud 反例）。
-- **X8 尝试被并发实例挡住**：`client-load-smoke` exit 2「另一个实例在跑（pid 33393；锁
+- **X8 尝试被并发实例挡住**：`client-load.entry` exit 2「另一个实例在跑（pid 33393；锁
   `runtime/smoke-workspace/client-load.lock/owner.json`）」——锁与 pid 存活检查工作正常，另一 agent
   正在跑同一冒烟；**未跑 ≠ 通过**，等锁释放后再跑。
 
@@ -1080,7 +1080,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 ### 第 20 轮（2026-11-11）：锁的陈旧度（观察，不建卡）
 
 - **观察**：`client-load.lock/owner.json` 写了 `at`，但 `acquireRunLock` 只查 pid 存活，**不读 `at`**，
-  也没有 `--force`/陈旧度接管；`client-load-smoke` 亦无全局 watchdog。结构上「owner 活着但卡死」会
+  也没有 `--force`/陈旧度接管；`client-load.entry` 亦无全局 watchdog。结构上「owner 活着但卡死」会
   永久阻塞后续 run（错误文案只有「等它结束再跑」）。
 - **本次不建卡**：实测 lock age = 4 分钟（owner 17210 于 23:47 启动，浏览器子进程在场），是**正常在跑**
   而非卡死——按「未证不写结论」留作观察；若真实卡死实例出现（>30 分钟无产出）再升卡。
@@ -1218,7 +1218,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 
 - **门禁现状（并发，非本卡引入）**：`md-links` 红在另一 agent 的未跟踪 Note 链接；`backlog-liveness` 红在
   048/049/050 已移入归档池但归档索引行未补；`pnpm test` 2 红（client 视图测试 `t is not a function`、
-  `protocol-core.test.mjs` 报 `lensScanOf` 尚未导出——他们正在加 lenses 解析修复，半成品状态）。以上均属
+  `protocol-core.spec.mjs` 报 `lensScanOf` 尚未导出——他们正在加 lenses 解析修复，半成品状态）。以上均属
   另一 agent 的在办改动，本卡不代改，待其收口后复跑。
 
 - **下一层**：§Protocol 之外的「在场 + 可解析」双必要条件族（leads 字段/decisions 行/readiness 装饰）；
@@ -1251,7 +1251,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 > 细节以对应 bug 卡为准。
 
 ### N1（02:1x）X8 首次全绿
-- `node --import tsx/esm scripts/smoke/client-load-smoke.mjs` → **75 PASS / 0 FAIL**；覆盖方法库/研究配置/
+- `node --import tsx/esm scripts/smoke/client-load.entry.mjs` → **75 PASS / 0 FAIL**；覆盖方法库/研究配置/
   终稿/状态页/Preview Notice 关闭。`client-load-latest.json` 写 ALL PASS。
 
 ### N2（02:2x）离线闸边界 → BUG-067
@@ -1305,7 +1305,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
   Team Lead" + 8 个 Team 工具，但方案 C 的三份 persona 里没有它。运行时证据缺席（method-coach 会话日志
   没有 request/header，无法确认工具面）。建议：要么给 method-editor persona 加同一句，要么在 design/20
   明写「方法编辑不在组队面、Team 注入可视而不理」。
-- **修复方在办的自伤（只记录，不代改）**：方案 C 在 `tests/pack/presets.test.mjs` 硬编码
+- **修复方在办的自伤（只记录，不代改）**：方案 C 在 `tests/pack/presets.spec.mjs` 硬编码
   `['scout','analyst','critic']` → 触发 `role-list-sync` 3 处；改了 presets 未重渲染 overlay →
   `overlay-fresh` 红。等其收口后复跑。
 
@@ -1336,7 +1336,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
   对方正在写 BUG-069 的 client 代码，文件在两次检查之间变化；不是构建门误报（其判据 = 逐源文件 mtime，
   注释已写明「宁可 exit 2 也不拿旧产物冒充证据」）。
 - 因此 **X8 终验未跑**（未跑 ≠ 通过）。等对方停止编辑并重建后，一条命令即可：
-  `node --import tsx/esm scripts/smoke/client-load-smoke.mjs`。
+  `node --import tsx/esm scripts/smoke/client-load.entry.mjs`。
 - `verify` 剩余 7 红：role-list-sync×3 / overlay-fresh / release-vocab（=BUG-072）/ 归档索引×2，均非本卡。
 
 ### 当前未跑 / 阻塞
@@ -1477,7 +1477,7 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 - **证据**：单回合 completed → true；completed 后再开新回合（未结束）→ true；completed 后
   新回合 failed → true。后两者当前回合未完成。
 - **判定**：**发现** → [BUG-091](../_archived/fixed_bugs/BUG-091-turn-completed-any-turn.md)（P2，排查中；未改产品代码）。
-- **下一层**：`snapshot-replay-smoke` A 层 + `record-role-fixture` 的真实多 turn 形态；
+- **下一层**：`snapshot-replay.entry` A 层 + `record-role-fixture` 的真实多 turn 形态；
   `turnOpenOf` 等「计数型」时序谓词；未跑，记空白。
 
 ### N22：defaults 双读失败被当 auto → BUG-092

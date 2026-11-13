@@ -5,7 +5,7 @@
 >
 > 首提 2026-10-23 ｜ 缺陷卡 [BUG-043](../../_backlog/_archived/fixed_bugs/BUG-043-graph-unmapped-task-shows-unexecuted.md)（已修）
 > ｜ 设计合同 [design/40 §2](../../docs/design/40-research-cockpit.md)（构成与折算层表）｜
-> 夹具 [plan-mapping](../../tests/fixtures/plan-mapping/) ｜ 测试 [graph-model.test.mjs](../../tests/cockpit/graph-model.test.mjs)
+> 夹具 [plan-mapping](../../tests/fixtures/plan-mapping/) ｜ 测试 [graph-model.test.mjs](../../tests/cockpit/graph-model.spec.mjs)
 
 ## 决定
 

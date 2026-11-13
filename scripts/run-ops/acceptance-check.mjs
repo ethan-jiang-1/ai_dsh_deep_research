@@ -4,7 +4,7 @@
 // 为什么存在：lib/acceptance-check.mjs 头注承诺"供操作侧收尾核验"（把"收活结论"对账成
 // 机械事实），但仓内此前无 CLI 入口。判据求值与三态语义（PASS/FAIL/UNVERIFIED，判不了的
 // 永不静默放行）**不在这里**：唯一语义源 = scripts/lib/acceptance-check.mjs（消费方 = 本件
-// 与 keyless 契约测试 tests/run/acceptance-check.test.mjs）；行为面 E2E = probes/behavior/discipline-probe.mjs。
+// 与 keyless 契约测试 tests/run/acceptance-check.spec.mjs）；行为面 E2E = probes/behavior/discipline-probe.mjs。
 //
 // 参数形态（按模块语义定，不猜约定位置）：判据是委派方**显式写下的清单**（模块签名 =
 // 数组入参；仓内 run 模板无判据落盘约定）→ 壳参数 = bundle 目录 + 判据 JSON 文件（数组，

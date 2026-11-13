@@ -68,9 +68,9 @@ AGENTS.md §命令速查）：
 | 改动面 | 最小可信证据 |
 |---|---|
 | 角色 preset 行形状（`presets/<role>.patch.yml`：dsh-agent-preset 行 + config.plugins + skills/） | `node scripts/verify/verify.mjs`（`preset-structure` / `row-deps` / `role-list-sync`） |
-| 接线（roster、bundle 行、skills 隔离） | `DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs`（L1 真挂载） |
-| 安装形状（pack → 干净 profile → plugin add） | `node scripts/smoke/release-smoke.mjs`（L2） |
-| persona / skill 文本（模型可见） | 追加 `node scripts/smoke/l4-lite-smoke.mjs`（真模型档） |
+| 接线（roster、bundle 行、skills 隔离） | `DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs`（L1 真挂载） |
+| 安装形状（pack → 干净 profile → plugin add） | `node scripts/smoke/release.entry.mjs`（L2） |
+| persona / skill 文本（模型可见） | 追加 `node scripts/smoke/l4-lite.e2e.mjs`（真模型档） |
 | docs / AGENTS | 追加 `node probes/behavior/entry-chain-probe.mjs`（真模型档） |
 | 门禁本身 | 注入回归看红 → 还原 → 绿（流程正本 = [writing-a-gate 技能](../../.agents/skills/writing-a-gate/SKILL.md)；台账 = `docs/evaluation.md` §L0） |
 
@@ -81,11 +81,11 @@ AGENTS.md §命令速查）：
 
 | 台阶 | 本仓证据 | 载体 |
 |---|---|---|
-| ① 导出形态守卫 | `src/index.ts` / `src/client/index.ts`：named exports（`inject` / `apply`）在场、无 `export default`、`inject` 为字符串数组 | `tests/pack/export-shape.test.mjs`（keyless 秒级） |
-| ② 行为 / 谓词 | `src/lib/` 每个折算谓词有正例 + 错误路径用例，同 diff 交付 | `tests/<domain>/*.test.mjs` |
+| ① 导出形态守卫 | `src/index.ts` / `src/client/index.ts`：named exports（`inject` / `apply`）在场、无 `export default`、`inject` 为字符串数组 | `tests/pack/export-shape.spec.mjs`（keyless 秒级） |
+| ② 行为 / 谓词 | `src/lib/` 每个折算谓词有正例 + 错误路径用例，同 diff 交付 | `tests/<domain>/*.spec.mjs` |
 | ③ 注册生命周期 | slot / 页签 / 活标题注册全量包 `scoped.effect(...)`——dispose 即撤销贡献，零裸注册 | verify 门禁 `client-effect-wrap` |
-| ④ 真挂载 | pack 构建产物经真 DSH web 装载（真入口路径；挂载失败只有真会话抓得到） | `client-load-smoke`（真浏览器断言清单） |
-| ⑤ 组装面 | persona、全部 request/header 与四处 user/message 注入（工作区指令 / skill 目录 / 运行时上下文 / 时钟序列）走 snapshot-replay B 层（组装请求 diff）；用户可见面走 C 层渲染金标准 | `snapshot-replay-smoke` + 场景声明 [snapshots/replay/research-face/snapshot.json](../../snapshots/replay/research-face/snapshot.json) |
+| ④ 真挂载 | pack 构建产物经真 DSH web 装载（真入口路径；挂载失败只有真会话抓得到） | `client-load.entry`（真浏览器断言清单） |
+| ⑤ 组装面 | persona、全部 request/header 与四处 user/message 注入（工作区指令 / skill 目录 / 运行时上下文 / 时钟序列）走 snapshot-replay B 层（组装请求 diff）；用户可见面走 C 层渲染金标准 | `snapshot-replay.entry` + 场景声明 [snapshots/replay/research-face/snapshot.json](../../snapshots/replay/research-face/snapshot.json) |
 
 ## 交付与部署形态（本包怎么送到用户手里）
 
@@ -126,13 +126,13 @@ agent-instructions 注入，冲突时项目优先。安装步骤（用户视角�
 | 你要做的事 | 必须一起动 | 最小证据 |
 |---|---|---|
 | 加/换一条 bundle 行（host 共享面） | `cordis.patch.yml` → `node dev/render-overlay.mjs` 重渲染；行引用的 `@deepseek-ai/*` 进 `peerDependencies` | `overlay-fresh` / `row-deps` 门禁 + L1 真挂载 + L2 安装形状 |
-| 加一个研究角色 | 按 [`adding-a-research-role`](../../.agents/skills/adding-a-research-role/SKILL.md) §2 的同步面逐项做（清单以技能为准） | `preset-smoke` 真挂载（L1）+ `preset-structure` / `role-list-sync` |
+| 加一个研究角色 | 按 [`adding-a-research-role`](../../.agents/skills/adding-a-research-role/SKILL.md) §2 的同步面逐项做（清单以技能为准） | `preset.e2e` 真挂载（L1）+ `preset-structure` / `role-list-sync` |
 | 加一个方法论 skill | `presets/<role>/skills/<n>/SKILL.md`（frontmatter `name` 逐字等于目录名）；persona 若点名 skill 名须同 diff 对账（各 preset 的 persona 均有硬引用） | `preset-structure` + L1 的 skills 隔离断言 |
 | 改研究手册 / 模板 | 改 `packages/deep-research-pack/content/`（手册/模板）；模板路径由 `research_pack_root` 插值 | `content-shape` 门禁 + `snapshot-replay` B 层 + `l4-lite` 真模型 |
-| 加部署脚本 / bin | `package.json` 的 `files` + `bin`（当前只有只读 doctor） | `release-smoke`（L2：真装一次，装完能跑） |
-| 加观察面 client 面能力 | `src/client/` + `tsconfig.client.json` 的 include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `client-load-smoke`（真浏览器）+ `client-keys` 门禁 |
-| 改**现有**观察面页签（最频改动） | 页签 → 文件 → 职责的构成正本 = [design/40 §2](../design/40-research-cockpit.md)；折算住 `src/lib/`（纯函数，别在组件里堆逻辑）；新路径进 design/40 登记 | `client-load-smoke`（页签可点可读；失败留 png/html/console/meta）+ `cockpit-doc-registry` / `client-keys` 门禁 |
-| 改 persona / skill / 手册文本（模型可见） | 同 diff 跑真模型档；运行中的 web 缓存 boot 文本，须重启通道 | `l4-lite-smoke`（真模型档） |
+| 加部署脚本 / bin | `package.json` 的 `files` + `bin`（当前只有只读 doctor） | `release.entry`（L2：真装一次，装完能跑） |
+| 加观察面 client 面能力 | `src/client/` + `tsconfig.client.json` 的 include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `client-load.entry`（真浏览器）+ `client-keys` 门禁 |
+| 改**现有**观察面页签（最频改动） | 页签 → 文件 → 职责的构成正本 = [design/40 §2](../design/40-research-cockpit.md)；折算住 `src/lib/`（纯函数，别在组件里堆逻辑）；新路径进 design/40 登记 | `client-load.entry`（页签可点可读；失败留 png/html/console/meta）+ `cockpit-doc-registry` / `client-keys` 门禁 |
+| 改 persona / skill / 手册文本（模型可见） | 同 diff 跑真模型档；运行中的 web 缓存 boot 文本，须重启通道 | `l4-lite.e2e`（真模型档） |
 | 换 vendor pin | `dev/vendor-build.sh` 全链重建 + 逐条重审 | [bumping-vendor-pin 技能](../../.agents/skills/bumping-vendor-pin/SKILL.md)（流程正本；历次轮次见归档） |
 | 改 profile 镜像 | 不手改——改 pack 源后跑 `bash dev/boot-run.sh`：组合不完整/缺席时它重建，漂移时它 **exit 1** 并打印 `rm -rf <profile>` 补救（直接 `dsh --profile deep-research` 会静默用旧镜像） | boot-run 漂移检测（fail-loud） |
 

@@ -6,25 +6,26 @@
 
 ## 分域（2026-10-20 用户指令：目录映射源代码）
 
-`tests/**/*.test.mjs` 是默认回归的递归发现面；`fixtures/` 与 `_tmp/` 不在发现面内。
-新测试按**被测面**入域，不放在 `tests/` 顶层：
+`pnpm test` 聚合两条 keyless 车道：`tests/**/*.spec.mjs`（进程内 spec）+ `tests/checks/*.test.mjs`（门禁自身）。
+`fixtures/` 与 `_tmp/` 不在两条发现面内；新测试按**被测面**入域，不放在 `tests/` 顶层：
 
 | 目录 | 映射的源代码/面 | 放什么 |
 |---|---|---|
 | `run/` | run 通道、run 状态、HITL、run 门与审计、观察/回放、run-ops/probe | `scripts/lib` 对应模块的回归（模块清单 = 盘上 `scripts/lib/` 目录，不在此枚举） |
 | `cockpit/` | pack client 观察面与其折算 | pack `src/lib` 折算模块的回归（清单 = 盘上 `src/lib/` 目录）+ `src/client` 抽出的纯逻辑判据（model / use* 内的纯函数；组件行为归 client-load 真机档） |
 | `pack/` | pack 结构、preset、导出与部署 | presets 形状、export-shape、deploy-bin |
-| `contracts/` | 跨仓合同/文档/门禁自测/测试基础设施 | 清单 = 盘上 `contracts/` 目录（evaluation、navigability、layering 等） |
+| `contracts/` | 跨仓**产品合同**（run bundle、版本呈现、方法映射等） | `*.spec.mjs`；清单 = 盘上 `contracts/` 目录 |
+| `checks/` | **门禁自身**与测试基础设施 | `*.test.mjs` 平铺；`pnpm test:checks` 只收这一层 |
 | `vendor/` | vendor **源码**契约（组合层 Loader、设置 schema） | 不在默认 glob；跑 `pnpm test:vendor`（根 tsconfig 源映射，fresh clone 无 vendor 构建可跑） |
 | `fixtures/` | 构造样本与冻结录制语料 | 测试/smoke 消费；taxonomy = [fixtures/README](fixtures/README.md) |
 
-域内文件名 = 被测模块名 + `.test.mjs`（如 `run/run-state.test.mjs` ↔ `scripts/lib/run-state.mjs`）；
+域内文件名 = 被测模块名 + `.spec.mjs`（如 `run/run-state.spec.mjs` ↔ `scripts/lib/run-state.mjs`）；checks 用 `<check>.test.mjs`；
 一文件测多个面按**主语**归域，跨域合同放 `contracts/`——pack src/lib 的 run 族折算（journal-wire 类）归
-`run/`，跨 scripts/lib 与 pack 的驾驶舱数据面（method-presets 类）归 `cockpit/`；与 verify 门禁同源的双断言面（`pack/presets.test` ↔ role-list-sync/preset-structure/row-deps/pack-bundle-compat）登记 = 该测试头注。
+`run/`，跨 scripts/lib 与 pack 的驾驶舱数据面（method-presets 类）归 `cockpit/`；与 verify 门禁同源的双断言面（`pack/presets.spec` ↔ role-list-sync/preset-structure/row-deps/pack-bundle-compat）登记 = 该测试头注。
 
 ## 放置规则（一处证据一个家）
 
-- **`tests/`**：契约测试与守卫（`*.test.mjs`），断言对象是仓库里的自控文件；
+- **`tests/`**：进程内契约测试与守卫（`*.spec.mjs`）；门禁自身住 `tests/checks/*.test.mjs`；断言对象是仓库里的自控文件；
 - 域内共享助手（非测试）住 `tests/<domain>/<name>-helpers.mjs`（glob 之外；只放夹具定位/临时目录，不放断言）。
 - **`tests/fixtures/`**：构造样本与经整理、人审冻结的录制回放语料；由测试或独立回放 smoke
   消费。原始运行日志、报告与抓取证据归 `runtime/smoke-workspace/`、`research-workspace/` 的
@@ -36,8 +37,8 @@
 
 ## 写测试时
 
-- **覆盖边界 + 减法都有契约**：`scripts/lib` 每个模块要么有直测、要么在 [test-surface](contracts/test-surface.test.mjs) 的 `SMOKE_ONLY` 登记"为什么只能 smoke"；覆盖率 = `pnpm test:coverage`（观察面，不设百分比门禁）；未使用 import / 未导出顶层声明由 [no-unused-code](contracts/no-unused-code.test.mjs) 机械清点（scripts/、dev/、tests/、pack src/；只证零引用，删副作用初始化前人工确认）；
-- **命名即申报**：`*.test.mjs` 命名即进 regression（递归 glob 选中，`layering` 钉 keyless）——
+- **覆盖边界 + 减法都有契约**：`scripts/lib` 每个模块要么有直测、要么在 [test-surface](checks/test-surface.test.mjs) 的 `SMOKE_ONLY` 登记"为什么只能 smoke"；覆盖率 = `pnpm test:coverage`（观察面，不设百分比门禁）；未使用 import / 未导出顶层声明由 [no-unused-code](checks/no-unused-code.test.mjs) 机械清点（scripts/、dev/、tests/、pack src/；只证零引用，删副作用初始化前人工确认）；
+- **命名即申报**：`*.spec.mjs` 进 spec 车道、`tests/checks/*.test.mjs` 进门禁车道（各自 glob 选中，`layering`/`test-lanes` 钉 keyless 与后缀）——
   新检查先想清它是不是 keyless 契约证据再命名；支援件住 `lib/`、`fixtures/`（glob 之外，
   import 不注册测试）；
 - **verify the world**：断言重读文件或观察持久状态，不信"代码里已经设好了"；

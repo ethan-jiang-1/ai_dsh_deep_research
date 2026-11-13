@@ -29,7 +29,7 @@
 - `pnpm test`：全绿（含 method draft、source、operation state、writer、events、commands 与 resume-context 回归）。
 - `pnpm verify`：全绿；pack Client/Host 构建通过。
 - 真实 Loader 组合 smoke：注册 Method Editor preset 的三个 Host tools，验证 durable owner command、SHA-256 失配拒绝、默认变更、删除与 workspace 回读；首轮 schema 增量已记录。
-- 真实浏览器 `client-load-smoke`（显式会话）：A′ 两列、详情/访谈/表单切换、显式来源、内置预览、已完成 run 预览与完成判据、摘要字段聚焦、640/480px 无横向裁切、库/工作台切换、分隔条键盘、`SessionReference.ready/openState` 门控全部通过；无模型 prompt。
+- 真实浏览器 `client-load.entry`（显式会话）：A′ 两列、详情/访谈/表单切换、显式来源、内置预览、已完成 run 预览与完成判据、摘要字段聚焦、640/480px 无横向裁切、库/工作台切换、分隔条键盘、`SessionReference.ready/openState` 门控全部通过；无模型 prompt。
 - 真实浏览器 + 真实模型隔离 E2E（`deepseek-official/deepseek-flash`，临时 workspace）：从真实方法条目进入工作台，UI 保存并设为默认 → 清除默认 → 删除；每一步 Host tool 执行、Client 回执 `Saved and verified`、目标条目字段/默认状态/删除结果均经文件回读核对。另有一次隔离 Method Editor save 探针，模型先读 `method-interview`，再按给定 operationId/payloadHash 调用 `method_library_upsert`，Host 结构化成功。
 - E2E 发现并修复两个真实问题：读态排队操作在 coach ready 后重建 draft/coach 导致 Session 建会话循环；工作台右缘按钮被右侧栏宽度拖拽柄遮挡。resume 判据已抽成 `shouldStartFreshDraftContext` 纯函数并留 keyless 反证。
 - 用户于 2026-10-30 授权以真实浏览器/真实模型 end-to-end 实测作为本次业务验收；真模型测试使用隔离工作区，没有改动当前 research-workspace 的方法库。

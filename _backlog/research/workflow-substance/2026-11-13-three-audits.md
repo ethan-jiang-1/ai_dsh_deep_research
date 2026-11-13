@@ -17,7 +17,7 @@ intent: 为 issue 2026-11-13-workflow-substance-gates 提供 fresh-agent 路径�
 | 1 | 根 `AGENTS.md` | 入口链 1–4；新门禁带反证 |
 | 2 | `docs/00-index.md` | 门禁改动走 guides/60；evaluation = 验收合同 |
 | 3 | `docs/guides/60-dev-loop.md` | 「加/改机械门禁」→ verify/gates + §L0 台账；先读 writing-a-gate |
-| 4 | `.agents/skills/writing-a-gate/SKILL.md` | 先想红、防空语料、`CASES` + gates-smoke |
+| 4 | `.agents/skills/writing-a-gate/SKILL.md` | 先想红、防空语料、`CASES` + gates.e2e |
 | 5 | `docs/evaluation.md` | 读到 §判据形状：结构化事实、歧义=红、不变量+矩阵、不造 grep 门禁——**推翻第 3/4 步** |
 
 ### 1.2 三个摩擦
@@ -52,7 +52,7 @@ console.log(parseReadinessDeclaration('{\"version\":1,\"readiness\":\"FAIL\",\"r
 - **重复键**：`JSON.parse` 静默取末值 → `FAIL, PASS` 读成 PASS。
 
 修复：`verdictAnalysisOf` 显式暴露 `ambiguous`；`readinessOfSources` 对互斥判红；声明重复键
-fail-closed。负例 = `tests/run/readiness-declaration.test.mjs` 末两例。
+fail-closed。负例 = `tests/run/readiness-declaration.spec.mjs` 末两例。
 
 ## 2. D51 真实链路审计：6 处违反自己的规则
 

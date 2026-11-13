@@ -23,9 +23,9 @@ YAML 解析；它不证明真挂载或模型行为。
 | [`docs/evaluation.md`](../../../../docs/evaluation.md) §L0/§L3 | 新测试属于 L0 契约回归；L3 方法论完整性另有映射审查与真模型档，不由 keyless 覆盖替代 |
 | [`docs/project-map.md`](../../../../docs/project-map.md) §测试怎么选 | 三轴（档位/验收面/命名即层）与“新检查落家序”；契约测试是第 1 步，义务 = evaluation 登记 + 带反证 |
 | [`docs/guides/60-dev-loop.md`](../../../../docs/guides/60-dev-loop.md) §2 | 任务型路由；纯文档/卫生只跑 L0；preset 内容改动还要看 L1 preset-smoke |
-| [`tests/contracts/layering.test.mjs`](../../../../tests/contracts/layering.test.mjs) | tests 禁真模型/浏览器/子进程/网络；新测试必须保持 keyless |
-| [`tests/contracts/test-surface.test.mjs`](../../../../tests/contracts/test-surface.test.mjs) | `scripts/lib` 与 pack `src/lib` 的覆盖边界；新测试不改变该登记 |
-| [`tests/contracts/no-unused-code.test.mjs`](../../../../tests/contracts/no-unused-code.test.mjs) | 新 helper/import 不得留下未使用绑定 |
+| [`tests/contracts/layering.test.mjs`](../../../../tests/checks/layering.test.mjs) | tests 禁真模型/浏览器/子进程/网络；新测试必须保持 keyless |
+| [`tests/contracts/test-surface.test.mjs`](../../../../tests/checks/test-surface.test.mjs) | `scripts/lib` 与 pack `src/lib` 的覆盖边界；新测试不改变该登记 |
+| [`tests/contracts/no-unused-code.test.mjs`](../../../../tests/checks/no-unused-code.test.mjs) | 新 helper/import 不得留下未使用绑定 |
 | `guard-red-record` 门禁 | 标题带 BUG-nnn 才需要负例留证；本卡新测试没用 BUG 标题 |
 
 当前命令：`pnpm test`（递归 glob，keyless，约 3–4s）、`pnpm verify`（L0 结构门禁）、

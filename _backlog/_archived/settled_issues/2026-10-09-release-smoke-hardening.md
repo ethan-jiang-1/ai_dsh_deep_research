@@ -9,7 +9,7 @@ opened: 2026-10-09
 
 **问题与期望结果：** L2 安装冒烟对 pack 的 client 半验证不足、进程卫生不完整。出处 = [company 钉版复核 Note](../../../notes/archived/2026-10-09-company-repin-review.md)（候选②，对照 company@59551f2 逐行差异表）。期望：安装域对 client 面（装配失败 = 整 UI 砖）有断言，且冒烟进程挂死/并发互撞不再可能。
 
-**当前情况：** [release-smoke.mjs](../../../scripts/smoke/release-smoke.mjs) 头注已列五条差异（2026-10-09 修订）。缺口按危害排序：
+**当前情况：** [release-smoke.mjs](../../../scripts/smoke/release.entry.mjs) 头注已列五条差异（2026-10-09 修订）。缺口按危害排序：
 1. **安装副本 `lib/client.js` 断言缺席**——pack 明确带 client 半（`exports ./client` → lib/client.js、files 含 lib/**），L2 却不验它在安装副本里在场；
 2. **`dependencies === undefined` 断言缺席**——防依赖面回潮成精确钉死（peers-only 发布形状）；
 3. **安装域浏览器模块表断言缺席**——client-load-smoke 是源码域；client 半"槽 key 拼错静默不渲染"只有浏览器能抓（company postmortem 0003 同款）；

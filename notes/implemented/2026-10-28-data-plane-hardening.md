@@ -54,10 +54,10 @@
 
 ## 实际跑过的验证
 
-- **L1 真挂载 ALL PASS**：`DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs`——四角色
+- **L1 真挂载 ALL PASS**：`DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs`——四角色
   `session/create` 全绿、skills 硬隔离断言全绿（证明 `time-context` 行在真会话里可激活，不只是 YAML 形状）。
-- **L2 安装形状 ALL PASS**：`release-smoke`——tarball 安装 → clean profile → scaffold/preflight →
-  安装域 preset-smoke 四角色真挂载 → remove 后无残留 → 端口释放；`pack-smoke` 104 条 tarball 条目全绿。
+- **L2 安装形状 ALL PASS**：`release.entry`——tarball 安装 → clean profile → scaffold/preflight →
+  安装域 preset.e2e 四角色真挂载 → remove 后无残留 → 端口释放；`pack.e2e` 104 条 tarball 条目全绿。
   另跑 `preflight-smoke` 全绿（fake anchor 的 peer/未验证面）。
 - **见证下界回归（自审红→绿）**：`contractEpochOf` 对 `schema` 形态返回 `''`（实测），
   修复前 `run-accept`/`node-gate` 拿到的下界是 `null`；新增 `epochDateOf` 后同一 bundle 返回
@@ -67,10 +67,10 @@
   数据卡 10 列 + 可移植闭集、手册两处副本的回执三态句、seed policy 两例、审计 findings.policy）。
 - **时钟行门禁先红后绿（实录）**：删掉 `analyst.patch.yml` 的 `- id: time-context` 两行 →
   `verify` 报 `preset-structure: analyst.patch.yml: 须恰有一条 - id: time-context（D32 时钟行，当前 0 条）`
-  → 还原 → 全绿。gates-smoke 全绿（88 个注入案例，含新增 `preset-structure-clock-missing`）。
+  → 还原 → 全绿。gates.e2e 全绿（88 个注入案例，含新增 `preset-structure-clock-missing`）。
 - **整数契约反证**：`schema: 2` 模式不读日期、`date` 取 `created`；`schema: 99` → 核心违约 +
   red；`schema: two` → 违约；无 schema 且 contract 非法 → 违约；仅 `contract: 2026-10-23` 的旧形态
-  判定与改前一致（`tests/run/schema-scan.test.mjs`）。
+  判定与改前一致（`tests/run/schema-scan.spec.mjs`）。
 - **现网结论未漂移**：`schema-scan` 缺省（archive）仍是 `契约前 0/46｜契约期 0/32`；显式点名
   在飞两 bundle 仍是 `2/2 RED`（`leads-eu.md` / `leads-supply.md` 未登记、journal 跨 bundle
   `[来源:]`、drafts 绝对路径）——本轮没有"顺手变绿"，因为那正是缺口 1 的证据。
@@ -79,21 +79,21 @@
   经压缩后达 200）。
 - **真模型重录 + 回放 ALL PASS**：四角色 fixture 用 `dev/record-role-fixture.mjs` 重录（真模型；
   重录前先 `git mv` 备份旧 fixture 到 /tmp 再删，录制器拒绝静默覆盖）。新基线带新手册与
-  `time-context` 注入；`snapshot-replay-smoke` 从 **9 FAILURE**（旧基线：手册过期 + 新注入种类 +
+  `time-context` 注入；`snapshot-replay.entry` 从 **9 FAILURE**（旧基线：手册过期 + 新注入种类 +
   scout skill-catalog 存量漂移）转为 **ALL PASS**。`time-context` 进比对面后判据 = **注入的
   turn/step**（载荷是墙钟，逐字不可复现——理由与边界写进 [snapshots/README](../../snapshots/README.md)）；
   C 金标准 `--update-expected` 重写并人审：只差 lead 一句总结措辞（模型换了说法），无结构变化。
 
 **自审第七轮（工具只读语义）：** 归档 `drt_cn-open-vs-us-closed-agentic` 时发现 `run-accept` 的 `--no-write` 从未实现、未知 flag 被静默忽略——用户以为只读，实际已经写盘（本次实测发生）。已实现真只读（预检绿即 exit 0、不落任何 bundle 文件）并让未知参数 exit 2；smoke 增四例。
 
-**自审第六轮（冒烟自身的前提）：** `workspace-isolation-smoke` 的前置检查写死 `_dist/…0.1.2.tgz`，而脚本根本不用 tarball——0.1.3 之后它一直 `exit 2`（"未跑"被当成正常）。删掉该前置后双实例隔离 ALL PASS。另用**当前源码** `npm pack`（repo 内 cache）+ 全局 rc.3 临时 profile 做安装域真挂载：`add` / `dump-config` / `preset-smoke --profile rc3check --no-patch` / `remove` 全 PASS——补上"rc.3 上装的是旧 tarball"的证据缺口。
+**自审第六轮（冒烟自身的前提）：** `workspace-isolation.entry` 的前置检查写死 `_dist/…0.1.2.tgz`，而脚本根本不用 tarball——0.1.3 之后它一直 `exit 2`（"未跑"被当成正常）。删掉该前置后双实例隔离 ALL PASS。另用**当前源码** `npm pack`（repo 内 cache）+ 全局 rc.3 临时 profile 做安装域真挂载：`add` / `dump-config` / `preset.e2e --profile rc3check --no-patch` / `remove` 全 PASS——补上"rc.3 上装的是旧 tarball"的证据缺口。
 
 **自审第五轮（标签语义）：** `stale`（用户没动、包里有新版）此前被标签说成"与包版本不同源"并建议 `--adopt`——动作是错的，正确动作是 `--upgrade`。处置建议收成 `seed-core.seedPolicyAdvice`（drift/update/grown 三态），scaffold 与 preflight 共用；模板漂移也按契约类点名（此前只有手册/NODES/判型库点名）。
 
 **自审第四轮（版本字段自身）：** 发现 `schema: 1` + `created` 会让 bundle 落进 `pre-contract` 得到
 **全量豁免**——把日期换成整数只是换了逃逸口。已收紧：写 schema 即按现行从严，低版本与高版本都判红，
 旧形态的唯一表达是**省略 schema**（`schema-scan` 与 `node-gate` 同一判据，带反证用例）。
-另修同族第二处：schema 形态若残留一个旧 `contract`，`epochDateOf` 曾取更早日期把见证下界往回拨（抄旧头 = 重开旧见证）；现改为 schema 在场只认 `created`。复跑 `data-smoke` / `user-env-smoke` / `profile-matrix-smoke` 全 PASS（新 peer 与种子 schema 下的安装面）。又补 fetch 面 fail-closed：`run.md` 在场但纪元非法时，门不再"无下界"采信见证（RED 并点名）。另加**模板自洽**契约测试：直接拿 `templates/run/run.md` 造一个新 run，断言零核心违约、展示日期取 `created`——模板不再只是写着的形状，而是可被判据接受的一份实例。
+另修同族第二处：schema 形态若残留一个旧 `contract`，`epochDateOf` 曾取更早日期把见证下界往回拨（抄旧头 = 重开旧见证）；现改为 schema 在场只认 `created`。复跑 `data.entry` / `user-env.entry` / `profile-matrix-smoke` 全 PASS（新 peer 与种子 schema 下的安装面）。又补 fetch 面 fail-closed：`run.md` 在场但纪元非法时，门不再"无下界"采信见证（RED 并点名）。另加**模板自洽**契约测试：直接拿 `templates/run/run.md` 造一个新 run，断言零核心违约、展示日期取 `created`——模板不再只是写着的形状，而是可被判据接受的一份实例。
 
 **自审第三轮（端到端覆盖与残留字面量）：** 又抓到两处真回归——① `presentGate` / `hitl2RowGate`
 独立调用时仍读 `contractEpochOf`（schema run 丢失见下界），已统一改 `epochDateOf`，并补

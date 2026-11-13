@@ -19,9 +19,9 @@
 ## 输掉的方案
 
 - **grandfather 豁免存量只管增量**：14 条声明每条都能写出真实配方（测试正文就在那）——豁免是偷懒不是必要，否。
-- **真注入级红证**（对每条历史 BUG 真注入一次看红）：成本过高且重复——静态对账够用，真注入义务留给新门禁自身的反证与 gates-smoke 常驻案例（同卡原取舍）。
+- **真注入级红证**（对每条历史 BUG 真注入一次看红）：成本过高且重复——静态对账够用，真注入义务留给新门禁自身的反证与 gates.e2e 常驻案例（同卡原取舍）。
 - **留证行内关键词宽松匹配**（任意注释提 BUG 号即算）：company 判据明写"标题是声明、注释只是解释"——宽松匹配会让解释性注释冒充留证，空转。
-- **把留证块判法放进 layering.test 而非 verify**：这是结构合同不是分层合同；verify 台账 + gates-smoke 案例的既有轨道更合身。
+- **把留证块判法放进 layering.test 而非 verify**：这是结构合同不是分层合同；verify 台账 + gates.e2e 案例的既有轨道更合身。
 
 ## 实际跑过的验证
 
@@ -32,9 +32,9 @@
 - 删留证块：删 local-date 的 BUG-017 留证（标题保留）→ 红 → 还原绿。
 - 双址正向：手工造活跃卡 `_backlog/bugs/BUG-991-probe.md` + 带留证标题声明 → 门禁照常 PASS（活跃址解析）→ 清理。
 - **门禁咬自己的交付**（两例，均真实咬合证据）：① hitl-provenance 首版留证把「（补记）」插在日期与冒号之间——不合判据形态，首跑即红（修格式后绿）；② 红证脚本误用 `git checkout --` 还原未提交文件，抹掉 local-date 留证块——门禁立刻点名该文件缺留证（重补后绿）。格式错和内容丢都被抓住。
-- gates-smoke 常驻：`guard-red-record-no-record` / `guard-red-record-dangling` 两注入案例 + `guard-red-record-active-bug` 双址正向对照（CONTROLS）。
+- gates.e2e 常驻：`guard-red-record-no-record` / `guard-red-record-dangling` 两注入案例 + `guard-red-record-active-bug` 双址正向对照（CONTROLS）。
 
-绿灯面（全部实跑）：`pnpm verify` 全绿（含新台账行两处同步）；`pnpm test` 全绿（留证块是注释，零行为面改动）；`gates-smoke` 全绿（含新案例）。
+绿灯面（全部实跑）：`pnpm verify` 全绿（含新台账行两处同步）；`pnpm test` 全绿（留证块是注释，零行为面改动）；`gates.e2e` 全绿（含新案例）。
 
 未跑项：L1/L2/真模型档（零 pack/preset/模型可见/驱动面改动——本轮只动 tests 注释、verify 门禁、文档）。
 

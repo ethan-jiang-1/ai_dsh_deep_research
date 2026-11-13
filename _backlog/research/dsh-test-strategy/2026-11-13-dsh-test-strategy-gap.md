@@ -23,7 +23,7 @@ intent: 把 DSH 的测试策略抓成可迁移的机制，对照本仓资产与 
    （readiness 074→141→150、方法库 heading 081→085→093→123→124→127→128→138、
    锁/端口 073→104→113→114→126→130）。
 4. **第二差距是昂贵层的必需性。** DSH 把「模型可见变更必须同 PR 加强制快照」写进政策并由 CI
-   执行；本仓的 `snapshot-replay-smoke` 是 162s 的 dev-only 档，任务型路由表把 L4-lite 列为
+   执行；本仓的 `snapshot-replay.entry` 是 162s 的 dev-only 档，任务型路由表把 L4-lite 列为
    必跑面，却没有把更便宜、更可靠的 keyless 组装请求 diff 放进 required 路径。
 5. **第三差距是账本。** 我们不知道每条慢资产「唯一证明什么、判据核在哪、最近一次真绿是什么、
    什么时候该退役」；`smoke-registry` 只有 `ci/dev-only` + 理由。`test-asset-fence` 已把这件事
@@ -68,20 +68,20 @@ intent: 把 DSH 的测试策略抓成可迁移的机制，对照本仓资产与 
 - 资产与命名：`tests/AGENTS.md`、`scripts/AGENTS.md`、`scripts/README.md`、
   `snapshots/README.md`、`probes/README.md`、`tests/fixtures/README.md`。
 - 机械面：`scripts/verify/context.mjs` 的 55 道门禁、`tests/contracts/{test-surface,
-  smoke-contract,smoke-registry,layering,verify-gates}.test.mjs`、`scripts/smoke/registry.json`。
+  smoke-contract,smoke-registry,layering,verify-gates}.spec.mjs`、`scripts/smoke/registry.json`。
 - 失败史：`_backlog/_archived/fixed_bugs/` 的 159 张卡、
   `_backlog/issues/2026-11-11-exploratory-test-strategy.md`（1847 行探索协议与逐轮记录）、
   2026-11-12/13 的五个批量修复提交（`252c2fd7`、`d966fa31`、`275b8c03`、`bb0323ac`、`4d6308c9`）
   与 D51 判据形状提交（`7b504d48`、`9f64b3a7`、`b64d170b`、`88cc38b6`、`d49b5e9f`）。
 - 成本侧：`_backlog/research/test-asset-fence/2026-11-13-test-asset-fence.md` 的实测
-  （`gates-smoke` 202s、`snapshot-replay` 162s）；本文复测快环（`pnpm verify` 3.91s、
+  （`gates.e2e` 202s、`snapshot-replay` 162s）；本文复测快环（`pnpm verify` 3.91s、
   `pnpm test` 4.59s / 1409 例）。
 
 ### 1.3 口径
 
 - 「本仓」= 本 git 仓，不含 `runtime/`、`research-workspace/` 运行区。
 - 「昂贵层」按墙钟与前置分，不按有没有凭据分：`snapshot-replay` 机制上 keyless，但 162s
-  已进入慢档；`preset-smoke` 起真 DSH 但 3.8s，仍在快/中档。
+  已进入慢档；`preset.e2e` 起真 DSH 但 3.8s，仍在快/中档。
 - 「强/弱」不是价值判断，是**证据形态与失败类的匹配度**：某一层强，只代表它对其目标失败类
   可见，不代表它能替代另一层。
 
@@ -240,10 +240,10 @@ DSH 的 `probe` 不是术语表里的对象，而是一种**问事实的动作**
 |---|---|---|
 | 档位 | 凭什么跑（keyless / 真模型 / 浏览器 / 未跑） | `AGENTS.md §密钥`、`smoke-contract` 的 REAL_MODEL closed set |
 | 验收面 | 证明了什么（L0–L4） | `docs/evaluation.md` |
-| 命名即层 | 住哪、怎么选（`*.test.mjs` / `*-smoke` / `*-probe` / `*-gate/audit/scan`） | `tests/AGENTS.md`、`scripts/AGENTS.md` |
+| 命名即层 | 住哪、怎么选（`*.spec.mjs` / `*-smoke` / `*-probe` / `*-gate/audit/scan`） | `tests/AGENTS.md`、`scripts/AGENTS.md` |
 
-五面：L0 结构（55 道门禁 + 1409 例 keyless 回归）、L1 真挂载（`preset-smoke`）、
-L2 安装（`release-smoke` 等）、L3 方法论完整性（映射表 + 契约）、L4 真模型交付
+五面：L0 结构（55 道门禁 + 1409 例 keyless 回归）、L1 真挂载（`preset.e2e`）、
+L2 安装（`release.entry` 等）、L3 方法论完整性（映射表 + 契约）、L4 真模型交付
 （L4-lite / 完整 run）。每面的退出语义统一为 0 绿 / 1 红 / 2 未跑；未跑 ≠ 通过。
 
 ### 3.2 资产盘点（实测）
@@ -252,10 +252,10 @@ L2 安装（`release-smoke` 等）、L3 方法论完整性（映射表 + 契约�
 |---|---|---|---|
 | L0 门禁 | 55 道 | `pnpm verify` | keyless；CI keyless job |
 | keyless 回归 | 176 文件 / 1409 例 | `pnpm test` | keyless；pre-commit + CI |
-| 门禁自测 | 108 注入案例 + 7 对照 | `scripts/smoke/gates-smoke.mjs` | keyless；CI keyless job（202s） |
+| 门禁自测 | 108 注入案例 + 7 对照 | `scripts/smoke/gates.e2e.mjs` | keyless；CI keyless job（202s） |
 | 分级冒烟 | 28 个 | 按任务路由 | 8 个 CI（keyless / client-load / deploy），20 个 dev-only |
 | 探针 | 8 支（行为 6 / 浏览器 1 / 流仪器 1）+ 索引生成器 | `probes/` | 真模型 6 / 连已起 GUI 1 / 仪器 1；不进默认回归 |
-| 场景回放 | 1 族 / 4 角色 case | `snapshot-replay-smoke` | keyless，但 dev-only（162s） |
+| 场景回放 | 1 族 / 4 角色 case | `snapshot-replay.entry` | keyless，但 dev-only（162s） |
 | run 门 | 7 个 | 随 run 验收 | keyless |
 | run 观察/运维 | 14 个 | 诊断/验收 | keyless |
 | 夹具 | 249 文件 | `tests/fixtures/` | 零孤儿由 navigability 契约把守 |
@@ -263,7 +263,7 @@ L2 安装（`release-smoke` 等）、L3 方法论完整性（映射表 + 契约�
 
 快环复测：`pnpm verify` 3.91s、`pnpm test` 4.59s（1409 例，本机热跑；同机负载下另一次
 复测 9.0–13.6s，口径见附录 C）。慢档引用
-`test-asset-fence` 实测：`gates-smoke` 202s、`snapshot-replay` 162s。
+`test-asset-fence` 实测：`gates.e2e` 202s、`snapshot-replay` 162s。
 
 ### 3.3 已经吸收的 DSH 纪律
 
@@ -273,7 +273,7 @@ L2 安装（`release-smoke` 等）、L3 方法论完整性（映射表 + 契约�
 
 - 档位与 with-key 分层、verify the world、真入口路径、mock 只放边界；
 - 证据匹配面（任务型路由表 + `guides/62` 五台阶）、prove-it-red、fix fixtures not normalizers；
-- 防假绿 verdict 0/1/2、真模型档 closed set、`gates-smoke` 对照组、`guard-red-record`；
+- 防假绿 verdict 0/1/2、真模型档 closed set、`gates.e2e` 对照组、`guard-red-record`；
 - 命名即层（后缀申报证据类型与档位）、`SMOKE_ONLY` 登记、fixture 零孤儿；
 - 快照 A/B/C 三层判据、`--update-expected --why`、record/refresh 分叉、B 层组装请求 diff；
 - probe 登记制与头注六字段；探索协议 E1–E6（本仓自创，非 DSH）。
@@ -286,7 +286,7 @@ L2 安装（`release-smoke` 等）、L3 方法论完整性（映射表 + 契约�
 | 每个 `scripts/lib`/pack `src/lib` 有直测 | `test-surface` | 直测质量仍靠 review |
 | 每个 smoke 有 CI/dev-only 归属 | `smoke-registry` | 成本/唯一证明面/判据核/退役条件无机械面 |
 | 真模型档 closed set | `smoke-contract` | — |
-| 门禁有反证 | `gates-smoke` 108 案例 + `verify-gates` 对照 | 部分结构性例外只有一次性红录 |
+| 门禁有反证 | `gates.e2e` 108 案例 + `verify-gates` 对照 | 部分结构性例外只有一次性红录 |
 | BUG 标题带编号的测试有红配方 | `guard-red-record` | 只咬标题带 BUG / 文件名含 conformance 的两类 |
 | 模型可见变更同 PR 更新快照 | 无 | 任务型路由表 + 人审 |
 | 慢夹具与判据同源 | 无（S0 只修了 run-accept 一处） | `tests/AGENTS`「改夹具先想红」 |
@@ -300,7 +300,7 @@ L2 安装（`release-smoke` 等）、L3 方法论完整性（映射表 + 契约�
 |---|---|---|---|
 | `docs/evaluation.md` §L0 反证口径 | 结构性例外 5 个 | `NO_CASE_GATES` 6 个（漏 `staged-change-pairing`） | Phase 1 E 同 diff 改 |
 | `probes/README.md` behavior「现有」 | 4 支 | 盘上/索引 6 支 | 同上 |
-| `scripts/README.md` smoke 表 | 25 行 | 28 个文件（3 个 client-load 支援件在 `client-load-smoke` 行内点名） | 同上 |
+| `scripts/README.md` smoke 表 | 25 行 | 28 个文件（3 个 client-load 支援件在 `client-load.entry` 行内点名） | 同上 |
 | `docs/external-materials.md` digest 行 | 11 篇 @ `639ed01539` | 16 篇，catalog 基线 rc.5，7 篇 reverified / 9 篇 carried | Phase 1 E 同 diff 改 |
 | `docs/guides/66-probe-playbook.md` | `:140` 与 `:152` 对同三格空白两套说法 | 应合并成一套「已有证据但不是探针」 | Phase 3 P |
 | `scripts/lib/replay-scene.mjs` | 头注「six B judges」 | `JUDGES` 5 项（`time-context` 另并） | Phase 3 P |
@@ -372,7 +372,7 @@ symlink 越界、锁/端口身份、判据关键词、快照 turn 语义、manif
 | 13 | probe/探索 | probe 是选择器；同源判据；flake 阶梯 | 8 支探针 + 头注 + 索引 + 探索协议 | ● 探针与探索强于 DSH 的成文面；◐ 探索未毕业成常驻实践 | **保留+毕业**：不改造探针，改造探索制度 |
 | 14 | CI/可靠性 | required 聚合、preflight、flake 八类、资源所有权 | 3 job、exit 2、closed set、port/lock/host-health；无 flake 分类；多处固定 sleep | ◐ 防假绿强；○ 无 flake 纪律；慢档归属倒挂 | **借鉴**：flake 最小集 + 快照 CI；不搬 run-gates DAG |
 | 15 | 测试基建 | test-support 七件套 + known limitations | `scripts/lib` + `web-harness` + fixtures；无 known limitations 节 | ◐ 集中但缺「这个 harness 证明不了什么」的成文 | **缩编**：给共享 harness 加一段已知限制 |
-| 16 | 资产退役 | expected-filenames、豁免移除条件、snapshot 世代不可变 | 无退役条件；`e2e-021rc2` 仍活；安装档重叠 | ○ 慢资产只增不减 | **借鉴**：S2 sunset + 季度复核 |
+| 16 | 资产退役 | expected-filenames、豁免移除条件、snapshot 世代不可变 | 无退役条件；`e2e-021rc2.entry` 仍活；安装档重叠 | ○ 慢资产只增不减 | **借鉴**：S2 sunset + 季度复核 |
 
 ## 5. 失败史告诉我们什么
 
@@ -482,12 +482,12 @@ BUG 号痕迹**，6 张没有标题级引用（095、106、108、112、113、136
 | 复盘触发 | `notes/README §事故复盘` 加 P0/P1/复发触发 | 159 张卡缺一次「流程为什么放它过去」；DSH 的 postmortem 回路已验证 | 低 |
 | 类级守卫规则 | `tests/AGENTS` + `guard-red-record` 扩展 | 治复发链；不是每条 bug 都写矩阵，而是判据/解析类必须 | 中 |
 | flake 最小纪律 | `scripts/AGENTS` 加 5 条 + 现有 port/lock/host-health 案例 | 固定 sleep/共享资源已在冒烟里出现；DSH 的归因条款能直接缩编 | 低 |
-| 资产退役 | S2 sunset + 季度复核 | 防慢资产只增不减；`e2e-021rc2` 是活例 | 低 |
+| 资产退役 | S2 sunset + 季度复核 | 防慢资产只增不减；`e2e-021rc2.entry` 是活例 | 低 |
 | 最小聚合裁决 | `ci.yml` 加 `needs: [keyless, client-load, deploy]` 的裁决 job + job 清单契约 | 今天不假绿，但新增 job 忘了加保护/加 `if:` 没人拦；DSH 的最小不变量可借 | 低 |
 | with-key 可触发通道 | `workflow_dispatch` 的 `l4-lite` 单档 + preflight 硬失败，不进 PR 聚合 | 把「真模型档能跑」从散文变成可触发事实；不撞 fork 无 secret | 中 |
-| 只读快照模式 | `snapshot-replay-smoke --read-only` 与 `--update-expected` 互斥 | 今天 refresh 是 replay 的 flag，误写只靠 `--why` + 暂存区配对；DSH 的 `DSH_SNAPSHOT=replay` 可缩编 | 低 |
+| 只读快照模式 | `snapshot-replay.entry --read-only` 与 `--update-expected` 互斥 | 今天 refresh 是 replay 的 flag，误写只靠 `--why` + 暂存区配对；DSH 的 `DSH_SNAPSHOT=replay` 可缩编 | 低 |
 | 客户端 dispose 行为 | 假 ctx 的 effect/dispose 测试（不是 HMR 行为面） | 2026-10-19 的静默失效是作用域生命周期，不是 HMR；静态包裹门禁只证形态 | 低 |
-| 装起 + 效果 | `lifecycle-smoke`/`release-smoke` 增「装起后内容注入/startup/defaults 真发生」正向断言 | 现在只证「装得起 + 无降级 + 元数据」，不证 `apply` 的效果 | 中 |
+| 装起 + 效果 | `lifecycle.entry`/`release.entry` 增「装起后内容注入/startup/defaults 真发生」正向断言 | 现在只证「装得起 + 无降级 + 元数据」，不证 `apply` 的效果 | 中 |
 | skip 可见 | `pnpm test` 零 skip 契约（或静态禁 `test.skip`） | 当前 0 skipped，但 `node:test` 的 skip 不会让 `pnpm test` 非零；DSH 的 skipped=failure 可缩编 | 低 |
 
 ### 6.2 缩编（保留判据，换载体）
@@ -579,7 +579,7 @@ BUG 号痕迹**，6 张没有标题级引用（095、106、108、112、113、136
 | **C. 运行时导出守卫** | 宿主半（`src/index.ts`、`content/startup/defaults/fetch-fallback`）用真 Loader `unwrapExports` round-trip；client 半保留静态 + `client-load` | 注入 `export default` 或 re-export default → 红；还原绿；不引入新依赖（用 vendor `createRequire`） | 低；已 spike 通过（见附录 C） |
 | **C2. 最小聚合裁决** | `ci.yml` 加 `needs: [keyless, client-load, deploy]` 的裁决 job，失败条件含 `skipped`；同 diff 加「job 名 ↔ needs」契约测试 | 删一个 needs / 加一个新 job 不登记 → 契约红；上游红时裁决 job 仍给出结果 | 低；不搬 failover/池选择 |
 | **C3. 客户端 dispose 行为** | 假 ctx 的 effect/dispose 测试（`src/client/index.ts` 的注册贡献）；不碰「HMR 行为面不做」的偏离 | 注入一个不 dispose 的注册 → 红；dispose 后贡献消失 | 低；与 C 同族，分钟级 |
-| **C4. 快照只读模式** | `snapshot-replay-smoke --read-only` 与 `--update-expected` 互斥；盘上运行默认只读 | 同时给两 flag → exit 2；只读跑不改任何期望文件 | 低；不加 dependency |
+| **C4. 快照只读模式** | `snapshot-replay.entry --read-only` 与 `--update-expected` 互斥；盘上运行默认只读 | 同时给两 flag → exit 2；只读跑不改任何期望文件 | 低；不加 dependency |
 | **C5. skip 可见** | `pnpm test` 零 skip 契约（解析 `node:test` 汇总或静态禁 `test.skip`）；CI 里 2 仍按红处理但报告分列 | 注入一个 `test.skip` → 契约红；正常套件 0 skipped | 低；当前 0 skipped，先立契约 |
 | **D. 证据账本模板** | `reviewing-a-delivery` 加「证据账本」节：证据/层/失败类/负控/CI/显式未覆盖；issue 模板同节 | 一次真实交付按模板填写；评审能指出未覆盖行 | 低；是流程，不是门禁 |
 | **E. 文档纠偏** | `docs/external-materials.md` digest 行改 16 篇 / rc.5 / 混合核验；`discipline-map` 源 10 同步；`evaluation` 结构性例外 5→6；`probes/README` behavior 4→6；`scripts/README` smoke 25→28；`guides/66` 两套说法合并 | `md-links`/`doc-paths` 绿；不吹「已全部对齐」 | 低；纯文档 |
@@ -588,9 +588,9 @@ BUG 号痕迹**，6 张没有标题级引用（095、106、108、112、113、136
 
 | 片 | 做什么 | 验收 | 成本/风险 |
 |---|---|---|---|
-| **F. 快照 A/B 进 CI** | 先 spike：`boot-run --prepare-profile`（temp home + tarball + team layer）→ `snapshot-replay-smoke --read-only --layers a,b`（砍 C：去 chromium/reload/最脆的 sleep）；CI 独立 job（vendor build + pack build + profile + 回放）；路由表把 B 列入模型可见变更的必跑面 | CI 基线绿；故意改 persona/手册 → B 红；运行 ≤5 min；skip 可见 | 高；profile 安装依赖 registry/team layer；需 spike 决定 source vs installed |
-| **F2. with-key 可触发通道** | `workflow_dispatch`（可选 nightly）跑 `l4-lite-smoke` 单档；preflight 缺 key 硬失败；**不进 PR 聚合**（fork 无 secret） | 手动触发可跑；缺 key 时红而不是全跳过；不阻塞 PR | 中；凭据只在可信环境 |
-| **F3. 装起 + 效果** | `lifecycle-smoke`/`release-smoke` 增正向断言：装起后内容注入/startup/defaults 真发生，而不只是元数据 | 删掉一个 apply 效果 → 红；装起 + 效果同链 | 中；需要可观测的效果点 |
+| **F. 快照 A/B 进 CI** | 先 spike：`boot-run --prepare-profile`（temp home + tarball + team layer）→ `snapshot-replay.entry --read-only --layers a,b`（砍 C：去 chromium/reload/最脆的 sleep）；CI 独立 job（vendor build + pack build + profile + 回放）；路由表把 B 列入模型可见变更的必跑面 | CI 基线绿；故意改 persona/手册 → B 红；运行 ≤5 min；skip 可见 | 高；profile 安装依赖 registry/team layer；需 spike 决定 source vs installed |
+| **F2. with-key 可触发通道** | `workflow_dispatch`（可选 nightly）跑 `l4-lite.e2e` 单档；preflight 缺 key 硬失败；**不进 PR 聚合**（fork 无 secret） | 手动触发可跑；缺 key 时红而不是全跳过；不阻塞 PR | 中；凭据只在可信环境 |
+| **F3. 装起 + 效果** | `lifecycle.entry`/`release.entry` 增正向断言：装起后内容注入/startup/defaults 真发生，而不只是元数据 | 删掉一个 apply 效果 → 红；装起 + 效果同链 | 中；需要可观测的效果点 |
 | **G. 失败类→层表** | 在 `evaluation.md` 或 `guides/67` 加一张 12 行的表（纯逻辑/服务/导出/工具/模型文本/persistence/provider/子进程/Client/配置/性能/文档），每行最低层 + 反例 | 表被 `guides/60` 路由表与 `reviewing-a-delivery` 引用；一次真实变更能按表选层 | 低；避免变成第二份路由表 |
 | **H. 类级守卫规则** | `tests/AGENTS` 加：判据/解析类修复必须带语法/状态矩阵（至少 N 个邻接变体），不只报出的输入；`guard-red-record` 对 `conformance`/`judgment` 类要求声明矩阵 | 用 081/150 两个真实族做样板；注入邻接变体 → 矩阵红 | 中；N 与「类」的判定需人审，不硬门 |
 | **I. 探索毕业** | 把 E1–E6 从 1847 行 issue 提炼成 `.agents/skills/exploratory-verification/SKILL.md` + `guides/67` 一节；定义每里程碑一轮、预算、charter 模板、毕业判据 | 技能可被新 agent 按 description 加载；一轮探索产出 charter/结果/毕业卡 | 中；不要把探索变成例行仪式 |
@@ -604,7 +604,7 @@ BUG 号痕迹**，6 张没有标题级引用（095、106、108、112、113、136
 | **L. Hook/HMR 行为测试** | `happy-dom`/jsdom + `react-dom/client` 的 session-switch/race 矩阵；HMR 行为面仍按 2026-10-04 偏离不做（dispose 已在 C3 补） | 注入 stale/race → 红；session switch 后旧投影不残留 | 中高；新依赖 + DOM 环境 |
 | **M. 快照世界树** | 回放 run 写出的 bundle 文件树与 `manifest` 哈希比对；record/refresh 不改写 | 改一个 bundle 文件 → 红；世界与转录分开 | 高；需要 bundle fixture |
 | **N. flake 最小纪律** | `scripts/AGENTS` 5 条 + 六类归因（环境红/前置缺席/构建过期/锁被占/端口残留/产品红）；冒烟里的 bare sleep 逐个改成谓词等待 | 一条慢冒烟注入延迟 → 不假绿；红能归入六类 | 中；改多个慢壳 |
-| **O. 退役/季度复核** | `e2e-021rc2` 补 picker 断言后退役；安装档合并评估；每季度对 DSH digest 重校一次 | 退役有替代证据；季度复核记录进 external-materials/notes | 中；退役前先补证据 |
+| **O. 退役/季度复核** | `e2e-021rc2.entry` 补 picker 断言后退役；安装档合并评估；每季度对 DSH digest 重校一次 | 退役有替代证据；季度复核记录进 external-materials/notes | 中；退役前先补证据 |
 | **P. 两处口径修正** | `replay-scene` 的 `JUDGES` 5 vs 头注 "six"（time-context 缺省永远放行）；`guides/66` 对同三格空白的两套说法 | 加一条「声明判据集 = 实际判据集」断言；文档只留一套说法 | 低；小但会误导 |
 
 ### 8.5 优先级与依赖
@@ -661,7 +661,7 @@ K/L/M/N/O/P 是季度项，等前两阶段稳定后再做。
 
 - **失败史样本**：逐卡深读 60/159，其余 99 张只用于背景与复发链核对；分类计数是样本计数，
   不是全量普查。复发链的因果只到卡内自述与提交记录，不证明「所有复发都由同一类缺口造成」。
-- **未复跑慢档**：`gates-smoke` / `snapshot-replay` / L1 / L2 / L4 本轮未跑；慢档数字引用
+- **未复跑慢档**：`gates.e2e` / `snapshot-replay` / L1 / L2 / L4 本轮未跑；慢档数字引用
   test-asset-fence 的实测（HEAD `ec652a30`），不当作本文改动面的证据。
 - **DSH 侧是静态核验**：没有跑 `run-gates.ts`、没有跑任何 DSH 测试；配置语义来自读代码。
   digest 与 rc.5 的 20 条漂移已标出，但未核验的 7 项仍在只读材料里列明。
@@ -723,13 +723,13 @@ K/L/M/N/O/P 是季度项，等前两阶段稳定后再做。
 | 命题 | 本仓条文/证据 |
 |---|---|
 | 五面与互不抵 | `docs/evaluation.md` §1、§完成判断四分离 |
-| exit 0/1/2 | `scripts/AGENTS.md` §冒烟脚本可靠性纪律；`tests/contracts/smoke-contract.test.mjs` |
-| 真模型 closed set | `tests/contracts/smoke-contract.test.mjs` 的 `REAL_MODEL` |
-| keyless 五件套 | `tests/contracts/layering.test.mjs` |
-| 覆盖边界 | `tests/contracts/test-surface.test.mjs`（scripts/lib + pack src/lib；不含 src/client） |
-| 门禁反证 | `scripts/smoke/gates-smoke.mjs`（108 案例 + 7 对照）；`tests/contracts/verify-gates.test.mjs` |
+| exit 0/1/2 | `scripts/AGENTS.md` §冒烟脚本可靠性纪律；`tests/checks/smoke-contract.test.mjs` |
+| 真模型 closed set | `tests/checks/smoke-contract.test.mjs` 的 `REAL_MODEL` |
+| keyless 五件套 | `tests/checks/layering.test.mjs` |
+| 覆盖边界 | `tests/checks/test-surface.test.mjs`（scripts/lib + pack src/lib；不含 src/client） |
+| 门禁反证 | `scripts/smoke/gates.e2e.mjs`（108 案例 + 7 对照）；`tests/checks/verify-gates.test.mjs` |
 | 命名即层 | `scripts/AGENTS.md` §依赖与分层；`tests/AGENTS.md` §放置规则 |
-| 快照 A/B/C | `scripts/smoke/snapshot-replay-smoke.mjs` 头注；`snapshots/README.md` |
+| 快照 A/B/C | `scripts/smoke/snapshot-replay.entry.mjs` 头注；`snapshots/README.md` |
 | 快照边界 | `snapshots/README.md` §证据边界、§已知限制 |
 | probe 登记 | `probes/README.md`；`docs/guides/66-probe-playbook.md` |
 | 探索协议 | `_backlog/issues/2026-11-11-exploratory-test-strategy.md` §策略 |
@@ -740,7 +740,7 @@ K/L/M/N/O/P 是季度项，等前两阶段稳定后再做。
 | skip | 当前 0 skipped，但 `node:test` 的 skip 不会让 `pnpm test` 非零；无契约 |
 | 快照三态 | `--update-expected` 是 replay 的 flag；无 `--read-only`；`lastRewrite` 当前不在盘上声明 → 配对门对「跑完不 commit」不生效 |
 | 快照判据集 | `replay-scene.mjs` 的 `JUDGES` 5 项 vs 头注「six B judges」；`time-context` 由 `replay-request` 另并，`cases[].judges` 永远放行其缺省 |
-| 装起 + 效果 | `lifecycle-smoke` 只到「无降级 + `readPluginMeta`」；`apply` 的内容注入/startup/defaults 效果无正向断言 |
+| 装起 + 效果 | `lifecycle.entry` 只到「无降级 + `readPluginMeta`」；`apply` 的内容注入/startup/defaults 效果无正向断言 |
 | probe 口径 | `guides/66:140` 与 `:152` 对同三格空白两套说法（「暂无探针但有证据」vs「有证据但不是探针」） |
 
 ## 附录 C：本次核验与 spike 记录
@@ -754,7 +754,7 @@ K/L/M/N/O/P 是季度项，等前两阶段稳定后再做。
   结论：宿主半运行时守卫可行、零新依赖；client 半需 DOM 装载器或留在浏览器档。
 - **digest 核验状态**：`catalog.json` 显示 16 篇中 7 篇 `reverified`、9 篇 `carried`；
   `docs/external-materials.md` 仍登记 11 篇 @ `639ed01539`——这是待纠偏的文档漂移。
-- **未跑**：`gates-smoke` / `snapshot-replay` 本轮未复跑（引用 test-asset-fence 的实测）；
+- **未跑**：`gates.e2e` / `snapshot-replay` 本轮未复跑（引用 test-asset-fence 的实测）；
   L1/L2/L4 未跑（非本文改动面）；真模型档未跑。
 - **只读核验材料（未入库，`runtime/dsh-test-strategy-research/`）**：
   `dsh-primary-sources.md`（121 行一手源事实表 + 20 条 digest 漂移）、

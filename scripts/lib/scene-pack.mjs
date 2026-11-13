@@ -4,7 +4,7 @@
 // 零消费者（grep 实证；runtime/README 目录表也没登记 scenes/），「看见当时页面」的闭环缺
 // 读取半边（抓了只能人肉逐文件开；"三天前页面坏了"零存量可看）。本模块收读取半边：
 // CLI 壳 = scene-capture 的 --list / --show 子命令；keyless 契约测试钉住
-// （tests/run/scene-pack.test.mjs——缺件与坏 meta 不静默）。
+// （tests/run/scene-pack.spec.mjs——缺件与坏 meta 不静默）。
 // 场景包形态（写盘正本 = scene-capture.mjs）：page.png / page.html / body.txt /
 // console.txt / meta.json（url 已脱敏 / at / screenshot / consoleProblems / exceptions）。
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';

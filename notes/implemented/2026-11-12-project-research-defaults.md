@@ -28,14 +28,14 @@
 ## 实际跑过的验证
 
 - **L0**：`pnpm verify` 全绿；`pnpm test` **1289 pass / 0 fail**；`pnpm typecheck` 通过。
-- **新增 keyless**：`tests/pack/research-defaults.test.mjs` 14 例（缺席/合法/部分 auto/非法/禁止字段/合并/unset/序列化/按钮状态/prompt 段/方法默认/命令结果/枚举对账）；`defaults-command.test.mjs` 10 例（空 show / set / stale / 非法 / unset / clear / 路径安全 / 坏文件 / schema / audience-only）；`defaults-effect.test.mjs` 6 例（context 名/order/插值、cwd 读、命令注册、commands 缺席、两 workspace 不串、commands 晚到注入）；`tests/cockpit/defaults-store.test.mjs` 8 例；`tests/cockpit/defaults-ui.test.mjs` 3 例（按钮四态 / 面板自动态与控件 / 显式值渲染）（无文件 auto、值/方法默认/冲突、两 session 隔离、set payload/revision、stale、unset/clear、invalid/unreadable、loading 不写）。
-- **L1**：`preset-smoke` **ALL PASS**（5 角色 + 2 worker 真挂载；skill 改动后）。
-- **client-load**：`client-load-smoke --seed tests/fixtures/client-load-home` **ALL PASS**；新增 pass-3d：按钮在场、状态文案、点开配置页签、面板自动态、seed 初始无文件、改深度 → 文件 `effort=deep`/`revision=1`、按钮变「已设 1 项」、unset → 无 effort/`revision=2`、文件无 `"auto"`；另改输出形态/读者/来源家族 → 文件逐次 `revision=3/4/5`、shape 保留、按钮变「已设 2 项」。
-- **L2**：`install-shape-smoke` **ALL PASS**；`product-boot-smoke` **GREEN**（第一次跑起步卡 3 项红，重跑 GREEN——首屏时序 flake，现场无 pageerror）；`release-smoke` **ALL PASS**（真实安装形状 + 安装域 preset-smoke 全绿）。
+- **新增 keyless**：`tests/pack/research-defaults.spec.mjs` 14 例（缺席/合法/部分 auto/非法/禁止字段/合并/unset/序列化/按钮状态/prompt 段/方法默认/命令结果/枚举对账）；`defaults-command.spec.mjs` 10 例（空 show / set / stale / 非法 / unset / clear / 路径安全 / 坏文件 / schema / audience-only）；`defaults-effect.spec.mjs` 6 例（context 名/order/插值、cwd 读、命令注册、commands 缺席、两 workspace 不串、commands 晚到注入）；`tests/cockpit/defaults-store.spec.mjs` 8 例；`tests/cockpit/defaults-ui.spec.mjs` 3 例（按钮四态 / 面板自动态与控件 / 显式值渲染）（无文件 auto、值/方法默认/冲突、两 session 隔离、set payload/revision、stale、unset/clear、invalid/unreadable、loading 不写）。
+- **L1**：`preset.e2e` **ALL PASS**（5 角色 + 2 worker 真挂载；skill 改动后）。
+- **client-load**：`client-load.entry --seed tests/fixtures/client-load-home` **ALL PASS**；新增 pass-3d：按钮在场、状态文案、点开配置页签、面板自动态、seed 初始无文件、改深度 → 文件 `effort=deep`/`revision=1`、按钮变「已设 1 项」、unset → 无 effort/`revision=2`、文件无 `"auto"`；另改输出形态/读者/来源家族 → 文件逐次 `revision=3/4/5`、shape 保留、按钮变「已设 2 项」。
+- **L2**：`install-shape.entry` **ALL PASS**；`product-boot.entry` **GREEN**（第一次跑起步卡 3 项红，重跑 GREEN——首屏时序 flake，现场无 pageerror）；`release.entry` **ALL PASS**（真实安装形状 + 安装域 preset.e2e 全绿）。
 - **L4-lite**：**ALL PASS**（5 角色 + method-editor 真模型响应；scout `web_search` 真调用）。
 - **一次性 seeded 真模型 probe（2026-11-12，port 3122，1 boot / 2 会话；脚本 `runtime/smoke-workspace/defaults-probe.mjs`，报告 `runtime/smoke-workspace/defaults-probe-last.md`）**：seeded HITL1 卡 **3×「项目默认」/ 1×「库默认」**；Q2 显式写「项目默认是深度档 + 完整报告/决策层，但单点名单题按题型推荐快答，冲突在此说明」并推荐 quick（符合 skill 的「冲突显式、用户本次优先」）；Q3 推荐项目默认 official+regulatory/12m；auto 卡 **0×「项目默认/库默认/默认」**。
 - **常驻 `probes/behavior/defaults-probe.mjs`（1 boot / 2 场景；REAL_MODEL；port 3124；`_index --write` 已登记）**：**ALL PASS** —— seeded HITL1 ask 在场、三问、项目默认标记 **7/7**（项目默认/库默认/事实核查/完整报告/决策层/official/regulatory）；auto 无项目默认/库默认；语言同句/选项名判据绿（NOTE：同选项但分句出现「按项目默认；中文正文…」，观察不判红）。
-- **snapshot**：`snapshot-replay-smoke` 12 项红（Team Lead/headers/runtime-context）已由 [BUG-080](../../_backlog/_archived/fixed_bugs/BUG-080-snapshot-research-face-stale-team-baseline.md) 用当前 profile 重录 4 角色 + source 身份 + C 金标准人审后 **ALL PASS**；重录还发现 MCP_PLAYWRIGHT=0 形态无 MCP 组，场景声明补 `mcp:false` + replay-fixtures 条件守卫（先红后绿）；重录 diff 不含 `research:defaults` 段（该段在 dev 工作区无默认时本就不注入）。seeded HITL1 默认推荐已有常驻 `defaults-probe`。
+- **snapshot**：`snapshot-replay.entry` 12 项红（Team Lead/headers/runtime-context）已由 [BUG-080](../../_backlog/_archived/fixed_bugs/BUG-080-snapshot-research-face-stale-team-baseline.md) 用当前 profile 重录 4 角色 + source 身份 + C 金标准人审后 **ALL PASS**；重录还发现 MCP_PLAYWRIGHT=0 形态无 MCP 组，场景声明补 `mcp:false` + replay-fixtures 条件守卫（先红后绿）；重录 diff 不含 `research:defaults` 段（该段在 dev 工作区无默认时本就不注入）。seeded HITL1 默认推荐已有常驻 `defaults-probe`。
 
 ### 反证（测试是否真会咬）
 
@@ -55,6 +55,6 @@
 - **`ctx.inject(['commands'])` 时序**：本轮实测命令服务晚于 pack 行 mount；若上游 loader 改成 commands 永不出现（headless），命令面静默缺席，注入仍工作——这是有意降级。
 - **ledger 预算**：D50 加入时 `docs/decisions.md` 触 32KB 硬顶，压缩了 D25/D40/D41 表述；后续新增 D 号需先退役/搬 Note。
 - **方法行只读**：面板不提供方法默认切换；用户需去顶部「方法库」tab。Lead 中继扩展未做。
-- **client-load 主机态**：2026-11-12 23:05 load ≈10.4 / 10 CPU 时**未强制**跑 `client-load-smoke --seed`，preflight 通过且 **ALL PASS**（clean-host 证据）；此前 load ≈18.9 的强制跑记录仅作历史。
+- **client-load 主机态**：2026-11-12 23:05 load ≈10.4 / 10 CPU 时**未强制**跑 `client-load.entry --seed`，preflight 通过且 **ALL PASS**（clean-host 证据）；此前 load ≈18.9 的强制跑记录仅作历史。
 - **`literature_review`**：protocol 保留值，不在面板六种内；单源对账另案。
 - **命令文本 code-like**：面板映射了 stale/invalid/io；聊天里直接输入命令时看到的是 code-like 文本，不是完整双语 prose。

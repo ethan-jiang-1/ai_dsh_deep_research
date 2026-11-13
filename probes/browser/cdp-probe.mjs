@@ -9,7 +9,7 @@
 // 为什么存在：Playwright actionability 被 DSH UI 挡死；执行冒烟与人工目验之间的交互驱动环
 // cdp-probe —— DSH deep-research 驾驶舱的真浏览器场景（裸 CDP，见 scripts/lib/cdp-driver.mjs）。
 //
-// 为什么存在：执行冒烟（client-load-smoke，Playwright）断言面是"能渲染"，但**交互驱动**在
+// 为什么存在：执行冒烟（client-load.entry，Playwright）断言面是"能渲染"，但**交互驱动**在
 // Playwright 里会被 DSH 自身的 UI 挡死——Preview Notice 横幅盖住右栏开关、会话行内嵌
 // Answer 按钮抢点击（actionability 检查不过 = 超时）。裸 CDP 的 evaluate/click 走 JS 派发，
 // 绕开全部可点性检查——本脚本是"执行冒烟"和"owner 亲眼看"之间的那一环（模式与场景层

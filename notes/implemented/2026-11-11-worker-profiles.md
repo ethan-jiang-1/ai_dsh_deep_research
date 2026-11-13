@@ -45,11 +45,11 @@
 ## 实际跑过的验证
 
 - `node dev/render-overlay.mjs`：overlay 含 workers；`overlay-fresh` 绿。
-- `DSH_SMOKE_REAL=1 node scripts/smoke/preset-smoke.mjs`：5 角色 + 2 worker 真挂载
+- `DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs`：5 角色 + 2 worker 真挂载
   ALL PASS；Lead 看见角色 skills；worker/wave 看见角色 skills；研究角色仍只看见自己的。
-- `node scripts/smoke/release-smoke.mjs --install-only`：安装域 7 个 preset 全挂；
+- `node scripts/smoke/release.entry.mjs --install-only`：安装域 7 个 preset 全挂；
   `dsh plugin remove` 后无残留。
-- `node scripts/smoke/l4-lite-smoke.mjs`：全角色响应 + scout 工具调用 ALL PASS。
+- `node scripts/smoke/l4-lite.e2e.mjs`：全角色响应 + scout 工具调用 ALL PASS。
 - 真模型 `request/header`（production overlay）：
   - `research-worker` = edit/glob/grep/present/read/read_image/skill/todo_write/
     web_fetch/web_search/working_directory/write；无 ask/goal/team/spawn/subagent/workflow。
@@ -58,7 +58,7 @@
     已消失）。
 - `SubagentPresetSelection` keyless 检查：`agentPreset: research-worker` 时
   `resolve({}) = research-worker`；无默认时仍继承父。
-- `pnpm test`：1165 pass / 0 fail（含 `tests/pack/workers.test.mjs` 六条、
+- `pnpm test`：1165 pass / 0 fail（含 `tests/pack/workers.spec.mjs` 六条、
   `presets-wiring` 的 Lead 多技能例外、`presets.test` 的“研究角色不挂 workflow”）。
 - `node scripts/dist/export-dist.mjs`：0.3.1 tarball 含 workers；`dist-tarball` 绿。
 

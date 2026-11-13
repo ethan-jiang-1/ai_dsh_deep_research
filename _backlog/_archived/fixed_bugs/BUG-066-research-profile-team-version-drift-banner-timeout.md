@@ -42,7 +42,7 @@ node --import tsx/esm scripts/smoke/snapshot-replay-smoke.mjs --face research-fa
 三处缺口叠在一起：
 
 1. **版本面缺失**：`team-preflight-smoke` 的 profile 组合校验只查 bundles + 盘上 preset
-   （[team-preflight-smoke.mjs](../../../scripts/smoke/team-preflight-smoke.mjs)），**不查团队层版本**；
+   （[team-preflight-smoke.mjs](../../../scripts/smoke/team-preflight.e2e.mjs)），**不查团队层版本**；
    `snapshot-replay-smoke` **完全不校验** profile。而 [dev/boot-run.sh](../../../dev/boot-run.sh) 的
    `profile_ok()` 早在 2026-10-19 就加过版本面——它的注释写着一模一样的教训：
    「只查 bundles 在场会把旧 pin 的组合判成在位……报 incompatible 并卡在启动横幅（表现 = snapshot-replay /

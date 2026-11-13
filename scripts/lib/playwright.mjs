@@ -1,11 +1,11 @@
 // playwright/chromium 定位的共享工具（本仓所有"真浏览器"检查的唯一实现）。
-// 来源：company scripts/lib/playwright.mjs 原样引入（它也是我们 client-load-smoke 机制的范本）；
+// 来源：company scripts/lib/playwright.mjs 原样引入（它也是我们 client-load.entry 机制的范本）；
 // 根 .pnpm store 有 playwright@1.63.x（vendor 全树 install 的传递产物），chromium 走 ms-playwright 缓存。
 //
 // 为什么抽出来：从 .pnpm store 里找 playwright、并在 playwright 期望的 chromium 版本缺席时
 // 回退到缓存里最新一份可执行文件——这段逻辑有真实的坑（`Executable doesn't exist` 的形态、
 // macOS app bundle 与 headless shell 的路径差异），复制第二份必然漂移。
-// 出处：client-load-smoke.mjs（postmortem 0003 起的既有实现）。
+// 出处：client-load.entry.mjs（postmortem 0003 起的既有实现）。
 import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'

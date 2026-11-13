@@ -10,15 +10,15 @@
 - **模板 schema 集与盘上集双向对账**：`tests/pack/template-files.mjs` 持有 `CORE_TEMPLATES`（8 md + 2 JSON），
   `templateFiles()` 读盘；`content-injection` 断言两者相等。新增模板必须有意改 schema 集，删除模板会同时
   让 schema 集/消费者断言红——不再有“只查存在、不查新增”的单向清单。
-- **模板契约只钉解析器/门禁消费键**：`tests/pack/template-contract.test.mjs` 钉 question 的
+- **模板契约只钉解析器/门禁消费键**：`tests/pack/template-contract.spec.mjs` 钉 question 的
   `研究类型`/`Decisions`、topics 的 `must_answer`/`scope_role`、leads 的状态/支持来源/关键线索/owner、
   findings 的 `F#`/`gap`。final 六节已由 `presets.test`（报告首屏）与 reader gate（读者版）把守，
   本文件不重复，避免把散文节名抄成第二份真相。
-- **具名非 quick 类型用合成 bundle 验条件性**：`tests/run/schema-scan.test.mjs` 在
+- **具名非 quick 类型用合成 bundle 验条件性**：`tests/run/schema-scan.spec.mjs` 在
   `drt-clean-post` 上改写 `question.md` 为 exploratory_map / claim_verification、删 leads/review，
   断言 `runType` 不是 quick_factual 且两条件件缺席仍红；不新增持久 fixture 目录（分支确定、无新
   形状；避免 fixture taxonomy 为对称而膨胀）。
-- **`presets.test.mjs` 拆分不做**：已按 323 行 / 19 个 test、按源面分域裁决归档；trigger = 单文件
+- **`presets.spec.mjs` 拆分不做**：已按 323 行 / 19 个 test、按源面分域裁决归档；trigger = 单文件
   >500 行 / 第二个独立合同模型 / 一次改动跨 ≥3 个主题且 review 痛。
 - **零 pack 行为变更**：只改测试与测试辅助件；无 persona/内容/门禁/组合改动。
 

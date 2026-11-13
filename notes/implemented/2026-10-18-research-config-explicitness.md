@@ -63,7 +63,7 @@
 
 - **L0**：`pnpm verify` 全绿；`pnpm test` **514/514**（新增 `method-of-question` 10 例、
   `receipt-fold` 7 例、显示名一致性、推荐映射/六条底线/两入口同钉、领域示范同钉）；
-- **解析器合同（新件 `tests/cockpit/method-presets.test.mjs`）**：方法预设表/映射表/共同底线三处解析的
+- **解析器合同（新件 `tests/cockpit/method-presets.spec.mjs`）**：方法预设表/映射表/共同底线三处解析的
   形状违约逐条钉 throw（表头缺席、分隔行非法、列数不符、**零数据行防空集**）；反证 = 拆掉防空集
   throw → 该例红 → 还原绿。**方法教训（写门禁通用）**：给"子串在场"类断言做反证时，**在子串尾部
   追加字符是不破的**（`X` 追加后原串仍在）——必须改动子串本身（删字/换字），否则反证是假的；
@@ -75,9 +75,9 @@
   改回旧值 → 显示名一致性红；④ `summaryOfEntry` 去掉剥标记/截断 → 摘要测试红；⑤ 领域示范改
   一字 → 同钉红。全部还原后绿；
 - **生成物与模型面**：`render-overlay` ＋ `sync-pack-workspace` 同步；**L1 真挂载 ALL PASS**
-  （4 preset ＋ skills 硬隔离）；`snapshot-replay-smoke` **ALL PASS**（A 回放通路 ＋ B 组装请求
+  （4 preset ＋ skills 硬隔离）；`snapshot-replay.entry` **ALL PASS**（A 回放通路 ＋ B 组装请求
   diff——skill 正文不进组装请求，B 层零漂移与预期一致）；
-- **真浏览器（keyless）**：`client-load-smoke` **ALL PASS**，含新增断言 9 条（本次研究区五态之一
+- **真浏览器（keyless）**：`client-load.entry` **ALL PASS**，含新增断言 9 条（本次研究区五态之一
   在场／六条底线逐字／两个入口按钮／推荐规则说明位 ＋ 每卡「什么时候用它」／回执区三态词汇／
   领域示范厚条目／详情执行面表块／内置名单派生 5 条／**未绑定会话上的「无 run」态互补案例**——
   给入口且不回落默认打法名；互补案例纪律见 [guides/60 §2](../../docs/guides/60-dev-loop.md)）；

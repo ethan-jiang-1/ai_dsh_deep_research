@@ -451,8 +451,8 @@
       "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
-        "scripts/smoke/release-smoke.mjs",
-        "scripts/smoke/preset-smoke.mjs"
+        "scripts/smoke/release.entry.mjs",
+        "scripts/smoke/preset.e2e.mjs"
       ]
     },
     {
@@ -996,7 +996,7 @@
       "verdict": "adapted",
       "landing": [
         "scripts/lib/replay-request.mjs",
-        "scripts/smoke/l4-lite-smoke.mjs",
+        "scripts/smoke/l4-lite.e2e.mjs",
         "snapshots/replay/research-face/snapshot.json"
       ]
     },
