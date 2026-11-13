@@ -525,7 +525,7 @@ export const CASES = [
   } },
   // D52：判据测试（*conformance*）即使标题不带 BUG 号，也必须给红配方。
   { id: 'guard-red-record-conformance-no-block', gate: 'guard-red-record', mutate: (dir) => {
-    writeFileSync(join(dir, 'tests', 'contracts', 'probe-conformance.spec.mjs'), "import test from 'node:test';\n\ntest('probe', () => {});\n");
+    writeFileSync(join(dir, 'tests', 'checks', 'probe-conformance.test.mjs'), "import test from 'node:test';\n\ntest('probe', () => {});\n");
   } },
   // align-ledger 在副本基线**非 PASS**（vendor/dsh 是 gitlink submodule，副本不拷其内容 →
   // "vendor 里不存在"是副本环境的固有报因）。故两案例必须带 expect 指名"na 活性"报因，

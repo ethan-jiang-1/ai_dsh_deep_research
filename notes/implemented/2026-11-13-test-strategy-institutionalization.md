@@ -56,7 +56,8 @@ dev-only；客户端 36/59 文件无直测；慢资产无账本；交付无证�
 
 - C 层 UI 已复验：C0 改用 `data-row-key` + `dismissPreviewNotice` 后 C0–C5 全 PASS；`ui.expected.md`
   由真实 UI 捕获重写（卡片 2 / 活动行 3，含 💬）。C 仍不在 CI（需 Chromium）。
-- `test:e2e` / `test:entry` 全量未跑（需 dev home/浏览器/安装前置）；命令与选择面已验。
+- `test:e2e` 全量已跑：PASS 6 / FAIL 0 / SKIP 0；`test:entry` 全量未跑（需 dev home/浏览器/安装前置）——
+  client-load / lifecycle / snapshot 已分别实跑绿。
 - `model-smoke.yml` 未真实运行（需 `DEEPSEEK_API_KEY`）；静态契约在，缺 key 会 exit 2。
 - 0.2.1-rc.2 → rc.5 真实升级未重跑（`e2e-021rc2` 已退役；复活条件在 trigger）。
 - 159 普查是 60 全文 + 99 关键节，不是逐行全文；分类计数按普查页口径。

@@ -326,6 +326,7 @@ W3-6 D54 + Note（全卡收口）
 - **2026-11-13 Wave 2 W2-3 先行片（角色消费者矩阵）**：新增 `tests/pack/role-consumer-matrix.spec.mjs`——`presetRoles()` 的每个角色必须在 ① patch `id: preset-<role>` ② `presets/<role>/skills/` 非空 ③ snapshot `roleFace` ④ roleFace 与盘上 roster 精确相等，四面同时在场；红证：删 method-editor roleFace → 红；还原 → 绿。
 - **2026-11-13 Wave 3 W3-5（资产退役）**：把 `e2e-021rc2.entry` 的角色 picker 连续断言迁入 `client-load.entry`，seed 档实跑 **ALL PASS**（picker 序列 = 四个 Deep Research 连续 + Method Editor）；随后退役 319 行 dev-only smoke，清 registry/README/guides/60/project-map/注释，写 [退役 Note](../../notes/archived/2026-11-13-e2e-021rc2-retirement.md) + trigger。替代证据 = required CI `client-load`，不是「删了」。
 - **2026-11-13 C UI 复验（W1-2 收尾）**：`snapshot-replay.entry` C0 从「点同命 title span」改为 `data-row-key` 的 `openSessionById`，并在 reload 后调 `dismissPreviewNotice` 关首访遮罩；C0–C5 全 PASS，`ui.expected.md` 由真实 UI 捕获重写（卡片 2 / 活动行 3，含 💬）。C 仍不进 CI（需 Chromium）。
+- **2026-11-13 命名迁移补洞 + 全量 e2e 车道**：`guard-red-record` 此前只扫 `tests/**/*.spec.mjs`，命名迁移后 `tests/checks/*.test.mjs` 的判据测试逃逸；现两车道都扫，`gates-cases` 的 conformance 注入目标改为 `tests/checks/probe-conformance.test.mjs`。`gates.e2e` 108 案例全绿；`pnpm test:e2e` 全量 **PASS 6 / FAIL 0 / SKIP 0**。`run-lane` 加单件/车道耗时与 `--only <substr>`；guides/67 增「成本预算」节（默认秒级、重资产按变更触发、新增入口先过成本关）。
 
 ## Wave 2/3 剩余裁决（2026-11-13，阶段边界）
 

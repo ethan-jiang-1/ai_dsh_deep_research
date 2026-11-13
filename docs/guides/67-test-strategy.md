@@ -86,6 +86,19 @@
 
 `pnpm test` = spec + checks；慢车道显式跑。错后缀/错 lane 由 `test-lanes` + `smoke-registry` 判红。
 
+## 8. 成本预算（重资产治理）
+
+- **默认回归必须秒级**：`pnpm test` = spec + checks；重资产不在 pre-commit。
+- **三条装配车道按变更类型触发**：模型可见文本 → snapshot B；客户端 → client-load；安装/发布 →
+  lifecycle/release；不要「改一行就跑全链」。
+- **CI required 只保留慢资产的最小集**：当前慢 CI job = `client-load` / `snapshot-replay` / `deploy`
+  （keyless）；`test:e2e`/`test:entry` 全量是诊断车道，不是每次提交的门。
+- **新增入口先过成本关**：必须说明替代谁/新失败类/为什么现有层看不见；registry 写 `cost` 与
+  `sunset`；不能替代的才新增。没有 `uniqueClaim` 的资产优先退役。
+- **局部重跑**：`pnpm test:e2e --only <substr>` / `pnpm test:entry --only <substr>`；
+  `--list` 显示 tier/cost。全量只在阶段收口/夜间/大改后跑。
+- **成本看的是每次发现**，不是测试数量或覆盖率；慢而重复的资产比少一个测试更贵。
+
 ## 7. 反模式
 
 - 为 159 张 BUG 逐张补测试（实例修）→ 先归类，落类级守卫或显式不可机械化。

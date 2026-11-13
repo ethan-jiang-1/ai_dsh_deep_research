@@ -147,7 +147,10 @@ export function runF() {
   const problems = [];
   let claims = 0;
   // 2026-10-20 起 tests/ 按域分子目录（run/cockpit/pack/contracts）：递归扫描，fixtures/_tmp 除外。
-  const testFiles = walk(join(ROOT, 'tests')).filter((f) => f.endsWith('.spec.mjs')
+  // 命名迁移（D53）：spec 车道 = *.spec.mjs；门禁自身 = tests/checks/*.test.mjs。
+  // 两个面都要扫——判据测试（*conformance*）住 checks 时也必须交红配方。
+  const testsRoot = join(ROOT, 'tests');
+  const testFiles = walk(testsRoot).filter((f) => (f.endsWith('.spec.mjs') || (f.endsWith('.test.mjs') && relative(testsRoot, f).startsWith(`checks${sep}`)))
     && !f.includes(`${sep}fixtures${sep}`) && !f.includes(`${sep}_tmp${sep}`));
   if (testFiles.length === 0) fail(gate, '防空语料：tests/ 下零个 *.spec.mjs——扫描面失效');
   for (const file of testFiles.sort()) {

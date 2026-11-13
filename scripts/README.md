@@ -101,7 +101,7 @@
 
 | 件 | 证明什么 | 档位 | 事实来源 |
 |---|---|---|---|
-| run-lane.mjs | `pnpm test:e2e` / `test:entry`：按 `scripts/smoke/registry.json` 的 `lane`/`tier` 选跑，0/1/2 汇总 | keyless 壳（脚本自检前置） | registry.json + `lib/smoke-lane.mjs` |
+| run-lane.mjs | `pnpm test:e2e` / `test:entry`：按 `scripts/smoke/registry.json` 的 `lane`/`tier` 选跑，0/1/2 汇总 + 单件/车道耗时；`--only <substr>` 定向、`--list` 带 tier/cost | keyless 壳（脚本自检前置） | registry.json + `lib/smoke-lane.mjs` |
 
 ## lib/（支撑库）
 

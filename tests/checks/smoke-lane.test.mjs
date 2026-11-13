@@ -16,6 +16,8 @@ test('smoke lane：按 lane 选、默认 ci、--all 带 dev-only、support 不�
   assert.deepEqual(selectSmokeLane(registry, { lane: 'e2e', includeDevOnly: true }).map((e) => e.file), ['scripts/smoke/a.e2e.mjs', 'scripts/smoke/b.e2e.mjs'])
   assert.deepEqual(selectSmokeLane(registry, { lane: 'entry' }).map((e) => e.file), ['scripts/smoke/c.entry.mjs'])
   assert.deepEqual(selectSmokeLane(registry, { lane: 'entry', includeDevOnly: true }).map((e) => e.file), ['scripts/smoke/c.entry.mjs'])
+  assert.deepEqual(selectSmokeLane(registry, { lane: 'e2e', only: 'a.' }).map((e) => e.file), ['scripts/smoke/a.e2e.mjs'])
+  assert.deepEqual(selectSmokeLane(registry, { lane: 'e2e', only: 'missing' }), [])
 })
 
 test('smoke lane：未知 lane / 空集合明确报错，不静默跑空', () => {
