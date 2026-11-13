@@ -235,6 +235,15 @@ W3-6 D53 + Note（全卡收口）
   名称错）；红证② = 去掉 `matchingHeadingLines` 的 `wellFormed` 过滤 → 两条红；各自还原 → 绿。
   登记 = `docs/evaluation.md` §L0 契约回归。实跑：单测 2/2 绿；`pnpm test` 1411/0；
   `pnpm verify` 全绿。未跑：慢档/真模型（非本片面）。
+- **2026-11-13 Wave 0 W0-5（运行时导出守卫）**：`tests/pack/export-shape.test.mjs` 宿主半
+  import 后断言模块形状（`default` 不在、`apply`/`inject`/`name` 在场），静态面补
+  `export default` / `as default` / `{ default } from` 三种写法；`tests/vendor/export-shape.vendor.mjs`
+  用真 Loader `unwrapExports` 往返（`pnpm test:vendor`，root tsconfig 的 vendor 源映射）。红证① =
+  给 `src/index.ts` 加 `export default` → 静态 + 模块形状红；红证② = 给 client 加
+  `export { apply as default }` → 静态红（补 `as default` 正则前实测漏过）；还原 → 绿。
+  边界：client 半 `.css` 不可 import、fetch-fallback 的 `fetch` 被 `layering` 闭包图禁入，两者保留
+  静态 + `client-load`/L1/L2。实跑：`pnpm test` 1412/0、`pnpm test:vendor` 4/0、`pnpm verify` 全绿。
+  未跑：慢档/真模型。
 
 ## 关闭条件
 
