@@ -10,7 +10,7 @@ opened: 2026-11-13
 > 去向：implemented — `notes/implemented/2026-11-13-test-strategy-institutionalization.md`
 > 授权：用户 2026-11-13 明确要求「长期正确、全面、代价不怕」；方向由 agent 定，不再逐项给选项；
 > 阶段边界报告证据与未跑项。
-> 研究：[_backlog/research/dsh-test-strategy](../research/dsh-test-strategy/README.md)（已定性）。
+> 研究：[_backlog/_archived/research/dsh-test-strategy](../_archived/research/dsh-test-strategy/README.md)（已定性）。
 > 兄弟卡：[_backlog/issues/2026-11-13-test-asset-fence](2026-11-13-test-asset-fence.md)（S0–S2 的资产围栏；
 > 本卡吸收其 S1/S2，并把「围栏」升级为「制度」）。
 
@@ -54,7 +54,7 @@ dev-only，靠人记得跑；客户端 36/59 文件无直测；慢资产没有�
 
 **当前情况：**
 
-- 研究正文（779 行）= [dsh-test-strategy-gap](../research/dsh-test-strategy/2026-11-13-dsh-test-strategy-gap.md)：
+- 研究正文（779 行）= [dsh-test-strategy-gap](../_archived/research/dsh-test-strategy/2026-11-13-dsh-test-strategy-gap.md)：
   DSH 16 篇 digest + `vendor/dsh` rc.5 一手源核验；本仓资产/失败史对照；差距矩阵；三环四账五关。
 - 已测事实：`pnpm verify` 3.9s（L0 门禁全绿；计数正本 = `scripts/verify/context.mjs` 的 `gates` 数组）；
   `pnpm test` 4.6s / 全绿 / 0 skipped（用例计数正本 = `pnpm test` 汇总）；`gates.e2e` 202s（CI）；
@@ -327,6 +327,7 @@ W3-6 D54 + Note（全卡收口）
 - **2026-11-13 Wave 3 W3-5（资产退役）**：把 `e2e-021rc2.entry` 的角色 picker 连续断言迁入 `client-load.entry`，seed 档实跑 **ALL PASS**（picker 序列 = 四个 Deep Research 连续 + Method Editor）；随后退役 319 行 dev-only smoke，清 registry/README/guides/60/project-map/注释，写 [退役 Note](../../notes/archived/2026-11-13-e2e-021rc2-retirement.md) + trigger。替代证据 = required CI `client-load`，不是「删了」。
 - **2026-11-13 C UI 复验（W1-2 收尾）**：`snapshot-replay.entry` C0 从「点同命 title span」改为 `data-row-key` 的 `openSessionById`，并在 reload 后调 `dismissPreviewNotice` 关首访遮罩；C0–C5 全 PASS，`ui.expected.md` 由真实 UI 捕获重写（卡片 2 / 活动行 3，含 💬）。C 仍不进 CI（需 Chromium）。
 - **2026-11-13 命名迁移补洞 + 全量 e2e 车道**：`guard-red-record` 此前只扫 `tests/**/*.spec.mjs`，命名迁移后 `tests/checks/*.test.mjs` 的判据测试逃逸；现两车道都扫，`gates-cases` 的 conformance 注入目标改为 `tests/checks/probe-conformance.test.mjs`。`gates.e2e` 108 案例全绿；`pnpm test:e2e` 全量 **PASS 6 / FAIL 0 / SKIP 0**。`run-lane` 加单件/车道耗时与 `--only <substr>`；guides/67 增「成本预算」节（默认秒级、重资产按变更触发、新增入口先过成本关）。
+- **2026-11-13 with-key 真模型（本机）**：`node scripts/smoke/l4-lite.e2e.mjs` **ALL PASS**——5 角色（含 method-editor）assistant 标记 + scout web_search 工具调用真实发生；`model-smoke.yml` 的 GitHub secret 运行仍未做，静态契约/缺 key exit 2 已在。
 
 ## Wave 2/3 剩余裁决（2026-11-13，阶段边界）
 

@@ -5,7 +5,7 @@
 > 制度决定 = [D54](../../docs/decisions.md#d54) + [三环四账五关 Note](2026-11-13-test-strategy-operating-model.md)；
 > 命名决定 = [D53](../../docs/decisions.md#d53) + [命名 Note](2026-11-13-test-naming-lanes.md)；
 > 操作手册 = [guides/67](../../docs/guides/67-test-strategy.md)；
-> 失败类账本 = [普查](../../_backlog/research/dsh-test-strategy/2026-11-13-failure-class-census.md)
+> 失败类账本 = [普查](../../_backlog/_archived/research/dsh-test-strategy/2026-11-13-failure-class-census.md)
 
 ## 决定
 

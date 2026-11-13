@@ -3,7 +3,7 @@
 > 状态：implemented
 > 关联：[D54](../../docs/decisions.md#d54)；操作手册 = [guides/67](../../docs/guides/67-test-strategy.md)；
 > 程序卡 = [测试策略制度化](../../_backlog/issues/2026-11-13-test-strategy-institutionalization.md)；
-> 失败类账本 = [普查](../../_backlog/research/dsh-test-strategy/2026-11-13-failure-class-census.md)；
+> 失败类账本 = [普查](../../_backlog/_archived/research/dsh-test-strategy/2026-11-13-failure-class-census.md)；
 > 命名车道 = [D53](../../docs/decisions.md#d53)
 
 ## 决定

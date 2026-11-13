@@ -2,7 +2,7 @@
 
 > 状态：implemented
 > 关联：[D52](../../docs/decisions.md#d52)；合同 = [evaluation §判据形状](../../docs/evaluation.md#verdict-shape)；
-> 证据 = [三次独立审计](../../_backlog/research/workflow-substance/2026-11-13-three-audits.md)
+> 证据 = [三次独立审计](../../_backlog/_archived/research/workflow-substance/2026-11-13-three-audits.md)
 
 ## 决定
 

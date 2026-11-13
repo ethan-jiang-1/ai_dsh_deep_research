@@ -9,7 +9,7 @@ opened: 2026-11-13
 >
 > **一句话**：本仓不缺「判据不猜」的原则，缺的是让原则落地的**字段和门**——设计期把判据的
 > 权威输入/歧义行为写成必填格，收口期把「Note 早写 / 卡关而行为未停」变成机械红，bug 通道把
-> 「同类第 N 次」变成必答。三次独立审计的证据 = [research](../../research/workflow-substance/README.md)。
+> 「同类第 N 次」变成必答。三次独立审计的证据 = [research](../../_archived/research/workflow-substance/README.md)。
 >
 > 结论：判据形状字段 + Note 同节 + 两道收口门（Note 早写、暂存区配对）+ 复发必答 + 判据测试负例 +
 > 金标准理由全部落地；D52 入台账，gates-smoke 108 案例全绿。
@@ -113,5 +113,5 @@ HITL2 7 张、方法库 heading 一串）。三次独立审计（fresh-agent 冷
 
 - 原则 = [D51](../../../docs/decisions.md#d51) + [evaluation §判据形状](../../../docs/evaluation.md#verdict-shape)；
   本卡只做「让原则有字段和门」，不改原则。
-- 证据 = [research](../../research/workflow-substance/README.md)；
+- 证据 = [research](../../_archived/research/workflow-substance/README.md)；
 - 已两处修复（互斥散文 / 重复键）= `b64d170b`，负例在 `tests/run/readiness-declaration.test.mjs`。

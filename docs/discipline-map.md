@@ -273,7 +273,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | 纪律 | 落点 | 机械把守 |
 |---|---|---|
 | [D53](decisions.md#d53) 测试文件名 = 证据车道 | [tests/AGENTS](../tests/AGENTS.md) / [scripts/AGENTS](../scripts/AGENTS.md) / [scripts/README](../scripts/README.md) | [test-lanes](../tests/checks/test-lanes.test.mjs) / [smoke-registry](../tests/checks/smoke-registry.test.mjs) / [smoke-oracle-surface](../tests/checks/smoke-oracle-surface.test.mjs) / layering ④ |
-| [D54](decisions.md#d54) 三环四账五关 | [guides/67](guides/67-test-strategy.md) / [失败类普查](../_backlog/research/dsh-test-strategy/2026-11-13-failure-class-census.md) | [test-lanes](../tests/checks/test-lanes.test.mjs) / [smoke-registry](../tests/checks/smoke-registry.test.mjs) / [smoke-oracle-surface](../tests/checks/smoke-oracle-surface.test.mjs) / [ci-jobs](../tests/checks/ci-jobs.test.mjs) / decisions-now |
+| [D54](decisions.md#d54) 三环四账五关 | [guides/67](guides/67-test-strategy.md) / [失败类普查](../_backlog/_archived/research/dsh-test-strategy/2026-11-13-failure-class-census.md) | [test-lanes](../tests/checks/test-lanes.test.mjs) / [smoke-registry](../tests/checks/smoke-registry.test.mjs) / [smoke-oracle-surface](../tests/checks/smoke-oracle-surface.test.mjs) / [ci-jobs](../tests/checks/ci-jobs.test.mjs) / decisions-now |
 
 ## 维护规则
 

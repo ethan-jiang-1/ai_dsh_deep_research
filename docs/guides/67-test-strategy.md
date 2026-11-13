@@ -2,7 +2,7 @@
 
 > 层：指南（怎么选证据）。**不是第六个评估面**——五面验收合同仍以
 > [evaluation.md](../evaluation.md) 为准；本页回答「这次改动该配什么证据、算不算够」。
-> 失败类全量账本 = [research/dsh-test-strategy 的普查](../../_backlog/research/dsh-test-strategy/2026-11-13-failure-class-census.md)；
+> 失败类全量账本 = [research/dsh-test-strategy 的普查](../../_backlog/_archived/research/dsh-test-strategy/2026-11-13-failure-class-census.md)；
 > 类级守卫形态 = [_backlog/methods/class-level-guards.md](../../_backlog/methods/class-level-guards.md)；
 > 命名车道 = [D53](../decisions.md#d53)。
 
@@ -60,7 +60,7 @@
 | 账 | 记什么 | 载体 | 何时更新 |
 |---|---|---|---|
 | **资产账** | cost / uniqueClaim / oracle / sunset / lane | [scripts/smoke/registry.json](../../scripts/smoke/registry.json) + `smoke-oracle-surface` | 新增/退役/改判据 |
-| **失败类账** | 类 → 代表 BUG → 守卫 → 缺口 → owner | [失败类普查](../../_backlog/research/dsh-test-strategy/2026-11-13-failure-class-census.md) + 本文表 | 每次 P0/P1/复发 |
+| **失败类账** | 类 → 代表 BUG → 守卫 → 缺口 → owner | [失败类普查](../../_backlog/_archived/research/dsh-test-strategy/2026-11-13-failure-class-census.md) + 本文表 | 每次 P0/P1/复发 |
 | **证据账** | 证据/层/失败类/负控/CI/显式未覆盖 | [reviewing-a-delivery](../../.agents/skills/reviewing-a-delivery/SKILL.md) 的证据账本节 | 每次非平凡交付 |
 | **探索账** | charter/面/oracle/结果/毕业/日期 | [research 题目录](../../_backlog/research/README.md) + [探索技能](../../.agents/skills/exploratory-verification/SKILL.md) | 每轮探索 |
 
