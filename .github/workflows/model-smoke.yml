@@ -1,0 +1,53 @@
+name: model-smoke
+
+# 真模型档：只手动触发，不进 PR/required。fork 无 secret 时任务会因 preflight exit 2 硬失败，
+# 不把「全跳过」伪装成绿（with-key policy 的本仓落地）。
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: model-smoke-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  l4-lite:
+    name: L4-lite (with-key)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout (with pinned DSH submodule)
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.7.0
+          run_install: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build vendor (pin tree)
+        run: bash dev/vendor-build.sh
+
+      - name: Build pack (dual halves)
+        run: pnpm build
+
+      - name: L4-lite (real model)
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          source dev/env.sh
+          node scripts/smoke/l4-lite.e2e.mjs

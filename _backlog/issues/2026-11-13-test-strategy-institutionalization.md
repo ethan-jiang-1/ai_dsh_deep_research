@@ -317,7 +317,7 @@ W3-6 D54 + Note（全卡收口）
 - **2026-11-13 Wave 2 W2-5 先行片（方法库路径形态矩阵）**：`tests/pack/method-library-io.spec.mjs` 加 1 例——空格/CJK/多层缺席目录/空库/目录当文件；与既有 symlink/hardlink 组成 8 例路径矩阵。实跑 8/8 绿。
 - **2026-11-13 Wave 3 先行片（探索技能 + 政策收口）**：新增 `.agents/skills/exploratory-verification/SKILL.md`（E1–E6、charter 七件、四态分诊、毕业判据、预算/反模式）与 `docs/guides/67-test-strategy.md`（三环/四账/五关、失败类→最低可见层、决策程序、命名命令、反模式）；`00-index` / `guides/60` / `evaluation` 接线，`docs-consistency` 技能路由补 `exploratory-verification`。实跑：`pnpm test` 97/0、`pnpm verify` 全绿。
 - **2026-11-13 Wave 3 W3-2（复盘）**：新增 [探索 BUG 波复盘](../../notes/archived/2026-11-13-exploratory-bug-wave-postmortem.md)——五节（现象/为什么没早发现/根因/修复与防线/未完成），把「发现→修→忘」换成「发现→归类→类级守卫→账本→复盘」；明确 159 普查是 60 全文 + 99 关键节、C UI 未复验、hook 面未建、全量 e2e/entry 未跑。
-- **2026-11-13 Wave 3 W3-7 先行片（CI 聚合）**：`.github/workflows/ci.yml` 新增书签式 `all-checks-passed`（`needs` 四 job：keyless/client-load/snapshot-replay/deploy；failure/cancelled/skipped 判红）；新增 `tests/checks/ci-jobs.test.mjs` 静态契约（needs 覆盖全 job、skip 判红、snapshot job 真跑 A/B）。红证：删一个 need → 红；还原 → 绿。with-key 可触发通道未做。
+- **2026-11-13 Wave 3 W3-7 先行片（CI 聚合）**：`.github/workflows/ci.yml` 新增书签式 `all-checks-passed`（`needs` 四 job：keyless/client-load/snapshot-replay/deploy；failure/cancelled/skipped 判红）；新增 `tests/checks/ci-jobs.test.mjs` 静态契约（needs 覆盖全 job、skip 判红、snapshot job 真跑 A/B）。红证：删一个 need → 红；还原 → 绿。with-key 可触发通道 = `.github/workflows/model-smoke.yml`（只 `workflow_dispatch`；secret 注入；`l4-lite.e2e`；缺 key preflight exit 2），契约 = [model-workflow](../../tests/checks/model-workflow.test.mjs)；本机未实跑（需凭据）。
 
 ## 关闭条件
 

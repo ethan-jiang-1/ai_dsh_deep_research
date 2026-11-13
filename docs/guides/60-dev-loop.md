@@ -242,7 +242,7 @@ source dev/env.sh        # DSH_HOME=runtime/harness-home（数据面）+ dsh 别
 
 ## 5. 密钥
 
-- 独立真模型档 = `tests/checks/smoke-contract.test.mjs` 的 REAL_MODEL 闭集（成员以测试为准；`dev/record-role-fixture.mjs` 是单独录制工具，完整 run 属 L4）；
+- 独立真模型档 = `tests/checks/smoke-contract.test.mjs` 的 REAL_MODEL 闭集（成员以测试为准；`dev/record-role-fixture.mjs` 是单独录制工具，完整 run 属 L4）；手动 CI 通道 = `.github/workflows/model-smoke.yml`（`workflow_dispatch`；缺 secret 由脚本 preflight exit 2 硬失败；不进 PR）。
   调用凭据可在开发 home 配置（根 [AGENTS §密钥](../../AGENTS.md)）。CDP `--ask` 按当前会话档位；
   永不提交密钥；
 - L1 真挂载无模型调用、无凭据可跑；L2 安装验收无模型调用并使用 `--install-only`，默认 doctor 仍检查凭据在场；

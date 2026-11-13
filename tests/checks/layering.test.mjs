@@ -35,7 +35,7 @@ const walkTests = (dir, rel = '') => {
     if (ent.name === 'fixtures' || ent.name === '_tmp' || ent.name === 'node_modules') continue;
     const r = rel === '' ? ent.name : `${rel}/${ent.name}`;
     if (ent.isDirectory()) out.push(...walkTests(join(dir, ent.name), r));
-    else if (ent.name.endsWith('.spec.mjs')) out.push(r);
+    else if (ent.name.endsWith('.spec.mjs') || (r.startsWith('checks/') && ent.name.endsWith('.test.mjs'))) out.push(r);
   }
   return out;
 };
@@ -46,9 +46,10 @@ const files = walkTests(TESTS);
 const MENTION_EXEMPT = {
   'deploy-bin.spec.mjs': '密钥名文本契约——钉部署脚本安全边界，判据本身含密钥名',
   'env-credentials.spec.mjs': '清洗谓词契约——判据本身含密钥名（字面量假值；不读真实环境/凭据，env 注入直测）',
-  'smoke-contract.spec.mjs': '真模型档 closed set 契约——.credentials.yaml 是判据本身',
+  'smoke-contract.test.mjs': '真模型档 closed set 契约——.credentials.yaml 是判据本身',
+  'model-workflow.test.mjs': '真模型 CI 通道契约——DEEPSEEK_API_KEY 是 workflow 文本判据，不读真实环境/凭据',
   'credentials-status.spec.mjs': '凭据分层契约——判据本身含密钥名/文件名；用临时目录，不读真实凭据',
-  'test-surface.spec.mjs': '覆盖边界登记——SMOKE_ONLY 的键就是 lib 模块名（playwright/zstd-read 等），判据必须写出这些名字；本文件不 import 它们',
+  'test-surface.test.mjs': '覆盖边界登记——SMOKE_ONLY 的键就是 lib 模块名（playwright/zstd-read 等），判据必须写出这些名字；本文件不 import 它们',
   'browser-cache.spec.mjs': '缓存目录名含 ms-playwright（平台缺省路径就是判据）；纯路径函数，不启动浏览器、不 spawn',
 };
 
