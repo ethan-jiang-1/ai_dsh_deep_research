@@ -758,7 +758,7 @@ test('负控：带未识别后缀的标题 → upsert 抛错，而不是新建',
 | **矩阵剧场** | 很多行，但改一个 `if` 只让一格红——等价于「一条路径 + 多维装饰」 | 判据：给矩阵每格标注它走的分支；若 > 80% 的格落在同一分支，砍维。`verdict-conformance:72-80` 的 32 格里真正分支只有 2 个（`lead === ''` / 否则），所以它的价值在**负控与期望生成规则**，不在格数——认清这一点才不会继续加维 |
 | **过拟合报出的输入** | 修复提交里新增的用例，全部取自带 BUG 卡的症状表 | **BUG-141 → 150** 是教科书案例：141 的修复把关键词表从 6 个扩到 8 个，新增的两个词正是 141 报告里的「现在/新判定」；150 的四种措辞一个都不在表内。修法 = 类级规则（结构位置），不是扩表 |
 | **把实现当行为** | 断言的对象是源码文本/正则/结构，而非运行结果 | `tests/pack/export-shape.spec.mjs:24`（对源文本 `doesNotMatch(/export\s+default/)`）——它的失效形态已在 `special-topics.md §1.3` 登记。另一类是「断言渲染出的字符串」，但 `library-fold.spec.mjs:391` 断 `renderLibraryEntry` 的输出格式，这是**与 Lead 的契约**（skill 契约要求该形态），不算反模式——**区分标准：这段文本有外部消费者吗** |
-| **夹具迁就谓词** | 修复一并改了夹具，使判据「看起来」通过 | test-asset-fence 的 S0 明确拒绝了这条路：`run-accept` 第 ⑦ 段红的原因是夹具创建了 `review/` 却没有 `review/readiness.json`，**没有**去放宽 `readinessOfSources`，也没有改 `## readiness: PASS` 标题（`_backlog/issues/2026-11-13-test-asset-fence.md` §方案与取舍：「不改标题：`terminalReadiness` 会剥 `##` 读成 PASS，改标题是误诊」） |
+| **夹具迁就谓词** | 修复一并改了夹具，使判据「看起来」通过 | test-asset-fence 的 S0 明确拒绝了这条路：`run-accept` 第 ⑦ 段红的原因是夹具创建了 `review/` 却没有 `review/readiness.json`，**没有**去放宽 `readinessOfSources`，也没有改 `## readiness: PASS` 标题（`_backlog/_archived/settled_issues/2026-11-13-test-asset-fence.md` §方案与取舍：「不改标题：`terminalReadiness` 会剥 `##` 读成 PASS，改标题是误诊」） |
 | **归一化凑绿** | 为了让新录制/新环境通过，给比较器加 replace | `scripts/lib/replay-request.mjs:23` 已把这条堵死（persona 归一化**清零**，而不是「加一条 replace」）；`snapshots/README.md` 写「只许重写、不许放宽比对」；反面教材 = `docs/postmortem/0002`（refresh 把 `UNKNOWN_TOOL` 当成新金标准，「A snapshot refresh is fixture production, not correctness review」） |
 | **只交付绿** | 没有红过的守卫 | `guard-red-record` 门禁就是为这条存在的（`f-repo.mjs:129-184`）。注意门禁自己声明了边界：「它不制造回归不跑测试，故**不证明留证是真的**」——留证写了但假，门禁看不出。**这是本仓唯一无法机械化的诚实缺口，必须靠人复现一次** |
 
@@ -830,4 +830,4 @@ test('负控：带未识别后缀的标题 → upsert 抛错，而不是新建',
   八个样本测试文件、`scripts/lib/replay-request.mjs`、`scripts/lib/run-lock.mjs`、
   `packages/deep-research-pack/src/lib/{review-readiness,library-fold,method-library-write}.ts`、
   `_backlog/_archived/fixed_bugs/BUG-{081,085,093,123,124,127,128,138,074,141,150}-*.md`、
-  `_backlog/issues/2026-11-13-test-asset-fence.md`、`_backlog/research/test-asset-fence/2026-11-13-test-asset-fence.md`
+  `_backlog/_archived/settled_issues/2026-11-13-test-asset-fence.md`、`_backlog/research/test-asset-fence/2026-11-13-test-asset-fence.md`

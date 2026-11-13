@@ -922,7 +922,7 @@
       "reason": "2026-11-10 第四遍 style 空间引用旧 harness 的 research_profile / research_style_params 作为方法源头（历史指针）；当前映射以 docs/design/30-methodology-mapping.md 为准，归档件只用于说明「验收 profile」这层曾被丢掉"
     },
     {
-      "source": "_backlog/issues/2026-11-13-test-strategy-institutionalization.md",
+      "source": "_backlog/_archived/settled_issues/2026-11-13-test-strategy-institutionalization.md",
       "target": "notes/archived/2026-11-13-exploratory-bug-wave-postmortem.md",
       "reason": "W3-2 复盘交付指针：本卡执行记录引用本次 79 张探索 BUG 的复盘；归档件为冻结证据，卡为活跃消费者"
     },
@@ -932,7 +932,7 @@
       "reason": "W3-5 资产退役：活触发条件引用退役 Note；归档件为冻结证据，trigger 为活跃消费者"
     },
     {
-      "source": "_backlog/issues/2026-11-13-test-strategy-institutionalization.md",
+      "source": "_backlog/_archived/settled_issues/2026-11-13-test-strategy-institutionalization.md",
       "target": "notes/archived/2026-11-13-e2e-021rc2-retirement.md",
       "reason": "W3-5 退役：程序卡执行记录引用退役 Note；归档件为冻结证据，卡为活跃去向"
     },

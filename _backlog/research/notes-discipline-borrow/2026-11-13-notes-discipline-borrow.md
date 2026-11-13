@@ -17,6 +17,9 @@ intent: 对照 DSH 原生 notes 制度（参考卷八篇 + vendor 一手定义�
 
 ## 0. 结论
 
+> 落地载体（2026-11-14 补记）：P0 四项已立 [issue 2026-11-14-notes-discipline-hardening](../../issues/2026-11-14-notes-discipline-hardening.md)；
+> P1（封印 + 归档出链排除）待该卡关闭后另卡。本页结论不变。
+
 1. **我们借到的是骨架，漏掉的是把守。** 生命周期四层、取代检查、毕业改写、归档层、
    活面→冻结层指针登记簿都在；缺的是让这些规则**会响**的几道窄检查：树形闭集/深度/日期前缀、
    归档元数据、拒绝条的重启条件。前三条探针实测全部**静默通过**（§3.4、§4.1、§4.2）。
@@ -137,7 +140,9 @@ grep 一条路。它选择"放弃第四层换分类只有一套且校验收口"�
 
 ### 3.4 但漏了它的前提：树形没有被咬住（探针 A/B/C）
 
-参考卷把"未知顶层目录会让整批 Note 对 walk 不可见"写进了源码注释，并用**等号**判深度。
+一手源码 `vendor/dsh/scripts/agent-note-tree.ts` 把"未知顶层目录会让整批 Note 对 walk 不可见"
+写进注释，并用**等号**判深度（`segs.length !== 3`）、用闭集判生命周期与 class、
+文件名正则 `^\d{4}-\d{2}-\d{2}-.+\.md$`、顶层 `INDEX.md` 直接报错——参考卷的转述与源码一致。
 本仓相反：门禁只读生命周期根下的**直接文件**，嵌套目录被静默跳过；`note-status` 只要求
 子目录有 README。实测（完整命令与结果 = §10.1）：
 
@@ -186,7 +191,8 @@ vendor 的头三行是位置敏感的（`# Agent Note:` / 空 / `Status:`），�
 本仓用 `> 状态：<裸值>` banner，`note-format` 只用多行正则**找得到一条**即可。实测：
 
 - 语料层：82 篇 implemented + 136 篇 archived 的状态行全部在头七行、恰一条——**纪律已经
-  形成，但没有门禁**；
+  形成，但没有门禁**（vendor 的一手源码 `verify-agent-note-format.ts` 有"line-3 Status 必须
+  全文件唯一"的显式断言，本仓没有）；
 - 探针 D：在合法 Note 末尾再塞一行 `> 状态：rejected` → **PASS**。
 
 建议把"唯一 + 在头部"写成断言（头七行内、恰一条）。成本约十行，基线绿；这不是学究气——
@@ -202,7 +208,9 @@ vendor 的 `validateMetadata()` 要求：恰一行 `Status: implemented`、下�
   文件放进 `notes/archived/` → **PASS**（仅 `note-status` 因目录有 README 而 PASS）。
 
 建议把上述四条写进 `note-format`（扫描 archived 只读元数据，不读骨架——冻结件不追改骨架）。
-基线全绿：实测 136 篇全部有 `> 状态：implemented` 与 `> 归档：<日期>`。这也为 §5 的封印
+基线全绿：实测 136 篇全部有 `> 状态：implemented` 与 `> 归档：<日期>`；其中 12 篇的归档行
+带括号理由（`> 归档：2026-10-20（…）`），所以断言取**日期前缀**而不是整行精确匹配，否则
+基线会误红 12 篇。这也为 §5 的封印
 准备元数据前提：归档行是"何时冻结"的唯一记录，不能靠猜。
 
 ### 4.3 rejected：重启条件才是这一层的价值
@@ -312,7 +320,8 @@ vendor 的 `BANNED_IMPLEMENTED` 挡 `## Proposal` / `## Plan` / `## Migration pl
 **阶段二（封印）**
 
 - 新 tracked 文件 `scripts/notes-archive-seal.json`：`{version: 1, files: {path: "sha256:…"}}`，
-  路径排序、字节稳定；
+  路径排序、字节稳定（形态与 vendor `archived-agent-notes.ts` 的 manifest 校验一致：version 固定 1、
+  `sha256:[0-9a-f]{64}`、路径排序渲染）；
 - 新门禁 `archive-seal`（c-notes 域）：
   1. 每条登记必须存在且哈希一致（缺失/改动 = 红）；
   2. `notes/archived/**` 的每篇 Note 必须在清单里（未封印 = 红）；
@@ -496,8 +505,8 @@ owns or constrains anything."
 - **断言**：状态行恰一条且在前七行（四态通用）；archived 篇另有 `> 状态：implemented` +
   `> 归档：<YYYY-MM-DD>`，日期是合法日历日且不早于文件名日期；rejected 篇有标题含
   复活/重启/重新引入的 h2。
-- **成本**：约三十行；基线应全绿（实测 82+136 篇状态行合规、136 篇归档行合规、10 篇拒绝条
-  有重启节）。
+- **成本**：约三十行；基线应全绿（实测 82+136 篇状态行合规；136 篇归档行全部有日期，
+  其中 12 篇带括号理由，断言按日期前缀；10 篇拒绝条有重启节）。
 - **红证**：探针 D/E；另注入一篇无归档行的冻结件、一篇删掉重启节的拒绝条。
 - **注意**：archived **不查骨架**（冻结件不追改），只查元数据；这是与 vendor 的
   `validateMetadata` 对齐、与 `note-format` 的活跃区骨架分离。
@@ -600,6 +609,8 @@ git checkout -- notes/archived/2026-09-24-review-driven-hardening.md
 - 参考卷八篇逐篇通读（`00-map` … `08-enforcement-sites`），只取"主张与判据"，不搬其仓库数字；
 - 一手定义：`vendor/dsh/.agents/notes/{README,AGENTS}.md`、`implemented/AGENTS.md`、
   `archived/AGENTS.md`、`.agents/skills/dsh-archive-agent-notes/SKILL.md`（只读，未改）；
+  以及门禁源码 `vendor/dsh/scripts/{agent-note-tree,verify-agent-note-format,archived-agent-notes}.ts`
+  ——参考卷的转述逐条与源码核对（深度等号/闭集/INDEX 禁令/状态行唯一/归档日期/哈希封印/具名例外）；
 - 本仓：`notes/` 四层宪章与全部条目标题、`scripts/verify/gates/{c-notes,a-docs}.mjs`、
   `docs/evaluation.md` §L0、`docs/discipline-map.md` 源 4、`_backlog/triggers.md`、
   `2026-10-08` 体检与 `2026-10-10` 裁定 Note、`2026-11-10` 两批归档的提交原文。

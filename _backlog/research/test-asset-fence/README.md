@@ -10,8 +10,8 @@ opened: 2026-11-13
 > 证明力如何分布？哪些慢资产可以降级、合并或退役，哪些关键合同只被慢资产覆盖而需要补快守卫，
 > 哪些快资产是重复、失修或假绿？目标形态 = 默认回归与 pre-commit 以秒级 keyless 单元/契约为重心，
 > 慢 E2E 只保留不可替代的装配、安装、浏览器与模型面。
-> 消费者：[issue 2026-11-13-test-asset-fence](../../issues/2026-11-13-test-asset-fence.md)
-> 产出的卡：[issue 2026-11-13-test-asset-fence](../../issues/2026-11-13-test-asset-fence.md)
+> 消费者：[issue 2026-11-13-test-asset-fence](../../_archived/settled_issues/2026-11-13-test-asset-fence.md)
+> 产出的卡：[issue 2026-11-13-test-asset-fence](../../_archived/settled_issues/2026-11-13-test-asset-fence.md)
 > 结论：—（调研中）
 
 ## 材料

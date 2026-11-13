@@ -7,8 +7,7 @@
 | 卡 | 状态 | 一句话 |
 |---|---|---|
 | [2026-11-11-exploratory-test-strategy](2026-11-11-exploratory-test-strategy.md) | 推敲中 | 探索性验证账本 + 第六轮 charter（测试制度改动面）；Y1 已中 BUG-160 |
-| [2026-11-13-test-asset-fence](2026-11-13-test-asset-fence.md) | 待落地 | 测试资产围栏：S0 修 run-accept 夹具 + S1 客户端快测 + S2 慢资产台账 |
-| [2026-11-13-test-strategy-institutionalization](2026-11-13-test-strategy-institutionalization.md) | 等人拍板 | 测试策略制度化：W0–W3 已交付，待用户验收 |
+| [2026-11-14-notes-discipline-hardening](2026-11-14-notes-discipline-hardening.md) | 待落地 | notes 纪律补借 P0：树形/归档元数据/拒绝条重启条件 + 归档校准 skill；封印另卡 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

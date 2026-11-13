@@ -1,17 +1,17 @@
 ---
-status: 等人拍板
+status: 已结
 opened: 2026-11-13
 ---
 
 # 落地：测试策略制度化——从失败类账本到类级守卫、模型可见证据与资产治理
 
-> 立卡：2026-11-13 ｜ 状态：等人拍板 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否（待用户验收）
+> 立卡：2026-11-13 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
 >
 > 去向：implemented — `notes/implemented/2026-11-13-test-strategy-institutionalization.md`
 > 授权：用户 2026-11-13 明确要求「长期正确、全面、代价不怕」；方向由 agent 定，不再逐项给选项；
 > 阶段边界报告证据与未跑项。
-> 研究：[_backlog/_archived/research/dsh-test-strategy](../_archived/research/dsh-test-strategy/README.md)（已定性）。
-> 兄弟卡：[_backlog/issues/2026-11-13-test-asset-fence](2026-11-13-test-asset-fence.md)（S0–S2 的资产围栏；
+> 研究：[_backlog/_archived/research/dsh-test-strategy](../research/dsh-test-strategy/README.md)（已定性）。
+> 兄弟卡：[_backlog/_archived/settled_issues/2026-11-13-test-asset-fence](2026-11-13-test-asset-fence.md)（S0–S2 的资产围栏；
 > 本卡吸收其 S1/S2，并把「围栏」升级为「制度」）。
 
 ## 一页摘要
@@ -54,7 +54,7 @@ dev-only，靠人记得跑；客户端 36/59 文件无直测；慢资产没有�
 
 **当前情况：**
 
-- 研究正文（779 行）= [dsh-test-strategy-gap](../_archived/research/dsh-test-strategy/2026-11-13-dsh-test-strategy-gap.md)：
+- 研究正文（779 行）= [dsh-test-strategy-gap](../research/dsh-test-strategy/2026-11-13-dsh-test-strategy-gap.md)：
   DSH 16 篇 digest + `vendor/dsh` rc.5 一手源核验；本仓资产/失败史对照；差距矩阵；三环四账五关。
 - 已测事实：`pnpm verify` 3.9s（L0 门禁全绿；计数正本 = `scripts/verify/context.mjs` 的 `gates` 数组）；
   `pnpm test` 4.6s / 全绿 / 0 skipped（用例计数正本 = `pnpm test` 汇总）；`gates.e2e` 202s（CI）；
@@ -311,20 +311,20 @@ W3-6 D54 + Note（全卡收口）
   `scripts/test/run-lane.mjs` + `scripts/lib/smoke-lane.mjs` 按 registry `lane`/`tier` 选跑；
   `test-lanes` / `smoke-registry` / `smoke-oracle` 契约钉后缀与 lane。红证：根目录 spec、checks 嵌套、
   旧 `.test.mjs`、`*.e2e.mjs` 进 tests、错 lane、孤儿支援件各红。实跑：`pnpm test` spec+checks、
-  `pnpm test:vendor`、lane `--list` 全绿；详见 [命名 Note](../../notes/implemented/2026-11-13-test-naming-lanes.md)。
+  `pnpm test:vendor`、lane `--list` 全绿；详见 [命名 Note](../../../notes/implemented/2026-11-13-test-naming-lanes.md)。
 - **2026-11-13 Wave 2 W2-4 先行片（run lock 状态矩阵）**：`tests/run/run-lock.spec.mjs` 加 3 例——坏 owner 形态（空/坏 JSON/0/负/非整数）、存活外部属主（拿锁拒绝 + onBusy 给 pid + 不覆盖 owner）、释放不存在锁幂等；单文件 7/7 绿。
 - **2026-11-13 Wave 2 W2-5 先行片（方法库路径形态矩阵）**：`tests/pack/method-library-io.spec.mjs` 加 1 例——空格/CJK/多层缺席目录/空库/目录当文件；与既有 symlink/hardlink 组成 8 例路径矩阵。实跑 8/8 绿。
 - **2026-11-13 Wave 3 先行片（探索技能 + 政策收口）**：新增 `.agents/skills/exploratory-verification/SKILL.md`（E1–E6、charter 七件、四态分诊、毕业判据、预算/反模式）与 `docs/guides/67-test-strategy.md`（三环/四账/五关、失败类→最低可见层、决策程序、命名命令、反模式）；`00-index` / `guides/60` / `evaluation` 接线，`docs-consistency` 技能路由补 `exploratory-verification`。实跑：`pnpm test` 97/0、`pnpm verify` 全绿。
-- **2026-11-13 Wave 3 W3-2（复盘）**：新增 [探索 BUG 波复盘](../../notes/archived/2026-11-13-exploratory-bug-wave-postmortem.md)——五节（现象/为什么没早发现/根因/修复与防线/未完成），把「发现→修→忘」换成「发现→归类→类级守卫→账本→复盘」；明确 159 普查是 60 全文 + 99 关键节、C UI 未复验、hook 面未建、全量 e2e/entry 未跑。
-- **2026-11-13 Wave 3 W3-7 先行片（CI 聚合）**：`.github/workflows/ci.yml` 新增书签式 `all-checks-passed`（`needs` 四 job：keyless/client-load/snapshot-replay/deploy；failure/cancelled/skipped 判红）；新增 `tests/checks/ci-jobs.test.mjs` 静态契约（needs 覆盖全 job、skip 判红、snapshot job 真跑 A/B）。红证：删一个 need → 红；还原 → 绿。with-key 可触发通道 = `.github/workflows/model-smoke.yml`（只 `workflow_dispatch`；secret 注入；`l4-lite.e2e`；缺 key preflight exit 2），契约 = [model-workflow](../../tests/checks/model-workflow.test.mjs)；本机未实跑（需凭据）。
+- **2026-11-13 Wave 3 W3-2（复盘）**：新增 [探索 BUG 波复盘](../../../notes/archived/2026-11-13-exploratory-bug-wave-postmortem.md)——五节（现象/为什么没早发现/根因/修复与防线/未完成），把「发现→修→忘」换成「发现→归类→类级守卫→账本→复盘」；明确 159 普查是 60 全文 + 99 关键节、C UI 未复验、hook 面未建、全量 e2e/entry 未跑。
+- **2026-11-13 Wave 3 W3-7 先行片（CI 聚合）**：`.github/workflows/ci.yml` 新增书签式 `all-checks-passed`（`needs` 四 job：keyless/client-load/snapshot-replay/deploy；failure/cancelled/skipped 判红）；新增 `tests/checks/ci-jobs.test.mjs` 静态契约（needs 覆盖全 job、skip 判红、snapshot job 真跑 A/B）。红证：删一个 need → 红；还原 → 绿。with-key 可触发通道 = `.github/workflows/model-smoke.yml`（只 `workflow_dispatch`；secret 注入；`l4-lite.e2e`；缺 key preflight exit 2），契约 = [model-workflow](../../../tests/checks/model-workflow.test.mjs)；本机未实跑（需凭据）。
 - **2026-11-13 Wave 1 W1-5（可选层缺席）**：`lifecycle.entry` 新增断言——未装团队层的干净 profile，dump 无 `ui-agent-team`，但本包 10 行/真启动/显示面/remove 全过；实跑 `DSH_BIN=/tmp/dsh-vendor lifecycle.entry` ALL PASS（22 项）。
 - **2026-11-13 Wave 1 W1-6（世界树设计稿）**：`snapshots/README` 新增「场景世界树」——`workspaceFinal` + `workspace.expected/` 形状、digest/文件集判据、record/refresh 永不写、独立刷新命令 + `--why` + 人审、触发条件（首个 bundle 终态场景/首次回放绿但世界漂移）。**未实施**：当前无场景声称 bundle 终态，不建空目录。
 - **2026-11-13 Wave 1 W1-4（装起 + 效果）**：`lifecycle.entry` 探针从装起的 tarball import `content`/`startup`/`defaults`，用 fake ctx 调 `apply`：断言 `research_pack_root`/`research:manual` 注册、startup 真登记工作区、defaults 注册 `research:defaults` context + `/research-defaults` 命令，三者均返回 disposer；实跑 **ALL PASS（25 项）**。
-- **2026-11-13 Wave 3 W3-6（D54 + Note）**：升 [D54](../../docs/decisions.md#d54)「测试制度 = 三环四账五关」+ [implemented Note](../../notes/implemented/2026-11-13-test-strategy-operating-model.md)；`guides/67` 为操作手册；`decisions-now` 扩到 D1–D54 并加 D54 锚点/手册/Note 断言；台账 32,725 bytes（硬顶 32,768），压缩 D44/D40 换空间。实跑 checks 101/0、verify 绿。
+- **2026-11-13 Wave 3 W3-6（D54 + Note）**：升 [D54](../../../docs/decisions.md#d54)「测试制度 = 三环四账五关」+ [implemented Note](../../../notes/implemented/2026-11-13-test-strategy-operating-model.md)；`guides/67` 为操作手册；`decisions-now` 扩到 D1–D54 并加 D54 锚点/手册/Note 断言；台账 32,725 bytes（硬顶 32,768），压缩 D44/D40 换空间。实跑 checks 101/0、verify 绿。
 - **2026-11-13 Wave 1 W1-3（角色面）**：`snapshot.json` 增 `roleFace`（显式角色面；缺省 = 研究四角色），consumer 用 `presetRoles()` 作允许集、按 `roleFace` 对账；`research-face` 增 `method-editor` case，从 `record-home` fresh profile 重录（首次 dev-home 录制 runtime-context 漂移 → 按 W1-2 纪律换 fresh profile 重录）。实跑 5 角色 A+B 全 PASS；`replay-scene.spec` 15/0；CI snapshot job 自动覆盖第 5 角色。
-- **2026-11-13 Wave 0 W0-6（触发条件登记）**：hook/DOM 行为面暂缓，静态 `client-effect-return` 已钉「effect 回调必须返回 disposer」；真实回收/组件行为 harness 的触发条件已落 [`_backlog/triggers.md`](../triggers.md)（effect 返回 disposer 但真实挂载不回收，或引入 DOM harness 时）。
+- **2026-11-13 Wave 0 W0-6（触发条件登记）**：hook/DOM 行为面暂缓，静态 `client-effect-return` 已钉「effect 回调必须返回 disposer」；真实回收/组件行为 harness 的触发条件已落 [`_backlog/triggers.md`](../../triggers.md)（effect 返回 disposer 但真实挂载不回收，或引入 DOM harness 时）。
 - **2026-11-13 Wave 2 W2-3 先行片（角色消费者矩阵）**：新增 `tests/pack/role-consumer-matrix.spec.mjs`——`presetRoles()` 的每个角色必须在 ① patch `id: preset-<role>` ② `presets/<role>/skills/` 非空 ③ snapshot `roleFace` ④ roleFace 与盘上 roster 精确相等，四面同时在场；红证：删 method-editor roleFace → 红；还原 → 绿。
-- **2026-11-13 Wave 3 W3-5（资产退役）**：把 `e2e-021rc2.entry` 的角色 picker 连续断言迁入 `client-load.entry`，seed 档实跑 **ALL PASS**（picker 序列 = 四个 Deep Research 连续 + Method Editor）；随后退役 319 行 dev-only smoke，清 registry/README/guides/60/project-map/注释，写 [退役 Note](../../notes/archived/2026-11-13-e2e-021rc2-retirement.md) + trigger。替代证据 = required CI `client-load`，不是「删了」。
+- **2026-11-13 Wave 3 W3-5（资产退役）**：把 `e2e-021rc2.entry` 的角色 picker 连续断言迁入 `client-load.entry`，seed 档实跑 **ALL PASS**（picker 序列 = 四个 Deep Research 连续 + Method Editor）；随后退役 319 行 dev-only smoke，清 registry/README/guides/60/project-map/注释，写 [退役 Note](../../../notes/archived/2026-11-13-e2e-021rc2-retirement.md) + trigger。替代证据 = required CI `client-load`，不是「删了」。
 - **2026-11-13 C UI 复验（W1-2 收尾）**：`snapshot-replay.entry` C0 从「点同命 title span」改为 `data-row-key` 的 `openSessionById`，并在 reload 后调 `dismissPreviewNotice` 关首访遮罩；C0–C5 全 PASS，`ui.expected.md` 由真实 UI 捕获重写（卡片 2 / 活动行 3，含 💬）。C 仍不进 CI（需 Chromium）。
 - **2026-11-13 命名迁移补洞 + 全量 e2e 车道**：`guard-red-record` 此前只扫 `tests/**/*.spec.mjs`，命名迁移后 `tests/checks/*.test.mjs` 的判据测试逃逸；现两车道都扫，`gates-cases` 的 conformance 注入目标改为 `tests/checks/probe-conformance.test.mjs`。`gates.e2e` 108 案例全绿；`pnpm test:e2e` 全量 **PASS 6 / FAIL 0 / SKIP 0**。`run-lane` 加单件/车道耗时与 `--only <substr>`；guides/67 增「成本预算」节（默认秒级、重资产按变更触发、新增入口先过成本关）。
 - **2026-11-13 with-key 真模型（本机）**：`node scripts/smoke/l4-lite.e2e.mjs` **ALL PASS**——5 角色（含 method-editor）assistant 标记 + scout web_search 工具调用真实发生；`model-smoke.yml` 的 GitHub secret 运行仍未做，静态契约/缺 key exit 2 已在。
@@ -356,7 +356,7 @@ W3-6 D54 + Note（全卡收口）
   通过；snapshot 5 角色 A/B 全 PASS；`lifecycle.entry` 25/25；`client-load.entry --seed` ALL PASS。
 - **未跑/未证明**：`test:e2e`/`test:entry` 全量、`model-smoke` 真实运行、rc.2→rc.5 真实升级；
   C 层 UI 已复验，不在此列。
-- **待用户**：验收（测试/CI/验收合同触面）；验收通过后把本卡归档并把状态改 `已结`。
+- **归档**：2026-11-14 用户确认两张测试卡可移入 archive；实现证据与未跑项不变。
 
 ## 关闭条件
 

@@ -66,7 +66,7 @@
 **发现 → 修 → 忘** 必须换成 **发现 → 归类 → 类级守卫 → 账本 → 复盘**。修一张卡只值一张卡；
 把一类输入空间钉成矩阵、把一条证据放回 required 路径、把一次漏检写进失败类账本，才值下一轮不再交学费。
 
-关联：[程序卡](../../_backlog/issues/2026-11-13-test-strategy-institutionalization.md) ·
+关联：[程序卡](../../_backlog/_archived/settled_issues/2026-11-13-test-strategy-institutionalization.md) ·
 [失败类普查](../../_backlog/_archived/research/dsh-test-strategy/2026-11-13-failure-class-census.md) ·
 [测试策略指南](../../docs/guides/67-test-strategy.md) ·
 [类级守卫方法](../../_backlog/methods/class-level-guards.md) ·

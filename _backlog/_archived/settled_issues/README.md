@@ -5,6 +5,8 @@
 | [2026-11-13-workflow-substance-gates](2026-11-13-workflow-substance-gates.md) | 加工环路的实体检查：判据形状字段 + Note 同节 + 两道收口门（Note 早写、暂存区配对）+ 复发必答 + 判据测试负例 + 金标准理由；D52；1400 测试 / gates-smoke 108 全绿；[Note](../../../notes/implemented/2026-11-13-workflow-substance-gates.md) | 2026-11-13 |
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-11-13-test-strategy-institutionalization](2026-11-13-test-strategy-institutionalization.md) | 测试策略制度化：D53 命名四车道 + D54 三环四账五关；快照 5 角色 A/B/C、装起效果、类级守卫、CI 聚合/with-key、e2e-021rc2 退役、慢资产预算；[Note](../../../notes/implemented/2026-11-13-test-strategy-institutionalization.md) | 2026-11-14 |
+| [2026-11-13-test-asset-fence](2026-11-13-test-asset-fence.md) | 测试资产围栏 S0–S2：run-accept 夹具同源 + client-surface 直测面 + smoke cost/claim/oracle/sunset 台账；S3 另卡/trigger；[Note](../../../notes/implemented/2026-11-13-test-asset-fence.md) | 2026-11-14 |
 | [2026-11-13-prose-surfaces-migration](2026-11-13-prose-surfaces-migration.md) | 判据形状迁移 II：人工走查改显式标记、方法库 heading 单一 codec（fold/写同判）、版本/present 审计 + 不变量；`pnpm test` 1386 / verify 绿；[Note](../../../notes/implemented/2026-11-13-verdict-shape.md) | 2026-11-13 |
 | [2026-11-13-verdict-shape-migration](2026-11-13-verdict-shape-migration.md) | 判据形状迁移（D51）：readiness 去关键词/词表、门③ 决策改事件链（旧场 UNATTESTED）、门② 版本配对读 present、`review/readiness.json` 声明件成为权威、变异矩阵常驻；verify/test/typecheck + replay 4 场景 + l4-lite 全绿；[Note](../../../notes/implemented/2026-11-13-verdict-shape.md) | 2026-11-13 |
 | [2026-11-12-project-research-defaults](2026-11-12-project-research-defaults.md) | 项目研究默认（D50）：workspace 文件 + `/research-defaults` host command + 活注入 + composer 按钮/配置页签；自动 = 缺席 = Lead 判断；L0–L2/client-load/L4-lite 绿，snapshot B 既有 Team Lead 漂移另案；[Note](../../../notes/implemented/2026-11-12-project-research-defaults.md) | 2026-11-12 |

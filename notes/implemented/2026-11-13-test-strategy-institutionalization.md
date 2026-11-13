@@ -1,7 +1,7 @@
 # 测试策略制度化：交付记录
 
 > 状态：implemented
-> 关联：程序卡 = [2026-11-13 测试策略制度化](../../_backlog/issues/2026-11-13-test-strategy-institutionalization.md)；
+> 关联：程序卡 = [2026-11-13 测试策略制度化](../../_backlog/_archived/settled_issues/2026-11-13-test-strategy-institutionalization.md)；
 > 制度决定 = [D54](../../docs/decisions.md#d54) + [三环四账五关 Note](2026-11-13-test-strategy-operating-model.md)；
 > 命名决定 = [D53](../../docs/decisions.md#d53) + [命名 Note](2026-11-13-test-naming-lanes.md)；
 > 操作手册 = [guides/67](../../docs/guides/67-test-strategy.md)；
