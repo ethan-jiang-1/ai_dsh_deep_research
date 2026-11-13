@@ -226,6 +226,16 @@ W3-6 D53 + Note（全卡收口）
 **排除项**：不新增慢 E2E 换覆盖；不搬 vitest/coverage/七层/run-gates DAG/多 OS/benchmark/Python SDK；
 不把探针做第六评估面；不建第二份索引；不为凑绿放宽判据。
 
+## 执行记录
+
+- **2026-11-13 Wave 2 先行片（W2-2 同源 codec）**：新增
+  `tests/cockpit/library-heading-consistency.test.mjs`——40 格矩阵（2 括号宽 × 2 段序 × 5 空白类 ×
+  2 后缀），断言 `foldLibrary` 与 `upsertMethodEntry` 对同一标题变体的「同名」判断一致；未识别
+  后缀 fail-loud。红证① = 去掉 `parseMethodHeading` 的半角括号分支 → 红（`## 方法(来源)〔默认偏好〕`
+  名称错）；红证② = 去掉 `matchingHeadingLines` 的 `wellFormed` 过滤 → 两条红；各自还原 → 绿。
+  登记 = `docs/evaluation.md` §L0 契约回归。实跑：单测 2/2 绿；`pnpm test` 1411/0；
+  `pnpm verify` 全绿。未跑：慢档/真模型（非本片面）。
+
 ## 关闭条件
 
 - Wave 0–3 的验收项全部有真实红绿证据；Top 5 类各有至少一条邻接变异红录。
