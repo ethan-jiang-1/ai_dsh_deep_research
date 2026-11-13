@@ -244,6 +244,14 @@ W3-6 D53 + Note（全卡收口）
   边界：client 半 `.css` 不可 import、fetch-fallback 的 `fetch` 被 `layering` 闭包图禁入，两者保留
   静态 + `client-load`/L1/L2。实跑：`pnpm test` 1412/0、`pnpm test:vendor` 4/0、`pnpm verify` 全绿。
   未跑：慢档/真模型。
+- **2026-11-13 Wave 0 W0-4（客户端直测面 S1）**：新增 `tests/cockpit/client-pure-logic.test.mjs`
+  （6 个无直测/无路径件：lead-prompt、research-graph/format、coach-prompts、operation-prompts、
+  section-labels、defaults/labels；8 例）与 `tests/contracts/client-surface.test.mjs`
+  （`src/client/**/*.ts` 每个有直测或 `CLIENT_SMOKE_ONLY` 理由；`.tsx` 整体归 client-load；
+  15 个登记件逐条写理由；`scripts/README` 的 `keyless-imports` 消费列同步加 `client-surface.test`）。
+  红证 = 临时新增 `src/client/__probe-untested.ts` → 契约点名红；删除 → 绿。实跑：
+  `pnpm test` 1421/0、`pnpm verify` 全绿。未跑：慢档/真模型/hook DOM 环境（hook 仍登记为
+  smoke-only，待 Wave 3 L）。
 
 ## 关闭条件
 
