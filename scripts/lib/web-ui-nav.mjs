@@ -2,14 +2,14 @@
 //
 // 正本地位与策略裁决（2026-10-21 收拢，六维卫生评审维度2 M2）：侧栏会话定位此前跨 6 文件
 // 3 风格——本 lib 只被部分采用：client-load.entry import 的同时自持 clickRowByText /
-// openSessionByRowKey 私有版；hitl-answer 自持行键扫描/折叠展开/搜索兜底一套；e2e-021rc2.entry
+// openSessionByRowKey 私有版；hitl-answer 自持行键扫描/折叠展开/搜索兜底一套；
 // 明写分叉理由改走 data-row-key；cdp-probe 另有 CDP evaluate 版「Show N more」点击；
 // client-hitl.entry 还在 class 扫行。两套选择器策略各有实红教训，裁决如下：
 //   · 类名锚（span[class*='_root_'] + 左栏 x<256 版面约束）：2026-10-13 从两份逐字副本收敛
-//     而来，但 vendor 换版类名漂移即**静默失效**（e2e-021rc2.entry 分叉实录：0.2.1-rc.2 上按类名
+//     而来，但 vendor 换版类名漂移即**静默失效**（ 分叉实录：0.2.1-rc.2 上按类名
 //     找分组行够不着，data-row-key 契约才稳）——例外正是本 lib 旧 expandGroup 的实现。
 //   · data-row-key 锚（session:<id> / workspace:<name> 行键）：UI 的权威行标识（BUG-034 行键
-//     直开、hitl-answer 行键复核、e2e-021rc2.entry 分叉三处实证）；盲点 = **搜索结果不带行键**
+//     直开、hitl-answer 行键复核 分叉三处实证）；盲点 = **搜索结果不带行键**
 //     （2026-10-18 实测），搜索兜底必须按文本点。
 // 裁决：**data-row-key 主锚**；类名扫描降级为兜底（vendor 行键缺席的旧形态）；「Show N more」
 // 逐层与「Search sessions」搜索为懒渲染/深列表的标准兜底层。全部消费方从本件取策略。
@@ -22,7 +22,7 @@ import { basename } from 'node:path'
 
 // 零依赖：page 按 Playwright Page 鸭子类型使用，不 import playwright——lib 面保持
 // keyless-闭包友好（tests/layering 闭包图不因本模块引入浏览器依赖）；真浏览器证据
-// 仍归消费方冒烟档（client-load.entry / e2e-021rc2.entry）。
+// 仍归消费方冒烟档（client-load.entry / ）。
 
 /** 侧栏候选分组名（折叠态逐组展开的目标序；组随会话 cwd 走——BUG-002 清扫轮实证：
  *  老 ad-hoc 会话在 harness-home 组，不在 research-workspace）。两消费方共用同一份。 */
@@ -49,7 +49,7 @@ export function sessionRowById(page, sessionId) {
 }
 
 /** 按文本找会话行（主锚：`[data-row-key^="session:"]` + hasText；text 可以是剥掉 markdown
- *  强调符的标题片段——run 标题常带反引号，原文喂匹配会失效，e2e-021rc2.entry 实证）。 */
+ *  强调符的标题片段——run 标题常带反引号，原文喂匹配会失效， 实证）。 */
 export function sessionRowsByLabel(page, text) {
   return page.locator('[data-row-key^="session:"]').filter({ hasText: text })
 }
@@ -87,11 +87,11 @@ async function showMoreOnce(page, { clickTimeoutMs = 4_000, settleMs = 1_500 } =
 
 /**
  * 展开侧栏指定折叠组：**data-row-key 主锚**（`[data-row-key^="workspace:"]` 行 hasText 组名
- * → 点，点击后等稳定窗；e2e-021rc2.entry 的 expandWorkspace 分叉实现升正本）；行键扫不到时降级
+ * → 点，点击后等稳定窗； 的 expandWorkspace 分叉实现升正本）；行键扫不到时降级
  * 类名扫描（`span[class*="_root_"]` 前缀匹配——2026-10-13 收敛版，vendor 行键缺席的旧形态
  * 兜底）。找不到返回 false。点击落空容忍（catch 吞）与原两份一致——调用方靠后续断言/谓词
  * 判成败，不靠本函数报错。
- * @param opts.settleMs 点击后稳定窗（默认 2s = client-load.entry 原值；e2e-021rc2.entry 传 3s）。
+ * @param opts.settleMs 点击后稳定窗（默认 2s = client-load.entry 原值； 传 3s）。
  */
 export async function expandGroup(page, groupTitle, { settleMs = 2_000 } = {}) {
   const wsRows = page.locator('[data-row-key^="workspace:"]')
@@ -127,7 +127,7 @@ export async function expandGroup(page, groupTitle, { settleMs = 2_000 } = {}) {
 /**
  * 向**已打开**的搜索面板输入（受控输入用 native setter + input 事件——execCommand 不触发
  * 受控更新）；输入后等稳定窗。与 searchSessionByTitle 的分工：本函数只打字不开面板——
- * 多关键词逐个试的消费方（e2e-021rc2.entry 的 frag 轮）开一次面板后反复调用，避免重复点开
+ * 多关键词逐个试的消费方（ 的 frag 轮）开一次面板后反复调用，避免重复点开
  * 面板按钮（该按钮疑似开关，重复点击可能把面板收起）。
  */
 export async function typeIntoSessionSearch(page, text, { settleMs = 2500 } = {}) {

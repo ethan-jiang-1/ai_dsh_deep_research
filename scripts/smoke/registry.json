@@ -112,17 +112,6 @@
     "sunset": "doctor 判据抽到 scripts/lib 并直测后退役",
     "lane": "e2e"
   },
-  "e2e-021rc2.entry.mjs": {
-    "tier": "dev-only",
-    "reason": "升级端到端，需已装实例；发布前手工档",
-    "cost": "manual",
-    "uniqueClaim": "升级后角色连续成组 + 研究状态/配置两页签真数据 + 插件零故障（真实 picker）",
-    "oracle": [
-      "tests/pack/presets.spec.mjs"
-    ],
-    "sunset": "client-load 的真实 picker 顺序断言到位后退役",
-    "lane": "entry"
-  },
   "gates.e2e.mjs": {
     "tier": "ci",
     "job": "keyless",

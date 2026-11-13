@@ -325,6 +325,7 @@ W3-6 D54 + Note（全卡收口）
 - **2026-11-13 Wave 1 W1-3（角色面）**：`snapshot.json` 增 `roleFace`（显式角色面；缺省 = 研究四角色），consumer 用 `presetRoles()` 作允许集、按 `roleFace` 对账；`research-face` 增 `method-editor` case，从 `record-home` fresh profile 重录（首次 dev-home 录制 runtime-context 漂移 → 按 W1-2 纪律换 fresh profile 重录）。实跑 5 角色 A+B 全 PASS；`replay-scene.spec` 15/0；CI snapshot job 自动覆盖第 5 角色。
 - **2026-11-13 Wave 0 W0-6（触发条件登记）**：hook/DOM 行为面暂缓，静态 `client-effect-return` 已钉「effect 回调必须返回 disposer」；真实回收/组件行为 harness 的触发条件已落 [`_backlog/triggers.md`](../triggers.md)（effect 返回 disposer 但真实挂载不回收，或引入 DOM harness 时）。
 - **2026-11-13 Wave 2 W2-3 先行片（角色消费者矩阵）**：新增 `tests/pack/role-consumer-matrix.spec.mjs`——`presetRoles()` 的每个角色必须在 ① patch `id: preset-<role>` ② `presets/<role>/skills/` 非空 ③ snapshot `roleFace` ④ roleFace 与盘上 roster 精确相等，四面同时在场；红证：删 method-editor roleFace → 红；还原 → 绿。
+- **2026-11-13 Wave 3 W3-5（资产退役）**：把 `e2e-021rc2.entry` 的角色 picker 连续断言迁入 `client-load.entry`，seed 档实跑 **ALL PASS**（picker 序列 = 四个 Deep Research 连续 + Method Editor）；随后退役 319 行 dev-only smoke，清 registry/README/guides/60/project-map/注释，写 [退役 Note](../../notes/archived/2026-11-13-e2e-021rc2-retirement.md) + trigger。替代证据 = required CI `client-load`，不是「删了」。
 
 ## Wave 2/3 剩余裁决（2026-11-13，阶段边界）
 
@@ -339,9 +340,7 @@ W3-6 D54 + Note（全卡收口）
 - **W2-7 变异证明**：本仓的变异证明 = 每片交付时的注入红录（见各卡/Note 的「反证/红证」节）+
   `guard-red-record` 门禁；通用 mutation harness 未建——成本高于收益，且逐片红录已能证明守卫会咬人。
   新守卫仍必须先看红；没有红录的守卫不得交付。
-- **W3-5 资产退役**：唯一计划内候选 = `e2e-021rc2.entry`（升级档）；退役前须把「真实 picker」断言
-  补进 `client-load.entry` 并实跑绿，否则替代证据不成立。本轮未退役（不拿「删了」冒充「退役有替代」）；
-  下一轮完成 picker 断言后再删，并同 diff 清 registry/README/triggers。
+- **W3-5 资产退役**：已完成——`e2e-021rc2.entry` 的 picker 断言已迁入 `client-load.entry` 并实跑 ALL PASS；旧件、registry、文档行、注释同 diff 清除，退役 Note + trigger 在场。
 
 ## 关闭条件
 

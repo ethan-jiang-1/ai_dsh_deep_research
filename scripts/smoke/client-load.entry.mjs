@@ -401,9 +401,33 @@ const saveArtifacts = async (reason, extra = {}) => {
 //    相位函数与 client-load-config.support.mjs 的 pass-4 共用；page 按 Playwright 鸭子类型传参）══
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms))
+
+/** 角色选择器：点开 seat 标签，读全部 preset 名，断言四个研究角色连续相邻（W3-5 退役 e2e-021rc2 的替代断言）。
+ *  只对「首次点开零 preset」重试一次；拿到名字后的数量/连续性断言不重试。 */
+async function assertRolePicker(page) {
+  const readNames = async () => {
+    const seat = page.locator('[class*="seatLabel"]').first()
+    if (!(await seat.isVisible({ timeout: 20_000 }).catch(() => false))) return null
+    await seat.click({ timeout: 8_000 }).catch(() => {})
+    await wait(2_500)
+    const names = await page.locator('[role="menuitem"], [role="option"], li').allInnerTexts()
+      .then((all) => all.map((s) => s.split('\n')[0].trim()).filter((s) => s !== ''))
+    await page.keyboard.press('Escape').catch(() => {})
+    await wait(800)
+    return names
+  }
+  let names = await readNames()
+  if (names === null || names.length === 0) { await wait(3_000); names = await readNames() }
+  if (names === null) return { ok: false, detail: '角色 seat 标签缺席（首屏未挂载）' }
+  if (names.length === 0) return { ok: false, detail: '角色选择器点开后零 preset（弹层未渲染）' }
+  const research = names.filter((n) => n.startsWith('Deep Research'))
+  const idx = names.map((n, i) => (n.startsWith('Deep Research') ? i : -1)).filter((i) => i >= 0)
+  const contiguous = idx.length === 4 && idx.every((v, k) => k === 0 || v === idx[k - 1] + 1)
+  return { ok: research.length === 4 && contiguous, detail: `四个角色=${String(research.length)} 连续=${String(contiguous)} 序列=[${names.join(' | ')}]` }
+}
 // 侧栏会话定位全套（clickRowByText / openSessionById / expandGroup / 候选分组名）=
 // lib/web-ui-nav.mjs **唯一正本**（data-row-key 主锚，2026-10-21 收拢——本件原私有
-// clickRowByText / openSessionByRowKey 与 hitl-answer / e2e-021rc2.entry / cdp-probe /
+// clickRowByText / openSessionByRowKey 与 hitl-answer  /  cdp-probe /
 // client-hitl.entry 的私有版全部退役改调 lib；收拢裁决与实红家谱见 lib 头注）。
 // 页面就绪序列（reload → New Session 首屏字样 → 稳定窗）——收口本文件六处同形重复；
 // settleMs 逐调用点保持原值（各处的稳定窗是实测调的，不统一）。
@@ -595,6 +619,12 @@ async function setupProbeSession() {
 /** pass-1：绑定会话（磁盘侧定位——渐进面真数据 = 本会话自己的 bundle，磁盘认证对账）。 */
 async function pass1BoundFacePhase() {
   await awaitAppReady(page, 6_000)
+  // W3-5：角色 picker 断言从 e2e-021rc2 迁入；先回首屏（New Session）再点 seat。
+  const newSession = page.getByText(/New Session|新会话/).first()
+  if (await newSession.isVisible({ timeout: 2_000 }).catch(() => false)) await newSession.click({ timeout: 5_000 }).catch(() => {})
+  await wait(1_000)
+  const rolePicker = await assertRolePicker(page)
+  step(rolePicker.ok, '角色选择器：四个 Deep Research preset 连续相邻', rolePicker.detail)
   const boundOk = boundSession !== null && expectedFace !== null
   step(boundOk, '磁盘侧找到绑定 run 的带历史会话（渐进面真数据源）', boundOk ? `「${boundSession.title}」→ drt_${boundSession.slug}` : '缺——先跑一场 run（run 通道现用 workspaceId 形态建会话）')
   if (boundOk) {

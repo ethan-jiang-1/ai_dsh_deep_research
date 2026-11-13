@@ -925,6 +925,16 @@
       "source": "_backlog/issues/2026-11-13-test-strategy-institutionalization.md",
       "target": "notes/archived/2026-11-13-exploratory-bug-wave-postmortem.md",
       "reason": "W3-2 复盘交付指针：本卡执行记录引用本次 79 张探索 BUG 的复盘；归档件为冻结证据，卡为活跃消费者"
+    },
+    {
+      "source": "_backlog/triggers.md",
+      "target": "notes/archived/2026-11-13-e2e-021rc2-retirement.md",
+      "reason": "W3-5 资产退役：活触发条件引用退役 Note；归档件为冻结证据，trigger 为活跃消费者"
+    },
+    {
+      "source": "_backlog/issues/2026-11-13-test-strategy-institutionalization.md",
+      "target": "notes/archived/2026-11-13-e2e-021rc2-retirement.md",
+      "reason": "W3-5 退役：程序卡执行记录引用退役 Note；归档件为冻结证据，卡为活跃去向"
     }
   ]
 }
