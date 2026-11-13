@@ -100,3 +100,18 @@ test('BUG-130 活 pid 长龄锁：错误含锁文件路径与删除处置，死 
     assert.equal(withMethodLibraryLock(dir, () => 1), 1)
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })
+
+// W2-5 路径形态矩阵补口（2026-11-13）：空格/CJK/多层缺席目录/空库/目录当文件。
+// 现有覆盖 = symlink/hardlink/目录目标；这四格是同一「工作区文件必须是普通文件」契约的邻接形态。
+test('路径形态：空格/CJK/多层缺席目录/空库正常；目录当文件拒绝', () => {
+  const base = root()
+  const dir = join(base, '研究 空间', 'nested', 'deeper')
+  try {
+    assert.equal(readLibraryFile(dir), '', '缺席库 = 空库，且父目录按需创建')
+    writeLibraryFileAtomic(dir, '# 库\n')
+    assert.equal(readLibraryFile(dir), '# 库\n')
+    assert.equal(safeMethodLibraryPath(dir), join(dir, 'method-library.md'))
+    mkdirSync(join(base, 'as-dir', 'method-library.md'), { recursive: true })
+    assert.throws(() => readLibraryFile(join(base, 'as-dir')), /普通文件/)
+  } finally { rmSync(base, { recursive: true, force: true }) }
+})

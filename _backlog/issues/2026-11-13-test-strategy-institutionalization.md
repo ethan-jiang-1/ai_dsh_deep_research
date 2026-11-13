@@ -314,6 +314,7 @@ W3-6 D54 + Note（全卡收口）
   旧 `.test.mjs`、`*.e2e.mjs` 进 tests、错 lane、孤儿支援件各红。实跑：`pnpm test` spec+checks、
   `pnpm test:vendor`、lane `--list` 全绿；详见 [命名 Note](../../notes/implemented/2026-11-13-test-naming-lanes.md)。
 - **2026-11-13 Wave 2 W2-4 先行片（run lock 状态矩阵）**：`tests/run/run-lock.spec.mjs` 加 3 例——坏 owner 形态（空/坏 JSON/0/负/非整数）、存活外部属主（拿锁拒绝 + onBusy 给 pid + 不覆盖 owner）、释放不存在锁幂等；单文件 7/7 绿。
+- **2026-11-13 Wave 2 W2-5 先行片（方法库路径形态矩阵）**：`tests/pack/method-library-io.spec.mjs` 加 1 例——空格/CJK/多层缺席目录/空库/目录当文件；与既有 symlink/hardlink 组成 8 例路径矩阵。实跑 8/8 绿。
 
 ## 关闭条件
 
