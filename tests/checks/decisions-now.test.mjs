@@ -52,16 +52,26 @@ test('已退役表：D35/D38/D39 各有锚点与一行去向，且不在已定�
   assert.match(RETIRED, /D40/, '已退役表应指向取代者 D40');
 });
 
-test('D 号唯一且连续：D1–D53 每个锚点恰好一次', () => {
+test('D 号唯一且连续：D1–D54 每个锚点恰好一次', () => {
   const anchors = [...TEXT.matchAll(/<a id="d(\d+)"><\/a>D\1/g)].map((m) => Number(m[1]));
-  assert.ok(anchors.length >= 53, `锚点过少（${anchors.length}）——防空语料`);
+  assert.ok(anchors.length >= 54, `锚点过少（${anchors.length}）——防空语料`);
   const counts = new Map();
   for (const n of anchors) counts.set(n, (counts.get(n) ?? 0) + 1);
   const dup = [...counts].filter(([, c]) => c > 1).map(([n]) => n);
   assert.deepEqual(dup, [], '同一 D 号出现多次（编号唯一）');
   const missing = [];
-  for (let n = 1; n <= 53; n += 1) if (!counts.has(n)) missing.push(n);
+  for (let n = 1; n <= 54; n += 1) if (!counts.has(n)) missing.push(n);
   assert.deepEqual(missing, [], 'D 号不连续（缺号会让引用悬空）');
+});
+
+test('D54 三环四账五关在册且指向操作手册/Note', () => {
+  const row = activeRows(ACTIVE).find((candidate) => candidate.number === '54');
+  assert.ok(row, 'D54 缺席——测试制度失去宪法锚点');
+  for (const token of ['三环', '四账', '五关', '失败类', '最低可见层']) {
+    assert.ok(row.decision.includes(token), `D54 缺制度词 ${token}`);
+  }
+  assert.ok(row.refs.includes('guides/67-test-strategy.md'), 'D54 必须指向 guides/67');
+  assert.ok(row.refs.includes('2026-11-13-test-strategy-operating-model.md'), 'D54 必须指向 implemented Note');
 });
 
 test('D53 测试命名四车道在册且指向命名 Note', () => {

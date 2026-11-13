@@ -321,6 +321,7 @@ W3-6 D54 + Note（全卡收口）
 - **2026-11-13 Wave 1 W1-5（可选层缺席）**：`lifecycle.entry` 新增断言——未装团队层的干净 profile，dump 无 `ui-agent-team`，但本包 10 行/真启动/显示面/remove 全过；实跑 `DSH_BIN=/tmp/dsh-vendor lifecycle.entry` ALL PASS（22 项）。
 - **2026-11-13 Wave 1 W1-6（世界树设计稿）**：`snapshots/README` 新增「场景世界树」——`workspaceFinal` + `workspace.expected/` 形状、digest/文件集判据、record/refresh 永不写、独立刷新命令 + `--why` + 人审、触发条件（首个 bundle 终态场景/首次回放绿但世界漂移）。**未实施**：当前无场景声称 bundle 终态，不建空目录。
 - **2026-11-13 Wave 1 W1-4 先行片（装起 + 内容效果）**：`lifecycle.entry` 探针改为「装起的 tarball 里 import `content` → 用 fake ctx 调 `apply` → 断言 `variable:research_pack_root` / `context:research:manual` / disposer」；实跑 ALL PASS（23 项）。**未证明**：startup/defaults 的安装态 apply 效果；仍待 W1-4 后续。
+- **2026-11-13 Wave 3 W3-6（D54 + Note）**：升 [D54](../../docs/decisions.md#d54)「测试制度 = 三环四账五关」+ [implemented Note](../../notes/implemented/2026-11-13-test-strategy-operating-model.md)；`guides/67` 为操作手册；`decisions-now` 扩到 D1–D54 并加 D54 锚点/手册/Note 断言；台账 32,725 bytes（硬顶 32,768），压缩 D44/D40 换空间。实跑 checks 101/0、verify 绿。
 
 ## 关闭条件
 
