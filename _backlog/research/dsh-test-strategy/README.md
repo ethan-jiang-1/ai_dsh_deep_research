@@ -24,3 +24,4 @@ opened: 2026-11-13
 | 文件 | 作用 | 日期 |
 |---|---|---|
 | [2026-11-13-dsh-test-strategy-gap.md](2026-11-13-dsh-test-strategy-gap.md) | DSH 16 篇 digest + vendor 一手源核验、本仓资产与失败史对照、差距矩阵、三环四账五关与落地路线 | 2026-11-13 |
+| [2026-11-13-failure-class-census.md](2026-11-13-failure-class-census.md) | 全量 159 张 BUG 的失败类普查（第一版失败类账本）：主类/发现层/守卫/复发链/沉淀缺口 | 2026-11-13 |
