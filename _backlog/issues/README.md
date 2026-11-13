@@ -8,6 +8,7 @@
 |---|---|---|
 | [2026-11-11-exploratory-test-strategy](2026-11-11-exploratory-test-strategy.md) | 等人拍板 | 探索性验证协议 + 第 1 轮 charter；pilot 已跑出 2 类 fail-open |
 | [2026-11-13-test-asset-fence](2026-11-13-test-asset-fence.md) | 待落地 | 测试资产围栏：S0 修 run-accept 夹具 + S1 客户端快测 + S2 慢资产台账 |
+| [2026-11-13-test-strategy-institutionalization](2026-11-13-test-strategy-institutionalization.md) | 待落地 | 测试策略制度化：失败类账本 + 类级守卫 + 模型可见证据 + 资产/证据/复盘治理 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
