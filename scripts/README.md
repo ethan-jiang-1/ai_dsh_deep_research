@@ -110,7 +110,7 @@
 | 模块 | 被谁消费 | 说明 |
 |---|---|---|
 | lib/content-budget.mjs | e-workspace、content-disclosure.spec | 常驻面预算唯一正本：T0 两级（下放 10,000 / 硬顶 12,288）+ lead persona/合计的 char/byte/token |
-| lib/roles.mjs | discipline-probe、doctor.e2e、fetch-fallback-orchestration.spec、l4-lite.e2e、preset.e2e、presets.spec、release.entry、replay-scene.spec、snapshot-replay.entry、strategy-core.spec、team-preflight.e2e | 角色清单访问器（presetRoles = 盘上全部；researchRoles = 研究面；事实源 = 盘上 presets/） |
+| lib/roles.mjs | discipline-probe、doctor.e2e、fetch-fallback-orchestration.spec、l4-lite.e2e、preset.e2e、presets.spec、release.entry、replay-scene.spec、snapshot-replay.entry、strategy-core.spec、team-preflight.e2e、role-consumer-matrix.spec | 角色清单访问器（presetRoles = 盘上全部；researchRoles = 研究面；事实源 = 盘上 presets/） |
 | lib/cli-entry.mjs | export-handoff、gates.e2e、market、run-dashboard、protocol-audit、schema-scan、verdict-audit、node-gate、evidence-audit、channel-cache、run-driver、vendor-artifacts、cli-entry.test | symlink-safe CLI 入口判定（realpath 归一；macOS `/tmp` → `/private/tmp` 下不静默） |
 | lib/channel-cache.mjs | run-driver、channel-cache.spec | 启动加速缓存判据：pack 源指纹（路径+size+mtime）+ 发布清单缓存（漂移门 ≈5s→≈0.7s，CLI 供 boot-run.sh 消费）+ 探针 GREEN 缓存（热复用 ≈0.5s / 冷启动命中 ≈10s；键 = pack 指纹 + runtime 构建 + 断言参数，TTL 30 分钟；命中前 HTTP 就绪检查；只存 GREEN，`--force-probe` 绕过） |
 | lib/bundle-sessions.mjs | bundle-sessions、bundle-sessions.spec | run bundle → 见证会话反查：聚合 scanWitnessLogs 的 boundSessions/presented（绑定谓词不另立——与 node-gate 门①②同源）；交付回执的 witness.sessions 亦由此面派生 |
