@@ -96,7 +96,7 @@ dev-only，靠人记得跑；客户端 36/59 文件无直测；慢资产没有�
    smoke-only 并写理由。
 3. 政策载体：`docs/testing.md` / `evaluation.md` 一节 / `guides/67`。先做 `guides/67`（程序）+
    `evaluation` 指针；若规则继续膨胀再升合同。
-4. 是否升 D 号：本卡交付时把「三环四账五关」升为 D53；不在开工前预支。
+4. 是否升 D 号：本卡交付时把「三环四账五关」升为 D54；不在开工前预支。
 
 **下一步：** 按 §方案 的 Wave 0 → 1 → 2 → 3 推进；每片先立红、再交付、同 diff 记账；
 每波结束报告已跑绿 / 已跑红 / 未跑。
@@ -128,7 +128,7 @@ W0-7 证据账 ──> W3-4 政策收口
 W0-8 可见性 ──> W3-7 CI 聚合 / with-key
 W1-1 快照只读 ──> W1-2 快照 A/B CI ──> W1-3 角色面 / W1-6 世界树
 W3-1 探索技能 ──> W3-2 复盘
-W3-6 D53 + Note（全卡收口）
+W3-6 D54 + Note（全卡收口）
 ```
 
 这不是执行队列；是「谁先落地、谁等谁」的依赖图。W0-1/W0-2 是唯一无代码依赖、且其他片都要
@@ -181,7 +181,7 @@ W3-6 D53 + Note（全卡收口）
 | W3-3 失败类→层表 | `guides/67` 一张 12 行表：失败类 → 最低可见层 → 反例 → 证据 | 被 guides/60 与 reviewing-a-delivery 引用；真实变更能按表选层 | W0-2 |
 | W3-4 政策收口 | `guides/67` + `evaluation` 指针；必要时升 `docs/testing.md` | 一个入口能回答「绿为什么有意义/怎么选层/怎么记账」 | W3-3 |
 | W3-5 资产退役 | `e2e-021rc2.entry` 补 picker 断言后退役；安装档合并评估 | 退役有替代证据；无消费者资产清零 | W0-3 |
-| W3-6 D53 + Note | 把三环四账五关升 D53；写 implemented Note | D 号台账/Note/研究题互链；`pnpm verify` 绿 | Wave 0–3 |
+| W3-6 D54 + Note | 把三环四账五关升 D54；写 implemented Note | D 号台账/Note/研究题互链；`pnpm verify` 绿 | Wave 0–3 |
 | W3-7 CI 聚合 + with-key | `needs` 聚合裁决（含 skipped）+ job 清单契约；`workflow_dispatch` l4-lite + preflight | 删 needs/新增 job 不登记 → 红；with-key 可触发且缺 key 硬失败 | 无 |
 
 ### 取舍
@@ -220,7 +220,7 @@ W3-6 D53 + Note（全卡收口）
 | 7 | 装起 + 效果 / 可选依赖 | 装配 | 删 apply 效果 → 红；可选缺席仍启动 | `lifecycle/release.entry` + 新断言 |
 | 8 | 类级守卫 top 5 | 确定性 | 每类至少一条邻接变异红录；矩阵/同源/消费者/状态/路径/假绿至少覆盖四类 | `tests/` + `scripts/lib/gates-cases.mjs` |
 | 9 | 探索技能 + 复盘 + 失败类→层表 | 文档/流程 | 技能可加载；复盘有「为什么没早发现」；表被引用 | `.agents/skills/` + `guides/67` + `notes/archived/` |
-| 10 | 资产退役 + D53 + Note | 文档/治理 | 退役有替代证据；D53/Note/研究题互链；verify 绿 | `docs/decisions.md` + `notes/implemented/` |
+| 10 | 资产退役 + D54 + Note | 文档/治理 | 退役有替代证据；D54/Note/研究题互链；verify 绿 | `docs/decisions.md` + `notes/implemented/` |
 | 11 | CI 聚合 + with-key 通道 | 装配/CI | 删 needs/新增 job 不登记 → 红；缺 key 硬失败 | `.github/workflows/ci.yml` + 契约 |
 | 12 | 收尾不回归 | 全面 | `pnpm verify` / `pnpm test` / `pnpm typecheck`（触 pack 时）/ 对应慢档绿；未跑分列 | 命令输出 + Note |
 
@@ -303,7 +303,8 @@ W3-6 D53 + Note（全卡收口）
   实测：`DSH_HOME=runtime/record-home ... --layers a,b` 四角色 A+B 全绿；`tests/run/replay-fixtures`
   按新 fixture 重算 `ui.expected.md` 后 `pnpm test` 1428/0。**未验证**：C 层 UI 捕获在 temp home
   被侧栏同名探针会话干扰（C0 失败），`ui.expected.md` 的卡片/活动行由 `cardTitleOf`/
-  `foldActivityRows` 纯函数重算，C UI 重跑待后续；CI 不跑 C（只 A/B）。- **2026-11-13 Wave 0 W0-10（命名对齐）**：按用户 2026-11-13 的四车道方案全仓迁移——
+  `foldActivityRows` 纯函数重算，C UI 重跑待后续；CI 不跑 C（只 A/B）。
+- **2026-11-13 Wave 0 W0-10（命名对齐）**：按用户 2026-11-13 的四车道方案全仓迁移——
   `tests/{run,cockpit,pack,contracts}/**/*.test.mjs` → `*.spec.mjs`；门禁自身 → `tests/checks/*.test.mjs`；
   `tests/vendor/*.vendor.mjs` → `*.vendor.spec.mjs`；28 个 smoke → `<target>.e2e.mjs`（真进程，10）/
   `<target>.entry.mjs`（真浏览器·profile·tarball，14）/ `<target>.support.mjs`（支援件，4）；
@@ -312,12 +313,13 @@ W3-6 D53 + Note（全卡收口）
   `test-lanes` / `smoke-registry` / `smoke-oracle` 契约钉后缀与 lane。红证：根目录 spec、checks 嵌套、
   旧 `.test.mjs`、`*.e2e.mjs` 进 tests、错 lane、孤儿支援件各红。实跑：`pnpm test` spec+checks、
   `pnpm test:vendor`、lane `--list` 全绿；详见 [命名 Note](../../notes/implemented/2026-11-13-test-naming-lanes.md)。
+- **2026-11-13 Wave 2 W2-4 先行片（run lock 状态矩阵）**：`tests/run/run-lock.spec.mjs` 加 3 例——坏 owner 形态（空/坏 JSON/0/负/非整数）、存活外部属主（拿锁拒绝 + onBusy 给 pid + 不覆盖 owner）、释放不存在锁幂等；单文件 7/7 绿。
 
 ## 关闭条件
 
 - Wave 0–3 的验收项全部有真实红绿证据；Top 5 类各有至少一条邻接变异红录。
 - `pnpm verify` / `pnpm test` / `pnpm typecheck`（触 pack 时）/ 快照 CI 基线 / 对应慢档绿；
   未跑项分列。
-- 失败类账本、资产账、证据账、探索账四份账本在场且被消费；D53 + implemented Note 与卡同变更；
+- 失败类账本、资产账、证据账、探索账四份账本在场且被消费；D54 + implemented Note 与卡同变更；
   研究题与卡互链。
 - 用户验收（测试/CI/验收合同触面）；审查记录（机械不跳 + 语义自审）。

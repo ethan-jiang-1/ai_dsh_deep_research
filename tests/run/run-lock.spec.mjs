@@ -61,3 +61,38 @@ test('BUG-073 释放只动自己的锁：别人存活属主在场时不删', () 
     assert.equal(existsSync(lock), true)
   } finally { rmSync(root, { recursive: true, force: true }) }
 })
+
+// W2-4 状态/交错矩阵补口（2026-11-13）：owner 文件的坏形态、存活的**外部**属主、释放不存在锁。
+// 这三类此前只有「死 pid / 创建窗口 / 自己的锁」三条；坏 JSON 与外部存活属主是 BUG-073 的邻接变体。
+test('owner 文件非法/空/0/负/非整数：一律不可作存活属主', () => {
+  const root = makeRoot()
+  const lock = join(root, 'invalid.lock')
+  try {
+    mkdirSync(lock)
+    for (const body of ['', '{', 'null', '{}', '{"pid":0}', '{"pid":-1}', '{"pid":"x"}', '{"pid":1.5}']) {
+      writeFileSync(join(lock, 'owner.json'), body)
+      assert.equal(lockOwnerPid(lock), null, `坏 owner 形态被当活属主：${JSON.stringify(body)}`)
+    }
+  } finally { rmSync(root, { recursive: true, force: true }) }
+})
+
+test('存活外部属主：拿锁被拒、onBusy 给 pid、owner 文件不被覆盖', () => {
+  const root = makeRoot()
+  const lock = join(root, 'external.lock')
+  try {
+    mkdirSync(lock)
+    const body = JSON.stringify({ pid: process.ppid, at: new Date().toISOString() })
+    writeFileSync(join(lock, 'owner.json'), body)
+    const busy = []
+    assert.equal(acquireRunLock({ lockDir: lock, onBusy: (pid) => busy.push(pid) }), false)
+    assert.deepEqual(busy, [process.ppid], '外部存活属主必须原样报给 onBusy')
+    assert.equal(readFileSync(join(lock, 'owner.json'), 'utf8'), body, '失败路径不得改写别人的 owner')
+  } finally { rmSync(root, { recursive: true, force: true }) }
+})
+
+test('释放不存在的锁 = 幂等成功（不是「未跑」）', () => {
+  const root = makeRoot()
+  try {
+    assert.equal(releaseRunLock(join(root, 'missing.lock')), true)
+  } finally { rmSync(root, { recursive: true, force: true }) }
+})
