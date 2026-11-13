@@ -325,6 +325,23 @@ W3-6 D54 + Note（全卡收口）
 - **2026-11-13 Wave 1 W1-3（角色面）**：`snapshot.json` 增 `roleFace`（显式角色面；缺省 = 研究四角色），consumer 用 `presetRoles()` 作允许集、按 `roleFace` 对账；`research-face` 增 `method-editor` case，从 `record-home` fresh profile 重录（首次 dev-home 录制 runtime-context 漂移 → 按 W1-2 纪律换 fresh profile 重录）。实跑 5 角色 A+B 全 PASS；`replay-scene.spec` 15/0；CI snapshot job 自动覆盖第 5 角色。
 - **2026-11-13 Wave 0 W0-6（触发条件登记）**：hook/DOM 行为面暂缓，静态 `client-effect-return` 已钉「effect 回调必须返回 disposer」；真实回收/组件行为 harness 的触发条件已落 [`_backlog/triggers.md`](../triggers.md)（effect 返回 disposer 但真实挂载不回收，或引入 DOM harness 时）。
 
+## Wave 2/3 剩余裁决（2026-11-13，阶段边界）
+
+- **W2-3 消费者清单**：现有五件已覆盖不相交的消费者集——`navigability`（fixtures/lib/scripts/dev）、
+  `presets-wiring`（skills/role 接线）、`test-surface`（scripts/lib 直测边界）、`client-surface`
+  （src/client 直测/豁免）、`smoke-registry`/`smoke-oracle`（smoke 资产账）。没有一张跨五者的单一
+  consumer graph；再建一张会与这五件重复。**处置**：以五件为类级守卫，新增消费者面时先扩对应那件，
+  不新造总图。
+- **W2-6 假绿 oracle**：C7 的代表形态已有直测——BUG-153（空 protocol 快照）、BUG-157（会话不可读）、
+  BUG-158（review 缺席）、BUG-159（claims evidence/topics 不盘上对账）；C7 新形态出现时按
+  `class-level-guards` 的 false-green oracle 形态补，不预建空矩阵。
+- **W2-7 变异证明**：本仓的变异证明 = 每片交付时的注入红录（见各卡/Note 的「反证/红证」节）+
+  `guard-red-record` 门禁；通用 mutation harness 未建——成本高于收益，且逐片红录已能证明守卫会咬人。
+  新守卫仍必须先看红；没有红录的守卫不得交付。
+- **W3-5 资产退役**：唯一计划内候选 = `e2e-021rc2.entry`（升级档）；退役前须把「真实 picker」断言
+  补进 `client-load.entry` 并实跑绿，否则替代证据不成立。本轮未退役（不拿「删了」冒充「退役有替代」）；
+  下一轮完成 picker 断言后再删，并同 diff 清 registry/README/triggers。
+
 ## 关闭条件
 
 - Wave 0–3 的验收项全部有真实红绿证据；Top 5 类各有至少一条邻接变异红录。
