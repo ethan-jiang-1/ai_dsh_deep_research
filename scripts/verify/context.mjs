@@ -41,7 +41,7 @@ export const gates = [
   'md-utf8-newline', 'md-links', 'md-anchors', 'doc-paths', 'doc-drefs', 'archived-note-pointer', 'count-free', 'doc-now-only', 'doc-budgets',
   'preset-structure', 'pack-bundle-compat', 'client-half', 'row-deps', 'pack-contract-sync', 'role-list-sync', 'client-keys', 'client-effect-wrap', 'cockpit-doc-registry', 'run-context-single-source',
   'pack-manifest', 'market-index', 'readme-shape', 'release-vocab',
-  'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'proposed-pointer-live',
+  'note-tree', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'proposed-pointer-live',
   'vendor-pin', 'vendor-clean', 'pin-agreement', 'align-ledger', 'discipline-na-trigger', 'discipline-state-vocab', 'repo-conventions', 'vendor-links',
   'content-shape', 'dev-runtime-clean', 'overlay-fresh', 'release-version', 'dist-manual-version', 'dist-tarball', 'dist-manual-fresh',
   'claude-symlink', 'secrets-untracked', 'dev-parity', 'host-paths', 'probe-registry', 'guard-red-record', 'gate-ledger-sync', 'entry-chain', 'backlog-liveness', 'staged-change-pairing', 'port-exclusive', 'hooks-active',

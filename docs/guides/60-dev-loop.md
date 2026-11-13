@@ -48,6 +48,7 @@
   DSH，会话 cwd 才落在研究工作区）+ 开发技能 `running-a-research-run`；
 - **交付收尾** → `reviewing-a-delivery`；**加/改角色** → `adding-a-research-role`；
   **加/改门禁** → `writing-a-gate`；**加/调节点轨道** → `changing-node-topology`；
+  **归档/删除/合并 Note** → `archiving-a-note`；
   **换 vendor pin** → `bumping-vendor-pin`；**间歇/环境依赖缺陷** → `reproducing-a-failure`；
   **真实边界单点证据** → `using-a-probe`；**回归绿但输入空间没枚举** → `exploratory-verification`。
 

@@ -41,6 +41,56 @@ const stripVerificationSection = (dirRel) => (dir) => {
 /** 证据节注入（**否定式标题**形态）：把真实证据节标题换成"## 未验证的猜测"
  *  ——文字游戏：标题里"验证"二字在场，但它声明的是**没有验证**。
  *  门禁须仍判红（语义倒置：明说缺席反而满足"要有证据节"，2026-10-08 二轮自审抓获）。 */
+
+/** 在指定目录里找首篇非 README 的 Note（按键名排序，保证案例确定性）。 */
+const firstNoteIn = (dir, suffix = '.md') => readdirSync(dir)
+  .filter((f) => f.endsWith(suffix) && f !== 'README.md').sort()[0];
+
+/** 状态行重复注入（2026-11-14 note-format 状态面）：在首篇 implemented Note 末尾再塞一条状态行。 */
+const duplicateStatusLine = (dir) => {
+  const d = join(dir, 'notes', 'implemented');
+  const p = join(d, firstNoteIn(d));
+  appendFileSync(p, '\n> 状态：rejected\n');
+};
+
+/** 归档行缺席注入：删掉首篇冻结件的 `> 归档：` 行（冻结件何时入层失去唯一记录）。 */
+const stripArchiveLine = (dir) => {
+  const d = join(dir, 'notes', 'archived');
+  const p = join(d, firstNoteIn(d));
+  writeFileSync(p, readFileSync(p, 'utf8').split('\n').filter((l) => !l.startsWith('> 归档：')).join('\n'));
+};
+
+/** 归档日期非法/过早注入：把首篇冻结件的归档日期改成给定值（保留理由后缀）。 */
+const rewriteArchiveDate = (date) => (dir) => {
+  const d = join(dir, 'notes', 'archived');
+  const p = join(d, firstNoteIn(d));
+  writeFileSync(p, readFileSync(p, 'utf8').replace(/^> 归档：\s*\d{4}-\d{2}-\d{2}/m, `> 归档：${date}`));
+};
+
+/** 拒绝条重启条件缺席注入：把首篇 rejected Note 里含 复活条件/重启/重新引入 的 h2 改成中性标题。 */
+const stripRejectedRevival = (dir) => {
+  const d = join(dir, 'notes', 'rejected');
+  const p = join(d, firstNoteIn(d));
+  writeFileSync(p, readFileSync(p, 'utf8').split('\n')
+    .map((l) => (/^##(?!#).*(复活条件|重启|重新引入)/.test(l) ? '## 附注' : l)).join('\n'));
+};
+
+/** 树形注入：在 notes/implemented 下建嵌套目录（Note 对格式/毕业扫描不可见）。 */
+const nestedNote = (dir) => {
+  const d = join(dir, 'notes', 'implemented', 'probe-nested');
+  mkdirSync(d, { recursive: true });
+  writeFileSync(join(d, 'README.md'), '# probe nested\n');
+  writeFileSync(join(d, '2099-01-01-probe.md'), '# probe\n\n> 状态：implemented\n\n## 决定\nx\n\n## 输掉的方案\ny\n\n## 验证\nz\n');
+};
+
+/** 树形注入：未知生命周期目录。 */
+const unknownLifecycle = (dir) => {
+  const d = join(dir, 'notes', 'probe-layer');
+  mkdirSync(d, { recursive: true });
+  writeFileSync(join(d, 'README.md'), '# probe layer\n');
+  writeFileSync(join(d, '2099-01-01-probe.md'), '# probe\n');
+};
+
 const negateVerificationSection = (dirRel) => (dir) => {
   const d = join(dir, dirRel);
   const WORD = /^##(?!#)\s*[^\n]*(验证|检查|验收|实录|记录|实证|探针|全绿|复验|证据)/m;
@@ -423,6 +473,18 @@ export const CASES = [
   { id: 'note-format-no-status', gate: 'note-format', mutate: stripFirstStatusLine(join('notes', 'implemented')) },
   { id: 'note-format-no-verification', gate: 'note-format', mutate: stripVerificationSection(join('notes', 'implemented')) },
   { id: 'note-format-negated-verification', gate: 'note-format', mutate: negateVerificationSection(join('notes', 'implemented')) },
+  // note-tree（2026-11-14 树形闭集）：四形态各一条——嵌套目录 / 未知生命周期层 / 无日期文件名 / INDEX.md。
+  { id: 'note-tree-nested-dir', gate: 'note-tree', mutate: nestedNote },
+  { id: 'note-tree-unknown-lifecycle', gate: 'note-tree', mutate: unknownLifecycle },
+  { id: 'note-tree-nondated-filename', gate: 'note-tree', mutate: (dir) => writeFileSync(join(dir, 'notes', 'implemented', 'notadate.md'),
+    '# probe\n\n> 状态：implemented\n\n## 决定\nx\n\n## 输掉的方案\ny\n\n## 验证\nz\n') },
+  { id: 'note-tree-index-file', gate: 'note-tree', mutate: (dir) => writeFileSync(join(dir, 'notes', 'INDEX.md'), '# index\n') },
+  // note-format 状态/归档元数据（2026-11-14 S2）：状态行重复 / 归档行缺席 / 日期非法 / 日期过早 / 拒绝条无重启节。
+  { id: 'note-format-duplicate-status', gate: 'note-format', mutate: duplicateStatusLine },
+  { id: 'note-format-archive-line-missing', gate: 'note-format', mutate: stripArchiveLine },
+  { id: 'note-format-archive-date-invalid', gate: 'note-format', mutate: rewriteArchiveDate('2099-13-40') },
+  { id: 'note-format-archive-date-early', gate: 'note-format', mutate: rewriteArchiveDate('2000-01-01') },
+  { id: 'note-format-rejected-no-revival', gate: 'note-format', mutate: stripRejectedRevival },
   { id: 'entry-chain-member-missing', gate: 'entry-chain', mutate: (dir) => {
     rmSync(join(dir, 'docs', 'design', '60-intent-carriers.md'));
   } },

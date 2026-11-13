@@ -1,17 +1,18 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-14
 ---
 
 # 落地：notes 工程纪律补借 P0——树形、归档元数据、拒绝条重启条件与归档校准 skill
 
-> 立卡：2026-11-14 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-14 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
 >
-> 去向：implemented — `notes/implemented/2026-11-14-notes-discipline-hardening.md`（交付时写）
+> 去向：implemented — `notes/implemented/2026-11-14-notes-discipline-hardening.md`
+> 结论：P0（S1–S4）已交付；证据 = [交付 Note](../../../notes/implemented/2026-11-14-notes-discipline-hardening.md)；P1 封印/出链排除另 trigger。
 > 立卡依据：用户 2026-11-14 直派「propose 一个 issue……借助我们的流程准备落地」。
-> **`待落地` 不是授权**：实施前按入口规则取授权（[backlog 入口](../README.md)）。
-> 出处：研究 = [notes 工程纪律补借](../research/notes-discipline-borrow/README.md)；材料 =
-> [2026-11-13-notes-discipline-borrow.md](../research/notes-discipline-borrow/2026-11-13-notes-discipline-borrow.md)。
+> **授权**：用户 2026-11-14 直派「set up goal 静默，自主执行」；P0 已交付，P1 另 trigger。
+> 出处：研究 = [notes 工程纪律补借](../../research/notes-discipline-borrow/README.md)；材料 =
+> [2026-11-13-notes-discipline-borrow.md](../../research/notes-discipline-borrow/2026-11-13-notes-discipline-borrow.md)。
 > 位置前提：**`notes/` 留在仓库根目录，不动**；只借思想与判据，不借 vendor `.agents/notes/`
 > 路径与 class 目录位置。
 
@@ -27,8 +28,8 @@ opened: 2026-11-14
 - **探针 A–F（2026-11-13，HEAD `8e935037`，跑完即删）**：A 嵌套目录 / B 未知生命周期层 /
   C 无日期文件名 / D 重复状态行 / E 无元数据冻结件——全部 **PASS**；F 往冻结件追加一行，
   `pnpm verify` **全绿**。命令与结果 = 材料 §10.1。
-- **语料基线（同日实测）**：`implemented/` 82 篇、`archived/` 136 篇、`rejected/` 10 篇、
-  `proposed/` 0 篇；82+136 篇状态行全在头七行、恰一条；136 篇归档行全部有合法日期且不早于
+- **语料基线（同日实测）**：`implemented/` 83 篇（研究时点 82；落盘时新增 test-asset-fence Note）、`archived/` 136 篇、`rejected/` 10 篇、
+  `proposed/` 0 篇；83+136 篇状态行全在头七行、恰一条；136 篇归档行全部有合法日期且不早于
   文件名日期，其中 12 篇带括号理由（断言须取日期前缀）；10 篇拒绝条全部有重启/复活节
   （3 篇独立 `## 复活条件`、4 篇 `## 重启*`、3 篇写在 `## 验收（= 复活条件现状）`）。
 - **冻结层实况**：28 篇 / 136 篇归档后被改过（跨八次提交）；最近一次 `767674b1`（测试车道
@@ -40,15 +41,14 @@ opened: 2026-11-14
 **未决问题：**
 
 - 新门禁放 `c-notes` 域（推荐，notes 域已在那里）还是另立域——不影响判据，落地时按
-  [scripts/AGENTS](../../scripts/AGENTS.md) 的域切分即可。
+  [scripts/AGENTS](../../../scripts/AGENTS.md) 的域切分即可。
 - P1（冻结封印 + 归档出链排除）的三个设计选择：清单放仓库内还是用 env 基线；排除
   `md-links` / `md-anchors` 的承诺降级要在哪份文档同步；具名例外的最小形态。**不在本卡**。
 - 是否要为这批门禁升格 D 号——建议不升（属门禁补齐，不是制度换向）；若用户视其为制度
   变更，交付时同 diff 登记。
 - 状态行"头七行"阈值：当前语料全部满足；若未来 banner 变长再重估，不预留更宽。
 
-**下一步：** 按 S1 → S2 → S3 先红后绿推进（S3 可与 S1/S2 并行），S4 随交付同 diff 改文档与
-Note；P1 待本卡关闭后按材料 §5.3 另立卡。
+**收口（2026-11-14）：** S1–S4 已交付（证据 = §执行记录 + 交付 Note）；P1 封印/出链排除 = `_backlog/triggers.md` 的 P1 行。
 
 ## 范围
 
@@ -95,7 +95,7 @@ Note；P1 待本卡关闭后按材料 §5.3 另立卡。
 - Note 文件名匹配 `^\d{4}-\d{2}-\d{2}-.+\.md$`（防探针 C；允许点与中文）。
 - `notes/` 下任何 `INDEX.md` 即红（参考卷同款；防第二份清单）。
 - 扫描集为空即红（防空语料）。
-- 登记：`scripts/verify/context.mjs` 的 gates 数组 + [evaluation §L0](../../docs/evaluation.md)
+- 登记：`scripts/verify/context.mjs` 的 gates 数组 + [evaluation §L0](../../../docs/evaluation.md)
   台账行 + `tests/checks/verify-gates.test.mjs` 静态对账 + `gates.e2e` 四案例
   （嵌套目录 / 未知层 / 无日期文件名 / INDEX.md）。
 
@@ -118,7 +118,7 @@ Note；P1 待本卡关闭后按材料 §5.3 另立卡。
 
 **S4 · 文档与 Note（同 diff）**
 
-- `notes/README.md`：补树形规则（一节或差异表行）、§已知缺口（材料 §8.3 的 G1–G6 压缩成
+- `notes/README.md`：补树形规则（一节或差异表行）、§已知缺口（材料 §8.3 的 G1–G5 压缩成
   本仓口径）、S3 skill 指针。
 - `docs/evaluation.md`：新门禁台账行；`scripts/verify/gates/c-notes.mjs` 头注补域归属。
 - `notes/AGENTS.md` 仅在需要一句话入口时改（受预算约束，优先下放 notes/README）。
@@ -145,7 +145,7 @@ Note；P1 待本卡关闭后按材料 §5.3 另立卡。
 - **坏输入**：缺失（目录/文件/状态行/归档行/重启节）→ 红；非法（未知层/嵌套/无日期文件名/
   `INDEX.md`/重复状态行/非法或过早归档日期）→ 红；互斥（同一状态行出现两次）→ 红；
   空扫描集 → 红。
-- **旧形态**：现有 82+136+10 篇已全部合规（实测）；无需迁移，grandfather 条款不变。
+- **旧形态**：现有 83+136+10 篇已全部合规（实测）；无需迁移，grandfather 条款不变。
 - **反证**：`gates.e2e` 每类坏输入一案例；`tests/checks/verify-gates.test.mjs` 静态对账
   （门禁 ↔ 案例）；探针 A–E 是本卡立项前的现状证据；探针 F 属 P1。
 
@@ -163,9 +163,20 @@ Note；P1 待本卡关闭后按材料 §5.3 另立卡。
 5. **收尾**：`pnpm verify` 全绿 + `pnpm test` 全绿；交付 Note 含实际红绿命令与输出摘要；
    P1 未做的事实与触发条件在 Note/材料中写明。
 
+## 执行记录
+
+- **S1/S2 已落地**（2026-11-14）：`note-tree` 新门禁 + `note-format` 状态行唯一/头七行、归档元数据、
+  拒绝条重启条件；九类注入各自点名红（原文 = [交付 Note](../../../notes/implemented/2026-11-14-notes-discipline-hardening.md) §实际跑过的验证）。
+- **S3 已落地**：`.agents/skills/archiving-a-note/SKILL.md` + guides/60 路由；`dev-skill-format` 与
+  `docs-consistency` 绿。
+- **S4 已落地**：notes/README 树形/元数据/已知缺口/差异表；evaluation §L0 台账；交付 Note 同 diff。
+- **机械证据**：`node scripts/smoke/gates.e2e.mjs` 117 案例全绿；`pnpm verify` 全绿；
+  `pnpm test` 1341 spec + 104 checks 全过。
+- **P1 未做**：冻结封印 + 归档出链排除；后续载体 = `_backlog/triggers.md` 的 P1 行。
+
 ## 关闭条件
 
-- 上列验收标准逐条成立；交付 Note 与门禁/文档同 diff；
-- 需要用户验收的面（门禁与验收合同变更）已请用户确认，或按入口规则记录跳过理由；
+- 上列验收标准逐条成立（2026-11-14 已满足）；交付 Note 与门禁/文档同 diff；
+- 审查：机械门禁 + `reviewing-a-delivery` 语义自审已做；用户 2026-11-14 授权静默自主执行，业务验收随交付回复呈报；
 - P1 的后续载体成立（另卡或 triggers 行），本卡不因 P1 未做而悬空；
-- 归档本卡时同变更更新 [issues 索引](README.md) 与去向载体。
+- 归档本卡时同变更更新 [issues 索引](../../issues/README.md) 与去向载体。

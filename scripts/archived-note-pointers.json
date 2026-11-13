@@ -950,6 +950,16 @@
       "source": "_backlog/research/notes-discipline-borrow/2026-11-13-notes-discipline-borrow.md",
       "target": "notes/archived/2026-10-21-six-dim-hygiene-round.md",
       "reason": "2026-11-13 notes 纪律研究：校准样表引用它作为「一轮关闭后归档」的实例；历史证据，不作现行权威"
+    },
+    {
+      "source": ".agents/skills/archiving-a-note/SKILL.md",
+      "target": "notes/archived/2026-10-30-notes-consistency-sweep.md",
+      "reason": "2026-11-14 归档校准 skill：校准样例引用它作为「规则已吸收进 notes/README + AGENTS 后归档」的实例；历史证据，不作现行权威"
+    },
+    {
+      "source": ".agents/skills/archiving-a-note/SKILL.md",
+      "target": "notes/archived/2026-09-30-vendor-pin-bump-020rc2.md",
+      "reason": "2026-11-14 归档校准 skill：校准样例引用它作为「被新 pin 取代后归档」的实例；历史证据，不作现行权威"
     }
   ]
 }

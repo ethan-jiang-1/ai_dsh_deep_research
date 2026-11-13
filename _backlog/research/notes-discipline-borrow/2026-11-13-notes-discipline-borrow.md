@@ -17,7 +17,7 @@ intent: 对照 DSH 原生 notes 制度（参考卷八篇 + vendor 一手定义�
 
 ## 0. 结论
 
-> 落地载体（2026-11-14 补记）：P0 四项已立 [issue 2026-11-14-notes-discipline-hardening](../../issues/2026-11-14-notes-discipline-hardening.md)；
+> 落地载体（2026-11-14 补记）：P0 四项已交付，[已结卡](../../_archived/settled_issues/2026-11-14-notes-discipline-hardening.md)；
 > P1（封印 + 归档出链排除）待该卡关闭后另卡。本页结论不变。
 
 1. **我们借到的是骨架，漏掉的是把守。** 生命周期四层、取代检查、毕业改写、归档层、

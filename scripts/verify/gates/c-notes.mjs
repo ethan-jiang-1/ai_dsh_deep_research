@@ -8,8 +8,69 @@ import { join } from 'node:path';
 import { ROOT, fail, note, trackedFiles } from '../context.mjs';
 
 export function runC() {
+// ── note-tree（notes/ 树形闭集与深度——DSH `agent-note-tree` 吸纳，2026-11-14）──
+// 为什么：路径即状态；未知顶层目录/嵌套目录会让 Note 对下方的格式/毕业扫描**不可见**。
+// 本仓此前只要求"每个子目录有 README"，探针实测（issue 2026-11-14-notes-discipline-hardening）
+// 嵌套 Note、未知生命周期层、无日期文件名、INDEX.md 四形态全部静默通过。
+// 判据 = 生命周期闭集 + 目录深度恰 2（notes/<lifecycle>/<note>.md）+ 文件名日期前缀 + 禁 INDEX.md。
+// 闭集只此一份：本数组即正本，notes/README 只链接本门禁（避免 vendor "两份字面副本"缺口）。
+{
+  const gate = 'note-tree';
+  const LIFECYCLES = ['proposed', 'implemented', 'rejected', 'archived'];
+  const ROOT_FILES = new Set(['README.md', 'AGENTS.md']);
+  const NOTE_FILE = /^\d{4}-\d{2}-\d{2}-.+\.md$/;
+  const notesDir = join(ROOT, 'notes');
+  if (!existsSync(notesDir)) fail(gate, 'notes/ 缺席——树形门禁失去扫描面（fail-loud）');
+  else {
+    let notes = 0;
+    for (const ent of readdirSync(notesDir, { withFileTypes: true })) {
+      if (ent.name.startsWith('.')) continue;
+      if (!ent.isDirectory()) {
+        if (ent.name === 'INDEX.md')
+          fail(gate, 'notes/INDEX.md: 禁止集中索引（路径即清单；浏览生命周期目录或检索）');
+        else if (ent.name.endsWith('.md') && !ROOT_FILES.has(ent.name))
+          fail(gate, `notes/${ent.name}: 顶层只允许 README.md / AGENTS.md（Note 必须住 notes/<lifecycle>/）`);
+        continue;
+      }
+      if (!LIFECYCLES.includes(ent.name)) {
+        fail(gate, `notes/${ent.name}/: 未知生命周期目录（允许：${LIFECYCLES.join(' / ')}）——目录里的 Note 会被扫描静默跳过`);
+        continue;
+      }
+      for (const child of readdirSync(join(notesDir, ent.name), { withFileTypes: true })) {
+        if (child.name.startsWith('.')) continue;
+        if (child.isDirectory()) {
+          fail(gate, `notes/${ent.name}/${child.name}/: 禁止嵌套目录（树深固定为 notes/<lifecycle>/<note>.md；分类层未引入，加层是显式结构调整）`);
+          continue;
+        }
+        if (child.name === 'INDEX.md') {
+          fail(gate, `notes/${ent.name}/INDEX.md: 禁止集中索引（路径即清单）`);
+          continue;
+        }
+        if (child.name === 'README.md') continue;
+        if (!child.name.endsWith('.md')) continue;
+        if (!NOTE_FILE.test(child.name)) {
+          fail(gate, `notes/${ent.name}/${child.name}: 文件名须为 yyyy-mm-dd-topic.md（日期 = 主题首提日，不是实现/归档日）`);
+          continue;
+        }
+        notes++;
+      }
+    }
+    for (const l of LIFECYCLES) {
+      if (!existsSync(join(notesDir, l)))
+        fail(gate, `notes/${l}/ 缺席——四个生命周期目录必须同时在场（空层合法；删除层是显式结构调整）`);
+    }
+    if (notes === 0) fail(gate, 'notes/ 下零篇 Note——扫描范围失效（防空语料）');
+  }
+}
+
 // ── note-format（notes/ 决定记录骨架与状态行——DSH SDLC reference 01
 //    点状吸纳："没记击败了什么的决定会重开讼"；遗留形态走 grandfather 条款不追改）──
+//
+// 2026-11-14 补状态面（卡 = 2026-11-14-notes-discipline-hardening，S2）：
+//   ① 状态行唯一且住头七行（vendor `verify-agent-note-format.ts` 的 line-3 唯一性同款）；
+//   ② archived 元数据：`> 状态：implemented` + `> 归档：<日期>`（唯一、状态后三行内、合法日历、
+//      不早于文件名日期）——冻结件只读元数据，**不查骨架**（快照不追改）；
+//   ③ rejected 必须有重启/复活条件节——这一层的价值是"什么时候可以重提"。
 {
   const gate = 'note-format';
   const GRANDFATHER = /<!-- grandfather:/;
@@ -21,9 +82,25 @@ export function runC() {
       fn(ent, readFileSync(join(dir, ent), 'utf8'));
     }
   };
+  // 状态行 = 唯一一条 `> 状态：`，且住头七行；返回值 = 剥壳后的裸值。
+  const statusOf = (text) => {
+    const lines = text.split('\n');
+    const idx = lines.flatMap((l, i) => (l.startsWith('> 状态：') ? [i] : []));
+    if (idx.length === 0) return { ok: false, why: '缺状态行' };
+    if (idx.length > 1) return { ok: false, why: `状态行必须唯一（发现 ${idx.length} 条，行 ${idx.map((i) => i + 1).join('/')}）——正文引文不算状态` };
+    if (idx[0] > 6) return { ok: false, why: `状态行须在头七行（当前第 ${idx[0] + 1} 行）——头部是状态面` };
+    const value = lines[idx[0]].replace(/^> 状态：/, '').replaceAll('**', '').trim();
+    return { ok: true, value, line: idx[0], lines };
+  };
+  const validDate = (y, m, d) => {
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+  };
   // proposed/：RFC 状态行（与目录互验）+ 输掉的方案在场
   each('proposed', (ent, text) => {
-    if (!/^> 状态：\*{0,2}(proposed|approved|superseded)\*{0,2}\s*$/m.test(text))
+    const st = statusOf(text);
+    if (!st.ok) fail(gate, `notes/proposed/${ent}: ${st.why}`);
+    else if (!/^(proposed|approved|superseded)$/.test(st.value))
       fail(gate, `notes/proposed/${ent}: 状态行须为裸值（> 状态：proposed|approved|superseded；不带日期/括号——上游 Status 行同构）`);
     if (!/输掉的方案/.test(text))
       fail(gate, `notes/proposed/${ent}: 缺"输掉的方案"——没记击败了什么的决定会重开讼`);
@@ -52,8 +129,10 @@ export function runC() {
   const VERIFY_NEGATED = /^##(?!#)[^\n]*(未|无|待|免|非|不|尚未)(验证|检查|验收|实录|记录|实证|探针|复验|证据)/m;
   each('implemented', (ent, text) => {
     const g = GRANDFATHER.test(text);
-    if (!/^> 状态：\*{0,2}implemented\*{0,2}\s*$/m.test(text))
-      fail(gate, `notes/implemented/${ent}: 缺裸状态行（> 状态：implemented——目录↔状态互验）`);
+    const st = statusOf(text);
+    if (!st.ok) fail(gate, `notes/implemented/${ent}: ${st.why}`);
+    else if (st.value !== 'implemented')
+      fail(gate, `notes/implemented/${ent}: 状态行须为裸值 implemented（当前 ${JSON.stringify(st.value)}——目录↔状态互验）`);
     if (!/^## 决定/m.test(text) && !g)
       fail(gate, `notes/implemented/${ent}: 缺"## 决定"节（遗留形态须标 grandfather 注释，见 notes/README.md）`);
     if (!/^## 输掉的方案/m.test(text) && !g)
@@ -68,11 +147,51 @@ export function runC() {
     // （合法历史命名被误杀），收益不抵代价（同 §词表按实测标题族归纳 的取舍）。
     // 与上游对齐：DSH testing policy 明确不声称一切语义规则都可机械化。
   });
-  // rejected/：否决状态行（提案体保留，结论在状态行）
+  // rejected/：否决状态行（提案体保留，结论在状态行）+ 重启/复活条件节
   each('rejected', (ent, text) => {
-    if (!/^> 状态：\*{0,2}rejected\*{0,2}(\s*—\s*.+)?$/m.test(text))
-      fail(gate, `notes/rejected/${ent}: 缺 rejected 状态行（裸值；一行理由用 —— 附在状态行后）`);
+    const st = statusOf(text);
+    if (!st.ok) fail(gate, `notes/rejected/${ent}: ${st.why}`);
+    else if (!/^rejected(\s*—\s*.+)?$/.test(st.value))
+      fail(gate, `notes/rejected/${ent}: 状态行须为裸值 rejected（一行理由用 —— 附在状态行后）`);
+    if (!/^##(?!#)[^\n]*(复活条件|重启|重新引入)/m.test(text))
+      fail(gate, `notes/rejected/${ent}: 缺"重启/复活条件"节——这一层的价值是"什么时候可以重提"（标题须含 复活条件|重启|重新引入）`);
   });
+  // archived/：冻结件只读元数据（状态 + 归档行 + 日期），不查骨架（快照不追改）。
+  // 12 篇历史件的状态行与归档行之间有空引用行 `>`——允许三行内，不逼重排。
+  {
+    const dir = join(ROOT, 'notes', 'archived');
+    if (existsSync(dir)) for (const ent of readdirSync(dir)) {
+      if (ent === 'README.md' || !ent.endsWith('.md')) continue;
+      const rel = `notes/archived/${ent}`;
+      const text = readFileSync(join(dir, ent), 'utf8');
+      const st = statusOf(text);
+      if (!st.ok) { fail(gate, `${rel}: ${st.why}`); continue; }
+      if (st.value !== 'implemented') {
+        fail(gate, `${rel}: 冻结件状态行须为 implemented（位置是 archived，状态不改成 archived）`);
+        continue;
+      }
+      const archiveIdx = st.lines.flatMap((l, i) => (l.startsWith('> 归档：') ? [i] : []));
+      if (archiveIdx.length !== 1) {
+        fail(gate, `${rel}: 归档行必须唯一（> 归档：<YYYY-MM-DD>；发现 ${archiveIdx.length} 条）——何时入层只有这一处记录`);
+        continue;
+      }
+      const ai = archiveIdx[0];
+      if (ai <= st.line || ai > st.line + 3) {
+        fail(gate, `${rel}: 归档行须紧接状态行（三行内；允许空引用行）——当前状态行 ${st.line + 1}、归档行 ${ai + 1}`);
+        continue;
+      }
+      const m = /^> 归档：\s*(\d{4})-(\d{2})-(\d{2})/.exec(st.lines[ai]);
+      if (!m) { fail(gate, `${rel}: 归档行须以 > 归档：YYYY-MM-DD 开头（理由可附在日期后）`); continue; }
+      const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+      if (!validDate(y, mo, d)) { fail(gate, `${rel}: 归档日期不是合法日历日（${m[1]}-${m[2]}-${m[3]}）`); continue; }
+      const fd = /^(\d{4})-(\d{2})-(\d{2})-/.exec(ent);
+      if (fd) {
+        const [fy, fm, fday] = [Number(fd[1]), Number(fd[2]), Number(fd[3])];
+        if (y < fy || (y === fy && (mo < fm || (mo === fm && d < fday))))
+          fail(gate, `${rel}: 归档日期 ${m[1]}-${m[2]}-${m[3]} 早于文件名日期 ${ent.slice(0, 10)}——归档不能早于主题首提`);
+      }
+    }
+  }
 }
 
 // ── note-status（notes/ 的时态与状态面——2026-09-25 用户诉求落地：

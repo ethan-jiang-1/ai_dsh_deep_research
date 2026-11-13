@@ -54,6 +54,17 @@
 
 问题澄清与执行分开：问题、证据与授权工作住发起方的记录区，**不是 notes 的职责，也不是写 Note 的前置门**。结论进入 notes 的唯一交接物 = Note 本身；收件规则 = [notes/AGENTS](AGENTS.md)（§收件与写入时机）。`proposed/` 仅承载需要显式评审的持久决定提案；写入时机 = 与决定/变更同一变更。
 
+## 树形与元数据（机械把守）
+
+**路径即状态**：`notes/<lifecycle>/<yyyy-mm-dd-topic>.md`，深度固定两层。`note-tree` 门禁把守
+生命周期闭集（`proposed / implemented / rejected / archived`）、禁止嵌套目录、文件名日期前缀、
+禁 `INDEX.md`、空语料即红；闭集常量只在门禁里维护一份，本节不复制名单。**不加分类层**：
+引入条件见下表 class 行；加层 = 显式改门禁，不是新增目录。
+
+`note-format` 把守状态面：`> 状态：<裸值>` **唯一且住头七行**；冻结件另须
+`> 状态：implemented` + 唯一 `> 归档：<YYYY-MM-DD>`（合法日历、不早于文件名日期，**不查骨架**）；
+拒绝条须有标题含 `复活条件 / 重启 / 重新引入` 的节——这一层的价值是"什么时候可以重提"。
+
 ## 事故复盘（不是目录）
 
 事故叙事**不设独立时态层**。达到“bug 到达了不该到达的地方”（真实用户 / 已合并提交 / 一次交付）
@@ -108,6 +119,9 @@ triggers；事故原文只作证据。
 | 纯推敲，无独有决定理由 / 输掉的方案 / 证据 | **删**（archived 不是垃圾桶） |
 | 完整交付、不再指导未来、历史价值低 | **archive**（冻结；此后正文不再补说明） |
 
+判据、取证程序与校准样例 = [archiving-a-note](../.agents/skills/archiving-a-note/SKILL.md)
+（归档/删除/合并/审计时加载）；规则正文仍是本节，技能只补判断顺序与样例，不复制条文。
+
 **三个触发点（主动，不等体检）：**
 
 1. **写时**：新增或修订 D 号、换 pin、改角色/机制的同 diff——搜同机制旧 Note；被取代者加
@@ -119,17 +133,29 @@ triggers；事故原文只作证据。
 **为什么不一刀切 archive**：archived **冻结后正文永不修改**——需要解释"被谁取代"的旧结论留在
 implemented 才能补历史注记；归档只收"不再指导未来、且不需要再解释"的惰性件。
 
+## 已知缺口（机械面管不到的一半）
+
+| # | 缺口 | 可证伪观察（哪份文件/行为改掉后此条变假） |
+|---|---|---|
+| G1 | 该写 Note 而没写——无存在性门禁（机械/局部编辑豁免是设计） | 出现能判"本次改动触及公开接口却没 Note"的机械检查 |
+| G2 | 理由质量——无质量门禁 | 出现可机械判的质量判据 |
+| G3 | 毕业改写只挡标题/标记，不查内容（`note-graduation-rewrite` 自认） | 增加任何形式的内容检查 |
+| G4 | 归档判断不可靠——只有入链可见性门禁 | 下一批归档按 [archiving-a-note](../.agents/skills/archiving-a-note/SKILL.md) 执行且报告与 diff 逐条对上 |
+| G5 | 冻结层无封印，且出链仍被 `md-links` 扫（改名会逼改档案） | `archive-seal` + 归档出链排除落地（P1；研究 = `_backlog/research/notes-discipline-borrow/`） |
+
+这五条是设计取舍的账，不是缺陷清单：让读者知道哪一半是硬的、哪一半是软的，不要把软的当硬引用。
+
 ## 与 vendor 原生规则的差异（本仓适配，勿回写成 DSH 一手规则）
 
 | 维度 | vendor `.agents/notes/` | 本仓 |
 |---|---|---|
 | 路径 | `.agents/notes/`（隐藏、agent 面） | `notes/`（顶层、人机共面）——人验收时直接看得到；`.agents/skills/` 已按 vendor 约定落地，notes 留在顶层是**登记的偏离**（代价：与 vendor 路径不同构；收益：人类可发现性） |
-| 第二轴 | 生命周期 + **class 子目录**（feature/bug-fix/simplification/architecture/process/testing），closed set 由门禁脚本校验 | **无 class 层**（2026-10-10 阈值重估维持）：文件名 = 首提日期 + 主题已承载检索面——机制名检索实测逐词命中（2026-10-12 时点；篇数以 `ls notes/implemented` 为准）；class 五类对吸收/审计类为主的构成分辨力低，且批量搬家 = 全仓链接与登记簿重写的审阅噪声（超过 50 篇的计数阈值已越过而检索未失效，计数本身不构成触发）。**引入条件（可判定）**：机制名检索实测失败（已知存在的条目搜不到），或出现按类别批量审阅/浏览的常态工作流 |
-| 冻结层 | `archived/`（implemented 可归档，归档树永久冻结） | **已设**（2026-09-27 用户指令激活）：单语单文件 + `> 归档：<日期>` 行，等价上游 triplet+hash seal 的本仓落地；判定 = vendor `dsh-archive-agent-notes` 的"未来决策价值"校准 |
-| 格式骨架 | `## Problem` / `Decision` / `Alternatives considered` / `Verification` 强制，`verify-agent-note-format` 门禁 | 中文骨架：决定 / 输掉的方案 / 实际跑过的验证 / 环境状态（guides/60 §4）+ **轻量门禁 `note-format`**——**前 3 节机械强制**（含验证节，2026-10-08 补齐；词表容忍历史命名变体），`环境状态` 暂只由 guides/60 §4 声明、无门禁 |
+| 第二轴 | 生命周期 + **class 子目录**（feature/bug-fix/simplification/architecture/process/testing），closed set 由门禁脚本校验 | **无 class 层**（2026-10-10 阈值重估维持；树形由 `note-tree` 把守：生命周期闭集 / 禁嵌套 / 日期前缀 / 禁 `INDEX`，加层 = 显式改门禁）：文件名 = 首提日期 + 主题已承载检索面——机制名检索实测逐词命中（2026-10-12 时点；篇数以 `ls notes/implemented` 为准）；class 五类对吸收/审计类为主的构成分辨力低，且批量搬家 = 全仓链接与登记簿重写的审阅噪声（超过 50 篇的计数阈值已越过而检索未失效，计数本身不构成触发）。**引入条件（可判定）**：机制名检索实测失败（已知存在的条目搜不到），或出现按类别批量审阅/浏览的常态工作流 |
+| 冻结层 | `archived/`（implemented 可归档，归档树永久冻结） | **已设**（2026-09-27 用户指令激活）：单语单文件 + `> 归档：<日期>` 行，等价上游 triplet+hash seal 的本仓落地；判定 = vendor `dsh-archive-agent-notes` 的"未来决策价值"校准（校准载体 = `archiving-a-note`）；`note-format` 现查归档元数据；**封印 = P1 未做** |
+| 格式骨架 | `## Problem` / `Decision` / `Alternatives considered` / `Verification` 强制，`verify-agent-note-format` 门禁 | 中文骨架：决定 / 输掉的方案 / 实际跑过的验证 / 环境状态（guides/60 §4）+ **轻量门禁 `note-format`**——**前 3 节机械强制**（含验证节，2026-10-08 补齐；词表容忍历史命名变体），`环境状态` 暂只由 guides/60 §4 声明、无门禁；rejected 另须重启/复活条件节 |
 | 取代检查 | 子树 AGENTS.md 硬触发：每新增 Note 搜同决定/同机制，完整取代同 PR 归档旧 triplet | 同（2026-09-24 吸纳：更新 owner / 部分互链 / 完整吸收后才删旧——见上节） |
-| 集中索引 | 明文禁止建 `INDEX.md`（目录树即清单） | **同构**：各目录不建手抄索引（`note-status` 门禁只强制各子目录 README 在场） |
-| 状态标记 | `Status: <status>` 头三行之第三行，裸值、无日期括号，目录互验（格式门禁） | 同构：`> 状态：<值>` 裸值 + 目录互验（`note-format` 门禁）；`archived/` 另有 `> 归档：<日期>` 行（冻结标记，vendor `Archived:` 行等价） |
+| 集中索引 | 明文禁止建 `INDEX.md`（目录树即清单） | **同构**：各目录不建手抄索引（`note-tree` 禁 `INDEX.md`；`note-status` 强制各子目录 README 在场） |
+| 状态标记 | `Status: <status>` 头三行之第三行，裸值、无日期括号，**全文件唯一**，目录互验（格式门禁） | 同构：`> 状态：<值>` 裸值 + **唯一且住头七行** + 目录互验（`note-format` 门禁）；`archived/` 另有 `> 归档：<日期>` 行（合法日历、不早于文件名日期） |
 
 **原生权威**（机制核对一律走它）：`vendor/dsh/.agents/notes/README.md`、
 `vendor/dsh/.agents/notes/implemented/AGENTS.md`、`vendor/dsh/.agents/notes/archived/AGENTS.md`
