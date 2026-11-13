@@ -14,6 +14,7 @@
 
 > CI 归属 = [registry.json](smoke/registry.json)：每个 smoke 必须登记 `ci` 或 `dev-only` + 理由；
 > 机械对账 = [tests/contracts/smoke-registry.test.mjs](../tests/contracts/smoke-registry.test.mjs)（新增件不登记即红）。
+> 下表按职责列件；client-load 支援件（`client-load-{config,final,reference,seed}`）在 client-load 行内点名，不单列；盘上集合以目录为准。
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|

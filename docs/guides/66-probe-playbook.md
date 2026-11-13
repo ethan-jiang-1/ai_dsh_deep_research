@@ -134,6 +134,8 @@ probes/
 | 入口/授权/开发环路由 | `entry-chain-probe` | 真模型；词面 + 原文留档 |
 | 纪律行为（A2/B1/收活/计划卡） | `discipline-probe` | 真模型；语义仍需人读 |
 | 偏好库可发现性 | `method-library-probe` | 真模型；BUG-042 判据 |
+| 项目研究默认（D50） | `defaults-probe` | 真模型；默认块可发现性/回读 |
+| wave 执行链 | `wave-execution-probe` | 真模型；lens-fanout 单 cell 链 |
 | 不满转接 | `rerun-triage-probe` | 真模型；五条行为 |
 | 驾驶舱交互/页签/发送 | `cdp-probe` | 连已起 GUI；`--ask` 按会话档 |
 | LLM 流取证 | `llm-stream-tee` | 仪器；不判 PASS/FAIL |
@@ -144,6 +146,7 @@ probes/
 ### 7.1 类型地图（选型用）
 
 类型按「证明什么」分，不按技术栈分。本仓当前覆盖在右列；空白不等于缺口——先问这个机制会不会坏。
+**「暂无」= 没有专用探针，不等于没有证据**；现有证据（L1/L2、client-load、run-gates、真 run）见 §7 的表。
 
 | 类型 | 回答什么 | 典型场景 | 本仓当前 |
 |---|---|---|---|

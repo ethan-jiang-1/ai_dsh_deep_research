@@ -121,6 +121,23 @@ description: Use when preparing delivery, when a cross-surface diff (pack, docs,
   （机械侧 = `count-free` / `doc-now-only`；本轮实证：`discipline-map` 写错 fixtures
   组数、`evaluation.md` 声称未跑过的形态数——**计数是陈旧的高发处**）。
 
+## 证据账本（非平凡交付）
+
+在交付报告 / issue 执行记录 / commit body 附下面这张表；字段可短，但**不能留白**：
+
+| 证据 | 层 | 覆盖的失败类 | 负控（见过红） | CI/收尾 |
+|---|---|---|---|---|
+| `tests/...` | unit / contract | 例：语法矩阵 / 同源 codec / 状态交错 | 是（注入什么）/ 否（理由） | `pnpm test` |
+| `scripts/smoke/...` | 装配 / 真入口 | 例：安装形状 / 浏览器装配 | 是 / 否 | CI job / 本地 |
+| `snapshots/...` | 组装转录 | 模型可见漂移 | diff 人审 | job / 本地 |
+
+- **够了判据**：七问（会红 / 真入口 / 验世界 / 模型可见钉住 / 最低层 / skip 可见 / 可重复）
+  逐条写 ✅/❌；失败类选层可查 [类级守卫方法](../../../_backlog/methods/class-level-guards.md)。
+- **显式未覆盖**：哪类失败没证、为什么现在不做、留下什么 issue/trigger；没有就写「无」。
+- **未跑**：与「已跑绿」分列；skip 不算 pass；值级改动写「值级不可证」。
+- 这是 `docs/evaluation.md` §完成判断四分离在**一次交付**上的纸面，不是新门禁；缺表 = 交付
+  证据链不完整，不能拿「机械全绿」冒充语义自审或用户批准。
+
 ## 产出与边界
 
 - Findings 分 **blocker / suggestion** 两档；blocker 全消或如实上报（含未跑项）才能进收尾；

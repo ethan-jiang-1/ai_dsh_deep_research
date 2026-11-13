@@ -202,7 +202,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | `LICENSE` | **已定：MIT**（2026-10-25 开源发布；根与 pack 各一份 [LICENSE](../LICENSE)，两处 `package.json` 均 `license: MIT`；pack `private: false` 可发布）——决定与输掉的方案 = [开源发布 Note](../notes/implemented/2026-10-25-open-source-launch.md) |
 
 <a id="source-10"></a>
-## 源 10：_digested/test-strategy 语料（测试策略消化 11 篇，基线 = 采纳时本仓 pin；现 pin 已前进，语料未同步，见 [external-materials](./external-materials.md)）
+## 源 10：_digested/test-strategy 语料（测试策略消化 16 篇；catalog 基线 = rc.5，7 篇 reverified / 9 篇 carried；见 [external-materials](./external-materials.md)）
 
 > 语料身份与吸收落点 = [external-materials.md](external-materials.md)；对照总账正本 = test-strategy 采纳
 > Note（[notes/implemented/2026-10-04-test-strategy-adoption.md](../notes/implemented/2026-10-04-test-strategy-adoption.md)）。

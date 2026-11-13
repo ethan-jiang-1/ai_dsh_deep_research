@@ -21,7 +21,7 @@
 
 | 域 | 放什么 | 现有 |
 |---|---|---|
-| `behavior/` | 真模型行为：同一套 boot + RPC + 会话日志 harness | entry-chain / discipline / method-library / rerun-triage |
+| `behavior/` | 真模型行为：同一套 boot + RPC + 会话日志 harness | entry-chain / discipline / method-library / rerun-triage / defaults / wave-execution |
 | `browser/` | 真浏览器交互：裸 CDP、GUI 场景 | cdp-probe |
 | `stream/` | 流取证仪器：预载 tee，不判 PASS/FAIL | llm-stream-tee |
 | 根 | 门户与生成物：`README.md` / `INDEX.generated.md` / `_index.mjs` | — |

@@ -259,6 +259,14 @@ W3-6 D53 + Note（全卡收口）
   `tests/cockpit/x.spec.mjs`、给测试加 `test.skip` 各红；删除/还原 → 绿。
   `scripts/README` 的 `keyless-imports` 消费列同步加 `test-lanes.test`。实跑：`pnpm test`
   1424/0、`pnpm verify` 全绿。未跑：慢档/真模型。
+- **2026-11-13 Wave 0 W0-7/W0-9（证据账本 + 文档纠偏）**：`reviewing-a-delivery` 加
+  「证据账本」节（证据/层/失败类/负控/CI/显式未覆盖 + 七问 + 未跑分列），指向
+  `docs/evaluation.md` 完成判断四分离与 `_backlog/methods/class-level-guards.md`；
+  `external-materials` 的 digest 行改 16 篇 / rc.5 / 7 reverified + 9 carried；`discipline-map`
+  源 10 同步；`evaluation` 结构性例外补 `staged-change-pairing`；`probes/README` behavior
+  列补 defaults/wave；`scripts/README` smoke 表说明 client-load 支援件在行内点名、不单列；
+  `guides/66` 补 defaults/wave 探针并注明「暂无专用探针 ≠ 没有证据」；`replay-scene` 注释改为
+  「五个声明 judge + time-context 另并」。实跑：`pnpm verify` 全绿、`pnpm test` 1424/0。
 
 ## 关闭条件
 
