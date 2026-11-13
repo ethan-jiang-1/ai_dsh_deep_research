@@ -319,6 +319,7 @@ W3-6 D54 + Note（全卡收口）
 - **2026-11-13 Wave 3 W3-2（复盘）**：新增 [探索 BUG 波复盘](../../notes/archived/2026-11-13-exploratory-bug-wave-postmortem.md)——五节（现象/为什么没早发现/根因/修复与防线/未完成），把「发现→修→忘」换成「发现→归类→类级守卫→账本→复盘」；明确 159 普查是 60 全文 + 99 关键节、C UI 未复验、hook 面未建、全量 e2e/entry 未跑。
 - **2026-11-13 Wave 3 W3-7 先行片（CI 聚合）**：`.github/workflows/ci.yml` 新增书签式 `all-checks-passed`（`needs` 四 job：keyless/client-load/snapshot-replay/deploy；failure/cancelled/skipped 判红）；新增 `tests/checks/ci-jobs.test.mjs` 静态契约（needs 覆盖全 job、skip 判红、snapshot job 真跑 A/B）。红证：删一个 need → 红；还原 → 绿。with-key 可触发通道 = `.github/workflows/model-smoke.yml`（只 `workflow_dispatch`；secret 注入；`l4-lite.e2e`；缺 key preflight exit 2），契约 = [model-workflow](../../tests/checks/model-workflow.test.mjs)；本机未实跑（需凭据）。
 - **2026-11-13 Wave 1 W1-5（可选层缺席）**：`lifecycle.entry` 新增断言——未装团队层的干净 profile，dump 无 `ui-agent-team`，但本包 10 行/真启动/显示面/remove 全过；实跑 `DSH_BIN=/tmp/dsh-vendor lifecycle.entry` ALL PASS（22 项）。
+- **2026-11-13 Wave 1 W1-6（世界树设计稿）**：`snapshots/README` 新增「场景世界树」——`workspaceFinal` + `workspace.expected/` 形状、digest/文件集判据、record/refresh 永不写、独立刷新命令 + `--why` + 人审、触发条件（首个 bundle 终态场景/首次回放绿但世界漂移）。**未实施**：当前无场景声称 bundle 终态，不建空目录。
 
 ## 关闭条件
 

@@ -41,6 +41,30 @@ A/B 层（A 回放通路 + B 组装请求 diff）进 CI job `snapshot-replay`：
 - 录制器不代写场景声明：新角色或重录后由人登记 case 与录制身份，漏登记即 fail-loud；
 - 新分类只在出现持久消费者时建立（探针证据、浏览器视觉证据同此律），不为未来的可能性预建空目录。
 
+## 场景世界树（设计稿，未实施）
+
+**问题**：当前 fixture 钉的是「模型可见请求 + 收尾文本」，不钉 run 结束后的工作区世界。若某场景的
+验收包含 bundle 文件（`drt_*/` 下的 report/leads/claims…），回放可以全绿而世界已不同——这是 C7
+假绿的一个形态。
+
+**形状（实施时）**：
+
+```
+snapshots/replay/<scene>/
+  snapshot.json          # case 增 "workspaceFinal": { "dir": "workspace.expected", "digest": "sha256:…", "files": N }
+  workspace.expected/    # 冻结的 run 结束世界（只读；不参与 record/refresh 写入）
+```
+
+- `workspaceFinal` 缺省 = 该 case 不声称世界树；**不建空目录**，首个有 bundle 终态断言的场景才建；
+- 比对面 = 文件集合 + 相对路径 + 内容 digest（或逐字节，按体积预算二选一）；不把 mtime/owner 当判据；
+- record/refresh 只写 `session*.jsonl` 与 `ui.expected.md`，**永不写** `workspace.expected/`；
+  刷新世界树必须独立命令 + `--why` + 人审，和 `ui.expected` 同一条重写纪律；
+- 回放结束后在隔离 temp workspace 生成终态，与 `workspace.expected/` 比对；缺文件/多文件/内容漂移都红；
+- symlink/hardlink/路径穿越按 `workspace.expected/` 的普通文件校验，不跟随。
+
+**触发条件**：首个「回放要证明 bundle 终态」的场景出现，或首次实测「回放绿但 bundle 漂移」。
+**未实施前**：快照只证明请求面与收尾文本，不证明工作区世界；该限制在本页与场景声明里显式写。
+
 ## 已知限制与延后工作
 
 - 目前只有 `replay/research-face` 一个场景族；探针与视觉证据的分类尚未建立。
