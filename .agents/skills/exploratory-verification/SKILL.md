@@ -7,7 +7,8 @@ description: Use when regression is green but the new behavior's input space is 
 
 本技能是 **guidance**，不是 checklist。策略总图 = [guides/67](../../../docs/guides/67-test-strategy.md)；
 类级守卫形态 = [class-level-guards](../../../_backlog/methods/class-level-guards.md)；探针 = [guides/66](../../../docs/guides/66-probe-playbook.md)；
-历史协议与逐轮实录 = [探索卡](../../../_backlog/issues/2026-11-11-exploratory-test-strategy.md)。
+逐轮账本与覆盖地图 = [探索卡](../../../_backlog/issues/2026-11-11-exploratory-test-strategy.md)；
+当前轮 charter 也在该卡 §第六轮 goal。
 
 ## 1. 什么时候用
 

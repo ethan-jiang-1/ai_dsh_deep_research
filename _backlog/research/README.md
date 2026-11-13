@@ -185,6 +185,7 @@ status——材料的状态就是题的状态。
 | 名头 | 问题 | 消费者 | 材料 |
 |---|---|---|---|
 | [测试资产围栏](test-asset-fence/README.md) | 现有测试资产成本/覆盖如何，哪些慢资产可降级/合并/退役、哪些快守卫要补 | [issue 2026-11-13-test-asset-fence](../issues/2026-11-13-test-asset-fence.md) | [test-asset-fence](test-asset-fence/2026-11-13-test-asset-fence.md) |
+| [notes 工程纪律补借](notes-discipline-borrow/README.md) | DSH 原生 notes 制度里，孙目录/状态面/冻结层还差哪些工程纪律 | 用户本轮直接委托（无卡）；落点见[题名页](notes-discipline-borrow/README.md) | [2026-11-13-notes-discipline-borrow](notes-discipline-borrow/2026-11-13-notes-discipline-borrow.md) |
 
 归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单，也不抄状态（状态正本 = 题名页）。
 

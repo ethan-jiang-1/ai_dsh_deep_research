@@ -12,7 +12,7 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| — | — | — | 当前无活跃缺陷卡 |
+| [BUG-160](BUG-160-smoke-registry-mention-not-execution.md) | 等人拍板 | P2 | smoke-registry 只查文件名出现：CI 执行行被注释掉仍绿 |
 
 ## 最近归档
 

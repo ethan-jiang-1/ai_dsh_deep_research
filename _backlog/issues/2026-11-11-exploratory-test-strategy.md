@@ -3,142 +3,98 @@ status: 推敲中
 opened: 2026-11-11
 ---
 
-# 推敲：探索性验证策略（exploratory verification）与第 1 轮 charter
+# 推敲：探索性验证账本（exploratory verification）——第六轮 charter
 
-> 立卡：2026-11-11 ｜ 状态：推敲中（执行中） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-11 ｜ 状态：推敲中（执行中；第六轮 charter 已于 2026-11-13 重定） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
 >
-> **一句话**：把「改完跑回归」升级为「变更面驱动的探索协议」——先问最低可观察层，能用纯函数/门禁/回放
-> 回答的不上探针，能用探针回答的不上 E2E；本轮 pilot 已用 0 次模型调用跑出 2 类静默失败（fail-open）。
+> **一句话**：探索协议已毕业为常驻方法（[guides/67](../../docs/guides/67-test-strategy.md) +
+> [exploratory-verification](../../.agents/skills/exploratory-verification/SKILL.md)）；本卡从「协议草稿」转为
+> **逐轮账本 + 当前轮 charter**，继续用变异/边界/消费者/双份事实找静默失败。
 >
-> **下一步**：按 §执行记录 逐轮推进；用户 2026-11-11 答复见 §用户答复——keyless 批已授权，
-> 只写 bug 卡不修代码，真模型批待单独批准。
+> **当前（2026-11-13 晚）**：前五轮 goal 修出 79 张 BUG（081–159，全部归档）；测试制度 W0–W3 已落地
+> （D53 命名四车道、D54 三环四账五关、快照 A/B 进 CI、registry 资产账、成本 ratchet、CI 聚合、
+> 探索技能 + 复盘）。最近 55 个 commit（`4d6308c9..HEAD`）几乎全是**测试制度自身**——它现在决定
+> 「什么叫绿」，所以第六轮先探这套制度的新判据；产品面剩余空白 = X6 worker 行为、安装域默认语言、
+> hook/DOM、world-tree。
+>
+> **下一步**：按 §第六轮 goal 跑 keyless 批（Y1–Y8）；真模型批 Y9 单独授权。
+> 首个发现 = [BUG-160](../bugs/BUG-160-smoke-registry-mention-not-execution.md)（CI 归属只看文件名出现）。
 
-**问题与期望结果：** 最近两周改了 216 个 commit（0.3.1 交接修复、D46 Protocol 表达层、D47 worker
-profiles、D48 Strategy 投影 + HITL1 typed inputs、探针迁根、T0 两级预算……）。回归能回答「旧行为被
-改坏没有」，回答不了「新东西在没被写进测试的输入上会不会静默放行」。本卡要交付的是**一套可复用的
-探索协议**（怎么选面、用什么 oracle、什么时候才值得跑探针/E2E、发现怎么分诊），以及**第 1 轮 charter
-图**；本轮结束时给出：探索过哪些面、每条 charter 的判定、真缺陷卡，以及「哪一面仍然空白」的诚实记账。
-找真缺陷就开 [bug 卡](../bugs/README.md)，不改产品代码，**不把「没找到」写成「没有 bug」**。
+**问题与期望结果：** 回归能回答「旧行为被改坏没有」，回答不了「新东西在没被写进测试的输入上会不会
+静默放行」。本卡曾是「交付一套可复用的探索协议 + 逐轮 charter」的载体；协议已于 2026-11-13 毕业到
+guides/67 + 技能，本卡保留账本与当前轮 charter。找真缺陷就开 [bug 卡](../bugs/README.md)，
+不改产品代码，**不把「没找到」写成「没有 bug」**。
 
-**当前情况（第 0 轮 pilot 已跑，2026-11-11）：**
+**当前情况（2026-11-13 晚基线）：**
 
-- 策略已成形（本卡 §策略）；pilot 扫了 5 个面（3 个实跑 + 2 个静态核对），**0 次模型调用、约 15 分钟**，
-  产出 2 类 fail-open 候选 + 4 个关闭假设（§第 0 轮）。
-- 基线全绿：`pnpm verify`、`pnpm test`（1178 例）当日实跑通过——探索不以「先怀疑基线」开场。
-- 两个 fail-open 都在 `checkStrategy`（[protocol-audit-core](../../scripts/lib/protocol-audit-core.mjs)）：
-  **通道字段缺席零提示**、**通道=workflow 且无 Wave 拓扑时 worker 对账被静默跳过**。现有契约测试
-  （[protocol-core.test](../../tests/run/protocol-core.spec.mjs)）覆盖了非法通道/预算漂移/不可解析预算，
-  恰好没有这两个形态——实现者按 happy path 写测试的典型盲区，也是本策略最稳定的收益来源。
-- 已关闭的面：canonical hash 稳定性、T0 两级预算计数（实跑）；worker profile 结构与回放角色覆盖
-  （静态核对，未重跑 smoke；证据见 §第 0 轮表）。
+- 方法已毕业：guides/67（三环/四账/五关、失败类→最低可见层）+ `exploratory-verification` 技能
+  （E1–E6、charter 七件、四态、毕业判据）+ `class-level-guards`（六形态）。
+- 测试制度落地：D53 四车道（`spec`/`e2e`/`entry`/`checks`）；D54 三环四账五关；registry 27 条资产账；
+  快照 5 角色 A/B 进 CI；`keyless` / `client-load` / `snapshot-replay` / `deploy` 四个 job 由
+  `all-checks-passed` 聚合为 required 书签；模型通道手动触发。
+- 基线实跑：`pnpm verify` 全绿；`pnpm test` = spec **1341** / checks **104**，均 0 skip；
+  `pnpm test:vendor` 4；`pnpm typecheck` 通过（2026-11-13 记录）；全量 `test:e2e` **6/0/0**、
+  `test:entry` **3/0/0**（2026-11-13 实跑记录，本轮未复跑）。
+- 前五轮：081–159 共 79 张卡全部归档；第 0–66 轮判定见 §覆盖地图与各轮收口；`X6` 仍无证据。
 
 **未决问题：**
 
-- 第 1 轮跑哪几条 charter（keyless 批默认全跑；真模型 X6 是否批准）。
-- 两个 fail-open 的处置：先只开 bug 卡，还是本轮直接补成带先红后绿的机械守卫。
-- 这套协议是否毕业成常驻文档（候选 `docs/guides/67-exploratory-test.md` + `implemented` Note）。
-- 探索轮与回归/里程碑的关系：探索发现不自动变成回归门；升格需要单独判定（§分诊与毕业）。
+- 第六轮 keyless 批（Y1–Y8）的实际收益；Y1 已中 BUG-160，Y2–Y8 待跑。
+- 真模型批 Y9（worker 行为）是否批准、预算多少。
+- 本卡继续作为账本，还是下一轮拆成独立卡（当前不拆；账本价值在覆盖地图）。
+- 安装域默认语言 / hook-DOM / world-tree 三个空白的 owner 与优先级。
 
-**下一步：** 等用户回答文末 Q1–Q4；批准后按 §第 1 轮 charter 图执行 keyless 批，真模型批单独授权。
+**下一步：** 跑 §第六轮 goal 的 keyless 批；每轮按七件 charter 记录，发现按四态分诊；
+真模型批等用户单独批准。
 
-## 为什么另立探索（而不是再跑一轮回归）
+## 阅读顺序（本卡 1.8k 行）
 
-| | 回归 | 探索 |
-|---|---|---|
-| 回答 | 旧行为被改坏了吗 | 哪些输入会让系统**静默**地做错事 |
-| oracle 来源 | 已写下的断言 | 散文合同、双份事实、回放金样、既有现场 |
-| 样本 | 固定清单，可枚举 | 变异/边界/矛盾，不可枚举 |
-| 停止 | 全绿 | 预算 + 覆盖地图 + 收益递减 |
-| 产物 | 绿/红 | bug 卡 / 观察 / 歧义 / 空假设（四态） |
+1. §第六轮 goal（当前要做什么、已探到哪）
+2. §覆盖地图（哪些面已探/关闭/空白）
+3. §已知与未决（当前状态）
+4. 历史各节（按主题跳读）：§第 0 轮 pilot → §第 1 轮 charter → §用户答复 → §执行记录 →
+   §第二轮…第五轮 goal 记录与收口。
 
-本仓的 bug 气味集中在三类，回归对它们天生不敏感：
+## 第六轮 goal（2026-11-13 晚）：测试制度改动面
 
-1. **静默接受（fail-open）**：散文写着「必须红 / 不得静默跳过」，代码在某个输入上绿了。
-   例：audit 在缺字段时零 finding，而它的兄弟字段各有一条 warn。
-2. **消费者遗忘**：新实体（新目录/新字段/新投影）出现后，N 个消费者里有一个没学会
-   （门禁 glob、roster、`files`、bundle 数组、回放、文档注册表）。这类 bug 的现场在**消费者**，
-   不在生产者。
-3. **双份事实漂移**：同一事实两处副本，一处改了另一处没改（模板↔解析器、手册源↔dist、overlay↔render）。
+**进入**：最近 55 个 commit（`4d6308c9..HEAD`）的主干是测试策略制度化（W0–W3），不是产品代码。
+它新增/改写了「什么叫绿」的载体：lane runner、registry 资产账、CI 聚合、快照角色面、装起效果、
+成本 ratchet、并行门禁。这些判据的输入空间没有被穷举——正是 E1 的变更面。
 
-## 策略
+**charter（keyless 批 ≤60 分钟；Y9 真模型单独授权）：**
 
-### E1 变更面盘点（git 驱动，0 模型）
+| ID | 假设（要杀死的命题） | 最低层 | oracle / 变异 | 预算 | 停止 |
+|---|---|---|---|---|---|
+| Y1 | registry 标 `ci` = CI 真执行；注释/字符串/`if:false` 不能冒充 | 静态 + 变异 | `smoke-registry`：注释掉 run 行但保留文件名 → 应红 | 5 min | **已探：仍绿 → [BUG-160](../bugs/BUG-160-smoke-registry-mention-not-execution.md)（P2 等人拍板）** |
+| Y2 | 车道 runner 的 SKIP 不会被当成 PASS；坏 args/坏前置可区分 | 纯函数 + 进程 | `run-lane` 退出码/汇总；`--only`/`args`；合成 exit 2 与 exit 1 对照 | 10 min | SKIP 仍 exit 0 = 候选（判契约） |
+| Y3 | 快照角色面显式化后，删 case/加角色/子集/legacy 都 fail-loud | 纯函数 + 回放 | `replay-scene` 矩阵；roleFace 子集/重复/外来；`--only`；A/B 只读 | 10 min | 差异需判应然/实然 |
+| Y4 | 装起效果断言验的是装起的产物，不是源码/旧 tarball | 入口 | `lifecycle.entry` ⑤；看 resolve 路径；删注册/换源 → 红 | 10 min | 源码/旧产物仍绿 = 候选 |
+| Y5 | 客户端绑定只选 lead 根，标题回退已禁；seed/args 与 CI 同源 | 纯函数 + 静态 + 入口 | `selectBoundSession` 矩阵；grep 标题回退；registry args vs `ci.yml` | 10 min | 标题回退/双份 args = 候选 |
+| Y6 | 成本/并行/计数不漂移：registry 27、cap 9/3/15、`--jobs` 非法值、并行与串行同判 | 静态 + 纯函数 | 计数对账；`gates.e2e --jobs=1` vs 默认的结果对账；`--jobs=abc`；注释/文档 vs 盘上 | 10 min | 漂移/并行差异 → owner/观察 |
+| Y7 | CI 契约（needs/skip/dispatch）与模型通道的静态形状没有旁路 | 静态 + 变异 | `ci-jobs`/`model-workflow`；删 need/add job/加 push → 红 | 10 min | 绿 = 候选 |
+| Y8 | 账本/指针/文档计数一致；D54/guide 67 的交叉引用可解析 | 静态 | `pnpm verify`；grep 计数；`archived-note-pointer` | 5 min | 漂移 → owner |
+| Y9 | worker profile 真按薄工具面行动（历史 X6） | 探针（真模型） | 1 boot / ≤6 调用；subagent 默认 worker；无 team/goal/ask | 单独授权 | 单场不写稳定 |
 
-`git diff --stat <上一轮探索锚点>..HEAD` → 按机制（不是按文件）归组 → 每条机制一个候选面。
-上一轮锚点 = 最近一张探索/取证卡；没有就取最近一次发布 tag。
+**执行记录（滚动）：**
 
-**优先级启发式**（不是公式，用来排序，省得平均用力）：
+- **2026-11-13 晚**：Y1 已探——把 `ci.yml` 的 `run: ... run-accept.e2e.mjs` 改成
+  `run: echo ... # ... run-accept.e2e.mjs`，`smoke-registry` 仍 **2/2 PASS**（文件名子串满足判据）；
+  还原后同判。→ [BUG-160](../bugs/BUG-160-smoke-registry-mention-not-execution.md)。
+- Y2–Y8 未跑（本轮重定 charter 时只做 Y1）；记录时保留「未跑 ≠ 通过」。
 
-```
-探索优先级 ≈ 近期改动量 × 合同/散文密度 × 现有证据薄度 ÷ 证据成本
-```
+**基线（本轮）**：`pnpm verify` 全绿；`pnpm test` spec 1341 / checks 104，0 skip；见 §当前情况。
 
-- 改动量：diff 行数与被触及的消费者数；
-- 合同密度：该面在 docs/审计里有没有「必须/不得/红/静默」这类可判定的散文；
-- 证据薄度：负例数、有无门禁/探针/回放；只有 happy path 测试 = 薄；
-- 证据成本：最低可观察层（E2 的表）。
+## 方法与协议（正本已毕业）
 
-### E2 先问最低可观察层（证据阶梯）
-
-| 问题 | 最低层 | 资产 | 成本 |
-|---|---|---|---|
-| 纯派生是否一致 / 边界输入会不会放行 | 纯函数 | `node --import tsx/esm` + 合成输入（`scripts/lib/*-core.mjs`） | 秒 |
-| 结构/副本是否漂移 | L0 门禁 + 契约测试 | `pnpm verify` / `pnpm test` | 秒 |
-| 新 preset/worker 真挂载了吗 | L1 keyless | `preset.e2e`（已含 worker profiles） | 分钟 |
-| 装配出的 model-visible 文本变了吗 | 回放（无模型） | `snapshot-replay.entry` | 分钟 |
-| 模型遵守散文纪律吗 | 探针 | `probes/behavior/*`（一次 boot 多场景） | 分钟 + 模型 |
-| 整条用户链路通不通 | L4 | 完整 run | 30–60 分钟 + 模型 |
-
-**默认往下走，不默认往上走**：能在纯函数层证伪的命题，不许用探针回答；探针档回答不了的，才考虑 L4。
-本轮 pilot 的 5 个问题全部停在第 1–2 层。
-
-### E3 四条无规格 oracle
-
-探索的难点是「没有断言可跑」。本仓有四类现成 oracle：
-
-1. **散文合同变异**：把 docs/审计里写死的「必须红」逐字变成输入，喂给被测函数；绿 = 候选 fail-open。
-   这是收益最高的一类——测试通常由实现者按同一条 happy path 写。
-2. **表示层差分**：列出「同一事实的两份副本」，逐字段/逐字对账；漂移 = 观察或 bug。
-3. **回放差分**：不重录金样，直接跑 `snapshot-replay.entry`；diff 告诉我「这次改动进了哪个座位的
-   model-visible 文本」，再判应然/实然。零模型、分钟级，是内容/persona 改动的归因器。
-4. **后验取证**：既有会话与 run bundle 就是免费样本（`session-events --stuck-after`、
-   `stream-diagnostics --recent`、`provider-error-stats`、`run-inventory`、`unconsumed-evidence`）；
-   只记计数与分布，不下单场结论。
-
-### E4 探针加速的三条用法
-
-> 回答用户关切：端到端太慢，探针不是「更小的 E2E」，而是三种加速器。
-
-1. **降级**：按 E2 的表，先把命题压到能回答它的最低层。pilot 里 5 个命题全部没进探针，成本从
-   「分钟×模型」降到「秒×0」。
-2. **放大**：一支探针 = 一次 boot + N 个场景（现存 `discipline-probe` 5 场景、
-   `wave-execution-probe` 1 cell 都是这个形状）。探索时把候选变异塞进同一次 boot 的 N 个场景，
-   而不是跑 N 次 run。第 1 轮 X6 就是这种用法：1 boot / ≤6 次调用覆盖 3 个 worker 命题。
-3. **取证复用**：`llm-stream-tee` / `session-replay` / `scene-capture` 对既有会话做事后归因；
-   探索的第一手材料可以零模型获得。证据落 `runtime/`，只有要冻结成金样才进 `snapshots/`。
-
-### E5 charter 纪律
-
-一条 charter = 一条可被证伪的命题，写清七件（缺一不跑）：
-
-```
-ID｜假设（要杀死的命题）｜最低可观察层｜oracle 与变异/场景｜预算｜停止条件｜证据落点
-```
-
-- 一条 charter 只证一个命题——红了能归因，绿了能说清证了什么。
-- **绿灯必须能被证伪**：每轮至少保留一条负对照（已知该红的输入），防止矩阵退化成「永远绿」。
-  pilot 的负对照 = 非法通道 / 预算漂移 / 不可解析预算，它们都真的红了。
-- 一个 charter 在最低层无发现 → 记「关闭假设」，**不升级到 L4**；升级需要新理由。
-
-### E6 分诊与毕业
-
-| 判定 | 去向 |
+| 主题 | 正本 |
 |---|---|
-| 真缺陷（有红/绿或复现） | [`_backlog/bugs/`](../bugs/README.md) 卡；修复按 [bugs 通道](../README.md) |
-| 文档/命名漂移 | 观察 + 指明 owner，不在本卡修 |
-| 契约歧义（两种读法都合法） | 提给用户 / 进 D 号决策，不擅自选一边 |
-| 空假设（探索过、没发现） | 记「已探索、无发现」+ 日期；**不写「没有 bug」** |
-| 可机械化的一类 fail-open | 升格为守卫：先注入回归看红 → 还原 → 绿，再登记台账（[writing-a-gate](../../.agents/skills/writing-a-gate/SKILL.md)） |
+| 三环 / 四账 / 五关；失败类 → 最低可见层；成本预算 | [guides/67](../../docs/guides/67-test-strategy.md) |
+| E1–E6、charter 七件、四态分诊、毕业判据、预算/反模式 | [exploratory-verification](../../.agents/skills/exploratory-verification/SKILL.md) |
+| 类级守卫六形态 | [_backlog/methods/class-level-guards.md](../methods/class-level-guards.md) |
+| 本卡 | 历轮账本 + 覆盖地图 + 当前轮 charter；不再复制协议正文 |
+
+**探索与回归的分工**：回归回答「旧行为被改坏没有」，探索回答「哪些新输入会静默做错事」；同一发现
+先归失败类，再落类级守卫或显式不可机械化（D54）。旧 §策略/E1–E6 正文已迁出本卡（git 历史可查）。
 
 ## 第 0 轮 pilot（2026-11-11，已跑）
 
@@ -190,7 +146,10 @@ plan 文本，跑 `evaluateBundle`，只看 `strategy-*` code。
 [tests/pack/workers.spec.mjs](../../tests/pack/workers.spec.mjs) 六条契约把守（`row-deps` 已覆盖 workers）。
 契约有家，门禁形状偏窄——owner = `scripts/verify`，本轮不修。
 
-## 第 1 轮 charter 图（待授权）
+## 第 1 轮 charter 图（历史，已执行）
+
+> 历史：X1–X5、X7、X8 已在第二轮/第三轮执行并给出判定（见 §覆盖地图）；X6（worker 行为）仍未跑。
+> 当前要跑的 charter = §第六轮 goal。
 
 keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主执行；X6 真模型批单独授权。
 
@@ -209,10 +168,13 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 - keyless 批总墙钟 ≤60 分钟；真模型批 ≤1 次 boot / ≤6 次调用 / ≤10 分钟；`SKIP ≠ PASS`，`未跑 ≠ 通过`。
 - **不跑 L4 全量**；不重跑 0.3.1 之前的旧矩阵；不把探索结果当回归清单。
-- 未获授权不启动 X6；探索卡不授予任何产品代码修改权（守卫/测试的修改按 [bugs 通道](../README.md)
-  的 P1/P2 规则或用户指示）。
+- 未获授权不启动 X6/Y9（真模型 worker 行为）；探索卡不授予任何产品代码修改权（守卫/测试的修改按
+  [bugs 通道](../README.md) 的 P1/P2 规则或用户指示）。
 
-## 验收标准
+## 验收标准（第 1 轮，历史）
+
+> 第六轮验收：Y1–Y8 全跑或逐项写明「未跑 + 原因」；每条有七件 charter 与四态判定；发现按 E6 分诊；
+> `pnpm verify` + `pnpm test` 绿；不把「没找到」写成「没有 bug」。
 
 1. X1–X5、X7、X8 全跑或逐项写明「未跑 + 原因」；X6 在授权预算内跑完或写明未跑。
 2. 每条 charter 有：假设、最低层、实际命令、原始输出/证据路径、判定（发现/关闭/观察/歧义）四态之一。
@@ -225,13 +187,15 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 ## 关闭条件
 
 - 上述验收 1–4 满足；覆盖地图与未覆盖面（含 owner）已写进本卡或转成 bug/观察。
+- 第六轮：Y1–Y9 全跑或逐项写明「未跑 + 原因」；发现全部有去向；基线 `pnpm verify` + `pnpm test` 绿。
 - findings 已全部有去向（bug 卡 / 观察 / 歧义 / 空假设），无悬空项。
 - 审查记录写 `审查：agent｜用户｜跳过 — 理由`；去向载体成立后与归档同变更。
 
 ## 范围与排除项
 
-**范围**：E1–E6 协议；X1–X8 charter；0.3.1 交接修复、D46/D47/D48、T0 两级预算、探针迁根、
-client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-core.mjs`、现有 probes、smoke、回放。
+**范围**：E1–E6 协议（正本 = guides/67 + 技能）；X1–X8 charter（历史）；第六轮 Y1–Y9 charter；
+0.3.1 交接修复、D46/D47/D48、T0 两级预算、探针迁根、client 侧 typed 输入、测试制度 W0–W3 等最近
+改动触及的面；可复用 `scripts/lib/*-core.mjs`、现有 probes、smoke、回放、registry/车道 runner。
 
 **排除**：无 oracle 的自由点击/漫游；重跑旧矩阵；把探索写成固定回归；L4 全量；改产品代码；
 在单场上写「稳定」；用「没找到」回答「有没有 bug」。
@@ -247,13 +211,13 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 | canonical / design_sha256 | 已关闭 | 第 0 轮 P2（顺序、`-0`、未知键均稳） |
 | T0 两级预算计数 | 已关闭 | 第 0 轮 P3（同文本同口径） |
 | worker profile 结构 / 挂载 | 已关闭（静态） | 第 0 轮 P4（契约测试 + preset.e2e 覆盖） |
-| 回放角色覆盖（角色面） | 已关闭（静态） | 第 0 轮 P5（研究角色 4 席；workers 不入研究面） |
-| 回放差分（X4） | 已探 | [BUG-051](../_archived/fixed_bugs/BUG-051-replay-smoke-panerows-undeclared.md)；lead 快照待重录；C2 未归属 |
+| 回放角色覆盖（角色面） | 已关闭 | 第 0 轮 P5；W1-3 后显式 `roleFace` = 5 席（4 研究 + method-editor）；workers 仍不入研究面 |
+| 回放差分（X4） | 已关闭 | [BUG-051](../_archived/fixed_bugs/BUG-051-replay-smoke-panerows-undeclared.md) 已修；5 角色 A/B 按当前 pack 重录并进 CI（W1-2/W1-3）；C0–C5 复验 |
 | 后验扫场（X5） | 已关闭 | 71 场/3742 文件；provider/stream 无系统性异常 |
 | 真实 bundle 反向验证 | 已探 | 8/8 `protocol-audit PASS`；2 个单深度 → [BUG-048](../_archived/fixed_bugs/BUG-048-protocol-depth-projection-first-pair-only.md) 生产证据 |
 | 入口 / 交接路径（X7） | 已关闭 | `isMain` 五形态无发现；`handoff.e2e` ALL PASS |
-| GUI typed 输入（X8） | 未跑 | 需已起 dev GUI |
-| worker 行为（X6） | 未跑 | 真模型批未授权 |
+| GUI typed 输入（X8） | 已关闭（CI 常驻） | `client-load.entry` 进 required CI；seed 74–76 PASS（第 31/32 轮）；第 50 轮 68/4 假红由 BUG-142 解释并已修 |
+| worker 行为（X6） | 未跑 | 真模型批未授权；l4-lite（2026-11-13）覆盖 5 角色，不含 worker profile |
 | 门禁的缺席语义（node-gate N/A 聚合） | 已探 | 观察：空 bundle 全 N/A、exit 0；acceptance 仍由 evidence-audit 兜底 |
 | 已交付 bundle 复核 | 已修（验证） | [BUG-052](../_archived/fixed_bugs/BUG-052-protocol-epoch-day-granularity-retro-red.md)：按回执时间断代，旧交付判「不适用」 |
 | plan 头类判据（plan-ref / 策略行） | 已修（验证） | [BUG-053](../_archived/fixed_bugs/BUG-053-plan-header-claims-first-match-anywhere.md)：改用 `headerBlockOf` |
@@ -267,13 +231,29 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 | verdict 契约的机械出口 | 已修（验证） | [BUG-057](../_archived/fixed_bugs/BUG-057-acceptance-check-exit-code-contradicts-verdict-contract.md)：FAIL→exit 1 / PASS→0 |
 | plan 图结构（无环合同） | 已探 | [BUG-058](../_archived/fixed_bugs/BUG-058-plan-cycle-has-no-mechanical-check.md)（有环全绿 + 提示误导） |
 
+### 第六轮新增面（2026-11-13 晚）
+
+| 面 | 状态 | 判定 / 证据 |
+|---|---|---|
+| 测试制度（D53/D54、guide 67、技能、复盘） | 已交付 | W3-1/3/4/6；guide + skill + D54 + Note + 复盘互链 |
+| 快照 A/B + 角色面 | 已关闭 | 5 角色 A/B 进 CI；method-editor roleFace 录制；C0–C5 复验（W1-2/W1-3） |
+| smoke 资产账 / 车道 runner | 已探 | registry 27 条四字段 + lane/args；**Y1 = BUG-160**（CI 归属只看文件名） |
+| CI 聚合 / with-key 通道 | 已关闭（静态） | `ci-jobs` / `model-workflow` 契约；真实 GitHub 绿未跑 |
+| 装起效果（lifecycle ⑤） | 已关闭（入口） | content/startup/defaults apply + disposer；25 项 ALL PASS（W1-4） |
+| 成本 ratchet / 并行门禁 | 已探（静态） | 9/3/15 + `smoke-cost-budget`；gates 108 案例 248s→86s；`--jobs` 非法值未测（Y6） |
+| 安装域默认语言（D49） | 未跑 | 需重新出包后的安装域断言；lifecycle 不查 `locale.preference` |
+| hook/DOM 行为面 | 未跑（已登记 trigger） | W0-6；触发条件在 [triggers](../triggers.md) |
+| world-tree（workspaceFinal） | 未跑（设计） | snapshots/README 设计稿；无场景声称 bundle 终态 |
+| 真实 GitHub CI / model-smoke | 未跑 | 静态契约在场；需 push / 手动 dispatch |
+
 ## 已知与未决
 
-- **已知**：策略可用（第 0 轮 15 分钟/0 模型；第 1 轮再出 3 张卡）；基线当日全绿；P4 观察已定 owner；
-  3 张 bug 卡均 `等人拍板`（修复触及验收合同，不自授权），修复归另一个 agent。
-- **未决**：X1–X8 的实际收益；两个 fail-open 是否同源（都出在 `checkStrategy` 的「声明 vs 派生」
-  两套逻辑）；worker 行为证据为零；协议是否值得常驻成 guides/。
-- **不证**：单条 charter 的结论不外推到所有输入；X6 单场不证稳定性；探索不证 L4 的语义质量。
+- **已知**：协议已毕业（guides/67 + 技能 + D54）；前五轮 081–159 全部归档；第 0–66 轮判定见
+  §覆盖地图与各轮收口；`pnpm verify` 全绿、`pnpm test` spec 1341 / checks 104（2026-11-13 晚实跑）；
+  快照 5 角色 A/B 进 CI；全量 `test:e2e` 6/0/0、`test:entry` 3/0/0（2026-11-13 实跑记录）。
+- **未决**：第六轮 keyless 批的收益（Y1 已中 BUG-160；Y2–Y8 待跑）；X6 worker 行为仍零证据；
+  安装域默认语言、hook/DOM、world-tree 仍空白；真实 GitHub CI / model-smoke 未跑。
+- **不证**：单条 charter 的结论不外推；X6 单场不证稳定性；探索不证 L4 的语义质量。
 
 ## 覆盖与收益（2026-11-11 收口评估）
 
@@ -299,8 +279,12 @@ client 侧 typed 输入等最近改动触及的面；可复用 `scripts/lib/*-co
 | X6 真模型 worker 行为 | 未跑 | 需用户批准预算（≤6 次调用/10 分钟） |
 | 回放 B·persona | 红（已知） | D48 后快照未重录，需 with-key 重录 |
 
-**收口条件（建议）**：X8 跑出判定、回放 C 层跑出判定、BUG-064 定性完成；若三者均无新独立缺陷，
-本卡可按「覆盖与收益耗尽」收口——`未跑清单` 与 `快照重录` 作为遗留项交给用户决定，不冒充已验。
+> 2026-11-13 更新：上表是 2026-11-11 的快照。X8 已进 required CI 并实跑（seed 74–76 PASS）；
+> 回放 C0–C5 已复验；B 层已按当前 pack 重录（5 角色 A/B 全绿）；BUG-064 已修。X6 仍未跑。
+
+**收口条件（2026-11-11 建议，已满足）**：X8 跑出判定、回放 C 层跑出判定、BUG-064 定性完成——
+三者均于 2026-11-13 前完成（X8 进 required CI 并实跑；C0–C5 复验；BUG-064 已修）；B 层快照已按
+当前 pack 重录。本卡**不**按「覆盖与收益耗尽」收口：第六轮 charter 已按测试制度改动面重定（§第六轮 goal）。
 
 ### 第 22 轮（2026-11-12 02:0x）：第二轮探索——profile 过期 + i18n 面对账
 
