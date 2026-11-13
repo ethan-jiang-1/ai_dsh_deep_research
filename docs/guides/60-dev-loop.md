@@ -49,7 +49,7 @@
 - **交付收尾** → `reviewing-a-delivery`；**加/改角色** → `adding-a-research-role`；
   **加/改门禁** → `writing-a-gate`；**加/调节点轨道** → `changing-node-topology`；
   **换 vendor pin** → `bumping-vendor-pin`；**间歇/环境依赖缺陷** → `reproducing-a-failure`；
-  **真实边界单点证据** → `using-a-probe`。
+  **真实边界单点证据** → `using-a-probe`；**回归绿但输入空间没枚举** → `exploratory-verification`。
 
 任务命中 `.agents/skills/` 某条 description（上列项）时**先读该 `SKILL.md` 全文再动手**，不从
 摘要猜流程。
@@ -64,6 +64,8 @@
 6. 收尾（§4）。
 
 ## 2. 面选择、任务型路由与全档命令（运行时入口）
+
+> 选测试证据（失败类 → 最低可见层；五关/四账）= [guides/67](67-test-strategy.md)。
 
 | 面 | 什么时候跑 | 命令 |
 |---|---|---|
