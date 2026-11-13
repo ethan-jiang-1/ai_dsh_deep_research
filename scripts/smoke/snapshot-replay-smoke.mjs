@@ -27,7 +27,7 @@
 // 录制：新角色或重录用 `node --import tsx/esm dev/record-role-fixture.mjs --role <r>`
 // （with-key 一次，之后 keyless 永久回放；录制品人审后入库，并在场景声明登记 source 身份）。
 //
-// 用法：source dev/env.sh && node scripts/smoke/snapshot-replay-smoke.mjs [--port 3103] [--read-only] [--update-expected --why <载体>] [--scenario <id>] [--face <name>]
+// 用法：source dev/env.sh && node scripts/smoke/snapshot-replay-smoke.mjs [--port 3103] [--read-only] [--layers a,b,c] [--update-expected --why <载体>] [--scenario <id>] [--face <name>]
 //   --scenario <id> 在每个选中场景集内都必须在场（缺席即 fail-loud exit 2，不静默缩场景）。
 // 红证（实录）：改 fixture 内一条 assistant 文本 → A 红；改 fixture persona/注入文本或工具 schema
 //   一词 → 对应 B 条红；改 fixture 一条 web_search 查询词 → C 红；各自还原 → 绿。
@@ -61,9 +61,14 @@ let snapshotMode;
 try { snapshotMode = resolveSnapshotMode({ argv: process.argv, env: process.env }); }
 catch (error) { console.error(`snapshot-replay-smoke: ${error.message}`); process.exit(2); }
 const { updateExpected: UPDATE_EXPECTED, why: WHY } = snapshotMode;
+const LAYERS = (arg('layers', 'a,b,c')).split(',').map((item) => item.trim().toLowerCase()).filter(Boolean);
+if (LAYERS.length === 0 || LAYERS.some((layer) => !['a', 'b', 'c'].includes(layer))) {
+  console.error('snapshot-replay-smoke: --layers 只接受 a,b,c 的非空子集（CI 用 a,b 砍掉 chromium 渲染层）');
+  process.exit(2);
+}
+const RUN_B = LAYERS.includes('b'), RUN_C = LAYERS.includes('c');
 const BOOT_TIMEOUT_MS = 120_000;
-const TURN_TIMEOUT_MS = 240_000;
-const RENDER_TIMEOUT_MS = 60_000;
+const TURN_TIMEOUT_MS = 240_000, RENDER_TIMEOUT_MS = 60_000;
 const REPLAY_ROOT = join(ROOT, 'snapshots', 'replay');
 const UNIQUE_TITLE = '快照回放冒烟·渲染面探针';
 const SENTINEL = '探针完成';
@@ -283,7 +288,7 @@ for (const { face, scene } of SCENES) {
 
     // ── B 层：组装请求 diff（persona + 全序列 request/header + 四处 user/message 注入，
     //    双侧定向归一化后逐条比对；判据由 manifest 声明、consumer 固定为全集）──
-    if (finalOk) {
+    if (RUN_B && finalOk) {
       const liveLines = parseLines(replayLogText);
       for (const verdict of compareReplayRequests(fixtureLines, liveLines)) {
         step(verdict.ok, `[${face}/${sc.id}] B·${verdict.id}`, verdict.ok ? verdict.detail.replace(`${verdict.id}: `, '') : verdict.detail);
@@ -300,7 +305,7 @@ for (const { face, scene } of SCENES) {
     }
 
     // ── C 层：渲染金标准（仅声明了 renderExpected 的场景；Playwright 文本捕获：研究语义卡 + 研究状态页签活动行）──
-    if (sc.renderExpected !== null && finalOk) {
+    if (RUN_C && sc.renderExpected !== null && finalOk) {
       await rpc('session/rename', { request: { sessionId, title: UNIQUE_TITLE } });
       const chromium = await loadChromium(ROOT);
       const browser = await launchChromium(chromium);

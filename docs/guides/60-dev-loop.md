@@ -89,7 +89,7 @@
 | 任务型 | 同 diff 必改 | 生成物与检查次序 | 必跑面 | 必写 | done |
 |---|---|---|---|---|---|
 | 改 preset 结构（角色/工具行/roster 接线；新增 skill 文件按下行） | pack 源 `presets/` | **`render-overlay` 先于 L1**（L1 挂的是 overlay，不是 pack 源） | L0 + L1 | 行为/发布集变才写 Note | 全部 preset 真挂载绿 + 文档同步 |
-| 改 persona / skill / 手册文本（模型可见） | pack 源 + `research-workspace/` 正本 | `render-overlay` 先于 L1 → L1 → snapshot-replay B 层（细则 = 表后脚注①）→ 重启 run 通道（web 缓存 boot 时文本） | L0 + L1 + L4-lite | 同上 | 真模型档证据 + L1 绿 |
+| 改 persona / skill / 手册文本（模型可见） | pack 源 + `research-workspace/` 正本 | `render-overlay` 先于 L1 → L1 → snapshot-replay B 层（CI `snapshot-replay` job 自动跑；本地 `--layers a,b` 定向；细则 = 表后脚注①）→ 重启 run 通道（web 缓存 boot 时文本） | L0 + L1 + L4-lite | 同上 | 真模型档证据 + L1 绿 + CI B 绿 |
 | **改驾驶舱**（观察面 client 面——`src/client/` 套件，[构成正本](../design/40-research-cockpit.md)） | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` + **可见文案 zh/en 键**（任何界面文本 day-one 双语，步骤 = [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)） | `pnpm build` → `client-load-smoke`（改挂起显性化再跑 `client-hitl-smoke`） | L0 + client-load-smoke | 同上 | 真浏览器断言全绿 |
 | 改 `src/lib/` 纯函数 / 类型面（pack 两半的编译面） | 对应 `src/lib` / `src/client` 类型位 | `pnpm typecheck` → `pnpm test`（typecheck 前置 = vendor 构建产物在场） | L0 + typecheck | 同上 | typecheck + 对应测试绿 |
 | **新增/修改机器判据**（门禁/审计/交付决定从散文里判值） | 设计卡 `## 判据形状` + 判据测试（不变量+矩阵） | 先写变异矩阵（红）→ 实现 → L0 | L0 + 判据测试 | 判据形状 + 反证 | 歧义会红 + 矩阵绿 |
@@ -157,7 +157,7 @@ node --import tsx/esm scripts/smoke/client-hitl-smoke.mjs   # 观察面活标题
 node --import tsx/esm scripts/smoke/cdp-ask-smoke.mjs    # 交互探针端到端（真模型档：一次性通道跑 --ask，断言发出 + journal 落盘；空闲态与在飞态两阶段）
 `research` 手工 profile 已弃用：回放/录制/团队预检统一用 `deep-research`（`dev/boot-run.sh` 维护版本面）；残留的 `research` 档不要再扩用。
 
-node scripts/smoke/snapshot-replay-smoke.mjs    # keyless 回放冒烟（须先 source dev/env.sh，端口 3103）：场景集由 snapshots/replay/research-face/snapshot.json 声明（研究角色集与盘上 presets/ 对账；方法编辑不属 run 生命周期）——逐场景 A 回放收尾逐字命中 + B 组装请求 diff（persona 全文 + 全部 request/header + 四处 user/message 注入（含时钟序列））+ 声明了 renderExpected 的场景做 C 渲染金标准比对；`--scenario <id>` 单场景、`--update-expected` 重写金标准
+node scripts/smoke/snapshot-replay-smoke.mjs --read-only --layers a,b   # keyless 回放冒烟（须先 source dev/env.sh，端口 3103）：CI job `snapshot-replay` 跑同一条 A/B；场景集由 snapshots/replay/research-face/snapshot.json 声明（研究角色集与盘上 presets/ 对账；方法编辑不属 run 生命周期）——逐场景 A 回放收尾逐字命中 + B 组装请求 diff（persona 全文 + 全部 request/header + 四处 user/message 注入（含时钟序列））；`--layers c` + 声明了 renderExpected 的场景做 C 渲染金标准比对（C 本地/里程碑）；`--scenario <id>` 单场景、`--update-expected --why <载体>` 重写金标准
 node --import tsx/esm dev/record-role-fixture.mjs --role <scout|analyst|critic|lead>   # 角色组装面 fixture 录制（真模型档一次性：`deep-research` profile（与回放同域，boot-run 维护版本面）+ 哨兵「探针完成」收尾 + 日志静默判定；录制品人审后入库 + 在场景声明登记 source 身份，此后 keyless 永久回放）
 node scripts/run-ops/run-accept.mjs <bundle>   # 交付验收原子动作：门 A + 证据审计 + 未来日期 sanity → acceptance.md；--archive 才归档
 node scripts/run-ops/runtime-clean.mjs [--older-than 14] [--yes]   # 运行区清理：默认 dry-run，只列白名单内过期条目；--yes 才删；黑名单/symlink/scenes/保留期 = runtime/README

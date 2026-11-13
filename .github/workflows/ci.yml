@@ -128,6 +128,50 @@ jobs:
           path: runtime/smoke-workspace/client-load-*
           if-no-files-found: warn
 
+  snapshot-replay:
+    name: snapshot A/B (fresh profile, keyless)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout (with pinned DSH submodule)
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.7.0
+          run_install: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Install zstd
+        run: sudo apt-get update && sudo apt-get install -y zstd
+
+      - name: Build vendor (pin tree)
+        run: bash dev/vendor-build.sh
+
+      - name: Build pack (npm pack prepack)
+        run: pnpm build
+
+      - name: Prepare fresh profile + snapshot A/B
+        run: |
+          export DSH_DEV_HOME="$GITHUB_WORKSPACE/runtime/ci-home"
+          export DSH_RUN_STATE_DIR="$GITHUB_WORKSPACE/runtime/ci-state"
+          export DSH_RUN_PORT=3199
+          source dev/env.sh
+          bash dev/boot-run.sh --prepare-profile
+          node scripts/smoke/snapshot-replay-smoke.mjs --read-only --layers a,b --port 3110
+
   deploy:
     name: keyless deploy smokes
     runs-on: ubuntu-latest

@@ -246,8 +246,7 @@
     "sunset": "当 secret-scan 范围由纯函数覆盖时退役"
   },
   "snapshot-replay-smoke.mjs": {
-    "tier": "dev-only",
-    "reason": "RPC/解压 + 场景资产；回放手工档",
+    "tier": "ci",
     "cost": "slow",
     "uniqueClaim": "A 回放通路 / B 组装请求 diff / C lead 渲染金标准",
     "oracle": [
@@ -255,7 +254,8 @@
       "tests/run/replay-scene.test.mjs",
       "tests/run/replay-fixtures.test.mjs"
     ],
-    "sunset": "当 A/B 进 CI 且 C 降里程碑时退役"
+    "sunset": "当 A/B 进 CI 且 C 降里程碑时退役",
+    "job": "snapshot-replay"
   },
   "team-preflight-smoke.mjs": {
     "tier": "dev-only",

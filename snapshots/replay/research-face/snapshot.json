@@ -12,12 +12,12 @@
       "fixture": "session.v4.jsonl",
       "renderExpected": "ui.expected.md",
       "source": {
-        "codeAnchor": "27a6fdd7e3a5b83dce0313fa93ce8b67992da277",
+        "codeAnchor": "da4eed0522a9183a59c7409178b8c5a98c75d584",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-12T14:51:27.949Z",
+        "recordedAt": "2026-11-13T08:59:24Z",
         "recording": "live",
         "locale": "zh-CN",
-        "note": "2026-11-12 re-record: Team Lead/Team tools baseline (agent-team-profile layer present) + D50 defaults probe; working tree changes (D50 + defaults-probe). BUG-080."
+        "note": "2026-11-13 re-record: current pack content (D51/D52 manual edits) + W1-2 fresh-profile baseline; all four research roles."
       }
     },
     {
@@ -25,12 +25,12 @@
       "preset": "scout",
       "fixture": "scout/session.v4.jsonl",
       "source": {
-        "codeAnchor": "27a6fdd7e3a5b83dce0313fa93ce8b67992da277",
+        "codeAnchor": "da4eed0522a9183a59c7409178b8c5a98c75d584",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-12T14:51:27.949Z",
+        "recordedAt": "2026-11-13T08:59:24Z",
         "recording": "live",
         "locale": "zh-CN",
-        "note": "2026-11-12 re-record: Team Lead/Team tools baseline (agent-team-profile layer present) + D50 defaults probe; working tree changes (D50 + defaults-probe). BUG-080."
+        "note": "2026-11-13 re-record: current pack content (D51/D52 manual edits) + W1-2 fresh-profile baseline; all four research roles."
       }
     },
     {
@@ -38,12 +38,12 @@
       "preset": "analyst",
       "fixture": "analyst/session.v4.jsonl",
       "source": {
-        "codeAnchor": "27a6fdd7e3a5b83dce0313fa93ce8b67992da277",
+        "codeAnchor": "da4eed0522a9183a59c7409178b8c5a98c75d584",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-12T14:51:27.949Z",
+        "recordedAt": "2026-11-13T08:59:24Z",
         "recording": "live",
         "locale": "zh-CN",
-        "note": "2026-11-12 re-record: Team Lead/Team tools baseline (agent-team-profile layer present) + D50 defaults probe; working tree changes (D50 + defaults-probe). BUG-080."
+        "note": "2026-11-13 re-record: current pack content (D51/D52 manual edits) + W1-2 fresh-profile baseline; all four research roles."
       }
     },
     {
@@ -51,13 +51,17 @@
       "preset": "critic",
       "fixture": "critic/session.v4.jsonl",
       "source": {
-        "codeAnchor": "7b504d48e43d0af84aa3042d3067cfb6436a76bf",
+        "codeAnchor": "da4eed0522a9183a59c7409178b8c5a98c75d584",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-12T21:04:21.000Z",
+        "recordedAt": "2026-11-13T08:59:24Z",
         "recording": "live",
         "locale": "zh-CN",
-        "note": "2026-11-13 re-record: critic persona 声明 review/readiness.json（D51 Slice B，working tree changes）。"
+        "note": "2026-11-13 re-record: current pack content (D51/D52 manual edits) + W1-2 fresh-profile baseline; all four research roles."
       }
     }
-  ]
+  ],
+  "lastRewrite": {
+    "why": "_backlog/issues/2026-11-13-test-strategy-institutionalization.md",
+    "at": "2026-11-13T09:05:13.923Z"
+  }
 }

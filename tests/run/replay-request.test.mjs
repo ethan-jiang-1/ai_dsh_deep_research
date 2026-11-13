@@ -358,3 +358,20 @@ test('BUG-091/106 当前回合：历史 completed/哨兵不夺权，末回合 co
   assert.equal(sentinelInAssistantText(open.join('\n'), '探针完成'), false)
   assert.equal(sentinelInAssistantText(failed.join('\n'), '探针完成'), false)
 })
+
+// 2026-11-13 W1-2：快照 A/B 进 CI 时，录制在 dev home、回放在 temp home；runtime-context 里
+// 的 profile 安装根是**位置身份**，不是模型可见语义。只归一前缀，包内 content 后缀仍逐字比。
+test('runtime-context：profile 安装根随 DSH_HOME 归一；包内路径后缀仍逐字比较', () => {
+  const msg = (root, file) => ({
+    type: 'user/message',
+    data: {
+      source: { kind: 'runtime-context' },
+      content: [{ type: 'text', text: `... ${root}/profiles/deep-research/node_modules/dsh-deep-research-pack/content/${file} ...` }],
+    },
+  })
+  const a = msg('/Users/me/runtime/harness-home', 'manual.md')
+  const b = msg('/home/ci/ci-home', 'manual.md')
+  const c = msg('/home/ci/ci-home', 'other.md')
+  assert.equal(compareReplayRequests([a], [b]).find((verdict) => verdict.id === 'runtime-context').ok, true)
+  assert.equal(compareReplayRequests([a], [c]).find((verdict) => verdict.id === 'runtime-context').ok, false)
+})

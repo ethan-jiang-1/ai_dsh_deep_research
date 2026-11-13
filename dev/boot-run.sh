@@ -2,7 +2,8 @@
 # dev/boot-run.sh — 开跑就绪命令（幂等，keyless）：deep-research profile（= 用户安装 profile 名）组合校验/补装 → boot web
 # → 打印入口步骤。RFC：notes/implemented/2026-09-24-m2-p1-run-channel.md（A 定案：团队机制归
 # vendor agent-team-profile 层）。操作指南全文 = docs/guides/61-run-playbook.md。
-# 用法：bash dev/boot-run.sh（Ctrl-C 停 web）。重复执行不重复安装（组合在位即跳过）。
+# 用法：bash dev/boot-run.sh（Ctrl-C 停 web）；--prepare-profile = 只装/校验 profile，不起 web（CI 快照用）。
+# 重复执行不重复安装（组合在位即跳过）。
 # 同机制纪律：dev 与用户安装走同一条载入路径（tarball → dsh plugin add → roster），差异只看 dev/README
 # 的 parity 表；profile 用户层（cordis.patch.yml）dev 不写——MCP 行走 --patch 覆盖层。
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -231,6 +232,11 @@ if [ "${1:-}" = "--drift-check" ]; then
   exit 0
 fi
 drift_check
+
+if [ "${1:-}" = "--prepare-profile" ]; then
+  echo "boot-run: profile 已准备（${PROFDIR}）——只安装/校验，不启动 web"
+  exit 0
+fi
 
 # ③ 仪表盘（RFC m2-run-dashboard + debug-dashboard-plus）：--latest 多场扫描
 # （research-workspace/drt_* + runtime/harness-home/runs ad-hoc 场）、流程步骤条、

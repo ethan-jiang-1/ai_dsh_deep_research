@@ -291,6 +291,18 @@ W3-6 D53 + Note（全卡收口）
   CLI 实测：双 flag / `DSH_SNAPSHOT=record` / `replay + --update-expected` 均 exit 2。
   实跑：`pnpm test` 1427/0、`pnpm verify` 全绿。未跑：真回放（W1-2 的 CI job）。
 
+- **2026-11-13 Wave 1 W1-2（快照 A/B 进 CI）**：`snapshot-replay-smoke` 加 `--layers a,b,c`（CI 用
+  `a,b` 砍掉 chromium 渲染层）；`dev/boot-run.sh --prepare-profile` 只装/校验 profile、不起 web；
+  `snapshots/replay/research-face` 四角色按当前 pack 重录（source 身份更新到 `da4eed05` / vendor
+  `b830ec950f`）——重录前 dev home 的 profile 内容陈旧，B 层在 fresh profile 下红，正是本次
+  要抓的漂移。CI 新增 `snapshot-replay` job（vendor build + pack build + temp home profile +
+  `zstd` + `--read-only --layers a,b`），`smoke/registry.json` 的 snapshot 条目改 `ci`/`snapshot-replay`。
+  `replay-request` 的 runtime-context 归一化补「profile 安装根」（dev home vs CI temp home 是
+  位置身份；包内 content 后缀仍逐字比较），直测在 `tests/run/replay-request.test.mjs`。
+  实测：`DSH_HOME=runtime/record-home ... --layers a,b` 四角色 A+B 全绿；`tests/run/replay-fixtures`
+  按新 fixture 重算 `ui.expected.md` 后 `pnpm test` 1428/0。**未验证**：C 层 UI 捕获在 temp home
+  被侧栏同名探针会话干扰（C0 失败），`ui.expected.md` 的卡片/活动行由 `cardTitleOf`/
+  `foldActivityRows` 纯函数重算，C UI 重跑待后续；CI 不跑 C（只 A/B）。
 ## 关闭条件
 
 - Wave 0–3 的验收项全部有真实红绿证据；Top 5 类各有至少一条邻接变异红录。
