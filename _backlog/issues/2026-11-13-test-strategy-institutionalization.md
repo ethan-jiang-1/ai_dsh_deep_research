@@ -330,6 +330,7 @@ W3-6 D54 + Note（全卡收口）
 - **2026-11-13 with-key 真模型（本机）**：`node scripts/smoke/l4-lite.e2e.mjs` **ALL PASS**——5 角色（含 method-editor）assistant 标记 + scout web_search 工具调用真实发生；`model-smoke.yml` 的 GitHub secret 运行仍未做，静态契约/缺 key exit 2 已在。
 - **2026-11-13 成本重构（门禁自测并行）**：`gates.e2e` 108 个独立注入案例改为有界并行（默认 `min(4, CPU)`，`--jobs=<n>` 可调）；实测串行 **248s** → 并行 **86s**（2.9×），108 案例仍全跑、判据不变。全量 `test:e2e` 复跑 **PASS 6 / FAIL 0 / SKIP 0**；`run-lane` 单件/车道耗时 + `--only` 已落。
 - **2026-11-13 成本预算 ratchet**：新增 `tests/checks/smoke-cost-budget.test.mjs`——CI 入口 ≤9、CI `slow` ≤3、全部 `slow` ≤15（当前 9/3/15），slow 资产必须有 sunset；红证：往 registry 加一个 ci/slow 假条目 → 红；删除 → 绿。
+- **2026-11-13 全量 entry 车道**：给 registry 的 `client-load.entry` 加 per-entry `args`（默认 `--seed tests/fixtures/client-load-home`），`run-lane` 逐件透传；`DSH_HOME=runtime/record-home DSH_BIN=/tmp/dsh-vendor pnpm test:entry` **PASS 3 / FAIL 0 / SKIP 0（374.7s）**——client-load seed、lifecycle、snapshot 5 角色 A/B/C 全跑。补全此前唯一的全量未跑项。
 
 ## Wave 2/3 剩余裁决（2026-11-13，阶段边界）
 
