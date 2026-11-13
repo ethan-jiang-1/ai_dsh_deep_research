@@ -267,6 +267,12 @@ W3-6 D53 + Note（全卡收口）
   列补 defaults/wave；`scripts/README` smoke 表说明 client-load 支援件在行内点名、不单列；
   `guides/66` 补 defaults/wave 探针并注明「暂无专用探针 ≠ 没有证据」；`replay-scene` 注释改为
   「五个声明 judge + time-context 另并」。实跑：`pnpm verify` 全绿、`pnpm test` 1424/0。
+- **2026-11-13 Wave 0 W0-3（smoke 资产账 S2）**：`scripts/smoke/registry.json` 28 条各加
+  `cost` / `uniqueClaim` / `oracle` / `sunset`；新增 `tests/contracts/smoke-oracle-surface.test.mjs`
+  （字段齐、cost 闭集、oracle 路径存在或 `none:` 有理由、真实 oracle ≥10、防空语料）；
+  `scripts/README` smoke 表加字段说明；`evaluation` §L0 登记。红证：删一条 oracle → 红；
+  oracle 改不存在路径 → 红；`none` 理由太短 → 红；还原 → 绿。实跑：`pnpm test` 1425/0、
+  `pnpm verify` 全绿。未跑：慢档/真模型。
 
 ## 关闭条件
 
