@@ -22,14 +22,14 @@ dsh --profile deep-research --from-default-profile web --dump-default-config
 
 # 2) 装插件 + 团队能力（DSH 的可选 agent-team-profile；版本必须等于 dsh --version）
 DSH_VER="$(dsh --version)"
-dsh plugin --profile deep-research add file:/path/to/dsh-deep-research-pack-0.3.3.tgz
+dsh plugin --profile deep-research add file:/path/to/dsh-deep-research-pack-0.3.4.tgz
 dsh plugin --profile deep-research add "@deepseek-ai/dsh-experimental-agent-team-profile@$DSH_VER"
 
 # 3) 启动
 dsh --profile deep-research
 ```
 
-第 1 步只建配置，不装包。把 `/path/to/dsh-deep-research-pack-0.3.3.tgz` 换成你下载的安装包（发布页或交付目录里的 tgz，通常与手册同目录）。第二条 `dsh plugin` 命令装的是团队能力（`agent-team-profile`），不要用 `@latest`——它的 `latest` 不指向当前 DSH 版本线。npm / Plugins 页装包是发布后路径（当前 staged）；0.3.3 用上面的 tarball。
+第 1 步只建配置，不装包。把 `/path/to/dsh-deep-research-pack-0.3.4.tgz` 换成你下载的安装包（发布页或交付目录里的 tgz，通常与手册同目录）。第二条 `dsh plugin` 命令装的是团队能力（`agent-team-profile`），不要用 `@latest`——它的 `latest` 不指向当前 DSH 版本线。npm / Plugins 页装包是发布后路径（当前 staged）；0.3.4 用上面的 tarball。
 
 > 从源码交付（手里没有现成 tgz 时）：`git clone --recurse-submodules` → `pnpm install` →
 > `bash dev/vendor-build.sh` → `node scripts/dist/export-dist.mjs`，再按手册装 `_dist/` 新生成的 tgz；

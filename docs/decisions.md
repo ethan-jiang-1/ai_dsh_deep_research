@@ -7,7 +7,7 @@
 
 ## 已定（写代码前不再讨论）
 
-> **当前安装事实（0.3.3）**：本地 tarball 是唯一发布形态；npm / Plugins 页 / Discover 为 staged。D40/D41 的“默认 Plugins 页”是发布后目标形态；见 [D42](#d42)。
+> **当前安装事实（0.3.4）**：本地 tarball 是唯一发布形态；npm / Plugins 页 / Discover 为 staged。D40/D41 的“默认 Plugins 页”是发布后目标形态；见 [D42](#d42)。
 
 
 | # | 决定 | 依据/出处 |
@@ -53,7 +53,7 @@
 
 
 | <a id="d41"></a>D41 | **交付模型与术语收口：bundle + custom profile（`deep-research`），借 26 判据不借“发行版”标签**：技术决定继承 D40；本行只定“怎么说/文档怎么守”。合同文档只用 DSH 对象（plugin/bundle/profile/preset/patch row/app surface/Harness home/data card）；退役旧词（插件即产品/产品 profile/形态/启动/设置/六轴）；不自称 Harness 发行版，runtime/app surface/lifecycle 提供者是 DSH/用户。文档形状：pack README = DSH `package-bundle`；安装手册 = 十一段；guides/65 = 六轴 owner + 数据卡。安装事实见 [D42](#d42)。 | 用户批准（2026-11-02）；[issue](../_backlog/_archived/settled_issues/2026-11-02-release-surface-26-alignment.md)；[Note](../notes/implemented/2026-11-02-release-model-terms.md)；[guides/65](./guides/65-run-forms.md)；[terms](./terms.md)；安装事实 = [D42](#d42) |
-| <a id="d42"></a>D42 | **0.3.3 当前安装事实 = 本地 tarball；npm / Plugins 页 / Discover 为 staged**：`dsh plugin --profile deep-research add file:<tgz>` 是当前唯一发布形态；npm 包名与 Plugins 页只在发布后可用。D40/D41 的“默认 Plugins 页”是发布后目标形态，保留原决定语境；当前装/卸/验证命令以 [安装手册](../_dist/安装手册.md) 为 owner，不再在台账里复制。 | 用户授权（2026-11-10，清除非绿项）；[Note](../notes/implemented/2026-11-10-current-install-fact.md)；[安装手册](../_dist/安装手册.md)；[D40](#d40) / [D41](#d41) 为历史决定语境 |
+| <a id="d42"></a>D42 | **0.3.4 当前安装事实 = 本地 tarball；npm / Plugins 页 / Discover 为 staged**：`dsh plugin --profile deep-research add file:<tgz>` 是当前唯一发布形态；npm 包名与 Plugins 页只在发布后可用。D40/D41 的“默认 Plugins 页”是发布后目标形态，保留原决定语境；当前装/卸/验证命令以 [安装手册](../_dist/安装手册.md) 为 owner，不再在台账里复制。 | 用户授权（2026-11-10，清除非绿项）；[Note](../notes/implemented/2026-11-10-current-install-fact.md)；[安装手册](../_dist/安装手册.md)；[D40](#d40) / [D41](#d41) 为历史决定语境 |
 | <a id="d43"></a>D43 | **研究视角层（lens）= 可选、可配对、可检查覆盖的证据面数据**：九字段（前八必需：`id/name`、`when`、`seek`、`verify`、`frame`、`refuse`、`bias`、`blind_spots`；`pairs_with` 可选）；出厂目录 = `content/lenses/<id>.md`（8 条）+ `question-patterns` 索引/默认集 + 手册契约；HITL1 选题型默认集（默认 2、上限 4；P1 可单 `official`），per-topic 子集、cells ≤12，同 topic ≥2 lens 默认独立 activation；evidence 加单值 `lens`（一卡一面），findings 记 `lenses`/`lens_gaps`，review 终局块填 `topic × lens` 覆盖表，静默空格 = MAJOR + FAIL；v1 不加机械覆盖门；不改四角色/plan schema。 | 用户 2026-11-10 授权落地；[issue](../_backlog/_archived/settled_issues/2026-11-10-lens-layer.md)；[Note](../notes/implemented/2026-11-10-lens-layer.md) |
 | <a id="d44"></a>D44 | **claim 级独立复核 = typed verdict + 机械覆盖门**：Lead 从 `final/vN` 抄 `review/claims.json`（`version/finalRef/claims`，text 逐字；critical 标 must-answer/首屏句），3–5 条/批派 `subagent(agent_preset=critic)`；child 只回单值 JSON（四值 + quote/reason），Lead 逐字落 `review/verdicts-r<N>.json`（raw 含围栏原文、解析只剥一层，投影逐字）；`verdict-audit` 核最新一轮 critical 覆盖/值域/raw 重解析/child preset·depth·只读/原文逐字，接 `run-accept` 第三道；HITL2 带 L2 / 覆盖 x/y + UNVERIFIED / 重抓 URL 三行数字。边界：不核 quote 真伪、claim 完整性、source tier、整篇 readiness；只到 L2；epoch 2026-11-11、quick_factual 豁免；与 D43 分离。 | 用户 2026-11-10 落地授权；[issue](../_backlog/_archived/settled_issues/2026-11-10-claim-verdict-quality-loop.md)；[Note](../notes/implemented/2026-11-10-claim-verdict-quality-loop.md) |
 | <a id="d45"></a>D45 | **wave 执行 = `lens-fanout` 固定配方**：只脚本化 deep-dive 的 topic×lens 取证层；Lead 用 `subagent(agent_preset=analyst)` 派 executor；plan 加 `## Wave 执行`、`task_id=plan-only`；HITL 仍两点。 | 用户 2026-11-10 授权；[issue](../_backlog/_archived/settled_issues/2026-11-10-wave-execution-lens-fanout.md)；[Note](../notes/implemented/2026-11-10-wave-execution-lens-fanout.md) |

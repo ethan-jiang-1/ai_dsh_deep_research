@@ -1,6 +1,7 @@
 # 交接证据收口：0.3.3 的 L1/L4/client-load、常驻面 byte/token 预算与源码移交
 
 > 状态：implemented
+> 历史注记：0.3.3 发布锚；现行发布身份 = [2026-11-13-manual-version-and-install-copies-0.3.4](2026-11-13-manual-version-and-install-copies-0.3.4.md)。
 
 ## 决定
 

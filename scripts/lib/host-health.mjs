@@ -82,3 +82,12 @@ export function isHostUnhealthyVerdict({ hasFailures, hostHealth, connectionDeat
   // 主机不健康 + 断言失败即判 NOT-RUN（不再要求连接死亡）；健康主机的断言红仍是产品红（BUG-152）。
   return hasFailures === true && hostHealth?.unhealthy === true
 }
+
+/** NOT-RUN 时的可执行清理提示：先辨 stale repo dev web，再动 load；保留当前 GUI。 */
+export const HOST_HEALTH_HINT = [
+  '清理 stale repo dev web（保留当前 GUI，默认 52887）：',
+  '  pgrep -fl "vendor/dsh/apps/cli/src/bin.ts"',
+  '  lsof -nP -iTCP -sTCP:LISTEN | grep node',
+  '只 kill pid/port 指向本仓 dev server 的进程；不要 kill 当前 GUI。',
+  '非 repo 负载：top -l 1 -o cpu -n 10（macOS）/ ps -Ao pid,pcpu,comm -r | head -10（Linux）',
+].join('\n')

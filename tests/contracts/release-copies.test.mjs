@@ -22,6 +22,8 @@ const liveDocs = [
   'docs/guides/64-release-versioning.md',
   'packages/deep-research-pack/README.md',
   'packages/deep-research-pack/README.zh.md',
+  'scripts/dist/product-manual.md',
+  '_dist/安装手册.md',
 ];
 
 test('live install docs name only the current tarball version', () => {

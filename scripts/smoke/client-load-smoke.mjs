@@ -62,7 +62,7 @@ import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.
 import { SMOKE_LOCALE, launchChromium, loadChromium } from '../lib/playwright.mjs'
 import { clientHistoryWindow, projectKey, readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
 import { deliveryFromReceipt } from '../../packages/deep-research-pack/src/lib/final-target.ts'
-import { availableMemoryMBFromMeminfo, availableMemoryMBFromVmStat, classifyHostHealth, isHostUnhealthyVerdict } from '../lib/host-health.mjs'
+import { availableMemoryMBFromMeminfo, availableMemoryMBFromVmStat, classifyHostHealth, HOST_HEALTH_HINT, isHostUnhealthyVerdict } from '../lib/host-health.mjs'
 import { acquireRunLock, releaseRunLock } from '../lib/run-lock.mjs'
 import { materializeSeedHome, resolveSeedFixture, seedFixtureSize } from './client-load-seed.mjs'
 import { prepareClientLoadReference } from './client-load-reference.mjs'
@@ -299,7 +299,7 @@ function hostFreeMB() {
   const startupHealth = classifyHostHealth(startupHost)
   const allowUnhealthy = process.env.DSH_CLIENT_LOAD_ALLOW_UNHEALTHY === '1'
   if (startupHealth.unhealthy && !allowUnhealthy) {
-    console.error(`client-load-smoke: NOT-RUN — 主机不健康（load ${startupHost.load1} / free ${startupHost.freeMB}MB / ${startupHost.cpuCount} CPU：${startupHealth.reasons.join('；')}）——先释放主机再跑；未跑 ≠ 通过`)
+    console.error(`client-load-smoke: NOT-RUN — 主机不健康（load ${startupHost.load1} / free ${startupHost.freeMB}MB / ${startupHost.cpuCount} CPU：${startupHealth.reasons.join('；')}）——先释放主机再跑；未跑 ≠ 通过\n${HOST_HEALTH_HINT}`)
     try {
       const latest = join(ROOT, 'runtime', 'smoke-workspace', 'client-load-latest.json')
       mkdirSync(dirname(latest), { recursive: true })
@@ -1329,7 +1329,7 @@ if (failures.length === 0) {
 } else if (hostNotRun) {
   writeLatest('NOT-RUN', artifactsSaved)
   console.log(`\nclient-load-smoke: NOT-RUN — 主机不健康（load ${lastHostHealth.load1} / free ${lastHostHealth.freeMB}MB / ${lastHostHealth.cpuCount} CPU：${lastHostHealth.reasons.join('；')}）`
-    + `且连接死亡；现场 ${artifactsSaved ?? '未保存'}——未跑 ≠ 通过，健康主机上重跑`)
+    + `且连接死亡；现场 ${artifactsSaved ?? '未保存'}——未跑 ≠ 通过，健康主机上重跑\n${HOST_HEALTH_HINT}`)
 } else {
   console.log(`\nclient-load-smoke: ${failures.length} FAILURE(S)\n${failures.join('\n')}`)
 }
