@@ -1,9 +1,14 @@
-// fix-evidence.mjs — bug 修复卡的实证合同（2026-11-14 假修事故；纯文本，keyless）。
+// fix-evidence.mjs — bug 修复卡的结构化实证合同（2026-11-14 假修事故；纯函数，keyless）。
 //
 // 为什么存在：卡内只有 `## 修复判据` 不够——状态可以翻、卡可以移，repo 却没有变更。修复 =
-// `## 修复落地` 的 改动（仓内路径）+ 红证（命令 + 实跑失败片段）+ 绿证（命令 + 实跑通过片段）；
-// 红证还须可重放（测试/门禁命令），或 改动 里至少一个测试/门禁资产。机械消费 =
-// staged-change-pairing（同暂存集）与 backlog-liveness（活跃 修复落地）。
+// `## 修复落地` 内一个 `json fix-evidence` 块：changes（仓内文件路径）+ red {command, exit, output?}
+// + green {command, exit}。**exit 是 oracle**，不是散文里的“失败/通过”子串；旧卡（2026-11-15 前）
+// 无块时按散文 grandfather，不再参与否定词/引号/目录前缀的启发式判定。
+// 机械消费 = staged-change-pairing（同暂存集）与 backlog-liveness（活跃 修复落地）。
+const CUTOFF = '2026-11-15'
+const REPLAYABLE = /(node\s+--test|pnpm\s+(?:test|verify)|gates\.e2e)/
+const STRUCTURED = /```json\s+fix-evidence\s*\n([\s\S]*?)```/g
+
 const fixSectionOf = (text) => {
   const match = /^##\s*修复落地[^\n]*$/m.exec(String(text ?? ''))
   if (match === null) return null
@@ -12,7 +17,7 @@ const fixSectionOf = (text) => {
   return (next === -1 ? rest : rest.slice(0, next)).trim()
 }
 
-/** 取 `## 修复落地` 内某个标签（改动/红证/绿证…）的块，直到下一个标签。 */
+/** 取 `## 修复落地` 内某个标签（改动/红证/绿证…）的块；仅旧卡路径兼容用。 */
 const labeledBlockOf = (section, label) => {
   const lines = section.split('\n')
   const pattern = new RegExp(`^\\s*[-*]?\\s*(?:\\*\\*)?${label}(?:\\*\\*)?[：:]`)
@@ -26,13 +31,67 @@ const labeledBlockOf = (section, label) => {
   return out.join('\n')
 }
 
-/** 修复卡「改动」里声明的仓内路径（去重，保持顺序）。 */
-/** 文件路径（目录/glob 不是「改动」的可配对对象）。 */
-const isFileLike = (path) => path !== '' && !path.endsWith('/') && !/[*?[\]{}]/.test(path)
+const isPlainObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value)
+/** 文件路径（目录/glob/绝对/.. 不是「改动」的可配对对象）。 */
+const isFileLike = (path) => typeof path === 'string' && path !== ''
+  && !path.endsWith('/') && !/[*?[\]{}]/.test(path) && !path.startsWith('/') && !path.split('/').includes('..')
 
+const openedOf = (text) => /^opened:\s*(\d{4}-\d{2}-\d{2})\s*$/m.exec(String(text ?? ''))?.[1] ?? null
+
+/** 结构化块：0 / 1 个；多于一个 = 两种证据，拒绝挑一个。 */
+const structuredOf = (section) => {
+  const blocks = [...section.matchAll(STRUCTURED)].map((match) => match[1])
+  if (blocks.length === 0) return { blocks: 0, value: null, error: null }
+  if (blocks.length > 1) return { blocks: 1, value: null, error: '只能有一个 `json fix-evidence` 块（两个 = 两种证据，拒绝挑一个）' }
+  try {
+    return { blocks: 1, value: JSON.parse(blocks[0]), error: null }
+  } catch {
+    return { blocks: 1, value: null, error: '`json fix-evidence` 不是合法 JSON' }
+  }
+}
+
+const validateStructured = (value) => {
+  if (!isPlainObject(value)) return ['结构化修复证据必须是 JSON 对象']
+  const problems = []
+  for (const key of Object.keys(value)) if (!['changes', 'red', 'green'].includes(key)) problems.push(`未知字段 ${key}（只收 changes / red / green）`)
+  if (!Array.isArray(value.changes) || value.changes.length === 0) {
+    problems.push('changes 必须是非空数组（仓内文件路径）')
+  } else {
+    const seen = new Set()
+    for (const path of value.changes) {
+      if (!isFileLike(path)) problems.push(`changes 只收仓内文件路径（目录 / glob / 绝对路径 / .. 不收）：${String(path)}`)
+      else if (seen.has(path)) problems.push(`changes 重复路径：${path}`)
+      else seen.add(path)
+    }
+  }
+  for (const [label, mustFail] of [['red', true], ['green', false]]) {
+    const step = value[label]
+    if (!isPlainObject(step)) { problems.push(`${label} 必须是对象（command / exit / output?）`); continue }
+    if (typeof step.command !== 'string' || step.command.trim() === '') problems.push(`${label}.command 必须是非空字符串`)
+    if (!Number.isInteger(step.exit)) problems.push(`${label}.exit 必须是整数（实跑退出码）`)
+    else if (mustFail && step.exit === 0) problems.push('red.exit 必须非 0（红证 = 旧实现/注入回归实跑失败）')
+    else if (!mustFail && step.exit !== 0) problems.push('green.exit 必须为 0（绿证 = 同一判据修后通过）')
+    if (step.output !== undefined && typeof step.output !== 'string') problems.push(`${label}.output 必须是字符串`)
+    for (const key of Object.keys(step)) if (!['command', 'exit', 'output'].includes(key)) problems.push(`${label}.${key} 未知字段（只收 command / exit / output）`)
+  }
+  if (isPlainObject(value.red) && typeof value.red.command === 'string' && !REPLAYABLE.test(value.red.command)) {
+    const testAsset = Array.isArray(value.changes) && value.changes.some((path) => typeof path === 'string'
+      && (path.startsWith('tests/') || path.startsWith('scripts/smoke/') || path === 'scripts/lib/gates-cases.mjs'))
+    if (!testAsset) problems.push('red.command 不可重放，且 changes 没有测试/门禁资产（tests/…、scripts/smoke/… 或 gates-cases）')
+  }
+  return problems
+}
+
+/** 修复卡「改动」里声明的仓内路径（结构化优先；旧卡退回散文；去重，保持顺序）。 */
 export function fixChangePathsOf(text) {
   const section = fixSectionOf(text)
   if (section === null) return []
+  const structured = structuredOf(section)
+  if (structured.value !== null && Array.isArray(structured.value.changes)) {
+    return [...new Set(structured.value.changes.filter((path) => typeof path === 'string' && isFileLike(path)))]
+  }
+  const opened = openedOf(text)
+  if (opened !== null && opened >= CUTOFF) return []
   const block = labeledBlockOf(section, '改动')
   if (block === null) return []
   return [...new Set([...block.matchAll(/`([^`]+)`/g)]
@@ -41,57 +100,18 @@ export function fixChangePathsOf(text) {
 }
 
 /**
- * 修复卡实证合同：`## 修复落地` + 改动（至少一个 `仓内路径`）+ 红证（实跑失败片段）+
- * 绿证（实跑通过片段）；红证须可重放（测试/门禁命令）或改动含测试/门禁资产。
+ * 修复卡实证合同：`## 修复落地` + `json fix-evidence` 块（changes / red / green）；旧卡（< 2026-11-15）
+ * 无块时 grandfather，不参与任何散文启发式。
  */
 export function fixEvidenceProblems(text) {
   const section = fixSectionOf(text)
-  if (section === null || section === '') return ['缺 ## 修复落地（改动 / 红证 / 绿证）']
-  const problems = []
-  const change = labeledBlockOf(section, '改动')
-  const rawPaths = change === null ? [] : [...change.matchAll(/`([^`]+)`/g)].map((match) => match[1].trim()).filter(Boolean)
-  const paths = fixChangePathsOf(text)
-  if (change === null) problems.push('缺「改动：`<仓内路径>`」')
-  else if (paths.length === 0) {
-    problems.push(rawPaths.length > 0
-      ? '「改动」只收文件路径（不能以 / 结尾或含 glob；目录请列具体文件）'
-      : '「改动」缺 `仓内路径`')
+  if (section === null || section === '') return ['缺 ## 修复落地（结构化 fix-evidence 块）']
+  const structured = structuredOf(section)
+  if (structured.error !== null) return [structured.error]
+  if (structured.blocks === 0) {
+    const opened = openedOf(text)
+    if (opened !== null && opened < CUTOFF) return []
+    return ['缺 `json fix-evidence` 块——改动 / 红证 / 绿证用字段表达（旧卡 2026-11-15 前 grandfather）']
   }
-  const NEGATION = /(?:未|不|没有|无|非|没|not)\s*$/i
-  const REPLAYABLE = /(node\s+--test|pnpm\s+(?:test|verify)|gates\.e2e)/
-  const lineAt = (body, index) => {
-    const start = body.lastIndexOf('\n', index) + 1
-    const end = body.indexOf('\n', index)
-    return body.slice(start, end === -1 ? undefined : end)
-  }
-  const hasUnnegatedMarker = (body, marker) => {
-    for (const match of body.matchAll(marker)) {
-      const index = match.index ?? 0
-      if (NEGATION.test(body.slice(Math.max(0, index - 10), index))) continue
-      // `exit N` 只有与可重放命令同一行才算结果片段；裸 exit 是标记不是证据。
-      if (/^exit\s/i.test(match[0]) && !REPLAYABLE.test(lineAt(body, index))) continue
-      return true
-    }
-    return false
-  }
-  for (const label of ['红证', '绿证']) {
-    const block = labeledBlockOf(section, label)
-    if (block === null) { problems.push(`缺「${label}」`); continue }
-    const body = block.replace(new RegExp(`^.*?${label}(?:\\*\\*)?[：:]`, 's'), '')
-    if (!/`[^`]+`|```/.test(body)) problems.push(`「${label}」缺命令（行内代码或围栏）`)
-    const marker = label === '红证'
-      ? /(FAIL|RED|not ok|AssertionError|exit\s*[1-9]|失败)/gi
-      : /(PASS|ok\b|exit\s*0|全绿|通过)/gi
-    if (!hasUnnegatedMarker(body, marker)) {
-      problems.push(`「${label}」缺实跑结果片段（${label === '红证' ? '失败' : '通过'}；否定句/裸 exit 不算）`)
-    }
-    if (label === '红证') {
-      const testAsset = paths.some((path) =>
-        path.startsWith('tests/') || path.startsWith('scripts/smoke/') || path === 'scripts/lib/gates-cases.mjs')
-      if (!REPLAYABLE.test(body) && !testAsset) {
-        problems.push('「红证」不可重放，且「改动」没有测试/门禁资产（tests/…、scripts/smoke/… 或 gates-cases）')
-      }
-    }
-  }
-  return problems
+  return validateStructured(structured.value)
 }

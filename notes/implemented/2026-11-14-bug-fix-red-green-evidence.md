@@ -1,4 +1,5 @@
 > 状态：implemented
+> 历史注记：2026-11-14 的散文 `改动/红证/绿证` 契约已由结构化 `json fix-evidence` 取代（现行 = [bugs/README §修复落地](../../_backlog/bugs/README.md)；决定 = [issue 2026-11-14-verification-oracle](../../_backlog/issues/2026-11-14-verification-oracle.md)）；本页保留当时的判据形状与理由。
 
 # 修复证据：红→绿 + 同暂存集
 

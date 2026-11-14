@@ -1,5 +1,5 @@
 // staged-change-pairing 回归 — D52 的暂存区成对判据（纯函数；git 由门禁注入）。
-// 反证：删掉任一分支（归档卡↔Note / expected↔lastRewrite），下方对应用例变绿。
+// 反证：删掉任一分支（归档卡↔Note / expected↔lastRewrite / 修复卡↔代码），下方对应用例变绿。
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { parseStagedChanges, stagedChangePairingProblems } from '../../scripts/lib/staged-change-pairing.mjs'
@@ -73,28 +73,51 @@ test('空暂存 / 无配对对象 → 绿（防空语料由门禁 note 承担）
   assert.deepEqual(stagedChangePairingProblems({ staged: changes([['M', 'README.md']]), ...harness(new Map()) }), [])
 })
 
-// ── ③ bug 修复卡：红→绿证据 + 同暂存集改动（2026-11-14 假修事故的机械面）──
+// ── ③ bug 修复卡：结构化 fix-evidence + 同暂存集改动（2026-11-14 假修事故的机械面）──
 const FIX_CARD = '_backlog/_archived/fixed_bugs/BUG-900-fix.md'
-const fixCardText = (paths = ['scripts/lib/fix.mjs']) => `---
+const fixCardText = (paths = ['scripts/lib/fix.mjs'], {
+  opened = '2026-11-15', redExit = 1, redCommand = 'node --test tests/fix.test.mjs', greenExit = 0,
+} = {}) => `---
+status: 已修
+severity: P2
+opened: ${opened}
+---
+
+# BUG-900：probe
+
+> 严重级别：P2｜发现：${opened}｜状态：已修
+
+## 修复落地（${opened}）
+
+\`\`\`json fix-evidence
+${JSON.stringify({
+    changes: paths,
+    red: { command: redCommand, exit: redExit, output: 'not ok 1 - old implementation' },
+    green: { command: redCommand, exit: greenExit },
+  }, null, 2)}
+\`\`\`
+
+散文只作人读副本，不参与判定。
+`
+
+const legacyFixCardText = (paths = ['scripts/lib/fix.mjs']) => `---
 status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 
-# BUG-900：probe
-
-> 严重级别：P2｜发现：2026-11-14｜状态：已修
+# BUG-901：legacy probe
 
 ## 修复落地（2026-11-14）
 
 - **改动**：${paths.map((path) => `\`${path}\``).join('、')}
 - **红证**：\`node --test tests/fix.test.mjs\`
   \`\`\`
-  not ok 1 - old implementation
+  not ok 1 - old
   \`\`\`
 - **绿证**：\`node --test tests/fix.test.mjs\`
   \`\`\`
-  ok 1 - new implementation
+  ok 1 - new
   \`\`\`
 `
 
@@ -103,7 +126,7 @@ const fixStaged = (extra = []) => changes([
   ...extra,
 ])
 
-test('修复卡：红证/绿证 + 改动在同暂存集 → 绿', () => {
+test('修复卡：结构化证据 + 改动在同暂存集 → 绿', () => {
   const files = new Map([[FIX_CARD, fixCardText()], ['scripts/lib/fix.mjs', 'export const x = 1\n'], ['tests/fix.test.mjs', 'test()\n']])
   assert.deepEqual(stagedChangePairingProblems({ staged: fixStaged([['M', 'scripts/lib/fix.mjs'], ['M', 'tests/fix.test.mjs']]), ...harness(files) }), [])
 })
@@ -115,7 +138,7 @@ test('假修事故：只翻已修 + 移动卡，repo 无其它变更 → 红', (
   assert.match(red[0], /同一暂存集|假修/)
 })
 
-test('修复卡缺 红证/绿证 → 红；声明的文件未暂存 → 红', () => {
+test('修复卡缺 ## 修复落地 → 红；声明的文件未暂存 → 红', () => {
   const noEvidence = new Map([[FIX_CARD, fixCardText().replace(/## 修复落地[\s\S]*$/, '')]])
   const missing = stagedChangePairingProblems({ staged: fixStaged([['M', 'scripts/lib/fix.mjs']]), ...harness(noEvidence) })
   assert.match(missing[0], /不是可复核的修复/)
@@ -130,6 +153,12 @@ test('修复卡声明的精确文件 / 文档变更 → 同暂存集绿（修复
   assert.deepEqual(stagedChangePairingProblems({ staged: fixStaged([['M', 'scripts/lib/fix.mjs']]), ...harness(fileFiles) }), [])
   const docsFiles = new Map([[FIX_CARD, fixCardText(['docs/guide.md'])], ['docs/guide.md', '# G\n']])
   assert.deepEqual(stagedChangePairingProblems({ staged: fixStaged([['M', 'docs/guide.md']]), ...harness(docsFiles) }), [])
+})
+
+test('旧卡（< 2026-11-15）无结构化块 → grandfather 仍可配对', () => {
+  const legacy = '_backlog/_archived/fixed_bugs/BUG-901-legacy.md'
+  const files = new Map([[legacy, legacyFixCardText()], ['scripts/lib/fix.mjs', 'x\n']])
+  assert.deepEqual(stagedChangePairingProblems({ staged: changes([['A', legacy], ['M', 'scripts/lib/fix.mjs']]), ...harness(files) }), [])
 })
 
 test('活跃 修复落地 卡也拦：只改卡/无代码 → 红；带证据 + 同暂存集 → 绿', () => {
@@ -149,9 +178,7 @@ test('活跃 修复落地 卡也拦：只改卡/无代码 → 红；带证据 + 
 })
 
 test('红证不可重放且改动无测试/门禁资产 → 红', () => {
-  const card = fixCardText()
-    .replace('`node --test tests/fix.test.mjs`', '`node -e "throw 1"`')
-    .replace('not ok 1 - old implementation', 'FAIL: old implementation')
+  const card = fixCardText(['scripts/lib/fix.mjs'], { redCommand: 'node -e "throw 1"' })
   const files = new Map([[FIX_CARD, card], ['scripts/lib/fix.mjs', 'x\n']])
   const red = stagedChangePairingProblems({ staged: fixStaged([['M', 'scripts/lib/fix.mjs']]), ...harness(files) })
   assert.match(red[0], /不可重放|测试\/门禁资产/)
@@ -164,7 +191,7 @@ test('改动目录前缀不能命中任意同目录 staged 文件', () => {
     staged: fixStaged([['M', 'scripts/lib/unrelated.mjs']]),
     ...harness(files),
   })
-  assert.match(red[0], /文件路径|同一暂存集|目录/)
+  assert.match(red[0], /不是可复核|文件路径|目录/)
   const exact = fixCardText(['scripts/lib/fix.mjs'])
   const files2 = new Map([[FIX_CARD, exact], ['scripts/lib/fix.mjs', 'x\n']])
   assert.deepEqual(stagedChangePairingProblems({
