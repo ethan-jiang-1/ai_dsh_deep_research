@@ -175,7 +175,7 @@
 | lib/note-scan.mjs | c-notes、note-scan.test | notes 门禁的 Markdown 块级扫描：fenced code mask（```/~~~、未闭合）、围栏外 h2/状态行；围栏里的引用不夺权（BUG-175） |
 | lib/ci-workflow.mjs | ci-workflow.test、smoke-registry.test | GitHub Actions 执行面：`on:` 事件、`jobs:` 键、`needs`、step `if:false`/`continue-on-error`、run 块；smoke 只认真实 node 执行（BUG-172） |
 | lib/smoke-assets.mjs | smoke-assets.test、smoke-registry.test、smoke-oracle-surface.test、smoke-cost-budget.test | `scripts/smoke` 顶层分类（普通文件/目录/symlink/其它）与扁平合同违规项；symlink 不再静默消失（BUG-176） |
-| lib/artifact-freshness.mjs | artifact-freshness.test、lifecycle.entry | `_dist` 产物 mtime 不早于 pack 源/构建（src/lib/presets/content/package）；旧 tarball → exit 2（BUG-174） |
+| lib/artifact-freshness.mjs | artifact-freshness.test、lifecycle.entry、export-dist | `_dist` 产物 mtime 不早于 pack 源/构建（src/lib/presets/content/package）；旧 tarball → exit 2（BUG-174） |
 | lib/run-accept-fixture.mjs | run-accept.e2e、run-accept-fixture.spec | claim 夹具的 review/readiness 文本（D51 同源：有声明 = declaration/PASS，缺声明 = missing/红） |
 | lib/node-gate-core.mjs | node-gate、node-gate-delivery.spec、node-gate-leads.spec、node-gate-session.spec | bundle 判据聚合；唯一导出 = `gateBundle`，领域门直接 import 各自模块 |
 | lib/node-gate-contracts.mjs | node-gate-contracts.spec、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、node-gate-delivery.spec、readiness-declaration.spec、review-readiness.spec、verdict-audit、verdict-audit-core | 交付日期合同、readiness 与 decisions 行解析 |

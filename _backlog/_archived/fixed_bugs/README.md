@@ -183,3 +183,4 @@
 | [BUG-174](BUG-174-lifecycle-stale-dist-tarball.md) | BUG-174：lifecycle 不校验 `_dist` tarball 新鲜度——可能验证旧产物并 ALL PASS | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
 | [BUG-171](BUG-171-protocol-version-chain-only-previous-snapshot.md) | BUG-171：protocol v3 的版本链只查 v2——`protocol/v1.json = {}` 仍 PASS | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
 | [BUG-180](BUG-180-method-heading-duplicate-unknown-segments-dropped.md) | BUG-180：方法标题把未知/重复段当合法——编辑一次静默丢段 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-181](BUG-181-artifact-freshness-deletion-blind.md) | BUG-181：artifact 新鲜度只看最新 mtime——删源文件后旧 tarball 仍 fresh | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |

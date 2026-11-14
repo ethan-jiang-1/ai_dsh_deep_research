@@ -189,7 +189,7 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 | [BUG-178](../bugs/BUG-178-readiness-markdown-containers-and-bold-paren.md) | Z2 readiness 容器 | blockquote/缩进代码翻转终局；加粗括号假红 | 等人拍板（P1） |
 | [BUG-179](../bugs/BUG-179-html-comments-not-masked.md) | Z3 HTML 注释 | 注释里的证据/判定被当正文 | 等人拍板（P1） |
 | [BUG-180](../_archived/fixed_bugs/BUG-180-method-heading-duplicate-unknown-segments-dropped.md) | Z4 方法标题 | 未知/重复段静默丢失 | 已修 |
-| [BUG-181](../bugs/BUG-181-artifact-freshness-deletion-blind.md) | Z5 产物新鲜度 | 删源文件后旧 tarball 仍 fresh | 修复就绪 |
+| [BUG-181](../_archived/fixed_bugs/BUG-181-artifact-freshness-deletion-blind.md) | Z5 产物新鲜度 | 删源文件后旧 tarball 仍 fresh | 已修 |
 | [BUG-182](../bugs/BUG-182-model-workflow-duplicate-onkeys-empty-map.md) | Z6 on: 解析 | 第二份 onKeysOf；`{}` 假红 | 等人拍板 |
 | [BUG-183](../bugs/BUG-183-note-scan-indented-status-heading.md) | Z7 notes 缩进 | 0–3 空格合法缩进被判缺席 | 等人拍板 |
 
@@ -371,7 +371,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 | readiness Markdown 容器 | 已探 | [BUG-178](../bugs/BUG-178-readiness-markdown-containers-and-bold-paren.md)：blockquote/indented code/加粗括号 |
 | HTML 注释块 | 已探 | [BUG-179](../bugs/BUG-179-html-comments-not-masked.md)：notes 证据与 readiness 判定都可被注释冒充 |
 | 方法标题未知/重复段 | 已探 | [BUG-180](../_archived/fixed_bugs/BUG-180-method-heading-duplicate-unknown-segments-dropped.md)：编辑丢段 |
-| artifact 新鲜度（文件集） | 已探 | [BUG-181](../bugs/BUG-181-artifact-freshness-deletion-blind.md)：删除不被发现 |
+| artifact 新鲜度（文件集） | 已探 | [BUG-181](../_archived/fixed_bugs/BUG-181-artifact-freshness-deletion-blind.md)：删除不被发现 |
 | on: 解析复用 | 已探 | [BUG-182](../bugs/BUG-182-model-workflow-duplicate-onkeys-empty-map.md)：第二份 onKeysOf + `{}` 假红 |
 | note-scan 缩进 | 已探 | [BUG-183](../bugs/BUG-183-note-scan-indented-status-heading.md)：0–3 空格合法缩进被误杀 |
 

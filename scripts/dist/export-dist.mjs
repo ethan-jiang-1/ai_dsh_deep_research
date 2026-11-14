@@ -20,6 +20,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { localDateStr } from '../lib/local-date.mjs'
+import { packInputRoots, writeBuildManifest } from '../lib/artifact-freshness.mjs'
 import { writeMarketIndex } from './market.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -42,7 +43,7 @@ try {
   // 全新导出：只清本脚本自己的既有产物，不碰放进 _dist/ 的其他东西。
   mkdirSync(DIST, { recursive: true })
   for (const name of readdirSync(DIST)) {
-    if (name === MANUAL || /^dsh-deep-research-pack-.*\.tgz$/.test(name)) {
+    if (name === MANUAL || name === 'build-manifest.json' || /^dsh-deep-research-pack-.*\.tgz$/.test(name)) {
       rmSync(join(DIST, name), { force: true })
     }
   }
@@ -124,6 +125,15 @@ try {
   //    不列 source=npm 条目；发布后再由发布流程恢复。
   const market = writeMarketIndex()
   report('市场索引', true, `market.json — staged（0 installable entries），${market.bytes}B，sha256 ${market.sha256.slice(0, 12)}…`)
+
+  // 5. 构建清单（BUG-181）：源指纹 + tarball 哈希；lifecycle 优先对清单，删除/替换源文件
+  //    不会被「剩余文件最大 mtime」蒙混过去。
+  const manifest = writeBuildManifest({
+    artifact: tarball,
+    roots: packInputRoots(PACK),
+    manifestPath: join(DIST, 'build-manifest.json'),
+  })
+  report('构建清单', true, `build-manifest.json — source ${manifest.sourceFingerprint.slice(0, 12)}…（${manifest.sourceFiles} files）`)
 
   console.log('\n_dist/ 内容：')
   for (const name of readdirSync(DIST).sort()) console.log(`  ${name}`)

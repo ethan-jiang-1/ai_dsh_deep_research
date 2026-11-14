@@ -1,15 +1,15 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 
 # BUG-181：artifact 新鲜度只看最新 mtime——删掉源文件后旧 tarball 仍判 fresh
 
-> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：修复就绪 — P2 修理型；修法/判据如下
+> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：已修 — 构建清单（源指纹 + artifact 哈希）+ tar 文件集回退；P2 修理型
 >
-> 位置：[scripts/lib/artifact-freshness.mjs](../../scripts/lib/artifact-freshness.mjs)
-> `newestMtimeIn` / `artifactFreshness`；消费 = [lifecycle.entry.mjs](../../scripts/smoke/lifecycle.entry.mjs)；
+> 位置：[scripts/lib/artifact-freshness.mjs](../../../scripts/lib/artifact-freshness.mjs)
+> `newestMtimeIn` / `artifactFreshness`；消费 = [lifecycle.entry.mjs](../../../scripts/smoke/lifecycle.entry.mjs)；
 > 前科 = BUG-174（mtime 新鲜度）。
 
 ## 症状
@@ -71,3 +71,24 @@ rmSync(base, { recursive: true, force: true });
 
 未修。P2 修理型，授权范围 = `scripts/lib/artifact-freshness.mjs` + `export-dist` 清单 +
 `tests/checks/artifact-freshness.test.mjs`；去向可记 `none — 机械修复`。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`scripts/lib/artifact-freshness.mjs`、`scripts/dist/export-dist.mjs`、`scripts/smoke/lifecycle.entry.mjs`、`tests/checks/artifact-freshness.test.mjs`、`scripts/README.md`
+- **红证**：旧实现只看 mtime；删除源文件后仍 `fresh:true`（文件集探针断言失败）：
+  ```
+  node --input-type=module -e '…删除 src/b.mjs 后 artifactFreshness(..., {artifactEntries:["package/a.mjs","package/b.mjs"], sourceEntries:["package/a.mjs"]})…'
+  AssertionError [ERR_ASSERTION]: deleted source must be stale
+    actual: true,
+    expected: false,
+  ```
+- **绿证**：`node --test tests/checks/artifact-freshness.test.mjs`
+  ```
+  # tests 4
+  # pass 4
+  # fail 0
+  ```
+- **反证/边界**：manifest 矩阵覆盖删除源、同 mtime 内容替换、artifact 被替换；`file-set` 矩阵覆盖无清单旧
+  tarball 的「多出已删源/缺少新增源」。本机真实 `_dist` tarball 无清单 → `lifecycle.entry` 仍
+  NOT-RUN（`mtime-only` 或 `file-set`），不再 ALL PASS；`export-dist` 下次导出写 `_dist/build-manifest.json`。
+  L2 全链未跑（需先 `export-dist`；CI deploy job 自带该前置）。

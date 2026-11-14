@@ -19,7 +19,7 @@ import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseMarketIndex } from '@deepseek-ai/dsh-plugin-market-index'
 import { scrubbedEnv } from '../lib/env.mjs'
-import { artifactFreshness } from '../lib/artifact-freshness.mjs'
+import { artifactFreshness, packInputRoots, packagedInputEntries } from '../lib/artifact-freshness.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
@@ -46,17 +46,19 @@ const allowStale = process.argv.includes('--allow-stale') || process.env.LIFECYC
 if (allowStale) {
   console.log('lifecycle.entry: --allow-stale——跳过 tarball 新鲜度检查（显式旧产物覆盖）')
 } else {
-  const freshness = artifactFreshness(tarball, [
-    join(PACK, 'src'),
-    join(PACK, 'lib'),
-    join(PACK, 'presets'),
-    join(PACK, 'content'),
-    join(PACK, 'package.json'),
-    join(PACK, 'cordis.patch.yml'),
-  ])
+  const listing = spawnSync('tar', ['-tzf', tarball], { encoding: 'utf8' })
+  const tarballEntries = String(listing.stdout ?? '').split('\n')
+    .filter((entry) => entry.startsWith('package/') && !entry.endsWith('/'))
+  const freshness = artifactFreshness(tarball, packInputRoots(PACK), {
+    manifestPath: join(ROOT, '_dist', 'build-manifest.json'),
+    artifactEntries: tarballEntries,
+    sourceEntries: packagedInputEntries(PACK),
+  })
   if (!freshness.fresh) {
-    const newest = freshness.newest === null ? '—' : relative(ROOT, freshness.newest.path)
-    notRun(`tarball 不是由当前 pack 生成：早于 ${newest}——先 node scripts/dist/export-dist.mjs（显式旧产物用 --allow-stale / LIFECYCLE_ALLOW_STALE=1）`)
+    const detail = freshness.mode === 'mtime-only'
+      ? `早于 ${freshness.newest === null ? '—' : relative(ROOT, freshness.newest.path)}`
+      : freshness.reason
+    notRun(`tarball 不是由当前 pack 生成（${freshness.mode}：${detail}）——先 node scripts/dist/export-dist.mjs（显式旧产物用 --allow-stale / LIFECYCLE_ALLOW_STALE=1）`)
   }
 }
 
