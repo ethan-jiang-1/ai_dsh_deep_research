@@ -152,3 +152,14 @@ test('研究配置面板形态：COMPACT 默认态下 README 不描述已迁走�
     assert.ok(!readme.includes(term), `COMPACT=true（四区不渲染）但 pack README 仍写「${term}」——发布物与源码不同事；同步为摘要面或改 COMPACT 前先改 README`)
   }
 })
+
+// 负例留证 2026-11-14：BUG-009 的回潮——guides/61 曾写「被通道重启终局化」，与卡内实测
+//（重启前后日志一字节不变，不补 turn/end）及运行技能「无终局化补写」相抵。
+// 红配方：把 61 的句子改回「被通道重启终局化」→ 本例红。
+test('通道重启不终局化挂起 ask：61 与运行技能同判（BUG-009）', () => {
+  const guide = read('docs/guides/61-run-playbook.md')
+  const skill = read('.agents/skills/running-a-research-run/SKILL.md')
+  assert.match(skill, /无终局化补写/, '运行技能必须写「无终局化补写」——机制权威')
+  assert.doesNotMatch(guide, /被通道重启终局化/, 'guides/61 不得写「被通道重启终局化」——重启不补 turn/end')
+  assert.match(guide, /不会终局化/, 'guides/61 必须明确挂起 ask 不会因重启终局化')
+})
