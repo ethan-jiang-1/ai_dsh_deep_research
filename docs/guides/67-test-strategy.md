@@ -76,6 +76,15 @@
 | C9/C10 | [181](../../_backlog/_archived/fixed_bugs/BUG-181-artifact-freshness-deletion-blind.md) | artifact 新鲜度只看 mtime，文件集变化不可见 | 构建清单/哈希；mtime 只作预检 |
 | C3/C8 | [182](../../_backlog/_archived/fixed_bugs/BUG-182-model-workflow-duplicate-onkeys-empty-map.md) | on: 解析有第二份实现；空映射 `{}` 假红 | 单一事件解析器；空值/mapping 矩阵 |
 
+### 2026-11-14 批 D 增量（7 卡；探索卡第九轮）
+
+| 失败类 | 卡 | 共同缺口 | 类级守卫方向 |
+|---|---|---|---|
+| C7/C8 | [184](../../_backlog/bugs/BUG-184-ci-workflow-quoted-comment-expressions.md)、[187](../../_backlog/bugs/BUG-187-ci-workflow-shell-short-circuit.md)、[190](../../_backlog/bugs/BUG-190-ci-workflow-inline-on-flow-mapping.md) | 表达式/shell/on: 的下一层形状未归一 | 单一表达式/命令/事件解析器；quoted/comment/短路/flow 矩阵 |
+| C7/C8 | [185](../../_backlog/bugs/BUG-185-markdown-mask-html-before-fence.md) | 块级 mask 顺序（fence vs HTML comment） | fence 优先的单一状态机；组合形态 conformance |
+| C7/C11 | [186](../../_backlog/bugs/BUG-186-fix-evidence-negation-and-exit-markers.md)、[189](../../_backlog/bugs/BUG-189-fix-evidence-directory-path-prefix.md) | 修复证据的 marker/路径是宽子串 | 否定感知 + 文件级路径；红绿命令必须可重放 |
+| C8/C4 | [188](../../_backlog/bugs/BUG-188-note-scan-bold-status-label.md) | 状态标签的 Markdown 装饰未统一 | notes/readiness 共用装饰词表 |
+
 **成本原则**：同一失败类能在纯函数层证，就不上进程/浏览器/模型；上贵层必须能说出「unit 为什么
 看不见」。**不是所有测试都要矩阵**：纯算术、封闭枚举 + 唯一写方、否决式不变量、受控常量路径、
 单次调用契约，举例/不变量就够（详见 class-level-guards §F）。

@@ -12,6 +12,13 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
+| [BUG-184](BUG-184-ci-workflow-quoted-comment-expressions.md) | 等人拍板 | P2 | ci-workflow 先剥 `${{ }}` 再去引号/注释：quoted/带注释表达式仍假红假绿 |
+| [BUG-185](BUG-185-markdown-mask-html-before-fence.md) | 等人拍板 | P1 | 共享 Markdown mask 先剥 HTML 注释再剥 fence：围栏里的 `<!--` 吞掉后面真实内容 |
+| [BUG-186](BUG-186-fix-evidence-negation-and-exit-markers.md) | 等人拍板 | P2 | fix-evidence 裸子串：「未失败」/「exit 1」都能当红绿证 |
+| [BUG-187](BUG-187-ci-workflow-shell-short-circuit.md) | 等人拍板 | P2 | ci-workflow 短路的 node 段仍算执行：`false && node` / `true || node` / `\|\| true` |
+| [BUG-188](BUG-188-note-scan-bold-status-label.md) | 等人拍板 | P2 | note-scan 不认加粗状态标签 `> **状态**：`，合法 Note 假红 |
+| [BUG-189](BUG-189-fix-evidence-directory-path-prefix.md) | 等人拍板 | P2 | fix-evidence 的「改动」接受目录：任意同目录 staged 文件即可满足配对 |
+| [BUG-190](BUG-190-ci-workflow-inline-on-flow-mapping.md) | 等人拍板 | P2 | ci-workflow 不认 `on: { workflow_dispatch: {} }` flow mapping，合法 workflow 假红 |
 
 ## 最近归档
 

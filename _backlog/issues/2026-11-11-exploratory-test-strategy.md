@@ -50,7 +50,7 @@ guides/67 + 技能，本卡保留账本与当前轮 charter。找真缺陷就开
 
 ## 阅读顺序（本卡 1.8k 行）
 
-1. §第六轮 goal / §第七轮 goal / §第八轮 goal（当前要做什么、已探到哪）
+1. §第六轮 goal / §第七轮 goal / §第八轮 goal / §第九轮 goal（当前要做什么、已探到哪）
 2. §覆盖地图（哪些面已探/关闭/空白）
 3. §已知与未决（当前状态）
 4. 历史各节（按主题跳读）：§第 0 轮 pilot → §第 1 轮 charter → §用户答复 → §执行记录 →
@@ -195,6 +195,36 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 
 **执行记录**：2026-11-14 七条 charter 全部跑出可复现结果（复现/红绿证据在卡内）；7 张已开卡。
 未跑：安装域默认语言、hook/DOM、world-tree（持续空白，未冒充已验）。
+
+## 第九轮 goal（2026-11-14）：修复后的新共享件边界
+
+**进入**：BUG-177–183 已闭环（quoted 表达式、Markdown mask、fix-evidence 等新件已落地）。本轮审
+这些修复件的邻接面与 shell/YAML/Markdown 的下一层边界；keyless，不调真模型。
+
+| ID | 假设（要杀死的命题） | 最低层 | oracle / 变异 | 预算 | 停止 |
+|---|---|---|---|---|---|
+| Z1 | quoted/带注释的 `${{ }}` 表达式能归一 | 纯函数 | `executedSmokeFiles` 合成 quoted/comment | 10 min | **中：BUG-184** |
+| Z2 | 共享 Markdown mask 的 fence/comment 顺序无洞 | 纯函数 | 围栏内 `<!--` + 真实证据/判定 | 10 min | **中：BUG-185（P1）** |
+| Z3 | fix-evidence 的 marker 不能被否定/裸 exit 冒充 | 纯函数 | `未失败`/`exit 1`/`exit 0` | 10 min | **中：BUG-186** |
+| Z4 | shell 短路/后台的 node 段不算执行 | 纯函数 | `false && node`/`true \|\| node`/`\|\| true`/`&` | 10 min | **中：BUG-187** |
+| Z5 | notes 状态标签加粗仍可识别 | 纯函数 | `> **状态**：implemented` | 10 min | **中：BUG-188** |
+| Z6 | 修复卡「改动」只收文件，不收目录 | 纯函数/配对 | `scripts/lib/` vs `scripts/lib/foo.mjs` | 10 min | **中：BUG-189** |
+| Z7 | `on:` 的 flow mapping/空格冒号可解析 | 纯函数 | `on: { workflow_dispatch: {} }` | 10 min | **中：BUG-190** |
+
+**批 D 发现（2026-11-14，7 卡）**
+
+| 卡 | 面 | 一句话 | 状态 |
+|---|---|---|---|
+| [BUG-184](../bugs/BUG-184-ci-workflow-quoted-comment-expressions.md) | Z1 表达式 | quoted/带注释的 `${{ }}` 仍假红假绿 | 等人拍板 |
+| [BUG-185](../bugs/BUG-185-markdown-mask-html-before-fence.md) | Z2 共享 mask | 先剥注释再剥 fence：围栏里的 `<!--` 吞掉真实内容 | 等人拍板（P1） |
+| [BUG-186](../bugs/BUG-186-fix-evidence-negation-and-exit-markers.md) | Z3 修复证据 | 「未失败」/`exit 1`/`exit 0` 都能当红绿证 | 等人拍板 |
+| [BUG-187](../bugs/BUG-187-ci-workflow-shell-short-circuit.md) | Z4 shell | `false && node` / `true \|\| node` / `\|\| true` 仍算执行 | 等人拍板 |
+| [BUG-188](../bugs/BUG-188-note-scan-bold-status-label.md) | Z5 notes 装饰 | `> **状态**：` 假红 | 等人拍板 |
+| [BUG-189](../bugs/BUG-189-fix-evidence-directory-path-prefix.md) | Z6 修复路径 | 目录前缀匹配任意同目录 staged 文件 | 等人拍板 |
+| [BUG-190](../bugs/BUG-190-ci-workflow-inline-on-flow-mapping.md) | Z7 on: 形状 | `on: { workflow_dispatch: {} }` 假红 | 等人拍板 |
+
+**执行记录**：七条 charter 全部跑出可复现结果；7 张已开卡。未跑：安装域默认语言、hook/DOM、world-tree
+（持续空白，未冒充已验）。
 
 ## 第 0 轮 pilot（2026-11-11，已跑）
 
@@ -374,6 +404,17 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 | artifact 新鲜度（文件集） | 已探 | [BUG-181](../_archived/fixed_bugs/BUG-181-artifact-freshness-deletion-blind.md)：删除不被发现 |
 | on: 解析复用 | 已探 | [BUG-182](../_archived/fixed_bugs/BUG-182-model-workflow-duplicate-onkeys-empty-map.md)：第二份 onKeysOf + `{}` 假红 |
 | note-scan 缩进 | 已探 | [BUG-183](../_archived/fixed_bugs/BUG-183-note-scan-indented-status-heading.md)：0–3 空格合法缩进被误杀 |
+
+### 第九轮新增面（2026-11-14）
+
+| 面 | 状态 | 判定 / 证据 |
+|---|---|---|
+| ci-workflow quoted/comment 表达式 | 已探 | [BUG-184](../bugs/BUG-184-ci-workflow-quoted-comment-expressions.md)：假红/假绿 |
+| 共享 Markdown mask 顺序 | 已探 | [BUG-185](../bugs/BUG-185-markdown-mask-html-before-fence.md)：围栏内 `<!--` 吞真实内容 |
+| fix-evidence marker/路径 | 已探 | [BUG-186](../bugs/BUG-186-fix-evidence-negation-and-exit-markers.md)、[BUG-189](../bugs/BUG-189-fix-evidence-directory-path-prefix.md)：否定/exit/目录 |
+| ci-workflow shell 短路 | 已探 | [BUG-187](../bugs/BUG-187-ci-workflow-shell-short-circuit.md)：短路的 node 段仍算执行 |
+| note-scan 加粗状态标签 | 已探 | [BUG-188](../bugs/BUG-188-note-scan-bold-status-label.md)：`> **状态**：` 假红 |
+| on: flow mapping | 已探 | [BUG-190](../bugs/BUG-190-ci-workflow-inline-on-flow-mapping.md)：inline mapping 假红 |
 
 ## 已知与未决
 
