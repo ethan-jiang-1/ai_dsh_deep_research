@@ -171,6 +171,7 @@
 | lib/method-presets.mjs | library-fold.spec、method-presets.spec | research-brief skill「方法预设」表的唯一解析入口（表头/行列数/防空集 fail-loud）——内置名单不再各写一份手写副本 |
 | lib/keyless-imports.mjs | layering.test、test-surface.test、client-surface.test、test-lanes.test | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
 | lib/gates-cases.mjs | gates.e2e、verify-gates.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
+| lib/fix-evidence.mjs | fix-evidence.test、staged-change-pairing、backlog-liveness | bug 修复卡实证合同：改动/红证/绿证 + 可重放红证/测试资产；活跃 修复落地 与归档共用 |
 | lib/note-scan.mjs | c-notes、note-scan.test | notes 门禁的 Markdown 块级扫描：fenced code mask（```/~~~、未闭合）、围栏外 h2/状态行；围栏里的引用不夺权（BUG-175） |
 | lib/ci-workflow.mjs | ci-workflow.test、smoke-registry.test | GitHub Actions 执行面：`on:` 事件、`jobs:` 键、`needs`、step `if:false`/`continue-on-error`、run 块；smoke 只认真实 node 执行（BUG-172） |
 | lib/smoke-assets.mjs | smoke-assets.test、smoke-registry.test、smoke-oracle-surface.test、smoke-cost-budget.test | `scripts/smoke` 顶层分类（普通文件/目录/symlink/其它）与扁平合同违规项；symlink 不再静默消失（BUG-176） |

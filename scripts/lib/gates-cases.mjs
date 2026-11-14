@@ -175,6 +175,13 @@ const READY_ISSUE_TEXT = '---\nstatus: 待落地\nopened: 2099-01-01\n---\n\n# R
 const READY_BUG_TEXT = '---\nstatus: 修复就绪\nseverity: P1\nopened: 2099-01-01\n---\n\n# Probe\n'
   + '> 严重级别：P1｜发现：2099-01-01｜状态：修复就绪\n\n'
   + '## 修复判据\n1. Probe.\n';
+const FIXED_BUG_NO_EVIDENCE = '---\nstatus: 修复落地\nseverity: P2\nopened: 2099-01-01\n---\n\n# Probe\n'
+  + '> 严重级别：P2｜发现：2099-01-01｜状态：修复落地\n\n'
+  + '## 修复判据\n1. Probe.\n';
+const FIXED_BUG_WITH_EVIDENCE = FIXED_BUG_NO_EVIDENCE
+  + '\n## 修复落地\n\n- **改动**：`scripts/lib/probe-fix.mjs`、`tests/probe.test.mjs`\n'
+  + '- **红证**：`node --test tests/probe.test.mjs`\n  ```\n  not ok 1 - old\n  ```\n'
+  + '- **绿证**：`node --test tests/probe.test.mjs`\n  ```\n  ok 1 - new\n  ```\n';
 
 function fixtureFile(dir, rel, text, indexed = true) {
   const path = join(dir, rel);
@@ -589,6 +596,7 @@ export const CASES = [
   { id: 'backlog-research-thread-unindexed', gate: 'backlog-liveness', mutate: researchThread(RESEARCH_TEXT, { index: '' }) },
   { id: 'backlog-issue-ready-no-acceptance', gate: 'backlog-liveness', mutate: backlogReadyIssue((text) => text.replace('## 验收标准\n1. Probe.\n', '')) },
   { id: 'backlog-bug-ready-no-criteria', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-996-ready.md', READY_BUG_TEXT.replace('## 修复判据\n1. Probe.\n', '')) },
+  { id: 'backlog-bug-fix-no-evidence', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-995-fix.md', FIXED_BUG_NO_EVIDENCE) },
   { id: 'backlog-research-material-unindexed', gate: 'backlog-liveness', mutate: researchThread(RESEARCH_TEXT,
     { banner: RESEARCH_BANNER.replace('| [2099-01-01-evidence.md](2099-01-01-evidence.md) | probe |\n', '| [other.md](other.md) |\n') }) },
   { id: 'backlog-research-banner-fields', gate: 'backlog-liveness', mutate: researchThread(RESEARCH_TEXT,
@@ -875,6 +883,7 @@ export const CONTROLS = [
   { id: 'backlog-active-issue', gate: 'backlog-liveness', mutate: backlogIssue() },
   { id: 'backlog-ready-issue', gate: 'backlog-liveness', mutate: backlogReadyIssue() },
   { id: 'backlog-ready-bug', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-995-ready.md', READY_BUG_TEXT) },
+  { id: 'backlog-fix-bug-with-evidence', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-994-fix.md', FIXED_BUG_WITH_EVIDENCE) },
   { id: 'backlog-research-thread', gate: 'backlog-liveness', mutate: researchThread(RESEARCH_TEXT) },
   // guard-red-record 双址正向：活跃 bugs/ 卡 + 带留证的标题声明 → 门禁照常 PASS
   //（活跃址解析；CONTROLS 断言目标门禁 PASS，其他门禁红不拦——活跃探针卡不满足

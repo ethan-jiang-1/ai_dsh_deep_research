@@ -3,6 +3,7 @@
 // tests/backlog-liveness.test；规则正本 = _backlog/AGENTS（状态机）+ _backlog/README（工作路径/关闭）。
 import { existsSync, lstatSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
+import { fixEvidenceProblems } from './fix-evidence.mjs';
 
 const CARD_STATES = {
   issues: ['推敲中', '待落地', '等人拍板'], bugs: ['排查中', '修复就绪', '修复落地', '等人拍板'],
@@ -179,6 +180,9 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
         if (shelf.endsWith('bugs') && !['P0', 'P1', 'P2'].includes(fields.get('severity'))) problems.push(`${loc} needs severity: P0/P1/P2`);
         if (shelf.endsWith('bugs') && ['修复就绪', '修复落地'].includes(fields.get('status')) && !hasFilledSection(text, '修复判据'))
           problems.push(`${loc} ${fields.get('status')} requires a non-empty ## 修复判据`);
+        if (shelf === 'bugs' && fields.get('status') === '修复落地') {
+          for (const problem of fixEvidenceProblems(text)) problems.push(`${loc} ${problem}`);
+        }
         const statusLine = statusLineOf(text);
         // 归档卡的退出值：已结/已修 = 已离开活跃区，状态行（含历史头）不得再写可关闭：否。
         // 只看卡头 25 行——正文里的历史讨论可以引用旧值，卡头是当前记账面。

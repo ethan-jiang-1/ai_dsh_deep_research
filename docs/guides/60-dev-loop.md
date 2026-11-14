@@ -24,6 +24,7 @@
 - 两门都是 DSH 自带机制（base bundle，零接线）；**不要发明 tasks.md**（DSH 明文否决计划
   文件："a plan directory creates a second durable home"——会话日志即计划与清单的持久真相）。
 - **验收门（TDD 式，[D23](../decisions.md#d23)）**：对已授权工作，在实施前把可判定的验收判据绑定检查方式；可机械者先立红，人工判据明确记录走查证据。验收尚不明确时，澄清是当前任务需要，不会自动阻断已授权且可独立推进的工作；证据设计复用本仓现有 owner，不另造队列。四条硬边界：①**改断言迁就实现不是修法**——断言只在行为/合同真实变化时同 diff 改（[tests/AGENTS](../../tests/AGENTS.md)）；②**未验项不得写 implemented**，被阻断检查如实注明；③**复发升格**——implemented 缺真实验证证据复发时，才考虑升为机械门禁并配负例；④证据和结论不得超出检查实际证明的范围（依据见 [external-materials.md](../external-materials.md) 与 [item-lifecycle-tdd Note](../../notes/archived/2026-10-05-item-lifecycle-tdd.md)）。
+- **修复卡证据（红→绿）**：bug 翻 `修复落地/已修` 必须写 `## 修复落地` 的 改动/红证/绿证（红证可重放或改动含测试/门禁资产），且归档与代码/测试同暂存集；只翻状态/移卡 = 假修（机械面 = `staged-change-pairing`；规则 = [_backlog/AGENTS.md](../../_backlog/AGENTS.md)）。
 - 多步实施按可独立验收结果拆解；小问题不强行拆成子任务。一次需要多个相互独立的人类判断时，分别记录问题与依赖，不把它们伪装成执行步骤。
 - steer（用户插话）开启新 turn = 清单重排的信号，看得见反馈被吸收。
 

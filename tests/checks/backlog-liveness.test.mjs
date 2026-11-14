@@ -19,6 +19,7 @@ const READY_ISSUE_TEXT = '---\nstatus: 待落地\nopened: 2026-10-08\n---\n\n# R
   + '> 去向：implemented — `notes/implemented/2026-10-08-ready.md`（交付时写）\n\n'
   + '## 验收标准\n1. 行为可观察。\n';
 const READY_BUG = 'BUG-019-ready.md';
+const FIX_EVIDENCE = '\n## 修复落地\n\n- **改动**：`scripts/lib/fix.mjs`、`tests/checks/fix.test.mjs`\n- **红证**：`node --test tests/checks/fix.test.mjs`\n  ```\n  not ok 1 - old\n  ```\n- **绿证**：`node --test tests/checks/fix.test.mjs`\n  ```\n  ok 1 - new\n  ```\n';
 const READY_BUG_TEXT = '---\nstatus: 修复就绪\nseverity: P1\nopened: 2026-10-08\n---\n\n# BUG-019\n'
   + '> 严重级别：P1（重要）｜发现：2026-10-08｜状态：修复就绪\n\n'
   + '## 修复判据\n1. 回归测试通过。\n';
@@ -145,7 +146,8 @@ test('bug lifecycle enums and status-line mirror are enforced on active cards', 
   const f = fixture(t);
   for (const phase of ['排查中', '修复就绪', '修复落地', '等人拍板']) {
     const text = BUG_TEXT.replace('status: 排查中', `status: ${phase}`).replace('状态：排查中', `状态：${phase}`);
-    bug(f, ['修复就绪', '修复落地'].includes(phase) ? `${text}\n## 修复判据\n1. Probe.\n` : text);
+    const criteria = ['修复就绪', '修复落地'].includes(phase) ? '\n## 修复判据\n1. Probe.\n' : '';
+    bug(f, `${text}${criteria}${phase === '修复落地' ? FIX_EVIDENCE : ''}`);
     assert.deepEqual(f.check(), [], phase);
   }
   bug(f, BUG_TEXT.replace('status: 排查中', 'status: 修复中').replace('状态：排查中', '状态：修复中'));
@@ -165,9 +167,9 @@ test('修复就绪/修复落地 need a non-empty 修复判据', (t) => {
   assert.deepEqual(f.check(), []);
   for (const phase of ['修复就绪', '修复落地']) {
     const text = READY_BUG_TEXT.replace('status: 修复就绪', `status: ${phase}`).replace('状态：修复就绪', `状态：${phase}`);
-    bug(f, text, READY_BUG);
+    bug(f, phase === '修复落地' ? `${text}${FIX_EVIDENCE}` : text, READY_BUG);
     assert.deepEqual(f.check(), [], phase);
-    bug(f, text.replace('## 修复判据\n1. 回归测试通过。\n', ''), READY_BUG);
+    bug(f, (phase === '修复落地' ? `${text}${FIX_EVIDENCE}` : text).replace('## 修复判据\n1. 回归测试通过。\n', ''), READY_BUG);
     assert.ok(f.check().some((p) => p.includes('修复判据')), phase);
   }
 });

@@ -30,6 +30,7 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
   [notes/AGENTS.md](notes/AGENTS.md)；落地 = [guides/60](docs/guides/60-dev-loop.md)。
 - 审查/验收：机械不跳；语义自审按风险；用户按重要性出场；`审查：跳过` 不写成 verified。
 - 归档：卡与去向载体同变更（Note / RFC / triggers / none）；延后项落 [triggers](_backlog/triggers.md)。
+- **修复证据**：bug 翻 `修复落地/已修` 必须写「改动 + 红证 + 绿证」（红证可重放或改动含测试/门禁资产）并与代码/测试同变更；只改状态/移动卡 = 假修（机械面 = `staged-change-pairing`；规则 = [_backlog/AGENTS.md](_backlog/AGENTS.md)）。
 
 ## 布局
 
