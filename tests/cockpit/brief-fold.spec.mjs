@@ -1,3 +1,5 @@
+// 负例留证 2026-11-14：BUG-033——交付三行曾被 /交付|定稿/ 宽匹配掩盖文案漂移；
+// 红配方：改 brief-fold 的 stageLine/knownLine/actionLine 任一交付文案 → 本例红。
 // 业务摘要折算回归（brief-fold）——驾驶舱业务摘要层（issue 2026-10-11-executive-research-ux-delivery）。
 // 九态可重放输入全覆盖（互补案例规则）+ fail-soft + 禁词（计数不冒充完成度）。
 // 红证：测试先于实现提交（模块缺席 = 红）；实现后九态逐态绿。
@@ -84,9 +86,11 @@ test('HITL2 修订表述拍板后：原位修改、不产生新版本', () => {
   assert.equal(b.userActionNeeded, false);
 });
 
-test('已交付定稿：报告已交付 + 无需操作', () => {
+test('已交付定稿（BUG-033）：交付三行逐字 + 无需操作', () => {
   const b = deriveBusinessBrief({ ...base, delivered: true, lastDecisionKind: 'approve' });
-  assert.match(b.stageLine, /交付|定稿/);
+  assert.equal(b.stageLine, '报告已按你的拍板定稿交付');
+  assert.equal(b.knownLine, '当前版已交付；历史拍板见 question.md §Decisions');
+  assert.equal(b.actionLine, '你现在无需操作；需要继续研究时在会话里提出（补研究/修订表述走交付审阅语义）');
   assert.equal(b.userActionNeeded, false);
 });
 

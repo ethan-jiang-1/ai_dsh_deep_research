@@ -68,3 +68,17 @@ test('渲染金标准 ↔ fixture 的 web_search 面静态对账（--update-expe
       `${c.fixture} → ${c.renderExpected}：🔍 检索活动行 ≠ fixture 事件经 foldActivityRows 的折算结果`)
   }
 })
+
+// 负例留证 2026-11-14：BUG-013 / BUG-080——source 身份曾被短哈希/陈旧声明掩盖；
+// 红配方：把任 case 的 source.codeAnchor 改成短哈希或删 vendor → 本例如期红。
+test('场景声明的 source 身份形状与 roleFace 覆盖（BUG-013 / BUG-080）', () => {
+  const manifest = JSON.parse(readFileSync(join(SCENARIO, 'snapshot.json'), 'utf8'))
+  assert.ok(Array.isArray(manifest.roleFace) && manifest.roleFace.length > 0, 'roleFace 非空')
+  assert.ok(Array.isArray(manifest.cases) && manifest.cases.length > 0, 'cases 非空')
+  for (const c of manifest.cases) {
+    assert.match(c.source?.codeAnchor ?? '', /^[0-9a-f]{40}$/, `${c.id}: codeAnchor 必须 40-hex`)
+    assert.match(c.source?.vendor ?? '', /^[0-9a-f]{40}$/, `${c.id}: vendor 必须 40-hex`)
+    assert.match(c.source?.recordedAt ?? '', /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/, `${c.id}: recordedAt 必须 RFC3339`)
+    assert.ok(manifest.roleFace.includes(c.preset), `${c.id}: preset ${c.preset} 不在 roleFace`)
+  }
+})
