@@ -12,9 +12,6 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [BUG-184](BUG-184-ci-workflow-quoted-comment-expressions.md) | 等人拍板 | P2 | ci-workflow 先剥 `${{ }}` 再去引号/注释：quoted/带注释表达式仍假红假绿 |
-| [BUG-187](BUG-187-ci-workflow-shell-short-circuit.md) | 等人拍板 | P2 | ci-workflow 短路的 node 段仍算执行：`false && node` / `true || node` / `\|\| true` |
-| [BUG-190](BUG-190-ci-workflow-inline-on-flow-mapping.md) | 等人拍板 | P2 | ci-workflow 不认 `on: { workflow_dispatch: {} }` flow mapping，合法 workflow 假红 |
 
 ## 最近归档
 

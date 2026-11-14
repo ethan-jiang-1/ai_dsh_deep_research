@@ -106,3 +106,37 @@ test('parseEvents：空映射 / 带 inputs 的 mapping / 行尾注释都算事�
   }
   assert.deepEqual(eventKeys(parseWorkflow('on:\n  push:\n  workflow_dispatch: {}\n')), ['push', 'workflow_dispatch'])
 })
+
+test('表达式外层：引号 / YAML 行尾注释 / ${{ }} 组合都要归一（BUG-184）', () => {
+  const wf = (ifExpr = '', coe = '') => `on:\n  workflow_dispatch:\njobs:\n  smoke:\n    steps:\n      - name: s\n${ifExpr === '' ? '' : `        if: ${ifExpr}\n`}${coe === '' ? '' : `        continue-on-error: ${coe}\n`}        run: node scripts/smoke/foo.e2e.mjs\n  all-checks-passed:\n    needs: [smoke]\n`
+  for (const expr of ['"${{ always() }}"', 'always() # comment', '${{ true }} # c']) {
+    assert.deepEqual([...executedSmokeFiles(wf(expr))], ['foo.e2e.mjs'], `if ${expr}`)
+  }
+  for (const coe of ['"${{ true }}"', 'true # comment']) {
+    assert.deepEqual([...executedSmokeFiles(wf('', coe))], [], `coe ${coe}`)
+  }
+  for (const expr of ['"${{ false }}"', 'false # c']) assert.deepEqual([...executedSmokeFiles(wf(expr))], [], `if ${expr}`)
+  assert.deepEqual([...executedSmokeFiles(wf('', 'false # c'))], ['foo.e2e.mjs'], 'coe false # c')
+})
+
+test('shell 短路 / 后台 / 吞错：node 不计执行（BUG-187）', () => {
+  const wf = (run) => `on:\n  workflow_dispatch:\njobs:\n  smoke:\n    steps:\n      - name: s\n        run: ${run}\n  all-checks-passed:\n    needs: [smoke]\n`
+  for (const run of ['false && node scripts/smoke/foo.e2e.mjs', 'true || node scripts/smoke/foo.e2e.mjs', 'node scripts/smoke/foo.e2e.mjs || true', 'node scripts/smoke/foo.e2e.mjs &']) {
+    assert.deepEqual([...executedSmokeFiles(wf(run))], [], run)
+  }
+  for (const run of ['node scripts/smoke/foo.e2e.mjs', 'node scripts/smoke/foo.e2e.mjs && echo ok', 'echo start && node scripts/smoke/foo.e2e.mjs']) {
+    assert.deepEqual([...executedSmokeFiles(wf(run))], ['foo.e2e.mjs'], run)
+  }
+})
+
+test('on: flow mapping / key 前空格（BUG-190）', () => {
+  for (const text of [
+    'on: { workflow_dispatch: {} }\n',
+    'on: { workflow_dispatch: { inputs: { x: { type: string } } } }\n',
+    'on: { workflow_dispatch: {}, pull_request_target: {} }\n',
+    'on:\n  workflow_dispatch : {}\n',
+  ]) {
+    const expected = text.includes('pull_request_target') ? ['workflow_dispatch', 'pull_request_target'] : ['workflow_dispatch']
+    assert.deepEqual(eventKeys(parseWorkflow(text)), expected, text)
+  }
+})

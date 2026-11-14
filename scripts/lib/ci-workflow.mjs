@@ -12,7 +12,12 @@ const indentOf = (line) => /^\s*/.exec(line)[0].length
 const isSkippable = (line) => line.trim() === '' || line.trimStart().startsWith('#')
 const unquote = (value) => String(value ?? '').trim().replace(/^["']|["']$/g, '').trim()
 /** GitHub 表达式的值面：先剥 `${{ }}` 外壳与引号，再按语义闭集判定（BUG-177）。 */
-const normalizeExpression = (expr) => unquote(String(expr ?? '').replace(/^\$\{\{\s*|\s*\}\}$/g, '')).toLowerCase()
+const normalizeExpression = (expr) => {
+  // 顺序：YAML 行尾注释（引号外）→ unquote → `${{ }}` 外壳 → lowercase（BUG-184）。
+  const withoutComment = stripShellComment(String(expr ?? '').trim()).trim()
+  const value = unquote(withoutComment).trim().replace(/^\$\{\{\s*|\s*\}\}$/g, '').trim()
+  return value.toLowerCase()
+}
 const isFalseExpr = (expr) => ['false', '!true', '0'].includes(normalizeExpression(expr))
 const isTrue = (expr) => normalizeExpression(expr) === 'true'
 const isAlways = (expr) => ['true', 'always()', 'success()'].includes(normalizeExpression(expr))
@@ -24,32 +29,65 @@ const parseList = (raw) => {
   return value === '' ? [] : [unquote(value)]
 }
 
+/** flow mapping 的顶层键（`{ a: {}, b: { inputs: … } }`）；嵌套逗号不计。 */
+function flowKeys(value) {
+  const inner = value.replace(/^\s*\{\s*/, '').replace(/\s*\}\s*$/, '')
+  const parts = []
+  let buffer = ''
+  let depth = 0
+  let quote = null
+  for (const ch of inner) {
+    if (quote !== null) {
+      buffer += ch
+      if (ch === quote) quote = null
+      continue
+    }
+    if (ch === '"' || ch === "'") { quote = ch; buffer += ch; continue }
+    if (ch === '{' || ch === '[') depth += 1
+    else if (ch === '}' || ch === ']') depth -= 1
+    if (ch === ',' && depth === 0) { parts.push(buffer); buffer = ''; continue }
+    buffer += ch
+  }
+  if (buffer.trim() !== '') parts.push(buffer)
+  return parts
+    .map((part) => unquote((part.split(':')[0] ?? '').trim()))
+    .filter(Boolean)
+}
+
 function parseEvents(lines) {
   const index = lines.findIndex((line) => /^on:\s*(.*)$/.test(line))
   if (index === -1) return []
   const value = /^on:\s*(.*)$/.exec(lines[index])[1].trim()
-  if (value !== '') return parseList(value)
+  if (value !== '') {
+    if (value.startsWith('{')) return flowKeys(value)
+    return parseList(value)
+  }
   const events = []
   for (let i = index + 1; i < lines.length; i += 1) {
     const line = lines[i]
     if (isSkippable(line)) continue
     if (indentOf(line) === 0) break
-    const match = /^\s{2}([A-Za-z_][A-Za-z0-9_-]*):\s*(.*)$/.exec(line)
+    const match = /^\s{2}([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(.*)$/.exec(line)
     if (match !== null) {
       const value = (match[2] ?? '').trim()
-      // key: / key: {} / key: { inputs: … } / key: # comment 都是事件键（BUG-182）。
+      // key: / key: {} / key: { inputs: … } / key: # comment 都是事件键（BUG-182/190）。
       if (value === '' || value.startsWith('#') || value.startsWith('{')) events.push(match[1])
     }
   }
   return events
 }
 
-/** 引号敏感的按 shell 运算符切段（`&&` / `||` / `;` / `|`）。 */
+/** 引号敏感的按 shell 运算符切段；每段带 sepAfter（`&&`/`||`/`;`/`|`/`&`）。 */
 function splitCommands(line) {
   const out = []
   let buffer = ''
   let single = false
   let double = false
+  const push = (sepAfter) => {
+    const command = buffer.trim()
+    if (command !== '') out.push({ command, sepAfter })
+    buffer = ''
+  }
   for (let i = 0; i < line.length; i += 1) {
     const ch = line[i]
     if (ch === '\\' && !single) {
@@ -62,21 +100,24 @@ function splitCommands(line) {
     if (!single && !double) {
       const pair = line.slice(i, i + 2)
       if (pair === '&&' || pair === '||') {
-        out.push(buffer)
-        buffer = ''
+        push(pair)
         i += 1
         continue
       }
       if (ch === ';' || ch === '|') {
-        out.push(buffer)
-        buffer = ''
+        push(ch)
+        continue
+      }
+      // `2>&1` / `&>` 是重定向，不是后台运算符。
+      if (ch === '&' && line[i - 1] !== '>' && line[i + 1] !== '>') {
+        push('&')
         continue
       }
     }
     buffer += ch
   }
-  out.push(buffer)
-  return out.map((item) => item.trim()).filter(Boolean)
+  push(null)
+  return out
 }
 
 /** 去掉 shell 行尾注释（引号内 # 不算）；行首/空白后的 # 才是注释。 */
@@ -112,7 +153,8 @@ function shellSegments(text) {
     }
     const code = stripShellComment(raw)
     if (code.trim() === '') continue
-    segments.push(...splitCommands(code))
+    const parts = splitCommands(code)
+    if (parts.length > 0) segments.push(parts)
   }
   return segments
 }
@@ -291,8 +333,17 @@ export function executedSmokeFiles(text) {
       // 空 = 默认执行；always()/success()/true 及其 `${{ }}` 外壳视为必然执行；其余不保证（BUG-177）。
       if (condition !== '' && !isAlways(condition)) continue
       if (typeof step.run !== 'string') continue
-      for (const segment of shellSegments(step.run)) {
-        for (const file of smokeFilesOfSegment(segment)) found.add(file)
+      // shell 短路/后台/吞错语义（BUG-187）：只计「无前置失败条件、node 不在 ||/& 尾部」的段。
+      const isKnownFailure = (command) => /^(?:false|!?\s*true|exit\s+[1-9])$/.test(command)
+      for (const segments of shellSegments(step.run)) {
+        for (let i = 0; i < segments.length; i += 1) {
+          const segment = segments[i]
+          const sepBefore = i === 0 ? null : segments[i - 1].sepAfter
+          if (sepBefore === '&' || segment.sepAfter === '&') continue
+          if (sepBefore === '||' || segment.sepAfter === '||') continue
+          if (sepBefore === '&&' && isKnownFailure(segments[i - 1].command)) continue
+          for (const file of smokeFilesOfSegment(segment.command)) found.add(file)
+        }
       }
     }
   }

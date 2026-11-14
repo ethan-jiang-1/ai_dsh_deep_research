@@ -1,13 +1,13 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 # BUG-184：ci-workflow 先剥 `${{ }}` 再去引号/注释——quoted/带注释的表达式仍假红假绿
 
-> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及 CI 执行面合同，需用户放行
+> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：已修 — 表达式先剥 YAML 注释再 unquote/剥 ${{ }}；用户放行批 D
 >
-> 位置：[scripts/lib/ci-workflow.mjs](../../scripts/lib/ci-workflow.mjs) 的
+> 位置：[scripts/lib/ci-workflow.mjs](../../../scripts/lib/ci-workflow.mjs) 的
 > `normalizeExpression`；前科 = BUG-177（裸表达式归一）。
 
 ## 症状
@@ -65,4 +65,22 @@ for (const [label, text] of [
 
 ## 修复关联
 
-未修。触面 = CI/验收合同，按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`。
+未修。触面 = CI/验收合同，按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`scripts/lib/ci-workflow.mjs`、`tests/checks/ci-workflow.test.mjs`
+- **红证**：`node --test tests/checks/ci-workflow.test.mjs`
+  ```
+  not ok 6 - 表达式外层：引号 / YAML 行尾注释 / ${{ }} 组合都要归一（BUG-184）
+  # pass 5
+  # fail 3
+  ```
+- **绿证**：`node --test tests/checks/ci-workflow.test.mjs`
+  ```
+  # tests 8
+  # pass 8
+  # fail 0
+  ```
+- **反证/边界**：`"${{ always() }}"` / `always() # c` / `"${{ true }}"` / `true # c` 都识别；
+  `"${{ false }}"` / `false # c` 仍跳过；`continue-on-error: false # c` 仍执行；真实 ci.yml 9 条不回归。

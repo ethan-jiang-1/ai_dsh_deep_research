@@ -193,3 +193,6 @@
 | [BUG-189](BUG-189-fix-evidence-directory-path-prefix.md) | BUG-189：fix-evidence 的「改动」接受目录路径——任意同目录 staged 文件即可满足配对 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
 | [BUG-185](BUG-185-markdown-mask-html-before-fence.md) | BUG-185：共享 Markdown mask 先剥 HTML 注释再剥 fence——围栏里的 `<!--` 吞掉后面真实内容 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
 | [BUG-188](BUG-188-note-scan-bold-status-label.md) | BUG-188：note-scan 不认加粗状态标签 `> **状态**：`——合法 Note 被判缺状态行 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-184](BUG-184-ci-workflow-quoted-comment-expressions.md) | BUG-184：ci-workflow 先剥 `${{ }}` 再去引号/注释——quoted/带注释表达式仍假红假绿 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-187](BUG-187-ci-workflow-shell-short-circuit.md) | BUG-187：ci-workflow 短路的 node 段仍算执行——`false && node` / `true || node` / `|| true` / `&` | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-190](BUG-190-ci-workflow-inline-on-flow-mapping.md) | BUG-190：ci-workflow 不认 `on:` inline flow mapping——合法 workflow 假红 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |

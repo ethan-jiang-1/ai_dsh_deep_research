@@ -1,13 +1,13 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 # BUG-187：ci-workflow 按 `&&`/`||` 切段后逐段认 node——短路的 node 段仍算执行
 
-> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及 CI 执行面合同，需用户放行
+> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：已修 — shell 段带运算符语义，短路/后台/吞错不计数；用户放行批 D
 >
-> 位置：[scripts/lib/ci-workflow.mjs](../../scripts/lib/ci-workflow.mjs) 的
+> 位置：[scripts/lib/ci-workflow.mjs](../../../scripts/lib/ci-workflow.mjs) 的
 > `splitCommands` / `smokeFilesOfSegment`；前科 = BUG-172/177（执行面/表达式）。
 
 ## 症状
@@ -59,4 +59,22 @@ for (const run of ["false && node scripts/smoke/foo.e2e.mjs", "true || node scri
 
 ## 修复关联
 
-未修。触面 = CI/验收合同，按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`。
+未修。触面 = CI/验收合同，按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`scripts/lib/ci-workflow.mjs`、`tests/checks/ci-workflow.test.mjs`
+- **红证**：`node --test tests/checks/ci-workflow.test.mjs`
+  ```
+  not ok 7 - shell 短路 / 后台 / 吞错：node 不计执行（BUG-187）
+  # pass 5
+  # fail 3
+  ```
+- **绿证**：`node --test tests/checks/ci-workflow.test.mjs`
+  ```
+  # tests 8
+  # pass 8
+  # fail 0
+  ```
+- **反证/边界**：`false && node`、`true || node`、`node || true`、`node &` 均不计；`node` /
+  `node && echo` / `echo start && node` 均计；`2>&1` 重定向不误切；heredoc 仍跳过。

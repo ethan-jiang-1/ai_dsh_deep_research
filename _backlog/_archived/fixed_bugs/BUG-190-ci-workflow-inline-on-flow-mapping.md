@@ -1,13 +1,13 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 # BUG-190：ci-workflow 不认 `on:` 的 inline flow mapping——合法 `on: { workflow_dispatch: {} }` 假红
 
-> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及 CI/with-key 合同，需用户放行
+> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：已修 — on: 支持 flow mapping / key 前空格；用户放行批 D
 >
-> 位置：[scripts/lib/ci-workflow.mjs](../../scripts/lib/ci-workflow.mjs) 的 `parseEvents`；
+> 位置：[scripts/lib/ci-workflow.mjs](../../../scripts/lib/ci-workflow.mjs) 的 `parseEvents`；
 > 消费 = model-workflow / smoke 执行面；前科 = BUG-182（`{}` empty map）。
 
 ## 症状
@@ -57,4 +57,22 @@ console.log(eventKeys(parseWorkflow("on: { workflow_dispatch: {} }\n")));
 
 ## 修复关联
 
-未修。触面 = CI/with-key 合同，按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`。
+未修。触面 = CI/with-key 合同，按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`scripts/lib/ci-workflow.mjs`、`tests/checks/ci-workflow.test.mjs`
+- **红证**：`node --test tests/checks/ci-workflow.test.mjs`
+  ```
+  not ok 8 - on: flow mapping / key 前空格（BUG-190）
+  # pass 5
+  # fail 3
+  ```
+- **绿证**：`node --test tests/checks/ci-workflow.test.mjs`
+  ```
+  # tests 8
+  # pass 8
+  # fail 0
+  ```
+- **反证/边界**：`on: { workflow_dispatch: {} }` / 带 inputs / 两事件键 / 块形态 `workflow_dispatch : {}`
+  都正确展开；`pull_request_target` 仍可见；单标量与 `[a,b]` 不回归。
