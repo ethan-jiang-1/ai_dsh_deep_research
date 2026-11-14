@@ -96,3 +96,26 @@ test('行锚：0–3 空格的状态行/heading 算；4 空格是 indented code 
   assert.deepEqual(statusLines('    > 状态：implemented\n'), [])
   assert.deepEqual(h2Titles('    ## 验证\n'), [])
 })
+
+// 负例留证 2026-11-14：BUG-185——mask 若 comment-first，围栏里的 `<!--` 会开注释并吞掉
+// closing fence 与后续 h2；红配方 = 退回 maskHtmlComments 前置 → 本例红。
+// 负例留证 2026-11-14：BUG-188——statusLines 若不剥标签装饰，`> **状态**：` 返回 []；
+// 红配方 = 删 statusValueOf 的 decorated 分支 → 装饰矩阵红。
+test('块顺序：围栏里的 <!-- 不开注释，后面的真实 h2 仍可见（BUG-185）', () => {
+  const text = ['```html', '<!--', '```', '', '## 实际跑过的验证'].join('\n')
+  assert.deepEqual(h2Titles(text).map((item) => item.title), ['实际跑过的验证'])
+  const closed = ['```html', '<!-- x -->', '```', '', '## 验证'].join('\n')
+  assert.deepEqual(h2Titles(closed).map((item) => item.title), ['验证'])
+})
+
+test('状态标签装饰：**状态** / __状态__ / 反引号 / 整体加粗都认（BUG-188）', () => {
+  for (const line of [
+    '> **状态**：implemented',
+    '> __状态__：implemented',
+    '> `状态`：implemented',
+    '> **状态：** implemented',
+  ]) {
+    assert.deepEqual(statusLines(`${line}\n`), [{ line: 1, value: 'implemented' }], line)
+  }
+  assert.deepEqual(statusLines('> 状态：PASS | FAIL\n'), [{ line: 1, value: 'PASS | FAIL' }])
+})

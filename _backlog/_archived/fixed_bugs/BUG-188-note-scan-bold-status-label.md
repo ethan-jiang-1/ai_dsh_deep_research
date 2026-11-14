@@ -1,14 +1,14 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 # BUG-188：note-scan 不认加粗状态标签 `> **状态**：implemented`——合法 Note 被判缺状态行
 
-> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及 notes 门禁，需用户放行
+> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：已修 — statusLines 剥状态标签装饰；用户放行批 D
 >
-> 位置：[scripts/lib/note-scan.mjs](../../scripts/lib/note-scan.mjs) 的 `statusLines`；
-> 消费 = [c-notes.mjs](../../scripts/verify/gates/c-notes.mjs) 的 note-format；前科 = BUG-183（缩进）。
+> 位置：[scripts/lib/note-scan.mjs](../../../scripts/lib/note-scan.mjs) 的 `statusLines`；
+> 消费 = [c-notes.mjs](../../../scripts/verify/gates/c-notes.mjs) 的 note-format；前科 = BUG-183（缩进）。
 
 ## 症状
 
@@ -48,4 +48,23 @@ console.log(JSON.stringify(statusLines("> **状态**：implemented\n"))); // []
 
 ## 修复关联
 
-未修。触面 = notes 门禁，按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`。
+未修。触面 = notes 门禁，按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`scripts/lib/note-scan.mjs`、`tests/checks/note-scan.test.mjs`
+- **红证**：`node --test tests/checks/note-scan.test.mjs`
+  ```
+  not ok 7 - 状态标签装饰：**状态** / __状态__ / 反引号 / 整体加粗都认（BUG-188）
+  # pass 13
+  # fail 3
+  ```
+- **绿证**：`node --test tests/checks/note-scan.test.mjs`
+  ```
+  # tests 7
+  # pass 7
+  # fail 0
+  ```
+- **反证/边界**：`> **状态**：` / `> __状态__：` / `` > `状态`： `` / `> **状态：**` 都产出裸值；
+  `> 状态：PASS | FAIL` 仍只是值（note-format 判模板）；无关行不认。
+  裸状态行仍只认 canonical 全角冒号——历史 `> 状态:…` 不被当成第二条状态（归档件 `note-format` 回归）。

@@ -1,14 +1,14 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P1
 opened: 2026-11-14
 ---
 # BUG-185：共享 Markdown mask 先剥 HTML 注释再剥 fence——围栏里的 `<!--` 会吞掉后面的真实内容
 
-> 严重级别：P1 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及 notes/交付判据，需用户放行
+> 严重级别：P1 ｜ 发现：2026-11-14 ｜ 状态：已修 — 单一状态机：fence 优先、注释只在 fence 外；用户放行批 D
 >
-> 位置：[scripts/lib/note-scan.mjs](../../scripts/lib/note-scan.mjs) 的 `maskFencedCode` 与
-> [review-readiness.ts](../../packages/deep-research-pack/src/lib/review-readiness.ts) 的
+> 位置：[scripts/lib/note-scan.mjs](../../../scripts/lib/note-scan.mjs) 的 `maskFencedCode` 与
+> [review-readiness.ts](../../../packages/deep-research-pack/src/lib/review-readiness.ts) 的
 > `maskReadinessLines`（两者都由 `tests/contracts/markdown-mask-conformance.spec.mjs` 钉同判）；
 > 前科 = BUG-175/179。
 
@@ -81,4 +81,23 @@ console.log(terminalReadiness(F + "html\n<!--\n" + F + "\n\nreadiness: PASS\n"))
 
 ## 修复关联
 
-未修。触面 = notes/交付判据，按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`。
+未修。触面 = notes/交付判据，按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`scripts/lib/note-scan.mjs`、`packages/deep-research-pack/src/lib/review-readiness.ts`、`tests/checks/note-scan.test.mjs`、`tests/contracts/verdict-conformance.spec.mjs`、`tests/contracts/markdown-mask-conformance.spec.mjs`
+- **红证**：`node --test tests/checks/note-scan.test.mjs tests/contracts/verdict-conformance.spec.mjs tests/contracts/markdown-mask-conformance.spec.mjs`
+  ```
+  not ok 6 - 块顺序：围栏里的 <!-- 不开注释，后面的真实 h2 仍可见（BUG-185）
+  not ok 16 - 不变量⑧：围栏里的 <!-- 是代码内容，不开注释
+  # pass 13
+  # fail 3
+  ```
+- **绿证**：`node --test tests/checks/note-scan.test.mjs tests/contracts/verdict-conformance.spec.mjs tests/contracts/markdown-mask-conformance.spec.mjs`
+  ```
+  # tests 16
+  # pass 16
+  # fail 0
+  ```
+- **反证/边界**：fence 内 `<!--` / 闭合 `<!-- x -->` 都不开注释，closing fence 与后续真实行保留；
+  fence 外未闭合注释仍 fail-closed 到 EOF；两份 mask 由 conformance 矩阵（含 3 个 fence/comment 组合）钉住。

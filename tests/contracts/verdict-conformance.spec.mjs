@@ -131,3 +131,12 @@ test('不变量⑦：容器 / indented code / HTML 注释 / 标签加粗+短括�
   assert.equal(terminalReadiness('**readiness（终局）**：FAIL\n'), 'FAIL', '括号整体加粗')
   assert.equal(terminalReadiness('**结论**：readiness: FAIL\n'), null, '散文标签仍不夺权')
 })
+
+// 负例留证 2026-11-14：BUG-185——mask 先剥 HTML 注释再剥 fence，围栏里的 `<!--` 会吞掉
+// closing fence 和后面的真实 readiness；红配方：maskReadinessLines 退回 comment-first → 本例 null。
+test('不变量⑧：围栏里的 <!-- 是代码内容，不开注释', () => {
+  const F = '```'
+  assert.equal(terminalReadiness(`${F}html\n<!--\n${F}\n\nreadiness: PASS\n`), 'PASS')
+  assert.equal(terminalReadiness(`${F}html\n<!-- x -->\n${F}\n\nreadiness: FAIL\n`), 'FAIL')
+  assert.equal(terminalReadiness('<!--\nreadiness: PASS\n-->\n\nreadiness: FAIL\n'), 'FAIL', '围栏外未闭合注释仍按剩余全文处理')
+})

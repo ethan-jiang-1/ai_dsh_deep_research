@@ -40,53 +40,55 @@ const containerRest = (line: string): string => {
   rest = rest.replace(/^ {0,3}(?:[-*+]|\d+[.)])\s+/, '')
   return rest
 }
-const maskHtmlComments = (lines: readonly string[]): string[] => {
-  let inComment = false
-  return lines.map((line) => {
-    let out = ''
-    let index = 0
-    while (index < line.length) {
-      if (inComment) {
-        const end = line.indexOf('-->', index)
-        if (end === -1) return out
-        inComment = false
-        index = end + 3
-        continue
-      }
-      const start = line.indexOf('<!--', index)
-      if (start === -1) { out += line.slice(index); break }
-      out += line.slice(index, start)
-      const end = line.indexOf('-->', start + 4)
-      if (end === -1) { inComment = true; break }
+const stripComments = (line: string, inComment: boolean): { readonly text: string; readonly inComment: boolean } => {
+  let out = ''
+  let comment = inComment
+  let index = 0
+  while (index < line.length) {
+    if (comment) {
+      const end = line.indexOf('-->', index)
+      if (end === -1) return { text: out, inComment: true }
+      comment = false
       index = end + 3
+      continue
     }
-    return out
-  })
+    const start = line.indexOf('<!--', index)
+    if (start === -1) { out += line.slice(index); break }
+    out += line.slice(index, start)
+    const end = line.indexOf('-->', start + 4)
+    if (end === -1) return { text: out, inComment: true }
+    index = end + 3
+  }
+  return { text: out, inComment: comment }
 }
 const isIndentedCode = (line: string): boolean => /^(?: {4}|\t)/.test(line.replace(/^(?: {0,3}> ?)+/, ''))
 
 export function maskReadinessLines(text: string): string[] {
   const lines = text.replace(/\r\n?/g, '\n').split('\n')
-  const commented = maskHtmlComments(lines)
   const out: string[] = []
   let fence: { readonly char: string; readonly length: number } | null = null
-  for (const line of commented) {
-    const content = containerRest(line)
-    const match = FENCE.exec(content)
-    const marker = match?.[2] ?? ''
-    if (fence === null) {
-      if (match !== null && marker !== '' && !(marker.charAt(0) === '`' && (match[3] ?? '').includes('`'))) {
-        fence = { char: marker.charAt(0), length: marker.length }
-        out.push('')
-        continue
+  let inComment = false
+  for (const line of lines) {
+    if (fence !== null) {
+      const match = FENCE.exec(containerRest(line))
+      const marker = match?.[2] ?? ''
+      if (match !== null && marker !== '' && marker.charAt(0) === fence.char && marker.length >= fence.length && (match[3] ?? '').trim() === '') {
+        fence = null
       }
-      out.push(line)
+      out.push('')
       continue
     }
-    if (match !== null && marker !== '' && marker.charAt(0) === fence.char && marker.length >= fence.length && (match[3] ?? '').trim() === '') {
-      fence = null
+    const stripped = stripComments(line, inComment)
+    inComment = stripped.inComment
+    if (stripped.text === '') { out.push(''); continue }
+    const match = FENCE.exec(containerRest(stripped.text))
+    const marker = match?.[2] ?? ''
+    if (match !== null && marker !== '' && !(marker.charAt(0) === '`' && (match[3] ?? '').includes('`'))) {
+      fence = { char: marker.charAt(0), length: marker.length }
+      out.push('')
+      continue
     }
-    out.push('')
+    out.push(stripped.text)
   }
   return out.map((line) => (line !== '' && isIndentedCode(line) ? '' : line))
 }

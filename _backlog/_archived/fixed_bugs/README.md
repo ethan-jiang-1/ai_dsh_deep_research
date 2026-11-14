@@ -191,3 +191,5 @@
 | [BUG-183](BUG-183-note-scan-indented-status-heading.md) | BUG-183：note-scan 不容忍 0–3 空格缩进——合法状态行/证据标题被判缺席 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
 | [BUG-186](BUG-186-fix-evidence-negation-and-exit-markers.md) | BUG-186：fix-evidence 的 fail/pass 判据是裸子串——「未失败」/「exit 1」都能当红绿证 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
 | [BUG-189](BUG-189-fix-evidence-directory-path-prefix.md) | BUG-189：fix-evidence 的「改动」接受目录路径——任意同目录 staged 文件即可满足配对 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-185](BUG-185-markdown-mask-html-before-fence.md) | BUG-185：共享 Markdown mask 先剥 HTML 注释再剥 fence——围栏里的 `<!--` 吞掉后面真实内容 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-188](BUG-188-note-scan-bold-status-label.md) | BUG-188：note-scan 不认加粗状态标签 `> **状态**：`——合法 Note 被判缺状态行 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
