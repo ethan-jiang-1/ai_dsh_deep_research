@@ -94,7 +94,8 @@ test('资产门：fixtures taxonomy 覆盖全部顶层组，每组 ≥1 真实 c
       if (ent.name === 'fixtures' || ent.name === '_tmp' || ent.name === 'node_modules') continue;
       const r = rel === '' ? ent.name : `${rel}/${ent.name}`;
       if (ent.isDirectory()) out.push(...walkTestFiles(join(dir, ent.name), r));
-      else if (ent.name.endsWith('.spec.mjs')) out.push(r);
+      // checks 的门禁/合同测试也是夹具的真实 consumer（如 guard-ledger）；只扫 spec 会误判孤儿。
+      else if (ent.name.endsWith('.spec.mjs') || ent.name.endsWith('.test.mjs')) out.push(r);
     }
     return out;
   };
