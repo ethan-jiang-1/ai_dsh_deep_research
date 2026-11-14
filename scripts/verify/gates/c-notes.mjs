@@ -6,6 +6,7 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROOT, fail, note, trackedFiles } from '../context.mjs';
+import { h2Titles, maskFencedCode, statusLines } from '../../lib/note-scan.mjs';
 
 export function runC() {
 // ── note-tree（notes/ 树形闭集与深度——DSH `agent-note-tree` 吸纳，2026-11-14）──
@@ -24,8 +25,14 @@ export function runC() {
   else {
     let notes = 0;
     for (const ent of readdirSync(notesDir, { withFileTypes: true })) {
+      // 隐藏目录不再被当噪声：它会让目录里的 Note 对格式/毕业扫描不可见（BUG-166/175）。
+      if (ent.isDirectory() && ent.name.startsWith('.')) {
+        fail(gate, `notes/${ent.name}/: 禁止隐藏目录（隐藏目录里的 Note 会被扫描静默跳过；点文件豁免只对非 .md 文件）`);
+        continue;
+      }
       if (!ent.isDirectory()) {
-        if (ent.name.startsWith('.')) continue;
+        // 点文件豁免只覆盖 .DS_Store 这类非 Note 文件；隐藏 .md 仍是 Note，必须走日期前缀合同（BUG-175）。
+        if (ent.name.startsWith('.') && !ent.name.endsWith('.md')) continue;
         if (ent.name === 'INDEX.md')
           fail(gate, 'notes/INDEX.md: 禁止集中索引（路径即清单；浏览生命周期目录或检索）');
         else if (ent.name.endsWith('.md') && !ROOT_FILES.has(ent.name))
@@ -41,7 +48,7 @@ export function runC() {
           fail(gate, `notes/${ent.name}/${child.name}/: 禁止嵌套目录（树深固定为 notes/<lifecycle>/<note>.md；分类层未引入，加层是显式结构调整）`);
           continue;
         }
-        if (child.name.startsWith('.')) continue;
+        if (child.name.startsWith('.') && !child.name.endsWith('.md')) continue;
         if (child.name === 'INDEX.md') {
           fail(gate, `notes/${ent.name}/INDEX.md: 禁止集中索引（路径即清单）`);
           continue;
@@ -82,18 +89,18 @@ export function runC() {
       fn(ent, readFileSync(join(dir, ent), 'utf8'));
     }
   };
-  // 状态行 = 头七行内的唯一一条 `> 状态：`；正文引用/代码围栏里的状态行不算状态（BUG-165）。
+  // 状态行 = 头七行内的唯一一条 `> 状态：`；fenced code 里的引用行不算状态（BUG-165/175）。
+  // 先 mask 围栏再取值：引文即使在头七行内也不得冒充第二条状态。
   const statusOf = (text) => {
     const lines = text.split('\n');
-    const head = lines.slice(0, 7);
-    const idx = head.flatMap((l, i) => (l.startsWith('> 状态：') ? [i] : []));
-    if (idx.length === 0) {
-      const late = lines.findIndex((l, i) => i >= 7 && l.startsWith('> 状态：'));
-      return { ok: false, why: late === -1 ? '缺状态行' : `状态行须在头七行（当前第 ${late + 1} 行）——头部是状态面` };
+    const found = statusLines(text);
+    if (found.length === 0) return { ok: false, why: '缺状态行' };
+    if (found.length > 1) {
+      return { ok: false, why: `状态行必须唯一（围栏外发现 ${found.length} 条，行 ${found.map((item) => item.line).join('/')}）——正文引文不算状态` };
     }
-    if (idx.length > 1) return { ok: false, why: `状态行必须唯一（头七行内发现 ${idx.length} 条，行 ${idx.map((i) => i + 1).join('/')}）——正文引文不算状态` };
-    const value = head[idx[0]].replace(/^> 状态：/, '').replaceAll('**', '').trim();
-    return { ok: true, value, line: idx[0], lines };
+    const item = found[0];
+    if (item.line > 7) return { ok: false, why: `状态行须在头七行（当前第 ${item.line} 行）——头部是状态面` };
+    return { ok: true, value: item.value, line: item.line - 1, lines };
   };
   const validDate = (y, m, d) => {
     const dt = new Date(Date.UTC(y, m - 1, d));
@@ -131,9 +138,9 @@ export function runC() {
   const EVIDENCE_WORD = '验证|检查|验收|实录|记录|实证|探针|全绿|复验|证据';
   const EVIDENCE_HEADING = new RegExp(EVIDENCE_WORD);
   const NEGATED_HEADING = new RegExp(`(未|无|待|免|非|不|尚未)(?:${EVIDENCE_WORD})`);
-  const hasPositiveEvidence = (text) => text.split('\n')
-    .filter((line) => /^##(?!#)\s*/.test(line))
-    .map((line) => line.replace(/^##(?!#)\s*/, ''))
+  // 证据节按 h2 判定；围栏里的 `## 验证` 是引文，不是本节证据（BUG-165/175）。
+  const hasPositiveEvidence = (text) => h2Titles(text)
+    .map((item) => item.title)
     .some((title) => EVIDENCE_HEADING.test(title) && !NEGATED_HEADING.test(title));
   each('implemented', (ent, text) => {
     const g = GRANDFATHER.test(text);
@@ -266,14 +273,11 @@ export function runC() {
     for (const f of files) {
       const text = readFileSync(join(dir, f), 'utf8');
       if (/<!--\s*grandfather:/.test(text)) continue;
-      const lines = text.split('\n');
-      let inFence = false;
+      // 围栏统一由 note-scan 剥（```/~~~、长度与未闭合都覆盖）；行号保持原文。
+      const lines = maskFencedCode(text);
       for (let i = 0; i < lines.length; i++) {
-        const raw = lines[i];
-        if (raw.trimStart().startsWith('```')) { inFence = !inFence; continue }
-        if (inFence) continue;
         // 剥离反引号内联代码（引文非正文）后再匹配；行号 = 原文真实行号。
-        const bare = raw.replace(/`[^`]*`/g, '');
+        const bare = lines[i].replace(/`[^`]*`/g, '');
         for (const [label, re] of markers) {
           if (re.test(bare)) {
             fail(gate, `notes/implemented/${f}:${i + 1} 命中${label}——计划体残留。毕业 = 正文改写（计划体 → 已交付事实体，删未来时态/待办清单；见 notes/AGENTS.md），只改路径不改正文 = 未来计划伪装成当前事实`);

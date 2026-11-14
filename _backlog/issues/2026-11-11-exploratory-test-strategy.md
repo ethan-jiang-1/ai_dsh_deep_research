@@ -17,7 +17,7 @@ opened: 2026-11-11
 > 「什么叫绿」，所以第六轮先探这套制度的新判据；产品面剩余空白 = X6 worker 行为、安装域默认语言、
 > hook/DOM、world-tree。
 >
-> **下一步**：按 §第六轮 goal 跑 keyless 批（Y1–Y8）；真模型批 Y9 单独授权。
+> **下一步**：批 A（160–167）与批 B（168–176）已修归档；Y9 真模型批仍单独授权，Z4/Z5 与第八轮待定。
 > 首个发现 = [BUG-160](../_archived/fixed_bugs/BUG-160-smoke-registry-mention-not-execution.md)；批 A（2026-11-14）
 > 再开 161–167；批 A 共 **8 张已修归档**（160–167）。
 
@@ -76,17 +76,19 @@ guides/67 + 技能，本卡保留账本与当前轮 charter。找真缺陷就开
 | Y8 | 账本/指针/文档计数一致；D54/guide 67 的交叉引用可解析 | 静态 | `pnpm verify`；grep 计数；`archived-note-pointer` | 5 min | 漂移 → owner |
 | Y9 | worker profile 真按薄工具面行动（历史 X6） | 探针（真模型） | 1 boot / ≤6 调用；subagent 默认 worker；无 team/goal/ask | 单独授权 | 单场不写稳定 |
 
-**批 B 发现（2026-11-14，7 卡；全部已开卡）**
+**批 B 发现（2026-11-14，9 卡；全部已修归档 168–176）**
 
 | 卡 | 面 | 一句话 | 状态 |
 |---|---|---|---|
-| [BUG-168](../bugs/BUG-168-legacy-present-payload-substring-false-positive.md) | Z1 旧场 present | 整段载荷找 slug：别的 bundle 的 present + 一句提及即 PASS | 等人拍板 |
-| [BUG-169](../bugs/BUG-169-readiness-fenced-code-verdict.md) | 产品边界（readiness） | 代码围栏里的判定当事：示例块可翻转 PASS/FAIL | 等人拍板（P1） |
-| [BUG-170](../bugs/BUG-170-readiness-bold-label-not-recognized.md) | 产品边界（readiness） | `**readiness**: FAIL` 被判无判定（合法 Markdown 假红） | 等人拍板 |
-| [BUG-171](../bugs/BUG-171-protocol-version-chain-only-previous-snapshot.md) | 产品边界（protocol） | v3 版本链只查 v2：`protocol/v1.json = {}` 仍 PASS | 等人拍板 |
-| [BUG-172](../bugs/BUG-172-smoke-registry-if-false-step-counted.md) | Y1/Y7 残余（smoke） | `if: false` 的 run 行仍算执行：跳过的 smoke 仍算 CI 资产 | 等人拍板 |
-| [BUG-173](../bugs/BUG-173-client-effect-bracket-access-escapes-return-gate.md) | 产品边界（client） | `scoped['effect']` 的无返回回调逃逸静态守卫 | 等人拍板 |
-| [BUG-174](../bugs/BUG-174-lifecycle-stale-dist-tarball.md) | Y4 残余（lifecycle） | `_dist` tarball 可陈旧：可能验证旧产物并 ALL PASS | 修复就绪 |
+| [BUG-168](../_archived/fixed_bugs/BUG-168-legacy-present-payload-substring-false-positive.md) | Z1 旧场 present | 整段载荷找 slug：别的 bundle 的 present + 一句提及即 PASS | 已修 |
+| [BUG-169](../_archived/fixed_bugs/BUG-169-readiness-fenced-code-verdict.md) | 产品边界（readiness） | 代码围栏里的判定当事：示例块可翻转 PASS/FAIL | 已修（P1） |
+| [BUG-170](../_archived/fixed_bugs/BUG-170-readiness-bold-label-not-recognized.md) | 产品边界（readiness） | `**readiness**: FAIL` 被判无判定（合法 Markdown 假红） | 已修 |
+| [BUG-171](../_archived/fixed_bugs/BUG-171-protocol-version-chain-only-previous-snapshot.md) | 产品边界（protocol） | v3 版本链只查 v2：`protocol/v1.json = {}` 仍 PASS | 已修 |
+| [BUG-172](../_archived/fixed_bugs/BUG-172-smoke-registry-if-false-step-counted.md) | Y1/Y7 残余（smoke） | `if: false` 的 run 行仍算执行：跳过的 smoke 仍算 CI 资产 | 已修 |
+| [BUG-176](../_archived/fixed_bugs/BUG-176-smoke-symlink-invisible-to-registry.md) | Y1/Y7 邻接（smoke 枚举） | symlink 在 `Dirent` 二分下不可见：链接资产永不登记/运行 | 已修 |
+| [BUG-173](../_archived/fixed_bugs/BUG-173-client-effect-bracket-access-escapes-return-gate.md) | 产品边界（client） | `scoped['effect']` 的无返回回调逃逸静态守卫 | 已修 |
+| [BUG-174](../_archived/fixed_bugs/BUG-174-lifecycle-stale-dist-tarball.md) | Y4 残余（lifecycle） | `_dist` tarball 可陈旧：可能验证旧产物并 ALL PASS | 已修 |
+| [BUG-175](../_archived/fixed_bugs/BUG-175-note-gates-fenced-code-and-hidden-md.md) | 类级残差（notes） | 围栏里的状态/证据夺权；隐藏 `.md` 绕过日期前缀 | 已修 |
 
 **执行记录（滚动）：**
 
@@ -148,7 +150,7 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 
 | ID | 假设（要杀死的命题） | 最低层 | oracle / 变异 | 预算 | 停止 |
 |---|---|---|---|---|---|
-| Z1 | 旧场 present 只认路径字段，不认整段载荷里的提及 | 纯函数 | `presentGate` 合成旧场 bundle；present 指向别的 bundle + note 提及本 slug | 10 min | **已探：PASS → [BUG-168](../bugs/BUG-168-legacy-present-payload-substring-false-positive.md)（P2 等人拍板）** |
+| Z1 | 旧场 present 只认路径字段，不认整段载荷里的提及 | 纯函数 | `presentGate` 合成旧场 bundle；present 指向别的 bundle + note 提及本 slug | 10 min | **已探：PASS → [BUG-168](../_archived/fixed_bugs/BUG-168-legacy-present-payload-substring-false-positive.md)（P2 等人拍板）** |
 | Z2 | 快照 roleFace 的子集/legacy/删 case 都 fail-loud | 纯函数 + 回放 | `replay-scene` 矩阵；`--only`；A/B 只读 | 10 min | **已跑：`replay-scene.spec` 15/15，无新发现** |
 | Z3 | client-load 只选 lead 根；seed/args 与 CI 同源 | 纯函数 + 静态 | `selectBoundSession` 矩阵；grep 标题回退；registry args vs `ci.yml` | 10 min | **已跑：`client-load-select.spec` 1/1；seed 双份 = 观察** |
 | Z4 | 方法库标点/尾部邻接不再造幽灵 | 纯函数 | `foldLibrary`/`upsertMethodEntry` 全角冒号/顿号/尾部矩阵 | 10 min | 绿 = 候选 |
@@ -158,7 +160,7 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 
 - **2026-11-14 Z1**：`presentInLogs` 旧场分支把 present 整段 JSON 做 slug 子串；`drt_other` 的
   present 加一句 `supersedes drt_legacy/main` → `presentGate` **PASS**（应 RED）→
-  [BUG-168](../bugs/BUG-168-legacy-present-payload-substring-false-positive.md)。
+  [BUG-168](../_archived/fixed_bugs/BUG-168-legacy-present-payload-substring-false-positive.md)。
 - **2026-11-14 Z2/Z3**：`replay-scene.spec` 15/15、`client-load-select.spec` 1/1，无新缺陷；Y3/Y5 关闭。
 - Z4（方法库标点/尾部）未跑；Z5（安装域/hook/world-tree）空白；批 B 7 张（168–174）已开卡，其中 168/169/171 是新增假绿/假红，174 是修复就绪。
 - **观察（不建卡）**：client-load 的 seed 参数在 `registry.json` 的 `args` 与 `ci.yml` 的 client-load 行各有一份字面量；当前同值，但没有契约保证同步（C3 双份事实）。owner = CI/registry；下一次改 fixture路径时先抽共享来源或加 args 对账。
@@ -320,12 +322,12 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 | 面 | 状态 | 判定 / 证据 |
 |---|---|---|
-| 旧场 present 证据（legacy 分支） | 已探 | [BUG-168](../bugs/BUG-168-legacy-present-payload-substring-false-positive.md)：整段载荷子串 → 别的 bundle 的 present + 一句提及即 PASS |
-| readiness 的 Markdown 结构面 | 已探 | [BUG-169](../bugs/BUG-169-readiness-fenced-code-verdict.md)（围栏翻转）、[BUG-170](../bugs/BUG-170-readiness-bold-label-not-recognized.md)（加粗标签假红） |
-| protocol 版本链（v3） | 已探 | [BUG-171](../bugs/BUG-171-protocol-version-chain-only-previous-snapshot.md)：只查 v2，v1 空快照仍 PASS |
-| CI step 跳过面（smoke） | 已探 | [BUG-172](../bugs/BUG-172-smoke-registry-if-false-step-counted.md)：`if: false` 的 run 行仍算执行 |
-| client-effect 方括号访问 | 已探 | [BUG-173](../bugs/BUG-173-client-effect-bracket-access-escapes-return-gate.md)：`scoped['effect']` 无返回回调逃逸 |
-| lifecycle 产物新鲜度 | 已探 | [BUG-174](../bugs/BUG-174-lifecycle-stale-dist-tarball.md)：`_dist` tarball 可陈旧，无自检 |
+| 旧场 present 证据（legacy 分支） | 已探 | [BUG-168](../_archived/fixed_bugs/BUG-168-legacy-present-payload-substring-false-positive.md)：整段载荷子串 → 别的 bundle 的 present + 一句提及即 PASS |
+| readiness 的 Markdown 结构面 | 已探 | [BUG-169](../_archived/fixed_bugs/BUG-169-readiness-fenced-code-verdict.md)（围栏翻转）、[BUG-170](../_archived/fixed_bugs/BUG-170-readiness-bold-label-not-recognized.md)（加粗标签假红） |
+| protocol 版本链（v3） | 已探 | [BUG-171](../_archived/fixed_bugs/BUG-171-protocol-version-chain-only-previous-snapshot.md)：只查 v2，v1 空快照仍 PASS |
+| CI step 跳过面（smoke） | 已修（验证） | [BUG-172](../_archived/fixed_bugs/BUG-172-smoke-registry-if-false-step-counted.md)：step 条件/continue-on-error 不再算执行；[BUG-176](../_archived/fixed_bugs/BUG-176-smoke-symlink-invisible-to-registry.md)：symlink 枚举红 |
+| client-effect 方括号访问 | 已探 | [BUG-173](../_archived/fixed_bugs/BUG-173-client-effect-bracket-access-escapes-return-gate.md)：`scoped['effect']` 无返回回调逃逸 |
+| lifecycle 产物新鲜度 | 已探 | [BUG-174](../_archived/fixed_bugs/BUG-174-lifecycle-stale-dist-tarball.md)：`_dist` tarball 可陈旧，无自检 |
 | Y3 roleFace | 已关闭（无发现） | `replay-scene.spec` 15/15；roleFace 子集/重复/外来/legacy 矩阵覆盖 |
 | Y5 client-load 绑定 | 已关闭（无发现） | `client-load-select.spec` 1/1；标题回退受禁；seed 双份 = 观察 |
 | 方法库标点/尾部邻接 | 未跑 | Z4 空白；下轮候选 |
@@ -333,11 +335,11 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 ## 已知与未决
 
 - **已知**：协议已毕业（guides/67 + 技能 + D54）；前五轮 081–159 全部归档；第 0–66 轮判定见
-  §覆盖地图与各轮收口；第六轮批 A（2026-11-14）新增 161–167 七张卡并全部修复归档（160–167，共 8 张）；第七轮批 B 7 张（168–174）已开卡；
+  §覆盖地图与各轮收口；第六轮批 A（2026-11-14）新增 161–167 七张卡并全部修复归档（160–167，共 8 张）；第七轮批 B 9 张（168–176）已修归档；
   `pnpm verify` 全绿、`pnpm test` spec 1342 / checks 108（2026-11-14 修复后复跑）；快照 5 角色 A/B 进 CI；
   全量 `test:e2e` 6/0/0、`test:entry` 3/0/0（2026-11-13 实跑记录）。
 - **未决**：Y3（roleFace）/Y5（client-load 绑定）/Y9（worker 行为）未跑；Y2/Y4 只有观察；
-  安装域默认语言、hook/DOM、world-tree 仍空白；真实 GitHub CI / model-smoke 未跑；批 A 8 张已修归档；第七轮批 B 7 张（168–174）已开卡；Z2/Z3 已关闭（Y3/Y5 无新缺陷），Z4/Z5 未跑。
+  安装域默认语言、hook/DOM、world-tree 仍空白；真实 GitHub CI / model-smoke 未跑；批 A 8 张已修归档；第七轮批 B 9 张（168–176）已修归档；Z2/Z3 已关闭（Y3/Y5 无新缺陷），Z4/Z5 未跑。
 - **不证**：单条 charter 的结论不外推；X6 单场不证稳定性；探索不证 L4 的语义质量。
 
 ## 覆盖与收益（2026-11-11 收口评估）

@@ -173,3 +173,12 @@
 | [BUG-165](BUG-165-note-format-quoted-status-and-negated-evidence.md) | BUG-165：note-format 全文正则把引用状态行/否定节当权威——合法 Note 误杀 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
 | [BUG-166](BUG-166-note-tree-hidden-directory-bypass.md) | BUG-166：note-tree 先跳过点目录再判嵌套——隐藏嵌套 Note 绕过树深/闭集 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
 | [BUG-167](BUG-167-method-heading-invisible-format-chars-duplicate.md) | BUG-167：方法标题不归一 Unicode 格式字符——ZWSP/软连字符造同名幽灵条目 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-172](BUG-172-smoke-registry-if-false-step-counted.md) | BUG-172：smoke-registry 把 `if: false` 的 run 行当执行——被跳过的 smoke 仍算 CI 资产 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-176](BUG-176-smoke-symlink-invisible-to-registry.md) | BUG-176：scripts/smoke 的 symlink 扫描不可见——链接资产永不登记、永不运行 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-175](BUG-175-note-gates-fenced-code-and-hidden-md.md) | BUG-175：notes 门禁不剥围栏 + 隐藏 `.md` 绕过日期前缀——示例当证据、引用当状态 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-169](BUG-169-readiness-fenced-code-verdict.md) | BUG-169：readiness 把代码围栏里的判定当事——示例块可翻转 PASS/FAIL | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-170](BUG-170-readiness-bold-label-not-recognized.md) | BUG-170：readiness 不认加粗标签 `**readiness**: FAIL`——合法 Markdown 被判无判定 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-173](BUG-173-client-effect-bracket-access-escapes-return-gate.md) | BUG-173：client-effect-return 只认点号——`scoped['effect']` 的无返回回调逃逸 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-168](BUG-168-legacy-present-payload-substring-false-positive.md) | BUG-168：旧场 present 按整段载荷找 slug——别的 bundle 的 present 含一句提及即放行 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-174](BUG-174-lifecycle-stale-dist-tarball.md) | BUG-174：lifecycle 不校验 `_dist` tarball 新鲜度——可能验证旧产物并 ALL PASS | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-171](BUG-171-protocol-version-chain-only-previous-snapshot.md) | BUG-171：protocol v3 的版本链只查 v2——`protocol/v1.json = {}` 仍 PASS | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |

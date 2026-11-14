@@ -1,16 +1,16 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 
 # BUG-168：旧场 present 证据按整段载荷找 slug——别的 bundle 的 present 含一句提及即放行
 
-> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及门②交付见证，需用户放行
+> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：已修 — 旧场 present 只读 files[].path + portableBundlePath；用户当轮指示继续推进
 >
-> 位置：[scripts/lib/node-gate-session-gates.mjs](../../scripts/lib/node-gate-session-gates.mjs) 的
+> 位置：[scripts/lib/node-gate-session-gates.mjs](../../../scripts/lib/node-gate-session-gates.mjs) 的
 > `presentInLogs`（旧场无 `run.md` 的兼容分支）；同族前科 = BUG-090（pack 绑定扫 content）、
-> [BUG-134](../_archived/fixed_bugs/BUG-134-gate-witness-bound-slugs-scans-content.md)（门侧绑定扫 content）。
+> [BUG-134](BUG-134-gate-witness-bound-slugs-scans-content.md)（门侧绑定扫 content）。
 
 ## 症状
 
@@ -88,5 +88,11 @@ present）——当前实现会正确 RED；差别只在是否有一句提及。
 
 ## 修复关联
 
-未修。触面 = 门②交付见证（验收合同），按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`；
+未修。触面 = 门②交付见证（验收合同），按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`；
 可与 BUG-090/134 的路径字段类修同批。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`presentInLogs` 解析 `present` 的 `arguments`，只取 `files[].path` / 单值 `path`/`file`，逐条走 `portableBundlePath` 并对 `drt_<slug>/final[/vN].md` 精确匹配；整段 JSON 子串与 `note` 提及不再算。`presentGate` 传入 `bundleDir`。
+- **证据**：`node --test tests/run/node-gate-witness.spec.mjs` → 32/32 PASS（新增旧场三例）。
+- **反证**：旧实现下「别的 bundle + note 提及」与「note-only」两例假绿；修后 RED；own-path 正例仍 PASS。

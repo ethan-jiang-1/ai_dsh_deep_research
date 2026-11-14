@@ -6,7 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| [2026-11-11-exploratory-test-strategy](2026-11-11-exploratory-test-strategy.md) | 推敲中 | 探索性验证账本 + 第六轮 charter；批 A 8 张已修归档；第七轮批 B 7 张（168–174）已开卡 |
+| [2026-11-11-exploratory-test-strategy](2026-11-11-exploratory-test-strategy.md) | 推敲中 | 探索性验证账本 + 第六轮 charter；批 A 8 张（160–167）与批 B 9 张（168–176）已修归档 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

@@ -635,3 +635,24 @@ test('BUG-153 协议快照内容：空对象/错版 RED，合法 v1 快照 PASS'
   const good = evaluateBundle({ ...base, snapshot: baseProtocol() })
   assert.equal(has(good, 'protocol-snapshot'), false, JSON.stringify(good.filter((f) => f.level === 'red')))
 })
+
+// 负例留证 2026-11-14：BUG-171——v3 只查 v2，protocol/v1.json={} 仍 PASS。红配方：把
+// checkAudit 的 chain 退回单值 `snapshot`（只看 v-1）→ 下方 bad/missing 两例变绿。
+test('BUG-171 协议版本链：v3 逐份校验 v1/v2；v1={} / 缺 v1 → 红', () => {
+  const protocol = baseProtocol({ version: 3 })
+  const base = { protocol, questionText: questionOf(protocol), planText: planOf(6, { version: 3 }), topicsText: topicsOf(6), auditText: '', hasSnapshot: true }
+  const bad = evaluateBundle({ ...base, snapshots: [
+    { version: 1, present: true, value: {} },
+    { version: 2, present: true, value: baseProtocol({ version: 2 }) },
+  ] })
+  assert.ok(has(bad, 'protocol-snapshot'), 'v1={} 必须红')
+  const missing = evaluateBundle({ ...base, snapshots: [
+    { version: 2, present: true, value: baseProtocol({ version: 2 }) },
+  ] })
+  assert.ok(has(missing, 'protocol-snapshot'), '缺 v1 必须红')
+  const good = evaluateBundle({ ...base, snapshots: [
+    { version: 1, present: true, value: baseProtocol() },
+    { version: 2, present: true, value: baseProtocol({ version: 2 }) },
+  ] })
+  assert.equal(has(good, 'protocol-snapshot'), false, JSON.stringify(good.filter((f) => f.level === 'red')))
+})

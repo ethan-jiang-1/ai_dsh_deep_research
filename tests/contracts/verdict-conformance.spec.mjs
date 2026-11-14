@@ -87,3 +87,32 @@ test('不变量⑤：生成矩阵——单一结构判定采用；结构 + 相�
     }
   }
 })
+
+// 负例留证 2026-11-14：BUG-169（fenced code 里的判定被当正文）、BUG-170（`**readiness**:`
+// 被判无判定）。红配方：删掉 maskFencedLines 的调用 → 前六例红；删掉 stripVerdictDecor 的
+// normalizeLabelDecor → 后七例红；两处都还原 → 绿。
+test('不变量⑥：fenced code 与标签加粗是结构，不是判定', () => {
+  // 围栏里的示例/旧轮引文不夺权（真值在围栏外）
+  assert.equal(terminalReadiness('readiness: PASS\n\n```\nreadiness: FAIL\n```\n'), 'PASS', '真 PASS + 后置围栏 FAIL')
+  assert.equal(terminalReadiness('readiness: FAIL\n\n```\nreadiness: PASS\n```\n'), 'FAIL', '真 FAIL + 后置围栏 PASS')
+  assert.equal(terminalReadiness('```md\nreadiness: FAIL\n```\n\nreadiness: PASS\n'), 'PASS', '前置围栏 FAIL + 真 PASS')
+  assert.equal(terminalReadiness('readiness: PASS\n\n~~~\nreadiness: FAIL\n~~~\n'), 'PASS', '~~~ 围栏同判')
+  assert.equal(terminalReadiness('readiness: PASS\n\n```\nreadiness: FAIL\n'), 'PASS', '未闭合围栏按剩余全文处理')
+  assert.equal(terminalReadiness('```\nreadiness: FAIL\n```\n'), null, '全文只有围栏示例 = 无判定')
+
+  // 标签本身的加粗/反引号是装饰（VERDICT_LINE 归一后再匹配）
+  for (const line of [
+    '**readiness**: FAIL',
+    '- **readiness**: FAIL',
+    '### **readiness**: FAIL',
+    '__readiness__: FAIL',
+    '`readiness`: FAIL',
+    '## **readiness**：FAIL',
+    '- __readiness__: **FAIL**',
+  ]) {
+    assert.equal(terminalReadiness(`${line}\n`), 'FAIL', line)
+  }
+  // 散文标签仍不夺权；空模板仍是空模板
+  assert.equal(terminalReadiness('**结论**：**readiness: FAIL**\n'), null, '散文标签不夺权')
+  assert.equal(terminalReadiness('**readiness**: PASS | FAIL\n'), null, '加粗标签的空模板仍是模板')
+})

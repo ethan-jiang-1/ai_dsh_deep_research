@@ -59,12 +59,13 @@
 
 | 失败类 | 卡 | 共同缺口 | 类级守卫方向 |
 |---|---|---|---|
-| C7/C8 | [168](../../_backlog/bugs/BUG-168-legacy-present-payload-substring-false-positive.md) | 旧场 present 按整段载荷找 slug（内容提及冒充路径） | present 路径字段 codec；所有分支只读 `files[].path` + 精确前缀 |
-| C7/C8 | [169](../../_backlog/bugs/BUG-169-readiness-fenced-code-verdict.md)、[170](../../_backlog/bugs/BUG-170-readiness-bold-label-not-recognized.md) | readiness 的 Markdown 结构建模不全：fenced block 与标签加粗 | 先块级剥离 fence；标签装饰归一；示例/引用不计 |
-| C7/C2 | [171](../../_backlog/bugs/BUG-171-protocol-version-chain-only-previous-snapshot.md) | 版本链只建模一跳（v3 不查 v1） | 按 1..v-1 枚举快照；逐份 schema/version/hash |
-| C7/C2 | [172](../../_backlog/bugs/BUG-172-smoke-registry-if-false-step-counted.md) | 「执行」不含 step 条件（`if: false` 仍算） | step-aware 执行面：跳过条件/continue-on-error 红 |
-| C7/C2 | [173](../../_backlog/bugs/BUG-173-client-effect-bracket-access-escapes-return-gate.md) | AST 形状窄于 API（方括号 effect 逃逸） | effect 调用的单一 predicate（Property/Element 同判） |
-| C9/C10 | [174](../../_backlog/bugs/BUG-174-lifecycle-stale-dist-tarball.md) | 产物新鲜度未建模（旧 tarball 冒充 HEAD） | 所有消费 `_dist` 的 entry 共用 artifact freshness 谓词 |
+| C7/C8 | [168](../../_backlog/_archived/fixed_bugs/BUG-168-legacy-present-payload-substring-false-positive.md) | 旧场 present 按整段载荷找 slug（内容提及冒充路径） | present 路径字段 codec；所有分支只读 `files[].path` + 精确前缀 |
+| C7/C8 | [169](../../_backlog/_archived/fixed_bugs/BUG-169-readiness-fenced-code-verdict.md)、[170](../../_backlog/_archived/fixed_bugs/BUG-170-readiness-bold-label-not-recognized.md) | readiness 的 Markdown 结构建模不全：fenced block 与标签加粗 | 先块级剥离 fence；标签装饰归一；示例/引用不计 |
+| C7/C2 | [171](../../_backlog/_archived/fixed_bugs/BUG-171-protocol-version-chain-only-previous-snapshot.md) | 版本链只建模一跳（v3 不查 v1） | 按 1..v-1 枚举快照；逐份 schema/version/hash |
+| C7/C2 | [172](../../_backlog/_archived/fixed_bugs/BUG-172-smoke-registry-if-false-step-counted.md)、[176](../../_backlog/_archived/fixed_bugs/BUG-176-smoke-symlink-invisible-to-registry.md) | 「执行」不含 step 条件（`if: false` 仍算）；盘上枚举看不见 symlink | step-aware 执行面 + lstat 分类；跳过条件/continue-on-error/symlink 红 |
+| C8/C2 | [175](../../_backlog/_archived/fixed_bugs/BUG-175-note-gates-fenced-code-and-hidden-md.md) | notes 门禁不剥 fenced code；隐藏 `.md` 绕过日期前缀 | 块级 mask（```/~~~、未闭合）+ 点文件只豁免非 `.md`；三读者共用 |
+| C7/C2 | [173](../../_backlog/_archived/fixed_bugs/BUG-173-client-effect-bracket-access-escapes-return-gate.md) | AST 形状窄于 API（方括号 effect 逃逸） | effect 调用的单一 predicate（Property/Element 同判） |
+| C9/C10 | [174](../../_backlog/_archived/fixed_bugs/BUG-174-lifecycle-stale-dist-tarball.md) | 产物新鲜度未建模（旧 tarball 冒充 HEAD） | 所有消费 `_dist` 的 entry 共用 artifact freshness 谓词 |
 
 **成本原则**：同一失败类能在纯函数层证，就不上进程/浏览器/模型；上贵层必须能说出「unit 为什么
 看不见」。**不是所有测试都要矩阵**：纯算术、封闭枚举 + 唯一写方、否决式不变量、受控常量路径、

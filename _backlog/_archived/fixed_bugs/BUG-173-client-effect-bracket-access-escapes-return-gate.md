@@ -1,15 +1,15 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 
 # BUG-173：client-effect-return 只认点号属性——`scoped['effect']` 的无返回回调逃逸
 
-> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及 client 注册契约，需用户放行
+> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：已修 — effect 调用 predicate 覆盖字面量方括号；用户当轮指示继续推进
 >
-> 位置：[tests/checks/client-effect-return.test.mjs](../../tests/checks/client-effect-return.test.mjs)；
-> 被测 = [packages/deep-research-pack/src/client/index.ts](../../packages/deep-research-pack/src/client/index.ts)。
+> 位置：[tests/checks/client-effect-return.test.mjs](../../../tests/checks/client-effect-return.test.mjs)；
+> 被测 = [packages/deep-research-pack/src/client/index.ts](../../../packages/deep-research-pack/src/client/index.ts)。
 
 ## 症状
 
@@ -65,4 +65,10 @@ AST 形状判据只建模了点号成员访问；`scoped['effect']` / `scoped["e
 
 ## 修复关联
 
-未修。触面 = client 注册契约/门禁自身，按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`。
+未修。触面 = client 注册契约/门禁自身，按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`tests/checks/client-effect-return.test.mjs` 抽 `isEffectCall`（PropertyAccess **或** 字面量 ElementAccess）与 `missingDisposers`；新增形状矩阵（单/双引号方括号、点号、other 不算）。
+- **证据**：`node --test tests/checks/client-effect-return.test.mjs` → 2/2 PASS。
+- **反证**：删掉 ElementAccess 分支 → 方括号红例漏检，矩阵测试 1 红；还原 → 绿。

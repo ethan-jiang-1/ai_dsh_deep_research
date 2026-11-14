@@ -15,10 +15,11 @@
 import { spawn, spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { dirname, join, resolve } from 'node:path'
+import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseMarketIndex } from '@deepseek-ai/dsh-plugin-market-index'
 import { scrubbedEnv } from '../lib/env.mjs'
+import { artifactFreshness } from '../lib/artifact-freshness.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
@@ -39,6 +40,25 @@ const tarball = process.env.PACK_TARBALL ?? join(ROOT, '_dist', `dsh-deep-resear
 const marketFile = join(ROOT, '_dist', 'market.json')
 if (!existsSync(tarball)) notRun(`tarball 缺席：${tarball}（先 node scripts/dist/export-dist.mjs）`)
 if (!existsSync(marketFile)) notRun('_dist/market.json 缺席（先 node scripts/dist/export-dist.mjs）')
+// 产物新鲜度（BUG-174）：旧 tarball 装上也能 ALL PASS，断言对象就不是当前 HEAD。CI 先
+// export-dist，天然新鲜；本地/显式 PACK_TARBALL 用 --allow-stale 覆盖并打印理由。
+const allowStale = process.argv.includes('--allow-stale') || process.env.LIFECYCLE_ALLOW_STALE === '1'
+if (allowStale) {
+  console.log('lifecycle.entry: --allow-stale——跳过 tarball 新鲜度检查（显式旧产物覆盖）')
+} else {
+  const freshness = artifactFreshness(tarball, [
+    join(PACK, 'src'),
+    join(PACK, 'lib'),
+    join(PACK, 'presets'),
+    join(PACK, 'content'),
+    join(PACK, 'package.json'),
+    join(PACK, 'cordis.patch.yml'),
+  ])
+  if (!freshness.fresh) {
+    const newest = freshness.newest === null ? '—' : relative(ROOT, freshness.newest.path)
+    notRun(`tarball 不是由当前 pack 生成：早于 ${newest}——先 node scripts/dist/export-dist.mjs（显式旧产物用 --allow-stale / LIFECYCLE_ALLOW_STALE=1）`)
+  }
+}
 
 // ① 市场索引：真校验器 + staged（npm 未发布，不得出现可安装条目）。
 const parsed = (() => {

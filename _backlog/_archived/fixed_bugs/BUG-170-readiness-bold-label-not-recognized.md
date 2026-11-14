@@ -1,14 +1,14 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 
 # BUG-170：readiness 不认加粗标签 `**readiness**: FAIL`——合法 Markdown 被判「无判定」
 
-> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及 readiness 判据，需用户放行
+> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：已修 — 标签加粗/反引号归为装饰；用户当轮指示继续推进
 >
-> 位置：[review-readiness.ts](../../packages/deep-research-pack/src/lib/review-readiness.ts) 的
+> 位置：[review-readiness.ts](../../../packages/deep-research-pack/src/lib/review-readiness.ts) 的
 > `stripVerdictDecor` / `VERDICT_LINE`；同族 = BUG-169（Markdown 结构未完整建模）。
 
 ## 症状
@@ -61,4 +61,10 @@ for (const s of ['**readiness**: FAIL', '- **readiness**: FAIL', '### **readines
 
 ## 修复关联
 
-未修。触面 = readiness 判据，按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`；可与 BUG-169 同批。
+未修。触面 = readiness 判据，按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`；可与 BUG-169 同批。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`stripVerdictDecor` 增加 `normalizeLabelDecor`：`**readiness**:` / `__readiness__:` / `` `readiness`: `` 在冒号前归为 `readiness:`；`VERDICT_LINE` 与空模板共用同一归一。
+- **证据**：`node --test tests/contracts/verdict-conformance.spec.mjs tests/run/review-readiness.spec.mjs` → 27/27 PASS；`pnpm typecheck` 通过。
+- **反证**：旧实现下 `**readiness**: FAIL` 等 7 形态读成 null；修后 FAIL；散文标签 `**结论**：...` 仍 null。

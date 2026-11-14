@@ -96,6 +96,60 @@ const unknownLifecycle = (dir) => {
   writeFileSync(join(d, '2099-01-01-probe.md'), '# probe\n');
 };
 
+/** 树形注入：隐藏生命周期子目录（BUG-175；旧实现先按点文件 continue 掉）。 */
+const hiddenNestedNote = (dir) => {
+  const d = join(dir, 'notes', 'implemented', '.probe-hidden');
+  mkdirSync(d, { recursive: true });
+  writeFileSync(join(d, '2099-01-01-probe.md'), '# probe\n\n> 状态：implemented\n\n## 决定\nx\n\n## 输掉的方案\ny\n\n## 验证\nz\n');
+};
+
+/** 树形注入：隐藏 .md 文件——点文件豁免不得把 Note 本身也豁免（BUG-175）。 */
+const hiddenNoteFile = (dir) => writeFileSync(join(dir, 'notes', 'implemented', '.hidden-note.md'),
+  '# probe\n\n> 状态：implemented\n\n## 决定\nx\n\n## 输掉的方案\ny\n\n## 验证\nz\n');
+
+/** 证据注入：所有真证据 h2 改中性，末尾补一个**围栏内**的 `## 验证`（围栏里的引文不算证据）。 */
+const fencedVerificationOnly = (dir) => {
+  const d = join(dir, 'notes', 'implemented');
+  const WORD = /^##(?!#)\s*[^\n]*(验证|检查|验收|实录|记录|实证|探针|全绿|复验|证据)/m;
+  const target = readdirSync(d).filter((f) => f.endsWith('.md') && f !== 'README.md').sort()
+    .find((f) => {
+      const t = readFileSync(join(d, f), 'utf8');
+      return !t.includes('<!-- grandfather:') && WORD.test(t);
+    });
+  if (!target) throw new Error('找不到可注入的 implemented Note（无含证据节的非 grandfather 篇）');
+  const p = join(d, target);
+  const out = readFileSync(p, 'utf8').split('\n')
+    .map((l) => (WORD.test(l) ? '## 附注' : l)).join('\n');
+  writeFileSync(p, `${out}\n\n\`\`\`markdown\n## 验证\n围栏里的示例不是本 Note 的证据节。\n\`\`\`\n`);
+};
+
+/** 状态行控制：头七行内插入**围栏里**的引用状态行——引用不是状态，门禁须 PASS（BUG-175）。 */
+const fencedQuotedStatus = (dir) => {
+  const d = join(dir, 'notes', 'implemented');
+  const p = join(d, firstNoteIn(d));
+  const lines = readFileSync(p, 'utf8').split('\n');
+  const at = lines.findIndex((l) => l.startsWith('> 状态：'));
+  if (at === -1) throw new Error('注入目标缺状态行');
+  lines.splice(at + 1, 0, '', '```markdown', '> 状态：proposed', '```');
+  writeFileSync(p, lines.join('\n'));
+};
+
+/** 证据控制：真实证据 h2 + 一条否定式 h2 并存——否定节不应否决整篇（BUG-165/175）。 */
+const negatedPlusRealEvidence = (dir) => {
+  const d = join(dir, 'notes', 'implemented');
+  const WORD = /^##(?!#)\s*[^\n]*(验证|检查|验收|实录|记录|实证|探针|全绿|复验|证据)/m;
+  const target = readdirSync(d).filter((f) => f.endsWith('.md') && f !== 'README.md').sort()
+    .find((f) => {
+      const t = readFileSync(join(d, f), 'utf8');
+      return !t.includes('<!-- grandfather:') && WORD.test(t);
+    });
+  if (!target) throw new Error('找不到可注入的 implemented Note（无含证据节的非 grandfather 篇）');
+  appendFileSync(join(d, target), '\n## 未验证的猜测\n\n这只是猜想，不构成证据。\n');
+};
+
+/** 点文件控制：`.DS_Store` 这类非 Note 点文件仍被忽略（不得误杀）。 */
+const dotStoreIgnored = (dir) => writeFileSync(join(dir, 'notes', 'implemented', '.DS_Store'), 'not a note\n');
+
 const negateVerificationSection = (dirRel) => (dir) => {
   const d = join(dir, dirRel);
   const WORD = /^##(?!#)\s*[^\n]*(验证|检查|验收|实录|记录|实证|探针|全绿|复验|证据)/m;
@@ -478,8 +532,11 @@ export const CASES = [
   { id: 'note-format-no-status', gate: 'note-format', mutate: stripFirstStatusLine(join('notes', 'implemented')) },
   { id: 'note-format-no-verification', gate: 'note-format', mutate: stripVerificationSection(join('notes', 'implemented')) },
   { id: 'note-format-negated-verification', gate: 'note-format', mutate: negateVerificationSection(join('notes', 'implemented')) },
+  { id: 'note-format-fenced-evidence', gate: 'note-format', mutate: fencedVerificationOnly },
   // note-tree（2026-11-14 树形闭集）：四形态各一条——嵌套目录 / 未知生命周期层 / 无日期文件名 / INDEX.md。
   { id: 'note-tree-nested-dir', gate: 'note-tree', mutate: nestedNote },
+  { id: 'note-tree-hidden-dir', gate: 'note-tree', mutate: hiddenNestedNote },
+  { id: 'note-tree-hidden-note-file', gate: 'note-tree', mutate: hiddenNoteFile },
   { id: 'note-tree-unknown-lifecycle', gate: 'note-tree', mutate: unknownLifecycle },
   { id: 'note-tree-nondated-filename', gate: 'note-tree', mutate: (dir) => writeFileSync(join(dir, 'notes', 'implemented', 'notadate.md'),
     '# probe\n\n> 状态：implemented\n\n## 决定\nx\n\n## 输掉的方案\ny\n\n## 验证\nz\n') },
@@ -831,4 +888,8 @@ export const CONTROLS = [
   } },
   { id: 'client-keys-ignore-node-modules-and-directory-symlink', gate: 'client-keys', mutate: addIgnoredClientPaths() },
   { id: 'cockpit-doc-registry-ignore-node-modules-and-directory-symlink', gate: 'cockpit-doc-registry', mutate: addIgnoredClientPaths() },
+  // BUG-175 正向控制：围栏里的引用状态行不夺权；真实证据 + 否定节并存仍合格；非 .md 点文件仍忽略。
+  { id: 'note-format-quoted-status', gate: 'note-format', mutate: fencedQuotedStatus },
+  { id: 'note-format-negated-plus-real', gate: 'note-format', mutate: negatedPlusRealEvidence },
+  { id: 'note-tree-dot-store', gate: 'note-tree', mutate: dotStoreIgnored },
 ];

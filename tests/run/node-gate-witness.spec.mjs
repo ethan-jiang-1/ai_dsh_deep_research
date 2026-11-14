@@ -431,3 +431,48 @@ test('BUG-156 版本配对：v2 在场而只 present v1 → RED（门②）', ()
     assert.equal(presentGate(b, v2, []).status, 'PASS')
   } finally { cleanup() }
 })
+
+// 负例留证 2026-11-14：BUG-168——旧场 present 把整段载荷做 slug 子串，别的 bundle 的 present
+// 只要 note 提一句就 PASS。红配方：把 presentInLogs 退回 `JSON.stringify(d).includes(slug)` →
+// 下方「别的 bundle + note 提及」例变 PASS。
+test('presentGate：旧场 present 只认 files[].path——别的 bundle + note 提及不夺权', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  try {
+    const b = writeBundle(dir, 'legacy')
+    rmSync(join(b, 'run.md'))
+    const sessions = writeSession(dir, [at({
+      type: 'tool/call',
+      data: { turn: 1, callId: 'p1', name: 'present', arguments: JSON.stringify({ files: [{ path: 'drt_other/final/v1.md' }], note: 'supersedes drt_legacy/main' }) },
+    })])
+    const r = presentGate(b, sessions, [])
+    assert.equal(r.status, 'RED', r.detail)
+  } finally { cleanup() }
+})
+
+test('presentGate：旧场 present 指向本 bundle 的 final/vN → PASS', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  try {
+    const b = writeBundle(dir, 'legacy')
+    rmSync(join(b, 'run.md'))
+    const sessions = writeSession(dir, [at({
+      type: 'tool/call',
+      data: { name: 'present', arguments: JSON.stringify({ files: [{ path: 'drt_legacy/final/v1.md' }] }) },
+    })])
+    const r = presentGate(b, sessions, [])
+    assert.equal(r.status, 'PASS', r.detail)
+    assert.match(r.detail, /指向本 bundle/)
+  } finally { cleanup() }
+})
+
+test('presentGate：旧场 note 里只有 slug、没有 files 路径 → RED', () => {
+  const { dir, cleanup } = makeRoot('witness')
+  try {
+    const b = writeBundle(dir, 'legacy')
+    rmSync(join(b, 'run.md'))
+    const sessions = writeSession(dir, [at({
+      type: 'tool/call',
+      data: { name: 'present', arguments: JSON.stringify({ note: 'see drt_legacy/final/v1.md' }) },
+    })])
+    assert.equal(presentGate(b, sessions, []).status, 'RED')
+  } finally { cleanup() }
+})

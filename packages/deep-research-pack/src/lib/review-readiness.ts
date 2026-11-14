@@ -29,6 +29,36 @@ type Readiness = 'PASS' | 'FAIL'
 const AMBIGUOUS = 'ambiguous' as const
 
 /**
+ * 把 fenced code 的行（含围栏行）替换为空行（BUG-169）：围栏里的示例/模板/旧轮引文不是正文。
+ * 行数与原文一致，候选命中行仍能指回真实行号；未闭合围栏按剩余全文围栏处理（fail-closed）。
+ * 支持 ``` / ~~~、语言后缀、最多 3 空格缩进；4 空格缩进是代码块，不是围栏。
+ */
+const FENCE = /^( {0,3})(`{3,}|~{3,})(.*)$/
+function maskFencedLines(text: string): string[] {
+  const lines = text.replace(/\r\n?/g, '\n').split('\n')
+  const out: string[] = []
+  let fence: { readonly char: string; readonly length: number } | null = null
+  for (const line of lines) {
+    const match = FENCE.exec(line)
+    const marker = match?.[2] ?? ''
+    if (fence === null) {
+      if (match !== null && marker !== '' && !(marker.charAt(0) === '`' && (match[3] ?? '').includes('`'))) {
+        fence = { char: marker.charAt(0), length: marker.length }
+        out.push('')
+        continue
+      }
+      out.push(line)
+      continue
+    }
+    if (match !== null && marker !== '' && marker.charAt(0) === fence.char && marker.length >= fence.length && (match[3] ?? '').trim() === '') {
+      fence = null
+    }
+    out.push('')
+  }
+  return out
+}
+
+/**
  * 剥去**行首 Markdown 装饰**，返回以 `readiness` 开头的剩余文本；未到判定词返回 null。
  *
  * 只认 Markdown 结构（空白/引用/列表符/标题/加粗/反引号），不认散文：`结论行：`、`本轮 `、`旧轮记录：`
@@ -37,7 +67,11 @@ const AMBIGUOUS = 'ambiguous' as const
  */
 function stripVerdictDecor(line: string): string | null {
   let s = line
+  // 标签本身的加粗/反引号也是装饰（BUG-170）：`**readiness**：FAIL` → `readiness：FAIL`。
+  const normalizeLabelDecor = (value: string): string => value
+    .replace(/^readiness(?:\*\*|__|`{1,2})(?=\s*[:：])/i, 'readiness')
   for (let i = 0; i < 12; i++) {
+    s = normalizeLabelDecor(s)
     if (/^readiness\b/i.test(s)) return s
     const next = s
       .replace(/^[\s>]+/, '')
@@ -47,6 +81,7 @@ function stripVerdictDecor(line: string): string | null {
     if (next === s) break
     s = next
   }
+  s = normalizeLabelDecor(s)
   return /^readiness\b/i.test(s) ? s : null
 }
 
@@ -115,7 +150,7 @@ export function verdictAnalysisOf(reviewText: string | null | undefined): Verdic
   const ROUND_HEADING = /^\s*(?:[>#\-+]\s*)*第\s*([0-9]+)\s*轮[^\n]{0,24}?readiness\s*[:：]\s*(?:\*\*|__|`{1,2})?\s*(PASS|FAIL)\b/i
   interface Candidate { readonly value: Readiness; readonly round: number | null; readonly index: number }
   const candidates: Candidate[] = []
-  const lines = reviewText.split('\n')
+  const lines = maskFencedLines(reviewText)
   let ambiguous = false
   for (const [index, line] of lines.entries()) {
     const rest = stripVerdictDecor(line)

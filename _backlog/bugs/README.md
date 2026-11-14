@@ -12,16 +12,20 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [BUG-168](BUG-168-legacy-present-payload-substring-false-positive.md) | 等人拍板 | P2 | 旧场 present 按整段载荷找 slug：别的 bundle 的 present 含一句提及即放行 |
-| [BUG-169](BUG-169-readiness-fenced-code-verdict.md) | 等人拍板 | P1 | readiness 把代码围栏里的判定当事：示例块可翻转 PASS/FAIL |
-| [BUG-170](BUG-170-readiness-bold-label-not-recognized.md) | 等人拍板 | P2 | readiness 不认加粗标签 `**readiness**: FAIL`：合法 Markdown 被判无判定 |
-| [BUG-171](BUG-171-protocol-version-chain-only-previous-snapshot.md) | 等人拍板 | P2 | protocol v3 的版本链只查 v2：`protocol/v1.json = {}` 仍 PASS |
-| [BUG-172](BUG-172-smoke-registry-if-false-step-counted.md) | 等人拍板 | P2 | smoke-registry 把 `if: false` 的 run 行当执行：跳过的 smoke 仍算 CI 资产 |
-| [BUG-173](BUG-173-client-effect-bracket-access-escapes-return-gate.md) | 等人拍板 | P2 | client-effect-return 只认点号：`scoped['effect']` 的无返回回调逃逸 |
-| [BUG-174](BUG-174-lifecycle-stale-dist-tarball.md) | 修复就绪 | P2 | lifecycle 不校验 `_dist` tarball 新鲜度：可能验证旧产物并 ALL PASS |
 
 ## 最近归档
 
+（2026-11-14 第七轮/类级残差修复闭环（9 张，168–176）：
+[168](../_archived/fixed_bugs/BUG-168-legacy-present-payload-substring-false-positive.md) 旧场 present 路径；
+[169](../_archived/fixed_bugs/BUG-169-readiness-fenced-code-verdict.md) readiness 围栏；
+[170](../_archived/fixed_bugs/BUG-170-readiness-bold-label-not-recognized.md) readiness 加粗标签；
+[171](../_archived/fixed_bugs/BUG-171-protocol-version-chain-only-previous-snapshot.md) protocol 版本链；
+[172](../_archived/fixed_bugs/BUG-172-smoke-registry-if-false-step-counted.md) CI step 跳过；
+[173](../_archived/fixed_bugs/BUG-173-client-effect-bracket-access-escapes-return-gate.md) client effect 方括号；
+[174](../_archived/fixed_bugs/BUG-174-lifecycle-stale-dist-tarball.md) tarball 新鲜度；
+[175](../_archived/fixed_bugs/BUG-175-note-gates-fenced-code-and-hidden-md.md) notes 围栏/隐藏 md；
+[176](../_archived/fixed_bugs/BUG-176-smoke-symlink-invisible-to-registry.md) smoke symlink。
+）
 （2026-11-14 第六轮批 A 修复闭环（8 张，160–167）：
 [160](../_archived/fixed_bugs/BUG-160-smoke-registry-mention-not-execution.md) CI 执行面；
 [161](../_archived/fixed_bugs/BUG-161-ci-jobs-job-id-regex-skips-underscore.md) CI job 清单；

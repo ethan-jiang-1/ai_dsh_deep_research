@@ -137,12 +137,21 @@ if (isMain(import.meta.url)) {
     process.exit(1)
   }
   const version = versionOf(protocol)
-  const snapshotPath = version !== null && version > 1 ? join(bundle, 'protocol', `v${version - 1}.json`) : null
-  const hasSnapshot = snapshotPath !== null && existsSync(snapshotPath)
-  let snapshot = null
-  if (hasSnapshot && snapshotPath !== null) {
-    try { snapshot = JSON.parse(readIf(snapshotPath)) } catch { snapshot = null }
+  // 版本链 = 1..version-1 的每一跳（BUG-171）；present/value 分开记，坏 JSON 与缺席同判红。
+  const snapshots = []
+  if (version !== null) {
+    for (let k = 1; k < version; k += 1) {
+      const path = join(bundle, 'protocol', `v${k}.json`)
+      const present = existsSync(path)
+      let value = null
+      if (present) {
+        try { value = JSON.parse(readIf(path)) } catch { value = null }
+      }
+      snapshots.push({ version: k, present, value })
+    }
   }
+  const hasSnapshot = snapshots.some((entry) => entry.present)
+  const snapshot = snapshots.length > 0 ? snapshots[snapshots.length - 1].value : null
   const findings = evaluateBundle({
     protocol,
     questionText: readIf(join(bundle, 'question.md')),
@@ -151,6 +160,7 @@ if (isMain(import.meta.url)) {
     auditText: readIf(join(bundle, 'protocol-audit.md')),
     hasSnapshot,
     snapshot,
+    snapshots,
     legacy: false,
   })
   const problems = findings.filter((item) => item.level === 'red')

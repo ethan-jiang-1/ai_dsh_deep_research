@@ -1,15 +1,15 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 
 # BUG-172：smoke-registry 把 `if: false` 的 run 行当执行——被跳过的 smoke 仍算 CI 资产
 
-> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及 CI/验收合同，需用户放行
+> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：已修 — 执行面改走 `scripts/lib/ci-workflow.mjs`（step if/continue-on-error + needs）；用户当轮指示继续推进
 >
-> 位置：[tests/checks/smoke-registry.test.mjs](../../tests/checks/smoke-registry.test.mjs) 的
-> `executedSmokeFiles`；前科 = [BUG-160](../_archived/fixed_bugs/BUG-160-smoke-registry-mention-not-execution.md)
+> 位置：[tests/checks/smoke-registry.test.mjs](../../../tests/checks/smoke-registry.test.mjs) 的
+> `executedSmokeFiles`；前科 = [BUG-160](BUG-160-smoke-registry-mention-not-execution.md)
 > （注释/echo 不算）。本条是它的**跳过面**残余：`if: false` / `continue-on-error`。
 
 ## 症状
@@ -56,5 +56,16 @@ success；聚合门只读 job 结果 → 全绿，而 smoke 从未运行。
 
 ## 修复关联
 
-未修。触面 = CI/验收合同，按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`；
+未修。触面 = CI/验收合同，按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`；
 可与 BUG-160 的同一解析器同批。
+
+## 修复落地（2026-11-14）
+
+- **改动**：新增 `scripts/lib/ci-workflow.mjs`（`on:`/`jobs:`/`needs`/step `if`/`continue-on-error`/
+  `run:` 块；heredoc 与 shell 注释跳过；无聚合 job = 空集）。`smoke-registry` 改用
+  `executedSmokeFiles(ci)`；`tests/checks/ci-workflow.test.mjs` 固定 if:false / continue-on-error /
+  not-in-needs / heredoc 四负控。
+- **证据**：`node --test tests/checks/ci-workflow.test.mjs ...` → 10/10 PASS；真实 ci.yml 执行面
+  = 9 条 tier-ci；`pnpm verify` / `pnpm test:checks` 绿。
+- **反证**：给 `run-accept` step 加 `if: false` → smoke-registry 红「没有可执行步骤」；
+  改 `continue-on-error: true` → 同红；还原 → 绿。

@@ -1,14 +1,14 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P1
 opened: 2026-11-14
 ---
 
 # BUG-169：readiness 终局把代码围栏里的判定当事——示例块可翻转 PASS/FAIL
 
-> 严重级别：P1 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及交付 readiness 判据，需用户放行
+> 严重级别：P1 ｜ 发现：2026-11-14 ｜ 状态：已修 — fenced code 在候选前 mask；用户当轮指示继续推进
 >
-> 位置：[review-readiness.ts](../../packages/deep-research-pack/src/lib/review-readiness.ts) 的
+> 位置：[review-readiness.ts](../../../packages/deep-research-pack/src/lib/review-readiness.ts) 的
 > `verdictAnalysisOf` / `lastInlineVerdict`；消费 = node-gate 门、状态页、client-load、run-dashboard。
 > 同族前科 = BUG-074/141/150（readiness 的行内引用/关键词窗口）。
 
@@ -61,5 +61,11 @@ console.log(terminalReadiness(b)); // PASS ← 反向：真实 FAIL 被围栏示
 
 ## 修复关联
 
-未修。触面 = 交付 readiness 判据，按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`；
+未修。触面 = 交付 readiness 判据，按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`；
 可与 BUG-150 的 range 仲裁同批。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`review-readiness.ts` 新增 `maskFencedLines`（```/~~~、语言后缀、3 空格缩进、未闭合 → 剩余全文围栏），`verdictAnalysisOf` 先 mask 再逐行判候选；围栏里的示例/旧轮引文不再夺权。
+- **证据**：`node --test tests/contracts/verdict-conformance.spec.mjs tests/run/review-readiness.spec.mjs` → 27/27 PASS；`pnpm typecheck` 通过。
+- **反证**：旧实现下新矩阵 1 红（`readiness: PASS` + 围栏 FAIL 读成 FAIL）；修后绿。

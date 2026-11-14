@@ -20,9 +20,33 @@ export const emptyOnUnreadableLogReader = (p) => {
   return readFileSync(p, 'utf8')
 }
 
-/** 扫会话根：本 bundle 的 slug 是否出现在任一 present 工具调用的载荷里。 */
-function presentInLogs(sessionsRoot, slug, readLog = emptyOnUnreadableLogReader) {
-  if (!sessionsRoot || !existsSync(sessionsRoot) || !slug) return false
+/**
+ * 旧场（无 run.md）的 present 见证：只认 present 的 `files[].path`（以及单个 `path`/`file`）
+ * 经 `portableBundlePath` 归一到本 bundle 的 `final.md` / `final/vN.md`。整段载荷子串不再算——
+ * 别的 bundle 的 present 在 note 里提一句本 slug 不能冒充路径（BUG-168）。
+ */
+function presentInLogs(sessionsRoot, slug, readLog = emptyOnUnreadableLogReader, bundleDir = null) {
+  if (!bundleDir || !sessionsRoot || !existsSync(sessionsRoot) || !slug) return false
+  const bare = String(slug).replace(/^drt_/, '')
+  const target = new RegExp(`^drt_${escapeRe(bare)}/final(?:/v\\d+)?\\.md$`)
+  // 真实语料里路径相对 workspace 根（`research-workspace/drt_<slug>/final.md`）或绝对路径；
+  // 原始路径按 `(?:^|/)drt_<slug>/final…` 精确匹配，bundle 内绝对路径另走 portableBundlePath。
+  const rawTarget = new RegExp(`(?:^|/)drt_${escapeRe(bare)}/final(?:/v\\d+)?\\.md$`)
+  const pathsOf = (args) => {
+    const out = []
+    if (Array.isArray(args.files)) {
+      for (const file of args.files) {
+        if (typeof file === 'string') out.push(file)
+        else if (file !== null && typeof file === 'object') {
+          for (const key of ['path', 'file', 'file_path', 'filePath']) {
+            if (typeof file[key] === 'string') out.push(file[key])
+          }
+        }
+      }
+    }
+    for (const key of ['path', 'file', 'file_path', 'filePath']) if (typeof args[key] === 'string') out.push(args[key])
+    return out
+  }
   const walk = (dir) => {
     for (const ent of readdirSync(dir, { withFileTypes: true })) {
       const p = join(dir, ent.name)
@@ -36,8 +60,14 @@ function presentInLogs(sessionsRoot, slug, readLog = emptyOnUnreadableLogReader)
         try { e = JSON.parse(line) } catch { continue }
         const d = e?.data ?? e
         if (d?.name !== 'present') continue
-        const payload = JSON.stringify(d ?? {}).replace(/\\\//g, '/')
-        if (payload.includes(slug)) return true
+        const args = argsObjectOf(d.arguments)
+        if (args === null) continue
+        for (const raw of pathsOf(args)) {
+          const normalized = String(raw).replace(/\\/g, '/')
+          if (!normalized.split('/').includes('..') && rawTarget.test(normalized)) return true
+          const label = portableBundlePath(raw, bundleDir)
+          if (label !== null && target.test(label)) return true
+        }
       }
     }
     return false
@@ -490,7 +520,7 @@ export function presentGate(bundleDir, sessionsRoot, hitl2Rows, readLog = emptyO
     }
     return { status: 'PASS', detail: `deliverables/presented 指向 ${label}（callId ${hit.callId ?? '—'}）——绑定会话 + 不可变快照` }
   }
-  const inLog = presentInLogs(sessionsRoot, slug, readLog)
+  const inLog = presentInLogs(sessionsRoot, slug, readLog, bundleDir)
   const relayRow = hitl2Rows.find((l) => /操作侧/.test(l))
   if (inLog) return { status: 'PASS', detail: '会话日志含指向本 bundle 的 present 声明（旧场无 run.md，按 epoch 豁免结构化事件）' }
   if (relayRow) return { status: 'PASS-RELAY', detail: '日志无 present 调用，但 §Decisions 拍板行显式标注操作侧补齐（旧场 epoch 豁免）——放行带注' }

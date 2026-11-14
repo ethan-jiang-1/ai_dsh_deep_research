@@ -54,6 +54,7 @@ export function evaluateBundle(input) {
     auditText = '',
     hasSnapshot = false,
     snapshot = null,
+    snapshots = null,
     legacy = false,
   } = input ?? {}
   if (legacy) return [warn('legacy-not-applicable', '契约日前 / 旧 bundle：不判 Protocol')]
@@ -67,7 +68,7 @@ export function evaluateBundle(input) {
     ...checkStrategy(protocol, planText, topicsText),
     ...checkProtocolStatus(protocol, questionText),
     ...checkPlanRef(protocol, planText),
-    ...checkAudit(protocol, auditText, hasSnapshot, snapshot),
+    ...checkAudit(protocol, auditText, hasSnapshot, snapshot, snapshots),
   ]
 }
 
@@ -277,28 +278,50 @@ function checkPlanRef(protocol, planText) {
   return []
 }
 
-function checkAudit(protocol, auditText, hasSnapshot, snapshot) {
+function checkAudit(protocol, auditText, hasSnapshot, snapshot, snapshots = null) {
   const out = []
   if (protocol.version > 1) {
-    if (!hasSnapshot) {
-      out.push(red('protocol-snapshot', `version=${protocol.version} 但缺 protocol/v${protocol.version - 1}.json 快照`))
-    } else if (!isObject(snapshot)) {
-      out.push(red('protocol-snapshot', `protocol/v${protocol.version - 1}.json 不可解析或不是对象`))
-    } else {
+    // 版本链 = 1..version-1 的**每一跳**（BUG-171；BUG-153 只补了 v-1 的内容校验）。
+    // 新调用方传 snapshots = [{ version, present, value }]；旧的单 snapshot 入参仍可用，
+    // 但只会覆盖 v-1——缺的早期版本按 missing 红，不静默跳过。
+    const chain = Array.isArray(snapshots) && snapshots.length > 0
+      ? snapshots.filter((entry) => Number.isInteger(entry?.version))
+      : [{ version: protocol.version - 1, present: hasSnapshot, value: snapshot }]
+    const seen = new Set()
+    for (const entry of chain) {
+      const k = entry.version
+      if (k < 1 || k >= protocol.version) continue
+      seen.add(k)
+      if (entry.present !== true) {
+        out.push(red('protocol-snapshot', `version=${protocol.version} 但缺 protocol/v${k}.json 快照`))
+        continue
+      }
+      const value = entry.value
+      if (!isObject(value)) {
+        out.push(red('protocol-snapshot', `protocol/v${k}.json 不可解析或不是对象`))
+        continue
+      }
       // 历史快照的 deviations 等字段可能按旧 schema 自由书写——不套当前严格校验；
       // 只校验「是完整协议文档」的最小结构（BUG-153：{} / 缺字段仍红）。
       const missing = ['schema', 'version', 'status', 'created', 'method', 'source_scope', 'effort', 'output', 'gates', 'deviations']
-        .filter((key) => snapshot[key] === undefined || snapshot[key] === null)
+        .filter((key) => value[key] === undefined || value[key] === null)
       if (missing.length > 0) {
-        out.push(red('protocol-snapshot', `protocol/v${protocol.version - 1}.json 缺协议字段：${missing.join(',')}`))
+        out.push(red('protocol-snapshot', `protocol/v${k}.json 缺协议字段：${missing.join(',')}`))
+        continue
       }
-      if (snapshot.version !== protocol.version - 1) {
-        out.push(red('protocol-snapshot', `快照 version=${String(snapshot.version)}，期望 ${protocol.version - 1}`))
+      if (value.version !== k) {
+        out.push(red('protocol-snapshot', `快照 version=${String(value.version)}，期望 ${k}`))
+        continue
       }
-      const priorHash = auditHashOf(auditText, protocol.version - 1)
-      if (priorHash !== null && priorHash !== designSha256(snapshot)) {
-        out.push(red('protocol-snapshot', `v${protocol.version - 1} 的 design_sha256 与快照内容不一致`))
+      const priorHash = auditHashOf(auditText, k)
+      if (priorHash === null) {
+        out.push(warn('audit-missing', `protocol-audit.md 无 v${k} 行——历史链指纹缺席（首次 --write 只补当前版本）`))
+      } else if (priorHash !== designSha256(value)) {
+        out.push(red('protocol-snapshot', `v${k} 的 design_sha256 与快照内容不一致`))
       }
+    }
+    for (let k = 1; k < protocol.version; k += 1) {
+      if (!seen.has(k)) out.push(red('protocol-snapshot', `version=${protocol.version} 但缺 protocol/v${k}.json 快照`))
     }
   }
   const hash = auditHashOf(auditText, protocol.version)

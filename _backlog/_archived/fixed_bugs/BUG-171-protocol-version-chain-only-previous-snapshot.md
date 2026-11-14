@@ -1,15 +1,15 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 
 # BUG-171：protocol v3 的版本链只查 v2——`protocol/v1.json = {}` 仍 PASS
 
-> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及交付审计/版本链，需用户放行
+> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：已修 — 版本链按 1..v-1 逐份校验；用户当轮指示继续推进
 >
-> 位置：[scripts/run-gates/protocol-audit.mjs](../../scripts/run-gates/protocol-audit.mjs)（只加载
-> `v{version-1}.json`）与 [protocol-audit-core.mjs](../../scripts/lib/protocol-audit-core.mjs) 的
+> 位置：[scripts/run-gates/protocol-audit.mjs](../../../scripts/run-gates/protocol-audit.mjs)（只加载
+> `v{version-1}.json`）与 [protocol-audit-core.mjs](../../../scripts/lib/protocol-audit-core.mjs) 的
 > `checkAudit`；前科 = BUG-153（快照只查在场）。
 
 ## 症状
@@ -82,4 +82,10 @@ D46 的「协议版本链」被实现成单跳链；v3 的第二跳（v1）没�
 
 ## 修复关联
 
-未修。触面 = 交付审计/版本链，按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`。
+未修。触面 = 交付审计/版本链，按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`protocol-audit-core.mjs` 的 `checkAudit` 接收 `snapshots = [{version,present,value}]`，按 1..version-1 逐份校验最小字段/`version===k`/`design_sha256`（缺失/坏 JSON/缺版本 = 红；历史指纹行缺席 = warning）；`protocol-audit.mjs` 读取全部 `protocol/v1..v{n-1}.json` 并传入。单 `snapshot` 旧入参仍兼容（只覆盖 v-1，早期版本按 missing 红）。
+- **证据**：`node --test tests/run/protocol-core.spec.mjs` → 34/34 PASS（新增 v3 三例）；真实 v2 bundle `drt_llm-inference-cost-routes` 跑 CLI → PASS（仅历史 v1 指纹 warning）。
+- **反证**：旧 core 下 v3 + `v1={}` / 缺 v1 两例假绿；修后红；合法 v1+v2 → 无 `protocol-snapshot` 红。

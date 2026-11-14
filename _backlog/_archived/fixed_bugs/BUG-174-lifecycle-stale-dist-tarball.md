@@ -1,15 +1,15 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 
 # BUG-174：lifecycle.entry 不校验 `_dist` tarball 新鲜度——可能验证旧产物并 ALL PASS
 
-> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：修复就绪 — P2 修理型；修法/判据如下
+> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：已修 — 共享 `artifact-freshness` 谓词 + lifecycle 入口 exit 2；用户当轮指示继续推进
 >
-> 位置：[scripts/smoke/lifecycle.entry.mjs](../../scripts/smoke/lifecycle.entry.mjs) 的 tarball 选择；
-> 前置生产者 = [scripts/dist/export-dist.mjs](../../scripts/dist/export-dist.mjs)；
+> 位置：[scripts/smoke/lifecycle.entry.mjs](../../../scripts/smoke/lifecycle.entry.mjs) 的 tarball 选择；
+> 前置生产者 = [scripts/dist/export-dist.mjs](../../../scripts/dist/export-dist.mjs)；
 > 对照资产 = `client-load.entry` 的构建新鲜度自检。
 
 ## 症状
@@ -58,3 +58,9 @@ ALL PASS（未跑 ≠ 通过，但这里是**旧产物冒充当前证据**）。
 
 未修。P2 修理型，授权范围 = `scripts/smoke/lifecycle.entry.mjs`（可抽 `scripts/lib/` 新鲜度谓词
 + 直测）；去向可记 `none — 机械修复`。
+
+## 修复落地（2026-11-14）
+
+- **改动**：新增 `scripts/lib/artifact-freshness.mjs`（产物 mtime vs 源/构建树最新 mtime；缺产物/无源 fail-closed；跳过 node_modules/.git/_tmp）；`lifecycle.entry` 在 tarball 存在后比较 `packages/deep-research-pack/{src,lib,presets,content,package.json,cordis.patch.yml}`，旧于任一 → exit 2 并给相对路径与 export-dist 指令；`--allow-stale` / `LIFECYCLE_ALLOW_STALE=1` 显式覆盖。
+- **证据**：`node --test tests/checks/artifact-freshness.test.mjs` → 2/2 PASS；本机真实 `_dist` tarball 探针 → `lifecycle.entry` **NOT-RUN / exit 2**（"早于 packages/deep-research-pack/src/lib/review-readiness.ts"）；`scripts/README.md` 登记 lib 与入口前置。
+- **反证**：把谓词的 mtime 比较反向 → 2/2 红；还原 → 绿。L2 全链未跑（`_dist` 需先 export-dist；CI deploy job 自带该前置）。

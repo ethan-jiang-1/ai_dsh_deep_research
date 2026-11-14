@@ -21,7 +21,7 @@
 |---|---|---|
 | preset.e2e.mjs | L1 真挂载：boot 页模块表行（client 半 served）、roster、逐角色建会话、skills 隔离 | keyless（`DSH_SMOKE_REAL=1` 起真 DSH，无模型） |
 | release.entry.mjs | L2 安装形状：pack → 干净 profile → plugin add → manifest/安装域 client 半断言 → 安装域冒烟 → 端口释放验证（进程卫生：超时预算 + 并发锁 + 退出确认） | keyless（`--install-only` 跳凭据） |
-| lifecycle.entry.mjs | L2 发布面/显示面：staged market.json 过 DSH 校验器（plugins 空 + staged 文案）→ 装 tarball → 本包行 dump（未装团队层时无 `ui-agent-team`）→ 真启动无降级 → 装起后 `content.apply` 真注册 `research_pack_root`/`research:manual`、`startup.apply` 真登记工作区、`defaults.apply` 真注册 context/命令，均返回 disposer → `readPluginMeta` 读出五个 specifier 的中英标题/图标 → remove 后 roster 回落 | keyless（真 dsh/pnpm + `_dist` 产物；缺前置 exit 2） |
+| lifecycle.entry.mjs | L2 发布面/显示面：staged market.json 过 DSH 校验器（plugins 空 + staged 文案）→ 装 tarball → 本包行 dump（未装团队层时无 `ui-agent-team`）→ 真启动无降级 → 装起后 `content.apply` 真注册 `research_pack_root`/`research:manual`、`startup.apply` 真登记工作区、`defaults.apply` 真注册 context/命令，均返回 disposer → `readPluginMeta` 读出五个 specifier 的中英标题/图标 → remove 后 roster 回落；tarball 旧于 pack 源/构建 = exit 2（BUG-174，`--allow-stale` 显式覆盖） | keyless（真 dsh/pnpm + `_dist` 产物；缺前置/产物陈旧 exit 2） |
 | install-shape.entry.mjs | L2 安装形状：原样执行手册的 CLI 装包分支（profile init → `dsh plugin --profile … add` pack+team → 真启动）；断言 roster 三状态、无 `did not activate`、首屏可达 | keyless（真 dsh/pnpm + 团队层 registry/缓存；缺前置 exit 2） |
 | product-boot.entry.mjs | L2 首启：纯 `dsh --profile deep-research` + Web + 浏览器；Host 注册工作区、blank Lead Session `cwd` = 工作区、首屏/目录按钮/Lead/composer | keyless（需浏览器 + 团队层；缺前置 exit 2） |
 | cold-start.entry.mjs | L2 冷启动：独立 `DSH_DEV_HOME` + profile + 端口 + state，`run-driver up --bootstrap` 到浏览器 GREEN；MCP 关闭 | keyless（须先 `source dev/env.sh`；vendor/依赖在位；团队层需 registry/缓存） |
@@ -171,6 +171,10 @@
 | lib/method-presets.mjs | library-fold.spec、method-presets.spec | research-brief skill「方法预设」表的唯一解析入口（表头/行列数/防空集 fail-loud）——内置名单不再各写一份手写副本 |
 | lib/keyless-imports.mjs | layering.test、test-surface.test、client-surface.test、test-lanes.test | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
 | lib/gates-cases.mjs | gates.e2e、verify-gates.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
+| lib/note-scan.mjs | c-notes、note-scan.test | notes 门禁的 Markdown 块级扫描：fenced code mask（```/~~~、未闭合）、围栏外 h2/状态行；围栏里的引用不夺权（BUG-175） |
+| lib/ci-workflow.mjs | ci-workflow.test、smoke-registry.test | GitHub Actions 执行面：`on:` 事件、`jobs:` 键、`needs`、step `if:false`/`continue-on-error`、run 块；smoke 只认真实 node 执行（BUG-172） |
+| lib/smoke-assets.mjs | smoke-assets.test、smoke-registry.test、smoke-oracle-surface.test、smoke-cost-budget.test | `scripts/smoke` 顶层分类（普通文件/目录/symlink/其它）与扁平合同违规项；symlink 不再静默消失（BUG-176） |
+| lib/artifact-freshness.mjs | artifact-freshness.test、lifecycle.entry | `_dist` 产物 mtime 不早于 pack 源/构建（src/lib/presets/content/package）；旧 tarball → exit 2（BUG-174） |
 | lib/run-accept-fixture.mjs | run-accept.e2e、run-accept-fixture.spec | claim 夹具的 review/readiness 文本（D51 同源：有声明 = declaration/PASS，缺声明 = missing/红） |
 | lib/node-gate-core.mjs | node-gate、node-gate-delivery.spec、node-gate-leads.spec、node-gate-session.spec | bundle 判据聚合；唯一导出 = `gateBundle`，领域门直接 import 各自模块 |
 | lib/node-gate-contracts.mjs | node-gate-contracts.spec、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、node-gate-delivery.spec、readiness-declaration.spec、review-readiness.spec、verdict-audit、verdict-audit-core | 交付日期合同、readiness 与 decisions 行解析 |
