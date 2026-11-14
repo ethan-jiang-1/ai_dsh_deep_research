@@ -64,11 +64,16 @@ export function maskFencedCode(text) {
   let fence = null
   let inComment = false
   let inIndented = false
-  let prevParagraph = false // 文档开头不是段落：indented code 可起始
+  let prevParagraph = false
+  let commentFromLineStart = false
+  const listIndents = []
+  const contentOf = (line) => (listIndents.length > 0 && line.startsWith(' '.repeat(listIndents[listIndents.length - 1].contentIndent))
+    ? line.slice(listIndents[listIndents.length - 1].contentIndent)
+    : containerRest(line)) // 文档开头不是段落：indented code 可起始
   for (const line of lines) {
     const blank = line.trim() === ''
     if (fence !== null) {
-      const match = FENCE.exec(containerRest(line))
+      const match = FENCE.exec(contentOf(line))
       if (match !== null && match[2][0] === fence.char && match[2].length >= fence.length && match[3].trim() === '') {
         fence = null
       }
@@ -76,18 +81,37 @@ export function maskFencedCode(text) {
       prevParagraph = false
       continue
     }
-    const content = containerRest(line)
+    // 列表内容缩进：`- item` 之后的 2/4 空格是内容缩进，先剥掉再判 fence/缩进代码。
+    const marker = /^(\s*)([-*+]|\d+[.)])(\s+)/.exec(line)
+    if (marker !== null) {
+      const markerIndent = marker[1].length
+      while (listIndents.length > 0 && listIndents[listIndents.length - 1].markerIndent >= markerIndent) listIndents.pop()
+      listIndents.push({ markerIndent, contentIndent: marker[0].length })
+    } else if (line.trim() !== '') {
+      while (listIndents.length > 0 && /^\s*/.exec(line)[0].length < listIndents[listIndents.length - 1].contentIndent) listIndents.pop()
+    }
+        const content = contentOf(line)
     // 行首注释 = CommonMark HTML block（type 2）：整行是 HTML，含 `-->` 后的同行文本。
-    if (inComment || /^ {0,3}<!--/.test(content)) {
-      const end = line.indexOf('-->')
-      if (end !== -1) inComment = false
-      else inComment = true
-      out.push('')
+    if (inComment) {
+      if (commentFromLineStart) {
+        if (line.includes('-->')) { inComment = false; commentFromLineStart = false }
+        out.push('')
+      } else {
+        const end = line.indexOf('-->')
+        if (end === -1) out.push('')
+        else { inComment = false; out.push(line.slice(end + 3)) }
+      }
+      prevParagraph = false
+      continue
+    }
+    if (/^ {0,3}<!--/.test(content)) {
+      if (line.includes('-->')) { out.push('') }
+      else { inComment = true; commentFromLineStart = true; out.push('') }
       prevParagraph = false
       continue
     }
     const stripped = stripComments(line, false)
-    if (stripped.inComment) inComment = true
+    if (stripped.inComment) { inComment = true; commentFromLineStart = false }
     // fence 只认行首（去容器前缀后的原始行）；注释后的同一行 ``` 不是 fence。
     const fenceMatch = FENCE.exec(content)
     if (fenceMatch !== null && !(fenceMatch[2][0] === '`' && fenceMatch[3].includes('`'))) {

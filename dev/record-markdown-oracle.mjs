@@ -53,6 +53,15 @@ const CORPUS = [
   ['list continuation indented', '- item\n    y\n'],
   ['after fence indented', '```\nx\n```\n    y\n'],
   ['blank then indented', 'a\n\n    y\n'],
+  ['lazy blockquote paragraph', '> a\nb\n'],
+  ['list 2-space continuation', '- a\n  b\n'],
+  ['fence in list 4-space', '- item\n    ```\n    x\n    ```\nafter'],
+  ['escaped backtick fence', '\\```\nx\n\\```\n'],
+  ['inline comment spanning lines', 'a <!-- x\ny --> b\n'],
+  ['setext heading', 'a\n---\nb\n'],
+  ['html block div', '<div>\nx\n</div>\n'],
+  ['fence info backtick', '``` a`b\nx\n```\n'],
+  ['nested list fence', '- a\n  - b\n    ```\n    x\n    ```\n'],
 ]
 
 /** 真实 CommonMark 视角：代码块整行剥掉；HTML 注释按字符区间剥掉（保留换行与行数）。 */

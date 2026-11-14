@@ -284,6 +284,96 @@
         "",
         ""
       ]
+    },
+    {
+      "name": "lazy blockquote paragraph",
+      "markdown": "> a\nb\n",
+      "masked": [
+        "> a",
+        "b",
+        ""
+      ]
+    },
+    {
+      "name": "list 2-space continuation",
+      "markdown": "- a\n  b\n",
+      "masked": [
+        "- a",
+        "  b",
+        ""
+      ]
+    },
+    {
+      "name": "fence in list 4-space",
+      "markdown": "- item\n    ```\n    x\n    ```\nafter",
+      "masked": [
+        "- item",
+        "",
+        "",
+        "",
+        "after"
+      ]
+    },
+    {
+      "name": "escaped backtick fence",
+      "markdown": "\\```\nx\n\\```\n",
+      "masked": [
+        "\\```",
+        "x",
+        "\\```",
+        ""
+      ]
+    },
+    {
+      "name": "inline comment spanning lines",
+      "markdown": "a <!-- x\ny --> b\n",
+      "masked": [
+        "a ",
+        " b",
+        ""
+      ]
+    },
+    {
+      "name": "setext heading",
+      "markdown": "a\n---\nb\n",
+      "masked": [
+        "a",
+        "---",
+        "b",
+        ""
+      ]
+    },
+    {
+      "name": "html block div",
+      "markdown": "<div>\nx\n</div>\n",
+      "masked": [
+        "<div>",
+        "x",
+        "</div>",
+        ""
+      ]
+    },
+    {
+      "name": "fence info backtick",
+      "markdown": "``` a`b\nx\n```\n",
+      "masked": [
+        "``` a`b",
+        "x",
+        "",
+        ""
+      ]
+    },
+    {
+      "name": "nested list fence",
+      "markdown": "- a\n  - b\n    ```\n    x\n    ```\n",
+      "masked": [
+        "- a",
+        "  - b",
+        "",
+        "",
+        "",
+        ""
+      ]
     }
   ]
 }

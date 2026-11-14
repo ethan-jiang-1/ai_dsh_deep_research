@@ -142,6 +142,46 @@
       "executed": [
         "a.e2e.mjs"
       ]
+    },
+    {
+      "name": "on flow sequence",
+      "workflow": "on: [workflow_dispatch]\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs: [keyless]\n    steps:\n      - run: echo ok\n",
+      "executed": [
+        "a.e2e.mjs"
+      ]
+    },
+    {
+      "name": "needs string",
+      "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs: keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "executed": [
+        "a.e2e.mjs"
+      ]
+    },
+    {
+      "name": "continue-on-error expression",
+      "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n        continue-on-error: true\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "executed": []
+    },
+    {
+      "name": "redirection",
+      "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs > /dev/null 2>&1\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "executed": [
+        "a.e2e.mjs"
+      ]
+    },
+    {
+      "name": "absolute path",
+      "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node \"$PWD/scripts/smoke/a.e2e.mjs\"\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "executed": [
+        "a.e2e.mjs"
+      ]
+    },
+    {
+      "name": "env assignment before node",
+      "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          PATH=\"$PATH\" node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "executed": [
+        "a.e2e.mjs"
+      ]
     }
   ]
 }

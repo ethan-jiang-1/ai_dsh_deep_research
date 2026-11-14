@@ -198,8 +198,12 @@ function smokeFilesOfSegment(segment) {
   if (words.length === 0) return []
   if (words[0].split('/').pop() !== 'node') return []
   return words.slice(1)
-    .map((word) => word.replace(/^\.\//, ''))
-    .filter((word) => /^scripts\/smoke\/[A-Za-z0-9._-]+\.mjs$/.test(word))
+    .map((word) => {
+      // 相对/绝对/$PWD 前缀都认；只取末尾的 scripts/smoke/<file>（oracle：真 bash 展开后执行）。
+      const match = /(?:^|\/)(scripts\/smoke\/[A-Za-z0-9._-]+\.mjs)$/.exec(word.replace(/^\.\//, ''))
+      return match === null ? null : match[1]
+    })
+    .filter((word) => word !== null)
     .map((word) => word.slice('scripts/smoke/'.length))
 }
 

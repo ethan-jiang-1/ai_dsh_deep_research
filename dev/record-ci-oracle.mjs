@@ -129,6 +129,12 @@ const CORPUS = [
   ['on block comment', RAW_JOBS('on:\n  # comment\n  workflow_dispatch:')],
   ['quoted expression', simple('node scripts/smoke/a.e2e.mjs', { stepIf: '${{ true }}' })],
   ['expression comment', RAW_JOBS('on:\n  workflow_dispatch: # c')],
+  ['on flow sequence', RAW_JOBS('on: [workflow_dispatch]')],
+  ['needs string', simple('node scripts/smoke/a.e2e.mjs', { needs: 'keyless' })],
+  ['continue-on-error expression', simple('node scripts/smoke/a.e2e.mjs', { stepCoe: true })],
+  ['redirection', simple('node scripts/smoke/a.e2e.mjs > /dev/null 2>&1')],
+  ['absolute path', simple('node "$PWD/scripts/smoke/a.e2e.mjs"')],
+  ['env assignment before node', simple('PATH="$PATH" node scripts/smoke/a.e2e.mjs')],
 ]
 
 const fixtures = CORPUS.map(([name, workflow]) => {
