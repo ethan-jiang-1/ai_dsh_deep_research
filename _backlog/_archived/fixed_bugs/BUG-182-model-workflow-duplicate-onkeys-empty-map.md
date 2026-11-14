@@ -1,15 +1,15 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 
 # BUG-182：model-workflow 又写了一份 onKeysOf——`workflow_dispatch: {}` 被判「没有事件」
 
-> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及 CI/with-key 合同，需用户放行
+> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：已修 — model-workflow 改用共享 eventKeys；on: 解析接受空映射；用户放行批 C
 >
-> 位置：[tests/checks/model-workflow.test.mjs](../../tests/checks/model-workflow.test.mjs) 的本地
-> `onKeysOf`；共享件 = [scripts/lib/ci-workflow.mjs](../../scripts/lib/ci-workflow.mjs) 的 `eventKeys`；
+> 位置：[tests/checks/model-workflow.test.mjs](../../../tests/checks/model-workflow.test.mjs) 的本地
+> `onKeysOf`；共享件 = [scripts/lib/ci-workflow.mjs](../../../scripts/lib/ci-workflow.mjs) 的 `eventKeys`；
 > 前科 = BUG-163（触发面白名单）。
 
 ## 症状
@@ -63,5 +63,24 @@ cp /tmp/ms.bak .github/workflows/model-smoke.yml
 
 ## 修复关联
 
-未修。触面 = CI/with-key 合同，按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`；
+未修。触面 = CI/with-key 合同，按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`；
 可与 BUG-163 的触发面同批。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`tests/checks/model-workflow.test.mjs`、`scripts/lib/ci-workflow.mjs`、`tests/checks/ci-workflow.test.mjs`
+- **红证**：`node --test tests/checks/model-workflow.test.mjs tests/checks/ci-workflow.test.mjs`
+  ```
+  not ok 5 - parseEvents：空映射 / 带 inputs 的 mapping / 行尾注释都算事件
+  # pass 6
+  # fail 2
+  ```
+- **绿证**：`node --test tests/checks/model-workflow.test.mjs tests/checks/ci-workflow.test.mjs`
+  ```
+  # tests 8
+  # pass 8
+  # fail 0
+  ```
+- **反证/边界**：`model-workflow` 删除本地 `onKeysOf`，改为 `eventKeys(parseWorkflow(TEXT))`；`parseEvents`
+  接受 `key:` / `key: {}` / `key: { inputs: … }` / `key: # comment`，`pull_request_target` 加入仍红；
+  真实 `model-smoke.yml` 仍只 `['workflow_dispatch']`。

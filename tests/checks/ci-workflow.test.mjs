@@ -79,3 +79,30 @@ test('真实 ci.yml：9 条 tier-ci smoke 都在执行面；注释/字符串不�
   }
   assert.ok(!executed.has('l4-lite.e2e.mjs'), '真模型档不在 keyless CI 执行面')
 })
+
+test('表达式归一：${{ }} 外壳不改变 always/true/false 语义（step / continue-on-error / job）', () => {
+  const wf = (ifExpr = '', coe = '') => `on:\n  workflow_dispatch:\njobs:\n  smoke:\n    steps:\n      - name: s\n${ifExpr === '' ? '' : `        if: ${ifExpr}\n`}${coe === '' ? '' : `        continue-on-error: ${coe}\n`}        run: node scripts/smoke/foo.e2e.mjs\n  all-checks-passed:\n    needs: [smoke]\n`
+  for (const expr of ['always()', '${{ always() }}', 'true', '${{ true }}']) {
+    assert.deepEqual([...executedSmokeFiles(wf(expr))], ['foo.e2e.mjs'], `step if ${expr}`)
+  }
+  for (const expr of ['false', '${{ false }}', 'failure()']) {
+    assert.deepEqual([...executedSmokeFiles(wf(expr))], [], `step if ${expr}`)
+  }
+  for (const coe of ['true', '${{ true }}']) assert.deepEqual([...executedSmokeFiles(wf('', coe))], [], `coe ${coe}`)
+  for (const coe of ['false', '${{ false }}']) assert.deepEqual([...executedSmokeFiles(wf('', coe))], ['foo.e2e.mjs'], `coe ${coe}`)
+
+  const job = (cond) => `jobs:\n  smoke:\n    if: ${cond}\n    steps:\n      - run: node scripts/smoke/foo.e2e.mjs\n  all-checks-passed:\n    needs: [smoke]\n`
+  for (const cond of ['always()', '${{ always() }}', 'true']) assert.deepEqual([...executedSmokeFiles(job(cond))], ['foo.e2e.mjs'], `job if ${cond}`)
+  for (const cond of ['false', '${{ false }}', 'failure()']) assert.deepEqual([...executedSmokeFiles(job(cond))], [], `job if ${cond}`)
+})
+
+test('parseEvents：空映射 / 带 inputs 的 mapping / 行尾注释都算事件', () => {
+  for (const text of [
+    'on:\n  workflow_dispatch: {}\n',
+    'on:\n  workflow_dispatch: { inputs: { x: { type: string } } }\n',
+    'on:\n  workflow_dispatch: # manual\n',
+  ]) {
+    assert.deepEqual(eventKeys(parseWorkflow(text)), ['workflow_dispatch'], text)
+  }
+  assert.deepEqual(eventKeys(parseWorkflow('on:\n  push:\n  workflow_dispatch: {}\n')), ['push', 'workflow_dispatch'])
+})

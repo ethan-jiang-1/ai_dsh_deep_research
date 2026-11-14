@@ -6,22 +6,13 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { eventKeys, parseWorkflow } from '../../scripts/lib/ci-workflow.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const TEXT = readFileSync(join(ROOT, '.github', 'workflows', 'model-smoke.yml'), 'utf8')
 
-/** `on:` 块的事件键集合（BUG-163：白名单必须恰为 workflow_dispatch）。 */
-function onKeysOf(text) {
-  const start = text.search(/^on:\s*$/m)
-  assert.notEqual(start, -1, 'model-smoke 缺 on: 块')
-  const rest = text.slice(start + 'on:'.length)
-  const end = rest.search(/^\S/m)
-  const block = end === -1 ? rest : rest.slice(0, end)
-  return [...block.matchAll(/^  ([A-Za-z_][A-Za-z0-9_-]*):\s*$/gm)].map((match) => match[1])
-}
-
 test('model-smoke：只 workflow_dispatch，不进 PR/push', () => {
-  assert.deepEqual(onKeysOf(TEXT), ['workflow_dispatch'], 'model-smoke 的 on: 只能有 workflow_dispatch（pull_request_target/workflow_run/release 等都不行）')
+  assert.deepEqual(eventKeys(parseWorkflow(TEXT)), ['workflow_dispatch'], 'model-smoke 的 on: 只能有 workflow_dispatch（pull_request_target/workflow_run/release 等都不行）')
   assert.doesNotMatch(TEXT, /^  pull_request:/m, 'model-smoke 不得进 PR')
   assert.doesNotMatch(TEXT, /^  push:/m, 'model-smoke 不得进 push')
 })
@@ -31,7 +22,7 @@ test('on: 键集合解析：额外事件（含 pull_request_target）必须可�
   workflow_dispatch:
   pull_request_target:
 `
-  assert.deepEqual(onKeysOf(synthetic), ['workflow_dispatch', 'pull_request_target'])
+  assert.deepEqual(eventKeys(parseWorkflow(synthetic)), ['workflow_dispatch', 'pull_request_target'])
 })
 
 test('model-smoke：用 secret 注入 key，跑 l4-lite.e2e（缺 key 由脚本 preflight exit 2 拦）', () => {

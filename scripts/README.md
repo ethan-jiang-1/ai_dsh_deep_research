@@ -173,7 +173,7 @@
 | lib/gates-cases.mjs | gates.e2e、verify-gates.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
 | lib/fix-evidence.mjs | fix-evidence.test、staged-change-pairing、backlog-liveness | bug 修复卡实证合同：改动/红证/绿证 + 可重放红证/测试资产；活跃 修复落地 与归档共用 |
 | lib/note-scan.mjs | c-notes、note-scan.test | notes 门禁的 Markdown 块级扫描：fenced code mask（```/~~~、未闭合）、围栏外 h2/状态行；围栏里的引用不夺权（BUG-175） |
-| lib/ci-workflow.mjs | ci-workflow.test、smoke-registry.test | GitHub Actions 执行面：`on:` 事件、`jobs:` 键、`needs`、step `if:false`/`continue-on-error`、run 块；smoke 只认真实 node 执行（BUG-172） |
+| lib/ci-workflow.mjs | ci-workflow.test、smoke-registry.test、model-workflow.test | GitHub Actions 执行面：`on:` 事件、`jobs:` 键、`needs`、step `if:false`/`continue-on-error`、run 块；smoke 只认真实 node 执行（BUG-172） |
 | lib/smoke-assets.mjs | smoke-assets.test、smoke-registry.test、smoke-oracle-surface.test、smoke-cost-budget.test | `scripts/smoke` 顶层分类（普通文件/目录/symlink/其它）与扁平合同违规项；symlink 不再静默消失（BUG-176） |
 | lib/artifact-freshness.mjs | artifact-freshness.test、lifecycle.entry、export-dist | `_dist` 产物 mtime 不早于 pack 源/构建（src/lib/presets/content/package）；旧 tarball → exit 2（BUG-174） |
 | lib/run-accept-fixture.mjs | run-accept.e2e、run-accept-fixture.spec | claim 夹具的 review/readiness 文本（D51 同源：有声明 = declaration/PASS，缺声明 = missing/红） |

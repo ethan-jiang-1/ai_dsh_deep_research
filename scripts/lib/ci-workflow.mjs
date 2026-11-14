@@ -11,11 +11,11 @@
 const indentOf = (line) => /^\s*/.exec(line)[0].length
 const isSkippable = (line) => line.trim() === '' || line.trimStart().startsWith('#')
 const unquote = (value) => String(value ?? '').trim().replace(/^["']|["']$/g, '').trim()
-const isFalseExpr = (expr) => {
-  const value = unquote(String(expr ?? '').replace(/^\$\{\{\s*|\s*\}\}$/g, '')).toLowerCase()
-  return value === 'false' || value === '!true' || value === '0'
-}
-const isTrue = (expr) => unquote(String(expr ?? '')).toLowerCase() === 'true'
+/** GitHub 表达式的值面：先剥 `${{ }}` 外壳与引号，再按语义闭集判定（BUG-177）。 */
+const normalizeExpression = (expr) => unquote(String(expr ?? '').replace(/^\$\{\{\s*|\s*\}\}$/g, '')).toLowerCase()
+const isFalseExpr = (expr) => ['false', '!true', '0'].includes(normalizeExpression(expr))
+const isTrue = (expr) => normalizeExpression(expr) === 'true'
+const isAlways = (expr) => ['true', 'always()', 'success()'].includes(normalizeExpression(expr))
 const parseList = (raw) => {
   const value = String(raw ?? '').trim()
   if (value.startsWith('[') && value.endsWith(']')) {
@@ -34,8 +34,12 @@ function parseEvents(lines) {
     const line = lines[i]
     if (isSkippable(line)) continue
     if (indentOf(line) === 0) break
-    const match = /^\s{2}([A-Za-z_][A-Za-z0-9_-]*):\s*(?:#.*)?$/.exec(line)
-    if (match !== null) events.push(match[1])
+    const match = /^\s{2}([A-Za-z_][A-Za-z0-9_-]*):\s*(.*)$/.exec(line)
+    if (match !== null) {
+      const value = (match[2] ?? '').trim()
+      // key: / key: {} / key: { inputs: … } / key: # comment 都是事件键（BUG-182）。
+      if (value === '' || value.startsWith('#') || value.startsWith('{')) events.push(match[1])
+    }
   }
   return events
 }
@@ -222,7 +226,7 @@ function parseJob(block, id) {
       }
     } else if (key === 'if') {
       job.disabled = isFalseExpr(raw)
-      job.conditional = !job.disabled
+      job.conditional = !job.disabled && normalizeExpression(raw) !== '' && !isAlways(raw)
     } else if (key === 'continue-on-error') {
       job.continueOnError = isTrue(raw)
     } else if (key === 'steps') {
@@ -284,8 +288,8 @@ export function executedSmokeFiles(text) {
     for (const step of job.steps) {
       if (step.continueOnError) continue
       const condition = step.if.trim()
-      // 空 = 默认执行；always()/success() 视为必然执行；false/failure()/其它条件 = 不保证，跳过。
-      if (condition !== '' && !/^(?:always\(\)|success\(\))$/i.test(condition)) continue
+      // 空 = 默认执行；always()/success()/true 及其 `${{ }}` 外壳视为必然执行；其余不保证（BUG-177）。
+      if (condition !== '' && !isAlways(condition)) continue
       if (typeof step.run !== 'string') continue
       for (const segment of shellSegments(step.run)) {
         for (const file of smokeFilesOfSegment(segment)) found.add(file)

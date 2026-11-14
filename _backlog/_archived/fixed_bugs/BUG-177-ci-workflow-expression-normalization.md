@@ -1,14 +1,14 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 
 # BUG-177：ci-workflow 的 GitHub 表达式归一不完备——`${{ always() }}` 假红、`${{ true }}` 的 continue-on-error 假绿
 
-> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及 CI 执行面合同，需用户放行
+> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：已修 — 表达式先剥 `${{ }}` 再按语义闭集判定；用户放行批 C
 >
-> 位置：[scripts/lib/ci-workflow.mjs](../../scripts/lib/ci-workflow.mjs)（`isTrue`、step `if` 判定、
+> 位置：[scripts/lib/ci-workflow.mjs](../../../scripts/lib/ci-workflow.mjs)（`isTrue`、step `if` 判定、
 > `parseJob` 的 `conditional`）；消费 = `smoke-registry` 等；前科 = BUG-172（step 跳过）。
 
 ## 症状
@@ -78,5 +78,25 @@ job 级 `if: always()` 同样返回 `[]`（假红）。
 
 ## 修复关联
 
-未修。触面 = CI/验收合同，按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`；可与 BUG-172 的
+未修。触面 = CI/验收合同，按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`；可与 BUG-172 的
 执行面同批。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`scripts/lib/ci-workflow.mjs`、`tests/checks/ci-workflow.test.mjs`
+- **红证**：`node --test tests/checks/ci-workflow.test.mjs`
+  ```
+  not ok 4 - 表达式归一：${{ }} 外壳不改变 always/true/false 语义（step / continue-on-error / job）
+  not ok 5 - parseEvents：空映射 / 带 inputs 的 mapping / 行尾注释都算事件
+  # pass 6
+  # fail 2
+  ```
+- **绿证**：`node --test tests/checks/ci-workflow.test.mjs`
+  ```
+  # tests 8
+  # pass 8
+  # fail 0
+  ```
+- **反证/边界**：`normalizeExpression` 同时服务 `isTrue`/`isFalseExpr`/`isAlways`；step 与 job
+  共用 `isAlways`，`continue-on-error: ${{ true }}` 不再算执行；`always()`/`${{ always() }}`/`true`/`${{ true }}`
+  均执行，`false`/`${{ false }}`/`failure()` 均跳过；真实 `ci.yml` 9 条 tier-ci 不回归。

@@ -184,3 +184,5 @@
 | [BUG-171](BUG-171-protocol-version-chain-only-previous-snapshot.md) | BUG-171：protocol v3 的版本链只查 v2——`protocol/v1.json = {}` 仍 PASS | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
 | [BUG-180](BUG-180-method-heading-duplicate-unknown-segments-dropped.md) | BUG-180：方法标题把未知/重复段当合法——编辑一次静默丢段 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
 | [BUG-181](BUG-181-artifact-freshness-deletion-blind.md) | BUG-181：artifact 新鲜度只看最新 mtime——删源文件后旧 tarball 仍 fresh | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-177](BUG-177-ci-workflow-expression-normalization.md) | BUG-177：ci-workflow 表达式归一不全——`${{ always() }}` 假红、`${{ true }}` continue-on-error 假绿 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-182](BUG-182-model-workflow-duplicate-onkeys-empty-map.md) | BUG-182：model-workflow 又写一份 onKeysOf——`workflow_dispatch: {}` 被判无事件 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
