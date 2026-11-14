@@ -56,3 +56,4 @@
   - `source dev/env.sh && node scripts/smoke/gates.e2e.mjs` 通过（含新增 `conformance.spec.mjs` 缺留证、`release-vocab` 正反例与 `ci-oracle` 对照）；
   - 重建开发 profile 后实跑 `source dev/env.sh && node scripts/smoke/snapshot-replay.entry.mjs --layers a,b` 五角色（`lead` / `scout` / `analyst` / `critic` / `method-editor`）全部 PASS。
 - **显式未覆盖 / 后续迁移面**：`asset-ledger` 中识别出的单模块内联样例测试（`self-referential`）保留为显式可见的组合迁移面，按 [_backlog/triggers.md](../../_backlog/triggers.md) 在对应失败类复发或周期复核时迁移；真模型档 `l4-lite` 未随本轮纯验证层改造触发。
+- **post-tag 归档（2026-11-15）**：D55 返工卡 `_backlog/_archived/settled_issues/2026-11-14-verification-oracle-hardening.md` 与本 Note 同变更归档（post-tag archiving batch）；卡状态已结。

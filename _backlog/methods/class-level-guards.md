@@ -787,7 +787,7 @@ test('负控：带未识别后缀的标题 → upsert 抛错，而不是新建',
 | 状态交错（真子进程） | 百毫秒–秒 | 不适合放矩阵 | 独立 smoke（`scripts/smoke/`，分级申报） |
 | 假绿 oracle（盘侧真值） | 毫秒 | < 100ms | `pnpm test` |
 
-口径依据：本仓 `pnpm test` 全量 1,407 例 4.4s（`_backlog/research/test-asset-fence/2026-11-13-test-asset-fence.md:14`，
+口径依据：本仓 `pnpm test` 全量 1,407 例 4.4s（`_backlog/_archived/research/test-asset-fence/2026-11-13-test-asset-fence.md:14`，
 **本文未复测**）→ 单例均值 ≈ 3ms；纯函数矩阵单格远低于此，所以「64 格 ≈ 一条普通测试」。
 **估算的用法**：写完后给该文件加 `--test-name-pattern` 定时一次，>1s 就砍维。
 
@@ -830,4 +830,4 @@ test('负控：带未识别后缀的标题 → upsert 抛错，而不是新建',
   八个样本测试文件、`scripts/lib/replay-request.mjs`、`scripts/lib/run-lock.mjs`、
   `packages/deep-research-pack/src/lib/{review-readiness,library-fold,method-library-write}.ts`、
   `_backlog/_archived/fixed_bugs/BUG-{081,085,093,123,124,127,128,138,074,141,150}-*.md`、
-  `_backlog/_archived/settled_issues/2026-11-13-test-asset-fence.md`、`_backlog/research/test-asset-fence/2026-11-13-test-asset-fence.md`
+  `_backlog/_archived/settled_issues/2026-11-13-test-asset-fence.md`、`_backlog/_archived/research/test-asset-fence/2026-11-13-test-asset-fence.md`

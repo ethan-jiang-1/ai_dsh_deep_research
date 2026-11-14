@@ -2,7 +2,7 @@
 
 > 状态：implemented
 > 关联：程序卡 = [2026-11-13 测试资产围栏](../../_backlog/_archived/settled_issues/2026-11-13-test-asset-fence.md)；
-> 研究 = [test-asset-fence](../../_backlog/research/test-asset-fence/README.md)；
+> 研究 = [test-asset-fence](../../_backlog/_archived/research/test-asset-fence/README.md)；
 > 制度 = [D54](2026-11-13-test-strategy-operating-model.md) / [guides/67](../../docs/guides/67-test-strategy.md)
 
 ## 决定

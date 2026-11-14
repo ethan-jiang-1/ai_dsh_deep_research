@@ -98,7 +98,7 @@ opened: 2026-11-14
 - **不重开已归档卡**：不移动、不改写 `_backlog/_archived/settled_issues/2026-11-14-verification-oracle.md` 与 `_backlog/_archived/fixed_bugs/BUG-*.md` 的历史结论正文（仅在必要处被新卡引用）。
 - **不给 `packages/deep-research-pack` 增加任何运行时第三方依赖**：`mdast-util-from-markdown` 与 `yaml` 仅限根 workspace `devDependencies`（供 `scripts/` 与 `tests/` 开发验证消费）。
 - **不在 `pnpm test` 或 `pnpm verify` 中引入网络请求、真模型调用或长时间浏览器冷启动**：所有新增 L0/keyless 守卫保持秒级确定性执行；真进程 `bash -eo pipefail` 对照归入 `e2e` 车道（`gates.e2e.mjs`）。
-- **不顺带删除或降级现有慢层 `scripts/smoke/*.entry.mjs` 资产**：慢资产去留由独立研究题 [test-asset-fence](../../research/test-asset-fence/README.md) 承接，本卡只负责把台账字段做实、把 keyless 守卫做真。
+- **不顺带删除或降级现有慢层 `scripts/smoke/*.entry.mjs` 资产**：慢资产去留由独立研究题 [test-asset-fence](../../_archived/research/test-asset-fence/README.md) 承接，本卡只负责把台账字段做实、把 keyless 守卫做真。
 
 ---
 

@@ -17,7 +17,7 @@ intent: 对照 DSH 原生 notes 制度（参考卷八篇 + vendor 一手定义�
 
 ## 0. 结论
 
-> 落地载体（2026-11-14 补记）：P0 四项已交付，[已结卡](../../_archived/settled_issues/2026-11-14-notes-discipline-hardening.md)；
+> 落地载体（2026-11-14 补记）：P0 四项已交付，[已结卡](../../settled_issues/2026-11-14-notes-discipline-hardening.md)；
 > P1（封印 + 归档出链排除）待该卡关闭后另卡。本页结论不变。
 
 1. **我们借到的是骨架，漏掉的是把守。** 生命周期四层、取代检查、毕业改写、归档层、
@@ -419,12 +419,12 @@ owns or constrains anything."
 
 | 判定 | 实例 | 规模 | 理由（本仓证据） |
 |---|---|---:|---|
-| 留活跃 | [run-bundle-charter](../../../notes/implemented/2026-10-23-run-bundle-charter.md) | 425 行 | 有活测试解析其 §未决；**规模大不是留的理由** |
-| 留活跃 | [project-navigability-phase1](../../../notes/implemented/2026-10-05-project-navigability-phase1.md) | 59 行 | evaluation 红证出处；**规模小不是删的理由** |
-| 留活跃 | [release-versioning](../../../notes/implemented/2026-10-25-release-versioning.md) | 46 行 | docs/guides 以它为 owner，删了会断链 |
-| 归档 | [notes-consistency-sweep](../../../notes/archived/2026-10-30-notes-consistency-sweep.md) | 110 行 | 规则已吸收进 notes/README + notes/AGENTS；历史价值保留 |
-| 归档 | [vendor-pin-bump-020rc2](../../../notes/archived/2026-09-30-vendor-pin-bump-020rc2.md) | 131 行 | 被 rc.5 取代；机制已不在 |
-| 归档 | [six-dim-hygiene-round](../../../notes/archived/2026-10-21-six-dim-hygiene-round.md) | 44 行 | 一轮已关闭的卫生轮；无独有决定理由 |
+| 留活跃 | [run-bundle-charter](../../../../notes/implemented/2026-10-23-run-bundle-charter.md) | 425 行 | 有活测试解析其 §未决；**规模大不是留的理由** |
+| 留活跃 | [project-navigability-phase1](../../../../notes/implemented/2026-10-05-project-navigability-phase1.md) | 59 行 | evaluation 红证出处；**规模小不是删的理由** |
+| 留活跃 | [release-versioning](../../../../notes/implemented/2026-10-25-release-versioning.md) | 46 行 | docs/guides 以它为 owner，删了会断链 |
+| 归档 | [notes-consistency-sweep](../../../../notes/archived/2026-10-30-notes-consistency-sweep.md) | 110 行 | 规则已吸收进 notes/README + notes/AGENTS；历史价值保留 |
+| 归档 | [vendor-pin-bump-020rc2](../../../../notes/archived/2026-09-30-vendor-pin-bump-020rc2.md) | 131 行 | 被 rc.5 取代；机制已不在 |
+| 归档 | [six-dim-hygiene-round](../../../../notes/archived/2026-10-21-six-dim-hygiene-round.md) | 44 行 | 一轮已关闭的卫生轮；无独有决定理由 |
 | 删 | （见 §6.2 的 8/8 反例） | — | 看起来完整、实际承接不完整：**"承接文件存在" ≠ "唯一理由已被承接"** |
 | 边界 | hitl-docking-polish / node-topology-procedure | — | 先补可复核面再归档；"边界个案用判断并留档" |
 

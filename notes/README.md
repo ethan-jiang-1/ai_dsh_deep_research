@@ -141,7 +141,7 @@ implemented 才能补历史注记；归档只收"不再指导未来、且不需�
 | G2 | 理由质量——无质量门禁 | 出现可机械判的质量判据 |
 | G3 | 毕业改写只挡标题/标记，不查内容（`note-graduation-rewrite` 自认） | 增加任何形式的内容检查 |
 | G4 | 归档判断不可靠——只有入链可见性门禁 | 下一批归档按 [archiving-a-note](../.agents/skills/archiving-a-note/SKILL.md) 执行且报告与 diff 逐条对上 |
-| G5 | 冻结层无封印，且出链仍被 `md-links` 扫（改名会逼改档案） | `archive-seal` + 归档出链排除落地（P1；研究 = `_backlog/research/notes-discipline-borrow/`） |
+| G5 | 冻结层无封印，且出链仍被 `md-links` 扫（改名会逼改档案） | `archive-seal` + 归档出链排除落地（P1；研究 = `_backlog/_archived/research/notes-discipline-borrow/`） |
 
 这五条是设计取舍的账，不是缺陷清单：让读者知道哪一半是硬的、哪一半是软的，不要把软的当硬引用。
 

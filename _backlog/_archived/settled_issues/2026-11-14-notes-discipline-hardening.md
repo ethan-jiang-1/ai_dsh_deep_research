@@ -11,8 +11,8 @@ opened: 2026-11-14
 > 结论：P0（S1–S4）已交付；证据 = [交付 Note](../../../notes/implemented/2026-11-14-notes-discipline-hardening.md)；P1 封印/出链排除另 trigger。
 > 立卡依据：用户 2026-11-14 直派「propose 一个 issue……借助我们的流程准备落地」。
 > **授权**：用户 2026-11-14 直派「set up goal 静默，自主执行」；P0 已交付，P1 另 trigger。
-> 出处：研究 = [notes 工程纪律补借](../../research/notes-discipline-borrow/README.md)；材料 =
-> [2026-11-13-notes-discipline-borrow.md](../../research/notes-discipline-borrow/2026-11-13-notes-discipline-borrow.md)。
+> 出处：研究 = [notes 工程纪律补借](../../_archived/research/notes-discipline-borrow/README.md)；材料 =
+> [2026-11-13-notes-discipline-borrow.md](../../_archived/research/notes-discipline-borrow/2026-11-13-notes-discipline-borrow.md)。
 > 位置前提：**`notes/` 留在仓库根目录，不动**；只借思想与判据，不借 vendor `.agents/notes/`
 > 路径与 class 目录位置。
 

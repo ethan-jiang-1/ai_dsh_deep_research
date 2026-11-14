@@ -3,7 +3,7 @@
 > 状态：implemented
 
 > 出处：[落地卡](../../_backlog/_archived/settled_issues/2026-11-14-notes-discipline-hardening.md) ·
-> 研究 = [notes 工程纪律补借](../../_backlog/research/notes-discipline-borrow/2026-11-13-notes-discipline-borrow.md) ·
+> 研究 = [notes 工程纪律补借](../../_backlog/_archived/research/notes-discipline-borrow/2026-11-13-notes-discipline-borrow.md) ·
 > 规则正文 = [notes/README](../README.md) · 数据面 = [evaluation §L0](../../docs/evaluation.md)
 
 ## 决定

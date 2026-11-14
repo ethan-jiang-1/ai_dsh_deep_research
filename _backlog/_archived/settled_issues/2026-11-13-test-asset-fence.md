@@ -8,7 +8,7 @@ opened: 2026-11-13
 > 立卡：2026-11-13 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
 >
 > 去向：implemented — `notes/implemented/2026-11-13-test-asset-fence.md`
-> 授权：用户 2026-11-13 直派「弄个 issue，然后推动落地」；研究 = [test-asset-fence](../../research/test-asset-fence/README.md)
+> 授权：用户 2026-11-13 直派「弄个 issue，然后推动落地」；研究 = [test-asset-fence](../../_archived/research/test-asset-fence/README.md)
 >
 > **结论**：S0–S2 已落地（S0 夹具 + S1 client-surface + S2 smoke 资产账）；S3 另卡/trigger，不在本卡范围。
 >
@@ -23,7 +23,7 @@ opened: 2026-11-13
 
 **当前情况：**
 
-- 研究正文与第二遍复核 = [2026-11-13-test-asset-fence.md](../../research/test-asset-fence/2026-11-13-test-asset-fence.md)。
+- 研究正文与第二遍复核 = [2026-11-13-test-asset-fence.md](../../_archived/research/test-asset-fence/2026-11-13-test-asset-fence.md)。
 - **S0 前红（现已修复）**：`node scripts/smoke/run-accept.e2e.mjs` 第 ⑦ 段曾 exit 1。根因不是
   `## readiness: PASS` 标题行，而是 claim 夹具创建了 `review/` 却没有 `review/readiness.json`；
   D51 的 `readinessOfSources({hasReviewDir:true})` 判 `source:'missing'`。实测补声明件后

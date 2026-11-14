@@ -90,5 +90,5 @@ description: Use when archiving, deleting, merging, or auditing Agent Notes in t
   （`note-tree` / `note-format` / `archived-note-pointer`）。
 - 冻结层出链当前**仍被**链接门禁扫描；因此仓库级改名可能逼你改冻结件。遇到时按
   `notes/archived/README.md` 的边界与交付自审处理，不要擅自检修历史——是否把出链排除出
-  链接门禁是 P1 的独立决定（研究 = `_backlog/research/notes-discipline-borrow/`）。
+  链接门禁是 P1 的独立决定（研究 = `_backlog/_archived/research/notes-discipline-borrow/`）。
 - 本技能不替代用户对"删/留"的业务判断；技术证据归 agent，业务验收归用户。

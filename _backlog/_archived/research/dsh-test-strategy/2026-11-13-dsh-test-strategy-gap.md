@@ -73,7 +73,7 @@ intent: 把 DSH 的测试策略抓成可迁移的机制，对照本仓资产与 
   `_backlog/issues/2026-11-11-exploratory-test-strategy.md`（1847 行探索协议与逐轮记录）、
   2026-11-12/13 的五个批量修复提交（`252c2fd7`、`d966fa31`、`275b8c03`、`bb0323ac`、`4d6308c9`）
   与 D51 判据形状提交（`7b504d48`、`9f64b3a7`、`b64d170b`、`88cc38b6`、`d49b5e9f`）。
-- 成本侧：`_backlog/research/test-asset-fence/2026-11-13-test-asset-fence.md` 的实测
+- 成本侧：`_backlog/_archived/research/test-asset-fence/2026-11-13-test-asset-fence.md` 的实测
   （`gates.e2e` 202s、`snapshot-replay` 162s）；本文复测快环（`pnpm verify` 3.91s、
   `pnpm test` 4.59s / 1409 例）。
 
@@ -733,7 +733,7 @@ K/L/M/N/O/P 是季度项，等前两阶段稳定后再做。
 | 快照边界 | `snapshots/README.md` §证据边界、§已知限制 |
 | probe 登记 | `probes/README.md`；`docs/guides/66-probe-playbook.md` |
 | 探索协议 | `_backlog/issues/2026-11-11-exploratory-test-strategy.md` §策略 |
-| 成本实测 | `_backlog/research/test-asset-fence/2026-11-13-test-asset-fence.md` §2.2 |
+| 成本实测 | `_backlog/_archived/research/test-asset-fence/2026-11-13-test-asset-fence.md` §2.2 |
 | 外部材料 | `docs/external-materials.md` 的 digest 行（当前仍写 11 篇 @ 639ed01539，待纠偏） |
 | CI 结构 | `.github/workflows/ci.yml` 3 个 job（keyless/client-load/deploy），无 `needs`/聚合；`smoke-registry` 只对账引用 |
 | CI 的 2 | exit 2 在 CI 里与 1 一样是 job 红；报告分列靠人写，不靠 CI |
