@@ -1,15 +1,15 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P1
 opened: 2026-11-14
 ---
 
 # BUG-179：HTML 注释不剥——notes 证据可从注释里「长出来」，readiness 可被注释翻转
 
-> 严重级别：P1 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及 notes/交付判据，需用户放行
+> 严重级别：P1 ｜ 发现：2026-11-14 ｜ 状态：已修 — notes/readiness 的 mask 都剥 HTML 注释；用户放行批 C
 >
-> 位置：[scripts/lib/note-scan.mjs](../../scripts/lib/note-scan.mjs) 的 `maskFencedCode` 与
-> [review-readiness.ts](../../packages/deep-research-pack/src/lib/review-readiness.ts) 的
+> 位置：[scripts/lib/note-scan.mjs](../../../scripts/lib/note-scan.mjs) 的 `maskFencedCode` 与
+> [review-readiness.ts](../../../packages/deep-research-pack/src/lib/review-readiness.ts) 的
 > `maskFencedLines`；前科 = BUG-175（围栏/隐藏 md）、BUG-169（围栏）。
 
 ## 症状
@@ -78,5 +78,24 @@ console.log(terminalReadiness("readiness: FAIL\n\n<!--\nreadiness: PASS\n-->\n")
 
 ## 修复关联
 
-未修。触面 = notes/交付判据，按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`；
+未修。触面 = notes/交付判据，按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`；
 可与 BUG-178 的 Markdown 容器 mask 同批。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`scripts/lib/note-scan.mjs`、`packages/deep-research-pack/src/lib/review-readiness.ts`、`tests/checks/note-scan.test.mjs`、`tests/contracts/verdict-conformance.spec.mjs`、`tests/contracts/markdown-mask-conformance.spec.mjs`
+- **红证**：`node --test tests/checks/note-scan.test.mjs tests/contracts/verdict-conformance.spec.mjs tests/contracts/markdown-mask-conformance.spec.mjs`
+  ```
+  not ok 4 - 块模型：blockquote/list fence、HTML 注释、indented code 都不算正文
+  not ok 13 - 不变量⑦：容器 / indented code / HTML 注释 / 标签加粗+短括号
+  # pass 8
+  # fail 5
+  ```
+- **绿证**：`node --test tests/checks/note-scan.test.mjs tests/contracts/verdict-conformance.spec.mjs tests/contracts/markdown-mask-conformance.spec.mjs`
+  ```
+  # tests 13
+  # pass 13
+  # fail 0
+  ```
+- **反证/边界**：跨行 `<!-- … -->` 未闭合按剩余全文注释（fail-closed）；注释内 `## 实际跑过的验证` /
+  `readiness: FAIL` 都不再计；注释外真实行不变；note-scan 与 readiness 两侧 mask 同判。

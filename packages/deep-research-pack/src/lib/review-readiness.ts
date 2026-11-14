@@ -29,17 +29,50 @@ type Readiness = 'PASS' | 'FAIL'
 const AMBIGUOUS = 'ambiguous' as const
 
 /**
- * 把 fenced code 的行（含围栏行）替换为空行（BUG-169）：围栏里的示例/模板/旧轮引文不是正文。
- * 行数与原文一致，候选命中行仍能指回真实行号；未闭合围栏按剩余全文围栏处理（fail-closed）。
- * 支持 ``` / ~~~、语言后缀、最多 3 空格缩进；4 空格缩进是代码块，不是围栏。
+ * 把非正文行（fence / HTML 注释 / indented code）替换为空行（BUG-169/178/179/183）：
+ * 支持 blockquote/list 容器、0–3 空格 fence、4 空格 indented code、跨行 HTML 注释；
+ * 行数与原文一致，未闭合 fence/注释按剩余全文处理（fail-closed）。与 notes 的 note-scan
+ * 由 tests/contracts/markdown-mask-conformance.spec.mjs 钉住同判。
  */
 const FENCE = /^( {0,3})(`{3,}|~{3,})(.*)$/
-function maskFencedLines(text: string): string[] {
+const containerRest = (line: string): string => {
+  let rest = line.replace(/^(?: {0,3}> ?)+/, '')
+  rest = rest.replace(/^ {0,3}(?:[-*+]|\d+[.)])\s+/, '')
+  return rest
+}
+const maskHtmlComments = (lines: readonly string[]): string[] => {
+  let inComment = false
+  return lines.map((line) => {
+    let out = ''
+    let index = 0
+    while (index < line.length) {
+      if (inComment) {
+        const end = line.indexOf('-->', index)
+        if (end === -1) return out
+        inComment = false
+        index = end + 3
+        continue
+      }
+      const start = line.indexOf('<!--', index)
+      if (start === -1) { out += line.slice(index); break }
+      out += line.slice(index, start)
+      const end = line.indexOf('-->', start + 4)
+      if (end === -1) { inComment = true; break }
+      index = end + 3
+    }
+    return out
+  })
+}
+const isIndentedCode = (line: string): boolean => /^(?: {4}|\t)/.test(line.replace(/^(?: {0,3}> ?)+/, ''))
+
+export function maskReadinessLines(text: string): string[] {
   const lines = text.replace(/\r\n?/g, '\n').split('\n')
+  const commented = maskHtmlComments(lines)
   const out: string[] = []
   let fence: { readonly char: string; readonly length: number } | null = null
-  for (const line of lines) {
-    const match = FENCE.exec(line)
+  for (const line of commented) {
+    const content = containerRest(line)
+    const match = FENCE.exec(content)
     const marker = match?.[2] ?? ''
     if (fence === null) {
       if (match !== null && marker !== '' && !(marker.charAt(0) === '`' && (match[3] ?? '').includes('`'))) {
@@ -55,7 +88,11 @@ function maskFencedLines(text: string): string[] {
     }
     out.push('')
   }
-  return out
+  return out.map((line) => (line !== '' && isIndentedCode(line) ? '' : line))
+}
+
+function maskFencedLines(text: string): string[] {
+  return maskReadinessLines(text)
 }
 
 /**
@@ -67,9 +104,12 @@ function maskFencedLines(text: string): string[] {
  */
 function stripVerdictDecor(line: string): string | null {
   let s = line
-  // 标签本身的加粗/反引号也是装饰（BUG-170）：`**readiness**：FAIL` → `readiness：FAIL`。
-  const normalizeLabelDecor = (value: string): string => value
-    .replace(/^readiness(?:\*\*|__|`{1,2})(?=\s*[:：])/i, 'readiness')
+  // 标签本身的加粗/反引号也是装饰（BUG-170/178）：`**readiness**：FAIL`、
+  // `**readiness**（终局）：FAIL`、`**readiness（终局）**：FAIL` 都归一后再匹配。
+  const normalizeLabelDecor = (value: string): string => {
+    const tail = value.replace(/^(readiness(?:[（(][^）)\n]{1,8}[）)])?)(?:\*\*|__|`{1,2})(?=\s*[:：])/i, '$1')
+    return tail.replace(/^readiness(?:\*\*|__|`{1,2})(?=\s*(?:[（(][^）)\n]{1,8}[）)])?\s*[:：])/i, 'readiness')
+  }
   for (let i = 0; i < 12; i++) {
     s = normalizeLabelDecor(s)
     if (/^readiness\b/i.test(s)) return s

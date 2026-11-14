@@ -1,15 +1,15 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 
 # BUG-183：note-scan 的行首锚不容忍 CommonMark 的 0–3 空格缩进——合法状态行/证据标题被判缺席
 
-> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及 notes 门禁，需用户放行
+> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：已修 — 状态行/heading 锚容忍 0–3 空格缩进；用户放行批 C
 >
-> 位置：[scripts/lib/note-scan.mjs](../../scripts/lib/note-scan.mjs) 的 `statusLines` / `h2Titles`；
-> 消费 = [c-notes.mjs](../../scripts/verify/gates/c-notes.mjs) 的 note-format；前科 = BUG-175。
+> 位置：[scripts/lib/note-scan.mjs](../../../scripts/lib/note-scan.mjs) 的 `statusLines` / `h2Titles`；
+> 消费 = [c-notes.mjs](../../../scripts/verify/gates/c-notes.mjs) 的 note-format；前科 = BUG-175。
 
 ## 症状
 
@@ -63,5 +63,23 @@ console.log(JSON.stringify(h2Titles("  ## 实际跑过的验证\n")));        //
 
 ## 修复关联
 
-未修。触面 = notes 门禁，按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`；可与 BUG-175/179 的
+未修。触面 = notes 门禁，按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`；可与 BUG-175/179 的
 结构扫描同批。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`scripts/lib/note-scan.mjs`、`tests/checks/note-scan.test.mjs`
+- **红证**：`node --test tests/checks/note-scan.test.mjs`
+  ```
+  not ok 5 - 行锚：0–3 空格的状态行/heading 算；4 空格是 indented code 不算
+  # pass 8
+  # fail 5
+  ```
+- **绿证**：`node --test tests/checks/note-scan.test.mjs`
+  ```
+  # tests 5
+  # pass 5
+  # fail 0
+  ```
+- **反证/边界**：`statusLines` 接受 `^ {0,3}> 状态：`，`h2Titles` 接受 `^ {0,3}##`；
+  4 空格归 indented code（mask），不算；既有 notes 全量 `pnpm verify` 不回归。

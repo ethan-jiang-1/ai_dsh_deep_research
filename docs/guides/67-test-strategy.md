@@ -71,8 +71,8 @@
 
 | 失败类 | 卡 | 共同缺口 | 类级守卫方向 |
 |---|---|---|---|
-| C7/C8 | [177](../../_backlog/_archived/fixed_bugs/BUG-177-ci-workflow-expression-normalization.md)、[178](../../_backlog/bugs/BUG-178-readiness-markdown-containers-and-bold-paren.md)、[179](../../_backlog/bugs/BUG-179-html-comments-not-masked.md) | 表达式/Markdown 结构建模不完整（`${{ }}`、容器、HTML 注释） | 条件与块级 mask 单一实现；结构闭集矩阵 |
-| C3/C4 | [180](../../_backlog/_archived/fixed_bugs/BUG-180-method-heading-duplicate-unknown-segments-dropped.md)、[183](../../_backlog/bugs/BUG-183-note-scan-indented-status-heading.md) | 已识别段/缩进口径不一致，未知形态被静默消费 | 单一 codec；CommonMark 容器缩进矩阵 |
+| C7/C8 | [177](../../_backlog/_archived/fixed_bugs/BUG-177-ci-workflow-expression-normalization.md)、[178](../../_backlog/_archived/fixed_bugs/BUG-178-readiness-markdown-containers-and-bold-paren.md)、[179](../../_backlog/_archived/fixed_bugs/BUG-179-html-comments-not-masked.md) | 表达式/Markdown 结构建模不完整（`${{ }}`、容器、HTML 注释） | 条件与块级 mask 单一实现；结构闭集矩阵 |
+| C3/C4 | [180](../../_backlog/_archived/fixed_bugs/BUG-180-method-heading-duplicate-unknown-segments-dropped.md)、[183](../../_backlog/_archived/fixed_bugs/BUG-183-note-scan-indented-status-heading.md) | 已识别段/缩进口径不一致，未知形态被静默消费 | 单一 codec；CommonMark 容器缩进矩阵 |
 | C9/C10 | [181](../../_backlog/_archived/fixed_bugs/BUG-181-artifact-freshness-deletion-blind.md) | artifact 新鲜度只看 mtime，文件集变化不可见 | 构建清单/哈希；mtime 只作预检 |
 | C3/C8 | [182](../../_backlog/_archived/fixed_bugs/BUG-182-model-workflow-duplicate-onkeys-empty-map.md) | on: 解析有第二份实现；空映射 `{}` 假红 | 单一事件解析器；空值/mapping 矩阵 |
 

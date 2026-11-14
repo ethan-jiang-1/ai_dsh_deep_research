@@ -186,3 +186,6 @@
 | [BUG-181](BUG-181-artifact-freshness-deletion-blind.md) | BUG-181：artifact 新鲜度只看最新 mtime——删源文件后旧 tarball 仍 fresh | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
 | [BUG-177](BUG-177-ci-workflow-expression-normalization.md) | BUG-177：ci-workflow 表达式归一不全——`${{ always() }}` 假红、`${{ true }}` continue-on-error 假绿 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
 | [BUG-182](BUG-182-model-workflow-duplicate-onkeys-empty-map.md) | BUG-182：model-workflow 又写一份 onKeysOf——`workflow_dispatch: {}` 被判无事件 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-178](BUG-178-readiness-markdown-containers-and-bold-paren.md) | BUG-178：readiness 的 Markdown 容器漏面——blockquote/缩进代码翻转终局；带括号加粗标签假红 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-179](BUG-179-html-comments-not-masked.md) | BUG-179：HTML 注释不剥——notes 证据可从注释长出，readiness 可被注释翻转 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-183](BUG-183-note-scan-indented-status-heading.md) | BUG-183：note-scan 不容忍 0–3 空格缩进——合法状态行/证据标题被判缺席 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |

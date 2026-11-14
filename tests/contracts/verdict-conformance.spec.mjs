@@ -116,3 +116,18 @@ test('不变量⑥：fenced code 与标签加粗是结构，不是判定', () =>
   assert.equal(terminalReadiness('**结论**：**readiness: FAIL**\n'), null, '散文标签不夺权')
   assert.equal(terminalReadiness('**readiness**: PASS | FAIL\n'), null, '加粗标签的空模板仍是模板')
 })
+
+// 负例留证 2026-11-14：BUG-178/179——readiness 的块 mask 只认顶层 fence；blockquote fence、
+// 4 空格 indented code、HTML 注释都能把示例当判定；READINESS 的标签加粗 + 短括号也假红。
+// 红配方：maskReadinessLines 退回只看 `^ {0,3}`\u0060\u0060\u0060 → 前三例红；normalizeLabelDecor 只认冒号前 `**` → 末例红。
+test('不变量⑦：容器 / indented code / HTML 注释 / 标签加粗+短括号', () => {
+  const F = '```'
+  assert.equal(terminalReadiness(`readiness: PASS\n\n> ${F}\n> readiness: FAIL\n> ${F}\n`), 'PASS', 'blockquote fence 后置')
+  assert.equal(terminalReadiness(`> ${F}\n> readiness: FAIL\n> ${F}\n\nreadiness: PASS\n`), 'PASS', 'blockquote fence 前置')
+  assert.equal(terminalReadiness('readiness: PASS\n\n    readiness: FAIL\n'), 'PASS', 'indented code')
+  assert.equal(terminalReadiness('readiness: PASS\n\n<!--\nreadiness: FAIL\n-->\n'), 'PASS', 'HTML 注释后置')
+  assert.equal(terminalReadiness('readiness: FAIL\n\n<!--\nreadiness: PASS\n-->\n'), 'FAIL', 'HTML 注释不翻转')
+  assert.equal(terminalReadiness('**readiness**（终局）：FAIL\n'), 'FAIL', '标签加粗 + 短括号')
+  assert.equal(terminalReadiness('**readiness（终局）**：FAIL\n'), 'FAIL', '括号整体加粗')
+  assert.equal(terminalReadiness('**结论**：readiness: FAIL\n'), null, '散文标签仍不夺权')
+})

@@ -12,9 +12,6 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [BUG-178](BUG-178-readiness-markdown-containers-and-bold-paren.md) | 等人拍板 | P1 | readiness 容器/缩进代码可翻转终局；带括号的加粗标签假红 |
-| [BUG-179](BUG-179-html-comments-not-masked.md) | 等人拍板 | P1 | HTML 注释不剥：notes 证据可从注释长出，readiness 可被注释翻转 |
-| [BUG-183](BUG-183-note-scan-indented-status-heading.md) | 等人拍板 | P2 | note-scan 不容忍 0–3 空格缩进：合法状态行/证据标题被判缺席 |
 
 ## 最近归档
 
