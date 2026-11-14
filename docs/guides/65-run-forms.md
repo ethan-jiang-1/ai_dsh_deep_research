@@ -132,10 +132,15 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
   只有 tar 的 `git init` → `git update-index --add --cacheinfo 160000,<submodule-sha>,vendor/dsh` →
   `git submodule update --init --recursive`；这条不依赖 origin 上有该 HEAD（未 push 的移交也成立），
   tar 里没有 `.git`，不要直接跑 `git submodule update --init`。
-- **插件移交**：`node scripts/dist/export-dist.mjs` → tarball + 安装手册 + 市场索引（含 sha256、
-  升级/回滚、离线矩阵）。
+- **插件移交**：`node scripts/dist/export-dist.mjs` → tarball + 安装手册 + `build-manifest.json`
+  （审计记录）+ 市场索引（含 sha256、升级/回滚、离线矩阵）。
+- **移交锚**：移交方在源树跑 `node scripts/dist/release-check.mjs --handoff` 必须绿（annotated tag = HEAD、工作树干净、
+  manual sha = tarball sha、tarball 由当前 pack 源生成）；接收方在 clean clone 上跑
+  `node scripts/dist/release-check.mjs --receiver`（tag/manual/tarball/manifest 对齐，不重算源指纹）；
+  源码包、`_dist` 制品与手册必须来自同一个 commit。
 - **研究数据移交**：run bundle 单独拷贝/归档；移交前跑 `node scripts/run-gates/path-hygiene.mjs <bundle>`。
-- **不做**：`cp -r` 工作树、把 `runtime/` 或 `research-workspace/drt_*` 打进源码包、把凭据/会话随包发送。
+- **不做**：`cp -r` 工作树、把 `runtime/` 或 `research-workspace/drt_*` 打进源码包、把凭据/会话随包发送；
+  不把旧 tag 与新 `_dist` 配对。
 
 ## 9. 证据
 

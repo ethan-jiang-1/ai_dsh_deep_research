@@ -9,9 +9,9 @@
 ## 先分流：用户要"用它"还是"改它"
 
 **先记住这条模型**：本包是 DSH 插件（bundle），运行环境 = 用户自建的 **custom profile**
-`deep-research`（[D41](./decisions.md#d41)）。首次由 CLI 建 profile（仅首次、破坏性）；**当前 0.3.4 用本地 tarball 装包（`file:`）**，npm/Plugins 页/Discover 为 staged（未发布 npm）；启动 `dsh --profile deep-research`。没有 launcher、没有 scaffold、没有自定义安装器；
+`deep-research`（[D41](./decisions.md#d41)）。首次由 CLI 建 profile（仅首次、破坏性）；**当前 0.3.5 用本地 tarball 装包（`file:`）**，npm/Plugins 页/Discover 为 staged（未发布 npm）；启动 `dsh --profile deep-research`。没有 launcher、没有 scaffold、没有自定义安装器；
 只保留只读 doctor。开发者在本仓走同名 profile（隔离 home）+ `research-workspace/` + run-driver。
-两条路径的命令与数据根不同，不要互相套用。**完整安装合同的 owner = [`scripts/dist/product-manual.md`](../scripts/dist/product-manual.md)；生成物 = [`_dist/安装手册.md`](../_dist/安装手册.md)（勿手改，重导出 = `node scripts/dist/export-dist.mjs`）；根 [README](../README.md) 承担用户路径（最短安装 + 一次走查），包 README 承担包级合同摘要、不复制用户步骤，完整合同 = 手册，命令由契约测试对账**。
+两条路径的命令与数据根不同，不要互相套用。**完整安装合同的 owner = [`scripts/dist/product-manual.md`](../scripts/dist/product-manual.md)；生成物 = [`_dist/安装手册.md`](../_dist/安装手册.md)（勿手改，重导出 = `node scripts/dist/export-dist.mjs`）；根 [README](../README.md) 承担用户路径（最短安装 + 一次走查），包 README 承担包级安装摘要与首装顺序（`readme-shape` + `install-copies` 校验），完整步骤归手册，完整合同 = 手册，命令由契约测试对账**。
 
 | 用户的说法 | 走哪（该事的唯一 owner） | 首个动作 |
 |---|---|---|
@@ -80,7 +80,7 @@
 | [guides/61-run-playbook.md](./guides/61-run-playbook.md) | 指南 | **开发通道 run 操作（M2）**：run-driver/boot-run、lead 会话、HITL 两点、观察面——run 通道（`deep-research` profile：本包 + vendor agent-team-profile 层，P1 定案）的使用面；安装用户看 pack README / 安装手册 / 65 |
 | [guides/62-plugin-authoring.md](./guides/62-plugin-authoring.md) | 指南 | **插件作者入口**（改插件内容的人/agent 入口）：DSH 词汇对齐（plugin/bundle/profile/preset）、参与阶梯 S0–S3、新行为归属、范本与证据义务、**交付与部署形态**（bundle/profile 拓扑 + 包内 content + 部署 bin）、**改动影响面**（添/换/删要一起动什么）——上游 `docs/user/develop/**` 的本仓投影 |
 | [guides/63-git-boundary.md](./guides/63-git-boundary.md) | 指南 | **Git 入库边界与跨环境纪律**：源/合同/证据 vs 生成物/运行态/本机态；三问判据、tracked 生成物条件、跨环境规则与门禁 |
-| [guides/64-release-versioning.md](./guides/64-release-versioning.md) | 指南 | **发布版本、tag 与 npm 发布顺序**：pack 版本 = 唯一发布源、root 镜像、annotated tag、发布前 `release-check` 与 `release-version` 门禁 |
+| [guides/64-release-versioning.md](./guides/64-release-versioning.md) | 指南 | **发布版本、tag 与 npm 发布顺序**：pack 版本 = 唯一发布源、root 镜像、annotated tag、发布前 `release-check`（含 `--handoff`）与 `release-version` 门禁 |
 | [guides/65-run-forms.md](./guides/65-run-forms.md) | 指南 | **运行形态合同**：M1 安装形态 / M1 互操作 / M2 独立开发 / M3 移交；六轴 owner 表；profile 归属与 patch 层；数据卡指针；`engines.dsh` + 团队层钉版；首屏工作区；`DSH_DEV_HOME`/多实例；干净 handoff 与证据矩阵 |
 | [guides/66-probe-playbook.md](./guides/66-probe-playbook.md) | 指南 | **探针**：定义、何时用、头注与索引、新增步骤、证据与边界；根 [probes/](../probes/README.md) 的单一入口 |
 | [guides/67-test-strategy.md](./guides/67-test-strategy.md) | 指南 | **测试策略**：三环/四账/五关；失败类→最低可见层；证据账本与命名车道；不是第六评估面 |

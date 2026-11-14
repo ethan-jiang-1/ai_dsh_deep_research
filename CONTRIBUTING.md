@@ -79,19 +79,27 @@ version must equal `dsh --version`. The install/upgrade/uninstall contract is ow
 
 ## Handoff
 
-Hand off a clean clone at the release tag plus the `_dist` artifact — never a copy of this
+Hand off a clean clone at the commit that the current version's annotated tag points to, with the
+`_dist` artifact built from that same commit — never a copy of this
 working tree (`runtime/harness-home` holds credentials/sessions; `research-workspace/drt_*`
 holds run data). The source handoff exporter writes only HEAD's tracked source and a
 `HANDOFF.md` with receiver commands; its smoke proves the archive has no runtime/credentials/
 run data:
 
 ```sh
+node scripts/dist/release-check.mjs --handoff
 node scripts/dist/export-handoff.mjs --out /tmp/handoff
 node scripts/smoke/handoff.e2e.mjs
 ```
 
-Attach `_dist/dsh-deep-research-pack-<version>.tgz` and the installation manual from the
-release tag.
+`release-check --handoff` must be green: the tag is annotated, points at HEAD, the worktree is
+clean, the manual sha equals the tarball sha, and the tarball matches the current pack source.
+On the receiving clean clone, `node scripts/dist/release-check.mjs --receiver` verifies
+tag/manual/tarball/manifest alignment without recomputing the source fingerprint.
+
+Attach `_dist/dsh-deep-research-pack-<version>.tgz`, the installation manual, and
+`build-manifest.json` from that same tagged commit (the manifest is the audit record for source
+freshness). Do not pair an older tag with a newer `_dist`.
 
 ## Verify your change
 

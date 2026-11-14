@@ -273,6 +273,16 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
+      "path": "tests/checks/release-anchor.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "release-anchor — 发布/移交锚的变异矩阵。",
+      "oracleType": "self-referential",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
       "path": "tests/checks/release-copies.test.mjs",
       "domain": "checks",
       "lane": "checks",

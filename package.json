@@ -1,6 +1,6 @@
 {
   "name": "ai-dsh-deep-research",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "private": true,
   "type": "module",
   "description": "DSH Deep Research 插件项目：多角色研究团队 preset pack（Lead/Scout/Analyst/Critic）+ Agent Team 协作。方法论内核源自 codex Deep Research harness 考古。",
@@ -60,6 +60,7 @@
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "dsh-deep-research-pack": "workspace:*",
+    "js-yaml": "4.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tsdown": "^0.22.2",

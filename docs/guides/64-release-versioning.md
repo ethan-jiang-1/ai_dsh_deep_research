@@ -1,7 +1,7 @@
 # 64 · 发布版本、tag 与 npm 发布顺序
 
 > 层：指南。本页拥有版本号、git tag、npm 发布三者的唯一顺序。发布前逐条走，不凭记忆。
-> **当前发布形态（0.3.4）= 本地 tarball；npm publish 未执行（凭据未就绪）。以下 npm 顺序是发布后路径，不是当前完成条件。**
+> **当前发布形态（0.3.5）= 本地 tarball；npm publish 未执行（凭据未就绪）。以下 npm 顺序是发布后路径，不是当前完成条件。**
 > 决定理由与输掉的方案 = [release-versioning Note](../../notes/implemented/2026-10-25-release-versioning.md)。
 
 ## 单一版本源
@@ -23,6 +23,10 @@
   release 记录写明。
 - 历史 tag `0.0.1`、`0.1.0` 是规则建立前的标记，**不作为发布版本使用**；从 `0.1.2` 起按本页。
 
+**handoff 锚**：移交的单位是“annotated tag + 同 commit 的 `_dist` 三件（tarball/手册/build-manifest）”，
+不是版本号。旧 tag 不得与新 `_dist` 配对；`release-check --handoff` 是发送方的配对机器检查；
+接收方在 clean clone 上用 `release-check --receiver` 只查 tag/manual/tarball/manifest（不重算源指纹）。
+
 ## 发布顺序（不可换序）
 
 1. 决定 semver 版本 `X.Y.Z`。
@@ -33,15 +37,17 @@
    先在该版本的全局宿主上跑 L1 真挂载 + L2 安装/首启 + client-load（命令 = [guides/60 §2](60-dev-loop.md)；
    缺环境 exit 2，未跑 ≠ 通过）。
 5. `node scripts/dist/release-check.mjs`：确认 root = pack；HEAD 未打 tag 时它只提示
-   “未打 tag”，打完后重跑必须 `tag = version` 且 tag 类型为 annotated。
+   “未打 tag”。
 6. commit 版本变更（`release: X.Y.Z ...`）。
 7. `git tag -a X.Y.Z -m "X.Y.Z"`，然后
-   `git push origin master` + `git push origin X.Y.Z`。
+   `node scripts/dist/release-check.mjs --handoff`（tag=HEAD、工作树干净、manual sha=制品 sha、
+   制品由当前源生成），再 `git push origin master` + `git push origin X.Y.Z`。
+   接收方在 clean clone 上跑 `node scripts/dist/release-check.mjs --receiver`（tag/manual/tarball/manifest）。
 8. `npm publish`（在 `packages/deep-research-pack`，需 `npm login`/2FA）；发布后
    `npm view dsh-deep-research-pack@X.Y.Z version`。
 9. 发布后 tag 不再移动；后续修复发新 patch，不改旧 tag。
 
-**市场索引的时序**：`_dist/market.json` 是发现面元数据，不是安装单位；0.3.4 它是 **staged 空索引**
+**市场索引的时序**：`_dist/market.json` 是发现面元数据，不是安装单位；0.3.5 它是 **staged 空索引**
 （`plugins: []` + staged 文案），不承诺可安装。npm publish 成功后由发布流程恢复条目；索引内容
 （版本/engines/图标）由 `export-dist` 从包清单与 locale 生成，不手写。
 
@@ -60,7 +66,8 @@
 - L1 真挂载 / L2 安装/首启 / client-load：宣告新 DSH 版本支持时的安装面与客户端挂载证据
   （命令 = [guides/60 §2](60-dev-loop.md)；缺环境 exit 2）。
 - `node scripts/dist/release-check.mjs`：发布前检查 root=pack、HEAD tag 与版本一致、tag 为
-  annotated；不联网、不写盘。
+  annotated；`--handoff` 另查 tag=HEAD、工作树干净、手册 sha=制品 sha、制品由当前 pack 源生成；
+  `--receiver` 在 clean clone 上只查 tag/manual/tarball/manifest（跳过源指纹）；不联网、不写盘。
 - keyless CI（[ci.yml](../../.github/workflows/ci.yml)）跑 verify/test；tag 检查是发布前的
   本地步骤（CI 不假定 tag 在场）。
 - 发布规则与 git 入库规则分家：本页管“版本与发布”，[guides/63](./63-git-boundary.md) 管

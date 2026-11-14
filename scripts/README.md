@@ -95,7 +95,7 @@
 | export-dist.mjs | pack → `_dist/` 安装包、安装手册与 staged 市场索引（tarball/手册同版本；market 为 0 条目） | keyless |
 | market.mjs | 生成 `_dist/market.json`（DSH 插件市场 format 1），先过 `parseMarketIndex` 再落盘；`--check` 只校验 | keyless |
 | export-handoff.mjs | HEAD 的 tracked 源 → `_dist/` 干净移交包（不含运行态/凭据/run 数据/依赖）；submodule 需对方 init | keyless |
-| release-check.mjs | 发布前版本/tag 一致性（root = pack、HEAD tag = version、tag 为 annotated）；只读 | keyless |
+| release-check.mjs | 发布前版本/tag 一致性（root = pack、HEAD tag = version、tag 为 annotated）；`--handoff` 另查 tag=HEAD、工作树、manual sha、artifact freshness；`--receiver` 在 clean clone 上跳过源指纹（tag/manual/tarball/manifest）；只读 | keyless |
 
 ## test/（测试车道 runner）
 
@@ -110,7 +110,8 @@
 |---|---|---|
 | lib/content-budget.mjs | e-workspace、content-disclosure.spec | 常驻面预算唯一正本：T0 两级（下放 10,000 / 硬顶 12,288）+ lead persona/合计的 char/byte/token |
 | lib/roles.mjs | discipline-probe、doctor.e2e、fetch-fallback-orchestration.spec、l4-lite.e2e、preset.e2e、presets.spec、release.entry、replay-fixtures.spec、replay-scene.spec、role-consumer-matrix.spec、snapshot-replay.entry、strategy-core.spec、team-preflight.e2e | 角色清单访问器（presetRoles = 盘上全部；researchRoles = 研究面；事实源 = 盘上 presets/） |
-| lib/cli-entry.mjs | export-handoff、gates.e2e、market、run-dashboard、protocol-audit、schema-scan、verdict-audit、node-gate、evidence-audit、channel-cache、run-driver、vendor-artifacts、cli-entry.test | symlink-safe CLI 入口判定（realpath 归一；macOS `/tmp` → `/private/tmp` 下不静默） |
+| lib/cli-entry.mjs | export-handoff、gates.e2e、market、run-dashboard、protocol-audit、schema-scan、verdict-audit、node-gate、evidence-audit、channel-cache、run-driver、vendor-artifacts、release-check、cli-entry.test | symlink-safe CLI 入口判定（realpath 归一；macOS `/tmp` → `/private/tmp` 下不静默） |
+| lib/release-anchor.mjs | release-check、release-anchor.test | 发布/移交锚纯判据：版本/tag 类型/commit、工作树、manual sha、build-manifest sha、artifact freshness；配套 `release-check --handoff` |
 | lib/channel-cache.mjs | run-driver、channel-cache.spec | 启动加速缓存判据：pack 源指纹（路径+size+mtime）+ 发布清单缓存（漂移门 ≈5s→≈0.7s，CLI 供 boot-run.sh 消费）+ 探针 GREEN 缓存（热复用 ≈0.5s / 冷启动命中 ≈10s；键 = pack 指纹 + runtime 构建 + 断言参数，TTL 30 分钟；命中前 HTTP 就绪检查；只存 GREEN，`--force-probe` 绕过） |
 | lib/bundle-sessions.mjs | bundle-sessions、bundle-sessions.spec | run bundle → 见证会话反查：聚合 scanWitnessLogs 的 boundSessions/presented（绑定谓词不另立——与 node-gate 门①②同源）；交付回执的 witness.sessions 亦由此面派生 |
 | lib/hitl-card-driver.mjs | hitl-answer | HITL 问询卡的浏览器内驱动片段（Playwright `page.evaluate` 入参）：问卡可见性、选项结构、提交/推进按钮可用性；纯 DOM 函数、零闭包，业务判定仍在 lib/ask-drive |
@@ -178,7 +179,7 @@
 | lib/asset-ledger.mjs | asset-ledger.test、guard-ledger.test、record-asset-ledger | 测试资产组合账生成器：lane/class/cost/uniqueClaim/oracleType/sunset（AST 自动推导 oracleType，禁手写 OVERRIDES）；与盘上测试和守卫账双向对账 |
 | lib/ci-workflow.mjs | ci-jobs.test、ci-workflow-oracle.test、ci-workflow.test、model-workflow.test、record-ci-oracle、smoke-registry.test | GitHub Actions 执行面与写入侧规范门：`yaml@2` 解析 `on:`/`jobs:`/`needs` + `bash -eo pipefail` 执行面 + `ciWorkflowRunProblems`（BUG-172/184/187/190） |
 | lib/smoke-assets.mjs | smoke-assets.test、smoke-registry.test、smoke-oracle-surface.test、smoke-cost-budget.test | `scripts/smoke` 顶层分类（普通文件/目录/symlink/其它）与扁平合同违规项；symlink 不再静默消失（BUG-176） |
-| lib/artifact-freshness.mjs | artifact-freshness.test、lifecycle.entry、export-dist | `_dist` 产物 mtime 不早于 pack 源/构建（src/lib/presets/content/package）；旧 tarball → exit 2（BUG-174） |
+| lib/artifact-freshness.mjs | artifact-freshness.test、lifecycle.entry、export-dist、release-check | `_dist` 产物 mtime 不早于 pack 源/构建（src/lib/presets/content/package）；旧 tarball → exit 2（BUG-174） |
 | lib/run-accept-fixture.mjs | run-accept.e2e、run-accept-fixture.spec | claim 夹具的 review/readiness 文本（D51 同源：有声明 = declaration/PASS，缺声明 = missing/红） |
 | lib/node-gate-core.mjs | node-gate、node-gate-delivery.spec、node-gate-leads.spec、node-gate-session.spec | bundle 判据聚合；唯一导出 = `gateBundle`，领域门直接 import 各自模块 |
 | lib/node-gate-contracts.mjs | node-gate-contracts.spec、node-gate-delivery-gate、node-gate-delivery.spec、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、readiness-declaration.spec、review-readiness.spec、verdict-audit、verdict-audit-core、verdict-conformance.spec | 交付日期合同、readiness 与 decisions 行解析 |
