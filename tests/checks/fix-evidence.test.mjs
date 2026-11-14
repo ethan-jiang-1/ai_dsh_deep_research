@@ -97,3 +97,14 @@ test('每个修复必须沉淀 guard：path 或 notMechanizable+trigger', () => 
   assert.deepEqual(fixEvidenceProblems(structured({ ...good, guard: { notMechanizable: '浏览器相位', trigger: '再次出现假红时' } })), [])
   assert.match(fixEvidenceProblems(structured({ ...good, guard: { path: 'tests/checks/fix.test.mjs', notMechanizable: 'x', trigger: 'y' } })).join('；'), /不能同时/)
 })
+
+test('负例留证：结构化块重复键 → 红（JSON.parse 取末值是假绿）', () => {
+  // 红配方：删掉 duplicateKeyOf 检查 → 本例变绿（末值胜出）。
+  const raw = '{"changes":["tests/checks/fix.test.mjs"],"changes":["scripts/lib/x.mjs"],"red":{"command":"node --test tests/checks/fix.test.mjs","exit":1},"green":{"command":"node --test tests/checks/fix.test.mjs","exit":0},"guard":{"path":"tests/checks/fix.test.mjs"}}'
+  const withDup = card(`## 修复落地\n\n\`\`\`json fix-evidence\n${raw}\n\`\`\`\n`)
+  assert.match(fixEvidenceProblems(withDup).join('；'), /重复键 changes/)
+  const clean = raw.replace(',"changes":["scripts/lib/x.mjs"]', '')
+  const nested = clean.replace('"exit":1', '"exit":1,"exit":0')
+  const withNested = card(`## 修复落地\n\n\`\`\`json fix-evidence\n${nested}\n\`\`\`\n`)
+  assert.match(fixEvidenceProblems(withNested).join('；'), /重复键 exit/)
+})

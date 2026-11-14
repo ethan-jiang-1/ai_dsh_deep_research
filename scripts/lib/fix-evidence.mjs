@@ -38,11 +38,54 @@ const isFileLike = (path) => typeof path === 'string' && path !== ''
 
 const openedOf = (text) => /^opened:\s*(\d{4}-\d{2}-\d{2})\s*$/m.exec(String(text ?? ''))?.[1] ?? null
 
+/** 同一对象内的重复键（JSON.parse 会静默取末值）——与 readiness 的重复键同类，fail-closed。 */
+const duplicateKeyOf = (text) => {
+  const stack = []
+  let index = 0
+  let expectKey = false
+  while (index < text.length) {
+    const ch = text[index]
+    if (ch === '"') {
+      let j = index + 1
+      let value = ''
+      let escape = false
+      while (j < text.length) {
+        const c = text[j]
+        if (escape) { value += c; escape = false; j += 1; continue }
+        if (c === '\\') { escape = true; j += 1; continue }
+        if (c === '"') break
+        value += c
+        j += 1
+      }
+      const isKey = expectKey && stack.length > 0 && stack[stack.length - 1] !== null && /^\s*:/.test(text.slice(j + 1))
+      if (isKey) {
+        const set = stack[stack.length - 1]
+        if (set.has(value)) return value
+        set.add(value)
+        expectKey = false
+      } else {
+        expectKey = false
+      }
+      index = j + 1
+      continue
+    }
+    if (ch === '{') { stack.push(new Set()); expectKey = true; index += 1; continue }
+    if (ch === '}') { stack.pop(); expectKey = false; index += 1; continue }
+    if (ch === '[') { stack.push(null); expectKey = false; index += 1; continue }
+    if (ch === ']') { stack.pop(); expectKey = false; index += 1; continue }
+    if (ch === ',') { expectKey = true; index += 1; continue }
+    index += 1
+  }
+  return null
+}
+
 /** 结构化块：0 / 1 个；多于一个 = 两种证据，拒绝挑一个。 */
 const structuredOf = (section) => {
   const blocks = [...section.matchAll(STRUCTURED)].map((match) => match[1])
   if (blocks.length === 0) return { blocks: 0, value: null, error: null }
   if (blocks.length > 1) return { blocks: 1, value: null, error: '只能有一个 `json fix-evidence` 块（两个 = 两种证据，拒绝挑一个）' }
+  const duplicate = duplicateKeyOf(blocks[0])
+  if (duplicate !== null) return { blocks: 1, value: null, error: `\`json fix-evidence\` 重复键 ${duplicate}（拒绝取末值）` }
   try {
     return { blocks: 1, value: JSON.parse(blocks[0]), error: null }
   } catch {
