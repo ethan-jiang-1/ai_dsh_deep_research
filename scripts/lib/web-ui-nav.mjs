@@ -332,7 +332,7 @@ export async function clickRowByText(page, text, opts = {}) {
  * **等本轮行键真的 `aria-selected="true"`**（与 client-load 的 activeSessionRowKey 同源）；
  * 不成立 → `{ found: true, opened: false, reason }`。`found` 语义保持向后兼容（找到并点了行），
  * 新判据是 `opened`；旧调用方不读它也不改变行为。
- * @returns { found, opened, reason?, via: 'direct'|'named-group'|'sweep'|'show-more'|'search'|'miss', tried }。
+ * @returns {{ found: boolean, opened: boolean, reason?: string, via: 'direct'|'named-group'|'sweep'|'show-more'|'search'|'miss', tried: string[] }}。
  */
 export async function openSessionById(page, sessionId, title = null, opts = {}) {
   const { clickTimeoutMs = 8_000, searchSettleMs = 2500, activateTimeoutMs = 5_000 } = opts

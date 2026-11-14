@@ -139,11 +139,10 @@
     {
       "id": "BUG-051",
       "mechanism": "smoke 顶层标识符必须声明（node --check 抓不到）",
-      "guard": null,
-      "oracleType": "none",
-      "status": "deferred",
-      "reason": "需 ts.createProgram(allowJs/checkJs) 的 TS2304 检查",
-      "trigger": "再次出现 smoke 死标识符/ReferenceError"
+      "guard": "tests/checks/smoke-identifiers.test.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "在任一 smoke 写 undeclaredSmokeProbe = 1 → TS2304 例红"
     },
     {
       "id": "BUG-059",

@@ -27,7 +27,7 @@ intent: 为 issue 2026-11-14-verification-oracle 的 S1 提供逐张机制/当�
 | 034 | 按 id 显式开会话，不赖默认视图 | `checks/client-load-same-source` | keyless | ✅ | 源扫 `openSessionById` + 禁私有定位器 |
 | 036 | 旧轮附录不夺权 + review 读到 eof | `run/review-readiness:45,61`、`run/run-context:150` | keyless | ◐ | 无需新增 |
 | 045 | 读失败态 ≠ 未绑定态，冒烟等显式状态 | `smoke/client-load:1063` | smoke-only | ○ | `cockpit/graph-model` 加 state-note 两例 |
-| 051 | smoke 顶层标识符必须声明（node --check 抓不到） | 无 | none | ○ | 新 `checks/smoke-identifiers`（ts.createProgram，TS2304） |
+| 051 | smoke 顶层标识符必须声明（node --check 抓不到） | `checks/smoke-identifiers` | keyless | ✅ | TS2304/TS2552 编译器守卫（含消费的 lib） |
 | 059 | 文案定位器须声明 locale 归属 | `checks/web-ui-nav-bilingual` | keyless | ✅ | TAB_TEXT 双语 + chrome 字面量 alternation |
 | 061 | 钉 locale 后 chrome 定位器同语言 | 同 059 | keyless | ✅ | 同 059；内容行 allowlist |
 | 063 | chrome 常量双语 + 失配不静默 | `run/web-ui-nav:77-88`、`cockpit/library-fold:364` | keyless | ◐ | 无需新增 |
@@ -38,10 +38,10 @@ intent: 为 issue 2026-11-14-verification-oracle 的 S1 提供逐张机制/当�
 
 ## 统计（2026-11-14）
 
-- ✅ 已沉淀 7：003、009、033、034、059、061、079（本 issue 批 1/2）。
+- ✅ 已沉淀 8：003、009、033、034、051、059、061、079（本 issue 批 1/2/3）。
 - ◐ keyless 已有 8：010、012、018、022、026、030、036、063（入守卫账，无需新增）。
 - ◐ 部分：013、080（source 形状已 keyless；persona/同代性靠重录触发）。
-- ○ 待补 7：027、045、051、024、028、095、136。
+- ○ 待补 6：027、045、024、028、095、136。
 - 审计结论：**无一张确实不可 keyless**；024/028 是 CJS 预载，可 `createRequire` 直测。
 
 ## 两条优先项

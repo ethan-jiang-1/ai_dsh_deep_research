@@ -165,7 +165,7 @@ BUG-043 已于 2026-10-23 修复归档到 [fixed 池](../_archived/fixed_bugs/BU
 
 1. **建卡（排查中）**：症状、复现、根因**假设**、严重级、牵出的失败类。根因是假设，直到证据确认（session bundle、git 历史、对照实验）；被证伪的假设连撤回记录一起留在卡上——撤回是证据，不是噪声。
 2. **修复就绪**：根因有证据确认 + 修法选定 + `## 修复判据` 写就。该翻转是入口票（正本 = [入口](../README.md)）**也是修复授权**（用户裁定 2026-10-12）：P1/P2 修理型修复凭卡自授权落地，当轮交付记录即落地凭证；P0 缺陷，或修复触及入口链、门禁与验收合同、文档合同、pack 公共行为或已记录决定（D 号）的，不自授权——卡转 `等人拍板`，修复按用户指示或随 issue RFC 落地。`## 修复判据` 可写明验证搭车的工作（复跑、他卡落地）——搭车依赖写进该段，不用即兴散文。
-3. **修复落地**：修复已进树；`## 修复判据`、验收证据与审查尚未过——这是 bug 的审查/证据位，不新增 `待审`。卡内 `## 修复落地` 必须有一个 `json fix-evidence` 块（`changes` + `red{command,exit,output?}` + `green{command,exit}`；`exit` 是 oracle；红证不可重放时 `changes` 须含测试/门禁资产）；旧卡（opened < 2026-11-15）无块时 grandfather。翻 `修复落地` 即由 `backlog-liveness` 检查；归档时 `changes` 与代码/测试变更同暂存集（`staged-change-pairing`；决定理由 = [红绿证据 Note](../../notes/implemented/2026-11-14-bug-fix-red-green-evidence.md) 的历史注记 + [oracle issue](../issues/2026-11-14-verification-oracle.md)）。
+3. **修复落地**：修复已进树；`## 修复判据`、验收证据与审查尚未过——这是 bug 的审查/证据位，不新增 `待审`。卡内 `## 修复落地` 必须有一个 `json fix-evidence` 块（`changes` + `red{command,exit,output?}` + `green{command,exit}` + `guard{path|notMechanizable,trigger}`；`exit` 是 oracle；红证不可重放时 `changes` 须含测试/门禁资产；guard 缺 = 红）；旧卡（opened < 2026-11-15）无块时 grandfather。翻 `修复落地` 即由 `backlog-liveness` 检查；归档时 `changes` 与代码/测试变更同暂存集（`staged-change-pairing`；决定理由 = [红绿证据 Note](../../notes/implemented/2026-11-14-bug-fix-red-green-evidence.md) 的历史注记 + [oracle issue](../issues/2026-11-14-verification-oracle.md)）。
 4. **已修**：修复判据满足、证据已记录、审查或跳过已记——状态行追加结论，`git mv` 进 fixed 池，同次变更。修复后回归 = 引用旧卡的新卡，不重开已修卡。
 
 ## 状态生命周期
@@ -244,12 +244,13 @@ opened: YYYY-MM-DD
 {
   "changes": ["<仓内文件路径>", "<对应测试/门禁资产，如 tests/…>"],
   "red": { "command": "<可重放命令：node --test … / pnpm verify / gates.e2e>", "exit": 1, "output": "not ok …" },
-  "green": { "command": "<同一命令>", "exit": 0 }
+  "green": { "command": "<同一命令>", "exit": 0 },
+  "guard": { "path": "<tests/… 或 scripts/smoke/… 下的永久守卫>" }
 }
 ```
 
 散文只作人读副本（可选）；`exit` 是 oracle，不从 output 里找“失败/通过”子串；红证不可重放时
-`changes` 必须含测试/门禁资产。
+`changes` 必须含测试/门禁资产。`guard` 必填：永久守卫路径，或 `{ "notMechanizable": "…", "trigger": "…" }`（缺 = 红）。
 ````
 
 **状态行追写法**（状态行镜像 frontmatter；位置只表达粗段：活跃区/归档池）：卡在本目录时 `状态：` 记号镜像 frontmatter（`pnpm verify` 互查），随翻转更新；判断、去向与审查**追加**在记号之后，既有记录不删除——翻到 `已修` 时形如 `状态：已修 — <结论，去向：implemented — Note / none — 机械修复，审查：agent/跳过 — 理由>（YYYY-MM-DD）`；进暂停池**不加任何判断**（没有判断落地）。

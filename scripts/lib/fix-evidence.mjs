@@ -2,7 +2,7 @@
 //
 // 为什么存在：卡内只有 `## 修复判据` 不够——状态可以翻、卡可以移，repo 却没有变更。修复 =
 // `## 修复落地` 内一个 `json fix-evidence` 块：changes（仓内文件路径）+ red {command, exit, output?}
-// + green {command, exit}。**exit 是 oracle**，不是散文里的“失败/通过”子串；旧卡（2026-11-15 前）
+// + green {command, exit} + guard（永久守卫路径，或 notMechanizable+trigger）。**exit 是 oracle**，不是散文里的“失败/通过”子串；旧卡（2026-11-15 前）
 // 无块时按散文 grandfather，不再参与否定词/引号/目录前缀的启发式判定。
 // 机械消费 = staged-change-pairing（同暂存集）与 backlog-liveness（活跃 修复落地）。
 const CUTOFF = '2026-11-15'
@@ -53,7 +53,7 @@ const structuredOf = (section) => {
 const validateStructured = (value) => {
   if (!isPlainObject(value)) return ['结构化修复证据必须是 JSON 对象']
   const problems = []
-  for (const key of Object.keys(value)) if (!['changes', 'red', 'green'].includes(key)) problems.push(`未知字段 ${key}（只收 changes / red / green）`)
+  for (const key of Object.keys(value)) if (!['changes', 'red', 'green', 'guard'].includes(key)) problems.push(`未知字段 ${key}（只收 changes / red / green / guard）`)
   if (!Array.isArray(value.changes) || value.changes.length === 0) {
     problems.push('changes 必须是非空数组（仓内文件路径）')
   } else {
@@ -73,6 +73,23 @@ const validateStructured = (value) => {
     else if (!mustFail && step.exit !== 0) problems.push('green.exit 必须为 0（绿证 = 同一判据修后通过）')
     if (step.output !== undefined && typeof step.output !== 'string') problems.push(`${label}.output 必须是字符串`)
     for (const key of Object.keys(step)) if (!['command', 'exit', 'output'].includes(key)) problems.push(`${label}.${key} 未知字段（只收 command / exit / output）`)
+  }
+  if (!isPlainObject(value.guard)) {
+    problems.push('guard 必须是对象：{ path } 或 { notMechanizable, trigger }（每个修复必须沉淀永久守卫，或显式不可机械化）')
+  } else {
+    for (const key of Object.keys(value.guard)) if (!['path', 'notMechanizable', 'trigger'].includes(key)) problems.push(`guard.${key} 未知字段`)
+    if (typeof value.guard.path === 'string') {
+      if (!isFileLike(value.guard.path) || !/^(tests\/|scripts\/smoke\/)/.test(value.guard.path)) {
+        problems.push('guard.path 必须是 tests/ 或 scripts/smoke/ 下的文件路径')
+      }
+      if (value.guard.notMechanizable !== undefined || value.guard.trigger !== undefined) {
+        problems.push('guard 不能同时给 path 与 notMechanizable')
+      }
+    } else if (typeof value.guard.notMechanizable === 'string' && value.guard.notMechanizable.trim() !== '') {
+      if (typeof value.guard.trigger !== 'string' || value.guard.trigger.trim() === '') problems.push('guard.notMechanizable 必须带 trigger')
+    } else {
+      problems.push('guard 必须给 path 或 notMechanizable + trigger')
+    }
   }
   if (isPlainObject(value.red) && typeof value.red.command === 'string' && !REPLAYABLE.test(value.red.command)) {
     const testAsset = Array.isArray(value.changes) && value.changes.some((path) => typeof path === 'string'
@@ -97,6 +114,15 @@ export function fixChangePathsOf(text) {
   return [...new Set([...block.matchAll(/`([^`]+)`/g)]
     .map((match) => match[1].trim())
     .filter((path) => isFileLike(path)))]
+}
+
+/** 修复卡声明的 guard（结构化块内）；无块/旧卡返回 null。 */
+export function fixGuardOf(text) {
+  const section = fixSectionOf(text)
+  if (section === null) return null
+  const structured = structuredOf(section)
+  if (structured.value === null || !isPlainObject(structured.value.guard)) return null
+  return structured.value.guard
 }
 
 /**

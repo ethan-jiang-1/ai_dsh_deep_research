@@ -8,10 +8,11 @@ const CARD = '_backlog/_archived/settled_issues/2026-11-13-x.md'
 const NOTE = 'notes/implemented/2026-11-13-x.md'
 const cardText = `---\nstatus: 已结\nopened: 2026-11-13\n---\n\n# X\n> 状态：已结 ｜ 可关闭：是\n> 去向：implemented — [Note](../../../${NOTE})\n`
 
-const harness = (files) => ({
-  read: (rel) => (files.has(rel) ? files.get(rel) : null),
-  exists: (rel) => files.has(rel),
-})
+const harness = (files) => {
+  // 修复卡的 guard 默认住 tests/checks/fix.test.mjs；所有用例都让它存在（守卫路径存在性由本门禁查）。
+  const map = new Map([['tests/checks/fix.test.mjs', 'test()\n'], ...files])
+  return { read: (rel) => (map.has(rel) ? map.get(rel) : null), exists: (rel) => map.has(rel) }
+}
 
 const changes = (rows) => rows.map(([status, ...paths]) => ({ status, paths }))
 
@@ -77,6 +78,7 @@ test('空暂存 / 无配对对象 → 绿（防空语料由门禁 note 承担）
 const FIX_CARD = '_backlog/_archived/fixed_bugs/BUG-900-fix.md'
 const fixCardText = (paths = ['scripts/lib/fix.mjs'], {
   opened = '2026-11-15', redExit = 1, redCommand = 'node --test tests/fix.test.mjs', greenExit = 0,
+  guard = { path: 'tests/checks/fix.test.mjs' },
 } = {}) => `---
 status: 已修
 severity: P2
@@ -94,6 +96,7 @@ ${JSON.stringify({
     changes: paths,
     red: { command: redCommand, exit: redExit, output: 'not ok 1 - old implementation' },
     green: { command: redCommand, exit: greenExit },
+    guard,
   }, null, 2)}
 \`\`\`
 
@@ -198,4 +201,11 @@ test('改动目录前缀不能命中任意同目录 staged 文件', () => {
     staged: fixStaged([['M', 'scripts/lib/fix.mjs']]),
     ...harness(files2),
   }), [])
+})
+
+test('修复卡 guard 路径不存在 → 红', () => {
+  const card = fixCardText(['scripts/lib/fix.mjs'], { guard: { path: 'tests/checks/missing.test.mjs' } })
+  const files = new Map([[FIX_CARD, card], ['scripts/lib/fix.mjs', 'x\n']])
+  const red = stagedChangePairingProblems({ staged: fixStaged([['M', 'scripts/lib/fix.mjs']]), ...harness(files) })
+  assert.match(red[0], /guard 路径不存在/)
 })

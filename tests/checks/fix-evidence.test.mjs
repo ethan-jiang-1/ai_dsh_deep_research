@@ -19,6 +19,7 @@ const good = {
   changes: ['scripts/lib/fix.mjs', 'tests/checks/fix.test.mjs'],
   red: { command: 'node --test tests/checks/fix.test.mjs', exit: 1, output: 'not ok 1 - old' },
   green: { command: 'node --test tests/checks/fix.test.mjs', exit: 0 },
+  guard: { path: 'tests/checks/fix.test.mjs' },
 }
 const structured = (value = good, opened = '2026-11-15') => card(`## 修复落地
 
@@ -70,7 +71,7 @@ test('未知字段 / 空命令 / 非法 JSON / 双块 → 红', () => {
 })
 
 test('红证不可重放且 changes 无测试资产 → 红；有测试资产 → 绿', () => {
-  const oneOff = { changes: ['scripts/lib/fix.mjs'], red: { command: 'node -e "throw 1"', exit: 1 }, green: { command: 'node -e ""', exit: 0 } }
+  const oneOff = { changes: ['scripts/lib/fix.mjs'], red: { command: 'node -e "throw 1"', exit: 1 }, green: { command: 'node -e ""', exit: 0 }, guard: good.guard }
   assert.match(fixEvidenceProblems(structured(oneOff)).join('；'), /不可重放|测试\/门禁资产/)
   const withAsset = { ...oneOff, changes: ['scripts/lib/fix.mjs', 'tests/checks/fix.test.mjs'] }
   assert.deepEqual(fixEvidenceProblems(structured(withAsset)), [])
@@ -86,4 +87,13 @@ test('负例留证：exit 是 oracle——output 里写“通过/失败”不改
   assert.deepEqual(fixEvidenceProblems(structured(lyingOutput)), [])
   const wrongExit = { ...good, red: { ...good.red, exit: 0 } }
   assert.match(fixEvidenceProblems(structured(wrongExit)).join('；'), /red\.exit/)
+})
+
+test('每个修复必须沉淀 guard：path 或 notMechanizable+trigger', () => {
+  const withoutGuard = { ...good }
+  delete withoutGuard.guard
+  assert.match(fixEvidenceProblems(structured(withoutGuard)).join('；'), /guard/)
+  assert.match(fixEvidenceProblems(structured({ ...good, guard: { path: 'src/x.mjs' } })).join('；'), /tests\/|scripts\/smoke/)
+  assert.deepEqual(fixEvidenceProblems(structured({ ...good, guard: { notMechanizable: '浏览器相位', trigger: '再次出现假红时' } })), [])
+  assert.match(fixEvidenceProblems(structured({ ...good, guard: { path: 'tests/checks/fix.test.mjs', notMechanizable: 'x', trigger: 'y' } })).join('；'), /不能同时/)
 })

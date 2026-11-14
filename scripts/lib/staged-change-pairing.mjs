@@ -14,6 +14,7 @@
 // `read`/`exists` 由调用方注入（keyless 测试不触盘）。
 import { dirname, join, normalize } from 'node:path'
 import { dispositionTargetOf } from './backlog-liveness.mjs'
+import { fixGuardOf } from './fix-evidence.mjs'
 import { fixChangePathsOf, fixEvidenceProblems } from './fix-evidence.mjs'
 
 /**
@@ -70,7 +71,11 @@ export function stagedChangePairingProblems({ staged, read, exists }) {
   //    活跃 修复落地 卡也拦（不只归档）：状态一翻就得有实证，不能等归档才补。
   const fixPairProblems = (card, text) => {
     const evidence = fixEvidenceProblems(text)
-    if (evidence.length > 0) return [`${card} 不是可复核的修复：${evidence.join('；')}——先写 ## 修复落地 的 改动/红证/绿证`]
+    if (evidence.length > 0) return [`${card} 不是可复核的修复：${evidence.join('；')}——先写 ## 修复落地 的 改动/红证/绿证/guard`]
+    const guard = fixGuardOf(text)
+    if (guard !== null && typeof guard.path === 'string' && !exists(guard.path)) {
+      return [`${card} 的 guard 路径不存在：${guard.path}——修复必须沉淀永久守卫，或写 notMechanizable + trigger`]
+    }
     const changes = fixChangePathsOf(text).filter((path) => !path.startsWith('_backlog/'))
     // 只做精确文件对账：目录前缀不再命中任意同目录 staged 文件（BUG-189）。
     const hit = changes.filter((path) => present.has(path))
