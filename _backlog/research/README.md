@@ -186,6 +186,7 @@ status——材料的状态就是题的状态。
 |---|---|---|---|
 | [测试资产围栏](test-asset-fence/README.md) | 现有测试资产成本/覆盖如何，哪些慢资产可降级/合并/退役、哪些快守卫要补 | [issue 2026-11-13-test-asset-fence](../_archived/settled_issues/2026-11-13-test-asset-fence.md) | [test-asset-fence](test-asset-fence/2026-11-13-test-asset-fence.md) |
 | [notes 工程纪律补借](notes-discipline-borrow/README.md) | DSH 原生 notes 制度里，孙目录/状态面/冻结层还差哪些工程纪律 | [已结卡 2026-11-14-notes-discipline-hardening](../_archived/settled_issues/2026-11-14-notes-discipline-hardening.md) | [2026-11-13-notes-discipline-borrow](notes-discipline-borrow/2026-11-13-notes-discipline-borrow.md) |
+| [D55 验证层 Oracle 落地复盘与缺口取证](d55-oracle-gap-audit/README.md) | 已归档卡 `2026-11-14-verification-oracle`（D55）从何而来、首轮落地在哪些面上流于形式、如何在打包与门禁约束下真正闭环 | [issue 2026-11-14-verification-oracle-hardening](../issues/2026-11-14-verification-oracle-hardening.md) | [2026-11-14-d55-provenance-and-oracle-audit](d55-oracle-gap-audit/2026-11-14-d55-provenance-and-oracle-audit.md) |
 
 归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单，也不抄状态（状态正本 = 题名页）。
 

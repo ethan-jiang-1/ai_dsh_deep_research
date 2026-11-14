@@ -7,6 +7,7 @@
 | 卡 | 状态 | 一句话 |
 |---|---|---|
 | [2026-11-11-exploratory-test-strategy](2026-11-11-exploratory-test-strategy.md) | 推敲中 | 探索性验证账本 + 第六轮 charter；批 A 8 张（160–167）与批 B 9 张（168–176）已修归档 |
+| [2026-11-14-verification-oracle-hardening](2026-11-14-verification-oracle-hardening.md) | 待落地 | D55 验证层 Oracle 独立化返工补强：Markdown 单一真源、CI `yaml` AST + 规范 `run:` 门、`fix-evidence` 四绕过封堵、五角色快照 B 层 keyless 与 72 卡双账收口 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
