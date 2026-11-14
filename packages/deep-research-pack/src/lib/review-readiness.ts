@@ -31,6 +31,7 @@ const AMBIGUOUS = 'ambiguous' as const
 /**
  * 把非正文行（fence / HTML 注释 / indented code）替换为空行（BUG-169/178/179/183）：
  * 支持 blockquote/list 容器、0–3 空格 fence、4 空格 indented code、跨行 HTML 注释；
+ * fence 在原始行判定（注释后的同行 ``` 不是 fence）；indented code 不打断段落；
  * 行数与原文一致，未闭合 fence/注释按剩余全文处理（fail-closed）。与 notes 的 note-scan
  * 由 tests/contracts/markdown-mask-conformance.spec.mjs 钉住同判。
  */
@@ -63,12 +64,23 @@ const stripComments = (line: string, inComment: boolean): { readonly text: strin
 }
 const isIndentedCode = (line: string): boolean => /^(?: {4}|\t)/.test(line.replace(/^(?: {0,3}> ?)+/, ''))
 
+/** 这一行是否延续段落（heading/列表项/空行/围栏/注释之后不是段落）。 */
+const isParagraphLine = (content: string): boolean => {
+  if (content.trim() === '') return false
+  if (/^ {0,3}#{1,6}(?:\s|$)/.test(content)) return false
+  if (/^ {0,3}(?:[-*+]|\d+[.)])(?:\s|$)/.test(content)) return true
+  return true
+}
+
 export function maskReadinessLines(text: string): string[] {
   const lines = text.replace(/\r\n?/g, '\n').split('\n')
   const out: string[] = []
   let fence: { readonly char: string; readonly length: number } | null = null
   let inComment = false
+  let inIndented = false
+  let prevParagraph = false // 文档开头不是段落：indented code 可起始
   for (const line of lines) {
+    const blank = line.trim() === ''
     if (fence !== null) {
       const match = FENCE.exec(containerRest(line))
       const marker = match?.[2] ?? ''
@@ -76,21 +88,46 @@ export function maskReadinessLines(text: string): string[] {
         fence = null
       }
       out.push('')
+      prevParagraph = false
       continue
     }
-    const stripped = stripComments(line, inComment)
-    inComment = stripped.inComment
-    if (stripped.text === '') { out.push(''); continue }
-    const match = FENCE.exec(containerRest(stripped.text))
+    const content = containerRest(line)
+    // 行首注释 = CommonMark HTML block（type 2）：整行是 HTML，含 `-->` 后的同行文本。
+    if (inComment || /^ {0,3}<!--/.test(content)) {
+      const end = line.indexOf('-->')
+      inComment = end === -1
+      out.push('')
+      prevParagraph = false
+      continue
+    }
+    const stripped = stripComments(line, false)
+    if (stripped.inComment) inComment = true
+    // fence 只认行首（去容器前缀后的原始行）；注释后的同一行 ``` 不是 fence。
+    const match = FENCE.exec(content)
     const marker = match?.[2] ?? ''
     if (match !== null && marker !== '' && !(marker.charAt(0) === '`' && (match[3] ?? '').includes('`'))) {
       fence = { char: marker.charAt(0), length: marker.length }
       out.push('')
+      prevParagraph = false
+      continue
+    }
+    if (inIndented) {
+      if (blank || isIndentedCode(content)) {
+        out.push('')
+        prevParagraph = false
+        continue
+      }
+      inIndented = false
+    } else if (!blank && isIndentedCode(content) && !prevParagraph) {
+      inIndented = true
+      out.push('')
+      prevParagraph = false
       continue
     }
     out.push(stripped.text)
+    prevParagraph = isParagraphLine(content)
   }
-  return out.map((line) => (line !== '' && isIndentedCode(line) ? '' : line))
+  return out
 }
 
 function maskFencedLines(text: string): string[] {
