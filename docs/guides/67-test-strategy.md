@@ -41,6 +41,31 @@
 | C11 文档/规则漂移 | 门禁/契约 | 文档副本同源、计数正本、路径/锚点门禁 | 人读 |
 | C12 残余 | 先归因 | 一次探针/现场；归不进去 = 先补归因，不硬塞 | 猜 |
 
+### 2026-11-14 批 A 增量（8 卡；探索卡第六轮）
+
+> 失败类账本的增量案例；159 例全量见[普查](../../_backlog/_archived/research/dsh-test-strategy/2026-11-13-failure-class-census.md)。
+> 每条卡的复现、根因与判据在卡内；这一表只记「类 → 缺口的共同形状 → 类级守卫方向」。
+
+| 失败类 | 卡 | 共同缺口 | 类级守卫方向 |
+|---|---|---|---|
+| C7/C2 | [160](../../_backlog/_archived/fixed_bugs/BUG-160-smoke-registry-mention-not-execution.md)、[161](../../_backlog/_archived/fixed_bugs/BUG-161-ci-jobs-job-id-regex-skips-underscore.md)、[162](../../_backlog/_archived/fixed_bugs/BUG-162-nested-smoke-invisible-to-registry-and-lane.md) | 枚举/执行面窄于声称面：文件名提及、job 名正则、顶层目录 | 结构化解析（run steps / jobs keys / 递归 walk）或显式禁例外；反证覆盖合法 id/路径 |
+| C7/C11 | [163](../../_backlog/_archived/fixed_bugs/BUG-163-model-workflow-pull-request-target-trigger.md) | 允许面用否定词表（只禁 `pull_request`/`push`） | 枚举完整键集合，白名单恰等于预期事件 |
+| C4/C9 | [164](../../_backlog/_archived/fixed_bugs/BUG-164-snapshot-why-accepts-flag-as-carrier.md) | CLI 值 token 未区分 flag 与载体 | 值 token 类型校验 + 缺值/flag/空值矩阵 |
+| C8/C4 | [165](../../_backlog/_archived/fixed_bugs/BUG-165-note-format-quoted-status-and-negated-evidence.md) | 全文正则冒充语义（引用状态行、否定节） | 先剥离引用/围栏；按节判定「至少一条非否定证据」 |
+| C2/C7 | [166](../../_backlog/_archived/fixed_bugs/BUG-166-note-tree-hidden-directory-bypass.md) | 扫描面在目录类型判断前收窄 | 类型判断先于点文件豁免；隐藏目录红 |
+| C4 | [167](../../_backlog/_archived/fixed_bugs/BUG-167-method-heading-invisible-format-chars-duplicate.md) | Unicode 身份未归一（`\p{Cf}`） | 标题 codec 单一归一面；空白 + 格式符矩阵 |
+
+### 2026-11-14 批 B 增量（7 卡；探索卡第七轮）
+
+| 失败类 | 卡 | 共同缺口 | 类级守卫方向 |
+|---|---|---|---|
+| C7/C8 | [168](../../_backlog/bugs/BUG-168-legacy-present-payload-substring-false-positive.md) | 旧场 present 按整段载荷找 slug（内容提及冒充路径） | present 路径字段 codec；所有分支只读 `files[].path` + 精确前缀 |
+| C7/C8 | [169](../../_backlog/bugs/BUG-169-readiness-fenced-code-verdict.md)、[170](../../_backlog/bugs/BUG-170-readiness-bold-label-not-recognized.md) | readiness 的 Markdown 结构建模不全：fenced block 与标签加粗 | 先块级剥离 fence；标签装饰归一；示例/引用不计 |
+| C7/C2 | [171](../../_backlog/bugs/BUG-171-protocol-version-chain-only-previous-snapshot.md) | 版本链只建模一跳（v3 不查 v1） | 按 1..v-1 枚举快照；逐份 schema/version/hash |
+| C7/C2 | [172](../../_backlog/bugs/BUG-172-smoke-registry-if-false-step-counted.md) | 「执行」不含 step 条件（`if: false` 仍算） | step-aware 执行面：跳过条件/continue-on-error 红 |
+| C7/C2 | [173](../../_backlog/bugs/BUG-173-client-effect-bracket-access-escapes-return-gate.md) | AST 形状窄于 API（方括号 effect 逃逸） | effect 调用的单一 predicate（Property/Element 同判） |
+| C9/C10 | [174](../../_backlog/bugs/BUG-174-lifecycle-stale-dist-tarball.md) | 产物新鲜度未建模（旧 tarball 冒充 HEAD） | 所有消费 `_dist` 的 entry 共用 artifact freshness 谓词 |
+
 **成本原则**：同一失败类能在纯函数层证，就不上进程/浏览器/模型；上贵层必须能说出「unit 为什么
 看不见」。**不是所有测试都要矩阵**：纯算术、封闭枚举 + 唯一写方、否决式不变量、受控常量路径、
 单次调用契约，举例/不变量就够（详见 class-level-guards §F）。

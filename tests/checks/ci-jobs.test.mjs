@@ -5,6 +5,7 @@
 // 这是静态清单契约；CI 行为仍需在 GitHub 上跑出一次绿。
 //
 // 反证：删掉聚合 job 的一个 need → 本文件红；把 skipped 从失败条件删掉 → 红；还原 → 绿。
+// BUG-161：job id 允许下划线/大写；解析 `jobs:` 块，不用窄字符集正则。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -13,13 +14,37 @@ import { fileURLToPath } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const TEXT = readFileSync(join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8')
-const jobs = [...TEXT.matchAll(/^  ([a-z][a-z0-9-]*):$/gm)].map((m) => m[1]).filter((name) => !['on', 'jobs', 'permissions', 'concurrency', 'push', 'pull_request', 'workflow_dispatch', 'schedule'].includes(name))
+
+/** `jobs:` 块里的键集合（job id 允许下划线/大写；BUG-161）。 */
+function jobNamesOf(text) {
+  const start = text.search(/^jobs:\s*$/m)
+  assert.notEqual(start, -1, 'ci.yml 缺 jobs: 块')
+  const rest = text.slice(start + 'jobs:'.length)
+  const end = rest.search(/^\S/m)
+  const block = end === -1 ? rest : rest.slice(0, end)
+  return [...block.matchAll(/^  ([A-Za-z_][A-Za-z0-9_-]*):\s*$/gm)].map((match) => match[1])
+}
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+const jobs = jobNamesOf(TEXT)
 const blockOf = (name) => {
-  const start = TEXT.search(new RegExp(`^  ${name}:$`, 'm'))
+  const start = TEXT.search(new RegExp(`^  ${escapeRegExp(name)}:\\s*$`, 'm'))
   assert.ok(start !== -1, `ci.yml 缺 job ${name}`)
-  const next = TEXT.slice(start + 1).search(/^  [a-z][a-z0-9-]*:$/m)
+  const next = TEXT.slice(start + 1).search(/^  [A-Za-z_][A-Za-z0-9_-]*:\s*$/m)
   return next === -1 ? TEXT.slice(start) : TEXT.slice(start, start + 1 + next)
 }
+
+test('CI 作业清单：job id 字符集含下划线/大写', () => {
+  const synthetic = `jobs:
+  keyless:
+    runs-on: ubuntu-latest
+  zz_probe_job:
+    runs-on: ubuntu-latest
+  all-checks-passed:
+    needs: [keyless]
+`
+  assert.deepEqual(jobNamesOf(synthetic), ['keyless', 'zz_probe_job', 'all-checks-passed'])
+})
 
 test('CI 聚合：all-checks-passed 覆盖全部其它 job，且 skipped 判红', () => {
   assert.ok(jobs.includes('all-checks-passed'), '缺书签式聚合 job all-checks-passed')

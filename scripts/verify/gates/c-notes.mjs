@@ -24,8 +24,8 @@ export function runC() {
   else {
     let notes = 0;
     for (const ent of readdirSync(notesDir, { withFileTypes: true })) {
-      if (ent.name.startsWith('.')) continue;
       if (!ent.isDirectory()) {
+        if (ent.name.startsWith('.')) continue;
         if (ent.name === 'INDEX.md')
           fail(gate, 'notes/INDEX.md: 禁止集中索引（路径即清单；浏览生命周期目录或检索）');
         else if (ent.name.endsWith('.md') && !ROOT_FILES.has(ent.name))
@@ -37,11 +37,11 @@ export function runC() {
         continue;
       }
       for (const child of readdirSync(join(notesDir, ent.name), { withFileTypes: true })) {
-        if (child.name.startsWith('.')) continue;
         if (child.isDirectory()) {
           fail(gate, `notes/${ent.name}/${child.name}/: 禁止嵌套目录（树深固定为 notes/<lifecycle>/<note>.md；分类层未引入，加层是显式结构调整）`);
           continue;
         }
+        if (child.name.startsWith('.')) continue;
         if (child.name === 'INDEX.md') {
           fail(gate, `notes/${ent.name}/INDEX.md: 禁止集中索引（路径即清单）`);
           continue;
@@ -82,14 +82,17 @@ export function runC() {
       fn(ent, readFileSync(join(dir, ent), 'utf8'));
     }
   };
-  // 状态行 = 唯一一条 `> 状态：`，且住头七行；返回值 = 剥壳后的裸值。
+  // 状态行 = 头七行内的唯一一条 `> 状态：`；正文引用/代码围栏里的状态行不算状态（BUG-165）。
   const statusOf = (text) => {
     const lines = text.split('\n');
-    const idx = lines.flatMap((l, i) => (l.startsWith('> 状态：') ? [i] : []));
-    if (idx.length === 0) return { ok: false, why: '缺状态行' };
-    if (idx.length > 1) return { ok: false, why: `状态行必须唯一（发现 ${idx.length} 条，行 ${idx.map((i) => i + 1).join('/')}）——正文引文不算状态` };
-    if (idx[0] > 6) return { ok: false, why: `状态行须在头七行（当前第 ${idx[0] + 1} 行）——头部是状态面` };
-    const value = lines[idx[0]].replace(/^> 状态：/, '').replaceAll('**', '').trim();
+    const head = lines.slice(0, 7);
+    const idx = head.flatMap((l, i) => (l.startsWith('> 状态：') ? [i] : []));
+    if (idx.length === 0) {
+      const late = lines.findIndex((l, i) => i >= 7 && l.startsWith('> 状态：'));
+      return { ok: false, why: late === -1 ? '缺状态行' : `状态行须在头七行（当前第 ${late + 1} 行）——头部是状态面` };
+    }
+    if (idx.length > 1) return { ok: false, why: `状态行必须唯一（头七行内发现 ${idx.length} 条，行 ${idx.map((i) => i + 1).join('/')}）——正文引文不算状态` };
+    const value = head[idx[0]].replace(/^> 状态：/, '').replaceAll('**', '').trim();
     return { ok: true, value, line: idx[0], lines };
   };
   const validDate = (y, m, d) => {
@@ -122,11 +125,16 @@ export function runC() {
   // 当前潜伏：71 篇命中者全走真 `##`，唯一无 h2 的那篇带 grandfather 注释）。
   // 词表按**实测标题族**归纳，容忍历史命名变体（验证/检查/验收/实录/记录/实证/探针/
   // 全绿/复验/证据）——不逼统一命名，否则 25 篇有效历史命名被误杀。
-  // 否定式标题必须排除（2026-10-08 二轮自审抓获）：`## 未验证的猜测` / `## 无验证` /
-  // `## 待验证` 原先**因为"验证"二字出现而通过**——即"明说没有证据"反而满足"要有证据节"，
-  // 语义倒置。紧邻否定词 + 证据词 = 该标题在声明缺席，不算证据节。
-  const VERIFY_SECTION = /^##(?!#)\s*[^\n]*(验证|检查|验收|实录|记录|实证|探针|全绿|复验|证据)/m;
-  const VERIFY_NEGATED = /^##(?!#)[^\n]*(未|无|待|免|非|不|尚未)(验证|检查|验收|实录|记录|实证|探针|复验|证据)/m;
+  // 否定式标题按**标题**排除（BUG-165）：`## 未验证的猜测` / `## 无验证` / `## 待验证`
+  // 是声明缺席，不算证据节；但同一篇里另有一条非否定证据 h2 时整篇仍合格——旧实现对全文
+  // `VERIFY_NEGATED.test(text)`，任意否定标题会把合法证据节一起判掉。
+  const EVIDENCE_WORD = '验证|检查|验收|实录|记录|实证|探针|全绿|复验|证据';
+  const EVIDENCE_HEADING = new RegExp(EVIDENCE_WORD);
+  const NEGATED_HEADING = new RegExp(`(未|无|待|免|非|不|尚未)(?:${EVIDENCE_WORD})`);
+  const hasPositiveEvidence = (text) => text.split('\n')
+    .filter((line) => /^##(?!#)\s*/.test(line))
+    .map((line) => line.replace(/^##(?!#)\s*/, ''))
+    .some((title) => EVIDENCE_HEADING.test(title) && !NEGATED_HEADING.test(title));
   each('implemented', (ent, text) => {
     const g = GRANDFATHER.test(text);
     const st = statusOf(text);
@@ -137,8 +145,8 @@ export function runC() {
       fail(gate, `notes/implemented/${ent}: 缺"## 决定"节（遗留形态须标 grandfather 注释，见 notes/README.md）`);
     if (!/^## 输掉的方案/m.test(text) && !g)
       fail(gate, `notes/implemented/${ent}: 缺"## 输掉的方案"节（遗留形态须标 grandfather 注释，见 notes/README.md）`);
-    if ((!VERIFY_SECTION.test(text) || VERIFY_NEGATED.test(text)) && !g)
-      fail(gate, `notes/implemented/${ent}: 缺"实际跑过的验证"节——无证据的"完成"不算完成（否定式标题如"## 未验证的猜测"不算证据节；词表见 note-format 实现注释；遗留形态标 grandfather）`);
+    if (!hasPositiveEvidence(text) && !g)
+      fail(gate, `notes/implemented/${ent}: 缺"实际跑过的验证"节——无证据的"完成"不算完成（否定式标题如"## 未验证的猜测"不算证据节；至少一条非否定证据 h2 才算；词表见 note-format 实现注释；遗留形态标 grandfather）`);
     // ── 本断言的**已知边界**（如实登记，不假装它更强）──────────────────────────────
     // 这是**在场检查**，不是**内容检查**：`## 证据待补` / `## 验证计划（未执行）` 这类空洞
     // 或自认未执行的标题同样会通过（对抗测试实证）。机械面在这里能保证的只有"作者被逼到

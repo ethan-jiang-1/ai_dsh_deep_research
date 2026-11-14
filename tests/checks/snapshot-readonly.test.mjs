@@ -42,4 +42,17 @@ test('快照回放：默认只读语义；只读 / update-expected 互斥；DSH_
     () => resolveSnapshotMode({ argv: ['--update-expected', '--why', '  '], env: {} }),
     /--why/,
   )
+  // BUG-164 红证：缺失值时后面的 flag 不得被当成载体。
+  for (const argv of [
+    ['--update-expected', '--why', '--port', '3110'],
+    ['--update-expected', '--why', '--case'],
+    ['--update-expected', '--why'],
+  ]) {
+    assert.throws(() => resolveSnapshotMode({ argv, env: {} }), /--why/, `必须拒绝 flag/缺值：${JSON.stringify(argv)}`)
+  }
+  assert.deepEqual(resolveSnapshotMode({ argv: ['--update-expected', '--why', 'none'], env: {} }), {
+    readOnly: false,
+    updateExpected: true,
+    why: 'none',
+  })
 })

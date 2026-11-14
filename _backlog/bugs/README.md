@@ -12,10 +12,26 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [BUG-160](BUG-160-smoke-registry-mention-not-execution.md) | 等人拍板 | P2 | smoke-registry 只查文件名出现：CI 执行行被注释掉仍绿 |
+| [BUG-168](BUG-168-legacy-present-payload-substring-false-positive.md) | 等人拍板 | P2 | 旧场 present 按整段载荷找 slug：别的 bundle 的 present 含一句提及即放行 |
+| [BUG-169](BUG-169-readiness-fenced-code-verdict.md) | 等人拍板 | P1 | readiness 把代码围栏里的判定当事：示例块可翻转 PASS/FAIL |
+| [BUG-170](BUG-170-readiness-bold-label-not-recognized.md) | 等人拍板 | P2 | readiness 不认加粗标签 `**readiness**: FAIL`：合法 Markdown 被判无判定 |
+| [BUG-171](BUG-171-protocol-version-chain-only-previous-snapshot.md) | 等人拍板 | P2 | protocol v3 的版本链只查 v2：`protocol/v1.json = {}` 仍 PASS |
+| [BUG-172](BUG-172-smoke-registry-if-false-step-counted.md) | 等人拍板 | P2 | smoke-registry 把 `if: false` 的 run 行当执行：跳过的 smoke 仍算 CI 资产 |
+| [BUG-173](BUG-173-client-effect-bracket-access-escapes-return-gate.md) | 等人拍板 | P2 | client-effect-return 只认点号：`scoped['effect']` 的无返回回调逃逸 |
+| [BUG-174](BUG-174-lifecycle-stale-dist-tarball.md) | 修复就绪 | P2 | lifecycle 不校验 `_dist` tarball 新鲜度：可能验证旧产物并 ALL PASS |
 
 ## 最近归档
 
+（2026-11-14 第六轮批 A 修复闭环（8 张，160–167）：
+[160](../_archived/fixed_bugs/BUG-160-smoke-registry-mention-not-execution.md) CI 执行面；
+[161](../_archived/fixed_bugs/BUG-161-ci-jobs-job-id-regex-skips-underscore.md) CI job 清单；
+[162](../_archived/fixed_bugs/BUG-162-nested-smoke-invisible-to-registry-and-lane.md) 嵌套 smoke；
+[163](../_archived/fixed_bugs/BUG-163-model-workflow-pull-request-target-trigger.md) with-key 触发面；
+[164](../_archived/fixed_bugs/BUG-164-snapshot-why-accepts-flag-as-carrier.md) snapshot --why；
+[165](../_archived/fixed_bugs/BUG-165-note-format-quoted-status-and-negated-evidence.md) note-format；
+[166](../_archived/fixed_bugs/BUG-166-note-tree-hidden-directory-bypass.md) note-tree；
+[167](../_archived/fixed_bugs/BUG-167-method-heading-invisible-format-chars-duplicate.md) 方法标题 Cf。
+）
 （2026-11-13 交付门/证据面复查批（11 张，149–159）：
 [149](../_archived/fixed_bugs/BUG-149-hitl2-pending-vocabulary-holes.md) HITL2 pending 词表；
 [150](../_archived/fixed_bugs/BUG-150-readiness-keyword-window-still-hijacked.md) readiness 范围仲裁；

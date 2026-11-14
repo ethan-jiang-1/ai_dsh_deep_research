@@ -1,5 +1,6 @@
 // 真模型档可触发通道契约（W3-7）——model-smoke 只能手动触发，且缺 secret 时 preflight 硬失败。
 // 这是静态形状契约；真实运行由有凭据的人手动触发后记录，不在 PR/required 里。
+// BUG-163：白名单是「on: 的键集合恰为 workflow_dispatch」，不是只禁 pull_request/push 两个词。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -9,10 +10,28 @@ import { fileURLToPath } from 'node:url'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const TEXT = readFileSync(join(ROOT, '.github', 'workflows', 'model-smoke.yml'), 'utf8')
 
+/** `on:` 块的事件键集合（BUG-163：白名单必须恰为 workflow_dispatch）。 */
+function onKeysOf(text) {
+  const start = text.search(/^on:\s*$/m)
+  assert.notEqual(start, -1, 'model-smoke 缺 on: 块')
+  const rest = text.slice(start + 'on:'.length)
+  const end = rest.search(/^\S/m)
+  const block = end === -1 ? rest : rest.slice(0, end)
+  return [...block.matchAll(/^  ([A-Za-z_][A-Za-z0-9_-]*):\s*$/gm)].map((match) => match[1])
+}
+
 test('model-smoke：只 workflow_dispatch，不进 PR/push', () => {
-  assert.match(TEXT, /^on:\s*\n\s+workflow_dispatch:\s*$/m, 'model-smoke 必须只手动触发')
+  assert.deepEqual(onKeysOf(TEXT), ['workflow_dispatch'], 'model-smoke 的 on: 只能有 workflow_dispatch（pull_request_target/workflow_run/release 等都不行）')
   assert.doesNotMatch(TEXT, /^  pull_request:/m, 'model-smoke 不得进 PR')
   assert.doesNotMatch(TEXT, /^  push:/m, 'model-smoke 不得进 push')
+})
+
+test('on: 键集合解析：额外事件（含 pull_request_target）必须可见', () => {
+  const synthetic = `on:
+  workflow_dispatch:
+  pull_request_target:
+`
+  assert.deepEqual(onKeysOf(synthetic), ['workflow_dispatch', 'pull_request_target'])
 })
 
 test('model-smoke：用 secret 注入 key，跑 l4-lite.e2e（缺 key 由脚本 preflight exit 2 拦）', () => {

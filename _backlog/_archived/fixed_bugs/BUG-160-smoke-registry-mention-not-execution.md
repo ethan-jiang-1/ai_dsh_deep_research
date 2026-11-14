@@ -1,16 +1,16 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-13
 ---
 
 # BUG-160：smoke-registry 只查文件名出现——CI 执行行被注释掉仍绿
 
-> 严重级别：P2 ｜ 发现：2026-11-13 ｜ 状态：等人拍板 — 修复触及门禁与验收合同（D54 必需关），需用户放行
+> 严重级别：P2 ｜ 发现：2026-11-13 ｜ 状态：已修 — smoke-registry 改认可执行 run 行；注释/echo 不再算（2026-11-14，去向：none — 缺陷修复，审查：agent 自审 + 机械门禁）
 >
-> 位置：[tests/checks/smoke-registry.test.mjs](../../tests/checks/smoke-registry.test.mjs)（`ci.includes(file)`）；
-> 机制正本 = [guides/67](../../docs/guides/67-test-strategy.md)「必需关」；
-> 同族先例 = [BUG-053](../_archived/fixed_bugs/BUG-053-plan-header-claims-first-match-anywhere.md)。
+> 位置：[tests/checks/smoke-registry.test.mjs](../../../tests/checks/smoke-registry.test.mjs)（`ci.includes(file)`）；
+> 机制正本 = [guides/67](../../../docs/guides/67-test-strategy.md)「必需关」；
+> 同族先例 = [BUG-053](BUG-053-plan-header-claims-first-match-anywhere.md)。
 
 ## 症状
 
@@ -50,10 +50,10 @@ cp /tmp/ci.yml.bak .github/workflows/ci.yml
 判据层选错：`ci.includes(file)` 证明的是「文件名出现在 ci.yml」，不是「存在一个执行该文件的
 run 步骤，且该 step 所属 job 在 `all-checks-passed.needs` 里」。
 
-- [ci-jobs.test.mjs](../../tests/checks/ci-jobs.test.mjs) 只把守 **job 名**与 `needs` / skipped 语义，
+- [ci-jobs.test.mjs](../../../tests/checks/ci-jobs.test.mjs) 只把守 **job 名**与 `needs` / skipped 语义，
   不解析 step 内容；
 - `echo`、注释、`if: false`、`continue-on-error` 都能让文件名在场而执行不发生；
-- 与 [BUG-053](../_archived/fixed_bugs/BUG-053-plan-header-claims-first-match-anywhere.md) 同族：
+- 与 [BUG-053](BUG-053-plan-header-claims-first-match-anywhere.md) 同族：
   「正文提及冒充声明」→「文件名提及冒充执行」。
 
 ## 影响面
@@ -79,5 +79,11 @@ run 步骤，且该 step 所属 job 在 `all-checks-passed.needs` 里」。
 
 ## 修复关联
 
-未修。触面 = 门禁与验收合同（D54 必需关），按 [_backlog/AGENTS](../AGENTS.md) 的 P2 规则也**不**
+已修（2026-11-14）。触面 = 门禁与验收合同（D54 必需关），按 [_backlog/AGENTS](../../AGENTS.md) 的 P2 规则也**不**
 自授权 → `等人拍板`。修复 owner = `tests/checks`，可与 Y1 的类级守卫（执行面 vs 文本面）同批。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`tests/checks/smoke-registry.test.mjs` 新增 `runBlocksOf` / `executedSmokeFiles`（单行 + `run: |` 块；剥离行尾注释、跳过 echo/printf/cat），ci 归属改用可执行集合。
+- **证据**：`node --test tests/checks/smoke-registry.test.mjs` → 4/4 PASS；全仓 `pnpm test` checks 108/108。
+- **反证**：把 `run: ... run-accept.e2e.mjs` 改成 `run: echo ... # ... run-accept.e2e.mjs` → 测试 3 红「没有可执行的 node 调用」；还原 → 绿。

@@ -46,11 +46,16 @@ const stripVerificationSection = (dirRel) => (dir) => {
 const firstNoteIn = (dir, suffix = '.md') => readdirSync(dir)
   .filter((f) => f.endsWith(suffix) && f !== 'README.md').sort()[0];
 
-/** 状态行重复注入（2026-11-14 note-format 状态面）：在首篇 implemented Note 末尾再塞一条状态行。 */
+/** 状态行重复注入（2026-11-14 note-format 状态面）：在首篇 implemented Note 的**头七行内**
+ *  再插一条状态行——正文末尾的重复按 BUG-165 的合同是引用，不算状态；案例必须注入头部才咬得住唯一性。 */
 const duplicateStatusLine = (dir) => {
   const d = join(dir, 'notes', 'implemented');
   const p = join(d, firstNoteIn(d));
-  appendFileSync(p, '\n> 状态：rejected\n');
+  const lines = readFileSync(p, 'utf8').split('\n');
+  const at = lines.findIndex((l) => l.startsWith('> 状态：'));
+  if (at === -1) throw new Error('注入目标缺状态行');
+  lines.splice(at + 1, 0, '> 状态：rejected');
+  writeFileSync(p, lines.join('\n'));
 };
 
 /** 归档行缺席注入：删掉首篇冻结件的 `> 归档：` 行（冻结件何时入层失去唯一记录）。 */

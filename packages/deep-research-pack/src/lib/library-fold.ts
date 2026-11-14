@@ -49,21 +49,26 @@ const HEADING_LINE = /^##\s+(.+)$/
 /** 标题段：`（…）` / `(…)` 来源注记，或 `〔…〕` 标注。 */
 const HEADING_SEGMENT = /^(?:[（(][^）)]*[）)]|〔[^〕]*〕)/
 const DEFAULT_MARK = '〔默认偏好〕'
+/** Unicode 格式字符（Cf：零宽空格/软连字符/LRM 等）——不可见，不能进 name 身份（BUG-167）。 */
+const FORMAT_CHARS = /\p{Cf}/gu
+const FORMAT_CHAR = /\p{Cf}/u
+const stripFormatChars = (value: string): string => value.replace(FORMAT_CHARS, '')
 
 /**
- * 方法库 heading 的**单一 codec**（D51，BUG-083/085/123/124/127/128 的类）：
+ * 方法库 heading 的**单一 codec**（D51，BUG-083/085/123/124/127/128/138/167 的类）：
  * `## <名>[（provenance）][〔默认偏好〕]`——段间允许空白（含 U+3000），段序不限；
  * 名称 = 首个段之前的文本。`wellFormed` = 名称之后只剩段与空白；尾缀（如 `）备注`）判非法。
  *
+ * 名称身份先剥 Unicode 格式字符（Cf）再比较：同一视觉标题不能因不可见字符变成两个条目。
  * fold 与写路径共用本函数：两侧对同一行必须得到同一个 name/provenance/isDefault。
  */
 export function parseMethodHeading(line: string): ParsedMethodHeading | null {
   const match = HEADING_LINE.exec(line.trimEnd())
   if (match === null) return null
-  const title = (match[1] ?? '').trim()
+  const title = stripFormatChars((match[1] ?? '').trim())
   if (title === '') return null
   const firstSegment = title.search(/[（(〔]/)
-  const name = (firstSegment === -1 ? title : title.slice(0, firstSegment)).trim()
+  const name = stripFormatChars((firstSegment === -1 ? title : title.slice(0, firstSegment)).trim())
   if (name === '') return null
   let rest = firstSegment === -1 ? '' : title.slice(firstSegment)
   let provenance: string | null = null
@@ -75,7 +80,7 @@ export function parseMethodHeading(line: string): ParsedMethodHeading | null {
     const segment = HEADING_SEGMENT.exec(rest)
     if (segment === null) { wellFormed = false; break }
     const raw = segment[0]
-    if ((raw.startsWith('（') || raw.startsWith('(')) && provenance === null) provenance = raw.slice(1, -1)
+    if ((raw.startsWith('（') || raw.startsWith('(')) && provenance === null) provenance = stripFormatChars(raw.slice(1, -1))
     else if (raw === DEFAULT_MARK) isDefault = true
     rest = rest.slice(raw.length)
   }
@@ -84,17 +89,20 @@ export function parseMethodHeading(line: string): ParsedMethodHeading | null {
 
 /** 渲染规范 heading（写路径的 default 操作使用；段序 = name → provenance → 默认标记）。 */
 export function renderMethodHeading(heading: Pick<ParsedMethodHeading, 'name' | 'provenance' | 'isDefault'>): string {
-  const provenance = heading.provenance === null ? '' : `（${heading.provenance}）`
-  return `## ${heading.name}${provenance}${heading.isDefault ? DEFAULT_MARK : ''}`
+  const name = stripFormatChars(heading.name)
+  const provenance = heading.provenance === null ? '' : `（${stripFormatChars(heading.provenance)}）`
+  return `## ${name}${provenance}${heading.isDefault ? DEFAULT_MARK : ''}`
 }
 
 /** 库条目标题行（`## ` 与 `##\t` 同判——读/写共用，BUG-083）。 */
 export const isLibraryHeadingLine = (line: string): boolean => parseMethodHeading(line) !== null
 
 /** 名称里不许出现的标注字符：`（…）`/`(…)` 是 provenance 语法、`〔…〕` 是默认标记语法；
- *  含这些字符的名称会让 fold 与写路径名字不对称（BUG-081）。 */
+ *  含这些字符的名称会让 fold 与写路径名字不对称（BUG-081）。不可见格式字符同理（BUG-167）：
+ *  解析会剥离它们，写入路径必须 fail-loud，不能静默新建一条视觉同名的条目。 */
 export function methodNameIssue(name: string): string | null {
   if (/[（）()〔〕]/.test(name)) return '名称不能包含全角括号「（）」、半角括号「()」或「〔〕」——它们是来源注记/默认标记的语法'
+  if (FORMAT_CHAR.test(name)) return '名称不能包含不可见的 Unicode 格式字符（零宽空格/软连字符/LRM 等）——它们会让同名条目看起来一样'
   return null
 }
 

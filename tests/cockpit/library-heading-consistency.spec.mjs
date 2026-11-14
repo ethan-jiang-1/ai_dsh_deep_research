@@ -79,3 +79,23 @@ test('负控：未识别后缀不会被 fold 当作可改写行', () => {
   assert.equal(parseMethodHeading(head)?.wellFormed, false)
   assert.throws(() => upsertMethodEntry(lib, folded[0]), /不可识别/)
 })
+
+// BUG-167 负例留证 2026-11-14：旧实现下 ZWSP/软连字符等 \p{Cf} 留在 name 里，
+// `foldLibrary` 读出 `方法\u200B`，`upsert('方法')` 判 created → 两条视觉同名。
+// 还原法 = 去掉 parseMethodHeading 的格式字符剥离 / methodNameIssue 的 Cf 拒绝。
+test('身份归一：Unicode 格式字符不制造同名幽灵条目', () => {
+  const sections = { source: 'a', verify: 'b', report: 'c', limit: 'd' }
+  const entry = { name: '方法', provenance: null, isDefault: false, sections, legacyText: null }
+  for (const ch of ['\u200B', '\u00AD', '\u2060', '\u200E', '\u180E']) {
+    const lib = `## 方法${ch}（来源）${BODY}`
+    assert.equal(foldLibrary(lib)[0].name, '方法', `fold 名称应剥掉 ${JSON.stringify(ch)}`)
+    const { text, action } = upsertMethodEntry(lib, entry)
+    assert.equal(action, 'updated', `${JSON.stringify(ch)} 不应造新条目`)
+    assert.equal(foldLibrary(text).length, 1, `${JSON.stringify(ch)} upsert 后条目数`)
+    assert.throws(
+      () => upsertMethodEntry(lib, { ...entry, name: `方法${ch}` }),
+      /不可见|格式|字符/,
+      `${JSON.stringify(ch)} 的写入路径应 fail-loud，不得静默新建`,
+    )
+  }
+})

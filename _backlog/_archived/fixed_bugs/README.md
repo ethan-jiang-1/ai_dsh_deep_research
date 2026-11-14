@@ -165,3 +165,11 @@
 | [BUG-157](BUG-157-verdicts-missing-session-only-warning.md) | BUG-157：verdicts 的 batch.session 缺失只 warning——伪造裁决可引用不存在的 child 会话通过（身份/原文未核） | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
 | [BUG-158](BUG-158-verdict-audit-review-missing-only-warning.md) | BUG-158：verdict-audit 在 review.md 整缺时只 warning——「critical unverifiable + 无 readi | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
 | [BUG-159](BUG-159-claims-evidence-topics-not-validated.md) | BUG-159：claims 的 evidence/topics 从未与盘上对账——可引用不存在的证据文件或绝对路径，audit 无红；schema-scan  | （2026-11-13 修复；证据见卡内「已落地」） | 2026-11-13 |
+| [BUG-160](BUG-160-smoke-registry-mention-not-execution.md) | BUG-160：smoke-registry 的 CI 归属只看文件名出现——注释掉 run 行仍绿 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-161](BUG-161-ci-jobs-job-id-regex-skips-underscore.md) | BUG-161：ci-jobs 的 job 名正则漏下划线/大写——新 job 可不在 needs 里 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-162](BUG-162-nested-smoke-invisible-to-registry-and-lane.md) | BUG-162：scripts/smoke 只扫顶层——嵌套 smoke 永不登记、永不运行 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-163](BUG-163-model-workflow-pull-request-target-trigger.md) | BUG-163：model-smoke 只禁 pull_request/push——pull_request_target 仍绿 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-164](BUG-164-snapshot-why-accepts-flag-as-carrier.md) | BUG-164：snapshot 的 --why 接受下一个 flag 当载体（--why --port） | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-165](BUG-165-note-format-quoted-status-and-negated-evidence.md) | BUG-165：note-format 全文正则把引用状态行/否定节当权威——合法 Note 误杀 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-166](BUG-166-note-tree-hidden-directory-bypass.md) | BUG-166：note-tree 先跳过点目录再判嵌套——隐藏嵌套 Note 绕过树深/闭集 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
+| [BUG-167](BUG-167-method-heading-invisible-format-chars-duplicate.md) | BUG-167：方法标题不归一 Unicode 格式字符——ZWSP/软连字符造同名幽灵条目 | （2026-11-14 修复；证据见卡内「修复落地」） | 2026-11-14 |
