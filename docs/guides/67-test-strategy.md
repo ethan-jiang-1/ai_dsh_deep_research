@@ -67,6 +67,15 @@
 | C7/C2 | [173](../../_backlog/_archived/fixed_bugs/BUG-173-client-effect-bracket-access-escapes-return-gate.md) | AST 形状窄于 API（方括号 effect 逃逸） | effect 调用的单一 predicate（Property/Element 同判） |
 | C9/C10 | [174](../../_backlog/_archived/fixed_bugs/BUG-174-lifecycle-stale-dist-tarball.md) | 产物新鲜度未建模（旧 tarball 冒充 HEAD） | 所有消费 `_dist` 的 entry 共用 artifact freshness 谓词 |
 
+### 2026-11-14 批 C 增量（7 卡；探索卡第八轮）
+
+| 失败类 | 卡 | 共同缺口 | 类级守卫方向 |
+|---|---|---|---|
+| C7/C8 | [177](../../_backlog/bugs/BUG-177-ci-workflow-expression-normalization.md)、[178](../../_backlog/bugs/BUG-178-readiness-markdown-containers-and-bold-paren.md)、[179](../../_backlog/bugs/BUG-179-html-comments-not-masked.md) | 表达式/Markdown 结构建模不完整（`${{ }}`、容器、HTML 注释） | 条件与块级 mask 单一实现；结构闭集矩阵 |
+| C3/C4 | [180](../../_backlog/_archived/fixed_bugs/BUG-180-method-heading-duplicate-unknown-segments-dropped.md)、[183](../../_backlog/bugs/BUG-183-note-scan-indented-status-heading.md) | 已识别段/缩进口径不一致，未知形态被静默消费 | 单一 codec；CommonMark 容器缩进矩阵 |
+| C9/C10 | [181](../../_backlog/bugs/BUG-181-artifact-freshness-deletion-blind.md) | artifact 新鲜度只看 mtime，文件集变化不可见 | 构建清单/哈希；mtime 只作预检 |
+| C3/C8 | [182](../../_backlog/bugs/BUG-182-model-workflow-duplicate-onkeys-empty-map.md) | on: 解析有第二份实现；空映射 `{}` 假红 | 单一事件解析器；空值/mapping 矩阵 |
+
 **成本原则**：同一失败类能在纯函数层证，就不上进程/浏览器/模型；上贵层必须能说出「unit 为什么
 看不见」。**不是所有测试都要矩阵**：纯算术、封闭枚举 + 唯一写方、否决式不变量、受控常量路径、
 单次调用契约，举例/不变量就够（详见 class-level-guards §F）。

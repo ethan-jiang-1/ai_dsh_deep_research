@@ -50,7 +50,7 @@ guides/67 + 技能，本卡保留账本与当前轮 charter。找真缺陷就开
 
 ## 阅读顺序（本卡 1.8k 行）
 
-1. §第六轮 goal / §第七轮 goal（当前要做什么、已探到哪）
+1. §第六轮 goal / §第七轮 goal / §第八轮 goal（当前要做什么、已探到哪）
 2. §覆盖地图（哪些面已探/关闭/空白）
 3. §已知与未决（当前状态）
 4. 历史各节（按主题跳读）：§第 0 轮 pilot → §第 1 轮 charter → §用户答复 → §执行记录 →
@@ -164,6 +164,37 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 - **2026-11-14 Z2/Z3**：`replay-scene.spec` 15/15、`client-load-select.spec` 1/1，无新缺陷；Y3/Y5 关闭。
 - Z4（方法库标点/尾部）未跑；Z5（安装域/hook/world-tree）空白；批 B 7 张（168–174）已开卡，其中 168/169/171 是新增假绿/假红，174 是修复就绪。
 - **观察（不建卡）**：client-load 的 seed 参数在 `registry.json` 的 `args` 与 `ci.yml` 的 client-load 行各有一份字面量；当前同值，但没有契约保证同步（C3 双份事实）。owner = CI/registry；下一次改 fixture路径时先抽共享来源或加 args 对账。
+
+## 第八轮 goal（2026-11-14）：新共享件与结构边界
+
+**进入**：BUG-168–176 已全部修复归档；用户 2026-11-14 再给预算轮次。本轮审计新共享件
+（`ci-workflow` / `note-scan` / `smoke-assets` / `artifact-freshness` / `fix-evidence`）的边界，
+并继续结构/产品邻接。keyless，不调真模型。
+
+| ID | 假设（要杀死的命题） | 最低层 | oracle / 变异 | 预算 | 停止 |
+|---|---|---|---|---|---|
+| Z1 | ci-workflow 的 `if`/`continue-on-error` 表达式归一完备 | 纯函数 | `executedSmokeFiles` 合成 `always()`/`${{ }}`/`true` | 10 min | **中：BUG-177** |
+| Z2 | readiness 的 Markdown 容器/装饰不漏 | 纯函数 | blockquote/indented code/加粗括号 | 10 min | **中：BUG-178** |
+| Z3 | notes/readiness 的块级 mask 覆盖 HTML 注释 | 纯函数 | 注释内证据/判定 | 10 min | **中：BUG-179** |
+| Z4 | 方法标题的未知/重复段不被静默吞掉 | 纯函数 | `（来源1）（来源2）`/`〔草稿〕`/重复默认 | 10 min | **中：BUG-180** |
+| Z5 | artifact 新鲜度能发现文件集变化 | 纯函数 | 删除源文件后比对 | 10 min | **中：BUG-181** |
+| Z6 | model-workflow 复用 on: 解析，空映射不假红 | 静态 + 门禁 | `workflow_dispatch: {}` | 10 min | **中：BUG-182** |
+| Z7 | note-scan 认 CommonMark 0–3 空格缩进 | 纯函数 | 缩进状态/标题矩阵 | 10 min | **中：BUG-183** |
+
+**批 C 发现（2026-11-14，7 卡）**
+
+| 卡 | 面 | 一句话 | 状态 |
+|---|---|---|---|
+| [BUG-177](../bugs/BUG-177-ci-workflow-expression-normalization.md) | Z1 CI 表达式 | `${{ always() }}` 假红、`${{ true }}` continue-on-error 假绿 | 等人拍板 |
+| [BUG-178](../bugs/BUG-178-readiness-markdown-containers-and-bold-paren.md) | Z2 readiness 容器 | blockquote/缩进代码翻转终局；加粗括号假红 | 等人拍板（P1） |
+| [BUG-179](../bugs/BUG-179-html-comments-not-masked.md) | Z3 HTML 注释 | 注释里的证据/判定被当正文 | 等人拍板（P1） |
+| [BUG-180](../_archived/fixed_bugs/BUG-180-method-heading-duplicate-unknown-segments-dropped.md) | Z4 方法标题 | 未知/重复段静默丢失 | 已修 |
+| [BUG-181](../bugs/BUG-181-artifact-freshness-deletion-blind.md) | Z5 产物新鲜度 | 删源文件后旧 tarball 仍 fresh | 修复就绪 |
+| [BUG-182](../bugs/BUG-182-model-workflow-duplicate-onkeys-empty-map.md) | Z6 on: 解析 | 第二份 onKeysOf；`{}` 假红 | 等人拍板 |
+| [BUG-183](../bugs/BUG-183-note-scan-indented-status-heading.md) | Z7 notes 缩进 | 0–3 空格合法缩进被判缺席 | 等人拍板 |
+
+**执行记录**：2026-11-14 七条 charter 全部跑出可复现结果（复现/红绿证据在卡内）；7 张已开卡。
+未跑：安装域默认语言、hook/DOM、world-tree（持续空白，未冒充已验）。
 
 ## 第 0 轮 pilot（2026-11-11，已跑）
 
@@ -331,6 +362,18 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 | Y3 roleFace | 已关闭（无发现） | `replay-scene.spec` 15/15；roleFace 子集/重复/外来/legacy 矩阵覆盖 |
 | Y5 client-load 绑定 | 已关闭（无发现） | `client-load-select.spec` 1/1；标题回退受禁；seed 双份 = 观察 |
 | 方法库标点/尾部邻接 | 未跑 | Z4 空白；下轮候选 |
+
+### 第八轮新增面（2026-11-14）
+
+| 面 | 状态 | 判定 / 证据 |
+|---|---|---|
+| ci-workflow 条件表达式 | 已探 | [BUG-177](../bugs/BUG-177-ci-workflow-expression-normalization.md)：`${{ always() }}` 假红 / `${{ true }}` 假绿 |
+| readiness Markdown 容器 | 已探 | [BUG-178](../bugs/BUG-178-readiness-markdown-containers-and-bold-paren.md)：blockquote/indented code/加粗括号 |
+| HTML 注释块 | 已探 | [BUG-179](../bugs/BUG-179-html-comments-not-masked.md)：notes 证据与 readiness 判定都可被注释冒充 |
+| 方法标题未知/重复段 | 已探 | [BUG-180](../_archived/fixed_bugs/BUG-180-method-heading-duplicate-unknown-segments-dropped.md)：编辑丢段 |
+| artifact 新鲜度（文件集） | 已探 | [BUG-181](../bugs/BUG-181-artifact-freshness-deletion-blind.md)：删除不被发现 |
+| on: 解析复用 | 已探 | [BUG-182](../bugs/BUG-182-model-workflow-duplicate-onkeys-empty-map.md)：第二份 onKeysOf + `{}` 假红 |
+| note-scan 缩进 | 已探 | [BUG-183](../bugs/BUG-183-note-scan-indented-status-heading.md)：0–3 空格合法缩进被误杀 |
 
 ## 已知与未决
 

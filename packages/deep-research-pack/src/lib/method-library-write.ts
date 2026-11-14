@@ -37,7 +37,7 @@ export function upsertMethodEntry(
   }
   const target = matchingHeadingLines(text, name)
   const folded = foldedHeadingLines(text, name)
-  if (target.length > 1 || folded.length > 1) throw new Error(`库里有重名方法「${name}」，拒绝写入`)
+  if (target.length + folded.length > 1) throw new Error(`库里有重名方法「${name}」，拒绝写入`)
   if (target.length === 0 && folded.length > 0) {
     throw new Error(`已存在同名条目但标题格式不可识别（第 ${String((folded[0]?.offset ?? 0) + 1)} 行附近）——先规范化标题再编辑`)
   }
@@ -74,7 +74,13 @@ export function setDefaultMethodEntry(text: string, name: string): { readonly te
   const nameIssue = methodNameIssue(target)
   if (nameIssue !== null) throw new Error(`方法条目名不合法：${nameIssue}`)
   const matches = matchingHeadingLines(text, target)
-  if (matches.length === 0) throw new Error(`库里没有「${target}」`)
+  if (matches.length === 0) {
+    const malformed = foldedHeadingLines(text, target)
+    if (malformed.length > 0) {
+      throw new Error(`已存在同名条目但标题格式不可识别（第 ${String((malformed[0]?.offset ?? 0) + 1)} 行附近）——先规范化标题再设为默认`)
+    }
+    throw new Error(`库里没有「${target}」`)
+  }
   if (matches.length > 1) throw new Error(`库里有重名方法「${target}」，拒绝设为默认`)
   return { text: setDefaultText(text, target) }
 }

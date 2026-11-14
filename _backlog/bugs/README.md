@@ -12,6 +12,12 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
+| [BUG-177](BUG-177-ci-workflow-expression-normalization.md) | 等人拍板 | P2 | ci-workflow 表达式归一不全：`${{ always() }}` 假红、`${{ true }}` continue-on-error 假绿 |
+| [BUG-178](BUG-178-readiness-markdown-containers-and-bold-paren.md) | 等人拍板 | P1 | readiness 容器/缩进代码可翻转终局；带括号的加粗标签假红 |
+| [BUG-179](BUG-179-html-comments-not-masked.md) | 等人拍板 | P1 | HTML 注释不剥：notes 证据可从注释长出，readiness 可被注释翻转 |
+| [BUG-181](BUG-181-artifact-freshness-deletion-blind.md) | 修复就绪 | P2 | artifact 新鲜度只看最新 mtime：删源文件后旧 tarball 仍 fresh |
+| [BUG-182](BUG-182-model-workflow-duplicate-onkeys-empty-map.md) | 等人拍板 | P2 | model-workflow 又写一份 onKeysOf：`workflow_dispatch: {}` 被判无事件 |
+| [BUG-183](BUG-183-note-scan-indented-status-heading.md) | 等人拍板 | P2 | note-scan 不容忍 0–3 空格缩进：合法状态行/证据标题被判缺席 |
 
 ## 最近归档
 

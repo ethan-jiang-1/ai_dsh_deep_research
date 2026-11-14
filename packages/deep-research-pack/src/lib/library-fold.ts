@@ -57,7 +57,8 @@ const stripFormatChars = (value: string): string => value.replace(FORMAT_CHARS, 
 /**
  * 方法库 heading 的**单一 codec**（D51，BUG-083/085/123/124/127/128/138/167 的类）：
  * `## <名>[（provenance）][〔默认偏好〕]`——段间允许空白（含 U+3000），段序不限；
- * 名称 = 首个段之前的文本。`wellFormed` = 名称之后只剩段与空白；尾缀（如 `）备注`）判非法。
+ * 名称 = 首个段之前的文本。`wellFormed` = 名称之后只剩「一个 provenance + 最多一个默认标记」；
+ * 第二个 `（…）`、未知 `〔…〕`、第二个 `〔默认偏好〕` 与尾缀（如 `）备注`）都判非法（BUG-180）。
  *
  * 名称身份先剥 Unicode 格式字符（Cf）再比较：同一视觉标题不能因不可见字符变成两个条目。
  * fold 与写路径共用本函数：两侧对同一行必须得到同一个 name/provenance/isDefault。
@@ -74,14 +75,28 @@ export function parseMethodHeading(line: string): ParsedMethodHeading | null {
   let provenance: string | null = null
   let isDefault = false
   let wellFormed = true
+  let provenanceSeen = false
+  let defaultSeen = false
   while (rest !== '') {
     const ws = /^\s+/.exec(rest)
     if (ws !== null) { rest = rest.slice(ws[0].length); continue }
     const segment = HEADING_SEGMENT.exec(rest)
     if (segment === null) { wellFormed = false; break }
     const raw = segment[0]
-    if ((raw.startsWith('（') || raw.startsWith('(')) && provenance === null) provenance = stripFormatChars(raw.slice(1, -1))
-    else if (raw === DEFAULT_MARK) isDefault = true
+    if (raw.startsWith('（') || raw.startsWith('(')) {
+      // 第二个 provenance 是「已识别形态但不应存在」——不能静默消费（BUG-180）。
+      if (provenanceSeen) { wellFormed = false; break }
+      provenance = stripFormatChars(raw.slice(1, -1))
+      provenanceSeen = true
+    } else if (raw === DEFAULT_MARK) {
+      if (defaultSeen) { wellFormed = false; break }
+      isDefault = true
+      defaultSeen = true
+    } else {
+      // 任何非默认的 〔…〕 都是未知段；写路径不得把它当可改写标题（BUG-180）。
+      wellFormed = false
+      break
+    }
     rest = rest.slice(raw.length)
   }
   return { name, provenance, isDefault, wellFormed }

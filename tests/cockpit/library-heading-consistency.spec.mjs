@@ -99,3 +99,29 @@ test('身份归一：Unicode 格式字符不制造同名幽灵条目', () => {
     )
   }
 })
+
+// 负例留证 2026-11-14：BUG-180——段循环把第二个 `（…）` / 未知 `〔…〕` / 第二个默认标记
+// 当作合法段消费；upsert 重写标题时静默丢段。红配方：删掉 provenanceSeen/defaultSeen/else
+// 分支 → 下方四例 wellFormed 变 true、upsert 不再抛错。
+test('段身份：重复/未知段必须不可改写，写路径 fail-loud 不丢段', () => {
+  const sections = { source: 's', verify: 'v', report: 'r', limit: 'l' }
+  const entry = { name: '方法', provenance: '新来源', isDefault: false, sections, legacyText: null }
+  for (const head of [
+    '## 方法（来源1）（来源2）',
+    '## 方法（来源）〔草稿〕',
+    '## 方法〔草稿〕',
+    '## 方法〔默认偏好〕〔草稿〕',
+    '## 方法〔默认偏好〕〔默认偏好〕',
+  ]) {
+    assert.equal(parseMethodHeading(head)?.wellFormed, false, `应判不可改写：${head}`)
+    const lib = `${head}${BODY}`
+    assert.throws(() => upsertMethodEntry(lib, entry), /不可识别|规范化|重名/, `${head} 不得静默重写`)
+    assert.equal(foldLibrary(lib)[0].name, '方法', `${head} 的名称仍可读（只拒绝改写）`)
+  }
+  // 正例：首个 provenance + 唯一默认标记仍可改写，不丢段。
+  const good = `## 方法（来源1）〔默认偏好〕${BODY}`
+  assert.equal(parseMethodHeading('## 方法（来源1）〔默认偏好〕')?.wellFormed, true)
+  const result = upsertMethodEntry(good, entry)
+  assert.equal(result.action, 'updated')
+  assert.equal(result.text.split('\n')[0], '## 方法（新来源）〔默认偏好〕')
+})
