@@ -46,9 +46,9 @@ test('覆盖：D-1 二十四张 + 批次 D 七张，一条不缺', () => {
   for (const id of BATCH_D) assert.ok(byId.has(`BUG-${id}`), `批次 D 缺账：BUG-${id}`)
 })
 
-test('自指守卫是显式的临时态，不是「已关闭」', () => {
+test('自指守卫若存在，必须是显式临时态；S2b 后允许为 0', () => {
   const selfReferential = bugs.filter((bug) => bug.oracleType === 'self-referential')
-  assert.ok(selfReferential.length > 0, '当前 CI 判据仍是自指；若已换 external，删掉本断言并更新台账')
+  // S2b 已把 CI 三条（184/187/190）换成 external；0 条是合法终点，不是漏账。
   for (const bug of selfReferential) assert.equal(bug.status, 'provisional', `${bug.id}: 自指守卫只能是 provisional`)
 })
 

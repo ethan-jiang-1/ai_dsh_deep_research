@@ -208,11 +208,10 @@
     {
       "id": "BUG-184",
       "mechanism": "CI 表达式：引号 / YAML 注释 / `${{ }}` 归一",
-      "guard": "tests/checks/ci-workflow.test.mjs",
-      "oracleType": "self-referential",
-      "status": "provisional",
-      "redRecipe": "把 normalizeExpression 退回先剥 `${{ }}` 再去引号 → 用例红",
-      "trigger": "S2b 录制式 CI 执行集 oracle 落地后换 external；在此之前新变体仍走探索"
+      "guard": "tests/checks/ci-workflow-oracle.test.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 parseEvents/normalizeExpression/splitCommands 退回旧形态 → oracle 对应 fixture 红"
     },
     {
       "id": "BUG-185",
@@ -233,11 +232,10 @@
     {
       "id": "BUG-187",
       "mechanism": "CI shell 短路/后台/吞错不计执行",
-      "guard": "tests/checks/ci-workflow.test.mjs",
-      "oracleType": "self-referential",
-      "status": "provisional",
-      "redRecipe": "把 splitCommands 退回纯切分且不判 sepAfter → 用例红",
-      "trigger": "S2b 录制式 CI 执行集 oracle 落地后换 external"
+      "guard": "tests/checks/ci-workflow-oracle.test.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 parseEvents/normalizeExpression/splitCommands 退回旧形态 → oracle 对应 fixture 红"
     },
     {
       "id": "BUG-188",
@@ -258,11 +256,10 @@
     {
       "id": "BUG-190",
       "mechanism": "CI `on:` inline flow mapping / key 前空格",
-      "guard": "tests/checks/ci-workflow.test.mjs",
-      "oracleType": "self-referential",
-      "status": "provisional",
-      "redRecipe": "把 parseEvents 退回只认 block mapping → flow 例红",
-      "trigger": "S2b 录制式 CI 执行集 oracle 落地后换 external"
+      "guard": "tests/checks/ci-workflow-oracle.test.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 parseEvents/normalizeExpression/splitCommands 退回旧形态 → oracle 对应 fixture 红"
     }
   ]
 }
