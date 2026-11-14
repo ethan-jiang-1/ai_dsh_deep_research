@@ -1,16 +1,17 @@
 ---
-status: 调研中
+status: 已定性
 opened: 2026-11-14
 ---
 
 # 验证层的 oracle 与沉淀缺口：为什么 D54 之后改善没有体感
 
-> 状态：调研中
+> 状态：已定性
 > 问题：D54 建起了三环四账五关，为什么探索仍能稳定产出 bug？31 张新卡落在哪一层、修复是什么形态、
 > 上一轮交付与未交付各是什么、旧账还有多少没沉淀——这些事实合起来说明下一台阶该做什么？
-> 消费者：[issue 2026-11-14-verification-oracle](../../issues/2026-11-14-verification-oracle.md)
-> 产出的卡：—（结论直接服务上述 issue）
-> 结论：—（issue 定性后更新）
+> 消费者：[已结卡 2026-11-14-verification-oracle](../../settled_issues/2026-11-14-verification-oracle.md)
+> 产出的卡：[验证层 oracle 卡](../../settled_issues/2026-11-14-verification-oracle.md)
+> 结论：oracle 自指是 D54 后仍高产的根因；换 oracle（结构化/录制式/规范形）+ 守卫账，D-1 24 张全沉淀，S4 声明面 0 新变体。
+> 归档：2026-11-14
 
 ## 材料
 

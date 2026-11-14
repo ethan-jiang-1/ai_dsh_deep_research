@@ -5,6 +5,7 @@
 | [2026-11-13-workflow-substance-gates](2026-11-13-workflow-substance-gates.md) | 加工环路的实体检查：判据形状字段 + Note 同节 + 两道收口门（Note 早写、暂存区配对）+ 复发必答 + 判据测试负例 + 金标准理由；D52；1400 测试 / gates-smoke 108 全绿；[Note](../../../notes/implemented/2026-11-13-workflow-substance-gates.md) | 2026-11-13 |
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-11-14-verification-oracle](2026-11-14-verification-oracle.md) | 验证层换 oracle：S1 24 张全沉淀；S2 Markdown 36/CI 29/fix-evidence 结构化+guard；S3 守卫 31/资产 208（194 自指显式）；S4 0 新邻接变体；[Note](../../../notes/implemented/2026-11-14-verification-oracle.md)、[D55](../../../docs/decisions.md#d55) | 2026-11-14 |
 | [2026-11-14-notes-discipline-hardening](2026-11-14-notes-discipline-hardening.md) | notes 纪律补借 P0：`note-tree` 树形闭集/深度/日期前缀 + `note-format` 状态唯一与归档元数据/拒绝条重启条件 + `archiving-a-note` 校准 skill；九类注入红证、gates.e2e 117 案例、verify/test 绿；P1 封印另 trigger；[Note](../../../notes/implemented/2026-11-14-notes-discipline-hardening.md) | 2026-11-14 |
 | [2026-11-13-test-strategy-institutionalization](2026-11-13-test-strategy-institutionalization.md) | 测试策略制度化：D53 命名四车道 + D54 三环四账五关；快照 5 角色 A/B/C、装起效果、类级守卫、CI 聚合/with-key、e2e-021rc2 退役、慢资产预算；[Note](../../../notes/implemented/2026-11-13-test-strategy-institutionalization.md) | 2026-11-14 |
 | [2026-11-13-test-asset-fence](2026-11-13-test-asset-fence.md) | 测试资产围栏 S0–S2：run-accept 夹具同源 + client-surface 直测面 + smoke cost/claim/oracle/sunset 台账；S3 另卡/trigger；[Note](../../../notes/implemented/2026-11-13-test-asset-fence.md) | 2026-11-14 |

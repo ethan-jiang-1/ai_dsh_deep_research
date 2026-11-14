@@ -82,7 +82,7 @@ export function maskReadinessLines(text: string): string[] {
   let prevParagraph = false // 文档开头不是段落：indented code 可起始
   const listIndents: { readonly markerIndent: number; readonly contentIndent: number }[] = []
   const contentOf = (line: string): string => {
-    const top = listIndents.length > 0 ? listIndents[listIndents.length - 1] : null
+    const top = listIndents.at(-1) ?? null
     return top !== null && line.startsWith(' '.repeat(top.contentIndent))
       ? line.slice(top.contentIndent)
       : containerRest(line)
@@ -102,11 +102,20 @@ export function maskReadinessLines(text: string): string[] {
     // 列表内容缩进：`- item` 之后的 2/4 空格是内容缩进，先剥掉再判 fence/缩进代码。
     const listMarker = /^(\s*)([-*+]|\d+[.)])(\s+)/.exec(line)
     if (listMarker !== null) {
-      const markerIndent = listMarker[1].length
-      while (listIndents.length > 0 && listIndents[listIndents.length - 1].markerIndent >= markerIndent) listIndents.pop()
-      listIndents.push({ markerIndent, contentIndent: listMarker[0].length })
+      const markerIndent = listMarker[1]?.length ?? 0
+      while (listIndents.length > 0) {
+        const top = listIndents[listIndents.length - 1]
+        if (top === undefined || top.markerIndent < markerIndent) break
+        listIndents.pop()
+      }
+      listIndents.push({ markerIndent, contentIndent: listMarker[0]?.length ?? 0 })
     } else if (line.trim() !== '') {
-      while (listIndents.length > 0 && /^\s*/.exec(line)[0].length < listIndents[listIndents.length - 1].contentIndent) listIndents.pop()
+      const leading = /^\s*/.exec(line)?.[0].length ?? 0
+      while (listIndents.length > 0) {
+        const top = listIndents[listIndents.length - 1]
+        if (top === undefined || leading >= top.contentIndent) break
+        listIndents.pop()
+      }
     }
     const content = contentOf(line)
     // 行首注释 = CommonMark HTML block（type 2）：整行是 HTML，含 `-->` 后的同行文本。

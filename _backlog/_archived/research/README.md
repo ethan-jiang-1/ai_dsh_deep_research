@@ -12,8 +12,10 @@
 
 ## 题名索引
 
-| [plugin-as-product/](plugin-as-product/README.md) · 插件即产品：独立启动 profile、用户工作区与 run bundle 归属 | 11 份 | [插件即产品决策卡](../settled_issues/2026-11-01-plugin-as-product.md) 及四张子卡 | [父卡](../settled_issues/2026-11-01-plugin-as-product.md)、[D38](../../../docs/decisions.md#d38)、[Note](../../../notes/archived/2026-11-01-plugin-as-product.md) | 2026-11-01 |
 | 名头 | 材料 | 历史消费者 | 产出的卡 | 归档 |
+|---|---|---|---|---|
+| [verification-oracle/](verification-oracle/README.md) · 验证层的 oracle 与沉淀缺口：为什么 D54 之后改善没有体感 | 2 份 | [验证层 oracle 卡](../settled_issues/2026-11-14-verification-oracle.md) | [D55](../../../docs/decisions.md#d55)、[Note](../../../notes/implemented/2026-11-14-verification-oracle.md) | 2026-11-14 |
+| [plugin-as-product/](plugin-as-product/README.md) · 插件即产品：独立启动 profile、用户工作区与 run bundle 归属 | 11 份 | [插件即产品决策卡](../settled_issues/2026-11-01-plugin-as-product.md) 及四张子卡 | [父卡](../settled_issues/2026-11-01-plugin-as-product.md)、[D38](../../../docs/decisions.md#d38)、[Note](../../../notes/archived/2026-11-01-plugin-as-product.md) | 2026-11-01 |
 | [workflow-substance/](workflow-substance/README.md) · 加工环路的实体检查缺口：三次独立审计 | 1 份 | [实体检查卡](../settled_issues/2026-11-13-workflow-substance-gates.md) | [D52](../../../docs/decisions.md#d52)、[Note](../../../notes/implemented/2026-11-13-workflow-substance-gates.md) | 2026-11-13 |
 | [dsh-test-strategy/](dsh-test-strategy/README.md) · DSH 测试策略对标：从「发现缺陷」到「制度化不漏」 | 2 份 | 用户 2026-11-13 请求 + goal `ca549260` | [测试策略制度化卡](../settled_issues/2026-11-13-test-strategy-institutionalization.md)（仍未结，研究已无活跃消费者）、[D54](../../../docs/decisions.md#d54)、[Note](../../../notes/implemented/2026-11-13-test-strategy-institutionalization.md) | 2026-11-13 |
 | [startup-preferences/](startup-preferences/README.md) · 项目研究默认：每个项目起来按哪套偏好跑 | 2 份 + `ux/` | 用户 2026-11-12 直派（公司仓 startup-settings issue 启发） | [项目研究默认卡](../settled_issues/2026-11-12-project-research-defaults.md)、[D50](../../../docs/decisions.md#d50)、[Note](../../../notes/implemented/2026-11-12-project-research-defaults.md) | 2026-11-12 |

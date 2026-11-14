@@ -1,11 +1,11 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-14
 ---
 
 # 推敲：验证层换 oracle + 每个修复沉淀守卫——从「制度齐全」到「证据可对账」
 
-> 立卡：2026-11-14 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-14 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
 >
 > **一句话**：D54 把测试制度建起来了，但改善没有体感——31 张新卡里 22 张落在验证层自身，
 > 修复仍在补启发式；同时旧账 41 张里 22 张没有带号的永久测试，补没补没人能对账。下一台阶不是再加一层
@@ -13,9 +13,27 @@ opened: 2026-11-14
 > 停止条件 = 同一探索协议在声明面上找不到新邻接变体。
 >
 > 证据 = [research/verification-oracle](../research/verification-oracle/README.md)；
-> 计划 Note = `notes/implemented/2026-11-14-verification-oracle.md`（交付时写）。
+> 计划 Note = [Note](../../../notes/implemented/2026-11-14-verification-oracle.md)。
 >
-> 去向：implemented — `notes/implemented/2026-11-14-verification-oracle.md`
+> 结论：S1 24 张全部沉淀；S2 换 oracle（Markdown 36 / CI 29 / fix-evidence 结构化 + guard）；
+> S3 双账（守卫 31、资产 208，194 自指显式）；S4 声明面 0 新邻接变体；verify/test/typecheck 全绿。
+> 去向：implemented — [Note](../../../notes/implemented/2026-11-14-verification-oracle.md)
+> 授权：用户 2026-11-14 直派「推动落地 + 加码」；审查：机械门禁全跑 + 语义自审逐条对验收。
+> 证据 = [research/verification-oracle](../research/verification-oracle/README.md)
+
+## 落地记录（2026-11-14）
+
+- **S1**：普查 D-1 的 24 张全部有永久 keyless 守卫或 source 形状 + 重录触发；守卫账
+  `guard-ledger` 31 项（closed 29 / partial 2，自指 0）。新增守卫：captureReadyOf、state-note、
+  VM 隔离预载、boot timer、probe 端口、smoke 标识符/死 import、client-load 同源等。
+- **S2**：Markdown 录制 oracle 36/36（mdast；note-scan + readiness 同判）；CI 录制 oracle 29/29
+  （真 YAML + 真 bash + 失败 stub）；fix-evidence 结构化块（exit 为 oracle、重复键 fail-closed、
+  guard 必填）；note 状态行规范形（note-format + gates.e2e 红案）。
+- **S3**：guard-ledger（oracleType/status/redRecipe）+ asset-ledger（208 个 spec/check；显式 14 /
+  self-referential 194 显式可见）；新卡缺 guard → 红，路径不在场 → 红。
+- **S4**：换 oracle 后复扫声明面 0 新邻接变体；5 个真分歧（子 shell、列表 fence、跨行注释、
+  绝对路径、重复键）全部先红后绿（探索卡第 10 轮）。
+- **证据**：`pnpm verify` / `pnpm test` / `pnpm typecheck` 全绿；e2e/entry 基线见 Note；D55 入台账。
 
 **问题与期望结果：** 2026-11-14 在 HEAD `85b7026f` 复算：
 

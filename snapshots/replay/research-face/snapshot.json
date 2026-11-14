@@ -19,12 +19,12 @@
       "fixture": "session.v4.jsonl",
       "renderExpected": "ui.expected.md",
       "source": {
-        "codeAnchor": "da4eed0522a9183a59c7409178b8c5a98c75d584",
+        "codeAnchor": "a295bbaa1dfef444f0a4f97f22e582589896e353",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-13T08:59:24Z",
+        "recordedAt": "2026-11-14T06:58:41Z",
         "recording": "live",
         "locale": "zh-CN",
-        "note": "2026-11-13 re-record: current pack content (D51/D52 manual edits) + W1-2 fresh-profile baseline; all four research roles."
+        "note": "2026-11-14 re-record: current pack content (verification-oracle + S2 masks)."
       }
     },
     {
@@ -32,12 +32,12 @@
       "preset": "scout",
       "fixture": "scout/session.v4.jsonl",
       "source": {
-        "codeAnchor": "da4eed0522a9183a59c7409178b8c5a98c75d584",
+        "codeAnchor": "a295bbaa1dfef444f0a4f97f22e582589896e353",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-13T08:59:24Z",
+        "recordedAt": "2026-11-14T06:58:41Z",
         "recording": "live",
         "locale": "zh-CN",
-        "note": "2026-11-13 re-record: current pack content (D51/D52 manual edits) + W1-2 fresh-profile baseline; all four research roles."
+        "note": "2026-11-14 re-record: current pack content (verification-oracle + S2 masks)."
       }
     },
     {
@@ -45,12 +45,12 @@
       "preset": "analyst",
       "fixture": "analyst/session.v4.jsonl",
       "source": {
-        "codeAnchor": "da4eed0522a9183a59c7409178b8c5a98c75d584",
+        "codeAnchor": "a295bbaa1dfef444f0a4f97f22e582589896e353",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-13T08:59:24Z",
+        "recordedAt": "2026-11-14T06:58:41Z",
         "recording": "live",
         "locale": "zh-CN",
-        "note": "2026-11-13 re-record: current pack content (D51/D52 manual edits) + W1-2 fresh-profile baseline; all four research roles."
+        "note": "2026-11-14 re-record: current pack content (verification-oracle + S2 masks)."
       }
     },
     {
@@ -58,12 +58,12 @@
       "preset": "critic",
       "fixture": "critic/session.v4.jsonl",
       "source": {
-        "codeAnchor": "da4eed0522a9183a59c7409178b8c5a98c75d584",
+        "codeAnchor": "a295bbaa1dfef444f0a4f97f22e582589896e353",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-13T08:59:24Z",
+        "recordedAt": "2026-11-14T06:58:41Z",
         "recording": "live",
         "locale": "zh-CN",
-        "note": "2026-11-13 re-record: current pack content (D51/D52 manual edits) + W1-2 fresh-profile baseline; all four research roles."
+        "note": "2026-11-14 re-record: current pack content (verification-oracle + S2 masks)."
       }
     },
     {
@@ -71,17 +71,17 @@
       "preset": "method-editor",
       "fixture": "method-editor/session.v4.jsonl",
       "source": {
-        "codeAnchor": "da4eed0522a9183a59c7409178b8c5a98c75d584",
+        "codeAnchor": "a295bbaa1dfef444f0a4f97f22e582589896e353",
         "vendor": "b830ec950faba0a46dda564be3e2d854afed94f1",
-        "recordedAt": "2026-11-13T10:25:07Z",
+        "recordedAt": "2026-11-14T06:58:41Z",
         "recording": "live",
         "locale": "zh-CN",
-        "note": "2026-11-13 W1-3: method-editor role face recorded from record-home fresh profile; pack content same as W1-2 baseline."
+        "note": "2026-11-14 re-record: current pack content (verification-oracle + S2 masks)."
       }
     }
   ],
   "lastRewrite": {
-    "why": "_backlog/_archived/settled_issues/2026-11-13-test-strategy-institutionalization.md",
-    "at": "2026-11-13T11:03:53.887Z"
+    "why": "_backlog/_archived/settled_issues/2026-11-14-verification-oracle.md",
+    "at": "2026-11-14T06:47:54.742Z"
   }
 }

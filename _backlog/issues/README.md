@@ -7,7 +7,6 @@
 | 卡 | 状态 | 一句话 |
 |---|---|---|
 | [2026-11-11-exploratory-test-strategy](2026-11-11-exploratory-test-strategy.md) | 推敲中 | 探索性验证账本 + 第六轮 charter；批 A 8 张（160–167）与批 B 9 张（168–176）已修归档 |
-| [2026-11-14-verification-oracle](2026-11-14-verification-oracle.md) | 待落地 | 验证层换 oracle + 每个修复沉淀守卫；31 张新卡 22 张在验证层，41 张旧账 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

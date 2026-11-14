@@ -91,7 +91,7 @@ export function runC() {
   };
   // 状态行 = 头七行内的唯一一条 `> 状态：`；fenced code 里的引用行不算状态（BUG-165/175）。
   // 先 mask 围栏再取值：引文即使在头七行内也不得冒充第二条状态。
-  const statusOf = (text) => {
+  const statusOf = (text, { strict = true } = {}) => {
     const lines = text.split('\n');
     const found = statusLines(text);
     if (found.length === 0) return { ok: false, why: '缺状态行' };
@@ -100,6 +100,9 @@ export function runC() {
     }
     const item = found[0];
     if (item.line > 7) return { ok: false, why: `状态行须在头七行（当前第 ${item.line} 行）——头部是状态面` };
+    if (strict && !/^> 状态：[a-z]+(?:\s+——?\s+.+)?$/.test(lines[item.line - 1] ?? '')) {
+      return { ok: false, why: '状态行须为规范形 `> 状态：<裸值>`（全角冒号；无加粗/反引号/HTML；不带日期/括号）' };
+    }
     return { ok: true, value: item.value, line: item.line - 1, lines };
   };
   const validDate = (y, m, d) => {
@@ -179,7 +182,7 @@ export function runC() {
       if (ent === 'README.md' || !ent.endsWith('.md')) continue;
       const rel = `notes/archived/${ent}`;
       const text = readFileSync(join(dir, ent), 'utf8');
-      const st = statusOf(text);
+      const st = statusOf(text, { strict: false });
       if (!st.ok) { fail(gate, `${rel}: ${st.why}`); continue; }
       if (st.value !== 'implemented') {
         fail(gate, `${rel}: 冻结件状态行须为 implemented（位置是 archived，状态不改成 archived）`);

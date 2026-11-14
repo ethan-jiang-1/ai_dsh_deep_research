@@ -2000,3 +2000,20 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **证据**：pidAlive true、oldLockTakenOver true、bug true。
 - **判定**：**发现** → [BUG-126](../_archived/fixed_bugs/BUG-126-method-lock-stale-live-pid.md)（P2，排查中；未改产品代码）。
 - **下一层**：pid 复用/心跳/flock 语义；未跑，记空白。
+
+### 第 10 轮（2026-11-14）：验证层换 oracle 后的邻接变体复扫
+
+- **charter**：S2a/S2b/S2c（[verification-oracle](../_archived/settled_issues/2026-11-14-verification-oracle.md)）之后，验证层的声明面
+  （Markdown mask / CI 执行面 / fix-evidence）是否还有探索能稳定打出的邻接变体；目标 = 0 新变体，
+  或每个发现都归因到「还没换 oracle」的面。
+- **最低层**：纯函数（`maskFencedCode` / `executedSmokeFiles` / `fixEvidenceProblems`）+ 录制 oracle 差分。
+- **实际命令**：`node dev/record-markdown-oracle.mjs --check`（36 例）、
+  `node dev/record-ci-oracle.mjs --check`（29 例）、`node --test tests/checks/fix-evidence.test.mjs`。
+- **发现（全部先红后绿）**：子 shell `(node …)` 漏计；列表内容缩进里的 fence 误判；跨行行内注释的
+  收尾文本被吞；绝对/`$PWD` 路径漏计；fix-evidence 重复键取末值。
+- **判定**：发现 5 → 全部在本轮修掉（commit `c937414f` / `726df0b7` / `a295bbaa`）；复扫
+  36/36、29/29、fix-evidence 10/10，**声明面 0 新邻接变体**。
+- **未换 oracle 的面**：note-scan 的 HTML/富装饰（S2d 规范形拒写，不猜）；staged-change-pairing 的
+  路径归一（精确匹配，宁红不猜）。
+- **下一层**：194 个 `self-referential` 测试资产的组合迁移（[asset-ledger](../../tests/fixtures/asset-ledger/README.md)
+  可见）；真模型/浏览器档仍是里程碑。

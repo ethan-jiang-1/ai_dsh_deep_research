@@ -179,9 +179,14 @@ const FIXED_BUG_NO_EVIDENCE = '---\nstatus: 修复落地\nseverity: P2\nopened: 
   + '> 严重级别：P2｜发现：2099-01-01｜状态：修复落地\n\n'
   + '## 修复判据\n1. Probe.\n';
 const FIXED_BUG_WITH_EVIDENCE = FIXED_BUG_NO_EVIDENCE
-  + '\n## 修复落地\n\n- **改动**：`scripts/lib/probe-fix.mjs`、`tests/probe.test.mjs`\n'
-  + '- **红证**：`node --test tests/probe.test.mjs`\n  ```\n  not ok 1 - old\n  ```\n'
-  + '- **绿证**：`node --test tests/probe.test.mjs`\n  ```\n  ok 1 - new\n  ```\n';
+  + '\n## 修复落地\n\n```json fix-evidence\n'
+  + JSON.stringify({
+    changes: ['scripts/lib/probe-fix.mjs', 'tests/probe.test.mjs'],
+    red: { command: 'node --test tests/probe.test.mjs', exit: 1, output: 'not ok 1 - old' },
+    green: { command: 'node --test tests/probe.test.mjs', exit: 0 },
+    guard: { path: 'tests/probe.test.mjs' },
+  }, null, 2)
+  + '\n```\n';
 
 function fixtureFile(dir, rel, text, indexed = true) {
   const path = join(dir, rel);
@@ -654,6 +659,15 @@ export const CASES = [
   { id: 'guard-red-record-dangling', gate: 'guard-red-record', mutate: (dir) => {
     const p = join(dir, 'tests', 'run', 'local-date.spec.mjs');
     appendFileSync(p, "\ntest('探针：悬空编号 BUG-999', () => {});\n");
+  } },
+  // S2d：状态行规范形（全角冒号/裸值/无装饰）；archived 冻结件 grandfather。
+  { id: 'note-format-noncanonical-status', gate: 'note-format', mutate: (dir) => {
+    const d = join(dir, 'notes', 'implemented');
+    const target = readdirSync(d).filter((f) => f.endsWith('.md') && f !== 'README.md')
+      .find((f) => readFileSync(join(d, f), 'utf8').includes('> 状态：'));
+    if (!target) throw new Error('找不到带规范状态行的活跃 Note——案例失效');
+    const p = join(d, target);
+    writeFileSync(p, readFileSync(p, 'utf8').replace('> 状态：', '> **状态**：'));
   } },
   // D52：判据测试（*conformance*）即使标题不带 BUG 号，也必须给红配方。
   { id: 'guard-red-record-conformance-no-block', gate: 'guard-red-record', mutate: (dir) => {

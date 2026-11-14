@@ -6,7 +6,7 @@ intent: 为 issue 2026-11-14-verification-oracle 提供 31 张新卡的分层、
 # 为什么 D54 之后改善没有体感：层转移、自指 oracle 与未沉淀的旧账
 
 > 证据边界：本页数字 = 2026-11-14 在 HEAD `85b7026f` 上只读复算；探针 = `runtime/smoke-workspace/`
-> 下的一次性脚本（gitignored），不改产品。消费者 = [issue 2026-11-14-verification-oracle](../../issues/2026-11-14-verification-oracle.md)。
+> 下的一次性脚本（gitignored），不改产品。消费者 = [issue 2026-11-14-verification-oracle](../../settled_issues/2026-11-14-verification-oracle.md)。
 
 ## 1. 层转移：31 张新卡里 22 张在验证层，不在产品
 
