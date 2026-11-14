@@ -1,14 +1,14 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 # BUG-189：fix-evidence 的「改动」接受目录路径——任意同目录 staged 文件即可满足配对
 
-> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及修复卡实证/暂存配对，需用户放行
+> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：已修 — 改动只收文件路径；staged 配对精确对账；用户放行批 D
 >
-> 位置：[scripts/lib/fix-evidence.mjs](../../scripts/lib/fix-evidence.mjs) 的 `fixChangePathsOf` 与
-> [scripts/lib/staged-change-pairing.mjs](../../scripts/lib/staged-change-pairing.mjs) 的 `hit` 目录分支。
+> 位置：[scripts/lib/fix-evidence.mjs](../../../scripts/lib/fix-evidence.mjs) 的 `fixChangePathsOf` 与
+> [scripts/lib/staged-change-pairing.mjs](../../../scripts/lib/staged-change-pairing.mjs) 的 `hit` 目录分支。
 
 ## 症状
 
@@ -54,4 +54,24 @@ console.log(JSON.stringify(fixEvidenceProblems(t))); // []
 
 ## 修复关联
 
-未修。触面 = 修复卡实证/暂存配对，按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`。
+未修。触面 = 修复卡实证/暂存配对，按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`scripts/lib/fix-evidence.mjs`、`scripts/lib/staged-change-pairing.mjs`、`tests/checks/fix-evidence.test.mjs`、`tests/checks/staged-change-pairing.test.mjs`
+- **红证**：`node --test tests/checks/fix-evidence.test.mjs tests/checks/staged-change-pairing.test.mjs`
+  ```
+  not ok 5 - 改动只收文件路径：目录 / glob → 红
+  not ok 18 - 改动目录前缀不能命中任意同目录 staged 文件
+  # pass 15
+  # fail 3
+  ```
+- **绿证**：`node --test tests/checks/fix-evidence.test.mjs tests/checks/staged-change-pairing.test.mjs`
+  ```
+  # tests 18
+  # pass 18
+  # fail 0
+  ```
+- **反证/边界**：`fixChangePathsOf` 过滤 `/` 结尾与 glob；`fixEvidenceProblems` 对目录路径报
+  「只收文件路径」；`staged-change-pairing` 删除目录前缀分支，改为 `present.has(path)` 精确对账；
+  精确文件 + 同暂存集仍绿，文档变更也绿。

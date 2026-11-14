@@ -72,8 +72,8 @@ export function stagedChangePairingProblems({ staged, read, exists }) {
     const evidence = fixEvidenceProblems(text)
     if (evidence.length > 0) return [`${card} 不是可复核的修复：${evidence.join('；')}——先写 ## 修复落地 的 改动/红证/绿证`]
     const changes = fixChangePathsOf(text).filter((path) => !path.startsWith('_backlog/'))
-    const hit = changes.filter((path) => present.has(path)
-      || (path.endsWith('/') && [...present].some((stagedPath) => stagedPath.startsWith(path))))
+    // 只做精确文件对账：目录前缀不再命中任意同目录 staged 文件（BUG-189）。
+    const hit = changes.filter((path) => present.has(path))
     if (hit.length === 0) return [`${card} 的「改动」没有任何文件在同一暂存集——只翻状态/移动卡不算修复；先落代码/测试并跑出红→绿`]
     return []
   }

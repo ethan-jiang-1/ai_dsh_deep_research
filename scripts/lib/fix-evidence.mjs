@@ -27,12 +27,17 @@ const labeledBlockOf = (section, label) => {
 }
 
 /** 修复卡「改动」里声明的仓内路径（去重，保持顺序）。 */
+/** 文件路径（目录/glob 不是「改动」的可配对对象）。 */
+const isFileLike = (path) => path !== '' && !path.endsWith('/') && !/[*?[\]{}]/.test(path)
+
 export function fixChangePathsOf(text) {
   const section = fixSectionOf(text)
   if (section === null) return []
   const block = labeledBlockOf(section, '改动')
   if (block === null) return []
-  return [...new Set([...block.matchAll(/`([^`]+)`/g)].map((match) => match[1].trim()).filter(Boolean))]
+  return [...new Set([...block.matchAll(/`([^`]+)`/g)]
+    .map((match) => match[1].trim())
+    .filter((path) => isFileLike(path)))]
 }
 
 /**
@@ -44,23 +49,46 @@ export function fixEvidenceProblems(text) {
   if (section === null || section === '') return ['缺 ## 修复落地（改动 / 红证 / 绿证）']
   const problems = []
   const change = labeledBlockOf(section, '改动')
-  const paths = change === null ? [] : [...change.matchAll(/`([^`]+)`/g)].map((match) => match[1].trim()).filter(Boolean)
+  const rawPaths = change === null ? [] : [...change.matchAll(/`([^`]+)`/g)].map((match) => match[1].trim()).filter(Boolean)
+  const paths = fixChangePathsOf(text)
   if (change === null) problems.push('缺「改动：`<仓内路径>`」')
-  else if (paths.length === 0) problems.push('「改动」缺 `仓内路径`')
+  else if (paths.length === 0) {
+    problems.push(rawPaths.length > 0
+      ? '「改动」只收文件路径（不能以 / 结尾或含 glob；目录请列具体文件）'
+      : '「改动」缺 `仓内路径`')
+  }
+  const NEGATION = /(?:未|不|没有|无|非|没|not)\s*$/i
+  const REPLAYABLE = /(node\s+--test|pnpm\s+(?:test|verify)|gates\.e2e)/
+  const lineAt = (body, index) => {
+    const start = body.lastIndexOf('\n', index) + 1
+    const end = body.indexOf('\n', index)
+    return body.slice(start, end === -1 ? undefined : end)
+  }
+  const hasUnnegatedMarker = (body, marker) => {
+    for (const match of body.matchAll(marker)) {
+      const index = match.index ?? 0
+      if (NEGATION.test(body.slice(Math.max(0, index - 10), index))) continue
+      // `exit N` 只有与可重放命令同一行才算结果片段；裸 exit 是标记不是证据。
+      if (/^exit\s/i.test(match[0]) && !REPLAYABLE.test(lineAt(body, index))) continue
+      return true
+    }
+    return false
+  }
   for (const label of ['红证', '绿证']) {
     const block = labeledBlockOf(section, label)
     if (block === null) { problems.push(`缺「${label}」`); continue }
     const body = block.replace(new RegExp(`^.*?${label}(?:\\*\\*)?[：:]`, 's'), '')
     if (!/`[^`]+`|```/.test(body)) problems.push(`「${label}」缺命令（行内代码或围栏）`)
     const marker = label === '红证'
-      ? /(FAIL|RED|not ok|AssertionError|exit\s*[1-9]|失败)/i
-      : /(PASS|ok\b|exit\s*0|全绿|通过)/i
-    if (!marker.test(body)) problems.push(`「${label}」缺实跑结果片段（${label === '红证' ? '失败' : '通过'}）`)
+      ? /(FAIL|RED|not ok|AssertionError|exit\s*[1-9]|失败)/gi
+      : /(PASS|ok\b|exit\s*0|全绿|通过)/gi
+    if (!hasUnnegatedMarker(body, marker)) {
+      problems.push(`「${label}」缺实跑结果片段（${label === '红证' ? '失败' : '通过'}；否定句/裸 exit 不算）`)
+    }
     if (label === '红证') {
-      const replayable = /(node\s+--test|pnpm\s+(?:test|verify)|gates\.e2e)/.test(body)
       const testAsset = paths.some((path) =>
         path.startsWith('tests/') || path.startsWith('scripts/smoke/') || path === 'scripts/lib/gates-cases.mjs')
-      if (!replayable && !testAsset) {
+      if (!REPLAYABLE.test(body) && !testAsset) {
         problems.push('「红证」不可重放，且「改动」没有测试/门禁资产（tests/…、scripts/smoke/… 或 gates-cases）')
       }
     }

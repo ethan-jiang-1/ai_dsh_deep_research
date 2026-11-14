@@ -217,10 +217,10 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 |---|---|---|---|
 | [BUG-184](../bugs/BUG-184-ci-workflow-quoted-comment-expressions.md) | Z1 表达式 | quoted/带注释的 `${{ }}` 仍假红假绿 | 等人拍板 |
 | [BUG-185](../bugs/BUG-185-markdown-mask-html-before-fence.md) | Z2 共享 mask | 先剥注释再剥 fence：围栏里的 `<!--` 吞掉真实内容 | 等人拍板（P1） |
-| [BUG-186](../bugs/BUG-186-fix-evidence-negation-and-exit-markers.md) | Z3 修复证据 | 「未失败」/`exit 1`/`exit 0` 都能当红绿证 | 等人拍板 |
+| [BUG-186](../_archived/fixed_bugs/BUG-186-fix-evidence-negation-and-exit-markers.md) | Z3 修复证据 | 「未失败」/`exit 1`/`exit 0` 都能当红绿证 | 等人拍板 |
 | [BUG-187](../bugs/BUG-187-ci-workflow-shell-short-circuit.md) | Z4 shell | `false && node` / `true \|\| node` / `\|\| true` 仍算执行 | 等人拍板 |
 | [BUG-188](../bugs/BUG-188-note-scan-bold-status-label.md) | Z5 notes 装饰 | `> **状态**：` 假红 | 等人拍板 |
-| [BUG-189](../bugs/BUG-189-fix-evidence-directory-path-prefix.md) | Z6 修复路径 | 目录前缀匹配任意同目录 staged 文件 | 等人拍板 |
+| [BUG-189](../_archived/fixed_bugs/BUG-189-fix-evidence-directory-path-prefix.md) | Z6 修复路径 | 目录前缀匹配任意同目录 staged 文件 | 等人拍板 |
 | [BUG-190](../bugs/BUG-190-ci-workflow-inline-on-flow-mapping.md) | Z7 on: 形状 | `on: { workflow_dispatch: {} }` 假红 | 等人拍板 |
 
 **执行记录**：七条 charter 全部跑出可复现结果；7 张已开卡。未跑：安装域默认语言、hook/DOM、world-tree
@@ -411,7 +411,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 |---|---|---|
 | ci-workflow quoted/comment 表达式 | 已探 | [BUG-184](../bugs/BUG-184-ci-workflow-quoted-comment-expressions.md)：假红/假绿 |
 | 共享 Markdown mask 顺序 | 已探 | [BUG-185](../bugs/BUG-185-markdown-mask-html-before-fence.md)：围栏内 `<!--` 吞真实内容 |
-| fix-evidence marker/路径 | 已探 | [BUG-186](../bugs/BUG-186-fix-evidence-negation-and-exit-markers.md)、[BUG-189](../bugs/BUG-189-fix-evidence-directory-path-prefix.md)：否定/exit/目录 |
+| fix-evidence marker/路径 | 已探 | [BUG-186](../_archived/fixed_bugs/BUG-186-fix-evidence-negation-and-exit-markers.md)、[BUG-189](../_archived/fixed_bugs/BUG-189-fix-evidence-directory-path-prefix.md)：否定/exit/目录 |
 | ci-workflow shell 短路 | 已探 | [BUG-187](../bugs/BUG-187-ci-workflow-shell-short-circuit.md)：短路的 node 段仍算执行 |
 | note-scan 加粗状态标签 | 已探 | [BUG-188](../bugs/BUG-188-note-scan-bold-status-label.md)：`> **状态**：` 假红 |
 | on: flow mapping | 已探 | [BUG-190](../bugs/BUG-190-ci-workflow-inline-on-flow-mapping.md)：inline mapping 假红 |

@@ -1,13 +1,13 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-14
 ---
 # BUG-186：fix-evidence 的 fail/pass 判据是裸子串——「未失败」/「exit 1」都能当红绿证
 
-> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：等人拍板 — 修复触及修复卡实证合同，需用户放行
+> 严重级别：P2 ｜ 发现：2026-11-14 ｜ 状态：已修 — marker 拒绝否定前缀；裸 exit 不算；用户放行批 D
 >
-> 位置：[scripts/lib/fix-evidence.mjs](../../scripts/lib/fix-evidence.mjs) 的
+> 位置：[scripts/lib/fix-evidence.mjs](../../../scripts/lib/fix-evidence.mjs) 的
 > `fixEvidenceProblems`；消费 = `staged-change-pairing` ③ 与 backlog-liveness 的真实假修防线。
 
 ## 症状
@@ -55,4 +55,24 @@ console.log(JSON.stringify(fixEvidenceProblems(exit)));     // []
 
 ## 修复关联
 
-未修。触面 = 修复卡实证合同，按 [_backlog/AGENTS](../AGENTS.md) 转 `等人拍板`。
+未修。触面 = 修复卡实证合同，按 [_backlog/AGENTS](../../AGENTS.md) 转 `等人拍板`。
+
+## 修复落地（2026-11-14）
+
+- **改动**：`scripts/lib/fix-evidence.mjs`、`tests/checks/fix-evidence.test.mjs`
+- **红证**：`node --test tests/checks/fix-evidence.test.mjs`
+  ```
+  not ok 4 - 否定与裸 exit 不能当红/绿证
+  not ok 5 - 改动只收文件路径：目录 / glob → 红
+  # pass 15
+  # fail 3
+  ```
+- **绿证**：`node --test tests/checks/fix-evidence.test.mjs tests/checks/staged-change-pairing.test.mjs`
+  ```
+  # tests 18
+  # pass 18
+  # fail 0
+  ```
+- **反证/边界**：`未失败`/`未通过` 不再匹配；`exit 1`/`exit 0` 只有与 `node --test`/`pnpm test`/
+  `gates.e2e` 同行才算结果；真实卡 `FAIL`/`PASS` 输出仍绿；`改动` 只收文件路径（BUG-189 同一
+  `fixChangePathsOf` 修复）。

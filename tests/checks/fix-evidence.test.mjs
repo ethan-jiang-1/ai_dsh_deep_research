@@ -42,3 +42,26 @@ test('fixEvidenceProblems：红证不可重放且无测试/门禁资产 → 红�
   const withAsset = oneOff.replace('`scripts/lib/fix.mjs`', '`scripts/lib/fix.mjs`、`tests/checks/fix.test.mjs`')
   assert.deepEqual(fixEvidenceProblems(withAsset), [])
 })
+
+test('否定与裸 exit 不能当红/绿证', () => {
+  const negation = GOOD
+    .replace('not ok 1 - old', '未失败（实际上没有失败）')
+    .replace('ok 1 - new', '未通过（实际上没有通过）')
+  const problems = fixEvidenceProblems(negation).join('；')
+  assert.match(problems, /红证.*缺实跑结果|红证.*否定/)
+  assert.match(problems, /绿证.*缺实跑结果|绿证.*否定/)
+
+  const bareExit = GOOD
+    .replace(/`node --test tests\/checks\/fix\.test\.mjs`/g, '`exit 1`')
+    .replace('not ok 1 - old', 'exit 1')
+    .replace('ok 1 - new', 'exit 0')
+  const exitProblems = fixEvidenceProblems(bareExit).join('；')
+  assert.match(exitProblems, /exit|实跑/)
+})
+
+test('改动只收文件路径：目录 / glob → 红', () => {
+  for (const path of ['scripts/lib/', 'tests/checks/*.test.mjs']) {
+    const card = GOOD.replace('`scripts/lib/fix.mjs`、`tests/checks/fix.test.mjs`', `\`${path}\``)
+    assert.match(fixEvidenceProblems(card).join('；'), /文件路径|目录|glob/)
+  }
+})

@@ -125,9 +125,9 @@ test('修复卡缺 红证/绿证 → 红；声明的文件未暂存 → 红', ()
   assert.match(wrong[0], /同一暂存集/)
 })
 
-test('修复卡声明目录前缀 / 文档变更 → 同暂存集绿（修复不限于代码）', () => {
-  const dirFiles = new Map([[FIX_CARD, fixCardText(['scripts/lib/'])], ['scripts/lib/fix.mjs', 'x\n']])
-  assert.deepEqual(stagedChangePairingProblems({ staged: fixStaged([['M', 'scripts/lib/fix.mjs']]), ...harness(dirFiles) }), [])
+test('修复卡声明的精确文件 / 文档变更 → 同暂存集绿（修复不限于代码）', () => {
+  const fileFiles = new Map([[FIX_CARD, fixCardText(['scripts/lib/fix.mjs'])], ['scripts/lib/fix.mjs', 'x\n']])
+  assert.deepEqual(stagedChangePairingProblems({ staged: fixStaged([['M', 'scripts/lib/fix.mjs']]), ...harness(fileFiles) }), [])
   const docsFiles = new Map([[FIX_CARD, fixCardText(['docs/guide.md'])], ['docs/guide.md', '# G\n']])
   assert.deepEqual(stagedChangePairingProblems({ staged: fixStaged([['M', 'docs/guide.md']]), ...harness(docsFiles) }), [])
 })
@@ -155,4 +155,20 @@ test('红证不可重放且改动无测试/门禁资产 → 红', () => {
   const files = new Map([[FIX_CARD, card], ['scripts/lib/fix.mjs', 'x\n']])
   const red = stagedChangePairingProblems({ staged: fixStaged([['M', 'scripts/lib/fix.mjs']]), ...harness(files) })
   assert.match(red[0], /不可重放|测试\/门禁资产/)
+})
+
+test('改动目录前缀不能命中任意同目录 staged 文件', () => {
+  const card = fixCardText(['scripts/lib/'])
+  const files = new Map([[FIX_CARD, card], ['scripts/lib/unrelated.mjs', 'x\n']])
+  const red = stagedChangePairingProblems({
+    staged: fixStaged([['M', 'scripts/lib/unrelated.mjs']]),
+    ...harness(files),
+  })
+  assert.match(red[0], /文件路径|同一暂存集|目录/)
+  const exact = fixCardText(['scripts/lib/fix.mjs'])
+  const files2 = new Map([[FIX_CARD, exact], ['scripts/lib/fix.mjs', 'x\n']])
+  assert.deepEqual(stagedChangePairingProblems({
+    staged: fixStaged([['M', 'scripts/lib/fix.mjs']]),
+    ...harness(files2),
+  }), [])
 })
