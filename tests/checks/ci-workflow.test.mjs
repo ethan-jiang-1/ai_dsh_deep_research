@@ -107,6 +107,12 @@ test('parseEvents：空映射 / 带 inputs 的 mapping / 行尾注释都算事�
   assert.deepEqual(eventKeys(parseWorkflow('on:\n  push:\n  workflow_dispatch: {}\n')), ['push', 'workflow_dispatch'])
 })
 
+// 负例留证 2026-11-14：BUG-184——normalizeExpression 先剥 ${{ }} 再 unquote/注释，quoted/注释
+// 表达式漏判；红配方 = 把顺序退回旧实现 → 本组红。
+// 负例留证 2026-11-14：BUG-187——splitCommands 丢运算符、逐段认 node，短路段假绿；
+// 红配方 = 退回字符串数组 → 短路矩阵红。
+// 负例留证 2026-11-14：BUG-190——parseEvents 不展开 inline flow mapping，合法 on: 假红；
+// 红配方 = 删 flowKeys 分支 → flow matrix 红。
 test('表达式外层：引号 / YAML 行尾注释 / ${{ }} 组合都要归一（BUG-184）', () => {
   const wf = (ifExpr = '', coe = '') => `on:\n  workflow_dispatch:\njobs:\n  smoke:\n    steps:\n      - name: s\n${ifExpr === '' ? '' : `        if: ${ifExpr}\n`}${coe === '' ? '' : `        continue-on-error: ${coe}\n`}        run: node scripts/smoke/foo.e2e.mjs\n  all-checks-passed:\n    needs: [smoke]\n`
   for (const expr of ['"${{ always() }}"', 'always() # comment', '${{ true }} # c']) {

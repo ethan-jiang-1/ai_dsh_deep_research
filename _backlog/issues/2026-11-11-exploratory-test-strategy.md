@@ -203,25 +203,25 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 
 | ID | 假设（要杀死的命题） | 最低层 | oracle / 变异 | 预算 | 停止 |
 |---|---|---|---|---|---|
-| Z1 | quoted/带注释的 `${{ }}` 表达式能归一 | 纯函数 | `executedSmokeFiles` 合成 quoted/comment | 10 min | **中：BUG-184** |
-| Z2 | 共享 Markdown mask 的 fence/comment 顺序无洞 | 纯函数 | 围栏内 `<!--` + 真实证据/判定 | 10 min | **中：BUG-185（P1）** |
-| Z3 | fix-evidence 的 marker 不能被否定/裸 exit 冒充 | 纯函数 | `未失败`/`exit 1`/`exit 0` | 10 min | **中：BUG-186** |
-| Z4 | shell 短路/后台的 node 段不算执行 | 纯函数 | `false && node`/`true \|\| node`/`\|\| true`/`&` | 10 min | **中：BUG-187** |
-| Z5 | notes 状态标签加粗仍可识别 | 纯函数 | `> **状态**：implemented` | 10 min | **中：BUG-188** |
-| Z6 | 修复卡「改动」只收文件，不收目录 | 纯函数/配对 | `scripts/lib/` vs `scripts/lib/foo.mjs` | 10 min | **中：BUG-189** |
-| Z7 | `on:` 的 flow mapping/空格冒号可解析 | 纯函数 | `on: { workflow_dispatch: {} }` | 10 min | **中：BUG-190** |
+| Z1 | quoted/带注释的 `${{ }}` 表达式能归一 | 纯函数 | `executedSmokeFiles` 合成 quoted/comment | 10 min | **已修：BUG-184** |
+| Z2 | 共享 Markdown mask 的 fence/comment 顺序无洞 | 纯函数 | 围栏内 `<!--` + 真实证据/判定 | 10 min | **已修：BUG-185（P1）** |
+| Z3 | fix-evidence 的 marker 不能被否定/裸 exit 冒充 | 纯函数 | `未失败`/`exit 1`/`exit 0` | 10 min | **已修：BUG-186** |
+| Z4 | shell 短路/后台的 node 段不算执行 | 纯函数 | `false && node`/`true \|\| node`/`\|\| true`/`&` | 10 min | **已修：BUG-187** |
+| Z5 | notes 状态标签加粗仍可识别 | 纯函数 | `> **状态**：implemented` | 10 min | **已修：BUG-188** |
+| Z6 | 修复卡「改动」只收文件，不收目录 | 纯函数/配对 | `scripts/lib/` vs `scripts/lib/foo.mjs` | 10 min | **已修：BUG-189** |
+| Z7 | `on:` 的 flow mapping/空格冒号可解析 | 纯函数 | `on: { workflow_dispatch: {} }` | 10 min | **已修：BUG-190** |
 
 **批 D 发现（2026-11-14，7 卡）**
 
 | 卡 | 面 | 一句话 | 状态 |
 |---|---|---|---|
-| [BUG-184](../_archived/fixed_bugs/BUG-184-ci-workflow-quoted-comment-expressions.md) | Z1 表达式 | quoted/带注释的 `${{ }}` 仍假红假绿 | 等人拍板 |
-| [BUG-185](../_archived/fixed_bugs/BUG-185-markdown-mask-html-before-fence.md) | Z2 共享 mask | 先剥注释再剥 fence：围栏里的 `<!--` 吞掉真实内容 | 等人拍板（P1） |
-| [BUG-186](../_archived/fixed_bugs/BUG-186-fix-evidence-negation-and-exit-markers.md) | Z3 修复证据 | 「未失败」/`exit 1`/`exit 0` 都能当红绿证 | 等人拍板 |
-| [BUG-187](../_archived/fixed_bugs/BUG-187-ci-workflow-shell-short-circuit.md) | Z4 shell | `false && node` / `true \|\| node` / `\|\| true` 仍算执行 | 等人拍板 |
-| [BUG-188](../_archived/fixed_bugs/BUG-188-note-scan-bold-status-label.md) | Z5 notes 装饰 | `> **状态**：` 假红 | 等人拍板 |
-| [BUG-189](../_archived/fixed_bugs/BUG-189-fix-evidence-directory-path-prefix.md) | Z6 修复路径 | 目录前缀匹配任意同目录 staged 文件 | 等人拍板 |
-| [BUG-190](../_archived/fixed_bugs/BUG-190-ci-workflow-inline-on-flow-mapping.md) | Z7 on: 形状 | `on: { workflow_dispatch: {} }` 假红 | 等人拍板 |
+| [BUG-184](../_archived/fixed_bugs/BUG-184-ci-workflow-quoted-comment-expressions.md) | Z1 表达式 | quoted/带注释的 `${{ }}` 仍假红假绿 | 已修 |
+| [BUG-185](../_archived/fixed_bugs/BUG-185-markdown-mask-html-before-fence.md) | Z2 共享 mask | 先剥注释再剥 fence：围栏里的 `<!--` 吞掉真实内容 | 已修（P1） |
+| [BUG-186](../_archived/fixed_bugs/BUG-186-fix-evidence-negation-and-exit-markers.md) | Z3 修复证据 | 「未失败」/`exit 1`/`exit 0` 都能当红绿证 | 已修 |
+| [BUG-187](../_archived/fixed_bugs/BUG-187-ci-workflow-shell-short-circuit.md) | Z4 shell | `false && node` / `true \|\| node` / `\|\| true` 仍算执行 | 已修 |
+| [BUG-188](../_archived/fixed_bugs/BUG-188-note-scan-bold-status-label.md) | Z5 notes 装饰 | `> **状态**：` 假红 | 已修 |
+| [BUG-189](../_archived/fixed_bugs/BUG-189-fix-evidence-directory-path-prefix.md) | Z6 修复路径 | 目录前缀匹配任意同目录 staged 文件 | 已修 |
+| [BUG-190](../_archived/fixed_bugs/BUG-190-ci-workflow-inline-on-flow-mapping.md) | Z7 on: 形状 | `on: { workflow_dispatch: {} }` 假红 | 已修 |
 
 **执行记录**：七条 charter 全部跑出可复现结果；7 张已开卡。未跑：安装域默认语言、hook/DOM、world-tree
 （持续空白，未冒充已验）。
