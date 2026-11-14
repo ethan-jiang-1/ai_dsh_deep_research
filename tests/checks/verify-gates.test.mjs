@@ -8,6 +8,8 @@
 // keyless 秒级报因）。依据 = RFC「DSH 插件开发语料（二代）吸收审计」缺口 2（2026-10-07）。
 // 负例留证 2026-10-28：删掉 gates-cases 里 count-free 的唯一案例 → 反向覆盖断言红
 //   （`覆盖缺口与 NO_CASE_GATES 不一致`，`# fail 1`）；还原 → 绿。
+// 负例留证 2026-11-14：BUG-016 / BUG-072 / BUG-166——删掉 md-links-untracked、release-vocab
+//   的正反配对（产品内嵌 vs 产品内容）或 note-tree 隐藏目录/点文件配对 → 下方事故案例对账红。
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -69,4 +71,17 @@ test('覆盖缺口恰为 NO_CASE_GATES 登记的结构性例外（新增门禁�
   }
   // 防空语料：两侧都非空，避免"全对上但都是空集"
   assert.ok(gatesArray.length > 0 && CASES.length > 0, '防空语料：gates 数组或案例表为空');
+});
+
+test('事故回归注入与正向控制常驻在场：未跟踪链接 / 产品内容复合词豁免 / 隐藏目录树深（BUG-016 / BUG-072 / BUG-166）', () => {
+  const caseIds = new Set(CASES.map((c) => c.id));
+  const controlIds = new Set(CONTROLS.map((c) => c.id));
+  assert.ok(caseIds.has('md-links-untracked'), 'BUG-016：缺 md-links-untracked 注入案例');
+  assert.ok(caseIds.has('release-vocab-product-embedded'), 'BUG-072：缺 release-vocab-product-embedded 负向案例');
+  assert.ok(controlIds.has('release-vocab-product-content'), 'BUG-072：缺 release-vocab-product-content 正向控制');
+  assert.ok(caseIds.has('note-tree-hidden-dir'), 'BUG-166：缺 note-tree-hidden-dir 隐藏目录注入案例');
+  assert.ok(caseIds.has('note-tree-hidden-note-file'), 'BUG-166：缺 note-tree-hidden-note-file 隐藏文件注入案例');
+  assert.ok(controlIds.has('note-tree-dot-store'), 'BUG-166：缺 note-tree-dot-store 点文件忽略控制');
+  const bPackSrc = readFileSync(here('../../scripts/verify/gates/b-pack.mjs'), 'utf8');
+  assert.ok(bPackSrc.includes('产品内(?!容)'), 'BUG-072：b-pack.mjs 必须保留 产品内(?!容) 负向先行断言');
 });

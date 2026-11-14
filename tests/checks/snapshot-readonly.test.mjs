@@ -8,11 +8,13 @@
 // `DSH_SNAPSHOT=replay --update-expected` → exit 2。真跑一次不改盘留给 W1-2 的 CI job。
 //
 // 反证：去掉 `resolveSnapshotMode` 的 `updateExpected && readOnly` 分支 → 本文件红；还原 → 绿。
+// 负例留证 2026-11-14：BUG-164——去掉 resolveSnapshotMode 对 `--why` 后紧跟 flag 的拦截 →
+//   `['--update-expected', '--why', '--port', '3110']` 把 `--port` 当载体放行；还原 → 绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { resolveSnapshotMode } from '../../scripts/lib/snapshot-mode.mjs'
 
-test('快照回放：默认只读语义；只读 / update-expected 互斥；DSH_SNAPSHOT 只认 replay；刷新必须带 --why', () => {
+test('快照回放：默认只读语义；只读 / update-expected 互斥；DSH_SNAPSHOT 只认 replay；刷新必须带非 flag 的 --why（BUG-164）', () => {
   assert.deepEqual(resolveSnapshotMode({ argv: [], env: {} }), { readOnly: false, updateExpected: false, why: null })
   assert.deepEqual(resolveSnapshotMode({ argv: ['--read-only'], env: {} }), { readOnly: true, updateExpected: false, why: null })
   assert.deepEqual(resolveSnapshotMode({ argv: ['--update-expected', '--why', 'issue/x'], env: {} }), {

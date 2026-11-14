@@ -24,151 +24,23 @@
  * 与 `tests/contracts/verdict-conformance.spec.mjs`（变异矩阵 + 不变量）覆盖。
  */
 
+import { maskMarkdownLines } from './markdown-mask.ts'
+
 type Readiness = 'PASS' | 'FAIL'
 /** 同一行出现互斥裸写判定 = 无法判定（D51：不取最后一个冒充）。 */
 const AMBIGUOUS = 'ambiguous' as const
 
 /**
- * 把非正文行（fence / HTML 注释 / indented code）替换为空行（BUG-169/178/179/183）：
- * 支持 blockquote/list 容器、0–3 空格 fence、4 空格 indented code、跨行 HTML 注释；
- * fence 在原始行判定（注释后的同行 ``` 不是 fence）；indented code 不打断段落；
- * 行数与原文一致，未闭合 fence/注释按剩余全文处理（fail-closed）。与 notes 的 note-scan
- * 由 tests/contracts/markdown-mask-conformance.spec.mjs 钉住同判。
+ * 把非正文行（fence / HTML 注释 / indented code）替换为空行（BUG-169/178/179/183/185）：
+ * 委托全仓唯一实现 `markdown-mask.ts`（与 `scripts/lib/note-scan.mjs` 同源，由
+ * `tests/contracts/markdown-mask-conformance.spec.mjs` 直接对照 `mdast-util-from-markdown` 守卫）。
  */
-const FENCE = /^( {0,3})(`{3,}|~{3,})(.*)$/
-const containerRest = (line: string): string => {
-  let rest = line.replace(/^(?: {0,3}> ?)+/, '')
-  rest = rest.replace(/^ {0,3}(?:[-*+]|\d+[.)])\s+/, '')
-  return rest
-}
-const stripComments = (line: string, inComment: boolean): { readonly text: string; readonly inComment: boolean } => {
-  let out = ''
-  let comment = inComment
-  let index = 0
-  while (index < line.length) {
-    if (comment) {
-      const end = line.indexOf('-->', index)
-      if (end === -1) return { text: out, inComment: true }
-      comment = false
-      index = end + 3
-      continue
-    }
-    const start = line.indexOf('<!--', index)
-    if (start === -1) { out += line.slice(index); break }
-    out += line.slice(index, start)
-    const end = line.indexOf('-->', start + 4)
-    if (end === -1) return { text: out, inComment: true }
-    index = end + 3
-  }
-  return { text: out, inComment: comment }
-}
-const isIndentedCode = (line: string): boolean => /^(?: {4}|\t)/.test(line.replace(/^(?: {0,3}> ?)+/, ''))
-
-/** 这一行是否延续段落（heading/列表项/空行/围栏/注释之后不是段落）。 */
-const isParagraphLine = (content: string): boolean => {
-  if (content.trim() === '') return false
-  if (/^ {0,3}#{1,6}(?:\s|$)/.test(content)) return false
-  if (/^ {0,3}(?:[-*+]|\d+[.)])(?:\s|$)/.test(content)) return true
-  return true
-}
-
 export function maskReadinessLines(text: string): string[] {
-  const lines = text.replace(/\r\n?/g, '\n').split('\n')
-  const out: string[] = []
-  let fence: { readonly char: string; readonly length: number } | null = null
-  let inComment = false
-  let commentFromLineStart = false
-  let inIndented = false
-  let prevParagraph = false // 文档开头不是段落：indented code 可起始
-  const listIndents: { readonly markerIndent: number; readonly contentIndent: number }[] = []
-  const contentOf = (line: string): string => {
-    const top = listIndents.at(-1) ?? null
-    return top !== null && line.startsWith(' '.repeat(top.contentIndent))
-      ? line.slice(top.contentIndent)
-      : containerRest(line)
-  }
-  for (const line of lines) {
-    const blank = line.trim() === ''
-    if (fence !== null) {
-      const match = FENCE.exec(contentOf(line))
-      const marker = match?.[2] ?? ''
-      if (match !== null && marker !== '' && marker.charAt(0) === fence.char && marker.length >= fence.length && (match[3] ?? '').trim() === '') {
-        fence = null
-      }
-      out.push('')
-      prevParagraph = false
-      continue
-    }
-    // 列表内容缩进：`- item` 之后的 2/4 空格是内容缩进，先剥掉再判 fence/缩进代码。
-    const listMarker = /^(\s*)([-*+]|\d+[.)])(\s+)/.exec(line)
-    if (listMarker !== null) {
-      const markerIndent = listMarker[1]?.length ?? 0
-      while (listIndents.length > 0) {
-        const top = listIndents[listIndents.length - 1]
-        if (top === undefined || top.markerIndent < markerIndent) break
-        listIndents.pop()
-      }
-      listIndents.push({ markerIndent, contentIndent: listMarker[0]?.length ?? 0 })
-    } else if (line.trim() !== '') {
-      const leading = /^\s*/.exec(line)?.[0].length ?? 0
-      while (listIndents.length > 0) {
-        const top = listIndents[listIndents.length - 1]
-        if (top === undefined || leading >= top.contentIndent) break
-        listIndents.pop()
-      }
-    }
-    const content = contentOf(line)
-    // 行首注释 = CommonMark HTML block（type 2）：整行是 HTML，含 `-->` 后的同行文本。
-    if (inComment) {
-      if (commentFromLineStart) {
-        if (line.includes('-->')) { inComment = false; commentFromLineStart = false }
-        out.push('')
-      } else {
-        const end = line.indexOf('-->')
-        if (end === -1) out.push('')
-        else { inComment = false; out.push(line.slice(end + 3)) }
-      }
-      prevParagraph = false
-      continue
-    }
-    if (/^ {0,3}<!--/.test(content)) {
-      if (line.includes('-->')) out.push('')
-      else { inComment = true; commentFromLineStart = true; out.push('') }
-      prevParagraph = false
-      continue
-    }
-    const stripped = stripComments(line, false)
-    if (stripped.inComment) { inComment = true; commentFromLineStart = false }
-    // fence 只认行首（去容器前缀后的原始行）；注释后的同一行 ``` 不是 fence。
-    const match = FENCE.exec(content)
-    const marker = match?.[2] ?? ''
-    if (match !== null && marker !== '' && !(marker.charAt(0) === '`' && (match[3] ?? '').includes('`'))) {
-      fence = { char: marker.charAt(0), length: marker.length }
-      out.push('')
-      prevParagraph = false
-      continue
-    }
-    if (inIndented) {
-      if (blank || isIndentedCode(content)) {
-        out.push('')
-        prevParagraph = false
-        continue
-      }
-      inIndented = false
-    } else if (!blank && isIndentedCode(content) && !prevParagraph) {
-      inIndented = true
-      out.push('')
-      prevParagraph = false
-      continue
-    }
-    out.push(stripped.text)
-    prevParagraph = isParagraphLine(content)
-  }
-  return out
+  return maskMarkdownLines(text)
 }
 
 function maskFencedLines(text: string): string[] {
-  return maskReadinessLines(text)
+  return maskMarkdownLines(text)
 }
 
 /**

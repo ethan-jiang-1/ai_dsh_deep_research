@@ -1,6 +1,8 @@
 // run-dashboard 回归 — RFC notes/archived/2026-09-24-m2-run-dashboard.md 的 keyless 验收：
 // fixture run 目录 → 断言矩阵计数与分级统计精确；fail-soft（缺失/畸形不 throw）。
 // 反证方法：改 fixture 数字（如 evidence quality A→B）本文件必须红——见 RFC 验收判据。
+// 负例留证 2026-10-12：BUG-012——仪表盘若另立第二套 HITL 状态机而不调 pack 的共享折算，
+//   timed pending 与后续事件边界即与驾驶舱分叉；红配方 = 让 dashboard 本地手算状态 → 下方投影例红。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { join, dirname } from 'node:path';
@@ -239,7 +241,7 @@ test('HITL 等待检测：v4 未答 ask 等待；匹配 callId 的 v3 答案/取
   }
 });
 
-test('HITL 公共投影：timed pending 与元数据/agent 后续事件不关闭；新代坏尾不回退旧代', () => {
+test('HITL 公共投影：timed pending 与元数据/agent 后续事件不关闭；新代坏尾不回退旧代（BUG-012）', () => {
   const root = mktmp();
   try {
     const t = Date.now();

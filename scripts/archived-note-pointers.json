@@ -960,6 +960,31 @@
       "source": ".agents/skills/archiving-a-note/SKILL.md",
       "target": "notes/archived/2026-09-30-vendor-pin-bump-020rc2.md",
       "reason": "2026-11-14 归档校准 skill：校准样例引用它作为「被新 pin 取代后归档」的实例；历史证据，不作现行权威"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-11-14-verification-oracle.md",
+      "target": "notes/archived/2026-11-14-verification-oracle.md",
+      "reason": "2026-11-14 D55 补强轮归档取代：首轮 2026-11-14-verification-oracle Note 已被 2026-11-14-verification-oracle-hardening 完整吸收并移入冻结层，首轮已结卡保留当时交付出处历史指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/2026-11-14-verification-oracle-hardening.md",
+      "target": "notes/archived/2026-11-14-verification-oracle.md",
+      "reason": "2026-11-14 D55 补强轮关闭记录：已结卡关闭条件显式记录首轮被取代 Note 迁入冻结层的归档去向，作历史对账指针"
+    },
+    {
+      "source": "_backlog/_archived/settled_issues/README.md",
+      "target": "notes/archived/2026-11-14-verification-oracle.md",
+      "reason": "2026-11-14 D55 补强轮路径重定向：已结卡索引表中首轮 2026-11-14-verification-oracle 行指向当时交付 Note 的历史指针（现行权威 = 2026-11-14-verification-oracle-hardening）"
+    },
+    {
+      "source": "_backlog/_archived/research/README.md",
+      "target": "notes/archived/2026-11-14-verification-oracle.md",
+      "reason": "2026-11-14 D55 补强轮路径重定向：归档研究索引表中 verification-oracle 首轮调研行指向当时交付 Note 的历史指针（现行权威 = 2026-11-14-verification-oracle-hardening）"
+    },
+    {
+      "source": "_backlog/_archived/research/d55-oracle-gap-audit/2026-11-14-d55-provenance-and-oracle-audit.md",
+      "target": "notes/archived/2026-11-14-verification-oracle.md",
+      "reason": "2026-11-14 D55 缺口取证材料：审计对象即为首轮 2026-11-14-verification-oracle 交付件，移入冻结层后保留为历史取证指针"
     }
   ]
 }

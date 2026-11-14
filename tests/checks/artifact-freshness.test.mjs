@@ -2,6 +2,8 @@
 //   旧 tarball 装上也能 ALL PASS，断言对象就不是当前 HEAD；本谓词让入口 fail-loud 成 exit 2。
 // 反证：把 `artifactFreshness` 的 mtime 比较反过来 → 下方 stale 例绿；删掉 node_modules 跳过 →
 // 「忽略目录」例红。
+// 负例留证 2026-11-14：BUG-174 / BUG-181——把 artifactFreshness 的 mtime 比较反过来或删掉
+//   build-manifest 文件集/哈希校验 → 旧 tarball 与删源文件例假绿；还原 → 绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from 'node:fs'
@@ -12,7 +14,7 @@ import { artifactFileSetProblems, artifactFreshness, newestMtimeIn, writeBuildMa
 const at = (iso) => new Date(iso)
 const touch = (path, iso) => utimesSync(path, at(iso), at(iso))
 
-test('artifactFreshness：产物不早于源/构建 = fresh；旧产物 = stale 并点名路径', () => {
+test('artifactFreshness：产物不早于源/构建 = fresh；旧产物 = stale 并点名路径（BUG-174）', () => {
   const dir = mkdtempSync(join(tmpdir(), 'artifact-freshness-'))
   try {
     const src = join(dir, 'src')
@@ -60,7 +62,7 @@ test('artifactFreshness：缺席产物 / 无源 = fail-closed；node_modules 不
   }
 })
 
-test('manifest：源文件删除 / 内容替换（同 mtime）/ tarball 替换 → stale；清单优先于 mtime', () => {
+test('manifest：源文件删除 / 内容替换（同 mtime）/ tarball 替换 → stale；清单优先于 mtime（BUG-181）', () => {
   const dir = mkdtempSync(join(tmpdir(), 'artifact-manifest-'))
   try {
     const src = join(dir, 'src')

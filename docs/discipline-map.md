@@ -187,6 +187,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 | `.agents/skills/` 命名带产品前缀（`dsh-`），少数通用技能无前缀 | 开发技能一律无前缀（与 vendor 的 `agent-experience`、`record-browser-gif` 同风格）；本仓没有产品前缀面，因为技能是仓内开发技能而非随包发布的用户技能 | 不适用（本仓无随包发布用户技能面；引入条件 = 本仓开始对外发布技能集时） |
 | **一段一行**（`verify-md-wrap` 门禁） | 本仓用硬折行 ~90 列，是同一规则（控制行宽以利审阅）的不同实现；上游一条一行是为了收窄 diff 噪声，本仓折行同样收窄横向滚动。没有 `verify-md-wrap` 门禁，靠惯例 | 带证据适配（同规则不同实现：无门禁、靠惯例；引入条件 = 折行漂移成审阅负担时补 wrap 门禁） |
 | `docs/defensive-patterns/`（0.2.1 起为五卷目录：general / package-surface / client-components / conversation-and-session / remote-and-api，双语对 + i18n sidecar；高风险缺陷模式供 review 逐条扫） | 主体 = vendor 的 TypeScript 代码模式清单；本仓 TS 面（`src/client/` 观察面 + `src/lib/` 折算）不另立第二份清单——**可迁移的部分已分居**：门禁与子进程陷阱 → [scripts/AGENTS.md](../scripts/AGENTS.md)，事故与教训 → notes/archived/ 的事故复盘与各毕业 Note | 不适用（不另建第二份清单，避免与上述 home 漂移；**重估触发**：本仓 TS 面扩大到需独立缺陷模式清单时） |
+
 vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗漏"的误读）：
 
 | vendor 文件/目录 | 本仓处置 |
@@ -195,7 +196,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | `docs/glossary.md` | 已具备：`docs/terms.md`（一个概念一个 canonical term，含 DSH↔本仓对照） |
 | `docs/development.md` · `docs/testing.md` · `docs/architecture.md` · `docs/cookbook/` · `docs/subsystems/` | 已具备（改名映射）：guides/60 · evaluation + guides/60 §2 · design/10 · guides/61/62 · design/ |
 | `docs/i18n/` · `docs/user/` · `website/` | 不适用：单语、无对外产品文档站与站点投影 |
-| `snapshots/`（session 回放 fixture） | **已具备**：[snapshots/](../snapshots/README.md) 场景证据层——研究角色场景 [场景证据层 snapshots/](../snapshots/README.md) 的 `snapshot.json` 由 [replay-scene](../scripts/lib/replay-scene.mjs) 消费并驱动 [snapshot-replay.entry](../scripts/smoke/snapshot-replay.entry.mjs)（keyless，禁 llm-deepseek + 插 vendor `dsh-llm-replay`）；纯函数夹具仍住 `tests/fixtures/`；判据见本表源 2 "Snapshot tests" 行 | 带证据适配 |
+| `snapshots/`（session 回放 fixture） | **已具备（带证据适配）**：[snapshots/](../snapshots/README.md) 场景证据层——研究角色场景 [场景证据层 snapshots/](../snapshots/README.md) 的 `snapshot.json` 由 [replay-scene](../scripts/lib/replay-scene.mjs) 消费并驱动 [snapshot-replay.entry](../scripts/smoke/snapshot-replay.entry.mjs)（keyless，禁 llm-deepseek + 插 vendor `dsh-llm-replay`）；纯函数夹具仍住 `tests/fixtures/`；判据见本表源 2 "Snapshot tests" 行 |
 | `benchmarks/` · `native/` · `python/` · `patches/` · `apps/` | 不适用：本仓无这些发布 lane 与运行时面 |
 | `CONTRIBUTING.md` · `SAFETY.md` · `SECURITY` · `THIRD_PARTY_NOTICES.md` · `BRAND_GUIDELINES.md` | **已具备（2026-10-25 开源发布）**：`CONTRIBUTING.md` / `SECURITY.md` / `.github/workflows/ci.yml`；`SAFETY.md`、`THIRD_PARTY_NOTICES.md`、`BRAND_GUIDELINES.md` 仍不适用（无运行时安全授权面、无捆绑第三方代码、无独立品牌资产政策）；重估触发 = 出现外部贡献分级审批或捆绑第三方代码时 |
 | `.editorconfig` · `.gitattributes` · lint（oxlint）· 重复代码检测（jscpd）· vitest 系列配置 · `lefthook.yml` | 前两件已具备（`repo-conventions` 门禁强制与 vendor 对齐）；后四件未引入（TS 面 = 一个包的 `src/`，测试栈 = node:test）；Markdown 纪律由门禁（md-utf8-newline / md-links / md-anchors / doc-budgets）承担，git 钩子 = `dev/hooks/pre-commit` |

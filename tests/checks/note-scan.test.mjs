@@ -1,16 +1,46 @@
-// note-scan 契约（BUG-175）——notes 门禁的块级 Markdown 扫描：
+// note-scan 契约（BUG-165 / BUG-175 / BUG-185 / BUG-188）——notes 门禁的块级 Markdown 扫描：
 //   - fenced code（``` / ~~~、长度、语言后缀、未闭合）内的行不是正文；
-//   - h2 枚举与状态行提取都走同一 mask；行号保持原文；
+//   - h2 枚举与状态行提取都走同一 mask，并与 `mdast-util-from-markdown` AST 对账；
 //   - 4 空格缩进不是围栏（CommonMark），点文件豁免不属于本模块。
 //
-// 反证：把 maskFencedCode 的 `~~~` 分支删掉 → 下方 tilde 例红；把未闭合围栏当正文 → 未闭合例红。
+// 负例留证 2026-11-14：BUG-165 / BUG-175——若不剥离围栏，围栏内 `> 状态：` 与 `## 围栏里的假证据` 会夺权；
+//   红配方 = 删掉 statusLines/h2Titles 的 maskFencedCode 前置 → 围栏引用例与 mdast 对账例红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { h2Titles, maskFencedCode, statusLines } from '../../scripts/lib/note-scan.mjs'
+import { fromMarkdown } from '../../scripts/lib/workspace-parsers.mjs'
 
 const visible = (masked) => masked.filter((line) => line !== '')
 
-test('maskFencedCode：反引号 / 波浪号 / 长围栏 / 未闭合 / 缩进边界', () => {
+const flattenMdastText = (node) => {
+  if (typeof node.value === 'string') return node.value
+  if (Array.isArray(node.children)) return node.children.map(flattenMdastText).join('')
+  return ''
+}
+
+const mdastH2Titles = (text) => {
+  const tree = fromMarkdown(text)
+  return tree.children
+    .filter((node) => node.type === 'heading' && node.depth === 2)
+    .map((node) => ({ line: node.position.start.line, title: flattenMdastText(node).trim() }))
+}
+
+const mdastStatusLines = (text) => {
+  const tree = fromMarkdown(text)
+  const out = []
+  for (const node of tree.children) {
+    if (node.type !== 'blockquote') continue
+    for (const child of node.children ?? []) {
+      if (child.type !== 'paragraph') continue
+      const flat = flattenMdastText(child).trim()
+      const match = /^状态[：:]\s*(.+)$/.exec(flat)
+      if (match) out.push({ line: child.position.start.line, value: match[1].trim() })
+    }
+  }
+  return out
+}
+
+test('maskFencedCode：反引号 / 波浪号 / 长围栏 / 未闭合 / 缩进边界（BUG-175）', () => {
   const text = [
     'a',
     '```md',
@@ -54,7 +84,7 @@ test('h2Titles：只认围栏外的真 h2（排除 ### 与围栏里的示例）'
   ])
 })
 
-test('statusLines：围栏里的引用状态行不算；裸值去加粗与空白', () => {
+test('statusLines：围栏里的引用状态行不算；裸值去加粗与空白（BUG-165）', () => {
   const text = [
     '> 状态：implemented',
     '```',
@@ -66,6 +96,7 @@ test('statusLines：围栏里的引用状态行不算；裸值去加粗与空白
     { line: 1, value: 'implemented' },
     { line: 5, value: 'approved' },
   ])
+  assert.deepEqual(statusLines(text), mdastStatusLines(text))
 })
 
 test('块模型：blockquote/list fence、HTML 注释、indented code 都不算正文', () => {
@@ -108,7 +139,7 @@ test('块顺序：围栏里的 <!-- 不开注释，后面的真实 h2 仍可见�
   assert.deepEqual(h2Titles(closed).map((item) => item.title), ['验证'])
 })
 
-test('状态标签装饰：**状态** / __状态__ / 反引号 / 整体加粗都认（BUG-188）', () => {
+test('状态标签装饰：**状态** / __状态__ / 反引号 / 整体加粗都认且与 mdast AST 全等（BUG-188）', () => {
   for (const line of [
     '> **状态**：implemented',
     '> __状态__：implemented',
@@ -116,6 +147,10 @@ test('状态标签装饰：**状态** / __状态__ / 反引号 / 整体加粗都
     '> **状态：** implemented',
   ]) {
     assert.deepEqual(statusLines(`${line}\n`), [{ line: 1, value: 'implemented' }], line)
+    assert.deepEqual(statusLines(`${line}\n`), mdastStatusLines(`${line}\n`), `${line} ↔ mdast`)
   }
   assert.deepEqual(statusLines('> 状态：PASS | FAIL\n'), [{ line: 1, value: 'PASS | FAIL' }])
+  const composite = ['## 决定', '```', '## 假标题', '> 状态：proposed', '```', '', '> **状态**：implemented', '', '## 验证'].join('\n')
+  assert.deepEqual(h2Titles(composite), mdastH2Titles(composite))
+  assert.deepEqual(statusLines(composite), mdastStatusLines(composite))
 })

@@ -94,7 +94,11 @@ if (!process.env.DSH_HOME) {
 }
 // profile 版本面：团队层未随 pin 重钉时 dsh 只拒绝服务，banner 只会超时（BUG-066）。
 {
-  const issues = profileLayerIssues({ profileDir: join(DSH_HOME, 'profiles', PROFILE), runtimeVersion: runtimeVersionOf(ROOT) });
+  const issues = profileLayerIssues({
+    profileDir: join(DSH_HOME, 'profiles', PROFILE),
+    runtimeVersion: runtimeVersionOf(ROOT),
+    packDir: join(ROOT, 'packages', 'deep-research-pack'),
+  });
   if (issues.length > 0) {
     console.error(`snapshot-replay.entry: ${issues.join('；')}——本次未跑（exit 2）`);
     process.exit(2);

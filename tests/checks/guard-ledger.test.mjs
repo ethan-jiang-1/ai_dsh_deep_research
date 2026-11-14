@@ -1,63 +1,148 @@
-// 负例留证 2026-11-14：S1/S3 的上升闸——守卫不再只问「有没有测试」，而是问「它的 oracle 是
-// 外部/结构化/规范形，还是自指」。红配方：删 ledger 任一条 → 覆盖红；把某条 closed 的 guard
-// 改成不存在路径 → 路径红；把 self-referential 的 trigger 删掉 → 红。
+// 负例留证 2026-11-14：D55 守卫台账全量收口——覆盖 D-1（24）+ D-2（17）+ 批 A–D（31）共 72 张卡，
+// 并与 asset-ledger 的 AST 推导 oracleType 及守卫文件内的 test('...BUG-nnn...') 标题做双向对账。
+// 红配方：删任一条入账卡、篡改 oracleType 使其偏离 asset-ledger、或删守卫测试标题中的 BUG-nnn → 本文件红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { assetLedgerOf, listTestFiles } from '../../scripts/lib/asset-ledger.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const LEDGER = JSON.parse(readFileSync(join(ROOT, 'tests/fixtures/guard-ledger/ledger.json'), 'utf8'))
+const ASSET_BY_PATH = new Map(assetLedgerOf(ROOT, listTestFiles(ROOT)).map((a) => [a.path, a]))
 const ORACLE_TYPES = new Set(['structured', 'external', 'canonical', 'self-referential', 'smoke-only', 'none'])
 const STATUSES = new Set(['closed', 'partial', 'provisional', 'deferred'])
-// v1 覆盖范围：普查 D-1 的 24 张 + 批次 D（184–190）。
+
 const D1 = ['003', '009', '010', '012', '013', '018', '022', '024', '026', '027', '028', '030', '033', '034', '036', '045', '051', '059', '061', '063', '079', '080', '095', '136']
-const BATCH_D = ['184', '185', '186', '187', '188', '189', '190']
+const D2 = ['001', '011', '016', '023', '025', '031', '032', '037', '042', '047', '055', '072', '106', '108', '112', '113', '152']
+const BATCH_AC = Array.from({ length: 24 }, (_, idx) => String(160 + idx))
+const BATCH_D = Array.from({ length: 7 }, (_, idx) => String(184 + idx))
+const SCOPED_IDS = [...D1, ...D2, ...BATCH_AC, ...BATCH_D].map((n) => `BUG-${n}`)
 
-const bugs = Array.isArray(LEDGER.bugs) ? LEDGER.bugs : []
-const byId = new Map(bugs.map((bug) => [bug.id, bug]))
+function claimedBugIdsInTestSource(text) {
+  const claimed = new Set()
+  for (const m of text.matchAll(/^\s*(?:await\s+)?(?:t\.)?(?:test|it)\(\s*(['"`])((?:\\.|(?!\1)[^\n])*)\1/gm)) {
+    for (const idMatch of m[2].matchAll(/BUG-\d{3}/g)) claimed.add(idMatch[0])
+  }
+  return claimed
+}
 
-test('guard ledger 形状：id 唯一、枚举合法、字段齐全', () => {
+function validateGuardLedger(ledger, { assetByPath, readText, fileExists, requiredIds }) {
+  const problems = []
+  const bugs = Array.isArray(ledger?.bugs) ? ledger.bugs : []
+  const byId = new Map()
+  for (const bug of bugs) {
+    if (byId.has(bug.id)) problems.push(`${bug.id}: 重复条目`)
+    byId.set(bug.id, bug)
+    if (!/^BUG-\d{3}$/.test(String(bug.id))) problems.push(`${bug.id}: id 形状非法`)
+    if (typeof bug.mechanism !== 'string' || bug.mechanism.trim() === '') problems.push(`${bug.id}: mechanism 为空`)
+    if (!ORACLE_TYPES.has(bug.oracleType)) problems.push(`${bug.id}: oracleType 非法 (${bug.oracleType})`)
+    if (!STATUSES.has(bug.status)) problems.push(`${bug.id}: status 非法 (${bug.status})`)
+    if (bug.status === 'deferred') {
+      if (bug.guard !== null) problems.push(`${bug.id}: deferred 不得声明 guard`)
+      if (!bug.reason || !bug.trigger) problems.push(`${bug.id}: deferred 缺 reason/trigger`)
+      continue
+    }
+    if (typeof bug.guard !== 'string' || bug.guard === '') {
+      problems.push(`${bug.id}: 非 deferred 缺 guard`)
+      continue
+    }
+    if (!fileExists(bug.guard)) {
+      problems.push(`${bug.id}: guard 路径不存在 (${bug.guard})`)
+      continue
+    }
+    if (typeof bug.redRecipe !== 'string' || bug.redRecipe.trim() === '') {
+      problems.push(`${bug.id}: 缺 redRecipe`)
+    }
+    if (bug.status === 'partial' && (!bug.reason || !bug.trigger)) {
+      problems.push(`${bug.id}: partial 缺 reason/trigger`)
+    }
+    if (bug.oracleType === 'self-referential') {
+      if (bug.status !== 'provisional') problems.push(`${bug.id}: self-referential 守卫只能标 provisional`)
+      if (!bug.trigger) problems.push(`${bug.id}: self-referential 守卫缺 trigger`)
+    }
+    if (bug.guard.startsWith('tests/')) {
+      const asset = assetByPath.get(bug.guard)
+      if (!asset) {
+        problems.push(`${bug.id}: guard 未登记在 asset-ledger (${bug.guard})`)
+      } else if (bug.oracleType !== asset.oracleType) {
+        problems.push(`${bug.id}: oracleType 失配——guard-ledger=${bug.oracleType} vs asset-ledger=${asset.oracleType} (${bug.guard})`)
+      }
+      const claimed = claimedBugIdsInTestSource(readText(bug.guard))
+      if (!claimed.has(bug.id)) {
+        problems.push(`${bug.id}: 守卫文件 ${bug.guard} 的 test() 标题未声称 ${bug.id}`)
+      }
+    }
+  }
+  for (const id of requiredIds) {
+    if (!byId.has(id)) problems.push(`缺账：${id}`)
+  }
+  return problems
+}
+
+test('guard ledger 全量对账：72 张卡齐全、与 asset-ledger 零 oracleType 冲突、测试标题逐卡绑定', () => {
   assert.equal(LEDGER.version, 1, 'ledger version 必须是 1')
   assert.ok(typeof LEDGER.scope === 'string' && LEDGER.scope !== '', 'scope 必须写清覆盖范围')
-  assert.ok(bugs.length >= 30, '防空语料：ledger 条目过少')
-  assert.equal(byId.size, bugs.length, 'BUG id 必须唯一')
-  for (const bug of bugs) {
-    assert.match(bug.id, /^BUG-\d{3}$/, `${bug.id}: id 形状`)
-    assert.ok(typeof bug.mechanism === 'string' && bug.mechanism !== '', `${bug.id}: mechanism 必填`)
-    assert.ok(ORACLE_TYPES.has(bug.oracleType), `${bug.id}: oracleType 非法（${bug.oracleType}）`)
-    assert.ok(STATUSES.has(bug.status), `${bug.id}: status 非法（${bug.status}）`)
-    if (bug.status === 'deferred') {
-      assert.equal(bug.guard, null, `${bug.id}: deferred 不得声称有 guard`)
-      assert.ok(bug.reason && bug.trigger, `${bug.id}: deferred 必须有 reason + trigger`)
-    } else {
-      assert.ok(typeof bug.guard === 'string' && bug.guard !== '', `${bug.id}: 非 deferred 必须有 guard`)
-      assert.ok(existsSync(join(ROOT, bug.guard)), `${bug.id}: guard 路径不存在（${bug.guard}）`)
-      assert.ok(bug.redRecipe && bug.redRecipe !== '', `${bug.id}: 非 deferred 必须有 redRecipe`)
-    }
-    if (bug.status === 'partial') assert.ok(bug.reason && bug.trigger, `${bug.id}: partial 必须有 reason + trigger`)
-    if (bug.oracleType === 'self-referential') assert.ok(bug.trigger && bug.trigger !== '', `${bug.id}: 自指守卫必须带 trigger`)
+  assert.equal(SCOPED_IDS.length, 72, '目标闭集应为 72 张卡')
+  const sourceCache = new Map()
+  const readText = (rel) => {
+    if (!sourceCache.has(rel)) sourceCache.set(rel, readFileSync(join(ROOT, rel), 'utf8'))
+    return sourceCache.get(rel)
   }
+  const problems = validateGuardLedger(LEDGER, {
+    assetByPath: ASSET_BY_PATH,
+    readText,
+    fileExists: (rel) => existsSync(join(ROOT, rel)),
+    requiredIds: SCOPED_IDS,
+  })
+  assert.deepEqual(problems, [], `guard-ledger 对账失败：\n${problems.join('\n')}`)
 })
 
-test('覆盖：D-1 二十四张 + 批次 D 七张，一条不缺', () => {
-  for (const id of D1) assert.ok(byId.has(`BUG-${id}`), `D-1 缺账：BUG-${id}`)
-  for (const id of BATCH_D) assert.ok(byId.has(`BUG-${id}`), `批次 D 缺账：BUG-${id}`)
+test('负控：漏卡、与 asset-ledger 的 oracleType 矛盾、守卫标题未声明 BUG-nnn 均必红', () => {
+  const sampleGuard = 'tests/checks/fake.test.mjs'
+  const assetByPath = new Map([[sampleGuard, { path: sampleGuard, oracleType: 'canonical' }]])
+  const baseBug = {
+    id: 'BUG-001',
+    mechanism: 'probe',
+    guard: sampleGuard,
+    oracleType: 'canonical',
+    status: 'closed',
+    redRecipe: 'mutate',
+  }
+
+  const missingCard = validateGuardLedger({ bugs: [baseBug] }, {
+    assetByPath,
+    readText: () => "test('probe（BUG-001）', () => {})\n",
+    fileExists: () => true,
+    requiredIds: ['BUG-001', 'BUG-002'],
+  })
+  assert.ok(missingCard.some((p) => p.includes('缺账：BUG-002')))
+
+  const mismatchedOracle = validateGuardLedger({ bugs: [{ ...baseBug, oracleType: 'external' }] }, {
+    assetByPath,
+    readText: () => "test('probe（BUG-001）', () => {})\n",
+    fileExists: () => true,
+    requiredIds: ['BUG-001'],
+  })
+  assert.ok(mismatchedOracle.some((p) => p.includes('oracleType 失配')))
+
+  const unboundTitle = validateGuardLedger({ bugs: [baseBug] }, {
+    assetByPath,
+    readText: () => "test('unrelated title without id', () => {})\n",
+    fileExists: () => true,
+    requiredIds: ['BUG-001'],
+  })
+  assert.ok(unboundTitle.some((p) => p.includes('test() 标题未声称 BUG-001')))
 })
 
-test('自指守卫若存在，必须是显式临时态；S2b 后允许为 0', () => {
-  const selfReferential = bugs.filter((bug) => bug.oracleType === 'self-referential')
-  // S2b 已把 CI 三条（184/187/190）换成 external；0 条是合法终点，不是漏账。
-  for (const bug of selfReferential) assert.equal(bug.status, 'provisional', `${bug.id}: 自指守卫只能是 provisional`)
-})
-
-test('台账可度量：按 oracleType / status 计数（防空 + 可见）', () => {
+test('台账可度量：按 oracleType / status 汇总可见且外部与规范形守卫在位', () => {
+  const bugs = LEDGER.bugs
   const count = (key) => bugs.reduce((acc, bug) => ((acc[bug[key]] = (acc[bug[key]] || 0) + 1), acc), {})
   const types = count('oracleType')
   const statuses = count('status')
-  console.log('guard-ledger:', JSON.stringify({ total: bugs.length, types, statuses }))
-  assert.ok((types.external || 0) >= 1, '至少一条外部 oracle（S2a Markdown）')
-  assert.ok((types.structured || 0) >= 1, '至少一条结构化 oracle（S2c）')
-  assert.ok((statuses.closed || 0) >= 10, 'closed 过少——台账退化成待办清单')
+  assert.equal(bugs.length, 72)
+  assert.ok((types.external || 0) >= 20, `external 守卫过少：${JSON.stringify(types)}`)
+  assert.ok((types.canonical || 0) >= 20, `canonical 守卫过少：${JSON.stringify(types)}`)
+  assert.equal(statuses.closed, 72, `72 张范围内卡应全部闭环：${JSON.stringify(statuses)}`)
 })

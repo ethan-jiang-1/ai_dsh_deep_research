@@ -80,10 +80,10 @@ test('负控：未识别后缀不会被 fold 当作可改写行', () => {
   assert.throws(() => upsertMethodEntry(lib, folded[0]), /不可识别/)
 })
 
-// BUG-167 负例留证 2026-11-14：旧实现下 ZWSP/软连字符等 \p{Cf} 留在 name 里，
+// 负例留证 2026-11-14：BUG-167——旧实现下 ZWSP/软连字符等 \p{Cf} 留在 name 里，
 // `foldLibrary` 读出 `方法\u200B`，`upsert('方法')` 判 created → 两条视觉同名。
 // 还原法 = 去掉 parseMethodHeading 的格式字符剥离 / methodNameIssue 的 Cf 拒绝。
-test('身份归一：Unicode 格式字符不制造同名幽灵条目', () => {
+test('身份归一：Unicode 格式字符不制造同名幽灵条目（BUG-167）', () => {
   const sections = { source: 'a', verify: 'b', report: 'c', limit: 'd' }
   const entry = { name: '方法', provenance: null, isDefault: false, sections, legacyText: null }
   for (const ch of ['\u200B', '\u00AD', '\u2060', '\u200E', '\u180E']) {
@@ -103,7 +103,7 @@ test('身份归一：Unicode 格式字符不制造同名幽灵条目', () => {
 // 负例留证 2026-11-14：BUG-180——段循环把第二个 `（…）` / 未知 `〔…〕` / 第二个默认标记
 // 当作合法段消费；upsert 重写标题时静默丢段。红配方：删掉 provenanceSeen/defaultSeen/else
 // 分支 → 下方四例 wellFormed 变 true、upsert 不再抛错。
-test('段身份：重复/未知段必须不可改写，写路径 fail-loud 不丢段', () => {
+test('段身份：重复/未知段必须不可改写，写路径 fail-loud 不丢段（BUG-180）', () => {
   const sections = { source: 's', verify: 'v', report: 'r', limit: 'l' }
   const entry = { name: '方法', provenance: '新来源', isDefault: false, sections, legacyText: null }
   for (const head of [

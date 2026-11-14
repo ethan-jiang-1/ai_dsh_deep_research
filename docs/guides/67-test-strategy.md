@@ -103,8 +103,8 @@
 
 | 账 | 记什么 | 载体 | 何时更新 |
 |---|---|---|---|
-| **资产账** | cost / uniqueClaim / oracle / sunset / lane | [scripts/smoke/registry.json](../../scripts/smoke/registry.json) + `smoke-oracle-surface` | 新增/退役/改判据 |
-| **失败类账** | 类 → 代表 BUG → 守卫 → 缺口 → owner | [失败类普查](../../_backlog/_archived/research/dsh-test-strategy/2026-11-13-failure-class-census.md) + 本文表 | 每次 P0/P1/复发 |
+| **资产账** | lane / class / cost / uniqueClaim / oracleType / sunset | 慢车道 = [scripts/smoke/registry.json](../../scripts/smoke/registry.json)（`smoke-oracle-surface`）；进程内 spec/check = [asset-ledger/ledger.json](../../tests/fixtures/asset-ledger/ledger.json)（AST 推导 `oracleType`，禁手写覆盖字典，`asset-ledger.test` 重算对账） | 新增/退役/改判据或改 import |
+| **失败类与守卫账** | 类 → 代表 BUG → 守卫路径 → `oracleType` → 红配方 | [失败类普查](../../_backlog/_archived/research/dsh-test-strategy/2026-11-13-failure-class-census.md) + 本文表 + [guard-ledger/ledger.json](../../tests/fixtures/guard-ledger/ledger.json)（与 `asset-ledger` 及测试标题双向对账，`guard-ledger.test`） | 每次 P0/P1/复发或入账 |
 | **证据账** | 证据/层/失败类/负控/CI/显式未覆盖 | [reviewing-a-delivery](../../.agents/skills/reviewing-a-delivery/SKILL.md) 的证据账本节 | 每次非平凡交付 |
 | **探索账** | charter/面/oracle/结果/毕业/日期 | [research 题目录](../../_backlog/research/README.md) + [探索技能](../../.agents/skills/exploratory-verification/SKILL.md) | 每轮探索 |
 

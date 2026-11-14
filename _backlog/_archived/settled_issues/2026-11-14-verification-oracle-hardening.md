@@ -1,28 +1,28 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-14
 ---
 
-# 待落地：验证层 Oracle 独立化补强与双台账收口（D55 返工）
+# 已结：验证层 Oracle 独立化补强与双台账收口（D55 返工）
 
-> 立卡：2026-11-14 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 — D55 首轮交付（`a3c98989..42b589e7`）五类结构缺口已全部实测复现并定性，按五分片一次性闭环 ｜ 可关闭：否
-> 去向：implemented — `notes/implemented/2026-11-14-verification-oracle-hardening.md`；业务验收：用户
+> 立卡：2026-11-14 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 — D55 首轮交付五类结构缺口按 S1–S5 全部闭环并验收全绿 ｜ 可关闭：是
+> 去向：implemented — [Note](../../../notes/implemented/2026-11-14-verification-oracle-hardening.md)；业务验收：用户
 
-**问题与期望结果：** [已结卡 2026-11-14-verification-oracle](../_archived/settled_issues/2026-11-14-verification-oracle.md)（[D55](../../docs/decisions.md#d55)）立项旨在终结「手写子集解析器 + 作者自写单测 + 散文证据」引发的第 6–9 轮同类复发（`BUG-160..190`）及历史守卫沉淀缺口，但首轮落地在五个面上只做了外围补丁而未触及根因（双份手写 Markdown 状态机未合并且 5 类相邻语法与 `mdast` 分歧、写入侧 CI `run:` 门漏做且 360 行手写 YAML 仍在、`fix-evidence`/`guard-red-record` 留 4 条绕过链与死正则、`guard-ledger` 与 `asset-ledger` 在 10 个测试文件上自相矛盾、S1 多处用源码字面 grep 冒充行为守卫且缺五角色快照 B 层 keyless 内容对账）。期望在不破插件包零运行时依赖与 `layering` 门禁的前提下，按五分片彻底兑现 D55 合同：单一真源实现、真实解析器/规范写入门、无绕过修复证据链、自洽四账与真正的行为/内容级 keyless 守卫。
-**当前情况：** 因果链与逐项实测复现已在活跃研究题 [d55-oracle-gap-audit](../research/d55-oracle-gap-audit/README.md)（正文 = [2026-11-14-d55-provenance-and-oracle-audit](../research/d55-oracle-gap-audit/2026-11-14-d55-provenance-and-oracle-audit.md)）完成定性；Node `v22.23.1` 原生直引 `.ts`、`pnpm-lock.yaml` 内置 `mdast-util-from-markdown@2.0.3` / `yaml@2.9.1` 及 `layering` 边界均已实测通过。
-**未决问题：** 无技术阻塞；待用户审阅本卡范围后授权执行（建议通过 `/goal` 按 S1–S5 分片推进）。
-**下一步：** 用户确认授权后，按 `## 分片` 的 S1 → S5 顺序逐片遵循先红后绿落地，收尾同变更交付新 Note、按 `archiving-a-note` 归档被取代的首轮 [Note 2026-11-14-verification-oracle](../../notes/implemented/2026-11-14-verification-oracle.md)、更新 [decisions.md#d55](../../docs/decisions.md#d55) 与 [guides/67](../../docs/guides/67-test-strategy.md)，并归档本卡与研究题。
+**问题与期望结果：** [已结卡 2026-11-14-verification-oracle](2026-11-14-verification-oracle.md)（[D55](../../../docs/decisions.md#d55)）立项旨在终结「手写子集解析器 + 作者自写单测 + 散文证据」引发的第 6–9 轮同类复发（`BUG-160..190`）及历史守卫沉淀缺口，但首轮落地在五个面上只做了外围补丁而未触及根因（双份手写 Markdown 状态机未合并且 5 类相邻语法与 `mdast` 分歧、写入侧 CI `run:` 门漏做且 360 行手写 YAML 仍在、`fix-evidence`/`guard-red-record` 留 4 条绕过链与死正则、`guard-ledger` 与 `asset-ledger` 在 10 个测试文件上自相矛盾、S1 多处用源码字面 grep 冒充行为守卫且缺五角色快照 B 层 keyless 内容对账）。期望在不破插件包零运行时依赖与 `layering` 门禁的前提下，按五分片彻底兑现 D55 合同：单一真源实现、真实解析器/规范写入门、无绕过修复证据链、自洽四账与真正的行为/内容级 keyless 守卫。
+**当前情况：** 已按 S1–S5 全量交付闭环；前序因果链与逐项实测复现见归档研究题 [d55-oracle-gap-audit](../research/d55-oracle-gap-audit/README.md)（正文 = [2026-11-14-d55-provenance-and-oracle-audit](../research/d55-oracle-gap-audit/2026-11-14-d55-provenance-and-oracle-audit.md)）。
+**未决问题：** 无。
+**下一步：** 已关闭归档。
 
 ---
 
 ## 背景与证据锚点
 
-> 按 [_backlog/AGENTS](../AGENTS.md) 铁律，已归档卡永不重开；本卡作为 D55 的正式补强卡引用前序载体，完整实测输出见 [2026-11-14-d55-provenance-and-oracle-audit](../research/d55-oracle-gap-audit/2026-11-14-d55-provenance-and-oracle-audit.md)。
+> 按 [_backlog/AGENTS](../../AGENTS.md) 铁律，已归档卡永不重开；本卡作为 D55 的正式补强卡引用前序载体，完整实测输出见 [2026-11-14-d55-provenance-and-oracle-audit](../research/d55-oracle-gap-audit/2026-11-14-d55-provenance-and-oracle-audit.md)。
 
 1. **S2a Markdown 遮罩未同源且相邻语法失真**：`scripts/lib/note-scan.mjs` 与 `packages/deep-research-pack/src/lib/review-readiness.ts` 仍各存一份 ~90 行手写遮罩；实测行内反引号 `` `<!--` ``、双反引号、引用块/列表未闭合围栏退出容器、跨行注释闭合行紧跟第二段注释共 5 类合法输入与 `mdast` 分歧（吞掉后续标题与 `终局判据` 或漏出隐藏注释）；`dev/record-markdown-oracle.mjs` 用 `[...src]` 混用 `mdast` UTF-16 offset，遇 emoji（`🎯`）直接算错切片且含重复用例名。
 2. **S2b CI 工作流缺写入侧门且保留假 `external` 关闭**：漏做规范 `run:` 写入门；`scripts/lib/ci-workflow.mjs` 仍保留 360 行手写缩进 YAML 状态机与 `/exit [1-9]/` 残缺黑名单；`record-ci-oracle.mjs` 缺 `-eo pipefail`；`BUG-190` 在 `guard-ledger` 标 `external/closed`，但 `ci-workflow-oracle.test.mjs` 只调 `executedSmokeFiles` 不读 `events`（删 `parseEvents` 仍 100% 绿）。
 3. **S2c 修复证据与红录门禁存在 4 条绕过链 + 1 条死正则**：① `red.command: "pnpm test"` 配任意既有测试路径即可零测试改动过 `staged-change-pairing`；② `backlog-liveness` 不查活跃/已归档卡 `guard.path` 盘上存活，归档后删守卫测试仍全绿；③ `fix-evidence.mjs` 用 `opened < '2026-11-15'` 一刀切豁免且删掉旧散文红绿检查，导致 `<= 2026-11-14` 卡双空；④ `fixSectionOf` 未剥围栏被 `red.output` 内 `## ` 截断、`duplicateKeyOf` 漏 `\uXXXX` 键转义；⑤ `f-repo.mjs:164` 写死 `/conformance\.test\.mjs$/`，D53 改 `.spec.mjs` 后全仓 0 命中。
-4. **S3 双台账撕裂与契约缺项**：`guard-ledger`（31 条）与 `asset-ledger`（208 条，其中 194 条因硬编码 14 条 `OVERRIDES` 被标成 `self-referential`）在 **10 个测试文件 / 11 条 BUG** 上 `oracleType` 直接冲突（含 `note-scan.test.mjs` 零外部真值却标 `external`）；`asset-ledger` 缺原卡要求的 `class` 与 `cost`，且未同步 [guides/67 §4 四账](../../docs/guides/67-test-strategy.md)。
+4. **S3 双台账撕裂与契约缺项**：`guard-ledger`（31 条）与 `asset-ledger`（208 条，其中 194 条因硬编码 14 条 `OVERRIDES` 被标成 `self-referential`）在 **10 个测试文件 / 11 条 BUG** 上 `oracleType` 直接冲突（含 `note-scan.test.mjs` 零外部真值却标 `external`）；`asset-ledger` 缺原卡要求的 `class` 与 `cost`，且未同步 [guides/67 §4 四账](../../../docs/guides/67-test-strategy.md)。
 5. **S1 源码 grep 伪守卫、快照 keyless 盲区与账本蒸发**：`boot-timer`（`BUG-095`）、`probe-port-policy`（`BUG-136`，只扫 1/6 行为探针，漏其余 5 个硬编码端口探针）、`smoke-imports`（`BUG-079` 单行正则漏跨行与传递闭包）、`web-ui-nav-bilingual`（`BUG-059/061` 单文件单行）均以源码字面 grep 冒充 `canonical` 守卫；`replay-fixtures.spec.mjs`（`BUG-013/080`）只验 40-hex 而未对五角色 `session.v4.jsonl` 做 B 层内容对账；普查 §D-2（17 卡）与探索批 A–C（24 卡中 23 张无标题声明、24 张未入账）+ 批 D `BUG-186/189` 账本蒸发。
 
 ---
@@ -77,7 +77,7 @@ opened: 2026-11-14
 | **4. 测试资产账与守卫账** | 测试文件 AST import 图 + 头注元数据 + `test('...BUG-nnn...')` 声明生成的统一账本（`tests/fixtures/asset-ledger/ledger.json` 与 `guard-ledger/ledger.json`） | `tests/checks/asset-ledger.test.mjs`、`tests/checks/guard-ledger.test.mjs` | 盘上测试增删未入账 → 红；同一文件在两账 `oracleType` 不一致 → 红；声称 `external`/`canonical` 但 AST 未 import 对应外部库/生产模块 → 红 | 删除 `asset-ledger.mjs` 内 14 条硬编码 `OVERRIDES` 字典 | `tests/checks/asset-ledger.test.mjs` + `tests/checks/guard-ledger.test.mjs`（防漂移与伪造 `oracleType` 负例） |
 | **5. 五角色快照 B 层 keyless 对账** | `snapshots/replay/research-face/snapshot.json` + 各角色 `session.v4.jsonl` 事件流 ↔ 当前 `presets/*.patch.yml`、`presets/*/skills/*/SKILL.md`、`content/manual.md`、`.git` vendor submodule SHA | `tests/run/replay-fixtures.spec.mjs`（日常秒级回归）与 `scripts/smoke/snapshot-replay.entry.mjs`（CI 真挂载回放） | 任一角色缺席 / `vendor` SHA 失配 / 录制 `persona`、`skill-catalog` 或 `runtime-context` 与当前包源码不一致 → 红 | 删除 `replay-fixtures.spec.mjs` 中手抄的弱子集断言，统一走 `loadReplayScene` + B 层内容提取器 | `tests/run/replay-fixtures.spec.mjs`（篡改任一角色 persona / manual / skill 描述 / vendor SHA 的负例断言） |
 
-方法 = [设计判据](../methods/judgment-design.md)。
+方法 = [设计判据](../../methods/judgment-design.md)。
 
 ---
 
@@ -98,7 +98,7 @@ opened: 2026-11-14
 - **不重开已归档卡**：不移动、不改写 `_backlog/_archived/settled_issues/2026-11-14-verification-oracle.md` 与 `_backlog/_archived/fixed_bugs/BUG-*.md` 的历史结论正文（仅在必要处被新卡引用）。
 - **不给 `packages/deep-research-pack` 增加任何运行时第三方依赖**：`mdast-util-from-markdown` 与 `yaml` 仅限根 workspace `devDependencies`（供 `scripts/` 与 `tests/` 开发验证消费）。
 - **不在 `pnpm test` 或 `pnpm verify` 中引入网络请求、真模型调用或长时间浏览器冷启动**：所有新增 L0/keyless 守卫保持秒级确定性执行；真进程 `bash -eo pipefail` 对照归入 `e2e` 车道（`gates.e2e.mjs`）。
-- **不顺带删除或降级现有慢层 `scripts/smoke/*.entry.mjs` 资产**：慢资产去留由独立研究题 [test-asset-fence](../research/test-asset-fence/README.md) 承接，本卡只负责把台账字段做实、把 keyless 守卫做真。
+- **不顺带删除或降级现有慢层 `scripts/smoke/*.entry.mjs` 资产**：慢资产去留由独立研究题 [test-asset-fence](../../research/test-asset-fence/README.md) 承接，本卡只负责把台账字段做实、把 keyless 守卫做真。
 
 ---
 
@@ -106,4 +106,24 @@ opened: 2026-11-14
 
 1. `## 分片` S1–S5 全部落地，`## 验收标准` AC1–AC5 对应的机械检查（`pnpm verify`、`pnpm test`、`pnpm typecheck`、`pnpm build`、`node scripts/smoke/gates.e2e.mjs`、`node scripts/smoke/pack.e2e.mjs`）全绿，且新增/收紧判据均完成同 diff 先红后绿验证。
 2. 完成 `reviewing-a-delivery` 语义自审（含证据账本）。
-3. 同次提交写入 `notes/implemented/2026-11-14-verification-oracle-hardening.md`，按 `archiving-a-note` 将被取代的首轮 `notes/implemented/2026-11-14-verification-oracle.md` 迁入 `notes/archived/` 并更新入链与 [decisions.md#d55](../../docs/decisions.md#d55)，同时将本卡迁入 `_backlog/_archived/settled_issues/`、将研究题 `d55-oracle-gap-audit/` 迁入 `_backlog/_archived/research/`。
+3. 同次提交写入 [notes/implemented/2026-11-14-verification-oracle-hardening.md](../../../notes/implemented/2026-11-14-verification-oracle-hardening.md)，按 `archiving-a-note` 将被取代的首轮 [notes/archived/2026-11-14-verification-oracle.md](../../../notes/archived/2026-11-14-verification-oracle.md) 迁入 `notes/archived/` 并更新入链与 [decisions.md#d55](../../../docs/decisions.md#d55)，同时将本卡迁入 `_backlog/_archived/settled_issues/`、将研究题 `d55-oracle-gap-audit/` 迁入 `_backlog/_archived/research/`。
+
+---
+
+## 落地记录（2026-11-14）
+
+- **S1（Markdown 单一真源 + 进程内 `mdast` 真值对账）**：新建 `packages/deep-research-pack/src/lib/markdown-mask.ts` 统一承接围栏、块引用/列表容器退出、行内反引号与同行多段/跨行 HTML 注释；`review-readiness.ts`、`note-scan.mjs` 与 `fix-evidence.mjs` 同源复用，删除两份旧手写遮罩与静态 `markdown-oracle`；`markdown-mask-conformance.spec.mjs`、`verdict-conformance.spec.mjs`、`note-scan.test.mjs` 直调 `mdast-util-from-markdown@2.0.3` 逐行/逐节点对账。
+- **S2（CI 工作流 `yaml` AST + 规范 `run:` 门 + 真 `bash -eo pipefail` 对照）**：新建受锁加载层 `scripts/lib/workspace-parsers.mjs`，重写 `ci-workflow.mjs` 与 `ci-jobs.test.mjs` 为 `yaml@2.9.1` AST，新增 `ciWorkflowRunProblems` 写入侧规范门，升级 `record-ci-oracle.mjs`（`events` 入账闭环 `BUG-190`）并接入 `gates.e2e.mjs`。
+- **S3（修复证据与红录绕过链封堵）**：修复 `fix-evidence.mjs`（`markdown-mask` 切节、`\uXXXX` 重复键拦截、活跃 `bugs/` 零豁免）、`staged-change-pairing.mjs`（禁借无关旧测试充当 `guard.path`）、`backlog-liveness.mjs`（常驻校验归档卡 `guard.path` 存在）与 `f-repo.mjs`（`conformance.(spec|test).mjs` + 单标题多 `BUG-nnn` 全提取），并在 `gates-cases.mjs` 增补注入案例。
+- **S4（真行为/AST 守卫 + 五角色快照 B 层 keyless 对账）**：拆出 `scripts/lib/web-banner.mjs` 完成三路径句柄零泄漏测试（`BUG-095`）；提炼共享端口退避与整组收割覆盖全部 6 个 `probes/behavior/*.mjs`（`BUG-136`）；升级 `smoke-imports.test.mjs` 与 `web-ui-nav-bilingual.test.mjs` 为 TS AST 扫描并修清 11 处单语定位器（`BUG-079`、`BUG-059/061`）；`profile-health.mjs` 补镜像新鲜度、`replay-fixtures.spec.mjs` 补五角色 `persona` / `skill-catalog` / `manual.md` / `vendor` SHA keyless 对账，并实跑真机 `snapshot-replay.entry.mjs --layers a,b` 五角色全 PASS（`BUG-013/080`）。
+- **S5（双台账 AST 推导与 72 卡全量闭环）**：`asset-ledger.mjs` 废除 `OVERRIDES`，由 TS AST 自动推导 `oracleType`（209 项：external 23 / canonical 112 / structured 42 / self-referential 32）；`guard-ledger` 扩至 D-1（24）+ D-2（17）+ 批 A–D（31）共 **72 张卡**，与 `asset-ledger` 0 处矛盾；同步 `guides/67`、`decisions.md#d55`、`scripts/README.md` 与新旧 Note。
+
+### 证据账本
+
+| 证据 | 层 | 覆盖的失败类 | 负控（见过红） | CI/收尾 |
+|---|---|---|---|---|
+| `tests/contracts/{markdown-mask,verdict}-conformance.spec.mjs` + `tests/checks/note-scan.test.mjs` | contract / checks | C3 双实现漂移、C4 CommonMark 相邻语法与 UTF-16 偏移 | 是（5 类首轮分歧输入先红后绿） | `pnpm test` |
+| `tests/checks/{ci-workflow,ci-workflow-oracle,ci-jobs,model-workflow,smoke-registry}.test.mjs` | checks | C7 假绿（短路/取反/提及当执行）、C4 YAML 流式映射/job id | 是（`! node`、`false &&`、`on: {...}` 负控） | `pnpm test` |
+| `tests/checks/{fix-evidence,staged-change-pairing,backlog-liveness}.test.mjs` | checks | C7/C11 伪造修复证据、借无关守卫路径、编码重复键 | 是（4 条绕过链逐一先红后绿） | `pnpm test` + `pnpm verify` |
+| `tests/checks/{boot-timer,probe-port-policy,smoke-imports,web-ui-nav-bilingual,asset-ledger,guard-ledger}.test.mjs` + `tests/run/replay-fixtures.spec.mjs` | checks / spec | C5 资源泄漏/占口自锁、C2 死链与单语定位器、C9 快照与双账漂移 | 是（句柄泄漏、跨行死链、伪 `external`、跨账失配、手册一字篡改） | `pnpm test` |
+| `scripts/smoke/{pack,gates}.e2e.mjs` + `scripts/smoke/snapshot-replay.entry.mjs --layers a,b` | e2e / entry | C10 打包零多余运行时依赖、门禁真实 CLI 注入、五角色真实挂载回放 | 是（120+ 门禁注入红例 + `ci-oracle --check`） | 本地收尾 + CI job |

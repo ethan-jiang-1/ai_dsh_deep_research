@@ -11,6 +11,18 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
+import { readinessOf } from '../../scripts/lib/node-gate-contracts.mjs'
+import { fromMarkdown } from '../../scripts/lib/workspace-parsers.mjs'
+
+const mdastInlineText = (line) => {
+  const tree = fromMarkdown(line)
+  const visit = (node) => {
+    if (typeof node.value === 'string') return node.value
+    if (Array.isArray(node.children)) return node.children.map(visit).join('')
+    return ''
+  }
+  return visit(tree).trim()
+}
 
 /** 结构位置：Markdown 装饰之后紧跟判定词。 */
 test('不变量①：行首 Markdown 装饰与分隔符后的裸写 → 采用该值', () => {
@@ -91,7 +103,7 @@ test('不变量⑤：生成矩阵——单一结构判定采用；结构 + 相�
 // 负例留证 2026-11-14：BUG-169（fenced code 里的判定被当正文）、BUG-170（`**readiness**:`
 // 被判无判定）。红配方：删掉 maskFencedLines 的调用 → 前六例红；删掉 stripVerdictDecor 的
 // normalizeLabelDecor → 后七例红；两处都还原 → 绿。
-test('不变量⑥：fenced code 与标签加粗是结构，不是判定', () => {
+test('不变量⑥：fenced code 与标签加粗是结构，不是判定（BUG-169 / BUG-170）', () => {
   // 围栏里的示例/旧轮引文不夺权（真值在围栏外）
   assert.equal(terminalReadiness('readiness: PASS\n\n```\nreadiness: FAIL\n```\n'), 'PASS', '真 PASS + 后置围栏 FAIL')
   assert.equal(terminalReadiness('readiness: FAIL\n\n```\nreadiness: PASS\n```\n'), 'FAIL', '真 FAIL + 后置围栏 PASS')
@@ -100,7 +112,7 @@ test('不变量⑥：fenced code 与标签加粗是结构，不是判定', () =>
   assert.equal(terminalReadiness('readiness: PASS\n\n```\nreadiness: FAIL\n'), 'PASS', '未闭合围栏按剩余全文处理')
   assert.equal(terminalReadiness('```\nreadiness: FAIL\n```\n'), null, '全文只有围栏示例 = 无判定')
 
-  // 标签本身的加粗/反引号是装饰（VERDICT_LINE 归一后再匹配）
+  // 标签本身的加粗/反引号是装饰（VERDICT_LINE 归一后再匹配，且与 mdast 行内纯文本 + node-gate 读取器一致）
   for (const line of [
     '**readiness**: FAIL',
     '- **readiness**: FAIL',
@@ -110,7 +122,12 @@ test('不变量⑥：fenced code 与标签加粗是结构，不是判定', () =>
     '## **readiness**：FAIL',
     '- __readiness__: **FAIL**',
   ]) {
+    assert.match(mdastInlineText(line), /^readiness[：:]\s*FAIL$/, `${line} 在 mdast 下的纯文本应为 readiness: FAIL`)
     assert.equal(terminalReadiness(`${line}\n`), 'FAIL', line)
+    assert.equal(readinessOf(`${line}\n`).pass, false, `${line} ↔ node-gate readinessOf (FAIL)`)
+    const passLine = line.replace('FAIL', 'PASS')
+    assert.equal(terminalReadiness(`${passLine}\n`), 'PASS', passLine)
+    assert.equal(readinessOf(`${passLine}\n`).pass, true, `${passLine} ↔ node-gate readinessOf (PASS)`)
   }
   // 散文标签仍不夺权；空模板仍是空模板
   assert.equal(terminalReadiness('**结论**：**readiness: FAIL**\n'), null, '散文标签不夺权')

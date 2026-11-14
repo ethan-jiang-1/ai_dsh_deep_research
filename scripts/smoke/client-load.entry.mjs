@@ -773,7 +773,7 @@ async function pass1BoundFacePhase() {
         // 交付后只读出口（rerun 不满转接卡）：已交付才渲染折叠块；展开后三行用户语言 + 后果 + 话术
         // 必须与 src/lib/rerun-triage 同源（文案常量 = 单一正本，组件只画）。
         if (diskSide.delivered) {
-          const triageSummary = page.getByText('还不满意？三种改法').first()
+          const triageSummary = page.getByText(/还不满意？三种改法|Not satisfied\? Three ways to change it/).first()
           const triageVisible = await triageSummary.isVisible().catch(() => false)
           if (triageVisible) await triageSummary.click({ timeout: 3_000 }).catch(() => {})
           const bodyText = triageVisible ? await paneTextOf(page) : ''
@@ -1161,7 +1161,7 @@ async function pass3cMethodLibraryPhase() {
     const saveControl = await page.getByRole('button', { name: /保存到方法库|Save to method library/i }).count().catch(() => 0)
     const focusedTag = await page.evaluate(() => document.activeElement?.tagName ?? '').catch(() => '')
     step(ta === 4 && saveControl > 0 && focusedTag === 'TEXTAREA', '摘要字段直达表单并聚焦', `${focusedTag}${ta === 4 ? ' / textarea 4' : ` / textarea ${ta}`}`)
-    await page.getByRole('button', { name: '取消' }).first().click({ timeout: 5_000 }).catch(() => {})
+    await page.getByRole('button', { name: /^(取消|Cancel)$/ }).first().click({ timeout: 5_000 }).catch(() => {})
     await wait(500)
   } else {
     step(false, '方法库库条目「在工作台继续」不可见')
@@ -1266,10 +1266,10 @@ async function pass3cMethodLibraryPhase() {
       await expandRight.click({ timeout: 5_000 }).catch(() => {})
       await wait(800)
     }
-    await page.getByRole('button', { name: '取消' }).first().click({ timeout: 5_000 }).catch(() => {})
+    await page.getByRole('button', { name: /^(取消|Cancel)$/ }).first().click({ timeout: 5_000 }).catch(() => {})
     await wait(500)
   }
-  const builtin = page.getByRole('button', { name: '内置参考' }).first()
+  const builtin = page.getByRole('button', { name: /^(内置参考|Built-in references)$/ }).first()
   if (await builtin.isVisible({ timeout: 5_000 }).catch(() => false)) {
     await builtin.click({ timeout: 5_000 }).catch(() => {})
     await wait(800)

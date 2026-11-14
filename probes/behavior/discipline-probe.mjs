@@ -43,6 +43,7 @@ import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { presetRoles } from '../../scripts/lib/roles.mjs';
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/vendor-artifacts.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/port-reclaim.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const OVERLAY = join(ROOT, 'dev', 'research.overlay.yml');
@@ -50,7 +51,7 @@ const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
   return i === -1 ? fallback : process.argv[i + 1];
 };
-const PORT = Number(arg('port', '3104'));
+let PORT = Number(arg('port', '3104'));
 const BOOT_TIMEOUT_MS = 120_000;
 const TURN_TIMEOUT_MS = 120_000;
 const POLL_MS = 3_000;
@@ -88,7 +89,7 @@ const rpc = makeRpc({
 const boot = async () => bootWeb({
   bin, cwd: dshSrc, profile: 'web', patchPath: OVERLAY, port: PORT,
   env: withModelKey({ DSH_HOME: home }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 600,
-  detached: false,
+  detached: true,
 });
 
 
@@ -167,7 +168,9 @@ const check = (label, fn) => fn().then(
   (error) => { failures.push(`${label}: ${error.message}`); console.log(`  FAIL ${label}: ${error.message}`); },
 );
 
-const { child, token } = await boot();
+PORT = await prepareProbePort(PORT, { label: 'discipline-probe' });
+const booted = await boot();
+const { token } = booted;
 try {
   const base = `http://127.0.0.1:${String(PORT)}`;
   const cookie = await authenticate(base, token);
@@ -184,14 +187,8 @@ try {
     });
   }
 } finally {
-  // 端口自持有（scripts/AGENTS「用完释放」）：SIGTERM 只达直接子进程，按端口收割孤儿。
-  child.kill('SIGTERM');
-  await sleep(400);
-  const taker = spawnSync('lsof', ['-t', '-nP', `-iTCP:${PORT}`, '-sTCP:LISTEN'], { encoding: 'utf8' });
-  for (const pid of (taker.stdout ?? '').split('\n').map((x) => x.trim()).filter(Boolean)) {
-    try { process.kill(Number(pid), 'SIGKILL') } catch { /* 已死 */ }
-  }
-  await sleep(300);
+  // 端口自持有（BUG-136）：整组 SIGKILL + 按端口收割孤儿。
+  await cleanupBootedProbe(booted, PORT);
 }
 
 mkdirSync(dirname(ARCHIVE), { recursive: true });

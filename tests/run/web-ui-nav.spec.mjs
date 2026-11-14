@@ -10,7 +10,7 @@
 //   ② 有遮罩 + Continue → present=true、clicked=true，且只点那个按钮；
 //   ③ 有遮罩但按钮找不到 → present=true、clicked=false（交给调用方判红，不空转）；
 //   ④ 中英三形态文案（Continue / 我知道了 / Got it）都认。
-// 负例留证 2026-10-27：把 labels 收窄成只认 'Continue' → 第 ④ 例红；把 present 判定去掉 →
+// 负例留证 2026-10-27：BUG-063——把 labels 收窄成只认英文 'Continue' → 第 ④ 双语文案例红；把 present 判定去掉 →
 // 第 ① 例红（页面上的 Continue 被误点）。还原 → 绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
@@ -73,7 +73,7 @@ test('遮罩判据：标题在场 + Continue → 点它一次并报告 clicked',
   assert.equal(dom.clicks[0].type, 'click')
 })
 
-test('遮罩判据：中英四形态文案都认（Continue / 继续 / 我知道了 / Got it）', () => {
+test('遮罩判据：中英四形态文案都认（Continue / 继续 / 我知道了 / Got it，BUG-063）', () => {
   assert.deepEqual(PREVIEW_NOTICE_CONTINUE, ['Continue', '继续', '我知道了', 'Got it'])
   for (const label of PREVIEW_NOTICE_CONTINUE) {
     const dom = fakeDocument({ heading: PREVIEW_NOTICE_HEADING, buttons: [label] })

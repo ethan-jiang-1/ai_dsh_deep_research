@@ -1,6 +1,8 @@
 // 流畸形死亡折算回归（stream-failure）——BUG-023 修复①的判据面。
 // 真实事件形状（session-e0408634 实录）：末位 turn/end error(MALFORMED) → dead；
 // 其后新 turn/start → 不打扰；成功 turn/end / 其他错误码 / 空事件 → 不误报。
+// 负例留证 2026-10-13：BUG-023——删掉 MALFORMED_RESPONSE 终结识别或忽略其后新 turn/start →
+//   死亡回合漏报或重试中误报，下方用例红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { streamFailureOf } from '../../packages/deep-research-pack/src/lib/stream-failure.ts';
@@ -11,7 +13,7 @@ const malformedTurnEnd = (seq, turn = 1) => ({
 });
 const okTurnEnd = (seq, turn = 1) => ({ type: 'turn/end', seq, data: { turn, reason: { kind: 'stop' } } });
 
-test('末位 turn/end 为 MALFORMED 且无新回合 → dead（真实死亡形态）', () => {
+test('末位 turn/end 为 MALFORMED 且无新回合 → dead（真实死亡形态，BUG-023）', () => {
   const s = streamFailureOf([
     { type: 'turn/start', seq: 6, data: { turn: 1 } },
     { type: 'user/message', seq: 10, data: { content: [{ type: 'text', text: '研究一下' }] } },

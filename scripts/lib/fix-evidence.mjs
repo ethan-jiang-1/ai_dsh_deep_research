@@ -1,23 +1,34 @@
-// fix-evidence.mjs — bug 修复卡的结构化实证合同（2026-11-14 假修事故；纯函数，keyless）。
+// fix-evidence.mjs — bug 修复卡的结构化实证合同（2026-11-14 假修事故；D55 补强；纯函数，keyless）。
 //
 // 为什么存在：卡内只有 `## 修复判据` 不够——状态可以翻、卡可以移，repo 却没有变更。修复 =
 // `## 修复落地` 内一个 `json fix-evidence` 块：changes（仓内文件路径）+ red {command, exit, output?}
-// + green {command, exit} + guard（永久守卫路径，或 notMechanizable+trigger）。**exit 是 oracle**，不是散文里的“失败/通过”子串；旧卡（2026-11-15 前）
-// 无块时按散文 grandfather，不再参与否定词/引号/目录前缀的启发式判定。
-// 机械消费 = staged-change-pairing（同暂存集）与 backlog-liveness（活跃 修复落地）。
+// + green {command, exit} + guard（永久守卫路径，或 notMechanizable+trigger）。**exit 是 oracle**，
+// 不是散文里的“失败/通过”子串；grandfather 仅对盘上已归档旧卡（allowLegacyProse=true 且 opened < 2026-11-15）
+// 生效——活跃 bugs/ 与新归档提交一律要求结构化 `json fix-evidence`，禁止借旧 opened 日期绕过。
+// 章节边界复用 `markdown-mask.ts` 剥离围栏与注释，防止围栏内 `## ` 截断；重复键经 JSON.parse 解码词法 token
+// 拦截 `\uXXXX` 同键绕过。
+import { maskMarkdownLines } from '../../packages/deep-research-pack/src/lib/markdown-mask.ts'
+
 const CUTOFF = '2026-11-15'
-const REPLAYABLE = /(node\s+--test|pnpm\s+(?:test|verify)|gates\.e2e)/
-const STRUCTURED = /```json\s+fix-evidence\s*\n([\s\S]*?)```/g
+const REPLAYABLE = /(node\s+(?:--import\s+\S+\s+)?--test|pnpm\s+(?:test|verify)|gates\.e2e)/
 
 const fixSectionOf = (text) => {
-  const match = /^##\s*修复落地[^\n]*$/m.exec(String(text ?? ''))
-  if (match === null) return null
-  const rest = String(text).slice(match.index + match[0].length)
-  const next = rest.search(/^##\s+/m)
-  return (next === -1 ? rest : rest.slice(0, next)).trim()
+  const normalized = String(text ?? '').replace(/\r\n?/g, '\n')
+  const rawLines = normalized.split('\n')
+  const maskedLines = maskMarkdownLines(normalized)
+  const startIdx = maskedLines.findIndex((line) => /^ {0,3}##(?!#)\s*修复落地/.test(line))
+  if (startIdx === -1) return null
+  let endIdx = maskedLines.length
+  for (let i = startIdx + 1; i < maskedLines.length; i += 1) {
+    if (/^ {0,3}##(?!#)\s+/.test(maskedLines[i])) {
+      endIdx = i
+      break
+    }
+  }
+  return rawLines.slice(startIdx + 1, endIdx).join('\n').trim()
 }
 
-/** 取 `## 修复落地` 内某个标签（改动/红证/绿证…）的块；仅旧卡路径兼容用。 */
+/** 取 `## 修复落地` 内某个标签（改动/红证/绿证…）的块；仅盘上已归档旧卡兼容用。 */
 const labeledBlockOf = (section, label) => {
   const lines = section.split('\n')
   const pattern = new RegExp(`^\\s*[-*]?\\s*(?:\\*\\*)?${label}(?:\\*\\*)?[：:]`)
@@ -38,7 +49,7 @@ const isFileLike = (path) => typeof path === 'string' && path !== ''
 
 const openedOf = (text) => /^opened:\s*(\d{4}-\d{2}-\d{2})\s*$/m.exec(String(text ?? ''))?.[1] ?? null
 
-/** 同一对象内的重复键（JSON.parse 会静默取末值）——与 readiness 的重复键同类，fail-closed。 */
+/** 同一对象内的重复键（JSON.parse 会静默取末值）——对字符串字面量做真实 JSON 解码以防 \uXXXX 同键绕过。 */
 const duplicateKeyOf = (text) => {
   const stack = []
   let index = 0
@@ -47,21 +58,26 @@ const duplicateKeyOf = (text) => {
     const ch = text[index]
     if (ch === '"') {
       let j = index + 1
-      let value = ''
       let escape = false
       while (j < text.length) {
         const c = text[j]
-        if (escape) { value += c; escape = false; j += 1; continue }
+        if (escape) { escape = false; j += 1; continue }
         if (c === '\\') { escape = true; j += 1; continue }
         if (c === '"') break
-        value += c
         j += 1
+      }
+      if (j >= text.length) return null
+      let decoded = null
+      try {
+        decoded = JSON.parse(text.slice(index, j + 1))
+      } catch {
+        return null
       }
       const isKey = expectKey && stack.length > 0 && stack[stack.length - 1] !== null && /^\s*:/.test(text.slice(j + 1))
       if (isKey) {
         const set = stack[stack.length - 1]
-        if (set.has(value)) return value
-        set.add(value)
+        if (set.has(decoded)) return decoded
+        set.add(decoded)
         expectKey = false
       } else {
         expectKey = false
@@ -79,9 +95,37 @@ const duplicateKeyOf = (text) => {
   return null
 }
 
+/** 按 CommonMark 围栏规则提取 `## 修复落地` 内顶层 `json fix-evidence` 代码块。 */
+const extractFixEvidenceFences = (section) => {
+  const blocks = []
+  let fence = null
+  let current = []
+  for (const line of section.split('\n')) {
+    if (fence !== null) {
+      const closeRe = new RegExp(`^ {0,3}${fence.ch}{${fence.len},}[ \\t]*$`)
+      if (closeRe.test(line)) {
+        if (fence.capture) blocks.push(current.join('\n'))
+        fence = null
+        current = []
+      } else if (fence.capture) {
+        current.push(line)
+      }
+      continue
+    }
+    const open = /^ {0,3}(`{3,}|~{3,})([^\n]*)$/.exec(line)
+    if (open !== null && !(open[1][0] === '`' && open[2].includes('`'))) {
+      const info = open[2].trim()
+      const capture = /^json\s+fix-evidence(?:\s|$)/.test(info)
+      fence = { ch: open[1][0], len: open[1].length, capture }
+      current = []
+    }
+  }
+  return blocks
+}
+
 /** 结构化块：0 / 1 个；多于一个 = 两种证据，拒绝挑一个。 */
 const structuredOf = (section) => {
-  const blocks = [...section.matchAll(STRUCTURED)].map((match) => match[1])
+  const blocks = extractFixEvidenceFences(section)
   if (blocks.length === 0) return { blocks: 0, value: null, error: null }
   if (blocks.length > 1) return { blocks: 1, value: null, error: '只能有一个 `json fix-evidence` 块（两个 = 两种证据，拒绝挑一个）' }
   const duplicate = duplicateKeyOf(blocks[0])
@@ -142,14 +186,15 @@ const validateStructured = (value) => {
   return problems
 }
 
-/** 修复卡「改动」里声明的仓内路径（结构化优先；旧卡退回散文；去重，保持顺序）。 */
-export function fixChangePathsOf(text) {
+/** 修复卡「改动」里声明的仓内路径（结构化优先；仅 allowLegacyProse 时旧卡退回散文）。 */
+export function fixChangePathsOf(text, { allowLegacyProse = false } = {}) {
   const section = fixSectionOf(text)
   if (section === null) return []
   const structured = structuredOf(section)
   if (structured.value !== null && Array.isArray(structured.value.changes)) {
     return [...new Set(structured.value.changes.filter((path) => typeof path === 'string' && isFileLike(path)))]
   }
+  if (!allowLegacyProse) return []
   const opened = openedOf(text)
   if (opened !== null && opened >= CUTOFF) return []
   const block = labeledBlockOf(section, '改动')
@@ -169,18 +214,21 @@ export function fixGuardOf(text) {
 }
 
 /**
- * 修复卡实证合同：`## 修复落地` + `json fix-evidence` 块（changes / red / green）；旧卡（< 2026-11-15）
- * 无块时 grandfather，不参与任何散文启发式。
+ * 修复卡实证合同：`## 修复落地` + `json fix-evidence` 块（changes / red / green / guard）。
+ * 默认（活跃卡与新归档动作）强制要求结构化块；仅在扫描盘上既有归档旧卡（allowLegacyProse=true 且 opened < 2026-11-15）时 grandfather。
  */
-export function fixEvidenceProblems(text) {
+export function fixEvidenceProblems(text, { allowLegacyProse = false } = {}) {
+  const opened = openedOf(text)
+  const isLegacyArchived = allowLegacyProse && opened !== null && opened < CUTOFF
   const section = fixSectionOf(text)
-  if (section === null || section === '') return ['缺 ## 修复落地（结构化 fix-evidence 块）']
+  if (section === null || section === '') {
+    return isLegacyArchived ? [] : ['缺 ## 修复落地（结构化 fix-evidence 块）']
+  }
   const structured = structuredOf(section)
   if (structured.error !== null) return [structured.error]
   if (structured.blocks === 0) {
-    const opened = openedOf(text)
-    if (opened !== null && opened < CUTOFF) return []
-    return ['缺 `json fix-evidence` 块——改动 / 红证 / 绿证用字段表达（旧卡 2026-11-15 前 grandfather）']
+    if (isLegacyArchived) return []
+    return ['缺 `json fix-evidence` 块——改动 / 红证 / 绿证用字段表达（仅盘上已归档旧卡 grandfather）']
   }
   return validateStructured(structured.value)
 }

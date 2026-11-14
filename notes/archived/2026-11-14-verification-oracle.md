@@ -1,6 +1,7 @@
 # 测试制度的 oracle 独立化：S1 沉淀、S2 换 oracle、S3 双账
 
 > 状态：implemented
+> 归档：2026-11-14
 > 关联：[D55](../../docs/decisions.md#d55)；程序卡 = [issue](../../_backlog/_archived/settled_issues/2026-11-14-verification-oracle.md)；
 > 证据 = [research](../../_backlog/_archived/research/verification-oracle/README.md)
 

@@ -73,8 +73,20 @@ export function stagedChangePairingProblems({ staged, read, exists }) {
     const evidence = fixEvidenceProblems(text)
     if (evidence.length > 0) return [`${card} 不是可复核的修复：${evidence.join('；')}——先写 ## 修复落地 的 改动/红证/绿证/guard`]
     const guard = fixGuardOf(text)
-    if (guard !== null && typeof guard.path === 'string' && !exists(guard.path)) {
-      return [`${card} 的 guard 路径不存在：${guard.path}——修复必须沉淀永久守卫，或写 notMechanizable + trigger`]
+    if (guard !== null && typeof guard.path === 'string') {
+      if (!exists(guard.path)) {
+        return [`${card} 的 guard 路径不存在：${guard.path}——修复必须沉淀永久守卫，或写 notMechanizable + trigger`]
+      }
+      const bugId = /BUG-\d{3}/.exec(card)?.[0] ?? null
+      if (!present.has(guard.path)) {
+        const guardText = read(guard.path) ?? ''
+        const claimsBug = bugId !== null
+          && new RegExp(`^\\s*(?:await\\s+)?(?:t\\.)?(?:test|it)\\(\\s*['"\`][^'"\`]*?\\b${bugId}\\b`, 'm').test(guardText)
+        const isSmoke = guard.path.startsWith('scripts/smoke/') && present.has('scripts/lib/gates-cases.mjs')
+        if (!claimsBug && !isSmoke) {
+          return [`${card} 的 guard.path (${guard.path}) 未在同一暂存集修改，且不含 ${bugId ?? '对应 BUG'} 标题声明——禁止借无关旧测试零改动挂靠`]
+        }
+      }
     }
     const changes = fixChangePathsOf(text).filter((path) => !path.startsWith('_backlog/'))
     // 只做精确文件对账：目录前缀不再命中任意同目录 staged 文件（BUG-189）。

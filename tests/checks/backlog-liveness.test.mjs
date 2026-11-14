@@ -19,7 +19,13 @@ const READY_ISSUE_TEXT = '---\nstatus: 待落地\nopened: 2026-10-08\n---\n\n# R
   + '> 去向：implemented — `notes/implemented/2026-10-08-ready.md`（交付时写）\n\n'
   + '## 验收标准\n1. 行为可观察。\n';
 const READY_BUG = 'BUG-019-ready.md';
-const FIX_EVIDENCE = '\n## 修复落地\n\n- **改动**：`scripts/lib/fix.mjs`、`tests/checks/fix.test.mjs`\n- **红证**：`node --test tests/checks/fix.test.mjs`\n  ```\n  not ok 1 - old\n  ```\n- **绿证**：`node --test tests/checks/fix.test.mjs`\n  ```\n  ok 1 - new\n  ```\n';
+const PROSE_ONLY_FIX_EVIDENCE = '\n## 修复落地\n\n- **改动**：`scripts/lib/fix.mjs`、`tests/checks/fix.test.mjs`\n- **红证**：`node --test tests/checks/fix.test.mjs`\n  ```\n  not ok 1 - old\n  ```\n- **绿证**：`node --test tests/checks/fix.test.mjs`\n  ```\n  ok 1 - new\n  ```\n';
+const FIX_EVIDENCE = '\n## 修复落地\n\n```json fix-evidence\n' + JSON.stringify({
+  changes: ['scripts/lib/fix.mjs', 'tests/checks/fix.test.mjs'],
+  red: { command: 'node --test tests/checks/fix.test.mjs', exit: 1, output: 'not ok 1 - old' },
+  green: { command: 'node --test tests/checks/fix.test.mjs', exit: 0 },
+  guard: { path: 'tests/checks/fix.test.mjs' },
+}, null, 2) + '\n```\n';
 const READY_BUG_TEXT = '---\nstatus: 修复就绪\nseverity: P1\nopened: 2026-10-08\n---\n\n# BUG-019\n'
   + '> 严重级别：P1（重要）｜发现：2026-10-08｜状态：修复就绪\n\n'
   + '## 修复判据\n1. 回归测试通过。\n';
@@ -47,6 +53,8 @@ function fixture(t) {
     '_archived/suspended_issues', '_archived/fixed_bugs', '_archived/suspended_bugs', '_archived/research']) put(`${shelf}/README.md`);
   for (const name of METHOD_NAMES) put(`methods/${name}.md`, `---\nname: ${name}\ndescription: Method\nwhenToUse: Need it\n---\n\n# Method\n`);
   put('methods/README.md', METHOD_NAMES.map((n) => `${n}.md`).join('\n'));
+  mkdirSync(join(repo, 'tests', 'checks'), { recursive: true });
+  writeFileSync(join(repo, 'tests', 'checks', 'fix.test.mjs'), "test('probe', () => {})\n");
   return { repo, root, files, put, check: () => backlogLivenessProblems(root, files) };
 }
 
@@ -311,4 +319,28 @@ test('D52：目标 Note 不在场时不误报', (t) => {
   issue(f, READY_ISSUE_TEXT, READY_ISSUE);
   const problems = f.check();
   assert.equal(problems.filter((p) => p.includes('Note 与卡关闭同变更')).length, 0, problems.join('\n'));
+});
+
+test('D55 补强：活跃 修复落地 卡禁借旧 opened 日期走散文绕过，且活跃/已归档结构化 guard.path 必须在盘存活', (t) => {
+  const f = fixture(t);
+  const oldDateActiveProse = READY_BUG_TEXT.replace('status: 修复就绪', 'status: 修复落地').replace('状态：修复就绪', '状态：修复落地') + PROSE_ONLY_FIX_EVIDENCE;
+  bug(f, oldDateActiveProse, READY_BUG);
+  assert.ok(f.check().some((p) => p.includes('fix-evidence')), '活跃卡即使 opened < 2026-11-15 也必须带 json fix-evidence');
+
+  f.files.splice(f.files.indexOf(`_backlog/bugs/${READY_BUG}`), 1);
+  f.put('bugs/README.md', '# Empty\n');
+
+  const archivedWithDeletedGuard = '---\nstatus: 已修\nseverity: P1\nopened: 2026-11-15\n---\n\n# BUG-900\n> 状态：已修｜可关闭：是\n\n## 修复判据\n1. ok\n\n## 修复落地\n\n```json fix-evidence\n' + JSON.stringify({
+    changes: ['scripts/lib/fix.mjs', 'tests/checks/deleted.test.mjs'],
+    red: { command: 'node --test tests/checks/deleted.test.mjs', exit: 1 },
+    green: { command: 'node --test tests/checks/deleted.test.mjs', exit: 0 },
+    guard: { path: 'tests/checks/deleted.test.mjs' },
+  }, null, 2) + '\n```\n';
+  f.put('_archived/fixed_bugs/BUG-900-deleted-guard.md', archivedWithDeletedGuard);
+  f.put('_archived/fixed_bugs/README.md', 'BUG-900-deleted-guard.md\n');
+  assert.ok(f.check().some((p) => p.includes('deleted.test.mjs')), '归档后删除 guard.path 必须被 backlog-liveness 判红');
+
+  mkdirSync(join(f.repo, 'tests', 'checks'), { recursive: true });
+  writeFileSync(join(f.repo, 'tests', 'checks', 'deleted.test.mjs'), "test('alive', () => {})\n");
+  assert.deepEqual(f.check(), []);
 });

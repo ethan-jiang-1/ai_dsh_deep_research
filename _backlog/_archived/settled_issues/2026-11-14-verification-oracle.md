@@ -13,11 +13,11 @@ opened: 2026-11-14
 > 停止条件 = 同一探索协议在声明面上找不到新邻接变体。
 >
 > 证据 = [research/verification-oracle](../research/verification-oracle/README.md)；
-> 计划 Note = [Note](../../../notes/implemented/2026-11-14-verification-oracle.md)。
+> 计划 Note = [Note](../../../notes/archived/2026-11-14-verification-oracle.md)。
 >
 > 结论：S1 24 张全部沉淀；S2 换 oracle（Markdown 36 / CI 29 / fix-evidence 结构化 + guard）；
 > S3 双账（守卫 31、资产 208，194 自指显式）；S4 声明面 0 新邻接变体；verify/test/typecheck 全绿。
-> 去向：implemented — [Note](../../../notes/implemented/2026-11-14-verification-oracle.md)
+> 去向：implemented — [Note](../../../notes/archived/2026-11-14-verification-oracle.md)
 > 授权：用户 2026-11-14 直派「推动落地 + 加码」；审查：机械门禁全跑 + 语义自审逐条对验收。
 > 证据 = [research/verification-oracle](../research/verification-oracle/README.md)
 

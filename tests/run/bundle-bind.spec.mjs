@@ -62,8 +62,10 @@ test('sessionBindingOf：写命中 → boundBy write；无命中 → 全 undefin
 });
 
 // ── kickoffSeen（BUG-001：立项轨道信号——ask_user_question 调用或 research-brief skill 加载）──
+// 负例留证 2026-10-03：BUG-001——旧实现立项窗口仅靠 read 命中旧 bundle 即展示旧研究进度，
+// 无 kickoffSeen 信号抑制。红配方：删掉 kickoffSeen 置位分支 → 下方两例变 false。
 
-test('kickoff：research-brief skill 加载（开工第一步）→ kickoffSeen true', () => {
+test('kickoff：research-brief skill 加载（开工第一步）→ kickoffSeen true（BUG-001）', () => {
   const events = [call('skill', { name: 'research-brief' })];
   assert.equal(sessionBindingOf(events).kickoffSeen, true);
 });

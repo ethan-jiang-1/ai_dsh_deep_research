@@ -21,6 +21,7 @@
     "hitl-fold.ts",
     "i18n.ts",
     "journal-wire.ts",
+    "markdown-mask.ts",
     "member-activity.ts",
     "method-draft.ts",
     "method-library-events.ts",

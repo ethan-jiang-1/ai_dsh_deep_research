@@ -58,7 +58,11 @@ if (!process.env.DSH_HOME) fail('未 source dev/env.sh（DSH_HOME 缺席）—�
 const DSH_HOME = resolve(process.env.DSH_HOME)
 requireCredentials('record-role-fixture', { home: DSH_HOME })
 {
-  const issues = profileLayerIssues({ profileDir: join(DSH_HOME, 'profiles', 'deep-research'), runtimeVersion: runtimeVersionOf(ROOT) });
+  const issues = profileLayerIssues({
+    profileDir: join(DSH_HOME, 'profiles', 'deep-research'),
+    runtimeVersion: runtimeVersionOf(ROOT),
+    packDir: join(ROOT, 'packages', 'deep-research-pack'),
+  });
   if (issues.length > 0) fail(issues.join('；'));
 }
 // 角色 fixture 住场景目录根（lead 的历史落点，ui.expected.md 同目录），其余角色住 <role>/ 子目录

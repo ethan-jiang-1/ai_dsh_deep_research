@@ -21,9 +21,8 @@ import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/
 import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
 import { readSessionTextOf } from '../../scripts/lib/session-log.mjs';
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/vendor-artifacts.mjs';
-import { reclaimPort } from '../../scripts/lib/port-reclaim.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/port-reclaim.mjs';
 import { randomUUID } from 'node:crypto'
-import { createServer } from 'node:net';
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -56,23 +55,7 @@ if (!existsSync(join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts'))) {
   }
 }
 
-const freePort = async () => {
-  const server = createServer()
-  const chosen = await new Promise((resolve, reject) => {
-    server.once('error', reject)
-    server.listen(0, '127.0.0.1', () => resolve(server.address().port))
-  })
-  await new Promise((resolve) => server.close(resolve))
-  return chosen
-}
-{
-  const stale = await reclaimPort(port)
-  if (stale !== null) {
-    const next = await freePort()
-    console.error(`defaults-probe: 端口 ${port} 预收割失败（${stale}）——自动改用临时端口 ${next}`)
-    port = next
-  }
-}
+port = await prepareProbePort(port, { label: 'defaults-probe' });
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const failures = [];
@@ -218,10 +201,8 @@ try {
   console.error('defaults-probe: 异常', error);
   exitCode = 1;
 } finally {
-  // web 会派生孙进程：整组 SIGKILL；失败再杀直接子进程（BUG-136：失败路径不得留宿主）。
-  if (booted?.child?.pid !== undefined) {
-    try { process.kill(-booted.child.pid, 'SIGKILL') } catch { try { booted.child.kill('SIGKILL') } catch { /* 已死 */ } }
-  }
+  // web 会派生孙进程：整组 SIGKILL + child.kill + 端口复收割（BUG-136：失败路径不得留宿主）。
+  await cleanupBootedProbe(booted, port);
   if (!KEEP) rmSync(WS, { recursive: true, force: true });
 }
 process.exit(failures.length === 0 && exitCode === 0 ? 0 : 1);

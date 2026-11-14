@@ -343,12 +343,13 @@ test('nextDriveAction：零 radio 且推进钮也禁用 → 仍 abort（不空�
 });
 
 // ── 侧栏找不到目标行时的错因判据（BUG-031：通道实例老化 vs 目标确实不在侧栏）──
+// 负例留证 2026-10-18：BUG-031——把组已全展开且零会话行的情形混入 absent → 丢失老化重启诊断，下方 aging 例红。
 test('sidebarMissVerdict：扫窗命中 → cap（不是"不在侧栏"）', () => {
   const v = sidebarMissVerdict({ renderedSessionRows: 0, collapsedGroups: 0, capHit: true, diskPending: true });
   assert.equal(v.kind, 'cap', JSON.stringify(v));
 });
 
-test('sidebarMissVerdict：UI 零会话行 + 组已全展开 + 盘侧确有挂起 → aging（疑通道实例老化，处置=重启通道+新会话）', () => {
+test('sidebarMissVerdict：UI 零会话行 + 组已全展开 + 盘侧确有挂起 → aging（疑通道实例老化，处置=重启通道+新会话，BUG-031）', () => {
   const v = sidebarMissVerdict({ renderedSessionRows: 0, collapsedGroups: 0, capHit: false, diskPending: true });
   assert.equal(v.kind, 'aging', JSON.stringify(v));
   assert.match(v.message, /重启通道/);
@@ -385,7 +386,8 @@ test('sidebarMissVerdict：盘侧已无挂起（目标非真挂起）→ absent�
 });
 
 // ── custom 文本是否真进答复批（BUG-032：UI 自定义是"替换选择"语义，二者只能留一个）──
-test('customLandedInBatch：批里带 custom 文本 → true（真进批的形态：selected:[] + custom）', () => {
+// 负例留证 2026-10-18：BUG-032——把仅有选项 label 无 custom 的批也判 customLanded=true → 静默丢失形态例红。
+test('customLandedInBatch：批里带 custom 文本 → true（真进批的形态：selected:[] + custom，BUG-032）', () => {
   const batch = [{ id: 'q1', selected: [], custom: '仍需一处修订（我逐项核过盘面）：\n\n① …' }];
   assert.equal(customLandedInBatch({ batch, custom: '仍需一处修订（我逐项核过盘面）：' }), true);
 });

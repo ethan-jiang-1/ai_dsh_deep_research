@@ -29,7 +29,7 @@ import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/
 import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
 import { readSessionTextOf } from '../../scripts/lib/session-log.mjs';
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/vendor-artifacts.mjs';
-import { reclaimPort } from '../../scripts/lib/port-reclaim.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/port-reclaim.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const OVERLAY = join(ROOT, 'dev', 'research.overlay.yml');
@@ -38,7 +38,7 @@ const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
   return i === -1 ? fallback : process.argv[i + 1];
 };
-const PORT = Number(arg('port', '3120'));
+let PORT = Number(arg('port', '3120'));
 const ROLE = arg('role', 'analyst');
 const KEEP = process.argv.includes('--keep');
 const BOOT_TIMEOUT_MS = 180_000;
@@ -142,11 +142,12 @@ const waitFor = async (id, label, predicate) => {
 };
 
 const main = async () => {
+  PORT = await prepareProbePort(PORT, { label: 'wave-execution-probe' });
   console.log(`wave-execution-probe: 真模型档（role=${ROLE}；单 cell；port=${PORT}）`);
   booted = await bootWeb({
     bin, cwd: ROOT, profile: 'web', patchPath: OVERLAY, port: PORT,
     env: { ...withModelKey({ DSH_HOME: home }), DSH_PERMISSION_MODE: 'danger-full-access' },
-    timeoutMs: BOOT_TIMEOUT_MS, tailChars: 800, detached: false,
+    timeoutMs: BOOT_TIMEOUT_MS, tailChars: 800, detached: true,
   });
   const base = `http://127.0.0.1:${String(PORT)}`;
   const cookie = await authenticate(base, booted.token);
@@ -263,8 +264,7 @@ try {
   console.error(`wave-execution-probe: ${error?.message ?? error}`);
   failures.push(String(error?.message ?? error));
 } finally {
-  await booted?.stop?.();
-  const leak = await reclaimPort(PORT);
+  const leak = await cleanupBootedProbe(booted, PORT);
   if (leak !== null) console.error(`wave-execution-probe: 端口 ${PORT} 未释放：${leak}`);
 }
 console.log('');

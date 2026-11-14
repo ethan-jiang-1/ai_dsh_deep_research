@@ -4,6 +4,8 @@
 // ci.yml 删掉 → 红；dev-only 不写理由 → 红。这样“新 smoke 永久不跑”不再能静默发生。
 // BUG-160/162/172/176：CI 归属只认「可执行 run 行」（注释/echo/if:false/continue-on-error 不算）；
 // scripts/smoke 只许顶层普通文件（子目录/symlink 红）。step 解析 = scripts/lib/ci-workflow.mjs。
+// 负例留证 2026-11-14：BUG-160——旧实现只检查 ci.yml 文本是否提及文件名，注释/echo/未挂 needs 的
+//   smoke 也能冒充 tier=ci；红配方 = 把 executedSmokeFiles 换回 ci.includes(file) → 注释/孤儿例放行。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -25,7 +27,7 @@ test('smoke registry：scripts/smoke 只许顶层普通文件——子目录 / s
   assert.ok(files.length >= 20, `防空语料：scripts/smoke 顶层文件过少（${files.length}）`)
 })
 
-test('smoke registry：盘上每个 smoke 都有且只有一条 CI/dev-only 归属', () => {
+test('smoke registry：盘上每个 smoke 都有且只有一条 CI/dev-only 归属（BUG-160）', () => {
   assert.deepEqual(Object.keys(registry).sort(), files.filter((name) => name.endsWith('.mjs')).sort(),
     'registry 与 scripts/smoke/*.mjs 集合必须相等')
   const executed = executedSmokeFiles(ci)

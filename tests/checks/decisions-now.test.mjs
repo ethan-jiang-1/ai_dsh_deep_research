@@ -83,6 +83,21 @@ test('D53 测试命名四车道在册且指向命名 Note', () => {
   assert.ok(row.refs.includes('2026-11-13-test-naming-lanes.md'), 'D53 必须指向命名 Note');
 });
 
+test('台账表格连续可渲染：已定表与已退役表各自单块连续、零表内空行且列数对齐', () => {
+  for (const [label, block, minRows] of [['已定', ACTIVE, 35], ['已退役', RETIRED, 3]]) {
+    const lines = block.split('\n');
+    const hdr = lines.findIndex((l) => l.startsWith('| # |'));
+    assert.ok(hdr >= 0, `${label}节缺表头`);
+    assert.match(lines[hdr + 1] ?? '', /^\|---\|---\|---\|$/, `${label}表缺三列分隔行`);
+    let end = hdr + 2;
+    while (end < lines.length && lines[end].startsWith('| ')) end += 1;
+    const dataRows = lines.slice(hdr + 2, end);
+    assert.ok(dataRows.length >= minRows, `${label}表连续数据行只有 ${dataRows.length} 行（表内空行会打断 GFM 表格渲染）`);
+    const stray = lines.slice(end).filter((l) => l.trim().startsWith('|'));
+    assert.deepEqual(stray, [], `${label}表尾后仍有孤立管道行（表内空行导致后续 D 号退化为纯文本）：${stray.map((s) => s.slice(0, 32)).join(' / ')}`);
+  }
+});
+
 // 增长守卫：台账是长表，新增 D 号前先退役/搬 Note；32KB 是硬顶，20KB 的收敛目标登记在
 // _backlog/triggers.md（2026-11-03 实测 29.4KB——继续压缩需逐行搬依据，单列批次做）。
 test('台账总量 ≤32KB（增长硬顶；20KB 目标见 triggers）', () => {

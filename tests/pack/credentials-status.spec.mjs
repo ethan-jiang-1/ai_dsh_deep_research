@@ -3,9 +3,11 @@
 // 反证：去掉 refs 非空判断 / 只看文件存在 → 空文件用例红；只查 home → workspace .env 用例红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import ts from 'typescript'
 import { credentialStatus } from '../../packages/deep-research-pack/scripts/lib/credentials-status.mjs'
 
 function fixture(t) {
@@ -93,4 +95,36 @@ test('credentialStatus：不可读凭据文件 → false，不抛栈', (t) => {
   const status = credentialStatus(base(fx))
   assert.equal(status.ok, false)
   assert.match(status.detail, /不可读|EACCES|无法读取/)
+})
+
+// 负例留证 2026-10-05：BUG-011——安装验收与研究就绪检查混用同一判据，无凭据 home 下 L2 keyless 必红；
+// 拆出 `--install-only` 跳过 credentialStatus 调用，默认仍判缺凭据。红配方：doctor.mjs 无条件调 credentialStatus → AST 守卫红。
+test('doctor.mjs：--install-only 显式门控 credentialStatus，默认无凭据仍报 false（BUG-011）', (t) => {
+  const fx = fixture(t)
+  assert.equal(credentialStatus(base(fx)).ok, false)
+  const doctorPath = join(dirname(fileURLToPath(import.meta.url)), '../../packages/deep-research-pack/scripts/doctor.mjs')
+  const source = readFileSync(doctorPath, 'utf8')
+  const sf = ts.createSourceFile(doctorPath, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS)
+  let gatedCalls = 0
+  let totalCalls = 0
+  const walk = (node, insideInstallOnlyNegation) => {
+    if (ts.isIfStatement(node)
+      && ts.isPrefixUnaryExpression(node.expression)
+      && node.expression.operator === ts.SyntaxKind.ExclamationToken
+      && ts.isIdentifier(node.expression.operand)
+      && node.expression.operand.text === 'installOnly') {
+      walk(node.thenStatement, true)
+      if (node.elseStatement) walk(node.elseStatement, false)
+      return
+    }
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 'credentialStatus') {
+      totalCalls += 1
+      if (insideInstallOnlyNegation) gatedCalls += 1
+    }
+    ts.forEachChild(node, (child) => walk(child, insideInstallOnlyNegation))
+  }
+  walk(sf, false)
+  assert.ok(source.includes("argv.includes('--install-only')"), 'doctor.mjs 必须解析 --install-only')
+  assert.equal(totalCalls, 1, 'doctor.mjs 应恰有一处 credentialStatus 调用')
+  assert.equal(gatedCalls, 1, 'credentialStatus 必须受 if (!installOnly) 门控')
 })

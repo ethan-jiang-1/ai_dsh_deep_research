@@ -435,7 +435,7 @@ test('BUG-156 版本配对：v2 在场而只 present v1 → RED（门②）', ()
 // 负例留证 2026-11-14：BUG-168——旧场 present 把整段载荷做 slug 子串，别的 bundle 的 present
 // 只要 note 提一句就 PASS。红配方：把 presentInLogs 退回 `JSON.stringify(d).includes(slug)` →
 // 下方「别的 bundle + note 提及」例变 PASS。
-test('presentGate：旧场 present 只认 files[].path——别的 bundle + note 提及不夺权', () => {
+test('presentGate：旧场 present 只认 files[].path——别的 bundle + note 提及不夺权（BUG-168）', () => {
   const { dir, cleanup } = makeRoot('witness')
   try {
     const b = writeBundle(dir, 'legacy')

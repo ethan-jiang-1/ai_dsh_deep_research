@@ -17,6 +17,8 @@
 // ③红 + 闭包传递红；lib 传递 spawnSync（port-reclaim）→ ③闭包红；test 命令改宽 → ④红。
 // ⚠ 教训（首版实证）：本文件的注释不要以"可匹配形态"引用违规示例——示例代码逐字
 //   进注释会被自己的正则命中（守卫红是对的，命中的是文档不是代码）。描述违规用散文。
+// 负例留证 2026-10-09：BUG-010——回归测试经本地模块传递引入子进程调用而不触发顶层文本扫描；
+//   红配方 = 在被 tests 引入的 scripts/lib 模块里放一个子进程调用 → inspectKeylessGraph 闭包红。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -82,7 +84,7 @@ test('② 回归层禁物：解析级调用表达式（spawn/exec/fetch——夹
   assert.deepEqual(offenders, [], 'spawn/exec/fetch 族只认解析后的调用位置——字符串夹具与注释不算执行');
 });
 
-test('③ import 图：tests 禁 import 驱动面 + 本地闭包零禁物（传递引入可见）', () => {
+test('③ import 图：tests 禁 import 驱动面 + 本地闭包零禁物（传递引入可见，BUG-010）', () => {
   // 双道：regex 驱动面禁令（报因明确——smoke/probe/dist/verify/probes 设计上就要起进程/浏览器/
   // 真模型相邻）+ 闭包图（本质守卫：跟随本地字面量 import 含再导出与动态字面量，禁物
   // 零容忍——run-gates/run-ops 的纯件靠它持续背书，混住驱动目录不再是豁免口）。

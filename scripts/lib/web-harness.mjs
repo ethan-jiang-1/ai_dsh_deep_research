@@ -15,30 +15,8 @@
 // 逐站点迁移（每站点独立 diff，单站点红只回滚该站点）。
 
 import { spawn } from 'node:child_process'
-import { startupFailureHint } from './startup-hint.mjs'
+import { waitForWebBanner } from './web-banner.mjs'
 
-/** 启动横幅里的 token URL——各站点同一形态（boot 输出一行 `http://127.0.0.1:<port>/?token=…`）。 */
-const bannerRe = (port) => new RegExp(`http://127\\.0\\.0\\.1:${port}/\\?token=(\\S+)`)
-
-/**
- * 起真 web 并等启动横幅。
- *
- * @param {object} o
- * @param {string} o.bin        CLI 入口（`vendor/dsh/apps/cli/src/bin.ts`）
- * @param {string} o.cwd        boot 的 cwd（源码域 = 本仓根 / vendor 根）
- * @param {string} o.profile    `--profile <name>`
- * @param {string|null} o.patchPath  `--patch <path>`（null = 不加）
- * @param {number} o.port       **必填**（端口 owner = 各站点；本件不设缺省）
- * @param {object} o.env        子进程环境（调用方构造：withModelKey / scrubbedEnv）
- * @param {number} o.timeoutMs  等横幅超时
- * @param {number} o.tailChars  失败信息里附的输出尾部字符数（各站点原值）
- * @param {string[]} [o.extraArgs]  `--` 之后的额外参数（各站点自持）
- * @param {boolean} [o.detached]  是否让子进程当组长（**原值保形，勿统一**）：组长能被整组收割
- *   （preset.e2e / snapshot-replay 的 `process.kill(-pid)` 依赖它），非组长随父进程组走
- *   （client-load 等原本如此——把它悄悄改成组长会改 Ctrl-C 与孤儿回收的行为）
- * @returns {Promise<{child: import('node:child_process').ChildProcess, token: string}>}
- *          横幅失败 → reject（收割留调用方；见文件头注）。
- */
 export function bootWeb({ bin, cwd, profile, patchPath = null, port, env, timeoutMs, tailChars, extraArgs = [], detached = true }) {
   if (typeof port !== 'number' || !Number.isInteger(port)) throw new TypeError('bootWeb: port 必填且为整数（端口 owner = 调用站点）')
   const argv = ['--import', 'tsx/esm', bin, '--profile', profile]
@@ -48,28 +26,7 @@ export function bootWeb({ bin, cwd, profile, patchPath = null, port, env, timeou
   // 子进程、孙进程成孤儿占住端口——组长模式让调用方能整组收割（process.kill(-pid)）；**没有这一
   // 需求的站点必须显式 false**（保形：改了进程组就改了 Ctrl-C 与孤儿回收的行为）。
   const child = spawn(process.execPath, argv, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'], detached })
-  let output = ''
-  const banner = new Promise((resolve, reject) => {
-    let timer
-    const settle = (fn, value) => {
-      if (timer !== undefined) clearTimeout(timer)
-      timer = undefined
-      child.off('exit', onExit)
-      fn(value)
-    }
-    const onData = (chunk) => {
-      output += String(chunk)
-      const m = bannerRe(port).exec(output)
-      if (m !== null) settle(resolve, { token: m[1] })
-    }
-    const onExit = (code) => settle(reject, new Error(`web 进程提前退出（code ${String(code)}）${startupFailureHint(output, profile) === '' ? '' : `\n${startupFailureHint(output, profile)}`}\n${output.slice(-tailChars)}`))
-    child.stdout.on('data', onData)
-    child.stderr.on('data', onData)
-    child.on('exit', onExit)
-    // 成功/失败/提前退出任一结算点都清 timer：库式消费者不再被 120–240s 的 timeout 多留（BUG-095）。
-    timer = setTimeout(() => settle(reject, new Error(`等待启动横幅超时${startupFailureHint(output, profile) === '' ? '' : `\n${startupFailureHint(output, profile)}`}\n${output.slice(-tailChars)}`)), timeoutMs)
-  })
-  return banner.then(({ token }) => ({ child, token, output: () => output }))
+  return waitForWebBanner(child, { port, profile, timeoutMs, tailChars }).then(({ token, output }) => ({ child, token, output }))
 }
 
 /**

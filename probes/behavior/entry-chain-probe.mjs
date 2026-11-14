@@ -27,13 +27,14 @@ import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/vendor-artifacts.mjs';
 import { directAuthorizationBoundaryPasses, rfcBoundaryPasses } from '../../scripts/lib/direct-authorization-boundary.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/port-reclaim.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
   return i === -1 ? fallback : process.argv[i + 1];
 };
-const PORT = Number(arg('port', '3114'));
+let PORT = Number(arg('port', '3114'));
 const BOOT_TIMEOUT_MS = 120_000;
 const TURN_TIMEOUT_MS = 180_000;
 const POLL_MS = 3_000;
@@ -61,7 +62,7 @@ const rpc = makeRpc({
 const boot = async () => bootWeb({
   bin, cwd: dshSrc, profile: 'web', patchPath: null, port: PORT,
   env: withModelKey({ DSH_HOME: home }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 600,
-  detached: false,
+  detached: true,
 });
 
 
@@ -111,7 +112,9 @@ console.log('probe: 真值——本仓不设仓级 queue 当前项，授权范�
     process.exit(2);
   }
 }
-const { child, token } = await boot();
+PORT = await prepareProbePort(PORT, { label: 'entry-chain-probe' });
+const booted = await boot();
+const { token } = booted;
 let verdict = [];
 let transcript = '';
 try {
@@ -137,8 +140,7 @@ try {
   verdict.push(['Q2 RFC 仅适用于需显式评审的持久决定，不是实施普遍前置', rfcBoundaryPasses(q2)]);
   verdict.push(['Q3 指认 guides/60（开发环）', /60|开发环|guides/i.test(q3)]);
 } finally {
-  child.kill('SIGTERM');
-  await sleep(300);
+  await cleanupBootedProbe(booted, PORT);
 }
 
 for (const [label, ok] of verdict) console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${label}`);

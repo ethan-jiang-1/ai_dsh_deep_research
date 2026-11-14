@@ -7,7 +7,8 @@
 // scripts/smoke/release.entry.mjs（⑤ 安装域冒烟后的释放验证——preset.e2e 被外层超时击杀
 // 时其 finally 不及跑，web 孙进程独立进程组会漏占端口）。
 import { spawnSync } from 'node:child_process';
-import { isOwnListener } from './port-reclaim-policy.mjs';
+import { createServer } from 'node:net';
+import { isOwnListener, reapBootedWeb, resolveProbePort } from './port-reclaim-policy.mjs';
 
 const commandOf = (pid) => {
   const r = spawnSync('ps', ['-o', 'command=', '-p', String(pid)], { encoding: 'utf8' })
@@ -41,3 +42,25 @@ export const reclaimPort = async (port) => {
   const left = listenersOn(port);
   return left !== null && left.length > 0 ? `端口 ${port} 用后未释放（残留 pid ${left.join(',')}）` : null;
 };
+
+const allocateEphemeralPort = async () => {
+  const server = createServer();
+  const chosen = await new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', () => resolve(server.address().port));
+  });
+  await new Promise((resolve) => server.close(resolve));
+  return chosen;
+};
+
+/** 行为探针统一端口准备入口（预收割失败自动回落临时端口，BUG-136）。 */
+export const prepareProbePort = (preferredPort, label = 'probe') => resolveProbePort(preferredPort, {
+  reclaim: reclaimPort,
+  allocateFreePort: allocateEphemeralPort,
+  onFallback: (from, to, reason) => {
+    console.error(`${label}: 端口 ${from} 预收割失败（${reason}）——自动改用临时端口 ${to}`);
+  },
+});
+
+/** 行为探针统一 finally 收割入口（整组 SIGKILL + 按端口回收孙进程，BUG-136）。 */
+export const cleanupBootedProbe = (booted, port) => reapBootedWeb(booted, port, { reclaim: reclaimPort });

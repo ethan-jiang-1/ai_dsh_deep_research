@@ -19,7 +19,7 @@ export async function pass5FinalDeliveryPhase(env) {
   const { page, step, wait, skipped, paneTextOf, boundSession, deliveredSessions, fileFaceOf } = env
   // 打开「研究状态」页签（右栏可能收起/页签可能不在带上）——本相位自用的小助手。
   const openStatusTab = async () => {
-    const expandBtn = page.getByRole('button', { name: 'Open right sidebar' })
+    const expandBtn = page.getByRole('button', { name: /Open right sidebar|打开右侧边栏/i })
     if (await expandBtn.count() > 0 && await expandBtn.first().isVisible().catch(() => false)) {
       await expandBtn.first().click({ timeout: 8_000 }).catch(() => {})
       await wait(1_500)
@@ -61,7 +61,7 @@ export async function pass5FinalDeliveryPhase(env) {
     if (!statusTab) { trials.push({ ...candidate, opened: true, statusTab: false, door: false }); continue }
     await wait(5_000)
     // 交付门来自 journal 流（present 事件），有界等待（≤15s）
-    const door = page.getByRole('button', { name: /读终稿/ }).first()
+    const door = page.getByRole('button', { name: /读终稿|Open final/ }).first()
     for (let i = 0; i < 5 && !doorFound; i++) {
       doorFound = await door.isVisible().catch(() => false)
       if (!doorFound) await wait(3_000)
@@ -71,7 +71,7 @@ export async function pass5FinalDeliveryPhase(env) {
   }
   if (deliveredTarget !== null && doorFound) {
     step(true, '交付目标会话可开且 ⑤ 交付门在场（present 见证）', `${deliveredTarget.title} → ${deliveredTarget.path}`)
-    await page.getByRole('button', { name: /读终稿/ }).first().click({ timeout: 6_000 }).catch(() => {})
+    await page.getByRole('button', { name: /读终稿|Open final/ }).first().click({ timeout: 6_000 }).catch(() => {})
     await wait(4_000)
     const finalText = await paneTextOf(page)
     const base = fileFaceOf(deliveredTarget.slug)?.base ?? null
@@ -100,7 +100,7 @@ export async function pass5FinalDeliveryPhase(env) {
     const onFinalTab = tabTitles.some((t) => TAB_TEXT.final.test(t))
     step(onFinalTab, '交付门点开 → 页签标题「终稿」（extension 带接管了文件地址）', `tabs=${JSON.stringify(tabTitles)}`)
     // 终稿页脚同款只读折叠块（与状态页 ⑤ 共用 src/lib/rerun-triage 文案）
-    const triageFooter = page.getByText('还不满意？三种改法').first()
+    const triageFooter = page.getByText(/还不满意？三种改法|Not satisfied\? Three ways to change it/).first()
     const footerVisible = await triageFooter.isVisible().catch(() => false)
     if (footerVisible) await triageFooter.click({ timeout: 3_000 }).catch(() => {})
     const footerText = footerVisible ? await paneTextOf(page) : ''
@@ -115,11 +115,11 @@ export async function pass5FinalDeliveryPhase(env) {
     })
     const stripState = /审查未过|当前版|读者版|审计版|\bv\d+\b/.test(stripText)
     if (readerName !== null) {
-      const toggle = page.getByRole('button', { name: /看审计版|看读者版/ }).first()
+      const toggle = page.getByRole('button', { name: /看审计版|看读者版|View audit edition|View reader edition/ }).first()
       const toggleVisible = await toggle.isVisible().catch(() => false)
       step(toggleVisible, '终稿页签读者版/审计版切换在场', readerName)
     } else if (ledgerLatest >= 1) {
-      const toggle = page.getByRole('button', { name: /看当前工作稿|看 v\d+（版本账）/ }).first()
+      const toggle = page.getByRole('button', { name: /看当前工作稿|看 v\d+（版本账）|View current draft|View v\d+ \(ledger\)/ }).first()
       const toggleVisible = await toggle.isVisible().catch(() => false)
       step(toggleVisible, '终稿页签版本切换在场（版本账 / 当前工作稿）', toggleVisible ? `v${ledgerLatest}` : '缺切换按钮')
     }
@@ -159,7 +159,7 @@ export async function pass5FinalDeliveryPhase(env) {
         // 会把这一拍读成"缺折叠块"。轮询上限 10s，再判。
         let statusFold = null
         for (let waited = 0; waited < 10_000; waited += 500) {
-          const candidate = page.getByText('还不满意？三种改法').first()
+          const candidate = page.getByText(/还不满意？三种改法|Not satisfied\? Three ways to change it/).first()
           if (await candidate.isVisible().catch(() => false)) { statusFold = candidate; break }
           await wait(500)
         }

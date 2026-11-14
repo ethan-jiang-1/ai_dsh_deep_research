@@ -261,7 +261,7 @@ test('a new system/message injection kind is surfaced too, not only user/message
   assert.deepEqual(unjudgedInjectionKinds(actual), ['tool-policy']);
 });
 
-test('every recorded role injects only kinds the compared judges cover', () => {
+test('every recorded role injects only kinds the compared judges cover（BUG-018）', () => {
   // 不变量：基线（人审过的录制）里的注入种类不得超出已登记的比对面。重录若带进未登记的种类，
   // 本条红——这是"重录后把该面加入比对面"这半句的唯一机械面。
   for (const role of roles) {
@@ -302,8 +302,10 @@ for (const [id, kind] of [['persona', 'system-prompt'], ['skill-catalog', 'skill
 // 复现的坑：哨兵「探针完成」写在录制 prompt 里，A 层用**全文 includes** 判回合完成 → user/message
 // 一落盘就放行 → 后续层在回合在飞时执行 → C5 金标准缺末行（当日 4 红 / 6 跑）。
 // 判据正本 = 录制器 dev/record-role-fixture.mjs（2026-10-13 因同一坑改过），此处收成共享件。
+// 负例留证 2026-10-13：BUG-018——删除一个 JUDGED_KINDS 或注入未声明种类 → unjudgedInjectionKinds 红。
+// 负例留证 2026-10-18：BUG-030——把 sentinelInAssistantText 退回全文 includes → prompt 回显例红。
 const line = (event) => JSON.stringify(event);
-test('回合落定：哨兵只出现在 prompt 回显（user/message、agent/inbox/spliced）→ 不算落定', () => {
+test('回合落定：哨兵只出现在 prompt 回显（user/message、agent/inbox/spliced）→ 不算落定（BUG-030）', () => {
   const log = [
     line({ type: 'agent/inbox/spliced', data: { text: '…以「探针完成」收尾。' } }),
     line({ type: 'user/message', data: { message: { content: [{ type: 'text', text: '…以「探针完成」收尾。' }] } } }),
@@ -340,9 +342,9 @@ test('time-context 只比 turn/step：墙钟不同不红，步序不同红', () 
   assert.equal(verdict.ok, false, '注入步序变化必须红');
 });
 
-// 负例留证 2026-11-12：BUG-091/106——历史 completed + 哨兵不得为后续 open/failed 回合作证。
+// 负例留证 2026-11-12：BUG-091 / BUG-106——历史 completed + 哨兵不得为后续 open/failed 回合作证。
 // 还原法 = turnCompleted 用全量 some；sentinelInAssistantText 用全量 assistant texts。
-test('BUG-091/106 当前回合：历史 completed/哨兵不夺权，末回合 completed 才放行', () => {
+test('BUG-091 / BUG-106 当前回合：历史 completed/哨兵不夺权，末回合 completed 才放行', () => {
   const line = (obj) => JSON.stringify(obj)
   const done = [
     line({ type: 'turn/start', data: { turn: 1 } }),

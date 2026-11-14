@@ -669,9 +669,25 @@ export const CASES = [
     const p = join(d, target);
     writeFileSync(p, readFileSync(p, 'utf8').replace('> 状态：', '> **状态**：'));
   } },
-  // D52：判据测试（*conformance*）即使标题不带 BUG 号，也必须给红配方。
+  // D52 / D55：判据测试（*conformance.test.mjs 与 *conformance.spec.mjs）即使标题不带 BUG 号，也必须给红配方。
   { id: 'guard-red-record-conformance-no-block', gate: 'guard-red-record', mutate: (dir) => {
     writeFileSync(join(dir, 'tests', 'checks', 'probe-conformance.test.mjs'), "import test from 'node:test';\n\ntest('probe', () => {});\n");
+  } },
+  { id: 'guard-red-record-conformance-spec-no-block', gate: 'guard-red-record', mutate: (dir) => {
+    writeFileSync(join(dir, 'tests', 'contracts', 'probe-conformance.spec.mjs'), "import test from 'node:test';\n\ntest('probe', () => {});\n");
+  } },
+  // D55：已归档修复卡若携带结构化 json fix-evidence，其 guard.path 在归档后被删必须由 backlog-liveness 判红。
+  { id: 'backlog-archived-bug-deleted-guard', gate: 'backlog-liveness', mutate: (dir) => {
+    const card = '---\nstatus: 已修\nseverity: P1\nopened: 2099-01-01\n---\n\n# BUG-993\n> 状态：已修｜可关闭：是\n\n## 修复判据\n1. ok\n'
+      + '\n## 修复落地\n\n```json fix-evidence\n'
+      + JSON.stringify({
+        changes: ['scripts/lib/probe-fix.mjs', 'tests/deleted-guard.spec.mjs'],
+        red: { command: 'node --test tests/deleted-guard.spec.mjs', exit: 1 },
+        green: { command: 'node --test tests/deleted-guard.spec.mjs', exit: 0 },
+        guard: { path: 'tests/deleted-guard.spec.mjs' },
+      }, null, 2)
+      + '\n```\n';
+    fixtureFile(dir, '_backlog/_archived/fixed_bugs/BUG-993-deleted-guard.md', card);
   } },
   // align-ledger 在副本基线**非 PASS**（vendor/dsh 是 gitlink submodule，副本不拷其内容 →
   // "vendor 里不存在"是副本环境的固有报因）。故两案例必须带 expect 指名"na 活性"报因，
@@ -865,10 +881,14 @@ export const CASES = [
     if (!text.includes('Custom plugin markets')) throw new Error('夹具手册缺 Custom plugin markets——案例失效');
     writeFileSync(p, text.replaceAll('Custom plugin markets', 'custom market'));
   } },
-  // release-vocab：退役词回潮。
+  // release-vocab：退役词回潮（含 BUG-072 的「产品内嵌」真退役词，与正向控制「产品内容」配对）。
   { id: 'release-vocab-retired-term', gate: 'release-vocab', mutate: (dir) => {
     const p = join(dir, 'README.md');
     writeFileSync(p, `${readFileSync(p, 'utf8')}\n产品 profile\n`);
+  } },
+  { id: 'release-vocab-product-embedded', gate: 'release-vocab', mutate: (dir) => {
+    const p = join(dir, 'README.md');
+    writeFileSync(p, `${readFileSync(p, 'utf8')}\n产品内嵌\n`);
   } },
   // dist-manual-fresh：生成物正文漂移。
   { id: 'dist-manual-fresh-body', gate: 'dist-manual-fresh', mutate: (dir) => {
@@ -897,7 +917,10 @@ export const CONTROLS = [
   { id: 'backlog-active-issue', gate: 'backlog-liveness', mutate: backlogIssue() },
   { id: 'backlog-ready-issue', gate: 'backlog-liveness', mutate: backlogReadyIssue() },
   { id: 'backlog-ready-bug', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-995-ready.md', READY_BUG_TEXT) },
-  { id: 'backlog-fix-bug-with-evidence', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-994-fix.md', FIXED_BUG_WITH_EVIDENCE) },
+  { id: 'backlog-fix-bug-with-evidence', gate: 'backlog-liveness', mutate: (dir) => {
+    writeFileSync(join(dir, 'tests', 'probe.test.mjs'), "test('probe', () => {});\n");
+    fixtureFile(dir, '_backlog/bugs/BUG-994-fix.md', FIXED_BUG_WITH_EVIDENCE);
+  } },
   { id: 'backlog-research-thread', gate: 'backlog-liveness', mutate: researchThread(RESEARCH_TEXT) },
   // guard-red-record 双址正向：活跃 bugs/ 卡 + 带留证的标题声明 → 门禁照常 PASS
   //（活跃址解析；CONTROLS 断言目标门禁 PASS，其他门禁红不拦——活跃探针卡不满足
@@ -915,4 +938,8 @@ export const CONTROLS = [
   { id: 'note-format-quoted-status', gate: 'note-format', mutate: fencedQuotedStatus },
   { id: 'note-format-negated-plus-real', gate: 'note-format', mutate: negatedPlusRealEvidence },
   { id: 'note-tree-dot-store', gate: 'note-tree', mutate: dotStoreIgnored },
+  { id: 'release-vocab-product-content', gate: 'release-vocab', mutate: (dir) => {
+    const p = join(dir, 'README.md');
+    writeFileSync(p, `${readFileSync(p, 'utf8')}\n本节说明产品内容的边界。\n`);
+  } },
 ];

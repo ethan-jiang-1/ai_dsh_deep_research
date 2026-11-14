@@ -1,11 +1,13 @@
 {
   "generatedBy": "dev/record-ci-oracle.mjs",
-  "oracle": "yaml@2 (real YAML) + bash (real shell) + failing stub node (failure propagation)",
-  "generatedAt": "2026-11-14",
+  "oracle": "yaml@2 (real YAML 1.2) + bash -eo pipefail (GitHub Actions default shell) + per-target failing stub node",
   "fixtures": [
     {
       "name": "plain",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": [
         "a.e2e.mjs"
       ]
@@ -13,26 +15,41 @@
     {
       "name": "quoted echo",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          echo \"node scripts/smoke/a.e2e.mjs\"\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": []
     },
     {
       "name": "single-quoted echo",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          echo 'node scripts/smoke/a.e2e.mjs'\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": []
     },
     {
       "name": "if false block",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          if false; then node scripts/smoke/a.e2e.mjs; fi\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": []
     },
     {
       "name": "or true",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs || true\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": []
     },
     {
       "name": "and echo",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs && echo done\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": [
         "a.e2e.mjs"
       ]
@@ -40,6 +57,9 @@
     {
       "name": "subshell",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          (node scripts/smoke/a.e2e.mjs)\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": [
         "a.e2e.mjs"
       ]
@@ -47,6 +67,9 @@
     {
       "name": "env prefix",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          CI=1 node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": [
         "a.e2e.mjs"
       ]
@@ -54,6 +77,9 @@
     {
       "name": "two smokes",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs; node scripts/smoke/b.e2e.mjs\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": [
         "a.e2e.mjs",
         "b.e2e.mjs"
@@ -62,16 +88,59 @@
     {
       "name": "background",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs &\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": []
     },
     {
       "name": "false and node",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          false && node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": []
+    },
+    {
+      "name": "exit 10 and node",
+      "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          exit 10 && node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
+      "executed": []
+    },
+    {
+      "name": "negated node",
+      "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          ! node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
+      "executed": []
+    },
+    {
+      "name": "multiline pipefail stop",
+      "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          false\n          node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
+      "executed": []
+    },
+    {
+      "name": "semicolon followed by echo under set -e",
+      "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs; echo after\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
+      "executed": [
+        "a.e2e.mjs"
+      ]
     },
     {
       "name": "comment",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs # run it\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": [
         "a.e2e.mjs"
       ]
@@ -79,6 +148,9 @@
     {
       "name": "exit 2 after",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs; exit 2\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": [
         "a.e2e.mjs"
       ]
@@ -86,26 +158,41 @@
     {
       "name": "step if false",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n        if: false\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": []
     },
     {
       "name": "step continue-on-error",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n        continue-on-error: true\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": []
     },
     {
       "name": "job if false",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n    if: false\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": []
     },
     {
       "name": "job not in needs",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs:\n      - other\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": []
     },
     {
       "name": "entry file",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.entry.mjs\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": [
         "a.entry.mjs"
       ]
@@ -113,18 +200,49 @@
     {
       "name": "heredoc",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          cat <<'EOF'\n          node scripts/smoke/a.e2e.mjs\n          EOF\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": []
     },
     {
-      "name": "on flow mapping",
+      "name": "on flow mapping single",
       "workflow": "on: { workflow_dispatch: {} }\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs: [keyless]\n    steps:\n      - run: echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
+      "executed": [
+        "a.e2e.mjs"
+      ]
+    },
+    {
+      "name": "on flow mapping multi",
+      "workflow": "on: { workflow_dispatch: {}, pull_request_target: { types: [opened] } }\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs: [keyless]\n    steps:\n      - run: echo ok\n",
+      "events": [
+        "workflow_dispatch",
+        "pull_request_target"
+      ],
       "executed": [
         "a.e2e.mjs"
       ]
     },
     {
       "name": "on block comment",
-      "workflow": "on:\n  # comment\n  workflow_dispatch:\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs: [keyless]\n    steps:\n      - run: echo ok\n",
+      "workflow": "on:\n  # comment\n  workflow_dispatch:\n  push:\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs: [keyless]\n    steps:\n      - run: echo ok\n",
+      "events": [
+        "workflow_dispatch",
+        "push"
+      ],
+      "executed": [
+        "a.e2e.mjs"
+      ]
+    },
+    {
+      "name": "on scalar string",
+      "workflow": "on: push\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs: [keyless]\n    steps:\n      - run: echo ok\n",
+      "events": [
+        "push"
+      ],
       "executed": [
         "a.e2e.mjs"
       ]
@@ -132,6 +250,9 @@
     {
       "name": "quoted expression",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n        if: ${{ true }}\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": [
         "a.e2e.mjs"
       ]
@@ -139,13 +260,20 @@
     {
       "name": "expression comment",
       "workflow": "on:\n  workflow_dispatch: # c\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs: [keyless]\n    steps:\n      - run: echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": [
         "a.e2e.mjs"
       ]
     },
     {
       "name": "on flow sequence",
-      "workflow": "on: [workflow_dispatch]\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs: [keyless]\n    steps:\n      - run: echo ok\n",
+      "workflow": "on: [workflow_dispatch, pull_request]\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs: [keyless]\n    steps:\n      - run: echo ok\n",
+      "events": [
+        "workflow_dispatch",
+        "pull_request"
+      ],
       "executed": [
         "a.e2e.mjs"
       ]
@@ -153,6 +281,9 @@
     {
       "name": "needs string",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs: keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": [
         "a.e2e.mjs"
       ]
@@ -160,11 +291,17 @@
     {
       "name": "continue-on-error expression",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs\n        continue-on-error: true\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": []
     },
     {
       "name": "redirection",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node scripts/smoke/a.e2e.mjs > /dev/null 2>&1\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": [
         "a.e2e.mjs"
       ]
@@ -172,6 +309,9 @@
     {
       "name": "absolute path",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          node \"$PWD/scripts/smoke/a.e2e.mjs\"\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": [
         "a.e2e.mjs"
       ]
@@ -179,6 +319,9 @@
     {
       "name": "env assignment before node",
       "workflow": "on:\n  workflow_dispatch: {}\njobs:\n  keyless:\n    steps:\n      - run: |\n          PATH=\"$PATH\" node scripts/smoke/a.e2e.mjs\n  all-checks-passed:\n    needs:\n      - keyless\n    steps:\n      - run: |\n          echo ok\n",
+      "events": [
+        "workflow_dispatch"
+      ],
       "executed": [
         "a.e2e.mjs"
       ]

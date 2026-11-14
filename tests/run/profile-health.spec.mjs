@@ -52,3 +52,33 @@ test('BUG-070 research 档失配：提示已弃用并指向 deep-research，不�
     assert.doesNotMatch(issues[0], /先跑 dev\/boot-run\.sh 重建/, '不得给死路指令')
   } finally { rmSync(item.dir, { recursive: true, force: true }) }
 })
+
+// 负例留证 2026-11-14：BUG-080——42b589e7 录制快照时 profile 的团队层版本合法，但镜像里的
+// content/manual.md 停在旧版，导致新快照带入过期手册且本机回放假绿；packDir 对账在入口阻断陈旧镜像。
+test('BUG-080 packDir 镜像新鲜度对账：manual.md 或 preset 漂移即阻断并给重建指令', () => {
+  const item = homeWith('0.2.1-rc.5')
+  try {
+    const packDir = join(item.dir, 'pack-src')
+    const mirrorDir = join(item.profile, 'node_modules', 'dsh-deep-research-pack')
+    mkdirSync(join(packDir, 'content'), { recursive: true })
+    mkdirSync(join(packDir, 'presets'), { recursive: true })
+    mkdirSync(join(mirrorDir, 'content'), { recursive: true })
+    mkdirSync(join(mirrorDir, 'presets'), { recursive: true })
+    writeFileSync(join(packDir, 'cordis.patch.yml'), '[]\n')
+    writeFileSync(join(mirrorDir, 'cordis.patch.yml'), '[]\n')
+    writeFileSync(join(packDir, 'content', 'manual.md'), '# 新版手册\n')
+    writeFileSync(join(mirrorDir, 'content', 'manual.md'), '# 旧版手册\n')
+    writeFileSync(join(packDir, 'presets', 'lead.patch.yml'), '[]\n')
+    writeFileSync(join(mirrorDir, 'presets', 'lead.patch.yml'), '[]\n')
+
+    const staleIssues = profileLayerIssues({ profileDir: item.profile, runtimeVersion: '0.2.1-rc.5', packDir })
+    assert.equal(staleIssues.length, 1)
+    assert.match(staleIssues[0], /content\/manual\.md/)
+    assert.match(staleIssues[0], /--prepare-profile/)
+
+    writeFileSync(join(mirrorDir, 'content', 'manual.md'), '# 新版手册\n')
+    assert.deepEqual(profileLayerIssues({ profileDir: item.profile, runtimeVersion: '0.2.1-rc.5', packDir }), [])
+  } finally {
+    rmSync(item.dir, { recursive: true, force: true })
+  }
+})

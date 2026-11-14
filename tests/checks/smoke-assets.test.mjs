@@ -4,6 +4,8 @@
 //
 // 反证：把 inspectSmokeDir 改回 `readdirSync(dir)` 只看名字 → symlink/dir 例红；把 smokeFiles
 // 的 `stat.isFile()` 换成 `ent.isFile()` → symlink 文件被算进 files，例红。
+// 负例留证 2026-11-14：BUG-162 / BUG-176——把 inspectSmokeDir 改回 `readdirSync(dir)` 只看名字或
+//   把 `stat.isFile()` 换成 `ent.isFile()` → 子目录/symlink 例红；还原 → 绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
@@ -11,7 +13,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { inspectSmokeDir, smokeFiles, smokeSurfaceIssues } from '../../scripts/lib/smoke-assets.mjs'
 
-test('smoke-assets：普通文件 / 目录 / symlink 文件 / symlink 目录分类可见', () => {
+test('smoke-assets：普通文件 / 目录 / symlink 文件 / symlink 目录分类可见（BUG-162 / BUG-176）', () => {
   const dir = mkdtempSync(join(tmpdir(), 'smoke-assets-'))
   try {
     writeFileSync(join(dir, 'a.e2e.mjs'), 'process.exit(0)\n')

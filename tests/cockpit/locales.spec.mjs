@@ -24,7 +24,9 @@ const placeholders = (text) => [...String(text).matchAll(/\{([A-Za-z0-9_]+)\}/g)
 /** 与 DSH translate 同形的占位符插值；缺参原样留 `{k}`（对账更容易看出漏参）。 */
 const tEn = (key, params = {}) => String(en[key]).replace(/\{([A-Za-z0-9_]+)\}/g, (all, name) => (name in params ? String(params[name]) : all))
 
-test('zh / en 键集一致、值非空、占位符集合逐键一致', () => {
+// 负例留证 2026-11-11：BUG-055——修复前方法库面板半套 i18n（英文 tab 下按钮/空态仍渲染中文或字典漏键）；
+// 任删一个 en 键或在英文视图硬编码中文即红。
+test('zh / en 键集一致、值非空、占位符集合逐键一致（BUG-055）', () => {
   assert.deepEqual(Object.keys(en).sort(), Object.keys(zh).sort(), '英文/中文字典键集必须一致（漏译 = 半套 i18n）')
   for (const key of Object.keys(zh)) {
     assert.ok(String(zh[key]).trim() !== '', `zh.${key} 为空`)

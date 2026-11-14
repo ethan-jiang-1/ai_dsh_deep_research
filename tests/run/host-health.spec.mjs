@@ -42,7 +42,9 @@ test('阈值可覆盖（站点/测试注入）', () => {
   assert.equal(HOST_HEALTH_THRESHOLDS.minFreeMB, 512)
 })
 
-test('NOT-RUN 只在失败 + 主机不健康 + 连接死亡/页面丢失同时成立', () => {
+// 负例留证 2026-11-13：BUG-152——旧实现只在 connectionDeath/pageLost 时判 NOT-RUN，不健康主机上的
+//   渲染超时断言失败被误判产品红；还原法 = 要求 connectionDeath 必真 → 下方断言失败例红。
+test('NOT-RUN 覆盖不健康主机的连接死亡与断言失败（BUG-152）', () => {
   const unhealthy = classifyHostHealth({ freeMB: 100, load1: 1, cpuCount: 8 })
   const healthy = classifyHostHealth({ freeMB: 2048, load1: 1, cpuCount: 8 })
   assert.equal(isHostUnhealthyVerdict({ hasFailures: true, hostHealth: unhealthy, connectionDeath: true, pageLost: false }), true)

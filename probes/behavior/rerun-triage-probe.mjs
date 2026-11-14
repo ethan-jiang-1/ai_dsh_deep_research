@@ -21,6 +21,7 @@
 import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
 import { findSessionDir, readSessionText, resolveSessionLog } from '../../scripts/lib/session-log.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/port-reclaim.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -31,7 +32,7 @@ const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
   return i === -1 ? fallback : process.argv[i + 1];
 };
-const PORT = Number(arg('port', '3118'));
+let PORT = Number(arg('port', '3118'));
 const BOOT_TIMEOUT_MS = 180_000;
 const TURN_TIMEOUT_MS = 240_000;
 const POLL_MS = 3_000;
@@ -86,38 +87,44 @@ const PROMPT = `用户看完你交付的 drt_probe 报告后，只说了一句�
 
 const main = async () => {
   console.log('rerun-triage-probe: 真模型档（cwd = 临时研究工作区，preset = lead）');
-  const b = await bootWeb({
-    bin, cwd: WS, profile: 'web', patchPath: overlay, port: PORT,
-    env: withModelKey({ DSH_HOME: home }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 800, detached: false,
-  });
-  const base = `http://127.0.0.1:${String(PORT)}`;
-  const cookie = await authenticate(base, b.token);
-  const rpc = makeRpc({
-    prefix: 'rt-',
-    errorOf: (endpoint, body) => `${endpoint} 失败: ${body?.result?.error?.message ?? JSON.stringify(body).slice(0, 200)}`,
-  });
-  const created = await rpc(base, cookie, 'session/create', { request: { cwd: WS, agentPreset: 'lead' } });
-  const sessionId = created?.id ?? created?.sessionId;
-  if (typeof sessionId !== 'string') throw new Error(`无会话 id：${JSON.stringify(created).slice(0, 200)}`);
-  await rpc(base, cookie, 'session/prompt', {
-    request: { requestId: randomUUID(), sessionId, mode: 'queue', content: [{ type: 'text', text: PROMPT }] },
-  });
-
-  // 会话目录/日志在 create 之后异步落盘：按 canonical 双形态发现 + 显式有界等待（不猜固定 sleep 时长）。
-  const sessionsRoot = join(home, 'sessions');
-  const deadline = Date.now() + TURN_TIMEOUT_MS;
-  let logPath = null;
-  while (Date.now() < deadline && logPath === null) {
-    const dir = findSessionDir(sessionsRoot, sessionId);
-    if (dir !== null) logPath = resolveSessionLog(dir);
-    if (logPath === null) await sleep(500);
-  }
-  if (logPath === null) throw new Error('会话日志不在场（超时）');
+  PORT = await prepareProbePort(PORT, { label: 'rerun-triage-probe' });
+  let b = null;
   let log = '';
-  while (Date.now() < deadline) {
-    await sleep(POLL_MS);
-    log = readSessionText(logPath) ?? '';
-    if (log.includes('"turn/end"') && log.includes('"assistant/message"')) break;
+  try {
+    b = await bootWeb({
+      bin, cwd: WS, profile: 'web', patchPath: overlay, port: PORT,
+      env: withModelKey({ DSH_HOME: home }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 800, detached: true,
+    });
+    const base = `http://127.0.0.1:${String(PORT)}`;
+    const cookie = await authenticate(base, b.token);
+    const rpc = makeRpc({
+      prefix: 'rt-',
+      errorOf: (endpoint, body) => `${endpoint} 失败: ${body?.result?.error?.message ?? JSON.stringify(body).slice(0, 200)}`,
+    });
+    const created = await rpc(base, cookie, 'session/create', { request: { cwd: WS, agentPreset: 'lead' } });
+    const sessionId = created?.id ?? created?.sessionId;
+    if (typeof sessionId !== 'string') throw new Error(`无会话 id：${JSON.stringify(created).slice(0, 200)}`);
+    await rpc(base, cookie, 'session/prompt', {
+      request: { requestId: randomUUID(), sessionId, mode: 'queue', content: [{ type: 'text', text: PROMPT }] },
+    });
+
+    // 会话目录/日志在 create 之后异步落盘：按 canonical 双形态发现 + 显式有界等待（不猜固定 sleep 时长）。
+    const sessionsRoot = join(home, 'sessions');
+    const deadline = Date.now() + TURN_TIMEOUT_MS;
+    let logPath = null;
+    while (Date.now() < deadline && logPath === null) {
+      const dir = findSessionDir(sessionsRoot, sessionId);
+      if (dir !== null) logPath = resolveSessionLog(dir);
+      if (logPath === null) await sleep(500);
+    }
+    if (logPath === null) throw new Error('会话日志不在场（超时）');
+    while (Date.now() < deadline) {
+      await sleep(POLL_MS);
+      log = readSessionText(logPath) ?? '';
+      if (log.includes('"turn/end"') && log.includes('"assistant/message"')) break;
+    }
+  } finally {
+    await cleanupBootedProbe(b, PORT);
   }
   const texts = [];
   const forbidden = [];
@@ -176,7 +183,6 @@ const main = async () => {
   console.log('');
   console.log(failures === 0 ? 'rerun-triage-probe: ALL PASS' : `rerun-triage-probe: ${failures} 处失败`);
   console.log(text ? `\n—— 模型原答（留档复核）——\n${text}` : '');
-  await b.stop?.();
   process.exit(failures === 0 ? 0 : 1);
 };
 

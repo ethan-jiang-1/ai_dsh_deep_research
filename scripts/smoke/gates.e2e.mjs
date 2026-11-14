@@ -173,6 +173,17 @@ async function main() {
     });
     for (const failure of caseResults) if (failure !== null) failures.push(failure);
 
+    // 真进程外部 oracle 对账：全量跑时同步核验 CI 执行面与真 bash -eo pipefail 录制件一致（D55 AC2）
+    if (caseFilter === null) {
+      const ciOracle = spawnSync(process.execPath, [join(ROOT, 'dev', 'record-ci-oracle.mjs'), '--check'], {
+        cwd: ROOT,
+        encoding: 'utf8',
+      });
+      if (ciOracle.status !== 0) {
+        failures.push(`ci-oracle: record-ci-oracle.mjs --check 失败（status=${ciOracle.status}）：${(ciOracle.stderr || ciOracle.stdout || '').trim()}`);
+      }
+    }
+
     if (failures.length > 0) {
       console.error(`gates.e2e: ${failures.length} 处失败：`);
       for (const f of failures) console.error(`  - ${f}`);

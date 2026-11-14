@@ -23,6 +23,7 @@
 import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/env.mjs';
 import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
 import { readSessionTextOf } from '../../scripts/lib/session-log.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/port-reclaim.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -33,7 +34,7 @@ const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
   return i === -1 ? fallback : process.argv[i + 1];
 };
-const PORT = Number(arg('port', '3116'));
+let PORT = Number(arg('port', '3116'));
 const BOOT_TIMEOUT_MS = 180_000;
 const TURN_TIMEOUT_MS = 240_000;
 const POLL_MS = 3_000;
@@ -81,36 +82,42 @@ Q3: 用户点名的『领域地图』在不在库里？你打算怎么处理？`
 
 const main = async () => {
   console.log('method-library-probe: 真模型档（cwd = 临时研究工作区）');
-  const b = await bootWeb({
-    bin, cwd: WS, profile: 'web', patchPath: null, port: PORT,
-    env: withModelKey({ DSH_HOME: home }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 800, detached: false,
-  });
-  const base = `http://127.0.0.1:${String(PORT)}`;
-  const cookie = await authenticate(base, b.token);
-  // cwd 钉在临时研究工作区：本探针验的就是"工作区里的偏好库能不能被看到"
-  const created = await rpc(base, cookie, 'session/create', { request: { cwd: WS } });
-  const sessionId = created?.id ?? created?.sessionId;
-  if (typeof sessionId !== 'string') throw new Error('无会话 id');
-  await rpc(base, cookie, 'session/prompt', {
-    request: { requestId: randomUUID(), sessionId, mode: 'queue', content: [{ type: 'text', text: PROMPT }] },
-  });
-
-  const deadline = Date.now() + TURN_TIMEOUT_MS;
+  PORT = await prepareProbePort(PORT, { label: 'method-library-probe' });
+  let b = null;
   let text = '';
-  while (Date.now() < deadline) {
-    await sleep(POLL_MS);
-    const log = readSessionLog(sessionId);
-    const parts = [];
-    for (const line of log.split('\n')) {
-      if (!line.includes('"assistant/message"')) continue;
-      try {
-        for (const blk of JSON.parse(line).data?.message?.content ?? []) {
-          if (blk.type === 'text' && blk.text) parts.push(blk.text);
-        }
-      } catch { /* 畸形行跳过 */ }
+  try {
+    b = await bootWeb({
+      bin, cwd: WS, profile: 'web', patchPath: null, port: PORT,
+      env: withModelKey({ DSH_HOME: home }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 800, detached: true,
+    });
+    const base = `http://127.0.0.1:${String(PORT)}`;
+    const cookie = await authenticate(base, b.token);
+    // cwd 钉在临时研究工作区：本探针验的就是"工作区里的偏好库能不能被看到"
+    const created = await rpc(base, cookie, 'session/create', { request: { cwd: WS } });
+    const sessionId = created?.id ?? created?.sessionId;
+    if (typeof sessionId !== 'string') throw new Error('无会话 id');
+    await rpc(base, cookie, 'session/prompt', {
+      request: { requestId: randomUUID(), sessionId, mode: 'queue', content: [{ type: 'text', text: PROMPT }] },
+    });
+
+    const deadline = Date.now() + TURN_TIMEOUT_MS;
+    while (Date.now() < deadline) {
+      await sleep(POLL_MS);
+      const log = readSessionLog(sessionId);
+      const parts = [];
+      for (const line of log.split('\n')) {
+        if (!line.includes('"assistant/message"')) continue;
+        try {
+          for (const blk of JSON.parse(line).data?.message?.content ?? []) {
+            if (blk.type === 'text' && blk.text) parts.push(blk.text);
+          }
+        } catch { /* 畸形行跳过 */ }
+      }
+      const joined = parts.join('\n');
+      if ((joined.match(/^Q[1-3]:/gm) ?? []).length >= 3) { text = joined; break; }
     }
-    const joined = parts.join('\n');
-    if ((joined.match(/^Q[1-3]:/gm) ?? []).length >= 3) { text = joined; break; }
+  } finally {
+    await cleanupBootedProbe(b, PORT);
   }
   if (!text) fail(`等答案超时（${TURN_TIMEOUT_MS}ms 内未见 Q1–Q3 三行）`);
   else {
@@ -139,7 +146,6 @@ const main = async () => {
   console.log('');
   console.log(failures === 0 ? 'method-library-probe: ALL PASS' : `method-library-probe: ${failures} 处失败`);
   console.log(text ? `\n—— 模型原答（留档复核）——\n${text}` : '');
-  await b.stop?.();
   process.exit(failures === 0 ? 0 : 1);
 };
 

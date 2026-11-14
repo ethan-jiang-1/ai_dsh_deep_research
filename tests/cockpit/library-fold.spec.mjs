@@ -203,7 +203,10 @@ test('foldLibrary：null / 空白 / 无条目 / 只有名字 → 容错不抛', 
   assert.equal(bare[0].sections.source, null);
 });
 
-test('editInstruction：新格式整条四字段；旧格式整段载荷', () => {
+// 负例留证 2026-10-13：BUG-025——旧实现编辑流硬编码 legacyText: null 并发空载荷；
+// 保留 legacyText 时纯旧条目发剥前缀整段载荷，新旧混居条目分区优先、legacyText 不丢失。
+// 红配方：editInstruction 忽略 legacyText 分支 → 旧格式与混居断言红。
+test('editInstruction：新格式整条四字段；旧格式整段载荷（BUG-025）', () => {
   const [e0, e1] = foldLibrary(v2);
   assert.equal(editInstruction(e0),
     '把研究偏好「只看官方来源」改为：找来源=官方/原始来源优先，第三方只作线索；怎么核实=关键来源独立重抓；单源结论显式标注；报告怎么写=答案+口径+依据+限制；不承诺=不做领域覆盖');

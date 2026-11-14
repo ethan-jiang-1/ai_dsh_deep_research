@@ -2,6 +2,8 @@
 // changes（仓内文件路径）+ red {command, exit, output?} + green {command, exit}；exit 是 oracle，
 // 不再从散文里找“失败/通过”子串。旧卡（opened < 2026-11-15）无块时 grandfather。
 // 反证：删掉 red.exit 非零检查 → 对应用例绿；删掉 isFileLike → 目录/glob 例绿；删掉重复块检查 → 双块例绿。
+// 负例留证 2026-11-14：BUG-186——旧实现靠散文“通过/失败/exit 1”子串判红绿，否定句与裸日志易假绿；
+//   现以结构化 `json fix-evidence` 整数 `exit` 为唯一 oracle（删 red.exit 非零检查 → 下方例变绿）。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { fixChangePathsOf, fixEvidenceProblems } from '../../scripts/lib/fix-evidence.mjs'
@@ -30,9 +32,11 @@ ${JSON.stringify(value, null, 2)}
 散文只作人读副本，不参与判定。
 `, opened)
 
-test('旧卡（< 2026-11-15）无结构化块 → grandfather；路径仍可从散文读', () => {
-  assert.deepEqual(fixEvidenceProblems(LEGACY), [])
-  assert.deepEqual(fixChangePathsOf(LEGACY), ['scripts/lib/fix.mjs', 'tests/checks/fix.test.mjs'])
+test('旧卡（< 2026-11-15）仅在已归档盘面（allowLegacyProse）grandfather；活跃/新归档一律要求结构化块', () => {
+  assert.deepEqual(fixEvidenceProblems(LEGACY, { allowLegacyProse: true }), [])
+  assert.deepEqual(fixChangePathsOf(LEGACY, { allowLegacyProse: true }), ['scripts/lib/fix.mjs', 'tests/checks/fix.test.mjs'])
+  assert.match(fixEvidenceProblems(LEGACY).join('；'), /fix-evidence/)
+  assert.deepEqual(fixChangePathsOf(LEGACY), [])
 })
 
 test('新卡无结构化块 → 红；缺 ## 修复落地 → 红', () => {
@@ -77,7 +81,7 @@ test('红证不可重放且 changes 无测试资产 → 红；有测试资产 �
   assert.deepEqual(fixEvidenceProblems(structured(withAsset)), [])
 })
 
-test('负例留证：exit 是 oracle——output 里写“通过/失败”不改变判定', () => {
+test('负例留证：exit 是 oracle——output 里写“通过/失败”不改变判定（BUG-186）', () => {
   // 红配方：把 red.exit 改成 0（或 fallback 回散文 marker）→ 本例变绿。
   const lyingOutput = {
     ...good,
@@ -98,8 +102,8 @@ test('每个修复必须沉淀 guard：path 或 notMechanizable+trigger', () => 
   assert.match(fixEvidenceProblems(structured({ ...good, guard: { path: 'tests/checks/fix.test.mjs', notMechanizable: 'x', trigger: 'y' } })).join('；'), /不能同时/)
 })
 
-test('负例留证：结构化块重复键 → 红（JSON.parse 取末值是假绿）', () => {
-  // 红配方：删掉 duplicateKeyOf 检查 → 本例变绿（末值胜出）。
+test('负例留证：结构化块重复键（含 \\uXXXX 转义同键）→ 红（JSON.parse 取末值是假绿）', () => {
+  // 红配方：删掉 duplicateKeyOf 检查或退回裸字符拼接 → 本例变绿（末值胜出）。
   const raw = '{"changes":["tests/checks/fix.test.mjs"],"changes":["scripts/lib/x.mjs"],"red":{"command":"node --test tests/checks/fix.test.mjs","exit":1},"green":{"command":"node --test tests/checks/fix.test.mjs","exit":0},"guard":{"path":"tests/checks/fix.test.mjs"}}'
   const withDup = card(`## 修复落地\n\n\`\`\`json fix-evidence\n${raw}\n\`\`\`\n`)
   assert.match(fixEvidenceProblems(withDup).join('；'), /重复键 changes/)
@@ -107,4 +111,24 @@ test('负例留证：结构化块重复键 → 红（JSON.parse 取末值是假�
   const nested = clean.replace('"exit":1', '"exit":1,"exit":0')
   const withNested = card(`## 修复落地\n\n\`\`\`json fix-evidence\n${nested}\n\`\`\`\n`)
   assert.match(fixEvidenceProblems(withNested).join('；'), /重复键 exit/)
+  const unicodeEscaped = raw.replace('"changes":["tests/checks/fix.test.mjs"]', '"\\u0063hanges":["tests/checks/fix.test.mjs"]')
+  const withUnicodeDup = card(`## 修复落地\n\n\`\`\`json fix-evidence\n${unicodeEscaped}\n\`\`\`\n`)
+  assert.match(fixEvidenceProblems(withUnicodeDup).join('；'), /重复键 changes/)
+})
+
+test('负例留证：## 修复落地 内围栏代码含 ## 标题行不截断 fix-evidence 块', () => {
+  const withFencedH2 = card(`## 修复落地
+
+\`\`\`markdown
+## 假标题（围栏内的示例输出，不是下一节）
+\`\`\`
+
+\`\`\`json fix-evidence
+${JSON.stringify(good, null, 2)}
+\`\`\`
+
+## 后续章节
+正文。
+`)
+  assert.deepEqual(fixEvidenceProblems(withFencedH2), [])
 })

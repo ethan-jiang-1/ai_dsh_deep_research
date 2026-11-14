@@ -10,6 +10,7 @@
 //      只放宽一层或两层**都咬不住**（连试三次注入均绿 = 反证空转）；能咬的配方 = 三层一起放宽、
 //      真去读 `stream[].chunk.reason`。写负例配方前先确认它真的会让测试红。
 //   ③去掉 `kind === 'error'` 判据 → 用例 4 红（正常回合被算成错误）。
+// 负例留证 2026-10-13：BUG-022——把 assistant/attempt 的流错误并入终结计数 → 同一回合双算例红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { turnEndErrorsOf, tallyTurnEndErrors, retryEventsOf } from '../../scripts/lib/provider-errors.mjs';
@@ -34,7 +35,7 @@ test('TRANSPORT 同形态也认；缺 code 记 UNKNOWN（如实，不猜）', ()
   assert.deepEqual(errors.map((e) => e.code), ['TRANSPORT', 'UNKNOWN']);
 });
 
-test('不双算：assistant/attempt 里的同一条错误不计（一个回合 = 一次事故）', () => {
+test('不双算：assistant/attempt 里的同一条错误不计（一个回合 = 一次事故，BUG-022）', () => {
   const attempt = JSON.stringify({
     type: 'assistant/attempt', seq: 10, time: 1,
     data: { turn: 6, step: 1, stream: [{ type: 'chunk', chunk: { type: 'finish', reason: { kind: 'error', failure: { message: 'DeepSeek Messages stream: event precedes message_start', code: 'MALFORMED_RESPONSE' } } } }] },

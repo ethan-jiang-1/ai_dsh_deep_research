@@ -177,9 +177,9 @@ test('BUG-101 没有 present（delivered=false）→ 不认 deliveredVersion/lab
   assert.doesNotMatch(face.label, /已交付 v9/)
 })
 
-// 负例留证 2026-11-12：BUG-102/112——正文版本引用/普通斜杠 bullet 不得制造头版本或冲突。
+// 负例留证 2026-11-12：BUG-102 / BUG-112——正文版本引用/普通斜杠 bullet 不得制造头版本或冲突。
 // 还原法 = planVersionsOf 全文取最后一条 / recorded 恢复无上下文斜杠分支。
-test('BUG-102/112 头部 v2 + 正文旧版引用 v1 → current=2；普通 `- 参考 / v1 /` 不产生 recorded', () => {
+test('BUG-102 / BUG-112 头部 v2 + 正文旧版引用 v1 → current=2；普通 `- 参考 / v1 /` 不产生 recorded', () => {
   const text = ['# Plan', '', '图版本：v2', '', '## 备注', '旧版图版本：v1 已废弃', '- 参考 / v1 / 旧方案示例', ''].join('\n')
   const face = runVersionFaceOf({ delivered: false, finalFileNames: [], planText: text })
   assert.equal(face.currentPlanVersion, 2)

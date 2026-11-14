@@ -64,7 +64,7 @@ test('client 注册：每个 effect 回调都返回 disposer（点号 + 字面�
   assert.deepEqual(missing, [], `client 注册无法回收：${missing.join('；')}`)
 })
 
-test('client 注册：方括号 effect 与点号同判（形状矩阵）', () => {
+test('client 注册：方括号 effect 与点号同判（形状矩阵，BUG-173）', () => {
   const source = parse('probe.ts', [
     'declare const scoped: any',
     "scoped['effect'](() => { void 0 })",

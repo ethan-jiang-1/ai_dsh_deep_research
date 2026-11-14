@@ -22,7 +22,9 @@ test('listDir：not-found = 合法空态；其他错误 = null（打 console，�
   assert.ok(logged >= 1, '真故障必须打日志');
 });
 
-test('readLibrary：分页拼到 eof；缺席 = absent；超过 20 页 = error', async () => {
+// 负例留证 2026-10-13：BUG-026——旧实现写死单次 40 行读取，超长库尾条目静默截断；
+// 改为分页拼到 eof、超 20 页报 error。红配方：去掉 while(!eof) 分页循环 → 第二页 line-2 丢失即红。
+test('readLibrary：分页拼到 eof；缺席 = absent；超过 20 页 = error（BUG-026）', async () => {
   let call = 0;
   const paged = createWorkspaceFiles(remoteOf(null, () => {
     call += 1;

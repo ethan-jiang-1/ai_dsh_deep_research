@@ -156,12 +156,14 @@ export function runF() {
   for (const file of testFiles.sort()) {
     const f = relative(ROOT, file);
     const text = readFileSync(file, 'utf8');
-    // ① 标题里的 BUG 号 = 守卫声明（node:test 的 test('…')；含 await t.test 子测形态）
+    // ① 标题里的 BUG 号 = 守卫声明（node:test 的 test('…')；含 await t.test 子测形态；同一标题多 ID 全取）
     const claimed = new Set();
-    for (const m of text.matchAll(/^\s*(?:await\s+)?(?:t\.)?(?:test|it)\(\s*['"`][^'"`]*?(BUG-\d{3})/gm)) claimed.add(m[1]);
+    for (const m of text.matchAll(/^\s*(?:await\s+)?(?:t\.)?(?:test|it)\(\s*(['"`])((?:\\.|(?!\1)[^\n])*)\1/gm)) {
+      for (const idMatch of m[2].matchAll(/BUG-\d{3}/g)) claimed.add(idMatch[0]);
+    }
     // 判据测试（文件名含 conformance）= 不变量 + 变异矩阵的常驻守卫：必须给出红配方，
     // 即使标题不声称具体事故（D52；否则「只交付绿」的判据测试没人知道会不会咬人）。
-    if (/conformance\.test\.mjs$/.test(f)) {
+    if (/conformance\.(?:spec|test)\.mjs$/.test(f)) {
       claims++;
       if (!/^\s*\/\/\s*(?:负例留证|夹具留证)\s+\d{4}-\d{2}-\d{2}：/m.test(text))
         problems.push(`${f}：判据测试（*conformance*）缺「// 负例留证/夹具留证 YYYY-MM-DD：」块——不变量测试必须给出红配方`);

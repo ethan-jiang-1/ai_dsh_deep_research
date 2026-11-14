@@ -28,7 +28,7 @@ test('开发技能清单覆盖盘上目录（2026-10-20 审计 P1-1 反证）', 
   for (const name of skills) assert.ok(guide.includes(name), `guides/60 未路由技能 ${name}——盘上有而文档不可发现`)
 })
 
-// 负例留证 2026-10-21（六维卫生轮 维度4 M1）：本测试首跑即红——research-workspace 根的
+// 负例留证 2026-10-21：六维卫生轮 维度4 M1——本测试首跑即红：research-workspace 根的
 // method-library.md 与 _abandoned/、pack 种子的"偏好库"类别均缺席根 AGENTS 布局块
 //（BUG-042 于 2026-10-19 新增偏好库种子后布局枚举未跟上）。红 → 补布局枚举 → 绿；
 // 此后工作区根实体契约新增而无布局行 = 常驻红（枚举漂移的机械防线，同"技能清单
@@ -39,7 +39,7 @@ test('开发技能清单覆盖盘上目录（2026-10-20 审计 P1-1 反证）', 
 // 扫盘会把 keyless 回归绑到开发机现场（实测 CI 红：根实体 1 < 5）。契约以常量枚举钉住，
 // 只对 tracked 的 `drafts/` 做存在性校验——运行区不参与 L0（scripts/AGENTS 范围纪律）。
 const WORKSPACE_ROOT_ENTITIES = ['method-library.md', 'drt_<slug>', 'archive/', '_abandoned/', 'drafts/']
-test('根 AGENTS 布局块覆盖工作区根实体与 pack 种子（2026-10-21 卫生轮）', () => {
+test('根 AGENTS 布局块覆盖工作区根实体与 pack 种子（2026-10-21 卫生轮，BUG-042）', () => {
   const agents = read('AGENTS.md')
   const section = agents.slice(agents.indexOf('## 布局'))
   assert.ok(section.includes('## 布局'), 'AGENTS.md 缺「## 布局」节')
@@ -162,4 +162,70 @@ test('通道重启不终局化挂起 ask：61 与运行技能同判（BUG-009）
   assert.match(skill, /无终局化补写/, '运行技能必须写「无终局化补写」——机制权威')
   assert.doesNotMatch(guide, /被通道重启终局化/, 'guides/61 不得写「被通道重启终局化」——重启不补 turn/end')
   assert.match(guide, /不会终局化/, 'guides/61 必须明确挂起 ask 不会因重启终局化')
+})
+
+// 负例留证 2026-11-14：本测试首跑即红——检出三处真实 GFM 表格渲染断裂：
+// ① docs/decisions.md:52/55（表内遗留空行导致 D40–D55 脱离表头退化为普通段落）；
+// ② docs/design/10-architecture.md:66（表间插入正文段落导致末行脱离表头）；
+// ③ docs/discipline-map.md:190/198（表后缺空行被吞入上一表 + 二列表混入第三列被静默截断）。
+test('GFM 表格完整性：docs/ 下所有表格必须带分隔行、列数一致且表后空行收口', () => {
+  const docs = readdirSync(join(ROOT, 'docs'), { recursive: true })
+    .filter((f) => typeof f === 'string' && f.endsWith('.md'))
+    .map((f) => `docs/${f.replaceAll('\\', '/')}`)
+  assert.ok(docs.length >= 15, `防空语料：docs/ 下 .md 过少（${docs.length}）`)
+  const delimRe = /^\|(?:\s*:?-+:\s*\||\s*:?-+\s*\|)+$/
+  const countCols = (row) => {
+    let s = row.trim()
+    if (s.startsWith('|')) s = s.slice(1)
+    if (s.endsWith('|') && !s.endsWith('\\|')) s = s.slice(0, -1)
+    let cols = 1
+    for (let i = 0; i < s.length; i += 1) {
+      if (s[i] === '|' && s[i - 1] !== '\\') cols += 1
+    }
+    return cols
+  }
+  const problems = []
+  let tablesChecked = 0
+  for (const rel of docs) {
+    const cleaned = read(rel).replace(/<!--[\s\S]*?-->/g, (m) => '\n'.repeat((m.match(/\n/g) ?? []).length))
+    const lines = cleaned.split('\n')
+    let inFence = null
+    for (let i = 0; i < lines.length; i += 1) {
+      const t = lines[i].trim()
+      const fm = /^(`{3,}|~{3,})/.exec(t)
+      if (fm) {
+        if (!inFence) inFence = fm[1][0]
+        else if (t.startsWith(inFence.repeat(3)) && new RegExp(`^${inFence}+\\s*$`).test(t)) inFence = null
+        continue
+      }
+      if (inFence) continue
+      if (t.startsWith('|') && t.endsWith('|')) {
+        const block = []
+        while (i < lines.length) {
+          const rt = lines[i].trim()
+          if (rt.startsWith('|') && rt.endsWith('|')) { block.push({ lineNo: i + 1, text: rt }); i += 1 }
+          else break
+        }
+        if (block.length < 2 || !delimRe.test(block[1].text)) {
+          problems.push(`${rel}:${block[0].lineNo} 孤立表格行（缺表头分隔行，可能是表内混入空行或正文）`)
+        } else {
+          tablesChecked += 1
+          const expectedCols = countCols(block[1].text)
+          for (const r of block) {
+            const c = countCols(r.text)
+            if (c !== expectedCols) problems.push(`${rel}:${r.lineNo} 列数不一致（实得 ${c} 列，表头 ${expectedCols} 列）`)
+          }
+          if (i < lines.length) {
+            const nextTrim = lines[i].trim()
+            if (nextTrim !== '' && !/^(#{1,6}\s|>|[-*+]\s|\d+\.\s|<a\s|`{3,}|~{3,})/.test(nextTrim)) {
+              problems.push(`${rel}:${i + 1} 表格紧接非空正文（缺空行会被 GFM 吞入上一张表）`)
+            }
+          }
+        }
+        i -= 1
+      }
+    }
+  }
+  assert.ok(tablesChecked >= 25, `防空语料：扫描到的表格过少（${tablesChecked}）`)
+  assert.deepEqual(problems, [], `docs/ 存在 GFM 表格渲染断裂：\n${problems.join('\n')}`)
 })

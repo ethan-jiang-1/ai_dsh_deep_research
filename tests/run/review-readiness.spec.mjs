@@ -10,6 +10,8 @@
 //   ①改回未锚行首的末位匹配 `matchAll(/readiness:\s*(PASS|FAIL)/g)` → 用例 3 红（附录 FAIL 夺权）；
 //   ②改成取首个匹配 → 用例 2 红（首审 FAIL 夺权）；
 //   ③删空串守卫（`text === '' → null` 放行）→ 用例 7 红。
+// 负例留证 2026-10-18：BUG-036——文末旧轮附录独立成行或固定行窗截断导致旧轮 FAIL 盖过真实终局 PASS；
+//   红配方 = 删掉轮次仲裁或回退未锚行首匹配 → 附录轮次例红。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readinessOf } from '../../scripts/lib/node-gate-contracts.mjs'
@@ -42,7 +44,7 @@ test('终局判定：终局 PASS + 文末附录保留首轮 FAIL 血统（行内
   assert.equal(terminalReadiness(text), 'PASS', '附录里的行内历史引用不得夺权');
 });
 
-test('终局判定：终局=「第 2 轮」标题行 PASS、附录=「第 1 轮」标题行 FAIL → PASS（轮次高者胜，独立成行形态）', () => {
+test('终局判定：终局=「第 2 轮」标题行 PASS、附录=「第 1 轮」标题行 FAIL → PASS（轮次高者胜，独立成行形态，BUG-036）', () => {
   const text = [
     '# 第 2 轮（复审）—— readiness: **PASS**',
     '',

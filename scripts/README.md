@@ -109,14 +109,15 @@
 | 模块 | 被谁消费 | 说明 |
 |---|---|---|
 | lib/content-budget.mjs | e-workspace、content-disclosure.spec | 常驻面预算唯一正本：T0 两级（下放 10,000 / 硬顶 12,288）+ lead persona/合计的 char/byte/token |
-| lib/roles.mjs | discipline-probe、doctor.e2e、fetch-fallback-orchestration.spec、l4-lite.e2e、preset.e2e、presets.spec、release.entry、replay-scene.spec、snapshot-replay.entry、strategy-core.spec、team-preflight.e2e、role-consumer-matrix.spec | 角色清单访问器（presetRoles = 盘上全部；researchRoles = 研究面；事实源 = 盘上 presets/） |
+| lib/roles.mjs | discipline-probe、doctor.e2e、fetch-fallback-orchestration.spec、l4-lite.e2e、preset.e2e、presets.spec、release.entry、replay-fixtures.spec、replay-scene.spec、role-consumer-matrix.spec、snapshot-replay.entry、strategy-core.spec、team-preflight.e2e | 角色清单访问器（presetRoles = 盘上全部；researchRoles = 研究面；事实源 = 盘上 presets/） |
 | lib/cli-entry.mjs | export-handoff、gates.e2e、market、run-dashboard、protocol-audit、schema-scan、verdict-audit、node-gate、evidence-audit、channel-cache、run-driver、vendor-artifacts、cli-entry.test | symlink-safe CLI 入口判定（realpath 归一；macOS `/tmp` → `/private/tmp` 下不静默） |
 | lib/channel-cache.mjs | run-driver、channel-cache.spec | 启动加速缓存判据：pack 源指纹（路径+size+mtime）+ 发布清单缓存（漂移门 ≈5s→≈0.7s，CLI 供 boot-run.sh 消费）+ 探针 GREEN 缓存（热复用 ≈0.5s / 冷启动命中 ≈10s；键 = pack 指纹 + runtime 构建 + 断言参数，TTL 30 分钟；命中前 HTTP 就绪检查；只存 GREEN，`--force-probe` 绕过） |
 | lib/bundle-sessions.mjs | bundle-sessions、bundle-sessions.spec | run bundle → 见证会话反查：聚合 scanWitnessLogs 的 boundSessions/presented（绑定谓词不另立——与 node-gate 门①②同源）；交付回执的 witness.sessions 亦由此面派生 |
 | lib/hitl-card-driver.mjs | hitl-answer | HITL 问询卡的浏览器内驱动片段（Playwright `page.evaluate` 入参）：问卡可见性、选项结构、提交/推进按钮可用性；纯 DOM 函数、零闭包，业务判定仍在 lib/ask-drive |
 | lib/frontmatter.mjs | bundle-date-sanity、evidence-audit-core、frontmatter.spec、run-dashboard-core | `---` frontmatter 拆分**唯一正本**（两 core 共用同一实现） |
 | lib/zstd-read.mjs | bundle-sessions、evidence-audit、node-gate、run-accept、verdict-audit | zstd CLI 文本解压**唯一调用段**（多帧拼接靠 CLI；成功/失败结构化返回，**失败契约留各壳**：`''` 继续 vs `null` 跳过） |
-| lib/web-harness.mjs | client-hitl.entry、client-load.entry、defaults-probe、discipline-probe、wave-execution-probe、entry-chain-probe、l4-lite.e2e、method-library-probe、preset.e2e、rerun-triage-probe、run-driver、session-replay、snapshot-replay.entry、team-preflight.e2e | DSH web 冒烟族**启停与通道唯一正本**：`bootWeb`（等启动横幅拿 token）+ `authenticate` + `makeRpc`；**参数保形**——端口/超时/尾部字符/rpcId 前缀/失败文案与收割方式全留各站点 |
+| lib/web-harness.mjs | client-hitl.entry、client-load.entry、defaults-probe、discipline-probe、wave-execution-probe、entry-chain-probe、l4-lite.e2e、method-library-probe、preset.e2e、rerun-triage-probe、run-driver、session-replay、snapshot-replay.entry、team-preflight.e2e | DSH web 冒烟族**启停与通道唯一正本**：`bootWeb`（委托 `web-banner` 等启动横幅拿 token）+ `authenticate` + `makeRpc`；**参数保形**——端口/超时/尾部字符/rpcId 前缀/失败文案与收割方式全留各站点 |
+| lib/web-banner.mjs | boot-timer.test、web-harness | DSH web 启动横幅等待与超时定时器结算纯函数（零 child_process/fetch，成功/早退/超时三路径均回收 timer；BUG-095） |
 | lib/session-log.mjs | bundle-sessions、cdp-ask.entry、cdp-probe、client-hitl.entry、client-load-reference.support、defaults-probe、client-load.entry、data.entry、discipline-probe、wave-execution-probe、entry-chain-probe、hitl-answer、l4-lite.e2e、method-library-probe、plan-card-stats、product-boot.entry、provider-error-stats、rerun-triage-probe、run-dashboard-core、run-kickoff、run-state、run-state.spec、session-events、session-log.spec、session-replay、snapshot-replay.entry、stream-diagnostics、team-preflight.e2e、verdict-audit、verdict-audit-fixture.spec、watch-run、workspace-isolation.entry | canonical 日志选择与读取 + 会话目录发现（findSessionDir 双形态/首匹配；readSessionTextOf 定位+读取——六处真模型档副本 2026-11-04 收口）+ 会话组发现（findGroup 子串参数化，缺省 research-workspace——BUG-010 三处同款一行收敛；冒烟/自测组逃生口 = 观察工具 --group） |
 | lib/session-events-core.mjs | session-events、session-events.spec | 会话事件摘要与筛选纯函数（CLI 壳 = run-ops/session-events 行） |
 | lib/llm-stream-tee-core.mjs | llm-stream-tee-core.spec | LLM 流 tee 的捕获判定（主机子串，fail-closed）与凭据头脱敏（预载壳 = probes/stream/llm-stream-tee.cjs——CJS require 面不在 .mjs 对账图内，壳本体是活进程仪器不设 keyless 自测） |
@@ -153,33 +154,34 @@
 | lib/backlog-liveness.mjs | backlog-liveness.test、f-repo、staged-change-pairing | 问题卡、缺陷、调研、方法与归档索引的结构合同；被 verify 入口与 keyless 回归消费 |
 | lib/staged-change-pairing.mjs | staged-change-pairing.test、f-repo | 暂存区成对变更判据（归档卡↔Note、ui.expected↔lastRewrite）；纯函数，git 由门禁注入 |
 | lib/direct-authorization-boundary.mjs | entry-chain-probe、entry-chain-probe.spec | 按授权范围执行、无需重复请批的词面判定；由探针与 keyless 回归消费 |
-| lib/replay-scene.mjs | replay-scene.spec、snapshot-replay.entry | 场景声明消费者：roster/版本/来源形状/路径校验（缺件、串角色、垃圾锚点 fail-loud）+ 场景集发现（`replay/*/snapshot.json` 全集、防空语料、--face 全名定向） |
+| lib/replay-scene.mjs | replay-fixtures.spec、replay-scene.spec、snapshot-replay.entry | 场景声明消费者：roster/版本/来源形状/路径校验（缺件、串角色、垃圾锚点 fail-loud）+ 场景集发现（`replay/*/snapshot.json` 全集、防空语料、--face 全名定向） |
 | lib/replay-request.mjs | record-role-fixture、replay-request.spec、snapshot-replay.entry | 组装请求面逐条比较：persona、header 全序列、四处 user/message 注入（含时钟序列）（定向归一化） |
 | lib/snapshot-mode.mjs | snapshot-readonly.test、snapshot-replay.entry | 快照 smoke 模式判据：只读/刷新互斥、`DSH_SNAPSHOT` 只认 replay、刷新必须 `--why` |
 | lib/smoke-lane.mjs | run-lane、smoke-lane.test | smoke 车道选择：lane/tier 过滤、support 不进车道、默认 ci + `--all` |
-| lib/profile-health.mjs | profile-health.spec、record-role-fixture、snapshot-replay.entry、team-preflight.e2e | dev profile 版本面预检：团队层版本 == 运行时 dsh 版本；缺席/落后 → 明确 exit 2 + 重建指令（BUG-066） |
-| lib/startup-hint.mjs | startup-hint.spec、web-harness | boot 失败归因：识别日志里的 incompatible/exemption，指出 profile 未随 pin 重钉（BUG-066） |
+| lib/profile-health.mjs | profile-health.spec、record-role-fixture、snapshot-replay.entry、team-preflight.e2e | dev profile 版本与镜像新鲜度预检：团队层版本 == 运行时 dsh 版本且安装副本关键文件与包源一致；缺席/落后/陈旧 → 明确 exit 2 + 重建指令（BUG-066/080） |
+| lib/startup-hint.mjs | startup-hint.spec、web-banner | boot 失败归因：识别日志里的 incompatible/exemption，指出 profile 未随 pin 重钉（BUG-066） |
 | lib/client-load-select.mjs | client-load-reference.support、client-load-select.spec | client-load 绑定会话选择（只认 lead 根；防富 coach 会话假红，BUG-142） |
-| lib/port-reclaim-policy.mjs | port-reclaim.spec、port-reclaim | 端口 listener 身份纯判据（只认本仓 DSH web；无子进程依赖） |
+| lib/port-reclaim-policy.mjs | port-reclaim、port-reclaim.spec、probe-port-policy.test | 端口 listener 身份纯判据与行为探针退避/整组收割纯编排（只认本仓 DSH web；遇占口回落临时端口；无子进程依赖，BUG-104/113/136） |
 | lib/run-lock.mjs | client-load.entry、run-lock.spec、snapshot-replay.entry | 冒烟脚本进程级运行锁：存活拒跑、陈旧锁接管、释放（共享 DSH_HOME 的脚本互斥） |
 | lib/replay-network-offline.cjs | snapshot-replay.entry | 回放 A 层离线闸 preload：非 loopback DNS(lookup/resolve*)/connect 立即失败；只作用于 dsh 主进程（BUG-064/067） |
 | lib/replay-network-offline-policy.cjs | replay-network-offline.spec | 离线闸纯判据（isLoopback/isDshMain；无 node:net 依赖，测试可直引） |
-| lib/port-reclaim.mjs | client-load.entry、cold-start.entry、data.entry、defaults-probe、preset.e2e、product-boot.entry、release.entry、wave-execution-probe、workspace-isolation.entry | 端口收割执行器（按端口杀 + 三轮验证释放；实测依据 = web 孙进程不在子进程组里） |
+| lib/port-reclaim.mjs | client-load.entry、cold-start.entry、data.entry、defaults-probe、discipline-probe、entry-chain-probe、method-library-probe、preset.e2e、product-boot.entry、release.entry、rerun-triage-probe、wave-execution-probe、workspace-isolation.entry | 端口收割执行器与探针端口准备/整组清理（按端口杀 + 三轮验证释放 + 占口回落空闲端口，BUG-136） |
 | lib/path-hygiene.mjs | node-gate-session-gates、path-hygiene、path-hygiene.spec、run-accept、run-receipt | 本机 home 路径纯文本检测（Unix/macOS/Windows 前缀；行号）+ `portableBundlePath`（bundle 内绝对路径 → `drt_<slug>/…` 可移植标签；bundle 外 → null） |
 | lib/secret-scan.mjs | run-accept、secret-scan、secret-scan.spec | 高置信凭据形态检测（sk-/ghp_/AKIA/PRIVATE KEY/Bearer）；只报 path/line/kind，不回显原文 |
 | lib/selftest-library.mjs | library-fold.spec | 「研究配置」面板/library-fold 自测例库单一正本：12 形态条目（四字段/部分/空值/旧格式/混居/重名/空条目/杂项行/续行/缩进），两处共用防形态漂移 |
 | lib/method-presets.mjs | library-fold.spec、method-presets.spec | research-brief skill「方法预设」表的唯一解析入口（表头/行列数/防空集 fail-loud）——内置名单不再各写一份手写副本 |
-| lib/keyless-imports.mjs | layering.test、test-surface.test、client-surface.test、test-lanes.test | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
+| lib/keyless-imports.mjs | asset-ledger、boot-timer.test、client-surface.test、layering.test、smoke-imports.test、test-lanes.test、test-surface.test | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
 | lib/gates-cases.mjs | gates.e2e、verify-gates.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
 | lib/fix-evidence.mjs | fix-evidence.test、staged-change-pairing、backlog-liveness | bug 修复卡实证合同：改动/红证/绿证 + 可重放红证/测试资产；活跃 修复落地 与归档共用 |
-| lib/note-scan.mjs | c-notes、note-scan.test、markdown-mask-conformance.spec、record-markdown-oracle | notes 门禁的 Markdown 块级扫描：fence（含容器）/HTML 注释/indented code；0–3 空格 h2/状态行；与 readiness mask 由 conformance 测试钉住（BUG-175/179/183） |
-| lib/asset-ledger.mjs | asset-ledger.test、record-asset-ledger | 测试资产组合账生成器：domain/claim/oracleType/sunset；与盘上测试重算对账 |
-| lib/ci-workflow.mjs | ci-workflow-oracle.test、ci-workflow.test、record-ci-oracle、smoke-registry.test、model-workflow.test | GitHub Actions 执行面：`on:` 事件、`jobs:` 键、`needs`、step `if:false`/`continue-on-error`、run 块；smoke 只认真实 node 执行（BUG-172） |
+| lib/workspace-parsers.mjs | ci-workflow、markdown-mask-conformance.spec、note-scan.test、record-ci-oracle、replay-fixtures.spec、verdict-conformance.spec、workspace-parsers.test | 锁定在 `node_modules/.pnpm` 内的外部纯函数解析器加载器（`yaml@2` + `mdast-util-from-markdown@2`；防向上穿透宿主机目录） |
+| lib/note-scan.mjs | c-notes、note-scan.test、markdown-mask-conformance.spec | notes 门禁的 Markdown 块级扫描：复用 `src/lib/markdown-mask.ts` 单一正本，与 `mdast` 直接在测试进程内逐行对账（BUG-169/175/178/179/183/185） |
+| lib/asset-ledger.mjs | asset-ledger.test、guard-ledger.test、record-asset-ledger | 测试资产组合账生成器：lane/class/cost/uniqueClaim/oracleType/sunset（AST 自动推导 oracleType，禁手写 OVERRIDES）；与盘上测试和守卫账双向对账 |
+| lib/ci-workflow.mjs | ci-jobs.test、ci-workflow-oracle.test、ci-workflow.test、model-workflow.test、record-ci-oracle、smoke-registry.test | GitHub Actions 执行面与写入侧规范门：`yaml@2` 解析 `on:`/`jobs:`/`needs` + `bash -eo pipefail` 执行面 + `ciWorkflowRunProblems`（BUG-172/184/187/190） |
 | lib/smoke-assets.mjs | smoke-assets.test、smoke-registry.test、smoke-oracle-surface.test、smoke-cost-budget.test | `scripts/smoke` 顶层分类（普通文件/目录/symlink/其它）与扁平合同违规项；symlink 不再静默消失（BUG-176） |
 | lib/artifact-freshness.mjs | artifact-freshness.test、lifecycle.entry、export-dist | `_dist` 产物 mtime 不早于 pack 源/构建（src/lib/presets/content/package）；旧 tarball → exit 2（BUG-174） |
 | lib/run-accept-fixture.mjs | run-accept.e2e、run-accept-fixture.spec | claim 夹具的 review/readiness 文本（D51 同源：有声明 = declaration/PASS，缺声明 = missing/红） |
 | lib/node-gate-core.mjs | node-gate、node-gate-delivery.spec、node-gate-leads.spec、node-gate-session.spec | bundle 判据聚合；唯一导出 = `gateBundle`，领域门直接 import 各自模块 |
-| lib/node-gate-contracts.mjs | node-gate-contracts.spec、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、node-gate-delivery.spec、readiness-declaration.spec、review-readiness.spec、verdict-audit、verdict-audit-core | 交付日期合同、readiness 与 decisions 行解析 |
+| lib/node-gate-contracts.mjs | node-gate-contracts.spec、node-gate-delivery-gate、node-gate-delivery.spec、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、readiness-declaration.spec、review-readiness.spec、verdict-audit、verdict-audit-core、verdict-conformance.spec | 交付日期合同、readiness 与 decisions 行解析 |
 | lib/node-gate-session-gates.mjs | ask-drive.spec、bundle-sessions、node-gate-core、node-gate-delivery-gate、node-gate-witness.spec、node-gate-delivery.spec、node-gate-session.spec、run-accept | HITL、present 与 §Decisions 会话门 |
 | lib/node-gate-run-gates.mjs | node-gate-core、node-gate-leads.spec、node-gate-session.spec | leads、版本与标题退化门 |
 | lib/node-gate-delivery-gate.mjs | node-gate-core、readiness-declaration.spec、run-receipt.spec | 门A 交付完整性判据 |

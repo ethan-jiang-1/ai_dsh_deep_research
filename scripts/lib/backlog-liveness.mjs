@@ -3,7 +3,7 @@
 // tests/backlog-liveness.test；规则正本 = _backlog/AGENTS（状态机）+ _backlog/README（工作路径/关闭）。
 import { existsSync, lstatSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { fixEvidenceProblems } from './fix-evidence.mjs';
+import { fixEvidenceProblems, fixGuardOf } from './fix-evidence.mjs';
 
 const CARD_STATES = {
   issues: ['推敲中', '待落地', '等人拍板'], bugs: ['排查中', '修复就绪', '修复落地', '等人拍板'],
@@ -182,6 +182,17 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
           problems.push(`${loc} ${fields.get('status')} requires a non-empty ## 修复判据`);
         if (shelf === 'bugs' && fields.get('status') === '修复落地') {
           for (const problem of fixEvidenceProblems(text)) problems.push(`${loc} ${problem}`);
+          const guard = fixGuardOf(text);
+          if (guard !== null && typeof guard.path === 'string' && !existsSync(resolve(backlogRoot, '..', guard.path))) {
+            problems.push(`${loc} guard.path 不存在（${guard.path}）——永久守卫文件不可缺失`);
+          }
+        }
+        if (shelf === '_archived/fixed_bugs') {
+          for (const problem of fixEvidenceProblems(text, { allowLegacyProse: true })) problems.push(`${loc} ${problem}`);
+          const guard = fixGuardOf(text);
+          if (guard !== null && typeof guard.path === 'string' && !existsSync(resolve(backlogRoot, '..', guard.path))) {
+            problems.push(`${loc} 已归档修复卡的 guard.path 已被删或移位（${guard.path}）——永久守卫必须在盘存活`);
+          }
         }
         const statusLine = statusLineOf(text);
         // 归档卡的退出值：已结/已修 = 已离开活跃区，状态行（含历史头）不得再写可关闭：否。

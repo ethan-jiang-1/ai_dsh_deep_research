@@ -26,7 +26,7 @@ const CLIENT_ROOT = fileURLToPath(new URL('../../packages/deep-research-pack/src
 // `var(--x)` 后紧跟十六进制 alpha（`%`/单位/字母前不算）= 该声明必被浏览器丢弃。
 const VAR_ALPHA = /var\(--[A-Za-z0-9-]+\)[0-9a-fA-F]{2}(?![0-9A-Za-z%-])/g
 
-test('pack client 源码里不得出现 var(--…) 后拼十六进制 alpha', () => {
+test('pack client 源码里不得出现 var(--…) 后拼十六进制 alpha（BUG-047）', () => {
   const hits = []
   const walk = (dir) => {
     for (const name of readdirSync(dir)) {
