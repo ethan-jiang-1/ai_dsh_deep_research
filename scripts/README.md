@@ -173,6 +173,7 @@
 | lib/gates-cases.mjs | gates.e2e、verify-gates.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
 | lib/fix-evidence.mjs | fix-evidence.test、staged-change-pairing、backlog-liveness | bug 修复卡实证合同：改动/红证/绿证 + 可重放红证/测试资产；活跃 修复落地 与归档共用 |
 | lib/note-scan.mjs | c-notes、note-scan.test、markdown-mask-conformance.spec、record-markdown-oracle | notes 门禁的 Markdown 块级扫描：fence（含容器）/HTML 注释/indented code；0–3 空格 h2/状态行；与 readiness mask 由 conformance 测试钉住（BUG-175/179/183） |
+| lib/asset-ledger.mjs | asset-ledger.test、record-asset-ledger | 测试资产组合账生成器：domain/claim/oracleType/sunset；与盘上测试重算对账 |
 | lib/ci-workflow.mjs | ci-workflow-oracle.test、ci-workflow.test、record-ci-oracle、smoke-registry.test、model-workflow.test | GitHub Actions 执行面：`on:` 事件、`jobs:` 键、`needs`、step `if:false`/`continue-on-error`、run 块；smoke 只认真实 node 执行（BUG-172） |
 | lib/smoke-assets.mjs | smoke-assets.test、smoke-registry.test、smoke-oracle-surface.test、smoke-cost-budget.test | `scripts/smoke` 顶层分类（普通文件/目录/symlink/其它）与扁平合同违规项；symlink 不再静默消失（BUG-176） |
 | lib/artifact-freshness.mjs | artifact-freshness.test、lifecycle.entry、export-dist | `_dist` 产物 mtime 不早于 pack 源/构建（src/lib/presets/content/package）；旧 tarball → exit 2（BUG-174） |

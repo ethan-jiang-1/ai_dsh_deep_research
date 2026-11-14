@@ -56,6 +56,7 @@
 | record-role-fixture.mjs | 角色组装面 fixture 录制（真模型档一次性；录制品人审入库 + 在场景声明登记 source 身份，此后 keyless 永久回放） |
 | record-markdown-oracle.mjs | Markdown mask 的外部 oracle 录制（dev-only：用 cockpit 同源 mdast-CommonMark 产出 `tests/fixtures/markdown-oracle/oracle.json`；测试只读夹具；`--check` 只比对不写） |
 | record-ci-oracle.mjs | CI 执行面的外部 oracle 录制（dev-only：真 YAML + 真 bash + 失败 stub node；测试只读 `tests/fixtures/ci-oracle/oracle.json`；`--check` 只比对） |
+| record-asset-ledger.mjs | 测试资产组合账生成（spec/check 的 domain/claim/oracleType/sunset；测试重算对账，漂移 = 红） |
 | hooks/ | pre-commit 钩子（verify+tests 红灯拦 commit；env.sh 幂等挂载 core.hooksPath） |
 
 ## 运行区（已外移根级 runtime/）

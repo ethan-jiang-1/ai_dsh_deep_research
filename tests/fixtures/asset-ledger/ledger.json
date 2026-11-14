@@ -1,0 +1,1670 @@
+{
+  "generatedBy": "dev/record-asset-ledger.mjs",
+  "note": "组合账：domain/claim/oracleType/sunset；self-referential = 下一轮迁移面；覆盖由 tests/checks/asset-ledger.test 重算对账。",
+  "assets": [
+    {
+      "path": "tests/checks/artifact-freshness.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "artifact-freshness 契约（BUG-174）——`_dist` 产物不早于被它打包的源/构建文件：",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/asset-ledger.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "红配方：新增/删除任一 spec/check 不重跑生成器 → 本例红；把头注 claim 改空 → 生成器红。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/backlog-liveness.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "backlog-liveness 回归 — 问题/缺陷/调研/方法/归档池结构合同的 keyless 断言；",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/boot-timer.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "settle 统一 clearTimeout，成功/提前退出/超时三条路径都走它。红配方：删 clearTimeout",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/ci-jobs.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "CI 作业清单契约（W3-7）——`.github/workflows/ci.yml` 的必需 job 必须被一个书签式聚合 job 覆盖：",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/ci-workflow-oracle.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "dev/record-ci-oracle.mjs 用「真 YAML 解析 + 真 bash + 失败 stub node」录制的 oracle 断言。",
+      "oracleType": "external",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/ci-workflow.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "ci-workflow 契约（BUG-172）——GitHub Actions 的**执行面**子集：",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/cjk-source.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "cjk-source.spec.mjs — client/lib 源码里的「UI 中文硬编码」扫描守卫（BUG-055 的失败类）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/cli-entry.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "cli-entry 回归 — symlink-safe CLI 入口判定（keyless，纯 fs 临时夹具）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/client-effect-return.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "client 注册回收形状契约（W0-6 的可落地半）——`src/client/index.ts` 里每个",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/client-file-size.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "client-file-size.spec.mjs — 驾驶舱 client 单文件行数上限（2026-11-03 审计 D2 的机械守卫）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/client-load-same-source.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "必须直调 hitl-fold.deriveAnchors 与 web-ui-nav.openSessionById。红配方：把 import 换成",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/client-surface.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "client 直测面契约（W0-4 / S1）——`src/client/**/*.ts` 每个纯逻辑件必须被至少一个",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/decisions-now.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "decisions-now.test.mjs — 决策台账只写当前决定（2026-11-03 七维卫生审计 D1-7）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/docs-consistency.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "docs-consistency 回归 — 跨文档/盘上的少数高价值事实一致性（keyless 纯 fs）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/evaluation-contract.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "评估合同在位性 — docs/evaluation.md 是本仓验收合同（先于框架定案），",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/fix-evidence.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "fix-evidence 契约（2026-11-14）——bug 卡的 `## 修复落地` 以 `json fix-evidence` 块为权威：",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/guard-ledger.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "外部/结构化/规范形，还是自指」。红配方：删 ledger 任一条 → 覆盖红；把某条 closed 的 guard",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/install-copies.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "install-copies — live install docs keep the canonical order and never install the",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/isolation-preload.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "本测试在 node:vm 沙箱里执行 dev/llm-socket-isolation.cjs，注入假 fetch/假 undici：",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/layering.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "测试分层守卫 — 回归层（tests/）禁止真实模型/浏览器/网络/子进程/密钥依赖（layering 二代）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/model-workflow.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "真模型档可触发通道契约（W3-7）——model-smoke 只能手动触发，且缺 secret 时 preflight 硬失败。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/navigability-contract.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "可驾驭性契约回归（D23 判据可检验化的机械面；条目 Note = notes/implemented/2026-10-05-project-navigability-phase1.md）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/no-unused-code.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "减法契约：scripts / dev / tests / pack src 里不得留下未使用的 import binding 或未导出的顶层声明。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/note-scan.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "note-scan 契约（BUG-175）——notes 门禁的块级 Markdown 扫描：",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/probe-port-policy.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "预收割失败 → freePort 临时端口 + finally 整组 SIGKILL。红配方：删 freePort 回落或",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/readme-manual-commands.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "README 的最短路径命令与 _dist/安装手册.md 同源",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/release-copies.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "release-copies — live install docs must name the current pack version only.",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/script-file-size.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "script-file-size.spec.mjs — scripts/ 的尺寸上限（2026-11-03 第 14 轮审计）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/smoke-assets.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "smoke-assets 契约（BUG-176）——`scripts/smoke` 顶层分类必须看见 symlink / 目录：",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/smoke-contract.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "真模型档 verdict 契约机械钉住（scripts/AGENTS §冒烟脚本可靠性纪律；test-strategy 语料",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/smoke-cost-budget.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "慢资产成本预算（W3-7 后成本治理）——ratchet，只降不升：",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/smoke-identifiers.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "本测试用 TypeScript 的 allowJs/checkJs 语义诊断，TS2304/TS2552（找不到名字）即红。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/smoke-imports.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "红配方：把任一 smoke 的相对 import 改成不存在的路径 → 本例红。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/smoke-lane.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "smoke 车道选择契约（W0-10）——`test:e2e`/`test:entry` 只跑 registry 里对应 lane 的条目：",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/smoke-oracle-surface.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "smoke 资产账契约（W0-3 / S2）——每条 smoke 必须回答四个问题：",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/smoke-registry.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "smoke-registry.test.mjs — 每个 smoke 的 CI 归属必须显式（2026-11-03 第 14 轮审计）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/snapshot-readonly.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "快照只读模式契约（W1-1）——回放与「写期望」必须在权限上分家：",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/staged-change-pairing.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "staged-change-pairing 回归 — D52 的暂存区成对判据（纯函数；git 由门禁注入）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/test-lanes.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "测试车道与可见性契约（W0-8 / 命名对齐）——四条「静默不跑」的防线：",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/test-surface.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "覆盖边界（2026-10-28 评分轮 Phase D；同日卫生轮扩到 pack 纯件）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/verify-gates.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "verify-gates.spec.mjs — 门禁自测面的静态契约",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/checks/web-ui-nav-bilingual.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "claim": "TAB_TEXT / 侧栏 pattern 是 locale-owned 唯一正本。红配方：删掉 TAB_TEXT.status 的英文半 →",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/brief-fold.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "红配方：改 brief-fold 的 stageLine/knownLine/actionLine 任一交付文案 → 本例红。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/builtin-display.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "builtin-display.spec.mjs — 内置打法内容显示投影的覆盖/零 CJK/zh 对钉/回退（BUG-069）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client-pure-logic.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "client 纯逻辑直测（W0-4 / S1）——测试资产围栏研究点名的 6 个无直测/无路径件：",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/coach-sessions.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "coach-sessions.spec.mjs — 方法编辑会话默认标题随 locale 迁移（BUG-069）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/config-feed-session.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "config feed 会话切换：reload epoch + 交互态复位（BUG-086/108）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/defaults-store.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "defaults-store.spec.mjs — 项目默认 client store 的状态机（keyless）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/defaults-ui.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "defaults-ui.spec.mjs — 项目默认按钮/面板的静态渲染（keyless；组件行为之外的最便宜截面）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/delivery-watch.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "delivery-watch.spec.mjs — 交付监听：live present → 打开终稿（去重/在屏）（2026-11-03 P4 拆分）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/final-tab-patterns.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "final-tab-patterns.spec.mjs — 「终稿」页签认领 glob 的形态合同（2026-11-03 实红回归）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/graph-model.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "tests/cockpit/graph-model.spec.mjs —— 研究图谱 plan↔Team 映射的 keyless 契约（BUG-043）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/i18n.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "i18n.spec.mjs — 折层翻译桥与数据面英文覆盖（BUG-055 残留收口）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/library-fold.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "方法库折算回归（library-fold）——「研究配置」页签数据面（D25 期 1 + detail-ux 期 1.5）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/library-heading-codec.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "library-heading-codec.spec.mjs — 方法库 heading 的单一 codec（D51 迁移 II·S2）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/library-heading-consistency.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "类级守卫：同一段方法库标题文本，fold（读字段）与 upsert（定位行）必须同源。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/locales.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "zh / en 键集一致、值非空、占位符集合逐键一致",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/method-library-model.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "method-library-model.spec.mjs — 方法库纯模型的判据（2026-11-03 P4 拆分）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/method-library-operation-state.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "Method Library operation snapshots describe desired effects independently of the Markdown writer.",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/method-library-read.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "Method Library workspace reads are complete only when the final page reaches EOF.",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/method-library-selection.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "method-library-selection.spec.mjs — 方法库选区样式不得静默失效（BUG-047 的机械守卫）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/method-library-views.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "method-library-views.spec.mjs — 方法库展示组件的直测（react-dom/server 静态渲染，keyless）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/method-of-question.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "「本次研究」区折算回归（method-of-question）——面板五态 + 方法节解析（子卡① ①-1／①-6）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/method-presets.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "方法预设解析器合同回归（scripts/lib/method-presets.mjs）——内置名单/推荐映射/共同底线的",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/plan-diff.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "tests/cockpit/plan-diff.spec.mjs —— 图谱版本轨的结构 diff 契约。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/plan-graph.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "tests/cockpit/plan-graph.spec.mjs —— 「研究图谱」Team 任务图纯折算的 keyless 契约（W2 / F3）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/plan-index.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "tests/cockpit/plan-index.spec.mjs —— `plan.md` 节点表的解析/查询/稳定性提示（keyless 契约）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/receipt-fold.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "回执三态与落盘对账回归（receipt-fold）——子卡① ①-2（总卡发现 4：回执 ≠ 落地）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/rerun-triage.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "rerun-triage 文案回归 — 「还不满意？三种改法」的单一正本（keyless 纯常量）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/research-config-source.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "research-config-source.spec.mjs — 「研究配置」页签的 keyless 源面合同。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/research-tabs.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "research-tabs.spec.mjs — 状态/图谱页签的 keyless 静态渲染（react-dom/server）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/run-source-browser.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "run-source-browser 回归 —— `remote.workspaceFiles` → RunSource 的 wire 映射（keyless）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/run-source-picker.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "run source picker：清单读失败 ≠ 无 final；回执/版本只认 file（BUG-099/109/100 消费面）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/run-version.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "tests/cockpit/run-version.spec.mjs —— rerun 版本面的 keyless 契约。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/session-follow.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "session-follow.spec.mjs — journal 流装配的纯函数契约（2026-11-03 P4 拆分）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/start-card.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "start-card — 产品首屏起步卡纯判据：有用户消息 / 有 drt_* 就收起，否则显示。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/state-note.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "红配方：删掉 followError 分支 → 失败态落到「尚未绑定」→ 本例红。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/status-feed.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "状态页数据装配：HITL2 锚点的交付事实 = present 见证，不是 final.md 在场（BUG-094）；",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/text-fold.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "text-fold 回归 — pack 折算文本口径的共享缝直接钉（keyless 纯函数）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/workspace-boot.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "workspace-boot.spec.mjs — 启动期工作区选择/恢复的纯逻辑契约（2026-11-03 P4 拆分）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/workspace-files.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "workspace-files.spec.mjs — workspaceFiles 读闭包的降级合同（2026-11-03 P4 拆分）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/workspace-title.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "claim": "workspace-title — 产品工作区标题的单一正本（2026-11-03 审计 D2：两半各写一份字面）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/contracts/markdown-mask-conformance.spec.mjs",
+      "domain": "contracts",
+      "lane": "spec",
+      "claim": "HTML 注释都漏；两份 mask 还会各自漂移。红配方：把任一侧退回「先剥注释再判 fence」或",
+      "oracleType": "external",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/contracts/methodology-mapping.spec.mjs",
+      "domain": "contracts",
+      "lane": "spec",
+      "claim": "L3 领域面判据 1 / 判据 4 的机械面（2026-10-28 评分轮 Phase A）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/contracts/present-version-conformance.spec.mjs",
+      "domain": "contracts",
+      "lane": "spec",
+      "claim": "present-version-conformance.spec.mjs — 版本/present 的结构化优先（D51 迁移 II·S3）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/contracts/product-invariants.spec.mjs",
+      "domain": "contracts",
+      "lane": "spec",
+      "claim": "product-invariants — D40 的产品不变量（keyless，静态面）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/contracts/rerun-triage-contract.spec.mjs",
+      "domain": "contracts",
+      "lane": "spec",
+      "claim": "rerun 不满转接层 · 跨面契约 — 词表/选项/报告末节/只读出口在三处文本与两个组件里必须同源。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/contracts/run-bundle-charter.spec.mjs",
+      "domain": "contracts",
+      "lane": "spec",
+      "claim": "D28 模型可见契约的 keyless 约束 — 手册/模板/RFC 与门禁解析器必须说同一件事。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/contracts/verdict-conformance.spec.mjs",
+      "domain": "contracts",
+      "lane": "spec",
+      "claim": "verdict-conformance.spec.mjs — 判据形状的不变量（D51）：结构位置决定判定，措辞不决定。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/client-locale.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "client-locale.spec.mjs — 驾驶舱 chrome 文案走 locale，不写死中文（2026-11-03 审计 D7-4）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/content-coverage.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "content 覆盖守卫（keyless，纯 fs）：研究类型词表、lens 选择矩阵、run 模板消费面。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/content-disclosure.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "content-disclosure — manual T0 与 generic 按需细则的披露缝（keyless）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/content-effect.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "content-effect.spec.mjs — 内容注入行把注册挂进 ctx.effect（2026-11-03 审计 D7-3）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/content-injection.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "content-injection 回归 — D40：研究内容在包内，由 src/content 以 runtime context 注入。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/credentials-status.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "credentials-status — preflight 的“研究就绪”不能把空凭据文件当有 key，也不能漏掉 DSH 支持的",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/data-plane-invariants.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "数据面不变量 — 架构承诺的静态守卫（本轮 FAQ 26 对账后显式化）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/defaults-command.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "defaults-command.spec.mjs — `/research-defaults` 的核心：原子写、revision、stale、路径安全。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/defaults-effect.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "defaults-effect.spec.mjs — host 行注册合同：context 名/order/插值 + 命令名/描述 + effect 回收。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/dsh-home.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "dsh-home 解析件 — pack 的 scaffold/preflight 与 DSH 本体必须把同一个 DSH_HOME 解析到同一目录。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/export-shape.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "导出形态守卫 — 自写插件代码的证据台阶①（test-strategy 语料 08 篇移植；对象 = D18 例外",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/fetch-fallback-credentials.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "fetch-fallback credentials — 回退腿凭据解析的 keyless 回归（D31）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/fetch-fallback-orchestration.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "fetch-fallback orchestration — 两腿决策流的假腿回归（D31）。被测 = orchestrate.ts：",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/fetch-fallback.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "fetch-fallback policy — 本地抓取失败 → DeepSeek Fetch API 回退的纯判据（D31）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/host-compat.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "宿主兼容裁决 — 用 vendor 的真实决策函数证明 pack 的 engines.dsh 会被拒绝/放行，",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/install-anchor.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "install-anchor 解析件 — preflight/scaffold 必须从“实际运行的 DSH 安装”解析 peer/版本，",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/lenses.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "lenses — 出厂研究视角（lens）目录的形状守卫（keyless，纯 fs）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/method-draft.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "method-draft 解析回归（keyless）：方法编辑输出契约 → 页面回填的唯一入口。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/method-library-commands.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "Method-library command authorization fold: UI owner prompt -> one matching tool call.",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/method-library-events.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "Method Library watcher decodes durable Session call/result identities, not prose acknowledgments.",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/method-library-io.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "method-library 写入边界：symlink 拒绝 / 原子 temp+rename / 跨进程锁（BUG-097/098/111）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/method-library-write.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "方法库 upsert 回归（keyless）：保存闭环的写盘纯函数——同名覆盖、库头/其它条目保留、默认唯一。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/package-contract.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "T0/T8 静态发布契约 — 不构建、不联网，钉住“发出去的是什么/不会执行什么”。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/presets-wiring.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "presets ↔ skills 的接线守卫（keyless，纯 fs + YAML 解析）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/presets.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "presets 结构回归 — 与 scripts/verify/verify.mjs 的 preset-structure / pack-bundle-compat /",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/product-startup.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "product-startup — GUI 侧工作区记忆的纯谓词（D40）；不碰 DOM/localStorage。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/readme-bilingual.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "readme-bilingual.spec.mjs — 插件包 README 的中英对照成对（2026-11-03 审计 D7-5）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/research-brief-contract.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "research-brief-contract.spec.mjs — HITL1 typed 输入与 Strategy 派生行的 keyless 源面合同。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/research-defaults.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "research-defaults.spec.mjs — 项目研究默认的共享纯函数合同（keyless）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/role-consumer-matrix.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "角色消费者矩阵（W2-3）——新增/改名 role 时，四个消费者面必须同时接线：",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/src-lib-faces.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "src-lib-faces.spec.mjs — pack `src/lib` 的编译面归属（host / shared / client）单一事实源。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/startup-effect.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "startup-effect.spec.mjs — Host 启动行的 effect 生命周期（2026-11-03 审计 P2/⑦）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/startup.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "startup — 产品 Host 启动行（D40）：env/设置 → 登记工作区 → best-effort Lead 会话。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/template-contract.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "template-contract — 模板里“机器/流程真正消费”的键（keyless，key 级）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/version-range.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "version-range 子集回归 — pack engines.dsh 的宽范围判定；反证：把 < / ^ / || 分支写反 → 红。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/wave-contract.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "tests/pack/wave-contract.spec.mjs —— wave 执行的**模型可见文本契约**（keyless）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/wave-recipes.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "tests/pack/wave-recipes.spec.mjs —— `content/waves/lens-fanout.js` 的 keyless 契约。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/workers.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "claim": "worker profile 结构回归（D47）——keyless，纯 fs + YAML。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/acceptance-check.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "acceptance-check 回归 — 收活判据三态求值（PASS / FAIL / UNVERIFIED，判不了永不静默放行）；",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/activity-fold.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "activity-fold 回归 — journal 事件 → 人性化活动行（keyless；四类出行 + 噪音过滤）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ask-drive.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "ask-drive 回归 — ask 卡代答驱动策略与裁决（keyless；BUG-004/BUG-005 的契约钉）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/binding-trust.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "binding-trust 回归 —— “这个绑定能不能当本场 run”的单一政策（keyless）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/browser-cache.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "browser-cache — 浏览器缓存目录判据（2026-11-03 CI 实测：Linux 上只认 macOS 路径，",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/bundle-bind.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "bundle-bind 回归 — 会话 → run bundle 绑定折算（keyless；RFC right-pane-ux-debt：",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/bundle-date-sanity.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "bundle-date-sanity 回归 — run bundle 未来日期检查（keyless 纯函数；CLI 壳 = run-accept.mjs）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/bundle-sessions.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "bundle-sessions：run bundle → 见证会话反查（keyless；临时 sessions 树，纯 fs）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/channel-cache.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "tests/run/channel-cache.spec.mjs — 启动加速缓存的 keyless 契约",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/client-load-select.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "client-load 绑定会话选择：只选 lead 根（BUG-142）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/entry-chain-probe.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "entry-chain-probe 词面判据回归 — direct-authorization-boundary 的授权边界判定（按授权范围",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/env-credentials.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "env-credentials 回归 —— 子进程环境清洗与真模型档前置（keyless）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/evidence-audit.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "evidence-audit 回归 — 溯源审计三断言（keyless，纯 .jsonl 夹具直调 auditBundle——",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/final-target.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "final-target 回归 —— 终稿页签的纯折算（keyless）：交付事件折叠 + 地址认领 + 读面定表。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/final-version.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "final-version.spec.mjs — 终稿版本文件名的单一判据（2026-11-03 七维卫生审计 D2-3）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/frontmatter.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "frontmatter 拆分契约（keyless 纯函数）——`scripts/lib/frontmatter.mjs` 的直测。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/hitl-fold.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "hitl-fold 回归 — HITL 挂起折算（keyless；v5 谓词 = 末位 ask 状态机：0.2.0 timed ask-user",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/hitl-provenance.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "hitl-answer 代答 provenance 写盘回归（BUG-014 正修）——代理模拟必须真落 §Decisions/journal，",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/hitl-signature-contract.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "persona↔fold 判型签名契约（审计 P3 件③；BUG-002 回归形态）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/hitl1-intake-samples.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "tests/hitl1-intake-samples.spec.mjs —— HITL1 四类输入样例集的**形状契约**（keyless）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/host-health.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "host-health — 真浏览器冒烟的主机健康判据（client-load 的 NOT-RUN 归因）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/inject-reconcile.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "tests/inject-reconcile.spec.mjs —— 注入消息「落盘对账」判据的 keyless 契约测试。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/journal-wire.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "journal-wire 回归 — journal wire 入参/正文解析共享核（keyless 纯函数）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/llm-stream-tee-core.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "llm-stream-tee-core 回归 — LLM 流透明 tee 预载壳的可提取纯函数面（keyless）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/local-date.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "local-date.spec.mjs — 人读日期行的本地口径契约（BUG-017 正修的测试资产，先红后绿）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/member-activity-fold.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "tests/member-activity-fold.spec.mjs — 队员动作折算的注入式契约测试（member-activity-stream 卡验收 #1）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/node-gate-contracts.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "node-gate-contracts 回归 — D28 契约纪元：run.md 的 contract 优先于 mtime；旧场才回退交付日。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/node-gate-delivery.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "node-gate-delivery —— 交付相关门：门②/③/④、门A、终局 readiness、D28/读者版边界。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/node-gate-leads.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "node-gate-leads —— 门L（leads.md 方向/分级/覆盖/断代）与 BUG-038 分级判据。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/node-gate-reader.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "node-gate-reader 回归 — 门C（读者版合同）的判据与反证（keyless）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/node-gate-session.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "node-gate-session —— 会话面门：门①（HITL1 签名/绑定/断代）与门R（标题重复退化）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/node-gate-witness.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "D28 结构化见证回归 — 新 run（有 run.md）的门②/③ 只认**绑定本 bundle 的 lead 会话**里的",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/path-hygiene.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "path-hygiene 纯函数回归 — run bundle 移交前的本机 home 路径检测。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/plan-card.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "tests/plan-card.spec.mjs —— HITL1 计划确认卡识别与字数口径的 keyless 契约（唯一语义源）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/port-reclaim.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "port-reclaim 身份判定：只收割本仓 DSH web（BUG-104）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/probe-index.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "tests/run/probe-index.spec.mjs — 探针索引纯函数（scripts/lib/probe-index.mjs）的 keyless 契约。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/probe-send-target.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "tests/probe-send-target.spec.mjs —— cdp-probe 提交按钮判定的 keyless 契约（BUG-021 正修）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/probe-status-tab.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "tests/probe-status-tab.spec.mjs —— cdp-probe 页签选择/打开判据的 keyless 契约",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/profile-health.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "还原法 = profileLayerIssues 跳过版本比较。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/protocol-core.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "protocol-core —— Protocol 纯判据的 keyless 回归（契约 = 核验 §6 + 表达层补篇 §4–§7）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/provenance.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "provenance 回归 — local-file 哈希/孤儿/绝对路径；离线审计在无语料时以 provenance 为准。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/provider-errors.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "tests/provider-errors.spec.mjs —— 上游流错误抽取的 keyless 契约（唯一语义源）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/readiness-declaration.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "readiness-declaration.spec.mjs — 结构化审查声明（D51）：门禁以 review/readiness.json 为准。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/replay-fixtures.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "tests/run/replay-fixtures.spec.mjs — 入库 fixture 的 MCP 组契约（BUG-019 回归守卫）",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/replay-network-offline.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "replay-network-offline — 回放 A 层离线闸的纯判据（BUG-064）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/replay-request.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "replay-request 回归 — 组装请求面比较判据（注入种类 / 定向归一化边界）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/replay-scene.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "replay-scene 回归 — 场景声明消费判据（roster / 来源形状 / 路径越界 fail-loud）+",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/review-readiness.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "终局 readiness 判定回归（review-readiness）——驾驶舱/仪表盘/冒烟的共用语义源。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/run-accept-fixture.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "run-accept-fixture — claim 夹具与 D51 readiness 判据同源。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/run-accept.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "run-accept 交付门接线 — 静态契约：path-hygiene 必须在预检里，且旧 bundle 走显式豁免。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/run-context-node.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "run-context-node 回归 —— `node:fs` 的 RunSource 适配器（keyless，临时目录）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/run-context.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "run-context 回归 —— run bundle 的读面（keyless）：三位置发现、同名优先级、分页到 eof、",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/run-dashboard.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "run-dashboard 回归 — RFC notes/archived/2026-09-24-m2-run-dashboard.md 的 keyless 验收：",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/run-driver-contract.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "run 通道驱动入口契约回归（用户指令 2026-10-19：\"驱动插件是最常用的命令，内化固定\"）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/run-fold.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "run-fold 回归 — 观察面共享步骤条与回边版本折算（keyless 纯函数）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/run-inventory.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "run-inventory 纯函数回归 — 只读保留期视图（数量/大小/最老日期），不做删除。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/run-lock.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "run-lock — 原子建锁与陈旧接管（BUG-073）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/run-receipt.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "run-receipt 回归 — 交付回执（delivered/manifest/acceptance）的纯生成、present 选择与哈希校验。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/run-state.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "run-state 回归 — run 操作面状态谓词（keyless；夹具 = 第 12 场真实会话日志的三个时点投影，",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/runtime-clean.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "runtime-clean-core 回归：白名单/保留期/安全边界。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/scene-pack.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "scene-pack.spec.mjs — 场景包读取回归（2026-10-21 卫生轮 维度6 高项）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/schema-scan.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "schema-scan 断代逻辑反证（RFC 2026-09-29-quality-evidence-loop 验收②）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/secret-scan.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "secret-scan 纯函数回归 — 交付物里的高置信凭据形态（不拿泛化 token= 误伤安全题材）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/session-events.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "session-events-core 回归 — 会话事件摘要/筛选/尾部（keyless 纯函数；CLI 壳 = session-events.mjs）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/session-log.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "session-log 回归 — 组发现契约（findGroup：组过滤盲区的逃生口）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/session-replay.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "session-replay 回归 — 历史会话解析与判读整形（2026-10-21，反馈通路事后半边）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/startup-hint.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "还原法 = startupFailureHint 恒返回空串。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/strategy-core.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "strategy-core.spec.mjs — Strategy 投影（K/O/G/B）的纯派生回归。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/stream-diagnostics.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "stream-diagnostics selection contract: --recent counts model-active sessions, not merely fresh logs.",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/stream-failure.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "流畸形死亡折算回归（stream-failure）——BUG-023 修复①的判据面。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/tool-card.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "tool-card 回归 — 研究语义卡标题折算（keyless；wire 权威形状 = queries 数组，录制流实证）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/unconsumed-evidence.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "unconsumed-evidence 回归 — B1 差集投影（evidence/ 未进 findings.md 的差集，critic 出题的",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/vendor-artifacts.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "vendor-artifacts 自检回归 — 与 boot 面护栏同源判据（keyless，纯 fs 静态夹具，不依赖真实",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/verdict-audit-fixture.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "verdict-audit fixture —— 真实 child 会话线形的 keyless 回归。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/verdict-audit.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "verdict-audit —— claim 级裁决判据的 keyless 回归（契约 = `_backlog/_archived/research/quality-loop/",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/web-ui-nav.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "web-ui-nav 的首屏遮罩判据（keyless：把注入页面里的 evaluate 源码放到假 DOM 上跑）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/workspace-root.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "claim": "workspace-root — dev 工作区根解析 + vendor 同形 projectKey + 会话组解析。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/vendor/bundle-composition.vendor.spec.mjs",
+      "domain": "vendor",
+      "lane": "vendor",
+      "claim": "bundle-composition — 组合层断言：我们 bundle 里每一条 `- id:` override 都必须真的命中一行。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/vendor/config-volatile.vendor.spec.mjs",
+      "domain": "vendor",
+      "lane": "vendor",
+      "claim": "config-volatile — 本包的 Settings 面（P3）：`enabled` 是唯一的 volatile 字段。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/vendor/export-shape.vendor.spec.mjs",
+      "domain": "vendor",
+      "lane": "vendor",
+      "claim": "导出形态守卫 · 真 Loader 往返（W0-5；vendor 源码契约层，跑 `pnpm test:vendor`）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    }
+  ]
+}
