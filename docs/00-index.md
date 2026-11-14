@@ -61,7 +61,7 @@
 |---|---|---|
 | [terms.md](./terms.md) | 导航/合同 | **术语对照**：本项目说法 → DSH 官方载体 → vendor 落点（按需查；新编号词汇先在此登记） |
 | [project-map.md](./project-map.md) | 导航 | 人和 Agent 的驾驭地图：运行链、职责划分、测试资产分层与失败定位入口 |
-| [decisions.md](./decisions.md) | 导航/合同 | D 号台账正文（按需查；决策理由/输掉的方案归 notes/） |
+| [decisions.md](./decisions.md) | 导航/合同 | D 号纯路由台账（≤100 字结论 + 活载体链接；理由/输掉的方案归 notes/，D56） |
 | [external-materials.md](./external-materials.md) | 导航/合同 | 外部材料钉版身份与吸收落点（按需查） |
 | [evaluation.md](./evaluation.md) | 合同 | 评估五面（L0 结构/L1 挂载/L2 安装/L3 领域/L4 交付）与里程碑矩阵——**先于框架定案** |
 | [design/10-architecture.md](./design/10-architecture.md) | 设计 | repo 形态与组合层（单包 5 preset：四研究角色 + 方法编辑）；通道选型（agent-team 主通道）；工具面；偏离登记 |
@@ -89,7 +89,7 @@
 
 ## 决策台账
 
-D 号正文 = [decisions.md](./decisions.md)（按需查，不在本页通读；新决策只进该页，本页不再复制）。
+D 号正文 = [decisions.md](./decisions.md)（按需查，不在本页通读；新决策 = 台账一行 ≤100 字路由，参数归合同、理由归 notes/，D56）。
 本页只保留"先去哪读"的地图与术语；决策理由/输掉的方案仍归 `notes/`。
 
 ## 术语映射

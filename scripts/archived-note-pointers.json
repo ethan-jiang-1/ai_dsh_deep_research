@@ -518,6 +518,11 @@
     },
     {
       "source": "docs/decisions.md",
+      "target": "notes/archived/2026-10-21-six-dim-hygiene-round.md",
+      "reason": "2026-11-14 台账纯路由化：D27（参与阶梯 S0–S3）的输掉方案 A0–A3/P0–P3 与卫生轮证据住该领域 Note，台账路由到真家"
+    },
+    {
+      "source": "docs/decisions.md",
       "target": "notes/archived/2026-09-24-deep-research-harness-analysis.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-09-24-deep-research-harness-analysis 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },

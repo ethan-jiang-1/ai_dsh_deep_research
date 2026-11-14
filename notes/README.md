@@ -25,9 +25,9 @@
 2026-09-24 立项：DSH Deep Research 插件——对 harness 要求高（接触大量搜索、结果信噪比
 差，仍要探索出最终答案在哪）；工程范式参考 `ai_dsh_company`，方法论参考
 `ai_tool_deepresearch`（codex 成熟 harness）；多角色（preset）+ Agent Teams 主通道、
-评估先行、八成把握垂直轮为立项当日定调。定调语义已全数落进
-[decisions.md 决策台账](../docs/decisions.md)（D 号依据列引原话——**新定调只进 D 号**，不再有
-追加式存档文件）；立项原话全文 = git 历史（`notes/intents.md` 2026-10-04 退役——冻结存档
+评估先行、八成把握垂直轮为立项当日定调。定调语义已落进当前合同（`docs/`）与领域 Note，
+[decisions.md](../docs/decisions.md) 是 ≤100 字的纯路由台账（[D56](../docs/decisions.md#d56)）：新定调的理由与原话进对应 Note，
+不再有追加式存档文件；立项原话全文 = git 历史（`notes/intents.md` 2026-10-04 退役——冻结存档
 与 D 号台账双载体，噪声大于信息，用户裁定剔除）。
 
 **`proposed/` = 需要显式评审的持久决定提案**：RFC 在决定需实现前形成明确范围、备选和验收时使用；它不是一般执行工作的前置。获授权工作按授权范围执行；多步工作使用会话内 plan/todo。`rejected/` 保留仍有防复犯价值的否决理由，并记录适用范围或重启条件。

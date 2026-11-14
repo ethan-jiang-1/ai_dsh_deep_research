@@ -98,3 +98,8 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 ## 6. 偏离登记（默认严格 DSH/company 纪律，偏离须 D 号 + 约束证据）
 
 簿记正本 = [decisions.md](../decisions.md) D 号台账（当前偏离 = D26）——一处事实一个家，本节不复制表（防双家漂移）。
+
+当前约束与偏离的合同句（路由 = [D56](../decisions.md#d56)）：
+
+- **Team 默认通道 = 部署层预授权**：vendor 官方 POLICY 是 opt-in（仅用户显式要求才建队友，`packages/experimental/tool-agent-team/src/index.ts`）；本产品即该显式要求的物化，preset 钉默认通道（D3）。
+- **对外交付零外部依赖**：pack 采纳面不得引入用户侧外部账号 / API key / 付费订阅；裁决优先于能力与价格权衡，mcp-client 通道选本地 Playwright MCP 而非需账号的远程抓取服务（D22）。

@@ -52,7 +52,7 @@ research-workspace/      dev 工作区实例（角色会话 cwd；用户工作�
 docs/                    00-index（地图；术语 = terms.md；D 号台账 = decisions.md）→ design/10-70 → discipline-map（纪律全量枚举）→ guides/60（开发环）+ guides/61（run 操作）+ guides/62（插件作者入口）+ guides/65（运行形态合同）+ guides/66（探针）+ evaluation.md（验收合同）
 notes/                   开发记忆与证据链（见下节）：proposed/（需评审 RFC）→ implemented/（活的决定）；
                          不再指导未来 → archived/ 冻结；rejected/（否决 + 重启条件）；事故复盘在 archived/；
-                         立项来历 = notes/README §立项来历（用户定调只进 decisions.md D 号依据列）
+                         立项来历 = notes/README §立项来历（台账只做路由、理由归 Note，D56）
 .agents/skills/          开发技能（DSH 约定路径：project-agents 发现根）：任务匹配即加载的程序化工作记忆
                          （换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷）；与随包 runtime skills（presets/*/skills/）分家
 probes/                  调试第一入口：真实边界单点探针（behavior/browser/stream 三域；真模型/已起 GUI/仪器）；指南 = docs/guides/66，索引 = probes/INDEX.generated.md（生成物）
