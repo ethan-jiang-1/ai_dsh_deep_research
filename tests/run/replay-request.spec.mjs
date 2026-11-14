@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds, sentinelInAssistantText, turnCompleted } from '../../scripts/lib/replay-request.mjs';
+import { captureReadyOf, compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds, sentinelInAssistantText, turnCompleted } from '../../scripts/lib/replay-request.mjs';
 
 // 录制面 = 场景声明里的 cases（research-face 只录研究角色；方法编辑不是研究面，不应
 // 因为盘上多一个 preset 就要求一份不存在的 research-face 录制）。
@@ -374,4 +374,14 @@ test('runtime-context：profile 安装根随 DSH_HOME 归一；包内路径后�
   const c = msg('/home/ci/ci-home', 'other.md')
   assert.equal(compareReplayRequests([a], [b]).find((verdict) => verdict.id === 'runtime-context').ok, true)
   assert.equal(compareReplayRequests([a], [c]).find((verdict) => verdict.id === 'runtime-context').ok, false)
+})
+
+// 负例留证 2026-11-14：BUG-027——C0b 就绪谓词曾内联在慢壳；抽纯函数后 0/部分/全挂三态可直测。
+// 红配方：把 every 改成 some → 部分挂载例变绿；把 0 期望当未就绪 → 空夹具例红。
+test('捕获就绪：0 期望 / 部分 / 全挂 三态（BUG-027）', () => {
+  assert.equal(captureReadyOf([], []), true)
+  assert.equal(captureReadyOf(['a', 'b'], []), false)
+  assert.equal(captureReadyOf(['a', 'b'], ['a']), false)
+  assert.equal(captureReadyOf(['a', 'b'], ['b', 'a', 'c']), true)
+  assert.equal(captureReadyOf(['a'], ['a']), true)
 })

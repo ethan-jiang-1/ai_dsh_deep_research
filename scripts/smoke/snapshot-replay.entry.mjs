@@ -42,7 +42,7 @@ import { authenticate, bootWeb } from '../lib/web-harness.mjs';
 import { presetRoles } from '../lib/roles.mjs';
 import { loadReplayScene, discoverReplayFaces } from '../lib/replay-scene.mjs';
 import { researchWorkspaceGroup } from '../lib/session-log.mjs';
-import { compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds, sentinelInAssistantText, turnCompleted } from '../lib/replay-request.mjs';
+import { captureReadyOf, compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds, sentinelInAssistantText, turnCompleted } from '../lib/replay-request.mjs';
 import { SMOKE_LOCALE, loadChromium, launchChromium } from '../lib/playwright.mjs';
 import { dismissPreviewNotice, openSessionById } from '../lib/web-ui-nav.mjs';
 import { profileLayerIssues, runtimeVersionOf } from '../lib/profile-health.mjs';
@@ -396,12 +396,12 @@ for (const { face, scene } of SCENES) {
           // 状态」活动行同缺末条 → C5 假红；固定 sleep 与"行稳定窗"都会在"部分数据已稳定"时
           // 放行，故用盘侧真值（夹具 callId）作显式就绪谓词。期望值 0 个调用的场景视为就绪。
           let mountedCalls = [];
-          let callsReady = replayCallIds.length === 0;
+          let callsReady = captureReadyOf(replayCallIds, mountedCalls);
           const callsDeadline = Date.now() + 30000;
           while (!callsReady && Date.now() < callsDeadline) {
             mountedCalls = await page.evaluate(() =>
               Array.from(document.querySelectorAll('[data-chat-call-id]')).map((el) => el.getAttribute('data-chat-call-id')));
-            callsReady = replayCallIds.every((id) => mountedCalls.includes(id));
+            callsReady = captureReadyOf(replayCallIds, mountedCalls);
             if (!callsReady) await sleep(300);
           }
           step(callsReady, `[${face}/${sc.id}] C0b 客户端历史就绪（夹具 tool/call 全挂后才捕获）`,

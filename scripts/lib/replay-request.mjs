@@ -182,3 +182,10 @@ export function turnCompleted(logText) {
   const last = ends.at(-1)
   return last?.data?.reason?.kind === 'completed'
 }
+
+/** 捕获前就绪：夹具期望的 tool/call id 全部挂上客户端才算就绪；0 期望 = 无对象（BUG-027）。 */
+export function captureReadyOf(expectedCallIds, mountedCallIds) {
+  const expected = Array.isArray(expectedCallIds) ? expectedCallIds : []
+  const mounted = new Set(Array.isArray(mountedCallIds) ? mountedCallIds : [])
+  return expected.every((id) => mounted.has(id))
+}

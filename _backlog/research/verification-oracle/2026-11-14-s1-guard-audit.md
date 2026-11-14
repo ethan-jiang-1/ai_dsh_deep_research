@@ -18,10 +18,10 @@ intent: 为 issue 2026-11-14-verification-oracle 的 S1 提供逐张机制/当�
 | 013 | fixture persona 必须等于当前 preset | `snapshot-replay` B1 + `run/replay-fixtures` source 形状 | smoke-only | ◐ | source 形状已 keyless；persona 内容仍靠重录触发（改模型可见面/pin → 重录） |
 | 018 | B 层声明面 ⊆ 实比对面（注入种类双向） | `run/replay-request:243,264,278` | keyless | ◐ | 无需新增 |
 | 022 | 畸形终结回合可数（一回合一次，不双算）+ 死亡可判 | `run/provider-errors:21-57`、`run/stream-failure:14` | keyless | ◐ | 恢复支仍仅 smoke（cdp-ask）；记残余 |
-| 024 | LLM 流必走一次性连接，隔离在场可证 | 无（boot-run 自检不入测试） | none | ○ | `run/run-driver-contract` 加 isolationPreloadOf(log) |
+| 024 | LLM 流必走一次性连接，隔离在场可证 | `checks/isolation-preload`（VM 行为） | keyless | ✅ | 假 fetch/undici：一次性 Agent + dispatcher + 预载自证 |
 | 026 | 长库/长 review 不得被固定行窗静默截断 | `cockpit/workspace-files:25,79`、`run/run-context:150` | keyless | ◐ | 读层守卫是唯一覆盖（12 形态浏览器相位已退役） |
-| 027 | 捕获前等夹具 tool/call 全挂（数据面 ≠ 稳定窗） | smoke C0b（`snapshot-replay.entry:407`） | smoke-only | ○ | 提 `captureReadyOf` 入 `replay-request` + 三例 |
-| 028 | 隔离回退可数且不静默 | 无 | none | ○ | 新 `checks/isolation-guard`（createRequire 预载） |
+| 027 | 捕获前等夹具 tool/call 全挂（数据面 ≠ 稳定窗） | `run/replay-request`（captureReadyOf） | keyless | ✅ | 0/部分/全挂三例 |
+| 028 | 隔离回退可数且不静默 | `checks/isolation-preload`（VM 行为） | keyless | ✅ | 逐次计数 + 警告；已发出后不回落 |
 | 030 | 落定 = 哨兵只在 assistant 文本 + turn/end completed | `run/replay-request:306-324` | keyless | ◐ | 无需新增 |
 | 033 | 摘要读点须等 🎯 水合完成再判 | `cockpit/brief-fold` 交付三行逐字 | keyless | ✅ | 已补 stage/known/action 三行精确断言 |
 | 034 | 按 id 显式开会话，不赖默认视图 | `checks/client-load-same-source` | keyless | ✅ | 源扫 `openSessionById` + 禁私有定位器 |
@@ -33,15 +33,15 @@ intent: 为 issue 2026-11-14-verification-oracle 的 S1 提供逐张机制/当�
 | 063 | chrome 常量双语 + 失配不静默 | `run/web-ui-nav:77-88`、`cockpit/library-fold:364` | keyless | ◐ | 无需新增 |
 | 079 | 每个 smoke 入口 import 可解析（死链即红） | `checks/smoke-imports` | keyless | ✅ | 静态相对 import 逐条 existsSync |
 | 080 | 回放基线 source 与当前 profile/pin 同代 | `run/replay-fixtures` source 形状 | smoke-only | ◐ | codeAnchor/vendor 40-hex + roleFace 覆盖已 keyless；同代性靠重录触发 |
-| 095 | bootWeb 成功/失败/早退都清 banner timer | 无 | none | ○ | 抽 `lib/boot-timer` + 断言无 Timeout |
-| 136 | 端口被占须退避，退出必收进程组 | 无（仅 BUG-104 身份） | none | ○ | 抽 `port-reclaim-policy` 三态 + finally 登记 |
+| 095 | bootWeb 成功/失败/早退都清 banner timer | `checks/boot-timer`（源形状） | keyless | ✅ | settle 清 timer + 三条结算分支 |
+| 136 | 端口被占须退避，退出必收进程组 | `checks/probe-port-policy`（源形状） | keyless | ✅ | freePort 回落 + finally 整组 SIGKILL |
 
 ## 统计（2026-11-14）
 
-- ✅ 已沉淀 8：003、009、033、034、051、059、061、079（本 issue 批 1/2/3）。
+- ✅ 已沉淀 14：003、009、024、027、028、033、034、045、051、059、061、079、095、136（本 issue 批 1/2/3/4）。
 - ◐ keyless 已有 8：010、012、018、022、026、030、036、063（入守卫账，无需新增）。
 - ◐ 部分：013、080（source 形状已 keyless；persona/同代性靠重录触发）。
-- ○ 待补 6：027、045、024、028、095、136。
+- ○ 待补 0（013/080 为 source 形状 + persona/同代性重录触发，见「部分」）。
 - 审计结论：**无一张确实不可 keyless**；024/028 是 CJS 预载，可 `createRequire` 直测。
 
 ## 两条优先项

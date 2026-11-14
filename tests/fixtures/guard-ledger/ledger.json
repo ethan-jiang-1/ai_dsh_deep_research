@@ -63,11 +63,10 @@
     {
       "id": "BUG-024",
       "mechanism": "LLM 流必走一次性连接，隔离在场可证",
-      "guard": null,
-      "oracleType": "none",
-      "status": "deferred",
-      "reason": "boot-run 自检未入 keyless；CJS 预载需 createRequire 直测",
-      "trigger": "再次出现直连/隔离缺失的真实漏检，或 boot-run 自检行被改动"
+      "guard": "tests/checks/isolation-preload.test.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "删 dispatcher/Agent 或改回共享池 → 本例红"
     },
     {
       "id": "BUG-026",
@@ -80,20 +79,18 @@
     {
       "id": "BUG-027",
       "mechanism": "捕获前等夹具 tool/call 全挂（数据面 ≠ 稳定窗）",
-      "guard": null,
-      "oracleType": "none",
-      "status": "deferred",
-      "reason": "captureReadyOf 仍长在 snapshot-replay.entry 的慢壳里",
-      "trigger": "下次 C0b 假红/假绿，或准备重录场景时"
+      "guard": "tests/run/replay-request.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "把 captureReadyOf 的 every 改成 some → 部分挂载例红"
     },
     {
       "id": "BUG-028",
       "mechanism": "隔离回退可数且不静默",
-      "guard": null,
-      "oracleType": "none",
-      "status": "deferred",
-      "reason": "一次性 harness 未升格；CJS 预载可 createRequire 直测",
-      "trigger": "再次出现隔离失败透传的真实漏检"
+      "guard": "tests/checks/isolation-preload.test.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "删 unisolatedCount/警告或把 issued 分支改回落 → 本例红"
     },
     {
       "id": "BUG-030",
@@ -130,11 +127,10 @@
     {
       "id": "BUG-045",
       "mechanism": "读失败态 ≠ 未绑定态，冒烟等显式状态",
-      "guard": null,
-      "oracleType": "none",
-      "status": "deferred",
-      "reason": "守卫对象在 client-load 的轮询/失败标记，尚未抽成纯判据",
-      "trigger": "再次出现「读失败」与「未绑定」合流的假红"
+      "guard": "tests/cockpit/state-note.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删 followError 分支 → 失败态落到未绑定 → 本例红"
     },
     {
       "id": "BUG-051",
@@ -189,20 +185,18 @@
     {
       "id": "BUG-095",
       "mechanism": "bootWeb 成功/失败/早退都清 banner timer",
-      "guard": null,
-      "oracleType": "none",
-      "status": "deferred",
-      "reason": "timer 清理仍在 bootWeb 壳内，未抽 lib",
-      "trigger": "再次出现 boot 后 active timer/端口泄漏"
+      "guard": "tests/checks/boot-timer.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删 settle 的 clearTimeout 或任一结算分支 → 本例红"
     },
     {
       "id": "BUG-136",
       "mechanism": "端口被占须退避，退出必收进程组",
-      "guard": null,
-      "oracleType": "none",
-      "status": "deferred",
-      "reason": "端口三态决策未抽成纯函数",
-      "trigger": "再次出现端口占用即退出/孤儿进程"
+      "guard": "tests/checks/probe-port-policy.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删 freePort 回落或 finally 的整组 kill → 本例红"
     },
     {
       "id": "BUG-184",
