@@ -140,7 +140,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 `tests/run/<owner>/` 与 `scripts/lib/<owner>/` 同名（`gates` / `ops` / `channel` / `harness` /
 `probes` / `shared`）；跨切证据住 `shared/`。模块 → owner → 测试的生成索引 = [tests/INDEX.generated.md](../tests/INDEX.generated.md)；
 镜像契约 = [test-owner-mirror](../tests/checks/test-owner-mirror.test.mjs)。
-pack 侧：`src/lib/<domain>/` ↔ `tests/cockpit/lib/<domain>/`（7 个 domain），`src/client/<sub>/` ↔ `tests/cockpit/client/<sub>/`，`src/<surface>/` ↔ `tests/pack/<surface>/`；契约 = [pack-mirror](../tests/checks/pack-mirror.test.mjs)。
+pack 侧：`src/lib/<domain>/` ↔ `tests/cockpit/lib/<domain>/`（7 个 domain），`src/client/<sub>/` ↔ `tests/cockpit/client/<sub>/`，`src/<surface>/` ↔ `tests/pack/<surface>/`、无主语合同住 `tests/pack/contract/`、pack 脚本住 `tests/pack/scripts/`；契约 = [pack-mirror](../tests/checks/pack-mirror.test.mjs)。
 
 ### 新检查落家序（加一个检查时按序找家，单一入口）
 

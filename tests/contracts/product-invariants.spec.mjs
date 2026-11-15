@@ -44,5 +44,5 @@ test('I2 启动期解决工作区：Host 读设置/登记；client 建/选会话
   assert.match(read('docs/guides/65-run-forms.md'), /--from-default-profile web/, '运行形态合同缺 DSH 安装路径')
 })
 
-// I3/I4（内容随包、runtime context + 变量注入）由 tests/pack/content-injection.spec.mjs
+// I3/I4（内容随包、runtime context + 变量注入）由 tests/pack/contract/content-injection.spec.mjs
 // 单一拥有（2026-11-03 维度⑤去重：同一断言不再两处维护；改内容面只改那一个文件）。

@@ -94,6 +94,34 @@ test('tests/cockpit/client：根 spec 只依赖 src/client 根文件；<sub> spe
   }
 })
 
+
+test('tests/pack：根层零平铺；surface 目录的 spec 必须 import 同名 surface；contract/ 收无主语合同', () => {
+  const PACK = join(ROOT, 'packages', 'deep-research-pack')
+  const BASE = join(ROOT, 'tests', 'pack')
+  const SRC = join(PACK, 'src')
+  const flat = readdirSync(BASE).filter((n) => n.endsWith('.spec.mjs'))
+  assert.deepEqual(flat, [], `tests/pack 根仍平铺 spec：${flat.join(', ')}`)
+  const surfaces = ['content', 'startup', 'defaults', 'fetch-fallback']
+  for (const surface of surfaces) {
+    const files = readdirSync(join(BASE, surface)).filter((n) => n.endsWith('.spec.mjs'))
+    assert.ok(files.length > 0, `tests/pack/${surface}/ 为空`)
+    for (const f of files) {
+      const p = join(BASE, surface, f)
+      const { imports } = parseKeylessImports(readFileSync(p, 'utf8'), p)
+      const areas = new Set()
+      for (const { specifier } of imports) {
+        const target = localImportPath(p, specifier)
+        if (target === undefined) continue
+        const rel = relative(SRC, target).split('\\').join('/')
+        if (rel.startsWith('..') || !/\.(ts|tsx)$/.test(rel)) continue
+        areas.add(rel.split('/')[0])
+      }
+      assert.ok(areas.has(surface), `${relative(ROOT, p)} 住 ${surface}/，但没 import src/${surface}`)
+    }
+  }
+  assert.ok(readdirSync(join(BASE, 'contract')).filter((n) => n.endsWith('.spec.mjs')).length >= 10, 'contract/ 防空语料')
+})
+
 test('六个 domain 有直接 spec（review/ 例外：subject 由 tests/run 覆盖）', () => {
   for (const domain of RUN_DOMAINS) {
     const files = readdirSync(join(TESTS, domain)).filter((n) => n.endsWith('.spec.mjs'))

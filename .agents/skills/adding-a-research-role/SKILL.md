@@ -37,7 +37,7 @@ description: Use when adding a research role preset, renaming one, or changing a
 - **真模型档覆盖**：`scripts/smoke/l4-lite.e2e.mjs` 的 `PROMPTS` 加该角色的标记 prompt——它是
   全角色冒烟，盘上有角色而无覆盖即 exit 2；
 - **台账**：增删角色 = 推翻 D2（角色 = 5 个：4 研究 + 方法编辑，D37），先在 `docs/decisions.md` 台账登记新 D 号，
-  再动代码——`tests/pack/presets.spec.mjs` 的数量哨兵会拦住没登记的增删。
+  再动代码——`tests/pack/scripts/presets.spec.mjs` 的数量哨兵会拦住没登记的增删。
 
 ## 3. 验证（完成判据，keyless 优先）
 

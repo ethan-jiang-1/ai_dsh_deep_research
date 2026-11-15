@@ -523,6 +523,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/client/locales/client-locale.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "client-locale.spec.mjs — 驾驶舱 chrome 文案走 locale，不写死中文（2026-11-03 审计 D7-4）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/client/research-config-source.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -560,6 +570,16 @@
       "cost": "fast-inproc",
       "uniqueClaim": "session-follow.spec.mjs — journal 流装配的纯函数契约（2026-11-03 P4 拆分）。",
       "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/startup/product-startup.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "product-startup — GUI 侧工作区记忆的纯谓词（D40）；不碰 DOM/localStorage。",
+      "oracleType": "self-referential",
       "sunset": "随被测模块删除"
     },
     {
@@ -633,6 +653,36 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/lib/method-library/method-draft.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "method-draft 解析回归（keyless）：方法编辑输出契约 → 页面回填的唯一入口。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/method-library/method-library-commands.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "Method-library command authorization fold: UI owner prompt -> one matching tool call.",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/method-library/method-library-events.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "Method Library watcher decodes durable Session call/result identities, not prose acknowledgments.",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/lib/method-library/method-library-operation-state.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -649,6 +699,16 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "Method Library workspace reads are complete only when the final page reaches EOF.",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/method-library/method-library-write.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "方法库 upsert 回归（keyless）：保存闭环的写盘纯函数——同名覆盖、库头/其它条目保留、默认唯一。",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
@@ -953,37 +1013,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/client-locale.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "client-locale.spec.mjs — 驾驶舱 chrome 文案走 locale，不写死中文（2026-11-03 审计 D7-4）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/content-coverage.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "content 覆盖守卫（keyless，纯 fs）：研究类型词表、lens 选择矩阵、run 模板消费面。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/content-disclosure.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "content-disclosure — manual T0 与 generic 按需细则的披露缝（keyless）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/content-effect.spec.mjs",
+      "path": "tests/pack/content/content-effect.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
@@ -993,7 +1023,27 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/content-injection.spec.mjs",
+      "path": "tests/pack/contract/content-coverage.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "content 覆盖守卫（keyless，纯 fs）：研究类型词表、lens 选择矩阵、run 模板消费面。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/contract/content-disclosure.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "content-disclosure — manual T0 与 generic 按需细则的披露缝（keyless）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/contract/content-injection.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
@@ -1003,17 +1053,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/credentials-status.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "credentials-status — preflight 的“研究就绪”不能把空凭据文件当有 key，也不能漏掉 DSH 支持的",
-      "oracleType": "external",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/data-plane-invariants.spec.mjs",
+      "path": "tests/pack/contract/data-plane-invariants.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
@@ -1023,37 +1063,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/defaults-command.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "defaults-command.spec.mjs — `/research-defaults` 的核心：原子写、revision、stale、路径安全。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/defaults-effect.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "defaults-effect.spec.mjs — host 行注册合同：context 名/order/插值 + 命令名/描述 + effect 回收。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/dsh-home.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "dsh-home 解析件 — pack 的 scaffold/preflight 与 DSH 本体必须把同一个 DSH_HOME 解析到同一目录。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/export-shape.spec.mjs",
+      "path": "tests/pack/contract/export-shape.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
@@ -1063,37 +1073,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/fetch-fallback-credentials.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "fetch-fallback credentials — 回退腿凭据解析的 keyless 回归（D31）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/fetch-fallback-orchestration.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "fetch-fallback orchestration — 两腿决策流的假腿回归（D31）。被测 = orchestrate.ts：",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/fetch-fallback.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "fetch-fallback policy — 本地抓取失败 → DeepSeek Fetch API 回退的纯判据（D31）。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/host-compat.spec.mjs",
+      "path": "tests/pack/contract/host-compat.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
@@ -1103,17 +1083,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/install-anchor.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "install-anchor 解析件 — preflight/scaffold 必须从“实际运行的 DSH 安装”解析 peer/版本，",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/lenses.spec.mjs",
+      "path": "tests/pack/contract/lenses.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
@@ -1123,37 +1093,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/method-draft.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "method-draft 解析回归（keyless）：方法编辑输出契约 → 页面回填的唯一入口。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/method-library-commands.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "Method-library command authorization fold: UI owner prompt -> one matching tool call.",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/method-library-events.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "Method Library watcher decodes durable Session call/result identities, not prose acknowledgments.",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/method-library-io.spec.mjs",
+      "path": "tests/pack/contract/method-library-io.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
@@ -1163,17 +1103,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/method-library-write.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "方法库 upsert 回归（keyless）：保存闭环的写盘纯函数——同名覆盖、库头/其它条目保留、默认唯一。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/package-contract.spec.mjs",
+      "path": "tests/pack/contract/package-contract.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
@@ -1183,7 +1113,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/presets-wiring.spec.mjs",
+      "path": "tests/pack/contract/presets-wiring.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
@@ -1193,27 +1123,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/presets.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "presets 结构回归 — 与 scripts/verify/verify.mjs 的 preset-structure / pack-bundle-compat /",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/product-startup.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "product-startup — GUI 侧工作区记忆的纯谓词（D40）；不碰 DOM/localStorage。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/readme-bilingual.spec.mjs",
+      "path": "tests/pack/contract/readme-bilingual.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
@@ -1223,7 +1133,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/research-brief-contract.spec.mjs",
+      "path": "tests/pack/contract/research-brief-contract.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
@@ -1233,17 +1143,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/research-defaults.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "research-defaults.spec.mjs — 项目研究默认的共享纯函数合同（keyless）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/role-consumer-matrix.spec.mjs",
+      "path": "tests/pack/contract/role-consumer-matrix.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
@@ -1253,7 +1153,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/src-lib-faces.spec.mjs",
+      "path": "tests/pack/contract/src-lib-faces.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
@@ -1263,27 +1163,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/startup-effect.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "startup-effect.spec.mjs — Host 启动行的 effect 生命周期（2026-11-03 审计 P2/⑦）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/startup.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "startup — 产品 Host 启动行（D40）：env/设置 → 登记工作区 → best-effort Lead 会话。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/template-contract.spec.mjs",
+      "path": "tests/pack/contract/template-contract.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
@@ -1293,7 +1173,137 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/version-range.spec.mjs",
+      "path": "tests/pack/contract/wave-contract.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/pack/contract/wave-contract.spec.mjs —— wave 执行的**模型可见文本契约**（keyless）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/contract/wave-recipes.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/pack/contract/wave-recipes.spec.mjs —— `content/waves/lens-fanout.js` 的 keyless 契约。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/contract/workers.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "worker profile 结构回归（D47）——keyless，纯 fs + YAML。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/defaults/defaults-command.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "defaults-command.spec.mjs — `/research-defaults` 的核心：原子写、revision、stale、路径安全。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/defaults/defaults-effect.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "defaults-effect.spec.mjs — host 行注册合同：context 名/order/插值 + 命令名/描述 + effect 回收。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/defaults/research-defaults.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "research-defaults.spec.mjs — 项目研究默认的共享纯函数合同（keyless）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/fetch-fallback/fetch-fallback-credentials.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "fetch-fallback credentials — 回退腿凭据解析的 keyless 回归（D31）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/fetch-fallback/fetch-fallback-orchestration.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "fetch-fallback orchestration — 两腿决策流的假腿回归（D31）。被测 = orchestrate.ts：",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/fetch-fallback/fetch-fallback.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "fetch-fallback policy — 本地抓取失败 → DeepSeek Fetch API 回退的纯判据（D31）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/scripts/credentials-status.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "credentials-status — preflight 的“研究就绪”不能把空凭据文件当有 key，也不能漏掉 DSH 支持的",
+      "oracleType": "external",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/scripts/dsh-home.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "dsh-home 解析件 — pack 的 scaffold/preflight 与 DSH 本体必须把同一个 DSH_HOME 解析到同一目录。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/scripts/install-anchor.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "install-anchor 解析件 — preflight/scaffold 必须从“实际运行的 DSH 安装”解析 peer/版本，",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/scripts/presets.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "presets 结构回归 — 与 scripts/verify/verify.mjs 的 preset-structure / pack-bundle-compat /",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/scripts/version-range.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
@@ -1303,33 +1313,23 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/wave-contract.spec.mjs",
+      "path": "tests/pack/startup/startup-effect.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "tests/pack/wave-contract.spec.mjs —— wave 执行的**模型可见文本契约**（keyless）。",
-      "oracleType": "canonical",
+      "uniqueClaim": "startup-effect.spec.mjs — Host 启动行的 effect 生命周期（2026-11-03 审计 P2/⑦）。",
+      "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/pack/wave-recipes.spec.mjs",
+      "path": "tests/pack/startup/startup.spec.mjs",
       "domain": "pack",
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "tests/pack/wave-recipes.spec.mjs —— `content/waves/lens-fanout.js` 的 keyless 契约。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/pack/workers.spec.mjs",
-      "domain": "pack",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "worker profile 结构回归（D47）——keyless，纯 fs + YAML。",
-      "oracleType": "canonical",
+      "uniqueClaim": "startup — 产品 Host 启动行（D40）：env/设置 → 登记工作区 → best-effort Lead 会话。",
+      "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
     {

@@ -81,7 +81,7 @@ AGENTS.md §命令速查）：
 
 | 台阶 | 本仓证据 | 载体 |
 |---|---|---|
-| ① 导出形态守卫 | `src/index.ts` / `src/client/index.ts`：named exports（`inject` / `apply`）在场、无 `export default`、`inject` 为字符串数组 | `tests/pack/export-shape.spec.mjs`（keyless 秒级） |
+| ① 导出形态守卫 | `src/index.ts` / `src/client/index.ts`：named exports（`inject` / `apply`）在场、无 `export default`、`inject` 为字符串数组 | `tests/pack/contract/export-shape.spec.mjs`（keyless 秒级） |
 | ② 行为 / 谓词 | `src/lib/` 每个折算谓词有正例 + 错误路径用例，同 diff 交付 | `tests/<domain>/*.spec.mjs` |
 | ③ 注册生命周期 | slot / 页签 / 活标题注册全量包 `scoped.effect(...)`——dispose 即撤销贡献，零裸注册 | verify 门禁 `client-effect-wrap` |
 | ④ 真挂载 | pack 构建产物经真 DSH web 装载（真入口路径；挂载失败只有真会话抓得到） | `client-load.entry`（真浏览器断言清单） |

@@ -37,7 +37,7 @@
     {
       "id": "BUG-011",
       "mechanism": "doctor.mjs 在 --install-only 模式下显式跳过 credentialStatus，默认仍检缺凭据",
-      "guard": "tests/pack/credentials-status.spec.mjs",
+      "guard": "tests/pack/scripts/credentials-status.spec.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "去掉 doctor.mjs 的 if (!installOnly) 门控 → AST 门控例红"

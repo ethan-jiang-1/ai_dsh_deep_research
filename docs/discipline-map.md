@@ -47,7 +47,7 @@
 | Typed events / declaration merging / assertNever / waterfall next() / branded ids / Trust TypeScript / explicit request-spec split | TS 面（`src/client/` 观察面 + `src/lib/` 折算）只**消费** vendor 的声明合并类型（`import type {} from '@deepseek-ai/dsh-*/client'`），不 author 会话事件、不注册服务或 waterfall 监听器、无跨边界自持 id、无 request/spec 默认化面 | 不适用（无对应机制面；本仓开始 author 事件或服务时重估） |
 | Keep compiler faces explicit（host/client 各出叶配置，根仅 solution） | `packages/deep-research-pack/tsconfig.host.json` · `tsconfig.client.json` 两叶（各自拉不同的 Context 类型增强）+ solution-only 根 `tsconfig.json`（`files: []` + references）；构建 = `tsc -b .` | 照搬 |
 | ESM everywhere / 包命名与 rescope / cordis peer 约定 | 不发布 npm 包（private pack 经 plugin add 分发） | 不适用（本仓无 npm 发布面——**重估触发**：pack 转为公开发布、或需与其他插件共享 peer 依赖时） |
-| Client UI copy is locale-owned | chrome 文案走 `src/client/locales.ts` 的 zh/en 字典（`ctx.locale.register` + `t()`；键集对账 = [client-locale](../tests/pack/client-locale.spec.mjs)）；研究面板正文仍以中文为主（产品中文优先，未逐条迁） | 带证据适配（chrome 已迁字典；正文中文优先——**重估触发**：需要英文 UI 或对外多语分发时逐条迁 `views.tsx` / `ResearchConfigTab`） |
+| Client UI copy is locale-owned | chrome 文案走 `src/client/locales.ts` 的 zh/en 字典（`ctx.locale.register` + `t()`；键集对账 = [client-locale](../tests/cockpit/client/locales/client-locale.spec.mjs)）；研究面板正文仍以中文为主（产品中文优先，未逐条迁） | 带证据适配（chrome 已迁字典；正文中文优先——**重估触发**：需要英文 UI 或对外多语分发时逐条迁 `views.tsx` / `ResearchConfigTab`） |
 | Choose PR history deliberately / GitHub stacks / Labels taxonomy | 无 GitHub PR 流（本地单仓窄切片提交） | 不适用（等价物 = 窄证据切片 commit 纪律 + pre-commit 门禁；**重估触发**：需多 commit 叠加审阅的 PR 流出现时） |
 | Both SDKs project the loop | 无 SDK 维护面 | 不适用（本仓不维护任何 SDK——**重估触发**：本仓开始对外提供 SDK 或需要同时投影两种运行时面时） |
 
@@ -214,7 +214,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | 证据匹配面（改动的面 ↔ 证据类型） | [guides/60 §2 任务型路由表](guides/60-dev-loop.md) + [guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md) + 根 AGENTS §纪律常驻指针 | 照搬（增量 = 常驻化：路由表与阶梯本就分住 guides/60 §2 与 guides/62，本条只是把指针常驻进根 AGENTS§纪律） |
 | 可靠性三纪律：retry 白名单 / 等待显式状态 / 释放到静默 | [scripts/AGENTS §冒烟脚本可靠性纪律](../scripts/AGENTS.md) | 照搬（载体 = 冒烟脚本层） |
 | 防假绿 verdict 契约（0 绿 / 1 红 / 2 未跑；未跑 ≠ 通过） | 真模型档脚本既有行为 → scripts/AGENTS.md 契约化 + `tests/checks/smoke-contract.test.mjs` 机械钉住 | 带证据适配（行为先在，语料后成文） |
-| 插件五台阶证据阶梯（导出守卫 → 行为 → 注册生命周期 → 真挂载 → 组装面） | [guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md) + `tests/pack/export-shape.spec.mjs`（台阶①）+ verify 门禁 `client-effect-wrap`（台阶③） | 带证据适配（自写代码面 = 驾驶舱） |
+| 插件五台阶证据阶梯（导出守卫 → 行为 → 注册生命周期 → 真挂载 → 组装面） | [guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md) + `tests/pack/contract/export-shape.spec.mjs`（台阶①）+ verify 门禁 `client-effect-wrap`（台阶③） | 带证据适配（自写代码面 = 驾驶舱） |
 | registrations are effects 的 HMR 投影（dispose 即撤销贡献） | 驾驶舱 slot 注册包 effect + 门禁 `client-effect-wrap` 静态把守（正则查包裹，不判 dispose 是否真发生）；HMR 行为断言不做（迭代循环走重启）。2026-10-19 实测该门禁的盲区：`ctx.inject(..., scoped => scoped.effect(...))` 里 scoped 作用域在回调返回后失活，注册被静默撤销，门禁照绿——静态包裹证明不了生命周期正确 | 带证据适配（静态收口形态；dispose 行为面未验证，2026-10-19 撞到真失效一次，修法 = 效果挂根 ctx 而非注入作用域） |
 | fix fixtures, not normalizers（证据不许磨到跟 bug 吻合） | [tests/AGENTS「改夹具先想红」](../tests/AGENTS.md) + guides/60 金标准红线（只许 `--update-expected` 重写，不许放宽比对） | 照搬 |
 | 后缀即层 / 命名即所有权（expected-filenames 门禁强制改名） | [scripts/AGENTS §依赖与分层「命名即层」](../scripts/AGENTS.md)（后缀申报证据类型与档位）+ 真模型档登记制 closed set（tests/checks/smoke-contract.test.mjs 对账"要求凭据的脚本恰为名单"） | 带证据适配（本仓车道 = glob + 目录形态，非多 vitest 配置） |

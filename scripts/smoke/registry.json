@@ -100,7 +100,7 @@
     "cost": "slow",
     "uniqueClaim": "真 web 数据面：包目录零写入/假 token 不泄漏/卸载保留用户文件",
     "oracle": [
-      "tests/pack/data-plane-invariants.spec.mjs"
+      "tests/pack/contract/data-plane-invariants.spec.mjs"
     ],
     "sunset": "当 data-plane-invariants 能覆盖真 IO 时退役",
     "lane": "entry"
@@ -177,8 +177,8 @@
     "cost": "medium",
     "uniqueClaim": "真 Loader + Method Editor + Host Tool + mock LLM：claim/摘要/默认/删除写读",
     "oracle": [
-      "tests/pack/method-library-io.spec.mjs",
-      "tests/pack/method-library-write.spec.mjs"
+      "tests/pack/contract/method-library-io.spec.mjs",
+      "tests/cockpit/lib/method-library/method-library-write.spec.mjs"
     ],
     "sunset": "当 host tool 组装可由 preset.e2e 覆盖时退役",
     "lane": "e2e"
@@ -189,7 +189,7 @@
     "cost": "medium",
     "uniqueClaim": "tarball 条目/模块表/sha/无 symlink/无安装脚本",
     "oracle": [
-      "tests/pack/package-contract.spec.mjs"
+      "tests/pack/contract/package-contract.spec.mjs"
     ],
     "sunset": "当 pack 形状由构建门覆盖时退役",
     "lane": "e2e"

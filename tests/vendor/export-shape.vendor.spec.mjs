@@ -9,7 +9,7 @@
 //
 // 负例留证 2026-11-13：给 `src/index.ts` 加 `export default function leak() {}` → 本文件红
 // （`'default' in mod`）；给 `src/client/index.ts` 加 `export { apply as default }` 本文件不覆盖
-// （client 半 `.css` 不可 import），由 `tests/pack/export-shape.spec.mjs` 的静态正则咬住；还原 → 绿。
+// （client 半 `.css` 不可 import），由 `tests/pack/contract/export-shape.spec.mjs` 的静态正则咬住；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Loader } from '../../vendor/dsh/vendor/loader/src/index.ts';
