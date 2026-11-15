@@ -14,6 +14,9 @@
    **时点**判；普通 commit 不假定 tag 在场，所以不进 L0。
 4. dev shell 里写死的 `scripts/lib/*.mjs` 字面量由 `repo-conventions` 把守（模块搬家后消费方
    未跟 = 红）——2026-11-15 实测 `bootstrap --check` 因路径搬家永远误报「vendor 产物缺席」。
+5. **移交单位 = sender 的 `_dist` 三件**，不是「同源重建」。实测同一 commit 在两台机器上
+   `export-dist` 的 tarball sha 不同（sender `abc1c56…` vs clean clone `d6f2a67…`，npm pack
+   不可重放）；接收方 `--receiver` 只对账 tag/manual/tarball/manifest，不重算制品。
 
 ## 输掉的方案
 
@@ -23,8 +26,9 @@
   可以同时成立，因为 `dist-tarball` 只证「手册↔制品」、`release-version` 只证「版本↔版本」。
 - **把 tag=HEAD 放进 L0**：CI 与日常 commit 未打 tag，会让每个普通 commit 红；tag 是发布时点
   事实，不是常驻结构事实。
-- **让 CI 在 tag 上重建 `_dist` 再判 handoff**：手册含本地日期、制品哈希不保证跨机重放，
-  重建会让工作树变脏，`--handoff` 的 worktree-clean 断言必然失败。
+- **让 CI 在 tag 上重建 `_dist` 再判 handoff**：手册含本地日期，且实测 tarball 跨机不可重放
+  （同 commit、同 pnpm/npm 版本，sha 仍不同），重建会让工作树变脏、`--handoff` 的
+  worktree-clean 与制品 sha 断言必然失败。接收方路径因此固定为「收制品、不重建」。
 
 ## 判据形状
 
@@ -41,10 +45,27 @@
 ## 实际跑过的验证
 
 - 红证 ①：`node scripts/verify/verify.mjs --only=dist-freshness` → FAIL
-  `source-changed（409 → 409 files）`（旧制品与当前源文件数相同、内容不同）。
+  `source-changed（409 → 409 files）`（旧 0.3.5 制品与当前源文件数相同、内容不同）。
 - 红证 ②：`node scripts/verify/verify.mjs --only=repo-conventions` → 5 处
   `dev/*.sh: 引用不存在的 scripts/lib/...`（boot-run 4 处、bootstrap 1 处）。
 - 绿证 ①：修 4 处 shell 路径 + `vendor-artifacts` 默认 root（两层→三层）后
-  `--only=repo-conventions` PASS；`node scripts/lib/harness/vendor-artifacts.mjs` exit 0。
+  `--only=repo-conventions` PASS；`node scripts/lib/harness/vendor-artifacts.mjs` exit 0；
+  `bash dev/bootstrap.sh --check` → 就绪。
 - 绿证 ②：`node scripts/dist/export-dist.mjs` 重建 0.3.6（186 条目、preset 行 5/5、skill 15、
   模板 11、manifest 源 409 files）后 `dist-freshness` / `dist-tarball` / `dist-manual-*` PASS。
+- L0：`pnpm verify` 全绿；`pnpm test` 198 pass / 0 fail / 0 skip（含 asset-ledger 重算）；
+  `pnpm typecheck` exit 0。
+- L2 安装面：`lifecycle.entry` ALL PASS（market → tarball → 干净 profile 装包 → dump 10 行 →
+  真启动 → readPluginMeta 5 specifier → remove 回落）；`install-shape.entry` ALL PASS
+  （手册 CLI 分支：profile init → plugin add pack + 团队层 → 真启动，roster 三态）；
+  `product-boot.entry` GREEN（首屏、Lead session、cwd = 工作区）。
+- L1 真挂载：`DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs` ALL PASS（5 角色 + 2 worker、
+  skills 按角色隔离）。
+- 移交边界：`node scripts/smoke/handoff.e2e.mjs` ALL PASS（源码包无运行态/凭据/run 数据，
+  HANDOFF 接收命令在场）。
+- clean clone（`/tmp/cold-clone`，submodule 从本机 object store 取同 pin）：`pnpm install
+  --frozen-lockfile` 88s → `pnpm verify && pnpm test` 14s（198 pass）→ `bash dev/vendor-build.sh`
+  147s → `node scripts/dist/export-dist.mjs` 7s；重建 tarball 与 sender 不同 sha（见决定 5）。
+- 发布锚：打 tag 前 `release-check --handoff` 仅 `handoff-tag-missing`（其余四项绿）；在版本
+  提交上打 annotated `0.3.6` 后 `release-check --handoff` exit 0（OK version=0.3.6 tag=0.3.6）；
+  clean clone 同 tag + sender 三件 → `release-check --receiver` exit 0。
