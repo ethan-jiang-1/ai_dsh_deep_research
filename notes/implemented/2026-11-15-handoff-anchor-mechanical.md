@@ -57,7 +57,7 @@
   `bash dev/bootstrap.sh --check` → 就绪。
 - 绿证 ②：`node scripts/dist/export-dist.mjs` 重建 0.3.6（186 条目、preset 行 5/5、skill 15、
   模板 11、manifest 源 409 files）后 `dist-freshness` / `dist-tarball` / `dist-manual-*` PASS。
-- L0：`pnpm verify` 全绿；`pnpm test` 198 pass / 0 fail / 0 skip（含 asset-ledger 重算）；
+- L0：`pnpm verify` 全绿；`pnpm test` spec 1,358 + checks 198 pass / 0 fail / 0 skip（含 asset-ledger 重算）；
   `pnpm typecheck` exit 0。
 - L2 安装面：`lifecycle.entry` ALL PASS（market → tarball → 干净 profile 装包 → dump 10 行 →
   真启动 → readPluginMeta 5 specifier → remove 回落）；`install-shape.entry` ALL PASS
@@ -68,7 +68,7 @@
 - 移交边界：`node scripts/smoke/handoff.e2e.mjs` ALL PASS（源码包无运行态/凭据/run 数据，
   HANDOFF 接收命令在场）。
 - clean clone（`/tmp/cold-clone`，submodule 从本机 object store 取同 pin）：`pnpm install
-  --frozen-lockfile` 88s → `pnpm verify && pnpm test` 14s（198 pass）→ `bash dev/vendor-build.sh`
+  --frozen-lockfile` 88s → `pnpm verify && pnpm test` 14s（spec 1,358 + checks 198）→ `bash dev/vendor-build.sh`
   147s → `node scripts/dist/export-dist.mjs` 7s；重建 tarball 与 sender 不同 sha（见决定 5）。
 - 发布锚：打 tag 前 `release-check --handoff` 仅 `handoff-tag-missing`（其余四项绿）；在版本
   提交上打 annotated `0.3.6` 后 `release-check --handoff` exit 0（OK version=0.3.6 tag=0.3.6）；
