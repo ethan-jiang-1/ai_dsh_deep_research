@@ -1,5 +1,4 @@
 # research/ · 研究题（名头）与活跃材料
-| [pack src ↔ 测试](pack-src-test-mirror/README.md) | `src/{lib,client,<surface>}` 与 `tests/{cockpit,pack}` 如何同名对齐；成本与家族表 | [issue 2026-11-15-pack-src-test-mirror](../issues/2026-11-15-pack-src-test-mirror.md) | [2026-11-15-pack-src-test-mirror](pack-src-test-mirror/2026-11-15-pack-src-test-mirror.md) |
 
 研究按**研究题**组织：一个研究题 = 一个目录 + 一张题名页（`README.md`）。题名页是这轮研究的
 **名头**：它回答「研究什么、服务谁、长出了哪些卡、有哪些材料」。研究材料住在题名目录内；研究

@@ -1,18 +1,18 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-15
 ---
 
 # 推敲：pack src 目录与测试目录同名对齐（按 domain 切）
 
-> 立卡：2026-11-15 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
-> 去向：proposed（RFC = `notes/proposed/2026-11-15-pack-src-test-mirror.md`；交付后随 Note 关闭，D52）
+> 立卡：2026-11-15 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
+> 去向：implemented（`notes/implemented/2026-11-15-pack-src-test-mirror.md`）
 >
 > **一句话**：`src/lib` 切 7 个 domain（`run` / `plan` / `events` / `method-library` / `review` /
 > `workspace` / `shared`），`src/client` 与 `src/<surface>` 保持既有目录；测试按**同一相对路径**
 > 镜像：`tests/cockpit/lib/<domain>/`、`tests/cockpit/client/<sub>/`、`tests/pack/<surface>/`。
 >
-> **当前**：owner 轴已由 [implemented Note](../../notes/implemented/2026-11-15-test-source-mirror.md)
+> **当前**：owner 轴已由 [implemented Note](../../../notes/implemented/2026-11-15-test-source-mirror.md)
 > 定案；pack 侧仍是「名对、目录不对」。术语方案 A 已由用户 2026-11-15 拍定（弃 `journal` /
 > `presentation` / `surface`）。盘点 = [研究正文](../research/pack-src-test-mirror/2026-11-15-pack-src-test-mirror.md)。
 >
@@ -96,3 +96,11 @@ opened: 2026-11-15
 
 - 上列 8 条满足；RFC 与实现同变更链回本卡；三条验证命令绿作为交付证据；
 - 交付后按 `> 去向` 落 Note 并与本卡归档同变更（D52）。
+
+## 落地结果（2026-11-15）
+
+- RFC `ef23c213`（7 domain 术语定稿）→ Step 1 `09e98025`（`src/lib` domain + `tests/cockpit/lib` 同名）
+  → Step 2 `3f77b3e7`（client 子目录 + shared）→ Step 3 `867de359`（pack surface + contract + scripts）。
+- 验收：7 domain 表、源码/测试镜像、`faces.json` 留根 + 递归校验、`pack-mirror` 四类反证、
+  索引/两账、verify/test/typecheck 全绿。
+- 残余风险与未来 domain 预留见 [Note](../../../notes/implemented/2026-11-15-pack-src-test-mirror.md)。

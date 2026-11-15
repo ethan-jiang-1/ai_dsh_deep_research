@@ -6,7 +6,7 @@ intent: 量清 pack 侧源码与测试的现状与跨树 import 成本，给出�
 # pack src ↔ 测试：先同名，再按 domain 切
 
 > 证据边界：HEAD `4a523649`，2026-11-15 静态测量（AST import 图 + 盘上枚举）。未改任何文件。
-> 总轴已定案 = [implemented Note](../../../notes/implemented/2026-11-15-test-source-mirror.md)；
+> 总轴已定案 = [implemented Note](../../../../notes/implemented/2026-11-15-test-source-mirror.md)；
 > 本文只回答「pack 侧按什么 domain 切、目录怎么同名」。术语方案 A 已由用户 2026-11-15 拍定。
 
 ## 0. 结论
@@ -28,7 +28,7 @@ intent: 量清 pack 侧源码与测试的现状与跨树 import 成本，给出�
 | 候选 | 撞车 / 问题 | 处置 |
 |---|---|---|
 | `journal` | run bundle 已有 `journal.md`（运行纪要）；`journal-wire` 是**会话事件** | 弃用，改 **`events`** |
-| `surface` | [terms.md](../../../docs/terms.md) 的 `app surface` 是 DSH 既有术语 | 弃用 |
+| `surface` | [terms.md](../../../../docs/terms.md) 的 `app surface` 是 DSH 既有术语 | 弃用 |
 | `presentation` | 层名不是 domain 名；把默认值/标题与 i18n/文本混成一桶 | 弃用，拆 `workspace` + `shared` |
 | `ui` / `view` | 这些件是**无 React 的纯数据/判据**，名字会误导 | 不用 |
 

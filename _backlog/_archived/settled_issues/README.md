@@ -5,6 +5,7 @@
 | [2026-11-13-workflow-substance-gates](2026-11-13-workflow-substance-gates.md) | 加工环路的实体检查：判据形状字段 + Note 同节 + 两道收口门（Note 早写、暂存区配对）+ 复发必答 + 判据测试负例 + 金标准理由；D52；1400 测试 / gates-smoke 108 全绿；[Note](../../../notes/implemented/2026-11-13-workflow-substance-gates.md) | 2026-11-13 |
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-11-15-pack-src-test-mirror](2026-11-15-pack-src-test-mirror.md) | pack src ↔ 测试按 domain 同名：`src/lib` 7 domain + `tests/cockpit/lib` 镜像；client `<sub>`、pack surface/contract/scripts；`faces.json` 留根；verify/test/typecheck 绿；[Note](../../../notes/implemented/2026-11-15-pack-src-test-mirror.md) | 2026-11-15 |
 | [2026-11-15-test-source-mirror](2026-11-15-test-source-mirror.md) | 测试子目录按消费者接口分层（owner 轴）：`scripts/lib/<owner>/` + `tests/run/<owner>/` 同名镜像、cockpit 切 client/lib、登记簿 + 索引 + owner 门禁；verify/test 全绿；[Note](../../../notes/implemented/2026-11-15-test-source-mirror.md) | 2026-11-15 |
 | [2026-11-14-decisions-routing-ledger](2026-11-14-decisions-routing-ledger.md) | 决策台账纯路由化：D1–D56 压缩为 ≤100 字结论 + 活载体路由，判据升级为转义感知解析 + 6 组变异；[Note](../../../notes/implemented/2026-11-14-decisions-routing-ledger.md)、[D56](../../../docs/decisions.md#d56) | 2026-11-14 |
 | [2026-11-14-verification-oracle-hardening](2026-11-14-verification-oracle-hardening.md) | D55 验证层 Oracle 独立化收口：Markdown 单一真源 + 进程内 `mdast` 对账、CI `yaml` AST + 规范 `run:` 门 + `bash -eo pipefail`、`fix-evidence` 四绕过封堵、五角色快照 B 层 keyless 与 72 卡双账 AST 零冲突收口；[Note](../../../notes/implemented/2026-11-14-verification-oracle-hardening.md)、[D55](../../../docs/decisions.md#d55) | 2026-11-14 |
