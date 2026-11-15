@@ -9,7 +9,7 @@ opened: 2026-11-15
 > 问题：`packages/deep-research-pack/src` 的目录与 `tests/` 的目录如何做到同名对齐，让 agent 从源码路径直接推出测试路径；范围、成本与第一步是什么。
 > 消费者：[issue 2026-11-15-pack-src-test-mirror](../../issues/2026-11-15-pack-src-test-mirror.md)
 > 产出的卡：[issue 2026-11-15-pack-src-test-mirror](../../issues/2026-11-15-pack-src-test-mirror.md)
-> 结论：沿用 owner 轴（已由 [implemented Note](../../../notes/implemented/2026-11-15-test-source-mirror.md) 定案），pack 侧按「源码相对路径」镜像：`src/lib/<family>/` ↔ `tests/cockpit/lib/<family>/`、`src/client/<sub>/` ↔ `tests/cockpit/client/<sub>/`、`src/<surface>/` ↔ `tests/pack/<surface>/`；跨切 spec 住 `tests/cockpit/shared/`；零源码改名的第一步 = 只给 `src/lib` 分家族目录并同步测试。
+> 结论：**目录名对齐优先，家族按 domain 切**（用户 2026-11-15 定调：不按技术形态、不短视）。pack 侧 7 个 domain = `run` / `plan` / `journal` / `method-library` / `review` / `presentation` / `shared`；`src/lib/<domain>/` ↔ `tests/cockpit/lib/<domain>/`、`src/client/<sub>/` ↔ `tests/cockpit/client/<sub>/`、`src/<surface>/` ↔ `tests/pack/<surface>/`；`faces.json` 留根；跨切住 `tests/cockpit/shared/`，合同件住 `tests/pack/contract/`。
 
 ## 材料
 
