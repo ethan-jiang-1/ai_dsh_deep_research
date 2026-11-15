@@ -5,7 +5,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { claimReviewFixture } from '../../../scripts/lib/harness/run-accept-fixture.mjs'
-import { readinessOfSources } from '../../../packages/deep-research-pack/src/lib/review-readiness.ts'
+import { readinessOfSources } from '../../../packages/deep-research-pack/src/lib/review/review-readiness.ts'
 
 test('claim 夹具：声称有 review/ 时必须带 review/readiness.json（declaration/PASS）', () => {
   const result = readinessOfSources(claimReviewFixture())

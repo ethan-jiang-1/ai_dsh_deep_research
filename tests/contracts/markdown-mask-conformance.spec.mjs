@@ -7,8 +7,8 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { fromMarkdown } from '../../scripts/lib/tools/workspace-parsers.mjs'
 import { maskFencedCode } from '../../scripts/lib/repo/note-scan.mjs'
-import { maskMarkdownLines } from '../../packages/deep-research-pack/src/lib/markdown-mask.ts'
-import { maskReadinessLines } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
+import { maskMarkdownLines } from '../../packages/deep-research-pack/src/lib/shared/markdown-mask.ts'
+import { maskReadinessLines } from '../../packages/deep-research-pack/src/lib/review/review-readiness.ts'
 
 /**
  * 真实 CommonMark 外部 oracle（直接调用 mdast-util-from-markdown，UTF-16 code-unit 精确对齐）：

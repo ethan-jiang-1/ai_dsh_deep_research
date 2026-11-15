@@ -13,7 +13,7 @@ import {
   DEFAULTS_AXES, DEFAULTS_FILE, DEFAULTS_SCHEMA,
   emptyDefaults, mergeDefaults, parseDefaults, sanitizePatch, serializeDefaults, unsetDefaults,
   type DefaultsAxis, type DefaultsProblem, type DefaultsValue,
-} from '../lib/research-defaults.ts'
+} from '../lib/workspace/research-defaults.ts'
 
 /** 命令结果（结构型，避免把 @deepseek-ai/dsh-commands 拉成运行时 import）。 */
 export type CommandResultLike =

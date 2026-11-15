@@ -14,7 +14,7 @@
 // - 不改 plan 形状：effort 只读 plan/topics 的既有字段，不要求 cell 列。
 
 import { createHash } from 'node:crypto'
-import { isActivePlanNode } from '../../../packages/deep-research-pack/src/lib/plan-index.ts'
+import { isActivePlanNode } from '../../../packages/deep-research-pack/src/lib/plan/plan-index.ts'
 
 /** 本工具的 Protocol schema 版本（整数契约）。 */
 export const PROTOCOL_SCHEMA = 1

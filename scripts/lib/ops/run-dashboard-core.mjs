@@ -13,9 +13,9 @@ import { join, basename } from 'node:path';
 import { resolveSessionLog, readSessionEvents } from '../shared/session-log.mjs';
 import { splitFrontmatter } from '../shared/frontmatter.mjs';
 import { hasFinalVersion } from '../shared/final-version.mjs';
-import { deriveSteps, latestRunVersion } from '../../../packages/deep-research-pack/src/lib/run-fold.ts';
-import { foldHitlPending } from '../../../packages/deep-research-pack/src/lib/hitl-fold.ts';
-import { terminalReadiness } from '../../../packages/deep-research-pack/src/lib/review-readiness.ts';
+import { deriveSteps, latestRunVersion } from '../../../packages/deep-research-pack/src/lib/run/run-fold.ts';
+import { foldHitlPending } from '../../../packages/deep-research-pack/src/lib/events/hitl-fold.ts';
+import { terminalReadiness } from '../../../packages/deep-research-pack/src/lib/review/review-readiness.ts';
 
 /** 多 run 场根（debug-dashboard-plus）：drt 正规场 + ad-hoc 场（无契约，标注呈现不隐藏） */
 const WORKSPACE = process.env.DSH_RUN_WORKSPACE || process.env.DEEP_RESEARCH_WORKSPACE || 'research-workspace';

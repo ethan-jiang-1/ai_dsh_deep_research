@@ -6,12 +6,12 @@
 import type { Context } from '@deepseek-ai/cordis'
 import { createHash } from 'node:crypto'
 import { defineTool } from '@deepseek-ai/dsh-tools'
-import { methodLibraryOperationProjection, hasMethodLibraryClaim } from './lib/method-library-commands.ts'
+import { methodLibraryOperationProjection, hasMethodLibraryClaim } from './lib/method-library/method-library-commands.ts'
 import type {} from '@deepseek-ai/dsh-session-projection/types'
 import type {} from '@deepseek-ai/dsh-api-session-controller/types'
 import { mutateMethodLibrary } from './method-library-io.ts'
-import { foldLibrary } from './lib/library-fold.ts'
-import { clearDefaultMethodEntry, removeMethodEntry, setDefaultMethodEntry, upsertMethodEntry } from './lib/method-library-write.ts'
+import { foldLibrary } from './lib/method-library/library-fold.ts'
+import { clearDefaultMethodEntry, removeMethodEntry, setDefaultMethodEntry, upsertMethodEntry } from './lib/method-library/method-library-write.ts'
 
 function digestText(text: string): string {
   return createHash('sha256').update(text, 'utf8').digest('hex')

@@ -12,7 +12,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { apply } from '../../packages/deep-research-pack/src/defaults/index.ts'
 import { resetDefaultsSectionCache } from '../../packages/deep-research-pack/src/defaults/context.ts'
-import { DEFAULTS_FILE } from '../../packages/deep-research-pack/src/lib/research-defaults.ts'
+import { DEFAULTS_FILE } from '../../packages/deep-research-pack/src/lib/workspace/research-defaults.ts'
 
 const dirs = []
 test.after(() => {

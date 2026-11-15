@@ -12,8 +12,8 @@ import { Button, Input, Menu, MenuItemButton, Modal, Tag } from '@deepseek-ai/ds
 import {
   createInstruction, editInstruction, instructionOf, legacyLinesOf,
   type LibrarySections,
-} from '../lib/library-fold.ts'
-import { BUILTIN_PREFERENCES, SECTIONS } from '../lib/config-tables.ts'
+} from '../lib/method-library/library-fold.ts'
+import { BUILTIN_PREFERENCES, SECTIONS } from '../lib/shared/config-tables.ts'
 import { displayBuiltinOf, displayNameOf, displayPatternsOf, displaySectionsOf, displaySummaryOf } from './builtin-display.ts'
 import { LegacyManagementPane } from './research-config/LegacyManagementPane.tsx'
 import { fieldExecutionRowsOf, specimenSkeletonsOf } from './research-config/config-model.ts'

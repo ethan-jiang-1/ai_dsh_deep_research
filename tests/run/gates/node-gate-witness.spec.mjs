@@ -15,7 +15,7 @@ import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import { hitl2ReplyInLogs, presentedInLogs } from '../../../scripts/lib/shared/node-gate-session-gates.mjs'
 import { hitl2RowGate, isHitl2Mention, presentGate } from '../../../scripts/lib/shared/node-gate-session-gates.mjs'
-import { deriveAnchors } from '../../../packages/deep-research-pack/src/lib/hitl-fold.ts'
+import { deriveAnchors } from '../../../packages/deep-research-pack/src/lib/events/hitl-fold.ts'
 import { closingProvenanceRow } from '../../../scripts/lib/shared/hitl-provenance.mjs'
 
 const makeRoot = (tag) => {

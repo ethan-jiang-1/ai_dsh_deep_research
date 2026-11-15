@@ -2,6 +2,196 @@
   "comment": "搬家路径重定向登记簿（2026-11-15 test-source-mirror）。md-links 对缺失目标先查本簿；条目必须 from 已不在盘上、to 在盘上且被 git 跟踪，否则门禁红。冻结层不改写：旧链接靠本簿解析。",
   "redirects": [
     {
+      "from": "packages/deep-research-pack/src/lib/activity-fold.ts",
+      "to": "packages/deep-research-pack/src/lib/events/activity-fold.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/binding-trust.ts",
+      "to": "packages/deep-research-pack/src/lib/run/binding-trust.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/brief-fold.ts",
+      "to": "packages/deep-research-pack/src/lib/run/brief-fold.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/bundle-bind.ts",
+      "to": "packages/deep-research-pack/src/lib/run/bundle-bind.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/config-tables.ts",
+      "to": "packages/deep-research-pack/src/lib/shared/config-tables.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/final-target.ts",
+      "to": "packages/deep-research-pack/src/lib/run/final-target.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/graph-model.ts",
+      "to": "packages/deep-research-pack/src/lib/plan/graph-model.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/hitl-fold.ts",
+      "to": "packages/deep-research-pack/src/lib/events/hitl-fold.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/i18n.ts",
+      "to": "packages/deep-research-pack/src/lib/shared/i18n.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/journal-wire.ts",
+      "to": "packages/deep-research-pack/src/lib/events/journal-wire.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/library-fold.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/library-fold.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/markdown-mask.ts",
+      "to": "packages/deep-research-pack/src/lib/shared/markdown-mask.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/member-activity.ts",
+      "to": "packages/deep-research-pack/src/lib/events/member-activity.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-draft.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-draft.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-library-commands.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-library-commands.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-library-events.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-library-events.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-library-hash.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-library-hash.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-library-operation-state.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-library-operation-state.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-library-operation.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-library-operation.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-library-read.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-library-read.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-library-source.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-library-source.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-library-write.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-library-write.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-of-question.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-of-question.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/plan-diff.ts",
+      "to": "packages/deep-research-pack/src/lib/plan/plan-diff.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/plan-graph.ts",
+      "to": "packages/deep-research-pack/src/lib/plan/plan-graph.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/plan-index.ts",
+      "to": "packages/deep-research-pack/src/lib/plan/plan-index.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/receipt-fold.ts",
+      "to": "packages/deep-research-pack/src/lib/run/receipt-fold.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/rerun-triage.ts",
+      "to": "packages/deep-research-pack/src/lib/run/rerun-triage.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/research-defaults.ts",
+      "to": "packages/deep-research-pack/src/lib/workspace/research-defaults.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/review-readiness.ts",
+      "to": "packages/deep-research-pack/src/lib/review/review-readiness.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/run-context.ts",
+      "to": "packages/deep-research-pack/src/lib/run/run-context.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/run-fold.ts",
+      "to": "packages/deep-research-pack/src/lib/run/run-fold.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/run-version.ts",
+      "to": "packages/deep-research-pack/src/lib/run/run-version.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/start-card.ts",
+      "to": "packages/deep-research-pack/src/lib/workspace/start-card.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/stream-failure.ts",
+      "to": "packages/deep-research-pack/src/lib/events/stream-failure.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/text-fold.ts",
+      "to": "packages/deep-research-pack/src/lib/shared/text-fold.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/tool-card.ts",
+      "to": "packages/deep-research-pack/src/lib/events/tool-card.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/workspace-title.ts",
+      "to": "packages/deep-research-pack/src/lib/workspace/workspace-title.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
       "from": "scripts/lib/acceptance-check.mjs",
       "to": "scripts/lib/ops/acceptance-check.mjs",
       "reason": "2026-11-15 test-source-mirror owner 分层"
@@ -443,7 +633,7 @@
     },
     {
       "from": "tests/cockpit/brief-fold.spec.mjs",
-      "to": "tests/cockpit/lib/brief-fold.spec.mjs",
+      "to": "tests/cockpit/lib/run/brief-fold.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
@@ -488,7 +678,7 @@
     },
     {
       "from": "tests/cockpit/graph-model.spec.mjs",
-      "to": "tests/cockpit/lib/graph-model.spec.mjs",
+      "to": "tests/cockpit/lib/plan/graph-model.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
@@ -497,18 +687,118 @@
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
+      "from": "tests/cockpit/lib/brief-fold.spec.mjs",
+      "to": "tests/cockpit/lib/run/brief-fold.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/graph-model.spec.mjs",
+      "to": "tests/cockpit/lib/plan/graph-model.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/library-fold.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/library-fold.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/library-heading-codec.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/library-heading-codec.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/library-heading-consistency.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/library-heading-consistency.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/method-library-operation-state.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/method-library-operation-state.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/method-library-read.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/method-library-read.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/method-of-question.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/method-of-question.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/method-presets.spec.mjs",
+      "to": "tests/cockpit/lib/shared/method-presets.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/plan-diff.spec.mjs",
+      "to": "tests/cockpit/lib/plan/plan-diff.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/plan-graph.spec.mjs",
+      "to": "tests/cockpit/lib/plan/plan-graph.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/plan-index.spec.mjs",
+      "to": "tests/cockpit/lib/plan/plan-index.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/receipt-fold.spec.mjs",
+      "to": "tests/cockpit/lib/run/receipt-fold.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/rerun-triage.spec.mjs",
+      "to": "tests/cockpit/lib/run/rerun-triage.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/run-source-picker.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/run-source-picker.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/run-version.spec.mjs",
+      "to": "tests/cockpit/lib/run/run-version.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/start-card.spec.mjs",
+      "to": "tests/cockpit/lib/workspace/start-card.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/status-feed.spec.mjs",
+      "to": "tests/cockpit/lib/events/status-feed.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/text-fold.spec.mjs",
+      "to": "tests/cockpit/lib/shared/text-fold.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/workspace-title.spec.mjs",
+      "to": "tests/cockpit/lib/workspace/workspace-title.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
       "from": "tests/cockpit/library-fold.spec.mjs",
-      "to": "tests/cockpit/lib/library-fold.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/library-fold.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
       "from": "tests/cockpit/library-heading-codec.spec.mjs",
-      "to": "tests/cockpit/lib/library-heading-codec.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/library-heading-codec.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
       "from": "tests/cockpit/library-heading-consistency.spec.mjs",
-      "to": "tests/cockpit/lib/library-heading-consistency.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/library-heading-consistency.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
@@ -523,12 +813,12 @@
     },
     {
       "from": "tests/cockpit/method-library-operation-state.spec.mjs",
-      "to": "tests/cockpit/lib/method-library-operation-state.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/method-library-operation-state.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
       "from": "tests/cockpit/method-library-read.spec.mjs",
-      "to": "tests/cockpit/lib/method-library-read.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/method-library-read.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
@@ -543,37 +833,37 @@
     },
     {
       "from": "tests/cockpit/method-of-question.spec.mjs",
-      "to": "tests/cockpit/lib/method-of-question.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/method-of-question.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
       "from": "tests/cockpit/method-presets.spec.mjs",
-      "to": "tests/cockpit/lib/method-presets.spec.mjs",
+      "to": "tests/cockpit/lib/shared/method-presets.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
       "from": "tests/cockpit/plan-diff.spec.mjs",
-      "to": "tests/cockpit/lib/plan-diff.spec.mjs",
+      "to": "tests/cockpit/lib/plan/plan-diff.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
       "from": "tests/cockpit/plan-graph.spec.mjs",
-      "to": "tests/cockpit/lib/plan-graph.spec.mjs",
+      "to": "tests/cockpit/lib/plan/plan-graph.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
       "from": "tests/cockpit/plan-index.spec.mjs",
-      "to": "tests/cockpit/lib/plan-index.spec.mjs",
+      "to": "tests/cockpit/lib/plan/plan-index.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
       "from": "tests/cockpit/receipt-fold.spec.mjs",
-      "to": "tests/cockpit/lib/receipt-fold.spec.mjs",
+      "to": "tests/cockpit/lib/run/receipt-fold.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
       "from": "tests/cockpit/rerun-triage.spec.mjs",
-      "to": "tests/cockpit/lib/rerun-triage.spec.mjs",
+      "to": "tests/cockpit/lib/run/rerun-triage.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
@@ -593,12 +883,12 @@
     },
     {
       "from": "tests/cockpit/run-source-picker.spec.mjs",
-      "to": "tests/cockpit/lib/run-source-picker.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/run-source-picker.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
       "from": "tests/cockpit/run-version.spec.mjs",
-      "to": "tests/cockpit/lib/run-version.spec.mjs",
+      "to": "tests/cockpit/lib/run/run-version.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
@@ -608,7 +898,7 @@
     },
     {
       "from": "tests/cockpit/start-card.spec.mjs",
-      "to": "tests/cockpit/lib/start-card.spec.mjs",
+      "to": "tests/cockpit/lib/workspace/start-card.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
@@ -618,12 +908,12 @@
     },
     {
       "from": "tests/cockpit/status-feed.spec.mjs",
-      "to": "tests/cockpit/lib/status-feed.spec.mjs",
+      "to": "tests/cockpit/lib/events/status-feed.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
       "from": "tests/cockpit/text-fold.spec.mjs",
-      "to": "tests/cockpit/lib/text-fold.spec.mjs",
+      "to": "tests/cockpit/lib/shared/text-fold.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
@@ -638,7 +928,7 @@
     },
     {
       "from": "tests/cockpit/workspace-title.spec.mjs",
-      "to": "tests/cockpit/lib/workspace-title.spec.mjs",
+      "to": "tests/cockpit/lib/workspace/workspace-title.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {

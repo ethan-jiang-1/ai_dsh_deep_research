@@ -6,7 +6,7 @@
 //   「交付审阅」pending——即 BUG-002 原始误标形态）→ 本文件两条 BUG-002 测齐红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { deriveAnchors, foldHitlPending } from '../../../packages/deep-research-pack/src/lib/hitl-fold.ts';
+import { deriveAnchors, foldHitlPending } from '../../../packages/deep-research-pack/src/lib/events/hitl-fold.ts';
 import { toolCall, toolResult } from '../../fixtures/events.mjs';
 
 // 事件构造走 tests/fixtures/events.mjs（wire 正本）；本文件的语义包装（v5 谓词的形态 defaults）留下。

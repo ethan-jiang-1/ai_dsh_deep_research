@@ -1,8 +1,8 @@
 // 方法库 upsert 回归（keyless）：保存闭环的写盘纯函数——同名覆盖、库头/其它条目保留、默认唯一。
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { foldLibrary } from '../../packages/deep-research-pack/src/lib/library-fold.ts'
-import { upsertMethodEntry } from '../../packages/deep-research-pack/src/lib/method-library-write.ts'
+import { foldLibrary } from '../../packages/deep-research-pack/src/lib/method-library/library-fold.ts'
+import { upsertMethodEntry } from '../../packages/deep-research-pack/src/lib/method-library/method-library-write.ts'
 
 const entry = (name, overrides = {}) => ({
   name,
@@ -70,7 +70,7 @@ test('显式 save-and-set upsert 新建条目并将其设为唯一默认', () =>
 })
 
 test('设默认操作只翻转唯一标记并拒绝重名目标', async () => {
-  const { setDefaultMethodEntry } = await import('../../packages/deep-research-pack/src/lib/method-library-write.ts')
+  const { setDefaultMethodEntry } = await import('../../packages/deep-research-pack/src/lib/method-library/method-library-write.ts')
   const library = '## 旧条目〔默认偏好〕\n- 找来源: a\n- 怎么核实: b\n- 报告怎么写: c\n- 不承诺: d\n\n## 目标\n- 找来源: e\n- 怎么核实: f\n- 报告怎么写: g\n- 不承诺: h\n'
   const result = setDefaultMethodEntry(library, '目标')
   assert.match(result.text, /## 旧条目\n/)
@@ -85,7 +85,7 @@ test('普通保存拒绝修补默认标记已重复的库', () => {
 })
 
 test('清除默认操作允许库中零个默认标记', async () => {
-  const { clearDefaultMethodEntry } = await import('../../packages/deep-research-pack/src/lib/method-library-write.ts')
+  const { clearDefaultMethodEntry } = await import('../../packages/deep-research-pack/src/lib/method-library/method-library-write.ts')
   const library = '## 一〔默认偏好〕\n- 找来源: a\n\n## 二〔默认偏好〕\n- 找来源: b\n'
   const result = clearDefaultMethodEntry(library)
   assert.doesNotMatch(result.text, /〔默认偏好〕/)
@@ -105,13 +105,13 @@ test('追加到有尾部空行/无换行的库也不粘连', () => {
 })
 
 test('remove：重复名称拒绝选择首条', async () => {
-  const { removeMethodEntry } = await import('../../packages/deep-research-pack/src/lib/method-library-write.ts')
+  const { removeMethodEntry } = await import('../../packages/deep-research-pack/src/lib/method-library/method-library-write.ts')
   const duplicated = '## 重名\n- 找来源: a\n\n## 重名\n- 找来源: b\n'
   assert.throws(() => removeMethodEntry(duplicated, '重名'), /重名/)
 })
 
 test('remove：同名整段删除，库头与其它条目保留', async () => {
-  const { removeMethodEntry } = await import('../../packages/deep-research-pack/src/lib/method-library-write.ts')
+  const { removeMethodEntry } = await import('../../packages/deep-research-pack/src/lib/method-library/method-library-write.ts')
   const library = `# 方法库\n\n## 旧条目\n- 找来源: a\n- 怎么核实: b\n- 报告怎么写: c\n- 不承诺: d\n\n## 要删的\n- 找来源: 1\n- 怎么核实: 2\n- 报告怎么写: 3\n- 不承诺: 4\n`
   const result = removeMethodEntry(library, '要删的')
   assert.equal(result.removed, true)

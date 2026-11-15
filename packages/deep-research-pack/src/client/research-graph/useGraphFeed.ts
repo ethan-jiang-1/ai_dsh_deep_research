@@ -9,10 +9,10 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { PlanIndex } from '../../lib/plan-index.ts'
-import { planIndex } from '../../lib/plan-index.ts'
-import { bindingTrust } from '../../lib/binding-trust.ts'
-import { openRun, type RunView } from '../../lib/run-context.ts'
+import type { PlanIndex } from '../../lib/plan/plan-index.ts'
+import { planIndex } from '../../lib/plan/plan-index.ts'
+import { bindingTrust } from '../../lib/run/binding-trust.ts'
+import { openRun, type RunView } from '../../lib/run/run-context.ts'
 import type { ResearchGraphTabProps } from './types.ts'
 
 /** plan.md 重读间隔（任务靠投影推送；只有文件需要低频重扫）。 */

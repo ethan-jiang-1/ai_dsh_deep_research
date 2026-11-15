@@ -31,7 +31,7 @@ const CANONICAL_LIBS = new Set([
   'tests/pack/template-files.mjs',
   'packages/deep-research-pack/src/client/locales.ts',
   'packages/deep-research-pack/src/client/research-graph/state-note.ts',
-  'packages/deep-research-pack/src/lib/brief-fold.ts',
+  'packages/deep-research-pack/src/lib/run/brief-fold.ts',
 ])
 const STRUCTURED_PKGS = new Set([
   'node:vm', 'vm', 'node:events', 'events', 'node:crypto', 'crypto', 'react', 'react-dom/server',

@@ -2,7 +2,7 @@
 // 判据：只取最后一个完整围栏；标题/四标签/来源/默认标记都按 library-fold 折；坏块不猜。
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { coachPatchAppliesToDraft, mergeCoachDraft, parseMethodDraft } from '../../packages/deep-research-pack/src/lib/method-draft.ts'
+import { coachPatchAppliesToDraft, mergeCoachDraft, parseMethodDraft } from '../../packages/deep-research-pack/src/lib/method-library/method-draft.ts'
 
 const ENTRY = `## 机房选型尽调（2026-10-28，对话）
 - 找来源: 官方定价页与公告优先，厂商自述标“自述”

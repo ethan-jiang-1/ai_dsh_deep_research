@@ -4,7 +4,7 @@
 // 为什么拆：schema 校验与 bundle 审计是两个消费面（校验器 vs gate），同文件会越过 scripts/lib 的
 // 单文件行数上限；拆开后 protocol-core 只答「JSON 形状对不对」，本件只答「bundle 的设计合同齐不齐」。
 
-import { planIndex, isActivePlanNode } from '../../../packages/deep-research-pack/src/lib/plan-index.ts'
+import { planIndex, isActivePlanNode } from '../../../packages/deep-research-pack/src/lib/plan/plan-index.ts'
 import { strategyOf } from './strategy-core.mjs'
 import {
   BAND_LABELS,

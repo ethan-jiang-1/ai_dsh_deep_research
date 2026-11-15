@@ -13,12 +13,12 @@
 // 消费方：scripts/run-ops/watch-run.mjs（盯场）、dev/hitl-answer.mjs（前置自拒）、
 // tests/run-state.spec.mjs（三态夹具与 native log reader，测试路径零子进程，layering 合规）。
 // 运行需 `node --import tsx/esm`（直引 pack .ts 源）。
-import { argsObjectOf } from '../../../packages/deep-research-pack/src/lib/journal-wire.ts'
+import { argsObjectOf } from '../../../packages/deep-research-pack/src/lib/events/journal-wire.ts'
 import { existsSync, lstatSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { foldHitlPending } from '../../../packages/deep-research-pack/src/lib/hitl-fold.ts'
-import { sessionBindingOf } from '../../../packages/deep-research-pack/src/lib/bundle-bind.ts'
-import { bundleCandidates } from '../../../packages/deep-research-pack/src/lib/run-context.ts'
+import { foldHitlPending } from '../../../packages/deep-research-pack/src/lib/events/hitl-fold.ts'
+import { sessionBindingOf } from '../../../packages/deep-research-pack/src/lib/run/bundle-bind.ts'
+import { bundleCandidates } from '../../../packages/deep-research-pack/src/lib/run/run-context.ts'
 import { readSessionEvents } from './session-log.mjs'
 
 export { readSessionEvents }

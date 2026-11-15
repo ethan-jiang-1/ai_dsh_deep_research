@@ -2,9 +2,9 @@
 //
 // 无 React：四字段执行面表、标本骨架、详情三态。组件负责读取/发送/渲染；这些是纯数据。
 // 用户可见文案走折层字典（`keyOf` + `t`）——见 BUG-055 的数据面收口。
-import type { LibrarySections } from '../../lib/library-fold.ts'
-import { BUILTIN_PREFERENCES } from '../../lib/config-tables.ts'
-import { translateZh, type PackTranslate } from '../../lib/i18n.ts'
+import type { LibrarySections } from '../../lib/method-library/library-fold.ts'
+import { BUILTIN_PREFERENCES } from '../../lib/shared/config-tables.ts'
+import { translateZh, type PackTranslate } from '../../lib/shared/i18n.ts'
 
 /** 库文件路径（工作区根；格式正本 = research-brief skill「用户方法库」）。 */
 export const LIBRARY_PATH = 'method-library.md'

@@ -1,0 +1,241 @@
+/**
+ * run-version.ts —— rerun 版本面的纯折算（keyless 单测；页签只画）。
+ *
+ * 为什么要有它：rerun 在文件契约里存在（D17），但观察面只显示当前 plan，看不出
+ * 「v1 已交付 / v2 还在跑 / final.md 是工作稿」。本文件把版本面折成**只用盘上事实**的一行：
+ *
+ *   plan 头 `图版本：vN` + 重写记录里的 `图版本 vM` + `plan/vN.md` 快照 + `final/vN.md` 版本账
+ *   + present 见证（交付）+ HITL2 挂起（由调用方折好的 hitl-fold）+ question.md 的 `> rerun:` 行
+ *
+ * 三条诚实规则：
+ *   ① 版本只从机器可读声明取（`图版本：vN` / `图版本 vN`），不从 H1 散文或快照反推；头与记录
+ *      不一致时两个都报，不静默挑一个。
+ *   ② `present` 事件**不携带版本号**（vendor `deliverables/presented` 只有 turn/callId/files），
+ *      所以「已交付版本」只能按 `final/` 版本账推定；版本账 >1 时文案必须带「推定」。
+ *   ③ `final.md` 是工作稿，`final/vN` 才是版本账；没有 present 就不说「已交付」。
+ *
+ * 边界：不改 D17 的三种 rerun 语义；polish 没有盘上版本痕迹，只能由 `> rerun:` 声明表达；
+ * 结构性 rerun 另起 bundle，本文件只认声明，不画血缘。
+ */
+import { latestRunVersion } from './run-fold.ts'
+import { translateZh, type PackTranslate } from '../shared/i18n.ts'
+
+/** rerun 三种语义（D17）。 */
+type RerunKind = 'evidence-expansion' | 'polish' | 'structural'
+
+/** `question.md` 里的 rerun 声明（同 bundle rerun 才有）。 */
+interface RerunDeclaration {
+  readonly version: number
+  readonly kind: RerunKind
+  /** ISO 日期（声明行里的 YYYY-MM-DD；缺省 = 未写）。 */
+  readonly date?: string
+}
+
+/** 版本面的输入事实（全部由调用方读盘/读 journal 后传入；本文件不做 I/O）。 */
+interface RunVersionFacts {
+  /** 当前 `plan.md` 全文。 */
+  readonly planText?: string | null
+  /** `plan/` 目录里的文件名（`v1.md` …）。 */
+  readonly planSnapshotNames?: readonly string[] | null
+  /** `final/` 目录里的文件名（`v1.md` …）。 */
+  readonly finalFileNames?: readonly string[] | null
+  /** `question.md` 全文（读 rerun 声明）。 */
+  readonly questionText?: string | null
+  /** journal 里有指向终稿的 present（调用方折好传入）。 */
+  readonly delivered?: boolean
+  /** present 点名的版本化终稿（`final/vN.md`）——没有就 null（版本未知）。 */
+  readonly deliveredVersion?: number | null
+  /** HITL2 挂起（hitl-fold 的 pending + 锚点判型结果）。 */
+  readonly hitlPending?: boolean
+  /** run 根 `final.md` 在场（工作稿）。 */
+  readonly draftPresent?: boolean
+}
+
+/** 版本面状态（页签按它决定说什么）。 */
+type RunVersionState = 'none' | 'drafting' | 'rerun-in-progress' | 'pending-hitl2' | 'delivered'
+
+/** 版本面的一次折算结果。 */
+export interface RunVersionFace {
+  /** `plan.md` 头部声明的图版本（缺声明 → null）。 */
+  readonly currentPlanVersion: number | null
+  /** 重写记录里出现过的最高图版本（缺重写记录 → null）。 */
+  readonly recordedPlanVersion: number | null
+  /** 头与重写记录不一致。 */
+  readonly versionConflicted: boolean
+  /** `plan/vN.md` 快照版本（升序）。 */
+  readonly planSnapshots: readonly number[]
+  /** 编号 ≥ 当前图版本的快照（不是“旧图”，不能拿去 diff）。 */
+  readonly snapshotAnomaly: readonly number[]
+  /** `final/` 版本账最高版本（0 = 无）。 */
+  readonly ledgerFinalVersion: number
+  /** 已交付版本（present 点名了 `final/vN`，或版本账只有 v1；否则 null = 未记载）。 */
+  readonly deliveredFinalVersion: number | null
+  /** present 只点名 `final.md` 且版本账 >1：交付过，但交付的是哪版没记。 */
+  readonly deliveryVersionAmbiguous: boolean
+  /** run 根 `final.md` 在场（工作稿）。 */
+  readonly draftPresent: boolean
+  /** question.md 的 rerun 声明；无 → null。 */
+  readonly rerun: RerunDeclaration | null
+  /** 一行状态。 */
+  readonly state: RunVersionState
+  /** 可显示的一句话（` · ` 分隔；空输入 → `未交付`）。 */
+  readonly label: string
+}
+
+const KIND_LABEL_KEYS: Readonly<Record<RerunKind, 'versionRerunEvidenceExpansion' | 'versionRerunPolish' | 'versionRerunStructural'>> = {
+  'evidence-expansion': 'versionRerunEvidenceExpansion',
+  polish: 'versionRerunPolish',
+  structural: 'versionRerunStructural',
+}
+
+const INT = (raw: string | undefined): number | null => {
+  if (raw === undefined) return null
+  const value = Number(raw)
+  return Number.isSafeInteger(value) && value > 0 ? value : null
+}
+
+/**
+ * 从 plan 全文拆两个版本来源（头声明 / 重写记录最高）。
+ * @param planText - `plan.md` 全文。
+ * @returns 两个版本号与是否冲突（缺声明 → null）。
+ */
+function planVersionsOf(planText: string | null | undefined): {
+  readonly header: number | null
+  readonly recorded: number | null
+  readonly conflicted: boolean
+} {
+  if (typeof planText !== 'string' || planText === '') return { header: null, recorded: null, conflicted: false }
+  // 先剥 HTML 注释（模板示例行也长这样），再取**最后**一条 `图版本：vN`：模板块里带一句样板
+  // `图版本：v1（每次重写递增）`，真正声明在它下面；取第一条会把重写后的 plan 读成 v1
+  // （受控 E2E 实测：v2 被读成 v1 / vN）。
+  const withoutComments = planText.replace(/<!--[\s\S]*?-->/g, '')
+  // 头部声明只认**首个 `##` 之前**的块（正文里的「旧版图版本：v1」不夺权，BUG-102）；
+  // 无 `##` 的旧形态退化为全文首个声明。
+  const hasHeading = /^##\s/m.test(withoutComments)
+  const headerBlock = hasHeading
+    ? (withoutComments.split(/^##\s/m)[0] ?? '')
+    : withoutComments.split('\n').filter((line) => !/^\s*>/.test(line)).join('\n')
+  const headerMatches = [...headerBlock.matchAll(/图版本\s*[：:]\s*v?(\d+)/g)]
+  // 有分节：头部最后一个声明；无分节（旧形态）：全文**首个**声明（BUG-125，不再取 last）。
+  let header: number | null = headerMatches.length === 0
+    ? null
+    : INT((hasHeading ? headerMatches.at(-1)?.[1] : headerMatches[0]?.[1]) ?? '')
+  // 重写记录的行形态会有漂移：模板写 `图版本 vN`，模型常写成 `日期 / vN / 动作`。
+  // 斜杠分支必须有重写语义/日期上下文（正文 `- 参考 / v1 / 示例` 不算，BUG-112）。
+  let recorded: number | null = null
+  for (const match of withoutComments.matchAll(/^[ \t]*[-*][^\n]*?(?:图版本\s*v?(\d+)|(?:重写|版本记录)[^\n]*?[/｜|]\s*v(\d+)\s*[/｜|]|\d{4}-\d{2}-\d{2}[^\n]*?[/｜|]\s*v(\d+)\s*[/｜|])/gm)) {
+    const version = INT(match[1] ?? match[2] ?? match[3])
+    if (version !== null && (recorded === null || version > recorded)) recorded = version
+  }
+  return { header, recorded, conflicted: header !== null && recorded !== null && header !== recorded }
+}
+
+/**
+ * 从 `question.md` 读 rerun 声明（只认标题级引用行 `> rerun: vN · kind · …`）。
+ * @param questionText - `question.md` 全文。
+ * @returns 声明或 null（不解析散文）。
+ */
+function rerunDeclarationOf(questionText: string | null | undefined): RerunDeclaration | null {
+  if (typeof questionText !== 'string' || questionText === '') return null
+  const match = /^[ \t]*>[ \t]*rerun[ \t]*[：:][ \t]*v?(\d+)[ \t]*·[ \t]*(evidence-expansion|polish|structural)(?=\s|·|$)([^\n]*)/mi.exec(questionText)
+  if (match === null) return null
+  const version = INT(match[1])
+  const kind = match[2] as RerunKind | undefined
+  const rest = match[3] ?? ''
+  // 模板里的示例行也长这样（且常被写成注释/占位符）——**必须有真实日期、不能带占位符**才算声明。
+  const date = /(\d{4}-\d{2}-\d{2})/.exec(rest)?.[1]
+  if (version === null || kind === undefined || date === undefined || rest.includes('<')) return null
+  return { version, kind, date }
+}
+
+/** 目录文件名 → vN 版本号（升序去重）。 */
+function versionsOf(names: readonly string[] | null | undefined): number[] {
+  const out = new Set<number>()
+  for (const name of Array.isArray(names) ? names : []) {
+    const version = INT(/^v([1-9]\d*)\.md$/.exec(name)?.[1])
+    if (version !== null) out.add(version)
+  }
+  return [...out].sort((a, b) => a - b)
+}
+
+/**
+ * 版本面折算（fail-soft：缺什么就说什么，不抛）。
+ * @param facts - 读盘/读 journal 后的事实。
+ * @param t UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
+ * @returns {@link RunVersionFace}。
+ */
+export function runVersionFaceOf(facts: RunVersionFacts, t: PackTranslate = translateZh): RunVersionFace {
+  const { header, recorded, conflicted } = planVersionsOf(facts.planText)
+  const planSnapshots = versionsOf(facts.planSnapshotNames)
+  const effectivePlanVersion = recorded ?? header
+  const snapshotAnomaly = effectivePlanVersion === null
+    ? []
+    : planSnapshots.filter((version) => version >= effectivePlanVersion)
+  const ledgerFinalVersion = latestRunVersion(Array.isArray(facts.finalFileNames) ? facts.finalFileNames : [])
+  const delivered = facts.delivered === true
+  const explicitDelivered = INT(String(facts.deliveredVersion ?? ''))
+  // 版本账只有 v1 时「已交付 = v1」是可靠的（首版交付只有一个版本）；版本账 >1 且 present
+  // 只点名 final.md 时，交付的是哪版**盘上不可知**——说「未记载」，不拿版本账最高号冒充。
+  const deliveredFinalVersion = !delivered
+    ? null // 没有 present 就不说「已交付」，不管 present 版本号是否被别处传入（BUG-101）
+    : explicitDelivered !== null
+      ? explicitDelivered
+      : ledgerFinalVersion === 1
+        ? 1
+        : null
+  const deliveryVersionAmbiguous = delivered && deliveredFinalVersion === null && ledgerFinalVersion > 1
+  const draftPresent = facts.draftPresent === true
+  const rerun = rerunDeclarationOf(facts.questionText)
+  const hitlPending = facts.hitlPending === true
+
+  const state: RunVersionState = hitlPending
+    ? 'pending-hitl2'
+    : delivered && (rerun === null || (deliveredFinalVersion !== null && rerun.version <= deliveredFinalVersion))
+      ? 'delivered'
+      : rerun !== null
+        ? 'rerun-in-progress'
+        : draftPresent
+          ? 'drafting'
+          : 'none'
+
+  const kindLabel = (kind: RerunKind): string => t(KIND_LABEL_KEYS[kind])
+  const parts: string[] = []
+  if (conflicted) parts.push(t('versionConflict', { header: String(header), recorded: String(recorded) }))
+  else if (typeof facts.planText === 'string' && facts.planText !== '' && header === null && recorded === null) {
+    parts.push(t('versionPlanUndeclared'))
+  }
+  if (snapshotAnomaly.length > 0) parts.push(t('versionSnapshotAnomaly', { versions: snapshotAnomaly.map((v) => `v${String(v)}`).join(t('listSeparator')) }))
+  const deliveredThisRerun = rerun !== null && deliveredFinalVersion !== null && rerun.version <= deliveredFinalVersion
+  parts.push(
+    deliveredThisRerun && rerun !== null
+      ? t('versionDeliveredRerun', { version: String(deliveredFinalVersion), kind: kindLabel(rerun.kind) })
+      : deliveredFinalVersion !== null
+        ? t('versionDelivered', { version: String(deliveredFinalVersion) })
+        : delivered && deliveryVersionAmbiguous
+          ? t('versionDeliveredUnrecorded', { version: String(ledgerFinalVersion) })
+          : delivered
+            ? t('versionDeliveredNoLedger')
+            : ledgerFinalVersion > 0
+            // 版本账在、但 present 不在本会话的 journal 窗口里：只说“没见证”，不说“没交付”。
+              ? t('versionLedgerUnwitnessed', { version: String(ledgerFinalVersion) })
+              : t('versionUndelivered'),
+  )
+  if (rerun !== null && !deliveredThisRerun) parts.push(t('versionRerunInProgress', { version: String(rerun.version), kind: kindLabel(rerun.kind) }))
+  if (draftPresent && (deliveredFinalVersion !== null || deliveryVersionAmbiguous || rerun !== null)) parts.push(t('versionWorkingDraft'))
+  if (hitlPending) parts.push(t('versionHitl2Pending'))
+
+  return {
+    currentPlanVersion: header,
+    recordedPlanVersion: recorded,
+    versionConflicted: conflicted,
+    planSnapshots,
+    snapshotAnomaly,
+    ledgerFinalVersion,
+    deliveredFinalVersion,
+    deliveryVersionAmbiguous,
+    draftPresent,
+    rerun,
+    state,
+    label: parts.join(' · '),
+  }
+}

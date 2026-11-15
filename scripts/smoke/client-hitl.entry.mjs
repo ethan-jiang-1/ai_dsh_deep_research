@@ -38,7 +38,7 @@ import { readSessionEvents, resolveSessionLog } from '../lib/shared/session-log.
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/harness/vendor-artifacts.mjs'
 import { SMOKE_LOCALE, launchChromium, loadChromium } from '../lib/harness/playwright.mjs'
 import { openSessionById, TAB_TEXT } from '../lib/shared/web-ui-nav.mjs'
-import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
+import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/events/hitl-fold.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const arg = (name, fallback) => {

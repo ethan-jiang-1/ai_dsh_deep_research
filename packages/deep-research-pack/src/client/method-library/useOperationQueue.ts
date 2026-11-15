@@ -1,5 +1,5 @@
 // useOperationQueue.ts — 方法库写操作队列：一次只允许一个显式写操作，从发送走到结算或结果未知。
-import { methodNameIssue } from '../../lib/library-fold.ts'
+import { methodNameIssue } from '../../lib/method-library/library-fold.ts'
 //
 // 从 MethodLibraryView.tsx 拆出（2026-11-03 审计 P4 续拆）。同文件两半，调用顺序是硬约束：
 // - `useOperationQueueState`：队列自己的 state/refs，必须在 `useDraftState` **之前**调用——
@@ -15,14 +15,14 @@ import { useRef, useState } from 'react'
 import type { MutableRefObject } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
-import { foldLibrary, renderLibraryEntry, type LibraryEntry } from '../../lib/library-fold.ts'
-import { methodLibraryCommandText } from '../../lib/method-library-operation.ts'
-import { methodLibraryEntryHash } from '../../lib/method-library-hash.ts'
-import type { MethodLibraryReadResult } from '../../lib/method-library-read.ts'
+import { foldLibrary, renderLibraryEntry, type LibraryEntry } from '../../lib/method-library/library-fold.ts'
+import { methodLibraryCommandText } from '../../lib/method-library/method-library-operation.ts'
+import { methodLibraryEntryHash } from '../../lib/method-library/method-library-hash.ts'
+import type { MethodLibraryReadResult } from '../../lib/method-library/method-library-read.ts'
 import {
   expectedMethodLibrarySnapshot, methodLibraryMatchesSnapshot, methodLibrarySettlement,
   methodLibrarySnapshot, shouldStartFreshDraftContext,
-} from '../../lib/method-library-operation-state.ts'
+} from '../../lib/method-library/method-library-operation-state.ts'
 import {
   LIBRARY_PATH, missingSectionKeys, operationMetadataMatches,
   type LoadState, type MethodLibraryOperationRequest, type Mode, type OperationOutcome,

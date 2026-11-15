@@ -57,7 +57,7 @@ import { createLeadPrompt } from './lead-prompt.ts'
 import { StartCard, type StartCardInjected } from './StartCard.tsx'
 import { DefaultsButton, type DefaultsButtonInjected } from './defaults/DefaultsButton.tsx'
 import { createDefaultsStore } from './defaults/store.ts'
-import { finalAddressOf, isFinalAddress } from '../lib/final-target.ts'
+import { finalAddressOf, isFinalAddress } from '../lib/run/final-target.ts'
 
 /** Required services：槽注册表（renderer）+ 右栏页签注册器 + 右栏导航面（openTab——挂起显性化）+ remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
  *  父级则取 .session 炸 "without injecting it"，只声明子级则取父属性炸 "without inject"）。 */

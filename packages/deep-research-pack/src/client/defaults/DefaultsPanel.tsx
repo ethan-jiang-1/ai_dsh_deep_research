@@ -10,8 +10,8 @@ import {
   AUTHORITIES, OUTPUT_SHAPES, RECENCIES, SOURCE_FAMILIES,
   type Authority, type DefaultsAxis, type DefaultsPatch, type EffortBand,
   type OutputShape, type Recency, type SourceFamily,
-} from '../../lib/research-defaults.ts'
-import type { PackTranslate } from '../../lib/i18n.ts'
+} from '../../lib/workspace/research-defaults.ts'
+import type { PackTranslate } from '../../lib/shared/i18n.ts'
 import { useDefaults, type DefaultsSnapshot, type DefaultsStore } from './store.ts'
 import { AUTHORITY_LABEL, FAMILY_LABEL, RECENCY_LABEL, SHAPE_LABEL } from './labels.ts'
 

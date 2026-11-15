@@ -8,7 +8,7 @@
 // 环境的注入面 = 主件文件级 helper 与调用时刻的快照（boundSession / deliveredSessions）。
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { latestRunVersion } from '../../packages/deep-research-pack/src/lib/run-fold.ts'
+import { latestRunVersion } from '../../packages/deep-research-pack/src/lib/run/run-fold.ts'
 import { openSessionById, TAB_TEXT } from '../lib/shared/web-ui-nav.mjs'
 
 /**

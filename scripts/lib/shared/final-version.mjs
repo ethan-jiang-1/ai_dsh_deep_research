@@ -5,11 +5,11 @@
 // 而 pack 的 `FINAL_VERSION_RE`（`v[1-9]…`）此前**零消费者**。同一条语义 8 份实现，
 // 改一处永远抓不全。
 //
-// 正本 = `packages/deep-research-pack/src/lib/final-target.ts`（client 终稿面与 run-fold
+// 正本 = `packages/deep-research-pack/src/lib/run/final-target.ts`（client 终稿面与 run-fold
 // 已消费它）。本文件只把「目录 → 版本号数组」的 IO 薄壳补齐；纯判据一律从 pack 导入。
 // 依赖方向：scripts → pack src（已有先例 = node-gate-contracts 直引 review-readiness.ts）。
 import { readdirSync } from 'node:fs'
-import { finalVersionOf, readableVersionOf } from '../../../packages/deep-research-pack/src/lib/final-target.ts'
+import { finalVersionOf, readableVersionOf } from '../../../packages/deep-research-pack/src/lib/run/final-target.ts'
 
 export { finalVersionOf, readableVersionOf }
 

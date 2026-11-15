@@ -15,7 +15,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readinessOf } from '../../../scripts/lib/shared/node-gate-contracts.mjs'
-import { terminalReadiness } from '../../../packages/deep-research-pack/src/lib/review-readiness.ts';
+import { terminalReadiness } from '../../../packages/deep-research-pack/src/lib/review/review-readiness.ts';
 
 test('终局判定：首行 frontmatter 形态（readiness: PASS）→ PASS', () => {
   assert.equal(terminalReadiness('readiness: PASS\n\n## 定义\n...\n'), 'PASS');

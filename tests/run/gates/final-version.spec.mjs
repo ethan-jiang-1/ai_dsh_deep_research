@@ -18,7 +18,7 @@ import {
   readableVersionOf,
   readableVersionsIn,
 } from '../../../scripts/lib/shared/final-version.mjs';
-import { latestRunVersion } from '../../../packages/deep-research-pack/src/lib/run-fold.ts';
+import { latestRunVersion } from '../../../packages/deep-research-pack/src/lib/run/run-fold.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 

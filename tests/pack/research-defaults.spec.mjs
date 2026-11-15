@@ -15,7 +15,7 @@ import {
   countSetAxes, defaultsButtonState, emptyDefaults, findDefaultMethod,
   hasAnyValue, mergeDefaults, parseCommandOutcome, parseDefaults, sanitizePatch,
   serializeDefaults, unsetDefaults,
-} from '../../packages/deep-research-pack/src/lib/research-defaults.ts'
+} from '../../packages/deep-research-pack/src/lib/workspace/research-defaults.ts'
 import { defaultsContextText } from '../../packages/deep-research-pack/src/defaults/context.ts'
 import {
   AUTHORITIES as PROTOCOL_AUTHORITIES,

@@ -10,12 +10,12 @@
 // fallback）；把 en 值改回中文 → 「en 投影零 CJK」红；改 zh 显示值一字 → 「zh 逐字等于 canonical」红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { BUILTIN_PREFERENCES, DEMO_ENTRY, PATTERN_METHOD_RULES } from '../../../packages/deep-research-pack/src/lib/config-tables.ts'
+import { BUILTIN_PREFERENCES, DEMO_ENTRY, PATTERN_METHOD_RULES } from '../../../packages/deep-research-pack/src/lib/shared/config-tables.ts'
 import {
   displayBuiltinOf, displayDemoOf, displayNameOf, displayPatternsOf, displaySectionsOf, displaySummaryOf,
 } from '../../../packages/deep-research-pack/src/client/builtin-display.ts'
 import { en, zh } from '../../../packages/deep-research-pack/src/client/locales.ts'
-import { interpolate } from '../../../packages/deep-research-pack/src/lib/i18n.ts'
+import { interpolate } from '../../../packages/deep-research-pack/src/lib/shared/i18n.ts'
 
 const CJK = /[\u4e00-\u9fa5]/
 const tZh = (key, params = {}) => interpolate(String(zh[key]), params)

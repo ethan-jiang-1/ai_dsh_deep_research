@@ -8,7 +8,7 @@
 
 // 入参解析正本 = pack `journal-wire.ts` 的 argsObjectOf（JSON 串/对象 + 截断容错同一实现；
 // 2026-11-03 卫生审计 D2-4：scripts 四处自写 JSON.parse，wire 形态变化要改四处）。
-import { argsObjectOf } from '../../../packages/deep-research-pack/src/lib/journal-wire.ts'
+import { argsObjectOf } from '../../../packages/deep-research-pack/src/lib/events/journal-wire.ts'
 
 /**
  * 解析 ask_user_question 调用参数 → 驱动前就知道的盘侧形态。

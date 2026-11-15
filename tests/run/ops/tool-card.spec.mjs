@@ -1,7 +1,7 @@
 // tool-card 回归 — 研究语义卡标题折算（keyless；wire 权威形状 = queries 数组，录制流实证）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cardTitleOf, parseArgsObject, cardStateOf } from '../../../packages/deep-research-pack/src/lib/tool-card.ts';
+import { cardTitleOf, parseArgsObject, cardStateOf } from '../../../packages/deep-research-pack/src/lib/events/tool-card.ts';
 
 test('web_search 卡标题：queries 数组 → 检索：词表（· 连接，60 字截断）', () => {
   const args = parseArgsObject('{"queries":["DSH harness","DeepSeek plugin"]}');

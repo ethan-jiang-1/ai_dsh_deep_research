@@ -10,10 +10,10 @@ import { useRef, useState } from 'react'
 import type { MutableRefObject } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
-import { SECTION_LABELS, type LibraryEntry, type LibrarySections } from '../../lib/library-fold.ts'
-import { BUILTIN_PREFERENCES } from '../../lib/config-tables.ts'
+import { SECTION_LABELS, type LibraryEntry, type LibrarySections } from '../../lib/method-library/library-fold.ts'
+import { BUILTIN_PREFERENCES } from '../../lib/shared/config-tables.ts'
 import { displayBuiltinOf } from '../builtin-display.ts'
-import type { DraftField } from '../../lib/method-draft.ts'
+import type { DraftField } from '../../lib/method-library/method-draft.ts'
 import {
   builtinLibraryEntry, draftDirty, draftOf, emptySections,
   type MethodLibraryOperationRequest, type Mode, type PendingMethodOperation,

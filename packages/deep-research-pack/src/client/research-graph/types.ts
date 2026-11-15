@@ -7,11 +7,11 @@
 //                 本页签只在提供时渲染「打开负责人」）。
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { RunSource } from '../../lib/run-context.ts'
+import type { RunSource } from '../../lib/run/run-context.ts'
 import type { TeamMemberProjection, TeamTaskView } from '@deepseek-ai/dsh-experimental-agent-team/client'
-import type { AttentionItem } from '../../lib/plan-graph.ts'
-import type { PlanNode } from '../../lib/plan-index.ts'
-import type { GraphNodeState } from '../../lib/graph-model.ts'
+import type { AttentionItem } from '../../lib/plan/plan-graph.ts'
+import type { PlanNode } from '../../lib/plan/plan-index.ts'
+import type { GraphNodeState } from '../../lib/plan/graph-model.ts'
 // 标准 props 的类型增强（useSession / sessionId / useSessions / useSessionStatus）。
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'

@@ -6,16 +6,16 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { foldLibrary, type LibraryEntry } from '../../lib/library-fold.ts'
-import { bindingTrust } from '../../lib/binding-trust.ts'
-import { openRun, type RunSource } from '../../lib/run-context.ts'
-import { foldMethodAdoption, type MethodAdoption } from '../../lib/method-of-question.ts'
-import { assistantReplyAfter, libraryDiff, receiptOf, type LibraryDiff } from '../../lib/receipt-fold.ts'
-import type { PackTranslate } from '../../lib/i18n.ts'
+import { foldLibrary, type LibraryEntry } from '../../lib/method-library/library-fold.ts'
+import { bindingTrust } from '../../lib/run/binding-trust.ts'
+import { openRun, type RunSource } from '../../lib/run/run-context.ts'
+import { foldMethodAdoption, type MethodAdoption } from '../../lib/method-library/method-of-question.ts'
+import { assistantReplyAfter, libraryDiff, receiptOf, type LibraryDiff } from '../../lib/run/receipt-fold.ts'
+import type { PackTranslate } from '../../lib/shared/i18n.ts'
 import { LIBRARY_PATH, type DetailState } from './config-model.ts'
 import type { FollowTarget, JournalFrame } from '../ResearchStatusTab.tsx'
 import type { DefaultsStore } from '../defaults/store.ts'
-import type { MethodLibraryReadResult } from '../../lib/method-library-read.ts'
+import type { MethodLibraryReadResult } from '../../lib/method-library/method-library-read.ts'
 
 /** 页签体注入面：库文件读取 + 目录列举（本次研究区定位 bundle）+ journal 流 + 指令发送闭包
  *  （index.ts 装配，绑定 remote）。 */

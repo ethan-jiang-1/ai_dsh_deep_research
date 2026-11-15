@@ -5,8 +5,8 @@ import { createHash } from 'node:crypto'
 import {
   applyMethodLibraryOperationEvent,
   initialMethodLibraryOperationState,
-} from '../../packages/deep-research-pack/src/lib/method-library-commands.ts'
-import { methodLibraryCommandText } from '../../packages/deep-research-pack/src/lib/method-library-operation.ts'
+} from '../../packages/deep-research-pack/src/lib/method-library/method-library-commands.ts'
+import { methodLibraryCommandText } from '../../packages/deep-research-pack/src/lib/method-library/method-library-operation.ts'
 
 const entryText = '## 机房选型\n- 找来源: a\n- 怎么核实: b\n- 报告怎么写: c\n- 不承诺: d'
 const payloadHash = createHash('sha256').update(entryText, 'utf8').digest('hex')

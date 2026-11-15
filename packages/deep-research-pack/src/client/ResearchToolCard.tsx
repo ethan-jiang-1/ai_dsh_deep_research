@@ -9,7 +9,7 @@
 import type { ReactNode } from 'react'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ToolCallViewProps } from '@deepseek-ai/dsh-client-ui-tool/client'
-import { cardStateOf, cardTitleOf, parseArgsObject } from '../lib/tool-card.ts'
+import { cardStateOf, cardTitleOf, parseArgsObject } from '../lib/events/tool-card.ts'
 
 /** 槽标准 props + 本包 locale 座（工具卡标题走字典）。 */
 type ResearchToolCardProps = ToolCallViewProps & PropsLocale<'deepResearchPack'>

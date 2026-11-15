@@ -7,7 +7,7 @@
 import type { ReactNode } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { defaultsButtonState } from '../../lib/research-defaults.ts'
+import { defaultsButtonState } from '../../lib/workspace/research-defaults.ts'
 import { AUTHORITY_LABEL, DEPTH_LABEL, FAMILY_LABEL, RECENCY_LABEL, SHAPE_LABEL } from './labels.ts'
 import { useDefaults, type DefaultsSnapshot, type DefaultsStore } from './store.ts'
 

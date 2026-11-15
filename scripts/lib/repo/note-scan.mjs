@@ -1,9 +1,9 @@
 // note-scan.mjs — notes 门禁的 Markdown 结构扫描（BUG-175/179/183/185/188；纯函数，keyless）。
 //
-// 块与行内注释遮罩直接复用 pack 唯一实现 `packages/deep-research-pack/src/lib/markdown-mask.ts`
+// 块与行内注释遮罩直接复用 pack 唯一实现 `packages/deep-research-pack/src/lib/shared/markdown-mask.ts`
 // （零第二份状态机副本；外部 CommonMark 真值由 `tests/contracts/markdown-mask-conformance.spec.mjs`
 // 直接对照 `mdast-util-from-markdown` 守卫）。行号保持原样，便于失败文案指到真实行。
-import { maskMarkdownLines } from '../../../packages/deep-research-pack/src/lib/markdown-mask.ts'
+import { maskMarkdownLines } from '../../../packages/deep-research-pack/src/lib/shared/markdown-mask.ts'
 
 /** 把非正文行（fence / 块级注释 / indented code）置空并剥除行内 HTML 注释；行数与原文一致。 */
 export function maskFencedCode(text) {

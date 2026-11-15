@@ -8,10 +8,10 @@
 // 删除属改记录决定，退役条件登记在 `_backlog/triggers.md`。
 import type { ReactNode } from 'react'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { PackTranslate } from '../../lib/i18n.ts'
-import { BUILTIN_PREFERENCES, DISTILL_INSTRUCTION, DRAFT_INSTRUCTION, PATTERN_METHOD_RULES, SECTIONS } from '../../lib/config-tables.ts'
+import type { PackTranslate } from '../../lib/shared/i18n.ts'
+import { BUILTIN_PREFERENCES, DISTILL_INSTRUCTION, DRAFT_INSTRUCTION, PATTERN_METHOD_RULES, SECTIONS } from '../../lib/shared/config-tables.ts'
 import { displayDemoOf, displayNameOf } from '../builtin-display.ts'
-import { summaryOfEntry, type LibraryEntry, type LibrarySections } from '../../lib/library-fold.ts'
+import { summaryOfEntry, type LibraryEntry, type LibrarySections } from '../../lib/method-library/library-fold.ts'
 import { sectionLabelOf } from './section-labels.ts'
 
 export interface LegacyManagementPaneProps {

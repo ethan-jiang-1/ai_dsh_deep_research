@@ -8,7 +8,7 @@
 import { useEffect, useState, type CSSProperties, type ReactElement } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { shouldShowStartCard } from '../lib/start-card.ts'
+import { shouldShowStartCard } from '../lib/workspace/start-card.ts'
 
 /** 注入面：会话身份、当前工作区、只读文件列表与一次性消息探测。 */
 export interface StartCardInjected {

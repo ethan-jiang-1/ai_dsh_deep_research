@@ -3,7 +3,7 @@
 // 本文件把政策钉成一张真值表：write 永远可信；read 在挂起/立项窗抑制；其余 read 可信。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { bindingTrust, statusFaceMarker } from '../../../packages/deep-research-pack/src/lib/binding-trust.ts';
+import { bindingTrust, statusFaceMarker } from '../../../packages/deep-research-pack/src/lib/run/binding-trust.ts';
 import { toolCall, toolResult } from '../../fixtures/events.mjs';
 
 const read = (path = 'drt_x/a.md') => toolCall({ name: 'read', arguments: { path }, time: '2026-10-23T10:00:00Z' });

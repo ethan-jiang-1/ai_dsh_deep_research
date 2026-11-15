@@ -4,7 +4,7 @@
 // （`method-coach-<draftKey>`），无浏览器持久化；`retain` 失败才创建（会话缺席 = 首次打开）。
 // 服务经 `ctx.get` 读取（Cordis：直接属性访问会触发 inject 守卫）。
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { translateZh, type PackTranslate } from '../lib/i18n.ts'
+import { translateZh, type PackTranslate } from '../lib/shared/i18n.ts'
 import { en, zh } from './locales.ts'
 
 /** 会话服务最小面（vendor sessions）。 */

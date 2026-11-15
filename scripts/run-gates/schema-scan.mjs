@@ -10,7 +10,7 @@
 import { existsSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { listRuns } from '../../packages/deep-research-pack/src/lib/run-context.ts'
+import { listRuns } from '../../packages/deep-research-pack/src/lib/run/run-context.ts'
 import { scanAll } from '../lib/gates/schema-scan-core.mjs'
 import { nodeRunSource } from '../lib/gates/run-source-node.mjs'
 import { workspaceRoot } from '../lib/shared/workspace-root.mjs'

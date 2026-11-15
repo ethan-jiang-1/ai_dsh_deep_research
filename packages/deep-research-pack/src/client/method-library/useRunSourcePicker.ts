@@ -10,8 +10,8 @@
 import { useRef, useState } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
-import { isCompletedMethodSourceRun, latestFinalVersion, type SourcePreview } from '../../lib/method-library-source.ts'
-import type { MethodLibraryReadResult } from '../../lib/method-library-read.ts'
+import { isCompletedMethodSourceRun, latestFinalVersion, type SourcePreview } from '../../lib/method-library/method-library-source.ts'
+import type { MethodLibraryReadResult } from '../../lib/method-library/method-library-read.ts'
 import type { RunSourceCandidate } from './views.tsx'
 
 /** run 列表的读取态（与 `SourceSelectionView` 的 runState 同一组值）。 */

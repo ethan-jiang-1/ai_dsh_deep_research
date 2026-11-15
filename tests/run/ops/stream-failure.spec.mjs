@@ -5,7 +5,7 @@
 //   死亡回合漏报或重试中误报，下方用例红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { streamFailureOf } from '../../../packages/deep-research-pack/src/lib/stream-failure.ts';
+import { streamFailureOf } from '../../../packages/deep-research-pack/src/lib/events/stream-failure.ts';
 
 const malformedTurnEnd = (seq, turn = 1) => ({
   type: 'turn/end', seq,

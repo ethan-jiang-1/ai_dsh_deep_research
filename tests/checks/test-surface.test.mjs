@@ -113,7 +113,7 @@ function coveredPackLib(files) {
       const resolved = localImportPath(file, specifier)
       if (resolved === undefined) continue
       const rel = relative(PACK_LIB, resolved).split('\\').join('/')
-      if (rel.startsWith('..') || !rel.endsWith('.ts') || rel.includes('/')) continue
+      if (rel.startsWith('..') || !rel.endsWith('.ts')) continue
       covered.add(rel.replace(/\.ts$/, ''))
     }
   }
@@ -122,7 +122,15 @@ function coveredPackLib(files) {
 
 test('覆盖边界：pack src/lib 每个纯件都被至少一个测试直接 import（新增件不写测试 = 红）', () => {
   const files = testFiles()
-  const modules = readdirSync(PACK_LIB).filter((f) => f.endsWith('.ts')).map((f) => f.replace(/\.ts$/, ''))
+  const modules = []
+  const collectPackLib = (dir) => {
+    for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, ent.name)
+      if (ent.isDirectory()) collectPackLib(p)
+      else if (ent.name.endsWith('.ts')) modules.push(relative(PACK_LIB, p).split('\\').join('/').replace(/\.ts$/, ''))
+    }
+  }
+  collectPackLib(PACK_LIB)
   assert.ok(modules.length >= 20, `防空语料：pack src/lib 模块过少（${modules.length}）`)
   const covered = coveredPackLib(files)
   const uncovered = modules.filter((name) => !covered.has(name)).sort()

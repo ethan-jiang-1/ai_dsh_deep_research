@@ -1,7 +1,7 @@
 // Method Library watcher decodes durable Session call/result identities, not prose acknowledgments.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { methodLibraryCoachEventOf } from '../../packages/deep-research-pack/src/lib/method-library-events.ts'
+import { methodLibraryCoachEventOf } from '../../packages/deep-research-pack/src/lib/method-library/method-library-events.ts'
 
 test('identifies owner prompt request IDs from durable user messages', () => {
   assert.deepEqual(methodLibraryCoachEventOf({

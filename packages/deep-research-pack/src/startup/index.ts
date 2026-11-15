@@ -12,7 +12,7 @@ import type { Context } from '@deepseek-ai/cordis'
 import { basename, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readSettings, resolveStartupWorkspace, writeSettings } from './settings.ts'
-import { workspaceTitleFor } from '../lib/workspace-title.ts'
+import { workspaceTitleFor } from '../lib/workspace/workspace-title.ts'
 
 /** Cordis 插件名。 */
 export const name = 'deep-research-startup'

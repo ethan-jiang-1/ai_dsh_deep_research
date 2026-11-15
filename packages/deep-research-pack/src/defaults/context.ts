@@ -15,7 +15,7 @@ import {
   type Authority, type DefaultsProblem, type DefaultsValue, type EffortBand,
   type OutputShape, type Recency, type SourceFamily,
   parseDefaults,
-} from '../lib/research-defaults.ts'
+} from '../lib/workspace/research-defaults.ts'
 
 /** 方法库文件名（与 manual / method-library-tool 同源）。 */
 const LIBRARY_FILE = 'method-library.md'

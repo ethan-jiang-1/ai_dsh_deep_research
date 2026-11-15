@@ -140,6 +140,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 `tests/run/<owner>/` 与 `scripts/lib/<owner>/` 同名（`gates` / `ops` / `channel` / `harness` /
 `probes` / `shared`）；跨切证据住 `shared/`。模块 → owner → 测试的生成索引 = [tests/INDEX.generated.md](../tests/INDEX.generated.md)；
 镜像契约 = [test-owner-mirror](../tests/checks/test-owner-mirror.test.mjs)。
+pack 侧：`src/lib/<domain>/` ↔ `tests/cockpit/lib/<domain>/`（7 个 domain），`src/client/<sub>/` ↔ `tests/cockpit/client/<sub>/`，`src/<surface>/` ↔ `tests/pack/<surface>/`；契约 = [pack-mirror](../tests/checks/pack-mirror.test.mjs)。
 
 ### 新检查落家序（加一个检查时按序找家，单一入口）
 
@@ -198,7 +199,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 页签不出现 / keyed 槽空白 | 同上 + `client-keys` 门禁 | `keys.ts` 字面量与 [驾驶舱 §2](design/40-research-cockpit.md) 的登记 |
 | 状态页显示“未绑定” | [client-load.entry](../scripts/smoke/client-load.entry.mjs) 的绑定会话断言；run 通道用 `run-driver probe --require-data` | [bundle-sessions](../scripts/run-ops/bundle-sessions.mjs) 反查会话 id + 状态摘要 |
 | run 卡住 / HITL 不弹 | [watch-run](../scripts/run-ops/watch-run.mjs) + [bundle-sessions](../scripts/run-ops/bundle-sessions.mjs) | 挂起谓词与日志回退检测；语义 = [Run 指南 §3](guides/61-run-playbook.md) |
-| 方法库保存失败 | [method-library 单测](../tests/cockpit/lib/method-library-operation-state.spec.mjs) + 写路径 [method-library-tool.e2e](../scripts/smoke/method-library-tool.e2e.mjs)（开发档，需 native 产物） | 回执三态；`useOperationQueue` |
+| 方法库保存失败 | [method-library 单测](../tests/cockpit/lib/method-library/method-library-operation-state.spec.mjs) + 写路径 [method-library-tool.e2e](../scripts/smoke/method-library-tool.e2e.mjs)（开发档，需 native 产物） | 回执三态；`useOperationQueue` |
 | 交付门红 | [node-gate-delivery 测试](../tests/run/gates/node-gate-delivery.spec.mjs) + [node-gate](../scripts/run-gates/node-gate.mjs) | 门 A/C 判据与 `present` 见证 |
 | 证据链红 | [evidence-audit 测试](../tests/run/gates/evidence-audit.spec.mjs) + [evidence-audit](../scripts/run-gates/evidence-audit.mjs) | `source_url` / 摘录 / 引用链 |
 | 安装 / 首启坏 | CI deploy 的 [lifecycle.entry](../scripts/smoke/lifecycle.entry.mjs)；本地 [product-boot.entry](../scripts/smoke/product-boot.entry.mjs) / [install-shape.entry](../scripts/smoke/install-shape.entry.mjs) | market/tarball 形状；首屏工作区 |

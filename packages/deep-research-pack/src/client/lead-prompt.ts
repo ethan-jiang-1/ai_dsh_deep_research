@@ -3,7 +3,7 @@
 // 从 client/index.ts 拆出（2026-11-03 审计 P4）。requestId 铸造 = vendor 同款
 // （session.ts beginSubmission：randomUUID as SessionRequestId）；remote 句柄在注入回调内取好。
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { translateZh, type PackTranslate } from '../lib/i18n.ts'
+import { translateZh, type PackTranslate } from '../lib/shared/i18n.ts'
 
 export interface LeadPromptRemote {
   prompt(input: unknown, signal: AbortSignal): Promise<{ ok: boolean; error?: unknown }>

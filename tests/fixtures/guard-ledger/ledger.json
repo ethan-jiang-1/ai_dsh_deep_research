@@ -101,7 +101,7 @@
     {
       "id": "BUG-025",
       "mechanism": "旧格式偏好条目保留 legacyText 整段编辑载荷，混居态分区优先不丢旧文",
-      "guard": "tests/cockpit/lib/library-fold.spec.mjs",
+      "guard": "tests/cockpit/lib/method-library/library-fold.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "忽略 legacyText 硬编码空载荷 → 旧格式与混居指令例红"
@@ -157,7 +157,7 @@
     {
       "id": "BUG-033",
       "mechanism": "摘要读点与交付三行精确对齐 brief-fold 正本",
-      "guard": "tests/cockpit/lib/brief-fold.spec.mjs",
+      "guard": "tests/cockpit/lib/run/brief-fold.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "改 brief-fold 交付三行任一文案或锚点 → 精确断言红"
@@ -301,7 +301,7 @@
     {
       "id": "BUG-112",
       "mechanism": "plan 版本解析只认头部主声明与规范重写记录行，忽略正文旧版引用与普通斜杠行",
-      "guard": "tests/cockpit/lib/run-version.spec.mjs",
+      "guard": "tests/cockpit/lib/run/run-version.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "恢复全文取末条或无上下文斜杠匹配 → 假版本冲突例红"
@@ -389,7 +389,7 @@
     {
       "id": "BUG-167",
       "mechanism": "方法库标题读写统一剥离并拒绝 Unicode 格式控制字符（\\p{Cf}），防视觉同名幽灵条目",
-      "guard": "tests/cockpit/lib/library-heading-consistency.spec.mjs",
+      "guard": "tests/cockpit/lib/method-library/library-heading-consistency.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "去掉格式字符剥离或写路径拒绝 → ZWSP 同名新建例红"
@@ -493,7 +493,7 @@
     {
       "id": "BUG-180",
       "mechanism": "方法库标题含重复来源段、重复默认段或未知括号段时标记不可改写并写路径 fail-loud",
-      "guard": "tests/cockpit/lib/library-heading-consistency.spec.mjs",
+      "guard": "tests/cockpit/lib/method-library/library-heading-consistency.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删段唯一性与未知段拒绝分支 → upsert 静默丢段例红"

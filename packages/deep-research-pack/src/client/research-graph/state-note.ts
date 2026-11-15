@@ -4,7 +4,7 @@
 // 图形态，输出 = { title, body } 或 null），此前以 IIFE 埋在 400+ 行组件里，既难单测也难对照。
 // 语义关键：**"读不到" ≠ "没有"**（BUG-045）——绑定读取失败必须与"尚未绑定"分开报。
 // 文案走折层字典（zh-fold / en-fold）；组件传 `props.t`，非 UI 面缺省中文。
-import { translateZh, type PackTranslate } from '../../lib/i18n.ts'
+import { translateZh, type PackTranslate } from '../../lib/shared/i18n.ts'
 
 export interface GraphStateNoteInput {
   readonly planState: 'loading' | 'missing' | 'unbound' | 'ready' | 'truncated'

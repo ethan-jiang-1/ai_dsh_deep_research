@@ -2,11 +2,11 @@
 //
 // 从 MethodLibraryView.tsx 拆出（BUG-055 数据面收口）：这些字符串进模型请求、不进用户界面；
 // 与 UI 的 `t()` 面分开后，client 组件的 CJK 扫描守卫才能把「组件写死中文」当红。
-import type { LibraryEntry, LibrarySections } from '../../lib/library-fold.ts'
-import { BUILTIN_PREFERENCES } from '../../lib/config-tables.ts'
-import { FIELD_LABELS, FIELD_ORDER, type DraftField } from '../../lib/method-draft.ts'
-import { SECTION_LABELS } from '../../lib/library-fold.ts'
-import type { SourcePreview } from '../../lib/method-library-source.ts'
+import type { LibraryEntry, LibrarySections } from '../../lib/method-library/library-fold.ts'
+import { BUILTIN_PREFERENCES } from '../../lib/shared/config-tables.ts'
+import { FIELD_LABELS, FIELD_ORDER, type DraftField } from '../../lib/method-library/method-draft.ts'
+import { SECTION_LABELS } from '../../lib/method-library/library-fold.ts'
+import type { SourcePreview } from '../../lib/method-library/method-library-source.ts'
 import type { Draft } from './views.tsx'
 import type { RunSourceCandidate } from './views.tsx'
 

@@ -12,7 +12,7 @@
  * 但 run-context 只传相对基址拼出的路径。
  */
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { Entry, Outcome, Page, RunSource } from '../lib/run-context.ts'
+import type { Entry, Outcome, Page, RunSource } from '../lib/run/run-context.ts'
 
 /** `remote.workspaceFiles` 的结构性子集（只取本适配器用到的三个方法；测试可传裸对象）。 */
 export interface WorkspaceFilesLike {

@@ -10,7 +10,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync,
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { runDefaultsCommand } from '../../packages/deep-research-pack/src/defaults/command.ts'
-import { DEFAULTS_FILE, parseDefaults } from '../../packages/deep-research-pack/src/lib/research-defaults.ts'
+import { DEFAULTS_FILE, parseDefaults } from '../../packages/deep-research-pack/src/lib/workspace/research-defaults.ts'
 
 const dirs = []
 function workspace() {

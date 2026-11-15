@@ -17,7 +17,7 @@ import { coachContextOf, coachStartAction, manualEditPrompt } from '../../../pac
 import { saveOperationInstruction, removeOperationInstruction, setDefaultOperationInstruction, clearDefaultOperationInstruction } from '../../../packages/deep-research-pack/src/client/method-library/operation-prompts.ts'
 import { sectionLabelOf } from '../../../packages/deep-research-pack/src/client/research-config/section-labels.ts'
 import { DEPTH_LABEL, SHAPE_LABEL, FAMILY_LABEL, AUTHORITY_LABEL, RECENCY_LABEL } from '../../../packages/deep-research-pack/src/client/defaults/labels.ts'
-import { EFFORT_BANDS, OUTPUT_SHAPES, SOURCE_FAMILIES, AUTHORITIES, RECENCIES } from '../../../packages/deep-research-pack/src/lib/research-defaults.ts'
+import { EFFORT_BANDS, OUTPUT_SHAPES, SOURCE_FAMILIES, AUTHORITIES, RECENCIES } from '../../../packages/deep-research-pack/src/lib/workspace/research-defaults.ts'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 

@@ -14,9 +14,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
-import type { MethodLibraryCoachEvent } from '../lib/method-library-events.ts'
-import type { SourcePreview } from '../lib/method-library-source.ts'
-import type { MethodLibraryReadResult } from '../lib/method-library-read.ts'
+import type { MethodLibraryCoachEvent } from '../lib/method-library/method-library-events.ts'
+import type { SourcePreview } from '../lib/method-library/method-library-source.ts'
+import type { MethodLibraryReadResult } from '../lib/method-library/method-library-read.ts'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import {
@@ -24,10 +24,10 @@ import {
   methodNameIssue,
   summaryOfEntry,
   type LibraryEntry,
-} from '../lib/library-fold.ts'
-import { BUILTIN_PREFERENCES } from '../lib/config-tables.ts'
+} from '../lib/method-library/library-fold.ts'
+import { BUILTIN_PREFERENCES } from '../lib/shared/config-tables.ts'
 import { displayNameOf, displaySummaryOf } from './builtin-display.ts'
-import { coachPatchAppliesToDraft, mergeCoachDraft, parseMethodDraft } from '../lib/method-draft.ts'
+import { coachPatchAppliesToDraft, mergeCoachDraft, parseMethodDraft } from '../lib/method-library/method-draft.ts'
 import { BUTTON_STYLE, HEADER_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE } from './method-library/styles.ts'
 import { BuiltinView, EditorView, LibraryRow, MethodSummaryView, ReadMineView, SourceSelectionView } from './method-library/views.tsx'
 import { MethodCoachPanel } from './method-library/coach.tsx'

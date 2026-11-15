@@ -8,7 +8,7 @@ import assert from 'node:assert/strict'
 import { readFileSync, existsSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { RERUN_TRIAGE_HINT, RERUN_TRIAGE_ROWS, RERUN_TRIAGE_TITLE } from '../../packages/deep-research-pack/src/lib/rerun-triage.ts'
+import { RERUN_TRIAGE_HINT, RERUN_TRIAGE_ROWS, RERUN_TRIAGE_TITLE } from '../../packages/deep-research-pack/src/lib/run/rerun-triage.ts'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
@@ -82,11 +82,11 @@ test('L1 词表：skill 七类说法 / 四种手段 / 五条纪律，且被 pers
 })
 
 test('L3 只读出口：两组件共用 src/lib 常量，且不引入动作按钮', () => {
-  const lib = 'packages/deep-research-pack/src/lib/rerun-triage.ts'
+  const lib = 'packages/deep-research-pack/src/lib/run/rerun-triage.ts'
   assert.ok(existsSync(join(ROOT, lib)), 'rerun-triage 文案常量模块不存在')
   for (const rel of ['packages/deep-research-pack/src/client/ResearchStatusTab.tsx', 'packages/deep-research-pack/src/client/ResearchFinalTab.tsx']) {
     const c = read(rel)
-    assert.ok(c.includes("lib/rerun-triage.ts"), `${rel} 未引用共享常量`)
+    assert.ok(c.includes("lib/run/rerun-triage.ts"), `${rel} 未引用共享常量`)
     assert.ok(c.includes('rerunTriageRowsOf(props.t)'), `${rel} 未走 locale 取词（BUG-055：英文界面不得回退中文）`)
   }
   assert.match(RERUN_TRIAGE_TITLE, /三种改法/, '常量缺折叠块标题')

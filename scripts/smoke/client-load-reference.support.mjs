@@ -5,11 +5,11 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { clientHistoryWindow, readSessionEvents, resolveSessionLog } from '../lib/shared/session-log.mjs'
-import { sessionBundleOf } from '../../packages/deep-research-pack/src/lib/bundle-bind.ts'
-import { deriveSteps, latestRunVersion } from '../../packages/deep-research-pack/src/lib/run-fold.ts'
-import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
-import { readinessOfSources } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
-import { latestFinalDelivery } from '../../packages/deep-research-pack/src/lib/final-target.ts'
+import { sessionBundleOf } from '../../packages/deep-research-pack/src/lib/run/bundle-bind.ts'
+import { deriveSteps, latestRunVersion } from '../../packages/deep-research-pack/src/lib/run/run-fold.ts'
+import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/events/hitl-fold.ts'
+import { readinessOfSources } from '../../packages/deep-research-pack/src/lib/review/review-readiness.ts'
+import { latestFinalDelivery } from '../../packages/deep-research-pack/src/lib/run/final-target.ts'
 import { selectBoundSession } from '../lib/harness/client-load-select.mjs'
 
 /**

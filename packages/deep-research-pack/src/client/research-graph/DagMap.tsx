@@ -5,7 +5,7 @@
 // types.ts。切出后页签体只留数据装配与布局，DAG 的几何/交互改动只读本文件。
 import type { ReactNode } from 'react'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
-import { wavesOf } from '../../lib/plan-graph.ts'
+import { wavesOf } from '../../lib/plan/plan-graph.ts'
 import type { GraphNodeView } from './types.ts'
 import { shortLabel } from './format.ts'
 

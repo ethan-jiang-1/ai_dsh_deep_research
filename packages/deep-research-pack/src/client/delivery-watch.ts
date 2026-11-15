@@ -9,7 +9,7 @@
 // 这是本包唯一一处"替用户打开东西"：出现时机就是交付本身，别处不再自动弹面。
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { Follow } from './session-follow.ts'
-import { draftInProgress, latestFinalDelivery, shouldOpenFinal } from '../lib/final-target.ts'
+import { draftInProgress, latestFinalDelivery, shouldOpenFinal } from '../lib/run/final-target.ts'
 
 export interface DeliveryWatchDeps {
   readonly follow: Follow

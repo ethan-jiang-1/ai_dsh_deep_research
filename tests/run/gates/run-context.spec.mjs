@@ -5,8 +5,8 @@
 // notes/archived/2026-10-19-final-tab-round-close.md §4），不是合成怪例。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { terminalReadiness } from '../../../packages/deep-research-pack/src/lib/review-readiness.ts';
-import { bundleCandidates, openRun, listRuns, readPolicyOf } from '../../../packages/deep-research-pack/src/lib/run-context.ts';
+import { terminalReadiness } from '../../../packages/deep-research-pack/src/lib/review/review-readiness.ts';
+import { bundleCandidates, openRun, listRuns, readPolicyOf } from '../../../packages/deep-research-pack/src/lib/run/run-context.ts';
 
 const OUT = (value) => ({ ok: true, value });
 const MISSING = { ok: false, reason: 'missing' };

@@ -159,7 +159,7 @@
 | lib/shared/replay-request.mjs | record-role-fixture、replay-request.spec、snapshot-replay.entry | 组装请求面逐条比较：persona、header 全序列、四处 user/message 注入（含时钟序列）（定向归一化） |
 | lib/harness/snapshot-mode.mjs | snapshot-readonly.test、snapshot-replay.entry | 快照 smoke 模式判据：只读/刷新互斥、`DSH_SNAPSHOT` 只认 replay、刷新必须 `--why` |
 | lib/repo/smoke-lane.mjs | run-lane、smoke-lane.test | smoke 车道选择：lane/tier 过滤、support 不进车道、默认 ci + `--all` |
-| lib/tools/test-index.mjs | render-test-index、test-index.test、test-owner-mirror.test | 测试 ↔ 源码 owner 索引生成：模块 → owner → 直接 import 的测试（生成物 = tests/INDEX.generated.md；生成器 = dev/render-test-index.mjs） |
+| lib/tools/test-index.mjs | render-test-index、test-index.test、test-owner-mirror.test、pack-mirror.test | 测试 ↔ 源码 owner 索引生成：模块 → owner → 直接 import 的测试（生成物 = tests/INDEX.generated.md；生成器 = dev/render-test-index.mjs） |
 | lib/shared/profile-health.mjs | profile-health.spec、record-role-fixture、snapshot-replay.entry、team-preflight.e2e | dev profile 版本与镜像新鲜度预检：团队层版本 == 运行时 dsh 版本且安装副本关键文件与包源一致；缺席/落后/陈旧 → 明确 exit 2 + 重建指令（BUG-066/080） |
 | lib/shared/startup-hint.mjs | startup-hint.spec、web-banner | boot 失败归因：识别日志里的 incompatible/exemption，指出 profile 未随 pin 重钉（BUG-066） |
 | lib/harness/client-load-select.mjs | client-load-reference.support、client-load-select.spec | client-load 绑定会话选择（只认 lead 根；防富 coach 会话假红，BUG-142） |
@@ -172,7 +172,7 @@
 | lib/shared/secret-scan.mjs | run-accept、secret-scan、secret-scan.spec | 高置信凭据形态检测（sk-/ghp_/AKIA/PRIVATE KEY/Bearer）；只报 path/line/kind，不回显原文 |
 | lib/test-infra/selftest-library.mjs | library-fold.spec | 「研究配置」面板/library-fold 自测例库单一正本：12 形态条目（四字段/部分/空值/旧格式/混居/重名/空条目/杂项行/续行/缩进），两处共用防形态漂移 |
 | lib/test-infra/method-presets.mjs | library-fold.spec、method-presets.spec | research-brief skill「方法预设」表的唯一解析入口（表头/行列数/防空集 fail-loud）——内置名单不再各写一份手写副本 |
-| lib/tools/keyless-imports.mjs | asset-ledger、boot-timer.test、test-index、test-owner-mirror.test、client-surface.test、layering.test、smoke-imports.test、test-lanes.test、test-surface.test | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
+| lib/tools/keyless-imports.mjs | asset-ledger、boot-timer.test、test-index、test-owner-mirror.test、pack-mirror.test、client-surface.test、layering.test、smoke-imports.test、test-lanes.test、test-surface.test | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
 | lib/harness/gates-cases.mjs | gates.e2e、verify-gates.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
 | lib/repo/fix-evidence.mjs | fix-evidence.test、staged-change-pairing、backlog-liveness | bug 修复卡实证合同：改动/红证/绿证 + 可重放红证/测试资产；活跃 修复落地 与归档共用 |
 | lib/tools/workspace-parsers.mjs | ci-workflow、markdown-mask-conformance.spec、note-scan.test、record-ci-oracle、replay-fixtures.spec、verdict-conformance.spec、workspace-parsers.test | 锁定在 `node_modules/.pnpm` 内的外部纯函数解析器加载器（`yaml@2` + `mdast-util-from-markdown@2`；防向上穿透宿主机目录） |

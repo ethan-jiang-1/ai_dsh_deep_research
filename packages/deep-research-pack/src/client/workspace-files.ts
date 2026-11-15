@@ -4,7 +4,7 @@
 //   · `workspace-file/not-found` = 目录/文件尚未产出（run 早期）→ 合法空态；
 //   · 其他错误码/通道异常 → 打 console（冒烟可抓）+ 返回 null，不静默吞。
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { joinMethodLibraryPages, type MethodLibraryReadResult } from '../lib/method-library-read.ts'
+import { joinMethodLibraryPages, type MethodLibraryReadResult } from '../lib/method-library/method-library-read.ts'
 
 type ReadPage = { readonly text: string; readonly lines: number; readonly eof: boolean }
 

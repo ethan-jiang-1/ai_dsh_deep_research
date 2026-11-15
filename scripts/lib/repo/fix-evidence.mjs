@@ -7,7 +7,7 @@
 // 生效——活跃 bugs/ 与新归档提交一律要求结构化 `json fix-evidence`，禁止借旧 opened 日期绕过。
 // 章节边界复用 `markdown-mask.ts` 剥离围栏与注释，防止围栏内 `## ` 截断；重复键经 JSON.parse 解码词法 token
 // 拦截 `\uXXXX` 同键绕过。
-import { maskMarkdownLines } from '../../../packages/deep-research-pack/src/lib/markdown-mask.ts'
+import { maskMarkdownLines } from '../../../packages/deep-research-pack/src/lib/shared/markdown-mask.ts'
 
 const CUTOFF = '2026-11-15'
 const REPLAYABLE = /(node\s+(?:--import\s+\S+\s+)?--test|pnpm\s+(?:test|verify)|gates\.e2e)/

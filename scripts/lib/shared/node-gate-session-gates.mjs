@@ -6,9 +6,9 @@ import { finalVersionsIn } from './final-version.mjs'
 import { planCardsOf } from './plan-card.mjs'
 import { HITL_CONTRACT_DATE, PRE_CONTRACT_NOTE, decisionsLines, isPreContract, readinessOfBundle } from './node-gate-contracts.mjs'
 import { epochDateOf, toDateStr } from '../gates/schema-scan-core.mjs'
-import { slugInArgs } from '../../../packages/deep-research-pack/src/lib/bundle-bind.ts'
-import { askKindOf } from '../../../packages/deep-research-pack/src/lib/hitl-fold.ts'
-import { argsObjectOf } from '../../../packages/deep-research-pack/src/lib/journal-wire.ts'
+import { slugInArgs } from '../../../packages/deep-research-pack/src/lib/run/bundle-bind.ts'
+import { askKindOf } from '../../../packages/deep-research-pack/src/lib/events/hitl-fold.ts'
+import { argsObjectOf } from '../../../packages/deep-research-pack/src/lib/events/journal-wire.ts'
 
 /** 纯日志 reader：.jsonl 直读；.zstd 报线索后按空语料继续（''，判据偏红方向——红必须带线索）。
  *  zstd CLI 解压由驱动壳注入，本模块零子进程。 */

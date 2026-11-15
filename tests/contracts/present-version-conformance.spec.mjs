@@ -8,8 +8,8 @@
 // 红配方：把 latestPresentedFinalVersion 改成「对 events 里任意文本 match vN」→ 下方 prose 例红。
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { latestPresentedFinalVersion } from '../../packages/deep-research-pack/src/lib/final-target.ts'
-import { runVersionFaceOf } from '../../packages/deep-research-pack/src/lib/run-version.ts'
+import { latestPresentedFinalVersion } from '../../packages/deep-research-pack/src/lib/run/final-target.ts'
+import { runVersionFaceOf } from '../../packages/deep-research-pack/src/lib/run/run-version.ts'
 
 const presented = (path, time) => ({ type: 'deliverables/presented', time, data: { files: [{ path }] } })
 

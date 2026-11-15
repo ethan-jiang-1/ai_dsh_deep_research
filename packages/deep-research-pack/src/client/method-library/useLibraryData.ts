@@ -4,10 +4,10 @@
 // 草稿、写操作与会话生命周期另属其他 hook。读失败不抛：absent/error 都落成状态。
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { BUILTIN_PREFERENCES } from '../../lib/config-tables.ts'
-import { foldLibrary } from '../../lib/library-fold.ts'
+import { BUILTIN_PREFERENCES } from '../../lib/shared/config-tables.ts'
+import { foldLibrary } from '../../lib/method-library/library-fold.ts'
 import { filterLibraryEntries, pickSelectedEntry } from './model.ts'
-import type { MethodLibraryReadResult } from '../../lib/method-library-read.ts'
+import type { MethodLibraryReadResult } from '../../lib/method-library/method-library-read.ts'
 import { LIBRARY_PATH, type LoadState, type Segment } from './model.ts'
 
 export interface LibraryDataDeps {

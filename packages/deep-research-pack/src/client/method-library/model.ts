@@ -3,10 +3,10 @@
 // 从 MethodLibraryView.tsx 拆出（2026-11-03 审计 P4）。这里只放**无 React**的类型与小函数，
 // 组件负责读盘/会话/布局；纯判据可 keyless 单测（operationMetadataMatches / draftOf 等）。
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { MethodLibraryAction } from '../../lib/method-library-operation.ts'
-import { SECTION_LABELS, summaryOfEntry, type LibraryEntry, type LibrarySections } from '../../lib/library-fold.ts'
-import type { MethodLibrarySnapshot } from '../../lib/method-library-operation-state.ts'
-import type { BUILTIN_PREFERENCES } from '../../lib/config-tables.ts'
+import type { MethodLibraryAction } from '../../lib/method-library/method-library-operation.ts'
+import { SECTION_LABELS, summaryOfEntry, type LibraryEntry, type LibrarySections } from '../../lib/method-library/library-fold.ts'
+import type { MethodLibrarySnapshot } from '../../lib/method-library/method-library-operation-state.ts'
+import type { BUILTIN_PREFERENCES } from '../../lib/shared/config-tables.ts'
 import type { Draft } from './views.tsx'
 
 export const LIBRARY_PATH = 'method-library.md'

@@ -1,7 +1,7 @@
 // activity-fold 回归 — journal 事件 → 人性化活动行（keyless；四类出行 + 噪音过滤）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { foldActivityRows } from '../../../packages/deep-research-pack/src/lib/activity-fold.ts';
+import { foldActivityRows } from '../../../packages/deep-research-pack/src/lib/events/activity-fold.ts';
 import { toolCall } from '../../fixtures/events.mjs';
 
 const ev = (type, data = {}, time) => ({ type, data, time });

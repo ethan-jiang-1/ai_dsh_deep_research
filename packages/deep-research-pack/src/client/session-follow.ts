@@ -4,7 +4,7 @@
 // 无 DOM/React；`remote` 以结构类型注入，测试用假 remote 直接驱动。
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { FollowTarget, JournalFrame } from './research-status/types.ts'
-import { methodLibraryCoachEventOf, type MethodLibraryCoachEvent } from '../lib/method-library-events.ts'
+import { methodLibraryCoachEventOf, type MethodLibraryCoachEvent } from '../lib/method-library/method-library-events.ts'
 
 /** 一条 follow 流（组件注入面 + 内部消费共用同一形状）。 */
 export type Follow = (target: FollowTarget, signal: AbortSignal) => AsyncGenerator<JournalFrame>

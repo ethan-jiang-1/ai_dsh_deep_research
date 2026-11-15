@@ -5,7 +5,7 @@
 // 纯函数与写盘器分离；keyless 契约测试钉住（tests/hitl-provenance.spec.mjs——含缺件
 // fail-loud 反证）。消费方 = dev/hitl-answer.mjs（盘侧裁决通过后调用）。
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { sessionBindingOf } from '../../../packages/deep-research-pack/src/lib/bundle-bind.ts';
+import { sessionBindingOf } from '../../../packages/deep-research-pack/src/lib/run/bundle-bind.ts';
 import { join } from 'node:path';
 
 /**

@@ -2,7 +2,7 @@
 // 状态页签只跟本会话自己的 run）。信号 = tool/call 参数里的 drt_<slug>/ 路径形态。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { sessionBindingOf, sessionBundleOf } from '../../../packages/deep-research-pack/src/lib/bundle-bind.ts';
+import { sessionBindingOf, sessionBundleOf } from '../../../packages/deep-research-pack/src/lib/run/bundle-bind.ts';
 import { toolCall } from '../../fixtures/events.mjs';
 
 // wire 正本 = tests/fixtures/events.mjs；字符串 arguments 原样传（坏 JSON 负例形态）。

@@ -1,7 +1,7 @@
 // run-fold 回归 — 观察面共享步骤条与回边版本折算（keyless 纯函数）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { deriveSteps, latestRunVersion } from '../../../packages/deep-research-pack/src/lib/run-fold.ts';
+import { deriveSteps, latestRunVersion } from '../../../packages/deep-research-pack/src/lib/run/run-fold.ts';
 
 test('回边版本投影：稀疏 v1 + v3 文件显示最高真实版本 v3', () => {
   assert.equal(latestRunVersion(['v1.md', 'v3.md', 'notes.md', 'v03.md', 'V4.md']), 3);

@@ -13,7 +13,7 @@ import type {} from '@deepseek-ai/dsh-agent-preset-registry'
 import { estimateToolsTokens } from '@deepseek-ai/dsh-token-meter/estimate'
 import { firstTurnInputEstimate } from './method-library-mock-llm.ts'
 import { bootProductionProfile } from '../../../vendor/dsh/packages/test-support/loader-smoke/tests/fixtures/production-profile.ts'
-import { methodLibraryCommandText } from '../../../packages/deep-research-pack/src/lib/method-library-operation.ts'
+import { methodLibraryCommandText } from '../../../packages/deep-research-pack/src/lib/method-library/method-library-operation.ts'
 
 const NAME = 'method-library-tool-loader-smoke'
 const [rawPatchPath] = process.argv.slice(2)

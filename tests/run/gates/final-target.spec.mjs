@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import {
   deliveryFromReceipt, draftInProgress, finalAddressOf, finalPathOf, finalPathOfWithin, finalReadPlan, finalVersionOfPath, isFinalAddress, latestFinalDelivery, latestPresentedFinalVersion,
   sessionFileOf, shouldOpenFinal,
-} from '../../../packages/deep-research-pack/src/lib/final-target.ts';
+} from '../../../packages/deep-research-pack/src/lib/run/final-target.ts';
 
 const presented = (files, extra = {}) => ({
   type: 'deliverables/presented',

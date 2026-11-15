@@ -6,7 +6,7 @@
 // 把 argsObjectOf 的截断 catch 改为抛出 → 「截断 JSON」用例红；还原 → 全绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { argsObjectOf, argValueOf, normalizeQueries, contentTextParts } from '../../../packages/deep-research-pack/src/lib/journal-wire.ts';
+import { argsObjectOf, argValueOf, normalizeQueries, contentTextParts } from '../../../packages/deep-research-pack/src/lib/events/journal-wire.ts';
 
 test('argsObjectOf：对象直通 / JSON 串解析 / 截断与非对象 → null / 数组按对象放行', () => {
   assert.deepEqual(argsObjectOf({ a: 1 }), { a: 1 });

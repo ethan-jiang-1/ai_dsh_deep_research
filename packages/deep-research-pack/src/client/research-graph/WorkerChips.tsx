@@ -5,7 +5,7 @@
 import type { ReactNode } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { UseSessions, UseSessionStatus } from '@deepseek-ai/dsh-client-ui-session/client'
-import { workerChipsOf, type WorkerChip } from '../../lib/plan-graph.ts'
+import { workerChipsOf, type WorkerChip } from '../../lib/plan/plan-graph.ts'
 
 /** worker chips 子组件的 props（hooks 从父级透传；每个成员实例化一次，hooks 数量恒定）。 */
 interface WorkerChipsProps {

@@ -18,7 +18,7 @@
  * 更新语义：文件被改写时，正在看（`tab.visible`）→ 顶部提示条"重新读取"，不换掉你正在读的
  * 字；没在看 → 静默重读。轮询节奏与驾驶舱其余面同款（30s）。
  */
-import { rerunTriageRowsOf } from '../lib/rerun-triage.ts'
+import { rerunTriageRowsOf } from '../lib/run/rerun-triage.ts'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { MarkdownText } from '@deepseek-ai/dsh-client-ui-primitives'
@@ -26,10 +26,10 @@ import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import {
   FINAL_LEDGER_DIR, FINAL_NAME, FINAL_READER_NAME, FINAL_REVIEW_NAME, finalReadPlan, sessionFileOf,
-} from '../lib/final-target.ts'
-import { openRun, type RunSource } from '../lib/run-context.ts'
-import { latestRunVersion } from '../lib/run-fold.ts'
-import { terminalReadiness } from '../lib/review-readiness.ts'
+} from '../lib/run/final-target.ts'
+import { openRun, type RunSource } from '../lib/run/run-context.ts'
+import { latestRunVersion } from '../lib/run/run-fold.ts'
+import { terminalReadiness } from '../lib/review/review-readiness.ts'
 import { RESEARCH_STATUS_TAB_KIND } from './keys.ts'
 
 /** 页签体注入面（index.ts 装配，绑定 remote.workspaceFiles）。 */

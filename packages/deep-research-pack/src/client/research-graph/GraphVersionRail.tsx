@@ -4,7 +4,7 @@
 // 自包含的展示（当前 plan 版本 / 看旧图 / 看差异 / 旧图节点结构）。父级持有状态与读数。
 import type { ReactNode } from 'react'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
-import type { PlanIndex } from '../../lib/plan-index.ts'
+import type { PlanIndex } from '../../lib/plan/plan-index.ts'
 import { BUTTON_STYLE, MUTED_STYLE, BANNER_STYLE } from './styles.ts'
 
 export function GraphVersionRail(props: {

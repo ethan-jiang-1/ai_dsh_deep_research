@@ -2,7 +2,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { contractEpochOf, deliveryDate, runSchemaOf } from '../gates/schema-scan-core.mjs'
-import { readinessOfSources, terminalVerdictLine } from '../../../packages/deep-research-pack/src/lib/review-readiness.ts'
+import { readinessOfSources, terminalVerdictLine } from '../../../packages/deep-research-pack/src/lib/review/review-readiness.ts'
 
 /** 门 L 契约日（2026-10-03 = RFC wave0-leads-polish 落地日；此前交付的 bundle 不追溯）。 */
 export const LEADS_CONTRACT_DATE = '2026-10-03'

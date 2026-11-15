@@ -35,9 +35,9 @@ import {
   countsOf,
   wavesOf,
   type MemberStatus,
-} from '../lib/plan-graph.ts'
-import { planIssuesOf, type PlanNode } from '../lib/plan-index.ts'
-import { planDiffOf, type PlanDiff } from '../lib/plan-diff.ts'
+} from '../lib/plan/plan-graph.ts'
+import { planIssuesOf, type PlanNode } from '../lib/plan/plan-index.ts'
+import { planDiffOf, type PlanDiff } from '../lib/plan/plan-diff.ts'
 import {
   coverageLineOf,
   coverageOf,
@@ -47,7 +47,7 @@ import {
   nodeStateOf,
   projectionPendingState,
   type GraphCoverage,
-} from '../lib/graph-model.ts'
+} from '../lib/plan/graph-model.ts'
 import { useGraphFeed } from './research-graph/useGraphFeed.ts'
 import type { GraphNodeView, ResearchGraphTabProps } from './research-graph/types.ts'
 import { shortLabel } from './research-graph/format.ts'

@@ -4,8 +4,8 @@
 // 改动须对照 2026-10-11 首验的三条队员流实测记录（纯 id follow 被 host 守卫拒的形态）。
 import { useEffect } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { foldMemberActivity, type MemberActivitySummary } from '../../lib/member-activity.ts'
-import type { PackTranslate } from '../../lib/i18n.ts'
+import { foldMemberActivity, type MemberActivitySummary } from '../../lib/events/member-activity.ts'
+import type { PackTranslate } from '../../lib/shared/i18n.ts'
 import type { FollowTarget, JournalFrame } from './types.ts'
 
 interface UseMemberActivityOptions {

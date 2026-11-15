@@ -4,8 +4,8 @@
 // 实测），改形状须连 follow 调用方与 vendor sessionAddress() 语义一起重校。
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { RunSource } from '../../lib/run-context.ts'
-import type { RunStep } from '../../lib/run-fold.ts'
+import type { RunSource } from '../../lib/run/run-context.ts'
+import type { RunStep } from '../../lib/run/run-fold.ts'
 
 /** journal 帧的最小投影（wire 形状 → 领域形状）。 */
 export type JournalFrame =

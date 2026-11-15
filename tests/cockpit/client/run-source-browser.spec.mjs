@@ -3,7 +3,7 @@
 // malformed wire → unreadable；位置/读策略本身由 tests/run/gates/run-context.spec.mjs 钉。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { listRuns, openRun } from '../../../packages/deep-research-pack/src/lib/run-context.ts';
+import { listRuns, openRun } from '../../../packages/deep-research-pack/src/lib/run/run-context.ts';
 import { browserRunSource } from '../../../packages/deep-research-pack/src/client/run-source-browser.ts';
 
 const ok = (value) => ({ ok: true, value });

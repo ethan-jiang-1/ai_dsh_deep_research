@@ -12,7 +12,7 @@ import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
-const FOLD = join(ROOT, 'packages/deep-research-pack/src/lib/hitl-fold.ts')
+const FOLD = join(ROOT, 'packages/deep-research-pack/src/lib/events/hitl-fold.ts')
 const PERSONA = join(ROOT, 'packages/deep-research-pack/presets/lead.patch.yml')
 
 const foldSrc = readFileSync(FOLD, 'utf8')

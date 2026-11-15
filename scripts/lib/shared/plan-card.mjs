@@ -10,7 +10,7 @@
 // notes/implemented/2026-10-11-plan-card-length-warn.md。
 
 // 入参解析正本 = pack `journal-wire.ts` 的 argsObjectOf（2026-11-03 卫生审计 D2-4）。
-import { argsObjectOf } from '../../../packages/deep-research-pack/src/lib/journal-wire.ts';
+import { argsObjectOf } from '../../../packages/deep-research-pack/src/lib/events/journal-wire.ts';
 
 /** 计划卡的签名标签（HITL1 第二段卡的固定选项之一）——比"正文含计划字样"稳。 */
 export const PLAN_CARD_MARK = '按计划开跑';

@@ -2,7 +2,7 @@
 // 不是 canonical 存储；gate/HITL1 卡只读它，不写第二份真相。
 // 边界：不读会话/驾驶舱，不调用模型，不判断策略好坏；解析失败退化为空值，不 throw。
 
-import { planIndex, isActivePlanNode } from '../../../packages/deep-research-pack/src/lib/plan-index.ts'
+import { planIndex, isActivePlanNode } from '../../../packages/deep-research-pack/src/lib/plan/plan-index.ts'
 import { headerBlockOf, lensScanOf, waveCountOf } from './protocol-core.mjs'
 
 const unique = (values) => [...new Set(values.filter((value) => value !== ''))]

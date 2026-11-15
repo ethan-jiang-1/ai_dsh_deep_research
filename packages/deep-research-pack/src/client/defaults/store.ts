@@ -9,8 +9,8 @@
  */
 import { useEffect, useSyncExternalStore } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { foldLibrary } from '../../lib/library-fold.ts'
-import type { MethodLibraryReadResult } from '../../lib/method-library-read.ts'
+import { foldLibrary } from '../../lib/method-library/library-fold.ts'
+import type { MethodLibraryReadResult } from '../../lib/method-library/method-library-read.ts'
 import {
   DEFAULTS_FILE,
   DEFAULTS_AXES,
@@ -23,7 +23,7 @@ import {
   type DefaultsPatch,
   type DefaultsProblem,
   type DefaultsValue,
-} from '../../lib/research-defaults.ts'
+} from '../../lib/workspace/research-defaults.ts'
 
 /** `remote.workspaceFiles.read` 的 client 闭包（index.ts 的 readText 形态）。 */
 export type DefaultsReadText = (

@@ -9,7 +9,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { DefaultsButton } from '../../../packages/deep-research-pack/src/client/defaults/DefaultsButton.tsx'
 import { DefaultsPanel } from '../../../packages/deep-research-pack/src/client/defaults/DefaultsPanel.tsx'
-import { emptyDefaults, parseDefaults } from '../../../packages/deep-research-pack/src/lib/research-defaults.ts'
+import { emptyDefaults, parseDefaults } from '../../../packages/deep-research-pack/src/lib/workspace/research-defaults.ts'
 import { zh } from '../../../packages/deep-research-pack/src/client/locales/zh.ts'
 
 const t = (key, params = {}) => String(zh[key]).replace(/\{([A-Za-z0-9_]+)\}/g, (all, name) => (name in params ? String(params[name]) : all))

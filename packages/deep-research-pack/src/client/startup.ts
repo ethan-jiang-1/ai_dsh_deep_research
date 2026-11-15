@@ -5,7 +5,7 @@
  * `localStorage`（设备/源级提示，不是权威）：权威仍是 DSH Workspace registry。
  * 谓词住这里，组件只做副作用。
  */
-import { PRODUCT_TITLE_PREFIX } from '../lib/workspace-title.ts'
+import { PRODUCT_TITLE_PREFIX } from '../lib/workspace/workspace-title.ts'
 
 /** 上次选择的产品工作区 id（浏览器本地提示）。 */
 export const PRODUCT_WORKSPACE_KEY = 'dsh.deep-research.workspaceId.v1'
@@ -14,7 +14,7 @@ export const PRODUCT_WORKSPACE_KEY = 'dsh.deep-research.workspaceId.v1'
 export const CURRENT_SESSION_KEY = 'dsh.sessions.current'
 
 /** Host 登记产品工作区时使用的标题前缀（单一正本 = src/lib/workspace-title.ts）。 */
-export { PRODUCT_TITLE_PREFIX } from '../lib/workspace-title.ts'
+export { PRODUCT_TITLE_PREFIX } from '../lib/workspace/workspace-title.ts'
 
 /** 只读选择所需的字段。 */
 export interface WorkspaceRowLike {

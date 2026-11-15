@@ -10,8 +10,8 @@
 // 教训：done 与 pending 都读成"没走过"，回边 ▲ 紧贴芯片造成"挖掘被点亮"的误读）。
 import type { ReactNode } from 'react'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
-import type { RunAnchor } from '../../lib/hitl-fold.ts'
-import type { RunStep } from '../../lib/run-fold.ts'
+import type { RunAnchor } from '../../lib/events/hitl-fold.ts'
+import type { RunStep } from '../../lib/run/run-fold.ts'
 
 /** 列位（1 起）：a1=1，steps[0..5]=2..7，a2=8，final=9；回边跨"挖掘列 → a2 列"。 */
 const EV_COL = 5

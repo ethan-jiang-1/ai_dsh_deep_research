@@ -10,7 +10,7 @@
 // 红配方：把 lastInlineVerdict 的 segment 检查退回关键词白名单（本轮/终局/真实/现在…）→ 第 3 组红。
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
+import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review/review-readiness.ts'
 import { readinessOf } from '../../scripts/lib/shared/node-gate-contracts.mjs'
 import { fromMarkdown } from '../../scripts/lib/tools/workspace-parsers.mjs'
 

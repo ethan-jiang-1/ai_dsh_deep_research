@@ -5,7 +5,7 @@
 import type { ReactNode } from 'react'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ToolCallViewProps } from '@deepseek-ai/dsh-client-ui-tool/client'
-import { cardStateOf, parseArgsObject } from '../lib/tool-card.ts'
+import { cardStateOf, parseArgsObject } from '../lib/events/tool-card.ts'
 import { METHOD_LIBRARY_DEFAULT, METHOD_LIBRARY_REMOVE } from './keys.ts'
 
 type MethodLibraryToolCardProps = ToolCallViewProps & PropsLocale<'deepResearchPack'>
