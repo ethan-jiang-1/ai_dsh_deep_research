@@ -3,7 +3,7 @@
 // 反证：新增一个 scripts/smoke/*.mjs 不登记 registry → 本文件红；把 registry 标 ci 的件从
 // ci.yml 删掉 → 红；dev-only 不写理由 → 红。这样“新 smoke 永久不跑”不再能静默发生。
 // BUG-160/162/172/176：CI 归属只认「可执行 run 行」（注释/echo/if:false/continue-on-error 不算）；
-// scripts/smoke 只许顶层普通文件（子目录/symlink 红）。step 解析 = scripts/lib/ci-workflow.mjs。
+// scripts/smoke 只许顶层普通文件（子目录/symlink 红）。step 解析 = scripts/lib/tools/ci-workflow.mjs。
 // 负例留证 2026-11-14：BUG-160——旧实现只检查 ci.yml 文本是否提及文件名，注释/echo/未挂 needs 的
 //   smoke 也能冒充 tier=ci；红配方 = 把 executedSmokeFiles 换回 ci.includes(file) → 注释/孤儿例放行。
 import { test } from 'node:test'
@@ -11,8 +11,8 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { executedSmokeFiles } from '../../scripts/lib/ci-workflow.mjs'
-import { inspectSmokeDir, smokeSurfaceIssues } from '../../scripts/lib/smoke-assets.mjs'
+import { executedSmokeFiles } from '../../scripts/lib/tools/ci-workflow.mjs'
+import { inspectSmokeDir, smokeSurfaceIssues } from '../../scripts/lib/test-infra/smoke-assets.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const SMOKE = join(ROOT, 'scripts', 'smoke')

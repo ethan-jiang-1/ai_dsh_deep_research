@@ -4,7 +4,7 @@
 //   任意同目录暂存文件；现只收精确文件路径（退回目录前缀 → 目录例变绿）。
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { parseStagedChanges, stagedChangePairingProblems } from '../../scripts/lib/staged-change-pairing.mjs'
+import { parseStagedChanges, stagedChangePairingProblems } from '../../scripts/lib/repo/staged-change-pairing.mjs'
 
 const CARD = '_backlog/_archived/settled_issues/2026-11-13-x.md'
 const NOTE = 'notes/implemented/2026-11-13-x.md'

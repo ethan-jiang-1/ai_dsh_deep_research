@@ -16,14 +16,14 @@ import { existsSync, readFileSync, renameSync, statSync, writeFileSync } from 'n
 import { basename, dirname, join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-import { futureDateFindings } from '../lib/bundle-date-sanity.mjs'
-import { scanHomePaths } from '../lib/path-hygiene.mjs'
-import { formatSecretFinding, scanSecrets } from '../lib/secret-scan.mjs'
-import { presentedInLogs } from '../lib/node-gate-session-gates.mjs'
-import { finalVersionsIn } from '../lib/final-version.mjs'
-import { epochDateOf, runSchemaOf } from '../lib/schema-scan-core.mjs'
-import { buildDelivered, buildManifest, corpusRootLabel, renderAcceptance, repairReceiptPaths, sha256Text, shouldWriteReceipts, withManualEvidence } from '../lib/run-receipt.mjs'
-import { readZstdText } from '../lib/zstd-read.mjs'
+import { futureDateFindings } from '../lib/ops/bundle-date-sanity.mjs'
+import { scanHomePaths } from '../lib/shared/path-hygiene.mjs'
+import { formatSecretFinding, scanSecrets } from '../lib/shared/secret-scan.mjs'
+import { presentedInLogs } from '../lib/shared/node-gate-session-gates.mjs'
+import { finalVersionsIn } from '../lib/shared/final-version.mjs'
+import { epochDateOf, runSchemaOf } from '../lib/gates/schema-scan-core.mjs'
+import { buildDelivered, buildManifest, corpusRootLabel, renderAcceptance, repairReceiptPaths, sha256Text, shouldWriteReceipts, withManualEvidence } from '../lib/shared/run-receipt.mjs'
+import { readZstdText } from '../lib/shared/zstd-read.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2)

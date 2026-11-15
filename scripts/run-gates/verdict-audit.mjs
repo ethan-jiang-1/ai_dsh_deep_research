@@ -11,7 +11,7 @@
 // 豁免：旧 bundle（无 run.md）与 quick_factual 编制、以及 claim 契约日前的 bundle 不判红（epoch）；
 //       quick_factual 与「无 claims/verdicts」的旧场只打 legacy-not-applicable 注记，exit 0。
 //
-// 分层同 evidence-audit：判据核住 `scripts/lib/verdict-audit-core.mjs`（tests 直调），本文件 = CLI 壳 +
+// 分层同 evidence-audit：判据核住 `scripts/lib/gates/verdict-audit-core.mjs`（tests 直调），本文件 = CLI 壳 +
 // 会话日志 reader 注入 + 报告渲染。
 // 用法：node scripts/run-gates/verdict-audit.mjs <run-bundle-dir> [--sessions <会话根>] [--write|--no-write] [--require]
 //       缺省 sessions = $DSH_HOME/sessions；默认只读，--write 才落 review/verdict-audit-r<N>.md。
@@ -19,13 +19,13 @@
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { finalVersionsIn } from '../lib/final-version.mjs'
-import { epochDateOf, runType } from '../lib/schema-scan-core.mjs'
-import { findSessionDir, resolveSessionLog } from '../lib/session-log.mjs'
-import { auditClaimVerdicts, CLAIMS_CONTRACT_DATE, parseClaims, parseSessionFacts, parseVerdicts } from '../lib/verdict-audit-core.mjs'
-import { readinessOfBundle } from '../lib/node-gate-contracts.mjs'
-import { readZstdText } from '../lib/zstd-read.mjs'
-import { isMain } from '../lib/cli-entry.mjs'
+import { finalVersionsIn } from '../lib/shared/final-version.mjs'
+import { epochDateOf, runType } from '../lib/gates/schema-scan-core.mjs'
+import { findSessionDir, resolveSessionLog } from '../lib/shared/session-log.mjs'
+import { auditClaimVerdicts, CLAIMS_CONTRACT_DATE, parseClaims, parseSessionFacts, parseVerdicts } from '../lib/gates/verdict-audit-core.mjs'
+import { readinessOfBundle } from '../lib/shared/node-gate-contracts.mjs'
+import { readZstdText } from '../lib/shared/zstd-read.mjs'
+import { isMain } from '../lib/shared/cli-entry.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 

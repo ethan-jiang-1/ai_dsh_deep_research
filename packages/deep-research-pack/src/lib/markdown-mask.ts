@@ -11,8 +11,8 @@
  *      与反斜杠转义 `\<!--` 内的 `<!--` 均是字面量，不触发注释剥除；
  *   4. 段落/标题作用域隔离：未闭合的行内 `<!--` 不跨空行或新块吞噬后续标题；闭合行后续多个注释逐段剥除。
  *
- * 消费方：`review-readiness.ts`（pack 双半，零外部依赖）、`scripts/lib/note-scan.mjs`（L0 门禁）、
- * `scripts/lib/fix-evidence.mjs`。外部真值契约 = `tests/contracts/markdown-mask-conformance.spec.mjs`
+ * 消费方：`review-readiness.ts`（pack 双半，零外部依赖）、`scripts/lib/repo/note-scan.mjs`（L0 门禁）、
+ * `scripts/lib/repo/fix-evidence.mjs`。外部真值契约 = `tests/contracts/markdown-mask-conformance.spec.mjs`
  * 直接对照 `mdast-util-from-markdown`。
  */
 

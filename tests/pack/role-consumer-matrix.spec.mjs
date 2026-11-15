@@ -10,7 +10,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { presetRoles } from '../../scripts/lib/roles.mjs'
+import { presetRoles } from '../../scripts/lib/shared/roles.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')

@@ -1,11 +1,11 @@
 // backlog-liveness 回归 — 问题/缺陷/调研/方法/归档池结构合同的 keyless 断言；
-// 判据核心 = scripts/lib/backlog-liveness.mjs（本测试即其反证记录）。
+// 判据核心 = scripts/lib/repo/backlog-liveness.mjs（本测试即其反证记录）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { backlogLivenessProblems } from '../../scripts/lib/backlog-liveness.mjs';
+import { backlogLivenessProblems } from '../../scripts/lib/repo/backlog-liveness.mjs';
 
 const METHOD_NAMES = ['requirements-elicitation', 'requirements-probes', 'requirements-synthesis',
   'validation-design', 'validation-evidence', 'validation-judgment', 'issue-to-note'];

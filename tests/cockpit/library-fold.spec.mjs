@@ -14,15 +14,15 @@ import { fileURLToPath } from 'node:url';
 import { foldLibrary, instructionOf, editInstruction, createInstruction, saveInstruction, renderLibraryEntry, flattenSectionValue, summaryOfEntry, SUMMARY_MAX_LENGTH, SECTION_LABELS, libraryReadStateOf, methodNameIssue } from '../../packages/deep-research-pack/src/lib/library-fold.ts';
 import { upsertMethodEntry, clearDefaultMethodEntry, setDefaultMethodEntry, removeMethodEntry } from '../../packages/deep-research-pack/src/lib/method-library-write.ts';
 import { findDefaultMethod } from '../../packages/deep-research-pack/src/lib/research-defaults.ts';
-import { SELFTEST_LIBRARY } from '../../scripts/lib/selftest-library.mjs';
-import { locateSessionStrategy, SHOW_MORE_SESSIONS_PATTERN } from '../../scripts/lib/web-ui-nav.mjs';
-import { METHOD_PRESETS_SKILL_PATH, methodPresetsFromSkillFile, patternMethodMappingFromSkill, baselineDisciplinesFromSkill } from '../../scripts/lib/method-presets.mjs';
+import { SELFTEST_LIBRARY } from '../../scripts/lib/test-infra/selftest-library.mjs';
+import { locateSessionStrategy, SHOW_MORE_SESSIONS_PATTERN } from '../../scripts/lib/shared/web-ui-nav.mjs';
+import { METHOD_PRESETS_SKILL_PATH, methodPresetsFromSkillFile, patternMethodMappingFromSkill, baselineDisciplinesFromSkill } from '../../scripts/lib/test-infra/method-presets.mjs';
 // 数据面正本 = lib/config-tables.ts（2026-10-27 卫生轮：常量从 700 行视图里搬出，测试直接 import，
 // 不再用 ts.createSourceFile 扒 TSX 源码——旧做法会为"视图重构"造出与业务无关的红）
 import { BASELINE_DISCIPLINES, BUILTIN_PREFERENCES, DEMO_ENTRY, DISTILL_INSTRUCTION, DRAFT_INSTRUCTION, PATTERN_METHOD_RULES, SECTIONS } from '../../packages/deep-research-pack/src/lib/config-tables.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-// 解析器 = scripts/lib/method-presets.mjs（与 client-load.entry 共用的唯一解析入口；防第四份
+// 解析器 = scripts/lib/test-infra/method-presets.mjs（与 client-load.entry 共用的唯一解析入口；防第四份
 // 手写副本漂移——总卡发现 14）。本文件只负责"客户端常量 ↔ skill 表 ↔ 期望"三方对钉。
 const METHOD_PRESETS_SKILL = join(ROOT, METHOD_PRESETS_SKILL_PATH);
 const CLIENT_PREFERENCES_SOURCE = join(ROOT, 'packages/deep-research-pack/src/client/ResearchConfigTab.tsx');
@@ -81,7 +81,7 @@ const EXPECTED_BUILTIN_PREFERENCES = [
   },
 ];
 
-// canonical 解析 = scripts/lib/method-presets.mjs（表头/行列数/防空集 fail-loud；与
+// canonical 解析 = scripts/lib/test-infra/method-presets.mjs（表头/行列数/防空集 fail-loud；与
 // client-load.entry 共用同一入口）——本文件不再自带第二份 Markdown 表解析器。
 
 
@@ -226,7 +226,7 @@ test('instructionOf：三个简单动词逐字（正本 = skill 管理动词）'
   assert.equal(instructionOf('remove', '实惠优先'), '删掉研究偏好「实惠优先」');
 });
 
-// ── 自测例电池（2026-10-13 用户委托自测轮）──例库单一正本 = scripts/lib/selftest-library.mjs
+// ── 自测例电池（2026-10-13 用户委托自测轮）──例库单一正本 = scripts/lib/test-infra/selftest-library.mjs
 //（与 client-load.entry 自测工作区共用，防形态漂移）。判读原则：canonical 形态 =
 // research-brief skill「用户方法库」节的 Lead 写入形态；偏离形态按「如实投影不编造」钉行为
 //（标「边界注记」），不静默纠正。lib 层契约由本电池钉住；组件层 legacy 渲染缺陷 = BUG-025

@@ -7,8 +7,8 @@
 //   红配方 = 删掉 statusLines/h2Titles 的 maskFencedCode 前置 → 围栏引用例与 mdast 对账例红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { h2Titles, maskFencedCode, statusLines } from '../../scripts/lib/note-scan.mjs'
-import { fromMarkdown } from '../../scripts/lib/workspace-parsers.mjs'
+import { h2Titles, maskFencedCode, statusLines } from '../../scripts/lib/repo/note-scan.mjs'
+import { fromMarkdown } from '../../scripts/lib/tools/workspace-parsers.mjs'
 
 const visible = (masked) => masked.filter((line) => line !== '')
 

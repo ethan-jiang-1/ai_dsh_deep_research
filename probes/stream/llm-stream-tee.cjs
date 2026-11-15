@@ -39,12 +39,12 @@
 //
 // 档位：keyless（不碰凭据——抄写面已脱敏；预载侧零模型/网络主动性，只旁路抄写）。
 // 这是活进程仪器，无 keyless 自动测试（不硬凑）；可提取纯函数（捕获判定 + 头脱敏）
-// 住 scripts/lib/llm-stream-tee-core.mjs，被 tests/run/llm-stream-tee-core.spec.mjs 钉住。
+// 住 scripts/lib/probes/llm-stream-tee-core.mjs，被 tests/run/probes/llm-stream-tee-core.spec.mjs 钉住。
 'use strict';
 const fs = require('node:fs');
 const net = require('node:net');
 const path = require('node:path');
-const { isCaptureTarget, redactHeaders } = require('../../scripts/lib/llm-stream-tee-core.mjs');
+const { isCaptureTarget, redactHeaders } = require('../../scripts/lib/probes/llm-stream-tee-core.mjs');
 
 const TAG = '[llm-stream-tee]';
 const ROOT = path.resolve(__dirname, '..', '..');

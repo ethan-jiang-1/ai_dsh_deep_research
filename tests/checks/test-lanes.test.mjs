@@ -14,7 +14,7 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join, relative, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { localImportPath, parseKeylessImports } from '../../scripts/lib/keyless-imports.mjs'
+import { localImportPath, parseKeylessImports } from '../../scripts/lib/tools/keyless-imports.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const TESTS = join(ROOT, 'tests')

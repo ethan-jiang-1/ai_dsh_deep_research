@@ -7,7 +7,7 @@
 // 判据：C1 页面断言（--expect-face/--expect-no-leak）；C2 --ask 消息在会话日志落盘；C3 无 console 异常
 // 不证明：模型内容质量；跨主题视觉；截图之外的布局问题
 // 为什么存在：Playwright actionability 被 DSH UI 挡死；执行冒烟与人工目验之间的交互驱动环
-// cdp-probe —— DSH deep-research 驾驶舱的真浏览器场景（裸 CDP，见 scripts/lib/cdp-driver.mjs）。
+// cdp-probe —— DSH deep-research 驾驶舱的真浏览器场景（裸 CDP，见 scripts/lib/shared/cdp-driver.mjs）。
 //
 // 为什么存在：执行冒烟（client-load.entry，Playwright）断言面是"能渲染"，但**交互驱动**在
 // Playwright 里会被 DSH 自身的 UI 挡死——Preview Notice 横幅盖住右栏开关、会话行内嵌
@@ -37,12 +37,12 @@ import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
-import { launchCdpBrowser } from '../../scripts/lib/cdp-driver.mjs';
-import { readSessionEvents, resolveSessionLog } from '../../scripts/lib/session-log.mjs';
-import { PREVIEW_NOTICE_PROBE_JS, SHOW_MORE_SESSIONS_PATTERN } from '../../scripts/lib/web-ui-nav.mjs';
-import { reconcileInjectedMessage } from '../../scripts/lib/inject-reconcile.mjs';
-import { pickSendTarget } from '../../scripts/lib/probe-send-target.mjs';
-import { pickStatusTab } from '../../scripts/lib/probe-status-tab.mjs';
+import { launchCdpBrowser } from '../../scripts/lib/shared/cdp-driver.mjs';
+import { readSessionEvents, resolveSessionLog } from '../../scripts/lib/shared/session-log.mjs';
+import { PREVIEW_NOTICE_PROBE_JS, SHOW_MORE_SESSIONS_PATTERN } from '../../scripts/lib/shared/web-ui-nav.mjs';
+import { reconcileInjectedMessage } from '../../scripts/lib/channel/inject-reconcile.mjs';
+import { pickSendTarget } from '../../scripts/lib/probes/probe-send-target.mjs';
+import { pickStatusTab } from '../../scripts/lib/shared/probe-status-tab.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -195,7 +195,7 @@ try {
       return true
     })()`) === true;
   };
-  // 页签选择/打开判据 = scripts/lib/probe-status-tab.mjs（纯函数，keyless 钉住）。页面只读 DOM，
+  // 页签选择/打开判据 = scripts/lib/shared/probe-status-tab.mjs（纯函数，keyless 钉住）。页面只读 DOM，
   // 选谁与判绿归纯函数——旧版有两个缺陷（2026-10-19 run-driver 落地时实测）：①点右栏后只等
   // 1.5s 就查按钮（右栏未挂载完 → 假红）；②paneText 取 body.innerText 里「研究状态」首现处
   // （会话正文提到这四个字 → 假阳）。现在：等页签**体**出现（`[data-sidebar-right-tab]` data
@@ -324,7 +324,7 @@ try {
     else {
       const sendAtMs = Date.now();
       // 判定与 DOM 访问分工：**页面只读按钮表与 composer 坐标**，选谁/拒点住
-      // `scripts/lib/probe-send-target.mjs`（纯函数，keyless 钉住状态机与 stop 陷阱），
+      // `scripts/lib/probes/probe-send-target.mjs`（纯函数，keyless 钉住状态机与 stop 陷阱），
       // 再由页面按索引点击——BUG-021 的两条现场规则因此有常驻资产，而不是只活在 evaluate 字符串里。
       const dom = await evaluate(`(() => {
         const composer = document.querySelector('[data-composer-input]')

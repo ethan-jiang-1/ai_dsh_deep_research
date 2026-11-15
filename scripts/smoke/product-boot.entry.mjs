@@ -10,10 +10,10 @@ import { spawn, spawnSync } from 'node:child_process'
 import { chmodSync, existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { loadChromium, launchChromium } from '../lib/playwright.mjs'
-import { reclaimPort, listenersOn } from '../lib/port-reclaim.mjs'
-import { scrubbedEnv } from '../lib/env.mjs'
-import { readSessionText } from '../lib/session-log.mjs'
+import { loadChromium, launchChromium } from '../lib/harness/playwright.mjs'
+import { reclaimPort, listenersOn } from '../lib/harness/port-reclaim.mjs'
+import { scrubbedEnv } from '../lib/shared/env.mjs'
+import { readSessionText } from '../lib/shared/session-log.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')

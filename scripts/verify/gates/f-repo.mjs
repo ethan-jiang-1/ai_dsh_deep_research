@@ -6,9 +6,9 @@
 import { readFileSync, readdirSync, existsSync, lstatSync, readlinkSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { backlogLivenessProblems } from '../../lib/backlog-liveness.mjs';
-import { parseStagedChanges, stagedChangePairingProblems } from '../../lib/staged-change-pairing.mjs';
-import { missingProbeFields, renderProbeIndex, scanProbeEntries } from '../../lib/probe-index.mjs';
+import { backlogLivenessProblems } from '../../lib/repo/backlog-liveness.mjs';
+import { parseStagedChanges, stagedChangePairingProblems } from '../../lib/repo/staged-change-pairing.mjs';
+import { missingProbeFields, renderProbeIndex, scanProbeEntries } from '../../lib/shared/probe-index.mjs';
 import { ROOT, gates, fail, note, walk, gitOnce, trackedFiles } from '../context.mjs';
 
 export function runF() {
@@ -257,7 +257,7 @@ export function runF() {
 }
 
 // ── backlog-liveness（backlog 各池的结构与生命周期合同——规则正本 = _backlog/AGENTS.md +
-//    _backlog/README.md，实现 = scripts/lib/backlog-liveness.mjs）。只证结构：不证明结论、证据质量或
+//    _backlog/README.md，实现 = scripts/lib/repo/backlog-liveness.mjs）。只证结构：不证明结论、证据质量或
 //    实施授权；活跃卡带当前 metadata，归档正文保留不追补；空池合法，制度文件缺席/未跟踪即红（防空）。
 //    2026-11-02 补齐 acceptance-presence 族（`待落地` 的 `结论倾向：现在做`/非空 `## 验收标准`/
 //    `去向`、`修复就绪/修复落地` 的非空 `## 修复判据`、活跃研究题名页状态/结论）。──

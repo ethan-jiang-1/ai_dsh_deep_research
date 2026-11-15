@@ -1,4 +1,835 @@
 {
   "comment": "搬家路径重定向登记簿（2026-11-15 test-source-mirror）。md-links 对缺失目标先查本簿；条目必须 from 已不在盘上、to 在盘上且被 git 跟踪，否则门禁红。冻结层不改写：旧链接靠本簿解析。",
-  "redirects": []
+  "redirects": [
+    {
+      "from": "scripts/lib/acceptance-check.mjs",
+      "to": "scripts/lib/ops/acceptance-check.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/artifact-freshness.mjs",
+      "to": "scripts/lib/shared/artifact-freshness.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/ask-drive.mjs",
+      "to": "scripts/lib/channel/ask-drive.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/asset-ledger.mjs",
+      "to": "scripts/lib/tools/asset-ledger.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/backlog-liveness.mjs",
+      "to": "scripts/lib/repo/backlog-liveness.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/browser-cache.mjs",
+      "to": "scripts/lib/harness/browser-cache.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/bundle-date-sanity.mjs",
+      "to": "scripts/lib/ops/bundle-date-sanity.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/bundle-sessions.mjs",
+      "to": "scripts/lib/ops/bundle-sessions.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/cdp-driver.mjs",
+      "to": "scripts/lib/shared/cdp-driver.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/channel-cache.mjs",
+      "to": "scripts/lib/channel/channel-cache.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/ci-workflow.mjs",
+      "to": "scripts/lib/tools/ci-workflow.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/cli-entry.mjs",
+      "to": "scripts/lib/shared/cli-entry.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/client-load-select.mjs",
+      "to": "scripts/lib/harness/client-load-select.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/content-budget.mjs",
+      "to": "scripts/lib/repo/content-budget.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/direct-authorization-boundary.mjs",
+      "to": "scripts/lib/probes/direct-authorization-boundary.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/env.mjs",
+      "to": "scripts/lib/shared/env.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/evidence-audit-core.mjs",
+      "to": "scripts/lib/gates/evidence-audit-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/final-version.mjs",
+      "to": "scripts/lib/shared/final-version.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/fix-evidence.mjs",
+      "to": "scripts/lib/repo/fix-evidence.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/frontmatter.mjs",
+      "to": "scripts/lib/shared/frontmatter.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/gates-cases.mjs",
+      "to": "scripts/lib/harness/gates-cases.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/hitl-card-driver.mjs",
+      "to": "scripts/lib/channel/hitl-card-driver.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/hitl-provenance.mjs",
+      "to": "scripts/lib/shared/hitl-provenance.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/host-health.mjs",
+      "to": "scripts/lib/harness/host-health.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/inject-reconcile.mjs",
+      "to": "scripts/lib/channel/inject-reconcile.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/keyless-imports.mjs",
+      "to": "scripts/lib/tools/keyless-imports.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/llm-stream-tee-core.mjs",
+      "to": "scripts/lib/probes/llm-stream-tee-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/local-date.mjs",
+      "to": "scripts/lib/shared/local-date.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/method-presets.mjs",
+      "to": "scripts/lib/test-infra/method-presets.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/node-gate-contracts.mjs",
+      "to": "scripts/lib/shared/node-gate-contracts.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/node-gate-core.mjs",
+      "to": "scripts/lib/gates/node-gate-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/node-gate-delivery-gate.mjs",
+      "to": "scripts/lib/gates/node-gate-delivery-gate.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/node-gate-reader-gate.mjs",
+      "to": "scripts/lib/gates/node-gate-reader-gate.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/node-gate-run-gates.mjs",
+      "to": "scripts/lib/gates/node-gate-run-gates.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/node-gate-session-gates.mjs",
+      "to": "scripts/lib/shared/node-gate-session-gates.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/note-scan.mjs",
+      "to": "scripts/lib/repo/note-scan.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/path-hygiene.mjs",
+      "to": "scripts/lib/shared/path-hygiene.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/plan-card.mjs",
+      "to": "scripts/lib/shared/plan-card.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/playwright.mjs",
+      "to": "scripts/lib/harness/playwright.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/port-reclaim-policy.mjs",
+      "to": "scripts/lib/harness/port-reclaim-policy.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/port-reclaim.mjs",
+      "to": "scripts/lib/harness/port-reclaim.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/probe-index.mjs",
+      "to": "scripts/lib/shared/probe-index.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/probe-send-target.mjs",
+      "to": "scripts/lib/probes/probe-send-target.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/probe-status-tab.mjs",
+      "to": "scripts/lib/shared/probe-status-tab.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/profile-health.mjs",
+      "to": "scripts/lib/shared/profile-health.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/protocol-audit-core.mjs",
+      "to": "scripts/lib/gates/protocol-audit-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/protocol-core.mjs",
+      "to": "scripts/lib/gates/protocol-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/provenance.mjs",
+      "to": "scripts/lib/gates/provenance.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/provider-errors.mjs",
+      "to": "scripts/lib/ops/provider-errors.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/release-anchor.mjs",
+      "to": "scripts/lib/repo/release-anchor.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/replay-network-offline-policy.cjs",
+      "to": "scripts/lib/harness/replay-network-offline-policy.cjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/replay-network-offline.cjs",
+      "to": "scripts/lib/harness/replay-network-offline.cjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/replay-request.mjs",
+      "to": "scripts/lib/shared/replay-request.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/replay-scene.mjs",
+      "to": "scripts/lib/harness/replay-scene.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/roles.mjs",
+      "to": "scripts/lib/shared/roles.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-accept-fixture.mjs",
+      "to": "scripts/lib/harness/run-accept-fixture.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-channel.mjs",
+      "to": "scripts/lib/channel/run-channel.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-dashboard-core.mjs",
+      "to": "scripts/lib/ops/run-dashboard-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-dashboard-html.mjs",
+      "to": "scripts/lib/ops/run-dashboard-html.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-inventory-core.mjs",
+      "to": "scripts/lib/ops/run-inventory-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-lock.mjs",
+      "to": "scripts/lib/harness/run-lock.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-receipt.mjs",
+      "to": "scripts/lib/shared/run-receipt.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-source-node.mjs",
+      "to": "scripts/lib/gates/run-source-node.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-state.mjs",
+      "to": "scripts/lib/shared/run-state.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/runtime-clean-core.mjs",
+      "to": "scripts/lib/ops/runtime-clean-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/scene-pack.mjs",
+      "to": "scripts/lib/ops/scene-pack.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/schema-scan-core.mjs",
+      "to": "scripts/lib/gates/schema-scan-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/secret-scan.mjs",
+      "to": "scripts/lib/shared/secret-scan.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/selftest-library.mjs",
+      "to": "scripts/lib/test-infra/selftest-library.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/session-events-core.mjs",
+      "to": "scripts/lib/ops/session-events-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/session-log.mjs",
+      "to": "scripts/lib/shared/session-log.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/session-replay.mjs",
+      "to": "scripts/lib/ops/session-replay.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/smoke-assets.mjs",
+      "to": "scripts/lib/test-infra/smoke-assets.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/smoke-lane.mjs",
+      "to": "scripts/lib/repo/smoke-lane.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/snapshot-mode.mjs",
+      "to": "scripts/lib/harness/snapshot-mode.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/staged-change-pairing.mjs",
+      "to": "scripts/lib/repo/staged-change-pairing.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/startup-hint.mjs",
+      "to": "scripts/lib/shared/startup-hint.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/strategy-core.mjs",
+      "to": "scripts/lib/gates/strategy-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/stream-diagnostics-core.mjs",
+      "to": "scripts/lib/ops/stream-diagnostics-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/unconsumed-evidence.mjs",
+      "to": "scripts/lib/ops/unconsumed-evidence.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/vendor-artifacts.mjs",
+      "to": "scripts/lib/harness/vendor-artifacts.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/verdict-audit-core.mjs",
+      "to": "scripts/lib/gates/verdict-audit-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/web-banner.mjs",
+      "to": "scripts/lib/shared/web-banner.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/web-harness.mjs",
+      "to": "scripts/lib/shared/web-harness.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/web-ui-nav.mjs",
+      "to": "scripts/lib/shared/web-ui-nav.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/workspace-parsers.mjs",
+      "to": "scripts/lib/tools/workspace-parsers.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/workspace-root.mjs",
+      "to": "scripts/lib/shared/workspace-root.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/zstd-read.mjs",
+      "to": "scripts/lib/shared/zstd-read.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "tests/run/acceptance-check.spec.mjs",
+      "to": "tests/run/ops/acceptance-check.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/activity-fold.spec.mjs",
+      "to": "tests/run/ops/activity-fold.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/ask-drive.spec.mjs",
+      "to": "tests/run/channel/ask-drive.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/binding-trust.spec.mjs",
+      "to": "tests/run/gates/binding-trust.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/browser-cache.spec.mjs",
+      "to": "tests/run/harness/browser-cache.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/bundle-bind.spec.mjs",
+      "to": "tests/run/gates/bundle-bind.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/bundle-date-sanity.spec.mjs",
+      "to": "tests/run/ops/bundle-date-sanity.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/bundle-sessions.spec.mjs",
+      "to": "tests/run/ops/bundle-sessions.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/channel-cache.spec.mjs",
+      "to": "tests/run/channel/channel-cache.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/client-load-select.spec.mjs",
+      "to": "tests/run/harness/client-load-select.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/entry-chain-probe.spec.mjs",
+      "to": "tests/run/probes/entry-chain-probe.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/env-credentials.spec.mjs",
+      "to": "tests/run/channel/env-credentials.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/evidence-audit.spec.mjs",
+      "to": "tests/run/gates/evidence-audit.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/final-target.spec.mjs",
+      "to": "tests/run/gates/final-target.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/final-version.spec.mjs",
+      "to": "tests/run/gates/final-version.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/frontmatter.spec.mjs",
+      "to": "tests/run/shared/frontmatter.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/hitl-fold.spec.mjs",
+      "to": "tests/run/channel/hitl-fold.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/hitl-provenance.spec.mjs",
+      "to": "tests/run/channel/hitl-provenance.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/hitl-signature-contract.spec.mjs",
+      "to": "tests/run/channel/hitl-signature-contract.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/hitl1-intake-samples.spec.mjs",
+      "to": "tests/run/channel/hitl1-intake-samples.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/host-health.spec.mjs",
+      "to": "tests/run/harness/host-health.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/inject-reconcile.spec.mjs",
+      "to": "tests/run/channel/inject-reconcile.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/journal-wire.spec.mjs",
+      "to": "tests/run/ops/journal-wire.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/llm-stream-tee-core.spec.mjs",
+      "to": "tests/run/probes/llm-stream-tee-core.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/local-date.spec.mjs",
+      "to": "tests/run/shared/local-date.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/member-activity-fold.spec.mjs",
+      "to": "tests/run/ops/member-activity-fold.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/node-gate-contracts.spec.mjs",
+      "to": "tests/run/gates/node-gate-contracts.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/node-gate-delivery.spec.mjs",
+      "to": "tests/run/gates/node-gate-delivery.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/node-gate-helpers.mjs",
+      "to": "tests/run/gates/node-gate-helpers.mjs",
+      "reason": "node-gate 家族助手随家族"
+    },
+    {
+      "from": "tests/run/node-gate-leads.spec.mjs",
+      "to": "tests/run/gates/node-gate-leads.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/node-gate-reader.spec.mjs",
+      "to": "tests/run/gates/node-gate-reader.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/node-gate-session.spec.mjs",
+      "to": "tests/run/gates/node-gate-session.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/node-gate-witness.spec.mjs",
+      "to": "tests/run/gates/node-gate-witness.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/path-hygiene.spec.mjs",
+      "to": "tests/run/gates/path-hygiene.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/plan-card.spec.mjs",
+      "to": "tests/run/gates/plan-card.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/port-reclaim.spec.mjs",
+      "to": "tests/run/harness/port-reclaim.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/probe-index.spec.mjs",
+      "to": "tests/run/probes/probe-index.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/probe-send-target.spec.mjs",
+      "to": "tests/run/probes/probe-send-target.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/probe-status-tab.spec.mjs",
+      "to": "tests/run/probes/probe-status-tab.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/profile-health.spec.mjs",
+      "to": "tests/run/channel/profile-health.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/protocol-core.spec.mjs",
+      "to": "tests/run/gates/protocol-core.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/provenance.spec.mjs",
+      "to": "tests/run/gates/provenance.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/provider-errors.spec.mjs",
+      "to": "tests/run/ops/provider-errors.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/readiness-declaration.spec.mjs",
+      "to": "tests/run/gates/readiness-declaration.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/replay-fixtures.spec.mjs",
+      "to": "tests/run/harness/replay-fixtures.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/replay-network-offline.spec.mjs",
+      "to": "tests/run/harness/replay-network-offline.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/replay-request.spec.mjs",
+      "to": "tests/run/harness/replay-request.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/replay-scene.spec.mjs",
+      "to": "tests/run/harness/replay-scene.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/review-readiness.spec.mjs",
+      "to": "tests/run/gates/review-readiness.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-accept-fixture.spec.mjs",
+      "to": "tests/run/harness/run-accept-fixture.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-accept.spec.mjs",
+      "to": "tests/run/ops/run-accept.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-context-node.spec.mjs",
+      "to": "tests/run/gates/run-context-node.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-context.spec.mjs",
+      "to": "tests/run/gates/run-context.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-dashboard.spec.mjs",
+      "to": "tests/run/ops/run-dashboard.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-driver-contract.spec.mjs",
+      "to": "tests/run/channel/run-driver-contract.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-fold.spec.mjs",
+      "to": "tests/run/ops/run-fold.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-inventory.spec.mjs",
+      "to": "tests/run/ops/run-inventory.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-lock.spec.mjs",
+      "to": "tests/run/harness/run-lock.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-receipt.spec.mjs",
+      "to": "tests/run/gates/run-receipt.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-state.spec.mjs",
+      "to": "tests/run/ops/run-state.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/runtime-clean.spec.mjs",
+      "to": "tests/run/ops/runtime-clean.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/scene-pack.spec.mjs",
+      "to": "tests/run/ops/scene-pack.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/schema-scan.spec.mjs",
+      "to": "tests/run/gates/schema-scan.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/secret-scan.spec.mjs",
+      "to": "tests/run/shared/secret-scan.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/session-events.spec.mjs",
+      "to": "tests/run/ops/session-events.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/session-log.spec.mjs",
+      "to": "tests/run/ops/session-log.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/session-replay.spec.mjs",
+      "to": "tests/run/ops/session-replay.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/startup-hint.spec.mjs",
+      "to": "tests/run/channel/startup-hint.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/strategy-core.spec.mjs",
+      "to": "tests/run/shared/strategy-core.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/stream-diagnostics.spec.mjs",
+      "to": "tests/run/ops/stream-diagnostics.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/stream-failure.spec.mjs",
+      "to": "tests/run/ops/stream-failure.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/tool-card.spec.mjs",
+      "to": "tests/run/ops/tool-card.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/unconsumed-evidence.spec.mjs",
+      "to": "tests/run/ops/unconsumed-evidence.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/vendor-artifacts.spec.mjs",
+      "to": "tests/run/harness/vendor-artifacts.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/verdict-audit-fixture.spec.mjs",
+      "to": "tests/run/shared/verdict-audit-fixture.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/verdict-audit.spec.mjs",
+      "to": "tests/run/gates/verdict-audit.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/web-ui-nav.spec.mjs",
+      "to": "tests/run/probes/web-ui-nav.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/workspace-root.spec.mjs",
+      "to": "tests/run/shared/workspace-root.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    }
+  ]
 }

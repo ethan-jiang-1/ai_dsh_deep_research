@@ -59,7 +59,7 @@ probes/                  调试第一入口：真实边界单点探针（behavio
 scripts/                 职责分组：verify/（L0 门禁）、smoke/（*.e2e.mjs 真进程 / *.entry.mjs 真入口 / *.support.mjs 支援）、test/（车道 runner）、run-gates/、run-ops/、dist/ + lib/——逐件职责与档位 = scripts/README.md
 tests/                   keyless 回归（node:test；*.spec.mjs = 进程内 spec，checks/*.test.mjs = 门禁自身；layering 守卫五件套——规则见 tests/AGENTS.md）
 snapshots/               场景证据层：整组录制资产 + 场景声明 snapshot.json（消费 = snapshot-replay.entry
-                         经 scripts/lib/replay-scene.mjs）；分类与证据边界 = snapshots/README.md
+                         经 scripts/lib/harness/replay-scene.mjs）；分类与证据边界 = snapshots/README.md
 dev/                     源码驱动与 run 通道：env.sh（双 home + 裸 dsh 拦截 + pre-commit 挂载）、vendor-build.sh（vendor 树构建）、render-overlay（tracked 生成物生成器：overlay）、boot-run.sh（run 通道开跑，自 source env.sh）/ run-driver.mjs（通道驱动与呈交，内部调 boot-run）、run-kickoff / hitl-answer（会话驱动与 HITL 代答）、record-role-fixture（fixture 录制）、research.overlay.yml（**生成物**，勿手改）、hooks/（pre-commit 红灯拦 commit）——逐件职责 = dev/README.md
 runtime/                 运行态区（gitignored）：harness-home/（开发 DSH home：会话/凭据/插件安装）+
                          smoke-workspace/（冒烟与 boot 运行产物）——dev/ 只住源码驱动，跑出来的东西住这里

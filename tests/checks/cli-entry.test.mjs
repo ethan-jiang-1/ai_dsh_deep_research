@@ -7,7 +7,7 @@ import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { isMain } from '../../scripts/lib/cli-entry.mjs';
+import { isMain } from '../../scripts/lib/shared/cli-entry.mjs';
 
 test('isMain：symlink 指向同一文件 → true', () => {
   const dir = mkdtempSync(join(tmpdir(), 'cli-entry-'));

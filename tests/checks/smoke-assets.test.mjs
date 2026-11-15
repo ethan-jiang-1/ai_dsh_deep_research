@@ -11,7 +11,7 @@ import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { inspectSmokeDir, smokeFiles, smokeSurfaceIssues } from '../../scripts/lib/smoke-assets.mjs'
+import { inspectSmokeDir, smokeFiles, smokeSurfaceIssues } from '../../scripts/lib/test-infra/smoke-assets.mjs'
 
 test('smoke-assets：普通文件 / 目录 / symlink 文件 / symlink 目录分类可见（BUG-162 / BUG-176）', () => {
   const dir = mkdtempSync(join(tmpdir(), 'smoke-assets-'))

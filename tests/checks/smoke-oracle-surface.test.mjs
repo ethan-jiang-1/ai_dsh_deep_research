@@ -16,7 +16,7 @@ import assert from 'node:assert/strict'
 import { readFileSync, existsSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { inspectSmokeDir, smokeSurfaceIssues } from '../../scripts/lib/smoke-assets.mjs'
+import { inspectSmokeDir, smokeSurfaceIssues } from '../../scripts/lib/test-infra/smoke-assets.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const SMOKE = join(ROOT, 'scripts', 'smoke')

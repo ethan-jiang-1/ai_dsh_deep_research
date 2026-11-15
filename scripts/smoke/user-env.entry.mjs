@@ -8,7 +8,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createHash } from 'node:crypto'
-import { scrubbedEnv } from '../lib/env.mjs'
+import { scrubbedEnv } from '../lib/shared/env.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')

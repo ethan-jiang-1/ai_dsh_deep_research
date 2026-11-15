@@ -18,16 +18,16 @@
 //
 // 前置：source dev/env.sh（DSH_HOME + 凭据）；DSH_SRC 默认本仓根（vendor/dsh）。
 // 用法：source dev/env.sh && node probes/behavior/entry-chain-probe.mjs [--port 3114]
-import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
-import { readSessionTextOf } from '../../scripts/lib/session-log.mjs';
+import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/shared/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/shared/web-harness.mjs';
+import { readSessionTextOf } from '../../scripts/lib/shared/session-log.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/vendor-artifacts.mjs';
-import { directAuthorizationBoundaryPasses, rfcBoundaryPasses } from '../../scripts/lib/direct-authorization-boundary.mjs';
-import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/port-reclaim.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/harness/vendor-artifacts.mjs';
+import { directAuthorizationBoundaryPasses, rfcBoundaryPasses } from '../../scripts/lib/probes/direct-authorization-boundary.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/harness/port-reclaim.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {

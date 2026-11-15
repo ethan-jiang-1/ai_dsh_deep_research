@@ -403,12 +403,32 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
+      "path": "tests/checks/test-index.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "测试索引对账（2026-11-15 test-source-mirror Step 0b）：tests/INDEX.generated.md 是生成物，",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
       "path": "tests/checks/test-lanes.test.mjs",
       "domain": "checks",
       "lane": "checks",
       "class": "check-gate",
       "cost": "fast-inproc",
       "uniqueClaim": "测试车道与可见性契约（W0-8 / 命名对齐）——四条「静默不跑」的防线：",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-owner-mirror.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "owner 镜像契约（2026-11-15 test-source-mirror Step 0b）：",
       "oracleType": "external",
       "sunset": "随门禁/台账合同退役"
     },
@@ -668,7 +688,7 @@
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "方法预设解析器合同回归（scripts/lib/method-presets.mjs）——内置名单/推荐映射/共同底线的",
+      "uniqueClaim": "方法预设解析器合同回归（scripts/lib/test-infra/method-presets.mjs）——内置名单/推荐映射/共同底线的",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
@@ -1303,27 +1323,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/acceptance-check.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "acceptance-check 回归 — 收活判据三态求值（PASS / FAIL / UNVERIFIED，判不了永不静默放行）；",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/activity-fold.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "activity-fold 回归 — journal 事件 → 人性化活动行（keyless；四类出行 + 噪音过滤）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/ask-drive.spec.mjs",
+      "path": "tests/run/channel/ask-drive.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",
@@ -1333,87 +1333,17 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/binding-trust.spec.mjs",
+      "path": "tests/run/channel/channel-cache.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "binding-trust 回归 —— “这个绑定能不能当本场 run”的单一政策（keyless）。",
+      "uniqueClaim": "tests/run/channel/channel-cache.spec.mjs — 启动加速缓存的 keyless 契约",
       "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/browser-cache.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "browser-cache — 浏览器缓存目录判据（2026-11-03 CI 实测：Linux 上只认 macOS 路径，",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/bundle-bind.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "bundle-bind 回归 — 会话 → run bundle 绑定折算（keyless；RFC right-pane-ux-debt：",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/bundle-date-sanity.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "bundle-date-sanity 回归 — run bundle 未来日期检查（keyless 纯函数；CLI 壳 = run-accept.mjs）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/bundle-sessions.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "bundle-sessions：run bundle → 见证会话反查（keyless；临时 sessions 树，纯 fs）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/channel-cache.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "tests/run/channel-cache.spec.mjs — 启动加速缓存的 keyless 契约",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/client-load-select.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "client-load 绑定会话选择：只选 lead 根（BUG-142）。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/entry-chain-probe.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "entry-chain-probe 词面判据回归 — direct-authorization-boundary 的授权边界判定（按授权范围",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/env-credentials.spec.mjs",
+      "path": "tests/run/channel/env-credentials.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",
@@ -1423,47 +1353,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/evidence-audit.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "evidence-audit 回归 — 溯源审计三断言（keyless，纯 .jsonl 夹具直调 auditBundle——",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/final-target.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "final-target 回归 —— 终稿页签的纯折算（keyless）：交付事件折叠 + 地址认领 + 读面定表。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/final-version.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "final-version.spec.mjs — 终稿版本文件名的单一判据（2026-11-03 七维卫生审计 D2-3）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/frontmatter.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "frontmatter 拆分契约（keyless 纯函数）——`scripts/lib/frontmatter.mjs` 的直测。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/hitl-fold.spec.mjs",
+      "path": "tests/run/channel/hitl-fold.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",
@@ -1473,7 +1363,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/hitl-provenance.spec.mjs",
+      "path": "tests/run/channel/hitl-provenance.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",
@@ -1483,7 +1373,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/hitl-signature-contract.spec.mjs",
+      "path": "tests/run/channel/hitl-signature-contract.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",
@@ -1493,7 +1383,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/hitl1-intake-samples.spec.mjs",
+      "path": "tests/run/channel/hitl1-intake-samples.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",
@@ -1503,17 +1393,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/host-health.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "host-health — 真浏览器冒烟的主机健康判据（client-load 的 NOT-RUN 归因）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/inject-reconcile.spec.mjs",
+      "path": "tests/run/channel/inject-reconcile.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",
@@ -1523,167 +1403,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/journal-wire.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "journal-wire 回归 — journal wire 入参/正文解析共享核（keyless 纯函数）。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/llm-stream-tee-core.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "llm-stream-tee-core 回归 — LLM 流透明 tee 预载壳的可提取纯函数面（keyless）。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/local-date.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "local-date.spec.mjs — 人读日期行的本地口径契约（BUG-017 正修的测试资产，先红后绿）。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/member-activity-fold.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "tests/member-activity-fold.spec.mjs — 队员动作折算的注入式契约测试（member-activity-stream 卡验收 #1）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/node-gate-contracts.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "node-gate-contracts 回归 — D28 契约纪元：run.md 的 contract 优先于 mtime；旧场才回退交付日。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/node-gate-delivery.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "node-gate-delivery —— 交付相关门：门②/③/④、门A、终局 readiness、D28/读者版边界。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/node-gate-leads.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "node-gate-leads —— 门L（leads.md 方向/分级/覆盖/断代）与 BUG-038 分级判据。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/node-gate-reader.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "node-gate-reader 回归 — 门C（读者版合同）的判据与反证（keyless）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/node-gate-session.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "node-gate-session —— 会话面门：门①（HITL1 签名/绑定/断代）与门R（标题重复退化）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/node-gate-witness.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "D28 结构化见证回归 — 新 run（有 run.md）的门②/③ 只认**绑定本 bundle 的 lead 会话**里的",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/path-hygiene.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "path-hygiene 纯函数回归 — run bundle 移交前的本机 home 路径检测。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/plan-card.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "tests/plan-card.spec.mjs —— HITL1 计划确认卡识别与字数口径的 keyless 契约（唯一语义源）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/port-reclaim.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "port-reclaim 身份判定：只收割本仓 DSH web（BUG-104 / BUG-113）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/probe-index.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "tests/run/probe-index.spec.mjs — 探针索引纯函数（scripts/lib/probe-index.mjs）的 keyless 契约。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/probe-send-target.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "tests/probe-send-target.spec.mjs —— cdp-probe 提交按钮判定的 keyless 契约（BUG-021 正修）。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/probe-status-tab.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "tests/probe-status-tab.spec.mjs —— cdp-probe 页签选择/打开判据的 keyless 契约",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/profile-health.spec.mjs",
+      "path": "tests/run/channel/profile-health.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",
@@ -1693,147 +1413,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/protocol-core.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "protocol-core —— Protocol 纯判据的 keyless 回归（契约 = 核验 §6 + 表达层补篇 §4–§7）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/provenance.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "provenance 回归 — local-file 哈希/孤儿/绝对路径；离线审计在无语料时以 provenance 为准。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/provider-errors.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "tests/provider-errors.spec.mjs —— 上游流错误抽取的 keyless 契约（唯一语义源）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/readiness-declaration.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "readiness-declaration.spec.mjs — 结构化审查声明（D51）：门禁以 review/readiness.json 为准。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/replay-fixtures.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "tests/run/replay-fixtures.spec.mjs — 入库 fixture 的 MCP 组契约（BUG-019 回归守卫）",
-      "oracleType": "external",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/replay-network-offline.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "replay-network-offline — 回放 A 层离线闸的纯判据（BUG-064）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/replay-request.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "replay-request 回归 — 组装请求面比较判据（注入种类 / 定向归一化边界）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/replay-scene.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "replay-scene 回归 — 场景声明消费判据（roster / 来源形状 / 路径越界 fail-loud）+",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/review-readiness.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "终局 readiness 判定回归（review-readiness）——驾驶舱/仪表盘/冒烟的共用语义源。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/run-accept-fixture.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "run-accept-fixture — claim 夹具与 D51 readiness 判据同源。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/run-accept.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "run-accept 交付门接线 — 静态契约：path-hygiene 必须在预检里，且旧 bundle 走显式豁免。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/run-context-node.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "run-context-node 回归 —— `node:fs` 的 RunSource 适配器（keyless，临时目录）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/run-context.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "run-context 回归 —— run bundle 的读面（keyless）：三位置发现、同名优先级、分页到 eof、",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/run-dashboard.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "run-dashboard 回归 — RFC notes/archived/2026-09-24-m2-run-dashboard.md 的 keyless 验收：",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/run-driver-contract.spec.mjs",
+      "path": "tests/run/channel/run-driver-contract.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",
@@ -1843,127 +1423,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/run-fold.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "run-fold 回归 — 观察面共享步骤条与回边版本折算（keyless 纯函数）。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/run-inventory.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "run-inventory 纯函数回归 — 只读保留期视图（数量/大小/最老日期），不做删除。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/run-lock.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "run-lock — 原子建锁与陈旧接管（BUG-073）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/run-receipt.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "run-receipt 回归 — 交付回执（delivered/manifest/acceptance）的纯生成、present 选择与哈希校验。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/run-state.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "run-state 回归 — run 操作面状态谓词（keyless；夹具 = 第 12 场真实会话日志的三个时点投影，",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/runtime-clean.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "runtime-clean-core 回归：白名单/保留期/安全边界。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/scene-pack.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "scene-pack.spec.mjs — 场景包读取回归（2026-10-21 卫生轮 维度6 高项）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/schema-scan.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "schema-scan 断代逻辑反证（RFC 2026-09-29-quality-evidence-loop 验收②）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/secret-scan.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "secret-scan 纯函数回归 — 交付物里的高置信凭据形态（不拿泛化 token= 误伤安全题材）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/session-events.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "session-events-core 回归 — 会话事件摘要/筛选/尾部（keyless 纯函数；CLI 壳 = session-events.mjs）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/session-log.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "session-log 回归 — 组发现契约（findGroup：组过滤盲区的逃生口）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/session-replay.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "session-replay 回归 — 历史会话解析与判读整形（2026-10-21，反馈通路事后半边）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/startup-hint.spec.mjs",
+      "path": "tests/run/channel/startup-hint.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",
@@ -1973,77 +1433,217 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/strategy-core.spec.mjs",
+      "path": "tests/run/gates/binding-trust.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "strategy-core.spec.mjs — Strategy 投影（K/O/G/B）的纯派生回归。",
+      "uniqueClaim": "binding-trust 回归 —— “这个绑定能不能当本场 run”的单一政策（keyless）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/bundle-bind.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "bundle-bind 回归 — 会话 → run bundle 绑定折算（keyless；RFC right-pane-ux-debt：",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/evidence-audit.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "evidence-audit 回归 — 溯源审计三断言（keyless，纯 .jsonl 夹具直调 auditBundle——",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/stream-diagnostics.spec.mjs",
+      "path": "tests/run/gates/final-target.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "stream-diagnostics selection contract: --recent counts model-active sessions, not merely fresh logs.",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/stream-failure.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "流畸形死亡折算回归（stream-failure）——BUG-023 修复①的判据面。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/tool-card.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "tool-card 回归 — 研究语义卡标题折算（keyless；wire 权威形状 = queries 数组，录制流实证）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/unconsumed-evidence.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "unconsumed-evidence 回归 — B1 差集投影（evidence/ 未进 findings.md 的差集，critic 出题的",
+      "uniqueClaim": "final-target 回归 —— 终稿页签的纯折算（keyless）：交付事件折叠 + 地址认领 + 读面定表。",
       "oracleType": "self-referential",
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/vendor-artifacts.spec.mjs",
+      "path": "tests/run/gates/final-version.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "vendor-artifacts 自检回归 — 与 boot 面护栏同源判据（keyless，纯 fs 静态夹具，不依赖真实",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/run/verdict-audit-fixture.spec.mjs",
-      "domain": "run",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "verdict-audit fixture —— 真实 child 会话线形的 keyless 回归。",
+      "uniqueClaim": "final-version.spec.mjs — 终稿版本文件名的单一判据（2026-11-03 七维卫生审计 D2-3）。",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/verdict-audit.spec.mjs",
+      "path": "tests/run/gates/node-gate-contracts.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "node-gate-contracts 回归 — D28 契约纪元：run.md 的 contract 优先于 mtime；旧场才回退交付日。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/node-gate-delivery.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "node-gate-delivery —— 交付相关门：门②/③/④、门A、终局 readiness、D28/读者版边界。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/node-gate-leads.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "node-gate-leads —— 门L（leads.md 方向/分级/覆盖/断代）与 BUG-038 分级判据。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/node-gate-reader.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "node-gate-reader 回归 — 门C（读者版合同）的判据与反证（keyless）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/node-gate-session.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "node-gate-session —— 会话面门：门①（HITL1 签名/绑定/断代）与门R（标题重复退化）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/node-gate-witness.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "D28 结构化见证回归 — 新 run（有 run.md）的门②/③ 只认**绑定本 bundle 的 lead 会话**里的",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/path-hygiene.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "path-hygiene 纯函数回归 — run bundle 移交前的本机 home 路径检测。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/plan-card.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/plan-card.spec.mjs —— HITL1 计划确认卡识别与字数口径的 keyless 契约（唯一语义源）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/protocol-core.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "protocol-core —— Protocol 纯判据的 keyless 回归（契约 = 核验 §6 + 表达层补篇 §4–§7）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/provenance.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "provenance 回归 — local-file 哈希/孤儿/绝对路径；离线审计在无语料时以 provenance 为准。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/readiness-declaration.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "readiness-declaration.spec.mjs — 结构化审查声明（D51）：门禁以 review/readiness.json 为准。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/review-readiness.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "终局 readiness 判定回归（review-readiness）——驾驶舱/仪表盘/冒烟的共用语义源。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/run-context-node.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "run-context-node 回归 —— `node:fs` 的 RunSource 适配器（keyless，临时目录）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/run-context.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "run-context 回归 —— run bundle 的读面（keyless）：三位置发现、同名优先级、分页到 eof、",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/run-receipt.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "run-receipt 回归 — 交付回执（delivered/manifest/acceptance）的纯生成、present 选择与哈希校验。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/schema-scan.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "schema-scan 断代逻辑反证（RFC 2026-09-29-quality-evidence-loop 验收②）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/verdict-audit.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",
@@ -2053,7 +1653,377 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/web-ui-nav.spec.mjs",
+      "path": "tests/run/harness/browser-cache.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "browser-cache — 浏览器缓存目录判据（2026-11-03 CI 实测：Linux 上只认 macOS 路径，",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/harness/client-load-select.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "client-load 绑定会话选择：只选 lead 根（BUG-142）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/harness/host-health.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "host-health — 真浏览器冒烟的主机健康判据（client-load 的 NOT-RUN 归因）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/harness/port-reclaim.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "port-reclaim 身份判定：只收割本仓 DSH web（BUG-104 / BUG-113）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/harness/replay-fixtures.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/run/harness/replay-fixtures.spec.mjs — 入库 fixture 的 MCP 组契约（BUG-019 回归守卫）",
+      "oracleType": "external",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/harness/replay-network-offline.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "replay-network-offline — 回放 A 层离线闸的纯判据（BUG-064）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/harness/replay-request.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "replay-request 回归 — 组装请求面比较判据（注入种类 / 定向归一化边界）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/harness/replay-scene.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "replay-scene 回归 — 场景声明消费判据（roster / 来源形状 / 路径越界 fail-loud）+",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/harness/run-accept-fixture.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "run-accept-fixture — claim 夹具与 D51 readiness 判据同源。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/harness/run-lock.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "run-lock — 原子建锁与陈旧接管（BUG-073）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/harness/vendor-artifacts.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "vendor-artifacts 自检回归 — 与 boot 面护栏同源判据（keyless，纯 fs 静态夹具，不依赖真实",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/acceptance-check.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "acceptance-check 回归 — 收活判据三态求值（PASS / FAIL / UNVERIFIED，判不了永不静默放行）；",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/activity-fold.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "activity-fold 回归 — journal 事件 → 人性化活动行（keyless；四类出行 + 噪音过滤）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/bundle-date-sanity.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "bundle-date-sanity 回归 — run bundle 未来日期检查（keyless 纯函数；CLI 壳 = run-accept.mjs）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/bundle-sessions.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "bundle-sessions：run bundle → 见证会话反查（keyless；临时 sessions 树，纯 fs）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/journal-wire.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "journal-wire 回归 — journal wire 入参/正文解析共享核（keyless 纯函数）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/member-activity-fold.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/member-activity-fold.spec.mjs — 队员动作折算的注入式契约测试（member-activity-stream 卡验收 #1）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/provider-errors.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/provider-errors.spec.mjs —— 上游流错误抽取的 keyless 契约（唯一语义源）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/run-accept.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "run-accept 交付门接线 — 静态契约：path-hygiene 必须在预检里，且旧 bundle 走显式豁免。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/run-dashboard.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "run-dashboard 回归 — RFC notes/archived/2026-09-24-m2-run-dashboard.md 的 keyless 验收：",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/run-fold.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "run-fold 回归 — 观察面共享步骤条与回边版本折算（keyless 纯函数）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/run-inventory.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "run-inventory 纯函数回归 — 只读保留期视图（数量/大小/最老日期），不做删除。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/run-state.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "run-state 回归 — run 操作面状态谓词（keyless；夹具 = 第 12 场真实会话日志的三个时点投影，",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/runtime-clean.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "runtime-clean-core 回归：白名单/保留期/安全边界。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/scene-pack.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "scene-pack.spec.mjs — 场景包读取回归（2026-10-21 卫生轮 维度6 高项）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/session-events.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "session-events-core 回归 — 会话事件摘要/筛选/尾部（keyless 纯函数；CLI 壳 = session-events.mjs）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/session-log.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "session-log 回归 — 组发现契约（findGroup：组过滤盲区的逃生口）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/session-replay.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "session-replay 回归 — 历史会话解析与判读整形（2026-10-21，反馈通路事后半边）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/stream-diagnostics.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "stream-diagnostics selection contract: --recent counts model-active sessions, not merely fresh logs.",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/stream-failure.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "流畸形死亡折算回归（stream-failure）——BUG-023 修复①的判据面。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/tool-card.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tool-card 回归 — 研究语义卡标题折算（keyless；wire 权威形状 = queries 数组，录制流实证）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/ops/unconsumed-evidence.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "unconsumed-evidence 回归 — B1 差集投影（evidence/ 未进 findings.md 的差集，critic 出题的",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/probes/entry-chain-probe.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "entry-chain-probe 词面判据回归 — direct-authorization-boundary 的授权边界判定（按授权范围",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/probes/llm-stream-tee-core.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "llm-stream-tee-core 回归 — LLM 流透明 tee 预载壳的可提取纯函数面（keyless）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/probes/probe-index.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/run/probes/probe-index.spec.mjs — 探针索引纯函数（scripts/lib/shared/probe-index.mjs）的 keyless 契约。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/probes/probe-send-target.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/probe-send-target.spec.mjs —— cdp-probe 提交按钮判定的 keyless 契约（BUG-021 正修）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/probes/probe-status-tab.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/probe-status-tab.spec.mjs —— cdp-probe 页签选择/打开判据的 keyless 契约",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/probes/web-ui-nav.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",
@@ -2063,7 +2033,57 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/run/workspace-root.spec.mjs",
+      "path": "tests/run/shared/frontmatter.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "frontmatter 拆分契约（keyless 纯函数）——`scripts/lib/shared/frontmatter.mjs` 的直测。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/shared/local-date.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "local-date.spec.mjs — 人读日期行的本地口径契约（BUG-017 正修的测试资产，先红后绿）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/shared/secret-scan.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "secret-scan 纯函数回归 — 交付物里的高置信凭据形态（不拿泛化 token= 误伤安全题材）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/shared/strategy-core.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "strategy-core.spec.mjs — Strategy 投影（K/O/G/B）的纯派生回归。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/shared/verdict-audit-fixture.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "verdict-audit fixture —— 真实 child 会话线形的 keyless 回归。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/shared/workspace-root.spec.mjs",
       "domain": "run",
       "lane": "spec",
       "class": "unit-pure",

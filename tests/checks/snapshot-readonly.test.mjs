@@ -3,7 +3,7 @@
 //   `DSH_SNAPSHOT` 只认 `replay`（record/refresh 不走本脚本）；
 //   `--update-expected` 仍必须带 `--why <载体>`。
 //
-// 判据核 = `scripts/lib/snapshot-mode.mjs`（纯函数）；本文件直测它，smoke 壳只消费。
+// 判据核 = `scripts/lib/harness/snapshot-mode.mjs`（纯函数）；本文件直测它，smoke 壳只消费。
 // CLI 行为已实测：双 flag → exit 2；`DSH_SNAPSHOT=record` → exit 2；
 // `DSH_SNAPSHOT=replay --update-expected` → exit 2。真跑一次不改盘留给 W1-2 的 CI job。
 //
@@ -12,7 +12,7 @@
 //   `['--update-expected', '--why', '--port', '3110']` 把 `--port` 当载体放行；还原 → 绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { resolveSnapshotMode } from '../../scripts/lib/snapshot-mode.mjs'
+import { resolveSnapshotMode } from '../../scripts/lib/harness/snapshot-mode.mjs'
 
 test('快照回放：默认只读语义；只读 / update-expected 互斥；DSH_SNAPSHOT 只认 replay；刷新必须带非 flag 的 --why（BUG-164）', () => {
   assert.deepEqual(resolveSnapshotMode({ argv: [], env: {} }), { readOnly: false, updateExpected: false, why: null })

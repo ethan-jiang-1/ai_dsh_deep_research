@@ -965,7 +965,7 @@
       "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
-        "scripts/lib/replay-request.mjs",
+        "scripts/lib/shared/replay-request.mjs",
         "snapshots/replay/research-face/snapshot.json"
       ]
     },
@@ -975,7 +975,7 @@
       "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
-        "scripts/lib/replay-request.mjs",
+        "scripts/lib/shared/replay-request.mjs",
         "snapshots/replay/research-face/snapshot.json"
       ]
     },
@@ -985,7 +985,7 @@
       "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
-        "scripts/lib/replay-request.mjs",
+        "scripts/lib/shared/replay-request.mjs",
         "snapshots/replay/research-face/snapshot.json"
       ]
     },
@@ -995,7 +995,7 @@
       "ownsTruncated": true,
       "verdict": "adapted",
       "landing": [
-        "scripts/lib/replay-request.mjs",
+        "scripts/lib/shared/replay-request.mjs",
         "scripts/smoke/l4-lite.e2e.mjs",
         "snapshots/replay/research-face/snapshot.json"
       ]

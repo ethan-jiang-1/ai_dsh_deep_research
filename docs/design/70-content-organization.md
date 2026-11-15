@@ -96,7 +96,7 @@
 ## 8. 当前债与下一步
 
 `content/manual.md` 现为 **9,996 字符**：下放触发 = 10,000（余 4），硬顶 = 12,288（余 2,292）。
-两个数只住 `scripts/lib/content-budget.mjs`：触发由 `tests/pack/content-disclosure.spec.mjs` 把守，
+两个数只住 `scripts/lib/repo/content-budget.mjs`：触发由 `tests/pack/content-disclosure.spec.mjs` 把守，
 硬顶由 `content-shape` 门禁把守；硬顶只防失控，不是可挪用的余量。
 
 **首刀已落（2026-11-11）**：状态头/读序/恢复细则下放到 `content/generic/state-and-recovery.md`；

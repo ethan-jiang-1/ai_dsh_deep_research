@@ -18,8 +18,8 @@ import { tmpdir } from 'node:os'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseMarketIndex } from '@deepseek-ai/dsh-plugin-market-index'
-import { scrubbedEnv } from '../lib/env.mjs'
-import { artifactFreshness, packInputRoots, packagedInputEntries } from '../lib/artifact-freshness.mjs'
+import { scrubbedEnv } from '../lib/shared/env.mjs'
+import { artifactFreshness, packInputRoots, packagedInputEntries } from '../lib/shared/artifact-freshness.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')

@@ -6,7 +6,7 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROOT, fail, note, trackedFiles } from '../context.mjs';
-import { h2Titles, maskFencedCode, statusLines } from '../../lib/note-scan.mjs';
+import { h2Titles, maskFencedCode, statusLines } from '../../lib/repo/note-scan.mjs';
 
 export function runC() {
 // ── note-tree（notes/ 树形闭集与深度——DSH `agent-note-tree` 吸纳，2026-11-14）──

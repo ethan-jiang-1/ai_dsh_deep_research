@@ -8,7 +8,7 @@
 // 门禁自身的反证是一次性人工实录（evaluation §L0 反证列），本 smoke 是它们的常驻回归。
 //
 // 档位：keyless（子进程 = git + node；无模型/浏览器/网络——故住 smoke 道，layering 禁默认
-// 回归 spawn；静态契约钉子 = tests/verify-gates.spec.mjs，经 scripts/lib/gates-cases.mjs
+// 回归 spawn；静态契约钉子 = tests/verify-gates.spec.mjs，经 scripts/lib/harness/gates-cases.mjs
 // 消费案例表——本脚本是纯 fs 案例的驱动壳 [2026-10-09 layering 二代拆分]）。
 // verdict 契约（scripts/AGENTS.md）：exit 0 = 全绿 / 1 = 断言红 / 2 = 未跑（前置缺席）。
 // 失败时保留临时目录并打印路径（语料 verify.spec.mjs 先例）；全绿即清理。
@@ -21,8 +21,8 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cpus } from 'node:os';
-import { CASES, CONTROLS } from '../lib/gates-cases.mjs';
-import { isMain } from '../lib/cli-entry.mjs';
+import { CASES, CONTROLS } from '../lib/harness/gates-cases.mjs';
+import { isMain } from '../lib/shared/cli-entry.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const VERIFY_REL = join('scripts', 'verify', 'verify.mjs');
@@ -44,7 +44,7 @@ function buildFixture() {
   const tmp = mkdtempSync(join(tmpdir(), 'gates.e2e-'));
   const ls = git(ROOT, ['ls-files', '-z']);
   if (ls.status !== 0) throw new Error(`git ls-files 失败：${String(ls.stderr).slice(0, 200)}`);
-  const files = [...new Set([...ls.stdout.split('\0').filter(Boolean), 'scripts/lib/backlog-liveness.mjs'])];
+  const files = [...new Set([...ls.stdout.split('\0').filter(Boolean), 'scripts/lib/repo/backlog-liveness.mjs'])];
   if (files.length < 50) throw new Error(`tracked 清单异常少（${files.length}）——fixture 建立中止`);
   for (const f of files) {
     const src = join(ROOT, f);
@@ -111,7 +111,7 @@ async function main() {
       const known = new Set([...CASES, ...CONTROLS].map((c) => c.id));
       const unknown = [...caseFilter].filter((id) => !known.has(id));
       if (unknown.length > 0) {
-        console.error(`gates.e2e: --case 里有未登记的案例 id：${unknown.join(', ')}（正本 = scripts/lib/gates-cases.mjs）`);
+        console.error(`gates.e2e: --case 里有未登记的案例 id：${unknown.join(', ')}（正本 = scripts/lib/harness/gates-cases.mjs）`);
         process.exit(2);
       }
     }

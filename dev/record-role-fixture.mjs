@@ -23,9 +23,9 @@ import { writeFileSync, readFileSync, existsSync, mkdirSync, readdirSync, statSy
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
-import { profileLayerIssues, runtimeVersionOf } from '../scripts/lib/profile-health.mjs'
-import { requireCredentials, scrubbedEnv, withModelKey } from '../scripts/lib/env.mjs'
-import { sentinelInAssistantText } from '../scripts/lib/replay-request.mjs'
+import { profileLayerIssues, runtimeVersionOf } from '../scripts/lib/shared/profile-health.mjs'
+import { requireCredentials, scrubbedEnv, withModelKey } from '../scripts/lib/shared/env.mjs'
+import { sentinelInAssistantText } from '../scripts/lib/shared/replay-request.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const argv = process.argv.slice(2)

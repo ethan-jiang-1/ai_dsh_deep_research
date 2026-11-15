@@ -31,7 +31,7 @@
 // 红绿语义：任一门 RED → exit 1；N/A = 无对象（未到该节点段，不是通过也不是失败——防空
 // 语料反面：无对象必须显式标注，不静默跳过）；PRE-CONTRACT = 契约前违约如实报告不计红。
 // 分层（2026-10-09 layering 二代）：判据核心（全部 gate 函数与契约日常量）住
-// scripts/lib/node-gate-core.mjs（keyless 纯逻辑，tests 消费）；本文件 = CLI 驱动壳 +
+// scripts/lib/gates/node-gate-core.mjs（keyless 纯逻辑，tests 消费）；本文件 = CLI 驱动壳 +
 // zstd 日志 reader（多帧拼接 CLI 可解全帧）注入。tests/ 层禁子进程，keyless 测试走纯
 // .jsonl 夹具直调（fixtures/node-gate/，先红后绿的永久反证记录）。
 // 用法：node scripts/run-gates/node-gate.mjs <run-bundle-dir> [--sessions <会话根>] [--write]
@@ -40,11 +40,11 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { listRuns } from '../../packages/deep-research-pack/src/lib/run-context.ts'
-import { gateBundle } from '../lib/node-gate-core.mjs'
-import { nodeRunSource } from '../lib/run-source-node.mjs'
-import { workspaceRoot } from '../lib/workspace-root.mjs'
-import { readZstdText } from '../lib/zstd-read.mjs'
-import { isMain } from '../lib/cli-entry.mjs'
+import { gateBundle } from '../lib/gates/node-gate-core.mjs'
+import { nodeRunSource } from '../lib/gates/run-source-node.mjs'
+import { workspaceRoot } from '../lib/shared/workspace-root.mjs'
+import { readZstdText } from '../lib/shared/zstd-read.mjs'
+import { isMain } from '../lib/shared/cli-entry.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 

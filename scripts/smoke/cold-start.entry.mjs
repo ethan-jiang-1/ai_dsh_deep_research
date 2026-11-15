@@ -13,7 +13,7 @@ import { spawn } from 'node:child_process'
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { reclaimPort } from '../lib/port-reclaim.mjs'
+import { reclaimPort } from '../lib/harness/port-reclaim.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PORT = process.env.COLD_START_PORT ?? '3129'

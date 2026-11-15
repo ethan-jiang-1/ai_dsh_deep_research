@@ -13,7 +13,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { ciWorkflowRunProblems, eventKeys, executedSmokeFiles, jobIds, parseWorkflow } from '../../scripts/lib/ci-workflow.mjs'
+import { ciWorkflowRunProblems, eventKeys, executedSmokeFiles, jobIds, parseWorkflow } from '../../scripts/lib/tools/ci-workflow.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 

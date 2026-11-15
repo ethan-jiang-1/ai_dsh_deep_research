@@ -27,17 +27,17 @@
 // 前置：source dev/env.sh；DEEPSEEK_API_KEY 已配；pack 已构建；zstd CLI 在 PATH。
 // 用法：source dev/env.sh && node --import tsx/esm scripts/smoke/client-hitl.entry.mjs [--port 3113]
 import { spawnSync } from 'node:child_process'
-import { answeredCountOf, landedAnswerOf } from '../lib/hitl-provenance.mjs'
+import { answeredCountOf, landedAnswerOf } from '../lib/shared/hitl-provenance.mjs'
 import { readdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
-import { requireCredentials, withModelKey } from '../lib/env.mjs'
-import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs'
-import { readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs'
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs'
-import { SMOKE_LOCALE, launchChromium, loadChromium } from '../lib/playwright.mjs'
-import { openSessionById, TAB_TEXT } from '../lib/web-ui-nav.mjs'
+import { requireCredentials, withModelKey } from '../lib/shared/env.mjs'
+import { authenticate, bootWeb, makeRpc } from '../lib/shared/web-harness.mjs'
+import { readSessionEvents, resolveSessionLog } from '../lib/shared/session-log.mjs'
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/harness/vendor-artifacts.mjs'
+import { SMOKE_LOCALE, launchChromium, loadChromium } from '../lib/harness/playwright.mjs'
+import { openSessionById, TAB_TEXT } from '../lib/shared/web-ui-nav.mjs'
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')

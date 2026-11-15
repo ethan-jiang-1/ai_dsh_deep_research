@@ -14,7 +14,7 @@
 import { existsSync, lstatSync, readdirSync, rmSync } from 'node:fs'
 import { dirname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { classifyRuntimePath, planRuntimeCleanup } from '../lib/runtime-clean-core.mjs'
+import { classifyRuntimePath, planRuntimeCleanup } from '../lib/ops/runtime-clean-core.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const RUNTIME = join(ROOT, 'runtime')

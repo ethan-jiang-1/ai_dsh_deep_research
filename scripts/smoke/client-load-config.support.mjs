@@ -6,7 +6,7 @@
 // （空白自测会话没有 conversation view tab，浏览器相位退役）。
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES, tabTitleIndex } from '../lib/web-ui-nav.mjs'
+import { expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES, tabTitleIndex } from '../lib/shared/web-ui-nav.mjs'
 
 /**
  * pass-4：「研究配置」页签（D25 期 1 管理中继面）——guide 胶囊在场 + 页签体渲染

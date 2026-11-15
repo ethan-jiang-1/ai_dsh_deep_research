@@ -4,7 +4,7 @@
 // 为什么存在：BUG-021 的生产现场坏在两层——①提交按钮 aria-label 是**状态机**（空闲 Send message／
 // 在飞 Queue message／插话 Steer message × 双语），旧探针只找含 "Send" 的字符串 → 在飞时**构造性
 // 零命中**；②同一位置在 `running && 草稿为空` 或**有挂起交互**时变成 stop，盲点"composer 区最后
-// 一个按钮"会**掐断在飞 turn**。判定本体已抽成 `scripts/lib/probe-send-target.mjs`（keyless 钉住），
+// 一个按钮"会**掐断在飞 turn**。判定本体已抽成 `scripts/lib/probes/probe-send-target.mjs`（keyless 钉住），
 // 但"在真 UI 上真的发得出去、且真落盘"只有真模型档能证——本 smoke 即那一条。
 //
 // 两阶段断言（起一条一次性通道 + 独立 workspace，**绝不打在交付会话上**）：
@@ -28,10 +28,10 @@ import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { requireCredentials, scrubbedEnv } from '../lib/env.mjs';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
-import { runStateOf } from '../lib/run-state.mjs';
-import { resolveSessionLog } from '../lib/session-log.mjs';
+import { requireCredentials, scrubbedEnv } from '../lib/shared/env.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/harness/vendor-artifacts.mjs';
+import { runStateOf } from '../lib/shared/run-state.mjs';
+import { resolveSessionLog } from '../lib/shared/session-log.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {

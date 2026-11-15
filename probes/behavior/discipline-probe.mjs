@@ -34,16 +34,16 @@
 // 用法：source dev/env.sh && node probes/behavior/discipline-probe.mjs [--port 3104] [--scenario <id>]
 // verdict：exit 0=全绿 / 1=断言红 / 2=前置缺席（冒烟可靠性纪律，未跑 ≠ 通过）。
 import { spawnSync } from 'node:child_process';
-import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
-import { readSessionTextOf } from '../../scripts/lib/session-log.mjs';
+import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/shared/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/shared/web-harness.mjs';
+import { readSessionTextOf } from '../../scripts/lib/shared/session-log.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { presetRoles } from '../../scripts/lib/roles.mjs';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/vendor-artifacts.mjs';
-import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/port-reclaim.mjs';
+import { presetRoles } from '../../scripts/lib/shared/roles.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/harness/vendor-artifacts.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/harness/port-reclaim.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const OVERLAY = join(ROOT, 'dev', 'research.overlay.yml');

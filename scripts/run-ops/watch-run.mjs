@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // scripts/run-ops/watch-run.mjs — run 盯场件（RFC run-ops-self-diagnosis）。谓词 =
-// scripts/lib/run-state.mjs（事件形状，非字符串 grep）。
+// scripts/lib/shared/run-state.mjs（事件形状，非字符串 grep）。
 //
 // 退出码：0 = HITL-PENDING 或 RUN-SETTLED（stdout `STATE:` 行自报是哪个）；1 = 超时；2 = 用法错。
 // 用法：node --import tsx/esm scripts/run-ops/watch-run.mjs <session-id> [--interval 20] [--timeout-min 90]
@@ -11,9 +11,9 @@
 import { existsSync, readdirSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { runStateOf, eventsRegressed, leadHitlCandidate } from '../lib/run-state.mjs'
-import { findGroup, researchWorkspaceGroup, resolveSessionLog } from '../lib/session-log.mjs'
-import { workspaceRoot } from '../lib/workspace-root.mjs'
+import { runStateOf, eventsRegressed, leadHitlCandidate } from '../lib/shared/run-state.mjs'
+import { findGroup, researchWorkspaceGroup, resolveSessionLog } from '../lib/shared/session-log.mjs'
+import { workspaceRoot } from '../lib/shared/workspace-root.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const SID = process.argv[2]

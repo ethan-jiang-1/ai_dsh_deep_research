@@ -16,9 +16,9 @@ import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { isMain } from '../lib/cli-entry.mjs'
-import { evaluateRelease, evaluateHandoff } from '../lib/release-anchor.mjs'
-import { artifactFreshness, packInputRoots } from '../lib/artifact-freshness.mjs'
+import { isMain } from '../lib/shared/cli-entry.mjs'
+import { evaluateRelease, evaluateHandoff } from '../lib/repo/release-anchor.mjs'
+import { artifactFreshness, packInputRoots } from '../lib/shared/artifact-freshness.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')

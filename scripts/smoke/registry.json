@@ -5,8 +5,8 @@
     "cost": "slow",
     "uniqueClaim": "真模型交互探针 --ask：空闲 Send / 在飞 Queue 双路径 + journal 落盘对账",
     "oracle": [
-      "tests/run/inject-reconcile.spec.mjs",
-      "tests/run/probe-send-target.spec.mjs"
+      "tests/run/channel/inject-reconcile.spec.mjs",
+      "tests/run/probes/probe-send-target.spec.mjs"
     ],
     "sunset": "当 client-hitl 的 HITL 代答覆盖发送/排队两路径时退役",
     "lane": "entry"
@@ -17,8 +17,8 @@
     "cost": "slow",
     "uniqueClaim": "真模型 HITL 活标题/挂起自动展开/代答盘侧落盘",
     "oracle": [
-      "tests/run/hitl-provenance.spec.mjs",
-      "tests/run/ask-drive.spec.mjs"
+      "tests/run/channel/hitl-provenance.spec.mjs",
+      "tests/run/channel/ask-drive.spec.mjs"
     ],
     "sunset": "当 client-load 能造活挂起且 hitl-provenance 覆盖 UI 面时退役",
     "lane": "entry"
@@ -51,7 +51,7 @@
     "cost": "medium",
     "uniqueClaim": "client-load 磁盘参考选择支援件：绑定会话/参考选择",
     "oracle": [
-      "tests/run/client-load-select.spec.mjs"
+      "tests/run/harness/client-load-select.spec.mjs"
     ],
     "sunset": "并入 client-load 主模块后退役",
     "lane": "support"
@@ -73,8 +73,8 @@
     "cost": "slow",
     "uniqueClaim": "真浏览器驾驶舱装配/页签/渐进面/磁盘真值对账",
     "oracle": [
-      "tests/run/client-load-select.spec.mjs",
-      "tests/run/host-health.spec.mjs"
+      "tests/run/harness/client-load-select.spec.mjs",
+      "tests/run/harness/host-health.spec.mjs"
     ],
     "sunset": "当 snapshot/preset 的 keyless 档能覆盖装配面时退役",
     "lane": "entry",
@@ -245,8 +245,8 @@
     "cost": "medium",
     "uniqueClaim": "run-accept 全链：归一/幂等/外部 present/秘密/repair/schema/claim",
     "oracle": [
-      "tests/run/run-accept-fixture.spec.mjs",
-      "tests/run/run-receipt.spec.mjs"
+      "tests/run/harness/run-accept-fixture.spec.mjs",
+      "tests/run/gates/run-receipt.spec.mjs"
     ],
     "sunset": "当 run-accept 核心有完整直测时退役",
     "lane": "e2e"
@@ -257,7 +257,7 @@
     "cost": "medium",
     "uniqueClaim": "CLI 扫描范围边界：默认不扫 evidence/--all 才扫/不回显",
     "oracle": [
-      "tests/run/secret-scan.spec.mjs"
+      "tests/run/shared/secret-scan.spec.mjs"
     ],
     "sunset": "当 secret-scan 范围由纯函数覆盖时退役",
     "lane": "e2e"
@@ -267,9 +267,9 @@
     "cost": "slow",
     "uniqueClaim": "A 回放通路 / B 组装请求 diff / C lead 渲染金标准",
     "oracle": [
-      "tests/run/replay-request.spec.mjs",
-      "tests/run/replay-scene.spec.mjs",
-      "tests/run/replay-fixtures.spec.mjs"
+      "tests/run/harness/replay-request.spec.mjs",
+      "tests/run/harness/replay-scene.spec.mjs",
+      "tests/run/harness/replay-fixtures.spec.mjs"
     ],
     "sunset": "当 A/B 进 CI 且 C 降里程碑时退役",
     "job": "snapshot-replay",

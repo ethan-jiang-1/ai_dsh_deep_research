@@ -68,7 +68,15 @@ test('资产门：scripts 职责索引覆盖全部盘上入口（根面 + 职责
   // 分组布局（2026-10-07 目录治理档 C）：顶层 = 职责子目录 + 根面（README/AGENTS/doc-budgets.json）；
   // 索引对组目录点名、对组内文件点名（lib/ 前缀形态）。
   const topEntries = readdirSync(join(ROOT, 'scripts'), { withFileTypes: true }).filter((e) => e.name !== 'README.md');
-  const libEntries = readdirSync(join(ROOT, 'scripts', 'lib'));
+  const libEntries = [];
+  const collectLib = (dir) => {
+    for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, ent.name);
+      if (ent.isDirectory()) collectLib(p);
+      else libEntries.push(relative(join(ROOT, 'scripts', 'lib'), p).split('\\').join('/'));
+    }
+  };
+  collectLib(join(ROOT, 'scripts', 'lib'));
   for (const ent of topEntries) assert.ok(idx.includes(ent.name), `scripts 职责索引未点名：${ent.name}${ent.isDirectory() ? '/' : ''}`);
   for (const f of libEntries) assert.ok(idx.includes(`lib/${f}`), `scripts 职责索引未点名：lib/${f}`);
 });
@@ -211,11 +219,20 @@ test('资产门：scripts/README lib 表「被谁消费」列 = 实际 import �
   }
   assert.ok(importers.size >= 20, `防空语料：import 图扫描到 ${importers.size} 个 lib 模块（过少 = 扫描面被收窄）`);
   // 行形：盘上每个 lib 模块必须有自己的表行（行内提及不算——资产门的文件名点名可被行内提及绕过）
-  for (const f of readdirSync(libDir).filter((f) => f.endsWith('.mjs'))) {
+  const libRows = [];
+  const collectRows = (dir) => {
+    for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, ent.name);
+      if (ent.isDirectory()) collectRows(p);
+      else if (ent.name.endsWith('.mjs')) libRows.push(relative(libDir, p).split('\\').join('/'));
+    }
+  };
+  collectRows(libDir);
+  for (const f of libRows) {
     assert.ok(idx.includes(`| lib/${f} |`), `lib 表缺行：lib/${f}——每个支撑模块一行，行内提及不算行`);
   }
   // 消费列 = 实际 import 集（双向精确对账）
-  const rows = [...idx.matchAll(/^\| lib\/([\w.-]+)\.mjs \| (.+?) \|/gm)];
+  const rows = [...idx.matchAll(/^\| lib\/([\w./-]+)\.mjs \| (.+?) \|/gm)];
   assert.ok(rows.length > 0, '防空语料：README lib 表零行');
   for (const [, lib, cell] of rows) {
     const actual = [...(importers.get(lib) ?? [])].sort();

@@ -2,7 +2,7 @@
 // 被测面 = packages/deep-research-pack/src/lib/text-fold.ts（method-of-question 与
 // library-fold 两消费方共用的剥标记/截断口径——此前仅经消费方传递覆盖，无直接测试）。
 // 共享缝直接钉——收敛后此缝成为单点，口径变形时红的第一个地方应是这里
-// （参照 tests/run/journal-wire.spec.mjs 头注精神）。
+// （参照 tests/run/ops/journal-wire.spec.mjs 头注精神）。
 // 负例留证 2026-10-21：把 truncateWithEllipsis 改为原样返回 → 「截断」用例红；
 // 把 flattenMarkdownInline 的 `**` 剥除去掉 → 「行内强调」用例红；还原（edit 改回）→ 全绿。
 import { test } from 'node:test';

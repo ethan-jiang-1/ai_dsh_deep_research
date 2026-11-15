@@ -1,0 +1,222 @@
+// final-target 回归 —— 终稿页签的纯折算（keyless）：交付事件折叠 + 地址认领 + 读面定表。
+// 反证口径：门的形态只认三个终稿位置（根 / archive / _abandoned），其余路径全拒——
+// 认宽了就是把 question/evidence/drafts 漏进终稿面。
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import {
+  deliveryFromReceipt, draftInProgress, finalAddressOf, finalPathOf, finalPathOfWithin, finalReadPlan, finalVersionOfPath, isFinalAddress, latestFinalDelivery, latestPresentedFinalVersion,
+  sessionFileOf, shouldOpenFinal,
+} from '../../../packages/deep-research-pack/src/lib/final-target.ts';
+
+const presented = (files, extra = {}) => ({
+  type: 'deliverables/presented',
+  data: { turn: 7, callId: 'call-1', files, ...extra },
+});
+
+test('finalPathOf：相对/archive/_abandoned 三位置与绝对路径都折成规范相对路径', () => {
+  assert.equal(finalPathOf('drt_x/final.md'), 'drt_x/final.md');
+  assert.equal(finalPathOf('archive/drt_x/final.md'), 'archive/drt_x/final.md');
+  assert.equal(finalPathOf('_abandoned/drt_x/final.md'), '_abandoned/drt_x/final.md');
+  assert.equal(finalPathOf('/Users/me/research-workspace/drt_x/final.md'), 'drt_x/final.md');
+  assert.equal(finalPathOf('/Users/me/research-workspace/archive/drt_2026-ai-browser/final.md'), 'archive/drt_2026-ai-browser/final.md');
+  assert.equal(finalPathOf('./drt_x/final.md'), 'drt_x/final.md');
+  assert.equal(finalPathOf('drt_x\\final.md'), 'drt_x/final.md');
+});
+
+test('finalPathOf：非终稿路径一律 null（中间过程不因后缀巧合漏进来）', () => {
+  assert.equal(finalPathOf('drt_x/question.md'), null);
+  assert.equal(finalPathOf('drt_x/evidence/final.md'), null);
+  assert.equal(finalPathOf('drt_x/drafts/final.md'), null);
+  assert.equal(finalPathOf('notes/final.md'), null);
+  assert.equal(finalPathOf('drt_x/final.md.bak'), null);
+  assert.equal(finalPathOf('drt_x/final.md/junk'), null);
+  assert.equal(finalPathOf(42), null);
+  assert.equal(finalPathOf(undefined), null);
+  assert.equal(finalPathOf(''), null);
+});
+
+test('latestFinalDelivery：取最后一条终稿交付；同一声明里的非终稿文件被跳过', () => {
+  const events = [
+    presented([{ path: 'drt_a/audit.md' }, { path: 'drt_a/final.md' }], { callId: 'call-a', turn: 3 }),
+    presented([{ path: 'drt_b/final.md' }], { callId: 'call-b', turn: 5 }),
+  ];
+  assert.deepEqual(latestFinalDelivery(events), { path: 'drt_b/final.md', turn: 5, callId: 'call-b' });
+});
+
+test('latestPresentedFinalVersion：认 present 点名里的 final/vN.md，最高版；普通 final.md → null', () => {
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_a/final.md' }])]), null)
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_a/final/v2.md' }, { path: 'drt_a/audit.md' }])]), 2)
+  assert.equal(
+    latestPresentedFinalVersion([presented([{ path: 'drt_a/final/v1.md' }]), presented([{ path: 'archive/drt_a/final/v3.md' }])]),
+    3,
+  )
+});
+
+test('latestFinalDelivery：只有非终稿 present → null（别的交付不点亮终稿）', () => {
+  assert.equal(latestFinalDelivery([presented([{ path: 'drt_a/audit.md' }])]), null);
+});
+
+test('latestFinalDelivery：畸形 data / 缺 callId / 非 present 事件 fail-soft', () => {
+  assert.equal(latestFinalDelivery([{ type: 'deliverables/presented', data: null }]), null);
+  assert.equal(latestFinalDelivery([{ type: 'deliverables/presented', data: { files: 'x' } }]), null);
+  assert.equal(latestFinalDelivery([{ type: 'tool/call', data: {} }, 'junk', null]), null);
+  assert.deepEqual(
+    latestFinalDelivery([presented([{ path: 'drt_a/final.md' }], { turn: 'x', callId: 9 })]),
+    { path: 'drt_a/final.md', turn: 0, callId: '' },
+  );
+});
+
+test('finalReadPlan：读面定表恰三条（终稿 / 审查 / 版本目录）', () => {
+  assert.deepEqual(finalReadPlan('drt_x/final.md'), {
+    final: 'drt_x/final.md', review: 'drt_x/review.md', versions: 'drt_x/final',
+  });
+  assert.deepEqual(finalReadPlan('archive/drt_x/final.md'), {
+    final: 'archive/drt_x/final.md', review: 'archive/drt_x/review.md', versions: 'archive/drt_x/final',
+  });
+  assert.equal(finalReadPlan('drt_x/question.md'), null);
+});
+
+test('地址：会话域解析 + 认领范围（extension 带只接管终稿）', () => {
+  const address = finalAddressOf('sess-1', 'archive/drt_x/final.md');
+  assert.ok(address.startsWith('dsh-resource://file/session/'));
+  assert.deepEqual(sessionFileOf(address), { sessionId: 'sess-1', path: 'archive/drt_x/final.md' });
+  assert.equal(isFinalAddress(address), true);
+  assert.equal(isFinalAddress(finalAddressOf('sess-1', 'drt_x/final.md')), true);
+  assert.equal(isFinalAddress(finalAddressOf('sess-1', '_abandoned/drt_x/final.md')), true);
+  assert.equal(isFinalAddress(finalAddressOf('sess-1', 'drt_x/question.md')), false);
+  assert.equal(isFinalAddress(finalAddressOf('sess-1', 'drt_x/drafts/final.md')), false);
+  assert.equal(isFinalAddress(finalAddressOf('sess-1', 'notes/final.md')), false);
+  // 绝对域不认（页签体只经会话文件面读）
+  assert.equal(isFinalAddress('dsh-resource://file/absolute/home/me/drt_x/final.md'), false);
+  assert.equal(sessionFileOf('dsh-resource://file/absolute/home/me/x.md'), null);
+});
+
+test('地址：编码段往返 + 查询串忽略 + 畸形编码 fail-soft', () => {
+  const address = finalAddressOf('sess 1', 'drt_x y/final.md');
+  assert.deepEqual(sessionFileOf(address), { sessionId: 'sess 1', path: 'drt_x y/final.md' });
+  assert.deepEqual(sessionFileOf(`${address}?line=3`), { sessionId: 'sess 1', path: 'drt_x y/final.md' });
+  assert.equal(sessionFileOf('dsh-resource://file/session/sess-1/%E0%A4%A'), null);
+  assert.equal(sessionFileOf('dsh-resource://file/session/sess-1'), null);
+  assert.equal(sessionFileOf('https://example.com/x.md'), null);
+});
+
+test('shouldOpenFinal：有交付 + 未开过 + 焦点不在输入框 → 才开（三条缺一不开）', () => {
+  const delivery = { path: 'drt_x/final.md', turn: 3, callId: 'call-1' };
+  assert.equal(shouldOpenFinal(delivery, new Set(), 's1', false), true);
+  assert.equal(shouldOpenFinal(null, new Set(), 's1', false), false);
+  assert.equal(shouldOpenFinal(delivery, new Set(), 's1', true), false);
+  assert.equal(shouldOpenFinal(delivery, new Set(['s1:call-1']), 's1', false), false);
+  // 去重键吃会话：同一 callId 在别的会话里不冲突
+  assert.equal(shouldOpenFinal(delivery, new Set(['s2:call-1']), 's1', false), true);
+});
+
+test('draftInProgress：空输入框不算在写（会话打开即聚焦 composer 的实测形态）', () => {
+  assert.equal(draftInProgress({ tagName: 'TEXTAREA', value: '' }), false);
+  assert.equal(draftInProgress({ tagName: 'TEXTAREA', value: '   ' }), false);
+  assert.equal(draftInProgress({ tagName: 'TEXTAREA', value: '写到一半的话' }), true);
+  assert.equal(draftInProgress({ tagName: 'INPUT', value: 'x' }), true);
+  assert.equal(draftInProgress({ tagName: 'BODY' }), false);
+  assert.equal(draftInProgress({ tagName: 'DIV', isContentEditable: true, textContent: '' }), false);
+  assert.equal(draftInProgress({ tagName: 'DIV', isContentEditable: true, textContent: '草稿' }), true);
+  assert.equal(draftInProgress(null), false);
+});
+
+// ── 终稿地址族（读者版；2026-10-23）──
+
+test('终稿地址族：final.md / final/vN / final/readable(-vN) 都折成族路径；非族文件仍拒', () => {
+  assert.equal(finalPathOf('drt_x/final/v2.md'), 'drt_x/final/v2.md');
+  assert.equal(finalPathOf('archive/drt_x/final/readable.md'), 'archive/drt_x/final/readable.md');
+  assert.equal(finalPathOf('drt_x/final/readable-v2.md'), 'drt_x/final/readable-v2.md');
+  assert.equal(finalPathOf('drt_x/final/v0.md'), null);
+  assert.equal(finalPathOf('drt_x/final/readable-final.md'), null);
+  assert.equal(finalPathOf('drt_x/final/other.md'), null);
+  assert.equal(finalPathOf('drt_x/drafts/readable-v1.md'), null);
+});
+
+test('终稿族读面：不论地址是 vN 还是 reader，都回到同一个 bundle 的 final.md/review.md/final/', () => {
+  for (const path of ['drt_x/final.md', 'drt_x/final/v2.md', 'drt_x/final/readable.md', 'drt_x/final/readable-v2.md']) {
+    assert.deepEqual(finalReadPlan(path), {
+      final: 'drt_x/final.md', review: 'drt_x/review.md', versions: 'drt_x/final',
+    }, path);
+  }
+  assert.deepEqual(finalReadPlan('archive/drt_x/final/readable-v2.md'), {
+    final: 'archive/drt_x/final.md', review: 'archive/drt_x/review.md', versions: 'archive/drt_x/final',
+  });
+});
+
+test('交付监听：present 同时带 reader 与 vN → 优先 open reader；只带 vN → open vN', () => {
+  assert.deepEqual(
+    latestFinalDelivery([presented([{ path: 'drt_x/final/v2.md' }, { path: 'drt_x/final/readable-v2.md' }], { callId: 'c2' })]),
+    { path: 'drt_x/final/readable-v2.md', turn: 7, callId: 'c2' },
+  );
+  assert.deepEqual(
+    latestFinalDelivery([presented([{ path: 'drt_x/final/v2.md' }])]),
+    { path: 'drt_x/final/v2.md', turn: 7, callId: 'call-1' },
+  );
+});
+
+test('present 版本：从 reader 的 readable-vN 也能读出 N；readable.md（工作件）不算版本', () => {
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_x/final/readable-v2.md' }])]), 2);
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_x/final/readable.md' }])]), null);
+});
+
+test('地址认领：终稿族三位置 + final/ 下 vN/readable 都认；drafts 与别的 final 仍拒', () => {
+  for (const path of ['drt_x/final.md', 'drt_x/final/v1.md', 'drt_x/final/readable.md', 'drt_x/final/readable-v1.md']) {
+    assert.equal(isFinalAddress(finalAddressOf('sess-1', path)), true, path);
+  }
+  assert.equal(isFinalAddress(finalAddressOf('sess-1', 'drt_x/drafts/readable-v1.md')), false);
+  assert.equal(isFinalAddress(finalAddressOf('sess-1', 'notes/final/v1.md')), false);
+  assert.equal(isFinalAddress(finalAddressOf('sess-1', 'drt_x/final/readable-final.md')), false);
+});
+
+// 负例留证 2026-11-12：BUG-101——非终稿族 notes/final/v9.md 被当交付版本；
+// BUG-103——全历史 max 与最后一条 present 错位。还原法 = 去掉 finalPathOf 过滤 / 改回 max。
+test('BUG-101/103 latestPresentedFinalVersion：只认终稿族，且以最后一条含版本的 present 为准', () => {
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'notes/final/v9.md' }])]), null)
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_x/final/v2.md' }]), presented([{ path: 'drt_x/final/v1.md' }])]), 1)
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_x/final/v1.md' }]), presented([{ path: 'drt_x/final/v2.md' }])]), 2)
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_x/final/v1.md' }, { path: 'drt_x/final/v3.md' }])]), 3)
+})
+
+// 负例留证 2026-11-13：BUG-116——v2 后 present 无版本 final.md 仍保留 v2；
+// BUG-122——notes/drt_x/final.md 被当终稿族。还原法 = 不重置 latest / 后缀直接提取。
+test('BUG-116/122 最后一条终稿 present 无版本 → null；嵌套 notes/drafts 不认终稿', () => {
+  assert.equal(latestPresentedFinalVersion([presented([{ path: 'drt_x/final/v2.md' }]), presented([{ path: 'drt_x/final.md' }])]), null)
+  assert.equal(finalPathOf('notes/drt_x/final.md'), null)
+  assert.equal(finalPathOf('drafts/drt_x/final/v2.md'), null)
+  assert.equal(finalPathOf('/tmp/notes/drt_x/final.md'), null)
+  assert.equal(finalPathOf('drt_x/final.md'), 'drt_x/final.md')
+  assert.equal(finalPathOf('archive/drt_x/final.md'), 'archive/drt_x/final.md')
+})
+
+// 负例留证 2026-11-13：BUG-129——绝对路径根被丢弃，跨 workspace 同 slug 被别名。还原法 = 不含根校验。
+test('BUG-129 finalPathOfWithin：绝对路径必须落在 cwd 内，跨 workspace/.. 返回 null', () => {
+  const cwd = '/Users/me/research-workspace'
+  assert.equal(finalPathOfWithin('/Users/me/research-workspace/drt_x/final.md', cwd), 'drt_x/final.md')
+  assert.equal(finalPathOfWithin('/Users/me/research-workspace/archive/drt_x/final.md', cwd), 'archive/drt_x/final.md')
+  assert.equal(finalPathOfWithin('/tmp/other-workspace/drt_x/final.md', cwd), null)
+  assert.equal(finalPathOfWithin('/Users/me/research-workspace/../other/drt_x/final.md', cwd), null)
+  assert.equal(latestFinalDelivery([presented([{ path: '/tmp/other-workspace/drt_x/final.md' }])], cwd), null)
+  assert.equal(latestPresentedFinalVersion([presented([{ path: '/tmp/other-workspace/drt_x/final/v9.md' }])], cwd), null)
+})
+
+// 负例留证 2026-11-13：D51——会话窗口不含旧 present 时，交付态从窗口读成「未交付」；
+// 持久回执 delivered.json 是同一事实。红配方：删掉 deliveryFromReceipt 的兜底接线（只留 present 事件）。
+test('deliveryFromReceipt：回执 → 交付见证（窗口外 present 的持久兜底）', () => {
+  const receipt = { present: { path: 'drt_x/final/v2.md', callId: 'p1', version: 2 }, final: { version: 2 } }
+  assert.deepEqual(deliveryFromReceipt(receipt), { path: 'drt_x/final/v2.md', turn: 0, callId: 'p1' })
+  // 缺 present.path 时用 slug + final.version 合成
+  assert.equal(deliveryFromReceipt({ final: { version: 3 } }, 'x')?.path, 'drt_x/final/v3.md')
+  // 畸形/空回执不冒充
+  assert.equal(deliveryFromReceipt(null), null)
+  assert.equal(deliveryFromReceipt({}), null)
+  assert.equal(deliveryFromReceipt({ present: { path: '  ' } }), null)
+})
+
+test('finalVersionOfPath：版本族路径才取版本', () => {
+  assert.equal(finalVersionOfPath('drt_x/final/v2.md'), 2)
+  assert.equal(finalVersionOfPath('drt_x/final/readable-v2.md'), 2)
+  assert.equal(finalVersionOfPath('drt_x/final.md'), null)
+  assert.equal(finalVersionOfPath('drt_x/notes/v9.md'), null)
+  assert.equal(finalVersionOfPath(undefined), null)
+})

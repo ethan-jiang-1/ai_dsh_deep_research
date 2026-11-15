@@ -9,7 +9,7 @@
 | # | 决定 | 依据/出处 |
 |---|---|---|
 | <a id="d1"></a>D1 | **自写包 = 1 个**（`deep-research-pack`）；角色是 preset 目录，不是包 | [10](./design/10-architecture.md) |
-| <a id="d2"></a>D2 | **角色 = 5 个**：Lead / Scout / Analyst / Critic + Method Editor（非研究角色，D37）；清单事实源 = 盘上 `presets/` | [20](./design/20-roles.md) · [roles.mjs](../scripts/lib/roles.mjs) |
+| <a id="d2"></a>D2 | **角色 = 5 个**：Lead / Scout / Analyst / Critic + Method Editor（非研究角色，D37）；清单事实源 = 盘上 `presets/` | [20](./design/20-roles.md) · [roles.mjs](../scripts/lib/shared/roles.mjs) |
 | <a id="d3"></a>D3 | **协作主通道 = Agent Teams**；单点查证走 one-shot subagent；preset 钉默认通道 = 部署层预授权 | [10 §3](./design/10-architecture.md) |
 | <a id="d4"></a>D4 | **方法论内核 = codex harness 考古十条**；不采纳 markdown 控制面与 CLI 状态机，不建仓库 markdown 队列 | [30](./design/30-methodology-mapping.md) · [考古](../notes/archived/2026-09-24-deep-research-harness-analysis.md) |
 | <a id="d5"></a>D5 | **证据身份链 = 唯一自建残留**：evidence frontmatter 文件契约 + critic 狩猎，不做 CLI 引擎 | [30](./design/30-methodology-mapping.md) · [evaluation](./evaluation.md) |

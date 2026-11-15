@@ -6,15 +6,15 @@
 // 看 node-gate 的输出数不出"连续几场"。本工具即那件可复跑的仪器（原先只有一次性运行态脚本，
 // 结果记在卡上而仪器不留，等于条件不可判定）。
 //
-// 口径与识别**不在这里**：`scripts/lib/plan-card.mjs` 是唯一语义源（与门① 同源消费）——本件只做
+// 口径与识别**不在这里**：`scripts/lib/shared/plan-card.mjs` 是唯一语义源（与门① 同源消费）——本件只做
 // 扫描、聚合与呈现。判据语义（严重级 = WARN、升格条件）= notes/implemented/2026-10-11-plan-card-length-warn.md。
 //
 // 用法：source dev/env.sh && node scripts/run-ops/plan-card-stats.mjs [--days 30] [--group <子串>] [--json]
 // 退出码：0 = 正常输出（超限与否不是本工具的判据）/ 2 = 用法或前置错（未 source dev/env.sh）
 import { join, resolve } from 'node:path';
-import { readSessionText, sessionLogsSince } from '../lib/session-log.mjs';
-import { defaultGroupSubstring } from '../lib/workspace-root.mjs';
-import { planCardsOf, PLAN_CARD_LIMIT } from '../lib/plan-card.mjs';
+import { readSessionText, sessionLogsSince } from '../lib/shared/session-log.mjs';
+import { defaultGroupSubstring } from '../lib/shared/workspace-root.mjs';
+import { planCardsOf, PLAN_CARD_LIMIT } from '../lib/shared/plan-card.mjs';
 
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
@@ -63,6 +63,6 @@ if (JSON_OUT) {
   }
   if (unreadable.length > 0) console.log(`⚠ 日志不可读 ${unreadable.length} 份（坏帧/读失败，已排除在统计外）：${unreadable.slice(0, 5).join('、')}`);
   console.log('判据语义：超限 = WARN（不拦交付）；升硬门前置 = 措辞收紧后**连续 ≥3 场** ≤200 字达标'
-    + '——本表按场次顺序复核该前置（口径与识别 = scripts/lib/plan-card.mjs，与 node-gate 门① 同源）。');
+    + '——本表按场次顺序复核该前置（口径与识别 = scripts/lib/shared/plan-card.mjs，与 node-gate 门① 同源）。');
 }
 process.exit(0);

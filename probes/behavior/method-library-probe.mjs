@@ -20,10 +20,10 @@
 // 是当前的诚实态，不是失败；失败面 = 编造条目或假称已执行。
 //
 // 前置：source dev/env.sh。用法：node probes/behavior/method-library-probe.mjs [--port 3116]
-import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
-import { readSessionTextOf } from '../../scripts/lib/session-log.mjs';
-import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/port-reclaim.mjs';
+import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/shared/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/shared/web-harness.mjs';
+import { readSessionTextOf } from '../../scripts/lib/shared/session-log.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/harness/port-reclaim.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';

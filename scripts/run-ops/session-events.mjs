@@ -15,10 +15,10 @@
 import { existsSync, readdirSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { findGroup, sessionLogsInGroup, readSessionEvents } from '../lib/session-log.mjs'
-import { defaultGroupSubstring } from '../lib/workspace-root.mjs'
-import { sessionTitleOf } from '../lib/run-state.mjs'
-import { filterEvents, tailEvents, formatEventLine, readableTitle, stuckOf } from '../lib/session-events-core.mjs'
+import { findGroup, sessionLogsInGroup, readSessionEvents } from '../lib/shared/session-log.mjs'
+import { defaultGroupSubstring } from '../lib/shared/workspace-root.mjs'
+import { sessionTitleOf } from '../lib/shared/run-state.mjs'
+import { filterEvents, tailEvents, formatEventLine, readableTitle, stuckOf } from '../lib/ops/session-events-core.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2)

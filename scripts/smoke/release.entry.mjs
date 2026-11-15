@@ -26,12 +26,12 @@
 // 用法：source dev/env.sh && node scripts/smoke/release.entry.mjs
 
 import { spawn } from 'node:child_process';
-import { scrubbedEnv } from '../lib/env.mjs';
+import { scrubbedEnv } from '../lib/shared/env.mjs';
 import { existsSync, lstatSync, readFileSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { presetRoles } from '../lib/roles.mjs';
-import { reclaimPort } from '../lib/port-reclaim.mjs';
+import { presetRoles } from '../lib/shared/roles.mjs';
+import { reclaimPort } from '../lib/harness/port-reclaim.mjs';
 import { satisfiesVersion } from '../../packages/deep-research-pack/scripts/lib/version-range.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');

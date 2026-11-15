@@ -14,14 +14,14 @@
 //   node dev/run-kickoff.mjs --port 3083 --token <t> --session <id> (--prompt <text> | --prompt-file <f>)
 // 输出：session id（stdout，一行）——后续日志核对/仪表盘观察用它定位。
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { appendDecisionsRow, closingProvenanceRow } from '../scripts/lib/hitl-provenance.mjs'
+import { appendDecisionsRow, closingProvenanceRow } from '../scripts/lib/shared/hitl-provenance.mjs'
 import { join } from 'node:path';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
-import { readSessionText, resolveSessionLog } from '../scripts/lib/session-log.mjs';
-import { bundleDirOf } from '../scripts/lib/run-state.mjs';
-import { reconcileInjectedMessage } from '../scripts/lib/inject-reconcile.mjs';
+import { readSessionText, resolveSessionLog } from '../scripts/lib/shared/session-log.mjs';
+import { bundleDirOf } from '../scripts/lib/shared/run-state.mjs';
+import { reconcileInjectedMessage } from '../scripts/lib/channel/inject-reconcile.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -158,11 +158,11 @@ if (prompt) {
  */
 async function closingRowForPending(sid) {
   try {
-    const { readSessionEvents, resolveSessionLog, researchWorkspaceGroup } = await import('../scripts/lib/session-log.mjs')
+    const { readSessionEvents, resolveSessionLog, researchWorkspaceGroup } = await import('../scripts/lib/shared/session-log.mjs')
     const { foldHitlPending } = await import('../packages/deep-research-pack/src/lib/hitl-fold.ts')
-    const { parseAskQuestions } = await import('../scripts/lib/ask-drive.mjs')
-    const { isDeliveryReviewCard } = await import('../scripts/lib/ask-drive.mjs')
-    const { attributionBundleOf } = await import('../scripts/lib/hitl-provenance.mjs')
+    const { parseAskQuestions } = await import('../scripts/lib/channel/ask-drive.mjs')
+    const { isDeliveryReviewCard } = await import('../scripts/lib/channel/ask-drive.mjs')
+    const { attributionBundleOf } = await import('../scripts/lib/shared/hitl-provenance.mjs')
     const sessionsRoot = join(process.env.DSH_HOME ?? '', 'sessions')
     const group = researchWorkspaceGroup(sessionsRoot)
     if (group === undefined) { console.error('run-kickoff: 记账跳过——找不到 research-workspace 会话组'); return null }

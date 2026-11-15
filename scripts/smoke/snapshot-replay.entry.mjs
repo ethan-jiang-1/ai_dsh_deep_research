@@ -16,7 +16,7 @@
 //     指令 / skill 目录 / 运行时上下文 / 时钟序列）逐条对录制基线比对——这些**模型可见文本**变化在此红
 //     （机制边界：canned 响应本身不随 persona 变化，A 层抓不到——这正是本层存在的理由）。
 //     定向归一化只覆盖源机制确实挥发的身份（GUI 端口、构建戳、工作区路径），实现 =
-//     scripts/lib/replay-request.mjs（逐条判据：persona/headers/agent-instructions/
+//     scripts/lib/shared/replay-request.mjs（逐条判据：persona/headers/agent-instructions/
 //     skill-catalog/runtime-context/time-context）。
 //   C 渲染金标准（场景声明了 renderExpected 的场景，如 lead）：Playwright 读对话流研究语义卡
 //     （web_search 卡标题）与「研究状态」页签人性化活动行（🔍/💬），与场景声明的期望文件
@@ -37,17 +37,17 @@ import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
-import { scrubbedEnv } from '../lib/env.mjs'
-import { authenticate, bootWeb } from '../lib/web-harness.mjs';
-import { presetRoles } from '../lib/roles.mjs';
-import { loadReplayScene, discoverReplayFaces } from '../lib/replay-scene.mjs';
-import { researchWorkspaceGroup } from '../lib/session-log.mjs';
-import { captureReadyOf, compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds, sentinelInAssistantText, turnCompleted } from '../lib/replay-request.mjs';
-import { SMOKE_LOCALE, loadChromium, launchChromium } from '../lib/playwright.mjs';
-import { dismissPreviewNotice, openSessionById } from '../lib/web-ui-nav.mjs';
-import { profileLayerIssues, runtimeVersionOf } from '../lib/profile-health.mjs';
-import { acquireRunLock, releaseRunLock } from '../lib/run-lock.mjs';
-import { resolveSnapshotMode } from '../lib/snapshot-mode.mjs';
+import { scrubbedEnv } from '../lib/shared/env.mjs'
+import { authenticate, bootWeb } from '../lib/shared/web-harness.mjs';
+import { presetRoles } from '../lib/shared/roles.mjs';
+import { loadReplayScene, discoverReplayFaces } from '../lib/harness/replay-scene.mjs';
+import { researchWorkspaceGroup } from '../lib/shared/session-log.mjs';
+import { captureReadyOf, compareReplayRequests, unjudgedInjectionKinds, unexpectedInjectionKinds, sentinelInAssistantText, turnCompleted } from '../lib/shared/replay-request.mjs';
+import { SMOKE_LOCALE, loadChromium, launchChromium } from '../lib/harness/playwright.mjs';
+import { dismissPreviewNotice, openSessionById } from '../lib/shared/web-ui-nav.mjs';
+import { profileLayerIssues, runtimeVersionOf } from '../lib/shared/profile-health.mjs';
+import { acquireRunLock, releaseRunLock } from '../lib/harness/run-lock.mjs';
+import { resolveSnapshotMode } from '../lib/harness/snapshot-mode.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {

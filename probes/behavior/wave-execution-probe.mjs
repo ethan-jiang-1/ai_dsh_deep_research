@@ -25,11 +25,11 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync, copyFileSyn
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
-import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
-import { readSessionTextOf } from '../../scripts/lib/session-log.mjs';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/vendor-artifacts.mjs';
-import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/port-reclaim.mjs';
+import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/shared/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/shared/web-harness.mjs';
+import { readSessionTextOf } from '../../scripts/lib/shared/session-log.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/harness/vendor-artifacts.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/harness/port-reclaim.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const OVERLAY = join(ROOT, 'dev', 'research.overlay.yml');

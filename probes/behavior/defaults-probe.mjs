@@ -17,11 +17,11 @@
 // 前置：source dev/env.sh（DSH_HOME + 凭据）；pack 已构建。
 // 用法：source dev/env.sh && node probes/behavior/defaults-probe.mjs [--port 3124] [--keep]
 // verdict：exit 0=全绿 / 1=断言红 / 2=前置缺席（未跑 ≠ 通过）。
-import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
-import { readSessionTextOf } from '../../scripts/lib/session-log.mjs';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/vendor-artifacts.mjs';
-import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/port-reclaim.mjs';
+import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/shared/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/shared/web-harness.mjs';
+import { readSessionTextOf } from '../../scripts/lib/shared/session-log.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/harness/vendor-artifacts.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/harness/port-reclaim.mjs';
 import { randomUUID } from 'node:crypto'
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';

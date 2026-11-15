@@ -9,15 +9,15 @@
 // 用法：source dev/env.sh && node scripts/smoke/l4-lite.e2e.mjs [--port 3101]
 
 import { spawnSync } from 'node:child_process';
-import { requireCredentials, withModelKey } from '../lib/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
-import { readSessionTextOf } from '../lib/session-log.mjs';
+import { requireCredentials, withModelKey } from '../lib/shared/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../lib/shared/web-harness.mjs';
+import { readSessionTextOf } from '../lib/shared/session-log.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { presetRoles } from '../lib/roles.mjs';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
+import { presetRoles } from '../lib/shared/roles.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/harness/vendor-artifacts.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const OVERLAY = join(ROOT, 'dev', 'research.overlay.yml');

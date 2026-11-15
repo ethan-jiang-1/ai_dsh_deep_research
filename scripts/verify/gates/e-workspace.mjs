@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { ROOT, PACK, fail, note, walk } from '../context.mjs';
-import { T0_HARD_MAX_CHARS } from '../../lib/content-budget.mjs';
+import { T0_HARD_MAX_CHARS } from '../../lib/repo/content-budget.mjs';
 
 export function runE() {
 // ── content-shape（D40：研究内容在包内，不在工作区）──
@@ -23,7 +23,7 @@ export function runE() {
     if (manual.trim() === '') fail(gate, 'content/manual.md 为空');
     // 常驻面预算（2026-11-11 两级）：12,288 = 失控硬顶（历史值 11,227 + ~9% 余量）；
     // 10,000 = 首刀后的下放触发，由 tests/pack/content-disclosure.spec.mjs 把守。两个数只住
-    // scripts/lib/content-budget.mjs。超硬顶先下放/压缩，不直接抬顶（抬顶须同变更登记理由）。
+    // scripts/lib/repo/content-budget.mjs。超硬顶先下放/压缩，不直接抬顶（抬顶须同变更登记理由）。
     // 准入规则（2026-11-10，claim-verdict 落地时定）：manual 只收**每个角色不加载任何 skill 也必须
     // 知道**的不变量与索引；**程序住 skill、结构住 template**。撞顶时处置序 = 下放 > 压缩 > 升顶；
     // 实例 = plan.md 的 W 语法搬模板+research-planning skill、claim 细则搬 claim-verdict skill。

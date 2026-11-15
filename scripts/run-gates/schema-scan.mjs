@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // schema-scan —— 节点 I/O 契约的在场级机检（NODES.md 八节点表「输出（写）」列全行断言）的
-// CLI 壳：判据核住 scripts/lib/schema-scan-core.mjs（2026-10-13 结构重构下沉——判据核可被
+// CLI 壳：判据核住 scripts/lib/gates/schema-scan-core.mjs（2026-10-13 结构重构下沉——判据核可被
 // node-gate 与 tests 导入，壳只管参数与报告渲染）。
 //
 // 分层定位：验收档命令（同 node-gate / evidence-audit 通道），不进 L0——运行区不进 verify
@@ -11,10 +11,10 @@ import { existsSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { listRuns } from '../../packages/deep-research-pack/src/lib/run-context.ts'
-import { scanAll } from '../lib/schema-scan-core.mjs'
-import { nodeRunSource } from '../lib/run-source-node.mjs'
-import { workspaceRoot } from '../lib/workspace-root.mjs'
-import { isMain } from '../lib/cli-entry.mjs'
+import { scanAll } from '../lib/gates/schema-scan-core.mjs'
+import { nodeRunSource } from '../lib/gates/run-source-node.mjs'
+import { workspaceRoot } from '../lib/shared/workspace-root.mjs'
+import { isMain } from '../lib/shared/cli-entry.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 

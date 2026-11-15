@@ -8,7 +8,7 @@
 // 退出码：0 干净或显式豁免 / 1 发现高置信凭据 / 2 前置缺席（未跑 ≠ 通过）。
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { formatSecretFinding, scanSecrets } from '../lib/secret-scan.mjs'
+import { formatSecretFinding, scanSecrets } from '../lib/shared/secret-scan.mjs'
 
 const args = process.argv.slice(2)
 const bundleArg = args.find((a) => !a.startsWith('--'))

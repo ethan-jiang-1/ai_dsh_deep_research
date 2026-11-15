@@ -12,9 +12,9 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { scrubbedEnv } from '../lib/env.mjs'
-import { reclaimPort } from '../lib/port-reclaim.mjs'
-import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs'
+import { scrubbedEnv } from '../lib/shared/env.mjs'
+import { reclaimPort } from '../lib/harness/port-reclaim.mjs'
+import { readSessionText, resolveSessionLog } from '../lib/shared/session-log.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const TEMP = join(ROOT, 'runtime', 'smoke-workspace', `workspace-isolation-${process.pid}`)

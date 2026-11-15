@@ -21,7 +21,7 @@ import {
   AUTHORITIES as PROTOCOL_AUTHORITIES,
   OUTPUT_SHAPES as PROTOCOL_OUTPUT_SHAPES,
   SOURCE_FAMILIES as PROTOCOL_SOURCE_FAMILIES,
-} from '../../scripts/lib/protocol-core.mjs'
+} from '../../scripts/lib/gates/protocol-core.mjs'
 
 const valid = {
   schema: 1,

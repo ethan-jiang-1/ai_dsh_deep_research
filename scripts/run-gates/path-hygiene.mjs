@@ -8,7 +8,7 @@
 // 退出码：0 干净或已显式豁免 / 1 发现路径 / 2 前置缺席（未跑 ≠ 通过）
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { scanHomePaths } from '../lib/path-hygiene.mjs'
+import { scanHomePaths } from '../lib/shared/path-hygiene.mjs'
 
 const args = process.argv.slice(2)
 const bundleArg = args.find((a) => !a.startsWith('--'))

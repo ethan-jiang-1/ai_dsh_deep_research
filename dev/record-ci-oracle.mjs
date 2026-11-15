@@ -13,8 +13,8 @@ import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, wr
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
-import { yaml } from '../scripts/lib/workspace-parsers.mjs'
-import { eventKeys, executedSmokeFiles, parseWorkflow } from '../scripts/lib/ci-workflow.mjs'
+import { yaml } from '../scripts/lib/tools/workspace-parsers.mjs'
+import { eventKeys, executedSmokeFiles, parseWorkflow } from '../scripts/lib/tools/ci-workflow.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = join(ROOT, 'tests/fixtures/ci-oracle/oracle.json')

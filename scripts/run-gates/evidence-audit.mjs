@@ -22,7 +22,7 @@
 // 输出：审计报告写 <bundle>/audit.md（run bundle 的新增文件，不改既有文件）+ 控制台摘要；
 //       存在 CRITICAL（伪造链接 / final 断链）→ exit 1（供 CI/收尾判据用）。
 // 分层（2026-10-09 layering 二代）：判据核心（auditBundle/buildCorpus/normalize 族）住
-// scripts/lib/evidence-audit-core.mjs（keyless 纯逻辑，tests 消费——tests/ 层禁子进程，
+// scripts/lib/gates/evidence-audit-core.mjs（keyless 纯逻辑，tests 消费——tests/ 层禁子进程，
 // keyless 测试走纯 .jsonl 夹具直调）；本文件 = CLI 驱动壳 + zstd 日志 reader（多帧拼接
 // CLI 可解全帧）注入。
 // 用法：node scripts/run-gates/evidence-audit.mjs <run-bundle-dir> [--sessions <会话根>] [--write]（缺省 $DSH_HOME/sessions）
@@ -31,11 +31,11 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { listRuns } from '../../packages/deep-research-pack/src/lib/run-context.ts'
-import { auditBundle } from '../lib/evidence-audit-core.mjs'
-import { nodeRunSource } from '../lib/run-source-node.mjs'
-import { workspaceRoot } from '../lib/workspace-root.mjs'
-import { readZstdText } from '../lib/zstd-read.mjs'
-import { isMain } from '../lib/cli-entry.mjs'
+import { auditBundle } from '../lib/gates/evidence-audit-core.mjs'
+import { nodeRunSource } from '../lib/gates/run-source-node.mjs'
+import { workspaceRoot } from '../lib/shared/workspace-root.mjs'
+import { readZstdText } from '../lib/shared/zstd-read.mjs'
+import { isMain } from '../lib/shared/cli-entry.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 

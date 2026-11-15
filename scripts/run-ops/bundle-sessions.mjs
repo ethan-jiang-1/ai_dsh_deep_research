@@ -10,11 +10,11 @@
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { sessionsOfBundleCached } from '../lib/bundle-sessions.mjs'
-import { readZstdText } from '../lib/zstd-read.mjs'
-import { defaultGroupSubstring, workspaceRoot } from '../lib/workspace-root.mjs'
-import { resolveSessionLog } from '../lib/session-log.mjs'
-import { runStateOf } from '../lib/run-state.mjs'
+import { sessionsOfBundleCached } from '../lib/ops/bundle-sessions.mjs'
+import { readZstdText } from '../lib/shared/zstd-read.mjs'
+import { defaultGroupSubstring, workspaceRoot } from '../lib/shared/workspace-root.mjs'
+import { resolveSessionLog } from '../lib/shared/session-log.mjs'
+import { runStateOf } from '../lib/shared/run-state.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2)

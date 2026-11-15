@@ -38,7 +38,7 @@ description: Use when adding, widening, or retiring a mechanical check in script
    与 `gate-ledger-sync` 门禁对账——**两处不同步即红**；
 3. 需要新契约断言时同步 `tests/`（keyless，零依赖）。
 
-门禁逻辑有增删时另有两处随行：`scripts/lib/gates-cases.mjs` 的案例表 `CASES`（注入案例
+门禁逻辑有增删时另有两处随行：`scripts/lib/harness/gates-cases.mjs` 的案例表 `CASES`（注入案例
 增删同 diff）与 `tests/checks/verify-gates.test.mjs`（案例 ↔ gates 数组静态对账）；改完必跑
 `node scripts/smoke/gates.e2e.mjs`（[scripts/AGENTS.md](../../../scripts/AGENTS.md)）。
 

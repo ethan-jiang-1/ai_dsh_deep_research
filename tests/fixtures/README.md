@@ -8,7 +8,7 @@
 | schema-scan/ | [schema-scan.spec.mjs](../run/schema-scan.spec.mjs)（[@scripts/run-gates/schema-scan.mjs](../../scripts/run-gates/schema-scan.mjs) 判据同源，夹具路径引用在测试） | 在场级断言用例（八节点输出件，断代定红） | 契约日用例即反证——改夹具应预期变红 | 是 |
 | run-state/ | [run-state.spec.mjs](../run/run-state.spec.mjs) | run 操作面状态谓词（真实会话日志三时点投影 + 构造 zstd 帧） | 语义由消费测试钉住 | 是 |
 | run-dashboard/ | [run-dashboard.spec.mjs](../run/run-dashboard.spec.mjs) | 仪表盘折算投影（日志选择、HITL 折算、步骤投影） | 同上 | 是 |
-| vendor-artifacts/ | [vendor-artifacts.spec.mjs](../run/vendor-artifacts.spec.mjs)（夹具路径经参数喂给 [scripts/lib/vendor-artifacts.mjs](../../scripts/lib/vendor-artifacts.mjs)） | vendor 构建产物自检判据（齐全/缺失两形态） | 纯 fs 静态夹具 | 是 |
+| vendor-artifacts/ | [vendor-artifacts.spec.mjs](../run/vendor-artifacts.spec.mjs)（夹具路径经参数喂给 [scripts/lib/harness/vendor-artifacts.mjs](../../scripts/lib/harness/vendor-artifacts.mjs)） | vendor 构建产物自检判据（齐全/缺失两形态） | 纯 fs 静态夹具 | 是 |
 | plan-wave/ | [plan-graph.spec.mjs](../cockpit/plan-graph.spec.mjs) | 固定 Wave plan：W1.1/W2.1/W2.2 并行、W3.1 汇合、legacy flat W 反例 | 语义由消费测试钉住 | 是 |
 | plan-mapping/ | [graph-model.spec.mjs](../cockpit/graph-model.spec.mjs) | BUG-043 五态负例：3 节点 / Team 1 任务（未映射），以及 stale / plan-only / 墓碑 / id 命中 / task_id 重复的混合样本 | 语义由消费测试钉住——四态断言即反证，改夹具应预期变红 | 是 |
 | run-rerun/ | [run-version.spec.mjs](../cockpit/run-version.spec.mjs) + [plan-diff.spec.mjs](../cockpit/plan-diff.spec.mjs) | rerun 版本面夹具：plan v2 + `plan/v1.md` 快照 + `final/v1.md` 版本账 + `final.md` 工作稿 + `> rerun:` 声明 | 语义由消费测试钉住——版本面退回「final.md 在场 = 已交付」即变红 | 是 |

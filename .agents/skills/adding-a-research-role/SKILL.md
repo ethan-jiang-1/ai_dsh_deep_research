@@ -30,7 +30,7 @@ description: Use when adding a research role preset, renaming one, or changing a
 - **源码域**：`dev/research.overlay.yml` 的 bundle 行——源码域通道（冒烟、探针）走它；
 - **镜像**：`runtime/harness-home/profiles/research/` 的 profile 镜像——run 通道走它；
   `bash dev/boot-run.sh` 的漂移检测会逐文件比 pack 源 vs 镜像，不符即 fail-loud；
-- **roster**：`scripts/lib/roles.mjs` 是访问器，事实源 = 盘上 `presets/`；改完跑
+- **roster**：`scripts/lib/shared/roles.mjs` 是访问器，事实源 = 盘上 `presets/`；改完跑
   `role-list-sync` 门禁（角色清单与 pack 对账）；
 - **persona 引用对账**：每个 preset 的 persona 文本硬引用 skill 名（如 critic「先加载
   adversarial-review skill」）——增删/改名 skill 时同 diff 检查 persona 是否跟着改（模型可见面）；

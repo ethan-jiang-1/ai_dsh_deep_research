@@ -2,7 +2,7 @@
 //   support 永不进车道；默认只跑 tier: ci；--all 才带 dev-only；未知 lane = 明确报错。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { selectSmokeLane } from '../../scripts/lib/smoke-lane.mjs'
+import { selectSmokeLane } from '../../scripts/lib/repo/smoke-lane.mjs'
 
 const registry = {
   'a.e2e.mjs': { lane: 'e2e', tier: 'ci' },

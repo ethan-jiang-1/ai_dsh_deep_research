@@ -14,9 +14,9 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { scrubbedEnv } from '../lib/env.mjs'
-import { projectionOf } from '../lib/protocol-audit-core.mjs'
-import { claimReviewFixture } from '../lib/run-accept-fixture.mjs'
+import { scrubbedEnv } from '../lib/shared/env.mjs'
+import { projectionOf } from '../lib/gates/protocol-audit-core.mjs'
+import { claimReviewFixture } from '../lib/harness/run-accept-fixture.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const CLI = join(ROOT, 'scripts', 'run-ops', 'run-accept.mjs')

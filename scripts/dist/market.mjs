@@ -13,7 +13,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseMarketIndex } from '@deepseek-ai/dsh-plugin-market-index'
-import { isMain } from '../lib/cli-entry.mjs'
+import { isMain } from '../lib/shared/cli-entry.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const DIST = join(ROOT, '_dist')

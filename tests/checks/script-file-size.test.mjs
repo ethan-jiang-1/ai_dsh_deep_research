@@ -13,7 +13,7 @@ const SCRIPTS = join(ROOT, 'scripts')
 const CAP = 550
 const EXCEPTIONS = {
   'smoke/client-load.entry.mjs': 'phase-oriented browser E2E（phase map 在文件头；拆分另立轮）',
-  'lib/gates-cases.mjs': '门禁注入案例表（数据表，不是控制流）',
+  'lib/harness/gates-cases.mjs': '门禁注入案例表（数据表，不是控制流）',
 }
 
 const walk = (dir) => readdirSync(dir).flatMap((name) => {

@@ -235,7 +235,7 @@ export function runD() {
 //    「写 `不适用` 必须同时给出**可判定的失效条件**……由 `align-ledger` 门禁的活性断言
 //    机械复核——理由变假即红」。但 `align-ledger` 只读 docs/alignment-ledger.json（108 条
 //    文件级），**从不读人读表**——那句承诺对 discipline-map 的 16 条「不适用」行根本没兑现。
-//    实测代价：源 10 有 2 行判「不适用」，而等价物早已在 scripts/lib/replay-scene.mjs 里
+//    实测代价：源 10 有 2 行判「不适用」，而等价物早已在 scripts/lib/harness/replay-scene.mjs 里
 //    （14 条比较前守卫、sessionFormat 钉代），台账记成"没做"——依据静默腐烂。
 //
 //    判据：状态列（第 3 列）真值以「不适用」开头的每一行，必须含一个可判定的重估触发词
@@ -363,8 +363,8 @@ export function runD() {
     else if (got !== want) fail(gate, `package.json engines.node = ${JSON.stringify(got)} ≠ vendor ${JSON.stringify(want)}（机制基线源码启动的 engines 区间必须与 vendor 一致）`);
   }
   // 子进程凭据卫生（vendor docs/defensive-patterns.md §27-29）：spawn 的 env 必须洗过，
-  // 禁止整体透传 process.env；白名单条目只能在调用点显式写（scripts/lib/env.mjs）。
-  if (!existsSync(join(ROOT, 'scripts', 'lib', 'env.mjs'))) fail(gate, 'scripts/lib/env.mjs 缺席（子进程 env 清洗助手）');
+  // 禁止整体透传 process.env；白名单条目只能在调用点显式写（scripts/lib/shared/env.mjs）。
+  if (!existsSync(join(ROOT, 'scripts', 'lib', 'shared', 'env.mjs'))) fail(gate, 'scripts/lib/shared/env.mjs 缺席（子进程 env 清洗助手）');
   const scriptsDir = join(ROOT, 'scripts');
   const scanTargets = [];
   for (const ent of readdirSync(scriptsDir, { withFileTypes: true })) {
@@ -380,7 +380,7 @@ export function runD() {
   for (const p of scanTargets) {
     const text = readFileSync(p, 'utf8');
     if (/env:\s*\{\s*\.\.\.process\.env/.test(text)) {
-      fail(gate, `${relative(ROOT, p)}: spawn env 整体透传 process.env——改用 scripts/lib/env.mjs 的 scrubbedEnv/withModelKey（凭据卫生）`);
+      fail(gate, `${relative(ROOT, p)}: spawn env 整体透传 process.env——改用 scripts/lib/shared/env.mjs 的 scrubbedEnv/withModelKey（凭据卫生）`);
     }
   }
   const hook = read('dev/hooks/pre-commit');

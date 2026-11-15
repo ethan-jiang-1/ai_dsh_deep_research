@@ -16,9 +16,9 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, wri
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createHash } from 'node:crypto'
-import { scrubbedEnv } from '../lib/env.mjs'
-import { reclaimPort } from '../lib/port-reclaim.mjs'
-import { readSessionText, resolveSessionLog } from '../lib/session-log.mjs'
+import { scrubbedEnv } from '../lib/shared/env.mjs'
+import { reclaimPort } from '../lib/harness/port-reclaim.mjs'
+import { readSessionText, resolveSessionLog } from '../lib/shared/session-log.mjs'
 
 const sha256 = (data) => createHash('sha256').update(data).digest('hex')
 

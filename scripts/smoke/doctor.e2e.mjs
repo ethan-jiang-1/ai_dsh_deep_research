@@ -7,8 +7,8 @@
 import { spawnSync } from 'node:child_process'
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
-import { scrubbedEnv } from '../lib/env.mjs'
-import { presetRoles } from '../lib/roles.mjs'
+import { scrubbedEnv } from '../lib/shared/env.mjs'
+import { presetRoles } from '../lib/shared/roles.mjs'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')

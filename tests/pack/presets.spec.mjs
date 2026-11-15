@@ -16,7 +16,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { presetRoles, researchRoles } from '../../scripts/lib/roles.mjs';
+import { presetRoles, researchRoles } from '../../scripts/lib/shared/roles.mjs';
 import { satisfiesVersion } from '../../packages/deep-research-pack/scripts/lib/version-range.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');

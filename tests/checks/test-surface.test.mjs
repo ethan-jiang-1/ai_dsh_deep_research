@@ -20,7 +20,7 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync, existsSync } from 'node:fs'
 import { join, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { localImportPath, parseKeylessImports } from '../../scripts/lib/keyless-imports.mjs'
+import { localImportPath, parseKeylessImports } from '../../scripts/lib/tools/keyless-imports.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const LIB = join(ROOT, 'scripts', 'lib')
@@ -28,16 +28,25 @@ const PACK_LIB = join(ROOT, 'packages', 'deep-research-pack', 'src', 'lib')
 
 /** 只可能由 smoke/probe 覆盖的模块（keyless 回归禁浏览器/子进程/端口，见 layering 五件套）。 */
 const SMOKE_ONLY = {
-  'playwright': 'chromium 定位与启动（纯件 browser-cache 有直测；launch 本身真浏览器档）',
-  'port-reclaim': '端口收割：需要真监听端口与系统进程，回归禁；身份纯判据 port-reclaim-policy 有直测',
-  'cdp-driver': 'Playwright/CDP 驱动：只被 smoke/probe 以真浏览器消费，keyless 回归禁浏览器',
-  'web-harness': '真 web 启动与 RPC 握手：只在 smoke 档跑，回归禁 spawn/网络',
-  'zstd-read': 'zstd CLI 解压：keyless 回归禁 spawn，{ok:false} 分支无直测（消费方测试注入 readLog，不触达解压本身）；失败面证据 = 一次性实测 + 消费方的降级处理',
-  'hitl-card-driver': '浏览器内 DOM 片段（getComputedStyle / HTMLTextAreaElement / 事件派发）：只能真浏览器跑；判据面在 ask-drive（有直测）',
+  'harness/playwright': 'chromium 定位与启动（纯件 browser-cache 有直测；launch 本身真浏览器档）',
+  'harness/port-reclaim': '端口收割：需要真监听端口与系统进程，回归禁；身份纯判据 port-reclaim-policy 有直测',
+  'shared/cdp-driver': 'Playwright/CDP 驱动：只被 smoke/probe 以真浏览器消费，keyless 回归禁浏览器',
+  'shared/web-harness': '真 web 启动与 RPC 握手：只在 smoke 档跑，回归禁 spawn/网络',
+  'shared/zstd-read': 'zstd CLI 解压：keyless 回归禁 spawn，{ok:false} 分支无直测（消费方测试注入 readLog，不触达解压本身）；失败面证据 = 一次性实测 + 消费方的降级处理',
+  'channel/hitl-card-driver': '浏览器内 DOM 片段（getComputedStyle / HTMLTextAreaElement / 事件派发）：只能真浏览器跑；判据面在 ask-drive（有直测）',
 }
 
 function libModules() {
-  return readdirSync(LIB).filter((f) => f.endsWith('.mjs')).map((f) => f.replace(/\.mjs$/, ''))
+  const out = []
+  const walk = (dir) => {
+    for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, ent.name)
+      if (ent.isDirectory()) walk(p)
+      else if (ent.name.endsWith('.mjs')) out.push(relative(LIB, p).split('\\').join('/').replace(/\.mjs$/, ''))
+    }
+  }
+  walk(LIB)
+  return out
 }
 
 function testFiles() {
@@ -69,7 +78,7 @@ function coveredByTests(files) {
       const resolved = localImportPath(file, specifier)
       if (resolved === undefined) continue
       const rel = relative(LIB, resolved).split('\\').join('/')
-      if (rel.startsWith('..') || !rel.endsWith('.mjs') || rel.includes('/')) continue
+      if (rel.startsWith('..') || !rel.endsWith('.mjs')) continue
       covered.add(rel.replace(/\.mjs$/, ''))
     }
   }

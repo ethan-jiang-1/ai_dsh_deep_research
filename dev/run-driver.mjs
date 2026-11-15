@@ -19,7 +19,7 @@
 // 加速（2026-11-05 实测）：boot-run 默认起 vendor **构建产物** lib/bin.js（≈3s；`DSH_RUN_RUNTIME=source`
 // 退回 tsx 源码 ≈13s）；`up` 对同一 pack 源 + 同一 runtime 构建的最近 GREEN 在 30 分钟内复用
 // （冷启动同样命中，命中前仍做一次 HTTP 就绪检查）；`--force-probe` 强制真验。缓存只存 GREEN。
-// 缓存判据 = scripts/lib/channel-cache.mjs（键 = pack 指纹 + runtime 构建 + 断言参数）。
+// 缓存判据 = scripts/lib/channel/channel-cache.mjs（键 = pack 指纹 + runtime 构建 + 断言参数）。
 //
 // 通道事实的唯一来源 = runtime/smoke-workspace/web.log 的**最后一条** `dsh web: <url>` 横幅
 // （boot-run 每次 boot 以 tee 截断写该文件；旧横幅 = 旧 token，用旧的必 401）。
@@ -32,10 +32,10 @@ import { createHash } from 'node:crypto';
 import { copyFileSync, existsSync, mkdirSync, openSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { isMain } from '../scripts/lib/cli-entry.mjs';
-import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../scripts/lib/run-channel.mjs';
-import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKey } from '../scripts/lib/channel-cache.mjs';
-import { authenticate } from '../scripts/lib/web-harness.mjs';
+import { isMain } from '../scripts/lib/shared/cli-entry.mjs';
+import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../scripts/lib/channel/run-channel.mjs';
+import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKey } from '../scripts/lib/channel/channel-cache.mjs';
+import { authenticate } from '../scripts/lib/shared/web-harness.mjs';
 
 export { guiUrlFromWebLog, runDriverVerdict };
 
@@ -49,7 +49,7 @@ const BOOT_LOG = join(STATE_DIR, 'run-driver-boot.log');
 const DEFAULT_PORT = process.env.DSH_RUN_PORT || '3083';
 const DEFAULT_PROFILE = process.env.DSH_RUN_PROFILE || 'deep-research';
 const PACK_DIR = join(ROOT, 'packages', 'deep-research-pack');
-// 验证缓存：只存最近一次 GREEN（键 = pack 指纹 + runtime 构建指纹 + 断言参数）；见 scripts/lib/channel-cache.mjs。
+// 验证缓存：只存最近一次 GREEN（键 = pack 指纹 + runtime 构建指纹 + 断言参数）；见 scripts/lib/channel/channel-cache.mjs。
 const PROBE_CACHE = join(STATE_DIR, 'probe-cache.json');
 const readProbeCache = () => {
   try { return JSON.parse(readFileSync(PROBE_CACHE, 'utf8')); } catch { return null; }

@@ -19,8 +19,8 @@ import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSyn
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { localDateStr } from '../lib/local-date.mjs'
-import { packInputRoots, writeBuildManifest } from '../lib/artifact-freshness.mjs'
+import { localDateStr } from '../lib/shared/local-date.mjs'
+import { packInputRoots, writeBuildManifest } from '../lib/shared/artifact-freshness.mjs'
 import { writeMarketIndex } from './market.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')

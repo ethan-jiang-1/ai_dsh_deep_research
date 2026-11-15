@@ -2,7 +2,7 @@
 // secret-scan.e2e — 交付物秘密扫描的**范围边界**证据（keyless；CLI 真入口）。
 //
 // 证明：默认只扫交付物（evidence 命中不红）；--all 才扫证据；--allow-legacy 只报告；
-// 输出不回显命中原文。纯函数正例/负例归 tests/run/secret-scan.spec.mjs。
+// 输出不回显命中原文。纯函数正例/负例归 tests/run/shared/secret-scan.spec.mjs。
 // 退出码：0 全绿；失败时非零退出（无前置缺席面）。
 import { spawnSync } from 'node:child_process'
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'

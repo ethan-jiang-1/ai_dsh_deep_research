@@ -26,7 +26,7 @@
 //   pass-5   终稿页签端到端 → pass5FinalDeliveryPhase（本件）
 // 模块构成：本件 = boot/RPC/断言收集器 + 文件级共享 helper（awaitAppReady/openGuideCapsule/
 //   openPane/paneTextOf/dialogTextOf——相位间共用，不再闭包在 try 内）+ pass-1/2/3/5；
-//   侧栏会话定位（clickRowByText / openSessionById）= scripts/lib/web-ui-nav.mjs **唯一正本**
+//   侧栏会话定位（clickRowByText / openSessionById）= scripts/lib/shared/web-ui-nav.mjs **唯一正本**
 //   （data-row-key 主锚——2026-10-21 收拢，本件原私有 clickRowByText/openSessionByRowKey 退役）；
 //   scripts/smoke/client-load-config.support.mjs = pass-4
 //   （「研究配置」摘要面——验证的是不同页签，拆独立模块；boot 入口与端口 3109 不变，
@@ -55,20 +55,20 @@ import { execFileSync } from 'node:child_process'
 import { cpus, freemem, loadavg } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { scrubbedEnv } from '../lib/env.mjs'
-import { reclaimPort } from '../lib/port-reclaim.mjs'
-import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs'
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs'
-import { SMOKE_LOCALE, launchChromium, loadChromium } from '../lib/playwright.mjs'
-import { clientHistoryWindow, projectKey, readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/session-log.mjs'
+import { scrubbedEnv } from '../lib/shared/env.mjs'
+import { reclaimPort } from '../lib/harness/port-reclaim.mjs'
+import { authenticate, bootWeb, makeRpc } from '../lib/shared/web-harness.mjs'
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/harness/vendor-artifacts.mjs'
+import { SMOKE_LOCALE, launchChromium, loadChromium } from '../lib/harness/playwright.mjs'
+import { clientHistoryWindow, projectKey, readSessionEvents, resolveSessionLog, researchWorkspaceGroup } from '../lib/shared/session-log.mjs'
 import { deliveryFromReceipt } from '../../packages/deep-research-pack/src/lib/final-target.ts'
-import { availableMemoryMBFromMeminfo, availableMemoryMBFromVmStat, classifyHostHealth, HOST_HEALTH_HINT, isHostUnhealthyVerdict } from '../lib/host-health.mjs'
-import { acquireRunLock, releaseRunLock } from '../lib/run-lock.mjs'
+import { availableMemoryMBFromMeminfo, availableMemoryMBFromVmStat, classifyHostHealth, HOST_HEALTH_HINT, isHostUnhealthyVerdict } from '../lib/harness/host-health.mjs'
+import { acquireRunLock, releaseRunLock } from '../lib/harness/run-lock.mjs'
 import { materializeSeedHome, resolveSeedFixture, seedFixtureSize } from './client-load-seed.support.mjs'
 import { prepareClientLoadReference } from './client-load-reference.support.mjs'
 import { pass3dDefaultsPhase, pass4ConfigTabPhase } from './client-load-config.support.mjs'
 import { pass5FinalDeliveryPhase } from './client-load-final.support.mjs'
-import { clickRowByText, dismissPreviewNotice, expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES, TAB_TEXT, tabTitleIndex } from '../lib/web-ui-nav.mjs'
+import { clickRowByText, dismissPreviewNotice, expandGroup, openSessionById, SIDEBAR_GROUP_CANDIDATES, TAB_TEXT, tabTitleIndex } from '../lib/shared/web-ui-nav.mjs'
 import { deriveAnchors, foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { isActivePlanNode, planIndex } from '../../packages/deep-research-pack/src/lib/plan-index.ts'
 import { deriveBusinessBrief } from '../../packages/deep-research-pack/src/lib/brief-fold.ts'

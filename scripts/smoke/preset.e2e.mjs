@@ -13,14 +13,14 @@
 //   钉 tag 源码基线 + tsx 解析树——机制权威）。
 // 用法：source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs [--port 3099]
 
-import { withModelKey } from '../lib/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
+import { withModelKey } from '../lib/shared/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../lib/shared/web-harness.mjs';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { presetRoles, researchRoles, workerPresets } from '../lib/roles.mjs';
-import { reclaimPort } from '../lib/port-reclaim.mjs';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
+import { presetRoles, researchRoles, workerPresets } from '../lib/shared/roles.mjs';
+import { reclaimPort } from '../lib/harness/port-reclaim.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/harness/vendor-artifacts.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
@@ -122,7 +122,7 @@ const rpc = makeRpc({
   errorOf: (endpoint, body) => `${endpoint} 失败: ${body?.result?.error?.message ?? JSON.stringify(body).slice(0, 200)}`,
 });
 
-// 端口自持有纪律（scripts/AGENTS.md「用完释放」）的执行器住 scripts/lib/port-reclaim.mjs
+// 端口自持有纪律（scripts/AGENTS.md「用完释放」）的执行器住 scripts/lib/harness/port-reclaim.mjs
 // （实测依据与收割策略的正本在该文件头注；本脚本消费它做 boot 失败兜底与收尾双保险）。
 
 // boot 正本 = lib/web-harness.bootWeb（端口、boot 环境、超时、失败尾部字符都留本站点）；

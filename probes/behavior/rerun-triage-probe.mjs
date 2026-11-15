@@ -18,10 +18,10 @@
 // 前置：source dev/env.sh（DSH_HOME + 凭据 + vendor 树）。用法：
 //   node probes/behavior/rerun-triage-probe.mjs [--port 3118]
 // 退出码：0 = 五条全中；1 = 有断言未中；2 = 前置缺席（未跑 ≠ 通过）。
-import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/web-harness.mjs';
-import { findSessionDir, readSessionText, resolveSessionLog } from '../../scripts/lib/session-log.mjs';
-import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/port-reclaim.mjs';
+import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/shared/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/shared/web-harness.mjs';
+import { findSessionDir, readSessionText, resolveSessionLog } from '../../scripts/lib/shared/session-log.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/harness/port-reclaim.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';

@@ -5,7 +5,7 @@
     {
       "id": "BUG-001",
       "mechanism": "立项期加载 research-brief 或发起 ask_user_question 即置 kickoffSeen 抑制旧绑定",
-      "guard": "tests/run/bundle-bind.spec.mjs",
+      "guard": "tests/run/gates/bundle-bind.spec.mjs",
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "删 kickoffSeen 置位分支 → 立项窗口错绑旧 bundle 例红"
@@ -45,7 +45,7 @@
     {
       "id": "BUG-012",
       "mechanism": "仪表盘复用 pack 的 HITL/步骤折算，不造第二状态机",
-      "guard": "tests/run/run-dashboard.spec.mjs",
+      "guard": "tests/run/ops/run-dashboard.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "让 dashboard 手算状态而不调共享折算 → 对账红"
@@ -53,7 +53,7 @@
     {
       "id": "BUG-013",
       "mechanism": "五角色快照录制 persona / skill-catalog / manual 与当前包源码逐字全等",
-      "guard": "tests/run/replay-fixtures.spec.mjs",
+      "guard": "tests/run/harness/replay-fixtures.spec.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "改任一 preset persona、manual.md 一字或篡改 session.v4.jsonl 注入面 → keyless 对账红"
@@ -69,7 +69,7 @@
     {
       "id": "BUG-018",
       "mechanism": "B 层声明面与实比对面双向一致（注入种类零漏检）",
-      "guard": "tests/run/replay-request.spec.mjs",
+      "guard": "tests/run/harness/replay-request.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删一个 JUDGED_KINDS 或注入未声明种类 → 对账红"
@@ -77,7 +77,7 @@
     {
       "id": "BUG-022",
       "mechanism": "流终结畸形回合按 turn/end 计一次，attempt 流块不双算",
-      "guard": "tests/run/provider-errors.spec.mjs",
+      "guard": "tests/run/ops/provider-errors.spec.mjs",
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "把 assistant/attempt 流错误并入终结计数 → 同一回合双算例红"
@@ -85,7 +85,7 @@
     {
       "id": "BUG-023",
       "mechanism": "末位 turn/end 报 MALFORMED_RESPONSE 且无新回合时判流死亡，重试中不误报",
-      "guard": "tests/run/stream-failure.spec.mjs",
+      "guard": "tests/run/ops/stream-failure.spec.mjs",
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "删 MALFORMED_RESPONSE 识别或忽略后续 turn/start → 死亡折算例红"
@@ -117,7 +117,7 @@
     {
       "id": "BUG-027",
       "mechanism": "回放捕获前须等夹具全部 tool/call 落定，禁靠固定稳定窗",
-      "guard": "tests/run/replay-request.spec.mjs",
+      "guard": "tests/run/harness/replay-request.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把 captureReadyOf 的 every 改成 some → 部分挂载例红"
@@ -133,7 +133,7 @@
     {
       "id": "BUG-030",
       "mechanism": "回合落定判据要求哨兵位于 assistant 文本且 turn/end completed",
-      "guard": "tests/run/replay-request.spec.mjs",
+      "guard": "tests/run/harness/replay-request.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把哨兵移进 tool 文本或去掉 turn/end completed → 落定用例红"
@@ -141,7 +141,7 @@
     {
       "id": "BUG-031",
       "mechanism": "HITL 代答按题面意图匹配选项，预选不符先改选再点 Submit",
-      "guard": "tests/run/ask-drive.spec.mjs",
+      "guard": "tests/run/channel/ask-drive.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "退回 Submit 可用即直接点击 → 预选偏离意图例红"
@@ -149,7 +149,7 @@
     {
       "id": "BUG-032",
       "mechanism": "HITL 代答完成必须以盘侧 session 事件 settled 为准，禁信 UI 卡消失自报",
-      "guard": "tests/run/ask-drive.spec.mjs",
+      "guard": "tests/run/channel/ask-drive.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "放宽 driveVerdict 允许无盘侧结果过关 → 未落定假绿例红"
@@ -173,7 +173,7 @@
     {
       "id": "BUG-036",
       "mechanism": "终局判据不被旧轮附录夺权且 review 读取必须到 eof",
-      "guard": "tests/run/review-readiness.spec.mjs",
+      "guard": "tests/run/gates/review-readiness.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "让旧轮附录覆盖头部判据或截断读取 → 用例红"
@@ -181,7 +181,7 @@
     {
       "id": "BUG-037",
       "mechanism": "侧栏未扫到挂起会话时必须先走标题搜索兜底，禁直接判会话缺失",
-      "guard": "tests/run/ask-drive.spec.mjs",
+      "guard": "tests/run/channel/ask-drive.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删 sidebarMissVerdict 的 search 分支直接报失 → 懒渲染漏扫例红"
@@ -245,7 +245,7 @@
     {
       "id": "BUG-063",
       "mechanism": "Preview Notice 首屏遮罩探测覆盖中英三文案且无遮罩零误点",
-      "guard": "tests/run/web-ui-nav.spec.mjs",
+      "guard": "tests/run/probes/web-ui-nav.spec.mjs",
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "收窄 Continue 文案或去掉遮罩在场前置 → 假 DOM 例红"
@@ -269,7 +269,7 @@
     {
       "id": "BUG-080",
       "mechanism": "五角色回放基线 vendor SHA / 内容与开发 profile 安装副本同代新鲜",
-      "guard": "tests/run/replay-fixtures.spec.mjs",
+      "guard": "tests/run/harness/replay-fixtures.spec.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "改 snapshots vendor SHA、改包手册/persona 或用旧 profile → 对账红"
@@ -285,7 +285,7 @@
     {
       "id": "BUG-106",
       "mechanism": "回放请求体归一剥离运行时动态字段，跨轮同语义请求稳定可比",
-      "guard": "tests/run/replay-request.spec.mjs",
+      "guard": "tests/run/harness/replay-request.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "去掉动态字段归一或放宽正文比较 → 请求对账例红"
@@ -309,7 +309,7 @@
     {
       "id": "BUG-113",
       "mechanism": "端口回收只匹配本仓 vendor/dsh CLI 或 dsh web 进程，不误杀仓内无关服务",
-      "guard": "tests/run/port-reclaim.spec.mjs",
+      "guard": "tests/run/harness/port-reclaim.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "放宽 isOwnListener 按仓库目录子串匹配 → 无关服务防误杀例红"
@@ -325,7 +325,7 @@
     {
       "id": "BUG-152",
       "mechanism": "浏览器冒烟主机健康前置解析内存/负载阈值，缺省或 NaN 指标按不健康归因",
-      "guard": "tests/run/host-health.spec.mjs",
+      "guard": "tests/run/harness/host-health.spec.mjs",
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "对缺省/NaN 指标放行健康或改错阈值边界 → 主机健康例红"
@@ -397,7 +397,7 @@
     {
       "id": "BUG-168",
       "mechanism": "终局呈交见证只认 present 工具结构化 files[].path 前缀，忽略散文提及",
-      "guard": "tests/run/node-gate-witness.spec.mjs",
+      "guard": "tests/run/gates/node-gate-witness.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "退回整段 JSON 字符串子串匹配 drt_ → 散文提及假阳性例红"
@@ -421,7 +421,7 @@
     {
       "id": "BUG-171",
       "mechanism": "协议版本链逐跳校验 1..v-1 全量历史快照存在性与哈希，不止查前一版",
-      "guard": "tests/run/protocol-core.spec.mjs",
+      "guard": "tests/run/gates/protocol-core.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "退回只查 v-1 单跳 → v3 缺 v1 漏检例红"

@@ -6,7 +6,7 @@
 //   现以结构化 `json fix-evidence` 整数 `exit` 为唯一 oracle（删 red.exit 非零检查 → 下方例变绿）。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { fixChangePathsOf, fixEvidenceProblems } from '../../scripts/lib/fix-evidence.mjs'
+import { fixChangePathsOf, fixEvidenceProblems } from '../../scripts/lib/repo/fix-evidence.mjs'
 
 const card = (body, opened = '2026-11-15') => `---\nstatus: 已修\nseverity: P2\nopened: ${opened}\n---\n\n# BUG-900：probe\n\n${body}`
 

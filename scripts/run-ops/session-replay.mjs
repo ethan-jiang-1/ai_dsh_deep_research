@@ -24,14 +24,14 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { scrubbedEnv } from '../lib/env.mjs';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/vendor-artifacts.mjs';
-import { authenticate, bootWeb, makeRpc } from '../lib/web-harness.mjs';
-import { launchChromium, loadChromium } from '../lib/playwright.mjs';
-import { openSessionById } from '../lib/web-ui-nav.mjs';
-import { pickStatusTab } from '../lib/probe-status-tab.mjs';
-import { readSessionEvents } from '../lib/session-log.mjs';
-import { resolveSessionQuery, sessionMetaOf, formatReplaySummary } from '../lib/session-replay.mjs';
+import { scrubbedEnv } from '../lib/shared/env.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/harness/vendor-artifacts.mjs';
+import { authenticate, bootWeb, makeRpc } from '../lib/shared/web-harness.mjs';
+import { launchChromium, loadChromium } from '../lib/harness/playwright.mjs';
+import { openSessionById } from '../lib/shared/web-ui-nav.mjs';
+import { pickStatusTab } from '../lib/shared/probe-status-tab.mjs';
+import { readSessionEvents } from '../lib/shared/session-log.mjs';
+import { resolveSessionQuery, sessionMetaOf, formatReplaySummary } from '../lib/ops/session-replay.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -142,7 +142,7 @@ try {
     opened = await openSessionById(page, target.sessionId, meta.title);
   }
   // ── ⑤b 可选：展开右栏并打开驾驶舱页签（观察面——"页签显示错了"类症状的现场）──
-  // 打开方式与判据 = scripts/lib/probe-status-tab.mjs（标题精确匹配，描述串不参与）。
+  // 打开方式与判据 = scripts/lib/shared/probe-status-tab.mjs（标题精确匹配，描述串不参与）。
   let statusPaneOpened = null;
   let graphPaneOpened = null;
   const openCockpitPane = async (title) => {

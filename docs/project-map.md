@@ -135,6 +135,12 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 单点机制（探针） | entry-chain / discipline / method-library / rerun-triage / cdp / tee | `probes/`（指南 = [guides/66](guides/66-probe-playbook.md)） | 真模型档/连已起 GUI；**不是第六个评估面** |
 | 生产审计 | node-gate / schema-scan / evidence-audit（对真实 run bundle） | `scripts/` run 门 | keyless |
 
+### 测试 owner 轴（2026-11-15）
+
+`tests/run/<owner>/` 与 `scripts/lib/<owner>/` 同名（`gates` / `ops` / `channel` / `harness` /
+`probes` / `shared`）；跨切证据住 `shared/`。模块 → owner → 测试的生成索引 = [tests/INDEX.generated.md](../tests/INDEX.generated.md)；
+镜像契约 = [test-owner-mirror](../tests/checks/test-owner-mirror.test.mjs)。
+
 ### 新检查落家序（加一个检查时按序找家，单一入口）
 
 1. **`tests/<domain>/*.spec.mjs` 契约测试**——断言对象是仓内自控文件、keyless 秒级可判真假。义务：同 diff 在 [evaluation](evaluation.md) 对应面登记；新契约测试带反证（[tests/AGENTS](../tests/AGENTS.md)）；
@@ -193,8 +199,8 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 状态页显示“未绑定” | [client-load.entry](../scripts/smoke/client-load.entry.mjs) 的绑定会话断言；run 通道用 `run-driver probe --require-data` | [bundle-sessions](../scripts/run-ops/bundle-sessions.mjs) 反查会话 id + 状态摘要 |
 | run 卡住 / HITL 不弹 | [watch-run](../scripts/run-ops/watch-run.mjs) + [bundle-sessions](../scripts/run-ops/bundle-sessions.mjs) | 挂起谓词与日志回退检测；语义 = [Run 指南 §3](guides/61-run-playbook.md) |
 | 方法库保存失败 | [method-library 单测](../tests/cockpit/method-library-operation-state.spec.mjs) + 写路径 [method-library-tool.e2e](../scripts/smoke/method-library-tool.e2e.mjs)（开发档，需 native 产物） | 回执三态；`useOperationQueue` |
-| 交付门红 | [node-gate-delivery 测试](../tests/run/node-gate-delivery.spec.mjs) + [node-gate](../scripts/run-gates/node-gate.mjs) | 门 A/C 判据与 `present` 见证 |
-| 证据链红 | [evidence-audit 测试](../tests/run/evidence-audit.spec.mjs) + [evidence-audit](../scripts/run-gates/evidence-audit.mjs) | `source_url` / 摘录 / 引用链 |
+| 交付门红 | [node-gate-delivery 测试](../tests/run/gates/node-gate-delivery.spec.mjs) + [node-gate](../scripts/run-gates/node-gate.mjs) | 门 A/C 判据与 `present` 见证 |
+| 证据链红 | [evidence-audit 测试](../tests/run/gates/evidence-audit.spec.mjs) + [evidence-audit](../scripts/run-gates/evidence-audit.mjs) | `source_url` / 摘录 / 引用链 |
 | 安装 / 首启坏 | CI deploy 的 [lifecycle.entry](../scripts/smoke/lifecycle.entry.mjs)；本地 [product-boot.entry](../scripts/smoke/product-boot.entry.mjs) / [install-shape.entry](../scripts/smoke/install-shape.entry.mjs) | market/tarball 形状；首屏工作区 |
 | 模型不按纪律/角色回话 | [discipline-probe](../probes/behavior/discipline-probe.mjs)（真模型档） | 对应纪律合同/persona；先看头注「何时跑」 |
 | Lead 不知道偏好库/条目 | [method-library-probe](../probes/behavior/method-library-probe.mjs)（真模型档） | 偏好库播种/手册指路；BUG-042 |

@@ -8,7 +8,7 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
-import { SHOW_MORE_SESSIONS_PATTERN, TAB_TEXT } from '../../scripts/lib/web-ui-nav.mjs'
+import { SHOW_MORE_SESSIONS_PATTERN, TAB_TEXT } from '../../scripts/lib/shared/web-ui-nav.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const SMOKE_DIR = join(ROOT, 'scripts', 'smoke')

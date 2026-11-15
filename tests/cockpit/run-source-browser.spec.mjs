@@ -1,6 +1,6 @@
 // run-source-browser 回归 —— `remote.workspaceFiles` → RunSource 的 wire 映射（keyless）。
 // 断言：not-found → missing（不是空目录）、空目录 → ok 空值、read 页字段透传、stat → version、
-// malformed wire → unreadable；位置/读策略本身由 tests/run/run-context.spec.mjs 钉。
+// malformed wire → unreadable；位置/读策略本身由 tests/run/gates/run-context.spec.mjs 钉。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { listRuns, openRun } from '../../packages/deep-research-pack/src/lib/run-context.ts';

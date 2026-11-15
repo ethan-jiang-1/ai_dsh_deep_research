@@ -4,13 +4,13 @@
 // 顺序都是这两处冒烟的期望值合同。怎么不改坏：改选取或排序判据 = 同 diff 改两冒烟的期望值。
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { clientHistoryWindow, readSessionEvents, resolveSessionLog } from '../lib/session-log.mjs'
+import { clientHistoryWindow, readSessionEvents, resolveSessionLog } from '../lib/shared/session-log.mjs'
 import { sessionBundleOf } from '../../packages/deep-research-pack/src/lib/bundle-bind.ts'
 import { deriveSteps, latestRunVersion } from '../../packages/deep-research-pack/src/lib/run-fold.ts'
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/hitl-fold.ts'
 import { readinessOfSources } from '../../packages/deep-research-pack/src/lib/review-readiness.ts'
 import { latestFinalDelivery } from '../../packages/deep-research-pack/src/lib/final-target.ts'
-import { selectBoundSession } from '../lib/client-load-select.mjs'
+import { selectBoundSession } from '../lib/harness/client-load-select.mjs'
 
 /**
  * 从 dev home 会话与研究 bundle 盘上事实建立 client-load 冒烟的参考对象。

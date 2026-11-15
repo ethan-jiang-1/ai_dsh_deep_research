@@ -9,7 +9,7 @@ import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } fr
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { scrubbedEnv } from '../lib/env.mjs'
+import { scrubbedEnv } from '../lib/shared/env.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')

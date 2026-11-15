@@ -5,7 +5,7 @@
 // 投影一致、版本没被静默改」。本工具把 `protocol.json` + `question.md §Protocol` + `plan.md` 头 +
 // `topics.md` 的 lens 计数 + `protocol-audit.md` 的版本指纹对成可复算的记录。
 //
-// 判据正本 = `scripts/lib/protocol-core.mjs`（tests 直调）；本文件 = CLI 壳 + bundle 读取 + 报告渲染。
+// 判据正本 = `scripts/lib/gates/protocol-core.mjs`（tests 直调）；本文件 = CLI 壳 + bundle 读取 + 报告渲染。
 // 契约 = 核验 §6 + 表达层补篇 §4–§7；epoch = PROTOCOL_CONTRACT_DATE（旧 bundle 不判红）。
 //
 // 不证明：quote/claim/coverage/output 终稿语义、source_scope 与方法四字段的语义一致（critic / 人）；
@@ -15,10 +15,10 @@
 // 退出码：0 = 绿（含 legacy-not-applicable）；1 = 红；2 = 用法/前置（bundle 不在场）。
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
-import { epochDateOf, runType } from '../lib/schema-scan-core.mjs'
-import { PROTOCOL_CONTRACT_DATE, designSha256, preContractByDelivery } from '../lib/protocol-core.mjs'
-import { evaluateBundle, requiredByProtocolContract } from '../lib/protocol-audit-core.mjs'
-import { isMain } from '../lib/cli-entry.mjs'
+import { epochDateOf, runType } from '../lib/gates/schema-scan-core.mjs'
+import { PROTOCOL_CONTRACT_DATE, designSha256, preContractByDelivery } from '../lib/gates/protocol-core.mjs'
+import { evaluateBundle, requiredByProtocolContract } from '../lib/gates/protocol-audit-core.mjs'
+import { isMain } from '../lib/shared/cli-entry.mjs'
 
 const readIf = (path) => (existsSync(path) ? readFileSync(path, 'utf8') : '')
 const versionOf = (protocol) => (typeof protocol?.version === 'number' ? protocol.version : null)

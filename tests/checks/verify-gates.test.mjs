@@ -2,7 +2,7 @@
 //
 // 真执行体 = scripts/smoke/gates.e2e.mjs（语料 verify.spec.mjs 模式：临时副本 + 注入回归 +
 // 真实 verify 入口判红；子进程归 smoke 道——layering 禁默认回归 spawn）。案例表住
-// scripts/lib/gates-cases.mjs（纯 fs——layering 二代后 tests 只消费 lib，不 import 驱动壳）。
+// scripts/lib/harness/gates-cases.mjs（纯 fs——layering 二代后 tests 只消费 lib，不 import 驱动壳）。
 // 本测试钉住它俩的接口不漂移：gates.e2e 的案例门禁名必须真实存在于 context.mjs 的 gates
 // 数组——门禁改名或退役而案例表没跟 = 本测试红（此时 smoke 的案例会在对照组就红，这里更早、
 // keyless 秒级报因）。依据 = RFC「DSH 插件开发语料（二代）吸收审计」缺口 2（2026-10-07）。
@@ -14,7 +14,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { CASES, CONTROLS, NO_CASE_GATES } from '../../scripts/lib/gates-cases.mjs';
+import { CASES, CONTROLS, NO_CASE_GATES } from '../../scripts/lib/harness/gates-cases.mjs';
 
 const here = (p) => new URL(p, import.meta.url);
 // 门禁名单正本 = context.mjs（2026-10-27 拆域：verify.mjs 只留入口，gates 数组搬进 context）；

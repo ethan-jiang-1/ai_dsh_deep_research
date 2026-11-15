@@ -4,7 +4,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { ASSET_CLASSES, ASSET_COSTS, ORACLE_TYPES, assetLedgerOf, listTestFiles } from '../scripts/lib/asset-ledger.mjs'
+import { ASSET_CLASSES, ASSET_COSTS, ORACLE_TYPES, assetLedgerOf, listTestFiles } from '../scripts/lib/tools/asset-ledger.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = join(ROOT, 'tests/fixtures/asset-ledger/ledger.json')

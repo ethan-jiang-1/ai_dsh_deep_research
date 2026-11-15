@@ -11,7 +11,7 @@
 - `class`：`check-gate`（`tests/checks/`）、`vendor-compat`（`tests/vendor/`）、`contract`（`tests/contracts/`）、`unit-pure`（其余进程内单测）。
 - `cost`：进程内 keyless 资产统一为 `fast-inproc`；慢资产（`*.e2e.mjs` / `*.entry.mjs`）归 [scripts/smoke/registry.json](../../../scripts/smoke/registry.json) 记账。
 - `uniqueClaim` = 头注首个非「负例留证 / 夹具留证」注释行；没有则取首个 `test()` 标题。
-- `oracleType` 由 [asset-ledger.mjs](../../../scripts/lib/asset-ledger.mjs) 基于 TypeScript AST import 图与语法节点自动推导（**禁手写 `OVERRIDES` 覆盖字典**）：
+- `oracleType` 由 [asset-ledger.mjs](../../../scripts/lib/tools/asset-ledger.mjs) 基于 TypeScript AST import 图与语法节点自动推导（**禁手写 `OVERRIDES` 覆盖字典**）：
   - `external`：直接引入外部语法/规范编译器或共享外部 AST 适配层（`typescript`、`mdast-util-from-markdown`、`yaml`、`keyless-imports`、`workspace-parsers`、`ci-workflow`）；
   - `canonical`：核验盘上规范正本、契约层或跨模块双读者/编解码一致性；
   - `structured`：经受控运行时 / VM / 假 DOM / 临时文件系统 / JSON 事件流或协议信封核验；

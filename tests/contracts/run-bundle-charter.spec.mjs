@@ -10,8 +10,8 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { SCHEMA_VERSION, RUN_PHASES, createdDateOf, runSchemaOf, schemaIssueOf } from '../../scripts/lib/schema-scan-core.mjs'
-import { READ_INTENTS, READ_ORDER } from '../../scripts/lib/run-receipt.mjs'
+import { SCHEMA_VERSION, RUN_PHASES, createdDateOf, runSchemaOf, schemaIssueOf } from '../../scripts/lib/gates/schema-scan-core.mjs'
+import { READ_INTENTS, READ_ORDER } from '../../scripts/lib/shared/run-receipt.mjs'
 import { handbookSurface } from '../pack/handbook-surface.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
