@@ -396,8 +396,13 @@ const addIgnoredClientPaths = () => (dir) => {
 };
 
 const writeRedirectRegistry = (entries) => (dir) => {
-  writeFileSync(join(dir, 'scripts', 'test-path-redirects.json'),
-    `${JSON.stringify({ comment: 'gates.e2e 注入', redirects: entries }, null, 2)}\n`);
+  // 追加而非覆盖：真实登记簿已承载搬家历史，覆盖会把冻结层链接全部打红（2026-11-15 实证）。
+  const path = join(dir, 'scripts', 'test-path-redirects.json');
+  let base = { comment: 'gates.e2e 注入', redirects: [] };
+  try { base = JSON.parse(readFileSync(path, 'utf8')); } catch { /* 缺席或坏 JSON：从空开始，由注入条目判红 */ }
+  const map = new Map((Array.isArray(base.redirects) ? base.redirects : []).map((r) => [r.from, r]));
+  for (const entry of entries) map.set(entry.from, entry);
+  writeFileSync(path, `${JSON.stringify({ ...base, redirects: [...map.values()] }, null, 2)}\n`);
 };
 
 export const CASES = [
@@ -926,9 +931,12 @@ export const NO_CASE_GATES = [
 export const CONTROLS = [
   // 搬家 + 登记 → 旧链接必须仍可解析（正向：缺登记仍红，登记后绿）。
   { id: 'md-links-redirected', gate: 'md-links', mutate: (dir) => {
-    const from = 'tests/run/gates/node-gate-delivery.spec.mjs';
-    const to = 'tests/run/gates/node-gate-delivery.spec.mjs';
+    // 自造探针：不依赖任何真实 spec 的当前位置（真实文件会搬家，案例曾因此失效——2026-11-15）。
+    const from = 'tests/run/__redirect-probe.spec.mjs';
+    const to = 'tests/run/gates/__redirect-probe.spec.mjs';
     mkdirSync(dirname(join(dir, to)), { recursive: true });
+    writeFileSync(join(dir, from), '// md-links redirect probe\n');
+    appendFileSync(join(dir, 'README.md'), '\n[redirect probe](./tests/run/__redirect-probe.spec.mjs)\n');
     writeFileSync(join(dir, to), readFileSync(join(dir, from)));
     rmSync(join(dir, from));
     writeRedirectRegistry([{ from, to, reason: '注入：搬家 + 登记' }])(dir);
