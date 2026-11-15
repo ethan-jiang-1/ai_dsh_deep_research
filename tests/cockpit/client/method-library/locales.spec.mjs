@@ -1,4 +1,4 @@
-import { methodNameIssue } from '../../../packages/deep-research-pack/src/lib/method-library/library-fold.ts'
+import { methodNameIssue } from '../../../../packages/deep-research-pack/src/lib/method-library/library-fold.ts'
 // locales.spec.mjs — 插件 UI 的中英文对账（BUG-055 的机械守卫）。
 //
 // 为什么存在：2026-11-11 用户报障 = 方法库面板 tab 名是英文、按钮/空态却是中文（半套 i18n）。
@@ -10,13 +10,13 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { en, zh } from '../../../packages/deep-research-pack/src/client/locales.ts'
-import { BuiltinView, EditorView, LibraryRow, ReadMineView, SourceSelectionView } from '../../../packages/deep-research-pack/src/client/method-library/views.tsx'
-import { builtinLibraryEntry } from '../../../packages/deep-research-pack/src/client/method-library/model.ts'
-import { BUILTIN_PREFERENCES } from '../../../packages/deep-research-pack/src/lib/shared/config-tables.ts'
-import { OrcaName } from '../../../packages/deep-research-pack/src/client/BrandMark.tsx'
-import { ResearchStatusTab } from '../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx'
-import { ResearchGraphTab } from '../../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx'
+import { en, zh } from '../../../../packages/deep-research-pack/src/client/locales.ts'
+import { BuiltinView, EditorView, LibraryRow, ReadMineView, SourceSelectionView } from '../../../../packages/deep-research-pack/src/client/method-library/views.tsx'
+import { builtinLibraryEntry } from '../../../../packages/deep-research-pack/src/client/method-library/model.ts'
+import { BUILTIN_PREFERENCES } from '../../../../packages/deep-research-pack/src/lib/shared/config-tables.ts'
+import { OrcaName } from '../../../../packages/deep-research-pack/src/client/BrandMark.tsx'
+import { ResearchStatusTab } from '../../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx'
+import { ResearchGraphTab } from '../../../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx'
 
 const CJK = /[\u4e00-\u9fa5]/
 const placeholders = (text) => [...String(text).matchAll(/\{([A-Za-z0-9_]+)\}/g)].map((m) => m[1]).sort()

@@ -6,9 +6,9 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { isReloadCurrent } from '../../../packages/deep-research-pack/src/client/research-config/useConfigFeed.ts'
+import { isReloadCurrent } from '../../../../packages/deep-research-pack/src/client/research-config/useConfigFeed.ts'
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..')
 
 test('BUG-086 reload epoch：旧 session 或旧序号都不算当前', () => {
   assert.equal(isReloadCurrent({ current: 's2', seq: 3 }, 's2', 3), true)

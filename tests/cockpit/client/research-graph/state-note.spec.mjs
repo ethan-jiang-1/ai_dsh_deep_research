@@ -2,7 +2,7 @@
 // 红配方：删掉 followError 分支 → 失败态落到「尚未绑定」→ 本例红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { graphStateNote } from '../../../packages/deep-research-pack/src/client/research-graph/state-note.ts'
+import { graphStateNote } from '../../../../packages/deep-research-pack/src/client/research-graph/state-note.ts'
 
 const base = { planState: 'unbound', boundSlug: null, followError: null, hasPlan: false, hasEdges: false, hasTopLevel: false }
 

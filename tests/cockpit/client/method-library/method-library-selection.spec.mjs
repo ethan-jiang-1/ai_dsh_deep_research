@@ -19,10 +19,10 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { LibraryRow } from '../../../packages/deep-research-pack/src/client/method-library/views.tsx'
-import { libraryRowStyle } from '../../../packages/deep-research-pack/src/client/method-library/styles.ts'
+import { LibraryRow } from '../../../../packages/deep-research-pack/src/client/method-library/views.tsx'
+import { libraryRowStyle } from '../../../../packages/deep-research-pack/src/client/method-library/styles.ts'
 
-const CLIENT_ROOT = fileURLToPath(new URL('../../../packages/deep-research-pack/src/client/', import.meta.url))
+const CLIENT_ROOT = fileURLToPath(new URL('../../../../packages/deep-research-pack/src/client/', import.meta.url))
 // `var(--x)` 后紧跟十六进制 alpha（`%`/单位/字母前不算）= 该声明必被浏览器丢弃。
 const VAR_ALPHA = /var\(--[A-Za-z0-9-]+\)[0-9a-fA-F]{2}(?![0-9A-Za-z%-])/g
 

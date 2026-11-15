@@ -6,7 +6,7 @@ description: Use when adding or changing any user-visible text in the deep-resea
 # 改界面文案：day-one 双语
 
 本技能是 **guidance，不是 checklist**。合同正本 = [design/40 §4](../../../docs/design/40-research-cockpit.md)；
-守卫 = `tests/cockpit/method-library/locales.spec.mjs`（键集/占位符/en 值/渲染）、`tests/cockpit/shared/i18n.spec.mjs`（折层
+守卫 = `tests/cockpit/client/method-library/locales.spec.mjs`（键集/占位符/en 值/渲染）、`tests/cockpit/shared/i18n.spec.mjs`（折层
 en 零 CJK）、`tests/checks/cjk-source.test.mjs`（源码中文扫描 + 允许清单）。相关技能：
 [`reviewing-a-delivery`](../reviewing-a-delivery/SKILL.md)。
 

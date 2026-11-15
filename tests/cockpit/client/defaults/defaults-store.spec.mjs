@@ -8,7 +8,7 @@
 // 分桶 → 本文件红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { createDefaultsStore } from '../../../packages/deep-research-pack/src/client/defaults/store.ts'
+import { createDefaultsStore } from '../../../../packages/deep-research-pack/src/client/defaults/store.ts'
 
 const DEFAULTS = 'research-defaults.json'
 

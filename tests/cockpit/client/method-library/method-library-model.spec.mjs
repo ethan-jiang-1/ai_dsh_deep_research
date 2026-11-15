@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   builtinLibraryEntry, draftDirty, draftOf, emptySections, expectedDefaults, filterLibraryEntries, missingSections, operationMetadataMatches, pickSelectedEntry,
-} from '../../../packages/deep-research-pack/src/client/method-library/model.ts';
+} from '../../../../packages/deep-research-pack/src/client/method-library/model.ts';
 
 const snapshot = (entries) => entries;
 const op = (over = {}) => ({

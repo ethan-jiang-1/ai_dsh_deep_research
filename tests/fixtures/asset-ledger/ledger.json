@@ -503,6 +503,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/client/defaults/defaults-store.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "defaults-store.spec.mjs — 项目默认 client store 的状态机（keyless）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/client/delivery-watch.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -533,12 +543,82 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/client/method-library/locales.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "zh / en 键集一致、值非空、占位符集合逐键一致（BUG-055）",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/method-library/method-library-model.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "method-library-model.spec.mjs — 方法库纯模型的判据（2026-11-03 P4 拆分）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/method-library/method-library-selection.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "method-library-selection.spec.mjs — 方法库选区样式不得静默失效（BUG-047 的机械守卫）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/method-library/method-library-views.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "method-library-views.spec.mjs — 方法库展示组件的直测（react-dom/server 静态渲染，keyless）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/product-startup.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "product-startup — GUI 侧工作区记忆的纯谓词（D40）；不碰 DOM/localStorage。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/client/research-config-source.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "research-config-source.spec.mjs — 「研究配置」页签的 keyless 源面合同。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/research-config/config-feed-session.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "config feed 会话切换：reload epoch + 交互态复位（BUG-086 / BUG-108）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/research-graph/state-note.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "红配方：删掉 followError 分支 → 失败态落到「尚未绑定」→ 本例红。",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
@@ -573,16 +653,6 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/client/startup/product-startup.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "product-startup — GUI 侧工作区记忆的纯谓词（D40）；不碰 DOM/localStorage。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
       "path": "tests/cockpit/client/workspace-boot.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -599,16 +669,6 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "workspace-files.spec.mjs — workspaceFiles 读闭包的降级合同（2026-11-03 P4 拆分）。",
-      "oracleType": "structured",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/defaults/defaults-store.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "defaults-store.spec.mjs — 项目默认 client store 的状态机（keyless）。",
       "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
@@ -850,66 +910,6 @@
       "cost": "fast-inproc",
       "uniqueClaim": "workspace-title — 产品工作区标题的单一正本（2026-11-03 审计 D2：两半各写一份字面）。",
       "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/method-library/locales.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "zh / en 键集一致、值非空、占位符集合逐键一致（BUG-055）",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/method-library/method-library-model.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "method-library-model.spec.mjs — 方法库纯模型的判据（2026-11-03 P4 拆分）。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/method-library/method-library-selection.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "method-library-selection.spec.mjs — 方法库选区样式不得静默失效（BUG-047 的机械守卫）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/method-library/method-library-views.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "method-library-views.spec.mjs — 方法库展示组件的直测（react-dom/server 静态渲染，keyless）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/research-config/config-feed-session.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "config feed 会话切换：reload epoch + 交互态复位（BUG-086 / BUG-108）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/research-graph/state-note.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "红配方：删掉 followError 分支 → 失败态落到「尚未绑定」→ 本例红。",
-      "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {

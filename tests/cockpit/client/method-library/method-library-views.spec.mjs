@@ -7,10 +7,10 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { BuiltinView, EditorView, ReadMineView } from '../../../packages/deep-research-pack/src/client/method-library/views.tsx'
-import { SECTION_LABELS } from '../../../packages/deep-research-pack/src/lib/method-library/library-fold.ts'
-import { zh } from '../../../packages/deep-research-pack/src/client/locales.ts'
-import { BUILTIN_PREFERENCES } from '../../../packages/deep-research-pack/src/lib/shared/config-tables.ts'
+import { BuiltinView, EditorView, ReadMineView } from '../../../../packages/deep-research-pack/src/client/method-library/views.tsx'
+import { SECTION_LABELS } from '../../../../packages/deep-research-pack/src/lib/method-library/library-fold.ts'
+import { zh } from '../../../../packages/deep-research-pack/src/client/locales.ts'
+import { BUILTIN_PREFERENCES } from '../../../../packages/deep-research-pack/src/lib/shared/config-tables.ts'
 
 /** 中文 locale 的 t 桩（组件文案迁到字典后，断言仍按产品中文口径）。 */
 const tZh = (key, params = {}) => String(zh[key]).replace(/\{([A-Za-z0-9_]+)\}/g, (all, name) => (name in params ? String(params[name]) : all))

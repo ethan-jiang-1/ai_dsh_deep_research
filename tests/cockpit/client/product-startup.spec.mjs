@@ -4,7 +4,7 @@ import assert from 'node:assert/strict'
 import {
   CURRENT_SESSION_KEY, PRODUCT_WORKSPACE_KEY, PRODUCT_TITLE_PREFIX,
   needsProductSwitch, pickProductWorkspace, readCurrentSessionId,
-} from '../../../../packages/deep-research-pack/src/client/startup.ts'
+} from '../../../packages/deep-research-pack/src/client/startup.ts'
 
 test('readCurrentSessionId：裸 id / {sessionId} / 坏值', () => {
   assert.equal(readCurrentSessionId(null), null)
