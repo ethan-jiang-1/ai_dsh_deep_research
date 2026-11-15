@@ -40,6 +40,10 @@ The note's `决定` is the issue's conclusion; `输掉的方案` comes from the 
 
 The note's `决定` is the fix approach, only when the fix carries a persistent decision; `实际跑过的验证` is the evidence against `## 修复判据`. Mechanical/local fixes are `none`; the bug card remains the defect record.
 
+### Batch → note
+
+When several bug cards share one root cause or are fixed as one slice, the shared decision (root cause, class, fix order, guard, residual) belongs in one batch Note. Each fixed card keeps its defect record and `fix-evidence`, records `去向：implemented — <batch Note>` and links the Note; the Note + fixed cards close in the same change. Duplicates/not-a-bug cards close with their link or `none`. A shared root cause is the default reason for a Note; a batch of independent mechanical fixes can use `none` and the existing issue/round record as the batch index.
+
 ## 3. Choose the disposition
 
 | Disposition | Use when | Write now | Close when |

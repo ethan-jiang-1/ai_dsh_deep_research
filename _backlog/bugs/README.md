@@ -6,7 +6,8 @@
 > [`../_archived/suspended_bugs/`](../_archived/suspended_bugs/README.md)（编号保留——暂停非
 > 完成，重启需用户新的优先级决定）。**编号规则唯一权威 = 本页**：新号 = 活跃 ∪ 全部归档池
 > （fixed + suspended）的已分配最大号 + 1（按盘上两区实算，不登记实值——登记 = 第二份手抄件必腐）。
-> 规矩手册 = [`../README.md`](../README.md)；本区子树指令 = [`../AGENTS.md`](../AGENTS.md)。
+> 规矩手册 = [`../README.md`](../README.md)；本区子树指令 = [`../AGENTS.md`](../AGENTS.md)；
+> 方法 = [`../methods/bug-to-fix.md`](../methods/bug-to-fix.md)——先判表面/边界，再按状态翻转收证据（DSH 插件 = 多边界组合，低边界绿不算修好）。
 
 ## 活跃列表
 
@@ -163,10 +164,12 @@ BUG-043 已于 2026-10-23 修复归档到 [fixed 池](../_archived/fixed_bugs/BU
 
 ## 缺陷通道（卡怎么走到已修）
 
-1. **建卡（排查中）**：症状、复现、根因**假设**、严重级、牵出的失败类。根因是假设，直到证据确认（session bundle、git 历史、对照实验）；被证伪的假设连撤回记录一起留在卡上——撤回是证据，不是噪声。
-2. **修复就绪**：根因有证据确认 + 修法选定 + `## 修复判据` 写就。该翻转是入口票（正本 = [入口](../README.md)）**也是修复授权**（用户裁定 2026-10-12）：P1/P2 修理型修复凭卡自授权落地，当轮交付记录即落地凭证；P0 缺陷，或修复触及入口链、门禁与验收合同、文档合同、pack 公共行为或已记录决定（D 号）的，不自授权——卡转 `等人拍板`，修复按用户指示或随 issue RFC 落地。`## 修复判据` 可写明验证搭车的工作（复跑、他卡落地）——搭车依赖写进该段，不用即兴散文。
-3. **修复落地**：修复已进树；`## 修复判据`、验收证据与审查尚未过——这是 bug 的审查/证据位，不新增 `待审`。卡内 `## 修复落地` 必须有一个 `json fix-evidence` 块（`changes` + `red{command,exit,output?}` + `green{command,exit}` + `guard{path|notMechanizable,trigger}`；`exit` 是 oracle；红证不可重放时 `changes` 须含测试/门禁资产；guard 缺 = 红）；旧卡（opened < 2026-11-15）无块时 grandfather。翻 `修复落地` 即由 `backlog-liveness` 检查；归档时 `changes` 与代码/测试变更同暂存集（`staged-change-pairing`；决定理由 = [红绿证据 Note](../../notes/implemented/2026-11-14-bug-fix-red-green-evidence.md) 的历史注记 + [oracle issue](../_archived/settled_issues/2026-11-14-verification-oracle.md)）。
-4. **已修**：修复判据满足、证据已记录、审查或跳过已记——状态行追加结论，`git mv` 进 fixed 池，同次变更。修复后回归 = 引用旧卡的新卡，不重开已修卡。
+1. **建卡（排查中）**：先写症状，再写 `## 分诊与授权`（严重级 + 表面/边界 + DSH 不变量 + 触及面 + 授权），然后写复现、根因**假设**、牵出的失败类。边界 = 能看见该症状的最低真实面（② 行为 / ③ 注册 / ④ 真挂载 / L1 / L2 / 浏览器 / snapshot B/C / L4-lite / 真 run；表 = [方法](../methods/bug-to-fix.md)）；低边界的绿不算修好。根因是假设，直到证据确认（session bundle、git 历史、对照实验、真实入口）；被证伪的假设连撤回记录一起留在卡上——撤回是证据，不是噪声。
+2. **修复就绪**：复现状态 + 根因证据 + 类决策（同机制第 N 次 / 类修或实例修 + why）+ 修法 + `## 修复判据` 写就 + 分诊授权。该翻转是入口票（正本 = [入口](../README.md)）**也是修复授权**（用户裁定 2026-10-12）：P1/P2 修理型修复凭卡自授权落地，当轮交付记录即落地凭证；P0 缺陷，或修复触及入口链、门禁与验收合同、文档合同、pack 公共行为或已记录决定（D 号）的，不自授权——卡转 `等人拍板`，修复按用户指示或随 issue RFC 落地。`## 修复判据` 可写明验证搭车的工作（复跑、他卡落地）——搭车依赖写进该段，不用即兴散文。
+3. **修复落地**：红证（同边界、exit≠0、红因正确）→ 绿证（同一命令 exit 0）→ 守卫（同边界；纯函数守卫不守 L1/L2），修复已进树；`## 修复判据`、验收证据与审查尚未过——这是 bug 的审查/证据位，不新增 `待审`。卡内 `## 修复落地` 必须有一个 `json fix-evidence` 块（`changes` + `red{command,exit,output?}` + `green{command,exit}` + `guard{path|notMechanizable,trigger}`；`exit` 是 oracle；红证不可重放时 `changes` 须含测试/门禁资产；guard 缺 = 红）；旧卡（opened < 2026-11-15）无块时 grandfather。翻 `修复落地` 即由 `backlog-liveness` 检查；归档时 `changes` 与代码/测试变更同暂存集（`staged-change-pairing`；决定理由 = [红绿证据 Note](../../notes/implemented/2026-11-14-bug-fix-red-green-evidence.md) 的历史注记 + [oracle issue](../_archived/settled_issues/2026-11-14-verification-oracle.md)）。
+4. **已修**：修复判据满足、证据已记录、审查或跳过已记，且四分离对账（能加载 / 有行为证据 / 能安装 / 已获批准各归其面）——状态行追加结论，`git mv` 进 fixed 池，同次变更。修复后回归 = 引用旧卡的新卡，不重开已修卡。
+
+**批修复。** 多张活跃卡同批修时，先做批聚类（卡 → 症状 → 表面/边界 → 共同根因候选），按根因决定一次修/拆修；共同根因或共享决定 → 一篇批 Note，每卡记 `去向：implemented — 批 Note`，卡与 Note 同变更归档；每卡仍有自己的 `fix-evidence` 与复现例，共享守卫不能替代单卡证据（细则 = [方法 §批模式](../methods/bug-to-fix.md)）。
 
 ## 状态生命周期
 
@@ -175,10 +178,10 @@ frontmatter `status` 是当前阶段的唯一家；状态行 `状态：` 记号�
 | 从 | 守卫 | 到 | 谁 |
 |---|---|---|---|
 | （建卡） | 分流后——决定不当场修才建档 | 排查中 | agent |
-| 排查中 | 根因有证据 + 修法选定 + `## 修复判据` 写就；P1/P2 修理型 | 修复就绪 | agent |
+| 排查中 | 复现状态 + 根因证据 + 类决策 + 修法 + `## 修复判据` + 分诊授权；P1/P2 修理型 | 修复就绪 | agent |
 | 排查中 | 同上就绪，但 P0 或修复触及入口链/门禁与验收合同/文档合同/pack 公共行为/已记录决定 | 等人拍板 | agent |
-| 修复就绪 | 修复进树 | 修复落地 | agent |
-| 修复落地 | 修复判据满足、证据已记录、审查或跳过已记 | 已修（同次变更归档） | agent |
+| 修复就绪 | 红证（同边界，exit≠0）+ 绿证（同一命令，exit 0）+ 守卫；修复进树 | 修复落地 | agent |
+| 修复落地 | 修复判据满足、证据已记录、审查或跳过已记 + 四分离 + 去向 | 已修（同次变更归档） | agent |
 | 排查中/修复就绪/修复落地 | 下一步是用户选择 | 等人拍板 | agent |
 | 等人拍板 | 用户的明确答复 | 等答前状态，或退出 | 仅用户 |
 | 修复就绪/修复落地 | 根因或修法被证伪（验收失败/新证据）——撤回记录留卡 | 排查中（回退） | agent |
@@ -222,34 +225,49 @@ opened: YYYY-MM-DD
 ## 症状
 观察到什么错误行为（现场、报错、复现路径）。
 
+## 分诊与授权
+- 严重级：<P0｜P1｜P2> — <为什么是这个级别；P0 = 阻断主路径/发布>
+- 表面 / 边界：<pack lib｜client｜host plugin｜preset｜content｜startup｜install｜run｜vendor seam> / <② 行为｜③ 注册｜④ 真挂载｜L1｜L2｜浏览器｜snapshot B/C｜L4-lite｜真 run>
+- DSH 不变量：<fail-loud｜model-visible ⟺ logged｜registrations are effects｜plugins not loop changes｜host read-only｜不适用>
+- 触及面：<none｜入口链｜门禁与验收合同｜文档合同｜pack 公共行为｜D 号> — <证据>
+- 授权：<自授权（P1/P2 修理型修复）｜等人拍板（用户 YYYY-MM-DD 放行）>
+- 批：<none｜cluster id — 同批卡：<links>；批 Note：<link>>
+
 ## 复现
+复现状态：<稳定 — 命令｜间歇 — 证据包 + 读法｜未复现 — 读法协议 + 为什么仍可修>
+边界：<同一表面/边界> — <命令或捕获>
 最小复现步骤 / 命令 / 输入。
 
-## 根因（假设）
+## 根因（假设 → 已证）
 机制层原因——越到契约/结构层越好，避免只描述表象；证据确认前是假设，证伪的假设连撤回记录留在卡上。
+根因证据：<command / contrast / trace> — <证明了什么>
+DSH 不变量：<上面的不变量在机制里怎么被违反；不适用则写「不适用」>
 
 ## 牵出的失败类
+- 同机制第 <N> 次｜处置：<类修 — <card link>｜实例修 — <why>>
 这个 bug 是哪类失败的探针，是否值得横切排查（契约探针纪律的落点）。
-**必答**：本卡是同机制第几次修复？第 2 次起写「类修（链接类卡）」或「实例修 + 为什么」；只写「值得横切排查」不算。
+
+## 修法
+选定的修法与所属层（pack 源 / 生成物 / 安装形态 / vendor seam）；为什么不是其他方案；拆 follow-up 的话链接。
 
 ## 修复判据
-做成什么样算修好（可写明验证搭车的工作）；翻到修复就绪前写就且非空（门禁检查）。产品可接受性与业务验收归用户；严重级分诊、根因与修复证据归 agent（P0/触面例外由用户拍板）。
+做成什么样算修好：报告例 + 邻接变体（类修时至少一个；实例修时写明为什么不需要）+ 负控/互补态；只写报告里的那一个字符串 = 回归，不是类判据。可写明验证搭车的工作；翻到修复就绪前写就且非空（门禁检查）。产品可接受性与业务验收归用户；严重级分诊、根因与修复证据归 agent（P0/触面例外由用户拍板）。
 
 ## 修复关联
-落地方式（修复 commit / 拆窄 follow-up / 搁置池行 / 上游 seam），修完归档时补。若修复承载持久决定理由，按 [结论去向](../methods/issue-to-note.md) 记 `去向`；机械或局部修复记 `none`。
+落地方式（修复 commit / 拆窄 follow-up / 搁置池行 / 上游 seam）；同批修复时链接批 Note；修完归档时补。若修复承载持久决定理由，按 [结论去向](../methods/issue-to-note.md) 记 `去向`；机械或局部修复记 `none`。
 
 ## 修复落地（YYYY-MM-DD）
 
 ```json fix-evidence
 {
   "changes": ["<仓内文件路径>", "<对应测试/门禁资产，如 tests/…>"],
-  "red": { "command": "<可重放命令：node --test … / pnpm verify / gates.e2e>", "exit": 1, "output": "not ok …" },
+  "red": { "command": "<同一判据命令：node --test … / pnpm verify / gates.e2e，或 L1/L2/浏览器/模型真入口（changes 须含测试/门禁资产）>", "exit": 1, "output": "not ok …" },
   "green": { "command": "<同一命令>", "exit": 0 },
   "guard": { "path": "<tests/… 或 scripts/smoke/… 下的永久守卫>" }
 }
 ```
 
-散文只作人读副本（可选）；`exit` 是 oracle，不从 output 里找“失败/通过”子串；红证不可重放时
+红证先在旧实现/注入回归上跑出 `exit≠0`；绿证 = 同一命令 `exit 0`；`guard` 必须与缺陷同边界（纯函数守卫不守 L1/L2）。散文只作人读副本（可选）；`exit` 是 oracle，不从 output 里找“失败/通过”子串；红证不可重放时
 `changes` 必须含测试/门禁资产。`guard` 必填：永久守卫路径，或 `{ "notMechanizable": "…", "trigger": "…" }`（缺 = 红）。
 ````
 
