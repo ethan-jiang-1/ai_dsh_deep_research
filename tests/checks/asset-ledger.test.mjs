@@ -1,8 +1,10 @@
 // 负例留证 2026-11-14：测试资产组合账——禁止手写账与硬编码 OVERRIDES，由 AST 自动推导 oracleType。
 // 红配方：新增/删除任一 spec/check 不重跑生成器 → 重算对账红；无外部语法解析 import 的测试被伪标为 external → AST 负例红。
+// 负例留证 2026-11-16：BUG-198——把任一 uniqueClaim 里的 tests/… 路径改成不存在文件 → 下方 claim
+// 路径检查点名红；还原 → 绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import * as assetLedgerMod from '../../scripts/lib/tools/asset-ledger.mjs'
@@ -31,6 +33,21 @@ test('每项具备完整六属性（lane/class/cost/uniqueClaim/oracleType/sunse
     assert.ok(typeof asset.sunset === 'string' && asset.sunset.trim() !== '', `${asset.path}: sunset 空`)
   }
 })
+
+test('uniqueClaim 里形如 tests/… 的路径 token 必须存在（BUG-198；防空 ≥10 条 claim）', () => {
+  const TOKEN = /tests\/[A-Za-z0-9_./-]+\.(?:mjs|cjs)/g
+  const claimsWithPaths = LEDGER.assets.filter((asset) => asset.uniqueClaim.match(TOKEN) !== null)
+  assert.ok(claimsWithPaths.length >= 10,
+    `防空语料：只有 ${claimsWithPaths.length} 条 claim 含 tests/… 路径 token——取样规则变了，先复核本判据`)
+  const bad = []
+  for (const asset of LEDGER.assets) {
+    for (const match of asset.uniqueClaim.matchAll(new RegExp(TOKEN.source, TOKEN.flags))) {
+      if (!existsSync(join(ROOT, match[0]))) bad.push(`${asset.path}: uniqueClaim -> ${match[0]}（不存在）`)
+    }
+  }
+  assert.deepEqual(bad, [], `生成物把不存在的路径固化成「事实」：\n${bad.join('\n')}`)
+})
+
 
 test('AST 推导负控：无外部解析器 import 不得归为 external；单模块内联样例归为 self-referential', () => {
   const inlineOnly = [

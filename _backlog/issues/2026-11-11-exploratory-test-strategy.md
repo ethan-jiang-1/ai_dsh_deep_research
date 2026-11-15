@@ -3,58 +3,237 @@ status: 推敲中
 opened: 2026-11-11
 ---
 
-# 推敲：探索性验证账本（exploratory verification）——第六轮 charter
+# 推敲：探索性验证账本（exploratory verification）——第十轮 charter：搬家副作用
 
-> 立卡：2026-11-11 ｜ 状态：推敲中（执行中；第六轮 charter 已于 2026-11-13 重定） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-11 ｜ 状态：推敲中（执行中；第十轮 charter 于 2026-11-15 重定） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
 >
 > **一句话**：探索协议已毕业为常驻方法（[guides/67](../../docs/guides/67-test-strategy.md) +
-> [exploratory-verification](../../.agents/skills/exploratory-verification/SKILL.md)）；本卡从「协议草稿」转为
-> **逐轮账本 + 当前轮 charter**，继续用变异/边界/消费者/双份事实找静默失败。
+> [exploratory-verification](../../.agents/skills/exploratory-verification/SKILL.md)）；本卡 =
+> **逐轮账本 + 当前轮 charter**。第十轮的靶子是**文件搬家**：回归能证明「搬完还绿」，证明不了
+> 「搬的过程中有人顺手改了落点、相对根、消费方或账本口径」。
 >
-> **当前（2026-11-13 晚）**：前五轮 goal 修出 79 张 BUG（081–159，全部归档）；测试制度 W0–W3 已落地
-> （D53 命名四车道、D54 三环四账五关、快照 A/B 进 CI、registry 资产账、成本 ratchet、CI 聚合、
-> 探索技能 + 复盘）。最近 55 个 commit（`4d6308c9..HEAD`）几乎全是**测试制度自身**——它现在决定
-> 「什么叫绿」，所以第六轮先探这套制度的新判据；产品面剩余空白 = X6 worker 行为、安装域默认语言、
-> hook/DOM、world-tree。
+> **当前（2026-11-15 晚）**：前九轮开到 BUG-190（全部修归档）；测试制度 W0–W3、D53/D54/D55 已落地。
+> 2026-11-15 的主干是**四个目录重构批次**（scripts/lib 按 owner、tests 镜像、pack src 按 domain）：
+> 七个 commit（六个执行 rename）**320 个 rename**、约 1.8k 行 import 重写、登记簿 320 条、
+> 两本账 + 索引重生成。**已知三处搬家副作用（外加一处相邻的派生件问题），全部由 review / 发版 /
+> 门禁自测咬出，没有一处由探索或门禁先发现**——这正是本轮要盯的面（证据与判据 = §第十轮 goal）。
 >
-> **下一步**：批 A（160–167）与批 B（168–176）已修归档；Y9 真模型批仍单独授权，Z4/Z5 与第八轮待定。
-> 首个发现 = [BUG-160](../_archived/fixed_bugs/BUG-160-smoke-registry-mention-not-execution.md)；批 A（2026-11-14）
-> 再开 161–167；批 A 共 **8 张已修归档**（160–167）。
+> **下一步**：批 E（191–198）已于 2026-11-16 全部修复归档（[批 Note](../../notes/implemented/2026-11-15-move-side-effect-guards.md)）；
+> R6（派生件新鲜度）与 R9（构建/注入面）未跑，留给下一轮；真模型批（Y9）仍单独授权。
 
 **问题与期望结果：** 回归能回答「旧行为被改坏没有」，回答不了「新东西在没被写进测试的输入上会不会
-静默放行」。本卡曾是「交付一套可复用的探索协议 + 逐轮 charter」的载体；协议已于 2026-11-13 毕业到
-guides/67 + 技能，本卡保留账本与当前轮 charter。找真缺陷就开 [bug 卡](../bugs/README.md)，
-不改产品代码，**不把「没找到」写成「没有 bug」**。
+静默放行」。搬家的特殊之处：**它按定义「不该改变行为」**，于是被改坏的东西不会让测试变红——测试跟着
+文件一起搬了。本卡给出的答案 = 一套**搬家的可证伪判据**（§搬家合同）+ 围绕其残差的 charter。找真缺
+陷就开 [bug 卡](../bugs/README.md)，不改产品代码，**不把「没找到」写成「没有 bug」**。
 
-**当前情况（2026-11-13 晚基线）：**
+**当前情况（2026-11-15 晚基线）：**
 
 - 方法已毕业：guides/67（三环/四账/五关、失败类→最低可见层）+ `exploratory-verification` 技能
   （E1–E6、charter 七件、四态、毕业判据）+ `class-level-guards`（六形态）。
-- 测试制度落地：D53 四车道（`spec`/`e2e`/`entry`/`checks`）；D54 三环四账五关；registry 27 条资产账；
-  快照 5 角色 A/B 进 CI；`keyless` / `client-load` / `snapshot-replay` / `deploy` 四个 job 由
-  `all-checks-passed` 聚合为 required 书签；模型通道手动触发。
-- 基线实跑：`pnpm verify` 全绿；`pnpm test` = spec **1341** / checks **104**，均 0 skip；
-  `pnpm test:vendor` 4；`pnpm typecheck` 通过（2026-11-13 记录）；全量 `test:e2e` **6/0/0**、
-  `test:entry` **3/0/0**（2026-11-13 实跑记录，本轮未复跑）。
-- 前五轮：081–159 共 79 张卡全部归档；第 0–66 轮判定见 §覆盖地图与各轮收口；`X6` 仍无证据。
+- 测试制度落地：D53 四车道（`spec`/`e2e`/`entry`/`checks`）；D54 三环四账五关；D55 验证层 oracle
+  独立化；registry 资产账；快照 5 角色 A/B 进 CI；四个 required job 由 `all-checks-passed` 聚合；
+  模型通道手动触发。
+- 基线（2026-11-15 23:2x 本轮实跑）：`pnpm verify` 全绿；`pnpm test` = spec **1358** / checks **198**，
+  0 fail / 0 skip；资产账 213 条（77 run + 46 cockpit + 32 pack + 7 contracts + 48 checks + 3 vendor）。
+  `pnpm typecheck` / `pnpm test:vendor` / 全量 `test:e2e` / `test:entry` 本轮未复跑。
+- 搬家面：四个重构批次（七个 commit、**320 rename**、326 次 rename 事件，含笔记/文档 6 次）；
+  四天三波合计约 **584 次**（11-12 的 51、11-13 的 213、11-15 的 320）；
+  登记簿 [scripts/test-path-redirects.json](../../scripts/test-path-redirects.json) 320 条；
+  两本账与 `tests/INDEX.generated.md` 每步重生成。
+- 前九轮：160–190 全部修归档；第 0–66 轮判定见 §覆盖地图与各轮收口；`X6` 仍无证据。
 
 **未决问题：**
 
-- 第六轮 keyless 批的后续收益：批 A 8 张（160–167）已修归档；Y3/Y5/Y9 待跑。
+- 批 E 8 张（191–198）已修复归档；证据与类级决定见 [批 Note](../../notes/implemented/2026-11-15-move-side-effect-guards.md)。
+- R6（派生件新鲜度：overlay/snapshot 与新源集对账）与 R9（pack 构建/注入面，需一次构建）未跑。
+- 观察未开卡：`shared/` 兜底规则、`navigability-contract` 对 `scripts/lib` 的平铺扫描、
+  `runtime/README.md` 散文路径、`run-lane` 全 SKIP exit 0（旧观察）。
 - 真模型批 Y9（worker 行为）是否批准、预算多少。
 - 本卡继续作为账本，还是下一轮拆成独立卡（当前不拆；账本价值在覆盖地图）。
-- 安装域默认语言 / hook-DOM / world-tree 三个空白的 owner 与优先级。
 
-**下一步：** 跑 §第六轮 goal 的 keyless 批；每轮按七件 charter 记录，发现按四态分诊；
-真模型批等用户单独批准。
+**下一步：** 批 E 已闭环（8 张归档，见 [批 Note](../../notes/implemented/2026-11-15-move-side-effect-guards.md)）；
+下一轮补 R6/R9，并把 M5/M7/M8 的观察收口（M1/M3/M4/M6 已有类级守卫）。
 
-## 阅读顺序（本卡 1.8k 行）
+## 阅读顺序（本卡 2.1k 行）
 
-1. §第六轮 goal / §第七轮 goal / §第八轮 goal / §第九轮 goal（当前要做什么、已探到哪）
+1. §第十轮 goal（当前要做什么、已探到哪）+ §搬家合同（判据来源）
 2. §覆盖地图（哪些面已探/关闭/空白）
 3. §已知与未决（当前状态）
-4. 历史各节（按主题跳读）：§第 0 轮 pilot → §第 1 轮 charter → §用户答复 → §执行记录 →
-   §第二轮…第五轮 goal 记录与收口。
+4. 历史各节（按主题跳读）：§第六轮…§第九轮 goal → §第 0 轮 pilot → §第 1 轮 charter →
+   §用户答复 → §执行记录 → §第二轮…第五轮 goal 记录与收口。
+
+## 第十轮 goal（2026-11-15）：搬家副作用
+
+**进入（git 可抓的事实）**：2026-11-15 一天内完成四个目录重构批次 + 一次落点补丁，共七个 commit
+（六个执行 rename）：
+
+| commit | 动作 | rename | import 级变更行 |
+|---|---|---|---|
+| `71e4776d` | Step 0a：`md-links` 读搬家登记簿 + RFC | 0 | 2 |
+| `a81f9424` | Step 0b+2：`scripts/lib` 按 owner 分层 + `tests/run` 同名镜像 | 166 | 886 |
+| `787e5914` | Step 1：`tests/cockpit` 切 `client/` 与 `lib/` | 40 | 194 |
+| `09e98025` | pack Step 1：`src/lib` 切 7 domain + `tests/cockpit/lib` 同名 | 58 | 561 |
+| `3f77b3e7` | pack Step 2：client 子目录 / `shared/` 对齐 | 10 | 2 |
+| `867de359` | pack Step 3：`tests/pack` 按 surface + contract | 38 | 94 |
+| `c6f29682` | 落点补丁：client 子目录归位 + 登记簿目标修正 | 8 | 38 |
+
+合计 **320 个源码/测试 rename**（范围内 326 次事件，另 6 次是笔记与文档）；登记簿 320 条；
+两本账（asset / guard）与 `tests/INDEX.generated.md` 每步重生成。
+
+**这不是第一天搬家**：`5d00f997`（11-12，按被测面分域）51 次、`767674b1`（11-13，后缀/车道改名）
+**213 次**、11-15 这三波 320 次——四天约 **584 次** rename。登记簿只覆盖最后一波（见 R0g）。
+
+**为什么必须探索，而不是只跑回归**——三处搬家副作用（外加一处相邻的派生件问题），
+没有一处是「测试变红」发现的：
+
+| # | 副作用 | 真因 | 谁咬出 | 修复 |
+|---|---|---|---|---|
+| 1 | `bootstrap --check` 永远报「vendor 产物缺席」 | 模块下移一层，`defaultRoot` 仍 `../..` → 解析到 `scripts/`，真因是 `MODULE_NOT_FOUND` | 0.3.6 发版自检 | `00a5fe3a` |
+| 2 | `dev/bootstrap.sh` / `dev/boot-run.sh` 的 node 调用静默失败 | shell 字面量不跟搬，任何车道都不看它 | 同批发版自检 | `00a5fe3a` 修；`482abf14` 把 `repo-conventions` 扫面扩到 `dev/hooks/*` |
+| 3 | 8 个 client 子目录 spec 落到 `tests/cockpit/<sub>/`；`method-library-selection` 的 `CLIENT_ROOT` 多一层 `..` | 落点规则只在 review 里；`pack-mirror` 只枚举已知子树 | review（下一 commit） | `c6f29682` |
+| 4 | `dist-freshness` 对「接收方未构建」误红（相邻） | 搬家改变 pack 源文件集（409 → 409 但 +162/−162），指纹必须重算；同一门禁的第三态（接收方 `lib/` 缺席）到 0.3.6 交接才补 | 0.3.6 交接 | `482abf14` |
+
+共同形状：**路径份额的变更没有对应的判据份额**。回归证「搬完还绿」，上面 1–3 都是「绿着做错事」。
+
+### 搬家合同（本轮判据来源，五条不变量）
+
+一次「只搬家、不改行为」的变更必须同时满足下五条；每条都能被机械证伪（→ = 对应 charter）：
+
+1. **引用面同构**：搬家前后，每个文件的本地 import 解析目标在 rename 映射下逐边相同。→ R0a / R8
+2. **非引用变更仅限路径字面量**：搬家 commit 里非注释、非 import 的源码行只能是路径字符串、
+   登记表或生成器适配；出现逻辑行 = 候选。→ R0b
+3. **落点由规则决定，不由「跑得通」决定**：每个新位置必须被某条位置门禁的**正向闭集**覆盖；
+   未被任何规则覆盖的落点 = 红，不是「暂时没人管」。→ R1 / R4
+4. **派生账随源集重算**：资产账 / 守卫账 / 索引 / 登记簿 / 构建清单在同一变更内重生成，
+   且与盘上全集双向相等（数量 + 路径）。→ R0d / R6
+5. **路径即合同**：任何消费面（shell / YAML / JSON / package.json / 散文）对旧路径的字面量，
+   要么同变更更新，要么进登记簿；登记簿的 `to` = 该文件**内容的最终落点**。→ R0c / R3 / R5
+
+**失败类增量（本轮命名；毕业 = 每类至少一条类级守卫或显式不可机械化）**：
+
+| 类 | 一句话 | 已知实例 |
+|---|---|---|
+| M1 落点补集 | 位置门禁枚举已知子树，子树之外无人管 | 副作用 3；R0e |
+| M2 深度常量 | 按自身位置算根，搬一层就静默指错目录 | 副作用 1、3 |
+| M3 非 JS 字面量 | shell / YAML / JSON / 散文里的路径没有车道 | 副作用 2；R0c |
+| M4 生成器吸收 | 重跑账本把错落点合法化为「当前状态」 | R0e |
+| M5 派生件陈旧 | manifest / overlay / snapshot / index 与源集脱节仍绿 | 副作用 4；R6 |
+| M6 无车道消费者 | 模块只被入口/运维脚本消费，断链测试看不见 | R7 |
+| M7 登记簿语义 | `to` 存在但指向错文件（门禁只查存在 + tracked） | 副作用 3 的登记簿半边；R5 |
+| M8 搬家史断档 | 登记簿只记最近一次搬家，前史的旧名没有机器映射 | R0g |
+
+### charter（keyless，≤90 分钟；R9 需构建，未构建记未跑）
+
+| ID | 假设（要杀死的命题） | 最低层 | oracle / 变异 | 预算 | 停止 |
+|---|---|---|---|---|---|
+| R1 | 位置门禁覆盖「已知子树之外的任何落点」，而不是只枚举已知子树 | 纯函数/门禁 | `tests/cockpit/misc/`、`tests/pack/misc/`、`tests/cockpit/shared/` 各放一个 spec + 重生成账本 → 应红；负对照 = 放对位置绿 | 15 min | **已探三格：全绿（fail-open）→ [BUG-191](../_archived/fixed_bugs/BUG-191-placement-gates-unknown-subtree-unruled.md)** |
+| R2 | 所有「按文件位置算根」的常量搬家后指向同一目录；错了必响 | 纯函数/静态 | 全树 `import.meta.url` + `'..'` 常量清单，逐个打印解析结果与预期根比对；再把两个搬家模块下移一层，看谁静默 | 20 min | **已探：枚举 148 处；两处已知实例已修，无新缺陷（观察）** |
+| R3 | 非 JS 消费面（sh/YAML/JSON/package.json/散文）的搬家路径都被门禁或登记簿接管 | 静态 + 变异 | 登记簿 `from` × 全树字面量（R0c 已跑）；再在 `dev/*.mjs`、`scripts/run-ops/*`、`probes/**` 放坏字面量，看谁红 | 20 min | **已探 → [BUG-192](../_archived/fixed_bugs/BUG-192-snapshot-replay-offline-preload-stale-path.md)、[BUG-193](../_archived/fixed_bugs/BUG-193-cdp-ask-spawns-moved-probe-path.md)（分段字面量）+ 观察** |
+| R4 | 账本/索引生成器能吸收任意新落点，只有位置门禁能拒绝——逐账核对「吸收面 vs 规则面」 | 纯函数 | asset-ledger / guard-ledger / INDEX / smoke registry / design-40 doc registry 各造一个新落点条目 | 20 min | **已探 → 191（账本吸收落点）、[BUG-194](../_archived/fixed_bugs/BUG-194-test-index-drops-tsx-importers.md)（索引吸收过滤器缺陷）** |
+| R5 | 登记簿语义与覆盖面：`to` = 内容最终落点；且覆盖全部历史搬家（或显式声明只覆盖最近一波） | 静态 | 320 条按内容 / `git log --follow` 对账；两跳链（如 brief-fold）逐条验证；`git log --diff-filter=R` 全量与冻结层旧名计数对账 | 15 min | **已探：R0f/R0g；语义无错条、断档登记为观察（未开卡）** |
+| R6 | 搬入点的派生件随源集重算；旧产物不会被当当前源 | 静态/入口 | manifest 源文件集 vs HEAD pack 源；`dist-freshness` 负对照（改一个源文件 → 应红） | 15 min | **未跑（R6，下一轮）** |
+| R7 | 每个搬家模块至少有一条测试车道消费者，或显式登记为「无车道」 | 静态/图 | import 图反向：0 spec 可达的模块清单；对照 lane/registry 与 D54 准入 | 15 min | **部分：`.cjs` 面 → [BUG-196](../_archived/fixed_bugs/BUG-196-test-surface-cjs-coverage-blind.md)；反向图未跑** |
+| R8 | 为搬家新加/加宽的门禁自身有反证且无同类空洞 | 门禁自身 | 逐门禁跑红配方；`gates.e2e` 案例 ↔ `context.gates` 对账（含 md-links 重定向三案、repo-conventions 扩面） | 15 min | **已探 → [BUG-197](../_archived/fixed_bugs/BUG-197-repo-conventions-hooks-surface-no-gate-case.md)** |
+| R9 | pack 搬家的构建/注入面不受路径影响（tsdown 入口、`exports`、`faces.json`、content 注入、client 模块 id） | 入口（keyless 构建） | `pnpm build` + `pnpm typecheck`；`preset.e2e` / `lifecycle.entry` 消费构建产物；比对 dist 清单 | 20 min | **未跑（R9，需构建）** |
+
+**证据落点**：一次性脚本与输出落 `runtime/`（gitignored，本轮 = `runtime/explore-20261115/`）；
+升格后落 `tests/checks/*.test.mjs`（位置/账本类）或 `tests/**/*.spec.mjs`（纯函数类）。
+**负对照**：R1「放对位置绿」、R6「改源文件红」、R2「把常量搬回原深度绿」。
+
+### 执行记录（滚动）
+
+- **2026-11-15 23:0x 侦察（R0，keyless，约 25 分钟，0 模型）**：先验证「搬完到底动了什么」。
+  每条都能用 `git archive <commit> | tar` 取两棵树 + 一次全树 import 扫描复现。
+
+  - **R0a 引用面同构 = 已关闭（无发现）**：六个搬家 commit 逐对取 base/post 两棵树，按
+    `git diff -M` 的 rename 映射把每条本地 import 的解析目标映射后比对。**六对全部 0 条边差**；
+    对照侧同时改内容的文件（254 + 49 + 165）也逐边相同 → 没有 import 指向别的模块。
+  - **R0b 非 import 源码变更 = 已探（只剩路径字面量）**：搬家 commit 内非注释、非 import 的
+    源码行 = 路径字符串（`gates-cases` 的 `from`、`fix-evidence` / `staged-change-pairing` 的模块
+    路径、`asset-ledger` 的模块表）+ `replay-scene.mjs` 的 `'../..'` → `'../../..'` +
+    `test-index` 新增扫描函数；**无逻辑改动**。这条同时是副作用 1 的负对照：同一深度修正正确，
+    `vendor-artifacts.mjs` 那处漏了。
+  - **R0c 旧路径字面量（live 面）= 已探：1 处观察**：以登记簿 320 条 `from` 扫全部 tracked
+    文件（1675）中的文本类，排除 `_backlog/`、`notes/`（冻结层）与登记簿自身后，只剩
+    [runtime/README.md](../../runtime/README.md) 第 9 行把 `scripts/lib/scene-pack.mjs` 写在
+    **无反引号散文**里（`doc-paths` 只解析反引号 token）。→ 观察，owner = runtime/README；
+    升格方向 = R3 的散文路径面。
+  - **R0d 账本完整性 = 已关闭**：asset-ledger **213 条 = 盘上 213 个 spec/check**（双向零差）；
+    登记簿 320 条 `to` 全部在 HEAD 且 tracked。
+  - **R0e 位置门禁补集 = 已探：fail-open（候选卡）**：在 `tests/cockpit/misc/` 放一个不 import
+    任何源码的 spec → `pack-mirror` / `test-owner-mirror` / `test-lanes` / `test-index` **全绿**，
+    只有 `asset-ledger` 因「账与盘不一致」红；跑 `node dev/record-asset-ledger.mjs` 重生成后
+    → **15/15 全绿**（探针已删，树复原）。即：任何 agent 把 spec 落在 `tests/cockpit/<未知目录>/`，
+    重跑一次生成器就被全部门禁接受（`tests/pack/<未知目录>/` 同形状，未单独验）。与副作用 3 同源
+    （那次靠 review）；`test-index` 只索引「谁 import 了模块」，不索引落点。→ 候选卡（未开）：
+    修法待定，方向 = 对 `tests/cockpit` 与 `tests/pack` 断言「全集 − 已知子集 = 空」，
+    而不是只枚举已知子集。
+  - **R0f 登记簿与 git rename 对账 = 已探**：320 条 vs 326 次事件；38 条不对应单次 pair
+    （两跳合并：`from` 指原路径、`to` 直接指最终落点；中间落点另有一条自己的条目——如 brief-fold
+    同时有 `cockpit/brief-fold → lib/run/brief-fold` 与 `lib/brief-fold → lib/run/brief-fold`，
+    跨 `787e5914` + `09e98025`）。门禁只查「from 已不在盘上 + to 在盘上且 tracked」，
+    **不查 to 是不是内容的真正落点** → R5。
+  - **R0g 登记簿的搬家史覆盖 = 已探：只覆盖最后一波**：registry 的 320 条全部来自 11-15；
+    11-12/11-13 两波（264 次）无登记簿。冻结层（`notes/` + `_backlog/_archived/`）里仍有
+    **474 个**指向旧 `*.test.mjs` 路径的代码跨度——**全是散文/反引号，0 条是 Markdown 链接**
+    （所以 md-links 不红；doc-paths 又排除冻结层）。风险不是门禁红，而是 agent 按旧名去找文件时
+    读空；升格方向 = 登记簿按 git 历史全量生成，或明确「冻结层代码跨度是历史事实、不解析」。
+
+### 批 E（2026-11-15 23:0x–2026-11-16 02:2x，keyless，0 模型）：8 张卡
+
+| 卡 | charter | 一句话 | 状态 |
+|---|---|---|---|
+| [BUG-191](../_archived/fixed_bugs/BUG-191-placement-gates-unknown-subtree-unruled.md) | R1 / R4 | 位置门禁只枚举已知子树：未知落点 + 重生成账本 = 全绿（三格实测） | 已修 P2 |
+| [BUG-192](../_archived/fixed_bugs/BUG-192-snapshot-replay-offline-preload-stale-path.md) | R3 | snapshot-replay 的离线预载仍指 `scripts/lib/replay-network-offline.cjs`（已搬 `harness/`）→ A 层闸没装、required CI job 必红 | 已修 P1 |
+| [BUG-193](../_archived/fixed_bugs/BUG-193-cdp-ask-spawns-moved-probe-path.md) | R3 | cdp-ask.entry spawn `scripts/probe/cdp-probe.mjs`（探针已迁 `probes/browser/`） | 已修 P2 |
+| [BUG-194](../_archived/fixed_bugs/BUG-194-test-index-drops-tsx-importers.md) | R4 / R7 | test-index 的 importer 过滤漏 `.tsx` → 6 个 client 模块永远显示「—」 | 已修 P2 |
+| [BUG-195](../_archived/fixed_bugs/BUG-195-gates-e2e-adhoc-jobs-value-fake-failures.md) | R6 邻接 | gates.e2e `--jobs=abc` → 0 案例真跑，却报 N 处「undefined」失败并留临时目录 | 已修 P2 |
+| [BUG-196](../_archived/fixed_bugs/BUG-196-test-surface-cjs-coverage-blind.md) | R7 | test-surface 的覆盖合同不含 `.cjs` → 新 `.cjs` 可零测试落地 | 已修 P2 |
+| [BUG-197](../_archived/fixed_bugs/BUG-197-repo-conventions-hooks-surface-no-gate-case.md) | R8 | repo-conventions 扩到 `dev/hooks`，`gates.e2e` 无对应注入案例（新扫面零红证） | 已修 P2 |
+| [BUG-198](../_archived/fixed_bugs/BUG-198-spec-header-stale-path-frozen-into-ledger-claim.md) | R3 | 7 个 spec 头注仍是旧路径，被资产账 `uniqueClaim` 固化 | 已修 P2 |
+
+**批 E 修复落地（2026-11-16）**：8 张全部 `已修` 并归档；类级守卫 =
+`test-placement`（落点补集）、`smoke-child-paths`（分段路径）、`gates-cli`（数值输入）+
+`test-index`/`test-surface`/`asset-ledger` 的独立抽查。验证 = `pnpm verify` 全绿、
+`pnpm test` spec 1363 / checks 209（0 fail / 0 skip）、`gates.e2e` 130 案例全绿。决定正本 =
+[批 Note](../../notes/implemented/2026-11-15-move-side-effect-guards.md)。
+
+**逐条记录（可重放）**：
+
+- **R1 → 191**：三格（`tests/cockpit/misc/`、`tests/pack/misc/`、`tests/cockpit/shared/`）各放一个无依赖
+  spec：未重生成账本 = 16/1（只有 asset-ledger 红）；`node dev/record-asset-ledger.mjs` 后 = **17/0 全绿**。
+  证据脚本 `runtime/explore-20261115/placement-probe.sh`（自复原）。根因：四条门禁只枚举已知子树，
+  无「补集 = 空」断言；资产账/索引以盘为准重生成 → 吸收。
+- **R2（深度常量）**：枚举全树 `import.meta.url` + `'..'` 常量 148 处（`runtime/explore-20261115/` 有扫描
+  思路），撤查 `scripts/lib/*/` 中 3 处（`workspace-parsers`、`replay-scene`、`vendor-artifacts`）——
+  后两处已在 2026-11-15 修过；**无新缺陷**。关闭假设。
+- **R3 → 192 / 193**：分段路径字面量（`join(ROOT, 'a','b',…)`）扫 367 条，2 条指向不存在文件：
+  `snapshot-replay.entry.mjs:78`（离线预载）与 `cdp-ask.entry.mjs:131`（探针 spawn）。`--require` 实测
+  exit 1（`MODULE_NOT_FOUND`）；CI `snapshot-replay` job 跑同一入口。`runtime/README.md` 的散文路径仍只算观察。
+- **R4 → 194**：索引 importer 抓取过滤 `/\.(mjs|cjs|ts)$/` 漏 `.tsx`；6 个 client 模块实测有 spec 却显示 `—`
+  （`runtime/explore-20261115/idxcheck.mjs`）。对账测试用同一生成器重算 → 自洽绿。
+- **R5**：登记簿 320 条 vs 326 次 rename 事件（R0f），语义抽查无错条；R0g 的「只覆盖最后一波」登记为观察，
+  未开卡。
+- **R7 → 196**：新增无测试 `scripts/lib/shared/zz-probe.cjs` → `test-surface` 2/2 绿；负控（pack `.ts` 同形）
+  → 红。根因：`libModules()`/`coveredByTests()` 只认 `.mjs`，而 `test-index` 认 `.mjs|cjs`。
+- **R8 → 197**：给 `dev/hooks/pre-commit` 注入坏路径 → 门禁确实红（本体有效）；但 `gates-cases.mjs` 里
+  **零条 `dev/hooks` 案例**（只有 `dev/bootstrap.sh` 那条旧扫面）→ 扩面没有红证。
+- **R6 / R9 未跑**：R6（overlay / snapshot 与新源集对账）、R9（`pnpm build` 后的产物路径/id 对比）留下一轮。
+- **基线**：本轮开头与结尾各跑一次 `pnpm verify` 全绿、`pnpm test` spec 1358 / checks 198（0 fail / 0 skip）；
+  `gates.e2e` 全量 128 案例全绿。
+
+**观察（未开卡）**：
+
+- `tests/run/shared/` 是位置规则的兜底：spec 住 `shared/` 时，`dir === 'shared'` 放行任何 owner 依赖
+  （实测：`tests/run/shared/` 放一个只依赖 `scripts/lib/gates/` 的 spec → `test-owner-mirror` 3/3 绿）。
+  契约说「依赖 owner ∈ {目录, shared}」——单 owner 的 spec 藏在 `shared/` 无人拦。
+- `navigability-contract` 的 fixture-consumer 列表对 `scripts/lib` 仍是平铺扫描（搬家后 0 条）：
+  当前无影响，但是潜在的假红源（只被 lib 子目录消费的 fixture 会被判孤儿）。
+- `smoke-imports` 的闭包递归只进 `.mjs|ts|tsx`，`.cjs` 目标不递归（本轮两次 192/193 都不是它咬到的）。
+- `run-lane` 全 SKIP 仍 exit 0（第六轮旧观察，维持不开卡：诊断车道自述「未跑 ≠ 通过」，但退出码仍会误读）。
+- `runtime/README.md` 的过期散文路径（R0c）：owner = runtime/README，未改（探索不改产品）。
+
+**本轮未跑**：R6、R9、R7 的完整反向图。**未跑 ≠ 通过**。
 
 ## 第六轮 goal（2026-11-13 晚）：测试制度改动面
 
@@ -137,10 +316,13 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 | 三环 / 四账 / 五关；失败类 → 最低可见层；成本预算 | [guides/67](../../docs/guides/67-test-strategy.md) |
 | E1–E6、charter 七件、四态分诊、毕业判据、预算/反模式 | [exploratory-verification](../../.agents/skills/exploratory-verification/SKILL.md) |
 | 类级守卫六形态 | [_backlog/methods/class-level-guards.md](../methods/class-level-guards.md) |
+| 搬家的可证伪判据（五不变量 + M1–M8 失败类） | 本卡 §搬家合同（正本暂住本卡；R1/R2 类级守卫落地后迁 guides/67 §2） |
 | 本卡 | 历轮账本 + 覆盖地图 + 当前轮 charter；不再复制协议正文 |
 
 **探索与回归的分工**：回归回答「旧行为被改坏没有」，探索回答「哪些新输入会静默做错事」；同一发现
 先归失败类，再落类级守卫或显式不可机械化（D54）。旧 §策略/E1–E6 正文已迁出本卡（git 历史可查）。
+**搬家的分工**：回归答「搬完还绿吗」（它几乎总会答是），探索答「搬的时候还有哪些面相信了旧路径」；
+前者是后者的负对照，不是替代。
 
 ## 第七轮 goal（2026-11-14）：Y3/Y5 + 产品边界
 
@@ -318,17 +500,22 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 - 上述验收 1–4 满足；覆盖地图与未覆盖面（含 owner）已写进本卡或转成 bug/观察。
 - 第六轮：Y1–Y9 全跑或逐项写明「未跑 + 原因」；发现全部有去向；基线 `pnpm verify` + `pnpm test` 绿。
+- 第十轮：R1–R9 全跑或逐项写明「未跑 + 原因」；R1 的 fail-open 有去向（bug 卡或 D54 显式例外）；
+  M1–M8 每类至少一条类级守卫或显式不可机械化；搬家合同五条都有一条可执行判据。
 - findings 已全部有去向（bug 卡 / 观察 / 歧义 / 空假设），无悬空项。
 - 审查记录写 `审查：agent｜用户｜跳过 — 理由`；去向载体成立后与归档同变更。
 
 ## 范围与排除项
 
-**范围**：E1–E6 协议（正本 = guides/67 + 技能）；X1–X8 charter（历史）；第六轮 Y1–Y9 charter；
-0.3.1 交接修复、D46/D47/D48、T0 两级预算、探针迁根、client 侧 typed 输入、测试制度 W0–W3 等最近
-改动触及的面；可复用 `scripts/lib/*-core.mjs`、现有 probes、smoke、回放、registry/车道 runner。
+**范围**：E1–E6 协议（正本 = guides/67 + 技能）；X1–X8 charter（历史）；第六至九轮 charter；
+第十轮 R1–R9（搬家副作用）；0.3.1 交接修复、D46/D47/D48、T0 两级预算、探针迁根、client 侧 typed
+输入、测试制度 W0–W3、D53–D56、2026-11-15 目录重构等最近改动触及的面；可复用
+`scripts/lib/**/*-core.mjs`、`scripts/lib/tools/test-index.mjs`、`scripts/lib/tools/asset-ledger.mjs`、
+现有 probes、smoke、回放、registry/车道 runner。
 
 **排除**：无 oracle 的自由点击/漫游；重跑旧矩阵；把探索写成固定回归；L4 全量；改产品代码；
-在单场上写「稳定」；用「没找到」回答「有没有 bug」。
+在单场上写「稳定」；用「没找到」回答「有没有 bug」；为让门禁变绿而重生成账本（那是吸收，不是修）；
+改写冻结层（`notes/`、`_backlog/_archived/`）正文。
 
 ## 覆盖地图（滚动）
 
@@ -416,15 +603,40 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 | note-scan 加粗状态标签 | 已探 | [BUG-188](../_archived/fixed_bugs/BUG-188-note-scan-bold-status-label.md)：`> **状态**：` 假红 |
 | on: flow mapping | 已探 | [BUG-190](../_archived/fixed_bugs/BUG-190-ci-workflow-inline-on-flow-mapping.md)：inline mapping 假红 |
 
+### 第十轮新增面（2026-11-15）
+
+| 面 | 状态 | 判定 / 证据 |
+|---|---|---|
+| import 边同构（六搬家 commit） | 已关闭 | R0a：逐对 base/post + rename 映射，0 条边差 |
+| 搬家 commit 的非 import 源码变更 | 已探 | R0b：只剩路径字面量 + 生成器新增；无逻辑改动 |
+| 旧路径字面量（live 面） | 已探（1 观察） | R0c + R3：分段字面量再抓 2 处 → [BUG-192](../_archived/fixed_bugs/BUG-192-snapshot-replay-offline-preload-stale-path.md)、[BUG-193](../_archived/fixed_bugs/BUG-193-cdp-ask-spawns-moved-probe-path.md)；`runtime/README.md` 散文路径 = 观察 |
+| 账本完整性（asset / guard / 索引） | 已关闭 | R0d：213 = 213 双向零差；登记簿 `to` 全在 HEAD |
+| 位置门禁的补集 | 已探 → 已开卡 | R1：三格 + 重生成账本 = 17/0 全绿 → [BUG-191](../_archived/fixed_bugs/BUG-191-placement-gates-unknown-subtree-unruled.md) |
+| 索引 importer 面 | 已探 → 已开卡 | R4/R7：`.tsx` 被过滤 → 6 模块假「—」 → [BUG-194](../_archived/fixed_bugs/BUG-194-test-index-drops-tsx-importers.md) |
+| 登记簿多跳语义 | 已探（观察） | R0f：38 条两跳合并；门禁不验 `to` 语义 |
+| 登记簿的搬家史覆盖 | 已探（观察） | R0g：只覆盖 11-15 一波；冻结层 474 个旧代码跨度无映射（0 条链接） |
+| 深度常量 / 相对根 | 已探（无新发现） | R2：枚举 148 处；两处已知实例已修，撤查 `scripts/lib/*/` 无静默 |
+| 非 JS 字面量消费面 | 已探 → 已开卡 | R3：入口 spawn/preload 两处断链 → 192/193；`dev/*.mjs` / `scripts/run-ops` / `probes` 仍无守卫（观察） |
+| 派生件新鲜度 | 部分 | R6 未跑；`dist-freshness` 三态已落地，overlay / snapshot 未对账 |
+| 无车道消费者的搬家模块 | 部分 → 已开卡 | R7：`.cjs` 面 → [BUG-196](../_archived/fixed_bugs/BUG-196-test-surface-cjs-coverage-blind.md)；完整反向图未跑 |
+| 搬家新门禁的反证 | 已探 → 已开卡 | R8：`dev/hooks` 扫面无注入案例 → [BUG-197](../_archived/fixed_bugs/BUG-197-repo-conventions-hooks-surface-no-gate-case.md) |
+| 生成器吸收异常落点 | 已探 → 已开卡 | R1/R4：重跑账本/索引把错落点或错过滤吸收为准 → 191 / 194 |
+| 源码头注 / 账本 claim | 已探 → 已开卡 | R3 邻接：7 处旧路径进 `uniqueClaim` → [BUG-198](../_archived/fixed_bugs/BUG-198-spec-header-stale-path-frozen-into-ledger-claim.md) |
+| CLI 数值输入（`--jobs`） | 已探 → 已开卡 | R6 邻接：0 案例真跑 + `undefined` 假失败 → [BUG-195](../_archived/fixed_bugs/BUG-195-gates-e2e-adhoc-jobs-value-fake-failures.md) |
+| pack 构建 / 注入面 | 未跑 | R9（需构建；未构建记未跑） |
+
 ## 已知与未决
 
-- **已知**：协议已毕业（guides/67 + 技能 + D54）；前五轮 081–159 全部归档；第 0–66 轮判定见
-  §覆盖地图与各轮收口；第六轮批 A（2026-11-14）新增 161–167 七张卡并全部修复归档（160–167，共 8 张）；第七轮批 B 9 张（168–176）已修归档；
-  `pnpm verify` 全绿、`pnpm test` spec 1342 / checks 108（2026-11-14 修复后复跑）；快照 5 角色 A/B 进 CI；
-  全量 `test:e2e` 6/0/0、`test:entry` 3/0/0（2026-11-13 实跑记录）。
-- **未决**：Y3（roleFace）/Y5（client-load 绑定）/Y9（worker 行为）未跑；Y2/Y4 只有观察；
-  安装域默认语言、hook/DOM、world-tree 仍空白；真实 GitHub CI / model-smoke 未跑；批 A 8 张已修归档；第七轮批 B 9 张（168–176）已修归档；Z2/Z3 已关闭（Y3/Y5 无新缺陷），Z4/Z5 未跑。
-- **不证**：单条 charter 的结论不外推；X6 单场不证稳定性；探索不证 L4 的语义质量。
+- **已知**：协议已毕业（guides/67 + 技能 + D54）；前九轮 160–190 全部归档；第 0–66 轮判定见
+  §覆盖地图与各轮收口；`pnpm verify` 全绿、`pnpm test` spec 1358 / checks 198（2026-11-16 复跑）；
+  快照 5 角色 A/B 进 CI。第十轮批 E（2026-11-15/16）开 **8 张卡**：2 张 `修复就绪`（192 P1、193）、
+  6 张 `等人拍板`（191、194、195、196、197、198）；侦察 R0a–R0g 与 charter R1–R8 的结论见上。
+- **未决**：六张 `等人拍板` 待用户放行；192（P1）/193 待落地；R6 / R9 / R7 完整反向图未跑；
+  `shared/` 兜底、`navigability-contract` 平铺扫描、`smoke-imports` 不递归 `.cjs`、`run-lane` 全 SKIP
+  exit 0 四条观察未开卡；Y9（worker 行为）真模型批未授权；安装域默认语言、hook/DOM、world-tree
+  仍空白；真实 GitHub CI / model-smoke 未跑。
+- **不证**：单条 charter 的结论不外推；X6 单场不证稳定性；探索不证 L4 的语义质量；
+  「搬完全绿」不证「没搬坏」（R0a 只证引用边，不证函数体）。
 
 ## 覆盖与收益（2026-11-11 收口评估）
 

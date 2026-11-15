@@ -75,8 +75,15 @@ const UNIQUE_TITLE = '快照回放冒烟·渲染面探针';
 const SENTINEL = '探针完成';
 const DSH_HOME = process.env.DSH_HOME ?? join(ROOT, 'runtime', 'harness-home');
 const SESSIONS = join(DSH_HOME, 'sessions');
-const OFFLINE_PRELOAD = join(ROOT, 'scripts', 'lib', 'replay-network-offline.cjs');
+const OFFLINE_PRELOAD = join(ROOT, 'scripts', 'lib', 'harness', 'replay-network-offline.cjs');
 const PROFILE = 'deep-research';
+// 传给子进程的 preload 是**分段字面量**，不在 import 图上：搬家未跟时 `--require` 会让 node 在
+// 加载任何用户代码前 MODULE_NOT_FOUND 退出 1，boot 只会以 banner 超时收场（BUG-192）。前置断言
+// 把「未跑」显式化（exit 2），并点名常量——不让未来同类以断言红/超时误诊。
+if (!existsSync(OFFLINE_PRELOAD)) {
+  console.error(`snapshot-replay.entry: 离线预载缺席（OFFLINE_PRELOAD=${OFFLINE_PRELOAD}）——路径搬家未跟；本次未跑（exit 2）`);
+  process.exit(2);
+}
 
 // manifest 是实际驱动的输入；完整角色集、全部判据与文件引用由 consumer 校验。
 // 场景角色集 = snapshot.json 的 roleFace（缺省 = 研究四角色；方法编辑按 W1-3 显式加入）——

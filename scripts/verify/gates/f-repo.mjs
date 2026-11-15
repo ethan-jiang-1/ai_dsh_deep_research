@@ -8,6 +8,7 @@ import { join, relative, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { backlogLivenessProblems } from '../../lib/repo/backlog-liveness.mjs';
 import { parseStagedChanges, stagedChangePairingProblems } from '../../lib/repo/staged-change-pairing.mjs';
+import { isTestFile, placementIssues } from '../../lib/repo/test-placement.mjs';
 import { missingProbeFields, renderProbeIndex, scanProbeEntries } from '../../lib/shared/probe-index.mjs';
 import { ROOT, gates, fail, note, walk, gitOnce, trackedFiles } from '../context.mjs';
 
@@ -210,6 +211,24 @@ export function runF() {
       });
       if (problems.length > 0) fail(gate, problems.join('；'));
     }
+  }
+}
+
+// ── test-placement（BUG-191）：tests/ 落点全集 − 已知子集 = 空 ──
+// 为什么：pack-mirror / test-owner-mirror / test-lanes 只枚举已知子树，未知落点 + 重生成资产账
+// = 全绿（M1/M4 合成）。本门禁把落点规则放进 L0：git ls-files tracked 面，任何测试文件不在
+// 已知 home（含未知深度/顶层平铺）= 红；账本重生成不能把它吸收成「当前状态」。规则正本 =
+// scripts/lib/repo/test-placement.mjs；负控 = tests/checks/test-placement.test.mjs +
+// gates.e2e `test-placement-unknown-subtree`（注入 tests/cockpit/misc/… → 点名红）。
+{
+  const gate = 'test-placement';
+  const r = gitOnce(['-c', 'core.quotepath=false', 'ls-files', 'tests']);
+  if (r.status !== 0) {
+    fail(gate, `git ls-files tests 不可用（${String(r.stderr).slice(0, 120)}）——本门禁依赖仓库态，fail-loud`);
+  } else {
+    const testPaths = r.stdout.split('\n').filter(Boolean).filter(isTestFile);
+    if (testPaths.length === 0) fail(gate, '防空语料：tests/ 扫到 0 个测试文件——扫描面失效');
+    else for (const issue of placementIssues(testPaths)) fail(gate, issue);
   }
 }
 

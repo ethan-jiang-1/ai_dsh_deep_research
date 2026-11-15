@@ -22,6 +22,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cpus } from 'node:os';
 import { CASES, CONTROLS } from '../lib/harness/gates-cases.mjs';
+import { boundedMap, parseJobsArg } from '../lib/harness/gates-cli.mjs';
 import { isMain } from '../lib/shared/cli-entry.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -33,6 +34,10 @@ const VERIFY_REL = join('scripts', 'verify', 'verify.mjs');
 const caseArgs = process.argv.filter((a) => a.startsWith('--case='));
 const caseNames = caseArgs.flatMap((a) => a.slice('--case='.length).split(',')).map((s) => s.trim()).filter(Boolean);
 const caseFilter = caseNames.length === 0 ? null : new Set(caseNames);
+// 数值输入在进入主流程前归一：非法 --jobs 是「未跑」（exit 2），不是 N 条 undefined 假失败。
+let JOBS;
+try { JOBS = parseJobsArg(process.argv, Math.max(1, Math.min(4, cpus().length))); }
+catch (error) { console.error(`gates.e2e: ${error.message}`); process.exit(2); }
 
 // ── fixture：tracked 文件副本 + git init/add（git ls-files 驱动的门禁在副本内可用）──
 
@@ -79,21 +84,6 @@ function runVerify(dir) {
     child.stderr.on('data', (chunk) => { out += String(chunk); });
     child.on('close', (status) => resolve({ status, out }));
   });
-}
-
-/** 有界并发 map：保持结果顺序；一个案例失败不取消其它案例（要一次看全）。 */
-async function mapLimit(items, limit, fn) {
-  const results = new Array(items.length);
-  let next = 0;
-  const workers = Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, async () => {
-    while (true) {
-      const index = next++;
-      if (index >= items.length) return;
-      results[index] = await fn(items[index], index);
-    }
-  });
-  await Promise.all(workers);
-  return results;
 }
 
 /** 判据行锚定：verify 每门禁恰打一行 `${verdict}  ${gate}`（scripts/verify/verify.mjs 末行循环）——
@@ -143,9 +133,7 @@ async function main() {
       }
     }
 
-    const jobsArg = process.argv.find((a) => a.startsWith('--jobs='));
-    const jobs = Math.max(1, Number(jobsArg?.slice('--jobs='.length) ?? Math.min(4, cpus().length)));
-    const controlResults = await mapLimit(controls, jobs, async ({ id, gate, mutate }) => {
+    const controlResults = await boundedMap(controls, JOBS, async ({ id, gate, mutate }) => {
       const dir = cloneFixture(base, `control-${id}`);
       mutate(dir);
       git(dir, ['add', '-A']); // tracked-only 门禁要看见注入的新文件（gitignored 探针天然不入）
@@ -155,10 +143,10 @@ async function main() {
       rmSync(dir, { recursive: true, force: true });
       return null;
     });
-    for (const failure of controlResults) if (failure !== null) failures.push(failure);
+    for (const failure of controlResults) if (typeof failure === 'string') failures.push(failure);
 
     // 案例组：注入 → 目标门禁点名红（带 expect 时须命中该报因）
-    const caseResults = await mapLimit(cases, jobs, async ({ id, gate, mutate, expect }) => {
+    const caseResults = await boundedMap(cases, JOBS, async ({ id, gate, mutate, expect }) => {
       const dir = cloneFixture(base, `case-${id}`);
       mutate(dir);
       git(dir, ['add', '-A']); // 同上：mutate 的新文件统一入 tracked 集（案例 mutate 本身是纯 fs）
@@ -171,7 +159,7 @@ async function main() {
       rmSync(dir, { recursive: true, force: true });
       return null;
     });
-    for (const failure of caseResults) if (failure !== null) failures.push(failure);
+    for (const failure of caseResults) if (typeof failure === 'string') failures.push(failure);
 
     // 真进程外部 oracle 对账：全量跑时同步核验 CI 执行面与真 bash -eo pipefail 录制件一致（D55 AC2）
     if (caseFilter === null) {

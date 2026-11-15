@@ -36,8 +36,8 @@ function importersUnder(root, baseDir) {
       const target = localImportPath(file, specifier)
       if (target === undefined) continue
       const rel = relative(baseDir, target).split('\\').join('/')
-      if (rel.startsWith('..') || !/\.(mjs|cjs|ts)$/.test(rel)) continue
-      const key = rel.replace(/\.(mjs|cjs|ts)$/, '')
+      if (rel.startsWith('..') || !/\.(mjs|cjs|ts|tsx)$/.test(rel)) continue
+      const key = rel.replace(/\.(mjs|cjs|ts|tsx)$/, '')
       if (!out.has(key)) out.set(key, new Set())
       out.get(key).add(relative(root, file).split('\\').join('/'))
     }

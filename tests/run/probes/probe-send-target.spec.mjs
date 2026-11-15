@@ -1,4 +1,4 @@
-// tests/probe-send-target.spec.mjs —— cdp-probe 提交按钮判定的 keyless 契约（BUG-021 正修）。
+// tests/run/probes/probe-send-target.spec.mjs —— cdp-probe 提交按钮判定的 keyless 契约（BUG-021 正修）。
 //
 // 为什么存在：这条规则原先只活在页面 `evaluate()` 字符串里，唯一证据是一次性真模型 harness。
 // 生产现场两次坏在这一层——①提交按钮 aria-label 是状态机（空闲 Send／在飞 Queue／插话 Steer ×

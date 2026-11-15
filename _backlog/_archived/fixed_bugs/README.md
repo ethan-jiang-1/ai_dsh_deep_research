@@ -6,6 +6,14 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [BUG-191](BUG-191-placement-gates-unknown-subtree-unruled.md) | 位置门禁只枚举已知子树：未知落点 + 重生成资产账 = 全绿 | （`test-placement` L0 门禁 + `pack-mirror` 全集−已知子集/`shared` 正规则；账本重生成不再吸收） | 2026-11-16 |
+| [BUG-192](BUG-192-snapshot-replay-offline-preload-stale-path.md) | snapshot-replay 的离线预载仍指搬家前路径 | （改 `scripts/lib/harness/` + boot 前缺席 exit 2；`smoke-child-paths` 静态守卫） | 2026-11-16 |
+| [BUG-193](BUG-193-cdp-ask-spawns-moved-probe-path.md) | cdp-ask.entry 启动搬家前的探针路径 | （改 `probes/browser/cdp-probe.mjs` + spawn 前缺席 exit 2；同静态守卫） | 2026-11-16 |
+| [BUG-194](BUG-194-test-index-drops-tsx-importers.md) | test-index 的 importer 抓取漏掉 `.tsx` | （扩展名闭集加 `.tsx` + 独立非空抽查；索引重生成） | 2026-11-16 |
+| [BUG-195](BUG-195-gates-e2e-adhoc-jobs-value-fake-failures.md) | gates.e2e 的 `--jobs` 不校验 | （`parseJobsArg` 正整数/exit 2 + `boundedMap` fail-loud + 只收字符串失败） | 2026-11-16 |
+| [BUG-196](BUG-196-test-surface-cjs-coverage-blind.md) | test-surface 覆盖合同不含 `.cjs` | （复用 `libModulesOf` 全集 + preload 登记 SMOKE_ONLY） | 2026-11-16 |
+| [BUG-197](BUG-197-repo-conventions-hooks-surface-no-gate-case.md) | repo-conventions 扩到 dev/hooks 但无对应案例 | （`repo-conventions-dev-hook-path` 注入案例 + `verify-gates` 静态钉） | 2026-11-16 |
+| [BUG-198](BUG-198-spec-header-stale-path-frozen-into-ledger-claim.md) | 7 个 spec 头注仍是旧路径并被账本固化 | （7 处头注改现路径 + claim 路径存在性判据） | 2026-11-16 |
 | [BUG-001](BUG-001-new-session-stale-run-face.md) | 新会话立项窗口期，「研究状态」页签错呈上一次 run 的渐进面 | （kickoffSeen 立项轨道信号 + 抑制条件扩展 + 🌱 状态行） | 2026-09-30 |
 | [BUG-002](BUG-002-pending-ask-anchor-misattribution.md) | 立项后未答的 ask 被锚点折算误标为「交付审阅 ⏳」 | （deriveAnchors 按 ask 内容判型：HITL1/HITL2 签名 + 契约外第三锚扩窗） | 2026-09-30 |
 | [BUG-003](BUG-003-client-load-smoke-loop-edge-mismatch.md) | 盘侧 tailAskPending=true 的绑定会话，观察面不渲染 ↻ rerun 回边 | （smoke 删手抄镜像直调 deriveAnchors + 绑定富度修正——近窗取事件最多会话） | 2026-10-04 |

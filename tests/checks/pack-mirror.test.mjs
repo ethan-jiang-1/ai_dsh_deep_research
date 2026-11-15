@@ -3,7 +3,10 @@
 //  ② spec 的 pack src/lib 依赖 domain ∈ {spec 目录, shared}；无依赖或只依赖 shared 的跨切 spec 只许住 shared；
 //  ③ pack src/lib 根零平铺 .ts，faces.json 留根；domain 闭集 = 7；
 //  ④ 六个 domain 有直接 spec（review/ 例外：subject 由 tests/run 覆盖，登记理由）。
-// 反证：把 spec 移到错误 domain → ②红；放回根 → ①红；在 src/lib 根放 .ts → ③红；清空一个 domain → ④红。
+//  ⑤ tests/cockpit/shared 只收跨 sub 的 client spec（≥2 个 client 子目录）；落点全集 − 已知
+//     子集 = 空（BUG-191，与 verify 门禁 test-placement 共用规则）。
+// 反证：把 spec 移到错误 domain → ②红；放回根 → ①红；在 src/lib 根放 .ts → ③红；清空一个 domain → ④红；
+// 未知子树/单 sub 藏进 shared → ⑤红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readdirSync, readFileSync, existsSync } from 'node:fs'
@@ -11,6 +14,7 @@ import { join, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { localImportPath, parseKeylessImports } from '../../scripts/lib/tools/keyless-imports.mjs'
 import { DOMAINS } from '../../scripts/lib/tools/test-index.mjs'
+import { placementIssues } from '../../scripts/lib/repo/test-placement.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const LIB = join(ROOT, 'packages', 'deep-research-pack', 'src', 'lib')
@@ -27,6 +31,37 @@ function walk(dir, filter, out = []) {
 }
 
 const specs = walk(TESTS, (n) => n.endsWith('.spec.mjs'))
+
+// 负例留证 2026-11-16：BUG-191——在 tests/cockpit/misc/ 或 tests/pack/misc/ 放一个 spec →
+// 下方「落点全集 − 已知子集」测试点名「未知落点」；把单 sub 的 spec 放进 tests/cockpit/shared/
+// → 「shared 只收跨 sub」测试红；删除探针 → 绿。账本重生成不解除（落点规则不读账）。
+test('tests 落点全集 − 已知子集 = 空（BUG-191；账本重生成不能吸收）', () => {
+  const all = walk(join(ROOT, 'tests'), (n) => n.endsWith('.spec.mjs') || n.endsWith('.test.mjs'))
+  const paths = all.map((p) => relative(ROOT, p).split('\\').join('/'))
+  assert.ok(paths.length >= 100, `防空语料：tests 测试文件过少（${paths.length}）——落点扫描面失效`)
+  assert.deepEqual(placementIssues(paths), [], '存在未被位置规则命名的落点——按 tests/AGENTS 归位（账本重生成不是修法）')
+})
+
+test('tests/cockpit/shared：只收跨 sub 的 client spec（≥2 个 client 子目录；BUG-191）', () => {
+  const SHARED = join(ROOT, 'tests', 'cockpit', 'shared')
+  const CLIENT = join(ROOT, 'packages', 'deep-research-pack', 'src', 'client')
+  const sharedSpecs = walk(SHARED, (n) => n.endsWith('.spec.mjs'))
+  assert.ok(sharedSpecs.length >= 2, `防空语料：tests/cockpit/shared spec 过少（${sharedSpecs.length}）`)
+  for (const p of sharedSpecs) {
+    const { imports } = parseKeylessImports(readFileSync(p, 'utf8'), p)
+    const subs = new Set()
+    for (const { specifier } of imports) {
+      const target = localImportPath(p, specifier)
+      if (target === undefined) continue
+      const lr = relative(CLIENT, target).split('\\').join('/')
+      if (lr.startsWith('..') || !/\.(ts|tsx)$/.test(lr)) continue
+      const seg = lr.split('/')
+      if (seg.length > 1) subs.add(seg[0])
+    }
+    assert.ok(subs.size >= 2,
+      `${relative(ROOT, p)} 住 client/shared/，但只依赖 ${[...subs].join('/') || '（无子目录）'}——shared 只收跨 sub 的 client spec；单 sub 归 client/<sub>/，无客户端依赖归 lib/ 或 checks/`)
+  }
+})
 
 test('tests/cockpit/lib 根零平铺 spec，且每个 spec 住已知 domain', () => {
   assert.ok(specs.length >= 18, `防空语料：cockpit lib spec 过少（${specs.length}）`)

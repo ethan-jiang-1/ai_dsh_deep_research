@@ -1,4 +1,4 @@
-// tests/member-activity-fold.spec.mjs — 队员动作折算的注入式契约测试（member-activity-stream 卡验收 #1）。
+// tests/run/ops/member-activity-fold.spec.mjs — 队员动作折算的注入式契约测试（member-activity-stream 卡验收 #1）。
 // 家 = packages/deep-research-pack/src/lib/events/member-activity.ts；卡 = _backlog/issues/2026-10-09-member-activity-stream.md。
 // 事件形状取自真实归档 journal（2026-10-10 挖掘：web_search 参数 = queries 数组〔activity-fold 快照
 // lane 实证〕；web_fetch 参数 = url；失败 result = data.message.isError + "Error: " 文本前缀）。

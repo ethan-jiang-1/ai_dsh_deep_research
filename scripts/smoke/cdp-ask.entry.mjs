@@ -63,6 +63,11 @@ if (!existsSync(BIN)) {
 }
 
 const TITLE = 'cdp-ask.entry 临时会话';
+const PROBE = join(ROOT, 'probes', 'browser', 'cdp-probe.mjs');
+if (!existsSync(PROBE)) {
+  console.error(`cdp-ask.entry: cdp-probe 探针缺席（PROBE=${PROBE}）——路径搬家未跟；本次未跑（exit 2）`);
+  process.exit(2);
+}
 // 每次跑用全新 workspace：侧栏里只有这一个会话，按标题点开不可能落到别的会话上
 // （2026-10-11 实测教训：同名会话撞车会让消息进旧会话而对账盯新会话 → 假红）。
 const WORKSPACE = join(ROOT, 'runtime', 'smoke-workspace', `cdp-ask-${Date.now()}`);
@@ -128,7 +133,7 @@ try {
 
   const sessionsRoot = join(HOME, 'sessions');
   const runProbe = async (ask) => {
-    const probe = spawn(process.execPath, [join(ROOT, 'scripts', 'probe', 'cdp-probe.mjs'), `${BASE}/?token=${token}`, '--open-session', TITLE, '--ask', ask, '--sessions', sessionsRoot], { cwd: ROOT, env: scrubbedEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
+    const probe = spawn(process.execPath, [PROBE, `${BASE}/?token=${token}`, '--open-session', TITLE, '--ask', ask, '--sessions', sessionsRoot], { cwd: ROOT, env: scrubbedEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
     let pout = '';
     let perr = '';
     probe.stdout.on('data', (c) => { pout += String(c); });

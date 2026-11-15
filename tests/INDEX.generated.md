@@ -27,6 +27,7 @@
 | harness | `harness/browser-cache` | `tests/run/harness/browser-cache.spec.mjs` |
 | harness | `harness/client-load-select` | `tests/run/harness/client-load-select.spec.mjs` |
 | harness | `harness/gates-cases` | `tests/checks/verify-gates.test.mjs` |
+| harness | `harness/gates-cli` | `tests/run/harness/gates-cli.spec.mjs` |
 | harness | `harness/host-health` | `tests/run/harness/host-health.spec.mjs` |
 | harness | `harness/playwright` | — |
 | harness | `harness/port-reclaim` | — |
@@ -61,6 +62,7 @@
 | repo | `repo/release-anchor` | `tests/checks/release-anchor.test.mjs` |
 | repo | `repo/smoke-lane` | `tests/checks/smoke-lane.test.mjs` |
 | repo | `repo/staged-change-pairing` | `tests/checks/staged-change-pairing.test.mjs` |
+| repo | `repo/test-placement` | `tests/checks/pack-mirror.test.mjs`<br>`tests/checks/test-placement.test.mjs` |
 | shared | `shared/artifact-freshness` | `tests/checks/artifact-freshness.test.mjs` |
 | shared | `shared/cdp-driver` | — |
 | shared | `shared/cli-entry` | `tests/checks/cli-entry.test.mjs` |
@@ -93,8 +95,8 @@
 | test-infra | `test-infra/smoke-assets` | `tests/checks/smoke-assets.test.mjs`<br>`tests/checks/smoke-cost-budget.test.mjs`<br>`tests/checks/smoke-oracle-surface.test.mjs`<br>`tests/checks/smoke-registry.test.mjs` |
 | tools | `tools/asset-ledger` | `tests/checks/asset-ledger.test.mjs`<br>`tests/checks/guard-ledger.test.mjs` |
 | tools | `tools/ci-workflow` | `tests/checks/ci-jobs.test.mjs`<br>`tests/checks/ci-workflow-oracle.test.mjs`<br>`tests/checks/ci-workflow.test.mjs`<br>`tests/checks/model-workflow.test.mjs`<br>`tests/checks/smoke-registry.test.mjs` |
-| tools | `tools/keyless-imports` | `tests/checks/boot-timer.test.mjs`<br>`tests/checks/client-surface.test.mjs`<br>`tests/checks/layering.test.mjs`<br>`tests/checks/pack-mirror.test.mjs`<br>`tests/checks/smoke-imports.test.mjs`<br>`tests/checks/test-lanes.test.mjs`<br>`tests/checks/test-owner-mirror.test.mjs`<br>`tests/checks/test-surface.test.mjs` |
-| tools | `tools/test-index` | `tests/checks/pack-mirror.test.mjs`<br>`tests/checks/test-index.test.mjs`<br>`tests/checks/test-owner-mirror.test.mjs` |
+| tools | `tools/keyless-imports` | `tests/checks/boot-timer.test.mjs`<br>`tests/checks/client-surface.test.mjs`<br>`tests/checks/layering.test.mjs`<br>`tests/checks/pack-mirror.test.mjs`<br>`tests/checks/smoke-imports.test.mjs`<br>`tests/checks/test-index.test.mjs`<br>`tests/checks/test-lanes.test.mjs`<br>`tests/checks/test-owner-mirror.test.mjs`<br>`tests/checks/test-surface.test.mjs` |
+| tools | `tools/test-index` | `tests/checks/pack-mirror.test.mjs`<br>`tests/checks/test-index.test.mjs`<br>`tests/checks/test-owner-mirror.test.mjs`<br>`tests/checks/test-surface.test.mjs` |
 | tools | `tools/workspace-parsers` | `tests/checks/note-scan.test.mjs`<br>`tests/checks/workspace-parsers.test.mjs`<br>`tests/contracts/markdown-mask-conformance.spec.mjs`<br>`tests/contracts/verdict-conformance.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs` |
 
 ## pack src/lib（产品面）
@@ -144,11 +146,11 @@
 
 | 区 | 文件 | 测试 |
 |---|---|---|
-| (root) | `BrandMark` | — |
+| (root) | `BrandMark` | `tests/cockpit/client/method-library/locales.spec.mjs` |
 | (root) | `builtin-display` | `tests/cockpit/client/builtin-display.spec.mjs` |
 | (root) | `coach-sessions` | `tests/cockpit/client/coach-sessions.spec.mjs` |
-| defaults | `defaults/DefaultsButton` | — |
-| defaults | `defaults/DefaultsPanel` | — |
+| defaults | `defaults/DefaultsButton` | `tests/cockpit/shared/defaults-ui.spec.mjs` |
+| defaults | `defaults/DefaultsPanel` | `tests/cockpit/shared/defaults-ui.spec.mjs` |
 | defaults | `defaults/labels` | `tests/cockpit/shared/client-pure-logic.spec.mjs` |
 | defaults | `defaults/store` | `tests/cockpit/client/defaults/defaults-store.spec.mjs` |
 | (root) | `delivery-watch` | `tests/cockpit/client/delivery-watch.spec.mjs` |
@@ -170,7 +172,7 @@
 | method-library | `method-library/useLibraryData` | — |
 | method-library | `method-library/useOperationQueue` | — |
 | method-library | `method-library/useRunSourcePicker` | — |
-| method-library | `method-library/views` | — |
+| method-library | `method-library/views` | `tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-selection.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs` |
 | (root) | `MethodLibraryToolCard` | — |
 | (root) | `MethodLibraryView` | — |
 | research-config | `research-config/config-model` | `tests/cockpit/shared/i18n.spec.mjs` |
@@ -193,8 +195,8 @@
 | research-status | `research-status/useStatusFeed` | — |
 | (root) | `ResearchConfigTab` | — |
 | (root) | `ResearchFinalTab` | — |
-| (root) | `ResearchGraphTab` | — |
-| (root) | `ResearchStatusTab` | — |
+| (root) | `ResearchGraphTab` | `tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/research-tabs.spec.mjs` |
+| (root) | `ResearchStatusTab` | `tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/research-tabs.spec.mjs` |
 | (root) | `ResearchToolCard` | — |
 | (root) | `run-source-browser` | `tests/cockpit/client/run-source-browser.spec.mjs` |
 | (root) | `session-follow` | `tests/cockpit/client/session-follow.spec.mjs` |

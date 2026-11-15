@@ -323,6 +323,16 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
+      "path": "tests/checks/smoke-child-paths.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "子进程/前置路径的分段字面量守卫（BUG-192 / BUG-193 类级，M3 非 JS 字面量）。",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
       "path": "tests/checks/smoke-contract.test.mjs",
       "domain": "checks",
       "lane": "checks",
@@ -419,7 +429,7 @@
       "class": "check-gate",
       "cost": "fast-inproc",
       "uniqueClaim": "测试索引对账（2026-11-15 test-source-mirror Step 0b）：tests/INDEX.generated.md 是生成物，",
-      "oracleType": "canonical",
+      "oracleType": "external",
       "sunset": "随门禁/台账合同退役"
     },
     {
@@ -440,6 +450,16 @@
       "cost": "fast-inproc",
       "uniqueClaim": "owner 镜像契约（2026-11-15 test-source-mirror Step 0b）：",
       "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-placement.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/ 落点闭集的纯函数负控（BUG-191：全集 − 已知子集 = 空）。",
+      "oracleType": "self-referential",
       "sunset": "随门禁/台账合同退役"
     },
     {
@@ -1398,7 +1418,7 @@
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "tests/hitl1-intake-samples.spec.mjs —— HITL1 四类输入样例集的**形状契约**（keyless）。",
+      "uniqueClaim": "tests/run/channel/hitl1-intake-samples.spec.mjs —— HITL1 四类输入样例集的**形状契约**（keyless）。",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
@@ -1408,7 +1428,7 @@
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "tests/inject-reconcile.spec.mjs —— 注入消息「落盘对账」判据的 keyless 契约测试。",
+      "uniqueClaim": "tests/run/channel/inject-reconcile.spec.mjs —— 注入消息「落盘对账」判据的 keyless 契约测试。",
       "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
@@ -1568,7 +1588,7 @@
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "tests/plan-card.spec.mjs —— HITL1 计划确认卡识别与字数口径的 keyless 契约（唯一语义源）。",
+      "uniqueClaim": "tests/run/gates/plan-card.spec.mjs —— HITL1 计划确认卡识别与字数口径的 keyless 契约（唯一语义源）。",
       "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
@@ -1680,6 +1700,16 @@
       "cost": "fast-inproc",
       "uniqueClaim": "client-load 绑定会话选择：只选 lead 根（BUG-142）。",
       "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/harness/gates-cli.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "gates.e2e 的数值输入与有界并发判据（BUG-195 类级：非法数值不得制造假失败/无界并发）。",
+      "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
     {
@@ -1828,7 +1858,7 @@
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "tests/member-activity-fold.spec.mjs — 队员动作折算的注入式契约测试（member-activity-stream 卡验收 #1）。",
+      "uniqueClaim": "tests/run/ops/member-activity-fold.spec.mjs — 队员动作折算的注入式契约测试（member-activity-stream 卡验收 #1）。",
       "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
@@ -1838,7 +1868,7 @@
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "tests/provider-errors.spec.mjs —— 上游流错误抽取的 keyless 契约（唯一语义源）。",
+      "uniqueClaim": "tests/run/ops/provider-errors.spec.mjs —— 上游流错误抽取的 keyless 契约（唯一语义源）。",
       "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
@@ -2018,7 +2048,7 @@
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "tests/probe-send-target.spec.mjs —— cdp-probe 提交按钮判定的 keyless 契约（BUG-021 正修）。",
+      "uniqueClaim": "tests/run/probes/probe-send-target.spec.mjs —— cdp-probe 提交按钮判定的 keyless 契约（BUG-021 正修）。",
       "oracleType": "self-referential",
       "sunset": "随被测模块删除"
     },
@@ -2028,7 +2058,7 @@
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "tests/probe-status-tab.spec.mjs —— cdp-probe 页签选择/打开判据的 keyless 契约",
+      "uniqueClaim": "tests/run/probes/probe-status-tab.spec.mjs —— cdp-probe 页签选择/打开判据的 keyless 契约",
       "oracleType": "self-referential",
       "sunset": "随被测模块删除"
     },

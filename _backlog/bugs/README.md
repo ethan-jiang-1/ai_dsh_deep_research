@@ -13,8 +13,21 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
+| （无） | — | — | 批 E（191–198）于 2026-11-16 修复归档，见下方「最近归档」 |
 
 ## 最近归档
+
+（2026-11-16 批 E 搬家副作用修复闭环（8 张，191–198），批 Note =
+[2026-11-15-move-side-effect-guards](../../notes/implemented/2026-11-15-move-side-effect-guards.md)：
+[191](../_archived/fixed_bugs/BUG-191-placement-gates-unknown-subtree-unruled.md) 位置门禁补集；
+[192](../_archived/fixed_bugs/BUG-192-snapshot-replay-offline-preload-stale-path.md) 离线预载路径；
+[193](../_archived/fixed_bugs/BUG-193-cdp-ask-spawns-moved-probe-path.md) 探针路径；
+[194](../_archived/fixed_bugs/BUG-194-test-index-drops-tsx-importers.md) 索引 `.tsx`；
+[195](../_archived/fixed_bugs/BUG-195-gates-e2e-adhoc-jobs-value-fake-failures.md) `--jobs`；
+[196](../_archived/fixed_bugs/BUG-196-test-surface-cjs-coverage-blind.md) `.cjs` 覆盖；
+[197](../_archived/fixed_bugs/BUG-197-repo-conventions-hooks-surface-no-gate-case.md) `dev/hooks` 案例；
+[198](../_archived/fixed_bugs/BUG-198-spec-header-stale-path-frozen-into-ledger-claim.md) claim 路径。
+）
 
 （2026-11-14 第七轮/类级残差修复闭环（9 张，168–176）：
 [168](../_archived/fixed_bugs/BUG-168-legacy-present-payload-substring-false-positive.md) 旧场 present 路径；

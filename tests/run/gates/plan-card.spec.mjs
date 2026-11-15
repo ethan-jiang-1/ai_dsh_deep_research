@@ -1,4 +1,4 @@
-// tests/plan-card.spec.mjs —— HITL1 计划确认卡识别与字数口径的 keyless 契约（唯一语义源）。
+// tests/run/gates/plan-card.spec.mjs —— HITL1 计划确认卡识别与字数口径的 keyless 契约（唯一语义源）。
 //
 // 为什么存在：同一判据曾有**两版实现**（node-gate 门① 的 WARN 记账与运行态标定扫描器）——各写
 // 一份"哪张 ask 是计划卡、正文多长"。收成 `scripts/lib/shared/plan-card.mjs` 后由本测试钉住口径与边界，

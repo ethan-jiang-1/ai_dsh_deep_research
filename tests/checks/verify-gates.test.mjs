@@ -85,3 +85,19 @@ test('事故回归注入与正向控制常驻在场：未跟踪链接 / 产品�
   const bPackSrc = readFileSync(here('../../scripts/verify/gates/b-pack.mjs'), 'utf8');
   assert.ok(bPackSrc.includes('产品内(?!容)'), 'BUG-072：b-pack.mjs 必须保留 产品内(?!容) 负向先行断言');
 });
+
+// 负例留证 2026-11-16：BUG-197——删掉 repo-conventions-dev-hook-path 案例 → 本测试红；
+// 还原 → 绿。案例自身由 gates.e2e 的真注入（pre-commit 追加坏路径）证明。
+test('dev/hooks 扫描面有常驻注入案例（BUG-197）', () => {
+  const caseIds = new Set(CASES.map((c) => c.id));
+  assert.ok(caseIds.has('repo-conventions-dev-hook-path'),
+    'BUG-197：缺 dev/hooks 注入案例——扫描面扩到 dev/hooks 后没有反证，改窄不会被自测台咬住');
+});
+
+// 负例留证 2026-11-16：BUG-191——删掉 test-placement-unknown-subtree 案例 → 本测试红；
+// 还原 → 绿。案例自身由 gates.e2e 的真注入（tests/cockpit/misc/ 落 spec）证明。
+test('位置门禁的未知落点有常驻注入案例（BUG-191）', () => {
+  const caseIds = new Set(CASES.map((c) => c.id));
+  assert.ok(caseIds.has('test-placement-unknown-subtree'),
+    'BUG-191：缺未知落点注入案例——落点补集规则没有反证，账本重生成会把它吸收成绿');
+});

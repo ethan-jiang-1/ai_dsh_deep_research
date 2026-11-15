@@ -1,4 +1,4 @@
-// tests/inject-reconcile.spec.mjs —— 注入消息「落盘对账」判据的 keyless 契约测试。
+// tests/run/channel/inject-reconcile.spec.mjs —— 注入消息「落盘对账」判据的 keyless 契约测试。
 //
 // 为什么存在：BUG-021 的根因之一是**判据本身弱**——`cdp-probe --ask` 旧版只看 UI 文本增长与
 // 固定串，发送是否真落进会话日志无人对账；于是"没发出去"与"发出去了没等到回复"共用同一句

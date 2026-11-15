@@ -1,4 +1,4 @@
-// tests/probe-status-tab.spec.mjs —— cdp-probe 页签选择/打开判据的 keyless 契约
+// tests/run/probes/probe-status-tab.spec.mjs —— cdp-probe 页签选择/打开判据的 keyless 契约
 // （scripts/lib/shared/probe-status-tab.mjs；2026-10-19 run-driver 落地时实测的假阳/假红正修）。
 //
 // 立红记录（反证）：①旧实现用 `textContent.includes('研究状态')` 选按钮——本测试的

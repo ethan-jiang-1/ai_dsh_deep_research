@@ -798,6 +798,22 @@ export const CASES = [
     mutate: appendTo(join('dev', 'bootstrap.sh'), '\nnode "$ROOT/scripts/lib/__moved-probe__.mjs"\n'),
     expect: '引用不存在的 scripts/lib/__moved-probe__.mjs' },
 
+  // 2026-11-15 `482abf14` 把同一个扫描面从 dev/*.sh 扩到 dev/hooks/*，但同 diff 没有注入案例
+  // （BUG-197）：扩面只有人手红证，未来把 hooks 从扫描面删掉不会被自测台咬住。注入 =
+  // pre-commit 末尾加一条指向不存在模块的 node 调用（门禁按字面量扫描，不必真执行钩子）。
+  { id: 'repo-conventions-dev-hook-path', gate: 'repo-conventions',
+    mutate: appendTo(join('dev', 'hooks', 'pre-commit'), '\nnode "$ROOT/scripts/lib/__moved-probe__.mjs"\n'),
+    expect: '引用不存在的 scripts/lib/__moved-probe__.mjs' },
+
+  // test-placement（BUG-191）：未知落点曾 + 重生成资产账 = 全绿（生成器把错落点吸收成
+  // 「当前状态」）。注入 = 在没有位置规则命名过的 tests/cockpit/misc/ 放一个 spec；
+  // 门禁必须点名「未知落点」，而不是靠 asset-ledger 的账盘漂移。
+  { id: 'test-placement-unknown-subtree', gate: 'test-placement', mutate: (dir) => {
+      mkdirSync(join(dir, 'tests', 'cockpit', 'misc'), { recursive: true });
+      writeFileSync(join(dir, 'tests', 'cockpit', 'misc', 'zz-place-probe.spec.mjs'),
+        "import { test } from 'node:test'\nimport assert from 'node:assert/strict'\ntest('p', () => { assert.equal(1, 1) })\n");
+    } },
+
   // dev/ 运行态回流（dev-runtime-clean）：在源码驱动目录造一个误落位 run bundle——
   // .gitignore 能挡 git，挡不住 cp -r/打包；门禁直接看盘。
   { id: 'dev-runtime-clean-stray', gate: 'dev-runtime-clean', mutate: (dir) => {

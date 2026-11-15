@@ -1,4 +1,4 @@
-// tests/hitl1-intake-samples.spec.mjs —— HITL1 四类输入样例集的**形状契约**（keyless）。
+// tests/run/channel/hitl1-intake-samples.spec.mjs —— HITL1 四类输入样例集的**形状契约**（keyless）。
 //
 // 为什么存在：①-a 的判据是「四类齐 + 每类问/不问清单齐」，材料住
 // `tests/fixtures/hitl1-intake-samples.md`。人工走查（①-b）照单核对的

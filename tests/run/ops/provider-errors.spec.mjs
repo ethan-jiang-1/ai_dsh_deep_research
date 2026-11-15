@@ -1,4 +1,4 @@
-// tests/provider-errors.spec.mjs —— 上游流错误抽取的 keyless 契约（唯一语义源）。
+// tests/run/ops/provider-errors.spec.mjs —— 上游流错误抽取的 keyless 契约（唯一语义源）。
 //
 // 为什么存在：这类停摆的第一版判据用正则猜（把 JSON 键序写死 → 全库零命中，白查一轮）。改为**解析**
 // 之后，判据的边界（只认 turn/end、不双算 attempt、key 顺序无关、畸形行容忍）必须常驻钉住。
