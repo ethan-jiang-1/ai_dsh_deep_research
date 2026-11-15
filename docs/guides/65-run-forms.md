@@ -137,6 +137,7 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 - **移交锚**：移交方在源树跑 `node scripts/dist/release-check.mjs --handoff` 必须绿（annotated tag = HEAD、工作树干净、
   manual sha = tarball sha、tarball 由当前 pack 源生成）；接收方在 clean clone 上跑
   `node scripts/dist/release-check.mjs --receiver`（tag/manual/tarball/manifest 对齐，不重算源指纹）；
+  未构建的 clone 上 `dist-freshness` 只 note（源指纹由发送方负责），不误红；
   源码包、`_dist` 制品与手册必须来自同一个 commit。
 - **研究数据移交**：run bundle 单独拷贝/归档；移交前跑 `node scripts/run-gates/path-hygiene.mjs <bundle>`。
 - **不做**：`cp -r` 工作树、把 `runtime/` 或 `research-workspace/drt_*` 打进源码包、把凭据/会话随包发送；

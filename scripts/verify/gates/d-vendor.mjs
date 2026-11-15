@@ -386,17 +386,24 @@ export function runD() {
   const hook = read('dev/hooks/pre-commit');
   if (hook === null) fail(gate, 'dev/hooks/pre-commit 缺席');
   else if (!hook.includes('git diff --cached --check')) fail(gate, 'pre-commit 缺 git diff --cached --check（暂存面空白/冲突标记检查，vendor lefthook whitespace 作业）');
-  // dev shell 入口里的 `scripts/lib/*.mjs` 字面量必须可解析。2026-11-15 owner 镜像重构把
-  // vendor-artifacts / channel-cache 搬进 owner 子目录，bootstrap --check 与 boot-run 的 node
-  // 调用未跟：命令静默失败、bootstrap 永远误报“vendor 产物缺席”（真因 = MODULE_NOT_FOUND）。
-  // JS import 由测试车道咬；shell 字面量没有车道，故在仓规门禁里把守（防空：dev/ 无 .sh 即红）。
-  const devShells = readdirSync(join(ROOT, 'dev')).filter((name) => name.endsWith('.sh'));
-  if (devShells.length === 0) fail(gate, 'dev/ 无 .sh 入口——扫描退化为空集（防空语料）');
-  for (const name of devShells) {
-    const text = readFileSync(join(ROOT, 'dev', name), 'utf8');
-    for (const hit of text.matchAll(/scripts\/lib\/[A-Za-z0-9_./-]+\.mjs/g)) {
+  // dev shell 入口（*.sh + hooks 脚本）里的 `scripts/*.mjs` 字面量必须可解析。2026-11-15
+  // owner 镜像重构把 vendor-artifacts / channel-cache 搬进 owner 子目录，bootstrap --check 与
+  // boot-run 的 node 调用未跟：命令静默失败、bootstrap 永远误报“vendor 产物缺席”（真因 =
+  // MODULE_NOT_FOUND）。JS import 由测试车道咬；shell 字面量没有车道，故在仓规门禁里把守
+  // （防空：扫到 0 个入口即红）。
+  const devEntries = [
+    ...readdirSync(join(ROOT, 'dev')).filter((name) => name.endsWith('.sh')).map((name) => join('dev', name)),
+    ...(existsSync(join(ROOT, 'dev', 'hooks'))
+      ? readdirSync(join(ROOT, 'dev', 'hooks'), { withFileTypes: true })
+        .filter((ent) => ent.isFile()).map((ent) => join('dev', 'hooks', ent.name))
+      : []),
+  ];
+  if (devEntries.length === 0) fail(gate, 'dev/ 无 shell 入口——扫描退化为空集（防空语料）');
+  for (const rel of devEntries) {
+    const text = readFileSync(join(ROOT, rel), 'utf8');
+    for (const hit of text.matchAll(/scripts\/(?:[A-Za-z0-9_.-]+\/)*[A-Za-z0-9_.-]+\.mjs/g)) {
       if (!existsSync(join(ROOT, hit[0]))) {
-        fail(gate, `dev/${name}: 引用不存在的 ${hit[0]}——模块搬家后消费方未跟（node 调用失败/静默误报）`);
+        fail(gate, `${rel}: 引用不存在的 ${hit[0]}——模块搬家后消费方未跟（node 调用失败/静默误报）`);
       }
     }
   }

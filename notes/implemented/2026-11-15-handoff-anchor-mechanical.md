@@ -8,8 +8,9 @@
    +162/−162，本质是路径搬家），已发布的 `0.3.5` tag 不移动——移动会让同一版本号对应两套制品，
    正是 0.3.4 的旧病（[release-anchor 头注](../../scripts/lib/repo/release-anchor.mjs)）。
 2. 「制品由当前 pack 源生成」成为 L0 门禁 `dist-freshness`：读 `_dist/build-manifest.json` 的
-   源指纹，与 pack 输入根逐一比对；**制品缺席 = note**（clean clone/源码 handoff 合法），
-   在场而指纹不符 = 红并给出重建命令。
+   源指纹，与 pack 输入根逐一比对；**制品或 pack `lib/` 缺席 = note**（clean clone、源码
+   handoff、接收方把 sender 三件放进未构建 clone 都合法），两者都在场而指纹不符 = 红并给出
+   重建命令。
 3. tag=HEAD、annotated tag、manual sha=制品 sha 仍由 `release-check --handoff` 在发布/移交
    **时点**判；普通 commit 不假定 tag 在场，所以不进 L0。
 4. dev shell 里写死的 `scripts/lib/*.mjs` 字面量由 `repo-conventions` 把守（模块搬家后消费方
@@ -35,8 +36,11 @@
 - 权威输入 = `_dist/dsh-deep-research-pack-<pack version>.tgz` + 同目录 `build-manifest.json`
   的 `sourceFingerprint`；唯一写入者 = `scripts/dist/export-dist.mjs`；读取者 = 门禁与
   `release-check`。
-- 缺失（clean clone / 源码 handoff）→ note，不静默也不误红；在场且指纹不匹配 → 红，报
-  `mode: reason` 与重建命令。
+- 缺失（clean clone / 源码 handoff / 接收方未构建：tarball 与 manifest 在场但 pack `lib/`
+  缺席）→ note，不静默也不误红；tarball 与 `lib/` 都在场、指纹不匹配或缺 manifest → 红，
+  报 `mode: reason` 与重建命令。
+- 接收方同时持有 sender 制品与本地构建产物时仍红：同源只能由构建者证明；接收方的对账入口
+  是 `release-check --receiver`，不是重算指纹。
 - 互斥/非法：版本文件名与 pack version 不一致由 `dist-manual-version` 判；手册 sha 与制品
   sha 不一致由 `dist-tarball` 判；两处与本源指纹检查互不顶替。
 - 反证：2026-11-15 旧 0.3.5 制品在场 → `dist-freshness` 点名红；重导出后绿。
@@ -69,3 +73,6 @@
 - 发布锚：打 tag 前 `release-check --handoff` 仅 `handoff-tag-missing`（其余四项绿）；在版本
   提交上打 annotated `0.3.6` 后 `release-check --handoff` exit 0（OK version=0.3.6 tag=0.3.6）；
   clean clone 同 tag + sender 三件 → `release-check --receiver` exit 0。
+- review 复核（同轮）：接收方形态（sender tarball + manifest 在场、pack `lib/` 缺席）→
+  `dist-freshness` 只 note（PASS）；本仓（`lib/` + fresh manifest）→ PASS；`repo-conventions`
+  扩到 `dev/hooks/*` 后 PASS；`gates.e2e` 128 案例全中、`pnpm verify` / `pnpm test` 仍绿。

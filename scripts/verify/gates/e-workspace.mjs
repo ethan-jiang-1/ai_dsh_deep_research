@@ -183,19 +183,24 @@ export function runE() {
 // 而 dist-tarball / release-version 各自都绿：它们只证「手册↔制品」与「版本↔版本」自洽，
 // 不证「制品↔当前源」。本门禁把 release-check 的 artifactFresh 半边常驻化；tag=HEAD 仍归
 // release-check（发布/移交时点；CI 不假定 tag 在场）。
-// 缺席（clean clone / 源码 handoff）→ note；在场且旧 → 红。
+// 三态：tarball 缺席（clean clone/源码 handoff）→ note；tarball 在场但 pack lib/ 缺席
+// （接收方把 sender 三件放进未构建的 clone）→ note（源指纹不可重算，由 sender 的 --handoff
+// 负责）；两者都在场 → 严格对指纹，不符即红。lib 在场而 manifest 缺席 = 无法证明 → 红。
 {
   const gate = 'dist-freshness';
   const pack = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
   const tarball = join(ROOT, '_dist', `dsh-deep-research-pack-${pack.version}.tgz`);
+  const manifestPath = join(ROOT, '_dist', 'build-manifest.json');
   if (!existsSync(tarball)) {
     note(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 缺席（clean clone / 源码 handoff）——源指纹检查跳过；发布/移交前跑 node scripts/dist/export-dist.mjs`);
+  } else if (!existsSync(join(PACK, 'lib'))) {
+    note(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 在场但 pack lib/ 缺席（接收方/未构建形态）——源指纹不可重算；源指纹以发送方 release-check --handoff 为准，接收方用 --receiver 对账`);
+  } else if (!existsSync(manifestPath)) {
+    fail(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 与 pack lib/ 在场，但缺 _dist/build-manifest.json——无法证明制品↔源同源；跑 node scripts/dist/export-dist.mjs 重导出`);
   } else {
-    const freshness = artifactFreshness(tarball, packInputRoots(PACK), {
-      manifestPath: join(ROOT, '_dist', 'build-manifest.json'),
-    });
+    const freshness = artifactFreshness(tarball, packInputRoots(PACK), { manifestPath });
     if (!freshness.fresh) {
-      fail(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 不是由当前 pack 源生成（${freshness.mode}: ${freshness.reason}）——跑 node scripts/dist/export-dist.mjs 重建；旧制品不得随交接发出`);
+      fail(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 不是由当前 pack 源生成（${freshness.mode}: ${freshness.reason}）——发送方跑 node scripts/dist/export-dist.mjs 重建；接收方对账用 node scripts/dist/release-check.mjs --receiver`);
     }
   }
 }
