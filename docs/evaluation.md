@@ -31,7 +31,7 @@
 | 门禁 | 断言什么 | 反证指针 |
 |---|---|---|
 | `md-utf8-newline` | 所有 tracked .md 严格 UTF-8、恰一个结尾换行（git ls-files 驱动——运行区不扫） | [noise-sweep Note](../notes/archived/2026-09-24-noise-sweep.md) |
-| `md-links` | tracked .md 的相对 Markdown 链接可解析**且目标被 git 跟踪**（运行区/本机数据引用走反引号路径） | [基础整治 Note](../notes/archived/2026-09-24-foundation-remediation.md) + [BUG-016 卡](../_backlog/_archived/fixed_bugs/BUG-016-fresh-clone-mdlinks-runtime-links.md)；gates.e2e `md-links-untracked` 常驻案例 |
+| `md-links` | tracked .md 的相对 Markdown 链接可解析**且目标被 git 跟踪**（运行区/本机数据引用走反引号路径） | [基础整治 Note](../notes/archived/2026-09-24-foundation-remediation.md) + [BUG-016 卡](../_backlog/_archived/fixed_bugs/BUG-016-fresh-clone-mdlinks-runtime-links.md)；gates.e2e `md-links-untracked` 常驻案例；路径重定向登记簿（`scripts/test-path-redirects.json`）扩展 = `md-links-redirected` 正向对照 + `md-links-redirect-stale`/`-dangling` 注入（2026-11-15 test-source-mirror） |
 | `md-anchors` | 相对链接的 `#fragment` 在目标文件真实存在（GitHub slug 规则 + 手写 `<a id>`） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) |
 | `doc-paths` | live 文档反引号里的仓内路径必须可解析（仓根 / 文档所在目录 / `vendor/dsh/` 三处试；无扩展名再试 `.md/.mjs/.sh/.cjs/.ts`）；排除 notes/、_backlog/、tests/fixtures/ 与三条带理由的外链白名单 | gates.e2e `doc-paths-dangling` 常驻案例；来历 = [七维卫生轮 Note](../notes/archived/2026-11-03-seven-dimension-hygiene-round.md) |
 | `doc-drefs` | live 文档里的 `[D<n>]` Markdown 链接必须指向 `docs/decisions.md#d<n>`（该页有对应锚点）——D 号台账是按需跳的唯一落点 | gates.e2e `doc-drefs-misdirected` 常驻案例；来历 = 七维卫生轮（D23/D24 曾指向无锚点的 00-index） |

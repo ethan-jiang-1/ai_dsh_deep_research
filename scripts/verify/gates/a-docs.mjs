@@ -6,7 +6,7 @@
 import { readFileSync, existsSync, statSync } from 'node:fs';
 import { join, dirname, resolve, relative, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { ROOT, fail, gitOnce, trackedFiles } from '../context.mjs';
+import { ROOT, fail, gitOnce, note, trackedFiles } from '../context.mjs';
 
 export function runA() {
   // live 文档范围：notes/_backlog 是历史层、fixtures 是样本，均不追改；doc-paths/doc-drefs 共用。
@@ -61,6 +61,31 @@ export function runA() {
     const lsAll = gitOnce(['-c', 'core.quotepath=false', 'ls-files']);
     if (lsAll.status !== 0) fail(gate, 'git ls-files（全量）不可用——tracked 目标判定失效，fail-loud');
     const trackedAll = new Set(lsAll.stdout.split('\n').filter(Boolean));
+    // 路径重定向登记簿（2026-11-15 test-source-mirror）：搬家后旧路径在此登记，冻结层正文不改写。
+    // 条目失真（from 仍在盘上 / to 不在盘上 / to 未跟踪）一律红——登记簿不许腐烂。
+    const registryPath = join(ROOT, 'scripts', 'test-path-redirects.json');
+    const redirects = new Map();
+    let redirected = 0;
+    if (existsSync(registryPath)) {
+      let parsed;
+      try { parsed = JSON.parse(readFileSync(registryPath, 'utf8')); }
+      catch (e) { fail(gate, `test-path-redirects.json 非法 JSON：${e.message}`); }
+      for (const entry of parsed?.redirects ?? []) {
+        if (typeof entry?.from !== 'string' || typeof entry?.to !== 'string') {
+          fail(gate, '重定向登记簿条目缺 from/to 字符串'); continue;
+        }
+        if (existsSync(join(ROOT, entry.from))) {
+          fail(gate, `重定向登记簿条目失真：${entry.from} 仍在盘上——搬走时再登记，或删条目`); continue;
+        }
+        if (!existsSync(join(ROOT, entry.to))) {
+          fail(gate, `重定向登记簿目标不存在：${entry.from} → ${entry.to}`); continue;
+        }
+        if (!trackedAll.has(entry.to)) {
+          fail(gate, `重定向登记簿目标未被 git 跟踪：${entry.to}`); continue;
+        }
+        redirects.set(entry.from, entry.to);
+      }
+    }
     const isTrackedTarget = (abs) => {
       const rel = relative(ROOT, abs);
       if (rel.startsWith('..')) return true; // 仓外绝对路径目标（罕见）不在此门禁判
@@ -86,11 +111,15 @@ export function runA() {
           const target = m[1].split('#')[0];
           if (!target || /^[a-z]+:\/\//i.test(target) || target.startsWith('mailto:')) continue;
           const abs = resolve(dirname(f), target);
-          if (!existsSync(abs)) fail(gate, `${rel}: 链接不可解析 → ${target}`);
-          else if (!isTrackedTarget(abs)) fail(gate, `${rel}: 链接目标未被 git 跟踪 → ${target}（链接语法 = 仓内可解析承诺；运行区/本机数据引用请用反引号路径——BUG-016）`);
+          if (!existsSync(abs)) {
+            const relTarget = relative(ROOT, abs).split('\\').join('/');
+            if (redirects.has(relTarget)) { redirected++; continue; }
+            fail(gate, `${rel}: 链接不可解析 → ${target}（若为搬家：登记 scripts/test-path-redirects.json）`);
+          } else if (!isTrackedTarget(abs)) fail(gate, `${rel}: 链接目标未被 git 跟踪 → ${target}（链接语法 = 仓内可解析承诺；运行区/本机数据引用请用反引号路径——BUG-016）`);
         }
       }
     }
+    if (redirected > 0) note(gate, `${redirected} 条链接经 test-path-redirects.json 解析到新位置`)
   }
 }
 

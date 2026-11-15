@@ -6,7 +6,7 @@ opened: 2026-11-15
 # 推敲：测试子目录按「消费者接口」分层（测试 ↔ 源码对应）
 
 > 立卡：2026-11-15 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
-> 去向：proposed（先落 RFC；本卡交付后随 Note 关闭，D52）
+> 去向：proposed（RFC = `notes/proposed/2026-11-15-test-source-mirror.md`；本卡交付后随 Note 关闭，D52）
 >
 > **一句话**：把 `tests/` 内部的子目录从「平铺 + 文件名约定」改成「镜像消费者接口」——研发面镜像
 > 命令家族（`run-gates`/`run-ops`/`dev`/`smoke`/`verify`/`probes` + 显式 `shared`），产品面镜像 DSH

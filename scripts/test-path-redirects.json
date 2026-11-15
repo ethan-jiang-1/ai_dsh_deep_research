@@ -1,0 +1,4 @@
+{
+  "comment": "搬家路径重定向登记簿（2026-11-15 test-source-mirror）。md-links 对缺失目标先查本簿；条目必须 from 已不在盘上、to 在盘上且被 git 跟踪，否则门禁红。冻结层不改写：旧链接靠本簿解析。",
+  "redirects": []
+}

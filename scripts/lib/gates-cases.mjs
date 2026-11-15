@@ -395,9 +395,19 @@ const addIgnoredClientPaths = () => (dir) => {
   symlinkSync(relative(dirname(linkDir), targetDir), linkDir, 'dir');
 };
 
+const writeRedirectRegistry = (entries) => (dir) => {
+  writeFileSync(join(dir, 'scripts', 'test-path-redirects.json'),
+    `${JSON.stringify({ comment: 'gates.e2e 注入', redirects: entries }, null, 2)}\n`);
+};
+
 export const CASES = [
   { id: 'md-links-dead', gate: 'md-links', mutate: appendTo('README.md', '\n[死链探针](./definitely-missing-file.md)\n') },
   { id: 'md-links-untracked', gate: 'md-links', mutate: linkUntrackedTarget() },
+  // 路径重定向登记簿（2026-11-15 test-source-mirror）：from 仍在盘上 = 失真；to 不在盘上 = 悬空。
+  { id: 'md-links-redirect-stale', gate: 'md-links',
+    mutate: writeRedirectRegistry([{ from: 'README.md', to: 'AGENTS.md', reason: '注入：from 仍在盘上' }]) },
+  { id: 'md-links-redirect-dangling', gate: 'md-links',
+    mutate: writeRedirectRegistry([{ from: 'tests/run/__moved-probe.spec.mjs', to: 'tests/run/__nowhere.spec.mjs', reason: '注入：to 不存在' }]) },
   { id: 'md-anchors-missing', gate: 'md-anchors', mutate: appendTo('README.md', '\n[坏锚探针](AGENTS.md#这个锚点肯定不存在xyz)\n') },
   // doc-paths（2026-11-03 卫生审计 D1-2）：反引号散文件路径指向空处——md-links 看不见，
   // 但 agent 会照它去读。注入到 docs/ 的 live 文档（fixtures 与 notes 层不在扫描面）。
@@ -914,6 +924,15 @@ export const NO_CASE_GATES = [
 ];
 
 export const CONTROLS = [
+  // 搬家 + 登记 → 旧链接必须仍可解析（正向：缺登记仍红，登记后绿）。
+  { id: 'md-links-redirected', gate: 'md-links', mutate: (dir) => {
+    const from = 'tests/run/node-gate-delivery.spec.mjs';
+    const to = 'tests/run/gates/node-gate-delivery.spec.mjs';
+    mkdirSync(dirname(join(dir, to)), { recursive: true });
+    writeFileSync(join(dir, to), readFileSync(join(dir, from)));
+    rmSync(join(dir, from));
+    writeRedirectRegistry([{ from, to, reason: '注入：搬家 + 登记' }])(dir);
+  } },
   { id: 'backlog-active-issue', gate: 'backlog-liveness', mutate: backlogIssue() },
   { id: 'backlog-ready-issue', gate: 'backlog-liveness', mutate: backlogReadyIssue() },
   { id: 'backlog-ready-bug', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-995-ready.md', READY_BUG_TEXT) },
