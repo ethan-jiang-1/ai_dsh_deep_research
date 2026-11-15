@@ -36,6 +36,8 @@ opened: 2026-11-15
 4. `tests/cockpit` = 20 client + 20 pack-lib 混居；`tests/pack` 已按组合面组织（17 个不 import 源码）。
 5. 旧决定（[triggers.md](../triggers.md) tests/ 分域行，2026-10-28）的前提已变：当时 56 个文件、
    「118 处历史链接」；今天 77 个、链接 22 条、19% 名字不可达。
+6. 基线复核（2026-11-15 08:10，HEAD `7421dc17`）：其间只动 `_backlog`/`notes`/指针登记，源码、
+   测试、门禁零变化；盘上计数与上列一致，`pnpm verify` / `pnpm test` 全绿（checks 188/188）。
 
 **未决问题：**
 

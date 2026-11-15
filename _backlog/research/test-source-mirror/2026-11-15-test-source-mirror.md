@@ -5,8 +5,8 @@ intent: 实测命名可达性、消费者归属与搬家成本，判定测试子
 
 # 测试子目录 ↔ 源码位置：先定「谁在用」
 
-> 证据边界：HEAD `686d4482`，2026-11-15 本机静态测量（TypeScript AST import 图 + 盘上枚举 +
-> 门禁源码阅读）。**未执行测试、未改任何代码**；所有计数可用 §2 的口径复算。
+> 证据边界：静态测量基线 = HEAD `686d4482`（2026-11-15，TypeScript AST import 图 + 盘上枚举 +
+> 门禁源码阅读）；**复核基线 = HEAD `7421dc17`**（同日 08:10，见 §0.1）。所有计数可用 §2 的口径复算。
 > 本材料取代本轮两份临时架构评审口头结论中的「按 import 图找家」框架（数据仍有效）。
 
 ## 0. 结论
@@ -29,6 +29,15 @@ intent: 实测命名可达性、消费者归属与搬家成本，判定测试子
 5. **产出**：[issue 2026-11-15-test-source-mirror](../../issues/2026-11-15-test-source-mirror.md)
    （`待落地`，去向 `proposed`；真正的调整借这张卡做，不直接动树）。
 
+## 0.1 基线复核（2026-11-15 08:10，HEAD `7421dc17`）
+
+- 两次提交之间**源码 / 测试 / 门禁面零改动**：`7421dc17` 只动 `_backlog/`（归档两个旧研究题）、
+  `notes/`、`scripts/archived-note-pointers.json` 与 archiving 技能；56 道门禁与 D 号台账未变。
+- 盘上计数与 §4/§5 一致：`tests/run` 78 文件（77 spec）、`tests/cockpit` 40、`tests/pack` 38、
+  `tests/checks` 45、`scripts/lib` 86 个 `.mjs`、`scripts/` 155 文件。
+- `pnpm verify` 全绿；`pnpm test` 全绿（checks 188/188，零 skip）。
+- 结论与成本数字不变；旧决定的重开条件仍成立。
+
 ## 1. 研究问题与边界
 
 - **回答**：`tests/` 子目录镜像哪一层源码；怎样让 agent 与人「找得到」；代价、机械面与回滚。
@@ -47,7 +56,8 @@ intent: 实测命名可达性、消费者归属与搬家成本，判定测试子
   `probes/`）出发，沿 lib→lib 反向 import 做传递闭包；一个模块的 owner 集 = 最终调用它的入口目录集。
 - **成本**：Markdown 链接用 `](...tests/run/...)` 形态计数（`md-links` 只咬链接）；guard/asset 两账用
   JSON 行计数；import 语句用 `from '…scripts/lib/…'` 行计数。
-- **未做的事**：未跑 `pnpm test`/`pnpm verify`（改树后必须跑；本材料只做静态结论）；未做浏览器/模型档。
+- **测试与门禁**：测量阶段未跑；入库前在 `686d4482` 与复核基线 `7421dc17` 上跑过 `pnpm verify`（全绿）
+  与 `pnpm test`（checks 188 全绿），未做浏览器/模型档——本材料的数字仍只来自静态测量。
 
 ## 3. 谁在用：五类消费者（DSH 模型）
 
