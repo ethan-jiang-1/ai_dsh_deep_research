@@ -66,6 +66,34 @@ test('src/lib 根零平铺 .ts，faces.json 留根，domain 闭集 = 7', () => {
   assert.ok(modules.length >= 30, `防空语料：src/lib 模块过少（${modules.length}）`)
 })
 
+
+test('tests/cockpit/client：根 spec 只依赖 src/client 根文件；<sub> spec 只依赖该 sub（跨 sub → shared）', () => {
+  const CLIENT = join(ROOT, 'packages', 'deep-research-pack', 'src', 'client')
+  const BASE = join(ROOT, 'tests', 'cockpit', 'client')
+  const clientSpecs = walk(BASE, (n) => n.endsWith('.spec.mjs'))
+  assert.ok(clientSpecs.length >= 8, `防空语料：cockpit client spec 过少（${clientSpecs.length}）`)
+  for (const p of clientSpecs) {
+    const rel = relative(BASE, p).split('\\').join('/')
+    const dir = rel.includes('/') ? rel.split('/')[0] : '(root)'
+    const { imports } = parseKeylessImports(readFileSync(p, 'utf8'), p)
+    const subs = new Set()
+    for (const { specifier } of imports) {
+      const target = localImportPath(p, specifier)
+      if (target === undefined) continue
+      const lr = relative(CLIENT, target).split('\\').join('/')
+      if (lr.startsWith('..') || !/\.(ts|tsx)$/.test(lr)) continue
+      const seg = lr.split('/')
+      if (seg.length > 1) subs.add(seg[0])
+    }
+    if (dir === '(root)') {
+      assert.equal(subs.size, 0, `${relative(ROOT, p)} 是 client 根 spec，却依赖子目录 ${[...subs].join('/')}——归位或住 shared/`)
+    } else {
+      assert.ok(subs.size <= 1 && (subs.size === 0 || subs.has(dir)),
+        `${relative(ROOT, p)} 住 client/${dir}/，却依赖 ${[...subs].join('/') || '（无子目录）'}——跨 sub 的 spec 住 tests/cockpit/shared/`)
+    }
+  }
+})
+
 test('六个 domain 有直接 spec（review/ 例外：subject 由 tests/run 覆盖）', () => {
   for (const domain of RUN_DOMAINS) {
     const files = readdirSync(join(TESTS, domain)).filter((n) => n.endsWith('.spec.mjs'))

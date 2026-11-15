@@ -81,6 +81,24 @@ export function packLibModulesOf(root) {
   return out.sort((a, b) => a.module.localeCompare(b.module))
 }
 
+/** 盘上 pack src/client/<sub>/<module>.ts(x)（根文件 key 不带子目录）。 */
+export function packClientModulesOf(root) {
+  const base = join(root, 'packages', 'deep-research-pack', 'src', 'client')
+  const out = []
+  const walk = (dir) => {
+    for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, ent.name)
+      if (ent.isDirectory()) walk(p)
+      else if (/\.(ts|tsx)$/.test(ent.name)) {
+        const rel = relative(base, p).split('\\').join('/')
+        out.push({ module: rel.replace(/\.(ts|tsx)$/, ''), area: rel.includes('/') ? rel.split('/')[0] : '(root)' })
+      }
+    }
+  }
+  walk(base)
+  return out.sort((a, b) => a.module.localeCompare(b.module))
+}
+
 /** 渲染索引 Markdown（稳定排序、无日期——生成物对账要求逐字节一致）。 */
 export function renderTestIndex(root) {
   const libImporters = importersUnder(root, join(root, 'scripts', 'lib'))
@@ -104,6 +122,12 @@ export function renderTestIndex(root) {
   for (const { module, domain } of packLibModulesOf(root)) {
     const tests = [...(packImporters.get(module) ?? [])].sort()
     lines.push(`| ${domain} | \`${module}\` | ${tests.length === 0 ? '—' : tests.map((t) => `\`${t}\``).join('<br>')} |`)
+  }
+  const clientImporters = importersUnder(root, join(root, 'packages', 'deep-research-pack', 'src', 'client'))
+  lines.push('', '## pack src/client（观察面）', '', '| 区 | 文件 | 测试 |', '|---|---|---|')
+  for (const { module, area } of packClientModulesOf(root)) {
+    const tests = [...(clientImporters.get(module) ?? [])].sort()
+    lines.push(`| ${area} | \`${module}\` | ${tests.length === 0 ? '—' : tests.map((t) => `\`${t}\``).join('<br>')} |`)
   }
   lines.push('')
   return lines.join('\n')

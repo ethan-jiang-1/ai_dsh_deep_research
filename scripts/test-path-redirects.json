@@ -643,8 +643,58 @@
     },
     {
       "from": "tests/cockpit/client-pure-logic.spec.mjs",
-      "to": "tests/cockpit/client/client-pure-logic.spec.mjs",
+      "to": "tests/cockpit/shared/client-pure-logic.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/client/client-pure-logic.spec.mjs",
+      "to": "tests/cockpit/shared/client-pure-logic.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/config-feed-session.spec.mjs",
+      "to": "tests/cockpit/research-config/config-feed-session.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/defaults-store.spec.mjs",
+      "to": "tests/cockpit/defaults/defaults-store.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/defaults-ui.spec.mjs",
+      "to": "tests/cockpit/shared/defaults-ui.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/i18n.spec.mjs",
+      "to": "tests/cockpit/shared/i18n.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/locales.spec.mjs",
+      "to": "tests/cockpit/method-library/locales.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/method-library-model.spec.mjs",
+      "to": "tests/cockpit/method-library/method-library-model.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/method-library-selection.spec.mjs",
+      "to": "tests/cockpit/method-library/method-library-selection.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/method-library-views.spec.mjs",
+      "to": "tests/cockpit/method-library/method-library-views.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/state-note.spec.mjs",
+      "to": "tests/cockpit/research-graph/state-note.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
     },
     {
       "from": "tests/cockpit/coach-sessions.spec.mjs",
@@ -653,17 +703,17 @@
     },
     {
       "from": "tests/cockpit/config-feed-session.spec.mjs",
-      "to": "tests/cockpit/client/config-feed-session.spec.mjs",
+      "to": "tests/cockpit/research-config/config-feed-session.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
       "from": "tests/cockpit/defaults-store.spec.mjs",
-      "to": "tests/cockpit/client/defaults-store.spec.mjs",
+      "to": "tests/cockpit/defaults/defaults-store.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
       "from": "tests/cockpit/defaults-ui.spec.mjs",
-      "to": "tests/cockpit/client/defaults-ui.spec.mjs",
+      "to": "tests/cockpit/shared/defaults-ui.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
@@ -683,7 +733,7 @@
     },
     {
       "from": "tests/cockpit/i18n.spec.mjs",
-      "to": "tests/cockpit/client/i18n.spec.mjs",
+      "to": "tests/cockpit/shared/i18n.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
@@ -803,12 +853,12 @@
     },
     {
       "from": "tests/cockpit/locales.spec.mjs",
-      "to": "tests/cockpit/client/locales.spec.mjs",
+      "to": "tests/cockpit/method-library/locales.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
       "from": "tests/cockpit/method-library-model.spec.mjs",
-      "to": "tests/cockpit/client/method-library-model.spec.mjs",
+      "to": "tests/cockpit/method-library/method-library-model.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
@@ -823,12 +873,12 @@
     },
     {
       "from": "tests/cockpit/method-library-selection.spec.mjs",
-      "to": "tests/cockpit/client/method-library-selection.spec.mjs",
+      "to": "tests/cockpit/method-library/method-library-selection.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
       "from": "tests/cockpit/method-library-views.spec.mjs",
-      "to": "tests/cockpit/client/method-library-views.spec.mjs",
+      "to": "tests/cockpit/method-library/method-library-views.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {
@@ -903,7 +953,7 @@
     },
     {
       "from": "tests/cockpit/state-note.spec.mjs",
-      "to": "tests/cockpit/client/state-note.spec.mjs",
+      "to": "tests/cockpit/research-graph/state-note.spec.mjs",
       "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
     },
     {

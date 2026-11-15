@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { libModulesOf, packLibModulesOf, renderTestIndex } from '../../scripts/lib/tools/test-index.mjs'
+import { libModulesOf, packClientModulesOf, packLibModulesOf, renderTestIndex } from '../../scripts/lib/tools/test-index.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const INDEX = join(ROOT, 'tests/INDEX.generated.md')
@@ -16,6 +16,8 @@ test('索引与盘上一致（模块数防空 + 逐字节相等）', () => {
   assert.ok(modules.length >= 80, `防空语料：scripts/lib 模块过少（${modules.length}）`)
   const packModules = packLibModulesOf(ROOT)
   assert.ok(packModules.length >= 30, `防空语料：pack src/lib 模块过少（${packModules.length}）`)
+  const clientModules = packClientModulesOf(ROOT)
+  assert.ok(clientModules.length >= 30, `防空语料：pack src/client 模块过少（${clientModules.length}）`)
   assert.ok(modules.every((m) => m.owner !== 'scripts'), 'lib 根层仍平铺模块——owner 分组未完成')
   const rendered = renderTestIndex(ROOT)
   const current = readFileSync(INDEX, 'utf8')

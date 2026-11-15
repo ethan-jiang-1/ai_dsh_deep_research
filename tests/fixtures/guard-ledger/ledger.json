@@ -197,7 +197,7 @@
     {
       "id": "BUG-045",
       "mechanism": "绑定状态读取失败态与未绑定空态显式分流",
-      "guard": "tests/cockpit/client/state-note.spec.mjs",
+      "guard": "tests/cockpit/research-graph/state-note.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删掉 followError 分支使失败态落入「尚未绑定」→ 本例红"
@@ -205,7 +205,7 @@
     {
       "id": "BUG-047",
       "mechanism": "pack client 禁止 var(--token) 后直拼十六进制 alpha（改走 color-mix）",
-      "guard": "tests/cockpit/client/method-library-selection.spec.mjs",
+      "guard": "tests/cockpit/method-library/method-library-selection.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "在 client 源码写回 var(--x)0f 拼接 → 源码扫描与样式断言红"
@@ -221,7 +221,7 @@
     {
       "id": "BUG-055",
       "mechanism": "插件 UI 中英文字典键集/占位符全等且英文视图渲染零 CJK 残留",
-      "guard": "tests/cockpit/client/locales.spec.mjs",
+      "guard": "tests/cockpit/method-library/locales.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删任一 en 键或在英文视图硬编码中文 → 字典与静态渲染例红"
@@ -293,7 +293,7 @@
     {
       "id": "BUG-108",
       "mechanism": "研究配置页签切换会话时同步复位回执、弹窗、菜单与发送态并校验 reload epoch",
-      "guard": "tests/cockpit/client/config-feed-session.spec.mjs",
+      "guard": "tests/cockpit/research-config/config-feed-session.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删 epochRef 会话比对或任一交互态复位 → 串会话回写例红"
