@@ -26,7 +26,7 @@ intent: 实测命名可达性、消费者归属与搬家成本，判定测试子
    不是当时记的「118 处历史链接」（那是引用数）；另有 19 条 guard-ledger、77 行资产账、10 个
    `../fixtures` 相对 import。`scripts/lib` 一侧 = 211 条 import 语句 + 94 条 md 链接 + README 88 行表
    + 4 处门禁假设。
-5. **产出**：[issue 2026-11-15-test-source-mirror](../../issues/2026-11-15-test-source-mirror.md)
+5. **产出**：[issue 2026-11-15-test-source-mirror](../../settled_issues/2026-11-15-test-source-mirror.md)
    （`待落地`，去向 `proposed`；真正的调整借这张卡做，不直接动树）。
 
 ## 0.1 基线复核（2026-11-15 08:10，HEAD `7421dc17`）
@@ -43,8 +43,8 @@ intent: 实测命名可达性、消费者归属与搬家成本，判定测试子
 - **回答**：`tests/` 子目录镜像哪一层源码；怎样让 agent 与人「找得到」；代价、机械面与回滚。
 - **不回答**：单个文件具体落哪（属实施）；是否重命名模块；是否合并 lib 模块；是否改
   `tests/checks` 平铺（车道硬规则）；是否动 `vendor/`（只读铁律）。
-- **既有决定**：[D53](../../../docs/decisions.md#d53) 命名即车道；[tests/AGENTS](../../../tests/AGENTS.md) 分域
-  映射；[triggers.md tests/ 分域行](../../triggers.md)（2026-10-28 维持单域）。
+- **既有决定**：[D53](../../../../docs/decisions.md#d53) 命名即车道；[tests/AGENTS](../../../../tests/AGENTS.md) 分域
+  映射；[triggers.md tests/ 分域行](../../../triggers.md)（2026-10-28 维持单域）。
 
 ## 2. 方法与口径（可复核）
 
@@ -64,7 +64,7 @@ intent: 实测命名可达性、消费者归属与搬家成本，判定测试子
 DSH 的官方放置逻辑（`vendor/dsh/docs/architecture.md` 的 §Profiles and bundles /
 §Capability seams / §Where new behavior goes）：行为挂在**扩展点**上——
 模型能力挂 `ctx.tools`、一个会话换能力集走 **preset**、人类命令挂 `ctx.commands`、界面走 **client slot**、
-持久状态走 session event。本包 [cordis.patch.yml](../../../packages/deep-research-pack/cordis.patch.yml)
+持久状态走 session event。本包 [cordis.patch.yml](../../../../packages/deep-research-pack/cordis.patch.yml)
 就是这张表的实例。
 
 | 代码 | 消费者 | 何时 |
@@ -172,7 +172,7 @@ DSH 的官方放置逻辑（`vendor/dsh/docs/architecture.md` 的 §Profiles and
 | 轴 | 形态 | 判定 | 理由 |
 |---|---|---|---|
 | **import 图** | `tests/<被测模块名>` | **否决** | 只证依赖，不证消费者；8 个入口目录零边；`session-log` 的 27 个消费者无法表达 |
-| **源根** | `tests/scripts-lib/…`、`tests/pack-lib/…` | **否决** | 破坏六域语义，与 [D53](../../../docs/decisions.md#d53) 命名即车道、tests/AGENTS 分域冲突；链接 churn 最大 |
+| **源根** | `tests/scripts-lib/…`、`tests/pack-lib/…` | **否决** | 破坏六域语义，与 [D53](../../../../docs/decisions.md#d53) 命名即车道、tests/AGENTS 分域冲突；链接 churn 最大 |
 | **主语** | `tests/run/{gate,deliver,session,audit,observe,channel,replay}` | **次优** | 人读顺，但不是「谁在用」；跨域模块仍要猜；agent 找命令时二次跳转 |
 | **owner** | `tests/run/{gates,ops,channel,harness,shared}` ↔ 同名 `scripts/lib/<owner>/` | **推荐** | 与消费者一致：agent「要跑哪个命令 → 测试在哪」一条路径；`shared` 把 37 个多消费者模块显式化；产品面已有先例（`tests/pack` 就是按组合面组织的） |
 
@@ -222,10 +222,10 @@ tests/run/<同名 owner>/<subject>.spec.mjs
 ## 8. 落地顺序、回滚与反证
 
 **Step 0（使能，不搬文件）**
-1. 路径重定向登记簿（照 [scripts/archived-note-pointers.json](../../../scripts/archived-note-pointers.json)
+1. 路径重定向登记簿（照 [scripts/archived-note-pointers.json](../../../../scripts/archived-note-pointers.json)
    的形状）：让冻结层指向旧路径的 22 条链接仍可解析——**不改归档正文**；
 2. 生成索引 `tests/INDEX.generated.md`（模块 → owner → 测试路径 → 消费者），照
-   [probes/INDEX.generated.md](../../../probes/INDEX.generated.md) 的形状；
+   [probes/INDEX.generated.md](../../../../probes/INDEX.generated.md) 的形状；
 3. owner 门禁：spec 所在目录必须等于其 import 模块的 owner（多 import 用 `shared` 白名单），先红后绿。
 
 **Step 1（试点）**：`tests/cockpit` 切 `client/` 与 `lib/`（40 件、11 链接、10 guard、40 行资产账），
@@ -281,7 +281,7 @@ tests/run/<同名 owner>/<subject>.spec.mjs
 
 ## 附录 B · 与旧决定的冲突（值得重开）
 
-[triggers.md tests/ 分域行](../../triggers.md) 记：2026-10-28 以 `tests/run` 56 个文件重估，维持单域，
+[triggers.md tests/ 分域行](../../../triggers.md) 记：2026-10-28 以 `tests/run` 56 个文件重估，维持单域，
 理由是「文件名 = 被测模块名，机制名检索仍直接命中；拆分要改 118 处历史链接」。
 今天：`tests/run` 已 77 个 spec；名字可达 54/86（19% 找不到，触发条件「机制名检索失败」已在
 这些模块上成立）；链接实测 22 条（16 冻结层），不是 118。**前提变了，应重开而不是照旧。**

@@ -1,12 +1,12 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-15
 ---
 
 # 推敲：测试子目录按「消费者接口」分层（测试 ↔ 源码对应）
 
-> 立卡：2026-11-15 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
-> 去向：proposed（RFC = `notes/proposed/2026-11-15-test-source-mirror.md`；本卡交付后随 Note 关闭，D52）
+> 立卡：2026-11-15 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
+> 去向：implemented（`notes/implemented/2026-11-15-test-source-mirror.md`）
 >
 > **一句话**：把 `tests/` 内部的子目录从「平铺 + 文件名约定」改成「镜像消费者接口」——研发面镜像
 > 命令家族（`run-gates`/`run-ops`/`dev`/`smoke`/`verify`/`probes` + 显式 `shared`），产品面镜像 DSH
@@ -34,7 +34,7 @@ opened: 2026-11-15
 2. `tests/` 六域已按「面」切开；缺的是面内子目录轴。
 3. owner（命令家族）归属：单一 owner 46 / 共享 37 / 无入口 3；`session-log` 27 个消费者。
 4. `tests/cockpit` = 20 client + 20 pack-lib 混居；`tests/pack` 已按组合面组织（17 个不 import 源码）。
-5. 旧决定（[triggers.md](../triggers.md) tests/ 分域行，2026-10-28）的前提已变：当时 56 个文件、
+5. 旧决定（[triggers.md](../../triggers.md) tests/ 分域行，2026-10-28）的前提已变：当时 56 个文件、
    「118 处历史链接」；今天 77 个、链接 22 条、19% 名字不可达。
 6. 基线复核（2026-11-15 08:10，HEAD `7421dc17`）：其间只动 `_backlog`/`notes`/指针登记，源码、
    测试、门禁零变化；盘上计数与上列一致，`pnpm verify` / `pnpm test` 全绿（checks 188/188）。
@@ -55,7 +55,7 @@ Step 0（使能）→ Step 1（cockpit 试点）→ Step 2（scripts/lib + tests
 - **已知不会做**：合并模块（删除测试跑过：27 个 ≤60 行模块多为纯判据，合并会撞 550 行上限并拆掉
   2026-10-27 建立的「一域一文件可独立 review」）；搬 8 个入口目录；改 `tests/checks` 平铺。
 - **未决**：上列四条；另加「Step 0 的重定向登记簿放在 `scripts/` 还是 `tests/`」——按现有先例
-  （[archived-note-pointers.json](../../scripts/archived-note-pointers.json)）放 `scripts/` 更像家。
+  （[archived-note-pointers.json](../../../scripts/archived-note-pointers.json)）放 `scripts/` 更像家。
 
 ## 方案与取舍
 
@@ -100,3 +100,13 @@ Step 0（使能）→ Step 1（cockpit 试点）→ Step 2（scripts/lib + tests
 - 上列 8 条全部满足，且语义自审（或用户验收）已记录；
 - RFC 与实现同变更链回本卡；`pnpm verify`/`pnpm test` 绿作为交付证据；
 - 交付后按 `> 去向` 落 Note 并与本卡归档同变更（D52）。
+
+## 落地结果（2026-11-15）
+
+- Step 0a `71e4776d`：重定向登记簿 + `md-links` 扩展（三案例先红后绿）。
+- Step 0b+2 `a81f9424`：`scripts/lib` 8 owner 分组 + `tests/run` 同名镜像；索引与 owner 门禁；两账与
+  README/AGENTS/evaluation/triggers 同步。
+- Step 1 `787e5914`：`tests/cockpit` 切 `client/` + `lib/`。
+- 验收：8 条验收标准逐条满足；`pnpm verify` / `pnpm test` 全绿；红证与迁移量见
+  [Note](../../../notes/implemented/2026-11-15-test-source-mirror.md)。
+- 审查：机械门禁全绿；语义自审见 Note「输掉的方案 / 残余风险」。

@@ -184,7 +184,6 @@ status——材料的状态就是题的状态。
 
 | 名头 | 问题 | 消费者 | 材料 |
 |---|---|---|---|
-| [测试目录 ↔ 源码位置](test-source-mirror/README.md) | 测试子目录该镜像哪一层源码；仓库两侧的消费者是谁 | [issue 2026-11-15-test-source-mirror](../issues/2026-11-15-test-source-mirror.md) | [2026-11-15-test-source-mirror](test-source-mirror/2026-11-15-test-source-mirror.md) |
 
 归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单，也不抄状态（状态正本 = 题名页）。
 

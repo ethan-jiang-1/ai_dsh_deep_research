@@ -7,7 +7,6 @@
 | 卡 | 状态 | 一句话 |
 |---|---|---|
 | [2026-11-11-exploratory-test-strategy](2026-11-11-exploratory-test-strategy.md) | 推敲中 | 探索性验证账本 + 第六轮 charter；批 A 8 张（160–167）与批 B 9 张（168–176）已修归档 |
-| [2026-11-15-test-source-mirror](2026-11-15-test-source-mirror.md) | 待落地 | 测试子目录按消费者接口分层（owner 轴 + 显式 shared）；待用户拍第一层轴，先落 RFC |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
