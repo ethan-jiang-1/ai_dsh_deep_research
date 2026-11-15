@@ -101,7 +101,7 @@
     {
       "id": "BUG-025",
       "mechanism": "旧格式偏好条目保留 legacyText 整段编辑载荷，混居态分区优先不丢旧文",
-      "guard": "tests/cockpit/library-fold.spec.mjs",
+      "guard": "tests/cockpit/lib/library-fold.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "忽略 legacyText 硬编码空载荷 → 旧格式与混居指令例红"
@@ -109,7 +109,7 @@
     {
       "id": "BUG-026",
       "mechanism": "方法库面板分页拼读到 eof，超 20 页显式报错不静默截断",
-      "guard": "tests/cockpit/workspace-files.spec.mjs",
+      "guard": "tests/cockpit/client/workspace-files.spec.mjs",
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "去掉 while(!eof) 分页循环或写死单页 limit → 第二页丢失例红"
@@ -157,7 +157,7 @@
     {
       "id": "BUG-033",
       "mechanism": "摘要读点与交付三行精确对齐 brief-fold 正本",
-      "guard": "tests/cockpit/brief-fold.spec.mjs",
+      "guard": "tests/cockpit/lib/brief-fold.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "改 brief-fold 交付三行任一文案或锚点 → 精确断言红"
@@ -197,7 +197,7 @@
     {
       "id": "BUG-045",
       "mechanism": "绑定状态读取失败态与未绑定空态显式分流",
-      "guard": "tests/cockpit/state-note.spec.mjs",
+      "guard": "tests/cockpit/client/state-note.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删掉 followError 分支使失败态落入「尚未绑定」→ 本例红"
@@ -205,7 +205,7 @@
     {
       "id": "BUG-047",
       "mechanism": "pack client 禁止 var(--token) 后直拼十六进制 alpha（改走 color-mix）",
-      "guard": "tests/cockpit/method-library-selection.spec.mjs",
+      "guard": "tests/cockpit/client/method-library-selection.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "在 client 源码写回 var(--x)0f 拼接 → 源码扫描与样式断言红"
@@ -221,7 +221,7 @@
     {
       "id": "BUG-055",
       "mechanism": "插件 UI 中英文字典键集/占位符全等且英文视图渲染零 CJK 残留",
-      "guard": "tests/cockpit/locales.spec.mjs",
+      "guard": "tests/cockpit/client/locales.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删任一 en 键或在英文视图硬编码中文 → 字典与静态渲染例红"
@@ -293,7 +293,7 @@
     {
       "id": "BUG-108",
       "mechanism": "研究配置页签切换会话时同步复位回执、弹窗、菜单与发送态并校验 reload epoch",
-      "guard": "tests/cockpit/config-feed-session.spec.mjs",
+      "guard": "tests/cockpit/client/config-feed-session.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删 epochRef 会话比对或任一交互态复位 → 串会话回写例红"
@@ -301,7 +301,7 @@
     {
       "id": "BUG-112",
       "mechanism": "plan 版本解析只认头部主声明与规范重写记录行，忽略正文旧版引用与普通斜杠行",
-      "guard": "tests/cockpit/run-version.spec.mjs",
+      "guard": "tests/cockpit/lib/run-version.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "恢复全文取末条或无上下文斜杠匹配 → 假版本冲突例红"
@@ -389,7 +389,7 @@
     {
       "id": "BUG-167",
       "mechanism": "方法库标题读写统一剥离并拒绝 Unicode 格式控制字符（\\p{Cf}），防视觉同名幽灵条目",
-      "guard": "tests/cockpit/library-heading-consistency.spec.mjs",
+      "guard": "tests/cockpit/lib/library-heading-consistency.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "去掉格式字符剥离或写路径拒绝 → ZWSP 同名新建例红"
@@ -493,7 +493,7 @@
     {
       "id": "BUG-180",
       "mechanism": "方法库标题含重复来源段、重复默认段或未知括号段时标记不可改写并写路径 fail-loud",
-      "guard": "tests/cockpit/library-heading-consistency.spec.mjs",
+      "guard": "tests/cockpit/lib/library-heading-consistency.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删段唯一性与未知段拒绝分支 → upsert 静默丢段例红"

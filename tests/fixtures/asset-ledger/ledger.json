@@ -473,17 +473,7 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
-      "path": "tests/cockpit/brief-fold.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "红配方：改 brief-fold 的 stageLine/knownLine/actionLine 任一交付文案 → 本例红。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/builtin-display.spec.mjs",
+      "path": "tests/cockpit/client/builtin-display.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -493,7 +483,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/client-pure-logic.spec.mjs",
+      "path": "tests/cockpit/client/client-pure-logic.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -503,7 +493,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/coach-sessions.spec.mjs",
+      "path": "tests/cockpit/client/coach-sessions.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -513,7 +503,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/config-feed-session.spec.mjs",
+      "path": "tests/cockpit/client/config-feed-session.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -523,7 +513,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/defaults-store.spec.mjs",
+      "path": "tests/cockpit/client/defaults-store.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -533,7 +523,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/defaults-ui.spec.mjs",
+      "path": "tests/cockpit/client/defaults-ui.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -543,7 +533,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/delivery-watch.spec.mjs",
+      "path": "tests/cockpit/client/delivery-watch.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -553,7 +543,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/final-tab-patterns.spec.mjs",
+      "path": "tests/cockpit/client/final-tab-patterns.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -563,17 +553,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/graph-model.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "tests/cockpit/graph-model.spec.mjs —— 研究图谱 plan↔Team 映射的 keyless 契约（BUG-043）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/i18n.spec.mjs",
+      "path": "tests/cockpit/client/i18n.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -583,37 +563,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/library-fold.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "方法库折算回归（library-fold）——「研究配置」页签数据面（D25 期 1 + detail-ux 期 1.5）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/library-heading-codec.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "library-heading-codec.spec.mjs — 方法库 heading 的单一 codec（D51 迁移 II·S2）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/library-heading-consistency.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "类级守卫：同一段方法库标题文本，fold（读字段）与 upsert（定位行）必须同源。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/locales.spec.mjs",
+      "path": "tests/cockpit/client/locales.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -623,7 +573,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/method-library-model.spec.mjs",
+      "path": "tests/cockpit/client/method-library-model.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -633,27 +583,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/method-library-operation-state.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "Method Library operation snapshots describe desired effects independently of the Markdown writer.",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/method-library-read.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "Method Library workspace reads are complete only when the final page reaches EOF.",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/method-library-selection.spec.mjs",
+      "path": "tests/cockpit/client/method-library-selection.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -663,7 +593,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/method-library-views.spec.mjs",
+      "path": "tests/cockpit/client/method-library-views.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -673,77 +603,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/method-of-question.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "「本次研究」区折算回归（method-of-question）——面板五态 + 方法节解析（子卡① ①-1／①-6）。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/method-presets.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "方法预设解析器合同回归（scripts/lib/test-infra/method-presets.mjs）——内置名单/推荐映射/共同底线的",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/plan-diff.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "tests/cockpit/plan-diff.spec.mjs —— 图谱版本轨的结构 diff 契约。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/plan-graph.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "tests/cockpit/plan-graph.spec.mjs —— 「研究图谱」Team 任务图纯折算的 keyless 契约（W2 / F3）。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/plan-index.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "tests/cockpit/plan-index.spec.mjs —— `plan.md` 节点表的解析/查询/稳定性提示（keyless 契约）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/receipt-fold.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "回执三态与落盘对账回归（receipt-fold）——子卡① ①-2（总卡发现 4：回执 ≠ 落地）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/rerun-triage.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "rerun-triage 文案回归 — 「还不满意？三种改法」的单一正本（keyless 纯常量）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/research-config-source.spec.mjs",
+      "path": "tests/cockpit/client/research-config-source.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -753,7 +613,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/research-tabs.spec.mjs",
+      "path": "tests/cockpit/client/research-tabs.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -763,7 +623,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/run-source-browser.spec.mjs",
+      "path": "tests/cockpit/client/run-source-browser.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -773,27 +633,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/run-source-picker.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "run source picker：清单读失败 ≠ 无 final；回执/版本只认 file（BUG-099/109/100 消费面）。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/run-version.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "tests/cockpit/run-version.spec.mjs —— rerun 版本面的 keyless 契约。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/session-follow.spec.mjs",
+      "path": "tests/cockpit/client/session-follow.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -803,17 +643,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/start-card.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "start-card — 产品首屏起步卡纯判据：有用户消息 / 有 drt_* 就收起，否则显示。",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/state-note.spec.mjs",
+      "path": "tests/cockpit/client/state-note.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -823,27 +653,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/status-feed.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "状态页数据装配：HITL2 锚点的交付事实 = present 见证，不是 final.md 在场（BUG-094）；",
-      "oracleType": "canonical",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/text-fold.spec.mjs",
-      "domain": "cockpit",
-      "lane": "spec",
-      "class": "unit-pure",
-      "cost": "fast-inproc",
-      "uniqueClaim": "text-fold 回归 — pack 折算文本口径的共享缝直接钉（keyless 纯函数）。",
-      "oracleType": "self-referential",
-      "sunset": "随被测模块删除"
-    },
-    {
-      "path": "tests/cockpit/workspace-boot.spec.mjs",
+      "path": "tests/cockpit/client/workspace-boot.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -853,7 +663,7 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/workspace-files.spec.mjs",
+      "path": "tests/cockpit/client/workspace-files.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
@@ -863,7 +673,197 @@
       "sunset": "随被测模块删除"
     },
     {
-      "path": "tests/cockpit/workspace-title.spec.mjs",
+      "path": "tests/cockpit/lib/brief-fold.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "红配方：改 brief-fold 的 stageLine/knownLine/actionLine 任一交付文案 → 本例红。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/graph-model.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/cockpit/lib/graph-model.spec.mjs —— 研究图谱 plan↔Team 映射的 keyless 契约（BUG-043）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/library-fold.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "方法库折算回归（library-fold）——「研究配置」页签数据面（D25 期 1 + detail-ux 期 1.5）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/library-heading-codec.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "library-heading-codec.spec.mjs — 方法库 heading 的单一 codec（D51 迁移 II·S2）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/library-heading-consistency.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "类级守卫：同一段方法库标题文本，fold（读字段）与 upsert（定位行）必须同源。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/method-library-operation-state.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "Method Library operation snapshots describe desired effects independently of the Markdown writer.",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/method-library-read.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "Method Library workspace reads are complete only when the final page reaches EOF.",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/method-of-question.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "「本次研究」区折算回归（method-of-question）——面板五态 + 方法节解析（子卡① ①-1／①-6）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/method-presets.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "方法预设解析器合同回归（scripts/lib/test-infra/method-presets.mjs）——内置名单/推荐映射/共同底线的",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/plan-diff.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/cockpit/lib/plan-diff.spec.mjs —— 图谱版本轨的结构 diff 契约。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/plan-graph.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/cockpit/lib/plan-graph.spec.mjs —— 「研究图谱」Team 任务图纯折算的 keyless 契约（W2 / F3）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/plan-index.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/cockpit/lib/plan-index.spec.mjs —— `plan.md` 节点表的解析/查询/稳定性提示（keyless 契约）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/receipt-fold.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "回执三态与落盘对账回归（receipt-fold）——子卡① ①-2（总卡发现 4：回执 ≠ 落地）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/rerun-triage.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "rerun-triage 文案回归 — 「还不满意？三种改法」的单一正本（keyless 纯常量）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/run-source-picker.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "run source picker：清单读失败 ≠ 无 final；回执/版本只认 file（BUG-099/109/100 消费面）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/run-version.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/cockpit/lib/run-version.spec.mjs —— rerun 版本面的 keyless 契约。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/start-card.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "start-card — 产品首屏起步卡纯判据：有用户消息 / 有 drt_* 就收起，否则显示。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/status-feed.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "状态页数据装配：HITL2 锚点的交付事实 = present 见证，不是 final.md 在场（BUG-094）；",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/text-fold.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "text-fold 回归 — pack 折算文本口径的共享缝直接钉（keyless 纯函数）。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/workspace-title.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",

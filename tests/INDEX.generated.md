@@ -83,11 +83,11 @@
 | shared | `shared/startup-hint` | `tests/run/channel/startup-hint.spec.mjs` |
 | shared | `shared/web-banner` | `tests/checks/boot-timer.test.mjs` |
 | shared | `shared/web-harness` | — |
-| shared | `shared/web-ui-nav` | `tests/checks/web-ui-nav-bilingual.test.mjs`<br>`tests/cockpit/library-fold.spec.mjs`<br>`tests/run/probes/web-ui-nav.spec.mjs` |
+| shared | `shared/web-ui-nav` | `tests/checks/web-ui-nav-bilingual.test.mjs`<br>`tests/cockpit/lib/library-fold.spec.mjs`<br>`tests/run/probes/web-ui-nav.spec.mjs` |
 | shared | `shared/workspace-root` | `tests/run/shared/workspace-root.spec.mjs` |
 | shared | `shared/zstd-read` | — |
-| test-infra | `test-infra/method-presets` | `tests/cockpit/library-fold.spec.mjs`<br>`tests/cockpit/method-presets.spec.mjs` |
-| test-infra | `test-infra/selftest-library` | `tests/cockpit/library-fold.spec.mjs` |
+| test-infra | `test-infra/method-presets` | `tests/cockpit/lib/library-fold.spec.mjs`<br>`tests/cockpit/lib/method-presets.spec.mjs` |
+| test-infra | `test-infra/selftest-library` | `tests/cockpit/lib/library-fold.spec.mjs` |
 | test-infra | `test-infra/smoke-assets` | `tests/checks/smoke-assets.test.mjs`<br>`tests/checks/smoke-cost-budget.test.mjs`<br>`tests/checks/smoke-oracle-surface.test.mjs`<br>`tests/checks/smoke-registry.test.mjs` |
 | tools | `tools/asset-ledger` | `tests/checks/asset-ledger.test.mjs`<br>`tests/checks/guard-ledger.test.mjs` |
 | tools | `tools/ci-workflow` | `tests/checks/ci-jobs.test.mjs`<br>`tests/checks/ci-workflow-oracle.test.mjs`<br>`tests/checks/ci-workflow.test.mjs`<br>`tests/checks/model-workflow.test.mjs`<br>`tests/checks/smoke-registry.test.mjs` |

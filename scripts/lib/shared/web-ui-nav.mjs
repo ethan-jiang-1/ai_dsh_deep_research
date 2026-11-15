@@ -37,7 +37,7 @@ export const SIDEBAR_GROUP_CANDIDATES = [
 /** 「Show N more sessions」按钮文本模式（regex source 字符串，**不是 RegExp 实例**：
  *  CDP 消费方要把这个模式插进 evaluate 字符串，JSON.stringify(RegExp) 会丢 source；
  *  Playwright 消费方 new RegExp(SHOW_MORE_SESSIONS_PATTERN) 等价。唯一正本——vendor 换
- *  文案只改这一处，各消费方一起跟。keyless 钉 = tests/cockpit/library-fold.spec.mjs。 */
+ *  文案只改这一处，各消费方一起跟。keyless 钉 = tests/cockpit/lib/library-fold.spec.mjs。 */
 export const SHOW_MORE_SESSIONS_PATTERN = 'Show \\d+ more sessions|展开其余 \\d+ 个会话'
 
 // ── 行键定位原语（data-row-key 主锚）──────────────────────────────────────────────

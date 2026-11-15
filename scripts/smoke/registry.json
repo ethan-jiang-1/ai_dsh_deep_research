@@ -211,8 +211,8 @@
     "cost": "slow",
     "uniqueClaim": "首启 blank Lead Session/cwd/StartCard/目录按钮",
     "oracle": [
-      "tests/cockpit/workspace-boot.spec.mjs",
-      "tests/cockpit/start-card.spec.mjs"
+      "tests/cockpit/client/workspace-boot.spec.mjs",
+      "tests/cockpit/lib/start-card.spec.mjs"
     ],
     "sunset": "当 client-load 首启相位覆盖时退役",
     "lane": "entry"
