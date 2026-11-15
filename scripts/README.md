@@ -180,7 +180,7 @@
 | lib/tools/asset-ledger.mjs | asset-ledger.test、guard-ledger.test、record-asset-ledger | 测试资产组合账生成器：lane/class/cost/uniqueClaim/oracleType/sunset（AST 自动推导 oracleType，禁手写 OVERRIDES）；与盘上测试和守卫账双向对账 |
 | lib/tools/ci-workflow.mjs | ci-jobs.test、ci-workflow-oracle.test、ci-workflow.test、model-workflow.test、record-ci-oracle、smoke-registry.test | GitHub Actions 执行面与写入侧规范门：`yaml@2` 解析 `on:`/`jobs:`/`needs` + `bash -eo pipefail` 执行面 + `ciWorkflowRunProblems`（BUG-172/184/187/190） |
 | lib/test-infra/smoke-assets.mjs | smoke-assets.test、smoke-registry.test、smoke-oracle-surface.test、smoke-cost-budget.test | `scripts/smoke` 顶层分类（普通文件/目录/symlink/其它）与扁平合同违规项；symlink 不再静默消失（BUG-176） |
-| lib/shared/artifact-freshness.mjs | artifact-freshness.test、lifecycle.entry、export-dist、release-check | `_dist` 产物 mtime 不早于 pack 源/构建（src/lib/presets/content/package）；旧 tarball → exit 2（BUG-174） |
+| lib/shared/artifact-freshness.mjs | artifact-freshness.test、lifecycle.entry、export-dist、release-check、e-workspace | `_dist` 产物 mtime 不早于 pack 源/构建（src/lib/presets/content/package）；旧 tarball → exit 2（BUG-174） |
 | lib/harness/run-accept-fixture.mjs | run-accept.e2e、run-accept-fixture.spec | claim 夹具的 review/readiness 文本（D51 同源：有声明 = declaration/PASS，缺声明 = missing/红） |
 | lib/gates/node-gate-core.mjs | node-gate、node-gate-delivery.spec、node-gate-leads.spec、node-gate-session.spec | bundle 判据聚合；唯一导出 = `gateBundle`，领域门直接 import 各自模块 |
 | lib/shared/node-gate-contracts.mjs | node-gate-contracts.spec、node-gate-delivery-gate、node-gate-delivery.spec、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、readiness-declaration.spec、review-readiness.spec、verdict-audit、verdict-audit-core、verdict-conformance.spec | 交付日期合同、readiness 与 decisions 行解析 |

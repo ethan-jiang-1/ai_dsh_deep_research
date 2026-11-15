@@ -1,0 +1,33 @@
+name: release-anchor
+
+# 发布时点锚：tag 名 = pack 版本号、annotated、tag 与 HEAD 的版本事实。
+# 「制品由当前 pack 源生成」归 L0 门禁 dist-freshness（本机/发送方；CI 不假定 _dist 在场），
+# 「tag=HEAD + manual sha=制品 sha + 制品 fresh」归发送方 `release-check --handoff`。
+on:
+  push:
+    tags: ['[0-9]*']
+
+permissions:
+  contents: read
+
+jobs:
+  anchor:
+    name: annotated tag = version = HEAD
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout (full history + tags)
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Fetch tags
+        run: git fetch --tags --force
+
+      - name: Release anchor (no artifacts needed)
+        run: node scripts/dist/release-check.mjs

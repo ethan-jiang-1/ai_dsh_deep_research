@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { ROOT, PACK, fail, note, walk } from '../context.mjs';
 import { T0_HARD_MAX_CHARS } from '../../lib/repo/content-budget.mjs';
+import { artifactFreshness, packInputRoots } from '../../lib/shared/artifact-freshness.mjs';
 
 export function runE() {
 // ── content-shape（D40：研究内容在包内，不在工作区）──
@@ -173,6 +174,28 @@ export function runE() {
       if (templates.length === 0) fail(gate, '源 content/templates/run/ 为空——制品内容检查失去语料（防空）');
       const missing = [...targets, ...templates].filter((p) => !entries.has(p));
       if (missing.length > 0) fail(gate, `tarball 缺源包条目：${missing.slice(0, 6).join('、')}${missing.length > 6 ? '…' : ''}——重导出（制品与 HEAD 源漂移）`);
+    }
+  }
+}
+
+// ── dist-freshness（交接锚的机械半：当前版本制品必须由当前 pack 源生成）──
+// 依据：2026-11-15 接手诊断——`release-check --handoff` 红（tag≠HEAD + 制品源指纹不匹配），
+// 而 dist-tarball / release-version 各自都绿：它们只证「手册↔制品」与「版本↔版本」自洽，
+// 不证「制品↔当前源」。本门禁把 release-check 的 artifactFresh 半边常驻化；tag=HEAD 仍归
+// release-check（发布/移交时点；CI 不假定 tag 在场）。
+// 缺席（clean clone / 源码 handoff）→ note；在场且旧 → 红。
+{
+  const gate = 'dist-freshness';
+  const pack = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
+  const tarball = join(ROOT, '_dist', `dsh-deep-research-pack-${pack.version}.tgz`);
+  if (!existsSync(tarball)) {
+    note(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 缺席（clean clone / 源码 handoff）——源指纹检查跳过；发布/移交前跑 node scripts/dist/export-dist.mjs`);
+  } else {
+    const freshness = artifactFreshness(tarball, packInputRoots(PACK), {
+      manifestPath: join(ROOT, '_dist', 'build-manifest.json'),
+    });
+    if (!freshness.fresh) {
+      fail(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 不是由当前 pack 源生成（${freshness.mode}: ${freshness.reason}）——跑 node scripts/dist/export-dist.mjs 重建；旧制品不得随交接发出`);
     }
   }
 }

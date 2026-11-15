@@ -791,6 +791,13 @@ export const CASES = [
     },
     expect: '.editorconfig 缺 "root = true"' },
 
+  // 搬家未跟（2026-11-15 owner 镜像重构）：dev shell 里写死的 scripts/lib 路径指向已搬走的模块
+  // → bootstrap --check 永远误报“vendor 产物缺席”、boot-run 的护栏/缓存整段静默失效。
+  // 注入 = 在 bootstrap.sh 末尾加一条指向不存在模块的 node 调用（门禁按字面量扫描，不必真执行）。
+  { id: 'repo-conventions-dev-script-path', gate: 'repo-conventions',
+    mutate: appendTo(join('dev', 'bootstrap.sh'), '\nnode "$ROOT/scripts/lib/__moved-probe__.mjs"\n'),
+    expect: '引用不存在的 scripts/lib/__moved-probe__.mjs' },
+
   // dev/ 运行态回流（dev-runtime-clean）：在源码驱动目录造一个误落位 run bundle——
   // .gitignore 能挡 git，挡不住 cp -r/打包；门禁直接看盘。
   { id: 'dev-runtime-clean-stray', gate: 'dev-runtime-clean', mutate: (dir) => {
@@ -926,6 +933,7 @@ export const NO_CASE_GATES = [
   { gate: 'staged-change-pairing', reason: '断言对象 = git 暂存区；gates.e2e 的注入副本不建立暂存索引，副本基线无对象' },
   { gate: 'hooks-active', reason: '断言对象 = 本机 git config core.hooksPath（副本 git init 后本就未设）' },
   { gate: 'dist-tarball', reason: '断言对象 = gitignored _dist 制品；gates.e2e 副本不含 tarball，注入 sha 漂移会落缺席 note 分支' },
+  { gate: 'dist-freshness', reason: '断言对象 = gitignored _dist 制品与其 build-manifest；gates.e2e 副本不含 tarball，注入必然落缺席 note 分支；红证 = 2026-11-15 真实旧制品在场被本门禁点名（红录住 handoff 锚 Note）' },
 ];
 
 export const CONTROLS = [

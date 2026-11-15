@@ -63,7 +63,7 @@ else
 fi
 
 # ④ vendor 构建产物（0.1.7 起启动依赖）
-if node "$ROOT/scripts/lib/vendor-artifacts.mjs" >/dev/null 2>&1; then
+if node "$ROOT/scripts/lib/harness/vendor-artifacts.mjs" >/dev/null 2>&1; then
   ok "vendor 构建产物在场"
 elif [ "$MODE" = check ]; then
   would "bash dev/vendor-build.sh（vendor 产物缺席）"

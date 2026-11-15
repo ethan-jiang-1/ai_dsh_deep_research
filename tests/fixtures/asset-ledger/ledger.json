@@ -1769,7 +1769,7 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "vendor-artifacts 自检回归 — 与 boot 面护栏同源判据（keyless，纯 fs 静态夹具，不依赖真实",
-      "oracleType": "self-referential",
+      "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {

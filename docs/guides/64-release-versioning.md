@@ -1,7 +1,7 @@
 # 64 · 发布版本、tag 与 npm 发布顺序
 
 > 层：指南。本页拥有版本号、git tag、npm 发布三者的唯一顺序。发布前逐条走，不凭记忆。
-> **当前发布形态（0.3.5）= 本地 tarball；npm publish 未执行（凭据未就绪）。以下 npm 顺序是发布后路径，不是当前完成条件。**
+> **当前发布形态（0.3.6）= 本地 tarball；npm publish 未执行（凭据未就绪）。以下 npm 顺序是发布后路径，不是当前完成条件。**
 > 决定理由与输掉的方案 = [release-versioning Note](../../notes/implemented/2026-10-25-release-versioning.md)。
 
 ## 单一版本源
@@ -47,7 +47,7 @@
    `npm view dsh-deep-research-pack@X.Y.Z version`。
 9. 发布后 tag 不再移动；后续修复发新 patch，不改旧 tag。
 
-**市场索引的时序**：`_dist/market.json` 是发现面元数据，不是安装单位；0.3.5 它是 **staged 空索引**
+**市场索引的时序**：`_dist/market.json` 是发现面元数据，不是安装单位；0.3.6 它是 **staged 空索引**
 （`plugins: []` + staged 文案），不承诺可安装。npm publish 成功后由发布流程恢复条目；索引内容
 （版本/engines/图标）由 `export-dist` 从包清单与 locale 生成，不手写。
 
@@ -68,7 +68,9 @@
 - `node scripts/dist/release-check.mjs`：发布前检查 root=pack、HEAD tag 与版本一致、tag 为
   annotated；`--handoff` 另查 tag=HEAD、工作树干净、手册 sha=制品 sha、制品由当前 pack 源生成；
   `--receiver` 在 clean clone 上只查 tag/manual/tarball/manifest（跳过源指纹）；不联网、不写盘。
-- keyless CI（[ci.yml](../../.github/workflows/ci.yml)）跑 verify/test；tag 检查是发布前的
-  本地步骤（CI 不假定 tag 在场）。
+- keyless CI（[ci.yml](../../.github/workflows/ci.yml)）跑 verify/test；tag 推送另跑
+  [release-anchor.yml](../../.github/workflows/release-anchor.yml) 的 `release-check`（tag 名/类型/版本，
+  无制品也能判）。制品↔源同源 = L0 门禁 `dist-freshness`；tag=HEAD + 手册/制品配对 = 发送方
+  `release-check --handoff`（需要 `_dist` 三件，CI 不假定它们在场）。
 - 发布规则与 git 入库规则分家：本页管“版本与发布”，[guides/63](./63-git-boundary.md) 管
   “什么进 git”。

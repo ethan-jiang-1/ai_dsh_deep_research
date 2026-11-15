@@ -40,10 +40,15 @@ export function assertVendorArtifacts(root) {
 export const ARTIFACT_REMEDY =
   'vendor 构建产物缺失——先跑 `bash dev/vendor-build.sh --clean`（升 pin 固定动作，见 docs/guides/60-dev-loop.md §3）';
 
+/** CLI 缺省 root = 仓根。本文件住 scripts/lib/harness/：向上三层才是仓根；搬家前住
+ *  scripts/lib/（两层）。2026-11-15 owner 镜像重构后 `../..` 只到 scripts/，bootstrap 因此
+ *  永远误报“vendor 产物缺席”（真因 = 检查的是 scripts/vendor/dsh/…）。 */
+export const defaultRoot = () => join(fileURLToPath(new URL('../../..', import.meta.url)));
+
 // CLI 模式：node scripts/lib/harness/vendor-artifacts.mjs [root]——缺失即打印 remedy 并 exit 1
 // （boot-run.sh 用；root 缺省 = 本仓根）。判据：只认 process.argv[1] 指向本文件。
 if (isMain(import.meta.url)) {
-  const root = process.argv[2] ?? join(fileURLToPath(new URL('../..', import.meta.url)));
+  const root = process.argv[2] ?? defaultRoot();
   const { ok, missing } = assertVendorArtifacts(root);
   if (!ok) {
     console.error(`boot 前自检红：vendor 构建产物缺失（${missing.join('、')}）`);

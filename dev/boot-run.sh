@@ -16,7 +16,7 @@ set -euo pipefail
 # ⓪ vendor 构建产物自检（RFC vendor-build-guard，2026-09-25）：0.1.7 起启动依赖构建
 #    产物，缺失时启动深处报错隐晦（typert-loader / client-modules）——提前拦成一行 remedy。
 #    这是 boot 面护栏；L0 门禁刻意不依赖构建产物（新 clone 未构建时 verify 仍应秒级绿）。
-node "$ROOT/scripts/lib/vendor-artifacts.mjs"
+node "$ROOT/scripts/lib/harness/vendor-artifacts.mjs"
 
 PROFILE="${DSH_RUN_PROFILE:-deep-research}"
 # 端口：缺省 3083（2026-09-28 用户指令——3081 让给别的项目；3080 = 本仓开发 GUI）；覆写：
@@ -58,8 +58,8 @@ drift_check() {
   # 发布清单缓存（2026-11-05 加速）：`npm pack --dry-run` 是漂移门 ~5s 的主要开销；清单只随
   # pack 源内容变化，键 = pack 源指纹（路径 + size + mtime，遍历顺序无关）。miss/损坏一律回退真跑。
   local fp
-  fp="$(node "$ROOT/scripts/lib/channel-cache.mjs" fingerprint "$PACKDIR")"
-  shipped="$(node "$ROOT/scripts/lib/channel-cache.mjs" read "$STATE_DIR/pack-shipped.json" "$fp" 2>/dev/null || true)"
+  fp="$(node "$ROOT/scripts/lib/channel/channel-cache.mjs" fingerprint "$PACKDIR")"
+  shipped="$(node "$ROOT/scripts/lib/channel/channel-cache.mjs" read "$STATE_DIR/pack-shipped.json" "$fp" 2>/dev/null || true)"
   if [ -z "$shipped" ]; then
     shipped="$(cd "$PACKDIR" && npm pack --dry-run --json --ignore-scripts --cache "$STATE_DIR/npm-cache" 2>/dev/null | node -e '
       let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => {
@@ -68,7 +68,7 @@ drift_check() {
       });
     ')"
     [ -n "$shipped" ] || { echo "boot-run: 漂移检测拿不到 pack 发布清单（npm pack --dry-run 失败）" >&2; exit 1; }
-    printf '%s\n' "$shipped" | node "$ROOT/scripts/lib/channel-cache.mjs" save "$STATE_DIR/pack-shipped.json" "$fp" >/dev/null 2>&1 || true
+    printf '%s\n' "$shipped" | node "$ROOT/scripts/lib/channel/channel-cache.mjs" save "$STATE_DIR/pack-shipped.json" "$fp" >/dev/null 2>&1 || true
   else
     echo "boot-run: 发布清单缓存命中（pack 指纹 ${fp:0:12}）" >&2
   fi
